@@ -11,6 +11,8 @@ public:
 
 void* fgets_(char* ptr, size_t len, FILE* f);
 bool loadMeshSTL_ascii(Mesh* mesh, const char* filename);
+bool loadMeshSTL_binary(Mesh* mesh, const char* filename);
+bool loadMeshSTL(Mesh* mesh, const char* filename);
 
 
 #endif // FILEOPENER_H
