@@ -1,6 +1,8 @@
 #include <QCoreApplication>
 #include "src/polyclipping/clipper.hpp"
 #include "src/cmdlineparser.h"
+#include "src/fileopener.h"
+#include <QDebug>
 
 using namespace ClipperLib;
 
@@ -68,7 +70,13 @@ int main(int argc, char *argv[])
 
     switch (parser.parseCommandLine(&errorMsg)) {
         case CommandLineOk:
+        {
+            // do something with parser object
+            Mesh* loadingmesh = new Mesh();
+            loadMeshSTL(loadingmesh, parser.inputfilename.toStdString().c_str());
+            qDebug() << loadingmesh->vertices.size() << loadingmesh->faces.size();
             break;
+        }
         case CommandLineError:
             fputs(qPrintable(errorMsg), stderr);
             fputs("\n\n", stderr);

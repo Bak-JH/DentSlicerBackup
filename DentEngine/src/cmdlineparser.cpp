@@ -1,6 +1,4 @@
 #include "cmdlineparser.h"
-#include "fileopener.h"
-#include <QDebug>
 
 CmdLineParser::CmdLineParser()
 {
@@ -46,8 +44,6 @@ CommandLineParseResult CmdLineParser::parseCommandLine(QString *errorMessage)
     }
     inputfilename = positionalArguments.first();
     outputfilename = positionalArguments.back();
-    Mesh* loadingmesh = new Mesh();
-    loadMeshSTL(loadingmesh, inputfilename.toStdString().c_str());
 
     return CommandLineOk;
 }

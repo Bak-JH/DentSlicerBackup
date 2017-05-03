@@ -6,7 +6,6 @@ FileOpener::FileOpener()
 
 }
 
-
 /* Custom fgets function to support Mac line-ends in Ascii STL files. OpenSCAD produces this when used on Mac */
 void* fgets_(char* ptr, size_t len, FILE* f)
 {
@@ -46,8 +45,6 @@ bool loadMeshSTL_ascii(Mesh* mesh, const char* filename)
     float f0, f1, f2;
     while(fgets_(buffer, sizeof(buffer), f))
     {
-        qDebug() << buffer;
-
         if (sscanf(buffer, " vertex %f %f %f", &f0, &f1, &f2) == 3)
         {
             vertex.setX(f0);
@@ -77,6 +74,56 @@ bool loadMeshSTL_ascii(Mesh* mesh, const char* filename)
 }
 
 bool loadMeshSTL_binary(Mesh* mesh, const char* filename){
+    FILE* f = fopen(filename, "rb");
+
+    fseek(f, 0L, SEEK_END);
+    long long file_size = ftell(f); //The file size is the position of the cursor after seeking to the end.
+    rewind(f); //Seek back to start.
+    size_t face_count = (file_size - 80 - sizeof(uint32_t)) / 50; //Subtract the size of the header. Every face uses exactly 50 bytes.
+
+    char buffer[80];
+    //Skip the header
+    if (fread(buffer, 80, 1, f) != 1)
+    {
+        fclose(f);
+        return false;
+    }
+
+    uint32_t reported_face_count;
+    //Read the face count. We'll use it as a sort of redundancy code to check for file corruption.
+    if (fread(&reported_face_count, sizeof(uint32_t), 1, f) != 1)
+    {
+        fclose(f);
+        return false;
+    }
+    if (reported_face_count != face_count)
+    {
+        //qDebug() << "Face count reported by file (%s) is not equal to actual face count (%s). File could be corrupt!\n", std::to_string(reported_face_count).c_str(), std::to_string(face_count).c_str();
+        //logWarning("Face count reported by file (%s) is not equal to actual face count (%s). File could be corrupt!\n", std::to_string(reported_face_count).c_str(), std::to_string(face_count).c_str());
+    }
+
+    //For each face read:
+    //float(x,y,z) = normal, float(X,Y,Z)*3 = vertexes, uint16_t = flags
+    // Every Face is 50 Bytes: Normal(3*float), Vertices(9*float), 2 Bytes Spacer
+    mesh->faces.reserve(face_count);
+    mesh->vertices.reserve(face_count);
+    for (unsigned int i = 0; i < face_count; i++)
+    {
+        if (fread(buffer, 50, 1, f) != 1)
+        {
+            fclose(f);
+            return false;
+        }
+        float *v= ((float*)buffer)+3;
+
+        QVector3D v0 = QVector3D(v[0], v[1], v[2]);
+        QVector3D v1 = QVector3D(v[3], v[4], v[5]);
+        QVector3D v2 = QVector3D(v[6], v[7], v[8]);
+
+        mesh->addFace(v0, v1, v2);
+    }
+    fclose(f);
+    mesh->connectFaces();
     return true;
 }
 
