@@ -1,7 +1,7 @@
-#include "fileopener.h"
+#include "fileloader.h"
 #include <QDebug>
 
-FileOpener::FileOpener()
+FileLoader::FileLoader()
 {
 
 }

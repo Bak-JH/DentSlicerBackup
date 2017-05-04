@@ -41,8 +41,8 @@ void Mesh::connectFaces(){
 void Mesh::addPoint(float x, float y, Path *path)
 {
     IntPoint ip;
-    ip.X = (int) x*cfg->resolution;
-    ip.Y = (int) y*cfg->resolution;
+    ip.X = (int) (x*cfg->resolution);
+    ip.Y = (int) (y*cfg->resolution);
     path->push_back(ip);
 }
 
@@ -75,7 +75,6 @@ Path Mesh::intersectionPath(MeshFace mf, float z){
     }
 
     float x_0, y_0, x_1, y_1;
-
     x_0 = (minority[0].position.x() - majority[0].position.x()) \
             * ((z-majority[0].position.z())/(minority[0].position.z()-majority[0].position.z())) \
             + majority[0].position.x();
@@ -89,19 +88,20 @@ Path Mesh::intersectionPath(MeshFace mf, float z){
             * ((z-majority[1].position.z())/(minority[0].position.z()-majority[1].position.z())) \
             + majority[1].position.y();
 
-    addPoint(x_0*cfg->resolution,y_0*cfg->resolution, &p);
-    addPoint(x_1*cfg->resolution,y_1*cfg->resolution, &p);
+    addPoint(x_0,y_0, &p);
+    addPoint(x_1,y_1, &p);
+
 
     return p;
 }
 
 /********************** Helper Functions **********************/
 
-int64_t Mesh::vertexHash(QVector3D v) // max build size = 1000mm, resolution = 1 micron
+int64_t vertexHash(QVector3D v) // max build size = 1000mm, resolution = 1 micron
 {
-    return ((int64_t)(v.x() / cfg->vertex_inbound_distance)) ^\
-            (((int64_t)(v.y() / cfg->vertex_inbound_distance)) << 21) ^\
-            (((int64_t)(v.z() / cfg->vertex_inbound_distance)) << 42);
+    return ((int64_t)(v.x() / Configuration::vertex_inbound_distance)) ^\
+            (((int64_t)(v.y() / Configuration::vertex_inbound_distance)) << 21) ^\
+            (((int64_t)(v.z() / Configuration::vertex_inbound_distance)) << 42);
 }
 
 int Mesh::getVertexIdx(QVector3D v){

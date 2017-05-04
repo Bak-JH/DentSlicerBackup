@@ -3,6 +3,9 @@ QT += gui
 
 CONFIG += c++11
 
+#QT +=  widgets
+#CONFIG += qt
+
 TARGET = DLPengine
 CONFIG += console
 CONFIG -= app_bundle
@@ -12,8 +15,9 @@ TEMPLATE = app
 SOURCES += main.cpp \
     src/cmdlineparser.cpp \
     src/slicer.cpp \
-    src/fileopener.cpp \
-    src/mesh.cpp
+    src/mesh.cpp \
+    src/fileloader.cpp \
+    src/svgexporter.cpp
 
 # The following define makes your compiler emit warnings if you use
 # any feature of Qt which as been marked deprecated (the exact warnings
@@ -32,6 +36,7 @@ SOURCES += src/polyclipping/clipper.cpp
 HEADERS += src/polyclipping/clipper.hpp \
     src/cmdlineparser.h \
     src/slicer.h \
-    src/fileopener.h \
     src/mesh.h \
-    src/configuration.h
+    src/configuration.h \
+    src/fileloader.h \
+    src/svgexporter.h

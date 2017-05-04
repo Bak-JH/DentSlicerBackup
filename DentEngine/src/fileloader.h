@@ -1,12 +1,12 @@
-#ifndef FILEOPENER_H
-#define FILEOPENER_H
+#ifndef FILELOADER_H
+#define FILELOADER_H
 #include <QVector3D>
 #include "mesh.h"
 
-class FileOpener
+class FileLoader
 {
 public:
-    FileOpener();
+    FileLoader();
 };
 
 void* fgets_(char* ptr, size_t len, FILE* f);
@@ -15,4 +15,4 @@ bool loadMeshSTL_binary(Mesh* mesh, const char* filename);
 bool loadMeshSTL(Mesh* mesh, const char* filename);
 
 
-#endif // FILEOPENER_H
+#endif // FILELOADER_H

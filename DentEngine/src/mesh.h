@@ -43,7 +43,6 @@ public :
     Path intersectionPath(MeshFace mf, float z);
 
     /********************** Helper Functions **********************/
-    int64_t vertexHash(QVector3D v);
     int getVertexIdx(QVector3D v);
     void updateMinMax(QVector3D v);
     int findFaceWith2Vertices(int v0_idx, int v1_idx, int self_idx);
@@ -52,6 +51,9 @@ public :
     MeshFace idx2MF(int idx);
     MeshVertex idx2MV(int idx);
 };
+
+
+int64_t vertexHash(QVector3D v);
 
 
 #endif // MESH_H

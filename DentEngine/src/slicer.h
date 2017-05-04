@@ -15,13 +15,21 @@ public:
     Slicer(Configuration* cfg) : cfg(cfg) {}
     Configuration* cfg;
 
-    int slice(Mesh* mesh);
+    vector<vector<Path>> slice(Mesh* mesh);
 
     vector<vector<Path>> meshSlice(Mesh* mesh); // totally k elements
-    int contourConstruct(vector<vector<Path>>);
+    vector<Path> contourConstruct(vector<Path>);
+
+    /****************** Helper Functions For Mesh Slicing Step *******************/
+
     vector<vector<int>> buildTriangleLists(Mesh* mesh, vector<float> planes, float delta);
     vector<float> buildUniformPlanes(float z_min, float z_max, float delta);
     vector<float> buildAdaptivePlanes(float z_min, float z_max);
+
+
+    /****************** Helper Functions For Contour Construction Step *******************/
+    void insertPathHash(QHash<int64_t, Path> *pathHash, IntPoint u, IntPoint v);
+    int64_t intPoint2Hash(IntPoint u);
 };
 
 
