@@ -5,51 +5,23 @@ Paths subj;
 Paths clip;
 Paths solution;
 
-int Slicer::slice(Mesh* mesh){
-    vector<vector<Path>> slices = meshSlice(mesh);
-    contourConstruct(slices);
+// converts float point to int in microns
+void Slicer::addPoint(float x, float y, Path *path)
+{
+    IntPoint ip;
+    ip.X = (int) x*cfg->resolution;
+    ip.Y = (int) y*cfg->resolution;
+    path->push_back(ip);
 }
 
-// slices mesh into segments
-vector<vector<Path>> Slicer::meshSlice(Mesh* mesh){
-    float delta = cfg->layer_height;
-    vector<float> planes;
-
+int Slicer::slice(Mesh* mesh){
     if (! strcmp(cfg->slicing_mode, "uniform")){
-        planes = buildUniformPlanes(mesh->z_min, mesh->z_max, delta);
+        float delta = cfg->layer_height;
+        vector<float> planes ;
+        vector<vector<int>> traingleLists = buildTriangleLists(mesh, planes, delta);
     } else if (cfg->slicing_mode == "adaptive") {
         // adaptive slice
-        planes = buildAdaptivePlanes(mesh->z_min, mesh->z_max);
     }
-
-    vector<vector<int>> triangleLists = buildTriangleLists(mesh, planes, delta);
-    vector<vector<Path>> pathLists;
-
-    vector<int> A;
-    for (int i=0; i<planes.size(); i++){
-        qDebug() << "slicing layer " << i << "/" << planes.size();
-        A.insert(A.end(), triangleLists[i].begin(), triangleLists[i].end()); // union
-
-        vector<Path>* paths = new vector<Path>;
-
-        for (int t_idx=0; t_idx<A.size(); t_idx++){
-            MeshFace cur_mf = mesh->idx2MF(A[t_idx]);
-            if (mesh->getFaceZmax(cur_mf) < planes[i])
-                A.erase(A.begin()+t_idx);
-            else{
-                // compute intersection
-                paths->push_back(mesh->intersectionPath(cur_mf, planes[i]));
-            }
-        }
-        pathLists.push_back(*paths);
-    }
-
-    return pathLists;
-}
-
-// construct closed contour using segments created from meshSlice step
-int Slicer::contourConstruct(vector<vector<Path>>){
-
 }
 
 // builds vector of vector of triangle idxs sorted by z_min
@@ -68,6 +40,7 @@ vector<vector<int>> Slicer::buildTriangleLists(Mesh* mesh, vector<float> planes,
             int llt_idx;
             MeshFace mf = mesh->idx2MF(f_idx);
             float z_min = mesh->getFaceZmin(mf);
+
             if (z_min < planes[0])
                 llt_idx = 0;
             else if (z_min > planes[planes.size()-1])
@@ -87,22 +60,14 @@ vector<vector<int>> Slicer::buildTriangleLists(Mesh* mesh, vector<float> planes,
     return list_list_triangle;
 }
 
-vector<float> Slicer::buildUniformPlanes(float z_min, float z_max, float delta){
-    vector<float> planes;
-    for (int idx=0; idx<(z_max-z_min)/delta; idx++){
-        planes.push_back(z_min + delta*idx);
-    }
-    return planes;
+int Slicer::meshSlice(Mesh* mesh){
+
 }
 
-vector<float> Slicer::buildAdaptivePlanes(float z_min, float z_max){
-    vector<float> planes;
-    return planes;
+int Slicer::contourConstruct(){
+
 }
 
-/****************** Helper Functions *******************/
-
-/*
 int Slicer::sliceLayer(Mesh* mesh, float z)
 {
 
@@ -142,4 +107,3 @@ int Slicer::sliceLayer(Mesh* mesh, float z)
 
     return 0;
 }
-*/

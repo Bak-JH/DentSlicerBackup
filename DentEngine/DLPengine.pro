@@ -33,4 +33,5 @@ HEADERS += src/polyclipping/clipper.hpp \
     src/cmdlineparser.h \
     src/slicer.h \
     src/fileopener.h \
-    src/mesh.h
+    src/mesh.h \
+    src/configuration.h

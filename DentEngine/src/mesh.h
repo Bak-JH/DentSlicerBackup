@@ -3,8 +3,11 @@
 #include <vector>
 #include <QVector3D>
 #include <QHash>
+#include "configuration.h"
+#include "polyclipping/clipper.hpp"
 
-const float vertex_meld_distance = 0.001; // resolution in mm (0.0001 and 0.0009 are same, 1 micron)
+using namespace std;
+using namespace ClipperLib;
 
 class MeshVertex {
 public:
@@ -24,17 +27,31 @@ public:
 
 class Mesh{
 public :
-    Mesh();
+    Mesh(Configuration* cfg) : cfg(cfg) {}
+    Configuration* cfg;
     std::vector<MeshVertex> vertices;
     QHash<int64_t, MeshVertex> vertices_hash;
     std::vector<MeshFace> faces;
+    float x_min, x_max, y_min, y_max, z_min, z_max;
 
+    /********************** Mesh Generation Functions **********************/
     void addFace(QVector3D v0, QVector3D v1, QVector3D v2);
-    int getVertexIdx(QVector3D v);
     void connectFaces();
+
+    /********************** Path Generation Functions **********************/
+    void addPoint(float x, float y, Path *path);
+    Path intersectionPath(MeshFace mf, float z);
+
+    /********************** Helper Functions **********************/
+    int64_t vertexHash(QVector3D v);
+    int getVertexIdx(QVector3D v);
+    void updateMinMax(QVector3D v);
     int findFaceWith2Vertices(int v0_idx, int v1_idx, int self_idx);
+    float getFaceZmin(MeshFace mf);
+    float getFaceZmax(MeshFace mf);
+    MeshFace idx2MF(int idx);
+    MeshVertex idx2MV(int idx);
 };
 
-int64_t vertexHash(QVector3D v);
 
 #endif // MESH_H

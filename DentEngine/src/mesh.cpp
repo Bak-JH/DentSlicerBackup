@@ -1,9 +1,8 @@
 #include "mesh.h"
 #include <QDebug>
 
-Mesh::Mesh(){
 
-};
+/********************** Mesh Generation Functions **********************/
 
 void Mesh::addFace(QVector3D v0, QVector3D v1, QVector3D v2){
     int v0_idx = getVertexIdx(v0);
@@ -35,13 +34,74 @@ void Mesh::connectFaces(){
     }
 }
 
+
+/********************** Path Generation Functions **********************/
+
+// converts float point to int in microns
+void Mesh::addPoint(float x, float y, Path *path)
+{
+    IntPoint ip;
+    ip.X = (int) x*cfg->resolution;
+    ip.Y = (int) y*cfg->resolution;
+    path->push_back(ip);
+}
+
+Path Mesh::intersectionPath(MeshFace mf, float z){
+    Path p;
+
+    vector<MeshVertex> upper;
+    vector<MeshVertex> lower;
+    for (int i=0; i<3; i++){
+        //qDebug() << idx2MV(mf.mesh_vertex[i]).position.z();
+        if (idx2MV(mf.mesh_vertex[i]).position.z() >= z)
+            upper.push_back(idx2MV(mf.mesh_vertex[i]));
+        else
+            lower.push_back(idx2MV(mf.mesh_vertex[i]));
+    }
+
+    vector<MeshVertex> majority;
+    vector<MeshVertex> minority;
+
+    if (upper.size() == 2){
+        majority = upper;
+        minority = lower;
+    } else if (lower.size() == 2){
+        majority = lower;
+        minority = upper;
+    } else{
+        if (getFaceZmin(mf) != z)
+            qDebug() << "intersection error at layer "<< getFaceZmax(mf) << getFaceZmin(mf) << z<< upper.size() << lower.size();
+        return p;
+    }
+
+    float x_0, y_0, x_1, y_1;
+
+    x_0 = (minority[0].position.x() - majority[0].position.x()) \
+            * ((z-majority[0].position.z())/(minority[0].position.z()-majority[0].position.z())) \
+            + majority[0].position.x();
+    y_0 = (minority[0].position.y() - majority[0].position.y()) \
+            * ((z-majority[0].position.z())/(minority[0].position.z()-majority[0].position.z())) \
+            + majority[0].position.y();
+    x_1 = (minority[0].position.x() - majority[1].position.x()) \
+            * ((z-majority[1].position.z())/(minority[0].position.z()-majority[1].position.z())) \
+            + majority[1].position.x();
+    y_1 = (minority[0].position.y() - majority[1].position.y()) \
+            * ((z-majority[1].position.z())/(minority[0].position.z()-majority[1].position.z())) \
+            + majority[1].position.y();
+
+    addPoint(x_0*cfg->resolution,y_0*cfg->resolution, &p);
+    addPoint(x_1*cfg->resolution,y_1*cfg->resolution, &p);
+
+    return p;
+}
+
 /********************** Helper Functions **********************/
 
-int64_t vertexHash(QVector3D v) // max build size = 1000mm, resolution = 1 micron
+int64_t Mesh::vertexHash(QVector3D v) // max build size = 1000mm, resolution = 1 micron
 {
-    return ((int64_t)(v.x() / vertex_meld_distance)) ^\
-            (((int64_t)(v.y() / vertex_meld_distance)) << 21) ^\
-            (((int64_t)(v.z() / vertex_meld_distance)) << 42);
+    return ((int64_t)(v.x() / cfg->vertex_inbound_distance)) ^\
+            (((int64_t)(v.y() / cfg->vertex_inbound_distance)) << 21) ^\
+            (((int64_t)(v.z() / cfg->vertex_inbound_distance)) << 42);
 }
 
 int Mesh::getVertexIdx(QVector3D v){
@@ -56,8 +116,25 @@ int Mesh::getVertexIdx(QVector3D v){
         vertices.emplace_back(mv);
         vertices_hash.insert(vertex_hash, mv);
         vertex_idx = mv.idx;
+        updateMinMax(v);
     }
     return vertex_idx;
+}
+
+// updates mesh's min max
+void Mesh::updateMinMax(QVector3D v){
+    if (v.x() > x_max)
+        x_max = v.x();
+    if (v.x() < x_min)
+        x_min = v.x();
+    if (v.y() > y_max)
+        y_max = v.y();
+    if (v.y() < y_min)
+        y_min = v.y();
+    if (v.z() > z_max)
+        z_max = v.z();
+    if (v.z() < z_min)
+        z_min = v.z();
 }
 
 // find face containing 2 vertices presented as arguments
@@ -81,4 +158,32 @@ int Mesh::findFaceWith2Vertices(int v0_idx, int v1_idx, int self_idx){
         qDebug() << candidates.size() << "multiple faces are connected so outputting first connected face" << candidates[0];
         return candidates[0];
     }
+}
+
+float Mesh::getFaceZmin(MeshFace mf){
+    float face_z_min=cfg->max_buildsize_x;
+    for (int i=0; i<3; i++){
+        float temp_z_min = idx2MV(mf.mesh_vertex[i]).position.z();
+        if (temp_z_min<face_z_min)
+            face_z_min = temp_z_min;
+    }
+    return face_z_min;
+}
+
+float Mesh::getFaceZmax(MeshFace mf){
+    float face_z_max=-cfg->max_buildsize_x;
+    for (int i=0; i<3; i++){
+        float temp_z_max = idx2MV(mf.mesh_vertex[i]).position.z();
+        if (temp_z_max>face_z_max)
+            face_z_max = temp_z_max;
+    }
+    return face_z_max;
+}
+
+MeshFace Mesh::idx2MF(int idx){
+    return faces[idx];
+}
+
+MeshVertex Mesh::idx2MV(int idx){
+    return vertices[idx];
 }
