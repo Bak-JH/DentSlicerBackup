@@ -29,8 +29,8 @@ int main(int argc, char *argv[])
 
     // Slice
     Slicer* slicer = new Slicer(cfg);
-    vector<Path> pathList = slicer->meshSlice(loaded_mesh)[600];
-    vector<Path> contourList = slicer->contourConstruct(pathList);
+    Paths pathList = slicer->meshSlice(loaded_mesh)[600];
+    Paths contourList = slicer->contourConstruct(pathList);
     //slicer->slice(loaded_mesh);
 
     p.setRenderHint(QPainter::Antialiasing);
@@ -75,7 +75,7 @@ int main(int argc, char *argv[])
 
             // Slice
             Slicer* slicer = new Slicer(cfg);
-            vector<vector<Path>> contourLists = slicer->slice(loaded_mesh);
+            vector<Paths> contourLists = slicer->slice(loaded_mesh);
 
             // Export to SVG
             SVGexporter* exporter = new SVGexporter(cfg);

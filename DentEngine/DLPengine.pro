@@ -17,7 +17,12 @@ SOURCES += main.cpp \
     src/slicer.cpp \
     src/mesh.cpp \
     src/fileloader.cpp \
-    src/svgexporter.cpp
+    src/svgexporter.cpp \
+    src/support.cpp \
+    src/support/kbranch.cpp \
+    src/infill.cpp \
+    src/bottom.cpp \
+    src/util/point3d.cpp
 
 # The following define makes your compiler emit warnings if you use
 # any feature of Qt which as been marked deprecated (the exact warnings
@@ -39,4 +44,9 @@ HEADERS += src/polyclipping/clipper.hpp \
     src/mesh.h \
     src/configuration.h \
     src/fileloader.h \
-    src/svgexporter.h
+    src/svgexporter.h \
+    src/support.h \
+    src/support/kbranch.h \
+    src/infill.h \
+    src/bottom.h \
+    src/util/point3d.h

@@ -13,7 +13,7 @@ public:
     SVGexporter(Configuration* cfg) : cfg(cfg) {}
     Configuration* cfg;
 
-    void exportSVG(vector<vector<Path>> contourLists, const char* outfilename);
+    void exportSVG(vector<Paths> contourLists, const char* outfilename);
 
     void writePolygon(ofstream& outfile, Path contour);
     void writeGroupHeader(ofstream& outfile, int layer_idx, float z);

@@ -1,12 +1,15 @@
 #include "svgexporter.h"
 
-void SVGexporter::exportSVG(vector<vector<Path>> contourLists, const char* outfilename){
+void SVGexporter::exportSVG(vector<Paths> contourLists, const char* outfilename){
     ofstream outfile(outfilename, ios::out);
 
     writeHeader(outfile);
 
     for (int i=0; i<contourLists.size(); i++){
-        writeGroupHeader(outfile, i, cfg->layer_height*(i+1));
+        if (cfg->slicing_mode == "uniform")
+            writeGroupHeader(outfile, i, cfg->layer_height*(i+1));
+        else
+            writeGroupHeader(outfile, i, cfg->layer_height*(i+1));
         for (Path contour : contourLists[i]){
             writePolygon(outfile, contour);
         }

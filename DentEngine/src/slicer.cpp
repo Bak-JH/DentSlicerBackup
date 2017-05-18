@@ -3,22 +3,23 @@
 
 using namespace ClipperLib;
 
-vector<vector<Path>> Slicer::slice(Mesh* mesh){
-    vector<vector<Path>> slices = meshSlice(mesh);
-    vector<vector<Path>> contours;
+Slices Slicer::slice(Mesh* mesh){
+    vector<Paths> slices = meshSlice(mesh);
+    Slices contoursList;
 
     for (int i=0; i< slices.size(); i++){
-        vector<Path> contour = contourConstruct(slices[i]);
-        contours.push_back(contour);
-        printf("contour constructed %d / %d - %d contours\n", i+1, slices.size(), contour.size());
+        Slice contours = contourConstruct(slices[i]);
+        contours.z = cfg->layer_height*i;
+        contoursList.push_back(contours);
+        printf("contour constructed %d / %d - %d contours\n", i+1, slices.size(), contours.size());
     }
 
     printf("done slicing\n");
-    return contours;
+    return contoursList;
 }
 
 // slices mesh into segments
-vector<vector<Path>> Slicer::meshSlice(Mesh* mesh){
+vector<Paths> Slicer::meshSlice(Mesh* mesh){
     float delta = cfg->layer_height;
     vector<float> planes;
 
@@ -30,13 +31,13 @@ vector<vector<Path>> Slicer::meshSlice(Mesh* mesh){
     }
 
     vector<vector<int>> triangleLists = buildTriangleLists(mesh, planes, delta);
-    vector<vector<Path>> pathLists;
+    vector<Paths> pathLists;
 
     vector<int> A;
     for (int i=0; i<planes.size(); i++){
         qDebug() << "slicing layer " << i << "/" << planes.size();
         A.insert(A.end(), triangleLists[i].begin(), triangleLists[i].end()); // union
-        vector<Path> paths;
+        Paths paths;
         for (int t_idx=0; t_idx<A.size(); t_idx++){
             MeshFace cur_mf = mesh->idx2MF(A[t_idx]);
             if (mesh->getFaceZmax(cur_mf) < planes[i]){
@@ -60,8 +61,8 @@ vector<vector<Path>> Slicer::meshSlice(Mesh* mesh){
 }
 
 // construct closed contour using segments created from meshSlice step
-vector<Path> Slicer::contourConstruct(vector<Path> pathList){
-    vector<Path> contourList;
+Slice Slicer::contourConstruct(Paths pathList){
+    Slice contourList;
 
     QHash<int64_t, Path> pathHash;
     if (pathList.size() == 0)
