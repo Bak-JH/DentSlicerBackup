@@ -4,3 +4,7 @@ kbranch::kbranch()
 {
 
 }
+
+void generateKbranch(Slices* slices){
+
+}

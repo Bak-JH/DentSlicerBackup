@@ -2,6 +2,7 @@
 #define SVGEXPORTER_H
 #include "polyclipping/clipper.hpp"
 #include "configuration.h"
+#include "slicer.h"
 #include <fstream>
 
 using namespace ClipperLib;
@@ -13,7 +14,7 @@ public:
     SVGexporter(Configuration* cfg) : cfg(cfg) {}
     Configuration* cfg;
 
-    void exportSVG(vector<Paths> contourLists, const char* outfilename);
+    void exportSVG(Slices contourLists, const char* outfilename);
 
     void writePolygon(ofstream& outfile, Path contour);
     void writeGroupHeader(ofstream& outfile, int layer_idx, float z);

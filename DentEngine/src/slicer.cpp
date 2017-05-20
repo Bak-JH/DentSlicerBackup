@@ -4,18 +4,37 @@
 using namespace ClipperLib;
 
 Slices Slicer::slice(Mesh* mesh){
-    vector<Paths> slices = meshSlice(mesh);
-    Slices contoursList;
 
-    for (int i=0; i< slices.size(); i++){
-        Slice contours = contourConstruct(slices[i]);
+    // mesh slicing step
+    vector<Paths> meshslices = meshSlice(mesh);
+    Slices slices;
+
+    // contour construction step
+    for (int i=0; i< meshslices.size(); i++){
+        Slice contours = contourConstruct(meshslices[i]);
         contours.z = cfg->layer_height*i;
-        contoursList.push_back(contours);
-        printf("contour constructed %d / %d - %d contours\n", i+1, slices.size(), contours.size());
+        slices.push_back(contours);
+        printf("contour constructed %d / %d - %d contours\n", i+1, meshslices.size(), contours.size());
     }
 
+    overhangDetect(&slices);
+
+    // needs to be done in parallel way
+
+    // infill generation step
+    Infill infill(cfg->infill_type);
+    infill.generate(&slices);
+
+    // support generation step
+    Support support(cfg->support_type);
+    support.generate(&slices);
+
+    // raft generation step
+    Raft raft(cfg->raft_type);
+    raft.generate(&slices);
+
     printf("done slicing\n");
-    return contoursList;
+    return slices;
 }
 
 // slices mesh into segments
@@ -192,6 +211,13 @@ Slice Slicer::contourConstruct(Paths pathList){
     return contourList;
 }
 
+
+// detects overhang regions in all layers
+void Slicer::overhangDetect(Slices* contoursList){
+    for (Slice slice : *contoursList){
+
+    }
+}
 
 
 /****************** Helper Functions For Mesh Slicing Step *******************/

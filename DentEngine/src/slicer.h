@@ -5,6 +5,7 @@
 #include "mesh.h"
 #include "support.h"
 #include "infill.h"
+#include "raft.h"
 #include <list>
 #include <qDebug>
 
@@ -12,13 +13,12 @@ using namespace std;
 using namespace ClipperLib;
 
 class Slice : public Paths{ // extends Paths (multiple contours contained in one Slice)
+public:
     float z;
-    Support* support_region;
-    Infill* infill_region;
+    Paths overhang_region;
 };
 
 using Slices = vector<Slice>;
-
 
 class Slicer : public Clipper
 {
@@ -26,10 +26,16 @@ public:
     Slicer(Configuration* cfg) : cfg(cfg) {}
     Configuration* cfg;
 
+    // entire slicing step
     Slices slice(Mesh* mesh);
 
+    // contour slicing
     vector<Paths> meshSlice(Mesh* mesh); // totally k elements
     Slice contourConstruct(Paths);
+
+    // overhang region detect
+    void overhangDetect(Slices* contoursList);
+
 
     /****************** Helper Functions For Mesh Slicing Step *******************/
 

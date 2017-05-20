@@ -75,11 +75,11 @@ int main(int argc, char *argv[])
 
             // Slice
             Slicer* slicer = new Slicer(cfg);
-            vector<Paths> contourLists = slicer->slice(loaded_mesh);
+            Slices contourLists = slicer->slice(loaded_mesh);
 
             // Export to SVG
             SVGexporter* exporter = new SVGexporter(cfg);
-            exporter->exportSVG(contourLists, parser.outputfilename.toStdString().c_str());
+            //exporter->exportSVG(contourLists, parser.outputfilename.toStdString().c_str());
 
             break;
         }

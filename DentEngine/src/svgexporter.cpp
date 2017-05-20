@@ -1,6 +1,6 @@
 #include "svgexporter.h"
 
-void SVGexporter::exportSVG(vector<Paths> contourLists, const char* outfilename){
+void SVGexporter::exportSVG(Slices contourLists, const char* outfilename){
     ofstream outfile(outfilename, ios::out);
 
     writeHeader(outfile);

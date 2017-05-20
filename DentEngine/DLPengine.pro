@@ -21,8 +21,7 @@ SOURCES += main.cpp \
     src/support.cpp \
     src/support/kbranch.cpp \
     src/infill.cpp \
-    src/bottom.cpp \
-    src/util/point3d.cpp
+    src/raft.cpp
 
 # The following define makes your compiler emit warnings if you use
 # any feature of Qt which as been marked deprecated (the exact warnings
@@ -48,5 +47,4 @@ HEADERS += src/polyclipping/clipper.hpp \
     src/support.h \
     src/support/kbranch.h \
     src/infill.h \
-    src/bottom.h \
-    src/util/point3d.h
+    src/raft.h
