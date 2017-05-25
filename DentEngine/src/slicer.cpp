@@ -11,16 +11,20 @@ Slices Slicer::slice(Mesh* mesh){
 
     // contour construction step
     for (int i=0; i< meshslices.size(); i++){
-        Slice contours = contourConstruct(meshslices[i]);
-        contours.z = cfg->layer_height*i;
-        slices.push_back(contours);
-        printf("contour constructed %d / %d - %d contours\n", i+1, meshslices.size(), contours.size());
+        Slice meshslice;
+        meshslice.outershell = contourConstruct(meshslices[i]);
+        meshslice.z = cfg->layer_height*i;
+        meshslice.outerShellOffset(-(cfg->wall_thickness+cfg->nozzle_width)/2, jtRound);
+        slices.push_back(meshslice);
     }
 
+    // containment relationship tree construction step, needs to be done in parallel way
+    containmentTreeConstruct(&slices);
+
+    // overhang detection step
     overhangDetect(&slices);
 
-    // needs to be done in parallel way
-
+    // below steps need to be done in parallel way
     // infill generation step
     Infill infill(cfg->infill_type);
     infill.generate(&slices);
@@ -80,8 +84,8 @@ vector<Paths> Slicer::meshSlice(Mesh* mesh){
 }
 
 // construct closed contour using segments created from meshSlice step
-Slice Slicer::contourConstruct(Paths pathList){
-    Slice contourList;
+Paths Slicer::contourConstruct(Paths pathList){
+    Paths contourList;
 
     QHash<int64_t, Path> pathHash;
     if (pathList.size() == 0)
@@ -208,15 +212,52 @@ Slice Slicer::contourConstruct(Paths pathList){
         //qDebug() << "contour added";
     }
 
+
+    // remove 2~ 3 vertices contours
+    Slice::iterator it;
+    for (it=contourList.begin(); it!=contourList.end();){
+        if (it->size() <=3){
+            contourList.erase(it);
+        } else
+            ++it;
+    }
     return contourList;
 }
 
+void Slicer::containmentTreeConstruct(Slices* contoursList){
+    Clipper clpr;
+
+    for (Slice slice : *contoursList){ // divide into parallel threads
+        clpr.Clear();
+        clpr.AddPaths(slice.outershell, ptSubject, true);
+        clpr.Execute(ctUnion, slice.polytree);
+    }
+
+    printf ("containment tree construction done\n");
+}
 
 // detects overhang regions in all layers
 void Slicer::overhangDetect(Slices* contoursList){
-    for (Slice slice : *contoursList){
+    Clipper clpr;
 
+    Slice prev_slice;
+
+    // calculate overhang regions
+    for (Slice slice : *contoursList){
+        // do something with polytree of slice
+        // region subtraction
+        prev_slice = slice;
     }
+
+    printf ("overhang detection done\n");
+}
+
+void Slice::offsetShellOffset(float delta, JoinType join_type){
+    ClipperOffset co;
+
+    co.AddPaths(outershell, join_type, etClosedPolygon);
+    co.Execute(outershell, delta);
+    return;
 }
 
 

@@ -12,13 +12,23 @@
 using namespace std;
 using namespace ClipperLib;
 
-class Slice : public Paths{ // extends Paths (multiple contours contained in one Slice)
+class Slice : public Paths{ // extends Paths (total paths)
 public:
     float z;
+    PolyTree polytree; // containment relationship per slice
     Paths overhang_region;
+
+    Paths outershell;
+    Paths infill;
+    Paths support;
+
+    void outerShellOffset(float delta, JoinType join_type);
 };
 
-using Slices = vector<Slice>;
+class Slices : public vector<Slice>{
+public:
+    vector<QVector3D> overhang_positions;
+};
 
 class Slicer : public Clipper
 {
@@ -31,11 +41,13 @@ public:
 
     // contour slicing
     vector<Paths> meshSlice(Mesh* mesh); // totally k elements
-    Slice contourConstruct(Paths);
+    Paths contourConstruct(Paths);
+
+    // containment relationship tree construct
+    void containmentTreeConstruct(Slices* contoursList);
 
     // overhang region detect
     void overhangDetect(Slices* contoursList);
-
 
     /****************** Helper Functions For Mesh Slicing Step *******************/
 

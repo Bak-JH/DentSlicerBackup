@@ -4,15 +4,15 @@
 #include "src/configuration.h"
 #include "src/slicer.h"
 #include "src/svgexporter.h"
-//#include <QApplication>
-//#include <QLabel>
 #include <QDebug>
 #include <QPicture>
 #include <QPainter>
+#include <QApplication>
+#include <QLabel>
 
 int main(int argc, char *argv[])
 {
-    /*// for debug
+    // for debug
     QApplication a(argc, argv);
     QLabel l;
     QPicture pi;
@@ -23,27 +23,50 @@ int main(int argc, char *argv[])
     // Load mesh
     Mesh* loaded_mesh = new Mesh(cfg);
     //loadMeshSTL(loaded_mesh, "C:\\Users\\Diri\\Desktop\\DLP\\test\\Hollow_Draudi_small.STL");
-    loadMeshSTL(loaded_mesh, "C:\\Users\\Diri\\Downloads\\All_Bobbleheads_Fallout_4\\files\\Bobblehead_Luck.STL");
+    loadMeshSTL(loaded_mesh, "C:\\Users\\diridiri\\Desktop\\DLP\\lowerjaw.STL");
     printf("vertices : %d, faces : %d\n", loaded_mesh->vertices.size(), loaded_mesh->faces.size());
     printf("slicing in %s mode, resolution %d\n", cfg->slicing_mode, cfg->resolution);
 
     // Slice
     Slicer* slicer = new Slicer(cfg);
-    Paths pathList = slicer->meshSlice(loaded_mesh)[600];
+    Paths pathList = slicer->meshSlice(loaded_mesh)[359];
+
     Paths contourList = slicer->contourConstruct(pathList);
+
+
+
+    Clipper clpr;
+    ClipperOffset co;
+    PolyTree polytree;
+
+    clpr.AddPaths(contourList, ptSubject, true);
+    clpr.Execute(ctUnion, polytree);
+    qDebug() << polytree.ChildCount();
+    Paths newcontourList;
+    ClosedPathsFromPolyTree(polytree, newcontourList);
+    co.AddPaths(newcontourList, jtRound, etClosedPolygon);
+    co.Execute(newcontourList, -(cfg->wall_thickness+cfg->nozzle_width)/2);
+    //PolyTreeToPaths(polytree, newcontourList);
+    qDebug() << newcontourList.size() << newcontourList[0].size();
     //slicer->slice(loaded_mesh);
 
     p.setRenderHint(QPainter::Antialiasing);
     p.setPen(QPen(Qt::black, 1, Qt::DashDotLine, Qt::RoundCap));
-    for(Path path: pathList){
-        qDebug() <<path[0].X<< path[0].Y<< path[1].X<< path[1].Y;
-        p.drawLine(path[0].X/100, path[0].Y/100, path[1].X/100, path[1].Y/100);
+    for(Path path: newcontourList){
+        //qDebug() <<path[0].X<< path[0].Y<< path[1].X<< path[1].Y;
+        //p.drawLine(path[0].X/100, path[0].Y/100, path[1].X/100, path[1].Y/100);
+        for (IntPoint ip : path){
+         p.drawPoint(ip.X/100+100, ip.Y/100+100);
+        }
+
     }
+    qDebug() << "contour count : " << contourList.size();
     qDebug() << "----------------------";
     for(Path contour: contourList){
+        qDebug() << "contour length " << contour.size();
         for (IntPoint ip : contour){
-            qDebug() << ip.X << ip.Y;
-            p.drawPoint(ip.X/100 + 200,ip.Y/100 + 200);
+            //qDebug() << ip.X << ip.Y;
+            p.drawPoint(ip.X/100 + 500,ip.Y/100 + 500);
             //p.drawLine(ip.X/100+200, ip.Y/100, contour[1].X/100 + 200, contour[1].Y/100);
         }
     }
@@ -54,9 +77,12 @@ int main(int argc, char *argv[])
 
     //*/
 
-    QCoreApplication a(argc, argv);
+    /*QCoreApplication a(argc, argv);
     QCoreApplication::setApplicationName("DLPengine");
     QCoreApplication::setApplicationVersion("1.0");
+    QLabel l;
+    QPicture pi;
+    QPainter p(&pi);
 
     CmdLineParser parser;
     QString errorMsg;
@@ -96,6 +122,6 @@ int main(int argc, char *argv[])
             parser.showHelp();
             Q_UNREACHABLE();
         }
-
+    */
     return a.exec();
 }

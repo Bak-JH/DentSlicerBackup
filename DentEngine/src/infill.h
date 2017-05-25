@@ -11,7 +11,8 @@
 using namespace std;
 using namespace ClipperLib;
 class Slice;
-using Slices = vector<Slice>;
+class Slices;
+
 
 class Infill
 {

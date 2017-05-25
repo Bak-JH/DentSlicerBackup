@@ -3,8 +3,8 @@ QT += gui
 
 CONFIG += c++11
 
-#QT +=  widgets
-#CONFIG += qt
+QT +=  widgets
+CONFIG += qt
 
 TARGET = DLPengine
 CONFIG += console
