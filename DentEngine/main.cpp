@@ -12,11 +12,11 @@
 
 int main(int argc, char *argv[])
 {
+
+#if debug_mode == 1
+
     // for debug
     QApplication a(argc, argv);
-    QLabel l;
-    QPicture pi;
-    QPainter p(&pi);
 
     Configuration* cfg = new Configuration();
 
@@ -26,63 +26,68 @@ int main(int argc, char *argv[])
     loadMeshSTL(loaded_mesh, "C:\\Users\\diridiri\\Desktop\\DLP\\lowerjaw.STL");
     printf("vertices : %d, faces : %d\n", loaded_mesh->vertices.size(), loaded_mesh->faces.size());
     printf("slicing in %s mode, resolution %d\n", cfg->slicing_mode, cfg->resolution);
-
+    printf("debugging layer : %d\n", debug_layer);
     // Slice
     Slicer* slicer = new Slicer(cfg);
-    Paths pathList = slicer->meshSlice(loaded_mesh)[359];
 
-    Paths contourList = slicer->contourConstruct(pathList);
+//    vector<Paths> meshslices = slicer->meshSlice(loaded_mesh);
+//    Paths contourList = meshslices[debug_layer];
+//    Slice meshslice;
+//    meshslice.outershell = slicer->contourConstruct(meshslices[22]);
+//    meshslice.outerShellOffset(-(cfg->wall_thickness+cfg->nozzle_width)/2, jtRound);
+//    Paths contourList = meshslice.outershell;
+//    meshslices = slicer->slice(lo)
+//    Paths contourList = meshslice.overhang_region;
 
+//    Paths contourList = slicer->slice(loaded_mesh)[debug_layer].overhang_region;
+    Slices slices = slicer->slice(loaded_mesh);
+//    int layer_num = round(slices.overhang_positions[5].z()/cfg->layer_height);
+//    qDebug() << slices.overhang_positions[5].z() << slices.overhang_positions[5].z()/cfg->layer_height << layer_num;
+//    Paths contourList = slices[debug_layer].outershell;
+    Paths contourList = slices[0].overhang_region;
+//    Paths contourList = slices[2].outershell;
+//    Paths contourList = slices[debug_layer].outershell;
 
-
-    Clipper clpr;
-    ClipperOffset co;
-    PolyTree polytree;
-
-    clpr.AddPaths(contourList, ptSubject, true);
-    clpr.Execute(ctUnion, polytree);
-    qDebug() << polytree.ChildCount();
-    Paths newcontourList;
-    ClosedPathsFromPolyTree(polytree, newcontourList);
-    co.AddPaths(newcontourList, jtRound, etClosedPolygon);
-    co.Execute(newcontourList, -(cfg->wall_thickness+cfg->nozzle_width)/2);
-    //PolyTreeToPaths(polytree, newcontourList);
-    qDebug() << newcontourList.size() << newcontourList[0].size();
-    //slicer->slice(loaded_mesh);
+    QLabel l;
+    l.setGeometry(0,0,1000,600);
+    QPicture pi;
+    QPainter p(&pi);
 
     p.setRenderHint(QPainter::Antialiasing);
-    p.setPen(QPen(Qt::black, 1, Qt::DashDotLine, Qt::RoundCap));
-    for(Path path: newcontourList){
-        //qDebug() <<path[0].X<< path[0].Y<< path[1].X<< path[1].Y;
-        //p.drawLine(path[0].X/100, path[0].Y/100, path[1].X/100, path[1].Y/100);
-        for (IntPoint ip : path){
-         p.drawPoint(ip.X/100+100, ip.Y/100+100);
-        }
-
-    }
+    p.setPen(QPen(Qt::black, 2, Qt::DashDotLine, Qt::SquareCap));
     qDebug() << "contour count : " << contourList.size();
     qDebug() << "----------------------";
-    for(Path contour: contourList){
-        qDebug() << "contour length " << contour.size();
+    for (int contour_idx=0; contour_idx < contourList.size() ; contour_idx++){
+        Path contour = contourList[contour_idx];
+        qDebug() << "contour length " << contour.size() << contour_idx;
+        IntPoint start_ip = contour[0];
+        IntPoint prev_ip = contour[0];
         for (IntPoint ip : contour){
             //qDebug() << ip.X << ip.Y;
-            p.drawPoint(ip.X/100 + 500,ip.Y/100 + 500);
-            //p.drawLine(ip.X/100+200, ip.Y/100, contour[1].X/100 + 200, contour[1].Y/100);
+            p.drawLine(prev_ip.X*10/Configuration::resolution + 500,prev_ip.Y*10/Configuration::resolution + 500, ip.X*10/Configuration::resolution + 500,ip.Y*10/Configuration::resolution + 500);
+            //p.drawPoint(ip.X*10/Configuration::resolution + 500,ip.Y*10/Configuration::resolution + 500);
+            prev_ip = ip;
         }
+        p.drawLine(prev_ip.X*10/Configuration::resolution + 500,prev_ip.Y*10/Configuration::resolution + 500, start_ip.X*10/Configuration::resolution + 500,start_ip.Y*10/Configuration::resolution + 500);
+    }
+
+    // draw overhang positions
+    qDebug() << slices.overhang_positions.size();
+    p.setPen(QPen(Qt::red, 2, Qt::DashLine, Qt::RoundCap));
+    for (QVector3D cop : slices.overhang_positions){
+        qDebug() << "pointing " << cop.x() << cop.y();
+        p.drawPoint(cop.x()*10 + 500, cop.y()*10 + 500);
     }
     p.end();
 
     l.setPicture(pi);
     l.show();
 
-    //*/
+#else
 
-    /*QCoreApplication a(argc, argv);
+    QCoreApplication a(argc, argv);
     QCoreApplication::setApplicationName("DLPengine");
     QCoreApplication::setApplicationVersion("1.0");
-    QLabel l;
-    QPicture pi;
-    QPainter p(&pi);
 
     CmdLineParser parser;
     QString errorMsg;
@@ -122,6 +127,8 @@ int main(int argc, char *argv[])
             parser.showHelp();
             Q_UNREACHABLE();
         }
-    */
+
+#endif // debug mode selection
+
     return a.exec();
 }

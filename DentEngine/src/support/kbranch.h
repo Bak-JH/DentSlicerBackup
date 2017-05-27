@@ -15,6 +15,6 @@ public:
 
 };
 
-void generateKbranch(Slices* slices);
+void generateKbranch(Slices& slices);
 
 #endif // KBRANCH_H

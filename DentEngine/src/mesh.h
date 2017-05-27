@@ -52,7 +52,6 @@ public :
     MeshVertex idx2MV(int idx);
 };
 
-
 int64_t vertexHash(QVector3D v);
 
 

@@ -61,7 +61,6 @@ vector<Paths> Slicer::meshSlice(Mesh* mesh){
         qDebug() << "slicing layer " << i << "/" << planes.size();
         A.insert(A.end(), triangleLists[i].begin(), triangleLists[i].end()); // union
         Paths paths;
-
         for (int t_idx=0; t_idx<A.size(); t_idx++){
             MeshFace cur_mf = mesh->idx2MF(A[t_idx]);
             if (mesh->getFaceZmax(cur_mf) < planes[i]){
@@ -90,7 +89,7 @@ vector<Paths> Slicer::meshSlice(Mesh* mesh){
 Paths Slicer::contourConstruct(Paths pathList){
     Paths contourList;
 
-    QHash<int64_t, Path> pathHash;
+    QHash<int, Path> pathHash;
     if (pathList.size() == 0)
         return contourList;
 
@@ -100,8 +99,8 @@ Paths Slicer::contourConstruct(Paths pathList){
         Path p = pathList[i];
         //insertPathHash(pathHash, p[0], p[1]); // inserts opposite too
 
-        int64_t path_hash_u = intPoint2Hash(p[0]);
-        int64_t path_hash_v = intPoint2Hash(p[1]);
+        int path_hash_u = intPoint2Hash(p[0]);//vertexHash(u_qv3);
+        int path_hash_v = intPoint2Hash(p[1]);//vertexHash(v_qv3);
 
         if (! pathHash.contains(path_hash_u)){
             debug_count ++;
@@ -111,9 +110,20 @@ Paths Slicer::contourConstruct(Paths pathList){
             debug_count ++;
             pathHash[path_hash_v].push_back(p[1]);
         }
+
         pathHash[path_hash_u].push_back(p[1]);
         pathHash[path_hash_v].push_back(p[0]);
     }
+
+    QHash<int, Path>::iterator i;
+    for (i=pathHash.begin(); i!= pathHash.end(); i++){
+        if (i.value().size() !=3){
+           qDebug() << i.key() << i.value().size() << i.value()[0].X << i.value()[0].Y << i.value()[1].X << i.value()[1].Y;
+        }
+    }
+
+    qDebug() << debug_count << pathList.size();
+
 
     // Build Polygons
     while(pathHash.size() >0){
@@ -124,40 +134,27 @@ Paths Slicer::contourConstruct(Paths pathList){
         start = pj_prev;
         contour.push_back(pj_prev);
         vector<IntPoint>* dest = &(pathHash.begin().value());
-
-        if (dest->size() == 0|| dest->size() == 1){
+        if (dest->size()<3){
+            qDebug() << "errrrr" << dest->size();
             pathHash.remove(intPoint2Hash(pj_prev));
             continue;
-        } else if (dest->size() ==2){
-            pj = (*dest)[1];
-            last = (*dest)[0]; // pj_prev itself
-            pathHash.remove(intPoint2Hash(pj_prev));
-        } else {
-            pj = (*dest)[1];
-            last = (*dest)[2];
-
-            dest->erase(dest->begin()+1);
-            dest->erase(dest->begin()+2);
-            if (dest->size() == 1)
-                pathHash.remove(intPoint2Hash(pj_prev));
         }
+
+        pj = (*dest)[1];
+        last = (*dest)[2];
+
+        dest->erase(dest->begin()+1);
+        dest->erase(dest->begin()+2);
+        if (dest->size() == 1)
+            pathHash.remove(intPoint2Hash(pj_prev));
+
         while(pj_next != last){
-            contour.push_back(pj);
             dest = &(pathHash[intPoint2Hash(pj)]);
 
-            if (dest->size() == 0|| dest->size() == 1){
+            if (dest->size()<3){
+                qDebug() << "errrrr" << dest->size();
                 pathHash.remove(intPoint2Hash(pj));
                 break;
-            } else if (dest->size() == 2){
-                start = (*dest)[0]; // itself
-                pathHash.remove(intPoint2Hash(pj));
-                pathHash.remove(intPoint2Hash((*dest)[1])); // maybe needless
-                pj_next = last;
-                pj = pj_next;
-                pj_prev = contour[0];
-                last = start;
-                reverse(contour.begin(), contour.end());
-                continue;
             }
 
             // find pj_prev and choose another pj_next and remove pj_prev, pj_next from H[pj]
@@ -172,6 +169,7 @@ Paths Slicer::contourConstruct(Paths pathList){
             if (dest->size() == 1)
                 pathHash.remove(intPoint2Hash(pj));
 
+            contour.push_back(pj);
 
             pj_prev = pj;
             pj = pj_next;
@@ -180,8 +178,10 @@ Paths Slicer::contourConstruct(Paths pathList){
         contour.push_back(last);
         contour.push_back(start);
 
-        int64_t last_hash = intPoint2Hash(last);
+        int last_hash = intPoint2Hash(last);
         if (pathHash.contains(last_hash)){
+            dest = &(pathHash[last_hash]);
+
             dest = &(pathHash[last_hash]);
             for (int d=1; d<dest->size(); d++){
                 if ((*dest)[d] == pj_prev){
@@ -263,6 +263,10 @@ void Slicer::overhangDetect(){
     }
 
     printf("overhang region detection done\n");
+
+    for (int op_idx=0; op_idx<slices.overhang_positions.size(); op_idx++){
+        qDebug() << slices.overhang_positions[op_idx].x()<<slices.overhang_positions[op_idx].y()<<slices.overhang_positions[op_idx].z();
+    }
 }
 
 /****************** Helper Functions For Offsetting Step *******************/
@@ -301,7 +305,6 @@ vector<vector<int>> Slicer::buildTriangleLists(Mesh* mesh, vector<float> planes,
             else
                 llt_idx = (int)((z_min - planes[0])/delta) +1;
 
-
             list_list_triangle[llt_idx].push_back(f_idx);
         }
     }
@@ -316,11 +319,8 @@ vector<vector<int>> Slicer::buildTriangleLists(Mesh* mesh, vector<float> planes,
 
 vector<float> Slicer::buildUniformPlanes(float z_min, float z_max, float delta){
     vector<float> planes;
-    int idx_max = ceil((z_max-z_min)/delta);
-    for (int idx=0; idx<=idx_max; idx++){
-        float plane_z = z_min+delta*idx;
-        //float plane_z = (idx == idx_max) ? z_min+delta*(idx-1)+delta/2:z_min + delta*idx;
-        planes.push_back(plane_z);
+    for (int idx=0; idx<(z_max-z_min)/delta; idx++){
+        planes.push_back(z_min + delta*idx);
     }
     return planes;
 }
@@ -333,12 +333,12 @@ vector<float> Slicer::buildAdaptivePlanes(float z_min, float z_max){
 
 /****************** Helper Functions For Contour Construction Step *******************/
 
-void Slicer::insertPathHash(QHash<int64_t, Path>& pathHash, IntPoint u, IntPoint v){
+void Slicer::insertPathHash(QHash<int, Path>& pathHash, IntPoint u, IntPoint v){
     QVector3D u_qv3 = QVector3D(u.X, u.Y, 0);
     QVector3D v_qv3 = QVector3D(v.X, v.Y, 0);
 
-    int64_t path_hash_u = vertexHash(u_qv3);
-    int64_t path_hash_v = vertexHash(v_qv3);
+    int path_hash_u = vertexHash(u_qv3);
+    int path_hash_v = vertexHash(v_qv3);
 
     if (! pathHash.contains(path_hash_u)){
         //pathHash[path_hash_u].push_back(u);
@@ -358,9 +358,9 @@ void Slicer::insertPathHash(QHash<int64_t, Path>& pathHash, IntPoint u, IntPoint
     return;
 }
 
-int64_t Slicer::intPoint2Hash(IntPoint u){
+int Slicer::intPoint2Hash(IntPoint u){
     QVector3D u_qv3 = QVector3D(u.X, u.Y, 0);
-    int64_t path_hash_u = vertexHash(u_qv3);
+    int path_hash_u = vertexHash(u_qv3);
     return path_hash_u;
 }
 

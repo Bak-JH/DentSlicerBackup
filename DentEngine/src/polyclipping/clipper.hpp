@@ -41,7 +41,7 @@
 //#define use_int32
 
 //use_xyz: adds a Z member to IntPoint. Adds a minor cost to perfomance.
-//#define use_xyz
+#define use_xyz
 
 //use_lines: Enables line clipping. Adds a very minor cost to performance.
 #define use_lines
@@ -99,6 +99,14 @@ struct IntPoint {
   friend inline bool operator!= (const IntPoint& a, const IntPoint& b)
   {
     return a.X != b.X  || a.Y != b.Y; 
+  }
+  friend inline IntPoint operator+ (const IntPoint& a, const IntPoint& b)
+  {
+      return IntPoint(a.X+b.X, a.Y+b.Y);
+  }
+  friend inline IntPoint operator- (const IntPoint& a, const IntPoint& b)
+  {
+      return IntPoint(a.X-b.X, a.Y-b.Y);
   }
 };
 //------------------------------------------------------------------------------

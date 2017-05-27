@@ -5,7 +5,7 @@ kbranch::kbranch()
 
 }
 
-void generateKbranch(Slices* slices){
+void generateKbranch(Slices& slices){
     // predict weight containing infill
 
     // set base width

@@ -18,7 +18,7 @@ class Infill
 {
 public:
     Infill(int type);
-    void generate(Slices* slices);
+    void generate(Slices& slices);
 };
 
 #endif // INFILL_H

@@ -8,9 +8,9 @@
 //#define tan_theta 1.4281480067421145021606184849985 // tan(55)
 //#define tan_theta 2.1445069205095586163562607910459 // tan(65)
 //#define tan_theta 2.7474774194546222787616640264977 // tan(70)
-#define tan_theta 5.671281819617709530994418439864 // tan(80)
+//#define tan_theta 5.671281819617709530994418439864 // tan(80)
 //#define tan_theta 11.430052302761343067210855549163 // tan(85)
-//#define tan_theta 100
+#define tan_theta 100
 
 #include <stdio.h>
 #include <math.h>
@@ -19,11 +19,11 @@ class Configuration{
 public:
     // configurations
     static constexpr int resolution_scale = 3;
-    static constexpr int resolution = pow(10,resolution_scale); // resolution range from 1000 to 1
+    static constexpr int resolution = pow(10,3); // resolution range from 1000 to 1
     float max_buildsize_x = 1000000/resolution;
 
     char* slicing_mode = "uniform"; // uniform OR adaptive
-    float layer_height = 0.1; // in mm
+    float layer_height = 1; // in mm
     float nozzle_width = 0; // in mm (diameter) , for pointwise printers
     float wall_thickness = 2; // in mm
     float fill_thickness = 1; // in mm

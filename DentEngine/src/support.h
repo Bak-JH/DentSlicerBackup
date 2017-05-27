@@ -16,7 +16,7 @@ public:
     int type;
 
     Support(int type);
-    void generate(Slices* slices);
+    void generate(Slices& slices);
 };
 
 

@@ -41,8 +41,8 @@ void Mesh::connectFaces(){
 void Mesh::addPoint(float x, float y, Path *path)
 {
     IntPoint ip;
-    ip.X = round(x*cfg->resolution);
-    ip.Y = round(y*cfg->resolution);
+    ip.X = (int) (x*cfg->resolution);
+    ip.Y = (int) (y*cfg->resolution);
     path->push_back(ip);
 }
 
@@ -71,7 +71,6 @@ Path Mesh::intersectionPath(MeshFace mf, float z){
     } else{
         if (getFaceZmin(mf) != z)
             qDebug() << "intersection error at layer "<< getFaceZmax(mf) << getFaceZmin(mf) << z<< upper.size() << lower.size();
-
         return p;
     }
 
@@ -89,8 +88,17 @@ Path Mesh::intersectionPath(MeshFace mf, float z){
             * ((z-majority[1].position.z())/(minority[0].position.z()-majority[1].position.z())) \
             + majority[1].position.y();
 
-    addPoint(x_0,y_0, &p);
-    addPoint(x_1,y_1, &p);
+    //p.push_back(IntPoint(100000,2,3));
+    int X_0 = (int)(x_0 * (cfg->resolution));
+    int Y_0 = (int)(y_0 * (cfg->resolution));
+    int X_1 = (int)(x_1 * (cfg->resolution));
+    int Y_1 = (int)(y_1 * (cfg->resolution));
+    qDebug() << X_0 << Y_0 << X_1 << Y_1;
+    //p.push_back(IntPoint(X_0, Y_0, 0));
+    p << IntPoint(X_0, Y_0, 0);
+    //addPoint(x_0,y_0, &p);
+    //addPoint(x_1,y_1, &p);
+
     return p;
 }
 
@@ -99,8 +107,8 @@ Path Mesh::intersectionPath(MeshFace mf, float z){
 int64_t vertexHash(QVector3D v) // max build size = 1000mm, resolution = 1 micron
 {
     return ((int64_t)(v.x() / Configuration::vertex_inbound_distance)) ^\
-            (((int64_t)(v.y() / Configuration::vertex_inbound_distance)) << 10) ^\
-            (((int64_t)(v.z() / Configuration::vertex_inbound_distance)) << 20);
+            (((int64_t)(v.y() / Configuration::vertex_inbound_distance)) << 21) ^\
+            (((int64_t)(v.z() / Configuration::vertex_inbound_distance)) << 42);
 }
 
 int Mesh::getVertexIdx(QVector3D v){

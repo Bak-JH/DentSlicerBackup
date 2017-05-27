@@ -1,6 +1,5 @@
 #include "slicer.h"
 #include <QHash>
-#include <QElapsedTimer>
 
 using namespace ClipperLib;
 
@@ -61,7 +60,6 @@ vector<Paths> Slicer::meshSlice(Mesh* mesh){
         qDebug() << "slicing layer " << i << "/" << planes.size();
         A.insert(A.end(), triangleLists[i].begin(), triangleLists[i].end()); // union
         Paths paths;
-
         for (int t_idx=0; t_idx<A.size(); t_idx++){
             MeshFace cur_mf = mesh->idx2MF(A[t_idx]);
             if (mesh->getFaceZmax(cur_mf) < planes[i]){
@@ -94,26 +92,27 @@ Paths Slicer::contourConstruct(Paths pathList){
     if (pathList.size() == 0)
         return contourList;
 
-    int debug_count=0;
-
     for (int i=0; i<pathList.size(); i++){
         Path p = pathList[i];
         //insertPathHash(pathHash, p[0], p[1]); // inserts opposite too
 
-        int64_t path_hash_u = intPoint2Hash(p[0]);
-        int64_t path_hash_v = intPoint2Hash(p[1]);
+        QVector3D u_qv3 = QVector3D(p[0].X, p[0].Y, 0);
+        QVector3D v_qv3 = QVector3D(p[1].X, p[1].Y, 0);
+
+        int64_t path_hash_u = vertexHash(u_qv3);
+        int64_t path_hash_v = vertexHash(v_qv3);
 
         if (! pathHash.contains(path_hash_u)){
-            debug_count ++;
             pathHash[path_hash_u].push_back(p[0]);
         }
         if (! pathHash.contains(path_hash_v)){
-            debug_count ++;
             pathHash[path_hash_v].push_back(p[1]);
         }
+
         pathHash[path_hash_u].push_back(p[1]);
         pathHash[path_hash_v].push_back(p[0]);
     }
+
 
     // Build Polygons
     while(pathHash.size() >0){
@@ -124,40 +123,25 @@ Paths Slicer::contourConstruct(Paths pathList){
         start = pj_prev;
         contour.push_back(pj_prev);
         vector<IntPoint>* dest = &(pathHash.begin().value());
-
-        if (dest->size() == 0|| dest->size() == 1){
+        if (dest->size()<3){
             pathHash.remove(intPoint2Hash(pj_prev));
             continue;
-        } else if (dest->size() ==2){
-            pj = (*dest)[1];
-            last = (*dest)[0]; // pj_prev itself
-            pathHash.remove(intPoint2Hash(pj_prev));
-        } else {
-            pj = (*dest)[1];
-            last = (*dest)[2];
-
-            dest->erase(dest->begin()+1);
-            dest->erase(dest->begin()+2);
-            if (dest->size() == 1)
-                pathHash.remove(intPoint2Hash(pj_prev));
         }
+
+        pj = (*dest)[1];
+        last = (*dest)[2];
+
+        dest->erase(dest->begin()+1);
+        dest->erase(dest->begin()+2);
+        if (dest->size() == 1)
+            pathHash.remove(intPoint2Hash(pj_prev));
+
         while(pj_next != last){
-            contour.push_back(pj);
             dest = &(pathHash[intPoint2Hash(pj)]);
 
-            if (dest->size() == 0|| dest->size() == 1){
+            if (dest->size()<3){
                 pathHash.remove(intPoint2Hash(pj));
                 break;
-            } else if (dest->size() == 2){
-                start = (*dest)[0]; // itself
-                pathHash.remove(intPoint2Hash(pj));
-                pathHash.remove(intPoint2Hash((*dest)[1])); // maybe needless
-                pj_next = last;
-                pj = pj_next;
-                pj_prev = contour[0];
-                last = start;
-                reverse(contour.begin(), contour.end());
-                continue;
             }
 
             // find pj_prev and choose another pj_next and remove pj_prev, pj_next from H[pj]
@@ -172,16 +156,18 @@ Paths Slicer::contourConstruct(Paths pathList){
             if (dest->size() == 1)
                 pathHash.remove(intPoint2Hash(pj));
 
+            contour.push_back(pj);
 
             pj_prev = pj;
             pj = pj_next;
         }
 
         contour.push_back(last);
-        contour.push_back(start);
 
         int64_t last_hash = intPoint2Hash(last);
         if (pathHash.contains(last_hash)){
+            dest = &(pathHash[last_hash]);
+
             dest = &(pathHash[last_hash]);
             for (int d=1; d<dest->size(); d++){
                 if ((*dest)[d] == pj_prev){
@@ -263,6 +249,10 @@ void Slicer::overhangDetect(){
     }
 
     printf("overhang region detection done\n");
+
+    for (int op_idx=0; op_idx<slices.overhang_positions.size(); op_idx++){
+        qDebug() << slices.overhang_positions[op_idx].x()<<slices.overhang_positions[op_idx].y()<<slices.overhang_positions[op_idx].z();
+    }
 }
 
 /****************** Helper Functions For Offsetting Step *******************/
@@ -301,7 +291,6 @@ vector<vector<int>> Slicer::buildTriangleLists(Mesh* mesh, vector<float> planes,
             else
                 llt_idx = (int)((z_min - planes[0])/delta) +1;
 
-
             list_list_triangle[llt_idx].push_back(f_idx);
         }
     }
@@ -316,11 +305,8 @@ vector<vector<int>> Slicer::buildTriangleLists(Mesh* mesh, vector<float> planes,
 
 vector<float> Slicer::buildUniformPlanes(float z_min, float z_max, float delta){
     vector<float> planes;
-    int idx_max = ceil((z_max-z_min)/delta);
-    for (int idx=0; idx<=idx_max; idx++){
-        float plane_z = z_min+delta*idx;
-        //float plane_z = (idx == idx_max) ? z_min+delta*(idx-1)+delta/2:z_min + delta*idx;
-        planes.push_back(plane_z);
+    for (int idx=0; idx<(z_max-z_min)/delta; idx++){
+        planes.push_back(z_min + delta*idx);
     }
     return planes;
 }
@@ -369,7 +355,6 @@ int64_t Slicer::intPoint2Hash(IntPoint u){
 // finds critical overhang region which exceeds threshold diagonal length
 void Slicer::getCriticalOverhangRegion(Slice& slice){
 
-
     for (int contour_idx=0; contour_idx< slice.overhang_region.size(); contour_idx++){
         Path contour = slice.overhang_region[contour_idx];
 
@@ -406,11 +391,10 @@ void Slicer::getCriticalOverhangRegion(Slice& slice){
             tail0count ++;
         }
 
-        start_ip_idx = head0count;
-        end_ip_idx = contour.size()-tail0count-1;
-
-        if (end_ip_idx<0)
-            return;
+//        for (IntPoint point : contour){
+//            qDebug() << point.Z;
+//        }
+//        qDebug() << head0count << tail0count;
 
         max_z0count = head0count + tail0count;
 
@@ -433,77 +417,57 @@ void Slicer::getCriticalOverhangRegion(Slice& slice){
         }
 
         if (reverse){
-            right_contour.insert(right_contour.end(), contour.begin()+end_ip_idx, contour.end());
-            left_contour.insert(left_contour.end(), contour.begin()+start_ip_idx, contour.begin()+end_ip_idx);
-            right_contour.insert(right_contour.end(), contour.begin(), contour.begin()+start_ip_idx);
+            qDebug() << (*(contour.begin() + end_ip_idx)).z;
+//            copy(contour.begin()+end_ip_idx, contour.end(), right_contour.end());
+//            copy(contour.at(start_ip_idx), contour.at(end_ip_idx), left_contour.end());
+//            copy(contour.begin(), contour.begin()+start_ip_idx, right_contour.end());
+//            for (ip_idx=end_ip_idx; ip_idx<contour.size(); ip_idx++){
+//                right_contour.push_back(contour[ip_idx]);
+//            }
+//            for (ip_idx=start_ip_idx; ip_idx<end_ip_idx; ip_idx++){
+//                left_contour.push_back(contour[ip_idx]);
+//            }
+//            for (ip_idx=0; ip_idx<start_ip_idx; ip_idx++){
+//                right_contour.push_back(contour[ip_idx]);
+//            }
         } else {
-            left_contour.insert(left_contour.end(), contour.begin()+end_ip_idx, contour.end());
-            right_contour.insert(right_contour.end(), contour.begin()+start_ip_idx, contour.begin()+end_ip_idx);
-            left_contour.insert(left_contour.end(), contour.begin(), contour.begin()+start_ip_idx);
+//            copy(contour.begin()+end_ip_idx, contour.end(), left_contour.end());
+//            copy(contour.begin()+start_ip_idx, contour.begin()+end_ip_idx, right_contour.end());
+//            copy(contour.begin(), contour.begin()+start_ip_idx, left_contour.end());
+//            for (ip_idx=end_ip_idx; ip_idx<contour.size(); ip_idx++){
+//                left_contour.push_back(contour[ip_idx]);
+//            }
+//            for (ip_idx=start_ip_idx; ip_idx<end_ip_idx; ip_idx++){
+//                right_contour.push_back(contour[ip_idx]);
+//            }
+//            for (ip_idx=0; ip_idx<start_ip_idx; ip_idx++){
+//                left_contour.push_back(contour[ip_idx]);
+//            }
         }
 
-        if (right_contour.size() <= 1 || left_contour.size() <= 1) // needs to be fixed for triangle 110
-            return;
+        qDebug() << "left and right size : " << left_contour.size() << right_contour.size();
 
-        // left right contour split done
-
+        // find critical overhang region        
         IntPoint prev_ip = right_contour[0];
         Path critical_right_path;
         Path critical_left_path;
 
-
-//        qDebug() << "inner contour : " << right_contour.size(); // critical overhang region detection is too long
-
-        QElapsedTimer timer;
-        timer.start();
-        int support_dense = int(15/cfg->support_density);
-
-        if (right_contour.size()/support_dense ==0){ // for small critical regions (including rectangles)
-            IntPoint ip = right_contour[1];
-
-            Path perpendicular;
-            perpendicular.push_back(ip);
-            perpendicular.push_back(ip+IntPoint(ip.Y-prev_ip.Y, prev_ip.X-ip.X));
-
-            IntPoint left_hit;
-            if (checkPerpendicularLength(perpendicular, left_contour, left_hit))
-            {
-                // need to be sorted
-                critical_right_path.push_back(ip);
-                critical_left_path.push_back(left_hit);
-            } else {
-                if (critical_right_path.size() != 0){
-                    // merge critical_path
-                    critical_right_path.insert(critical_right_path.end(), critical_left_path.begin(), critical_left_path.end());
-
-                    slice.critical_overhang_region.push_back(critical_right_path);
-                    critical_right_path.clear();
-                    critical_left_path.clear();
-                }
-            }
-        }
-
-        // clean buffer paths for next usage
-        critical_right_path.clear();
-        critical_left_path.clear();
-
-        //int upper_ip_idx = (right_contour.size()/support_dense==0) ? 1:right_contour.size()/support_dense;
-        for (int ip_idx=0; ip_idx<=right_contour.size()/support_dense; ip_idx++){
-            IntPoint ip = right_contour[ip_idx*support_dense];
+        for (int ip_idx=0; ip_idx<right_contour.size(); ip_idx++){
+            IntPoint ip = right_contour[ip_idx];
             if (ip_idx == 0)
                 continue;
 
             Path perpendicular;
             perpendicular.push_back(ip);
             perpendicular.push_back(ip+IntPoint(ip.Y-prev_ip.Y, prev_ip.X-ip.X));
-//            qDebug() << "timer 4-1" << timer.elapsed() << "milliseconds";
+
             IntPoint left_hit;
             if (checkPerpendicularLength(perpendicular, left_contour, left_hit))
             {
                 // need to be sorted
                 critical_right_path.push_back(ip);
                 critical_left_path.push_back(left_hit);
-            } else {
+            } else{
                 if (critical_right_path.size() != 0){
                     // merge critical_path
                     critical_right_path.insert(critical_right_path.end(), critical_left_path.begin(), critical_left_path.end());
@@ -513,10 +477,11 @@ void Slicer::getCriticalOverhangRegion(Slice& slice){
                     critical_left_path.clear();
                 }
             }
-
             prev_ip = ip;
 
         }
+
+
     }
 }
 

@@ -5,6 +5,6 @@ Raft::Raft(int type)
 
 }
 
-void Raft::generate(Slices* slices){
+void Raft::generate(Slices& slices){
 
 }

@@ -5,6 +5,6 @@ Infill::Infill(int type)
 
 }
 
-void Infill::generate(Slices* slices){
+void Infill::generate(Slices& slices){
 
 }

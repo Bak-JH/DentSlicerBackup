@@ -3,7 +3,7 @@
 #include "polyclipping/clipper.hpp"
 
 #define generalraft 1
-#define clampraft
+#define clampraft 2
 
 using namespace std;
 using namespace ClipperLib;
@@ -16,7 +16,7 @@ class Raft
 {
 public:
     Raft(int type);
-    void generate(Slices* slices);
+    void generate(Slices& slices);
 };
 
 #endif // RAFT_H
