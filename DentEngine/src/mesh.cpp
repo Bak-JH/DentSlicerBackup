@@ -154,7 +154,7 @@ int Mesh::findFaceWith2Vertices(int v0_idx, int v1_idx, int self_idx){
         //qDebug() << "found face";
         return candidates[0];
     } else {
-        qDebug() << candidates.size() << "multiple faces are connected so outputting first connected face" << candidates[0];
+        //qDebug() << candidates.size() << "multiple faces are connected so outputting first connected face" << candidates[0];
         return candidates[0];
     }
 }

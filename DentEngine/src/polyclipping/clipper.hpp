@@ -108,6 +108,24 @@ struct IntPoint {
   {
       return IntPoint(a.X-b.X, a.Y-b.Y);
   }
+  friend inline IntPoint operator/ (const IntPoint& a, const int d){
+      return IntPoint(a.X/d, a.Y/d);
+  }
+  friend inline IntPoint operator* (const IntPoint& a, const int d){
+      return IntPoint(a.X*d, a.Y*d);
+  }
+  friend inline IntPoint operator+= (IntPoint& a, const IntPoint& b){
+      a.X += b.X;
+      a.Y += b.Y;
+  }
+  friend inline IntPoint operator-= (IntPoint& a, const IntPoint& b){
+      a.X -= b.X;
+      a.Y -= b.Y;
+  }
+  friend inline IntPoint operator/= (IntPoint& a, const int d){
+      a.X /= d;
+      a.Y /= d;
+  }
 };
 //------------------------------------------------------------------------------
 

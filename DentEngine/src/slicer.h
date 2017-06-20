@@ -30,14 +30,15 @@ public:
 
 class Slices : public vector<Slice>{
 public:
+    Paths overhang_regions;
     vector<QVector3D> overhang_positions;
+    vector<IntPoint> intersectionPoints;
 };
 
 class Slicer : public QThread
 {
 public:
-    Slicer(Configuration* cfg) : cfg(cfg) {}
-    Configuration* cfg;
+    Slicer() {};
     Slices slices;
 
     /****************** Entire Slicing Step *******************/
@@ -52,8 +53,6 @@ public:
     Paths contourConstruct(Paths);
 
 
-    /****************** Overhang Detection Step *******************/
-    void overhangDetect();
 
 
     /****************** Helper Functions For Mesh Slicing Step *******************/
@@ -66,10 +65,6 @@ public:
     void insertPathHash(QHash<int64_t, Path>& pathHash, IntPoint u, IntPoint v);
     int64_t intPoint2Hash(IntPoint u);
 
-
-    /****************** Helper Functions For Contour Management *******************/
-    void getCriticalOverhangRegion(Slice& slice);
-    bool checkPerpendicularLength(Path A, Path B, IntPoint& left_hit);
 
 
     /****************** Deprecated functions *******************/

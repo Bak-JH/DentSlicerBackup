@@ -4,7 +4,6 @@ Support::Support(int type){
     Support::type = type;
 }
 
-
 void Support::generate(Slices& slices){
     switch (type)
     {
@@ -63,55 +62,54 @@ void overhangDetect(Slices& slices){
         }
 
 
-
-        // poll normal of polygon
+        // poll centroid of polygon
         for (int cop_idx=0; cop_idx<slice.critical_overhang_region.size(); cop_idx ++){
             Path cop = slice.critical_overhang_region[cop_idx];
-            Paths partial_cops = areaSubdivision(cop,  pow(cfg->subdivision_radius*cfg->resolution,2)*cfg->support_density);
-            for (int p_cop_idx=0; p_cop_idx<partial_cops.size(); p_cop_idx++){
-                Path partial_cop = partial_cops[p_cop_idx];
-                //IntPoint centroid = getPolygonCentroid(partial_cop); // need to change to this
-                IntPoint centroid = getPolygonNormal(partial_cop);
+            float cop_area = Area(cop);
+            int dup_count = round(cop_area/40000); // best scenario
+            //int dup_count = round(cop_area/(pow(cfg->duplication_radius*cfg->resolution,2)));
+            qDebug() << "dup_count : " <<dup_count;
+            QVector3D centroid = getPolygonCentroid(slice.critical_overhang_region[cop_idx]);
 
-                slices.overhang_positions.push_back(QVector3D(float(centroid.X)/Configuration::resolution, float(centroid.Y)/Configuration::resolution, slice.z));
+            for (int op_idx=0; op_idx<dup_count; op_idx ++){
+                slices.overhang_positions.push_back(QVector3D(centroid.x(), centroid.y(), slice.z));
             }
         }
 
-        // poll centroid but using dupplication scheme
-        /*for (int cop_idx=0; cop_idx<slice.critical_overhang_region.size(); cop_idx++){
+
+        // poll 1/n position
+        /*for (int cop_idx=0; cop_idx<slice.critical_overhang_region.size(); cop_idx ++){
             Path cop = slice.critical_overhang_region[cop_idx];
-
-            float cop_area = Area(cop);
-            // int dup_count = round(cop_area/40000); // best scenario
-            int dup_count = round(cop_area/(pow(cfg->duplication_radius*cfg->resolution,2)));
-            qDebug() << "dup_count : " <<dup_count;
-            IntPoint centroid = getPolygonCentroid(cop);
-
-            for (int op_idx=0; op_idx<dup_count; op_idx ++){
-                slices.overhang_positions.push_back(QVector3D(float(centroid.X)/Configuration::resolution, float(centroid.Y)/Configuration::resolution, slice.z));
+            float avg_x=0, avg_y=0;
+            for (int int_idx=0; int_idx<cop.size(); int_idx ++){
+                avg_x += cop[int_idx].X;
+                avg_y += cop[int_idx].Y;
             }
+            avg_x /= cop.size()*Configuration::resolution;
+            avg_y /= cop.size()*Configuration::resolution;
+
+            slices.overhang_positions.push_back(QVector3D(avg_x, avg_y, slice.z));
         }*/
     }
 
     // poll overhang positions among selected points
 
-    /*vector<QVector3D> overhang_positions;
-    int support_count = cfg->support_density*100; // best scenario
-//    int support_count = (pow(6, cfg->support_density)-1)/5 * slices.overhang_positions.size(); // 100 must be relational to material's weight or size
+    vector<QVector3D> overhang_positions;
+    //int support_count = cfg->support_density*100; // best scenario
+    int support_count = (pow(6, cfg->support_density)-1)/5 * slices.overhang_positions.size(); // 100 must be relational to material's weight or size
     qDebug() << "polling " << support_count << "supports from " << slices.overhang_positions.size();
 
     for (int idx=0; idx<support_count; idx++){
         int random_idx = rand() % slices.overhang_positions.size();
         overhang_positions.push_back(slices.overhang_positions[random_idx]);
     }
-    slices.overhang_positions = overhang_positions;*/
+    slices.overhang_positions = overhang_positions;
 
-    clusterPoints(slices.overhang_positions);
+//    clusterPoints(slices.overhang_positions);
 
 
     printf("overhang region detection done\n");
 }
-
 
 // finds critical overhang region which exceeds threshold diagonal length
 void getCriticalOverhangRegion(Slice& slice) {
@@ -188,40 +186,18 @@ void getCriticalOverhangRegion(Slice& slice) {
             left_contour.insert(left_contour.end(), contour.begin(), contour.begin()+start_ip_idx);
         }
 
-        /*if (left_contour.size() == 0){
-            //left_contour.clear();
-            left_contour.push_back(right_contour[right_contour.size()-1]);
-            left_contour.push_back(right_contour[0]);
-        } else if (left_contour.size() == 1){
-            left_contour.push_back(right_contour[0]);
-        }*/
-
-        if (left_contour.size() <=1){
+        if (left_contour.size() <= 1){
             left_contour.clear();
             left_contour.push_back(right_contour[right_contour.size()-1]);
             left_contour.push_back(right_contour[0]);
-
         }
 
-
-        // get maximal hor_len so that we get only minimal vert_len
-        float hor_len = 0;
-        /*for (IntPoint ip1 : left_contour){
-            for (IntPoint ip2 : left_contour){
-                float distance = pointDistance(ip1, ip2);
-                if (distance >= hor_len)
-                    hor_len = distance;
-            }
-        }*/
-
-        // faster but not precise
-        hor_len = pointDistance(left_contour[0], left_contour[left_contour.size()-1]);
-
+        float hor_len = pointDistance(left_contour[0], left_contour[left_contour.size()-1]);
         float contour_area = Area(contour);
 
         float vert_len = contour_area/(hor_len*Configuration::resolution);
 
-        if (vert_len >= cfg->overhang_threshold){
+        if (vert_len > cfg->overhang_threshold){
             slice.critical_overhang_region.push_back(contour);
         }
 
@@ -383,7 +359,7 @@ float pointDistance(IntPoint A, IntPoint B){
 }
 
 float pointDistance(QVector3D A, QVector3D B){
-    return sqrt(pow(A.x()-B.x(), 2)+pow(A.y()-B.y(),2)+pow(A.z()-B.z(),2));
+    return sqrt(pow(A.x()-B.x(), 2)+pow(A.y()-B.y(),2));
 }
 
 bool checkPerpendicularLength(Path A, Path B, IntPoint& left_hit){
@@ -417,22 +393,10 @@ bool checkPerpendicularLength(Path A, Path B, IntPoint& left_hit){
     return false;
 }
 
-IntPoint getPolygonNormal(Path vertices){
-    IntPoint normal;
-    for (IntPoint vertice : vertices){
-        normal.X+=vertice.X;
-        normal.Y+=vertice.Y;
-    }
-    normal.X /= vertices.size();
-    normal.Y /= vertices.size();
-    return normal;
-}
-
-IntPoint getPolygonCentroid(Path vertices)
+QVector3D getPolygonCentroid(Path vertices)
 {
     int vertexCount = vertices.size();
-
-    IntPoint centroid;
+    QVector3D centroid;
     float signedArea = 0.0;
     float x0 = 0.0; // Current vertex X
     float y0 = 0.0; // Current vertex Y
@@ -442,7 +406,7 @@ IntPoint getPolygonCentroid(Path vertices)
 
     // For all vertices
     int i=0;
-    for (i=0; i<vertexCount; i++)
+    for (i=0; i<vertexCount; ++i)
     {
         x0 = vertices[i].X;
         y0 = vertices[i].Y;
@@ -450,57 +414,13 @@ IntPoint getPolygonCentroid(Path vertices)
         y1 = vertices[(i+1) % vertexCount].Y;
         a = x0*y1 - x1*y0;
         signedArea += a;
-        centroid += IntPoint((x0 + x1) *a,(y0 + y1) *a);
+        centroid += QVector3D((x0 + x1)*a,(y0 + y1)*a, 0);
     }
 
-    if (signedArea == 0 || vertexCount <= 3){
-        centroid = getPolygonNormal(vertices);
-    } else {
-        signedArea *= 0.5;
-        centroid /= (6.0*signedArea);
-    }
-    /*if (!PointInPolygon(centroid, vertices)){
-        centroid = vertices[vertices.size()/2];
-    }*/
+    signedArea *= 0.5;
+    centroid /= (6.0*signedArea*Configuration::resolution);
+
     return centroid;
-}
-
-// subdivides area into reasonable size
-Paths areaSubdivision(Path area, float criterion){
-    float area_size = abs(Area(area));
-//    qDebug() << "areasubdivision" << area_size << criterion;
-    Paths result;
-    if ((area_size >criterion) && area.size()>=4){
-        int half_size = (area.size()/2);
-        IntPoint begin_point = area[0];
-        IntPoint end_point = area[area.size()-1];
-        IntPoint half_point = area[half_size-1];
-        IntPoint half_next_point = area[half_size];
-        IntPoint A_point = (begin_point + end_point)/2; // check out 연구노트
-        IntPoint B_point = (half_point + half_next_point)/2;
-
-        Path left_half;
-        left_half.push_back(A_point);
-        left_half.insert(left_half.end(), area.begin(), area.begin() + half_size);
-        left_half.push_back(B_point);
-
-        Path right_half;
-        right_half.push_back(B_point);
-        right_half.insert(right_half.end(), area.begin() + half_size, area.end());
-        right_half.push_back(A_point);
-
-//        qDebug() << "left right half size : " << left_half.size() << right_half.size() << area.size();
-
-        for (Path path : areaSubdivision(left_half, criterion)){
-            result.push_back(path);
-        }
-        for (Path path : areaSubdivision(right_half, criterion)){
-            result.push_back(path);
-        }
-    } else {
-        result.push_back(area);
-    }
-    return result;
 }
 
 void clusterPoints(vector<QVector3D>& points){
@@ -509,33 +429,31 @@ void clusterPoints(vector<QVector3D>& points){
 
     QVector3D container_point;
     int container_count;
-    float container_size = 10000;//(1-cfg->support_density)*10;
+    float container_size = (1-cfg->support_density)*10;
 
     unclassified_points = points;
-    container_point = unclassified_points[unclassified_points.size()-1];
+    container_point = *unclassified_points.end();
     unclassified_points.pop_back();
-    classified_points.push_back(container_point);
 
     vector<QVector3D>::iterator it;
-    int total_size = unclassified_points.size();
-    while (total_size>0){
-        //qDebug() << "unclassified_points size : " << unclassified_points.size();
-        for (it = unclassified_points.begin(); it != unclassified_points.end();){
-            QVector3D point = (*it);
-            if (pointDistance(point, container_point) <= cfg->duplication_radius){
+    while (unclassified_points.size()>0){
+        qDebug() << "unclassified_points size : " << unclassified_points.size();
+        for (int idx=0; idx<unclassified_points.size(); idx++){
+        //for (it=unclassified_points.begin(); it!= unclassified_points.end(); it++){
+            QVector3D point = unclassified_points[idx];
+            if (pointDistance(point, container_point) < cfg->duplication_radius){
                 container_count ++;
-                unclassified_points.erase(it);
-            } else {
-                ++it;
+                unclassified_points.erase(unclassified_points.begin()+idx);
+            }
+            if (container_count >= container_size && unclassified_points.size()>=1){
+                classified_points.push_back(container_point);
+                container_count = 0;
+                container_point = *unclassified_points.end();
+                unclassified_points.pop_back();
             }
         }
-        total_size = unclassified_points.size();
-        if (total_size >=1){
-            container_count = 0;
-            container_point = unclassified_points[total_size-1];
-            unclassified_points.pop_back();
-            classified_points.push_back(container_point);
-        }
+        container_point = *unclassified_points.end();
+        unclassified_points.pop_back();
     }
     points = classified_points;
     qDebug() << "clustered points" << points.size();

@@ -20,7 +20,7 @@ Slices Slicer::slice(Mesh* mesh){
     }
 
     // overhang detection step
-    overhangDetect();
+    overhangDetect(slices);
 
     // below steps need to be done in parallel way
     // infill generation step
@@ -44,6 +44,7 @@ Slices Slicer::slice(Mesh* mesh){
 // slices mesh into segments
 vector<Paths> Slicer::meshSlice(Mesh* mesh){
     float delta = cfg->layer_height;
+
     vector<float> planes;
 
     if (! strcmp(cfg->slicing_mode, "uniform")){
@@ -214,56 +215,7 @@ Paths Slicer::contourConstruct(Paths pathList){
     return contourList;
 }
 
-/****************** Overhang Detection Step *******************/
 
-// detects overhang regions in all layers
-void Slicer::overhangDetect(){
-    Clipper clpr;
-    clpr.ZFillFunction(&zfillone);
-
-    Paths prev_sum;
-    // calculate overhang regions
-    for (int idx=slices.size()-1; idx>=0; idx--){
-        qDebug() << "overhang region detect" << idx << "/" << slices.size();
-        Slice& slice = slices[idx];
-
-        // region subtraction
-        clpr.Clear();
-        clpr.AddPaths(prev_sum, ptSubject, true);
-        clpr.AddPaths(slice.outershell, ptClip, true);
-        clpr.Execute(ctDifference, slice.overhang_region, pftNonZero, pftNonZero);
-
-        // update prev_sum
-        clpr.Clear();
-        clpr.AddPaths(slice.outershell, ptSubject, true);
-        clpr.AddPaths(slice.overhang_region, ptClip, true);
-        clpr.Execute(ctUnion, prev_sum, pftNonZero, pftNonZero);
-
-        // calculate critical overhang region
-        getCriticalOverhangRegion(slice);
-
-        // no critical overhang region so continue
-        if (slice.critical_overhang_region.size() == 0){
-            continue;
-        }
-
-        // poll 1/n position
-        for (int cop_idx=0; cop_idx<slice.critical_overhang_region.size(); cop_idx ++){
-            Path cop = slice.critical_overhang_region[cop_idx];
-            float avg_x=0, avg_y=0;
-            for (int int_idx=0; int_idx<cop.size(); int_idx ++){
-                avg_x += cop[int_idx].X;
-                avg_y += cop[int_idx].Y;
-            }
-            avg_x /= cop.size()*Configuration::resolution;
-            avg_y /= cop.size()*Configuration::resolution;
-
-            slices.overhang_positions.push_back(QVector3D(avg_x, avg_y, slice.z));
-        }
-    }
-
-    printf("overhang region detection done\n");
-}
 
 /****************** Helper Functions For Offsetting Step *******************/
 
@@ -364,221 +316,15 @@ int64_t Slicer::intPoint2Hash(IntPoint u){
     return path_hash_u;
 }
 
-/****************** Helper Functions For Contour Management *******************/
-
-// finds critical overhang region which exceeds threshold diagonal length
-void Slicer::getCriticalOverhangRegion(Slice& slice){
-
-
-    for (int contour_idx=0; contour_idx< slice.overhang_region.size(); contour_idx++){
-        Path contour = slice.overhang_region[contour_idx];
-
-        Path right_contour;
-        Path left_contour;
-
-        int z0count = 0;
-        int max_z0count =0;
-
-        int head0count = 0;
-        int tail0count = 0;
-
-        bool reverse = true;
-
-        int ip_idx = 0;
-        int start_ip_idx = 0;
-        int end_ip_idx = contour.size()-1;
-        int temp_start_ip_idx = 0;
-
-        while(ip_idx < contour.size()){
-            IntPoint ip = contour[ip_idx];
-            if (ip.Z != 0)
-                break;
-            head0count ++;
-            ip_idx ++;
-        }
-
-        ip_idx = contour.size();
-        while(ip_idx >0 ){
-            ip_idx --;
-            IntPoint ip = contour[ip_idx];
-            if (ip.Z != 0)
-                break;
-            tail0count ++;
-        }
-
-        start_ip_idx = head0count;
-        end_ip_idx = contour.size()-tail0count-1;
-
-        if (end_ip_idx<0)
-            return;
-
-        max_z0count = head0count + tail0count;
-
-        temp_start_ip_idx = head0count;
-        for (ip_idx=head0count; ip_idx<contour.size()-tail0count; ip_idx++){
-            IntPoint ip = contour[ip_idx];
-
-            if (ip.Z == 1){
-                if (z0count > max_z0count){
-                    max_z0count = z0count;
-                    end_ip_idx = ip_idx;
-                    start_ip_idx = temp_start_ip_idx;
-                    reverse = false;
-                }
-                z0count =0;
-                temp_start_ip_idx = ip_idx;
-            } else {
-                z0count ++;
-            }
-        }
-
-        if (reverse){
-            right_contour.insert(right_contour.end(), contour.begin()+end_ip_idx, contour.end());
-            left_contour.insert(left_contour.end(), contour.begin()+start_ip_idx, contour.begin()+end_ip_idx);
-            right_contour.insert(right_contour.end(), contour.begin(), contour.begin()+start_ip_idx);
-        } else {
-            left_contour.insert(left_contour.end(), contour.begin()+end_ip_idx, contour.end());
-            right_contour.insert(right_contour.end(), contour.begin()+start_ip_idx, contour.begin()+end_ip_idx);
-            left_contour.insert(left_contour.end(), contour.begin(), contour.begin()+start_ip_idx);
-        }
-
-        if (right_contour.size() <= 1 || left_contour.size() <= 1) // needs to be fixed for triangle 110
-            return;
-
-        // left right contour split done
-
-        IntPoint prev_ip = right_contour[0];
-        Path critical_right_path;
-        Path critical_left_path;
-
-
-//        qDebug() << "inner contour : " << right_contour.size(); // critical overhang region detection is too long
-
-        QElapsedTimer timer;
-        timer.start();
-        int support_dense = int(15/cfg->support_density);
-
-        if (right_contour.size()/support_dense ==0){ // for small critical regions (including rectangles)
-            IntPoint ip = right_contour[1];
-
-            Path perpendicular;
-            perpendicular.push_back(ip);
-            perpendicular.push_back(ip+IntPoint(ip.Y-prev_ip.Y, prev_ip.X-ip.X));
-
-            IntPoint left_hit;
-            if (checkPerpendicularLength(perpendicular, left_contour, left_hit))
-            {
-                // need to be sorted
-                critical_right_path.push_back(ip);
-                critical_left_path.push_back(left_hit);
-            } else {
-                if (critical_right_path.size() != 0){
-                    // merge critical_path
-                    critical_right_path.insert(critical_right_path.end(), critical_left_path.begin(), critical_left_path.end());
-
-                    slice.critical_overhang_region.push_back(critical_right_path);
-                    critical_right_path.clear();
-                    critical_left_path.clear();
-                }
-            }
-        }
-
-        // clean buffer paths for next usage
-        critical_right_path.clear();
-        critical_left_path.clear();
-
-        //int upper_ip_idx = (right_contour.size()/support_dense==0) ? 1:right_contour.size()/support_dense;
-        for (int ip_idx=0; ip_idx<=right_contour.size()/support_dense; ip_idx++){
-            IntPoint ip = right_contour[ip_idx*support_dense];
-            if (ip_idx == 0)
-                continue;
-
-            Path perpendicular;
-            perpendicular.push_back(ip);
-            perpendicular.push_back(ip+IntPoint(ip.Y-prev_ip.Y, prev_ip.X-ip.X));
-//            qDebug() << "timer 4-1" << timer.elapsed() << "milliseconds";
-            IntPoint left_hit;
-            if (checkPerpendicularLength(perpendicular, left_contour, left_hit))
-            {
-                // need to be sorted
-                critical_right_path.push_back(ip);
-                critical_left_path.push_back(left_hit);
-            } else {
-                if (critical_right_path.size() != 0){
-                    // merge critical_path
-                    critical_right_path.insert(critical_right_path.end(), critical_left_path.begin(), critical_left_path.end());
-
-                    slice.critical_overhang_region.push_back(critical_right_path);
-                    critical_right_path.clear();
-                    critical_left_path.clear();
-                }
-            }
-
-            prev_ip = ip;
-
-        }
-    }
-}
-
-IntPoint lineIntersection(Path& A, Path& B) {
-    // Store the values for fast access and easy
-    // equations-to-code conversion
-    float x1 = A[0].X, x2 = A[1].X, x3 = B[0].X, x4 = B[1].X;
-    float y1 = A[0].Y, y2 = A[1].Y, y3 = B[0].Y, y4 = B[1].Y;
-
-    float d = (x1 - x2) * (y3 - y4) - (y1 - y2) * (x3 - x4);
-    // If d is zero, there is no intersection
-    if (d == 0) return NULL;
-
-    // Get the x and y
-    float pre = (x1*y2 - y1*x2), post = (x3*y4 - y3*x4);
-    float x = ( pre * (x3 - x4) - (x1 - x2) * post ) / d;
-    float y = ( pre * (y3 - y4) - (y1 - y2) * post ) / d;
-
-    // Check if the x and y coordinates are within both lines
-    if ( x < min(x1, x2) || x > max(x1, x2) ||
-    x < min(x3, x4) || x > max(x3, x4) ) return NULL;
-    if ( y < min(y1, y2) || y > max(y1, y2) ||
-    y < min(y3, y4) || y > max(y3, y4) ) return NULL;
-
-    // Return the point of intersection
-    IntPoint ret;
-    ret.X = x;
-    ret.Y = y;
-    return ret;
-}
-
-float pointDistance(IntPoint A, IntPoint B){
-    return sqrt(pow(A.X-B.X, 2)+pow(A.Y-B.Y,2));
-}
-
-bool Slicer::checkPerpendicularLength(Path A, Path B, IntPoint& left_hit){
-    IntPoint prev_ip = B[0];
-
-    for (int idx=0; idx<B.size(); idx++){
-        IntPoint ip = B[idx];
-        if (idx == 0)
-            continue;
-
-        Path B_part;
-        B_part.push_back(prev_ip);
-        B_part.push_back(ip);
-        IntPoint li = lineIntersection(A,B_part);
-        if (li != NULL){
-            if (pointDistance(ip, li)/Configuration::resolution > cfg->overhang_threshold){
-                left_hit = li;
-                return true;
-            }
-        }
-        prev_ip = ip;
-    }
-    return false;
-}
-
 /****************** ZFill method on intersection point *******************/
 
 void zfillone(IntPoint& e1bot, IntPoint& e1top, IntPoint& e2bot, IntPoint& e2top, IntPoint& pt){
-    pt.Z =1;
+    //qDebug() << "zfillone" << pt.X << pt.Y;
+//    e1bot.Z = 1;
+//    e2bot.Z = 1;
+//    e1top.Z = 1;
+//    e2top.Z = 1;
+    pt.Z = 1;
 }
 
 

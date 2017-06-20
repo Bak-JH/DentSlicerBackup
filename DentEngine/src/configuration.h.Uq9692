@@ -31,10 +31,7 @@ public:
     float support_density = 0.3;
     float infill_density = 0.3;
 
-    float subdivision_radius = 0.85; // in mm
-    float duplication_radius = 3; // in mm
 
-    float default_support_radius = 3 ; // in mm
 
     float overhang_threshold = layer_height/tan_theta;
     float overhang_poll_threshold = support_density * 100; // unit region as 1cm^2

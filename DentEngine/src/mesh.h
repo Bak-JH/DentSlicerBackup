@@ -27,8 +27,7 @@ public:
 
 class Mesh{
 public :
-    Mesh(Configuration* cfg) : cfg(cfg) {}
-    Configuration* cfg;
+    Mesh() {};
     std::vector<MeshVertex> vertices;
     QHash<int64_t, MeshVertex> vertices_hash;
     std::vector<MeshFace> faces;

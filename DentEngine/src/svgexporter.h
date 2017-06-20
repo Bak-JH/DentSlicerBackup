@@ -11,8 +11,7 @@ using namespace std;
 class SVGexporter
 {
 public:
-    SVGexporter(Configuration* cfg) : cfg(cfg) {}
-    Configuration* cfg;
+    SVGexporter(){};
 
     void exportSVG(Slices contourLists, const char* outfilename);
 
