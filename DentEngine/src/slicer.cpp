@@ -327,7 +327,13 @@ void zfillone(IntPoint& e1bot, IntPoint& e1top, IntPoint& e2bot, IntPoint& e2top
     pt.Z = 1;
 }
 
+///****************** overhang position initializers *******************/
 
+//OverhangPosition::OverhangPosition(int x, int y, int z){
+//    X = x;
+//    Y = y;
+//    Z = z;
+//}
 
 /****************** Deprecated functions *******************/
 
@@ -344,32 +350,4 @@ void Slicer::containmentTreeConstruct(){
     printf ("containment tree construction done\n");
 }
 
-
-void Slicer::overhangPositionPoll(){
-    // collect critical overhang region and select critical overhang position
-    for (int idx=slices.size()-1; idx>=0; idx--){
-        qDebug() << "overhang position poll " << idx+1 << "/" << slices.size();
-        Slice slice = slices[idx];
-        getCriticalOverhangRegion(slice);
-
-        // no critical overhang region so continue
-        if (slice.critical_overhang_region.size() == 0){
-            continue;
-        }
-
-        // poll 1/n position
-        for (int cop_idx=0; cop_idx<slice.critical_overhang_region.size(); cop_idx ++){
-            Path cop = slice.critical_overhang_region[cop_idx];
-            float avg_x=0, avg_y=0;
-            for (int int_idx=0; int_idx<cop.size(); int_idx ++){
-                avg_x += cop[int_idx].X;
-                avg_y += cop[int_idx].Y;
-            }
-            avg_x /= cop.size()*Configuration::resolution;
-            avg_y /= cop.size()*Configuration::resolution;
-
-            slices.overhang_positions.push_back(QVector3D(avg_x, avg_y, slice.z));
-        }
-    }
-}
 

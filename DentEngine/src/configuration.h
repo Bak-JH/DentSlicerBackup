@@ -32,7 +32,7 @@ public:
     float infill_density = 0.3;
 
     float subdivision_radius = 0.85; // in mm
-    float duplication_radius = 3; // in mm
+    float duplication_radius = 5; // in mm
 
     float default_support_radius = 3 ; // in mm
 
@@ -40,7 +40,7 @@ public:
     float overhang_poll_threshold = support_density * 100; // unit region as 1cm^2
 
 
-    int support_type = 1;
+    int support_type = 2;
     int infill_type = 1;
     int raft_type = 1;
 

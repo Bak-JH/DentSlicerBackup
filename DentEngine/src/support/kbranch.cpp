@@ -10,8 +10,23 @@ kbranch::kbranch()
 }
 
 void generateKbranch(Slices& slices){
-    for (QVector3D overhang_position : slices.overhang_positions){
+    Clipper clpr;
+    for (int op_idx=0; op_idx<slices.overhang_positions.size(); op_idx ++){
+        qDebug() << "generating support " << op_idx << "/" << slices.overhang_positions.size();
+
+        OverhangPosition overhang_position = slices.overhang_positions[op_idx];
         //drawCircle(overhang_position);
+        int slice_idx = int(overhang_position.Z/(Configuration::resolution)/cfg->layer_height);
+        qDebug() << overhang_position.Z << slice_idx;
+        while (!checkInclusion(slices[slice_idx], overhang_position) && (slice_idx != 0)){
+            //qDebug() << "support generation on " << slice_idx;
+            Slice slice = slices[slice_idx];
+            clpr.Clear();
+            clpr.AddPaths(slice.outershell, ptSubject, true);
+            clpr.AddPath(drawCircle(overhang_position), ptClip, true);
+            clpr.Execute(ctUnion, slice.outershell, pftNonZero, pftNonZero);
+            slice_idx --;
+        }
     }
     // predict weight containing infill
 
@@ -20,23 +35,56 @@ void generateKbranch(Slices& slices){
     // generate
 
     // offset it by half of nozzle_width
+
+    // generate support
+    /*for (int slice_idx=slices.size()-1; slice_idx>=0; slice_idx--){
+        Slice slice = slices[slice_idx];
+        vector<OverhangPosition>::iterator opit;
+        for (opit = slices.overhang_positions.begin() ; opit != slices.overhang_positions.end();){
+            OverhangPosition overhang_position = (*opit);
+            for (Path contour : slice.outershell){
+                if (PointInPolygon(overhang_position, contour)){
+                    slices.overhang_positions.erase(opit);
+                    break;
+                }
+            }
+
+            // else part
+            ++opit;
+            overhang_position.height += cfg->layer_height;
+            clpr.Clear();
+            clpr.AddPaths(slice.outershell, ptSubject, true);
+            clpr.AddPaths(support.drawCircle(), ptClip, true);
+            clpr.Execute(ctUnion, slice.outershell, pftNonZero, pftNonZero);
+        }
+        for (OverhangPosition overhang_position : slices.overhang_positions){
+
+        }
+    }*/
 }
 
+bool checkInclusion(Slice& slice, OverhangPosition overhang_position){
+    for (Path contour : slice){
+        if (PointInPolygon(overhang_position, contour)){
+            return true;
+        }
+    }
+    return false;
 
-void kbranch::drawCircle(QVector3D overhang_position){
+}
+
+Path drawCircle(OverhangPosition overhang_position){
     //Slice slice = slices[overhang_position.z()/cfg->layer_height];
-    vector<QVector3D> circle;
+    Path circle;
     int circle_resolution = 8;
     float circle_radius = cfg->default_support_radius;
     float unit_angle = PI*360/circle_resolution;
     float angle = 0;
 
-    float root2 = 1.414213562373;
-
     for (int i=0; i<circle_resolution; i++){
         angle += unit_angle;
-        QVector3D circle_point = overhang_position + QVector3D(circle_radius*sin(angle), circle_radius*cos(angle), overhang_position.z());//QVector3D(circle_radius/root2, circle_radius/root, overhang_position.z());
+        IntPoint circle_point = overhang_position + OverhangPosition(int(circle_radius*cos(angle)), int(circle_radius*sin(angle)), overhang_position.Z);
         circle.push_back(circle_point);
     }
-
+    return circle;
 }

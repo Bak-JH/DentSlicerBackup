@@ -21,7 +21,7 @@ int main(int argc, char *argv[])
     // Load mesh
     Mesh* loaded_mesh = new Mesh();
     //loadMeshSTL(loaded_mesh, "C:\\Users\\Diri\\Desktop\\DLP\\test\\Hollow_Draudi_small.STL");
-    loadMeshSTL(loaded_mesh, "C:\\Users\\diridiri\\Desktop\\DLP\\overhang2.STL");
+    loadMeshSTL(loaded_mesh, "C:\\Users\\diridiri\\Desktop\\DLP\\overhang_test_small.STL");
     printf("vertices : %d, faces : %d\n", loaded_mesh->vertices.size(), loaded_mesh->faces.size());
     printf("slicing in %s mode, resolution %d\n", cfg->slicing_mode, cfg->resolution);
     printf("debugging layer : %d\n", debug_layer);
@@ -42,8 +42,8 @@ int main(int argc, char *argv[])
 //    int layer_num = round(slices.overhang_positions[5].z()/cfg->layer_height);
 //    qDebug() << slices.overhang_positions[5].z() << slices.overhang_positions[5].z()/cfg->layer_height << layer_num;
 //    Paths contourList = slices[debug_layer].outershell;
-    Paths contourList = slices[50].overhang_region;
-    Paths totalContour = slices[50].outershell;
+    Paths contourList = slices[1].overhang_region;
+    Paths totalContour = slices[1].outershell;
 //    Paths contourList = slices[2].outershell;
 //    Paths contourList = slices[debug_layer].outershell;
 
@@ -110,10 +110,10 @@ int main(int argc, char *argv[])
     // draw overhang positions
     qDebug() << slices.overhang_positions.size();
     p.setPen(QPen(Qt::red, 2, Qt::DashLine, Qt::RoundCap));
-    for (QVector3D cop : slices.overhang_positions){
-        p.drawPoint(cop.x()*10 + 500, cop.y()*10 + 500);
+    for (OverhangPosition cop : slices.overhang_positions){
+        p.drawPoint(cop.X*10/Configuration::resolution + 500, cop.Y*10/Configuration::resolution + 500);
 
-        qDebug() << "overhang positions " << cop.x() << cop.y();
+        qDebug() << "overhang positions " << cop.X << cop.Y;
     }
     p.end();
 
@@ -144,8 +144,9 @@ int main(int argc, char *argv[])
             Slices contourLists = slicer->slice(loaded_mesh);
 
             // Export to SVG
+            qDebug() << contourLists[5].size();
             SVGexporter* exporter = new SVGexporter();
-            //exporter->exportSVG(contourLists, parser.outputfilename.toStdString().c_str());
+            exporter->exportSVG(contourLists, parser.outputfilename.toStdString().c_str());
 
             break;
         }

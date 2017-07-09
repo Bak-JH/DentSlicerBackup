@@ -11,6 +11,7 @@ using namespace std;
 using namespace ClipperLib;
 class Slice;
 class Slices;
+class OverhangPosition;
 
 class Support {
 public:
@@ -33,7 +34,7 @@ float pointDistance(QVector3D A, QVector3D B);
 IntPoint getPolygonNormal(Path vertices);
 IntPoint getPolygonCentroid(Path vertices);
 Paths areaSubdivision(Path area, float criterion);
-void clusterPoints(vector<QVector3D>& points);
+void clusterPoints(vector<OverhangPosition>& points);
 
 
 

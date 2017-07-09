@@ -28,10 +28,19 @@ public:
     void outerShellOffset(float delta, JoinType join_type);
 };
 
+class OverhangPosition : public IntPoint {
+public:
+    OverhangPosition(int x=0, int y=0, int z=0) : IntPoint(x, y, z){}
+//    OverhangPosition(int x=0, int y=0, int z=0);
+    float height = 0;
+};
+
+
 class Slices : public vector<Slice>{
 public:
     Paths overhang_regions;
-    vector<QVector3D> overhang_positions;
+    vector<OverhangPosition> overhang_positions;
+    //    vector<QVector3D> overhang_positions;
     vector<IntPoint> intersectionPoints;
 };
 
@@ -68,7 +77,6 @@ public:
 
 
     /****************** Deprecated functions *******************/
-    void overhangPositionPoll();
     void containmentTreeConstruct();
 };
 

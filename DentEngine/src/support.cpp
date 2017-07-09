@@ -25,34 +25,20 @@ void overhangDetect(Slices& slices){
     clpr.ZFillFunction(&zfillone);
 
     Paths prev_sum;
+
     // calculate overhang regions
     for (int idx=slices.size()-1; idx>=0; idx--){
         qDebug() << "overhang region detect" << idx << "/" << slices.size();
         Slice& slice = slices[idx];
         Paths temp_overhang_region;
 
-        /*// region subtraction
-        clpr.Clear();
-        clpr.AddPaths(prev_sum, ptSubject, true);
-        clpr.AddPaths(slice.outershell, ptClip, true);
-        clpr.Execute(ctDifference, slice.overhang_region, pftNonZero, pftNonZero);
-
-        // update prev_sum
-        clpr.Clear();
-        clpr.AddPaths(slice.outershell, ptSubject, true);
-        clpr.AddPaths(slice.overhang_region, ptClip, true);
-        clpr.Execute(ctUnion, prev_sum, pftNonZero, pftNonZero);*/
-
+        // area subtraction
         clpr.Clear();
         clpr.AddPaths(prev_sum, ptSubject, true);
         clpr.AddPaths(slice.outershell, ptClip, true);
         clpr.Execute(ctDifference, slice.overhang_region, pftNonZero, pftNonZero);
 
         prev_sum = slice.outershell;
-
-        //qDebug() << "o r size : "<< slice.overhang_region.size();
-
-
 
         // calculate critical overhang region
         getCriticalOverhangRegion(slice);
@@ -72,8 +58,9 @@ void overhangDetect(Slices& slices){
                 Path partial_cop = partial_cops[p_cop_idx];
                 //IntPoint centroid = getPolygonCentroid(partial_cop); // need to change to this
                 IntPoint centroid = getPolygonNormal(partial_cop);
-
-                slices.overhang_positions.push_back(QVector3D(float(centroid.X)/Configuration::resolution, float(centroid.Y)/Configuration::resolution, slice.z));
+//                qDebug() << slice.z << int(slice.z*Configuration::resolution) << slice.z*Configuration::resolution/Configuration::resolution;
+                slices.overhang_positions.push_back(OverhangPosition(centroid.X, centroid.Y, int(slice.z*cfg->resolution)));
+                //slices.overhang_positions.push_back(QVector3D(float(centroid.X)/Configuration::resolution, float(centroid.Y)/Configuration::resolution, slice.z));
             }
         }
 
@@ -91,6 +78,7 @@ void overhangDetect(Slices& slices){
                 slices.overhang_positions.push_back(QVector3D(float(centroid.X)/Configuration::resolution, float(centroid.Y)/Configuration::resolution, slice.z));
             }
         }*/
+
     }
 
     // poll overhang positions among selected points
@@ -503,11 +491,11 @@ Paths areaSubdivision(Path area, float criterion){
     return result;
 }
 
-void clusterPoints(vector<QVector3D>& points){
-    vector<QVector3D> unclassified_points;
-    vector<QVector3D> classified_points;
+void clusterPoints(vector<OverhangPosition>& points){
+    vector<OverhangPosition> unclassified_points;
+    vector<OverhangPosition> classified_points;
 
-    QVector3D container_point;
+    OverhangPosition container_point;
     int container_count;
     float container_size = 10000;//(1-cfg->support_density)*10;
 
@@ -516,13 +504,13 @@ void clusterPoints(vector<QVector3D>& points){
     unclassified_points.pop_back();
     classified_points.push_back(container_point);
 
-    vector<QVector3D>::iterator it;
+    vector<OverhangPosition>::iterator it;
     int total_size = unclassified_points.size();
     while (total_size>0){
         //qDebug() << "unclassified_points size : " << unclassified_points.size();
         for (it = unclassified_points.begin(); it != unclassified_points.end();){
-            QVector3D point = (*it);
-            if (pointDistance(point, container_point) <= cfg->duplication_radius){
+            OverhangPosition point = (*it);
+            if (pointDistance(point, container_point) <= cfg->duplication_radius*Configuration::resolution){
                 container_count ++;
                 unclassified_points.erase(it);
             } else {

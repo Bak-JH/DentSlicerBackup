@@ -9,16 +9,18 @@ using namespace ClipperLib;
 
 class Slice;
 class Slices;
+class OverhangPosition;
 
 class kbranch{
 public:
     kbranch();
 
 
-    /****************** Helper Functions *******************/
-    void drawCircle(QVector3D overhang_position);
 };
 
 void generateKbranch(Slices& slices);
+/****************** Helper Functions *******************/
+bool checkInclusion(Slice& slice, OverhangPosition overhang_position);
+Path drawCircle(OverhangPosition overhang_position);
 
 #endif // KBRANCH_H
