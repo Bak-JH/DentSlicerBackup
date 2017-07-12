@@ -1,6 +1,6 @@
 import QtQuick 2.4
 import QtQuick.Controls 1.4
-import QtCanvas3D 1.1
+import QtQuick.Scene3D 2.0
 import QtQuick.Window 2.2
 
 import "glcode.js" as GLCode
@@ -24,21 +24,35 @@ ApplicationWindow {
         }
     }
 
-    Canvas3D {
-        id: canvas3d
-        anchors.fill: parent
-        focus: true
+    UpperTab{
+        id : uppertab
+        anchors.top: parent.top
+        anchors.left: parent.left
 
-        onInitializeGL: {
-            GLCode.initializeGL(canvas3d);
-        }
 
-        onPaintGL: {
-            GLCode.paintGL(canvas3d);
-        }
-
-        onResizeGL: {
-            GLCode.resizeGL(canvas3d);
-        }
     }
+    LeftTab{
+        id : lefttab
+        anchors.top: uppertab.bottom
+        anchors.left: parent.left
+    }
+
+    Scene3D {
+        id: scene3d
+
+        //anchors.fill: parent
+        anchors.top : uppertab.bottom
+        anchors.left : lefttab.right
+        anchors.right : parent.right
+        anchors.bottom : parent.bottom
+        /*width: 600
+        height: 400
+        anchors.margins: 10*/
+        focus: true
+        aspects: ["input", "logic"]
+        cameraAspectRatioMode: Scene3D.AutomaticAspectRatio
+
+        MainView {}
+    }
+
 }

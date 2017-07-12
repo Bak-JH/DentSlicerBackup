@@ -3,5 +3,11 @@
         <file>main.qml</file>
         <file>glcode.js</file>
         <file>three.js</file>
+        <file>UpperTab.qml</file>
+        <file>LeftTab.qml</file>
+        <file>MainView.qml</file>
+        <file>CoordinateMesh.qml</file>
+        <file>CameraManager.qml</file>
+        <file>CameraController.qml</file>
     </qresource>
 </RCC>
