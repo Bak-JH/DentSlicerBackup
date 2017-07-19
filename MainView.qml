@@ -10,17 +10,21 @@ import Qt3D.Logic 2.0
 
 Entity {
     id: sceneRoot
+    property vector3d xup : Qt.vector3d( 1.0, 0.0, 0.0 )
+    property vector3d xdown : Qt.vector3d( -1.0, 0.0, 0.0 )
 
+    property vector3d yup : Qt.vector3d( 0.0, 1.0, 0.0 )
+    property vector3d ydown : Qt.vector3d( 0.0, -1.0, 0.0 )
+    property vector3d zup : Qt.vector3d( 0.0, 0.0, 1.0 )
+    property vector3d zdown : Qt.vector3d( 0.0, 0.0, -1.0 )
+
+    CoordinateMesh{}
     CameraManager{
         id : cm
-
-
-
     }
 
     MouseDevice{
         id : mouseDevice
-
     }
 
     MouseHandler{
@@ -35,14 +39,10 @@ Entity {
             var Camera_position, average, temp, Camera_radius
             var d = wheel.angleDelta.y ;
 
-            if(d>0){
+            if(d>0)
                 cm.zoomUp()
-
-            }
-            else if(d<0){
+            else if(d<0)
                 cm.zoomDown()
-            }
-
         }
     }
 
@@ -53,40 +53,40 @@ Entity {
         warmColor: Qt.rgba(40/255,40/255,40/255,1.0)
         coolColor: Qt.rgba(240/255,240/255,240/255,1.0)
     }
+
     PhongMaterial {
         id: meshMaterial
         property int counter : 0
         ambient: Qt.rgba(81/255,200/255,242/255,1.0)
 
     }
+
     ObjectPicker {
-                id: picker
-                hoverEnabled: true
-                //onClicked: console.log("Contains mouse: " + containsMouse)
-                /*
-                onContainsMouseChanged: console.log("Contains mouse: " + containsMouse)
-                */
+        id: picker
+        hoverEnabled: true
+        //onClicked: console.log("Contains mouse: " + containsMouse)
+        /*
+        onContainsMouseChanged: console.log("Contains mouse: " + containsMouse)
+        */
 
-                onClicked: {
-                    if(meshMaterial.counter%2 == 0)
-                        meshMaterial.ambient = Qt.rgba(200/255,200/255,242/255,1.0)
-                    else
-                        meshMaterial.ambient = Qt.rgba(81/255,200/255,242/255,1.0)
-                    meshMaterial.counter++;
-                }
+        onClicked: {
+            if(meshMaterial.counter%2 == 0)
+                meshMaterial.ambient = Qt.rgba(200/255,200/255,242/255,1.0)
+            else
+                meshMaterial.ambient = Qt.rgba(81/255,200/255,242/255,1.0)
+            meshMaterial.counter++;
+        }
 
-                onContainsMouseChanged: {
-                    meshMaterial.ambient = Qt.rgba(200/255,40/255,242/255,1.0)
-                }
-                onExited: {
-                    meshMaterial.ambient = Qt.rgba(200/255,200/255,242/255,1.0)
-                }
+        onContainsMouseChanged: {
+            meshMaterial.ambient = Qt.rgba(200/255,40/255,242/255,1.0)
+        }
+        onExited: {
+            meshMaterial.ambient = Qt.rgba(200/255,200/255,242/255,1.0)
+        }
+    }
 
 
 
-
-            }
-    CoordinateMesh{}
     Entity{
         id : total
 
@@ -105,7 +105,7 @@ Entity {
             }
             Transform {
                 id: meshTransform
-                property vector3d objectRotation : fromAxisAndAngle(Qt.vector3d(0,0, 1), 60)
+                property quaternion objectRotation : fromAxisAndAngle(Qt.vector3d(0,0, 1), 60)
 
                 scale3D: Qt.vector3d(0.1,0.1,0.1)
 
@@ -122,11 +122,6 @@ Entity {
             components: [ testMesh, meshMaterial, meshTransform,picker ]
 
         }
-        /*
-        MeshTest{
-
-        }*/
-
 
         Entity {
             id: planeEntity
@@ -163,31 +158,9 @@ Entity {
 
             components: [ planeTitleMesh, planeMaterial, planeTitleTransform ]
         }
-        /*
-        function changeRotation(){
-            var temp = meshTransform.rotation
-            //var temp2 = Qt.quaternion(0.996,0,0,0.087)
-            var temp2 = Qt.quaternion(0.996,0,0.087,0)
 
-            console.log(temp + "   " + temp2)
-            var target = multiplyQuaternion(temp,temp2)
-
-        }
-
-        function multiplyQuaternion(a,b)
-        {
-            var result = Qt.quaternion(0,0,0,0);
-            result.x = a.x*b.scalar + a.scalar*b.x + a.y*b.z - a.z*b.y
-            result.y = a.y*b.scalar + a.scalar*b.y + a.z*b.x - a.x*b.z
-            result.z = a.z*b.scalar + a.scalar*b.z + a.x*b.y - a.y*b.x
-            result.scalar = a.scalar*b.scalar - a.x*b.x - a.y*b.y - a.z*b.z
-
-            meshTransform.rotation = result
-            return result
-
-        }
-        */
     }
+
     MouseDevice {
         id: mouse
         sensitivity: 0.1
@@ -234,22 +207,44 @@ Entity {
           },
 
         FrameAction {
-            property real rotationSpeed : 10
+            property real rotationSpeed : 4
+
+
             onTriggered: {
                 if (rotateAction.active) {
-                    var target = axisAngle2Quaternion(rotationSpeed * rotateXAxis.value * dt,Qt.vector3d( 0.0, 1.0, 0.0 ))
-                    //var target2 = axisAngle2Quaternion(rotationSpeed * rotateYAxis.value * dt,Qt.vector3d( 0.0, 0.0, 1.0 ))
-                    planeTransform.rotation = multiplyQuaternion(planeTransform.rotation,target)
-                    meshTransform.rotation = multiplyQuaternion(meshTransform.rotation,planeTransform.rotation)
-                    //meshTransform.rotation = multiplyQuaternion(meshTransform.rotation,target2)
+                    var currentPlaneRotation = planeTransform.rotation
+                    var target = axisAngle2Quaternion(rotationSpeed * rotateXAxis.value * dt,qq.rotatedVector(planeTransform.rotation,yup))
+                    var target2 = axisAngle2Quaternion(rotationSpeed * rotateYAxis.value * dt,ydown)
 
 
-                    //meshTransform.rotation = target2;
+                    console.log("rtv " + qq.rotatedVector(planeTransform.rotation,ydown))
+                    target = multiplyQuaternion(target,target2)
+
+
+                    //console.log("rtv  " + target.rotatedVector(zup))
+
+
+                    planeTransform.rotation = multiplyQuaternion(target,planeTransform.rotation)
+
+
                     /*
-                    root.camera.panAboutViewCenter(rotationSpeed * rotateXAxis.value * dt,Qt.vector3d( 0.0, 0.0, 1.0 ));
-                    root.camera.tiltAboutViewCenter(rotationSpeed * rotateYAxis.value * dt,Qt.vector3d( -1.0, 0.0, 0.0 ));
-                    // lock the camera roll angle
-                    root.camera.setUpVector(_originalUpVector);
+                    if(currentPlaneRotation !== multiplyQuaternion(target,currentPlaneRotation)){
+                        planeTransform.rotation = multiplyQuaternion(target,planeTransform.rotation)
+                        planeTransform.rotation = multiplyQuaternion(target2,planeTransform.rotation)
+                        meshTransform.rotation = multiplyQuaternion(planeTransform.rotation,meshTransform.objectRotation)
+                    }
+                    */
+
+
+                    //var target2 = axisAngle2Quaternion(rotationSpeed * rotateYAxis.value * dt,Qt.vector3d( 0.0, 0.0, 1.0 ))
+                    //target = multiplyQuaternion(target,target2)
+                    //console.log("tar"  + target)
+                    //planeTransform.rotation = multiplyQuaternion(planeTransform.rotation,target)
+                    //planeTransform.rotation = multiplyQuaternion(planeTransform.rotation,target2)
+                    /*console.log("cur"  + currentPlaneRotation + " pla"  + planeTransform.rotation)
+
+                    if(currentPlaneRotation != planeTransform.rotation)
+                        meshTransform.rotation = multiplyQuaternion(planeTransform.rotation,meshTransform.rotation)
                     */
                 }
             }
@@ -276,37 +271,17 @@ Entity {
             if (event.key === Qt.Key_X) {
                 meshTransform.scale3D = meshTransform.scale3D.minus(Qt.vector3d(0.05,0.05,0.05));
             }
-            /*
-            if (event.key === Qt.Key_W) {
-                meshTransform.translation = meshTransform.translation.plus(Qt.vector3d(0.00,0.05,0.00));
-            }
-            if (event.key === Qt.Key_S) {
-                meshTransform.translation = meshTransform.translation.minus(Qt.vector3d(0.00,0.05,0.00));
-
-            }
-            if (event.key === Qt.Key_A) {
-                meshTransform.translation = meshTransform.translation.plus(Qt.vector3d(0.05,0.00,0.00));
-            }
-            if (event.key === Qt.Key_D) {
-                meshTransform.translation = meshTransform.translation.minus(Qt.vector3d(0.05,0.00,0.00));
-
-            }*/
-
 
             if (event.key === Qt.Key_J) {
-                //totalTransform.rotation = Qt.quaternion(10,1,0,0)
                 console.log(meshTransform.rotation)
             }
             if (event.key === Qt.Key_K) {
-                //totalTransform.rotation = Qt.quaternion(20,1,0,0)
                 total.changeRotation()
             }
             if (event.key === Qt.Key_I) {
-                //totalTransform.rotation = Qt.quaternion(30,1,0,0)
                 meshTransform.rotation = Qt.quaternion(0.5,0,0,0.5)
             }
             if (event.key === Qt.Key_L) {
-                   //totalTransform.rotation = Qt.quaternion(30,1,0,0)
                 meshTransform.rotation = Qt.quaternion(0.8,0,0,0.5)
             }
 
@@ -332,8 +307,6 @@ Entity {
         result.z = a.z*b.scalar + a.scalar*b.z + a.x*b.y - a.y*b.x
         result.scalar = a.scalar*b.scalar - a.x*b.x - a.y*b.y - a.z*b.z
 
-        meshTransform.rotation = result
         return result
-
     }
 }

@@ -5,9 +5,8 @@ import QtQuick.Layouts 1.0
 import QtQuick.Controls 1.0
 import QtQuick.Controls.Styles 1.0
 
-Item {
-    height : parent.height - 120
-    width : 260
+Rectangle {
+    color: "#E2E1E1"
     /*
     Rectangle{
         anchors.fill: parent

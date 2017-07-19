@@ -26,15 +26,23 @@ ApplicationWindow {
 
     UpperTab{
         id : uppertab
+        width : parent.width
+        height: 120
+
         anchors.top: parent.top
         anchors.left: parent.left
 
-
     }
+
     LeftTab{
         id : lefttab
+        width : 260
+        height : parent.height - uppertab.height
+
+
         anchors.top: uppertab.bottom
         anchors.left: parent.left
+
     }
 
     Scene3D {

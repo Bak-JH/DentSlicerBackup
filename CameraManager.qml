@@ -30,7 +30,7 @@ Entity {
 
         position: defaultCameraPosition
         upVector: defaultUp
-        viewCenter: Qt.vector3d( xLookAtOffset, yLookAtOffset, zLookAtOffset )
+        viewCenter: Qt.vector3d( 0, 0, 0 )
 
         property vector3d temp : Qt.vector3d( 0.0, 0.0, 0.0 )
 
@@ -72,7 +72,7 @@ Entity {
         average = camera.viewCenter
         temp = Camera_position.minus(average.times(10))
         cameraRadius = Math.sqrt(Math.pow(temp.x,2) + Math.pow(temp.y,2) + Math.pow(temp.z,2))
-        console.log(cameraRadius)
+        //console.log(cameraRadius)
         camera.temp = temp.times(0.25)
 
         return cameraRadius
@@ -143,23 +143,4 @@ Entity {
         }
     }
 
-
-
-    /*
-    KeyboardDevice{
-        id : keyboardDevice
-    }
-
-    KeyboardHandler{
-        id : keyboardHandler
-        Keys.onPressed: {
-                if (event.key == Qt.Key_T) {
-                    camera.viewCenter = Qt.vector3d( xLookAtOffset, yLookAtOffset, zLookAtOffset )
-                }
-                if (event.key == Qt.Key_P) {
-                    console.log("pos  " + camera.position + " / cent  " + camera.viewCenter + " / rot" + camera.rotation)
-                }
-        }
-    }
-    */
 }
