@@ -33,11 +33,21 @@ Entity {
         viewCenter: Qt.vector3d( 0, 0, 0 )
 
         property vector3d temp : Qt.vector3d( 0.0, 0.0, 0.0 )
-
-
-
-
     }
+
+    Entity {
+        components: [
+            DirectionalLight {
+                //worldDirection: Qt.vector3d(0.3, -3.0, 0.0).normalized();
+                worldDirection : Qt.vector3d(0, 0, -1).normalized()
+
+                //color: "#fbf9ce"
+                color: "white"
+                intensity: 0.3
+            }
+        ]
+    }
+
     CameraController{
         camera:camera
     }

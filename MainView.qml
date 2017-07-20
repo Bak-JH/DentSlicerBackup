@@ -47,11 +47,24 @@ Entity {
     }
 
 
-
+    /*
     GoochMaterial {
         id: planeMaterial
         warmColor: Qt.rgba(40/255,40/255,40/255,1.0)
         coolColor: Qt.rgba(240/255,240/255,240/255,1.0)
+    }*/
+    DiffuseMapMaterial{
+        id : planeMaterial
+        diffuse: "qrc:/grid2.png"
+        specular: Qt.rgba( 0.9, 0.9, 0.9, 1.0 )
+        shininess: 2.0
+    }
+
+    DiffuseMapMaterial{
+        id : planeDownMaterial
+        diffuse: "qrc:/grid.png"
+        specular: Qt.rgba( 0.9, 0.9, 0.9, 1.0 )
+        shininess: 2.0
     }
 
     PhongMaterial {
@@ -60,6 +73,8 @@ Entity {
         ambient: Qt.rgba(81/255,200/255,242/255,1.0)
 
     }
+
+
 
     ObjectPicker {
         id: picker
@@ -85,15 +100,13 @@ Entity {
         }
     }
 
-
-
     Entity{
         id : total
 
         Transform{
             id : totalTransform
 
-            rotation: fromAxisAndAngle(Qt.vector3d(0,0, 1), 60)
+            //rotation: fromAxisAndAngle(Qt.vector3d(0,0, 1), 60)
         }
 
         Entity {
@@ -125,6 +138,7 @@ Entity {
 
         Entity {
             id: planeEntity
+
             PlaneMesh{
                 id: planeMesh
                 height : 100
@@ -139,25 +153,140 @@ Entity {
             }
 
             components: [ planeMesh, planeMaterial, planeTransform ]
-        }
+            Entity {
+                PlaneMesh{
+                    id: planeDownMesh
+                    height : 100
+                    width : 100
 
-        Entity {
-            id: planeTitleEntity
-            PlaneMesh{
-                id: planeTitleMesh
-                height : 60
-                width : 10
+                }
 
+                Transform{
+                    id: planeDownTransform
+                    translation: Qt.vector3d(0,0,0)
+                    rotation: fromAxisAndAngle(Qt.vector3d(1,0, 0), 180)
+                }
+
+                components: [ planeDownMesh, planeDownMaterial, planeDownTransform ]
+            }
+            Entity {
+                id: cylinderEntity1
+                CylinderMesh{
+                    id: cylinderMesh1
+                    radius: 0.1
+                    length: 100
+                }
+
+                Transform{
+                    id: cylinderTransform1
+                    translation: Qt.vector3d(-50,cylinderMesh1.length/2,50)
+                    rotation: fromAxisAndAngle(Qt.vector3d(1,0, 0), 0)
+                }
+
+                components: [ cylinderMesh1, planeMaterial, cylinderTransform1 ]
             }
 
-            Transform{
-                id: planeTitleTransform
-                translation: Qt.vector3d(50,0,0)
-                rotation: fromAxisAndAngle(Qt.vector3d(1,0, 0), 90)
+            Entity {
+                id: cylinderEntity2
+                CylinderMesh{
+                    id: cylinderMesh2
+                    radius: 0.1
+                    length: 100
+
+                }
+
+                Transform{
+                    id: cylinderTransform2
+                    translation: Qt.vector3d(-50,cylinderMesh2.length/2,-50)
+                    rotation: fromAxisAndAngle(Qt.vector3d(1,0, 0), 0)
+                }
+
+                components: [ cylinderMesh2, planeMaterial, cylinderTransform2 ]
             }
 
-            components: [ planeTitleMesh, planeMaterial, planeTitleTransform ]
+            Entity {
+                id: cylinderEntity3
+                CylinderMesh{
+                    id: cylinderMesh3
+                    radius: 0.1
+                    length: 100
+
+                }
+
+                Transform{
+                    id: cylinderTransform3
+                    translation: Qt.vector3d(50,cylinderMesh3.length/2,50)
+                    rotation: fromAxisAndAngle(Qt.vector3d(1,0, 0), 0)
+                }
+
+                components: [ cylinderMesh3, planeMaterial, cylinderTransform3 ]
+            }
+
+            Entity {
+                id: cylinderEntity4
+                CylinderMesh{
+                    id: cylinderMesh4
+                    radius: 0.1
+                    length: 100
+
+                }
+
+                Transform{
+                    id: cylinderTransform4
+                    translation: Qt.vector3d(50,cylinderMesh2.length/2,-50)
+                    rotation: fromAxisAndAngle(Qt.vector3d(1,0, 0), 0)
+                }
+
+                components: [ cylinderMesh4, planeMaterial, cylinderTransform4 ]
+            }
+
+
+            Entity {
+                id: backPlane
+                PlaneMesh{
+                    id: backPlaneMesh
+                    height: 100
+                    width: 100
+
+                }
+
+                Transform{
+                    id: backPlaneTransform
+                    translation: Qt.vector3d(-50,backPlaneMesh.height/2,0)
+                    rotation: fromAxisAndAngle(Qt.vector3d(0,0, 1), -90)
+                }
+
+                GoochMaterial {
+                    id: backPlaneMaterial
+                    warmColor: Qt.rgba(234/255,234/255,234/255,1.0)
+                    coolColor: Qt.rgba(234/255,234/255,234/255,1.0)
+                }
+
+                components: [ backPlaneMesh, backPlaneMaterial, backPlaneTransform ]
+            }
+
+            Entity {
+                id: planeTitleEntity
+                PlaneMesh{
+                    id: planeTitleMesh
+                    height : 60
+                    width : 10
+
+                }
+
+                Transform{
+                    id: planeTitleTransform
+                    translation: Qt.vector3d(50,0,0)
+                    rotation: fromAxisAndAngle(Qt.vector3d(1,0, 0), 0)
+                }
+
+                components: [ planeTitleMesh, planeMaterial, planeTitleTransform ]
+            }
         }
+
+
+
+
 
     }
 
@@ -209,46 +338,22 @@ Entity {
         FrameAction {
             property real rotationSpeed : 4
 
-
             onTriggered: {
                 if (rotateAction.active) {
-                    var currentPlaneRotation = planeTransform.rotation
                     var target = axisAngle2Quaternion(rotationSpeed * rotateXAxis.value * dt,qq.rotatedVector(planeTransform.rotation,yup))
                     var target2 = axisAngle2Quaternion(rotationSpeed * rotateYAxis.value * dt,ydown)
 
+                    //console.log("rtv " + qq.rotatedVector(planeTransform.rotation,ydown))
+                    target = qq.multiplyQuaternion(target,target2)
 
-                    console.log("rtv " + qq.rotatedVector(planeTransform.rotation,ydown))
-                    target = multiplyQuaternion(target,target2)
+                    planeTransform.rotation = qq.multiplyQuaternion(target,planeTransform.rotation)
+                    //planeTransform.rotation = qq.multiplyQuaternion(planeTransform.rotation,target)
 
-
-                    //console.log("rtv  " + target.rotatedVector(zup))
-
-
-                    planeTransform.rotation = multiplyQuaternion(target,planeTransform.rotation)
-
-
-                    /*
-                    if(currentPlaneRotation !== multiplyQuaternion(target,currentPlaneRotation)){
-                        planeTransform.rotation = multiplyQuaternion(target,planeTransform.rotation)
-                        planeTransform.rotation = multiplyQuaternion(target2,planeTransform.rotation)
-                        meshTransform.rotation = multiplyQuaternion(planeTransform.rotation,meshTransform.objectRotation)
-                    }
-                    */
-
-
-                    //var target2 = axisAngle2Quaternion(rotationSpeed * rotateYAxis.value * dt,Qt.vector3d( 0.0, 0.0, 1.0 ))
-                    //target = multiplyQuaternion(target,target2)
-                    //console.log("tar"  + target)
-                    //planeTransform.rotation = multiplyQuaternion(planeTransform.rotation,target)
-                    //planeTransform.rotation = multiplyQuaternion(planeTransform.rotation,target2)
-                    /*console.log("cur"  + currentPlaneRotation + " pla"  + planeTransform.rotation)
-
-                    if(currentPlaneRotation != planeTransform.rotation)
-                        meshTransform.rotation = multiplyQuaternion(planeTransform.rotation,meshTransform.rotation)
-                    */
                 }
             }
         }
+
+
     ]
 
 

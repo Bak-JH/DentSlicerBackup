@@ -9,5 +9,7 @@
         <file>CoordinateMesh.qml</file>
         <file>CameraManager.qml</file>
         <file>CameraController.qml</file>
+        <file>grid.png</file>
+        <file>grid2.png</file>
     </qresource>
 </RCC>
