@@ -24,5 +24,16 @@ Rectangle {
         color: "#CECECE"
     }
 
+    LeftTabViewMode{
+        id : ltvm
+        anchors.top : parent.top
+        anchors.left : parent.left
+    }
+    LeftTabPartList{
+        id : ltpl
+        anchors.top : ltvm.bottom
+        anchors.left: parent.left
+    }
+
 
 }

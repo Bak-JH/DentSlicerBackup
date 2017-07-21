@@ -74,6 +74,7 @@ Entity {
     NormalDiffuseMapAlphaMaterial{
         id : planeDownMaterial
         diffuse: "qrc:/grid2.png"
+        normal: "qrc:/grid2.png"
         ambient: Qt.rgba(0/255, 0/255, 0/255, 0.0)
         //specular: Qt.rgba( 0, 0, 0, 1.0 )
         shininess: 0

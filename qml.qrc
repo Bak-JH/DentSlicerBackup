@@ -11,5 +11,7 @@
         <file>CameraController.qml</file>
         <file>grid.png</file>
         <file>grid2.png</file>
+        <file>LeftTabViewMode.qml</file>
+        <file>LeftTabPartList.qml</file>
     </qresource>
 </RCC>
