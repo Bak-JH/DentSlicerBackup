@@ -18,8 +18,24 @@ Entity {
 
     property vector3d defaultUp: Qt.vector3d(0, 0, 1)
     property vector3d defaultCameraPosition: Qt.vector3d(40,0,40)
-
-
+    /*
+    Entity {
+        id: light // Light
+        PointLight {
+            id: scene_root_pointlight
+            intensity: 1
+        }
+        Transform {
+            id: light_transform
+            matrix: Qt.matrix4x4(1,0,0,8,0,1,0,10,0,0,1,-5,0,0,0,1)
+            translation: Qt.vector3d(8,10,-5)
+        }
+        components: [
+            scene_root_pointlight,
+            light_transform
+        ]
+    }
+    */
     Camera {
         id: camera
 
@@ -56,7 +72,8 @@ Entity {
         RenderSettings {
             activeFrameGraph: ForwardRenderer {
                 camera: camera
-                clearColor: "transparent"
+                //clearColor: "transparent"
+                clearColor: "#EAEAEA"
             }
         },
         InputSettings {     }

@@ -53,18 +53,30 @@ Entity {
         warmColor: Qt.rgba(40/255,40/255,40/255,1.0)
         coolColor: Qt.rgba(240/255,240/255,240/255,1.0)
     }*/
-    DiffuseMapMaterial{
-        id : planeMaterial
-        diffuse: "qrc:/grid2.png"
-        specular: Qt.rgba( 0.9, 0.9, 0.9, 1.0 )
-        shininess: 2.0
-    }
 
     DiffuseMapMaterial{
-        id : planeDownMaterial
+        id : planeMaterial
+        /*
+        ambient: Qt.rgba( 204/255, 204/255, 204/255, 1.0 )
+        diffuse: "black"
+        specular: "black"
+        shininess: 0.0
+        */
+
         diffuse: "qrc:/grid.png"
-        specular: Qt.rgba( 0.9, 0.9, 0.9, 1.0 )
-        shininess: 2.0
+        //specular: Qt.rgba( 1, 1, 1, 1.0 )
+        ambient: Qt.rgba(255/255, 255/255, 255/255, 1.0 )
+        shininess: 0
+
+    }
+
+
+    NormalDiffuseMapAlphaMaterial{
+        id : planeDownMaterial
+        diffuse: "qrc:/grid2.png"
+        ambient: Qt.rgba(0/255, 0/255, 0/255, 0.0)
+        //specular: Qt.rgba( 0, 0, 0, 1.0 )
+        shininess: 0
     }
 
     PhongMaterial {

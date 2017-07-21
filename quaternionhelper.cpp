@@ -1,6 +1,5 @@
 #include "quaternionhelper.h"
 
-
 QuaternionHelper::QuaternionHelper(QObject *parent) : QObject(parent)
 {
 
