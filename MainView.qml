@@ -271,8 +271,8 @@ Entity {
 
                 GoochMaterial {
                     id: backPlaneMaterial
-                    warmColor: Qt.rgba(234/255,234/255,234/255,1.0)
-                    coolColor: Qt.rgba(234/255,234/255,234/255,1.0)
+                    warmColor: Qt.rgba(244/255,244/255,244/255,1.0)
+                    coolColor: Qt.rgba(244/255,244/255,244/255,1.0)
                 }
 
                 components: [ backPlaneMesh, backPlaneMaterial, backPlaneTransform ]
