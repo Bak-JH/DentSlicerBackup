@@ -17,14 +17,20 @@ void generateKbranch(Slices& slices){
         OverhangPosition overhang_position = slices.overhang_positions[op_idx];
         //drawCircle(overhang_position);
         int slice_idx = int(overhang_position.Z/(Configuration::resolution)/cfg->layer_height);
-        qDebug() << overhang_position.Z << slice_idx;
         while (!checkInclusion(slices[slice_idx], overhang_position) && (slice_idx != 0)){
-            //qDebug() << "support generation on " << slice_idx;
-            Slice slice = slices[slice_idx];
+            Slice& slice = slices[slice_idx];
+            //qDebug() << "support generation on " << slice_idx << slice.outershell.size() << slice.outershell[slice.outershell.size()-1].size();
+
+            Paths temp_paths;
+            temp_paths.push_back(drawCircle(overhang_position));
             clpr.Clear();
             clpr.AddPaths(slice.outershell, ptSubject, true);
-            clpr.AddPath(drawCircle(overhang_position), ptClip, true);
+            clpr.AddPaths(temp_paths, ptClip, true);
             clpr.Execute(ctUnion, slice.outershell, pftNonZero, pftNonZero);
+            //clpr.Execute(ctUnion, slice.outershell, pftNonZero, pftNonZero);
+
+            //qDebug() << "after union" << result_paths.size() << result_paths[0].size();
+            //qDebug() << "after union" << slice.outershell.size() << slice.outershell[slice.outershell.size()-1].size();
             slice_idx --;
         }
     }
@@ -78,8 +84,8 @@ Path drawCircle(OverhangPosition overhang_position){
     Path circle;
     int circle_resolution = 8;
     float circle_radius = cfg->default_support_radius;
-    float unit_angle = PI*360/circle_resolution;
-    float angle = 0;
+    float unit_angle = PI*2/circle_resolution;
+    float angle = PI*2;
 
     for (int i=0; i<circle_resolution; i++){
         angle += unit_angle;

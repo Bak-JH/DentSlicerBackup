@@ -31,6 +31,11 @@ Slices Slicer::slice(Mesh* mesh){
     Support support(cfg->support_type);
     support.generate(slices);
 
+    for (Slice slice : slices){
+        qDebug() << slice.outershell.size() ;//<< slice.outershell[slice.outershell.size()-1].size();
+    }
+
+
     // raft generation step
     Raft raft(cfg->raft_type);
     raft.generate(slices);

@@ -23,7 +23,7 @@ void SVGexporter::exportSVG(Slices contourLists, const char* outfilename){
 }
 
 void SVGexporter::writePolygon(ofstream& outfile, Path contour){
-    outfile << "      <polygon DLPengine:type=\"DLPengine\" points=\"";
+    outfile << "      <polygon diridiri:type=\"contour\" points=\"";
     for (IntPoint point: contour){
         outfile << std::fixed << (float)point.X/cfg->resolution << "," << std::fixed << (float)point.Y/cfg->resolution << " ";
     }
@@ -32,7 +32,7 @@ void SVGexporter::writePolygon(ofstream& outfile, Path contour){
 }
 
 void SVGexporter:: writeGroupHeader(ofstream& outfile, int layer_idx, float z){
-    outfile << "    <g id=\"layer" << layer_idx << "\" DLPengine:z=\""<< std::fixed << z << "\">\n";
+    outfile << "    <g id=\"layer" << layer_idx << "\" diridiri:z=\""<< std::fixed << z << "\">\n";
 }
 
 void SVGexporter:: writeGroupFooter(ofstream& outfile){

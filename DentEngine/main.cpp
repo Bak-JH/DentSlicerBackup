@@ -42,8 +42,8 @@ int main(int argc, char *argv[])
 //    int layer_num = round(slices.overhang_positions[5].z()/cfg->layer_height);
 //    qDebug() << slices.overhang_positions[5].z() << slices.overhang_positions[5].z()/cfg->layer_height << layer_num;
 //    Paths contourList = slices[debug_layer].outershell;
-    Paths contourList = slices[1].overhang_region;
-    Paths totalContour = slices[1].outershell;
+    Paths contourList = slices[10].overhang_region;
+    Paths totalContour = slices[10].outershell;
 //    Paths contourList = slices[2].outershell;
 //    Paths contourList = slices[debug_layer].outershell;
 
@@ -72,7 +72,7 @@ int main(int argc, char *argv[])
     }
 
     // outershell
-    /*p.setPen(QPen(Qt::green, 2, Qt::DashLine, Qt::RoundCap));
+    p.setPen(QPen(Qt::green, 2, Qt::DashLine, Qt::RoundCap));
     for (int contour_idx=0; contour_idx < totalContour.size() ; contour_idx++){
         Path contour = totalContour[contour_idx];
         qDebug() << "contour length " << contour.size() << contour_idx;
@@ -85,7 +85,7 @@ int main(int argc, char *argv[])
             prev_ip = ip;
         }
         p.drawLine(prev_ip.X*10/Configuration::resolution + 500,prev_ip.Y*10/Configuration::resolution + 500, start_ip.X*10/Configuration::resolution + 500,start_ip.Y*10/Configuration::resolution + 500);
-    }*/
+    }
 
 
     // intersection points
@@ -94,9 +94,11 @@ int main(int argc, char *argv[])
        p.drawPoint(ip.X*10/Configuration::resolution + 500, ip.Y*10/Configuration::resolution + 500);
     }
 
-    p.setPen(QPen(Qt::yellow, 10, Qt::DashLine, Qt::RoundCap));
+    // test distance
+    /*p.setPen(QPen(Qt::yellow, 10, Qt::DashLine, Qt::RoundCap));
     p.drawPoint(500, 500);
-    p.drawPoint(500+cfg->duplication_radius, 500);
+    p.drawPoint(500+cfg->duplication_radius, 500);*/
+
     /*for (int contour_idx =0; contour_idx < totalContour.size(); contour_idx ++){
         Path contour = totalContour[contour_idx];
         for (IntPoint ip: contour){
