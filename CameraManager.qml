@@ -107,26 +107,40 @@ Entity {
 
     function zoomUp(){
         var cameraRadius = zoomGap()
+
         if(cameraRadius > 10){
+            /*
             //camera.position = camera.position.minus(temp.times(0.25))
 
             zoomAnimation.to = camera.position.minus(camera.temp)
             zoomAnimation.start()
-
-
+            */
+            var zoomFactor = 0.1
+            var zoom = 1.0 - zoomFactor;
+            var viewVector = camera.position.minus(camera.viewCenter)
+            viewVector = viewVector.times(zoom);
+            camera.position = camera.viewCenter.plus(viewVector);
         }
+
     }
 
     function zoomDown(){
         var cameraRadius = zoomGap()
 
         if(cameraRadius < 1600){
+            /*
             //camera.position = camera.position.minus(temp.times(0.25))
             zoomAnimation.to = camera.position.plus(camera.temp)
             zoomAnimation.start()
+            */
 
-
+            var zoomFactor = 0.1
+            var zoom = 1.0 + zoomFactor;
+            var viewVector = camera.position.minus(camera.viewCenter)
+            viewVector = viewVector.times(zoom);
+            camera.position = camera.viewCenter.plus(viewVector);
         }
+
     }
 
     MouseDevice{

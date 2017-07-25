@@ -40,7 +40,7 @@ Rectangle {
         color: "#CECECE"
     }
 
-    Item{
+    Rectangle{
         id : firsttab
         width : buttonWidth * 3 + 2
         height: parent.height
@@ -49,7 +49,7 @@ Rectangle {
         anchors.top : parent.top
         anchors.bottom : parent.bottom
 
-        //color: parent.color
+        color: "transparent"
 
 
         Rectangle{
@@ -73,7 +73,7 @@ Rectangle {
         anchors.left : firsttab.right
         anchors.top : parent.top
         anchors.bottom : parent.bottom
-
+        /*
         Rectangle{
             id : second_tab_right_line
             width: 2
@@ -85,6 +85,7 @@ Rectangle {
 
             color : "#CECECE"
         }
+        */
     }
     /*
     Rectangle{

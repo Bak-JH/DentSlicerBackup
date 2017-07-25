@@ -7,7 +7,8 @@ CONFIG += c++11
 SOURCES += main.cpp \
     quaternionhelper.cpp
 
-RESOURCES += qml.qrc
+RESOURCES += qml.qrc \
+    resources.qrc
 
 # Additional import path used to resolve QML modules in Qt Creator's code model
 QML_IMPORT_PATH =
