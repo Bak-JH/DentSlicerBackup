@@ -12,6 +12,7 @@ Rectangle {
     state : "open"
 
     Rectangle{
+        id : tab
         width: parent.width
         height: 24
         anchors.left : parent.left
@@ -45,22 +46,34 @@ Rectangle {
 
             MouseArea {
                     anchors.fill: parent
-                    onClicked: { ltvm.state == 'open' ? ltvm.state = "close" : ltvm.state = 'open';
- }
+                    onClicked: { ltvm.state == 'open' ? ltvm.state = "close" : ltvm.state = 'open';}
             }
         }
+    }
 
+    Rectangle{
+        id : content
+        width: parent.width
+        height: parent.height - 24
+        anchors.left : parent.left
+        anchors.top :  tab.bottom
+
+        color:"red"
     }
 
     states: [
         State{
             name:"open"
             PropertyChanges { target: arrow; rotation:0 }
+            PropertyChanges { target: content; visible:true }
+            PropertyChanges { target: ltvm; height : 180 }
 
         },
         State{
             name:"close"
             PropertyChanges { target: arrow; rotation:180 }
+            PropertyChanges { target: content; visible:false }
+            PropertyChanges { target: ltvm; height : 24 }
         }
     ]
 
