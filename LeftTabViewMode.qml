@@ -7,8 +7,9 @@ Rectangle {
     width : 260
     height : 180
 
-    color: "transparent"
+    color : "transparent"
 
+    state : "open"
 
     Rectangle{
         width: parent.width
@@ -31,9 +32,12 @@ Rectangle {
         }
 
         Image{
+            id : arrow
             source: "qrc:/Resource/triangle.png"
             width : 12
             height : 10
+            //transform:Rotation{origin.x: arrow.width/2; origin.y: arrow.height/2; axis { x: 1; y: 0; z: 0 } angle: 0 }
+            rotation: 0
 
             anchors.verticalCenter: parent.verticalCenter
             anchors.right : parent.right
@@ -41,13 +45,24 @@ Rectangle {
 
             MouseArea {
                     anchors.fill: parent
-                    onClicked: { console.log("View Mode") }
+                    onClicked: { ltvm.state == 'open' ? ltvm.state = "close" : ltvm.state = 'open';
+ }
             }
-
         }
 
-
     }
+
+    states: [
+        State{
+            name:"open"
+            PropertyChanges { target: arrow; rotation:0 }
+
+        },
+        State{
+            name:"close"
+            PropertyChanges { target: arrow; rotation:180 }
+        }
+    ]
 
 
 }

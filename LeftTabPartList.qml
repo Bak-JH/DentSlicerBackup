@@ -6,6 +6,8 @@ Rectangle {
 
     color: "transparent"
 
+    state : "open"
+
     /************************** upper **************************/
     Rectangle{
         id : name
@@ -29,6 +31,7 @@ Rectangle {
         }
 
         Image{
+            id : arrow
             source: "qrc:/Resource/triangle.png"
             width : 12
             height : 10
@@ -39,7 +42,7 @@ Rectangle {
 
             MouseArea {
                     anchors.fill: parent
-                    onClicked: { console.log("Part List") }
+                    onClicked: { ltpl.state == 'open' ? ltpl.state = "close" : ltpl.state = 'open';}
             }
         }
 
@@ -50,11 +53,22 @@ Rectangle {
         width : 232
         height: 200
 
-        anchors.top : name.top
+        anchors.top : name.bottom
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.topMargin: 12
 
         color : "#F9F9F9"
     }
+
+    states: [
+        State{
+            name:"open"
+            PropertyChanges { target: arrow; rotation:0 }
+        },
+        State{
+            name:"close"
+            PropertyChanges { target: arrow; rotation:180 }
+        }
+    ]
 
 }
