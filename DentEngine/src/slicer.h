@@ -30,9 +30,12 @@ public:
 
 class OverhangPosition : public IntPoint {
 public:
-    OverhangPosition(int x=0, int y=0, int z=0) : IntPoint(x, y, z){}
+    OverhangPosition(int x=0, int y=0, int z=0, int radius=0) : IntPoint(x, y, z), radius(radius){}
 //    OverhangPosition(int x=0, int y=0, int z=0);
-    float height = 0;
+    float height = 0; // in mm
+    int radius;
+    bool branchable = true;
+    OverhangPosition branching_overhang_position;
 };
 
 

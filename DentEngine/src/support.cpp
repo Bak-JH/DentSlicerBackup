@@ -59,7 +59,7 @@ void overhangDetect(Slices& slices){
                 //IntPoint centroid = getPolygonCentroid(partial_cop); // need to change to this
                 IntPoint centroid = getPolygonNormal(partial_cop);
 //                qDebug() << slice.z << int(slice.z*Configuration::resolution) << slice.z*Configuration::resolution/Configuration::resolution;
-                slices.overhang_positions.push_back(OverhangPosition(centroid.X, centroid.Y, int(slice.z*cfg->resolution)));
+                slices.overhang_positions.push_back(OverhangPosition(centroid.X, centroid.Y, int(slice.z*cfg->resolution), cfg->default_support_radius));
                 //slices.overhang_positions.push_back(QVector3D(float(centroid.X)/Configuration::resolution, float(centroid.Y)/Configuration::resolution, slice.z));
             }
         }

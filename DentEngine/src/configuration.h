@@ -25,7 +25,7 @@ public:
 
     char* slicing_mode = "uniform"; // uniform OR adaptive
     float layer_height = 0.1; // in mm
-    float nozzle_width = 0; // in mm (diameter) , for pointwise printers
+    float nozzle_width = 0; // in mm (diameter) , for printers with nozzles
     float wall_thickness = 2; // in mm
     float fill_thickness = 1; // in mm
     float support_density = 0.3;
@@ -34,7 +34,8 @@ public:
     float subdivision_radius = 0.85; // in mm
     float duplication_radius = 3; // in mm
 
-    float default_support_radius = 500 ; // in microns
+    float default_support_radius = 300 ; // in microns
+    float branching_threshold = 10; // in mm
 
     float overhang_threshold = layer_height/tan_theta;
     float overhang_poll_threshold = support_density * 100; // unit region as 1cm^2

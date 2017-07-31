@@ -21,6 +21,6 @@ public:
 void generateKbranch(Slices& slices);
 /****************** Helper Functions *******************/
 bool checkInclusion(Slice& slice, OverhangPosition overhang_position);
-Path drawCircle(OverhangPosition overhang_position);
+Path drawCircle(OverhangPosition overhang_position, int radius);
 
 #endif // KBRANCH_H

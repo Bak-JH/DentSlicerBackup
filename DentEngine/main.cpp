@@ -42,8 +42,8 @@ int main(int argc, char *argv[])
 //    int layer_num = round(slices.overhang_positions[5].z()/cfg->layer_height);
 //    qDebug() << slices.overhang_positions[5].z() << slices.overhang_positions[5].z()/cfg->layer_height << layer_num;
 //    Paths contourList = slices[debug_layer].outershell;
-    Paths contourList = slices[10].overhang_region;
-    Paths totalContour = slices[10].outershell;
+    Paths contourList = slices[30].overhang_region;
+    Paths totalContour = slices[30].outershell;
 //    Paths contourList = slices[2].outershell;
 //    Paths contourList = slices[debug_layer].outershell;
 
