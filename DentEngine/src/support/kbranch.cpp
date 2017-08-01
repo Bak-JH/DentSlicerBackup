@@ -43,17 +43,34 @@ void generateKbranch(Slices& slices){
                     overhang_point.branchable = false;
                     overhang_point.branching_overhang_point = target_overhang_point;
                     target_overhang_point->branchable = false;
+                    target_overhang_point->branching_cnt ++;
                 }
+
                 qDebug() << "min distance = " << min_distance;
             } else if (overhang_point.branching_overhang_point != NULL) { // move overhang position to target op
-                //overhang_point.move ()
-                if (false) {// branch reached another stem
+                IntPoint unit_move = (overhang_point.branching_overhang_point->position - overhang_point.position)/cfg->layer_height*1000;
+
+
+                //overhang_point.move (overhang_point.position + overhang_point.brancing_overhang_point->position)
+                if (pointDistance(overhang_point.position, overhang_point.branching_overhang_point->position) <= cfg-> default_support_radius) {// branch reached another stem
                     overhang_point.branching_overhang_point = NULL;
                     overhang_point.branchable = true;
                     overhang_point.branching_overhang_point->branchable = true;
+
+                    // brancing done
                 }
 
             } else { // do not branch, route stem
+                Paths circle_paths;
+                circle_paths.push_back(drawCircle(overhang_point, int(cfg->default_support_radius)));
+                clpr.Clear();
+                clpr.AddPaths(slice.outershell, ptSubject, true);
+                clpr.AddPaths(circle_paths, ptClip, true);
+                clpr.Execute(ctUnion, slice.outershell, pftNonZero, pftNonZero);
+                overhang_point.height += cfg->layer_height;
+            }
+
+            if (overhang_point.branching_cnt >= 3){
                 Paths circle_paths;
                 circle_paths.push_back(drawCircle(overhang_point, int(cfg->default_support_radius)));
                 clpr.Clear();

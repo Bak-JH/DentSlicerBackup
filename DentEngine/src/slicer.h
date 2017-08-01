@@ -35,6 +35,7 @@ public:
     float height = 0; // in mm
     int radius;
     bool branchable = true;
+    int branching_cnt = 0;
     OverhangPoint* branching_overhang_point;
 
     void moveTo(int x, int y, int z);
