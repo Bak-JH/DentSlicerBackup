@@ -59,8 +59,8 @@ void overhangDetect(Slices& slices){
                 //IntPoint centroid = getPolygonCentroid(partial_cop); // need to change to this
                 IntPoint centroid = getPolygonNormal(partial_cop);
 //                qDebug() << slice.z << int(slice.z*Configuration::resolution) << slice.z*Configuration::resolution/Configuration::resolution;
-                slices.overhang_positions.push_back(OverhangPosition(centroid.X, centroid.Y, int(slice.z*cfg->resolution), cfg->default_support_radius));
-                //slices.overhang_positions.push_back(QVector3D(float(centroid.X)/Configuration::resolution, float(centroid.Y)/Configuration::resolution, slice.z));
+                slices.overhang_points.push_back(OverhangPoint(centroid.X, centroid.Y, int(slice.z*cfg->resolution), cfg->default_support_radius));
+                //slices.overhang_points.push_back(QVector3D(float(centroid.X)/Configuration::resolution, float(centroid.Y)/Configuration::resolution, slice.z));
             }
         }
 
@@ -75,7 +75,7 @@ void overhangDetect(Slices& slices){
             IntPoint centroid = getPolygonCentroid(cop);
 
             for (int op_idx=0; op_idx<dup_count; op_idx ++){
-                slices.overhang_positions.push_back(QVector3D(float(centroid.X)/Configuration::resolution, float(centroid.Y)/Configuration::resolution, slice.z));
+                slices.overhang_points.push_back(QVector3D(float(centroid.X)/Configuration::resolution, float(centroid.Y)/Configuration::resolution, slice.z));
             }
         }*/
 
@@ -83,18 +83,18 @@ void overhangDetect(Slices& slices){
 
     // poll overhang positions among selected points
 
-    /*vector<QVector3D> overhang_positions;
+    /*vector<QVector3D> overhang_points;
     int support_count = cfg->support_density*100; // best scenario
-//    int support_count = (pow(6, cfg->support_density)-1)/5 * slices.overhang_positions.size(); // 100 must be relational to material's weight or size
-    qDebug() << "polling " << support_count << "supports from " << slices.overhang_positions.size();
+//    int support_count = (pow(6, cfg->support_density)-1)/5 * slices.overhang_points.size(); // 100 must be relational to material's weight or size
+    qDebug() << "polling " << support_count << "supports from " << slices.overhang_points.size();
 
     for (int idx=0; idx<support_count; idx++){
-        int random_idx = rand() % slices.overhang_positions.size();
-        overhang_positions.push_back(slices.overhang_positions[random_idx]);
+        int random_idx = rand() % slices.overhang_points.size();
+        overhang_points.push_back(slices.overhang_points[random_idx]);
     }
-    slices.overhang_positions = overhang_positions;*/
+    slices.overhang_points = overhang_points;*/
 
-    clusterPoints(slices.overhang_positions);
+    clusterPoints(slices.overhang_points);
 
 
     printf("overhang region detection done\n");
@@ -491,11 +491,11 @@ Paths areaSubdivision(Path area, float criterion){
     return result;
 }
 
-void clusterPoints(vector<OverhangPosition>& points){
-    vector<OverhangPosition> unclassified_points;
-    vector<OverhangPosition> classified_points;
+void clusterPoints(vector<OverhangPoint>& points){
+    vector<OverhangPoint> unclassified_points;
+    vector<OverhangPoint> classified_points;
 
-    OverhangPosition container_point;
+    OverhangPoint container_point;
     int container_count;
     float container_size = 10000;//(1-cfg->support_density)*10;
 
@@ -504,13 +504,13 @@ void clusterPoints(vector<OverhangPosition>& points){
     unclassified_points.pop_back();
     classified_points.push_back(container_point);
 
-    vector<OverhangPosition>::iterator it;
+    vector<OverhangPoint>::iterator it;
     int total_size = unclassified_points.size();
     while (total_size>0){
         //qDebug() << "unclassified_points size : " << unclassified_points.size();
         for (it = unclassified_points.begin(); it != unclassified_points.end();){
-            OverhangPosition point = (*it);
-            if (pointDistance(point, container_point) <= cfg->duplication_radius*Configuration::resolution){
+            OverhangPoint point = (*it);
+            if (pointDistance(point.position, container_point.position) <= cfg->duplication_radius*Configuration::resolution){
                 container_count ++;
                 unclassified_points.erase(it);
             } else {

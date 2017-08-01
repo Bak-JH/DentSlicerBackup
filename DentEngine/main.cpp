@@ -39,8 +39,8 @@ int main(int argc, char *argv[])
 
 //    Paths contourList = slicer->slice(loaded_mesh)[debug_layer].overhang_region;
     Slices slices = slicer->slice(loaded_mesh);
-//    int layer_num = round(slices.overhang_positions[5].z()/cfg->layer_height);
-//    qDebug() << slices.overhang_positions[5].z() << slices.overhang_positions[5].z()/cfg->layer_height << layer_num;
+//    int layer_num = round(slices.overhang_points[5].z()/cfg->layer_height);
+//    qDebug() << slices.overhang_points[5].z() << slices.overhang_points[5].z()/cfg->layer_height << layer_num;
 //    Paths contourList = slices[debug_layer].outershell;
     Paths contourList = slices[30].overhang_region;
     Paths totalContour = slices[30].outershell;
@@ -110,12 +110,12 @@ int main(int argc, char *argv[])
     }*/
 
     // draw overhang positions
-    qDebug() << slices.overhang_positions.size();
+    qDebug() << slices.overhang_points.size();
     p.setPen(QPen(Qt::red, 2, Qt::DashLine, Qt::RoundCap));
-    for (OverhangPosition cop : slices.overhang_positions){
-        p.drawPoint(cop.X*10/Configuration::resolution + 500, cop.Y*10/Configuration::resolution + 500);
+    for (OverhangPoint cop : slices.overhang_points){
+        p.drawPoint(cop.position.X*10/Configuration::resolution + 500, cop.position.Y*10/Configuration::resolution + 500);
 
-        qDebug() << "overhang positions " << cop.X << cop.Y;
+        qDebug() << "overhang positions " << cop.position.X << cop.position.Y;
     }
     p.end();
 

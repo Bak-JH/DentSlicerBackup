@@ -334,11 +334,15 @@ void zfillone(IntPoint& e1bot, IntPoint& e1top, IntPoint& e2bot, IntPoint& e2top
 
 ///****************** overhang position initializers *******************/
 
-//OverhangPosition::OverhangPosition(int x, int y, int z){
+//OverhangPoint::OverhangPoint(int x, int y, int z){
 //    X = x;
 //    Y = y;
 //    Z = z;
 //}
+
+void OverhangPoint::moveTo(int x, int y, int z){
+    position = IntPoint(x,y,z);
+}
 
 /****************** Deprecated functions *******************/
 

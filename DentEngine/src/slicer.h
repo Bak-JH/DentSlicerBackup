@@ -28,22 +28,24 @@ public:
     void outerShellOffset(float delta, JoinType join_type);
 };
 
-class OverhangPosition : public IntPoint {
+class OverhangPoint {
 public:
-    OverhangPosition(int x=0, int y=0, int z=0, int radius=0) : IntPoint(x, y, z), radius(radius){}
-//    OverhangPosition(int x=0, int y=0, int z=0);
+    OverhangPoint(int x=0, int y=0, int z=0, int radius=0) : position(x, y, z), radius(radius){}
+    IntPoint position;
     float height = 0; // in mm
     int radius;
     bool branchable = true;
-    OverhangPosition branching_overhang_position;
+    OverhangPoint* branching_overhang_point;
+
+    void moveTo(int x, int y, int z);
 };
 
 
 class Slices : public vector<Slice>{
 public:
     Paths overhang_regions;
-    vector<OverhangPosition> overhang_positions;
-    //    vector<QVector3D> overhang_positions;
+    vector<OverhangPoint> overhang_points;
+    //    vector<QVector3D> overhang_points;
     vector<IntPoint> intersectionPoints;
 };
 
