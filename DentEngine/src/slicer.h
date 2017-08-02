@@ -30,7 +30,8 @@ public:
 
 class OverhangPoint {
 public:
-    OverhangPoint(int x=0, int y=0, int z=0, int radius=0) : position(x, y, z), radius(radius){}
+    OverhangPoint(int x=0, int y=0, int z=0, int radius=0) : prev_position(x, y, z), position(x, y, z), radius(radius){}
+    IntPoint prev_position;
     IntPoint position;
     float height = 0; // in mm
     int radius;
@@ -38,7 +39,7 @@ public:
     int branching_cnt = 0;
     OverhangPoint* branching_overhang_point;
 
-    void moveTo(int x, int y, int z);
+    void moveTo(IntPoint target);
 };
 
 

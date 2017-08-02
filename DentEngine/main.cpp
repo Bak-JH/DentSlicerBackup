@@ -113,9 +113,9 @@ int main(int argc, char *argv[])
     qDebug() << slices.overhang_points.size();
     p.setPen(QPen(Qt::red, 2, Qt::DashLine, Qt::RoundCap));
     for (OverhangPoint cop : slices.overhang_points){
-        p.drawPoint(cop.position.X*10/Configuration::resolution + 500, cop.position.Y*10/Configuration::resolution + 500);
+        p.drawPoint(cop.prev_position.X*10/Configuration::resolution + 500, cop.prev_position.Y*10/Configuration::resolution + 500);
 
-        qDebug() << "overhang positions " << cop.position.X << cop.position.Y;
+        qDebug() << "overhang positions " << cop.prev_position.X << cop.prev_position.Y;
     }
     p.end();
 

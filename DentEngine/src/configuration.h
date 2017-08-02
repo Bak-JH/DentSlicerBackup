@@ -35,7 +35,7 @@ public:
     float duplication_radius = 3; // in mm
 
     float default_support_radius = 300 ; // in microns
-    float branching_threshold = 10; // in mm
+    float branching_threshold = 90000; // in microns
 
     float overhang_threshold = layer_height/tan_theta;
     float overhang_poll_threshold = support_density * 100; // unit region as 1cm^2
