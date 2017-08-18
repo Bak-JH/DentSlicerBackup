@@ -6,6 +6,8 @@ using namespace ClipperLib;
 
 Slices Slicer::slice(Mesh* mesh){
 
+    slices.mesh = mesh;
+
     // mesh slicing step
     vector<Paths> meshslices = meshSlice(mesh);
 
@@ -327,17 +329,6 @@ void zfillone(IntPoint& e1bot, IntPoint& e1top, IntPoint& e2bot, IntPoint& e2top
     pt.Z = 1;
 }
 
-///****************** overhang position initializers *******************/
-
-//OverhangPoint::OverhangPoint(int x, int y, int z){
-//    X = x;
-//    Y = y;
-//    Z = z;
-//}
-
-void OverhangPoint::moveTo(IntPoint target){
-    position = IntPoint(target.X,target.Y,target.Z);
-}
 
 /****************** Deprecated functions *******************/
 

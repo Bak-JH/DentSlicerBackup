@@ -21,7 +21,8 @@ int main(int argc, char *argv[])
     // Load mesh
     Mesh* loaded_mesh = new Mesh();
     //loadMeshSTL(loaded_mesh, "C:\\Users\\Diri\\Desktop\\DLP\\test\\Hollow_Draudi_small.STL");
-    loadMeshSTL(loaded_mesh, "C:\\Users\\diridiri\\Desktop\\DLP\\overhang_test_small.STL");
+    //loadMeshSTL(loaded_mesh, "C:\\Users\\diridiri\\Desktop\\DLP\\overhang_test_small.STL");
+    loadMeshSTL(loaded_mesh, "C:\\Users\\diridiri\\Desktop\\DLP\\lowerjaw.STL");
     printf("vertices : %d, faces : %d\n", loaded_mesh->vertices.size(), loaded_mesh->faces.size());
     printf("slicing in %s mode, resolution %d\n", cfg->slicing_mode, cfg->resolution);
     printf("debugging layer : %d\n", debug_layer);
@@ -42,8 +43,8 @@ int main(int argc, char *argv[])
 //    int layer_num = round(slices.overhang_points[5].z()/cfg->layer_height);
 //    qDebug() << slices.overhang_points[5].z() << slices.overhang_points[5].z()/cfg->layer_height << layer_num;
 //    Paths contourList = slices[debug_layer].outershell;
-    Paths contourList = slices[30].overhang_region;
-    Paths totalContour = slices[30].outershell;
+    Paths contourList = slices[debug_layer].overhang_region;
+    Paths totalContour = slices[debug_layer].outershell;
 //    Paths contourList = slices[2].outershell;
 //    Paths contourList = slices[debug_layer].outershell;
 
@@ -88,16 +89,23 @@ int main(int argc, char *argv[])
     }
 
 
-    // intersection points
-    p.setPen(QPen(Qt::blue, 10, Qt::DashLine, Qt::RoundCap));
-    for(IntPoint ip : slices.intersectionPoints){
-       p.drawPoint(ip.X*10/Configuration::resolution + 500, ip.Y*10/Configuration::resolution + 500);
-    }
+    // raft points
+    /*p.setPen(QPen(Qt::blue, 2, Qt::SolidLine, Qt::RoundCap));
+    Path contour = slices.raft_points;
+    if (slices.raft_points.size()>=1){
+        IntPoint start_ip = contour[0];
+        IntPoint prev_ip = contour[0];
+        for (IntPoint ip : contour){
+            p.drawLine(prev_ip.X*10/Configuration::resolution + 500,prev_ip.Y*10/Configuration::resolution + 500, ip.X*10/Configuration::resolution + 500,ip.Y*10/Configuration::resolution + 500);
+            prev_ip = ip;
+        }
+        p.drawLine(prev_ip.X*10/Configuration::resolution + 500,prev_ip.Y*10/Configuration::resolution + 500, start_ip.X*10/Configuration::resolution + 500,start_ip.Y*10/Configuration::resolution + 500);
+    }*/
 
     // test distance
-    /*p.setPen(QPen(Qt::yellow, 10, Qt::DashLine, Qt::RoundCap));
-    p.drawPoint(500, 500);
-    p.drawPoint(500+cfg->duplication_radius, 500);*/
+    p.setPen(QPen(Qt::yellow, 10, Qt::DashLine, Qt::RoundCap));
+    p.drawPoint(20*10/Configuration::resolution, 500);
+    p.drawPoint((20+cfg->branching_threshold_radius)*10/Configuration::resolution, 500);
 
     /*for (int contour_idx =0; contour_idx < totalContour.size(); contour_idx ++){
         Path contour = totalContour[contour_idx];

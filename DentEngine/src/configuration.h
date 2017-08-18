@@ -35,7 +35,8 @@ public:
     float duplication_radius = 3; // in mm
 
     float default_support_radius = 300 ; // in microns
-    float branching_threshold = 90000; // in microns
+    float branching_threshold_radius = 4000; // in microns
+    int branchable_overhang_point_cnt = 4;
 
     float overhang_threshold = layer_height/tan_theta;
     float overhang_poll_threshold = support_density * 100; // unit region as 1cm^2
@@ -43,7 +44,11 @@ public:
 
     int support_type = 2;
     int infill_type = 1;
-    int raft_type = 1;
+    int raft_type = 2;
+
+    // raft settings
+    float raft_thickness = 5;
+    int raft_offset_radius = 2000; // in microns
 
     // set configuration
 };

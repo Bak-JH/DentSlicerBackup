@@ -14,6 +14,8 @@
 using namespace std;
 using namespace ClipperLib;
 
+class OverhangPoint;
+
 class Slice : public Paths{ // extends Paths (total paths)
 public:
     float z;
@@ -28,27 +30,15 @@ public:
     void outerShellOffset(float delta, JoinType join_type);
 };
 
-class OverhangPoint {
-public:
-    OverhangPoint(int x=0, int y=0, int z=0, int radius=0) : prev_position(x, y, z), position(x, y, z), radius(radius){}
-    IntPoint prev_position;
-    IntPoint position;
-    float height = 0; // in mm
-    int radius;
-    bool branchable = true;
-    int branching_cnt = 0;
-    OverhangPoint* branching_overhang_point;
-
-    void moveTo(IntPoint target);
-};
-
 
 class Slices : public vector<Slice>{
 public:
+    Mesh* mesh;
     Paths overhang_regions;
     vector<OverhangPoint> overhang_points;
     //    vector<QVector3D> overhang_points;
-    vector<IntPoint> intersectionPoints;
+    //vector<IntPoint> intersectionPoints;
+    Path raft_points;
 };
 
 class Slicer : public QThread

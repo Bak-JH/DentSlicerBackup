@@ -22,15 +22,19 @@ SOURCES += main.cpp \
     src/support/kbranch.cpp \
     src/infill.cpp \
     src/raft.cpp \
-    src/configuration.cpp
+    src/configuration.cpp \
+    src/support/generalbranch.cpp \
+    src/raft/generalraft.cpp \
+    src/raft/kraft.cpp \
+    src/util/convexhull.cpp
 
 # The following define makes your compiler emit warnings if you use
 # any feature of Qt which as been marked deprecated (the exact warnings
 # depend on your compiler). Please consult the documentation of the
 # deprecated API in order to know how to port your code away from it.
 DEFINES += QT_DEPRECATED_WARNINGS
-DEFINES += "debug_mode=1"\
-            "debug_layer=81"
+DEFINES += "debug_mode=0"\
+            "debug_layer=40"
 
 # You can also make your code fail to compile if you use deprecated APIs.
 # In order to do so, uncomment the following line.
@@ -50,4 +54,8 @@ HEADERS += src/polyclipping/clipper.hpp \
     src/support.h \
     src/support/kbranch.h \
     src/infill.h \
-    src/raft.h
+    src/raft.h \
+    src/support/generalbranch.h \
+    src/raft/generalraft.h \
+    src/raft/kraft.h \
+    src/util/convexhull.h

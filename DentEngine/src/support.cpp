@@ -8,14 +8,18 @@ Support::Support(int type){
 void Support::generate(Slices& slices){
     switch (type)
     {
+    case 0:
+        break;
     case generalsupport:
+        generateGeneralBranch(slices);
         break;
     case kbranchsupport:
-        generateKbranch(slices);
-        printf ("support generation done\n");
+        generateKBranch(slices);
         break;
     }
+    printf ("support generation done\n");
 }
+
 
 /****************** Overhang Detection Step *******************/
 
@@ -374,6 +378,32 @@ float pointDistance(QVector3D A, QVector3D B){
     return sqrt(pow(A.x()-B.x(), 2)+pow(A.y()-B.y(),2)+pow(A.z()-B.z(),2));
 }
 
+// if slice contains overhang_point in somewhere
+bool checkInclusion(Slice& slice, OverhangPoint overhang_point){
+    for (Path contour : slice){
+        if (PointInPolygon(overhang_point.position, contour)){
+            return true;
+        }
+    }
+    return false;
+
+}
+
+Path drawCircle(OverhangPoint overhang_point, int radius){
+    Path circle;
+    int circle_resolution = 8;
+    float circle_radius = radius; //cfg->default_support_radius;
+    float unit_angle = PI*2/circle_resolution;
+    float angle = PI*2;
+
+    for (int i=0; i<circle_resolution; i++){
+        angle += unit_angle;
+        IntPoint circle_point = overhang_point.position + IntPoint(int(circle_radius*cos(angle)), int(circle_radius*sin(angle)), overhang_point.position.Z);
+        circle.push_back(circle_point);
+    }
+    return circle;
+}
+
 bool checkPerpendicularLength(Path A, Path B, IntPoint& left_hit){
 
     IntPoint prev_ip = B[0];
@@ -415,6 +445,7 @@ IntPoint getPolygonNormal(Path vertices){
     normal.Y /= vertices.size();
     return normal;
 }
+
 
 IntPoint getPolygonCentroid(Path vertices)
 {
@@ -527,4 +558,10 @@ void clusterPoints(vector<OverhangPoint>& points){
     }
     points = classified_points;
     qDebug() << "clustered points" << points.size();
+}
+
+//****************** overhang position initializers *******************/
+
+void OverhangPoint::branchTo(IntPoint target){
+    branching_overhang_point->position = IntPoint(target.X,target.Y,target.Z);
 }
