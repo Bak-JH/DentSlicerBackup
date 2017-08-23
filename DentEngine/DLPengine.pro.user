@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE QtCreatorProject>
-<!-- Written by QtCreator 4.2.2, 2017-08-19T02:02:06. -->
+<!-- Written by QtCreator 4.2.2, 2017-08-21T20:33:28. -->
 <qtcreator>
  <data>
   <variable>EnvironmentId</variable>
@@ -54,7 +54,9 @@
  </data>
  <data>
   <variable>ProjectExplorer.Project.PluginSettings</variable>
-  <valuemap type="QVariantMap"/>
+  <valuemap type="QVariantMap">
+   <valuelist type="QVariantList" key="ClangStaticAnalyzer.SuppressedDiagnostics"/>
+  </valuemap>
  </data>
  <data>
   <variable>ProjectExplorer.Project.Target.0</variable>
@@ -288,7 +290,7 @@
     <value type="QString" key="ProjectExplorer.ProjectConfiguration.DisplayName">DLPengine2</value>
     <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">Qt4ProjectManager.Qt4RunConfiguration:C:/Users/diridiri/Desktop/DLP/DLPengine/DLPengine.pro</value>
     <value type="bool" key="QmakeProjectManager.QmakeRunConfiguration.UseLibrarySearchPath">true</value>
-    <value type="QString" key="Qt4ProjectManager.Qt4RunConfiguration.CommandLineArguments">C:\Users\diridiri\Desktop\DLP\lowerjaw.STL C:\Users\diridiri\Desktop\DLP\output.svg</value>
+    <value type="QString" key="Qt4ProjectManager.Qt4RunConfiguration.CommandLineArguments">C:\Users\diridiri\Desktop\DLP\lowerjaw.STL C:\Users\diridiri\Desktop\DLP\output</value>
     <value type="QString" key="Qt4ProjectManager.Qt4RunConfiguration.ProFile">DLPengine.pro</value>
     <value type="bool" key="Qt4ProjectManager.Qt4RunConfiguration.UseDyldImageSuffix">false</value>
     <value type="QString" key="Qt4ProjectManager.Qt4RunConfiguration.UserWorkingDirectory"></value>

@@ -4,6 +4,7 @@
 #include "configuration.h"
 #include "slicer.h"
 #include <fstream>
+#include <QDir>
 
 using namespace ClipperLib;
 using namespace std;
@@ -13,7 +14,7 @@ class SVGexporter
 public:
     SVGexporter(){};
 
-    void exportSVG(Slices contourLists, const char* outfilename);
+    void exportSVG(Slices contourLists, QString outfoldername);
 
     void writePolygon(ofstream& outfile, Path contour);
     void writeGroupHeader(ofstream& outfile, int layer_idx, float z);

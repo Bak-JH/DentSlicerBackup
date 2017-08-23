@@ -148,6 +148,7 @@ int main(int argc, char *argv[])
             loadMeshSTL(loaded_mesh, parser.inputfilename.toStdString().c_str());
             printf("vertices : %d, faces : %d\n", loaded_mesh->vertices.size(), loaded_mesh->faces.size());
             printf("slicing in %s mode, resolution %d\n", cfg->slicing_mode, cfg->resolution);
+            printf("x : %f %f, y: %f %f, z: %f %f\n", loaded_mesh->x_min, loaded_mesh->x_max, loaded_mesh->y_min, loaded_mesh->y_max, loaded_mesh->z_min, loaded_mesh->z_max);
 
             // Slice
             Slicer* slicer = new Slicer();
@@ -156,7 +157,7 @@ int main(int argc, char *argv[])
             // Export to SVG
             qDebug() << contourLists[5].size();
             SVGexporter* exporter = new SVGexporter();
-            exporter->exportSVG(contourLists, parser.outputfilename.toStdString().c_str());
+            exporter->exportSVG(contourLists, parser.outputfilename);
 
             break;
         }

@@ -25,8 +25,6 @@ void generateKRaft(Slices& slices){
         //raft_slice.outershell.push_back();
         slices.insert(slices.begin(), raft_slice);
 
-        qDebug() << raft_offset;
-
     }
 
     qDebug() << "slices size :" << slices.size();

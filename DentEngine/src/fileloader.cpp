@@ -70,6 +70,7 @@ bool loadMeshSTL_ascii(Mesh* mesh, const char* filename)
     }
     fclose(f);
     mesh->connectFaces();
+    cfg->origin = QVector3D(mesh->x_min, mesh->y_min, mesh->z_min);
     return true;
 }
 
@@ -124,6 +125,7 @@ bool loadMeshSTL_binary(Mesh* mesh, const char* filename){
     }
     fclose(f);
     mesh->connectFaces();
+    cfg->origin = QVector3D(mesh->x_min, mesh->y_min, mesh->z_min);
     return true;
 }
 
