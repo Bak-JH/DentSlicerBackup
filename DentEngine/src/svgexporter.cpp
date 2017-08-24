@@ -16,6 +16,7 @@ void SVGexporter::exportSVG(Slices contourLists, QString outfoldername){
             writeGroupHeader(outfile, i, cfg->layer_height*(i+1));
         else
             writeGroupHeader(outfile, i, cfg->layer_height*(i+1));
+
         for (Path contour : contourLists[i].outershell){
             writePolygon(outfile, contour);
         }
