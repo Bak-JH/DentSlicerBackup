@@ -42,6 +42,7 @@ public:
     float overhang_threshold = layer_height/tan_theta;
     float overhang_poll_threshold = support_density * 100; // unit region as 1cm^2
 
+    int resin_type = 1;
 
     int support_type = 2;
     int infill_type = 1;
@@ -53,8 +54,12 @@ public:
 
     // set configuration
     QVector3D origin;
+    int resolution_x = 1280;
+    int resolution_y = 800;
+    int bed_x = 131.2; // in mm
+    int bed_y = 82; // in mm
+    float pixel_per_mm = float(resolution_x)/float(bed_x);
 };
-
 
 extern Configuration* cfg;
 

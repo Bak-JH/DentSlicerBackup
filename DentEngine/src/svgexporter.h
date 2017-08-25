@@ -5,6 +5,8 @@
 #include "slicer.h"
 #include <fstream>
 #include <QDir>
+#include <QJsonObject>
+#include <QJsonDocument>
 
 using namespace ClipperLib;
 using namespace std;

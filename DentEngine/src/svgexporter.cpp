@@ -6,6 +6,21 @@ void SVGexporter::exportSVG(Slices contourLists, QString outfoldername){
         dir.mkpath(".");
     }
 
+    QString infofilename = outfoldername + "/" + "info.json";
+    ofstream infofile(infofilename.toStdString().c_str(), ios::out);
+    QJsonObject jsonObject;
+    jsonObject["layer_height"] = round(cfg->layer_height*100)/100;
+    jsonObject["total_layer"] = int(contourLists.size());
+    jsonObject["bed_curing_time"] = 5000; // depends on cfg->resin_type
+    jsonObject["curing_time"] = 2500; // depends on cfg->resin_type
+    jsonObject["mirror_rot_time"] = 2000;
+    QJsonDocument jsonDocument(jsonObject);
+    QByteArray jsonBytes = jsonDocument.toJson();
+
+    infofile << jsonBytes.toStdString();
+    infofile.close();
+    qDebug() << jsonBytes;
+
     for (int i=0; i<contourLists.size(); i++){
         QString outfilename = outfoldername + "/" + QString::number(i) + ".svg";
 
@@ -31,7 +46,10 @@ void SVGexporter::exportSVG(Slices contourLists, QString outfoldername){
 void SVGexporter::writePolygon(ofstream& outfile, Path contour){
     outfile << "      <polygon contour:type=\"contour\" points=\"";
     for (IntPoint point: contour){
-        outfile << std::fixed << (float)point.X/cfg->resolution - cfg->origin.x() << "," << std::fixed << (float)point.Y/cfg->resolution - cfg->origin.y() << " ";
+        outfile << std::fixed << (float)point.X*cfg->pixel_per_mm/cfg->resolution + cfg->resolution_x/2 << "," << std::fixed << (float)point.Y*cfg->pixel_per_mm/cfg->resolution + cfg->resolution_y/2 - 100 << " "; // doesn't need 100 actually
+
+        // just fit to origin
+        //outfile << std::fixed << (float)point.X/cfg->resolution - cfg->origin.x() << "," << std::fixed << (float)point.Y/cfg->resolution - cfg->origin.y() << " ";
     }
     outfile << "\" style=\"fill: white\" />\n";
 
@@ -46,7 +64,7 @@ void SVGexporter:: writeGroupFooter(ofstream& outfile){
 }
 
 void SVGexporter::writeHeader(ofstream& outfile){
-    outfile << "<svg width='1024' height='600' xmlns='http://www.w3.org/2000/svg' xmlns:contour='http://hix.co.kr' style='background-color: black;'>\n";
+    outfile << "<svg width='" << cfg->resolution_x << "' height='" << cfg->resolution_y << "' xmlns='http://www.w3.org/2000/svg' xmlns:contour='http://hix.co.kr' style='background-color: black;'>\n";
 }
 
 void SVGexporter::writeFooter(ofstream& outfile){

@@ -13,11 +13,14 @@ Slices Slicer::slice(Mesh* mesh){
 
     // contour construction step
     for (int i=0; i< meshslices.size(); i++){
-        qDebug() << "constructing contour" << i+1 << "/" << meshslices.size();
+        qDebug() << "constructing contour" << i+1 << "/" << meshslices.size() << "offset" << -(cfg->wall_thickness+cfg->nozzle_width)/2;
         Slice meshslice;
         meshslice.outershell = contourConstruct(meshslices[i]);
+        int prev_size = meshslice.outershell.size();
         meshslice.z = cfg->layer_height*i;
-        meshslice.outerShellOffset(-(cfg->wall_thickness+cfg->nozzle_width)/2, jtRound);
+
+        // flaw exists if contour overlaps
+        //meshslice.outerShellOffset(-(cfg->wall_thickness+cfg->nozzle_width)/2, jtRound);
         slices.push_back(meshslice);
     }
 
@@ -226,6 +229,7 @@ void Slice::outerShellOffset(float delta, JoinType join_type){
 
     co.AddPaths(outershell, join_type, etClosedPolygon);
     co.Execute(outershell, delta);
+
     return;
 }
 

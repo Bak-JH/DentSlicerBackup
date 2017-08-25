@@ -71,8 +71,8 @@ void generateKBranch(Slices& slices){
             float radius = cfg->default_support_radius;
 
             // just routed
-            if (overhang_point.height<1){
-                radius = cfg->default_support_radius*overhang_point.height;
+            if (overhang_point.height<(1-0.2)){
+                radius = cfg->default_support_radius*(overhang_point.height+0.2);
                 goto stem;
             }
 
