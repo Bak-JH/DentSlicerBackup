@@ -4,7 +4,7 @@ import QtQuick.Scene3D 2.0
 import QtQuick.Window 2.2
 
 import "glcode.js" as GLCode
-
+import QtQuick.Dialogs 1.2
 ApplicationWindow {
     title: qsTr("DLPslicer")
     width: 1280
@@ -60,7 +60,15 @@ ApplicationWindow {
         aspects: ["input", "logic"]
         cameraAspectRatioMode: Scene3D.AutomaticAspectRatio
 
-        MainView {}
+        MainView {id: sceneRoot}
+    }
+
+
+    MeshTransformerZoom{
+        anchors.right: parent.right
+        anchors.bottom: parent.bottom
+        anchors.rightMargin: 100
+        anchors.bottomMargin: 100
     }
 
 }

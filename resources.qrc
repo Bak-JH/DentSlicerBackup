@@ -1,5 +1,22 @@
 <RCC>
     <qresource prefix="/">
         <file>Resource/triangle.png</file>
+        <file>resource/zoom.png</file>
+        <file>resource/triangle.png</file>
+        <file>resource/upper_arrange.png</file>
+        <file>resource/upper_autorepair.png</file>
+        <file>resource/upper_base.png</file>
+        <file>resource/upper_cut.png</file>
+        <file>resource/upper_export.png</file>
+        <file>resource/upper_label.png</file>
+        <file>resource/upper_layflat.png</file>
+        <file>resource/upper_move.png</file>
+        <file>resource/upper_open.png</file>
+        <file>resource/upper_orientation.png</file>
+        <file>resource/upper_rotate.png</file>
+        <file>resource/upper_save.png</file>
+        <file>resource/upper_scale.png</file>
+        <file>resource/upper_shelloffset.png</file>
+        <file>resource/upper_support.png</file>
     </qresource>
 </RCC>

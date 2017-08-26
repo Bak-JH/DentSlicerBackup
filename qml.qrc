@@ -13,5 +13,13 @@
         <file>grid2.png</file>
         <file>LeftTabViewMode.qml</file>
         <file>LeftTabPartList.qml</file>
+        <file>Model.qml</file>
+        <file>FileTest.qml</file>
+        <file>Plane.qml</file>
+        <file>MeshTransformerRotate.qml</file>
+        <file>MeshTransformerMove.qml</file>
+        <file>MeshTransformerZoom.qml</file>
+        <file>LeftTabSlicingOption.qml</file>
+        <file>UpperButton.qml</file>
     </qresource>
 </RCC>

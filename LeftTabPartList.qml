@@ -2,7 +2,7 @@ import QtQuick 2.0
 
 Rectangle {
     width : 260
-    height : 364
+    height : 350
 
     color: "transparent"
 
@@ -57,11 +57,11 @@ Rectangle {
         anchors.left : parent.left
         anchors.top :  tab.bottom
 
-        color:"blue"
+        color:"transparent"
 
         Rectangle{
             width : 232
-            height: 200
+            height: 294
 
             anchors.top : content.top
             anchors.horizontalCenter: parent.horizontalCenter

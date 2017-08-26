@@ -3,13 +3,13 @@ import Qt3D.Core 2.0
 import Qt3D.Render 2.0
 import Qt3D.Input 2.0
 import Qt3D.Extras 2.0
-import QtQuick 2.7 as QQ2
+import QtQuick 2.7
 
 
 import Qt3D.Logic 2.0
 
 Entity {
-    id: sceneRoot
+
     property vector3d xup : Qt.vector3d( 1.0, 0.0, 0.0 )
     property vector3d xdown : Qt.vector3d( -1.0, 0.0, 0.0 )
 
@@ -18,10 +18,9 @@ Entity {
     property vector3d zup : Qt.vector3d( 0.0, 0.0, 1.0 )
     property vector3d zdown : Qt.vector3d( 0.0, 0.0, -1.0 )
 
-    CoordinateMesh{}
-    CameraManager{
-        id : cm
-    }
+    CoordinateMesh{} // 기준좌표 체크
+
+    CameraManager{id : cm}
 
     MouseDevice{
         id : mouseDevice
@@ -45,14 +44,6 @@ Entity {
                 cm.zoomDown()
         }
     }
-
-
-    /*
-    GoochMaterial {
-        id: planeMaterial
-        warmColor: Qt.rgba(40/255,40/255,40/255,1.0)
-        coolColor: Qt.rgba(240/255,240/255,240/255,1.0)
-    }*/
 
     DiffuseMapMaterial{
         id : planeMaterial
@@ -118,189 +109,29 @@ Entity {
 
         Transform{
             id : totalTransform
-
             //rotation: fromAxisAndAngle(Qt.vector3d(0,0, 1), 60)
         }
-
-        Entity {
+        /*
+        Model{
             id: meshEntity
-            Mesh{
-                id: testMesh
-                source: "file:///D:/Dev/Trash/3Dtest/lowerjaw.obj"
-                //source: "file:///D:/Dev/Trash/3Dtest/full.stl"
-            }
-            Transform {
-                id: meshTransform
-                property quaternion objectRotation : fromAxisAndAngle(Qt.vector3d(0,0, 1), 60)
-
-                scale3D: Qt.vector3d(0.1,0.1,0.1)
-
-                rotation: objectRotation
-                translation: Qt.vector3d(0,0,0)
-            }
-            /*
-            ObjectPicker{
-                onClicked: {
-                    console.log("click")
-                }
-            }*/
-
-            components: [ testMesh, meshMaterial, meshTransform,picker ]
-
+            inputSource:"file:///D:/Dev/Trash/3Dtest/lowerjaw.obj"
         }
 
-        Entity {
-            id: planeEntity
+        Model{
+            id: meshEntity2
+            inputSource:"file:///D:/Dev/DLPSlicer/DLPslicer/resource/mesh/hix.obj"
+        }
+        Model{
+            id: meshEntity3
+            inputSource:"file:///D:/Dev/DLPSlicer/DLPslicer/resource/mesh/hix.obj"
+        }*/
 
-            PlaneMesh{
-                id: planeMesh
-                height : 100
-                width : 100
-
-            }
-
-            Transform{
-                id: planeTransform
-                translation: Qt.vector3d(0,0,0)
-                rotation: fromAxisAndAngle(Qt.vector3d(1,0, 0), 90)
-            }
-
-            components: [ planeMesh, planeMaterial, planeTransform ]
-            Entity {
-                PlaneMesh{
-                    id: planeDownMesh
-                    height : 100
-                    width : 100
-
-                }
-
-                Transform{
-                    id: planeDownTransform
-                    translation: Qt.vector3d(0,0,0)
-                    rotation: fromAxisAndAngle(Qt.vector3d(1,0, 0), 180)
-                }
-
-                components: [ planeDownMesh, planeDownMaterial, planeDownTransform ]
-            }
-            Entity {
-                id: cylinderEntity1
-                CylinderMesh{
-                    id: cylinderMesh1
-                    radius: 0.1
-                    length: 100
-                }
-
-                Transform{
-                    id: cylinderTransform1
-                    translation: Qt.vector3d(-50,cylinderMesh1.length/2,50)
-                    rotation: fromAxisAndAngle(Qt.vector3d(1,0, 0), 0)
-                }
-
-                components: [ cylinderMesh1, planeMaterial, cylinderTransform1 ]
-            }
-
-            Entity {
-                id: cylinderEntity2
-                CylinderMesh{
-                    id: cylinderMesh2
-                    radius: 0.1
-                    length: 100
-
-                }
-
-                Transform{
-                    id: cylinderTransform2
-                    translation: Qt.vector3d(-50,cylinderMesh2.length/2,-50)
-                    rotation: fromAxisAndAngle(Qt.vector3d(1,0, 0), 0)
-                }
-
-                components: [ cylinderMesh2, planeMaterial, cylinderTransform2 ]
-            }
-
-            Entity {
-                id: cylinderEntity3
-                CylinderMesh{
-                    id: cylinderMesh3
-                    radius: 0.1
-                    length: 100
-
-                }
-
-                Transform{
-                    id: cylinderTransform3
-                    translation: Qt.vector3d(50,cylinderMesh3.length/2,50)
-                    rotation: fromAxisAndAngle(Qt.vector3d(1,0, 0), 0)
-                }
-
-                components: [ cylinderMesh3, planeMaterial, cylinderTransform3 ]
-            }
-
-            Entity {
-                id: cylinderEntity4
-                CylinderMesh{
-                    id: cylinderMesh4
-                    radius: 0.1
-                    length: 100
-
-                }
-
-                Transform{
-                    id: cylinderTransform4
-                    translation: Qt.vector3d(50,cylinderMesh2.length/2,-50)
-                    rotation: fromAxisAndAngle(Qt.vector3d(1,0, 0), 0)
-                }
-
-                components: [ cylinderMesh4, planeMaterial, cylinderTransform4 ]
-            }
-
-
-            Entity {
-                id: backPlane
-                PlaneMesh{
-                    id: backPlaneMesh
-                    height: 100
-                    width: 100
-
-                }
-
-                Transform{
-                    id: backPlaneTransform
-                    translation: Qt.vector3d(-50,backPlaneMesh.height/2,0)
-                    rotation: fromAxisAndAngle(Qt.vector3d(0,0, 1), -90)
-                }
-
-                GoochMaterial {
-                    id: backPlaneMaterial
-                    warmColor: Qt.rgba(244/255,244/255,244/255,1.0)
-                    coolColor: Qt.rgba(244/255,244/255,244/255,1.0)
-                }
-
-                components: [ backPlaneMesh, backPlaneMaterial, backPlaneTransform ]
-            }
-
-            Entity {
-                id: planeTitleEntity
-                PlaneMesh{
-                    id: planeTitleMesh
-                    height : 60
-                    width : 10
-
-                }
-
-                Transform{
-                    id: planeTitleTransform
-                    translation: Qt.vector3d(50,0,0)
-                    rotation: fromAxisAndAngle(Qt.vector3d(1,0, 0), 0)
-                }
-
-                components: [ planeTitleMesh, planeMaterial, planeTitleTransform ]
+        Plane{id: planeEntity
+            Model{
+                id: meshEntity4
+                inputSource:"file:///D:/Dev/DLPSlicer/DLPslicer/resource/mesh/lowerjaw.obj"
             }
         }
-
-
-
-
-
     }
 
     MouseDevice {
@@ -319,7 +150,6 @@ Entity {
                               sourceDevice: mouse
                               buttons: [ MouseEvent.RightButton ]
                           }
-
                       ]
                   }
               ]
@@ -353,13 +183,14 @@ Entity {
 
             onTriggered: {
                 if (rotateAction.active) {
-                    var target = axisAngle2Quaternion(rotationSpeed * rotateXAxis.value * dt,qq.rotatedVector(planeTransform.rotation,yup))
+
+                    var target = axisAngle2Quaternion(rotationSpeed * rotateXAxis.value * dt,qq.rotatedVector(planeEntity.planeTransform.rotation,yup))
                     var target2 = axisAngle2Quaternion(rotationSpeed * rotateYAxis.value * dt,ydown)
 
                     //console.log("rtv " + qq.rotatedVector(planeTransform.rotation,ydown))
                     target = qq.multiplyQuaternion(target,target2)
 
-                    planeTransform.rotation = qq.multiplyQuaternion(target,planeTransform.rotation)
+                    planeEntity.planeTransform.rotation = qq.multiplyQuaternion(target,planeEntity.planeTransform.rotation)
                     //planeTransform.rotation = qq.multiplyQuaternion(planeTransform.rotation,target)
 
                 }
@@ -368,10 +199,6 @@ Entity {
 
 
     ]
-
-
-
-
 
     KeyboardDevice{
         id : keyboardDevice
@@ -402,7 +229,16 @@ Entity {
             if (event.key === Qt.Key_L) {
                 meshTransform.rotation = Qt.quaternion(0.8,0,0,0.5)
             }
-
+            if (event.key === Qt.Key_A) {
+                meshEntity4.testMesh.setSource("file:///D:/Dev/DLPSlicer/DLPslicer/resource/mesh/hix.obj");
+                //openFile();
+            }
+            if (event.key === Qt.Key_S) {
+                meshEntity4.testMesh.setSource("file:///D:/Dev/DLPSlicer/DLPslicer/resource/mesh/lowerjaw.obj");
+            }
+            if (event.key === Qt.Key_D) {
+                meshEntity4.testMesh.setSource("file:///D:/Dev/DLPSlicer/DLPslicer/resource/mesh/upperjaw.obj");
+            }
         }
     }
 
@@ -427,4 +263,14 @@ Entity {
 
         return result
     }
+
+    function openFile(){
+        //fileDialog.open()
+        console.log("button")
+        var compo = Qt.createComponent("Model.qml");
+
+        var loadmodel = compo.createObject(total, {});
+
+    }
+
 }

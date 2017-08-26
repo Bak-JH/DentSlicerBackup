@@ -75,9 +75,13 @@ Entity {
                 //clearColor: "transparent"
                 clearColor: "#EAEAEA"
             }
+
         },
+
+
         InputSettings {     }
     ]
+
 
     QQ2.Vector3dAnimation{
         id : zoomAnimation
@@ -179,6 +183,27 @@ Entity {
             }
             if (event.key === Qt.Key_P) {
                 console.log("pos  " + camera.position + " / cent  " + camera.viewCenter + " / rot" + camera.upVector)
+            }
+            if (event.key === Qt.Key_C) {
+                console.log("view  " + camera.viewMatrix + " proj  " + camera.projectionMatrix)
+            }
+            if (event.key === Qt.Key_V) {
+                var point = Qt.vector3d(0,0,0);
+                var matrix = Qt.matrix4x4(0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0);
+
+                matrix = camera.projectionMatrix.times(camera.viewMatrix);
+
+                point = matrix.times(point)
+
+                point.x = (point.x+1) * scene3d.width/2;
+                point.y = (-1 * point.y+1) * scene3d.height/2;
+
+
+                console.log("point2 " + point);
+                console.log("viwport  w" + scene3d.width);
+                console.log("viwport  h" + scene3d.height);
+
+
 
             }
         }

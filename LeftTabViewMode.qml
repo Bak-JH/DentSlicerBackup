@@ -1,7 +1,7 @@
 import QtQuick 2.0
 
 import QtQuick.Controls 1.2
-
+import QtQuick.Layouts 1.3
 
 Rectangle {
     width : 260
@@ -34,7 +34,7 @@ Rectangle {
 
         Image{
             id : arrow
-            source: "qrc:/Resource/triangle.png"
+            source: "qrc:/resource/triangle.png"
             width : 12
             height : 10
             //transform:Rotation{origin.x: arrow.width/2; origin.y: arrow.height/2; axis { x: 1; y: 0; z: 0 } angle: 0 }
@@ -58,7 +58,32 @@ Rectangle {
         anchors.left : parent.left
         anchors.top :  tab.bottom
 
-        color:"red"
+        color:"Transparent"
+        GroupBox {
+            //title: "Tab Position"
+            width: parent.width
+            height: parent.height
+            anchors.left: parent.left
+            anchors.top : parent.top
+
+            ColumnLayout {
+                spacing: 10
+                ExclusiveGroup { id: tabPositionGroup }
+                RadioButton {
+                    text: "Object View"
+                    checked: true
+                    exclusiveGroup: tabPositionGroup
+                }
+                RadioButton {
+                    text: "Support View"
+                    exclusiveGroup: tabPositionGroup
+                }
+                RadioButton {
+                    text: "Layer View"
+                    exclusiveGroup: tabPositionGroup
+                }
+            }
+        }
     }
 
     states: [
