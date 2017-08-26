@@ -370,6 +370,10 @@ IntPoint lineIntersection(Path& A, Path& B) {
     return ret;
 }
 
+float pointDistance3D(IntPoint A, IntPoint B){
+    return sqrt(pow(A.X-B.X, 2)+pow(A.Y-B.Y,2)+pow(A.Z-B.Z,2));
+}
+
 float pointDistance(IntPoint A, IntPoint B){
     return sqrt(pow(A.X-B.X, 2)+pow(A.Y-B.Y,2));
 }
@@ -386,7 +390,6 @@ bool checkInclusion(Slice& slice, OverhangPoint overhang_point){
         }
     }
     return false;
-
 }
 
 Path drawCircle(OverhangPoint overhang_point, int radius){

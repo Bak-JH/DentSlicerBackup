@@ -35,7 +35,7 @@ public:
     float subdivision_radius = 0.85; // in mm
     float duplication_radius = 3; // in mm
 
-    float default_support_radius = 600 ; // in microns
+    float default_support_radius = 1000 ; // in microns
     float branching_threshold_radius = 4000; // in microns
     int branchable_overhang_point_cnt = 4;
 
@@ -49,8 +49,8 @@ public:
     int raft_type = 2;
 
     // raft settings
-    float raft_thickness = 2;
-    int raft_offset_radius = 1000; // in microns
+    float raft_thickness = 3;
+    int raft_offset_radius = 1800; // in microns
 
     // set configuration
     QVector3D origin;
