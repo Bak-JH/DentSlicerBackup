@@ -203,7 +203,8 @@ Entity {
                 console.log("viwport  w" + scene3d.width);
                 console.log("viwport  h" + scene3d.height);
 
-
+                rt.anchors.leftMargin = point.x
+                rt.anchors.topMargin = point.y
 
             }
         }

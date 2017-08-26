@@ -71,4 +71,14 @@ ApplicationWindow {
         anchors.bottomMargin: 100
     }
 
+    RectTest{
+        id:rt
+        anchors.left : scene3d.left
+        anchors.top:scene3d.top
+
+        anchors.leftMargin: 400
+        anchors.topMargin: 400
+
+    }
+
 }

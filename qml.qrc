@@ -21,5 +21,6 @@
         <file>MeshTransformerZoom.qml</file>
         <file>LeftTabSlicingOption.qml</file>
         <file>UpperButton.qml</file>
+        <file>RectTest.qml</file>
     </qresource>
 </RCC>
