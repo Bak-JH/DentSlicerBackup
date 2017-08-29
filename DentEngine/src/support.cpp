@@ -384,7 +384,7 @@ float pointDistance(QVector3D A, QVector3D B){
 
 // if slice contains overhang_point in somewhere
 bool checkInclusion(Slice& slice, OverhangPoint overhang_point){
-    for (Path contour : slice){
+    for (Path contour : slice.overhang_region){
         if (PointInPolygon(overhang_point.position, contour)){
             return true;
         }
@@ -544,7 +544,7 @@ void clusterPoints(vector<OverhangPoint>& points){
         //qDebug() << "unclassified_points size : " << unclassified_points.size();
         for (it = unclassified_points.begin(); it != unclassified_points.end();){
             OverhangPoint point = (*it);
-            if (pointDistance(point.position, container_point.position) <= cfg->duplication_radius*Configuration::resolution){
+            if (pointDistance3D(point.position, container_point.position) <= cfg->duplication_radius*Configuration::resolution){
                 container_count ++;
                 unclassified_points.erase(it);
             } else {

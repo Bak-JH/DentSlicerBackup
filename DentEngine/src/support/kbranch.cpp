@@ -63,23 +63,26 @@ void generateKBranch(Slices& slices){
 
         for (int op_idx=0; op_idx<slices.overhang_points.size(); op_idx++){
 
-            OverhangPoint& overhang_point = slices.overhang_points[op_idx];
+            OverhangPoint* overhang_point = &slices.overhang_points[op_idx];
 
             // if overhang point's position height is lower than current layer height or overhang ended
-            if (overhang_point.position.Z <= (layer_idx-3)*cfg->layer_height*cfg->resolution || overhang_point.position.Z == -1)
+            if (overhang_point->position.Z <= (layer_idx-3)*cfg->layer_height*cfg->resolution || overhang_point->position.Z == -1)
+            {
+                //qDebug() << "overhang ended or not started yet : " << op_idx;
                 continue;
+            }
 
             // just routed
-            if (overhang_point.height < (1-0.2)){
+            if (overhang_point->height < (1-0.2)){
                 goto stem;
             }
 
-            if (overhang_point.branchable){
+            if (overhang_point->branchable){
 
                 float min_distance = 9999999;
                 BranchableOverhangPoint* min_bop = NULL;
 
-                for (BranchableOverhangPoint* bop : overhang_point.branchable_overhang_points){
+                for (BranchableOverhangPoint* bop : overhang_point->branchable_overhang_points){
                     if (min_distance >= (*bop).distance && bop->overhangpoint->position.Z >= layer_idx*cfg->layer_height*cfg->resolution){
                         min_distance = (*bop).distance;
                         min_bop = bop;
@@ -95,43 +98,43 @@ void generateKBranch(Slices& slices){
                 // found available branch
 
                 // change branch status
-                overhang_point.branchable = false;
-                overhang_point.branching_overhang_point = new OverhangPoint(overhang_point.position.X, overhang_point.position.Y, overhang_point.position.Z);
-                overhang_point.target_branching_overhang_point = target_stem_point;
+                overhang_point->branchable = false;
+                overhang_point->branching_overhang_point = new OverhangPoint(overhang_point->position.X, overhang_point->position.Y, overhang_point->position.Z);
+                overhang_point->target_branching_overhang_point = target_stem_point;
                 target_stem_point->branchable = false;
                 target_stem_point->branching_cnt ++;
 
                 float distance = min_distance;
-                overhang_point.unit_move = (overhang_point.target_branching_overhang_point->position - overhang_point.position)*cfg->layer_height*cfg->resolution/distance;
-                IntPoint total_move = overhang_point.position + overhang_point.unit_move;
-                overhang_point.branchTo(IntPoint(total_move.X, total_move.Y, overhang_point.position.Z));
+                overhang_point->unit_move = (overhang_point->target_branching_overhang_point->position - overhang_point->position)*cfg->layer_height*cfg->resolution/distance;
+                IntPoint total_move = overhang_point->position + overhang_point->unit_move;
+                overhang_point->branchTo(IntPoint(total_move.X, total_move.Y, overhang_point->position.Z));
 
-            } else if (overhang_point.target_branching_overhang_point != NULL) { // branching
+            } else if (overhang_point->target_branching_overhang_point != NULL) { // branching
 
-                if (overhang_point.target_branching_overhang_point->position.Z == -1){
-                    overhang_point.branchable = true;
-                    overhang_point.target_branching_overhang_point = NULL;
-                    overhang_point.branching_overhang_point = NULL;
+                if (overhang_point->target_branching_overhang_point->position.Z == -1){
+                    overhang_point->branchable = true;
+                    overhang_point->target_branching_overhang_point = NULL;
+                    overhang_point->branching_overhang_point = NULL;
                     //overhang_point.position = overhang_point.branching_overhang_point->position;
                     goto stem;
                 }
 
                 //unit_move = (overhang_point.target_branching_overhang_point->position - overhang_point.branching_overhang_point.position)*cfg->layer_height*1000/distance;
-                float prev_distance = pointDistance(overhang_point.branching_overhang_point->position, overhang_point.target_branching_overhang_point->position);
-                IntPoint total_move = overhang_point.branching_overhang_point->position + overhang_point.unit_move;
-                overhang_point.branchTo(IntPoint(total_move.X, total_move.Y, overhang_point.position.Z));
-                float distance = pointDistance(overhang_point.branching_overhang_point->position, overhang_point.target_branching_overhang_point->position);
+                float prev_distance = pointDistance(overhang_point->branching_overhang_point->position, overhang_point->target_branching_overhang_point->position);
+                IntPoint total_move = overhang_point->branching_overhang_point->position + overhang_point->unit_move;
+                overhang_point->branchTo(IntPoint(total_move.X, total_move.Y, overhang_point->position.Z));
+                float distance = pointDistance(overhang_point->branching_overhang_point->position, overhang_point->target_branching_overhang_point->position);
 
                 if (prev_distance < distance){
                     qDebug() << "ironic" << prev_distance << distance;
-                    qDebug() << "length of unit move" << sqrt(pow(overhang_point.unit_move.X,2)+pow(overhang_point.unit_move.Y,2));
+                    qDebug() << "length of unit move" << sqrt(pow(overhang_point->unit_move.X,2)+pow(overhang_point->unit_move.Y,2));
                 }
                 if (distance <= cfg->default_support_radius){ // branch reached another stem
-                    overhang_point.branchable = true;
-                    overhang_point.target_branching_overhang_point->branchable = true;
-                    overhang_point.target_branching_overhang_point = NULL;
-                    overhang_point.branching_overhang_point = NULL;
-                    overhang_point.unit_move = NULL;
+                    overhang_point->branchable = true;
+                    overhang_point->target_branching_overhang_point->branchable = true;
+                    overhang_point->target_branching_overhang_point = NULL;
+                    overhang_point->branching_overhang_point = NULL;
+                    overhang_point->unit_move = NULL;
                     // brancing done
                     //qDebug() << "branching done";
                 }
@@ -140,32 +143,36 @@ void generateKBranch(Slices& slices){
         stem:
             // route stem if no intersection
 
-            if (overhang_point.height < (2-0.4))
-                radius = cfg->default_support_radius*(overhang_point.height/2 + 0.4);
+            if (overhang_point->height < (2-0.4))
+                radius = cfg->default_support_radius*(overhang_point->height/2 + 0.4);
             else {
-                radius = (overhang_point.height>30) ? cfg->default_support_radius*(1+ (overhang_point.height-30)/30) : radius = cfg->default_support_radius;
+                radius = (overhang_point->height>30) ? cfg->default_support_radius*(1+ (overhang_point->height-30)/30) : radius = cfg->default_support_radius;
             }
 
-            if (overhang_point.branching_overhang_point != NULL)
-                circle_paths.push_back(drawCircle(*overhang_point.branching_overhang_point, int(radius)));
+            if (overhang_point->branching_overhang_point != NULL)
+                circle_paths.push_back(drawCircle(*overhang_point->branching_overhang_point, int(radius)));
 
-            circle_paths.push_back(drawCircle(overhang_point, int(radius)));
+            circle_paths.push_back(drawCircle(*overhang_point, int(radius)));
 
-            overhang_point.height += cfg->layer_height;
+            overhang_point->height += cfg->layer_height;
 
+            if (checkInclusion(slice, *overhang_point)){
+                qDebug() << "included" << overhang_point->position.Z;
+            }
             // check if reached shell
-            if (checkInclusion(slice, overhang_point) && overhang_point.height > 5){ // && overhang_point.position.Z > (layer_idx*cfg->layer_height+1)*cfg->resolution){
-                qDebug() << "reached end" << overhang_point.position.Z << layer_idx*cfg->layer_height*cfg->resolution;
-                overhang_point.position.Z = -1; // finish flag
-            }
+            /*if (checkInclusion(slice, *overhang_point) && overhang_point->height > 5){
+                qDebug() << "reached end" << overhang_point->position.Z << layer_idx*cfg->layer_height*cfg->resolution;
+                overhang_point->position.Z = -1; // finish flag
+                overhang_point->exist = false;
+            }*/
 
-            if (overhang_point.branching_overhang_point != NULL){
-                if (checkInclusion(slice, *overhang_point.branching_overhang_point)){
-                    overhang_point.branchable = true;
-                    overhang_point.target_branching_overhang_point->branchable = true;
-                    overhang_point.target_branching_overhang_point = NULL;
-                    overhang_point.branching_overhang_point = NULL;
-                    overhang_point.unit_move = NULL;
+            if (overhang_point->branching_overhang_point != NULL){
+                if (checkInclusion(slice, *overhang_point->branching_overhang_point)){
+                    overhang_point->branchable = true;
+                    overhang_point->target_branching_overhang_point->branchable = true;
+                    overhang_point->target_branching_overhang_point = NULL;
+                    overhang_point->branching_overhang_point = NULL;
+                    overhang_point->unit_move = NULL;
                 }
             }
         }

@@ -8,7 +8,33 @@ KRaft::KRaft()
 
 void generateKRaft(Slices& slices){
     ClipperOffset co;
-    convexHull(slices);
+
+    Slice raft_slice;
+    Slice first_slice = slices[0];
+    Slice first_offset_slice;
+
+    co.AddPaths(first_slice.outershell, jtRound, etClosedPolygon);
+    co.Execute(first_offset_slice.outershell, cfg->raft_base_radius);
+
+    int layer_count = cfg->raft_thickness/cfg->layer_height;
+
+    for (int layer_idx=0; layer_idx*cfg->layer_height<cfg->raft_thickness; layer_idx ++){
+        qDebug() << "generating raft " << layer_idx << layer_count << layer_idx*cfg->layer_height;
+
+        raft_slice.outershell.clear();
+
+        int raft_offset = abs(layer_idx-layer_count/2)*(cfg->raft_offset_radius*2/layer_count);
+
+        if (raft_offset == 0){ // if offset is 0, errors
+            raft_slice.outershell = first_offset_slice.outershell;
+            //raft_slice.outershell.push_back(slices.raft_points);
+        } else {
+            co.AddPaths(first_offset_slice.outershell, jtRound, etClosedPolygon);
+            co.Execute(raft_slice.outershell, raft_offset);
+        }
+        slices.insert(slices.begin(), raft_slice);
+    }
+    /*convexHull(slices);
 
     int layer_count = cfg->raft_thickness/cfg->layer_height;
 
@@ -30,7 +56,7 @@ void generateKRaft(Slices& slices){
         //raft_slice.outershell.push_back();
         slices.insert(slices.begin(), raft_slice);
 
-    }
+    }*/
 
     qDebug() << "slices size :" << slices.size();
 }

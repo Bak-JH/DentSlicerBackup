@@ -227,8 +227,18 @@ Paths Slicer::contourConstruct(Paths pathList){
 void Slice::outerShellOffset(float delta, JoinType join_type){
     ClipperOffset co;
 
+    /*
+    for (int path_idx=0; path_idx < outershell.size(); path_idx ++){
+        Path p = outershell[path_idx];
+        Path temp_p;
+        co.AddPath(p, join_type, etClosedPolygon);
+        co.Execute(temp_p, delta);
+    }*/
+
+
     co.AddPaths(outershell, join_type, etClosedPolygon);
     co.Execute(outershell, delta);
+
 
     return;
 }

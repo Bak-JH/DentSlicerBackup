@@ -29,13 +29,13 @@ public:
     float nozzle_width = 0; // in mm (diameter) , for printers with nozzles
     float wall_thickness = 2; // in mm
     float fill_thickness = 1; // in mm
-    float support_density = 0.3;
+    float support_density = 0.15;
     float infill_density = 0.3;
 
     float subdivision_radius = 0.85; // in mm
-    float duplication_radius = 3; // in mm
+    float duplication_radius = 4; // in mm
 
-    float default_support_radius = 1000 ; // in microns
+    float default_support_radius = 700 ; // in microns
     float branching_threshold_radius = 4000; // in microns
     int branchable_overhang_point_cnt = 4;
 
@@ -50,6 +50,7 @@ public:
 
     // raft settings
     float raft_thickness = 3;
+    int raft_base_radius = 3000;
     int raft_offset_radius = 1800; // in microns
 
     // set configuration

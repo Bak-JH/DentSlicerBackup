@@ -32,8 +32,8 @@ public:
 
 class OverhangPoint {
 public:
-    OverhangPoint(int x=0, int y=0, int z=0, int radius=0) : prev_position(x, y, z), position(x, y, z), radius(radius){}
-    IntPoint prev_position;
+    OverhangPoint(int x=0, int y=0, int z=0, int radius=0) : position(x, y, z), radius(radius){}
+    bool exist= true;
     IntPoint position;
     float height = 0; // in mm
     int radius;
