@@ -22,5 +22,6 @@
         <file>LeftTabSlicingOption.qml</file>
         <file>UpperButton.qml</file>
         <file>RectTest.qml</file>
+        <file>MeshTransformerTab.qml</file>
     </qresource>
 </RCC>

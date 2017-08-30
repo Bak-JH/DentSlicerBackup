@@ -47,7 +47,24 @@ Entity {
             ambient: Qt.rgba(255/255,0/255,0/255,1.0)
 
         }
+        /*
+        ObjectPicker{
+            id : torusXpicker
+            hoverEnabled: true
+            onEntered: {
+                torusXMaterial.ambient = Qt.rgba(255/255,255/255,0/255,1.0)
+                console.log("xin")
+            }
 
+            onExited: {
+                torusXMaterial.ambient = Qt.rgba(255/255,0/255,0/255,1.0)
+                console.log("xout")
+            }
+            onContainsMouseChanged: {
+                console.log("cxfcfccfcfcf");
+            }
+        }
+        */
         components: [ torusXMesh, torusXMaterial, torusXTransform]
     }
 
@@ -95,6 +112,24 @@ Entity {
             ambient: Qt.rgba(0/255,0/255,255/255,1.0)
         }
 
-        components: [ torusZMesh, torusZMaterial, torusZTransform]
+        property ObjectPicker objectPickerTT: ObjectPicker{
+             hoverEnabled: true
+             onContainsMouseChanged: {
+                 console.log("enenenenter ====" + containsMouse)
+             }
+
+             onEntered: {
+                 console.log("enenenenter")
+                 torusZMaterial.ambient = Qt.rgba(255/255,0/255,0/255,1.0)
+             }
+
+             onExited: {
+                    console.log("clclclikck")
+                    torusZMaterial.ambient = Qt.rgba(0/255,0/255,255/255,1.0)
+             }
+         }
+
+
+        components: [ torusZMesh, torusZMaterial, torusZTransform,objectPickerTT]
     }
 }

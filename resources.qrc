@@ -1,6 +1,5 @@
 <RCC>
     <qresource prefix="/">
-        <file>Resource/triangle.png</file>
         <file>resource/zoom.png</file>
         <file>resource/triangle.png</file>
         <file>resource/upper_arrange.png</file>
@@ -18,5 +17,13 @@
         <file>resource/upper_scale.png</file>
         <file>resource/upper_shelloffset.png</file>
         <file>resource/upper_support.png</file>
+        <file>resource/model_delete.png</file>
+        <file>resource/model_delete_select.png</file>
+        <file>resource/model_move.png</file>
+        <file>resource/model_move_select.png</file>
+        <file>resource/model_rotate.png</file>
+        <file>resource/model_rotate_select.png</file>
+        <file>resource/model_zoom.png</file>
+        <file>resource/model_zoom_select.png</file>
     </qresource>
 </RCC>

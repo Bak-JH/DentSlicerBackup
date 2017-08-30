@@ -32,7 +32,7 @@ Rectangle {
 
         Image{
             id : arrow
-            source: "qrc:/Resource/triangle.png"
+            source: "qrc:/resource/triangle.png"
             width : 12
             height : 10
 

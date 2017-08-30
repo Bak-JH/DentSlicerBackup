@@ -71,7 +71,7 @@ ApplicationWindow {
         anchors.bottomMargin: 100
     }
 
-    RectTest{
+    MeshTransformerTab{
         id:rt
         anchors.left : scene3d.left
         anchors.top:scene3d.top
@@ -80,5 +80,6 @@ ApplicationWindow {
         anchors.topMargin: 400
 
     }
+
 
 }
