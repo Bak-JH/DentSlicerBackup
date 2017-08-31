@@ -11,8 +11,8 @@ void SVGexporter::exportSVG(Slices contourLists, QString outfoldername){
     QJsonObject jsonObject;
     jsonObject["layer_height"] = round(cfg->layer_height*100)/100;
     jsonObject["total_layer"] = int(contourLists.size());
-    jsonObject["bed_curing_time"] = 5000; // depends on cfg->resin_type
-    jsonObject["curing_time"] = 2500; // depends on cfg->resin_type
+    jsonObject["bed_curing_time"] = 15000; // depends on cfg->resin_type
+    jsonObject["curing_time"] = 2100; // depends on cfg->resin_type
     jsonObject["mirror_rot_time"] = 2000;
     QJsonDocument jsonDocument(jsonObject);
     QByteArray jsonBytes = jsonDocument.toJson();

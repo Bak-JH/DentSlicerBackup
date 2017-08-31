@@ -125,11 +125,7 @@ void generateKBranch(Slices& slices){
                 overhang_point->branchTo(IntPoint(total_move.X, total_move.Y, overhang_point->position.Z));
                 float distance = pointDistance(overhang_point->branching_overhang_point->position, overhang_point->target_branching_overhang_point->position);
 
-                if (prev_distance < distance){
-                    qDebug() << "ironic" << prev_distance << distance;
-                    qDebug() << "length of unit move" << sqrt(pow(overhang_point->unit_move.X,2)+pow(overhang_point->unit_move.Y,2));
-                }
-                if (distance <= cfg->default_support_radius){ // branch reached another stem
+                if (distance <= 2*cfg->layer_height*cfg->resolution){ // branch reached another stem
                     overhang_point->branchable = true;
                     overhang_point->target_branching_overhang_point->branchable = true;
                     overhang_point->target_branching_overhang_point = NULL;
@@ -142,6 +138,13 @@ void generateKBranch(Slices& slices){
 
         stem:
             // route stem if no intersection
+
+            if (checkInclusion(slice, *overhang_point)){
+                //qDebug() << "reached end" << overhang_point->position.Z << layer_idx*cfg->layer_height*cfg->resolution;
+                continue;
+                //overhang_point->position.Z = -1; // finish flag
+                //overhang_point->exist = false;
+            }
 
             if (overhang_point->height < (2-0.4))
                 radius = cfg->default_support_radius*(overhang_point->height/2 + 0.4);
@@ -156,11 +159,11 @@ void generateKBranch(Slices& slices){
 
             overhang_point->height += cfg->layer_height;
 
-            if (checkInclusion(slice, *overhang_point)){
+            /*if (checkInclusion(slice, *overhang_point)){
                 qDebug() << "included" << overhang_point->position.Z;
-            }
+            }*/
             // check if reached shell
-            /*if (checkInclusion(slice, *overhang_point) && overhang_point->height > 5){
+            /*if (checkInclusion(slice, *overhang_point) && overhang_point->height > 5){// && overhang_point->height > cfg->layer_height){
                 qDebug() << "reached end" << overhang_point->position.Z << layer_idx*cfg->layer_height*cfg->resolution;
                 overhang_point->position.Z = -1; // finish flag
                 overhang_point->exist = false;

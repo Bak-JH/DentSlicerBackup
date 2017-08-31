@@ -33,7 +33,7 @@ public:
     float infill_density = 0.3;
 
     float subdivision_radius = 0.85; // in mm
-    float duplication_radius = 4; // in mm
+    float duplication_radius = 5; // in mm
 
     float default_support_radius = 700 ; // in microns
     float branching_threshold_radius = 4000; // in microns

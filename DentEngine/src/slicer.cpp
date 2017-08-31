@@ -235,11 +235,15 @@ void Slice::outerShellOffset(float delta, JoinType join_type){
         co.Execute(temp_p, delta);
     }*/
 
+    /*Paths temp_outershell;
+
+    co.AddPaths(outershell, join_type, etClosedPolygon);
+    co.Execute(temp_outershell, delta);
+
+    outershell = temp_outershell;*/
 
     co.AddPaths(outershell, join_type, etClosedPolygon);
     co.Execute(outershell, delta);
-
-
     return;
 }
 
