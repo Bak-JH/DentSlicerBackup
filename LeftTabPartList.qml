@@ -1,8 +1,9 @@
 import QtQuick 2.0
 
 Rectangle {
+    property real originalHeight: 350
     width : 260
-    height : 350
+    height : originalHeight
 
     color: "transparent"
 
@@ -78,7 +79,7 @@ Rectangle {
             name:"open"
             PropertyChanges { target: arrow; rotation:0 }
             PropertyChanges { target: content; visible:true }
-            PropertyChanges { target: ltpl; height : 364 }
+            PropertyChanges { target: ltpl; height : originalHeight }
         },
         State{
             name:"close"

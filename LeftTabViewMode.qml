@@ -1,11 +1,13 @@
 import QtQuick 2.0
 
 import QtQuick.Controls 1.2
+import QtQuick.Controls.Styles 1.4
 import QtQuick.Layouts 1.3
 
 Rectangle {
+    property real originalHeight: 140
     width : 260
-    height : 180
+    height : originalHeight
 
     color : "transparent"
 
@@ -58,32 +60,86 @@ Rectangle {
         anchors.left : parent.left
         anchors.top :  tab.bottom
 
-        color:"Transparent"
-        GroupBox {
-            //title: "Tab Position"
+        color: "transparent"
+
+        Item{
             width: parent.width
             height: parent.height
             anchors.left: parent.left
             anchors.top : parent.top
+            anchors.leftMargin: 16
+            anchors.topMargin: 18
 
             ColumnLayout {
                 spacing: 10
-                ExclusiveGroup { id: tabPositionGroup }
+
+                ExclusiveGroup { id: viewModeGroup }
                 RadioButton {
                     text: "Object View"
                     checked: true
-                    exclusiveGroup: tabPositionGroup
+                    exclusiveGroup: viewModeGroup
+
+                    style: RadioButtonStyle {
+                        indicator: Rectangle {
+                            implicitWidth: 16
+                            implicitHeight: 16
+                            radius: 9
+                            border.color: control.activeFocus ? "darkblue" : "gray"
+                            border.width: 0
+                            Rectangle {
+                                anchors.fill: parent
+                                visible: control.checked
+                                color: "#505A5E"
+                                radius: 9
+                                anchors.margins: 4
+                            }
+                        }
+                    }
                 }
                 RadioButton {
                     text: "Support View"
-                    exclusiveGroup: tabPositionGroup
+                    exclusiveGroup: viewModeGroup
+                    style: RadioButtonStyle {
+                        indicator: Rectangle {
+                            implicitWidth: 16
+                            implicitHeight: 16
+                            radius: 9
+                            border.color: control.activeFocus ? "darkblue" : "gray"
+                            border.width: 0
+                            Rectangle {
+                                anchors.fill: parent
+                                visible: control.checked
+                                color: "#505A5E"
+                                radius: 9
+                                anchors.margins: 4
+                            }
+                        }
+                    }
                 }
                 RadioButton {
                     text: "Layer View"
-                    exclusiveGroup: tabPositionGroup
+                    exclusiveGroup: viewModeGroup
+                    style: RadioButtonStyle {
+                        indicator: Rectangle {
+                            implicitWidth: 16
+                            implicitHeight: 16
+                            radius: 9
+                            border.color: control.activeFocus ? "darkblue" : "gray"
+                            border.width: 0
+                            Rectangle {
+                                anchors.fill: parent
+                                visible: control.checked
+                                color: "#505A5E"
+                                radius: 9
+                                anchors.margins: 4
+                            }
+                        }
+                    }
                 }
             }
         }
+
+
     }
 
     states: [
@@ -91,7 +147,7 @@ Rectangle {
             name:"open"
             PropertyChanges { target: arrow; rotation:0 }
             PropertyChanges { target: content; visible:true }
-            PropertyChanges { target: ltvm; height : 180 }
+            PropertyChanges { target: ltvm; height : originalHeight }
 
         },
         State{

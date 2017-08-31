@@ -6,7 +6,7 @@ import QtQuick.Controls 1.0
 import QtQuick.Controls.Styles 1.0
 
 Rectangle {
-    color: "#E2E1E1"
+    color: "#EFEFEF"
     /*
     Rectangle{
         anchors.fill: parent

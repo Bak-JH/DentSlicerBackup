@@ -27,7 +27,7 @@ ApplicationWindow {
     UpperTab{
         id : uppertab
         width : parent.width
-        height: 120
+        height: 116
 
         anchors.top: parent.top
         anchors.left: parent.left

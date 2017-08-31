@@ -20,7 +20,7 @@ Rectangle {
 
     Rectangle{
         id : bottomine
-        height: 4
+        height: 3
         width: parent.width
         //anchors.fill: parent
 

@@ -46,7 +46,7 @@ Rectangle {
 
             MouseArea {
                     anchors.fill: parent
-                    onClicked: { ltvm.state == 'open' ? ltvm.state = "close" : ltvm.state = 'open';}
+                    onClicked: { ltso.state == 'open' ? ltso.state = "close" : ltso.state = 'open';}
             }
         }
     }
@@ -59,25 +59,37 @@ Rectangle {
         anchors.top :  tab.bottom
 
         color:"Transparent"
-        GroupBox {
-            title: "Tab Position"
+        Item {
+            width: parent.width
+            height: parent.height
+            anchors.left: parent.left
+            anchors.top : parent.top
+            //anchors.leftMargin: 16
+            anchors.topMargin: 18
 
             ColumnLayout {
+                spacing: 8
+                LeftTabSlicingOptionElement{
 
-                ExclusiveGroup { id: tabPositionGroup }
-                RadioButton {
+                }
+                LeftTabSlicingOptionElement{
 
-                    text: "Object View"
-                    checked: true
-                    exclusiveGroup: tabPositionGroup
                 }
-                RadioButton {
-                    text: "Support View"
-                    exclusiveGroup: tabPositionGroup
+                LeftTabSlicingOptionElement{
+
                 }
-                RadioButton {
-                    text: "Layer View"
-                    exclusiveGroup: tabPositionGroup
+                LeftTabSlicingOptionElement{
+
+                }
+
+                ComboBox {
+                    model:["test1","test2","test3"]
+                }
+                ComboBox {
+                    model:["test1","test2","test3"]
+                }
+                ComboBox {
+                    model:["test1","test2","test3"]
                 }
             }
         }
