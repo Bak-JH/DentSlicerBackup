@@ -18,7 +18,8 @@ Rectangle{
         anchors.topMargin: 16;
         text: iconText
         font.pixelSize: 16
-        font.bold: true
+        //font.bold: true
+        font.family: "Arial"
         color: "#494949"
     }
 

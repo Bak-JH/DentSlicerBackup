@@ -1,5 +1,9 @@
 import QtQuick 2.0
 
+import QtQuick.Controls 1.2
+import QtQuick.Controls.Styles 1.4
+import QtQuick.Layouts 1.3
+
 Rectangle {
     property real originalHeight: 350
     width : 260
@@ -69,6 +73,33 @@ Rectangle {
             anchors.topMargin: 12
 
             color : "#F9F9F9"
+            border.width: 1
+            border.color:"#C6C6C6"
+            Item {
+                width: parent.width
+                height: parent.height
+                anchors.left: parent.left
+                anchors.top : parent.top
+                //anchors.leftMargin: 16
+
+                ColumnLayout {
+                    spacing:0
+                    LeftTabPartListElement{
+                        modelName :"tttttt"
+                        state: "on"
+                    }
+                    LeftTabPartListElement{
+                        modelName :"cc"
+                        state: "off"
+                    }
+                    LeftTabPartListElement{
+                        modelName :"tttaasat"
+                        state: "off"
+                    }
+                }
+            }
+
+
         }
     }
 

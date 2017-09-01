@@ -21,6 +21,7 @@ Item {
         font.bold: true
         anchors.leftMargin:16
         text:"aaaaa"
+        font.family: "Arial"
 
     }
 
@@ -43,6 +44,7 @@ Item {
                 anchors.leftMargin: 10
 
                 font.pixelSize: 14
+                font.family: "Arial"
                 //font.family: "Courier"
                 //font.capitalization: Font.SmallCaps
                 color: "black"

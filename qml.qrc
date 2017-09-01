@@ -24,5 +24,6 @@
         <file>RectTest.qml</file>
         <file>MeshTransformerTab.qml</file>
         <file>LeftTabSlicingOptionElement.qml</file>
+        <file>LeftTabPartListElement.qml</file>
     </qresource>
 </RCC>
