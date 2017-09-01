@@ -25,5 +25,6 @@
         <file>MeshTransformerTab.qml</file>
         <file>LeftTabSlicingOptionElement.qml</file>
         <file>LeftTabPartListElement.qml</file>
+        <file>SlicingData.qml</file>
     </qresource>
 </RCC>
