@@ -25,7 +25,7 @@ Item {
             text:"VIEW"
             anchors.top : parent.top
             anchors.horizontalCenter: parent.horizontalCenter
-            anchors.topMargin: 8
+            anchors.topMargin: 6
 
             font.family: "Arial"
             font.pixelSize: 12

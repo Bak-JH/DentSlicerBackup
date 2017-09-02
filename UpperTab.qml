@@ -40,6 +40,63 @@ Rectangle {
         anchors.right : parent.right
         anchors.bottom: bottomine.top
         color: "#CECECE"
+
+        Text{
+            id : firsttabname
+            width : buttonWidth * 3 + 2
+            height: parent.height
+            anchors.left : parent.left
+            anchors.bottom: parent.bottom
+
+            text : "FILE"
+            horizontalAlignment: Text.AlignHCenter
+            verticalAlignment: Text.AlignVCenter
+            font.family: "Arial"
+            font.pixelSize: 12
+            color: "#636363"
+        }
+        Text{
+            id : secondtabname
+            width : buttonWidth * 5 + 2
+            height: parent.height
+            anchors.left : firsttabname.right
+            anchors.bottom: parent.bottom
+
+            text : "POSITION"
+            horizontalAlignment: Text.AlignHCenter
+            verticalAlignment: Text.AlignVCenter
+            font.family: "Arial"
+            font.pixelSize: 12
+            color: "#636363"
+        }
+        Text{
+            id : thirdtabname
+            width : buttonWidth * 4 + 2
+            height: parent.height
+            anchors.left : secondtabname.right
+            anchors.bottom: parent.bottom
+
+            text : "MODIFY"
+            horizontalAlignment: Text.AlignHCenter
+            verticalAlignment: Text.AlignVCenter
+            font.family: "Arial"
+            font.pixelSize: 12
+            color: "#636363"
+        }
+        Text{
+            id : fourthtabname
+            width : buttonWidth * 3 + 2
+            height: parent.height
+            anchors.left : thirdtabname.right
+            anchors.bottom: parent.bottom
+
+            text : "EDIT"
+            horizontalAlignment: Text.AlignHCenter
+            verticalAlignment: Text.AlignVCenter
+            font.family: "Arial"
+            font.pixelSize: 12
+            color: "#636363"
+        }
     }
 
     Item{
@@ -49,7 +106,7 @@ Rectangle {
 
         anchors.left : parent.left
         anchors.top : parent.top
-        anchors.bottom : parent.bottom
+        //anchors.bottom : parent.bottom
 
         //color: "transparent"
         UpperButton{
