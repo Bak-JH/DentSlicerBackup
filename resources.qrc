@@ -27,5 +27,12 @@
         <file>resource/model_zoom_select.png</file>
         <file>resource/part_off.png</file>
         <file>resource/part_on.png</file>
+        <file>resource/slicing_clock.png</file>
+        <file>resource/slicing_layer.png</file>
+        <file>resource/slicing_size.png</file>
+        <file>resource/slicing_volume.png</file>
+        <file>resource/view.png</file>
+        <file>resource/view_background.png</file>
+        <file>resource/slicing_refresh.png</file>
     </qresource>
 </RCC>

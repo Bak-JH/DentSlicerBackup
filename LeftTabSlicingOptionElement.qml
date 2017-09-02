@@ -9,6 +9,9 @@ Item {
     width: parent.width
     height: 24
 
+    property string columnName
+    property var columnContents :[]
+
 
 
     Text{
@@ -20,7 +23,7 @@ Item {
         font.pixelSize: 14
         font.bold: true
         anchors.leftMargin:16
-        text:"aaaaa"
+        text: columnName
         font.family: "Arial"
 
     }
@@ -30,7 +33,7 @@ Item {
         height: parent.height
         anchors.left: text.right
         anchors.top : parent.top
-        model:["test1","test2","test3"]
+        model:columnContents
 
         style: ComboBoxStyle {
 

@@ -63,14 +63,28 @@ ApplicationWindow {
         MainView {id: sceneRoot}
     }
 
-
+    /*
     MeshTransformerZoom{
         anchors.right: parent.right
         anchors.bottom: parent.bottom
         anchors.rightMargin: 100
         anchors.bottomMargin: 100
+    }*/
+
+    ViewChange{
+        anchors.top : scene3d.top
+        anchors.right : scene3d.right
+        anchors.topMargin: 32
+        anchors.rightMargin: 32
     }
 
+
+    SlicingData{
+        anchors.right: parent.right
+        anchors.bottom: parent.bottom
+        anchors.rightMargin: 22
+        anchors.bottomMargin: 22
+    }
     MeshTransformerTab{
         id:rt
         anchors.left : scene3d.left
@@ -78,8 +92,8 @@ ApplicationWindow {
 
         anchors.leftMargin: 400
         anchors.topMargin: 400
-
     }
+
 
 
 }

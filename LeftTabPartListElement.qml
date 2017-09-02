@@ -2,7 +2,7 @@ import QtQuick 2.0
 
 Item {
     width: 232
-    height: 22
+    height: 28
 
     property string modelName
 
@@ -53,6 +53,7 @@ Item {
         anchors.leftMargin: 10
 
         font.family: "Arial"
+        font.pixelSize: 14
 
     }
 

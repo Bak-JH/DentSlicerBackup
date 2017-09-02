@@ -70,27 +70,27 @@ Rectangle {
             ColumnLayout {
                 spacing: 8
                 LeftTabSlicingOptionElement{
+                    columnName: "Resolution"
+                    columnContents: ["1920*1080","1024*768"]
 
                 }
                 LeftTabSlicingOptionElement{
-
+                    columnName: "Layer height"
+                    columnContents: ["0.1","0.2","0.05"]
                 }
                 LeftTabSlicingOptionElement{
-
+                    columnName: "Support"
+                    columnContents: ["k-branch","general"]
                 }
                 LeftTabSlicingOptionElement{
-
+                    columnName: "Infill"
+                    columnContents: ["general","full","none"]
+                }
+                LeftTabSlicingOptionElement{
+                    columnName: "Raft"
+                    columnContents: ["general","none"]
                 }
 
-                ComboBox {
-                    model:["test1","test2","test3"]
-                }
-                ComboBox {
-                    model:["test1","test2","test3"]
-                }
-                ComboBox {
-                    model:["test1","test2","test3"]
-                }
             }
         }
     }

@@ -75,7 +75,8 @@ Rectangle {
 
                 ExclusiveGroup { id: viewModeGroup }
                 RadioButton {
-                    text: "Object View"
+                    //text: "Object View"
+
                     checked: true
                     exclusiveGroup: viewModeGroup
 
@@ -93,6 +94,14 @@ Rectangle {
                                 radius: 9
                                 anchors.margins: 4
                             }
+                        }
+                        label: Text {
+                            text: "Object View"
+                            anchors.left : parent.left
+                            anchors.leftMargin: 10
+
+                            font.family: "Arial"
+                            font.pixelSize: 14
                         }
                     }
                 }
@@ -114,10 +123,18 @@ Rectangle {
                                 anchors.margins: 4
                             }
                         }
+                        label: Text {
+                            text: "Support View"
+                            anchors.left : parent.left
+                            anchors.leftMargin: 10
+
+                            font.family: "Arial"
+                            font.pixelSize: 14
+                        }
                     }
                 }
                 RadioButton {
-                    text: "Layer View"
+                    //text: "Layer View"
                     exclusiveGroup: viewModeGroup
                     style: RadioButtonStyle {
                         indicator: Rectangle {
@@ -133,6 +150,14 @@ Rectangle {
                                 radius: 9
                                 anchors.margins: 4
                             }
+                        }
+                        label: Text {
+                            text: "Layer View"
+                            anchors.left : parent.left
+                            anchors.leftMargin: 10
+
+                            font.family: "Arial"
+                            font.pixelSize: 14
                         }
                     }
                 }
