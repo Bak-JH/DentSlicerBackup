@@ -71,6 +71,13 @@ ApplicationWindow {
         anchors.bottomMargin: 100
     }*/
 
+    ViewChange{
+        anchors.top : scene3d.top
+        anchors.right : scene3d.right
+        anchors.topMargin: 32
+        anchors.rightMargin: 32
+    }
+
 
     SlicingData{
         anchors.right: parent.right
