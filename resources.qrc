@@ -34,5 +34,12 @@
         <file>resource/view.png</file>
         <file>resource/view_background.png</file>
         <file>resource/slicing_refresh.png</file>
+        <file>resource/view_back.png</file>
+        <file>resource/view_bottom.png</file>
+        <file>resource/view_center.png</file>
+        <file>resource/view_front.png</file>
+        <file>resource/view_left.png</file>
+        <file>resource/view_right.png</file>
+        <file>resource/view_up.png</file>
     </qresource>
 </RCC>

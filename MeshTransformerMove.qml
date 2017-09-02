@@ -15,15 +15,35 @@ Entity {
         Transform {
             id: arrowTransform
             translation: center
-            scale3D: Qt.vector3d(1,1,1)
+            scale3D: Qt.vector3d(0.2,0.2,0.2)
         }
         PhongAlphaMaterial{
-            id: arrowMaterial
+            id: arrowXMaterial
             ambient: Qt.rgba(255/255,255/255,0/255,1.0)
             alpha: 0.8
         }
 
-        components: [ arrowMesh, arrowMaterial, arrowTransform]
+        ObjectPicker{
+            id : arrowXpicker
+            hoverEnabled: true
+            onEntered: {
+                arrowXMaterial.ambient = Qt.rgba(80/255,80/255,80/255,1.0)
+                console.log("inX")
+            }
+
+            onExited: {
+                arrowXMaterial.ambient = Qt.rgba(255/255,255/255,0/255,1.0)
+                console.log("outX")
+            }
+            onClicked: {
+                console.log("clickX")
+            }
+            onReleased: {
+                console.log("releaseX")
+            }
+        }
+
+        components: [ arrowMesh, arrowXMaterial, arrowTransform, arrowXpicker]
     }
 
     Entity {
@@ -35,7 +55,7 @@ Entity {
         Transform {
             id: arrowYTransform
             translation: center
-            scale3D: Qt.vector3d(1,1,1)
+            scale3D: Qt.vector3d(0.2,0.2,0.2)
             rotation: fromAxisAndAngle(Qt.vector3d(0,0, 1), 90)
         }
         PhongAlphaMaterial{
@@ -43,25 +63,29 @@ Entity {
             ambient: Qt.rgba(0/255,255/255,0/255,1.0)
             alpha: 0.8
         }
-        /*
+
         ObjectPicker{
             id : arrowYpicker
             hoverEnabled: true
             onEntered: {
-                arrowYMaterial.ambient = Qt.rgba(255/255,0/255,0/255,1.0)
-                console.log("in")
+                arrowYMaterial.ambient = Qt.rgba(80/255,80/255,80/255,1.0)
+                console.log("inY")
             }
 
             onExited: {
                 arrowYMaterial.ambient = Qt.rgba(0/255,255/255,0/255,1.0)
-                console.log("out")
+                console.log("outY")
             }
-            onContainsMouseChanged: {
-                console.log("cfcfccfcfcf");
+            onClicked: {
+                console.log("clickY")
             }
+            onReleased: {
+                console.log("releasey")
+            }
+
         }
-        */
-        components: [ arrowYMesh, arrowYMaterial, arrowYTransform]
+
+        components: [ arrowYMesh, arrowYMaterial, arrowYTransform, arrowYpicker]
     }
 
 }

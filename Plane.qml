@@ -151,7 +151,7 @@ Entity {
         components: [ planeTitleMesh, planeMaterial, planeTitleTransform ]
     }
 
-    MeshTransformerRotate{}
+    //MeshTransformerRotate{}
     MeshTransformerMove{}
 
 

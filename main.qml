@@ -57,6 +57,7 @@ ApplicationWindow {
         height: 400
         anchors.margins: 10*/
         focus: true
+        hoverEnabled: true
         aspects: ["input", "logic"]
         cameraAspectRatioMode: Scene3D.AutomaticAspectRatio
 

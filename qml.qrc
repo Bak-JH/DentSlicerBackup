@@ -28,5 +28,6 @@
         <file>SlicingData.qml</file>
         <file>ViewChange.qml</file>
         <file>SlicingDataElement.qml</file>
+        <file>ViewButton.qml</file>
     </qresource>
 </RCC>
