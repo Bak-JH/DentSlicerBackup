@@ -4,8 +4,12 @@ QT += qml quick
 
 CONFIG += c++11
 
+TARGET = DentStudio
+
 SOURCES += main.cpp \
-    quaternionhelper.cpp
+    quaternionhelper.cpp \
+    slicingengine.cpp \
+    configuration.cpp
 
 RESOURCES += qml.qrc \
     resources.qrc
@@ -30,4 +34,6 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
 HEADERS += \
-    quaternionhelper.h
+    quaternionhelper.h \
+    slicingengine.h \
+    configuration.h

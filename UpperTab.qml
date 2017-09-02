@@ -54,7 +54,7 @@ Rectangle {
         //color: "transparent"
         UpperButton{
             id : first_tab_button_open
-
+            objectName : "open"
             anchors.left: parent.left
             iconSource: "qrc:/resource/upper_open.png"
             iconText: "Open"
@@ -86,11 +86,6 @@ Rectangle {
             anchors.bottom : tabgroupname.top
 
             color : "#CECECE"
-        }
-
-        MouseArea{
-            anchors.fill: parent
-            onClicked: {openFile()}
         }
     }
 
