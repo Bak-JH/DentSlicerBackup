@@ -41,5 +41,6 @@
         <file>resource/view_left.png</file>
         <file>resource/view_right.png</file>
         <file>resource/view_up.png</file>
+        <file>resource/combo_arrow.png</file>
     </qresource>
 </RCC>

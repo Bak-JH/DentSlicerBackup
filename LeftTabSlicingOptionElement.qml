@@ -35,6 +35,18 @@ Item {
         anchors.top : parent.top
         model:columnContents
 
+        Image{
+            id : arrow
+
+            width: 10
+            height: 6
+            anchors.right: parent.right
+            anchors.verticalCenter: parent.verticalCenter
+            anchors.rightMargin: 8
+
+            source : "qrc:/resource/combo_arrow.png"
+        }
+
         style: ComboBoxStyle {
 
             background: Rectangle {

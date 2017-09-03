@@ -75,6 +75,7 @@ Entity {
                 //clearColor: "transparent"
                 clearColor: "#EAEAEA"
             }
+            pickingSettings.pickMethod: PickingSettings.TrianglePicking
 
         },
 
