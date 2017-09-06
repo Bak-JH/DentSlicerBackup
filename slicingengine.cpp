@@ -19,13 +19,13 @@ void SlicingEngine::slice (QVariantMap config){
 
 
     QObject *parent;
-    QString program = "D:/Dev/DLPSlicer/build-DLPslicer-Desktop_Qt_5_8_0_MinGW_32bit-Debug/DentStudioEngine/DentStudioEngine.exe";
-    qDebug() << QDir::currentPath();
-    QStringList arguments;
-    //arguments << (*cfg)["inputfilepath"].toString() << (*cfg)["outputfilepath"].toString();
-    //arguments << "C:/Users/diridiri/Desktop/DLP/lowerjaw.STL" << "C:/Users/diridiri/Desktop/DLP/output";
+    QString program = "C:/Users/diridiri/Desktop/DLP/DLPbuild/debug/DentStudioEngine.exe"; //"D:/Dev/DLPSlicer/build-DLPslicer-Desktop_Qt_5_8_0_MinGW_32bit-Debug/DentStudioEngine/DentStudioEngine.exe";
+    QStringList command_list;
+    command_list << program << (*cfg)["inputfilepath"].toString() << (*cfg)["outputfilepath"].toString() << "&";
 
-    QProcess *slicing_process = new QProcess(parent);
-    qDebug() << slicing_process->startDetached(program, arguments);
+    QString command = command_list.join(" ");
+    system(command.toStdString().c_str());
+    //QProcess *slicing_process = new QProcess(parent);
+    //qDebug() << slicing_process->startDetached(program, arguments);
     //slicing_process->waitForFinished();
 }

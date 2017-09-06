@@ -30,7 +30,7 @@ Rectangle{
 
         // do collecting things
         // configurations[key] = value;
-        configurations["inputfilepath"] = "C:/Users/diridiri/Desktop/DLP/lowerjaw.STL";
+        configurations["inputfilepath"] = "C:/Users/diridiri/Desktop/DLP/lowerjaw_13.STL";//"C:/Users/diridiri/Desktop/DLP/lowerjaw.STL";
         configurations["outputfilepath"] = "C:/Users/diridiri/Desktop/DLP/output";
 
         return configurations;
