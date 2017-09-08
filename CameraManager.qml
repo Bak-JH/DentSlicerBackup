@@ -1,6 +1,5 @@
 import QtQuick 2.0
 
-
 import Qt3D.Core 2.0
 import Qt3D.Render 2.0
 import Qt3D.Input 2.0
@@ -17,7 +16,10 @@ Entity {
     property real zCameraOffset: 0
 
     property vector3d defaultUp: Qt.vector3d(0, 0, 1)
+    property vector3d defaultDown: Qt.vector3d(0, 0, -1)
     property vector3d defaultCameraPosition: Qt.vector3d(40,0,40)
+    property vector3d orthoCameraPosition: Qt.vector3d(5000,0,5000)
+    property vector3d defaultCameraPosition2: Qt.vector3d(580,0,580)
     /*
     Entity {
         id: light // Light
@@ -41,12 +43,50 @@ Entity {
 
         projectionType: CameraLens.PerspectiveProjection
         fieldOfView: 45
-        nearPlane : 0.1
+        nearPlane : 1
         farPlane : 1000.0
+
+
 
         position: defaultCameraPosition
         upVector: defaultUp
         viewCenter: Qt.vector3d( 0, 0, 0 )
+
+        property vector3d temp : Qt.vector3d( 0.0, 0.0, 0.0 )
+    }
+    Camera {
+        id: cameratest
+
+        projectionType: CameraLens.OrthographicProjection
+        fieldOfView: 45
+        nearPlane : 1
+        farPlane : 500000.0
+
+        position: orthoCameraPosition
+        upVector: defaultUp
+        viewCenter: Qt.vector3d( 0, 0, 0 )
+
+        property vector3d temp : Qt.vector3d( 0.0, 0.0, 0.0 )
+    }
+
+    Camera {
+        id: camera2
+
+        projectionType: CameraLens.PerspectiveProjection
+        fieldOfView: 45
+        nearPlane : 0.1
+        farPlane : 100
+
+        position: defaultCameraPosition2
+        upVector: defaultUp
+        viewCenter: Qt.vector3d( 579.9, 0, 579.9 )
+        //aspectRatio: window.width/window.height
+        //aspectRatio: 1280/768
+        aspectRatio: scene3d.width/scene3d.height
+
+
+
+
 
         property vector3d temp : Qt.vector3d( 0.0, 0.0, 0.0 )
     }
@@ -70,17 +110,66 @@ Entity {
 
     components: [
         RenderSettings {
+            id : rd
+            pickingSettings.pickMethod: PickingSettings.TrianglePicking
+
+
+            activeFrameGraph: RenderSurfaceSelector {
+                //camera:camera2
+
+                Viewport {
+                    id: mainViewport
+                    normalizedRect: Qt.rect(0, 0, 1, 1)
+
+
+                    ClearBuffers {
+                        buffers: ClearBuffers.ColorDepthBuffer
+                        clearColor: Qt.rgba(0.6, 0.6, 0.6, 1.0)
+                    }
+
+
+                    Viewport {
+                        id: mainCam
+                        normalizedRect: Qt.rect(0, 0, 1, 1)
+                        CameraSelector {
+                            camera:camera
+
+                            ClearBuffers {
+                               buffers: ClearBuffers.ColorDepthBuffer
+                               clearColor: "#EAEAEA"
+                            }
+
+                        }
+                    }
+
+
+
+                    Viewport {
+                        id: supportCam
+                        normalizedRect: Qt.rect(0, 0, 1, 1)
+                        CameraSelector {
+                            camera:camera2
+
+                        }
+                    }
+
+
+
+                }
+            }
+
+            /*
             activeFrameGraph: ForwardRenderer {
                 camera: camera
                 //clearColor: "transparent"
                 clearColor: "#EAEAEA"
-            }
-            pickingSettings.pickMethod: PickingSettings.TrianglePicking
+            } //original
+            */
 
         },
 
 
-        InputSettings {     }
+        InputSettings {}
     ]
 
 
@@ -177,10 +266,19 @@ Entity {
         onPressed: {
 
             if (event.key === Qt.Key_T) {
-                camera.viewCenter = Qt.vector3d( xLookAtOffset, yLookAtOffset, zLookAtOffset )
-                camera.upVector = defaultUp
-
-
+                supportCam.normalizedRect = Qt.rect(0, 0, 0, 0);
+            }
+            if (event.key === Qt.Key_Y) {
+                supportCam.normalizedRect = Qt.rect(0, 0, 1, 1);
+            }
+            if (event.key === Qt.Key_H) {
+                console.log("ww wh" + Window.width + "   "  + Window.height + "  " + window.height + " " + window.width)
+            }
+            if (event.key === Qt.Key_N) {
+                rd.pickingSettings.pickMethod= PickingSettings.TrianglePicking
+            }
+            if (event.key === Qt.Key_M) {
+                rd.pickingSettings.pickMethod= PickingSettings.BoundingVolumePicking
             }
             if (event.key === Qt.Key_P) {
                 console.log("pos  " + camera.position + " / cent  " + camera.viewCenter + " / rot" + camera.upVector)

@@ -7,6 +7,7 @@ import "glcode.js" as GLCode
 import QtQuick.Dialogs 1.2
 ApplicationWindow {
     title: qsTr("DLPslicer")
+    id : window
     width: 1280
     height: 768
     visible: true
@@ -45,17 +46,28 @@ ApplicationWindow {
 
     }
 
+    Rectangle{
+        id : back
+        anchors.top : uppertab.bottom
+        anchors.left : lefttab.right
+        anchors.right : parent.right
+        anchors.bottom : parent.bottom
+        color: "white"
+    }
+
+
+
     Scene3D {
         id: scene3d
 
         //anchors.fill: parent
         anchors.top : uppertab.bottom
         anchors.left : lefttab.right
-        anchors.right : parent.right
-        anchors.bottom : parent.bottom
-        /*width: 600
-        height: 400
-        anchors.margins: 10*/
+        //anchors.right : parent.right
+        //anchors.bottom : parent.bottom
+        width: 1200
+        height: 800
+        //anchors.margins: 10
         focus: true
         hoverEnabled: true
         aspects: ["input", "logic"]
@@ -73,8 +85,8 @@ ApplicationWindow {
     }*/
 
     ViewChange{
-        anchors.top : scene3d.top
-        anchors.right : scene3d.right
+        anchors.top : uppertab.bottom
+        anchors.right : parent.right
         anchors.topMargin: 32
         anchors.rightMargin: 32
     }
@@ -95,6 +107,12 @@ ApplicationWindow {
         anchors.topMargin: 400
     }
 
+    function moveH(){
+        scene3d.anchors.leftMargin = scene3d.anchors.leftMargin + 1
+    }
 
+    function moveV(){
+        scene3d.anchors.topMargin = scene3d.anchors.topMargin + 1
+    }
 
 }

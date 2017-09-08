@@ -164,18 +164,23 @@ Entity {
                     viewVector = viewVector.times(zoom);
                     root.camera.position = root.camera.viewCenter.plus(viewVector);
                 } else if (moveAction.active) {
-                    root.camera.translate(Qt.vector3d(translationSpeed * -translateXAxis.value,
+                    /*root.camera.translate(Qt.vector3d(translationSpeed * -translateXAxis.value,
                                                       translationSpeed * -translateYAxis.value,
-                                                      0).times(dt));
+                                                      0).times(dt));*/
+
+                    window.moveH();
 
 
-                } /*else if (rotateAction.active) {
-                    root.camera.panAboutViewCenter(rotationSpeed * rotateXAxis.value * dt,Qt.vector3d( 0.0, 0.0, 1.0 ));
-                    root.camera.tiltAboutViewCenter(rotationSpeed * rotateYAxis.value * dt,Qt.vector3d( -1.0, 0.0, 0.0 ));
+
+                } else if (rotateAction.active) {
+                    //root.camera.panAboutViewCenter(rotationSpeed * rotateXAxis.value * dt,Qt.vector3d( 0.0, 0.0, 1.0 ));
+                    //root.camera.viewCenter = Qt.vector3d(0,0,50);
+                    root.camera.tiltAboutViewCenter(rotationSpeed * rotateYAxis.value*(-1) * dt,Qt.vector3d( -1.0, 0.0, 0.0 ));
+                    //root.camera.viewCenter = Qt.vector3d(0,0,0);
                     // lock the camera roll angle
                     root.camera.setUpVector(_originalUpVector);
 
-                }*/
+                }
             }
         }
     ]

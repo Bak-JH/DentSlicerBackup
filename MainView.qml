@@ -132,6 +132,9 @@ Entity {
                 inputSource:"file:///D:/Dev/DLPSlicer/DLPslicer/resource/mesh/lowerjaw.obj"
             }
         }
+
+        MeshTransformerRotate{}
+        MeshTransformerMove{}
     }
 
     MouseDevice {
@@ -185,10 +188,14 @@ Entity {
                 if (rotateAction.active) {
 
                     var target = axisAngle2Quaternion(rotationSpeed * rotateXAxis.value * dt,qq.rotatedVector(planeEntity.planeTransform.rotation,yup))
-                    var target2 = axisAngle2Quaternion(rotationSpeed * rotateYAxis.value * dt,ydown)
+
+                    /* two axis rotate
+                    //var target2 = axisAngle2Quaternion(rotationSpeed * rotateYAxis.value * dt,ydown)
+                    //target = qq.multiplyQuaternion(target,target2)
+                    */
 
                     //console.log("rtv " + qq.rotatedVector(planeTransform.rotation,ydown))
-                    target = qq.multiplyQuaternion(target,target2)
+
 
                     planeEntity.planeTransform.rotation = qq.multiplyQuaternion(target,planeEntity.planeTransform.rotation)
                     //planeTransform.rotation = qq.multiplyQuaternion(planeTransform.rotation,target)
@@ -196,7 +203,6 @@ Entity {
                 }
             }
         }
-
 
     ]
 
@@ -229,15 +235,27 @@ Entity {
             if (event.key === Qt.Key_L) {
                 meshTransform.rotation = Qt.quaternion(0.8,0,0,0.5)
             }
+            if (event.key === Qt.Key_W) {
+                scene3d.anchors.topMargin = scene3d.anchors.topMargin - 1
+            }
             if (event.key === Qt.Key_A) {
-                meshEntity4.testMesh.setSource("file:///D:/Dev/DLPSlicer/DLPslicer/resource/mesh/hix.obj");
-                //openFile();
+                scene3d.anchors.leftMargin = scene3d.anchors.leftMargin - 1
             }
             if (event.key === Qt.Key_S) {
-                meshEntity4.testMesh.setSource("file:///D:/Dev/DLPSlicer/DLPslicer/resource/mesh/lowerjaw.obj");
+                scene3d.anchors.topMargin = scene3d.anchors.topMargin + 1
             }
             if (event.key === Qt.Key_D) {
-                meshEntity4.testMesh.setSource("file:///D:/Dev/DLPSlicer/DLPslicer/resource/mesh/upperjaw.obj");
+                scene3d.anchors.leftMargin = scene3d.anchors.leftMargin + 1
+            }
+
+            if (event.key === Qt.Key_Q) {
+                scene3d.width = scene3d.width -2
+                scene3d.height = scene3d.height -1
+            }
+            if (event.key === Qt.Key_E) {
+                scene3d.width = scene3d.width +2
+                scene3d.height = scene3d.height +1
+
             }
         }
     }

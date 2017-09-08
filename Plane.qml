@@ -152,7 +152,7 @@ Entity {
     }
 
     //MeshTransformerRotate{}
-    MeshTransformerMove{}
+    //MeshTransformerMove{}
 
 
 
