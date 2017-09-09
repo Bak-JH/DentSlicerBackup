@@ -17,7 +17,7 @@ Entity {
 
     property vector3d defaultUp: Qt.vector3d(0, 0, 1)
     property vector3d defaultDown: Qt.vector3d(0, 0, -1)
-    property vector3d defaultCameraPosition: Qt.vector3d(40,0,40)
+    property vector3d defaultCameraPosition: Qt.vector3d(500,0,500)
     property vector3d orthoCameraPosition: Qt.vector3d(5000,0,5000)
     property vector3d defaultCameraPosition2: Qt.vector3d(580,0,580)
     /*
@@ -111,7 +111,7 @@ Entity {
     components: [
         RenderSettings {
             id : rd
-            pickingSettings.pickMethod: PickingSettings.TrianglePicking
+            //pickingSettings.pickMethod: PickingSettings.TrianglePicking
 
 
             activeFrameGraph: RenderSurfaceSelector {
@@ -143,7 +143,7 @@ Entity {
                     }
 
 
-
+                    /*
                     Viewport {
                         id: supportCam
                         normalizedRect: Qt.rect(0, 0, 1, 1)
@@ -151,7 +151,7 @@ Entity {
                             camera:camera2
 
                         }
-                    }
+                    }*/
 
 
 

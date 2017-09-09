@@ -17,7 +17,7 @@ Entity {
         id: meshTransform
         property quaternion objectRotation : fromAxisAndAngle(Qt.vector3d(0,0, 1), 60)
 
-        scale3D: Qt.vector3d(0.1,0.1,0.1)
+        scale3D: Qt.vector3d(1,1,1)
 
         rotation: objectRotation
         translation: Qt.vector3d(0,0,0)

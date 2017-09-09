@@ -9,7 +9,7 @@ Entity {
 
     PlaneMesh{
         id: planeMesh
-        height : 100
+        height : 80
         width : 100
 
     }
@@ -24,7 +24,7 @@ Entity {
     Entity {
         PlaneMesh{
             id: planeDownMesh
-            height : 100
+            height : 80
             width : 100
 
         }
@@ -42,12 +42,12 @@ Entity {
         CylinderMesh{
             id: cylinderMesh1
             radius: 0.1
-            length: 100
+            length: 150
         }
 
         Transform{
             id: cylinderTransform1
-            translation: Qt.vector3d(-50,cylinderMesh1.length/2,50)
+            translation: Qt.vector3d(-50,cylinderMesh1.length/2,40)
             rotation: fromAxisAndAngle(Qt.vector3d(1,0, 0), 0)
         }
 
@@ -59,13 +59,13 @@ Entity {
         CylinderMesh{
             id: cylinderMesh2
             radius: 0.1
-            length: 100
+            length: 150
 
         }
 
         Transform{
             id: cylinderTransform2
-            translation: Qt.vector3d(-50,cylinderMesh2.length/2,-50)
+            translation: Qt.vector3d(-50,cylinderMesh2.length/2,-40)
             rotation: fromAxisAndAngle(Qt.vector3d(1,0, 0), 0)
         }
 
@@ -77,13 +77,13 @@ Entity {
         CylinderMesh{
             id: cylinderMesh3
             radius: 0.1
-            length: 100
+            length: 150
 
         }
 
         Transform{
             id: cylinderTransform3
-            translation: Qt.vector3d(50,cylinderMesh3.length/2,50)
+            translation: Qt.vector3d(50,cylinderMesh3.length/2,40)
             rotation: fromAxisAndAngle(Qt.vector3d(1,0, 0), 0)
         }
 
@@ -95,13 +95,13 @@ Entity {
         CylinderMesh{
             id: cylinderMesh4
             radius: 0.1
-            length: 100
+            length: 150
 
         }
 
         Transform{
             id: cylinderTransform4
-            translation: Qt.vector3d(50,cylinderMesh2.length/2,-50)
+            translation: Qt.vector3d(50,cylinderMesh2.length/2,-40)
             rotation: fromAxisAndAngle(Qt.vector3d(1,0, 0), 0)
         }
 
@@ -113,14 +113,14 @@ Entity {
         id: backPlane
         PlaneMesh{
             id: backPlaneMesh
-            height: 100
-            width: 100
+            height: 80
+            width: 150
 
         }
 
         Transform{
             id: backPlaneTransform
-            translation: Qt.vector3d(-50,backPlaneMesh.height/2,0)
+            translation: Qt.vector3d(-50,75,0)
             rotation: fromAxisAndAngle(Qt.vector3d(0,0, 1), -90)
         }
 
