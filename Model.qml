@@ -20,7 +20,7 @@ Entity {
         scale3D: Qt.vector3d(1,1,1)
 
         rotation: objectRotation
-        translation: Qt.vector3d(0,0,0)
+        translation: Qt.vector3d(0,0,0);
     }
 
     ObjectPicker{

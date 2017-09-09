@@ -167,8 +167,9 @@ Entity {
                     /*root.camera.translate(Qt.vector3d(translationSpeed * -translateXAxis.value,
                                                       translationSpeed * -translateYAxis.value,
                                                       0).times(dt));*/
-
-                    window.moveH();
+                    //console.log("X " + translateXAxis.value + " Y " + translateYAxis.value);
+                    window.moveH(translateXAxis.value);
+                    window.moveV(translateYAxis.value);
 
 
 

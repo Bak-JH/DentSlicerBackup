@@ -45,6 +45,8 @@ Entity {
         }
     }
 
+
+
     DiffuseMapMaterial{
         id : planeMaterial
         /*
@@ -257,7 +259,22 @@ Entity {
                 scene3d.height = scene3d.height +1
 
             }
+            if (event.key === Qt.Key_M) {
+                loadOBJFile()
+                //var newObject = Qt.createQmlObject('import QtQuick 2.0; Model{inputSource:"file:///D:/Dev/DLPSlicer/DLPslicer/resource/mesh/full.obj"}',
+                //                                   planeEntity,
+                //                                   "Model");
+            }
+
+
         }
+    }
+
+    function loadOBJFile(){
+        var fileName = "file:///D:/Dev/DLPSlicer/DLPslicer/resource/mesh/full.obj"
+        var newObject = Qt.createQmlObject('import QtQuick 2.0; Model{inputSource:"'+fileName +'"}',
+                                           planeEntity,
+                                           "Model");
     }
 
 

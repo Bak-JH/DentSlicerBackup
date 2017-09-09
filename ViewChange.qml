@@ -31,8 +31,15 @@ Item {
             font.pixelSize: 12
 
         }
+        MouseArea{
+            anchors.fill: parent
+            onClicked: {
+                views.visible = !views.visible
+            }
+        }
     }
     Image{
+        id : views
         width : parent.width
         height : 200
 
@@ -40,6 +47,8 @@ Item {
         anchors.bottom: parent.bottom
 
         source:"qrc:/resource/view_background.png"
+
+        visible: false;
 
         GridLayout{
             anchors.horizontalCenter: parent.horizontalCenter
