@@ -113,6 +113,11 @@ ApplicationWindow {
         anchors.bottomMargin: 22
     }
 
+    FileDialogLoad{
+        id: filedialogload
+        visible: false
+    }
+
     function moveH(value){
         scene3d.anchors.leftMargin = scene3d.anchors.leftMargin + parseInt(10*value)
     }

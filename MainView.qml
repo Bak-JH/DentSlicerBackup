@@ -260,7 +260,7 @@ Entity {
 
             }
             if (event.key === Qt.Key_M) {
-                loadOBJFile()
+                //loadOBJFile()
                 //var newObject = Qt.createQmlObject('import QtQuick 2.0; Model{inputSource:"file:///D:/Dev/DLPSlicer/DLPslicer/resource/mesh/full.obj"}',
                 //                                   planeEntity,
                 //                                   "Model");
@@ -270,9 +270,9 @@ Entity {
         }
     }
 
-    function loadOBJFile(){
-        var fileName = "file:///D:/Dev/DLPSlicer/DLPslicer/resource/mesh/full.obj"
-        var newObject = Qt.createQmlObject('import QtQuick 2.0; Model{inputSource:"'+fileName +'"}',
+    function loadOBJFile(url){
+        //var fileName = "file:///D:/Dev/DLPSlicer/DLPslicer/resource/mesh/full.obj"
+        var newObject = Qt.createQmlObject('import QtQuick 2.0; Model{inputSource:"'+url +'"}',
                                            planeEntity,
                                            "Model");
     }

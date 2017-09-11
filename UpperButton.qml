@@ -39,8 +39,7 @@ Rectangle{
     MouseArea{
         anchors.fill: parent
         onClicked:{
-            console.log(parent.id);
-            console.log(parent.parent.id);
+            loadFileWindow();
 
 
 
@@ -55,13 +54,23 @@ Rectangle{
                 }
                 }
             })();*/
+            /*harin
+            console.log(parent.id);
+            console.log(parent.parent.id);
 
             console.log("exporting");
             // collect configurations
             var cfg = collectConfigurations();
             se.slice(cfg);
+            */
 
         }
     }
+
+    function loadFileWindow(){
+        filedialogload.open();
+    }
 }
+
+
 
