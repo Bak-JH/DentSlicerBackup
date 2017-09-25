@@ -153,6 +153,7 @@ Entity {
             property real translationSpeed : 150.0
             property real rotationSpeed : 260.0
             property real zoomFactor : 0.1
+            property vector3d angleVector
 
             onTriggered: {
                 if (zoomInAction.active || zoomOutAction.active) {
@@ -169,22 +170,29 @@ Entity {
                                                       0).times(dt));*/
                     //console.log("X " + translateXAxis.value + " Y " + translateYAxis.value);
 
-
-
                     window.moveH(translateXAxis.value);
                     window.moveV(translateYAxis.value);
 
-
-
                 } else if (rotateAction.active) {
                     //root.camera.panAboutViewCenter(rotationSpeed * rotateXAxis.value * dt,Qt.vector3d( 0.0, 0.0, 1.0 ));
-                    //root.camera.viewCenter = Qt.vector3d(0,0,50);
+                    angleVector = root.camera.position.minus(Qt.vector3d(0,0,0)).normalized();
+                    if(angleVector.z>0.999){
+                        if(rotateYAxis.value<=0){
+                            return;
+                        }
+                    }
+                    if(angleVector.z<-0.999){
+                        if(rotateYAxis.value>=0){
+                            return;
+                        }
+                    }
+
                     root.camera.tiltAboutViewCenter(rotationSpeed * rotateYAxis.value*(-1) * dt,Qt.vector3d( -1.0, 0.0, 0.0 ));
-                    //root.camera.viewCenter = Qt.vector3d(0,0,0);
+
                     // lock the camera roll angle
                     root.camera.setUpVector(_originalUpVector);
-
                 }
+
             }
         }
     ]

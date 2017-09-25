@@ -20,6 +20,10 @@ Entity {
     property vector3d defaultCameraPosition: Qt.vector3d(500,0,500)
     property vector3d orthoCameraPosition: Qt.vector3d(5000,0,5000)
     property vector3d defaultCameraPosition2: Qt.vector3d(580,0,580)
+
+    property vector3d inputViewCenter : Qt.vector3d( 0, 0, 50)
+
+
     /*
     Entity {
         id: light // Light
@@ -50,7 +54,8 @@ Entity {
 
         position: defaultCameraPosition
         upVector: defaultUp
-        viewCenter: Qt.vector3d( 0, 0, 0 )
+        //viewCenter: Qt.vector3d( 0, 0, 0 )
+        viewCenter: inputViewCenter
 
         property vector3d temp : Qt.vector3d( 0.0, 0.0, 0.0 )
     }
