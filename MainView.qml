@@ -31,7 +31,7 @@ Entity {
         sourceDevice: mouseDevice
 
         onPressed: {
-            //console.log("cliccckckc")
+            //console.log(mouseDevice.X + " " + mouseDevice.Y)
         }
 
         onWheel: {

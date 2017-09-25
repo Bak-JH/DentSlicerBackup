@@ -168,6 +168,9 @@ Entity {
                                                       translationSpeed * -translateYAxis.value,
                                                       0).times(dt));*/
                     //console.log("X " + translateXAxis.value + " Y " + translateYAxis.value);
+
+
+
                     window.moveH(translateXAxis.value);
                     window.moveV(translateYAxis.value);
 

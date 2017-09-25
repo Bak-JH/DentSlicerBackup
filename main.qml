@@ -34,6 +34,9 @@ ApplicationWindow {
         color: "#EAEAEA"
 
     }
+
+
+
     Scene3D {
         id: scene3d
 
@@ -50,7 +53,14 @@ ApplicationWindow {
         aspects: ["input", "logic"]
         cameraAspectRatioMode: Scene3D.AutomaticAspectRatio
 
-        MainView {id: sceneRoot}
+        MainView {id: sceneRoot
+            MouseArea{
+                anchors.fill: parent
+                onClicked: {
+                    console.log("mouse x  " + mouseX)
+                }
+            }
+        }
 
     }
 
@@ -116,6 +126,33 @@ ApplicationWindow {
     FileDialogLoad{
         id: filedialogload
         visible: false
+    }
+
+    MouseArea{
+        acceptedButtons: Qt.MiddleButton
+        anchors.fill: parent
+        property bool isDrag: false
+        property vector2d prevPosition;
+        property vector2d currPosition;
+
+        onPressed: {
+            isDrag = true;
+            prevPosition = Qt.vector2d(mouseX,mouseY);
+        }
+        onReleased:  {
+            isDrag = false
+        }
+
+        onPositionChanged: {
+            if(isDrag){
+                currPosition = Qt.vector2d(mouseX,mouseY);
+                //console.log("chchchch  mouse x  " + (currPosition.x - prevPosition.x) + "mouse y  " + (currPosition.y - prevPosition.y))
+                scene3d.anchors.leftMargin = scene3d.anchors.leftMargin + (currPosition.x - prevPosition.x);
+                scene3d.anchors.topMargin = scene3d.anchors.topMargin + (currPosition.y - prevPosition.y);
+                prevPosition = currPosition;
+            }
+        }
+
     }
 
     function moveH(value){
