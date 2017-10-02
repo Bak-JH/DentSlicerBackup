@@ -42,5 +42,9 @@
         <file>resource/view_right.png</file>
         <file>resource/view_up.png</file>
         <file>resource/combo_arrow.png</file>
+        <file>resource/zoom_down.png</file>
+        <file>resource/zoom_up.png</file>
+        <file>resource/move_arrow.png</file>
+        <file>resource/move_circle.png</file>
     </qresource>
 </RCC>

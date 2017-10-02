@@ -1,91 +1,122 @@
 import QtQuick 2.0
-import Qt3D.Core 2.0
-import Qt3D.Render 2.0
-import Qt3D.Input 2.0
-import Qt3D.Extras 2.0
+import QtGraphicalEffects 1.0
 
-Entity {
-    property vector3d center : Qt.vector3d( 0.0, 20.0, 0.0 )
-    Entity {
-        id: arrow
-        Mesh{
-            id: arrowMesh
-            source:"file:///D:/Dev/DLPSlicer/DLPslicer/resource/mesh/arrow.obj"
-        }
-        Transform {
-            id: arrowTransform
-            translation: center
-            scale3D: Qt.vector3d(0.2,0.2,0.2)
-        }
-        PhongAlphaMaterial{
-            id: arrowXMaterial
-            ambient: Qt.rgba(255/255,255/255,0/255,1.0)
-            alpha: 0.8
-        }
+Item {
+    width : 200
+    height: 200
+    property int axisClicked : 0;
 
-        ObjectPicker{
-            id : arrowXpicker
+    Image{
+        id : moveCenter
+        source: "qrc:/resource/move_circle.png"
+        width : 8
+        height : 8
+        anchors.verticalCenter:  parent.verticalCenter
+        anchors.horizontalCenter: parent.horizontalCenter
+
+    }
+    Image{
+        id : moveX
+        source: "qrc:/resource/move_arrow.png"
+        width : 200
+        height : 10
+        anchors.verticalCenter:  parent.verticalCenter
+        anchors.horizontalCenter: parent.horizontalCenter
+
+        rotation: 0
+
+        MouseArea {
+            property vector2d pressPosition
+            property vector2d prevPosition
+            property vector2d currPosition
+            property bool isDrag : false
+            anchors.fill: parent
             hoverEnabled: true
+
             onEntered: {
-                arrowXMaterial.ambient = Qt.rgba(80/255,80/255,80/255,1.0)
-                console.log("inX")
+                moveXColor.color = "#F2CA20"
             }
 
             onExited: {
-                arrowXMaterial.ambient = Qt.rgba(255/255,255/255,0/255,1.0)
-                console.log("outX")
+                moveXColor.color = "#606060"
             }
-            onClicked: {
-                console.log("clickX")
+
+            onPressed: {
+                moveY.visible = false
+                moveYColor.visible = false
+                axisClicked = 1;
             }
+
             onReleased: {
-                console.log("releaseX")
+                moveY.visible = true
+                moveYColor.visible = true
+                axisClicked = 0;
             }
         }
-
-        components: [ arrowMesh, arrowXMaterial, arrowTransform, arrowXpicker]
     }
 
-    Entity {
-        id: arrowY
-        Mesh{
-            id: arrowYMesh
-            source:"file:///D:/Dev/DLPSlicer/DLPslicer/resource/mesh/arrow.obj"
-        }
-        Transform {
-            id: arrowYTransform
-            translation: center
-            scale3D: Qt.vector3d(0.2,0.2,0.2)
-            rotation: fromAxisAndAngle(Qt.vector3d(0,0, 1), 90)
-        }
-        PhongAlphaMaterial{
-            id: arrowYMaterial
-            ambient: Qt.rgba(0/255,255/255,0/255,1.0)
-            alpha: 0.8
-        }
+    Image{
+        id : moveY
+        source: "qrc:/resource/move_arrow.png"
+        width : 200
+        height : 10
+        anchors.verticalCenter:  parent.verticalCenter
+        anchors.horizontalCenter: parent.horizontalCenter
 
-        ObjectPicker{
-            id : arrowYpicker
+        rotation: 90
+
+        MouseArea {
+            property vector2d pressPosition
+            property vector2d prevPosition
+            property vector2d currPosition
+            property bool isDrag : false
+            anchors.fill: parent
             hoverEnabled: true
+
             onEntered: {
-                arrowYMaterial.ambient = Qt.rgba(80/255,80/255,80/255,1.0)
-                console.log("inY")
+                moveYColor.color = "#F2CA20"
             }
 
             onExited: {
-                arrowYMaterial.ambient = Qt.rgba(0/255,255/255,0/255,1.0)
-                console.log("outY")
+                moveYColor.color = "#606060"
             }
-            onClicked: {
-                console.log("clickY")
+            onPressed: {
+                moveX.visible = false
+                moveXColor.visible = false
+                axisClicked = 2;
             }
+
             onReleased: {
-                console.log("releasey")
+                moveX.visible = true
+                moveXColor.visible = true
+                axisClicked = 0;
             }
-
         }
-
-        components: [ arrowYMesh, arrowYMaterial, arrowYTransform, arrowYpicker]
     }
 
+
+    ColorOverlay{
+        id : moveXColor
+        anchors.fill: moveX
+        source:moveX
+        color : "#606060"
+    }
+    ColorOverlay{
+        id : moveYColor
+        anchors.fill: moveY
+        source:moveY
+        rotation: 90
+        color : "#606060"
+    }
+    ColorOverlay{
+        id : centerColor
+        anchors.fill: moveCenter
+        source:moveCenter
+        color : "#191919"
+    }
+
+    function perfectPosition(w, h){
+        mtz.anchors.topMargin = w;
+        mtz.anchors.leftMargin = h;
+    }
 }

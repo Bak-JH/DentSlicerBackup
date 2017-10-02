@@ -5,9 +5,9 @@ import Qt3D.Input 2.0
 import Qt3D.Extras 2.0
 
 Entity {
-    property vector3d center : Qt.vector3d( 579.9 ,0,579.9 )
+    property vector3d center : Qt.vector3d( 450,0,450 )
     //property vector3d center : Qt.vector3d( 20 ,20,20 )
-    property vector3d inputScale : Qt.vector3d(0.001,0.001,0.001)
+    property vector3d inputScale : Qt.vector3d(1,1,1)
     Transform {
         rotation : fromAxisAndAngle(Qt.vector3d(1,0, 1), 60)
     }
@@ -38,7 +38,7 @@ Entity {
         TorusMesh{
             id: torusXMesh
             radius : 14.1
-            minorRadius: 0.3
+            minorRadius: 0.1
             rings: 100
             slices: 20
 
@@ -46,7 +46,7 @@ Entity {
         Transform {
             id: torusXTransform
             translation: center
-            scale3D: inputScale
+            scale3D: Qt.vector3d(1,1,1)
             rotation: fromAxisAndAngle(Qt.vector3d(0,1, 0), 90)
         }
         PhongAlphaMaterial {
@@ -140,8 +140,16 @@ Entity {
                 torusZMaterial.ambient = Qt.rgba(0/255,0/255,0/255,0.35)
              }
          }
-
-
         components: [ torusZMesh, torusZMaterial, torusZTransform,objectPickerZ]
+    }
+
+    function perfectPosition(){
+        var temp, cameraP, cameraV ;
+        cameraP = sceneRoot.cm.camera.position;
+        cameraV = sceneRoot.cm.camera.viewCenter;
+
+        temp = cameraP.minus(cameraV).normalized()
+        center = cameraP.minus(temp.times(400))
+        //sceneRoot.total.mtr.center = camera.position.minus(temp.times(400))
     }
 }

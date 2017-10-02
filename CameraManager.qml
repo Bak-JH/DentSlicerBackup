@@ -18,10 +18,11 @@ Entity {
     property vector3d defaultUp: Qt.vector3d(0, 0, 1)
     property vector3d defaultDown: Qt.vector3d(0, 0, -1)
     property vector3d defaultCameraPosition: Qt.vector3d(500,0,500)
-    property vector3d orthoCameraPosition: Qt.vector3d(5000,0,5000)
-    property vector3d defaultCameraPosition2: Qt.vector3d(580,0,580)
+    //property vector3d orthoCameraPosition: Qt.vector3d(5000,0,5000)
+    //property vector3d defaultCameraPosition2: Qt.vector3d(580,0,580)
 
     property vector3d inputViewCenter : Qt.vector3d( 0, 0, 50)
+    property alias camera: camera
 
 
     /*
@@ -48,7 +49,7 @@ Entity {
         projectionType: CameraLens.PerspectiveProjection
         fieldOfView: 45
         nearPlane : 1
-        farPlane : 1000.0
+        farPlane : 10000.0
 
 
 
@@ -59,6 +60,7 @@ Entity {
 
         property vector3d temp : Qt.vector3d( 0.0, 0.0, 0.0 )
     }
+    /*
     Camera {
         id: cameratest
 
@@ -95,7 +97,7 @@ Entity {
 
         property vector3d temp : Qt.vector3d( 0.0, 0.0, 0.0 )
     }
-
+    */
     Entity {
         components: [
             DirectionalLight {
@@ -116,7 +118,7 @@ Entity {
     components: [
         RenderSettings {
             id : rd
-            //pickingSettings.pickMethod: PickingSettings.TrianglePicking
+            pickingSettings.pickMethod: PickingSettings.BoundingVolumePicking
 
 
             activeFrameGraph: RenderSurfaceSelector {
@@ -198,7 +200,7 @@ Entity {
         average = camera.viewCenter
         temp = Camera_position.minus(average.times(10))
         cameraRadius = Math.sqrt(Math.pow(temp.x,2) + Math.pow(temp.y,2) + Math.pow(temp.z,2))
-        //console.log(cameraRadius)
+        //console.log("view center" + camera.viewCenter + " rad " + cameraRadius)
         camera.temp = temp.times(0.25)
 
         return cameraRadius
@@ -207,7 +209,7 @@ Entity {
     function zoomUp(){
         var cameraRadius = zoomGap()
 
-        if(cameraRadius > 10){
+        if(cameraRadius > 360){
             /*
             //camera.position = camera.position.minus(temp.times(0.25))
 
@@ -219,6 +221,9 @@ Entity {
             var viewVector = camera.position.minus(camera.viewCenter)
             viewVector = viewVector.times(zoom);
             camera.position = camera.viewCenter.plus(viewVector);
+
+            sceneRoot.total.mtr.perfectPosition();
+
         }
 
     }
@@ -238,6 +243,8 @@ Entity {
             var viewVector = camera.position.minus(camera.viewCenter)
             viewVector = viewVector.times(zoom);
             camera.position = camera.viewCenter.plus(viewVector);
+
+            sceneRoot.total.mtr.perfectPosition();
         }
 
     }
@@ -268,29 +275,30 @@ Entity {
         id : keyboardHandler
         sourceDevice: keyboardDevice
 
-        onPressed: {
+        property vector3d temp;
 
-            if (event.key === Qt.Key_T) {
-                supportCam.normalizedRect = Qt.rect(0, 0, 0, 0);
+        onPressed: {
+            if (event.key === Qt.Key_A) {
+                //console.log("pos " + camera.position + " vc " + camera.viewCenter  )
+                //console.log(camera.position.minus(camera.viewCenter))
+                /*
+                temp = camera.position.minus(camera.viewCenter).normalized()
+
+                console.log("bef " + sceneRoot.total.mtr.center )
+                console.log( camera.position.minus(temp.times(80)))
+                sceneRoot.total.mtr.center = camera.position.minus(temp.times(400))
+                console.log("Aft "  + sceneRoot.total.mtr.center )
+                */
+                sceneRoot.total.mtr.perfectPosition();
+
             }
-            if (event.key === Qt.Key_Y) {
-                supportCam.normalizedRect = Qt.rect(0, 0, 1, 1);
+            if (event.key === Qt.Key_S) {
+
             }
-            if (event.key === Qt.Key_H) {
-                console.log("ww wh" + Window.width + "   "  + Window.height + "  " + window.height + " " + window.width)
+            if (event.key === Qt.Key_D) {
+
             }
-            if (event.key === Qt.Key_N) {
-                rd.pickingSettings.pickMethod= PickingSettings.TrianglePicking
-            }
-            if (event.key === Qt.Key_M) {
-                rd.pickingSettings.pickMethod= PickingSettings.BoundingVolumePicking
-            }
-            if (event.key === Qt.Key_P) {
-                console.log("pos  " + camera.position + " / cent  " + camera.viewCenter + " / rot" + camera.upVector)
-            }
-            if (event.key === Qt.Key_C) {
-                console.log("view  " + camera.viewMatrix + " proj  " + camera.projectionMatrix)
-            }
+
             if (event.key === Qt.Key_V) {
                 var point = Qt.vector3d(0,0,0);
                 var matrix = Qt.matrix4x4(0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0);

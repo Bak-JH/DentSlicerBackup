@@ -156,7 +156,7 @@ Entity {
             property vector3d angleVector
 
             onTriggered: {
-                if (zoomInAction.active || zoomOutAction.active) {
+                if (zoomInAction.active || zoomOutAction.active) { // not use
                     var zoom = 1.0 - zoomFactor;
                     if (zoomOutAction.active) {
                         zoom = 1.0 + zoomFactor;
@@ -164,14 +164,13 @@ Entity {
                     var viewVector = root.camera.position.minus(root.camera.viewCenter)
                     viewVector = viewVector.times(zoom);
                     root.camera.position = root.camera.viewCenter.plus(viewVector);
-                } else if (moveAction.active) {
-                    /*root.camera.translate(Qt.vector3d(translationSpeed * -translateXAxis.value,
-                                                      translationSpeed * -translateYAxis.value,
-                                                      0).times(dt));*/
-                    //console.log("X " + translateXAxis.value + " Y " + translateYAxis.value);
 
+
+                } else if (moveAction.active) { // not use
+                    /*
                     window.moveH(translateXAxis.value);
                     window.moveV(translateYAxis.value);
+                    */
 
                 } else if (rotateAction.active) {
                     //root.camera.panAboutViewCenter(rotationSpeed * rotateXAxis.value * dt,Qt.vector3d( 0.0, 0.0, 1.0 ));
@@ -191,6 +190,8 @@ Entity {
 
                     // lock the camera roll angle
                     root.camera.setUpVector(_originalUpVector);
+
+                    sceneRoot.total.mtr.perfectPosition();
                 }
 
             }

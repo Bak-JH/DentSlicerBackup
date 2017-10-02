@@ -18,6 +18,9 @@ Entity {
     property vector3d zup : Qt.vector3d( 0.0, 0.0, 1.0 )
     property vector3d zdown : Qt.vector3d( 0.0, 0.0, -1.0 )
 
+    property alias total: total
+    property alias cm: cm
+
     CoordinateMesh{} // 기준좌표 체크
 
     CameraManager{id : cm}
@@ -108,6 +111,7 @@ Entity {
 
     Entity{
         id : total
+        //property alias mtr: mtr
 
         Transform{
             id : totalTransform
@@ -135,8 +139,8 @@ Entity {
             }
         }
 
-        MeshTransformerRotate{}
-        MeshTransformerMove{}
+        //MeshTransformerRotate{id:mtr}
+        //MeshTransformerMove{}
     }
 
     MouseDevice {

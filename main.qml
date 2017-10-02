@@ -30,8 +30,8 @@ ApplicationWindow {
         anchors.left : lefttab.right
         anchors.right : parent.right
         anchors.bottom : parent.bottom
-        //color: "white"
-        color: "#EAEAEA"
+        color: "blue"
+        //color: "#EAEAEA"
 
     }
 
@@ -45,9 +45,11 @@ ApplicationWindow {
         anchors.left : lefttab.right
         //anchors.right : parent.right
         //anchors.bottom : parent.bottom
-        width: window.width - lefttab.width
-        height: window.height - uppertab.height
+        width: (window.width - lefttab.width) * 1
+        height: (window.height - uppertab.height) * 1
         //anchors.margins: 10
+        //anchors.leftMargin: - (window.width - lefttab.width)*1
+        //anchors.topMargin: - (window.width - lefttab.width)*1
         focus: true
         hoverEnabled: true
         aspects: ["input", "logic"]
@@ -61,6 +63,7 @@ ApplicationWindow {
                 }
             }
         }
+
 
     }
 
@@ -100,13 +103,25 @@ ApplicationWindow {
 
 
 
-    /*
+
     MeshTransformerZoom{
-        anchors.right: parent.right
-        anchors.bottom: parent.bottom
-        anchors.rightMargin: 100
-        anchors.bottomMargin: 100
-    }*/
+        id : mtz
+
+        anchors.top: uppertab.bottom
+        anchors.left: lefttab.right
+
+        anchors.topMargin: 0
+        anchors.leftMargin: 0
+    }
+    MeshTransformerMove{
+        id : mtm
+
+        anchors.top: uppertab.bottom
+        anchors.left: lefttab.right
+
+        anchors.topMargin: 0
+        anchors.leftMargin: 0
+    }
 
     ViewChange{
         anchors.top : uppertab.bottom
