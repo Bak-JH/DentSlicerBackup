@@ -27,9 +27,30 @@ Entity {
         id : picker
         onClicked: {
             console.log("click")
-            var globalCoordinares = ttt.mapToItem(ttt.parent, 0, 0);
+            //var globalCoordinares = ttt.mapToItem(ttt.parent, 0, 0);
             console.log(ttt.parent.id);
-            console.log("X: " + globalCoordinares.x + " y: " + globalCoordinares.y);
+            //console.log("X: " + globalCoordinares.x + " y: " + globalCoordinares.y);
+
+            var point = Qt.vector3d(0,0,0);
+            var matrix = Qt.matrix4x4(0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0);
+
+
+
+
+            matrix = cm.camera.projectionMatrix.times(cm.camera.viewMatrix);
+
+            point = matrix.times(point)
+
+            point.x = (point.x+1) * scene3d.width/2;
+            point.y = (-1 * point.y+1) * scene3d.height/2;
+
+
+            console.log("point2 " + point);
+            console.log("viwport  w" + scene3d.width);
+            console.log("viwport  h" + scene3d.height);
+
+            rt.anchors.leftMargin = point.x
+            rt.anchors.topMargin = point.y
         }
     }
     PhongMaterial {

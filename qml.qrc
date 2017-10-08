@@ -30,5 +30,7 @@
         <file>SlicingDataElement.qml</file>
         <file>ViewButton.qml</file>
         <file>FileDialogLoad.qml</file>
+        <file>MeshTransformerRotateTest.qml</file>
+        <file>UICore.qml</file>
     </qresource>
 </RCC>

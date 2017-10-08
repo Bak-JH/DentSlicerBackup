@@ -34,47 +34,69 @@ ApplicationWindow {
         //color: "#EAEAEA"
 
     }
+    /*
+    Rectangle{
+        anchors.top : uppertab.bottom
+        anchors.left : lefttab.right
+        width: (window.width - lefttab.width) * 1
+        height: (window.height - uppertab.height) * 1
+
+        //anchors.margins:10
+        //anchors.leftMargin: - (window.width - lefttab.width)*2
+        //anchors.topMargin: - (window.width - lefttab.width)*2
+        MouseArea{
+            anchors.fill: parent
+            onClicked: {
+                console.log("mouse x  " + mouseX)
+            }
+        }
+        Scene3D {
+            id: scene3d
+
+            width: parent.width
+            height: parent.height
+            anchors.fill: parent
+
+            focus: true
+            hoverEnabled: true
+            aspects: ["input", "logic"]
+            cameraAspectRatioMode: Scene3D.AutomaticAspectRatio
+
+            MainView {id: sceneRoot}
+        }
 
 
+    }*/
 
     Scene3D {
         id: scene3d
-
-        //anchors.fill: parent
+        /*
+        width: parent.width
+        height: parent.height
+        anchors.fill: parent
+        */
         anchors.top : uppertab.bottom
         anchors.left : lefttab.right
-        //anchors.right : parent.right
-        //anchors.bottom : parent.bottom
         width: (window.width - lefttab.width) * 1
         height: (window.height - uppertab.height) * 1
-        //anchors.margins: 10
-        //anchors.leftMargin: - (window.width - lefttab.width)*1
-        //anchors.topMargin: - (window.width - lefttab.width)*1
+
         focus: true
         hoverEnabled: true
         aspects: ["input", "logic"]
         cameraAspectRatioMode: Scene3D.AutomaticAspectRatio
 
-        MainView {id: sceneRoot
-            MouseArea{
-                anchors.fill: parent
-                onClicked: {
-                    console.log("mouse x  " + mouseX)
-                }
-            }
-        }
-
-
+        MainView {id: sceneRoot}
     }
 
-    MeshTransformerTab{
-        id:rt
-        anchors.left : scene3d.left
-        anchors.top:scene3d.top
-
-        anchors.leftMargin: 400
-        anchors.topMargin: 400
+    UICore{
+        id:ui
     }
+
+
+
+
+
+
 
     UpperTab{
         id : uppertab
@@ -100,10 +122,6 @@ ApplicationWindow {
 
 
 
-
-
-
-
     MeshTransformerZoom{
         id : mtz
 
@@ -121,6 +139,15 @@ ApplicationWindow {
 
         anchors.topMargin: 0
         anchors.leftMargin: 0
+    }
+    MeshTransformerRotateTest{
+        id : mtr
+
+        anchors.top: uppertab.bottom
+        anchors.left: lefttab.right
+
+        anchors.topMargin: 100
+        anchors.leftMargin: 100
     }
 
     ViewChange{

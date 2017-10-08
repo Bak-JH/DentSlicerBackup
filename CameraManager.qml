@@ -209,7 +209,7 @@ Entity {
     function zoomUp(){
         var cameraRadius = zoomGap()
 
-        if(cameraRadius > 360){
+        if(cameraRadius > 10){
             /*
             //camera.position = camera.position.minus(temp.times(0.25))
 
@@ -222,7 +222,7 @@ Entity {
             viewVector = viewVector.times(zoom);
             camera.position = camera.viewCenter.plus(viewVector);
 
-            sceneRoot.total.mtr.perfectPosition();
+            //sceneRoot.total.mtr.perfectPosition();
 
         }
 
@@ -244,7 +244,7 @@ Entity {
             viewVector = viewVector.times(zoom);
             camera.position = camera.viewCenter.plus(viewVector);
 
-            sceneRoot.total.mtr.perfectPosition();
+            //sceneRoot.total.mtr.perfectPosition();
         }
 
     }
@@ -279,18 +279,7 @@ Entity {
 
         onPressed: {
             if (event.key === Qt.Key_A) {
-                //console.log("pos " + camera.position + " vc " + camera.viewCenter  )
-                //console.log(camera.position.minus(camera.viewCenter))
-                /*
-                temp = camera.position.minus(camera.viewCenter).normalized()
-
-                console.log("bef " + sceneRoot.total.mtr.center )
-                console.log( camera.position.minus(temp.times(80)))
-                sceneRoot.total.mtr.center = camera.position.minus(temp.times(400))
-                console.log("Aft "  + sceneRoot.total.mtr.center )
-                */
                 sceneRoot.total.mtr.perfectPosition();
-
             }
             if (event.key === Qt.Key_S) {
 

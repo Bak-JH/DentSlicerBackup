@@ -23,7 +23,7 @@ Item {
         anchors.verticalCenter:  parent.verticalCenter
         anchors.horizontalCenter: parent.horizontalCenter
 
-        rotation: 0
+        rotation: 30
 
         MouseArea {
             property vector2d pressPosition
@@ -63,7 +63,7 @@ Item {
         anchors.verticalCenter:  parent.verticalCenter
         anchors.horizontalCenter: parent.horizontalCenter
 
-        rotation: 90
+        rotation: 110
 
         MouseArea {
             property vector2d pressPosition
@@ -100,13 +100,16 @@ Item {
         anchors.fill: moveX
         source:moveX
         color : "#606060"
+        rotation: 30
     }
     ColorOverlay{
         id : moveYColor
         anchors.fill: moveY
         source:moveY
-        rotation: 90
+
         color : "#606060"
+        rotation: 110
+
     }
     ColorOverlay{
         id : centerColor

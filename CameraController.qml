@@ -191,7 +191,7 @@ Entity {
                     // lock the camera roll angle
                     root.camera.setUpVector(_originalUpVector);
 
-                    sceneRoot.total.mtr.perfectPosition();
+                    //sceneRoot.total.mtr.perfectPosition();
                 }
 
             }

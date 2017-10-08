@@ -46,5 +46,11 @@
         <file>resource/zoom_up.png</file>
         <file>resource/move_arrow.png</file>
         <file>resource/move_circle.png</file>
+        <file>resource/rotate_back.png</file>
+        <file>resource/rotate_z.png</file>
+        <file>resource/rotate_x.png</file>
+        <file>resource/rotate_x2.png</file>
+        <file>resource/rotate_y.png</file>
+        <file>resource/rotate_y2.png</file>
     </qresource>
 </RCC>

@@ -54,4 +54,9 @@ Item {
         source: "qrc:/resource/model_delete.png"
     }
 
+    function setPosition(w, h){
+        anchors.leftMargin = w
+        anchors.topMargin = h
+    }
+
 }
