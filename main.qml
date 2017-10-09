@@ -12,6 +12,9 @@ ApplicationWindow {
     height: 768
     visible: true
 
+    property alias uppertab: uppertab
+    property alias lefttab: lefttab
+
     menuBar: MenuBar{
         Menu{
             title : "File"
@@ -88,13 +91,6 @@ ApplicationWindow {
         MainView {id: sceneRoot}
     }
 
-    UICore{
-        id:ui
-    }
-
-
-
-
 
 
 
@@ -116,53 +112,17 @@ ApplicationWindow {
 
         anchors.top: uppertab.bottom
         anchors.left: parent.left
-
     }
 
+    UICore{
+        id:ui
+        width: (window.width - lefttab.width) * 1
+        height: (window.height - uppertab.height) * 1
 
-
-
-    MeshTransformerZoom{
-        id : mtz
-
-        anchors.top: uppertab.bottom
         anchors.left: lefttab.right
-
-        anchors.topMargin: 0
-        anchors.leftMargin: 0
-    }
-    MeshTransformerMove{
-        id : mtm
-
-        anchors.top: uppertab.bottom
-        anchors.left: lefttab.right
-
-        anchors.topMargin: 0
-        anchors.leftMargin: 0
-    }
-    MeshTransformerRotateTest{
-        id : mtr
-
-        anchors.top: uppertab.bottom
-        anchors.left: lefttab.right
-
-        anchors.topMargin: 100
-        anchors.leftMargin: 100
-    }
-
-    ViewChange{
         anchors.top : uppertab.bottom
-        anchors.right : parent.right
-        anchors.topMargin: 32
-        anchors.rightMargin: 32
-    }
-
-
-    SlicingData{
-        anchors.right: parent.right
         anchors.bottom: parent.bottom
-        anchors.rightMargin: 22
-        anchors.bottomMargin: 22
+
     }
 
     FileDialogLoad{

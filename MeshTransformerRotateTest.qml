@@ -294,4 +294,18 @@ Item {
 
     }
 
+    function show(w,h){
+        var result = Qt.vector2d(0,0)
+
+        result.x = w + scene3d.anchors.leftMargin
+        result.y = h + scene3d.anchors.topMargin
+
+        setPosition(result.x,result.y)
+    }
+
+    function setPosition(w, h){
+        anchors.leftMargin = w
+        anchors.topMargin = h
+    }
+
 }

@@ -289,6 +289,7 @@ Entity {
             }
 
             if (event.key === Qt.Key_V) {
+                /*
                 var point = Qt.vector3d(0,0,0);
                 var matrix = Qt.matrix4x4(0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0);
 
@@ -306,6 +307,7 @@ Entity {
 
                 rt.anchors.leftMargin = point.x
                 rt.anchors.topMargin = point.y
+                */
 
             }
         }

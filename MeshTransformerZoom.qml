@@ -99,11 +99,20 @@ Item {
         color : "#606060"
     }
 
+    function show(w,h){
+        var result = Qt.vector2d(0,0)
 
-    function perfectPosition(w, h){
-        mtz.anchors.topMargin = w;
-        mtz.anchors.leftMargin = h;
+        result.x = w + scene3d.anchors.leftMargin
+        result.y = h + scene3d.anchors.topMargin
+
+        setPosition(result.x,result.y)
     }
+
+    function setPosition(w, h){
+        anchors.leftMargin = w
+        anchors.topMargin = h
+    }
+
 
     function zoom_Up(){
         console.log("zoom up")

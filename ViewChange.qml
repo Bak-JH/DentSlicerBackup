@@ -9,7 +9,6 @@ Item {
     width : 194
     height: 262
 
-
     Item{
         width: 48
         height: 50
