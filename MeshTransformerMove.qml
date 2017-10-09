@@ -23,7 +23,7 @@ Item {
         anchors.verticalCenter:  parent.verticalCenter
         anchors.horizontalCenter: parent.horizontalCenter
 
-        rotation: 30
+        //rotation: 30
 
         MouseArea {
             property vector2d pressPosition
@@ -42,12 +42,16 @@ Item {
             }
 
             onPressed: {
+                isDrag = true
                 moveY.visible = false
                 moveYColor.visible = false
                 axisClicked = 1;
+                pressPosition = Qt.vector2d(mouseX , mouseY);
+                prevPosition = Qt.vector2d(mouseX , mouseY);
             }
 
             onReleased: {
+                isDrag = false
                 moveY.visible = true
                 moveYColor.visible = true
                 axisClicked = 0;
@@ -63,7 +67,7 @@ Item {
         anchors.verticalCenter:  parent.verticalCenter
         anchors.horizontalCenter: parent.horizontalCenter
 
-        rotation: 110
+        rotation: 90
 
         MouseArea {
             property vector2d pressPosition
@@ -81,15 +85,32 @@ Item {
                 moveYColor.color = "#606060"
             }
             onPressed: {
+                isDrag = true
                 moveX.visible = false
                 moveXColor.visible = false
                 axisClicked = 2;
+                pressPosition = Qt.vector2d(mouseX , mouseY);
+                prevPosition = Qt.vector2d(mouseX , mouseY);
             }
 
             onReleased: {
+                isDrag = false
                 moveX.visible = true
                 moveXColor.visible = true
                 axisClicked = 0;
+            }
+            onPositionChanged: {
+                if(isDrag){
+                    currPosition = Qt.vector2d(mouseX , mouseY);
+
+                    if(pressPosition.y > currPosition.y){
+                        moveYPlus();
+                    }else{
+                        moveYMinus();
+                    }
+                    prevPosition = currPosition
+
+                }
             }
         }
     }
@@ -100,7 +121,7 @@ Item {
         anchors.fill: moveX
         source:moveX
         color : "#606060"
-        rotation: 30
+        //rotation: 30
     }
     ColorOverlay{
         id : moveYColor
@@ -108,7 +129,7 @@ Item {
         source:moveY
 
         color : "#606060"
-        rotation: 110
+        rotation: 90
 
     }
     ColorOverlay{
@@ -133,5 +154,23 @@ Item {
     function setPosition(w, h){
         anchors.leftMargin = w
         anchors.topMargin = h
+    }
+
+    /*
+    function moveXPlus(){
+        meshTransform.translation = meshTransform.translation.minus(Qt.vector3d(0.01,0.00,0.00))
+    }
+    function moveXMinus(){
+        meshTransform.translation = meshTransform.translation.minus(Qt.vector3d(0.01,0.00,0.00))
+    }*/
+
+    function moveYPlus(){
+
+        console.log("y plus")
+        sceneRoot.total.meshEntity4.moveYPlus()
+    }
+    function moveYMinus(){
+        console.log("y minus")
+        sceneRoot.total.meshEntity4.moveYMinus()
     }
 }

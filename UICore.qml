@@ -84,7 +84,7 @@ Item {
         point.x = (point.x+1) * scene3d.width/2;
         point.y = (-1 * point.y+1) * scene3d.height/2;
 
-        return Qt.vector2d(point.x,point.y)
+        return Qt.vector2d(point.x+100,point.y-50)
 
         /*
         console.log("point2 " + point);

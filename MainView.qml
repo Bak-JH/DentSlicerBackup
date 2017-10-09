@@ -112,6 +112,9 @@ Entity {
     Entity{
         id : total
         //property alias mtr: mtr
+        property alias meshEntity4: meshEntity4
+
+
 
         Transform{
             id : totalTransform

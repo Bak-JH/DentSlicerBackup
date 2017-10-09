@@ -116,9 +116,11 @@ Item {
 
     function zoom_Up(){
         console.log("zoom up")
+        sceneRoot.total.meshEntity4.zoomUp()
     }
 
     function zoom_Down(){
         console.log("zoom down")
+        sceneRoot.total.meshEntity4.zoomDown()
     }
 }
