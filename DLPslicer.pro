@@ -1,6 +1,6 @@
 TEMPLATE = app
 
-QT += qml quick
+QT += qml quick opengl
 
 CONFIG += c++11
 
@@ -9,7 +9,8 @@ TARGET = DentStudio
 SOURCES += main.cpp \
     quaternionhelper.cpp \
     slicingengine.cpp \
-    configuration.cpp
+    configuration.cpp \
+    glmodel.cpp
 
 RESOURCES += qml.qrc \
     resources.qrc
@@ -36,4 +37,7 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 HEADERS += \
     quaternionhelper.h \
     slicingengine.h \
-    configuration.h
+    configuration.h \
+    glmodel.h
+
+LIBS += -lOpengl32

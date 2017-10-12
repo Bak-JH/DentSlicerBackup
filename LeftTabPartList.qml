@@ -55,6 +55,11 @@ Rectangle {
 
     /************************** content **************************/
 
+    GlModel{
+
+
+    }
+
     Rectangle{
         id : content
         width: parent.width
