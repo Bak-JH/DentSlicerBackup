@@ -5,13 +5,14 @@
 #include "quaternionhelper.h"
 #include "slicingengine.h"
 #include "configuration.h"
-
+#include "glmodel.h"
 
 int main(int argc, char *argv[])
 {
     QGuiApplication app(argc, argv);
     QScopedPointer<QuaternionHelper> qq(new QuaternionHelper);
     QScopedPointer<SlicingEngine> se(new SlicingEngine);
+    qmlRegisterType<GlModel>("GLQML", 1, 0, "GlModel");
 
     QQmlApplicationEngine engine;
     engine.load(QUrl(QStringLiteral("qrc:/main.qml")));
