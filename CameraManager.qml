@@ -279,13 +279,17 @@ Entity {
 
         onPressed: {
             if (event.key === Qt.Key_A) {
-                sceneRoot.total.mtr.perfectPosition();
+                //sceneRoot.total.mtr.perfectPosition();
+                defaultCameraPosition.plus(Qt.vector3d(10,0,0))
             }
             if (event.key === Qt.Key_S) {
-
+                defaultCameraPosition.minus(Qt.vector3d(0,10,0))
             }
             if (event.key === Qt.Key_D) {
-
+                defaultCameraPosition.minus(Qt.vector3d(10,0,0))
+            }
+            if (event.key === Qt.Key_W) {
+                defaultCameraPosition.plus(Qt.vector3d(0,10,0))
             }
 
             if (event.key === Qt.Key_V) {

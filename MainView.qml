@@ -20,8 +20,9 @@ Entity {
 
     property alias total: total
     property alias cm: cm
+    property alias systemTransform: systemTransform
 
-    CoordinateMesh{} // 기준좌표 체크
+    //CoordinateMesh{} // 기준좌표 체크
 
     CameraManager{id : cm}
 
@@ -40,11 +41,24 @@ Entity {
         onWheel: {
             var Camera_position, average, temp, Camera_radius
             var d = wheel.angleDelta.y ;
-
+            /*
             if(d>0)
                 cm.zoomUp()
             else if(d<0)
                 cm.zoomDown()
+            */
+            if(d>0){
+                console.log("Dfdf")
+                console.log(systemTransform.scale3D)
+                //sceneRoot.systemTransform.scale3D = sceneRoot.systemTransform.scale3D.plus(Qt.vector3d(0.02,0.02,0.02))
+                systemTransform.scale3D = systemTransform.scale3D.plus(Qt.vector3d(0.0002,0.0002,0.0002))
+                console.log(systemTransform.scale3D)
+            }
+            else if(d<0){
+                //sceneRoot.systemTransform.scale3D = sceneRoot.systemTransform.scale3D.minus(Qt.vector3d(0.02,0.02,0.02))
+                systemTransform.scale3D = systemTransform.scale3D.minus(Qt.vector3d(0.0002,0.0002,0.0002))
+            }
+
         }
     }
 
@@ -141,10 +155,25 @@ Entity {
                 inputSource:"file:///D:/Dev/DLPSlicer/DLPslicer/resource/mesh/lowerjaw.obj"
             }
         }*/
-        Model{
-            id: meshEntity4
-            inputSource:"file:///D:/Dev/DLPSlicer/DLPslicer/resource/mesh/lowerjaw.obj"
+        Entity{
+            Transform{
+                id: systemTransform
+                scale3D: Qt.vector3d(0.01,0.01,0.01)
+            }
+            components: [systemTransform]
+
+            Plane{
+                id: planeEntity
+            }
+
+            Model{
+                id: meshEntity4
+                inputSource:"file:///D:/Dev/DLPSlicer/DLPslicer/resource/mesh/lowerjaw.obj"
+            }
+            CoordinateMesh{}
         }
+
+
 
         //MeshTransformerRotate{id:mtr}
         //MeshTransformerMove{}
@@ -200,7 +229,8 @@ Entity {
             onTriggered: {
                 if (rotateAction.active) {
 
-                    var target = axisAngle2Quaternion(rotationSpeed * rotateXAxis.value * dt,qq.rotatedVector(planeEntity.planeTransform.rotation,yup))
+                    //var target = axisAngle2Quaternion(rotationSpeed * rotateXAxis.value * dt,qq.rotatedVector(planeEntity.planeTransform.rotation,yup))
+                    var target = axisAngle2Quaternion(rotationSpeed * rotateXAxis.value * dt,qq.rotatedVector(systemTransform.rotation,zup))
 
                     /* two axis rotate
                     //var target2 = axisAngle2Quaternion(rotationSpeed * rotateYAxis.value * dt,ydown)
@@ -210,7 +240,7 @@ Entity {
                     //console.log("rtv " + qq.rotatedVector(planeTransform.rotation,ydown))
 
 
-                    planeEntity.planeTransform.rotation = qq.multiplyQuaternion(target,planeEntity.planeTransform.rotation)
+                    systemTransform.rotation = qq.multiplyQuaternion(target,systemTransform.rotation)
                     //planeTransform.rotation = qq.multiplyQuaternion(planeTransform.rotation,target)
 
                 }

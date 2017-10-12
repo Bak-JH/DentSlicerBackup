@@ -9,8 +9,8 @@ Entity {
 
     PlaneMesh{
         id: planeMesh
-        height : 80
-        width : 100
+        height : 100
+        width : 80
 
     }
 
@@ -24,8 +24,8 @@ Entity {
     Entity {
         PlaneMesh{
             id: planeDownMesh
-            height : 80
-            width : 100
+            height : 100
+            width : 80
 
         }
 
@@ -47,7 +47,7 @@ Entity {
 
         Transform{
             id: cylinderTransform1
-            translation: Qt.vector3d(-50,cylinderMesh1.length/2,40)
+            translation: Qt.vector3d(-40,cylinderMesh1.length/2,50)
             rotation: fromAxisAndAngle(Qt.vector3d(1,0, 0), 0)
         }
 
@@ -65,7 +65,7 @@ Entity {
 
         Transform{
             id: cylinderTransform2
-            translation: Qt.vector3d(-50,cylinderMesh2.length/2,-40)
+            translation: Qt.vector3d(-40,cylinderMesh2.length/2,-50)
             rotation: fromAxisAndAngle(Qt.vector3d(1,0, 0), 0)
         }
 
@@ -83,7 +83,7 @@ Entity {
 
         Transform{
             id: cylinderTransform3
-            translation: Qt.vector3d(50,cylinderMesh3.length/2,40)
+            translation: Qt.vector3d(40,cylinderMesh3.length/2,50)
             rotation: fromAxisAndAngle(Qt.vector3d(1,0, 0), 0)
         }
 
@@ -101,7 +101,7 @@ Entity {
 
         Transform{
             id: cylinderTransform4
-            translation: Qt.vector3d(50,cylinderMesh2.length/2,-40)
+            translation: Qt.vector3d(40,cylinderMesh2.length/2,-50)
             rotation: fromAxisAndAngle(Qt.vector3d(1,0, 0), 0)
         }
 
@@ -113,15 +113,16 @@ Entity {
         id: backPlane
         PlaneMesh{
             id: backPlaneMesh
-            height: 80
-            width: 150
+            height: 150
+            width: 80
 
         }
 
         Transform{
             id: backPlaneTransform
-            translation: Qt.vector3d(-50,75,0)
-            rotation: fromAxisAndAngle(Qt.vector3d(0,0, 1), -90)
+            //translation: Qt.vector3d(-50,75,0)
+            rotation: fromAxisAndAngle(Qt.vector3d(1,0, 0), 90)
+            translation: Qt.vector3d(0,75,-50)
         }
 
         GoochMaterial {
@@ -137,14 +138,14 @@ Entity {
         id: planeTitleEntity
         PlaneMesh{
             id: planeTitleMesh
-            height : 60
-            width : 10
+            height : 10
+            width : 60
 
         }
 
         Transform{
             id: planeTitleTransform
-            translation: Qt.vector3d(50,0,0)
+            translation: Qt.vector3d(0,0,50)
             rotation: fromAxisAndAngle(Qt.vector3d(1,0, 0), 0)
         }
 

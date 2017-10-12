@@ -33,8 +33,8 @@ ApplicationWindow {
         anchors.left : lefttab.right
         anchors.right : parent.right
         anchors.bottom : parent.bottom
-        color: "blue"
-        //color: "#EAEAEA"
+        //color: "blue"
+        color: "#EAEAEA"
 
     }
     /*

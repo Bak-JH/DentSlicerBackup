@@ -7,6 +7,7 @@ Entity {
     property string inputSource;
 
     property alias testMesh: testMesh
+    property alias meshTransform: meshTransform
     id : ttt
     Mesh{
         id: testMesh
@@ -17,7 +18,7 @@ Entity {
         id: meshTransform
         property quaternion objectRotation : fromAxisAndAngle(Qt.vector3d(0,0, 1), 60)
 
-        scale3D: Qt.vector3d(0.01,0.01,0.01)
+        scale3D: Qt.vector3d(1,1,1)
 
         //rotation: objectRotation
         translation: Qt.vector3d(0,0,0);
