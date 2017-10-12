@@ -134,12 +134,16 @@ Entity {
             id: meshEntity3
             inputSource:"file:///D:/Dev/DLPSlicer/DLPslicer/resource/mesh/hix.obj"
         }*/
-
+        /*
         Plane{id: planeEntity
             Model{
                 id: meshEntity4
                 inputSource:"file:///D:/Dev/DLPSlicer/DLPslicer/resource/mesh/lowerjaw.obj"
             }
+        }*/
+        Model{
+            id: meshEntity4
+            inputSource:"file:///D:/Dev/DLPSlicer/DLPslicer/resource/mesh/lowerjaw.obj"
         }
 
         //MeshTransformerRotate{id:mtr}
