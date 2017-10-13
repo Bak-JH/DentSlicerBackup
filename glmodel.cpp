@@ -105,6 +105,7 @@ void GlModelRenderer::paint()
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE);
 
+    //glDrawArrays(GL_TRIANGLE_FAN, , );
     glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 
     m_program->disableAttributeArray(0);

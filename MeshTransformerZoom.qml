@@ -117,6 +117,7 @@ Item {
     function zoom_Up(){
         console.log("zoom up")
         sceneRoot.total.meshEntity4.zoomUp()
+        sceneRoot.total.meshEntity4.cut()
     }
 
     function zoom_Down(){

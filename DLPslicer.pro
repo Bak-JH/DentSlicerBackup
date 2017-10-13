@@ -10,7 +10,8 @@ SOURCES += main.cpp \
     quaternionhelper.cpp \
     slicingengine.cpp \
     configuration.cpp \
-    glmodel.cpp
+    glmodel.cpp \
+    geometryengine.cpp
 
 RESOURCES += qml.qrc \
     resources.qrc
@@ -38,6 +39,7 @@ HEADERS += \
     quaternionhelper.h \
     slicingengine.h \
     configuration.h \
-    glmodel.h
+    glmodel.h \
+    geometryengine.h
 
 LIBS += -lOpengl32

@@ -13,6 +13,7 @@ Entity {
         source: inputSource
         //source: "file:///D:/Dev/Trash/3Dtest/full.stl"
     }
+
     Transform {
         id: meshTransform
         property quaternion objectRotation : fromAxisAndAngle(Qt.vector3d(0,0, 1), 60)
@@ -86,6 +87,4 @@ Entity {
     function moveYMinus(){
         meshTransform.translation = meshTransform.translation.minus(Qt.vector3d(0.1,0.0,0.0))
     }
-
-
 }

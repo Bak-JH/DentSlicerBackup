@@ -13,6 +13,7 @@ Item {
             loops: Animation.Infinite
             running: true
         }
+        objectName: "glloadedmodel"
     }
 
     Rectangle {
