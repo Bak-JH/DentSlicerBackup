@@ -7,6 +7,7 @@ Entity {
     property string inputSource;
 
     property alias testMesh: testMesh
+    property alias meshTransform: meshTransform
     id : ttt
     Mesh{
         id: testMesh
@@ -20,7 +21,7 @@ Entity {
 
         scale3D: Qt.vector3d(1,1,1)
 
-        rotation: objectRotation
+        //rotation: objectRotation
         translation: Qt.vector3d(0,0,0);
     }
 

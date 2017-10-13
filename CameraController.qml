@@ -175,21 +175,27 @@ Entity {
                 } else if (rotateAction.active) {
                     //root.camera.panAboutViewCenter(rotationSpeed * rotateXAxis.value * dt,Qt.vector3d( 0.0, 0.0, 1.0 ));
                     angleVector = root.camera.position.minus(Qt.vector3d(0,0,0)).normalized();
+
+                    console.log("Zzzz " +angleVector.z)
                     if(angleVector.z>0.999){
+
                         if(rotateYAxis.value<=0){
                             return;
                         }
+                        root.camera.setUpVector(_originalUpVector);
                     }
                     if(angleVector.z<-0.999){
+
                         if(rotateYAxis.value>=0){
                             return;
                         }
+                        root.camera.setUpVector(_originalUpVector.times(-1));
                     }
 
                     root.camera.tiltAboutViewCenter(rotationSpeed * rotateYAxis.value*(-1) * dt,Qt.vector3d( -1.0, 0.0, 0.0 ));
 
                     // lock the camera roll angle
-                    root.camera.setUpVector(_originalUpVector);
+                    //root.camera.setUpVector(_originalUpVector);
 
                     //sceneRoot.total.mtr.perfectPosition();
                 }

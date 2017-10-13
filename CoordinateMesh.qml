@@ -6,6 +6,25 @@ import Qt3D.Extras 2.0
 
 
 Entity {
+    /*
+    Entity {
+        id: meshXEntity
+        SphereMesh{
+            id: meshX
+            radius : 2
+        }
+        Transform {
+            id: meshXTransform
+            translation: Qt.vector3d(0,0,0)
+            scale3D: Qt.vector3d(0.01,0.01,0.01)
+        }
+        PhongMaterial {
+            id: meshXMaterial
+            ambient: Qt.rgba(255/255,0/255,0/255,1.0)
+        }
+
+        components: [ meshX, meshXMaterial, meshXTransform]
+    }*/
 
     Entity {
         id: meshXEntity
@@ -64,5 +83,6 @@ Entity {
 
         components: [ meshZ, meshZMaterial, meshZTransform]
     }
+
 
 }

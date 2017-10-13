@@ -15,13 +15,13 @@ Entity {
     property real yCameraOffset: 0
     property real zCameraOffset: 0
 
-    property vector3d defaultUp: Qt.vector3d(0, 0, 1)
-    property vector3d defaultDown: Qt.vector3d(0, 0, -1)
-    property vector3d defaultCameraPosition: Qt.vector3d(500,0,500)
+    property vector3d defaultUp: Qt.vector3d(0, 1, 0)
+    property vector3d defaultDown: Qt.vector3d(0,-1, 0)
+    property vector3d defaultCameraPosition: Qt.vector3d(0,0,100)
     //property vector3d orthoCameraPosition: Qt.vector3d(5000,0,5000)
     //property vector3d defaultCameraPosition2: Qt.vector3d(580,0,580)
 
-    property vector3d inputViewCenter : Qt.vector3d( 0, 0, 50)
+    property vector3d inputViewCenter : Qt.vector3d( 0, 0, 0)
     property alias camera: camera
 
 
@@ -46,10 +46,10 @@ Entity {
     Camera {
         id: camera
 
-        projectionType: CameraLens.PerspectiveProjection
-        fieldOfView: 45
-        nearPlane : 1
-        farPlane : 10000.0
+        projectionType: CameraLens.OrthographicProjection
+        fieldOfView: 100
+        nearPlane : 10
+        farPlane : 1000
 
 
 
@@ -279,13 +279,17 @@ Entity {
 
         onPressed: {
             if (event.key === Qt.Key_A) {
-                sceneRoot.total.mtr.perfectPosition();
+                //sceneRoot.total.mtr.perfectPosition();
+                defaultCameraPosition.plus(Qt.vector3d(10,0,0))
             }
             if (event.key === Qt.Key_S) {
-
+                defaultCameraPosition.minus(Qt.vector3d(0,10,0))
             }
             if (event.key === Qt.Key_D) {
-
+                defaultCameraPosition.minus(Qt.vector3d(10,0,0))
+            }
+            if (event.key === Qt.Key_W) {
+                defaultCameraPosition.plus(Qt.vector3d(0,10,0))
             }
 
             if (event.key === Qt.Key_V) {

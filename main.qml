@@ -80,8 +80,10 @@ ApplicationWindow {
         */
         anchors.top : uppertab.bottom
         anchors.left : lefttab.right
-        width: (window.width - lefttab.width) * 1
-        height: (window.height - uppertab.height) * 1
+        //width: (window.width - lefttab.width) * 1
+        //height: (window.height - uppertab.height) * 1
+        width: 800
+        height: 800
 
         focus: true
         hoverEnabled: true
