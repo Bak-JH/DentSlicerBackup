@@ -40,6 +40,8 @@ Slices Slicer::slice(Mesh* mesh){
     Raft raft(cfg->raft_type);
     raft.generate(slices);
 
+    containmentTreeConstruct();
+
     printf("done slicing\n");
     return slices;
 }

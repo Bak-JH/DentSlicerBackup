@@ -41,15 +41,38 @@ void SVGexporter::exportSVG(Slices contourLists, QString outfoldername){
         else
             writeGroupHeader(outfile, i, cfg->layer_height*(i+1));
 
-        for (Path contour : contourLists[i].outershell){
+        PolyTree slice_polytree = contourLists[i].polytree;
+        /*for (Path contour : contourLists[i].outershell){
             writePolygon(outfile, contour);
+        }*/
+        PolyNode* pn = slice_polytree.GetFirst();
+        while (pn != NULL){
+            writePolygon(outfile, pn);
+            pn = pn->GetNext();
         }
+
         writeGroupFooter(outfile);
         writeFooter(outfile);
 
         outfile.close();
     }
     printf("done exporting\n");
+}
+
+void SVGexporter::writePolygon(ofstream& outfile, PolyNode* contour){
+    outfile << "      <polygon contour:type=\"contour\" points=\"";
+    for (IntPoint point: contour->Contour){
+        outfile << std::fixed << (float)(point.X-origin_x)*cfg->pixel_per_mm/cfg->resolution + cfg->resolution_x/2 << "," << std::fixed << (float)(point.Y-origin_y)*cfg->pixel_per_mm/cfg->resolution + cfg->resolution_y/2 << " "; // doesn't need 100 actually
+
+        // just fit to origin
+        //outfile << std::fixed << (float)point.X/cfg->resolution - cfg->origin.x() << "," << std::fixed << (float)point.Y/cfg->resolution - cfg->origin.y() << " ";
+    }
+    if (! contour->IsHole()){
+        outfile << "\" style=\"fill: white\" />\n";
+    } else {
+        outfile << "\" style=\"fill: black\" />\n";
+    }
+
 }
 
 void SVGexporter::writePolygon(ofstream& outfile, Path contour){
@@ -60,7 +83,11 @@ void SVGexporter::writePolygon(ofstream& outfile, Path contour){
         // just fit to origin
         //outfile << std::fixed << (float)point.X/cfg->resolution - cfg->origin.x() << "," << std::fixed << (float)point.Y/cfg->resolution - cfg->origin.y() << " ";
     }
-    outfile << "\" style=\"fill: white\" />\n";
+    if (Orientation(contour)){
+        outfile << "\" style=\"fill: white\" />\n";
+    } else {
+        outfile << "\" style=\"fill: black\" />\n";
+    }
 
 }
 

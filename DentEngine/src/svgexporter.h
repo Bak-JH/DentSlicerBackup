@@ -19,6 +19,7 @@ public:
     void exportSVG(Slices contourLists, QString outfoldername);
 
     void writePolygon(ofstream& outfile, Path contour);
+    void writePolygon(ofstream& outfile, PolyNode* contour);
     void writeGroupHeader(ofstream& outfile, int layer_idx, float z);
     void writeGroupFooter(ofstream& outfile);
     void writeHeader(ofstream& outfile);

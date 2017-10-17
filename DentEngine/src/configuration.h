@@ -25,7 +25,7 @@ public:
     static constexpr float vertex_inbound_distance = 0.001;//(float)1/resolution; // resolution in mm (0.0001 and 0.0009 are same, 1 micron)
 
     char* slicing_mode = "uniform"; // uniform OR adaptive
-    float layer_height = 0.05; // in mm
+    float layer_height = 0.1; // in mm
     float nozzle_width = 0; // in mm (diameter) , for printers with nozzles
     float wall_thickness = 2; // in mm
     float fill_thickness = 1; // in mm

@@ -169,6 +169,7 @@ int main(int argc, char *argv[])
             exporter->exportSVG(contourLists, parser.outputfilename);
 
             break;
+            return 1;
         }
         case CommandLineError:
             fputs(qPrintable(errorMsg), stderr);

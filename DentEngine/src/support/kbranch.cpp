@@ -184,7 +184,7 @@ void generateKBranch(Slices& slices){
         clpr.Clear();
         clpr.AddPaths(slice.outershell, ptSubject, true);
         clpr.AddPaths(circle_paths, ptClip, true);
-        clpr.Execute(ctUnion, slice.outershell, pftNonZero, pftNonZero);
+        clpr.Execute(ctUnion, slice.outershell, pftEvenOdd, pftPositive);
     }
 
     // predict weight containing infill
