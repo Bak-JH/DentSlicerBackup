@@ -25,17 +25,19 @@ public:
     static constexpr float vertex_inbound_distance = 0.001;//(float)1/resolution; // resolution in mm (0.0001 and 0.0009 are same, 1 micron)
 
     char* slicing_mode = "uniform"; // uniform OR adaptive
-    float layer_height = 0.1; // in mm
+    float layer_height = 0.05; // in mm
     float nozzle_width = 0; // in mm (diameter) , for printers with nozzles
     float wall_thickness = 2; // in mm
     float fill_thickness = 1; // in mm
-    float support_density = 0.15;
+    float support_density = 0.6;
     float infill_density = 0.3;
 
     float subdivision_radius = 0.85; // in mm
-    float duplication_radius = 5; // in mm
+    float duplication_radius = 4; // in mm
+    int cluster_size = 2000;
 
-    float default_support_radius = 700 ; // in microns
+    float overhang_checking_diff_layer_height = 0.5; // in mm
+    float default_support_radius = 900 ; // in microns
     float branching_threshold_radius = 4000; // in microns
     int branchable_overhang_point_cnt = 4;
 

@@ -9,8 +9,8 @@ CmdLineParser::CmdLineParser()
 CommandLineParseResult CmdLineParser::parseCommandLine(QString *errorMessage)
 {
     this->setSingleDashWordOptionMode(QCommandLineParser::ParseAsLongOptions);
-    const QCommandLineOption filloption("f", "fill type", "fill");
-    const QCommandLineOption supporteroption("s", "supporter type", "supporter");
+    const QCommandLineOption filloption("f", "fill type", "");
+    const QCommandLineOption supporteroption("s", "supporter type", "");
 
     this->addOption(filloption);
     this->addOption(supporteroption);
@@ -44,6 +44,10 @@ CommandLineParseResult CmdLineParser::parseCommandLine(QString *errorMessage)
     }
     inputfilename = positionalArguments.first();
     outputfilename = positionalArguments.back();
+    if (supporteroption.valueName() != "")
+        cfg->support_type = supporteroption.valueName().toInt();
+    if (filloption.valueName() != "")
+        cfg->infill_type = filloption.valueName().toInt();
 
     return CommandLineOk;
 }

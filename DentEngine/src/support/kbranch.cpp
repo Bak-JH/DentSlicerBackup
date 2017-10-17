@@ -73,7 +73,7 @@ void generateKBranch(Slices& slices){
             }
 
             // just routed
-            if (overhang_point->height < (1-0.2)){
+            if (overhang_point->height < (2-0.8)){
                 goto stem;
             }
 
@@ -146,8 +146,8 @@ void generateKBranch(Slices& slices){
                 //overhang_point->exist = false;
             }
 
-            if (overhang_point->height < (2-0.4))
-                radius = cfg->default_support_radius*(overhang_point->height/2 + 0.4);
+            if (overhang_point->height < (2-1.4))
+                radius = cfg->default_support_radius*(overhang_point->height/2 + 0.7);
             else {
                 radius = (overhang_point->height>30) ? cfg->default_support_radius*(1+ (overhang_point->height-30)/30) : radius = cfg->default_support_radius;
             }

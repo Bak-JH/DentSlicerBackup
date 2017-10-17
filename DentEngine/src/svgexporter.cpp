@@ -1,5 +1,9 @@
 #include "svgexporter.h"
 
+int origin_x;
+int origin_y;
+int origin_z;
+
 void SVGexporter::exportSVG(Slices contourLists, QString outfoldername){
     QDir dir(outfoldername);
     if (!dir.exists()) {
@@ -14,12 +18,17 @@ void SVGexporter::exportSVG(Slices contourLists, QString outfoldername){
     jsonObject["bed_curing_time"] = 15000; // depends on cfg->resin_type
     jsonObject["curing_time"] = 2100; // depends on cfg->resin_type
     jsonObject["mirror_rot_time"] = 2000;
+    jsonObject["z_hop_height"] = 15;
     QJsonDocument jsonDocument(jsonObject);
     QByteArray jsonBytes = jsonDocument.toJson();
 
     infofile << jsonBytes.toStdString();
     infofile.close();
     qDebug() << jsonBytes;
+
+    origin_x = cfg->origin.x()*cfg->resolution;
+    origin_y = cfg->origin.y()*cfg->resolution;
+    origin_z = cfg->origin.z()*cfg->resolution;
 
     for (int i=0; i<contourLists.size(); i++){
         QString outfilename = outfoldername + "/" + QString::number(i) + ".svg";
@@ -46,7 +55,7 @@ void SVGexporter::exportSVG(Slices contourLists, QString outfoldername){
 void SVGexporter::writePolygon(ofstream& outfile, Path contour){
     outfile << "      <polygon contour:type=\"contour\" points=\"";
     for (IntPoint point: contour){
-        outfile << std::fixed << (float)point.X*cfg->pixel_per_mm/cfg->resolution + cfg->resolution_x/2 << "," << std::fixed << (float)point.Y*cfg->pixel_per_mm/cfg->resolution + cfg->resolution_y/2 - 100 << " "; // doesn't need 100 actually
+        outfile << std::fixed << (float)(point.X-origin_x)*cfg->pixel_per_mm/cfg->resolution + cfg->resolution_x/2 << "," << std::fixed << (float)(point.Y-origin_y)*cfg->pixel_per_mm/cfg->resolution + cfg->resolution_y/2 << " "; // doesn't need 100 actually
 
         // just fit to origin
         //outfile << std::fixed << (float)point.X/cfg->resolution - cfg->origin.x() << "," << std::fixed << (float)point.Y/cfg->resolution - cfg->origin.y() << " ";

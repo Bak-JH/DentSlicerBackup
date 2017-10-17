@@ -57,13 +57,17 @@ void overhangDetect(Slices& slices){
         // poll normal of polygon
         for (int cop_idx=0; cop_idx<slice.critical_overhang_region.size(); cop_idx ++){
             Path cop = slice.critical_overhang_region[cop_idx];
-            Paths partial_cops = areaSubdivision(cop,  pow(cfg->subdivision_radius*cfg->resolution,2)*cfg->support_density);
+            Paths partial_cops = areaSubdivision(cop,  pow(cfg->subdivision_radius*cfg->resolution,2)*(1-cfg->support_density));
             for (int p_cop_idx=0; p_cop_idx<partial_cops.size(); p_cop_idx++){
                 Path partial_cop = partial_cops[p_cop_idx];
                 //IntPoint centroid = getPolygonCentroid(partial_cop); // need to change to this
                 IntPoint centroid = getPolygonNormal(partial_cop);
+                IntPoint outlier = getPolygonOutlier(partial_cop, centroid);
 //                qDebug() << slice.z << int(slice.z*Configuration::resolution) << slice.z*Configuration::resolution/Configuration::resolution;
                 slices.overhang_points.push_back(OverhangPoint(centroid.X, centroid.Y, int(slice.z*cfg->resolution), cfg->default_support_radius));
+                //for (int i=0; i<10; i++){
+                slices.overhang_points.push_back(OverhangPoint(outlier.X, outlier.Y, int(slice.z*cfg->resolution), cfg->default_support_radius));
+                //}
                 //slices.overhang_points.push_back(QVector3D(float(centroid.X)/Configuration::resolution, float(centroid.Y)/Configuration::resolution, slice.z));
             }
         }
@@ -136,7 +140,7 @@ void getCriticalOverhangRegion(Slice& slice) {
         }
 
         ip_idx = contour.size();
-        while(ip_idx >0 ){
+        while(ip_idx > 0){
             ip_idx --;
             IntPoint ip = contour[ip_idx];
             if (ip.Z != 0)
@@ -449,6 +453,19 @@ IntPoint getPolygonNormal(Path vertices){
     return normal;
 }
 
+IntPoint getPolygonOutlier(Path vertices, IntPoint normal){
+    IntPoint outlier;
+    int max_distance = 0;
+    for (IntPoint vertice : vertices){
+        int temp_distance = pointDistance(vertice, normal);
+        if (temp_distance > max_distance){
+            outlier = vertice;
+            max_distance = temp_distance;
+        }
+    }
+    return outlier;
+}
+
 
 IntPoint getPolygonCentroid(Path vertices)
 {
@@ -531,7 +548,7 @@ void clusterPoints(vector<OverhangPoint>& points){
 
     OverhangPoint container_point;
     int container_count = 0;
-    float container_size = 2000;//(1-cfg->support_density)*10;
+    float container_size = cfg->cluster_size;//(1-cfg->support_density)*10;
 
     unclassified_points = points;
     container_point = unclassified_points[unclassified_points.size()-1];

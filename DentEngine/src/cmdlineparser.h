@@ -1,6 +1,7 @@
 #ifndef CMDLINEPARSER_H
 #define CMDLINEPARSER_H
 #include <QCommandLineParser>
+#include "configuration.h"
 
 enum CommandLineParseResult
 {

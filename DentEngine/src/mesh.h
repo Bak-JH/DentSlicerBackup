@@ -31,7 +31,7 @@ public :
     std::vector<MeshVertex> vertices;
     QHash<int64_t, MeshVertex> vertices_hash;
     std::vector<MeshFace> faces;
-    float x_min, x_max, y_min, y_max, z_min, z_max;
+    float x_min = 99999, x_max = 99999, y_min = 99999, y_max = 99999, z_min = 99999, z_max = 99999;
 
     /********************** Mesh Generation Functions **********************/
     void addFace(QVector3D v0, QVector3D v1, QVector3D v2);

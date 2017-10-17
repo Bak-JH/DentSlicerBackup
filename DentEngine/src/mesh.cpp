@@ -122,17 +122,17 @@ int Mesh::getVertexIdx(QVector3D v){
 
 // updates mesh's min max
 void Mesh::updateMinMax(QVector3D v){
-    if (v.x() > x_max)
+    if (v.x() > x_max || x_max == 99999)
         x_max = v.x();
-    if (v.x() < x_min)
+    if (v.x() < x_min || x_min == 99999)
         x_min = v.x();
-    if (v.y() > y_max)
+    if (v.y() > y_max || y_max == 99999)
         y_max = v.y();
-    if (v.y() < y_min)
+    if (v.y() < y_min || y_min == 99999)
         y_min = v.y();
-    if (v.z() > z_max)
+    if (v.z() > z_max || z_max == 99999)
         z_max = v.z();
-    if (v.z() < z_min)
+    if (v.z() < z_min || z_min == 99999)
         z_min = v.z();
 }
 

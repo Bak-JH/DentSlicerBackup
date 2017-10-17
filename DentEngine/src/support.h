@@ -60,6 +60,7 @@ Path drawCircle(OverhangPoint overhang_point, int radius);
 
 IntPoint getPolygonNormal(Path vertices);
 IntPoint getPolygonCentroid(Path vertices);
+IntPoint getPolygonOutlier(Path vertices, IntPoint normal);
 Paths areaSubdivision(Path area, float criterion);
 void clusterPoints(vector<OverhangPoint>& points);
 

@@ -6,7 +6,7 @@ CONFIG += c++11
 QT +=  widgets
 CONFIG += qt
 
-TARGET = DLPengine
+TARGET = DentStudioEngine
 CONFIG += console
 CONFIG -= app_bundle
 
@@ -34,7 +34,7 @@ SOURCES += main.cpp \
 # deprecated API in order to know how to port your code away from it.
 DEFINES += QT_DEPRECATED_WARNINGS
 DEFINES += "debug_mode=0"\
-            "debug_layer=110"
+            "debug_layer=30"
 
 # You can also make your code fail to compile if you use deprecated APIs.
 # In order to do so, uncomment the following line.

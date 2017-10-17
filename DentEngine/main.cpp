@@ -119,15 +119,15 @@ int main(int argc, char *argv[])
 
     // draw overhang positions
     qDebug() << slices.overhang_points.size();
-    /*p.setPen(QPen(Qt::red, 2, Qt::DashLine, Qt::RoundCap));
-    for (OverhangPoint cop : slices.overhang_points){
-        p.drawPoint(cop.prev_position.X*10/Configuration::resolution + 500, cop.prev_position.Y*10/Configuration::resolution + 500);
-
-        qDebug() << "overhang positions " << cop.prev_position.X << cop.prev_position.Y;
-    }
-    p.end();*/
-
     p.setPen(QPen(Qt::red, 2, Qt::DashLine, Qt::RoundCap));
+    for (OverhangPoint cop : slices.overhang_points){
+        p.drawPoint(cop.position.X*10/Configuration::resolution + 500, cop.position.Y*10/Configuration::resolution + 500);
+
+        qDebug() << "overhang positions " << cop.position.X << cop.position.Y;
+    }
+    p.end();
+
+    /*p.setPen(QPen(Qt::red, 2, Qt::DashLine, Qt::RoundCap));
     for (OverhangPoint cop : slices.overhang_points){
         if (!cop.exist){
             p.drawPoint(cop.position.X*10/Configuration::resolution + 500, cop.position.Y*10/Configuration::resolution + 500);
@@ -135,7 +135,7 @@ int main(int argc, char *argv[])
 
         qDebug() << "overhang positions " << cop.position.X << cop.position.Y;
     }
-    p.end();
+    p.end();*/
 
     l.setPicture(pi);
     l.show();
@@ -143,8 +143,7 @@ int main(int argc, char *argv[])
 #else
 
     QCoreApplication a(argc, argv);
-    QCoreApplication::setApplicationName("DLPengine");
-    QCoreApplication::setApplicationVersion("1.0");
+    QCoreApplication::setApplicationName("DentStudioEngine");
 
     CmdLineParser parser;
     QString errorMsg;
