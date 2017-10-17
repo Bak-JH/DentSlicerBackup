@@ -209,9 +209,9 @@ Paths Slicer::contourConstruct(Paths pathList){
         if (contour.size() == 2)
             continue;
 
-        if (Orientation(contour)){
+        /*if (Orientation(contour)){
             ReversePath(contour);
-        }
+        }*/
 
         contourList.push_back(contour);
     }

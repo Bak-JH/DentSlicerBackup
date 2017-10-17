@@ -30,8 +30,13 @@ void overhangDetect(Slices& slices){
 
     Paths prev_sum;
 
+    //int checking_layers = cfg->overhang_detect_diff_layer_height / cfg->layer_height;
+    //qDebug() << "Checking layers per " << checking_layers << "layers";
+
     // calculate overhang regions
     for (int idx=slices.size()-1; idx>=0; idx--){
+        //if (idx % checking_layers != 0)
+        //    continue;
         qDebug() << "overhang region detect" << idx << "/" << slices.size();
         Slice& slice = slices[idx];
         Paths temp_overhang_region;

@@ -36,7 +36,7 @@ public:
     float duplication_radius = 4; // in mm
     int cluster_size = 2000;
 
-    float overhang_checking_diff_layer_height = 0.5; // in mm
+    float overhang_detect_diff_layer_height = 0.5; // in mm
     float default_support_radius = 900 ; // in microns
     float branching_threshold_radius = 4000; // in microns
     int branchable_overhang_point_cnt = 4;

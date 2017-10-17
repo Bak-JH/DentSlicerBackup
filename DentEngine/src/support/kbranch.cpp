@@ -78,7 +78,6 @@ void generateKBranch(Slices& slices){
             }
 
             if (overhang_point->branchable){
-
                 float min_distance = 9999999;
                 BranchableOverhangPoint* min_bop = NULL;
 
@@ -152,9 +151,11 @@ void generateKBranch(Slices& slices){
                 radius = (overhang_point->height>30) ? cfg->default_support_radius*(1+ (overhang_point->height-30)/30) : radius = cfg->default_support_radius;
             }
 
-            if (overhang_point->branching_overhang_point != NULL)
-                circle_paths.push_back(drawCircle(*overhang_point->branching_overhang_point, int(radius)));
+            if (overhang_point->branching_overhang_point != NULL){
 
+                Path circledrew = drawCircle(*overhang_point->branching_overhang_point, int(radius));
+                circle_paths.push_back(circledrew);
+            }
             circle_paths.push_back(drawCircle(*overhang_point, int(radius)));
 
             overhang_point->height += cfg->layer_height;
