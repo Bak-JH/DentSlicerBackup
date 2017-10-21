@@ -4,6 +4,8 @@ import Qt3D.Render 2.0
 import Qt3D.Extras 2.0
 
 Entity {
+
+    objectName: "normalModel"
     property string inputSource;
 
     property alias testMesh: testMesh

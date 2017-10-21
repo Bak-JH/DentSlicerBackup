@@ -25,21 +25,11 @@ Rectangle{
     }
 
 
-    function collectConfigurations(){
-        var configurations = {};
-
-        // do collecting things
-        // configurations[key] = value;
-        configurations["inputfilepath"] = "C:/Users/diridiri/Desktop/DLP/lowerjaw_13.STL";//"C:/Users/diridiri/Desktop/DLP/lowerjaw.STL";
-        configurations["outputfilepath"] = "C:/Users/diridiri/Desktop/DLP/output";
-
-        return configurations;
-    }
 
     MouseArea{
         anchors.fill: parent
         onClicked:{
-            loadFileWindow();
+            //loadFileWindow();
 
 
 
@@ -54,22 +44,11 @@ Rectangle{
                 }
                 }
             })();*/
-            /*harin
-            console.log(parent.id);
-            console.log(parent.parent.id);
 
-            console.log("exporting");
-            // collect configurations
-            var cfg = collectConfigurations();
-            se.slice(cfg);
-            */
 
         }
     }
 
-    function loadFileWindow(){
-        filedialogload.open();
-    }
 }
 
 

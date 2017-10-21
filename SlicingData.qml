@@ -1,8 +1,14 @@
 import QtQuick 2.0
 
 Item {
+    id: slicing_data
     width: 358
     height: 80
+
+    property alias slicing_layer:slicing_layer
+    property alias slicing_volume:slicing_volume
+    property alias slicing_time:sdupleft
+    property alias slicing_size:sddownleft
 
     Rectangle{
         anchors.fill: parent
@@ -79,6 +85,7 @@ Item {
             inputSource: "qrc:/resource/slicing_size.png"
         }
         SlicingDataElement{
+            id : slicing_layer
             anchors.top : parent.top
             anchors.left: sdupleft.right
             anchors.topMargin: 3
@@ -89,6 +96,7 @@ Item {
             inputSource: "qrc:/resource/slicing_layer.png"
         }
         SlicingDataElement{
+            id: slicing_volume
             anchors.bottom : parent.bottom
             anchors.left: sddownleft.right
             anchors.bottomMargin: 3
@@ -97,6 +105,18 @@ Item {
             inputWidth: 100
             inputData: "26 ml"
             inputSource: "qrc:/resource/slicing_volume.png"
+        }
+
+        Connections {
+            target: qm
+            onUpdateModelInfo:{
+                slicing_time.inputData = parseInt(printing_time/60)+"h "+printing_time%60+"m";
+                slicing_layer.inputData = layer+" layer";
+
+                slicing_size.inputData = xyz;
+                slicing_volume.inputData = volume.toFixed(1)+ " ml";
+
+            }
         }
     }
 

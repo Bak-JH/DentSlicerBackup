@@ -6,9 +6,20 @@
 #include "slicingengine.h"
 #include "configuration.h"
 #include "glmodel.h"
+#include "qmlmanager.h"
 
-static QQuickItem* FindItemByName(QList<QObject*> nodes, const QString& name);
-static QQuickItem* FindItemByName(QQmlApplicationEngine* engine, const QString& name);
+
+#include <Qt3DCore/QEntity>
+#include <Qt3DCore/QTransform>
+#include <Qt3DCore/QEntity>
+#include <Qt3DCore/QTransform>
+#include <QQuickItem>
+
+using namespace Qt3DCore;
+//using namespace Qt3DRender;
+
+static QObject* FindItemByName(QList<QObject*> nodes, const QString& name);
+static QObject* FindItemByName(QQmlApplicationEngine* engine, const QString& name);
 
 int main(int argc, char *argv[])
 {
@@ -16,14 +27,24 @@ int main(int argc, char *argv[])
     QScopedPointer<QuaternionHelper> qq(new QuaternionHelper);
     QScopedPointer<SlicingEngine> se(new SlicingEngine);
     qmlRegisterType<GlModel>("GLQML", 1, 0, "GlModel");
+    QScopedPointer<QmlManager> qm(new QmlManager);
 
     QQmlApplicationEngine engine;
     engine.load(QUrl(QStringLiteral("qrc:/main.qml")));
+    engine.rootContext()->setContextProperty("qm", qm.data());
     engine.rootContext()->setContextProperty("qq",qq.data());
     engine.rootContext()->setContextProperty("se",se.data());
 
-    //qDebug() << FindItemByName(&engine, "Model")->;
+    QObject* mainView = FindItemByName(&engine, "MainView");
+    QEntity* teethModel = (QEntity *)FindItemByName(&engine, "teethModel");
 
+    QObject::connect(se.data(), SIGNAL(updateModelInfo(int,int,QString,float)), qm.data(), SLOT(sendUpdateModelInfo(int,int,QString,float)));
+
+    QComponentVector::iterator i;
+    /*QComponentVector teethModelComponents = teethModel->components();
+    for (i=teethModelComponents.begin(); i!=teethModelComponents.end(); ++i ){
+        //QDebug() << (*(QComponent*)i).children().size();
+    }*/
 
     if (engine.rootObjects().isEmpty())
         return -1;
@@ -31,16 +52,16 @@ int main(int argc, char *argv[])
     return app.exec();
 }
 
-static QQuickItem* FindItemByName(QList<QObject*> nodes, const QString& name)
+static QObject* FindItemByName(QList<QObject*> nodes, const QString& name)
 {
     for(int i = 0; i < nodes.size(); i++){
         // search for node
         if (nodes.at(i) && nodes.at(i)->objectName() == name){
-            return dynamic_cast<QQuickItem*>(nodes.at(i));
+            return dynamic_cast<QObject*>(nodes.at(i));
         }
         // search in children
         else if (nodes.at(i) && nodes.at(i)->children().size() > 0){
-            QQuickItem* item = FindItemByName(nodes.at(i)->children(), name);
+            QObject* item = FindItemByName(nodes.at(i)->children(), name);
             if (item)
                 return item;
         }
@@ -49,7 +70,7 @@ static QQuickItem* FindItemByName(QList<QObject*> nodes, const QString& name)
     return NULL;
 }
 
-static QQuickItem* FindItemByName(QQmlApplicationEngine* engine, const QString& name)
+static QObject* FindItemByName(QQmlApplicationEngine* engine, const QString& name)
 {
     return FindItemByName(engine->rootObjects(), name);
 }

@@ -1,10 +1,23 @@
 import QtQuick 2.0
 import GLQML 1.0
+import Qt3D.Core 2.0
+import Qt3D.Render 2.0
+import Qt3D.Extras 2.0
 
-Item {
 
-    width: 320
-    height: 480
+Entity {
+    property string inputSource;
+
+    property alias testMesh: testMesh
+    property alias meshTransform: meshTransform
+
+    id : glmodelentity
+
+    Mesh{
+        id: testMesh
+        source: inputSource
+        //source: "file:///D:/Dev/Trash/3Dtest/full.stl"
+    }
 
     GlModel {
         SequentialAnimation on t {

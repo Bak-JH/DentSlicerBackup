@@ -5,6 +5,7 @@ Item {
     property alias mtz: mtz
     property alias mtm: mtm
     property alias mtr: mtr
+    property alias slicing_data:slicing_data
 
     property bool isTab : false
     property bool isZoom : false
@@ -64,6 +65,7 @@ Item {
     }
 
     SlicingData{
+        id : slicing_data
         anchors.bottom: parent.bottom
         anchors.right: parent.right
 

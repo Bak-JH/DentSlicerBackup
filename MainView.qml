@@ -9,7 +9,6 @@ import QtQuick 2.7
 import Qt3D.Logic 2.0
 
 Entity {
-
     property vector3d xup : Qt.vector3d( 1.0, 0.0, 0.0 )
     property vector3d xdown : Qt.vector3d( -1.0, 0.0, 0.0 )
 
@@ -156,6 +155,8 @@ Entity {
             }
         }*/
         Entity{
+
+            objectName:"teethModel"
             Transform{
                 id: systemTransform
                 scale3D: Qt.vector3d(0.01,0.01,0.01)

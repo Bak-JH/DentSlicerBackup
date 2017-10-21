@@ -115,7 +115,12 @@ Rectangle {
             anchors.left: parent.left
             iconSource: "qrc:/resource/upper_open.png"
             iconText: "Open"
-
+            MouseArea{
+                anchors.fill: parent
+                onClicked:{
+                    filedialogload.open();
+                }
+            }
         }
 
         UpperButton{
@@ -125,12 +130,38 @@ Rectangle {
             iconSource: "qrc:/resource/upper_save.png"
             iconText: "Save"
         }
+
+
         UpperButton{
             id : first_tab_button_export
 
             anchors.left: first_tab_button_save.right
             iconSource: "qrc:/resource/upper_export.png"
             iconText: "Export"
+
+            MouseArea{
+                anchors.fill: parent
+                onClicked:{
+                    function collectConfigurations(){
+                        var configurations = {};
+
+                        // do collecting things
+                        // configurations[key] = value;
+                        configurations["s"] = "s#2";
+                        configurations["f"] = "s#1";
+                        configurations["r"] = "s#2";
+                        return configurations;
+                    }
+
+                    console.log(parent.id);
+                    console.log(parent.parent.id);
+
+                    console.log("exporting");
+                    // collect configurations
+                    var cfg = collectConfigurations();
+                    se.slice(cfg);
+                }
+            }
         }
 
         Rectangle{

@@ -90,7 +90,10 @@ ApplicationWindow {
         aspects: ["input", "logic"]
         cameraAspectRatioMode: Scene3D.AutomaticAspectRatio
 
-        MainView {id: sceneRoot}
+        MainView {
+            objectName: "MainView"
+            id: sceneRoot
+        }
     }
 
 

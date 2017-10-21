@@ -14,6 +14,7 @@ Rectangle {
 
 
     }*/
+
     Rectangle{
         id: rightline
         width: 2
