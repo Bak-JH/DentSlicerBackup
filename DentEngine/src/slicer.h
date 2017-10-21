@@ -27,6 +27,8 @@ public:
     Paths infill;
     Paths support;
 
+    int Area;
+
     void outerShellOffset(float delta, JoinType join_type);
 };
 

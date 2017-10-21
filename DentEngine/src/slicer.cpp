@@ -12,9 +12,11 @@ Slices Slicer::slice(Mesh* mesh){
     // mesh slicing step
     vector<Paths> meshslices = meshSlice(mesh);
 
+    printf("meshslice done\n");
+    fflush(stdout);
     // contour construction step
     for (int i=0; i< meshslices.size(); i++){
-        qDebug() << "constructing contour" << i+1 << "/" << meshslices.size() << "offset" << -(cfg->wall_thickness+cfg->nozzle_width)/2;
+        //qDebug() << "constructing contour" << i+1 << "/" << meshslices.size() << "offset" << -(cfg->wall_thickness+cfg->nozzle_width)/2;
         Slice meshslice;
         meshslice.outershell = contourConstruct(meshslices[i]);
         int prev_size = meshslice.outershell.size();
@@ -24,6 +26,8 @@ Slices Slicer::slice(Mesh* mesh){
         //meshslice.outerShellOffset(-(cfg->wall_thickness+cfg->nozzle_width)/2, jtRound);
         slices.push_back(meshslice);
     }
+    //printf("contourconstruction done\n");
+    //printf("meshslice done\n");
 
     //QTextStream(stdout) << "meshslice done" <<endl;
     //cout << "meshslice done" << endl;
@@ -32,6 +36,7 @@ Slices Slicer::slice(Mesh* mesh){
     // overhang detection step
     overhangDetect(slices);
     printf("overhangdetect done\n");
+    fflush(stdout);
     //cout << "overhangdetect done" <<endl;
 
     // below steps need to be done in parallel way
@@ -39,22 +44,26 @@ Slices Slicer::slice(Mesh* mesh){
     Infill infill(cfg->infill_type);
     infill.generate(slices);
     printf("infill done\n");
+    fflush(stdout);
     //cout << "infill done" <<endl;
 
     // support generation step
     Support support(cfg->support_type);
     support.generate(slices);
     printf("support done\n");
+    fflush(stdout);
     //cout << "support done" <<endl;
 
     // raft generation step
     Raft raft(cfg->raft_type);
     raft.generate(slices);
     printf("raft done\n");
+    fflush(stdout);
     //cout << "raft done" <<endl;
 
     containmentTreeConstruct();
     printf("ctreeconstruct done\n");
+    fflush(stdout);
     return slices;
 }
 

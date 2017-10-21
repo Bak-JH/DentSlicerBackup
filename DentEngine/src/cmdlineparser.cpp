@@ -9,9 +9,13 @@ CmdLineParser::CmdLineParser()
 CommandLineParseResult CmdLineParser::parseCommandLine(QString *errorMessage)
 {
     this->setSingleDashWordOptionMode(QCommandLineParser::ParseAsLongOptions);
+    const QCommandLineOption resolutionoption("r", "resolution", "");
+    const QCommandLineOption layerheightoption("l", "layer height", "");
     const QCommandLineOption filloption("f", "fill type", "");
     const QCommandLineOption supporteroption("s", "supporter type", "");
 
+    this->addOption(resolutionoption);
+    this->addOption(layerheightoption);
     this->addOption(filloption);
     this->addOption(supporteroption);
 
@@ -44,6 +48,8 @@ CommandLineParseResult CmdLineParser::parseCommandLine(QString *errorMessage)
     }
     inputfilename = positionalArguments.first();
     outputfilename = positionalArguments.back();
+    if (layerheightoption.valueName() != "")
+        cfg->layer_height = layerheightoption.valueName().toFloat();
     if (supporteroption.valueName() != "")
         cfg->support_type = supporteroption.valueName().toInt();
     if (filloption.valueName() != "")

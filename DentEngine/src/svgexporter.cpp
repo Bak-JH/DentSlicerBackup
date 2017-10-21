@@ -31,6 +31,8 @@ void SVGexporter::exportSVG(Slices contourLists, QString outfoldername){
     origin_y = cfg->origin.y()*cfg->resolution;
     origin_z = cfg->origin.z()*cfg->resolution;
 
+    int64_t area = 0;
+
     for (int i=0; i<contourLists.size(); i++){
         QString outfilename = outfoldername + "/" + QString::number(i) + ".svg";
 
@@ -45,6 +47,7 @@ void SVGexporter::exportSVG(Slices contourLists, QString outfoldername){
         PolyTree slice_polytree = contourLists[i].polytree;
         PolyNode* pn = slice_polytree.GetFirst();
         while (pn != NULL){
+            area += Area(pn->Contour);
             writePolygon(outfile, pn);
             pn = pn->GetNext();
         }
@@ -54,6 +57,17 @@ void SVGexporter::exportSVG(Slices contourLists, QString outfoldername){
 
         outfile.close();
     }
+    printf("slicing done\n");
+    int layer = contourLists.size();
+    int printing_time = layer*15/60;
+
+    float x = contourLists.mesh->x_max-contourLists.mesh->x_min;
+    float y = contourLists.mesh->y_max-contourLists.mesh->y_min;
+    float z = contourLists.mesh->z_max-contourLists.mesh->z_min;
+
+    float volume = ((float)(area/pow(cfg->pixel_per_mm,2))/1000000)*cfg->layer_height;
+    printf("info:%d:%d:%.1f:%.1f:%.1f:%.1f\n",printing_time,layer,x,y,z,volume);
+    fflush(stdout);
     exit(0);
     return;
 }

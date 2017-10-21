@@ -160,6 +160,7 @@ int main(int argc, char *argv[])
 
             // Slice
             printf("slicing init\n");
+            fflush(stdout);
             Slicer* slicer = new Slicer();
             Slices contourLists = slicer->slice(loaded_mesh);
 
@@ -168,6 +169,8 @@ int main(int argc, char *argv[])
             exporter->exportSVG(contourLists, parser.outputfilename);
 
             printf("slicing done");
+            fflush(stdout);
+            exit(0);
             break;
         }
         case CommandLineError:
