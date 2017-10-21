@@ -16,5 +16,4 @@ void Raft::generate(Slices& slices){
         generateKRaft(slices);
         break;
     }
-    printf ("raft generation done\n");
 }

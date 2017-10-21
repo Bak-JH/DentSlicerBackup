@@ -17,7 +17,6 @@ void Support::generate(Slices& slices){
         generateKBranch(slices);
         break;
     }
-    printf ("support generation done\n");
 }
 
 
@@ -108,9 +107,6 @@ void overhangDetect(Slices& slices){
     slices.overhang_points = overhang_points;*/
 
     clusterPoints(slices.overhang_points);
-
-
-    printf("overhang region detection done\n");
 }
 
 

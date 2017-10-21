@@ -1,6 +1,7 @@
 #include "slicer.h"
 #include <QHash>
 #include <QElapsedTimer>
+#include <QTextStream>
 
 using namespace ClipperLib;
 
@@ -24,25 +25,36 @@ Slices Slicer::slice(Mesh* mesh){
         slices.push_back(meshslice);
     }
 
+    //QTextStream(stdout) << "meshslice done" <<endl;
+    //cout << "meshslice done" << endl;
+    //qCritical() << "meshslice done";
+
     // overhang detection step
     overhangDetect(slices);
+    printf("overhangdetect done\n");
+    //cout << "overhangdetect done" <<endl;
 
     // below steps need to be done in parallel way
     // infill generation step
     Infill infill(cfg->infill_type);
     infill.generate(slices);
+    printf("infill done\n");
+    //cout << "infill done" <<endl;
 
     // support generation step
     Support support(cfg->support_type);
     support.generate(slices);
+    printf("support done\n");
+    //cout << "support done" <<endl;
 
     // raft generation step
     Raft raft(cfg->raft_type);
     raft.generate(slices);
+    printf("raft done\n");
+    //cout << "raft done" <<endl;
 
     containmentTreeConstruct();
-
-    printf("done slicing\n");
+    printf("ctreeconstruct done\n");
     return slices;
 }
 
@@ -361,8 +373,6 @@ void Slicer::containmentTreeConstruct(){
         clpr.AddPaths(slice->outershell, ptSubject, true);
         clpr.Execute(ctUnion, slice->polytree);
     }
-
-    printf ("containment tree construction done\n");
 }
 
 

@@ -11,7 +11,7 @@
 #include <qDebug>
 
 
-using namespace std;
+//using namespace std;
 using namespace ClipperLib;
 
 class OverhangPoint;

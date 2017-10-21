@@ -5,6 +5,7 @@ int origin_y;
 int origin_z;
 
 void SVGexporter::exportSVG(Slices contourLists, QString outfoldername){
+    qDebug() << "export svg";
     QDir dir(outfoldername);
     if (!dir.exists()) {
         dir.mkpath(".");
@@ -24,7 +25,7 @@ void SVGexporter::exportSVG(Slices contourLists, QString outfoldername){
 
     infofile << jsonBytes.toStdString();
     infofile.close();
-    qDebug() << jsonBytes;
+    //qDebug() << jsonBytes;
 
     origin_x = cfg->origin.x()*cfg->resolution;
     origin_y = cfg->origin.y()*cfg->resolution;
@@ -42,9 +43,6 @@ void SVGexporter::exportSVG(Slices contourLists, QString outfoldername){
             writeGroupHeader(outfile, i, cfg->layer_height*(i+1));
 
         PolyTree slice_polytree = contourLists[i].polytree;
-        /*for (Path contour : contourLists[i].outershell){
-            writePolygon(outfile, contour);
-        }*/
         PolyNode* pn = slice_polytree.GetFirst();
         while (pn != NULL){
             writePolygon(outfile, pn);
@@ -56,7 +54,8 @@ void SVGexporter::exportSVG(Slices contourLists, QString outfoldername){
 
         outfile.close();
     }
-    printf("done exporting\n");
+    exit(0);
+    return;
 }
 
 void SVGexporter::writePolygon(ofstream& outfile, PolyNode* contour){

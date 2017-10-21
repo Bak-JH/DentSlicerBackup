@@ -1,9 +1,9 @@
 QT += core
-QT += gui
 
 CONFIG += c++11
 
-QT +=  widgets
+QT += widgets
+QT -= gui
 CONFIG += qt
 
 TARGET = DentStudioEngine
@@ -33,6 +33,7 @@ SOURCES += main.cpp \
 # depend on your compiler). Please consult the documentation of the
 # deprecated API in order to know how to port your code away from it.
 DEFINES += QT_DEPRECATED_WARNINGS
+DEFINES += QT_NO_DEBUG_OUTPUT
 DEFINES += "debug_mode=0"\
             "debug_layer=30"
 

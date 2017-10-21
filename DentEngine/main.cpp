@@ -144,7 +144,6 @@ int main(int argc, char *argv[])
 
     QCoreApplication a(argc, argv);
     QCoreApplication::setApplicationName("DentStudioEngine");
-
     CmdLineParser parser;
     QString errorMsg;
 
@@ -155,21 +154,21 @@ int main(int argc, char *argv[])
             // Load mesh
             Mesh* loaded_mesh = new Mesh();
             loadMeshSTL(loaded_mesh, parser.inputfilename.toStdString().c_str());
-            printf("vertices : %d, faces : %d\n", loaded_mesh->vertices.size(), loaded_mesh->faces.size());
-            printf("slicing in %s mode, resolution %d\n", cfg->slicing_mode, cfg->resolution);
-            printf("x : %f %f, y: %f %f, z: %f %f\n", loaded_mesh->x_min, loaded_mesh->x_max, loaded_mesh->y_min, loaded_mesh->y_max, loaded_mesh->z_min, loaded_mesh->z_max);
+            //printf("vertices : %d, faces : %d\n", loaded_mesh->vertices.size(), loaded_mesh->faces.size());
+            //printf("slicing in %s mode, resolution %d\n", cfg->slicing_mode, cfg->resolution);
+            //printf("x : %f %f, y: %f %f, z: %f %f\n", loaded_mesh->x_min, loaded_mesh->x_max, loaded_mesh->y_min, loaded_mesh->y_max, loaded_mesh->z_min, loaded_mesh->z_max);
 
             // Slice
+            printf("slicing init\n");
             Slicer* slicer = new Slicer();
             Slices contourLists = slicer->slice(loaded_mesh);
 
             // Export to SVG
-            qDebug() << contourLists[5].size();
             SVGexporter* exporter = new SVGexporter();
             exporter->exportSVG(contourLists, parser.outputfilename);
 
+            printf("slicing done");
             break;
-            return 1;
         }
         case CommandLineError:
             fputs(qPrintable(errorMsg), stderr);
