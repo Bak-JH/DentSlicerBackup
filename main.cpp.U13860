@@ -9,6 +9,10 @@
 #include "qmlmanager.h"
 
 
+#include <Qt3DCore/QEntity>
+#include <Qt3DCore/QTransform>
+#include <QQuickItem>
+#include <Qt3DRender/Qt3DRender>
 
 using namespace Qt3DCore;
 //using namespace Qt3DRender;
@@ -19,9 +23,9 @@ static QObject* FindItemByName(QQmlApplicationEngine* engine, const QString& nam
 int main(int argc, char *argv[])
 {
     QGuiApplication app(argc, argv);
-    qmlRegisterType<GLModel>("GLQML", 1, 0, "GLModel");
     QScopedPointer<QuaternionHelper> qq(new QuaternionHelper);
     QScopedPointer<SlicingEngine> se(new SlicingEngine);
+    qmlRegisterType<GlModel>("GLQML", 1, 0, "GlModel");
     QScopedPointer<QmlManager> qm(new QmlManager);
 
     QQmlApplicationEngine engine;
@@ -38,7 +42,7 @@ int main(int argc, char *argv[])
 
 
     foreach(QObject* obj, ((QObject*)teethModel)->children()){
-        //qDebug() << (*((QEntity*)obj));
+        qDebug() << (*((QEntity*)obj)).metaObject();
         /*foreach (QComponent* component, (*((QEntity*)obj)).components()){
             qDebug() << component->objectName();
         }*/

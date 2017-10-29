@@ -2,18 +2,18 @@
 #define GLMODEL_H
 
 #include <QObject>
-#include <Qt3DCore>
-#include <Qt3DRender>
-#include <Qt3DExtras>
-#include <Qt3DInput>
+//#include <Qt3DCore/Qt3DCore>
+//#include <Qt3DRender/Qt3DRender>
+//#include <Qt3DExtras/Qt3DExtras>
 
-using namespace Qt3DCore;
-using namespace Qt3DRender;
-using namespace Qt3DExtras;
+//using namespace Qt3DCore;
+//using namespace Qt3DRender;
+//using namespace Qt3DExtras;
 
 class GLModel : public QEntity
 {
     Q_OBJECT
+    /*
 public:
     GLModel(QNode* parent = nullptr);
 
@@ -25,13 +25,9 @@ private:
     QAttribute *positionAttribute;
     QGeometryRenderer* m_geometryRenderer;
 
-    float x,y,z;
-    int m_count;
+    float x,y;
 
-    QNode* m_parent;
-
-    void addPoint();
-    void onTimerUpdate();
+    void addPoint();*/
 };
 
 /*

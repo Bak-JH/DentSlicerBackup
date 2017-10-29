@@ -1,5 +1,119 @@
 #include "glmodel.h"
 
+
+
+GLModel::GLModel(QNode *parent)
+    : QEntity(parent)
+    , x(0.0f)
+    , y(0.0f)
+    , z(0.0f)
+    , m_count(0)
+{
+    m_planeMaterial = new QPhongAlphaMaterial();
+    m_planeMaterial->setAmbient(QColor(100,100,100));
+    m_planeMaterial->setDiffuse(QColor(255,255,255));
+    m_planeMaterial->setAlpha(1.0f);
+
+    m_parent = parent;
+
+    QTimer *timer = new QTimer();
+    QObject::connect(timer, &QTimer::timeout,this,&GLModel::onTimerUpdate);
+
+    timer->start(100);
+}
+
+
+void GLModel::addPoint(){
+    float* reVertexArray;
+
+    //x += 5.0f;
+    //y += 3.0f;
+    x += 0.01f;
+    y -= (qrand() % 2 - 1)*0.01;
+    z = 0.01f;
+
+    if (!(m_count % 100)) {
+        //every 100-th timer tick:
+        m_geometryRenderer = new QGeometryRenderer();
+        QGeometry* meshGeometry = new QGeometry(m_geometryRenderer);
+
+        QByteArray vertexArray;
+        vertexArray.resize(200*3*sizeof(float));
+        reVertexArray = reinterpret_cast<float*>(vertexArray.data());
+
+        //coordinates of left vertex
+        reVertexArray[0] = y-0.1f;
+        reVertexArray[1] = z;
+        reVertexArray[2] = x;
+
+        //coordinates of right vertex
+        reVertexArray[3] = y+0.1f;
+        reVertexArray[4] = z;
+        reVertexArray[5] = x;
+
+        vertexBuffer = new Qt3DRender::QBuffer(Qt3DRender::QBuffer::VertexBuffer,meshGeometry);
+        vertexBuffer->setUsage(Qt3DRender::QBuffer::DynamicDraw);
+        vertexBuffer->setData(vertexArray);
+
+        // Attributes
+        positionAttribute = new QAttribute(meshGeometry);
+        positionAttribute->setAttributeType(QAttribute::VertexAttribute);
+        positionAttribute->setBuffer(vertexBuffer);
+        positionAttribute->setDataType(QAttribute::Float);
+        positionAttribute->setDataSize(3);
+        positionAttribute->setByteOffset(0);
+        positionAttribute->setByteStride(3*sizeof(float));
+        positionAttribute->setCount(2);
+        positionAttribute->setName(QAttribute::defaultPositionAttributeName());
+
+        meshGeometry->addAttribute(positionAttribute);
+
+        m_geometryRenderer->setInstanceCount(1);
+        m_geometryRenderer->setFirstVertex(0);
+        m_geometryRenderer->setFirstInstance(0);
+        m_geometryRenderer->setPrimitiveType(QGeometryRenderer::TriangleStrip);
+        m_geometryRenderer->setGeometry(meshGeometry);
+
+        QEntity* entity = new QEntity(this);
+        entity->addComponent(m_geometryRenderer);
+        entity->addComponent(m_planeMaterial);
+
+        return;
+    }
+
+
+    //update geometry
+    QByteArray appendVertexArray;
+    appendVertexArray.resize(2*3*sizeof(float));
+    reVertexArray = reinterpret_cast<float*>(appendVertexArray.data());
+
+    //coordinates of left vertex
+    reVertexArray[0] = y-0.1f;
+    reVertexArray[1] = z;
+    reVertexArray[2] = x;
+
+    //coordinates of right vertex
+    reVertexArray[3] = y+0.1f;
+    reVertexArray[4] = z+0.1f;
+    reVertexArray[5] = x;
+
+    uint vertexCount = positionAttribute->count();
+    vertexBuffer->updateData(vertexCount*3*sizeof(float),appendVertexArray);
+    positionAttribute->setCount(vertexCount+2);
+}
+
+void GLModel::onTimerUpdate()
+{
+    addPoint();
+
+    qDebug() << m_count;
+    //qDebug() << "x=" << x << "; y=" << y;
+    //qDebug() << m_parent;
+
+    m_count ++;
+}
+
+/*
 #include <QQuickWindow>
 #include <QOpenGLShaderProgram>
 #include <QOpenGLContext>
@@ -201,4 +315,4 @@ void GlModelRenderer::mouseMoveEvent(QMouseEvent * event){
 
 }
 
-
+*/

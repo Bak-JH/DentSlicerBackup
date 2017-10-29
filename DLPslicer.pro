@@ -1,6 +1,6 @@
 TEMPLATE = app
 
-QT += qml quick opengl
+QT += qml quick opengl 3dcore 3drender 3dinput 3dextras
 
 CONFIG += c++11
 
