@@ -12,7 +12,9 @@ SOURCES += main.cpp \
     configuration.cpp \
     glmodel.cpp \
     qmlmanager.cpp \
-    modelloader.cpp
+    fileloader.cpp \
+    mesh.cpp \
+    polyclipping/clipper.cpp
 
 RESOURCES += qml.qrc \
     resources.qrc
@@ -42,6 +44,8 @@ HEADERS += \
     configuration.h \
     glmodel.h \
     qmlmanager.h \
-    modelloader.h
+    fileloader.h \
+    mesh.h \
+    polyclipping/clipper.hpp
 
 LIBS += -lOpengl32

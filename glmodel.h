@@ -7,7 +7,7 @@
 #include <Qt3DExtras>
 #include <Qt3DInput>
 #include <vector>
-#include "modelloader.h"
+#include "fileloader.h"
 
 #define MAX_BUF_LEN 100000
 
@@ -36,10 +36,11 @@ private:
     int f_cnt;
 
     QNode* m_parent;
+    Mesh* mesh;
 
     void initialize();
     void addVertex(QVector3D vertex);
-    void addVertices(vector<QVector3D> vertices);
+    void addVertices(vector<MeshVertex> vertices);
     void onTimerUpdate();
 };
 
