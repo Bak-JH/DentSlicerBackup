@@ -11,9 +11,8 @@ SOURCES += main.cpp \
     slicingengine.cpp \
     configuration.cpp \
     glmodel.cpp \
-    geometryengine.cpp \
-    text3d.cpp \
-    qmlmanager.cpp
+    qmlmanager.cpp \
+    modelloader.cpp
 
 RESOURCES += qml.qrc \
     resources.qrc
@@ -42,8 +41,7 @@ HEADERS += \
     slicingengine.h \
     configuration.h \
     glmodel.h \
-    geometryengine.h \
-    text3d.h \
-    qmlmanager.h
+    qmlmanager.h \
+    modelloader.h
 
 LIBS += -lOpengl32

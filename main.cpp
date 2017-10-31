@@ -38,7 +38,7 @@ int main(int argc, char *argv[])
 
 
     foreach(QObject* obj, ((QObject*)teethModel)->children()){
-        //qDebug() << (*((QEntity*)obj));
+        //qDebug() << (*((QEntity*)obj)).components()[0];
         /*foreach (QComponent* component, (*((QEntity*)obj)).components()){
             qDebug() << component->objectName();
         }*/

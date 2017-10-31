@@ -6,10 +6,15 @@
 #include <Qt3DRender>
 #include <Qt3DExtras>
 #include <Qt3DInput>
+#include <vector>
+#include "modelloader.h"
+
+#define MAX_BUF_LEN 100000
 
 using namespace Qt3DCore;
 using namespace Qt3DRender;
 using namespace Qt3DExtras;
+using namespace std;
 
 class GLModel : public QEntity
 {
@@ -23,16 +28,21 @@ private:
     QPhongAlphaMaterial *m_planeMaterial;
     Qt3DRender::QBuffer *vertexBuffer;
     QAttribute *positionAttribute;
+    QGeometry* m_geometry;
     QGeometryRenderer* m_geometryRenderer;
 
     float x,y,z;
-    int m_count;
+    int v_cnt;
+    int f_cnt;
 
     QNode* m_parent;
 
-    void addPoint();
+    void initialize();
+    void addVertex(QVector3D vertex);
+    void addVertices(vector<QVector3D> vertices);
     void onTimerUpdate();
 };
+
 
 /*
 #include <QQuickItem>

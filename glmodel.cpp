@@ -1,13 +1,12 @@
 #include "glmodel.h"
 
-
-
 GLModel::GLModel(QNode *parent)
     : QEntity(parent)
     , x(0.0f)
     , y(0.0f)
     , z(0.0f)
-    , m_count(0)
+    , v_cnt(0)
+    , f_cnt(0)
 {
     m_planeMaterial = new QPhongAlphaMaterial();
     m_planeMaterial->setAmbient(QColor(100,100,100));
@@ -16,102 +15,123 @@ GLModel::GLModel(QNode *parent)
 
     m_parent = parent;
 
+    initialize();
     QTimer *timer = new QTimer();
     QObject::connect(timer, &QTimer::timeout,this,&GLModel::onTimerUpdate);
 
+    /*ModelLoader * mi = new ModelLoader(this);
+    mi->loadModel("C:/Users/diridiri/Desktop/DLP/partial1.stl");*/
+
     timer->start(100);
+
 }
 
-
-void GLModel::addPoint(){
+void GLModel::initialize(){
     float* reVertexArray;
+    m_geometryRenderer = new QGeometryRenderer();
+    m_geometry = new QGeometry(m_geometryRenderer);
+    QByteArray vertexArray;
+    vertexArray.resize(MAX_BUF_LEN*3*sizeof(float));
+    reVertexArray = reinterpret_cast<float*>(vertexArray.data());
 
-    //x += 5.0f;
-    //y += 3.0f;
-    x += 0.01f;
-    y -= (qrand() % 2 - 1)*0.01;
-    z = 0.01f;
+    //coordinates of left vertex
+    reVertexArray[0] = x;
+    reVertexArray[1] = y-1.0f;
+    reVertexArray[2] = z;
 
-    if (!(m_count % 100)) {
-        //every 100-th timer tick:
-        m_geometryRenderer = new QGeometryRenderer();
-        QGeometry* meshGeometry = new QGeometry(m_geometryRenderer);
+    //coordinates of right vertex
+    reVertexArray[3] = x;
+    reVertexArray[4] = y+1.0f;
+    reVertexArray[5] = z;
 
-        QByteArray vertexArray;
-        vertexArray.resize(200*3*sizeof(float));
-        reVertexArray = reinterpret_cast<float*>(vertexArray.data());
+    vertexBuffer = new Qt3DRender::QBuffer(Qt3DRender::QBuffer::VertexBuffer,m_geometry);
+    vertexBuffer->setUsage(Qt3DRender::QBuffer::DynamicDraw);
+    vertexBuffer->setData(vertexArray);
 
-        //coordinates of left vertex
-        reVertexArray[0] = y-0.1f;
-        reVertexArray[1] = z;
-        reVertexArray[2] = x;
+    // Attributes
+    positionAttribute = new QAttribute(m_geometry);
+    positionAttribute->setAttributeType(QAttribute::VertexAttribute);
+    positionAttribute->setBuffer(vertexBuffer);
+    positionAttribute->setDataType(QAttribute::Float);
+    positionAttribute->setDataSize(3);
+    positionAttribute->setByteOffset(0);
+    positionAttribute->setByteStride(3*sizeof(float));
+    positionAttribute->setCount(2);
+    positionAttribute->setName(QAttribute::defaultPositionAttributeName());
 
-        //coordinates of right vertex
-        reVertexArray[3] = y+0.1f;
-        reVertexArray[4] = z;
-        reVertexArray[5] = x;
+    m_geometry->addAttribute(positionAttribute);
 
-        vertexBuffer = new Qt3DRender::QBuffer(Qt3DRender::QBuffer::VertexBuffer,meshGeometry);
-        vertexBuffer->setUsage(Qt3DRender::QBuffer::DynamicDraw);
-        vertexBuffer->setData(vertexArray);
+    m_geometryRenderer->setInstanceCount(1);
+    m_geometryRenderer->setFirstVertex(0);
+    m_geometryRenderer->setFirstInstance(0);
+    m_geometryRenderer->setPrimitiveType(QGeometryRenderer::TriangleStrip);
+    m_geometryRenderer->setGeometry(m_geometry);
 
-        // Attributes
-        positionAttribute = new QAttribute(meshGeometry);
-        positionAttribute->setAttributeType(QAttribute::VertexAttribute);
-        positionAttribute->setBuffer(vertexBuffer);
-        positionAttribute->setDataType(QAttribute::Float);
-        positionAttribute->setDataSize(3);
-        positionAttribute->setByteOffset(0);
-        positionAttribute->setByteStride(3*sizeof(float));
-        positionAttribute->setCount(2);
-        positionAttribute->setName(QAttribute::defaultPositionAttributeName());
+    QEntity* entity = new QEntity(this);
+    entity->addComponent(m_geometryRenderer);
+    entity->addComponent(m_planeMaterial);
 
-        meshGeometry->addAttribute(positionAttribute);
+    return;
+}
 
-        m_geometryRenderer->setInstanceCount(1);
-        m_geometryRenderer->setFirstVertex(0);
-        m_geometryRenderer->setFirstInstance(0);
-        m_geometryRenderer->setPrimitiveType(QGeometryRenderer::TriangleStrip);
-        m_geometryRenderer->setGeometry(meshGeometry);
-
-        QEntity* entity = new QEntity(this);
-        entity->addComponent(m_geometryRenderer);
-        entity->addComponent(m_planeMaterial);
-
-        return;
-    }
-
+void GLModel::addVertex(QVector3D vertex){
+    x += 1.0f;
+    y -= 1.0f;
+    z = 1.0f;
 
     //update geometry
     QByteArray appendVertexArray;
     appendVertexArray.resize(2*3*sizeof(float));
-    reVertexArray = reinterpret_cast<float*>(appendVertexArray.data());
+    float* reVertexArray = reinterpret_cast<float*>(appendVertexArray.data());
 
     //coordinates of left vertex
-    reVertexArray[0] = y-0.1f;
-    reVertexArray[1] = z;
-    reVertexArray[2] = x;
+    reVertexArray[0] = x;
+    reVertexArray[1] = y-1.0f;
+    reVertexArray[2] = z;
 
     //coordinates of right vertex
-    reVertexArray[3] = y+0.1f;
-    reVertexArray[4] = z+0.1f;
-    reVertexArray[5] = x;
+    reVertexArray[3] = x;
+    reVertexArray[4] = y+1.0f;
+    reVertexArray[5] = z+1.0f;
 
     uint vertexCount = positionAttribute->count();
     vertexBuffer->updateData(vertexCount*3*sizeof(float),appendVertexArray);
     positionAttribute->setCount(vertexCount+2);
+
+    return;
+}
+
+void GLModel::addVertices(vector<QVector3D> vertices){
+    //update geometry
+    QByteArray appendVertexArray;
+    appendVertexArray.resize(vertices.size()*3*sizeof(float));
+    float* reVertexArray = reinterpret_cast<float*>(appendVertexArray.data());
+
+    //coordinates of left vertex
+    reVertexArray[0] = x;
+    reVertexArray[1] = y-1.0f;
+    reVertexArray[2] = z;
+
+    //coordinates of right vertex
+    reVertexArray[3] = x;
+    reVertexArray[4] = y+1.0f;
+    reVertexArray[5] = z+1.0f;
+
+    uint vertexCount = positionAttribute->count();
+    vertexBuffer->updateData(vertexCount*3*sizeof(float),appendVertexArray);
+    positionAttribute->setCount(vertexCount+2);
+    return;
 }
 
 void GLModel::onTimerUpdate()
 {
-    addPoint();
-
-    qDebug() << m_count;
-    //qDebug() << "x=" << x << "; y=" << y;
-    //qDebug() << m_parent;
-
-    m_count ++;
+    x += 1.0f;
+    y += 1.0f;
+    z += 1.0f;
+    addVertex(QVector3D(x,y,z));
 }
+
+
 
 /*
 #include <QQuickWindow>
