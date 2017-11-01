@@ -9,7 +9,7 @@
 #include <vector>
 #include "fileloader.h"
 
-#define MAX_BUF_LEN 100000
+#define MAX_BUF_LEN 2000000
 
 using namespace Qt3DCore;
 using namespace Qt3DRender;
@@ -44,7 +44,8 @@ private:
 
     void initialize();
     void addVertex(QVector3D vertex);
-    void addVertices(vector<MeshVertex> vertices);
+    void addVertices();
+    void addVertices(vector<QVector3D> vertices);
     void onTimerUpdate();
 };
 
