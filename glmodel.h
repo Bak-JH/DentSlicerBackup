@@ -31,12 +31,16 @@ private:
     QGeometry* m_geometry;
     QGeometryRenderer* m_geometryRenderer;
 
+    QString filename;
     float x,y,z;
     int v_cnt;
     int f_cnt;
 
-    QNode* m_parent;
     Mesh* mesh;
+    QNode* m_parent;
+
+    Qt3DRender::QMesh *m_mesh;
+    Qt3DCore::QTransform *m_transform;
 
     void initialize();
     void addVertex(QVector3D vertex);

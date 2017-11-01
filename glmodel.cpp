@@ -7,9 +7,15 @@ GLModel::GLModel(QNode *parent)
     , z(0.0f)
     , v_cnt(0)
     , f_cnt(0)
+    , m_mesh(new Qt3DRender::QMesh())
+    , m_transform(new Qt3DCore::QTransform())
 {
+
+    addComponent(m_mesh);
+    addComponent(m_transform);
+
     m_planeMaterial = new QPhongAlphaMaterial();
-    m_planeMaterial->setAmbient(QColor(100,100,100));
+    m_planeMaterial->setAmbient(QColor(81,200,242));
     m_planeMaterial->setDiffuse(QColor(255,255,255));
     m_planeMaterial->setAlpha(1.0f);
 
@@ -21,12 +27,15 @@ GLModel::GLModel(QNode *parent)
 
     mesh = new Mesh();
     loadMeshSTL(mesh, "C:/Users/diridiri/Desktop/DLP/partial1.stl");
+    addVertices(mesh->vertices);
+
+    m_mesh->setGeometry(m_geometry);
 
     //qDebug() << "done loading mesh";
     /*ModelLoader * mi = new ModelLoader(this);
-    mi->loadModel("C:/Users/diridiri/Desktop/DLP/partial1.stl");*/
+    mi->loadModel("C:/Users/diridiri/Desktop/DLP/partial1.stl");
 
-    //timer->start(20000);
+    //timer->start(20000);*/
 
 }
 
@@ -38,7 +47,7 @@ void GLModel::initialize(){
     vertexArray.resize(MAX_BUF_LEN*3*sizeof(float));
     reVertexArray = reinterpret_cast<float*>(vertexArray.data());
 
-    //coordinates of left vertex
+    /*//coordinates of left vertex
     reVertexArray[0] = x;
     reVertexArray[1] = y-1.0f;
     reVertexArray[2] = z;
@@ -46,7 +55,7 @@ void GLModel::initialize(){
     //coordinates of right vertex
     reVertexArray[3] = x;
     reVertexArray[4] = y+1.0f;
-    reVertexArray[5] = z;
+    reVertexArray[5] = z;*/
 
     vertexBuffer = new Qt3DRender::QBuffer(Qt3DRender::QBuffer::VertexBuffer,m_geometry);
     vertexBuffer->setUsage(Qt3DRender::QBuffer::DynamicDraw);
@@ -71,38 +80,16 @@ void GLModel::initialize(){
     m_geometryRenderer->setPrimitiveType(QGeometryRenderer::TriangleStrip);
     m_geometryRenderer->setGeometry(m_geometry);
 
-    QEntity* entity = new QEntity(this);
-    entity->addComponent(m_geometryRenderer);
-    entity->addComponent(m_planeMaterial);
+    //RenderableEntity* entity = new QEntity(this);
+    //entity->addComponent(m_geometryRenderer);
+    //entity->addComponent(m_planeMaterial);
+    addComponent(m_geometryRenderer);
+    addComponent(m_planeMaterial);
 
     return;
 }
 
 void GLModel::addVertex(QVector3D vertex){
-    /*x += 1.0f;
-    y -= 1.0f;
-    z = 1.0f;
-
-    //update geometry
-    QByteArray appendVertexArray;
-    appendVertexArray.resize(2*3*sizeof(float));
-    float* reVertexArray = reinterpret_cast<float*>(appendVertexArray.data());
-
-    //coordinates of left vertex
-    reVertexArray[0] = x;
-    reVertexArray[1] = y-1.0f;
-    reVertexArray[2] = z;
-
-    //coordinates of right vertex
-    reVertexArray[3] = x;
-    reVertexArray[4] = y+1.0f;
-    reVertexArray[5] = z+1.0f;
-
-    uint vertexCount = positionAttribute->count();
-    vertexBuffer->updateData(vertexCount*3*sizeof(float),appendVertexArray);
-    positionAttribute->setCount(vertexCount+2);
-
-    return;*/
 
     //update geometry
     QByteArray appendVertexArray;
@@ -150,8 +137,6 @@ void GLModel::onTimerUpdate()
     y += 1.0f;
     z += 1.0f;
     addVertex(QVector3D(x,y,z));*/
-    addVertices(mesh->vertices);
-    qDebug() <<
 }
 
 
