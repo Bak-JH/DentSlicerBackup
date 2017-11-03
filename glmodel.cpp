@@ -23,13 +23,14 @@ GLModel::GLModel(QNode *parent)
     QTimer *timer = new QTimer();
     QObject::connect(timer, &QTimer::timeout,this,&GLModel::onTimerUpdate);
 
-    mesh = new Mesh();
+    /*mesh = new Mesh();
     loadMeshSTL(mesh, "C:/Users/diridiri/Desktop/DLP/partial1.stl");
     initialize();
-    addVertices();
+    addVertices();*/
     //addVertices(mesh->vertices);
-    /*m_mesh->setGeometry(m_geometry);
-    //m_mesh->setSource(QUrl(QStringLiteral("file:///C:/Users/diridiri/Desktop/DLP/lowerjaw_2.STL")));//"file:///D:/Dev/DLPSlicer/DLPslicer/resource/mesh/lowerjaw.obj")));
+
+    //m_mesh->setGeometry(m_geometry);
+    /*m_mesh->setSource(QUrl(QStringLiteral("file:///D:/Dev/DLPSlicer/DLPslicer/resource/mesh/lowerjaw.obj")));
     Qt3DExtras::QDiffuseMapMaterial *diffuseMapMaterial = new Qt3DExtras::QDiffuseMapMaterial();
     diffuseMapMaterial->setSpecular(QColor::fromRgbF(0.2f, 0.2f, 0.2f, 1.0f));
     diffuseMapMaterial->setShininess(2.0f);
@@ -113,7 +114,7 @@ void GLModel::addVertex(QVector3D vertex){
 
 void GLModel::addVertices(){
     foreach (MeshFace mf , mesh->faces){
-        vector<MeshVertex> temp_face;
+        /*vector<MeshVertex> temp_face;
         for (int fn=0; fn<3; fn++){
             temp_face.push_back(mesh->vertices[mf.mesh_vertex[fn]].position);
         }
@@ -122,8 +123,17 @@ void GLModel::addVertices(){
         vector<QVector3D> result_vs;
         for (int i=0; i<3; i++){
             result_vs.push_back(temp_face[i].position);
-            result_vs.push_back(norm_v);
         }
+        result_vs.push_back(norm_v);*/
+
+        vector<QVector3D> result_vs;
+        for (int fn=0; fn<3; fn++){
+            result_vs.push_back(mesh->vertices[mf.mesh_vertex[fn]].position);
+        }
+        //addVertices(temp_face);
+        QVector3D norm_v = QVector3D::normal(result_vs[0], result_vs[1], result_vs[2]);
+
+        result_vs.push_back(norm_v);
         addVertices(result_vs);
     }
 }
