@@ -8,6 +8,8 @@
 #include <Qt3DInput>
 #include <vector>
 #include "fileloader.h"
+#include <QBuffer>
+#include <QObjectPicker>
 
 #define MAX_BUF_LEN 2000000
 
@@ -22,14 +24,19 @@ class GLModel : public QEntity
 public:
     GLModel(QNode* parent = nullptr);
 
-
-private:
-
     QPhongAlphaMaterial *m_planeMaterial;
     Qt3DRender::QBuffer *vertexBuffer;
     QAttribute *positionAttribute;
     QGeometry* m_geometry;
     QGeometryRenderer* m_geometryRenderer;
+
+
+    Qt3DRender::QObjectPicker *m_objectPicker;
+    Qt3DRender::QMesh *m_mesh;
+    Qt3DCore::QTransform *m_transform;
+
+private:
+
 
     QString filename;
     float x,y,z;
@@ -39,16 +46,18 @@ private:
     Mesh* mesh;
     QNode* m_parent;
 
-    Qt3DRender::QMesh *m_mesh;
-    Qt3DCore::QTransform *m_transform;
 
     void initialize();
     void addVertex(QVector3D vertex);
     void addVertices();
     void addVertices(vector<QVector3D> vertices);
     void onTimerUpdate();
+
+public slots:
+    void handlePickerClicked(Qt3DRender::QPickEvent*);
 };
 
+Qt3DRender::QAttribute *copyAttribute(Qt3DRender::QAttribute *oldAtt, QMap<Qt3DRender::QBuffer *, Qt3DRender::QBuffer *> &bufferMap);
 
 /*
 #include <QQuickItem>
