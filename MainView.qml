@@ -338,17 +338,19 @@ Entity {
             }
 
             if (event.key === Qt.Key_J) {
-                console.log(meshTransform.rotation)
+                systemTransform.translation = systemTransform.translation.plus(Qt.vector3d(-0.01,0,0))
             }
             if (event.key === Qt.Key_K) {
-                total.changeRotation()
+                systemTransform.translation = systemTransform.translation.plus(Qt.vector3d(0,-0.01,0))
             }
             if (event.key === Qt.Key_I) {
-                meshTransform.rotation = Qt.quaternion(0.5,0,0,0.5)
+                console.log("i");
+                systemTransform.translation = systemTransform.translation.plus(Qt.vector3d(0,0.01,0))
             }
             if (event.key === Qt.Key_L) {
-                meshTransform.rotation = Qt.quaternion(0.8,0,0,0.5)
+                systemTransform.translation = systemTransform.translation.plus(Qt.vector3d(0.01,0,0))
             }
+            /*
             if (event.key === Qt.Key_W) {
                 scene3d.anchors.topMargin = scene3d.anchors.topMargin - 1
             }
@@ -360,7 +362,7 @@ Entity {
             }
             if (event.key === Qt.Key_D) {
                 scene3d.anchors.leftMargin = scene3d.anchors.leftMargin + 1
-            }
+            }*/
 
             if (event.key === Qt.Key_Q) {
                 scene3d.width = scene3d.width -2
