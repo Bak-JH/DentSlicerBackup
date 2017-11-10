@@ -12,7 +12,7 @@ Item {
     property string columnName
     property var columnContents :[]
 
-
+    property alias currentText: combo.currentText
 
     Text{
         id:text

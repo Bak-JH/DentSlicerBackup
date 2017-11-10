@@ -105,6 +105,15 @@ ApplicationWindow {
         width : parent.width
         height: 116
 
+        function getCurrentText(){}
+        options: [
+             lefttab.ltso.option_resolution.currentText ,
+             lefttab.ltso.option_layer_height.currentText,
+             lefttab.ltso.option_support.currentText,
+             lefttab.ltso.option_infill.currentText,
+             lefttab.ltso.option_raft.currentText]
+
+
         anchors.top: parent.top
         anchors.left: parent.left
 
