@@ -29,6 +29,7 @@ Item {
     }
 
     ComboBox {
+        id: combo
         width: 116
         height: parent.height
         anchors.left: text.right
