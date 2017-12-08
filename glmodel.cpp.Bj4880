@@ -9,7 +9,6 @@ GLModel::GLModel(QNode *parent)
     , v_cnt(0)
     , f_cnt(0)
     , m_mesh(new Qt3DRender::QMesh())
-    , m_geometry(new QGeometry())
     , m_transform(new Qt3DCore::QTransform())
     , m_objectPicker(new Qt3DRender::QObjectPicker())
 {
@@ -30,29 +29,13 @@ GLModel::GLModel(QNode *parent)
     QObject::connect(m_objectPicker, SIGNAL(clicked(Qt3DRender::QPickEvent*)), this, SLOT(handlePickerClicked(Qt3DRender::QPickEvent*)));
 
     mesh = new Mesh();
-    qDebug() << "loading mesh";
-    loadMeshSTL(mesh, "C:/Users/diridiri/Desktop/DLP/partial1_flip.stl");
-    qDebug() << "loaded mesh";
-    initialize();
-    //addVertices(mesh);
+    //loadMeshSTL(mesh, "C:/Users/diridiri/Desktop/DLP/partial1_flip.stl");
+    //initialize();
+    //addVertices();
     //addVertices(mesh->vertices);
     //m_mesh->setGeometry(m_geometry);
 
-    m_mesh->setGeometry(m_geometry);
-    Plane plane;
-    plane.push_back(QVector3D(0,0,0));
-    plane.push_back(QVector3D(0,1,0));
-    plane.push_back(QVector3D(0,0,1));
-    Mesh* lmesh = new Mesh();
-    Mesh* rmesh = new Mesh();
-    bisectModel(mesh, plane, lmesh, rmesh);
-    addVertices(rmesh);
-    qDebug() << mesh->x_min << mesh->x_max;
-    //m_mesh->setGeometry(lmesh->geometry());
-    //m_mesh->setSource(QUrl(QStringLiteral("file:///D:/Dev/DLPSlicer/DLPslicer/resource/mesh/lowerjaw.obj")));
-
-    qDebug() << "source setting done" << m_mesh->geometry() << "children nodes" << m_mesh->childNodes().count();
-
+    m_mesh->setSource(QUrl(QStringLiteral("file:///D:/Dev/DLPSlicer/DLPslicer/resource/mesh/lowerjaw.obj")));
     Qt3DExtras::QDiffuseMapMaterial *diffuseMapMaterial = new Qt3DExtras::QDiffuseMapMaterial();
     diffuseMapMaterial->setSpecular(QColor::fromRgbF(0.2f, 0.2f, 0.2f, 1.0f));
     diffuseMapMaterial->setShininess(2.0f);
@@ -67,13 +50,20 @@ GLModel::GLModel(QNode *parent)
     addComponent(m_transform);
     addComponent(m_objectPicker);
 
+    //m_mesh->setGeometry(m_geometry);
+
+
+    m_geometry = m_mesh->geometry();
+    qDebug() << (void* )m_geometry;
+    qDebug() << "0000";
     auto attributes = m_geometry->attributes();
 
     int vertexIndex = 0;
 
-    qDebug() << "attributes size : " << attributes.count();
+    qDebug() << "1111";
     for (auto i = 0; i < attributes.count(); ++i)
     {
+        qDebug() << "2";
         qDebug() << i;
         if (attributes.at(i)->name() == QAttribute::VertexAttribute)//QAttribute::defaultPositionAttributeName())
         {
@@ -149,16 +139,15 @@ void GLModel::initialize(){
     float* reVertexArray;
     m_geometryRenderer = new QGeometryRenderer();
     m_geometry = new QGeometry(m_geometryRenderer);
-
     QByteArray vertexArray;
-    vertexArray.resize(mesh->faces.size()*3*(3)*sizeof(float));
+    vertexArray.resize(mesh->vertices.size()*5*3*3*sizeof(float));
 
     vertexBuffer = new Qt3DRender::QBuffer(Qt3DRender::QBuffer::VertexBuffer,m_geometry);
     vertexBuffer->setUsage(Qt3DRender::QBuffer::DynamicDraw);
     vertexBuffer->setData(vertexArray);
 
     QByteArray vertexNormalArray;
-    vertexNormalArray.resize(mesh->faces.size()*3*(3)*sizeof(float));
+    vertexNormalArray.resize(mesh->vertices.size()*5*3*1*sizeof(float));
     vertexNormalBuffer = new Qt3DRender::QBuffer(Qt3DRender::QBuffer::VertexBuffer,m_geometry);
     vertexNormalBuffer->setUsage(Qt3DRender::QBuffer::DynamicDraw);
     vertexNormalBuffer->setData(vertexNormalArray);
@@ -171,7 +160,7 @@ void GLModel::initialize(){
     positionAttribute->setDataSize(3);
     positionAttribute->setByteOffset(0);
     positionAttribute->setByteStride(3*sizeof(float));
-    positionAttribute->setCount(0);
+    positionAttribute->setCount(mesh->vertices.size());
     positionAttribute->setName(QAttribute::defaultPositionAttributeName());
 
     // normal Attributes
@@ -180,10 +169,9 @@ void GLModel::initialize(){
     normalAttribute->setBuffer(vertexNormalBuffer);
     normalAttribute->setDataType(QAttribute::Float);
     normalAttribute->setDataSize(3);
-    //normalAttribute->setVertexSize(3);
     normalAttribute->setByteOffset(0);
     normalAttribute->setByteStride(3*sizeof(float));
-    normalAttribute->setCount(0);
+    normalAttribute->setCount(mesh->vertices.size());
     normalAttribute->setName(QAttribute::defaultNormalAttributeName());
 
     m_geometry->addAttribute(positionAttribute);
@@ -215,36 +203,27 @@ void GLModel::addVertex(QVector3D vertex){
     reVertexArray[2] = z;
 
     uint vertexCount = positionAttribute->count();
-    vertexBuffer->updateData(vertexCount*6*sizeof(float),appendVertexArray);
+    vertexBuffer->updateData(vertexCount*3*sizeof(float),appendVertexArray);
     positionAttribute->setCount(vertexCount+1);
 
     return;
 }
 
-void GLModel::clearVertices(){
-    //uint vertexCount = positionAttribute->count();
-    //vertexBuffer->
-    //positionAttribute->setCount(vertexCount+vertexCount);
-    return;
-}
-
-void GLModel::addVertices(Mesh* mesh){
+void GLModel::addVertices(){
     foreach (MeshFace mf , mesh->faces){
 
         vector<QVector3D> result_vs;
-        for (int fn=2; fn>=0; fn--){
+        for (int fn=0; fn<3; fn++){
             result_vs.push_back(mesh->idx2MV(mf.mesh_vertex[fn]).position);
         }
 
-        addVertices(result_vs);
-    }
-    foreach (MeshFace mf , mesh->faces){
-
+        QVector3D norm_v = QVector3D::normal(result_vs[1], result_vs[2], result_vs[0]);
         vector<QVector3D> result_vns;
-        for (int fn=2; fn>=0; fn--){
-            result_vns.push_back(mesh->idx2MV(mf.mesh_vertex[fn]).vn);
+        for(int i=0; i<1; i++){
+            result_vns.push_back(norm_v);
         }
 
+        addVertices(result_vs);
         addNormalVertices(result_vns);
     }
 }
@@ -252,6 +231,7 @@ void GLModel::addVertices(Mesh* mesh){
 void GLModel::addVertices(vector<QVector3D> vertices){
 
     int vertex_cnt = vertices.size();
+    //update geometry
     QByteArray appendVertexArray;
     appendVertexArray.resize(vertex_cnt*3*sizeof(float));
     float* reVertexArray = reinterpret_cast<float*>(appendVertexArray.data());
@@ -264,33 +244,30 @@ void GLModel::addVertices(vector<QVector3D> vertices){
     }
 
     uint vertexCount = positionAttribute->count();
-    qDebug() << vertexCount;
     vertexBuffer->updateData(vertexCount*3*sizeof(float),appendVertexArray);
-    positionAttribute->setCount(vertexCount + vertex_cnt);
+    positionAttribute->setCount(vertexCount+vertex_cnt);
     return;
 }
 
-
 void GLModel::addNormalVertices(vector<QVector3D> vertices){
-    qDebug() << "adding normal vertices";
-    int vertex_normal_cnt = vertices.size();
+
+    int vertex_cnt = vertices.size();
+    //update geometry
     QByteArray appendVertexArray;
-    appendVertexArray.resize(vertex_normal_cnt*3*sizeof(float));
-    float * reVertexArray = reinterpret_cast<float*>(appendVertexArray.data());
+    appendVertexArray.resize(vertex_cnt*3*sizeof(float));
+    float* reVertexArray = reinterpret_cast<float*>(appendVertexArray.data());
 
-    for (int i=0; i<vertex_normal_cnt; i++){
-
+    for (int i=0; i<vertex_cnt; i++){
         //coordinates of left vertex
-        reVertexArray[3*i+0] = vertices[i].x();
-        reVertexArray[3*i+1] = vertices[i].y();
-        reVertexArray[3*i+2] = vertices[i].z();
-
+        reVertexArray[i*3+0] = vertices[i].x();
+        reVertexArray[i*3+1] = vertices[i].y();
+        reVertexArray[i*3+2] = vertices[i].z();
     }
 
-    uint vertexNormalCount = normalAttribute->count();
-    qDebug() << vertexNormalCount;
-    vertexNormalBuffer->updateData(vertexNormalCount*3*sizeof(float), appendVertexArray);
-    normalAttribute->setCount(vertexNormalCount+ vertex_normal_cnt);
+
+    uint vertexCount = normalAttribute->count();
+    vertexNormalBuffer->updateData(vertexCount*3*sizeof(float),appendVertexArray);
+    normalAttribute->setCount(vertexCount+vertex_cnt);
     return;
 }
 
@@ -333,7 +310,6 @@ void GLModel::handlePickerClicked(QPickEvent *pick)
 {
     qDebug() << "handle picker clicked1";
     qDebug() << pick->position();
-    //QPickTriangleEvent *trianglePick = qobject_cast<QPick>
     QPickTriangleEvent *trianglePick = qobject_cast<QPickTriangleEvent*>(pick);
     qDebug() << trianglePick->position();
     QGeometry *geometry = m_mesh->geometry();
