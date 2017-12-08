@@ -9,7 +9,6 @@ GLModel::GLModel(QNode *parent)
     , v_cnt(0)
     , f_cnt(0)
     , m_mesh(new Qt3DRender::QMesh())
-    , m_geometry(new QGeometry())
     , m_transform(new Qt3DCore::QTransform())
     , m_objectPicker(new Qt3DRender::QObjectPicker())
 {
@@ -30,29 +29,13 @@ GLModel::GLModel(QNode *parent)
     QObject::connect(m_objectPicker, SIGNAL(clicked(Qt3DRender::QPickEvent*)), this, SLOT(handlePickerClicked(Qt3DRender::QPickEvent*)));
 
     mesh = new Mesh();
-    qDebug() << "loading mesh";
-    loadMeshSTL(mesh, "C:/Users/diridiri/Desktop/DLP/partial1_flip.stl");
-    qDebug() << "loaded mesh";
-    initialize();
-    //addVertices(mesh);
+    //loadMeshSTL(mesh, "C:/Users/diridiri/Desktop/DLP/partial1_flip.stl");
+    //initialize();
+    //addVertices();
     //addVertices(mesh->vertices);
     //m_mesh->setGeometry(m_geometry);
 
-    m_mesh->setGeometry(m_geometry);
-    Plane plane;
-    plane.push_back(QVector3D(0,0,0));
-    plane.push_back(QVector3D(0,1,0));
-    plane.push_back(QVector3D(0,0,1));
-    Mesh* lmesh = new Mesh();
-    Mesh* rmesh = new Mesh();
-    bisectModel(mesh, plane, lmesh, rmesh);
-    addVertices(rmesh);
-    qDebug() << mesh->x_min << mesh->x_max;
-    //m_mesh->setGeometry(lmesh->geometry());
-    //m_mesh->setSource(QUrl(QStringLiteral("file:///D:/Dev/DLPSlicer/DLPslicer/resource/mesh/lowerjaw.obj")));
-
-    qDebug() << "source setting done" << m_mesh->geometry() << "children nodes" << m_mesh->childNodes().count();
-
+    m_mesh->setSource(QUrl(QStringLiteral("file:///D:/Dev/DLPSlicer/DLPslicer/resource/mesh/lowerjaw.obj")));
     Qt3DExtras::QDiffuseMapMaterial *diffuseMapMaterial = new Qt3DExtras::QDiffuseMapMaterial();
     diffuseMapMaterial->setSpecular(QColor::fromRgbF(0.2f, 0.2f, 0.2f, 1.0f));
     diffuseMapMaterial->setShininess(2.0f);
@@ -67,13 +50,20 @@ GLModel::GLModel(QNode *parent)
     addComponent(m_transform);
     addComponent(m_objectPicker);
 
+    //m_mesh->setGeometry(m_geometry);
+
+
+    m_geometry = m_mesh->geometry();
+    qDebug() << (void* )m_geometry;
+    qDebug() << "0000";
     auto attributes = m_geometry->attributes();
 
     int vertexIndex = 0;
 
-    qDebug() << "attributes size : " << attributes.count();
+    qDebug() << "1111";
     for (auto i = 0; i < attributes.count(); ++i)
     {
+        qDebug() << "2";
         qDebug() << i;
         if (attributes.at(i)->name() == QAttribute::VertexAttribute)//QAttribute::defaultPositionAttributeName())
         {
@@ -219,14 +209,7 @@ void GLModel::addVertex(QVector3D vertex){
     return;
 }
 
-void GLModel::clearVertices(){
-    //uint vertexCount = positionAttribute->count();
-    //vertexBuffer->
-    //positionAttribute->setCount(vertexCount+vertexCount);
-    return;
-}
-
-void GLModel::addVertices(Mesh* mesh){
+void GLModel::addVertices(){
     foreach (MeshFace mf , mesh->faces){
 
         vector<QVector3D> result_vs;
@@ -327,7 +310,6 @@ void GLModel::handlePickerClicked(QPickEvent *pick)
 {
     qDebug() << "handle picker clicked1";
     qDebug() << pick->position();
-    //QPickTriangleEvent *trianglePick = qobject_cast<QPick>
     QPickTriangleEvent *trianglePick = qobject_cast<QPickTriangleEvent*>(pick);
     qDebug() << trianglePick->position();
     QGeometry *geometry = m_mesh->geometry();

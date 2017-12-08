@@ -54,11 +54,13 @@ private:
 
     void initialize();
     void addVertex(QVector3D vertex);
-    void addVertices();
+    void addVertices(Mesh* mesh);
     void addVertices(vector<QVector3D> vertices);
     void addNormalVertices(vector<QVector3D> vertices);
+    void clearVertices();
     void onTimerUpdate();
 
+    // bisects mesh into leftMesh, rightMesh divided by plane
     void bisectModel(Mesh* mesh, Plane plane, Mesh* leftMesh, Mesh* rightMesh);
     bool isLeftToPlane(Plane plane, QVector3D position);
 
