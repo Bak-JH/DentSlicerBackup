@@ -29,7 +29,7 @@ class Mesh{
 public :
     Mesh() {};
     std::vector<MeshVertex> vertices;
-    QHash<int64_t, MeshVertex> vertices_hash;
+    QHash<uint32_t, MeshVertex> vertices_hash;
     std::vector<MeshFace> faces;
     float x_min = 99999, x_max = 99999, y_min = 99999, y_max = 99999, z_min = 99999, z_max = 99999;
 
@@ -51,7 +51,8 @@ public :
     MeshVertex idx2MV(int idx);
 };
 
-int64_t vertexHash(QVector3D v);
+uint32_t vertexHash(QVector3D v);
+float vertexDistance(QVector3D, QVector3D);
 
 
 #endif // MESH_H
