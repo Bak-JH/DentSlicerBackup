@@ -80,10 +80,11 @@ ApplicationWindow {
         */
         anchors.top : uppertab.bottom
         anchors.left : lefttab.right
-        //width: (window.width - lefttab.width) * 1
+        width: (window.width - lefttab.width) * 1
+        height: (window.width - lefttab.width) * 1
         //height: (window.height - uppertab.height) * 1
-        width: 800
-        height: 800
+        //width: 800
+        //height: 800
 
         focus: true
         hoverEnabled: true
@@ -103,6 +104,15 @@ ApplicationWindow {
         id : uppertab
         width : parent.width
         height: 116
+
+        function getCurrentText(){}
+        options: [
+             lefttab.ltso.option_resolution.currentText ,
+             lefttab.ltso.option_layer_height.currentText,
+             lefttab.ltso.option_support.currentText,
+             lefttab.ltso.option_infill.currentText,
+             lefttab.ltso.option_raft.currentText]
+
 
         anchors.top: parent.top
         anchors.left: parent.left
@@ -153,9 +163,18 @@ ApplicationWindow {
         onPositionChanged: {
             if(isDrag){
                 currPosition = Qt.vector2d(mouseX,mouseY);
-                //console.log("chchchch  mouse x  " + (currPosition.x - prevPosition.x) + "mouse y  " + (currPosition.y - prevPosition.y))
+                // move screen by drag scene3d
+
                 scene3d.anchors.leftMargin = scene3d.anchors.leftMargin + (currPosition.x - prevPosition.x);
                 scene3d.anchors.topMargin = scene3d.anchors.topMargin + (currPosition.y - prevPosition.y);
+
+                /*
+                var xDif = (currPosition.x - prevPosition.x);
+                var yDif = (currPosition.y - prevPosition.y);
+
+                sceneRoot.systemTransform.translation = sceneRoot.systemTransform.translation.plus(Qt.vector3d(0.001,0,0).times(xDif))
+                sceneRoot.systemTransform.translation = sceneRoot.systemTransform.translation.plus(Qt.vector3d(0,-0.001,0).times(yDif))
+                */
                 prevPosition = currPosition;
             }
         }

@@ -10,6 +10,8 @@ Rectangle {
     property int buttonWidth : 86
     property int buttonHeight : 100
 
+    property var options: []
+
 
     /*
     Rectangle{
@@ -147,9 +149,11 @@ Rectangle {
 
                         // do collecting things
                         // configurations[key] = value;
-                        configurations["s"] = "s#2";
-                        configurations["f"] = "s#1";
-                        configurations["r"] = "s#2";
+                        configurations["resolution"] = "resolution#"+options[0];
+                        configurations["layer_height"] = "layer_height#"+options[1];
+                        configurations["support"] = "support#"+options[2];
+                        configurations["infill"] = "infill#"+options[3];
+                        configurations["raft"] = "raft#"+options[4];
                         return configurations;
                     }
 

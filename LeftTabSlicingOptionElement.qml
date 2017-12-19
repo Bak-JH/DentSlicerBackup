@@ -12,7 +12,7 @@ Item {
     property string columnName
     property var columnContents :[]
 
-
+    property alias currentText: combo.currentText
 
     Text{
         id:text
@@ -29,6 +29,7 @@ Item {
     }
 
     ComboBox {
+        id: combo
         width: 116
         height: parent.height
         anchors.left: text.right
