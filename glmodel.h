@@ -30,8 +30,10 @@ public:
     QPhongAlphaMaterial *m_planeMaterial;
     Qt3DRender::QBuffer *vertexBuffer;
     Qt3DRender::QBuffer *vertexNormalBuffer;
+    Qt3DRender::QBuffer *vertexColorBuffer;
     QAttribute *positionAttribute;
-    QAttribute * normalAttribute;
+    QAttribute *normalAttribute;
+    QAttribute *colorAttribute;
     QGeometry* m_geometry;
     QGeometryRenderer* m_geometryRenderer;
 
@@ -57,6 +59,7 @@ private:
     void addVertices(Mesh* mesh);
     void addVertices(vector<QVector3D> vertices);
     void addNormalVertices(vector<QVector3D> vertices);
+    void addColorVertices(vector<QVector3D> vertices);
     void clearVertices();
     void onTimerUpdate();
 

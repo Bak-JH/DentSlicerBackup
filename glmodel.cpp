@@ -163,8 +163,14 @@ void GLModel::initialize(){
     vertexNormalBuffer->setUsage(Qt3DRender::QBuffer::DynamicDraw);
     vertexNormalBuffer->setData(vertexNormalArray);
 
+    QByteArray vertexColorArray;
+    vertexColorArray.resize(mesh->faces.size()*3*(3)*sizeof(float));
+    vertexColorBuffer = new Qt3DRender::QBuffer(Qt3DRender::QBuffer::VertexBuffer,m_geometry);
+    vertexColorBuffer->setUsage(Qt3DRender::QBuffer::DynamicDraw);
+    vertexColorBuffer->setData(vertexColorArray);
+
     // vertex Attributes
-    positionAttribute = new QAttribute(m_geometry);
+    positionAttribute = new QAttribute();
     positionAttribute->setAttributeType(QAttribute::VertexAttribute);
     positionAttribute->setBuffer(vertexBuffer);
     positionAttribute->setDataType(QAttribute::Float);
@@ -175,19 +181,30 @@ void GLModel::initialize(){
     positionAttribute->setName(QAttribute::defaultPositionAttributeName());
 
     // normal Attributes
-    normalAttribute = new QAttribute(m_geometry);
+    normalAttribute = new QAttribute();
     normalAttribute->setAttributeType(QAttribute::VertexAttribute);
     normalAttribute->setBuffer(vertexNormalBuffer);
     normalAttribute->setDataType(QAttribute::Float);
     normalAttribute->setDataSize(3);
-    //normalAttribute->setVertexSize(3);
     normalAttribute->setByteOffset(0);
     normalAttribute->setByteStride(3*sizeof(float));
     normalAttribute->setCount(0);
     normalAttribute->setName(QAttribute::defaultNormalAttributeName());
 
+    // color Attributes
+    colorAttribute = new QAttribute();
+    colorAttribute->setAttributeType(QAttribute::VertexAttribute);
+    colorAttribute->setBuffer(vertexColorBuffer);
+    colorAttribute->setDataType(QAttribute::Float);
+    colorAttribute->setDataSize(3);
+    colorAttribute->setByteOffset(0);
+    colorAttribute->setByteStride(3*sizeof(float));
+    colorAttribute->setCount(0);
+    colorAttribute->setName(QAttribute::defaultColorAttributeName());
+
     m_geometry->addAttribute(positionAttribute);
     m_geometry->addAttribute(normalAttribute);
+    m_geometry->addAttribute(colorAttribute);
 
     m_geometryRenderer->setInstanceCount(1);
     m_geometryRenderer->setFirstVertex(0);
@@ -247,6 +264,15 @@ void GLModel::addVertices(Mesh* mesh){
 
         addNormalVertices(result_vns);
     }
+    foreach (MeshFace mf , mesh->faces){
+
+        vector<QVector3D> result_vcs;
+        for (int fn=2; fn>=0; fn--){
+            result_vcs.push_back(QVector3D(1.0f, 0.0f, 0.0f));
+        }
+
+        addColorVertices(result_vcs);
+    }
 }
 
 void GLModel::addVertices(vector<QVector3D> vertices){
@@ -264,7 +290,6 @@ void GLModel::addVertices(vector<QVector3D> vertices){
     }
 
     uint vertexCount = positionAttribute->count();
-    qDebug() << vertexCount;
     vertexBuffer->updateData(vertexCount*3*sizeof(float),appendVertexArray);
     positionAttribute->setCount(vertexCount + vertex_cnt);
     return;
@@ -272,7 +297,6 @@ void GLModel::addVertices(vector<QVector3D> vertices){
 
 
 void GLModel::addNormalVertices(vector<QVector3D> vertices){
-    qDebug() << "adding normal vertices";
     int vertex_normal_cnt = vertices.size();
     QByteArray appendVertexArray;
     appendVertexArray.resize(vertex_normal_cnt*3*sizeof(float));
@@ -288,12 +312,30 @@ void GLModel::addNormalVertices(vector<QVector3D> vertices){
     }
 
     uint vertexNormalCount = normalAttribute->count();
-    qDebug() << vertexNormalCount;
     vertexNormalBuffer->updateData(vertexNormalCount*3*sizeof(float), appendVertexArray);
     normalAttribute->setCount(vertexNormalCount+ vertex_normal_cnt);
     return;
 }
 
+void GLModel::addColorVertices(vector<QVector3D> vertices){
+    int vertex_color_cnt = vertices.size();
+    QByteArray appendVertexArray;
+    appendVertexArray.resize(vertex_color_cnt*3*sizeof(float));
+    float * reVertexArray = reinterpret_cast<float*>(appendVertexArray.data());
+
+    for (int i=0; i<vertex_color_cnt; i++){
+
+        //coordinates of left vertex
+        reVertexArray[3*i+0] = vertices[i].x();
+        reVertexArray[3*i+1] = vertices[i].y();
+        reVertexArray[3*i+2] = vertices[i].z();
+    }
+
+    uint vertexColorCount = colorAttribute->count();
+    vertexColorBuffer->updateData(vertexColorCount*3*sizeof(float), appendVertexArray);
+    colorAttribute->setCount(vertexColorCount + vertex_color_cnt);
+    return;
+}
 // need to create new mesh object liek Mesh* leftMesh = new Mesh();
 void GLModel::bisectModel(Mesh* mesh, Plane plane, Mesh* leftMesh, Mesh* rightMesh){
     // do bisecting mesh
