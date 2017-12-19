@@ -173,10 +173,12 @@ Entity {
                     */
 
                 } else if (rotateAction.active) {
-                    //root.camera.panAboutViewCenter(rotationSpeed * rotateXAxis.value * dt,Qt.vector3d( 0.0, 0.0, 1.0 ));
-                    angleVector = root.camera.position.minus(Qt.vector3d(0,0,0)).normalized();
 
-                    console.log("Zzzz " +angleVector.z)
+                    //angleVector = root.camera.position.minus(Qt.vector3d(0,0,0)).normalized();
+                    angleVector = root.camera.position.minus(sceneRoot.systemTransform.translation.plus(40,50,75)).normalized();
+
+
+                    //console.log("Zzzz " +angleVector.z)
                     if(angleVector.z>0.999){
 
                         if(rotateYAxis.value<=0){

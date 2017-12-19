@@ -51,8 +51,6 @@ Entity {
         nearPlane : 10
         farPlane : 1000
 
-
-
         position: defaultCameraPosition
         upVector: defaultUp
         //viewCenter: Qt.vector3d( 0, 0, 0 )
@@ -190,7 +188,6 @@ Entity {
         duration: 100
         easing.type: "Linear"
 
-
     }
 
     function zoomGap(){
@@ -279,20 +276,20 @@ Entity {
 
         onPressed: {
             if (event.key === Qt.Key_A) {
-                //sceneRoot.total.mtr.perfectPosition();
-                defaultCameraPosition.plus(Qt.vector3d(10,0,0))
+                camera.position = camera.position.plus(Qt.vector3d(0,0,-10))
             }
             if (event.key === Qt.Key_S) {
-                defaultCameraPosition.minus(Qt.vector3d(0,10,0))
+                camera.position = camera.position.plus(Qt.vector3d(0,-10,0))
             }
             if (event.key === Qt.Key_D) {
-                defaultCameraPosition.minus(Qt.vector3d(10,0,0))
+                camera.position = camera.position.plus(Qt.vector3d(0,0,10))
             }
             if (event.key === Qt.Key_W) {
-                defaultCameraPosition.plus(Qt.vector3d(0,10,0))
+                camera.position = camera.position.plus(Qt.vector3d(0,10,0))
             }
 
             if (event.key === Qt.Key_V) {
+                console.log("cccc  " + camera.position)
                 /*
                 var point = Qt.vector3d(0,0,0);
                 var matrix = Qt.matrix4x4(0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0);

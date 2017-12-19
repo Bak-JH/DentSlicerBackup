@@ -4,6 +4,14 @@ import QtQuick.Controls 1.2
 import QtQuick.Layouts 1.3
 
 Rectangle {
+
+    property alias option_resolution: option_resolution
+    property alias option_layer_height: option_layer_height
+    property alias option_support: option_support
+    property alias option_infill: option_infill
+    property alias option_raft: option_raft
+
+
     width : 260
     height : 180
 
@@ -70,23 +78,28 @@ Rectangle {
             ColumnLayout {
                 spacing: 8
                 LeftTabSlicingOptionElement{
+                    id:option_resolution
                     columnName: "Resolution"
                     columnContents: ["1920*1080","1024*768"]
 
                 }
                 LeftTabSlicingOptionElement{
+                    id:option_layer_height
                     columnName: "Layer height"
                     columnContents: ["0.1","0.2","0.05"]
                 }
                 LeftTabSlicingOptionElement{
+                    id:option_support
                     columnName: "Support"
                     columnContents: ["k-branch","general"]
                 }
                 LeftTabSlicingOptionElement{
+                    id:option_infill
                     columnName: "Infill"
                     columnContents: ["general","full","none"]
                 }
                 LeftTabSlicingOptionElement{
+                    id:option_raft
                     columnName: "Raft"
                     columnContents: ["general","none"]
                 }
