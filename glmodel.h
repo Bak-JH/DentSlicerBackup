@@ -31,9 +31,11 @@ public:
     Qt3DRender::QBuffer *vertexBuffer;
     Qt3DRender::QBuffer *vertexNormalBuffer;
     Qt3DRender::QBuffer *vertexColorBuffer;
+    Qt3DRender::QBuffer *indexBuffer;
     QAttribute *positionAttribute;
     QAttribute *normalAttribute;
     QAttribute *colorAttribute;
+    QAttribute *indexAttribute;
     QGeometry* m_geometry;
     QGeometryRenderer* m_geometryRenderer;
 
@@ -60,6 +62,7 @@ private:
     void addVertices(vector<QVector3D> vertices);
     void addNormalVertices(vector<QVector3D> vertices);
     void addColorVertices(vector<QVector3D> vertices);
+    void addIndexes(vector<int> vertices);
     void clearVertices();
     void onTimerUpdate();
 
