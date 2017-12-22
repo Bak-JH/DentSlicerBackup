@@ -30,9 +30,10 @@ GLModel::GLModel(QNode *parent)
     QObject::connect(m_objectPicker, SIGNAL(clicked(Qt3DRender::QPickEvent*)), this, SLOT(handlePickerClicked(Qt3DRender::QPickEvent*)));
 
     mesh = new Mesh();
-    qDebug() << "loading mesh";
+    qDebug() << "Loading mesh";
     loadMeshSTL(mesh, "C:/Users/diridiri/Desktop/DLP/partial1_flip.stl");
-    qDebug() << "loaded mesh";
+    //qDebug() << "Number fo faces :" << mesh->faces.size();
+    qDebug() << "Mesh loaded";
     initialize();
     //addVertices(mesh);
     //addVertices(mesh->vertices);
