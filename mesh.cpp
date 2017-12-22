@@ -9,8 +9,6 @@ void Mesh::addFace(QVector3D v0, QVector3D v1, QVector3D v2){
     int v1_idx = getVertexIdx(v1);
     int v2_idx = getVertexIdx(v2);
 
-    //qDebug() << v0_idx << v1_idx << v2_idx;
-
     MeshFace mf;
     mf.idx = faces.size();
     mf.mesh_vertex[0] = v0_idx;
