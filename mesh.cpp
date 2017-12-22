@@ -8,6 +8,7 @@ void Mesh::addFace(QVector3D v0, QVector3D v1, QVector3D v2){
     int v0_idx = getVertexIdx(v0);
     int v1_idx = getVertexIdx(v1);
     int v2_idx = getVertexIdx(v2);
+    //*qDebug() << "Face add (" << v0_idx << "," << v1_idx << "," << v2_idx << ")";
 
     MeshFace mf;
     mf.idx = faces.size();
@@ -48,10 +49,14 @@ void Mesh::addFace(QVector3D v0, QVector3D v1, QVector3D v2){
 // add connected face idx to each meshes
 void Mesh::connectFaces(){
     for (int i=0; i<faces.size(); i++){
-        MeshFace mf = faces[i];
+        MeshFace &mf = faces[i];
+        //*qDebug() << "Connecting face : " << i << "(" << mf.mesh_vertex[0] << "," << mf.mesh_vertex[1] << "," << mf.mesh_vertex[2] << ")";
         mf.connected_face_idx[0] = findFaceWith2Vertices(mf.mesh_vertex[0], mf.mesh_vertex[1], i); // connected to vertex 0 1
+        //*qDebug() << " neighbor of" << i << ":" << mf.connected_face_idx[0];
         mf.connected_face_idx[1] = findFaceWith2Vertices(mf.mesh_vertex[1], mf.mesh_vertex[2], i); // connected to vertex 0 1
+        //*qDebug() << " neighbor of" << i << ":" << mf.connected_face_idx[1];
         mf.connected_face_idx[2] = findFaceWith2Vertices(mf.mesh_vertex[2], mf.mesh_vertex[0], i); // connected to vertex 0 1
+        //*qDebug() << " neighbor of" << i << ":" << mf.connected_face_idx[2];
     }
 }
 
@@ -91,7 +96,7 @@ Path Mesh::intersectionPath(MeshFace mf, float z){
         minority = upper;
     } else{
         if (getFaceZmin(mf) != z)
-            qDebug() << "intersection error at layer "<< getFaceZmax(mf) << getFaceZmin(mf) << z<< upper.size() << lower.size();
+            //qDebug() << "intersection error at layer "<< getFaceZmax(mf) << getFaceZmin(mf) << z<< upper.size() << lower.size();
 
         return p;
     }
@@ -177,11 +182,15 @@ void Mesh::updateMinMax(QVector3D v){
 // find face containing 2 vertices presented as arguments
 int Mesh::findFaceWith2Vertices(int v0_idx, int v1_idx, int self_idx){
     std::vector<int> candidates;
+    //*qDebug() << " with vrtx" << v0_idx << "," << v1_idx;
     for (int f: vertices[v0_idx].connected_faces){
-        if (f == self_idx)
+        if (f == self_idx){
+            //*qDebug() << " candidate" << f << "(itself)";
             continue;
+        }
         if (faces[f].mesh_vertex[0] == v1_idx || faces[f].mesh_vertex[1] == v1_idx || faces[f].mesh_vertex[2] == v1_idx){
             candidates.emplace_back(f);
+            //*qDebug() << " candidate" << f;
         }
     }
     if (candidates.size() == 0){
