@@ -13,10 +13,16 @@ GLModel::GLModel(QNode *parent)
     , m_transform(new Qt3DCore::QTransform())
     , m_objectPicker(new Qt3DRender::QObjectPicker())
 {
+    Qt3DRender::QPickingSettings *settings = new Qt3DRender::QPickingSettings(m_objectPicker);
+
+    settings->setFaceOrientationPickingMode(Qt3DRender::QPickingSettings::FrontFace);
+    settings->setPickMethod(Qt3DRender::QPickingSettings::TrianglePicking);
+    settings->setPickResultMode(Qt3DRender::QPickingSettings::NearestPick);
+
     /*Qt3DRender::QRenderSettings *settings = (Qt3DRender::QRenderSettings*) QRenderSettings::activeFrameGraph()->parent();
     if (settings)
-        settings->pickingSettings()->setPickMethod(Qt3DRender::QPickingSettings::TrianglePicking);
-    */
+        settings->pickingSettings()->setPickMethod(Qt3DRender::QPickingSettings::TrianglePicking);*/
+
 
     m_planeMaterial = new QPhongAlphaMaterial();
     m_planeMaterial->setAmbient(QColor(81,200,242));
@@ -27,7 +33,6 @@ GLModel::GLModel(QNode *parent)
 
     QTimer *timer = new QTimer();
     QObject::connect(timer, &QTimer::timeout,this,&GLModel::onTimerUpdate);
-    QObject::connect(m_objectPicker, SIGNAL(clicked(Qt3DRender::QPickEvent*)), this, SLOT(handlePickerClicked(Qt3DRender::QPickEvent*)));
 
     mesh = new Mesh();
     qDebug() << "Loading mesh";
@@ -59,6 +64,10 @@ GLModel::GLModel(QNode *parent)
     //addComponent(diffuseMapMaterial);
     //addComponent(phongMaterial);
     addComponent(m_transform);
+
+    m_objectPicker->setHoverEnabled(true);
+    QObject::connect(m_objectPicker, SIGNAL(clicked(Qt3DRender::QPickEvent*)), this, SLOT(handlePickerClicked(Qt3DRender::QPickEvent*)));
+
     addComponent(m_objectPicker);
 
     auto attributes = m_geometry->attributes();
@@ -373,23 +382,11 @@ void GLModel::onTimerUpdate()
 
 void GLModel::handlePickerClicked(QPickEvent *pick)
 {
-    qDebug() << "handle picker clicked1";
-    qDebug() << pick->position();
-    //QPickTriangleEvent *trianglePick = qobject_cast<QPick>
-    QPickTriangleEvent *trianglePick = qobject_cast<QPickTriangleEvent*>(pick);
-    qDebug() << trianglePick->position();
+    QPickTriangleEvent *trianglePick = static_cast<QPickTriangleEvent*>(pick);
+    qDebug() << trianglePick->worldIntersection();
     QGeometry *geometry = m_mesh->geometry();
-    qDebug() << "handle picker clicked2";
     auto attributes = geometry->attributes();
-    qDebug() << "handle picker clicked3";
-    //qDebug() << trianglePick->
-    qDebug() << (void*)trianglePick;
-    /*qDebug() << trianglePick->isAccepted();
-    qDebug() << (void*)trianglePick->vertex1Index();
-    qDebug() << (void*)trianglePick->vertex2Index();
-    qDebug() << (void*)trianglePick->vertex3Index();*/
     int vertexIndex = trianglePick->vertex1Index();
-    qDebug() << "handle picker clicked4";
     for (auto i = 0; i < attributes.count(); ++i)
     {
         qDebug() << i;
