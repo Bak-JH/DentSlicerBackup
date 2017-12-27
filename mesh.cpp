@@ -22,25 +22,25 @@ void Mesh::addFace(QVector3D v0, QVector3D v1, QVector3D v2){
     vertices[v1_idx].connected_faces.emplace_back(mf.idx);
     vertices[v2_idx].connected_faces.emplace_back(mf.idx);
     if (vertices[v0_idx].connected_faces.size()>=3){
-        MeshVertex mv = vertices[v0_idx];
-        vertices[v0_idx].vn = QVector3D(idx2MF(mv.connected_faces[0]).fn + idx2MF(mv.connected_faces[1]).fn + idx2MF(mv.connected_faces[2]).fn).normalized();
+        MeshVertex &mv = vertices[v0_idx];
+        mv.vn = QVector3D(idx2MF(mv.connected_faces[0]).fn + idx2MF(mv.connected_faces[1]).fn + idx2MF(mv.connected_faces[2]).fn).normalized();
     } else {
-        MeshVertex mv = vertices[v0_idx];
-        vertices[v0_idx].vn = QVector3D(0,0,0);
+        MeshVertex &mv = vertices[v0_idx];
+        mv.vn = QVector3D(0,0,0);
     }
     if (vertices[v1_idx].connected_faces.size()>=3){
-        MeshVertex mv = vertices[v1_idx];
+        MeshVertex &mv = vertices[v1_idx];
         vertices[v1_idx].vn = QVector3D(idx2MF(mv.connected_faces[0]).fn + idx2MF(mv.connected_faces[1]).fn + idx2MF(mv.connected_faces[2]).fn).normalized();
     } else {
-        MeshVertex mv = vertices[v1_idx];
+        MeshVertex &mv = vertices[v1_idx];
         vertices[v1_idx].vn = QVector3D(0,0,0);
     }
     if (vertices[v2_idx].connected_faces.size()>=3){
-        MeshVertex mv = vertices[v2_idx];
-        vertices[v2_idx].vn = QVector3D(idx2MF(mv.connected_faces[0]).fn + idx2MF(mv.connected_faces[1]).fn + idx2MF(mv.connected_faces[2]).fn).normalized();
+        MeshVertex &mv = vertices[v2_idx];
+        mv.vn = QVector3D(idx2MF(mv.connected_faces[0]).fn + idx2MF(mv.connected_faces[1]).fn + idx2MF(mv.connected_faces[2]).fn).normalized();
     } else {
-        MeshVertex mv = vertices[v2_idx];
-        vertices[v2_idx].vn = QVector3D(0,0,0);
+        MeshVertex &mv = vertices[v2_idx];
+        mv.vn = QVector3D(0,0,0);
     }
 
     faces.emplace_back(mf);
