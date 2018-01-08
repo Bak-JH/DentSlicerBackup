@@ -8,6 +8,7 @@
 #include <Qt3DInput>
 #include <vector>
 #include "fileloader.h"
+#include "arrange.h"
 #include <QBuffer>
 #include <QObjectPicker>
 
