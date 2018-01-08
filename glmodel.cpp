@@ -31,13 +31,21 @@ GLModel::GLModel(QNode *parent)
 
     mesh = new Mesh();
     qDebug() << "Loading mesh";
-    loadMeshSTL(mesh, "C:/Users/diridiri/Desktop/DLP/partial1_flip.stl");
-    //qDebug() << "Number fo faces :" << mesh->faces.size();
+    loadMeshSTL(mesh, /*"C:/Users/hsy61/Desktop/a_stencil.stl");/*/"C:/Users/hsy61/Desktop/DLPslicer/Resource/mesh/upperjaw.stl");
+    qDebug() << "Number of faces :" << mesh->faces.size();
     qDebug() << "Mesh loaded";
     initialize();
     //addVertices(mesh);
     //addVertices(mesh->vertices);
     //m_mesh->setGeometry(m_geometry);
+
+
+    Paths projection = Projection(mesh);
+    qDebug() << "Projection done";
+    DebugPath(projection);
+    //Mesh outline_mesh = PathsToMesh(projection);
+    //addVertices(&outline_mesh);
+
 
     m_mesh->setGeometry(m_geometry);
     Plane plane;
@@ -47,7 +55,7 @@ GLModel::GLModel(QNode *parent)
     Mesh* lmesh = new Mesh();
     Mesh* rmesh = new Mesh();
     bisectModel(mesh, plane, lmesh, rmesh);
-    addVertices(rmesh);
+    //***addVertices(mesh);
     qDebug() << mesh->x_min << mesh->x_max;
     //m_mesh->setGeometry(lmesh->geometry());
     //m_mesh->setSource(QUrl(QStringLiteral("file:///D:/Dev/DLPSlicer/DLPslicer/resource/mesh/lowerjaw.obj")));

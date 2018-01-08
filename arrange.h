@@ -16,11 +16,11 @@ public:
     Arrange();
 };
 
-void SpreadingCheck(Mesh* mesh, bool* check, int chking, std::vector<std::pair<int, int>>* edge_set);
-void GetOutline (Mesh* mesh, std::vector<std::pair<int, int>> edge_set, Paths* outline_set);
-Paths SpreadingCheck1(Mesh* mesh, bool* check, bool* outer_check, int chking);
-Path GetOutline1(Mesh* mesh, bool* check, bool* outer_check, int chking, int path_head);
-bool IsSideBound(Mesh* mesh, MeshFace mf, int neighbor_idx);
+Paths SpreadingCheck(Mesh* mesh, bool* check, bool* outer_check, int chking);
+Path GetOutline(Mesh* mesh, bool* check, bool* outer_check, int chking, int path_head);
+bool IsEdgeBound(Mesh* mesh, MeshFace mf, int neighbor_idx);
 Paths Projection(Mesh* mesh);
 Mesh PathsToMesh(Paths paths);
+Paths Resize(Paths paths);
+void DebugPath(Paths paths);
 #endif // ARRANGE_H
