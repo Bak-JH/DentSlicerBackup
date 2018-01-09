@@ -4,7 +4,7 @@ import Qt3D.Render 2.0
 import Qt3D.Input 2.0
 import Qt3D.Extras 2.0
 import QtQuick 2.7
-import GLQML 1.0
+//import GLQML 1.0
 
 
 import Qt3D.Logic 2.0
@@ -168,32 +168,13 @@ Entity {
                 id: planeEntity
             }
 
-            GLModel{
+            /*GLModel{
                 id : glloadedmodel
                 ObjectPicker{
                     id : picker2
                     onClicked: {
 
                         console.log("click")
-
-                        /*var point = Qt.vector3d(0,0,0);
-                        var matrix = Qt.matrix4x4(0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0);
-
-                        matrix = cm.camera.projectionMatrix.times(cm.camera.viewMatrix);
-
-                        point = matrix.times(point)
-
-                        point.x = (point.x+1) * scene3d.width/2;
-                        point.y = (-1 * point.y+1) * scene3d.height/2;
-
-
-                        console.log("point2 " + point);
-                        console.log("viwport  w" + scene3d.width);
-                        console.log("viwport  h" + scene3d.height);
-
-                        //ui.mttab.anchors.leftMargin = point.x
-                        //ui.mttab.anchors.topMargin = point.y
-                        */
 
                         var point = ui.world2Screen(Qt.vector3d(0,0,0))
 
@@ -233,7 +214,7 @@ Entity {
                 function moveYMinus(){
                     meshTransform.translation = meshTransform.translation.minus(Qt.vector3d(0.1,0.0,0.0))
                 }
-            }
+            }*/
 
             Model{
                 id: meshEntity4
