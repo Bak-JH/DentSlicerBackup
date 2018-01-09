@@ -119,7 +119,7 @@ vector<Paths> Slicer::meshSlice(Mesh* mesh){
 Paths Slicer::contourConstruct(Paths pathList){
     Paths contourList;
 
-    QHash<int64_t, Path> pathHash;
+    QHash<uint32_t, Path> pathHash;
     if (pathList.size() == 0)
         return contourList;
 
@@ -129,8 +129,8 @@ Paths Slicer::contourConstruct(Paths pathList){
         Path p = pathList[i];
         //insertPathHash(pathHash, p[0], p[1]); // inserts opposite too
 
-        int64_t path_hash_u = intPoint2Hash(p[0]);
-        int64_t path_hash_v = intPoint2Hash(p[1]);
+        uint32_t path_hash_u = intPoint2Hash(p[0]);
+        uint32_t path_hash_v = intPoint2Hash(p[1]);
 
         if (! pathHash.contains(path_hash_u)){
             debug_count ++;
@@ -209,7 +209,7 @@ Paths Slicer::contourConstruct(Paths pathList){
         contour.push_back(last);
         contour.push_back(start);
 
-        int64_t last_hash = intPoint2Hash(last);
+        uint32_t last_hash = intPoint2Hash(last);
         if (pathHash.contains(last_hash)){
             dest = &(pathHash[last_hash]);
             for (int d=1; d<dest->size(); d++){
@@ -328,12 +328,12 @@ vector<float> Slicer::buildAdaptivePlanes(float z_min, float z_max){
 
 /****************** Helper Functions For Contour Construction Step *******************/
 
-void Slicer::insertPathHash(QHash<int64_t, Path>& pathHash, IntPoint u, IntPoint v){
+void Slicer::insertPathHash(QHash<uint32_t, Path>& pathHash, IntPoint u, IntPoint v){
     QVector3D u_qv3 = QVector3D(u.X, u.Y, 0);
     QVector3D v_qv3 = QVector3D(v.X, v.Y, 0);
 
-    int64_t path_hash_u = vertexHash(u_qv3);
-    int64_t path_hash_v = vertexHash(v_qv3);
+    uint32_t path_hash_u = vertexHash(u_qv3);
+    uint32_t path_hash_v = vertexHash(v_qv3);
 
     if (! pathHash.contains(path_hash_u)){
         //pathHash[path_hash_u].push_back(u);
@@ -353,9 +353,9 @@ void Slicer::insertPathHash(QHash<int64_t, Path>& pathHash, IntPoint u, IntPoint
     return;
 }
 
-int64_t Slicer::intPoint2Hash(IntPoint u){
+uint32_t Slicer::intPoint2Hash(IntPoint u){
     QVector3D u_qv3 = QVector3D(u.X, u.Y, 0);
-    int64_t path_hash_u = vertexHash(u_qv3);
+    uint32_t path_hash_u = vertexHash(u_qv3);
     return path_hash_u;
 }
 

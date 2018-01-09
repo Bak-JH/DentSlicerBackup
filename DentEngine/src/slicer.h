@@ -70,8 +70,8 @@ public:
 
 
     /****************** Helper Functions For Contour Construction Step *******************/
-    void insertPathHash(QHash<int64_t, Path>& pathHash, IntPoint u, IntPoint v);
-    int64_t intPoint2Hash(IntPoint u);
+    void insertPathHash(QHash<uint32_t, Path>& pathHash, IntPoint u, IntPoint v);
+    uint32_t intPoint2Hash(IntPoint u);
 
 
 
