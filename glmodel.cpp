@@ -56,6 +56,10 @@ GLModel::GLModel(QNode *parent)
     //addVertices(&outline_mesh);
 
 
+
+
+    qDebug() << "loaded mesh";
+    initialize(mesh);
     m_mesh->setGeometry(m_geometry);
 
 
