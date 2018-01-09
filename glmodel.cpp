@@ -43,7 +43,7 @@ GLModel::GLModel(QNode *parent)
 
     mesh = new Mesh();
     qDebug() << "Loading mesh";
-    loadMeshSTL(mesh, /*"C:/Users/hsy61/Desktop/a_stencil.stl");/*/"C:/Users/hsy61/Desktop/DLPslicer/Resource/mesh/upperjaw.stl");
+    loadMeshSTL(mesh, "C:/Users/hsy61/Desktop/a_stencil.stl");
     qDebug() << "Number of faces :" << mesh->faces.size();
     qDebug() << "Mesh loaded";
     initialize(mesh);
