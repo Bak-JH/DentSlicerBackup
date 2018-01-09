@@ -18,11 +18,19 @@ ApplicationWindow {
     menuBar: MenuBar{
         Menu{
             title : "File"
-            MenuItem{text : "Open..."}
-            MenuItem{text : "Close..."}
+            MenuItem{text : "New File or Project"}
+            MenuItem{text : "Open File of Project"}
+            MenuItem{text : "Open File with ...."}
+            MenuItem{text : "Recent Files"}
+            MenuItem{text : "Recent Projects"}
+            MenuItem{text : "Sessions"}
+            MenuItem{text : "Session Menager...."}
+            MenuItem{text : "Close Project \"  \""}
+            MenuItem{text : "Print"}
+            MenuItem{text : "Exit"}
         }
         Menu{
-            title : "Help"
+            title : "Edit"
             MenuItem{text : "help..."}
             MenuItem{text : "hellllp..."}
         }
@@ -96,7 +104,6 @@ ApplicationWindow {
             id: sceneRoot
         }
     }
-
 
 
 
