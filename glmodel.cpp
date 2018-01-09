@@ -13,10 +13,16 @@ GLModel::GLModel(QNode *parent)
     , m_transform(new Qt3DCore::QTransform())
     , m_objectPicker(new Qt3DRender::QObjectPicker())
 {
+    Qt3DRender::QPickingSettings *settings = new Qt3DRender::QPickingSettings(m_objectPicker);
+
+    settings->setFaceOrientationPickingMode(Qt3DRender::QPickingSettings::FrontFace);
+    settings->setPickMethod(Qt3DRender::QPickingSettings::TrianglePicking);
+    settings->setPickResultMode(Qt3DRender::QPickingSettings::NearestPick);
+
     /*Qt3DRender::QRenderSettings *settings = (Qt3DRender::QRenderSettings*) QRenderSettings::activeFrameGraph()->parent();
     if (settings)
-        settings->pickingSettings()->setPickMethod(Qt3DRender::QPickingSettings::TrianglePicking);
-    */
+        settings->pickingSettings()->setPickMethod(Qt3DRender::QPickingSettings::TrianglePicking);*/
+
 
     m_planeMaterial = new QPhongAlphaMaterial();
     m_planeMaterial->setAmbient(QColor(81,200,242));
@@ -27,7 +33,6 @@ GLModel::GLModel(QNode *parent)
 
     QTimer *timer = new QTimer();
     QObject::connect(timer, &QTimer::timeout,this,&GLModel::onTimerUpdate);
-    QObject::connect(m_objectPicker, SIGNAL(clicked(Qt3DRender::QPickEvent*)), this, SLOT(handlePickerClicked(Qt3DRender::QPickEvent*)));
 
     mesh = new Mesh();
     qDebug() << "Loading mesh";
@@ -35,9 +40,6 @@ GLModel::GLModel(QNode *parent)
     qDebug() << "Number of faces :" << mesh->faces.size();
     qDebug() << "Mesh loaded";
     initialize();
-    //addVertices(mesh);
-    //addVertices(mesh->vertices);
-    //m_mesh->setGeometry(m_geometry);
 
 
     Paths projection = Projection(mesh);
@@ -55,25 +57,25 @@ GLModel::GLModel(QNode *parent)
     Mesh* lmesh = new Mesh();
     Mesh* rmesh = new Mesh();
     bisectModel(mesh, plane, lmesh, rmesh);
-    //***addVertices(mesh);
-    qDebug() << mesh->x_min << mesh->x_max;
-    //m_mesh->setGeometry(lmesh->geometry());
+    addVertices(rmesh);
     //m_mesh->setSource(QUrl(QStringLiteral("file:///D:/Dev/DLPSlicer/DLPslicer/resource/mesh/lowerjaw.obj")));
 
-    qDebug() << "source setting done" << m_mesh->geometry() << "children nodes" << m_mesh->childNodes().count();
-
     Qt3DExtras::QDiffuseMapMaterial *diffuseMapMaterial = new Qt3DExtras::QDiffuseMapMaterial();
-    diffuseMapMaterial->setSpecular(QColor::fromRgbF(0.2f, 0.2f, 0.2f, 1.0f));
-    diffuseMapMaterial->setShininess(2.0f);
-
-    addComponent(diffuseMapMaterial);
-
+    diffuseMapMaterial->setAmbient(QColor(QRgb(0x92bcc4)));
+    //diffuseMapMaterial->setSpecular(QColor::fromRgbF(0.9f, 0.9f, 0.9f, 1.0f));
+    //diffuseMapMaterial->setShininess(10.0f);
     Qt3DExtras::QPhongMaterial *phongMaterial = new Qt3DExtras::QPhongMaterial();
-    phongMaterial->setDiffuse(QColor(QRgb(0xa69929)));
+    //phongMaterial->setAmbiant(QColor(QRgb(0x92bcc4)));
+    //phongMaterial->setDiffuse(QColor(QRgb(0x92bcc4)));
 
     addComponent(m_mesh);
-    addComponent(phongMaterial);
+    //addComponent(diffuseMapMaterial);
+    //addComponent(phongMaterial);
     addComponent(m_transform);
+
+    m_objectPicker->setHoverEnabled(true);
+    QObject::connect(m_objectPicker, SIGNAL(clicked(Qt3DRender::QPickEvent*)), this, SLOT(handlePickerClicked(Qt3DRender::QPickEvent*)));
+
     addComponent(m_objectPicker);
 
     auto attributes = m_geometry->attributes();
@@ -83,7 +85,6 @@ GLModel::GLModel(QNode *parent)
     qDebug() << "attributes size : " << attributes.count();
     for (auto i = 0; i < attributes.count(); ++i)
     {
-        qDebug() << i;
         if (attributes.at(i)->name() == QAttribute::VertexAttribute)//QAttribute::defaultPositionAttributeName())
         {
             /*QAttribute *attribute = attributes.at(i);
@@ -100,18 +101,7 @@ GLModel::GLModel(QNode *parent)
             qDebug() << value;
             break;*/
         }
-        qDebug() << "3";
     }
-
-    //Qt3DRender::QGeometry *newGeometry = new Qt3DRender::QGeometry;
-
-    /*QMap<Qt3DRender::QBuffer *, Qt3DRender::QBuffer *> bufferMap;
-    Q_FOREACH (Qt3DRender::QAttribute *att , m_mesh->geometry()->attributes()){
-        Qt3DRender::QAttribute *newAtt = copyAttribute(att, bufferMap);
-        if (newAtt)
-            new_mesh->geometry
-        //qDebug() << "asdf" << att ;
-    }*/
 }
 
 Qt3DRender::QAttribute *copyAttribute(
@@ -159,12 +149,6 @@ void GLModel::initialize(){
     m_geometryRenderer = new QGeometryRenderer();
     m_geometry = new QGeometry(m_geometryRenderer);
 
-    /*QByteArray indexArray;
-    indexArray.resize(mesh->faces.size()*3*(3)*sizeof(int));
-    indexBuffer = new Qt3DRender::QBuffer(Qt3DRender::QBuffer::IndexBuffer,m_geometry);
-    indexBuffer->setUsage(Qt3DRender::QBuffer::DynamicDraw);
-    indexBuffer->setData(indexArray);*/
-
     QByteArray vertexArray;
     vertexArray.resize(mesh->faces.size()*3*(3)*sizeof(float));
     vertexBuffer = new Qt3DRender::QBuffer(Qt3DRender::QBuffer::VertexBuffer,m_geometry);
@@ -177,21 +161,11 @@ void GLModel::initialize(){
     vertexNormalBuffer->setUsage(Qt3DRender::QBuffer::DynamicDraw);
     vertexNormalBuffer->setData(vertexNormalArray);
 
-    /*QByteArray vertexColorArray;
+    QByteArray vertexColorArray;
     vertexColorArray.resize(mesh->faces.size()*3*(3)*sizeof(float));
     vertexColorBuffer = new Qt3DRender::QBuffer(Qt3DRender::QBuffer::VertexBuffer,m_geometry);
     vertexColorBuffer->setUsage(Qt3DRender::QBuffer::DynamicDraw);
-    vertexColorBuffer->setData(vertexColorArray);*/
-
-    /*// index Attributes
-    indexAttribute = new QAttribute();
-    indexAttribute->setAttributeType(QAttribute::IndexAttribute);
-    indexAttribute->setBuffer(indexBuffer);
-    indexAttribute->setDataType(QAttribute::Int);
-    indexAttribute->setDataSize(1);
-    indexAttribute->setByteOffset(0);
-    indexAttribute->setByteStride(0);
-    indexAttribute->setCount(0);*/
+    vertexColorBuffer->setData(vertexColorArray);
 
     // vertex Attributes
     positionAttribute = new QAttribute();
@@ -215,21 +189,20 @@ void GLModel::initialize(){
     normalAttribute->setCount(0);
     normalAttribute->setName(QAttribute::defaultNormalAttributeName());
 
-    /*// color Attributes
+    // color Attributes
     colorAttribute = new QAttribute();
     colorAttribute->setAttributeType(QAttribute::VertexAttribute);
     colorAttribute->setBuffer(vertexColorBuffer);
     colorAttribute->setDataType(QAttribute::Float);
     colorAttribute->setDataSize(3);
     colorAttribute->setByteOffset(0);
-    colorAttribute->setByteStride(3*sizeof(float));
+    colorAttribute->setByteStride(3 * sizeof(float));
     colorAttribute->setCount(0);
-    colorAttribute->setName(QAttribute::defaultColorAttributeName());*/
+    colorAttribute->setName(QAttribute::defaultColorAttributeName());
 
-    //m_geometry->addAttribute(indexAttribute);
     m_geometry->addAttribute(positionAttribute);
     m_geometry->addAttribute(normalAttribute);
-    //m_geometry->addAttribute(colorAttribute);
+    m_geometry->addAttribute(colorAttribute);
 
     m_geometryRenderer->setInstanceCount(1);
     m_geometryRenderer->setFirstVertex(0);
@@ -297,7 +270,7 @@ void GLModel::addVertices(Mesh* mesh){
 
         addNormalVertices(result_vns);
     }
-    /*foreach (MeshFace mf , mesh->faces){
+    foreach (MeshFace mf , mesh->faces){
 
         vector<QVector3D> result_vcs;
         for (int fn=2; fn>=0; fn--){
@@ -305,7 +278,7 @@ void GLModel::addVertices(Mesh* mesh){
         }
 
         addColorVertices(result_vcs);
-    }*/
+    }
 }
 
 void GLModel::addVertices(vector<QVector3D> vertices){
@@ -417,23 +390,11 @@ void GLModel::onTimerUpdate()
 
 void GLModel::handlePickerClicked(QPickEvent *pick)
 {
-    qDebug() << "handle picker clicked1";
-    qDebug() << pick->position();
-    //QPickTriangleEvent *trianglePick = qobject_cast<QPick>
-    QPickTriangleEvent *trianglePick = qobject_cast<QPickTriangleEvent*>(pick);
-    qDebug() << trianglePick->position();
+    QPickTriangleEvent *trianglePick = static_cast<QPickTriangleEvent*>(pick);
+    qDebug() << trianglePick->worldIntersection();
     QGeometry *geometry = m_mesh->geometry();
-    qDebug() << "handle picker clicked2";
     auto attributes = geometry->attributes();
-    qDebug() << "handle picker clicked3";
-    //qDebug() << trianglePick->
-    qDebug() << (void*)trianglePick;
-    /*qDebug() << trianglePick->isAccepted();
-    qDebug() << (void*)trianglePick->vertex1Index();
-    qDebug() << (void*)trianglePick->vertex2Index();
-    qDebug() << (void*)trianglePick->vertex3Index();*/
     int vertexIndex = trianglePick->vertex1Index();
-    qDebug() << "handle picker clicked4";
     for (auto i = 0; i < attributes.count(); ++i)
     {
         qDebug() << i;
