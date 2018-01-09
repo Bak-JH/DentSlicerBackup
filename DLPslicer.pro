@@ -1,4 +1,4 @@
-TEMPLATE = app
+.TEMPLATE = app
 
 QT += qml quick opengl 3dcore 3drender 3dinput 3dextras
 
@@ -15,7 +15,8 @@ SOURCES += main.cpp \
     fileloader.cpp \
     mesh.cpp \
     polyclipping/clipper.cpp \
-    arrange.cpp
+    arrange.cpp \
+    lights.cpp \
 
 RESOURCES += qml.qrc \
     resources.qrc
@@ -48,8 +49,7 @@ HEADERS += \
     fileloader.h \
     mesh.h \
     polyclipping/clipper.hpp \
-    arrange.h
+    arrange.h \
+    lights.h \
 
 LIBS += -lOpengl32
-
-QMAKE_LFLAGS_WINDOWS += -Wl,--stack,32000000

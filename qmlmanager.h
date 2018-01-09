@@ -4,6 +4,8 @@
 #include <QObject>
 #include <QDebug>
 #include <QString>
+#include <QGuiApplication>
+#include <QQmlApplicationEngine>
 
 class QmlManager : public QObject
 {
@@ -17,6 +19,13 @@ signals:
 public slots:
     void sendUpdateModelInfo(int, int, QString, float);
 };
+
+
+
+QObject* FindItemByName(QList<QObject*> nodes, const QString& name);
+QObject* FindItemByName(QQmlApplicationEngine* engine, const QString& name);
+
+
 
 extern QmlManager qm;
 
