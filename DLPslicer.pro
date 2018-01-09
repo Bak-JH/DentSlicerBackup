@@ -51,5 +51,3 @@ HEADERS += \
     lights.h
 
 LIBS += -lOpengl32
-
-QMAKE_LFLAGS_WINDOWS += -Wl,--stack,32000000
