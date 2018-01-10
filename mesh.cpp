@@ -8,9 +8,8 @@ void Mesh::addFace(QVector3D v0, QVector3D v1, QVector3D v2){
     int v0_idx = getVertexIdx(v0);
     int v1_idx = getVertexIdx(v1);
     int v2_idx = getVertexIdx(v2);
-    //*qDebug() << "Face add (" << v0_idx << "," << v1_idx << "," << v2_idx << ")";
 
-    MeshFace mf;
+    MeshFace mf = MeshFace();
     mf.idx = faces.size();
     mf.mesh_vertex[0] = v0_idx;
     mf.mesh_vertex[1] = v1_idx;
@@ -21,6 +20,9 @@ void Mesh::addFace(QVector3D v0, QVector3D v1, QVector3D v2){
     vertices[v0_idx].connected_faces.emplace_back(mf.idx);
     vertices[v1_idx].connected_faces.emplace_back(mf.idx);
     vertices[v2_idx].connected_faces.emplace_back(mf.idx);
+
+    faces.emplace_back(mf);
+
     if (vertices[v0_idx].connected_faces.size()>=3){
         MeshVertex &mv = vertices[v0_idx];
         mv.vn = QVector3D(idx2MF(mv.connected_faces[0]).fn + idx2MF(mv.connected_faces[1]).fn + idx2MF(mv.connected_faces[2]).fn).normalized();
@@ -28,13 +30,15 @@ void Mesh::addFace(QVector3D v0, QVector3D v1, QVector3D v2){
         MeshVertex &mv = vertices[v0_idx];
         mv.vn = QVector3D(0,0,0);
     }
+
     if (vertices[v1_idx].connected_faces.size()>=3){
         MeshVertex &mv = vertices[v1_idx];
-        vertices[v1_idx].vn = QVector3D(idx2MF(mv.connected_faces[0]).fn + idx2MF(mv.connected_faces[1]).fn + idx2MF(mv.connected_faces[2]).fn).normalized();
+        mv.vn = QVector3D(idx2MF(mv.connected_faces[0]).fn + idx2MF(mv.connected_faces[1]).fn + idx2MF(mv.connected_faces[2]).fn).normalized();
     } else {
         MeshVertex &mv = vertices[v1_idx];
-        vertices[v1_idx].vn = QVector3D(0,0,0);
+        mv.vn = QVector3D(0,0,0);
     }
+
     if (vertices[v2_idx].connected_faces.size()>=3){
         MeshVertex &mv = vertices[v2_idx];
         mv.vn = QVector3D(idx2MF(mv.connected_faces[0]).fn + idx2MF(mv.connected_faces[1]).fn + idx2MF(mv.connected_faces[2]).fn).normalized();
@@ -42,21 +46,27 @@ void Mesh::addFace(QVector3D v0, QVector3D v1, QVector3D v2){
         MeshVertex &mv = vertices[v2_idx];
         mv.vn = QVector3D(0,0,0);
     }
-
-    faces.emplace_back(mf);
 }
 
 // add connected face idx to each meshes
 void Mesh::connectFaces(){
     for (int i=0; i<faces.size(); i++){
         MeshFace &mf = faces[i];
-        //*qDebug() << "Connecting face : " << i << "(" << mf.mesh_vertex[0] << "," << mf.mesh_vertex[1] << "," << mf.mesh_vertex[2] << ")";
-        mf.connected_face_idx[0] = findFaceWith2Vertices(mf.mesh_vertex[0], mf.mesh_vertex[1], i); // connected to vertex 0 1
-        //*qDebug() << " neighbor of" << i << ":" << mf.connected_face_idx[0];
-        mf.connected_face_idx[1] = findFaceWith2Vertices(mf.mesh_vertex[1], mf.mesh_vertex[2], i); // connected to vertex 0 1
-        //*qDebug() << " neighbor of" << i << ":" << mf.connected_face_idx[1];
-        mf.connected_face_idx[2] = findFaceWith2Vertices(mf.mesh_vertex[2], mf.mesh_vertex[0], i); // connected to vertex 0 1
-        //*qDebug() << " neighbor of" << i << ":" << mf.connected_face_idx[2];
+
+        vector<int> faces1 = findFaceWith2Vertices(mf.mesh_vertex[0], mf.mesh_vertex[1], i);
+        vector<int> faces2 = findFaceWith2Vertices(mf.mesh_vertex[1], mf.mesh_vertex[2], i);
+        vector<int> faces3 = findFaceWith2Vertices(mf.mesh_vertex[2], mf.mesh_vertex[0], i);
+
+        /*if (faces1.size() != 0)
+            mf.neighboring_faces.push_back(faces1);
+        if (faces2.size() != 0)
+            mf.neighboring_faces.push_back(faces2);
+        if (faces3.size() != 0)
+            mf.neighboring_faces.push_back(faces3);*/
+
+        mf.neighboring_faces.push_back(faces1);
+        mf.neighboring_faces.push_back(faces2);
+        mf.neighboring_faces.push_back(faces3);
     }
 }
 
@@ -180,7 +190,7 @@ void Mesh::updateMinMax(QVector3D v){
 }
 
 // find face containing 2 vertices presented as arguments
-int Mesh::findFaceWith2Vertices(int v0_idx, int v1_idx, int self_idx){
+vector<int> Mesh::findFaceWith2Vertices(int v0_idx, int v1_idx, int self_idx){
     std::vector<int> candidates;
     //*qDebug() << " with vrtx" << v0_idx << "," << v1_idx;
     for (int f: vertices[v0_idx].connected_faces){
@@ -193,17 +203,15 @@ int Mesh::findFaceWith2Vertices(int v0_idx, int v1_idx, int self_idx){
             //*qDebug() << " candidate" << f;
         }
     }
-    if (candidates.size() == 0){
-        //qDebug() << "no candidates";
-        return -1;
-    }
+    return candidates;
+    /*
     if (candidates.size() == 1){
         //qDebug() << "found face";
         return candidates[0];
     } else {
         //qDebug() << candidates.size() << "multiple faces are connected so outputting first connected face" << candidates[0];
         return candidates[0];
-    }
+    }*/
 }
 
 float Mesh::getFaceZmin(MeshFace mf){
@@ -227,6 +235,7 @@ float Mesh::getFaceZmax(MeshFace mf){
 }
 
 MeshFace Mesh::idx2MF(int idx){
+    //qDebug() << "face size" << faces.size() << "finding" << idx;
     return faces[idx];
 }
 

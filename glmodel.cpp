@@ -43,7 +43,7 @@ GLModel::GLModel(QNode *parent)
 
     mesh = new Mesh();
     qDebug() << "loading mesh";
-    loadMeshSTL(mesh, "C:/Users/Hix/Desktop/partial2_flip.stl");
+    loadMeshSTL(mesh, "C:/Users/diridiri/Desktop/DLP/partial2_flip.stl");
 
 
     qDebug() << "loaded mesh";
