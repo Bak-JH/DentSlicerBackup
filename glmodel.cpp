@@ -438,19 +438,23 @@ void GLModel::handlePickerClicked(QPickEvent *pick)
 
 void GLModel::makePlane(){
 
-    if (vector_set.size()<3){
-        qDebug()<<"Error: There is not enough vectors to render a plane.";
-        QCoreApplication::quit();
-        return;
-    }
+//    if (vector_set.size()<3){
+//        qDebug()<<"Error: There is not enough vectors to render a plane.";
+//        QCoreApplication::quit();
+//        return;
+//    }
 
 
-    QVector3D v1;
-    QVector3D v2;
-    QVector3D v3;
-    v1=vector_set[vector_set.size()-3];
-    v2=vector_set[vector_set.size()-2];
-    v3=vector_set[vector_set.size()-1];
+    //    QVector3D v1;
+    //    QVector3D v2;
+    //    QVector3D v3;
+    //    v1=vector_set[vector_set.size()-3];
+    //    v2=vector_set[vector_set.size()-2];
+    //    v3=vector_set[vector_set.size()-1];
+
+    QVector3D v1(4,0,0);
+    QVector3D v2(0,4,0);
+    QVector3D v3(0,0,4);
 
         planeMaterial = new Qt3DExtras::QPhongMaterial();
             planeMaterial->setDiffuse(QColor(QRgb(0x00aaaa)));
@@ -500,27 +504,29 @@ void GLModel::delModel(){
 void GLModel::modelcut(){
     makePlane();
 //    delModel();
-    before_initiate();
+//    before_initiate();
+    before_add_verticies();
+//    Plane plane;
+//    plane.push_back(vector_set[vector_set.size()-3]);
+//    plane.push_back(vector_set[vector_set.size()-2]);
+//    plane.push_back(vector_set[vector_set.size()-1]);
 
-    Plane plane;
-    plane.push_back(vector_set[vector_set.size()-3]);
-    plane.push_back(vector_set[vector_set.size()-2]);
-    plane.push_back(vector_set[vector_set.size()-1]);
+    //////////
+        Plane plane;
+        QVector3D v1(4,0,0);
+        QVector3D v2(0,4,0);
+        QVector3D v3(0,0,4);
+        plane.push_back(v1);
+        plane.push_back(v2);
+        plane.push_back(v3);
+     /////////
     bisectModel(mesh, plane, lmesh, rmesh);
-
-    initialize(rmesh);
-    delete mesh;
-    delete lmesh;
-    //m_mesh->setGeometry(m_geometry);
     addVertices(rmesh);
-    /*qDebug()<<"dddd";
-    addComponent(m_mesh);*/
 
 }
 
 
 void GLModel::before_initiate(){
-
 
     m_geometryRenderer->setGeometry(nullptr);
     m_geometry->removeAttribute(colorAttribute);
@@ -540,3 +546,33 @@ void GLModel::before_initiate(){
 }
 
 
+GLModel::~GLModel(){
+    delete m_mesh;
+    delete m_transform;
+    delete m_objectPicker;
+    delete m_planeMaterial;
+    delete mesh;
+    delete rmesh;
+    delete lmesh;
+    delete colorAttribute;
+    delete normalAttribute;
+    delete positionAttribute;
+    delete vertexColorBuffer;
+    delete vertexNormalBuffer;
+    delete vertexBuffer;
+    delete m_geometry;
+    delete m_geometryRenderer;
+}
+
+void GLModel::before_add_verticies(){
+    QByteArray appendVertexArray;
+    vertexBuffer->updateData(1, appendVertexArray);
+
+    positionAttribute->setCount(1);
+
+    vertexNormalBuffer->updateData(1, appendVertexArray);
+    normalAttribute->setCount(1);
+
+    vertexColorBuffer->updateData(1, appendVertexArray);
+    colorAttribute->setCount(1);
+}

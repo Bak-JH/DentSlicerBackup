@@ -28,7 +28,7 @@ class GLModel : public QEntity
     Q_OBJECT
 public:
     GLModel(QNode* parent=nullptr);
-
+    ~GLModel();
     QPhongAlphaMaterial *m_planeMaterial;
     Qt3DRender::QBuffer *vertexBuffer;
     Qt3DRender::QBuffer *vertexNormalBuffer;
@@ -54,6 +54,10 @@ public:
     Qt3DCore::QEntity* planeEntity[2];
     Qt3DExtras::QPhongMaterial *planeMaterial;
     GLModel* glmodel;
+    void delModel();
+    void before_initiate();
+    void before_add_verticies();
+
 
 private:
 
@@ -77,8 +81,7 @@ private:
     void clearVertices();
     void onTimerUpdate();
     void makePlane();
-    void delModel();
-    void before_initiate();
+
 //    void makePlane(QVector3D& v0, QVector3D& v1, QVector3D& v2);
 
     // bisects mesh into leftMesh, rightMesh divided by plane
