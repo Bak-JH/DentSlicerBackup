@@ -49,9 +49,9 @@ GLModel::GLModel(QNode *parent)
     initialize(mesh);
 
 
-    Paths projection = Projection(mesh);
-    qDebug() << "Projection done";
-    DebugPath(projection);
+    //Paths projection = Projection(mesh);
+    //qDebug() << "Projection done";
+    //DebugPath(projection);
     //Mesh outline_mesh = PathsToMesh(projection);
     //addVertices(&outline_mesh);
 

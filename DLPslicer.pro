@@ -55,12 +55,8 @@ HEADERS += \
     fileloader.h \
     mesh.h \
     polyclipping/clipper.hpp \
-<<<<<<< HEAD
     arrange.h \
-    lights.h \
-=======
     meshrepair.h \
     lights.h
->>>>>>> master
 
 LIBS += -lOpengl32
