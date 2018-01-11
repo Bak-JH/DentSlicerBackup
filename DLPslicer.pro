@@ -2,7 +2,7 @@
 
 QT += qml quick opengl 3dcore 3drender 3dinput 3dextras
 
-CONFIG += c++11
+CONFIG += c++11 resources_big
 
 TARGET = DentStudio
 
@@ -16,7 +16,8 @@ SOURCES += main.cpp \
     mesh.cpp \
     polyclipping/clipper.cpp \
     arrange.cpp \
-    lights.cpp \
+    meshrepair.cpp \
+    lights.cpp
 
 RESOURCES += qml.qrc \
     resources.qrc
@@ -40,6 +41,11 @@ qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
+# for extra security on Windows: enable ASLR and DEP via GCC linker flags
+win32:QMAKE_LFLAGS *= -Wl,--dynamicbase -Wl,--nxcompat
+# enable GCC large addresss aware linker flag
+win32:QMAKE_LFLAGS *= -Wl,--large-address-aware
+
 HEADERS += \
     quaternionhelper.h \
     slicingengine.h \
@@ -49,7 +55,12 @@ HEADERS += \
     fileloader.h \
     mesh.h \
     polyclipping/clipper.hpp \
+<<<<<<< HEAD
     arrange.h \
     lights.h \
+=======
+    meshrepair.h \
+    lights.h
+>>>>>>> master
 
 LIBS += -lOpengl32

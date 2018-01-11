@@ -57,7 +57,6 @@ GLModel::GLModel(QNode *parent)
 
 
 
-
     qDebug() << "loaded mesh";
     initialize(mesh);
     m_mesh->setGeometry(m_geometry);
