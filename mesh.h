@@ -27,6 +27,9 @@ public:
     int idx;
     int mesh_vertex[3] = {-1};
     //int connected_face_idx[3];
+    //<<<<
+    int connected_face_idx[3];
+    //>>>>
 
     vector<vector<int>> neighboring_faces;
 
@@ -52,7 +55,11 @@ public :
     /********************** Helper Functions **********************/
     int getVertexIdx(QVector3D v);
     void updateMinMax(QVector3D v);
+    /*<<<<>>>>
     vector<int> findFaceWith2Vertices(int v0_idx, int v1_idx, int self_idx);
+    <<<<*/
+    int findFaceWith2Vertices(int v0_idx, int v1_idx, int self_idx);
+    //>>>>
     float getFaceZmin(MeshFace mf);
     float getFaceZmax(MeshFace mf);
     MeshFace idx2MF(int idx);

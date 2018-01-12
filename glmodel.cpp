@@ -43,15 +43,15 @@ GLModel::GLModel(QNode *parent)
 
     mesh = new Mesh();
     qDebug() << "Loading mesh";
-    loadMeshSTL(mesh, "C:/Users/hsy61/Desktop/a_stencil.stl");
+    loadMeshSTL(mesh, "C:/Users/hsy61/Desktop/3D_modles/upperjaw.stl");
     qDebug() << "Number of faces :" << mesh->faces.size();
     qDebug() << "Mesh loaded";
     initialize(mesh);
 
 
-    //Paths projection = Projection(mesh);
-    //qDebug() << "Projection done";
-    //DebugPath(projection);
+    Paths projection = Projection(mesh);
+    qDebug() << "Projection done";
+    DebugPath(projection);
     //Mesh outline_mesh = PathsToMesh(projection);
     //addVertices(&outline_mesh);
 
