@@ -11,6 +11,7 @@
 #include "arrange.h"
 #include <QBuffer>
 #include <QObjectPicker>
+#include "meshrepair.h"
 #include "qmlmanager.h"
 
 #define MAX_BUF_LEN 2000000
