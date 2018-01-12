@@ -9,16 +9,6 @@
 using namespace std;
 using namespace ClipperLib;
 
-class MeshVertex {
-public:
-    MeshVertex(){}
-    int idx;
-    QVector3D position;
-    QVector3D vn;
-    std::vector<int> connected_faces;
-    MeshVertex(QVector3D position): position(position) {connected_faces.reserve(8);}
-};
-
 class MeshFace {
 public:
     MeshFace() {}
@@ -28,9 +18,19 @@ public:
     int mesh_vertex[3] = {-1};
     //int connected_face_idx[3];
 
-    vector<vector<int>> neighboring_faces;
+    vector<vector<MeshFace>> neighboring_faces;
 
     QVector3D fn;
+};
+
+class MeshVertex {
+public:
+    MeshVertex(){}
+    int idx;
+    QVector3D position;
+    QVector3D vn;
+    std::vector<MeshFace> connected_faces;
+    MeshVertex(QVector3D position): position(position) {}//connected_faces.reserve(8);}
 };
 
 class Mesh{
@@ -43,6 +43,7 @@ public :
 
     /********************** Mesh Generation Functions **********************/
     void addFace(QVector3D v0, QVector3D v1, QVector3D v2);
+    vector<MeshFace>::iterator removeFace(vector<MeshFace>::iterator f_it);
     void connectFaces();
 
     /********************** Path Generation Functions **********************/
@@ -52,7 +53,7 @@ public :
     /********************** Helper Functions **********************/
     int getVertexIdx(QVector3D v);
     void updateMinMax(QVector3D v);
-    vector<int> findFaceWith2Vertices(int v0_idx, int v1_idx, int self_idx);
+    vector<MeshFace> findFaceWith2Vertices(int v0_idx, int v1_idx, MeshFace self_it);
     float getFaceZmin(MeshFace mf);
     float getFaceZmax(MeshFace mf);
     MeshFace idx2MF(int idx);

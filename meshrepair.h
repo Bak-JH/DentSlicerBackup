@@ -1,16 +1,17 @@
 #ifndef MESHREPAIR_H
 #define MESHREPAIR_H
 #include "mesh.h"
+#include <QDebug>
 
-// removes unused vertices
-void removeUnconnectedVertices(Mesh& mesh);
+void repairMesh(Mesh& mesh);
 
-// removes totally unconnected faces
+// removes unconnected vertices and faces
+
 // if 2 edges are unconnected or 1 edge is unconnected, goto fillhole
-void removeUnconnectedFaces(Mesh& mesh);
+void removeUnconnected(Mesh& mesh);
 
 // removes zero area triangles
-void removeDegeneracy(Mesh& mesh);
+void removeDegenerate(Mesh& mesh);
 
 // detects hole and remove them
 void fillHoles(Mesh& mesh);
