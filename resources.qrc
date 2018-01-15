@@ -52,5 +52,20 @@
         <file>resource/rotate_x2.png</file>
         <file>resource/rotate_y.png</file>
         <file>resource/rotate_y2.png</file>
+        <file>Resource/upper2_arrange.png</file>
+        <file>Resource/upper2_autorepair.png</file>
+        <file>Resource/upper2_cut.png</file>
+        <file>Resource/upper2_export.png</file>
+        <file>Resource/upper2_extend.png</file>
+        <file>Resource/upper2_label.png</file>
+        <file>Resource/upper2_layflat.png</file>
+        <file>Resource/upper2_move.png</file>
+        <file>Resource/upper2_open.png</file>
+        <file>Resource/upper2_orient.png</file>
+        <file>Resource/upper2_rotate.png</file>
+        <file>Resource/upper2_save.png</file>
+        <file>Resource/upper2_scale.png</file>
+        <file>Resource/upper2_shelloffset.png</file>
+        <file>Resource/upper2_support.png</file>
     </qresource>
 </RCC>

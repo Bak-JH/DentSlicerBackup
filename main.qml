@@ -14,6 +14,8 @@ ApplicationWindow {
 
     property alias uppertab: uppertab
     property alias lefttab: lefttab
+    //uppertab.popup1.left: parent.left
+    //uppertab.popup1.top: parent.top
 
     menuBar: MenuBar{
         Menu{
@@ -113,9 +115,12 @@ ApplicationWindow {
              lefttab.ltso.option_infill.currentText,
              lefttab.ltso.option_raft.currentText]
 
-
         anchors.top: parent.top
         anchors.left: parent.left
+
+        //popup1.popup_anchor_left: lefttab.right
+        //popup_anchor_top: lefttab.top
+
 
     }
 
