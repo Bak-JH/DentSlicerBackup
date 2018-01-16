@@ -31,7 +31,18 @@ public:
     QVector3D vn;
     std::vector<MeshFace> connected_faces;
     MeshVertex(QVector3D position): position(position) {}//connected_faces.reserve(8);}
+
+    friend inline bool operator== (const MeshVertex& a, const MeshVertex& b){
+        return a.position == b.position;
+    }
+
+    friend inline bool operator!= (const MeshVertex& a, const MeshVertex& b){
+        return a.position != b.position;
+    }
 };
+
+typedef vector<MeshVertex> Path3D;
+typedef vector<Path3D> Paths3D;
 
 class Mesh{
 public :
@@ -39,6 +50,10 @@ public :
     std::vector<MeshVertex> vertices;
     QHash<uint32_t, MeshVertex> vertices_hash;
     std::vector<MeshFace> faces;
+
+    // used for auto repair steps
+    Paths3D holes;
+
     float x_min = 99999, x_max = 99999, y_min = 99999, y_max = 99999, z_min = 99999, z_max = 99999;
 
     /********************** Mesh Generation Functions **********************/

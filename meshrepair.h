@@ -13,6 +13,10 @@ void removeUnconnected(Mesh& mesh);
 // removes zero area triangles
 void removeDegenerate(Mesh& mesh);
 
+// find hole edges(edges along the holes) and make contour from it
+void identifyHoles(Mesh& mesh);
+
+
 // detects hole and remove them
 void fillHoles(Mesh& mesh);
 
@@ -21,5 +25,15 @@ void fixNormalOrientations(Mesh& mesh);
 
 // future works
 void removeGaps(Mesh& mesh);
+
+
+
+/*---------------- helper functions -----------------*/
+
+// convert mesh vertex to hash value
+uint32_t meshVertex2Hash(MeshVertex u);
+
+// construct closed contour using segments created from identify step
+Paths3D contourConstruct(Paths3D hole_edges);
 
 #endif // MESHREPAIR_H
