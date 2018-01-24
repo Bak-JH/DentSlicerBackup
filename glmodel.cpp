@@ -46,6 +46,8 @@ GLModel::GLModel(QNode *parent)
     loadMeshSTL(mesh, "C:/Users/hsy61/Desktop/3D_modles/upperjaw.stl");
     qDebug() << "Number of faces :" << mesh->faces.size();
     qDebug() << "Mesh loaded";
+    repairMesh(mesh);
+    qDebug() << "Mesh repaired";
     initialize(mesh);
 
 
@@ -57,7 +59,6 @@ GLModel::GLModel(QNode *parent)
 
 
 
-    qDebug() << "loaded mesh";
     initialize(mesh);
     m_mesh->setGeometry(m_geometry);
 
