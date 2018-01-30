@@ -43,17 +43,18 @@ GLModel::GLModel(QNode *parent)
 
     mesh = new Mesh();
     qDebug() << "Loading mesh";
-    loadMeshSTL(mesh, "C:/Users/hsy61/Desktop/3D_modles/upperjaw.stl");
+    loadMeshSTL(mesh, "C:/Users/hsy61/Desktop/3D_modles/simple/hexagon.stl");
     qDebug() << "Number of faces :" << mesh->faces.size();
     qDebug() << "Mesh loaded";
-    repairMesh(mesh);
-    qDebug() << "Mesh repaired";
+    //repairMesh(mesh);
+    //qDebug() << "Mesh repaired";
     initialize(mesh);
 
 
-    Paths projection = Projection(mesh);
+    Paths projection = project(mesh);
     qDebug() << "Projection done";
-    DebugPath(projection);
+    qDebug()<< projection[0][0].X << projection[0][0].Y << projection.size();
+    debugPath(projection);
     //Mesh outline_mesh = PathsToMesh(projection);
     //addVertices(&outline_mesh);
 

@@ -16,11 +16,14 @@ public:
     Arrange();
 };
 
-Paths SpreadingCheck(Mesh* mesh, bool* check, bool* outer_check, int chking);
-Path GetOutline(Mesh* mesh, bool* check, bool* outer_check, int chking, int path_head);
-bool IsEdgeBound(Mesh* mesh, MeshFace mf, int neighbor_idx);
-Paths Projection(Mesh* mesh);
-Mesh PathsToMesh(Paths paths);
-Paths Resize(Paths paths);
-void DebugPath(Paths paths);
+Paths spreadingCheck(Mesh* mesh, bool* check, int chking_start);
+int getPathHead(MeshFace* mf, int side);
+Path buildOutline(Mesh* mesh, bool* check, bool* outer_check, int chking, int path_head);
+bool isEdgeBound(MeshFace* mf, int side);
+Path idxsToPath(Mesh* mesh, vector<int> path_by_idx, int resolution);
+Paths project(Mesh* mesh);
+Paths clipOutlines(vector<Paths> outline_sets);
+Mesh pathsToMesh(Paths paths);
+Paths resize(Paths paths);
+void debugPath(Paths paths);
 #endif // ARRANGE_H
