@@ -18,7 +18,8 @@ void Mesh::addFace(QVector3D v0, QVector3D v1, QVector3D v2){
     mf->neighboring_faces.push_back(nf2);
     mf->neighboring_faces.push_back(nf3);
 
-    mf->idx = faces.size();
+    int new_idx = faces.size();
+    mf->idx = new_idx;
     mf->mesh_vertex[0] = v0_idx;
     mf->mesh_vertex[1] = v1_idx;
     mf->mesh_vertex[2] = v2_idx;
@@ -27,9 +28,9 @@ void Mesh::addFace(QVector3D v0, QVector3D v1, QVector3D v2){
 
     faces.emplace_back(*mf);
 
-    vertices[v0_idx].connected_faces.emplace_back(mf);
-    vertices[v1_idx].connected_faces.emplace_back(mf);
-    vertices[v2_idx].connected_faces.emplace_back(mf);
+    vertices[v0_idx].connected_faces.emplace_back(& faces[new_idx]);
+    vertices[v1_idx].connected_faces.emplace_back(& faces[new_idx]);
+    vertices[v2_idx].connected_faces.emplace_back(& faces[new_idx]);
 
 
     if (vertices[v0_idx].connected_faces.size()>=3){
