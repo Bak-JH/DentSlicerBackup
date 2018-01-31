@@ -42,7 +42,7 @@ int main(int argc, char *argv[])
     Lights* mylights = new Lights(teethModel);
 //    QObject::connect(item,SIGNAL(qmlSignal()),cut,SLOT(makePlane()));
 
-   QObject::connect(item,SIGNAL(qmlSignal()),gglmodel,SLOT(modelcut()));
+    QObject::connect(item,SIGNAL(qmlSignal()),gglmodel,SLOT(modelcut()));
     QObject::connect(se.data(), SIGNAL(updateModelInfo(int,int,QString,float)), qm.data(), SLOT(sendUpdateModelInfo(int,int,QString,float)));
 
 

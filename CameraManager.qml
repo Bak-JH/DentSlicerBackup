@@ -218,7 +218,6 @@ Entity {
             var viewVector = camera.position.minus(camera.viewCenter)
             viewVector = viewVector.times(zoom);
             camera.position = camera.viewCenter.plus(viewVector);
-
             //sceneRoot.total.mtr.perfectPosition();
 
         }

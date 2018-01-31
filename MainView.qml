@@ -283,7 +283,6 @@ Entity {
 
                     //var target = axisAngle2Quaternion(rotationSpeed * rotateXAxis.value * dt,qq.rotatedVector(planeEntity.planeTransform.rotation,yup))
                     var target = axisAngle2Quaternion(rotationSpeed * rotateXAxis.value * dt,qq.rotatedVector(systemTransform.rotation,zup))
-
                     /* two axis rotate
                     //var target2 = axisAngle2Quaternion(rotationSpeed * rotateYAxis.value * dt,ydown)
                     //target = qq.multiplyQuaternion(target,target2)
@@ -291,8 +290,7 @@ Entity {
 
                     //console.log("rtv " + qq.rotatedVector(planeTransform.rotation,ydown))
 
-
-                    systemTransform.rotation = qq.multiplyQuaternion(target,systemTransform.rotation)
+                    cm.camera.rotateAboutViewCenter(qq.multiplyQuaternion(target,systemTransform.rotation));
                     //planeTransform.rotation = qq.multiplyQuaternion(planeTransform.rotation,target)
 
                 }

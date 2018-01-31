@@ -40,8 +40,6 @@ public:
     QAttribute *indexAttribute;
     QGeometry* m_geometry;
     QGeometryRenderer* m_geometryRenderer;
-
-
     Qt3DRender::QObjectPicker *m_objectPicker;
     Qt3DRender::QMesh *m_mesh;
     Qt3DCore::QTransform *m_transform;
@@ -53,12 +51,16 @@ public:
     Qt3DCore::QTransform *planeTransform[2];
     Qt3DCore::QEntity* planeEntity[2];
     Qt3DExtras::QPhongMaterial *planeMaterial;
-    GLModel* glmodel;
+    Qt3DExtras::QSphereMesh *sphereMesh[4];
+    Qt3DCore::QTransform *sphereTransform[4];
+    QPhongMaterial *sphereMaterial[4];
+    Qt3DCore::QEntity *sphereEntity[4];
     void delModel();
     void before_initiate();
     void before_add_verticies();
-
-
+    void makePlane();
+    void pushPoint(QVector3D v);
+    void delPoints();
 private:
 
     QString filename;
@@ -69,9 +71,8 @@ private:
     Mesh* rmesh;
     Mesh* mesh;
     QNode* m_parent;
-
-
-    void initialize(Mesh* mesh);
+    int Number_of_points;
+    void initialize(const Mesh* mesh);
     void addVertex(QVector3D vertex);
     void addVertices(Mesh* mesh);
     void addVertices(vector<QVector3D> vertices);
@@ -80,7 +81,7 @@ private:
     void addIndexes(vector<int> vertices);
     void clearVertices();
     void onTimerUpdate();
-    void makePlane();
+
 
 //    void makePlane(QVector3D& v0, QVector3D& v1, QVector3D& v2);
 
@@ -89,10 +90,11 @@ private:
     bool isLeftToPlane(Plane plane, QVector3D position);
 
 public slots:
+//    void handlePickerClicked(Qt3DRender::QPickEvent*);
     void handlePickerClicked(Qt3DRender::QPickEvent*);
+    void handleMoved(Qt3DRender::QPickEvent*);
+
     void modelcut();
-
-
 
 };
 

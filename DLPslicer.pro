@@ -38,7 +38,7 @@ DEFINES += QT_DEPRECATED_WARNINGS
 qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
-
+win32:QMAKE_LFLAGS *= -Wl,--large-address-aware
 HEADERS += \
     quaternionhelper.h \
     slicingengine.h \

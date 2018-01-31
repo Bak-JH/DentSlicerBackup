@@ -178,7 +178,7 @@ Entity {
                     angleVector = root.camera.position.minus(sceneRoot.systemTransform.translation.plus(40,50,75)).normalized();
 
 
-                    //console.log("Zzzz " +angleVector.z)
+//                    console.log("Zzzz " +angleVector.z)
                     if(angleVector.z>0.999){
 
                         if(rotateYAxis.value<=0){
@@ -193,9 +193,7 @@ Entity {
                         }
                         root.camera.setUpVector(_originalUpVector.times(-1));
                     }
-
                     root.camera.tiltAboutViewCenter(rotationSpeed * rotateYAxis.value*(-1) * dt,Qt.vector3d( -1.0, 0.0, 0.0 ));
-
                     // lock the camera roll angle
                     //root.camera.setUpVector(_originalUpVector);
 

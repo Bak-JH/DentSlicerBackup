@@ -389,9 +389,9 @@ Rectangle {
                     id:item
 
                     objectName: "item"
-//////수정부분
+
                     signal qmlSignal()
-////여기까지
+
                         Text {
                         text: "Apply"
                         color:"#ffffff"
@@ -401,11 +401,11 @@ Rectangle {
                         anchors.horizontalCenter:  parent.horizontalCenter
                         anchors.verticalCenter:  parent.verticalCenter}
 
-////                        //수정부분
+
                         MouseArea{
                             anchors.fill:parent
                             onClicked: item.qmlSignal()}}
-////                        //여기까지
+
 }
 
 
