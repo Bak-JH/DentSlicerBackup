@@ -99,9 +99,15 @@ void identifyHoles(Mesh* mesh){
             hole_edges.push_back(temp_edge);
         }
     }
+    qDebug() << "hole edges count :" << hole_edges.size();
+    mesh->holes = hole_edges;
+
+    // construct hole using hole_edges;
+    holeConstruct(mesh);
 
     // get closed contour from hole_edges
-    mesh->holes = contourConstruct(hole_edges);
+    //mesh->holes = holeConstruct(hole_edges);F
+    //mesh->holes = contourConstruct(hole_edges);
     qDebug() << "mesh hole count :" << mesh->holes.size();
     return;
 }
@@ -110,51 +116,71 @@ void identifyHoles(Mesh* mesh){
 // detects hole and remove them
 void fillHoles(Mesh* mesh){
     for (Path3D hole : mesh->holes){
+
+        // refine hole boundary edges
         if (hole.size() <= 2) { // if edge is less than 3 (no hole)
             continue;
         }
-        Path3D prev_path;
-        Path3D cur_path;
 
-        for (Path3D::iterator vert_it = hole.begin()+1; vert_it != hole.end()-1; ++vert_it){
+        Path3D newhole;
+        Path3D::iterator vert_it = hole.begin() +1;
+        while (vert_it != hole.end()-1){
             MeshVertex prev_vert = (*(vert_it-1));
             MeshVertex cur_vert = (*vert_it);
             MeshVertex next_vert = (*(vert_it+1));
 
-            prev_path.clear();
-            prev_path.push_back(prev_vert);
-            prev_path.push_back(cur_vert);
-            cur_path.clear();
-            cur_path.push_back(cur_vert);
-            cur_path.push_back(next_vert);
-            reverse(cur_path.begin(), cur_path.end());
 
-            int div_cnt = suggestDivisionCnt(prev_path, cur_path);
-            for ( ; div_cnt>=0 ; div_cnt--){
-                // do something abount division
+            QVector3D cur_vert_position = cur_vert.position;
+            QVector3D next_vector = next_vert.position - cur_vert.position;
+            QVector3D prev_vector = cur_vert.position - prev_vert.position;
+
+            int div_cnt = suggestDivisionCnt(prev_vector, next_vector);
+
+            qDebug() << div_cnt << "division occured";
+
+            // remove cur_vert
+            //vert_it = hole.erase(vert_it);
+
+            if (div_cnt == 1){ // if less than 70 deg
+                // add face with prev, cur, next vertices
+                mesh->addFace(prev_vert.position, cur_vert_position, next_vert.position);
+
+            } else { // if larger than 70 deg
+                for (int cur_div=1; cur_div<=div_cnt; cur_div++){
+                    QVector3D diff_vector = (cur_div*prev_vector + (div_cnt-cur_div)*next_vector)/div_cnt;
+                    MeshVertex new_vertex = MeshVertex(cur_vert_position + diff_vector);
+                    hole.insert(vert_it, new_vertex);
+
+                    //hole.insert(new_vertex);
+                }
             }
+            qDebug() << "before erase : hole size :" << hole.size();
+            vert_it = hole.erase(vert_it);
+            //vert_it ++;
         }
     }
 }
 
+// floating sphere detects gaps and connects gaps
+void fillGaps(){
+
+}
 
 
-int suggestDivisionCnt(Path3D e1,Path3D e2){
-    QVector3D e1_diff = e1[1].position-e1[0].position;
-    QVector3D e2_diff = e2[1].position-e2[0].position;
+int suggestDivisionCnt(QVector3D e1,QVector3D e2){
 
-    float norm_prod = e1_diff.length() * e2_diff.length();
-    float dot_prod = QVector3D::dotProduct(e1_diff, e2_diff);
+    float norm_prod = e1.length() * e2.length();
+    float dot_prod = QVector3D::dotProduct(e1, e2);
 
     float cos = dot_prod/norm_prod;
 
 
-    if (cos >= cos50){
-        return 0;
-    } else if (cos100<=cos<cos50){
+    if (cos >= cos75){
         return 1;
-    } else if (cos150<=cos<cos100){
+    } else if (cos135<=cos<cos75){
         return 2;
+    /*} else if (cos150<=cos<cos135){
+        return 2;*/
     } else {
         return 3;
     }
@@ -179,6 +205,97 @@ uint32_t meshVertex2Hash(MeshVertex u){
     return path_hash_u;
 }
 
+// construct closed hole using segments
+Paths3D holeConstruct(Mesh* mesh){
+    Paths3D holeList;
+
+    QMultiHash<int, MeshVertex> connectionHash;
+    // insert connectionHashes
+    for (Path3D edges: mesh->holes){
+        int hash_u = edges[0].idx;
+        int hash_v = edges[1].idx;
+
+        if (!connectionHash.contains(hash_u)){
+            connectionHash.insert(hash_u, edges[0]);
+        }
+        if (!connectionHash.contains(hash_v)){
+            connectionHash.insert(hash_v, edges[1]);
+        }
+
+        connectionHash.insert(hash_u, edges[1]);
+        connectionHash.insert(hash_u, edges[0]);
+    }
+
+    MeshVertex init_vert = mesh->idx2MV(connectionHash.begin().key());
+    qDebug() << init_vert.position;
+
+    MeshVertex prev_vert = init_vert;
+
+    Path3D cur_path;
+
+    while(connectionHash.size() != 0){
+
+        cur_path.push_back(prev_vert);
+        QList<MeshVertex> connected_vertices = connectionHash.values(prev_vert.idx);
+        qDebug() << connected_vertices.size();
+        int prev_vert_idx = prev_vert.idx;
+
+        bool foundEnd = false;
+        int found_idx = 0;
+
+        if (connected_vertices.size() == 0){ // not closed contour, so end up with init_vert
+
+            qDebug() << "connected vertices size 0";
+
+            cur_path.push_back(init_vert);
+            holeList.push_back(cur_path);
+            cur_path.clear();
+
+            // choose next pivot
+            if (connectionHash.size() !=0){
+                prev_vert = mesh->idx2MV(connectionHash.begin().key());
+            }
+
+            continue;
+        }
+
+
+        // search init_vert
+        for(int i=0; i<connected_vertices.size(); i++){
+            if (connected_vertices[i].idx == init_vert.idx){
+                foundEnd = true;
+                found_idx = i;
+            }
+        }
+
+        prev_vert = connected_vertices[found_idx];
+        if (foundEnd){
+            qDebug() << "found end" << cur_path.size();
+            // end cur_path and push it to holeList
+            cur_path.push_back(init_vert);
+            holeList.push_back(cur_path);
+            cur_path.clear();
+
+            // remove history
+            connectionHash.remove(prev_vert_idx, connected_vertices[found_idx]);
+
+            // select new pivot
+            prev_vert = mesh->idx2MV(connectionHash.begin().key());
+
+        } else {
+            // select next vertex
+            prev_vert = connected_vertices[0];
+            qDebug() << "finding next vertex from" << prev_vert_idx << "" << connected_vertices.size();
+
+            // remove history
+            connectionHash.remove(prev_vert_idx, connected_vertices[0]);
+        }
+
+
+    }
+
+    return holeList;
+}
 
 // construct closed contour using segments created from identify step
 Paths3D contourConstruct(Paths3D hole_edges){

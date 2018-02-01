@@ -6,10 +6,8 @@
 #include "configuration.h"
 #include "polyclipping/clipper.hpp"
 
-#define cos50 0.64278761
-#define cos100 -0.17364818
-#define cos150 -0.8660254
-
+#define cos75 0.25881905
+#define cos135 -0.70710678
 
 using namespace std;
 using namespace ClipperLib;

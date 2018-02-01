@@ -29,10 +29,13 @@ void removeGaps(Mesh* mesh);
 /*---------------- helper functions -----------------*/
 
 // divide angle per 60 deg
-int suggestDivisionCnt(Path3D e1, Path3D e2);
+int suggestDivisionCnt(QVector3D e1, QVector3D e2);
 
 // convert mesh vertex to hash value
 uint32_t meshVertex2Hash(MeshVertex u);
+
+// construct closed hole using segments
+Paths3D holeConstruct(Mesh* mesh);
 
 // construct closed contour using segments created from identify step
 Paths3D contourConstruct(Paths3D hole_edges);
