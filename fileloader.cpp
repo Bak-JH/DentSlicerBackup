@@ -43,6 +43,12 @@ bool loadMeshSTL_ascii(Mesh* mesh, const char* filename)
     int n = 0;
     QVector3D v0, v1, v2;
     float f0, f1, f2;
+
+    fseek(f, 0L, SEEK_END);
+    long long file_size = ftell(f); //The file size is the position of the cursor after seeking to the end.
+    rewind(f); //Seek back to start.
+    size_t face_count = (file_size - 14) / 87; //Subtract the size of the header and conclusion. Every face uses more than 87 bytes.
+
     while(fgets_(buffer, sizeof(buffer), f))
     {
         if (sscanf(buffer, " vertex %f %f %f", &f0, &f1, &f2) == 3)
