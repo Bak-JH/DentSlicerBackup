@@ -22,24 +22,13 @@ GLModel::GLModel(QNode *parent)
     settings->setPickMethod(Qt3DRender::QPickingSettings::TrianglePicking);
     settings->setPickResultMode(Qt3DRender::QPickingSettings::NearestPick);
 
-    /*Qt3DRender::QRenderSettings *settings = (Qt3DRender::QRenderSettings*) QRenderSettings::activeFrameGraph()->parent();
-    if (settings)
-        settings->pickingSettings()->setPickMethod(Qt3DRender::QPickingSettings::TrianglePicking);*/
-
-
     m_planeMaterial = new QPhongAlphaMaterial();
     m_planeMaterial->setAmbient(QColor(81,200,242));
     m_planeMaterial->setDiffuse(QColor(255,255,255));
     m_planeMaterial->setAlpha(1.0f);
 
-
-
-    //m_parent = parent;
-
     QTimer *timer = new QTimer();
     QObject::connect(timer, &QTimer::timeout,this,&GLModel::onTimerUpdate);
-
-  //  connect(m_objectPicker,SIGNAL(clicked(Qt3DRender::QPickEvent*)),this,SLOT(addUserPoint(Qt3DRender::QPickEvent*)));
 
     mesh = new Mesh();
     qDebug() << "Loading mesh";
@@ -63,64 +52,20 @@ GLModel::GLModel(QNode *parent)
     initialize(mesh);
     m_mesh->setGeometry(m_geometry);
 
-
-
-//    Plane plane;
-//    plane.push_back(QVector3D(7,0,0));
-//    plane.push_back(QVector3D(0,7,0));
-//    plane.push_back(QVector3D(0,0,7));
-
     lmesh = new Mesh();
     rmesh = new Mesh();
 
-//    bisectModel(mesh, plane, lmesh, rmesh);
     addVertices(mesh);
 
-
-    //m_mesh->setSource(QUrl(QStringLiteral("file:///D:/Dev/DLPSlicer/DLPslicer/resource/mesh/lowerjaw.obj")));
-
     Qt3DExtras::QDiffuseMapMaterial *diffuseMapMaterial = new Qt3DExtras::QDiffuseMapMaterial();
-//    diffuseMapMaterial->setAmbient(QColor(QRgb(0xdd0000)));
-//    diffuseMapMaterial->setSpecular(QColor::fromRgbF(0.9f, 0.9f, 0.9f, 1.0f));
-////    diffuseMapMaterial->setShininess(10.0f);
-////    Qt3DExtras::QPhongMaterial *phongMaterial = new Qt3DExtras::QPhongMaterial();
-//    phongMaterial->setAmbiant(QColor(QRgb(0x92bcc4)));
-//    phongMaterial->setDiffuse(QColor(QRgb(0x92bcc4)));
 
     addComponent(m_mesh);
-//    addComponent(diffuseMapMaterial);
-    //addComponent(phongMaterial);
     addComponent(m_transform);
 
     m_objectPicker->setHoverEnabled(true);
     QObject::connect(m_objectPicker, SIGNAL(clicked(Qt3DRender::QPickEvent*)), this, SLOT(handlePickerClicked(Qt3DRender::QPickEvent*)));
 
     addComponent(m_objectPicker);
-
-    auto attributes = m_geometry->attributes();
-
-    int vertexIndex = 0;
-
-    qDebug() << "attributes size : " << attributes.count();
-    for (auto i = 0; i < attributes.count(); ++i)
-    {
-        if (attributes.at(i)->name() == QAttribute::VertexAttribute)//QAttribute::defaultPositionAttributeName())
-        {
-            /*QAttribute *attribute = attributes.at(i);
-            Qt3DRender::QBuffer *buffer = attribute->buffer();
-            const QByteArray &data = buffer->data();
-
-            int vertexOffset = vertexIndex * attribute->byteStride();
-            int offset = vertexOffset + attribute->byteOffset();
-
-            char *rawData = (char*)&(data.constData()[offset]);
-
-            // replace float with your data type
-            float *value = reinterpret_cast<float*>(rawData);
-            qDebug() << value;
-            break;*/
-        }
-    }
 }
 
 Qt3DRender::QAttribute *copyAttribute(
@@ -398,7 +343,6 @@ void GLModel::bisectModel(Mesh* mesh, Plane plane, Mesh* leftMesh, Mesh* rightMe
 
 bool GLModel::isLeftToPlane(Plane plane, QVector3D position){
     // determine if position is left to plane or not
-    //if (QVector3D::dotProduct(QVector3D::normal(plane[0], plane[1], plane[2]), position)>0)
     if(position.distanceToPlane(plane[0],plane[1],plane[2])>0)
         return false;
     return true;
@@ -411,10 +355,6 @@ void GLModel::onTimerUpdate()
     z += 1.0f;
     addVertex(QVector3D(x,y,z));*/
 }
-
-//void GLModel::addUserPoint(QPickEvent *pick){
-//plane.push_back(pick->worldIntersection());
-//}
 
 void GLModel::handlePickerClicked(QPickEvent *pick)
 {
@@ -457,7 +397,6 @@ void GLModel::makePlane(){
         return;
     }
 
-
     QVector3D v1;
     QVector3D v2;
     QVector3D v3;
@@ -466,8 +405,8 @@ void GLModel::makePlane(){
     v3=vector_set[vector_set.size()-1];
 
         planeMaterial = new Qt3DExtras::QPhongMaterial();
-            planeMaterial->setDiffuse(QColor(QRgb(0x00aaaa)));
-            //To manipulate plane color, change the QRgb(0x~~~~~~).
+        planeMaterial->setDiffuse(QColor(QRgb(0x00aaaa)));
+        //To manipulate plane color, change the QRgb(0x~~~~~~).
         QVector3D world_origin(0,0,0);
         QVector3D original_normal(0,1,0);
         QVector3D desire_normal(QVector3D::normal(v1,v2,v3)); //size=1
@@ -484,12 +423,9 @@ void GLModel::makePlane(){
                 planeTransform[i]->setRotation(QQuaternion::fromAxisAndAngle(crossproduct_vector, angle+180*i));
                 planeTransform[i]->setTranslation(desire_normal*(-world_origin.distanceToPlane(v1,v2,v3)));
 
-
                 qDebug()<<"vector:"<<desire_normal;
                 qDebug()<<"factor:"<<world_origin.distanceToPlane(v1,v2,v3);
                 qDebug()<<"output:"<<desire_normal*world_origin.distanceToPlane(v1,v2,v3);
-
-
 
             planeEntity[i] = new Qt3DCore::QEntity(motherEntity);
                 planeEntity[i]->addComponent(ClipPlane[i]);
@@ -512,7 +448,6 @@ void GLModel::delModel(){
 
 void GLModel::modelcut(){
     makePlane();
-//    delModel();
     before_initiate();
 
     Plane plane;
@@ -524,11 +459,7 @@ void GLModel::modelcut(){
     initialize(rmesh);
     delete mesh;
     delete lmesh;
-    //m_mesh->setGeometry(m_geometry);
     addVertices(rmesh);
-    /*qDebug()<<"dddd";
-    addComponent(m_mesh);*/
-
 }
 
 
