@@ -5,21 +5,30 @@ Arrange::Arrange()
 {
 
 }
+bool shit = false;
 
 Paths spreadingCheck(Mesh* mesh, bool* check, int chking_start){
-    qDebug() << "SpreadingCheck started from" << chking_start;
+    //qDebug() << "SpreadingCheck started from" << chking_start;
     Paths paths;
     int chking = -1;
     bool outer_check[mesh->faces.size()] = {false};
     vector<MeshFace*> to_check;
     to_check.push_back(& mesh->faces[chking_start]);
     while(to_check.size()>0){
-        qDebug() << "to_do: " << to_check.size();
+        //qDebug() << "New spreadingCheck generation (" << to_check.size() << "faces)";
         vector<MeshFace*> next_to_check;
         for(int i=0; i<to_check.size(); i++){
             chking = to_check[i]->idx;
-            if(check[chking]) {qDebug() << "Passed" << chking; continue;}
-            qDebug() << "Cheking face" << chking;
+            /*Debug
+            qDebug() << "to_check" << i << "(Face" << chking << ")";
+            for(int side=0; side<3; side++){
+                if (isEdgeBound(to_check[i], side)){
+                    if(!outer_check[chking]) qDebug() << " - unchecked bound";
+                    else qDebug() << " - checked bound";
+                }else qDebug() << " -" << to_check[i]->neighboring_faces[side].size()
+                               << "neighbors (first:" << to_check[i]->neighboring_faces[side][0]->idx << ")";
+            }//*/
+            if(check[chking]) continue;
             check[chking] = true;
             MeshFace* mf = to_check[i];
             for(int side=0; side<3; side++){
@@ -29,11 +38,9 @@ Paths spreadingCheck(Mesh* mesh, bool* check, int chking_start){
                         Path path = buildOutline(mesh, check, outer_check, chking, path_head);
                         paths.push_back(path);
                     }
-                    else qDebug() << "Passed(bound)" << chking;
-                }else{
+                }else{//법선 방향 조건이 만족되는 이웃만 to_check에 추가하는 것이 맞을지 검토
                     vector<MeshFace*> neighbors = mf->neighboring_faces[side];
                     next_to_check.insert(next_to_check.end(), neighbors.begin(), neighbors.end());
-                    qDebug() << "Add to_do" << neighbors.size() << "(first:" << neighbors[0]->idx << ")";
                 }
             }
         }
@@ -55,8 +62,15 @@ int getPathHead(MeshFace* mf, int side){
 }
 
 Path buildOutline(Mesh* mesh, bool* check, bool* outer_check, int chking, int path_head){
-    /****/qDebug() << "BuildOutline from" << chking;
+    /*Debug
+    qDebug() << "buildOutline from" << chking;
+    //*/
     if(path_head==-1){
+        /*Debug
+        qDebug() << "!!!" << chking
+                 << cfg->resolution * mesh->vertices[mesh->faces[chking].mesh_vertex[0]].position.x()
+                 << cfg->resolution * mesh->vertices[mesh->faces[chking].mesh_vertex[0]].position.y();
+        //*/
         outer_check[chking] = true;
         check[chking] = true;
         MeshFace* mf = & mesh->faces[chking];
@@ -112,7 +126,7 @@ Path buildOutline(Mesh* mesh, bool* check, bool* outer_check, int chking, int pa
         }
         if(path_tail == path_head) outline_closed = true;
     }
-    return idxsToPath(mesh, path_by_idx, 1000000000);
+    return idxsToPath(mesh, path_by_idx);
 }
 
 bool isEdgeBound(MeshFace* mf, int side){//bound edge: connected to face with opposit fn.z or not connected any face
@@ -127,14 +141,14 @@ bool isEdgeBound(MeshFace* mf, int side){//bound edge: connected to face with op
     return is_edge_bound;
 }
 
-Path idxsToPath(Mesh* mesh, vector<int> path_by_idx, int resolution){
+Path idxsToPath(Mesh* mesh, vector<int> path_by_idx){
     Path path;
     for(int id : path_by_idx){
         QVector3D vertex = mesh->vertices[id].position;
         //*mesh->Mesh::addPoint(1*, 1*vertex.y(), &path);//resolution related
         IntPoint ip;
-        ip.X = resolution*vertex.x();
-        ip.Y = resolution*vertex.y();
+        ip.X = cfg->resolution*vertex.x();
+        ip.Y = cfg->resolution*vertex.y();
         path.push_back(ip);
         //qDebug() << "path build" << id << ip.X << ip.Y;
     }
@@ -142,12 +156,6 @@ Path idxsToPath(Mesh* mesh, vector<int> path_by_idx, int resolution){
 }
 
 Paths project(Mesh* mesh){
-    qDebug() << "-------" << mesh->faces[0].neighboring_faces[0][0]->idx << mesh->faces[0].neighboring_faces[1][0]->idx << mesh->faces[0].neighboring_faces[2][0]->idx;
-    for(int i=0; i<mesh->faces.size(); i++){
-        qDebug() << mesh->faces[i].fn.z();
-    }
-    // qDebug() << "@" << mesh->faces[13].neighboring_faces[0].size();
-    // qDebug() << "@" << mesh->faces[5].neighboring_faces[0][0]->neighboring_faces[0].size() << mesh->faces[5].neighboring_faces[0][0]->idx;
     int face_number = mesh->faces.size();
     bool check_done = false;
     int chking_start;
@@ -158,42 +166,32 @@ Paths project(Mesh* mesh){
         for(int i=0; i<face_number; i++){
             if (0<=mesh->faces[i].fn.z() && !face_checked[i]){
                 chking_start=i;//new checking target obtained
-                //qDebug() << "Outline_set #" << outline_sets.size();
+                if(outline_sets.size()==27) shit=true;
+                if(outline_sets.size()==28) shit=false;
                 outline_sets.push_back(spreadingCheck(mesh, face_checked, chking_start));
                 break;
             }else if(i==face_number-1) check_done = true;
         }
-        /*if(!check_done){
-            //*qDebug() << "Outline_set #" << outline_sets.size();
-            //Paths outline_set;
-            //outline_set = spreadingCheck(mesh, face_checked, outer_face_checked, checking_face);
-        }*/
     }
-    /****/qDebug() << "Total outline_set : " << outline_sets.size();
+    /****/qDebug() << "Total outline_set : " << outline_sets.size() << "->" << clipOutlines(outline_sets).size();
     return clipOutlines(outline_sets);
-    /***************************test code*
-    int set = 2;
-    qDebug() << "Projection result" << set;
-    //qDebug() << "number of point" << outline_sets[set].size();
-    //for (int i=0; i<outline_sets[set].size(); i++)qDebug() << "(" << outline_sets[set][i].X << "," << outline_sets[set][i].Y << ")";
-    //return outline_sets[set];
-    Paths s;
-    //SimplifyPolygons(outline_sets[set], s, pftNonZero);
-    //return s;
-    return outline_sets[set];
-    /*****************************/
 }
 
 Paths clipOutlines(vector<Paths> outline_sets){
     Paths projection;
+    //Paths tmp_clip_result;
     Clipper c;
-    for(int i=0; i<outline_sets.size(); i++){
+    for(int i=0; i<(outline_sets.size()); i++){
+        //if(i!=28)continue;
         //*qDebug() << "Clipping" << i;
         c.Clear();
         c.AddPaths(projection, ptSubject, true);
         c.AddPaths(outline_sets[i], ptClip, true);
-        //review adding simplyfying process
+        //simplyfy 사용할지 검토
         c.Execute(ctUnion, projection, pftNonZero, pftNonZero);
+        /*projection.clear();
+        projection.insert(projection.end(), tmp_clip_result.begin(), tmp_clip_result.end());
+        tmp_clip_result.clear();*/
     }
     return projection;
 }

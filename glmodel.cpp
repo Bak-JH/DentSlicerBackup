@@ -32,12 +32,13 @@ GLModel::GLModel(QNode *parent)
 
     mesh = new Mesh();
     qDebug() << "Loading mesh";
-    loadMeshSTL(mesh, "C:/Users/hsy61/Desktop/3D_modles/simple/hexagon.stl");
+    //loadMeshSTL(mesh, "C:/Users/hsy61/Desktop/3D_models/test/train.stl");
+    loadMeshSTL(mesh, "C:/Users/hsy61/Desktop/3D_models/teeth_models/lowerjaw_part1.stl");
     qDebug() << "Number of faces :" << mesh->faces.size();
     qDebug() << "Mesh loaded";
     //repairMesh(mesh);
     //qDebug() << "Mesh repaired";
-    initialize(mesh);
+    //initialize(mesh);
 
 
     Paths projection = project(mesh);
