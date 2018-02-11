@@ -57,4 +57,4 @@ HEADERS += \
     meshrepair.h \
     lights.h
 
-LIBS += -lOpengl32
+#LIBS += -lOpengl32

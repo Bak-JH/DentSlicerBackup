@@ -5,6 +5,7 @@
 #include <QHash>
 #include "configuration.h"
 #include "polyclipping/clipper.hpp"
+#include <cmath>
 
 #define cos50 0.64278761
 #define cos100 -0.17364818

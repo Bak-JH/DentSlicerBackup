@@ -270,7 +270,7 @@ vector<MeshFace*> Mesh::findFaceWith2Vertices(int v0_idx, int v1_idx, MeshFace s
 }
 
 float Mesh::getFaceZmin(MeshFace mf){
-    float face_z_min=cfg->max_buildsize_x;
+    float face_z_min=1000;//cfg->max_buildsize_x;
     for (int i=0; i<3; i++){
         float temp_z_min = idx2MV(mf.mesh_vertex[i]).position.z();
         if (temp_z_min<face_z_min)
@@ -280,7 +280,7 @@ float Mesh::getFaceZmin(MeshFace mf){
 }
 
 float Mesh::getFaceZmax(MeshFace mf){
-    float face_z_max=-cfg->max_buildsize_x;
+    float face_z_max=-1000;//-cfg->max_buildsize_x;
     for (int i=0; i<3; i++){
         float temp_z_max = idx2MV(mf.mesh_vertex[i]).position.z();
         if (temp_z_max>face_z_max)

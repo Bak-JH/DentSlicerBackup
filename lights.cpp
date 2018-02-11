@@ -28,10 +28,10 @@ Lights::Lights(Qt3DCore::QEntity *rootEntity)
 }
 
 Lights::~Lights(){
-    delete[] lightEntity;
-    delete[] light;
-    delete[] lightTransform;
-    delete[] lightEntity;
+    //delete[] lightEntity;
+    //delete[] light;
+    //delete[] lightTransform;
+    //delete[] lightEntity;
 }
 
 
