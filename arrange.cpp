@@ -11,7 +11,6 @@ Paths spreadingCheck(Mesh* mesh, bool* check, int chking_start){
     /**/qDebug() << "SpreadingCheck started from" << chking_start;
     Paths paths;
     int chking = -1;
-    bool outer_check[mesh->faces.size()] = {false};
     vector<MeshFace*> to_check;
     to_check.push_back(& mesh->faces[chking_start]);
     while(to_check.size()>0){
@@ -22,21 +21,22 @@ Paths spreadingCheck(Mesh* mesh, bool* check, int chking_start){
             //*Debug
             qDebug() << "to_check" << i << "(Face" << chking << ")";
             for(int side=0; side<3; side++){
-                if (isEdgeBound(to_check[i], side)){
-                    if(!outer_check[chking]) qDebug() << " - unchecked bound";
-                    else qDebug() << " - checked bound";
-                }else qDebug() << " -" << to_check[i]->neighboring_faces[side].size()
+                if (isEdgeBound(to_check[i], side)) qDebug() << " - unchecked bound";
+                else qDebug() << " -" << to_check[i]->neighboring_faces[side].size()
                                << "neighbors (first:" << to_check[i]->neighboring_faces[side][0]->idx << ")";
             }//*/
             if(check[chking]) continue;
             check[chking] = true;
             MeshFace* mf = to_check[i];
-            for(int side=0; side<3; side++){
+            int side;
+            int outline_checked = false;
+            for(side=0; side<3; side++){
                 if (isEdgeBound(mf, side)){
-                    if(!outer_check[chking]){
+                    if(!outline_checked){
                         int path_head = getPathHead(mf, side);
-                        Path path = buildOutline(mesh, check, outer_check, chking, path_head);
+                        Path path = buildOutline(mesh, check, chking, path_head);
                         paths.push_back(path);
+                        outline_checked = true;
                     }
                 }else{//법선 방향 조건이 만족되는 이웃만 to_check에 추가하는 것이 맞을지 검토
                     vector<MeshFace*> neighbors = mf->neighboring_faces[side];
@@ -58,12 +58,11 @@ int getPathHead(MeshFace* mf, int side){
     return mf->mesh_vertex[side];
 }
 
-Path buildOutline(Mesh* mesh, bool* check, bool* outer_check, int chking, int path_head){
+Path buildOutline(Mesh* mesh, bool* check, int chking, int path_head){
     //*Debug
     qDebug() << "buildOutline from" << chking;
     //*/
     if(path_head==-1){
-        outer_check[chking] = true;
         check[chking] = true;
         MeshFace* mf = & mesh->faces[chking];
         Path path;
@@ -77,12 +76,11 @@ Path buildOutline(Mesh* mesh, bool* check, bool* outer_check, int chking, int pa
     }
     vector<int> path_by_idx;
     bool outline_closed = false;
-    int outer_chking = chking;
     int from = -1;
     int path_tail = path_head;
     while(!outline_closed){
-        qDebug() << outer_chking;
-        MeshFace* mf = & mesh->faces[outer_chking];
+        qDebug() << chking;
+        MeshFace* mf = & mesh->faces[chking];
         int outline_edge_cnt = 0;
         int path_tail_idx;
         int orientation = 0;//path_head를 가지는 face와의 상대 orientation임(fn과 orientation 일치성 확보되면 불필요)
@@ -97,25 +95,24 @@ Path buildOutline(Mesh* mesh, bool* check, bool* outer_check, int chking, int pa
         }
         if(orientation!=0){
             path_by_idx.push_back(path_tail);
-            outer_check[outer_chking] = true;
-            check[outer_chking] = true;
-            from = outer_chking;
+            check[chking] = true;
+            from = chking;
             if(outline_edge_cnt==1){
                 path_tail = mf->mesh_vertex[(path_tail_idx+orientation+3)%3];
-                outer_chking = mf->neighboring_faces[(path_tail_idx+1)%3][0]->idx;
+                chking = mf->neighboring_faces[(path_tail_idx+1)%3][0]->idx;
             }else{
                 path_by_idx.push_back(mf->mesh_vertex[(path_tail_idx+orientation)%3]);
                 path_tail = mf->mesh_vertex[(path_tail_idx+2*orientation+3)%3];
-                outer_chking = mf->neighboring_faces[(path_tail_idx+orientation+1)%3][0]->idx;
+                chking = mf->neighboring_faces[(path_tail_idx+orientation+1)%3][0]->idx;
             }
         }else{//if orientation is 0, the face doesn't share any bound edge with current outline
-            check[outer_chking] = true; //the face may share some bound edge with other outline, so we do not midify outer_check
+            //the face may share some bound edge with other outline, so we do not mark it checked
             if(mf->neighboring_faces[path_tail_idx][0]->idx==from){
-                from = outer_chking;
-                outer_chking = mf->neighboring_faces[(path_tail_idx+2)%3][0]->idx;
+                from = chking;
+                chking = mf->neighboring_faces[(path_tail_idx+2)%3][0]->idx;
             }else{
-                from = outer_chking;
-                outer_chking = mf->neighboring_faces[path_tail_idx][0]->idx;
+                from = chking;
+                chking = mf->neighboring_faces[path_tail_idx][0]->idx;
             }
         }
         if(path_tail == path_head) outline_closed = true;

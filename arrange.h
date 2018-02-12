@@ -18,7 +18,7 @@ public:
 
 Paths spreadingCheck(Mesh* mesh, bool* check, int chking_start);
 int getPathHead(MeshFace* mf, int side);
-Path buildOutline(Mesh* mesh, bool* check, bool* outer_check, int chking, int path_head);
+Path buildOutline(Mesh* mesh, bool* check, int chking, int path_head);
 bool isEdgeBound(MeshFace* mf, int side);
 Path idxsToPath(Mesh* mesh, vector<int> path_by_idx);
 Paths project(Mesh* mesh);
