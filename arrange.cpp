@@ -64,15 +64,9 @@ Path buildOutline(Mesh* mesh, bool* check, int chking, int path_head){
     //*/
     if(path_head==-1){
         check[chking] = true;
-        MeshFace* mf = & mesh->faces[chking];
-        Path path;
-        for(int j = 0; j<3; j++){
-            int v_idx = mf->mesh_vertex[j];
-            QVector3D vertex = mesh->vertices[v_idx].position;
-            mesh->Mesh::addPoint(vertex.x(), vertex.y(), &path);
-        }
+        vector<int> path_by_idx = arrToVect(mesh->faces[chking].mesh_vertex);
         qDebug() << "buildOutline done";
-        return path;
+        return idxsToPath(mesh, path_by_idx);
     }
     vector<int> path_by_idx;
     bool outline_closed = false;
@@ -133,15 +127,16 @@ bool isEdgeBound(MeshFace* mf, int side){//bound edge: connected to face with op
     return is_edge_bound;
 }
 
+vector<int> arrToVect(int arr[]){
+    vector<int> vec (arr, arr + sizeof arr / sizeof arr[0]);
+    return vec;
+}
+
 Path idxsToPath(Mesh* mesh, vector<int> path_by_idx){
     Path path;
     for(int id : path_by_idx){
         QVector3D vertex = mesh->vertices[id].position;
-        //*mesh->Mesh::addPoint(1*, 1*vertex.y(), &path);//resolution related
-        IntPoint ip;
-        ip.X = cfg->resolution*vertex.x();
-        ip.Y = cfg->resolution*vertex.y();
-        path.push_back(ip);
+        mesh->Mesh::addPoint(vertex.x(), vertex.y(), &path);
         //qDebug() << "path build" << id << ip.X << ip.Y;
     }
     return path;
