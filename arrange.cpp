@@ -62,13 +62,13 @@ Path buildOutline(Mesh* mesh, bool* check, int chking, int path_head){
     //*Debug
     qDebug() << "buildOutline from" << chking;
     //*/
-    if(path_head==-1){
+    vector<int> path_by_idx;
+    if(path_head==-1){//혼자있는 면의 경우 오리엔테이션 확인 방법이 마련되어있지 않음
         check[chking] = true;
-        vector<int> path_by_idx = arrToVect(mesh->faces[chking].mesh_vertex);
+        path_by_idx = arrToVect(mesh->faces[chking].mesh_vertex);
         qDebug() << "buildOutline done";
         return idxsToPath(mesh, path_by_idx);
     }
-    vector<int> path_by_idx;
     bool outline_closed = false;
     int from = -1;
     int path_tail = path_head;
@@ -153,8 +153,6 @@ Paths project(Mesh* mesh){
         for(int i=0; i<face_number; i++){
             if (0<=mesh->faces[i].fn.z() && !face_checked[i]){
                 chking_start=i;//new checking target obtained
-                if(outline_sets.size()==27) shit=true;
-                if(outline_sets.size()==28) shit=false;
                 outline_sets.push_back(spreadingCheck(mesh, face_checked, chking_start));
                 break;
             }else if(i==face_number-1) check_done = true;
@@ -169,7 +167,6 @@ Paths clipOutlines(vector<Paths> outline_sets){
     //Paths tmp_clip_result;
     Clipper c;
     for(int i=0; i<(outline_sets.size()); i++){
-        //if(i!=28)continue;
         //*qDebug() << "Clipping" << i;
         c.Clear();
         c.AddPaths(projection, ptSubject, true);
