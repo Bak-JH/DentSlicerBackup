@@ -32,5 +32,7 @@
         <file>FileDialogLoad.qml</file>
         <file>MeshTransformerRotateTest.qml</file>
         <file>UICore.qml</file>
+        <file>Cutbox.qml</file>
+        <file>Planeslider.qml</file>
     </qresource>
 </RCC>

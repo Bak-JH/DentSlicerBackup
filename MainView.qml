@@ -48,11 +48,11 @@ Entity {
                 cm.zoomDown()
             */
             if(d>0){
-                console.log("Dfdf")
-                console.log(systemTransform.scale3D)
+                //console.log("Dfdf")
+                //console.log(systemTransform.scale3D)
                 //sceneRoot.systemTransform.scale3D = sceneRoot.systemTransform.scale3D.plus(Qt.vector3d(0.02,0.02,0.02))
                 systemTransform.scale3D = systemTransform.scale3D.plus(Qt.vector3d(0.0002,0.0002,0.0002))
-                console.log(systemTransform.scale3D)
+                //console.log(systemTransform.scale3D)
             }
             else if(d<0){
                 //sceneRoot.systemTransform.scale3D = sceneRoot.systemTransform.scale3D.minus(Qt.vector3d(0.02,0.02,0.02))
@@ -66,16 +66,16 @@ Entity {
 
     DiffuseMapMaterial{
         id : planeMaterial
-        /*
-        ambient: Qt.rgba( 204/255, 204/255, 204/255, 1.0 )
-        diffuse: "black"
-        specular: "black"
-        shininess: 0.0
-        */
+
+//        ambient: Qt.rgba( 204/255, 204/255, 204/255, 1.0 )
+//        diffuse: "black"
+//        specular: "black"
+//        shininess: 0.0
+
 
         diffuse: "qrc:/grid.png"
-        //specular: Qt.rgba( 1, 1, 1, 1.0 )
-        ambient: Qt.rgba(255/255, 255/255, 255/255, 1.0 )
+        specular: Qt.rgba( 0, 0, 0, 1.0 )
+        ambient: Qt.rgba(254/255, 254/255, 254/255, 1.0 )
         shininess: 0
 
     }
@@ -282,7 +282,7 @@ Entity {
                 if (rotateAction.active) {
 
                     //var target = axisAngle2Quaternion(rotationSpeed * rotateXAxis.value * dt,qq.rotatedVector(planeEntity.planeTransform.rotation,yup))
-                    var target = axisAngle2Quaternion(rotationSpeed * rotateXAxis.value * dt,qq.rotatedVector(systemTransform.rotation,zup))
+                    var target = axisAngle2Quaternion(rotationSpeed * rotateXAxis.value * dt,qq.rotatedVector(systemTransform.rotation,zdown))
                     /* two axis rotate
                     //var target2 = axisAngle2Quaternion(rotationSpeed * rotateYAxis.value * dt,ydown)
                     //target = qq.multiplyQuaternion(target,target2)

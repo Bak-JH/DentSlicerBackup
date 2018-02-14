@@ -53,5 +53,13 @@
         <file>resource/rotate_y.png</file>
         <file>resource/rotate_y2.png</file>
         <file>resource/cut_act.png</file>
+        <file>resource/curve.png</file>
+        <file>resource/flat.png</file>
+        <file>resource/bar.png</file>
+        <file>resource/downTriangle.png</file>
+        <file>resource/upTriangle.png</file>
+        <file>resource/switch.png</file>
+        <file>resource/cursor.png</file>
+        <file>resource/pen.png</file>
     </qresource>
 </RCC>

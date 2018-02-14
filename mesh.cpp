@@ -194,7 +194,7 @@ int Mesh::findFaceWith2Vertices(int v0_idx, int v1_idx, int self_idx){
         }
     }
     if (candidates.size() == 0){
-        //qDebug() << "no candidates";
+        //qDebug() << "no candida
         return -1;
     }
     if (candidates.size() == 1){
