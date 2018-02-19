@@ -45,27 +45,29 @@ public:
     QGeometry* m_geometry;
     QGeometryRenderer* m_geometryRenderer;
     Qt3DRender::QObjectPicker *m_objectPicker;
-    Qt3DRender::QMesh *m_mesh;
     Qt3DCore::QTransform *m_transform;
 
-    std::vector<QVector3D> vector_set;
+    Qt3DCore::QEntity *parentEntity;
+    std::vector<QVector3D> cuttingPoints;
 
-    Qt3DCore::QEntity *motherEntity;
-    Qt3DExtras::QPlaneMesh* ClipPlane[2];
-    Qt3DCore::QTransform *planeTransform[2];
+    Qt3DExtras::QPlaneMesh* clipPlane[2];
     Qt3DCore::QEntity* planeEntity[2];
+    Qt3DCore::QTransform *planeTransform[2];
     Qt3DExtras::QPhongMaterial *planeMaterial;
+
     Qt3DExtras::QSphereMesh *sphereMesh[4];
+    Qt3DCore::QEntity *sphereEntity[4];
     Qt3DCore::QTransform *sphereTransform[4];
     QPhongMaterial *sphereMaterial[4];
-    Qt3DCore::QEntity *sphereEntity[4];
-    void delModel();
-    void before_initiate();
-    void before_add_verticies();
-    void makePlane();
-    void pushPoint(QVector3D v);
-    void delPoints();
+
+    void removeModel();
+    void beforeInitialize();
+    void beforeAddVerticies();
+    void generatePlane();
+    void addCuttingPoint(QVector3D v);
+    void removeCuttingPoints();
     void drawLine(QVector3D endpoint);
+
     QVector3D goWider(QVector3D endpoint,QVector3D startpoint,int factor);
 private:
     bool flatState;
@@ -89,7 +91,7 @@ private:
     void addIndexes(vector<int> vertices);
     void clearVertices();
     void onTimerUpdate();
-    Mesh* Tolower(Mesh* mesh);
+    Mesh* toSparse(Mesh* mesh);
 
 
     // bisects mesh into leftMesh, rightMesh divided by plane

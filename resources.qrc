@@ -52,8 +52,11 @@
         <file>resource/rotate_x2.png</file>
         <file>resource/rotate_y.png</file>
         <file>resource/rotate_y2.png</file>
-<<<<<<< HEAD
+
+
+        <file>resource/cut_curved.png</file>
         <file>resource/cut_act.png</file>
+        <file>resource/cut_flat.png</file>
         <file>resource/curve.png</file>
         <file>resource/flat.png</file>
         <file>resource/bar.png</file>
@@ -62,9 +65,7 @@
         <file>resource/switch.png</file>
         <file>resource/cursor.png</file>
         <file>resource/pen.png</file>
-=======
-        <file>resource/cut_curved.png</file>
-        <file>resource/cut_flat.png</file>
+
         <file>Resource/label_description.png</file>
         <file>Resource/upper2_arrange.png</file>
         <file>Resource/upper2_autorepair.png</file>
@@ -93,6 +94,5 @@
         <file>Resource/popup_image/scale_lock.png</file>
         <file>Resource/popup_image/shelloffset_switch.png</file>
         <file>Resource/popup_image/shelloffset_switch_hover.png</file>
->>>>>>> develop
     </qresource>
 </RCC>

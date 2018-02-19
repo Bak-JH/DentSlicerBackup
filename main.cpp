@@ -13,10 +13,6 @@
 
 using namespace Qt3DCore;
 
-//using namespace Qt3DRender;
-//void makePlane(QVector3D& v1, QVector3D& v2, QVector3D& v3, QEntity* motherEntity);
-
-
 int main(int argc, char *argv[])
 {
     QGuiApplication app(argc, argv);
@@ -37,13 +33,13 @@ int main(int argc, char *argv[])
     QObject* mainView = FindItemByName(&engine, "MainView");
     QEntity* teethModel = (QEntity *)FindItemByName(&engine, "normalModel");
     GLModel* gglmodel = new GLModel(teethModel);
-    GLModel* ggglmodel =new GLModel(nullptr,3);
+    //GLModel* ggglmodel =new GLModel(nullptr,3);
 
     QObject *item = FindItemByName(&engine, "item");
     QObject *curve = FindItemByName(&engine, "curve");
     QObject *flat = FindItemByName(&engine, "flat");
     QObject *slider = FindItemByName(&engine, "sslider");
-    Lights* mylights = new Lights(teethModel);
+    Lights* lights = new Lights(teethModel);
 
     QObject::connect(item,SIGNAL(qmlSignal()),gglmodel,SLOT(modelcut()));
     QObject::connect(curve,SIGNAL(curveSignal()),gglmodel,SLOT(Lineaccept()));
