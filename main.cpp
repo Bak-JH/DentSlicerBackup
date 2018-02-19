@@ -42,9 +42,9 @@ int main(int argc, char *argv[])
     Lights* lights = new Lights(teethModel);
 
     QObject::connect(item,SIGNAL(qmlSignal()),gglmodel,SLOT(modelcut()));
-    QObject::connect(curve,SIGNAL(curveSignal()),gglmodel,SLOT(Lineaccept()));
-    QObject::connect(flat,SIGNAL(flatSignal()),gglmodel,SLOT(Pointaccept()));
-    QObject::connect(slider,SIGNAL(govalue(double)),gglmodel,SLOT(getsignal(double)));
+    QObject::connect(curve,SIGNAL(curveSignal()),gglmodel,SLOT(lineAccept()));
+    QObject::connect(flat,SIGNAL(flatSignal()),gglmodel,SLOT(pointAccept()));
+    QObject::connect(slider,SIGNAL(govalue(double)),gglmodel,SLOT(getSignal(double)));
     QObject::connect(se.data(), SIGNAL(updateModelInfo(int,int,QString,float)), qm.data(), SLOT(sendUpdateModelInfo(int,int,QString,float)));
 
 

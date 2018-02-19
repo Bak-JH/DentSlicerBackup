@@ -68,7 +68,7 @@ public:
     void removeCuttingPoints();
     void drawLine(QVector3D endpoint);
 
-    QVector3D goWider(QVector3D endpoint,QVector3D startpoint,int factor);
+    QVector3D spreadPoint(QVector3D endpoint,QVector3D startpoint,int factor);
 private:
     bool flatState;
     bool curveState;
@@ -79,6 +79,7 @@ private:
     Mesh* lmesh;
     Mesh* rmesh;
     Mesh* mesh;
+    Mesh* sparseMesh;
     QNode* m_parent;
     QVector3D lastpoint;
     int Number_of_points;
@@ -106,9 +107,9 @@ public slots:
     void engoo();
     void exgoo();
     void modelcut();
-    void Lineaccept();
-    void Pointaccept();
-    void getsignal(double value);
+    void lineAccept();
+    void pointAccept();
+    void getSignal(double value);
 };
 
 Qt3DRender::QAttribute *copyAttribute(Qt3DRender::QAttribute *oldAtt, QMap<Qt3DRender::QBuffer *, Qt3DRender::QBuffer *> &bufferMap);

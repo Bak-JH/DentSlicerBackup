@@ -35,7 +35,7 @@ GLModel::GLModel(QNode *parent)
     , m_transform(new Qt3DCore::QTransform())
     , m_objectPicker(new Qt3DRender::QObjectPicker())
     , parentEntity(reinterpret_cast<Qt3DCore::QEntity *>(parent))
-    , Number_of_points(0)
+    , numPoints(0)
     , curveState(false)
     , flatState(false)
 {
@@ -59,7 +59,8 @@ GLModel::GLModel(QNode *parent)
     rmesh = new Mesh();
 
     loadMeshSTL(mesh, "C:/Users/diridiri/Desktop/DLP/partial2_flip.stl");
-    Mesh* sparseMesh =toSparse(mesh);
+
+    sparseMesh = toSparse(mesh);
     //repairMesh(mesh);
 
     initialize(sparseMesh);
@@ -194,9 +195,6 @@ void GLModel::initialize(const Mesh* mesh){
 
     addComponent(m_geometryRenderer);
     addComponent(m_planeMaterial);
-
-
-
 
     return;
 }
@@ -366,7 +364,7 @@ bool GLModel::isLeftToPlane(Plane plane, QVector3D position){
 void GLModel::handlePickerClicked(QPickEvent *pick)
 {
     QPickTriangleEvent *trianglePick = static_cast<QPickTriangleEvent*>(pick);
-    if (flatState&&Number_of_points< sizeof(sphereEntity)/4)
+    if (flatState&&numPoints< sizeof(sphereEntity)/4)
         {//qDebug() << pick->localIntersection()<<"pick";
         QVector3D v = pick->localIntersection();
         addCuttingPoint(v);
@@ -418,23 +416,23 @@ void GLModel::generatePlane(){
 
 void GLModel::addCuttingPoint(QVector3D v){
     cuttingPoints.push_back(v);
-    sphereMesh[Number_of_points] = new Qt3DExtras::QSphereMesh;
-    sphereMesh[Number_of_points]->setRadius(1);
-    sphereTransform[Number_of_points] = new Qt3DCore::QTransform;
-    sphereTransform[Number_of_points]->setTranslation(v);
+    sphereMesh[numPoints] = new Qt3DExtras::QSphereMesh;
+    sphereMesh[numPoints]->setRadius(1);
+    sphereTransform[numPoints] = new Qt3DCore::QTransform;
+    sphereTransform[numPoints]->setTranslation(v);
 
-    sphereMaterial[Number_of_points] = new Qt3DExtras::QPhongMaterial();
-    sphereMaterial[Number_of_points]->setDiffuse(QColor(QRgb(0xaa0000)));
-    sphereEntity[Number_of_points] = new Qt3DCore::QEntity(parentEntity);
-    sphereEntity[Number_of_points]->addComponent(sphereMesh[Number_of_points]);
-    sphereEntity[Number_of_points]->addComponent(sphereTransform[Number_of_points]);
-    sphereEntity[Number_of_points]->addComponent(sphereMaterial[Number_of_points]);
-    Number_of_points++;
+    sphereMaterial[numPoints] = new Qt3DExtras::QPhongMaterial();
+    sphereMaterial[numPoints]->setDiffuse(QColor(QRgb(0xaa0000)));
+    sphereEntity[numPoints] = new Qt3DCore::QEntity(parentEntity);
+    sphereEntity[numPoints]->addComponent(sphereMesh[numPoints]);
+    sphereEntity[numPoints]->addComponent(sphereTransform[numPoints]);
+    sphereEntity[numPoints]->addComponent(sphereMaterial[numPoints]);
+    numPoints++;
 }
 
 void GLModel::removeCuttingPoints(){
 
-    for(int i=0;i<Number_of_points;i++)
+    for(int i=0;i<numPoints;i++)
     {
         sphereEntity[i]->removeComponent(sphereMesh[i]);
         sphereEntity[i]->removeComponent(sphereTransform[i]);
@@ -444,7 +442,7 @@ void GLModel::removeCuttingPoints(){
     delete [] sphereMaterial;
     delete [] sphereMesh;
     delete [] sphereTransform;
-    Number_of_points=0;
+    numPoints=0;
 }
 
 void GLModel::removeModel(){
@@ -615,20 +613,20 @@ void GLModel::drawLine(QVector3D endpoint)
     }
 }
 
-void GLModel::Lineaccept(){
+void GLModel::lineAccept(){
     if(!curveState){
         curveState=true;}
     else {
         curveState=false;}}
 
-void GLModel::Pointaccept(){
+void GLModel::pointAccept(){
     if(!flatState){
         flatState=true;}
     else {
         removeCuttingPoints();
         flatState=false;}}
 
-void GLModel::getsignal(double value){
+void GLModel::getSignal(double value){
     QVector3D v1=cuttingPoints[cuttingPoints.size()-3];
     QVector3D v2=cuttingPoints[cuttingPoints.size()-2];
     QVector3D v3=cuttingPoints[cuttingPoints.size()-1];
@@ -644,7 +642,9 @@ void GLModel::getsignal(double value){
     }
 }
 
-QVector3D GLModel::spreadPoints(QVector3D endPoint,QVector3D startPoint,int factor){
+/** HELPER functions **/
+
+QVector3D GLModel::spreadPoint(QVector3D endPoint,QVector3D startPoint,int factor){
     QVector3D standardVector = endPoint-startPoint;
     QVector3D finalVector=endPoint+standardVector*(factor-1);
     return finalVector;
@@ -660,9 +660,9 @@ Mesh* GLModel::toSparse(Mesh* mesh){
             QVector3D point2 =mesh->idx2MV(mf.mesh_vertex[1]).position;
             QVector3D point3 =mesh->idx2MV(mf.mesh_vertex[2]).position;
             QVector3D CenterOfMass = (point1+point2+point3)/3;
-            point1=GLModel::goWider(point1,CenterOfMass,factor);
-            point2=GLModel::goWider(point2,CenterOfMass,factor);
-            point3=GLModel::goWider(point3,CenterOfMass,factor);
+            point1=GLModel::spreadPoint(point1,CenterOfMass,factor);
+            point2=GLModel::spreadPoint(point2,CenterOfMass,factor);
+            point3=GLModel::spreadPoint(point3,CenterOfMass,factor);
             newMesh->addFace(mesh->idx2MV(mf.mesh_vertex[0]).position, mesh->idx2MV(mf.mesh_vertex[1]).position, mesh->idx2MV(mf.mesh_vertex[2]).position);
             newMesh->addFace(point1,point2,point3);
         }
