@@ -6,8 +6,27 @@
 #include "configuration.h"
 #include "polyclipping/clipper.hpp"
 
+#define cos50 0.64278761
+#define cos100 -0.17364818
+#define cos150 -0.8660254
+
+
 using namespace std;
 using namespace ClipperLib;
+
+class MeshFace {
+public:
+    MeshFace() {}
+    //MeshFace() {neighboring_faces.reserve(10);}
+
+    int idx;
+    int mesh_vertex[3] = {-1};
+    //int connected_face_idx[3];
+
+    vector<vector<MeshFace*>> neighboring_faces;
+
+    QVector3D fn;
+};
 
 class MeshVertex {
 public:
@@ -15,17 +34,20 @@ public:
     int idx;
     QVector3D position;
     QVector3D vn;
-    std::vector<int> connected_faces;
-    MeshVertex(QVector3D position): position(position) {connected_faces.reserve(8);}
+    std::vector<MeshFace*> connected_faces;
+    MeshVertex(QVector3D position): position(position) {}//connected_faces.reserve(8);}
+
+    friend inline bool operator== (const MeshVertex& a, const MeshVertex& b){
+        return a.position == b.position;
+    }
+
+    friend inline bool operator!= (const MeshVertex& a, const MeshVertex& b){
+        return a.position != b.position;
+    }
 };
 
-class MeshFace {
-public:
-    int idx;
-    int mesh_vertex[3] = {-1};
-    int connected_face_idx[3];
-    QVector3D fn;
-};
+typedef vector<MeshVertex> Path3D;
+typedef vector<Path3D> Paths3D;
 
 class Mesh{
 public :
@@ -33,10 +55,15 @@ public :
     std::vector<MeshVertex> vertices;
     QHash<uint32_t, MeshVertex> vertices_hash;
     std::vector<MeshFace> faces;
+
+    // used for auto repair steps
+    Paths3D holes;
+
     float x_min = 99999, x_max = 99999, y_min = 99999, y_max = 99999, z_min = 99999, z_max = 99999;
 
     /********************** Mesh Generation Functions **********************/
     void addFace(QVector3D v0, QVector3D v1, QVector3D v2);
+    vector<MeshFace>::iterator removeFace(vector<MeshFace>::iterator f_it);
     void connectFaces();
 
     /********************** Path Generation Functions **********************/
@@ -46,7 +73,7 @@ public :
     /********************** Helper Functions **********************/
     int getVertexIdx(QVector3D v);
     void updateMinMax(QVector3D v);
-    int findFaceWith2Vertices(int v0_idx, int v1_idx, int self_idx);
+    vector<MeshFace*> findFaceWith2Vertices(int v0_idx, int v1_idx, MeshFace self_f);
     float getFaceZmin(MeshFace mf);
     float getFaceZmax(MeshFace mf);
     MeshFace idx2MF(int idx);

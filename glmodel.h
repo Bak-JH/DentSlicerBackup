@@ -11,6 +11,7 @@
 #include "arrange.h"
 #include <QBuffer>
 #include <QObjectPicker>
+#include "meshrepair.h"
 #include "qmlmanager.h"
 #include <QCursor>
 #include "mesh.h"

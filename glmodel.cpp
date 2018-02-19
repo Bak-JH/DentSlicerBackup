@@ -39,6 +39,12 @@ GLModel::GLModel(QNode *parent)
     , curveState(false)
     , flatState(false)
 {
+    /*Qt3DRender::QPickingSettings *settings = new Qt3DRender::QPickingSettings(m_objectPicker);
+
+    settings->setFaceOrientationPickingMode(Qt3DRender::QPickingSettings::FrontFace);
+    settings->setPickMethod(Qt3DRender::QPickingSettings::TrianglePicking);
+    settings->setPickResultMode(Qt3DRender::QPickingSettings::NearestPick);*/
+
     m_planeMaterial = new QPhongAlphaMaterial();
     m_planeMaterial->setAmbient(QColor(81,200,242));
     m_planeMaterial->setDiffuse(QColor(255,255,255));
@@ -49,16 +55,21 @@ GLModel::GLModel(QNode *parent)
     QObject::connect(timer, &QTimer::timeout,this,&GLModel::onTimerUpdate);
 
     mesh = new Mesh();
-    loadMeshSTL(mesh, "C:/Users/Hix/Desktop/partial2_flip.stl");
-    Mesh* lowermesh =Tolower(mesh);
-    initialize(mesh);
-
     lmesh = new Mesh();
     rmesh = new Mesh();
 
-//    bisectModel(mesh, plane, lmesh, rmesh);
+    loadMeshSTL(mesh, "C:/Users/diridiri/Desktop/DLP/partial2_flip.stl");
+    Mesh* lowermesh =Tolower(mesh);
+    //repairMesh(mesh);
+
+    initialize(mesh);
+    //m_mesh->setGeometry(m_geometry);
+
     addVertices(mesh);
+
     Qt3DExtras::QDiffuseMapMaterial *diffuseMapMaterial = new Qt3DExtras::QDiffuseMapMaterial();
+
+    //addComponent(m_mesh);
     addComponent(m_transform);
 
     m_objectPicker->setHoverEnabled(true);
@@ -70,17 +81,6 @@ GLModel::GLModel(QNode *parent)
  QObject::connect(m_objectPicker, SIGNAL(entered()), this, SLOT(engoo()));
  QObject::connect(m_objectPicker, SIGNAL(exited()), this, SLOT(exgoo()));
     addComponent(m_objectPicker);
-
-    auto attributes = m_geometry->attributes();
-
-    int vertexIndex = 0;
-    m_objectPicker->setDragEnabled(true);
-    for (auto i = 0; i < attributes.count(); ++i)
-    {
-        if (attributes.at(i)->name() == QAttribute::VertexAttribute)//QAttribute::defaultPositionAttributeName())
-        {
-        }
-    }
 }
 
 Qt3DRender::QAttribute *copyAttribute(
@@ -358,7 +358,6 @@ void GLModel::bisectModel(Mesh* mesh, Plane plane, Mesh* leftMesh, Mesh* rightMe
 
 bool GLModel::isLeftToPlane(Plane plane, QVector3D position){
     // determine if position is left to plane or not
-    //if (QVector3D::dotProduct(QVector3D::normal(plane[0], plane[1], plane[2]), position)>0)
     if(position.distanceToPlane(plane[0],plane[1],plane[2])>0)
         return false;
     return true;
@@ -392,16 +391,16 @@ void GLModel::makePlane(){
         QCoreApplication::quit();
         return;
     }
-        QVector3D v1;
-        QVector3D v2;
-        QVector3D v3;
-        v1=vector_set[vector_set.size()-3];
-        v2=vector_set[vector_set.size()-2];
-        v3=vector_set[vector_set.size()-1];
 
+    QVector3D v1;
+    QVector3D v2;
+    QVector3D v3;
+    v1=vector_set[vector_set.size()-3];
+    v2=vector_set[vector_set.size()-2];
+    v3=vector_set[vector_set.size()-1];
         planeMaterial = new Qt3DExtras::QPhongMaterial();
-            planeMaterial->setDiffuse(QColor(QRgb(0x00aaaa)));
-            //To manipulate plane color, change the QRgb(0x~~~~~~).
+        planeMaterial->setDiffuse(QColor(QRgb(0x00aaaa)));
+        //To manipulate plane color, change the QRgb(0x~~~~~~).
         QVector3D world_origin(0,0,0);
         QVector3D original_normal(0,1,0);
         QVector3D desire_normal(QVector3D::normal(v1,v2,v3)); //size=1

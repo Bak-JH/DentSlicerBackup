@@ -15,6 +15,7 @@ ApplicationWindow {
     property alias uppertab: uppertab
     property alias lefttab: lefttab
 
+
     menuBar: MenuBar{
         Menu{
             title : "File"
@@ -119,11 +120,14 @@ ApplicationWindow {
              lefttab.ltso.option_infill.currentText,
              lefttab.ltso.option_raft.currentText]
 
-
         anchors.top: parent.top
         anchors.left: parent.left
 
+        //popup1.popup_anchor_left: lefttab.right
+        //popup_anchor_top: lefttab.top
+
     }
+
 
     LeftTab{
         id : lefttab

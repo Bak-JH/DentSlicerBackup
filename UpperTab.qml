@@ -2,13 +2,50 @@ import Qt3D.Core 2.0
 import QtQuick 2.0
 import QtQuick.Layouts 1.0
 import QtQuick.Controls 1.0
-import QtQuick.Controls.Styles 1.0
+//import QtQuick.Controls.Styles 1.0
+import QtQuick.Controls.Styles 1.4
+
+
 
 Rectangle {
+    id: box_uppertab
     color: "#E2E1E1"
     property int buttonWidth : 86
     property int buttonHeight : 100
     property var options: []
+
+
+    function all_off() {
+        first_tab_button_open.state = "inactive";
+        first_tab_button_export.state = "inactive";
+        first_tab_button_save.state = "inactive";
+        second_tab_button_arrange.state = "inactive";
+        second_tab_button_layflat.state = "inactive";
+        second_tab_button_move.state = "inactive";
+        second_tab_button_orient.state = "inactive";
+        second_tab_button_rotate.state = "inactive";
+        third_tab_button_autorepair.state = "inactive";
+        third_tab_button_cut.state = "inactive";
+        third_tab_button_shelloffset.state = "inactive";
+        third_tab_button_scale.state = "inactive";
+        fourth_tab_button_extend.state = "inactive";
+        fourth_tab_button_label.state = "inactive";
+        fourth_tab_button_support.state = "inactive";
+
+        console.log("all off");
+    }
+
+    property real move_x_value
+    property real move_y_value
+    property real move_z_value
+    property real rotate_x_value
+    property real rotate_y_value
+    property real rotate_z_value
+    property real scale_x_value
+    property real scale_y_value
+    property real scale_z_value
+
+
 
 
     /*
@@ -100,6 +137,7 @@ Rectangle {
     }
 
     Item{
+
         id : firsttab
         width : buttonWidth * 3 + 2
         height: parent.height
@@ -113,7 +151,8 @@ Rectangle {
             id : first_tab_button_open
             objectName : "open"
             anchors.left: parent.left
-            iconSource: "qrc:/resource/upper_open.png"
+            iconSource1: "qrc:/resource/upper_open.png"
+            iconSource2: "qrc:/Resource/upper2_open.png"
             iconText: "Open"
             MouseArea{
                 anchors.fill: parent
@@ -127,7 +166,8 @@ Rectangle {
             id : first_tab_button_save
 
             anchors.left: first_tab_button_open.right
-            iconSource: "qrc:/resource/upper_save.png"
+            iconSource1: "qrc:/resource/upper_save.png"
+            iconSource2: "qrc:/Resource/upper2_save.png"
             iconText: "Save"
         }
 
@@ -136,7 +176,8 @@ Rectangle {
             id : first_tab_button_export
 
             anchors.left: first_tab_button_save.right
-            iconSource: "qrc:/resource/upper_export.png"
+            iconSource1: "qrc:/resource/upper_export.png"
+            iconSource2: "qrc:/Resource/upper2_export.png"
             iconText: "Export"
 
             MouseArea{
@@ -192,36 +233,40 @@ Rectangle {
             id : second_tab_button_move
 
             anchors.left: parent.left
-            iconSource: "qrc:/resource/upper_move.png"
+            iconSource1: "qrc:/resource/upper_move.png"
+            iconSource2: "qrc:/Resource/upper2_move.png"
             iconText: "Move"
-
         }
         UpperButton{
             id : second_tab_button_rotate
 
             anchors.left: second_tab_button_move.right
-            iconSource: "qrc:/resource/upper_rotate.png"
+            iconSource1: "qrc:/resource/upper_rotate.png"
+            iconSource2: "qrc:/Resource/upper2_rotate.png"
             iconText: "Rotate"
         }
         UpperButton{
             id : second_tab_button_layflat
 
             anchors.left: second_tab_button_rotate.right
-            iconSource: "qrc:/resource/upper_layflat.png"
+            iconSource1: "qrc:/resource/upper_layflat.png"
+            iconSource2: "qrc:/Resource/upper2_layflat.png"
             iconText: "Lay flat"
         }
         UpperButton{
             id : second_tab_button_arrange
 
             anchors.left: second_tab_button_layflat.right
-            iconSource: "qrc:/resource/upper_arrange.png"
+            iconSource1: "qrc:/resource/upper_arrange.png"
+            iconSource2: "qrc:/Resource/upper2_arrange.png"
             iconText: "Arrange"
         }
         UpperButton{
             id : second_tab_button_orient
 
             anchors.left: second_tab_button_arrange.right
-            iconSource: "qrc:/resource/upper_orientation.png"
+            iconSource1: "qrc:/resource/upper_orientation.png"
+            iconSource2: "qrc:/Resource/upper2_orient.png"
             iconText: "Orient"
         }
 
@@ -250,28 +295,55 @@ Rectangle {
         //color: "transparent"
         UpperButton{
             id : third_tab_button_scale
-
+            //state: inactive
             anchors.left: parent.left
-            iconSource: "qrc:/resource/upper_scale.png"
+            iconSource1: "qrc:/resource/upper_scale.png"
+            iconSource2: "qrc:/Resource/upper2_scale.png"
             iconText: "Scale"
+            /*
+            Connections {
+                target: box_uppertab
+                box: third_tab_button_scale.iconText
+            }
+            visible: if(box_uppertab.box != iconText) return false;
+            */
+
+            /*
+            parent.parent.box: iconText
+            visible: if (parent.parent.box != iconText) return false;
+            */
+
+            //state: if(box_uppertab.box != "Scale") return "inactive";
+
+
         }
+
         UpperButton{
             id : third_tab_button_autorepair
-
             anchors.left: third_tab_button_scale.right
-            iconSource: "qrc:/resource/upper_autorepair.png"
+            iconSource1: "qrc:/resource/upper_autorepair.png"
+            iconSource2: "qrc:/Resource/upper2_autorepair.png"
             iconText: "Auto Repair"
+            /*
+            Connections {
+                target: box_uppertab
+                box: third_tab_button_autorepair.iconText
+            }
+            visible: if(box_uppertab.box != iconText) return false;
+            */
+
         }
+
         UpperButton{
             id : third_tab_button_cut
-            state:'Inactivation'
+            //state:"inactive"
             anchors.left: third_tab_button_autorepair.right
-            anchors.leftMargin: 4
-            anchors.bottom: third_tab_button_autorepair.bottom
-            anchors.bottomMargin: 3
-            iconSource: "qrc:/resource/upper_cut.png"
+            //anchors.leftMargin: 4
+            //anchors.bottom: third_tab_button_autorepair.bottom
+            //anchors.bottomMargin: 3
+            iconSource1: "qrc:/resource/upper_cut.png"
+            iconSource2: "qrc:/Resource/upper2_cut.png"
             iconText: "Cut"
-
 
             states: [
                 State{
@@ -300,13 +372,13 @@ Rectangle {
                 anchors.top:  parent.bottom
                 anchors.topMargin: 35
             }
-
-
+            
         UpperButton{
             id : third_tab_button_shelloffset
 
             anchors.left: third_tab_button_cut.right
-            iconSource: "qrc:/resource/upper_shelloffset.png"
+            iconSource1: "qrc:/resource/upper_shelloffset.png"
+            iconSource2: "qrc:/Resource/upper2_shelloffset.png"
             iconText: "Shell Offset"
         }
 
@@ -335,25 +407,29 @@ Rectangle {
         //color: "transparent"
 
         UpperButton{
-            id : fourth_tab_button_base
+            id : fourth_tab_button_extend
 
             anchors.left: parent.left
-            iconSource: "qrc:/resource/upper_base.png"
-            iconText: "Base"
+            iconSource1: "qrc:/resource/upper_base.png"
+            iconSource2: "qrc:/Resource/upper2_extend.png"
+            iconText: "Extend"
         }
 
         UpperButton{
             id : fourth_tab_button_support
 
-            anchors.left: fourth_tab_button_base.right
-            iconSource: "qrc:/resource/upper_support.png"
+            anchors.left: fourth_tab_button_extend.right
+            iconSource1: "qrc:/resource/upper_support.png"
+            iconSource2: "qrc:/Resource/upper2_support.png"
             iconText: "Support"
+
         }
         UpperButton{
             id : fourth_tab_button_label
 
             anchors.left: fourth_tab_button_support.right
-            iconSource: "qrc:/resource/upper_label.png"
+            iconSource1: "qrc:/resource/upper_label.png"
+            iconSource2: "qrc:/Resource/upper2_label.png"
             iconText: "Label"
         }
 
@@ -379,10 +455,828 @@ Rectangle {
         var loadmodel = compo.createObject(sceneRoot);
 
     }
-
-
-
 }
+
+    // Pop-Up
+    Item {
+        id: popup
+        width: 300
+        height: 300
+        anchors.left: parent.left
+        anchors.top: parent.bottom
+        anchors.topMargin: 20
+        anchors.leftMargin: 280
+        //color: "transparent"
+
+
+        //4. PopUp - Move
+        PopUp {
+            id: popup_move
+            funcname: "Move"
+            height: 250
+            //detail1: ""
+            //detail2: ""
+            //image: ""
+            detailline1_vis: false
+            detailline2_vis: false
+            applyfinishbutton_vis: false
+            applybutton_vis: true
+            applybutton_text: "Finish"
+            descriptionimage_vis: false
+            numberbox_vis: true
+            numberbox_nameing_vis: true
+            numberbox_width: 110
+            numberbox_y: 45
+            //numbox_default: 0
+            numbox_updown_scale: 1
+            numbox_value_x: move_x_value
+            numbox_value_y: move_y_value
+            numbox_value_z: move_z_value
+            state: second_tab_button_move.state=="active" ? "active" : "inactive"
+        }
+
+        //5. PopUp - Rotate
+        PopUp {
+            id: popup_rotate
+            funcname: "Rotate"
+            height: 250
+            detail1: ""
+            detail2: ""
+            //image: ""
+            detailline1_vis: false
+            detailline2_vis: false
+            applyfinishbutton_vis: false
+            applybutton_vis: true
+            applybutton_text: "Finish"
+            descriptionimage_vis: false
+            numberbox_vis: true
+            numberbox_nameing_vis: true
+            numberbox_width: 110
+            numberbox_y: 45
+            //numbox_default: 0
+            numbox_updown_scale: 5
+            number_unit: "°"
+            state: second_tab_button_rotate.state=="active" ? "active" : "inactive"
+        }
+
+        //6. PopUp - Lay Flat
+        PopUp {
+            id: popup_layflat
+            funcname: "Lay flat"
+            height: 220
+            detail1: "Click the surface to face it down."
+            //detail2: ""
+            image: "qrc:/Resource/popup_image/image_layflat.png"
+            detailline1_vis: false
+            detailline2_vis: false
+            imageHeight: 76
+            applyfinishbutton_vis: false
+            applybutton_vis: true
+            applybutton_text: "Finish"
+            descriptionimage_vis: true
+            state: second_tab_button_layflat.state=="active" ? "active" : "inactive"
+        }
+
+        //7. PopUp - Arrange
+        PopUp {
+            id: popup_arrange
+            funcname: "Arrange"
+            height: 220
+            detail1: "Click Apply to align the models."
+            //detail2: ""
+            image: "qrc:/Resource/popup_image/image_arrange.png"
+            detailline1_vis: false
+            detailline2_vis: false
+            imageHeight: 76
+            applyfinishbutton_vis: true
+            applybutton_vis: false
+            descriptionimage_vis: true
+            state: second_tab_button_arrange.state=="active" ? "active" : "inactive"
+        }
+
+        //8. PopUp - Orient
+        PopUp {
+            id: popup_orient
+            funcname: "Orient"
+            height: 220
+            detail1: "Click Apply to rotate the model."
+            //detail2: ""
+            image: "qrc:/Resource/popup_image/image_orient.png"
+            detailline1_vis: false
+            detailline2_vis: false
+            imageHeight: 76
+            applyfinishbutton_vis: true
+            applybutton_vis: false
+            descriptionimage_vis: true
+            state: second_tab_button_orient.state=="active" ? "active" : "inactive"
+        }
+
+        //9. PopUp - Scale
+        PopUp {
+            id: popup_scale
+            funcname: "Scale"
+            height: 330
+            detail1: "Current size"
+            detail2: "Scale"
+            //image: ""
+            detailline1_vis: true
+            detailline2_vis: true
+            imageHeight: 112
+            applyfinishbutton_vis: false
+            applybutton_vis: true
+            applybutton_text: "Finish"
+            descriptionimage_vis: false
+            numberbox_vis: true
+            numberbox_nameing_vis: true
+            numberbox_width: 110
+            numbox_updown_vis: false
+            numberbox_y: 75
+            //numbox_default: 0
+            numbox_total_height: 120
+            state: third_tab_button_scale.state=="active" ? "active" : "inactive"
+
+            //detail1 - size lock
+            Rectangle {
+                width: 25
+                height: 100
+                anchors.right: parent.right
+                anchors.rightMargin: 35
+                y: 85
+                color: "transparent"
+                Image {
+                    id: scale_lock
+                    anchors.left: parent.left
+                    anchors.top: parent.top
+                    source: "qrc:/Resource/popup_image/scale_lock.png"
+                }
+                MouseArea {
+                    anchors.fill: parent
+                    onClicked: scale_lock.source == "qrc:/Resource/popup_image/scale_lock.png" ?
+                                   scale_lock.source = "qrc:/Resource/popup_image/scale_unlock.png"
+                                 : scale_lock.source = "qrc:/Resource/popup_image/scale_lock.png"
+                }
+            }
+
+            numbox_detail2_vis: true
+            numberbox_detail2_y: 240
+            numbox_detail2_defalult: 100
+            numbox_updown_scale: 10
+            number_unit_detail2: "%"
+
+        }
+
+        //10. PopUp - Auto Repair
+        PopUp {
+            id: popup_autorepair
+            funcname: "Auto Repair"
+            height: 220
+            detail1: "Click Apply to fix the model."
+            //detail2: ""
+            image: "qrc:/Resource/popup_image/image_autorepair.png"
+            detailline1_vis: false
+            detailline2_vis: false
+            imageHeight: 76
+            applyfinishbutton_vis: true
+            applybutton_vis: false
+            descriptionimage_vis: true
+            state: third_tab_button_autorepair.state=="active" ? "active" : "inactive"
+        }
+
+        //11. PopUp - Cut
+        /*PopUp {
+            id: popup_cut
+            funcname: "Cut"
+            height: 300
+            detail1: "Click Apply to align the models."
+            detail2: ""
+            //image: "qrc:/resource/arrage_discription.png"
+            detailline1_vis: false
+            detailline2_vis: false
+            applyfinishbutton_vis: false
+            applybutton_vis: true
+            descriptionimage_vis: false
+            state: third_tab_button_cut.state=="active" ? "active" : "inactive"
+        }*/
+        PopUp {
+            id:popup1
+            funcname: "Cut"
+            height: 294
+            detail1: "Cutting Surface"
+            imageHeight: 64
+                Rectangle {
+                    id: cut_flatButton
+                    color: parent.color
+                    width: 92
+                    height: 64
+                    anchors.left: parent.left
+                    anchors.leftMargin: 20
+                    anchors.top: parent.top
+                    anchors.topMargin: 80
+                    radius: 2
+                    Image {
+                        id: cut_flatImage
+                        source:"qrc:/resource/cut_flat.png"
+                        anchors.top: parent.top
+                        anchors.topMargin: 14
+                        anchors.horizontalCenter: parent.horizontalCenter
+                    }
+                    Text {
+                        id: cut_flatButt
+                        text: qsTr("Flat Surface")
+                        font.family: "Arial"
+                        font.pointSize: 5
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        anchors.bottom: parent.bottom
+                        anchors.bottomMargin: 5
+                    }
+
+                    MouseArea {     //mouse hover
+                        anchors.fill: parent
+                        hoverEnabled: true
+                        onEntered: {
+                            parent.color = "#f9f9f9"
+                            parent.border.color = "#cccccc"
+                        }
+                        onExited: {
+                            if (cut_flatButton.state != "clicked") {
+                                parent.color = "#e5e5e5";
+                                parent.border.color = "transparent";
+                            }
+                            else {
+                                parent.color = "#f9f9f9";
+                                parent.border.color = "#cccccc";
+                            }
+                        }
+                        onClicked: {
+//                                cut_flatButton.state == "clicked" ? cut_flatButton.state = "" : cut_flatButton.state = "clicked"
+                            cut_flatButton.state = "clicked"
+                            cut_curvedButton.state = "unclicked"
+                        }
+                    }
+                    states: [
+                        State {
+                            name: "clicked"
+                            PropertyChanges {
+                                target: cut_flatButton; color: "#f9f9f9"
+                            }
+                            PropertyChanges {
+                                target: cut_flatButton; border.color: "#cccccc"
+                            }
+                        },
+                        State {
+                            name: "unclicked"
+                            PropertyChanges {
+                                target: cut_flatButton; color: "#e5e5e5"
+                            }
+                            PropertyChanges {
+                                target: cut_flatButton; border.color: "transparent"
+                            }
+                        }
+
+                    ]
+                }
+                Rectangle {
+                    id: cut_curvedButton
+                    color: parent.color
+                    width: 92
+                    height: 64
+                    anchors.right: parent.right
+                    anchors.rightMargin: 20
+                    anchors.top: parent.top
+                    anchors.topMargin: 80
+                    radius: 2
+                    Image {
+                        id: cut_curvedImage
+                        source:"qrc:/resource/cut_curved.png"
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        anchors.top: parent.top
+                        anchors.topMargin: 14
+                    }
+                    Text {
+                        id: cut_curvedButt
+                        text: qsTr("Curved Surface")
+                        font.family: "Arial"
+                        font.pointSize: 5
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        anchors.bottom: parent.bottom
+                        anchors.bottomMargin: 5
+                    }
+
+                    MouseArea {     //mouse hover
+                        anchors.fill: parent
+                        hoverEnabled: true
+
+                        onEntered: {
+                            parent.color = "#f9f9f9"
+                            parent.border.color = "#cccccc"
+                        }
+                        onExited: {
+                            if (cut_curvedButton.state != "clicked") {
+                                parent.color = "#e5e5e5";
+                                parent.border.color = "transparent";
+                            }
+                            else {
+                                parent.color = "#f9f9f9";
+                                parent.border.color = "#cccccc";
+                            }
+                        }
+                        onClicked: {
+                            cut_curvedButton.state = "clicked"
+                            cut_flatButton.state = "unclicked"
+                        }
+                    }
+                    states: [
+                        State {
+                            name: "clicked"
+                            PropertyChanges {
+                                target: cut_curvedButton; color: "#f9f9f9"
+                            }
+                            PropertyChanges {
+                                target: cut_curvedButton; border.color: "#cccccc"
+                            }
+                        },
+                        State {
+                            name: "unclicked"
+                            PropertyChanges {
+                                target: cut_curvedButton; color: "#e5e5e5"
+                            }
+                            PropertyChanges {
+                                target: cut_curvedButton; border.color: "transparent"
+                            }
+                        }
+                    ]
+                }
+            detail2 : "After Treatment"
+            ExclusiveGroup { id: cutRadios }
+            RadioButton {
+                id: radio1
+                exclusiveGroup: cutRadios
+                checked: true
+                anchors.top: parent.top
+                anchors.topMargin: 190
+                anchors.left: parent.left
+                anchors.leftMargin: 20
+                style: RadioButtonStyle {
+                    indicator: Rectangle {
+                        implicitHeight: 16
+                        implicitWidth: 16
+                        radius: 8
+                        Rectangle {
+                            anchors.fill: parent
+                            visible: control.checked
+                            color: "#151515"
+                            radius: 9
+                            anchors.margins: 4
+                        }
+                    }
+                    label: Text {
+                        color: "black"
+                        text: "None"
+                        font.family: "Arial"
+                        font.pointSize: 7.5
+                    }
+                }
+            }
+            RadioButton {
+                id: radio2
+                exclusiveGroup: cutRadios
+                anchors.top: radio1.bottom
+                anchors.topMargin: 10
+                anchors.left: parent.left
+                anchors.leftMargin: 20
+                style: RadioButtonStyle {
+                    indicator: Rectangle {
+                        implicitHeight: 16
+                        implicitWidth: 16
+                        radius: 8
+                        Rectangle {
+                            anchors.fill: parent
+                            visible: control.checked
+                            color: "#151515"
+                            radius: 9
+                            anchors.margins: 4
+                        }
+                    }
+                    label: Text {
+                        color: "black"
+                        text: "Generate Surface"
+                        font.family: "Arial"
+                        font.pointSize: 7.5
+                    }
+                }
+            }
+            descriptionimage_vis: true
+            detailline1_vis: true
+            detailline2_vis: true
+            applyfinishbutton_vis: true
+            applybutton_vis: false
+        }
+
+
+        //12. PopUp - Shell Offset
+        PopUp {
+            id: popup_shelloffset
+            funcname: "Shell Offset"
+            height: 265
+            detail1: "Direction"
+            detail2: "Offset value"
+            //image: ""
+            detailline1_vis: true
+            detailline2_vis: true
+            imageHeight: 40
+            applyfinishbutton_vis: true
+            applybutton_vis: false
+            descriptionimage_vis: false
+            numbox_detail2_vis: true
+            numberbox_detail2_y: 170
+            numbox_detail2_defalult: 3.0
+            numbox_updown_scale: 0.5
+            state: third_tab_button_shelloffset.state=="active" ? "active" : "inactive"
+            //switch button
+            Rectangle {
+                width: 165
+                height: 24
+                anchors.left: parent.left
+                anchors.top: parent.top
+                anchors.leftMargin: 35
+                anchors.topMargin: 85
+                color: "transparent"
+                Rectangle {
+                    width: 26
+                    height: 24
+                    anchors.left: parent.left
+                    color: parent.color
+                    Image {
+                        anchors.fill: parent
+                        source: mousearea_shelloffset_switch.containsMouse
+                                ? "qrc:/Resource/popup_image/shelloffset_switch_hover.png"
+                                : "qrc:/Resource/popup_image/shelloffset_switch.png"
+                    }
+                    MouseArea {
+                        id: mousearea_shelloffset_switch
+                        anchors.fill: parent
+                        hoverEnabled: true
+                    }
+                }
+                Text {
+                    anchors.right: parent.right
+                    anchors.verticalCenter: parent.verticalCenter
+                    text: "Switch the direction"
+                    font.family: "Arial"
+                    font.pointSize: 9
+                }
+            }
+        }
+
+        //13. PopUp - Extend
+        PopUp {
+            id: popup_extend
+            funcname: "Extend"
+            height: 200
+            detail1: "Extend Value"
+            detail2: ""
+            //image: ""
+            detailline1_vis: true
+            detailline2_vis: false
+            applyfinishbutton_vis: true
+            applybutton_vis: false
+            descriptionimage_vis: false
+            numbox_detail2_vis: true
+            numberbox_detail2_y: 90
+            numbox_detail2_defalult: 30.0
+            numbox_updown_scale: 0.5
+            state: fourth_tab_button_extend.state=="active" ? "active" : "inactive"
+        }
+
+        //14. PopUp - Support
+        /*PopUp {
+            id: popup_support
+            funcname: "Support"
+            height: 300
+            detail1: ""
+            detail2: ""
+            //image: ""
+            detailline1_vis: false
+            detailline2_vis: false
+            applyfinishbutton_vis: false
+            applybutton_vis: true
+            descriptionimage_vis: false
+            state: fourth_tab_button_support.state=="active" ? "active" : "inactive"
+        }*/
+        PopUp {
+                        id:popup_Support
+                        funcname: "Support"
+                        height: 320
+                        imageHeight: 34
+                        detail1: "Automatic Generation"
+                        Rectangle {
+                            id: support_autoButton
+                            color: parent.color
+                            width: 178
+                            height: 32
+                            radius: 2
+                            border.color: "#cccccc"
+                            anchors.horizontalCenter: parent.horizontalCenter
+                            anchors.top: parent.top
+                            anchors.topMargin: 72
+                            Text {
+                                id: generateText
+                                text: "Generate supports"
+                                anchors.horizontalCenter: parent.horizontalCenter
+                                anchors.verticalCenter: parent.verticalCenter
+                                font.family: "Arial"
+                                font.pointSize: 7
+                            }
+                            MouseArea {
+                                anchors.fill: parent
+                                hoverEnabled: true
+                                onEntered: {
+                                    parent.color = "#f9f9f9"
+                                    generateText.color = "#888888"
+                                }
+                                onExited: {
+                                    if (support_autoButton.state == "clicked") {
+                                        parent.color = "#f9f9f9"
+                                        generateText.color = "#888888"
+                                    }
+                                    else {
+                                        parent.color = "#e5e5e5"
+                                        generateText.color = "black"
+                                    }
+                                }
+                                onClicked: {
+                                    support_autoButton.state = "clicked"
+                                    support_addButton.state = "unclicked"
+                                    support_removeButton.state = "unclicked"
+                                }
+                            }
+                            states: [
+                                State {
+                                    name: "clicked"
+                                    PropertyChanges { target: support_autoButton; color: "#f9f9f9" }
+                                    PropertyChanges { target: generateText; color: "#888888" }
+                                },
+                                State {
+                                    name: "unclicked"
+                                    PropertyChanges { target: support_autoButton; color: "#e5e5e5" }
+                                    PropertyChanges { target: generateText; color: "black" }
+                                }
+                            ]
+                        }
+
+                        detail2: "Manual Generation"
+                        Rectangle {
+                            id: support_addButton
+                            color: parent.color
+                            width: 178
+                            height: 32
+                            radius: 2
+                            border.color: "#cccccc"
+                            anchors.horizontalCenter: parent.horizontalCenter
+                            anchors.top: parent.top
+                            anchors.topMargin: 173
+                            Text {
+                                id: addText
+                                text: "Add supports"
+                                anchors.horizontalCenter: parent.horizontalCenter
+                                anchors.verticalCenter: parent.verticalCenter
+                                font.family: "Arial"
+                                font.pointSize: 7
+                            }
+                            MouseArea {
+                                anchors.fill: parent
+                                hoverEnabled: true
+                                onEntered: {
+                                    parent.color = "#f9f9f9"
+                                    addText.color = "#888888"
+                                }
+                                onExited: {
+                                    if (support_addButton.state == "clicked") {
+                                        parent.color = "#f9f9f9"
+                                        addText.color = "#888888"
+                                    }
+                                    else {
+                                        parent.color = "#e5e5e5"
+                                        addText.color = "black"
+                                    }
+                                }
+                                onClicked: {
+                                    support_addButton.state = "clicked"
+                                    support_autoButton.state = "unclicked"
+                                    support_removeButton.state = "unclicked"
+                                }
+                            }
+                            states: [
+                                State {
+                                    name: "clicked"
+                                    PropertyChanges { target: support_addButton; color: "#f9f9f9" }
+                                    PropertyChanges { target: addText; color: "#888888" }
+                                },
+                                State {
+                                    name: "unclicked"
+                                    PropertyChanges { target: support_addButton; color: "#e5e5e5" }
+                                    PropertyChanges { target: addText; color: "black" }
+                                }
+                            ]
+                        }
+
+                        Rectangle {
+                            id: support_removeButton
+                            color: parent.color
+                            width: 178
+                            height: 32
+                            radius: 2
+                            border.color: "#cccccc"
+                            anchors.horizontalCenter: parent.horizontalCenter
+                            anchors.top: support_addButton.bottom
+                            anchors.topMargin: 20
+                            Text {
+                                id: removeText
+                                text: "Remove supports"
+                                anchors.horizontalCenter: parent.horizontalCenter
+                                anchors.verticalCenter: parent.verticalCenter
+                                font.family: "Arial"
+                                font.pointSize: 7
+                            }
+                            MouseArea {
+                                anchors.fill: parent
+                                hoverEnabled: true
+                                onEntered: {
+                                    parent.color = "#f9f9f9"
+                                    removeText.color = "#888888"
+                                }
+                                onExited: {
+                                    if (support_removeButton.state == "clicked") {
+                                        parent.color = "#f9f9f9"
+                                        removeText.color = "#888888"
+                                    }
+                                    else {
+                                        parent.color = "#e5e5e5"
+                                        removeText.color = "black"
+                                    }
+                                }
+                                onClicked:  {
+                                    support_removeButton.state = "clicked"
+                                    support_addButton.state = "unclicked"
+                                    support_autoButton.state = "unclicked"
+                                }
+                            }
+                            states: [
+                                State {
+                                    name: "clicked"
+                                    PropertyChanges { target: support_removeButton; color: "#f9f9f9" }
+                                    PropertyChanges { target: removeText; color: "#888888" }
+
+                                },
+                                State {
+                                    name: "unclicked"
+                                    PropertyChanges { target: support_removeButton; color: "#e5e5e5" }
+                                    PropertyChanges { target: removeText; color: "black" }
+                                }
+
+                            ]
+                        }
+                        descriptionimage_vis: true
+                        detailline1_vis: true
+                        detailline2_vis: true
+                        applyfinishbutton_vis: false
+                        applybutton_vis: true
+                    }
+
+        //15. PopUp - Label
+        /*PopUp {
+            id: popup_label
+            funcname: "Label"
+            height: 300
+            detail1: ""
+            detail2: ""
+            //image: ""
+            detailline1_vis: false
+            detailline2_vis: false
+            applyfinishbutton_vis: false
+            applybutton_vis: true
+            descriptionimage_vis: false
+            state: fourth_tab_button_label.state=="active" ? "active" : "inactive"
+        }*/
+        PopUp {
+                        id:popup_label
+                        funcname: "Label"
+                        height: 282
+                        imageHeight: 76
+                        detail1: "Type letters on the surface."
+                        detail2: "Font"
+                        image: "qrc:/Resource/label_description.png"
+
+                        ComboBox {
+                            id: fontBox
+                            currentIndex: 0
+                            activeFocusOnPress: true
+                            width: 176
+                            anchors.top: parent.top
+                            anchors.topMargin: 200
+                            anchors.horizontalCenter: parent.horizontalCenter
+
+                            Image {
+                                width: 12
+                                height: 8
+                                anchors.right: parent.right
+                                anchors.rightMargin: 8
+                                anchors.verticalCenter: parent.verticalCenter
+
+                                source: "qrc:/resource/combo_arrow.png"
+
+                            }
+
+                            style: ComboBoxStyle {
+                                background: Rectangle {     //box style (not drop-down part)
+        //                            implicitWidth: 176
+        //                            implicitHeight: 24
+                                    width: parent.width
+                                    height: parent.height
+                                    radius: 2
+                                    color: "#f9f9f9"
+                                    border.color: fontBox.hovered ? "light blue" : "transparent"
+                                }
+
+                                label: Text {
+                                    text: control.currentText
+                                    font.family: "Arial"
+                                    font.pointSize: 7
+                                }
+
+                                //drop-down customization
+                                property Component __dropDownStyle: MenuStyle {
+                                    __maxPopupHeight: 120
+                                    __menuItemType: "comboboxitem"
+
+                                    frame: Rectangle {      //drop-down box style
+                                        color: "#f9f9f9"
+                                        width: 174
+                                        radius: 2
+                                    }
+                                    itemDelegate.label:     //item text
+                                        Text {
+                                            text: styleData.text
+                                            font.family: "Arial"
+                                            font.pointSize: 7
+                                            color: styleData.selected ? "#666666" : "#303030"
+        //                                    color: styleData.selected ? "red" : "blue"
+                                        }
+                                    itemDelegate.background: Rectangle {
+                                        color: styleData.selected ? "#eaeaea" : "#f9f9f9"
+                                    }
+
+
+                                    //scroller customization
+                                    __scrollerStyle: ScrollViewStyle {
+                                        scrollBarBackground: Rectangle {
+                                            color: "#eaeaea"
+                                            implicitWidth: 7
+                                            implicitHeight: 110
+                                        }
+                                        handle: Rectangle {
+                                            color: "#b7b7b7"
+                                            implicitWidth: 9
+                                            implicitHeight: 45
+                                            radius: 2
+                                        }
+                                        minimumHandleLength: 35
+                                        incrementControl: Rectangle {
+                                            implicitWidth: 0
+                                            implicitHeight: 0
+                                        }
+                                        decrementControl: Rectangle {
+                                            implicitWidth: 0
+                                            implicitHeight: 0
+                                        }
+                                    }
+                                }
+                            }
+
+                            //fonts list
+                            model: ListModel {
+                                id: fontItems
+                                ListElement { text: "Arial1" }
+                                ListElement { text: "Arial2" }
+                                ListElement { text: "Arial3" }
+                                ListElement { text: "Arial4" }
+                                ListElement { text: "Arial5" }
+                                ListElement { text: "Arial6" }
+                                ListElement { text: "Arial7" }
+                                ListElement { text: "Arial8" }
+                                ListElement { text: "Arial9" }
+                                ListElement { text: "Arial10" }
+                            }
+                        }
+
+                        descriptionimage_vis: true
+                        detailline1_vis: false
+                        detailline2_vis: true
+                        applyfinishbutton_vis: false
+                        applybutton_vis: true
+                    }
+
+    }
 
 }
 

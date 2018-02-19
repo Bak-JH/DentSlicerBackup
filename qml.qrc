@@ -34,5 +34,6 @@
         <file>UICore.qml</file>
         <file>Cutbox.qml</file>
         <file>Planeslider.qml</file>
+        <file>PopUp.qml</file>
     </qresource>
 </RCC>

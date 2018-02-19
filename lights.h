@@ -26,7 +26,7 @@ private:
     Qt3DRender::QPointLight *light[4];
     Qt3DCore::QTransform *lightTransform[4];
     int light_distance = 100;
-    int number_of_lights = 4;
+    int number_of_lights = 2;
 };
 
 #endif // MODELCUT_H
