@@ -14,22 +14,10 @@ SOURCES += main.cpp \
     qmlmanager.cpp \
     fileloader.cpp \
     mesh.cpp \
-    polyclipping/clipper.cpp \
     meshrepair.cpp \
     lights.cpp \
-    features/arrange.cpp \
     polyclipping/clipper.cpp \
-    configuration.cpp \
-    fileloader.cpp \
-    fpstext.cpp \
-    glmodel.cpp \
-    lights.cpp \
-    main.cpp \
-    mesh.cpp \
-    meshrepair.cpp \
-    qmlmanager.cpp \
-    quaternionhelper.cpp \
-    slicingengine.cpp
+    features/arrange.cpp
 
 RESOURCES += qml.qrc \
     resources.qrc
@@ -66,20 +54,9 @@ HEADERS += \
     qmlmanager.h \
     fileloader.h \
     mesh.h \
-    polyclipping/clipper.hpp \
     meshrepair.h \
     lights.h \
-    features/arrange.h \
     polyclipping/clipper.hpp \
-    configuration.h \
-    fileloader.h \
-    fpstext.h \
-    glmodel.h \
-    lights.h \
-    mesh.h \
-    meshrepair.h \
-    qmlmanager.h \
-    quaternionhelper.h \
-    slicingengine.h
+    features/arrange.h
 
 LIBS += -lOpengl32

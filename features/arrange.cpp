@@ -16,7 +16,7 @@ Paths spreadingCheck(Mesh* mesh, bool* check, int chking_start){
     while(to_check.size()>0){
         /**/qDebug() << "New spreadingCheck generation (" << to_check.size() << "faces)";
         vector<MeshFace*> next_to_check;
-        for(int i=0; i<to_check.size(); i++){
+        for(uint8_t i=0; i<to_check.size(); i++){
             chking = to_check[i]->idx;
             //*Debug
             qDebug() << "to_check" << i << "(Face" << chking << ")";
@@ -113,7 +113,7 @@ Path buildOutline(Mesh* mesh, bool* check, int chking, int path_head){
 
 bool isEdgeBound(MeshFace* mf, int side){//bound edge: connected to face with opposit fn.z or not connected any face
     bool is_edge_bound = true;
-    for(int i=0; i<mf->neighboring_faces[side].size(); i++){
+    for(uint8_t i=0; i<mf->neighboring_faces[side].size(); i++){
         MeshFace* neighbor = mf->neighboring_faces[side][i];
         if(neighbor->fn.z()>=0){
             is_edge_bound = false;
@@ -130,6 +130,7 @@ vector<int> arrToVect(int arr[]){
 
 int getVetex(MeshFace* mf, int base, int xth, int orientation){
     if(xth>0) return mf->mesh_vertex[(base+xth*(orientation+3))%3];
+    else return -1;
 }
 
 Path idxsToPath(Mesh* mesh, vector<int> path_by_idx){
@@ -166,7 +167,7 @@ Paths clipOutlines(vector<Paths> outline_sets){
     Paths projection;
     //Paths tmp_clip_result;
     Clipper c;
-    for(int i=0; i<(outline_sets.size()); i++){
+    for(uint i=0; i<(outline_sets.size()); i++){
         //*qDebug() << "Clipping" << i;
         c.Clear();
         c.AddPaths(projection, ptSubject, true);
@@ -182,9 +183,9 @@ Paths clipOutlines(vector<Paths> outline_sets){
 
 void debugPath(Paths paths){
     qDebug() << "===============";
-    for (int i=0; i<paths.size(); i++){
+    for (uint8_t i=0; i<paths.size(); i++){
         qDebug() << ""; //*/qDebug() << "path"; qDebug() << i;
-        for (int j=0; j<paths[i].size(); j++){
+        for (uint8_t j=0; j<paths[i].size(); j++){
             qDebug()<< paths[i][j].X << paths[i][j].Y;
         }
     }

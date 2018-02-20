@@ -3,9 +3,9 @@
 #include <vector>
 #include <QVector3D>
 #include <QHash>
-#include "configuration.h"
-#include "mesh.h"
-#include "polyclipping/clipper.hpp"
+#include "./configuration.h"
+#include "./mesh.h"
+#include "./polyclipping/clipper.hpp"
 
 using namespace std;
 using namespace ClipperLib;
