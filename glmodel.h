@@ -8,7 +8,7 @@
 #include <Qt3DInput>
 #include <vector>
 #include "fileloader.h"
-#include "features/arrange.h"
+#include "feature/arrange.h"
 #include <QBuffer>
 #include <QObjectPicker>
 #include "meshrepair.h"
