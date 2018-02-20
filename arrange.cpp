@@ -71,45 +71,41 @@ Path buildOutline(Mesh* mesh, bool* check, int chking, int path_head){
     }
     bool outline_closed = false;
     int from = -1;
+    int nxt_chk = -1;
     int path_tail = path_head;
     while(!outline_closed){
         qDebug() << chking;
         MeshFace* mf = & mesh->faces[chking];
         int outline_edge_cnt = 0;
-        int path_tail_idx;
+        int tail_idx;//The index that path_tail has in the mf->mesh_vertex
         int orientation = 0;//path_head를 가지는 face와의 상대 orientation임(fn과 orientation 일치성 확보되면 불필요)
         for (int i=0; i<3; i++){
-            if(mf->mesh_vertex[i]==path_tail) path_tail_idx = i;
+            if(mf->mesh_vertex[i]==path_tail) tail_idx = i;
             if(isEdgeBound(mf, i)) outline_edge_cnt++;
         }
-        if(isEdgeBound(mf, path_tail_idx)){
-            orientation = 1;
-        }else if(isEdgeBound(mf, (path_tail_idx+2)%3)){
-            orientation = -1;
-        }
+        if(isEdgeBound(mf, tail_idx)) orientation = 1;
+        else if(isEdgeBound(mf, (tail_idx+2)%3)) orientation = -1;
         if(orientation!=0){
             path_by_idx.push_back(path_tail);
             check[chking] = true;
-            from = chking;
+
             if(outline_edge_cnt==1){
-                path_tail = mf->mesh_vertex[(path_tail_idx+orientation+3)%3];
-                chking = mf->neighboring_faces[(path_tail_idx+1)%3][0]->idx;
-            }else{
-                path_by_idx.push_back(mf->mesh_vertex[(path_tail_idx+orientation)%3]);
-                path_tail = mf->mesh_vertex[(path_tail_idx+2*orientation+3)%3];
-                chking = mf->neighboring_faces[(path_tail_idx+orientation+1)%3][0]->idx;
+                path_tail = getVetex(mf, tail_idx, 1, orientation);
+                nxt_chk = mf->neighboring_faces[(tail_idx+1)%3][0]->idx;
+            }else{//outline_edge_cnt==2
+                path_by_idx.push_back(getVetex(mf, tail_idx, 1, orientation));
+                path_tail = getVetex(mf, tail_idx, 2, orientation);
+                nxt_chk = mf->neighboring_faces[(tail_idx+orientation+1)%3][0]->idx;
             }
+
+            if(path_tail == path_head) outline_closed = true;
         }else{//if orientation is 0, the face doesn't share any bound edge with current outline
             //the face may share some bound edge with other outline, so we do not mark it checked
-            if(mf->neighboring_faces[path_tail_idx][0]->idx==from){
-                from = chking;
-                chking = mf->neighboring_faces[(path_tail_idx+2)%3][0]->idx;
-            }else{
-                from = chking;
-                chking = mf->neighboring_faces[path_tail_idx][0]->idx;
-            }
+            if(mf->neighboring_faces[tail_idx][0]->idx==from) nxt_chk = mf->neighboring_faces[(tail_idx+2)%3][0]->idx;
+            else nxt_chk = mf->neighboring_faces[tail_idx][0]->idx;
         }
-        if(path_tail == path_head) outline_closed = true;
+        from = chking;
+        chking = nxt_chk;
     }
     qDebug() << "buildOutline done";
     return idxsToPath(mesh, path_by_idx);
@@ -130,6 +126,10 @@ bool isEdgeBound(MeshFace* mf, int side){//bound edge: connected to face with op
 vector<int> arrToVect(int arr[]){
     vector<int> vec (arr, arr + sizeof arr / sizeof arr[0]);
     return vec;
+}
+
+int getVetex(MeshFace* mf, int base, int xth, int orientation){
+    if(xth>0) return mf->mesh_vertex[(base+xth*(orientation+3))%3];
 }
 
 Path idxsToPath(Mesh* mesh, vector<int> path_by_idx){
