@@ -75,7 +75,7 @@ GLModel::GLModel(QNode *parent)
 
     m_objectPicker->setHoverEnabled(true);
 
-// QObject::connect(m_objectPicker, SIGNAL(clicked(Qt3DRender::QPickEvent*)), this, SLOT(handlePickerClicked(Qt3DRender::QPickEvent*)));
+ QObject::connect(m_objectPicker, SIGNAL(clicked(Qt3DRender::QPickEvent*)), this, SLOT(handlePickerClicked(Qt3DRender::QPickEvent*)));
  QObject::connect(m_objectPicker, SIGNAL(moved(Qt3DRender::QPickEvent*)), this, SLOT(mgoo(Qt3DRender::QPickEvent*)));
  QObject::connect(m_objectPicker, SIGNAL(pressed(Qt3DRender::QPickEvent*)), this, SLOT(pgoo(Qt3DRender::QPickEvent*)));
  QObject::connect(m_objectPicker, SIGNAL(released(Qt3DRender::QPickEvent*)), this, SLOT(rgoo(Qt3DRender::QPickEvent*)));
@@ -364,6 +364,7 @@ bool GLModel::isLeftToPlane(Plane plane, QVector3D position){
 void GLModel::handlePickerClicked(QPickEvent *pick)
 {
     QPickTriangleEvent *trianglePick = static_cast<QPickTriangleEvent*>(pick);
+    qDebug() << "handle picker clicked";
     if (flatState&&numPoints< sizeof(sphereEntity)/4)
         {//qDebug() << pick->localIntersection()<<"pick";
         QVector3D v = pick->localIntersection();
@@ -614,17 +615,21 @@ void GLModel::drawLine(QVector3D endpoint)
 }
 
 void GLModel::lineAccept(){
+    qDebug() << "line Accept";
     if(!curveState){
         curveState=true;}
     else {
-        curveState=false;}}
+        curveState=false;}
+}
 
 void GLModel::pointAccept(){
+    qDebug() << "point Accept";
     if(!flatState){
         flatState=true;}
     else {
         removeCuttingPoints();
-        flatState=false;}}
+        flatState=false;}
+}
 
 void GLModel::getSignal(double value){
     QVector3D v1=cuttingPoints[cuttingPoints.size()-3];

@@ -345,7 +345,7 @@ Rectangle {
             iconSource2: "qrc:/Resource/upper2_cut.png"
             iconText: "Cut"
 
-            states: [
+            /*states: [
                 State{
                     name:"Inactivation"
                     PropertyChanges { target: third_tab_button_cut;  iconSource: "qrc:/resource/upper_cut.png" }
@@ -371,7 +371,7 @@ Rectangle {
                 anchors.horizontalCenter:  parent.horizontalCenter
                 anchors.top:  parent.bottom
                 anchors.topMargin: 35
-            }
+            }*/
             
         UpperButton{
             id : third_tab_button_shelloffset
@@ -568,6 +568,11 @@ Rectangle {
             applyfinishbutton_vis: true
             applybutton_vis: false
             descriptionimage_vis: true
+            leftselectimage_vis: true
+            rightselectimage_vis: true
+            radiobutton1_vis: true
+            radiobutton2_vis: true
+            slider_vis: true
             state: second_tab_button_orient.state=="active" ? "active" : "inactive"
         }
 
@@ -643,21 +648,21 @@ Rectangle {
         }
 
         //11. PopUp - Cut
-        /*PopUp {
+        PopUp {
             id: popup_cut
             funcname: "Cut"
             height: 300
-            detail1: "Click Apply to align the models."
-            detail2: ""
+            detail1: "Cutting Surface"
+            detail2: "After treatment"
             //image: "qrc:/resource/arrage_discription.png"
-            detailline1_vis: false
-            detailline2_vis: false
-            applyfinishbutton_vis: false
+            detailline1_vis: true
+            detailline2_vis: true
+            applyfinishbutton_vis: true
             applybutton_vis: true
             descriptionimage_vis: false
             state: third_tab_button_cut.state=="active" ? "active" : "inactive"
-        }*/
-        PopUp {
+        }
+        /*PopUp {
             id:popup1
             funcname: "Cut"
             height: 294
@@ -870,7 +875,7 @@ Rectangle {
             detailline2_vis: true
             applyfinishbutton_vis: true
             applybutton_vis: false
-        }
+        }*/
 
 
         //12. PopUp - Shell Offset

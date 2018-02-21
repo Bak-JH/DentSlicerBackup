@@ -7,14 +7,14 @@
 #include <Qt3DExtras>
 #include <Qt3DInput>
 #include <vector>
-#include "fileloader.h"
-#include "arrange.h"
 #include <QBuffer>
 #include <QObjectPicker>
-#include "meshrepair.h"
-#include "qmlmanager.h"
 #include <QCursor>
+#include "feature/meshrepair.h"
+#include "qmlmanager.h"
 #include "mesh.h"
+#include "fileloader.h"
+#include "arrange.h"
 
 #define MAX_BUF_LEN 2000000
 
@@ -48,6 +48,7 @@ public:
     Qt3DCore::QTransform *m_transform;
 
     Qt3DCore::QEntity *parentEntity;
+
     std::vector<QVector3D> cuttingPoints;
 
     Qt3DExtras::QPlaneMesh* clipPlane[2];
@@ -70,6 +71,7 @@ public:
 
     QVector3D spreadPoint(QVector3D endpoint,QVector3D startpoint,int factor);
 private:
+    int numPoints;
     bool flatState;
     bool curveState;
     QString filename;
@@ -82,7 +84,6 @@ private:
     Mesh* sparseMesh;
     QNode* m_parent;
     QVector3D lastpoint;
-    int Number_of_points;
     void initialize(const Mesh* mesh);
     void addVertex(QVector3D vertex);
     void addVertices(Mesh* mesh);

@@ -14,9 +14,10 @@ SOURCES += main.cpp \
     qmlmanager.cpp \
     fileloader.cpp \
     mesh.cpp \
+    lights.cpp \
     polyclipping/clipper.cpp \
-    meshrepair.cpp \
-    lights.cpp
+    feature/modelcut.cpp \
+    feature/meshrepair.cpp
 
 RESOURCES += qml.qrc \
     resources.qrc
@@ -53,8 +54,9 @@ HEADERS += \
     qmlmanager.h \
     fileloader.h \
     mesh.h \
+    lights.h \
     polyclipping/clipper.hpp \
-    meshrepair.h \
-    lights.h
+    feature/modelcut.h \
+    feature/meshrepair.h
 
 LIBS += -lOpengl32
