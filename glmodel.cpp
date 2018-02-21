@@ -364,7 +364,7 @@ bool GLModel::isLeftToPlane(Plane plane, QVector3D position){
 void GLModel::handlePickerClicked(QPickEvent *pick)
 {
     QPickTriangleEvent *trianglePick = static_cast<QPickTriangleEvent*>(pick);
-    qDebug() << "handle picker clicked";
+    qDebug() << flatState << numPoints << sizeof(sphereEntity)/4;
     if (flatState&&numPoints< sizeof(sphereEntity)/4)
         {//qDebug() << pick->localIntersection()<<"pick";
         QVector3D v = pick->localIntersection();
@@ -657,7 +657,7 @@ QVector3D GLModel::spreadPoint(QVector3D endPoint,QVector3D startPoint,int facto
 
 
 Mesh* GLModel::toSparse(Mesh* mesh){
-    int i=0, jump=20, factor=2;
+    int i=0, jump=30, factor=10;
     Mesh* newMesh = new Mesh;
     foreach (MeshFace mf , mesh->faces){
         if (i%jump==0){

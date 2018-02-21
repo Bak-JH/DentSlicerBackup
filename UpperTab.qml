@@ -344,34 +344,6 @@ Rectangle {
             iconSource1: "qrc:/resource/upper_cut.png"
             iconSource2: "qrc:/Resource/upper2_cut.png"
             iconText: "Cut"
-
-            /*states: [
-                State{
-                    name:"Inactivation"
-                    PropertyChanges { target: third_tab_button_cut;  iconSource: "qrc:/resource/upper_cut.png" }
-                    PropertyChanges { target: cutbox;  visible: false}
-                },
-                State{
-                    name:"Activation"
-                    PropertyChanges { target: third_tab_button_cut;  iconSource: "qrc:/resource/cut_act.png" }
-                    PropertyChanges { target: third_tab_button_cut;  iconText: ""}
-                    PropertyChanges { target: cutbox;  visible: true}
-
-                }
-            ]
-
-            MouseArea {
-                    anchors.fill: parent
-                    onClicked: { third_tab_button_cut.state == 'Activation' ? third_tab_button_cut.state = 'Inactivation' : third_tab_button_cut.state = 'Activation';}
-                        }
-
-
-            Cutbox{
-                id:cutbox
-                anchors.horizontalCenter:  parent.horizontalCenter
-                anchors.top:  parent.bottom
-                anchors.topMargin: 35
-            }*/
             
         UpperButton{
             id : third_tab_button_shelloffset
@@ -649,17 +621,17 @@ Rectangle {
             height: 300
             detail1: "Cutting Surface"
             detail2: "After treatment"
-            //image: "qrc:/resource/arrage_discription.png"
             detailline1_vis: true
             detailline2_vis: true
             applyfinishbutton_vis: true
-            applybutton_vis: true
+            applybutton_vis: false
             descriptionimage_vis: false
             leftselectimage_vis: true
             rightselectimage_vis: true
             radiobutton1_vis: true
             radiobutton2_vis: true
             slider_vis: true
+            imageHeight: 70
             state: third_tab_button_cut.state=="active" ? "active" : "inactive"
         }
         /*PopUp {

@@ -39,6 +39,7 @@ int main(int argc, char *argv[])
     QObject *curve = FindItemByName(&engine, "curve");
     QObject *flat = FindItemByName(&engine, "flat");
     QObject *slider = FindItemByName(&engine, "sslider");
+    qDebug() << flat ;
     Lights* lights = new Lights(teethModel);
 
     QObject::connect(item,SIGNAL(qmlSignal()),gglmodel,SLOT(modelcut()));

@@ -288,7 +288,7 @@ Rectangle {
         anchors.left: parent.left
         anchors.leftMargin: 17
         anchors.top: parent.top
-        anchors.topMargin: 50
+        anchors.topMargin: 70
         objectName: "flat"
         Image {
             id: flatd
@@ -309,7 +309,7 @@ Rectangle {
         anchors.right: parent.right
         anchors.rightMargin: 17
         anchors.top: parent.top
-        anchors.topMargin: 50
+        anchors.topMargin: 70
         objectName: "curve"
         Image {
             id: curved
@@ -319,11 +319,11 @@ Rectangle {
         signal curveSignal
         MouseArea {
             anchors.fill: parent
-            onClicked: curve.curveSignal()
+            onClicked: curveSignal()
         }
     }
 
-    Rectangle {
+    /*Rectangle {
         width: 109.5
         height: 30
         id: applyBox
@@ -374,7 +374,7 @@ Rectangle {
                 }
             }
         }
-    }
+    }*/
 
     ExclusiveGroup {
         id: viewModeGroup
