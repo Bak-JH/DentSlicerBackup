@@ -568,11 +568,6 @@ Rectangle {
             applyfinishbutton_vis: true
             applybutton_vis: false
             descriptionimage_vis: true
-            leftselectimage_vis: true
-            rightselectimage_vis: true
-            radiobutton1_vis: true
-            radiobutton2_vis: true
-            slider_vis: true
             state: second_tab_button_orient.state=="active" ? "active" : "inactive"
         }
 
@@ -660,6 +655,11 @@ Rectangle {
             applyfinishbutton_vis: true
             applybutton_vis: true
             descriptionimage_vis: false
+            leftselectimage_vis: true
+            rightselectimage_vis: true
+            radiobutton1_vis: true
+            radiobutton2_vis: true
+            slider_vis: true
             state: third_tab_button_cut.state=="active" ? "active" : "inactive"
         }
         /*PopUp {

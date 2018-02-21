@@ -287,14 +287,15 @@ Rectangle {
         height: 66
         anchors.left: parent.left
         anchors.leftMargin: 17
-        anchors.bottom: parent.bottom
-        anchors.bottomMargin: 160
+        anchors.top: parent.top
+        anchors.topMargin: 50
         objectName: "flat"
-        signal flatSignal
         Image {
             id: flatd
             source: "qrc:/resource/flat.png"
         }
+
+        signal flatSignal
         MouseArea {
             anchors.fill: parent
             onClicked: leftselectimage.flatSignal()
@@ -307,15 +308,15 @@ Rectangle {
         height: 66
         anchors.right: parent.right
         anchors.rightMargin: 17
-        anchors.bottom: parent.bottom
-        anchors.bottomMargin: 160
+        anchors.top: parent.top
+        anchors.topMargin: 50
         objectName: "curve"
-        signal curveSignal
         Image {
             id: curved
             anchors.fill: parent
             source: "qrc:/resource/curve.png"
         }
+        signal curveSignal
         MouseArea {
             anchors.fill: parent
             onClicked: curve.curveSignal()
