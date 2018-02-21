@@ -23,8 +23,7 @@ using namespace Qt3DRender;
 using namespace Qt3DExtras;
 using namespace std;
 
-// plane contains at least 3 vertices contained in the plane in clockwise direction
-typedef vector<QVector3D> Plane;
+
 
 class GLModel : public QEntity
 {
