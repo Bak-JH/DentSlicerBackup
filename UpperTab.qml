@@ -344,6 +344,7 @@ Rectangle {
             iconSource1: "qrc:/resource/upper_cut.png"
             iconSource2: "qrc:/Resource/upper2_cut.png"
             iconText: "Cut"
+        }
             
         UpperButton{
             id : third_tab_button_shelloffset
@@ -366,7 +367,7 @@ Rectangle {
             color : "#CECECE"
         }
 
-    }
+
 
     Item{
         id : fourthtab

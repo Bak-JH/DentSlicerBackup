@@ -63,8 +63,8 @@ GLModel::GLModel(QNode *parent)
     sparseMesh = toSparse(mesh);
     //repairMesh(mesh);
 
-    initialize(sparseMesh);
-    addVertices(sparseMesh);
+    initialize(mesh);
+    addVertices(mesh);
 //    initialize(mesh);
 //    addVertices(mesh);
 
