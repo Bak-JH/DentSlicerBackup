@@ -21,7 +21,7 @@ int getPathHead(MeshFace* mf, int side);
 Path buildOutline(Mesh* mesh, bool* check, int chking, int path_head);
 bool isEdgeBound(MeshFace* mf, int side);
 vector<int> arrToVect(int arr[]);
-int getVetex(MeshFace* mf, int base, int xth, int orientation);
+int getNbrVtx(MeshFace* mf, int base, int xth, int orientation);
 Path idxsToPath(Mesh* mesh, vector<int> path_by_idx);
 Paths project(Mesh* mesh);
 Paths clipOutlines(vector<Paths> outline_sets);

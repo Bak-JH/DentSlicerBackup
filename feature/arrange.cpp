@@ -90,11 +90,11 @@ Path buildOutline(Mesh* mesh, bool* check, int chking, int path_head){
             check[chking] = true;
 
             if(outline_edge_cnt==1){
-                path_tail = getVtxIdx(mf, tail_idx, 1, orientation);
+                path_tail = getNbrVtx(mf, tail_idx, 1, orientation);
                 nxt_chk = mf->neighboring_faces[(tail_idx+1)%3][0]->idx;
             }else{//outline_edge_cnt==2
-                path_by_idx.push_back(getVtxIdx(mf, tail_idx, 1, orientation));
-                path_tail = getVtxIdx(mf, tail_idx, 2, orientation);
+                path_by_idx.push_back(getNbrVtx(mf, tail_idx, 1, orientation));
+                path_tail = getNbrVtx(mf, tail_idx, 2, orientation);
                 nxt_chk = mf->neighboring_faces[(tail_idx+orientation+1)%3][0]->idx;
             }
 
@@ -128,7 +128,7 @@ vector<int> arrToVect(int arr[]){
     return vec;
 }
 
-int getVtxIdx(MeshFace* mf, int base, int xth, int orientation){
+int getNbrVtx(MeshFace* mf, int base, int xth, int orientation){//getNeighborVtx
     if(xth>0) return mf->mesh_vertex[(base+xth*(orientation+3))%3];
     else return -1;
 }
