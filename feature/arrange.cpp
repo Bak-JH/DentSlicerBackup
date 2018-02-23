@@ -21,7 +21,7 @@ Paths spreadingCheck(Mesh* mesh, bool* check, int chking_start){
             //*Debug
             qDebug() << "to_check" << i << "(Face" << chking << ")";
             for(int side=0; side<3; side++){
-                if (isEdgeBound(to_check[i], side)) qDebug() << " - unchecked bound";
+                if(isEdgeBound(to_check[i], side)) qDebug() << " - unchecked bound";
                 else qDebug() << " -" << to_check[i]->neighboring_faces[side].size()
                                << "neighbors (first:" << to_check[i]->neighboring_faces[side][0]->idx << ")";
             }//*/
@@ -31,7 +31,7 @@ Paths spreadingCheck(Mesh* mesh, bool* check, int chking_start){
             int side;
             int outline_checked = false;
             for(side=0; side<3; side++){
-                if (isEdgeBound(mf, side)){
+                if(isEdgeBound(mf, side)){
                     if(!outline_checked){
                         int path_head = getPathHead(mf, side);
                         Path path = buildOutline(mesh, check, chking, path_head);
@@ -79,7 +79,7 @@ Path buildOutline(Mesh* mesh, bool* check, int chking, int path_head){
         int outline_edge_cnt = 0;
         int tail_idx;//The index that path_tail has in the mf->mesh_vertex
         int orientation = 0;//path_head를 가지는 face와의 상대 orientation임(fn과 orientation 일치성 확보되면 불필요)
-        for (int i=0; i<3; i++){
+        for(int i=0; i<3; i++){
             if(mf->mesh_vertex[i]==path_tail) tail_idx = i;
             if(isEdgeBound(mf, i)) outline_edge_cnt++;
         }
@@ -152,7 +152,7 @@ Paths project(Mesh* mesh){
     /****/qDebug() << "Get outline";
     while(!check_done){
         for(int i=0; i<face_number; i++){
-            if (0<=mesh->faces[i].fn.z() && !face_checked[i]){
+            if(0<=mesh->faces[i].fn.z() && !face_checked[i]){
                 chking_start=i;//new checking target obtained
                 outline_sets.push_back(spreadingCheck(mesh, face_checked, chking_start));
                 break;
@@ -183,9 +183,9 @@ Paths clipOutlines(vector<Paths> outline_sets){
 
 void debugPath(Paths paths){
     qDebug() << "===============";
-    for (uint8_t i=0; i<paths.size(); i++){
+    for(uint8_t i=0; i<paths.size(); i++){
         qDebug() << ""; //*/qDebug() << "path"; qDebug() << i;
-        for (uint8_t j=0; j<paths[i].size(); j++){
+        for(uint8_t j=0; j<paths[i].size(); j++){
             qDebug()<< paths[i][j].X << paths[i][j].Y;
         }
     }
