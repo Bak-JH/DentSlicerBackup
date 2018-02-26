@@ -20,6 +20,8 @@ Paths spreadingCheck(Mesh* mesh, bool* check, int chking_start);
 int getPathHead(MeshFace* mf, int side);
 Path buildOutline(Mesh* mesh, bool* check, int chking, int path_head);
 bool isEdgeBound(MeshFace* mf, int side);
+bool isNbrOrientSame(MeshFace* mf, int side);
+int searchVtxInFace(MeshFace* mf, int vertex);
 vector<int> arrToVect(int arr[]);
 int getNbrVtx(MeshFace* mf, int base, int xth, int orientation);
 Path idxsToPath(Mesh* mesh, vector<int> path_by_idx);

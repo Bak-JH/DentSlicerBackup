@@ -16,15 +16,21 @@ Paths spreadingCheck(Mesh* mesh, bool* check, int chking_start){
     while(to_check.size()>0){
         /**/qDebug() << "New spreadingCheck generation (" << to_check.size() << "faces)";
         vector<MeshFace*> next_to_check;
-        for(uint8_t i=0; i<to_check.size(); i++){
+        for(int i=0; i<to_check.size(); i++){
             chking = to_check[i]->idx;
-            //*Debug
+            /*Debug
+            if(to_check.size()==261){
             qDebug() << "to_check" << i << "(Face" << chking << ")";
             for(int side=0; side<3; side++){
-                if(isEdgeBound(to_check[i], side)) qDebug() << " - unchecked bound";
+                MeshFace* neighbor = to_check[i]->neighboring_faces[side][0];
+                if(isEdgeBound(to_check[i], side)) qDebug() << " - unchecked bound"
+                                                            << to_check[i]->neighboring_faces[side].size()
+                                                            << (to_check[i]->neighboring_faces[side].size() != 1)
+                                                            << (neighbor->fn.z()<0)
+                                                            << !isNbrOrientSame(to_check[i], side);
                 else qDebug() << " -" << to_check[i]->neighboring_faces[side].size()
                                << "neighbors (first:" << to_check[i]->neighboring_faces[side][0]->idx << ")";
-            }//*/
+            }}//*/
             if(check[chking]) continue;
             check[chking] = true;
             MeshFace* mf = to_check[i];
@@ -111,16 +117,25 @@ Path buildOutline(Mesh* mesh, bool* check, int chking, int path_head){
     return idxsToPath(mesh, path_by_idx);
 }
 
-bool isEdgeBound(MeshFace* mf, int side){//bound edge: connected to face with opposit fn.z or not connected any face
-    bool is_edge_bound = true;
-    for(uint8_t i=0; i<mf->neighboring_faces[side].size(); i++){
-        MeshFace* neighbor = mf->neighboring_faces[side][i];
-        if(neighbor->fn.z()>=0){
-            is_edge_bound = false;
-            break;
-        }
+bool isEdgeBound(MeshFace* mf, int side){//bound edge: connected to face with opposit fn.z/not connected any face/multiple neighbor/opposit orientation
+    if(mf->neighboring_faces[side].size() != 1) return true;
+    MeshFace* neighbor = mf->neighboring_faces[side][0];
+    if(neighbor->fn.z()<0) return true;
+    if(!isNbrOrientSame(mf, side)) return true;
+    return false;
+}
+
+bool isNbrOrientSame(MeshFace* mf, int side){
+    MeshFace* nbr = mf->neighboring_faces[side][0];
+    if(getNbrVtx(nbr, searchVtxInFace(nbr, mf->mesh_vertex[side]), 2, 1) == getNbrVtx(mf, side, 1, 1)) return true;
+    return false;
+}
+
+int searchVtxInFace(MeshFace* mf, int vertexIdx){
+    for(int i=0; i<3; i++){
+        if(mf->mesh_vertex[i] == vertexIdx) return i;
     }
-    return is_edge_bound;
+    return -1;
 }
 
 vector<int> arrToVect(int arr[]){
@@ -129,7 +144,7 @@ vector<int> arrToVect(int arr[]){
 }
 
 int getNbrVtx(MeshFace* mf, int base, int xth, int orientation){//getNeighborVtx
-    if(xth>0) return mf->mesh_vertex[(base+xth*(orientation+3))%3];
+    if(xth>0) return mf->mesh_vertex[(base+(xth+3)*(orientation+3))%3];
     else return -1;
 }
 
@@ -183,9 +198,9 @@ Paths clipOutlines(vector<Paths> outline_sets){
 
 void debugPath(Paths paths){
     qDebug() << "===============";
-    for(uint8_t i=0; i<paths.size(); i++){
+    for(int i=0; i<paths.size(); i++){
         qDebug() << ""; //*/qDebug() << "path"; qDebug() << i;
-        for(uint8_t j=0; j<paths[i].size(); j++){
+        for(int j=0; j<paths[i].size(); j++){
             qDebug()<< paths[i][j].X << paths[i][j].Y;
         }
     }
