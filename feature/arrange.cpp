@@ -19,18 +19,13 @@ Paths spreadingCheck(Mesh* mesh, bool* check, int chking_start){
         for(int i=0; i<to_check.size(); i++){
             chking = to_check[i]->idx;
             /*Debug
-            if(to_check.size()==261){
             qDebug() << "to_check" << i << "(Face" << chking << ")";
             for(int side=0; side<3; side++){
                 MeshFace* neighbor = to_check[i]->neighboring_faces[side][0];
-                if(isEdgeBound(to_check[i], side)) qDebug() << " - unchecked bound"
-                                                            << to_check[i]->neighboring_faces[side].size()
-                                                            << (to_check[i]->neighboring_faces[side].size() != 1)
-                                                            << (neighbor->fn.z()<0)
-                                                            << !isNbrOrientSame(to_check[i], side);
+                if(isEdgeBound(to_check[i], side)) qDebug() << " - unchecked bound";
                 else qDebug() << " -" << to_check[i]->neighboring_faces[side].size()
                                << "neighbors (first:" << to_check[i]->neighboring_faces[side][0]->idx << ")";
-            }}//*/
+            }//*/
             if(check[chking]) continue;
             check[chking] = true;
             MeshFace* mf = to_check[i];
@@ -84,28 +79,23 @@ Path buildOutline(Mesh* mesh, bool* check, int chking, int path_head){
         MeshFace* mf = & mesh->faces[chking];
         int outline_edge_cnt = 0;
         int tail_idx;//The index that path_tail has in the mf->mesh_vertex
-        int orientation = 0;//path_head를 가지는 face와의 상대 orientation임(fn과 orientation 일치성 확보되면 불필요)
         for(int i=0; i<3; i++){
             if(mf->mesh_vertex[i]==path_tail) tail_idx = i;
             if(isEdgeBound(mf, i)) outline_edge_cnt++;
         }
-        if(isEdgeBound(mf, tail_idx)) orientation = 1;
-        else if(isEdgeBound(mf, (tail_idx+2)%3)) orientation = -1;
-        if(orientation!=0){
+        if(isEdgeBound(mf, tail_idx)){
             path_by_idx.push_back(path_tail);
             check[chking] = true;
-
             if(outline_edge_cnt==1){
-                path_tail = getNbrVtx(mf, tail_idx, 1, orientation);
+                path_tail = getNbrVtx(mf, tail_idx, 1);
                 nxt_chk = mf->neighboring_faces[(tail_idx+1)%3][0]->idx;
             }else{//outline_edge_cnt==2
-                path_by_idx.push_back(getNbrVtx(mf, tail_idx, 1, orientation));
-                path_tail = getNbrVtx(mf, tail_idx, 2, orientation);
-                nxt_chk = mf->neighboring_faces[(tail_idx+orientation+1)%3][0]->idx;
+                path_by_idx.push_back(getNbrVtx(mf, tail_idx, 1));
+                path_tail = getNbrVtx(mf, tail_idx, 2);
+                nxt_chk = mf->neighboring_faces[(tail_idx+2)%3][0]->idx;
             }
-
             if(path_tail == path_head) outline_closed = true;
-        }else{//if orientation is 0, the face doesn't share any bound edge with current outline
+        }else{//if not isEdgeBound(mf, tail_idx), the face doesn't share any bound edge with current outline
             //the face may share some bound edge with other outline, so we do not mark it checked
             if(mf->neighboring_faces[tail_idx][0]->idx==from) nxt_chk = mf->neighboring_faces[(tail_idx+2)%3][0]->idx;
             else nxt_chk = mf->neighboring_faces[tail_idx][0]->idx;
@@ -127,7 +117,7 @@ bool isEdgeBound(MeshFace* mf, int side){//bound edge: connected to face with op
 
 bool isNbrOrientSame(MeshFace* mf, int side){
     MeshFace* nbr = mf->neighboring_faces[side][0];
-    if(getNbrVtx(nbr, searchVtxInFace(nbr, mf->mesh_vertex[side]), 2, 1) == getNbrVtx(mf, side, 1, 1)) return true;
+    if(getNbrVtx(nbr, searchVtxInFace(nbr, mf->mesh_vertex[side]), 2) == getNbrVtx(mf, side, 1)) return true;
     return false;
 }
 
@@ -143,8 +133,8 @@ vector<int> arrToVect(int arr[]){
     return vec;
 }
 
-int getNbrVtx(MeshFace* mf, int base, int xth, int orientation){//getNeighborVtx
-    if(xth>0) return mf->mesh_vertex[(base+(xth+3)*(orientation+3))%3];
+int getNbrVtx(MeshFace* mf, int base, int xth){//getNeighborVtx
+    if(xth>0) return mf->mesh_vertex[(base+xth+3)%3];
     else return -1;
 }
 

@@ -23,7 +23,7 @@ bool isEdgeBound(MeshFace* mf, int side);
 bool isNbrOrientSame(MeshFace* mf, int side);
 int searchVtxInFace(MeshFace* mf, int vertex);
 vector<int> arrToVect(int arr[]);
-int getNbrVtx(MeshFace* mf, int base, int xth, int orientation);
+int getNbrVtx(MeshFace* mf, int base, int xth);
 Path idxsToPath(Mesh* mesh, vector<int> path_by_idx);
 Paths project(Mesh* mesh);
 Paths clipOutlines(vector<Paths> outline_sets);
