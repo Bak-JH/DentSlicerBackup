@@ -30,4 +30,5 @@ Paths clipOutlines(vector<Paths> outline_sets);
 Mesh pathsToMesh(Paths paths);
 Paths resize(Paths paths);
 void debugPath(Paths paths);
+void debugFace(Mesh* mesh);
 #endif // ARRANGE_H

@@ -75,7 +75,7 @@ Path buildOutline(Mesh* mesh, bool* check, int chking, int path_head){
     int nxt_chk = -1;
     int path_tail = path_head;
     while(!outline_closed){
-        qDebug() << chking;
+        qDebug() << "chking" << chking;
         MeshFace* mf = & mesh->faces[chking];
         int outline_edge_cnt = 0;
         int tail_idx;//The index that path_tail has in the mf->mesh_vertex
@@ -195,4 +195,35 @@ void debugPath(Paths paths){
         }
     }
     qDebug() << "===============";
+}
+
+void debugFace(Mesh* mesh){
+    int face_number = mesh->faces.size();
+    for(int i=0; i<face_number; i++){
+        MeshFace* mf = & mesh->faces[i];
+        QVector3D fst_vtx = mesh->vertices[mf->mesh_vertex[0]].position;
+        float fst_vtx_x = fst_vtx.x();
+        int fst_vtx_x_int = round(fst_vtx_x*cfg->resolution);
+        //qDebug() << fst_vtx_x_int;
+        if(/*fst_vtx_x_int==-37824 || fst_vtx_x_int==-37825 || */fst_vtx_x_int==-37780){
+            for(int side=0; side<3; side++){
+                QVector3D vtx = mesh->vertices[mf->mesh_vertex[side]].position;
+                float x_f = vtx.x();
+                float y_f = vtx.y();
+                int x_int = round(x_f*cfg->resolution);
+                int y_int = round(y_f*cfg->resolution);
+                qDebug() << "(" << x_int << "," << y_int << ")";
+            }
+            qDebug() << "fn" << "(" << mf->fn.x() << "," << mf->fn.y() << "," << mf->fn.z() << ")";
+            for(int side=0; side<3; side++){
+                qDebug() << "side" << side;
+                qDebug() << "nbr_cnt:" << mf->neighboring_faces[side].size();
+                MeshFace* neighbor = mf->neighboring_faces[side][0];
+                if(neighbor->fn.z()<0) qDebug() << "fst_nbr_fn.z(): -";
+                else qDebug() << "fst_nbr_fn.z(): +";
+                if(isNbrOrientSame(mf, side)) qDebug() << "nbr_ornt: same";
+                else qDebug() << "nbr_ornt: diff";;
+            }
+        }
+    }
 }
