@@ -135,7 +135,7 @@ bool loadMeshSTL_binary(Mesh* mesh, const char* filename){
     return true;
 }
 
-bool loadMeshSTL(Mesh *mesh, const char* filename)
+bool loadMeshSTL(Mesh* mesh, const char* filename)
 {
     FILE* f = fopen(filename, "r");
     if (f == nullptr)
