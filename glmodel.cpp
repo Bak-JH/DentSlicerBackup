@@ -41,14 +41,14 @@ GLModel::GLModel(QNode *parent)
     //qDebug() << "Mesh repaired";
     //initialize(mesh);
 
-
+    /* Projection
     Paths projection = project(mesh);
     qDebug() << "Projection done";
     qDebug()<< projection[0][0].X << projection[0][0].Y << projection.size();
     debugPath(projection);
     //Mesh outline_mesh = PathsToMesh(projection);
     //addVertices(&outline_mesh);
-
+    //*/
 
 
     initialize(mesh);
