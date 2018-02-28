@@ -149,19 +149,19 @@ Path idxsToPath(Mesh* mesh, vector<int> path_by_idx){
 }
 
 Paths project(Mesh* mesh){
-    int face_number = mesh->faces.size();
+    int face_cnt = mesh->faces.size();
     bool check_done = false;
     int chking_start;
-    bool face_checked[face_number] = {false}; //한 번 확인한 것은 체크리스트에서 제거되는 자료구조 도입 필요(법선 확인이 반복시행됨)
+    bool face_checked[face_cnt] = {false}; //한 번 확인한 것은 체크리스트에서 제거되는 자료구조 도입 필요(법선 확인이 반복시행됨)
     vector<Paths> outline_sets;
     /****/qDebug() << "Get outline";
     while(!check_done){
-        for(int i=0; i<face_number; i++){
+        for(int i=0; i<face_cnt; i++){
             if(0<=mesh->faces[i].fn.z() && !face_checked[i]){
                 chking_start=i;//new checking target obtained
                 outline_sets.push_back(spreadingCheck(mesh, face_checked, chking_start));
                 break;
-            }else if(i==face_number-1) check_done = true;
+            }else if(i==face_cnt-1) check_done = true;
         }
     }
     /****/qDebug() << "Total outline_set : " << outline_sets.size() << "->" << clipOutlines(outline_sets).size();
@@ -197,33 +197,35 @@ void debugPath(Paths paths){
     qDebug() << "===============";
 }
 
-void debugFace(Mesh* mesh){
-    int face_number = mesh->faces.size();
-    for(int i=0; i<face_number; i++){
-        MeshFace* mf = & mesh->faces[i];
-        QVector3D fst_vtx = mesh->vertices[mf->mesh_vertex[0]].position;
-        float fst_vtx_x = fst_vtx.x();
-        int fst_vtx_x_int = round(fst_vtx_x*cfg->resolution);
-        //qDebug() << fst_vtx_x_int;
-        if(/*fst_vtx_x_int==-37824 || fst_vtx_x_int==-37825 || */fst_vtx_x_int==-37780){
-            for(int side=0; side<3; side++){
-                QVector3D vtx = mesh->vertices[mf->mesh_vertex[side]].position;
-                float x_f = vtx.x();
-                float y_f = vtx.y();
-                int x_int = round(x_f*cfg->resolution);
-                int y_int = round(y_f*cfg->resolution);
-                qDebug() << "(" << x_int << "," << y_int << ")";
-            }
-            qDebug() << "fn" << "(" << mf->fn.x() << "," << mf->fn.y() << "," << mf->fn.z() << ")";
-            for(int side=0; side<3; side++){
-                qDebug() << "side" << side;
-                qDebug() << "nbr_cnt:" << mf->neighboring_faces[side].size();
-                MeshFace* neighbor = mf->neighboring_faces[side][0];
-                if(neighbor->fn.z()<0) qDebug() << "fst_nbr_fn.z(): -";
-                else qDebug() << "fst_nbr_fn.z(): +";
-                if(isNbrOrientSame(mf, side)) qDebug() << "nbr_ornt: same";
-                else qDebug() << "nbr_ornt: diff";;
-            }
+void debugFace(Mesh* mesh, int face_idx){
+        MeshFace* mf = & mesh->faces[face_idx];
+        for(int side=0; side<3; side++){
+            QVector3D vtx = mesh->vertices[mf->mesh_vertex[side]].position;
+            float x_f = vtx.x();
+            float y_f = vtx.y();
+            int x_int = round(x_f*cfg->resolution);
+            int y_int = round(y_f*cfg->resolution);
+            qDebug() << "(" << x_int << "," << y_int << ")";
         }
+        qDebug() << "fn" << "(" << mf->fn.x() << "," << mf->fn.y() << "," << mf->fn.z() << ")";
+        for(int side=0; side<3; side++){
+            qDebug() << "side" << side;
+            qDebug() << "nbr_cnt:" << mf->neighboring_faces[side].size();
+            MeshFace* neighbor = mf->neighboring_faces[side][0];
+            if(neighbor->fn.z()<0) qDebug() << "fst_nbr_fn.z(): -";
+            else qDebug() << "fst_nbr_fn.z(): +";
+            if(isNbrOrientSame(mf, side)) qDebug() << "nbr_ornt: same";
+            else qDebug() << "nbr_ornt: diff";;
+        }
+    }
+}
+
+int findVertexWithIntpoint(int x, int y, Mesh* mesh){
+    int vertex_cnt = mesh->vertices.size();
+    for(int i=0; i<vertex_cnt; i++){
+        QVector3D vtx_pos = mesh->vertices[i].position;
+        int x_int = round(vtx_pos.x()*cfg->resolution);
+        int y_int = round(vtx_pos.y()*cfg->resolution);
+        if(x_int==x && y_int==y) return i;
     }
 }

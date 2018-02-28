@@ -31,4 +31,5 @@ Mesh pathsToMesh(Paths paths);
 Paths resize(Paths paths);
 void debugPath(Paths paths);
 void debugFace(Mesh* mesh);
+int findVertexWithIntpoint(int x, int y, Mesh* mesh);
 #endif // ARRANGE_H
