@@ -34,7 +34,7 @@ GLModel::GLModel(QNode *parent)
     qDebug() << "Loading mesh";
     //loadMeshSTL(mesh, "C:/Users/hsy61/Desktop/3D_models/simple/cube.stl");
     //loadMeshSTL(mesh, "C:/Users/hsy61/Desktop/3D_models/test/train.stl");
-    loadMeshSTL(mesh, "C:/Users/hsy61/Desktop/3D_models/teeth_models/lowerjaw_resize_part1.stl");
+    loadMeshSTL(mesh, "C:/Users/hsy61/Desktop/3D_models/teeth_models/upperjaw.stl");
     qDebug() << "Number of faces :" << mesh->faces.size();
     qDebug() << "Mesh loaded";
     //repairMesh(mesh);
@@ -46,10 +46,13 @@ GLModel::GLModel(QNode *parent)
     qDebug() << "Projection done";
     qDebug()<< projection[0][0].X << projection[0][0].Y << projection.size();
     debugPath(projection);
-    //Mesh outline_mesh = PathsToMesh(projection);
-    //addVertices(&outline_mesh);
+    //Mesh outline_mesh = PathsToMesh(projection);addVertices(&outline_mesh);
     //*/
-    //debugFace(mesh);
+    /* debugFaces
+    vector<int> debug_face_list = {};
+    debugFaces(mesh, debug_face_list);
+    //*/
+    //m_transform->setScale(0.1);
 
 
     initialize(mesh);

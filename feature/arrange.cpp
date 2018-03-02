@@ -197,35 +197,53 @@ void debugPath(Paths paths){
     qDebug() << "===============";
 }
 
+void debugFaces(Mesh* mesh, vector<int> face_list){
+    for(int i=0; i<face_list.size(); i++){
+        debugFace(mesh, face_list[i]);
+    }
+}
+
 void debugFace(Mesh* mesh, int face_idx){
         MeshFace* mf = & mesh->faces[face_idx];
+        qDebug() << "face #" << face_idx;
         for(int side=0; side<3; side++){
             QVector3D vtx = mesh->vertices[mf->mesh_vertex[side]].position;
             float x_f = vtx.x();
             float y_f = vtx.y();
+            float z_f = vtx.z();
             int x_int = round(x_f*cfg->resolution);
             int y_int = round(y_f*cfg->resolution);
-            qDebug() << "(" << x_int << "," << y_int << ")";
+            int z_int = round(z_f*cfg->resolution);
+            qDebug() << "(" << x_f << "," << y_f << "," << z_f << ")";
         }
-        qDebug() << "fn" << "(" << mf->fn.x() << "," << mf->fn.y() << "," << mf->fn.z() << ")";
+        qDebug() << "face normal:" << "(" << mf->fn.x() << "," << mf->fn.y() << "," << mf->fn.z() << ")";
         for(int side=0; side<3; side++){
-            qDebug() << "side" << side;
-            qDebug() << "nbr_cnt:" << mf->neighboring_faces[side].size();
-            MeshFace* neighbor = mf->neighboring_faces[side][0];
-            if(neighbor->fn.z()<0) qDebug() << "fst_nbr_fn.z(): -";
-            else qDebug() << "fst_nbr_fn.z(): +";
-            if(isNbrOrientSame(mf, side)) qDebug() << "nbr_ornt: same";
-            else qDebug() << "nbr_ornt: diff";;
+            if(mf->neighboring_faces[side].size()==1){
+                MeshFace* neighbor = mf->neighboring_faces[side][0];
+                if(neighbor->fn.z()>=0){
+                    if(isNbrOrientSame(mf, side)) qDebug() << "side" << side << ": nbr" << mf->neighboring_faces[side][0]->idx;
+                    else qDebug() << "side" << side << ": bound(ornt diff)";
+                }else{
+                    if(isNbrOrientSame(mf, side)) qDebug() << "side" << side << ": bound(fn.z diff)";
+                    else qDebug() << "side" << side << ": bound(fn.z diff, ornt diff)";
+                }
+            }else if(mf->neighboring_faces[side].size()==0){
+                qDebug() << "side" << side << ": bound(no neighbor)";
+            }else{
+                qDebug() << "side" << side << ": bound(multi-neighbor" << mf->neighboring_faces[side].size() << ")";
+            }
         }
-    }
 }
 
-int findVertexWithIntpoint(int x, int y, Mesh* mesh){
-    int vertex_cnt = mesh->vertices.size();
-    for(int i=0; i<vertex_cnt; i++){
-        QVector3D vtx_pos = mesh->vertices[i].position;
+int findVertexWithIntpoint(IntPoint p, Mesh* mesh){
+    return findVertexWithIntXY(p.X, p.Y, mesh);
+}
+
+int findVertexWithIntXY(int x, int y, Mesh* mesh){
+    for(int vtx_idx=0; vtx_idx<mesh->vertices.size(); vtx_idx++){
+        QVector3D vtx_pos = mesh->vertices[vtx_idx].position;
         int x_int = round(vtx_pos.x()*cfg->resolution);
         int y_int = round(vtx_pos.y()*cfg->resolution);
-        if(x_int==x && y_int==y) return i;
+        if(x_int==x && y_int==y) return vtx_idx;
     }
 }
