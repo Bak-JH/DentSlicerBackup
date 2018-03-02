@@ -32,5 +32,6 @@ Paths resize(Paths paths);
 void debugPath(Paths paths);
 void debugFaces(Mesh* mesh, vector<int> face_list);
 void debugFace(Mesh* mesh, int face_idx);
-int findVertexWithIntpoint(int x, int y, Mesh* mesh);
+int findVertexWithIntpoint(IntPoint p, Mesh* mesh);
+int findVertexWithIntXY(int x, int y, Mesh* mesh);
 #endif // ARRANGE_H
