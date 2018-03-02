@@ -14,7 +14,7 @@ Paths spreadingCheck(Mesh* mesh, bool* check, int chking_start){
     vector<MeshFace*> to_check;
     to_check.push_back(& mesh->faces[chking_start]);
     while(to_check.size()>0){
-        /**/qDebug() << "New spreadingCheck generation (" << to_check.size() << "faces)";
+        //**qDebug() << "New spreadingCheck generation (" << to_check.size() << "faces)";
         vector<MeshFace*> next_to_check;
         for(int i=0; i<to_check.size(); i++){
             chking = to_check[i]->idx;
@@ -61,13 +61,13 @@ int getPathHead(MeshFace* mf, int side){
 
 Path buildOutline(Mesh* mesh, bool* check, int chking, int path_head){
     //*Debug
-    qDebug() << "buildOutline from" << chking;
+    //**qDebug() << "buildOutline from" << chking;
     //*/
     vector<int> path_by_idx;
     if(path_head==-1){//혼자있는 면의 경우 오리엔테이션 확인 방법이 마련되어있지 않음
         check[chking] = true;
         path_by_idx = arrToVect(mesh->faces[chking].mesh_vertex);
-        qDebug() << "buildOutline done";
+        //**qDebug() << "buildOutline done";
         return idxsToPath(mesh, path_by_idx);
     }
     bool outline_closed = false;
@@ -75,7 +75,7 @@ Path buildOutline(Mesh* mesh, bool* check, int chking, int path_head){
     int nxt_chk = -1;
     int path_tail = path_head;
     while(!outline_closed){
-        qDebug() << "chking" << chking;
+        //**qDebug() << "chking" << chking;
         MeshFace* mf = & mesh->faces[chking];
         int outline_edge_cnt = 0;
         int tail_idx;//The index that path_tail has in the mf->mesh_vertex
@@ -103,7 +103,7 @@ Path buildOutline(Mesh* mesh, bool* check, int chking, int path_head){
         from = chking;
         chking = nxt_chk;
     }
-    qDebug() << "buildOutline done";
+    //**qDebug() << "buildOutline done";
     return idxsToPath(mesh, path_by_idx);
 }
 
