@@ -108,7 +108,7 @@ Path buildOutline(Mesh* mesh, bool* check, int chking, int path_head, bool is_ch
 bool isEdgeBound(MeshFace* mf, int side, bool is_chking_pos){//bound edge: connected to face with opposit fn.z/not connected any face/multiple neighbor/opposit orientation
     if(mf->neighboring_faces[side].size() != 1) return true;
     MeshFace* neighbor = mf->neighboring_faces[side][0];
-    if(!checkFNZ(neighbor, is_chking_pos)/*neighbor->fn.z()<0*/) return true;
+    if(!checkFNZ(neighbor, is_chking_pos)) return true;
     if(!isNbrOrientSame(mf, side)) return true;
     return false;
 }
@@ -147,20 +147,18 @@ Path idxsToPath(Mesh* mesh, vector<int> path_by_idx){
 }
 
 Paths project(Mesh* mesh){
-    int face_cnt = mesh->faces.size();
-    bool check_done = false;
-    int chking_start;
-    bool face_checked[face_cnt] = {false}; //한 번 확인한 것은 체크리스트에서 제거되는 자료구조 도입 필요(법선 확인이 반복시행됨)
+    int faces_size = mesh->faces.size();
     vector<Paths> outline_sets;
-    /****/qDebug() << "Get outline";
     bool is_chking_pos = true;
+    bool check_done = false;
+    bool face_checked[faces_size] = {false}; //한 번 확인한 것은 체크리스트에서 제거되는 자료구조 도입 필요(법선 확인이 반복시행됨)
+    /****/qDebug() << "Get outline(is_chking_pos:" << is_chking_pos << ")";
     while(!check_done){
-        for(int i=0; i<face_cnt; i++){
-            if(checkFNZ(& mesh->faces[i], is_chking_pos)/*0<=mesh->faces[i].fn.z()*/ && !face_checked[i]){
-                chking_start=i;//new checking target obtained
-                outline_sets.push_back(spreadingCheck(mesh, face_checked, chking_start, is_chking_pos));
+        for(int face_idx=0; face_idx<faces_size; face_idx++){
+            if(checkFNZ(& mesh->faces[face_idx], is_chking_pos) && !face_checked[face_idx]){
+                outline_sets.push_back(spreadingCheck(mesh, face_checked, face_idx, is_chking_pos));
                 break;
-            }else if(i==face_cnt-1) check_done = true;
+            }else if(face_idx==faces_size-1) check_done = true;
         }
     }
     /****/qDebug() << "Total outline_set : " << outline_sets.size() << "->" << clipOutlines(outline_sets).size();
@@ -198,7 +196,8 @@ bool checkFNZ(MeshFace* face, bool is_chking_pos){
 void debugPath(Paths paths){
     qDebug() << "===============";
     for(int i=0; i<paths.size(); i++){
-        qDebug() << ""; //*/qDebug() << "path"; qDebug() << i;
+        qDebug() << "";
+        //qDebug() << "path" << i;
         for(int j=0; j<paths[i].size(); j++){
             qDebug()<< paths[i][j].X << paths[i][j].Y;
         }
