@@ -32,7 +32,7 @@ GLModel::GLModel(QNode *parent)
 
     mesh = new Mesh();
     qDebug() << "loading mesh";
-    loadMeshSTL(mesh, "C:/Users/diridiri/Desktop/DLP/partial2_flip.stl");
+    loadMeshSTL(mesh, "C:/Users/jaine/workspace/DLPslicerResource/partial2_flip.stl");
     //repairMesh(mesh);
 
     qDebug() << "loaded mesh";

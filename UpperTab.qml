@@ -1133,124 +1133,146 @@ Rectangle {
             state: fourth_tab_button_label.state=="active" ? "active" : "inactive"
         }*/
         PopUp {
-                        id:popup_label
-                        funcname: "Label"
-                        height: 282
-                        imageHeight: 76
-                        detail1: "Type letters on the surface."
-                        detail2: "Font"
-                        image: "qrc:/Resource/label_description.png"
+            id:popup_label
+            funcname: "Label"
+            height: 450 // 282
+            imageHeight: 76
+            detail1: "Type letters on the surface."
+            detail2: "Font"
+            image: "qrc:/Resource/label_description.png"
 
-                        ComboBox {
-                            id: fontBox
-                            currentIndex: 0
-                            activeFocusOnPress: true
-                            width: 176
-                            anchors.top: parent.top
-                            anchors.topMargin: 200
-                            anchors.horizontalCenter: parent.horizontalCenter
+            Rectangle {
+                id: text3DInputBackground
+                width: 176
+                height: 20
 
-                            Image {
-                                width: 12
-                                height: 8
-                                anchors.right: parent.right
-                                anchors.rightMargin: 8
-                                anchors.verticalCenter: parent.verticalCenter
+                y: 300
 
-                                source: "qrc:/resource/combo_arrow.png"
+                color: "#ffffffff"
 
-                            }
+                anchors.left: parent.left
+                anchors.right: parent.right
+                anchors.leftMargin: 25
+                anchors.rightMargin: 25
 
-                            style: ComboBoxStyle {
-                                background: Rectangle {     //box style (not drop-down part)
-        //                            implicitWidth: 176
-        //                            implicitHeight: 24
-                                    width: parent.width
-                                    height: parent.height
-                                    radius: 2
-                                    color: "#f9f9f9"
-                                    border.color: fontBox.hovered ? "light blue" : "transparent"
-                                }
+                TextField {
+                    id:text3DInput
 
-                                label: Text {
-                                    text: control.currentText
-                                    font.family: "Arial"
-                                    font.pointSize: 7
-                                }
+                    anchors.fill: parent
 
-                                //drop-down customization
-                                property Component __dropDownStyle: MenuStyle {
-                                    __maxPopupHeight: 120
-                                    __menuItemType: "comboboxitem"
+                    placeholderText: qsTr("Enter text")
+                }
+            }
 
-                                    frame: Rectangle {      //drop-down box style
-                                        color: "#f9f9f9"
-                                        width: 174
-                                        radius: 2
-                                    }
-                                    itemDelegate.label:     //item text
-                                        Text {
-                                            text: styleData.text
-                                            font.family: "Arial"
-                                            font.pointSize: 7
-                                            color: styleData.selected ? "#666666" : "#303030"
-        //                                    color: styleData.selected ? "red" : "blue"
-                                        }
-                                    itemDelegate.background: Rectangle {
-                                        color: styleData.selected ? "#eaeaea" : "#f9f9f9"
-                                    }
+            ComboBox {
+                id: fontBox
+                currentIndex: 0
+                activeFocusOnPress: true
+                width: 176
+                anchors.top: parent.top
+                anchors.topMargin: 200
+                anchors.horizontalCenter: parent.horizontalCenter
 
+                Image {
+                    width: 12
+                    height: 8
+                    anchors.right: parent.right
+                    anchors.rightMargin: 8
+                    anchors.verticalCenter: parent.verticalCenter
 
-                                    //scroller customization
-                                    __scrollerStyle: ScrollViewStyle {
-                                        scrollBarBackground: Rectangle {
-                                            color: "#eaeaea"
-                                            implicitWidth: 7
-                                            implicitHeight: 110
-                                        }
-                                        handle: Rectangle {
-                                            color: "#b7b7b7"
-                                            implicitWidth: 9
-                                            implicitHeight: 45
-                                            radius: 2
-                                        }
-                                        minimumHandleLength: 35
-                                        incrementControl: Rectangle {
-                                            implicitWidth: 0
-                                            implicitHeight: 0
-                                        }
-                                        decrementControl: Rectangle {
-                                            implicitWidth: 0
-                                            implicitHeight: 0
-                                        }
-                                    }
-                                }
-                            }
+                    source: "qrc:/resource/combo_arrow.png"
 
-                            //fonts list
-                            model: ListModel {
-                                id: fontItems
-                                ListElement { text: "Arial1" }
-                                ListElement { text: "Arial2" }
-                                ListElement { text: "Arial3" }
-                                ListElement { text: "Arial4" }
-                                ListElement { text: "Arial5" }
-                                ListElement { text: "Arial6" }
-                                ListElement { text: "Arial7" }
-                                ListElement { text: "Arial8" }
-                                ListElement { text: "Arial9" }
-                                ListElement { text: "Arial10" }
-                            }
-                        }
+                }
 
-                        descriptionimage_vis: true
-                        detailline1_vis: false
-                        detailline2_vis: true
-                        applyfinishbutton_vis: false
-                        applybutton_vis: true
+                style: ComboBoxStyle {
+                    background: Rectangle {     //box style (not drop-down part)
+//                            implicitWidth: 176
+//                            implicitHeight: 24
+                        width: parent.width
+                        height: parent.height
+                        radius: 2
+                        color: "#f9f9f9"
+                        border.color: fontBox.hovered ? "light blue" : "transparent"
                     }
 
-    }
+                    label: Text {
+                        text: control.currentText
+                        font.family: "Arial"
+                        font.pointSize: 7
+                    }
 
+                    //drop-down customization
+                    property Component __dropDownStyle: MenuStyle {
+                        __maxPopupHeight: 120
+                        __menuItemType: "comboboxitem"
+
+                        frame: Rectangle {      //drop-down box style
+                            color: "#f9f9f9"
+                            width: 174
+                            radius: 2
+                        }
+                        itemDelegate.label:     //item text
+                            Text {
+                                text: styleData.text
+                                font.family: "Arial"
+                                font.pointSize: 7
+                                color: styleData.selected ? "#666666" : "#303030"
+//                                    color: styleData.selected ? "red" : "blue"
+                            }
+                        itemDelegate.background: Rectangle {
+                            color: styleData.selected ? "#eaeaea" : "#f9f9f9"
+                        }
+
+
+                        //scroller customization
+                        __scrollerStyle: ScrollViewStyle {
+                            scrollBarBackground: Rectangle {
+                                color: "#eaeaea"
+                                implicitWidth: 7
+                                implicitHeight: 110
+                            }
+                            handle: Rectangle {
+                                color: "#b7b7b7"
+                                implicitWidth: 9
+                                implicitHeight: 45
+                                radius: 2
+                            }
+                            minimumHandleLength: 35
+                            incrementControl: Rectangle {
+                                implicitWidth: 0
+                                implicitHeight: 0
+                            }
+                            decrementControl: Rectangle {
+                                implicitWidth: 0
+                                implicitHeight: 0
+                            }
+                        }
+                    }
+                }
+
+                //fonts list
+                model: ListModel {
+                    id: fontItems
+                    ListElement { text: "Arial1" }
+                    ListElement { text: "Arial2" }
+                    ListElement { text: "Arial3" }
+                    ListElement { text: "Arial4" }
+                    ListElement { text: "Arial5" }
+                    ListElement { text: "Arial6" }
+                    ListElement { text: "Arial7" }
+                    ListElement { text: "Arial8" }
+                    ListElement { text: "Arial9" }
+                    ListElement { text: "Arial10" }
+                }
+            }
+
+            descriptionimage_vis: true
+            detailline1_vis: false
+            detailline2_vis: true
+            applyfinishbutton_vis: false
+            applybutton_vis: true
+            state: fourth_tab_button_label.state=="active" ? "active" : "inactive"
+        }
+    }
 }
 
