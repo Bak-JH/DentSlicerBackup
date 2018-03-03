@@ -12,6 +12,9 @@ class QmlManager : public QObject
     Q_OBJECT
 public:
     explicit QmlManager(QObject *parent = nullptr);
+    QQmlApplicationEngine* engine;
+
+    void initializeUI(QQmlApplicationEngine *e);
 
 signals:
     void updateModelInfo(int printing_time, int layer, QString xyz, float volume);

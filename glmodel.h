@@ -7,12 +7,14 @@
 #include <Qt3DExtras>
 #include <Qt3DInput>
 #include <vector>
-#include "fileloader.h"
-#include "arrange.h"
 #include <QBuffer>
 #include <QObjectPicker>
-#include "meshrepair.h"
+#include <QCursor>
+#include "feature/meshrepair.h"
 #include "qmlmanager.h"
+#include "mesh.h"
+#include "fileloader.h"
+#include "arrange.h"
 
 #define MAX_BUF_LEN 2000000
 
@@ -21,15 +23,17 @@ using namespace Qt3DRender;
 using namespace Qt3DExtras;
 using namespace std;
 
-// plane contains at least 3 vertices contained in the plane in clockwise direction
-typedef vector<QVector3D> Plane;
+
 
 class GLModel : public QEntity
 {
     Q_OBJECT
 public:
-    GLModel(QNode* parent=nullptr);
+    // load teeth model default
+    GLModel(QNode* parent=nullptr, QString fname="", bool isShadow=false); // main constructor for mainmesh and shadowmesh
+    ~GLModel();
 
+    GLModel *shadowModel; // GLmodel's sparse mesh that gets picker input
     QPhongAlphaMaterial *m_planeMaterial;
     Qt3DRender::QBuffer *vertexBuffer;
     Qt3DRender::QBuffer *vertexNormalBuffer;
@@ -41,23 +45,36 @@ public:
     QAttribute *indexAttribute;
     QGeometry* m_geometry;
     QGeometryRenderer* m_geometryRenderer;
-
-
     Qt3DRender::QObjectPicker *m_objectPicker;
-    Qt3DRender::QMesh *m_mesh;
     Qt3DCore::QTransform *m_transform;
 
-    std::vector<QVector3D> vector_set;
+    Qt3DCore::QEntity *parentEntity;
 
-    Qt3DCore::QEntity *motherEntity;
-    Qt3DExtras::QPlaneMesh* ClipPlane[2];
-    Qt3DCore::QTransform *planeTransform[2];
+    std::vector<QVector3D> cuttingPoints;
+
+    Qt3DExtras::QPlaneMesh* clipPlane[2];
     Qt3DCore::QEntity* planeEntity[2];
+    Qt3DCore::QTransform *planeTransform[2];
     Qt3DExtras::QPhongMaterial *planeMaterial;
-    GLModel* glmodel;
 
+    Qt3DExtras::QSphereMesh *sphereMesh[4];
+    Qt3DCore::QEntity *sphereEntity[4];
+    Qt3DCore::QTransform *sphereTransform[4];
+    QPhongMaterial *sphereMaterial[4];
+
+    void removeModel();
+    void beforeInitialize();
+    void beforeAddVerticies();
+    void generatePlane();
+    void addCuttingPoint(QVector3D v);
+    void removeCuttingPoints();
+    void drawLine(QVector3D endpoint);
+
+    QVector3D spreadPoint(QVector3D endpoint,QVector3D startpoint,int factor);
 private:
-
+    int numPoints;
+    bool flatState;
+    bool curveState;
     QString filename;
     float x,y,z;
     int v_cnt;
@@ -65,10 +82,10 @@ private:
     Mesh* lmesh;
     Mesh* rmesh;
     Mesh* mesh;
+    Mesh* sparseMesh;
     QNode* m_parent;
-
-
-    void initialize(Mesh* mesh);
+    QVector3D lastpoint;
+    void initialize(const Mesh* mesh);
     void addVertex(QVector3D vertex);
     void addVertices(Mesh* mesh);
     void addVertices(vector<QVector3D> vertices);
@@ -77,10 +94,8 @@ private:
     void addIndexes(vector<int> vertices);
     void clearVertices();
     void onTimerUpdate();
-    void makePlane();
-    void delModel();
-    void before_initiate();
-//    void makePlane(QVector3D& v0, QVector3D& v1, QVector3D& v2);
+    Mesh* toSparse(Mesh* mesh);
+
 
     // bisects mesh into leftMesh, rightMesh divided by plane
     void bisectModel(Mesh* mesh, Plane plane, Mesh* leftMesh, Mesh* rightMesh);
@@ -88,10 +103,15 @@ private:
 
 public slots:
     void handlePickerClicked(Qt3DRender::QPickEvent*);
+    void mgoo(Qt3DRender::QPickEvent*);
+    void pgoo(Qt3DRender::QPickEvent*);
+    void rgoo(Qt3DRender::QPickEvent*);
+    void engoo();
+    void exgoo();
     void modelcut();
-
-
-
+    void lineAccept();
+    void pointAccept();
+    void getSignal(double value);
 };
 
 Qt3DRender::QAttribute *copyAttribute(Qt3DRender::QAttribute *oldAtt, QMap<Qt3DRender::QBuffer *, Qt3DRender::QBuffer *> &bufferMap);

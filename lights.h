@@ -21,7 +21,7 @@ public:
     ~Lights();
 
 private:
-    Qt3DCore::QEntity *motherEntity;
+    Qt3DCore::QEntity *parentEntity;
     Qt3DCore::QEntity *lightEntity[4];
     Qt3DRender::QPointLight *light[4];
     Qt3DCore::QTransform *lightTransform[4];

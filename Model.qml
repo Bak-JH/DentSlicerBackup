@@ -5,7 +5,7 @@ import Qt3D.Extras 2.0
 
 Entity {
 
-    objectName: "normalModel"
+    objectName: "model"
     property string inputSource;
 
     property alias testMesh: testMesh
@@ -27,39 +27,6 @@ Entity {
         translation: Qt.vector3d(0,0,0);
     }
 
-    ObjectPicker{
-        id : picker
-        onClicked: {
-            /*
-            console.log("click")
-
-            var point = Qt.vector3d(0,0,0);
-            var matrix = Qt.matrix4x4(0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0);
-
-            matrix = cm.camera.projectionMatrix.times(cm.camera.viewMatrix);
-
-            point = matrix.times(point)
-
-            point.x = (point.x+1) * scene3d.width/2;
-            point.y = (-1 * point.y+1) * scene3d.height/2;
-
-
-            console.log("point2 " + point);
-            console.log("viwport  w" + scene3d.width);
-            console.log("viwport  h" + scene3d.height);
-
-            //ui.mttab.anchors.leftMargin = point.x
-            //ui.mttab.anchors.topMargin = point.y
-            */
-
-            var point = ui.world2Screen(Qt.vector3d(0,0,0))
-
-            ui.isTab = true
-            ui.mttab.show(point.x,point.y)
-
-
-        }
-    }
     PhongMaterial {
         id: testMaterial
         property int counter : 0
@@ -67,7 +34,7 @@ Entity {
 
     }
 
-    components: [ testMesh, testMaterial, meshTransform,picker ]
+    components: [ testMesh, testMaterial, meshTransform ]
     //components: [ testMesh, testMaterial, meshTransform]
 
     function zoomUp(){
