@@ -36,6 +36,7 @@ GLModel::GLModel(QNode *parent)
     //loadMeshSTL(mesh, "C:/Users/hsy61/Desktop/3D_models/test/train.stl");
     loadMeshSTL(mesh, "C:/Users/hsy61/Desktop/3D_models/teeth_models/lowerjaw.stl");
     //loadMeshSTL(mesh, "C:/Users/hsy61/Desktop/3D_models/cc_debug/c1111mrr.stl");
+    loadMeshSTL(mesh, "C:/Users/hsy61/Desktop/partial2/partial1.stl");
     qDebug() << "Number of faces :" << mesh->faces.size();
     qDebug() << "Mesh loaded";
     //repairMesh(mesh);

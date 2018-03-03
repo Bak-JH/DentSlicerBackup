@@ -149,16 +149,19 @@ Path idxsToPath(Mesh* mesh, vector<int> path_by_idx){
 Paths project(Mesh* mesh){
     int faces_size = mesh->faces.size();
     vector<Paths> outline_sets;
-    bool is_chking_pos = true;
-    bool check_done = false;
-    bool face_checked[faces_size] = {false}; //한 번 확인한 것은 체크리스트에서 제거되는 자료구조 도입 필요(법선 확인이 반복시행됨)
-    /****/qDebug() << "Get outline(is_chking_pos:" << is_chking_pos << ")";
-    while(!check_done){
-        for(int face_idx=0; face_idx<faces_size; face_idx++){
-            if(checkFNZ(& mesh->faces[face_idx], is_chking_pos) && !face_checked[face_idx]){
-                outline_sets.push_back(spreadingCheck(mesh, face_checked, face_idx, is_chking_pos));
-                break;
-            }else if(face_idx==faces_size-1) check_done = true;
+    bool is_chking_pos = false;
+    for(int i=0; i<2; i++){
+        is_chking_pos = !is_chking_pos;
+        bool check_done = false;
+        bool face_checked[faces_size] = {false}; //한 번 확인한 것은 체크리스트에서 제거되는 자료구조 도입 필요(법선 확인이 반복시행됨)
+        /****/qDebug() << "Get outline(is_chking_pos:" << is_chking_pos << ")";
+        while(!check_done){
+            for(int face_idx=0; face_idx<faces_size; face_idx++){
+                if(checkFNZ(& mesh->faces[face_idx], is_chking_pos) && !face_checked[face_idx]){
+                    outline_sets.push_back(spreadingCheck(mesh, face_checked, face_idx, is_chking_pos));//위/아래를 보는 면 사이 orientation 괜찮은가
+                    break;
+                }else if(face_idx==faces_size-1) check_done = true;
+            }
         }
     }
     /****/qDebug() << "Total outline_set : " << outline_sets.size() << "->" << clipOutlines(outline_sets).size();
@@ -185,10 +188,10 @@ Paths clipOutlines(vector<Paths> outline_sets){
 
 bool checkFNZ(MeshFace* face, bool is_chking_pos){
     if(is_chking_pos){
-        if(face.fn.z()>=0) return true;
+        if(face->fn.z()>=0) return true;
         else return false;
     }else{
-        if(face.fn.z()<=0) return true;
+        if(face->fn.z()<=0) return true;
         else return false;
     }
 }
