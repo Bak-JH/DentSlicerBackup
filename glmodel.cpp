@@ -48,6 +48,8 @@ GLModel::GLModel(QNode *parent)
     qDebug() << "Projection done";
     qDebug()<< projection[0][0].X << projection[0][0].Y << projection.size();
     debugPath(projection);
+    RDPSimpPaths(&projection);
+    debugPath(projection);
     //Mesh outline_mesh = PathsToMesh(projection);addVertices(&outline_mesh);
     //*/
     /* debugFaces

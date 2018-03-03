@@ -1,5 +1,6 @@
 #include "arrange.h"
 #include <QDebug>
+#include <math.h>
 
 Arrange::Arrange()
 {
@@ -257,4 +258,56 @@ int findVertexWithIntXY(int x, int y, Mesh* mesh){
         int y_int = round(vtx_pos.y()*cfg->resolution);
         if(x_int==x && y_int==y) return vtx_idx;
     }
+}
+
+//=========================================
+//Ramer–Douglas–Peucker line simplification
+//=========================================
+void RDPSimpPaths(Paths* paths){
+    for(int path_idx=0; path_idx<paths->size(); path_idx++){
+        RDPSimp(&(*paths)[path_idx]);
+        if((*paths)[path_idx].size()==2) {
+            paths->erase(paths->begin()+path_idx);
+            path_idx--;
+        }
+    }
+}
+
+void RDPSimp(Path* path){
+    int path_size = path->size();
+    bool keepingPointMrkArr[path_size] = {false};
+    keepingPointMrkArr[0] = true;
+    keepingPointMrkArr[path_size-1] = true;
+    RDPSimpIter(path, 0, path_size-1, keepingPointMrkArr);
+    Path simplified_path;
+    for(int point_idx=0; point_idx<path_size; point_idx++){
+        if(keepingPointMrkArr[point_idx]) simplified_path.push_back((*path)[point_idx]);
+    }
+    /**/qDebug() << path->size() << "->" << simplified_path.size();
+    path->swap(simplified_path);
+    simplified_path.clear();
+}
+
+void RDPSimpIter(Path* path, int start, int end, bool* keepingPointMrkArr){
+    float epsilon = 100;
+    float max_distance = 0;
+    int max_dist_point = -1;
+    for(int point_idx=start+1; point_idx<end; point_idx++){
+        float distance = distL2P(&(*path)[start], &(*path)[end], &(*path)[point_idx]);
+        if(max_distance<distance){
+            max_distance = distance;
+            max_dist_point = point_idx;
+        }
+    }
+    if(epsilon<max_distance){
+        keepingPointMrkArr[max_dist_point] = true;
+        if(start+1<max_dist_point)RDPSimpIter(path, start, max_dist_point, keepingPointMrkArr);
+        if(end-1>max_dist_point)RDPSimpIter(path, max_dist_point, end, keepingPointMrkArr);
+    }
+}
+
+float distL2P(IntPoint* line_p1, IntPoint* line_p2, IntPoint* p){
+    float triangle_area_double = abs(line_p1->X*(line_p2->Y-p->Y) + line_p2->X*(p->Y-line_p1->Y) +p->X*(line_p1->Y-line_p2->Y));
+    float bottom_side_length = sqrt(pow((line_p1->X-line_p2->X),2) + pow((line_p1->Y-line_p2->Y),2));
+    return triangle_area_double/bottom_side_length;
 }

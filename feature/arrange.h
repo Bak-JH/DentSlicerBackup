@@ -33,4 +33,9 @@ void debugFaces(Mesh* mesh, vector<int> face_list);
 void debugFace(Mesh* mesh, int face_idx);
 int findVertexWithIntpoint(IntPoint p, Mesh* mesh);
 int findVertexWithIntXY(int x, int y, Mesh* mesh);
+
+void RDPSimpPaths(Paths* paths);
+void RDPSimp(Path* path);
+void RDPSimpIter(Path* path, int start, int end, bool* keepingPointMrkArr);
+float distL2P(IntPoint* line_p1, IntPoint* line_p2, IntPoint* p);
 #endif // ARRANGE_H
