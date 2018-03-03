@@ -99,7 +99,6 @@ ApplicationWindow {
         hoverEnabled: true
         aspects: ["input", "logic"]
         cameraAspectRatioMode: Scene3D.AutomaticAspectRatio
-
         MainView {
             objectName: "MainView"
             id: sceneRoot

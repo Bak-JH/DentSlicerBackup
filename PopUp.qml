@@ -1,5 +1,8 @@
+import Qt3D.Core 2.0
 import QtQuick 2.7
-
+import QtQuick.Layouts 1.0
+import QtQuick.Controls 1.0
+import QtQuick.Controls.Styles 1.0
 
 Rectangle {
     property alias funcname: funcname.text
@@ -16,6 +19,16 @@ Rectangle {
     //----------------------------------------------------------------
 
     property int imageHeight
+
+    //----------------------------------------------------------------
+
+    property alias leftselectimage_vis : leftselectimage.visible
+    property alias rightselectimage_vis : rightselectimage.visible
+    property alias radiobutton1_vis : radiobutton1.visible
+    property alias radiobutton2_vis : radiobutton2.visible
+    property alias slider_vis : slider.visible
+
+    //----------------------------------------------------------------
 
     property alias numberbox_vis: numberbox.visible
     property alias numberbox_nameing_vis: numberbox_naming.visible
@@ -63,6 +76,9 @@ Rectangle {
     property real numbox_value_z : numbox_default
     property real numbox_value_detail2 : numbox_detail2_defalult
 
+    function do_apply(functionname){
+        console.log(functionname);
+    }
 
     function focus_all_off() {
         numberbox1_text.focus = false;
@@ -187,7 +203,7 @@ Rectangle {
             onEntered: parent.color = "#b5b5b5"
             onExited: parent.color = "#999999"
             onPressed: parent.color = "#3ea6b7"
-            onReleased: {all_off(); focus_all_off(); numbox_reset(); parent.color = "#999999"}
+            onReleased: {do_apply(funcname.text);all_off(); focus_all_off(); numbox_reset(); parent.color = "#999999"}
         }
     }
 
@@ -263,6 +279,182 @@ Rectangle {
             onReleased: {all_off(); focus_all_off(); numbox_reset(); parent.color = "#999999"}
         }
     }
+
+    Item {
+        id: leftselectimage
+        visible: false
+        width: 94
+        height: 66
+        anchors.left: parent.left
+        anchors.leftMargin: 17
+        anchors.top: parent.top
+        anchors.topMargin: 70
+        objectName: "flat"
+        Image {
+            id: flatd
+            source: "qrc:/resource/flat.png"
+        }
+
+        signal flatSignal
+        MouseArea {
+            anchors.fill: parent
+            onClicked: leftselectimage.flatSignal()
+        }
+    }
+    Item {
+        id: rightselectimage
+        visible: false
+        width: 94
+        height: 66
+        anchors.right: parent.right
+        anchors.rightMargin: 17
+        anchors.top: parent.top
+        anchors.topMargin: 70
+        objectName: "curve"
+        Image {
+            id: curved
+            anchors.fill: parent
+            source: "qrc:/resource/curve.png"
+        }
+        signal curveSignal
+        MouseArea {
+            anchors.fill: parent
+            onClicked: curveSignal()
+        }
+    }
+
+    /*Rectangle {
+        width: 109.5
+        height: 30
+        id: applyBox
+        color: "#ababab"
+        anchors.bottom: parent.bottom
+        anchors.bottomMargin: 7
+        anchors.left: parent.left
+        anchors.leftMargin: 7
+        state: 'Inactivation'
+        states: [
+            State {
+                name: "Inactivation"
+                PropertyChanges {
+                    target: slider
+                    visible: false
+                }
+            },
+            State {
+                name: "Activation"
+                PropertyChanges {
+                    target: slider
+                    visible: true
+                }
+            }
+        ]
+        Item {
+            width: parent.width
+            height: parent.height
+            anchors.horizontalCenter: parent.horizontalCenter
+            anchors.verticalCenter: parent.verticalCenter
+            id: item
+            objectName: "item"
+            signal qmlSignal
+            Text {
+                text: "Apply"
+                color: "#ffffff"
+                font.family: "Arial"
+                font.bold: true
+                font.pixelSize: 17
+                anchors.horizontalCenter: parent.horizontalCenter
+                anchors.verticalCenter: parent.verticalCenter
+            }
+            MouseArea {
+                anchors.fill: parent
+                onClicked: {
+                    item.qmlSignal()
+                    applyBox.state == 'Activation' ? applyBox.state = 'Inactivation' : applyBox.state = 'Activation'
+                }
+            }
+        }
+    }*/
+
+    ExclusiveGroup {
+        id: viewModeGroup
+    }
+
+    RadioButton {
+        id: radiobutton1
+        visible: false
+        anchors.bottom: parent.bottom
+        anchors.bottomMargin: 90
+        anchors.left: parent.left
+        anchors.leftMargin: 30
+        exclusiveGroup: viewModeGroup
+        style: RadioButtonStyle {
+            indicator: Rectangle {
+                implicitWidth: 16
+                implicitHeight: 16
+                radius: 9
+                border.color: control.activeFocus ? "darkblue" : "gray"
+                border.width: 0
+                Rectangle {
+                    anchors.fill: parent
+                    visible: control.checked
+                    color: "#505A5E"
+                    radius: 9
+                    anchors.margins: 4
+                }
+            }
+            label: Text {
+                text: "None"
+                anchors.left: parent.left
+                anchors.leftMargin: 10
+                font.family: "Arial"
+                font.pixelSize: 14
+            }
+        }
+    }
+
+    RadioButton {
+        id: radiobutton2
+        visible: false
+        anchors.bottom: parent.bottom
+        anchors.bottomMargin: 65
+        anchors.left: parent.left
+        anchors.leftMargin: 30
+        exclusiveGroup: viewModeGroup
+        style: RadioButtonStyle {
+            indicator: Rectangle {
+                implicitWidth: 16
+                implicitHeight: 16
+                radius: 9
+                border.color: control.activeFocus ? "darkblue" : "gray"
+                border.width: 0
+                Rectangle {
+                    anchors.fill: parent
+                    visible: control.checked
+                    color: "#505A5E"
+                    radius: 9
+                    anchors.margins: 4
+                }
+            }
+            label: Text {
+                text: "Gernerate Surface"
+                anchors.left: parent.left
+                anchors.leftMargin: 10
+                font.family: "Arial"
+                font.pixelSize: 14
+            }
+        }
+    }
+
+    Planeslider {
+        id: slider
+        visible: false
+        anchors.right: parent.left
+        anchors.rightMargin: 20
+        anchors.bottom: parent.bottom
+        anchors.bottomMargin: -20
+    }
+
 
     //Number write down button
     Item{
