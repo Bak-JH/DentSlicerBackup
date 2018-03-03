@@ -7,7 +7,7 @@ Arrange::Arrange()
 }
 bool shit = false;
 
-Paths spreadingCheck(Mesh* mesh, bool* check, int chking_start){
+Paths spreadingCheck(Mesh* mesh, bool* check, int chking_start, bool is_chking_pos){
     /**/qDebug() << "SpreadingCheck started from" << chking_start;
     Paths paths;
     int chking = -1;
@@ -32,10 +32,10 @@ Paths spreadingCheck(Mesh* mesh, bool* check, int chking_start){
             int side;
             int outline_checked = false;
             for(side=0; side<3; side++){
-                if(isEdgeBound(mf, side)){
+                if(isEdgeBound(mf, side, is_chking_pos)){
                     if(!outline_checked){
-                        int path_head = getPathHead(mf, side);
-                        Path path = buildOutline(mesh, check, chking, path_head);
+                        int path_head = getPathHead(mf, side, is_chking_pos);
+                        Path path = buildOutline(mesh, check, chking, path_head, is_chking_pos);
                         paths.push_back(path);
                         outline_checked = true;
                     }
@@ -51,18 +51,16 @@ Paths spreadingCheck(Mesh* mesh, bool* check, int chking_start){
     return paths;
 }
 
-int getPathHead(MeshFace* mf, int side){
-    if(side==0 && isEdgeBound(mf, 2)) {
-        if(isEdgeBound(mf, 1)) return -1;//all side of chking face is bound, face is alone
+int getPathHead(MeshFace* mf, int side, bool is_chking_pos){
+    if(side==0 && isEdgeBound(mf, 2, is_chking_pos)) {
+        if(isEdgeBound(mf, 1, is_chking_pos)) return -1;//all side of chking face is bound, face is alone
         else return mf->mesh_vertex[2];
     }
     return mf->mesh_vertex[side];
 }
 
-Path buildOutline(Mesh* mesh, bool* check, int chking, int path_head){
-    //*Debug
+Path buildOutline(Mesh* mesh, bool* check, int chking, int path_head, bool is_chking_pos){
     //**qDebug() << "buildOutline from" << chking;
-    //*/
     vector<int> path_by_idx;
     if(path_head==-1){//혼자있는 면의 경우 오리엔테이션 확인 방법이 마련되어있지 않음
         check[chking] = true;
@@ -81,9 +79,9 @@ Path buildOutline(Mesh* mesh, bool* check, int chking, int path_head){
         int tail_idx;//The index that path_tail has in the mf->mesh_vertex
         for(int i=0; i<3; i++){
             if(mf->mesh_vertex[i]==path_tail) tail_idx = i;
-            if(isEdgeBound(mf, i)) outline_edge_cnt++;
+            if(isEdgeBound(mf, i, is_chking_pos)) outline_edge_cnt++;
         }
-        if(isEdgeBound(mf, tail_idx)){
+        if(isEdgeBound(mf, tail_idx, is_chking_pos)){
             path_by_idx.push_back(path_tail);
             check[chking] = true;
             if(outline_edge_cnt==1){
@@ -107,10 +105,10 @@ Path buildOutline(Mesh* mesh, bool* check, int chking, int path_head){
     return idxsToPath(mesh, path_by_idx);
 }
 
-bool isEdgeBound(MeshFace* mf, int side){//bound edge: connected to face with opposit fn.z/not connected any face/multiple neighbor/opposit orientation
+bool isEdgeBound(MeshFace* mf, int side, bool is_chking_pos){//bound edge: connected to face with opposit fn.z/not connected any face/multiple neighbor/opposit orientation
     if(mf->neighboring_faces[side].size() != 1) return true;
     MeshFace* neighbor = mf->neighboring_faces[side][0];
-    if(neighbor->fn.z()<0) return true;
+    if(!checkFNZ(neighbor, is_chking_pos)/*neighbor->fn.z()<0*/) return true;
     if(!isNbrOrientSame(mf, side)) return true;
     return false;
 }
@@ -155,11 +153,12 @@ Paths project(Mesh* mesh){
     bool face_checked[face_cnt] = {false}; //한 번 확인한 것은 체크리스트에서 제거되는 자료구조 도입 필요(법선 확인이 반복시행됨)
     vector<Paths> outline_sets;
     /****/qDebug() << "Get outline";
+    bool is_chking_pos = true;
     while(!check_done){
         for(int i=0; i<face_cnt; i++){
-            if(0<=mesh->faces[i].fn.z() && !face_checked[i]){
+            if(checkFNZ(& mesh->faces[i], is_chking_pos)/*0<=mesh->faces[i].fn.z()*/ && !face_checked[i]){
                 chking_start=i;//new checking target obtained
-                outline_sets.push_back(spreadingCheck(mesh, face_checked, chking_start));
+                outline_sets.push_back(spreadingCheck(mesh, face_checked, chking_start, is_chking_pos));
                 break;
             }else if(i==face_cnt-1) check_done = true;
         }
@@ -184,6 +183,16 @@ Paths clipOutlines(vector<Paths> outline_sets){
         tmp_clip_result.clear();*/
     }
     return projection;
+}
+
+bool checkFNZ(MeshFace* face, bool is_chking_pos){
+    if(is_chking_pos){
+        if(face.fn.z()>=0) return true;
+        else return false;
+    }else{
+        if(face.fn.z()<=0) return true;
+        else return false;
+    }
 }
 
 void debugPath(Paths paths){

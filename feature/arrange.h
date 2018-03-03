@@ -16,19 +16,18 @@ public:
     Arrange();
 };
 
-Paths spreadingCheck(Mesh* mesh, bool* check, int chking_start);
-int getPathHead(MeshFace* mf, int side);
-Path buildOutline(Mesh* mesh, bool* check, int chking, int path_head);
-bool isEdgeBound(MeshFace* mf, int side);
+Paths spreadingCheck(Mesh* mesh, bool* check, int chking_start, bool is_chking_pos);
+int getPathHead(MeshFace* mf, int side, bool is_chking_pos);
+Path buildOutline(Mesh* mesh, bool* check, int chking, int path_head, bool is_chking_pos);
+bool isEdgeBound(MeshFace* mf, int side, bool is_chking_pos);
 bool isNbrOrientSame(MeshFace* mf, int side);
-int searchVtxInFace(MeshFace* mf, int vertex);
+int searchVtxInFace(MeshFace* mf, int vertexIdx);
 vector<int> arrToVect(int arr[]);
 int getNbrVtx(MeshFace* mf, int base, int xth);
 Path idxsToPath(Mesh* mesh, vector<int> path_by_idx);
 Paths project(Mesh* mesh);
 Paths clipOutlines(vector<Paths> outline_sets);
-Mesh pathsToMesh(Paths paths);
-Paths resize(Paths paths);
+bool checkFNZ(MeshFace* face, bool is_chking_pos);
 void debugPath(Paths paths);
 void debugFaces(Mesh* mesh, vector<int> face_list);
 void debugFace(Mesh* mesh, int face_idx);
