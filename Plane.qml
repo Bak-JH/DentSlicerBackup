@@ -109,7 +109,7 @@ Entity {
     }
 
 
-    Entity {
+    /*Entity {
         id: backPlane
         PlaneMesh{
             id: backPlaneMesh
@@ -132,7 +132,7 @@ Entity {
         }
 
         components: [ backPlaneMesh, backPlaneMaterial, backPlaneTransform ]
-    }
+    }*/
 
     Entity {
         id: planeTitleEntity
