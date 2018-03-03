@@ -3,42 +3,54 @@
 #include <QString>
 #include <QtMath>
 
-GLModel::GLModel(QNode *parent, int p)
-    : x(0.0f)
-    , y(0.0f)
-    , z(0.0f)
-    , v_cnt(0)
-    , f_cnt(0)
-    , m_transform(new Qt3DCore::QTransform())
-    , m_objectPicker(new Qt3DRender::QObjectPicker())
-{
-    mesh = new Mesh();
-    loadMeshSTL(mesh, "C:/Users/diridiri/Desktop/DLP/partial2_flip.stl");
-    Mesh* sparseMesh =toSparse(mesh);
-    initialize(mesh);
-    addVertices(sparseMesh);
-    addComponent(m_transform);
-    m_objectPicker->setHoverEnabled(true);
-    m_objectPicker->setDragEnabled(true);
-    QObject::connect(m_objectPicker, SIGNAL(clicked(Qt3DRender::QPickEvent*)), this, SLOT(handlePickerClicked(Qt3DRender::QPickEvent*)));
-    addComponent(m_objectPicker);
-}
-
-
-GLModel::GLModel(QNode *parent)
+GLModel::GLModel(QNode *parent, QString fname, bool isShadow)
     : QEntity(parent)
+    , filename(fname)
     , x(0.0f)
     , y(0.0f)
     , z(0.0f)
     , v_cnt(0)
     , f_cnt(0)
     , m_transform(new Qt3DCore::QTransform())
-    , m_objectPicker(new Qt3DRender::QObjectPicker())
+    //, m_objectPicker(new Qt3DRender::QObjectPicker())
     , parentEntity(reinterpret_cast<Qt3DCore::QEntity *>(parent))
     , numPoints(0)
     , curveState(false)
     , flatState(false)
 {
+
+    if (isShadow){
+        mesh = new Mesh();
+        loadMeshSTL(mesh, filename.toStdString().c_str());
+        sparseMesh =toSparse(mesh);
+
+        initialize(sparseMesh);
+        addVertices(sparseMesh);
+
+        addComponent(m_transform);
+        //m_objectPicker->setHoverEnabled(true);
+        //m_objectPicker->setDragEnabled(true);
+
+        m_objectPicker = new Qt3DRender::QObjectPicker();
+        // add only m_objectPicker
+        QObject::connect(m_objectPicker, SIGNAL(clicked(Qt3DRender::QPickEvent*)), this, SLOT(handlePickerClicked(Qt3DRender::QPickEvent*)));
+        QObject::connect(m_objectPicker, SIGNAL(moved(Qt3DRender::QPickEvent*)), this, SLOT(mgoo(Qt3DRender::QPickEvent*)));
+        QObject::connect(m_objectPicker, SIGNAL(pressed(Qt3DRender::QPickEvent*)), this, SLOT(pgoo(Qt3DRender::QPickEvent*)));
+        QObject::connect(m_objectPicker, SIGNAL(released(Qt3DRender::QPickEvent*)), this, SLOT(rgoo(Qt3DRender::QPickEvent*)));
+        QObject::connect(m_objectPicker, SIGNAL(entered()), this, SLOT(engoo()));
+        QObject::connect(m_objectPicker, SIGNAL(exited()), this, SLOT(exgoo()));
+        addComponent(m_objectPicker);
+
+
+        /*m_planeMaterial = new QPhongAlphaMaterial();
+        m_planeMaterial->setAmbient(QColor(0,200,242));
+        m_planeMaterial->setDiffuse(QColor(255,255,255));
+        m_planeMaterial->setSpecular(QColor(81,200,242));
+        m_planeMaterial->setAlpha(1.0f);
+        addComponent(m_planeMaterial);*/
+        return;
+    }
+
     /*Qt3DRender::QPickingSettings *settings = new Qt3DRender::QPickingSettings(m_objectPicker);
 
     settings->setFaceOrientationPickingMode(Qt3DRender::QPickingSettings::FrontFace);
@@ -51,14 +63,11 @@ GLModel::GLModel(QNode *parent)
     m_planeMaterial->setSpecular(QColor(81,200,242));
     m_planeMaterial->setAlpha(1.0f);
 
-    //QTimer *timer = new QTimer();
-    //QObject::connect(timer, &QTimer::timeout,this,&GLModel::onTimerUpdate);
-
     mesh = new Mesh();
     lmesh = new Mesh();
     rmesh = new Mesh();
 
-    loadMeshSTL(mesh, "C:/Users/diridiri/Desktop/DLP/partial2_flip.stl");
+    loadMeshSTL(mesh, filename.toStdString().c_str());//"C:/Users/diridiri/Desktop/DLP/partial2_flip.stl");
 
     sparseMesh = toSparse(mesh);
     //repairMesh(mesh);
@@ -72,16 +81,14 @@ GLModel::GLModel(QNode *parent)
 
     //addComponent(m_mesh);
     addComponent(m_transform);
+    addComponent(m_planeMaterial);
 
-    m_objectPicker->setHoverEnabled(true);
+    qDebug() << "created original model";
 
- QObject::connect(m_objectPicker, SIGNAL(clicked(Qt3DRender::QPickEvent*)), this, SLOT(handlePickerClicked(Qt3DRender::QPickEvent*)));
- QObject::connect(m_objectPicker, SIGNAL(moved(Qt3DRender::QPickEvent*)), this, SLOT(mgoo(Qt3DRender::QPickEvent*)));
- QObject::connect(m_objectPicker, SIGNAL(pressed(Qt3DRender::QPickEvent*)), this, SLOT(pgoo(Qt3DRender::QPickEvent*)));
- QObject::connect(m_objectPicker, SIGNAL(released(Qt3DRender::QPickEvent*)), this, SLOT(rgoo(Qt3DRender::QPickEvent*)));
- QObject::connect(m_objectPicker, SIGNAL(entered()), this, SLOT(engoo()));
- QObject::connect(m_objectPicker, SIGNAL(exited()), this, SLOT(exgoo()));
-    addComponent(m_objectPicker);
+    // create shadow model to handle picking settings
+    shadowModel = new GLModel(this, filename, true);
+
+    qDebug() << "created shadow model";
 }
 
 Qt3DRender::QAttribute *copyAttribute(
@@ -194,7 +201,6 @@ void GLModel::initialize(const Mesh* mesh){
     m_geometryRenderer->setGeometry(m_geometry);
 
     addComponent(m_geometryRenderer);
-    addComponent(m_planeMaterial);
 
     return;
 }

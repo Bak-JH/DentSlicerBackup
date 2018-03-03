@@ -29,9 +29,11 @@ class GLModel : public QEntity
 {
     Q_OBJECT
 public:
-    GLModel(QNode* parent=nullptr);
-    GLModel(QNode* parent,int p);
+    // load teeth model default
+    GLModel(QNode* parent=nullptr, QString fname="", bool isShadow=false); // main constructor for mainmesh and shadowmesh
     ~GLModel();
+
+    GLModel *shadowModel; // GLmodel's sparse mesh that gets picker input
     QPhongAlphaMaterial *m_planeMaterial;
     Qt3DRender::QBuffer *vertexBuffer;
     Qt3DRender::QBuffer *vertexNormalBuffer;
