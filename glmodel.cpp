@@ -1,58 +1,95 @@
-
+#include <QRenderSettings>
 #include "glmodel.h"
 #include <QString>
+#include <QtMath>
 
-GLModel::GLModel(QNode *parent)
+GLModel::GLModel(QNode *parent, QString fname, bool isShadow)
     : QEntity(parent)
+    , filename(fname)
     , x(0.0f)
     , y(0.0f)
     , z(0.0f)
     , v_cnt(0)
     , f_cnt(0)
-    , m_mesh(new Qt3DRender::QMesh())
     , m_transform(new Qt3DCore::QTransform())
-    , m_objectPicker(new Qt3DRender::QObjectPicker())
-    , motherEntity(reinterpret_cast<Qt3DCore::QEntity *>(parent))
-
-
+    //, m_objectPicker(new Qt3DRender::QObjectPicker())
+    , parentEntity(reinterpret_cast<Qt3DCore::QEntity *>(parent))
+    , numPoints(0)
+    , curveState(false)
+    , flatState(false)
 {
-    Qt3DRender::QPickingSettings *settings = new Qt3DRender::QPickingSettings(m_objectPicker);
+
+    if (isShadow){
+        mesh = new Mesh();
+        loadMeshSTL(mesh, filename.toStdString().c_str());
+        sparseMesh =toSparse(mesh);
+
+        initialize(sparseMesh);
+        addVertices(sparseMesh);
+
+        addComponent(m_transform);
+        //m_objectPicker->setHoverEnabled(true);
+        //m_objectPicker->setDragEnabled(true);
+
+        m_objectPicker = new Qt3DRender::QObjectPicker();
+        // add only m_objectPicker
+        QObject::connect(m_objectPicker, SIGNAL(clicked(Qt3DRender::QPickEvent*)), this, SLOT(handlePickerClicked(Qt3DRender::QPickEvent*)));
+        QObject::connect(m_objectPicker, SIGNAL(moved(Qt3DRender::QPickEvent*)), this, SLOT(mgoo(Qt3DRender::QPickEvent*)));
+        QObject::connect(m_objectPicker, SIGNAL(pressed(Qt3DRender::QPickEvent*)), this, SLOT(pgoo(Qt3DRender::QPickEvent*)));
+        QObject::connect(m_objectPicker, SIGNAL(released(Qt3DRender::QPickEvent*)), this, SLOT(rgoo(Qt3DRender::QPickEvent*)));
+        QObject::connect(m_objectPicker, SIGNAL(entered()), this, SLOT(engoo()));
+        QObject::connect(m_objectPicker, SIGNAL(exited()), this, SLOT(exgoo()));
+        addComponent(m_objectPicker);
+
+
+        /*m_planeMaterial = new QPhongAlphaMaterial();
+        m_planeMaterial->setAmbient(QColor(0,200,242));
+        m_planeMaterial->setDiffuse(QColor(255,255,255));
+        m_planeMaterial->setSpecular(QColor(81,200,242));
+        m_planeMaterial->setAlpha(1.0f);
+        addComponent(m_planeMaterial);*/
+        return;
+    }
+
+    /*Qt3DRender::QPickingSettings *settings = new Qt3DRender::QPickingSettings(m_objectPicker);
 
     settings->setFaceOrientationPickingMode(Qt3DRender::QPickingSettings::FrontFace);
     settings->setPickMethod(Qt3DRender::QPickingSettings::TrianglePicking);
-    settings->setPickResultMode(Qt3DRender::QPickingSettings::NearestPick);
+    settings->setPickResultMode(Qt3DRender::QPickingSettings::NearestPick);*/
 
     m_planeMaterial = new QPhongAlphaMaterial();
     m_planeMaterial->setAmbient(QColor(81,200,242));
     m_planeMaterial->setDiffuse(QColor(255,255,255));
+    m_planeMaterial->setSpecular(QColor(81,200,242));
     m_planeMaterial->setAlpha(1.0f);
 
-    QTimer *timer = new QTimer();
-    QObject::connect(timer, &QTimer::timeout,this,&GLModel::onTimerUpdate);
-
     mesh = new Mesh();
-    qDebug() << "loading mesh";
-    loadMeshSTL(mesh, "C:/Users/jaine/workspace/DLPslicerResource/partial2_flip.stl");
-    //repairMesh(mesh);
-
-    qDebug() << "loaded mesh";
-    initialize(mesh);
-    m_mesh->setGeometry(m_geometry);
 
     lmesh = new Mesh();
     rmesh = new Mesh();
 
+    loadMeshSTL(mesh, filename.toStdString().c_str());//"C:/Users/diridiri/Desktop/DLP/partial2_flip.stl");
+
+    sparseMesh = toSparse(mesh);
+    //repairMesh(mesh);
+
+    initialize(mesh);
     addVertices(mesh);
+//    initialize(mesh);
+//    addVertices(mesh);
 
     Qt3DExtras::QDiffuseMapMaterial *diffuseMapMaterial = new Qt3DExtras::QDiffuseMapMaterial();
 
-    addComponent(m_mesh);
+    //addComponent(m_mesh);
     addComponent(m_transform);
+    addComponent(m_planeMaterial);
 
-    m_objectPicker->setHoverEnabled(true);
-    QObject::connect(m_objectPicker, SIGNAL(clicked(Qt3DRender::QPickEvent*)), this, SLOT(handlePickerClicked(Qt3DRender::QPickEvent*)));
+    qDebug() << "created original model";
 
-    addComponent(m_objectPicker);
+    // create shadow model to handle picking settings
+    shadowModel = new GLModel(this, filename, true);
+
+    qDebug() << "created shadow model";
 }
 
 Qt3DRender::QAttribute *copyAttribute(
@@ -97,10 +134,11 @@ Qt3DRender::QAttribute *copyAttribute(
 
 
 
-void GLModel::initialize(Mesh* mesh){
+void GLModel::initialize(const Mesh* mesh){
 
     m_geometryRenderer = new QGeometryRenderer();
     m_geometry = new QGeometry(m_geometryRenderer);
+
 
     QByteArray vertexArray;
     vertexArray.resize(mesh->faces.size()*3*(3)*sizeof(float));
@@ -164,10 +202,6 @@ void GLModel::initialize(Mesh* mesh){
     m_geometryRenderer->setGeometry(m_geometry);
 
     addComponent(m_geometryRenderer);
-    addComponent(m_planeMaterial);
-
-
-
 
     return;
 }
@@ -214,9 +248,8 @@ void GLModel::addVertices(Mesh* mesh)
             result_vs.push_back(mesh->idx2MV(mf.mesh_vertex[fn]).position);
         }
 
-        addVertices(result_vs);
+        addVertices(result_vs);   
     }
-
     foreach (MeshFace mf , mesh->faces){
 
         vector<QVector3D> result_vns;
@@ -335,50 +368,23 @@ bool GLModel::isLeftToPlane(Plane plane, QVector3D position){
     return true;
 }
 
-void GLModel::onTimerUpdate()
-{
-    /*x += 1.0f;
-    y += 1.0f;
-    z += 1.0f;
-    addVertex(QVector3D(x,y,z));*/
-}
-
 void GLModel::handlePickerClicked(QPickEvent *pick)
 {
     QPickTriangleEvent *trianglePick = static_cast<QPickTriangleEvent*>(pick);
-
-    qDebug() << trianglePick->localIntersection()<<"aaa";
-    vector_set.push_back(trianglePick->localIntersection());
-
-    QGeometry *geometry = m_mesh->geometry();
-    auto attributes = geometry->attributes();
-    int vertexIndex = trianglePick->vertex1Index();
-    for (auto i = 0; i < attributes.count(); ++i)
-    {
-  //      qDebug() << i;
-        if (attributes.at(i)->name() == QAttribute::defaultPositionAttributeName())
-        {
-            QAttribute *attribute = attributes.at(i);
-            Qt3DRender::QBuffer *buffer = attribute->buffer();
-            const QByteArray &data = buffer->data();
- 
-            int vertexOffset = vertexIndex * attribute->byteStride();
-            int offset = vertexOffset + attribute->byteOffset();
-
-            char *rawData = (char*)&(data.constData()[offset]);
-
-            // replace float with your data type
-            float *value = reinterpret_cast<float*>(rawData);
-
-            break;
-        }
+    qDebug() << flatState << numPoints << sizeof(sphereEntity)/4;
+    if (flatState&&numPoints< sizeof(sphereEntity)/4)
+        {//qDebug() << pick->localIntersection()<<"pick";
+        QVector3D v = pick->localIntersection();
+        addCuttingPoint(v);
     }
+    else
+        return;
 }
 
 
-void GLModel::makePlane(){
+void GLModel::generatePlane(){
 
-    if (vector_set.size()<3){
+    if (cuttingPoints.size()<3){
         qDebug()<<"Error: There is not enough vectors to render a plane.";
         QCoreApplication::quit();
         return;
@@ -387,10 +393,9 @@ void GLModel::makePlane(){
     QVector3D v1;
     QVector3D v2;
     QVector3D v3;
-    v1=vector_set[vector_set.size()-3];
-    v2=vector_set[vector_set.size()-2];
-    v3=vector_set[vector_set.size()-1];
-
+    v1=cuttingPoints[cuttingPoints.size()-3];
+    v2=cuttingPoints[cuttingPoints.size()-2];
+    v3=cuttingPoints[cuttingPoints.size()-1];
         planeMaterial = new Qt3DExtras::QPhongMaterial();
         planeMaterial->setDiffuse(QColor(QRgb(0x00aaaa)));
         //To manipulate plane color, change the QRgb(0x~~~~~~).
@@ -401,58 +406,95 @@ void GLModel::makePlane(){
         QVector3D crossproduct_vector(QVector3D::crossProduct(original_normal,desire_normal));
 
         for (int i=0;i<2;i++){
-            ClipPlane[i]=new Qt3DExtras::QPlaneMesh();
-                ClipPlane[i]->setHeight(30.0);
-                ClipPlane[i]->setWidth(30.0);
+            clipPlane[i]=new Qt3DExtras::QPlaneMesh();
+                clipPlane[i]->setHeight(30.0);
+                clipPlane[i]->setWidth(30.0);
 
             planeTransform[i]=new Qt3DCore::QTransform();
                 planeTransform[i]->setScale(2.0f);
                 planeTransform[i]->setRotation(QQuaternion::fromAxisAndAngle(crossproduct_vector, angle+180*i));
                 planeTransform[i]->setTranslation(desire_normal*(-world_origin.distanceToPlane(v1,v2,v3)));
 
-                qDebug()<<"vector:"<<desire_normal;
-                qDebug()<<"factor:"<<world_origin.distanceToPlane(v1,v2,v3);
-                qDebug()<<"output:"<<desire_normal*world_origin.distanceToPlane(v1,v2,v3);
-
-            planeEntity[i] = new Qt3DCore::QEntity(motherEntity);
-                planeEntity[i]->addComponent(ClipPlane[i]);
+            planeEntity[i] = new Qt3DCore::QEntity(parentEntity);
+                planeEntity[i]->addComponent(clipPlane[i]);
                 planeEntity[i]->addComponent(planeTransform[i]);
                 planeEntity[i]->addComponent(planeMaterial);
         }
-
 }
 
-void GLModel::delModel(){
-    delete positionAttribute;
-    delete normalAttribute;
-    delete colorAttribute;
+void GLModel::addCuttingPoint(QVector3D v){
+    cuttingPoints.push_back(v);
+    sphereMesh[numPoints] = new Qt3DExtras::QSphereMesh;
+    sphereMesh[numPoints]->setRadius(1);
+    sphereTransform[numPoints] = new Qt3DCore::QTransform;
+    sphereTransform[numPoints]->setTranslation(v);
+
+    sphereMaterial[numPoints] = new Qt3DExtras::QPhongMaterial();
+    sphereMaterial[numPoints]->setDiffuse(QColor(QRgb(0xaa0000)));
+    sphereEntity[numPoints] = new Qt3DCore::QEntity(parentEntity);
+    sphereEntity[numPoints]->addComponent(sphereMesh[numPoints]);
+    sphereEntity[numPoints]->addComponent(sphereTransform[numPoints]);
+    sphereEntity[numPoints]->addComponent(sphereMaterial[numPoints]);
+    numPoints++;
+}
+
+void GLModel::removeCuttingPoints(){
+
+    for(int i=0;i<numPoints;i++)
+    {
+        sphereEntity[i]->removeComponent(sphereMesh[i]);
+        sphereEntity[i]->removeComponent(sphereTransform[i]);
+        sphereEntity[i]->removeComponent(sphereMaterial[i]);
+    }
+    delete [] sphereEntity;
+    delete [] sphereMaterial;
+    delete [] sphereMesh;
+    delete [] sphereTransform;
+    numPoints=0;
+}
+
+void GLModel::removeModel(){
     delete vertexBuffer;
     delete vertexNormalBuffer;
     delete vertexColorBuffer;
+    delete positionAttribute;
+    delete normalAttribute;
+    delete colorAttribute;
+    removeComponent(m_geometryRenderer);
+    removeComponent(m_planeMaterial);
     delete m_geometry;
     delete m_geometryRenderer;
 }
 
 void GLModel::modelcut(){
-    makePlane();
-    before_initiate();
 
-    Plane plane;
-    plane.push_back(vector_set[vector_set.size()-3]);
-    plane.push_back(vector_set[vector_set.size()-2]);
-    plane.push_back(vector_set[vector_set.size()-1]);
-    bisectModel(mesh, plane, lmesh, rmesh);
+    removeCuttingPoints();
+    generatePlane();
+//    beforeInitialize();
+////
+//    Plane plane;
+//    plane.push_back(cuttingPoints[cuttingPoints.size()-3]);
+//    plane.push_back(cuttingPoints[cuttingPoints.size()-2]);   //plane에 잘 들어감
+//    plane.push_back(cuttingPoints[cuttingPoints.size()-1]);
+////
+//    initialize(mesh);
+//    addComponent(m_objectPicker);
+//    QObject::connect(m_objectPicker, SIGNAL(clicked(Qt3DRender::QPickEvent*)), this, SLOT(handlePickerClicked(Qt3DRender::QPickEvent*)));
+//    addComponent(m_transform);
 
-    initialize(rmesh);
-    delete mesh;
-    delete lmesh;
-    addVertices(rmesh);
+//    addVertices(mesh);
+//    bisectModel(mesh, plane, lmesh, rmesh);
+//    addVertices(rmesh);
 }
 
 
-void GLModel::before_initiate(){
-
-
+void GLModel::beforeInitialize(){
+//    delete m_mesh;
+    removeComponent(m_objectPicker);
+    QObject::disconnect(m_objectPicker, SIGNAL(clicked(Qt3DRender::QPickEvent*)), this, SLOT(handlePickerClicked(Qt3DRender::QPickEvent*)));
+    removeComponent(m_transform);
+    removeComponent(m_geometryRenderer);
+    removeComponent(m_planeMaterial);
     m_geometryRenderer->setGeometry(nullptr);
     m_geometry->removeAttribute(colorAttribute);
     m_geometry->removeAttribute(normalAttribute);
@@ -471,3 +513,172 @@ void GLModel::before_initiate(){
 }
 
 
+GLModel::~GLModel(){
+    delete m_transform;
+    delete m_objectPicker;
+    delete m_planeMaterial;
+    delete mesh;
+    delete rmesh;
+    delete lmesh;
+    delete colorAttribute;
+    delete normalAttribute;
+    delete positionAttribute;
+    delete vertexColorBuffer;
+    delete vertexNormalBuffer;
+    delete vertexBuffer;
+    delete m_geometry;
+    delete m_geometryRenderer;
+}
+
+void GLModel::beforeAddVerticies(){
+    //쓰지말것
+    removeComponent(m_geometryRenderer);
+    removeComponent(m_planeMaterial);
+    m_geometryRenderer->setGeometry(nullptr);
+    m_geometry->removeAttribute(positionAttribute);
+    m_geometry->removeAttribute(normalAttribute);
+    m_geometry->removeAttribute(colorAttribute);
+
+    positionAttribute->setBuffer(nullptr);
+//    delete vertexBuffer;
+//    QByteArray vertexArray;
+//    vertexArray.resize(mesh->faces.size()*3*(3)*sizeof(float));
+//    vertexBuffer = new Qt3DRender::QBuffer(Qt3DRender::QBuffer::VertexBuffer,m_geometry);
+//    vertexBuffer->setUsage(Qt3DRender::QBuffer::DynamicDraw);
+//    vertexBuffer->setData(vertexArray);
+//    positionAttribute->setBuffer(vertexBuffer);
+
+
+//    normalAttribute->setBuffer(nullptr);
+//    delete vertexNormalBuffer;
+//    QByteArray vertexNormalArray;
+//    vertexNormalArray.resize(mesh->faces.size()*3*(3)*sizeof(float));
+//    vertexNormalBuffer = new Qt3DRender::QBuffer(Qt3DRender::QBuffer::VertexBuffer,m_geometry);
+//    vertexNormalBuffer->setUsage(Qt3DRender::QBuffer::DynamicDraw);
+//    vertexNormalBuffer->setData(vertexNormalArray);
+//    normalAttribute->setBuffer(vertexNormalBuffer);
+
+//    colorAttribute->setBuffer(nullptr);
+//    delete vertexColorBuffer;
+//    QByteArray vertexColorArray;
+//    vertexColorArray.resize(mesh->faces.size()*3*(3)*sizeof(float));
+//    vertexColorBuffer = new Qt3DRender::QBuffer(Qt3DRender::QBuffer::VertexBuffer,m_geometry);
+//    vertexColorBuffer->setUsage(Qt3DRender::QBuffer::DynamicDraw);
+//    vertexColorBuffer->setData(vertexColorArray);
+//    colorAttribute->setBuffer(vertexColorBuffer);
+
+//    m_geometry->addAttribute(positionAttribute);
+//    m_geometry->addAttribute(normalAttribute);
+//    m_geometry->addAttribute(colorAttribute);
+//    m_geometryRenderer->setGeometry(m_geometry);
+//    addComponent(m_geometryRenderer);
+//    addComponent(m_planeMaterial);
+
+}
+
+void GLModel::engoo(){
+    m_planeMaterial->setAmbient(QColor(10,200,10));
+}
+
+void GLModel::exgoo(){
+    m_planeMaterial->setAmbient(QColor(81,200,242));
+}
+void GLModel::mgoo(Qt3DRender::QPickEvent* v)
+{
+    QVector3D endpoint(v->localIntersection());
+    drawLine(endpoint);
+}
+void GLModel::pgoo(Qt3DRender::QPickEvent* v){
+    lastpoint=v->localIntersection();
+}
+
+void GLModel::rgoo(Qt3DRender::QPickEvent* v){
+}
+
+void GLModel::drawLine(QVector3D endpoint)
+{
+    if (curveState){
+        float line_length=endpoint.distanceToPoint(lastpoint);
+        QVector3D original_normal(0,1,0);
+        QVector3D desire_normal(endpoint-lastpoint);
+        desire_normal.normalize();//size=1
+        float angle = qAcos(QVector3D::dotProduct(original_normal,desire_normal))*180/M_PI;
+        QVector3D crossproduct_vector(QVector3D::crossProduct(original_normal,desire_normal));
+        QVector3D desire_point=(endpoint+lastpoint)/2;
+        Qt3DExtras::QCylinderMesh* line = new Qt3DExtras::QCylinderMesh;
+        line->setRadius(0.05);
+        line->setLength(line_length);
+        Qt3DCore::QTransform * lineTransform = new Qt3DCore::QTransform;
+        lineTransform->setRotation(QQuaternion::fromAxisAndAngle(crossproduct_vector, angle));
+        lineTransform->setTranslation(desire_point);
+        Qt3DExtras::QPhongMaterial * lineMaterial = new Qt3DExtras::QPhongMaterial();
+        lineMaterial->setDiffuse(QColor(QRgb(0x00aa00)));
+        Qt3DCore::QEntity* lineEntity = new Qt3DCore::QEntity(parentEntity);
+        lineEntity->addComponent(line);
+        lineEntity->addComponent(lineTransform);
+        lineEntity->addComponent(lineMaterial);
+        lastpoint=endpoint;
+    }
+}
+
+void GLModel::lineAccept(){
+    qDebug() << "line Accept";
+    if(!curveState){
+        curveState=true;}
+    else {
+        curveState=false;}
+}
+
+void GLModel::pointAccept(){
+    qDebug() << "point Accept";
+    if(!flatState){
+        flatState=true;}
+    else {
+        removeCuttingPoints();
+        flatState=false;}
+}
+
+void GLModel::getSignal(double value){
+    QVector3D v1=cuttingPoints[cuttingPoints.size()-3];
+    QVector3D v2=cuttingPoints[cuttingPoints.size()-2];
+    QVector3D v3=cuttingPoints[cuttingPoints.size()-1];
+    QVector3D world_origin(0,0,0);
+    QVector3D original_normal(0,1,0);
+    QVector3D desire_normal(QVector3D::normal(v1,v2,v3)); //size=1
+    float angle = qAcos(QVector3D::dotProduct(original_normal,desire_normal))*180/M_PI+(value-1)*30;
+    QVector3D crossproduct_vector(QVector3D::crossProduct(original_normal,desire_normal));
+    for (int i=0;i<2;i++){
+        planeTransform[i]->setRotation(QQuaternion::fromAxisAndAngle(crossproduct_vector, angle+180*i));
+        planeTransform[i]->setTranslation(desire_normal*(-world_origin.distanceToPlane(v1,v2,v3)));
+        planeEntity[i]->addComponent(planeTransform[i]);
+    }
+}
+
+/** HELPER functions **/
+
+QVector3D GLModel::spreadPoint(QVector3D endPoint,QVector3D startPoint,int factor){
+    QVector3D standardVector = endPoint-startPoint;
+    QVector3D finalVector=endPoint+standardVector*(factor-1);
+    return finalVector;
+}
+
+
+Mesh* GLModel::toSparse(Mesh* mesh){
+    int i=0, jump=30, factor=10;
+    Mesh* newMesh = new Mesh;
+    foreach (MeshFace mf , mesh->faces){
+        if (i%jump==0){
+            QVector3D point1 =mesh->idx2MV(mf.mesh_vertex[0]).position;
+            QVector3D point2 =mesh->idx2MV(mf.mesh_vertex[1]).position;
+            QVector3D point3 =mesh->idx2MV(mf.mesh_vertex[2]).position;
+            QVector3D CenterOfMass = (point1+point2+point3)/3;
+            point1=GLModel::spreadPoint(point1,CenterOfMass,factor);
+            point2=GLModel::spreadPoint(point2,CenterOfMass,factor);
+            point3=GLModel::spreadPoint(point3,CenterOfMass,factor);
+            newMesh->addFace(mesh->idx2MV(mf.mesh_vertex[0]).position, mesh->idx2MV(mf.mesh_vertex[1]).position, mesh->idx2MV(mf.mesh_vertex[2]).position);
+            newMesh->addFace(point1,point2,point3);
+        }
+        i+=1;
+    }
+return newMesh;
+}

@@ -116,8 +116,8 @@ Entity {
     components: [
         RenderSettings {
             id : rd
-            pickingSettings.pickMethod: PickingSettings.BoundingVolumePicking
-
+            pickingSettings.pickMethod: PickingSettings.TrianglePicking
+            pickingSettings.pickResultMode: PickingSettings.AllPicks
 
             activeFrameGraph: RenderSurfaceSelector {
                 //camera:camera2
@@ -197,7 +197,7 @@ Entity {
         average = camera.viewCenter
         temp = Camera_position.minus(average.times(10))
         cameraRadius = Math.sqrt(Math.pow(temp.x,2) + Math.pow(temp.y,2) + Math.pow(temp.z,2))
-        //console.log("view center" + camera.viewCenter + " rad " + cameraRadius)
+
         camera.temp = temp.times(0.25)
 
         return cameraRadius
@@ -218,7 +218,6 @@ Entity {
             var viewVector = camera.position.minus(camera.viewCenter)
             viewVector = viewVector.times(zoom);
             camera.position = camera.viewCenter.plus(viewVector);
-
             //sceneRoot.total.mtr.perfectPosition();
 
         }
@@ -256,8 +255,6 @@ Entity {
         sourceDevice: mouseDevice
         /*
         onPressed: {
-            console.log("aaaaaa")
-            console.log("pos  " + camera.position + " / cent  " + camera.viewCenter + " / rot" + camera.upVector)
             camera.viewCenter = Qt.vector3d( xLookAtOffset, yLookAtOffset, zLookAtOffset )
 
         }
@@ -289,7 +286,7 @@ Entity {
             }
 
             if (event.key === Qt.Key_V) {
-                console.log("cccc  " + camera.position)
+
                 /*
                 var point = Qt.vector3d(0,0,0);
                 var matrix = Qt.matrix4x4(0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0);
@@ -302,9 +299,7 @@ Entity {
                 point.y = (-1 * point.y+1) * scene3d.height/2;
 
 
-                console.log("point2 " + point);
-                console.log("viwport  w" + scene3d.width);
-                console.log("viwport  h" + scene3d.height);
+
 
                 rt.anchors.leftMargin = point.x
                 rt.anchors.topMargin = point.y

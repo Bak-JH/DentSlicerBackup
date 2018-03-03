@@ -1,11 +1,9 @@
 import Qt3D.Core 2.0
-
 import QtQuick 2.0
 import QtQuick.Layouts 1.0
 import QtQuick.Controls 1.0
 //import QtQuick.Controls.Styles 1.0
 import QtQuick.Controls.Styles 1.4
-
 
 
 
@@ -346,7 +344,8 @@ Rectangle {
             iconSource1: "qrc:/resource/upper_cut.png"
             iconSource2: "qrc:/Resource/upper2_cut.png"
             iconText: "Cut"
-
+        }
+            
         UpperButton{
             id : third_tab_button_shelloffset
 
@@ -368,7 +367,7 @@ Rectangle {
             color : "#CECECE"
         }
 
-    }
+
 
     Item{
         id : fourthtab
@@ -617,21 +616,26 @@ Rectangle {
         }
 
         //11. PopUp - Cut
-        /*PopUp {
+        PopUp {
             id: popup_cut
             funcname: "Cut"
             height: 300
-            detail1: "Click Apply to align the models."
-            detail2: ""
-            //image: "qrc:/resource/arrage_discription.png"
-            detailline1_vis: false
-            detailline2_vis: false
-            applyfinishbutton_vis: false
-            applybutton_vis: true
+            detail1: "Cutting Surface"
+            detail2: "After treatment"
+            detailline1_vis: true
+            detailline2_vis: true
+            applyfinishbutton_vis: true
+            applybutton_vis: false
             descriptionimage_vis: false
+            leftselectimage_vis: true
+            rightselectimage_vis: true
+            radiobutton1_vis: true
+            radiobutton2_vis: true
+            slider_vis: true
+            imageHeight: 70
             state: third_tab_button_cut.state=="active" ? "active" : "inactive"
-        }*/
-        PopUp {
+        }
+        /*PopUp {
             id:popup1
             funcname: "Cut"
             height: 294
@@ -844,7 +848,7 @@ Rectangle {
             detailline2_vis: true
             applyfinishbutton_vis: true
             applybutton_vis: false
-        }
+        }*/
 
 
         //12. PopUp - Shell Offset
@@ -1140,6 +1144,12 @@ Rectangle {
             detail1: "Type letters on the surface."
             detail2: "Font"
             image: "qrc:/Resource/label_description.png"
+
+            onApplyClicked: {
+                console.log("ApplyClicked")
+                console.log(text3DInput.text)
+                console.log(fontBox.currentText)
+            }
 
             Rectangle {
                 id: text3DInputBackground
