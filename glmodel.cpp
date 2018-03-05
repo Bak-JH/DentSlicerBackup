@@ -412,11 +412,18 @@ bool GLModel::isLeftToPlane(Plane plane, QVector3D position){
 
 void GLModel::handlePickerClicked(QPickEvent *pick)
 {
-    if (labellingTextPreview && labellingTextPreview->isEnabled()) {
-        labellingTextPreview->setTranslation(pick->localIntersection());
-        labellingTextPreview->setNormal(QVector3D(0, 0, 1));
-    }
+    if (labelingActive) {
+        if (labellingTextPreview)
+            labellingTextPreview->setEnabled(true);
 
+        if (auto* gglModel = qobject_cast<GLModel*>(parent()))
+            gglModel->m_planeMaterial->setDiffuse(QColor(0, 255, 0));
+
+        if (labellingTextPreview && labellingTextPreview->isEnabled()) {
+            labellingTextPreview->setTranslation(pick->localIntersection());
+            labellingTextPreview->setNormal(QVector3D(0, 0, 1));
+        }
+    }
     QPickTriangleEvent *trianglePick = static_cast<QPickTriangleEvent*>(pick);
     qDebug() << flatState << numPoints << sizeof(sphereEntity)/4;
     if (flatState&&numPoints< sizeof(sphereEntity)/4)
@@ -746,14 +753,17 @@ void GLModel::getTextChanged(QString text)
 
 void GLModel::openLabelling()
 {
-    if (!labellingTextPreview->isEnabled())
-        labellingTextPreview->setEnabled(true);
+    labelingActive = true;
 }
 
 void GLModel::closeLabelling()
 {
-    if (labellingTextPreview->isEnabled())
+    labelingActive = false;
+    if (labellingTextPreview && labellingTextPreview->isEnabled())
         labellingTextPreview->setEnabled(false);
+
+    if (auto* gglModel = qobject_cast<GLModel*>(parent()))
+        gglModel->m_planeMaterial->setDiffuse(QColor(255,255,255));
 }
 
 void GLModel::getFontNameChanged(QString fontName)
@@ -767,6 +777,9 @@ void GLModel::generateText3DMesh()
     if (!labellingTextPreview)
         return;
 
+    QVector3D* originalVertices = reinterpret_cast<QVector3D*>(vertexBuffer->data().data());
+    int originalVerticesSize = vertexBuffer->data().size() / sizeof(float) / 3;
+
     QVector3D* vertices;
     int verticesSize;
     unsigned int* indices;
@@ -775,50 +788,34 @@ void GLModel::generateText3DMesh()
     float scale = labellingTextPreview->ratioY * labellingTextPreview->scaleY;
     QVector3D translation = labellingTextPreview->translation;
 
-    generateText3DGeometry(&vertices, &verticesSize,
-                           &indices, &indicesSize,
-                           QFont(labellingTextPreview->fontName),
-                           labellingTextPreview->text,
-                           depth);
-
-    float mx = FLT_MAX, Mx = -FLT_MAX, my = FLT_MAX, My = -FLT_MAX;
-
-    for (int i = 0; i < verticesSize / 2; ++i) {
-        auto& v = vertices[2 * i + 0];
-
-        mx = v.x() < mx ? v.x() : mx;
-        my = v.y() < my ? v.y() : my;
-        Mx = v.x() > Mx ? v.x() : Mx;
-        My = v.y() > My ? v.y() : My;
-    }
-
-    for (int i = 0; i < verticesSize / 2; ++i) {
-        auto& v = vertices[2 * i + 0];
-        v.setX(v.x() - (Mx - mx) * 0.5f);
-        v.setY(v.y() - (My - my) * 0.5f);
-        v = v / (My - my);
-    }
-
-    Qt3DCore::QTransform transform;
+    Qt3DCore::QTransform transform, normalTransform;
     transform.setScale(scale);
     transform.setRotationX(90);
     transform.setTranslation(translation);
 
-    for (int i = 0; i < verticesSize / 2; ++i) {
-        vertices[2 * i] = transform.matrix() * vertices[2 * i];
-    }
+    normalTransform.setRotationX(90);
+
+    generateText3DGeometry(&vertices, &verticesSize,
+                           &indices, &indicesSize,
+                           QFont(labellingTextPreview->fontName),
+                           labellingTextPreview->text,
+                           depth,
+                           originalVertices,
+                           originalVerticesSize, QVector3D(0, 1, 0),
+                           transform.matrix(),
+                           normalTransform.matrix());
 
     std::vector<QVector3D> outVertices;
     std::vector<QVector3D> outNormals;
     for (int i = 0; i < indicesSize / 3; ++i) {
         // Insert vertices in CW order
         outVertices.push_back(vertices[2 * indices[3*i + 0] + 0]);
-        outVertices.push_back(vertices[2 * indices[3*i + 2] + 0]);
         outVertices.push_back(vertices[2 * indices[3*i + 1] + 0]);
+        outVertices.push_back(vertices[2 * indices[3*i + 2] + 0]);
 
         outNormals.push_back(vertices[2 * indices[3*i + 0] + 1]);
-        outNormals.push_back(vertices[2 * indices[3*i + 2] + 1]);
         outNormals.push_back(vertices[2 * indices[3*i + 1] + 1]);
+        outNormals.push_back(vertices[2 * indices[3*i + 2] + 1]);
     }
 
     if (GLModel* gglModel = qobject_cast<GLModel*>(parent())) {

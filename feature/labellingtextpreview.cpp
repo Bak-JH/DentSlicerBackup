@@ -43,10 +43,17 @@ void LabellingTextPreview::setText(QString text)
         texture->removeTextureImage(textureImage);
     }
 
-    textureImage = new TextureImage(64, 16, 8.0f, text, fontName);
+    width = text.size() * 12;
+
+    if (width < minimumWidth)
+        width = minimumWidth;
+
+    textureImage = new TextureImage(width, 16, 8.0f, text, fontName);
     textureImage->update();
 
     texture->addTextureImage(textureImage);
+
+    updateTransform();
 }
 
 void LabellingTextPreview::setFontName(QString fontName)
@@ -57,10 +64,17 @@ void LabellingTextPreview::setFontName(QString fontName)
         texture->removeTextureImage(textureImage);
     }
 
-    textureImage = new TextureImage(64, 16, 8.0f, text, fontName);
+    width = text.size() * 12;
+
+    if (width < minimumWidth)
+        width = minimumWidth;
+
+    textureImage = new TextureImage(width, 16, 8.0f, text, fontName);
     textureImage->update();
 
     texture->addTextureImage(textureImage);
+
+    updateTransform();
 }
 
 void LabellingTextPreview::setTranslation(const QVector3D& t)
@@ -89,5 +103,5 @@ void LabellingTextPreview::updateTransform()
 
     planeTransform->setTranslation(translation + minusNormal * 0.5f);
     planeTransform->setRotation(QQuaternion::fromAxisAndAngle(QVector3D(1, 0, 0), 180));
-    planeTransform->setScale3D(QVector3D(1, 1.0f, ratioY) * scaleY);
+    planeTransform->setScale3D(QVector3D(width / minimumWidth, 1.0f, ratioY) * scaleY);
 }

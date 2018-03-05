@@ -10,6 +10,8 @@ void generateText3DGeometry(QVector3D** vertices, int* verticesSize,
                             QFont font, QString text, float depth,
                             const QVector3D* originalVertices,
                             const int originalVerticesCount,
-                            const QVector3D normalVector);
+                            const QVector3D normalVector,
+                            const QMatrix4x4& transform,
+                            const QMatrix4x4& normalTransform);
 
 #endif // TEXT3DGEOMETRYGENERATOR_H

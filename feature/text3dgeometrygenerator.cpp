@@ -5,6 +5,8 @@
 #include <QVector3D>
 #include <QTextLayout>
 #include <QTime>
+#include <cfloat>
+#include <cmath>
 
 #include "qtriangulator_p.h"
 #include "text3dgeometrygenerator.h"
@@ -85,7 +87,9 @@ void generateText3DGeometry(QVector3D** vertices, int* verticesSize,
                             QFont font, QString text, float depth,
                             const QVector3D* originalVertices,
                             const int originalVerticesCount,
-                            const QVector3D normalVector)
+                            const QVector3D normalVector,
+                            const QMatrix4x4& transform,
+                            const QMatrix4x4& normalTransform)
 {
     float edgeSplitAngle = 90.f * 0.1f;
     TriangulationData data = triangulate(text, font);
@@ -101,14 +105,66 @@ void generateText3DGeometry(QVector3D** vertices, int* verticesSize,
     QVector<IndexType> internalIndices;
     QVector<Vertex> internalVertices;
 
+    float mx = FLT_MAX, Mx = -FLT_MAX, my = FLT_MAX, My = -FLT_MAX;
+
+    for (QVector3D &v : data.vertices) {
+        mx = v.x() < mx ? v.x() : mx;
+        my = v.y() < my ? v.y() : my;
+        Mx = v.x() > Mx ? v.x() : Mx;
+        My = v.y() > My ? v.y() : My;
+    }
+
+    for (QVector3D &v : data.vertices) {
+        v.setX(v.x() - (Mx - mx) * 0.5f);
+        v.setY(v.y() - (My - my) * 0.5f);
+        v = v / (My - my);
+    }
+
+    for (QVector3D &v : data.vertices) {
+        v = transform * v;
+    }
+
     // TODO: keep 'vertices.size()' small when extruding
     internalVertices.reserve(data.vertices.size() * 2);
-    for (QVector3D &v : data.vertices) // front face
-        internalVertices.push_back({ v, // vertex
-                             QVector3D(0.0f, 0.0f, -1.0f) }); // normal
-    for (QVector3D &v : data.vertices) // front face
-        internalVertices.push_back({ QVector3D(v.x(), v.y(), depth), // vertex
-                             QVector3D(0.0f, 0.0f, 1.0f) }); // normal
+    for (QVector3D &v : data.vertices) { // front face
+        QVector3D outIntersectionPoint;
+        bool isIntersected = false;
+
+        for (int i = 0; i < originalVerticesCount / 3; ++i) {
+            auto vertex = v;
+            auto v0 = originalVertices[3 * i + 0];
+            auto v1 = originalVertices[3 * i + 1];
+            auto v2 = originalVertices[3 * i + 2];
+
+            isIntersected = RayIntersectsTriangle(vertex, -normalVector,
+                                      v0, v1, v2,
+                                      outIntersectionPoint);
+            if (isIntersected) {
+                if (std::isinf(outIntersectionPoint.z())) {
+                    isIntersected = false;
+                    continue;
+                }
+
+                qDebug() << "intersected:" << v << outIntersectionPoint;
+                break;
+            }
+        }
+
+        isIntersected = false; // XXX
+
+        if (isIntersected) {
+            internalVertices.push_back({ outIntersectionPoint, // vertex
+                                 -normalVector }); // normal
+        } else {
+            internalVertices.push_back({ v - normalVector, // vertex
+                                 -normalVector }); // normal
+        }
+    }
+
+    for (QVector3D &v : data.vertices) { // front face
+        internalVertices.push_back({ v + normalVector * 0.2f, // vertex
+                             normalVector }); // normal
+    }
 
     for (int i = 0, verticesIndex = internalVertices.size(); i < data.outlines.size(); ++i) {
         const int begin = data.outlines[i].begin;

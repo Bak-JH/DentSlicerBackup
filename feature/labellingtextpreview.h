@@ -56,7 +56,10 @@ public:
     QString text;
     QString fontName = "Arial";
 
-    float scaleY = 10.0f;
+    float minimumScaleX = 1.0f;
+    float minimumWidth = 64;
+    float width = 64;
+    float scaleY = 5.0f;
     float ratioY = 16.0f / 64;
 
 private:

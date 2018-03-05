@@ -99,6 +99,8 @@ private:
     void onTimerUpdate();
     Mesh* toSparse(Mesh* mesh);
 
+    bool labelingActive = false;
+
 
     // bisects mesh into leftMesh, rightMesh divided by plane
     void bisectModel(Mesh* mesh, Plane plane, Mesh* leftMesh, Mesh* rightMesh);
