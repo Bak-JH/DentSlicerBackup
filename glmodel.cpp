@@ -3,6 +3,8 @@
 #include <QString>
 #include <QtMath>
 
+#include "feature/text3dgeometrygenerator.h"
+
 GLModel::GLModel(QNode *parent, QString fname, bool isShadow)
     : QEntity(parent)
     , filename(fname)
@@ -28,10 +30,12 @@ GLModel::GLModel(QNode *parent, QString fname, bool isShadow)
         addVertices(sparseMesh);
 
         addComponent(m_transform);
+
+        m_objectPicker = new Qt3DRender::QObjectPicker();
+
         //m_objectPicker->setHoverEnabled(true);
         //m_objectPicker->setDragEnabled(true);
 
-        m_objectPicker = new Qt3DRender::QObjectPicker();
         // add only m_objectPicker
         QObject::connect(m_objectPicker, SIGNAL(clicked(Qt3DRender::QPickEvent*)), this, SLOT(handlePickerClicked(Qt3DRender::QPickEvent*)));
         QObject::connect(m_objectPicker, SIGNAL(moved(Qt3DRender::QPickEvent*)), this, SLOT(mgoo(Qt3DRender::QPickEvent*)));
@@ -48,6 +52,10 @@ GLModel::GLModel(QNode *parent, QString fname, bool isShadow)
         m_planeMaterial->setSpecular(QColor(81,200,242));
         m_planeMaterial->setAlpha(1.0f);
         addComponent(m_planeMaterial);*/
+
+        labellingTextPreview = new LabellingTextPreview(this);
+        labellingTextPreview->setEnabled(false);
+
         return;
     }
 
@@ -285,7 +293,18 @@ void GLModel::addVertices(vector<QVector3D> vertices){
     }
 
     uint vertexCount = positionAttribute->count();
-    vertexBuffer->updateData(vertexCount*3*sizeof(float),appendVertexArray);
+
+    int offset = vertexCount*3*sizeof(float);
+    int bytesSize = appendVertexArray.size();
+
+    if ((offset + bytesSize) > vertexBuffer->data().size()) {
+        auto data = vertexBuffer->data();
+        int dataOriginalSize = data.size();
+        data.resize(dataOriginalSize + bytesSize);
+        vertexBuffer->setData(data);
+    }
+
+    vertexBuffer->updateData(offset,appendVertexArray);
     positionAttribute->setCount(vertexCount + vertex_cnt);
     return;
 }
@@ -306,7 +325,17 @@ void GLModel::addNormalVertices(vector<QVector3D> vertices){
     }
 
     uint vertexNormalCount = normalAttribute->count();
-    vertexNormalBuffer->updateData(vertexNormalCount*3*sizeof(float), appendVertexArray);
+
+    int offset = vertexNormalCount*3*sizeof(float);
+    int bytesSize = appendVertexArray.size();
+
+    if ((offset + bytesSize) > vertexNormalBuffer->data().size()) {
+        auto data = vertexNormalBuffer->data();
+        data.resize(data.size() + bytesSize);
+        vertexNormalBuffer->setData(data);
+    }
+
+    vertexNormalBuffer->updateData(offset, appendVertexArray);
     normalAttribute->setCount(vertexNormalCount+ vertex_normal_cnt);
     return;
 }
@@ -370,6 +399,11 @@ bool GLModel::isLeftToPlane(Plane plane, QVector3D position){
 
 void GLModel::handlePickerClicked(QPickEvent *pick)
 {
+    if (labellingTextPreview && labellingTextPreview->isEnabled()) {
+        labellingTextPreview->setTranslation(pick->localIntersection());
+        labellingTextPreview->setNormal(QVector3D(0, 0, 1));
+    }
+
     QPickTriangleEvent *trianglePick = static_cast<QPickTriangleEvent*>(pick);
     qDebug() << flatState << numPoints << sizeof(sphereEntity)/4;
     if (flatState&&numPoints< sizeof(sphereEntity)/4)
@@ -585,8 +619,15 @@ void GLModel::exgoo(){
 }
 void GLModel::mgoo(Qt3DRender::QPickEvent* v)
 {
+    qDebug() << "Moved";
+
+    /*
     QVector3D endpoint(v->localIntersection());
-    drawLine(endpoint);
+
+    qDebug() << endpoint;
+    */
+
+    // drawLine(endpoint);
 }
 void GLModel::pgoo(Qt3DRender::QPickEvent* v){
     lastpoint=v->localIntersection();
@@ -681,4 +722,77 @@ Mesh* GLModel::toSparse(Mesh* mesh){
         i+=1;
     }
 return newMesh;
+}
+
+void GLModel::getTextChanged(QString text)
+{
+    qDebug() << "text:" << text;
+    if (labellingTextPreview)
+        labellingTextPreview->setText(text);
+}
+
+void GLModel::openLabelling()
+{
+    if (!labellingTextPreview->isEnabled())
+        labellingTextPreview->setEnabled(true);
+}
+
+void GLModel::closeLabelling()
+{
+    if (labellingTextPreview->isEnabled())
+        labellingTextPreview->setEnabled(false);
+}
+
+void GLModel::getFontNameChanged(QString fontName)
+{
+    if (labellingTextPreview)
+        labellingTextPreview->setFontName(fontName);
+}
+
+void GLModel::generateText3DMesh()
+{
+    if (!labellingTextPreview)
+        return;
+
+    QVector3D* vertices;
+    int verticesSize;
+    unsigned int* indices;
+    int indicesSize;
+    float depth = 3.0f;
+    float scale = 4;
+    QVector3D translation = labellingTextPreview->translation;
+
+    generateText3DGeometry(&vertices, &verticesSize,
+                           &indices, &indicesSize,
+                           QFont(labellingTextPreview->fontName),
+                           labellingTextPreview->text,
+                           depth);
+
+    /*
+    for (int i = 0; i < verticesSize / 2; ++i) {
+        vertices[2 * i] = vertices[2 * i] * scale; // - translation;
+    }
+    */
+
+    std::vector<QVector3D> outVertices;
+    std::vector<QVector3D> outNormals;
+    for (int i = 0; i < indicesSize / 3; ++i) {
+        // Insert vertices in CW order
+        outVertices.push_back(vertices[2 * indices[3*i + 0] + 0]);
+        outVertices.push_back(vertices[2 * indices[3*i + 2] + 0]);
+        outVertices.push_back(vertices[2 * indices[3*i + 1] + 0]);
+
+        outNormals.push_back(vertices[2 * indices[3*i + 0] + 1]);
+        outNormals.push_back(vertices[2 * indices[3*i + 2] + 1]);
+        outNormals.push_back(vertices[2 * indices[3*i + 1] + 1]);
+    }
+
+    GLModel* gglModel = qobject_cast<GLModel*>(parent());
+
+    if (gglModel) {
+        qDebug() << "addVertices";
+        gglModel->addVertices(outVertices);
+        qDebug() << "addNormalVertices";
+        gglModel->addNormalVertices(outNormals);
+    }
 }

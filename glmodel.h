@@ -15,6 +15,7 @@
 #include "mesh.h"
 #include "fileloader.h"
 #include "arrange.h"
+#include "feature/labellingtextpreview.h"
 
 #define MAX_BUF_LEN 2000000
 
@@ -61,6 +62,8 @@ public:
     Qt3DCore::QEntity *sphereEntity[4];
     Qt3DCore::QTransform *sphereTransform[4];
     QPhongMaterial *sphereMaterial[4];
+
+    LabellingTextPreview* labellingTextPreview = nullptr;
 
     void removeModel();
     void beforeInitialize();
@@ -112,6 +115,11 @@ public slots:
     void lineAccept();
     void pointAccept();
     void getSignal(double value);
+    void getTextChanged(QString text);
+    void openLabelling();
+    void closeLabelling();
+    void getFontNameChanged(QString fontName);
+    void generateText3DMesh();
 };
 
 Qt3DRender::QAttribute *copyAttribute(Qt3DRender::QAttribute *oldAtt, QMap<Qt3DRender::QBuffer *, Qt3DRender::QBuffer *> &bufferMap);

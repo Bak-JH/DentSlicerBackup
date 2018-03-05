@@ -1137,6 +1137,7 @@ Rectangle {
             state: fourth_tab_button_label.state=="active" ? "active" : "inactive"
         }*/
         PopUp {
+            objectName: "labellingPopup"
             id:popup_label
             funcname: "Label"
             height: 450 // 282
@@ -1145,10 +1146,16 @@ Rectangle {
             detail2: "Font"
             image: "qrc:/Resource/label_description.png"
 
+            signal generateText3DMesh()
+            signal openLabelling()
+            signal closeLabelling()
+
             onApplyClicked: {
                 console.log("ApplyClicked")
-                console.log(text3DInput.text)
-                console.log(fontBox.currentText)
+
+                // text3DInput.text, labelFontBox.currentText
+
+                generateText3DMesh()
             }
 
             Rectangle {
@@ -1167,21 +1174,33 @@ Rectangle {
 
                 TextField {
                     id:text3DInput
+                    objectName: "text3DInput"
+
+                    signal sendTextChanged(string text)
 
                     anchors.fill: parent
 
                     placeholderText: qsTr("Enter text")
+
+                    onTextChanged: {
+                        sendTextChanged(text)
+                    }
                 }
             }
 
             ComboBox {
-                id: fontBox
+                objectName: "labelFontBox"
+                id: labelFontBox
                 currentIndex: 0
                 activeFocusOnPress: true
                 width: 176
                 anchors.top: parent.top
                 anchors.topMargin: 200
                 anchors.horizontalCenter: parent.horizontalCenter
+
+                signal sendFontName(string fontName)
+
+                onCurrentTextChanged: sendFontName(currentText)
 
                 Image {
                     width: 12
@@ -1202,7 +1221,7 @@ Rectangle {
                         height: parent.height
                         radius: 2
                         color: "#f9f9f9"
-                        border.color: fontBox.hovered ? "light blue" : "transparent"
+                        border.color: labelFontBox.hovered ? "light blue" : "transparent"
                     }
 
                     label: Text {
@@ -1263,10 +1282,10 @@ Rectangle {
                 //fonts list
                 model: ListModel {
                     id: fontItems
-                    ListElement { text: "Arial1" }
-                    ListElement { text: "Arial2" }
-                    ListElement { text: "Arial3" }
-                    ListElement { text: "Arial4" }
+                    ListElement { text: "Arial" }
+                    ListElement { text: "굴림체" }
+                    ListElement { text: "바탕체" }
+                    ListElement { text: "궁서체" }
                     ListElement { text: "Arial5" }
                     ListElement { text: "Arial6" }
                     ListElement { text: "Arial7" }
@@ -1281,7 +1300,16 @@ Rectangle {
             detailline2_vis: true
             applyfinishbutton_vis: false
             applybutton_vis: true
-            state: fourth_tab_button_label.state=="active" ? "active" : "inactive"
+            state: {
+                if (fourth_tab_button_label.state=="active") {
+                    openLabelling()
+                    return "active"
+                }
+                else {
+                    closeLabelling()
+                    return "inactive"
+                }
+            }
         }
     }
 }

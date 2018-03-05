@@ -19,12 +19,20 @@ void QmlManager::initializeUI(QQmlApplicationEngine* e){
     QObject *curve = FindItemByName(engine, "curve");
     QObject *flat = FindItemByName(engine, "flat");
     QObject *slider = FindItemByName(engine, "sslider");
+    QObject *text3DInput = FindItemByName(engine, "text3DInput");
+    QObject *labellingPopup = FindItemByName(engine, "labellingPopup");
+    QObject *labelFontBox = FindItemByName(engine, "labelFontBox");
     Lights* lights = new Lights(teethModel);
 
     QObject::connect(item,SIGNAL(qmlSignal()),gglmodel,SLOT(modelcut()));
     QObject::connect(curve,SIGNAL(curveSignal()),gglmodel,SLOT(lineAccept()));
     QObject::connect(flat,SIGNAL(flatSignal()),gglmodel,SLOT(pointAccept()));
     QObject::connect(slider,SIGNAL(govalue(double)),gglmodel,SLOT(getSignal(double)));
+    QObject::connect(text3DInput, SIGNAL(sendTextChanged(QString)),gglmodel->shadowModel,SLOT(getTextChanged(QString)));
+    QObject::connect(labellingPopup, SIGNAL(openLabelling()),gglmodel->shadowModel,SLOT(openLabelling()));
+    QObject::connect(labellingPopup, SIGNAL(closeLabelling()),gglmodel->shadowModel,SLOT(closeLabelling()));
+    QObject::connect(labellingPopup, SIGNAL(generateText3DMesh()),gglmodel->shadowModel, SLOT(generateText3DMesh()));
+    QObject::connect(labelFontBox, SIGNAL(sendFontName(QString)),gglmodel->shadowModel, SLOT(getFontNameChanged(QString)));
 }
 
 

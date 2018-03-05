@@ -17,7 +17,11 @@ SOURCES += main.cpp \
     lights.cpp \
     polyclipping/clipper.cpp \
     feature/modelcut.cpp \
-    feature/meshrepair.cpp
+    feature/meshrepair.cpp \
+    feature/labellingtextpreview.cpp \
+    feature/mathutils.cpp \
+    feature/qtriangulator.cpp \
+    feature/text3dgeometrygenerator.cpp
 
 RESOURCES += qml.qrc \
     resources.qrc
@@ -57,6 +61,14 @@ HEADERS += \
     lights.h \
     polyclipping/clipper.hpp \
     feature/modelcut.h \
-    feature/meshrepair.h
+    feature/meshrepair.h \
+    feature/labellingtextpreview.h \
+    feature/mathutils.h \
+    feature/qbezier.h \
+    feature/qdatabuffer_p.h \
+    feature/qrbtree.h \
+    feature/qtriangulator_p.h \
+    feature/qvectorpath_p.h \
+    feature/text3dgeometrygenerator.h
 
 LIBS += -lOpengl32
