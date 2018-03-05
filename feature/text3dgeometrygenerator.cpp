@@ -128,6 +128,8 @@ void generateText3DGeometry(QVector3D** vertices, int* verticesSize,
     internalVertices.reserve(data.vertices.size() * 2);
     for (QVector3D &v : data.vertices) { // front face
         QVector3D outIntersectionPoint;
+        QVector3D minimumLength(FLT_MAX, FLT_MAX, FLT_MAX);
+
         bool isIntersected = false;
 
         for (int i = 0; i < originalVerticesCount / 3; ++i) {
@@ -136,7 +138,7 @@ void generateText3DGeometry(QVector3D** vertices, int* verticesSize,
             auto v1 = originalVertices[3 * i + 1];
             auto v2 = originalVertices[3 * i + 2];
 
-            isIntersected = RayIntersectsTriangle(vertex, -normalVector,
+            isIntersected = RayIntersectsTriangle(vertex, normalVector,
                                       v0, v1, v2,
                                       outIntersectionPoint);
             if (isIntersected) {
@@ -145,15 +147,14 @@ void generateText3DGeometry(QVector3D** vertices, int* verticesSize,
                     continue;
                 }
 
-                qDebug() << "intersected:" << v << outIntersectionPoint;
-                break;
+                if (outIntersectionPoint.lengthSquared() < minimumLength.lengthSquared()) {
+                    minimumLength = outIntersectionPoint;
+                }
             }
         }
 
-        isIntersected = false; // XXX
-
         if (isIntersected) {
-            internalVertices.push_back({ outIntersectionPoint, // vertex
+            internalVertices.push_back({ minimumLength, // vertex
                                  -normalVector }); // normal
         } else {
             internalVertices.push_back({ v - normalVector, // vertex
@@ -161,9 +162,17 @@ void generateText3DGeometry(QVector3D** vertices, int* verticesSize,
         }
     }
 
+    for (auto& v : internalVertices) {
+        qDebug() << "1:" << v.position;
+    }
+
     for (QVector3D &v : data.vertices) { // front face
         internalVertices.push_back({ v + normalVector * 0.2f, // vertex
                              normalVector }); // normal
+    }
+
+    for (auto& v : internalVertices) {
+        qDebug() << "2:" << v.position;
     }
 
     for (int i = 0, verticesIndex = internalVertices.size(); i < data.outlines.size(); ++i) {
@@ -229,16 +238,8 @@ void generateText3DGeometry(QVector3D** vertices, int* verticesSize,
         indicesFaces[numIndices + j + 2] = indicesFaces[j + 1] + numVertices;
     }
 
-    unsigned int idx = 1;
-
-    while (idx < internalVertices.size()) {
-        idx = idx << 1;
-    }
-
-    internalVertices.resize(idx);
-
-    *vertices = new QVector3D[internalVertices.size()];
-    memcpy(*vertices, internalVertices.data(), sizeof(QVector3D) * internalVertices.size());
+    *vertices = new QVector3D[internalVertices.size() * 2];
+    memcpy(*vertices, internalVertices.data(), sizeof(QVector3D) * internalVertices.size() * 2);
     *verticesSize = internalVertices.size();
 
     *indices = new unsigned int[internalIndices.size()];
