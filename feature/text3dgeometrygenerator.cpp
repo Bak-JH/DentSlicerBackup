@@ -8,6 +8,7 @@
 
 #include "qtriangulator_p.h"
 #include "text3dgeometrygenerator.h"
+#include "mathutils.h"
 
 using IndexType = unsigned int;
 
@@ -81,7 +82,10 @@ inline QVector3D mix(const QVector3D &a, const QVector3D &b, float ratio)
 
 void generateText3DGeometry(QVector3D** vertices, int* verticesSize,
                             unsigned int** indices, int* indicesSize,
-                            QFont font, QString text, float depth)
+                            QFont font, QString text, float depth,
+                            const QVector3D* originalVertices,
+                            const int originalVerticesCount,
+                            const QVector3D normalVector)
 {
     float edgeSplitAngle = 90.f * 0.1f;
     TriangulationData data = triangulate(text, font);

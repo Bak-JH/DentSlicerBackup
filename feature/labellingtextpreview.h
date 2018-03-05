@@ -56,6 +56,9 @@ public:
     QString text;
     QString fontName = "Arial";
 
+    float scaleY = 10.0f;
+    float ratioY = 16.0f / 64;
+
 private:
 
     Qt3DCore::QEntity* planeEntity = nullptr;

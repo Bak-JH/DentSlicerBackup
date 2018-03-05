@@ -89,5 +89,5 @@ void LabellingTextPreview::updateTransform()
 
     planeTransform->setTranslation(translation + minusNormal * 0.5f);
     planeTransform->setRotation(QQuaternion::fromAxisAndAngle(QVector3D(1, 0, 0), 180));
-    planeTransform->setScale3D(QVector3D(1, 1.0f, 16.0f / 64) * 32);
+    planeTransform->setScale3D(QVector3D(1, 1.0f, ratioY) * scaleY);
 }

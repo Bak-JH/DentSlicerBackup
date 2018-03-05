@@ -2,6 +2,7 @@
 #include "glmodel.h"
 #include <QString>
 #include <QtMath>
+#include <cfloat>
 
 #include "feature/text3dgeometrygenerator.h"
 
@@ -280,33 +281,38 @@ void GLModel::addVertices(Mesh* mesh)
 
 void GLModel::addVertices(vector<QVector3D> vertices){
 
-    int vertex_cnt = vertices.size();
+    int appendVertexCount = vertices.size();
     QByteArray appendVertexArray;
-    appendVertexArray.resize(vertex_cnt*3*sizeof(float));
+    appendVertexArray.resize(appendVertexCount*3*sizeof(float));
     float* reVertexArray = reinterpret_cast<float*>(appendVertexArray.data());
 
-    for (int i=0; i<vertex_cnt; i++){
+    for (int i=0; i<appendVertexCount; i++){
         //coordinates of left vertex
         reVertexArray[i*3+0] = vertices[i].x();
         reVertexArray[i*3+1] = vertices[i].y();
         reVertexArray[i*3+2] = vertices[i].z();
     }
 
-    uint vertexCount = positionAttribute->count();
+    uint currentVertexCount = positionAttribute->count();
 
-    int offset = vertexCount*3*sizeof(float);
-    int bytesSize = appendVertexArray.size();
+    int currentVertexArraySize = currentVertexCount*3*sizeof(float);
+    int appendVertexArraySize = appendVertexArray.size();
 
-    if ((offset + bytesSize) > vertexBuffer->data().size()) {
+    if ((currentVertexArraySize  + appendVertexArraySize) > vertexBuffer->data().size()) {
         auto data = vertexBuffer->data();
-        int dataOriginalSize = data.size();
-        data.resize(dataOriginalSize + bytesSize);
+        int currentVertexArraySize = data.size();
+
+        int countPowerOf2 = 1;
+        while (countPowerOf2 < currentVertexArraySize + appendVertexArraySize) {
+            countPowerOf2 <<= 1;
+        }
+
+        data.resize(countPowerOf2);
         vertexBuffer->setData(data);
     }
 
-    vertexBuffer->updateData(offset,appendVertexArray);
-    positionAttribute->setCount(vertexCount + vertex_cnt);
-    return;
+    vertexBuffer->updateData(currentVertexArraySize, appendVertexArray);
+    positionAttribute->setCount(currentVertexCount + appendVertexCount);
 }
 
 
@@ -331,7 +337,14 @@ void GLModel::addNormalVertices(vector<QVector3D> vertices){
 
     if ((offset + bytesSize) > vertexNormalBuffer->data().size()) {
         auto data = vertexNormalBuffer->data();
-        data.resize(data.size() + bytesSize);
+
+        int countPowerOf2 = 1;
+        while (countPowerOf2 < data.size() + bytesSize) {
+            countPowerOf2 <<= 1;
+        }
+
+        data.resize(countPowerOf2);
+
         vertexNormalBuffer->setData(data);
     }
 
@@ -758,8 +771,8 @@ void GLModel::generateText3DMesh()
     int verticesSize;
     unsigned int* indices;
     int indicesSize;
-    float depth = 3.0f;
-    float scale = 4;
+    float depth = 1.0f;
+    float scale = labellingTextPreview->ratioY * labellingTextPreview->scaleY;
     QVector3D translation = labellingTextPreview->translation;
 
     generateText3DGeometry(&vertices, &verticesSize,
@@ -768,11 +781,32 @@ void GLModel::generateText3DMesh()
                            labellingTextPreview->text,
                            depth);
 
-    /*
+    float mx = FLT_MAX, Mx = -FLT_MAX, my = FLT_MAX, My = -FLT_MAX;
+
     for (int i = 0; i < verticesSize / 2; ++i) {
-        vertices[2 * i] = vertices[2 * i] * scale; // - translation;
+        auto& v = vertices[2 * i + 0];
+
+        mx = v.x() < mx ? v.x() : mx;
+        my = v.y() < my ? v.y() : my;
+        Mx = v.x() > Mx ? v.x() : Mx;
+        My = v.y() > My ? v.y() : My;
     }
-    */
+
+    for (int i = 0; i < verticesSize / 2; ++i) {
+        auto& v = vertices[2 * i + 0];
+        v.setX(v.x() - (Mx - mx) * 0.5f);
+        v.setY(v.y() - (My - my) * 0.5f);
+        v = v / (My - my);
+    }
+
+    Qt3DCore::QTransform transform;
+    transform.setScale(scale);
+    transform.setRotationX(90);
+    transform.setTranslation(translation);
+
+    for (int i = 0; i < verticesSize / 2; ++i) {
+        vertices[2 * i] = transform.matrix() * vertices[2 * i];
+    }
 
     std::vector<QVector3D> outVertices;
     std::vector<QVector3D> outNormals;
@@ -787,9 +821,7 @@ void GLModel::generateText3DMesh()
         outNormals.push_back(vertices[2 * indices[3*i + 1] + 1]);
     }
 
-    GLModel* gglModel = qobject_cast<GLModel*>(parent());
-
-    if (gglModel) {
+    if (GLModel* gglModel = qobject_cast<GLModel*>(parent())) {
         qDebug() << "addVertices";
         gglModel->addVertices(outVertices);
         qDebug() << "addNormalVertices";
