@@ -12,6 +12,7 @@
 #include <QCursor>
 #include "feature/meshrepair.h"
 #include "qmlmanager.h"
+#include "autoorientation.h"
 #include "mesh.h"
 #include "fileloader.h"
 #include "arrange.h"
@@ -34,6 +35,7 @@ public:
     ~GLModel();
 
     GLModel *shadowModel; // GLmodel's sparse mesh that gets picker input
+    bool appropriately_rotated=false;
     QPhongAlphaMaterial *m_planeMaterial;
     Qt3DRender::QBuffer *vertexBuffer;
     Qt3DRender::QBuffer *vertexNormalBuffer;
@@ -56,6 +58,7 @@ public:
     Qt3DCore::QEntity* planeEntity[2];
     Qt3DCore::QTransform *planeTransform[2];
     Qt3DExtras::QPhongMaterial *planeMaterial;
+    autoorientation* m_autoorientation;
 
     Qt3DExtras::QSphereMesh *sphereMesh[4];
     Qt3DCore::QEntity *sphereEntity[4];
@@ -71,6 +74,9 @@ public:
     void drawLine(QVector3D endpoint);
 
     QVector3D spreadPoint(QVector3D endpoint,QVector3D startpoint,int factor);
+
+    Mesh* mesh;
+
 private:
     int numPoints;
     bool flatState;
@@ -81,7 +87,6 @@ private:
     int f_cnt;
     Mesh* lmesh;
     Mesh* rmesh;
-    Mesh* mesh;
     Mesh* sparseMesh;
     QNode* m_parent;
     QVector3D lastpoint;
@@ -100,7 +105,6 @@ private:
     // bisects mesh into leftMesh, rightMesh divided by plane
     void bisectModel(Mesh* mesh, Plane plane, Mesh* leftMesh, Mesh* rightMesh);
     bool isLeftToPlane(Plane plane, QVector3D position);
-
 public slots:
     void handlePickerClicked(Qt3DRender::QPickEvent*);
     void mgoo(Qt3DRender::QPickEvent*);
@@ -112,6 +116,21 @@ public slots:
     void lineAccept();
     void pointAccept();
     void getSignal(double value);
+};
+
+class orientThread: public QThread
+{
+    Q_OBJECT
+public:
+    GLModel* m_glmodel;
+    autoorientation* m_autoorientation;
+    orientThread(GLModel* glmodel);
+signals:
+    void loadPopup(QVariant value);
+public slots:
+    void markPopup(bool value);
+private:
+    void run() Q_DECL_OVERRIDE;
 };
 
 Qt3DRender::QAttribute *copyAttribute(Qt3DRender::QAttribute *oldAtt, QMap<Qt3DRender::QBuffer *, Qt3DRender::QBuffer *> &bufferMap);

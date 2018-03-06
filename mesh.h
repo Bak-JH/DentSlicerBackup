@@ -29,6 +29,7 @@ public:
     vector<vector<MeshFace*>> neighboring_faces;
 
     QVector3D fn;
+    QVector3D fn_unnorm;
 };
 
 class MeshVertex {

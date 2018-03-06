@@ -7,9 +7,9 @@
 #include "configuration.h"
 #include "glmodel.h"
 #include "qmlmanager.h"
-#include "lights.h"
 #include <QQuickView>
-
+#include "QtConcurrent/QtConcurrent"
+#include "QFuture"
 
 using namespace Qt3DCore;
 

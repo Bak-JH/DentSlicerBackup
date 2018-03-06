@@ -1,9 +1,6 @@
 #include "qmlmanager.h"
 #include "lights.h"
 #include "glmodel.h"
-#include <QQmlApplicationEngine>
-#include <QQmlEngine>
-
 
 QmlManager::QmlManager(QObject *parent) : QObject(parent)
 {
@@ -20,7 +17,13 @@ void QmlManager::initializeUI(QQmlApplicationEngine* e){
     QObject *flat = FindItemByName(engine, "flat");
     QObject *slider = FindItemByName(engine, "sslider");
     Lights* lights = new Lights(teethModel);
+    QObject* autoorientButton = FindItemByName(engine, "autoorientButton");
+    QObject* progress_text = FindItemByName(engine, "progress_text");
+    orientThread* ot=new orientThread(gglmodel);
 
+    QObject::connect(gglmodel->m_autoorientation, SIGNAL(setProgress(QVariant)),progress_text, SLOT(update_loading(QVariant)));
+    QObject::connect(ot, SIGNAL(loadPopup(QVariant)),autoorientButton, SLOT(show_popup(QVariant)));
+    QObject::connect(autoorientButton, SIGNAL(autoOrientSignal()),ot, SLOT(start()));
     QObject::connect(item,SIGNAL(qmlSignal()),gglmodel,SLOT(modelcut()));
     QObject::connect(curve,SIGNAL(curveSignal()),gglmodel,SLOT(lineAccept()));
     QObject::connect(flat,SIGNAL(flatSignal()),gglmodel,SLOT(pointAccept()));
