@@ -12,6 +12,7 @@ Rectangle {
     property alias detailline1_vis: detailline1.visible
     property alias detailline2_vis: detailline2.visible
     property alias applybutton_vis: applybutton.visible
+    property alias okbutton_vis: okbutton.visible
     property alias descriptionimage_vis: descriptionimage.visible
     property alias applyfinishbutton_vis: applyfinishbutton.visible
     property alias applybutton_text: applybutton_text.text
@@ -77,7 +78,38 @@ Rectangle {
     property real numbox_value_detail2 : numbox_detail2_defalult
 
     function do_apply(functionname){
-        console.log(functionname);
+        switch(functionname.text){
+                case "Move":
+                    break;
+                case "Rotate":
+                    break;
+                case "Lay flat":
+                    break;
+                case "Arrange":
+                    break;
+                case "Orient":
+                    popup_orient.autoOrientSignal();
+                    break;
+                case "Scale":
+                    break;
+                case "Auto Repair":
+                    break;
+                case "Cut":
+                    break;
+                case "Shell Offset":
+                    break;
+                case "Extend":
+                    break;
+                case "Support":
+                    break;
+                case "Label":
+                    break;
+                case "Move":
+                    break;
+                default:
+                    console.log(functionname);
+                    break;
+                }
     }
 
     function focus_all_off() {
@@ -98,6 +130,9 @@ Rectangle {
         numberbox_detail2_text.text = numbox_value_detail2 + number_unit;
     }
 
+    function destroy_popup(){
+        popup_target.state="inactive";
+    }
 
     id: popup_target
     visible: false
@@ -187,6 +222,7 @@ Rectangle {
         anchors.bottom: parent.bottom
         anchors.bottomMargin: 7
         anchors.horizontalCenter: parent.horizontalCenter
+
         Text {
             id: applybutton_text
             anchors.verticalCenter: parent.verticalCenter
@@ -207,6 +243,35 @@ Rectangle {
         }
     }
 
+    //OK button
+        Rectangle {
+            id: okbutton
+            width: 90
+            height: 20
+            color: "#999999"
+            anchors.bottom: parent.bottom
+            anchors.bottomMargin: 15
+            anchors.horizontalCenter: parent.horizontalCenter
+            Text {
+                id: okbutton_text
+                anchors.verticalCenter: parent.verticalCenter
+                anchors.horizontalCenter: parent.horizontalCenter
+                text: "OK"
+                color: "#ffffff"
+                font.pointSize: 8
+                font.family: "Arial"
+            }
+            MouseArea {
+                id: mousearea_ok
+                anchors.fill: parent
+                hoverEnabled: true
+                onEntered: parent.color = "#b5b5b5"
+                onExited: parent.color = "#999999"
+                onPressed: parent.color = "#3ea6b7"
+                onReleased: {destroy_popup();focus_all_off(); numbox_reset();  parent.color = "#999999"}
+            }
+        }
+
     //Description image
     Rectangle {
         id: descriptionimage
@@ -226,6 +291,7 @@ Rectangle {
 
     //Apply-Finish button
     Rectangle {
+
         id: applyfinishbutton
         width: 111.6
         height: 30.7
@@ -249,7 +315,7 @@ Rectangle {
             onEntered: parent.color = "#b5b5b5"
             onExited: parent.color = "#999999"
             onPressed: parent.color = "#3ea6b7"
-            onReleased: {all_off(); focus_all_off(); numbox_reset(); parent.color = "#999999"}
+            onReleased: {all_off(); focus_all_off() ;numbox_reset();do_apply(funcname); parent.color = "#999999"}
         }
     }
     Rectangle {
@@ -323,58 +389,7 @@ Rectangle {
         }
     }
 
-    /*Rectangle {
-        width: 109.5
-        height: 30
-        id: applyBox
-        color: "#ababab"
-        anchors.bottom: parent.bottom
-        anchors.bottomMargin: 7
-        anchors.left: parent.left
-        anchors.leftMargin: 7
-        state: 'Inactivation'
-        states: [
-            State {
-                name: "Inactivation"
-                PropertyChanges {
-                    target: slider
-                    visible: false
-                }
-            },
-            State {
-                name: "Activation"
-                PropertyChanges {
-                    target: slider
-                    visible: true
-                }
-            }
-        ]
-        Item {
-            width: parent.width
-            height: parent.height
-            anchors.horizontalCenter: parent.horizontalCenter
-            anchors.verticalCenter: parent.verticalCenter
-            id: item
-            objectName: "item"
-            signal qmlSignal
-            Text {
-                text: "Apply"
-                color: "#ffffff"
-                font.family: "Arial"
-                font.bold: true
-                font.pixelSize: 17
-                anchors.horizontalCenter: parent.horizontalCenter
-                anchors.verticalCenter: parent.verticalCenter
-            }
-            MouseArea {
-                anchors.fill: parent
-                onClicked: {
-                    item.qmlSignal()
-                    applyBox.state == 'Activation' ? applyBox.state = 'Inactivation' : applyBox.state = 'Activation'
-                }
-            }
-        }
-    }*/
+
 
     ExclusiveGroup {
         id: viewModeGroup
