@@ -16,6 +16,7 @@ SOURCES += main.cpp \
     mesh.cpp \
     lights.cpp \
     polyclipping/clipper.cpp \
+    autoorientation.cpp \
     feature/modelcut.cpp \
     feature/meshrepair.cpp \
     feature/labellingtextpreview.cpp \
@@ -60,6 +61,7 @@ HEADERS += \
     mesh.h \
     lights.h \
     polyclipping/clipper.hpp \
+    autoorientation.h \
     feature/modelcut.h \
     feature/meshrepair.h \
     feature/labellingtextpreview.h \

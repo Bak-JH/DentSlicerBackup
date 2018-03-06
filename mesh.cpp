@@ -25,7 +25,7 @@ void Mesh::addFace(QVector3D v0, QVector3D v1, QVector3D v2){
     mf->mesh_vertex[2] = v2_idx;
 
     mf->fn = QVector3D::normal(vertices[v0_idx].position, vertices[v1_idx].position, vertices[v2_idx].position);
-
+    mf->fn_unnorm = QVector3D::crossProduct(vertices[v1_idx].position-vertices[v0_idx].position,vertices[v2_idx].position-vertices[v0_idx].position);
     faces.emplace_back(*mf);
 
     vertices[v0_idx].connected_faces.emplace_back(& faces[new_idx]);

@@ -24,7 +24,8 @@ Lights::Lights(Qt3DCore::QEntity *rootEntity)
     lightTransform[i]->setTranslation(QVector3D(light_distance,-light_distance,0));
 
     lightEntity[i]->addComponent(light[i]);
-    lightEntity[i]->addComponent(lightTransform[i]);}
+    lightEntity[i]->addComponent(lightTransform[i]);
+    }
 }
 
 Lights::~Lights(){

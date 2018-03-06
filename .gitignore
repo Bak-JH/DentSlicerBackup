@@ -1,2 +1,4 @@
 /DLPslicer.pro.user.*
 /DLPslicer.pro.user
+*.h.*
+*.cpp.*
