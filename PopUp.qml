@@ -80,7 +80,7 @@ Rectangle {
     signal applyClicked()
 
     function do_apply(functionname){
-        switch(functionname.text){
+        switch(functionname){
                 case "Move":
                     break;
                 case "Rotate":
@@ -318,7 +318,7 @@ Rectangle {
             onEntered: parent.color = "#b5b5b5"
             onExited: parent.color = "#999999"
             onPressed: parent.color = "#3ea6b7"
-            onReleased: {all_off(); focus_all_off() ;numbox_reset();do_apply(funcname); parent.color = "#999999"}
+            onReleased: {do_apply(funcname.text); all_off(); focus_all_off() ;numbox_reset();parent.color = "#999999"}
         }
     }
     Rectangle {
