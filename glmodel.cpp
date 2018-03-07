@@ -99,8 +99,33 @@ GLModel::GLModel(QNode *parent, QString fname, bool isShadow)
     shadowModel = new GLModel(this, filename, true);
 
     qDebug() << "created shadow model";
+
+    m_autoorientation = new autoorientation();
 }
 
+orientThread::orientThread(GLModel* glmodel){
+    m_glmodel=glmodel;
+    m_autoorientation=glmodel->m_autoorientation;
+}
+
+void orientThread::run(){
+    if(m_glmodel->appropriately_rotated){
+        qDebug()<<"already oriented";
+        markPopup(false);
+    }else{
+        markPopup(true);
+        rotateResult* rotateres=this->m_autoorientation->Tweak(m_glmodel->mesh,true,45,&m_glmodel->appropriately_rotated);\
+        m_glmodel->m_transform->setMatrix(rotateres->R);
+    }
+}
+
+void orientThread::markPopup(bool flag){
+    if(flag){
+        emit orientThread::loadPopup("progress_popup");
+    }else{
+        emit orientThread::loadPopup("result_orient");
+    }
+}
 Qt3DRender::QAttribute *copyAttribute(
         Qt3DRender::QAttribute *oldAtt,
         QMap<Qt3DRender::QBuffer *, Qt3DRender::QBuffer *> &bufferMap)
@@ -140,6 +165,7 @@ Qt3DRender::QAttribute *copyAttribute(
 
     return newAtt;
 }
+
 
 
 

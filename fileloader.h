@@ -2,7 +2,7 @@
 #define FILELOADER_H
 #include <QVector3D>
 #include "mesh.h"
-
+#include "glmodel.h"
 class FileLoader
 {
 public:

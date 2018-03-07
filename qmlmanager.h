@@ -6,6 +6,7 @@
 #include <QString>
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
+#include <QQmlEngine>
 
 class QmlManager : public QObject
 {

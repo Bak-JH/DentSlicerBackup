@@ -1,9 +1,6 @@
 #include "qmlmanager.h"
 #include "lights.h"
 #include "glmodel.h"
-#include <QQmlApplicationEngine>
-#include <QQmlEngine>
-
 
 QmlManager::QmlManager(QObject *parent) : QObject(parent)
 {
@@ -13,7 +10,7 @@ void QmlManager::initializeUI(QQmlApplicationEngine* e){
     engine = e;
     QObject* mainView = FindItemByName(engine, "MainView");
     QEntity* teethModel = (QEntity *)FindItemByName(engine, "model");
-    GLModel* gglmodel = new GLModel(teethModel, "C:/Users/jaine/workspace/DLPslicerResource/partial2_flip.stl", false);
+    GLModel* gglmodel = new GLModel(teethModel, "C:/Users/diridiri/Desktop/DLP/partial2_flip.stl", false);
 
     QObject *item = FindItemByName(engine, "item");
     QObject *curve = FindItemByName(engine, "curve");
@@ -23,7 +20,13 @@ void QmlManager::initializeUI(QQmlApplicationEngine* e){
     QObject *labellingPopup = FindItemByName(engine, "labellingPopup");
     QObject *labelFontBox = FindItemByName(engine, "labelFontBox");
     Lights* lights = new Lights(teethModel);
+    QObject* autoorientButton = FindItemByName(engine, "autoorientButton");
+    QObject* progress_text = FindItemByName(engine, "progress_text");
+    orientThread* ot=new orientThread(gglmodel);
 
+    QObject::connect(gglmodel->m_autoorientation, SIGNAL(setProgress(QVariant)),progress_text, SLOT(update_loading(QVariant)));
+    QObject::connect(ot, SIGNAL(loadPopup(QVariant)),autoorientButton, SLOT(show_popup(QVariant)));
+    QObject::connect(autoorientButton, SIGNAL(autoOrientSignal()),ot, SLOT(start()));
     QObject::connect(item,SIGNAL(qmlSignal()),gglmodel,SLOT(modelcut()));
     QObject::connect(curve,SIGNAL(curveSignal()),gglmodel,SLOT(lineAccept()));
     QObject::connect(flat,SIGNAL(flatSignal()),gglmodel,SLOT(pointAccept()));
