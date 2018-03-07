@@ -963,9 +963,6 @@ Rectangle {
 
             onApplyClicked: {
                 console.log("ApplyClicked")
-
-                // text3DInput.text, labelFontBox.currentText
-
                 generateText3DMesh()
             }
 

@@ -4,6 +4,7 @@
 #include <QAbstractTexture>
 #include <QPlaneMesh>
 #include <QSphereMesh>
+#include <cmath>
 
 using namespace Qt3DCore;
 using namespace Qt3DRender;

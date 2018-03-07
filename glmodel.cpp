@@ -526,10 +526,10 @@ void GLModel::removeCuttingPoints(){
         sphereEntity[i]->removeComponent(sphereTransform[i]);
         sphereEntity[i]->removeComponent(sphereMaterial[i]);
     }
-    delete [] sphereEntity;
+    /*delete [] sphereEntity;
     delete [] sphereMaterial;
     delete [] sphereMesh;
-    delete [] sphereTransform;
+    delete [] sphereTransform;*/
     numPoints=0;
 }
 

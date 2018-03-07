@@ -73,4 +73,4 @@ HEADERS += \
     feature/qvectorpath_p.h \
     feature/text3dgeometrygenerator.h
 
-LIBS += -lOpengl32
+#LIBS += -lOpengl32
