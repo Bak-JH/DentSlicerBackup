@@ -1,4 +1,4 @@
-#include "labellingtextpreview.h"
+#include "feature/labellingtextpreview.h"
 
 #include <QTexture>
 #include <QAbstractTexture>

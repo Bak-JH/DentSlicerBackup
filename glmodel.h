@@ -143,7 +143,4 @@ private:
     void run() Q_DECL_OVERRIDE;
 };
 
-Qt3DRender::QAttribute *copyAttribute(Qt3DRender::QAttribute *oldAtt, QMap<Qt3DRender::QBuffer *, Qt3DRender::QBuffer *> &bufferMap);
-
-
 #endif // GLMODEL_H

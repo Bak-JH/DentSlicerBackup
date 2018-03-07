@@ -46,25 +46,11 @@ GLModel::GLModel(QNode *parent, QString fname, bool isShadow)
         QObject::connect(m_objectPicker, SIGNAL(exited()), this, SLOT(exgoo()));
         addComponent(m_objectPicker);
 
-
-        /*m_planeMaterial = new QPhongAlphaMaterial();
-        m_planeMaterial->setAmbient(QColor(0,200,242));
-        m_planeMaterial->setDiffuse(QColor(255,255,255));
-        m_planeMaterial->setSpecular(QColor(81,200,242));
-        m_planeMaterial->setAlpha(1.0f);
-        addComponent(m_planeMaterial);*/
-
         labellingTextPreview = new LabellingTextPreview(this);
         labellingTextPreview->setEnabled(false);
 
         return;
     }
-
-    /*Qt3DRender::QPickingSettings *settings = new Qt3DRender::QPickingSettings(m_objectPicker);
-
-    settings->setFaceOrientationPickingMode(Qt3DRender::QPickingSettings::FrontFace);
-    settings->setPickMethod(Qt3DRender::QPickingSettings::TrianglePicking);
-    settings->setPickResultMode(Qt3DRender::QPickingSettings::NearestPick);*/
 
     m_planeMaterial = new QPhongAlphaMaterial();
     m_planeMaterial->setAmbient(QColor(81,200,242));
@@ -84,12 +70,9 @@ GLModel::GLModel(QNode *parent, QString fname, bool isShadow)
 
     initialize(mesh);
     addVertices(mesh);
-//    initialize(mesh);
-//    addVertices(mesh);
 
     Qt3DExtras::QDiffuseMapMaterial *diffuseMapMaterial = new Qt3DExtras::QDiffuseMapMaterial();
 
-    //addComponent(m_mesh);
     addComponent(m_transform);
     addComponent(m_planeMaterial);
 
@@ -126,48 +109,6 @@ void orientThread::markPopup(bool flag){
         emit orientThread::loadPopup("result_orient");
     }
 }
-Qt3DRender::QAttribute *copyAttribute(
-        Qt3DRender::QAttribute *oldAtt,
-        QMap<Qt3DRender::QBuffer *, Qt3DRender::QBuffer *> &bufferMap)
-{
-    Qt3DRender::QAttribute *newAtt = nullptr;
-    if (oldAtt) {
-        newAtt = new Qt3DRender::QAttribute;
-
-        newAtt->setName(oldAtt->name());
-        newAtt->setDataType(oldAtt->vertexBaseType());
-        newAtt->setDataSize(oldAtt->vertexSize());
-        newAtt->setCount(oldAtt->count());
-        newAtt->setByteStride(oldAtt->byteStride());
-        newAtt->setByteOffset(oldAtt->byteOffset());
-        newAtt->setDivisor(oldAtt->divisor());
-        newAtt->setAttributeType(oldAtt->attributeType());
-
-        Qt3DRender::QBuffer *oldBuf = oldAtt->buffer();
-        if (oldBuf) {
-            Qt3DRender::QBuffer *newBuf = bufferMap.value(oldBuf);
-            if (!newBuf) {
-                newBuf = new Qt3DRender::QBuffer;
-                bufferMap.insert(oldBuf, newBuf);
-
-                if (oldBuf->data().isEmpty())
-                    newBuf->setData(oldBuf->dataGenerator()->operator()());
-                else
-                    newBuf->setData(oldBuf->data());
-                newBuf->setType(oldBuf->type());
-                newBuf->setUsage(oldBuf->usage());
-                newBuf->setSyncData(oldBuf->isSyncData());
-            }
-
-            newAtt->setBuffer(newBuf);
-        }
-    }
-
-    return newAtt;
-}
-
-
-
 
 void GLModel::initialize(const Mesh* mesh){
 

@@ -16,11 +16,13 @@ public:
 //    float R[16];
     QMatrix4x4 R;
 };
+
 class Orient {
 public:
     float val;
     QVector3D label;
 };
+
 class Liste {
 public:
     QVector3D orientation;

@@ -1,4 +1,4 @@
-#include "qtriangulator_p.h"
+#include "utils/qtriangulator_p.h"
 #include <QtGui/qevent.h>
 #include <QtGui/qpainter.h>
 #include <QtGui/qpainterpath.h>
@@ -8,10 +8,10 @@
 #include <QtCore/qglobal.h>
 #include <QtCore/qpoint.h>
 #include <QtCore/qalgorithms.h>
-#include <feature/qbezier.h>
-#include <feature/qdatabuffer_p.h>
-#include <feature/qrbtree.h>
-#include <feature/qvectorpath_p.h>
+#include <utils/qbezier.h>
+#include <utils/qdatabuffer_p.h>
+#include <utils/qrbtree.h>
+#include <utils/qvectorpath_p.h>
 
 QT_BEGIN_NAMESPACE
 

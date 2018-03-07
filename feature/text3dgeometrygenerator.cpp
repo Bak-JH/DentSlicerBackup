@@ -8,9 +8,9 @@
 #include <cfloat>
 #include <cmath>
 
-#include "qtriangulator_p.h"
-#include "text3dgeometrygenerator.h"
-#include "mathutils.h"
+#include "utils/qtriangulator_p.h"
+#include "feature/text3dgeometrygenerator.h"
+#include "utils/mathutils.h"
 
 using IndexType = unsigned int;
 
@@ -133,37 +133,40 @@ void generateText3DGeometry(QVector3D** vertices, int* verticesSize,
         bool isIntersected = false;
 
         for (int i = 0; i < originalVerticesCount / 3; ++i) {
+            bool isIntersectedNow = false;
+
             auto vertex = v;
             auto v0 = originalVertices[3 * i + 0];
             auto v1 = originalVertices[3 * i + 1];
             auto v2 = originalVertices[3 * i + 2];
 
-            isIntersected = RayIntersectsTriangle(vertex, normalVector,
+            isIntersectedNow = RayIntersectsTriangle(vertex - normalVector * 0.5f, normalVector,
                                       v0, v1, v2,
                                       outIntersectionPoint);
-            if (isIntersected) {
-                if (std::isinf(outIntersectionPoint.z())) {
-                    isIntersected = false;
-                    continue;
-                }
+            if (isIntersectedNow) {
+                qDebug() << "isIntersected:" << v << outIntersectionPoint;
 
-                if (outIntersectionPoint.lengthSquared() < minimumLength.lengthSquared()) {
+                if ((v - outIntersectionPoint).lengthSquared() < (v - minimumLength).lengthSquared()) {
                     minimumLength = outIntersectionPoint;
                 }
+
+                isIntersected = true;
             }
+        }
+
+        if (std::isinf(minimumLength.z())) {
+            isIntersected = false;
         }
 
         if (isIntersected) {
             internalVertices.push_back({ minimumLength, // vertex
                                  -normalVector }); // normal
+
+            qDebug() << "isIntersected:" << v << minimumLength;
         } else {
             internalVertices.push_back({ v - normalVector, // vertex
                                  -normalVector }); // normal
         }
-    }
-
-    for (auto& v : internalVertices) {
-        qDebug() << "1:" << v.position;
     }
 
     for (QVector3D &v : data.vertices) { // front face

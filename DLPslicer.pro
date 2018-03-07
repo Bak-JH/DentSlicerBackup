@@ -19,10 +19,10 @@ SOURCES += main.cpp \
     autoorientation.cpp \
     feature/modelcut.cpp \
     feature/meshrepair.cpp \
+    feature/text3dgeometrygenerator.cpp \
     feature/labellingtextpreview.cpp \
-    feature/mathutils.cpp \
-    feature/qtriangulator.cpp \
-    feature/text3dgeometrygenerator.cpp
+    utils/mathutils.cpp \
+    utils/qtriangulator.cpp
 
 RESOURCES += qml.qrc \
     resources.qrc
@@ -65,12 +65,12 @@ HEADERS += \
     feature/modelcut.h \
     feature/meshrepair.h \
     feature/labellingtextpreview.h \
-    feature/mathutils.h \
-    feature/qbezier.h \
-    feature/qdatabuffer_p.h \
-    feature/qrbtree.h \
-    feature/qtriangulator_p.h \
-    feature/qvectorpath_p.h \
-    feature/text3dgeometrygenerator.h
+    feature/text3dgeometrygenerator.h \
+    utils/mathutils.h \
+    utils/qbezier.h \
+    utils/qdatabuffer_p.h \
+    utils/qrbtree.h \
+    utils/qtriangulator_p.h \
+    utils/qvectorpath_p.h
 
 #LIBS += -lOpengl32
