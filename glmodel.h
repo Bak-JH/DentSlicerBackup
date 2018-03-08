@@ -121,7 +121,7 @@ public slots:
     void lineAccept();
     void pointAccept();
     void getSignal(double value);
-    void getTextChanged(QString text);
+    void getTextChanged(QString text, int contentWidth);
     void openLabelling();
     void closeLabelling();
     void getFontNameChanged(QString fontName);

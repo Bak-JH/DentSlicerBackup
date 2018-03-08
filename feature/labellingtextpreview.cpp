@@ -30,12 +30,12 @@ LabellingTextPreview::LabellingTextPreview(Qt3DCore::QNode* parent)
     planeEntity->addComponent(planeMaterial);
     planeEntity->addComponent(planeTransform);
 
-    setText("Enter text");
+    setText("Enter text", QString("Enter text").size());
     setFontName("Arial");
     setTranslation(QVector3D(0, 0, 0));
     setNormal(QVector3D(0, 0, 1));
 }
-void LabellingTextPreview::setText(QString text)
+void LabellingTextPreview::setText(QString text, int contentWidth)
 {
     this->text = text;
 
@@ -43,7 +43,8 @@ void LabellingTextPreview::setText(QString text)
         texture->removeTextureImage(textureImage);
     }
 
-    width = text.size() * 12;
+    width = contentWidth * 2;
+    qDebug() << width;
 
     if (width < minimumWidth)
         width = minimumWidth;

@@ -10,7 +10,7 @@ void QmlManager::initializeUI(QQmlApplicationEngine* e){
     engine = e;
     QObject* mainView = FindItemByName(engine, "MainView");
     QEntity* teethModel = (QEntity *)FindItemByName(engine, "model");
-    GLModel* gglmodel = new GLModel(teethModel, "C:/Users/diridiri/Desktop/DLP/partial2_flip.stl", false);
+    GLModel* gglmodel = new GLModel(teethModel, "C:/Users/jaine/workspace/DLPslicerResource/partial2_flip.stl", false);
 
     QObject *item = FindItemByName(engine, "item");
     QObject *curve = FindItemByName(engine, "curve");
@@ -31,7 +31,7 @@ void QmlManager::initializeUI(QQmlApplicationEngine* e){
     QObject::connect(curve,SIGNAL(curveSignal()),gglmodel,SLOT(lineAccept()));
     QObject::connect(flat,SIGNAL(flatSignal()),gglmodel,SLOT(pointAccept()));
     QObject::connect(slider,SIGNAL(govalue(double)),gglmodel,SLOT(getSignal(double)));
-    QObject::connect(text3DInput, SIGNAL(sendTextChanged(QString)),gglmodel->shadowModel,SLOT(getTextChanged(QString)));
+    QObject::connect(text3DInput, SIGNAL(sendTextChanged(QString, int)),gglmodel->shadowModel,SLOT(getTextChanged(QString, int)));
     QObject::connect(labellingPopup, SIGNAL(openLabelling()),gglmodel->shadowModel,SLOT(openLabelling()));
     QObject::connect(labellingPopup, SIGNAL(closeLabelling()),gglmodel->shadowModel,SLOT(closeLabelling()));
     QObject::connect(labellingPopup, SIGNAL(generateText3DMesh()),gglmodel->shadowModel, SLOT(generateText3DMesh()));
