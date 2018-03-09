@@ -14,6 +14,9 @@
 using namespace std;
 using namespace ClipperLib;
 
+// plane contains at least 3 vertices contained in the plane in clockwise direction
+typedef vector<QVector3D> Plane;
+
 class MeshFace {
 public:
     MeshFace() {}
@@ -26,6 +29,7 @@ public:
     vector<vector<MeshFace*>> neighboring_faces;
 
     QVector3D fn;
+    QVector3D fn_unnorm;
 };
 
 class MeshVertex {

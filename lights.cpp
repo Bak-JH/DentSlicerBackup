@@ -2,13 +2,13 @@
 #include <qDebug>
 
 Lights::Lights(Qt3DCore::QEntity *rootEntity)
-    : motherEntity(rootEntity)
+    : parentEntity(rootEntity)
 {
 
 //Light
 
     for (int i=0;i<number_of_lights;i++){
-    lightEntity[i]= new Qt3DCore::QEntity(motherEntity);
+    lightEntity[i]= new Qt3DCore::QEntity(parentEntity);
     light[i]=new Qt3DRender::QPointLight(lightEntity[i]);
     light[i]->setColor("white");
     light[i]->setIntensity(0.7);
@@ -24,7 +24,8 @@ Lights::Lights(Qt3DCore::QEntity *rootEntity)
     lightTransform[i]->setTranslation(QVector3D(light_distance,-light_distance,0));
 
     lightEntity[i]->addComponent(light[i]);
-    lightEntity[i]->addComponent(lightTransform[i]);}
+    lightEntity[i]->addComponent(lightTransform[i]);
+    }
 }
 
 Lights::~Lights(){

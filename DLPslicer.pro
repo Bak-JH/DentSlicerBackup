@@ -14,9 +14,11 @@ SOURCES += main.cpp \
     qmlmanager.cpp \
     fileloader.cpp \
     mesh.cpp \
-    meshrepair.cpp \
     lights.cpp \
     polyclipping/clipper.cpp \
+    autoorientation.cpp \
+    feature/modelcut.cpp \
+    feature/meshrepair.cpp \
     feature/arrange.cpp\
     feature/convex_hull.cpp
 
@@ -55,9 +57,11 @@ HEADERS += \
     qmlmanager.h \
     fileloader.h \
     mesh.h \
-    meshrepair.h \
     lights.h \
     polyclipping/clipper.hpp \
+    autoorientation.h \
+    feature/modelcut.h \
+    feature/meshrepair.h \
     feature/arrange.h \
     feature/convex_hull.h
 

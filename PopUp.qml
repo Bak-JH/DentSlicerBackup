@@ -1,5 +1,8 @@
+import Qt3D.Core 2.0
 import QtQuick 2.7
-
+import QtQuick.Layouts 1.0
+import QtQuick.Controls 1.0
+import QtQuick.Controls.Styles 1.0
 
 Rectangle {
     property alias funcname: funcname.text
@@ -9,6 +12,7 @@ Rectangle {
     property alias detailline1_vis: detailline1.visible
     property alias detailline2_vis: detailline2.visible
     property alias applybutton_vis: applybutton.visible
+    property alias okbutton_vis: okbutton.visible
     property alias descriptionimage_vis: descriptionimage.visible
     property alias applyfinishbutton_vis: applyfinishbutton.visible
     property alias applybutton_text: applybutton_text.text
@@ -16,6 +20,16 @@ Rectangle {
     //----------------------------------------------------------------
 
     property int imageHeight
+
+    //----------------------------------------------------------------
+
+    property alias leftselectimage_vis : leftselectimage.visible
+    property alias rightselectimage_vis : rightselectimage.visible
+    property alias radiobutton1_vis : radiobutton1.visible
+    property alias radiobutton2_vis : radiobutton2.visible
+    property alias slider_vis : slider.visible
+
+    //----------------------------------------------------------------
 
     property alias numberbox_vis: numberbox.visible
     property alias numberbox_nameing_vis: numberbox_naming.visible
@@ -63,6 +77,40 @@ Rectangle {
     property real numbox_value_z : numbox_default
     property real numbox_value_detail2 : numbox_detail2_defalult
 
+    function do_apply(functionname){
+        switch(functionname.text){
+                case "Move":
+                    break;
+                case "Rotate":
+                    break;
+                case "Lay flat":
+                    break;
+                case "Arrange":
+                    break;
+                case "Orient":
+                    popup_orient.autoOrientSignal();
+                    break;
+                case "Scale":
+                    break;
+                case "Auto Repair":
+                    break;
+                case "Cut":
+                    break;
+                case "Shell Offset":
+                    break;
+                case "Extend":
+                    break;
+                case "Support":
+                    break;
+                case "Label":
+                    break;
+                case "Move":
+                    break;
+                default:
+                    console.log(functionname);
+                    break;
+                }
+    }
 
     function focus_all_off() {
         numberbox1_text.focus = false;
@@ -82,6 +130,9 @@ Rectangle {
         numberbox_detail2_text.text = numbox_value_detail2 + number_unit;
     }
 
+    function destroy_popup(){
+        popup_target.state="inactive";
+    }
 
     id: popup_target
     visible: false
@@ -171,6 +222,7 @@ Rectangle {
         anchors.bottom: parent.bottom
         anchors.bottomMargin: 7
         anchors.horizontalCenter: parent.horizontalCenter
+
         Text {
             id: applybutton_text
             anchors.verticalCenter: parent.verticalCenter
@@ -187,9 +239,38 @@ Rectangle {
             onEntered: parent.color = "#b5b5b5"
             onExited: parent.color = "#999999"
             onPressed: parent.color = "#3ea6b7"
-            onReleased: {all_off(); focus_all_off(); numbox_reset(); parent.color = "#999999"}
+            onReleased: {do_apply(funcname.text);all_off(); focus_all_off(); numbox_reset(); parent.color = "#999999"}
         }
     }
+
+    //OK button
+        Rectangle {
+            id: okbutton
+            width: 90
+            height: 20
+            color: "#999999"
+            anchors.bottom: parent.bottom
+            anchors.bottomMargin: 15
+            anchors.horizontalCenter: parent.horizontalCenter
+            Text {
+                id: okbutton_text
+                anchors.verticalCenter: parent.verticalCenter
+                anchors.horizontalCenter: parent.horizontalCenter
+                text: "OK"
+                color: "#ffffff"
+                font.pointSize: 8
+                font.family: "Arial"
+            }
+            MouseArea {
+                id: mousearea_ok
+                anchors.fill: parent
+                hoverEnabled: true
+                onEntered: parent.color = "#b5b5b5"
+                onExited: parent.color = "#999999"
+                onPressed: parent.color = "#3ea6b7"
+                onReleased: {destroy_popup();focus_all_off(); numbox_reset();  parent.color = "#999999"}
+            }
+        }
 
     //Description image
     Rectangle {
@@ -210,6 +291,7 @@ Rectangle {
 
     //Apply-Finish button
     Rectangle {
+
         id: applyfinishbutton
         width: 111.6
         height: 30.7
@@ -233,7 +315,7 @@ Rectangle {
             onEntered: parent.color = "#b5b5b5"
             onExited: parent.color = "#999999"
             onPressed: parent.color = "#3ea6b7"
-            onReleased: {all_off(); focus_all_off(); numbox_reset(); parent.color = "#999999"}
+            onReleased: {all_off(); focus_all_off() ;numbox_reset();do_apply(funcname); parent.color = "#999999"}
         }
     }
     Rectangle {
@@ -263,6 +345,131 @@ Rectangle {
             onReleased: {all_off(); focus_all_off(); numbox_reset(); parent.color = "#999999"}
         }
     }
+
+    Item {
+        id: leftselectimage
+        visible: false
+        width: 94
+        height: 66
+        anchors.left: parent.left
+        anchors.leftMargin: 17
+        anchors.top: parent.top
+        anchors.topMargin: 70
+        objectName: "flat"
+        Image {
+            id: flatd
+            source: "qrc:/resource/flat.png"
+        }
+
+        signal flatSignal
+        MouseArea {
+            anchors.fill: parent
+            onClicked: leftselectimage.flatSignal()
+        }
+    }
+    Item {
+        id: rightselectimage
+        visible: false
+        width: 94
+        height: 66
+        anchors.right: parent.right
+        anchors.rightMargin: 17
+        anchors.top: parent.top
+        anchors.topMargin: 70
+        objectName: "curve"
+        Image {
+            id: curved
+            anchors.fill: parent
+            source: "qrc:/resource/curve.png"
+        }
+        signal curveSignal
+        MouseArea {
+            anchors.fill: parent
+            onClicked: curveSignal()
+        }
+    }
+
+
+
+    ExclusiveGroup {
+        id: viewModeGroup
+    }
+
+    RadioButton {
+        id: radiobutton1
+        visible: false
+        anchors.bottom: parent.bottom
+        anchors.bottomMargin: 90
+        anchors.left: parent.left
+        anchors.leftMargin: 30
+        exclusiveGroup: viewModeGroup
+        style: RadioButtonStyle {
+            indicator: Rectangle {
+                implicitWidth: 16
+                implicitHeight: 16
+                radius: 9
+                border.color: control.activeFocus ? "darkblue" : "gray"
+                border.width: 0
+                Rectangle {
+                    anchors.fill: parent
+                    visible: control.checked
+                    color: "#505A5E"
+                    radius: 9
+                    anchors.margins: 4
+                }
+            }
+            label: Text {
+                text: "None"
+                anchors.left: parent.left
+                anchors.leftMargin: 10
+                font.family: "Arial"
+                font.pixelSize: 14
+            }
+        }
+    }
+
+    RadioButton {
+        id: radiobutton2
+        visible: false
+        anchors.bottom: parent.bottom
+        anchors.bottomMargin: 65
+        anchors.left: parent.left
+        anchors.leftMargin: 30
+        exclusiveGroup: viewModeGroup
+        style: RadioButtonStyle {
+            indicator: Rectangle {
+                implicitWidth: 16
+                implicitHeight: 16
+                radius: 9
+                border.color: control.activeFocus ? "darkblue" : "gray"
+                border.width: 0
+                Rectangle {
+                    anchors.fill: parent
+                    visible: control.checked
+                    color: "#505A5E"
+                    radius: 9
+                    anchors.margins: 4
+                }
+            }
+            label: Text {
+                text: "Gernerate Surface"
+                anchors.left: parent.left
+                anchors.leftMargin: 10
+                font.family: "Arial"
+                font.pixelSize: 14
+            }
+        }
+    }
+
+    Planeslider {
+        id: slider
+        visible: false
+        anchors.right: parent.left
+        anchors.rightMargin: 20
+        anchors.bottom: parent.bottom
+        anchors.bottomMargin: -20
+    }
+
 
     //Number write down button
     Item{

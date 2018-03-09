@@ -1,11 +1,9 @@
 import Qt3D.Core 2.0
-
 import QtQuick 2.0
 import QtQuick.Layouts 1.0
 import QtQuick.Controls 1.0
 //import QtQuick.Controls.Styles 1.0
 import QtQuick.Controls.Styles 1.4
-
 
 
 
@@ -346,7 +344,8 @@ Rectangle {
             iconSource1: "qrc:/resource/upper_cut.png"
             iconSource2: "qrc:/Resource/upper2_cut.png"
             iconText: "Cut"
-
+        }
+            
         UpperButton{
             id : third_tab_button_shelloffset
 
@@ -368,7 +367,7 @@ Rectangle {
             color : "#CECECE"
         }
 
-    }
+
 
     Item{
         id : fourthtab
@@ -454,6 +453,8 @@ Rectangle {
             detailline1_vis: false
             detailline2_vis: false
             applyfinishbutton_vis: false
+
+            okbutton_vis: false
             applybutton_vis: true
             applybutton_text: "Finish"
             descriptionimage_vis: false
@@ -479,6 +480,7 @@ Rectangle {
             //image: ""
             detailline1_vis: false
             detailline2_vis: false
+            okbutton_vis: false
             applyfinishbutton_vis: false
             applybutton_vis: true
             applybutton_text: "Finish"
@@ -505,6 +507,7 @@ Rectangle {
             detailline2_vis: false
             imageHeight: 76
             applyfinishbutton_vis: false
+            okbutton_vis: false
             applybutton_vis: true
             applybutton_text: "Finish"
             descriptionimage_vis: true
@@ -523,6 +526,7 @@ Rectangle {
             detailline2_vis: false
             imageHeight: 76
             applyfinishbutton_vis: true
+            okbutton_vis: false
             applybutton_vis: false
             descriptionimage_vis: true
             state: second_tab_button_arrange.state=="active" ? "active" : "inactive"
@@ -532,6 +536,17 @@ Rectangle {
         PopUp {
             id: popup_orient
             funcname: "Orient"
+            objectName: "autoorientButton"
+            function show_popup(id){
+                if(id=="progress_popup"){
+                    progress_popup.state="active";
+                }
+                if(id=="result_orient"){
+                    result_text.text="The model is already.";
+                    result_orient.state="active";
+                }
+            }
+
             height: 220
             detail1: "Click Apply to rotate the model."
             //detail2: ""
@@ -539,9 +554,11 @@ Rectangle {
             detailline1_vis: false
             detailline2_vis: false
             imageHeight: 76
-            applyfinishbutton_vis: true
+            okbutton_vis: false
             applybutton_vis: false
+            applyfinishbutton_vis: true
             descriptionimage_vis: true
+            signal autoOrientSignal()
             state: second_tab_button_orient.state=="active" ? "active" : "inactive"
         }
 
@@ -557,6 +574,7 @@ Rectangle {
             detailline2_vis: true
             imageHeight: 112
             applyfinishbutton_vis: false
+            okbutton_vis: false
             applybutton_vis: true
             applybutton_text: "Finish"
             descriptionimage_vis: false
@@ -612,238 +630,30 @@ Rectangle {
             imageHeight: 76
             applyfinishbutton_vis: true
             applybutton_vis: false
+            okbutton_vis: false
             descriptionimage_vis: true
             state: third_tab_button_autorepair.state=="active" ? "active" : "inactive"
         }
 
         //11. PopUp - Cut
-        /*PopUp {
+        PopUp {
             id: popup_cut
             funcname: "Cut"
             height: 300
-            detail1: "Click Apply to align the models."
-            detail2: ""
-            //image: "qrc:/resource/arrage_discription.png"
-            detailline1_vis: false
-            detailline2_vis: false
-            applyfinishbutton_vis: false
-            applybutton_vis: true
-            descriptionimage_vis: false
-            state: third_tab_button_cut.state=="active" ? "active" : "inactive"
-        }*/
-        PopUp {
-            id:popup1
-            funcname: "Cut"
-            height: 294
             detail1: "Cutting Surface"
-            imageHeight: 64
-                Rectangle {
-                    id: cut_flatButton
-                    color: parent.color
-                    width: 92
-                    height: 64
-                    anchors.left: parent.left
-                    anchors.leftMargin: 20
-                    anchors.top: parent.top
-                    anchors.topMargin: 80
-                    radius: 2
-                    Image {
-                        id: cut_flatImage
-                        source:"qrc:/resource/cut_flat.png"
-                        anchors.top: parent.top
-                        anchors.topMargin: 14
-                        anchors.horizontalCenter: parent.horizontalCenter
-                    }
-                    Text {
-                        id: cut_flatButt
-                        text: qsTr("Flat Surface")
-                        font.family: "Arial"
-                        font.pointSize: 5
-                        anchors.horizontalCenter: parent.horizontalCenter
-                        anchors.bottom: parent.bottom
-                        anchors.bottomMargin: 5
-                    }
-
-                    MouseArea {     //mouse hover
-                        anchors.fill: parent
-                        hoverEnabled: true
-                        onEntered: {
-                            parent.color = "#f9f9f9"
-                            parent.border.color = "#cccccc"
-                        }
-                        onExited: {
-                            if (cut_flatButton.state != "clicked") {
-                                parent.color = "#e5e5e5";
-                                parent.border.color = "transparent";
-                            }
-                            else {
-                                parent.color = "#f9f9f9";
-                                parent.border.color = "#cccccc";
-                            }
-                        }
-                        onClicked: {
-//                                cut_flatButton.state == "clicked" ? cut_flatButton.state = "" : cut_flatButton.state = "clicked"
-                            cut_flatButton.state = "clicked"
-                            cut_curvedButton.state = "unclicked"
-                        }
-                    }
-                    states: [
-                        State {
-                            name: "clicked"
-                            PropertyChanges {
-                                target: cut_flatButton; color: "#f9f9f9"
-                            }
-                            PropertyChanges {
-                                target: cut_flatButton; border.color: "#cccccc"
-                            }
-                        },
-                        State {
-                            name: "unclicked"
-                            PropertyChanges {
-                                target: cut_flatButton; color: "#e5e5e5"
-                            }
-                            PropertyChanges {
-                                target: cut_flatButton; border.color: "transparent"
-                            }
-                        }
-
-                    ]
-                }
-                Rectangle {
-                    id: cut_curvedButton
-                    color: parent.color
-                    width: 92
-                    height: 64
-                    anchors.right: parent.right
-                    anchors.rightMargin: 20
-                    anchors.top: parent.top
-                    anchors.topMargin: 80
-                    radius: 2
-                    Image {
-                        id: cut_curvedImage
-                        source:"qrc:/resource/cut_curved.png"
-                        anchors.horizontalCenter: parent.horizontalCenter
-                        anchors.top: parent.top
-                        anchors.topMargin: 14
-                    }
-                    Text {
-                        id: cut_curvedButt
-                        text: qsTr("Curved Surface")
-                        font.family: "Arial"
-                        font.pointSize: 5
-                        anchors.horizontalCenter: parent.horizontalCenter
-                        anchors.bottom: parent.bottom
-                        anchors.bottomMargin: 5
-                    }
-
-                    MouseArea {     //mouse hover
-                        anchors.fill: parent
-                        hoverEnabled: true
-
-                        onEntered: {
-                            parent.color = "#f9f9f9"
-                            parent.border.color = "#cccccc"
-                        }
-                        onExited: {
-                            if (cut_curvedButton.state != "clicked") {
-                                parent.color = "#e5e5e5";
-                                parent.border.color = "transparent";
-                            }
-                            else {
-                                parent.color = "#f9f9f9";
-                                parent.border.color = "#cccccc";
-                            }
-                        }
-                        onClicked: {
-                            cut_curvedButton.state = "clicked"
-                            cut_flatButton.state = "unclicked"
-                        }
-                    }
-                    states: [
-                        State {
-                            name: "clicked"
-                            PropertyChanges {
-                                target: cut_curvedButton; color: "#f9f9f9"
-                            }
-                            PropertyChanges {
-                                target: cut_curvedButton; border.color: "#cccccc"
-                            }
-                        },
-                        State {
-                            name: "unclicked"
-                            PropertyChanges {
-                                target: cut_curvedButton; color: "#e5e5e5"
-                            }
-                            PropertyChanges {
-                                target: cut_curvedButton; border.color: "transparent"
-                            }
-                        }
-                    ]
-                }
-            detail2 : "After Treatment"
-            ExclusiveGroup { id: cutRadios }
-            RadioButton {
-                id: radio1
-                exclusiveGroup: cutRadios
-                checked: true
-                anchors.top: parent.top
-                anchors.topMargin: 190
-                anchors.left: parent.left
-                anchors.leftMargin: 20
-                style: RadioButtonStyle {
-                    indicator: Rectangle {
-                        implicitHeight: 16
-                        implicitWidth: 16
-                        radius: 8
-                        Rectangle {
-                            anchors.fill: parent
-                            visible: control.checked
-                            color: "#151515"
-                            radius: 9
-                            anchors.margins: 4
-                        }
-                    }
-                    label: Text {
-                        color: "black"
-                        text: "None"
-                        font.family: "Arial"
-                        font.pointSize: 7.5
-                    }
-                }
-            }
-            RadioButton {
-                id: radio2
-                exclusiveGroup: cutRadios
-                anchors.top: radio1.bottom
-                anchors.topMargin: 10
-                anchors.left: parent.left
-                anchors.leftMargin: 20
-                style: RadioButtonStyle {
-                    indicator: Rectangle {
-                        implicitHeight: 16
-                        implicitWidth: 16
-                        radius: 8
-                        Rectangle {
-                            anchors.fill: parent
-                            visible: control.checked
-                            color: "#151515"
-                            radius: 9
-                            anchors.margins: 4
-                        }
-                    }
-                    label: Text {
-                        color: "black"
-                        text: "Generate Surface"
-                        font.family: "Arial"
-                        font.pointSize: 7.5
-                    }
-                }
-            }
-            descriptionimage_vis: true
+            detail2: "After treatment"
             detailline1_vis: true
             detailline2_vis: true
             applyfinishbutton_vis: true
             applybutton_vis: false
+            descriptionimage_vis: false
+            leftselectimage_vis: true
+            rightselectimage_vis: true
+            radiobutton1_vis: true
+            radiobutton2_vis: true
+            slider_vis: true
+            imageHeight: 70
+            state: third_tab_button_cut.state=="active" ? "active" : "inactive"
         }
 
 
@@ -859,6 +669,7 @@ Rectangle {
             detailline2_vis: true
             imageHeight: 40
             applyfinishbutton_vis: true
+            okbutton_vis: false
             applybutton_vis: false
             descriptionimage_vis: false
             numbox_detail2_vis: true
@@ -912,6 +723,7 @@ Rectangle {
             //image: ""
             detailline1_vis: true
             detailline2_vis: false
+            okbutton_vis: false
             applyfinishbutton_vis: true
             applybutton_vis: false
             descriptionimage_vis: false
@@ -933,6 +745,7 @@ Rectangle {
             detailline1_vis: false
             detailline2_vis: false
             applyfinishbutton_vis: false
+            okbutton_vis: false
             applybutton_vis: true
             descriptionimage_vis: false
             state: fourth_tab_button_support.state=="active" ? "active" : "inactive"
@@ -1113,6 +926,7 @@ Rectangle {
                         descriptionimage_vis: true
                         detailline1_vis: true
                         detailline2_vis: true
+                        okbutton_vis: false
                         applyfinishbutton_vis: false
                         applybutton_vis: true
                     }
@@ -1128,6 +942,7 @@ Rectangle {
             detailline1_vis: false
             detailline2_vis: false
             applyfinishbutton_vis: false
+            okbutton_vis: false
             applybutton_vis: true
             descriptionimage_vis: false
             state: fourth_tab_button_label.state=="active" ? "active" : "inactive"
@@ -1246,6 +1061,7 @@ Rectangle {
                         descriptionimage_vis: true
                         detailline1_vis: false
                         detailline2_vis: true
+                        okbutton_vis: false
                         applyfinishbutton_vis: false
                         applybutton_vis: true
                     }
