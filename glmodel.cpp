@@ -32,11 +32,11 @@ GLModel::GLModel(QNode *parent)
 
     mesh = new Mesh();
     qDebug() << "Loading mesh";
-    //loadMeshSTL(mesh, "C:/Users/hsy61/Desktop/3D_models/simple/cube.stl");
+    loadMeshSTL(mesh, "C:/Users/hsy61/Desktop/3D_models/simple/tetrahedron.stl");
     //loadMeshSTL(mesh, "C:/Users/hsy61/Desktop/3D_models/test/train.stl");
-    loadMeshSTL(mesh, "C:/Users/hsy61/Desktop/3D_models/teeth_models/lowerjaw.stl");
+    //loadMeshSTL(mesh, "C:/Users/hsy61/Desktop/3D_models/teeth_models/lowerjaw.stl");
     //loadMeshSTL(mesh, "C:/Users/hsy61/Desktop/3D_models/cc_debug/c1111mrr.stl");
-    loadMeshSTL(mesh, "C:/Users/hsy61/Desktop/partial2/partial1.stl");
+    //loadMeshSTL(mesh, "C:/Users/hsy61/Desktop/partial2/partial1.stl");
     qDebug() << "Number of faces :" << mesh->faces.size();
     qDebug() << "Mesh loaded";
     //repairMesh(mesh);
@@ -47,16 +47,25 @@ GLModel::GLModel(QNode *parent)
     Paths projection = project(mesh);
     qDebug() << "Projection done";
     qDebug()<< projection[0][0].X << projection[0][0].Y << projection.size();
-    debugPath(projection);
+    debugPaths(projection);
     RDPSimpPaths(&projection);
-    debugPath(projection);
+    debugPaths(projection);
+    //* Arrange
+    vector<Mesh> meshes;
+    vector<XYArrangement> arng_result;
+    meshes.push_back(*mesh);
+    arngMeshes(&meshes);
+    //*/
+    //testSimplifyPolygon();
+    //testClip();
+    //vector<XYArrangement>* mesh_arngment
     //Mesh outline_mesh = PathsToMesh(projection);addVertices(&outline_mesh);
     //*/
     /* debugFaces
     vector<int> debug_face_list = {};
     debugFaces(mesh, debug_face_list);
     //*/
-    //m_transform->setScale(0.1);
+    m_transform->setRotationZ(90);
 
 
     initialize(mesh);

@@ -17,7 +17,8 @@ SOURCES += main.cpp \
     meshrepair.cpp \
     lights.cpp \
     polyclipping/clipper.cpp \
-    feature/arrange.cpp
+    feature/arrange.cpp\
+    feature/convex_hull.cpp
 
 RESOURCES += qml.qrc \
     resources.qrc
@@ -57,6 +58,7 @@ HEADERS += \
     meshrepair.h \
     lights.h \
     polyclipping/clipper.hpp \
-    feature/arrange.h
+    feature/arrange.h \
+    feature/convex_hull.h
 
 LIBS += -lOpengl32
