@@ -534,9 +534,9 @@ Rectangle {
 
         //8. PopUp - Orient
         PopUp {
+            objectName: "orientPopup"
             id: popup_orient
             funcname: "Orient"
-            objectName: "autoorientButton"
             function show_popup(id){
                 if(id=="progress_popup"){
                     progress_popup.state="active";
@@ -637,6 +637,7 @@ Rectangle {
 
         //11. PopUp - Cut
         PopUp {
+            objectName: "cutPopup"
             id: popup_cut
             funcname: "Cut"
             height: 300
@@ -646,6 +647,7 @@ Rectangle {
             detailline2_vis: true
             applyfinishbutton_vis: true
             applybutton_vis: false
+            okbutton_vis:false
             descriptionimage_vis: false
             leftselectimage_vis: true
             rightselectimage_vis: true
@@ -654,6 +656,26 @@ Rectangle {
             slider_vis: true
             imageHeight: 70
             state: third_tab_button_cut.state=="active" ? "active" : "inactive"
+
+
+            onFlatModeClicked: {
+                console.log("flat mode selected");
+                flatModeSelected();
+            }
+
+            onCurveModeClicked: {
+                console.log("curve mode selected");
+                curveModeSelected();
+            }
+
+            onApplyClicked: {
+                console.log("ApplyClicked")
+                modelCut();
+            }
+
+            signal flatModeSelected();
+            signal curveModeSelected();
+            signal modelCut();
         }
 
 
@@ -948,7 +970,7 @@ Rectangle {
             state: fourth_tab_button_label.state=="active" ? "active" : "inactive"
         }*/
         PopUp {
-            objectName: "labellingPopup"
+            objectName: "labelPopup"
             id:popup_label
             funcname: "Label"
             height: 450 // 282

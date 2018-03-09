@@ -10,32 +10,45 @@ void QmlManager::initializeUI(QQmlApplicationEngine* e){
     engine = e;
     QObject* mainView = FindItemByName(engine, "MainView");
     QEntity* teethModel = (QEntity *)FindItemByName(engine, "model");
-    GLModel* gglmodel = new GLModel(teethModel, "/Users/Diridiri/Desktop/DLP/DLPslicer/demo_object.stl",false);//"C:/Users/jaine/workspace/DLPslicerResource/partial2_flip.stl", false);
+    GLModel* glmodel = new GLModel(teethModel, "/Users/Diridiri/Desktop/DLP/DLPslicer/partial2_flip.stl",false);//"C:/Users/jaine/workspace/DLPslicerResource/partial2_flip.stl", false);
 
-    QObject *item = FindItemByName(engine, "item");
-    QObject *curve = FindItemByName(engine, "curve");
-    QObject *flat = FindItemByName(engine, "flat");
-    QObject *slider = FindItemByName(engine, "sslider");
-    QObject *text3DInput = FindItemByName(engine, "text3DInput");
-    QObject *labellingPopup = FindItemByName(engine, "labellingPopup");
-    QObject *labelFontBox = FindItemByName(engine, "labelFontBox");
+    // model cut components
+    QObject *cutPopup = FindItemByName(engine, "cutPopup");
+    QObject *curveButton = FindItemByName(engine, "curveButton");
+    QObject *flatButton = FindItemByName(engine, "flatButton");
+    QObject *slider = FindItemByName(engine, "slider");
     Lights* lights = new Lights(teethModel);
-    QObject* autoorientButton = FindItemByName(engine, "autoorientButton");
-    QObject* progress_text = FindItemByName(engine, "progress_text");
-    orientThread* ot=new orientThread(gglmodel);
 
-    QObject::connect(gglmodel->m_autoorientation, SIGNAL(setProgress(QVariant)),progress_text, SLOT(update_loading(QVariant)));
-    QObject::connect(ot, SIGNAL(loadPopup(QVariant)),autoorientButton, SLOT(show_popup(QVariant)));
-    QObject::connect(autoorientButton, SIGNAL(autoOrientSignal()),ot, SLOT(start()));
-    QObject::connect(item,SIGNAL(qmlSignal()),gglmodel,SLOT(modelcut()));
-    QObject::connect(curve,SIGNAL(curveSignal()),gglmodel,SLOT(lineAccept()));
-    QObject::connect(flat,SIGNAL(flatSignal()),gglmodel,SLOT(pointAccept()));
-    QObject::connect(slider,SIGNAL(govalue(double)),gglmodel,SLOT(getSignal(double)));
-    QObject::connect(text3DInput, SIGNAL(sendTextChanged(QString)),gglmodel->shadowModel,SLOT(getTextChanged(QString)));
-    QObject::connect(labellingPopup, SIGNAL(openLabelling()),gglmodel->shadowModel,SLOT(openLabelling()));
-    QObject::connect(labellingPopup, SIGNAL(closeLabelling()),gglmodel->shadowModel,SLOT(closeLabelling()));
-    QObject::connect(labellingPopup, SIGNAL(generateText3DMesh()),gglmodel->shadowModel, SLOT(generateText3DMesh()));
-    QObject::connect(labelFontBox, SIGNAL(sendFontName(QString)),gglmodel->shadowModel, SLOT(getFontNameChanged(QString)));
+    // labelling components
+    QObject *text3DInput = FindItemByName(engine, "text3DInput");
+    QObject *labelPopup = FindItemByName(engine, "labelPopup");
+    QObject *labelFontBox = FindItemByName(engine, "labelFontBox");
+
+    // orientation components
+    QObject* orientPopup = FindItemByName(engine, "orientPopup");
+    QObject* progress_text = FindItemByName(engine, "progress_text");
+    featureThread* ft = new featureThread(glmodel, ftrOrient);
+
+    QObject::connect(ft, SIGNAL(setProgress(QVariant)),progress_text, SLOT(update_loading(QVariant)));
+    QObject::connect(ft, SIGNAL(loadPopup(QVariant)),orientPopup, SLOT(show_popup(QVariant)));
+
+    // need to connect for every popup
+
+    // model cut popup codes
+    QObject::connect(cutPopup,SIGNAL(modelCut()),glmodel->shadowModel,SLOT(modelCut()));
+    QObject::connect(cutPopup,SIGNAL(curveModeSelected()),glmodel->shadowModel,SLOT(lineAccept()));
+    QObject::connect(cutPopup,SIGNAL(flatModeSelected()),glmodel->shadowModel,SLOT(pointAccept()));
+    QObject::connect(slider,SIGNAL(govalue(double)),glmodel->shadowModel,SLOT(getSignal(double)));
+
+    // auto orientation popup codes
+    QObject::connect(orientPopup, SIGNAL(autoOrientSignal()),ft, SLOT(start()));
+
+    // label popup codes
+    QObject::connect(text3DInput, SIGNAL(sendTextChanged(QString)),glmodel->shadowModel,SLOT(getTextChanged(QString)));
+    QObject::connect(labelPopup, SIGNAL(openLabelling()),glmodel->shadowModel,SLOT(openLabelling()));
+    QObject::connect(labelPopup, SIGNAL(closeLabelling()),glmodel->shadowModel,SLOT(closeLabelling()));
+    QObject::connect(labelPopup, SIGNAL(generateText3DMesh()),glmodel->shadowModel, SLOT(generateText3DMesh()));
+    QObject::connect(labelFontBox, SIGNAL(sendFontName(QString)),glmodel->shadowModel, SLOT(getFontNameChanged(QString)));
 }
 
 

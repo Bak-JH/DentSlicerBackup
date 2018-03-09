@@ -16,7 +16,7 @@ SOURCES += main.cpp \
     mesh.cpp \
     lights.cpp \
     polyclipping/clipper.cpp \
-    autoorientation.cpp \
+    feature/autoorientation.cpp \
     feature/modelcut.cpp \
     feature/meshrepair.cpp \
     feature/text3dgeometrygenerator.cpp \
@@ -61,7 +61,7 @@ HEADERS += \
     mesh.h \
     lights.h \
     polyclipping/clipper.hpp \
-    autoorientation.h \
+    feature/autoorientation.h \
     feature/modelcut.h \
     feature/meshrepair.h \
     feature/labellingtextpreview.h \

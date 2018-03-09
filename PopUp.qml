@@ -97,6 +97,7 @@ Rectangle {
                 case "Auto Repair":
                     break;
                 case "Cut":
+                    applyClicked();
                     break;
                 case "Shell Offset":
                     break;
@@ -349,6 +350,8 @@ Rectangle {
         }
     }
 
+    signal flatModeClicked();
+
     Item {
         id: leftselectimage
         visible: false
@@ -358,18 +361,19 @@ Rectangle {
         anchors.leftMargin: 17
         anchors.top: parent.top
         anchors.topMargin: 70
-        objectName: "flat"
+        objectName: "flatButton"
         Image {
-            id: flatd
             source: "qrc:/resource/flat.png"
         }
 
-        signal flatSignal
         MouseArea {
             anchors.fill: parent
-            onClicked: leftselectimage.flatSignal()
+            onClicked: flatModeClicked()
         }
     }
+
+    signal curveModeClicked();
+
     Item {
         id: rightselectimage
         visible: false
@@ -379,16 +383,14 @@ Rectangle {
         anchors.rightMargin: 17
         anchors.top: parent.top
         anchors.topMargin: 70
-        objectName: "curve"
+        objectName: "curveButton"
         Image {
-            id: curved
             anchors.fill: parent
             source: "qrc:/resource/curve.png"
         }
-        signal curveSignal
         MouseArea {
             anchors.fill: parent
-            onClicked: curveSignal()
+            onClicked: curveModeClicked();
         }
     }
 

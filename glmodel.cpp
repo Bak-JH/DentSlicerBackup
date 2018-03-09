@@ -16,7 +16,7 @@ GLModel::GLModel(QNode *parent, QString fname, bool isShadow)
     , f_cnt(0)
     , m_transform(new Qt3DCore::QTransform())
     //, m_objectPicker(new Qt3DRender::QObjectPicker())
-    , parentEntity(reinterpret_cast<Qt3DCore::QEntity *>(parent))
+    , parentModel((GLModel*)(parent))
     , numPoints(0)
     , curveState(false)
     , flatState(false)
@@ -83,30 +83,70 @@ GLModel::GLModel(QNode *parent, QString fname, bool isShadow)
 
     qDebug() << "created shadow model";
 
-    m_autoorientation = new autoorientation();
 }
 
-orientThread::orientThread(GLModel* glmodel){
-    m_glmodel=glmodel;
-    m_autoorientation=glmodel->m_autoorientation;
+featureThread::featureThread(GLModel* glmodel, int type){
+    qDebug() << "feature thread created" << type;
+    m_glmodel = glmodel;
+    optype = type;
+
+    // enable features
+    ot = new autoorientation();
+
+    connect(ot, SIGNAL(progressChanged(float)), this, SLOT(progressChanged(float)));
 }
 
-void orientThread::run(){
-    if(m_glmodel->appropriately_rotated){
-        qDebug()<<"already oriented";
-        markPopup(false);
-    }else{
-        markPopup(true);
-        rotateResult* rotateres=this->m_autoorientation->Tweak(m_glmodel->mesh,true,45,&m_glmodel->appropriately_rotated);\
-        m_glmodel->m_transform->setMatrix(rotateres->R);
+void featureThread::run(){
+    switch (optype){
+        case ftrOpen:
+            break;
+        case ftrSave:
+            break;
+        case ftrExport:
+            break;
+        case ftrMove:
+            break;
+        case ftrRotate:
+            break;
+        case ftrLayFlat:
+            break;
+        case ftrArrange:
+            break;
+        case ftrOrient:
+            if(m_glmodel->appropriately_rotated){
+                markPopup(false);
+            } else {
+                markPopup(true);
+                rotateResult* rotateres= ot->Tweak(m_glmodel->mesh,true,45,&m_glmodel->appropriately_rotated);
+                m_glmodel->m_transform->setMatrix(rotateres->R);
+            }
+            break;
+        case ftrScale:
+            break;
+        case ftrRepair:
+            break;
+        case ftrCut:
+            break;
+        case ftrShellOffset:
+            break;
+        case ftrExtend:
+            break;
+        case ftrSupport:
+            break;
+        case ftrLabel:
+            break;
     }
 }
 
-void orientThread::markPopup(bool flag){
+void featureThread::progressChanged(float value){
+    emit featureThread::setProgress(value);
+}
+
+void featureThread::markPopup(bool flag){
     if(flag){
-        emit orientThread::loadPopup("progress_popup");
+        emit featureThread::loadPopup("progress_popup");
     }else{
-        emit orientThread::loadPopup("result_orient");
+        emit featureThread::loadPopup("result_orient");
     }
 }
 
@@ -353,6 +393,7 @@ void GLModel::addIndexes(vector<int> indexes){
 // need to create new mesh object liek Mesh* leftMesh = new Mesh();
 void GLModel::bisectModel(Mesh* mesh, Plane plane, Mesh* leftMesh, Mesh* rightMesh){
     // do bisecting mesh
+    qDebug() << "in bisect";
     foreach (MeshFace mf, mesh->faces){
         bool faceLeftToPlane = true;
         for (int vn=0; vn<3; vn++){
@@ -366,8 +407,11 @@ void GLModel::bisectModel(Mesh* mesh, Plane plane, Mesh* leftMesh, Mesh* rightMe
             rightMesh->addFace(mesh->vertices[mf.mesh_vertex[0]].position, mesh->vertices[mf.mesh_vertex[1]].position, mesh->vertices[mf.mesh_vertex[2]].position);
     }
 
+    qDebug() << "done bisect";
+
     leftMesh->connectFaces();
     rightMesh->connectFaces();
+    qDebug() << "done connecting";
 }
 
 bool GLModel::isLeftToPlane(Plane plane, QVector3D position){
@@ -383,8 +427,8 @@ void GLModel::handlePickerClicked(QPickEvent *pick)
         if (labellingTextPreview)
             labellingTextPreview->setEnabled(true);
 
-        if (auto* gglModel = qobject_cast<GLModel*>(parent()))
-            gglModel->m_planeMaterial->setDiffuse(QColor(0, 255, 0));
+        if (auto* glmodel = qobject_cast<GLModel*>(parent()))
+            glmodel->m_planeMaterial->setDiffuse(QColor(0, 255, 0));
 
         if (labellingTextPreview && labellingTextPreview->isEnabled()) {
             labellingTextPreview->setTranslation(pick->localIntersection());
@@ -392,14 +436,16 @@ void GLModel::handlePickerClicked(QPickEvent *pick)
         }
     }
     QPickTriangleEvent *trianglePick = static_cast<QPickTriangleEvent*>(pick);
-    qDebug() << flatState << numPoints << sizeof(sphereEntity)/4;
-    if (flatState&&numPoints< sizeof(sphereEntity)/4)
-        {//qDebug() << pick->localIntersection()<<"pick";
+    //qDebug() << flatState << numPoints << sizeof(sphereEntity)/4;
+    if (flatState&&parentModel->numPoints< sizeof(sphereEntity)/4) {
+        qDebug() << pick->localIntersection()<<"pick";
         QVector3D v = pick->localIntersection();
-        addCuttingPoint(v);
+        parentModel->addCuttingPoint(v);
     }
-    else
+    else {
+        qDebug() << "fail to flat state" << flatState;
         return;
+    }
 }
 
 
@@ -436,7 +482,7 @@ void GLModel::generatePlane(){
                 planeTransform[i]->setRotation(QQuaternion::fromAxisAndAngle(crossproduct_vector, angle+180*i));
                 planeTransform[i]->setTranslation(desire_normal*(-world_origin.distanceToPlane(v1,v2,v3)));
 
-            planeEntity[i] = new Qt3DCore::QEntity(parentEntity);
+            planeEntity[i] = new Qt3DCore::QEntity(parentModel);
                 planeEntity[i]->addComponent(clipPlane[i]);
                 planeEntity[i]->addComponent(planeTransform[i]);
                 planeEntity[i]->addComponent(planeMaterial);
@@ -452,7 +498,7 @@ void GLModel::addCuttingPoint(QVector3D v){
 
     sphereMaterial[numPoints] = new Qt3DExtras::QPhongMaterial();
     sphereMaterial[numPoints]->setDiffuse(QColor(QRgb(0xaa0000)));
-    sphereEntity[numPoints] = new Qt3DCore::QEntity(parentEntity);
+    sphereEntity[numPoints] = new Qt3DCore::QEntity(parentModel);
     sphereEntity[numPoints]->addComponent(sphereMesh[numPoints]);
     sphereEntity[numPoints]->addComponent(sphereTransform[numPoints]);
     sphereEntity[numPoints]->addComponent(sphereMaterial[numPoints]);
@@ -487,25 +533,25 @@ void GLModel::removeModel(){
     delete m_geometryRenderer;
 }
 
-void GLModel::modelcut(){
+void GLModel::modelCut(){
+    parentModel->removeCuttingPoints();
+    parentModel->generatePlane();
 
-    removeCuttingPoints();
-    generatePlane();
 //    beforeInitialize();
 ////
-//    Plane plane;
-//    plane.push_back(cuttingPoints[cuttingPoints.size()-3]);
-//    plane.push_back(cuttingPoints[cuttingPoints.size()-2]);   //plane에 잘 들어감
-//    plane.push_back(cuttingPoints[cuttingPoints.size()-1]);
-////
+    Plane plane;
+    plane.push_back(cuttingPoints[cuttingPoints.size()-3]);
+    plane.push_back(cuttingPoints[cuttingPoints.size()-2]);   //plane에 잘 들어감
+    plane.push_back(cuttingPoints[cuttingPoints.size()-1]);
+    parentModel->bisectModel(parentModel->mesh, plane, parentModel->lmesh, parentModel->rmesh);
+
 //    initialize(mesh);
 //    addComponent(m_objectPicker);
 //    QObject::connect(m_objectPicker, SIGNAL(clicked(Qt3DRender::QPickEvent*)), this, SLOT(handlePickerClicked(Qt3DRender::QPickEvent*)));
 //    addComponent(m_transform);
 
 //    addVertices(mesh);
-//    bisectModel(mesh, plane, lmesh, rmesh);
-//    addVertices(rmesh);
+    //addVertices(rmesh);
 }
 
 
@@ -641,7 +687,7 @@ void GLModel::drawLine(QVector3D endpoint)
         lineTransform->setTranslation(desire_point);
         Qt3DExtras::QPhongMaterial * lineMaterial = new Qt3DExtras::QPhongMaterial();
         lineMaterial->setDiffuse(QColor(QRgb(0x00aa00)));
-        Qt3DCore::QEntity* lineEntity = new Qt3DCore::QEntity(parentEntity);
+        Qt3DCore::QEntity* lineEntity = new Qt3DCore::QEntity(parentModel);
         lineEntity->addComponent(line);
         lineEntity->addComponent(lineTransform);
         lineEntity->addComponent(lineMaterial);
@@ -658,12 +704,10 @@ void GLModel::lineAccept(){
 }
 
 void GLModel::pointAccept(){
-    qDebug() << "point Accept";
-    if(!flatState){
-        flatState=true;}
-    else {
+    qDebug() << "point Accept" << flatState;
+    if (flatState)
         removeCuttingPoints();
-        flatState=false;}
+    flatState = !flatState;
 }
 
 void GLModel::getSignal(double value){
@@ -729,8 +773,8 @@ void GLModel::closeLabelling()
     if (labellingTextPreview && labellingTextPreview->isEnabled())
         labellingTextPreview->setEnabled(false);
 
-    if (auto* gglModel = qobject_cast<GLModel*>(parent()))
-        gglModel->m_planeMaterial->setDiffuse(QColor(255,255,255));
+    if (auto* glmodel = qobject_cast<GLModel*>(parent()))
+        glmodel->m_planeMaterial->setDiffuse(QColor(255,255,255));
 }
 
 void GLModel::getFontNameChanged(QString fontName)
@@ -785,10 +829,10 @@ void GLModel::generateText3DMesh()
         outNormals.push_back(vertices[2 * indices[3*i + 2] + 1]);
     }
 
-    if (GLModel* gglModel = qobject_cast<GLModel*>(parent())) {
+    if (GLModel* glmodel = qobject_cast<GLModel*>(parent())) {
         qDebug() << "addVertices";
-        gglModel->addVertices(outVertices);
+        glmodel->addVertices(outVertices);
         qDebug() << "addNormalVertices";
-        gglModel->addNormalVertices(outNormals);
+        glmodel->addNormalVertices(outNormals);
     }
 }
