@@ -10,7 +10,7 @@ void QmlManager::initializeUI(QQmlApplicationEngine* e){
     engine = e;
     QObject* mainView = FindItemByName(engine, "MainView");
     QEntity* teethModel = (QEntity *)FindItemByName(engine, "model");
-    GLModel* gglmodel = new GLModel(teethModel, "C:/Users/diridiri/Desktop/DLP/partial2_flip.stl", false);
+    GLModel* gglmodel = new GLModel(teethModel, "C:/Users/hsy61/Desktop/3D_models/simple/tetrahedron.stl", false);
 
     QObject *item = FindItemByName(engine, "item");
     QObject *curve = FindItemByName(engine, "curve");
