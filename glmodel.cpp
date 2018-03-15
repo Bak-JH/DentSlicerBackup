@@ -25,6 +25,7 @@ GLModel::GLModel(QNode *parent, QString fname, bool isShadow)
     if (isShadow){
         mesh = new Mesh();
         loadMeshSTL(mesh, filename.toStdString().c_str());
+
         sparseMesh =toSparse(mesh);
 
         initialize(sparseMesh);
@@ -537,14 +538,51 @@ void GLModel::modelCut(){
     parentModel->removeCuttingPoints();
     parentModel->generatePlane();
 
-//    beforeInitialize();
-////
     Plane plane;
-    plane.push_back(cuttingPoints[cuttingPoints.size()-3]);
-    plane.push_back(cuttingPoints[cuttingPoints.size()-2]);   //plane에 잘 들어감
-    plane.push_back(cuttingPoints[cuttingPoints.size()-1]);
+    plane.push_back(parentModel->cuttingPoints[parentModel->cuttingPoints.size()-3]);
+    plane.push_back(parentModel->cuttingPoints[parentModel->cuttingPoints.size()-2]);   //plane에 잘 들어감
+    plane.push_back(parentModel->cuttingPoints[parentModel->cuttingPoints.size()-1]);
     parentModel->bisectModel(parentModel->mesh, plane, parentModel->lmesh, parentModel->rmesh);
+    qDebug() << filename;
+    GLModel* leftmodel = new GLModel(parentModel->parentModel,filename, false);
+    parentModel->deleteLater();
+    deleteLater();
+    //shadowModel->deleteLater();
+    //deleteLater();
+    //delete shadowModel;
+    //shadowModel->deleteLater();
 
+    qDebug() << "ok till here";
+    //deleteLater();
+    //deleteLater();
+    //removeModel();
+    //delete m_planeMaterial;
+    /*delete vertexBuffer;
+    qDeleteAll(vertexNormalBuffer);
+    qDeleteAll(vertexColorBuffer);
+    qDeleteAll(indexBuffer);
+    qDeleteAll(positionAttribute);
+    qDeleteAll(normalAttribute);
+    qDeleteAll(colorAttribute);
+    qDeleteAll(indexAttribute);
+    qDeleteAll(m_geometry);
+    qDeleteAll(m_objectPicker);
+    qDeleteAll(m_transform);
+    qDeleteAll(cuttingPoints);
+    qDeleteAll(clipPlane);
+    qDeleteAll(planeEntity);
+    qDeleteAll(planeTransform);
+    qDeleteAll(planeMaterial);
+    qDeleteAll(sphereMesh);
+    qDeleteAll(sphereEntity);
+    qDeleteAll(sphereTransform);
+    qDeleteAll(sphereMaterial);
+    qDeleteAll(mesh);
+    qDeleteAll(lmesh);
+    qDeleteAll(rmesh);
+    qDeleteAll(m_parent);*/
+
+    //delete this;
 //    initialize(mesh);
 //    addComponent(m_objectPicker);
 //    QObject::connect(m_objectPicker, SIGNAL(clicked(Qt3DRender::QPickEvent*)), this, SLOT(handlePickerClicked(Qt3DRender::QPickEvent*)));
@@ -581,7 +619,7 @@ void GLModel::beforeInitialize(){
 
 
 GLModel::~GLModel(){
-    delete m_transform;
+    /*delete m_transform;
     delete m_objectPicker;
     delete m_planeMaterial;
     delete mesh;
@@ -594,7 +632,7 @@ GLModel::~GLModel(){
     delete vertexNormalBuffer;
     delete vertexBuffer;
     delete m_geometry;
-    delete m_geometryRenderer;
+    delete m_geometryRenderer;*/
 }
 
 void GLModel::beforeAddVerticies(){
