@@ -32,7 +32,7 @@ class GLModel : public QEntity
     Q_OBJECT
 public:
     // load teeth model default
-    GLModel(QNode* parent=nullptr, QString fname="", bool isShadow=false); // main constructor for mainmesh and shadowmesh
+    GLModel(QNode* parent=nullptr, Mesh* loadMesh=nullptr, QString fname="", bool isShadow=false); // main constructor for mainmesh and shadowmesh
     ~GLModel();
 
     GLModel *parentModel;

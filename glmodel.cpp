@@ -6,7 +6,7 @@
 
 #include "feature/text3dgeometrygenerator.h"
 
-GLModel::GLModel(QNode *parent, QString fname, bool isShadow)
+GLModel::GLModel(QNode *parent, Mesh* loadMesh, QString fname, bool isShadow)
     : QEntity(parent)
     , filename(fname)
     , x(0.0f)
@@ -21,12 +21,20 @@ GLModel::GLModel(QNode *parent, QString fname, bool isShadow)
     , curveState(false)
     , flatState(false)
 {
-
+    // generates shadow model for object picking
     if (isShadow){
-        mesh = new Mesh();
-        loadMeshSTL(mesh, filename.toStdString().c_str());
 
-        sparseMesh =toSparse(mesh);
+        if (filename != ""){
+            mesh = new Mesh();
+            loadMeshSTL(mesh, filename.toStdString().c_str());
+        } else {
+            mesh = loadMesh;
+        }
+
+        lmesh = new Mesh();
+        rmesh = new Mesh();
+
+        sparseMesh = toSparse(mesh);
 
         initialize(sparseMesh);
         addVertices(sparseMesh);
@@ -59,15 +67,17 @@ GLModel::GLModel(QNode *parent, QString fname, bool isShadow)
     m_planeMaterial->setSpecular(QColor(81,200,242));
     m_planeMaterial->setAlpha(1.0f);
 
-    mesh = new Mesh();
+    if (filename != ""){
+        mesh = new Mesh();
+        loadMeshSTL(mesh, filename.toStdString().c_str());
+    } else {
+        mesh = loadMesh;
+    }
 
     lmesh = new Mesh();
     rmesh = new Mesh();
 
-    loadMeshSTL(mesh, filename.toStdString().c_str());//"C:/Users/diridiri/Desktop/DLP/partial2_flip.stl");
-
     sparseMesh = toSparse(mesh);
-    //repairMesh(mesh);
 
     initialize(mesh);
     addVertices(mesh);
@@ -80,7 +90,7 @@ GLModel::GLModel(QNode *parent, QString fname, bool isShadow)
     qDebug() << "created original model";
 
     // create shadow model to handle picking settings
-    shadowModel = new GLModel(this, filename, true);
+    shadowModel = new GLModel(this, mesh, filename, true);
 
     qDebug() << "created shadow model";
 
@@ -395,6 +405,11 @@ void GLModel::addIndexes(vector<int> indexes){
 void GLModel::bisectModel(Mesh* mesh, Plane plane, Mesh* leftMesh, Mesh* rightMesh){
     // do bisecting mesh
     qDebug() << "in bisect";
+    leftMesh->faces.reserve(mesh->faces.size());
+    leftMesh->vertices.reserve(mesh->faces.size());
+    rightMesh->faces.reserve(mesh->faces.size());
+    rightMesh->vertices.reserve(mesh->faces.size());
+
     foreach (MeshFace mf, mesh->faces){
         bool faceLeftToPlane = true;
         for (int vn=0; vn<3; vn++){
@@ -542,9 +557,13 @@ void GLModel::modelCut(){
     plane.push_back(parentModel->cuttingPoints[parentModel->cuttingPoints.size()-3]);
     plane.push_back(parentModel->cuttingPoints[parentModel->cuttingPoints.size()-2]);   //plane에 잘 들어감
     plane.push_back(parentModel->cuttingPoints[parentModel->cuttingPoints.size()-1]);
-    parentModel->bisectModel(parentModel->mesh, plane, parentModel->lmesh, parentModel->rmesh);
+    qDebug() << parentModel->parentModel;
+    //parentModel->bisectModel(parentModel->mesh, plane, leftModel->mesh, rightModel->mesh);
+    parentModel->bisectModel(parentModel->mesh, plane, lmesh, rmesh);
+    GLModel* leftModel = new GLModel(parentModel->parentModel, lmesh, "", false);
+    //GLModel* rightModel = new GLModel(parentModel->parentModel, rmesh, "", false);
+
     qDebug() << filename;
-    GLModel* leftmodel = new GLModel(parentModel->parentModel,filename, false);
     parentModel->deleteLater();
     deleteLater();
     //shadowModel->deleteLater();
