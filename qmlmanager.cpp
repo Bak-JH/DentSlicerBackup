@@ -27,6 +27,7 @@ void QmlManager::initializeUI(QQmlApplicationEngine* e){
     // orientation components
     QObject* orientPopup = FindItemByName(engine, "orientPopup");
     QObject* progress_text = FindItemByName(engine, "progress_text");
+
     featureThread* ft = new featureThread(glmodel, ftrOrient);
 
     QObject::connect(ft, SIGNAL(setProgress(QVariant)),progress_text, SLOT(update_loading(QVariant)));

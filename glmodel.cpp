@@ -812,11 +812,11 @@ Mesh* GLModel::toSparse(Mesh* mesh){
 return newMesh;
 }
 
-void GLModel::getTextChanged(QString text)
+void GLModel::getTextChanged(QString text, int contentWidth)
 {
     qDebug() << "text:" << text;
     if (labellingTextPreview)
-        labellingTextPreview->setText(text);
+        labellingTextPreview->setText(text, contentWidth);
 }
 
 void GLModel::openLabelling()

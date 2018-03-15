@@ -128,7 +128,7 @@ public slots:
     void getSignal(double value);
 
     // Labelling
-    void getTextChanged(QString text);
+    void getTextChanged(QString text, int contentWidth);
     void openLabelling();
     void closeLabelling();
     void getFontNameChanged(QString fontName);

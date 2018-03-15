@@ -44,7 +44,7 @@ class LabellingTextPreview : public Qt3DCore::QEntity
 public:
     LabellingTextPreview(Qt3DCore::QNode* parent = nullptr);
 
-    void setText(QString text);
+    void setText(QString text, int contentWidth);
     void setFontName(QString fontName);
     void setTranslation(const QVector3D& t);
     void setNormal(const QVector3D& n);

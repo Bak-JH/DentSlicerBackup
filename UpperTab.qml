@@ -1002,18 +1002,26 @@ Rectangle {
                 anchors.leftMargin: 25
                 anchors.rightMargin: 25
 
+                Text {
+                    id: hiddenText
+                    anchors.fill: text3DInput
+                    text: text3DInput.text
+                    font.pixelSize: text3DInput.font.pixelSize
+                    visible: false
+                }
+
                 TextField {
                     id:text3DInput
                     objectName: "text3DInput"
 
-                    signal sendTextChanged(string text)
+                    signal sendTextChanged(string text, int contentWidth)
 
                     anchors.fill: parent
 
                     placeholderText: qsTr("Enter text")
 
                     onTextChanged: {
-                        sendTextChanged(text)
+                        sendTextChanged(text, hiddenText.contentWidth)
                     }
                 }
             }
