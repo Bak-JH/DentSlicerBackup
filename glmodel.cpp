@@ -77,6 +77,17 @@ GLModel::GLModel(QNode *parent, QString fname, bool isShadow)
 //    initialize(mesh);
 //    addVertices(mesh);
 
+
+
+    //* Arrange
+    vector<Mesh> meshes_to_arrange;
+    vector<XYArrangement> arng_result;
+    meshes_to_arrange.push_back(*mesh);
+    arng_result = arngMeshes(&meshes_to_arrange);
+    //*/
+
+
+
     Qt3DExtras::QDiffuseMapMaterial *diffuseMapMaterial = new Qt3DExtras::QDiffuseMapMaterial();
 
     //addComponent(m_mesh);
