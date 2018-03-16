@@ -14,6 +14,21 @@ void QmlManager::initializeUI(QQmlApplicationEngine* e){
     GLModel* gglmodel = new GLModel(teethModel, "C:/Users/hsy61/Desktop/3D_models/test/train_small.stl", false);
     //GLModel* gglmodel = new GLModel(teethModel, "C:/Users/hsy61/Desktop/3D_models/teeth_models/lowerjaw.stl", false);
 
+
+    GLModel* gglmodel2 = new GLModel(teethModel, "C:/Users/hsy61/Desktop/3D_models/simple/cube_10.stl", false);
+
+    //* Arrange **********************************
+    vector<Mesh> meshes_to_arrange;
+    vector<XYArrangement> arng_result_set;
+    meshes_to_arrange.push_back(* gglmodel->mesh);
+    meshes_to_arrange.push_back(* gglmodel2->mesh);
+    arng_result_set = arngMeshes(&meshes_to_arrange);
+    vector<Qt3DCore::QTransform*> m_transform_set;
+    m_transform_set.push_back(gglmodel->m_transform);
+    m_transform_set.push_back(gglmodel2->m_transform);
+    arrangeQt3D(m_transform_set, arng_result_set);
+    //*/
+
     QObject *item = FindItemByName(engine, "item");
     QObject *curve = FindItemByName(engine, "curve");
     QObject *flat = FindItemByName(engine, "flat");

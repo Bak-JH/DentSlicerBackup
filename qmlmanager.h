@@ -7,6 +7,7 @@
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
 #include <QQmlEngine>
+#include "feature/arrange.h"
 
 class QmlManager : public QObject
 {

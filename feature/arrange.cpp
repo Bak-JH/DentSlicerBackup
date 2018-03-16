@@ -640,8 +640,8 @@ vector<vector<IntPoint>> getObjVecsInRegions(vector<float>* sub_slope_set, vecto
         int from_slope = (*sub_slope_set)[sub_edge_idx];
         int to_slope = (*sub_slope_set)[(sub_edge_idx+1)%(*sub_slope_set).size()];
         int obj_edge_idx = (obj_edge_tail+1)%(*obj_slope_set).size();
-        //int tmp= obj_edge_idx; start from?
-        while(isOnCCWPath(from_slope, to_slope, (*obj_slope_set)[obj_edge_idx])){
+        int start_from = obj_edge_idx;
+        while(isOnCCWPath(from_slope, to_slope, (*obj_slope_set)[obj_edge_idx]) && obj_edge_idx != start_from){
             obj_edge_tail = obj_edge_idx;
             obj_vecs_in_single_region.push_back((*obj_vec_set)[obj_edge_idx]);
             obj_edge_idx = (obj_edge_idx+1)%(*obj_slope_set).size();

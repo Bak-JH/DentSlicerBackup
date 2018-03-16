@@ -15,7 +15,6 @@
 #include "autoorientation.h"
 #include "mesh.h"
 #include "fileloader.h"
-#include "feature/arrange.h"
 
 #define MAX_BUF_LEN 2000000
 
