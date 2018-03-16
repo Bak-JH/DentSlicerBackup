@@ -385,7 +385,7 @@ void initStage(Paths* cum_outline){
 
 XYArrangement arngFig(Paths* cum_outline, Paths* fig){
     /**/qDebug() << "Arrange new fig @arngFig";
-    float angle_unit = 360;
+    float angle_unit = 90;
 
     Paths optimal_rot_fig;
     XYArrangement global_optimal_arrangement;
@@ -619,13 +619,14 @@ vector<vector<IntPoint>> getObjVecsInRegions(vector<float>* sub_slope_set, vecto
                 }
             }
             if(obj_vecs_in_single_region_front_part.size() != obj_slope_set->size()){
+                int start_from = obj_edge_idx;
                 obj_edge_tail = obj_edge_idx;
                 obj_vecs_in_single_region.push_back((*obj_vec_set)[obj_edge_idx]);
-                obj_edge_idx++;
-                while(isOnCCWPath((*sub_slope_set)[0], (*sub_slope_set)[1], (*obj_slope_set)[obj_edge_idx])){
+                obj_edge_idx = (obj_edge_idx+1)%(*obj_slope_set).size();
+                while(isOnCCWPath((*sub_slope_set)[0], (*sub_slope_set)[1], (*obj_slope_set)[obj_edge_idx]) && obj_edge_idx != start_from){
                     obj_edge_tail = obj_edge_idx;
                     obj_vecs_in_single_region.push_back((*obj_vec_set)[obj_edge_idx]);
-                    obj_edge_idx ++;
+                    obj_edge_idx = (obj_edge_idx+1)%(*obj_slope_set).size();
                 }
             }
             obj_vecs_in_single_region.insert(obj_vecs_in_single_region.begin(),obj_vecs_in_single_region_front_part.rbegin(),obj_vecs_in_single_region_front_part.rend());
