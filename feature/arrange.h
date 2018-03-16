@@ -2,6 +2,7 @@
 #define ARRANGE_H
 #include <vector>
 #include <QVector3D>
+#include <Qt3DCore>
 #include <QHash>
 #include <QDebug>
 #include <math.h>
@@ -66,6 +67,9 @@ IntPoint getNthEdgeVec(Path* path, int edge_idx, bool isForward);
 IntPoint getEdgeVec(IntPoint* p1, IntPoint* p2);
 IntPoint getFirstNFPPoint(float first_slope, IntPoint first_point, Path* obj, vector<float> obj_slope_set);
 IntPoint rotateIntPointRad(IntPoint point, float rot_angle);
+
+void arrangeQt3D(vector<Qt3DCore::QTransform*> m_transform_set, vector<XYArrangement> arng_result_set);
+void arrangeSingleQt3D(Qt3DCore::QTransform* m_transform, XYArrangement arng_result);
 
 void testSimplifyPolygon();
 void testClip();

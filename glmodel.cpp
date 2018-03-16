@@ -2,6 +2,7 @@
 #include "glmodel.h"
 #include <QString>
 #include <QtMath>
+#include <typeinfo>
 
 GLModel::GLModel(QNode *parent, QString fname, bool isShadow)
     : QEntity(parent)
@@ -81,9 +82,13 @@ GLModel::GLModel(QNode *parent, QString fname, bool isShadow)
 
     //* Arrange
     vector<Mesh> meshes_to_arrange;
-    vector<XYArrangement> arng_result;
+    vector<XYArrangement> arng_result_set;
     meshes_to_arrange.push_back(*mesh);
-    arng_result = arngMeshes(&meshes_to_arrange);
+    arng_result_set = arngMeshes(&meshes_to_arrange);
+    vector<Qt3DCore::QTransform*> m_transform_set;
+    m_transform_set.push_back(m_transform);
+    arrangeQt3D(m_transform_set, arng_result_set);
+    //arrangeSingleQt3D(m_transform, &arng_result_set[0]);
     //*/
 
 

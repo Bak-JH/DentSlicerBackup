@@ -337,17 +337,19 @@ vector<XYArrangement> arngMeshes(vector<Mesh>* meshes){
 }
 
 vector<XYArrangement> arng2D(vector<Paths>* figs){
-    vector<XYArrangement> arng_result;
+    vector<XYArrangement> arng_result_set;
     Paths cum_outline;
     initStage(&cum_outline);
     for(int idx=0; idx<figs->size(); idx++){
         XYArrangement new_result = arngFig(&cum_outline, &(*figs)[idx]);
         if(new_result.second==-1) break;//-1 means arng imposible
-        arng_result.push_back(new_result);
+        arng_result_set.push_back(new_result);
         /**/qDebug() << idx << "arngd @arng2D";
     }
     /**/qDebug() << "Arrange all done";
+    /**/qDebug() << arng_result_set.size();
     /**/debugPaths(cum_outline);
+    return arng_result_set;
 }
 
 void initStage(Paths* cum_outline){
@@ -691,12 +693,11 @@ IntPoint getEdgeVec(IntPoint* p1, IntPoint* p2){
     return vec;
 }
 
-IntPoint getFirstNFPPoint(float first_sub_slope, IntPoint first_point_sub, Path* obj, vector<float> obj_slope_set){
-    /**/qDebug() << "- getFirstNFPPoint start";
+IntPoint getFirstNFPPoint(float sub_slope, IntPoint sub_point, Path* obj, vector<float> obj_slope_set){
     int first_obj_slope_idx = -1;
     float min_slope_diff = 2*M_PI;
     for(int idx=0; idx<obj->size(); idx++){
-        float raw_slope_diff = obj_slope_set[idx] - first_sub_slope;
+        float raw_slope_diff = obj_slope_set[idx] - sub_slope;
         float slope_diff;
         if(raw_slope_diff<0) slope_diff = raw_slope_diff + 2*M_PI;
         else slope_diff = raw_slope_diff;
@@ -705,26 +706,34 @@ IntPoint getFirstNFPPoint(float first_sub_slope, IntPoint first_point_sub, Path*
             min_slope_diff = slope_diff;
         }
     }
-    qDebug()<<"------";
-    qDebug()<<first_sub_slope;
-    qDebug()<<obj_slope_set[first_obj_slope_idx];
     IntPoint first_point_obj = (*obj)[first_obj_slope_idx];
-    qDebug()<< first_point_obj.X << first_point_obj.Y;
-    IntPoint fist_nfp_point;
-    fist_nfp_point.X = first_point_sub.X - first_point_obj.X;
-    fist_nfp_point.Y = first_point_sub.Y - first_point_obj.Y;
+    IntPoint fist_nfp_point = {sub_point.X - first_point_obj.X, sub_point.Y - first_point_obj.Y};
     return fist_nfp_point;
 }
 
 IntPoint rotateIntPointRad(IntPoint point, float rot_angle){
     IntPoint rot_point;
-    //*qDebug() << "set rot_point";
     rot_point.X = point.X*cosf(rot_angle) - point.Y*sinf(rot_angle);
     rot_point.Y = point.X*sinf(rot_angle) + point.Y*cosf(rot_angle);
     //*qDebug() << "- point rotated";
     return rot_point;
 }
 
+//=========================================
+//arrange Qt3D
+//=========================================
+
+void arrangeQt3D(vector<Qt3DCore::QTransform*> m_transform_set, vector<XYArrangement> arng_result_set){
+    for(int idx=0; idx<arng_result_set.size(); idx++){
+        arrangeSingleQt3D(m_transform_set[idx], arng_result_set[idx]);
+    }
+}
+
+void arrangeSingleQt3D(Qt3DCore::QTransform* m_transform, XYArrangement arng_result){
+    QVector3D trans_vec = QVector3D(arng_result.first.X/cfg->resolution, arng_result.first.Y/cfg->resolution, 0);
+    m_transform->setTranslation(trans_vec);
+    m_transform->setRotationZ(arng_result.second);
+}
 
 //=========================================
 //test
