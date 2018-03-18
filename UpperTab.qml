@@ -15,6 +15,24 @@ Rectangle {
     property var options: []
 
 
+    // feature type number
+    property int ftrOpen : 1
+    property int ftrSave : 2
+    property int ftrExport : 3
+    property int ftrMove : 4
+    property int ftrRotate : 5
+    property int ftrLayFlat : 6
+    property int ftrArrange : 7
+    property int ftrOrient : 8
+    property int ftrScale : 9
+    property int ftrRepair : 10
+    property int ftrCut : 11
+    property int ftrShellOffset : 12
+    property int ftrExtend : 13
+    property int ftrSupport : 14
+    property int ftrLabel : 15
+
+
     function all_off() {
         first_tab_button_open.state = "inactive";
         first_tab_button_export.state = "inactive";
@@ -558,7 +576,11 @@ Rectangle {
             applybutton_vis: false
             applyfinishbutton_vis: true
             descriptionimage_vis: true
-            signal autoOrientSignal()
+            signal runFeature(int type);
+            onApplyClicked: {
+                console.log("auto orientation")
+                runFeature(ftrOrient);
+            }
             state: second_tab_button_orient.state=="active" ? "active" : "inactive"
         }
 
@@ -670,12 +692,12 @@ Rectangle {
 
             onApplyClicked: {
                 console.log("ApplyClicked")
-                modelCut();
+                runFeature(ftrCut);
             }
 
             signal flatModeSelected();
             signal curveModeSelected();
-            signal modelCut();
+            signal runFeature(int type);
         }
 
 
@@ -979,12 +1001,14 @@ Rectangle {
             detail2: "Font"
             image: "qrc:/Resource/label_description.png"
 
+            //signal runFeature(int type);
             signal generateText3DMesh()
             signal openLabelling()
             signal closeLabelling()
 
             onApplyClicked: {
                 console.log("ApplyClicked")
+                //runFeature(ftrLabel);
                 generateText3DMesh()
             }
 
