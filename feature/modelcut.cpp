@@ -95,7 +95,11 @@ void modelcut::addCuttingPoint(Qt3DCore::QEntity* targetEntity, QVector3D v){
     sphereTransform[numPoints]->setTranslation(v);
 
     sphereMaterial[numPoints] = new Qt3DExtras::QPhongMaterial();
-    sphereMaterial[numPoints]->setDiffuse(QColor(QRgb(0xaa0000)));
+    sphereMaterial[numPoints]->setAmbient(QColor(QRgb(0x0049FF)));
+    sphereMaterial[numPoints]->setDiffuse(QColor(QRgb(0x0049FF)));
+    sphereMaterial[numPoints]->setSpecular(QColor(QRgb(0x0049FF)));
+    sphereMaterial[numPoints]->setShininess(0.0f);
+
     sphereEntity[numPoints] = new Qt3DCore::QEntity(targetEntity);
     sphereEntity[numPoints]->addComponent(sphereMesh[numPoints]);
     sphereEntity[numPoints]->addComponent(sphereTransform[numPoints]);
