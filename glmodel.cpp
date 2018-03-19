@@ -61,11 +61,11 @@ GLModel::GLModel(QNode *parent, Mesh* loadMesh, QString fname, bool isShadow)
         return;
     }
 
-    m_planeMaterial = new QPhongAlphaMaterial();
-    m_planeMaterial->setAmbient(QColor(81,200,242));
-    m_planeMaterial->setDiffuse(QColor(255,255,255));
-    m_planeMaterial->setSpecular(QColor(81,200,242));
-    m_planeMaterial->setAlpha(1.0f);
+    m_meshMaterial = new QPhongMaterial();
+    m_meshMaterial->setAmbient(QColor(77,128,135));
+    m_meshMaterial->setDiffuse(QColor(173,215,218));
+    m_meshMaterial->setSpecular(QColor(182,237,246));
+    m_meshMaterial->setShininess(0.0f);
 
     if (filename != ""){
         mesh = new Mesh();
@@ -85,7 +85,7 @@ GLModel::GLModel(QNode *parent, Mesh* loadMesh, QString fname, bool isShadow)
     Qt3DExtras::QDiffuseMapMaterial *diffuseMapMaterial = new Qt3DExtras::QDiffuseMapMaterial();
 
     addComponent(m_transform);
-    addComponent(m_planeMaterial);
+    addComponent(m_meshMaterial);
 
     qDebug() << "created original model";
 
@@ -454,7 +454,7 @@ void GLModel::handlePickerClicked(QPickEvent *pick)
             labellingTextPreview->setEnabled(true);
 
         if (auto* glmodel = qobject_cast<GLModel*>(parent()))
-            glmodel->m_planeMaterial->setDiffuse(QColor(0, 255, 0));
+            glmodel->m_meshMaterial->setDiffuse(QColor(0, 255, 0));
 
         if (labellingTextPreview && labellingTextPreview->isEnabled()) {
             labellingTextPreview->setTranslation(pick->localIntersection());
@@ -554,7 +554,7 @@ void GLModel::removeModel(){
     delete normalAttribute;
     delete colorAttribute;
     removeComponent(m_geometryRenderer);
-    removeComponent(m_planeMaterial);
+    removeComponent(m_meshMaterial);
     delete m_geometry;
     delete m_geometryRenderer;
 }
@@ -585,7 +585,7 @@ void GLModel::modelCut(){
     //deleteLater();
     //deleteLater();
     //removeModel();
-    //delete m_planeMaterial;
+    //delete m_meshMaterial;
     /*delete vertexBuffer;
     qDeleteAll(vertexNormalBuffer);
     qDeleteAll(vertexColorBuffer);
@@ -628,7 +628,7 @@ void GLModel::beforeInitialize(){
     QObject::disconnect(m_objectPicker, SIGNAL(clicked(Qt3DRender::QPickEvent*)), this, SLOT(handlePickerClicked(Qt3DRender::QPickEvent*)));
     removeComponent(m_transform);
     removeComponent(m_geometryRenderer);
-    removeComponent(m_planeMaterial);
+    removeComponent(m_meshMaterial);
     m_geometryRenderer->setGeometry(nullptr);
     m_geometry->removeAttribute(colorAttribute);
     m_geometry->removeAttribute(normalAttribute);
@@ -650,7 +650,7 @@ void GLModel::beforeInitialize(){
 GLModel::~GLModel(){
     /*delete m_transform;
     delete m_objectPicker;
-    delete m_planeMaterial;
+    delete m_meshMaterial;
     delete mesh;
     delete rmesh;
     delete lmesh;
@@ -667,7 +667,7 @@ GLModel::~GLModel(){
 void GLModel::beforeAddVerticies(){
     //쓰지말것
     removeComponent(m_geometryRenderer);
-    removeComponent(m_planeMaterial);
+    removeComponent(m_meshMaterial);
     m_geometryRenderer->setGeometry(nullptr);
     m_geometry->removeAttribute(positionAttribute);
     m_geometry->removeAttribute(normalAttribute);
@@ -706,16 +706,16 @@ void GLModel::beforeAddVerticies(){
 //    m_geometry->addAttribute(colorAttribute);
 //    m_geometryRenderer->setGeometry(m_geometry);
 //    addComponent(m_geometryRenderer);
-//    addComponent(m_planeMaterial);
+//    addComponent(m_meshMaterial);
 
 }
 
 void GLModel::engoo(){
-    m_planeMaterial->setAmbient(QColor(10,200,10));
+    m_meshMaterial->setAmbient(QColor(10,200,10));
 }
 
 void GLModel::exgoo(){
-    m_planeMaterial->setAmbient(QColor(81,200,242));
+    m_meshMaterial->setAmbient(QColor(81,200,242));
 }
 void GLModel::mgoo(Qt3DRender::QPickEvent* v)
 {
@@ -841,7 +841,7 @@ void GLModel::closeLabelling()
         labellingTextPreview->setEnabled(false);
 
     if (auto* glmodel = qobject_cast<GLModel*>(parent()))
-        glmodel->m_planeMaterial->setDiffuse(QColor(255,255,255));
+        glmodel->m_meshMaterial->setDiffuse(QColor(255,255,255));
 }
 
 void GLModel::getFontNameChanged(QString fontName)

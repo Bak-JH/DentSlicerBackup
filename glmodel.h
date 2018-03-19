@@ -38,7 +38,7 @@ public:
     GLModel *parentModel;
     GLModel *shadowModel; // GLmodel's sparse mesh that gets picker input
     bool appropriately_rotated=false;
-    QPhongAlphaMaterial *m_planeMaterial;
+    QPhongMaterial *m_meshMaterial;
     Qt3DRender::QBuffer *vertexBuffer;
     Qt3DRender::QBuffer *vertexNormalBuffer;
     Qt3DRender::QBuffer *vertexColorBuffer;
