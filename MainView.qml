@@ -163,8 +163,11 @@ Entity {
                 scale3D: Qt.vector3d(0.01,0.01,0.01)
             }
             components: [systemTransform]
-
+            /*
             Plane{
+                id: planeEntity
+            }*/
+            Plate{
                 id: planeEntity
             }
 
