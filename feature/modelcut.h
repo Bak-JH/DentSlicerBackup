@@ -28,7 +28,7 @@ public:
     Qt3DExtras::QPlaneMesh* clipPlane[2];
     Qt3DCore::QEntity* planeEntity[2];
     Qt3DCore::QTransform *planeTransform[2];
-    Qt3DExtras::QPhongMaterial *planeMaterial;
+    Qt3DExtras::QPhongAlphaMaterial *planeMaterial;
 
     int numPoints;
 //private:

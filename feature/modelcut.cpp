@@ -55,8 +55,13 @@ void modelcut::generatePlane(Qt3DCore::QEntity* targetEntity){
     v1=cuttingPoints[cuttingPoints.size()-3];
     v2=cuttingPoints[cuttingPoints.size()-2];
     v3=cuttingPoints[cuttingPoints.size()-1];
-        planeMaterial = new Qt3DExtras::QPhongMaterial();
-        planeMaterial->setDiffuse(QColor(QRgb(0x00aaaa)));
+        planeMaterial = new Qt3DExtras::QPhongAlphaMaterial();
+        planeMaterial->setAmbient(QColor(QRgb(0xF4F4F4)));
+        planeMaterial->setDiffuse(QColor(QRgb(0xF4F4F4)));
+        planeMaterial->setSpecular(QColor(QRgb(0xF4F4F4)));
+        planeMaterial->setAlpha(50.0f);
+
+
         //To manipulate plane color, change the QRgb(0x~~~~~~).
         QVector3D world_origin(0,0,0);
         QVector3D original_normal(0,1,0);
