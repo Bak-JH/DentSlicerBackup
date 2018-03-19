@@ -484,7 +484,7 @@ void GLModel::handlePickerClicked(QPickEvent *pick)
             labellingTextPreview->setEnabled(true);
 
         if (auto* glmodel = qobject_cast<GLModel*>(parent()))
-            glmodel->m_planeMaterial->setDiffuse(QColor(0, 255, 0));
+            glmodel->m_meshMaterial->setDiffuse(QColor(0, 255, 0));
 
         if (labellingTextPreview && labellingTextPreview->isEnabled()) {
             labellingTextPreview->setTranslation(pick->localIntersection());

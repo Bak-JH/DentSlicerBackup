@@ -1,5 +1,6 @@
 #include "modelcut.h"
 
+
 modelcut::modelcut(){
     numPoints = 0;
 }
