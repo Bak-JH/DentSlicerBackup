@@ -46,9 +46,6 @@ Entity {
         }
     }
 
-
-
-
     KeyboardDevice {
         id: keyboard
     }

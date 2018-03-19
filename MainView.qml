@@ -26,16 +26,12 @@ Entity {
 
     CameraManager{id : cm}
 
-    MouseDevice{
-        id : mouseDevice
-    }
-
     MouseHandler{
         id : mouseHandler
-        sourceDevice: mouseDevice
+        sourceDevice: mouse
 
         onPressed: {
-            //console.log(mouseDevice.X + " " + mouseDevice.Y)
+            //console.log(mouse.X + " " + mouse.Y)
         }
 
         onWheel: {
@@ -65,101 +61,16 @@ Entity {
         }
     }
 
-
-
-    DiffuseMapMaterial{
-        id : planeMaterial
-
-//        ambient: Qt.rgba( 204/255, 204/255, 204/255, 1.0 )
-//        diffuse: "black"
-//        specular: "black"
-//        shininess: 0.0
-
-
-        diffuse: TextureLoader { source: "qrc:/grid.png"}
-        //specular: Qt.rgba( 1, 1, 1, 1.0 )
-        ambient: Qt.rgba(255/255, 255/255, 255/255, 1.0 )
-        shininess: 0
-
-    }
-
-
-    NormalDiffuseMapAlphaMaterial{
-        id : planeDownMaterial
-        diffuse: TextureLoader { source: "qrc:/grid2.png"}
-        normal: TextureLoader { source: "qrc:/grid2.png"}
-        ambient: Qt.rgba(0/255, 0/255, 0/255, 0.0)
-        //specular: Qt.rgba( 0, 0, 0, 1.0 )
-        shininess: 0
-    }
-
-    PhongMaterial {
-        id: meshMaterial
-        property int counter : 0
-        ambient: Qt.rgba(81/255,200/255,242/255,1.0)
-
-    }
-
-
-
-    ObjectPicker {
-        id: picker
-        hoverEnabled: true
-        //onClicked: console.log("Contains mouse: " + containsMouse)
-        /*
-        onContainsMouseChanged: console.log("Contains mouse: " + containsMouse)
-        */
-
-        onClicked: {
-            if(meshMaterial.counter%2 == 0)
-                meshMaterial.ambient = Qt.rgba(200/255,200/255,242/255,1.0)
-            else
-                meshMaterial.ambient = Qt.rgba(81/255,200/255,242/255,1.0)
-            meshMaterial.counter++;
-        }
-
-        onContainsMouseChanged: {
-            meshMaterial.ambient = Qt.rgba(200/255,40/255,242/255,1.0)
-        }
-        onExited: {
-            meshMaterial.ambient = Qt.rgba(200/255,200/255,242/255,1.0)
-        }
-    }
-
     Entity{
         id : total
         //property alias mtr: mtr
-        property alias meshEntity4: meshEntity4
-
-
 
         Transform{
             id : totalTransform
             //rotation: fromAxisAndAngle(Qt.vector3d(0,0, 1), 60)
         }
-        /*
-        Model{
-            id: meshEntity
-            inputSource:"file:///D:/Dev/Trash/3Dtest/lowerjaw.obj"
-        }
 
-        Model{
-            id: meshEntity2
-            inputSource:"file:///D:/Dev/DLPSlicer/DLPslicer/resource/mesh/hix.obj"
-        }
-        Model{
-            id: meshEntity3
-            inputSource:"file:///D:/Dev/DLPSlicer/DLPslicer/resource/mesh/hix.obj"
-        }*/
-        /*
-        Plane{id: planeEntity
-            Model{
-                id: meshEntity4
-                inputSource:"file:///D:/Dev/DLPSlicer/DLPslicer/resource/mesh/lowerjaw.obj"
-            }
-        }*/
         Entity{
-
             objectName:"teethModel"
             Transform{
                 id: systemTransform
@@ -173,55 +84,6 @@ Entity {
             Plate{
                 id: planeEntity
             }
-
-            /*GLModel{
-                id : glloadedmodel
-                ObjectPicker{
-                    id : picker2
-                    onClicked: {
-
-                        console.log("click")
-
-                        var point = ui.world2Screen(Qt.vector3d(0,0,0))
-
-                        ui.isTab = true
-                        ui.mttab.show(point.x,point.y)
-
-
-                    }
-                }
-                PhongMaterial {
-                    id: testMaterial
-                    property int counter : 0
-                    ambient: Qt.rgba(81/255,200/255,242/255,1.0)
-
-                }
-
-                //components: [ testMesh, testMaterial, meshTransform,picker ]
-                //components: [ testMesh, testMaterial, meshTransform]
-
-                function zoomUp(){
-                    meshTransform.scale3D = meshTransform.scale3D.plus(Qt.vector3d(0.01,0.01,0.01))
-                }
-                function zoomDown(){
-                    meshTransform.scale3D = meshTransform.scale3D.minus(Qt.vector3d(0.01,0.01,0.01))
-                }
-
-                function moveXPlus(){
-                    meshTransform.translation = meshTransform.translation.plus(Qt.vector3d(0.0,0.00,0.1))
-                }
-                function moveXMinus(){
-                    meshTransform.translation = meshTransform.translation.minus(Qt.vector3d(0.0,0.00,0.1))
-                }
-
-                function moveYPlus(){
-                    meshTransform.translation = meshTransform.translation.plus(Qt.vector3d(0.1,0.0,0.0))
-                }
-                function moveYMinus(){
-                    meshTransform.translation = meshTransform.translation.minus(Qt.vector3d(0.1,0.0,0.0))
-                }
-            }*/
-
             Model{
                 id: meshEntity4
                 //inputSource:"file:///D:/Dev/DLPSlicer/DLPslicer/resource/mesh/lowerjaw.obj"
@@ -230,8 +92,6 @@ Entity {
 
             CoordinateMesh{}
         }
-
-
 
         //MeshTransformerRotate{id:mtr}
         //MeshTransformerMove{}
