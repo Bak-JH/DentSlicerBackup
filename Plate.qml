@@ -19,9 +19,9 @@ Entity {
 
     PhongMaterial{
         id : plateMaterial
-        ambient: Qt.rgba(255/255, 255/255, 255/255, 0 )
-        diffuse: Qt.rgba(255/255, 255/255, 255/255, 0 )
-        specular: Qt.rgba(255/255, 255/255, 255/255, 0 )
+        ambient: Qt.rgba(255/255, 255/255, 255/255, 1 )
+        diffuse: Qt.rgba(255/255, 255/255, 255/255, 1 )
+        specular: Qt.rgba(255/255, 255/255, 255/255, 1 )
         shininess: 0
     }
 
