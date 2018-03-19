@@ -90,7 +90,8 @@ Rectangle {
                 case "Arrange":
                     break;
                 case "Orient":
-                    popup_orient.autoOrientSignal();
+                    applyClicked();
+                    //popup_orient.autoOrientSignal();
                     break;
                 case "Scale":
                     break;

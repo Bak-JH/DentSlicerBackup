@@ -14,6 +14,7 @@
 #include "mesh.h"
 #include "fileloader.h"
 #include "arrange.h"
+#include "feature/modelcut.h"
 #include "feature/labellingtextpreview.h"
 #include "feature/autoorientation.h"
 #include "feature/meshrepair.h"
@@ -25,7 +26,46 @@ using namespace Qt3DRender;
 using namespace Qt3DExtras;
 using namespace std;
 
+/* feature thread */
+#define ftrOpen 1
+#define ftrSave 2
+#define ftrExport 3
+#define ftrMove 4
+#define ftrRotate 5
+#define ftrLayFlat 6
+#define ftrArrange 7
+#define ftrOrient 8
+#define ftrScale 9
+#define ftrRepair 10
+#define ftrCut 11
+#define ftrShellOffset 12
+#define ftrExtend 13
+#define ftrSupport 14
+#define ftrLabel 15
 
+class GLModel;
+
+class featureThread: public QThread
+{
+    Q_OBJECT
+public:
+    featureThread(GLModel* glmodel, int type);
+    GLModel* m_glmodel;
+    int progress;
+    int optype; // defines typeofoperation
+    autoorientation* ot;
+    modelcut* ct;
+
+signals:
+    void loadPopup(QVariant value);
+    void setProgress(QVariant value);
+public slots:
+    void markPopup(bool value);
+    void progressChanged(float value);
+    void setTypeAndStart(int type);
+private:
+    void run() Q_DECL_OVERRIDE;
+};
 
 class GLModel : public QEntity
 {
@@ -37,6 +77,9 @@ public:
 
     GLModel *parentModel;
     GLModel *shadowModel; // GLmodel's sparse mesh that gets picker input
+
+    QThread* ownerThread;
+
     bool appropriately_rotated=false;
     QPhongMaterial *m_meshMaterial;
     Qt3DRender::QBuffer *vertexBuffer;
@@ -54,31 +97,22 @@ public:
 
     //Qt3DCore::QEntity *parentEntity;
 
-    std::vector<QVector3D> cuttingPoints;
 
-    Qt3DExtras::QPlaneMesh* clipPlane[2];
-    Qt3DCore::QEntity* planeEntity[2];
-    Qt3DCore::QTransform *planeTransform[2];
-    Qt3DExtras::QPhongMaterial *planeMaterial;
-
-    Qt3DExtras::QSphereMesh *sphereMesh[4];
-    Qt3DCore::QEntity *sphereEntity[4];
-    Qt3DCore::QTransform *sphereTransform[4];
-    QPhongMaterial *sphereMaterial[4];
 
     LabellingTextPreview* labellingTextPreview = nullptr;
 
+    void createGLModel(GLModel* parentModel);
     void removeModel();
     void beforeInitialize();
     void beforeAddVerticies();
 
     // Model Cut
     void generatePlane();
-    void addCuttingPoint(QVector3D v);
-    void removeCuttingPoints();
-    void drawLine(QVector3D endpoint);
-    void bisectModel(Mesh* mesh, Plane plane, Mesh* leftMesh, Mesh* rightMesh);
-    bool isLeftToPlane(Plane plane, QVector3D position);
+    //void addCuttingPoint(QVector3D v);
+    //void removeCuttingPoints();
+    //void drawLine(QVector3D endpoint);
+    //void bisectModel(Mesh* mesh, Plane plane, Mesh* leftMesh, Mesh* rightMesh);
+    //bool isLeftToPlane(Plane plane, QVector3D position);
 
 
     QVector3D spreadPoint(QVector3D endpoint,QVector3D startpoint,int factor);
@@ -87,8 +121,9 @@ public:
     Mesh* lmesh;
     Mesh* rmesh;
 
+    featureThread* ft;
+
 private:
-    int numPoints;
     bool flatState;
     bool curveState;
     QString filename;
@@ -125,10 +160,9 @@ public slots:
     void modelCut();
     void lineAccept();
     void pointAccept();
-    void getSignal(double value);
 
     // Labelling
-    void getTextChanged(QString text);
+    void getTextChanged(QString text, int contentWidth);
     void openLabelling();
     void closeLabelling();
     void getFontNameChanged(QString fontName);
@@ -136,41 +170,5 @@ public slots:
 };
 
 
-/* feature thread */
-#define ftrOpen 1
-#define ftrSave 2
-#define ftrExport 3
-#define ftrMove 4
-#define ftrRotate 5
-#define ftrLayFlat 6
-#define ftrArrange 7
-#define ftrOrient 8
-#define ftrScale 9
-#define ftrRepair 10
-#define ftrCut 11
-#define ftrShellOffset 12
-#define ftrExtend 13
-#define ftrSupport 14
-#define ftrLabel 15
-
-
-class featureThread: public QThread
-{
-    Q_OBJECT
-public:
-    GLModel* m_glmodel;
-    int progress;
-    int optype; // defines typeofoperation
-    autoorientation* ot;
-    featureThread(GLModel* glmodel, int type);
-signals:
-    void loadPopup(QVariant value);
-    void setProgress(QVariant value);
-public slots:
-    void markPopup(bool value);
-    void progressChanged(float value);
-private:
-    void run() Q_DECL_OVERRIDE;
-};
 
 #endif // GLMODEL_H
