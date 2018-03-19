@@ -271,7 +271,7 @@ void GLModel::addVertices(Mesh* mesh)
     }*/
     foreach (MeshFace mf , mesh->faces){
         vector<QVector3D> result_vs;
-        for (int fn=2; fn>=0; fn--){
+        for (int fn=0; fn<=2; fn++){
             result_vs.push_back(mesh->idx2MV(mf.mesh_vertex[fn]).position);
         }
 
@@ -280,16 +280,26 @@ void GLModel::addVertices(Mesh* mesh)
     foreach (MeshFace mf , mesh->faces){
 
         vector<QVector3D> result_vns;
-        for (int fn=2; fn>=0; fn--){
+        for (int fn=0; fn<=2; fn++){
             result_vns.push_back(mesh->idx2MV(mf.mesh_vertex[fn]).vn);
+
+            if(mesh->idx2MV(mf.mesh_vertex[fn]).vn[0] == 0)
+                if(mesh->idx2MV(mf.mesh_vertex[fn]).vn[1] == 0)
+                    if(mesh->idx2MV(mf.mesh_vertex[fn]).vn[2] == 0)
+                    {
+                        result_vns.pop_back();
+                        result_vns.push_back(QVector3D(1,1,1));
+                    }
         }
+
+
 
         addNormalVertices(result_vns);
     }
     foreach (MeshFace mf , mesh->faces){
 
         vector<QVector3D> result_vcs;
-        for (int fn=2; fn>=0; fn--){
+        for (int fn=0; fn<=2; fn++){
             result_vcs.push_back(QVector3D(1.0f, 0.0f, 0.0f));
         }
 

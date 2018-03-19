@@ -10,7 +10,7 @@ void QmlManager::initializeUI(QQmlApplicationEngine* e){
     engine = e;
     QObject* mainView = FindItemByName(engine, "MainView");
     QEntity* teethModel = (QEntity *)FindItemByName(engine, "model");
-    GLModel* glmodel = new GLModel(teethModel, nullptr, "C:/Users/diridiri/Desktop/DLP/partial2_flip.stl", false);//"/Users/Diridiri/Desktop/DLP/DLPslicer/partial2_flip.stl",false);//"C:/Users/jaine/workspace/DLPslicerResource/partial2_flip.stl", false);
+    GLModel* glmodel = new GLModel(teethModel, nullptr, "D:/Dev/2018/DLPslicer/partial2_flip.stl", false);//"/Users/Diridiri/Desktop/DLP/DLPslicer/partial2_flip.stl",false);//"C:/Users/jaine/workspace/DLPslicerResource/partial2_flip.stl", false);
 
     // model cut components
     QObject *cutPopup = FindItemByName(engine, "cutPopup");
