@@ -47,16 +47,19 @@ Entity {
             else if(d<0)
                 cm.zoomDown()
             */
+            var scaleTmp = systemTransform.scale3D;
             if(d>0){
+                systemTransform.scale3D = scaleTmp.times(1.08);
                 //console.log("Dfdf")
                 //console.log(systemTransform.scale3D)
                 //sceneRoot.systemTransform.scale3D = sceneRoot.systemTransform.scale3D.plus(Qt.vector3d(0.02,0.02,0.02))
-                systemTransform.scale3D = systemTransform.scale3D.plus(Qt.vector3d(0.0002,0.0002,0.0002))
+                //systemTransform.scale3D = systemTransform.scale3D.plus(Qt.vector3d(0.0002,0.0002,0.0002))
                 //console.log(systemTransform.scale3D)
             }
             else if(d<0){
+                systemTransform.scale3D = scaleTmp.times(0.92);
                 //sceneRoot.systemTransform.scale3D = sceneRoot.systemTransform.scale3D.minus(Qt.vector3d(0.02,0.02,0.02))
-                systemTransform.scale3D = systemTransform.scale3D.minus(Qt.vector3d(0.0002,0.0002,0.0002))
+                //systemTransform.scale3D = systemTransform.scale3D.minus(Qt.vector3d(0.0002,0.0002,0.0002))
             }
 
         }
@@ -236,7 +239,7 @@ Entity {
 
     MouseDevice {
         id: mouse
-        sensitivity: 0.1
+        sensitivity: 0.005
     }
     components: [
         LogicalDevice {
@@ -279,23 +282,12 @@ Entity {
           },
 
         FrameAction {
-            property real rotationSpeed : 4
+            property real rotationSpeed : 20
 
             onTriggered: {
                 if (rotateAction.active) {
-
-                    //var target = axisAngle2Quaternion(rotationSpeed * rotateXAxis.value * dt,qq.rotatedVector(planeEntity.planeTransform.rotation,yup))
                     var target = axisAngle2Quaternion(rotationSpeed * rotateXAxis.value * dt,qq.rotatedVector(systemTransform.rotation,zdown))
-                    /* two axis rotate
-                    //var target2 = axisAngle2Quaternion(rotationSpeed * rotateYAxis.value * dt,ydown)
-                    //target = qq.multiplyQuaternion(target,target2)
-                    */
-
-                    //console.log("rtv " + qq.rotatedVector(planeTransform.rotation,ydown))
-
                     cm.camera.rotateAboutViewCenter(qq.multiplyQuaternion(target,systemTransform.rotation));
-                    //planeTransform.rotation = qq.multiplyQuaternion(planeTransform.rotation,target)
-
                 }
             }
         }
