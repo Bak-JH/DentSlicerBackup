@@ -6,7 +6,7 @@ Lights::Lights(Qt3DCore::QEntity *rootEntity)
 {
 
 //Light
-
+    /*
     for (int i=0;i<number_of_lights;i++){
     lightEntity[i]= new Qt3DCore::QEntity(parentEntity);
     light[i]=new Qt3DRender::QPointLight(lightEntity[i]);
@@ -26,6 +26,7 @@ Lights::Lights(Qt3DCore::QEntity *rootEntity)
     lightEntity[i]->addComponent(light[i]);
     lightEntity[i]->addComponent(lightTransform[i]);
     }
+    */
 }
 
 Lights::~Lights(){
