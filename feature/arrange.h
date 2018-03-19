@@ -59,6 +59,7 @@ int getMaxX(IntPoint translate_vec, Paths* fig);
 int getMaxY(IntPoint translate_vec, Paths* fig);
 Paths getNFP(Paths* subject, Paths* object);
 Paths simplyfyRawNFP(Paths* raw_nfp_set, Paths* subject);
+Paths mergeNFP(Paths* separate_nfp_set);
 vector<vector<IntPoint>> getObjVecsInRegions(vector<float>* sub_slope_set, vector<float>* obj_slope_set, vector<IntPoint>* obj_vec_set);
 bool isOnCCWPath(float start, float end, float object);
 float getNthEdgeSlope(Path* path, int edge_idx, bool isForward);

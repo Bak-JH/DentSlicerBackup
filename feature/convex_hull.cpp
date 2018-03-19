@@ -71,14 +71,11 @@ Path grahamScan(Path path)    {
     hull.push(points[1]);
 
     for (int i = 2; i < N; i++) {
-        /**/qDebug() << i;
         IntPoint top = hull.top();
-        /**/qDebug() << "pivot";
         hull.pop();
         while (hull.size()>0 && ccw(hull.top(), top, points[i]) != -1)   {
             top = hull.top();
             hull.pop();
-            /**/qDebug() << hull.size();
         }
         hull.push(top);
         hull.push(points[i]);
@@ -88,13 +85,11 @@ Path grahamScan(Path path)    {
         hull_path.push_back(hull.top());
         hull.pop();
     }
-    /**/qDebug() << "got hull_path";
     return hull_path;
 }
 
 Path getConvexHull(Path* path){
     /**/qDebug() << "getConvexHull";
-    /**/debugPath(*path);
     /**/qDebug() << "orient" << Orientation(*path);
     Path convex_hull = grahamScan(*path);
     /**/qDebug() << "got convex_hull";

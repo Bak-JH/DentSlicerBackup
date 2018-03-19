@@ -393,12 +393,14 @@ XYArrangement arngFig(Paths* cum_outline, Paths* fig){
     int global_min_height = abs((*cum_outline)[0][0].Y);//universal plane 상 최대 Y
     /**/qDebug() << "- global_min_width init" << global_min_width << "@arngFig";
     for(float rot_angle=0; rot_angle<360; rot_angle += angle_unit){
+        IntPoint optimal_point;
         /**/qDebug() << "- rot_angle" << rot_angle << "@arngFig";
         Paths rot_fig = rotatePaths(fig, rot_angle);
         /**/qDebug() << "- fig rotated" << "@arngFig";
         Paths nfp_set = getNFP(cum_outline, &rot_fig);
         /**/qDebug() << "- got nfp_set" << "(size:" << nfp_set.size() << ")" << "@arngFig";
-        IntPoint optimal_point = getOptimalPoint(&nfp_set);
+        if(nfp_set.size()>0) optimal_point = getOptimalPoint(&nfp_set);
+        else optimal_point = {abs((*cum_outline)[0][0].X), abs((*cum_outline)[0][0].Y)};
         /**/qDebug() << "- got optimal_point" << "@arngFig";
         int local_min_width = getMaxX(optimal_point, &rot_fig);
         /**/qDebug() << "- got local_min_width" << local_min_width << "@arngFig";
@@ -475,14 +477,14 @@ void cumulativeClip(Paths* cum_outline, Paths* new_fig){
 
 IntPoint getOptimalPoint(Paths* nfp_set){
     /**/qDebug() << "-0" << "@arngFig";
-    int min_x = (*nfp_set)[1][0].X;
-    int min_y = (*nfp_set)[1][0].Y;
+    int min_x = (*nfp_set)[0][0].X;
+    int min_y = (*nfp_set)[0][0].Y;
     /**/qDebug() << "-1" << "@arngFig";
     int paths_inculding_optimal_point = 1;
     /**/qDebug() << "-2" << "@arngFig";
     int optimal_point_idx = 0;
     /**/qDebug() << "- optimalPoint checked" << "0" << "@getOptimalPoint";
-    for(int path_idx=1; path_idx<nfp_set->size();path_idx++){
+    for(int path_idx=0; path_idx<nfp_set->size();path_idx++){
         for(int point_idx=0; point_idx<(*nfp_set)[path_idx].size(); point_idx++){
             if((*nfp_set)[path_idx][point_idx].X<min_x){
                 min_x = (*nfp_set)[path_idx][point_idx].X;
@@ -500,6 +502,7 @@ IntPoint getOptimalPoint(Paths* nfp_set){
         }
     }
     return (*nfp_set)[paths_inculding_optimal_point][optimal_point_idx];
+
 }
 
 int getMaxX(IntPoint translate_vec, Paths* fig){
@@ -578,7 +581,8 @@ Paths getNFP(Paths* subject, Paths* object){
     }
     /**/qDebug() << "- got raw_nfp_set" << "(size:" << raw_nfp_set.size() << ")" << "@getNFP";
     /**/debugPaths(raw_nfp_set);
-    return simplyfyRawNFP(&raw_nfp_set, subject);
+    Paths separate_nfp_set = simplyfyRawNFP(&raw_nfp_set, subject);
+    return mergeNFP(&separate_nfp_set);
 }
 
 Paths simplyfyRawNFP(Paths* raw_nfp_set, Paths* subject){
@@ -587,20 +591,52 @@ Paths simplyfyRawNFP(Paths* raw_nfp_set, Paths* subject){
     for(int idx=1; idx<raw_nfp_set->size(); idx++){//path_idx0 is univesal_plane
         /**/qDebug() << "- simplyfy raw_nfp[" << idx << "]" << "@simplyfyRawNFP";
         Paths result_paths;
-        if(Orientation((*subject)[idx])){
-            /**/qDebug() << "- ccw" << "@simplyfyRawNFP";
-            SimplifyPolygon((*raw_nfp_set)[idx], result_paths, pftPositive);
-        }else{
-            /**/qDebug() << "- cw" << "@simplyfyRawNFP";
-            SimplifyPolygon((*raw_nfp_set)[idx], result_paths, pftNegative);
+        if((*subject)[idx].size() != 0){
+            if(Orientation((*subject)[idx])){
+                /**/qDebug() << "- ccw" << "@simplyfyRawNFP";
+                SimplifyPolygon((*raw_nfp_set)[idx], result_paths, pftPositive);
+                if(result_paths.size()>0 && result_paths[0].size()>0){
+                    if(Orientation(result_paths[0])) ReversePath(result_paths[0]);
+                }
+            }else{
+                /**/qDebug() << "- cw" << "@simplyfyRawNFP";
+                SimplifyPolygon((*raw_nfp_set)[idx], result_paths, pftNegative);
+                if(result_paths.size()>0 && result_paths[0].size()>0){
+                    if(!Orientation(result_paths[0])) ReversePath(result_paths[0]);
+                }
+            }
         }
-        /**/qDebug() << "- raw_nfp[" << idx << "] simplyfied" << "@simplyfyRawNFP";
-        /**/qDebug() << "- result_paths size" << result_paths.size() << "@simplyfyRawNFP";
+        /**/qDebug() << "- raw_nfp[" << idx << "] simplyfied" << result_paths.size() << "@simplyfyRawNFP";
         /**/debugPaths(result_paths);
-        simplyfied_nfp_set.push_back(result_paths[0]);
+        if(result_paths.size()>0){
+            simplyfied_nfp_set.push_back(result_paths[0]);
+        }
+        else{
+            Path empty;
+            simplyfied_nfp_set.push_back(empty);
+        }
     }
-    /**/qDebug() << "- simplyfyRawNFP done" << "@simplyfyRawNFP";
     return simplyfied_nfp_set;
+}
+
+Paths mergeNFP(Paths* separate_nfp_set){
+    Paths merged_nfp;
+    for(int idx =1; idx<separate_nfp_set->size(); idx++){
+        if((*separate_nfp_set)[idx].size()>0){
+            if(Orientation((*separate_nfp_set)[idx])){
+                Clipper c;
+                c.AddPaths(merged_nfp, ptSubject, true);
+                c.AddPath((*separate_nfp_set)[idx], ptClip, true);
+                c.Execute(ctUnion, merged_nfp, pftPositive, pftPositive);
+            }else{
+                Clipper c;
+                c.AddPaths(merged_nfp, ptSubject, true);
+                c.AddPath((*separate_nfp_set)[idx], ptClip, true);
+                c.Execute(ctDifference, merged_nfp, pftPositive, pftNegative);
+            }
+        }
+    }
+    return merged_nfp;
 }
 
 vector<vector<IntPoint>> getObjVecsInRegions(vector<float>* sub_slope_set, vector<float>* obj_slope_set, vector<IntPoint>* obj_vec_set){
@@ -641,8 +677,9 @@ vector<vector<IntPoint>> getObjVecsInRegions(vector<float>* sub_slope_set, vecto
         int from_slope = (*sub_slope_set)[sub_edge_idx];
         int to_slope = (*sub_slope_set)[(sub_edge_idx+1)%(*sub_slope_set).size()];
         int obj_edge_idx = (obj_edge_tail+1)%(*obj_slope_set).size();
-        int start_from = obj_edge_idx;
+        int start_from = -1;
         while(isOnCCWPath(from_slope, to_slope, (*obj_slope_set)[obj_edge_idx]) && obj_edge_idx != start_from){
+            if(start_from == -1) start_from=obj_edge_idx;
             obj_edge_tail = obj_edge_idx;
             obj_vecs_in_single_region.push_back((*obj_vec_set)[obj_edge_idx]);
             obj_edge_idx = (obj_edge_idx+1)%(*obj_slope_set).size();
@@ -690,7 +727,7 @@ IntPoint getEdgeVec(IntPoint* p1, IntPoint* p2){
     IntPoint vec;
     vec.X = p2->X - p1->X;
     vec.Y = p2->Y - p1->Y;
-    /**/qDebug() << vec.X << "," << vec.Y;
+    //**qDebug() << vec.X << "," << vec.Y;
     return vec;
 }
 
