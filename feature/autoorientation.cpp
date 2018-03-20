@@ -10,11 +10,8 @@ The critical angle CA is a variable that can be set by the operator as
      temperature, printing speed, etc.
 */
 
-void autoorientation::progressChanged(float value){
-    emit autoorientation::setProgress(value);
-}
 rotateResult* autoorientation::Tweak(Mesh* mesh, bool bi_algorithmic,int CA,bool *appropriately_rotated){
-    progressChanged(0);
+    emit progressChanged(0);
 
     float n[]={0.0, 0.0, 1.0};
     int best_n; //orientation의 갯수, 여기 갯수에서 +1 한 것이 총 orientation 갯수가 됩니다.
@@ -68,10 +65,10 @@ rotateResult* autoorientation::Tweak(Mesh* mesh, bool bi_algorithmic,int CA,bool
         liste[i].lineL=lineL;
         liste[i].isActive=true;
         free(temp);
-        progressChanged(i*0.04/(best_n+1)+0.95);
+        emit progressChanged(i*0.04/(best_n+1)+0.95);
     }
 
-    progressChanged(0.99);
+    emit progressChanged(0.99);
     bool minFlag=true;
     //qt에서 최댓값이 얼마인지 몰라 flag로 만들었습니다.
     float Unprintability;
@@ -140,7 +137,7 @@ rotateResult* autoorientation::Tweak(Mesh* mesh, bool bi_algorithmic,int CA,bool
     }
     //━━━━━━━━━━━━━━━━━━━━ 내용 출력 ━━━━━━━━━━━━━━━━━━━
     free(orientations);
-    progressChanged(1);
+    emit progressChanged(1);
     return result;
 }
 float autoorientation::target_function(float touching,float overhang,float line){
@@ -303,10 +300,10 @@ Orient* autoorientation::area_cumulation(Mesh* mesh,float n[],bool bi_algorithmi
         }
 
         if(i%3000==0)
-            progressChanged((float)i*0.15/mesh->faces.size());
+            emit progressChanged((float)i*0.15/mesh->faces.size());
     }
 
-    progressChanged(0.15);
+    emit progressChanged(0.15);
     //map에 있는 값들의 value를 오름차순해서, 상위 best_n개를 뽑아야합니다.
     //python 원문에서는 Counter(map).most_common(best_n)으로 간단히 구현되는 것이지만,
     //역시 c++에는 없으므로 만들었습니다.
@@ -384,9 +381,9 @@ Orient* autoorientation::egde_plus_vertex(Mesh* mesh, int best_n){
 
         free(randomNormal);
         if(i%3000==0)
-            progressChanged((float)i*0.80/(vcount*it)+0.15);
+            emit progressChanged((float)i*0.80/(vcount*it)+0.15);
     }
-    progressChanged(0.95);
+    emit progressChanged(0.95);
     map<QString,float>::iterator it_map;
     float val[best_n];
     QString val_n[best_n];
@@ -561,3 +558,5 @@ rotateResult* autoorientation::euler(Liste bestside){
     result->R=RMatrix;
     return result;
 }
+
+

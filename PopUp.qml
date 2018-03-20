@@ -77,8 +77,10 @@ Rectangle {
     property real numbox_value_z : numbox_default
     property real numbox_value_detail2 : numbox_detail2_defalult
 
+    signal applyClicked()
+
     function do_apply(functionname){
-        switch(functionname.text){
+        switch(functionname){
                 case "Move":
                     break;
                 case "Rotate":
@@ -95,6 +97,7 @@ Rectangle {
                 case "Auto Repair":
                     break;
                 case "Cut":
+                    applyClicked();
                     break;
                 case "Shell Offset":
                     break;
@@ -103,6 +106,7 @@ Rectangle {
                 case "Support":
                     break;
                 case "Label":
+                    applyClicked();
                     break;
                 case "Move":
                     break;
@@ -315,7 +319,7 @@ Rectangle {
             onEntered: parent.color = "#b5b5b5"
             onExited: parent.color = "#999999"
             onPressed: parent.color = "#3ea6b7"
-            onReleased: {all_off(); focus_all_off() ;numbox_reset();do_apply(funcname); parent.color = "#999999"}
+            onReleased: {do_apply(funcname.text); all_off(); focus_all_off() ;numbox_reset();parent.color = "#999999"}
         }
     }
     Rectangle {
@@ -346,6 +350,8 @@ Rectangle {
         }
     }
 
+    signal flatModeClicked();
+
     Item {
         id: leftselectimage
         visible: false
@@ -355,18 +361,19 @@ Rectangle {
         anchors.leftMargin: 17
         anchors.top: parent.top
         anchors.topMargin: 70
-        objectName: "flat"
+        objectName: "flatButton"
         Image {
-            id: flatd
             source: "qrc:/resource/flat.png"
         }
 
-        signal flatSignal
         MouseArea {
             anchors.fill: parent
-            onClicked: leftselectimage.flatSignal()
+            onClicked: flatModeClicked()
         }
     }
+
+    signal curveModeClicked();
+
     Item {
         id: rightselectimage
         visible: false
@@ -376,16 +383,14 @@ Rectangle {
         anchors.rightMargin: 17
         anchors.top: parent.top
         anchors.topMargin: 70
-        objectName: "curve"
+        objectName: "curveButton"
         Image {
-            id: curved
             anchors.fill: parent
             source: "qrc:/resource/curve.png"
         }
-        signal curveSignal
         MouseArea {
             anchors.fill: parent
-            onClicked: curveSignal()
+            onClicked: curveModeClicked();
         }
     }
 
@@ -927,7 +932,4 @@ Rectangle {
             }
         }
     }
-
-
-
 }
