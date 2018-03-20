@@ -494,10 +494,12 @@ void GLModel::handlePickerClicked(QPickEvent *pick)
     }
     QPickTriangleEvent *trianglePick = static_cast<QPickTriangleEvent*>(pick);
     //qDebug() << flatState << numPoints << sizeof(sphereEntity)/4;
-    if (flatState&&parentModel->ft->ct->numPoints< sizeof(parentModel->ft->ct->sphereEntity)/4) {
+    if (flatState&&parentModel->numPoints< sizeof(parentModel->sphereEntity)/4) {
+    //if (flatState&&parentModel->ft->ct->numPoints< sizeof(parentModel->ft->ct->sphereEntity)/4) {
         qDebug() << pick->localIntersection()<<"pick";
         QVector3D v = pick->localIntersection();
-        parentModel->ft->ct->addCuttingPoint(parentModel, v);
+        parentModel->addCuttingPoint(v);
+        //parentModel->ft->ct->addCuttingPoint(parentModel, v);
     }
     else {
         qDebug() << "fail to flat state" << flatState;
@@ -505,7 +507,7 @@ void GLModel::handlePickerClicked(QPickEvent *pick)
     }
 }
 
-/*
+
 // need to create new mesh object liek Mesh* leftMesh = new Mesh();
 void GLModel::bisectModel(Mesh* mesh, Plane plane, Mesh* leftMesh, Mesh* rightMesh){
     // do bisecting mesh
@@ -590,7 +592,11 @@ void GLModel::addCuttingPoint(QVector3D v){
     sphereTransform[numPoints]->setTranslation(v);
 
     sphereMaterial[numPoints] = new Qt3DExtras::QPhongMaterial();
-    sphereMaterial[numPoints]->setDiffuse(QColor(QRgb(0xaa0000)));
+    sphereMaterial[numPoints]->setAmbient(QColor(QRgb(0x0049FF)));
+    sphereMaterial[numPoints]->setDiffuse(QColor(QRgb(0x0049FF)));
+    sphereMaterial[numPoints]->setSpecular(QColor(QRgb(0x0049FF)));
+    sphereMaterial[numPoints]->setShininess(0.0f);
+
     sphereEntity[numPoints] = new Qt3DCore::QEntity(parentModel);
     sphereEntity[numPoints]->addComponent(sphereMesh[numPoints]);
     sphereEntity[numPoints]->addComponent(sphereTransform[numPoints]);
@@ -622,7 +628,27 @@ void GLModel::removeModel(){
     delete m_geometryRenderer;
 }
 
-*/
+
+void GLModel::modelCut(){
+    parentModel->removeCuttingPoints();
+    parentModel->generatePlane();
+
+    Plane plane;
+    plane.push_back(parentModel->cuttingPoints[parentModel->cuttingPoints.size()-3]);
+    plane.push_back(parentModel->cuttingPoints[parentModel->cuttingPoints.size()-2]);   //plane에 잘 들어감
+    plane.push_back(parentModel->cuttingPoints[parentModel->cuttingPoints.size()-1]);
+    qDebug() << parentModel->parentModel;
+    //parentModel->bisectModel(parentModel->mesh, plane, leftModel->mesh, rightModel->mesh);
+    parentModel->bisectModel(parentModel->mesh, plane, lmesh, rmesh);
+    GLModel* leftModel = new GLModel(parentModel->parentModel, lmesh, "", false);
+    //GLModel* rightModel = new GLModel(parentModel->parentModel, rmesh, "", false);
+
+    qDebug() << filename;
+    parentModel->deleteLater();
+    deleteLater();
+}
+
+/*
 void GLModel::modelCut(){
     ft->ct->removeCuttingPoints();
     ft->ct->generatePlane(parentModel);
@@ -643,7 +669,7 @@ void GLModel::modelCut(){
 
     qDebug() << "done model cut";
 
-}
+}*/
 
 
 void GLModel::beforeInitialize(){
@@ -799,6 +825,22 @@ void GLModel::pointAccept(){
     if (flatState)
         ft->ct->removeCuttingPoints();
     flatState = !flatState;
+}
+
+void GLModel::getSliderSignal(double value){
+    QVector3D v1=cuttingPoints[cuttingPoints.size()-3];
+    QVector3D v2=cuttingPoints[cuttingPoints.size()-2];
+    QVector3D v3=cuttingPoints[cuttingPoints.size()-1];
+    QVector3D world_origin(0,0,0);
+    QVector3D original_normal(0,1,0);
+    QVector3D desire_normal(QVector3D::normal(v1,v2,v3)); //size=1
+    float angle = qAcos(QVector3D::dotProduct(original_normal,desire_normal))*180/M_PI+(value-1)*30;
+    QVector3D crossproduct_vector(QVector3D::crossProduct(original_normal,desire_normal));
+    for (int i=0;i<2;i++){
+        planeTransform[i]->setRotation(QQuaternion::fromAxisAndAngle(crossproduct_vector, angle+180*i));
+        planeTransform[i]->setTranslation(desire_normal*(-world_origin.distanceToPlane(v1,v2,v3)));
+        planeEntity[i]->addComponent(planeTransform[i]);
+    }
 }
 
 
