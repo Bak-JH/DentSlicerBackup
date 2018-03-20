@@ -25,24 +25,6 @@ Entity {
     property alias camera: camera
 
 
-
-    Entity {
-        id: light // Light
-        PointLight {
-            id: scene_root_pointlight
-            intensity: 1
-        }
-        Transform {
-            id: light_transform
-            matrix: Qt.matrix4x4(1,0,0,8,0,1,0,10,0,0,1,-5,0,0,0,1)
-            translation: Qt.vector3d(8,10,-5)
-        }
-        components: [
-            scene_root_pointlight,
-            light_transform
-        ]
-    }
-
     Camera {
         id: camera
 
@@ -57,6 +39,27 @@ Entity {
         viewCenter: inputViewCenter
 
         property vector3d temp : Qt.vector3d( 0.0, 0.0, 0.0 )
+
+        onPositionChanged: {
+            cameraLightTransform.translation = camera.position.times(0.2)
+            cameraLight.localDirection = camera.viewCenter.minus(camera.position).times(100)
+        }
+    }
+
+    Entity {
+        components: [
+            SpotLight {
+                id: cameraLight
+                localDirection: Qt.vector3d(0.0, 0.0, -5.0)
+                color: "white"
+                intensity: 0.6
+            },
+            Transform {
+                id: cameraLightTransform
+                translation: Qt.vector3d(0.0, 0.0, 5.0)
+
+            }
+        ]
     }
 
     Entity {

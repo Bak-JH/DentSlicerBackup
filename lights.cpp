@@ -11,7 +11,7 @@ Lights::Lights(Qt3DCore::QEntity *rootEntity)
     lightEntity[i]= new Qt3DCore::QEntity(parentEntity);
     light[i]=new Qt3DRender::QPointLight(lightEntity[i]);
     light[i]->setColor("white");
-    light[i]->setIntensity(0.3);
+    light[i]->setIntensity(0.1);
     lightTransform[i] = new Qt3DCore::QTransform(lightEntity[i]);
 
     if (i==0)
