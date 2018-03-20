@@ -46,16 +46,13 @@ Entity {
         }
     }
 
-
-
-
     KeyboardDevice {
         id: keyboard
     }
 
     MouseDevice {
         id: mouse
-        sensitivity: 0.1
+        sensitivity: 0.005
     }
 
     components: [
@@ -151,7 +148,7 @@ Entity {
 
         FrameAction {
             property real translationSpeed : 150.0
-            property real rotationSpeed : 260.0
+            property real rotationSpeed : 2000
             property real zoomFactor : 0.1
             property vector3d angleVector
 

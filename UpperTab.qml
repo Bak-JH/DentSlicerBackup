@@ -15,6 +15,24 @@ Rectangle {
     property var options: []
 
 
+    // feature type number
+    property int ftrOpen : 1
+    property int ftrSave : 2
+    property int ftrExport : 3
+    property int ftrMove : 4
+    property int ftrRotate : 5
+    property int ftrLayFlat : 6
+    property int ftrArrange : 7
+    property int ftrOrient : 8
+    property int ftrScale : 9
+    property int ftrRepair : 10
+    property int ftrCut : 11
+    property int ftrShellOffset : 12
+    property int ftrExtend : 13
+    property int ftrSupport : 14
+    property int ftrLabel : 15
+
+
     function all_off() {
         first_tab_button_open.state = "inactive";
         first_tab_button_export.state = "inactive";
@@ -530,13 +548,18 @@ Rectangle {
             applybutton_vis: false
             descriptionimage_vis: true
             state: second_tab_button_arrange.state=="active" ? "active" : "inactive"
+            signal runFeature(int type);
+            onApplyClicked: {
+                console.log("arrange");
+                runFeature(ftrArrage);
+            }
         }
 
         //8. PopUp - Orient
         PopUp {
+            objectName: "orientPopup"
             id: popup_orient
             funcname: "Orient"
-            objectName: "autoorientButton"
             function show_popup(id){
                 if(id=="progress_popup"){
                     progress_popup.state="active";
@@ -558,7 +581,11 @@ Rectangle {
             applybutton_vis: false
             applyfinishbutton_vis: true
             descriptionimage_vis: true
-            signal autoOrientSignal()
+            signal runFeature(int type);
+            onApplyClicked: {
+                console.log("auto orientation")
+                runFeature(ftrOrient);
+            }
             state: second_tab_button_orient.state=="active" ? "active" : "inactive"
         }
 
@@ -633,10 +660,16 @@ Rectangle {
             okbutton_vis: false
             descriptionimage_vis: true
             state: third_tab_button_autorepair.state=="active" ? "active" : "inactive"
+            signal runFeature(int type);
+            onApplyClicked: {
+                console.log("auto repair");
+                runFeature(ftrRepair);
+            }
         }
 
         //11. PopUp - Cut
         PopUp {
+            objectName: "cutPopup"
             id: popup_cut
             funcname: "Cut"
             height: 300
@@ -646,6 +679,7 @@ Rectangle {
             detailline2_vis: true
             applyfinishbutton_vis: true
             applybutton_vis: false
+            okbutton_vis:false
             descriptionimage_vis: false
             leftselectimage_vis: true
             rightselectimage_vis: true
@@ -654,6 +688,26 @@ Rectangle {
             slider_vis: true
             imageHeight: 70
             state: third_tab_button_cut.state=="active" ? "active" : "inactive"
+
+
+            onFlatModeClicked: {
+                console.log("flat mode selected");
+                flatModeSelected();
+            }
+
+            onCurveModeClicked: {
+                console.log("curve mode selected");
+                curveModeSelected();
+            }
+
+            onApplyClicked: {
+                console.log("ApplyClicked")
+                runFeature(ftrCut);
+            }
+
+            signal flatModeSelected();
+            signal curveModeSelected();
+            signal runFeature(int type);
         }
 
 
@@ -948,125 +1002,187 @@ Rectangle {
             state: fourth_tab_button_label.state=="active" ? "active" : "inactive"
         }*/
         PopUp {
-                        id:popup_label
-                        funcname: "Label"
-                        height: 282
-                        imageHeight: 76
-                        detail1: "Type letters on the surface."
-                        detail2: "Font"
-                        image: "qrc:/Resource/label_description.png"
+            objectName: "labelPopup"
+            id:popup_label
+            funcname: "Label"
+            height: 450 // 282
+            imageHeight: 76
+            detail1: "Type letters on the surface."
+            detail2: "Font"
+            image: "qrc:/Resource/label_description.png"
 
-                        ComboBox {
-                            id: fontBox
-                            currentIndex: 0
-                            activeFocusOnPress: true
-                            width: 176
-                            anchors.top: parent.top
-                            anchors.topMargin: 200
-                            anchors.horizontalCenter: parent.horizontalCenter
+            //signal runFeature(int type);
+            signal generateText3DMesh()
+            signal openLabelling()
+            signal closeLabelling()
 
-                            Image {
-                                width: 12
-                                height: 8
-                                anchors.right: parent.right
-                                anchors.rightMargin: 8
-                                anchors.verticalCenter: parent.verticalCenter
+            onApplyClicked: {
+                console.log("ApplyClicked")
+                //runFeature(ftrLabel);
+                generateText3DMesh()
+            }
 
-                                source: "qrc:/resource/combo_arrow.png"
+            Rectangle {
+                id: text3DInputBackground
+                width: 176
+                height: 20
 
-                            }
+                y: 300
 
-                            style: ComboBoxStyle {
-                                background: Rectangle {     //box style (not drop-down part)
-        //                            implicitWidth: 176
-        //                            implicitHeight: 24
-                                    width: parent.width
-                                    height: parent.height
-                                    radius: 2
-                                    color: "#f9f9f9"
-                                    border.color: fontBox.hovered ? "light blue" : "transparent"
-                                }
+                color: "#ffffffff"
 
-                                label: Text {
-                                    text: control.currentText
-                                    font.family: "Arial"
-                                    font.pointSize: 7
-                                }
+                anchors.left: parent.left
+                anchors.right: parent.right
+                anchors.leftMargin: 25
+                anchors.rightMargin: 25
 
-                                //drop-down customization
-                                property Component __dropDownStyle: MenuStyle {
-                                    __maxPopupHeight: 120
-                                    __menuItemType: "comboboxitem"
+                Text {
+                    id: hiddenText
+                    anchors.fill: text3DInput
+                    text: text3DInput.text
+                    font.pixelSize: text3DInput.font.pixelSize
+                    visible: false
+                }
 
-                                    frame: Rectangle {      //drop-down box style
-                                        color: "#f9f9f9"
-                                        width: 174
-                                        radius: 2
-                                    }
-                                    itemDelegate.label:     //item text
-                                        Text {
-                                            text: styleData.text
-                                            font.family: "Arial"
-                                            font.pointSize: 7
-                                            color: styleData.selected ? "#666666" : "#303030"
-        //                                    color: styleData.selected ? "red" : "blue"
-                                        }
-                                    itemDelegate.background: Rectangle {
-                                        color: styleData.selected ? "#eaeaea" : "#f9f9f9"
-                                    }
+                TextField {
+                    id:text3DInput
+                    objectName: "text3DInput"
 
+                    signal sendTextChanged(string text, int contentWidth)
 
-                                    //scroller customization
-                                    __scrollerStyle: ScrollViewStyle {
-                                        scrollBarBackground: Rectangle {
-                                            color: "#eaeaea"
-                                            implicitWidth: 7
-                                            implicitHeight: 110
-                                        }
-                                        handle: Rectangle {
-                                            color: "#b7b7b7"
-                                            implicitWidth: 9
-                                            implicitHeight: 45
-                                            radius: 2
-                                        }
-                                        minimumHandleLength: 35
-                                        incrementControl: Rectangle {
-                                            implicitWidth: 0
-                                            implicitHeight: 0
-                                        }
-                                        decrementControl: Rectangle {
-                                            implicitWidth: 0
-                                            implicitHeight: 0
-                                        }
-                                    }
-                                }
-                            }
+                    anchors.fill: parent
 
-                            //fonts list
-                            model: ListModel {
-                                id: fontItems
-                                ListElement { text: "Arial1" }
-                                ListElement { text: "Arial2" }
-                                ListElement { text: "Arial3" }
-                                ListElement { text: "Arial4" }
-                                ListElement { text: "Arial5" }
-                                ListElement { text: "Arial6" }
-                                ListElement { text: "Arial7" }
-                                ListElement { text: "Arial8" }
-                                ListElement { text: "Arial9" }
-                                ListElement { text: "Arial10" }
-                            }
-                        }
+                    placeholderText: qsTr("Enter text")
 
-                        descriptionimage_vis: true
-                        detailline1_vis: false
-                        detailline2_vis: true
-                        okbutton_vis: false
-                        applyfinishbutton_vis: false
-                        applybutton_vis: true
+                    onTextChanged: {
+                        sendTextChanged(text, hiddenText.contentWidth)
+                    }
+                }
+            }
+
+            ComboBox {
+                objectName: "labelFontBox"
+                id: labelFontBox
+                currentIndex: 0
+                activeFocusOnPress: true
+                width: 176
+                anchors.top: parent.top
+                anchors.topMargin: 200
+                anchors.horizontalCenter: parent.horizontalCenter
+
+                signal sendFontName(string fontName)
+
+                onCurrentTextChanged: sendFontName(currentText)
+
+                Image {
+                    width: 12
+                    height: 8
+                    anchors.right: parent.right
+                    anchors.rightMargin: 8
+                    anchors.verticalCenter: parent.verticalCenter
+
+                    source: "qrc:/resource/combo_arrow.png"
+
+                }
+
+                style: ComboBoxStyle {
+                    background: Rectangle {     //box style (not drop-down part)
+//                            implicitWidth: 176
+//                            implicitHeight: 24
+                        width: parent.width
+                        height: parent.height
+                        radius: 2
+                        color: "#f9f9f9"
+                        border.color: labelFontBox.hovered ? "light blue" : "transparent"
                     }
 
-    }
+                    label: Text {
+                        text: control.currentText
+                        font.family: "Arial"
+                        font.pointSize: 7
+                    }
 
+                    //drop-down customization
+                    property Component __dropDownStyle: MenuStyle {
+                        __maxPopupHeight: 120
+                        __menuItemType: "comboboxitem"
+
+                        frame: Rectangle {      //drop-down box style
+                            color: "#f9f9f9"
+                            width: 174
+                            radius: 2
+                        }
+                        itemDelegate.label:     //item text
+                            Text {
+                                text: styleData.text
+                                font.family: "Arial"
+                                font.pointSize: 7
+                                color: styleData.selected ? "#666666" : "#303030"
+//                                    color: styleData.selected ? "red" : "blue"
+                            }
+                        itemDelegate.background: Rectangle {
+                            color: styleData.selected ? "#eaeaea" : "#f9f9f9"
+                        }
+
+                        //scroller customization
+                        __scrollerStyle: ScrollViewStyle {
+                            scrollBarBackground: Rectangle {
+                                color: "#eaeaea"
+                                implicitWidth: 7
+                                implicitHeight: 110
+                            }
+                            handle: Rectangle {
+                                color: "#b7b7b7"
+                                implicitWidth: 9
+                                implicitHeight: 45
+                                radius: 2
+                            }
+                            minimumHandleLength: 35
+                            incrementControl: Rectangle {
+                                implicitWidth: 0
+                                implicitHeight: 0
+                            }
+                            decrementControl: Rectangle {
+                                implicitWidth: 0
+                                implicitHeight: 0
+                            }
+                        }
+                    }
+                }
+
+                //fonts list
+                model: ListModel {
+                    id: fontItems
+                    ListElement { text: "Arial" }
+                    ListElement { text: "굴림체" }
+                    ListElement { text: "바탕체" }
+                    ListElement { text: "궁서체" }
+                    ListElement { text: "Arial5" }
+                    ListElement { text: "Arial6" }
+                    ListElement { text: "Arial7" }
+                    ListElement { text: "Arial8" }
+                    ListElement { text: "Arial9" }
+                    ListElement { text: "Arial10" }
+                }
+            }
+
+            descriptionimage_vis: true
+            detailline1_vis: false
+            detailline2_vis: true
+            okbutton_vis:false
+            applyfinishbutton_vis: false
+            applybutton_vis: true
+            state: {
+                if (fourth_tab_button_label.state=="active") {
+                    openLabelling()
+                    return "active"
+                }
+                else {
+                    closeLabelling()
+                    return "inactive"
+                }
+            }
+        }
+    }
 }
 

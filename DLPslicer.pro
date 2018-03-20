@@ -16,9 +16,15 @@ SOURCES += main.cpp \
     mesh.cpp \
     lights.cpp \
     polyclipping/clipper.cpp \
-    autoorientation.cpp \
+    feature/autoorientation.cpp \
     feature/modelcut.cpp \
-    feature/meshrepair.cpp
+    feature/meshrepair.cpp \
+    feature/arrange.cpp \
+    feature/convex_hull.cpp \
+    feature/text3dgeometrygenerator.cpp \
+    feature/labellingtextpreview.cpp \
+    utils/mathutils.cpp \
+    utils/qtriangulator.cpp
 
 RESOURCES += qml.qrc \
     resources.qrc
@@ -57,8 +63,18 @@ HEADERS += \
     mesh.h \
     lights.h \
     polyclipping/clipper.hpp \
-    autoorientation.h \
+    feature/autoorientation.h \
     feature/modelcut.h \
-    feature/meshrepair.h
+    feature/meshrepair.h \
+    feature/arrange.h \
+    feature/convex_hull.h \
+    feature/labellingtextpreview.h \
+    feature/text3dgeometrygenerator.h \
+    utils/mathutils.h \
+    utils/qbezier.h \
+    utils/qdatabuffer_p.h \
+    utils/qrbtree.h \
+    utils/qtriangulator_p.h \
+    utils/qvectorpath_p.h
 
-LIBS += -lOpengl32
+#LIBS += -lOpengl32
