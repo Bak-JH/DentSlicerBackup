@@ -1,3 +1,15 @@
+/*
+ * qmlmanager.cpp
+ * : handles UI components (QML components) including Generation, Translation, Connections(sig&slot)
+ *
+ *
+ *
+ *
+ *
+*/
+
+
+
 #include "qmlmanager.h"
 #include "lights.h"
 #include "glmodel.h"
@@ -11,7 +23,7 @@ void QmlManager::initializeUI(QQmlApplicationEngine* e){
     QObject* mainView = FindItemByName(engine, "MainView");
     QEntity* teethModel = (QEntity *)FindItemByName(engine, "model");
 
-    GLModel* glmodel = new GLModel(teethModel, nullptr, "C:/Users/user/Documents/diridiri/DLPslicer/partial2_flip.stl", false);
+    GLModel* glmodel = new GLModel(teethModel, nullptr, "C:/Users/diridiri/Desktop/DLP/partial2_flip.stl", false);
     //GLModel* glmodel = new GLModel(teethModel, nullptr, "C:/Users/user/Documents/diridiri/DLPslicer/partial2_flip.stl", false);//"/Users/Diridiri/Desktop/DLP/DLPslicer/partial2_flip.stl",false);//"C:/Users/jaine/workspace/DLPslicerResource/partial2_flip.stl", false);
     //GLModel* gglmodel = new GLModel(teethModel, "C:/Users/hsy61/Desktop/3D_models/teeth_models/lowerjaw.stl", false);
 
@@ -54,11 +66,12 @@ void QmlManager::initializeUI(QQmlApplicationEngine* e){
     // need to connect for every popup
 
     // model cut popup codes
-    //QObject::connect(cutPopup,SIGNAL(modelCut()),glmodel->shadowModel , SLOT(modelCut()));
-    QObject::connect(cutPopup,SIGNAL(rrunFeature(int)),glmodel->ft , SLOT(setTypeAndStart(int)));
+    QObject::connect(cutPopup,SIGNAL(modelCut()),glmodel->shadowModel , SLOT(modelCut()));
+    //QObject::connect(cutPopup,SIGNAL(runFeature(int)),glmodel->ft , SLOT(setTypeAndStart(int)));
     QObject::connect(cutPopup,SIGNAL(curveModeSelected()),glmodel->shadowModel,SLOT(lineAccept()));
     QObject::connect(cutPopup,SIGNAL(flatModeSelected()),glmodel->shadowModel,SLOT(pointAccept()));
-    QObject::connect(slider,SIGNAL(govalue(double)),glmodel->ft->ct,SLOT(getSliderSignal(double)));
+    QObject::connect(slider, SIGNAL(govalue(double)), glmodel->shadowModel, SLOT(getSliderSignal(double)));
+    //QObject::connect(slider,SIGNAL(govalue(double)),glmodel->ft->ct,SLOT(getSliderSignal(double)));
 
     // auto orientation popup codes
     QObject::connect(orientPopup, SIGNAL(runFeature(int)), glmodel->ft, SLOT(setTypeAndStart(int)));

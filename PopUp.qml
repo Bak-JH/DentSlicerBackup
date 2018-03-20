@@ -398,7 +398,6 @@ Rectangle {
     }
 
 
-
     ExclusiveGroup {
         id: viewModeGroup
     }
