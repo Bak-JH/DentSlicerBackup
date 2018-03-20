@@ -26,7 +26,7 @@ Entity {
         components: [ meshX, meshXMaterial, meshXTransform]
     }*/
 
-    Entity {
+    /*Entity {
         id: meshXEntity
         SphereMesh{
             id: meshX
@@ -83,6 +83,6 @@ Entity {
 
         components: [ meshZ, meshZMaterial, meshZTransform]
     }
-
+*/
 
 }

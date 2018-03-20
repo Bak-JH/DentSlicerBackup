@@ -7,6 +7,7 @@
 #include <map>
 #include <string>
 #include <QTime>
+
 using namespace std;
 
 class rotateResult{
@@ -16,11 +17,13 @@ public:
 //    float R[16];
     QMatrix4x4 R;
 };
+
 class Orient {
 public:
     float val;
     QVector3D label;
 };
+
 class Liste {
 public:
     QVector3D orientation;
@@ -35,13 +38,9 @@ class autoorientation : public QObject
     Q_OBJECT
 public:
     autoorientation();
-    int progress;
     rotateResult* Tweak(Mesh* mesh, bool bi_algorithmic,int CA,bool *appropriately_rotated);
     float approachvertex(Mesh* mesh,float n[]);
-public slots:
-    void progressChanged(float value);
-signals:
-    void setProgress(QVariant value);
+
 private:
     float target_function(float touching,float overhang,float line);
     float* lithograph(Mesh* mesh, float n[], float amin, int CA);
@@ -51,5 +50,7 @@ private:
     float* calc_random_normal(Mesh* mesh,int i);
     Orient* remove_duplicates(Orient* o,int *orientCnt);
     rotateResult* euler(Liste bestside);
+signals:
+    void progressChanged(float);
 };
 #endif // AUTOORIENTATION_H

@@ -11,7 +11,7 @@ Lights::Lights(Qt3DCore::QEntity *rootEntity)
     lightEntity[i]= new Qt3DCore::QEntity(parentEntity);
     light[i]=new Qt3DRender::QPointLight(lightEntity[i]);
     light[i]->setColor("white");
-    light[i]->setIntensity(0.7);
+    light[i]->setIntensity(0.3);
     lightTransform[i] = new Qt3DCore::QTransform(lightEntity[i]);
 
     if (i==0)
@@ -26,13 +26,14 @@ Lights::Lights(Qt3DCore::QEntity *rootEntity)
     lightEntity[i]->addComponent(light[i]);
     lightEntity[i]->addComponent(lightTransform[i]);
     }
+
 }
 
 Lights::~Lights(){
-    delete[] lightEntity;
+    /*delete[] lightEntity;
     delete[] light;
     delete[] lightTransform;
-    delete[] lightEntity;
+    delete[] lightEntity;*/
 }
 
 

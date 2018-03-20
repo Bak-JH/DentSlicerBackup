@@ -3,7 +3,7 @@ import QtQuick.Controls 1.4
 import QtQuick.Controls.Styles 1.0
 Slider {
     id:slider
-    objectName: 'sslider'
+    objectName: 'slider'
     property string name:"slider"
     signal govalue(double value)
     maximumValue: 2
