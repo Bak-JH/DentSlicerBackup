@@ -10,7 +10,7 @@ void QmlManager::initializeUI(QQmlApplicationEngine* e){
     engine = e;
     QObject* mainView = FindItemByName(engine, "MainView");
     QEntity* teethModel = (QEntity *)FindItemByName(engine, "model");
-    GLModel* glmodel = new GLModel(teethModel, nullptr, "C:/Users/diridiri/Desktop/DLP/partial2_flip.stl", false);//"/Users/Diridiri/Desktop/DLP/DLPslicer/partial2_flip.stl",false);//"C:/Users/jaine/workspace/DLPslicerResource/partial2_flip.stl", false);
+    GLModel* glmodel = new GLModel(teethModel, nullptr, "C:/Users/user/Documents/diridiri/DLPslicer/partial2_flip.stl", false);//"/Users/Diridiri/Desktop/DLP/DLPslicer/partial2_flip.stl",false);//"C:/Users/jaine/workspace/DLPslicerResource/partial2_flip.stl", false);
 
     // model cut components
     QObject *cutPopup = FindItemByName(engine, "cutPopup");
@@ -45,7 +45,7 @@ void QmlManager::initializeUI(QQmlApplicationEngine* e){
     QObject::connect(orientPopup, SIGNAL(autoOrientSignal()),ft, SLOT(start()));
 
     // label popup codes
-    QObject::connect(text3DInput, SIGNAL(sendTextChanged(QString)),glmodel->shadowModel,SLOT(getTextChanged(QString)));
+    QObject::connect(text3DInput, SIGNAL(sendTextChanged(QString, int)),glmodel->shadowModel,SLOT(getTextChanged(QString, int)));
     QObject::connect(labelPopup, SIGNAL(openLabelling()),glmodel->shadowModel,SLOT(openLabelling()));
     QObject::connect(labelPopup, SIGNAL(closeLabelling()),glmodel->shadowModel,SLOT(closeLabelling()));
     QObject::connect(labelPopup, SIGNAL(generateText3DMesh()),glmodel->shadowModel, SLOT(generateText3DMesh()));
