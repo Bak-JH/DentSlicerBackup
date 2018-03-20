@@ -97,22 +97,32 @@ public:
 
     //Qt3DCore::QEntity *parentEntity;
 
+    std::vector<QVector3D> cuttingPoints;
 
+    Qt3DExtras::QPlaneMesh* clipPlane[2];
+    Qt3DCore::QEntity* planeEntity[2];
+    Qt3DCore::QTransform *planeTransform[2];
+    Qt3DExtras::QPhongMaterial *planeMaterial;
 
-    LabellingTextPreview* labellingTextPreview = nullptr;
+    Qt3DExtras::QSphereMesh *sphereMesh[4];
+    Qt3DCore::QEntity *sphereEntity[4];
+    Qt3DCore::QTransform *sphereTransform[4];
+    QPhongMaterial *sphereMaterial[4];
 
     void createGLModel(GLModel* parentModel);
     void removeModel();
     void beforeInitialize();
     void beforeAddVerticies();
 
+    LabellingTextPreview* labellingTextPreview = nullptr;
+
     // Model Cut
     void generatePlane();
-    //void addCuttingPoint(QVector3D v);
-    //void removeCuttingPoints();
-    //void drawLine(QVector3D endpoint);
-    //void bisectModel(Mesh* mesh, Plane plane, Mesh* leftMesh, Mesh* rightMesh);
-    //bool isLeftToPlane(Plane plane, QVector3D position);
+    void addCuttingPoint(QVector3D v);
+    void removeCuttingPoints();
+    void drawLine(QVector3D endpoint);
+    void bisectModel(Mesh* mesh, Plane plane, Mesh* leftMesh, Mesh* rightMesh);
+    bool isLeftToPlane(Plane plane, QVector3D position);
 
 
     QVector3D spreadPoint(QVector3D endpoint,QVector3D startpoint,int factor);
@@ -124,6 +134,7 @@ public:
     featureThread* ft;
 
 private:
+    int numPoints;
     bool flatState;
     bool curveState;
     QString filename;
@@ -146,7 +157,6 @@ private:
 
     bool labelingActive = false;
 
-
 public slots:
     // object picker parts
     void handlePickerClicked(Qt3DRender::QPickEvent*);
@@ -160,6 +170,7 @@ public slots:
     void modelCut();
     void lineAccept();
     void pointAccept();
+    void getSliderSignal(double value);
 
     // Labelling
     void getTextChanged(QString text, int contentWidth);

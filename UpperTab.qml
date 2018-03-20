@@ -689,7 +689,6 @@ Rectangle {
             imageHeight: 70
             state: third_tab_button_cut.state=="active" ? "active" : "inactive"
 
-
             onFlatModeClicked: {
                 console.log("flat mode selected");
                 flatModeSelected();
@@ -702,12 +701,14 @@ Rectangle {
 
             onApplyClicked: {
                 console.log("ApplyClicked")
-                runFeature(ftrCut);
+                //runFeature(ftrCut);
+                modelCut();
             }
 
             signal flatModeSelected();
             signal curveModeSelected();
             signal runFeature(int type);
+            signal modelCut();
         }
 
 
