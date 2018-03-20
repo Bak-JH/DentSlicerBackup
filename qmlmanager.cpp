@@ -10,7 +10,24 @@ void QmlManager::initializeUI(QQmlApplicationEngine* e){
     engine = e;
     QObject* mainView = FindItemByName(engine, "MainView");
     QEntity* teethModel = (QEntity *)FindItemByName(engine, "model");
-    GLModel* glmodel = new GLModel(teethModel, nullptr, "D:/Dev/2018/DLPslicer/partial2_flip.stl", false);//"/Users/Diridiri/Desktop/DLP/DLPslicer/partial2_flip.stl",false);//"C:/Users/jaine/workspace/DLPslicerResource/partial2_flip.stl", false);
+
+    GLModel* glmodel = new GLModel(teethModel, nullptr, "C:/Users/user/Documents/diridiri/DLPslicer/partial2_flip.stl", false);
+    //GLModel* glmodel = new GLModel(teethModel, nullptr, "C:/Users/user/Documents/diridiri/DLPslicer/partial2_flip.stl", false);//"/Users/Diridiri/Desktop/DLP/DLPslicer/partial2_flip.stl",false);//"C:/Users/jaine/workspace/DLPslicerResource/partial2_flip.stl", false);
+    //GLModel* gglmodel = new GLModel(teethModel, "C:/Users/hsy61/Desktop/3D_models/teeth_models/lowerjaw.stl", false);
+
+
+    GLModel* glmodel2 = new GLModel(teethModel, nullptr, "C:/Users/user/Documents/diridiri/DLPslicer/partial2_flip.stl", false);
+
+    /*//* Arrange **********************************
+    vector<Mesh> meshes_to_arrange;
+    vector<XYArrangement> arng_result_set;
+    meshes_to_arrange.push_back(* glmodel->mesh);
+    meshes_to_arrange.push_back(* glmodel2->mesh);
+    arng_result_set = arngMeshes(&meshes_to_arrange);
+    vector<Qt3DCore::QTransform*> m_transform_set;
+    m_transform_set.push_back(glmodel->m_transform);
+    m_transform_set.push_back(glmodel2->m_transform);
+    arrangeQt3D(m_transform_set, arng_result_set);*/
 
     // model cut components
     QObject *cutPopup = FindItemByName(engine, "cutPopup");
@@ -28,7 +45,8 @@ void QmlManager::initializeUI(QQmlApplicationEngine* e){
     QObject* orientPopup = FindItemByName(engine, "orientPopup");
     QObject* progress_text = FindItemByName(engine, "progress_text");
 
-    //featureThread* ft = new featureThread(glmodel, ftrOrient);
+    featureThread* ft = new featureThread(glmodel, ftrOrient);
+    featureThread* ft2 = new featureThread(glmodel2, ftrOrient);
 
     QObject::connect(glmodel->ft, SIGNAL(setProgress(QVariant)),progress_text, SLOT(update_loading(QVariant)));
     QObject::connect(glmodel->ft, SIGNAL(loadPopup(QVariant)),orientPopup, SLOT(show_popup(QVariant)));

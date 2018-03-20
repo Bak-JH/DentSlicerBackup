@@ -307,4 +307,3 @@ float vertexDistance(QVector3D a, QVector3D b){
 float sortIdx(){
 
 }
-

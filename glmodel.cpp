@@ -82,6 +82,7 @@ GLModel::GLModel(QNode *parent, Mesh* loadMesh, QString fname, bool isShadow)
     initialize(mesh);
     addVertices(mesh);
 
+
     Qt3DExtras::QDiffuseMapMaterial *diffuseMapMaterial = new Qt3DExtras::QDiffuseMapMaterial();
 
     addComponent(m_transform);
