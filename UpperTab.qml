@@ -548,6 +548,11 @@ Rectangle {
             applybutton_vis: false
             descriptionimage_vis: true
             state: second_tab_button_arrange.state=="active" ? "active" : "inactive"
+            signal runFeature(int type);
+            onApplyClicked: {
+                console.log("arrange");
+                runFeature(ftrArrage);
+            }
         }
 
         //8. PopUp - Orient
@@ -655,6 +660,11 @@ Rectangle {
             okbutton_vis: false
             descriptionimage_vis: true
             state: third_tab_button_autorepair.state=="active" ? "active" : "inactive"
+            signal runFeature(int type);
+            onApplyClicked: {
+                console.log("auto repair");
+                runFeature(ftrRepair);
+            }
         }
 
         //11. PopUp - Cut

@@ -88,6 +88,7 @@ Rectangle {
                 case "Lay flat":
                     break;
                 case "Arrange":
+                    applyClicked();
                     break;
                 case "Orient":
                     applyClicked();
@@ -96,6 +97,7 @@ Rectangle {
                 case "Scale":
                     break;
                 case "Auto Repair":
+                    applyClicked();
                     break;
                 case "Cut":
                     applyClicked();
