@@ -92,5 +92,6 @@
         <file>Resource/popup_image/shelloffset_switch.png</file>
         <file>Resource/popup_image/shelloffset_switch_hover.png</file>
         <file>Resource/mesh/grid.obj</file>
+        <file>Resource/splash.png</file>
     </qresource>
 </RCC>
