@@ -59,7 +59,7 @@ void modelcut::generatePlane(Qt3DCore::QEntity* targetEntity){
         planeMaterial->setAmbient(QColor(QRgb(0xF4F4F4)));
         planeMaterial->setDiffuse(QColor(QRgb(0xF4F4F4)));
         planeMaterial->setSpecular(QColor(QRgb(0xF4F4F4)));
-        planeMaterial->setAlpha(50.0f);
+        planeMaterial->setAlpha(0.5f);
 
 
         //To manipulate plane color, change the QRgb(0x~~~~~~).
