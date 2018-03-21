@@ -401,7 +401,7 @@ Rectangle {
             id : fourth_tab_button_extend
 
             anchors.left: parent.left
-            iconSource1: "qrc:/resource/upper_base.png"
+            iconSource1: "qrc:/Resource/upper_extend.png"
             iconSource2: "qrc:/Resource/upper2_extend.png"
             iconText: "Extend"
         }
