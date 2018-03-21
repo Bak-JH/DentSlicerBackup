@@ -18,7 +18,7 @@ class QmlManager : public QObject
 public:
     explicit QmlManager(QObject *parent = nullptr);
     QQmlApplicationEngine* engine;
-    QObject* mainView;
+    QObject* mainWindow;
     QEntity* models;
     vector<GLModel*> glmodels;
 
