@@ -10,6 +10,7 @@
 #include "./mesh.h"
 #include "./polyclipping/clipper.hpp"
 #include "convex_hull.h"
+#include "./glmodel.h"
 
 using namespace std;
 using namespace ClipperLib;
@@ -44,6 +45,8 @@ void RDPSimp(Path* path);
 void RDPSimpIter(Path* path, int start, int end, bool* keepingPointMrkArr);
 float distL2P(IntPoint* line_p1, IntPoint* line_p2, IntPoint* p);
 
+void offsetPath(Paths* paths);
+
 typedef pair<IntPoint, float> XYArrangement;
 vector<XYArrangement> arngMeshes(vector<Mesh>* meshes);
 vector<XYArrangement> arng2D(vector<Paths>* figs);
@@ -71,8 +74,10 @@ IntPoint rotateIntPointRad(IntPoint point, float rot_angle);
 
 void arrangeQt3D(vector<Qt3DCore::QTransform*> m_transform_set, vector<XYArrangement> arng_result_set);
 void arrangeSingleQt3D(Qt3DCore::QTransform* m_transform, XYArrangement arng_result);
+void arrangeGlmodels(vector<GLModel*>* glmodels);
 
 void testSimplifyPolygon();
 void testClip();
+void testOffset();
 
 #endif // ARRANGE_H

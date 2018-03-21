@@ -24,7 +24,8 @@ void QmlManager::initializeUI(QQmlApplicationEngine* e){
     models = (QEntity *)FindItemByName(engine, "Models");
     Lights* lights = new Lights(models);
 
-    openModelFile("C:/Users/user/Documents/diridiri/DLPslicer/partial2_flip.stl");
+    openModelFile("C:/Users/hsy61/Desktop/3D_models/simple/cube_10.stl");
+    openModelFile("C:/Users/hsy61/Desktop/3D_models/simple/cube_10.stl");
 }
 
 
@@ -40,6 +41,7 @@ void QmlManager::openModelFile(QString fname){
 
     // Arrange **********************************
     if (glmodels.size()>=2){
+        /*
         vector<Mesh> meshes_to_arrange;
         vector<XYArrangement> arng_result_set;
         vector<Qt3DCore::QTransform*> m_transform_set;
@@ -49,6 +51,8 @@ void QmlManager::openModelFile(QString fname){
         }
         arng_result_set = arngMeshes(&meshes_to_arrange);
         arrangeQt3D(m_transform_set, arng_result_set);
+        */
+        arrangeGlmodels(&glmodels);
     }
 
     // model cut components

@@ -318,6 +318,22 @@ float distL2P(IntPoint* line_p1, IntPoint* line_p2, IntPoint* p){
     return triangle_area_double/bottom_side_length;
 }
 
+//=========================================
+//Offset Function
+//=========================================
+
+void offsetPath(Paths* paths){
+    int offset = 2000;
+    Paths out;
+    ClipperOffset co;
+    co.AddPaths(*paths, jtRound, etClosedPolygon);
+    //if(Orientation(*paths)) co.Execute(out, offset);
+    //else co.Execute(out, -offset);
+    co.Execute(out, offset);
+    qDebug() << "~~~~~~~";
+    debugPaths(out);
+    *paths = out;
+}
 
 //=========================================
 //Arrangement Algorithm
@@ -331,6 +347,7 @@ vector<XYArrangement> arngMeshes(vector<Mesh>* meshes){
     for(int idx=0; idx<meshes->size(); idx++){
         outlines.push_back(project(&(*meshes)[idx]));
         RDPSimpPaths(&outlines[idx]);
+        offsetPath(&outlines[idx]);
     }
     /**/qDebug() << "Projection done @arngMeshes";
     return arng2D(&outlines);
@@ -773,6 +790,18 @@ void arrangeSingleQt3D(Qt3DCore::QTransform* m_transform, XYArrangement arng_res
     m_transform->setRotationZ(arng_result.second);
 }
 
+void arrangeGlmodels(vector<GLModel*>* glmodels){
+    vector<Mesh> meshes_to_arrange;
+    vector<XYArrangement> arng_result_set;
+    vector<Qt3DCore::QTransform*> m_transform_set;
+    for(int idx=0; idx<glmodels->size(); idx++){
+        meshes_to_arrange.push_back(* (*glmodels)[idx]->mesh);
+        m_transform_set.push_back((*glmodels)[idx]->m_transform);
+    }
+    arng_result_set = arngMeshes(&meshes_to_arrange);
+    arrangeQt3D(m_transform_set, arng_result_set);
+}
+
 //=========================================
 //test
 //=========================================
@@ -839,4 +868,27 @@ void testClip(){
 
     cumulativeClip(&cumulative_paths, &new_paths);
     debugPaths(cumulative_paths);
+}
+
+void testOffset(){
+
+    Path path1;
+    int path1_data[][2] =
+    {
+        {400, 400},
+        {400, 0},
+        {0, 0},
+        {0, 400}
+    };
+    for(int idx=0; idx<sizeof(path1_data)/sizeof(path1_data[0]);idx++){
+        IntPoint point;
+        point.X=path1_data[idx][0];
+        point.Y=path1_data[idx][1];
+        path1.push_back(point);
+    }
+    Paths paths1;
+    paths1.push_back(path1);
+
+    //offsetPath(&path1);
+    debugPath(path1);
 }
