@@ -19,7 +19,7 @@ SOURCES += main.cpp \
     feature/autoorientation.cpp \
     feature/modelcut.cpp \
     feature/meshrepair.cpp \
-    feature/arrange.cpp \
+    feature/autoarrange.cpp \
     feature/convex_hull.cpp \
     feature/text3dgeometrygenerator.cpp \
     feature/labellingtextpreview.cpp \
@@ -66,7 +66,7 @@ HEADERS += \
     feature/autoorientation.h \
     feature/modelcut.h \
     feature/meshrepair.h \
-    feature/arrange.h \
+    feature/autoarrange.h \
     feature/convex_hull.h \
     feature/labellingtextpreview.h \
     feature/text3dgeometrygenerator.h \

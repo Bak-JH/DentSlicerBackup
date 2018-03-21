@@ -111,9 +111,11 @@ featureThread::featureThread(GLModel* glmodel, int type){
     // enable features
     ot = new autoorientation();
     ct = new modelcut();
+    //ar = new autoarrange();
 
     connect(ot, SIGNAL(progressChanged(float)), this, SLOT(progressChanged(float)));
     connect(ct, SIGNAL(progressChanged(float)), this, SLOT(progressChanged(float)));
+    //connect(ar, SIGNAL(progressChanged(float)), this, SLOT(progressChanged(float)));
 }
 
 void featureThread::setTypeAndStart(int type){
@@ -149,6 +151,7 @@ void featureThread::run(){
             }
         case ftrArrange:
             {
+                //ar->arrangeGlmodels(&glmodels);
                 break;
             }
         case ftrOrient:

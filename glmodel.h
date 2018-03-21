@@ -16,6 +16,7 @@
 #include "feature/labellingtextpreview.h"
 #include "feature/autoorientation.h"
 #include "feature/meshrepair.h"
+#include "feature/autoarrange.h"
 
 #define MAX_BUF_LEN 2000000
 
@@ -53,6 +54,7 @@ public:
     int optype; // defines typeofoperation
     autoorientation* ot;
     modelcut* ct;
+    //autoarrange* ar;
 
 signals:
     void loadPopup(QVariant value);
@@ -177,7 +179,5 @@ public slots:
     void getFontNameChanged(QString fontName);
     void generateText3DMesh();
 };
-
-
 
 #endif // GLMODEL_H

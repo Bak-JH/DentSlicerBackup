@@ -41,7 +41,6 @@ void QmlManager::openModelFile(QString fname){
 
     // Arrange **********************************
     if (glmodels.size()>=2){
-        /*
         vector<Mesh> meshes_to_arrange;
         vector<XYArrangement> arng_result_set;
         vector<Qt3DCore::QTransform*> m_transform_set;
@@ -49,10 +48,11 @@ void QmlManager::openModelFile(QString fname){
             meshes_to_arrange.push_back(*(glmodels[i]->mesh));
             m_transform_set.push_back(glmodels[i]->m_transform);
         }
-        arng_result_set = arngMeshes(&meshes_to_arrange);
-        arrangeQt3D(m_transform_set, arng_result_set);
-        */
-        arrangeGlmodels(&glmodels);
+        autoarrange* ar;
+        arng_result_set = ar->arngMeshes(&meshes_to_arrange);
+        ar->arrangeQt3D(m_transform_set, arng_result_set);
+        //ar->arrangeGlmodels(&glmodel);
+        //arrangeGlmodels(&glmodels);
     }
 
     // model cut components
