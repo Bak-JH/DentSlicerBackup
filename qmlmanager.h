@@ -8,6 +8,9 @@
 #include <QQmlApplicationEngine>
 #include <QQmlEngine>
 #include "feature/arrange.h"
+#include "glmodel.h"
+#include "QtConcurrent/QtConcurrentRun"
+#include "QFuture"
 
 class QmlManager : public QObject
 {
@@ -15,14 +18,19 @@ class QmlManager : public QObject
 public:
     explicit QmlManager(QObject *parent = nullptr);
     QQmlApplicationEngine* engine;
+    QObject* mainView;
+    QEntity* models;
+    vector<GLModel*> glmodels;
 
     void initializeUI(QQmlApplicationEngine *e);
+    void openModelFile_internal(QString filename);
 
 signals:
     void updateModelInfo(int printing_time, int layer, QString xyz, float volume);
 
 public slots:
     void sendUpdateModelInfo(int, int, QString, float);
+    void openModelFile(QString filename);
 };
 
 

@@ -78,6 +78,7 @@ Rectangle {
     property real numbox_value_detail2 : numbox_detail2_defalult
 
     signal applyClicked()
+    signal finishClicked()
 
     function do_apply(functionname){
         switch(functionname){
@@ -246,7 +247,7 @@ Rectangle {
             onEntered: parent.color = "#b5b5b5"
             onExited: parent.color = "#999999"
             onPressed: parent.color = "#3ea6b7"
-            onReleased: {do_apply(funcname.text);all_off(); focus_all_off(); numbox_reset(); parent.color = "#999999"}
+            onReleased: {applyClicked(); focus_all_off(); numbox_reset(); parent.color = "#999999"}
         }
     }
 
@@ -349,7 +350,7 @@ Rectangle {
             onEntered: parent.color = "#b5b5b5"
             onExited: parent.color = "#999999"
             onPressed: parent.color = "#3ea6b7"
-            onReleased: {all_off(); focus_all_off(); numbox_reset(); parent.color = "#999999"}
+            onReleased: {finishClicked(); all_off(); focus_all_off(); numbox_reset(); parent.color = "#999999"}
         }
     }
 
