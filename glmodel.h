@@ -10,10 +10,9 @@
 #include <QBuffer>
 #include <QObjectPicker>
 #include <QCursor>
-#include "qmlmanager.h"
 #include "mesh.h"
 #include "fileloader.h"
-#include "feature/arrange.h"
+#include "feature/modelcut.h"
 #include "feature/labellingtextpreview.h"
 #include "feature/autoorientation.h"
 #include "feature/meshrepair.h"
@@ -25,7 +24,46 @@ using namespace Qt3DRender;
 using namespace Qt3DExtras;
 using namespace std;
 
+/* feature thread */
+#define ftrOpen 1
+#define ftrSave 2
+#define ftrExport 3
+#define ftrMove 4
+#define ftrRotate 5
+#define ftrLayFlat 6
+#define ftrArrange 7
+#define ftrOrient 8
+#define ftrScale 9
+#define ftrRepair 10
+#define ftrCut 11
+#define ftrShellOffset 12
+#define ftrExtend 13
+#define ftrSupport 14
+#define ftrLabel 15
 
+class GLModel;
+
+class featureThread: public QThread
+{
+    Q_OBJECT
+public:
+    featureThread(GLModel* glmodel, int type);
+    GLModel* m_glmodel;
+    int progress;
+    int optype; // defines typeofoperation
+    autoorientation* ot;
+    modelcut* ct;
+
+signals:
+    void loadPopup(QVariant value);
+    void setProgress(QVariant value);
+public slots:
+    void markPopup(bool value);
+    void progressChanged(float value);
+    void setTypeAndStart(int type);
+private:
+    void run() Q_DECL_OVERRIDE;
+};
 
 class GLModel : public QEntity
 {
@@ -37,8 +75,11 @@ public:
 
     GLModel *parentModel;
     GLModel *shadowModel; // GLmodel's sparse mesh that gets picker input
+
+    QThread* ownerThread;
+
     bool appropriately_rotated=false;
-    QPhongAlphaMaterial *m_planeMaterial;
+    QPhongMaterial *m_meshMaterial;
     Qt3DRender::QBuffer *vertexBuffer;
     Qt3DRender::QBuffer *vertexNormalBuffer;
     Qt3DRender::QBuffer *vertexColorBuffer;
@@ -59,21 +100,20 @@ public:
     Qt3DExtras::QPlaneMesh* clipPlane[2];
     Qt3DCore::QEntity* planeEntity[2];
     Qt3DCore::QTransform *planeTransform[2];
-    Qt3DExtras::QPhongMaterial *planeMaterial;
+    Qt3DExtras::QPhongAlphaMaterial *planeMaterial;
 
     Qt3DExtras::QSphereMesh *sphereMesh[4];
     Qt3DCore::QEntity *sphereEntity[4];
     Qt3DCore::QTransform *sphereTransform[4];
     QPhongMaterial *sphereMaterial[4];
 
-    LabellingTextPreview* labellingTextPreview = nullptr;
-
     void removeModel();
     void beforeInitialize();
     void beforeAddVerticies();
 
+    LabellingTextPreview* labellingTextPreview = nullptr;
+
     // Model Cut
-    void generatePlane();
     void addCuttingPoint(QVector3D v);
     void removeCuttingPoints();
     void drawLine(QVector3D endpoint);
@@ -86,6 +126,8 @@ public:
     Mesh* mesh;
     Mesh* lmesh;
     Mesh* rmesh;
+
+    featureThread* ft;
 
 private:
     int numPoints;
@@ -111,7 +153,6 @@ private:
 
     bool labelingActive = false;
 
-
 public slots:
     // object picker parts
     void handlePickerClicked(Qt3DRender::QPickEvent*);
@@ -122,10 +163,12 @@ public slots:
     void exgoo();
 
     // Model Cut
+    void generatePlane();
+    void removePlane();
     void modelCut();
     void lineAccept();
     void pointAccept();
-    void getSignal(double value);
+    void getSliderSignal(double value);
 
     // Labelling
     void getTextChanged(QString text, int contentWidth);
@@ -136,41 +179,5 @@ public slots:
 };
 
 
-/* feature thread */
-#define ftrOpen 1
-#define ftrSave 2
-#define ftrExport 3
-#define ftrMove 4
-#define ftrRotate 5
-#define ftrLayFlat 6
-#define ftrArrange 7
-#define ftrOrient 8
-#define ftrScale 9
-#define ftrRepair 10
-#define ftrCut 11
-#define ftrShellOffset 12
-#define ftrExtend 13
-#define ftrSupport 14
-#define ftrLabel 15
-
-
-class featureThread: public QThread
-{
-    Q_OBJECT
-public:
-    GLModel* m_glmodel;
-    int progress;
-    int optype; // defines typeofoperation
-    autoorientation* ot;
-    featureThread(GLModel* glmodel, int type);
-signals:
-    void loadPopup(QVariant value);
-    void setProgress(QVariant value);
-public slots:
-    void markPopup(bool value);
-    void progressChanged(float value);
-private:
-    void run() Q_DECL_OVERRIDE;
-};
 
 #endif // GLMODEL_H

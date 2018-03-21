@@ -1,5 +1,4 @@
-#ifndef MODELCUT_H
-#define MODELCUT_H
+
 
 #include <QtCore/QObject>
 #include <Qt3DCore/qentity.h>
@@ -28,5 +27,3 @@ private:
     int light_distance = 100;
     int number_of_lights = 4;
 };
-
-#endif // MODELCUT_H

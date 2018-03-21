@@ -15,6 +15,24 @@ Rectangle {
     property var options: []
 
 
+    // feature type number
+    property int ftrOpen : 1
+    property int ftrSave : 2
+    property int ftrExport : 3
+    property int ftrMove : 4
+    property int ftrRotate : 5
+    property int ftrLayFlat : 6
+    property int ftrArrange : 7
+    property int ftrOrient : 8
+    property int ftrScale : 9
+    property int ftrRepair : 10
+    property int ftrCut : 11
+    property int ftrShellOffset : 12
+    property int ftrExtend : 13
+    property int ftrSupport : 14
+    property int ftrLabel : 15
+
+
     function all_off() {
         first_tab_button_open.state = "inactive";
         first_tab_button_export.state = "inactive";
@@ -530,6 +548,11 @@ Rectangle {
             applybutton_vis: false
             descriptionimage_vis: true
             state: second_tab_button_arrange.state=="active" ? "active" : "inactive"
+            signal runFeature(int type);
+            onApplyClicked: {
+                console.log("arrange");
+                runFeature(ftrArrage);
+            }
         }
 
         //8. PopUp - Orient
@@ -558,7 +581,11 @@ Rectangle {
             applybutton_vis: false
             applyfinishbutton_vis: true
             descriptionimage_vis: true
-            signal autoOrientSignal()
+            signal runFeature(int type);
+            onApplyClicked: {
+                console.log("auto orientation")
+                runFeature(ftrOrient);
+            }
             state: second_tab_button_orient.state=="active" ? "active" : "inactive"
         }
 
@@ -633,6 +660,11 @@ Rectangle {
             okbutton_vis: false
             descriptionimage_vis: true
             state: third_tab_button_autorepair.state=="active" ? "active" : "inactive"
+            signal runFeature(int type);
+            onApplyClicked: {
+                console.log("auto repair");
+                runFeature(ftrRepair);
+            }
         }
 
         //11. PopUp - Cut
@@ -657,7 +689,6 @@ Rectangle {
             imageHeight: 70
             state: third_tab_button_cut.state=="active" ? "active" : "inactive"
 
-
             onFlatModeClicked: {
                 console.log("flat mode selected");
                 flatModeSelected();
@@ -670,11 +701,13 @@ Rectangle {
 
             onApplyClicked: {
                 console.log("ApplyClicked")
+                //runFeature(ftrCut);
                 modelCut();
             }
 
             signal flatModeSelected();
             signal curveModeSelected();
+            signal runFeature(int type);
             signal modelCut();
         }
 
@@ -979,12 +1012,14 @@ Rectangle {
             detail2: "Font"
             image: "qrc:/Resource/label_description.png"
 
+            //signal runFeature(int type);
             signal generateText3DMesh()
             signal openLabelling()
             signal closeLabelling()
 
             onApplyClicked: {
                 console.log("ApplyClicked")
+                //runFeature(ftrLabel);
                 generateText3DMesh()
             }
 

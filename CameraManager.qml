@@ -25,24 +25,6 @@ Entity {
     property alias camera: camera
 
 
-    /*
-    Entity {
-        id: light // Light
-        PointLight {
-            id: scene_root_pointlight
-            intensity: 1
-        }
-        Transform {
-            id: light_transform
-            matrix: Qt.matrix4x4(1,0,0,8,0,1,0,10,0,0,1,-5,0,0,0,1)
-            translation: Qt.vector3d(8,10,-5)
-        }
-        components: [
-            scene_root_pointlight,
-            light_transform
-        ]
-    }
-    */
     Camera {
         id: camera
 
@@ -53,49 +35,33 @@ Entity {
 
         position: defaultCameraPosition
         upVector: defaultUp
-        //viewCenter: Qt.vector3d( 0, 0, 0 )
+
         viewCenter: inputViewCenter
 
         property vector3d temp : Qt.vector3d( 0.0, 0.0, 0.0 )
-    }
-    /*
-    Camera {
-        id: cameratest
 
-        projectionType: CameraLens.OrthographicProjection
-        fieldOfView: 45
-        nearPlane : 1
-        farPlane : 500000.0
-
-        position: orthoCameraPosition
-        upVector: defaultUp
-        viewCenter: Qt.vector3d( 0, 0, 0 )
-
-        property vector3d temp : Qt.vector3d( 0.0, 0.0, 0.0 )
+        onPositionChanged: {
+            cameraLightTransform.translation = camera.position.times(0.2)
+            cameraLight.localDirection = camera.viewCenter.minus(camera.position).times(100)
+        }
     }
 
-    Camera {
-        id: camera2
+    Entity {
+        components: [
+            SpotLight {
+                id: cameraLight
+                localDirection: Qt.vector3d(0.0, 0.0, -5.0)
+                color: "white"
+                intensity: 0.6
+            },
+            Transform {
+                id: cameraLightTransform
+                translation: Qt.vector3d(0.0, 0.0, 5.0)
 
-        projectionType: CameraLens.PerspectiveProjection
-        fieldOfView: 45
-        nearPlane : 0.1
-        farPlane : 100
-
-        position: defaultCameraPosition2
-        upVector: defaultUp
-        viewCenter: Qt.vector3d( 579.9, 0, 579.9 )
-        //aspectRatio: window.width/window.height
-        //aspectRatio: 1280/768
-        aspectRatio: scene3d.width/scene3d.height
-
-
-
-
-
-        property vector3d temp : Qt.vector3d( 0.0, 0.0, 0.0 )
+            }
+        ]
     }
-    */
+
     Entity {
         components: [
             DirectionalLight {
@@ -120,59 +86,29 @@ Entity {
             pickingSettings.pickResultMode: PickingSettings.AllPicks
 
             activeFrameGraph: RenderSurfaceSelector {
-                //camera:camera2
-
                 Viewport {
                     id: mainViewport
                     normalizedRect: Qt.rect(0, 0, 1, 1)
-
 
                     ClearBuffers {
                         buffers: ClearBuffers.ColorDepthBuffer
                         clearColor: Qt.rgba(0.6, 0.6, 0.6, 1.0)
                     }
 
-
                     Viewport {
                         id: mainCam
                         normalizedRect: Qt.rect(0, 0, 1, 1)
                         CameraSelector {
                             camera:camera
-
                             ClearBuffers {
                                buffers: ClearBuffers.ColorDepthBuffer
                                clearColor: "#EAEAEA"
                             }
-
                         }
                     }
-
-
-                    /*
-                    Viewport {
-                        id: supportCam
-                        normalizedRect: Qt.rect(0, 0, 1, 1)
-                        CameraSelector {
-                            camera:camera2
-
-                        }
-                    }*/
-
-
-
                 }
             }
-
-            /*
-            activeFrameGraph: ForwardRenderer {
-                camera: camera
-                //clearColor: "transparent"
-                clearColor: "#EAEAEA"
-            } //original
-            */
-
         },
-
 
         InputSettings {}
     ]
@@ -247,18 +183,11 @@ Entity {
 
     MouseDevice{
         id : mouseDevice
-
     }
 
     MouseHandler{
         id : mouseHandler
         sourceDevice: mouseDevice
-        /*
-        onPressed: {
-            camera.viewCenter = Qt.vector3d( xLookAtOffset, yLookAtOffset, zLookAtOffset )
-
-        }
-        */
     }
 
     KeyboardDevice{
@@ -286,24 +215,6 @@ Entity {
             }
 
             if (event.key === Qt.Key_V) {
-
-                /*
-                var point = Qt.vector3d(0,0,0);
-                var matrix = Qt.matrix4x4(0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0);
-
-                matrix = camera.projectionMatrix.times(camera.viewMatrix);
-
-                point = matrix.times(point)
-
-                point.x = (point.x+1) * scene3d.width/2;
-                point.y = (-1 * point.y+1) * scene3d.height/2;
-
-
-
-
-                rt.anchors.leftMargin = point.x
-                rt.anchors.topMargin = point.y
-                */
 
             }
         }

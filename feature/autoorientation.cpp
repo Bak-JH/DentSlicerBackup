@@ -1,5 +1,6 @@
 #include "autoorientation.h"
 #include <qDebug>
+
 autoorientation::autoorientation()
 {
 

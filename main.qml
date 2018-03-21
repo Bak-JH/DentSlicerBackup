@@ -11,10 +11,10 @@ ApplicationWindow {
     id : window
     width: 1280
     height: 768
-    visible: true
-    property alias uppertab: uppertab
-    property alias lefttab: lefttab
+    visible: false
 
+    objectName: "mainWindow"
+    property alias lefttab: lefttab
 
     menuBar: MenuBar{
         Menu{
@@ -302,3 +302,4 @@ ApplicationWindow {
     }
 
 }
+

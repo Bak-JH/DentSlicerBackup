@@ -88,13 +88,16 @@ Rectangle {
                 case "Lay flat":
                     break;
                 case "Arrange":
+                    applyClicked();
                     break;
                 case "Orient":
-                    popup_orient.autoOrientSignal();
+                    applyClicked();
+                    //popup_orient.autoOrientSignal();
                     break;
                 case "Scale":
                     break;
                 case "Auto Repair":
+                    applyClicked();
                     break;
                 case "Cut":
                     applyClicked();
@@ -393,7 +396,6 @@ Rectangle {
             onClicked: curveModeClicked();
         }
     }
-
 
 
     ExclusiveGroup {
