@@ -33,7 +33,7 @@ Rectangle{
             anchors.horizontalCenter: parent.horizontalCenter
             anchors.topMargin: 16
             text: iconText
-            font.pixelSize: 16
+            font.pixelSize: 15
             //font.bold: true
             font.family: "Arial"
             color: "#494949"
@@ -63,7 +63,7 @@ Rectangle{
             anchors.horizontalCenter: parent.horizontalCenter
             anchors.topMargin: 16
             text: iconText
-            font.pixelSize: 16
+            font.pixelSize: 15
             font.family: "Arial"
             color: "#ffffff"
         }

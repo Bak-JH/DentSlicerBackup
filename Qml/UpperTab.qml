@@ -10,8 +10,8 @@ import QtQuick.Controls.Styles 1.4
 Rectangle {
     id: box_uppertab
     color: "#E2E1E1"
-    property int buttonWidth : 86
-    property int buttonHeight : 100
+    property int buttonWidth : 83
+    property int buttonHeight : 97
     property var options: []
 
 
