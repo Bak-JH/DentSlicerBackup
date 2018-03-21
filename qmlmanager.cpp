@@ -20,10 +20,11 @@ QmlManager::QmlManager(QObject *parent) : QObject(parent)
 
 void QmlManager::initializeUI(QQmlApplicationEngine* e){
     engine = e;
-    mainView = FindItemByName(engine, "MainView");
+    mainWindow = FindItemByName(engine, "mainWindow");
     models = (QEntity *)FindItemByName(engine, "Models");
+    Lights* lights = new Lights(models);
 
-    openModelFile("C:/Users/diridiri/Desktop/DLP/DLPslicer/partial2_flip.stl");
+    openModelFile("C:/Users/user/Documents/diridiri/DLPslicer/partial2_flip.stl");
 }
 
 
@@ -55,7 +56,6 @@ void QmlManager::openModelFile(QString fname){
     QObject *curveButton = FindItemByName(engine, "curveButton");
     QObject *flatButton = FindItemByName(engine, "flatButton");
     QObject *slider = FindItemByName(engine, "slider");
-    Lights* lights = new Lights(models);
 
     // labelling components
     QObject *text3DInput = FindItemByName(engine, "text3DInput");

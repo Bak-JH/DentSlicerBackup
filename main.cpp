@@ -40,7 +40,7 @@ int main(int argc, char **argv)
     qmlManager->initializeUI(&engine);
     splash->close();
 
-    FindItemByName(&engine,"mainWindow")->setProperty("visible",true);
+    qmlManager->mainWindow->setProperty("visible",true);
 
     QObject::connect(se.data(), SIGNAL(updateModelInfo(int,int,QString,float)), qmlManager, SLOT(sendUpdateModelInfo(int,int,QString,float)));
 
