@@ -5,16 +5,16 @@ import Qt3D.Extras 2.0
 
 Entity {
 
-    objectName: "model"
+    objectName: "Models"
     property string inputSource;
 
     property alias testMesh: testMesh
     property alias meshTransform: meshTransform
-    id : ttt
+
+
     Mesh{
         id: testMesh
         source: inputSource
-        //source: "file:///D:/Dev/Trash/3Dtest/full.stl"
     }
 
     Transform {

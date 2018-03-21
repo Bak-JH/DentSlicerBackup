@@ -702,12 +702,20 @@ Rectangle {
             onApplyClicked: {
                 console.log("ApplyClicked")
                 //runFeature(ftrCut);
+                //modelCut();
+                generatePlane();
+            }
+
+            // on Finish Clicked:
+            onFinishClicked: {
+                console.log("Finish Clicked")
                 modelCut();
             }
 
             signal flatModeSelected();
             signal curveModeSelected();
             signal runFeature(int type);
+            signal generatePlane();
             signal modelCut();
         }
 

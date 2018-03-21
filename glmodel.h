@@ -10,11 +10,9 @@
 #include <QBuffer>
 #include <QObjectPicker>
 #include <QCursor>
-#include "qmlmanager.h"
 #include "mesh.h"
 #include "fileloader.h"
 #include "feature/modelcut.h"
-#include "feature/arrange.h"
 #include "feature/labellingtextpreview.h"
 #include "feature/autoorientation.h"
 #include "feature/meshrepair.h"
@@ -102,14 +100,13 @@ public:
     Qt3DExtras::QPlaneMesh* clipPlane[2];
     Qt3DCore::QEntity* planeEntity[2];
     Qt3DCore::QTransform *planeTransform[2];
-    Qt3DExtras::QPhongMaterial *planeMaterial;
+    Qt3DExtras::QPhongAlphaMaterial *planeMaterial;
 
     Qt3DExtras::QSphereMesh *sphereMesh[4];
     Qt3DCore::QEntity *sphereEntity[4];
     Qt3DCore::QTransform *sphereTransform[4];
     QPhongMaterial *sphereMaterial[4];
 
-    void createGLModel(GLModel* parentModel);
     void removeModel();
     void beforeInitialize();
     void beforeAddVerticies();
@@ -117,7 +114,6 @@ public:
     LabellingTextPreview* labellingTextPreview = nullptr;
 
     // Model Cut
-    void generatePlane();
     void addCuttingPoint(QVector3D v);
     void removeCuttingPoints();
     void drawLine(QVector3D endpoint);
@@ -167,6 +163,8 @@ public slots:
     void exgoo();
 
     // Model Cut
+    void generatePlane();
+    void removePlane();
     void modelCut();
     void lineAccept();
     void pointAccept();

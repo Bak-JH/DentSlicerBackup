@@ -28,12 +28,12 @@ int main(int argc, char **argv)
     QScopedPointer<QuaternionHelper> qq(new QuaternionHelper);
     QScopedPointer<SlicingEngine> se(new SlicingEngine);
     QmlManager *qmlManager = new QmlManager();
-    QScopedPointer<QmlManager> qm(qmlManager);
+    //QScopedPointer<QmlManager> qm(qmlManager);
 
     QQmlApplicationEngine engine;
     engine.load(QUrl(QStringLiteral("qrc:/main.qml")));
-
-    engine.rootContext()->setContextProperty("qm", qm.data());
+    //engine.rootContext()->setContextProperty("qm", qm.data());
+    engine.rootContext()->setContextProperty("qm", qmlManager);
     engine.rootContext()->setContextProperty("qq",qq.data());
     engine.rootContext()->setContextProperty("se",se.data());
 
@@ -42,7 +42,7 @@ int main(int argc, char **argv)
 
     FindItemByName(&engine,"mainWindow")->setProperty("visible",true);
 
-    QObject::connect(se.data(), SIGNAL(updateModelInfo(int,int,QString,float)), qm.data(), SLOT(sendUpdateModelInfo(int,int,QString,float)));
+    QObject::connect(se.data(), SIGNAL(updateModelInfo(int,int,QString,float)), qmlManager, SLOT(sendUpdateModelInfo(int,int,QString,float)));
 
     if (engine.rootObjects().isEmpty())
         return -1;
