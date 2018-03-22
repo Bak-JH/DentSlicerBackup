@@ -1,38 +1,46 @@
 <RCC>
     <qresource prefix="/">
-        <file>main.qml</file>
-        <file>glcode.js</file>
         <file>three.js</file>
-        <file>UpperTab.qml</file>
-        <file>LeftTab.qml</file>
-        <file>MainView.qml</file>
-        <file>CoordinateMesh.qml</file>
-        <file>CameraManager.qml</file>
-        <file>CameraController.qml</file>
         <file>grid.png</file>
         <file>grid2.png</file>
-        <file>LeftTabViewMode.qml</file>
-        <file>LeftTabPartList.qml</file>
-        <file>Model.qml</file>
-        <file>Plane.qml</file>
-        <file>MeshTransformerRotate.qml</file>
-        <file>MeshTransformerMove.qml</file>
-        <file>MeshTransformerZoom.qml</file>
-        <file>LeftTabSlicingOption.qml</file>
-        <file>UpperButton.qml</file>
-        <file>RectTest.qml</file>
-        <file>MeshTransformerTab.qml</file>
-        <file>LeftTabSlicingOptionElement.qml</file>
-        <file>LeftTabPartListElement.qml</file>
-        <file>SlicingData.qml</file>
-        <file>ViewChange.qml</file>
-        <file>SlicingDataElement.qml</file>
-        <file>ViewButton.qml</file>
-        <file>FileDialogLoad.qml</file>
-        <file>MeshTransformerRotateTest.qml</file>
-        <file>UICore.qml</file>
-        <file>Planeslider.qml</file>
-        <file>PopUp.qml</file>
-        <file>Plate.qml</file>
+        <file>Qml/CameraController.qml</file>
+        <file>Qml/CameraManager.qml</file>
+        <file>Qml/CoordinateMesh.qml</file>
+        <file>Qml/Cutbox.qml</file>
+        <file>Qml/CutBox2.qml</file>
+        <file>Qml/FileDialogLoad.qml</file>
+        <file>Qml/GlModel.qml</file>
+        <file>Qml/LeftSlicingOption.qml</file>
+        <file>Qml/LeftTab.qml</file>
+        <file>Qml/LeftTabPartList.qml</file>
+        <file>Qml/LeftTabPartListElement.qml</file>
+        <file>Qml/LeftTabSlicingOption.qml</file>
+        <file>Qml/LeftTabSlicingOptionElement.qml</file>
+        <file>Qml/LeftTabViewMode.qml</file>
+        <file>Qml/Lights.qml</file>
+        <file>Qml/main.qml</file>
+        <file>Qml/MainView.qml</file>
+        <file>Qml/MainViewForm.ui.qml</file>
+        <file>Qml/Materials.qml</file>
+        <file>Qml/MeshTransformerMove.qml</file>
+        <file>Qml/MeshTransformerRotate.qml</file>
+        <file>Qml/MeshTransformerRotateTest.qml</file>
+        <file>Qml/MeshTransformerTab.qml</file>
+        <file>Qml/MeshTransformerZoom.qml</file>
+        <file>Qml/Model.qml</file>
+        <file>Qml/Plane.qml</file>
+        <file>Qml/Planeslider.qml</file>
+        <file>Qml/Plate.qml</file>
+        <file>Qml/PopUp.qml</file>
+        <file>Qml/RectTest.qml</file>
+        <file>Qml/SCroll.qml</file>
+        <file>Qml/SlicingData.qml</file>
+        <file>Qml/SlicingDataElement.qml</file>
+        <file>Qml/UICore.qml</file>
+        <file>Qml/UpperButton.qml</file>
+        <file>Qml/UpperTab.qml</file>
+        <file>Qml/ViewButton.qml</file>
+        <file>Qml/ViewChange.qml</file>
+        <file>Qml/glcode.js</file>
     </qresource>
 </RCC>

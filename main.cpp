@@ -31,7 +31,7 @@ int main(int argc, char **argv)
     QScopedPointer<QmlManager> qm(qmlManager);
 
     QQmlApplicationEngine engine;
-    engine.load(QUrl(QStringLiteral("qrc:/main.qml")));
+    engine.load(QUrl(QStringLiteral("qrc:/Qml/main.qml")));
     //engine.rootContext()->setContextProperty("qm", qm.data());
     engine.rootContext()->setContextProperty("qm", qm.data());
     //FindItemByName(&engine, "slicing_data")->setContextProperty("qm", qmlManager);

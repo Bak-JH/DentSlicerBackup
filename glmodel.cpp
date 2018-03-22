@@ -587,7 +587,7 @@ void GLModel::generatePlane(){
     parentModel->planeMaterial->setAmbient(QColor(QRgb(0xF4F4F4)));
     parentModel->planeMaterial->setDiffuse(QColor(QRgb(0xF4F4F4)));
     parentModel->planeMaterial->setSpecular(QColor(QRgb(0xF4F4F4)));
-    parentModel->planeMaterial->setAlpha(50.0f);
+    parentModel->planeMaterial->setAlpha(0.5f);
 
 
     //To manipulate plane color, change the QRgb(0x~~~~~~).
