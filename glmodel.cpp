@@ -3,9 +3,10 @@
 #include <QString>
 #include <QtMath>
 #include <cfloat>
-
+#include "qmlManager.h"
 #include "feature/text3dgeometrygenerator.h"
-#include <QtConcurrent>
+#include <QtConcurrent/QtConcurrent>
+#include <QFuture>
 
 GLModel::GLModel(QNode *parent, Mesh* loadMesh, QString fname, bool isShadow)
     : QEntity(parent)
@@ -97,6 +98,8 @@ GLModel::GLModel(QNode *parent, Mesh* loadMesh, QString fname, bool isShadow)
 
     // create shadow model to handle picking settings
     shadowModel = new GLModel(this, mesh, filename, true);
+
+    QObject::connect(this,SIGNAL(bisectDone()),this,SLOT(modelCutFinished()));
 
     qDebug() << "created shadow model";
 
@@ -330,6 +333,8 @@ void GLModel::clearVertices(){
 
 void GLModel::addVertices(Mesh* mesh)
 {
+    int face_size = mesh->faces.size();
+    int face_idx = 0;
     /*foreach (MeshFace mf , mesh->faces){
 
         vector<int> result_vs;
@@ -339,6 +344,10 @@ void GLModel::addVertices(Mesh* mesh)
         addIndexes(result_vs);
     }*/
     foreach (MeshFace mf , mesh->faces){
+        face_idx ++;
+        if (face_idx %100 ==0)
+            QCoreApplication::processEvents();
+
         vector<QVector3D> result_vs;
         for (int fn=0; fn<=2; fn++){
             result_vs.push_back(mesh->idx2MV(mf.mesh_vertex[fn]).position);
@@ -346,7 +355,11 @@ void GLModel::addVertices(Mesh* mesh)
 
         addVertices(result_vs);   
     }
+
     foreach (MeshFace mf , mesh->faces){
+        face_idx ++;
+        if (face_idx %100 ==0)
+            QCoreApplication::processEvents();
 
         vector<QVector3D> result_vns;
         for (int fn=0; fn<=2; fn++){
@@ -365,7 +378,11 @@ void GLModel::addVertices(Mesh* mesh)
 
         addNormalVertices(result_vns);
     }
+
     foreach (MeshFace mf , mesh->faces){
+        face_idx ++;
+        if (face_idx %100 ==0)
+            QCoreApplication::processEvents();
 
         vector<QVector3D> result_vcs;
         for (int fn=0; fn<=2; fn++){
@@ -509,8 +526,15 @@ void GLModel::handlePickerClicked(QPickEvent *pick)
     }
 }
 
+void GLModel::bisectModel(Plane plane){
+    QFuture<void> future = QtConcurrent::run(this, &bisectModel_internal, plane);
+}
+
 // need to create new mesh object liek Mesh* leftMesh = new Mesh();
-void GLModel::bisectModel(Mesh* mesh, Plane plane, Mesh* leftMesh, Mesh* rightMesh){
+void GLModel::bisectModel_internal(Plane plane){
+
+    Mesh* leftMesh = lmesh;
+    Mesh* rightMesh = rmesh;
     // do bisecting mesh
     qDebug() << "in bisect";
     leftMesh->faces.reserve(mesh->faces.size());
@@ -536,6 +560,7 @@ void GLModel::bisectModel(Mesh* mesh, Plane plane, Mesh* leftMesh, Mesh* rightMe
     leftMesh->connectFaces();
     rightMesh->connectFaces();
     qDebug() << "done connecting";
+    emit bisectDone();
 }
 
 bool GLModel::isLeftToPlane(Plane plane, QVector3D position){
@@ -656,12 +681,22 @@ void GLModel::modelCut(){
     plane.push_back(parentModel->cuttingPoints[parentModel->cuttingPoints.size()-1]);
     qDebug() << parentModel->parentModel;
     //parentModel->bisectModel(parentModel->mesh, plane, leftModel->mesh, rightModel->mesh);
-    parentModel->bisectModel(parentModel->mesh, plane, lmesh, rmesh);
-    GLModel* leftModel = new GLModel(parentModel->parentModel, lmesh, "", false);
+    //parentModel->bisectModel(parentModel->mesh, plane, parentModel->lmesh, parentModel->rmesh);
+    //parentModel->bisectModel_internal(plane);
+    parentModel->bisectModel(plane);
+    //QFuture<void> future = QtConcurrent::run(parentModel, &bisectModel_internal, plane);// parentModel->bisectModel(plane);
+    //qm.openModelFile("");
+    //future.waitForFinished();
+
+}
+
+void GLModel::modelCutFinished(){
+    qDebug() << "modelCut finished";
+    GLModel* leftModel = new GLModel(parentModel, lmesh, "", false);
     //GLModel* rightModel = new GLModel(parentModel->parentModel, rmesh, "", false);
 
-    parentModel->deleteLater();
     deleteLater();
+    shadowModel->deleteLater();
 }
 
 /*
@@ -874,6 +909,8 @@ Mesh* GLModel::toSparse(Mesh* mesh){
     Mesh* newMesh = new Mesh;
     foreach (MeshFace mf , mesh->faces){
         if (i%jump==0){
+            QCoreApplication::processEvents();
+
             QVector3D point1 =mesh->idx2MV(mf.mesh_vertex[0]).position;
             QVector3D point2 =mesh->idx2MV(mf.mesh_vertex[1]).position;
             QVector3D point3 =mesh->idx2MV(mf.mesh_vertex[2]).position;

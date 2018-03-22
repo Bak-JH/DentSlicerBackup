@@ -117,7 +117,10 @@ public:
     void addCuttingPoint(QVector3D v);
     void removeCuttingPoints();
     void drawLine(QVector3D endpoint);
-    void bisectModel(Mesh* mesh, Plane plane, Mesh* leftMesh, Mesh* rightMesh);
+    //void bisectModel(Mesh* mesh, Plane plane, Mesh* leftMesh, Mesh* rightMesh);
+    //void bisectModel_internal(Mesh* mesh, Plane plane, Mesh* leftMesh, Mesh* rightMesh);
+    void bisectModel(Plane plane);
+    void bisectModel_internal(Plane plane);
     bool isLeftToPlane(Plane plane, QVector3D position);
 
 
@@ -153,6 +156,10 @@ private:
 
     bool labelingActive = false;
 
+signals:
+    void bisectDone();
+
+
 public slots:
     // object picker parts
     void handlePickerClicked(Qt3DRender::QPickEvent*);
@@ -169,6 +176,7 @@ public slots:
     void lineAccept();
     void pointAccept();
     void getSliderSignal(double value);
+    void modelCutFinished();
 
     // Labelling
     void getTextChanged(QString text, int contentWidth);

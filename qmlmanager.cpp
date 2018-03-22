@@ -24,7 +24,7 @@ void QmlManager::initializeUI(QQmlApplicationEngine* e){
     models = (QEntity *)FindItemByName(engine, "Models");
     Lights* lights = new Lights(models);
 
-    openModelFile("C:/Users/user/Documents/diridiri/DLPslicer/partial2_flip.stl");
+    //openModelFile("C:/Users/user/Documents/diridiri/DLPslicer/partial2_flip.stl");
 }
 
 

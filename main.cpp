@@ -28,12 +28,13 @@ int main(int argc, char **argv)
     QScopedPointer<QuaternionHelper> qq(new QuaternionHelper);
     QScopedPointer<SlicingEngine> se(new SlicingEngine);
     QmlManager *qmlManager = new QmlManager();
-    //QScopedPointer<QmlManager> qm(qmlManager);
+    QScopedPointer<QmlManager> qm(qmlManager);
 
     QQmlApplicationEngine engine;
     engine.load(QUrl(QStringLiteral("qrc:/main.qml")));
     //engine.rootContext()->setContextProperty("qm", qm.data());
-    engine.rootContext()->setContextProperty("qm", qmlManager);
+    engine.rootContext()->setContextProperty("qm", qm.data());
+    //FindItemByName(&engine, "slicing_data")->setContextProperty("qm", qmlManager);
     engine.rootContext()->setContextProperty("qq",qq.data());
     engine.rootContext()->setContextProperty("se",se.data());
 
