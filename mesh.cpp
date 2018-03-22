@@ -11,13 +11,9 @@ void Mesh::vertexMove(QVector3D direction){
     y_max = 99999;
     z_min = 99999;
     z_max = 99999;
-
     for (int i=0;i<numberofVertices;i++){
         QVector3D tmp = direction+vertices[i].position;
         vertices[i].position = tmp;
-        //vertices[i].position.setX(vertices[i].position.x()+direction.x());
-        //vertices[i].position.setY(vertices[i].position.y()+direction.y());
-        //vertices[i].position.setZ(vertices[i].position.z()+direction.z());
         updateMinMax(vertices[i].position);
     }
 }
