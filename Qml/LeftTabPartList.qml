@@ -5,6 +5,7 @@ import QtQuick.Controls.Styles 1.4
 import QtQuick.Layouts 1.3
 
 Rectangle {
+    objectName: "partList"
     property real originalHeight: 350
     width : 260
     height : originalHeight
@@ -83,7 +84,9 @@ Rectangle {
                 //anchors.leftMargin: 16
 
                 ColumnLayout {
+                    id: partListColumn
                     spacing:0
+                    /*
                     LeftTabPartListElement{
                         modelName :"tttttt"
                         state: "on"
@@ -96,14 +99,13 @@ Rectangle {
                         modelName :"tttaasat"
                         state: "off"
                     }
+                    */
                 }
             }
 
 
         }
     }
-
-
 
     states: [
         State{
@@ -119,5 +121,15 @@ Rectangle {
             PropertyChanges { target: ltpl; height : 24 }
         }
     ]
+
+    function addPart(fileName){ // add in list with filename
+            var newComponent = Qt.createComponent("LeftTabPartListElement.qml")
+            //var newPart = Qt.createQmlObject(test,container,'firstObject');
+            var newPart = newComponent.createObject(partListColumn, {"modelName" : fileName, "state" : "on", "objectName" : "qwer"})
+        }
+
+    function deletePart(num){ // delete in list by number
+        partListColumn.children[num].destroy()
+    }
 
 }

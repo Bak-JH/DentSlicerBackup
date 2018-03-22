@@ -35,7 +35,10 @@ Item {
             source: "qrc:/resource/part_on.png"
         }
 
-
+        MouseArea {
+                anchors.fill: parent
+                onClicked: { icon.parent.state == 'on' ? icon.parent.state = "off" : icon.parent.state = 'on';}
+        }
     }
     Rectangle{
         id:line

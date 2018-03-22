@@ -3,6 +3,7 @@
 #include <QString>
 #include <QtMath>
 #include <cfloat>
+#include "qmlmanager.h"
 
 #include "feature/text3dgeometrygenerator.h"
 #include <QtConcurrent>
@@ -85,7 +86,6 @@ GLModel::GLModel(QNode *parent, Mesh* loadMesh, QString fname, bool isShadow)
     //QFuture<void> future = QtConcurrent::run(this, &GLModel::initialize, mesh);
     //future = QtConcurrent::run(this, &GLModel::addVertices, mesh);
 
-
     Qt3DExtras::QDiffuseMapMaterial *diffuseMapMaterial = new Qt3DExtras::QDiffuseMapMaterial();
 
     addComponent(m_transform);
@@ -101,6 +101,25 @@ GLModel::GLModel(QNode *parent, Mesh* loadMesh, QString fname, bool isShadow)
     qDebug() << "created shadow model";
 
     ft = new featureThread(this, 0);
+
+    // Add to Part List
+    if(!isShadow){
+        QList<QObject*> temp;
+        QObject *root = parent;
+        while(root->objectName() != "mainWindow"){
+            root = root->parent();
+            qDebug()<<"parent  " <<root->objectName()<<endl;
+        }
+        temp.append(root);
+        qDebug()<<"result  " <<root->objectName()<<endl;
+        QObject *partList = (QEntity *)FindItemByName(temp, "partList");
+
+        QMetaObject::invokeMethod(partList, "addPart",
+            Q_ARG(QVariant, fname));
+    }
+
+
+
 }
 
 featureThread::featureThread(GLModel* glmodel, int type){
@@ -298,6 +317,8 @@ void GLModel::initialize(const Mesh* mesh){
     m_geometryRenderer->setGeometry(m_geometry);
 
     addComponent(m_geometryRenderer);
+
+
 
     return;
 }
