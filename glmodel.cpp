@@ -108,7 +108,7 @@ void GLModel::moveModelMesh(QVector3D direction){
     sparseMesh=toSparse(mesh);
     initialize(mesh);
     addVertices(mesh);
-    //shadowModel->removeModel();
+    shadowModel->removeModel();
     shadowModel=new GLModel(this,mesh,"",true);
 }
 featureThread::featureThread(GLModel* glmodel, int type){
