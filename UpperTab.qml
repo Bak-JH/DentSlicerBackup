@@ -551,7 +551,7 @@ Rectangle {
             signal runFeature(int type);
             onApplyClicked: {
                 console.log("arrange");
-                runFeature(ftrArrage);
+                runFeature(ftrArrange);
             }
         }
 

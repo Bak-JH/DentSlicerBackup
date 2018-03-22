@@ -152,6 +152,7 @@ void featureThread::run(){
         case ftrArrange:
             {
                 //ar->arrangeGlmodels(&glmodels);
+                qDebug() << "arr clicked!!!!!";
                 break;
             }
         case ftrOrient:
