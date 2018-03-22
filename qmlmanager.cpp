@@ -36,12 +36,16 @@ void QmlManager::initializeUI(QQmlApplicationEngine* e){
     QObject::connect(rotateButton,SIGNAL(runGroupFeature(int,QString)),this,SLOT(runGroupFeature(int,QString)));
 }
 
-
 void QmlManager::openModelFile(QString fname){
 
     GLModel* glmodel = new GLModel(models, nullptr, fname, false);
 
     glmodels.push_back(glmodel);
+    glmodel->moveModelMesh(QVector3D(
+                           (-1)*glmodel->mesh->x_min,
+                           (-1)*glmodel->mesh->y_min,
+                           (-1)*glmodel->mesh->z_min));
+    // set initial position
 
     // auto Repair
 

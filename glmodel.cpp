@@ -58,6 +58,7 @@ GLModel::GLModel(QNode *parent, Mesh* loadMesh, QString fname, bool isShadow)
 
         labellingTextPreview = new LabellingTextPreview(this);
         labellingTextPreview->setEnabled(false);
+        m_meshMaterial = new QPhongMaterial();
 
         return;
     }
@@ -102,7 +103,14 @@ GLModel::GLModel(QNode *parent, Mesh* loadMesh, QString fname, bool isShadow)
 
     ft = new featureThread(this, 0);
 }
-
+void GLModel::moveModelMesh(QVector3D direction){
+    mesh->vertexMove(direction);
+    sparseMesh=toSparse(mesh);
+    initialize(mesh);
+    addVertices(mesh);
+    //shadowModel->removeModel();
+    shadowModel=new GLModel(this,mesh,"",true);
+}
 featureThread::featureThread(GLModel* glmodel, int type){
     qDebug() << "feature thread created" << type;
     m_glmodel = glmodel;
