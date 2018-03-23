@@ -25,12 +25,17 @@ public:
     void initializeUI(QQmlApplicationEngine *e);
     void openModelFile_internal(QString filename);
 
+private:
+    bool glmodels_arranged;
+
 signals:
     void updateModelInfo(int printing_time, int layer, QString xyz, float volume);
 
 public slots:
     void sendUpdateModelInfo(int, int, QString, float);
     void openModelFile(QString filename);
+    void runArrange();
+
 };
 
 

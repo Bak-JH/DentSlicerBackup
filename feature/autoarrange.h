@@ -6,7 +6,7 @@
 #include <QHash>
 #include <QDebug>
 #include <math.h>
-#include "./glmodel.h"
+//#include "./glmodel.h"
 #include "./configuration.h"
 #include "./mesh.h"
 #include "./polyclipping/clipper.hpp"

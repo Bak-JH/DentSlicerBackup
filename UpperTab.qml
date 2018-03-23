@@ -534,6 +534,7 @@ Rectangle {
 
         //7. PopUp - Arrange
         PopUp {
+            objectName: "arrangePopup"
             id: popup_arrange
             funcname: "Arrange"
             height: 220

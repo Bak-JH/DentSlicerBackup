@@ -101,6 +101,7 @@ GLModel::GLModel(QNode *parent, Mesh* loadMesh, QString fname, bool isShadow)
     qDebug() << "created shadow model";
 
     ft = new featureThread(this, 0);
+    arsignal = new arrangeSignalSender();
 }
 
 featureThread::featureThread(GLModel* glmodel, int type){
@@ -111,11 +112,11 @@ featureThread::featureThread(GLModel* glmodel, int type){
     // enable features
     ot = new autoorientation();
     ct = new modelcut();
-    //ar = new autoarrange();
+    ar = new autoarrange();
 
     connect(ot, SIGNAL(progressChanged(float)), this, SLOT(progressChanged(float)));
     connect(ct, SIGNAL(progressChanged(float)), this, SLOT(progressChanged(float)));
-    //connect(ar, SIGNAL(progressChanged(float)), this, SLOT(progressChanged(float)));
+    connect(ar, SIGNAL(progressChanged(float)), this, SLOT(progressChanged(float)));
 }
 
 void featureThread::setTypeAndStart(int type){
@@ -151,8 +152,7 @@ void featureThread::run(){
             }
         case ftrArrange:
             {
-                //ar->arrangeGlmodels(&glmodels);
-                qDebug() << "arr clicked!!!!!";
+                emit (m_glmodel->arsignal)->runArrange();
                 break;
             }
         case ftrOrient:
@@ -233,6 +233,9 @@ void featureThread::markPopup(bool flag){
     }
 }
 
+arrangeSignalSender::arrangeSignalSender(){
+
+}
 
 void GLModel::initialize(const Mesh* mesh){
 
