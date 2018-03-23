@@ -113,6 +113,8 @@ public:
 
     LabellingTextPreview* labellingTextPreview = nullptr;
 
+    // Model move
+    void moveModelMesh(QVector3D direction);
     // Model Cut
     void addCuttingPoint(QVector3D v);
     void removeCuttingPoints();

@@ -2,6 +2,21 @@
 #include <QDebug>
 
 
+/********************** Mesh Edit Functions***********************/
+void Mesh::vertexMove(QVector3D direction){
+    int numberofVertices = vertices.size();
+    x_min = 99999;
+    x_max = 99999;
+    y_min = 99999;
+    y_max = 99999;
+    z_min = 99999;
+    z_max = 99999;
+    for (int i=0;i<numberofVertices;i++){
+        QVector3D tmp = direction+vertices[i].position;
+        vertices[i].position = tmp;
+        updateMinMax(vertices[i].position);
+    }
+}
 /********************** Mesh Generation Functions **********************/
 
 void Mesh::addFace(QVector3D v0, QVector3D v1, QVector3D v2){

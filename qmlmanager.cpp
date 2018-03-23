@@ -39,15 +39,30 @@ void QmlManager::initializeUI(QQmlApplicationEngine* e){
     orientPopup = FindItemByName(engine, "orientPopup");
     progress_text = FindItemByName(engine, "progress_text");
 
+    //rotation Sphere
+    rotateSphere = (QEntity *)FindItemByName(engine, "rotateSphereEntity");
+    rotateSphereX = (QEntity *)FindItemByName(engine, "rotateSphereTorusX");
+    rotateSphereY = (QEntity *)FindItemByName(engine, "rotateSphereTorusY");
+    rotateSphereZ = (QEntity *)FindItemByName(engine, "rotateSphereTorusZ");
+    QObject* rotateSphereobj = FindItemByName(engine, "rotateSphere");
+    QObject::connect(rotateSphereobj, SIGNAL(rotateSignal(int,int)),this, SLOT(modelRotate(int,int)));
+    rotateSphere->setEnabled(0);
+    QObject *rotateButton = FindItemByName(engine, "rotateButton");
+    QObject::connect(rotateButton,SIGNAL(runGroupFeature(int,QString)),this,SLOT(runGroupFeature(int,QString)));
+
     //openModelFile("C:/Users/user/Documents/diridiri/DLPslicer/partial2_flip.stl");
 }
-
 
 void QmlManager::openModelFile(QString fname){
 
     GLModel* glmodel = new GLModel(models, nullptr, fname, false);
 
     glmodels.push_back(glmodel);
+    glmodel->moveModelMesh(QVector3D(
+                           (-1)*glmodel->mesh->x_min,
+                           (-1)*glmodel->mesh->y_min,
+                           (-1)*glmodel->mesh->z_min));
+    // set initial position
 
     // auto Repair
 
@@ -127,3 +142,49 @@ QObject* FindItemByName(QQmlApplicationEngine* engine, const QString& name)
     return FindItemByName(engine->rootObjects(), name);
 }
 
+void QmlManager::showRotateSphere(){
+    rotateSphere->setEnabled(1);
+    //QFrameAction::QFrameAction qframeaction(rotateSphere);
+}
+void QmlManager::modelRotate(int Axis, int Angle){
+    //QMatrix4x4 tmpMatrix = glmodel->m_transform->matrix();
+    switch(Axis){
+    case 1:{  //X
+        //float tmpx = glmodel->m_transform->rotationX();
+        //glmodel->m_transform->setRotationX(tmpx+Angle);
+        break;
+    }
+    case 2:{  //Y
+        //float tmpy = glmodel->m_transform->rotationY();
+        //glmodel->m_transform->setRotationY(tmpy+Angle);
+        break;
+    }
+    case 3:{  //Z
+        //float tmpz = glmodel->m_transform->rotationZ();
+        //glmodel->m_transform->setRotationZ(tmpz+Angle);
+        break;
+    }
+    }
+    //qDebug() << glmodel->m_transform->rotationX() << Angle;
+    //glmodel->m_transform->setMatrix(tmpMatrix);
+    qDebug() << "Angle Monitor" << Angle;
+}
+void QmlManager::runGroupFeature(int ftrType, QString state){
+    showRotateSphere();
+    switch(ftrType){
+    case 5: //rotate
+    {
+        qDebug()<<state;
+        if (state == "active"){
+            rotateSphere->setEnabled(0);
+        }else if(state == "inactive"){
+            showRotateSphere();
+        }
+        break;
+    }
+    case 4:  //move
+    {
+        break;
+    }
+    }
+}
