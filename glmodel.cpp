@@ -137,7 +137,7 @@ GLModel::GLModel(QNode *parent, Mesh* loadMesh, QString fname, bool isShadow)
         QObject *partList = (QEntity *)FindItemByName(temp, "partList");
 
         QMetaObject::invokeMethod(partList, "addPart",
-            Q_ARG(QVariant, fname),
+            Q_ARG(QVariant, getFileName(fname.toStdString().c_str())),
             Q_ARG(QVariant, ID));
     }
 
@@ -909,6 +909,17 @@ void GLModel::getSliderSignal(double value){
 
 
 /** HELPER functions **/
+QString GLModel::getFileName(const string& s){
+   char sep = '/';
+
+   size_t i = s.rfind(sep, s.length());
+   if (i != string::npos) {
+      return QString::fromStdString(s.substr(i+1, s.length() - i));
+   }
+
+   return QString::fromStdString("");
+}
+
 QVector3D GLModel::spreadPoint(QVector3D endPoint,QVector3D startPoint,int factor){
     QVector3D standardVector = endPoint-startPoint;
     QVector3D finalVector=endPoint+standardVector*(factor-1);

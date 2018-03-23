@@ -123,6 +123,7 @@ public:
     bool isLeftToPlane(Plane plane, QVector3D position);
 
 
+    QString getFileName(const string& s);
     QVector3D spreadPoint(QVector3D endpoint,QVector3D startpoint,int factor);
 
     Mesh* mesh;
