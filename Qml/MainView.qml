@@ -88,8 +88,12 @@ Entity {
                 id: meshEntity4
                 //inputSource:"file:///D:/Dev/DLPSlicer/DLPslicer/resource/mesh/lowerjaw.obj"
             }
-
-
+            Entity{
+                objectName: "rotateSphereEntity"
+                MeshTransformerRotate{
+                    objectName: "rotateSphere"
+                }
+            }
             CoordinateMesh{}
         }
 

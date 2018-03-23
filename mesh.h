@@ -65,6 +65,8 @@ public :
 
     float x_min = 99999, x_max = 99999, y_min = 99999, y_max = 99999, z_min = 99999, z_max = 99999;
 
+    /********************** Mesh Edit Functions***********************/
+    void vertexMove(QVector3D direction);
     /********************** Mesh Generation Functions **********************/
     void addFace(QVector3D v0, QVector3D v1, QVector3D v2);
     vector<MeshFace>::iterator removeFace(vector<MeshFace>::iterator f_it);

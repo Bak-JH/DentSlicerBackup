@@ -257,11 +257,15 @@ Rectangle {
         }
         UpperButton{
             id : second_tab_button_rotate
-
+            objectName: "rotateButton"
             anchors.left: second_tab_button_move.right
             iconSource1: "qrc:/resource/upper_rotate.png"
             iconSource2: "qrc:/Resource/upper2_rotate.png"
             iconText: "Rotate"
+            signal runGroupFeature(int type, string state);
+            onButtonClicked:{
+                   runGroupFeature(ftrRotate, state);
+            }
         }
         UpperButton{
             id : second_tab_button_layflat
@@ -491,6 +495,7 @@ Rectangle {
         //5. PopUp - Rotate
         PopUp {
             id: popup_rotate
+            objectName: "rotatePopup"
             funcname: "Rotate"
             height: 250
             detail1: ""
@@ -510,6 +515,11 @@ Rectangle {
             //numbox_default: 0
             numbox_updown_scale: 5
             number_unit: "°"
+            signal runFeature(int type);
+            onApplyClicked: {
+                console.log("rotate")
+                runFeature(ftrRotate);
+            }
             state: second_tab_button_rotate.state=="active" ? "active" : "inactive"
         }
 

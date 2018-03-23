@@ -15,6 +15,17 @@ Rectangle{
     anchors.bottom : tabgroupname.top
 
     color : "transparent"
+    signal buttonClicked()
+    function do_buttonclick(iconText){
+        switch(iconText){
+        case "Rotate":
+            buttonClicked();
+            break;
+        default:
+            //console.log(functionname);
+            break;
+        }
+    }
 
 
     //Default
@@ -108,6 +119,8 @@ Rectangle{
         }
 
         onClicked:{
+            do_buttonclick(iconText)
+
            /* if (parent.state == "inactive"){
                 box_uppertab.inbox(iconText);
                 parent.state = "active";
