@@ -25,8 +25,11 @@ public:
     void initializeUI(QQmlApplicationEngine *e);
     void openModelFile_internal(QString filename);
 
+    Q_INVOKABLE void ModelVisible(int ID, bool isVisible);
+
 signals:
     void updateModelInfo(int printing_time, int layer, QString xyz, float volume);
+
 
 public slots:
     void sendUpdateModelInfo(int, int, QString, float);

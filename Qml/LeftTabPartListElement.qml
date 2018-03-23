@@ -5,6 +5,7 @@ Item {
     height: 28
 
     property string modelName
+    property int glModelID
 
     Rectangle{
         width:parent.width
@@ -36,8 +37,12 @@ Item {
         }
 
         MouseArea {
-                anchors.fill: parent
-                onClicked: { icon.parent.state == 'on' ? icon.parent.state = "off" : icon.parent.state = 'on';}
+            anchors.fill: parent
+            onClicked: {
+                icon.parent.state == 'on' ? icon.parent.state = "off" : icon.parent.state = 'on';
+                //ModelVisible(icon.parent.state);
+                qm.ModelVisible(glModelID,icon.parent.state);
+            }
         }
     }
     Rectangle{
@@ -64,14 +69,15 @@ Item {
         State{
             name:"on"
             PropertyChanges { target: iconimage; source:"qrc:/resource/part_on.png" }
-
-
         },
         State{
             name:"off"
             PropertyChanges { target: iconimage; source:"qrc:/resource/part_off.png" }
         }
     ]
-
-
+    /*
+    function ModelVisible(isVisible){
+        console.log("ididid  "+ glModelID);
+        qm.ModelVisible(glModelID,isVisible);
+    }*/
 }

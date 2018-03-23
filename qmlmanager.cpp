@@ -128,3 +128,14 @@ QObject* FindItemByName(QQmlApplicationEngine* engine, const QString& name)
     return FindItemByName(engine->rootObjects(), name);
 }
 
+void QmlManager::ModelVisible(int ID, bool isVisible){
+    GLModel* target;
+    for(int i=0; i<glmodels.size();i++){
+        if(glmodels.at(i)->ID == ID){
+            target = glmodels.at(i);
+            break;
+        }
+    }
+
+    target->setProperty("visible",isVisible);
+}

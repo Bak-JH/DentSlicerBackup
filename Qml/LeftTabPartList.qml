@@ -122,11 +122,12 @@ Rectangle {
         }
     ]
 
-    function addPart(fileName){ // add in list with filename
-            var newComponent = Qt.createComponent("LeftTabPartListElement.qml")
-            //var newPart = Qt.createQmlObject(test,container,'firstObject');
-            var newPart = newComponent.createObject(partListColumn, {"modelName" : fileName, "state" : "on", "objectName" : "qwer"})
-        }
+    function addPart(fileName, ID){ // add in list with filename
+        var newComponent = Qt.createComponent("LeftTabPartListElement.qml")
+        //var newPart = Qt.createQmlObject(test,container,'firstObject');
+        var newPart = newComponent.createObject(partListColumn, {"modelName" : fileName, "state" : "on", "objectName" : "qwer", "glModelID" : ID})
+        console.log("glmodel  glglgl  : " + ID);
+    }
 
     function deletePart(num){ // delete in list by number
         partListColumn.children[num].destroy()

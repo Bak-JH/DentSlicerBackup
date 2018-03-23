@@ -16,6 +16,7 @@
 #include "feature/labellingtextpreview.h"
 #include "feature/autoorientation.h"
 #include "feature/meshrepair.h"
+#include <iostream>
 
 #define MAX_BUF_LEN 2000000
 
@@ -111,6 +112,7 @@ public:
     void beforeInitialize();
     void beforeAddVerticies();
 
+
     LabellingTextPreview* labellingTextPreview = nullptr;
 
     // Model Cut
@@ -128,6 +130,9 @@ public:
     Mesh* rmesh;
 
     featureThread* ft;
+
+    static int ID; //for use in Part List
+    static QObject* mainWindow;
 
 private:
     int numPoints;

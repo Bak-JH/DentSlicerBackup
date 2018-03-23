@@ -17,7 +17,7 @@ using namespace Qt3DCore;
 int main(int argc, char **argv)
 {
     QApplication app(argc, argv);
-    QPixmap pixmap(":/Resource/splash.png");
+    QPixmap pixmap(":/Resource/teeth_splash.png");
     QSplashScreen *splash = new QSplashScreen(pixmap);
     splash->show();
 

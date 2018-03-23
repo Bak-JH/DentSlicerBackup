@@ -8,6 +8,9 @@
 #include "feature/text3dgeometrygenerator.h"
 #include <QtConcurrent>
 
+int GLModel::ID = 0;
+QObject* GLModel::mainWindow = NULL;
+
 GLModel::GLModel(QNode *parent, Mesh* loadMesh, QString fname, bool isShadow)
     : QEntity(parent)
     , filename(fname)
@@ -103,22 +106,40 @@ GLModel::GLModel(QNode *parent, Mesh* loadMesh, QString fname, bool isShadow)
     ft = new featureThread(this, 0);
 
     // Add to Part List
+    ID++;
+    qDebug()<<"glmodel ID  "<<ID<<endl;
+
+
+    if(mainWindow == NULL){
+        QObject *root = parent;
+        while(root->objectName() != "mainWindow"){
+            root = root->parent();
+            qDebug()<<"parent  " <<root->objectName()<<endl;
+            if(root->parent()==NULL)
+                qDebug()<<"NULLLLLLLL "<<endl;
+        }
+        mainWindow = root;
+    }
+
+
     if(!isShadow){
+        /*
         QList<QObject*> temp;
         QObject *root = parent;
         while(root->objectName() != "mainWindow"){
             root = root->parent();
             qDebug()<<"parent  " <<root->objectName()<<endl;
-        }
-        temp.append(root);
-        qDebug()<<"result  " <<root->objectName()<<endl;
+            if(root->parent()==NULL)
+                qDebug()<<"NULLLLLLLL "<<endl;
+        }*/
+        QList<QObject*> temp;
+        temp.append(mainWindow);
         QObject *partList = (QEntity *)FindItemByName(temp, "partList");
 
         QMetaObject::invokeMethod(partList, "addPart",
-            Q_ARG(QVariant, fname));
+            Q_ARG(QVariant, fname),
+            Q_ARG(QVariant, ID));
     }
-
-
 
 }
 
@@ -381,8 +402,6 @@ void GLModel::addVertices(Mesh* mesh)
                         result_vns.push_back(QVector3D(1,1,1));
                     }
         }
-
-
 
         addNormalVertices(result_vns);
     }
@@ -882,7 +901,6 @@ void GLModel::getSliderSignal(double value){
 
 
 /** HELPER functions **/
-
 QVector3D GLModel::spreadPoint(QVector3D endPoint,QVector3D startPoint,int factor){
     QVector3D standardVector = endPoint-startPoint;
     QVector3D finalVector=endPoint+standardVector*(factor-1);

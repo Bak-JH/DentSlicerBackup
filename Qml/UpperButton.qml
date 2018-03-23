@@ -102,11 +102,9 @@ Rectangle{
         hoverEnabled: true
         onEntered: {
             basicbutton.color = "#D8D8D8"
-            console.log("enter")
         }
         onExited: {
             basicbutton.color = parent.color
-            console.log("exit");
         }
 
         onClicked:{
