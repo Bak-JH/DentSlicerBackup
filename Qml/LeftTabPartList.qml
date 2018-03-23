@@ -129,8 +129,12 @@ Rectangle {
         console.log("glmodel  glglgl  : " + ID);
     }
 
-    function deletePart(num){ // delete in list by number
-        partListColumn.children[num].destroy()
+    function deletePart(ID){ // delete in list by ID
+        for(var i=0;i<partListColumn.children.length;i++){
+            if(partListColumn.childAt(i).ID == ID)
+                partListColumn.children[i].destroy()
+        }
+
     }
 
 }

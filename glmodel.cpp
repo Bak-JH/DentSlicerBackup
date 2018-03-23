@@ -680,6 +680,14 @@ void GLModel::removeModel(){
     removeComponent(m_meshMaterial);
     delete m_geometry;
     delete m_geometryRenderer;
+
+    //remove part list
+    QList<QObject*> temp;
+    temp.append(mainWindow);
+    QObject *partList = (QEntity *)FindItemByName(temp, "partList");
+
+    QMetaObject::invokeMethod(partList, "deletePart",
+        Q_ARG(QVariant, ID));
 }
 
 
