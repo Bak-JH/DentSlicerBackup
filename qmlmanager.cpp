@@ -24,6 +24,21 @@ void QmlManager::initializeUI(QQmlApplicationEngine* e){
     models = (QEntity *)FindItemByName(engine, "Models");
     Lights* lights = new Lights(models);
 
+    // model cut components
+    cutPopup = FindItemByName(engine, "cutPopup");
+    curveButton = FindItemByName(engine, "curveButton");
+    flatButton = FindItemByName(engine, "flatButton");
+    slider = FindItemByName(engine, "slider");
+
+    // labelling components
+    text3DInput = FindItemByName(engine, "text3DInput");
+    labelPopup = FindItemByName(engine, "labelPopup");
+    labelFontBox = FindItemByName(engine, "labelFontBox");
+
+    // orientation components
+    orientPopup = FindItemByName(engine, "orientPopup");
+    progress_text = FindItemByName(engine, "progress_text");
+
     //openModelFile("C:/Users/user/Documents/diridiri/DLPslicer/partial2_flip.stl");
 }
 
@@ -51,20 +66,6 @@ void QmlManager::openModelFile(QString fname){
         arrangeQt3D(m_transform_set, arng_result_set);
     }
 
-    // model cut components
-    QObject *cutPopup = FindItemByName(engine, "cutPopup");
-    QObject *curveButton = FindItemByName(engine, "curveButton");
-    QObject *flatButton = FindItemByName(engine, "flatButton");
-    QObject *slider = FindItemByName(engine, "slider");
-
-    // labelling components
-    QObject *text3DInput = FindItemByName(engine, "text3DInput");
-    QObject *labelPopup = FindItemByName(engine, "labelPopup");
-    QObject *labelFontBox = FindItemByName(engine, "labelFontBox");
-
-    // orientation components
-    QObject* orientPopup = FindItemByName(engine, "orientPopup");
-    QObject* progress_text = FindItemByName(engine, "progress_text");
 
     featureThread* ft = new featureThread(glmodel, ftrOrient);
 
@@ -77,8 +78,7 @@ void QmlManager::openModelFile(QString fname){
     QObject::connect(cutPopup,SIGNAL(generatePlane()),glmodel->shadowModel , SLOT(generatePlane()));
     QObject::connect(cutPopup,SIGNAL(modelCut()),glmodel->shadowModel , SLOT(modelCut()));
     //QObject::connect(cutPopup,SIGNAL(runFeature(int)),glmodel->ft , SLOT(setTypeAndStart(int)));
-    QObject::connect(cutPopup,SIGNAL(curveModeSelected()),glmodel->shadowModel,SLOT(lineAccept()));
-    QObject::connect(cutPopup,SIGNAL(flatModeSelected()),glmodel->shadowModel,SLOT(pointAccept()));
+    QObject::connect(cutPopup,SIGNAL(cutModeSelected(int)),glmodel->shadowModel,SLOT(cutModeSelected(int)));
     QObject::connect(slider, SIGNAL(govalue(double)), glmodel->shadowModel, SLOT(getSliderSignal(double)));
     //QObject::connect(slider,SIGNAL(govalue(double)),glmodel->ft->ct,SLOT(getSliderSignal(double)));
 

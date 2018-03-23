@@ -19,8 +19,7 @@ GLModel::GLModel(QNode *parent, Mesh* loadMesh, QString fname, bool isShadow)
     , m_transform(new Qt3DCore::QTransform())
     //, m_objectPicker(new Qt3DRender::QObjectPicker())
     , parentModel((GLModel*)(parent))
-    , curveState(false)
-    , flatState(false)
+    , cutMode(0)
 {
     ownerThread = QThread::currentThread();
     // generates shadow model for object picking
@@ -43,7 +42,7 @@ GLModel::GLModel(QNode *parent, Mesh* loadMesh, QString fname, bool isShadow)
 
         addComponent(m_transform);
 
-        m_objectPicker = new Qt3DRender::QObjectPicker();
+        m_objectPicker = new Qt3DRender::QObjectPicker(this);
 
         //m_objectPicker->setHoverEnabled(true);
         //m_objectPicker->setDragEnabled(true);
@@ -511,17 +510,15 @@ void GLModel::handlePickerClicked(QPickEvent *pick)
             labellingTextPreview->setNormal(QVector3D(0, 0, 1));
         }
     }
+    qDebug() << "cut mode :" << cutMode;
     QPickTriangleEvent *trianglePick = static_cast<QPickTriangleEvent*>(pick);
-    //qDebug() << flatState << numPoints << sizeof(sphereEntity)/4;
-    if (flatState&&parentModel->numPoints< sizeof(parentModel->sphereEntity)/4) {
-    //if (flatState&&parentModel->ft->ct->numPoints< sizeof(parentModel->ft->ct->sphereEntity)/4) {
+    if (cutMode == 1 && parentModel->numPoints< sizeof(parentModel->sphereEntity)/4) {
         qDebug() << pick->localIntersection()<<"pick";
         QVector3D v = pick->localIntersection();
         parentModel->addCuttingPoint(v);
         //parentModel->ft->ct->addCuttingPoint(parentModel, v);
-    }
-    else {
-        qDebug() << "fail to flat state" << flatState;
+    } else {
+        qDebug() << "current cut mode :" << cutMode;
         return;
     }
 }
@@ -839,7 +836,7 @@ void GLModel::rgoo(Qt3DRender::QPickEvent* v){
 
 /*void GLModel::drawLine(QVector3D endpoint)
 {
-    if (curveState){
+    if (cutMode == 2){
         float line_length=endpoint.distanceToPoint(lastpoint);
         QVector3D original_normal(0,1,0);
         QVector3D desire_normal(endpoint-lastpoint);
@@ -863,19 +860,11 @@ void GLModel::rgoo(Qt3DRender::QPickEvent* v){
     }
 }*/
 
-void GLModel::lineAccept(){
-    qDebug() << "line Accept";
-    if(!curveState){
-        curveState=true;}
-    else {
-        curveState=false;}
-}
-
-void GLModel::pointAccept(){
-    qDebug() << "point Accept" << flatState;
-    if (flatState)
-        ft->ct->removeCuttingPoints();
-    flatState = !flatState;
+void GLModel::cutModeSelected(int type){
+    qDebug() << "cut mode selected" << type;
+    parentModel->removeCuttingPoints();
+    cutMode = type;
+    return;
 }
 
 void GLModel::getSliderSignal(double value){

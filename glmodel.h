@@ -134,8 +134,6 @@ public:
 
 private:
     int numPoints;
-    bool flatState;
-    bool curveState;
     QString filename;
     float x,y,z;
     int v_cnt;
@@ -154,6 +152,7 @@ private:
     void onTimerUpdate();
     Mesh* toSparse(Mesh* mesh);
 
+    int cutMode = 0;
     bool labelingActive = false;
 
 signals:
@@ -173,8 +172,7 @@ public slots:
     void generatePlane();
     void removePlane();
     void modelCut();
-    void lineAccept();
-    void pointAccept();
+    void cutModeSelected(int type);
     void getSliderSignal(double value);
     void modelCutFinished();
 

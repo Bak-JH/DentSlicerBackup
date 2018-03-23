@@ -168,7 +168,7 @@ Rectangle {
         UpperButton{
             id : first_tab_button_open
             objectName : "open"
-            anchors.left: parent.left
+            //anchors.left: parent.left
             iconSource1: "qrc:/resource/upper_open.png"
             iconSource2: "qrc:/Resource/upper2_open.png"
             iconText: "Open"
@@ -691,12 +691,12 @@ Rectangle {
 
             onFlatModeClicked: {
                 console.log("flat mode selected");
-                flatModeSelected();
+                cutModeSelected(1);
             }
 
             onCurveModeClicked: {
                 console.log("curve mode selected");
-                curveModeSelected();
+                cutModeSelected(2);
             }
 
             onApplyClicked: {
@@ -712,8 +712,7 @@ Rectangle {
                 modelCut();
             }
 
-            signal flatModeSelected();
-            signal curveModeSelected();
+            signal cutModeSelected(int type);
             signal runFeature(int type);
             signal generatePlane();
             signal modelCut();

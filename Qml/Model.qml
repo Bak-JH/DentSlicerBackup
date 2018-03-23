@@ -8,14 +8,14 @@ Entity {
     objectName: "Models"
     property string inputSource;
 
-    property alias testMesh: testMesh
+    //property alias testMesh: testMesh
     property alias meshTransform: meshTransform
 
 
-    Mesh{
+    /*Mesh{
         id: testMesh
         source: inputSource
-    }
+    }*/
 
     Transform {
         id: meshTransform
@@ -34,7 +34,8 @@ Entity {
 
     }
 
-    components: [ testMesh, testMaterial, meshTransform ]
+    components: [ testMaterial, meshTransform ]
+    //components: [ testMesh, testMaterial, meshTransform ]
     //components: [ testMesh, testMaterial, meshTransform]
 
     function zoomUp(){

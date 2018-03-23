@@ -18,8 +18,26 @@ class QmlManager : public QObject
 public:
     explicit QmlManager(QObject *parent = nullptr);
     QQmlApplicationEngine* engine;
+
+    // UI components
     QObject* mainWindow;
     QEntity* models;
+
+    // model cut components
+    QObject *cutPopup;
+    QObject *curveButton;
+    QObject *flatButton;
+    QObject *slider;
+
+    // labelling components
+    QObject *text3DInput;
+    QObject *labelPopup;
+    QObject *labelFontBox;
+
+    // orientation components
+    QObject* orientPopup;
+    QObject* progress_text;
+
     vector<GLModel*> glmodels;
 
     void initializeUI(QQmlApplicationEngine *e);
