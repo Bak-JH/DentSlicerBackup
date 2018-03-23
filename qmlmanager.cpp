@@ -50,7 +50,7 @@ void QmlManager::initializeUI(QQmlApplicationEngine* e){
     QObject *rotateButton = FindItemByName(engine, "rotateButton");
     QObject::connect(rotateButton,SIGNAL(runGroupFeature(int,QString)),this,SLOT(runGroupFeature(int,QString)));
 
-    //openModelFile("C:/Users/user/Documents/diridiri/DLPslicer/partial2_flip.stl");
+    openModelFile("C:/Users/diridiri/Desktop/DLP/DLPslicer/partial2_flip.stl");
 }
 
 void QmlManager::openModelFile(QString fname){
@@ -91,7 +91,8 @@ void QmlManager::openModelFile(QString fname){
 
     // model cut popup codes
     QObject::connect(cutPopup,SIGNAL(generatePlane()),glmodel->shadowModel , SLOT(generatePlane()));
-    QObject::connect(cutPopup,SIGNAL(modelCut()),glmodel->shadowModel , SLOT(modelCut()));
+    //QObject::connect(cutPopup,SIGNAL(modelCut()),glmodel->shadowModel , SLOT(modelCut()));
+    QObject::connect(cutPopup,SIGNAL(modelCut()),glmodel->shadowModel , SLOT(selectRLModel()));
     //QObject::connect(cutPopup,SIGNAL(runFeature(int)),glmodel->ft , SLOT(setTypeAndStart(int)));
     QObject::connect(cutPopup,SIGNAL(cutModeSelected(int)),glmodel->shadowModel,SLOT(cutModeSelected(int)));
     QObject::connect(slider, SIGNAL(govalue(double)), glmodel->shadowModel, SLOT(getSliderSignal(double)));

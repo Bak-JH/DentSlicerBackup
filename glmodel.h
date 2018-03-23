@@ -176,6 +176,7 @@ public slots:
     void modelCut();
     void cutModeSelected(int type);
     void getSliderSignal(double value);
+    void generateRLModel();
     void modelCutFinished();
 
     // Labelling

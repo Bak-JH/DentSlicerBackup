@@ -99,7 +99,7 @@ GLModel::GLModel(QNode *parent, Mesh* loadMesh, QString fname, bool isShadow)
     // create shadow model to handle picking settings
     shadowModel = new GLModel(this, mesh, filename, true);
 
-    QObject::connect(this,SIGNAL(bisectDone()),this,SLOT(modelCutFinished()));
+    QObject::connect(this,SIGNAL(bisectDone()),this,SLOT(generateRLModel()));
 
     qDebug() << "created shadow model";
 
@@ -525,7 +525,9 @@ void GLModel::handlePickerClicked(QPickEvent *pick)
         QVector3D v = pick->localIntersection();
         parentModel->addCuttingPoint(v);
         //parentModel->ft->ct->addCuttingPoint(parentModel, v);
-    } else {
+    } else if (cutMode == 9999){
+        if (auto* glmodel = qobject_cast<GLModel*>(parent()))
+            glmodel->m_meshMaterial->setDiffuse(QColor(0, 255, 0));
         qDebug() << "current cut mode :" << cutMode;
         return;
     }
@@ -617,6 +619,7 @@ void GLModel::generatePlane(){
         parentModel->planeEntity[i]->addComponent(parentModel->planeTransform[i]);
         parentModel->planeEntity[i]->addComponent(parentModel->planeMaterial);
     }
+    modelCut();
 }
 
 void GLModel::removePlane(){
@@ -646,6 +649,7 @@ void GLModel::addCuttingPoint(QVector3D v){
     sphereEntity[numPoints]->addComponent(sphereTransform[numPoints]);
     sphereEntity[numPoints]->addComponent(sphereMaterial[numPoints]);
     numPoints++;
+
 }
 
 void GLModel::removeCuttingPoints(){
@@ -678,8 +682,6 @@ void GLModel::modelCut(){
         return;
     }
 
-    removePlane();
-
     Plane plane;
     plane.push_back(parentModel->cuttingPoints[parentModel->cuttingPoints.size()-3]);
     plane.push_back(parentModel->cuttingPoints[parentModel->cuttingPoints.size()-2]);   //plane에 잘 들어감
@@ -695,13 +697,19 @@ void GLModel::modelCut(){
 
 }
 
-void GLModel::modelCutFinished(){
+void GLModel::generateRLModel(){
     qDebug() << "modelCut finished";
     GLModel* leftModel = new GLModel(parentModel, lmesh, "", false);
-    //GLModel* rightModel = new GLModel(parentModel->parentModel, rmesh, "", false);
+    GLModel* rightModel = new GLModel(parentModel, rmesh, "", false);
 
     deleteLater();
     shadowModel->deleteLater();
+}
+
+void GLModel::modelCutFinished(){
+
+    removePlane();
+
 }
 
 /*

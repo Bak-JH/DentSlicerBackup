@@ -714,6 +714,7 @@ Rectangle {
                 //runFeature(ftrCut);
                 //modelCut();
                 generatePlane();
+                cutModeSelected(9999);
             }
 
             // on Finish Clicked:
