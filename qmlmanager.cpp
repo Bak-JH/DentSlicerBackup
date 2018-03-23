@@ -136,6 +136,5 @@ void QmlManager::ModelVisible(int ID, bool isVisible){
             break;
         }
     }
-
-    target->setProperty("visible",isVisible);
+    target->setEnabled(isVisible);
 }

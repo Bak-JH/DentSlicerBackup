@@ -131,7 +131,8 @@ public:
 
     featureThread* ft;
 
-    static int ID; //for use in Part List
+    int ID; //for use in Part List
+    static int globalID;
     static QObject* mainWindow;
 
 private:
@@ -157,6 +158,7 @@ private:
     Mesh* toSparse(Mesh* mesh);
 
     bool labelingActive = false;
+
 
 public slots:
     // object picker parts

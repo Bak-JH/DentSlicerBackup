@@ -40,8 +40,11 @@ Item {
             anchors.fill: parent
             onClicked: {
                 icon.parent.state == 'on' ? icon.parent.state = "off" : icon.parent.state = 'on';
-                //ModelVisible(icon.parent.state);
-                qm.ModelVisible(glModelID,icon.parent.state);
+
+                if(icon.parent.state == 'on')
+                    qm.ModelVisible(glModelID,true);
+                else
+                    qm.ModelVisible(glModelID,false);
             }
         }
     }
@@ -75,9 +78,5 @@ Item {
             PropertyChanges { target: iconimage; source:"qrc:/resource/part_off.png" }
         }
     ]
-    /*
-    function ModelVisible(isVisible){
-        console.log("ididid  "+ glModelID);
-        qm.ModelVisible(glModelID,isVisible);
-    }*/
+
 }

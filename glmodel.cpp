@@ -8,7 +8,7 @@
 #include "feature/text3dgeometrygenerator.h"
 #include <QtConcurrent>
 
-int GLModel::ID = 0;
+int GLModel::globalID = 0;
 QObject* GLModel::mainWindow = NULL;
 
 GLModel::GLModel(QNode *parent, Mesh* loadMesh, QString fname, bool isShadow)
@@ -106,7 +106,7 @@ GLModel::GLModel(QNode *parent, Mesh* loadMesh, QString fname, bool isShadow)
     ft = new featureThread(this, 0);
 
     // Add to Part List
-    ID++;
+    ID = globalID++;
     qDebug()<<"glmodel ID  "<<ID<<endl;
 
 
