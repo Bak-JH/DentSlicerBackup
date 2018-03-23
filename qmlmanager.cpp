@@ -12,41 +12,52 @@
 
 #include "qmlmanager.h"
 #include "lights.h"
-#include "glmodel.h"
 
 QmlManager::QmlManager(QObject *parent) : QObject(parent)
 {
+
 }
 
 void QmlManager::initializeUI(QQmlApplicationEngine* e){
     engine = e;
-    QObject* mainView = FindItemByName(engine, "MainView");
-    QEntity* teethModel = (QEntity *)FindItemByName(engine, "model");
+    mainWindow = FindItemByName(engine, "mainWindow");
+    models = (QEntity *)FindItemByName(engine, "Models");
+    Lights* lights = new Lights(models);
 
-    GLModel* glmodel = new GLModel(teethModel, nullptr, "D:/Dev/2018/Working/DLPslicer/partial2_flip.stl", false);
-    //GLModel* glmodel = new GLModel(teethModel, nullptr, "C:/Users/user/Documents/diridiri/DLPslicer/partial2_flip.stl", false);//"/Users/Diridiri/Desktop/DLP/DLPslicer/partial2_flip.stl",false);//"C:/Users/jaine/workspace/DLPslicerResource/partial2_flip.stl", false);
-    //GLModel* gglmodel = new GLModel(teethModel, "C:/Users/hsy61/Desktop/3D_models/teeth_models/lowerjaw.stl", false);
+    //openModelFile("C:/Users/user/Documents/diridiri/DLPslicer/partial2_flip.stl");
+    openModelFile("D:/Dev/2018/DLPslicer/partial2_flip.stl");
+}
 
 
-    GLModel* glmodel2 = new GLModel(teethModel, nullptr, "C:/Users/user/Documents/diridiri/DLPslicer/partial2_flip.stl", false);
 
-    /*//* Arrange **********************************
-    vector<Mesh> meshes_to_arrange;
-    vector<XYArrangement> arng_result_set;
-    meshes_to_arrange.push_back(* glmodel->mesh);
-    meshes_to_arrange.push_back(* glmodel2->mesh);
-    arng_result_set = arngMeshes(&meshes_to_arrange);
-    vector<Qt3DCore::QTransform*> m_transform_set;
-    m_transform_set.push_back(glmodel->m_transform);
-    m_transform_set.push_back(glmodel2->m_transform);
-    arrangeQt3D(m_transform_set, arng_result_set);*/
+void QmlManager::openModelFile(QString fname){
+
+    GLModel* glmodel = new GLModel(models, nullptr, fname, false);
+
+    glmodels.push_back(glmodel);
+
+    // auto Repair
+
+    // auto Arrange
+
+    // Arrange **********************************
+    if (glmodels.size()>=2){
+        vector<Mesh> meshes_to_arrange;
+        vector<XYArrangement> arng_result_set;
+        vector<Qt3DCore::QTransform*> m_transform_set;
+        for (int i=0; i<glmodels.size(); i++){
+            meshes_to_arrange.push_back(*(glmodels[i]->mesh));
+            m_transform_set.push_back(glmodels[i]->m_transform);
+        }
+        arng_result_set = arngMeshes(&meshes_to_arrange);
+        arrangeQt3D(m_transform_set, arng_result_set);
+    }
 
     // model cut components
     QObject *cutPopup = FindItemByName(engine, "cutPopup");
     QObject *curveButton = FindItemByName(engine, "curveButton");
     QObject *flatButton = FindItemByName(engine, "flatButton");
     QObject *slider = FindItemByName(engine, "slider");
-    Lights* lights = new Lights(teethModel);
 
     // labelling components
     QObject *text3DInput = FindItemByName(engine, "text3DInput");
@@ -58,7 +69,6 @@ void QmlManager::initializeUI(QQmlApplicationEngine* e){
     QObject* progress_text = FindItemByName(engine, "progress_text");
 
     featureThread* ft = new featureThread(glmodel, ftrOrient);
-    featureThread* ft2 = new featureThread(glmodel2, ftrOrient);
 
     QObject::connect(glmodel->ft, SIGNAL(setProgress(QVariant)),progress_text, SLOT(update_loading(QVariant)));
     QObject::connect(glmodel->ft, SIGNAL(loadPopup(QVariant)),orientPopup, SLOT(show_popup(QVariant)));
@@ -66,6 +76,7 @@ void QmlManager::initializeUI(QQmlApplicationEngine* e){
     // need to connect for every popup
 
     // model cut popup codes
+    QObject::connect(cutPopup,SIGNAL(generatePlane()),glmodel->shadowModel , SLOT(generatePlane()));
     QObject::connect(cutPopup,SIGNAL(modelCut()),glmodel->shadowModel , SLOT(modelCut()));
     //QObject::connect(cutPopup,SIGNAL(runFeature(int)),glmodel->ft , SLOT(setTypeAndStart(int)));
     QObject::connect(cutPopup,SIGNAL(curveModeSelected()),glmodel->shadowModel,SLOT(lineAccept()));
@@ -84,10 +95,9 @@ void QmlManager::initializeUI(QQmlApplicationEngine* e){
     QObject::connect(labelPopup, SIGNAL(generateText3DMesh()), glmodel->shadowModel, SLOT(generateText3DMesh()));
     QObject::connect(labelFontBox, SIGNAL(sendFontName(QString)),glmodel->shadowModel, SLOT(getFontNameChanged(QString)));
 
-    // auto Repair
+    // auto Repair popup codes
 
-    // auto Arrange
-
+    // auto Arrange popup codes
 }
 
 
