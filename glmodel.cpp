@@ -5,7 +5,7 @@
 #include <cfloat>
 
 #include "feature/text3dgeometrygenerator.h"
-#include "QtConcurrent/QtConcurrentRun"
+#include <QtConcurrent>
 
 GLModel::GLModel(QNode *parent, Mesh* loadMesh, QString fname, bool isShadow)
     : QEntity(parent)
@@ -233,9 +233,6 @@ void featureThread::markPopup(bool flag){
     }
 }
 
-arrangeSignalSender::arrangeSignalSender(){
-
-}
 
 void GLModel::initialize(const Mesh* mesh){
 
@@ -569,7 +566,7 @@ void GLModel::generatePlane(){
     parentModel->planeMaterial->setAmbient(QColor(QRgb(0xF4F4F4)));
     parentModel->planeMaterial->setDiffuse(QColor(QRgb(0xF4F4F4)));
     parentModel->planeMaterial->setSpecular(QColor(QRgb(0xF4F4F4)));
-    parentModel->planeMaterial->setAlpha(50.0f);
+    parentModel->planeMaterial->setAlpha(0.5f);
 
 
     //To manipulate plane color, change the QRgb(0x~~~~~~).

@@ -4,7 +4,6 @@
         <file>resource/triangle.png</file>
         <file>resource/upper_arrange.png</file>
         <file>resource/upper_autorepair.png</file>
-        <file>resource/upper_base.png</file>
         <file>resource/upper_cut.png</file>
         <file>resource/upper_export.png</file>
         <file>resource/upper_label.png</file>
@@ -93,5 +92,6 @@
         <file>Resource/popup_image/shelloffset_switch_hover.png</file>
         <file>Resource/mesh/grid.obj</file>
         <file>Resource/splash.png</file>
+        <file>Resource/upper_extend.png</file>
     </qresource>
 </RCC>

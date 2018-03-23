@@ -35,7 +35,6 @@ public slots:
     void sendUpdateModelInfo(int, int, QString, float);
     void openModelFile(QString filename);
     void runArrange();
-
 };
 
 

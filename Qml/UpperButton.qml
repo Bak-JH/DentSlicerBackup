@@ -27,17 +27,31 @@ Rectangle{
             anchors.margins: 2
             anchors.fill: parent
             source: iconSource1
+            /*
+            MouseArea{
+                anchors.fill: parent
+
+                onEntered: {
+                    basicbutton.color = "red"
+                    console.log("enter")
+                }
+                onExited: {
+                    basicbutton.color = parent.color
+                    console.log("exit");
+                }
+            }*/
         }
         Text{
             anchors.top:parent.top
             anchors.horizontalCenter: parent.horizontalCenter
             anchors.topMargin: 16
             text: iconText
-            font.pixelSize: 16
+            font.pixelSize: 15
             //font.bold: true
             font.family: "Arial"
             color: "#494949"
         }
+
     }
 
     //Active
@@ -63,7 +77,7 @@ Rectangle{
             anchors.horizontalCenter: parent.horizontalCenter
             anchors.topMargin: 16
             text: iconText
-            font.pixelSize: 16
+            font.pixelSize: 15
             font.family: "Arial"
             color: "#ffffff"
         }
@@ -86,6 +100,15 @@ Rectangle{
         id: mouse
         anchors.fill: parent
         hoverEnabled: true
+        onEntered: {
+            basicbutton.color = "#D8D8D8"
+            console.log("enter")
+        }
+        onExited: {
+            basicbutton.color = parent.color
+            console.log("exit");
+        }
+
         onClicked:{
            /* if (parent.state == "inactive"){
                 box_uppertab.inbox(iconText);
