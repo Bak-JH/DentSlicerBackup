@@ -96,5 +96,6 @@
         <file>Resource/splash2.png</file>
         <file>Resource/mesh/plate.stl</file>
         <file>Resource/mesh/plate_plane.stl</file>
+        <file>Resource/mesh/arrow.stl</file>
     </qresource>
 </RCC>

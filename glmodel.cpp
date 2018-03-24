@@ -147,10 +147,9 @@ void GLModel::rotateModelMesh(QMatrix4x4 matrix){
 }
 
 void GLModel::updateModelMesh(){
-    if (z != 0){
-        moveModelMesh(QVector3D(0.0f,0.0f,-z));
-        return;
-    }
+    QVector3D tmp = m_transform->translation();
+    float zlength = mesh->z_max - mesh->z_min;
+    m_transform->setTranslation(QVector3D(tmp.x(),tmp.y(),zlength/2));
     initialize(mesh);
     addVertices(mesh);
     shadowModel->removeModel();

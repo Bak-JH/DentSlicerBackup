@@ -26,7 +26,7 @@ Entity {
         objectName: "rotateSphereSphere"
         SphereMesh{
             id: sphere1
-            radius : 14
+            radius : 7
         }
         Transform {
             id: sphere1Transform
@@ -45,10 +45,10 @@ Entity {
         objectName: "rotateSphereTorusX"
         TorusMesh{
             id: torusXMesh
-            radius : 14.1
-            minorRadius: 0.8
-            rings: 100
-            slices: 20
+            radius : 7
+            minorRadius: 0.35
+            rings: 50
+            slices: 10
         }
         Transform {
             id: torusXTransform
@@ -98,10 +98,10 @@ Entity {
         objectName: "rotateSphereTorusY"
         TorusMesh{
             id: torusYMesh
-            radius : 14.1
-            minorRadius: 0.8
-            rings: 100
-            slices: 20
+            radius : 7
+            minorRadius: 0.35
+            rings: 50
+            slices: 10
         }
         Transform {
             id: torusYTransform
@@ -153,10 +153,10 @@ Entity {
         objectName: "rotateSphereTorusZ"
         TorusMesh{
             id: torusZMesh
-            radius : 14.1
-            minorRadius: 0.8
-            rings: 100
-            slices: 20
+            radius : 7
+            minorRadius: 0.35
+            rings: 50
+            slices: 10
         }
         Transform {
             id: torusZTransform
@@ -248,6 +248,9 @@ Entity {
     FrameAction{
         id : rotationFrameAction
         onTriggered: {
+            var syszoom = Qt.vector3d(0,0,0)
+            syszoom = sceneRoot.systemTransform.scale3D
+            rotateSphereTransform.scale3D = Qt.vector3d(0.01/syszoom.x,0.01/syszoom.y,0.01/syszoom.z)
             rotateSphereTransform.translation = center.minus(cm.camera.viewVector)
             //console.log("camera")
             if (rotateAxis == 0 && pastAxis != 0){

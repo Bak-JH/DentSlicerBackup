@@ -168,7 +168,7 @@ Rectangle {
         UpperButton{
             id : first_tab_button_open
             objectName : "open"
-            //anchors.left: parent.left
+            anchors.left: parent.left
             iconSource1: "qrc:/resource/upper_open.png"
             iconSource2: "qrc:/Resource/upper2_open.png"
             iconText: "Open"
@@ -232,7 +232,7 @@ Rectangle {
 
             anchors.right: parent.right
             anchors.top : parent.top
-            //anchors.bottom : tabgroupname.top
+            anchors.bottom : tabgroupname.top
 
             color : "#CECECE"
         }
@@ -299,7 +299,7 @@ Rectangle {
 
             anchors.right: parent.right
             anchors.top : parent.top
-            //anchors.bottom : tabgroupname.top
+            anchors.bottom : tabgroupname.top
 
             color : "#CECECE"
         }
@@ -384,7 +384,7 @@ Rectangle {
 
             anchors.right: parent.right
             anchors.top : parent.top
-            //anchors.bottom : tabgroupname.top
+            anchors.bottom : tabgroupname.top
 
             color : "#CECECE"
         }
@@ -435,7 +435,7 @@ Rectangle {
 
             anchors.right: parent.right
             anchors.top : parent.top
-            //anchors.bottom : tabgroupname.top
+            anchors.bottom : tabgroupname.top
 
             color : "#CECECE"
         }
@@ -544,7 +544,6 @@ Rectangle {
 
         //7. PopUp - Arrange
         PopUp {
-            objectName: "arrangePopup"
             id: popup_arrange
             funcname: "Arrange"
             height: 220
@@ -562,7 +561,7 @@ Rectangle {
             signal runFeature(int type);
             onApplyClicked: {
                 console.log("arrange");
-                runFeature(ftrArrange);
+                runFeature(ftrArrage);
             }
         }
 
@@ -658,7 +657,6 @@ Rectangle {
         //10. PopUp - Auto Repair
         PopUp {
             id: popup_autorepair
-            objectName: "repairPopup"
             funcname: "Auto Repair"
             height: 220
             detail1: "Click Apply to fix the model."
@@ -703,31 +701,32 @@ Rectangle {
 
             onFlatModeClicked: {
                 console.log("flat mode selected");
-                cutModeSelected(1);
+                flatModeSelected();
             }
 
             onCurveModeClicked: {
                 console.log("curve mode selected");
-                cutModeSelected(2);
+                curveModeSelected();
             }
 
             onApplyClicked: {
                 console.log("ApplyClicked")
                 //runFeature(ftrCut);
+                //modelCut();
                 generatePlane();
-                cutModeSelected(9999);
             }
 
             // on Finish Clicked:
             onFinishClicked: {
                 console.log("Finish Clicked")
-                modelCutFinish();
+                modelCut();
             }
 
-            signal cutModeSelected(int type);
+            signal flatModeSelected();
+            signal curveModeSelected();
             signal runFeature(int type);
             signal generatePlane();
-            signal modelCutFinish();
+            signal modelCut();
         }
 
 

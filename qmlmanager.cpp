@@ -116,7 +116,7 @@ void QmlManager::openModelFile(QString fname){
 
     // do auto arrange
     if (glmodels.size() >=2){
-        runArrange();
+        //runArrange();
     }
 }
 
@@ -142,7 +142,7 @@ void QmlManager::runArrange_internal(){
             }
             autoarrange* ar;
             arng_result_set = ar->arngMeshes(&meshes_to_arrange);
-            vector<QVector3D> translations;
+            /*vector<QVector3D> translations;
             vector<float> rotations;
             for (int i=0; i<arng_result_set.size(); i++){
                 XYArrangement arng_result = arng_result_set[i];
@@ -150,9 +150,9 @@ void QmlManager::runArrange_internal(){
                 translations.push_back(trans_vec);
                 rotations.push_back(arng_result.second);
             }
-            emit arrangeDone(translations, rotations);
+            emit arrangeDone(translations, rotations);*/
 
-            //ar->arrangeQt3D(m_transform_set, arng_result_set);
+            ar->arrangeQt3D(m_transform_set, arng_result_set);
             //ar->arrangeGlmodels(&glmodel);
         }
     }
@@ -204,11 +204,12 @@ void QmlManager::ModelVisible(int ID, bool isVisible){
 
 void QmlManager::showRotateSphere(){
     rotateSphere->setEnabled(1);
-    GLModel *glmodel = glmodels.at(1);
+    GLModel *glmodel = glmodels.at(0);
+    QVector3D tmp = glmodel->m_transform->translation();
     QQmlProperty::write(rotateSphereobj,"center",glmodel->m_transform->translation());
 }
 void QmlManager::modelRotateDone(int Axis){
-    GLModel *glmodel = glmodels.at(1);
+    GLModel *glmodel = glmodels.at(0);
     float angle;
     switch(Axis){
     case 1:{
@@ -228,13 +229,12 @@ void QmlManager::modelRotateDone(int Axis){
     }
     }
     glmodel->rotateModelMesh(Axis,-angle);
-    float zlength = (glmodel->mesh->z_max - glmodel->mesh->z_min);
-    glmodel->m_transform->setTranslation(QVector3D(0,0,zlength/2));
+    //float zlength = (glmodel->mesh->z_max - glmodel->mesh->z_min);
+    //glmodel->m_transform->setTranslation(QVector3D(0,0,zlength/2));
     QQmlProperty::write(rotateSphereobj,"center",glmodel->m_transform->translation());
 }
-
 void QmlManager::modelRotate(int Axis, int Angle){
-    GLModel *glmodel = glmodels.at(1);
+   GLModel *glmodel = glmodels.at(0);
     switch(Axis){
     case 1:{  //X
         float tmpx = glmodel->m_transform->rotationX();
