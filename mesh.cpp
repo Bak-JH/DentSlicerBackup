@@ -17,6 +17,57 @@ void Mesh::vertexMove(QVector3D direction){
         updateMinMax(vertices[i].position);
     }
 }
+void Mesh::vertexRotate(int Axis, float Angle){
+    int numberofVertices = vertices.size();
+    int numberofFaces = faces.size();
+    x_min = 99999;
+    x_max = 99999;
+    y_min = 99999;
+    y_max = 99999;
+    z_min = 99999;
+    z_max = 99999;
+    Qt3DCore::QTransform* tmp = new Qt3DCore::QTransform();
+    switch(Axis){
+    case 1:{
+        tmp->setRotationX(Angle);
+        break;
+    }
+    case 2:{
+        tmp->setRotationY(Angle);
+        break;
+    }
+    case 3:{
+        tmp->setRotationZ(Angle);
+        break;
+    }
+    }
+    qDebug() << tmp->matrix();
+    QVector4D tmpVertex;
+    QVector3D tmpVertex2;
+    for (int i=0;i<numberofVertices;i++){
+        tmpVertex =vertices[i].position.toVector4D();
+        tmpVertex2.setX(QVector4D::dotProduct(tmpVertex,tmp->matrix().column(0)));
+        tmpVertex2.setY(QVector4D::dotProduct(tmpVertex,tmp->matrix().column(1)));
+        tmpVertex2.setZ(QVector4D::dotProduct(tmpVertex,tmp->matrix().column(2)));
+        vertices[i].position = tmpVertex2;
+        updateMinMax(vertices[i].position);
+    }
+    for (int i=0;i<numberofFaces;i++){
+        faces[i].fn = QVector3D::normal(vertices[faces[i].mesh_vertex[0]].position,
+                                        vertices[faces[i].mesh_vertex[1]].position,
+                                        vertices[faces[i].mesh_vertex[2]].position);
+        faces[i].fn_unnorm = QVector3D::crossProduct(vertices[faces[i].mesh_vertex[1]].position-vertices[faces[i].mesh_vertex[0]].position,
+                                                     vertices[faces[i].mesh_vertex[2]].position-vertices[faces[i].mesh_vertex[0]].position);
+    }
+    for (int i=0;i<numberofVertices;i++){
+        if (vertices[i].connected_faces.size()>=3){
+            vertices[i].vn = QVector3D(vertices[i].connected_faces[0]->fn + vertices[i].connected_faces[1]->fn + vertices[i].connected_faces[2]->fn).normalized();
+        } else {
+            vertices[i].vn = QVector3D(0,0,0);
+        }
+    }
+}
+
 /********************** Mesh Generation Functions **********************/
 
 void Mesh::addFace(QVector3D v0, QVector3D v1, QVector3D v2){

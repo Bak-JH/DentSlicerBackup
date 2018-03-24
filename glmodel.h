@@ -123,9 +123,10 @@ public:
     void beforeAddVerticies();
 
     LabellingTextPreview* labellingTextPreview = nullptr;
-
-    // Model move
+    // Model Mesh move
     void moveModelMesh(QVector3D direction);
+    // Model Mesh rotate
+    void rotateModelMesh(int Axis, float Angle);
     // Model Cut
     void addCuttingPoint(QVector3D v);
     void removeCuttingPoints();

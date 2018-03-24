@@ -62,11 +62,17 @@ void QmlManager::openModelFile(QString fname){
     GLModel* glmodel = new GLModel(models, nullptr, fname, false);
 
     glmodels.push_back(glmodel);
-    glmodel->moveModelMesh(QVector3D(
-                           (-1)*glmodel->mesh->x_min,
-                           (-1)*glmodel->mesh->y_min,
-                           (-1)*glmodel->mesh->z_min));
+
     // set initial position
+    float xmid = (glmodel->mesh->x_max + glmodel->mesh->x_min)/2;
+    float ymid = (glmodel->mesh->y_max + glmodel->mesh->y_min)/2;
+    float zmid = (glmodel->mesh->z_max + glmodel->mesh->z_min)/2;
+    float zlength = (glmodel->mesh->z_max - glmodel->mesh->z_min);
+    glmodel->moveModelMesh(QVector3D(
+                           (-1)*xmid,
+                           (-1)*ymid,
+                           (-1)*zmid));
+    glmodel->m_transform->setTranslation(QVector3D(0,0,zlength/2));
 
     // auto Repair
 
@@ -168,18 +174,18 @@ void QmlManager::modelRotate(int Axis, int Angle){
     //QMatrix4x4 tmpMatrix = glmodel->m_transform->matrix();
     switch(Axis){
     case 1:{  //X
-        //float tmpx = glmodel->m_transform->rotationX();
-        //glmodel->m_transform->setRotationX(tmpx+Angle);
+    //    float tmpx = glmodel->m_transform->rotationX();
+    //    glmodel->m_transform->setRotationX(tmpx+Angle);
         break;
     }
     case 2:{  //Y
-        //float tmpy = glmodel->m_transform->rotationY();
-        //glmodel->m_transform->setRotationY(tmpy+Angle);
+    //    float tmpy = glmodel->m_transform->rotationY();
+    //    glmodel->m_transform->setRotationY(tmpy+Angle);
         break;
     }
     case 3:{  //Z
-        //float tmpz = glmodel->m_transform->rotationZ();
-        //glmodel->m_transform->setRotationZ(tmpz+Angle);
+    //    float tmpz = glmodel->m_transform->rotationZ();
+    //    glmodel->m_transform->setRotationZ(tmpz+Angle);
         break;
     }
     }

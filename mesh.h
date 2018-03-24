@@ -1,6 +1,7 @@
 #ifndef MESH_H
 #define MESH_H
 #include <vector>
+#include <Qt3DCore/qtransform.h>
 #include <QVector3D>
 #include <QHash>
 #include "configuration.h"
@@ -67,6 +68,8 @@ public :
 
     /********************** Mesh Edit Functions***********************/
     void vertexMove(QVector3D direction);
+    void vertexRotate(int Axis, float Angle);
+
     /********************** Mesh Generation Functions **********************/
     void addFace(QVector3D v0, QVector3D v1, QVector3D v2);
     vector<MeshFace>::iterator removeFace(vector<MeshFace>::iterator f_it);
