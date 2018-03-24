@@ -29,7 +29,7 @@ public:
     float nozzle_width = 0; // in mm (diameter) , for printers with nozzles
     float wall_thickness = 2; // in mm
     float fill_thickness = 1; // in mm
-    float support_density = 0.6;
+    float support_density = 0.4;
     float infill_density = 0.3;
 
     float subdivision_radius = 0.85; // in mm

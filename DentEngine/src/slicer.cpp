@@ -26,7 +26,7 @@ Slices Slicer::slice(Mesh* mesh){
         //meshslice.outerShellOffset(-(cfg->wall_thickness+cfg->nozzle_width)/2, jtRound);
         slices.push_back(meshslice);
     }
-    //printf("contourconstruction done\n");
+    fflush(stdout);
     //printf("meshslice done\n");
 
     //QTextStream(stdout) << "meshslice done" <<endl;
@@ -180,7 +180,9 @@ Paths Slicer::contourConstruct(Paths pathList){
             } else if (dest->size() == 2){
                 start = (*dest)[0]; // itself
                 pathHash.remove(intPoint2Hash(pj));
-                pathHash.remove(intPoint2Hash((*dest)[1])); // maybe needless
+                uint32_t endHash = intPoint2Hash((*dest)[1]);
+                if (pathHash.contains(endHash))
+                    pathHash.remove(endHash); // maybe needless
                 pj_next = last;
                 pj = pj_next;
                 pj_prev = contour[0];

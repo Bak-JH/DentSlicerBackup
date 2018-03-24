@@ -559,7 +559,7 @@ void clusterPoints(vector<OverhangPoint>& points){
     vector<OverhangPoint>::iterator it;
     int total_size = unclassified_points.size();
     while (total_size>0){
-        //qDebug() << "unclassified_points size : " << unclassified_points.size();
+        qDebug() << "unclassified_points size : " << unclassified_points.size();
         for (it = unclassified_points.begin(); it != unclassified_points.end();){
             OverhangPoint point = (*it);
             if (pointDistance3D(point.position, container_point.position) <= cfg->duplication_radius*Configuration::resolution){
