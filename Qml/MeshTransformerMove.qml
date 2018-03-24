@@ -12,9 +12,12 @@ Entity{
     property vector3d center : Qt.vector3d( 0,0,0 )
     property vector3d inputScale : Qt.vector3d(0.6,0.6,0.6)
     property vector3d initScale : Qt.vector3d(0.3,0.3,0.3)
+    property vector3d intersect : Qt.vector3d(0,0,0)
     property int moveAxis : 0 //0:none, 1:x, 2:y, 3:z
     property vector2d mouseOrigin : Qt.vector2d(0,0)
     property vector2d mouseCurrent : Qt.vector2d(0,0)
+    property int moveDirection : 0
+
     property int pastDistance :0
     property int pastAxis :0
     components: [
@@ -75,6 +78,14 @@ Entity{
             }
             onPressed: { //move start
                 if (moveAxis  == 0){
+                    intersect = Qt.vector3d(pick.localIntersection.x,pick.localIntersection.y,pick.localIntersection.z)
+
+                    if (pick.localIntersection.z > 0){
+                        moveDirection = 1;
+                    }else{
+                        moveDirection = -1;
+                    }
+
                     mouseOrigin = Qt.vector2d(pick.position.x , pick.position.y)
                     moveAxis = 1 //X
                     moveArrowXMaterial.ambient = Qt.rgba(200/255,200/255,0/255,1)
@@ -117,6 +128,13 @@ Entity{
             }
             onPressed: { //move start
                 if (moveAxis  == 0){
+                    intersect = Qt.vector3d(pick.localIntersection.x,pick.localIntersection.y,pick.localIntersection.z)
+
+                    if (pick.localIntersection.z > 0){
+                        moveDirection = -1;
+                    }else{
+                        moveDirection = 1;
+                    }
                     mouseOrigin = Qt.vector2d(pick.position.x , pick.position.y)
                     moveAxis = 2 //Y
                     moveArrowYMaterial.ambient = Qt.rgba(200/255,200/255,0/255,1)
@@ -180,6 +198,8 @@ Entity{
                 }
                 pastAxis = moveAxis
                 if (moveAxis != 0){
+                    console.log(intersect)
+                    console.log(moveDirection)
                     var Origin = world2Screen(center)
                     var mouseOrigin_Origin = mouseOrigin.minus(Origin).length() //a
                     var mouseCurrent_Origin = mouseCurrent.minus(Origin).length() //b
@@ -188,10 +208,10 @@ Entity{
                     distance*=( 0.0006 / syszoom.x)
                     switch(moveAxis){
                     case 1: // xAxis
-                        moveSignal(1,distance - pastDistance)
+                        moveSignal(1,moveDirection*(distance - pastDistance))
                         break;
                     case 2: // yAxis
-                        moveSignal(2,distance - pastDistance)
+                        moveSignal(2,moveDirection*(distance - pastDistance))
                         break;
                     }
                     pastDistance = distance
