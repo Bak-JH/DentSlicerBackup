@@ -19,7 +19,7 @@ int main(int argc, char **argv)
     QApplication app(argc, argv);
     QQmlApplicationEngine engine;
 
-    QPixmap pixmap(":/Resource/splash.png");
+    QPixmap pixmap(":/Resource/splash2.png");
     QSplashScreen *splash = new QSplashScreen(pixmap);
     splash->show();
 
