@@ -4,7 +4,7 @@
 #include <stack>
 #include <algorithm>
 #include "./polyclipping/clipper.hpp"
-#include "arrange.h"
+#include "autoarrange.h"
 
 using namespace std;
 using namespace ClipperLib;

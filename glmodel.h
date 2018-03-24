@@ -16,6 +16,7 @@
 #include "feature/labellingtextpreview.h"
 #include "feature/autoorientation.h"
 #include "feature/meshrepair.h"
+#include "feature/autoarrange.h"
 
 #define MAX_BUF_LEN 2000000
 
@@ -53,6 +54,7 @@ public:
     int optype; // defines typeofoperation
     autoorientation* ot;
     modelcut* ct;
+    autoarrange* ar;
 
 signals:
     void loadPopup(QVariant value);
@@ -63,6 +65,15 @@ public slots:
     void setTypeAndStart(int type);
 private:
     void run() Q_DECL_OVERRIDE;
+};
+
+class arrangeSignalSender: public QObject
+{
+    Q_OBJECT
+public:
+    arrangeSignalSender();
+signals:
+    void runArrange();
 };
 
 class GLModel : public QEntity
@@ -130,6 +141,7 @@ public:
     Mesh* rmesh;
 
     featureThread* ft;
+    arrangeSignalSender* arsignal;
 
 private:
     int numPoints;
@@ -179,7 +191,5 @@ public slots:
     void getFontNameChanged(QString fontName);
     void generateText3DMesh();
 };
-
-
 
 #endif // GLMODEL_H
