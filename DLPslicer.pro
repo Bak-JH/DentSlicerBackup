@@ -24,7 +24,8 @@ SOURCES += main.cpp \
     feature/text3dgeometrygenerator.cpp \
     feature/labellingtextpreview.cpp \
     utils/mathutils.cpp \
-    utils/qtriangulator.cpp
+    utils/qtriangulator.cpp \
+    feature/stlexporter.cpp
 
 RESOURCES += qml.qrc \
     resources.qrc
@@ -75,6 +76,7 @@ HEADERS += \
     utils/qdatabuffer_p.h \
     utils/qrbtree.h \
     utils/qtriangulator_p.h \
-    utils/qvectorpath_p.h
+    utils/qvectorpath_p.h \
+    feature/stlexporter.h
 
 #LIBS += -lOpengl32

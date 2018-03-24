@@ -7,6 +7,7 @@
 #include <QProcess>
 #include "configuration.h"
 #include "qmlmanager.h"
+#include "feature/stlexporter.h"
 
 class SlicingEngine : public QObject
 {

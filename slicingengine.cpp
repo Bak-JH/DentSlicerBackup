@@ -16,8 +16,9 @@ void SlicingEngine::slice (QVariantMap config){
         (*cfg)[buf] = iter.value().toString();
     }*/
 
+    qDebug() << "current directory : " << QDir::currentPath()+"/DentEngine/DentStudioEngine.exe";
     QObject *parent;
-    QString program = "\"C:\\Users\\diridiri\\Desktop\\DLP\\DLPbuild\\debug\\DentStudioEngine.exe\"";
+    QString program =QDir::currentPath()+"/DentEngine/DentStudioEngine.exe";
     QStringList command_list;
     command_list << "C:/Users/diridiri/Desktop/DLP/partial1.STL" << "C:/Users/diridiri/Desktop/DLP/output";
     for(QVariantMap::const_iterator iter = (*cfg).begin(); iter != (*cfg).end(); ++iter) {
