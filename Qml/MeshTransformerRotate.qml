@@ -250,23 +250,13 @@ Entity {
             if (parent.parent.enabled.toString()=="true"){
                 var syszoom = Qt.vector3d(0,0,0)
                 syszoom = sceneRoot.systemTransform.scale3D
-                rotateSphereTransform.scale3D = Qt.vector3d(0.01/syszoom.x,0.01/syszoom.y,0.01/syszoom.z)
-                rotateSphereTransform.translation = center.minus(cm.camera.viewVector)
-                //console.log("camera")
                 if (rotateAxis == 0 && pastAxis != 0){
                     rotateDone(pastAxis);
                     pastAxis = 0;
                 }
-                //console.log(center)
+                pastAxis = rotateAxis
                 if (rotateAxis != 0){
-                    //console.log(cm.camera.viewCenter)
-                    //console.log("start")
                     var Origin = world2Screen(center)
-                    //console.log("mouse location")
-                    //console.log(center)
-                    //console.log(Origin)
-                    var a = Qt.vector2d(0,0)
-                    var b = Qt.vector2d(1,1)
                     var ccwvar = vertexccw(mouseOrigin.x,mouseOrigin.y,Origin.x,Origin.y,mouseCurrent.x,mouseCurrent.y)
                     var mouseOrigin_Origin = mouseOrigin.minus(Origin).length()
                     var mouseCurrent_Origin = mouseCurrent.minus(Origin).length()
@@ -287,11 +277,12 @@ Entity {
                         rotateSignal(3,degreeangle-pastAngle)
                     break;
                     }
-                    pastAxis = rotateAxis
                     pastAngle = degreeangle
-                    console.log(degreeangle)
-
                 }
+                rotateSphereTransform.scale3D = Qt.vector3d(0.01/syszoom.x,0.01/syszoom.y,0.01/syszoom.z)
+                rotateSphereTransform.translation = center.minus(cm.camera.viewVector)
+            }else{
+                rotateAxis=0;
             }
         }
     }

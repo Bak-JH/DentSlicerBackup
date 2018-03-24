@@ -75,6 +75,7 @@ public slots:
     void runGroupFeature(int,QString);
     void modelRotate(int,int);
     void modelMove(int,int);
+    void modelMoveDone(int);
     void modelRotateDone(int);
     void runArrange();
     void applyArrangeResult(vector<QVector3D>, vector<float>);

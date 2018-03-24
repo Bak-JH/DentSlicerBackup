@@ -9,6 +9,7 @@ import QtQuick.Controls.Styles 1.4
 
 Rectangle {
     id: box_uppertab
+    objectName: "boxUpperTab"
     color: "#E2E1E1"
     property int buttonWidth : 83
     property int buttonHeight : 97
@@ -31,17 +32,19 @@ Rectangle {
     property int ftrExtend : 13
     property int ftrSupport : 14
     property int ftrLabel : 15
-
-
+    signal runGroupFeature(int type, string state);
     function all_off() {
         first_tab_button_open.state = "inactive";
         first_tab_button_export.state = "inactive";
         first_tab_button_save.state = "inactive";
         second_tab_button_arrange.state = "inactive";
         second_tab_button_layflat.state = "inactive";
+
         second_tab_button_move.state = "inactive";
+        runGroupFeature(ftrMove,"inactive");
         second_tab_button_orient.state = "inactive";
         second_tab_button_rotate.state = "inactive";
+        runGroupFeature(ftrRotate,"inactive");
         third_tab_button_autorepair.state = "inactive";
         third_tab_button_cut.state = "inactive";
         third_tab_button_shelloffset.state = "inactive";
@@ -49,7 +52,6 @@ Rectangle {
         fourth_tab_button_extend.state = "inactive";
         fourth_tab_button_label.state = "inactive";
         fourth_tab_button_support.state = "inactive";
-
         console.log("all off");
     }
 

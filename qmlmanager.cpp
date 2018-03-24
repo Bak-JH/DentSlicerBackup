@@ -47,6 +47,7 @@ void QmlManager::initializeUI(QQmlApplicationEngine* e){
     moveArrow = (QEntity *)FindItemByName(engine, "moveArrowEntity");
     moveArrowobj = FindItemByName(engine, "moveArrow");
     QObject::connect(moveArrowobj, SIGNAL(moveSignal(int,int)),this, SLOT(modelMove(int,int)));
+    QObject::connect(moveArrowobj, SIGNAL(moveDone(int)),this, SLOT(modelMoveDone(int)));
     moveArrow->setEnabled(0);
 
     rotateSphere = (QEntity *)FindItemByName(engine, "rotateSphereEntity");
@@ -61,6 +62,9 @@ void QmlManager::initializeUI(QQmlApplicationEngine* e){
     QObject *moveButton = FindItemByName(engine, "moveButton");
     QObject::connect(moveButton,SIGNAL(runGroupFeature(int,QString)),this,SLOT(runGroupFeature(int,QString)));
     QObject::connect(rotateButton,SIGNAL(runGroupFeature(int,QString)),this,SLOT(runGroupFeature(int,QString)));
+
+    QObject *boxUpperTab = FindItemByName(engine, "boxUpperTab");
+    QObject::connect(boxUpperTab,SIGNAL(runGroupFeature(int,QString)),this,SLOT(runGroupFeature(int,QString)));
 }
 
 void QmlManager::openModelFile(QString fname){
@@ -211,14 +215,16 @@ void QmlManager::ModelVisible(int ID, bool isVisible){
 void QmlManager::showMoveArrow(){
     moveArrow->setEnabled(1);
     GLModel *glmodel = glmodels.at(0);
-    QVector3D tmp = glmodel->m_transform->translation();
     QQmlProperty::write(moveArrowobj,"center",glmodel->m_transform->translation());
 }
 void QmlManager::showRotateSphere(){
     rotateSphere->setEnabled(1);
     GLModel *glmodel = glmodels.at(0);
-    QVector3D tmp = glmodel->m_transform->translation();
     QQmlProperty::write(rotateSphereobj,"center",glmodel->m_transform->translation());
+}
+void QmlManager::modelMoveDone(int Axis){
+    GLModel *glmodel = glmodels.at(0);
+    QQmlProperty::write(moveArrowobj,"center",glmodel->m_transform->translation());
 }
 
 void QmlManager::modelRotateDone(int Axis){
@@ -286,9 +292,9 @@ void QmlManager::runGroupFeature(int ftrType, QString state){
     case 5: //rotate
     {
         qDebug()<<state;
-        if (state == "active"){
+        if (state == "inactive"){
             rotateSphere->setEnabled(0);
-        }else if(state == "inactive"){
+        }else if(state == "active"){
             showRotateSphere();
         }
         break;
@@ -296,9 +302,9 @@ void QmlManager::runGroupFeature(int ftrType, QString state){
     case 4:  //move
     {
         qDebug()<<state;
-        if (state == "active"){
+        if (state == "inactive"){
             moveArrow->setEnabled(0);
-        }else if(state == "inactive"){
+        }else if(state == "active"){
             showMoveArrow();
         }
         break;

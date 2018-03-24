@@ -154,9 +154,6 @@ Entity{
             mouseCurrent = Qt.vector2d(mouse.x,mouse.y)
         }
     }
-    function vertexccw(x1,y1,x2,y2,x3,y3){
-        return (x1*y2+x2*y3+x3*y1) - (x1*y3+x2*y1+x3*y2)
-    }
     function world2Screen(target){
         var tmp = Qt.vector3d(0,0,0)
         tmp = target
@@ -170,27 +167,24 @@ Entity{
         return Qt.vector2d(point.x,point.y)
     }
     signal moveSignal(int Axis, int distance)
-    //signal moveDone(int Axis)
+    signal moveDone(int Axis)
     FrameAction{
         id : moveFrameAction
         onTriggered: {
             if (parent.parent.enabled.toString()=="true"){
                 var syszoom = Qt.vector3d(0,0,0)
                 syszoom = sceneRoot.systemTransform.scale3D
-                moveArrowTransform.scale3D = Qt.vector3d(0.01/syszoom.x,0.01/syszoom.y,0.01/syszoom.z)
-                moveArrowTransform.translation = center.minus(cm.camera.viewVector)
-                //console.log(sceneRoot.systemTransform.scale3D)
                 if (moveAxis == 0 && pastAxis != 0){
-                    //moveDone(pastAxis);
+                    moveDone(pastAxis);
                     pastAxis = 0;
                 }
+                pastAxis = moveAxis
                 if (moveAxis != 0){
                     var Origin = world2Screen(center)
                     var mouseOrigin_Origin = mouseOrigin.minus(Origin).length() //a
                     var mouseCurrent_Origin = mouseCurrent.minus(Origin).length() //b
                     var mouseCurrent_mouseOrigin = mouseOrigin.minus(mouseCurrent).length() //c
                     var distance = ((Math.pow(mouseCurrent_Origin,2)-Math.pow(mouseCurrent_mouseOrigin,2)-Math.pow(mouseOrigin_Origin,2))/(2*mouseOrigin_Origin))
-                    //system zome : 0.0022 -> 1:1
                     distance*=( 0.0006 / syszoom.x)
                     switch(moveAxis){
                     case 1: // xAxis
@@ -200,11 +194,14 @@ Entity{
                         moveSignal(2,distance - pastDistance)
                         break;
                     }
-                    pastAxis = moveAxis
                     pastDistance = distance
                     //sphere3Transform.translation = Qt.vector3d(distance,0,0)
-                    console.log(distance)
+                    //console.log(distance)
                 }
+                moveArrowTransform.scale3D = Qt.vector3d(0.01/syszoom.x,0.01/syszoom.y,0.01/syszoom.z)
+                moveArrowTransform.translation = center.minus(cm.camera.viewVector)
+            }else{
+                moveAxis=0;
             }
         }
     }

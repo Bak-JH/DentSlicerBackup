@@ -122,21 +122,6 @@ Rectangle{
         }
 
         onClicked:{
-            do_buttonclick(iconText)
-
-           /* if (parent.state == "inactive"){
-                box_uppertab.inbox(iconText);
-                parent.state = "active";
-                console.log("active");
-                console.log(box_uppertab.box);
-            }
-            else {
-                //box_uppertab.inbox("none");
-                parent.state = "inactive";
-                console.log("inactive");
-                console.log(box_uppertab.box);
-            }*/
-
             if (parent.state == "inactive"){
                 all_off();
                 parent.state = "active";
@@ -146,6 +131,7 @@ Rectangle{
                 parent.state = "inactive";
                 console.log("inactive" + iconText);
             }
+            do_buttonclick(iconText)
         }
             //loadFileWindow();
 
