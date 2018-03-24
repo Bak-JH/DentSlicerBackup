@@ -175,7 +175,6 @@ Entity {
                     torusZMaterial.ambient = Qt.rgba(125/255,0/255,125/255,0.5)
                     torusXMaterial.ambient = Qt.rgba(0/255,0/255,0/255,0.5)
                     torusYMaterial.ambient = Qt.rgba(0/255,0/255,0/255,0.5)
-
                 }
             }
             onExited: {
@@ -248,49 +247,51 @@ Entity {
     FrameAction{
         id : rotationFrameAction
         onTriggered: {
-            var syszoom = Qt.vector3d(0,0,0)
-            syszoom = sceneRoot.systemTransform.scale3D
-            rotateSphereTransform.scale3D = Qt.vector3d(0.01/syszoom.x,0.01/syszoom.y,0.01/syszoom.z)
-            rotateSphereTransform.translation = center.minus(cm.camera.viewVector)
-            //console.log("camera")
-            if (rotateAxis == 0 && pastAxis != 0){
-                rotateDone(pastAxis);
-                pastAxis = 0;
-            }
-            //console.log(center)
-            if (rotateAxis != 0){
-                //console.log(cm.camera.viewCenter)
-                console.log("start")
-                var Origin = world2Screen(center)
-                console.log("mouse location")
-                console.log(center)
-                console.log(Origin)
-                var a = Qt.vector2d(0,0)
-                var b = Qt.vector2d(1,1)
-                var ccwvar = vertexccw(mouseOrigin.x,mouseOrigin.y,Origin.x,Origin.y,mouseCurrent.x,mouseCurrent.y)
-                var mouseOrigin_Origin = mouseOrigin.minus(Origin).length()
-                var mouseCurrent_Origin = mouseCurrent.minus(Origin).length()
-                var mouseCurrent_mouseOrigin = mouseOrigin.minus(mouseCurrent).length()
-                var sinangle = ccwvar/(mouseOrigin_Origin * mouseCurrent_Origin)
-                var degreeangle = Math.asin(sinangle) * 180 / Math.PI
-                if (Math.pow(mouseCurrent_mouseOrigin,2) > Math.pow(mouseOrigin_Origin,2)+Math.pow(mouseCurrent_Origin,2)){
-                    degreeangle = (Math.abs(degreeangle)/degreeangle)*(180-Math.abs(degreeangle))
+            if (parent.parent.enabled.toString()=="true"){
+                var syszoom = Qt.vector3d(0,0,0)
+                syszoom = sceneRoot.systemTransform.scale3D
+                rotateSphereTransform.scale3D = Qt.vector3d(0.01/syszoom.x,0.01/syszoom.y,0.01/syszoom.z)
+                rotateSphereTransform.translation = center.minus(cm.camera.viewVector)
+                //console.log("camera")
+                if (rotateAxis == 0 && pastAxis != 0){
+                    rotateDone(pastAxis);
+                    pastAxis = 0;
                 }
-                switch(rotateAxis){
-                case 1: // xAxis
-                    rotateSignal(1,degreeangle-pastAngle)
+                //console.log(center)
+                if (rotateAxis != 0){
+                    //console.log(cm.camera.viewCenter)
+                    //console.log("start")
+                    var Origin = world2Screen(center)
+                    //console.log("mouse location")
+                    //console.log(center)
+                    //console.log(Origin)
+                    var a = Qt.vector2d(0,0)
+                    var b = Qt.vector2d(1,1)
+                    var ccwvar = vertexccw(mouseOrigin.x,mouseOrigin.y,Origin.x,Origin.y,mouseCurrent.x,mouseCurrent.y)
+                    var mouseOrigin_Origin = mouseOrigin.minus(Origin).length()
+                    var mouseCurrent_Origin = mouseCurrent.minus(Origin).length()
+                    var mouseCurrent_mouseOrigin = mouseOrigin.minus(mouseCurrent).length()
+                    var sinangle = ccwvar/(mouseOrigin_Origin * mouseCurrent_Origin)
+                    var degreeangle = Math.asin(sinangle) * 180 / Math.PI
+                    if (Math.pow(mouseCurrent_mouseOrigin,2) > Math.pow(mouseOrigin_Origin,2)+Math.pow(mouseCurrent_Origin,2)){
+                        degreeangle = (Math.abs(degreeangle)/degreeangle)*(180-Math.abs(degreeangle))
+                    }
+                    switch(rotateAxis){
+                    case 1: // xAxis
+                        rotateSignal(1,degreeangle-pastAngle)
+                        break;
+                    case 2: // yAxis
+                        rotateSignal(2,degreeangle-pastAngle)
                     break;
-                case 2: // yAxis
-                    rotateSignal(2,degreeangle-pastAngle)
-                break;
-                case 3: // zAxis
-                    rotateSignal(3,degreeangle-pastAngle)
-                break;
-                }
-                pastAxis = rotateAxis
-                pastAngle = degreeangle
-                console.log(degreeangle)
+                    case 3: // zAxis
+                        rotateSignal(3,degreeangle-pastAngle)
+                    break;
+                    }
+                    pastAxis = rotateAxis
+                    pastAngle = degreeangle
+                    console.log(degreeangle)
 
+                }
             }
         }
     }

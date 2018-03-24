@@ -18,6 +18,9 @@ Rectangle{
     signal buttonClicked()
     function do_buttonclick(iconText){
         switch(iconText){
+        case "Move":
+            buttonClicked();
+            break;
         case "Rotate":
             buttonClicked();
             break;

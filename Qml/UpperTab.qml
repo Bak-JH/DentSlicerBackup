@@ -249,11 +249,15 @@ Rectangle {
 
         UpperButton{
             id : second_tab_button_move
-
+            objectName: "moveButton"
             anchors.left: parent.left
             iconSource1: "qrc:/resource/upper_move.png"
             iconSource2: "qrc:/Resource/upper2_move.png"
             iconText: "Move"
+            signal runGroupFeature(int type, string state);
+            onButtonClicked:{
+                   runGroupFeature(ftrMove, state);
+            }
         }
         UpperButton{
             id : second_tab_button_rotate

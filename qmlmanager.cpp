@@ -44,6 +44,11 @@ void QmlManager::initializeUI(QQmlApplicationEngine* e){
 
 
     //rotation Sphere
+    moveArrow = (QEntity *)FindItemByName(engine, "moveArrowEntity");
+    moveArrowobj = FindItemByName(engine, "moveArrow");
+    QObject::connect(moveArrowobj, SIGNAL(moveSignal(int,int)),this, SLOT(modelMove(int,int)));
+    moveArrow->setEnabled(0);
+
     rotateSphere = (QEntity *)FindItemByName(engine, "rotateSphereEntity");
     rotateSphereX = (QEntity *)FindItemByName(engine, "rotateSphereTorusX");
     rotateSphereY = (QEntity *)FindItemByName(engine, "rotateSphereTorusY");
@@ -53,8 +58,9 @@ void QmlManager::initializeUI(QQmlApplicationEngine* e){
     QObject::connect(rotateSphereobj, SIGNAL(rotateDone(int)),this, SLOT(modelRotateDone(int)));
     rotateSphere->setEnabled(0);
     QObject *rotateButton = FindItemByName(engine, "rotateButton");
+    QObject *moveButton = FindItemByName(engine, "moveButton");
+    QObject::connect(moveButton,SIGNAL(runGroupFeature(int,QString)),this,SLOT(runGroupFeature(int,QString)));
     QObject::connect(rotateButton,SIGNAL(runGroupFeature(int,QString)),this,SLOT(runGroupFeature(int,QString)));
-
 }
 
 void QmlManager::openModelFile(QString fname){
@@ -116,7 +122,7 @@ void QmlManager::openModelFile(QString fname){
 
     // do auto arrange
     if (glmodels.size() >=2){
-        //runArrange();
+        runArrange();
     }
 }
 
@@ -202,12 +208,19 @@ void QmlManager::ModelVisible(int ID, bool isVisible){
     target->setEnabled(isVisible);
 }
 
+void QmlManager::showMoveArrow(){
+    moveArrow->setEnabled(1);
+    GLModel *glmodel = glmodels.at(0);
+    QVector3D tmp = glmodel->m_transform->translation();
+    QQmlProperty::write(moveArrowobj,"center",glmodel->m_transform->translation());
+}
 void QmlManager::showRotateSphere(){
     rotateSphere->setEnabled(1);
     GLModel *glmodel = glmodels.at(0);
     QVector3D tmp = glmodel->m_transform->translation();
     QQmlProperty::write(rotateSphereobj,"center",glmodel->m_transform->translation());
 }
+
 void QmlManager::modelRotateDone(int Axis){
     GLModel *glmodel = glmodels.at(0);
     float angle;
@@ -233,6 +246,21 @@ void QmlManager::modelRotateDone(int Axis){
     //glmodel->m_transform->setTranslation(QVector3D(0,0,zlength/2));
     QQmlProperty::write(rotateSphereobj,"center",glmodel->m_transform->translation());
 }
+void QmlManager::modelMove(int Axis, int Distance){
+   GLModel *glmodel = glmodels.at(0);
+    switch(Axis){
+    case 1:{  //X
+        QVector3D tmp = glmodel->m_transform->translation();
+        glmodel->m_transform->setTranslation(QVector3D(tmp.x()+Distance,tmp.y(),tmp.z()));
+        break;
+    }
+    case 2:{  //Y
+        QVector3D tmp = glmodel->m_transform->translation();
+        glmodel->m_transform->setTranslation(QVector3D(tmp.x(),tmp.y()+Distance,tmp.z()));
+        break;
+    }
+    }
+}
 void QmlManager::modelRotate(int Axis, int Angle){
    GLModel *glmodel = glmodels.at(0);
     switch(Axis){
@@ -254,7 +282,6 @@ void QmlManager::modelRotate(int Axis, int Angle){
     }
 }
 void QmlManager::runGroupFeature(int ftrType, QString state){
-    showRotateSphere();
     switch(ftrType){
     case 5: //rotate
     {
@@ -268,6 +295,12 @@ void QmlManager::runGroupFeature(int ftrType, QString state){
     }
     case 4:  //move
     {
+        qDebug()<<state;
+        if (state == "active"){
+            moveArrow->setEnabled(0);
+        }else if(state == "inactive"){
+            showMoveArrow();
+        }
         break;
     }
     }

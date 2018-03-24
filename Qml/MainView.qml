@@ -84,12 +84,12 @@ Entity {
                 objectName: "rotateSphere"
             }
         }
-        /*Entity{
+        Entity{
             objectName: "moveArrowEntity"
             MeshTransformerMove{
                 objectName: "moveArrow"
             }
-        }*/
+        }
         CoordinateMesh{}
     }
 
