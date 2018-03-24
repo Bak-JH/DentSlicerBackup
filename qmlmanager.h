@@ -56,7 +56,10 @@ public:
     Qt3DCore::QEntity *rotateSphereX;
     Qt3DCore::QEntity *rotateSphereY;
     Qt3DCore::QEntity *rotateSphereZ;
+    Qt3DCore::QEntity *moveArrow;
+    QObject *moveArrowobj;
     void showRotateSphere();
+    void showMoveArrow();
     void initializeUI(QQmlApplicationEngine *e);
     void openModelFile_internal(QString filename);
     void runArrange_internal();
@@ -76,6 +79,8 @@ public slots:
     void openModelFile(QString filename);
     void runGroupFeature(int,QString);
     void modelRotate(int,int);
+    void modelMove(int,int);
+    void modelMoveDone(int);
     void modelRotateDone(int);
     void runArrange();
     void applyArrangeResult(vector<QVector3D>, vector<float>);

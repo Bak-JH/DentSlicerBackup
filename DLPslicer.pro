@@ -6,6 +6,9 @@ CONFIG += c++11 resources_big
 
 TARGET = DentStudio
 
+RC_ICONS = icon-32.ico
+RC_FILE = DLPslicer.rc
+
 SOURCES += main.cpp \
     quaternionhelper.cpp \
     slicingengine.cpp \
@@ -80,3 +83,8 @@ HEADERS += \
     feature/stlexporter.h
 
 #LIBS += -lOpengl32
+
+DISTFILES += \
+    icon-32.ico \
+    DLPslicer.rc \
+    icon.ico

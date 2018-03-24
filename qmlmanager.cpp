@@ -49,6 +49,12 @@ void QmlManager::initializeUI(QQmlApplicationEngine* e){
     exportButton = FindItemByName(engine, "exportBtn");
 
     //rotation Sphere
+    moveArrow = (QEntity *)FindItemByName(engine, "moveArrowEntity");
+    moveArrowobj = FindItemByName(engine, "moveArrow");
+    QObject::connect(moveArrowobj, SIGNAL(moveSignal(int,int)),this, SLOT(modelMove(int,int)));
+    QObject::connect(moveArrowobj, SIGNAL(moveDone(int)),this, SLOT(modelMoveDone(int)));
+    moveArrow->setEnabled(0);
+
     rotateSphere = (QEntity *)FindItemByName(engine, "rotateSphereEntity");
     rotateSphereX = (QEntity *)FindItemByName(engine, "rotateSphereTorusX");
     rotateSphereY = (QEntity *)FindItemByName(engine, "rotateSphereTorusY");
@@ -58,8 +64,12 @@ void QmlManager::initializeUI(QQmlApplicationEngine* e){
     QObject::connect(rotateSphereobj, SIGNAL(rotateDone(int)),this, SLOT(modelRotateDone(int)));
     rotateSphere->setEnabled(0);
     QObject *rotateButton = FindItemByName(engine, "rotateButton");
+    QObject *moveButton = FindItemByName(engine, "moveButton");
+    QObject::connect(moveButton,SIGNAL(runGroupFeature(int,QString)),this,SLOT(runGroupFeature(int,QString)));
     QObject::connect(rotateButton,SIGNAL(runGroupFeature(int,QString)),this,SLOT(runGroupFeature(int,QString)));
 
+    QObject *boxUpperTab = FindItemByName(engine, "boxUpperTab");
+    QObject::connect(boxUpperTab,SIGNAL(runGroupFeature(int,QString)),this,SLOT(runGroupFeature(int,QString)));
 }
 
 void QmlManager::openModelFile(QString fname){
@@ -154,7 +164,7 @@ void QmlManager::runArrange_internal(){
             }
             autoarrange* ar;
             arng_result_set = ar->arngMeshes(&meshes_to_arrange);
-            vector<QVector3D> translations;
+            /*vector<QVector3D> translations;
             vector<float> rotations;
             for (int i=0; i<arng_result_set.size(); i++){
                 XYArrangement arng_result = arng_result_set[i];
@@ -162,9 +172,9 @@ void QmlManager::runArrange_internal(){
                 translations.push_back(trans_vec);
                 rotations.push_back(arng_result.second);
             }
-            emit arrangeDone(translations, rotations);
+            emit arrangeDone(translations, rotations);*/
 
-            //ar->arrangeQt3D(m_transform_set, arng_result_set);
+            ar->arrangeQt3D(m_transform_set, arng_result_set);
             //ar->arrangeGlmodels(&glmodel);
         }
     }
@@ -190,13 +200,23 @@ void QmlManager::ModelVisible(int ID, bool isVisible){
     target->setEnabled(isVisible);
 }
 
+void QmlManager::showMoveArrow(){
+    moveArrow->setEnabled(1);
+    GLModel *glmodel = glmodels.at(0);
+    QQmlProperty::write(moveArrowobj,"center",glmodel->m_transform->translation());
+}
 void QmlManager::showRotateSphere(){
     rotateSphere->setEnabled(1);
-    GLModel *glmodel = glmodels.at(1);
+    GLModel *glmodel = glmodels.at(0);
     QQmlProperty::write(rotateSphereobj,"center",glmodel->m_transform->translation());
 }
+void QmlManager::modelMoveDone(int Axis){
+    GLModel *glmodel = glmodels.at(0);
+    QQmlProperty::write(moveArrowobj,"center",glmodel->m_transform->translation());
+}
+
 void QmlManager::modelRotateDone(int Axis){
-    GLModel *glmodel = glmodels.at(1);
+    GLModel *glmodel = glmodels.at(0);
     float angle;
     switch(Axis){
     case 1:{
@@ -216,13 +236,27 @@ void QmlManager::modelRotateDone(int Axis){
     }
     }
     glmodel->rotateModelMesh(Axis,-angle);
-    float zlength = (glmodel->mesh->z_max - glmodel->mesh->z_min);
-    glmodel->m_transform->setTranslation(QVector3D(0,0,zlength/2));
+    //float zlength = (glmodel->mesh->z_max - glmodel->mesh->z_min);
+    //glmodel->m_transform->setTranslation(QVector3D(0,0,zlength/2));
     QQmlProperty::write(rotateSphereobj,"center",glmodel->m_transform->translation());
 }
-
+void QmlManager::modelMove(int Axis, int Distance){
+   GLModel *glmodel = glmodels.at(0);
+    switch(Axis){
+    case 1:{  //X
+        QVector3D tmp = glmodel->m_transform->translation();
+        glmodel->m_transform->setTranslation(QVector3D(tmp.x()+Distance,tmp.y(),tmp.z()));
+        break;
+    }
+    case 2:{  //Y
+        QVector3D tmp = glmodel->m_transform->translation();
+        glmodel->m_transform->setTranslation(QVector3D(tmp.x(),tmp.y()+Distance,tmp.z()));
+        break;
+    }
+    }
+}
 void QmlManager::modelRotate(int Axis, int Angle){
-    GLModel *glmodel = glmodels.at(1);
+   GLModel *glmodel = glmodels.at(0);
     switch(Axis){
     case 1:{  //X
         float tmpx = glmodel->m_transform->rotationX();
@@ -243,20 +277,25 @@ void QmlManager::modelRotate(int Axis, int Angle){
 }
 
 void QmlManager::runGroupFeature(int ftrType, QString state){
-    showRotateSphere();
     switch(ftrType){
     case 5: //rotate
     {
         qDebug()<<state;
-        if (state == "active"){
+        if (state == "inactive"){
             rotateSphere->setEnabled(0);
-        }else if(state == "inactive"){
+        }else if(state == "active"){
             showRotateSphere();
         }
         break;
     }
     case 4:  //move
     {
+        qDebug()<<state;
+        if (state == "inactive"){
+            moveArrow->setEnabled(0);
+        }else if(state == "active"){
+            showMoveArrow();
+        }
         break;
     }
     }

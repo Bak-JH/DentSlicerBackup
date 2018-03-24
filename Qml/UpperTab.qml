@@ -9,6 +9,7 @@ import QtQuick.Controls.Styles 1.4
 
 Rectangle {
     id: box_uppertab
+    objectName: "boxUpperTab"
     color: "#E2E1E1"
     property int buttonWidth : 83
     property int buttonHeight : 97
@@ -31,17 +32,19 @@ Rectangle {
     property int ftrExtend : 13
     property int ftrSupport : 14
     property int ftrLabel : 15
-
-
+    signal runGroupFeature(int type, string state);
     function all_off() {
         first_tab_button_open.state = "inactive";
         first_tab_button_export.state = "inactive";
         first_tab_button_save.state = "inactive";
         second_tab_button_arrange.state = "inactive";
         second_tab_button_layflat.state = "inactive";
+
         second_tab_button_move.state = "inactive";
+        runGroupFeature(ftrMove,"inactive");
         second_tab_button_orient.state = "inactive";
         second_tab_button_rotate.state = "inactive";
+        runGroupFeature(ftrRotate,"inactive");
         third_tab_button_autorepair.state = "inactive";
         third_tab_button_cut.state = "inactive";
         third_tab_button_shelloffset.state = "inactive";
@@ -49,7 +52,6 @@ Rectangle {
         fourth_tab_button_extend.state = "inactive";
         fourth_tab_button_label.state = "inactive";
         fourth_tab_button_support.state = "inactive";
-
         console.log("all off");
     }
 
@@ -168,7 +170,7 @@ Rectangle {
         UpperButton{
             id : first_tab_button_open
             objectName : "open"
-            //anchors.left: parent.left
+            anchors.left: parent.left
             iconSource1: "qrc:/resource/upper_open.png"
             iconSource2: "qrc:/Resource/upper2_open.png"
             iconText: "Open"
@@ -251,7 +253,7 @@ Rectangle {
 
             anchors.right: parent.right
             anchors.top : parent.top
-            //anchors.bottom : tabgroupname.top
+            anchors.bottom : tabgroupname.top
 
             color : "#CECECE"
         }
@@ -268,11 +270,15 @@ Rectangle {
 
         UpperButton{
             id : second_tab_button_move
-
+            objectName: "moveButton"
             anchors.left: parent.left
             iconSource1: "qrc:/resource/upper_move.png"
             iconSource2: "qrc:/Resource/upper2_move.png"
             iconText: "Move"
+            signal runGroupFeature(int type, string state);
+            onButtonClicked:{
+                   runGroupFeature(ftrMove, state);
+            }
         }
         UpperButton{
             id : second_tab_button_rotate
@@ -318,7 +324,7 @@ Rectangle {
 
             anchors.right: parent.right
             anchors.top : parent.top
-            //anchors.bottom : tabgroupname.top
+            anchors.bottom : tabgroupname.top
 
             color : "#CECECE"
         }
@@ -403,7 +409,7 @@ Rectangle {
 
             anchors.right: parent.right
             anchors.top : parent.top
-            //anchors.bottom : tabgroupname.top
+            anchors.bottom : tabgroupname.top
 
             color : "#CECECE"
         }
@@ -454,7 +460,7 @@ Rectangle {
 
             anchors.right: parent.right
             anchors.top : parent.top
-            //anchors.bottom : tabgroupname.top
+            anchors.bottom : tabgroupname.top
 
             color : "#CECECE"
         }
@@ -563,7 +569,6 @@ Rectangle {
 
         //7. PopUp - Arrange
         PopUp {
-            objectName: "arrangePopup"
             id: popup_arrange
             funcname: "Arrange"
             height: 220
@@ -581,7 +586,7 @@ Rectangle {
             signal runFeature(int type);
             onApplyClicked: {
                 console.log("arrange");
-                runFeature(ftrArrange);
+                runFeature(ftrArrage);
             }
         }
 
@@ -677,7 +682,6 @@ Rectangle {
         //10. PopUp - Auto Repair
         PopUp {
             id: popup_autorepair
-            objectName: "repairPopup"
             funcname: "Auto Repair"
             height: 220
             detail1: "Click Apply to fix the model."
@@ -722,31 +726,32 @@ Rectangle {
 
             onFlatModeClicked: {
                 console.log("flat mode selected");
-                cutModeSelected(1);
+                flatModeSelected();
             }
 
             onCurveModeClicked: {
                 console.log("curve mode selected");
-                cutModeSelected(2);
+                curveModeSelected();
             }
 
             onApplyClicked: {
                 console.log("ApplyClicked")
                 //runFeature(ftrCut);
+                //modelCut();
                 generatePlane();
-                cutModeSelected(9999);
             }
 
             // on Finish Clicked:
             onFinishClicked: {
                 console.log("Finish Clicked")
-                modelCutFinish();
+                modelCut();
             }
 
-            signal cutModeSelected(int type);
+            signal flatModeSelected();
+            signal curveModeSelected();
             signal runFeature(int type);
             signal generatePlane();
-            signal modelCutFinish();
+            signal modelCut();
         }
 
 

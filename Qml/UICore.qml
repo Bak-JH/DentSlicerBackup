@@ -3,7 +3,7 @@ import QtQuick 2.0
 Item {
     property alias mttab: mttab
     property alias mtz: mtz
-    property alias mtm: mtm
+    //property alias mtm: mtm
     property alias mtr: mtr
     property alias slicing_data:slicing_data
 
@@ -34,7 +34,7 @@ Item {
         visible: isZoom
     }
 
-    MeshTransformerMove{
+/*    MeshTransformerMove{
         id : mtm
 
         anchors.top: parent.top
@@ -43,7 +43,8 @@ Item {
         anchors.topMargin: 0
         anchors.leftMargin: 0
         visible: isMove
-    }
+    }*/
+
     MeshTransformerRotateTest{
         id : mtr
 
