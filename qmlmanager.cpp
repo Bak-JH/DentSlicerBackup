@@ -59,7 +59,7 @@ void QmlManager::initializeUI(QQmlApplicationEngine* e){
 
 void QmlManager::openModelFile(QString fname){
 
-    GLModel* glmodel = new GLModel(models, nullptr, fname, false);
+    GLModel* glmodel = new GLModel(mainWindow, models, nullptr, fname, false);
 
     glmodels.push_back(glmodel);
 
@@ -190,6 +190,18 @@ QObject* FindItemByName(QQmlApplicationEngine* engine, const QString& name)
     return FindItemByName(engine->rootObjects(), name);
 }
 
+
+void QmlManager::ModelVisible(int ID, bool isVisible){
+    GLModel* target;
+    for(int i=0; i<glmodels.size();i++){
+        if(glmodels.at(i)->ID == ID){
+            target = glmodels.at(i);
+            break;
+        }
+    }
+    target->setEnabled(isVisible);
+}
+
 void QmlManager::showRotateSphere(){
     rotateSphere->setEnabled(1);
     GLModel *glmodel = glmodels.at(1);
@@ -259,4 +271,5 @@ void QmlManager::runGroupFeature(int ftrType, QString state){
         break;
     }
     }
+
 }

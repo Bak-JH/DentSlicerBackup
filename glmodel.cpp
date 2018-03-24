@@ -3,14 +3,19 @@
 #include <QString>
 #include <QtMath>
 #include <cfloat>
-#include "qmlManager.h"
+
+#include "qmlmanager.h"
 #include "feature/text3dgeometrygenerator.h"
 #include <QtConcurrent/QtConcurrent>
 #include <QFuture>
 
-GLModel::GLModel(QNode *parent, Mesh* loadMesh, QString fname, bool isShadow)
+int GLModel::globalID = 0;
+
+
+GLModel::GLModel(QObject* mainWindow, QNode *parent, Mesh* loadMesh, QString fname, bool isShadow)
     : QEntity(parent)
     , filename(fname)
+    , mainWindow(mainWindow)
     , x(0.0f)
     , y(0.0f)
     , z(0.0f)
@@ -22,6 +27,7 @@ GLModel::GLModel(QNode *parent, Mesh* loadMesh, QString fname, bool isShadow)
     , cutMode(0)
     , numPoints(0)
 {
+
     // generates shadow model for object picking
     if (isShadow){
 
@@ -77,7 +83,6 @@ GLModel::GLModel(QNode *parent, Mesh* loadMesh, QString fname, bool isShadow)
     //QFuture<void> future = QtConcurrent::run(this, &GLModel::initialize, mesh);
     //future = QtConcurrent::run(this, &GLModel::addVertices, mesh);
 
-
     Qt3DExtras::QDiffuseMapMaterial *diffuseMapMaterial = new Qt3DExtras::QDiffuseMapMaterial();
 
     addComponent(m_transform);
@@ -88,7 +93,7 @@ GLModel::GLModel(QNode *parent, Mesh* loadMesh, QString fname, bool isShadow)
     //repairMesh(mesh);
 
     // create shadow model to handle picking settings
-    shadowModel = new GLModel(this, mesh, filename, true);
+    shadowModel = new GLModel(this->mainWindow, this, mesh, filename, true);
 
     QObject::connect(this,SIGNAL(bisectDone()),this,SLOT(generateRLModel()));
     QObject::connect(this,SIGNAL(_updateModelMesh()),this,SLOT(updateModelMesh()));
@@ -98,6 +103,18 @@ GLModel::GLModel(QNode *parent, Mesh* loadMesh, QString fname, bool isShadow)
 
     ft = new featureThread(this, 0);
     arsignal = new arrangeSignalSender();
+
+    // Add to Part List
+    ID = globalID++;
+
+    QList<QObject*> temp;
+    temp.append(mainWindow);
+    QObject *partList = (QEntity *)FindItemByName(temp, "partList");
+
+    QMetaObject::invokeMethod(partList, "addPart",
+        Q_ARG(QVariant, getFileName(fname.toStdString().c_str())),
+        Q_ARG(QVariant, ID));
+
 }
 
 void GLModel::moveModelMesh(QVector3D direction){
@@ -137,7 +154,8 @@ void GLModel::updateModelMesh(){
     initialize(mesh);
     addVertices(mesh);
     shadowModel->removeModel();
-    shadowModel=new GLModel(this,mesh,filename,true);
+    shadowModel=new GLModel(this->mainWindow, this, mesh, filename, true);
+
 }
 
 featureThread::featureThread(GLModel* glmodel, int type){
@@ -339,6 +357,8 @@ void GLModel::initialize(const Mesh* mesh){
 
     addComponent(m_geometryRenderer);
 
+
+
     return;
 }
 
@@ -410,8 +430,6 @@ void GLModel::addVertices(Mesh* mesh)
                         result_vns.push_back(QVector3D(1,1,1));
                     }
         }
-
-
 
         addNormalVertices(result_vns);
     }
@@ -708,7 +726,17 @@ void GLModel::removeModel(){
     removeComponent(m_meshMaterial);
     delete m_geometry;
     delete m_geometryRenderer;
+
+    //remove part list
+    QList<QObject*> temp;
+    temp.append(mainWindow);
+    QObject *partList = (QEntity *)FindItemByName(temp, "partList");
+
+    QMetaObject::invokeMethod(partList, "deletePart",
+        Q_ARG(QVariant, ID));
+
     deleteLater();
+
 }
 
 
@@ -723,19 +751,25 @@ void GLModel::modelCut(){
     plane.push_back(parentModel->cuttingPoints[parentModel->cuttingPoints.size()-1]);
     qDebug() << parentModel->parentModel;
     //parentModel->bisectModel(parentModel->mesh, plane, leftModel->mesh, rightModel->mesh);
+
+    parentModel->bisectModel(plane);
+    GLModel* leftModel = new GLModel(mainWindow, parentModel->parentModel, lmesh, "", false);
+    //GLModel* rightModel = new GLModel(mainWindow, parentModel->parentModel, rmesh, "", false);
+
     //parentModel->bisectModel(parentModel->mesh, plane, parentModel->lmesh, parentModel->rmesh);
     //parentModel->bisectModel_internal(plane);
-    parentModel->bisectModel(plane);
+
     //QFuture<void> future = QtConcurrent::run(parentModel, &bisectModel_internal, plane);// parentModel->bisectModel(plane);
     //qm.openModelFile("");
     //future.waitForFinished();
+
 
 }
 
 void GLModel::generateRLModel(){
     qDebug() << "modelCut finished";
-    leftModel = new GLModel(parentModel, lmesh, "", false);
-    rightModel = new GLModel(parentModel, rmesh, "", false);
+    leftModel = new GLModel(parentModel->mainWindow, parentModel, lmesh, "", false);
+    rightModel = new GLModel(parentModel->mainWindow, parentModel, rmesh, "", false);
 
 }
 
@@ -761,8 +795,8 @@ void GLModel::modelCut(){
     ft->ct->bisectModel(mesh, plane, lmesh, rmesh);
 
     // select between two pieces
-    GLModel* leftModel = new GLModel(parentModel, lmesh, "", false);
-    //GLModel* rightModel = new GLModel(parentModel->parentModel, rmesh, "", false);
+    GLModel* leftModel = new GLModel(mainWindow, parentModel, lmesh, "", false);
+    //GLModel* rightModel = new GLModel(mainWindow, parentModel->parentModel, rmesh, "", false);
 
     shadowModel->deleteLater();
     deleteLater();
@@ -937,6 +971,16 @@ void GLModel::getSliderSignal(double value){
 
 
 /** HELPER functions **/
+QString GLModel::getFileName(const string& s){
+   char sep = '/';
+
+   size_t i = s.rfind(sep, s.length());
+   if (i != string::npos) {
+      return QString::fromStdString(s.substr(i+1, s.length() - i));
+   }
+
+   return QString::fromStdString("");
+}
 
 QVector3D GLModel::spreadPoint(QVector3D endPoint,QVector3D startPoint,int factor){
     QVector3D standardVector = endPoint-startPoint;

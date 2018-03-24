@@ -16,7 +16,9 @@
 #include "feature/labellingtextpreview.h"
 #include "feature/autoorientation.h"
 #include "feature/meshrepair.h"
+#include <iostream>
 #include "feature/autoarrange.h"
+
 
 #define MAX_BUF_LEN 2000000
 
@@ -81,7 +83,7 @@ class GLModel : public QEntity
     Q_OBJECT
 public:
     // load teeth model default
-    GLModel(QNode* parent=nullptr, Mesh* loadMesh=nullptr, QString fname="", bool isShadow=false); // main constructor for mainmesh and shadowmesh
+    GLModel(QObject* mainWindow=nullptr, QNode* parent=nullptr, Mesh* loadMesh=nullptr, QString fname="", bool isShadow=false); // main constructor for mainmesh and shadowmesh
     ~GLModel();
 
     GLModel *parentModel;
@@ -122,6 +124,7 @@ public:
     void beforeInitialize();
     void beforeAddVerticies();
 
+
     LabellingTextPreview* labellingTextPreview = nullptr;
     // Model Mesh move
     void moveModelMesh(QVector3D direction);
@@ -140,6 +143,7 @@ public:
     bool isLeftToPlane(Plane plane, QVector3D position);
 
 
+    QString getFileName(const string& s);
     QVector3D spreadPoint(QVector3D endpoint,QVector3D startpoint,int factor);
 
     Mesh* mesh;
@@ -148,6 +152,10 @@ public:
 
     featureThread* ft;
     arrangeSignalSender* arsignal;
+
+    int ID; //for use in Part List
+    static int globalID;
+    QObject* mainWindow;
 
 private:
     int numPoints;
@@ -174,7 +182,6 @@ private:
 signals:
     void bisectDone();
     void _updateModelMesh();
-
 
 public slots:
     // object picker parts

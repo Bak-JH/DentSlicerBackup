@@ -59,9 +59,12 @@ public:
 private:
     bool glmodels_arranged;
 
+    Q_INVOKABLE void ModelVisible(int ID, bool isVisible);
+
 signals:
     void updateModelInfo(int printing_time, int layer, QString xyz, float volume);
     void arrangeDone(vector<QVector3D>, vector<float>);
+
 
 public slots:
     void sendUpdateModelInfo(int, int, QString, float);
