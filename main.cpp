@@ -43,10 +43,10 @@ int main(int argc, char **argv)
 
     qmlManager->initializeUI(&engine);
     splash->close();
+    qmlManager->openModelFile("C:/Users/diridiri/Desktop/DLP/DLPslicer/partial2_flip.stl");//DLPslicer/partial2_flip.stl");
 
     qmlManager->mainWindow->setProperty("visible",true);
 
-    qmlManager->openModelFile("C:/Users/diridiri/Desktop/DLP/DLPslicer/partial2_flip.stl");
 
     return app.exec();
 }

@@ -54,7 +54,6 @@ void QmlManager::initializeUI(QQmlApplicationEngine* e){
     QObject *rotateButton = FindItemByName(engine, "rotateButton");
     QObject::connect(rotateButton,SIGNAL(runGroupFeature(int,QString)),this,SLOT(runGroupFeature(int,QString)));
 
-    //openModelFile("C:/Users/diridiri/Desktop/DLP/DLPslicer/partial2_flip.stl");
 }
 
 void QmlManager::openModelFile(QString fname){

@@ -152,7 +152,6 @@ private:
     float x,y,z;
     int v_cnt;
     int f_cnt;
-    Mesh* sparseMesh;
     QNode* m_parent;
     QVector3D lastpoint;
     void initialize(const Mesh* mesh);

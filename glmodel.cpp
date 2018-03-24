@@ -25,20 +25,13 @@ GLModel::GLModel(QNode *parent, Mesh* loadMesh, QString fname, bool isShadow)
     // generates shadow model for object picking
     if (isShadow){
 
-        if (filename != ""){
-            mesh = new Mesh();
-            loadMeshSTL(mesh, filename.toStdString().c_str());
-        } else {
-            mesh = loadMesh;
-        }
-
         lmesh = new Mesh();
         rmesh = new Mesh();
 
-        sparseMesh = toSparse(mesh);
+        mesh = toSparse(parentModel->mesh);
 
-        initialize(sparseMesh);
-        addVertices(sparseMesh);
+        initialize(mesh);
+        addVertices(mesh);
 
         addComponent(m_transform);
 
@@ -79,8 +72,6 @@ GLModel::GLModel(QNode *parent, Mesh* loadMesh, QString fname, bool isShadow)
     lmesh = new Mesh();
     rmesh = new Mesh();
 
-    sparseMesh = toSparse(mesh);
-
     initialize(mesh);
     addVertices(mesh);
     //QFuture<void> future = QtConcurrent::run(this, &GLModel::initialize, mesh);
@@ -108,11 +99,10 @@ GLModel::GLModel(QNode *parent, Mesh* loadMesh, QString fname, bool isShadow)
 }
 void GLModel::moveModelMesh(QVector3D direction){
     mesh->vertexMove(direction);
-    sparseMesh=toSparse(mesh);
     initialize(mesh);
     addVertices(mesh);
     shadowModel->removeModel();
-    shadowModel=new GLModel(this,mesh,"",true);
+    shadowModel=new GLModel(this,mesh,filename,true);
 }
 featureThread::featureThread(GLModel* glmodel, int type){
     qDebug() << "feature thread created" << type;
