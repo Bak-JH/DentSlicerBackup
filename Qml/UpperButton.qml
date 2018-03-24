@@ -74,7 +74,7 @@ Rectangle{
         Rectangle {
             width: parent.width - 6
             height: parent.height - 6
-            color: "#669fad"
+            color: "#3EA6B7"
             anchors.verticalCenter: parent.verticalCenter
             anchors.horizontalCenter: parent.horizontalCenter
         }

@@ -93,8 +93,8 @@
         <file>Resource/mesh/grid.obj</file>
         <file>Resource/splash.png</file>
         <file>Resource/upper_extend.png</file>
-
         <file>Resource/splash2.png</file>
-
+        <file>Resource/mesh/plate.stl</file>
+        <file>Resource/mesh/plate_plane.stl</file>
     </qresource>
 </RCC>

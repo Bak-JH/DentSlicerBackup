@@ -5,25 +5,42 @@ import Qt3D.Input 2.0
 import Qt3D.Extras 2.0
 
 Entity {
-    Mesh{
-        id: plateMesh
-        source: "qrc:/Resource/mesh/grid.obj"
-
-    }
-
     Transform{
         id: plateTransform
         translation: Qt.vector3d(0,0,0)
         //rotation: fromAxisAndAngle(Qt.vector3d(1,0, 0), 90)
     }
 
-    PhongMaterial{
+    PhongAlphaMaterial{
         id : plateMaterial
+        ambient: Qt.rgba(100/255, 100/255, 100/255, 1 )
+        diffuse: Qt.rgba(100/255, 100/255, 100/255, 1 )
+        specular: Qt.rgba(100/255, 100/255, 100/255, 1 )
+        shininess: 0
+        alpha: 1
+    }
+
+    PhongAlphaMaterial{
+        id : platePlaneMaterial
         ambient: Qt.rgba(255/255, 255/255, 255/255, 1 )
         diffuse: Qt.rgba(255/255, 255/255, 255/255, 1 )
         specular: Qt.rgba(255/255, 255/255, 255/255, 1 )
-        shininess: 0
+        alpha: 1
     }
 
-    components: [ plateMesh, plateTransform, plateMaterial ]
+
+    Entity{
+        Mesh{
+            id: platePlaneMesh
+            source: "qrc:/Resource/mesh/plate_plane.stl"
+        }
+        components: [ platePlaneMesh, plateTransform, platePlaneMaterial ]
+    }
+    Entity{
+        Mesh{
+            id: plateMesh
+            source: "qrc:/Resource/mesh/plate.stl"
+        }
+        components: [ plateMesh, plateTransform, plateMaterial ]
+    }
 }
