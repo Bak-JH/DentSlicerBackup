@@ -232,7 +232,7 @@ Rectangle {
 
             anchors.right: parent.right
             anchors.top : parent.top
-            anchors.bottom : tabgroupname.top
+            //anchors.bottom : tabgroupname.top
 
             color : "#CECECE"
         }
@@ -299,7 +299,7 @@ Rectangle {
 
             anchors.right: parent.right
             anchors.top : parent.top
-            anchors.bottom : tabgroupname.top
+            //anchors.bottom : tabgroupname.top
 
             color : "#CECECE"
         }
@@ -384,7 +384,7 @@ Rectangle {
 
             anchors.right: parent.right
             anchors.top : parent.top
-            anchors.bottom : tabgroupname.top
+            //anchors.bottom : tabgroupname.top
 
             color : "#CECECE"
         }
@@ -435,7 +435,7 @@ Rectangle {
 
             anchors.right: parent.right
             anchors.top : parent.top
-            anchors.bottom : tabgroupname.top
+            //anchors.bottom : tabgroupname.top
 
             color : "#CECECE"
         }
