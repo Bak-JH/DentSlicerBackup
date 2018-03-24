@@ -38,6 +38,10 @@ public:
     QObject* orientPopup;
     QObject* progress_text;
 
+    // auto repair components
+    QObject* repairPopup;
+
+
     vector<GLModel*> glmodels;
 
     Qt3DCore::QEntity *managerModel;

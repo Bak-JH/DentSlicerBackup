@@ -20,6 +20,7 @@ GLModel::GLModel(QNode *parent, Mesh* loadMesh, QString fname, bool isShadow)
     //, m_objectPicker(new Qt3DRender::QObjectPicker())
     , parentModel((GLModel*)(parent))
     , cutMode(0)
+    , numPoints(0)
 {
     // generates shadow model for object picking
     if (isShadow){
@@ -656,6 +657,10 @@ void GLModel::addCuttingPoint(QVector3D v){
 
 void GLModel::removeCuttingPoints(){
 
+    qDebug() << "in the removeCuttingPOints";
+
+    qDebug() << "numPoints:" << numPoints;
+    qDebug() << "ok till here";
     for(int i=0;i<numPoints;i++)
     {
         sphereEntity[i]->removeComponent(sphereMesh[i]);

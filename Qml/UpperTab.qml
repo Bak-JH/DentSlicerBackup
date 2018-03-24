@@ -658,6 +658,7 @@ Rectangle {
         //10. PopUp - Auto Repair
         PopUp {
             id: popup_autorepair
+            objectName: "repairPopup"
             funcname: "Auto Repair"
             height: 220
             detail1: "Click Apply to fix the model."

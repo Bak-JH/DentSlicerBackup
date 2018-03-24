@@ -47,7 +47,6 @@ int main(int argc, char **argv)
     qmlManager->mainWindow->setProperty("visible",true);
 
     qmlManager->openModelFile("C:/Users/diridiri/Desktop/DLP/DLPslicer/partial2_flip.stl");
-    //app.exec();
 
     return app.exec();
 }

@@ -39,6 +39,10 @@ void QmlManager::initializeUI(QQmlApplicationEngine* e){
     orientPopup = FindItemByName(engine, "orientPopup");
     progress_text = FindItemByName(engine, "progress_text");
 
+    // repair components
+    repairPopup = FindItemByName(engine, "repairPopup");
+
+
     //rotation Sphere
     rotateSphere = (QEntity *)FindItemByName(engine, "rotateSphereEntity");
     rotateSphereX = (QEntity *)FindItemByName(engine, "rotateSphereTorusX");
@@ -98,6 +102,7 @@ void QmlManager::openModelFile(QString fname){
     QObject::connect(labelFontBox, SIGNAL(sendFontName(QString)),glmodel->shadowModel, SLOT(getFontNameChanged(QString)));
 
     // auto Repair popup codes
+    QObject::connect(repairPopup, SIGNAL(runFeature(int)), glmodel->ft, SLOT(setTypeAndStart(int)));
 
     // auto arrange popup codes
     QObject::connect(arrangePopup, SIGNAL(runFeature(int)), glmodel->ft, SLOT(setTypeAndStart(int)));
