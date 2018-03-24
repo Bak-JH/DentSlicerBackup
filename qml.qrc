@@ -9,7 +9,6 @@
         <file>Qml/Cutbox.qml</file>
         <file>Qml/CutBox2.qml</file>
         <file>Qml/FileDialogLoad.qml</file>
-        <file>Qml/GlModel.qml</file>
         <file>Qml/LeftSlicingOption.qml</file>
         <file>Qml/LeftTab.qml</file>
         <file>Qml/LeftTabPartList.qml</file>

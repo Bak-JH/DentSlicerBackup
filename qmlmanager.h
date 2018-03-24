@@ -7,7 +7,8 @@
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
 #include <QQmlEngine>
-#include "feature/arrange.h"
+#include <QQmlProperty>
+#include "feature/autoarrange.h"
 #include "glmodel.h"
 #include "QtConcurrent/QtConcurrentRun"
 #include "QFuture"
@@ -18,11 +19,34 @@ class QmlManager : public QObject
 public:
     explicit QmlManager(QObject *parent = nullptr);
     QQmlApplicationEngine* engine;
+
+    // UI components
     QObject* mainWindow;
     QEntity* models;
+
+    // model cut components
+    QObject *cutPopup;
+    QObject *curveButton;
+    QObject *flatButton;
+    QObject *slider;
+
+    // labelling components
+    QObject *text3DInput;
+    QObject *labelPopup;
+    QObject *labelFontBox;
+
+    // orientation components
+    QObject* orientPopup;
+    QObject* progress_text;
+
+    // auto repair components
+    QObject* repairPopup;
+
+
     vector<GLModel*> glmodels;
 
     Qt3DCore::QEntity *managerModel;
+    QObject *rotateSphereobj;
     Qt3DCore::QEntity *rotateSphere;
     Qt3DCore::QEntity *rotateSphereX;
     Qt3DCore::QEntity *rotateSphereY;
@@ -30,11 +54,16 @@ public:
     void showRotateSphere();
     void initializeUI(QQmlApplicationEngine *e);
     void openModelFile_internal(QString filename);
+    void runArrange_internal();
+
+private:
+    bool glmodels_arranged;
 
     Q_INVOKABLE void ModelVisible(int ID, bool isVisible);
 
 signals:
     void updateModelInfo(int printing_time, int layer, QString xyz, float volume);
+    void arrangeDone(vector<QVector3D>, vector<float>);
 
 
 public slots:
@@ -42,6 +71,9 @@ public slots:
     void openModelFile(QString filename);
     void runGroupFeature(int,QString);
     void modelRotate(int,int);
+    void modelRotateDone(int);
+    void runArrange();
+    void applyArrangeResult(vector<QVector3D>, vector<float>);
 };
 
 

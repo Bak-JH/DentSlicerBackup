@@ -17,6 +17,8 @@
 #include "feature/autoorientation.h"
 #include "feature/meshrepair.h"
 #include <iostream>
+#include "feature/autoarrange.h"
+
 
 #define MAX_BUF_LEN 2000000
 
@@ -54,6 +56,7 @@ public:
     int optype; // defines typeofoperation
     autoorientation* ot;
     modelcut* ct;
+    autoarrange* ar;
 
 signals:
     void loadPopup(QVariant value);
@@ -66,6 +69,15 @@ private:
     void run() Q_DECL_OVERRIDE;
 };
 
+class arrangeSignalSender: public QObject
+{
+    Q_OBJECT
+public:
+    arrangeSignalSender();
+signals:
+    void runArrange();
+};
+
 class GLModel : public QEntity
 {
     Q_OBJECT
@@ -76,8 +88,8 @@ public:
 
     GLModel *parentModel;
     GLModel *shadowModel; // GLmodel's sparse mesh that gets picker input
-
-    QThread* ownerThread;
+    GLModel *leftModel;
+    GLModel *rightModel;
 
     bool appropriately_rotated=false;
     QPhongMaterial *m_meshMaterial;
@@ -114,14 +126,20 @@ public:
 
 
     LabellingTextPreview* labellingTextPreview = nullptr;
-
-    // Model move
+    // Model Mesh move
     void moveModelMesh(QVector3D direction);
+    // Model Mesh rotate
+    void rotateModelMesh(int Axis, float Angle);
+    void rotateModelMesh(QMatrix4x4 matrix);
+
     // Model Cut
     void addCuttingPoint(QVector3D v);
     void removeCuttingPoints();
     void drawLine(QVector3D endpoint);
-    void bisectModel(Mesh* mesh, Plane plane, Mesh* leftMesh, Mesh* rightMesh);
+    //void bisectModel(Mesh* mesh, Plane plane, Mesh* leftMesh, Mesh* rightMesh);
+    //void bisectModel_internal(Mesh* mesh, Plane plane, Mesh* leftMesh, Mesh* rightMesh);
+    void bisectModel(Plane plane);
+    void bisectModel_internal(Plane plane);
     bool isLeftToPlane(Plane plane, QVector3D position);
 
 
@@ -133,6 +151,7 @@ public:
     Mesh* rmesh;
 
     featureThread* ft;
+    arrangeSignalSender* arsignal;
 
     int ID; //for use in Part List
     static int globalID;
@@ -140,13 +159,10 @@ public:
 
 private:
     int numPoints;
-    bool flatState;
-    bool curveState;
     QString filename;
     float x,y,z;
     int v_cnt;
     int f_cnt;
-    Mesh* sparseMesh;
     QNode* m_parent;
     QVector3D lastpoint;
     void initialize(const Mesh* mesh);
@@ -160,8 +176,12 @@ private:
     void onTimerUpdate();
     Mesh* toSparse(Mesh* mesh);
 
+    int cutMode = 0;
     bool labelingActive = false;
 
+signals:
+    void bisectDone();
+    void _updateModelMesh();
 
 public slots:
     // object picker parts
@@ -176,9 +196,10 @@ public slots:
     void generatePlane();
     void removePlane();
     void modelCut();
-    void lineAccept();
-    void pointAccept();
+    void cutModeSelected(int type);
     void getSliderSignal(double value);
+    void generateRLModel();
+    void modelCutFinished();
 
     // Labelling
     void getTextChanged(QString text, int contentWidth);
@@ -186,8 +207,9 @@ public slots:
     void closeLabelling();
     void getFontNameChanged(QString fontName);
     void generateText3DMesh();
+
+    // Model Mesh info update
+    void updateModelMesh();
 };
-
-
 
 #endif // GLMODEL_H

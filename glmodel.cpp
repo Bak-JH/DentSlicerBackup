@@ -3,10 +3,11 @@
 #include <QString>
 #include <QtMath>
 #include <cfloat>
-#include "qmlmanager.h"
 
+#include "qmlmanager.h"
 #include "feature/text3dgeometrygenerator.h"
-#include <QtConcurrent>
+#include <QtConcurrent/QtConcurrent>
+#include <QFuture>
 
 int GLModel::globalID = 0;
 
@@ -23,32 +24,24 @@ GLModel::GLModel(QObject* mainWindow, QNode *parent, Mesh* loadMesh, QString fna
     , m_transform(new Qt3DCore::QTransform())
     //, m_objectPicker(new Qt3DRender::QObjectPicker())
     , parentModel((GLModel*)(parent))
-    , curveState(false)
-    , flatState(false)
+    , cutMode(0)
+    , numPoints(0)
 {
 
-    ownerThread = QThread::currentThread();
     // generates shadow model for object picking
     if (isShadow){
-
-        if (filename != ""){
-            mesh = new Mesh();
-            loadMeshSTL(mesh, filename.toStdString().c_str());
-        } else {
-            mesh = loadMesh;
-        }
 
         lmesh = new Mesh();
         rmesh = new Mesh();
 
-        sparseMesh = toSparse(mesh);
+        mesh = toSparse(parentModel->mesh);
 
-        initialize(sparseMesh);
-        addVertices(sparseMesh);
+        initialize(mesh);
+        addVertices(mesh);
 
         addComponent(m_transform);
 
-        m_objectPicker = new Qt3DRender::QObjectPicker();
+        m_objectPicker = new Qt3DRender::QObjectPicker(this);
 
         //m_objectPicker->setHoverEnabled(true);
         //m_objectPicker->setDragEnabled(true);
@@ -85,8 +78,6 @@ GLModel::GLModel(QObject* mainWindow, QNode *parent, Mesh* loadMesh, QString fna
     lmesh = new Mesh();
     rmesh = new Mesh();
 
-    sparseMesh = toSparse(mesh);
-
     initialize(mesh);
     addVertices(mesh);
     //QFuture<void> future = QtConcurrent::run(this, &GLModel::initialize, mesh);
@@ -104,9 +95,14 @@ GLModel::GLModel(QObject* mainWindow, QNode *parent, Mesh* loadMesh, QString fna
     // create shadow model to handle picking settings
     shadowModel = new GLModel(this->mainWindow, this, mesh, filename, true);
 
+    QObject::connect(this,SIGNAL(bisectDone()),this,SLOT(generateRLModel()));
+    QObject::connect(this,SIGNAL(_updateModelMesh()),this,SLOT(updateModelMesh()));
+
+
     qDebug() << "created shadow model";
 
     ft = new featureThread(this, 0);
+    arsignal = new arrangeSignalSender();
 
     // Add to Part List
     ID = globalID++;
@@ -119,16 +115,49 @@ GLModel::GLModel(QObject* mainWindow, QNode *parent, Mesh* loadMesh, QString fna
         Q_ARG(QVariant, getFileName(fname.toStdString().c_str())),
         Q_ARG(QVariant, ID));
 
-
 }
+
 void GLModel::moveModelMesh(QVector3D direction){
     mesh->vertexMove(direction);
-    sparseMesh=toSparse(mesh);
+    emit _updateModelMesh();
+}
+
+void GLModel::rotateModelMesh(int Axis, float Angle){
+    Qt3DCore::QTransform* tmp = new Qt3DCore::QTransform();
+    switch(Axis){
+    case 1:{
+        tmp->setRotationX(Angle);
+        break;
+    }
+    case 2:{
+        tmp->setRotationY(Angle);
+        break;
+    }
+    case 3:{
+        tmp->setRotationZ(Angle);
+        break;
+    }
+    }
+    rotateModelMesh(tmp->matrix());
+}
+
+void GLModel::rotateModelMesh(QMatrix4x4 matrix){
+    mesh->vertexRotate(matrix);
+    emit _updateModelMesh();
+}
+
+void GLModel::updateModelMesh(){
+    if (z != 0){
+        moveModelMesh(QVector3D(0.0f,0.0f,-z));
+        return;
+    }
     initialize(mesh);
     addVertices(mesh);
     shadowModel->removeModel();
-    shadowModel=new GLModel(this->mainWindow, this, mesh, "", true);
+    shadowModel=new GLModel(this->mainWindow, this, mesh, filename, true);
+
 }
+
 featureThread::featureThread(GLModel* glmodel, int type){
     qDebug() << "feature thread created" << type;
     m_glmodel = glmodel;
@@ -137,9 +166,11 @@ featureThread::featureThread(GLModel* glmodel, int type){
     // enable features
     ot = new autoorientation();
     ct = new modelcut();
+    ar = new autoarrange();
 
     connect(ot, SIGNAL(progressChanged(float)), this, SLOT(progressChanged(float)));
     connect(ct, SIGNAL(progressChanged(float)), this, SLOT(progressChanged(float)));
+    connect(ar, SIGNAL(progressChanged(float)), this, SLOT(progressChanged(float)));
 }
 
 void featureThread::setTypeAndStart(int type){
@@ -175,6 +206,7 @@ void featureThread::run(){
             }
         case ftrArrange:
             {
+                emit (m_glmodel->arsignal)->runArrange();
                 break;
             }
         case ftrOrient:
@@ -184,7 +216,8 @@ void featureThread::run(){
                 } else {
                     markPopup(true);
                     rotateResult* rotateres= ot->Tweak(m_glmodel->mesh,true,45,&m_glmodel->appropriately_rotated);
-                    m_glmodel->m_transform->setMatrix(rotateres->R);
+                    m_glmodel->rotateModelMesh(rotateres->R);
+                    //m_glmodel->m_transform->setMatrix(rotateres->R);
                 }
                 break;
             }
@@ -202,8 +235,6 @@ void featureThread::run(){
                 // m_glmodel is shadow model
                 /*markPopup(false);
                 ct->removeCuttingPoints();
-                QThread* curThread = thread();
-                moveToThread(m_glmodel->ownerThread);
                 ct->generatePlane(m_glmodel->parentModel);
                 moveToThread(curThread);
 
@@ -213,10 +244,8 @@ void featureThread::run(){
                 plane.push_back(ct->cuttingPoints[ct->cuttingPoints.size()-1]);
                 ct->bisectModel(m_glmodel->mesh, plane, m_glmodel->lmesh, m_glmodel->rmesh);
 
-                moveToThread(m_glmodel->ownerThread);
-                qDebug() << "moved to thread" << m_glmodel->ownerThread;
                 //GLModel* leftModel = new GLModel(m_glmodel, m_glmodel->lmesh, "", false);
-                moveToThread(curThread);
+
                 qDebug() << "deleting shadowmodel";
                 m_glmodel->shadowModel->deleteLater();
                 qDebug() << "deleting current Model";
@@ -255,6 +284,9 @@ void featureThread::markPopup(bool flag){
     }
 }
 
+arrangeSignalSender::arrangeSignalSender(){
+
+}
 
 void GLModel::initialize(const Mesh* mesh){
 
@@ -358,6 +390,8 @@ void GLModel::clearVertices(){
 
 void GLModel::addVertices(Mesh* mesh)
 {
+    int face_size = mesh->faces.size();
+    int face_idx = 0;
     /*foreach (MeshFace mf , mesh->faces){
 
         vector<int> result_vs;
@@ -367,6 +401,10 @@ void GLModel::addVertices(Mesh* mesh)
         addIndexes(result_vs);
     }*/
     foreach (MeshFace mf , mesh->faces){
+        face_idx ++;
+        if (face_idx %100 ==0)
+            QCoreApplication::processEvents();
+
         vector<QVector3D> result_vs;
         for (int fn=0; fn<=2; fn++){
             result_vs.push_back(mesh->idx2MV(mf.mesh_vertex[fn]).position);
@@ -374,7 +412,11 @@ void GLModel::addVertices(Mesh* mesh)
 
         addVertices(result_vs);   
     }
+
     foreach (MeshFace mf , mesh->faces){
+        face_idx ++;
+        if (face_idx %100 ==0)
+            QCoreApplication::processEvents();
 
         vector<QVector3D> result_vns;
         for (int fn=0; fn<=2; fn++){
@@ -391,7 +433,11 @@ void GLModel::addVertices(Mesh* mesh)
 
         addNormalVertices(result_vns);
     }
+
     foreach (MeshFace mf , mesh->faces){
+        face_idx ++;
+        if (face_idx %100 ==0)
+            QCoreApplication::processEvents();
 
         vector<QVector3D> result_vcs;
         for (int fn=0; fn<=2; fn++){
@@ -520,23 +566,30 @@ void GLModel::handlePickerClicked(QPickEvent *pick)
             labellingTextPreview->setNormal(QVector3D(0, 0, 1));
         }
     }
+
     QPickTriangleEvent *trianglePick = static_cast<QPickTriangleEvent*>(pick);
-    //qDebug() << flatState << numPoints << sizeof(sphereEntity)/4;
-    if (flatState&&parentModel->numPoints< sizeof(parentModel->sphereEntity)/4) {
-    //if (flatState&&parentModel->ft->ct->numPoints< sizeof(parentModel->ft->ct->sphereEntity)/4) {
+    if (cutMode == 1 && parentModel->numPoints< sizeof(parentModel->sphereEntity)/4) {
         qDebug() << pick->localIntersection()<<"pick";
         QVector3D v = pick->localIntersection();
         parentModel->addCuttingPoint(v);
         //parentModel->ft->ct->addCuttingPoint(parentModel, v);
-    }
-    else {
-        qDebug() << "fail to flat state" << flatState;
+    } else if (cutMode == 9999){
+        if (auto* glmodel = qobject_cast<GLModel*>(parent()))
+            glmodel->m_meshMaterial->setDiffuse(QColor(0, 255, 0));
+        qDebug() << "current cut mode :" << cutMode;
         return;
     }
 }
 
+void GLModel::bisectModel(Plane plane){
+    QFuture<void> future = QtConcurrent::run(this, &bisectModel_internal, plane);
+}
+
 // need to create new mesh object liek Mesh* leftMesh = new Mesh();
-void GLModel::bisectModel(Mesh* mesh, Plane plane, Mesh* leftMesh, Mesh* rightMesh){
+void GLModel::bisectModel_internal(Plane plane){
+
+    Mesh* leftMesh = lmesh;
+    Mesh* rightMesh = rmesh;
     // do bisecting mesh
     qDebug() << "in bisect";
     leftMesh->faces.reserve(mesh->faces.size());
@@ -562,6 +615,7 @@ void GLModel::bisectModel(Mesh* mesh, Plane plane, Mesh* leftMesh, Mesh* rightMe
     leftMesh->connectFaces();
     rightMesh->connectFaces();
     qDebug() << "done connecting";
+    emit bisectDone();
 }
 
 bool GLModel::isLeftToPlane(Plane plane, QVector3D position){
@@ -613,6 +667,7 @@ void GLModel::generatePlane(){
         parentModel->planeEntity[i]->addComponent(parentModel->planeTransform[i]);
         parentModel->planeEntity[i]->addComponent(parentModel->planeMaterial);
     }
+    modelCut();
 }
 
 void GLModel::removePlane(){
@@ -642,10 +697,15 @@ void GLModel::addCuttingPoint(QVector3D v){
     sphereEntity[numPoints]->addComponent(sphereTransform[numPoints]);
     sphereEntity[numPoints]->addComponent(sphereMaterial[numPoints]);
     numPoints++;
+
 }
 
 void GLModel::removeCuttingPoints(){
 
+    qDebug() << "in the removeCuttingPOints";
+
+    qDebug() << "numPoints:" << numPoints;
+    qDebug() << "ok till here";
     for(int i=0;i<numPoints;i++)
     {
         sphereEntity[i]->removeComponent(sphereMesh[i]);
@@ -674,6 +734,9 @@ void GLModel::removeModel(){
 
     QMetaObject::invokeMethod(partList, "deletePart",
         Q_ARG(QVariant, ID));
+
+    deleteLater();
+
 }
 
 
@@ -682,20 +745,41 @@ void GLModel::modelCut(){
         return;
     }
 
-    removePlane();
-
     Plane plane;
     plane.push_back(parentModel->cuttingPoints[parentModel->cuttingPoints.size()-3]);
     plane.push_back(parentModel->cuttingPoints[parentModel->cuttingPoints.size()-2]);   //plane에 잘 들어감
     plane.push_back(parentModel->cuttingPoints[parentModel->cuttingPoints.size()-1]);
     qDebug() << parentModel->parentModel;
     //parentModel->bisectModel(parentModel->mesh, plane, leftModel->mesh, rightModel->mesh);
-    parentModel->bisectModel(parentModel->mesh, plane, lmesh, rmesh);
+
+    parentModel->bisectModel(plane);
     GLModel* leftModel = new GLModel(mainWindow, parentModel->parentModel, lmesh, "", false);
     //GLModel* rightModel = new GLModel(mainWindow, parentModel->parentModel, rmesh, "", false);
 
-    parentModel->deleteLater();
-    deleteLater();
+    //parentModel->bisectModel(parentModel->mesh, plane, parentModel->lmesh, parentModel->rmesh);
+    //parentModel->bisectModel_internal(plane);
+
+    //QFuture<void> future = QtConcurrent::run(parentModel, &bisectModel_internal, plane);// parentModel->bisectModel(plane);
+    //qm.openModelFile("");
+    //future.waitForFinished();
+
+
+}
+
+void GLModel::generateRLModel(){
+    qDebug() << "modelCut finished";
+    leftModel = new GLModel(parentModel, lmesh, "", false);
+    rightModel = new GLModel(parentModel, rmesh, "", false);
+
+}
+
+void GLModel::modelCutFinished(){
+    qDebug() << "modelcut finished";
+    removePlane();
+    parentModel->leftModel->deleteLater();
+    parentModel->rightModel->deleteLater();
+
+    // remove parent model and its shadow model
 }
 
 /*
@@ -838,7 +922,7 @@ void GLModel::rgoo(Qt3DRender::QPickEvent* v){
 
 /*void GLModel::drawLine(QVector3D endpoint)
 {
-    if (curveState){
+    if (cutMode == 2){
         float line_length=endpoint.distanceToPoint(lastpoint);
         QVector3D original_normal(0,1,0);
         QVector3D desire_normal(endpoint-lastpoint);
@@ -862,19 +946,11 @@ void GLModel::rgoo(Qt3DRender::QPickEvent* v){
     }
 }*/
 
-void GLModel::lineAccept(){
-    qDebug() << "line Accept";
-    if(!curveState){
-        curveState=true;}
-    else {
-        curveState=false;}
-}
-
-void GLModel::pointAccept(){
-    qDebug() << "point Accept" << flatState;
-    if (flatState)
-        ft->ct->removeCuttingPoints();
-    flatState = !flatState;
+void GLModel::cutModeSelected(int type){
+    qDebug() << "cut mode selected" << type;
+    parentModel->removeCuttingPoints();
+    cutMode = type;
+    return;
 }
 
 void GLModel::getSliderSignal(double value){
@@ -912,12 +988,13 @@ QVector3D GLModel::spreadPoint(QVector3D endPoint,QVector3D startPoint,int facto
     return finalVector;
 }
 
-
 Mesh* GLModel::toSparse(Mesh* mesh){
     int i=0, jump=30, factor=10;
     Mesh* newMesh = new Mesh;
     foreach (MeshFace mf , mesh->faces){
         if (i%jump==0){
+            QCoreApplication::processEvents();
+
             QVector3D point1 =mesh->idx2MV(mf.mesh_vertex[0]).position;
             QVector3D point2 =mesh->idx2MV(mf.mesh_vertex[1]).position;
             QVector3D point3 =mesh->idx2MV(mf.mesh_vertex[2]).position;

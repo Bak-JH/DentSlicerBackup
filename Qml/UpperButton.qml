@@ -12,7 +12,7 @@ Rectangle{
     width: buttonWidth
     height: buttonHeight
     anchors.top : parent.top
-    anchors.bottom : tabgroupname.top
+    //anchors.bottom : tabgroupname.top
 
     color : "transparent"
     signal buttonClicked()

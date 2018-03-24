@@ -24,16 +24,37 @@ void QmlManager::initializeUI(QQmlApplicationEngine* e){
     models = (QEntity *)FindItemByName(engine, "Models");
     Lights* lights = new Lights(models);
 
+    // model cut components
+    cutPopup = FindItemByName(engine, "cutPopup");
+    curveButton = FindItemByName(engine, "curveButton");
+    flatButton = FindItemByName(engine, "flatButton");
+    slider = FindItemByName(engine, "slider");
+
+    // labelling components
+    text3DInput = FindItemByName(engine, "text3DInput");
+    labelPopup = FindItemByName(engine, "labelPopup");
+    labelFontBox = FindItemByName(engine, "labelFontBox");
+
+    // orientation components
+    orientPopup = FindItemByName(engine, "orientPopup");
+    progress_text = FindItemByName(engine, "progress_text");
+
+    // repair components
+    repairPopup = FindItemByName(engine, "repairPopup");
+
+
     //rotation Sphere
     rotateSphere = (QEntity *)FindItemByName(engine, "rotateSphereEntity");
     rotateSphereX = (QEntity *)FindItemByName(engine, "rotateSphereTorusX");
     rotateSphereY = (QEntity *)FindItemByName(engine, "rotateSphereTorusY");
     rotateSphereZ = (QEntity *)FindItemByName(engine, "rotateSphereTorusZ");
-    QObject* rotateSphereobj = FindItemByName(engine, "rotateSphere");
+    rotateSphereobj = FindItemByName(engine, "rotateSphere");
     QObject::connect(rotateSphereobj, SIGNAL(rotateSignal(int,int)),this, SLOT(modelRotate(int,int)));
+    QObject::connect(rotateSphereobj, SIGNAL(rotateDone(int)),this, SLOT(modelRotateDone(int)));
     rotateSphere->setEnabled(0);
     QObject *rotateButton = FindItemByName(engine, "rotateButton");
     QObject::connect(rotateButton,SIGNAL(runGroupFeature(int,QString)),this,SLOT(runGroupFeature(int,QString)));
+
 }
 
 void QmlManager::openModelFile(QString fname){
@@ -41,45 +62,25 @@ void QmlManager::openModelFile(QString fname){
     GLModel* glmodel = new GLModel(mainWindow, models, nullptr, fname, false);
 
     glmodels.push_back(glmodel);
-    glmodel->moveModelMesh(QVector3D(
-                           (-1)*glmodel->mesh->x_min,
-                           (-1)*glmodel->mesh->y_min,
-                           (-1)*glmodel->mesh->z_min));
+
     // set initial position
+    float xmid = (glmodel->mesh->x_max + glmodel->mesh->x_min)/2;
+    float ymid = (glmodel->mesh->y_max + glmodel->mesh->y_min)/2;
+    float zmid = (glmodel->mesh->z_max + glmodel->mesh->z_min)/2;
+    float zlength = (glmodel->mesh->z_max - glmodel->mesh->z_min);
+    glmodel->moveModelMesh(QVector3D(
+                           (-1)*xmid,
+                           (-1)*ymid,
+                           (-1)*zmid));
+    glmodel->m_transform->setTranslation(QVector3D(0,0,zlength/2));
 
     // auto Repair
 
-    // auto Arrange
-
-    // Arrange **********************************
-    if (glmodels.size()>=2){
-        vector<Mesh> meshes_to_arrange;
-        vector<XYArrangement> arng_result_set;
-        vector<Qt3DCore::QTransform*> m_transform_set;
-        for (int i=0; i<glmodels.size(); i++){
-            meshes_to_arrange.push_back(*(glmodels[i]->mesh));
-            m_transform_set.push_back(glmodels[i]->m_transform);
-        }
-        arng_result_set = arngMeshes(&meshes_to_arrange);
-        arrangeQt3D(m_transform_set, arng_result_set);
-    }
-
-    // model cut components
-    QObject *cutPopup = FindItemByName(engine, "cutPopup");
-    QObject *curveButton = FindItemByName(engine, "curveButton");
-    QObject *flatButton = FindItemByName(engine, "flatButton");
-    QObject *slider = FindItemByName(engine, "slider");
-
-    // labelling components
-    QObject *text3DInput = FindItemByName(engine, "text3DInput");
-    QObject *labelPopup = FindItemByName(engine, "labelPopup");
-    QObject *labelFontBox = FindItemByName(engine, "labelFontBox");
-
-    // orientation components
-    QObject* orientPopup = FindItemByName(engine, "orientPopup");
-    QObject* progress_text = FindItemByName(engine, "progress_text");
-
-    featureThread* ft = new featureThread(glmodel, ftrOrient);
+    // auto arrange components
+    glmodels_arranged = false;
+    QObject* arrangePopup = FindItemByName(engine, "arrangePopup");
+    //QObject* progress_text = FindItemByName(engine, "progress_text"); //orientation와 공유
+    QObject::connect(glmodel->arsignal, SIGNAL(runArrange()), this, SLOT(runArrange()));
 
     QObject::connect(glmodel->ft, SIGNAL(setProgress(QVariant)),progress_text, SLOT(update_loading(QVariant)));
     QObject::connect(glmodel->ft, SIGNAL(loadPopup(QVariant)),orientPopup, SLOT(show_popup(QVariant)));
@@ -88,10 +89,10 @@ void QmlManager::openModelFile(QString fname){
 
     // model cut popup codes
     QObject::connect(cutPopup,SIGNAL(generatePlane()),glmodel->shadowModel , SLOT(generatePlane()));
-    QObject::connect(cutPopup,SIGNAL(modelCut()),glmodel->shadowModel , SLOT(modelCut()));
+    //QObject::connect(cutPopup,SIGNAL(modelCut()),glmodel->shadowModel , SLOT(modelCut()));
+    QObject::connect(cutPopup,SIGNAL(modelCutFinish()),glmodel->shadowModel , SLOT(modelCutFinished()));
     //QObject::connect(cutPopup,SIGNAL(runFeature(int)),glmodel->ft , SLOT(setTypeAndStart(int)));
-    QObject::connect(cutPopup,SIGNAL(curveModeSelected()),glmodel->shadowModel,SLOT(lineAccept()));
-    QObject::connect(cutPopup,SIGNAL(flatModeSelected()),glmodel->shadowModel,SLOT(pointAccept()));
+    QObject::connect(cutPopup,SIGNAL(cutModeSelected(int)),glmodel->shadowModel,SLOT(cutModeSelected(int)));
     QObject::connect(slider, SIGNAL(govalue(double)), glmodel->shadowModel, SLOT(getSliderSignal(double)));
     //QObject::connect(slider,SIGNAL(govalue(double)),glmodel->ft->ct,SLOT(getSliderSignal(double)));
 
@@ -107,8 +108,16 @@ void QmlManager::openModelFile(QString fname){
     QObject::connect(labelFontBox, SIGNAL(sendFontName(QString)),glmodel->shadowModel, SLOT(getFontNameChanged(QString)));
 
     // auto Repair popup codes
+    QObject::connect(repairPopup, SIGNAL(runFeature(int)), glmodel->ft, SLOT(setTypeAndStart(int)));
 
-    // auto Arrange popup codes
+    // auto arrange popup codes
+    QObject::connect(arrangePopup, SIGNAL(runFeature(int)), glmodel->ft, SLOT(setTypeAndStart(int)));
+    QObject::connect(this, SIGNAL(arrangeDone(vector<QVector3D>, vector<float>)), this, SLOT(applyArrangeResult(vector<QVector3D>, vector<float>)));
+
+    // do auto arrange
+    if (glmodels.size() >=2){
+        runArrange();
+    }
 }
 
 
@@ -116,6 +125,47 @@ void QmlManager::sendUpdateModelInfo(int printing_time, int layer, QString xyz, 
     updateModelInfo(printing_time, layer, xyz, volume);
 }
 
+void QmlManager::runArrange(){
+    QFuture<void> future = QtConcurrent::run(this, &runArrange_internal);
+}
+
+void QmlManager::runArrange_internal(){
+    if(!glmodels_arranged){
+        glmodels_arranged = true;
+        if (glmodels.size()>=2){
+            vector<Mesh> meshes_to_arrange;
+            vector<XYArrangement> arng_result_set;
+            vector<Qt3DCore::QTransform*> m_transform_set;
+            for (int i=0; i<glmodels.size(); i++){
+                meshes_to_arrange.push_back(*(glmodels[i]->mesh));
+                m_transform_set.push_back(glmodels[i]->m_transform);
+            }
+            autoarrange* ar;
+            arng_result_set = ar->arngMeshes(&meshes_to_arrange);
+            vector<QVector3D> translations;
+            vector<float> rotations;
+            for (int i=0; i<arng_result_set.size(); i++){
+                XYArrangement arng_result = arng_result_set[i];
+                QVector3D trans_vec = QVector3D(arng_result.first.X/cfg->resolution, arng_result.first.Y/cfg->resolution, 0);
+                translations.push_back(trans_vec);
+                rotations.push_back(arng_result.second);
+            }
+            emit arrangeDone(translations, rotations);
+
+            //ar->arrangeQt3D(m_transform_set, arng_result_set);
+            //ar->arrangeGlmodels(&glmodel);
+        }
+    }
+    qDebug()<< "run arrange";
+}
+
+void QmlManager::applyArrangeResult(vector<QVector3D> translations, vector<float> rotations){
+    qDebug() << "apply arrange result ";
+    for (int i=0; i<glmodels.size(); i++){
+        glmodels[i]->moveModelMesh(translations[i]);
+        glmodels[i]->rotateModelMesh(3, rotations[i]);
+    }
+}
 
 QObject* FindItemByName(QList<QObject*> nodes, const QString& name)
 {
@@ -154,30 +204,54 @@ void QmlManager::ModelVisible(int ID, bool isVisible){
 
 void QmlManager::showRotateSphere(){
     rotateSphere->setEnabled(1);
-    //QFrameAction::QFrameAction qframeaction(rotateSphere);
+    GLModel *glmodel = glmodels.at(1);
+    QQmlProperty::write(rotateSphereobj,"center",glmodel->m_transform->translation());
 }
+void QmlManager::modelRotateDone(int Axis){
+    GLModel *glmodel = glmodels.at(1);
+    float angle;
+    switch(Axis){
+    case 1:{
+        angle = glmodel->m_transform->rotationX();
+        glmodel->m_transform->setRotationX(0);
+        break;
+    }
+    case 2:{
+        angle = glmodel->m_transform->rotationY();
+        glmodel->m_transform->setRotationY(0);
+        break;
+    }
+    case 3:{
+        angle = glmodel->m_transform->rotationZ();
+        glmodel->m_transform->setRotationZ(0);
+        break;
+    }
+    }
+    glmodel->rotateModelMesh(Axis,-angle);
+    float zlength = (glmodel->mesh->z_max - glmodel->mesh->z_min);
+    glmodel->m_transform->setTranslation(QVector3D(0,0,zlength/2));
+    QQmlProperty::write(rotateSphereobj,"center",glmodel->m_transform->translation());
+}
+
 void QmlManager::modelRotate(int Axis, int Angle){
-    //QMatrix4x4 tmpMatrix = glmodel->m_transform->matrix();
+    GLModel *glmodel = glmodels.at(1);
     switch(Axis){
     case 1:{  //X
-        //float tmpx = glmodel->m_transform->rotationX();
-        //glmodel->m_transform->setRotationX(tmpx+Angle);
+        float tmpx = glmodel->m_transform->rotationX();
+        glmodel->m_transform->setRotationX(tmpx+Angle);
         break;
     }
     case 2:{  //Y
-        //float tmpy = glmodel->m_transform->rotationY();
-        //glmodel->m_transform->setRotationY(tmpy+Angle);
+        float tmpy = glmodel->m_transform->rotationY();
+        glmodel->m_transform->setRotationY(tmpy+Angle);
         break;
     }
     case 3:{  //Z
-        //float tmpz = glmodel->m_transform->rotationZ();
-        //glmodel->m_transform->setRotationZ(tmpz+Angle);
+        float tmpz = glmodel->m_transform->rotationZ();
+        glmodel->m_transform->setRotationZ(tmpz+Angle);
         break;
     }
     }
-    //qDebug() << glmodel->m_transform->rotationX() << Angle;
-    //glmodel->m_transform->setMatrix(tmpMatrix);
-    qDebug() << "Angle Monitor" << Angle;
 }
 void QmlManager::runGroupFeature(int ftrType, QString state){
     showRotateSphere();

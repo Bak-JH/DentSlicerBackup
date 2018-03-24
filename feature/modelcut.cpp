@@ -110,6 +110,7 @@ void modelcut::addCuttingPoint(Qt3DCore::QEntity* targetEntity, QVector3D v){
     sphereEntity[numPoints]->addComponent(sphereTransform[numPoints]);
     sphereEntity[numPoints]->addComponent(sphereMaterial[numPoints]);
     numPoints++;
+
 }
 
 

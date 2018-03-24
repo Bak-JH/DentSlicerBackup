@@ -63,48 +63,35 @@ Entity {
 
     Entity{
         id : total
-        //property alias mtr: mtr
-
+        objectName:"total"
         Transform{
-            id : totalTransform
-            //rotation: fromAxisAndAngle(Qt.vector3d(0,0, 1), 60)
+            id: systemTransform
+            scale3D: Qt.vector3d(0.01,0.01,0.01)
+        }
+        components: [systemTransform]
+
+        Plate{
+            id: planeEntity
         }
 
+        Model{
+            id: meshEntity4
+            //inputSource:"file:///D:/Dev/DLPSlicer/DLPslicer/resource/mesh/lowerjaw.obj"
+        }
         Entity{
-            objectName:"teethModel"
-            Transform{
-                id: systemTransform
-                scale3D: Qt.vector3d(0.01,0.01,0.01)
+            objectName: "rotateSphereEntity"
+            MeshTransformerRotate{
+                objectName: "rotateSphere"
             }
-            components: [systemTransform]
-            /*
-            Plane{
-                id: planeEntity
-            }*/
-            Plate{
-                id: planeEntity
-            }
-            Model{
-                id: meshEntity4
-                //inputSource:"file:///D:/Dev/DLPSlicer/DLPslicer/resource/mesh/lowerjaw.obj"
-            }
-            Entity{
-                objectName: "rotateSphereEntity"
-                MeshTransformerRotate{
-                    objectName: "rotateSphere"
-                }
-            }
-            CoordinateMesh{}
         }
-
-        //MeshTransformerRotate{id:mtr}
-        //MeshTransformerMove{}
+        CoordinateMesh{}
     }
 
     MouseDevice {
         id: mouse
         sensitivity: 0.005
     }
+
     components: [
         LogicalDevice {
               id: logicalDevice;
