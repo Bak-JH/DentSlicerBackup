@@ -59,6 +59,7 @@ private:
 
 signals:
     void updateModelInfo(int printing_time, int layer, QString xyz, float volume);
+    void arrangeDone(vector<QVector3D>, vector<float>);
 
 public slots:
     void sendUpdateModelInfo(int, int, QString, float);
@@ -66,6 +67,7 @@ public slots:
     void runGroupFeature(int,QString);
     void modelRotate(int,int);
     void runArrange();
+    void applyArrangeResult(vector<QVector3D>, vector<float>);
 };
 
 

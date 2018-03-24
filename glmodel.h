@@ -127,6 +127,9 @@ public:
     void moveModelMesh(QVector3D direction);
     // Model Mesh rotate
     void rotateModelMesh(int Axis, float Angle);
+    // Model Mesh info update
+    void updateModelMesh();
+
     // Model Cut
     void addCuttingPoint(QVector3D v);
     void removeCuttingPoints();

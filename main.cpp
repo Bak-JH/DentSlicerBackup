@@ -18,6 +18,8 @@ int main(int argc, char **argv)
 {
     QApplication app(argc, argv);
     QQmlApplicationEngine engine;
+    qRegisterMetaType<vector<QVector3D>>("vector<QVector3D>");
+    qRegisterMetaType<vector<float>>("vector<float>");
 
     QPixmap pixmap(":/Resource/splash.png");
     QSplashScreen *splash = new QSplashScreen(pixmap);

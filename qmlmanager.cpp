@@ -111,6 +111,12 @@ void QmlManager::openModelFile(QString fname){
 
     // auto arrange popup codes
     QObject::connect(arrangePopup, SIGNAL(runFeature(int)), glmodel->ft, SLOT(setTypeAndStart(int)));
+    QObject::connect(this, SIGNAL(arrangeDone(vector<QVector3D>, vector<float>)), this, SLOT(applyArrangeResult(vector<QVector3D>, vector<float>)));
+
+    // do auto arrange
+    if (glmodels.size() >=2){
+        runArrange();
+    }
 }
 
 
@@ -135,11 +141,29 @@ void QmlManager::runArrange_internal(){
             }
             autoarrange* ar;
             arng_result_set = ar->arngMeshes(&meshes_to_arrange);
-            ar->arrangeQt3D(m_transform_set, arng_result_set);
+            vector<QVector3D> translations;
+            vector<float> rotations;
+            for (int i=0; i<arng_result_set.size(); i++){
+                XYArrangement arng_result = arng_result_set[i];
+                QVector3D trans_vec = QVector3D(arng_result.first.X/cfg->resolution, arng_result.first.Y/cfg->resolution, 0);
+                translations.push_back(trans_vec);
+                rotations.push_back(arng_result.second);
+            }
+            emit arrangeDone(translations, rotations);
+
+            //ar->arrangeQt3D(m_transform_set, arng_result_set);
             //ar->arrangeGlmodels(&glmodel);
         }
     }
     qDebug()<< "run arrange";
+}
+
+void QmlManager::applyArrangeResult(vector<QVector3D> translations, vector<float> rotations){
+    qDebug() << "apply arrange result ";
+    for (int i=0; i<glmodels.size(); i++){
+        glmodels[i]->moveModelMesh(translations[i]);
+        glmodels[i]->rotateModelMesh(3, rotations[i]);
+    }
 }
 
 QObject* FindItemByName(QList<QObject*> nodes, const QString& name)

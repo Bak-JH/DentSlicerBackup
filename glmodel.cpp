@@ -100,14 +100,15 @@ GLModel::GLModel(QNode *parent, Mesh* loadMesh, QString fname, bool isShadow)
 
 void GLModel::moveModelMesh(QVector3D direction){
     mesh->vertexMove(direction);
-    initialize(mesh);
-    addVertices(mesh);
-    shadowModel->removeModel();
-    shadowModel=new GLModel(this,mesh,filename,true);
+    updateModelMesh();
 }
 
 void GLModel::rotateModelMesh(int Axis, float Angle){
     mesh->vertexRotate(Axis,Angle);
+    updateModelMesh();
+}
+
+void GLModel::updateModelMesh(){
     initialize(mesh);
     addVertices(mesh);
     shadowModel->removeModel();
@@ -681,6 +682,7 @@ void GLModel::removeModel(){
     removeComponent(m_meshMaterial);
     delete m_geometry;
     delete m_geometryRenderer;
+    deleteLater();
 }
 
 
