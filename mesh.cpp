@@ -17,7 +17,8 @@ void Mesh::vertexMove(QVector3D direction){
         updateMinMax(vertices[i].position);
     }
 }
-void Mesh::vertexRotate(int Axis, float Angle){
+
+void Mesh::vertexRotate(QMatrix4x4 tmpmatrix){
     int numberofVertices = vertices.size();
     int numberofFaces = faces.size();
     x_min = 99999;
@@ -26,29 +27,13 @@ void Mesh::vertexRotate(int Axis, float Angle){
     y_max = 99999;
     z_min = 99999;
     z_max = 99999;
-    Qt3DCore::QTransform* tmp = new Qt3DCore::QTransform();
-    switch(Axis){
-    case 1:{
-        tmp->setRotationX(Angle);
-        break;
-    }
-    case 2:{
-        tmp->setRotationY(Angle);
-        break;
-    }
-    case 3:{
-        tmp->setRotationZ(Angle);
-        break;
-    }
-    }
-    qDebug() << tmp->matrix();
     QVector4D tmpVertex;
     QVector3D tmpVertex2;
     for (int i=0;i<numberofVertices;i++){
         tmpVertex =vertices[i].position.toVector4D();
-        tmpVertex2.setX(QVector4D::dotProduct(tmpVertex,tmp->matrix().column(0)));
-        tmpVertex2.setY(QVector4D::dotProduct(tmpVertex,tmp->matrix().column(1)));
-        tmpVertex2.setZ(QVector4D::dotProduct(tmpVertex,tmp->matrix().column(2)));
+        tmpVertex2.setX(QVector4D::dotProduct(tmpVertex,tmpmatrix.column(0)));
+        tmpVertex2.setY(QVector4D::dotProduct(tmpVertex,tmpmatrix.column(1)));
+        tmpVertex2.setZ(QVector4D::dotProduct(tmpVertex,tmpmatrix.column(2)));
         vertices[i].position = tmpVertex2;
         updateMinMax(vertices[i].position);
     }

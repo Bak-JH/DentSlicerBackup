@@ -127,8 +127,7 @@ public:
     void moveModelMesh(QVector3D direction);
     // Model Mesh rotate
     void rotateModelMesh(int Axis, float Angle);
-    // Model Mesh info update
-    void updateModelMesh();
+    void rotateModelMesh(QMatrix4x4 matrix);
 
     // Model Cut
     void addCuttingPoint(QVector3D v);
@@ -174,6 +173,7 @@ private:
 
 signals:
     void bisectDone();
+    void _updateModelMesh();
 
 
 public slots:
@@ -200,6 +200,9 @@ public slots:
     void closeLabelling();
     void getFontNameChanged(QString fontName);
     void generateText3DMesh();
+
+    // Model Mesh info update
+    void updateModelMesh();
 };
 
 #endif // GLMODEL_H

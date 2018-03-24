@@ -91,6 +91,8 @@ GLModel::GLModel(QNode *parent, Mesh* loadMesh, QString fname, bool isShadow)
     shadowModel = new GLModel(this, mesh, filename, true);
 
     QObject::connect(this,SIGNAL(bisectDone()),this,SLOT(generateRLModel()));
+    QObject::connect(this,SIGNAL(_updateModelMesh()),this,SLOT(updateModelMesh()));
+
 
     qDebug() << "created shadow model";
 
@@ -100,15 +102,38 @@ GLModel::GLModel(QNode *parent, Mesh* loadMesh, QString fname, bool isShadow)
 
 void GLModel::moveModelMesh(QVector3D direction){
     mesh->vertexMove(direction);
-    updateModelMesh();
+    emit _updateModelMesh();
 }
 
 void GLModel::rotateModelMesh(int Axis, float Angle){
-    mesh->vertexRotate(Axis,Angle);
-    updateModelMesh();
+    Qt3DCore::QTransform* tmp = new Qt3DCore::QTransform();
+    switch(Axis){
+    case 1:{
+        tmp->setRotationX(Angle);
+        break;
+    }
+    case 2:{
+        tmp->setRotationY(Angle);
+        break;
+    }
+    case 3:{
+        tmp->setRotationZ(Angle);
+        break;
+    }
+    }
+    rotateModelMesh(tmp->matrix());
+}
+
+void GLModel::rotateModelMesh(QMatrix4x4 matrix){
+    mesh->vertexRotate(matrix);
+    emit _updateModelMesh();
 }
 
 void GLModel::updateModelMesh(){
+    if (z != 0){
+        moveModelMesh(QVector3D(0.0f,0.0f,-z));
+        return;
+    }
     initialize(mesh);
     addVertices(mesh);
     shadowModel->removeModel();
@@ -173,7 +198,8 @@ void featureThread::run(){
                 } else {
                     markPopup(true);
                     rotateResult* rotateres= ot->Tweak(m_glmodel->mesh,true,45,&m_glmodel->appropriately_rotated);
-                    m_glmodel->m_transform->setMatrix(rotateres->R);
+                    m_glmodel->rotateModelMesh(rotateres->R);
+                    //m_glmodel->m_transform->setMatrix(rotateres->R);
                 }
                 break;
             }

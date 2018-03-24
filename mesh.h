@@ -68,7 +68,7 @@ public :
 
     /********************** Mesh Edit Functions***********************/
     void vertexMove(QVector3D direction);
-    void vertexRotate(int Axis, float Angle);
+    void vertexRotate(QMatrix4x4 tmpmatrix);
 
     /********************** Mesh Generation Functions **********************/
     void addFace(QVector3D v0, QVector3D v1, QVector3D v2);
