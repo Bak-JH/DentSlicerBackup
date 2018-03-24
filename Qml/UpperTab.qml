@@ -544,6 +544,7 @@ Rectangle {
 
         //7. PopUp - Arrange
         PopUp {
+            objectName: "arrangePopup"
             id: popup_arrange
             funcname: "Arrange"
             height: 220
@@ -561,7 +562,7 @@ Rectangle {
             signal runFeature(int type);
             onApplyClicked: {
                 console.log("arrange");
-                runFeature(ftrArrage);
+                runFeature(ftrArrange);
             }
         }
 
