@@ -48,6 +48,7 @@ public:
     void showRotateSphere();
     void initializeUI(QQmlApplicationEngine *e);
     void openModelFile_internal(QString filename);
+    void runArrange_internal();
 
 private:
     bool glmodels_arranged;

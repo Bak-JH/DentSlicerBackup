@@ -109,6 +109,10 @@ void QmlManager::sendUpdateModelInfo(int printing_time, int layer, QString xyz, 
 }
 
 void QmlManager::runArrange(){
+    QFuture<void> future = QtConcurrent::run(this, &runArrange_internal);
+}
+
+void QmlManager::runArrange_internal(){
     if(!glmodels_arranged){
         glmodels_arranged = true;
         if (glmodels.size()>=2){
