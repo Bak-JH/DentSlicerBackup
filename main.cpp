@@ -46,7 +46,7 @@ int main(int argc, char **argv)
     engine.load(QUrl(QStringLiteral("qrc:/Qml/main.qml")));
 
     qmlManager->initializeUI(&engine);
-    qmlManager->openModelFile("C:/Users/diridiri/Desktop/DLP/DLPslicer/partial2_flip.stl");//DLPslicer/partial2_flip.stl");
+    //qmlManager->openModelFile("C:/Users/diridiri/Desktop/DLP/DLPslicer/partial2_flip.stl");//DLPslicer/partial2_flip.stl");
     splash->close();
 
     qmlManager->mainWindow->setProperty("visible",true);

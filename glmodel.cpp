@@ -768,8 +768,8 @@ void GLModel::modelCut(){
 
 void GLModel::generateRLModel(){
     qDebug() << "modelCut finished";
-    leftModel = new GLModel(parentModel, lmesh, "", false);
-    rightModel = new GLModel(parentModel, rmesh, "", false);
+    leftModel = new GLModel(parentModel->mainWindow, parentModel, lmesh, "", false);
+    rightModel = new GLModel(parentModel->mainWindow, parentModel, rmesh, "", false);
 
 }
 
