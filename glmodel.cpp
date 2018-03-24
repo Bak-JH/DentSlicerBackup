@@ -97,6 +97,7 @@ GLModel::GLModel(QNode *parent, Mesh* loadMesh, QString fname, bool isShadow)
     ft = new featureThread(this, 0);
     arsignal = new arrangeSignalSender();
 }
+
 void GLModel::moveModelMesh(QVector3D direction){
     mesh->vertexMove(direction);
     initialize(mesh);
@@ -104,13 +105,13 @@ void GLModel::moveModelMesh(QVector3D direction){
     shadowModel->removeModel();
     shadowModel=new GLModel(this,mesh,filename,true);
 }
+
 void GLModel::rotateModelMesh(int Axis, float Angle){
     mesh->vertexRotate(Axis,Angle);
-    sparseMesh=toSparse(mesh);
     initialize(mesh);
     addVertices(mesh);
     shadowModel->removeModel();
-    shadowModel=new GLModel(this,mesh,"",true);
+    shadowModel=new GLModel(this,mesh,filename,true);
 }
 
 featureThread::featureThread(GLModel* glmodel, int type){
