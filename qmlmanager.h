@@ -7,7 +7,7 @@
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
 #include <QQmlEngine>
-#include "feature/arrange.h"
+#include "feature/autoarrange.h"
 #include "glmodel.h"
 #include "QtConcurrent/QtConcurrentRun"
 #include "QFuture"
@@ -31,6 +31,9 @@ public:
     void initializeUI(QQmlApplicationEngine *e);
     void openModelFile_internal(QString filename);
 
+private:
+    bool glmodels_arranged;
+
 signals:
     void updateModelInfo(int printing_time, int layer, QString xyz, float volume);
 
@@ -39,6 +42,7 @@ public slots:
     void openModelFile(QString filename);
     void runGroupFeature(int,QString);
     void modelRotate(int,int);
+    void runArrange();
 };
 
 

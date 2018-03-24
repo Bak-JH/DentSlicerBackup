@@ -1,12 +1,11 @@
-#include "arrange.h"
+#include "autoarrange.h"
 
-Arrange::Arrange()
+autoarrange::autoarrange()
 {
 
 }
-bool shit = false;
 
-Paths spreadingCheck(Mesh* mesh, bool* check, int chking_start, bool is_chking_pos){
+Paths autoarrange::spreadingCheck(Mesh* mesh, bool* check, int chking_start, bool is_chking_pos){
     /**/qDebug() << "SpreadingCheck started from" << chking_start;
     Paths paths;
     int chking = -1;
@@ -50,7 +49,7 @@ Paths spreadingCheck(Mesh* mesh, bool* check, int chking_start, bool is_chking_p
     return paths;
 }
 
-int getPathHead(MeshFace* mf, int side, bool is_chking_pos){
+int autoarrange::getPathHead(MeshFace* mf, int side, bool is_chking_pos){
     if(side==0 && isEdgeBound(mf, 2, is_chking_pos)) {
         if(isEdgeBound(mf, 1, is_chking_pos)) return -1;//all side of chking face is bound, face is alone
         else return mf->mesh_vertex[2];
@@ -58,7 +57,7 @@ int getPathHead(MeshFace* mf, int side, bool is_chking_pos){
     return mf->mesh_vertex[side];
 }
 
-Path buildOutline(Mesh* mesh, bool* check, int chking, int path_head, bool is_chking_pos){
+Path autoarrange::buildOutline(Mesh* mesh, bool* check, int chking, int path_head, bool is_chking_pos){
     //**qDebug() << "buildOutline from" << chking;
     vector<int> path_by_idx;
     if(path_head==-1){//혼자있는 면의 경우 오리엔테이션 확인 방법이 마련되어있지 않음
@@ -104,7 +103,7 @@ Path buildOutline(Mesh* mesh, bool* check, int chking, int path_head, bool is_ch
     return idxsToPath(mesh, path_by_idx);
 }
 
-bool isEdgeBound(MeshFace* mf, int side, bool is_chking_pos){//bound edge: connected to face with opposit fn.z/not connected any face/multiple neighbor/opposit orientation
+bool autoarrange::isEdgeBound(MeshFace* mf, int side, bool is_chking_pos){//bound edge: connected to face with opposit fn.z/not connected any face/multiple neighbor/opposit orientation
     if(mf->neighboring_faces[side].size() != 1) return true;
     MeshFace* neighbor = mf->neighboring_faces[side][0];
     if(!checkFNZ(neighbor, is_chking_pos)) return true;
@@ -112,30 +111,30 @@ bool isEdgeBound(MeshFace* mf, int side, bool is_chking_pos){//bound edge: conne
     return false;
 }
 
-bool isNbrOrientSame(MeshFace* mf, int side){
+bool autoarrange::isNbrOrientSame(MeshFace* mf, int side){
     MeshFace* nbr = mf->neighboring_faces[side][0];
     if(getNbrVtx(nbr, searchVtxInFace(nbr, mf->mesh_vertex[side]), 2) == getNbrVtx(mf, side, 1)) return true;
     return false;
 }
 
-int searchVtxInFace(MeshFace* mf, int vertexIdx){
+int autoarrange::searchVtxInFace(MeshFace* mf, int vertexIdx){
     for(int i=0; i<3; i++){
         if(mf->mesh_vertex[i] == vertexIdx) return i;
     }
     return -1;
 }
 
-vector<int> arrToVect(int arr[]){
+vector<int> autoarrange::arrToVect(int arr[]){
     vector<int> vec (arr, arr + sizeof arr / sizeof arr[0]);
     return vec;
 }
 
-int getNbrVtx(MeshFace* mf, int base, int xth){//getNeighborVtx
+int autoarrange::getNbrVtx(MeshFace* mf, int base, int xth){//getNeighborVtx
     if(xth>0) return mf->mesh_vertex[(base+xth+3)%3];
     else return -1;
 }
 
-Path idxsToPath(Mesh* mesh, vector<int> path_by_idx){
+Path autoarrange::idxsToPath(Mesh* mesh, vector<int> path_by_idx){
     Path path;
     for(int id : path_by_idx){
         QVector3D vertex = mesh->vertices[id].position;
@@ -145,7 +144,7 @@ Path idxsToPath(Mesh* mesh, vector<int> path_by_idx){
     return path;
 }
 
-Paths project(Mesh* mesh){
+Paths autoarrange::project(Mesh* mesh){
     int faces_size = mesh->faces.size();
     vector<Paths> outline_sets;
     bool is_chking_pos = false;
@@ -167,7 +166,7 @@ Paths project(Mesh* mesh){
     return clipOutlines(outline_sets);
 }
 
-Paths clipOutlines(vector<Paths> outline_sets){
+Paths autoarrange::clipOutlines(vector<Paths> outline_sets){
     Paths projection;
     //Paths tmp_clip_result;
     Clipper c;
@@ -185,7 +184,7 @@ Paths clipOutlines(vector<Paths> outline_sets){
     return projection;
 }
 
-bool checkFNZ(MeshFace* face, bool is_chking_pos){
+bool autoarrange::checkFNZ(MeshFace* face, bool is_chking_pos){
     if(is_chking_pos){
         if(face->fn.z()>=0) return true;
         else return false;
@@ -195,7 +194,7 @@ bool checkFNZ(MeshFace* face, bool is_chking_pos){
     }
 }
 
-void debugPaths(Paths paths){
+void autoarrange::debugPaths(Paths paths){
     qDebug() << "===============";
     for(int i=0; i<paths.size(); i++){
         qDebug() << "";
@@ -207,7 +206,7 @@ void debugPaths(Paths paths){
     qDebug() << "===============";
 }
 
-void debugPath(Path path){
+void autoarrange::debugPath(Path path){
     qDebug() << "===============";
     for(int i=0; i<path.size(); i++){
         qDebug()<< path[i].X << path[i].Y;
@@ -215,13 +214,13 @@ void debugPath(Path path){
     qDebug() << "===============";
 }
 
-void debugFaces(Mesh* mesh, vector<int> face_list){
+void autoarrange::debugFaces(Mesh* mesh, vector<int> face_list){
     for(int i=0; i<face_list.size(); i++){
         debugFace(mesh, face_list[i]);
     }
 }
 
-void debugFace(Mesh* mesh, int face_idx){
+void autoarrange::debugFace(Mesh* mesh, int face_idx){
         MeshFace* mf = & mesh->faces[face_idx];
         qDebug() << "face #" << face_idx;
         for(int side=0; side<3; side++){
@@ -253,11 +252,11 @@ void debugFace(Mesh* mesh, int face_idx){
         }
 }
 
-int findVertexWithIntpoint(IntPoint p, Mesh* mesh){
+int autoarrange::findVertexWithIntpoint(IntPoint p, Mesh* mesh){
     return findVertexWithIntXY(p.X, p.Y, mesh);
 }
 
-int findVertexWithIntXY(int x, int y, Mesh* mesh){
+int autoarrange::findVertexWithIntXY(int x, int y, Mesh* mesh){
     for(int vtx_idx=0; vtx_idx<mesh->vertices.size(); vtx_idx++){
         QVector3D vtx_pos = mesh->vertices[vtx_idx].position;
         int x_int = round(vtx_pos.x()*cfg->resolution);
@@ -269,7 +268,7 @@ int findVertexWithIntXY(int x, int y, Mesh* mesh){
 //=========================================
 //Ramer–Douglas–Peucker line simplification
 //=========================================
-void RDPSimpPaths(Paths* paths){
+void autoarrange::RDPSimpPaths(Paths* paths){
     for(int path_idx=0; path_idx<paths->size(); path_idx++){
         RDPSimp(&(*paths)[path_idx]);
         if((*paths)[path_idx].size()==2) {
@@ -279,7 +278,7 @@ void RDPSimpPaths(Paths* paths){
     }
 }
 
-void RDPSimp(Path* path){
+void autoarrange::RDPSimp(Path* path){
     int path_size = path->size();
     bool keepingPointMrkArr[path_size] = {false};
     keepingPointMrkArr[0] = true;
@@ -294,7 +293,7 @@ void RDPSimp(Path* path){
     simplified_path.clear();
 }
 
-void RDPSimpIter(Path* path, int start, int end, bool* keepingPointMrkArr){
+void autoarrange::RDPSimpIter(Path* path, int start, int end, bool* keepingPointMrkArr){
     float epsilon = 100;
     float max_distance = 0;
     int max_dist_point = -1;
@@ -312,12 +311,28 @@ void RDPSimpIter(Path* path, int start, int end, bool* keepingPointMrkArr){
     }
 }
 
-float distL2P(IntPoint* line_p1, IntPoint* line_p2, IntPoint* p){
+float autoarrange::distL2P(IntPoint* line_p1, IntPoint* line_p2, IntPoint* p){
     float triangle_area_double = abs(line_p1->X*(line_p2->Y-p->Y) + line_p2->X*(p->Y-line_p1->Y) +p->X*(line_p1->Y-line_p2->Y));
     float bottom_side_length = sqrt(pow((line_p1->X-line_p2->X),2) + pow((line_p1->Y-line_p2->Y),2));
     return triangle_area_double/bottom_side_length;
 }
 
+//=========================================
+//Offset Function
+//=========================================
+
+void autoarrange::offsetPath(Paths* paths){
+    int offset = 2000;
+    Paths out;
+    ClipperOffset co;
+    co.AddPaths(*paths, jtRound, etClosedPolygon);
+    //if(Orientation(*paths)) co.Execute(out, offset);
+    //else co.Execute(out, -offset);
+    co.Execute(out, offset);
+    qDebug() << "~~~~~~~";
+    debugPaths(out);
+    *paths = out;
+}
 
 //=========================================
 //Arrangement Algorithm
@@ -325,18 +340,19 @@ float distL2P(IntPoint* line_p1, IntPoint* line_p2, IntPoint* p){
 
 //typedef pair<IntPoint, float> XYArrangement;
 
-vector<XYArrangement> arngMeshes(vector<Mesh>* meshes){
+vector<XYArrangement> autoarrange::arngMeshes(vector<Mesh>* meshes){
     vector<Paths> outlines;
     /**/qDebug() << "Arrange start";
     for(int idx=0; idx<meshes->size(); idx++){
         outlines.push_back(project(&(*meshes)[idx]));
         RDPSimpPaths(&outlines[idx]);
+        offsetPath(&outlines[idx]);
     }
     /**/qDebug() << "Projection done @arngMeshes";
     return arng2D(&outlines);
 }
 
-vector<XYArrangement> arng2D(vector<Paths>* figs){
+vector<XYArrangement> autoarrange::arng2D(vector<Paths>* figs){
     vector<XYArrangement> arng_result_set;
     Paths cum_outline;
     initStage(&cum_outline);
@@ -352,7 +368,7 @@ vector<XYArrangement> arng2D(vector<Paths>* figs){
     return arng_result_set;
 }
 
-void initStage(Paths* cum_outline){
+void autoarrange::initStage(Paths* cum_outline){
 
     int stage_x = 72000;
     int stage_y = 72000;
@@ -383,7 +399,7 @@ void initStage(Paths* cum_outline){
     cum_outline->push_back(stage);
 }
 
-XYArrangement arngFig(Paths* cum_outline, Paths* fig){
+XYArrangement autoarrange::arngFig(Paths* cum_outline, Paths* fig){
     /**/qDebug() << "Arrange new fig @arngFig";
     float angle_unit = 90;
 
@@ -430,7 +446,7 @@ XYArrangement arngFig(Paths* cum_outline, Paths* fig){
     return global_optimal_arrangement;
 }
 
-Paths rotatePaths(Paths* paths, float rot_angle){//Rotation about origin,because QTransform does so.
+Paths autoarrange::rotatePaths(Paths* paths, float rot_angle){//Rotation about origin,because QTransform does so.
     Paths rot_paths;
     rot_paths.resize(paths->size());
     for(int path_idx=0; path_idx<paths->size();path_idx++){
@@ -441,7 +457,7 @@ Paths rotatePaths(Paths* paths, float rot_angle){//Rotation about origin,because
     return rot_paths;
 }
 
-IntPoint rotateIntPoint(IntPoint point, float rot_angle){//Rotation about origin,because QTransform does so.
+IntPoint autoarrange::rotateIntPoint(IntPoint point, float rot_angle){//Rotation about origin,because QTransform does so.
     IntPoint rot_point;
     float rad_angle = rot_angle*M_PI/180;
     rot_point.X = point.X*cosf(rad_angle) - point.Y*sinf(rad_angle);
@@ -449,7 +465,7 @@ IntPoint rotateIntPoint(IntPoint point, float rot_angle){//Rotation about origin
     return rot_point;
 }
 
-void tanslatePaths(Paths* paths, IntPoint tanslate_vec){
+void autoarrange::tanslatePaths(Paths* paths, IntPoint tanslate_vec){
     Paths translated_paths;
     translated_paths.resize(paths->size());
     for(int path_idx=0; path_idx<paths->size();path_idx++){
@@ -461,21 +477,21 @@ void tanslatePaths(Paths* paths, IntPoint tanslate_vec){
     translated_paths.clear();
 }
 
-IntPoint tanslateIntPoint(IntPoint point, IntPoint tanslate_vec){
+IntPoint autoarrange::tanslateIntPoint(IntPoint point, IntPoint tanslate_vec){
     IntPoint tanslated_point;
     tanslated_point.X = point.X + tanslate_vec.X;
     tanslated_point.Y = point.Y + tanslate_vec.Y;
     return tanslated_point;
 }
 
-void cumulativeClip(Paths* cum_outline, Paths* new_fig){
+void autoarrange::cumulativeClip(Paths* cum_outline, Paths* new_fig){
     Clipper c;
     c.AddPaths(*cum_outline, ptSubject, true);
     c.AddPaths(*new_fig, ptClip, true);
     c.Execute(ctUnion, *cum_outline, pftPositive, pftPositive);
 }
 
-IntPoint getOptimalPoint(Paths* nfp_set){
+IntPoint autoarrange::getOptimalPoint(Paths* nfp_set){
     /**/qDebug() << "-0" << "@arngFig";
     int min_x = (*nfp_set)[0][0].X;
     int min_y = (*nfp_set)[0][0].Y;
@@ -505,7 +521,7 @@ IntPoint getOptimalPoint(Paths* nfp_set){
 
 }
 
-int getMaxX(IntPoint translate_vec, Paths* fig){
+int autoarrange::getMaxX(IntPoint translate_vec, Paths* fig){
     Path path = (*fig)[0];//paths[0]이 가장 외곽일거라 가정
     int max_x = path[0].X;
     for(int idx=1; idx<path.size(); idx++){
@@ -514,7 +530,7 @@ int getMaxX(IntPoint translate_vec, Paths* fig){
     return max_x + translate_vec.X - path[0].X;
 }
 
-int getMaxY(IntPoint translate_vec, Paths* fig){
+int autoarrange::getMaxY(IntPoint translate_vec, Paths* fig){
     Path path = (*fig)[0];//paths[0]이 가장 외곽일거라 가정
     int max_y = path[0].Y;
     for(int idx=1; idx<path.size(); idx++){
@@ -523,7 +539,7 @@ int getMaxY(IntPoint translate_vec, Paths* fig){
     return max_y + translate_vec.Y - path[0].Y;
 }
 
-Paths getNFP(Paths* subject, Paths* object){
+Paths autoarrange::getNFP(Paths* subject, Paths* object){
     Path convex_obj = getConvexHull(&(*object)[0]);
     /**/qDebug() << "- getConvexHull result" << "@getNFP";
     /**/debugPath(convex_obj);//qDebug
@@ -585,7 +601,7 @@ Paths getNFP(Paths* subject, Paths* object){
     return mergeNFP(&separate_nfp_set);
 }
 
-Paths simplyfyRawNFP(Paths* raw_nfp_set, Paths* subject){
+Paths autoarrange::simplyfyRawNFP(Paths* raw_nfp_set, Paths* subject){
     Paths simplyfied_nfp_set;
     simplyfied_nfp_set.resize(1);//path_idx0 is univesal_plane
     for(int idx=1; idx<raw_nfp_set->size(); idx++){//path_idx0 is univesal_plane
@@ -619,7 +635,7 @@ Paths simplyfyRawNFP(Paths* raw_nfp_set, Paths* subject){
     return simplyfied_nfp_set;
 }
 
-Paths mergeNFP(Paths* separate_nfp_set){
+Paths autoarrange::mergeNFP(Paths* separate_nfp_set){
     Paths merged_nfp;
     for(int idx =1; idx<separate_nfp_set->size(); idx++){
         if((*separate_nfp_set)[idx].size()>0){
@@ -639,7 +655,7 @@ Paths mergeNFP(Paths* separate_nfp_set){
     return merged_nfp;
 }
 
-vector<vector<IntPoint>> getObjVecsInRegions(vector<float>* sub_slope_set, vector<float>* obj_slope_set, vector<IntPoint>* obj_vec_set){
+vector<vector<IntPoint>> autoarrange::getObjVecsInRegions(vector<float>* sub_slope_set, vector<float>* obj_slope_set, vector<IntPoint>* obj_vec_set){
     vector<vector<IntPoint>> obj_vecs_in_regions;
     //obj_vecs_in_regions.resize(sub_slope_set->size());
     int obj_edge_tail;
@@ -691,7 +707,7 @@ vector<vector<IntPoint>> getObjVecsInRegions(vector<float>* sub_slope_set, vecto
     return obj_vecs_in_regions;
 }
 
-bool isOnCCWPath(float start, float end, float object){
+bool autoarrange::isOnCCWPath(float start, float end, float object){
     if(start<0) start=start+2*M_PI;
     if(end<0) end=end+2*M_PI;
     if(object<0) object=object+2*M_PI;
@@ -700,7 +716,7 @@ bool isOnCCWPath(float start, float end, float object){
     else return false;
 }
 
-float getNthEdgeSlope(Path* path, int edge_idx, bool isForward){
+float autoarrange::getNthEdgeSlope(Path* path, int edge_idx, bool isForward){
     if(isForward){
         return getEdgeSlope(&(*path)[edge_idx], &(*path)[(edge_idx+1)%(path->size())]);
     }else{
@@ -708,14 +724,14 @@ float getNthEdgeSlope(Path* path, int edge_idx, bool isForward){
     }
 }
 
-float getEdgeSlope(IntPoint* p1, IntPoint* p2){
+float autoarrange::getEdgeSlope(IntPoint* p1, IntPoint* p2){
     //*qDebug() << "- edge slope" << atan2f((p2->Y-p1->Y),(p2->X-p1->X));
     float raw_slope = atan2f((p2->Y-p1->Y),(p2->X-p1->X));
     if(raw_slope<0) return raw_slope + 2*M_PI;
     else return raw_slope;
 }
 
-IntPoint getNthEdgeVec(Path* path, int edge_idx, bool isForward){
+IntPoint autoarrange::getNthEdgeVec(Path* path, int edge_idx, bool isForward){
     if(isForward){
         return getEdgeVec(&(*path)[edge_idx], &(*path)[(edge_idx+1)%(path->size())]);
     }else{
@@ -723,7 +739,7 @@ IntPoint getNthEdgeVec(Path* path, int edge_idx, bool isForward){
     }
 }
 
-IntPoint getEdgeVec(IntPoint* p1, IntPoint* p2){
+IntPoint autoarrange::getEdgeVec(IntPoint* p1, IntPoint* p2){
     IntPoint vec;
     vec.X = p2->X - p1->X;
     vec.Y = p2->Y - p1->Y;
@@ -731,7 +747,7 @@ IntPoint getEdgeVec(IntPoint* p1, IntPoint* p2){
     return vec;
 }
 
-IntPoint getFirstNFPPoint(float sub_slope, IntPoint sub_point, Path* obj, vector<float> obj_slope_set){
+IntPoint autoarrange::getFirstNFPPoint(float sub_slope, IntPoint sub_point, Path* obj, vector<float> obj_slope_set){
     int first_obj_slope_idx = -1;
     float min_slope_diff = 2*M_PI;
     for(int idx=0; idx<obj->size(); idx++){
@@ -749,7 +765,7 @@ IntPoint getFirstNFPPoint(float sub_slope, IntPoint sub_point, Path* obj, vector
     return fist_nfp_point;
 }
 
-IntPoint rotateIntPointRad(IntPoint point, float rot_angle){
+IntPoint autoarrange::rotateIntPointRad(IntPoint point, float rot_angle){
     IntPoint rot_point;
     rot_point.X = point.X*cosf(rot_angle) - point.Y*sinf(rot_angle);
     rot_point.Y = point.X*sinf(rot_angle) + point.Y*cosf(rot_angle);
@@ -761,23 +777,35 @@ IntPoint rotateIntPointRad(IntPoint point, float rot_angle){
 //arrange Qt3D
 //=========================================
 
-void arrangeQt3D(vector<Qt3DCore::QTransform*> m_transform_set, vector<XYArrangement> arng_result_set){
+void autoarrange::arrangeQt3D(vector<Qt3DCore::QTransform*> m_transform_set, vector<XYArrangement> arng_result_set){
     for(int idx=0; idx<arng_result_set.size(); idx++){
         arrangeSingleQt3D(m_transform_set[idx], arng_result_set[idx]);
     }
 }
 
-void arrangeSingleQt3D(Qt3DCore::QTransform* m_transform, XYArrangement arng_result){
+void autoarrange::arrangeSingleQt3D(Qt3DCore::QTransform* m_transform, XYArrangement arng_result){
     QVector3D trans_vec = QVector3D(arng_result.first.X/cfg->resolution, arng_result.first.Y/cfg->resolution, 0);
     m_transform->setTranslation(trans_vec);
     m_transform->setRotationZ(arng_result.second);
 }
 
+/*void autoarrange::arrangeGlmodels(vector<GLModel*>* glmodels){
+    vector<Mesh> meshes_to_arrange;
+    vector<XYArrangement> arng_result_set;
+    vector<Qt3DCore::QTransform*> m_transform_set;
+    for(int idx=0; idx<glmodels->size(); idx++){
+        meshes_to_arrange.push_back(* (*glmodels)[idx]->mesh);
+        m_transform_set.push_back((*glmodels)[idx]->m_transform);
+    }
+    arng_result_set = arngMeshes(&meshes_to_arrange);
+    arrangeQt3D(m_transform_set, arng_result_set);
+}*/
+
 //=========================================
 //test
 //=========================================
 
-void testSimplifyPolygon(){
+void autoarrange::testSimplifyPolygon(){
     Path path;
     int path_data[][2] =
     {
@@ -798,7 +826,7 @@ void testSimplifyPolygon(){
     debugPaths(result_paths);
 }
 
-void testClip(){
+void autoarrange::testClip(){
     Path path1;
     int path1_data[][2] =
     {
@@ -839,4 +867,27 @@ void testClip(){
 
     cumulativeClip(&cumulative_paths, &new_paths);
     debugPaths(cumulative_paths);
+}
+
+void autoarrange::testOffset(){
+
+    Path path1;
+    int path1_data[][2] =
+    {
+        {400, 400},
+        {400, 0},
+        {0, 0},
+        {0, 400}
+    };
+    for(int idx=0; idx<sizeof(path1_data)/sizeof(path1_data[0]);idx++){
+        IntPoint point;
+        point.X=path1_data[idx][0];
+        point.Y=path1_data[idx][1];
+        path1.push_back(point);
+    }
+    Paths paths1;
+    paths1.push_back(path1);
+
+    //offsetPath(&path1);
+    debugPath(path1);
 }

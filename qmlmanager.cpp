@@ -49,20 +49,11 @@ void QmlManager::openModelFile(QString fname){
 
     // auto Repair
 
-    // auto Arrange
-
-    // Arrange **********************************
-    if (glmodels.size()>=2){
-        vector<Mesh> meshes_to_arrange;
-        vector<XYArrangement> arng_result_set;
-        vector<Qt3DCore::QTransform*> m_transform_set;
-        for (int i=0; i<glmodels.size(); i++){
-            meshes_to_arrange.push_back(*(glmodels[i]->mesh));
-            m_transform_set.push_back(glmodels[i]->m_transform);
-        }
-        arng_result_set = arngMeshes(&meshes_to_arrange);
-        arrangeQt3D(m_transform_set, arng_result_set);
-    }
+    // auto arrange components
+    glmodels_arranged = false;
+    QObject* arrangePopup = FindItemByName(engine, "arrangePopup");
+    //QObject* progress_text = FindItemByName(engine, "progress_text"); //orientation와 공유
+    QObject::connect(glmodel->arsignal, SIGNAL(runArrange()), this, SLOT(runArrange()));
 
     // model cut components
     QObject *cutPopup = FindItemByName(engine, "cutPopup");
@@ -108,7 +99,8 @@ void QmlManager::openModelFile(QString fname){
 
     // auto Repair popup codes
 
-    // auto Arrange popup codes
+    // auto arrange popup codes
+    QObject::connect(arrangePopup, SIGNAL(runFeature(int)), glmodel->ft, SLOT(setTypeAndStart(int)));
 }
 
 
@@ -116,6 +108,25 @@ void QmlManager::sendUpdateModelInfo(int printing_time, int layer, QString xyz, 
     updateModelInfo(printing_time, layer, xyz, volume);
 }
 
+void QmlManager::runArrange(){
+    if(!glmodels_arranged){
+        glmodels_arranged = true;
+        if (glmodels.size()>=2){
+            vector<Mesh> meshes_to_arrange;
+            vector<XYArrangement> arng_result_set;
+            vector<Qt3DCore::QTransform*> m_transform_set;
+            for (int i=0; i<glmodels.size(); i++){
+                meshes_to_arrange.push_back(*(glmodels[i]->mesh));
+                m_transform_set.push_back(glmodels[i]->m_transform);
+            }
+            autoarrange* ar;
+            arng_result_set = ar->arngMeshes(&meshes_to_arrange);
+            ar->arrangeQt3D(m_transform_set, arng_result_set);
+            //ar->arrangeGlmodels(&glmodel);
+        }
+    }
+    qDebug()<< "run arrange";
+}
 
 QObject* FindItemByName(QList<QObject*> nodes, const QString& name)
 {
