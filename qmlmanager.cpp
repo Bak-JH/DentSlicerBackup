@@ -150,6 +150,7 @@ void QmlManager::ModelVisible(int ID, bool isVisible){
         }
     }
     target->setEnabled(isVisible);
+}
 
 void QmlManager::showRotateSphere(){
     rotateSphere->setEnabled(1);
