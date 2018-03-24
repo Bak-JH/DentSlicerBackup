@@ -38,7 +38,7 @@ void QmlManager::initializeUI(QQmlApplicationEngine* e){
 
 void QmlManager::openModelFile(QString fname){
 
-    GLModel* glmodel = new GLModel(models, nullptr, fname, false);
+    GLModel* glmodel = new GLModel(mainWindow, models, nullptr, fname, false);
 
     glmodels.push_back(glmodel);
     glmodel->moveModelMesh(QVector3D(

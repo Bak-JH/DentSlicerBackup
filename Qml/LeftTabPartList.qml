@@ -131,7 +131,7 @@ Rectangle {
 
     function deletePart(ID){ // delete in list by ID
         for(var i=0;i<partListColumn.children.length;i++){
-            if(partListColumn.childAt(i).ID == ID)
+            if(partListColumn.childAt(i).ID === ID)
                 partListColumn.children[i].destroy()
         }
 

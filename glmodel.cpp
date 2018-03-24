@@ -9,11 +9,12 @@
 #include <QtConcurrent>
 
 int GLModel::globalID = 0;
-QObject* GLModel::mainWindow = NULL;
 
-GLModel::GLModel(QNode *parent, Mesh* loadMesh, QString fname, bool isShadow)
+
+GLModel::GLModel(QObject* mainWindow, QNode *parent, Mesh* loadMesh, QString fname, bool isShadow)
     : QEntity(parent)
     , filename(fname)
+    , mainWindow(mainWindow)
     , x(0.0f)
     , y(0.0f)
     , z(0.0f)
@@ -25,6 +26,7 @@ GLModel::GLModel(QNode *parent, Mesh* loadMesh, QString fname, bool isShadow)
     , curveState(false)
     , flatState(false)
 {
+
     ownerThread = QThread::currentThread();
     // generates shadow model for object picking
     if (isShadow){
@@ -100,7 +102,7 @@ GLModel::GLModel(QNode *parent, Mesh* loadMesh, QString fname, bool isShadow)
     //repairMesh(mesh);
 
     // create shadow model to handle picking settings
-    shadowModel = new GLModel(this, mesh, filename, true);
+    shadowModel = new GLModel(this->mainWindow, this, mesh, filename, true);
 
     qDebug() << "created shadow model";
 
@@ -108,39 +110,15 @@ GLModel::GLModel(QNode *parent, Mesh* loadMesh, QString fname, bool isShadow)
 
     // Add to Part List
     ID = globalID++;
-    qDebug()<<"glmodel ID  "<<ID<<endl;
 
+    QList<QObject*> temp;
+    temp.append(mainWindow);
+    QObject *partList = (QEntity *)FindItemByName(temp, "partList");
 
-    if(mainWindow == NULL){
-        QObject *root = parent;
-        while(root->objectName() != "mainWindow"){
-            root = root->parent();
-            qDebug()<<"parent  " <<root->objectName()<<endl;
-            if(root->parent()==NULL)
-                qDebug()<<"NULLLLLLLL "<<endl;
-        }
-        mainWindow = root;
-    }
+    QMetaObject::invokeMethod(partList, "addPart",
+        Q_ARG(QVariant, getFileName(fname.toStdString().c_str())),
+        Q_ARG(QVariant, ID));
 
-
-    if(!isShadow){
-        /*
-        QList<QObject*> temp;
-        QObject *root = parent;
-        while(root->objectName() != "mainWindow"){
-            root = root->parent();
-            qDebug()<<"parent  " <<root->objectName()<<endl;
-            if(root->parent()==NULL)
-                qDebug()<<"NULLLLLLLL "<<endl;
-        }*/
-        QList<QObject*> temp;
-        temp.append(mainWindow);
-        QObject *partList = (QEntity *)FindItemByName(temp, "partList");
-
-        QMetaObject::invokeMethod(partList, "addPart",
-            Q_ARG(QVariant, getFileName(fname.toStdString().c_str())),
-            Q_ARG(QVariant, ID));
-    }
 
 }
 void GLModel::moveModelMesh(QVector3D direction){
@@ -149,7 +127,7 @@ void GLModel::moveModelMesh(QVector3D direction){
     initialize(mesh);
     addVertices(mesh);
     shadowModel->removeModel();
-    shadowModel=new GLModel(this,mesh,"",true);
+    shadowModel=new GLModel(this->mainWindow, this, mesh, "", true);
 }
 featureThread::featureThread(GLModel* glmodel, int type){
     qDebug() << "feature thread created" << type;
@@ -713,8 +691,8 @@ void GLModel::modelCut(){
     qDebug() << parentModel->parentModel;
     //parentModel->bisectModel(parentModel->mesh, plane, leftModel->mesh, rightModel->mesh);
     parentModel->bisectModel(parentModel->mesh, plane, lmesh, rmesh);
-    GLModel* leftModel = new GLModel(parentModel->parentModel, lmesh, "", false);
-    //GLModel* rightModel = new GLModel(parentModel->parentModel, rmesh, "", false);
+    GLModel* leftModel = new GLModel(mainWindow, parentModel->parentModel, lmesh, "", false);
+    //GLModel* rightModel = new GLModel(mainWindow, parentModel->parentModel, rmesh, "", false);
 
     parentModel->deleteLater();
     deleteLater();
@@ -733,8 +711,8 @@ void GLModel::modelCut(){
     ft->ct->bisectModel(mesh, plane, lmesh, rmesh);
 
     // select between two pieces
-    GLModel* leftModel = new GLModel(parentModel, lmesh, "", false);
-    //GLModel* rightModel = new GLModel(parentModel->parentModel, rmesh, "", false);
+    GLModel* leftModel = new GLModel(mainWindow, parentModel, lmesh, "", false);
+    //GLModel* rightModel = new GLModel(mainWindow, parentModel->parentModel, rmesh, "", false);
 
     shadowModel->deleteLater();
     deleteLater();
