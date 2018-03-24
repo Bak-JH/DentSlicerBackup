@@ -48,8 +48,9 @@ void QmlManager::initializeUI(QQmlApplicationEngine* e){
     rotateSphereX = (QEntity *)FindItemByName(engine, "rotateSphereTorusX");
     rotateSphereY = (QEntity *)FindItemByName(engine, "rotateSphereTorusY");
     rotateSphereZ = (QEntity *)FindItemByName(engine, "rotateSphereTorusZ");
-    QObject* rotateSphereobj = FindItemByName(engine, "rotateSphere");
+    rotateSphereobj = FindItemByName(engine, "rotateSphere");
     QObject::connect(rotateSphereobj, SIGNAL(rotateSignal(int,int)),this, SLOT(modelRotate(int,int)));
+    QObject::connect(rotateSphereobj, SIGNAL(rotateDone(int)),this, SLOT(modelRotateDone(int)));
     rotateSphere->setEnabled(0);
     QObject *rotateButton = FindItemByName(engine, "rotateButton");
     QObject::connect(rotateButton,SIGNAL(runGroupFeature(int,QString)),this,SLOT(runGroupFeature(int,QString)));
@@ -191,30 +192,54 @@ QObject* FindItemByName(QQmlApplicationEngine* engine, const QString& name)
 
 void QmlManager::showRotateSphere(){
     rotateSphere->setEnabled(1);
-    //QFrameAction::QFrameAction qframeaction(rotateSphere);
+    GLModel *glmodel = glmodels.at(1);
+    QQmlProperty::write(rotateSphereobj,"center",glmodel->m_transform->translation());
 }
+void QmlManager::modelRotateDone(int Axis){
+    GLModel *glmodel = glmodels.at(1);
+    float angle;
+    switch(Axis){
+    case 1:{
+        angle = glmodel->m_transform->rotationX();
+        glmodel->m_transform->setRotationX(0);
+        break;
+    }
+    case 2:{
+        angle = glmodel->m_transform->rotationY();
+        glmodel->m_transform->setRotationY(0);
+        break;
+    }
+    case 3:{
+        angle = glmodel->m_transform->rotationZ();
+        glmodel->m_transform->setRotationZ(0);
+        break;
+    }
+    }
+    glmodel->rotateModelMesh(Axis,-angle);
+    float zlength = (glmodel->mesh->z_max - glmodel->mesh->z_min);
+    glmodel->m_transform->setTranslation(QVector3D(0,0,zlength/2));
+    QQmlProperty::write(rotateSphereobj,"center",glmodel->m_transform->translation());
+}
+
 void QmlManager::modelRotate(int Axis, int Angle){
-    //QMatrix4x4 tmpMatrix = glmodel->m_transform->matrix();
+    GLModel *glmodel = glmodels.at(1);
     switch(Axis){
     case 1:{  //X
-    //    float tmpx = glmodel->m_transform->rotationX();
-    //    glmodel->m_transform->setRotationX(tmpx+Angle);
+        float tmpx = glmodel->m_transform->rotationX();
+        glmodel->m_transform->setRotationX(tmpx+Angle);
         break;
     }
     case 2:{  //Y
-    //    float tmpy = glmodel->m_transform->rotationY();
-    //    glmodel->m_transform->setRotationY(tmpy+Angle);
+        float tmpy = glmodel->m_transform->rotationY();
+        glmodel->m_transform->setRotationY(tmpy+Angle);
         break;
     }
     case 3:{  //Z
-    //    float tmpz = glmodel->m_transform->rotationZ();
-    //    glmodel->m_transform->setRotationZ(tmpz+Angle);
+        float tmpz = glmodel->m_transform->rotationZ();
+        glmodel->m_transform->setRotationZ(tmpz+Angle);
         break;
     }
     }
-    //qDebug() << glmodel->m_transform->rotationX() << Angle;
-    //glmodel->m_transform->setMatrix(tmpMatrix);
-    qDebug() << "Angle Monitor" << Angle;
 }
 void QmlManager::runGroupFeature(int ftrType, QString state){
     showRotateSphere();

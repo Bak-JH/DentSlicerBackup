@@ -21,7 +21,7 @@ int main(int argc, char **argv)
     qRegisterMetaType<vector<QVector3D>>("vector<QVector3D>");
     qRegisterMetaType<vector<float>>("vector<float>");
 
-    QPixmap pixmap(":/Resource/splash.png");
+    QPixmap pixmap(":/Resource/splash2.png");
     QSplashScreen *splash = new QSplashScreen(pixmap);
     splash->show();
 

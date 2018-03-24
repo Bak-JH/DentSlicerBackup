@@ -7,6 +7,7 @@
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
 #include <QQmlEngine>
+#include <QQmlProperty>
 #include "feature/autoarrange.h"
 #include "glmodel.h"
 #include "QtConcurrent/QtConcurrentRun"
@@ -45,6 +46,7 @@ public:
     vector<GLModel*> glmodels;
 
     Qt3DCore::QEntity *managerModel;
+    QObject *rotateSphereobj;
     Qt3DCore::QEntity *rotateSphere;
     Qt3DCore::QEntity *rotateSphereX;
     Qt3DCore::QEntity *rotateSphereY;
@@ -66,6 +68,7 @@ public slots:
     void openModelFile(QString filename);
     void runGroupFeature(int,QString);
     void modelRotate(int,int);
+    void modelRotateDone(int);
     void runArrange();
     void applyArrangeResult(vector<QVector3D>, vector<float>);
 };
