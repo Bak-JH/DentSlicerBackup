@@ -104,6 +104,11 @@ Entity {
                                buffers: ClearBuffers.ColorDepthBuffer
                                clearColor: "#EAEAEA"
                             }
+                            SortPolicy {
+                                sortTypes: [
+                                    SortPolicy.BackToFront
+                                ]
+                            }
                         }
                     }
                 }
