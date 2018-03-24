@@ -104,6 +104,15 @@ void GLModel::moveModelMesh(QVector3D direction){
     shadowModel->removeModel();
     shadowModel=new GLModel(this,mesh,filename,true);
 }
+void GLModel::rotateModelMesh(int Axis, float Angle){
+    mesh->vertexRotate(Axis,Angle);
+    sparseMesh=toSparse(mesh);
+    initialize(mesh);
+    addVertices(mesh);
+    shadowModel->removeModel();
+    shadowModel=new GLModel(this,mesh,"",true);
+}
+
 featureThread::featureThread(GLModel* glmodel, int type){
     qDebug() << "feature thread created" << type;
     m_glmodel = glmodel;
