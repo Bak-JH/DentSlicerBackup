@@ -21,7 +21,6 @@ GLModel::GLModel(QNode *parent, Mesh* loadMesh, QString fname, bool isShadow)
     , parentModel((GLModel*)(parent))
     , cutMode(0)
 {
-    ownerThread = QThread::currentThread();
     // generates shadow model for object picking
     if (isShadow){
 
@@ -186,8 +185,6 @@ void featureThread::run(){
                 // m_glmodel is shadow model
                 /*markPopup(false);
                 ct->removeCuttingPoints();
-                QThread* curThread = thread();
-                moveToThread(m_glmodel->ownerThread);
                 ct->generatePlane(m_glmodel->parentModel);
                 moveToThread(curThread);
 
@@ -197,10 +194,8 @@ void featureThread::run(){
                 plane.push_back(ct->cuttingPoints[ct->cuttingPoints.size()-1]);
                 ct->bisectModel(m_glmodel->mesh, plane, m_glmodel->lmesh, m_glmodel->rmesh);
 
-                moveToThread(m_glmodel->ownerThread);
-                qDebug() << "moved to thread" << m_glmodel->ownerThread;
                 //GLModel* leftModel = new GLModel(m_glmodel, m_glmodel->lmesh, "", false);
-                moveToThread(curThread);
+
                 qDebug() << "deleting shadowmodel";
                 m_glmodel->shadowModel->deleteLater();
                 qDebug() << "deleting current Model";
@@ -518,7 +513,7 @@ void GLModel::handlePickerClicked(QPickEvent *pick)
             labellingTextPreview->setNormal(QVector3D(0, 0, 1));
         }
     }
-    qDebug() << "cut mode :" << cutMode;
+
     QPickTriangleEvent *trianglePick = static_cast<QPickTriangleEvent*>(pick);
     if (cutMode == 1 && parentModel->numPoints< sizeof(parentModel->sphereEntity)/4) {
         qDebug() << pick->localIntersection()<<"pick";
@@ -699,17 +694,18 @@ void GLModel::modelCut(){
 
 void GLModel::generateRLModel(){
     qDebug() << "modelCut finished";
-    GLModel* leftModel = new GLModel(parentModel, lmesh, "", false);
-    GLModel* rightModel = new GLModel(parentModel, rmesh, "", false);
+    leftModel = new GLModel(parentModel, lmesh, "", false);
+    rightModel = new GLModel(parentModel, rmesh, "", false);
 
-    deleteLater();
-    shadowModel->deleteLater();
 }
 
 void GLModel::modelCutFinished(){
-
+    qDebug() << "modelcut finished";
     removePlane();
+    parentModel->leftModel->deleteLater();
+    parentModel->rightModel->deleteLater();
 
+    // remove parent model and its shadow model
 }
 
 /*
@@ -907,7 +903,6 @@ QVector3D GLModel::spreadPoint(QVector3D endPoint,QVector3D startPoint,int facto
     QVector3D finalVector=endPoint+standardVector*(factor-1);
     return finalVector;
 }
-
 
 Mesh* GLModel::toSparse(Mesh* mesh){
     int i=0, jump=30, factor=10;

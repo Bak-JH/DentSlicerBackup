@@ -712,7 +712,6 @@ Rectangle {
             onApplyClicked: {
                 console.log("ApplyClicked")
                 //runFeature(ftrCut);
-                //modelCut();
                 generatePlane();
                 cutModeSelected(9999);
             }
@@ -720,13 +719,13 @@ Rectangle {
             // on Finish Clicked:
             onFinishClicked: {
                 console.log("Finish Clicked")
-                modelCut();
+                modelCutFinish();
             }
 
             signal cutModeSelected(int type);
             signal runFeature(int type);
             signal generatePlane();
-            signal modelCut();
+            signal modelCutFinish();
         }
 
 

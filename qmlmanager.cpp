@@ -50,7 +50,7 @@ void QmlManager::initializeUI(QQmlApplicationEngine* e){
     QObject *rotateButton = FindItemByName(engine, "rotateButton");
     QObject::connect(rotateButton,SIGNAL(runGroupFeature(int,QString)),this,SLOT(runGroupFeature(int,QString)));
 
-    openModelFile("C:/Users/diridiri/Desktop/DLP/DLPslicer/partial2_flip.stl");
+    //openModelFile("C:/Users/diridiri/Desktop/DLP/DLPslicer/partial2_flip.stl");
 }
 
 void QmlManager::openModelFile(QString fname){
@@ -81,9 +81,6 @@ void QmlManager::openModelFile(QString fname){
         arrangeQt3D(m_transform_set, arng_result_set);
     }
 
-
-    featureThread* ft = new featureThread(glmodel, ftrOrient);
-
     QObject::connect(glmodel->ft, SIGNAL(setProgress(QVariant)),progress_text, SLOT(update_loading(QVariant)));
     QObject::connect(glmodel->ft, SIGNAL(loadPopup(QVariant)),orientPopup, SLOT(show_popup(QVariant)));
 
@@ -92,7 +89,7 @@ void QmlManager::openModelFile(QString fname){
     // model cut popup codes
     QObject::connect(cutPopup,SIGNAL(generatePlane()),glmodel->shadowModel , SLOT(generatePlane()));
     //QObject::connect(cutPopup,SIGNAL(modelCut()),glmodel->shadowModel , SLOT(modelCut()));
-    QObject::connect(cutPopup,SIGNAL(modelCut()),glmodel->shadowModel , SLOT(selectRLModel()));
+    QObject::connect(cutPopup,SIGNAL(modelCutFinish()),glmodel->shadowModel , SLOT(modelCutFinished()));
     //QObject::connect(cutPopup,SIGNAL(runFeature(int)),glmodel->ft , SLOT(setTypeAndStart(int)));
     QObject::connect(cutPopup,SIGNAL(cutModeSelected(int)),glmodel->shadowModel,SLOT(cutModeSelected(int)));
     QObject::connect(slider, SIGNAL(govalue(double)), glmodel->shadowModel, SLOT(getSliderSignal(double)));

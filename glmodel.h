@@ -75,8 +75,8 @@ public:
 
     GLModel *parentModel;
     GLModel *shadowModel; // GLmodel's sparse mesh that gets picker input
-
-    QThread* ownerThread;
+    GLModel *leftModel;
+    GLModel *rightModel;
 
     bool appropriately_rotated=false;
     QPhongMaterial *m_meshMaterial;
