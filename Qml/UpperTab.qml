@@ -182,17 +182,26 @@ Rectangle {
 
         UpperButton{
             id : first_tab_button_save
+            objectName: "saveBtn"
 
             anchors.left: first_tab_button_open.right
             iconSource1: "qrc:/resource/upper_save.png"
             iconSource2: "qrc:/Resource/upper2_save.png"
             iconText: "Save"
+            signal runFeature(int type);
+            MouseArea{
+                anchors.fill: parent
+                onClicked:{
+                    parent.runFeature(ftrSave);
+                }
+
+            }
         }
 
 
         UpperButton{
             id : first_tab_button_export
-
+            objectName: "exportBtn"
             anchors.left: first_tab_button_save.right
             iconSource1: "qrc:/resource/upper_export.png"
             iconSource2: "qrc:/Resource/upper2_export.png"
@@ -202,7 +211,15 @@ Rectangle {
                 anchors.fill: parent
                 onClicked:{
                     function collectConfigurations(){
-                        var configurations = {};
+                        var configurations = "";
+                        configurations += "r#"+options[0] + "/";
+                        configurations += "l#"+options[1] + "/";
+                        configurations += "s#"+options[2] + "/";
+                        configurations += "f#"+options[3] + "/";
+                        configurations += "b#"+options[4];
+                        return configurations;
+
+                        /*var configurations = {};
 
                         // do collecting things
                         // configurations[key] = value;
@@ -211,7 +228,7 @@ Rectangle {
                         configurations["support"] = "support#"+options[2];
                         configurations["infill"] = "infill#"+options[3];
                         configurations["raft"] = "raft#"+options[4];
-                        return configurations;
+                        return configurations;*/
                     }
 
                     console.log(parent.id);
@@ -220,9 +237,11 @@ Rectangle {
                     console.log("exporting");
                     // collect configurations
                     var cfg = collectConfigurations();
-                    se.slice(cfg);
+                    //se.slice(cfg);
+                    parent.runFeature(ftrExport, cfg);
                 }
             }
+            signal runFeature(int type, string config);
         }
 
         Rectangle{

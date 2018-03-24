@@ -42,6 +42,11 @@ void QmlManager::initializeUI(QQmlApplicationEngine* e){
     // repair components
     repairPopup = FindItemByName(engine, "repairPopup");
 
+    // save component
+    saveButton = FindItemByName(engine, "saveBtn");
+
+    // export component
+    exportButton = FindItemByName(engine, "exportBtn");
 
     //rotation Sphere
     rotateSphere = (QEntity *)FindItemByName(engine, "rotateSphereEntity");
@@ -114,16 +119,23 @@ void QmlManager::openModelFile(QString fname){
     QObject::connect(arrangePopup, SIGNAL(runFeature(int)), glmodel->ft, SLOT(setTypeAndStart(int)));
     QObject::connect(this, SIGNAL(arrangeDone(vector<QVector3D>, vector<float>)), this, SLOT(applyArrangeResult(vector<QVector3D>, vector<float>)));
 
+    // save button codes
+    QObject::connect(saveButton, SIGNAL(runFeature(int)), glmodel->ft, SLOT(setTypeAndRun(int)));
+
+    // export button codes
+    QObject::connect(exportButton, SIGNAL(runFeature(int, QString)), glmodel->ft, SLOT(setTypeAndRun(int, QString)));
+
     // do auto arrange
     if (glmodels.size() >=2){
         runArrange();
     }
 }
 
-
+// slicing information
 void QmlManager::sendUpdateModelInfo(int printing_time, int layer, QString xyz, float volume){
     updateModelInfo(printing_time, layer, xyz, volume);
 }
+
 
 void QmlManager::runArrange(){
     QFuture<void> future = QtConcurrent::run(this, &runArrange_internal);
@@ -166,30 +178,6 @@ void QmlManager::applyArrangeResult(vector<QVector3D> translations, vector<float
         glmodels[i]->rotateModelMesh(3, rotations[i]);
     }
 }
-
-QObject* FindItemByName(QList<QObject*> nodes, const QString& name)
-{
-    for(int i = 0; i < nodes.size(); i++){
-        // search for node
-        if (nodes.at(i) && nodes.at(i)->objectName() == name){
-            return dynamic_cast<QObject*>(nodes.at(i));
-        }
-        // search in children
-        else if (nodes.at(i) && nodes.at(i)->children().size() > 0){
-            QObject* item = FindItemByName(nodes.at(i)->children(), name);
-            if (item)
-                return item;
-        }
-    }
-    // not found
-    return NULL;
-}
-
-QObject* FindItemByName(QQmlApplicationEngine* engine, const QString& name)
-{
-    return FindItemByName(engine->rootObjects(), name);
-}
-
 
 void QmlManager::ModelVisible(int ID, bool isVisible){
     GLModel* target;
@@ -253,6 +241,7 @@ void QmlManager::modelRotate(int Axis, int Angle){
     }
     }
 }
+
 void QmlManager::runGroupFeature(int ftrType, QString state){
     showRotateSphere();
     switch(ftrType){
@@ -272,4 +261,27 @@ void QmlManager::runGroupFeature(int ftrType, QString state){
     }
     }
 
+}
+
+QObject* FindItemByName(QList<QObject*> nodes, const QString& name)
+{
+    for(int i = 0; i < nodes.size(); i++){
+        // search for node
+        if (nodes.at(i) && nodes.at(i)->objectName() == name){
+            return dynamic_cast<QObject*>(nodes.at(i));
+        }
+        // search in children
+        else if (nodes.at(i) && nodes.at(i)->children().size() > 0){
+            QObject* item = FindItemByName(nodes.at(i)->children(), name);
+            if (item)
+                return item;
+        }
+    }
+    // not found
+    return NULL;
+}
+
+QObject* FindItemByName(QQmlApplicationEngine* engine, const QString& name)
+{
+    return FindItemByName(engine->rootObjects(), name);
 }

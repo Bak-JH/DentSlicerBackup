@@ -10,14 +10,16 @@
 #include <QBuffer>
 #include <QObjectPicker>
 #include <QCursor>
+#include <iostream>
 #include "mesh.h"
 #include "fileloader.h"
+#include "slicingengine.h"
 #include "feature/modelcut.h"
 #include "feature/labellingtextpreview.h"
 #include "feature/autoorientation.h"
 #include "feature/meshrepair.h"
-#include <iostream>
 #include "feature/autoarrange.h"
+#include "feature/stlexporter.h"
 
 
 #define MAX_BUF_LEN 2000000
@@ -54,9 +56,12 @@ public:
     GLModel* m_glmodel;
     int progress;
     int optype; // defines typeofoperation
+    QString data;
     autoorientation* ot;
     modelcut* ct;
     autoarrange* ar;
+    STLexporter* ste;
+    SlicingEngine* se;
 
 signals:
     void loadPopup(QVariant value);
@@ -64,6 +69,8 @@ signals:
 public slots:
     void markPopup(bool value);
     void progressChanged(float value);
+    void setTypeAndRun(int type);
+    void setTypeAndRun(int type, QString data);
     void setTypeAndStart(int type);
 private:
     void run() Q_DECL_OVERRIDE;

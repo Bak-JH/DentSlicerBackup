@@ -42,6 +42,11 @@ public:
     // auto repair components
     QObject* repairPopup;
 
+    // save components
+    QObject* saveButton;
+
+    // export components
+    QObject* exportButton;
 
     vector<GLModel*> glmodels;
 

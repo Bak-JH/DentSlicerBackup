@@ -8,6 +8,7 @@
 #include "feature/text3dgeometrygenerator.h"
 #include <QtConcurrent/QtConcurrent>
 #include <QFuture>
+#include <QFileDialog>
 
 int GLModel::globalID = 0;
 
@@ -167,10 +168,24 @@ featureThread::featureThread(GLModel* glmodel, int type){
     ot = new autoorientation();
     ct = new modelcut();
     ar = new autoarrange();
+    ste = new STLexporter();
+    se = new SlicingEngine();
 
     connect(ot, SIGNAL(progressChanged(float)), this, SLOT(progressChanged(float)));
     connect(ct, SIGNAL(progressChanged(float)), this, SLOT(progressChanged(float)));
     connect(ar, SIGNAL(progressChanged(float)), this, SLOT(progressChanged(float)));
+
+}
+
+void featureThread::setTypeAndRun(int type){
+    optype = type;
+    run();
+}
+
+void featureThread::setTypeAndRun(int type, QString map){
+    optype = type;
+    data = map;
+    run();
 }
 
 void featureThread::setTypeAndStart(int type){
@@ -186,10 +201,20 @@ void featureThread::run(){
             }
         case ftrSave:
             {
+                qDebug() << "file save called";
+                QString fileName = QFileDialog::getSaveFileName(nullptr, tr("Save to STL file"), "", tr("3D Model file (*.stl)"));
+                QFuture<void> future = QtConcurrent::run(ste, &STLexporter::exportSTL, m_glmodel->mesh,fileName);
                 break;
             }
         case ftrExport:
             {
+                qDebug() << "export called";
+                // save to file
+                QString fileName = QFileDialog::getSaveFileName(nullptr, tr("Save to STL file"), "", tr("3D Model file (*.stl)"));
+                ste->exportSTL(m_glmodel->mesh, fileName);
+
+                // slice file
+                se->slice(data,fileName);
                 break;
             }
         case ftrMove:

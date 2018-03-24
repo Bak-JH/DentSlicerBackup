@@ -156,6 +156,11 @@ ApplicationWindow {
         visible: false
     }
 
+    FileDialogSave{
+        id: filedialogsave
+        visible: false
+    }
+
     MouseArea{
         acceptedButtons: Qt.MiddleButton
         anchors.fill: parent
