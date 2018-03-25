@@ -38,7 +38,7 @@ GLModel::GLModel(QObject* mainWindow, QNode *parent, Mesh* loadMesh, QString fna
         mesh = toSparse(parentModel->mesh);
 
         initialize(mesh);
-        addVertices(mesh);
+        addVertices(mesh, false);
 
         addComponent(m_transform);
 
@@ -80,7 +80,7 @@ GLModel::GLModel(QObject* mainWindow, QNode *parent, Mesh* loadMesh, QString fna
     rmesh = new Mesh();
 
     initialize(mesh);
-    addVertices(mesh);
+    addVertices(mesh, false);
     //QFuture<void> future = QtConcurrent::run(this, &GLModel::initialize, mesh);
     //future = QtConcurrent::run(this, &GLModel::addVertices, mesh);
 
@@ -152,7 +152,7 @@ void GLModel::updateModelMesh(){
     float zlength = mesh->z_max - mesh->z_min;
     m_transform->setTranslation(QVector3D(tmp.x(),tmp.y(),zlength/2));
     initialize(mesh);
-    addVertices(mesh);
+    addVertices(mesh, false);
     shadowModel->removeModel();
     shadowModel=new GLModel(this->mainWindow, this, mesh, filename, true);
 
@@ -412,7 +412,7 @@ void GLModel::clearVertices(){
     return;
 }
 
-void GLModel::addVertices(Mesh* mesh)
+void GLModel::addVertices(Mesh* mesh, bool CW)
 {
     int face_size = mesh->faces.size();
     int face_idx = 0;
@@ -430,11 +430,18 @@ void GLModel::addVertices(Mesh* mesh)
             QCoreApplication::processEvents();
 
         vector<QVector3D> result_vs;
-        for (int fn=0; fn<=2; fn++){
-            result_vs.push_back(mesh->idx2MV(mf.mesh_vertex[fn]).position);
+        if (CW){
+            for (int fn=2; fn>=0; fn--){
+                result_vs.push_back(mesh->idx2MV(mf.mesh_vertex[fn]).position);
+            }
+        } else {
+            for (int fn=0; fn<=2; fn++){
+                result_vs.push_back(mesh->idx2MV(mf.mesh_vertex[fn]).position);
+            }
         }
 
-        addVertices(result_vs);   
+
+        addVertices(result_vs);
     }
 
     foreach (MeshFace mf , mesh->faces){
@@ -443,16 +450,30 @@ void GLModel::addVertices(Mesh* mesh)
             QCoreApplication::processEvents();
 
         vector<QVector3D> result_vns;
-        for (int fn=0; fn<=2; fn++){
-            result_vns.push_back(mesh->idx2MV(mf.mesh_vertex[fn]).vn);
+        if (CW){
+            for (int fn=2; fn>=0; fn--){
+                result_vns.push_back(mesh->idx2MV(mf.mesh_vertex[fn]).vn);
 
-            if(mesh->idx2MV(mf.mesh_vertex[fn]).vn[0] == 0)
-                if(mesh->idx2MV(mf.mesh_vertex[fn]).vn[1] == 0)
-                    if(mesh->idx2MV(mf.mesh_vertex[fn]).vn[2] == 0)
-                    {
-                        result_vns.pop_back();
-                        result_vns.push_back(QVector3D(1,1,1));
-                    }
+                if(mesh->idx2MV(mf.mesh_vertex[fn]).vn[0] == 0)
+                    if(mesh->idx2MV(mf.mesh_vertex[fn]).vn[1] == 0)
+                        if(mesh->idx2MV(mf.mesh_vertex[fn]).vn[2] == 0)
+                        {
+                            result_vns.pop_back();
+                            result_vns.push_back(QVector3D(1,1,1));
+                        }
+            }
+        } else {
+            for (int fn=0; fn<=2; fn++){
+                result_vns.push_back(mesh->idx2MV(mf.mesh_vertex[fn]).vn);
+
+                if(mesh->idx2MV(mf.mesh_vertex[fn]).vn[0] == 0)
+                    if(mesh->idx2MV(mf.mesh_vertex[fn]).vn[1] == 0)
+                        if(mesh->idx2MV(mf.mesh_vertex[fn]).vn[2] == 0)
+                        {
+                            result_vns.pop_back();
+                            result_vns.push_back(QVector3D(1,1,1));
+                        }
+            }
         }
 
         addNormalVertices(result_vns);
@@ -464,9 +485,16 @@ void GLModel::addVertices(Mesh* mesh)
             QCoreApplication::processEvents();
 
         vector<QVector3D> result_vcs;
-        for (int fn=0; fn<=2; fn++){
-            result_vcs.push_back(QVector3D(1.0f, 0.0f, 0.0f));
+        if (CW){
+            for (int fn=2; fn>=0; fn--){
+                result_vcs.push_back(QVector3D(1.0f, 0.0f, 0.0f));
+            }
+        } else {
+            for (int fn=0; fn<=2; fn++){
+                result_vcs.push_back(QVector3D(1.0f, 0.0f, 0.0f));
+            }
         }
+
 
         addColorVertices(result_vcs);
     }
@@ -1015,6 +1043,9 @@ QVector3D GLModel::spreadPoint(QVector3D endPoint,QVector3D startPoint,int facto
 Mesh* GLModel::toSparse(Mesh* mesh){
     int i=0, jump=30, factor=10;
     Mesh* newMesh = new Mesh;
+    newMesh->faces.reserve(mesh->faces.size()/5);
+    newMesh->vertices.reserve(mesh->faces.size()/5);
+
     foreach (MeshFace mf , mesh->faces){
         if (i%jump==0){
             QCoreApplication::processEvents();
@@ -1031,6 +1062,7 @@ Mesh* GLModel::toSparse(Mesh* mesh){
         }
         i+=1;
     }
+    //newMesh->connectFaces();
 return newMesh;
 }
 
@@ -1109,9 +1141,7 @@ void GLModel::generateText3DMesh()
     }
 
     if (GLModel* glmodel = qobject_cast<GLModel*>(parent())) {
-        qDebug() << "addVertices";
         glmodel->addVertices(outVertices);
-        qDebug() << "addNormalVertices";
         glmodel->addNormalVertices(outNormals);
     }
 }
