@@ -76,7 +76,7 @@ Item {
 
 
     function world2Screen(target){
-
+    //not working old version
         //var point = Qt.vector3d(0,0,0);
         var point = target
         var matrix = Qt.matrix4x4(0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0);

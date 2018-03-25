@@ -67,6 +67,9 @@ Entity {
         Transform{
             id: systemTransform
             scale3D: Qt.vector3d(0.01,0.01,0.01)
+            rotationZ:0
+            rotationY:0
+            rotationX:0
         }
         components: [systemTransform]
 
@@ -139,12 +142,14 @@ Entity {
           },
 
         FrameAction {
-            property real rotationSpeed : 20
-
+            property real rotationSpeed : 2000
             onTriggered: {
                 if (rotateAction.active) {
-                    var target = axisAngle2Quaternion(rotationSpeed * rotateXAxis.value * dt,qq.rotatedVector(systemTransform.rotation,zdown))
-                    cm.camera.rotateAboutViewCenter(qq.multiplyQuaternion(target,systemTransform.rotation));
+                    sceneRoot.systemTransform.rotationZ += rotationSpeed * rotateXAxis.value * dt;
+                    //var target = axisAngle2Quaternion(rotationSpeed * rotateXAxis.value * dt,qq.rotatedVector(systemTransform.rotation,zdown))
+                    //cm.camera.rotateAboutViewCenter(qq.multiplyQuaternion(target,systemTransform.rotation));
+                    sceneRoot.systemTransform.rotationX += rotationSpeed * (-1) * rotateYAxis.value * dt;
+
                 }
             }
         }
@@ -161,7 +166,7 @@ Entity {
 
         onPressed: {
 
-            if (event.key === Qt.Key_Z) {
+            /*if (event.key === Qt.Key_Z) {
                 meshTransform.scale3D = meshTransform.scale3D.plus(Qt.vector3d(0.05,0.05,0.05));
             }
             if (event.key === Qt.Key_X) {
@@ -180,7 +185,7 @@ Entity {
             }
             if (event.key === Qt.Key_L) {
                 systemTransform.translation = systemTransform.translation.plus(Qt.vector3d(0.01,0,0))
-            }
+            }*/
             /*
             if (event.key === Qt.Key_W) {
                 scene3d.anchors.topMargin = scene3d.anchors.topMargin - 1
@@ -194,7 +199,7 @@ Entity {
             if (event.key === Qt.Key_D) {
                 scene3d.anchors.leftMargin = scene3d.anchors.leftMargin + 1
             }*/
-
+        /*
             if (event.key === Qt.Key_Q) {
                 scene3d.width = scene3d.width -2
                 scene3d.height = scene3d.height -1
@@ -203,7 +208,7 @@ Entity {
                 scene3d.width = scene3d.width +2
                 scene3d.height = scene3d.height +1
 
-            }
+            }*/
             if (event.key === Qt.Key_M) {
                 //loadOBJFile()
                 //var newObject = Qt.createQmlObject('import QtQuick 2.0; Model{inputSource:"file:///D:/Dev/DLPSlicer/DLPslicer/resource/mesh/full.obj"}',

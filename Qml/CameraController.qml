@@ -145,70 +145,40 @@ Entity {
                   }
               ]
           },
-
         FrameAction {
             property real translationSpeed : 150.0
             property real rotationSpeed : 2000
             property real zoomFactor : 0.1
             property vector3d angleVector
-
             onTriggered: {
-                if (zoomInAction.active || zoomOutAction.active) { // not use
-                    var zoom = 1.0 - zoomFactor;
-                    if (zoomOutAction.active) {
-                        zoom = 1.0 + zoomFactor;
-                    }
-                    var viewVector = root.camera.position.minus(root.camera.viewCenter)
-                    viewVector = viewVector.times(zoom);
-                    root.camera.position = root.camera.viewCenter.plus(viewVector);
-
-
-                } else if (moveAction.active) { // not use
-                    /*
-                    window.moveH(translateXAxis.value);
-                    window.moveV(translateYAxis.value);
-                    */
-
-                } else if (rotateAction.active) {
-
+                if (rotateAction.active) {
                     //angleVector = root.camera.position.minus(Qt.vector3d(0,0,0)).normalized();
                     angleVector = root.camera.position.minus(sceneRoot.systemTransform.translation.plus(40,50,75)).normalized();
-
                     if(angleVector.z>0.999){
-
                         if(rotateYAxis.value<=0){
                             return;
                         }
-
-                       //root.camera.setUpVector(previousUpvector);
                     }
-
-
                     if(angleVector.z<-0.5){
                         if(rotateYAxis.value>=0){
                             return;
                         }
-                       //root.camera.setUpVector(_originalUpVector);
                     }
-
-
                     if(angleVector.z<-0.999){
-
                         if(rotateYAxis.value>=0){
                             return;
                         }
-                        root.camera.setUpVector(_originalUpVector.times(-1));
+                        //root.camera.setUpVector(_originalUpVector.times(-1));
                     }
-                    root.camera.tiltAboutViewCenter(rotationSpeed * rotateYAxis.value*(-1) * dt);
+                   // sceneRoot.systemTransform.rotationX += rotationSpeed * rotateYAxis.value * dt;
+                    //root.camera.tiltAboutViewCenter(rotationSpeed * rotateYAxis.value*(-1) * dt);
 
                     if(root.camera.upVector.z<0){
-                    root.camera.tiltAboutViewCenter(rotationSpeed * rotateYAxis.value*dt);
+                   //     sceneRoot.systemTransform.rotationX += rotationSpeed * rotateYAxis.value * (-1)* dt;
+//                        root.camera.tiltAboutViewCenter(rotationSpeed * rotateYAxis.value*dt);
                     }
-
-
                     // lock the camera roll angle
                     //root.camera.setUpVector(_originalUpVector);
-
                     //sceneRoot.total.mtr.perfectPosition();
                 }
 

@@ -12,9 +12,11 @@ Entity{
     property vector3d center : Qt.vector3d( 0,0,0 )
     property vector3d inputScale : Qt.vector3d(0.6,0.6,0.6)
     property vector3d initScale : Qt.vector3d(0.3,0.3,0.3)
+    property vector3d intersect : Qt.vector3d(0,0,0)
     property int moveAxis : 0 //0:none, 1:x, 2:y, 3:z
     property vector2d mouseOrigin : Qt.vector2d(0,0)
     property vector2d mouseCurrent : Qt.vector2d(0,0)
+    property int moveDirection : 0
     property int pastDistance :0
     property int pastAxis :0
     components: [
@@ -75,6 +77,14 @@ Entity{
             }
             onPressed: { //move start
                 if (moveAxis  == 0){
+                    intersect = Qt.vector3d(pick.localIntersection.x,pick.localIntersection.y,pick.localIntersection.z)
+
+                    if (pick.localIntersection.z > 0){
+                        moveDirection = 1;
+                    }else{
+                        moveDirection = -1;
+                    }
+
                     mouseOrigin = Qt.vector2d(pick.position.x , pick.position.y)
                     moveAxis = 1 //X
                     moveArrowXMaterial.ambient = Qt.rgba(200/255,200/255,0/255,1)
@@ -117,6 +127,13 @@ Entity{
             }
             onPressed: { //move start
                 if (moveAxis  == 0){
+                    intersect = Qt.vector3d(pick.localIntersection.x,pick.localIntersection.y,pick.localIntersection.z)
+
+                    if (pick.localIntersection.z > 0){
+                        moveDirection = -1;
+                    }else{
+                        moveDirection = 1;
+                    }
                     mouseOrigin = Qt.vector2d(pick.position.x , pick.position.y)
                     moveAxis = 2 //Y
                     moveArrowYMaterial.ambient = Qt.rgba(200/255,200/255,0/255,1)
@@ -158,13 +175,21 @@ Entity{
         var tmp = Qt.vector3d(0,0,0)
         tmp = target
         target = tmp.times(systemTransform.scale3D)
-        var point = target
+        var theta = (-1)*sceneRoot.systemTransform.rotationX/180.0*Math.PI
+        var alpha = (-1)*sceneRoot.systemTransform.rotationZ/180.0*Math.PI
+        target = Qt.vector3d(target.x * Math.cos(alpha)+target.y*Math.sin(alpha),
+                             target.x * (-1) * Math.sin(alpha) + target.y*Math.cos(alpha),
+                             target.z)
+        var target3 = Qt.vector3d(target.x,
+                             target.y * Math.cos(theta)+target.z*Math.sin(theta),
+                             (-1)*target.y*Math.sin(theta)+target.z*Math.cos(theta))
+        var point2 = target3
         var matrix = Qt.matrix4x4(0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0);
-        matrix = sceneRoot.cm.camera.projectionMatrix.times(sceneRoot.cm.camera.viewMatrix);
-        point = matrix.times(point)
-        point.x = (point.x+1) * scene3d.width/2;
-        point.y = (-1 * point.y+1) * scene3d.height/2;
-        return Qt.vector2d(point.x,point.y)
+        matrix = sceneRoot.cm.camera.projectionMatrix.times(sceneRoot.cm.camera.viewMatrix);//
+        point2 = matrix.times(point2)
+        point2.x = (point2.x+1) * scene3d.width/2;
+        point2.y = (-1 * point2.y+1) * scene3d.height/2;
+        return Qt.vector2d(point2.x,point2.y)
     }
     signal moveSignal(int Axis, int distance)
     signal moveDone(int Axis)
@@ -180,6 +205,8 @@ Entity{
                 }
                 pastAxis = moveAxis
                 if (moveAxis != 0){
+                    //console.log(intersect)
+                    //console.log(moveDirection)
                     var Origin = world2Screen(center)
                     var mouseOrigin_Origin = mouseOrigin.minus(Origin).length() //a
                     var mouseCurrent_Origin = mouseCurrent.minus(Origin).length() //b
@@ -188,10 +215,10 @@ Entity{
                     distance*=( 0.0006 / syszoom.x)
                     switch(moveAxis){
                     case 1: // xAxis
-                        moveSignal(1,distance - pastDistance)
+                        moveSignal(1,moveDirection*(distance - pastDistance))
                         break;
                     case 2: // yAxis
-                        moveSignal(2,distance - pastDistance)
+                        moveSignal(2,moveDirection*(distance - pastDistance))
                         break;
                     }
                     pastDistance = distance
@@ -199,7 +226,14 @@ Entity{
                     //console.log(distance)
                 }
                 moveArrowTransform.scale3D = Qt.vector3d(0.01/syszoom.x,0.01/syszoom.y,0.01/syszoom.z)
-                moveArrowTransform.translation = center.minus(cm.camera.viewVector)
+
+                //moveArrowTransform.translation = center.minus(cm.camera.viewVector) // When camera rotating mode
+                var theta = sceneRoot.systemTransform.rotationX/180.0*Math.PI
+                var alpha = sceneRoot.systemTransform.rotationZ/180.0*Math.PI
+                moveArrowTransform.translation = Qt.vector3d(center.x+100*Math.sin(theta)*Math.sin(alpha),
+                                                                center.y+100*Math.sin(theta)*Math.cos(alpha),
+                                                                center.z+100*Math.cos(theta))
+
             }else{
                 moveAxis=0;
             }

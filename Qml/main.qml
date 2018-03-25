@@ -175,17 +175,10 @@ ApplicationWindow {
             if(isDrag){
                 currPosition = Qt.vector2d(mouseX,mouseY);
                 // move screen by drag scene3d
-
-                scene3d.anchors.leftMargin = scene3d.anchors.leftMargin + (currPosition.x - prevPosition.x);
-                scene3d.anchors.topMargin = scene3d.anchors.topMargin + (currPosition.y - prevPosition.y);
-
-                /*
-                var xDif = (currPosition.x - prevPosition.x);
-                var yDif = (currPosition.y - prevPosition.y);
-
-                sceneRoot.systemTransform.translation = sceneRoot.systemTransform.translation.plus(Qt.vector3d(0.001,0,0).times(xDif))
-                sceneRoot.systemTransform.translation = sceneRoot.systemTransform.translation.plus(Qt.vector3d(0,-0.001,0).times(yDif))
-                */
+                sceneRoot.cm.camera.translateWorld(Qt.vector3d((-1)*(currPosition.x - prevPosition.x)/1000,0,0),0);
+                sceneRoot.cm.camera.translateWorld(Qt.vector3d(0,(1)*(currPosition.y - prevPosition.y)/1000,0),0);
+//                scene3d.anchors.leftMargin = scene3d.anchors.leftMargin + (currPosition.x - prevPosition.x);
+//                scene3d.anchors.topMargin = scene3d.anchors.topMargin + (currPosition.y - prevPosition.y);
                 prevPosition = currPosition;
             }
         }
