@@ -33,10 +33,14 @@ void repairMesh(Mesh* mesh){
 // if 2 edges are unconnected or 1 edge is unconnected, goto fillhole
 void removeUnconnected(Mesh* mesh){
     int unconnected_cnt = 0;
+    int face_idx = 0;
 
     vector<MeshFace>::iterator mf_it = mesh->faces.begin();
 
     while (mf_it != mesh->faces.end()){
+        face_idx ++;
+        if (face_idx %100 ==0)
+            QCoreApplication::processEvents();
         MeshFace& mf = (*mf_it);
         int neighbor_cnt = 0;
 
@@ -58,9 +62,13 @@ void removeUnconnected(Mesh* mesh){
 // removes zero area triangles
 void removeDegenerate(Mesh* mesh){
     int degenerate_cnt = 0;
+    int face_idx = 0;
 
     vector<MeshFace>::iterator mf_it = mesh->faces.begin();
     while (mf_it != mesh->faces.end()){
+        face_idx ++;
+        if (face_idx %100 ==0)
+            QCoreApplication::processEvents();
         MeshFace &mf = (*mf_it);
 
         // one vertice && 2 vertices case
@@ -77,9 +85,13 @@ void removeDegenerate(Mesh* mesh){
 }
 
 void identifyHoles(Mesh* mesh){
+    int face_idx = 0;
     Paths3D hole_edges;
 
     for (MeshFace &mf : mesh->faces){
+        face_idx ++;
+        if (face_idx %100 ==0)
+            QCoreApplication::processEvents();
         if (mf.neighboring_faces[0].size() == 0){ // edge 0 is unconnected
             Path3D temp_edge;
             temp_edge.push_back(mesh->idx2MV(mf.mesh_vertex[0]));

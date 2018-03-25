@@ -2,3 +2,5 @@
 /DLPslicer.pro.user
 *.h.*
 *.cpp.*
+*.autosave
+

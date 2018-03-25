@@ -8,7 +8,7 @@ SlicingEngine::SlicingEngine()
 QProcess *slicing_process;
 
 // collect configuration and start slicing process
-void SlicingEngine::slice (QVariantMap config){
+void SlicingEngine::slice (QString config, QString filename){
 
     /*for(QVariantMap::const_iterator iter = config.begin(); iter != config.end(); ++iter) {
       char buf[100];
@@ -16,14 +16,21 @@ void SlicingEngine::slice (QVariantMap config){
         (*cfg)[buf] = iter.value().toString();
     }*/
 
+    qDebug() << "current directory : " << QDir::currentPath()+"/DentEngine/DentStudioEngine.exe";
     QObject *parent;
-    QString program = "\"C:\\Users\\diridiri\\Desktop\\DLP\\DLPbuild\\debug\\DentStudioEngine.exe\"";
+    QString program ="\""+QDir::currentPath()+"/DentEngine/DentStudioEngine.exe\"";
+    program = program.replace("/","\\");
+    qDebug() << program;
     QStringList command_list;
-    command_list << "C:/Users/diridiri/Desktop/DLP/partial1.STL" << "C:/Users/diridiri/Desktop/DLP/output";
-    for(QVariantMap::const_iterator iter = (*cfg).begin(); iter != (*cfg).end(); ++iter) {
-      QStringList valuestring = iter.value().toString().split("#");
-      command_list << "-"+valuestring[0] << valuestring[1];
+    command_list << filename << filename+"_temp";
+    //command_list << "C:/Users/diridiri/Desktop/DLP/partial1.STL" << "C:/Users/diridiri/Desktop/DLP/output";
+    QStringList configs = config.split("/");
+    for (QString config : configs){
+        QStringList valuestring = config.split("#");
+        command_list << "-"+valuestring[0] << valuestring[1];
     }
+
+    qDebug() << command_list;
     slicing_process = new QProcess(this);
     connect(slicing_process, SIGNAL(started()), this, SLOT(slicingStarted()));
     connect(slicing_process, SIGNAL(readyReadStandardOutput()), this, SLOT(slicingOutput()));

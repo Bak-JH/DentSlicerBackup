@@ -191,6 +191,7 @@ ApplicationWindow {
         }
 
     }
+
     PopUp {
         id: progress_popup
         funcname:""
@@ -260,6 +261,7 @@ ApplicationWindow {
             }
         }
     }
+
     PopUp {
         id: result_orient
         objectName: "result_orient"
@@ -291,8 +293,8 @@ ApplicationWindow {
         applyfinishbutton_vis: false
         descriptionimage_vis: true
         state: "inactive"
-
     }
+
     function moveH(value){
         scene3d.anchors.leftMargin = scene3d.anchors.leftMargin + parseInt(10*value)
     }

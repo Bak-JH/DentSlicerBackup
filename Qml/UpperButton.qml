@@ -18,6 +18,9 @@ Rectangle{
     signal buttonClicked()
     function do_buttonclick(iconText){
         switch(iconText){
+        case "Move":
+            buttonClicked();
+            break;
         case "Rotate":
             buttonClicked();
             break;
@@ -74,7 +77,7 @@ Rectangle{
         Rectangle {
             width: parent.width - 6
             height: parent.height - 6
-            color: "#669fad"
+            color: "#3EA6B7"
             anchors.verticalCenter: parent.verticalCenter
             anchors.horizontalCenter: parent.horizontalCenter
         }
@@ -113,29 +116,12 @@ Rectangle{
         hoverEnabled: true
         onEntered: {
             basicbutton.color = "#D8D8D8"
-            console.log("enter")
         }
         onExited: {
             basicbutton.color = parent.color
-            console.log("exit");
         }
 
         onClicked:{
-            do_buttonclick(iconText)
-
-           /* if (parent.state == "inactive"){
-                box_uppertab.inbox(iconText);
-                parent.state = "active";
-                console.log("active");
-                console.log(box_uppertab.box);
-            }
-            else {
-                //box_uppertab.inbox("none");
-                parent.state = "inactive";
-                console.log("inactive");
-                console.log(box_uppertab.box);
-            }*/
-
             if (parent.state == "inactive"){
                 all_off();
                 parent.state = "active";
@@ -145,6 +131,7 @@ Rectangle{
                 parent.state = "inactive";
                 console.log("inactive" + iconText);
             }
+            do_buttonclick(iconText)
         }
             //loadFileWindow();
 

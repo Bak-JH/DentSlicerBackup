@@ -6,14 +6,14 @@
 #include <QString>
 #include <QProcess>
 #include "configuration.h"
-#include "qmlmanager.h"
+#include "feature/stlexporter.h"
 
 class SlicingEngine : public QObject
 {
     Q_OBJECT
 public:
     SlicingEngine();
-    Q_INVOKABLE void slice (QVariantMap cfg);
+    Q_INVOKABLE void slice (QString cfg, QString filename);
 
 public slots:
     void slicingStarted();

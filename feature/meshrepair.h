@@ -2,6 +2,7 @@
 #define MESHREPAIR_H
 #include "mesh.h"
 #include <QDebug>
+#include <QCoreApplication>
 
 void repairMesh(Mesh* mesh);
 
