@@ -66,11 +66,11 @@ Entity {
         objectName:"total"
         Transform{
             id: systemTransform
-            scale3D: Qt.vector3d(0.01,0.01,0.01)
 
-            rotationZ:0
-            rotationY:0
-            rotationX:0
+            scale3D: Qt.vector3d(0.004,0.004,0.004)
+            rotationX : -70
+            rotationY : 0
+            rotationZ : -40
         }
 
         components: [systemTransform]
@@ -169,6 +169,10 @@ Entity {
         sourceDevice: keyboardDevice
 
         onPressed: {
+            if (event.key === Qt.Key_Delete) {
+                console.log("deleeeeee")
+                qm.DoDelete()
+            }
             /*
             if (event.key === Qt.Key_Z) {
                 console.log("posi   " + sceneRoot.systemTransform.translation)
@@ -261,7 +265,10 @@ Entity {
         var compo = Qt.createComponent("Model.qml");
 
         var loadmodel = compo.createObject(total, {});
+    }
 
+    function initCamera(){
+        cm.initCamera()
     }
 
 }

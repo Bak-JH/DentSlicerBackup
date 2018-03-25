@@ -128,6 +128,7 @@ public:
     QPhongMaterial *sphereMaterial[4];
 
     void removeModel();
+    void removeModelPartList();
     void beforeInitialize();
     void beforeAddVerticies();
 

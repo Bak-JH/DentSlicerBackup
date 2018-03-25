@@ -622,7 +622,6 @@ void GLModel::addIndexes(vector<int> indexes){
 
 void GLModel::handlePickerClicked(QPickEvent *pick)
 {
-    qDebug() << "****************88";
     qDebug() << pick->localIntersection()<<"pick" << parentModel->ID;
     emit modelSelected(parentModel->ID);
 
@@ -805,18 +804,18 @@ void GLModel::removeModel(){
     delete m_geometry;
     delete m_geometryRenderer;
 
+    deleteLater();
+}
+
+void GLModel::removeModelPartList(){
     //remove part list
     QList<QObject*> temp;
     temp.append(mainWindow);
     QObject *partList = (QEntity *)FindItemByName(temp, "partList");
 
-    QMetaObject::invokeMethod(partList, "deletePart",
-        Q_ARG(QVariant, ID));
-
-    deleteLater();
-
+    qDebug() <<"remove ID   " << ID;
+    QMetaObject::invokeMethod(partList, "deletePart", Q_ARG(QVariant, ID));
 }
-
 
 void GLModel::modelCut(){
     if (parentModel->cuttingPoints.size() < 3){

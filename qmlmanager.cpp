@@ -24,6 +24,9 @@ void QmlManager::initializeUI(QQmlApplicationEngine* e){
     models = (QEntity *)FindItemByName(engine, "Models");
     Lights* lights = new Lights(models);
 
+    QObject* mv = FindItemByName(engine, "MainView");
+    QMetaObject::invokeMethod(mv, "initCamera");
+
     // model cut components
     cutPopup = FindItemByName(engine, "cutPopup");
     curveButton = FindItemByName(engine, "curveButton");
@@ -220,6 +223,22 @@ void QmlManager::ModelVisible(int ID, bool isVisible){
         }
     }
     target->setEnabled(isVisible);
+}
+
+void QmlManager::DoDelete(){
+    /*set ID for delete*/
+    int ID = 1;
+    GLModel* target;
+    for(int i=0; i<glmodels.size();i++){
+        if(glmodels.at(i)->ID == ID){
+            target = glmodels.at(i);
+            break;
+        }
+    }
+    if(target != NULL){
+        target->removeModelPartList();
+        target->removeModel();
+    }
 }
 
 void QmlManager::showMoveArrow(){
