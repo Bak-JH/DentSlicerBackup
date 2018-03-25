@@ -43,6 +43,11 @@ GLModel::GLModel(QObject* mainWindow, QNode *parent, Mesh* loadMesh, QString fna
         addComponent(m_transform);
 
         m_meshMaterial = new QPhongMaterial();
+        m_meshMaterial->setAmbient(QColor(77,128,0));
+        m_meshMaterial->setDiffuse(QColor(173,215,218));
+        m_meshMaterial->setSpecular(QColor(182,237,246));
+        m_meshMaterial->setShininess(0.0f);
+        addComponent(m_meshMaterial);
 
         m_objectPicker = new Qt3DRender::QObjectPicker(this);
 
@@ -613,12 +618,15 @@ void GLModel::handlePickerClicked(QPickEvent *pick)
         if (labellingTextPreview)
             labellingTextPreview->setEnabled(true);
 
-        if (auto* glmodel = qobject_cast<GLModel*>(parent()))
-            glmodel->m_meshMaterial->setDiffuse(QColor(0, 255, 0));
+        parentModel->m_meshMaterial->setDiffuse(QColor(0, 255, 0));
 
         if (labellingTextPreview && labellingTextPreview->isEnabled()) {
-            labellingTextPreview->setTranslation(QVector3D(x,y,z) + pick->localIntersection());
-            labellingTextPreview->setNormal(pick->localIntersection()-QVector3D(x,y,z));
+            /*QVector3D tmp = m_transform->translation();
+            float zlength = mesh->z_max - mesh->z_min;
+            labellingTextPreview->planeTransform->setTranslation(QVector3D(tmp.x(),tmp.y(),zlength/2));*/
+
+            labellingTextPreview->setTranslation(pick->localIntersection());
+            labellingTextPreview->setNormal(pick->localIntersection());
         }
     }
 
@@ -1120,20 +1128,21 @@ void GLModel::generateText3DMesh()
     int indicesSize;
     float depth = 1.0f;
     float scale = labellingTextPreview->ratioY * labellingTextPreview->scaleY;
-    QVector3D translation = labellingTextPreview->translation;
+    QVector3D translation = labellingTextPreview->translation+ QVector3D(0,1,0);
 
     Qt3DCore::QTransform transform, normalTransform;
     transform.setScale(scale);
     transform.setRotationX(90);
     transform.setTranslation(translation);
 
-    auto axis = QVector3D::crossProduct(QVector3D(1, 0, 0), -labellingTextPreview->normal);
+    /*auto axis = QVector3D::crossProduct(QVector3D(1, 0, 0), -labellingTextPreview->normal);
     axis.normalize();
     auto cos_t = QVector3D::dotProduct(QVector3D(1, 0, 0), -labellingTextPreview->normal);
     auto sin_t = sqrtf(1 - cos_t * cos_t);
     auto angle = atan2f(cos_t, sin_t) * 180 / M_PI;
+    normalTransform.setRotation(QQuaternion::fromAxisAndAngle(axis, angle + 180));*/
 
-    normalTransform.setRotation(QQuaternion::fromAxisAndAngle(axis, angle + 180));
+    normalTransform.setRotationX(90);
 
     generateText3DGeometry(&vertices, &verticesSize,
                            &indices, &indicesSize,
@@ -1148,14 +1157,14 @@ void GLModel::generateText3DMesh()
     std::vector<QVector3D> outVertices;
     std::vector<QVector3D> outNormals;
     for (int i = 0; i < indicesSize / 3; ++i) {
-        // Insert vertices in CW order
-        outVertices.push_back(vertices[2 * indices[3*i + 0] + 0]);
-        outVertices.push_back(vertices[2 * indices[3*i + 1] + 0]);
+        // Insert vertices in CCW order
         outVertices.push_back(vertices[2 * indices[3*i + 2] + 0]);
+        outVertices.push_back(vertices[2 * indices[3*i + 1] + 0]);
+        outVertices.push_back(vertices[2 * indices[3*i + 0] + 0]);
 
-        outNormals.push_back(vertices[2 * indices[3*i + 0] + 1]);
-        outNormals.push_back(vertices[2 * indices[3*i + 1] + 1]);
         outNormals.push_back(vertices[2 * indices[3*i + 2] + 1]);
+        outNormals.push_back(vertices[2 * indices[3*i + 1] + 1]);
+        outNormals.push_back(vertices[2 * indices[3*i + 0] + 1]);
     }
 
     if (GLModel* glmodel = qobject_cast<GLModel*>(parent())) {

@@ -104,6 +104,7 @@ void LabellingTextPreview::updateTransform()
     auto angle = atan2f(cos_t, sin_t) * 180 / M_PI;
 
     planeTransform->setTranslation(translation + normal * 0.5f);
-    planeTransform->setRotation(QQuaternion::fromAxisAndAngle(axis, angle + 180));
+    //planeTransform->setRotation(QQuaternion::fromAxisAndAngle(axis, angle + 180));
+    planeTransform->setRotation(QQuaternion::fromAxisAndAngle(QVector3D(1,0,0), 180));
     planeTransform->setScale3D(QVector3D(width / minimumWidth, 1.0f, ratioY) * scaleY);
 }
