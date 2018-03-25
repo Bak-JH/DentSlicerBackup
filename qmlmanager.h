@@ -42,6 +42,9 @@ public:
     // auto repair components
     QObject* repairPopup;
 
+    // auto arrange components
+    QObject* arrangePopup;
+
     // save components
     QObject* saveButton;
 
@@ -49,6 +52,7 @@ public:
     QObject* exportButton;
 
     vector<GLModel*> glmodels;
+    GLModel* selectedModel = nullptr;
 
     Qt3DCore::QEntity *managerModel;
     QObject *rotateSphereobj;
@@ -63,6 +67,7 @@ public:
     void initializeUI(QQmlApplicationEngine *e);
     void openModelFile_internal(QString filename);
     void runArrange_internal();
+    void connectHandlers(GLModel* glmodel);
 
 private:
     bool glmodels_arranged;
@@ -78,6 +83,7 @@ public slots:
     void sendUpdateModelInfo(int, int, QString, float);
     void openModelFile(QString filename);
     void runGroupFeature(int,QString);
+    void modelSelected(int);
     void modelRotate(int,int);
     void modelMove(int,int);
     void modelMoveDone(int);

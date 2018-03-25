@@ -42,6 +42,9 @@ void QmlManager::initializeUI(QQmlApplicationEngine* e){
     // repair components
     repairPopup = FindItemByName(engine, "repairPopup");
 
+    // arrange components
+    arrangePopup = FindItemByName(engine, "arrangePopup");
+
     // save component
     saveButton = FindItemByName(engine, "saveBtn");
 
@@ -70,7 +73,7 @@ void QmlManager::initializeUI(QQmlApplicationEngine* e){
 
     QObject *boxUpperTab = FindItemByName(engine, "boxUpperTab");
     QObject::connect(boxUpperTab,SIGNAL(runGroupFeature(int,QString)),this,SLOT(runGroupFeature(int,QString)));
-    openModelFile("C:/Users/diridiri/Desktop/DLP/lowerjaw.stl");//DLPslicer/partial2_flip.stl");
+    openModelFile("C:/Users/diridiri/Desktop/DLP/partial1.stl");
 }
 
 void QmlManager::openModelFile(QString fname){
@@ -90,12 +93,18 @@ void QmlManager::openModelFile(QString fname){
                            (-1)*zmid));
     glmodel->m_transform->setTranslation(QVector3D(0,0,zlength/2));
 
-    // auto Repair
-
-    // auto arrange components
-    glmodels_arranged = false;
-    QObject* arrangePopup = FindItemByName(engine, "arrangePopup");
     //QObject* progress_text = FindItemByName(engine, "progress_text"); //orientation와 공유
+
+    connectHandlers(glmodel);
+
+    glmodels_arranged = false;
+    // do auto arrange
+    if (glmodels.size() >=2){
+        runArrange();
+    }
+}
+
+void QmlManager::connectHandlers(GLModel* glmodel){
     QObject::connect(glmodel->arsignal, SIGNAL(runArrange()), this, SLOT(runArrange()));
 
     QObject::connect(glmodel->ft, SIGNAL(setProgress(QVariant)),progress_text, SLOT(update_loading(QVariant)));
@@ -136,10 +145,9 @@ void QmlManager::openModelFile(QString fname){
     // export button codes
     QObject::connect(exportButton, SIGNAL(runFeature(int, QString)), glmodel->ft, SLOT(setTypeAndRun(int, QString)));
 
-    // do auto arrange
-    if (glmodels.size() >=2){
-        runArrange();
-    }
+    // model selection codes
+    QObject::connect(glmodel->shadowModel, SIGNAL(modelSelected(int)), this, SLOT(modelSelected(int)));
+
 }
 
 // slicing information
@@ -188,6 +196,22 @@ void QmlManager::applyArrangeResult(vector<QVector3D> translations, vector<float
         glmodels[i]->moveModelMesh(translations[i]);
         glmodels[i]->rotateModelMesh(3, rotations[i]);
     }
+}
+
+void QmlManager::modelSelected(int ID){
+    GLModel* target;
+    for(int i=0; i<glmodels.size();i++){
+        if(glmodels.at(i)->ID == ID){
+            target = glmodels.at(i);
+            break;
+        }
+    }
+
+    if (selectedModel != nullptr){
+        selectedModel->m_meshMaterial->setDiffuse(QColor(173,215,218));
+    }
+    selectedModel = target;
+    selectedModel->m_meshMaterial->setDiffuse(QColor(100,255,100));
 }
 
 void QmlManager::ModelVisible(int ID, bool isVisible){
