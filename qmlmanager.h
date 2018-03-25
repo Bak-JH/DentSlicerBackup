@@ -69,6 +69,8 @@ public:
     void runArrange_internal();
     void connectHandlers(GLModel* glmodel);
 
+    void connectHandlers(GLModel* glmodel);
+
 private:
     bool glmodels_arranged;
 

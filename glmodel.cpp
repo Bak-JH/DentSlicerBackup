@@ -621,8 +621,10 @@ void GLModel::addIndexes(vector<int> indexes){
 
 void GLModel::handlePickerClicked(QPickEvent *pick)
 {
+
     qDebug() << pick->localIntersection()<<"pick" << parentModel->ID;
     emit modelSelected(parentModel->ID);
+
     if (labelingActive) {
         if (labellingTextPreview)
             labellingTextPreview->setEnabled(true);
@@ -648,6 +650,7 @@ void GLModel::handlePickerClicked(QPickEvent *pick)
     } else if (cutMode == 9999){
         if (auto* glmodel = qobject_cast<GLModel*>(parent()))
             glmodel->m_meshMaterial->setDiffuse(QColor(100, 255, 100));
+
         qDebug() << "current cut mode :" << cutMode;
         return;
     }

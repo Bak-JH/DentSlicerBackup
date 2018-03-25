@@ -220,7 +220,8 @@ Entity {
             }
 
             if (event.key === Qt.Key_V) {
-
+                //console.log("camera pppoos " + camera.translateWorld(Qt.vector3d(0,0,0)));
+                //console.log("camera viewcenter" + camera.viewCenter);
             }
         }
     }
