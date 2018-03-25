@@ -73,6 +73,8 @@ void QmlManager::initializeUI(QQmlApplicationEngine* e){
 
     QObject *boxUpperTab = FindItemByName(engine, "boxUpperTab");
     QObject::connect(boxUpperTab,SIGNAL(runGroupFeature(int,QString)),this,SLOT(runGroupFeature(int,QString)));
+    QObject::connect(this, SIGNAL(arrangeDone(vector<QVector3D>, vector<float>)), this, SLOT(applyArrangeResult(vector<QVector3D>, vector<float>)));
+
 }
 
 void QmlManager::openModelFile(QString fname){
@@ -134,7 +136,6 @@ void QmlManager::connectHandlers(GLModel* glmodel){
 
     // auto arrange popup codes
     QObject::connect(arrangePopup, SIGNAL(runFeature(int)), glmodel->ft, SLOT(setTypeAndStart(int)));
-    QObject::connect(this, SIGNAL(arrangeDone(vector<QVector3D>, vector<float>)), this, SLOT(applyArrangeResult(vector<QVector3D>, vector<float>)));
 
     // save button codes
     QObject::connect(saveButton, SIGNAL(runFeature(int)), glmodel->ft, SLOT(setTypeAndRun(int)));
@@ -170,7 +171,7 @@ void QmlManager::runArrange_internal(){
             }
             autoarrange* ar;
             arng_result_set = ar->arngMeshes(&meshes_to_arrange);
-            /*vector<QVector3D> translations;
+            vector<QVector3D> translations;
             vector<float> rotations;
             for (int i=0; i<arng_result_set.size(); i++){
                 XYArrangement arng_result = arng_result_set[i];
@@ -178,9 +179,9 @@ void QmlManager::runArrange_internal(){
                 translations.push_back(trans_vec);
                 rotations.push_back(arng_result.second);
             }
-            emit arrangeDone(translations, rotations);*/
+            emit arrangeDone(translations, rotations);
 
-            ar->arrangeQt3D(m_transform_set, arng_result_set);
+            //ar->arrangeQt3D(m_transform_set, arng_result_set);
             //ar->arrangeGlmodels(&glmodel);
         }
     }
