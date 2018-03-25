@@ -38,9 +38,17 @@ GLModel::GLModel(QObject* mainWindow, QNode *parent, Mesh* loadMesh, QString fna
         mesh = toSparse(parentModel->mesh);
 
         initialize(mesh);
-        addVertices(mesh);
+        addVertices(mesh, false);
 
         addComponent(m_transform);
+
+        /*m_meshMaterial = new QPhongMaterial();
+        m_meshMaterial->setAmbient(QColor(77,128,0));
+        m_meshMaterial->setDiffuse(QColor(173,215,218));
+        m_meshMaterial->setSpecular(QColor(182,237,246));
+        m_meshMaterial->setShininess(0.0f);
+        addComponent(m_meshMaterial);*/
+        m_meshMaterial = new QPhongMaterial();
 
         m_objectPicker = new Qt3DRender::QObjectPicker(this);
 
@@ -58,7 +66,6 @@ GLModel::GLModel(QObject* mainWindow, QNode *parent, Mesh* loadMesh, QString fna
 
         labellingTextPreview = new LabellingTextPreview(this);
         labellingTextPreview->setEnabled(false);
-        m_meshMaterial = new QPhongMaterial();
 
         return;
     }
@@ -80,7 +87,7 @@ GLModel::GLModel(QObject* mainWindow, QNode *parent, Mesh* loadMesh, QString fna
     rmesh = new Mesh();
 
     initialize(mesh);
-    addVertices(mesh);
+    addVertices(mesh, false);
     //QFuture<void> future = QtConcurrent::run(this, &GLModel::initialize, mesh);
     //future = QtConcurrent::run(this, &GLModel::addVertices, mesh);
 
@@ -148,13 +155,13 @@ void GLModel::rotateModelMesh(QMatrix4x4 matrix){
 }
 
 void GLModel::updateModelMesh(){
+    initialize(mesh);
+    addVertices(mesh, false);
+    shadowModel->removeModel();
+    shadowModel=new GLModel(this->mainWindow, this, mesh, filename, true);
     QVector3D tmp = m_transform->translation();
     float zlength = mesh->z_max - mesh->z_min;
     m_transform->setTranslation(QVector3D(tmp.x(),tmp.y(),zlength/2));
-    initialize(mesh);
-    addVertices(mesh);
-    shadowModel->removeModel();
-    shadowModel=new GLModel(this->mainWindow, this, mesh, filename, true);
 
 }
 
@@ -412,7 +419,7 @@ void GLModel::clearVertices(){
     return;
 }
 
-void GLModel::addVertices(Mesh* mesh)
+void GLModel::addVertices(Mesh* mesh, bool CW)
 {
     int face_size = mesh->faces.size();
     int face_idx = 0;
@@ -430,11 +437,18 @@ void GLModel::addVertices(Mesh* mesh)
             QCoreApplication::processEvents();
 
         vector<QVector3D> result_vs;
-        for (int fn=0; fn<=2; fn++){
-            result_vs.push_back(mesh->idx2MV(mf.mesh_vertex[fn]).position);
+        if (CW){
+            for (int fn=2; fn>=0; fn--){
+                result_vs.push_back(mesh->idx2MV(mf.mesh_vertex[fn]).position);
+            }
+        } else {
+            for (int fn=0; fn<=2; fn++){
+                result_vs.push_back(mesh->idx2MV(mf.mesh_vertex[fn]).position);
+            }
         }
 
-        addVertices(result_vs);   
+
+        addVertices(result_vs);
     }
 
     foreach (MeshFace mf , mesh->faces){
@@ -443,16 +457,30 @@ void GLModel::addVertices(Mesh* mesh)
             QCoreApplication::processEvents();
 
         vector<QVector3D> result_vns;
-        for (int fn=0; fn<=2; fn++){
-            result_vns.push_back(mesh->idx2MV(mf.mesh_vertex[fn]).vn);
+        if (CW){
+            for (int fn=2; fn>=0; fn--){
+                result_vns.push_back(mesh->idx2MV(mf.mesh_vertex[fn]).vn);
 
-            if(mesh->idx2MV(mf.mesh_vertex[fn]).vn[0] == 0)
-                if(mesh->idx2MV(mf.mesh_vertex[fn]).vn[1] == 0)
-                    if(mesh->idx2MV(mf.mesh_vertex[fn]).vn[2] == 0)
-                    {
-                        result_vns.pop_back();
-                        result_vns.push_back(QVector3D(1,1,1));
-                    }
+                if(mesh->idx2MV(mf.mesh_vertex[fn]).vn[0] == 0)
+                    if(mesh->idx2MV(mf.mesh_vertex[fn]).vn[1] == 0)
+                        if(mesh->idx2MV(mf.mesh_vertex[fn]).vn[2] == 0)
+                        {
+                            result_vns.pop_back();
+                            result_vns.push_back(QVector3D(1,1,1));
+                        }
+            }
+        } else {
+            for (int fn=0; fn<=2; fn++){
+                result_vns.push_back(mesh->idx2MV(mf.mesh_vertex[fn]).vn);
+
+                if(mesh->idx2MV(mf.mesh_vertex[fn]).vn[0] == 0)
+                    if(mesh->idx2MV(mf.mesh_vertex[fn]).vn[1] == 0)
+                        if(mesh->idx2MV(mf.mesh_vertex[fn]).vn[2] == 0)
+                        {
+                            result_vns.pop_back();
+                            result_vns.push_back(QVector3D(1,1,1));
+                        }
+            }
         }
 
         addNormalVertices(result_vns);
@@ -464,9 +492,16 @@ void GLModel::addVertices(Mesh* mesh)
             QCoreApplication::processEvents();
 
         vector<QVector3D> result_vcs;
-        for (int fn=0; fn<=2; fn++){
-            result_vcs.push_back(QVector3D(1.0f, 0.0f, 0.0f));
+        if (CW){
+            for (int fn=2; fn>=0; fn--){
+                result_vcs.push_back(QVector3D(1.0f, 0.0f, 0.0f));
+            }
+        } else {
+            for (int fn=0; fn<=2; fn++){
+                result_vcs.push_back(QVector3D(1.0f, 0.0f, 0.0f));
+            }
         }
+
 
         addColorVertices(result_vcs);
     }
@@ -578,16 +613,21 @@ void GLModel::addIndexes(vector<int> indexes){
 
 void GLModel::handlePickerClicked(QPickEvent *pick)
 {
+    qDebug() << pick->localIntersection()<<"pick" << parentModel->ID;
+    emit modelSelected(parentModel->ID);
     if (labelingActive) {
         if (labellingTextPreview)
             labellingTextPreview->setEnabled(true);
 
-        if (auto* glmodel = qobject_cast<GLModel*>(parent()))
-            glmodel->m_meshMaterial->setDiffuse(QColor(0, 255, 0));
+        parentModel->m_meshMaterial->setDiffuse(QColor(0, 255, 0));
 
         if (labellingTextPreview && labellingTextPreview->isEnabled()) {
+            /*QVector3D tmp = m_transform->translation();
+            float zlength = mesh->z_max - mesh->z_min;
+            labellingTextPreview->planeTransform->setTranslation(QVector3D(tmp.x(),tmp.y(),zlength/2));*/
+
             labellingTextPreview->setTranslation(pick->localIntersection());
-            labellingTextPreview->setNormal(QVector3D(0, 0, 1));
+            labellingTextPreview->setNormal(pick->localIntersection());
         }
     }
 
@@ -599,7 +639,7 @@ void GLModel::handlePickerClicked(QPickEvent *pick)
         //parentModel->ft->ct->addCuttingPoint(parentModel, v);
     } else if (cutMode == 9999){
         if (auto* glmodel = qobject_cast<GLModel*>(parent()))
-            glmodel->m_meshMaterial->setDiffuse(QColor(0, 255, 0));
+            glmodel->m_meshMaterial->setDiffuse(QColor(100, 255, 100));
         qDebug() << "current cut mode :" << cutMode;
         return;
     }
@@ -684,7 +724,8 @@ void GLModel::generatePlane(){
         parentModel->planeTransform[i]=new Qt3DCore::QTransform();
         parentModel->planeTransform[i]->setScale(2.0f);
         parentModel->planeTransform[i]->setRotation(QQuaternion::fromAxisAndAngle(crossproduct_vector, angle+180*i));
-        parentModel->planeTransform[i]->setTranslation(desire_normal*(-world_origin.distanceToPlane(v1,v2,v3)));
+        float zlength = parentModel->mesh->z_max - parentModel->mesh->z_min;
+        parentModel->planeTransform[i]->setTranslation(desire_normal*(-world_origin.distanceToPlane(v1,v2,v3))+QVector3D(0,0,zlength/2));
 
         parentModel->planeEntity[i] = new Qt3DCore::QEntity(parentModel->parentModel);
         parentModel->planeEntity[i]->addComponent(parentModel->clipPlane[i]);
@@ -704,11 +745,12 @@ void GLModel::removePlane(){
 }
 
 void GLModel::addCuttingPoint(QVector3D v){
+    float zlength = mesh->z_max - mesh->z_min;
     cuttingPoints.push_back(v);
     sphereMesh[numPoints] = new Qt3DExtras::QSphereMesh;
     sphereMesh[numPoints]->setRadius(1);
     sphereTransform[numPoints] = new Qt3DCore::QTransform;
-    sphereTransform[numPoints]->setTranslation(v);
+    sphereTransform[numPoints]->setTranslation(v + QVector3D(0,0,zlength/2));
 
     sphereMaterial[numPoints] = new Qt3DExtras::QPhongMaterial();
     sphereMaterial[numPoints]->setAmbient(QColor(QRgb(0x0049FF)));
@@ -791,9 +833,15 @@ void GLModel::modelCut(){
 }
 
 void GLModel::generateRLModel(){
-    qDebug() << "modelCut finished";
     leftModel = new GLModel(parentModel->mainWindow, parentModel, lmesh, "", false);
     rightModel = new GLModel(parentModel->mainWindow, parentModel, rmesh, "", false);
+    QVector3D tmp = leftModel->m_transform->translation();
+    float zlength = mesh->z_max - mesh->z_min;
+    leftModel->m_transform->setTranslation(QVector3D(tmp.x(),tmp.y(),zlength/2));
+    tmp = rightModel->m_transform->translation();
+    rightModel->m_transform->setTranslation(QVector3D(tmp.x(),tmp.y(),zlength/2));
+    //leftModel->m_transform = m_transform;
+    //rightModel->m_transform = m_transform;
 
 }
 
@@ -1015,6 +1063,9 @@ QVector3D GLModel::spreadPoint(QVector3D endPoint,QVector3D startPoint,int facto
 Mesh* GLModel::toSparse(Mesh* mesh){
     int i=0, jump=30, factor=10;
     Mesh* newMesh = new Mesh;
+    newMesh->faces.reserve(mesh->faces.size()/5);
+    newMesh->vertices.reserve(mesh->faces.size()/5);
+
     foreach (MeshFace mf , mesh->faces){
         if (i%jump==0){
             QCoreApplication::processEvents();
@@ -1031,6 +1082,7 @@ Mesh* GLModel::toSparse(Mesh* mesh){
         }
         i+=1;
     }
+    //newMesh->connectFaces();
 return newMesh;
 }
 
@@ -1076,12 +1128,19 @@ void GLModel::generateText3DMesh()
     int indicesSize;
     float depth = 1.0f;
     float scale = labellingTextPreview->ratioY * labellingTextPreview->scaleY;
-    QVector3D translation = labellingTextPreview->translation;
+    QVector3D translation = labellingTextPreview->translation+ QVector3D(0,-0.3,0);
 
     Qt3DCore::QTransform transform, normalTransform;
     transform.setScale(scale);
     transform.setRotationX(90);
     transform.setTranslation(translation);
+
+    /*auto axis = QVector3D::crossProduct(QVector3D(1, 0, 0), -labellingTextPreview->normal);
+    axis.normalize();
+    auto cos_t = QVector3D::dotProduct(QVector3D(1, 0, 0), -labellingTextPreview->normal);
+    auto sin_t = sqrtf(1 - cos_t * cos_t);
+    auto angle = atan2f(cos_t, sin_t) * 180 / M_PI;
+    normalTransform.setRotation(QQuaternion::fromAxisAndAngle(axis, angle + 180));*/
 
     normalTransform.setRotationX(90);
 
@@ -1098,20 +1157,19 @@ void GLModel::generateText3DMesh()
     std::vector<QVector3D> outVertices;
     std::vector<QVector3D> outNormals;
     for (int i = 0; i < indicesSize / 3; ++i) {
-        // Insert vertices in CW order
-        outVertices.push_back(vertices[2 * indices[3*i + 0] + 0]);
-        outVertices.push_back(vertices[2 * indices[3*i + 1] + 0]);
+        // Insert vertices in CCW order
         outVertices.push_back(vertices[2 * indices[3*i + 2] + 0]);
+        outVertices.push_back(vertices[2 * indices[3*i + 1] + 0]);
+        outVertices.push_back(vertices[2 * indices[3*i + 0] + 0]);
+        parentModel->mesh->addFace(vertices[2 * indices[3*i + 2] + 0], vertices[2 * indices[3*i + 1] + 0], vertices[2 * indices[3*i + 0] + 0]);
 
-        outNormals.push_back(vertices[2 * indices[3*i + 0] + 1]);
-        outNormals.push_back(vertices[2 * indices[3*i + 1] + 1]);
         outNormals.push_back(vertices[2 * indices[3*i + 2] + 1]);
+        outNormals.push_back(vertices[2 * indices[3*i + 1] + 1]);
+        outNormals.push_back(vertices[2 * indices[3*i + 0] + 1]);
     }
 
     if (GLModel* glmodel = qobject_cast<GLModel*>(parent())) {
-        qDebug() << "addVertices";
         glmodel->addVertices(outVertices);
-        qDebug() << "addNormalVertices";
         glmodel->addNormalVertices(outNormals);
     }
 }

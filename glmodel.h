@@ -131,8 +131,8 @@ public:
     void beforeInitialize();
     void beforeAddVerticies();
 
-
     LabellingTextPreview* labellingTextPreview = nullptr;
+
     // Model Mesh move
     void moveModelMesh(QVector3D direction);
     // Model Mesh rotate
@@ -174,7 +174,7 @@ private:
     QVector3D lastpoint;
     void initialize(const Mesh* mesh);
     void addVertex(QVector3D vertex);
-    void addVertices(Mesh* mesh);
+    void addVertices(Mesh* mesh, bool CW);
     void addVertices(vector<QVector3D> vertices);
     void addNormalVertices(vector<QVector3D> vertices);
     void addColorVertices(vector<QVector3D> vertices);
@@ -187,6 +187,7 @@ private:
     bool labelingActive = false;
 
 signals:
+    void modelSelected(int);
     void bisectDone();
     void _updateModelMesh();
 

@@ -51,6 +51,7 @@ public:
 
     void updateTransform();
 
+    Qt3DCore::QTransform* planeTransform = nullptr;
     QVector3D translation;
     QVector3D normal;
     QString text;
@@ -65,7 +66,6 @@ public:
 private:
 
     Qt3DCore::QEntity* planeEntity = nullptr;
-    Qt3DCore::QTransform* planeTransform = nullptr;
     Qt3DExtras::QNormalDiffuseMapAlphaMaterial* planeMaterial = nullptr;
 
     Qt3DRender::QAbstractTexture* texture = nullptr;
