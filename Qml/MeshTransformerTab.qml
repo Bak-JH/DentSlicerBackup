@@ -116,22 +116,22 @@ Item {
         model_move.source = "qrc:/resource/model_move_select.png"
 
         var point = ui.world2Screen(Qt.vector3d(0,0,0))
-        ui.isMove = true
-        ui.mtm.show(point.x,point.y)
+    //    ui.isMove = true
+    //    ui.mtm.show(point.x,point.y)
     }
     function selectRotate(){
         model_rotate.source = "qrc:/resource/model_rotate_select.png"
 
         var point = ui.world2Screen(Qt.vector3d(0,0,0))
-        ui.isRotate = true
-        ui.mtr.show(point.x,point.y)
+    //    ui.isRotate = true
+    //    ui.mtr.show(point.x,point.y)
     }
     function selectZoom(){
         model_zoom.source = "qrc:/resource/model_zoom_select.png"
 
         var point = ui.world2Screen(Qt.vector3d(0,0,0))
-        ui.isZoom = true
-        ui.mtz.show(point.x,point.y)
+    //    ui.isZoom = true
+    //    ui.mtz.show(point.x,point.y)
     }
 
 
