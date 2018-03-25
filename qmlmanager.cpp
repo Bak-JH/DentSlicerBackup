@@ -86,12 +86,10 @@ void QmlManager::openModelFile(QString fname){
     float xmid = (glmodel->mesh->x_max + glmodel->mesh->x_min)/2;
     float ymid = (glmodel->mesh->y_max + glmodel->mesh->y_min)/2;
     float zmid = (glmodel->mesh->z_max + glmodel->mesh->z_min)/2;
-    float zlength = (glmodel->mesh->z_max - glmodel->mesh->z_min);
     glmodel->moveModelMesh(QVector3D(
                            (-1)*xmid,
                            (-1)*ymid,
                            (-1)*zmid));
-    glmodel->m_transform->setTranslation(QVector3D(0,0,zlength/2));
 
     //QObject* progress_text = FindItemByName(engine, "progress_text"); //orientation와 공유
 

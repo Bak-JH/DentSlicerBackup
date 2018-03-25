@@ -89,21 +89,21 @@ void LabellingTextPreview::setTranslation(const QVector3D& t)
 void LabellingTextPreview::setNormal(const QVector3D& n)
 {
     normal = n;
+    normal.normalize();
 
     updateTransform();
 }
 
 void LabellingTextPreview::updateTransform()
 {
-    auto minusNormal= normal;
-    minusNormal.setZ(-normal.z());
+    auto axis = QVector3D::crossProduct(QVector3D(1,0,0), -normal);
+    axis.normalize();
+    auto cos_t = QVector3D::dotProduct(QVector3D(1,0,0), -normal);
 
-    auto axis = QVector3D::crossProduct(QVector3D(0, 1, 0), minusNormal);
-    auto cos_t = QVector3D::dotProduct(QVector3D(0, 1, 0), minusNormal);
     auto sin_t = sqrtf(1 - cos_t * cos_t);
-    auto angle = atan2f(sin_t, cos_t) * 180 / M_PI;
+    auto angle = atan2f(cos_t, sin_t) * 180 / M_PI;
 
-    planeTransform->setTranslation(translation + minusNormal * 0.5f);
-    planeTransform->setRotation(QQuaternion::fromAxisAndAngle(QVector3D(1, 0, 0), 180));
+    planeTransform->setTranslation(translation + normal * 0.5f);
+    planeTransform->setRotation(QQuaternion::fromAxisAndAngle(axis, angle + 180));
     planeTransform->setScale3D(QVector3D(width / minimumWidth, 1.0f, ratioY) * scaleY);
 }
