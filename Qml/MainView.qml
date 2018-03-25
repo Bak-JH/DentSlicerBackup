@@ -93,7 +93,6 @@ Entity {
                 objectName: "moveArrow"
             }
         }
-
         CoordinateMesh{}
     }
 

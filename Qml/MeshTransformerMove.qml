@@ -17,7 +17,6 @@ Entity{
     property vector2d mouseOrigin : Qt.vector2d(0,0)
     property vector2d mouseCurrent : Qt.vector2d(0,0)
     property int moveDirection : 0
-
     property int pastDistance :0
     property int pastAxis :0
     components: [
@@ -206,8 +205,8 @@ Entity{
                 }
                 pastAxis = moveAxis
                 if (moveAxis != 0){
-                    console.log(intersect)
-                    console.log(moveDirection)
+                    //console.log(intersect)
+                    //console.log(moveDirection)
                     var Origin = world2Screen(center)
                     var mouseOrigin_Origin = mouseOrigin.minus(Origin).length() //a
                     var mouseCurrent_Origin = mouseCurrent.minus(Origin).length() //b
@@ -227,12 +226,14 @@ Entity{
                     //console.log(distance)
                 }
                 moveArrowTransform.scale3D = Qt.vector3d(0.01/syszoom.x,0.01/syszoom.y,0.01/syszoom.z)
+
                 //moveArrowTransform.translation = center.minus(cm.camera.viewVector) // When camera rotating mode
                 var theta = sceneRoot.systemTransform.rotationX/180.0*Math.PI
                 var alpha = sceneRoot.systemTransform.rotationZ/180.0*Math.PI
                 moveArrowTransform.translation = Qt.vector3d(center.x+100*Math.sin(theta)*Math.sin(alpha),
                                                                 center.y+100*Math.sin(theta)*Math.cos(alpha),
                                                                 center.z+100*Math.cos(theta))
+
             }else{
                 moveAxis=0;
             }

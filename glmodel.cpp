@@ -125,7 +125,6 @@ GLModel::GLModel(QObject* mainWindow, QNode *parent, Mesh* loadMesh, QString fna
 
 }
 
-
 void GLModel::moveModelMesh(QVector3D direction){
     mesh->vertexMove(direction);
     emit _updateModelMesh();
@@ -163,6 +162,7 @@ void GLModel::updateModelMesh(){
     QVector3D tmp = m_transform->translation();
     float zlength = mesh->z_max - mesh->z_min;
     m_transform->setTranslation(QVector3D(tmp.x(),tmp.y(),zlength/2));
+
 }
 
 featureThread::featureThread(GLModel* glmodel, int type){
@@ -833,8 +833,6 @@ void GLModel::modelCut(){
 }
 
 void GLModel::generateRLModel(){
-    qDebug() << "modelCut finished";
-    qDebug() << "parent model : "<< parentModel;
     leftModel = new GLModel(parentModel->mainWindow, parentModel, lmesh, "", false);
     rightModel = new GLModel(parentModel->mainWindow, parentModel, rmesh, "", false);
     QVector3D tmp = leftModel->m_transform->translation();
@@ -844,6 +842,7 @@ void GLModel::generateRLModel(){
     rightModel->m_transform->setTranslation(QVector3D(tmp.x(),tmp.y(),zlength/2));
     //leftModel->m_transform = m_transform;
     //rightModel->m_transform = m_transform;
+
 }
 
 void GLModel::modelCutFinished(){

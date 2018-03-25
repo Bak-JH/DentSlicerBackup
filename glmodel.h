@@ -131,10 +131,8 @@ public:
     void beforeInitialize();
     void beforeAddVerticies();
 
-
     LabellingTextPreview* labellingTextPreview = nullptr;
 
-    void translateModelMesh();
     // Model Mesh move
     void moveModelMesh(QVector3D direction);
     // Model Mesh rotate

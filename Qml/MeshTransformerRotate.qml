@@ -233,7 +233,6 @@ Entity {
         var tmp = Qt.vector3d(0,0,0)
         tmp = target
         target = tmp.times(systemTransform.scale3D)
-
         var theta = (-1)*sceneRoot.systemTransform.rotationX/180.0*Math.PI
         var alpha = (-1)*sceneRoot.systemTransform.rotationZ/180.0*Math.PI
         //console.log("cordinate")
@@ -294,6 +293,7 @@ Entity {
                     pastAngle = degreeangle
                 }
                 rotateSphereTransform.scale3D = Qt.vector3d(0.01/syszoom.x,0.01/syszoom.y,0.01/syszoom.z)
+
                 //console.log(sceneRoot.systemTransform.rotationX )
                 var theta = sceneRoot.systemTransform.rotationX/180.0*Math.PI
                 var alpha = sceneRoot.systemTransform.rotationZ/180.0*Math.PI
