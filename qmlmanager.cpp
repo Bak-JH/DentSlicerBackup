@@ -57,7 +57,6 @@ void QmlManager::initializeUI(QQmlApplicationEngine* e){
     QObject::connect(moveArrowobj, SIGNAL(moveSignal(int,int)),this, SLOT(modelMove(int,int)));
     QObject::connect(moveArrowobj, SIGNAL(moveDone(int)),this, SLOT(modelMoveDone(int)));
     moveArrow->setEnabled(0);
-
     rotateSphere = (QEntity *)FindItemByName(engine, "rotateSphereEntity");
     rotateSphereX = (QEntity *)FindItemByName(engine, "rotateSphereTorusX");
     rotateSphereY = (QEntity *)FindItemByName(engine, "rotateSphereTorusY");
@@ -74,9 +73,7 @@ void QmlManager::initializeUI(QQmlApplicationEngine* e){
     QObject *boxUpperTab = FindItemByName(engine, "boxUpperTab");
     QObject::connect(boxUpperTab,SIGNAL(runGroupFeature(int,QString)),this,SLOT(runGroupFeature(int,QString)));
     QObject::connect(this, SIGNAL(arrangeDone(vector<QVector3D>, vector<float>)), this, SLOT(applyArrangeResult(vector<QVector3D>, vector<float>)));
-
 }
-
 void QmlManager::openModelFile(QString fname){
 
     GLModel* glmodel = new GLModel(mainWindow, models, nullptr, fname, false);
@@ -191,11 +188,10 @@ void QmlManager::runArrange_internal(){
 void QmlManager::applyArrangeResult(vector<QVector3D> translations, vector<float> rotations){
     qDebug() << "apply arrange result ";
     for (int i=0; i<glmodels.size(); i++){
-        glmodels[i]->moveModelMesh(translations[i]);
+        glmodels[i]->m_transform->setTranslation(translations[i]);
         glmodels[i]->rotateModelMesh(3, rotations[i]);
     }
 }
-
 void QmlManager::modelSelected(int ID){
     GLModel* target;
     for(int i=0; i<glmodels.size();i++){

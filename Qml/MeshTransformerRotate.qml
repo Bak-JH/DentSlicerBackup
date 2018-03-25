@@ -279,15 +279,33 @@ Entity {
                     if (Math.pow(mouseCurrent_mouseOrigin,2) > Math.pow(mouseOrigin_Origin,2)+Math.pow(mouseCurrent_Origin,2)){
                         degreeangle = (Math.abs(degreeangle)/degreeangle)*(180-Math.abs(degreeangle))
                     }
+                    var updown=0
+                    if (Math.sin((systemTransform.rotationX)/ 180 * Math.PI) > 0){
+                        updown = -1
+                    }else{
+                        updown = 1
+                    }
                     switch(rotateAxis){
                     case 1: // xAxis
-                        rotateSignal(1,degreeangle-pastAngle)
+                        if (Math.sin(systemTransform.rotationZ / 180 * Math.PI) < 0){
+                            rotateSignal(1,updown * (degreeangle-pastAngle))
+                        }else{
+                            rotateSignal(1,updown * (-degreeangle+pastAngle))
+                        }
                         break;
                     case 2: // yAxis
-                        rotateSignal(2,degreeangle-pastAngle)
+                        if (Math.sin((systemTransform.rotationZ-90) / 180 * Math.PI) >0){
+                            rotateSignal(2,updown * (degreeangle-pastAngle))
+                        }else{
+                            rotateSignal(2,updown * (-degreeangle+pastAngle))
+                        }
                     break;
                     case 3: // zAxis
-                        rotateSignal(3,degreeangle-pastAngle)
+                        if (Math.sin((systemTransform.rotationX+90)/ 180 * Math.PI) > 0){
+                            rotateSignal(3,degreeangle-pastAngle)
+                        }else{
+                            rotateSignal(3,-degreeangle+pastAngle)
+                        }
                     break;
                     }
                     pastAngle = degreeangle
