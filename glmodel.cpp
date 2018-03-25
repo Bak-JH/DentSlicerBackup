@@ -42,12 +42,13 @@ GLModel::GLModel(QObject* mainWindow, QNode *parent, Mesh* loadMesh, QString fna
 
         addComponent(m_transform);
 
-        m_meshMaterial = new QPhongMaterial();
+        /*m_meshMaterial = new QPhongMaterial();
         m_meshMaterial->setAmbient(QColor(77,128,0));
         m_meshMaterial->setDiffuse(QColor(173,215,218));
         m_meshMaterial->setSpecular(QColor(182,237,246));
         m_meshMaterial->setShininess(0.0f);
-        addComponent(m_meshMaterial);
+        addComponent(m_meshMaterial);*/
+        m_meshMaterial = new QPhongMaterial();
 
         m_objectPicker = new Qt3DRender::QObjectPicker(this);
 
@@ -1128,7 +1129,7 @@ void GLModel::generateText3DMesh()
     int indicesSize;
     float depth = 1.0f;
     float scale = labellingTextPreview->ratioY * labellingTextPreview->scaleY;
-    QVector3D translation = labellingTextPreview->translation+ QVector3D(0,1,0);
+    QVector3D translation = labellingTextPreview->translation+ QVector3D(0,-0.3,0);
 
     Qt3DCore::QTransform transform, normalTransform;
     transform.setScale(scale);
@@ -1161,6 +1162,7 @@ void GLModel::generateText3DMesh()
         outVertices.push_back(vertices[2 * indices[3*i + 2] + 0]);
         outVertices.push_back(vertices[2 * indices[3*i + 1] + 0]);
         outVertices.push_back(vertices[2 * indices[3*i + 0] + 0]);
+        parentModel->mesh->addFace(vertices[2 * indices[3*i + 2] + 0], vertices[2 * indices[3*i + 1] + 0], vertices[2 * indices[3*i + 0] + 0]);
 
         outNormals.push_back(vertices[2 * indices[3*i + 2] + 1]);
         outNormals.push_back(vertices[2 * indices[3*i + 1] + 1]);
