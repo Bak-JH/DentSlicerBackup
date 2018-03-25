@@ -49,12 +49,10 @@ GLModel::GLModel(QObject* mainWindow, QNode *parent, Mesh* loadMesh, QString fna
         m_meshMaterial->setShininess(0.0f);
         addComponent(m_meshMaterial);*/
         m_meshMaterial = new QPhongMaterial();
-
         m_objectPicker = new Qt3DRender::QObjectPicker(this);
 
-        //m_objectPicker->setHoverEnabled(true);
+        m_objectPicker->setHoverEnabled(true);
         //m_objectPicker->setDragEnabled(true);
-
         // add only m_objectPicker
         QObject::connect(m_objectPicker, SIGNAL(clicked(Qt3DRender::QPickEvent*)), this, SLOT(handlePickerClicked(Qt3DRender::QPickEvent*)));
         QObject::connect(m_objectPicker, SIGNAL(moved(Qt3DRender::QPickEvent*)), this, SLOT(mgoo(Qt3DRender::QPickEvent*)));
@@ -129,7 +127,10 @@ void GLModel::moveModelMesh(QVector3D direction){
     mesh->vertexMove(direction);
     emit _updateModelMesh();
 }
-
+void GLModel::scaleModelMesh(float scale){
+    mesh->vertexScale(scale);
+    emit _updateModelMesh();
+}
 void GLModel::rotateModelMesh(int Axis, float Angle){
     Qt3DCore::QTransform* tmp = new Qt3DCore::QTransform();
     switch(Axis){
@@ -621,7 +622,7 @@ void GLModel::addIndexes(vector<int> indexes){
 
 void GLModel::handlePickerClicked(QPickEvent *pick)
 {
-
+    qDebug() << "****************88";
     qDebug() << pick->localIntersection()<<"pick" << parentModel->ID;
     emit modelSelected(parentModel->ID);
 
