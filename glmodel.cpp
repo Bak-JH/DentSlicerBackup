@@ -587,7 +587,7 @@ void GLModel::handlePickerClicked(QPickEvent *pick)
 
         if (labellingTextPreview && labellingTextPreview->isEnabled()) {
             labellingTextPreview->setTranslation(pick->localIntersection());
-            labellingTextPreview->setNormal(QVector3D(0, 0, 1));
+            labellingTextPreview->setNormal(pick->localIntersection());
         }
     }
 
@@ -1083,7 +1083,13 @@ void GLModel::generateText3DMesh()
     transform.setRotationX(90);
     transform.setTranslation(translation);
 
-    normalTransform.setRotationX(90);
+    auto axis = QVector3D::crossProduct(QVector3D(1, 0, 0), -labellingTextPreview->normal);
+    axis.normalize();
+    auto cos_t = QVector3D::dotProduct(QVector3D(1, 0, 0), -labellingTextPreview->normal);
+    auto sin_t = sqrtf(1 - cos_t * cos_t);
+    auto angle = atan2f(cos_t, sin_t) * 180 / M_PI;
+
+    normalTransform.setRotation(QQuaternion::fromAxisAndAngle(axis, angle + 180));
 
     generateText3DGeometry(&vertices, &verticesSize,
                            &indices, &indicesSize,
@@ -1098,7 +1104,6 @@ void GLModel::generateText3DMesh()
     std::vector<QVector3D> outVertices;
     std::vector<QVector3D> outNormals;
     for (int i = 0; i < indicesSize / 3; ++i) {
-        // Insert vertices in CW order
         outVertices.push_back(vertices[2 * indices[3*i + 0] + 0]);
         outVertices.push_back(vertices[2 * indices[3*i + 1] + 0]);
         outVertices.push_back(vertices[2 * indices[3*i + 2] + 0]);

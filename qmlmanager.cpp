@@ -70,6 +70,8 @@ void QmlManager::initializeUI(QQmlApplicationEngine* e){
 
     QObject *boxUpperTab = FindItemByName(engine, "boxUpperTab");
     QObject::connect(boxUpperTab,SIGNAL(runGroupFeature(int,QString)),this,SLOT(runGroupFeature(int,QString)));
+
+    openModelFile("C:/Users/jaine/workspace/DLPslicerResource/partial2_flip.stl");
 }
 
 void QmlManager::openModelFile(QString fname){
