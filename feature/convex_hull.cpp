@@ -8,7 +8,7 @@ IntPoint pivot;
 // returns -1 if a -> b -> c forms a counter-clockwise turn,
 // +1 for a clockwise turn, 0 if they are collinear
 int ccw(IntPoint a, IntPoint b, IntPoint c) {
-    int area = (b.X - a.X) * (c.Y - a.Y) - (b.Y - a.Y) * (c.X - a.X);
+    long long int area = (b.X - a.X) * (c.Y - a.Y) - (b.Y - a.Y) * (c.X - a.X);
     if (area > 0)
         return -1;
     else if (area < 0)
@@ -18,7 +18,7 @@ int ccw(IntPoint a, IntPoint b, IntPoint c) {
 
 // returns square of Euclidean distance between two points
 int sqrDist(IntPoint a, IntPoint b)  {
-    int dx = a.X - b.X, dy = a.Y - b.Y;
+    long long int dx = a.X - b.X, dy = a.Y - b.Y;
     return dx * dx + dy * dy;
 }
 
@@ -90,7 +90,7 @@ Path grahamScan(Path path)    {
 
 Path getConvexHull(Path* path){
     /**/qDebug() << "getConvexHull";
-    /**/qDebug() << "orient" << Orientation(*path);
+    /**/qDebug() << "path orient" << Orientation(*path);
     Path convex_hull = grahamScan(*path);
     /**/qDebug() << "got convex_hull";
     if(!Orientation(convex_hull)) ReversePath(convex_hull);
