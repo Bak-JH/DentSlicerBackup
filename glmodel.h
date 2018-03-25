@@ -187,7 +187,9 @@ private:
     bool labelingActive = false;
 
 signals:
+
     void modelSelected(int);
+
     void bisectDone();
     void _updateModelMesh();
 

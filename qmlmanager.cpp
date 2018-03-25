@@ -73,6 +73,7 @@ void QmlManager::initializeUI(QQmlApplicationEngine* e){
 
     QObject *boxUpperTab = FindItemByName(engine, "boxUpperTab");
     QObject::connect(boxUpperTab,SIGNAL(runGroupFeature(int,QString)),this,SLOT(runGroupFeature(int,QString)));
+
     QObject::connect(this, SIGNAL(arrangeDone(vector<QVector3D>, vector<float>)), this, SLOT(applyArrangeResult(vector<QVector3D>, vector<float>)));
 
 }
@@ -210,6 +211,7 @@ void QmlManager::modelSelected(int ID){
     }
     selectedModel = target;
     selectedModel->m_meshMaterial->setDiffuse(QColor(100,255,100));
+
 }
 
 void QmlManager::ModelVisible(int ID, bool isVisible){
