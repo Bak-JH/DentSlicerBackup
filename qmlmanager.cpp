@@ -77,7 +77,9 @@ void QmlManager::initializeUI(QQmlApplicationEngine* e){
     QObject::connect(boxUpperTab,SIGNAL(runGroupFeature(int,QString)),this,SLOT(runGroupFeature(int,QString)));
 
     QObject::connect(this, SIGNAL(arrangeDone(vector<QVector3D>, vector<float>)), this, SLOT(applyArrangeResult(vector<QVector3D>, vector<float>)));
-    openModelFile("c:/Users/SH/Desktop/dlpslicer/DLPslicer/demo_object.stl");
+
+    openModelFile(QDir::currentPath()+"/Models/partial1.stl");
+    //openModelFile("c:/Users/SH/Desktop/dlpslicer/DLPslicer/demo_object.stl");
 }
 void QmlManager::openModelFile(QString fname){
 
@@ -93,7 +95,6 @@ void QmlManager::openModelFile(QString fname){
                            (-1)*xmid,
                            (-1)*ymid,
                            (-1)*zmid));
-    glmodel->scaleModelMesh(0.5);
     //QObject* progress_text = FindItemByName(engine, "progress_text"); //orientation와 공유
 
     connectHandlers(glmodel);
@@ -207,10 +208,10 @@ void QmlManager::modelSelected(int ID){
     }
 
     if (selectedModel != nullptr){
-        selectedModel->m_meshMaterial->setDiffuse(QColor(173,215,218));
+        //selectedModel->m_meshMaterial->setDiffuse(QColor(173,215,218));
     }
     selectedModel = target;
-    selectedModel->m_meshMaterial->setDiffuse(QColor(100,255,100));
+    //selectedModel->m_meshMaterial->setDiffuse(QColor(100,255,100));
 
 }
 

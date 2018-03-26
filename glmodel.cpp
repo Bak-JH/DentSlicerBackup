@@ -42,13 +42,14 @@ GLModel::GLModel(QObject* mainWindow, QNode *parent, Mesh* loadMesh, QString fna
 
         addComponent(m_transform);
 
-        /*m_meshMaterial = new QPhongMaterial();
-        m_meshMaterial->setAmbient(QColor(77,128,0));
+        m_meshMaterial = new QPhongMaterial();
+        /*m_meshMaterial->setAmbient(QColor(77,128,0));
         m_meshMaterial->setDiffuse(QColor(173,215,218));
         m_meshMaterial->setSpecular(QColor(182,237,246));
         m_meshMaterial->setShininess(0.0f);
         addComponent(m_meshMaterial);*/
-        m_meshMaterial = new QPhongMaterial();
+
+        //m_meshMaterial = new QPhongMaterial();
         m_objectPicker = new Qt3DRender::QObjectPicker(this);
 
         m_objectPicker->setHoverEnabled(true);
@@ -167,8 +168,11 @@ void GLModel::updateModelMesh(){
     delete m_geometryRenderer;
     initialize(mesh);
     addVertices(mesh, false);
-    shadowModel->removeModel();
+    Qt3DRender::QObjectPicker* op = shadowModel->m_objectPicker;
+    GLModel* temp = shadowModel;
     shadowModel=new GLModel(this->mainWindow, this, mesh, filename, true);
+    shadowModel->m_objectPicker = op;
+    temp->removeModel();
     QVector3D tmp = m_transform->translation();
     float zlength = mesh->z_max - mesh->z_min;
     m_transform->setTranslation(QVector3D(tmp.x(),tmp.y(),zlength/2));
@@ -626,11 +630,12 @@ void GLModel::handlePickerClicked(QPickEvent *pick)
     emit modelSelected(parentModel->ID);
 
     if (labelingActive) {
+        qDebug() << "1";
         if (labellingTextPreview)
             labellingTextPreview->setEnabled(true);
-
-        parentModel->m_meshMaterial->setDiffuse(QColor(0, 255, 0));
-
+        qDebug() << "2";
+        parentModel->m_meshMaterial->setDiffuse(QColor(100, 255, 100));
+        qDebug() << "3";
         if (labellingTextPreview && labellingTextPreview->isEnabled()) {
             /*QVector3D tmp = m_transform->translation();
             float zlength = mesh->z_max - mesh->z_min;
@@ -639,6 +644,7 @@ void GLModel::handlePickerClicked(QPickEvent *pick)
             labellingTextPreview->setTranslation(pick->localIntersection());
             labellingTextPreview->setNormal(pick->localIntersection());
         }
+        qDebug() << "4";
     }
 
     QPickTriangleEvent *trianglePick = static_cast<QPickTriangleEvent*>(pick);
@@ -851,16 +857,16 @@ void GLModel::generateRLModel(){
     leftModel->m_transform->setTranslation(QVector3D(tmp.x(),tmp.y(),zlength/2));
     tmp = rightModel->m_transform->translation();
     rightModel->m_transform->setTranslation(QVector3D(tmp.x(),tmp.y(),zlength/2));
-    //leftModel->m_transform = m_transform;
-    //rightModel->m_transform = m_transform;
 
 }
 
 void GLModel::modelCutFinished(){
     qDebug() << "modelcut finished";
     removePlane();
-    parentModel->leftModel->deleteLater();
+    //parentModel->leftModel->deleteLater();
     parentModel->rightModel->deleteLater();
+    parentModel->deleteLater();
+    deleteLater();
 
     // remove parent model and its shadow model
 }
