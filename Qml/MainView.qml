@@ -44,7 +44,7 @@ Entity {
                 cm.zoomDown()
             */
             var scaleTmp = systemTransform.scale3D;
-            if(d>0){
+            if(d>0){// mouse wheel zoom
                 systemTransform.scale3D = scaleTmp.times(1.08);
                 //console.log("Dfdf")
                 //console.log(systemTransform.scale3D)
@@ -66,11 +66,13 @@ Entity {
         objectName:"total"
         Transform{
             id: systemTransform
-            scale3D: Qt.vector3d(0.01,0.01,0.01)
-            rotationZ:0
-            rotationY:0
-            rotationX:0
+
+            scale3D: Qt.vector3d(0.004,0.004,0.004)
+            rotationX : -70
+            rotationY : 0
+            rotationZ : -40
         }
+
         components: [systemTransform]
 
         Plate{
@@ -93,6 +95,7 @@ Entity {
                 objectName: "moveArrow"
             }
         }
+
         CoordinateMesh{}
     }
 
@@ -144,7 +147,8 @@ Entity {
         FrameAction {
             property real rotationSpeed : 2000
             onTriggered: {
-                if (rotateAction.active) {
+
+                if (rotateAction.active) {// mouse right rotate
                     sceneRoot.systemTransform.rotationZ += rotationSpeed * rotateXAxis.value * dt;
                     //var target = axisAngle2Quaternion(rotationSpeed * rotateXAxis.value * dt,qq.rotatedVector(systemTransform.rotation,zdown))
                     //cm.camera.rotateAboutViewCenter(qq.multiplyQuaternion(target,systemTransform.rotation));
@@ -165,9 +169,15 @@ Entity {
         sourceDevice: keyboardDevice
 
         onPressed: {
-
-            /*if (event.key === Qt.Key_Z) {
-                meshTransform.scale3D = meshTransform.scale3D.plus(Qt.vector3d(0.05,0.05,0.05));
+            if (event.key === Qt.Key_Delete) {
+                console.log("deleeeeee")
+                qm.DoDelete()
+            }
+            /*
+            if (event.key === Qt.Key_Z) {
+                console.log("posi   " + sceneRoot.systemTransform.translation)
+                console.log("roti   " + sceneRoot.systemTransform.rotation)
+                console.log("scal   " + sceneRoot.systemTransform.scale3D)
             }
             if (event.key === Qt.Key_X) {
                 meshTransform.scale3D = meshTransform.scale3D.minus(Qt.vector3d(0.05,0.05,0.05));
@@ -255,7 +265,10 @@ Entity {
         var compo = Qt.createComponent("Model.qml");
 
         var loadmodel = compo.createObject(total, {});
+    }
 
+    function initCamera(){
+        cm.initCamera()
     }
 
 }

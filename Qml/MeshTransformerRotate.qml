@@ -15,6 +15,10 @@ Entity {
     property vector2d mouseCurrent : Qt.vector2d(0,0)
     property int pastAngle :0
     property int pastAxis :0
+
+    property color yellow : Qt.rgba(237/255,217/255,41/255,1)
+    property color grey : Qt.rgba(150/255,150/255,150/255,1)
+
     components: [
     Transform {
         id:rotateSphereTransform
@@ -56,9 +60,12 @@ Entity {
             scale3D: Qt.vector3d(1,1,1)
             rotation: fromAxisAndAngle(Qt.vector3d(0,1, 0), 90)
         }
-        PhongAlphaMaterial {
+        PhongMaterial {
             id: torusXMaterial
-            ambient: Qt.rgba(0/255,0/255,0/255,0.5)
+            ambient: grey
+            diffuse: grey
+            specular: grey
+            shininess: 0
         }
         ObjectPicker{
              id : objectPickerX
@@ -66,14 +73,24 @@ Entity {
              hoverEnabled: true
              onEntered: {
                  if (rotateAxis == 0){
-                 torusXMaterial.ambient = Qt.rgba(0/255,125/255,125/255,0.5)
-                 torusYMaterial.ambient = Qt.rgba(0/255,0/255,0/255,0.5)
-                 torusZMaterial.ambient = Qt.rgba(0/255,0/255,0/255,0.5)
+                     torusXMaterial.ambient = yellow
+                     torusXMaterial.diffuse = yellow
+                     torusXMaterial.specular = yellow
+
+                     torusYMaterial.ambient = grey
+                     torusYMaterial.diffuse = grey
+                     torusYMaterial.specular = grey
+
+                     torusZMaterial.ambient = grey
+                     torusZMaterial.diffuse = grey
+                     torusZMaterial.specular = grey
                  }
              }
              onExited: {
                  if (rotateAxis == 0){
-                torusXMaterial.ambient = Qt.rgba(0/255,0/255,0/255,0.5) //rotation end
+                     torusXMaterial.ambient = grey
+                     torusXMaterial.diffuse = grey
+                     torusXMaterial.specular = grey
                  }
              }
              onPressed: { //rotation start
@@ -81,14 +98,24 @@ Entity {
                  mouseOrigin = Qt.vector2d(pick.position.x , pick.position.y)
                  if ( rotateAxis  == 0){
                      rotateAxis = 1 //
-                    torusXMaterial.ambient = Qt.rgba(0/255,255/255,255/255,1.0)
-                    pastAngle=0;
+                     torusY.enabled = false
+                     torusZ.enabled = false
+                     sphere.enabled = false
+                     torusXMaterial.ambient = yellow
+                     torusXMaterial.diffuse = yellow
+                     torusXMaterial.specular = yellow
+                     pastAngle=0;
                  }
              }
              onReleased: {
                  rotateAxis = 0;
                  console.log("releaseX")
-                 torusXMaterial.ambient = Qt.rgba(0/255,0/255,0/255,0.5) //rotation end
+                 torusY.enabled = true
+                 torusZ.enabled = true
+                 sphere.enabled = true
+                 torusXMaterial.ambient = grey
+                 torusXMaterial.diffuse = grey
+                 torusXMaterial.specular = grey
              }
          }
         components: [ torusXMesh, torusXMaterial, torusXTransform,objectPickerX]
@@ -109,9 +136,12 @@ Entity {
             scale3D: inputScale
             rotation:fromAxisAndAngle(Qt.vector3d(1,0, 0), 90)
         }
-        PhongAlphaMaterial {
+        PhongMaterial {
             id: torusYMaterial
-            ambient: Qt.rgba(0/255,0/255,0/255,0.5)
+            ambient: grey
+            diffuse: grey
+            specular: grey
+            shininess: 0
         }
 
         ObjectPicker{
@@ -120,15 +150,25 @@ Entity {
 
              onEntered: {
                  if (rotateAxis == 0){
-                 torusYMaterial.ambient = Qt.rgba(125/255,125/255,0/255,0.5)
-                 torusXMaterial.ambient = Qt.rgba(0/255,0/255,0/255,0.5)
-                 torusZMaterial.ambient = Qt.rgba(0/255,0/255,0/255,0.5)
+                     torusXMaterial.ambient = grey
+                     torusXMaterial.diffuse = grey
+                     torusXMaterial.specular = grey
+
+                     torusYMaterial.ambient = yellow
+                     torusYMaterial.diffuse = yellow
+                     torusYMaterial.specular = yellow
+
+                     torusZMaterial.ambient = grey
+                     torusZMaterial.diffuse = grey
+                     torusZMaterial.specular = grey
 
                  }
              }
              onExited: {
                  if (rotateAxis == 0){
-                     torusYMaterial.ambient = Qt.rgba(0/255,0/255,0/255,0.5) //rotation end
+                     torusYMaterial.ambient = grey
+                     torusYMaterial.diffuse = grey
+                     torusYMaterial.specular = grey
                  }
              }
              onPressed: { //rotation start
@@ -136,13 +176,23 @@ Entity {
                  mouseOrigin = Qt.vector2d(pick.position.x , pick.position.y)
                  if ( rotateAxis  == 0){
                     rotateAxis = 2 //
-                    torusYMaterial.ambient = Qt.rgba(255/255,255/255,0/255,1.0)
+                     torusX.enabled = false
+                     torusZ.enabled = false
+                     sphere.enabled = false
+                     torusYMaterial.ambient = yellow
+                     torusYMaterial.diffuse = yellow
+                     torusYMaterial.specular = yellow
                     pastAngle=0;
                  }
              }
              onReleased: {
                  rotateAxis = 0;
-                 torusYMaterial.ambient = Qt.rgba(0/255,0/255,0/255,0.5) //rotation end
+                 torusX.enabled = true
+                 torusZ.enabled = true
+                 sphere.enabled = true
+                 torusYMaterial.ambient = grey
+                 torusYMaterial.diffuse = grey
+                 torusYMaterial.specular = grey
              }
          }
         components: [ torusYMesh, torusYMaterial, torusYTransform, objectPickerY]
@@ -163,23 +213,36 @@ Entity {
             translation: Qt.vector3d( 0,0,0 )
             scale3D: inputScale
         }
-        PhongAlphaMaterial {
+        PhongMaterial {
             id: torusZMaterial
-            ambient: Qt.rgba(0/255,0/255,0/255,0.5)
+            ambient: grey
+            diffuse: grey
+            specular: grey
+            shininess: 0
         }
         ObjectPicker{
             id : objectPickerZ
             hoverEnabled: true
             onEntered: {
                 if (rotateAxis == 0){
-                    torusZMaterial.ambient = Qt.rgba(125/255,0/255,125/255,0.5)
-                    torusXMaterial.ambient = Qt.rgba(0/255,0/255,0/255,0.5)
-                    torusYMaterial.ambient = Qt.rgba(0/255,0/255,0/255,0.5)
+                    torusXMaterial.ambient = grey
+                    torusXMaterial.diffuse = grey
+                    torusXMaterial.specular = grey
+
+                    torusYMaterial.ambient = grey
+                    torusYMaterial.diffuse = grey
+                    torusYMaterial.specular = grey
+
+                    torusZMaterial.ambient = yellow
+                    torusZMaterial.diffuse = yellow
+                    torusZMaterial.specular = yellow
                 }
             }
             onExited: {
                 if (rotateAxis == 0){
-                    torusZMaterial.ambient = Qt.rgba(0/255,0/255,0/255,0.5) //rotation end
+                    torusZMaterial.ambient = grey
+                    torusZMaterial.diffuse = grey
+                    torusZMaterial.specular = grey
                 }
             }
             onPressed: { //rotation start
@@ -187,13 +250,23 @@ Entity {
                 mouseOrigin = Qt.vector2d(pick.position.x , pick.position.y)
                 if ( rotateAxis  == 0 ) {
                     rotateAxis = 3 //
-                    torusZMaterial.ambient = Qt.rgba(255/255,0/255,255/255,1.0)
+                    torusX.enabled = false
+                    torusY.enabled = false
+                    sphere.enabled = false
+                    torusZMaterial.ambient = yellow
+                    torusZMaterial.diffuse = yellow
+                    torusZMaterial.specular = yellow
                     pastAngle=0;
                 }
             }
             onReleased: {
                 rotateAxis = 0;
-                torusZMaterial.ambient = Qt.rgba(0/255,0/255,0/255,0.5) //rotation end
+                torusX.enabled = true
+                torusY.enabled = true
+                sphere.enabled = true
+                torusZMaterial.ambient = grey
+                torusZMaterial.diffuse = grey
+                torusZMaterial.specular = grey
             }
          }
         components: [ torusZMesh, torusZMaterial, torusZTransform,objectPickerZ]
@@ -233,6 +306,7 @@ Entity {
         var tmp = Qt.vector3d(0,0,0)
         tmp = target
         target = tmp.times(systemTransform.scale3D)
+
         var theta = (-1)*sceneRoot.systemTransform.rotationX/180.0*Math.PI
         var alpha = (-1)*sceneRoot.systemTransform.rotationZ/180.0*Math.PI
         //console.log("cordinate")
@@ -255,6 +329,7 @@ Entity {
         point2.y = (-1 * point2.y+1) * scene3d.height/2;
         return Qt.vector2d(point2.x,point2.y)
     }
+
     signal rotateSignal(int Axis, int angle)
     signal rotateDone(int Axis)
     FrameAction{
@@ -279,15 +354,33 @@ Entity {
                     if (Math.pow(mouseCurrent_mouseOrigin,2) > Math.pow(mouseOrigin_Origin,2)+Math.pow(mouseCurrent_Origin,2)){
                         degreeangle = (Math.abs(degreeangle)/degreeangle)*(180-Math.abs(degreeangle))
                     }
+                    var updown=0
+                    if (Math.sin((systemTransform.rotationX)/ 180 * Math.PI) > 0){
+                        updown = -1
+                    }else{
+                        updown = 1
+                    }
                     switch(rotateAxis){
                     case 1: // xAxis
-                        rotateSignal(1,degreeangle-pastAngle)
+                        if (Math.sin(systemTransform.rotationZ / 180 * Math.PI) < 0){
+                            rotateSignal(1,updown * (degreeangle-pastAngle))
+                        }else{
+                            rotateSignal(1,updown * (-degreeangle+pastAngle))
+                        }
                         break;
                     case 2: // yAxis
-                        rotateSignal(2,degreeangle-pastAngle)
+                        if (Math.sin((systemTransform.rotationZ-90) / 180 * Math.PI) >0){
+                            rotateSignal(2,updown * (degreeangle-pastAngle))
+                        }else{
+                            rotateSignal(2,updown * (-degreeangle+pastAngle))
+                        }
                     break;
                     case 3: // zAxis
-                        rotateSignal(3,degreeangle-pastAngle)
+                        if (Math.sin((systemTransform.rotationX+90)/ 180 * Math.PI) > 0){
+                            rotateSignal(3,degreeangle-pastAngle)
+                        }else{
+                            rotateSignal(3,-degreeangle+pastAngle)
+                        }
                     break;
                     }
                     pastAngle = degreeangle

@@ -42,19 +42,18 @@ GLModel::GLModel(QObject* mainWindow, QNode *parent, Mesh* loadMesh, QString fna
 
         addComponent(m_transform);
 
-        /*m_meshMaterial = new QPhongMaterial();
-        m_meshMaterial->setAmbient(QColor(77,128,0));
+        m_meshMaterial = new QPhongMaterial();
+        /*m_meshMaterial->setAmbient(QColor(77,128,0));
         m_meshMaterial->setDiffuse(QColor(173,215,218));
         m_meshMaterial->setSpecular(QColor(182,237,246));
         m_meshMaterial->setShininess(0.0f);
         addComponent(m_meshMaterial);*/
-        m_meshMaterial = new QPhongMaterial();
 
+        //m_meshMaterial = new QPhongMaterial();
         m_objectPicker = new Qt3DRender::QObjectPicker(this);
 
-        //m_objectPicker->setHoverEnabled(true);
+        m_objectPicker->setHoverEnabled(true);
         //m_objectPicker->setDragEnabled(true);
-
         // add only m_objectPicker
         QObject::connect(m_objectPicker, SIGNAL(clicked(Qt3DRender::QPickEvent*)), this, SLOT(handlePickerClicked(Qt3DRender::QPickEvent*)));
         QObject::connect(m_objectPicker, SIGNAL(moved(Qt3DRender::QPickEvent*)), this, SLOT(mgoo(Qt3DRender::QPickEvent*)));
@@ -129,7 +128,10 @@ void GLModel::moveModelMesh(QVector3D direction){
     mesh->vertexMove(direction);
     emit _updateModelMesh();
 }
-
+void GLModel::scaleModelMesh(float scale){
+    mesh->vertexScale(scale);
+    emit _updateModelMesh();
+}
 void GLModel::rotateModelMesh(int Axis, float Angle){
     Qt3DCore::QTransform* tmp = new Qt3DCore::QTransform();
     switch(Axis){
@@ -155,14 +157,25 @@ void GLModel::rotateModelMesh(QMatrix4x4 matrix){
 }
 
 void GLModel::updateModelMesh(){
+    delete vertexBuffer;
+    delete vertexColorBuffer;
+    delete vertexNormalBuffer;
+    delete positionAttribute;
+    delete normalAttribute;
+    delete colorAttribute;
+    removeComponent(m_geometryRenderer);
+    delete m_geometry;
+    delete m_geometryRenderer;
     initialize(mesh);
     addVertices(mesh, false);
-    shadowModel->removeModel();
+    Qt3DRender::QObjectPicker* op = shadowModel->m_objectPicker;
+    GLModel* temp = shadowModel;
     shadowModel=new GLModel(this->mainWindow, this, mesh, filename, true);
+    shadowModel->m_objectPicker = op;
+    temp->removeModel();
     QVector3D tmp = m_transform->translation();
     float zlength = mesh->z_max - mesh->z_min;
     m_transform->setTranslation(QVector3D(tmp.x(),tmp.y(),zlength/2));
-
 }
 
 featureThread::featureThread(GLModel* glmodel, int type){
@@ -615,12 +628,14 @@ void GLModel::handlePickerClicked(QPickEvent *pick)
 {
     qDebug() << pick->localIntersection()<<"pick" << parentModel->ID;
     emit modelSelected(parentModel->ID);
+
     if (labelingActive) {
+        qDebug() << "1";
         if (labellingTextPreview)
             labellingTextPreview->setEnabled(true);
-
-        parentModel->m_meshMaterial->setDiffuse(QColor(0, 255, 0));
-
+        qDebug() << "2";
+        parentModel->m_meshMaterial->setDiffuse(QColor(100, 255, 100));
+        qDebug() << "3";
         if (labellingTextPreview && labellingTextPreview->isEnabled()) {
             /*QVector3D tmp = m_transform->translation();
             float zlength = mesh->z_max - mesh->z_min;
@@ -629,6 +644,7 @@ void GLModel::handlePickerClicked(QPickEvent *pick)
             labellingTextPreview->setTranslation(pick->localIntersection());
             labellingTextPreview->setNormal(pick->localIntersection());
         }
+        qDebug() << "4";
     }
 
     QPickTriangleEvent *trianglePick = static_cast<QPickTriangleEvent*>(pick);
@@ -640,6 +656,7 @@ void GLModel::handlePickerClicked(QPickEvent *pick)
     } else if (cutMode == 9999){
         if (auto* glmodel = qobject_cast<GLModel*>(parent()))
             glmodel->m_meshMaterial->setDiffuse(QColor(100, 255, 100));
+
         qDebug() << "current cut mode :" << cutMode;
         return;
     }
@@ -793,18 +810,18 @@ void GLModel::removeModel(){
     delete m_geometry;
     delete m_geometryRenderer;
 
+    deleteLater();
+}
+
+void GLModel::removeModelPartList(){
     //remove part list
     QList<QObject*> temp;
     temp.append(mainWindow);
     QObject *partList = (QEntity *)FindItemByName(temp, "partList");
 
-    QMetaObject::invokeMethod(partList, "deletePart",
-        Q_ARG(QVariant, ID));
-
-    deleteLater();
-
+    qDebug() <<"remove ID   " << ID;
+    QMetaObject::invokeMethod(partList, "deletePart", Q_ARG(QVariant, ID));
 }
-
 
 void GLModel::modelCut(){
     if (parentModel->cuttingPoints.size() < 3){
@@ -840,16 +857,16 @@ void GLModel::generateRLModel(){
     leftModel->m_transform->setTranslation(QVector3D(tmp.x(),tmp.y(),zlength/2));
     tmp = rightModel->m_transform->translation();
     rightModel->m_transform->setTranslation(QVector3D(tmp.x(),tmp.y(),zlength/2));
-    //leftModel->m_transform = m_transform;
-    //rightModel->m_transform = m_transform;
 
 }
 
 void GLModel::modelCutFinished(){
     qDebug() << "modelcut finished";
     removePlane();
-    parentModel->leftModel->deleteLater();
+    //parentModel->leftModel->deleteLater();
     parentModel->rightModel->deleteLater();
+    parentModel->deleteLater();
+    deleteLater();
 
     // remove parent model and its shadow model
 }

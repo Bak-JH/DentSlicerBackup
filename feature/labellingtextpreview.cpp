@@ -13,28 +13,35 @@ using namespace Qt3DExtras;
 LabellingTextPreview::LabellingTextPreview(Qt3DCore::QNode* parent)
     : Qt3DCore::QEntity(parent)
 {
+    qDebug() << "l1";
     texture = new QTexture2D(this);
     texture->setMinificationFilter(QAbstractTexture::Filter::Linear);
     texture->setMagnificationFilter(QAbstractTexture::Filter::Linear);
     texture->setFormat(QAbstractTexture::TextureFormat::RGBAFormat);
 
+    qDebug() << "l2";
     auto* planeMesh = new Qt3DExtras::QPlaneMesh(this);
 
+    qDebug() << "l3";
     planeTransform = new Qt3DCore::QTransform(this);
 
+    qDebug() << "l4";
     planeMaterial = new Qt3DExtras::QNormalDiffuseMapAlphaMaterial(this);
     planeMaterial->setAmbient(QColor(255, 255, 255, 128));
     planeMaterial->setDiffuse(texture);
 
+    qDebug() << "l5";
     planeEntity = new Qt3DCore::QEntity(this);
     planeEntity->addComponent(planeMesh);
     planeEntity->addComponent(planeMaterial);
     planeEntity->addComponent(planeTransform);
 
+    qDebug() << "l6";
     setText("Enter text", QString("Enter text").size());
     setFontName("Arial");
     setTranslation(QVector3D(0, 0, 0));
     setNormal(QVector3D(0, 0, 1));
+    qDebug() << "l7";
 }
 void LabellingTextPreview::setText(QString text, int contentWidth)
 {

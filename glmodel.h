@@ -128,6 +128,7 @@ public:
     QPhongMaterial *sphereMaterial[4];
 
     void removeModel();
+    void removeModelPartList();
     void beforeInitialize();
     void beforeAddVerticies();
 
@@ -138,7 +139,8 @@ public:
     // Model Mesh rotate
     void rotateModelMesh(int Axis, float Angle);
     void rotateModelMesh(QMatrix4x4 matrix);
-
+    // Model Mesh scale
+    void scaleModelMesh(float scale);
     // Model Cut
     void addCuttingPoint(QVector3D v);
     void removeCuttingPoints();
@@ -187,7 +189,9 @@ private:
     bool labelingActive = false;
 
 signals:
+
     void modelSelected(int);
+
     void bisectDone();
     void _updateModelMesh();
 

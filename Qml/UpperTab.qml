@@ -1050,7 +1050,7 @@ Rectangle {
             objectName: "labelPopup"
             id:popup_label
             funcname: "Label"
-            height: 450 // 282
+            height: 320 // 282
             imageHeight: 76
             detail1: "Type letters on the surface."
             detail2: "Font"
@@ -1069,17 +1069,21 @@ Rectangle {
 
             Rectangle {
                 id: text3DInputBackground
-                width: 176
-                height: 20
+                width: 194
+                height: 24
 
                 y: 300
 
                 color: "#ffffffff"
 
-                anchors.left: parent.left
-                anchors.right: parent.right
-                anchors.leftMargin: 25
-                anchors.rightMargin: 25
+                //anchors.left: parent.left
+                //anchors.right : parent.right
+                anchors.bottom: parent.bottom
+                anchors.horizontalCenter: parent.horizontalCenter
+
+                //anchors.leftMargin: 25
+                //anchors.rightMargin: 25
+                anchors.bottomMargin: 60
 
                 Text {
                     id: hiddenText
@@ -1092,13 +1096,19 @@ Rectangle {
                 TextField {
                     id:text3DInput
                     objectName: "text3DInput"
+                    anchors.fill: parent
+                    style: TextFieldStyle {
+                        textColor: "#333333"
+                        background: Rectangle {
+                            radius: 2
+                            border.color: "#CCC"
+                            border.width: 1
+                        }
+                    }
 
                     signal sendTextChanged(string text, int contentWidth)
-
-                    anchors.fill: parent
-
                     placeholderText: qsTr("Enter text")
-
+                    font.family: "Arial"
                     onTextChanged: {
                         sendTextChanged(text, hiddenText.contentWidth)
                     }
@@ -1110,10 +1120,13 @@ Rectangle {
                 id: labelFontBox
                 currentIndex: 0
                 activeFocusOnPress: true
-                width: 176
+                width: 194
+                height: 24
+
+                anchors.horizontalCenter: parent.horizontalCenter
                 anchors.top: parent.top
                 anchors.topMargin: 200
-                anchors.horizontalCenter: parent.horizontalCenter
+
 
                 signal sendFontName(string fontName)
 
@@ -1144,7 +1157,7 @@ Rectangle {
                     label: Text {
                         text: control.currentText
                         font.family: "Arial"
-                        font.pointSize: 7
+                        font.pointSize: 9
                     }
 
                     //drop-down customization
@@ -1161,7 +1174,7 @@ Rectangle {
                             Text {
                                 text: styleData.text
                                 font.family: "Arial"
-                                font.pointSize: 7
+                                font.pointSize: 9
                                 color: styleData.selected ? "#666666" : "#303030"
 //                                    color: styleData.selected ? "red" : "blue"
                             }
