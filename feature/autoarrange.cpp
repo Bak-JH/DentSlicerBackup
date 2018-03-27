@@ -355,7 +355,7 @@ void autoarrange::offsetPath(Paths* paths){
     int offset = 2000;
     Paths out;
     ClipperOffset co;
-    co.AddPaths(*paths, jtRound, etClosedPolygon);
+    co.AddPaths(*paths, jtSquare, etClosedPolygon);
     //if(Orientation(*paths)) co.Execute(out, offset);
     //else co.Execute(out, -offset);
     co.Execute(out, offset);
@@ -431,7 +431,7 @@ void autoarrange::initStage(Paths* cum_outline){
 
 XYArrangement autoarrange::arngFig(Paths* cum_outline, Paths* fig){
     /**/qDebug() << "Arrange new fig @arngFig";
-    float angle_unit = 360;
+    float angle_unit = 30;
 
     Paths optimal_rot_fig;
     XYArrangement global_optimal_arrangement;
@@ -608,7 +608,7 @@ Paths autoarrange::getNFP(Paths* subject, Paths* object){
     Paths raw_nfp_set;
     raw_nfp_set.resize(subject->size());
     for(int path_idx=1; path_idx<subject->size(); path_idx++){//path_idx0 is univesal_plane
-        vector<vector<IntPoint>> obj_vecs_in_regions = getObjVecsInRegions(&sub_slope_set[path_idx], &obj_slope_set, &obj_vec_set);
+        vector<vector<IntPoint>> obj_vecs_in_regions = getObjVecsInRegions(&sub_vec_set[path_idx], &obj_vec_set);
         /**/qDebug() << "- getObjVecsInRegions done" << "@getNFP";
         IntPoint tail = getFirstNFPPoint(sub_slope_set[path_idx][0], (*subject)[path_idx][0], &convex_obj, obj_slope_set);
         /**/qDebug() << "- got nfp first point" << "@getNFP";
@@ -623,6 +623,7 @@ Paths autoarrange::getNFP(Paths* subject, Paths* object){
                 tail = tanslateIntPoint(tail, obj_vecs_in_regions[edge_idx][obj_vec_idx]);
             }
         }
+        /**/if(tail!=raw_nfp_set[path_idx][0]) qDebug() << "raw_nfp" << path_idx << "not closed";
     }
     /**/qDebug() << "- got raw_nfp_set" << "(size:" << raw_nfp_set.size() << ")" << "@getNFP";
     /**/debugPaths(raw_nfp_set);
@@ -684,30 +685,29 @@ Paths autoarrange::mergeNFP(Paths* separate_nfp_set){
     return merged_nfp;
 }
 
-vector<vector<IntPoint>> autoarrange::getObjVecsInRegions(vector<float>* sub_slope_set, vector<float>* obj_slope_set, vector<IntPoint>* obj_vec_set){
+vector<vector<IntPoint>> autoarrange::getObjVecsInRegions(vector<IntPoint>* sub_vec_set, vector<IntPoint>* obj_vec_set){
     vector<vector<IntPoint>> obj_vecs_in_regions;
-    //obj_vecs_in_regions.resize(sub_slope_set->size());
     int obj_edge_tail;
-    for(int obj_edge_idx=0; obj_edge_idx<obj_slope_set->size(); obj_edge_idx++){
+    for(int obj_edge_idx=0; obj_edge_idx<obj_vec_set->size(); obj_edge_idx++){
         vector<IntPoint> obj_vecs_in_single_region_front_part;
         vector<IntPoint> obj_vecs_in_single_region;
-        if(isOnCCWPath((*sub_slope_set)[0], (*sub_slope_set)[1], (*obj_slope_set)[obj_edge_idx])){
+        if(isVecCCW((*sub_vec_set)[0], (*obj_vec_set)[obj_edge_idx], (*sub_vec_set)[1])){
             if(obj_edge_idx==0){
-                int obj_edge_idx2 = obj_slope_set->size() - 1;
-                while(isOnCCWPath((*sub_slope_set)[0], (*sub_slope_set)[1], (*obj_slope_set)[obj_edge_idx2])&&obj_edge_idx2>=0){
+                int obj_edge_idx2 = obj_vec_set->size() - 1;
+                while(isVecCCW((*sub_vec_set)[0], (*obj_vec_set)[obj_edge_idx2], (*sub_vec_set)[1])&&obj_edge_idx2>=0){
                     obj_vecs_in_single_region_front_part.push_back((*obj_vec_set)[obj_edge_idx2]);
                     obj_edge_idx2--;
                 }
             }
-            if(obj_vecs_in_single_region_front_part.size() != obj_slope_set->size()){
+            if(obj_vecs_in_single_region_front_part.size() != obj_vec_set->size()){
                 int start_from = obj_edge_idx;
                 obj_edge_tail = obj_edge_idx;
                 obj_vecs_in_single_region.push_back((*obj_vec_set)[obj_edge_idx]);
-                obj_edge_idx = (obj_edge_idx+1)%(*obj_slope_set).size();
-                while(isOnCCWPath((*sub_slope_set)[0], (*sub_slope_set)[1], (*obj_slope_set)[obj_edge_idx]) && obj_edge_idx != start_from){
+                obj_edge_idx = (obj_edge_idx+1)%(*obj_vec_set).size();
+                while(isVecCCW((*sub_vec_set)[0], (*obj_vec_set)[obj_edge_idx], (*sub_vec_set)[1]) && obj_edge_idx != start_from){
                     obj_edge_tail = obj_edge_idx;
                     obj_vecs_in_single_region.push_back((*obj_vec_set)[obj_edge_idx]);
-                    obj_edge_idx = (obj_edge_idx+1)%(*obj_slope_set).size();
+                    obj_edge_idx = (obj_edge_idx+1)%(*obj_vec_set).size();
                 }
             }
             obj_vecs_in_single_region.insert(obj_vecs_in_single_region.begin(),obj_vecs_in_single_region_front_part.rbegin(),obj_vecs_in_single_region_front_part.rend());
@@ -721,23 +721,48 @@ vector<vector<IntPoint>> autoarrange::getObjVecsInRegions(vector<float>* sub_slo
         /**/qDebug() << "in region 0 0";
         obj_vecs_in_regions.push_back(obj_vecs_in_single_region);
     }
-    for(int sub_edge_idx=1; sub_edge_idx<(*sub_slope_set).size(); sub_edge_idx++){
+    for(int sub_edge_idx=1; sub_edge_idx<(*sub_vec_set).size(); sub_edge_idx++){
         vector<IntPoint> obj_vecs_in_single_region;
-        int from_slope = (*sub_slope_set)[sub_edge_idx];
-        int to_slope = (*sub_slope_set)[(sub_edge_idx+1)%(*sub_slope_set).size()];
-        int obj_edge_idx = (obj_edge_tail+1)%(*obj_slope_set).size();
+        IntPoint from_slope = (*sub_vec_set)[sub_edge_idx];
+        IntPoint to_slope = (*sub_vec_set)[(sub_edge_idx+1)%(*sub_vec_set).size()];
+        int obj_edge_idx = (obj_edge_tail+1)%(*obj_vec_set).size();
         int start_from = -1;
-        while(isOnCCWPath(from_slope, to_slope, (*obj_slope_set)[obj_edge_idx]) && obj_edge_idx != start_from){
+        while(isVecCCW(from_slope, (*obj_vec_set)[obj_edge_idx], to_slope) && obj_edge_idx != start_from){
             if(start_from == -1) start_from=obj_edge_idx;
             obj_edge_tail = obj_edge_idx;
             obj_vecs_in_single_region.push_back((*obj_vec_set)[obj_edge_idx]);
-            obj_edge_idx = (obj_edge_idx+1)%(*obj_slope_set).size();
-            //*qDebug() << isOnCCWPath(from_slope, to_slope, (*obj_slope_set)[obj_edge_idx]);
+            obj_edge_idx = (obj_edge_idx+1)%(*obj_vec_set).size();
         }
         /**/qDebug() << "in region" << sub_edge_idx << obj_vecs_in_single_region.size();
         obj_vecs_in_regions.push_back(obj_vecs_in_single_region);
     }
     return obj_vecs_in_regions;
+}
+
+IntPoint autoarrange::inverseVec(IntPoint p){
+    return {-p.X, -p.Y};
+}
+
+bool autoarrange::isVecAlign(IntPoint a, IntPoint b){
+    return a.X*b.Y==a.Y*b.X && a.X*b.X>=0 && a.Y*b.Y>=0;
+}
+
+bool autoarrange::isCCW(IntPoint a, IntPoint b, IntPoint c){
+    return ccw(a, b, c)==-1;
+}
+
+bool autoarrange::isVecCCW(IntPoint a, IntPoint b, IntPoint c){
+    if(isVecAlign(b, c)) return false;
+    if(isVecAlign(a, b)) return true;
+    IntPoint o = {0,0};
+    if(isCCW(a, o, c)){
+        if(isCCW(a, o, b) && isCCW(b, o, c)) return false;
+        return true;
+    }
+    else{
+        if(isCCW(c, o, b) && isCCW(b, o, a)) return true;
+        return false;
+    }
 }
 
 bool autoarrange::isOnCCWPath(float start, float end, float object){

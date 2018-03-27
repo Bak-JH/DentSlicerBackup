@@ -66,7 +66,11 @@ private:
     Paths getNFP(Paths* subject, Paths* object);
     Paths simplyfyRawNFP(Paths* raw_nfp_set, Paths* subject);
     Paths mergeNFP(Paths* separate_nfp_set);
-    vector<vector<IntPoint>> getObjVecsInRegions(vector<float>* sub_slope_set, vector<float>* obj_slope_set, vector<IntPoint>* obj_vec_set);
+    vector<vector<IntPoint>> getObjVecsInRegions(vector<IntPoint>* sub_vec_set, vector<IntPoint>* obj_vec_set);
+    IntPoint inverseVec(IntPoint p);
+    bool isVecAlign(IntPoint a, IntPoint b);
+    bool isCCW(IntPoint a, IntPoint b, IntPoint c);
+    bool isVecCCW(IntPoint a, IntPoint b, IntPoint c);
     bool isOnCCWPath(float start, float end, float object);
     float getNthEdgeSlope(Path* path, int edge_idx, bool isForward);
     float getEdgeSlope(IntPoint* p1, IntPoint* p2);
