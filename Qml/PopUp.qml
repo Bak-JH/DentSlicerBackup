@@ -170,7 +170,7 @@ Rectangle {
         anchors.topMargin: 8
         anchors.left: parent.left
         anchors.leftMargin: 10
-        font.pointSize: 10.5
+        font.pointSize: 12
         color: "#494949"
         font.family: "Arial"
     }
@@ -182,7 +182,7 @@ Rectangle {
         anchors.topMargin: 15
         anchors.left: funcname.left
         anchors.leftMargin: 10
-        font.pointSize: 9
+        font.pointSize: 11
         color: "#999999"
         font.family: "Arial"
     }
@@ -205,7 +205,7 @@ Rectangle {
         anchors.topMargin: 15
         anchors.left: funcname.left
         anchors.leftMargin: 10
-        font.pointSize: 9
+        font.pointSize: 11
         color: "#999999"
         font.family: "Arial"
     }

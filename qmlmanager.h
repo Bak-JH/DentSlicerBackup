@@ -69,10 +69,13 @@ public:
     void runArrange_internal();
     void connectHandlers(GLModel* glmodel);
 
+    Q_INVOKABLE void ModelVisible(int ID, bool isVisible);
+    Q_INVOKABLE void DoDelete();
+
 private:
     bool glmodels_arranged;
 
-    Q_INVOKABLE void ModelVisible(int ID, bool isVisible);
+
 
 signals:
     void updateModelInfo(int printing_time, int layer, QString xyz, float volume);

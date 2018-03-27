@@ -17,7 +17,6 @@ void Mesh::vertexMove(QVector3D direction){
         updateMinMax(vertices[i].position);
     }
 }
-
 void Mesh::vertexRotate(QMatrix4x4 tmpmatrix){
     int numberofVertices = vertices.size();
     int numberofFaces = faces.size();
@@ -53,6 +52,23 @@ void Mesh::vertexRotate(QMatrix4x4 tmpmatrix){
     }
 }
 
+void Mesh::vertexScale(float scale){
+    int numberofVertices = vertices.size();
+    x_min = 99999;
+    x_max = 99999;
+    y_min = 99999;
+    y_max = 99999;
+    z_min = 99999;
+    z_max = 99999;
+    for (int i=0;i<numberofVertices;i++){
+        QVector3D tmp;
+        tmp.setX(vertices[i].position.x() * scale);
+        tmp.setY(vertices[i].position.y() * scale);
+        tmp.setZ(vertices[i].position.z() * scale);
+        vertices[i].position = tmp;
+        updateMinMax(vertices[i].position);
+    }
+}
 /********************** Mesh Generation Functions **********************/
 
 void Mesh::addFace(QVector3D v0, QVector3D v1, QVector3D v2){
