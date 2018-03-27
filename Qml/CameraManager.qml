@@ -183,7 +183,11 @@ Entity {
 
             //sceneRoot.total.mtr.perfectPosition();
         }
+    }
 
+    function initCamera(){
+        sceneRoot.cm.camera.translateWorld(sceneRoot.cm.camera.viewCenter.times(-1))
+        sceneRoot.cm.camera.translateWorld(Qt.vector3d(-0.015,-0.16,0))
     }
 
     MouseDevice{
@@ -220,7 +224,8 @@ Entity {
             }
 
             if (event.key === Qt.Key_V) {
-
+                //console.log("camera pppoos " + camera.translateWorld(Qt.vector3d(0,0,0)));
+                //console.log("camera viewcenter" + camera.viewCenter);
             }
         }
     }

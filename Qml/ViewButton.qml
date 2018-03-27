@@ -21,6 +21,17 @@ Item {
             height: 35
             anchors.centerIn: parent
             source:inputSource
+
+            MouseArea{
+                anchors.fill: parent
+                hoverEnabled: true
+                onEntered: {
+                    icon.color = "#CCCCCC"
+                }
+                onExited: {
+                    icon.color = "#D6D6D6"
+                }
+            }
         }
     }
 

@@ -24,6 +24,9 @@ void QmlManager::initializeUI(QQmlApplicationEngine* e){
     models = (QEntity *)FindItemByName(engine, "Models");
     Lights* lights = new Lights(models);
 
+    QObject* mv = FindItemByName(engine, "MainView");
+    QMetaObject::invokeMethod(mv, "initCamera");
+
     // model cut components
     cutPopup = FindItemByName(engine, "cutPopup");
     curveButton = FindItemByName(engine, "curveButton");
@@ -57,7 +60,6 @@ void QmlManager::initializeUI(QQmlApplicationEngine* e){
     QObject::connect(moveArrowobj, SIGNAL(moveSignal(int,int)),this, SLOT(modelMove(int,int)));
     QObject::connect(moveArrowobj, SIGNAL(moveDone(int)),this, SLOT(modelMoveDone(int)));
     moveArrow->setEnabled(0);
-
     rotateSphere = (QEntity *)FindItemByName(engine, "rotateSphereEntity");
     rotateSphereX = (QEntity *)FindItemByName(engine, "rotateSphereTorusX");
     rotateSphereY = (QEntity *)FindItemByName(engine, "rotateSphereTorusY");
@@ -73,9 +75,10 @@ void QmlManager::initializeUI(QQmlApplicationEngine* e){
 
     QObject *boxUpperTab = FindItemByName(engine, "boxUpperTab");
     QObject::connect(boxUpperTab,SIGNAL(runGroupFeature(int,QString)),this,SLOT(runGroupFeature(int,QString)));
-    openModelFile("C:/Users/diridiri/Desktop/DLP/partial1.stl");
-}
 
+    QObject::connect(this, SIGNAL(arrangeDone(vector<QVector3D>, vector<float>)), this, SLOT(applyArrangeResult(vector<QVector3D>, vector<float>)));
+    openModelFile("c:/Users/SH/Desktop/dlpslicer/DLPslicer/demo_object.stl");
+}
 void QmlManager::openModelFile(QString fname){
 
     GLModel* glmodel = new GLModel(mainWindow, models, nullptr, fname, false);
@@ -86,13 +89,11 @@ void QmlManager::openModelFile(QString fname){
     float xmid = (glmodel->mesh->x_max + glmodel->mesh->x_min)/2;
     float ymid = (glmodel->mesh->y_max + glmodel->mesh->y_min)/2;
     float zmid = (glmodel->mesh->z_max + glmodel->mesh->z_min)/2;
-    float zlength = (glmodel->mesh->z_max - glmodel->mesh->z_min);
     glmodel->moveModelMesh(QVector3D(
                            (-1)*xmid,
                            (-1)*ymid,
                            (-1)*zmid));
-    glmodel->m_transform->setTranslation(QVector3D(0,0,zlength/2));
-
+    glmodel->scaleModelMesh(0.5);
     //QObject* progress_text = FindItemByName(engine, "progress_text"); //orientation와 공유
 
     connectHandlers(glmodel);
@@ -137,7 +138,6 @@ void QmlManager::connectHandlers(GLModel* glmodel){
 
     // auto arrange popup codes
     QObject::connect(arrangePopup, SIGNAL(runFeature(int)), glmodel->ft, SLOT(setTypeAndStart(int)));
-    QObject::connect(this, SIGNAL(arrangeDone(vector<QVector3D>, vector<float>)), this, SLOT(applyArrangeResult(vector<QVector3D>, vector<float>)));
 
     // save button codes
     QObject::connect(saveButton, SIGNAL(runFeature(int)), glmodel->ft, SLOT(setTypeAndRun(int)));
@@ -173,7 +173,7 @@ void QmlManager::runArrange_internal(){
             }
             autoarrange* ar;
             arng_result_set = ar->arngMeshes(&meshes_to_arrange);
-            /*vector<QVector3D> translations;
+            vector<QVector3D> translations;
             vector<float> rotations;
             for (int i=0; i<arng_result_set.size(); i++){
                 XYArrangement arng_result = arng_result_set[i];
@@ -181,9 +181,9 @@ void QmlManager::runArrange_internal(){
                 translations.push_back(trans_vec);
                 rotations.push_back(arng_result.second);
             }
-            emit arrangeDone(translations, rotations);*/
+            emit arrangeDone(translations, rotations);
 
-            ar->arrangeQt3D(m_transform_set, arng_result_set);
+            //ar->arrangeQt3D(m_transform_set, arng_result_set);
             //ar->arrangeGlmodels(&glmodel);
         }
     }
@@ -193,11 +193,10 @@ void QmlManager::runArrange_internal(){
 void QmlManager::applyArrangeResult(vector<QVector3D> translations, vector<float> rotations){
     qDebug() << "apply arrange result ";
     for (int i=0; i<glmodels.size(); i++){
-        glmodels[i]->moveModelMesh(translations[i]);
+        glmodels[i]->m_transform->setTranslation(translations[i]);
         glmodels[i]->rotateModelMesh(3, rotations[i]);
     }
 }
-
 void QmlManager::modelSelected(int ID){
     GLModel* target;
     for(int i=0; i<glmodels.size();i++){
@@ -212,6 +211,7 @@ void QmlManager::modelSelected(int ID){
     }
     selectedModel = target;
     selectedModel->m_meshMaterial->setDiffuse(QColor(100,255,100));
+
 }
 
 void QmlManager::ModelVisible(int ID, bool isVisible){
@@ -223,6 +223,22 @@ void QmlManager::ModelVisible(int ID, bool isVisible){
         }
     }
     target->setEnabled(isVisible);
+}
+
+void QmlManager::DoDelete(){
+    /*set ID for delete*/
+    int ID = 1;
+    GLModel* target;
+    for(int i=0; i<glmodels.size();i++){
+        if(glmodels.at(i)->ID == ID){
+            target = glmodels.at(i);
+            break;
+        }
+    }
+    if(target != NULL){
+        target->removeModelPartList();
+        target->removeModel();
+    }
 }
 
 void QmlManager::showMoveArrow(){

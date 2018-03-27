@@ -34,6 +34,10 @@ Paths autoarrange::spreadingCheck(Mesh* mesh, bool* check, int chking_start, boo
                     if(!outline_checked){
                         int path_head = getPathHead(mf, side, is_chking_pos);
                         Path path = buildOutline(mesh, check, chking, path_head, is_chking_pos);
+                        if(path.size()==0){
+                            Paths empty_paths;
+                            return empty_paths;
+                        }
                         paths.push_back(path);
                         outline_checked = true;
                     }
@@ -71,6 +75,11 @@ Path autoarrange::buildOutline(Mesh* mesh, bool* check, int chking, int path_hea
     int nxt_chk = -1;
     int path_tail = path_head;
     while(!outline_closed){
+        if(check[chking]){
+            Path empty_path;
+            qDebug() << "mesh error";
+            return empty_path;
+        }
         //**qDebug() << "chking" << chking;
         MeshFace* mf = & mesh->faces[chking];
         int outline_edge_cnt = 0;
@@ -103,7 +112,12 @@ Path autoarrange::buildOutline(Mesh* mesh, bool* check, int chking, int path_hea
     return idxsToPath(mesh, path_by_idx);
 }
 
-bool autoarrange::isEdgeBound(MeshFace* mf, int side, bool is_chking_pos){//bound edge: connected to face with opposit fn.z/not connected any face/multiple neighbor/opposit orientation
+bool autoarrange::isEdgeBound(MeshFace* mf, int side, bool is_chking_pos){
+    //condition of bound edge:
+    //1. connected to face with opposit fn.z
+    //2. not connected any face
+    //3. multiple neighbor
+    //4. opposit orientation
     if(mf->neighboring_faces[side].size() != 1) return true;
     MeshFace* neighbor = mf->neighboring_faces[side][0];
     if(!checkFNZ(neighbor, is_chking_pos)) return true;
@@ -148,22 +162,38 @@ Paths autoarrange::project(Mesh* mesh){
     int faces_size = mesh->faces.size();
     vector<Paths> outline_sets;
     bool is_chking_pos = false;
+    bool mesh_error = false;
     for(int i=0; i<2; i++){
         is_chking_pos = !is_chking_pos;
         bool check_done = false;
         bool face_checked[faces_size] = {false}; //한 번 확인한 것은 체크리스트에서 제거되는 자료구조 도입 필요(법선 확인이 반복시행됨)
         /****/qDebug() << "Get outline(is_chking_pos:" << is_chking_pos << ")";
-        while(!check_done){
+        while(!check_done && !mesh_error){
             for(int face_idx=0; face_idx<faces_size; face_idx++){
                 if(checkFNZ(& mesh->faces[face_idx], is_chking_pos) && !face_checked[face_idx]){
-                    outline_sets.push_back(spreadingCheck(mesh, face_checked, face_idx, is_chking_pos));//위/아래를 보는 면 사이 orientation 괜찮은가
+                    outline_sets.push_back(spreadingCheck(mesh, face_checked, face_idx, is_chking_pos));
+                    if(outline_sets[outline_sets.size()-1].size()==0) mesh_error = true;
                     break;
                 }else if(face_idx==faces_size-1) check_done = true;
             }
         }
+        if(mesh_error) break;
     }
-    /****/qDebug() << "Total outline_set : " << outline_sets.size() << "->" << clipOutlines(outline_sets).size();
-    return clipOutlines(outline_sets);
+    if(mesh_error){
+        Paths outline;
+        Path vtxs;
+        for(int i=0; i<mesh->vertices.size(); i++){
+            QVector3D vertex = mesh->vertices[i].position;
+            mesh->Mesh::addPoint(vertex.x(), vertex.y(), &vtxs);
+        }
+        /****/qDebug() << "got vtxs of mesh(" << vtxs.size() << "), start getting convexHull";
+        outline.push_back(getConvexHull(&vtxs));
+        return outline;
+    }
+    else{
+        /****/qDebug() << "Total outline_set : " << outline_sets.size() << "->" << clipOutlines(outline_sets).size();
+        return clipOutlines(outline_sets);
+    }
 }
 
 Paths autoarrange::clipOutlines(vector<Paths> outline_sets){
@@ -370,8 +400,8 @@ vector<XYArrangement> autoarrange::arng2D(vector<Paths>* figs){
 
 void autoarrange::initStage(Paths* cum_outline){
 
-    int stage_x = 72000;
-    int stage_y = 72000;
+    int stage_x = 95000;
+    int stage_y = 75000;
 
     Path stage;
     IntPoint p1, p2, p3, p4;
@@ -401,7 +431,7 @@ void autoarrange::initStage(Paths* cum_outline){
 
 XYArrangement autoarrange::arngFig(Paths* cum_outline, Paths* fig){
     /**/qDebug() << "Arrange new fig @arngFig";
-    float angle_unit = 90;
+    float angle_unit = 360;
 
     Paths optimal_rot_fig;
     XYArrangement global_optimal_arrangement;
@@ -440,9 +470,10 @@ XYArrangement autoarrange::arngFig(Paths* cum_outline, Paths* fig){
         return make_pair(p,-1);//-1 means arng imposible
     }
     tanslatePaths(&optimal_rot_fig, global_optimal_arrangement.first);
-    /**/qDebug() << "- path translated" << "@arngFig";
+    /**/qDebug() << "- path translated" << global_optimal_arrangement.first.X << global_optimal_arrangement.first.Y << "@arngFig";
     cumulativeClip(cum_outline, &optimal_rot_fig);
     /**/qDebug() << "- cumulativeClip done" << "@arngFig";
+    /**/debugPaths(*cum_outline);
     return global_optimal_arrangement;
 }
 
@@ -492,14 +523,11 @@ void autoarrange::cumulativeClip(Paths* cum_outline, Paths* new_fig){
 }
 
 IntPoint autoarrange::getOptimalPoint(Paths* nfp_set){
-    /**/qDebug() << "-0" << "@arngFig";
     int min_x = (*nfp_set)[0][0].X;
     int min_y = (*nfp_set)[0][0].Y;
-    /**/qDebug() << "-1" << "@arngFig";
     int paths_inculding_optimal_point = 1;
-    /**/qDebug() << "-2" << "@arngFig";
     int optimal_point_idx = 0;
-    /**/qDebug() << "- optimalPoint checked" << "0" << "@getOptimalPoint";
+    //*qDebug() << "- optimalPoint checked" << "0" << "@getOptimalPoint";
     for(int path_idx=0; path_idx<nfp_set->size();path_idx++){
         for(int point_idx=0; point_idx<(*nfp_set)[path_idx].size(); point_idx++){
             if((*nfp_set)[path_idx][point_idx].X<min_x){
@@ -507,14 +535,14 @@ IntPoint autoarrange::getOptimalPoint(Paths* nfp_set){
                 min_y = (*nfp_set)[path_idx][point_idx].Y;
                 paths_inculding_optimal_point = path_idx;
                 optimal_point_idx = point_idx;
-                /**/qDebug() << "- upadte optimalPoint to" << point_idx << "@getOptimalPoint";
+                //*qDebug() << "- upadte optimalPoint to" << point_idx << "@getOptimalPoint";
             }else if((*nfp_set)[path_idx][point_idx].X==min_x && (*nfp_set)[path_idx][point_idx].Y<min_y){
                 min_y = (*nfp_set)[path_idx][point_idx].Y;
                 paths_inculding_optimal_point = path_idx;
                 optimal_point_idx = point_idx;
-                /**/qDebug() << "- upadte optimalPoint to" << point_idx << "@getOptimalPoint";
+                //*qDebug() << "- upadte optimalPoint to" << point_idx << "@getOptimalPoint";
             }
-            /**/qDebug() << "- optimalPoint checked" << point_idx << "@getOptimalPoint";
+            //*qDebug() << "- optimalPoint checked" << point_idx << "@getOptimalPoint";
         }
     }
     return (*nfp_set)[paths_inculding_optimal_point][optimal_point_idx];
@@ -584,13 +612,14 @@ Paths autoarrange::getNFP(Paths* subject, Paths* object){
         /**/qDebug() << "- getObjVecsInRegions done" << "@getNFP";
         IntPoint tail = getFirstNFPPoint(sub_slope_set[path_idx][0], (*subject)[path_idx][0], &convex_obj, obj_slope_set);
         /**/qDebug() << "- got nfp first point" << "@getNFP";
+        //**/qDebug() << "- add ObjVecs to NFP" << obj_vecs_in_regions.size() << "@getNFP";
         for(int edge_idx=0; edge_idx<(*subject)[path_idx].size(); edge_idx++){
             /**/qDebug() << "- subject edge" << edge_idx << obj_vecs_in_regions[edge_idx].size() << "@getNFP";
             raw_nfp_set[path_idx].push_back(tail);
             tail = tanslateIntPoint(tail, sub_vec_set[path_idx][edge_idx]);
             for(int obj_vec_idx=0; obj_vec_idx<obj_vecs_in_regions[edge_idx].size(); obj_vec_idx++){
                 raw_nfp_set[path_idx].push_back(tail);
-                /**/qDebug() << obj_vecs_in_regions[edge_idx][obj_vec_idx].X <<","<<obj_vecs_in_regions[edge_idx][obj_vec_idx].Y << "@getNFP";
+                //*qDebug() << obj_vecs_in_regions[edge_idx][obj_vec_idx].X <<","<<obj_vecs_in_regions[edge_idx][obj_vec_idx].Y << "@getNFP";
                 tail = tanslateIntPoint(tail, obj_vecs_in_regions[edge_idx][obj_vec_idx]);
             }
         }
@@ -687,7 +716,11 @@ vector<vector<IntPoint>> autoarrange::getObjVecsInRegions(vector<float>* sub_slo
             break;
         }
     }
-
+    if(obj_vecs_in_regions.size() == 0){
+        vector<IntPoint> obj_vecs_in_single_region;
+        /**/qDebug() << "in region 0 0";
+        obj_vecs_in_regions.push_back(obj_vecs_in_single_region);
+    }
     for(int sub_edge_idx=1; sub_edge_idx<(*sub_slope_set).size(); sub_edge_idx++){
         vector<IntPoint> obj_vecs_in_single_region;
         int from_slope = (*sub_slope_set)[sub_edge_idx];
@@ -699,7 +732,7 @@ vector<vector<IntPoint>> autoarrange::getObjVecsInRegions(vector<float>* sub_slo
             obj_edge_tail = obj_edge_idx;
             obj_vecs_in_single_region.push_back((*obj_vec_set)[obj_edge_idx]);
             obj_edge_idx = (obj_edge_idx+1)%(*obj_slope_set).size();
-            /**/qDebug() << isOnCCWPath(from_slope, to_slope, (*obj_slope_set)[obj_edge_idx]);
+            //*qDebug() << isOnCCWPath(from_slope, to_slope, (*obj_slope_set)[obj_edge_idx]);
         }
         /**/qDebug() << "in region" << sub_edge_idx << obj_vecs_in_single_region.size();
         obj_vecs_in_regions.push_back(obj_vecs_in_single_region);
@@ -784,7 +817,7 @@ void autoarrange::arrangeQt3D(vector<Qt3DCore::QTransform*> m_transform_set, vec
 }
 
 void autoarrange::arrangeSingleQt3D(Qt3DCore::QTransform* m_transform, XYArrangement arng_result){
-    QVector3D trans_vec = QVector3D(arng_result.first.X/cfg->resolution, arng_result.first.Y/cfg->resolution, 0);
+    QVector3D trans_vec = QVector3D(arng_result.first.X/cfg->resolution, arng_result.first.Y/cfg->resolution, m_transform->translation().z());
     m_transform->setTranslation(trans_vec);
     m_transform->setRotationZ(arng_result.second);
 }

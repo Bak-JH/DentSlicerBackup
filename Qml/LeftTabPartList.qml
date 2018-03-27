@@ -130,11 +130,12 @@ Rectangle {
     }
 
     function deletePart(ID){ // delete in list by ID
-        for(var i=0;i<partListColumn.children.length;i++){
-            if(partListColumn.childAt(i).ID === ID)
+        for(var i=0 ; i<partListColumn.children.length; i++){
+            console.log("iddididididid   " + partListColumn.children[i].glModelID)
+            if(partListColumn.children[i].glModelID === ID){
                 partListColumn.children[i].destroy()
+            }
         }
-
     }
 
 }

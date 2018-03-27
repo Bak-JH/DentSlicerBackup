@@ -172,7 +172,7 @@ ApplicationWindow {
         }
 
         onPositionChanged: {
-            if(isDrag){
+            if(isDrag){//mouse wheel drag
                 currPosition = Qt.vector2d(mouseX,mouseY);
                 // move screen by drag scene3d
                 sceneRoot.cm.camera.translateWorld(Qt.vector3d((-1)*(currPosition.x - prevPosition.x)/1000,0,0),0);
