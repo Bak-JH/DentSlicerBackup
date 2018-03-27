@@ -41,7 +41,7 @@ Path grahamScan(Path path)    {
     for(int point_idx=0; point_idx<path.size(); point_idx++){//
         points[point_idx] = path[point_idx];
     }
-    /**/qDebug() << "path to arr" << path.size() << sizeof(points)/sizeof(points[0]);
+    //*qDebug() << "path to arr" << path.size() << sizeof(points)/sizeof(points[0]);
     int N = path.size();
     stack<IntPoint> hull;
     Path hull_path;
@@ -54,18 +54,18 @@ Path grahamScan(Path path)    {
     for (int i = 1; i < N; i++)
         if (compareIntPoint(points[i], points[leastY]))
             leastY = i;
-    /**/qDebug() << "got lesatY" << leastY;
+    //*qDebug() << "got lesatY" << leastY;
 
     // swap the pivot with the first point
     IntPoint temp = points[0];
     points[0] = points[leastY];
     points[leastY] = temp;
-    /**/qDebug() << "swap lesatY with [0]";
+    //*qDebug() << "swap lesatY with [0]";
 
     // sort the remaining point according to polar order about the pivot
     pivot = points[0];
     sort(points + 1, points + N, POLAR_ORDER);
-    /**/qDebug() << "POLAR_ORDER sort";
+    //*qDebug() << "POLAR_ORDER sort";
 
     hull.push(points[0]);
     hull.push(points[1]);
@@ -80,7 +80,7 @@ Path grahamScan(Path path)    {
         hull.push(top);
         hull.push(points[i]);
     }
-    /**/qDebug() << "hull size" << hull.size();
+    //*qDebug() << "hull size" << hull.size();
     while (!hull.empty()){
         hull_path.push_back(hull.top());
         hull.pop();
@@ -89,11 +89,11 @@ Path grahamScan(Path path)    {
 }
 
 Path getConvexHull(Path* path){
-    /**/qDebug() << "getConvexHull";
-    /**/qDebug() << "path orient" << Orientation(*path);
+    //*qDebug() << "getConvexHull";
+    //*qDebug() << "path orient" << Orientation(*path);
     Path convex_hull = grahamScan(*path);
-    /**/qDebug() << "got convex_hull";
+    //*qDebug() << "got convex_hull";
     if(!Orientation(convex_hull)) ReversePath(convex_hull);
-    /**/qDebug() << "convexHull orient" << Orientation(convex_hull);
+    //*qDebug() << "convexHull orient" << Orientation(convex_hull);
     return convex_hull;
 }
