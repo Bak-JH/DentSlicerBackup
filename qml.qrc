@@ -1,6 +1,5 @@
 <RCC>
     <qresource prefix="/">
-        <file>three.js</file>
         <file>grid.png</file>
         <file>grid2.png</file>
         <file>Qml/CameraController.qml</file>
@@ -41,5 +40,6 @@
         <file>Qml/ViewButton.qml</file>
         <file>Qml/ViewChange.qml</file>
         <file>Qml/glcode.js</file>
+        <file>Qml/three.js</file>
     </qresource>
 </RCC>

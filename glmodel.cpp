@@ -630,12 +630,9 @@ void GLModel::handlePickerClicked(QPickEvent *pick)
     emit modelSelected(parentModel->ID);
 
     if (labelingActive) {
-        qDebug() << "1";
         if (labellingTextPreview)
             labellingTextPreview->setEnabled(true);
-        qDebug() << "2";
         parentModel->m_meshMaterial->setDiffuse(QColor(100, 255, 100));
-        qDebug() << "3";
         if (labellingTextPreview && labellingTextPreview->isEnabled()) {
             /*QVector3D tmp = m_transform->translation();
             float zlength = mesh->z_max - mesh->z_min;
@@ -644,7 +641,6 @@ void GLModel::handlePickerClicked(QPickEvent *pick)
             labellingTextPreview->setTranslation(pick->localIntersection());
             labellingTextPreview->setNormal(pick->localIntersection());
         }
-        qDebug() << "4";
     }
 
     QPickTriangleEvent *trianglePick = static_cast<QPickTriangleEvent*>(pick);

@@ -2,7 +2,7 @@ import QtQuick 2.4
 import QtQuick.Controls 1.4
 import QtQuick.Scene3D 2.0
 import QtQuick.Window 2.2
-
+import QtCanvas3D 1.1
 import QtQuick.Controls.Styles 1.4
 import "glcode.js" as GLCode
 import QtQuick.Dialogs 1.2
@@ -81,7 +81,7 @@ ApplicationWindow {
 
     }*/
 
-    Scene3D {
+    Canvas3D {
         id: scene3d
         /*
         width: parent.width
@@ -95,11 +95,21 @@ ApplicationWindow {
         //height: (window.height - uppertab.height) * 1
         //width: 800
         //height: 800
+        onInitializeGL: {
+            GLCode.initializeGL(scene3d);
+        }
 
+        onPaintGL: {
+            GLCode.paintGL(scene3d);
+        }
+
+        onResizeGL: {
+            GLCode.resizeGL(scene3d);
+        }
         focus: true
-        hoverEnabled: true
+        /*hoverEnabled: true
         aspects: ["input", "logic"]
-        cameraAspectRatioMode: Scene3D.AutomaticAspectRatio
+        cameraAspectRatioMode: Scene3D.AutomaticAspectRatio*/
         MainView {
             objectName: "MainView"
             id: sceneRoot
