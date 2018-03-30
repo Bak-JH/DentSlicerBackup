@@ -257,7 +257,9 @@ Paths3D contourConstruct(Paths3D hole_edges){
             } else if (dest->size() == 2){
                 start = (*dest)[0]; // itself
                 pathHash.remove(meshVertex2Hash(pj));
-                pathHash.remove(meshVertex2Hash((*dest)[1])); // maybe needless
+                uint32_t endHash = meshVertex2Hash((*dest)[1]);
+                if (pathHash.contains(endHash))
+                    pathHash.remove(endHash); // maybe needless
                 pj_next = last;
                 pj = pj_next;
                 pj_prev = contour[0];

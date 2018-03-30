@@ -28,7 +28,9 @@ SOURCES += main.cpp \
     feature/labellingtextpreview.cpp \
     utils/mathutils.cpp \
     utils/qtriangulator.cpp \
-    feature/stlexporter.cpp
+    feature/stlexporter.cpp \
+    feature/extension.cpp \
+    feature/shelloffset.cpp
 
 RESOURCES += qml.qrc \
     resources.qrc
@@ -80,7 +82,9 @@ HEADERS += \
     utils/qrbtree.h \
     utils/qtriangulator_p.h \
     utils/qvectorpath_p.h \
-    feature/stlexporter.h
+    feature/stlexporter.h \
+    feature/extension.h \
+    feature/shelloffset.h
 
 #LIBS += -lOpengl32
 
