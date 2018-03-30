@@ -153,7 +153,9 @@ void generateKBranch(Slices& slices){
             }
 
             if (overhang_point->branching_overhang_point != NULL){
-                Path circledrew = drawCircle(*overhang_point->branching_overhang_point, int(radius));
+                qDebug() << (void *)overhang_point->branching_overhang_point;
+
+                Path circledrew = drawCircle(*(overhang_point->branching_overhang_point), int(radius));
                 circle_paths.push_back(circledrew);
             }
             circle_paths.push_back(drawCircle(*overhang_point, int(radius)));

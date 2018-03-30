@@ -120,8 +120,16 @@ Paths Slicer::contourConstruct(Paths pathList){
     Paths contourList;
 
     QHash<uint32_t, Path> pathHash;
+
     if (pathList.size() == 0)
         return contourList;
+
+    int pathCnt = 0;
+    for (int i=0; i<pathList.size(); i++){
+        pathCnt += pathList[i].size();
+    }
+    qDebug() << pathCnt;
+    pathHash.reserve(pathCnt*10);
 
     int debug_count=0;
 
@@ -179,10 +187,11 @@ Paths Slicer::contourConstruct(Paths pathList){
                 break;
             } else if (dest->size() == 2){
                 start = (*dest)[0]; // itself
-                pathHash.remove(intPoint2Hash(pj));
                 uint32_t endHash = intPoint2Hash((*dest)[1]);
                 if (pathHash.contains(endHash))
                     pathHash.remove(endHash); // maybe needless
+
+                pathHash.remove(intPoint2Hash(pj));
                 pj_next = last;
                 pj = pj_next;
                 pj_prev = contour[0];

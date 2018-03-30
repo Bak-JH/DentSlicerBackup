@@ -29,6 +29,8 @@ void overhangDetect(Slices& slices){
 
     Paths prev_sum;
 
+    //slices.overhang_points.reserve(100000);
+
     //int checking_layers = cfg->overhang_detect_diff_layer_height / cfg->layer_height;
     //qDebug() << "Checking layers per " << checking_layers << "layers";
 
