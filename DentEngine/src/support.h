@@ -39,8 +39,8 @@ public:
     int radius;
     bool branchable = true;
     int branching_cnt = 0;
-    OverhangPoint* branching_overhang_point;
-    OverhangPoint* target_branching_overhang_point;
+    OverhangPoint* branching_overhang_point = NULL;
+    OverhangPoint* target_branching_overhang_point = NULL;
     IntPoint unit_move;
     vector<BranchableOverhangPoint*> branchable_overhang_points;
 
@@ -55,14 +55,15 @@ void getCriticalOverhangRegion(Slice& slice);
 bool checkPerpendicularLength(Path A, Path B, IntPoint& left_hit);
 float pointDistance(IntPoint A, IntPoint B);
 float pointDistance(QVector3D A, QVector3D B);
-bool checkInclusion(Slice& slice, OverhangPoint overhang_point);
-Path drawCircle(OverhangPoint overhang_point, int radius);
+bool checkInclusion(Slice& slice, Path circle);
+bool checkInclusion(Slice& slice, OverhangPoint* overhang_point);
+Path drawCircle(OverhangPoint* overhang_point, int radius);
 
 IntPoint getPolygonNormal(Path vertices);
 IntPoint getPolygonCentroid(Path vertices);
 IntPoint getPolygonOutlier(Path vertices, IntPoint normal);
 Paths areaSubdivision(Path area, float criterion);
-void clusterPoints(vector<OverhangPoint>& points);
+void clusterPoints(vector<OverhangPoint*>& points);
 
 
 

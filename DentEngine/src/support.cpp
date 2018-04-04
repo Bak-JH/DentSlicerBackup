@@ -70,9 +70,10 @@ void overhangDetect(Slices& slices){
                 IntPoint centroid = getPolygonNormal(partial_cop);
                 IntPoint outlier = getPolygonOutlier(partial_cop, centroid);
 //                qDebug() << slice.z << int(slice.z*Configuration::resolution) << slice.z*Configuration::resolution/Configuration::resolution;
-                slices.overhang_points.push_back(OverhangPoint(centroid.X, centroid.Y, int(slice.z*cfg->resolution), cfg->default_support_radius));
-                //for (int i=0; i<10; i++){
-                slices.overhang_points.push_back(OverhangPoint(outlier.X, outlier.Y, int(slice.z*cfg->resolution), cfg->default_support_radius));
+                OverhangPoint* center_op = new OverhangPoint(centroid.X, centroid.Y, int(slice.z*cfg->resolution), cfg->default_support_radius);
+                slices.overhang_points.push_back(center_op);
+                OverhangPoint* outlier_op = new OverhangPoint(outlier.X, outlier.Y, int(slice.z*cfg->resolution), cfg->default_support_radius);
+                slices.overhang_points.push_back(outlier_op);
                 //}
                 //slices.overhang_points.push_back(QVector3D(float(centroid.X)/Configuration::resolution, float(centroid.Y)/Configuration::resolution, slice.z));
             }
@@ -389,17 +390,34 @@ float pointDistance(QVector3D A, QVector3D B){
     return sqrt(pow(A.x()-B.x(), 2)+pow(A.y()-B.y(),2)+pow(A.z()-B.z(),2));
 }
 
+bool checkInclusion(Slice& slice, Path p){
+    for (PolyNode* pn : slice.polytree.Childs){
+        if (pn->IsHole()){
+            qDebug() << "holehole";
+            continue;
+        }
+        for (IntPoint ip: p){
+            if (PointInPolygon(ip, pn->Contour)){
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
 // if slice contains overhang_point in somewhere
-bool checkInclusion(Slice& slice, OverhangPoint overhang_point){
-    for (Path contour : slice.outershell){
-        if (PointInPolygon(overhang_point.position, contour)){
+bool checkInclusion(Slice& slice, OverhangPoint* overhang_point){
+    for (PolyNode* pn : slice.polytree.Childs){
+        if (pn->IsHole())
+            continue;
+        if (PointInPolygon(overhang_point->position, pn->Contour)){
             return true;
         }
     }
     return false;
 }
 
-Path drawCircle(OverhangPoint overhang_point, int radius){
+Path drawCircle(OverhangPoint* overhang_point, int radius){
     Path circle;
     int circle_resolution = 8;
     float circle_radius = radius; //cfg->default_support_radius;
@@ -408,7 +426,7 @@ Path drawCircle(OverhangPoint overhang_point, int radius){
 
     for (int i=0; i<circle_resolution; i++){
         angle += unit_angle;
-        IntPoint circle_point = overhang_point.position + IntPoint(int(circle_radius*cos(angle)), int(circle_radius*sin(angle)), overhang_point.position.Z);
+        IntPoint circle_point = overhang_point->position + IntPoint(int(circle_radius*cos(angle)), int(circle_radius*sin(angle)), overhang_point->position.Z);
         circle.push_back(circle_point);
     }
     return circle;
@@ -545,11 +563,11 @@ Paths areaSubdivision(Path area, float criterion){
     return result;
 }
 
-void clusterPoints(vector<OverhangPoint>& points){
-    vector<OverhangPoint> unclassified_points;
-    vector<OverhangPoint> classified_points;
+void clusterPoints(vector<OverhangPoint*>& points){
+    vector<OverhangPoint*> unclassified_points;
+    vector<OverhangPoint*> classified_points;
 
-    OverhangPoint container_point;
+    OverhangPoint* container_point;
     int container_count = 0;
     float container_size = cfg->cluster_size;//(1-cfg->support_density)*10;
 
@@ -558,13 +576,13 @@ void clusterPoints(vector<OverhangPoint>& points){
     unclassified_points.pop_back();
     classified_points.push_back(container_point);
 
-    vector<OverhangPoint>::iterator it;
+    vector<OverhangPoint*>::iterator it;
     int total_size = unclassified_points.size();
     while (total_size>0){
         qDebug() << "unclassified_points size : " << unclassified_points.size();
         for (it = unclassified_points.begin(); it != unclassified_points.end();){
-            OverhangPoint point = (*it);
-            if (pointDistance3D(point.position, container_point.position) <= cfg->duplication_radius*Configuration::resolution){
+            OverhangPoint* point = (*it);
+            if (pointDistance3D(point->position, container_point->position) <= cfg->duplication_radius*Configuration::resolution){
                 container_count ++;
                 unclassified_points.erase(it);
                 if (container_count > container_size)
@@ -584,6 +602,10 @@ void clusterPoints(vector<OverhangPoint>& points){
     }
     points = classified_points;
     qDebug() << "clustered points" << points.size();
+    for (it = points.begin(); it != points.end();){
+        qDebug() << (void*)(*it);
+        ++it;
+    }
 }
 
 //****************** overhang position initializers *******************/

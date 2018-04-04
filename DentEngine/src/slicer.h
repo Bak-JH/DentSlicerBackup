@@ -37,7 +37,7 @@ class Slices : public vector<Slice>{
 public:
     Mesh* mesh;
     Paths overhang_regions;
-    vector<OverhangPoint> overhang_points;
+    vector<OverhangPoint*> overhang_points;
     //    vector<QVector3D> overhang_points;
     //vector<IntPoint> intersectionPoints;
     Path raft_points;

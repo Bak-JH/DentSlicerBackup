@@ -39,6 +39,8 @@ Slices Slicer::slice(Mesh* mesh){
     fflush(stdout);
     //cout << "overhangdetect done" <<endl;
 
+    containmentTreeConstruct();
+
     // below steps need to be done in parallel way
     // infill generation step
     Infill infill(cfg->infill_type);
@@ -392,6 +394,10 @@ void Slicer::containmentTreeConstruct(){
         clpr.Clear();
         clpr.AddPaths(slice->outershell, ptSubject, true);
         clpr.Execute(ctUnion, slice->polytree);
+
+        for (PolyNode* pn : slice->polytree.Childs){
+            qDebug() << pn->IsHole() << pn->Parent << pn->Parent->Parent;
+        }
     }
 }
 

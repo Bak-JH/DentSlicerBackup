@@ -19,9 +19,9 @@ void generateGeneralBranch(Slices& slices){
     for (int op_idx=0; op_idx<slices.overhang_points.size(); op_idx ++){
         qDebug() << "generating support " << op_idx << "/" << slices.overhang_points.size();
 
-        OverhangPoint overhang_point = slices.overhang_points[op_idx];
+        OverhangPoint* overhang_point = slices.overhang_points[op_idx];
         //drawCircle(overhang_point);
-        int slice_idx = int(overhang_point.position.Z/(Configuration::resolution)/cfg->layer_height);
+        int slice_idx = int(overhang_point->position.Z/(Configuration::resolution)/cfg->layer_height);
 
         if (slice_idx+1 > slices.size()-1 || slice_idx == 1)
             continue;
@@ -38,7 +38,7 @@ void generateGeneralBranch(Slices& slices){
             clpr.AddPaths(slice.outershell, ptSubject, true);
             clpr.AddPaths(circle_paths, ptClip, true);
             clpr.Execute(ctUnion, slice.outershell, pftNonZero, pftNonZero);
-            overhang_point.height += cfg->layer_height;
+            overhang_point->height += cfg->layer_height;
         }
 
 
@@ -56,7 +56,7 @@ void generateGeneralBranch(Slices& slices){
             clpr.AddPaths(slice.outershell, ptSubject, true);
             clpr.AddPaths(circle_paths, ptClip, true);
             clpr.Execute(ctUnion, slice.outershell, pftNonZero, pftNonZero);
-            overhang_point.height += cfg->layer_height;
+            overhang_point->height += cfg->layer_height;
 
             slice_idx --;
         }
