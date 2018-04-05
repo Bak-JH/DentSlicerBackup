@@ -78,8 +78,8 @@ void QmlManager::initializeUI(QQmlApplicationEngine* e){
 
     QObject::connect(this, SIGNAL(arrangeDone(vector<QVector3D>, vector<float>)), this, SLOT(applyArrangeResult(vector<QVector3D>, vector<float>)));
 
-    openModelFile(QDir::currentPath()+"/Models/partial1.stl");
-    //openModelFile("c:/Users/SH/Desktop/dlpslicer/DLPslicer/demo_object.stl");
+    //openModelFile(QDir::currentPath()+"/Models/partial1.stl");
+    //openModelFile("c:/Users/user/Desktop/partial1.stl");
 }
 void QmlManager::openModelFile(QString fname){
 
@@ -91,6 +91,7 @@ void QmlManager::openModelFile(QString fname){
     float xmid = (glmodel->mesh->x_max + glmodel->mesh->x_min)/2;
     float ymid = (glmodel->mesh->y_max + glmodel->mesh->y_min)/2;
     float zmid = (glmodel->mesh->z_max + glmodel->mesh->z_min)/2;
+
     glmodel->moveModelMesh(QVector3D(
                            (-1)*xmid,
                            (-1)*ymid,
@@ -178,7 +179,7 @@ void QmlManager::runArrange_internal(){
             vector<float> rotations;
             for (int i=0; i<arng_result_set.size(); i++){
                 XYArrangement arng_result = arng_result_set[i];
-                QVector3D trans_vec = QVector3D(arng_result.first.X/cfg->resolution, arng_result.first.Y/cfg->resolution, 0);
+                QVector3D trans_vec = QVector3D(arng_result.first.X/scfg->resolution, arng_result.first.Y/scfg->resolution, 0);
                 translations.push_back(trans_vec);
                 rotations.push_back(arng_result.second);
             }

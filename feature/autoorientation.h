@@ -1,6 +1,6 @@
 #ifndef AUTOORIENTATION_H
 #define AUTOORIENTATION_H
-#include "mesh.h"
+#include "DentEngine/src/mesh.h"
 #include "QMatrix4x4"
 #include <math.h>
 #include <algorithm>
