@@ -16,7 +16,7 @@
 #include <math.h>
 #include <QVector3D>
 
-class Configuration{
+class SlicingConfiguration{
 public:
     // configurations
     static constexpr int resolution_scale = 3;
@@ -64,6 +64,6 @@ public:
     float pixel_per_mm = float(resolution_x)/float(bed_x);
 };
 
-extern Configuration* cfg;
+extern SlicingConfiguration* scfg;
 
 #endif // CONFIGURATION_H

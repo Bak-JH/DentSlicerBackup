@@ -1,3 +1,3 @@
 #include "configuration.h"
 
-Configuration* cfg = new Configuration();
+SlicingConfiguration* scfg = new SlicingConfiguration();

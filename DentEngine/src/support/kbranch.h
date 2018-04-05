@@ -1,9 +1,9 @@
 #ifndef KBRANCH_H
 #define KBRANCH_H
-#include "DentEngine/src/polyclipping/clipper.hpp"
-#include "DentEngine/src/configuration.h"
-#include "DentEngine/src/support.h"
-#include "DentEngine/src/util/convexhull.h"
+#include "../polyclipping/clipper.hpp"
+#include "../configuration.h"
+#include "../support.h"
+#include "../util/convexhull.h"
 #include <QVector3D>
 #include <math.h>
 

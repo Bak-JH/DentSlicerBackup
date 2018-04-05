@@ -21,24 +21,24 @@ void generateGeneralBranch(Slices& slices){
 
         OverhangPoint* overhang_point = slices.overhang_points[op_idx];
         //drawCircle(overhang_point);
-        int slice_idx = int(overhang_point->position.Z/(Configuration::resolution)/cfg->layer_height);
+        int slice_idx = int(overhang_point->position.Z/(SlicingConfiguration::resolution)/scfg->layer_height);
 
         if (slice_idx+1 > slices.size()-1 || slice_idx == 1)
             continue;
 
         // draw pin point
         for (int layer_idx = slice_idx+1; layer_idx > slice_idx-1; layer_idx--){
-            // qDebug() << layer_idx << slice_idx << "asdfasdf" << cfg->default_support_radius*(slice_idx-layer_idx+2)/3;
+            // qDebug() << layer_idx << slice_idx << "asdfasdf" << scfg->default_support_radius*(slice_idx-layer_idx+2)/3;
 
             Slice& slice = slices[layer_idx];
 
             Paths circle_paths;
-            circle_paths.push_back(drawCircle(overhang_point, int(cfg->default_support_radius*(slice_idx-layer_idx+2)/3)));
+            circle_paths.push_back(drawCircle(overhang_point, int(scfg->default_support_radius*(slice_idx-layer_idx+2)/3)));
             clpr.Clear();
             clpr.AddPaths(slice.outershell, ptSubject, true);
             clpr.AddPaths(circle_paths, ptClip, true);
             clpr.Execute(ctUnion, slice.outershell, pftNonZero, pftNonZero);
-            overhang_point->height += cfg->layer_height;
+            overhang_point->height += scfg->layer_height;
         }
 
 
@@ -46,17 +46,17 @@ void generateGeneralBranch(Slices& slices){
         while (!checkInclusion(slices[slice_idx+1], overhang_point) && (slice_idx != 0)){
 
             //qDebug()
-            //if ((overhang_point.height % cfg->branching_threshold_radius) == 0)
+            //if ((overhang_point.height % scfg->branching_threshold_radius) == 0)
 
             Slice& slice = slices[slice_idx];
 
             Paths circle_paths;
-            circle_paths.push_back(drawCircle(overhang_point, int(cfg->default_support_radius)));
+            circle_paths.push_back(drawCircle(overhang_point, int(scfg->default_support_radius)));
             clpr.Clear();
             clpr.AddPaths(slice.outershell, ptSubject, true);
             clpr.AddPaths(circle_paths, ptClip, true);
             clpr.Execute(ctUnion, slice.outershell, pftNonZero, pftNonZero);
-            overhang_point->height += cfg->layer_height;
+            overhang_point->height += scfg->layer_height;
 
             slice_idx --;
         }

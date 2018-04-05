@@ -49,11 +49,11 @@ CommandLineParseResult CmdLineParser::parseCommandLine(QString *errorMessage)
     inputfilename = positionalArguments.first();
     outputfilename = positionalArguments.back();
     if (layerheightoption.valueName() != "")
-        cfg->layer_height = layerheightoption.valueName().toFloat();
+        scfg->layer_height = layerheightoption.valueName().toFloat();
     if (supporteroption.valueName() != "")
-        cfg->support_type = supporteroption.valueName().toInt();
+        scfg->support_type = supporteroption.valueName().toInt();
     if (filloption.valueName() != "")
-        cfg->infill_type = filloption.valueName().toInt();
+        scfg->infill_type = filloption.valueName().toInt();
 
     return CommandLineOk;
 }

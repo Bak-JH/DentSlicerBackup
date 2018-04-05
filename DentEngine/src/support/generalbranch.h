@@ -1,8 +1,8 @@
 #ifndef GENERALBRANCH_H
 #define GENERALBRANCH_H
-#include "DentEngine/src/polyclipping/clipper.hpp"
-#include "DentEngine/src/configuration.h"
-#include "DentEngine/src/support.h"
+#include "../polyclipping/clipper.hpp"
+#include "../configuration.h"
+#include "../support.h"
 
 using namespace std;
 using namespace ClipperLib;

@@ -69,7 +69,7 @@ void convexHull(Slices& slices)
     Point* points = new Point[n];
 
     int convexhull_recovery = 10;
-    int convexhull_resolution = cfg->resolution/convexhull_recovery;
+    int convexhull_resolution = scfg->resolution/convexhull_recovery;
 
     for (int v_idx =0; v_idx< n; v_idx ++){
         Point temp_point;

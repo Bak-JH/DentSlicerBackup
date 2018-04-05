@@ -16,14 +16,14 @@ Slices Slicer::slice(Mesh* mesh){
     fflush(stdout);
     // contour construction step
     for (int i=0; i< meshslices.size(); i++){
-        //qDebug() << "constructing contour" << i+1 << "/" << meshslices.size() << "offset" << -(cfg->wall_thickness+cfg->nozzle_width)/2;
+        //qDebug() << "constructing contour" << i+1 << "/" << meshslices.size() << "offset" << -(scfg->wall_thickness+scfg->nozzle_width)/2;
         Slice meshslice;
         meshslice.outershell = contourConstruct(meshslices[i]);
         int prev_size = meshslice.outershell.size();
-        meshslice.z = cfg->layer_height*i;
+        meshslice.z = scfg->layer_height*i;
 
         // flaw exists if contour overlaps
-        //meshslice.outerShellOffset(-(cfg->wall_thickness+cfg->nozzle_width)/2, jtRound);
+        //meshslice.outerShellOffset(-(scfg->wall_thickness+scfg->nozzle_width)/2, jtRound);
         slices.push_back(meshslice);
     }
     fflush(stdout);
@@ -43,21 +43,21 @@ Slices Slicer::slice(Mesh* mesh){
 
     // below steps need to be done in parallel way
     // infill generation step
-    Infill infill(cfg->infill_type);
+    Infill infill(scfg->infill_type);
     infill.generate(slices);
     printf("infill done\n");
     fflush(stdout);
     //cout << "infill done" <<endl;
 
     // support generation step
-    Support support(cfg->support_type);
+    Support support(scfg->support_type);
     support.generate(slices);
     printf("support done\n");
     fflush(stdout);
     //cout << "support done" <<endl;
 
     // raft generation step
-    Raft raft(cfg->raft_type);
+    Raft raft(scfg->raft_type);
     raft.generate(slices);
     printf("raft done\n");
     fflush(stdout);
@@ -73,13 +73,13 @@ Slices Slicer::slice(Mesh* mesh){
 
 // slices mesh into segments
 vector<Paths> Slicer::meshSlice(Mesh* mesh){
-    float delta = cfg->layer_height;
+    float delta = scfg->layer_height;
 
     vector<float> planes;
 
-    if (! strcmp(cfg->slicing_mode, "uniform")){
+    if (! strcmp(scfg->slicing_mode, "uniform")){
         planes = buildUniformPlanes(mesh->z_min, mesh->z_max, delta);
-    } else if (cfg->slicing_mode == "adaptive") {
+    } else if (scfg->slicing_mode == "adaptive") {
         // adaptive slice
         planes = buildAdaptivePlanes(mesh->z_min, mesh->z_max);
     }

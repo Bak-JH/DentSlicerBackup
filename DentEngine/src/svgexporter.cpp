@@ -14,10 +14,10 @@ void SVGexporter::exportSVG(Slices contourLists, QString outfoldername){
     QString infofilename = outfoldername + "/" + "info.json";
     ofstream infofile(infofilename.toStdString().c_str(), ios::out);
     QJsonObject jsonObject;
-    jsonObject["layer_height"] = round(cfg->layer_height*100)/100;
+    jsonObject["layer_height"] = round(scfg->layer_height*100)/100;
     jsonObject["total_layer"] = int(contourLists.size());
-    jsonObject["bed_curing_time"] = 15000; // depends on cfg->resin_type
-    jsonObject["curing_time"] = 2100; // depends on cfg->resin_type
+    jsonObject["bed_curing_time"] = 15000; // depends on scfg->resin_type
+    jsonObject["curing_time"] = 2100; // depends on scfg->resin_type
     jsonObject["mirror_rot_time"] = 2000;
     jsonObject["z_hop_height"] = 15;
     QJsonDocument jsonDocument(jsonObject);
@@ -27,9 +27,9 @@ void SVGexporter::exportSVG(Slices contourLists, QString outfoldername){
     infofile.close();
     //qDebug() << jsonBytes;
 
-    origin_x = cfg->origin.x()*cfg->resolution;
-    origin_y = cfg->origin.y()*cfg->resolution;
-    origin_z = cfg->origin.z()*cfg->resolution;
+    origin_x = scfg->origin.x()*scfg->resolution;
+    origin_y = scfg->origin.y()*scfg->resolution;
+    origin_z = scfg->origin.z()*scfg->resolution;
 
     int64_t area = 0;
 
@@ -39,10 +39,10 @@ void SVGexporter::exportSVG(Slices contourLists, QString outfoldername){
         ofstream outfile(outfilename.toStdString().c_str(), ios::out);
 
         writeHeader(outfile);
-        if (cfg->slicing_mode == "uniform")
-            writeGroupHeader(outfile, i, cfg->layer_height*(i+1));
+        if (scfg->slicing_mode == "uniform")
+            writeGroupHeader(outfile, i, scfg->layer_height*(i+1));
         else
-            writeGroupHeader(outfile, i, cfg->layer_height*(i+1));
+            writeGroupHeader(outfile, i, scfg->layer_height*(i+1));
 
         PolyTree slice_polytree = contourLists[i].polytree;
         PolyNode* pn = slice_polytree.GetFirst();
@@ -65,7 +65,7 @@ void SVGexporter::exportSVG(Slices contourLists, QString outfoldername){
     float y = contourLists.mesh->y_max-contourLists.mesh->y_min;
     float z = contourLists.mesh->z_max-contourLists.mesh->z_min;
 
-    float volume = ((float)(area/pow(cfg->pixel_per_mm,2))/1000000)*cfg->layer_height;
+    float volume = ((float)(area/pow(scfg->pixel_per_mm,2))/1000000)*scfg->layer_height;
     printf("info:%d:%d:%.1f:%.1f:%.1f:%.1f\n",printing_time,layer,x,y,z,volume);
     fflush(stdout);
     exit(0);
@@ -75,10 +75,10 @@ void SVGexporter::exportSVG(Slices contourLists, QString outfoldername){
 void SVGexporter::writePolygon(ofstream& outfile, PolyNode* contour){
     outfile << "      <polygon contour:type=\"contour\" points=\"";
     for (IntPoint point: contour->Contour){
-        outfile << std::fixed << (float)(point.X-origin_x)*cfg->pixel_per_mm/cfg->resolution + cfg->resolution_x/2 << "," << std::fixed << (float)(point.Y-origin_y)*cfg->pixel_per_mm/cfg->resolution + cfg->resolution_y/2 << " "; // doesn't need 100 actually
+        outfile << std::fixed << (float)(point.X-origin_x)*scfg->pixel_per_mm/scfg->resolution + scfg->resolution_x/2 << "," << std::fixed << (float)(point.Y-origin_y)*scfg->pixel_per_mm/scfg->resolution + scfg->resolution_y/2 << " "; // doesn't need 100 actually
 
         // just fit to origin
-        //outfile << std::fixed << (float)point.X/cfg->resolution - cfg->origin.x() << "," << std::fixed << (float)point.Y/cfg->resolution - cfg->origin.y() << " ";
+        //outfile << std::fixed << (float)point.X/scfg->resolution - scfg->origin.x() << "," << std::fixed << (float)point.Y/scfg->resolution - scfg->origin.y() << " ";
     }
     if (! contour->IsHole()){
         outfile << "\" style=\"fill: white\" />\n";
@@ -91,10 +91,10 @@ void SVGexporter::writePolygon(ofstream& outfile, PolyNode* contour){
 void SVGexporter::writePolygon(ofstream& outfile, Path contour){
     outfile << "      <polygon contour:type=\"contour\" points=\"";
     for (IntPoint point: contour){
-        outfile << std::fixed << (float)(point.X-origin_x)*cfg->pixel_per_mm/cfg->resolution + cfg->resolution_x/2 << "," << std::fixed << (float)(point.Y-origin_y)*cfg->pixel_per_mm/cfg->resolution + cfg->resolution_y/2 << " "; // doesn't need 100 actually
+        outfile << std::fixed << (float)(point.X-origin_x)*scfg->pixel_per_mm/scfg->resolution + scfg->resolution_x/2 << "," << std::fixed << (float)(point.Y-origin_y)*scfg->pixel_per_mm/scfg->resolution + scfg->resolution_y/2 << " "; // doesn't need 100 actually
 
         // just fit to origin
-        //outfile << std::fixed << (float)point.X/cfg->resolution - cfg->origin.x() << "," << std::fixed << (float)point.Y/cfg->resolution - cfg->origin.y() << " ";
+        //outfile << std::fixed << (float)point.X/scfg->resolution - scfg->origin.x() << "," << std::fixed << (float)point.Y/scfg->resolution - scfg->origin.y() << " ";
     }
     if (Orientation(contour)){
         outfile << "\" style=\"fill: white\" />\n";
@@ -113,7 +113,7 @@ void SVGexporter:: writeGroupFooter(ofstream& outfile){
 }
 
 void SVGexporter::writeHeader(ofstream& outfile){
-    outfile << "<svg width='" << cfg->resolution_x << "' height='" << cfg->resolution_y << "' xmlns='http://www.w3.org/2000/svg' xmlns:contour='http://hix.co.kr' style='background-color: black;'>\n";
+    outfile << "<svg width='" << scfg->resolution_x << "' height='" << scfg->resolution_y << "' xmlns='http://www.w3.org/2000/svg' xmlns:contour='http://hix.co.kr' style='background-color: black;'>\n";
 }
 
 void SVGexporter::writeFooter(ofstream& outfile){

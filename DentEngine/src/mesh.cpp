@@ -224,8 +224,8 @@ void Mesh::connectFaces(){
 void Mesh::addPoint(float x, float y, Path *path)
 {
     IntPoint ip;
-    ip.X = round(x*cfg->resolution);
-    ip.Y = round(y*cfg->resolution);
+    ip.X = round(x*scfg->resolution);
+    ip.Y = round(y*scfg->resolution);
     path->push_back(ip);
 }
 
@@ -280,9 +280,9 @@ Path Mesh::intersectionPath(MeshFace mf, float z){
 
 uint32_t vertexHash(QVector3D v) // max build size = 1000mm, resolution = 1 micron
 {
-    return (uint32_t((v.x() / Configuration::vertex_inbound_distance)) ^\
-            (uint32_t((v.y() / Configuration::vertex_inbound_distance)) << 10) ^\
-            (uint32_t((v.z() / Configuration::vertex_inbound_distance)) << 20));
+    return (uint32_t((v.x() / SlicingConfiguration::vertex_inbound_distance)) ^\
+            (uint32_t((v.y() / SlicingConfiguration::vertex_inbound_distance)) << 10) ^\
+            (uint32_t((v.z() / SlicingConfiguration::vertex_inbound_distance)) << 20));
 }
 
 int Mesh::getVertexIdx(QVector3D v){
@@ -293,7 +293,7 @@ int Mesh::getVertexIdx(QVector3D v){
     for(unsigned int idx = 0; idx < hashed_points.size(); idx++)
     {
 
-        if (vertexDistance(vertices[hashed_points.at(idx).idx].position, v)<=Configuration::vertex_inbound_distance*Configuration::vertex_inbound_distance)
+        if (vertexDistance(vertices[hashed_points.at(idx).idx].position, v)<=SlicingConfiguration::vertex_inbound_distance*SlicingConfiguration::vertex_inbound_distance)
         {
             return hashed_points.at(idx).idx;
         }
@@ -339,7 +339,7 @@ vector<MeshFace*> Mesh::findFaceWith2Vertices(int v0_idx, int v1_idx, MeshFace s
 }
 
 float Mesh::getFaceZmin(MeshFace mf){
-    float face_z_min=1000;//cfg->max_buildsize_x;
+    float face_z_min=1000;//scfg->max_buildsize_x;
     for (int i=0; i<3; i++){
         float temp_z_min = idx2MV(mf.mesh_vertex[i]).position.z();
         if (temp_z_min<face_z_min)
@@ -349,7 +349,7 @@ float Mesh::getFaceZmin(MeshFace mf){
 }
 
 float Mesh::getFaceZmax(MeshFace mf){
-    float face_z_max=-1000;//-cfg->max_buildsize_x;
+    float face_z_max=-1000;//-scfg->max_buildsize_x;
     for (int i=0; i<3; i++){
         float temp_z_max = idx2MV(mf.mesh_vertex[i]).position.z();
         if (temp_z_max>face_z_max)
