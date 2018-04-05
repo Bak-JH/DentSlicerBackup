@@ -79,7 +79,7 @@ void QmlManager::initializeUI(QQmlApplicationEngine* e){
     QObject::connect(this, SIGNAL(arrangeDone(vector<QVector3D>, vector<float>)), this, SLOT(applyArrangeResult(vector<QVector3D>, vector<float>)));
 
     //openModelFile(QDir::currentPath()+"/Models/partial1.stl");
-    //openModelFile("c:/Users/SH/Desktop/dlpslicer/DLPslicer/demo_object.stl");
+    //openModelFile("c:/Users/user/Desktop/partial1.stl");
 }
 void QmlManager::openModelFile(QString fname){
 
@@ -91,6 +91,7 @@ void QmlManager::openModelFile(QString fname){
     float xmid = (glmodel->mesh->x_max + glmodel->mesh->x_min)/2;
     float ymid = (glmodel->mesh->y_max + glmodel->mesh->y_min)/2;
     float zmid = (glmodel->mesh->z_max + glmodel->mesh->z_min)/2;
+
     glmodel->moveModelMesh(QVector3D(
                            (-1)*xmid,
                            (-1)*ymid,

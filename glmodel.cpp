@@ -48,11 +48,10 @@ GLModel::GLModel(QObject* mainWindow, QNode *parent, Mesh* loadMesh, QString fna
         m_meshMaterial->setSpecular(QColor(182,237,246));
         m_meshMaterial->setShininess(0.0f);
         addComponent(m_meshMaterial);*/
-
         //m_meshMaterial = new QPhongMaterial();
         m_objectPicker = new Qt3DRender::QObjectPicker(this);
 
-        m_objectPicker->setHoverEnabled(true);
+        //m_objectPicker->setHoverEnabled(true);
         //m_objectPicker->setDragEnabled(true);
         // add only m_objectPicker
         QObject::connect(m_objectPicker, SIGNAL(clicked(Qt3DRender::QPickEvent*)), this, SLOT(handlePickerClicked(Qt3DRender::QPickEvent*)));
@@ -63,8 +62,8 @@ GLModel::GLModel(QObject* mainWindow, QNode *parent, Mesh* loadMesh, QString fna
         QObject::connect(m_objectPicker, SIGNAL(exited()), this, SLOT(exgoo()));
         addComponent(m_objectPicker);
 
-        labellingTextPreview = new LabellingTextPreview(this);
-        labellingTextPreview->setEnabled(false);
+        //labellingTextPreview = new LabellingTextPreview(this);
+        //labellingTextPreview->setEnabled(false);
 
         return;
     }
