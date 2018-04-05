@@ -1,8 +1,8 @@
 #ifndef KRAFT_H
 #define KRAFT_H
-#include "src/polyclipping/clipper.hpp"
-#include "src/configuration.h"
-#include "src/support.h"
+#include "DentEngine/src/polyclipping/clipper.hpp"
+#include "DentEngine/src/configuration.h"
+#include "DentEngine/src/support.h"
 
 using namespace std;
 using namespace ClipperLib;

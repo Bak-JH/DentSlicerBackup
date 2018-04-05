@@ -1,8 +1,8 @@
 #ifndef GENERALRAFT_H
 #define GENERALRAFT_H
-#include "src/polyclipping/clipper.hpp"
-#include "src/configuration.h"
-#include "src/raft.h"
+#include "DentEngine/src/polyclipping/clipper.hpp"
+#include "DentEngine/src/configuration.h"
+#include "DentEngine/src/raft.h"
 
 using namespace std;
 using namespace ClipperLib;

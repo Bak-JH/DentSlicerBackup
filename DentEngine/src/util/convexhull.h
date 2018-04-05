@@ -4,9 +4,9 @@
 #include <iostream>
 #include <stack>
 #include <stdlib.h>
-#include "src/polyclipping/clipper.hpp"
-#include "src/mesh.h"
-#include "src/slicer.h"
+#include "DentEngine/src/polyclipping/clipper.hpp"
+#include "DentEngine/src/mesh.h"
+#include "DentEngine/src/slicer.h"
 #include <QDebug>
 
 using namespace std;
