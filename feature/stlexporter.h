@@ -1,6 +1,6 @@
 #ifndef STLEXPORTER_H
 #define STLEXPORTER_H
-#include "mesh.h"
+#include "DentEngine/src/mesh.h"
 #include <fstream>
 
 class STLexporter

@@ -1,6 +1,5 @@
 <RCC>
     <qresource prefix="/">
-        <file>three.js</file>
         <file>grid.png</file>
         <file>grid2.png</file>
         <file>Qml/CameraController.qml</file>
@@ -19,7 +18,6 @@
         <file>Qml/Lights.qml</file>
         <file>Qml/main.qml</file>
         <file>Qml/MainView.qml</file>
-        <file>Qml/MainViewForm.ui.qml</file>
         <file>Qml/Materials.qml</file>
         <file>Qml/MeshTransformerMove.qml</file>
         <file>Qml/MeshTransformerRotate.qml</file>
@@ -41,5 +39,6 @@
         <file>Qml/ViewButton.qml</file>
         <file>Qml/ViewChange.qml</file>
         <file>Qml/glcode.js</file>
+        <file>Qml/three.js</file>
     </qresource>
 </RCC>

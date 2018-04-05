@@ -258,9 +258,9 @@ void autoarrange::debugFace(Mesh* mesh, int face_idx){
             float x_f = vtx.x();
             float y_f = vtx.y();
             float z_f = vtx.z();
-            int x_int = round(x_f*cfg->resolution);
-            int y_int = round(y_f*cfg->resolution);
-            int z_int = round(z_f*cfg->resolution);
+            int x_int = round(x_f*scfg->resolution);
+            int y_int = round(y_f*scfg->resolution);
+            int z_int = round(z_f*scfg->resolution);
             qDebug() << "(" << x_f << "," << y_f << "," << z_f << ")";
         }
         qDebug() << "face normal:" << "(" << mf->fn.x() << "," << mf->fn.y() << "," << mf->fn.z() << ")";
@@ -289,8 +289,8 @@ int autoarrange::findVertexWithIntpoint(IntPoint p, Mesh* mesh){
 int autoarrange::findVertexWithIntXY(int x, int y, Mesh* mesh){
     for(int vtx_idx=0; vtx_idx<mesh->vertices.size(); vtx_idx++){
         QVector3D vtx_pos = mesh->vertices[vtx_idx].position;
-        int x_int = round(vtx_pos.x()*cfg->resolution);
-        int y_int = round(vtx_pos.y()*cfg->resolution);
+        int x_int = round(vtx_pos.x()*scfg->resolution);
+        int y_int = round(vtx_pos.y()*scfg->resolution);
         if(x_int==x && y_int==y) return vtx_idx;
     }
 }
@@ -842,7 +842,7 @@ void autoarrange::arrangeQt3D(vector<Qt3DCore::QTransform*> m_transform_set, vec
 }
 
 void autoarrange::arrangeSingleQt3D(Qt3DCore::QTransform* m_transform, XYArrangement arng_result){
-    QVector3D trans_vec = QVector3D(arng_result.first.X/cfg->resolution, arng_result.first.Y/cfg->resolution, m_transform->translation().z());
+    QVector3D trans_vec = QVector3D(arng_result.first.X/scfg->resolution, arng_result.first.Y/scfg->resolution, m_transform->translation().z());
     m_transform->setTranslation(trans_vec);
     m_transform->setRotationZ(arng_result.second);
 }

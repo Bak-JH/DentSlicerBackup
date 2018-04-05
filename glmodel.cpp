@@ -63,8 +63,8 @@ GLModel::GLModel(QObject* mainWindow, QNode *parent, Mesh* loadMesh, QString fna
         QObject::connect(m_objectPicker, SIGNAL(exited()), this, SLOT(exgoo()));
         addComponent(m_objectPicker);
 
-        labellingTextPreview = new LabellingTextPreview(this);
-        labellingTextPreview->setEnabled(false);
+        //labellingTextPreview = new LabellingTextPreview(this);
+        //labellingTextPreview->setEnabled(false);
 
         return;
     }
@@ -633,9 +633,8 @@ void GLModel::handlePickerClicked(QPickEvent *pick)
         qDebug() << "1";
         if (labellingTextPreview)
             labellingTextPreview->setEnabled(true);
-        qDebug() << "2";
         parentModel->m_meshMaterial->setDiffuse(QColor(100, 255, 100));
-        qDebug() << "3";
+
         if (labellingTextPreview && labellingTextPreview->isEnabled()) {
             /*QVector3D tmp = m_transform->translation();
             float zlength = mesh->z_max - mesh->z_min;

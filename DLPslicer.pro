@@ -12,11 +12,9 @@ RC_FILE = DLPslicer.rc
 SOURCES += main.cpp \
     quaternionhelper.cpp \
     slicingengine.cpp \
-    configuration.cpp \
     glmodel.cpp \
     qmlmanager.cpp \
     fileloader.cpp \
-    mesh.cpp \
     lights.cpp \
     polyclipping/clipper.cpp \
     feature/autoorientation.cpp \
@@ -28,7 +26,23 @@ SOURCES += main.cpp \
     feature/labellingtextpreview.cpp \
     utils/mathutils.cpp \
     utils/qtriangulator.cpp \
-    feature/stlexporter.cpp
+    feature/stlexporter.cpp \
+    feature/extension.cpp \
+    feature/shelloffset.cpp \
+    DentEngine/src/cmdlineparser.cpp \
+    DentEngine/src/configuration.cpp \
+    DentEngine/src/infill.cpp \
+    DentEngine/src/mesh.cpp \
+    DentEngine/src/raft.cpp \
+    DentEngine/src/slicer.cpp \
+    DentEngine/src/support.cpp \
+    DentEngine/src/svgexporter.cpp \
+    DentEngine/src/support/generalbranch.cpp \
+    DentEngine/src/support/kbranch.cpp \
+    DentEngine/src/raft/generalraft.cpp \
+    DentEngine/src/raft/kraft.cpp \
+    DentEngine/src/util/convexhull.cpp \
+
 
 RESOURCES += qml.qrc \
     resources.qrc
@@ -60,11 +74,9 @@ win32:QMAKE_LFLAGS *= -Wl,--large-address-aware
 HEADERS += \
     quaternionhelper.h \
     slicingengine.h \
-    configuration.h \
     glmodel.h \
     qmlmanager.h \
     fileloader.h \
-    mesh.h \
     lights.h \
     polyclipping/clipper.hpp \
     feature/autoorientation.h \
@@ -80,7 +92,22 @@ HEADERS += \
     utils/qrbtree.h \
     utils/qtriangulator_p.h \
     utils/qvectorpath_p.h \
-    feature/stlexporter.h
+    feature/stlexporter.h \
+    feature/extension.h \
+    feature/shelloffset.h \
+    DentEngine/src/cmdlineparser.h \
+    DentEngine/src/configuration.h \
+    DentEngine/src/infill.h \
+    DentEngine/src/mesh.h \
+    DentEngine/src/raft.h \
+    DentEngine/src/slicer.h \
+    DentEngine/src/support.h \
+    DentEngine/src/svgexporter.h \
+    DentEngine/src/support/generalbranch.h \
+    DentEngine/src/support/kbranch.h \
+    DentEngine/src/raft/generalraft.h \
+    DentEngine/src/raft/kraft.h \
+    DentEngine/src/util/convexhull.h \
 
 #LIBS += -lOpengl32
 

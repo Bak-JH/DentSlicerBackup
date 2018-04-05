@@ -5,8 +5,9 @@
 #include <QDebug>
 #include <QString>
 #include <QProcess>
-#include "configuration.h"
+#include "DentEngine/src/configuration.h"
 #include "feature/stlexporter.h"
+#include "DentEngine/src/mesh.h"
 
 class SlicingEngine : public QObject
 {

@@ -7,13 +7,34 @@ SlicingEngine::SlicingEngine()
 
 QProcess *slicing_process;
 
+/*
+void SlicingEngine::slice (QString config, QString filename){
+    // Load mesh
+    Mesh* loaded_mesh = new Mesh();
+    loadMeshSTL(loaded_mesh, parser.inputfilename.toStdString().c_str());
+    //printf("vertices : %d, faces : %d\n", loaded_mesh->vertices.size(), loaded_mesh->faces.size());
+    //printf("slicing in %s mode, resolution %d\n", scfg->slicing_mode, scfg->resolution);
+    //printf("x : %f %f, y: %f %f, z: %f %f\n", loaded_mesh->x_min, loaded_mesh->x_max, loaded_mesh->y_min, loaded_mesh->y_max, loaded_mesh->z_min, loaded_mesh->z_max);
+
+    // Slice
+    printf("slicing init\n");
+    fflush(stdout);
+    Slicer* slicer = new Slicer();
+    Slices contourLists = slicer->slice(loaded_mesh);
+
+    // Export to SVG
+    SVGexporter* exporter = new SVGexporter();
+    exporter->exportSVG(contourLists, parser.outputfilename);
+}
+*/
+
 // collect configuration and start slicing process
 void SlicingEngine::slice (QString config, QString filename){
 
     /*for(QVariantMap::const_iterator iter = config.begin(); iter != config.end(); ++iter) {
       char buf[100];
         sprintf(buf, "-%s", iter.key());
-        (*cfg)[buf] = iter.value().toString();
+        (*scfg)[buf] = iter.value().toString();
     }*/
 
     qDebug() << "current directory : " << QDir::currentPath()+"/DentEngine/DentStudioEngine.exe";

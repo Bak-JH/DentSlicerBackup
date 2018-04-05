@@ -11,7 +11,7 @@
 #include <QObjectPicker>
 #include <QCursor>
 #include <iostream>
-#include "mesh.h"
+#include "DentEngine/src/mesh.h"
 #include "fileloader.h"
 #include "slicingengine.h"
 #include "feature/modelcut.h"
