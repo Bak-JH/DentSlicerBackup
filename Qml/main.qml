@@ -81,7 +81,7 @@ ApplicationWindow {
 
     }*/
 
-    Canvas3D {
+    Scene3D {
         id: scene3d
         /*
         width: parent.width
@@ -95,21 +95,11 @@ ApplicationWindow {
         //height: (window.height - uppertab.height) * 1
         //width: 800
         //height: 800
-        onInitializeGL: {
-            GLCode.initializeGL(scene3d);
-        }
 
-        onPaintGL: {
-            GLCode.paintGL(scene3d);
-        }
-
-        onResizeGL: {
-            GLCode.resizeGL(scene3d);
-        }
         focus: true
-        /*hoverEnabled: true
+        hoverEnabled: true
         aspects: ["input", "logic"]
-        cameraAspectRatioMode: Scene3D.AutomaticAspectRatio*/
+        cameraAspectRatioMode: Scene3D.AutomaticAspectRatio
         MainView {
             objectName: "MainView"
             id: sceneRoot

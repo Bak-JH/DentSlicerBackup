@@ -1,7 +1,7 @@
 #ifndef FILELOADER_H
 #define FILELOADER_H
 #include <QVector3D>
-#include "mesh.h"
+#include "DentEngine/src/mesh.h"
 #include "glmodel.h"
 class FileLoader
 {

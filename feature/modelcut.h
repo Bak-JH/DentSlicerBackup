@@ -1,6 +1,6 @@
 #ifndef MODELCUT_H
 #define MODELCUT_H
-#include "mesh.h"
+#include "DentEngine/src/mesh.h"
 #include <QObject>
 #include <Qt3DCore>
 #include <Qt3DRender>

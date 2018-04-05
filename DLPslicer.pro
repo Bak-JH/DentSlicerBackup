@@ -12,11 +12,9 @@ RC_FILE = DLPslicer.rc
 SOURCES += main.cpp \
     quaternionhelper.cpp \
     slicingengine.cpp \
-    configuration.cpp \
     glmodel.cpp \
     qmlmanager.cpp \
     fileloader.cpp \
-    mesh.cpp \
     lights.cpp \
     polyclipping/clipper.cpp \
     feature/autoorientation.cpp \
@@ -33,14 +31,12 @@ SOURCES += main.cpp \
     feature/shelloffset.cpp \
     DentEngine/src/cmdlineparser.cpp \
     DentEngine/src/configuration.cpp \
-    DentEngine/src/fileloader.cpp \
     DentEngine/src/infill.cpp \
     DentEngine/src/mesh.cpp \
     DentEngine/src/raft.cpp \
     DentEngine/src/slicer.cpp \
     DentEngine/src/support.cpp \
     DentEngine/src/svgexporter.cpp \
-    DentEngine/src/polyclipping/clipper.cpp \
     DentEngine/src/support/generalbranch.cpp \
     DentEngine/src/support/kbranch.cpp \
     DentEngine/src/raft/generalraft.cpp \
@@ -78,11 +74,9 @@ win32:QMAKE_LFLAGS *= -Wl,--large-address-aware
 HEADERS += \
     quaternionhelper.h \
     slicingengine.h \
-    configuration.h \
     glmodel.h \
     qmlmanager.h \
     fileloader.h \
-    mesh.h \
     lights.h \
     polyclipping/clipper.hpp \
     feature/autoorientation.h \
@@ -103,14 +97,12 @@ HEADERS += \
     feature/shelloffset.h \
     DentEngine/src/cmdlineparser.h \
     DentEngine/src/configuration.h \
-    DentEngine/src/fileloader.h \
     DentEngine/src/infill.h \
     DentEngine/src/mesh.h \
     DentEngine/src/raft.h \
     DentEngine/src/slicer.h \
     DentEngine/src/support.h \
     DentEngine/src/svgexporter.h \
-    DentEngine/src/polyclipping/clipper.hpp \
     DentEngine/src/support/generalbranch.h \
     DentEngine/src/support/kbranch.h \
     DentEngine/src/raft/generalraft.h \

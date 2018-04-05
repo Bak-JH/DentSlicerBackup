@@ -1,6 +1,6 @@
 #ifndef MESHREPAIR_H
 #define MESHREPAIR_H
-#include "mesh.h"
+#include "DentEngine/src/mesh.h"
 #include <QDebug>
 #include <QCoreApplication>
 

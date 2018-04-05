@@ -7,8 +7,8 @@
 #include <QDebug>
 #include <math.h>
 //#include "./glmodel.h"
-#include "./configuration.h"
-#include "./mesh.h"
+#include "DentEngine/src/configuration.h"
+#include "DentEngine/src/mesh.h"
 #include "./polyclipping/clipper.hpp"
 #include "convex_hull.h"
 
