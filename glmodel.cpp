@@ -48,10 +48,11 @@ GLModel::GLModel(QObject* mainWindow, QNode *parent, Mesh* loadMesh, QString fna
         m_meshMaterial->setSpecular(QColor(182,237,246));
         m_meshMaterial->setShininess(0.0f);
         addComponent(m_meshMaterial);*/
+
         //m_meshMaterial = new QPhongMaterial();
         m_objectPicker = new Qt3DRender::QObjectPicker(this);
 
-        //m_objectPicker->setHoverEnabled(true);
+        m_objectPicker->setHoverEnabled(true);
         //m_objectPicker->setDragEnabled(true);
         // add only m_objectPicker
         QObject::connect(m_objectPicker, SIGNAL(clicked(Qt3DRender::QPickEvent*)), this, SLOT(handlePickerClicked(Qt3DRender::QPickEvent*)));
@@ -629,9 +630,11 @@ void GLModel::handlePickerClicked(QPickEvent *pick)
     emit modelSelected(parentModel->ID);
 
     if (labelingActive) {
+        qDebug() << "1";
         if (labellingTextPreview)
             labellingTextPreview->setEnabled(true);
         parentModel->m_meshMaterial->setDiffuse(QColor(100, 255, 100));
+
         if (labellingTextPreview && labellingTextPreview->isEnabled()) {
             /*QVector3D tmp = m_transform->translation();
             float zlength = mesh->z_max - mesh->z_min;
@@ -640,6 +643,7 @@ void GLModel::handlePickerClicked(QPickEvent *pick)
             labellingTextPreview->setTranslation(pick->localIntersection());
             labellingTextPreview->setNormal(pick->localIntersection());
         }
+        qDebug() << "4";
     }
 
     QPickTriangleEvent *trianglePick = static_cast<QPickTriangleEvent*>(pick);
