@@ -49,7 +49,6 @@ GLModel::GLModel(QObject* mainWindow, QNode *parent, Mesh* loadMesh, QString fna
         m_meshMaterial->setShininess(0.0f);
         addComponent(m_meshMaterial);*/
 
-        //m_meshMaterial = new QPhongMaterial();
         m_objectPicker = new Qt3DRender::QObjectPicker(this);
 
         m_objectPicker->setHoverEnabled(true);
@@ -63,8 +62,8 @@ GLModel::GLModel(QObject* mainWindow, QNode *parent, Mesh* loadMesh, QString fna
         QObject::connect(m_objectPicker, SIGNAL(exited()), this, SLOT(exgoo()));
         addComponent(m_objectPicker);
 
-        //labellingTextPreview = new LabellingTextPreview(this);
-        //labellingTextPreview->setEnabled(false);
+        labellingTextPreview = new LabellingTextPreview(this);
+        labellingTextPreview->setEnabled(false);
 
         return;
     }
@@ -201,7 +200,7 @@ void featureThread::setTypeAndRun(int type){
     run();
 }
 
-void featureThread::setTypeAndRun(int type, QString map){
+void featureThread::setTypeAndRun(int type, QVariant map){
     optype = type;
     data = map;
     run();
@@ -227,13 +226,12 @@ void featureThread::run(){
             }
         case ftrExport:
             {
-                qDebug() << "export called";
                 // save to file
                 QString fileName = QFileDialog::getSaveFileName(nullptr, tr("Save to STL file"), "", tr("3D Model file (*.stl)"));
                 ste->exportSTL(m_glmodel->mesh, fileName);
 
                 // slice file
-                se->slice(data,fileName);
+                QFuture<void> future = QtConcurrent::run(se, &SlicingEngine::slice, data, fileName);
                 break;
             }
         case ftrMove:
@@ -364,7 +362,7 @@ void GLModel::initialize(const Mesh* mesh){
     positionAttribute->setDataSize(3);
     positionAttribute->setByteOffset(0);
     positionAttribute->setByteStride(3*sizeof(float));
-    positionAttribute->setCount(0);
+    positionAttribute->setCount(12);
     positionAttribute->setName(QAttribute::defaultPositionAttributeName());
 
     // normal Attributes
@@ -375,7 +373,7 @@ void GLModel::initialize(const Mesh* mesh){
     normalAttribute->setDataSize(3);
     normalAttribute->setByteOffset(0);
     normalAttribute->setByteStride(3*sizeof(float));
-    normalAttribute->setCount(0);
+    normalAttribute->setCount(12);
     normalAttribute->setName(QAttribute::defaultNormalAttributeName());
 
     // color Attributes
@@ -386,7 +384,7 @@ void GLModel::initialize(const Mesh* mesh){
     colorAttribute->setDataSize(3);
     colorAttribute->setByteOffset(0);
     colorAttribute->setByteStride(3 * sizeof(float));
-    colorAttribute->setCount(0);
+    colorAttribute->setCount(12);
     colorAttribute->setName(QAttribute::defaultColorAttributeName());
 
     m_geometry->addAttribute(positionAttribute);
@@ -609,6 +607,23 @@ void GLModel::addColorVertices(vector<QVector3D> vertices){
     }
 
     uint vertexColorCount = colorAttribute->count();
+
+    int offset = vertexColorCount*3*sizeof(float);
+    int bytesSize = appendVertexArray.size();
+
+    if ((offset + bytesSize) > vertexColorBuffer->data().size()) {
+        auto data = vertexColorBuffer->data();
+
+        int countPowerOf2 = 1;
+        while (countPowerOf2 < data.size() + bytesSize) {
+            countPowerOf2 <<= 1;
+        }
+
+        data.resize(countPowerOf2);
+
+        vertexColorBuffer->setData(data);
+    }
+
     vertexColorBuffer->updateData(vertexColorCount*3*sizeof(float), appendVertexArray);
     colorAttribute->setCount(vertexColorCount + vertex_color_cnt);
     return;
@@ -1077,29 +1092,42 @@ QVector3D GLModel::spreadPoint(QVector3D endPoint,QVector3D startPoint,int facto
 }
 
 Mesh* GLModel::toSparse(Mesh* mesh){
-    int i=0, jump=30, factor=10;
+    int i=0;
+    int jump = (mesh->faces.size()<30000) ? 1:mesh->faces.size()/30000; // 30000 is chosen for 800000 mesh, 30
+    int factor = (jump ==1) ? 1:3*log(jump);
+
+    qDebug() << "mesh specification : " << mesh->faces.size() << jump << factor;
+
     Mesh* newMesh = new Mesh;
-    newMesh->faces.reserve(mesh->faces.size()/5);
-    newMesh->vertices.reserve(mesh->faces.size()/5);
 
-    foreach (MeshFace mf , mesh->faces){
-        if (i%jump==0){
-            QCoreApplication::processEvents();
-
-            QVector3D point1 =mesh->idx2MV(mf.mesh_vertex[0]).position;
-            QVector3D point2 =mesh->idx2MV(mf.mesh_vertex[1]).position;
-            QVector3D point3 =mesh->idx2MV(mf.mesh_vertex[2]).position;
-            QVector3D CenterOfMass = (point1+point2+point3)/3;
-            point1=GLModel::spreadPoint(point1,CenterOfMass,factor);
-            point2=GLModel::spreadPoint(point2,CenterOfMass,factor);
-            point3=GLModel::spreadPoint(point3,CenterOfMass,factor);
+    if (jump == 1){ // if mesh face count is less than 30000
+        newMesh->faces.reserve(mesh->faces.size());
+        newMesh->vertices.reserve(mesh->vertices.size());
+        foreach (MeshFace mf, mesh->faces){
             newMesh->addFace(mesh->idx2MV(mf.mesh_vertex[0]).position, mesh->idx2MV(mf.mesh_vertex[1]).position, mesh->idx2MV(mf.mesh_vertex[2]).position);
-            newMesh->addFace(point1,point2,point3);
         }
-        i+=1;
+    } else {
+        newMesh->faces.reserve(mesh->faces.size()/5);
+        newMesh->vertices.reserve(mesh->faces.size()/5);
+        foreach (MeshFace mf , mesh->faces){
+            if (i%jump==0){
+                QCoreApplication::processEvents();
+
+                QVector3D point1 =mesh->idx2MV(mf.mesh_vertex[0]).position;
+                QVector3D point2 =mesh->idx2MV(mf.mesh_vertex[1]).position;
+                QVector3D point3 =mesh->idx2MV(mf.mesh_vertex[2]).position;
+                QVector3D CenterOfMass = (point1+point2+point3)/3;
+                point1=GLModel::spreadPoint(point1,CenterOfMass,factor);
+                point2=GLModel::spreadPoint(point2,CenterOfMass,factor);
+                point3=GLModel::spreadPoint(point3,CenterOfMass,factor);
+                //newMesh->addFace(mesh->idx2MV(mf.mesh_vertex[0]).position, mesh->idx2MV(mf.mesh_vertex[1]).position, mesh->idx2MV(mf.mesh_vertex[2]).position);
+                newMesh->addFace(point1,point2,point3);
+            }
+            i+=1;
+        }
     }
-    //newMesh->connectFaces();
-return newMesh;
+
+    return newMesh;
 }
 
 void GLModel::getTextChanged(QString text, int contentWidth)

@@ -5,16 +5,18 @@
 #include <QDebug>
 #include <QString>
 #include <QProcess>
-#include "DentEngine/src/configuration.h"
 #include "feature/stlexporter.h"
-#include "DentEngine/src/mesh.h"
+#include "fileloader.h"
+#include "DentEngine/src/slicer.h"
+#include "DentEngine/src/configuration.h"
+#include "DentEngine/src/svgexporter.h"
 
 class SlicingEngine : public QObject
 {
     Q_OBJECT
 public:
     SlicingEngine();
-    Q_INVOKABLE void slice (QString cfg, QString filename);
+    Q_INVOKABLE void slice (QVariant cfg, QString filename);
 
 public slots:
     void slicingStarted();

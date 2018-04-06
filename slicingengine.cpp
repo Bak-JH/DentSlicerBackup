@@ -7,35 +7,44 @@ SlicingEngine::SlicingEngine()
 
 QProcess *slicing_process;
 
-/*
-void SlicingEngine::slice (QString config, QString filename){
+void SlicingEngine::slice (QVariant cfg, QString filename){
+
+    QVariantMap config = cfg.toMap();
+    for(QVariantMap::const_iterator iter = config.begin(); iter != config.end(); ++iter) {
+        qDebug() << iter.key() << iter.value().toString();
+        if (!strcmp(iter.key().toStdString().c_str(), "support_type")){
+            (*scfg)[iter.key().toStdString().c_str()] = 2;//iter.value().toString();
+        } else if (!strcmp(iter.key().toStdString().c_str(), "infill_type")){
+            (*scfg)[iter.key().toStdString().c_str()] = 1;//iter.value().toString();
+        } else if (!strcmp(iter.key().toStdString().c_str(), "raft_type")){
+            (*scfg)[iter.key().toStdString().c_str()] = 2;//iter.value().toString();
+        } else if (!strcmp(iter.key().toStdString().c_str(), "layer_height")){
+            //(*scfg)[iter.key().toStdString().c_str()] = 2;//iter.value().toString();
+        } else if (!strcmp(iter.key().toStdString().c_str(), "resolution")){
+            //(*scfg)[iter.key().toStdString().c_str()] = 2;//iter.value().toString();
+        } else {
+        }
+    }
+
     // Load mesh
     Mesh* loaded_mesh = new Mesh();
-    loadMeshSTL(loaded_mesh, parser.inputfilename.toStdString().c_str());
+    loadMeshSTL(loaded_mesh, filename.toStdString().c_str());
     //printf("vertices : %d, faces : %d\n", loaded_mesh->vertices.size(), loaded_mesh->faces.size());
     //printf("slicing in %s mode, resolution %d\n", scfg->slicing_mode, scfg->resolution);
     //printf("x : %f %f, y: %f %f, z: %f %f\n", loaded_mesh->x_min, loaded_mesh->x_max, loaded_mesh->y_min, loaded_mesh->y_max, loaded_mesh->z_min, loaded_mesh->z_max);
 
     // Slice
-    printf("slicing init\n");
-    fflush(stdout);
     Slicer* slicer = new Slicer();
     Slices contourLists = slicer->slice(loaded_mesh);
 
     // Export to SVG
     SVGexporter* exporter = new SVGexporter();
-    exporter->exportSVG(contourLists, parser.outputfilename);
+    exporter->exportSVG(contourLists, filename+"_temp");
 }
-*/
 
+/*
 // collect configuration and start slicing process
 void SlicingEngine::slice (QString config, QString filename){
-
-    /*for(QVariantMap::const_iterator iter = config.begin(); iter != config.end(); ++iter) {
-      char buf[100];
-        sprintf(buf, "-%s", iter.key());
-        (*scfg)[buf] = iter.value().toString();
-    }*/
 
     qDebug() << "current directory : " << QDir::currentPath()+"/DentEngine/DentStudioEngine.exe";
     QObject *parent;
@@ -59,6 +68,7 @@ void SlicingEngine::slice (QString config, QString filename){
     connect(slicing_process, SIGNAL(error(QProcess::ProcessError)), this, SLOT(slicingError(QProcess::ProcessError)));
     slicing_process->start(program, command_list);
 }
+*/
 
 
 void SlicingEngine::slicingStarted(){
