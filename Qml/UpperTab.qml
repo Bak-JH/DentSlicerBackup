@@ -213,24 +213,24 @@ Rectangle {
                 anchors.fill: parent
                 onClicked:{
                     function collectConfigurations(){
-                        var configurations = "";
+                        /*var configurations = "";
                         configurations += "r#"+options[0] + "/";
                         configurations += "l#"+options[1] + "/";
                         configurations += "s#"+options[2] + "/";
                         configurations += "f#"+options[3] + "/";
                         configurations += "b#"+options[4];
-                        return configurations;
+                        return configurations;*/
 
-                        /*var configurations = {};
+                        var configurations = {};
 
                         // do collecting things
                         // configurations[key] = value;
-                        configurations["resolution"] = "resolution#"+options[0];
-                        configurations["layer_height"] = "layer_height#"+options[1];
-                        configurations["support"] = "support#"+options[2];
-                        configurations["infill"] = "infill#"+options[3];
-                        configurations["raft"] = "raft#"+options[4];
-                        return configurations;*/
+                        configurations["resolution"] = options[0];
+                        configurations["layer_height"] = options[1];
+                        configurations["support_type"] = options[2];
+                        configurations["infill_type"] = options[3];
+                        configurations["raft_type"] = options[4];
+                        return configurations;
                     }
 
                     console.log(parent.id);
@@ -243,7 +243,7 @@ Rectangle {
                     parent.runFeature(ftrExport, cfg);
                 }
             }
-            signal runFeature(int type, string config);
+            signal runFeature(int type, var config);
         }
 
         Rectangle{

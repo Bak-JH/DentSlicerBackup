@@ -145,7 +145,7 @@ void QmlManager::connectHandlers(GLModel* glmodel){
     QObject::connect(saveButton, SIGNAL(runFeature(int)), glmodel->ft, SLOT(setTypeAndRun(int)));
 
     // export button codes
-    QObject::connect(exportButton, SIGNAL(runFeature(int, QString)), glmodel->ft, SLOT(setTypeAndRun(int, QString)));
+    QObject::connect(exportButton, SIGNAL(runFeature(int, QVariant)), glmodel->ft, SLOT(setTypeAndRun(int, QVariant)));
 
     // model selection codes
     QObject::connect(glmodel->shadowModel, SIGNAL(modelSelected(int)), this, SLOT(modelSelected(int)));

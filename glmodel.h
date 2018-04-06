@@ -56,7 +56,7 @@ public:
     GLModel* m_glmodel;
     int progress;
     int optype; // defines typeofoperation
-    QString data;
+    QVariant data;
     autoorientation* ot;
     modelcut* ct;
     autoarrange* ar;
@@ -70,7 +70,7 @@ public slots:
     void markPopup(bool value);
     void progressChanged(float value);
     void setTypeAndRun(int type);
-    void setTypeAndRun(int type, QString data);
+    void setTypeAndRun(int type, QVariant data);
     void setTypeAndStart(int type);
 private:
     void run() Q_DECL_OVERRIDE;

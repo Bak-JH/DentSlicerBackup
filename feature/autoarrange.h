@@ -9,7 +9,7 @@
 //#include "./glmodel.h"
 #include "DentEngine/src/configuration.h"
 #include "DentEngine/src/mesh.h"
-#include "./polyclipping/clipper.hpp"
+#include "DentEngine/src/polyclipping/clipper/clipper.hpp"
 #include "convex_hull.h"
 
 using namespace std;

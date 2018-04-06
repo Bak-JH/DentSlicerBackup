@@ -3,7 +3,7 @@
 #include <cstdio>
 #include <stack>
 #include <algorithm>
-#include "./polyclipping/clipper.hpp"
+#include "DentEngine/src/polyclipping/clipper/clipper.hpp"
 #include "autoarrange.h"
 
 using namespace std;

@@ -16,7 +16,6 @@ SOURCES += main.cpp \
     qmlmanager.cpp \
     fileloader.cpp \
     lights.cpp \
-    polyclipping/clipper.cpp \
     feature/autoorientation.cpp \
     feature/modelcut.cpp \
     feature/meshrepair.cpp \
@@ -41,7 +40,13 @@ SOURCES += main.cpp \
     DentEngine/src/support/kbranch.cpp \
     DentEngine/src/raft/generalraft.cpp \
     DentEngine/src/raft/kraft.cpp \
-    DentEngine/src/util/convexhull.cpp \
+    DentEngine/src/polyclipping/clipper/clipper.cpp \
+    DentEngine/src/polyclipping/clip2tri/clip2tri.cpp \
+    DentEngine/src/polyclipping/poly2tri/common/shapes.cpp \
+    DentEngine/src/polyclipping/poly2tri/sweep/advancing_front.cpp \
+    DentEngine/src/polyclipping/poly2tri/sweep/cdt.cpp \
+    DentEngine/src/polyclipping/poly2tri/sweep/sweep.cpp \
+    DentEngine/src/polyclipping/poly2tri/sweep/sweep_context.cpp
 
 
 RESOURCES += qml.qrc \
@@ -78,7 +83,6 @@ HEADERS += \
     qmlmanager.h \
     fileloader.h \
     lights.h \
-    polyclipping/clipper.hpp \
     feature/autoorientation.h \
     feature/modelcut.h \
     feature/meshrepair.h \
@@ -107,7 +111,15 @@ HEADERS += \
     DentEngine/src/support/kbranch.h \
     DentEngine/src/raft/generalraft.h \
     DentEngine/src/raft/kraft.h \
-    DentEngine/src/util/convexhull.h \
+    DentEngine/src/polyclipping/clipper/clipper.hpp \
+    DentEngine/src/polyclipping/clip2tri/clip2tri.h \
+    DentEngine/src/polyclipping/poly2tri/common/shapes.h \
+    DentEngine/src/polyclipping/poly2tri/common/utils.h \
+    DentEngine/src/polyclipping/poly2tri/sweep/advancing_front.h \
+    DentEngine/src/polyclipping/poly2tri/sweep/cdt.h \
+    DentEngine/src/polyclipping/poly2tri/sweep/sweep.h \
+    DentEngine/src/polyclipping/poly2tri/sweep/sweep_context.h \
+    DentEngine/src/polyclipping/poly2tri/poly2tri.h
 
 #LIBS += -lOpengl32
 
