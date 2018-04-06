@@ -5,7 +5,7 @@
 #include <QVector3D>
 #include <QHash>
 #include "configuration.h"
-#include "polyclipping/clipper.hpp"
+#include "polyclipping/clipper/clipper.hpp"
 
 #define cos50 0.64278761
 #define cos100 -0.17364818

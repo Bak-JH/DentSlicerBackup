@@ -1,6 +1,6 @@
 #ifndef SLICER_H
 #define SLICER_H
-#include "polyclipping/clipper.hpp"
+#include "polyclipping/clipper/clipper.hpp"
 #include "configuration.h"
 #include "mesh.h"
 #include "support.h"
@@ -9,10 +9,12 @@
 #include <list>
 #include <QThread>
 #include <qDebug>
+#include "polyclipping/clip2tri/clip2tri.h"
 
 
 //using namespace std;
 using namespace ClipperLib;
+using namespace c2t;
 
 class OverhangPoint;
 

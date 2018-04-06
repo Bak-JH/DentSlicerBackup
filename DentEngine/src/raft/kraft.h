@@ -1,6 +1,6 @@
 #ifndef KRAFT_H
 #define KRAFT_H
-#include "../polyclipping/clipper.hpp"
+#include "../polyclipping/clipper/clipper.hpp"
 #include "../configuration.h"
 #include "../support.h"
 

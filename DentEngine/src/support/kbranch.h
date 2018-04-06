@@ -1,9 +1,8 @@
 #ifndef KBRANCH_H
 #define KBRANCH_H
-#include "../polyclipping/clipper.hpp"
+#include "../polyclipping/clipper/clipper.hpp"
 #include "../configuration.h"
 #include "../support.h"
-#include "../util/convexhull.h"
 #include <QVector3D>
 #include <math.h>
 

@@ -1,7 +1,7 @@
 #ifndef RAFT_H
 #define RAFT_H
 #include "slicer.h"
-#include "polyclipping/clipper.hpp"
+#include "polyclipping/clipper/clipper.hpp"
 #include "raft/kraft.h"
 #include "raft/generalraft.h"
 

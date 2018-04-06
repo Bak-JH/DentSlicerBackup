@@ -1,6 +1,6 @@
 #ifndef GENERALRAFT_H
 #define GENERALRAFT_H
-#include "../polyclipping/clipper.hpp"
+#include "../polyclipping/clipper/clipper.hpp"
 #include "../configuration.h"
 #include "../raft.h"
 

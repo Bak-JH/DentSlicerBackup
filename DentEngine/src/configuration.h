@@ -15,8 +15,10 @@
 #include <stdio.h>
 #include <math.h>
 #include <QVector3D>
+#include <QVariant>
 
-class SlicingConfiguration{
+class SlicingConfiguration : public QVariantMap
+{
 public:
     // configurations
     static constexpr int resolution_scale = 3;

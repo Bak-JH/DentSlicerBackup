@@ -1,6 +1,6 @@
 #ifndef INFILL_H
 #define INFILL_H
-#include "polyclipping/clipper.hpp"
+#include "polyclipping/clipper/clipper.hpp"
 
 
 #define gridfill 1

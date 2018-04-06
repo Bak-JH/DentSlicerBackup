@@ -1,7 +1,7 @@
 #ifndef SUPPORT_H
 #define SUPPORT_H
 #include "slicer.h"
-#include "polyclipping/clipper.hpp"
+#include "polyclipping/clipper/clipper.hpp"
 #include "support/kbranch.h"
 #include "support/generalbranch.h"
 

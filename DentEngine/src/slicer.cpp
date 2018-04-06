@@ -387,7 +387,7 @@ void zfillone(IntPoint& e1bot, IntPoint& e1top, IntPoint& e2bot, IntPoint& e2top
 /****************** Deprecated functions *******************/
 
 void Slicer::containmentTreeConstruct(){
-    Clipper clpr;
+    /*Clipper clpr;
 
     for (int idx=0; idx<slices.size(); idx++){ // divide into parallel threads
         Slice* slice = &(slices[idx]);
@@ -398,6 +398,27 @@ void Slicer::containmentTreeConstruct(){
         for (PolyNode* pn : slice->polytree.Childs){
             qDebug() << pn->IsHole() << pn->Parent << pn->Parent->Parent;
         }
+    }*/
+
+    // vector<vector<IntPoint>> to vector<vector<Point>>
+
+    for (int idx=0; idx<slices.size(); idx++){
+        Slice* slice = &(slices[idx]);
+
+        vector<vector<c2t::Point>> pointPaths;
+        pointPaths.reserve(slice->outershell.size());
+
+        for (Path p : slice->outershell){
+            vector<c2t::Point> pointPath;
+            pointPath.reserve(p.size());
+            for (IntPoint ip : p){
+                pointPath.push_back(c2t::Point((float)ip.X/scfg->resolution,(float)ip.Y/scfg->resolution));
+            }
+            pointPaths.push_back(pointPath);
+        }
+        clip2tri ct;
+
+        ct.mergePolysToPolyTree(pointPaths, slice->polytree);
     }
 }
 

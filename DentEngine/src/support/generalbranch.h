@@ -1,6 +1,6 @@
 #ifndef GENERALBRANCH_H
 #define GENERALBRANCH_H
-#include "../polyclipping/clipper.hpp"
+#include "../polyclipping/clipper/clipper.hpp"
 #include "../configuration.h"
 #include "../support.h"
 

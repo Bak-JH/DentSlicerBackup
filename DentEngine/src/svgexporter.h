@@ -1,6 +1,6 @@
 #ifndef SVGEXPORTER_H
 #define SVGEXPORTER_H
-#include "polyclipping/clipper.hpp"
+#include "polyclipping/clipper/clipper.hpp"
 #include "configuration.h"
 #include "slicer.h"
 #include <fstream>
