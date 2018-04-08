@@ -83,7 +83,7 @@ Entity {
         RenderSettings {
             id : rd
             pickingSettings.pickMethod: PickingSettings.TrianglePicking
-            pickingSettings.pickResultMode: PickingSettings.AllPicks
+            pickingSettings.pickResultMode: PickingSettings.NearestPick
 
             activeFrameGraph: RenderSurfaceSelector {
                 Viewport {
