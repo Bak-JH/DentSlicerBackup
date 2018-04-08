@@ -4,3 +4,8 @@ extension::extension()
 {
 
 }
+
+
+extension::vertexPolling(Mesh* mesh){
+
+}

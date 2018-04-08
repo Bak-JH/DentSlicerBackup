@@ -39,11 +39,12 @@ GLModel::GLModel(QObject* mainWindow, QNode *parent, Mesh* loadMesh, QString fna
 
         initialize(mesh);
         addVertices(mesh, false);
+        applyGeometry();
 
         addComponent(m_transform);
 
         m_meshMaterial = new QPhongMaterial();
-        /*m_meshMaterial->setAmbient(QColor(77,128,0));
+        /*m_meshMaterial->setAmbient(QColor(255,0,0));
         m_meshMaterial->setDiffuse(QColor(173,215,218));
         m_meshMaterial->setSpecular(QColor(182,237,246));
         m_meshMaterial->setShininess(0.0f);
@@ -86,6 +87,7 @@ GLModel::GLModel(QObject* mainWindow, QNode *parent, Mesh* loadMesh, QString fna
 
     initialize(mesh);
     addVertices(mesh, false);
+    applyGeometry();
     //QFuture<void> future = QtConcurrent::run(this, &GLModel::initialize, mesh);
     //future = QtConcurrent::run(this, &GLModel::addVertices, mesh);
 
@@ -167,6 +169,7 @@ void GLModel::updateModelMesh(){
     delete m_geometryRenderer;
     initialize(mesh);
     addVertices(mesh, false);
+    applyGeometry();
     Qt3DRender::QObjectPicker* op = shadowModel->m_objectPicker;
     GLModel* temp = shadowModel;
     shadowModel=new GLModel(this->mainWindow, this, mesh, filename, true);
@@ -362,7 +365,7 @@ void GLModel::initialize(const Mesh* mesh){
     positionAttribute->setDataSize(3);
     positionAttribute->setByteOffset(0);
     positionAttribute->setByteStride(3*sizeof(float));
-    positionAttribute->setCount(12);
+    positionAttribute->setCount(0);
     positionAttribute->setName(QAttribute::defaultPositionAttributeName());
 
     // normal Attributes
@@ -373,7 +376,7 @@ void GLModel::initialize(const Mesh* mesh){
     normalAttribute->setDataSize(3);
     normalAttribute->setByteOffset(0);
     normalAttribute->setByteStride(3*sizeof(float));
-    normalAttribute->setCount(12);
+    normalAttribute->setCount(0);
     normalAttribute->setName(QAttribute::defaultNormalAttributeName());
 
     // color Attributes
@@ -384,8 +387,13 @@ void GLModel::initialize(const Mesh* mesh){
     colorAttribute->setDataSize(3);
     colorAttribute->setByteOffset(0);
     colorAttribute->setByteStride(3 * sizeof(float));
-    colorAttribute->setCount(12);
+    colorAttribute->setCount(0);
     colorAttribute->setName(QAttribute::defaultColorAttributeName());
+
+    return;
+}
+
+void GLModel::applyGeometry(){
 
     m_geometry->addAttribute(positionAttribute);
     m_geometry->addAttribute(normalAttribute);
@@ -398,8 +406,6 @@ void GLModel::initialize(const Mesh* mesh){
     m_geometryRenderer->setGeometry(m_geometry);
 
     addComponent(m_geometryRenderer);
-
-
 
     return;
 }
@@ -472,9 +478,9 @@ void GLModel::addVertices(Mesh* mesh, bool CW)
             for (int fn=2; fn>=0; fn--){
                 result_vns.push_back(mesh->idx2MV(mf.mesh_vertex[fn]).vn);
 
-                if(mesh->idx2MV(mf.mesh_vertex[fn]).vn[0] == 0)
-                    if(mesh->idx2MV(mf.mesh_vertex[fn]).vn[1] == 0)
-                        if(mesh->idx2MV(mf.mesh_vertex[fn]).vn[2] == 0)
+                if(mesh->idx2MV(mf.mesh_vertex[fn]).vn[0] == 0 &&\
+                        mesh->idx2MV(mf.mesh_vertex[fn]).vn[1] == 0 &&\
+                        mesh->idx2MV(mf.mesh_vertex[fn]).vn[2] == 0)
                         {
                             result_vns.pop_back();
                             result_vns.push_back(QVector3D(1,1,1));
@@ -484,9 +490,9 @@ void GLModel::addVertices(Mesh* mesh, bool CW)
             for (int fn=0; fn<=2; fn++){
                 result_vns.push_back(mesh->idx2MV(mf.mesh_vertex[fn]).vn);
 
-                if(mesh->idx2MV(mf.mesh_vertex[fn]).vn[0] == 0)
-                    if(mesh->idx2MV(mf.mesh_vertex[fn]).vn[1] == 0)
-                        if(mesh->idx2MV(mf.mesh_vertex[fn]).vn[2] == 0)
+                if(mesh->idx2MV(mf.mesh_vertex[fn]).vn[0] == 0 &&\
+                        mesh->idx2MV(mf.mesh_vertex[fn]).vn[1] == 0 &&\
+                        mesh->idx2MV(mf.mesh_vertex[fn]).vn[2] == 0)
                         {
                             result_vns.pop_back();
                             result_vns.push_back(QVector3D(1,1,1));
@@ -533,7 +539,7 @@ void GLModel::addVertices(vector<QVector3D> vertices){
     }
 
     uint currentVertexCount = positionAttribute->count();
-
+    //qDebug() << "position Attribute size : " << (int)currentVertexCount;
     int currentVertexArraySize = currentVertexCount*3*sizeof(float);
     int appendVertexArraySize = appendVertexArray.size();
 

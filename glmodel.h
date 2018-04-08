@@ -175,6 +175,7 @@ private:
     QNode* m_parent;
     QVector3D lastpoint;
     void initialize(const Mesh* mesh);
+    void applyGeometry();
     void addVertex(QVector3D vertex);
     void addVertices(Mesh* mesh, bool CW);
     void addVertices(vector<QVector3D> vertices);
