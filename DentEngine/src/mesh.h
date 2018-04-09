@@ -24,7 +24,7 @@ public:
     //MeshFace() {neighboring_faces.reserve(10);}
 
     int idx;
-    int mesh_vertex[3] = {-1};
+    int mesh_vertex[3] = {-1,-1,-1};
     //int connected_face_idx[3];
 
     vector<vector<MeshFace*>> neighboring_faces;
@@ -67,6 +67,7 @@ public :
     float x_min = 99999, x_max = 99999, y_min = 99999, y_max = 99999, z_min = 99999, z_max = 99999;
 
     /********************** Mesh Edit Functions***********************/
+    void vertexOffset(float factor);
     void vertexMove(QVector3D direction);
     void vertexRotate(QMatrix4x4 tmpmatrix);
     void vertexScale(float scale);

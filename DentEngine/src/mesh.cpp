@@ -3,6 +3,21 @@
 
 
 /********************** Mesh Edit Functions***********************/
+void Mesh::vertexOffset(float factor){
+    int numberofVertices = vertices.size();
+    x_min = 99999;
+    x_max = 99999;
+    y_min = 99999;
+    y_max = 99999;
+    z_min = 99999;
+    z_max = 99999;
+    for (int i=0;i<numberofVertices;i++){
+        QVector3D tmp = vertices[i].position - vertices[i].vn*factor;
+        vertices[i].position = tmp;
+        updateMinMax(vertices[i].position);
+    }
+}
+
 void Mesh::vertexMove(QVector3D direction){
     int numberofVertices = vertices.size();
     x_min = 99999;
