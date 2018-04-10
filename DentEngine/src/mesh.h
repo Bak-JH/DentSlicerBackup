@@ -94,5 +94,11 @@ public :
 uint32_t vertexHash(QVector3D v);
 float vertexDistance(QVector3D, QVector3D);
 
+// construct closed contour using segments created from identify step
+Paths contourConstruct(Paths);
+Paths3D contourConstruct(Paths3D hole_edges);
+
+uint32_t intPoint2Hash(IntPoint u);
+uint32_t meshVertex2Hash(MeshVertex u);
 
 #endif // MESH_H

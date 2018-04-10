@@ -60,8 +60,6 @@ public:
 
 
     /****************** Contour Construction Step *******************/
-    Paths contourConstruct(Paths);
-
 
 
 
@@ -73,7 +71,6 @@ public:
 
     /****************** Helper Functions For Contour Construction Step *******************/
     void insertPathHash(QHash<uint32_t, Path>& pathHash, IntPoint u, IntPoint v);
-    uint32_t intPoint2Hash(IntPoint u);
 
 
 
