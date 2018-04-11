@@ -1,4 +1,5 @@
 #include "fileloader.h"
+#include <QCoreApplication>
 #include <QDebug>
 
 FileLoader::FileLoader()
@@ -51,8 +52,16 @@ bool loadMeshSTL_ascii(Mesh* mesh, const char* filename)
 
     mesh->faces.reserve(face_count);
     mesh->vertices.reserve(face_count);
+
+    int face_cnt = 0;
+
     while(fgets_(buffer, sizeof(buffer), f))
     {
+
+        if (face_cnt%1000==0)
+            QCoreApplication::processEvents();
+        face_cnt += 1;
+
         if (sscanf(buffer, " vertex %f %f %f", &f0, &f1, &f2) == 3)
         {
             vertex.setX(f0);
@@ -118,6 +127,8 @@ bool loadMeshSTL_binary(Mesh* mesh, const char* filename){
     mesh->vertices.reserve(face_count);
     for (unsigned int i = 0; i < face_count; i++)
     {
+        if (i%1000==0)
+            QCoreApplication::processEvents();
         if (fread(buffer, 50, 1, f) != 1)
         {
             fclose(f);

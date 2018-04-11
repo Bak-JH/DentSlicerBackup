@@ -44,11 +44,11 @@ GLModel::GLModel(QObject* mainWindow, QNode *parent, Mesh* loadMesh, QString fna
         addComponent(m_transform);
 
         m_meshMaterial = new QPhongMaterial();
-        /*m_meshMaterial->setAmbient(QColor(255,0,0));
+        m_meshMaterial->setAmbient(QColor(255,0,0));
         m_meshMaterial->setDiffuse(QColor(173,215,218));
         m_meshMaterial->setSpecular(QColor(182,237,246));
         m_meshMaterial->setShininess(0.0f);
-        addComponent(m_meshMaterial);*/
+        addComponent(m_meshMaterial);
 
         m_objectPicker = new Qt3DRender::QObjectPicker(this);
 
@@ -62,6 +62,8 @@ GLModel::GLModel(QObject* mainWindow, QNode *parent, Mesh* loadMesh, QString fna
         QObject::connect(m_objectPicker, SIGNAL(entered()), this, SLOT(engoo()));
         QObject::connect(m_objectPicker, SIGNAL(exited()), this, SLOT(exgoo()));
         addComponent(m_objectPicker);
+
+        QObject::connect(this,SIGNAL(_updateModelMesh()),this,SLOT(updateModelMesh()));
 
         labellingTextPreview = new LabellingTextPreview(this);
         labellingTextPreview->setEnabled(false);
@@ -127,10 +129,14 @@ GLModel::GLModel(QObject* mainWindow, QNode *parent, Mesh* loadMesh, QString fna
 
 void GLModel::moveModelMesh(QVector3D direction){
     mesh->vertexMove(direction);
+    if (shadowModel != NULL)
+        shadowModel->moveModelMesh(direction);
     emit _updateModelMesh();
 }
 void GLModel::scaleModelMesh(float scale){
     mesh->vertexScale(scale);
+    if (shadowModel != NULL)
+        shadowModel->scaleModelMesh(scale);
     emit _updateModelMesh();
 }
 void GLModel::rotateModelMesh(int Axis, float Angle){
@@ -154,10 +160,13 @@ void GLModel::rotateModelMesh(int Axis, float Angle){
 
 void GLModel::rotateModelMesh(QMatrix4x4 matrix){
     mesh->vertexRotate(matrix);
+    if (shadowModel != NULL)
+        shadowModel->rotateModelMesh(matrix);
     emit _updateModelMesh();
 }
 
 void GLModel::updateModelMesh(){
+    // delete allocated buffers, geometry
     delete vertexBuffer;
     delete vertexColorBuffer;
     delete vertexNormalBuffer;
@@ -167,17 +176,23 @@ void GLModel::updateModelMesh(){
     removeComponent(m_geometryRenderer);
     delete m_geometry;
     delete m_geometryRenderer;
+
+    // reinitialize with updated mesh
     initialize(mesh);
     addVertices(mesh, false);
     applyGeometry();
-    Qt3DRender::QObjectPicker* op = shadowModel->m_objectPicker;
+
+    // create new object picker, shadowmodel, remove prev shadowmodel
+    /*Qt3DRender::QObjectPicker* op = shadowModel->m_objectPicker;
     GLModel* temp = shadowModel;
     shadowModel=new GLModel(this->mainWindow, this, mesh, filename, true);
     shadowModel->m_objectPicker = op;
-    temp->removeModel();
+    temp->removeModel();*/
+
     QVector3D tmp = m_transform->translation();
     float zlength = mesh->z_max - mesh->z_min;
-    m_transform->setTranslation(QVector3D(tmp.x(),tmp.y(),zlength/2));
+    if (shadowModel != NULL) // since shadow model transformed twice
+        m_transform->setTranslation(QVector3D(tmp.x(),tmp.y(),zlength/2));
 }
 
 featureThread::featureThread(GLModel* glmodel, int type){
@@ -649,9 +664,8 @@ void GLModel::handlePickerClicked(QPickEvent *pick)
 {
     qDebug() << pick->localIntersection()<<"pick" << parentModel->ID;
     emit modelSelected(parentModel->ID);
-
+    qDebug() << "model selected emit";
     if (labelingActive) {
-        qDebug() << "1";
         if (labellingTextPreview)
             labellingTextPreview->setEnabled(true);
         parentModel->m_meshMaterial->setDiffuse(QColor(100, 255, 100));
@@ -664,7 +678,6 @@ void GLModel::handlePickerClicked(QPickEvent *pick)
             labellingTextPreview->setTranslation(pick->localIntersection());
             labellingTextPreview->setNormal(pick->localIntersection());
         }
-        qDebug() << "4";
     }
 
     QPickTriangleEvent *trianglePick = static_cast<QPickTriangleEvent*>(pick);
@@ -872,12 +885,12 @@ void GLModel::modelCut(){
 void GLModel::generateRLModel(){
     leftModel = new GLModel(parentModel->mainWindow, parentModel, lmesh, "", false);
     rightModel = new GLModel(parentModel->mainWindow, parentModel, rmesh, "", false);
-    QVector3D tmp = leftModel->m_transform->translation();
     float zlength = mesh->z_max - mesh->z_min;
+
+    QVector3D tmp = leftModel->m_transform->translation();
     leftModel->m_transform->setTranslation(QVector3D(tmp.x(),tmp.y(),zlength/2));
     tmp = rightModel->m_transform->translation();
     rightModel->m_transform->setTranslation(QVector3D(tmp.x(),tmp.y(),zlength/2));
-
 }
 
 void GLModel::modelCutFinished(){

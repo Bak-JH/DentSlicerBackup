@@ -41,9 +41,9 @@ Item {
                 icon.parent.state == 'on' ? icon.parent.state = "off" : icon.parent.state = 'on';
 
                 if(icon.parent.state == 'on')
-                    qm.ModelVisible(glModelID,true);
+                    qm.modelVisible(glModelID,true);
                 else
-                    qm.ModelVisible(glModelID,false);
+                    qm.modelVisible(glModelID,false);
             }
         }
     }

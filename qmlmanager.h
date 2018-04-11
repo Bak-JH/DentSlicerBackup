@@ -7,8 +7,9 @@
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
 #include <QQmlEngine>
-#include <QQmlProperty>
+#include <QQmlProperty>0269
 #include "feature/autoarrange.h"
+#include "feature/shelloffset.h"
 #include "glmodel.h"
 #include "QtConcurrent/QtConcurrentRun"
 #include "QFuture"
@@ -67,10 +68,11 @@ public:
     void initializeUI(QQmlApplicationEngine *e);
     void openModelFile_internal(QString filename);
     void runArrange_internal();
+    void disconnectHandlers(GLModel* glmodel);
     void connectHandlers(GLModel* glmodel);
 
-    Q_INVOKABLE void ModelVisible(int ID, bool isVisible);
-    Q_INVOKABLE void DoDelete();
+    Q_INVOKABLE void modelVisible(int ID, bool isVisible);
+    Q_INVOKABLE void doDelete();
 
 private:
     bool glmodels_arranged;

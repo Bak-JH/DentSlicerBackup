@@ -93,10 +93,10 @@ public:
     GLModel(QObject* mainWindow=nullptr, QNode* parent=nullptr, Mesh* loadMesh=nullptr, QString fname="", bool isShadow=false); // main constructor for mainmesh and shadowmesh
     ~GLModel();
 
-    GLModel *parentModel;
-    GLModel *shadowModel; // GLmodel's sparse mesh that gets picker input
-    GLModel *leftModel;
-    GLModel *rightModel;
+    GLModel *parentModel = NULL;
+    GLModel *shadowModel = NULL; // GLmodel's sparse mesh that gets picker input
+    GLModel *leftModel = NULL;
+    GLModel *rightModel = NULL;
 
     bool appropriately_rotated=false;
     QPhongMaterial *m_meshMaterial;
@@ -165,6 +165,7 @@ public:
     int ID; //for use in Part List
     static int globalID;
     QObject* mainWindow;
+    void addVertices(Mesh* mesh, bool CW);
 
 private:
     int numPoints;
@@ -177,7 +178,6 @@ private:
     void initialize(const Mesh* mesh);
     void applyGeometry();
     void addVertex(QVector3D vertex);
-    void addVertices(Mesh* mesh, bool CW);
     void addVertices(vector<QVector3D> vertices);
     void addNormalVertices(vector<QVector3D> vertices);
     void addColorVertices(vector<QVector3D> vertices);

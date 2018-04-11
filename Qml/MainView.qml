@@ -78,7 +78,7 @@ Entity {
         onPressed: {
             if (event.key === Qt.Key_Delete) {
                 console.log("deleeeeee")
-                qm.DoDelete()
+                qm.doDelete()
             }
         }
     }
