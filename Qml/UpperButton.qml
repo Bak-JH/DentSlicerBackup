@@ -6,15 +6,13 @@ Rectangle{
     property string iconSource2
     property string iconText
 
-
-    //property string activefunction
     id: temp
     width: buttonWidth
     height: buttonHeight
     anchors.top : parent.top
-    //anchors.bottom : tabgroupname.top
 
     color : "transparent"
+
     signal buttonClicked()
     function do_buttonclick(iconText){
         switch(iconText){
@@ -41,19 +39,6 @@ Rectangle{
             anchors.margins: 2
             anchors.fill: parent
             source: iconSource1
-            /*
-            MouseArea{
-                anchors.fill: parent
-
-                onEntered: {
-                    basicbutton.color = "red"
-                    console.log("enter")
-                }
-                onExited: {
-                    basicbutton.color = parent.color
-                    console.log("exit");
-                }
-            }*/
         }
         Text{
             anchors.top:parent.top
@@ -133,21 +118,7 @@ Rectangle{
             }
             do_buttonclick(iconText)
         }
-            //loadFileWindow();
 
-
-
-            /*(function upperButtonFunction(id){
-                switch (id){
-                case first_tab_button_export:{
-                    console.log("exporting");
-                    // collect configurations
-                    var cfg = collectConfigurations();
-                    se.slice(cfg);
-                    break;
-                }
-                }
-            })();*/
     }
 
 }

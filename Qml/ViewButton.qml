@@ -15,7 +15,6 @@ Item {
         border.width: 1
         border.color: "#CECECE"
 
-
         Image {
             width: 35
             height: 35

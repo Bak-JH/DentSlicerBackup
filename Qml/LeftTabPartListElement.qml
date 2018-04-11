@@ -17,7 +17,6 @@ Item {
     Rectangle{
         width : parent.width
         height: 1
-
         anchors.bottom: parent.bottom
         color: "#C6C6C6"
 
@@ -65,7 +64,6 @@ Item {
 
         font.family: "Arial"
         font.pixelSize: 14
-
     }
 
     states: [

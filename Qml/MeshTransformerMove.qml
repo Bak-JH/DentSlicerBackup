@@ -32,24 +32,7 @@ Entity{
         id: moveArrowMesh
         source: "qrc:/Resource/mesh/arrow.stl"
     }
-    /*Entity {
-            id: spheremove
-            objectName: "moveSphere"
-            SphereMesh{
-                id: spheremesh
-                radius : 5
-            }
-            Transform {
-                id: sphere3Transform
-                translation: Qt.vector3d( 0,0,0 )
-            }
-            PhongAlphaMaterial{
-                id: sphere3Material
-                ambient: Qt.rgba(255/255,255/255,255/255,0.5)
-            }
 
-            components: [ spheremesh, sphere3Material, sphere3Transform]
-        }*/
     Entity {
         id: moveArrowX
         Transform{

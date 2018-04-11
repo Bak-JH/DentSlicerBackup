@@ -46,58 +46,23 @@ Entity {
         }
     }
 
-    KeyboardDevice {
-        id: keyboard
-    }
-
     MouseDevice {
         id: mouse
         sensitivity: 0.005
     }
 
+    /***************************************** Mouse Right Rotate *****************************************/
     components: [
         LogicalDevice {
               id: logicalDevice;
 
               actions: [
                   Action {
-                      id: moveAction
-                      inputs: [
-                          ActionInput {
-                              sourceDevice: mouse
-                              //buttons: [ MouseEvent.LeftButton ]
-                              buttons: [ MouseEvent.MiddleButton ]
-                          }
-                      ]
-                  },
-                  Action {
                       id: rotateAction
                       inputs: [
                           ActionInput {
                               sourceDevice: mouse
                               buttons: [ MouseEvent.RightButton ]
-                          }
-
-                      ]
-                  },
-                  Action {
-                      id: zoomInAction
-                      inputs: [
-                          ActionInput {
-                              //sourceDevice: keyboard
-                              //buttons: [ Qt.Key_Plus ]
-                              sourceDevice: keyboard
-                              buttons: [ Qt.Key_Plus ]
-
-                          }
-                      ]
-                  },
-                  Action {
-                      id: zoomOutAction
-                      inputs: [
-                          ActionInput {
-                              sourceDevice: keyboard
-                              buttons: [ Qt.Key_Minus ]
                           }
                       ]
                   }
@@ -123,66 +88,45 @@ Entity {
                           }
 
                       ]
-                  },
-
-                  Axis {
-                      id: translateXAxis
-                      inputs: [
-                          AnalogAxisInput {
-                              sourceDevice: mouse
-                              axis: MouseDevice.X
-                          }
-                      ]
-                  },
-                  Axis {
-                      id: translateYAxis
-                      inputs: [
-                          AnalogAxisInput {
-                              sourceDevice: mouse
-                              axis: MouseDevice.Y
-                          }
-                      ]
                   }
               ]
           },
+
         FrameAction {
-            property real translationSpeed : 150.0
             property real rotationSpeed : 2000
-            property real zoomFactor : 0.1
-            property vector3d angleVector
             onTriggered: {
-                if (rotateAction.active) {
-                    //angleVector = root.camera.position.minus(Qt.vector3d(0,0,0)).normalized();
-                    angleVector = root.camera.position.minus(sceneRoot.systemTransform.translation.plus(40,50,75)).normalized();
-                    if(angleVector.z>0.999){
-                        if(rotateYAxis.value<=0){
-                            return;
-                        }
-                    }
-                    if(angleVector.z<-0.5){
-                        if(rotateYAxis.value>=0){
-                            return;
-                        }
-                    }
-                    if(angleVector.z<-0.999){
-                        if(rotateYAxis.value>=0){
-                            return;
-                        }
-                        //root.camera.setUpVector(_originalUpVector.times(-1));
-                    }
-                   // sceneRoot.systemTransform.rotationX += rotationSpeed * rotateYAxis.value * dt;
-                    //root.camera.tiltAboutViewCenter(rotationSpeed * rotateYAxis.value*(-1) * dt);
+                if (rotateAction.active) {// mouse right rotate
+                    sceneRoot.systemTransform.rotationZ += rotationSpeed * rotateXAxis.value * dt;
+                    //var target = axisAngle2Quaternion(rotationSpeed * rotateXAxis.value * dt,qq.rotatedVector(systemTransform.rotation,zdown))
+                    //cm.camera.rotateAboutViewCenter(qq.multiplyQuaternion(target,systemTransform.rotation));
+                    sceneRoot.systemTransform.rotationX += rotationSpeed * (-1) * rotateYAxis.value * dt;
 
-                    if(root.camera.upVector.z<0){
-                   //     sceneRoot.systemTransform.rotationX += rotationSpeed * rotateYAxis.value * (-1)* dt;
-//                        root.camera.tiltAboutViewCenter(rotationSpeed * rotateYAxis.value*dt);
-                    }
-                    // lock the camera roll angle
-                    //root.camera.setUpVector(_originalUpVector);
-                    //sceneRoot.total.mtr.perfectPosition();
                 }
-
             }
         }
     ]
+
+    /***************************************** Mouse Wheel Zoom *****************************************/
+    MouseHandler{
+        id : mouseHandler
+        sourceDevice: mouse
+
+        onWheel: {
+            var Camera_position, average, temp, Camera_radius
+            var d = wheel.angleDelta.y ;
+
+            var scaleTmp = sceneRoot.systemTransform.scale3D;
+            if(d>0){// mouse wheel zoom
+                sceneRoot.systemTransform.scale3D = scaleTmp.times(1.08);
+            }
+            else if(d<0){
+                sceneRoot.systemTransform.scale3D = scaleTmp.times(0.92);
+            }
+
+        }
+    }
+
+    /***************************************** Mouse Wheel Move *****************************************/
+    // => main.qml MouseArea
+
 }

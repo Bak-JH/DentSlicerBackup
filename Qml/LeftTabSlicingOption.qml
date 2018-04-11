@@ -72,7 +72,7 @@ Rectangle {
             height: parent.height
             anchors.left: parent.left
             anchors.top : parent.top
-            //anchors.leftMargin: 16
+
             anchors.topMargin: 18
 
             ColumnLayout {

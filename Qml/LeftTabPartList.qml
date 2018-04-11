@@ -86,20 +86,6 @@ Rectangle {
                 ColumnLayout {
                     id: partListColumn
                     spacing:0
-                    /*
-                    LeftTabPartListElement{
-                        modelName :"tttttt"
-                        state: "on"
-                    }
-                    LeftTabPartListElement{
-                        modelName :"cc"
-                        state: "off"
-                    }
-                    LeftTabPartListElement{
-                        modelName :"tttaasat"
-                        state: "off"
-                    }
-                    */
                 }
             }
 
@@ -124,7 +110,6 @@ Rectangle {
 
     function addPart(fileName, ID){ // add in list with filename
         var newComponent = Qt.createComponent("LeftTabPartListElement.qml")
-        //var newPart = Qt.createQmlObject(test,container,'firstObject');
         var newPart = newComponent.createObject(partListColumn, {"modelName" : fileName, "state" : "on", "objectName" : "qwer", "glModelID" : ID})
         console.log("glmodel  glglgl  : " + ID);
     }
