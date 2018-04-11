@@ -36,65 +36,23 @@ ApplicationWindow {
             MenuItem{text : "hellllp..."}
         }
     }
+
     Rectangle{
         id : back
         anchors.top : uppertab.bottom
         anchors.left : lefttab.right
         anchors.right : parent.right
         anchors.bottom : parent.bottom
-//        color: "blue"
         color: "#EAEAEA"
-
     }
-
-    /*
-    Rectangle{
-        anchors.top : uppertab.bottom
-        anchors.left : lefttab.right
-        width: (window.width - lefttab.width) * 1
-        height: (window.height - uppertab.height) * 1
-
-        //anchors.margins:10
-        //anchors.leftMargin: - (window.width - lefttab.width)*2
-        //anchors.topMargin: - (window.width - lefttab.width)*2
-        MouseArea{
-            anchors.fill: parent
-            onClicked: {
-                console.log("mouse x  " + mouseX)
-            }
-        }
-        Scene3D {
-            id: scene3d
-
-            width: parent.width
-            height: parent.height
-            anchors.fill: parent
-
-            focus: true
-            hoverEnabled: true
-            aspects: ["input", "logic"]
-            cameraAspectRatioMode: Scene3D.AutomaticAspectRatio
-
-            MainView {id: sceneRoot}
-        }
-
-
-    }*/
 
     Scene3D {
         id: scene3d
-        /*
-        width: parent.width
-        height: parent.height
-        anchors.fill: parent
-        */
-        anchors.top : uppertab.bottom
-        anchors.left : lefttab.right
+
         width: (window.width - lefttab.width) * 1
         height: (window.width - lefttab.width) * 1
-        //height: (window.height - uppertab.height) * 1
-        //width: 800
-        //height: 800
+        anchors.top : uppertab.bottom
+        anchors.left : lefttab.right
 
         focus: true
         hoverEnabled: true
@@ -105,8 +63,6 @@ ApplicationWindow {
             id: sceneRoot
         }
     }
-
-
 
     UpperTab{
         id : uppertab
@@ -124,11 +80,7 @@ ApplicationWindow {
         anchors.top: parent.top
         anchors.left: parent.left
 
-        //popup1.popup_anchor_left: lefttab.right
-        //popup_anchor_top: lefttab.top
-
     }
-
 
     LeftTab{
         id : lefttab
@@ -182,7 +134,6 @@ ApplicationWindow {
                 prevPosition = currPosition;
             }
         }
-
     }
 
     PopUp {
@@ -286,14 +237,6 @@ ApplicationWindow {
         applyfinishbutton_vis: false
         descriptionimage_vis: true
         state: "inactive"
-    }
-
-    function moveH(value){
-        scene3d.anchors.leftMargin = scene3d.anchors.leftMargin + parseInt(10*value)
-    }
-
-    function moveV(value){
-        scene3d.anchors.topMargin = scene3d.anchors.topMargin + parseInt(-10*value)
     }
 
 }

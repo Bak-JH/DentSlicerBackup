@@ -66,15 +66,6 @@ Rectangle {
     property real scale_z_value
 
 
-
-
-    /*
-    Rectangle{
-        anchors.fill: parent
-
-        color: "#E2E1E1"
-    }*/
-
     Rectangle{
         id : bottomine
         height: 3

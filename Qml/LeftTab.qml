@@ -9,13 +9,6 @@ Rectangle {
     property alias ltso: ltso
 
     color: "#EFEFEF"
-    /*
-    Rectangle{
-        anchors.fill: parent
-        color: "#E2E1E1"
-
-
-    }*/
 
     Rectangle{
         id: rightline
@@ -42,10 +35,6 @@ Rectangle {
         id:ltso
         anchors.top : ltvm.bottom
         anchors.left: parent.left
-
     }
-
-
-
 
 }

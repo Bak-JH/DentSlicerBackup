@@ -39,7 +39,6 @@ Rectangle {
             source: "qrc:/resource/triangle.png"
             width : 12
             height : 10
-            //transform:Rotation{origin.x: arrow.width/2; origin.y: arrow.height/2; axis { x: 1; y: 0; z: 0 } angle: 0 }
             rotation: 0
 
             anchors.verticalCenter: parent.verticalCenter
@@ -75,8 +74,6 @@ Rectangle {
 
                 ExclusiveGroup { id: viewModeGroup }
                 RadioButton {
-                    //text: "Object View"
-
                     checked: true
                     exclusiveGroup: viewModeGroup
 

@@ -15,7 +15,6 @@ Item {
         anchors.top : parent.top
         anchors.right : parent.right
 
-        //color: "red"
         Image{
             anchors.fill: parent
             source:"qrc:/resource/view.png"
@@ -37,6 +36,7 @@ Item {
             }
         }
     }
+
     Image{
         id : views
         width : parent.width
@@ -113,9 +113,6 @@ Item {
             }
             ViewButton{state:"none"}
 
-
-
-
         }
 
     }
@@ -124,7 +121,7 @@ Item {
         sceneRoot.systemTransform.rotationX = 0
         sceneRoot.systemTransform.rotationY = 0
         sceneRoot.systemTransform.rotationZ = 0
-        //sceneRoot.cm.camera.viewCenter = Qt.vector3d(0.025,-0.25,0)
+
         sceneRoot.cm.camera.translateWorld(sceneRoot.cm.camera.viewCenter.times(-1))
         sceneRoot.cm.camera.translateWorld(Qt.vector3d(0.025,-0.25,0))
 
@@ -134,17 +131,16 @@ Item {
         sceneRoot.systemTransform.rotationX = -90
         sceneRoot.systemTransform.rotationY = 0
         sceneRoot.systemTransform.rotationZ = -180
-        //sceneRoot.cm.camera.viewCenter = Qt.vector3d(0.02,-0.06,0)
+
         sceneRoot.cm.camera.translateWorld(sceneRoot.cm.camera.viewCenter.times(-1))
         sceneRoot.cm.camera.translateWorld(Qt.vector3d(0.02,-0.06,0))
     }
     function viewLeft(){
         sceneRoot.systemTransform.scale3D = Qt.vector3d(0.004,0.004,0.004)
-        //sceneRoot.systemTransform.rotation = Qt.quaternion(0.5,-0.5,0.5,0.5)
         sceneRoot.systemTransform.rotationX = -90
         sceneRoot.systemTransform.rotationY = 0
         sceneRoot.systemTransform.rotationZ = 90;
-        //sceneRoot.cm.camera.viewCenter = Qt.vector3d(0.015,-0.04,0)
+
         sceneRoot.cm.camera.translateWorld(sceneRoot.cm.camera.viewCenter.times(-1))
         sceneRoot.cm.camera.translateWorld(Qt.vector3d(0.015,-0.04,0))
     }
@@ -153,7 +149,7 @@ Item {
         sceneRoot.systemTransform.rotationX = -90
         sceneRoot.systemTransform.rotationY = 0
         sceneRoot.systemTransform.rotationZ = -90;
-        //sceneRoot.cm.camera.viewCenter = Qt.vector3d(0.015,-0.04,0)
+
         sceneRoot.cm.camera.translateWorld(sceneRoot.cm.camera.viewCenter.times(-1))
         sceneRoot.cm.camera.translateWorld(Qt.vector3d(0.015,-0.04,0))
     }
@@ -162,7 +158,7 @@ Item {
         sceneRoot.systemTransform.rotationX = -90
         sceneRoot.systemTransform.rotationY = 0
         sceneRoot.systemTransform.rotationZ = 0;
-        //sceneRoot.cm.camera.viewCenter = Qt.vector3d(0.02,-0.06,0)
+
         sceneRoot.cm.camera.translateWorld(sceneRoot.cm.camera.viewCenter.times(-1))
         sceneRoot.cm.camera.translateWorld(Qt.vector3d(0.02,-0.06,0))
     }
@@ -171,7 +167,7 @@ Item {
         sceneRoot.systemTransform.rotationX = -180
         sceneRoot.systemTransform.rotationY = 0
         sceneRoot.systemTransform.rotationZ = 0
-        //sceneRoot.cm.camera.viewCenter = Qt.vector3d(0.025,-0.25,0)
+
         sceneRoot.cm.camera.translateWorld(sceneRoot.cm.camera.viewCenter.times(-1))
         sceneRoot.cm.camera.translateWorld(Qt.vector3d(0.025,-0.25,0))
 
@@ -181,6 +177,7 @@ Item {
         sceneRoot.systemTransform.rotationX = -70
         sceneRoot.systemTransform.rotationY = 0
         sceneRoot.systemTransform.rotationZ = -40
+
         sceneRoot.cm.camera.translateWorld(sceneRoot.cm.camera.viewCenter.times(-1))
         sceneRoot.cm.camera.translateWorld(Qt.vector3d(-0.015,-0.16,0))
     }

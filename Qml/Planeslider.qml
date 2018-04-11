@@ -27,6 +27,6 @@ Slider {
         else if(value<0)
             value=0
         govalue(value)
-}
+    }
 }
 
