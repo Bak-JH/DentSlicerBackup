@@ -49,7 +49,6 @@ void generateKBranch(Slices& slices){
                 bop->overhangpoint = slices.overhang_points[op2_idx];
                 bop->distance = distance;
                 overhang_point->branchable_overhang_points.push_back(bop);
-                qDebug() << "changed maximum overhang _point with " << (void*) bop;
             }
         }
     }
