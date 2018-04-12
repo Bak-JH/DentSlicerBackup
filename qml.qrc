@@ -36,5 +36,7 @@
         <file>Qml/ViewChange.qml</file>
         <file>Qml/glcode.js</file>
         <file>Qml/three.js</file>
+        <file>Qml/ProgressPopUp.qml</file>
+        <file>Qml/ResultPopup.qml</file>
     </qresource>
 </RCC>

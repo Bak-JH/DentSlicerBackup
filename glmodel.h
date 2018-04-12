@@ -63,11 +63,13 @@ public:
     STLexporter* ste;
     SlicingEngine* se;
 
+    void openProgressPopUp();
+    void openResultPopUp(string inputText);
+
 signals:
     void loadPopup(QVariant value);
     void setProgress(QVariant value);
 public slots:
-    void markPopup(bool value);
     void progressChanged(float value);
     void setTypeAndRun(int type);
     void setTypeAndRun(int type, QVariant data);

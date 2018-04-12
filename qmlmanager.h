@@ -38,7 +38,7 @@ public:
 
     // orientation components
     QObject* orientPopup;
-    QObject* progress_text;
+    QObject* progress_popup;
 
     // auto repair components
     QObject* repairPopup;

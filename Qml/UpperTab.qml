@@ -583,19 +583,11 @@ Rectangle {
         }
 
         //8. PopUp - Orient
+
         PopUp {
             objectName: "orientPopup"
             id: popup_orient
             funcname: "Orient"
-            function show_popup(id){
-                if(id=="progress_popup"){
-                    progress_popup.state="active";
-                }
-                if(id=="result_orient"){
-                    result_text.text="The model is already.";
-                    result_orient.state="active";
-                }
-            }
 
             height: 220
             detail1: "Click Apply to rotate the model."
