@@ -40,7 +40,7 @@ void QmlManager::initializeUI(QQmlApplicationEngine* e){
 
     // orientation components
     orientPopup = FindItemByName(engine, "orientPopup");
-    progress_text = FindItemByName(engine, "progress_text");
+    progress_popup = FindItemByName(engine, "progress_popup");
 
     // repair components
     repairPopup = FindItemByName(engine, "repairPopup");
@@ -155,8 +155,9 @@ void QmlManager::disconnectHandlers(GLModel* glmodel){
 void QmlManager::connectHandlers(GLModel* glmodel){
     QObject::connect(glmodel->arsignal, SIGNAL(runArrange()), this, SLOT(runArrange()));
 
-    QObject::connect(glmodel->ft, SIGNAL(setProgress(QVariant)),progress_text, SLOT(update_loading(QVariant)));
-    QObject::connect(glmodel->ft, SIGNAL(loadPopup(QVariant)),orientPopup, SLOT(show_popup(QVariant)));
+    //QObject::connect(glmodel->ft, SIGNAL(setProgress(QVariant)),progress_text, SLOT(update_loading(QVariant)));
+    QObject::connect(glmodel->ft, SIGNAL(setProgress(QVariant)),progress_popup, SLOT(updateNumber(QVariant)));
+    //QObject::connect(glmodel->ft, SIGNAL(loadPopup(QVariant)),orientPopup, SLOT(show_popup(QVariant)));
 
     // need to connect for every popup
 

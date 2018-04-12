@@ -15,6 +15,7 @@ ApplicationWindow {
 
     objectName: "mainWindow"
     property alias lefttab: lefttab
+    property alias progressPopUp: progressPopUp
 
     menuBar: MenuBar{
         Menu{
@@ -135,7 +136,7 @@ ApplicationWindow {
             }
         }
     }
-
+    /*
     PopUp {
         id: progress_popup
         funcname:""
@@ -205,7 +206,7 @@ ApplicationWindow {
             }
         }
     }
-
+    */
     PopUp {
         id: result_orient
         objectName: "result_orient"
@@ -237,6 +238,15 @@ ApplicationWindow {
         applyfinishbutton_vis: false
         descriptionimage_vis: true
         state: "inactive"
+    }
+
+
+    ProgressPopUp{
+        id : progressPopUp
+    }
+
+    ResultPopup{
+        id : resultPopUp
     }
 
 }

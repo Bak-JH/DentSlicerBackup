@@ -272,9 +272,9 @@ void featureThread::run(){
         case ftrOrient:
             {
                 if(m_glmodel->appropriately_rotated){
-                    markPopup(false);
+                    openResultPopUp("Model already orient");
                 } else {
-                    markPopup(true);
+                    openProgressPopUp();
                     rotateResult* rotateres= ot->Tweak(m_glmodel->mesh,true,45,&m_glmodel->appropriately_rotated);
                     m_glmodel->rotateModelMesh(rotateres->R);
                     //m_glmodel->m_transform->setMatrix(rotateres->R);
@@ -332,17 +332,26 @@ void featureThread::run(){
     }
 }
 
-void featureThread::progressChanged(float value){
-    emit featureThread::setProgress(value);
+void featureThread::openProgressPopUp(){
+    QList<QObject*> temp;
+    temp.append(m_glmodel->mainWindow);
+    QObject *progressPopUp = (QEntity *)FindItemByName(temp, "progress_popup");
+    QMetaObject::invokeMethod(progressPopUp, "openPopUp");
 }
 
-void featureThread::markPopup(bool flag){
-    if(flag){
-        emit featureThread::loadPopup("progress_popup");
-    }else{
-        emit featureThread::loadPopup("result_orient");
-    }
+void featureThread::openResultPopUp(string inputText){
+    QList<QObject*> temp;
+    temp.append(m_glmodel->mainWindow);
+    QObject *resultPopUp = (QEntity *)FindItemByName(temp, "result_popup");
+    QMetaObject::invokeMethod(resultPopUp, "openResultPopUp", Q_ARG(QVariant, QString::fromStdString(inputText)));
 }
+
+void featureThread::progressChanged(float value){
+    emit featureThread::setProgress(value);
+    if(value == 1)
+        openResultPopUp("Orientation done");
+}
+
 
 arrangeSignalSender::arrangeSignalSender(){
 
