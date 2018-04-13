@@ -88,6 +88,10 @@ void Mesh::vertexScale(float scale){
 /********************** Mesh Generation Functions **********************/
 
 void Mesh::addFace(QVector3D v0, QVector3D v1, QVector3D v2){
+    addFace(v0,v1,v2,-1);
+}
+
+void Mesh::addFace(QVector3D v0, QVector3D v1, QVector3D v2, int parent_idx){
     int v0_idx = getVertexIdx(v0);
     int v1_idx = getVertexIdx(v1);
     int v2_idx = getVertexIdx(v2);
@@ -103,6 +107,7 @@ void Mesh::addFace(QVector3D v0, QVector3D v1, QVector3D v2){
 
     int new_idx = faces.size();
     mf->idx = new_idx;
+    mf->parent_idx = parent_idx;
     mf->mesh_vertex[0] = v0_idx;
     mf->mesh_vertex[1] = v1_idx;
     mf->mesh_vertex[2] = v2_idx;
@@ -161,6 +166,7 @@ vector<MeshFace>::iterator Mesh::removeFace(vector<MeshFace>::iterator f_it){
                     MeshFace* nf_nf_ptr = (*nf_nf_ptr_it);
                     if (nf_nf_ptr == &mf) {
                         nf_nf_ptr_it = nf_ptr->neighboring_faces[i].erase(nf_nf_ptr_it);
+                        break;
                     } else {
                         nf_nf_ptr_it ++;
                     }
@@ -664,7 +670,51 @@ Paths3D contourConstruct(Paths3D hole_edges){
     return contourList;
 }
 
+vector<vector<QVector3D>> interpolate(Path3D from, Path3D to){
+    vector<vector<QVector3D>> temp_faces;
 
+    if (from.size() != to.size()){
+        qDebug() << "from and to size differs";
+        return temp_faces;
+    }
+
+    // add odd number faces
+    for (int i=1; i<from.size()-1; i++){
+        if (i%2 != 0){
+            // add right left new face
+            vector<QVector3D> temp_face1;
+            temp_face1.push_back(to[i].position);
+            temp_face1.push_back(from[i-1].position);
+            temp_face1.push_back(from[i].position);
+            temp_faces.push_back(temp_face1);
+            vector<QVector3D> temp_face2;
+            temp_face2.push_back(to[i].position);
+            temp_face2.push_back(from[i].position);
+            temp_face2.push_back(from[i+1].position);
+            temp_faces.push_back(temp_face2);
+        }
+    }
+
+
+    // add even number faces
+    for (int i=2; i<from.size()-1; i++){
+        if (i%2 == 0){
+            // add right left new face
+            vector<QVector3D> temp_face1;
+            temp_face1.push_back(to[i].position);
+            temp_face1.push_back(from[i-1].position);
+            temp_face1.push_back(from[i].position);
+            temp_faces.push_back(temp_face1);
+            vector<QVector3D> temp_face2;
+            temp_face2.push_back(to[i].position);
+            temp_face2.push_back(from[i].position);
+            temp_face2.push_back(from[i+1].position);
+            temp_faces.push_back(temp_face2);
+        }
+    }
+
+    return temp_faces;
+}
 
 /************** Helper Functions *****************/
 

@@ -24,6 +24,7 @@ public:
     //MeshFace() {neighboring_faces.reserve(10);}
 
     int idx;
+    int parent_idx = -1;
     int mesh_vertex[3] = {-1,-1,-1};
     //int connected_face_idx[3];
 
@@ -74,6 +75,7 @@ public :
 
     /********************** Mesh Generation Functions **********************/
     void addFace(QVector3D v0, QVector3D v1, QVector3D v2);
+    void addFace(QVector3D v0, QVector3D v1, QVector3D v2, int parent_idx);
     vector<MeshFace>::iterator removeFace(vector<MeshFace>::iterator f_it);
     void connectFaces();
 
@@ -97,6 +99,7 @@ float vertexDistance(QVector3D, QVector3D);
 // construct closed contour using segments created from identify step
 Paths contourConstruct(Paths);
 Paths3D contourConstruct(Paths3D hole_edges);
+vector<vector<QVector3D>> interpolate(Path3D from, Path3D to);
 
 uint32_t intPoint2Hash(IntPoint u);
 uint32_t meshVertex2Hash(MeshVertex u);
