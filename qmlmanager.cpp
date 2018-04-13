@@ -42,6 +42,9 @@ void QmlManager::initializeUI(QQmlApplicationEngine* e){
     orientPopup = FindItemByName(engine, "orientPopup");
     progress_popup = FindItemByName(engine, "progress_popup");
 
+    // extension components
+    extensionPopup = FindItemByName(engine, "extensionPopup");
+
     // repair components
     repairPopup = FindItemByName(engine, "repairPopup");
 
@@ -81,9 +84,9 @@ void QmlManager::initializeUI(QQmlApplicationEngine* e){
     //openModelFile(QDir::currentPath()+"/Models/partial1.stl");
     //openModelFile("c:/Users/user/Desktop/partial1.stl");
 }
-void QmlManager::openModelFile(QString fname){
 
-    GLModel* glmodel = new GLModel(mainWindow, models, nullptr, fname, false);
+void QmlManager::createModelFile(Mesh* target_mesh, QString fname) {
+    GLModel* glmodel = new GLModel(mainWindow, models, target_mesh, fname, false);
 
     glmodels.push_back(glmodel);
 
@@ -105,10 +108,14 @@ void QmlManager::openModelFile(QString fname){
 
     // do auto arrange
     if (glmodels.size() >=2){
-        runArrange();
+        //runArrange();
     }
 
     //shellOffset(glmodel, -0.5);
+}
+
+void QmlManager::openModelFile(QString fname){
+    createModelFile(nullptr, fname);
 }
 
 void QmlManager::disconnectHandlers(GLModel* glmodel){
@@ -120,13 +127,11 @@ void QmlManager::disconnectHandlers(GLModel* glmodel){
     // need to connect for every popup
 
     // model cut popup codes
-    QObject::disconnect(cutPopup,SIGNAL(generatePlane()),glmodel->shadowModel , SLOT(generatePlane()));
-    //QObject::connect(cutPopup,SIGNAL(modelCut()),glmodel->shadowModel , SLOT(modelCut()));
-    QObject::disconnect(cutPopup,SIGNAL(modelCutFinish()),glmodel->shadowModel , SLOT(modelCutFinished()));
-    //QObject::connect(cutPopup,SIGNAL(runFeature(int)),glmodel->ft , SLOT(setTypeAndStart(int)));
+    QObject::disconnect(cutPopup,SIGNAL(modelCut()),glmodel->shadowModel , SLOT(modelCut()));
     QObject::disconnect(cutPopup,SIGNAL(cutModeSelected(int)),glmodel->shadowModel,SLOT(cutModeSelected(int)));
+    QObject::disconnect(cutPopup, SIGNAL(openCut()), glmodel->shadowModel, SLOT(openCut()));
+    QObject::disconnect(cutPopup, SIGNAL(closeCut()), glmodel->shadowModel, SLOT(closeCut()));
     QObject::disconnect(slider, SIGNAL(govalue(double)), glmodel->shadowModel, SLOT(getSliderSignal(double)));
-    //QObject::connect(slider,SIGNAL(govalue(double)),glmodel->ft->ct,SLOT(getSliderSignal(double)));
 
     // auto orientation popup codes
     QObject::disconnect(orientPopup, SIGNAL(runFeature(int)), glmodel->ft, SLOT(setTypeAndStart(int)));
@@ -138,6 +143,10 @@ void QmlManager::disconnectHandlers(GLModel* glmodel){
     //QObject::connect(labelPopup, SIGNAL(runFeature(int)),glmodel->ft, SLOT(setTypeAndStart(int)));
     QObject::disconnect(labelPopup, SIGNAL(generateText3DMesh()), glmodel->shadowModel, SLOT(generateText3DMesh()));
     QObject::disconnect(labelFontBox, SIGNAL(sendFontName(QString)),glmodel->shadowModel, SLOT(getFontNameChanged(QString)));
+
+    // extension popup codes
+    QObject::disconnect(extensionPopup, SIGNAL(openExtension()), glmodel->shadowModel, SLOT(openExtension()));
+    QObject::disconnect(extensionPopup, SIGNAL(closeExtension()), glmodel->shadowModel, SLOT(closeExtension()));
 
     // auto Repair popup codes
     QObject::disconnect(repairPopup, SIGNAL(runFeature(int)), glmodel->ft, SLOT(setTypeAndStart(int)));
@@ -162,13 +171,11 @@ void QmlManager::connectHandlers(GLModel* glmodel){
     // need to connect for every popup
 
     // model cut popup codes
-    QObject::connect(cutPopup,SIGNAL(generatePlane()),glmodel->shadowModel , SLOT(generatePlane()));
-    //QObject::connect(cutPopup,SIGNAL(modelCut()),glmodel->shadowModel , SLOT(modelCut()));
-    QObject::connect(cutPopup,SIGNAL(modelCutFinish()),glmodel->shadowModel , SLOT(modelCutFinished()));
-    //QObject::connect(cutPopup,SIGNAL(runFeature(int)),glmodel->ft , SLOT(setTypeAndStart(int)));
+    QObject::connect(cutPopup,SIGNAL(modelCut()),glmodel->shadowModel , SLOT(modelCut()));
     QObject::connect(cutPopup,SIGNAL(cutModeSelected(int)),glmodel->shadowModel,SLOT(cutModeSelected(int)));
+    QObject::connect(cutPopup, SIGNAL(openCut()), glmodel->shadowModel, SLOT(openCut()));
+    QObject::connect(cutPopup, SIGNAL(closeCut()), glmodel->shadowModel, SLOT(closeCut()));
     QObject::connect(slider, SIGNAL(govalue(double)), glmodel->shadowModel, SLOT(getSliderSignal(double)));
-    //QObject::connect(slider,SIGNAL(govalue(double)),glmodel->ft->ct,SLOT(getSliderSignal(double)));
 
     // auto orientation popup codes
     QObject::connect(orientPopup, SIGNAL(runFeature(int)), glmodel->ft, SLOT(setTypeAndStart(int)));
@@ -180,6 +187,10 @@ void QmlManager::connectHandlers(GLModel* glmodel){
     //QObject::connect(labelPopup, SIGNAL(runFeature(int)),glmodel->ft, SLOT(setTypeAndStart(int)));
     QObject::connect(labelPopup, SIGNAL(generateText3DMesh()), glmodel->shadowModel, SLOT(generateText3DMesh()));
     QObject::connect(labelFontBox, SIGNAL(sendFontName(QString)),glmodel->shadowModel, SLOT(getFontNameChanged(QString)));
+
+    // extension popup codes
+    QObject::connect(extensionPopup, SIGNAL(openExtension()), glmodel->shadowModel, SLOT(openExtension()));
+    QObject::connect(extensionPopup, SIGNAL(closeExtension()), glmodel->shadowModel, SLOT(closeExtension()));
 
     // auto Repair popup codes
     QObject::connect(repairPopup, SIGNAL(runFeature(int)), glmodel->ft, SLOT(setTypeAndStart(int)));
@@ -252,15 +263,22 @@ void QmlManager::modelSelected(int ID){
         }
     }
 
+    // reset previous model texture
     if (selectedModel != nullptr){
         qDebug() << "resetting model" << selectedModel->ID;
         selectedModel->m_meshMaterial->setDiffuse(QColor(173,215,218));
         disconnectHandlers(selectedModel);
     }
-    selectedModel = target;
-    selectedModel->m_meshMaterial->setDiffuse(QColor(100,255,100));
-    qDebug() << "changing model" << selectedModel->ID;
-    connectHandlers(selectedModel);
+
+    if (selectedModel != target){
+        // change selectedModel
+        selectedModel = target;
+        selectedModel->m_meshMaterial->setDiffuse(QColor(100,255,100));
+        qDebug() << "changing model" << selectedModel->ID;
+        connectHandlers(selectedModel);
+    } else {
+        selectedModel = nullptr;
+    }
 }
 
 void QmlManager::modelVisible(int ID, bool isVisible){
@@ -291,18 +309,27 @@ void QmlManager::doDelete(){
 }
 
 void QmlManager::showMoveArrow(){
+    if (selectedModel == nullptr)
+        return;
     moveArrow->setEnabled(1);
     QQmlProperty::write(moveArrowobj,"center",selectedModel->m_transform->translation());
 }
 void QmlManager::showRotateSphere(){
+    if (selectedModel == nullptr)
+        return;
     rotateSphere->setEnabled(1);
     QQmlProperty::write(rotateSphereobj,"center",selectedModel->m_transform->translation());
 }
 void QmlManager::modelMoveDone(int Axis){
+    if (selectedModel == nullptr)
+        return;
     QQmlProperty::write(moveArrowobj,"center",selectedModel->m_transform->translation());
 }
 
 void QmlManager::modelRotateDone(int Axis){
+    if (selectedModel == nullptr)
+        return;
+
     float angle;
     switch(Axis){
     case 1:{
@@ -327,6 +354,8 @@ void QmlManager::modelRotateDone(int Axis){
     QQmlProperty::write(rotateSphereobj,"center",selectedModel->m_transform->translation());
 }
 void QmlManager::modelMove(int Axis, int Distance){
+    if (selectedModel == nullptr)
+        return;
     switch(Axis){
     case 1:{  //X
         QVector3D tmp = selectedModel->m_transform->translation();
@@ -341,6 +370,9 @@ void QmlManager::modelMove(int Axis, int Distance){
     }
 }
 void QmlManager::modelRotate(int Axis, int Angle){
+    if (selectedModel == nullptr)
+        return;
+
     switch(Axis){
     case 1:{  //X
         float tmpx = selectedModel->m_transform->rotationX();

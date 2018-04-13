@@ -36,7 +36,6 @@ GLModel::GLModel(QObject* mainWindow, QNode *parent, Mesh* loadMesh, QString fna
         rmesh = new Mesh();
 
         mesh = toSparse(parentModel->mesh);
-
         initialize(mesh);
         addVertices(mesh, false);
         applyGeometry();
@@ -117,14 +116,14 @@ GLModel::GLModel(QObject* mainWindow, QNode *parent, Mesh* loadMesh, QString fna
     // Add to Part List
     ID = globalID++;
 
-    QList<QObject*> temp;
+    /*QList<QObject*> temp;
     temp.append(mainWindow);
     QObject *partList = (QEntity *)FindItemByName(temp, "partList");
 
     QMetaObject::invokeMethod(partList, "addPart",
         Q_ARG(QVariant, getFileName(fname.toStdString().c_str())),
         Q_ARG(QVariant, ID));
-
+    */
 }
 
 void GLModel::moveModelMesh(QVector3D direction){
@@ -671,10 +670,10 @@ void GLModel::addIndexes(vector<int> indexes){
 
 void GLModel::handlePickerClicked(QPickEvent *pick)
 {
-    qDebug() << pick->localIntersection()<<"pick" << parentModel->ID;
-    emit modelSelected(parentModel->ID);
+    if (!cutActive)
+        emit modelSelected(parentModel->ID);
     qDebug() << "model selected emit";
-    if (labelingActive) {
+    if (labellingActive) {
         if (labellingTextPreview)
             labellingTextPreview->setEnabled(true);
         parentModel->m_meshMaterial->setDiffuse(QColor(100, 255, 100));
@@ -690,17 +689,30 @@ void GLModel::handlePickerClicked(QPickEvent *pick)
     }
 
     QPickTriangleEvent *trianglePick = static_cast<QPickTriangleEvent*>(pick);
-    if (cutMode == 1 && parentModel->numPoints< sizeof(parentModel->sphereEntity)/4) {
-        qDebug() << pick->localIntersection()<<"pick";
-        QVector3D v = pick->localIntersection();
-        parentModel->addCuttingPoint(v);
-        //parentModel->ft->ct->addCuttingPoint(parentModel, v);
-    } else if (cutMode == 9999){
-        if (auto* glmodel = qobject_cast<GLModel*>(parent()))
-            glmodel->m_meshMaterial->setDiffuse(QColor(100, 255, 100));
 
-        qDebug() << "current cut mode :" << cutMode;
-        return;
+    if (cutActive){
+        if (cutMode == 1 && parentModel->numPoints< sizeof(parentModel->sphereEntity)/4) {
+            qDebug() << pick->localIntersection()<<"pick";
+            QVector3D v = pick->localIntersection();
+            parentModel->addCuttingPoint(v);
+            if (parentModel->numPoints >= 3)
+                generatePlane();
+            //parentModel->ft->ct->addCuttingPoint(parentModel, v);
+        } else if (cutMode == 9999){
+            qDebug() << "current cut mode :" << cutMode;
+            return;
+        }
+    }
+
+    if (extensionActive){
+        MeshFace shadow_meshface = mesh->faces[trianglePick->triangleIndex()];
+        qDebug() << "found parent meshface" << shadow_meshface.parent_idx;
+        parentModel->uncolorExtensionFaces();
+        parentModel->targetMeshFace = &parentModel->mesh->faces[shadow_meshface.parent_idx];
+        parentModel->colorExtensionFaces();
+        //detectExtensionFaces(parentModel->mesh, &parentModel->mesh->faces[shadow_meshface.parent_idx], )
+        //extendMesh(parentModel->mesh, &parentModel->mesh->faces[shadow_meshface.parent_idx], 10);
+        qDebug() << mesh->faces[trianglePick->triangleIndex()].fn;
     }
 }
 
@@ -741,15 +753,9 @@ void GLModel::bisectModel_internal(Plane plane){
     emit bisectDone();
 }
 
-bool GLModel::isLeftToPlane(Plane plane, QVector3D position){
-    // determine if position is left to plane or not
-    if(position.distanceToPlane(plane[0],plane[1],plane[2])>0)
-        return false;
-    return true;
-}
 
 void GLModel::generatePlane(){
-    parentModel->removeCuttingPoints();
+    removePlane();
     if (parentModel->cuttingPoints.size()<3){
         qDebug()<<"Error: There is not enough vectors to render a plane.";
         return;
@@ -767,8 +773,14 @@ void GLModel::generatePlane(){
     parentModel->planeMaterial->setSpecular(QColor(QRgb(0xF4F4F4)));
     parentModel->planeMaterial->setAlpha(0.5f);
 
+    // set cutting plane
+    parentModel->cuttingPlane.clear();
+    parentModel->cuttingPlane.push_back(v1);
+    parentModel->cuttingPlane.push_back(v2);
+    parentModel->cuttingPlane.push_back(v3);
 
     //To manipulate plane color, change the QRgb(0x~~~~~~).
+    QVector3D tmp = parentModel->m_transform->translation();
     QVector3D world_origin(0,0,0);
     QVector3D original_normal(0,1,0);
     QVector3D desire_normal(QVector3D::normal(v1,v2,v3)); //size=1
@@ -777,24 +789,28 @@ void GLModel::generatePlane(){
 
     for (int i=0;i<2;i++){
         parentModel->clipPlane[i]=new Qt3DExtras::QPlaneMesh();
-        parentModel->clipPlane[i]->setHeight(30.0);
-        parentModel->clipPlane[i]->setWidth(30.0);
+        parentModel->clipPlane[i]->setHeight(100.0);
+        parentModel->clipPlane[i]->setWidth(100.0);
 
         parentModel->planeTransform[i]=new Qt3DCore::QTransform();
         parentModel->planeTransform[i]->setScale(2.0f);
         parentModel->planeTransform[i]->setRotation(QQuaternion::fromAxisAndAngle(crossproduct_vector, angle+180*i));
         float zlength = parentModel->mesh->z_max - parentModel->mesh->z_min;
-        parentModel->planeTransform[i]->setTranslation(desire_normal*(-world_origin.distanceToPlane(v1,v2,v3))+QVector3D(0,0,zlength/2));
+        parentModel->planeTransform[i]->setTranslation(desire_normal*(-world_origin.distanceToPlane(v1,v2,v3))+QVector3D(tmp.x(),tmp.y(),zlength/2));
 
         parentModel->planeEntity[i] = new Qt3DCore::QEntity(parentModel->parentModel);
         parentModel->planeEntity[i]->addComponent(parentModel->clipPlane[i]);
         parentModel->planeEntity[i]->addComponent(parentModel->planeTransform[i]);
         parentModel->planeEntity[i]->addComponent(parentModel->planeMaterial);
     }
-    modelCut();
+
+    parentModel->removeCuttingPoints();
+    //modelCut();
 }
 
 void GLModel::removePlane(){
+    if (parentModel->planeMaterial == nullptr)
+        return;
     delete parentModel->planeMaterial;
     for (int i=0;i<2;i++){
         delete parentModel->clipPlane[i];
@@ -804,12 +820,13 @@ void GLModel::removePlane(){
 }
 
 void GLModel::addCuttingPoint(QVector3D v){
+    QVector3D tmp = m_transform->translation();
     float zlength = mesh->z_max - mesh->z_min;
     cuttingPoints.push_back(v);
     sphereMesh[numPoints] = new Qt3DExtras::QSphereMesh;
-    sphereMesh[numPoints]->setRadius(1);
+    sphereMesh[numPoints]->setRadius(0.5);
     sphereTransform[numPoints] = new Qt3DCore::QTransform;
-    sphereTransform[numPoints]->setTranslation(v + QVector3D(0,0,zlength/2));
+    sphereTransform[numPoints]->setTranslation(v + QVector3D(tmp.x(),tmp.y(),zlength/2));
 
     sphereMaterial[numPoints] = new Qt3DExtras::QPhongMaterial();
     sphereMaterial[numPoints]->setAmbient(QColor(QRgb(0x0049FF)));
@@ -838,6 +855,7 @@ void GLModel::removeCuttingPoints(){
         sphereEntity[i]->removeComponent(sphereMaterial[i]);
     }
     numPoints=0;
+    cuttingPoints.clear();
 }
 
 void GLModel::removeModel(){
@@ -866,75 +884,28 @@ void GLModel::removeModelPartList(){
 }
 
 void GLModel::modelCut(){
-    if (parentModel->cuttingPoints.size() < 3){
+    qDebug() << "modelcut called";
+    if (parentModel->cuttingPlane.size() != 3){
         return;
     }
 
-    Plane plane;
-    plane.push_back(parentModel->cuttingPoints[parentModel->cuttingPoints.size()-3]);
-    plane.push_back(parentModel->cuttingPoints[parentModel->cuttingPoints.size()-2]);   //plane에 잘 들어감
-    plane.push_back(parentModel->cuttingPoints[parentModel->cuttingPoints.size()-1]);
-    qDebug() << parentModel->parentModel;
-    //parentModel->bisectModel(parentModel->mesh, plane, leftModel->mesh, rightModel->mesh);
-
-    parentModel->bisectModel(plane);
-    GLModel* leftModel = new GLModel(mainWindow, parentModel->parentModel, lmesh, "", false);
-    //GLModel* rightModel = new GLModel(mainWindow, parentModel->parentModel, rmesh, "", false);
-
-    //parentModel->bisectModel(parentModel->mesh, plane, parentModel->lmesh, parentModel->rmesh);
-    //parentModel->bisectModel_internal(plane);
-
-    //QFuture<void> future = QtConcurrent::run(parentModel, &bisectModel_internal, plane);// parentModel->bisectModel(plane);
-    //qm.openModelFile("");
-    //future.waitForFinished();
-
-
+    parentModel->bisectModel(parentModel->cuttingPlane);
 }
 
 void GLModel::generateRLModel(){
-    leftModel = new GLModel(parentModel->mainWindow, parentModel, lmesh, "", false);
-    rightModel = new GLModel(parentModel->mainWindow, parentModel, rmesh, "", false);
-    float zlength = mesh->z_max - mesh->z_min;
+    qmlManager->createModelFile(lmesh, "");
+    qmlManager->createModelFile(rmesh, "");
+    //parentModel->deleteLater();
+    shadowModel->removePlane();
+    removeCuttingPoints();
 
-    QVector3D tmp = leftModel->m_transform->translation();
-    leftModel->m_transform->setTranslation(QVector3D(tmp.x(),tmp.y(),zlength/2));
-    tmp = rightModel->m_transform->translation();
-    rightModel->m_transform->setTranslation(QVector3D(tmp.x(),tmp.y(),zlength/2));
-}
-
-void GLModel::modelCutFinished(){
-    qDebug() << "modelcut finished";
-    removePlane();
-    //parentModel->leftModel->deleteLater();
-    parentModel->rightModel->deleteLater();
-    parentModel->deleteLater();
-    deleteLater();
-
-    // remove parent model and its shadow model
-}
-
-/*
-void GLModel::modelCut(){
-    ft->ct->removeCuttingPoints();
-    ft->ct->generatePlane(parentModel);
-
-    Plane plane;
-    plane.push_back(ft->ct->cuttingPoints[ft->ct->cuttingPoints.size()-3]);
-    plane.push_back(ft->ct->cuttingPoints[ft->ct->cuttingPoints.size()-2]);   //plane에 잘 들어감
-    plane.push_back(ft->ct->cuttingPoints[ft->ct->cuttingPoints.size()-1]);
-
-    ft->ct->bisectModel(mesh, plane, lmesh, rmesh);
-
-    // select between two pieces
-    GLModel* leftModel = new GLModel(mainWindow, parentModel, lmesh, "", false);
-    //GLModel* rightModel = new GLModel(mainWindow, parentModel->parentModel, rmesh, "", false);
-
+    // delete original model
     shadowModel->deleteLater();
     deleteLater();
+    qmlManager->selectedModel = nullptr;
+}
 
-    qDebug() << "done model cut";
 
-}*/
 
 
 void GLModel::beforeInitialize(){
@@ -1124,15 +1095,13 @@ Mesh* GLModel::toSparse(Mesh* mesh){
     int jump = (mesh->faces.size()<30000) ? 1:mesh->faces.size()/30000; // 30000 is chosen for 800000 mesh, 30
     int factor = (jump ==1) ? 1:3*log(jump);
 
-    qDebug() << "mesh specification : " << mesh->faces.size() << jump << factor;
-
     Mesh* newMesh = new Mesh;
 
     if (jump == 1){ // if mesh face count is less than 30000
         newMesh->faces.reserve(mesh->faces.size());
         newMesh->vertices.reserve(mesh->vertices.size());
         foreach (MeshFace mf, mesh->faces){
-            newMesh->addFace(mesh->idx2MV(mf.mesh_vertex[0]).position, mesh->idx2MV(mf.mesh_vertex[1]).position, mesh->idx2MV(mf.mesh_vertex[2]).position);
+            newMesh->addFace(mesh->idx2MV(mf.mesh_vertex[0]).position, mesh->idx2MV(mf.mesh_vertex[1]).position, mesh->idx2MV(mf.mesh_vertex[2]).position, mf.idx);
         }
     } else {
         newMesh->faces.reserve(mesh->faces.size()/5);
@@ -1150,6 +1119,7 @@ Mesh* GLModel::toSparse(Mesh* mesh){
                 point3=GLModel::spreadPoint(point3,CenterOfMass,factor);
                 //newMesh->addFace(mesh->idx2MV(mf.mesh_vertex[0]).position, mesh->idx2MV(mf.mesh_vertex[1]).position, mesh->idx2MV(mf.mesh_vertex[2]).position);
                 newMesh->addFace(point1,point2,point3);
+                newMesh->faces.end()->parent_idx = mf.idx;
             }
             i+=1;
         }
@@ -1167,17 +1137,14 @@ void GLModel::getTextChanged(QString text, int contentWidth)
 
 void GLModel::openLabelling()
 {
-    labelingActive = true;
+    labellingActive = true;
 }
 
 void GLModel::closeLabelling()
 {
-    labelingActive = false;
+    labellingActive = false;
     if (labellingTextPreview && labellingTextPreview->isEnabled())
         labellingTextPreview->setEnabled(false);
-
-    if (auto* glmodel = qobject_cast<GLModel*>(parent()))
-        glmodel->m_meshMaterial->setDiffuse(QColor(255,255,255));
 }
 
 void GLModel::getFontNameChanged(QString fontName)
@@ -1244,4 +1211,54 @@ void GLModel::generateText3DMesh()
         glmodel->addVertices(outVertices);
         glmodel->addNormalVertices(outNormals);
     }
+}
+
+
+// for extension
+
+void GLModel::colorExtensionFaces(){
+    if (targetMeshFace == NULL)
+        return;
+
+    QVector3D normal = targetMeshFace->fn;
+
+    vector<MeshFace*> extension_faces;
+    detectExtensionFaces(mesh, normal, targetMeshFace, &extension_faces);
+    qDebug() << "detected extension faces" << extension_faces.size();
+}
+
+void GLModel:: uncolorExtensionFaces(){
+    if (targetMeshFace == NULL)
+        return;
+
+    QVector3D normal = targetMeshFace->fn;
+
+    vector<MeshFace*> extension_faces;
+    detectExtensionFaces(mesh, normal, targetMeshFace, &extension_faces);
+
+    // do uncolor thing
+}
+
+void GLModel::generateExtensionFaces(float distance){
+    extendMesh(mesh, targetMeshFace, distance);
+}
+
+void GLModel::openExtension(){
+    extensionActive = true;
+}
+
+void GLModel::closeExtension(){
+    extensionActive = false;
+}
+
+void GLModel::openCut(){
+    qDebug() << "opencut called";
+    cutActive = true;
+}
+
+void GLModel::closeCut(){
+    qDebug() << "closecut called";
+    cutActive = false;
+    removePlane();
+    parentModel->removeCuttingPoints();
 }

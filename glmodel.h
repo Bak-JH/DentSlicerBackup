@@ -20,6 +20,7 @@
 #include "feature/meshrepair.h"
 #include "feature/autoarrange.h"
 #include "feature/stlexporter.h"
+#include "feature/extension.h"
 
 
 #define MAX_BUF_LEN 2000000
@@ -100,6 +101,8 @@ public:
     GLModel *leftModel = NULL;
     GLModel *rightModel = NULL;
 
+    MeshFace *targetMeshFace = NULL; // used for object selection (specific area, like extension or labelling)
+
     bool appropriately_rotated=false;
     QPhongMaterial *m_meshMaterial;
     Qt3DRender::QBuffer *vertexBuffer;
@@ -118,11 +121,12 @@ public:
     //Qt3DCore::QEntity *parentEntity;
 
     std::vector<QVector3D> cuttingPoints;
+    Plane cuttingPlane;
 
     Qt3DExtras::QPlaneMesh* clipPlane[2];
     Qt3DCore::QEntity* planeEntity[2];
     Qt3DCore::QTransform *planeTransform[2];
-    Qt3DExtras::QPhongAlphaMaterial *planeMaterial;
+    Qt3DExtras::QPhongAlphaMaterial *planeMaterial = nullptr;
 
     Qt3DExtras::QSphereMesh *sphereMesh[4];
     Qt3DCore::QEntity *sphereEntity[4];
@@ -151,7 +155,6 @@ public:
     //void bisectModel_internal(Mesh* mesh, Plane plane, Mesh* leftMesh, Mesh* rightMesh);
     void bisectModel(Plane plane);
     void bisectModel_internal(Plane plane);
-    bool isLeftToPlane(Plane plane, QVector3D position);
 
 
     QString getFileName(const string& s);
@@ -189,7 +192,9 @@ private:
     Mesh* toSparse(Mesh* mesh);
 
     int cutMode = 0;
-    bool labelingActive = false;
+    bool labellingActive = false;
+    bool extensionActive = false;
+    bool cutActive = false;
 
 signals:
 
@@ -214,7 +219,8 @@ public slots:
     void cutModeSelected(int type);
     void getSliderSignal(double value);
     void generateRLModel();
-    void modelCutFinished();
+    void openCut();
+    void closeCut();
 
     // Labelling
     void getTextChanged(QString text, int contentWidth);
@@ -223,8 +229,17 @@ public slots:
     void getFontNameChanged(QString fontName);
     void generateText3DMesh();
 
+    // Extension
+    void openExtension();
+    void closeExtension();
+    void colorExtensionFaces();
+    void uncolorExtensionFaces();
+    void generateExtensionFaces(float distance);
+
+
     // Model Mesh info update
     void updateModelMesh();
 };
+
 
 #endif // GLMODEL_H

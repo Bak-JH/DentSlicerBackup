@@ -13,6 +13,7 @@
 #include <QSplashScreen>
 
 using namespace Qt3DCore;
+QmlManager *qmlManager;
 
 int main(int argc, char **argv)
 {
@@ -33,7 +34,7 @@ int main(int argc, char **argv)
     //app.changeOverrideCursor(cursorTarget2);
     QScopedPointer<QuaternionHelper> qq(new QuaternionHelper);
     QScopedPointer<SlicingEngine> se(new SlicingEngine);
-    QmlManager *qmlManager = new QmlManager();
+    qmlManager = new QmlManager();
     QScopedPointer<QmlManager> qm(qmlManager);
     QObject::connect(se.data(), SIGNAL(updateModelInfo(int,int,QString,float)), qmlManager, SLOT(sendUpdateModelInfo(int,int,QString,float)));
 

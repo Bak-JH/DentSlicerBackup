@@ -21,6 +21,9 @@ void identifyHoles(Mesh* mesh);
 // detects hole and remove them
 void fillHoles(Mesh* mesh);
 
+// fill hole path with faces
+vector<vector<QVector3D>> fillPath(Path3D path);
+
 // detects orientation defects, which induces normal vector errors and render errors
 void fixNormalOrientations(Mesh* mesh);
 

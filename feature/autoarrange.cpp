@@ -949,3 +949,158 @@ void autoarrange::testOffset(){
     //offsetPath(&path1);
     debugPath(path1);
 }
+
+
+/*
+ * 연결된 face들로 구성된 집합의 외곽 경로를 구하는 함수 입니다.
+ * mesh와 탐색을 시작할 면을 인풋으로 받습니다.
+ *
+ *   1. 면f가 구하고자 하는 면들의 집햅에 포함되고
+ *   2. 면f의 n번째 변에 대해 isEdgeBound(f,n)이 거짓일 때
+ *   ->  면f과 n번째 변을 공유하는 면(이웃)은 집합에 포함됩니다.
+ *
+ *   1. 면f가 n번째 변을 공유하는 이웃이 유일하게 존재하고
+ *   2. 면f과 n번째 변을 공유하는 이웃이 같은 orientation을 가지며
+ *   3. meetNbrCond(이웃 면)이 참일 떄
+ *   -> isEdgeBound(f,n)은 거짓입니다.
+ *   (1번 및 2번 조건을 제거/수정할 경우 나머지 코드들이 유효하지 않을 수 있습니다.)
+ *
+ * meetNbrCond()함수 및 매개변수를 수정하여 사용하시면 됩니다.
+ * 외곽 경로의 orientation은 탐색을 시작하는 면의 orientaiton과 같습니다.
+ * 리턴값은 mesh가 가지는 vertices에 속한 MeshVertex의 복제본으로 구성된 Paths3D입니다.
+ * 꼼꼼히 검토했으나 용도에 따른 개조로 인해 불안정한 부분이 있을 수 있습니다...ㅜㅜ
+ */
+
+
+typedef vector<MeshVertex> Path3D;
+typedef vector<Path3D> Paths3D;
+
+Paths3D spreadingCheck3D(Mesh& mesh, int chking_start){
+    bool check[mesh.faces.size()] = {false};
+    bool outer_check[mesh.faces.size()] = {false};
+    Paths3D paths;
+    int chking = -1;
+    vector<MeshFace*> to_check;
+    to_check.push_back(& mesh.faces[chking_start]);
+    while(to_check.size()>0){
+        vector<MeshFace*> next_to_check;
+        for(int i=0; i<to_check.size(); i++){
+            chking = to_check[i]->idx;
+            if(check[chking]) continue;
+            check[chking] = true;
+            MeshFace& mf = *to_check[i];
+            int side;
+            int outline_checked = false;
+            for(side=0; side<3; side++){
+                if(isEdgeBound1(mf, side)){
+                    if(!outline_checked && !outer_check[chking]){
+                        int path_head = getPathHead1(mf, side);
+                        Path3D idx_path = buildOutline3D(mesh, outer_check, chking, path_head);
+                        if(idx_path.size()==0) return {};//empty_paths;
+                        paths.push_back(idx_path);
+                        outline_checked = true;
+                    }
+                }else{
+                    vector<MeshFace*> neighbors = mf.neighboring_faces[side];
+                    next_to_check.insert(next_to_check.end(), neighbors.begin(), neighbors.end());
+                }
+            }
+        }
+        to_check.clear();
+        to_check.insert(to_check.end(), next_to_check.begin(), next_to_check.end());
+    }
+    return paths;
+}
+
+int getPathHead1(MeshFace& mf, int side){
+    if(side==0 && isEdgeBound1(mf, 2)) {
+        if(isEdgeBound1(mf, 1)) return -1;//all side of chking face is bound, face is alone
+        else return mf.mesh_vertex[2];
+    }
+    return mf.mesh_vertex[side];
+}
+
+Path3D buildOutline3D(Mesh& mesh, bool* outer_check, int chking, int path_head){
+    vector<int> path_by_idx;
+    if(path_head==-1){
+        path_by_idx = arrToVect1(mesh.faces[chking].mesh_vertex);
+        return idxsToPath3D(mesh, path_by_idx);
+    }
+    bool outline_closed = false;
+    int from = -1;
+    int nxt_chk = -1;
+    int path_tail = path_head;
+    while(!outline_closed){
+        if(outer_check[chking]) return {};//empty_path; //mesh error
+        MeshFace& mf = mesh.faces[chking];
+        int outline_edge_cnt = 0;
+        int tail_idx;//The index that path_tail has in the mf.mesh_vertex
+        for(int i=0; i<3; i++){
+            if(mf.mesh_vertex[i]==path_tail) tail_idx = i;
+            if(isEdgeBound1(mf, i)) outline_edge_cnt++;
+        }
+        if(isEdgeBound1(mf, tail_idx)){
+            path_by_idx.push_back(path_tail);
+            outer_check[chking] = true;
+            if(outline_edge_cnt==1){
+                path_tail = getNbrVtx1(mf, tail_idx, 1);
+                nxt_chk = mf.neighboring_faces[(tail_idx+1)%3][0]->idx;
+            }else{//outline_edge_cnt==2
+                path_by_idx.push_back(getNbrVtx1(mf, tail_idx, 1));
+                path_tail = getNbrVtx1(mf, tail_idx, 2);
+                nxt_chk = mf.neighboring_faces[(tail_idx+2)%3][0]->idx;
+            }
+            if(path_tail == path_head) outline_closed = true;
+        }else{//if not isEdgeBound1(mf, tail_idx), the face doesn't share any bound edge with current outline
+            //the face may share some bound edge with other outline, so we do not mark it checked
+            if(mf.neighboring_faces[tail_idx][0]->idx==from) nxt_chk = mf.neighboring_faces[(tail_idx+2)%3][0]->idx;
+            else nxt_chk = mf.neighboring_faces[tail_idx][0]->idx;
+        }
+        from = chking;
+        chking = nxt_chk;
+    }
+    return idxsToPath3D(mesh, path_by_idx);
+}
+
+int getNbrVtx1(MeshFace& mf, int base, int xth){//getNeighborVtx
+    if(xth>0) return mf.mesh_vertex[(base+xth+3)%3];
+    else return -1;
+}
+
+bool isEdgeBound1(MeshFace& mf, int side){
+    if(mf.neighboring_faces[side].size() != 1) return true;
+    MeshFace& neighbor = *mf.neighboring_faces[side][0];
+    if(!meetNbrCond(neighbor)) return true;
+    if(!isNbrOrientSame1(mf, side)) return true;
+    return false;
+}
+
+bool isNbrOrientSame1(MeshFace& mf, int side){
+    MeshFace& nbr = *mf.neighboring_faces[side][0];
+    if(getNbrVtx1(nbr, searchVtxInFace1(nbr, mf.mesh_vertex[side]), 2) == getNbrVtx1(mf, side, 1)) return true;
+    return false;
+}
+
+bool meetNbrCond(MeshFace& mf){//mf가 이웃의 조건을 만족하는가
+    //코드와 매개변수를 추가하여 사용해주십시오.
+    if(1) return true;
+    return false;
+}
+
+Path3D idxsToPath3D(Mesh& mesh, vector<int> path_by_idx){
+    Path3D path;
+    for(int idx : path_by_idx) path.push_back(mesh.vertices[idx]);
+    return path;
+}
+
+int searchVtxInFace1(MeshFace& mf, int vertexIdx){
+    for(int i=0; i<3; i++){
+        if(mf.mesh_vertex[i] == vertexIdx) return i;
+    }
+    return -1;
+}
+
+vector<int> arrToVect1(int arr[]){
+    vector<int> vec (arr, arr + sizeof arr / sizeof arr[0]);
+    return vec;
+}

@@ -707,7 +707,16 @@ Rectangle {
             radiobutton2_vis: true
             slider_vis: true
             imageHeight: 70
-            state: third_tab_button_cut.state=="active" ? "active" : "inactive"
+            state: {
+                if (third_tab_button_cut.state=="active") {
+                    openCut()
+                    return "active"
+                }
+                else {
+                    closeCut()
+                    return "inactive"
+                }
+            }
 
             onFlatModeClicked: {
                 console.log("flat mode selected");
@@ -722,20 +731,24 @@ Rectangle {
             onApplyClicked: {
                 console.log("ApplyClicked")
                 //runFeature(ftrCut);
-                generatePlane();
-                cutModeSelected(9999);
+                //generatePlane();
+                modelCut();
             }
 
             // on Finish Clicked:
             onFinishClicked: {
                 console.log("Finish Clicked");
-                modelCutFinish();
+                closeCut();
+                //modelCutFinish();
             }
 
             signal cutModeSelected(int type);
             signal runFeature(int type);
-            signal generatePlane();
-            signal modelCutFinish();
+            signal modelCut();
+            //signal generatePlane();
+            //signal modelCutFinish();
+            signal openCut();
+            signal closeCut();
         }
 
 
@@ -797,6 +810,7 @@ Rectangle {
 
         //13. PopUp - Extend
         PopUp {
+            objectName:"extensionPopup"
             id: popup_extend
             funcname: "Extend"
             height: 200
@@ -813,7 +827,22 @@ Rectangle {
             numberbox_detail2_y: 90
             numbox_detail2_defalult: 30.0
             numbox_updown_scale: 0.5
-            state: fourth_tab_button_extend.state=="active" ? "active" : "inactive"
+            state: { //fourth_tab_button_extend.state=="active" ? "active" : "inactive"
+                if (fourth_tab_button_extend.state == "active"){
+                    openExtension();
+                    return "active";
+                } else {
+                    closeExtension();
+                    return "inactive";
+                }
+            }
+            onApplyClicked:{
+                console.log("Apply clicked");
+
+            }
+            signal openExtension()
+            signal closeExtension()
+
         }
 
         //14. PopUp - Support
