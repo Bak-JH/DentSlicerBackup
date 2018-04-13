@@ -40,6 +40,9 @@ public:
     QObject* orientPopup;
     QObject* progress_popup;
 
+    // extension components
+    QObject* extensionPopup;
+
     // auto repair components
     QObject* repairPopup;
 
@@ -86,6 +89,7 @@ signals:
 
 public slots:
     void sendUpdateModelInfo(int, int, QString, float);
+    void createModelFile(Mesh* target_mesh, QString filename);
     void openModelFile(QString filename);
     void runGroupFeature(int,QString);
     void modelSelected(int);
@@ -104,6 +108,6 @@ QObject* FindItemByName(QQmlApplicationEngine* engine, const QString& name);
 
 
 
-extern QmlManager qm;
+extern QmlManager *qmlManager;
 
 #endif // QMLMANAGER_H

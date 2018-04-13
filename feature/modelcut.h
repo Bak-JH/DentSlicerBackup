@@ -13,7 +13,6 @@ class modelcut : public QObject {
 public:
     modelcut();
     void bisectModel(Mesh* mesh, Plane plane, Mesh* leftMesh, Mesh* rightMesh);
-    bool isLeftToPlane(Plane plane, QVector3D position);
     void generatePlane(Qt3DCore::QEntity* targetEntity);
     void addCuttingPoint(Qt3DCore::QEntity* targetEntity, QVector3D v);
     void removeCuttingPoints();
@@ -46,5 +45,8 @@ signals:
 public slots:
     void getSliderSignal(double value);
 };
+
+bool isLeftToPlane(Plane plane, QVector3D position);
+
 
 #endif // MODELCUT_H

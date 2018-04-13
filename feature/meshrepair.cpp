@@ -1,4 +1,5 @@
 #include "meshrepair.h"
+#include "modelcut.h"
 
 void repairMesh(Mesh* mesh){
 
@@ -126,7 +127,16 @@ void fillHoles(Mesh* mesh){
         if (hole.size() <= 2) { // if edge is less than 3 (no hole)
             continue;
         }
-        Path3D prev_path;
+
+        // fill holes
+        vector<vector<QVector3D>> cap = fillPath(hole);
+        for (vector<QVector3D> face : cap){
+            mesh->addFace(face[0],face[1],face[2]);
+        }
+
+        mesh->connectFaces();
+
+        /*Path3D prev_path;
         Path3D cur_path;
 
         for (Path3D::iterator vert_it = hole.begin()+1; vert_it != hole.end()-1; ++vert_it){
@@ -146,10 +156,75 @@ void fillHoles(Mesh* mesh){
             for ( ; div_cnt>=0 ; div_cnt--){
                 // do something abount division
             }
-        }
+        }*/
     }
 }
 
+vector<vector<QVector3D>> fillPath(Path3D path){
+    vector<vector<QVector3D>> result;
+    if (path.size() <3)
+        return result;
+
+    Plane maximal_plane;
+    maximal_plane.push_back(path[0].position);
+    maximal_plane.push_back(path[1].position);
+    maximal_plane.push_back(path[2].position);
+
+    // update maximal plane
+    while(path.size() != 3){
+        for (vector<MeshVertex>::iterator p_it =path.begin(); p_it != path.end(); ++p_it){
+            if (!isLeftToPlane(maximal_plane, p_it->position)){
+                maximal_plane.pop_back();
+                path.erase(p_it);
+                maximal_plane.push_back(p_it->position);
+                break;
+            }
+        }
+    }
+
+    // project path to target path
+    Path3D target_path;
+    target_path.reserve(path.size());
+
+    QVector3D plane_normal = QVector3D::normal(maximal_plane[0],maximal_plane[1],maximal_plane[2]);
+
+    for (int i=0; i<path.size(); i++){
+        target_path.push_back(path[i]);
+
+        // project qvector3d to maximal plane
+        float distance = path[i].position.distanceToPlane(maximal_plane[0],maximal_plane[1],maximal_plane[2]);
+        target_path.end()->position += plane_normal * distance;
+    }
+
+    // interpolate between path and target path
+    result = interpolate(path, target_path);
+
+    // fill Hole
+    int half_path_size = path.size()/2;
+
+    for (int i=0; i<half_path_size-1; i++){
+        vector<QVector3D> temp_face;
+        temp_face.push_back(path[i].position);
+        temp_face.push_back(path[path.size()-i-2].position);
+        temp_face.push_back(path[i+1].position);
+        result.push_back(temp_face);
+        temp_face.clear();
+        temp_face.push_back(path[i+1].position);
+        temp_face.push_back(path[path.size()-i-2].position);
+        temp_face.push_back(path[path.size()-i-3].position);
+        result.push_back(temp_face);
+    }
+
+    if (path.size()%2 != 0){
+        vector<QVector3D> temp_face;
+        temp_face.push_back(path[0].position);
+        temp_face.push_back(path[path.size()-1].position);
+        temp_face.push_back(path[path.size()-2].position);
+        result.push_back(temp_face);
+    }
+
+    return result;
+}
 
 
 int suggestDivisionCnt(Path3D e1,Path3D e2){

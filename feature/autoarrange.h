@@ -85,7 +85,21 @@ private:
     void testClip();
     void testOffset();
 
+
 signals:
     void progressChanged(float);
 };
+
+
+Paths3D spreadingCheck3D(Mesh& mesh, int chking_start);
+int getPathHead1(MeshFace& mf, int side);
+Path3D buildOutline3D(Mesh& mesh, bool* outer_check, int chking, int path_head);
+int getNbrVtx1(MeshFace& mf, int base, int xth);
+bool isEdgeBound1(MeshFace& mf, int side);
+bool isNbrOrientSame1(MeshFace& mf, int side);
+bool meetNbrCond(MeshFace& mf);
+Path3D idxsToPath3D(Mesh& mesh, vector<int> path_by_idx);
+int searchVtxInFace1(MeshFace& mf, int vertexIdx);
+vector<int> arrToVect1(int arr[]);
+
 #endif // ARRANGE_H

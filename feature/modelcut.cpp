@@ -34,7 +34,7 @@ void modelcut::bisectModel(Mesh* mesh, Plane plane, Mesh* leftMesh, Mesh* rightM
     qDebug() << "done connecting";
 }
 
-bool modelcut::isLeftToPlane(Plane plane, QVector3D position){
+bool isLeftToPlane(Plane plane, QVector3D position){
     // determine if position is left to plane or not
     if(position.distanceToPlane(plane[0],plane[1],plane[2])>0)
         return false;

@@ -323,7 +323,7 @@ Rectangle {
             onEntered: parent.color = "#b5b5b5"
             onExited: parent.color = "#999999"
             onPressed: parent.color = "#3ea6b7"
-            onReleased: {do_apply(funcname.text); all_off(); focus_all_off() ;numbox_reset();parent.color = "#999999"}
+            onReleased: {do_apply(funcname.text); /*all_off();*/ focus_all_off() ;numbox_reset();parent.color = "#999999"}
         }
     }
     Rectangle {
