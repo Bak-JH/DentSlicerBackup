@@ -156,10 +156,14 @@ vector<MeshFace>::iterator Mesh::removeFace(vector<MeshFace>::iterator f_it){
     MeshVertex &mv2 = vertices[mf.mesh_vertex[2]];
 
     // remove f_it face from its neighboring faces' neighboring faces list
-    vector<MeshFace*>::iterator mf_ptr_it;
-    //for ()
     for (vector<MeshFace*> nfs : mf.neighboring_faces){
-        for (MeshFace* nf_ptr : nfs){
+        for (vector<MeshFace*>::iterator nf_ptr_it = nfs.begin(); nf_ptr_it != nfs.end();){
+        //for (MeshFace* nf_ptr : nfs){
+            MeshFace* nf_ptr = (*nf_ptr_it);
+            if (nf_ptr->neighboring_faces.size() != 3){ // already deleted meshface
+                nf_ptr_it = nfs.erase(nf_ptr_it);
+                continue;
+            }
             for (int i=0; i<3; i++){
                 vector<MeshFace*>::iterator nf_nf_ptr_it = nf_ptr->neighboring_faces[i].begin();
                 while (nf_nf_ptr_it != nf_ptr->neighboring_faces[i].end()){
@@ -172,48 +176,49 @@ vector<MeshFace>::iterator Mesh::removeFace(vector<MeshFace>::iterator f_it){
                     }
                 }
             }
+            ++nf_ptr_it;
         }
     }
 
 
     if (mf.mesh_vertex[0] == mf.mesh_vertex[1] && mf.mesh_vertex[1] == mf.mesh_vertex[2]){
         for (int c_idx=0; c_idx < mv1.connected_faces.size(); c_idx ++){
-            MeshFace &cf = (*mv1.connected_faces[c_idx]);
+            MeshFace *cf = mv1.connected_faces[c_idx];
             for (int v_idx=0; v_idx<3; v_idx ++){
-                if (cf.mesh_vertex[v_idx] == mf.mesh_vertex[1])
-                    cf.mesh_vertex[v_idx] = mf.mesh_vertex[0];
+                if (cf->mesh_vertex[v_idx] == mf.mesh_vertex[1])
+                    cf->mesh_vertex[v_idx] = mf.mesh_vertex[0];
             }
         }
 
         for (int c_idx=0; c_idx < mv2.connected_faces.size(); c_idx ++){
-            MeshFace &cf = (*mv2.connected_faces[c_idx]);
+            MeshFace *cf = mv2.connected_faces[c_idx];
             for (int v_idx=0; v_idx<3; v_idx ++){
-                if (cf.mesh_vertex[v_idx] == mf.mesh_vertex[2])
-                    cf.mesh_vertex[v_idx] = mf.mesh_vertex[0];
+                if (cf->mesh_vertex[v_idx] == mf.mesh_vertex[2])
+                    cf->mesh_vertex[v_idx] = mf.mesh_vertex[0];
             }
         }
     } else if (mf.mesh_vertex[0] == mf.mesh_vertex[1]){ // replace 1 vertices in connected faces of 1 by 0
         for (int c_idx=0; c_idx < mv1.connected_faces.size(); c_idx ++){
-            MeshFace &cf = (*mv1.connected_faces[c_idx]);
+            MeshFace *cf = mv1.connected_faces[c_idx];
             for (int v_idx=0; v_idx<3; v_idx ++){
-                if (cf.mesh_vertex[v_idx] == mf.mesh_vertex[1])
-                    cf.mesh_vertex[v_idx] = mf.mesh_vertex[0];
+                if (cf->mesh_vertex[v_idx] == mf.mesh_vertex[1])
+                    cf->mesh_vertex[v_idx] = mf.mesh_vertex[0];
             }
         }
     } else if (mf.mesh_vertex[1] == mf.mesh_vertex[2]){ // replace 2 by 1
         for (int c_idx=0; c_idx < mv2.connected_faces.size(); c_idx ++){
-            MeshFace &cf = (*mv2.connected_faces[c_idx]);
+            MeshFace *cf = mv2.connected_faces[c_idx];
             for (int v_idx=0; v_idx<3; v_idx ++){
-                if (cf.mesh_vertex[v_idx] == mf.mesh_vertex[2])
-                    cf.mesh_vertex[v_idx] = mf.mesh_vertex[1];
+                if (cf->mesh_vertex[v_idx] == mf.mesh_vertex[2])
+                    cf->mesh_vertex[v_idx] = mf.mesh_vertex[1];
             }
         }
     } else if (mf.mesh_vertex[2] == mf.mesh_vertex[0]){ // replace 0 by 2
         for (int c_idx=0; c_idx < mv0.connected_faces.size(); c_idx ++){
-            MeshFace &cf = (*mv0.connected_faces[c_idx]);
+            MeshFace *cf = mv0.connected_faces[c_idx];
             for (int v_idx=0; v_idx<3; v_idx ++){
-                if (cf.mesh_vertex[v_idx] == mf.mesh_vertex[0])
-                    cf.mesh_vertex[v_idx] = mf.mesh_vertex[2];
+                if (cf->mesh_vertex[v_idx] == mf.mesh_vertex[0])
+                    cf->mesh_vertex[v_idx] = mf.mesh_vertex[2];
             }
         }
     }
@@ -227,6 +232,11 @@ void Mesh::connectFaces(){
 
     for (vector<MeshFace>::iterator it = faces.begin(); it!= faces.end(); it++){
         MeshFace &mf = (*it);
+
+        // clear neighboring faces
+        mf.neighboring_faces[0].clear();
+        mf.neighboring_faces[1].clear();
+        mf.neighboring_faces[2].clear();
 
         vector<MeshFace*> faces1 = findFaceWith2Vertices(mf.mesh_vertex[0], mf.mesh_vertex[1], mf);
         vector<MeshFace*> faces2 = findFaceWith2Vertices(mf.mesh_vertex[1], mf.mesh_vertex[2], mf);
@@ -569,6 +579,32 @@ Paths3D contourConstruct(Paths3D hole_edges){
         pathHash[path_hash_v].push_back(p[0]);
     }
 
+
+    /*while (pathHash.size() > 0){
+        MeshVertex start, pj_prev, pj, pj_next, last, u, v;
+        Path3D contour;
+        start = pathHash.begin().value()[0];
+        pj_prev = start;
+        pathHash.remove(meshVertex2Hash(start));
+
+        pj = pathHash.begin().value()[0];
+        last = pathHash.end().value()[0];
+
+        while (pj != last){
+            u = (pathHash[meshVertex2Hash(pj)]).at(1);
+            v = (pathHash[meshVertex2Hash(pj)]).at(2);
+            pathHash.remove(meshVertex2Hash(pj));
+            if (u == pj_prev){
+                pj_next = v;
+            } else {
+                pj_next = u;
+            }
+            pj = pj_next;
+        }
+        contourList.push_back(contour);
+    }*/
+
+
     // Build Polygons
     while(pathHash.size() >0){
         Path3D contour;
@@ -659,9 +695,9 @@ Paths3D contourConstruct(Paths3D hole_edges){
         if (contour.size() == 2)
             continue;
 
-        /*if (Orientation(contour)){
-            ReversePath(contour);
-        }*/
+        //if (Orientation(contour)){
+        //    ReversePath(contour);
+        //}
 
         contourList.push_back(contour);
     }
@@ -672,11 +708,17 @@ Paths3D contourConstruct(Paths3D hole_edges){
 
 vector<vector<QVector3D>> interpolate(Path3D from, Path3D to){
     vector<vector<QVector3D>> temp_faces;
+    temp_faces.reserve(from.size() * 2);
 
     if (from.size() != to.size()){
         qDebug() << "from and to size differs";
         return temp_faces;
     }
+    if (from.size() <3){
+        return temp_faces;
+    }
+
+    qDebug() << from.size() << to.size();
 
     // add odd number faces
     for (int i=1; i<from.size()-1; i++){
