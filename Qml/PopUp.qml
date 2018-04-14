@@ -104,8 +104,10 @@ Rectangle {
                     applyClicked();
                     break;
                 case "Shell Offset":
+                    applyClicked();
                     break;
                 case "Extend":
+                    applyClicked();
                     break;
                 case "Support":
                     break;

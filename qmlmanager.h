@@ -43,6 +43,9 @@ public:
     // extension components
     QObject* extensionPopup;
 
+    // shell offset components;
+    QObject* shelloffsetPopup;
+
     // auto repair components
     QObject* repairPopup;
 
@@ -96,6 +99,7 @@ public slots:
     void sendUpdateModelInfo(int, int, QString, float);
     void createModelFile(Mesh* target_mesh, QString filename);
     void openModelFile(QString filename);
+    void deleteModelFile(int ID);
     void runGroupFeature(int,QString);
     void modelSelected(int);
     void modelRotate(int,int);

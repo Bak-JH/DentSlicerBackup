@@ -749,6 +749,7 @@ Rectangle {
 
         //12. PopUp - Shell Offset
         PopUp {
+            objectName: "shelloffsetPopup"
             id: popup_shelloffset
             funcname: "Shell Offset"
             height: 265
@@ -764,9 +765,26 @@ Rectangle {
             descriptionimage_vis: false
             numbox_detail2_vis: true
             numberbox_detail2_y: 170
-            numbox_detail2_defalult: 3.0
-            numbox_updown_scale: 0.5
-            state: third_tab_button_shelloffset.state=="active" ? "active" : "inactive"
+            numbox_detail2_defalult: 1.0
+            numbox_updown_scale: 0.25
+            state: {
+                if (third_tab_button_shelloffset.state == "active"){
+                    //openShellOffset();
+                    return "active";
+                } else {
+                    //closeShellOffset();
+                    return "inactive";
+                }
+            }
+
+            //signal runFeature(int type);
+            signal shellOffset(double factor);
+
+            onApplyClicked: {
+                console.log("shell offset -" + numbox_detail2_defalult);
+                shellOffset(-numbox_detail2_defalult);//runFeature(ftrShellOffset);
+            }
+
             //switch button
             Rectangle {
                 width: 165
@@ -831,10 +849,11 @@ Rectangle {
                     return "inactive";
                 }
             }
-            onApplyClicked:{
-                console.log("Apply clicked");
-
+            onApplyClicked: {
+                console.log("extension");
+                runFeature(ftrExtend);
             }
+            signal runFeature(int type);
             signal openExtension()
             signal closeExtension()
 

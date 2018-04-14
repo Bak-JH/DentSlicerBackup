@@ -64,7 +64,6 @@ void extendAlongOutline(Mesh* mesh, QVector3D normal, Path3D selectedPath, float
     // drill along selected faces
 
     while (distance>0){
-        vector<vector<QVector3D>> interpolated_faces;
 
         // prolong next Path
         Path3D next_path;
@@ -74,11 +73,8 @@ void extendAlongOutline(Mesh* mesh, QVector3D normal, Path3D selectedPath, float
             (*next_path.end()).position + normal;
         }
 
-        // extend to next Path
-        interpolated_faces = interpolate(selectedPath, next_path);
-
-        // add Face to Mesh
-        for (vector<QVector3D> face : interpolated_faces){
+        // add extend Face to Mesh
+        for (array<QVector3D,3> face : interpolate(selectedPath, next_path)){
             mesh->addFace(face[0], face[1], face[2]);
         }
 
@@ -90,12 +86,10 @@ void extendAlongOutline(Mesh* mesh, QVector3D normal, Path3D selectedPath, float
     }
 
     // fill holes
-    vector<vector<QVector3D>> cap = fillPath(selectedPath);
-    for (vector<QVector3D> face : cap){
+    for (array<QVector3D,3> face : fillPath(selectedPath)){
         mesh->addFace(face[0],face[1],face[2]);
     }
 
     mesh->connectFaces();
 }
-
 
