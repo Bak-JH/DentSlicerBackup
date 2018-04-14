@@ -53,7 +53,8 @@ public:
     QObject* saveButton;
 
     // export components
-    QObject* exportButton;
+    //QObject* exportButton;
+    QObject* exportOKButton;
 
     vector<GLModel*> glmodels;
     GLModel* selectedModel = nullptr;

@@ -82,11 +82,6 @@ Item {
                     border.color: "#C6C6C6"
                     //radius: 15
                 }
-                //padding.top: 12
-                //padding.bottom: 12
-
-
-
 
                 itemDelegate.label:             // an item text
                     Text

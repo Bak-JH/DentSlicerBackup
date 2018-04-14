@@ -203,15 +203,8 @@ Rectangle {
             MouseArea{
                 anchors.fill: parent
                 onClicked:{
+                    /*
                     function collectConfigurations(){
-                        /*var configurations = "";
-                        configurations += "r#"+options[0] + "/";
-                        configurations += "l#"+options[1] + "/";
-                        configurations += "s#"+options[2] + "/";
-                        configurations += "f#"+options[3] + "/";
-                        configurations += "b#"+options[4];
-                        return configurations;*/
-
                         var configurations = {};
 
                         // do collecting things
@@ -232,6 +225,8 @@ Rectangle {
                     var cfg = collectConfigurations();
                     //se.slice(cfg);
                     parent.runFeature(ftrExport, cfg);
+                    */
+                    lefttabExport.visible = true;
                 }
             }
             signal runFeature(int type, var config);

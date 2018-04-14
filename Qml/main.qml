@@ -15,8 +15,9 @@ ApplicationWindow {
 
     objectName: "mainWindow"
     property alias lefttab: lefttab
+    property alias lefttabExport: lefttabExport
     property alias progressPopUp: progressPopUp
-
+    /* hidden for beta
     menuBar: MenuBar{
         Menu{
             title : "File"
@@ -37,7 +38,7 @@ ApplicationWindow {
             MenuItem{text : "hellllp..."}
         }
     }
-
+    */
     Rectangle{
         id : back
         anchors.top : uppertab.bottom
@@ -91,6 +92,15 @@ ApplicationWindow {
 
         anchors.top: uppertab.bottom
         anchors.left: parent.left
+    }
+    LeftTabExport{
+        id : lefttabExport
+        width : 260
+        height : parent.height - uppertab.height
+
+        anchors.top: uppertab.bottom
+        anchors.left: parent.left
+        visible: false
     }
 
     UICore{
