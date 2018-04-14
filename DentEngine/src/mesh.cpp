@@ -462,9 +462,12 @@ Paths contourConstruct(Paths pathList){
             last = (*dest)[2];
 
             dest->erase(dest->begin()+1);
-            dest->erase(dest->begin()+2);
-            if (dest->size() == 1)
+            dest->erase(dest->begin()+1);
+            if (dest->size() == 1){
                 pathHash.remove(intPoint2Hash(pj_prev));
+                pj_next = last;
+                contour.push_back(pj);
+            }
         }
         while(pj_next != last){
             contour.push_back(pj);
@@ -475,9 +478,9 @@ Paths contourConstruct(Paths pathList){
                 break;
             } else if (dest->size() == 2){
                 start = (*dest)[0]; // itself
-                uint32_t endHash = intPoint2Hash((*dest)[1]);
+                /*uint32_t endHash = intPoint2Hash((*dest)[1]);
                 if (pathHash.contains(endHash))
-                    pathHash.remove(endHash); // maybe needless
+                    pathHash.remove(endHash); // maybe needless*/
 
                 pathHash.remove(intPoint2Hash(pj));
                 pj_next = last;
@@ -542,12 +545,24 @@ Paths contourConstruct(Paths pathList){
     return contourList;
 }
 
+void findAndDeleteHash(vector<uint32_t>* hashList, uint32_t hash){
+    for (vector<uint32_t>::iterator h_it = hashList->begin(); h_it != hashList->end();){
+        if (*h_it == hash){
+            hashList->erase(h_it);
+            break;
+        }
+        h_it ++;
+    }
+}
 
 // construct closed contour using segments created from identify step
 Paths3D contourConstruct(Paths3D hole_edges){
     Paths3D contourList;
 
     QHash<uint32_t, Path3D> pathHash;
+    vector<uint32_t> hashList;
+    hashList.reserve(hole_edges.size());
+
     if (hole_edges.size() == 0)
         return contourList;
 
@@ -569,28 +584,35 @@ Paths3D contourConstruct(Paths3D hole_edges){
 
         if (! pathHash.contains(path_hash_u)){
             debug_count ++;
+            pathHash[path_hash_u].reserve(10);
             pathHash[path_hash_u].push_back(p[0]);
+            hashList.push_back(path_hash_u);
         }
         if (! pathHash.contains(path_hash_v)){
             debug_count ++;
+            pathHash[path_hash_v].reserve(10);
             pathHash[path_hash_v].push_back(p[1]);
+            hashList.push_back(path_hash_v);
         }
         pathHash[path_hash_u].push_back(p[1]);
         pathHash[path_hash_v].push_back(p[0]);
     }
 
+    //qDebug() << "path hash begin :" << pathHash.begin().value()[0].position;
 
-    /*while (pathHash.size() > 0){
+    /*while (pathHash.size() > 3){
         MeshVertex start, pj_prev, pj, pj_next, last, u, v;
         Path3D contour;
         start = pathHash.begin().value()[0];
+        contour.push_back(start);
         pj_prev = start;
+        pj = pathHash[meshVertex2Hash(start)].at(1);
+        last = pathHash[meshVertex2Hash(start)].at(2);
+
         pathHash.remove(meshVertex2Hash(start));
 
-        pj = pathHash.begin().value()[0];
-        last = pathHash.end().value()[0];
-
         while (pj != last){
+            contour.push_back(pj);
             u = (pathHash[meshVertex2Hash(pj)]).at(1);
             v = (pathHash[meshVertex2Hash(pj)]).at(2);
             pathHash.remove(meshVertex2Hash(pj));
@@ -601,8 +623,13 @@ Paths3D contourConstruct(Paths3D hole_edges){
             }
             pj = pj_next;
         }
+        contour.push_back(pj);
+        contour.push_back(start);
+
         contourList.push_back(contour);
     }*/
+
+
 
 
     // Build Polygons
@@ -610,40 +637,54 @@ Paths3D contourConstruct(Paths3D hole_edges){
         Path3D contour;
         MeshVertex start, pj_prev, pj, pj_next, last;
 
-        pj_prev = pathHash.begin().value()[0];
-        start = pj_prev;
-        contour.push_back(pj_prev);
-        vector<MeshVertex>* dest = &(pathHash.begin().value());
-
+        start = pathHash[hashList[0]][0];// pathHash.begin().value()[0];
+        pj_prev = start;
+        contour.push_back(start);
+        Path3D* dest = &(pathHash[hashList[0]]);//pathHash.begin().value());
         if (dest->size() == 0|| dest->size() == 1){
-            pathHash.remove(meshVertex2Hash(pj_prev));
+            uint32_t temp_hash = meshVertex2Hash(pj_prev);
+            pathHash.remove(temp_hash);
+            findAndDeleteHash(&hashList, temp_hash); //hashList.remove(temp_hash);
             continue;
         } else if (dest->size() ==2){
             pj = (*dest)[1];
             last = (*dest)[0]; // pj_prev itself
-            pathHash.remove(meshVertex2Hash(pj_prev));
+            pj_next = (*dest)[0];
+            uint32_t temp_hash = meshVertex2Hash(pj_prev);
+            pathHash.remove(temp_hash);
+            findAndDeleteHash(&hashList, temp_hash);
         } else {
             pj = (*dest)[1];
             last = (*dest)[2];
 
             dest->erase(dest->begin()+1);
-            dest->erase(dest->begin()+2);
-            if (dest->size() == 1)
-                pathHash.remove(meshVertex2Hash(pj_prev));
+            dest->erase(dest->begin()+1);
+
+            if (dest->size() == 1){
+                uint32_t temp_hash = meshVertex2Hash(pj_prev);
+                pathHash.remove(temp_hash);
+                findAndDeleteHash(&hashList, temp_hash);
+                pj_next = last;
+                contour.push_back(pj);
+            }
         }
         while(pj_next != last){
             contour.push_back(pj);
             dest = &(pathHash[meshVertex2Hash(pj)]);
 
             if (dest->size() == 0|| dest->size() == 1){
-                pathHash.remove(meshVertex2Hash(pj));
+                uint32_t temp_hash = meshVertex2Hash(pj);
+                pathHash.remove(temp_hash);
+                findAndDeleteHash(&hashList, temp_hash);
                 break;
             } else if (dest->size() == 2){
                 start = (*dest)[0]; // itself
-                uint32_t endHash = meshVertex2Hash((*dest)[1]);
+                /*uint32_t endHash = meshVertex2Hash((*dest)[1]);
                 if (pathHash.contains(endHash))
-                    pathHash.remove(endHash); // maybe needless
-                pathHash.remove(meshVertex2Hash(pj));
+                    pathHash.remove(endHash); // maybe needless*/
+                uint32_t temp_hash = meshVertex2Hash(pj);
+                pathHash.remove(temp_hash);
+                findAndDeleteHash(&hashList, temp_hash);
                 pj_next = last;
                 pj = pj_next;
                 pj_prev = contour[0];
@@ -661,9 +702,11 @@ Paths3D contourConstruct(Paths3D hole_edges){
             }
             pj_next = (*dest)[1];
             dest->erase(dest->begin()+1);
-            if (dest->size() == 1)
-                pathHash.remove(meshVertex2Hash(pj));
-
+            if (dest->size() == 1){
+                uint32_t temp_hash = meshVertex2Hash(pj);
+                pathHash.remove(temp_hash);
+                findAndDeleteHash(&hashList, temp_hash);
+            }
 
             pj_prev = pj;
             pj = pj_next;
@@ -687,13 +730,16 @@ Paths3D contourConstruct(Paths3D hole_edges){
                     break;
                 }
             }
-            if (dest->size() == 1)
+            if (dest->size() == 1){
                 pathHash.remove(last_hash);
+                findAndDeleteHash(&hashList, last_hash);
+            }
         }
 
         // remove 2-vertices-contours
-        if (contour.size() == 2)
+        if (contour.size() == 2){
             continue;
+        }
 
         //if (Orientation(contour)){
         //    ReversePath(contour);
@@ -707,16 +753,17 @@ Paths3D contourConstruct(Paths3D hole_edges){
 }
 
 vector<vector<QVector3D>> interpolate(Path3D from, Path3D to){
-    vector<vector<QVector3D>> temp_faces;
-    temp_faces.reserve(from.size() * 2);
-
+    vector<vector<QVector3D>> result_faces;
     if (from.size() != to.size()){
         qDebug() << "from and to size differs";
-        return temp_faces;
+        return result_faces;
     }
     if (from.size() <3){
-        return temp_faces;
+        qDebug() << "from path size small :" << from.size();
+        return result_faces;
     }
+
+    result_faces.reserve(from.size()*2);
 
     qDebug() << from.size() << to.size();
 
@@ -728,15 +775,15 @@ vector<vector<QVector3D>> interpolate(Path3D from, Path3D to){
             temp_face1.push_back(to[i].position);
             temp_face1.push_back(from[i-1].position);
             temp_face1.push_back(from[i].position);
-            temp_faces.push_back(temp_face1);
+            result_faces.push_back(temp_face1);
             vector<QVector3D> temp_face2;
             temp_face2.push_back(to[i].position);
             temp_face2.push_back(from[i].position);
             temp_face2.push_back(from[i+1].position);
-            temp_faces.push_back(temp_face2);
+            result_faces.push_back(temp_face2);
         }
     }
-
+    qDebug() << "reserved odd number faces" << result_faces.size();
 
     // add even number faces
     for (int i=2; i<from.size()-1; i++){
@@ -746,16 +793,30 @@ vector<vector<QVector3D>> interpolate(Path3D from, Path3D to){
             temp_face1.push_back(to[i].position);
             temp_face1.push_back(from[i-1].position);
             temp_face1.push_back(from[i].position);
-            temp_faces.push_back(temp_face1);
+            result_faces.push_back(temp_face1);
             vector<QVector3D> temp_face2;
             temp_face2.push_back(to[i].position);
             temp_face2.push_back(from[i].position);
             temp_face2.push_back(from[i+1].position);
-            temp_faces.push_back(temp_face2);
+            result_faces.push_back(temp_face2);
         }
     }
+    qDebug() << "reserved even number faces" << result_faces.size();
 
-    return temp_faces;
+    // add right left new face
+    vector<QVector3D> temp_face1;
+    temp_face1.push_back(to[from.size()-1].position);
+    temp_face1.push_back(from[from.size()-2].position);
+    temp_face1.push_back(from[from.size()-1].position);
+    result_faces.push_back(temp_face1);
+    vector<QVector3D> temp_face2;
+    temp_face2.push_back(to[from.size()-1].position);
+    temp_face2.push_back(from[from.size()-1].position);
+    temp_face2.push_back(from[0].position);
+    result_faces.push_back(temp_face2);
+
+
+    return result_faces;
 }
 
 /************** Helper Functions *****************/
