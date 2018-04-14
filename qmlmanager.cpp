@@ -55,7 +55,8 @@ void QmlManager::initializeUI(QQmlApplicationEngine* e){
     saveButton = FindItemByName(engine, "saveBtn");
 
     // export component
-    exportButton = FindItemByName(engine, "exportBtn");
+    //exportButton = FindItemByName(engine, "exportBtn");
+    exportOKButton = FindItemByName(engine, "exportOKBtn");
 
     //rotation Sphere
     moveArrow = (QEntity *)FindItemByName(engine, "moveArrowEntity");
@@ -121,8 +122,8 @@ void QmlManager::openModelFile(QString fname){
 void QmlManager::disconnectHandlers(GLModel* glmodel){
     QObject::disconnect(glmodel->arsignal, SIGNAL(runArrange()), this, SLOT(runArrange()));
 
-    QObject::disconnect(glmodel->ft, SIGNAL(setProgress(QVariant)),progress_text, SLOT(update_loading(QVariant)));
-    QObject::disconnect(glmodel->ft, SIGNAL(loadPopup(QVariant)),orientPopup, SLOT(show_popup(QVariant)));
+    QObject::disconnect(glmodel->ft, SIGNAL(setProgress(QVariant)),progress_popup, SLOT(updateNumber(QVariant)));
+    //QObject::disconnect(glmodel->ft, SIGNAL(loadPopup(QVariant)),orientPopup, SLOT(show_popup(QVariant)));
 
     // need to connect for every popup
 
@@ -158,7 +159,8 @@ void QmlManager::disconnectHandlers(GLModel* glmodel){
     QObject::disconnect(saveButton, SIGNAL(runFeature(int)), glmodel->ft, SLOT(setTypeAndRun(int)));
 
     // export button codes
-    QObject::disconnect(exportButton, SIGNAL(runFeature(int, QVariant)), glmodel->ft, SLOT(setTypeAndRun(int, QVariant)));
+    QObject::disconnect(exportOKButton, SIGNAL(runFeature(int, QVariant)), glmodel->ft, SLOT(setTypeAndRun(int, QVariant)));
+    //QObject::disconnect(exportButton, SIGNAL(runFeature(int, QVariant)), glmodel->ft, SLOT(setTypeAndRun(int, QVariant)));
 }
 
 void QmlManager::connectHandlers(GLModel* glmodel){
@@ -202,7 +204,8 @@ void QmlManager::connectHandlers(GLModel* glmodel){
     QObject::connect(saveButton, SIGNAL(runFeature(int)), glmodel->ft, SLOT(setTypeAndRun(int)));
 
     // export button codes
-    QObject::connect(exportButton, SIGNAL(runFeature(int, QVariant)), glmodel->ft, SLOT(setTypeAndRun(int, QVariant)));
+    QObject::connect(exportOKButton, SIGNAL(runFeature(int, QVariant)), glmodel->ft, SLOT(setTypeAndRun(int, QVariant)));
+    //QObject::connect(exportButton, SIGNAL(runFeature(int, QVariant)), glmodel->ft, SLOT(setTypeAndRun(int, QVariant)));
 
 }
 

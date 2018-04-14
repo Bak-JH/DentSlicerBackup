@@ -38,5 +38,7 @@
         <file>Qml/three.js</file>
         <file>Qml/ProgressPopUp.qml</file>
         <file>Qml/ResultPopup.qml</file>
+        <file>Qml/LeftTabExport.qml</file>
+        <file>Qml/LeftTabExportElement.qml</file>
     </qresource>
 </RCC>

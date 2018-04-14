@@ -7,10 +7,12 @@ Rectangle {
 
     property alias option_resolution: option_resolution
     property alias option_layer_height: option_layer_height
-    property alias option_support: option_support
-    property alias option_infill: option_infill
+    property alias option_bed_number: option_bed_number
     property alias option_raft: option_raft
-
+    property alias option_support: option_support
+    property alias option_support_density: option_support_density
+    property alias option_infill: option_infill
+    property alias option_infill_density: option_infill_density
 
     width : 260
     height : 180
@@ -89,8 +91,23 @@ Rectangle {
                     columnContents: ["0.1","0.2","0.05"]
                 }
                 LeftTabSlicingOptionElement{
+                    id:option_bed_number
+                    columnName: "Bed number"
+                    columnContents: ["1","2","3"]
+                }
+                LeftTabSlicingOptionElement{
+                    id:option_raft
+                    columnName: "Raft"
+                    columnContents: ["general","none"]
+                }
+                LeftTabSlicingOptionElement{
                     id:option_support
                     columnName: "Support"
+                    columnContents: ["k-branch","general"]
+                }
+                LeftTabSlicingOptionElement{
+                    id:option_support_density
+                    columnName: ""
                     columnContents: ["k-branch","general"]
                 }
                 LeftTabSlicingOptionElement{
@@ -99,9 +116,9 @@ Rectangle {
                     columnContents: ["general","full","none"]
                 }
                 LeftTabSlicingOptionElement{
-                    id:option_raft
-                    columnName: "Raft"
-                    columnContents: ["general","none"]
+                    id:option_infill_density
+                    columnName: ""
+                    columnContents: ["general","full","none"]
                 }
 
             }
