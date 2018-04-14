@@ -45,6 +45,9 @@ void QmlManager::initializeUI(QQmlApplicationEngine* e){
     // extension components
     extensionPopup = FindItemByName(engine, "extensionPopup");
 
+    // shell offset components
+    shelloffsetPopup = FindItemByName(engine, "shelloffsetPopup");
+
     // repair components
     repairPopup = FindItemByName(engine, "repairPopup");
 
@@ -85,12 +88,13 @@ void QmlManager::initializeUI(QQmlApplicationEngine* e){
     QObject::connect(this, SIGNAL(arrangeDone(vector<QVector3D>, vector<float>)), this, SLOT(applyArrangeResult(vector<QVector3D>, vector<float>)));
 
     //openModelFile(QDir::currentPath()+"/Models/partial1.stl");
-    //openModelFile("c:/Users/user/Desktop/partial1.stl");
+    openModelFile("c:/Users/user/Desktop/asdfasf.stl");
 }
 
 void QmlManager::createModelFile(Mesh* target_mesh, QString fname) {
     GLModel* glmodel = new GLModel(mainWindow, models, target_mesh, fname, false);
 
+    qDebug() << "created new model file";
     glmodels.push_back(glmodel);
 
     // set initial position
@@ -102,10 +106,13 @@ void QmlManager::createModelFile(Mesh* target_mesh, QString fname) {
                            (-1)*xmid,
                            (-1)*ymid,
                            (-1)*zmid));
+    qDebug() << "moved model to right place";
     //QObject* progress_text = FindItemByName(engine, "progress_text"); //orientation와 공유
 
     // model selection codes, connect handlers later when model selected
     QObject::connect(glmodel->shadowModel, SIGNAL(modelSelected(int)), this, SLOT(modelSelected(int)));
+
+    qDebug() << "connected model selected signal";
 
     glmodels_arranged = false;
 
@@ -121,11 +128,24 @@ void QmlManager::openModelFile(QString fname){
     createModelFile(nullptr, fname);
 }
 
+void QmlManager::deleteModelFile(int ID){
+    for(int i=0; i<glmodels.size();i++){
+        if(glmodels.at(i)->ID == ID){
+            glmodels.at(i)->shadowModel->deleteLater();
+            glmodels.at(i)->deleteLater();
+            selectedModel = nullptr;
+            break;
+        }
+    }
+}
+
 void QmlManager::disconnectHandlers(GLModel* glmodel){
     QObject::disconnect(glmodel->arsignal, SIGNAL(runArrange()), this, SLOT(runArrange()));
 
     QObject::disconnect(glmodel->ft, SIGNAL(setProgress(QVariant)),progress_popup, SLOT(updateNumber(QVariant)));
+
     //QObject::disconnect(glmodel->ft, SIGNAL(loadPopup(QVariant)),orientPopup, SLOT(show_popup(QVariant)));
+
 
     // need to connect for every popup
 
@@ -150,6 +170,11 @@ void QmlManager::disconnectHandlers(GLModel* glmodel){
     // extension popup codes
     QObject::disconnect(extensionPopup, SIGNAL(openExtension()), glmodel->shadowModel, SLOT(openExtension()));
     QObject::disconnect(extensionPopup, SIGNAL(closeExtension()), glmodel->shadowModel, SLOT(closeExtension()));
+    QObject::disconnect(extensionPopup, SIGNAL(runFeature(int)), glmodel->ft, SLOT(setTypeAndStart(int)));
+
+    // shelloffset popup codes
+    QObject::disconnect(shelloffsetPopup, SIGNAL(shellOffset(float)), glmodel, SLOT(generateShellOffset(float)));
+
 
     // auto Repair popup codes
     QObject::disconnect(repairPopup, SIGNAL(runFeature(int)), glmodel->ft, SLOT(setTypeAndStart(int)));
@@ -195,6 +220,11 @@ void QmlManager::connectHandlers(GLModel* glmodel){
     // extension popup codes
     QObject::connect(extensionPopup, SIGNAL(openExtension()), glmodel->shadowModel, SLOT(openExtension()));
     QObject::connect(extensionPopup, SIGNAL(closeExtension()), glmodel->shadowModel, SLOT(closeExtension()));
+    QObject::connect(extensionPopup, SIGNAL(runFeature(int)), glmodel->ft, SLOT(setTypeAndStart(int)));
+
+    // shelloffset popup codes
+    QObject::connect(shelloffsetPopup, SIGNAL(shellOffset(double)), glmodel, SLOT(generateShellOffset(double)));
+
 
     // auto Repair popup codes
     QObject::connect(repairPopup, SIGNAL(runFeature(int)), glmodel->ft, SLOT(setTypeAndStart(int)));
@@ -267,6 +297,7 @@ void QmlManager::modelSelected(int ID){
             break;
         }
     }
+
     // reset previous model texture
     if (selectedModel != nullptr){
         qDebug() << "resetting model" << selectedModel->ID;
@@ -299,6 +330,16 @@ void QmlManager::modelSelected(int ID){
                 break;
             }
         }
+    } else {
+        selectedModel = nullptr;
+    }
+
+    if (selectedModel != target){
+        // change selectedModel
+        selectedModel = target;
+        selectedModel->m_meshMaterial->setDiffuse(QColor(100,255,100));
+        qDebug() << "changing model" << selectedModel->ID;
+        connectHandlers(selectedModel);
     } else {
         selectedModel = nullptr;
     }

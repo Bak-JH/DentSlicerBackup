@@ -6,6 +6,7 @@
 
 #include "qmlmanager.h"
 #include "feature/text3dgeometrygenerator.h"
+#include "feature/shelloffset.h"
 #include <QtConcurrent/QtConcurrent>
 #include <QFuture>
 #include <QFileDialog>
@@ -43,11 +44,12 @@ GLModel::GLModel(QObject* mainWindow, QNode *parent, Mesh* loadMesh, QString fna
         addComponent(m_transform);
 
         m_meshMaterial = new QPhongMaterial();
-        m_meshMaterial->setAmbient(QColor(255,0,0));
+        /*m_meshMaterial->setAmbient(QColor(255,0,0));
         m_meshMaterial->setDiffuse(QColor(173,215,218));
         m_meshMaterial->setSpecular(QColor(182,237,246));
         m_meshMaterial->setShininess(0.0f);
         addComponent(m_meshMaterial);
+        */
 
         m_objectPicker = new Qt3DRender::QObjectPicker(this);
 
@@ -130,6 +132,7 @@ void GLModel::moveModelMesh(QVector3D direction){
     mesh->vertexMove(direction);
     if (shadowModel != NULL)
         shadowModel->moveModelMesh(direction);
+    qDebug() << "moved vertex";
     emit _updateModelMesh();
 }
 void GLModel::scaleModelMesh(float scale){
@@ -175,11 +178,14 @@ void GLModel::updateModelMesh(){
     removeComponent(m_geometryRenderer);
     delete m_geometry;
     delete m_geometryRenderer;
-
+    qDebug() << "deleted buffers";
     // reinitialize with updated mesh
     initialize(mesh);
+    qDebug() << "reinitialized";
     addVertices(mesh, false);
+    qDebug() << "added vertices";
     applyGeometry();
+    qDebug() << "applied geometries";
 
     // create new object picker, shadowmodel, remove prev shadowmodel
     /*Qt3DRender::QObjectPicker* op = shadowModel->m_objectPicker;
@@ -314,10 +320,12 @@ void featureThread::run(){
             }
         case ftrShellOffset:
             {
+                shellOffset(m_glmodel, -0.5);
                 break;
             }
         case ftrExtend:
             {
+
                 break;
             }
         case ftrSupport:
@@ -905,34 +913,6 @@ void GLModel::generateRLModel(){
     qmlManager->selectedModel = nullptr;
 }
 
-
-
-
-void GLModel::beforeInitialize(){
-//    delete m_mesh;
-    removeComponent(m_objectPicker);
-    QObject::disconnect(m_objectPicker, SIGNAL(clicked(Qt3DRender::QPickEvent*)), this, SLOT(handlePickerClicked(Qt3DRender::QPickEvent*)));
-    removeComponent(m_transform);
-    removeComponent(m_geometryRenderer);
-    removeComponent(m_meshMaterial);
-    m_geometryRenderer->setGeometry(nullptr);
-    m_geometry->removeAttribute(colorAttribute);
-    m_geometry->removeAttribute(normalAttribute);
-    m_geometry->removeAttribute(positionAttribute);
-    colorAttribute->setBuffer(nullptr);
-    delete colorAttribute;
-    normalAttribute->setBuffer(nullptr);
-    delete normalAttribute;
-    positionAttribute->setBuffer(nullptr);
-    delete positionAttribute;
-    delete vertexColorBuffer;
-    delete vertexNormalBuffer;
-    delete vertexBuffer;
-    delete m_geometry;
-    delete m_geometryRenderer;
-}
-
-
 GLModel::~GLModel(){
     /*delete m_transform;
     delete m_objectPicker;
@@ -948,52 +928,6 @@ GLModel::~GLModel(){
     delete vertexBuffer;
     delete m_geometry;
     delete m_geometryRenderer;*/
-}
-
-void GLModel::beforeAddVerticies(){
-    //쓰지말것
-    removeComponent(m_geometryRenderer);
-    removeComponent(m_meshMaterial);
-    m_geometryRenderer->setGeometry(nullptr);
-    m_geometry->removeAttribute(positionAttribute);
-    m_geometry->removeAttribute(normalAttribute);
-    m_geometry->removeAttribute(colorAttribute);
-
-    positionAttribute->setBuffer(nullptr);
-//    delete vertexBuffer;
-//    QByteArray vertexArray;
-//    vertexArray.resize(mesh->faces.size()*3*(3)*sizeof(float));
-//    vertexBuffer = new Qt3DRender::QBuffer(Qt3DRender::QBuffer::VertexBuffer,m_geometry);
-//    vertexBuffer->setUsage(Qt3DRender::QBuffer::DynamicDraw);
-//    vertexBuffer->setData(vertexArray);
-//    positionAttribute->setBuffer(vertexBuffer);
-
-
-//    normalAttribute->setBuffer(nullptr);
-//    delete vertexNormalBuffer;
-//    QByteArray vertexNormalArray;
-//    vertexNormalArray.resize(mesh->faces.size()*3*(3)*sizeof(float));
-//    vertexNormalBuffer = new Qt3DRender::QBuffer(Qt3DRender::QBuffer::VertexBuffer,m_geometry);
-//    vertexNormalBuffer->setUsage(Qt3DRender::QBuffer::DynamicDraw);
-//    vertexNormalBuffer->setData(vertexNormalArray);
-//    normalAttribute->setBuffer(vertexNormalBuffer);
-
-//    colorAttribute->setBuffer(nullptr);
-//    delete vertexColorBuffer;
-//    QByteArray vertexColorArray;
-//    vertexColorArray.resize(mesh->faces.size()*3*(3)*sizeof(float));
-//    vertexColorBuffer = new Qt3DRender::QBuffer(Qt3DRender::QBuffer::VertexBuffer,m_geometry);
-//    vertexColorBuffer->setUsage(Qt3DRender::QBuffer::DynamicDraw);
-//    vertexColorBuffer->setData(vertexColorArray);
-//    colorAttribute->setBuffer(vertexColorBuffer);
-
-//    m_geometry->addAttribute(positionAttribute);
-//    m_geometry->addAttribute(normalAttribute);
-//    m_geometry->addAttribute(colorAttribute);
-//    m_geometryRenderer->setGeometry(m_geometry);
-//    addComponent(m_geometryRenderer);
-//    addComponent(m_meshMaterial);
-
 }
 
 void GLModel::engoo(){
@@ -1213,7 +1147,6 @@ void GLModel::generateText3DMesh()
     }
 }
 
-
 // for extension
 
 void GLModel::colorExtensionFaces(){
@@ -1249,6 +1182,11 @@ void GLModel::openExtension(){
 
 void GLModel::closeExtension(){
     extensionActive = false;
+}
+
+// for shell offset
+void GLModel::generateShellOffset(double factor){
+    shellOffset(this, (float)factor);
 }
 
 void GLModel::openCut(){

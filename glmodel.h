@@ -135,8 +135,6 @@ public:
 
     void removeModel();
     void removeModelPartList();
-    void beforeInitialize();
-    void beforeAddVerticies();
 
     LabellingTextPreview* labellingTextPreview = nullptr;
 
@@ -235,6 +233,9 @@ public slots:
     void colorExtensionFaces();
     void uncolorExtensionFaces();
     void generateExtensionFaces(float distance);
+
+    // ShellOffset
+    void generateShellOffset(double factor);
 
 
     // Model Mesh info update
