@@ -1,6 +1,6 @@
 #include "mesh.h"
 #include <QDebug>
-
+#include <QCoreApplication>
 
 /********************** Mesh Edit Functions***********************/
 void Mesh::vertexOffset(float factor){
@@ -12,6 +12,8 @@ void Mesh::vertexOffset(float factor){
     z_min = 99999;
     z_max = 99999;
     for (int i=0;i<numberofVertices;i++){
+        if (i%100 == 0)
+            QCoreApplication::processEvents();
         QVector3D tmp = vertices[i].position - vertices[i].vn*factor;
         vertices[i].position = tmp;
         updateMinMax(vertices[i].position);
@@ -27,6 +29,8 @@ void Mesh::vertexMove(QVector3D direction){
     z_min = 99999;
     z_max = 99999;
     for (int i=0;i<numberofVertices;i++){
+        if (i%100 == 0)
+            QCoreApplication::processEvents();
         QVector3D tmp = direction+vertices[i].position;
         vertices[i].position = tmp;
         updateMinMax(vertices[i].position);
@@ -45,6 +49,8 @@ void Mesh::vertexRotate(QMatrix4x4 tmpmatrix){
     QVector4D tmpVertex;
     QVector3D tmpVertex2;
     for (int i=0;i<numberofVertices;i++){
+        if (i%100 == 0)
+            QCoreApplication::processEvents();
         tmpVertex =vertices[i].position.toVector4D();
         tmpVertex2.setX(QVector4D::dotProduct(tmpVertex,tmpmatrix.column(0)));
         tmpVertex2.setY(QVector4D::dotProduct(tmpVertex,tmpmatrix.column(1)));
@@ -53,6 +59,8 @@ void Mesh::vertexRotate(QMatrix4x4 tmpmatrix){
         updateMinMax(vertices[i].position);
     }
     for (int i=0;i<numberofFaces;i++){
+        if (i%100 == 0)
+            QCoreApplication::processEvents();
         faces[i].fn = QVector3D::normal(vertices[faces[i].mesh_vertex[0]].position,
                                         vertices[faces[i].mesh_vertex[1]].position,
                                         vertices[faces[i].mesh_vertex[2]].position);
@@ -60,6 +68,8 @@ void Mesh::vertexRotate(QMatrix4x4 tmpmatrix){
                                                      vertices[faces[i].mesh_vertex[2]].position-vertices[faces[i].mesh_vertex[0]].position);
     }
     for (int i=0;i<numberofVertices;i++){
+        if (i%100 == 0)
+            QCoreApplication::processEvents();
         if (vertices[i].connected_faces.size()>=3){
             vertices[i].vn = QVector3D(vertices[i].connected_faces[0]->fn + vertices[i].connected_faces[1]->fn + vertices[i].connected_faces[2]->fn).normalized();
         } else {
@@ -77,6 +87,8 @@ void Mesh::vertexScale(float scale){
     z_min = 99999;
     z_max = 99999;
     for (int i=0;i<numberofVertices;i++){
+        if (i%100 == 0)
+            QCoreApplication::processEvents();
         QVector3D tmp;
         tmp.setX(vertices[i].position.x() * scale);
         tmp.setY(vertices[i].position.y() * scale);
@@ -229,8 +241,13 @@ vector<MeshFace>::iterator Mesh::removeFace(vector<MeshFace>::iterator f_it){
 // add connected face idx to each meshes
 void Mesh::connectFaces(){
     //for (int i=0; i<faces.size(); i++){
-
+    int cnt = 0;
     for (vector<MeshFace>::iterator it = faces.begin(); it!= faces.end(); it++){
+        if (cnt % 100 == 0){
+            QCoreApplication::processEvents();
+        }
+        cnt ++;
+
         MeshFace &mf = (*it);
 
         // clear neighboring faces
@@ -752,8 +769,8 @@ Paths3D contourConstruct(Paths3D hole_edges){
     return contourList;
 }
 
-vector<vector<QVector3D>> interpolate(Path3D from, Path3D to){
-    vector<vector<QVector3D>> result_faces;
+vector<std::array<QVector3D, 3>> interpolate(Path3D from, Path3D to){
+    vector<std::array<QVector3D, 3>> result_faces;
     if (from.size() != to.size()){
         qDebug() << "from and to size differs";
         return result_faces;
@@ -771,15 +788,15 @@ vector<vector<QVector3D>> interpolate(Path3D from, Path3D to){
     for (int i=1; i<from.size()-1; i++){
         if (i%2 != 0){
             // add right left new face
-            vector<QVector3D> temp_face1;
-            temp_face1.push_back(to[i].position);
-            temp_face1.push_back(from[i-1].position);
-            temp_face1.push_back(from[i].position);
+            array<QVector3D,3> temp_face1;
+            temp_face1[0] = to[i].position;
+            temp_face1[1] = from[i-1].position;
+            temp_face1[2] = from[i].position;
             result_faces.push_back(temp_face1);
-            vector<QVector3D> temp_face2;
-            temp_face2.push_back(to[i].position);
-            temp_face2.push_back(from[i].position);
-            temp_face2.push_back(from[i+1].position);
+            array<QVector3D,3> temp_face2;
+            temp_face2[0] = to[i].position;
+            temp_face2[1] = from[i].position;
+            temp_face2[2] = from[i+1].position;
             result_faces.push_back(temp_face2);
         }
     }
@@ -789,32 +806,31 @@ vector<vector<QVector3D>> interpolate(Path3D from, Path3D to){
     for (int i=2; i<from.size()-1; i++){
         if (i%2 == 0){
             // add right left new face
-            vector<QVector3D> temp_face1;
-            temp_face1.push_back(to[i].position);
-            temp_face1.push_back(from[i-1].position);
-            temp_face1.push_back(from[i].position);
+            array<QVector3D,3> temp_face1;
+            temp_face1[0] = to[i].position;
+            temp_face1[1] = from[i-1].position;
+            temp_face1[2] = from[i].position;
             result_faces.push_back(temp_face1);
-            vector<QVector3D> temp_face2;
-            temp_face2.push_back(to[i].position);
-            temp_face2.push_back(from[i].position);
-            temp_face2.push_back(from[i+1].position);
+            array<QVector3D,3> temp_face2;
+            temp_face2[0] = to[i].position;
+            temp_face2[1] = from[i].position;
+            temp_face2[2] = from[i+1].position;
             result_faces.push_back(temp_face2);
         }
     }
     qDebug() << "reserved even number faces" << result_faces.size();
 
     // add right left new face
-    vector<QVector3D> temp_face1;
-    temp_face1.push_back(to[from.size()-1].position);
-    temp_face1.push_back(from[from.size()-2].position);
-    temp_face1.push_back(from[from.size()-1].position);
+    array<QVector3D,3> temp_face1;
+    temp_face1[0] = to[from.size()-1].position;
+    temp_face1[1] = from[from.size()-2].position;
+    temp_face1[2] = from[from.size()-1].position;
     result_faces.push_back(temp_face1);
-    vector<QVector3D> temp_face2;
-    temp_face2.push_back(to[from.size()-1].position);
-    temp_face2.push_back(from[from.size()-1].position);
-    temp_face2.push_back(from[0].position);
+    array<QVector3D,3> temp_face2;
+    temp_face2[0] = to[from.size()-1].position;
+    temp_face2[1] = from[from.size()-1].position;
+    temp_face2[2] = from[0].position;
     result_faces.push_back(temp_face2);
-
 
     return result_faces;
 }
