@@ -63,7 +63,8 @@ void QmlManager::initializeUI(QQmlApplicationEngine* e){
     moveArrowobj = FindItemByName(engine, "moveArrow");
     QObject::connect(moveArrowobj, SIGNAL(moveSignal(int,int)),this, SLOT(modelMove(int,int)));
     QObject::connect(moveArrowobj, SIGNAL(moveDone(int)),this, SLOT(modelMoveDone(int)));
-    moveArrow->setEnabled(0);
+    hideMoveArrow();
+    //moveArrow->setEnabled(0);
     rotateSphere = (QEntity *)FindItemByName(engine, "rotateSphereEntity");
     rotateSphereX = (QEntity *)FindItemByName(engine, "rotateSphereTorusX");
     rotateSphereY = (QEntity *)FindItemByName(engine, "rotateSphereTorusY");
@@ -71,7 +72,8 @@ void QmlManager::initializeUI(QQmlApplicationEngine* e){
     rotateSphereobj = FindItemByName(engine, "rotateSphere");
     QObject::connect(rotateSphereobj, SIGNAL(rotateSignal(int,int)),this, SLOT(modelRotate(int,int)));
     QObject::connect(rotateSphereobj, SIGNAL(rotateDone(int)),this, SLOT(modelRotateDone(int)));
-    rotateSphere->setEnabled(0);
+    //rotateSphere->setEnabled(0);
+    hideRotateSphere();
     QObject *rotateButton = FindItemByName(engine, "rotateButton");
     QObject *moveButton = FindItemByName(engine, "moveButton");
     QObject::connect(moveButton,SIGNAL(runGroupFeature(int,QString)),this,SLOT(runGroupFeature(int,QString)));
@@ -265,20 +267,38 @@ void QmlManager::modelSelected(int ID){
             break;
         }
     }
-
     // reset previous model texture
     if (selectedModel != nullptr){
         qDebug() << "resetting model" << selectedModel->ID;
         selectedModel->m_meshMaterial->setDiffuse(QColor(173,215,218));
         disconnectHandlers(selectedModel);
+        if (groupFunctionState == "active"){
+            switch (groupFunctionIndex){
+            case 5:
+                hideRotateSphere();
+                break;
+            case 4:
+                hideMoveArrow();
+                break;
+            }
+        }
     }
-
     if (selectedModel != target){
         // change selectedModel
         selectedModel = target;
         selectedModel->m_meshMaterial->setDiffuse(QColor(100,255,100));
         qDebug() << "changing model" << selectedModel->ID;
         connectHandlers(selectedModel);
+        if (groupFunctionState == "active"){
+            switch (groupFunctionIndex){
+            case 5:
+                showRotateSphere();
+                break;
+            case 4:
+                showMoveArrow();
+                break;
+            }
+        }
     } else {
         selectedModel = nullptr;
     }
@@ -317,6 +337,12 @@ void QmlManager::showMoveArrow(){
     moveArrow->setEnabled(1);
     QQmlProperty::write(moveArrowobj,"center",selectedModel->m_transform->translation());
 }
+void QmlManager::hideMoveArrow(){
+    moveArrow->setEnabled(0);
+}
+void QmlManager::hideRotateSphere(){
+    rotateSphere->setEnabled(0);
+}
 void QmlManager::showRotateSphere(){
     if (selectedModel == nullptr)
         return;
@@ -328,7 +354,6 @@ void QmlManager::modelMoveDone(int Axis){
         return;
     QQmlProperty::write(moveArrowobj,"center",selectedModel->m_transform->translation());
 }
-
 void QmlManager::modelRotateDone(int Axis){
     if (selectedModel == nullptr)
         return;
@@ -354,7 +379,8 @@ void QmlManager::modelRotateDone(int Axis){
     selectedModel->rotateModelMesh(Axis,-angle);
     //float zlength = (glmodel->mesh->z_max - glmodel->mesh->z_min);
     //glmodel->m_transform->setTranslation(QVector3D(0,0,zlength/2));
-    QQmlProperty::write(rotateSphereobj,"center",selectedModel->m_transform->translation());
+    hideRotateSphere();
+    showRotateSphere();
 }
 void QmlManager::modelMove(int Axis, int Distance){
     if (selectedModel == nullptr)
@@ -396,12 +422,15 @@ void QmlManager::modelRotate(int Axis, int Angle){
 }
 
 void QmlManager::runGroupFeature(int ftrType, QString state){
+    groupFunctionIndex = ftrType;
+    groupFunctionState = state;
     switch(ftrType){
     case 5: //rotate
     {
         qDebug()<<state;
         if (state == "inactive"){
-            rotateSphere->setEnabled(0);
+            hideRotateSphere();
+
         }else if(state == "active"){
             showRotateSphere();
         }

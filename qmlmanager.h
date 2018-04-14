@@ -67,8 +67,12 @@ public:
     Qt3DCore::QEntity *rotateSphereZ;
     Qt3DCore::QEntity *moveArrow;
     QObject *moveArrowobj;
+    int groupFunctionIndex;
+    QString groupFunctionState;
     void showRotateSphere();
     void showMoveArrow();
+    void hideRotateSphere();
+    void hideMoveArrow();
     void initializeUI(QQmlApplicationEngine *e);
     void openModelFile_internal(QString filename);
     void runArrange_internal();
