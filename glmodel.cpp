@@ -124,7 +124,7 @@ GLModel::GLModel(QObject* mainWindow, QNode *parent, Mesh* loadMesh, QString fna
     qDebug() << "created shadow model";
 
     ft = new featureThread(this, 0);
-    arsignal = new arrangeSignalSender();
+    //arsignal = new arrangeSignalSender();//unused, signal from qml goes right into QmlManager.runArrange
 
     // Add to Part List
     ID = globalID++;
@@ -285,7 +285,8 @@ void featureThread::run(){
             }
         case ftrArrange:
             {
-                emit (m_glmodel->arsignal)->runArrange();
+                //emit (m_glmodel->arsignal)->runArrange();
+                //unused, signal from qml goes right into QmlManager.runArrange
                 break;
             }
         case ftrOrient:
