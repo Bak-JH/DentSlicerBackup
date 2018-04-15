@@ -83,7 +83,7 @@ GLModel::GLModel(QObject* mainWindow, QNode *parent, Mesh* loadMesh, QString fna
     m_meshMaterial->setSpecular(QColor(182,237,246));
     m_meshMaterial->setShininess(0.0f);
 
-    if (filename != ""){
+    if (filename != "" && !EndsWith(filename.toStdString(), std::string("_left").c_str()) && !EndsWith(filename.toStdString(),  std::string("_right").c_str())){
         mesh = new Mesh();
         loadMeshSTL(mesh, filename.toStdString().c_str());
     } else {
@@ -137,6 +137,7 @@ GLModel::GLModel(QObject* mainWindow, QNode *parent, Mesh* loadMesh, QString fna
         Q_ARG(QVariant, getFileName(fname.toStdString().c_str())),
         Q_ARG(QVariant, ID));
     */
+    qmlManager->addPart(getFileName(fname.toStdString().c_str()), ID);
 }
 
 void GLModel::moveModelMesh(QVector3D direction){
@@ -915,10 +916,10 @@ void GLModel::modelCut(){
 }
 
 void GLModel::generateRLModel(){
-    qmlManager->createModelFile(lmesh, "");
+    qmlManager->createModelFile(lmesh, filename+"_left");
     // 승환 70%
     qmlManager->setProgress(0.72);
-    qmlManager->createModelFile(rmesh, "");
+    qmlManager->createModelFile(rmesh, filename+"_right");
     // 승환 90%
     qmlManager->setProgress(0.91);
 
@@ -1027,6 +1028,12 @@ void GLModel::getSliderSignal(double value){
 
 
 /** HELPER functions **/
+
+bool GLModel::EndsWith(const string& a, const string& b) {
+    if (b.size() > a.size()) return false;
+    return std::equal(a.begin() + a.size() - b.size(), a.end(), b.begin());
+}
+
 QString GLModel::getFileName(const string& s){
    char sep = '/';
 

@@ -41,5 +41,7 @@
         <file>Qml/LeftTabExport.qml</file>
         <file>Qml/LeftTabExportElement.qml</file>
         <file>Qml/Login.qml</file>
+        <file>Qml/FeedbackPopUp.qml</file>
+
     </qresource>
 </RCC>

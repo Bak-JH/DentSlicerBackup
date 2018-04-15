@@ -150,7 +150,7 @@ public:
     void bisectModel(Plane plane);
     void bisectModel_internal(Plane plane);
 
-
+    bool EndsWith(const string& a, const string& b);
     QString getFileName(const string& s);
     QVector3D spreadPoint(QVector3D endpoint,QVector3D startpoint,int factor);
 
