@@ -95,6 +95,8 @@ void QmlManager::initializeUI(QQmlApplicationEngine* e){
 }
 
 void QmlManager::createModelFile(Mesh* target_mesh, QString fname) {
+    openProgressPopUp();
+
     GLModel* glmodel = new GLModel(mainWindow, models, target_mesh, fname, false);
     // 승환 GLModel constructor 안쪽
 
@@ -111,9 +113,6 @@ void QmlManager::createModelFile(Mesh* target_mesh, QString fname) {
                            (-1)*ymid,
                            (-1)*zmid));
     qDebug() << "moved model to right place";
-    //QObject* progress_text = FindItemByName(engine, "progress_text"); //orientation와 공유
-    // 승환 100%
-    qmlManager->setProgress(1);
 
     // model selection codes, connect handlers later when model selected
     QObject::connect(glmodel->shadowModel, SIGNAL(modelSelected(int)), this, SLOT(modelSelected(int)));
@@ -127,7 +126,8 @@ void QmlManager::createModelFile(Mesh* target_mesh, QString fname) {
         //runArrange();
     }
 
-    //shellOffset(glmodel, -0.5);
+    // 승환 100%
+    qmlManager->setProgress(1);
 }
 
 void QmlManager::openModelFile(QString fname){
@@ -136,12 +136,14 @@ void QmlManager::openModelFile(QString fname){
 
 void QmlManager::deleteModelFile(int ID){
     if (selectedModel != nullptr && selectedModel->ID == ID){
+        disconnectHandlers(selectedModel);
         selectedModel->shadowModel->deleteLater();
         selectedModel->deleteLater();
         selectedModel = nullptr;
     } else {
         for(int i=0; i<glmodels.size();i++){
             if(glmodels.at(i)->ID == ID){
+                disconnectHandlers(glmodels.at(i));
                 glmodels.at(i)->shadowModel->deleteLater();
                 glmodels.at(i)->deleteLater();
                 break;
@@ -180,10 +182,10 @@ void QmlManager::disconnectHandlers(GLModel* glmodel){
     // extension popup codes
     QObject::disconnect(extensionPopup, SIGNAL(openExtension()), glmodel->shadowModel, SLOT(openExtension()));
     QObject::disconnect(extensionPopup, SIGNAL(closeExtension()), glmodel->shadowModel, SLOT(closeExtension()));
-    QObject::disconnect(extensionPopup, SIGNAL(runFeature(int)), glmodel->ft, SLOT(setTypeAndStart(int)));
+    QObject::disconnect(extensionPopup, SIGNAL(generateExtensionFaces(double)), glmodel, SLOT(generateExtensionFaces(double)));
 
     // shelloffset popup codes
-    QObject::disconnect(shelloffsetPopup, SIGNAL(shellOffset(float)), glmodel, SLOT(generateShellOffset(float)));
+    QObject::disconnect(shelloffsetPopup, SIGNAL(shellOffset(double)), glmodel, SLOT(generateShellOffset(double)));
 
 
     // auto Repair popup codes
@@ -517,8 +519,11 @@ void QmlManager::openResultPopUp(string inputText_h, string inputText_m, string 
                               Q_ARG(QVariant, QString::fromStdString(inputText_l)));
 }
 void QmlManager::setProgress(float value){
-    QMetaObject::invokeMethod(progress_popup, "updateNumber",
+    if (value == 0 || value >= progress){
+        QMetaObject::invokeMethod(progress_popup, "updateNumber",
                                       Q_ARG(QVariant, value));
+        progress = value;
+    }
 }
 
 void QmlManager::setProgressText(string inputText){

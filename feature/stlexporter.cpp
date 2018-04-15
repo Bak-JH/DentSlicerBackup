@@ -1,4 +1,5 @@
 #include "stlexporter.h"
+#include "qmlmanager.h"
 
 STLexporter::STLexporter()
 {
@@ -6,20 +7,30 @@ STLexporter::STLexporter()
 }
 
 void STLexporter::exportSTL(Mesh* mesh, QString outfilename){
-
     qDebug() << "export STL";
     ofstream outfile(outfilename.toStdString().c_str(), ios::out);
 
     writeHeader(outfile);
+    qmlManager->setProgress(0.1);
+    QCoreApplication::processEvents();
 
+    int total_cnt = mesh->faces.size();
+    int cnt = 0;
     for (MeshFace mf : mesh->faces){
         writeFace(outfile, mesh, mf);
+
+        if (cnt %100 == 0){
+            QCoreApplication::processEvents();
+            qmlManager->setProgress(0.8*cnt/total_cnt);
+        }
     }
 
     writeFooter(outfile);
 
     outfile.close();
-
+    qmlManager->setProgress(1);
+    QCoreApplication::processEvents();
+    qmlManager->openResultPopUp("","File Saved","");
     return;
 }
 

@@ -39,7 +39,7 @@ Rectangle {
         Text {
             id: progress_text1
 
-            text: "0% to complete"
+            text: "0% complete"
             anchors.top: parent.top
             anchors.topMargin: 20
             anchors.horizontalCenter: parent.horizontalCenter
@@ -84,18 +84,19 @@ Rectangle {
 
 
     function openPopUp(){
+        progress_value.value=0
         console.log("open tttttttttttttt")
         progressPopUp.visible = true
-        progress_text1.text = "0% to complete"
+        progress_text1.text = "0% complete"
         progress_text2.text = "Working..."
     }
 
     function updateNumber(value){
         progress_value.value=value;
-        progress_text1.text=Math.round(value*100) + "% to complete";
+        progress_text1.text=Math.round(value*100) + "% complete";
         if(value==1){
             progressPopUp.visible = false
-            progress_text1.text = "0% to complete"
+            progress_text1.text = "0% complete"
             //result_orient.state="active";
             //result_text.text="Orientation Complete.";
         }

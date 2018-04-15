@@ -68,8 +68,11 @@ GLModel::GLModel(QObject* mainWindow, QNode *parent, Mesh* loadMesh, QString fna
 
         QObject::connect(this,SIGNAL(_updateModelMesh()),this,SLOT(updateModelMesh()));
 
-        labellingTextPreview = new LabellingTextPreview(this);
+        /*labellingTextPreview = new LabellingTextPreview(this);
         labellingTextPreview->setEnabled(false);
+
+        labellingTextPreview->setTranslation(QVector3D(100,0,0));
+        */
 
         return;
     }
@@ -252,17 +255,19 @@ void featureThread::run(){
             {
                 qDebug() << "file save called";
                 QString fileName = QFileDialog::getSaveFileName(nullptr, tr("Save to STL file"), "", tr("3D Model file (*.stl)"));
+                qmlManager->openProgressPopUp();
                 QFuture<void> future = QtConcurrent::run(ste, &STLexporter::exportSTL, m_glmodel->mesh,fileName);
                 break;
             }
         case ftrExport:
             {
-                /*// save to file
-                QString fileName = QFileDialog::getSaveFileName(nullptr, tr("Save to STL file"), "", tr("3D Model file (*.stl)"));
+                // save to file
+                /*QString fileName = QFileDialog::getSaveFileName(nullptr, tr("Save to STL file"), "", tr("3D Model file (*.stl)"));
                 ste->exportSTL(m_glmodel->mesh, fileName);
                 */
 
                 // slice file
+                qmlManager->openProgressPopUp();
                 QFuture<void> future = QtConcurrent::run(se, &SlicingEngine::slice, data, m_glmodel->mesh, m_glmodel->filename);
                 break;
             }
@@ -285,14 +290,10 @@ void featureThread::run(){
             }
         case ftrOrient:
             {
-                if(m_glmodel->appropriately_rotated){
-                    qmlManager->openResultPopUp("","Model already orient","");
-                } else {
-                    qmlManager->openProgressPopUp();
-                    rotateResult* rotateres= ot->Tweak(m_glmodel->mesh,true,45,&m_glmodel->appropriately_rotated);
-                    m_glmodel->rotateModelMesh(rotateres->R);
-                    //m_glmodel->m_transform->setMatrix(rotateres->R);
-                }
+                qmlManager->openProgressPopUp();
+                rotateResult* rotateres= ot->Tweak(m_glmodel->mesh,true,45,&m_glmodel->appropriately_rotated);
+                m_glmodel->rotateModelMesh(rotateres->R);
+
                 break;
             }
         case ftrScale:
@@ -306,24 +307,6 @@ void featureThread::run(){
             }
         case ftrCut:
             {
-                // m_glmodel is shadow model
-                /*markPopup(false);
-                ct->removeCuttingPoints();
-                ct->generatePlane(m_glmodel->parentModel);
-                moveToThread(curThread);
-
-                Plane plane;
-                plane.push_back(ct->cuttingPoints[ct->cuttingPoints.size()-3]);
-                plane.push_back(ct->cuttingPoints[ct->cuttingPoints.size()-2]);   //plane에 잘 들어감
-                plane.push_back(ct->cuttingPoints[ct->cuttingPoints.size()-1]);
-                ct->bisectModel(m_glmodel->mesh, plane, m_glmodel->lmesh, m_glmodel->rmesh);
-
-                //GLModel* leftModel = new GLModel(m_glmodel, m_glmodel->lmesh, "", false);
-
-                qDebug() << "deleting shadowmodel";
-                m_glmodel->shadowModel->deleteLater();
-                qDebug() << "deleting current Model";
-                m_glmodel->deleteLater();*/
                 m_glmodel->modelCut();
                 break;
             }
@@ -692,25 +675,27 @@ void GLModel::addIndexes(vector<int> indexes){
 
 void GLModel::handlePickerClicked(QPickEvent *pick)
 {
-    if (!cutActive && !extensionActive)
+    if (!cutActive && !extensionActive && !labellingActive)
         emit modelSelected(parentModel->ID);
     qDebug() << "model selected emit";
-    if (labellingActive) {
-        if (labellingTextPreview)
-            labellingTextPreview->setEnabled(true);
-        parentModel->m_meshMaterial->setDiffuse(QColor(100, 255, 100));
-
-        if (labellingTextPreview && labellingTextPreview->isEnabled()) {
-            /*QVector3D tmp = m_transform->translation();
-            float zlength = mesh->z_max - mesh->z_min;
-            labellingTextPreview->planeTransform->setTranslation(QVector3D(tmp.x(),tmp.y(),zlength/2));*/
-
-            labellingTextPreview->setTranslation(pick->localIntersection());
-            labellingTextPreview->setNormal(pick->localIntersection());
-        }
-    }
 
     QPickTriangleEvent *trianglePick = static_cast<QPickTriangleEvent*>(pick);
+
+    if (labellingActive) {
+        MeshFace shadow_meshface = mesh->faces[trianglePick->triangleIndex()];
+
+        parentModel->targetMeshFace = &parentModel->mesh->faces[shadow_meshface.parent_idx];
+
+        if (labellingTextPreview)
+            labellingTextPreview->deleteLater();
+        labellingTextPreview = new LabellingTextPreview(this);
+        labellingTextPreview->setEnabled(true);
+
+        if (labellingTextPreview && labellingTextPreview->isEnabled()) {
+            labellingTextPreview->setTranslation(pick->localIntersection() + parentModel->targetMeshFace->fn);
+            labellingTextPreview->setNormal(parentModel->targetMeshFace->fn);
+        }
+    }
 
     if (cutActive){
         if (cutMode == 1 && parentModel->numPoints< sizeof(parentModel->sphereEntity)/4) {
@@ -730,7 +715,6 @@ void GLModel::handlePickerClicked(QPickEvent *pick)
         MeshFace shadow_meshface = mesh->faces[trianglePick->triangleIndex()];
         qDebug() << "found parent meshface" << shadow_meshface.parent_idx;
 
-
         parentModel->uncolorExtensionFaces();
         parentModel->targetMeshFace = &parentModel->mesh->faces[shadow_meshface.parent_idx];
         /*qDebug() << trianglePick->localIntersection() \
@@ -740,8 +724,8 @@ void GLModel::handlePickerClicked(QPickEvent *pick)
         */
         // << parentModel->targetMeshFace->mesh_vertex[1] << parentModel->targetMeshFace->mesh_vertex[2];
         parentModel->colorExtensionFaces();
-        //detectExtensionFaces(parentModel->mesh, &parentModel->mesh->faces[shadow_meshface.parent_idx], )
-        //extendMesh(parentModel->mesh, &parentModel->mesh->faces[shadow_meshface.parent_idx], 10);
+    } else {
+        parentModel->uncolorExtensionFaces();
     }
 }
 
@@ -920,6 +904,7 @@ void GLModel::removeModelPartList(){
 
 void GLModel::modelCut(){
     qDebug() << "modelcut called";
+    qmlManager->openProgressPopUp();
     if (parentModel->cuttingPlane.size() != 3){
         return;
     }
@@ -940,9 +925,8 @@ void GLModel::generateRLModel(){
     removeCuttingPoints();
 
     // delete original model
-    shadowModel->deleteLater();
-    deleteLater();
-    qmlManager->selectedModel = nullptr;
+    qmlManager->deleteModelFile(ID);
+
     // 승환 100%
     qmlManager->setProgress(1);
 }
@@ -1132,7 +1116,7 @@ void GLModel::generateText3DMesh()
     int verticesSize;
     unsigned int* indices;
     int indicesSize;
-    float depth = 1.0f;
+    float depth = 0.5f;
     float scale = labellingTextPreview->ratioY * labellingTextPreview->scaleY;
     QVector3D translation = labellingTextPreview->translation+ QVector3D(0,-0.3,0);
 
@@ -1155,8 +1139,10 @@ void GLModel::generateText3DMesh()
                            QFont(labellingTextPreview->fontName),
                            labellingTextPreview->text,
                            depth,
-                           originalVertices,
-                           originalVerticesSize, QVector3D(0, 1, 0),
+                           mesh,
+                           //originalVertices,
+                           //originalVerticesSize,
+                           QVector3D(0, 1, 0),
                            transform.matrix(),
                            normalTransform.matrix());
 
@@ -1230,6 +1216,7 @@ void GLModel::closeExtension(){
 
 // for shell offset
 void GLModel::generateShellOffset(double factor){
+    qmlManager->openProgressPopUp();
     shellOffset(this, (float)factor);
 }
 

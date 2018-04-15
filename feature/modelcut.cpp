@@ -7,12 +7,10 @@ modelcut::modelcut(){
 
 void modelcut::bisectModel(Mesh* mesh, Plane plane, Mesh* leftMesh, Mesh* rightMesh){
     // do bisecting mesh
-    qDebug() << "in bisect" << mesh->faces.size();
-    leftMesh->faces.reserve(mesh->faces.size());
-    leftMesh->vertices.reserve(mesh->faces.size());
-    rightMesh->faces.reserve(mesh->faces.size());
-    rightMesh->vertices.reserve(mesh->faces.size());
-    qDebug() << "done reserving ";
+    leftMesh->faces.reserve(mesh->faces.size()*2);
+    leftMesh->vertices.reserve(mesh->faces.size()*2);
+    rightMesh->faces.reserve(mesh->faces.size()*2);
+    rightMesh->vertices.reserve(mesh->faces.size()*2);
 
     foreach (MeshFace mf, mesh->faces){
         bool faceLeftToPlane = true;

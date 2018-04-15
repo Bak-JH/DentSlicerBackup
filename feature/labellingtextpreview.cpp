@@ -96,15 +96,27 @@ void LabellingTextPreview::setNormal(const QVector3D& n)
 
 void LabellingTextPreview::updateTransform()
 {
-    auto axis = QVector3D::crossProduct(QVector3D(1,0,0), -normal);
+    QMatrix3x3 first = QQuaternion::fromAxisAndAngle(QVector3D(1,0,0), 180).toRotationMatrix();
+    float first_angle = (normal[1] == 0) ? 180 :-atanf(normal[2]/normal[1])*180/M_PI;
+    QMatrix3x3 second = QQuaternion::fromAxisAndAngle(QVector3D(1,0,0), first_angle).toRotationMatrix();
+    float second_angle = (normal[1] == 0) ? 180 :atanf(normal[0]/normal[1])*180/M_PI;
+    QMatrix3x3 third = QQuaternion::fromAxisAndAngle(QVector3D(0,0,1), second_angle).toRotationMatrix();
+
+    /*float first_angle = (normal[2] == 0) ? 180 : atanf(normal[0]/normal[2]);
+    float second_angle = (normal[0] == 0) ? 180 : atanf(normal[1]/normal[0]);
+    QMatrix3x3 first = QQuaternion::fromAxisAndAngle(QVector3D(1,1,0), first_angle).toRotationMatrix();
+    QMatrix3x3 second = QQuaternion::fromAxisAndAngle(QVector3D(0,0,1), second_angle).toRotationMatrix();*/
+    /*auto axis = QVector3D::crossProduct(QVector3D(1,0,0), -normal);
     axis.normalize();
     auto cos_t = QVector3D::dotProduct(QVector3D(1,0,0), -normal);
 
     auto sin_t = sqrtf(1 - cos_t * cos_t);
     auto angle = atan2f(cos_t, sin_t) * 180 / M_PI;
-
+    */
     planeTransform->setTranslation(translation + normal * 0.5f);
     //planeTransform->setRotation(QQuaternion::fromAxisAndAngle(axis, angle + 180));
-    planeTransform->setRotation(QQuaternion::fromAxisAndAngle(QVector3D(1,0,0), 180));
+    //planeTransform->setRotation(QQuaternion::fromAxisAndAngle(QVector3D(1,0,0), 180));
+    planeTransform->setRotation(QQuaternion::fromRotationMatrix(first*second*third));
+    //planeTransform->setRotation(QQuaternion::fromRotationMatrix(first*second));
     planeTransform->setScale3D(QVector3D(width / minimumWidth, 1.0f, ratioY) * scaleY);
 }
