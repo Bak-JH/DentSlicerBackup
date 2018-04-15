@@ -39,6 +39,7 @@ public:
     // orientation components
     QObject* orientPopup;
     QObject* progress_popup;
+    QObject* result_popup;
 
     // extension components
     QObject* extensionPopup;
@@ -82,6 +83,11 @@ public:
     void disconnectHandlers(GLModel* glmodel);
     void connectHandlers(GLModel* glmodel);
 
+    void openProgressPopUp();
+    void openResultPopUp(string inputText_h, string inputText_m, string inputText_l);
+    void setProgress(float value);
+    void setProgressText(string inputText);
+
     Q_INVOKABLE void modelVisible(int ID, bool isVisible);
     Q_INVOKABLE void doDelete();
 
@@ -108,6 +114,7 @@ public slots:
     void modelRotateDone(int);
     void runArrange();
     void applyArrangeResult(vector<QVector3D>, vector<float>);
+
 };
 
 

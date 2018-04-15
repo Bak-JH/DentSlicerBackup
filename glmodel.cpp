@@ -87,6 +87,7 @@ GLModel::GLModel(QObject* mainWindow, QNode *parent, Mesh* loadMesh, QString fna
         mesh = loadMesh;
     }
     // 승환 25%
+    qmlManager->setProgress(0.23);
 
     lmesh = new Mesh();
     rmesh = new Mesh();
@@ -95,6 +96,7 @@ GLModel::GLModel(QObject* mainWindow, QNode *parent, Mesh* loadMesh, QString fna
     addVertices(mesh, false);
     applyGeometry();
     // 승환 50%
+    qmlManager->setProgress(0.49);
     //QFuture<void> future = QtConcurrent::run(this, &GLModel::initialize, mesh);
     //future = QtConcurrent::run(this, &GLModel::addVertices, mesh);
 
@@ -110,6 +112,7 @@ GLModel::GLModel(QObject* mainWindow, QNode *parent, Mesh* loadMesh, QString fna
     // create shadow model to handle picking settings
     shadowModel = new GLModel(this->mainWindow, this, mesh, filename, true);
     // 승환 75%
+    qmlManager->setProgress(0.73);
 
     QObject::connect(this,SIGNAL(bisectDone()),this,SLOT(generateRLModel()));
     QObject::connect(this,SIGNAL(_updateModelMesh()),this,SLOT(updateModelMesh()));
@@ -217,9 +220,9 @@ featureThread::featureThread(GLModel* glmodel, int type){
     ste = new STLexporter();
     se = new SlicingEngine();
 
-    connect(ot, SIGNAL(progressChanged(float)), this, SLOT(progressChanged(float)));
-    connect(ct, SIGNAL(progressChanged(float)), this, SLOT(progressChanged(float)));
-    connect(ar, SIGNAL(progressChanged(float)), this, SLOT(progressChanged(float)));
+    //connect(ot, SIGNAL(progressChanged(float)), this, SLOT(progressChanged(float)));
+    //connect(ct, SIGNAL(progressChanged(float)), this, SLOT(progressChanged(float)));
+    //connect(ar, SIGNAL(progressChanged(float)), this, SLOT(progressChanged(float)));
 
 }
 
@@ -283,9 +286,9 @@ void featureThread::run(){
         case ftrOrient:
             {
                 if(m_glmodel->appropriately_rotated){
-                    openResultPopUp("","Model already orient","");
+                    qmlManager->openResultPopUp("","Model already orient","");
                 } else {
-                    openProgressPopUp();
+                    qmlManager->openProgressPopUp();
                     rotateResult* rotateres= ot->Tweak(m_glmodel->mesh,true,45,&m_glmodel->appropriately_rotated);
                     m_glmodel->rotateModelMesh(rotateres->R);
                     //m_glmodel->m_transform->setMatrix(rotateres->R);
@@ -344,7 +347,7 @@ void featureThread::run(){
             }
     }
 }
-
+/*
 void featureThread::openProgressPopUp(){
     QList<QObject*> temp;
     temp.append(m_glmodel->mainWindow);
@@ -362,12 +365,13 @@ void featureThread::openResultPopUp(string inputText_h, string inputText_m, stri
                               Q_ARG(QVariant, QString::fromStdString(inputText_l)));
 }
 
+
 void featureThread::progressChanged(float value){
     emit featureThread::setProgress(value);
     if(value == 1)
         openResultPopUp("testttttttttttt","","2line");
         //openResultPopUp("","Orientation done","");
-}
+}*/
 
 
 arrangeSignalSender::arrangeSignalSender(){
@@ -772,11 +776,14 @@ void GLModel::bisectModel_internal(Plane plane){
 
     qDebug() << "done bisect";
     // 승환 30%
+    qmlManager->setProgress(0.22);
 
     leftMesh->connectFaces();
     // 승환 40%
+    qmlManager->setProgress(0.41);
     rightMesh->connectFaces();
     // 승환 50%
+    qmlManager->setProgress(0.56);
     qDebug() << "done connecting";
     emit bisectDone();
 }
@@ -923,8 +930,10 @@ void GLModel::modelCut(){
 void GLModel::generateRLModel(){
     qmlManager->createModelFile(lmesh, "");
     // 승환 70%
+    qmlManager->setProgress(0.72);
     qmlManager->createModelFile(rmesh, "");
     // 승환 90%
+    qmlManager->setProgress(0.91);
 
     //parentModel->deleteLater();
     shadowModel->removePlane();
@@ -935,6 +944,7 @@ void GLModel::generateRLModel(){
     deleteLater();
     qmlManager->selectedModel = nullptr;
     // 승환 100%
+    qmlManager->setProgress(1);
 }
 
 GLModel::~GLModel(){
