@@ -45,7 +45,7 @@ Rectangle {
             anchors.topMargin: 30
             anchors.horizontalCenter: parent.horizontalCenter
             verticalAlignment: Text.AlignTop
-            font.pointSize: 14
+            font.pixelSize: 19
             color: "#0DA3B2"
             font.family: mainFont.name
         }
@@ -59,7 +59,7 @@ Rectangle {
             anchors.topMargin: 44
             anchors.horizontalCenter: parent.horizontalCenter
             verticalAlignment: Text.AlignTop
-            font.pointSize: 14
+            font.pixelSize: 19
             color: "#0DA3B2"
             font.family: mainFont.name
         }
@@ -73,7 +73,7 @@ Rectangle {
             anchors.topMargin: 58
             anchors.horizontalCenter: parent.horizontalCenter
             verticalAlignment: Text.AlignTop
-            font.pointSize: 14
+            font.pixelSize: 19
             color: "#0DA3B2"
             font.family: mainFont.name
         }
@@ -93,7 +93,7 @@ Rectangle {
                 anchors.horizontalCenter: parent.horizontalCenter
                 text: "OK"
                 color: "#ffffff"
-                font.pointSize: 18
+                font.pixelSize: 24
                 font.family: mainFont.name
             }
             MouseArea {

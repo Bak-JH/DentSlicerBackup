@@ -185,7 +185,7 @@ Rectangle {
         anchors.topMargin: 4
         anchors.left: parent.left
         anchors.leftMargin: 10
-        font.pointSize: 14
+        font.pixelSize: 19
         color: "#ffffff"
         font.family: mediumFont.name
         verticalAlignment: Text.AlignTop
@@ -198,7 +198,7 @@ Rectangle {
         anchors.topMargin: 15
         anchors.left: funcname.left
         anchors.leftMargin: 10
-        font.pointSize: 11
+        font.pixelSize: 15
         //color: "#999999"
         color: "#3EA6B7"
         font.family: mainFont.name
@@ -222,7 +222,7 @@ Rectangle {
         anchors.topMargin: 15
         anchors.left: funcname.left
         anchors.leftMargin: 10
-        font.pointSize: 11
+        font.pixelSize: 15
         //color: "#999999"
         color: "#3EA6B7"
 
@@ -256,7 +256,7 @@ Rectangle {
             anchors.horizontalCenter: parent.horizontalCenter
             text: "Apply"
             color: "#ffffff"
-            font.pointSize: 12
+            font.pixelSize: 16
             font.family: mainFont.name
         }
         MouseArea {
@@ -285,7 +285,7 @@ Rectangle {
                 anchors.horizontalCenter: parent.horizontalCenter
                 text: "OK"
                 color: "#ffffff"
-                font.pointSize: 12
+                font.pixelSize: 16
                 font.family: mainFont.name
             }
             MouseArea {
@@ -332,7 +332,7 @@ Rectangle {
             anchors.horizontalCenter: parent.horizontalCenter
             text: "Apply"
             color: "#ffffff"
-            font.pointSize: 12
+            font.pixelSize: 16
             font.family: mainFont.name
         }
         MouseArea {
@@ -359,7 +359,7 @@ Rectangle {
             anchors.horizontalCenter: parent.horizontalCenter
             text: "Finish"
             color: "#ffffff"
-            font.pointSize: 12
+            font.pixelSize: 16
             font.family: mainFont.name
         }
         MouseArea {
@@ -541,7 +541,7 @@ Rectangle {
                     anchors.verticalCenter: parent.verticalCenter
                     text: numbox_value_x + number_unit
                     //maximumLength:
-                    font.pointSize: 9
+                    font.pixelSize: 12
                     font.family: mainFont.name
                     color: focus ? "black" : "#595959"
                     selectByMouse: true
@@ -674,7 +674,7 @@ Rectangle {
                     anchors.rightMargin: 5
                     anchors.verticalCenter: parent.verticalCenter
                     text: numbox_value_y + number_unit
-                    font.pointSize: 9
+                    font.pixelSize: 12
                     font.family: mainFont.name
                     color: focus ? "black" : "#595959"
                     selectByMouse: true
@@ -796,7 +796,7 @@ Rectangle {
                     anchors.rightMargin: 5
                     anchors.verticalCenter: parent.verticalCenter
                     text: numbox_value_z + number_unit
-                    font.pointSize: 9
+                    font.pixelSize: 12
                     font.family: mainFont.name
                     color: focus ? "black" : "#595959"
                     selectByMouse: true
@@ -902,7 +902,7 @@ Rectangle {
                     anchors.verticalCenter: parent.verticalCenter
                     anchors.left: parent.left
                     text: "X :"
-                    font.pointSize: 9
+                    font.pixelSize: 12
                     font.family: mainFont.name
                 }
             }
@@ -916,7 +916,7 @@ Rectangle {
                     anchors.verticalCenter: parent.verticalCenter
                     anchors.left: parent.left
                     text: "Y :"
-                    font.pointSize: 9
+                    font.pixelSize: 12
                     font.family: mainFont.name
                 }
             }
@@ -930,7 +930,7 @@ Rectangle {
                     anchors.verticalCenter: parent.verticalCenter
                     anchors.left: parent.left
                     text: "Z :"
-                    font.pointSize: 9
+                    font.pixelSize: 12
                     font.family: mainFont.name
                 }
             }
@@ -960,7 +960,7 @@ Rectangle {
                 anchors.rightMargin: 5
                 anchors.verticalCenter: parent.verticalCenter
                 text: numbox_value_detail2 + number_unit_detail2
-                font.pointSize: 9
+                font.pixelSize: 12
                 font.family: mainFont.name
                 color: focus ? "black" : "#595959"
                 selectByMouse: true

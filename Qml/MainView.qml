@@ -79,6 +79,7 @@ Entity {
             if (event.key === Qt.Key_Delete) {
                 console.log("deleeeeee")
                 qm.doDelete()
+
             }
         }
     }

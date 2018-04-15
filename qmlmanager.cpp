@@ -21,6 +21,8 @@ QmlManager::QmlManager(QObject *parent) : QObject(parent)
 void QmlManager::initializeUI(QQmlApplicationEngine* e){
     engine = e;
     mainWindow = FindItemByName(engine, "mainWindow");
+    loginWindow = FindItemByName(engine, "loginWindow");
+
     models = (QEntity *)FindItemByName(engine, "Models");
     Lights* lights = new Lights(models);
 
@@ -359,19 +361,10 @@ void QmlManager::modelVisible(int ID, bool isVisible){
 }
 
 void QmlManager::doDelete(){
-    /*set ID for delete*/
-    int ID = 1;
-    GLModel* target;
-    for(int i=0; i<glmodels.size();i++){
-        if(glmodels.at(i)->ID == ID){
-            target = glmodels.at(i);
-            break;
-        }
-    }
-    if(target != NULL){
-        target->removeModelPartList();
-        target->removeModel();
-    }
+    if(selectedModel == nullptr)
+        return;
+
+    deleteModelFile(selectedModel->ID);
 }
 
 void QmlManager::showMoveArrow(){
@@ -524,6 +517,7 @@ void QmlManager::setProgress(float value){
                                       Q_ARG(QVariant, value));
         progress = value;
     }
+
 }
 
 void QmlManager::setProgressText(string inputText){

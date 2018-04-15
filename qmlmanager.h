@@ -27,6 +27,7 @@ public:
 
     // UI components
     QObject* mainWindow;
+    QObject* loginWindow;
     QEntity* models;
     QObject* mv;
 

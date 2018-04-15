@@ -75,7 +75,7 @@ Rectangle {
         anchors.left : parent.left
         //anchors.right : parent.right
         anchors.bottom: parent.bottom
-        color: "#D4D6D9"
+        color: "#E6E6E6"
     }
     /*
     Rectangle{
@@ -242,7 +242,7 @@ Rectangle {
             anchors.top : parent.top
             //anchors.bottom : tabgroupname.top
 
-            color : "#D4D6D9"
+            color : "#E6E6E6"
         }
     }
 
@@ -313,7 +313,7 @@ Rectangle {
             anchors.right: parent.right
             anchors.top : parent.top
             //anchors.bottom : tabgroupname.top
-            color : "#CECECE"
+            color : "#E6E6E6"
         }
 
     }
@@ -399,7 +399,7 @@ Rectangle {
             anchors.top : parent.top
             //anchors.bottom : tabgroupname.top
 
-            color : "#CECECE"
+            color : "#E6E6E6"
         }
 
 
@@ -450,7 +450,7 @@ Rectangle {
             anchors.top : parent.top
             //anchors.bottom : tabgroupname.top
 
-            color : "#CECECE"
+            color : "#E6E6E6"
         }
     }
 
@@ -818,7 +818,7 @@ Rectangle {
                     anchors.verticalCenter: parent.verticalCenter
                     text: "Switch the direction"
                     font.family: mainFont.name
-                    font.pointSize: 9
+                    font.pixelSize: 12
                 }
             }
         }
@@ -899,7 +899,7 @@ Rectangle {
                                 anchors.horizontalCenter: parent.horizontalCenter
                                 anchors.verticalCenter: parent.verticalCenter
                                 font.family: mainFont.name
-                                font.pointSize: 7
+                                font.pixelSize: 9
                             }
                             MouseArea {
                                 anchors.fill: parent
@@ -955,7 +955,7 @@ Rectangle {
                                 anchors.horizontalCenter: parent.horizontalCenter
                                 anchors.verticalCenter: parent.verticalCenter
                                 font.family: mainFont.name
-                                font.pointSize: 7
+                                font.pixelSize: 9
                             }
                             MouseArea {
                                 anchors.fill: parent
@@ -1010,7 +1010,7 @@ Rectangle {
                                 anchors.horizontalCenter: parent.horizontalCenter
                                 anchors.verticalCenter: parent.verticalCenter
                                 font.family: mainFont.name
-                                font.pointSize: 7
+                                font.pixelSize: 9
                             }
                             MouseArea {
                                 anchors.fill: parent
@@ -1185,7 +1185,7 @@ Rectangle {
                     label: Text {
                         text: control.currentText
                         font.family: mainFont.name
-                        font.pointSize: 9
+                        font.pixelSize: 12
                     }
 
                     //drop-down customization
@@ -1202,7 +1202,7 @@ Rectangle {
                             Text {
                                 text: styleData.text
                                 font.family: mainFont.name
-                                font.pointSize: 9
+                                font.pixelSize: 12
                                 color: styleData.selected ? "#666666" : "#303030"
 //                                    color: styleData.selected ? "red" : "blue"
                             }
