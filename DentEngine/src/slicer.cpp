@@ -11,6 +11,7 @@ Slices Slicer::slice(Mesh* mesh){
 
     // mesh slicing step
     vector<Paths> meshslices = meshSlice(mesh);
+    // 승환 30%
 
     printf("meshslice done\n");
     fflush(stdout);
@@ -26,6 +27,7 @@ Slices Slicer::slice(Mesh* mesh){
         //meshslice.outerShellOffset(-(scfg->wall_thickness+scfg->nozzle_width)/2, jtRound);
         slices.push_back(meshslice);
     }
+    //승환 40%
     fflush(stdout);
     //printf("meshslice done\n");
 
@@ -39,7 +41,10 @@ Slices Slicer::slice(Mesh* mesh){
     fflush(stdout);
     //cout << "overhangdetect done" <<endl;
 
+    // 승환 50%
+
     containmentTreeConstruct();
+    // 승환 60%
 
     // below steps need to be done in parallel way
     // infill generation step
@@ -48,6 +53,7 @@ Slices Slicer::slice(Mesh* mesh){
     printf("infill done\n");
     fflush(stdout);
     //cout << "infill done" <<endl;
+    // 승환 70%
 
     // support generation step
     Support support(scfg->support_type);
@@ -55,6 +61,7 @@ Slices Slicer::slice(Mesh* mesh){
     printf("support done\n");
     fflush(stdout);
     //cout << "support done" <<endl;
+    // 승환 80%
 
     // raft generation step
     Raft raft(scfg->raft_type);
@@ -62,6 +69,7 @@ Slices Slicer::slice(Mesh* mesh){
     printf("raft done\n");
     fflush(stdout);
     //cout << "raft done" <<endl;
+    // 승환 90%
 
     containmentTreeConstruct();
     printf("ctreeconstruct done\n");
