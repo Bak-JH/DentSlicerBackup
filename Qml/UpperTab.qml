@@ -572,10 +572,10 @@ Rectangle {
             applybutton_vis: false
             descriptionimage_vis: true
             state: second_tab_button_arrange.state=="active" ? "active" : "inactive"
-            signal runFeature(int type);
+            signal runFeature();
             onApplyClicked: {
                 console.log("arrange");
-                runFeature(ftrArrange);
+                runFeature();
             }
         }
 

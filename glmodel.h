@@ -159,7 +159,7 @@ public:
     Mesh* rmesh;
 
     featureThread* ft;
-    arrangeSignalSender* arsignal;
+    //arrangeSignalSender* arsignal; //unused, signal from qml goes right into QmlManager.runArrange
 
     int ID; //for use in Part List
     static int globalID;
