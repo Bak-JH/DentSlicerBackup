@@ -1,8 +1,45 @@
 #include "autoarrange.h"
+#define ANGLE_UNIT 270
+#define STAGE_WIDTH 95000
+#define STAGE_HEIGHT 75000
+#define OFFSET 2000
 
 autoarrange::autoarrange()
 {
 
+}
+
+Paths autoarrange::getMeshRecArea(Mesh& mesh){//getting rectangle area of mesh in XY Plane, OFFSET included
+    Paths outline;
+    Path vertices;//all vertices in mesh
+    for(MeshVertex vertex : mesh.vertices){
+        QVector3D v_pos = vertex.position;
+        mesh.addPoint(v_pos.x(), v_pos.y(), &vertices);
+    }
+    int max_x = getMaxX(vertices) + OFFSET;
+    int max_y = getMaxY(vertices) + OFFSET;
+    int min_x = getMinX(vertices) - OFFSET;
+    int min_y = getMinY(vertices) - OFFSET;
+    Path recArea = {IntPoint(max_x, max_y),
+                  IntPoint(min_x, max_y),
+                  IntPoint(min_x, min_y),
+                  IntPoint(max_x, min_y)};
+    outline.push_back(recArea);
+    /**/qDebug() << "got MeshRecArea";
+    /**/debugPaths(outline);
+    return outline;
+}
+
+Paths autoarrange::getMeshConvexHull(Mesh& mesh){//getting convex hull area of mesh in XY Plane
+    Paths outline;
+    Path vertices;//all vertices in mesh
+    for(MeshVertex vertex : mesh.vertices){
+        QVector3D v_pos = vertex.position;
+        mesh.addPoint(v_pos.x(), v_pos.y(), &vertices);
+    }
+    outline.push_back(getConvexHull(&vertices));
+    /**/qDebug() << "got MeshConvexHull";
+    return outline;
 }
 
 Paths autoarrange::spreadingCheck(Mesh* mesh, bool* check, int chking_start, bool is_chking_pos){
@@ -34,10 +71,7 @@ Paths autoarrange::spreadingCheck(Mesh* mesh, bool* check, int chking_start, boo
                     if(!outline_checked){
                         int path_head = getPathHead(mf, side, is_chking_pos);
                         Path path = buildOutline(mesh, check, chking, path_head, is_chking_pos);
-                        if(path.size()==0){
-                            Paths empty_paths;
-                            return empty_paths;
-                        }
+                        if(path.size()==0) return {};
                         paths.push_back(path);
                         outline_checked = true;
                     }
@@ -76,9 +110,8 @@ Path autoarrange::buildOutline(Mesh* mesh, bool* check, int chking, int path_hea
     int path_tail = path_head;
     while(!outline_closed){
         if(check[chking]){
-            Path empty_path;
             qDebug() << "mesh error";
-            return empty_path;
+            return {};
         }
         //**qDebug() << "chking" << chking;
         MeshFace* mf = & mesh->faces[chking];
@@ -150,10 +183,9 @@ int autoarrange::getNbrVtx(MeshFace* mf, int base, int xth){//getNeighborVtx
 
 Path autoarrange::idxsToPath(Mesh* mesh, vector<int> path_by_idx){
     Path path;
-    for(int id : path_by_idx){
-        QVector3D vertex = mesh->vertices[id].position;
+    for(int idx : path_by_idx){
+        QVector3D vertex = mesh->vertices[idx].position;
         mesh->Mesh::addPoint(vertex.x(), vertex.y(), &path);
-        //qDebug() << "path build" << id << ip.X << ip.Y;
     }
     return path;
 }
@@ -180,15 +212,7 @@ Paths autoarrange::project(Mesh* mesh){
         if(mesh_error) break;
     }
     if(mesh_error){
-        Paths outline;
-        Path vtxs;
-        for(int i=0; i<mesh->vertices.size(); i++){
-            QVector3D vertex = mesh->vertices[i].position;
-            mesh->Mesh::addPoint(vertex.x(), vertex.y(), &vtxs);
-        }
-        /****/qDebug() << "got vtxs of mesh(" << vtxs.size() << "), start getting convexHull";
-        outline.push_back(getConvexHull(&vtxs));
-        return outline;
+        return getMeshConvexHull(*mesh);
     }
     else{
         /****/qDebug() << "Total outline_set : " << outline_sets.size() << "->" << clipOutlines(outline_sets).size();
@@ -352,16 +376,21 @@ float autoarrange::distL2P(IntPoint* line_p1, IntPoint* line_p2, IntPoint* p){
 //=========================================
 
 void autoarrange::offsetPath(Paths* paths){
-    int offset = 2000;
     Paths out;
     ClipperOffset co;
     co.AddPaths(*paths, jtSquare, etClosedPolygon);
     //if(Orientation(*paths)) co.Execute(out, offset);
     //else co.Execute(out, -offset);
-    co.Execute(out, offset);
-    qDebug() << "~~~~~~~";
-    debugPaths(out);
+    co.Execute(out, OFFSET);
+    //*debugPaths(out);
     *paths = out;
+}
+
+void autoarrange::offsetPaths_rec(Paths& paths){
+    paths[0][0] = {paths[0][0].X + 3, paths[0][0].Y + 3};
+    paths[0][1] = {paths[0][1].X - 3, paths[0][1].Y + 3};
+    paths[0][2] = {paths[0][2].X - 3, paths[0][2].Y - 3};
+    paths[0][3] = {paths[0][3].X + 3, paths[0][3].Y - 3};
 }
 
 //=========================================
@@ -370,465 +399,405 @@ void autoarrange::offsetPath(Paths* paths){
 
 //typedef pair<IntPoint, float> XYArrangement;
 
-vector<XYArrangement> autoarrange::arngMeshes(vector<Mesh>* meshes){
+vector<XYArrangement> autoarrange::simpArngMeshes(vector<Mesh>& meshes){
     vector<Paths> outlines;
     /**/qDebug() << "Arrange start";
-    for(int idx=0; idx<meshes->size(); idx++){
-        outlines.push_back(project(&(*meshes)[idx]));
+    for(int idx=0; idx<meshes.size(); idx++){
+        outlines.push_back(getMeshConvexHull(meshes[idx]));
         RDPSimpPaths(&outlines[idx]);
         offsetPath(&outlines[idx]);
     }
     /**/qDebug() << "Projection done @arngMeshes";
-    return arng2D(&outlines);
+    return arng2D(outlines);
 }
 
-vector<XYArrangement> autoarrange::arng2D(vector<Paths>* figs){
+vector<XYArrangement> autoarrange::arngMeshes(vector<Mesh>& meshes){
+    vector<Paths> outlines;
+    /**/qDebug() << "Arrange start";
+    for(int idx=0; idx<meshes.size(); idx++){
+        //outlines.push_back(project(& meshes[idx]));
+        //RDPSimpPaths(&outlines[idx]);
+        //offsetPath(&outlines[idx]);
+        outlines.push_back(getMeshRecArea(meshes[idx]));
+    }
+    return arng2D(outlines);
+}
+
+bool compareArea(pair<Paths*, int>& fig1, pair<Paths*, int>& fig2){//used for sort
+    return Area((*fig1.first)[0])>Area((*fig2.first)[0]);
+}
+
+vector<XYArrangement> autoarrange::arng2D(vector<Paths>& figs){
+    vector<pair<Paths*, int> > figs_with_idx;//tried to use reference istead of pointer, but it caused error
+    for(Paths& fig : figs) figs_with_idx.push_back({&fig, figs_with_idx.size()});
+    sort(figs_with_idx.begin(), figs_with_idx.end(), compareArea);
     vector<XYArrangement> arng_result_set;
+    arng_result_set.resize(figs.size(), {{0,0},-1});
     Paths cum_outline;
-    initStage(&cum_outline);
-    for(int idx=0; idx<figs->size(); idx++){
-        XYArrangement new_result = arngFig(&cum_outline, &(*figs)[idx]);
-        if(new_result.second==-1) break;//-1 means arng imposible
-        arng_result_set.push_back(new_result);
-        /**/qDebug() << idx << "arngd @arng2D";
+    initStage(cum_outline);
+    int cumXOfNotArrangeable = 0;
+    for(pair<Paths*, int>& fig_with_idx : figs_with_idx){
+        Paths& fig = *fig_with_idx.first;
+        XYArrangement new_result = arngFig(cum_outline, fig);
+        if(new_result.second==-1){//unable to arrange
+            new_result.first = {-abs(cum_outline[0][0].X) + cumXOfNotArrangeable - getMinX(fig[0]),
+                                abs(cum_outline[0][0].Y) - getMinY(fig[0])};
+            new_result.second = 0;
+            cumXOfNotArrangeable = cumXOfNotArrangeable + getMaxX(fig[0]) - getMinX(fig[0]);
+        }
+        arng_result_set[fig_with_idx.second] = new_result;
+        /**/qDebug() << "- fig" << fig_with_idx.second << "arngd";
     }
     /**/qDebug() << "Arrange all done";
-    /**/qDebug() << arng_result_set.size();
     /**/debugPaths(cum_outline);
+    //test position
     return arng_result_set;
 }
 
-void autoarrange::initStage(Paths* cum_outline){
-
-    int stage_x = 95000;
-    int stage_y = 75000;
-
-    Path stage;
-    IntPoint p1, p2, p3, p4;
-    p1.X=stage_x/2;p1.Y=stage_y/2;
-    p2.X=-stage_x/2;p2.Y=stage_y/2;
-    p3.X=-stage_x/2;p3.Y=-stage_y/2;
-    p4.X=stage_x/2;p4.Y=-stage_y/2;
-    stage.push_back(p4);//cw
-    stage.push_back(p3);
-    stage.push_back(p2);
-    stage.push_back(p1);
-
-    Path universal_plane;//to make placeable space have zero filling value
-    IntPoint u_p1, u_p2, u_p3, u_p4;
-    u_p1.X=stage_x/2+1;u_p1.Y=stage_y/2+1;
-    u_p2.X=-stage_x/2-1;u_p2.Y=stage_y/2+1;
-    u_p3.X=-stage_x/2-1;u_p3.Y=-stage_y/2-1;
-    u_p4.X=stage_x/2+1;u_p4.Y=-stage_y/2-1;
-    universal_plane.push_back(u_p1);//ccw
-    universal_plane.push_back(u_p2);
-    universal_plane.push_back(u_p3);
-    universal_plane.push_back(u_p4);
-
-    cum_outline->push_back(universal_plane);
-    cum_outline->push_back(stage);
+void autoarrange::initStage(Paths& cum_outline){
+    //universal_plane의 중앙이 (0,0)이라는 특성을 외부 함수에서 사용
+    int half_width = STAGE_WIDTH/2;
+    int half_height = STAGE_HEIGHT/2;
+    //stage as hole, cw(hole)
+    Path stage = {IntPoint(half_width, half_height),
+                  IntPoint(half_width, -half_height),
+                  IntPoint(-half_width, -half_height),
+                  IntPoint(-half_width, half_height)};
+    //set universal_plane to make placeable space have zero filling value, ccw(fill)
+    Path universal_plane = {IntPoint(half_width+1, half_height+1),
+                            IntPoint(-half_width-1, half_height+1),
+                            IntPoint(-half_width-1, -half_height-1),
+                            IntPoint(half_width+1, -half_height-1)};
+    cum_outline.push_back(universal_plane);
+    cum_outline.push_back(stage);
 }
 
-XYArrangement autoarrange::arngFig(Paths* cum_outline, Paths* fig){
-    /**/qDebug() << "Arrange new fig @arngFig";
-    float angle_unit = 30;
-
-    Paths optimal_rot_fig;
-    XYArrangement global_optimal_arrangement;
-    int global_min_width = abs((*cum_outline)[0][0].X);//universal plane 상 최대 X
-    int global_min_height = abs((*cum_outline)[0][0].Y);//universal plane 상 최대 Y
-    /**/qDebug() << "- global_min_width init" << global_min_width << "@arngFig";
-    for(float rot_angle=0; rot_angle<360; rot_angle += angle_unit){
+XYArrangement autoarrange::newArngFig(Paths& cum_outline, Paths& fig){
+    /**/qDebug() << "Arrange new fig";
+    Paths optimal_rot_fig;//_ptr;
+    XYArrangement optimal_arrangement;
+    int min_width = abs(cum_outline[0][0].X);//universal plane 상 최대 X
+    int min_height = abs(cum_outline[0][0].Y);//universal plane 상 최대 Y
+    for(float rot_angle=0; rot_angle<360; rot_angle += ANGLE_UNIT){
         IntPoint optimal_point;
-        /**/qDebug() << "- rot_angle" << rot_angle << "@arngFig";
         Paths rot_fig = rotatePaths(fig, rot_angle);
-        /**/qDebug() << "- fig rotated" << "@arngFig";
-        Paths nfp_set = getNFP(cum_outline, &rot_fig);
-        /**/qDebug() << "- got nfp_set" << "(size:" << nfp_set.size() << ")" << "@arngFig";
-        if(nfp_set.size()>0) optimal_point = getOptimalPoint(&nfp_set);
-        else optimal_point = {abs((*cum_outline)[0][0].X), abs((*cum_outline)[0][0].Y)};
-        /**/qDebug() << "- got optimal_point" << "@arngFig";
-        int local_min_width = getMaxX(optimal_point, &rot_fig);
-        /**/qDebug() << "- got local_min_width" << local_min_width << "@arngFig";
-        int local_min_height = getMaxY(optimal_point, &rot_fig);
-        if(local_min_width<global_min_width){
-            /**/qDebug() << "- global_min_width" << "@arngFig";
+        Paths fig_extra_offset = fig;
+        offsetPaths_rec(fig_extra_offset);
+        Paths rot_fig_extra_offset = rotatePaths(fig_extra_offset, rot_angle);
+        Paths nfp_set = getNFP(cum_outline, rot_fig_extra_offset);
+        /*left for trouble shooting, there is known error case using this version
+        if(nfp_set.size()>0) optimal_point = getOptimalPoint(nfp_set);
+        else optimal_point = {abs(cum_outline[0][0].X), abs(cum_outline[0][0].Y)};//*/
+        if(nfp_set.size()==0) continue;
+        optimal_point = getOptimalPoint(nfp_set);
+        //max relative x(and y) of rot_fig + optimal_point.X(and Y), paths[0]이 가장 외곽일거라 가정
+        int tmp_min_width = getMaxX(rot_fig[0]) - rot_fig[0][0].X  + optimal_point.X;
+        int tmp_min_height = getMaxY(rot_fig[0]) - rot_fig[0][0].Y  + optimal_point.Y;\
+        if(tmp_min_width<min_width || (tmp_min_width==min_width && tmp_min_height<min_height)){
             optimal_rot_fig = rot_fig;
-            global_optimal_arrangement = {optimal_point, rot_angle};
-            global_min_width = local_min_width;
-            global_min_height = local_min_height;
-        }else if(local_min_width==global_min_width && local_min_height<global_min_height){
-            /**/qDebug() << "- global_min_height" << "@arngFig";
-            optimal_rot_fig = rot_fig;
-            global_optimal_arrangement = {optimal_point, rot_angle};
-            global_min_height = local_min_height;
+            optimal_arrangement = {optimal_point, rot_angle};
+            min_width = tmp_min_width;
+            min_height = tmp_min_height;
         }
     }
-    if(global_min_width == abs((*cum_outline)[0][0].X)){//arng imposible
-        /**/qDebug() << "- arng imposible" << "@arngFig";
-        IntPoint p = {0, 0};
-        return make_pair(p,-1);//-1 means arng imposible
+    if(min_width == abs(cum_outline[0][0].X)){
+        /**/qDebug() << "- arng imposible";
+        return make_pair(IntPoint(0,0),-1);
     }
-    tanslatePaths(&optimal_rot_fig, global_optimal_arrangement.first);
-    /**/qDebug() << "- path translated" << global_optimal_arrangement.first.X << global_optimal_arrangement.first.Y << "@arngFig";
-    cumulativeClip(cum_outline, &optimal_rot_fig);
-    /**/qDebug() << "- cumulativeClip done" << "@arngFig";
-    /**/debugPaths(*cum_outline);
-    return global_optimal_arrangement;
+    //Paths& optimal_rot_fig = *optimal_rot_fig_ptr;
+    tanslatePaths(optimal_rot_fig, optimal_arrangement.first);
+    cumulativeClip(cum_outline, optimal_rot_fig);
+    /**/qDebug() << "- cumulativeClip done";
+    return optimal_arrangement;
 }
 
-Paths autoarrange::rotatePaths(Paths* paths, float rot_angle){//Rotation about origin,because QTransform does so.
+XYArrangement autoarrange::arngFig(Paths& cum_outline, Paths& fig){
+    /**/qDebug() << "Arrange new fig";
+    Paths optimal_rot_fig;//_ptr;
+    XYArrangement optimal_arrangement;
+    int min_width = abs(cum_outline[0][0].X);//universal plane 상 최대 X
+    int min_height = abs(cum_outline[0][0].Y);//universal plane 상 최대 Y
+    for(float rot_angle=0; rot_angle<360; rot_angle += ANGLE_UNIT){
+        IntPoint optimal_point;
+        Paths rot_fig = rotatePaths(fig, rot_angle);
+        Paths nfp_set = getNFP(cum_outline, rot_fig);
+        /*left for trouble shooting, there is known error case using this version
+        if(nfp_set.size()>0) optimal_point = getOptimalPoint(nfp_set);
+        else optimal_point = {abs(cum_outline[0][0].X), abs(cum_outline[0][0].Y)};//*/
+        if(nfp_set.size()==0) continue;
+        optimal_point = getOptimalPoint(nfp_set);
+        //max relative x(and y) of rot_fig + optimal_point.X(and Y), paths[0]이 가장 외곽일거라 가정
+        int tmp_min_width = getMaxX(rot_fig[0]) - rot_fig[0][0].X  + optimal_point.X;
+        int tmp_min_height = getMaxY(rot_fig[0]) - rot_fig[0][0].Y  + optimal_point.Y;\
+        if(tmp_min_width<min_width || (tmp_min_width==min_width && tmp_min_height<min_height)){
+            optimal_rot_fig = rot_fig;
+            optimal_arrangement = {optimal_point, rot_angle};
+            min_width = tmp_min_width;
+            min_height = tmp_min_height;
+        }
+    }
+    if(min_width == abs(cum_outline[0][0].X)){
+        /**/qDebug() << "- arng imposible";
+        return make_pair(IntPoint(0,0),-1);
+    }
+    //Paths& optimal_rot_fig = *optimal_rot_fig_ptr;
+    tanslatePaths(optimal_rot_fig, optimal_arrangement.first);
+    cumulativeClip(cum_outline, optimal_rot_fig);
+    /**/qDebug() << "- cumulativeClip done";
+    return optimal_arrangement;
+}
+
+Paths autoarrange::rotatePaths(Paths& paths, float rot_angle){//Rotation about origin(because QTransform does so)
     Paths rot_paths;
-    rot_paths.resize(paths->size());
-    for(int path_idx=0; path_idx<paths->size();path_idx++){
-        for(int point_idx=0; point_idx<(*paths)[path_idx].size(); point_idx++){
-            rot_paths[path_idx].push_back(rotateIntPoint((*paths)[path_idx][point_idx], rot_angle));
+    rot_paths.resize(paths.size());
+    for(int path_idx=0; path_idx<paths.size();path_idx++){
+        for(IntPoint& point : paths[path_idx]){
+            rot_paths[path_idx].push_back(rotatePoint(point, rot_angle));
         }
     }
     return rot_paths;
 }
 
-IntPoint autoarrange::rotateIntPoint(IntPoint point, float rot_angle){//Rotation about origin,because QTransform does so.
-    IntPoint rot_point;
+IntPoint autoarrange::rotatePoint(IntPoint& point, float rot_angle){//Rotation about origin(because QTransform does so)
     float rad_angle = rot_angle*M_PI/180;
+    /*left for trouble shooting, there is known error case using this version
+    IntPoint rot_point;
     rot_point.X = point.X*cosf(rad_angle) - point.Y*sinf(rad_angle);
     rot_point.Y = point.X*sinf(rad_angle) + point.Y*cosf(rad_angle);
-    return rot_point;
+    return rot_point;//*/
+    return {round(point.X*cosf(rad_angle) - point.Y*sinf(rad_angle)), round(point.X*sinf(rad_angle) + point.Y*cosf(rad_angle))};
 }
 
-void autoarrange::tanslatePaths(Paths* paths, IntPoint tanslate_vec){
-    Paths translated_paths;
-    translated_paths.resize(paths->size());
-    for(int path_idx=0; path_idx<paths->size();path_idx++){
-        for(int point_idx=0; point_idx<(*paths)[path_idx].size(); point_idx++){
-            translated_paths[path_idx].push_back(tanslateIntPoint((*paths)[path_idx][point_idx], tanslate_vec));
+void autoarrange::tanslatePaths(Paths& paths, IntPoint& tanslate_vec){
+    Paths trans_paths;
+    trans_paths.resize(paths.size());
+    for(int path_idx=0; path_idx<paths.size();path_idx++){
+        for(IntPoint& point : paths[path_idx]){
+            trans_paths[path_idx].push_back(tanslatePoint(point, tanslate_vec));
         }
     }
-    paths->swap(translated_paths);
-    translated_paths.clear();
+    paths.swap(trans_paths);
+    trans_paths.clear();
 }
 
-IntPoint autoarrange::tanslateIntPoint(IntPoint point, IntPoint tanslate_vec){
-    IntPoint tanslated_point;
-    tanslated_point.X = point.X + tanslate_vec.X;
-    tanslated_point.Y = point.Y + tanslate_vec.Y;
+IntPoint autoarrange::tanslatePoint(IntPoint& point, IntPoint& tanslate_vec){
+    IntPoint tanslated_point = point + tanslate_vec;
     return tanslated_point;
 }
 
-void autoarrange::cumulativeClip(Paths* cum_outline, Paths* new_fig){
+void autoarrange::cumulativeClip(Paths& cum_outline, Paths& new_fig){
     Clipper c;
-    c.AddPaths(*cum_outline, ptSubject, true);
-    c.AddPaths(*new_fig, ptClip, true);
-    c.Execute(ctUnion, *cum_outline, pftPositive, pftPositive);
+    c.AddPaths(cum_outline, ptSubject, true);
+    c.AddPaths(new_fig, ptClip, true);
+    c.Execute(ctUnion, cum_outline, pftPositive, pftPositive);
 }
 
-IntPoint autoarrange::getOptimalPoint(Paths* nfp_set){
-    int min_x = (*nfp_set)[0][0].X;
-    int min_y = (*nfp_set)[0][0].Y;
-    int paths_inculding_optimal_point = 1;
-    int optimal_point_idx = 0;
-    //*qDebug() << "- optimalPoint checked" << "0" << "@getOptimalPoint";
-    for(int path_idx=0; path_idx<nfp_set->size();path_idx++){
-        for(int point_idx=0; point_idx<(*nfp_set)[path_idx].size(); point_idx++){
-            if((*nfp_set)[path_idx][point_idx].X<min_x){
-                min_x = (*nfp_set)[path_idx][point_idx].X;
-                min_y = (*nfp_set)[path_idx][point_idx].Y;
-                paths_inculding_optimal_point = path_idx;
-                optimal_point_idx = point_idx;
-                //*qDebug() << "- upadte optimalPoint to" << point_idx << "@getOptimalPoint";
-            }else if((*nfp_set)[path_idx][point_idx].X==min_x && (*nfp_set)[path_idx][point_idx].Y<min_y){
-                min_y = (*nfp_set)[path_idx][point_idx].Y;
-                paths_inculding_optimal_point = path_idx;
-                optimal_point_idx = point_idx;
-                //*qDebug() << "- upadte optimalPoint to" << point_idx << "@getOptimalPoint";
+IntPoint autoarrange::getOptimalPoint(Paths& nfp_set){
+    IntPoint opt_point = {nfp_set[0][0].X, nfp_set[0][0].Y};
+    for(Path& path : nfp_set){
+        for(IntPoint& point : path){
+            if(point.X < opt_point.X || (point.X == opt_point.X && point.Y < opt_point.Y)){
+                opt_point = point;
             }
-            //*qDebug() << "- optimalPoint checked" << point_idx << "@getOptimalPoint";
         }
     }
-    return (*nfp_set)[paths_inculding_optimal_point][optimal_point_idx];
-
+    return opt_point;
 }
 
-int autoarrange::getMaxX(IntPoint translate_vec, Paths* fig){
-    Path path = (*fig)[0];//paths[0]이 가장 외곽일거라 가정
+int autoarrange::getMaxX(Path& path){
     int max_x = path[0].X;
-    for(int idx=1; idx<path.size(); idx++){
-        if(max_x<path[idx].X) max_x=path[idx].X;
-    }
-    return max_x + translate_vec.X - path[0].X;
+    for(IntPoint& point : path) if(max_x<point.X) max_x=point.X;
+    return max_x;
 }
 
-int autoarrange::getMaxY(IntPoint translate_vec, Paths* fig){
-    Path path = (*fig)[0];//paths[0]이 가장 외곽일거라 가정
+int autoarrange::getMinX(Path& path){
+    int min_x = path[0].X;
+    for(IntPoint& point : path) if(min_x>point.X) min_x=point.X;
+    return min_x;
+}
+
+int autoarrange::getMaxY(Path& path){
     int max_y = path[0].Y;
-    for(int idx=1; idx<path.size(); idx++){
-        if(max_y<path[idx].Y) max_y=path[idx].Y;
-    }
-    return max_y + translate_vec.Y - path[0].Y;
+    for(IntPoint& point : path) if(max_y<point.Y) max_y=point.Y;
+    return max_y;
 }
 
-Paths autoarrange::getNFP(Paths* subject, Paths* object){
-    Path convex_obj = getConvexHull(&(*object)[0]);
-    /**/qDebug() << "- getConvexHull result" << "@getNFP";
-    /**/debugPath(convex_obj);//qDebug
+int autoarrange::getMinY(Path& path){
+    int min_y = path[0].Y;
+    for(IntPoint& point : path) if(min_y>point.Y) min_y=point.Y;
+    return min_y;
+}
 
-    vector<vector<float>> sub_slope_set;
-    /**/qDebug() << "- sub_slope_set" << "@getNFP";
-    sub_slope_set.resize(subject->size());
-    for(int path_idx=1; path_idx<subject->size(); path_idx++){//path_idx0 is univesal_plane
-        for(int edge_idx=0; edge_idx<(*subject)[path_idx].size(); edge_idx++){
-            sub_slope_set[path_idx].push_back(getNthEdgeSlope(&(*subject)[path_idx], edge_idx, true));
+Paths autoarrange::getNFP(Paths& subject, Paths& object){
+    Path convex_obj = getConvexHull(&object[0]);
+    /**/qDebug() << "- got object convexHull" << checkConvex(convex_obj);
+    //*debugPath(convex_obj);
+
+    vector<Vecs> sub_vecs;
+    sub_vecs.resize(subject.size());
+    for(int path_idx=0; path_idx<subject.size(); path_idx++){//path_idx0 is univesal_plane
+        for(int edge_idx=0; edge_idx<subject[path_idx].size(); edge_idx++){
+            sub_vecs[path_idx].push_back(getEdgeVec(subject[path_idx], edge_idx, true));
         }
     }
 
-    vector<vector<IntPoint>> sub_vec_set;
-    /**/qDebug() << "- sub_vec_set" << "@getNFP";
-    sub_vec_set.resize(subject->size());
-    for(int path_idx=0; path_idx<subject->size(); path_idx++){//path_idx0 is univesal_plane
-        for(int edge_idx=0; edge_idx<(*subject)[path_idx].size(); edge_idx++){
-            sub_vec_set[path_idx].push_back(getNthEdgeVec(&(*subject)[path_idx], edge_idx, true));
-        }
-    }
-
-    vector<float> obj_slope_set;
-    /**/qDebug() << "- obj_slope_set" << "@getNFP";
+    Vecs obj_vecs;
     for(int edge_idx=0; edge_idx<convex_obj.size(); edge_idx++){
-        /**/qDebug()<<convex_obj[edge_idx].X<<convex_obj[edge_idx].Y << getNthEdgeSlope(&convex_obj, edge_idx, false);
-        obj_slope_set.push_back(getNthEdgeSlope(&convex_obj, edge_idx, false));
+        obj_vecs.push_back(getEdgeVec(convex_obj, edge_idx, false));
     }
-
-    vector<IntPoint> obj_vec_set;
-    /**/qDebug() << "- obj_vec_set" << "@getNFP";
-    for(int edge_idx=0; edge_idx<convex_obj.size(); edge_idx++){
-        obj_vec_set.push_back(getNthEdgeVec(&convex_obj, edge_idx, false));
-    }
-
-    /**/qDebug() << "- nfp setup done" << "@getNFP";
 
     Paths raw_nfp_set;
-    raw_nfp_set.resize(subject->size());
-    for(int path_idx=1; path_idx<subject->size(); path_idx++){//path_idx0 is univesal_plane
-        vector<vector<IntPoint>> obj_vecs_in_regions = getObjVecsInRegions(&sub_vec_set[path_idx], &obj_vec_set);
-        /**/qDebug() << "- getObjVecsInRegions done" << "@getNFP";
-        IntPoint tail = getFirstNFPPoint(sub_slope_set[path_idx][0], (*subject)[path_idx][0], &convex_obj, obj_slope_set);
-        /**/qDebug() << "- got nfp first point" << "@getNFP";
-        //**/qDebug() << "- add ObjVecs to NFP" << obj_vecs_in_regions.size() << "@getNFP";
-        for(int edge_idx=0; edge_idx<(*subject)[path_idx].size(); edge_idx++){
-            /**/qDebug() << "- subject edge" << edge_idx << obj_vecs_in_regions[edge_idx].size() << "@getNFP";
+    raw_nfp_set.resize(subject.size());
+    for(int path_idx=1; path_idx<subject.size(); path_idx++){//path_idx0 is univesal_plane
+        vector<Vecs> obj_vecs_in_regions = getObjVecsInRegions(sub_vecs[path_idx], obj_vecs);
+        IntPoint tail = getFirstNFPPoint(sub_vecs[path_idx][0], subject[path_idx][0], convex_obj, obj_vecs);
+        for(int edge_idx=0; edge_idx<subject[path_idx].size(); edge_idx++){
             raw_nfp_set[path_idx].push_back(tail);
-            tail = tanslateIntPoint(tail, sub_vec_set[path_idx][edge_idx]);
+            tail = tanslatePoint(tail, sub_vecs[path_idx][edge_idx]);
             for(int obj_vec_idx=0; obj_vec_idx<obj_vecs_in_regions[edge_idx].size(); obj_vec_idx++){
                 raw_nfp_set[path_idx].push_back(tail);
-                //*qDebug() << obj_vecs_in_regions[edge_idx][obj_vec_idx].X <<","<<obj_vecs_in_regions[edge_idx][obj_vec_idx].Y << "@getNFP";
-                tail = tanslateIntPoint(tail, obj_vecs_in_regions[edge_idx][obj_vec_idx]);
+                tail = tanslatePoint(tail, obj_vecs_in_regions[edge_idx][obj_vec_idx]);
             }
         }
         /**/if(tail!=raw_nfp_set[path_idx][0]) qDebug() << "raw_nfp" << path_idx << "not closed";
     }
-    /**/qDebug() << "- got raw_nfp_set" << "(size:" << raw_nfp_set.size() << ")" << "@getNFP";
-    /**/debugPaths(raw_nfp_set);
-    Paths separate_nfp_set = simplyfyRawNFP(&raw_nfp_set, subject);
-    return mergeNFP(&separate_nfp_set);
+    /**/qDebug() << "- got raw_nfp_set" << "(size:" << raw_nfp_set.size() << ")";
+    //*debugPaths(raw_nfp_set);
+    Paths separate_nfp_set = simplyfyRawNFP(raw_nfp_set, subject);
+    return mergeNFP(separate_nfp_set);
 }
 
-Paths autoarrange::simplyfyRawNFP(Paths* raw_nfp_set, Paths* subject){
+Paths autoarrange::simplyfyRawNFP(Paths& raw_nfp_set, Paths& subject){
     Paths simplyfied_nfp_set;
     simplyfied_nfp_set.resize(1);//path_idx0 is univesal_plane
-    for(int idx=1; idx<raw_nfp_set->size(); idx++){//path_idx0 is univesal_plane
-        /**/qDebug() << "- simplyfy raw_nfp[" << idx << "]" << "@simplyfyRawNFP";
+    for(int idx=1; idx<raw_nfp_set.size(); idx++){//path_idx0 is univesal_plane
         Paths result_paths;
-        if((*subject)[idx].size() != 0){
-            if(Orientation((*subject)[idx])){
-                /**/qDebug() << "- ccw" << "@simplyfyRawNFP";
-                SimplifyPolygon((*raw_nfp_set)[idx], result_paths, pftPositive);
+        if(subject[idx].size() != 0){
+            if(Orientation(subject[idx])){
+                SimplifyPolygon(raw_nfp_set[idx], result_paths, pftPositive);
                 if(result_paths.size()>0 && result_paths[0].size()>0){
                     if(Orientation(result_paths[0])) ReversePath(result_paths[0]);
                 }
             }else{
-                /**/qDebug() << "- cw" << "@simplyfyRawNFP";
-                SimplifyPolygon((*raw_nfp_set)[idx], result_paths, pftNegative);
+                SimplifyPolygon(raw_nfp_set[idx], result_paths, pftNegative);
                 if(result_paths.size()>0 && result_paths[0].size()>0){
                     if(!Orientation(result_paths[0])) ReversePath(result_paths[0]);
                 }
             }
         }
-        /**/qDebug() << "- raw_nfp[" << idx << "] simplyfied" << result_paths.size() << "@simplyfyRawNFP";
-        /**/debugPaths(result_paths);
-        if(result_paths.size()>0){
-            simplyfied_nfp_set.push_back(result_paths[0]);
-        }
-        else{
-            Path empty;
-            simplyfied_nfp_set.push_back(empty);
-        }
+        //*qDebug() << "- raw_nfp[" << idx << "] simplyfied" << result_paths.size();
+        //*debugPaths(result_paths);
+        if(result_paths.size()>0) simplyfied_nfp_set.push_back(result_paths[0]);
+        else simplyfied_nfp_set.push_back({});
     }
     return simplyfied_nfp_set;
 }
 
-Paths autoarrange::mergeNFP(Paths* separate_nfp_set){
+Paths autoarrange::mergeNFP(Paths& separate_nfp_set){
     Paths merged_nfp;
-    for(int idx =1; idx<separate_nfp_set->size(); idx++){
-        if((*separate_nfp_set)[idx].size()>0){
-            if(Orientation((*separate_nfp_set)[idx])){
-                Clipper c;
-                c.AddPaths(merged_nfp, ptSubject, true);
-                c.AddPath((*separate_nfp_set)[idx], ptClip, true);
-                c.Execute(ctUnion, merged_nfp, pftPositive, pftPositive);
-            }else{
-                Clipper c;
-                c.AddPaths(merged_nfp, ptSubject, true);
-                c.AddPath((*separate_nfp_set)[idx], ptClip, true);
-                c.Execute(ctDifference, merged_nfp, pftPositive, pftNegative);
-            }
+    for(Path& nfp : separate_nfp_set){
+        if(nfp.size()>0){
+            Clipper c;
+            c.AddPaths(merged_nfp, ptSubject, true);
+            c.AddPath(nfp, ptClip, true);
+            if(Orientation(nfp)) c.Execute(ctUnion, merged_nfp, pftPositive, pftPositive);
+            else c.Execute(ctDifference, merged_nfp, pftPositive, pftNegative);
         }
     }
     return merged_nfp;
 }
 
-vector<vector<IntPoint>> autoarrange::getObjVecsInRegions(vector<IntPoint>* sub_vec_set, vector<IntPoint>* obj_vec_set){
-    vector<vector<IntPoint>> obj_vecs_in_regions;
+vector<Vecs> autoarrange::getObjVecsInRegions(Vecs& sub_vecs, Vecs& obj_vecs){
+    vector<Vecs> obj_vecs_in_regions;
     int obj_edge_tail;
-    for(int obj_edge_idx=0; obj_edge_idx<obj_vec_set->size(); obj_edge_idx++){
-        vector<IntPoint> obj_vecs_in_single_region_front_part;
-        vector<IntPoint> obj_vecs_in_single_region;
-        if(isVecCCW((*sub_vec_set)[0], (*obj_vec_set)[obj_edge_idx], (*sub_vec_set)[1])){
+    for(int obj_edge_idx=0; obj_edge_idx<obj_vecs.size(); obj_edge_idx++){
+        Vecs obj_vecs_in_single_region_front_part;
+        Vecs obj_vecs_in_single_region;
+        if(isVecCCW(sub_vecs[0], obj_vecs[obj_edge_idx], sub_vecs[1])){
             if(obj_edge_idx==0){
-                int obj_edge_idx2 = obj_vec_set->size() - 1;
-                while(isVecCCW((*sub_vec_set)[0], (*obj_vec_set)[obj_edge_idx2], (*sub_vec_set)[1])&&obj_edge_idx2>=0){
-                    obj_vecs_in_single_region_front_part.push_back((*obj_vec_set)[obj_edge_idx2]);
+                int obj_edge_idx2 = obj_vecs.size() - 1;
+                while(isVecCCW(sub_vecs[0], obj_vecs[obj_edge_idx2], sub_vecs[1])&&obj_edge_idx2>=0){
+                    obj_vecs_in_single_region_front_part.push_back(obj_vecs[obj_edge_idx2]);
                     obj_edge_idx2--;
                 }
             }
-            if(obj_vecs_in_single_region_front_part.size() != obj_vec_set->size()){
+            if(obj_vecs_in_single_region_front_part.size() != obj_vecs.size()){
                 int start_from = obj_edge_idx;
                 obj_edge_tail = obj_edge_idx;
-                obj_vecs_in_single_region.push_back((*obj_vec_set)[obj_edge_idx]);
-                obj_edge_idx = (obj_edge_idx+1)%(*obj_vec_set).size();
-                while(isVecCCW((*sub_vec_set)[0], (*obj_vec_set)[obj_edge_idx], (*sub_vec_set)[1]) && obj_edge_idx != start_from){
+                obj_vecs_in_single_region.push_back(obj_vecs[obj_edge_idx]);
+                obj_edge_idx = (obj_edge_idx+1)%obj_vecs.size();
+                while(isVecCCW(sub_vecs[0], obj_vecs[obj_edge_idx], sub_vecs[1]) && obj_edge_idx != start_from){
                     obj_edge_tail = obj_edge_idx;
-                    obj_vecs_in_single_region.push_back((*obj_vec_set)[obj_edge_idx]);
-                    obj_edge_idx = (obj_edge_idx+1)%(*obj_vec_set).size();
+                    obj_vecs_in_single_region.push_back(obj_vecs[obj_edge_idx]);
+                    obj_edge_idx = (obj_edge_idx+1)%obj_vecs.size();
                 }
             }
             obj_vecs_in_single_region.insert(obj_vecs_in_single_region.begin(),obj_vecs_in_single_region_front_part.rbegin(),obj_vecs_in_single_region_front_part.rend());
-            /**/qDebug() << "in region 0" << obj_vecs_in_single_region.size();
+            //*qDebug() << "in region 0" << obj_vecs_in_single_region.size();
             obj_vecs_in_regions.push_back(obj_vecs_in_single_region);
             break;
         }
     }
     if(obj_vecs_in_regions.size() == 0){
-        vector<IntPoint> obj_vecs_in_single_region;
-        /**/qDebug() << "in region 0 0";
+        Vecs obj_vecs_in_single_region;
+        //*qDebug() << "in region 0 0";
         obj_vecs_in_regions.push_back(obj_vecs_in_single_region);
     }
-    for(int sub_edge_idx=1; sub_edge_idx<(*sub_vec_set).size(); sub_edge_idx++){
-        vector<IntPoint> obj_vecs_in_single_region;
-        IntPoint from_slope = (*sub_vec_set)[sub_edge_idx];
-        IntPoint to_slope = (*sub_vec_set)[(sub_edge_idx+1)%(*sub_vec_set).size()];
-        int obj_edge_idx = (obj_edge_tail+1)%(*obj_vec_set).size();
+    for(int sub_edge_idx=1; sub_edge_idx<sub_vecs.size(); sub_edge_idx++){
+        Vecs obj_vecs_in_single_region;
+        IntPoint from_slope = sub_vecs[sub_edge_idx];
+        IntPoint to_slope = sub_vecs[(sub_edge_idx+1)%sub_vecs.size()];
+        int obj_edge_idx = (obj_edge_tail+1)%obj_vecs.size();
         int start_from = -1;
-        while(isVecCCW(from_slope, (*obj_vec_set)[obj_edge_idx], to_slope) && obj_edge_idx != start_from){
+        while(isVecCCW(from_slope, obj_vecs[obj_edge_idx], to_slope) && obj_edge_idx != start_from){
             if(start_from == -1) start_from=obj_edge_idx;
             obj_edge_tail = obj_edge_idx;
-            obj_vecs_in_single_region.push_back((*obj_vec_set)[obj_edge_idx]);
-            obj_edge_idx = (obj_edge_idx+1)%(*obj_vec_set).size();
+            obj_vecs_in_single_region.push_back(obj_vecs[obj_edge_idx]);
+            obj_edge_idx = (obj_edge_idx+1)%obj_vecs.size();
         }
-        /**/qDebug() << "in region" << sub_edge_idx << obj_vecs_in_single_region.size();
+        //*qDebug() << "in region" << sub_edge_idx << obj_vecs_in_single_region.size();
         obj_vecs_in_regions.push_back(obj_vecs_in_single_region);
     }
     return obj_vecs_in_regions;
 }
 
-IntPoint autoarrange::inverseVec(IntPoint p){
-    return {-p.X, -p.Y};
-}
-
-bool autoarrange::isVecAlign(IntPoint a, IntPoint b){
+bool autoarrange::isVecAlign(const IntPoint& a, const IntPoint& b){
     return a.X*b.Y==a.Y*b.X && a.X*b.X>=0 && a.Y*b.Y>=0;
 }
 
-bool autoarrange::isCCW(IntPoint a, IntPoint b, IntPoint c){
+bool autoarrange::isCCW(const IntPoint& a, const IntPoint& b, const IntPoint& c){
     return ccw(a, b, c)==-1;
 }
 
-bool autoarrange::isVecCCW(IntPoint a, IntPoint b, IntPoint c){
+bool autoarrange::isVecCCW(const IntPoint& a, const IntPoint& b, const IntPoint& c){
     if(isVecAlign(b, c)) return false;
     if(isVecAlign(a, b)) return true;
     IntPoint o = {0,0};
     if(isCCW(a, o, c)){
         if(isCCW(a, o, b) && isCCW(b, o, c)) return false;
         return true;
-    }
-    else{
+    }else{
         if(isCCW(c, o, b) && isCCW(b, o, a)) return true;
         return false;
     }
 }
 
-bool autoarrange::isOnCCWPath(float start, float end, float object){
-    if(start<0) start=start+2*M_PI;
-    if(end<0) end=end+2*M_PI;
-    if(object<0) object=object+2*M_PI;
-    if(start<end) return  start<=object && object<end;
-    else if(start>end) return  start<=object || object<end;
-    else return false;
-}
-
-float autoarrange::getNthEdgeSlope(Path* path, int edge_idx, bool isForward){
+IntPoint autoarrange::getEdgeVec(const Path& path, int edge_idx, bool isForward){
     if(isForward){
-        return getEdgeSlope(&(*path)[edge_idx], &(*path)[(edge_idx+1)%(path->size())]);
+        return path[(edge_idx+1)%(path.size())] - path[edge_idx];
     }else{
-        return getEdgeSlope(&(*path)[(edge_idx+1)%(path->size())], &(*path)[edge_idx]);
+        return path[edge_idx] - path[(edge_idx+1)%(path.size())];
     }
 }
 
-float autoarrange::getEdgeSlope(IntPoint* p1, IntPoint* p2){
-    //*qDebug() << "- edge slope" << atan2f((p2->Y-p1->Y),(p2->X-p1->X));
-    float raw_slope = atan2f((p2->Y-p1->Y),(p2->X-p1->X));
-    if(raw_slope<0) return raw_slope + 2*M_PI;
-    else return raw_slope;
-}
-
-IntPoint autoarrange::getNthEdgeVec(Path* path, int edge_idx, bool isForward){
-    if(isForward){
-        return getEdgeVec(&(*path)[edge_idx], &(*path)[(edge_idx+1)%(path->size())]);
-    }else{
-        return getEdgeVec(&(*path)[(edge_idx+1)%(path->size())], &(*path)[edge_idx]);
+IntPoint autoarrange::getFirstNFPPoint(const IntPoint& first_sub_vec, const IntPoint& first_sub_vtx, const Path& obj, const Vecs& obj_vecs){
+    int first_obj_vec = 0;
+    for(int idx=1; idx<obj.size(); idx++){
+        if(isVecCCW(first_sub_vec, obj_vecs[idx], obj_vecs[first_obj_vec])) first_obj_vec = idx;
     }
-}
-
-IntPoint autoarrange::getEdgeVec(IntPoint* p1, IntPoint* p2){
-    IntPoint vec;
-    vec.X = p2->X - p1->X;
-    vec.Y = p2->Y - p1->Y;
-    //**qDebug() << vec.X << "," << vec.Y;
-    return vec;
-}
-
-IntPoint autoarrange::getFirstNFPPoint(float sub_slope, IntPoint sub_point, Path* obj, vector<float> obj_slope_set){
-    int first_obj_slope_idx = -1;
-    float min_slope_diff = 2*M_PI;
-    for(int idx=0; idx<obj->size(); idx++){
-        float raw_slope_diff = obj_slope_set[idx] - sub_slope;
-        float slope_diff;
-        if(raw_slope_diff<0) slope_diff = raw_slope_diff + 2*M_PI;
-        else slope_diff = raw_slope_diff;
-        if(slope_diff<min_slope_diff){
-            first_obj_slope_idx = idx;
-            min_slope_diff = slope_diff;
-        }
-    }
-    IntPoint first_point_obj = (*obj)[first_obj_slope_idx];
-    IntPoint fist_nfp_point = {sub_point.X - first_point_obj.X, sub_point.Y - first_point_obj.Y};
-    return fist_nfp_point;
-}
-
-IntPoint autoarrange::rotateIntPointRad(IntPoint point, float rot_angle){
-    IntPoint rot_point;
-    rot_point.X = point.X*cosf(rot_angle) - point.Y*sinf(rot_angle);
-    rot_point.Y = point.X*sinf(rot_angle) + point.Y*cosf(rot_angle);
-    //*qDebug() << "- point rotated";
-    return rot_point;
+    IntPoint first_obj_vtx = obj[first_obj_vec];
+    IntPoint first_nfp_vtx = first_sub_vtx - first_obj_vtx;
+    return first_nfp_vtx;
 }
 
 //=========================================
@@ -860,6 +829,22 @@ void autoarrange::arrangeSingleQt3D(Qt3DCore::QTransform* m_transform, XYArrange
 }*/
 
 //=========================================
+//check
+//=========================================
+bool autoarrange::checkConvex(Path& path){
+    int not_allowed = -1;
+    if(Orientation(path)) not_allowed = 1;
+    IntPoint p1 = path[path.size()-2];
+    IntPoint p2 = path[path.size()-1];
+    for(IntPoint p3 : path){
+        if(ccw(p1, p2, p3)==not_allowed) return false;
+        p1 = p2;
+        p2 = p3;
+    }
+    return true;
+}
+
+//=========================================
 //test
 //=========================================
 
@@ -868,6 +853,8 @@ void autoarrange::testSimplifyPolygon(){
     int path_data[][2] =
     {
         {0, 0},
+        {1, 0},
+        {2, 0},
         {1, 0},
         {0, 1},
         {0, -1},
@@ -881,6 +868,7 @@ void autoarrange::testSimplifyPolygon(){
     }
     Paths result_paths;
     SimplifyPolygon(path, result_paths, pftPositive);
+    qDebug() << "testSimplifyPolygon";
     debugPaths(result_paths);
 }
 
@@ -923,7 +911,7 @@ void autoarrange::testClip(){
     Paths new_paths;
     new_paths.push_back(path2);
 
-    cumulativeClip(&cumulative_paths, &new_paths);
+    cumulativeClip(cumulative_paths, new_paths);
     debugPaths(cumulative_paths);
 }
 
