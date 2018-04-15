@@ -334,16 +334,6 @@ void QmlManager::modelSelected(int ID){
     } else {
         selectedModel = nullptr;
     }
-
-    if (selectedModel != target){
-        // change selectedModel
-        selectedModel = target;
-        selectedModel->m_meshMaterial->setDiffuse(QColor(100,255,100));
-        qDebug() << "changing model" << selectedModel->ID;
-        connectHandlers(selectedModel);
-    } else {
-        selectedModel = nullptr;
-    }
 }
 
 void QmlManager::modelVisible(int ID, bool isVisible){
