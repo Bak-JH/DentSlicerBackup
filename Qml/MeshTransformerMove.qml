@@ -35,6 +35,7 @@ Entity{
 
     Entity {
         id: moveArrowX
+        objectName: "moveArrowX"
         Transform{
             id: movearrowXTransform
             translation: Qt.vector3d(0,0,0)
@@ -50,7 +51,7 @@ Entity{
         }
         ObjectPicker{
             id : moveArrowobjectPickerX
-            dragEnabled: true
+            isShareable: false
             hoverEnabled: true
             onEntered: {
                 if (moveAxis == 0){
@@ -70,32 +71,26 @@ Entity{
             onPressed: { //move start
                 if (moveAxis  == 0){
                     intersect = Qt.vector3d(pick.localIntersection.x,pick.localIntersection.y,pick.localIntersection.z)
-
                     if (pick.localIntersection.z > 0){
                         moveDirection = 1;
                     }else{
                         moveDirection = -1;
                     }
-
                     mouseOrigin = Qt.vector2d(pick.position.x , pick.position.y)
                     moveAxis = 1 //X
-                    moveArrowY.enabled = false
+                    moveArrowY.setEnabled(false)
                     pastDistance=0;
                 }
             }
             onReleased: {
-                moveAxis = 0;
-                moveArrowY.enabled = true
-                moveArrowXMaterial.ambient = Qt.rgba(150/255,150/255,150/255,1)
-                moveArrowXMaterial.diffuse = Qt.rgba(150/255,150/255,150/255,1)
-                moveArrowXMaterial.specular = Qt.rgba(150/255,150/255,150/255,1)
+                arrowRelease();
             }
         }
         components: [ moveArrowMesh, movearrowXTransform, moveArrowXMaterial,moveArrowobjectPickerX ]
     }
     Entity {
         id: moveArrowY
-
+        objectName: "moveArrowY"
         Transform{
             id: movearrowYTransform
             translation: Qt.vector3d(0,0,0)
@@ -140,21 +135,32 @@ Entity{
                     mouseOrigin = Qt.vector2d(pick.position.x , pick.position.y)
                     moveAxis = 2 //Y
                     //moveArrowYMaterial.ambient = Qt.rgba(200/255,200/255,0/255,1)
-                    moveArrowX.enabled = false
+                    moveArrowX.setEnabled(false)
                     pastDistance=0;
                 }
             }
             onReleased: {
-                moveAxis = 0;
-                moveArrowX.enabled = true
-                moveArrowYMaterial.ambient = Qt.rgba(150/255,150/255,150/255,1)
-                moveArrowYMaterial.diffuse = Qt.rgba(150/255,150/255,150/255,1)
-                moveArrowYMaterial.specular = Qt.rgba(150/255,150/255,150/255,1)
-
+                arrowRelease();
             }
         }
         components: [ moveArrowMesh, movearrowYTransform, moveArrowYMaterial,moveArrowobjectPickerY]
     }
+    function arrowRelease(){
+        if (moveAxis == 1){
+            moveAxis = 0;
+            moveArrowY.setEnabled(true)
+            moveArrowXMaterial.ambient = Qt.rgba(150/255,150/255,150/255,1)
+            moveArrowXMaterial.diffuse = Qt.rgba(150/255,150/255,150/255,1)
+            moveArrowXMaterial.specular = Qt.rgba(150/255,150/255,150/255,1)
+        }else if (moveAxis == 2){
+            moveAxis = 0;
+            moveArrowX.setEnabled(true)
+            moveArrowYMaterial.ambient = Qt.rgba(150/255,150/255,150/255,1)
+            moveArrowYMaterial.diffuse = Qt.rgba(150/255,150/255,150/255,1)
+            moveArrowYMaterial.specular = Qt.rgba(150/255,150/255,150/255,1)
+        }
+    }
+
     MouseDevice{
         id: movemousedevice
         sensitivity: 0.01
@@ -169,12 +175,11 @@ Entity{
             }
         }
         onReleased: {
-            if (mouse.buttons == MouseEvent.LeftButton){
-                moveAxis = 0;
-                moveArrowXMaterial.ambient = Qt.rgba(150/255,150/255,150/255,0.5)
-                moveArrowYMaterial.ambient = Qt.rgba(150/255,150/255,150/255,0.5)
-                moveArrowZMaterial.ambient = Qt.rgba(150/255,150/255,150/255,0.5)
-            }
+            arrowRelease();
+            //moveAxis = 0;
+
+            //moveArrowXMaterial.ambient = Qt.rgba(150/255,150/255,150/255,1)
+            //moveArrowYMaterial.ambient = Qt.rgba(150/255,150/255,150/255,1)
         }
         onPositionChanged: {
             mouseCurrent = Qt.vector2d(mouse.x,mouse.y)
@@ -215,9 +220,6 @@ Entity{
                 }
                 pastAxis = moveAxis
                 if (moveAxis != 0){
-                    //console.log(intersect)
-                    //console.log(moveDirection)
-
                     var Origin = world2Screen(center)
                     var mouseOrigin_Origin = mouseOrigin.minus(Origin).length() //a
                     var mouseCurrent_Origin = mouseCurrent.minus(Origin).length() //b

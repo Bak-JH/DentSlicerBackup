@@ -7,6 +7,10 @@
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
 #include <QQmlEngine>
+#include <QMouseEvent>
+#include <QCoreApplication>
+#include <QEvent>
+#include <QPointF>
 #include <QQmlProperty>0269
 #include "feature/autoarrange.h"
 #include "feature/shelloffset.h"
@@ -24,6 +28,7 @@ public:
     // UI components
     QObject* mainWindow;
     QEntity* models;
+    QObject* mv;
 
     // model cut components
     QObject *cutPopup;
@@ -70,6 +75,8 @@ public:
     Qt3DCore::QEntity *rotateSphereY;
     Qt3DCore::QEntity *rotateSphereZ;
     Qt3DCore::QEntity *moveArrow;
+    Qt3DCore::QEntity *moveArrowX;
+    Qt3DCore::QEntity *moveArrowY;
     QObject *moveArrowobj;
     int groupFunctionIndex;
     QString groupFunctionState;
@@ -77,6 +84,7 @@ public:
     void showMoveArrow();
     void hideRotateSphere();
     void hideMoveArrow();
+    void mouseHack();
     void initializeUI(QQmlApplicationEngine *e);
     void openModelFile_internal(QString filename);
     void runArrange_internal();
