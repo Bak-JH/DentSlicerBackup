@@ -56,6 +56,8 @@ void QmlManager::initializeUI(QQmlApplicationEngine* e){
 
     // arrange components
     arrangePopup = FindItemByName(engine, "arrangePopup");
+    progress_popup = FindItemByName(engine, "progress_popup");
+    QObject::connect(arrangePopup, SIGNAL(runFeature()), this, SLOT(runArrange()));
 
     // save component
     saveButton = FindItemByName(engine, "saveBtn");
@@ -155,7 +157,6 @@ void QmlManager::deleteModelFile(int ID){
 }
 
 void QmlManager::disconnectHandlers(GLModel* glmodel){
-    QObject::disconnect(glmodel->arsignal, SIGNAL(runArrange()), this, SLOT(runArrange()));
 
     //QObject::disconnect(glmodel->ft, SIGNAL(setProgress(QVariant)),progress_popup, SLOT(updateNumber(QVariant)));
     //QObject::disconnect(glmodel->ft, SIGNAL(loadPopup(QVariant)),orientPopup, SLOT(show_popup(QVariant)));
@@ -194,7 +195,9 @@ void QmlManager::disconnectHandlers(GLModel* glmodel){
     QObject::disconnect(repairPopup, SIGNAL(runFeature(int)), glmodel->ft, SLOT(setTypeAndStart(int)));
 
     // auto arrange popup codes
-    QObject::disconnect(arrangePopup, SIGNAL(runFeature(int)), glmodel->ft, SLOT(setTypeAndStart(int)));
+    //unused, signal from qml goes right into QmlManager.runArrange
+    //QObject::disconnect(arrangePopup, SIGNAL(runFeature(int)), glmodel->ft, SLOT(setTypeAndStart(int)));
+    //QObject::disconnect(glmodel->arsignal, SIGNAL(runArrange()), this, SLOT(runArrange()));
 
     // save button codes
     QObject::disconnect(saveButton, SIGNAL(runFeature(int)), glmodel->ft, SLOT(setTypeAndRun(int)));
@@ -205,7 +208,6 @@ void QmlManager::disconnectHandlers(GLModel* glmodel){
 }
 
 void QmlManager::connectHandlers(GLModel* glmodel){
-    QObject::connect(glmodel->arsignal, SIGNAL(runArrange()), this, SLOT(runArrange()));
 
     //QObject::connect(glmodel->ft, SIGNAL(setProgress(QVariant)),progress_text, SLOT(update_loading(QVariant)));
     //QObject::connect(glmodel->ft, SIGNAL(setProgress(QVariant)),progress_popup, SLOT(updateNumber(QVariant)));
@@ -244,7 +246,10 @@ void QmlManager::connectHandlers(GLModel* glmodel){
     QObject::connect(repairPopup, SIGNAL(runFeature(int)), glmodel->ft, SLOT(setTypeAndStart(int)));
 
     // auto arrange popup codes
-    QObject::connect(arrangePopup, SIGNAL(runFeature(int)), glmodel->ft, SLOT(setTypeAndStart(int)));
+    //unused, signal from qml goes right into QmlManager.runArrange
+    //QObject::connect(arrangePopup, SIGNAL(runFeature(int)), glmodel->ft, SLOT(setTypeAndStart(int)));
+    //QObject::connect(glmodel->arsignal, SIGNAL(runArrange()), this, SLOT(runArrange()));
+    //QObject::connect(arrangePopup, SIGNAL(runFeature()), this, SLOT(runArrange()));
 
     // save button codes
     QObject::connect(saveButton, SIGNAL(runFeature(int)), glmodel->ft, SLOT(setTypeAndRun(int)));

@@ -3,6 +3,7 @@
 #define STAGE_WIDTH 95000
 #define STAGE_HEIGHT 75000
 #define OFFSET 2000
+#include <qmlmanager.h>
 
 autoarrange::autoarrange()
 {
@@ -414,11 +415,14 @@ vector<XYArrangement> autoarrange::simpArngMeshes(vector<Mesh>& meshes){
 vector<XYArrangement> autoarrange::arngMeshes(vector<Mesh>& meshes){
     vector<Paths> outlines;
     /**/qDebug() << "Arrange start";
+    qmlManager->setProgress(0);
+    qmlManager->setProgressText("Getting projection of meshes on work plane...");
     for(int idx=0; idx<meshes.size(); idx++){
         //outlines.push_back(project(& meshes[idx]));
         //RDPSimpPaths(&outlines[idx]);
         //offsetPath(&outlines[idx]);
         outlines.push_back(getMeshRecArea(meshes[idx]));
+        qmlManager->setProgress(0.5*idx/meshes.size());
     }
     return arng2D(outlines);
 }
@@ -428,6 +432,7 @@ bool compareArea(pair<Paths*, int>& fig1, pair<Paths*, int>& fig2){//used for so
 }
 
 vector<XYArrangement> autoarrange::arng2D(vector<Paths>& figs){
+    qmlManager->setProgressText("Simulating arrangement");
     vector<pair<Paths*, int> > figs_with_idx;//tried to use reference istead of pointer, but it caused error
     for(Paths& fig : figs) figs_with_idx.push_back({&fig, figs_with_idx.size()});
     sort(figs_with_idx.begin(), figs_with_idx.end(), compareArea);
@@ -436,6 +441,7 @@ vector<XYArrangement> autoarrange::arng2D(vector<Paths>& figs){
     Paths cum_outline;
     initStage(cum_outline);
     int cumXOfNotArrangeable = 0;
+    int progress = 0;
     for(pair<Paths*, int>& fig_with_idx : figs_with_idx){
         Paths& fig = *fig_with_idx.first;
         XYArrangement new_result = arngFig(cum_outline, fig);
@@ -447,8 +453,11 @@ vector<XYArrangement> autoarrange::arng2D(vector<Paths>& figs){
         }
         arng_result_set[fig_with_idx.second] = new_result;
         /**/qDebug() << "- fig" << fig_with_idx.second << "arngd";
+        qmlManager->setProgress(0.5 + 0.5*(++progress)/figs_with_idx.size());
     }
     /**/qDebug() << "Arrange all done";
+    qmlManager->setProgressText("Done");
+    qmlManager->openResultPopUp("","Arrangement done","");
     /**/debugPaths(cum_outline);
     //test position
     return arng_result_set;
