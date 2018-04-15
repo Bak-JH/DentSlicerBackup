@@ -5,8 +5,6 @@ import QtQuick.Controls 1.0
 //import QtQuick.Controls.Styles 1.0
 import QtQuick.Controls.Styles 1.4
 
-
-
 Rectangle {
     id: box_uppertab
     objectName: "boxUpperTab"
@@ -452,6 +450,35 @@ Rectangle {
 
             color : "#E6E6E6"
         }
+    }
+
+    Item{
+        id : fifthtab
+        width : buttonWidth *1
+        height: buttonHeight
+
+        anchors.left : fourthtab.right
+        anchors.top : parent.top
+        //anchors.bottom : parent.bottom
+
+        //color: "transparent"
+
+
+        UpperButton{
+            id : fifth_tab_button_fidback
+            objectName : "Feedback"
+            //anchors.left: parent.left
+            iconSource1: "qrc:/resource/upper_open.png"
+            iconSource2: "qrc:/Resource/upper2_open.png"
+            iconText: "Feedback"
+            MouseArea{
+                anchors.fill: parent
+                onClicked:{
+                    feedbackPopUp.visible = true;
+                }
+            }
+        }
+
     }
 
 
@@ -1268,6 +1295,10 @@ Rectangle {
                     return "inactive"
                 }
             }
+        }
+        FeedbackPopUp{
+            id:feedbackPopUp
+            visible: false
         }
     }
 }

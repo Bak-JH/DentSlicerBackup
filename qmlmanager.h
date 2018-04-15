@@ -31,6 +31,8 @@ public:
     QEntity* models;
     QObject* mv;
 
+    QObject* partList;
+
     // model cut components
     QObject *cutPopup;
     QObject *curveButton;
@@ -96,6 +98,8 @@ public:
     void disconnectHandlers(GLModel* glmodel);
     void connectHandlers(GLModel* glmodel);
 
+    void addPart(QString fileName, int ID);
+    void deletePart(int ID);
     void openProgressPopUp();
     void openResultPopUp(string inputText_h, string inputText_m, string inputText_l);
     void setProgress(float value);

@@ -29,6 +29,8 @@ void QmlManager::initializeUI(QQmlApplicationEngine* e){
     mv = FindItemByName(engine, "MainView");
     QMetaObject::invokeMethod(mv, "initCamera");
 
+    partList = FindItemByName(engine, "partList");
+
     // model cut components
     cutPopup = FindItemByName(engine, "cutPopup");
     curveButton = FindItemByName(engine, "curveButton");
@@ -154,6 +156,7 @@ void QmlManager::deleteModelFile(int ID){
             }
         }
     }
+    deletePart(ID);
 }
 
 void QmlManager::disconnectHandlers(GLModel* glmodel){
@@ -506,6 +509,16 @@ void QmlManager::runGroupFeature(int ftrType, QString state){
 
 }
 
+void QmlManager::addPart(QString fileName, int ID){
+    QMetaObject::invokeMethod(partList, "addPart",
+        Q_ARG(QVariant, fileName),
+        Q_ARG(QVariant, ID));
+}
+
+void QmlManager::deletePart(int ID){
+    QMetaObject::invokeMethod(partList, "deletePart", Q_ARG(QVariant, ID));
+}
+
 void QmlManager::openProgressPopUp(){
     progress = 0;
     QMetaObject::invokeMethod(progress_popup, "openPopUp");
@@ -523,6 +536,7 @@ void QmlManager::setProgress(float value){
                                       Q_ARG(QVariant, value));
         progress = value;
     }
+
 }
 
 void QmlManager::setProgressText(string inputText){
