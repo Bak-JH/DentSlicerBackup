@@ -654,7 +654,7 @@ Rectangle {
 
             numbox_detail2_vis: true
             numberbox_detail2_y: 240
-            numbox_detail2_defalult: 100
+            numbox_detail2_default: 100
             numbox_updown_scale: 10
             number_unit_detail2: "%"
 
@@ -767,7 +767,7 @@ Rectangle {
             descriptionimage_vis: false
             numbox_detail2_vis: true
             numberbox_detail2_y: 170
-            numbox_detail2_defalult: 1.0
+            numbox_detail2_default: 1.0
             numbox_updown_scale: 0.25
             state: {
                 if (third_tab_button_shelloffset.state == "active"){
@@ -783,8 +783,8 @@ Rectangle {
             signal shellOffset(double factor);
 
             onApplyClicked: {
-                console.log("shell offset -" + numbox_detail2_defalult);
-                shellOffset(-numbox_detail2_defalult);//runFeature(ftrShellOffset);
+                console.log("shell offset -" + numbox_detail2_default);
+                shellOffset(-numbox_detail2_default);//runFeature(ftrShellOffset);
             }
 
             //switch button
@@ -840,7 +840,7 @@ Rectangle {
             descriptionimage_vis: false
             numbox_detail2_vis: true
             numberbox_detail2_y: 90
-            numbox_detail2_defalult: 30.0
+            numbox_detail2_default: 10.0
             numbox_updown_scale: 0.5
             state: { //fourth_tab_button_extend.state=="active" ? "active" : "inactive"
                 if (fourth_tab_button_extend.state == "active"){
@@ -853,9 +853,9 @@ Rectangle {
             }
             onApplyClicked: {
                 console.log("extension");
-                runFeature(ftrExtend);
+                generateExtensionFaces(numbox_detail2_default);
             }
-            signal runFeature(int type);
+            signal generateExtensionFaces(double distance);
             signal openExtension()
             signal closeExtension()
 

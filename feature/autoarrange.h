@@ -90,16 +90,15 @@ signals:
     void progressChanged(float);
 };
 
-
-Paths3D spreadingCheck3D(Mesh& mesh, int chking_start);
-int getPathHead1(MeshFace& mf, int side);
-Path3D buildOutline3D(Mesh& mesh, bool* outer_check, int chking, int path_head);
-int getNbrVtx1(MeshFace& mf, int base, int xth);
-bool isEdgeBound1(MeshFace& mf, int side);
-bool isNbrOrientSame1(MeshFace& mf, int side);
-bool meetNbrCond(MeshFace& mf);
-Path3D idxsToPath3D(Mesh& mesh, vector<int> path_by_idx);
-int searchVtxInFace1(MeshFace& mf, int vertexIdx);
-vector<int> arrToVect1(int arr[]);
+Paths3D spreadingCheckExt(Mesh& mesh, int chking_start);
+int getExtPathHead(MeshFace& mf, int side);
+Path3D buildOutlineExt(Mesh& mesh, bool* outer_check, int chking, int path_head);
+int getNbrVtxExt(MeshFace& mf, int base, int xth);
+bool isEdgeBoundExt(MeshFace& mf, int side);
+bool isNbrOrientSameExt(MeshFace& mf, int side);
+bool meetNbrCondExt(MeshFace& mf);
+Path3D idxsToPathExt(Mesh& mesh, vector<int> path_by_idx);
+int searchVtxInFaceExt(MeshFace& mf, int vertexIdx);
+vector<int> arrToVectExt(int arr[]);
 
 #endif // ARRANGE_H

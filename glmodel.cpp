@@ -688,7 +688,7 @@ void GLModel::addIndexes(vector<int> indexes){
 
 void GLModel::handlePickerClicked(QPickEvent *pick)
 {
-    if (!cutActive)
+    if (!cutActive && !extensionActive)
         emit modelSelected(parentModel->ID);
     qDebug() << "model selected emit";
     if (labellingActive) {
@@ -718,19 +718,26 @@ void GLModel::handlePickerClicked(QPickEvent *pick)
             //parentModel->ft->ct->addCuttingPoint(parentModel, v);
         } else if (cutMode == 9999){
             qDebug() << "current cut mode :" << cutMode;
-            return;
+            //return;
         }
     }
 
     if (extensionActive){
         MeshFace shadow_meshface = mesh->faces[trianglePick->triangleIndex()];
         qDebug() << "found parent meshface" << shadow_meshface.parent_idx;
+
+
         parentModel->uncolorExtensionFaces();
         parentModel->targetMeshFace = &parentModel->mesh->faces[shadow_meshface.parent_idx];
+        /*qDebug() << trianglePick->localIntersection() \
+                 << parentModel->mesh->idx2MV(parentModel->targetMeshFace->mesh_vertex[0]).position\
+                << parentModel->mesh->idx2MV(parentModel->targetMeshFace->mesh_vertex[1]).position\
+                << parentModel->mesh->idx2MV(parentModel->targetMeshFace->mesh_vertex[2]).position;
+        */
+        // << parentModel->targetMeshFace->mesh_vertex[1] << parentModel->targetMeshFace->mesh_vertex[2];
         parentModel->colorExtensionFaces();
         //detectExtensionFaces(parentModel->mesh, &parentModel->mesh->faces[shadow_meshface.parent_idx], )
         //extendMesh(parentModel->mesh, &parentModel->mesh->faces[shadow_meshface.parent_idx], 10);
-        qDebug() << mesh->faces[trianglePick->triangleIndex()].fn;
     }
 }
 
@@ -1069,8 +1076,7 @@ Mesh* GLModel::toSparse(Mesh* mesh){
                 point2=GLModel::spreadPoint(point2,CenterOfMass,factor);
                 point3=GLModel::spreadPoint(point3,CenterOfMass,factor);
                 //newMesh->addFace(mesh->idx2MV(mf.mesh_vertex[0]).position, mesh->idx2MV(mf.mesh_vertex[1]).position, mesh->idx2MV(mf.mesh_vertex[2]).position);
-                newMesh->addFace(point1,point2,point3);
-                newMesh->faces.end()->parent_idx = mf.idx;
+                newMesh->addFace(point1,point2,point3, mf.idx);
             }
             i+=1;
         }
@@ -1170,27 +1176,38 @@ void GLModel::colorExtensionFaces(){
     if (targetMeshFace == NULL)
         return;
 
+    /*
     QVector3D normal = targetMeshFace->fn;
 
     vector<MeshFace*> extension_faces;
-    detectExtensionFaces(mesh, normal, targetMeshFace, &extension_faces);
+    detectExtensionFaces(mesh, normal, targetMeshFace, targetMeshFace, &extension_faces);
     qDebug() << "detected extension faces" << extension_faces.size();
+
+    Paths3D extension_outlines = detectExtensionOutline(mesh, extension_faces);
+    qDebug() << "detected extension outlines" << extension_outlines.size();
+    */
 }
 
 void GLModel:: uncolorExtensionFaces(){
     if (targetMeshFace == NULL)
         return;
 
-    QVector3D normal = targetMeshFace->fn;
+    /*QVector3D normal = targetMeshFace->fn;
 
     vector<MeshFace*> extension_faces;
-    detectExtensionFaces(mesh, normal, targetMeshFace, &extension_faces);
+    detectExtensionFaces(mesh, normal, targetMeshFace, targetMeshFace, &extension_faces);
+    qDebug() << "detected extension faces" << extension_faces.size();
+
+    Paths3D extension_outlines = detectExtensionOutline(mesh, extension_faces);
+    qDebug() << "detected extension outlines" << extension_outlines.size();
 
     // do uncolor thing
+    */
 }
 
-void GLModel::generateExtensionFaces(float distance){
+void GLModel::generateExtensionFaces(double distance){
     extendMesh(mesh, targetMeshFace, distance);
+    emit _updateModelMesh();
 }
 
 void GLModel::openExtension(){

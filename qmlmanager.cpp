@@ -131,12 +131,17 @@ void QmlManager::openModelFile(QString fname){
 }
 
 void QmlManager::deleteModelFile(int ID){
-    for(int i=0; i<glmodels.size();i++){
-        if(glmodels.at(i)->ID == ID){
-            glmodels.at(i)->shadowModel->deleteLater();
-            glmodels.at(i)->deleteLater();
-            selectedModel = nullptr;
-            break;
+    if (selectedModel != nullptr && selectedModel->ID == ID){
+        selectedModel->shadowModel->deleteLater();
+        selectedModel->deleteLater();
+        selectedModel = nullptr;
+    } else {
+        for(int i=0; i<glmodels.size();i++){
+            if(glmodels.at(i)->ID == ID){
+                glmodels.at(i)->shadowModel->deleteLater();
+                glmodels.at(i)->deleteLater();
+                break;
+            }
         }
     }
 }
@@ -221,7 +226,7 @@ void QmlManager::connectHandlers(GLModel* glmodel){
     // extension popup codes
     QObject::connect(extensionPopup, SIGNAL(openExtension()), glmodel->shadowModel, SLOT(openExtension()));
     QObject::connect(extensionPopup, SIGNAL(closeExtension()), glmodel->shadowModel, SLOT(closeExtension()));
-    QObject::connect(extensionPopup, SIGNAL(runFeature(int)), glmodel->ft, SLOT(setTypeAndStart(int)));
+    QObject::connect(extensionPopup, SIGNAL(generateExtensionFaces(double)), glmodel, SLOT(generateExtensionFaces(double)));
 
     // shelloffset popup codes
     QObject::connect(shelloffsetPopup, SIGNAL(shellOffset(double)), glmodel, SLOT(generateShellOffset(double)));

@@ -4,9 +4,10 @@
 #include "autoarrange.h"
 #include "meshrepair.h"
 
-void extendMesh(Mesh* mesh, MeshFace* mf, float distance);
-void detectExtensionFaces(Mesh* mesh, QVector3D normal, MeshFace* mf, vector<MeshFace*>* result);
-Path3D detectExtensionOutline(Mesh* mesh, vector<MeshFace*> meshfaces);
-void extendAlongOutline(Mesh* mesh, QVector3D normal, Path3D selectedPath, float distance);
+void extendMesh(Mesh* mesh, MeshFace* mf, double distance);
+void detectExtensionFaces(Mesh* mesh, QVector3D normal, MeshFace* original_mf, MeshFace* mf, vector<MeshFace*>* result);
+Paths3D detectExtensionOutline(Mesh* mesh, vector<MeshFace*> meshfaces);
+void extendAlongOutline(Mesh* mesh, QVector3D normal, Paths3D selectedPath, double distance);
+void coverCap(Mesh* mesh, QVector3D normal, vector<MeshFace*> extension_faces, double distance);
 
 #endif // EXTENSION_H
