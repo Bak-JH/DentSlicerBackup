@@ -7,7 +7,7 @@ SlicingEngine::SlicingEngine()
 
 QProcess *slicing_process;
 
-void SlicingEngine::slice (QVariant cfg, QString filename){
+void SlicingEngine::slice (QVariant cfg, Mesh* mesh, QString filename){
 
     QVariantMap config = cfg.toMap();
     for(QVariantMap::const_iterator iter = config.begin(); iter != config.end(); ++iter) {
@@ -26,20 +26,20 @@ void SlicingEngine::slice (QVariant cfg, QString filename){
         }
     }
 
+    // 승환 25%
+
     // Load mesh
-    Mesh* loaded_mesh = new Mesh();
-    loadMeshSTL(loaded_mesh, filename.toStdString().c_str());
-    //printf("vertices : %d, faces : %d\n", loaded_mesh->vertices.size(), loaded_mesh->faces.size());
-    //printf("slicing in %s mode, resolution %d\n", scfg->slicing_mode, scfg->resolution);
-    //printf("x : %f %f, y: %f %f, z: %f %f\n", loaded_mesh->x_min, loaded_mesh->x_max, loaded_mesh->y_min, loaded_mesh->y_max, loaded_mesh->z_min, loaded_mesh->z_max);
+    Mesh* loaded_mesh = mesh;
 
     // Slice
     Slicer* slicer = new Slicer();
     Slices contourLists = slicer->slice(loaded_mesh);
+    // 승환 slice 안쪽
 
     // Export to SVG
     SVGexporter* exporter = new SVGexporter();
-    exporter->exportSVG(contourLists, filename+"_temp");
+    exporter->exportSVG(contourLists, filename+"_export");
+    // 승환 100%
 }
 
 /*

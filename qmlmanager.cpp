@@ -93,6 +93,7 @@ void QmlManager::initializeUI(QQmlApplicationEngine* e){
 
 void QmlManager::createModelFile(Mesh* target_mesh, QString fname) {
     GLModel* glmodel = new GLModel(mainWindow, models, target_mesh, fname, false);
+    // 승환 GLModel constructor 안쪽
 
     qDebug() << "created new model file";
     glmodels.push_back(glmodel);
@@ -108,6 +109,7 @@ void QmlManager::createModelFile(Mesh* target_mesh, QString fname) {
                            (-1)*zmid));
     qDebug() << "moved model to right place";
     //QObject* progress_text = FindItemByName(engine, "progress_text"); //orientation와 공유
+    // 승환 100%
 
     // model selection codes, connect handlers later when model selected
     QObject::connect(glmodel->shadowModel, SIGNAL(modelSelected(int)), this, SLOT(modelSelected(int)));
