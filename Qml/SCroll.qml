@@ -36,7 +36,7 @@ Item {
 
            label: Text {
                text: control.currentText
-               font.family: "Arial"
+               font.family: mainFont.name
                font.pointSize: 7
            }
 
@@ -53,7 +53,7 @@ Item {
                itemDelegate.label:     //item text
                    Text {
                        text: styleData.text
-                       font.family: "Arial"
+                       font.family: mainFont.name
                        font.pointSize: 7
                        color: styleData.selected ? "#666666" : "#303030"
     //                                    color: styleData.selected ? "red" : "blue"

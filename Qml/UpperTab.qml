@@ -10,9 +10,9 @@ import QtQuick.Controls.Styles 1.4
 Rectangle {
     id: box_uppertab
     objectName: "boxUpperTab"
-    color: "#E2E1E1"
-    property int buttonWidth : 83
-    property int buttonHeight : 97
+    color: "#42BFCC"
+    property int buttonWidth : 88
+    property int buttonHeight : 98
     property var options: []
 
 
@@ -68,16 +68,16 @@ Rectangle {
 
     Rectangle{
         id : bottomine
-        height: 3
+        height: 2
         width: parent.width
         //anchors.fill: parent
 
         anchors.left : parent.left
         //anchors.right : parent.right
         anchors.bottom: parent.bottom
-        color: "#A8A8A8"
+        color: "#D4D6D9"
     }
-
+    /*
     Rectangle{
         id : tabgroupname
         width: parent.width
@@ -99,7 +99,7 @@ Rectangle {
             text : "FILE"
             horizontalAlignment: Text.AlignHCenter
             verticalAlignment: Text.AlignVCenter
-            font.family: "Arial"
+            font.family: mainFont.name
             font.pixelSize: 12
             color: "#636363"
         }
@@ -113,7 +113,7 @@ Rectangle {
             text : "POSITION"
             horizontalAlignment: Text.AlignHCenter
             verticalAlignment: Text.AlignVCenter
-            font.family: "Arial"
+            font.family: mainFont.name
             font.pixelSize: 12
             color: "#636363"
         }
@@ -127,7 +127,7 @@ Rectangle {
             text : "MODIFY"
             horizontalAlignment: Text.AlignHCenter
             verticalAlignment: Text.AlignVCenter
-            font.family: "Arial"
+            font.family: mainFont.name
             font.pixelSize: 12
             color: "#636363"
         }
@@ -141,23 +141,24 @@ Rectangle {
             text : "EDIT"
             horizontalAlignment: Text.AlignHCenter
             verticalAlignment: Text.AlignVCenter
-            font.family: "Arial"
+            font.family: mainFont.name
             font.pixelSize: 12
             color: "#636363"
         }
     }
-
+    */
     Item{
-
         id : firsttab
-        width : buttonWidth * 3 + 2
-        height: parent.height
+        width : buttonWidth * 3 + 1
+        height: buttonHeight
 
         anchors.left : parent.left
         anchors.top : parent.top
         //anchors.bottom : parent.bottom
 
         //color: "transparent"
+
+
         UpperButton{
             id : first_tab_button_open
             objectName : "open"
@@ -234,25 +235,26 @@ Rectangle {
 
         Rectangle{
             id : first_tab_right_line
-            width: 2
+            width: 1
             height: buttonHeight
 
             anchors.right: parent.right
             anchors.top : parent.top
             //anchors.bottom : tabgroupname.top
 
-            color : "#CECECE"
+            color : "#D4D6D9"
         }
     }
 
     Item{
         id : secondtab
-        width : buttonWidth * 5 + 2
-        height: parent.height
+        width : buttonWidth * 5 + 1
+        height: buttonHeight
 
         anchors.left : firsttab.right
         anchors.top : parent.top
-        anchors.bottom : parent.bottom
+
+
 
         UpperButton{
             id : second_tab_button_move
@@ -305,13 +307,12 @@ Rectangle {
 
         Rectangle{
             id : second_tab_right_line
-            width: 2
+            width: 1
             height: buttonHeight
 
             anchors.right: parent.right
             anchors.top : parent.top
             //anchors.bottom : tabgroupname.top
-
             color : "#CECECE"
         }
 
@@ -319,12 +320,13 @@ Rectangle {
 
     Item{
         id : thirdtab
-        width : buttonWidth * 4 + 2
-        height: parent.height
+        width : buttonWidth * 4 + 1
+        height: buttonHeight
 
         anchors.left : secondtab.right
         anchors.top : parent.top
-        anchors.bottom : parent.bottom
+
+
         //color: "transparent"
         UpperButton{
             id : third_tab_button_scale
@@ -390,7 +392,7 @@ Rectangle {
 
         Rectangle{
             id : third_tab_right_line
-            width: 2
+            width: 1
             height: buttonHeight
 
             anchors.right: parent.right
@@ -404,12 +406,12 @@ Rectangle {
 
     Item{
         id : fourthtab
-        width : buttonWidth * 3 + 2
-        height: parent.height
+        width : buttonWidth * 3 + 1
+        height: buttonHeight
 
         anchors.left : thirdtab.right
         anchors.top : parent.top
-        anchors.bottom : parent.bottom
+
         //color: "transparent"
 
         UpperButton{
@@ -441,7 +443,7 @@ Rectangle {
 
         Rectangle{
             id : fourth_tab_right_line
-            width: 2
+            width: 1
             height: buttonHeight
 
             anchors.right: parent.right
@@ -789,7 +791,7 @@ Rectangle {
             Rectangle {
                 width: 165
                 height: 24
-                //anchors.left: parent.left
+                anchors.left: parent.left
                 anchors.top: parent.top
                 anchors.leftMargin: 35
                 anchors.topMargin: 85
@@ -815,7 +817,7 @@ Rectangle {
                     anchors.right: parent.right
                     anchors.verticalCenter: parent.verticalCenter
                     text: "Switch the direction"
-                    font.family: "Arial"
+                    font.family: mainFont.name
                     font.pointSize: 9
                 }
             }
@@ -896,7 +898,7 @@ Rectangle {
                                 text: "Generate supports"
                                 anchors.horizontalCenter: parent.horizontalCenter
                                 anchors.verticalCenter: parent.verticalCenter
-                                font.family: "Arial"
+                                font.family: mainFont.name
                                 font.pointSize: 7
                             }
                             MouseArea {
@@ -952,7 +954,7 @@ Rectangle {
                                 text: "Add supports"
                                 anchors.horizontalCenter: parent.horizontalCenter
                                 anchors.verticalCenter: parent.verticalCenter
-                                font.family: "Arial"
+                                font.family: mainFont.name
                                 font.pointSize: 7
                             }
                             MouseArea {
@@ -1007,7 +1009,7 @@ Rectangle {
                                 text: "Remove supports"
                                 anchors.horizontalCenter: parent.horizontalCenter
                                 anchors.verticalCenter: parent.verticalCenter
-                                font.family: "Arial"
+                                font.family: mainFont.name
                                 font.pointSize: 7
                             }
                             MouseArea {
@@ -1134,7 +1136,7 @@ Rectangle {
 
                     signal sendTextChanged(string text, int contentWidth)
                     placeholderText: qsTr("Enter text")
-                    font.family: "Arial"
+                    font.family: mainFont.name
                     onTextChanged: {
                         sendTextChanged(text, hiddenText.contentWidth)
                     }
@@ -1182,7 +1184,7 @@ Rectangle {
 
                     label: Text {
                         text: control.currentText
-                        font.family: "Arial"
+                        font.family: mainFont.name
                         font.pointSize: 9
                     }
 
@@ -1199,7 +1201,7 @@ Rectangle {
                         itemDelegate.label:     //item text
                             Text {
                                 text: styleData.text
-                                font.family: "Arial"
+                                font.family: mainFont.name
                                 font.pointSize: 9
                                 color: styleData.selected ? "#666666" : "#303030"
 //                                    color: styleData.selected ? "red" : "blue"

@@ -18,7 +18,8 @@ Rectangle {
         anchors.topMargin: 32
         anchors.horizontalCenter: parent.horizontalCenter
 
-        font.family: "Arial"
+        font.family: mainFont.name
+
         font.bold: true
         color: "#3D3D3D"
         font.pixelSize: 16
@@ -95,7 +96,7 @@ Rectangle {
             text: "OK"
             color: "#ffffff"
             font.pointSize: 12
-            font.family: "Arial"
+            font.family: mainFont.name
         }
 
         MouseArea {
@@ -150,7 +151,8 @@ Rectangle {
             text: "Cancel"
             color: "#ffffff"
             font.pointSize: 12
-            font.family: "Arial"
+            font.family: mainFont.name
+
         }
 
         MouseArea {

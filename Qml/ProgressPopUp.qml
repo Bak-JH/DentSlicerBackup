@@ -4,8 +4,8 @@ import QtQuick.Controls.Styles 1.4
 
 Rectangle {
     objectName: "progress_popup"
-    width: 460
-    height: 108
+    width: 462
+    height: 110
     anchors.centerIn: parent
     visible : false
 
@@ -16,47 +16,72 @@ Rectangle {
 
     property int progressNumber
     property string progressText : "calculating..."
-    Text {
-        id: progress_text1
 
-        text: "0% to complete"
-        anchors.top: parent.top
-        anchors.topMargin: 20
-        anchors.horizontalCenter: parent.horizontalCenter
-        font.pixelSize: 20
-        color: "black"
-        font.family: "Arial"
-    }
-    Text {
-        id: progress_text2
-        text: "Calculating..."
-        anchors.top : parent.top
-        anchors.horizontalCenter: parent.horizontalCenter
-        anchors.topMargin: 50
-        font.pixelSize: 18
-        color: "#666666"
-        font.family: "Arial"
-    }
-
-    ProgressBar {
-        id:progress_value
-        value: 0
-        anchors.horizontalCenter: parent.horizontalCenter
+    Rectangle{//shadow
+        id : shadowRect
+        width: parent.width-2
+        height: parent.height-2
         anchors.bottom: parent.bottom
-        anchors.bottomMargin: 22
-        style:ProgressBarStyle {
-            background: Rectangle{
-                color:"#EFEFEF"
-                implicitWidth: 410
-                implicitHeight: 8
-            }
-            progress: Rectangle{
-                color:"#44A6B6"
-                implicitHeight: 8
-                implicitWidth: progress_value.value
+        anchors.right: parent.right
+
+        color: "#CCCCCC"
+    }
+
+    Rectangle{//main
+        id : contentRect
+        width: parent.width-2
+        height: parent.height-2
+        anchors.top: parent.top
+        anchors.left: parent.left
+
+        color: "#ffffff"
+
+        Text {
+            id: progress_text1
+
+            text: "0% to complete"
+            anchors.top: parent.top
+            anchors.topMargin: 20
+            anchors.horizontalCenter: parent.horizontalCenter
+            font.pixelSize: 20
+            color: "black"
+            font.family: mainFont.name
+        }
+        Text {
+            id: progress_text2
+            text: "Calculating..."
+            anchors.top : parent.top
+            anchors.horizontalCenter: parent.horizontalCenter
+            anchors.topMargin: 50
+            font.pixelSize: 18
+            color: "#666666"
+            font.family: mainFont.name
+        }
+
+        ProgressBar {
+            id:progress_value
+            value: 0
+            anchors.horizontalCenter: parent.horizontalCenter
+            anchors.bottom: parent.bottom
+            anchors.bottomMargin: 22
+            style:ProgressBarStyle {
+                background: Rectangle{
+                    color:"#EFEFEF"
+                    implicitWidth: 410
+                    implicitHeight: 8
+                }
+                progress: Rectangle{
+                    color:"#44A6B6"
+                    implicitHeight: 8
+                    implicitWidth: progress_value.value
+                }
             }
         }
     }
+
+
+
+
 
     function openPopUp(){
         console.log("open tttttttttttttt")

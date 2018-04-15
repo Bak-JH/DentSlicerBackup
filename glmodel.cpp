@@ -48,8 +48,10 @@ GLModel::GLModel(QObject* mainWindow, QNode *parent, Mesh* loadMesh, QString fna
         m_meshMaterial->setDiffuse(QColor(173,215,218));
         m_meshMaterial->setSpecular(QColor(182,237,246));
         m_meshMaterial->setShininess(0.0f);
+
         addComponent(m_meshMaterial);
         */
+
 
         m_objectPicker = new Qt3DRender::QObjectPicker(this);
 
@@ -277,7 +279,7 @@ void featureThread::run(){
         case ftrOrient:
             {
                 if(m_glmodel->appropriately_rotated){
-                    openResultPopUp("Model already orient");
+                    openResultPopUp("","Model already orient","");
                 } else {
                     openProgressPopUp();
                     rotateResult* rotateres= ot->Tweak(m_glmodel->mesh,true,45,&m_glmodel->appropriately_rotated);
@@ -346,17 +348,21 @@ void featureThread::openProgressPopUp(){
     QMetaObject::invokeMethod(progressPopUp, "openPopUp");
 }
 
-void featureThread::openResultPopUp(string inputText){
+void featureThread::openResultPopUp(string inputText_h, string inputText_m, string inputText_l){
     QList<QObject*> temp;
     temp.append(m_glmodel->mainWindow);
     QObject *resultPopUp = (QEntity *)FindItemByName(temp, "result_popup");
-    QMetaObject::invokeMethod(resultPopUp, "openResultPopUp", Q_ARG(QVariant, QString::fromStdString(inputText)));
+    QMetaObject::invokeMethod(resultPopUp, "openResultPopUp",
+                              Q_ARG(QVariant, QString::fromStdString(inputText_h)),
+                              Q_ARG(QVariant, QString::fromStdString(inputText_m)),
+                              Q_ARG(QVariant, QString::fromStdString(inputText_l)));
 }
 
 void featureThread::progressChanged(float value){
     emit featureThread::setProgress(value);
     if(value == 1)
-        openResultPopUp("Orientation done");
+        openResultPopUp("testttttttttttt","","2line");
+        //openResultPopUp("","Orientation done","");
 }
 
 

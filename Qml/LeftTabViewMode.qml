@@ -5,8 +5,8 @@ import QtQuick.Controls.Styles 1.4
 import QtQuick.Layouts 1.3
 
 Rectangle {
-    property real originalHeight: 140
-    width : 260
+    property real originalHeight: 126
+    width : 264
     height : originalHeight
 
     color : "transparent"
@@ -16,22 +16,24 @@ Rectangle {
     Rectangle{
         id : tab
         width: parent.width
-        height: 24
+        height: 28
         anchors.left : parent.left
         anchors.top :  parent.top
 
-        color: "#CECECE"
+        color: "transparent"
 
         Text{
+            height: parent.height
             text : "View Mode"
 
-            color:"#303030"
-            font.family: "Arial"
+            color:"#888D8E"
+            font.family: mainFont.name
             font.pointSize: 12
 
-            anchors.verticalCenter: parent.verticalCenter
+            anchors.bottom: parent.bottom
             anchors.left : parent.left
-            anchors.leftMargin: 10
+            anchors.leftMargin: 14
+            verticalAlignment: Text.AlignBottom
         }
 
         Image{
@@ -67,7 +69,7 @@ Rectangle {
             anchors.left: parent.left
             anchors.top : parent.top
             anchors.leftMargin: 16
-            anchors.topMargin: 18
+            anchors.topMargin: 12
 
             ColumnLayout {
                 spacing: 10
@@ -97,7 +99,7 @@ Rectangle {
                             anchors.left : parent.left
                             anchors.leftMargin: 10
 
-                            font.family: "Arial"
+                            font.family: mainFont.name
                             font.pixelSize: 14
                         }
                     }
@@ -125,7 +127,7 @@ Rectangle {
                             anchors.left : parent.left
                             anchors.leftMargin: 10
 
-                            font.family: "Arial"
+                            font.family: mainFont.name
                             font.pixelSize: 14
                         }
                     }
@@ -153,7 +155,7 @@ Rectangle {
                             anchors.left : parent.left
                             anchors.leftMargin: 10
 
-                            font.family: "Arial"
+                            font.family: mainFont.name
                             font.pixelSize: 14
                         }
                     }
@@ -176,7 +178,7 @@ Rectangle {
             name:"close"
             PropertyChanges { target: arrow; rotation:180 }
             PropertyChanges { target: content; visible:false }
-            PropertyChanges { target: ltvm; height : 24 }
+            PropertyChanges { target: ltvm; height : 28 }
         }
     ]
 

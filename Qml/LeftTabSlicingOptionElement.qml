@@ -24,7 +24,7 @@ Item {
         font.bold: true
         anchors.leftMargin:16
         text: columnName
-        font.family: "Arial"
+        font.family: mainFont.name
 
     }
 
@@ -65,7 +65,7 @@ Item {
                 anchors.leftMargin: 16
 
                 font.pixelSize: 14
-                font.family: "Arial"
+                font.family: mainFont.name
 
                 color: "black"
                 text: control.currentText
@@ -93,7 +93,7 @@ Item {
                         anchors.leftMargin: 16
 
                         font.pixelSize: 14
-                        font.family: "Arial"
+                        font.family: mainFont.name
 
                         color: "black"
 

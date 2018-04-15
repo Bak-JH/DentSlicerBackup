@@ -62,7 +62,7 @@ Item {
         anchors.verticalCenter: parent.verticalCenter
         anchors.leftMargin: 10
 
-        font.family: "Arial"
+        font.family: mainFont.name
         font.pixelSize: 14
     }
 

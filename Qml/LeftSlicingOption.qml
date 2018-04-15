@@ -24,7 +24,7 @@ Rectangle {
             text : "View Mode"
 
             color:"#303030"
-            font.family: "Arial"
+            font.family: mainFont.name
             font.pointSize: 12
 
             anchors.verticalCenter: parent.verticalCenter
