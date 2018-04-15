@@ -36,7 +36,7 @@ Rectangle {
 
             color:"#888D8E"
             font.family: mainFont.name
-            font.pointSize: 12
+            font.pixelSize: 16
 
             anchors.bottom: parent.bottom
             anchors.left : parent.left

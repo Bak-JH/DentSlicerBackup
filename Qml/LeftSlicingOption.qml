@@ -25,7 +25,7 @@ Rectangle {
 
             color:"#303030"
             font.family: mainFont.name
-            font.pointSize: 12
+            font.pixelSize: 16
 
             anchors.verticalCenter: parent.verticalCenter
             anchors.left : parent.left

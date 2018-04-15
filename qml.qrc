@@ -40,5 +40,6 @@
         <file>Qml/ResultPopup.qml</file>
         <file>Qml/LeftTabExport.qml</file>
         <file>Qml/LeftTabExportElement.qml</file>
+        <file>Qml/Login.qml</file>
     </qresource>
 </RCC>

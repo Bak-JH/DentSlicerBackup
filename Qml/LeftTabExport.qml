@@ -27,12 +27,12 @@ Rectangle {
 
     Rectangle{
         id: rightline
-        width: 2
+        width: 1
         anchors.right : parent.right
         anchors.top : parent.top
         anchors.bottom: parent.bottom
 
-        color: "#CECECE"
+        color: "#CCCCCC"
     }
 
     Rectangle{
@@ -95,7 +95,7 @@ Rectangle {
             anchors.centerIn: parent
             text: "OK"
             color: "#ffffff"
-            font.pointSize: 12
+            font.pixelSize: 16
             font.family: mainFont.name
         }
 
@@ -150,7 +150,7 @@ Rectangle {
             anchors.centerIn: parent
             text: "Cancel"
             color: "#ffffff"
-            font.pointSize: 12
+            font.pixelSize: 16
             font.family: mainFont.name
 
         }

@@ -79,10 +79,6 @@ Rectangle {
         }
     }
 
-
-
-
-
     function openPopUp(){
         progress_value.value=0
         console.log("open tttttttttttttt")

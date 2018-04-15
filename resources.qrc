@@ -100,5 +100,9 @@
         <file>Resource/font/NotoSans-Regular.ttf</file>
         <file>Resource/font/NotoSans-SemiCondensed.ttf</file>
         <file>Resource/font/NotoSans-SemiCondensedMedium.ttf</file>
+        <file>Resource/login_logo.png</file>
+        <file>Resource/login_leftbutton.png</file>
+        <file>Resource/login_rightbutton.png</file>
+        <file>icon-32.ico</file>
     </qresource>
 </RCC>
