@@ -1,5 +1,6 @@
 #include "slicingengine.h"
 #include <QDir>
+#include "qmlmanager.h"
 
 SlicingEngine::SlicingEngine()
 {
@@ -27,6 +28,7 @@ void SlicingEngine::slice (QVariant cfg, Mesh* mesh, QString filename){
     }
 
     // 승환 25%
+    qmlManager->setProgress(0.25);
 
     // Load mesh
     Mesh* loaded_mesh = mesh;
@@ -40,6 +42,7 @@ void SlicingEngine::slice (QVariant cfg, Mesh* mesh, QString filename){
     SVGexporter* exporter = new SVGexporter();
     exporter->exportSVG(contourLists, filename+"_export");
     // 승환 100%
+    qmlManager->setProgress(1);
 }
 
 /*

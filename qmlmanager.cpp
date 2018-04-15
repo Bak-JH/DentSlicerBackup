@@ -41,6 +41,7 @@ void QmlManager::initializeUI(QQmlApplicationEngine* e){
     // orientation components
     orientPopup = FindItemByName(engine, "orientPopup");
     progress_popup = FindItemByName(engine, "progress_popup");
+    result_popup = FindItemByName(engine, "result_popup");
 
     // extension components
     extensionPopup = FindItemByName(engine, "extensionPopup");
@@ -110,6 +111,7 @@ void QmlManager::createModelFile(Mesh* target_mesh, QString fname) {
     qDebug() << "moved model to right place";
     //QObject* progress_text = FindItemByName(engine, "progress_text"); //orientation와 공유
     // 승환 100%
+    qmlManager->setProgress(1);
 
     // model selection codes, connect handlers later when model selected
     QObject::connect(glmodel->shadowModel, SIGNAL(modelSelected(int)), this, SLOT(modelSelected(int)));
@@ -149,7 +151,7 @@ void QmlManager::deleteModelFile(int ID){
 void QmlManager::disconnectHandlers(GLModel* glmodel){
     QObject::disconnect(glmodel->arsignal, SIGNAL(runArrange()), this, SLOT(runArrange()));
 
-    QObject::disconnect(glmodel->ft, SIGNAL(setProgress(QVariant)),progress_popup, SLOT(updateNumber(QVariant)));
+    //QObject::disconnect(glmodel->ft, SIGNAL(setProgress(QVariant)),progress_popup, SLOT(updateNumber(QVariant)));
     //QObject::disconnect(glmodel->ft, SIGNAL(loadPopup(QVariant)),orientPopup, SLOT(show_popup(QVariant)));
 
 
@@ -200,7 +202,7 @@ void QmlManager::connectHandlers(GLModel* glmodel){
     QObject::connect(glmodel->arsignal, SIGNAL(runArrange()), this, SLOT(runArrange()));
 
     //QObject::connect(glmodel->ft, SIGNAL(setProgress(QVariant)),progress_text, SLOT(update_loading(QVariant)));
-    QObject::connect(glmodel->ft, SIGNAL(setProgress(QVariant)),progress_popup, SLOT(updateNumber(QVariant)));
+    //QObject::connect(glmodel->ft, SIGNAL(setProgress(QVariant)),progress_popup, SLOT(updateNumber(QVariant)));
     //QObject::connect(glmodel->ft, SIGNAL(loadPopup(QVariant)),orientPopup, SLOT(show_popup(QVariant)));
 
     // need to connect for every popup
@@ -486,6 +488,28 @@ void QmlManager::runGroupFeature(int ftrType, QString state){
     }
 
 }
+
+void QmlManager::openProgressPopUp(){
+    QMetaObject::invokeMethod(progress_popup, "openPopUp");
+}
+
+void QmlManager::openResultPopUp(string inputText_h, string inputText_m, string inputText_l){
+    QMetaObject::invokeMethod(result_popup, "openResultPopUp",
+                              Q_ARG(QVariant, QString::fromStdString(inputText_h)),
+                              Q_ARG(QVariant, QString::fromStdString(inputText_m)),
+                              Q_ARG(QVariant, QString::fromStdString(inputText_l)));
+}
+void QmlManager::setProgress(float value){
+    QMetaObject::invokeMethod(progress_popup, "updateNumber",
+                                      Q_ARG(QVariant, value));
+}
+
+void QmlManager::setProgressText(string inputText){
+    QMetaObject::invokeMethod(progress_popup, "updateText",
+                              Q_ARG(QVariant, QString::fromStdString(inputText)));
+}
+
+
 
 QObject* FindItemByName(QList<QObject*> nodes, const QString& name)
 {

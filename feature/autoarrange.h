@@ -85,9 +85,6 @@ private:
     void testClip();
     void testOffset();
 
-
-signals:
-    void progressChanged(float);
 };
 
 Paths3D spreadingCheckExt(Mesh& mesh, int chking_start);
