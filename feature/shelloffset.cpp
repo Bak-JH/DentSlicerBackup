@@ -27,9 +27,11 @@ void shellOffset(GLModel* glmodel, float factor){
             unconnectedOffsetMeshFaces.push_back(offsetMesh->faces[offsetMesh->faces.size()-1]);
         }
     }
+    // 승환 20%
 
     // offset vertices into normal direction
     offsetMesh->vertexOffset(factor);
+    // 승환 40%
 
     // copy original mesh for outer shell
     foreach (MeshFace mf, glmodel->mesh->faces){
@@ -41,6 +43,7 @@ void shellOffset(GLModel* glmodel, float factor){
         QVector3D qv3 = glmodel->mesh->idx2MV(mf.mesh_vertex[2]).position;
         offsetMesh->addFace(qv1, qv2, qv3);
     }
+    // 승환 60%
 
     // identify holes to connect
     for (int i=0; i<unconnectedMeshFaces.size(); i++){
@@ -77,6 +80,7 @@ void shellOffset(GLModel* glmodel, float factor){
 
     // connect built Mesh
     offsetMesh->connectFaces();
+    // 승환 80%
 
     /*GLModel* offsetModel = new GLModel(glmodel->parentModel->mainWindow, glmodel->parentModel, offsetMesh, "", false);
     float zlength = glmodel->mesh->z_max - glmodel->mesh->z_min;
@@ -86,7 +90,7 @@ void shellOffset(GLModel* glmodel, float factor){
 
     qmlManager->deleteModelFile(glmodel->ID);
     qmlManager->createModelFile(offsetMesh, "");
-
+    // 승환 100%
 
     qDebug() << "shell offsetting done";
 }

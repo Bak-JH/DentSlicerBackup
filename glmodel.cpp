@@ -86,6 +86,7 @@ GLModel::GLModel(QObject* mainWindow, QNode *parent, Mesh* loadMesh, QString fna
     } else {
         mesh = loadMesh;
     }
+    // 승환 25%
 
     lmesh = new Mesh();
     rmesh = new Mesh();
@@ -93,6 +94,7 @@ GLModel::GLModel(QObject* mainWindow, QNode *parent, Mesh* loadMesh, QString fna
     initialize(mesh);
     addVertices(mesh, false);
     applyGeometry();
+    // 승환 50%
     //QFuture<void> future = QtConcurrent::run(this, &GLModel::initialize, mesh);
     //future = QtConcurrent::run(this, &GLModel::addVertices, mesh);
 
@@ -107,6 +109,7 @@ GLModel::GLModel(QObject* mainWindow, QNode *parent, Mesh* loadMesh, QString fna
 
     // create shadow model to handle picking settings
     shadowModel = new GLModel(this->mainWindow, this, mesh, filename, true);
+    // 승환 75%
 
     QObject::connect(this,SIGNAL(bisectDone()),this,SLOT(generateRLModel()));
     QObject::connect(this,SIGNAL(_updateModelMesh()),this,SLOT(updateModelMesh()));
@@ -251,12 +254,13 @@ void featureThread::run(){
             }
         case ftrExport:
             {
-                // save to file
+                /*// save to file
                 QString fileName = QFileDialog::getSaveFileName(nullptr, tr("Save to STL file"), "", tr("3D Model file (*.stl)"));
                 ste->exportSTL(m_glmodel->mesh, fileName);
+                */
 
                 // slice file
-                QFuture<void> future = QtConcurrent::run(se, &SlicingEngine::slice, data, fileName);
+                QFuture<void> future = QtConcurrent::run(se, &SlicingEngine::slice, data, m_glmodel->mesh, m_glmodel->filename);
                 break;
             }
         case ftrMove:
@@ -760,9 +764,12 @@ void GLModel::bisectModel_internal(Plane plane){
     }
 
     qDebug() << "done bisect";
+    // 승환 30%
 
     leftMesh->connectFaces();
+    // 승환 40%
     rightMesh->connectFaces();
+    // 승환 50%
     qDebug() << "done connecting";
     emit bisectDone();
 }
@@ -908,7 +915,10 @@ void GLModel::modelCut(){
 
 void GLModel::generateRLModel(){
     qmlManager->createModelFile(lmesh, "");
+    // 승환 70%
     qmlManager->createModelFile(rmesh, "");
+    // 승환 90%
+
     //parentModel->deleteLater();
     shadowModel->removePlane();
     removeCuttingPoints();
@@ -917,6 +927,7 @@ void GLModel::generateRLModel(){
     shadowModel->deleteLater();
     deleteLater();
     qmlManager->selectedModel = nullptr;
+    // 승환 100%
 }
 
 GLModel::~GLModel(){

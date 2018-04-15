@@ -167,12 +167,12 @@ public:
 
     int ID; //for use in Part List
     static int globalID;
+    QString filename;
     QObject* mainWindow;
     void addVertices(Mesh* mesh, bool CW);
 
 private:
     int numPoints;
-    QString filename;
     float x,y,z;
     int v_cnt;
     int f_cnt;
