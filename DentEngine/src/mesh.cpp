@@ -195,42 +195,42 @@ vector<MeshFace>::iterator Mesh::removeFace(vector<MeshFace>::iterator f_it){
 
     if (mf.mesh_vertex[0] == mf.mesh_vertex[1] && mf.mesh_vertex[1] == mf.mesh_vertex[2]){
         for (int c_idx=0; c_idx < mv1.connected_faces.size(); c_idx ++){
-            MeshFace *cf = mv1.connected_faces[c_idx];
+            MeshFace &cf = (*mv1.connected_faces[c_idx]);
             for (int v_idx=0; v_idx<3; v_idx ++){
-                if (cf->mesh_vertex[v_idx] == mf.mesh_vertex[1])
-                    cf->mesh_vertex[v_idx] = mf.mesh_vertex[0];
+                if (cf.mesh_vertex[v_idx] == mf.mesh_vertex[1])
+                    cf.mesh_vertex[v_idx] = mf.mesh_vertex[0];
             }
         }
 
         for (int c_idx=0; c_idx < mv2.connected_faces.size(); c_idx ++){
-            MeshFace *cf = mv2.connected_faces[c_idx];
+            MeshFace &cf = (*mv2.connected_faces[c_idx]);
             for (int v_idx=0; v_idx<3; v_idx ++){
-                if (cf->mesh_vertex[v_idx] == mf.mesh_vertex[2])
-                    cf->mesh_vertex[v_idx] = mf.mesh_vertex[0];
+                if (cf.mesh_vertex[v_idx] == mf.mesh_vertex[2])
+                    cf.mesh_vertex[v_idx] = mf.mesh_vertex[0];
             }
         }
     } else if (mf.mesh_vertex[0] == mf.mesh_vertex[1]){ // replace 1 vertices in connected faces of 1 by 0
         for (int c_idx=0; c_idx < mv1.connected_faces.size(); c_idx ++){
-            MeshFace *cf = mv1.connected_faces[c_idx];
+            MeshFace &cf = (*mv1.connected_faces[c_idx]);
             for (int v_idx=0; v_idx<3; v_idx ++){
-                if (cf->mesh_vertex[v_idx] == mf.mesh_vertex[1])
-                    cf->mesh_vertex[v_idx] = mf.mesh_vertex[0];
+                if (cf.mesh_vertex[v_idx] == mf.mesh_vertex[1])
+                    cf.mesh_vertex[v_idx] = mf.mesh_vertex[0];
             }
         }
     } else if (mf.mesh_vertex[1] == mf.mesh_vertex[2]){ // replace 2 by 1
         for (int c_idx=0; c_idx < mv2.connected_faces.size(); c_idx ++){
-            MeshFace *cf = mv2.connected_faces[c_idx];
+            MeshFace &cf = (*mv2.connected_faces[c_idx]);
             for (int v_idx=0; v_idx<3; v_idx ++){
-                if (cf->mesh_vertex[v_idx] == mf.mesh_vertex[2])
-                    cf->mesh_vertex[v_idx] = mf.mesh_vertex[1];
+                if (cf.mesh_vertex[v_idx] == mf.mesh_vertex[2])
+                    cf.mesh_vertex[v_idx] = mf.mesh_vertex[1];
             }
         }
     } else if (mf.mesh_vertex[2] == mf.mesh_vertex[0]){ // replace 0 by 2
         for (int c_idx=0; c_idx < mv0.connected_faces.size(); c_idx ++){
-            MeshFace *cf = mv0.connected_faces[c_idx];
+            MeshFace &cf = (*mv0.connected_faces[c_idx]);
             for (int v_idx=0; v_idx<3; v_idx ++){
-                if (cf->mesh_vertex[v_idx] == mf.mesh_vertex[0])
-                    cf->mesh_vertex[v_idx] = mf.mesh_vertex[2];
+                if (cf.mesh_vertex[v_idx] == mf.mesh_vertex[0])
+                    cf.mesh_vertex[v_idx] = mf.mesh_vertex[2];
             }
         }
     }
