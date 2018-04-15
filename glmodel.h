@@ -232,7 +232,7 @@ public slots:
     void closeExtension();
     void colorExtensionFaces();
     void uncolorExtensionFaces();
-    void generateExtensionFaces(float distance);
+    void generateExtensionFaces(double distance);
 
     // ShellOffset
     void generateShellOffset(double factor);

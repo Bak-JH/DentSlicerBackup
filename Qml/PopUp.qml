@@ -49,7 +49,7 @@ Rectangle {
     property int numberbox_width
     property int numberbox_y
     property real numbox_default : 0
-    property real numbox_detail2_defalult : 0
+    property real numbox_detail2_default : 0
     property bool numbox_updown_vis: true
     property alias numbox_total_height: numberbox.height
     property alias numbox_detail2_vis: numberbox_detail2.visible
@@ -86,7 +86,7 @@ Rectangle {
     property real numbox_value_x : numbox_default
     property real numbox_value_y : numbox_default
     property real numbox_value_z : numbox_default
-    property real numbox_value_detail2 : numbox_detail2_defalult
+    property real numbox_value_detail2 : numbox_detail2_default
 
     signal applyClicked()
     signal finishClicked()
@@ -147,7 +147,7 @@ Rectangle {
         numberbox2_text.text = numbox_value_y + number_unit;
         numbox_value_z = numbox_default;
         numberbox3_text.text = numbox_value_z + number_unit;
-        numbox_value_detail2 = numbox_detail2_defalult;
+        numbox_value_detail2 = numbox_detail2_default;
         numberbox_detail2_text.text = numbox_value_detail2 + number_unit;
     }
 
