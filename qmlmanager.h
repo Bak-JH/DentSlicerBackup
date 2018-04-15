@@ -78,8 +78,12 @@ public:
     Qt3DCore::QEntity *moveArrowX;
     Qt3DCore::QEntity *moveArrowY;
     QObject *moveArrowobj;
+
     int groupFunctionIndex;
     QString groupFunctionState;
+
+    float progress = 0;
+
     void showRotateSphere();
     void showMoveArrow();
     void hideRotateSphere();

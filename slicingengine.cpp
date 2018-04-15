@@ -32,6 +32,9 @@ void SlicingEngine::slice (QVariant cfg, Mesh* mesh, QString filename){
 
     // Load mesh
     Mesh* loaded_mesh = mesh;
+    /*Mesh* loaded_mesh = new Mesh();
+    loadMeshSTL(loaded_mesh, filename.toStdString().c_str());
+    */
 
     // Slice
     Slicer* slicer = new Slicer();
@@ -41,6 +44,7 @@ void SlicingEngine::slice (QVariant cfg, Mesh* mesh, QString filename){
     // Export to SVG
     SVGexporter* exporter = new SVGexporter();
     exporter->exportSVG(contourLists, filename+"_export");
+
     // 승환 100%
     qmlManager->setProgress(1);
 }
