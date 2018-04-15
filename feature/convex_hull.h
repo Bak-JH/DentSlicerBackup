@@ -9,7 +9,7 @@
 using namespace std;
 using namespace ClipperLib;
 
-int ccw(IntPoint a, IntPoint b, IntPoint c);
+int ccw(const IntPoint& a, const IntPoint& b, const IntPoint& c);
 int sqrDist(IntPoint a, IntPoint b);
 bool POLAR_ORDER(IntPoint a, IntPoint b);
 bool compareIntPoint(IntPoint a, IntPoint b);

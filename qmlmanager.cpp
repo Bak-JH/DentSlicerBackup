@@ -91,7 +91,7 @@ void QmlManager::initializeUI(QQmlApplicationEngine* e){
     QObject::connect(this, SIGNAL(arrangeDone(vector<QVector3D>, vector<float>)), this, SLOT(applyArrangeResult(vector<QVector3D>, vector<float>)));
 
     //openModelFile(QDir::currentPath()+"/Models/partial1.stl");
-    openModelFile("c:/Users/user/Desktop/asdfasf.stl");
+    //openModelFile("c:/Users/user/Desktop/asdfasf.stl");
 }
 
 void QmlManager::createModelFile(Mesh* target_mesh, QString fname) {
@@ -273,8 +273,8 @@ void QmlManager::runArrange_internal(){
                 m_transform_set.push_back(glmodels[i]->m_transform);
             }
             autoarrange* ar;
-            arng_result_set = ar->arngMeshes(&meshes_to_arrange);
-            vector<QVector3D> translations;
+            arng_result_set = ar->arngMeshes(meshes_to_arrange);
+            /*vector<QVector3D> translations;
             vector<float> rotations;
             for (int i=0; i<arng_result_set.size(); i++){
                 XYArrangement arng_result = arng_result_set[i];
@@ -282,9 +282,9 @@ void QmlManager::runArrange_internal(){
                 translations.push_back(trans_vec);
                 rotations.push_back(arng_result.second);
             }
-            emit arrangeDone(translations, rotations);
+            emit arrangeDone(translations, rotations);*/
 
-            //ar->arrangeQt3D(m_transform_set, arng_result_set);
+            ar->arrangeQt3D(m_transform_set, arng_result_set);
             //ar->arrangeGlmodels(&glmodel);
         }
     }
