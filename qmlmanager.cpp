@@ -28,6 +28,24 @@ void QmlManager::initializeUI(QQmlApplicationEngine* e){
 
     mv = FindItemByName(engine, "MainView");
     QMetaObject::invokeMethod(mv, "initCamera");
+    // model move componetns
+    movePopup = FindItemByName(engine, "movePopup");
+    QObject::connect(movePopup, SIGNAL(runFeature(int,int,int)),this, SLOT(modelMoveByNumber(int,int)));
+
+    // model rotate components
+    rotatePopup = FindItemByName(engine, "rotatePopup");
+    rotateSphere = (QEntity *)FindItemByName(engine, "rotateSphereEntity");
+    rotateSphereX = (QEntity *)FindItemByName(engine, "rotateSphereTorusX");
+    rotateSphereY = (QEntity *)FindItemByName(engine, "rotateSphereTorusY");
+    rotateSphereZ = (QEntity *)FindItemByName(engine, "rotateSphereTorusZ");
+    rotateSphereobj = FindItemByName(engine, "rotateSphere");
+    QObject::connect(rotateSphereobj, SIGNAL(rotateSignal(int,int)),this, SLOT(modelRotate(int,int)));
+    QObject::connect(rotateSphereobj, SIGNAL(rotateDone(int)),this, SLOT(modelRotateDone(int)));
+    hideRotateSphere();
+    // model rotate popup codes
+    QObject::connect(rotatePopup, SIGNAL(runFeature(int,int,int,int)),this, SLOT(modelRotateByNumber(int,int,int)));
+    //rotateSphere->setEnabled(0);
+    QObject *rotateButton = FindItemByName(engine, "rotateButton");
 
     // model cut components
     cutPopup = FindItemByName(engine, "cutPopup");
@@ -64,7 +82,6 @@ void QmlManager::initializeUI(QQmlApplicationEngine* e){
     //exportButton = FindItemByName(engine, "exportBtn");
     exportOKButton = FindItemByName(engine, "exportOKBtn");
 
-    //rotation Sphere
     moveArrow = (QEntity *)FindItemByName(engine, "moveArrowEntity");
     moveArrowX = (QEntity *)FindItemByName(engine, "moveArrowX");
     moveArrowY = (QEntity *)FindItemByName(engine, "moveArrowY");
@@ -73,16 +90,6 @@ void QmlManager::initializeUI(QQmlApplicationEngine* e){
     QObject::connect(moveArrowobj, SIGNAL(moveDone(int)),this, SLOT(modelMoveDone(int)));
     hideMoveArrow();
     //moveArrow->setEnabled(0);
-    rotateSphere = (QEntity *)FindItemByName(engine, "rotateSphereEntity");
-    rotateSphereX = (QEntity *)FindItemByName(engine, "rotateSphereTorusX");
-    rotateSphereY = (QEntity *)FindItemByName(engine, "rotateSphereTorusY");
-    rotateSphereZ = (QEntity *)FindItemByName(engine, "rotateSphereTorusZ");
-    rotateSphereobj = FindItemByName(engine, "rotateSphere");
-    QObject::connect(rotateSphereobj, SIGNAL(rotateSignal(int,int)),this, SLOT(modelRotate(int,int)));
-    QObject::connect(rotateSphereobj, SIGNAL(rotateDone(int)),this, SLOT(modelRotateDone(int)));
-    //rotateSphere->setEnabled(0);
-    hideRotateSphere();
-    QObject *rotateButton = FindItemByName(engine, "rotateButton");
     QObject *moveButton = FindItemByName(engine, "moveButton");
     QObject::connect(moveButton,SIGNAL(runGroupFeature(int,QString)),this,SLOT(runGroupFeature(int,QString)));
     QObject::connect(rotateButton,SIGNAL(runGroupFeature(int,QString)),this,SLOT(runGroupFeature(int,QString)));
@@ -162,6 +169,7 @@ void QmlManager::disconnectHandlers(GLModel* glmodel){
 
 
     // need to connect for every popup
+    // model rotate popup codes
 
     // model cut popup codes
     QObject::disconnect(cutPopup,SIGNAL(modelCut()),glmodel->shadowModel , SLOT(modelCut()));
@@ -212,7 +220,6 @@ void QmlManager::connectHandlers(GLModel* glmodel){
     //QObject::connect(glmodel->ft, SIGNAL(loadPopup(QVariant)),orientPopup, SLOT(show_popup(QVariant)));
 
     // need to connect for every popup
-
     // model cut popup codes
     QObject::connect(cutPopup,SIGNAL(modelCut()),glmodel->shadowModel , SLOT(modelCut()));
     QObject::connect(cutPopup,SIGNAL(cutModeSelected(int)),glmodel->shadowModel,SLOT(cutModeSelected(int)));
@@ -471,7 +478,24 @@ void QmlManager::modelRotate(int Axis, int Angle){
     }
     }
 }
+void QmlManager::modelMoveByNumber(int X, int Y){
+    if (selectedModel == nullptr)
+        return;
+    QVector3D tmp = selectedModel->m_transform->translation();
+    selectedModel->m_transform->setTranslation(QVector3D(tmp.x()+X,tmp.y()+Y,tmp.z()));
 
+}
+void QmlManager::modelRotateByNumber(int X, int Y, int Z){
+    if (selectedModel == nullptr)
+        return;
+    Qt3DCore::QTransform* tmp = new Qt3DCore::QTransform();
+    tmp->setRotationX(X);
+    tmp->setRotationY(Y);
+    tmp->setRotationZ(Z);
+    selectedModel->rotateModelMesh(tmp->matrix());
+    showRotateSphere();
+    mouseHack();
+}
 void QmlManager::runGroupFeature(int ftrType, QString state){
     groupFunctionIndex = ftrType;
     groupFunctionState = state;

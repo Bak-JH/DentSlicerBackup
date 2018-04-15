@@ -30,6 +30,21 @@ public:
     QObject* loginWindow;
     QEntity* models;
     QObject* mv;
+    // model rotate components
+    QObject *rotatePopup;
+    QObject *rotateSphereobj;
+    Qt3DCore::QEntity *rotateSphere;
+    Qt3DCore::QEntity *rotateSphereX;
+    Qt3DCore::QEntity *rotateSphereY;
+    Qt3DCore::QEntity *rotateSphereZ;
+
+    // model move components
+    QObject *movePopup;
+    Qt3DCore::QEntity *managerModel;
+    Qt3DCore::QEntity *moveArrow;
+    Qt3DCore::QEntity *moveArrowX;
+    Qt3DCore::QEntity *moveArrowY;
+    QObject *moveArrowobj;
 
     // model cut components
     QObject *cutPopup;
@@ -69,16 +84,6 @@ public:
     vector<GLModel*> glmodels;
     GLModel* selectedModel = nullptr;
 
-    Qt3DCore::QEntity *managerModel;
-    QObject *rotateSphereobj;
-    Qt3DCore::QEntity *rotateSphere;
-    Qt3DCore::QEntity *rotateSphereX;
-    Qt3DCore::QEntity *rotateSphereY;
-    Qt3DCore::QEntity *rotateSphereZ;
-    Qt3DCore::QEntity *moveArrow;
-    Qt3DCore::QEntity *moveArrowX;
-    Qt3DCore::QEntity *moveArrowY;
-    QObject *moveArrowobj;
 
     int groupFunctionIndex;
     QString groupFunctionState;
@@ -122,7 +127,9 @@ public slots:
     void runGroupFeature(int,QString);
     void modelSelected(int);
     void modelRotate(int,int);
+    void modelRotateByNumber(int,int,int);
     void modelMove(int,int);
+    void modelMoveByNumber(int,int);
     void modelMoveDone(int);
     void modelRotateDone(int);
     void runArrange();
