@@ -5,7 +5,7 @@ int origin_y;
 int origin_z;
 
 void SVGexporter::exportSVG(Slices contourLists, QString outfoldername){
-    qDebug() << "export svg";
+    qDebug() << "export svg at "<< outfoldername;
     QDir dir(outfoldername);
     if (!dir.exists()) {
         dir.mkpath(".");
@@ -57,7 +57,7 @@ void SVGexporter::exportSVG(Slices contourLists, QString outfoldername){
 
         outfile.close();
     }
-    printf("slicing done\n");
+    //printf("slicing done\n");
     int layer = contourLists.size();
     int printing_time = layer*15/60;
 
@@ -66,9 +66,10 @@ void SVGexporter::exportSVG(Slices contourLists, QString outfoldername){
     float z = contourLists.mesh->z_max-contourLists.mesh->z_min;
 
     float volume = ((float)(area/pow(scfg->pixel_per_mm,2))/1000000)*scfg->layer_height;
-    printf("info:%d:%d:%.1f:%.1f:%.1f:%.1f\n",printing_time,layer,x,y,z,volume);
-    fflush(stdout);
-    exit(0);
+    //printf("info:%d:%d:%.1f:%.1f:%.1f:%.1f\n",printing_time,layer,x,y,z,volume);
+    //fflush(stdout);
+    qDebug() << "slicing done";
+    //exit(0);
     return;
 }
 

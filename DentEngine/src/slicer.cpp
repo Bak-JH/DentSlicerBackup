@@ -2,6 +2,7 @@
 #include <QHash>
 #include <QElapsedTimer>
 #include <QTextStream>
+#include "qmlmanager.h"
 
 using namespace ClipperLib;
 
@@ -12,6 +13,7 @@ Slices Slicer::slice(Mesh* mesh){
     // mesh slicing step
     vector<Paths> meshslices = meshSlice(mesh);
     // 승환 30%
+    qmlManager->setProgress(0.3);
 
     printf("meshslice done\n");
     fflush(stdout);
@@ -28,6 +30,7 @@ Slices Slicer::slice(Mesh* mesh){
         slices.push_back(meshslice);
     }
     //승환 40%
+    qmlManager->setProgress(0.4);
     fflush(stdout);
     //printf("meshslice done\n");
 
@@ -42,9 +45,11 @@ Slices Slicer::slice(Mesh* mesh){
     //cout << "overhangdetect done" <<endl;
 
     // 승환 50%
+    qmlManager->setProgress(0.5);
 
-    containmentTreeConstruct();
+    //containmentTreeConstruct();
     // 승환 60%
+    qmlManager->setProgress(0.6);
 
     // below steps need to be done in parallel way
     // infill generation step
@@ -54,6 +59,7 @@ Slices Slicer::slice(Mesh* mesh){
     fflush(stdout);
     //cout << "infill done" <<endl;
     // 승환 70%
+    qmlManager->setProgress(0.7);
 
     // support generation step
     Support support(scfg->support_type);
@@ -62,6 +68,7 @@ Slices Slicer::slice(Mesh* mesh){
     fflush(stdout);
     //cout << "support done" <<endl;
     // 승환 80%
+    qmlManager->setProgress(0.8);
 
     // raft generation step
     Raft raft(scfg->raft_type);
@@ -70,6 +77,7 @@ Slices Slicer::slice(Mesh* mesh){
     fflush(stdout);
     //cout << "raft done" <<endl;
     // 승환 90%
+    qmlManager->setProgress(0.9);
 
     containmentTreeConstruct();
     printf("ctreeconstruct done\n");
