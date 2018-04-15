@@ -69,7 +69,7 @@ Entity {
         }
         ObjectPicker{
              id : objectPickerX
-             dragEnabled: true
+             isShareable: false
              hoverEnabled: true
              onEntered: {
                  if (rotateAxis == 0){
@@ -94,28 +94,22 @@ Entity {
                  }
              }
              onPressed: { //rotation start
-                 var point = world2Screen(Qt.vector3d(0,0,0))
-                 mouseOrigin = Qt.vector2d(pick.position.x , pick.position.y)
-                 if ( rotateAxis  == 0){
-                     rotateAxis = 1 //
-                     torusY.enabled = false
-                     torusZ.enabled = false
-                     sphere.enabled = false
-                     torusXMaterial.ambient = yellow
-                     torusXMaterial.diffuse = yellow
-                     torusXMaterial.specular = yellow
-                     pastAngle=0;
+                 if (parent.parent.enabled == true){
+                     var point = world2Screen(Qt.vector3d(0,0,0))
+                     mouseOrigin = Qt.vector2d(pick.position.x , pick.position.y)
+                     if ( rotateAxis  == 0){
+                         rotateAxis = 1 //
+                         torusY.setEnabled(false)
+                         torusZ.setEnabled(false)
+                         torusXMaterial.ambient = yellow
+                         torusXMaterial.diffuse = yellow
+                         torusXMaterial.specular = yellow
+                         pastAngle=0;
+                     }
                  }
              }
              onReleased: {
-                 rotateAxis = 0;
-                 console.log("releaseX")
-                 torusY.enabled = true
-                 torusZ.enabled = true
-                 sphere.enabled = true
-                 torusXMaterial.ambient = grey
-                 torusXMaterial.diffuse = grey
-                 torusXMaterial.specular = grey
+                 torusRelease();
              }
          }
         components: [ torusXMesh, torusXMaterial, torusXTransform,objectPickerX]
@@ -147,7 +141,7 @@ Entity {
         ObjectPicker{
             id : objectPickerY
              hoverEnabled: true
-
+            isShareable: false
              onEntered: {
                  if (rotateAxis == 0){
                      torusXMaterial.ambient = grey
@@ -172,27 +166,22 @@ Entity {
                  }
              }
              onPressed: { //rotation start
-                 var point = world2Screen(Qt.vector3d(0,0,0))
-                 mouseOrigin = Qt.vector2d(pick.position.x , pick.position.y)
-                 if ( rotateAxis  == 0){
-                    rotateAxis = 2 //
-                     torusX.enabled = false
-                     torusZ.enabled = false
-                     sphere.enabled = false
-                     torusYMaterial.ambient = yellow
-                     torusYMaterial.diffuse = yellow
-                     torusYMaterial.specular = yellow
-                    pastAngle=0;
+                 if (parent.parent.enabled == true){
+                     var point = world2Screen(Qt.vector3d(0,0,0))
+                     mouseOrigin = Qt.vector2d(pick.position.x , pick.position.y)
+                     if ( rotateAxis  == 0){
+                        rotateAxis = 2 //
+                         torusX.setEnabled(false)
+                         torusZ.setEnabled(false)
+                         torusYMaterial.ambient = yellow
+                         torusYMaterial.diffuse = yellow
+                         torusYMaterial.specular = yellow
+                        pastAngle=0;
+                     }
                  }
              }
              onReleased: {
-                 rotateAxis = 0;
-                 torusX.enabled = true
-                 torusZ.enabled = true
-                 sphere.enabled = true
-                 torusYMaterial.ambient = grey
-                 torusYMaterial.diffuse = grey
-                 torusYMaterial.specular = grey
+                 torusRelease()
              }
          }
         components: [ torusYMesh, torusYMaterial, torusYTransform, objectPickerY]
@@ -223,6 +212,7 @@ Entity {
         ObjectPicker{
             id : objectPickerZ
             hoverEnabled: true
+            isShareable: false
             onEntered: {
                 if (rotateAxis == 0){
                     torusXMaterial.ambient = grey
@@ -246,27 +236,22 @@ Entity {
                 }
             }
             onPressed: { //rotation start
-                var point = world2Screen(Qt.vector3d(0,0,0))
-                mouseOrigin = Qt.vector2d(pick.position.x , pick.position.y)
-                if ( rotateAxis  == 0 ) {
-                    rotateAxis = 3 //
-                    torusX.enabled = false
-                    torusY.enabled = false
-                    sphere.enabled = false
-                    torusZMaterial.ambient = yellow
-                    torusZMaterial.diffuse = yellow
-                    torusZMaterial.specular = yellow
-                    pastAngle=0;
+                if (parent.parent.enabled==true){
+                    var point = world2Screen(Qt.vector3d(0,0,0))
+                    mouseOrigin = Qt.vector2d(pick.position.x , pick.position.y)
+                    if ( rotateAxis  == 0 ) {
+                        rotateAxis = 3 //
+                        torusX.setEnabled(false)
+                        torusY.setEnabled(false)
+                        torusZMaterial.ambient = yellow
+                        torusZMaterial.diffuse = yellow
+                        torusZMaterial.specular = yellow
+                        pastAngle=0;
+                    }
                 }
             }
             onReleased: {
-                rotateAxis = 0;
-                torusX.enabled = true
-                torusY.enabled = true
-                sphere.enabled = true
-                torusZMaterial.ambient = grey
-                torusZMaterial.diffuse = grey
-                torusZMaterial.specular = grey
+                torusRelease();
             }
          }
         components: [ torusZMesh, torusZMaterial, torusZTransform,objectPickerZ]
@@ -280,24 +265,44 @@ Entity {
     MouseHandler{
         id : rotationMouseHandler
         sourceDevice: rotationmousedevice
-        onClicked: {
+        onPressed: {
             if (mouse.buttons == MouseEvent.RightButton){
                 rotateAxis = 0;
             }
         }
         onReleased: {
-            if (mouse.buttons == MouseEvent.LeftButton){
-                torusXMaterial.ambient = Qt.rgba(255/255,0/255,255/255,0.5)
-                torusYMaterial.ambient = Qt.rgba(255/255,0/255,255/255,0.5)
-                torusZMaterial.ambient = Qt.rgba(255/255,0/255,255/255,0.5)
+                torusRelease();
                 rotateAxis = 0;
-            }
         }
         onPositionChanged: {
-            //console.log(mouse.x,mouse.y)
             mouseCurrent = Qt.vector2d(mouse.x,mouse.y)
         }
     }
+    function torusRelease(){
+        if (rotateAxis == 1){
+            rotateAxis = 0;
+            torusY.setEnabled(true)
+            torusZ.setEnabled(true)
+            torusXMaterial.ambient = grey
+            torusXMaterial.diffuse = grey
+            torusXMaterial.specular = grey
+        }else if (rotateAxis == 2){
+            rotateAxis = 0;
+            torusX.setEnabled(true)
+            torusZ.setEnabled(true)
+            torusYMaterial.ambient = grey
+            torusYMaterial.diffuse = grey
+            torusYMaterial.specular = grey
+        }else if (rotateAxis == 3){
+            rotateAxis = 0;
+            torusX.setEnabled(true)
+            torusY.setEnabled(true)
+            torusZMaterial.ambient = grey
+            torusZMaterial.diffuse = grey
+            torusZMaterial.specular = grey
+        }
+    }
+
     function vertexccw(x1,y1,x2,y2,x3,y3){
         return (x1*y2+x2*y3+x3*y1) - (x1*y3+x2*y1+x3*y2)
     }

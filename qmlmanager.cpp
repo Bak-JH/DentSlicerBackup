@@ -24,7 +24,7 @@ void QmlManager::initializeUI(QQmlApplicationEngine* e){
     models = (QEntity *)FindItemByName(engine, "Models");
     Lights* lights = new Lights(models);
 
-    QObject* mv = FindItemByName(engine, "MainView");
+    mv = FindItemByName(engine, "MainView");
     QMetaObject::invokeMethod(mv, "initCamera");
 
     // model cut components
@@ -64,6 +64,8 @@ void QmlManager::initializeUI(QQmlApplicationEngine* e){
 
     //rotation Sphere
     moveArrow = (QEntity *)FindItemByName(engine, "moveArrowEntity");
+    moveArrowX = (QEntity *)FindItemByName(engine, "moveArrowX");
+    moveArrowY = (QEntity *)FindItemByName(engine, "moveArrowY");
     moveArrowobj = FindItemByName(engine, "moveArrow");
     QObject::connect(moveArrowobj, SIGNAL(moveSignal(int,int)),this, SLOT(modelMove(int,int)));
     QObject::connect(moveArrowobj, SIGNAL(moveDone(int)),this, SLOT(modelMoveDone(int)));
@@ -374,6 +376,8 @@ void QmlManager::showMoveArrow(){
     if (selectedModel == nullptr)
         return;
     moveArrow->setEnabled(1);
+    moveArrowX->setEnabled(1);
+    moveArrowY->setEnabled(1);
     QQmlProperty::write(moveArrowobj,"center",selectedModel->m_transform->translation());
 }
 void QmlManager::hideMoveArrow(){
@@ -386,12 +390,25 @@ void QmlManager::showRotateSphere(){
     if (selectedModel == nullptr)
         return;
     rotateSphere->setEnabled(1);
+    rotateSphereX->setEnabled(1);
+    rotateSphereY->setEnabled(1);
+    rotateSphereZ->setEnabled(1);
     QQmlProperty::write(rotateSphereobj,"center",selectedModel->m_transform->translation());
+}
+void QmlManager::mouseHack(){
+    const QPointF tmp_cor(265,105);
+    QMouseEvent* evt = new QMouseEvent(QEvent::MouseButtonPress,tmp_cor,Qt::LeftButton, Qt::LeftButton,0);
+    //QCoreApplication::postEvent(this->parent(),evt);
+    QCoreApplication::postEvent(mainWindow,evt);
+    QMouseEvent* evt2 = new QMouseEvent(QEvent::MouseButtonRelease,tmp_cor,Qt::LeftButton, Qt::LeftButton,0);
+    //QCoreApplication::postEvent(this->parent(),evt2);
+    QCoreApplication::postEvent(mainWindow,evt2);
 }
 void QmlManager::modelMoveDone(int Axis){
     if (selectedModel == nullptr)
         return;
     QQmlProperty::write(moveArrowobj,"center",selectedModel->m_transform->translation());
+    mouseHack();
 }
 void QmlManager::modelRotateDone(int Axis){
     if (selectedModel == nullptr)
@@ -418,8 +435,8 @@ void QmlManager::modelRotateDone(int Axis){
     selectedModel->rotateModelMesh(Axis,-angle);
     //float zlength = (glmodel->mesh->z_max - glmodel->mesh->z_min);
     //glmodel->m_transform->setTranslation(QVector3D(0,0,zlength/2));
-    hideRotateSphere();
     showRotateSphere();
+    mouseHack();
 }
 void QmlManager::modelMove(int Axis, int Distance){
     if (selectedModel == nullptr)
