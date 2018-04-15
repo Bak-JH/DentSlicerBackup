@@ -14,7 +14,7 @@ Rectangle {
     property alias option_infill: option_infill
     property alias option_infill_density: option_infill_density
 
-    width : 260
+    width : 264
     height : 180
 
     color : "transparent"
@@ -24,22 +24,24 @@ Rectangle {
     Rectangle{
         id : tab
         width: parent.width
-        height: 24
+        height: 28
         anchors.left : parent.left
         anchors.top :  parent.top
 
-        color: "#CECECE"
+        color: "transparent"
 
         Text{
+            height: parent.height
             text : "Slicing Option"
 
-            color:"#303030"
-            font.family: "Arial"
+            color:"#888D8E"
+            font.family: mainFont.name
             font.pointSize: 12
 
-            anchors.verticalCenter: parent.verticalCenter
+            anchors.bottom: parent.bottom
             anchors.left : parent.left
-            anchors.leftMargin: 10
+            anchors.leftMargin: 14
+            verticalAlignment: Text.AlignBottom
         }
 
         Image{
@@ -75,7 +77,7 @@ Rectangle {
             anchors.left: parent.left
             anchors.top : parent.top
 
-            anchors.topMargin: 18
+            anchors.topMargin: 16
 
             ColumnLayout {
                 spacing: 8
@@ -137,7 +139,7 @@ Rectangle {
             name:"close"
             PropertyChanges { target: arrow; rotation:180 }
             PropertyChanges { target: content; visible:false }
-            PropertyChanges { target: ltso; height : 24 }
+            PropertyChanges { target: ltso; height : 28 }
         }
     ]
 

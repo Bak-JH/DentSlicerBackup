@@ -99,7 +99,7 @@ Entity {
                             camera:camera
                             ClearBuffers {
                                buffers: ClearBuffers.ColorDepthBuffer
-                               clearColor: "#EAEAEA"
+                               clearColor: "#E5E5E5"
                             }
                             SortPolicy {
                                 sortTypes: [

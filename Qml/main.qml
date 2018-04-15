@@ -17,6 +17,18 @@ ApplicationWindow {
     property alias lefttab: lefttab
     property alias lefttabExport: lefttabExport
     property alias progressPopUp: progressPopUp
+
+    property alias mainFont : mainFont
+
+    FontLoader{
+        id : mainFont
+        source: "qrc:/Resource/font/NotoSans-SemiCondensed.ttf"
+    }
+    FontLoader{
+        id : mediumFont
+        source: "qrc:/Resource/font/NotoSans-SemiCondensedMedium.ttf"
+    }
+
     /* hidden for beta
     menuBar: MenuBar{
         Menu{
@@ -45,7 +57,7 @@ ApplicationWindow {
         anchors.left : lefttab.right
         anchors.right : parent.right
         anchors.bottom : parent.bottom
-        color: "#EAEAEA"
+        color: "#E5E5E5"
     }
 
     Scene3D {
@@ -69,7 +81,7 @@ ApplicationWindow {
     UpperTab{
         id : uppertab
         width : parent.width
-        height: 116
+        height: 100
 
         function getCurrentText(){}
         options: [
@@ -86,7 +98,7 @@ ApplicationWindow {
 
     LeftTab{
         id : lefttab
-        width : 260
+        width : 265
         height : parent.height - uppertab.height
 
 
@@ -178,7 +190,7 @@ ApplicationWindow {
             anchors.horizontalCenter: parent.horizontalCenter
             font.pointSize: 7
             color: "#494949"
-            font.family: "Arial"
+            font.family: mainFont.name
         }
         Text {
             id: progress_text2
@@ -187,7 +199,7 @@ ApplicationWindow {
             anchors.horizontalCenter: parent.horizontalCenter
             font.pointSize: 6
             color: "#999999"
-            font.family: "Arial"
+            font.family: mainFont.name
         }
         detailline1_vis: false
         detailline2_vis: false
@@ -229,7 +241,7 @@ ApplicationWindow {
             anchors.horizontalCenter: parent.horizontalCenter
             font.pointSize: 7
             color: "#494949"
-            font.family: "Arial"
+            font.family: mainFont.name
         }
         height: 100
         width: 230
@@ -258,6 +270,8 @@ ApplicationWindow {
     ResultPopup{
         id : resultPopUp
     }
+
+
 
 }
 

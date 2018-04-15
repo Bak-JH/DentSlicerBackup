@@ -47,7 +47,7 @@ Rectangle{
 
     Text {
         text: "CUT"
-        font.family: "Arial"
+        font.family: mainFont.name
         styleColor: "#000000"
         font.pixelSize: 17
         anchors.top:  parent.top
@@ -58,7 +58,7 @@ Rectangle{
 
     Text {
         text: "Cutting Surface --------"
-        font.family: "Arial"
+        font.family: mainFont.name
         color: "#aaaaaa"
         font.pixelSize: 15
         anchors.top:  parent.top
@@ -69,7 +69,7 @@ Rectangle{
 
     Text {
         text: "After treatment --------"
-        font.family: "Arial"
+        font.family: mainFont.name
         color: "#aaaaaa"
         font.pixelSize: 15
         anchors.top:  parent.top
@@ -89,7 +89,7 @@ Rectangle{
             Text {
                 text: "Finish"
                 color:"#ffffff"
-                font.family: "Arial"
+                font.family: mainFont.name
                 font.bold: true
                 font.pixelSize: 17
                 anchors.horizontalCenter:  parent.horizontalCenter
@@ -132,7 +132,7 @@ Rectangle{
                     Text {
                         text: "Apply"
                         color:"#ffffff"
-                        font.family: "Arial"
+                        font.family: mainFont.name
                         font.bold: true
                         font.pixelSize:17
                         anchors.horizontalCenter:  parent.horizontalCenter
@@ -169,7 +169,7 @@ Rectangle{
                 text: "None"
                 anchors.left : parent.left
                 anchors.leftMargin: 10
-                font.family: "Arial"
+                font.family: mainFont.name
                 font.pixelSize: 14
                 }
                 }
@@ -200,7 +200,7 @@ Rectangle{
                 text: "Gernerate Surface"
                 anchors.left : parent.left
                 anchors.leftMargin: 10
-                font.family: "Arial"
+                font.family: mainFont.name
                 font.pixelSize: 14
                 }
                 }

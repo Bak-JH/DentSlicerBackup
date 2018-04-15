@@ -12,12 +12,12 @@ Rectangle {
 
     Rectangle{
         id: rightline
-        width: 2
+        width: 1
         anchors.right : parent.right
         anchors.top : parent.top
         anchors.bottom: parent.bottom
 
-        color: "#CECECE"
+        color: "#CCCCCC"
     }
     LeftTabPartList{
         id : ltpl
@@ -25,15 +25,23 @@ Rectangle {
         anchors.left: parent.left
     }
 
-    LeftTabViewMode{
-        id : ltvm
-        anchors.top : ltpl.bottom
-        anchors.left : parent.left
+    Rectangle{
+        id : line1
+        width : parent.width-1; height: 2;anchors.left: parent.left;anchors.top : ltpl.bottom;color: "#D8D8D8"
     }
 
+    LeftTabViewMode{
+        id : ltvm
+        anchors.top : line1.bottom
+        anchors.left : parent.left
+    }
+    Rectangle{
+        id : line2
+        width : parent.width-1; height: 2;anchors.left: parent.left;anchors.top : ltvm.bottom;color: "#D8D8D8"
+    }
     LeftTabSlicingOption{
         id:ltso
-        anchors.top : ltvm.bottom
+        anchors.top : line2.bottom
         anchors.left: parent.left
     }
 

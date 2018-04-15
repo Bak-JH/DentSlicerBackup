@@ -11,9 +11,9 @@ Item {
         anchors.fill: parent
         radius: 1
 
-        color:  "#D6D6D6"
+        //color:  "#FFFFFF"
         border.width: 1
-        border.color: "#CECECE"
+        border.color: "#CCCCCC"
 
         Image {
             width: 35
@@ -25,10 +25,10 @@ Item {
                 anchors.fill: parent
                 hoverEnabled: true
                 onEntered: {
-                    icon.color = "#CCCCCC"
+                    icon.color = "#E3E3E5"
                 }
                 onExited: {
-                    icon.color = "#D6D6D6"
+                    icon.color = "#FFFFFF"
                 }
             }
         }

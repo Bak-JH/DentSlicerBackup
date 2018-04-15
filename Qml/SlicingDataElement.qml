@@ -25,7 +25,7 @@ Item {
         anchors.leftMargin: 4
 
         text : inputData
-        font.family: "Arial"
+        font.family: mainFont.name
         color: "#7C7C7C"
     }
 }

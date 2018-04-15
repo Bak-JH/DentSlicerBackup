@@ -32,7 +32,8 @@ Item {
 
         font.pixelSize: 14
         //font.bold: true
-        font.family: "Arial"
+        font.family: mainFont.name
+
         color: "black"
     }
 
@@ -44,7 +45,8 @@ Item {
         text : columnContent
 
         font.pixelSize: 14
-        font.family: "Arial"
+        font.family: mainFont.name
+
         color: "#7c7c7c"
     }
 

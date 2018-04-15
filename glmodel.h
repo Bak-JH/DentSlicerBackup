@@ -65,7 +65,7 @@ public:
     SlicingEngine* se;
 
     void openProgressPopUp();
-    void openResultPopUp(string inputText);
+    void openResultPopUp(string inputText_h, string inputText_m, string inputText_l);
 
 signals:
     void loadPopup(QVariant value);

@@ -6,8 +6,8 @@ import QtQuick.Layouts 1.3
 
 Rectangle {
     objectName: "partList"
-    property real originalHeight: 350
-    width : 260
+    property real originalHeight: 336
+    width : 264
     height : originalHeight
 
     color: "transparent"
@@ -18,22 +18,25 @@ Rectangle {
     Rectangle{
         id : tab
         width: parent.width
-        height: 24
+        height: 28
         anchors.left : parent.left
         anchors.top :  parent.top
 
-        color: "#CECECE"
+        //color: "#CECECE"
+        color: "transparent"
 
         Text{
+            height: parent.height
             text : "Part List"
 
-            color:"#303030"
-            font.family: "Arial"
+            color:"#888D8E"
+            font.family: mainFont.name
             font.pointSize: 12
 
-            anchors.verticalCenter: parent.verticalCenter
+            anchors.bottom: parent.bottom
             anchors.left : parent.left
-            anchors.leftMargin: 10
+            anchors.leftMargin: 14
+            verticalAlignment: Text.AlignBottom
         }
 
         Image{
@@ -66,12 +69,12 @@ Rectangle {
         color:"transparent"
 
         Rectangle{
-            width : 232
+            width : 240
             height: 294
 
             anchors.top : content.top
             anchors.horizontalCenter: parent.horizontalCenter
-            anchors.topMargin: 12
+            anchors.topMargin: 4
 
             color : "#F9F9F9"
             border.width: 1
@@ -104,7 +107,7 @@ Rectangle {
             name:"close"
             PropertyChanges { target: arrow; rotation:180 }
             PropertyChanges { target: content; visible:false }
-            PropertyChanges { target: ltpl; height : 24 }
+            PropertyChanges { target: ltpl; height : 28 }
         }
     ]
 

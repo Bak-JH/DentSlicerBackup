@@ -9,7 +9,9 @@ Rectangle{
     id: temp
     width: buttonWidth
     height: buttonHeight
+
     anchors.top : parent.top
+    anchors.left: parent.left
 
     color : "transparent"
 
@@ -36,19 +38,22 @@ Rectangle{
         anchors.fill: parent
         color: parent.color
         Image {
-            anchors.margins: 2
-            anchors.fill: parent
+            //anchors.margins: 2
+            //anchors.fill: parent
+            anchors.top: parent.top
+            anchors.horizontalCenter: parent.horizontalCenter
+
             source: iconSource1
         }
         Text{
             anchors.top:parent.top
             anchors.horizontalCenter: parent.horizontalCenter
-            anchors.topMargin: 16
+            anchors.topMargin: 14
             text: iconText
-            font.pixelSize: 15
+            font.pixelSize: 16
             //font.bold: true
-            font.family: "Arial"
-            color: "#494949"
+            font.family: mainFont.name
+            color: "#ffffff"
         }
 
     }
@@ -58,7 +63,8 @@ Rectangle{
         id: activebutton
         visible: false
         anchors.fill: parent
-        color: "#5595a0"
+        color: "#ffffff"
+        /*
         Rectangle {
             width: parent.width - 6
             height: parent.height - 6
@@ -66,19 +72,22 @@ Rectangle{
             anchors.verticalCenter: parent.verticalCenter
             anchors.horizontalCenter: parent.horizontalCenter
         }
+        */
         Image {
-            anchors.margins: 2
-            anchors.fill: parent
+            //anchors.margins: 2
+            //anchors.fill: parent
+            anchors.top: parent.top
+            anchors.horizontalCenter: parent.horizontalCenter
             source: iconSource2
         }
         Text {
             anchors.top:parent.top
             anchors.horizontalCenter: parent.horizontalCenter
-            anchors.topMargin: 16
+            anchors.topMargin: 14
             text: iconText
-            font.pixelSize: 15
-            font.family: "Arial"
-            color: "#ffffff"
+            font.pixelSize: 16
+            font.family: mainFont.name
+            color: "#3BA1B2"
         }
     }
 
@@ -100,7 +109,7 @@ Rectangle{
         anchors.fill: parent
         hoverEnabled: true
         onEntered: {
-            basicbutton.color = "#D8D8D8"
+            basicbutton.color = "#3EABBA"
         }
         onExited: {
             basicbutton.color = parent.color

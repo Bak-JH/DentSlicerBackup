@@ -5,6 +5,17 @@ import QtQuick.Controls 1.0
 import QtQuick.Controls.Styles 1.0
 
 Rectangle {
+
+    id: popup_target
+    visible: false
+    width: 244
+    //height: 300
+    anchors.leftMargin: 20
+    anchors.topMargin: 20
+    color: "#ffffff"
+    //border.width: 1
+    //border.color: "#cccccc"
+
     property alias funcname: funcname.text
     property alias detail1: detail1.text
     property alias detail2: detail2.text
@@ -144,15 +155,7 @@ Rectangle {
         popup_target.state="inactive";
     }
 
-    id: popup_target
-    visible: false
-    width: 244
-    //height: 300
-    anchors.leftMargin: 20
-    anchors.topMargin: 20
-    color: "#e5e5e5"
-    border.width: 1
-    border.color: "#cccccc"
+
 
     states: [
         State{
@@ -166,15 +169,26 @@ Rectangle {
     ]
 
     //function name
+    Rectangle{
+        width: parent.width
+        height: 32
+        anchors.top: parent.top
+        anchors.left: parent.left
+        color: "#0DA3B2"
+
+    }
+
+
     Text {
         id: funcname
         anchors.top: parent.top
-        anchors.topMargin: 8
+        anchors.topMargin: 4
         anchors.left: parent.left
         anchors.leftMargin: 10
-        font.pointSize: 12
-        color: "#494949"
-        font.family: "Arial"
+        font.pointSize: 14
+        color: "#ffffff"
+        font.family: mediumFont.name
+        verticalAlignment: Text.AlignTop
     }
 
     //detail name1
@@ -185,8 +199,9 @@ Rectangle {
         anchors.left: funcname.left
         anchors.leftMargin: 10
         font.pointSize: 11
-        color: "#999999"
-        font.family: "Arial"
+        //color: "#999999"
+        color: "#3EA6B7"
+        font.family: mainFont.name
     }
 
     //detail name right side line1
@@ -208,8 +223,10 @@ Rectangle {
         anchors.left: funcname.left
         anchors.leftMargin: 10
         font.pointSize: 11
-        color: "#999999"
-        font.family: "Arial"
+        //color: "#999999"
+        color: "#3EA6B7"
+
+        font.family: mainFont.name
     }
 
     //detail name right side line2
@@ -239,8 +256,8 @@ Rectangle {
             anchors.horizontalCenter: parent.horizontalCenter
             text: "Apply"
             color: "#ffffff"
-            font.pointSize: 10
-            font.family: "Arial"
+            font.pointSize: 12
+            font.family: mainFont.name
         }
         MouseArea {
             id: mousearea_apply
@@ -268,14 +285,14 @@ Rectangle {
                 anchors.horizontalCenter: parent.horizontalCenter
                 text: "OK"
                 color: "#ffffff"
-                font.pointSize: 8
-                font.family: "Arial"
+                font.pointSize: 12
+                font.family: mainFont.name
             }
             MouseArea {
                 id: mousearea_ok
                 anchors.fill: parent
                 hoverEnabled: true
-                onEntered: parent.color = "#b5b5b5"
+                onEntered: parent.color = "#BCBCBE"
                 onExited: parent.color = "#999999"
                 onPressed: parent.color = "#3ea6b7"
                 onReleased: {destroy_popup();focus_all_off(); numbox_reset();  parent.color = "#999999"}
@@ -315,14 +332,14 @@ Rectangle {
             anchors.horizontalCenter: parent.horizontalCenter
             text: "Apply"
             color: "#ffffff"
-            font.pointSize: 10
-            font.family: "Arial"
+            font.pointSize: 12
+            font.family: mainFont.name
         }
         MouseArea {
             id: mousearea_applyfinish_apply
             anchors.fill: parent
             hoverEnabled: true
-            onEntered: parent.color = "#b5b5b5"
+            onEntered: parent.color = "#BCBCBE"
             onExited: parent.color = "#999999"
             onPressed: parent.color = "#3ea6b7"
             onReleased: {do_apply(funcname.text); /*all_off();*/ focus_all_off() ;numbox_reset();parent.color = "#999999"}
@@ -342,14 +359,14 @@ Rectangle {
             anchors.horizontalCenter: parent.horizontalCenter
             text: "Finish"
             color: "#ffffff"
-            font.pointSize: 10
-            font.family: "Arial"
+            font.pointSize: 12
+            font.family: mainFont.name
         }
         MouseArea {
             id: mousearea_applyfinish_finish
             anchors.fill: parent
             hoverEnabled: true
-            onEntered: parent.color = "#b5b5b5"
+            onEntered: parent.color = "#BCBCBE"
             onExited: parent.color = "#999999"
             onPressed: parent.color = "#3ea6b7"
             onReleased: {finishClicked(); all_off(); focus_all_off(); numbox_reset(); parent.color = "#999999"}
@@ -418,6 +435,7 @@ Rectangle {
                 implicitWidth: 16
                 implicitHeight: 16
                 radius: 9
+                color : "#E2E2E2"
                 border.color: control.activeFocus ? "darkblue" : "gray"
                 border.width: 0
                 Rectangle {
@@ -432,7 +450,7 @@ Rectangle {
                 text: "None"
                 anchors.left: parent.left
                 anchors.leftMargin: 10
-                font.family: "Arial"
+                font.family: mainFont.name
                 font.pixelSize: 14
             }
         }
@@ -451,6 +469,7 @@ Rectangle {
                 implicitWidth: 16
                 implicitHeight: 16
                 radius: 9
+                color : "#E2E2E2"
                 border.color: control.activeFocus ? "darkblue" : "gray"
                 border.width: 0
                 Rectangle {
@@ -465,7 +484,7 @@ Rectangle {
                 text: "Gernerate Surface"
                 anchors.left: parent.left
                 anchors.leftMargin: 10
-                font.family: "Arial"
+                font.family: mainFont.name
                 font.pixelSize: 14
             }
         }
@@ -502,8 +521,19 @@ Rectangle {
                 id: numberbox1
                 width: numberbox_width
                 height: 24
-                color: "#f5f5f5"
+                color: "#ffffff"
                 anchors.verticalCenter: parent.verticalCenter
+                MouseArea {
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    onEntered: {
+                        numberbox1.color =  "#f5f5f5"
+                    }
+                    onExited: {
+                        numberbox1.color = "#ffffff"
+                    }
+
+                }
                 TextInput {
                     id: numberbox1_text
                     anchors.right: parent.right
@@ -512,9 +542,13 @@ Rectangle {
                     text: numbox_value_x + number_unit
                     //maximumLength:
                     font.pointSize: 9
-                    font.family: "Arial"
+                    font.family: mainFont.name
                     color: focus ? "black" : "#595959"
                     selectByMouse: true
+                    onFocusChanged: {
+                        if(numberbox1_text.activeFocus)
+                            numberbox1.color = "#f5f5f5"
+                    }
                     onEditingFinished:  {
                         //console.log(displayText);
                         //console.log(displayText.substring(0,displayText.length - number_unit.length).replace(/\D/g, '').length);
@@ -539,14 +573,25 @@ Rectangle {
                             text = numbox_value_x + number_unit;
                         }
                         //console.log(displayText);
+                        numberbox1.color = "#ffffff"
                     }
                 }
+                Rectangle{
+                    width: parent.width
+                    height: 1
+
+                    anchors.left: parent.left
+                    anchors.top: parent.bottom
+                    color: "#3f3f3f"
+                }
             }
+
+
             //up-button
             Rectangle {
                 visible: numbox_updown_vis
-                width:17
-                height: 14.5
+                width:18
+                height: 15
                 anchors.right: parent.right
                 anchors.top: parent.top
                 color: "transparent"
@@ -571,8 +616,8 @@ Rectangle {
             //down-button
             Rectangle {
                 visible: numbox_updown_vis
-                width: 17
-                height: 14.5
+                width: 18
+                height: 15
                 anchors.right: parent.right
                 anchors.bottom: parent.bottom
                 color: "transparent"
@@ -609,8 +654,19 @@ Rectangle {
                 //width: 110
                 width: numberbox_width
                 height: 24
-                color: "#f5f5f5"
+                color: "#ffffff"
                 anchors.verticalCenter: parent.verticalCenter
+                MouseArea {
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    onEntered: {
+                        numberbox2.color =  "#f5f5f5"
+                    }
+                    onExited: {
+                        numberbox2.color = "#ffffff"
+                    }
+
+                }
 
                 TextInput {
                     id: numberbox2_text
@@ -619,9 +675,13 @@ Rectangle {
                     anchors.verticalCenter: parent.verticalCenter
                     text: numbox_value_y + number_unit
                     font.pointSize: 9
-                    font.family: "Arial"
+                    font.family: mainFont.name
                     color: focus ? "black" : "#595959"
                     selectByMouse: true
+                    onFocusChanged: {
+                        if(numberbox2_text.focus)
+                            numberbox2.color = "#f5f5f5"
+                    }
                     onEditingFinished:  {
                         if(displayText.substring(0,displayText.length - number_unit.length).replace(/\D/g, '').length === displayText.substring(0,displayText.length - number_unit.length).length){
                             if(displayText.substring(displayText.length - number_unit.length, displayText.length) === number_unit){
@@ -639,15 +699,24 @@ Rectangle {
                         else {
                             text = numbox_value_y + number_unit;
                         }
+                        numberbox2.color = "#ffffff"
                     }
+                }
+                Rectangle{
+                    width: parent.width
+                    height: 1
+
+                    anchors.left: parent.left
+                    anchors.top: parent.bottom
+                    color: "#3f3f3f"
                 }
 
             }
             //up-button
             Rectangle {
                 visible: numbox_updown_vis
-                width:17
-                height: 14.5
+                width:18
+                height: 15
                 anchors.right: parent.right
                 anchors.top: parent.top
                 color: "transparent"
@@ -671,8 +740,8 @@ Rectangle {
             //down-button
             Rectangle {
                 visible: numbox_updown_vis
-                width: 17
-                height: 14.5
+                width: 18
+                height: 15
                 anchors.right: parent.right
                 anchors.bottom: parent.bottom
                 color: "transparent"
@@ -708,8 +777,19 @@ Rectangle {
                 //width: 110
                 width: numberbox_width
                 height: 24
-                color: "#f5f5f5"
+                color: "#ffffff"
                 anchors.verticalCenter: parent.verticalCenter
+                MouseArea {
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    onEntered: {
+                        numberbox3.color =  "#f5f5f5"
+                    }
+                    onExited: {
+                        numberbox3.color = "#ffffff"
+                    }
+
+                }
                 TextInput {
                     id: numberbox3_text
                     anchors.right: parent.right
@@ -717,9 +797,15 @@ Rectangle {
                     anchors.verticalCenter: parent.verticalCenter
                     text: numbox_value_z + number_unit
                     font.pointSize: 9
-                    font.family: "Arial"
+                    font.family: mainFont.name
                     color: focus ? "black" : "#595959"
                     selectByMouse: true
+
+                    onFocusChanged: {
+                        if(numberbox3_text.focus)
+                            numberbox3.color = "#f5f5f5"
+                    }
+
                     onEditingFinished:  {
                         if(displayText.substring(0,displayText.length - number_unit.length).replace(/\D/g, '').length === displayText.substring(0,displayText.length - number_unit.length).length){
                             if(displayText.substring(displayText.length - number_unit.length, displayText.length) === number_unit){
@@ -737,14 +823,24 @@ Rectangle {
                         else {
                             text = numbox_value_z + number_unit;
                         }
+                        numberbox3.color = "#ffffff"
                     }
                 }
+                Rectangle{
+                    width: parent.width
+                    height: 1
+
+                    anchors.left: parent.left
+                    anchors.top: parent.bottom
+                    color: "#3f3f3f"
+                }
+
             }
             //up-button
             Rectangle {
                 visible: numbox_updown_vis
-                width:17
-                height: 14.5
+                width:18
+                height: 15
                 anchors.right: parent.right
                 anchors.top: parent.top
                 color: "transparent"
@@ -807,7 +903,7 @@ Rectangle {
                     anchors.left: parent.left
                     text: "X :"
                     font.pointSize: 9
-                    font.family: "Arial"
+                    font.family: mainFont.name
                 }
             }
             Rectangle {
@@ -821,7 +917,7 @@ Rectangle {
                     anchors.left: parent.left
                     text: "Y :"
                     font.pointSize: 9
-                    font.family: "Arial"
+                    font.family: mainFont.name
                 }
             }
             Rectangle {
@@ -835,7 +931,7 @@ Rectangle {
                     anchors.left: parent.left
                     text: "Z :"
                     font.pointSize: 9
-                    font.family: "Arial"
+                    font.family: mainFont.name
                 }
             }
         }
@@ -865,7 +961,7 @@ Rectangle {
                 anchors.verticalCenter: parent.verticalCenter
                 text: numbox_value_detail2 + number_unit_detail2
                 font.pointSize: 9
-                font.family: "Arial"
+                font.family: mainFont.name
                 color: focus ? "black" : "#595959"
                 selectByMouse: true
                 onEditingFinished:  {
@@ -936,5 +1032,22 @@ Rectangle {
                 onReleased: { detail2_downbutton_image1.source = "qrc:/Resource/popup_image/down_button.png"}
             }
         }
+    }
+
+    Rectangle{//shadow
+        width: parent.width
+        height: 2
+        anchors.left: parent.left
+        anchors.top : parent.bottom
+        anchors.leftMargin: 2
+        color: "#CCCCCC"
+    }
+    Rectangle{//shadow
+        width: 2
+        height: parent.height
+        anchors.left: parent.right
+        anchors.top : parent.top
+        anchors.topMargin: 2
+        color: "#CCCCCC"
     }
 }
