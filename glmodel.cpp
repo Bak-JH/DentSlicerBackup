@@ -302,6 +302,7 @@ void featureThread::run(){
             }
         case ftrRepair:
             {
+                qmlManager->openProgressPopUp();
                 repairMesh(m_glmodel->mesh);
                 break;
             }
@@ -740,10 +741,10 @@ void GLModel::bisectModel_internal(Plane plane){
     Mesh* rightMesh = rmesh;
     // do bisecting mesh
     qDebug() << "in bisect";
-    leftMesh->faces.reserve(mesh->faces.size());
-    leftMesh->vertices.reserve(mesh->faces.size());
-    rightMesh->faces.reserve(mesh->faces.size());
-    rightMesh->vertices.reserve(mesh->faces.size());
+    leftMesh->faces.reserve(mesh->faces.size()*3);
+    leftMesh->vertices.reserve(mesh->faces.size()*3);
+    rightMesh->faces.reserve(mesh->faces.size()*3);
+    rightMesh->vertices.reserve(mesh->faces.size()*3);
 
     foreach (MeshFace mf, mesh->faces){
         bool faceLeftToPlane = true;
@@ -1050,14 +1051,14 @@ Mesh* GLModel::toSparse(Mesh* mesh){
     Mesh* newMesh = new Mesh;
 
     if (jump == 1){ // if mesh face count is less than 30000
-        newMesh->faces.reserve(mesh->faces.size());
-        newMesh->vertices.reserve(mesh->vertices.size());
+        newMesh->faces.reserve(mesh->faces.size()*2);
+        newMesh->vertices.reserve(mesh->vertices.size()*2);
         foreach (MeshFace mf, mesh->faces){
             newMesh->addFace(mesh->idx2MV(mf.mesh_vertex[0]).position, mesh->idx2MV(mf.mesh_vertex[1]).position, mesh->idx2MV(mf.mesh_vertex[2]).position, mf.idx);
         }
     } else {
-        newMesh->faces.reserve(mesh->faces.size()/5);
-        newMesh->vertices.reserve(mesh->faces.size()/5);
+        newMesh->faces.reserve(mesh->faces.size());
+        newMesh->vertices.reserve(mesh->faces.size());
         foreach (MeshFace mf , mesh->faces){
             if (i%jump==0){
                 QCoreApplication::processEvents();

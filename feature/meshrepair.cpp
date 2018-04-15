@@ -1,5 +1,6 @@
 #include "meshrepair.h"
 #include "modelcut.h"
+#include "qmlmanager.h"
 
 void repairMesh(Mesh* mesh){
 
@@ -7,25 +8,31 @@ void repairMesh(Mesh* mesh){
     // remove Unconnected
     removeUnconnected(mesh);
     qDebug() << "removed unconnected";
+    qmlManager->setProgress(0.1);
 
     // remove degenerate
     removeDegenerate(mesh);
     qDebug() << "removed degenerate";
+    qmlManager->setProgress(0.25);
 
     // find holes
     identifyHoles(mesh);
+    qmlManager->setProgress(0.5);
 
     // fill holes
-    fillHoles(mesh);
+    //fillHoles(mesh);
     qDebug() << "filled holes";
+    qmlManager->setProgress(0.7);
 
     // fix normal orientations
     fixNormalOrientations(mesh);
     qDebug() << "fixed normal orientations";
+    qmlManager->setProgress(0.8);
 
     // remove gaps
     removeGaps(mesh);
     qDebug() << "removed gaps";
+    qmlManager->setProgress(1);
 }
 
 

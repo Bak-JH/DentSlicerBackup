@@ -502,6 +502,7 @@ void QmlManager::runGroupFeature(int ftrType, QString state){
 }
 
 void QmlManager::openProgressPopUp(){
+    progress = 0;
     QMetaObject::invokeMethod(progress_popup, "openPopUp");
 }
 
@@ -517,7 +518,6 @@ void QmlManager::setProgress(float value){
                                       Q_ARG(QVariant, value));
         progress = value;
     }
-
 }
 
 void QmlManager::setProgressText(string inputText){
