@@ -845,23 +845,24 @@ void GLModel::addCuttingPoint(QVector3D v){
     QVector3D tmp = m_transform->translation();
     float zlength = mesh->z_max - mesh->z_min;
     cuttingPoints.push_back(v);
-    sphereMesh[numPoints] = new Qt3DExtras::QSphereMesh;
-    sphereMesh[numPoints]->setRadius(0.5);
-    sphereTransform[numPoints] = new Qt3DCore::QTransform;
-    sphereTransform[numPoints]->setTranslation(v + QVector3D(tmp.x(),tmp.y(),zlength/2));
 
-    sphereMaterial[numPoints] = new Qt3DExtras::QPhongMaterial();
-    sphereMaterial[numPoints]->setAmbient(QColor(QRgb(0x0049FF)));
-    sphereMaterial[numPoints]->setDiffuse(QColor(QRgb(0x0049FF)));
-    sphereMaterial[numPoints]->setSpecular(QColor(QRgb(0x0049FF)));
-    sphereMaterial[numPoints]->setShininess(0.0f);
+    sphereMesh.push_back(new Qt3DExtras::QSphereMesh);
+    sphereMesh[sphereMesh.size()-1]->setRadius(0.5);
+    sphereTransform.push_back(new Qt3DCore::QTransform);
+    sphereTransform[sphereTransform.size()-1]->setTranslation(v + QVector3D(tmp.x(),tmp.y(),zlength/2));
 
-    sphereEntity[numPoints] = new Qt3DCore::QEntity(parentModel);
-    sphereEntity[numPoints]->addComponent(sphereMesh[numPoints]);
-    sphereEntity[numPoints]->addComponent(sphereTransform[numPoints]);
-    sphereEntity[numPoints]->addComponent(sphereMaterial[numPoints]);
+    sphereMaterial.push_back(new Qt3DExtras::QPhongMaterial());
+    sphereMaterial[sphereMaterial.size()-1]->setAmbient(QColor(QRgb(0x0049FF)));
+    sphereMaterial[sphereMaterial.size()-1]->setDiffuse(QColor(QRgb(0x0049FF)));
+    sphereMaterial[sphereMaterial.size()-1]->setSpecular(QColor(QRgb(0x0049FF)));
+    sphereMaterial[sphereMaterial.size()-1]->setShininess(0.0f);
+
+    sphereEntity.push_back(new Qt3DCore::QEntity(parentModel));
+    sphereEntity[sphereEntity.size()-1]->addComponent(sphereMesh[sphereMesh.size()-1]);
+    sphereEntity[sphereEntity.size()-1]->addComponent(sphereTransform[sphereTransform.size()-1]);
+    sphereEntity[sphereEntity.size()-1]->addComponent(sphereMaterial[sphereMaterial.size()-1]);
+
     numPoints++;
-
 }
 
 void GLModel::removeCuttingPoints(){
@@ -870,8 +871,7 @@ void GLModel::removeCuttingPoints(){
 
     qDebug() << "numPoints:" << numPoints;
     qDebug() << "ok till here";
-    for(int i=0;i<numPoints;i++)
-    {
+    for (int i=0; i<sphereEntity.size(); i++){
         sphereEntity[i]->removeComponent(sphereMesh[i]);
         sphereEntity[i]->removeComponent(sphereTransform[i]);
         sphereEntity[i]->removeComponent(sphereMaterial[i]);
@@ -932,6 +932,9 @@ void GLModel::generateRLModel(){
 
     // 승환 100%
     qmlManager->setProgress(1);
+
+    // do auto arrange
+    qmlManager->runArrange();
 }
 
 GLModel::~GLModel(){

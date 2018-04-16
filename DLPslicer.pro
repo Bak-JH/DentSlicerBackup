@@ -46,7 +46,8 @@ SOURCES += main.cpp \
     DentEngine/src/polyclipping/poly2tri/sweep/advancing_front.cpp \
     DentEngine/src/polyclipping/poly2tri/sweep/cdt.cpp \
     DentEngine/src/polyclipping/poly2tri/sweep/sweep.cpp \
-    DentEngine/src/polyclipping/poly2tri/sweep/sweep_context.cpp
+    DentEngine/src/polyclipping/poly2tri/sweep/sweep_context.cpp \
+    utils/httpreq.cpp
 
 
 RESOURCES += qml.qrc \
@@ -119,7 +120,8 @@ HEADERS += \
     DentEngine/src/polyclipping/poly2tri/sweep/cdt.h \
     DentEngine/src/polyclipping/poly2tri/sweep/sweep.h \
     DentEngine/src/polyclipping/poly2tri/sweep/sweep_context.h \
-    DentEngine/src/polyclipping/poly2tri/poly2tri.h
+    DentEngine/src/polyclipping/poly2tri/poly2tri.h \
+    utils/httpreq.h
 
 #LIBS += -lOpengl32
 

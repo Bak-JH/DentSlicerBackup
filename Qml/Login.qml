@@ -181,6 +181,7 @@ ApplicationWindow {
 
 
         Rectangle { // login button
+            objectName: "loginButton"
             width: 128
             height: 36
             anchors.left: parent.left
@@ -210,9 +211,14 @@ ApplicationWindow {
                 hoverEnabled: true
                 onClicked: {
                     console.log("ID :" + idbox_text.text + "   PW : " + pwbox_text.text)
-                    loginWindow.close()
-                    window.visible = true
+                    parent.loginTrial(idbox_text.text, pwbox_text.text);
                 }
+            }
+            signal loginTrial(string id, string pw);
+
+            function loginSuccess(){
+                loginWindow.close()
+                window.visible = true;
             }
         }
 

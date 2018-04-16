@@ -456,8 +456,6 @@ vector<XYArrangement> autoarrange::arng2D(vector<Paths>& figs){
         qmlManager->setProgress(0.5 + 0.5*(++progress)/figs_with_idx.size());
     }
     /**/qDebug() << "Arrange all done";
-    qmlManager->setProgressText("Done");
-    qmlManager->openResultPopUp("","Arrangement done","");
     /**/debugPaths(cum_outline);
     //test position
     return arng_result_set;
