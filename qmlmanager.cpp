@@ -22,6 +22,7 @@ void QmlManager::initializeUI(QQmlApplicationEngine* e){
     engine = e;
     mainWindow = FindItemByName(engine, "mainWindow");
     loginWindow = FindItemByName(engine, "loginWindow");
+    loginButton = FindItemByName(engine, "loginButton");
 
     models = (QEntity *)FindItemByName(engine, "Models");
     Lights* lights = new Lights(models);
@@ -96,6 +97,8 @@ void QmlManager::initializeUI(QQmlApplicationEngine* e){
 
     QObject::connect(this, SIGNAL(arrangeDone(vector<QVector3D>, vector<float>)), this, SLOT(applyArrangeResult(vector<QVector3D>, vector<float>)));
 
+    httpreq* hr = new httpreq();
+    QObject::connect(loginButton, SIGNAL(loginTrial(QString, QString)), hr, SLOT(login(QString,QString)));
     //openModelFile(QDir::currentPath()+"/Models/partial1.stl");
     //openModelFile("c:/Users/user/Desktop/asdfasf.stl");
 }
@@ -125,37 +128,34 @@ void QmlManager::createModelFile(Mesh* target_mesh, QString fname) {
 
     qDebug() << "connected model selected signal";
 
-    glmodels_arranged = false;
-
-    // do auto arrange
-    if (glmodels.size() >=2){
-        //runArrange();
-    }
-
     // 승환 100%
     qmlManager->setProgress(1);
 }
 
 void QmlManager::openModelFile(QString fname){
     createModelFile(nullptr, fname);
+
+    // do auto arrange
+    runArrange();
 }
 
 void QmlManager::deleteModelFile(int ID){
-    if (selectedModel != nullptr && selectedModel->ID == ID){
-        disconnectHandlers(selectedModel);
-        selectedModel->shadowModel->deleteLater();
-        selectedModel->deleteLater();
-        selectedModel = nullptr;
-    } else {
-        for(int i=0; i<glmodels.size();i++){
-            if(glmodels.at(i)->ID == ID){
-                disconnectHandlers(glmodels.at(i));
-                glmodels.at(i)->shadowModel->deleteLater();
-                glmodels.at(i)->deleteLater();
-                break;
-            }
-        }
+    //for(int i=0; i<glmodels.size();i++){
+    qDebug() << "deletemodelfile" << glmodels.size();
+    for (vector<GLModel*>::iterator gl_it = glmodels.begin(); gl_it != glmodels.end();){
+        if((*gl_it)->ID == ID){
+            disconnectHandlers((*gl_it));
+            (*gl_it)->shadowModel->deleteLater();
+            (*gl_it)->deleteLater();
+            if (selectedModel != nullptr && selectedModel->ID == ID)
+                selectedModel = nullptr;
+            gl_it = glmodels.erase(gl_it);
+            break;
+        } else
+            gl_it ++;
     }
+    qDebug() << "deleteModelFile" << glmodels.size();
+
     deletePart(ID);
 }
 
@@ -252,7 +252,6 @@ void QmlManager::connectHandlers(GLModel* glmodel){
     //unused, signal from qml goes right into QmlManager.runArrange
     //QObject::connect(arrangePopup, SIGNAL(runFeature(int)), glmodel->ft, SLOT(setTypeAndStart(int)));
     //QObject::connect(glmodel->arsignal, SIGNAL(runArrange()), this, SLOT(runArrange()));
-    //QObject::connect(arrangePopup, SIGNAL(runFeature()), this, SLOT(runArrange()));
 
     // save button codes
     QObject::connect(saveButton, SIGNAL(runFeature(int)), glmodel->ft, SLOT(setTypeAndRun(int)));
@@ -274,33 +273,30 @@ void QmlManager::runArrange(){
 }
 
 void QmlManager::runArrange_internal(){
-    if(!glmodels_arranged){
-        glmodels_arranged = true;
-        if (glmodels.size()>=2){
-            vector<Mesh> meshes_to_arrange;
-            vector<XYArrangement> arng_result_set;
-            vector<Qt3DCore::QTransform*> m_transform_set;
-            for (int i=0; i<glmodels.size(); i++){
-                meshes_to_arrange.push_back(*(glmodels[i]->mesh));
-                m_transform_set.push_back(glmodels[i]->m_transform);
-            }
-            autoarrange* ar;
-            arng_result_set = ar->arngMeshes(meshes_to_arrange);
-            /*vector<QVector3D> translations;
-            vector<float> rotations;
-            for (int i=0; i<arng_result_set.size(); i++){
-                XYArrangement arng_result = arng_result_set[i];
-                QVector3D trans_vec = QVector3D(arng_result.first.X/scfg->resolution, arng_result.first.Y/scfg->resolution, 0);
-                translations.push_back(trans_vec);
-                rotations.push_back(arng_result.second);
-            }
-            emit arrangeDone(translations, rotations);*/
-
-            ar->arrangeQt3D(m_transform_set, arng_result_set);
-            //ar->arrangeGlmodels(&glmodel);
+    qDebug() << "run arrange glmodels size : " <<glmodels.size();
+    if (glmodels.size()>=2){
+        vector<Mesh> meshes_to_arrange;
+        vector<XYArrangement> arng_result_set;
+        vector<Qt3DCore::QTransform*> m_transform_set;
+        for (int i=0; i<glmodels.size(); i++){
+            meshes_to_arrange.push_back(*(glmodels[i]->mesh));
+            m_transform_set.push_back(glmodels[i]->m_transform);
         }
+        autoarrange* ar;
+        arng_result_set = ar->arngMeshes(meshes_to_arrange);
+        vector<QVector3D> translations;
+        vector<float> rotations;
+        for (int i=0; i<arng_result_set.size(); i++){
+            XYArrangement arng_result = arng_result_set[i];
+            QVector3D trans_vec = QVector3D(arng_result.first.X/scfg->resolution, arng_result.first.Y/scfg->resolution, 0);
+            translations.push_back(trans_vec);
+            rotations.push_back(arng_result.second);
+        }
+        emit arrangeDone(translations, rotations);
+
+        //ar->arrangeQt3D(m_transform_set, arng_result_set);
+        //ar->arrangeGlmodels(&glmodel);
     }
-    qDebug()<< "run arrange";
 }
 
 void QmlManager::applyArrangeResult(vector<QVector3D> translations, vector<float> rotations){
@@ -309,6 +305,8 @@ void QmlManager::applyArrangeResult(vector<QVector3D> translations, vector<float
         glmodels[i]->m_transform->setTranslation(translations[i]);
         glmodels[i]->rotateModelMesh(3, rotations[i]);
     }
+    qmlManager->setProgressText("Done");
+    qmlManager->openResultPopUp("","Arrangement done","");
 }
 void QmlManager::modelSelected(int ID){
     qDebug() << "model id :" << ID ;

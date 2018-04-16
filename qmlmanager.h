@@ -17,6 +17,7 @@
 #include "glmodel.h"
 #include "QtConcurrent/QtConcurrentRun"
 #include "QFuture"
+#include "utils/httpreq.h"
 
 class QmlManager : public QObject
 {
@@ -28,6 +29,7 @@ public:
     // UI components
     QObject* mainWindow;
     QObject* loginWindow;
+    QObject* loginButton;
     QEntity* models;
     QObject* mv;
 
@@ -112,7 +114,7 @@ public:
 
 
 private:
-    bool glmodels_arranged;
+    //bool glmodels_arranged;
 
 
 

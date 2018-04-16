@@ -124,10 +124,10 @@ public:
     Qt3DCore::QTransform *planeTransform[2];
     Qt3DExtras::QPhongAlphaMaterial *planeMaterial = nullptr;
 
-    Qt3DExtras::QSphereMesh *sphereMesh[4];
-    Qt3DCore::QEntity *sphereEntity[4];
-    Qt3DCore::QTransform *sphereTransform[4];
-    QPhongMaterial *sphereMaterial[4];
+    vector<Qt3DExtras::QSphereMesh*> sphereMesh;
+    vector<Qt3DCore::QEntity*> sphereEntity;
+    vector<Qt3DCore::QTransform*> sphereTransform;
+    vector<QPhongMaterial*> sphereMaterial;
 
     void removeModel();
     void removeModelPartList();
