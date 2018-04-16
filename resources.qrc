@@ -104,5 +104,8 @@
         <file>Resource/login_leftbutton.png</file>
         <file>Resource/login_rightbutton.png</file>
         <file>icon-32.ico</file>
+        <file>Resource/upper_feedback.png</file>
+        <file>Resource/upper2_feedback.png</file>
+        <file>Resource/part_select.png</file>
     </qresource>
 </RCC>

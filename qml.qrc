@@ -42,6 +42,7 @@
         <file>Qml/LeftTabExportElement.qml</file>
         <file>Qml/Login.qml</file>
         <file>Qml/FeedbackPopUp.qml</file>
-
+        <file>Qml/LeftTabSlicingOptionElement2.qml</file>
+        <file>Qml/LeftTabSlicingOptionElement3.qml</file>
     </qresource>
 </RCC>

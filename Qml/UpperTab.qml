@@ -465,11 +465,11 @@ Rectangle {
 
 
         UpperButton{
-            id : fifth_tab_button_fidback
+            id : fifth_tab_button_feedback
             objectName : "Feedback"
             //anchors.left: parent.left
-            iconSource1: "qrc:/resource/upper_open.png"
-            iconSource2: "qrc:/Resource/upper2_open.png"
+            iconSource1: "qrc:/Resource/upper_feedback.png"
+            iconSource2: "qrc:/Resource/upper2_feedback.png"
             iconText: "Feedback"
             MouseArea{
                 anchors.fill: parent

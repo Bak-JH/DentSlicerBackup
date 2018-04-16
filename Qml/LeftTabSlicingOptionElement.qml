@@ -21,7 +21,7 @@ Item {
         anchors.verticalCenter: parent.verticalCenter
 
         font.pixelSize: 14
-        font.bold: true
+        //font.bold: true
         anchors.leftMargin:16
         text: columnName
         font.family: mainFont.name
