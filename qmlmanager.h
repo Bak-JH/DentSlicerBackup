@@ -105,8 +105,11 @@ public:
     void setProgress(float value);
     void setProgressText(string inputText);
 
+    Q_INVOKABLE void selectPart(int ID);
+    Q_INVOKABLE void unselectPart(int ID);
     Q_INVOKABLE void modelVisible(int ID, bool isVisible);
     Q_INVOKABLE void doDelete();
+
 
 private:
     bool glmodels_arranged;

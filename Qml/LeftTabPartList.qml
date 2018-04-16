@@ -89,6 +89,13 @@ Rectangle {
                 ColumnLayout {
                     id: partListColumn
                     spacing:0
+                    /*
+                    LeftTabPartListElement{
+                        modelName : "stst"
+                        state : "on"
+                        objectName : "qwer"
+                        glModelID : -1
+                    }*/
                 }
             }
 
@@ -122,6 +129,23 @@ Rectangle {
             console.log("iddididididid   " + partListColumn.children[i].glModelID)
             if(partListColumn.children[i].glModelID === ID){
                 partListColumn.children[i].destroy()
+            }
+        }
+    }
+
+    function selectPartByModel(ID){
+        for(var i=0 ; i<partListColumn.children.length; i++){
+            console.log("selsel   " + partListColumn.children[i].glModelID)
+            if(partListColumn.children[i].glModelID === ID){
+                partListColumn.children[i].state = 'select'
+            }
+        }
+    }
+    function unselectPartByModel(ID){
+        for(var i=0 ; i<partListColumn.children.length; i++){
+            console.log("unselunsel   " + partListColumn.children[i].glModelID)
+            if(partListColumn.children[i].glModelID === ID){
+                partListColumn.children[i].state = 'on'
             }
         }
     }

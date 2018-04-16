@@ -1,15 +1,17 @@
 import QtQuick 2.0
 
 Item {
-    width: 232
+    width: 240
     height: 28
 
     property string modelName
     property int glModelID
 
     Rectangle{
-        width:parent.width
-        height: parent.height-1
+        id:background
+        width:parent.width-2
+        height: parent.height-2
+        anchors.centerIn: parent
         color: "transparent"
 
     }
@@ -38,7 +40,15 @@ Item {
         MouseArea {
             anchors.fill: parent
             onClicked: {
-                icon.parent.state == 'on' ? icon.parent.state = "off" : icon.parent.state = 'on';
+                if(icon.parent.state == 'on')
+                    icon.parent.state = 'off';
+                else if(icon.parent.state == 'off')
+                    icon.parent.state = 'on';
+                else if(icon.parent.state == 'select'){
+                    icon.parent.state = 'off';
+                    unselectPart(glModelID)
+                }
+
 
                 if(icon.parent.state == 'on')
                     qm.modelVisible(glModelID,true);
@@ -55,8 +65,33 @@ Item {
         anchors.top : parent.top
         color: "#C6C6C6"
     }
+    Rectangle{
+        id : clickArea
+        width: parent.width-32
+        height: parent.height
+        anchors.left: icon.right
+        color: "transparent"
+        MouseArea {
+            anchors.fill: clickArea
+            onClicked: {
+                console.log("clcl");
+                if(icon.parent.state == 'on'){
+                    icon.parent.state = 'select';
+                    selectPart(glModelID);
+                }
+                else if(icon.parent.state == 'off')
+                    return;
+                else if(icon.parent.state == 'select'){
+                    icon.parent.state = 'on'
+                    unselectPart(glModelID)
+                }
+
+            }
+        }
+    }
 
     Text{
+        id : modelNameText
         text : modelName
         anchors.left: line.right
         anchors.verticalCenter: parent.verticalCenter
@@ -68,13 +103,33 @@ Item {
 
     states: [
         State{
-            name:"on"
-            PropertyChanges { target: iconimage; source:"qrc:/resource/part_on.png" }
-        },
-        State{
             name:"off"
             PropertyChanges { target: iconimage; source:"qrc:/resource/part_off.png" }
+        },
+        State{
+            name:"on"
+            PropertyChanges { target: iconimage; source:"qrc:/resource/part_on.png" }
+            PropertyChanges { target: background; color:"transparent" }
+            PropertyChanges { target: modelNameText; color:"black" }
+        },
+        State{
+            name:"select"
+            PropertyChanges { target: iconimage; source:"qrc:/Resource/part_select.png" }
+            PropertyChanges { target: background; color:"#EAEAEA" }
+            PropertyChanges { target: modelNameText; color:"#0DA3B2" }
+            /*
+            StateChangeScript {
+                script: selectPart(glModelID);
+            }
+            */
         }
     ]
+
+    function selectPart(ID){ // select Model in PartList by ID
+        qm.selectPart(ID);
+    }
+    function unselectPart(ID){ // select Model in PartList by ID
+        qm.unselectPart(ID);
+    }
 
 }

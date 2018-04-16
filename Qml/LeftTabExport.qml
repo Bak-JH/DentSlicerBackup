@@ -70,11 +70,11 @@ Rectangle {
                 }
                 LeftTabExportElement{
                     columnName: "Support"
-                    columnContent : lefttab.ltso.option_support.currentText + " / " + lefttab.ltso.option_support_density.currentText + "%"
+                    columnContent : lefttab.ltso.option_support.currentText + " / " + lefttab.ltso.option_support_density.density
                 }
                 LeftTabExportElement{
                     columnName: "Infill"
-                    columnContent : lefttab.ltso.option_infill.currentText + " / " + lefttab.ltso.option_infill_density.currentText + "%"
+                    columnContent : lefttab.ltso.option_infill.currentText + " / " + lefttab.ltso.option_infill_density.density
                 }
             }
         }

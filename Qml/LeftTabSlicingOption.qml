@@ -11,8 +11,10 @@ Rectangle {
     property alias option_raft: option_raft
     property alias option_support: option_support
     property alias option_support_density: option_support_density
+
     property alias option_infill: option_infill
     property alias option_infill_density: option_infill_density
+
 
     width : 264
     height : 180
@@ -102,25 +104,38 @@ Rectangle {
                     columnName: "Raft"
                     columnContents: ["general","none"]
                 }
+                LeftTabSlicingOptionElement2{
+                    columnName: "Support"
+                    columnText: "Type"
+                }
+
                 LeftTabSlicingOptionElement{
                     id:option_support
-                    columnName: "Support"
-                    columnContents: ["k-branch","general"]
-                }
-                LeftTabSlicingOptionElement{
-                    id:option_support_density
                     columnName: ""
                     columnContents: ["k-branch","general"]
+                }
+                LeftTabSlicingOptionElement2{
+                    columnName: ""
+                    columnText: "Density"
+                }
+                LeftTabSlicingOptionElement3{
+                    id:option_support_density
+                }
+                LeftTabSlicingOptionElement2{
+                    columnName: "Infill"
+                    columnText: "Type"
                 }
                 LeftTabSlicingOptionElement{
                     id:option_infill
-                    columnName: "Infill"
-                    columnContents: ["general","full","none"]
-                }
-                LeftTabSlicingOptionElement{
-                    id:option_infill_density
                     columnName: ""
                     columnContents: ["general","full","none"]
+                }
+                LeftTabSlicingOptionElement2{
+                    columnName: ""
+                    columnText: "Density"
+                }
+                LeftTabSlicingOptionElement3{
+                    id:option_infill_density
                 }
 
             }

@@ -324,6 +324,7 @@ void QmlManager::modelSelected(int ID){
     if (selectedModel != nullptr){
         qDebug() << "resetting model" << selectedModel->ID;
         selectedModel->m_meshMaterial->setDiffuse(QColor(173,215,218));
+        QMetaObject::invokeMethod(partList, "unselectPartByModel", Q_ARG(QVariant, selectedModel->ID));
         disconnectHandlers(selectedModel);
         if (groupFunctionState == "active"){
             switch (groupFunctionIndex){
@@ -340,6 +341,7 @@ void QmlManager::modelSelected(int ID){
         // change selectedModel
         selectedModel = target;
         selectedModel->m_meshMaterial->setDiffuse(QColor(100,255,100));
+        QMetaObject::invokeMethod(partList, "selectPartByModel", Q_ARG(QVariant, selectedModel->ID));
         qDebug() << "changing model" << selectedModel->ID;
         connectHandlers(selectedModel);
         if (groupFunctionState == "active"){
@@ -355,7 +357,39 @@ void QmlManager::modelSelected(int ID){
     } else {
         selectedModel = nullptr;
     }
+
 }
+
+void QmlManager::selectPart(int ID){
+    emit modelSelected(ID);
+}
+void QmlManager::unselectPart(int ID){
+    GLModel* target;
+    for(int i=0; i<glmodels.size();i++){
+        if(glmodels.at(i)->ID == ID){
+            target = glmodels.at(i);
+            break;
+        }
+    }
+
+    qDebug() << "resetting model" << ID;
+    target->m_meshMaterial->setDiffuse(QColor(173,215,218));
+    disconnectHandlers(target);
+    if (groupFunctionState == "active"){
+        switch (groupFunctionIndex){
+        case 5:
+            hideRotateSphere();
+            break;
+        case 4:
+            hideMoveArrow();
+            break;
+        }
+    }
+
+    selectedModel = nullptr;
+
+}
+
 
 void QmlManager::modelVisible(int ID, bool isVisible){
     GLModel* target;
