@@ -277,6 +277,47 @@ void Mesh::addPoint(float x, float y, Path *path)
     path->push_back(ip);
 }
 
+Path3D Mesh::intersectionPath(Plane base_plane, Plane target_plane) {
+    Path3D p;
+
+    vector<QVector3D> upper;
+    vector<QVector3D> lower;
+    for (int i=0; i<3; i++){
+        if (target_plane[i].distanceToPlane(base_plane[0],base_plane[1],base_plane[2]) >0)
+            upper.push_back(target_plane[i]);
+        else
+            lower.push_back(target_plane[i]);
+    }
+
+    vector<QVector3D> majority;
+    vector<QVector3D> minority;
+
+    if (upper.size() == 2){
+        majority = upper;
+        minority = lower;
+    } else if (lower.size() == 2){
+        majority = lower;
+        minority = upper;
+    } else {
+        qDebug() << "wrong faces";
+        // size is 0
+        return p;
+    }
+
+    float minority_distance = minority[0].distanceToPlane(base_plane[0],base_plane[1],base_plane[2]);
+    float majority1_distance = majority[0].distanceToPlane(base_plane[0],base_plane[1],base_plane[2]);
+    float majority2_distance = majority[1].distanceToPlane(base_plane[0],base_plane[1],base_plane[2]);
+
+    // calculate intersection points
+    MeshVertex mv1, mv2;
+    mv1.position = minority[0] + (majority[0] - minority[0])*(minority_distance/(majority1_distance+minority_distance));
+    mv2.position = minority[0] + (majority[1] - minority[0])*(minority_distance/(majority2_distance+minority_distance));
+    p.push_back(mv1);
+    p.push_back(mv2);
+
+    return p;
+}
+
 Path Mesh::intersectionPath(MeshFace mf, float z){
     Path p;
 
@@ -614,39 +655,6 @@ Paths3D contourConstruct(Paths3D hole_edges){
         pathHash[path_hash_u].push_back(p[1]);
         pathHash[path_hash_v].push_back(p[0]);
     }
-
-    //qDebug() << "path hash begin :" << pathHash.begin().value()[0].position;
-
-    /*while (pathHash.size() > 3){
-        MeshVertex start, pj_prev, pj, pj_next, last, u, v;
-        Path3D contour;
-        start = pathHash.begin().value()[0];
-        contour.push_back(start);
-        pj_prev = start;
-        pj = pathHash[meshVertex2Hash(start)].at(1);
-        last = pathHash[meshVertex2Hash(start)].at(2);
-
-        pathHash.remove(meshVertex2Hash(start));
-
-        while (pj != last){
-            contour.push_back(pj);
-            u = (pathHash[meshVertex2Hash(pj)]).at(1);
-            v = (pathHash[meshVertex2Hash(pj)]).at(2);
-            pathHash.remove(meshVertex2Hash(pj));
-            if (u == pj_prev){
-                pj_next = v;
-            } else {
-                pj_next = u;
-            }
-            pj = pj_next;
-        }
-        contour.push_back(pj);
-        contour.push_back(start);
-
-        contourList.push_back(contour);
-    }*/
-
-
 
 
     // Build Polygons
