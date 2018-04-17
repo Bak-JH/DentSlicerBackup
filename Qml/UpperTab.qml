@@ -69,7 +69,6 @@ Rectangle {
         height: 2
         width: parent.width
         //anchors.fill: parent
-
         anchors.left : parent.left
         //anchors.right : parent.right
         anchors.bottom: parent.bottom
@@ -507,6 +506,7 @@ Rectangle {
         //4. PopUp - Move
         PopUp {
             id: popup_move
+            objectName: "movePopup"
             funcname: "Move"
             height: 250
             //detail1: ""
@@ -514,11 +514,11 @@ Rectangle {
             //image: ""
             detailline1_vis: false
             detailline2_vis: false
-            applyfinishbutton_vis: false
+            applyfinishbutton_vis: true
 
             okbutton_vis: false
-            applybutton_vis: true
-            applybutton_text: "Finish"
+            applybutton_vis: false
+            //applybutton_text: "Finish"
             descriptionimage_vis: false
             numberbox_vis: true
             numberbox_nameing_vis: true
@@ -530,6 +530,15 @@ Rectangle {
             numbox_value_y: move_y_value
             numbox_value_z: move_z_value
             state: second_tab_button_move.state=="active" ? "active" : "inactive"
+            signal runFeature(int type, int X, int Y);
+            onApplyClicked: {
+                console.log("move")
+                runFeature(ftrMove,popup_move.numberbox1_number,popup_move.numberbox2_number);
+            }
+            signal runGroupFeature(int type, string state);
+            onFinishClicked:{
+                runGroupFeature(ftrMove, state);
+            }
         }
 
         //5. PopUp - Rotate
@@ -544,9 +553,9 @@ Rectangle {
             detailline1_vis: false
             detailline2_vis: false
             okbutton_vis: false
-            applyfinishbutton_vis: false
-            applybutton_vis: true
-            applybutton_text: "Finish"
+            applyfinishbutton_vis: true
+            applybutton_vis: false
+            //applybutton_text: "Finish"
             descriptionimage_vis: false
             numberbox_vis: true
             numberbox_nameing_vis: true
@@ -555,10 +564,14 @@ Rectangle {
             //numbox_default: 0
             numbox_updown_scale: 5
             number_unit: "°"
-            signal runFeature(int type);
+            signal runFeature(int type, int X, int Y, int Z);
             onApplyClicked: {
                 console.log("rotate")
-                runFeature(ftrRotate);
+                runFeature(ftrRotate,popup_rotate.numberbox1_number,popup_rotate.numberbox2_number,popup_rotate.numberbox3_number);
+            }
+            signal runGroupFeature(int type, string state);
+            onFinishClicked:{
+                runGroupFeature(ftrRotate, state);
             }
             state: second_tab_button_rotate.state=="active" ? "active" : "inactive"
         }

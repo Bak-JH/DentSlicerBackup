@@ -56,6 +56,11 @@ Rectangle {
     property int numberbox_detail2_y
     property real numbox_updown_scale
 
+    //------------------------------------------------data
+    property int numberbox1_number:0
+    property int numberbox2_number:0
+    property int numberbox3_number:0
+
     /*
     function possible_calculate(unit,lastvalue,input){
         //unit = String(unit);
@@ -94,8 +99,10 @@ Rectangle {
     function do_apply(functionname){
         switch(functionname){
                 case "Move":
+                    applyClicked();
                     break;
                 case "Rotate":
+                    applyClicked();
                     break;
                 case "Lay flat":
                     break;
@@ -124,8 +131,6 @@ Rectangle {
                     break;
                 case "Label":
                     applyClicked();
-                    break;
-                case "Move":
                     break;
                 default:
                     console.log(functionname);
@@ -549,37 +554,20 @@ Rectangle {
                         if(numberbox1_text.activeFocus)
                             numberbox1.color = "#f5f5f5"
                     }
-                    onEditingFinished:  {
-                        //console.log(displayText);
-                        //console.log(displayText.substring(0,displayText.length - number_unit.length).replace(/\D/g, '').length);
-                        //console.log(displayText.substring(0,displayText.length - number_unit.length).length);
-                        //console.log(displayText.substring(displayText.length - number_unit.length, displayText.length));
-                        //console.log(number_unit);
-                        if(displayText.substring(0,displayText.length - number_unit.length).replace(/\D/g, '').length === displayText.substring(0,displayText.length - number_unit.length).length){
-                            if(displayText.substring(displayText.length - number_unit.length, displayText.length) === number_unit){
-                                numbox_value_x = parseFloat(displayText.substring(0,displayText.length - number_unit.length));
-                                //console.log("ok");
-                                text = numbox_value_x + number_unit;
-                            }
-                            else if(displayText.replace(/\D/g, '').length === displayText.length) {
-                                numbox_value_x = parseFloat(displayText);
-                                text = numbox_value_x + number_unit;
-                            }
-                            else {
-                                text = numbox_value_x + number_unit;
-                            }
+                    onTextChanged: {
+                        if (text.length-number_unit.length == 1){
+                            text = text.charAt(0).replace(/[^-|0-9]/g,'') + number_unit;
+                        }else{
+                            text = text.charAt(0).replace(/[^-|1-9]/g,'')+text.substring(1,text.length).replace(/[^0-9]/g, '') + number_unit;
                         }
-                        else {
-                            text = numbox_value_x + number_unit;
-                        }
-                        //console.log(displayText);
                         numberbox1.color = "#ffffff"
+                        numberbox1_number = parseInt(text.substring(0,text.length-number_unit.length),10)
+
                     }
                 }
                 Rectangle{
                     width: parent.width
                     height: 1
-
                     anchors.left: parent.left
                     anchors.top: parent.bottom
                     color: "#3f3f3f"
@@ -682,24 +670,14 @@ Rectangle {
                         if(numberbox2_text.focus)
                             numberbox2.color = "#f5f5f5"
                     }
-                    onEditingFinished:  {
-                        if(displayText.substring(0,displayText.length - number_unit.length).replace(/\D/g, '').length === displayText.substring(0,displayText.length - number_unit.length).length){
-                            if(displayText.substring(displayText.length - number_unit.length, displayText.length) === number_unit){
-                                numbox_value_y = parseFloat(displayText.substring(0,displayText.length - number_unit.length));
-                                text = numbox_value_y + number_unit;
-                            }
-                            else if(displayText.replace(/\D/g, '').length === displayText.length) {
-                                numbox_value_y = parseFloat(displayText);
-                                text = numbox_value_y + number_unit;
-                            }
-                            else {
-                                text = numbox_value_y + number_unit;
-                            }
-                        }
-                        else {
-                            text = numbox_value_y + number_unit;
+                    onTextChanged: {
+                        if (text.length-number_unit.length == 1){
+                            text = text.charAt(0).replace(/[^-|0-9]/g,'') + number_unit;
+                        }else{
+                            text = text.charAt(0).replace(/[^-|1-9]/g,'')+text.substring(1,text.length).replace(/[^0-9]/g, '') + number_unit;
                         }
                         numberbox2.color = "#ffffff"
+                        numberbox2_number = parseInt(text.substring(0,text.length-number_unit.length),10)
                     }
                 }
                 Rectangle{
@@ -806,24 +784,14 @@ Rectangle {
                             numberbox3.color = "#f5f5f5"
                     }
 
-                    onEditingFinished:  {
-                        if(displayText.substring(0,displayText.length - number_unit.length).replace(/\D/g, '').length === displayText.substring(0,displayText.length - number_unit.length).length){
-                            if(displayText.substring(displayText.length - number_unit.length, displayText.length) === number_unit){
-                                numbox_value_z = parseFloat(displayText.substring(0,displayText.length - number_unit.length));
-                                text = numbox_value_z + number_unit;
-                            }
-                            else if(displayText.replace(/\D/g, '').length === displayText.length) {
-                                numbox_value_z = parseFloat(displayText);
-                                text = numbox_value_z + number_unit;
-                            }
-                            else {
-                                text = numbox_value_z + number_unit;
-                            }
-                        }
-                        else {
-                            text = numbox_value_z + number_unit;
+                    onTextChanged: {
+                        if (text.length-number_unit.length == 1){
+                            text = text.charAt(0).replace(/[^-|0-9]/g,'') + number_unit;
+                        }else{
+                            text = text.charAt(0).replace(/[^-|1-9]/g,'')+text.substring(1,text.length).replace(/[^0-9]/g, '') + number_unit;
                         }
                         numberbox3.color = "#ffffff"
+                        numberbox3_number = parseInt(text.substring(0,text.length-number_unit.length),10)
                     }
                 }
                 Rectangle{
