@@ -283,19 +283,22 @@ Path3D Mesh::intersectionPath(Plane base_plane, Plane target_plane) {
     vector<QVector3D> upper;
     vector<QVector3D> lower;
     for (int i=0; i<3; i++){
-        if (target_plane[i].distanceToPlane(base_plane[0],base_plane[1],base_plane[2]) >0)
+        if (target_plane[i].distanceToPlane(base_plane[0],base_plane[1],base_plane[2]) >0){
             upper.push_back(target_plane[i]);
-        else
+        } else {
             lower.push_back(target_plane[i]);
+        }
     }
 
     vector<QVector3D> majority;
     vector<QVector3D> minority;
 
+    bool flip = false;
     if (upper.size() == 2){
         majority = upper;
         minority = lower;
     } else if (lower.size() == 2){
+        flip = true;
         majority = lower;
         minority = upper;
     } else {
@@ -312,9 +315,14 @@ Path3D Mesh::intersectionPath(Plane base_plane, Plane target_plane) {
     MeshVertex mv1, mv2;
     mv1.position = minority[0] + (majority[0] - minority[0])*(minority_distance/(majority1_distance+minority_distance));
     mv2.position = minority[0] + (majority[1] - minority[0])*(minority_distance/(majority2_distance+minority_distance));
-    p.push_back(mv1);
-    p.push_back(mv2);
 
+    if (flip){
+        p.push_back(mv1);
+        p.push_back(mv2);
+    } else {
+        p.push_back(mv2);
+        p.push_back(mv1);
+    }
     return p;
 }
 
@@ -613,6 +621,14 @@ void findAndDeleteHash(vector<uint32_t>* hashList, uint32_t hash){
     }
 }
 
+bool contourContains(Path3D contour, MeshVertex mv){
+    for (MeshVertex cmv : contour){
+        if (cmv == mv)
+            return true;
+    }
+    return false;
+}
+
 bool listContains(vector<uint32_t>* hashList, uint32_t hash){
     for (vector<uint32_t>::iterator h_it = hashList->begin(); h_it != hashList->end();){
         if (*h_it == hash){
@@ -746,6 +762,7 @@ Paths3D contourConstruct(Paths3D hole_edges){
             findAndDeleteHash(&hashList, meshVertex2Hash(start));
         }
 
+        //while (!contourContains(contour, pj)){
         while (pj != last){
             contour.push_back(pj);
             qDebug() << "inserted pj : " << pj.position;
@@ -778,9 +795,27 @@ Paths3D contourConstruct(Paths3D hole_edges){
             }
             pj_prev = pj;
             pj = pj_next;
+
+            if (contourContains(contour, pj)){
+                Path3D new_contour;
+                Path3D::iterator new_start;
+
+                for (Path3D::iterator p_it = contour.begin(); p_it != contour.end();){
+                    if (*p_it == pj){
+                        new_start = p_it;
+                        break;
+                    }
+                    p_it ++;
+                }
+
+                new_contour.insert(new_contour.end(), new_start, contour.end());
+                new_contour.push_back(pj);
+                contourList.push_back(new_contour);
+                contour = Path3D(contour.begin(), new_start);
+            }
         }
 
-        uint32_t lastHash = meshVertex2Hash(last);
+        uint32_t lastHash = meshVertex2Hash(pj);
         for (Path3D::iterator mv_it = pathHash[lastHash].begin(); mv_it != pathHash[lastHash].end();){
             if (*mv_it == pj_prev || *mv_it == start)
                 mv_it = pathHash[lastHash].erase(mv_it);
@@ -788,13 +823,12 @@ Paths3D contourConstruct(Paths3D hole_edges){
                 mv_it ++;
         }
 
-        if (pathHash[meshVertex2Hash(last)].size() <= 2){
-            pathHash.remove(meshVertex2Hash(last));
-            findAndDeleteHash(&hashList, meshVertex2Hash(last));
+        if (pathHash[meshVertex2Hash(pj)].size() <= 2){
+            pathHash.remove(meshVertex2Hash(pj));
+            findAndDeleteHash(&hashList, meshVertex2Hash(pj));
         }
 
-        contour.push_back(last);
-        contour.push_back(start);
+        contour.push_back(pj);
         contourList.push_back(contour);
     }
 
