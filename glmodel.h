@@ -2,6 +2,7 @@
 #define GLMODEL_H
 
 #include <QObject>
+#include <QApplication>
 #include <Qt3DCore>
 #include <Qt3DRender>
 #include <Qt3DExtras>
@@ -133,7 +134,8 @@ public:
     void removeModelPartList();
 
     LabellingTextPreview* labellingTextPreview = nullptr;
-
+    // changeColor
+    void changecolor(int mode); //0 default, 1 selected, 2 outofarea
     // Model Mesh move
     void moveModelMesh(QVector3D direction);
     // Model Mesh rotate
@@ -149,7 +151,7 @@ public:
     //void bisectModel_internal(Mesh* mesh, Plane plane, Mesh* leftMesh, Mesh* rightMesh);
     void bisectModel(Plane plane);
     void bisectModel_internal(Plane plane);
-
+    void checkPrintingArea();
     bool EndsWith(const string& a, const string& b);
     QString getFileName(const string& s);
     QVector3D spreadPoint(QVector3D endpoint,QVector3D startpoint,int factor);
@@ -169,6 +171,7 @@ public:
 
 private:
     int numPoints;
+    int colorMode;
     float x,y,z;
     int v_cnt;
     int f_cnt;
@@ -189,22 +192,29 @@ private:
     bool labellingActive = false;
     bool extensionActive = false;
     bool cutActive = false;
+    bool layflatActive = false;
 
 signals:
 
     void modelSelected(int);
-
+    void resetLayflat();
     void bisectDone();
     void _updateModelMesh();
 
 public slots:
     // object picker parts
     void handlePickerClicked(Qt3DRender::QPickEvent*);
+    void handlePickerClickedLayflat(Qt3DRender::QPickEvent*);
     void mgoo(Qt3DRender::QPickEvent*);
     void pgoo(Qt3DRender::QPickEvent*);
     void rgoo(Qt3DRender::QPickEvent*);
     void engoo();
     void exgoo();
+
+
+    // Lay Flat
+    void openLayflat();
+    void closeLayflat();
 
     // Model Cut
     void generatePlane();

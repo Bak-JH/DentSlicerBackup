@@ -27,6 +27,8 @@ Rectangle {
     property alias descriptionimage_vis: descriptionimage.visible
     property alias applyfinishbutton_vis: applyfinishbutton.visible
     property alias applybutton_text: applybutton_text.text
+    property alias applyfinishbutton_text:applyfinishbutton_text.text
+    property bool applybutton_action:true
 
     //----------------------------------------------------------------
 
@@ -105,6 +107,7 @@ Rectangle {
                     applyClicked();
                     break;
                 case "Lay flat":
+                    applyClicked();
                     break;
                 case "Arrange":
                     applyClicked();
@@ -146,14 +149,27 @@ Rectangle {
     }
 
     function numbox_reset() {
+        applyfinishbutton.color = "#BBB"
         numbox_value_x = numbox_default;
-        numberbox1_text.text = numbox_value_x + number_unit;
+        numberbox1_text.text = numbox_value_x;
+        numberbox1_number = numbox_value_x;
         numbox_value_y = numbox_default;
-        numberbox2_text.text = numbox_value_y + number_unit;
+        numberbox2_text.text = numbox_value_y;
+        numberbox2_number = numbox_value_x;
         numbox_value_z = numbox_default;
-        numberbox3_text.text = numbox_value_z + number_unit;
+        numberbox3_text.text = numbox_value_z;
+        numberbox3_number = numbox_value_x;
         numbox_value_detail2 = numbox_detail2_default;
-        numberbox_detail2_text.text = numbox_value_detail2 + number_unit;
+        numberbox_detail2_text.text = numbox_value_detail2;
+    }
+    function colorApplyFinishButton(mode){
+        console.log(mode)
+        if (mode === 1){
+            applyfinishbutton.color="#3ea6b7"
+        }else{
+            applyfinishbutton.color="#BBB"
+        }
+
     }
 
     function destroy_popup(){
@@ -268,9 +284,9 @@ Rectangle {
             id: mousearea_apply
             anchors.fill: parent
             hoverEnabled: true
-            onEntered: parent.color = "#b5b5b5"
-            onExited: parent.color = "#999999"
-            onPressed: parent.color = "#3ea6b7"
+            //onEntered: parent.color = "#b5b5b5"
+            //onExited: parent.color = "#999999"
+            onPressed: parent.color = applybutton_action ? "#3ea6b7" : "#999999"
             onReleased: {applyClicked(); focus_all_off(); numbox_reset(); parent.color = "#999999"}
         }
     }
@@ -327,12 +343,13 @@ Rectangle {
         id: applyfinishbutton
         width: 111.6
         height: 30.7
-        color: "#999999"
+        color: "#BBB"
         anchors.bottom: parent.bottom
         anchors.bottomMargin: 7
         anchors.right: parent.horizontalCenter
         anchors.rightMargin: 3.5
         Text {
+            id: applyfinishbutton_text
             anchors.verticalCenter: parent.verticalCenter
             anchors.horizontalCenter: parent.horizontalCenter
             text: "Apply"
@@ -344,10 +361,10 @@ Rectangle {
             id: mousearea_applyfinish_apply
             anchors.fill: parent
             hoverEnabled: true
-            onEntered: parent.color = "#BCBCBE"
-            onExited: parent.color = "#999999"
-            onPressed: parent.color = "#3ea6b7"
-            onReleased: {do_apply(funcname.text); /*all_off();*/ focus_all_off() ;numbox_reset();parent.color = "#999999"}
+            //onEntered: parent.color = "#BCBCBE"
+            //onExited: parent.color = "#999999"
+            //onPressed: parent.color = "#3ea6b7"
+            onReleased: {do_apply(funcname.text); /*all_off();*/ focus_all_off() ;numbox_reset();parent.color = "#BBB"}
         }
     }
     Rectangle {
@@ -532,39 +549,59 @@ Rectangle {
                     anchors.fill: parent
                     hoverEnabled: true
                     onEntered: {
-                        numberbox1.color =  "#f5f5f5"
+                    ///    numberbox1.color =  "#f5f5f5"
                     }
                     onExited: {
-                        numberbox1.color = "#ffffff"
+                    //    numberbox1.color = "#ffffff"
                     }
 
                 }
-                TextInput {
+                TextField {
                     id: numberbox1_text
                     anchors.right: parent.right
-                    anchors.rightMargin: 5
+                    anchors.rightMargin: 8*number_unit.length
                     anchors.verticalCenter: parent.verticalCenter
-                    text: numbox_value_x + number_unit
-                    //maximumLength:
+                    horizontalAlignment: TextInput.AlignRight
+                    //text: numbox_value_z + number_unit
+                    placeholderText: numbox_value_x
                     font.pixelSize: 12
                     font.family: mainFont.name
-                    color: focus ? "black" : "#595959"
+                    textColor: focus ? "black" : "#595959"
                     selectByMouse: true
                     onFocusChanged: {
-                        if(numberbox1_text.activeFocus)
-                            numberbox1.color = "#f5f5f5"
+                    //    if(numberbox1_text.focus)
+                    //        numberbox1.color = "#f5f5f5"
                     }
                     onTextChanged: {
-                        if (text.length-number_unit.length == 1){
-                            text = text.charAt(0).replace(/[^-|0-9]/g,'') + number_unit;
+                        if (text.length == 1){
+                            text = text.replace(/[^-|0-9]/g,'');
                         }else{
-                            text = text.charAt(0).replace(/[^-|1-9]/g,'')+text.substring(1,text.length).replace(/[^0-9]/g, '') + number_unit;
+                            text = text.charAt(0).replace(/[^-|1-9]/g,'')+text.substring(1,text.length).replace(/[^0-9]/g, '');
                         }
-                        numberbox1.color = "#ffffff"
-                        numberbox1_number = parseInt(text.substring(0,text.length-number_unit.length),10)
-
+                    //    numberbox1.color = "#ffffff"
+                        if (text === "") text = "0"
+                        numberbox1_number = parseInt(text,10)
+                        console.log(numberbox1_number);
+                        //if (numberbox1_number != 0 ) applyfinishbutton.color = "#3ea6b7"
+                        console.log(applyfinishbutton.color);
+                        //if (numberbox1_number == 0 && numberbox2_number == 0 && numberbox3_number==0 ) applyfinishbutton.color = "#999999"
+                    }
+                    style: TextFieldStyle {
+                        textColor: "black"
+                        background: Rectangle {
+                            border.width: 0
+                        }
                     }
                 }
+                Text{
+                    font.pixelSize: 12
+                    font.family: mainFont.name
+                    text:number_unit
+                    anchors.right: parent.right
+                    anchors.verticalCenter: parent.verticalCenter
+                    color: "#111"
+                }
+
                 Rectangle{
                     width: parent.width
                     height: 1
@@ -648,37 +685,52 @@ Rectangle {
                     anchors.fill: parent
                     hoverEnabled: true
                     onEntered: {
-                        numberbox2.color =  "#f5f5f5"
+                    //    numberbox2.color =  "#f5f5f5"
                     }
                     onExited: {
-                        numberbox2.color = "#ffffff"
+                    //    numberbox2.color = "#ffffff"
                     }
 
                 }
-
-                TextInput {
+                TextField {
                     id: numberbox2_text
                     anchors.right: parent.right
-                    anchors.rightMargin: 5
+                    anchors.rightMargin: 8*number_unit.length
                     anchors.verticalCenter: parent.verticalCenter
-                    text: numbox_value_y + number_unit
+                    horizontalAlignment: TextInput.AlignRight
+                    //text: numbox_value_z + number_unit
+                    placeholderText: numbox_value_y
                     font.pixelSize: 12
                     font.family: mainFont.name
-                    color: focus ? "black" : "#595959"
+                    textColor: focus ? "black" : "#595959"
                     selectByMouse: true
                     onFocusChanged: {
-                        if(numberbox2_text.focus)
-                            numberbox2.color = "#f5f5f5"
                     }
                     onTextChanged: {
-                        if (text.length-number_unit.length == 1){
-                            text = text.charAt(0).replace(/[^-|0-9]/g,'') + number_unit;
+                        if (text.length == 1){
+                            text = text.replace(/[^-|0-9]/g,'');
                         }else{
-                            text = text.charAt(0).replace(/[^-|1-9]/g,'')+text.substring(1,text.length).replace(/[^0-9]/g, '') + number_unit;
+                            text = text.charAt(0).replace(/[^-|1-9]/g,'')+text.substring(1,text.length).replace(/[^0-9]/g, '');
                         }
-                        numberbox2.color = "#ffffff"
-                        numberbox2_number = parseInt(text.substring(0,text.length-number_unit.length),10)
+                        if (text === "") text = "0"
+                        numberbox2_number = parseInt(text,10)
+                     //   if (numberbox2_number != 0 ) applyfinishbutton.color = "#3ea6b7"
+                     //   if (numberbox1_number == 0 && numberbox2_number == 0 && numberbox3_number==0 ) applyfinishbutton.color = "#999999"
                     }
+                    style: TextFieldStyle {
+                        textColor: "black"
+                        background: Rectangle {
+                            border.width: 0
+                        }
+                    }
+                }
+                Text{
+                    font.pixelSize: 12
+                    font.family: mainFont.name
+                    text:number_unit
+                    anchors.right: parent.right
+                    anchors.verticalCenter: parent.verticalCenter
+                    color: "#111"
                 }
                 Rectangle{
                     width: parent.width
@@ -761,38 +813,54 @@ Rectangle {
                     anchors.fill: parent
                     hoverEnabled: true
                     onEntered: {
-                        numberbox3.color =  "#f5f5f5"
+                    //    numberbox3.color =  "#f5f5f5"
                     }
                     onExited: {
-                        numberbox3.color = "#ffffff"
+                    //    numberbox3.color = "#ffffff"
                     }
-
                 }
-                TextInput {
+                TextField {
                     id: numberbox3_text
                     anchors.right: parent.right
-                    anchors.rightMargin: 5
+                    anchors.rightMargin: 8*number_unit.length
                     anchors.verticalCenter: parent.verticalCenter
-                    text: numbox_value_z + number_unit
+                    horizontalAlignment: TextInput.AlignRight
+                    //text: numbox_value_z + number_unit
+                    placeholderText: numbox_value_z
                     font.pixelSize: 12
                     font.family: mainFont.name
-                    color: focus ? "black" : "#595959"
+                    textColor: focus ? "black" : "#595959"
                     selectByMouse: true
-
                     onFocusChanged: {
-                        if(numberbox3_text.focus)
-                            numberbox3.color = "#f5f5f5"
+                    //    if(numberbox3_text.focus)
+                    //        numberbox3.color = "#f5f5f5"
                     }
-
                     onTextChanged: {
-                        if (text.length-number_unit.length == 1){
-                            text = text.charAt(0).replace(/[^-|0-9]/g,'') + number_unit;
+                        if (text.length == 1){
+                            text = text.replace(/[^-|0-9]/g,'');
                         }else{
-                            text = text.charAt(0).replace(/[^-|1-9]/g,'')+text.substring(1,text.length).replace(/[^0-9]/g, '') + number_unit;
+                            text = text.charAt(0).replace(/[^-|1-9]/g,'')+text.substring(1,text.length).replace(/[^0-9]/g, '');
                         }
-                        numberbox3.color = "#ffffff"
-                        numberbox3_number = parseInt(text.substring(0,text.length-number_unit.length),10)
+                    //    numberbox3.color = "#ffffff"
+                        if (text === "") text = "0"
+                        numberbox3_number = parseInt(text,10)
+                       // if (numberbox3_number != 0 ) applyfinishbutton.color = "#3ea6b7"
+                       // if (numberbox1_number == 0 && numberbox2_number == 0 && numberbox3_number==0 ) applyfinishbutton.color = "#999999"
                     }
+                    style: TextFieldStyle {
+                        textColor: "black"
+                        background: Rectangle {
+                            border.width: 0
+                        }
+                    }
+                }
+                Text{
+                    font.pixelSize: 12
+                    font.family: mainFont.name
+                    text:number_unit
+                    anchors.right: parent.right
+                    anchors.verticalCenter: parent.verticalCenter
+                    color: "#111"
                 }
                 Rectangle{
                     width: parent.width
@@ -922,34 +990,40 @@ Rectangle {
             height: 24
             color: "#f5f5f5"
             anchors.verticalCenter: parent.verticalCenter
-            TextInput {
+
+            TextField {
                 id: numberbox_detail2_text
                 anchors.right: parent.right
-                anchors.rightMargin: 5
+                anchors.rightMargin: 8*number_unit_detail2.length
                 anchors.verticalCenter: parent.verticalCenter
-                text: numbox_value_detail2 + number_unit_detail2
+                horizontalAlignment: TextInput.AlignRight
+                placeholderText: numbox_value_detail2
                 font.pixelSize: 12
                 font.family: mainFont.name
-                color: focus ? "black" : "#595959"
+                textColor: focus ? "black" : "#595959"
                 selectByMouse: true
-                onEditingFinished:  {
-                    if(displayText.substring(0,displayText.length - number_unit_detail2.length).replace(/\D/g, '').length === displayText.substring(0,displayText.length - number_unit_detail2.length).length){
-                        if(displayText.substring(displayText.length - number_unit_detail2.length, displayText.length) === number_unit_detail2){
-                            numbox_value_detail2 = parseFloat(displayText.substring(0,displayText.length - number_unit_detail2.length));
-                            text = numbox_value_detail2 + number_unit_detail2;
-                        }
-                        else if(displayText.replace(/\D/g, '').length === displayText.length) {
-                            numbox_value_detail2 = parseFloat(displayText);
-                            text = numbox_value_detail2 + number_unit_detail2;
-                        }
-                        else {
-                            text = numbox_value_detail2 + number_unit_detail2;
-                        }
+                onTextChanged: {
+                    if (text.length == 1){
+                        text = text.replace(/[^-|0-9]/g,'');
+                    }else{
+                        text = text.charAt(0).replace(/[^-|1-9]/g,'')+text.substring(1,text.length).replace(/[^0-9]/g, '');
                     }
-                    else {
-                        text = numbox_value_detail2 + number_unit_detail2;
+                    numbox_value_detail2 = parseFloat(text)
+                }
+                style: TextFieldStyle {
+                    textColor: "black"
+                    background: Rectangle {
+                        border.width: 0
                     }
                 }
+            }
+            Text{
+                font.pixelSize: 12
+                font.family: mainFont.name
+                text:number_unit_detail2
+                anchors.right: parent.right
+                anchors.verticalCenter: parent.verticalCenter
+                color: "#111"
             }
         }
         //up-button

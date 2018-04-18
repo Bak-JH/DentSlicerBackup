@@ -11,6 +11,7 @@
 #include <QCoreApplication>
 #include <QEvent>
 #include <QPointF>
+#include <QCursor>
 #include <QQmlProperty>0269
 #include "feature/autoarrange.h"
 #include "feature/shelloffset.h"
@@ -48,6 +49,10 @@ public:
     Qt3DCore::QEntity *moveArrowY;
     QObject *moveArrowobj;
 
+    // model layflat components;
+    QObject *layflatPopup;
+    QObject *layflatButton;
+
     QObject* partList;
 
     // model cut components
@@ -65,7 +70,7 @@ public:
     QObject* orientPopup;
     QObject* progress_popup;
     QObject* result_popup;
-
+    QObject* orientButton;
     // extension components
     QObject* extensionPopup;
 
@@ -74,6 +79,7 @@ public:
 
     // auto repair components
     QObject* repairPopup;
+    QObject* repairButton;
 
     // auto arrange components
     QObject* arrangePopup;
@@ -91,9 +97,7 @@ public:
 
     int groupFunctionIndex;
     QString groupFunctionState;
-
     float progress = 0;
-
     void showRotateSphere();
     void showMoveArrow();
     void hideRotateSphere();
@@ -136,13 +140,16 @@ public slots:
     void runGroupFeature(int,QString);
     void modelSelected(int);
     void modelRotate(int,int);
-    void modelRotateByNumber(int,int,int);
+
+    void modelRotateByNumber(int axis, int, int, int);
     void modelMove(int,int);
-    void modelMoveByNumber(int,int);
+    void modelMoveByNumber(int axis, int, int);
     void modelMoveDone(int);
     void modelRotateDone(int);
+    void resetLayflat();
     void runArrange();
     void applyArrangeResult(vector<QVector3D>, vector<float>);
+    void cleanSelectedModel(int);
 
 };
 
