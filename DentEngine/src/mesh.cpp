@@ -304,9 +304,9 @@ Path3D Mesh::intersectionPath(Plane base_plane, Plane target_plane) {
         return p;
     }
 
-    float minority_distance = minority[0].distanceToPlane(base_plane[0],base_plane[1],base_plane[2]);
-    float majority1_distance = majority[0].distanceToPlane(base_plane[0],base_plane[1],base_plane[2]);
-    float majority2_distance = majority[1].distanceToPlane(base_plane[0],base_plane[1],base_plane[2]);
+    float minority_distance = abs(minority[0].distanceToPlane(base_plane[0],base_plane[1],base_plane[2]));
+    float majority1_distance = abs(majority[0].distanceToPlane(base_plane[0],base_plane[1],base_plane[2]));
+    float majority2_distance = abs(majority[1].distanceToPlane(base_plane[0],base_plane[1],base_plane[2]));
 
     // calculate intersection points
     MeshVertex mv1, mv2;
@@ -613,8 +613,64 @@ void findAndDeleteHash(vector<uint32_t>* hashList, uint32_t hash){
     }
 }
 
+bool listContains(vector<uint32_t>* hashList, uint32_t hash){
+    for (vector<uint32_t>::iterator h_it = hashList->begin(); h_it != hashList->end();){
+        if (*h_it == hash){
+            return true;
+        }
+        h_it ++;
+    }
+    return false;
+}
+
+MeshVertex findAvailableMeshVertex(
+        QHash<uint32_t, Path3D>* pathHash,
+        vector<uint32_t>* hashList,
+        MeshVertex start
+        ){
+    int pj_idx = 1;
+    MeshVertex pj = (*pathHash)[meshVertex2Hash(start)].at(pj_idx);
+
+    /*qDebug() << "finding availableMeshVertex from : " << (*pathHash)[meshVertex2Hash(start)].size()-1;
+
+    // choose from only available vertex ( in the hash list )
+    for (Path3D::iterator p_it = (*pathHash)[meshVertex2Hash(start)].begin(); p_it != (*pathHash)[meshVertex2Hash(start)].end();){
+
+    }
+
+    while (listContains(hashList, meshVertex2Hash(pj))){
+        qDebug() << "searching available vertex " << pj.position << meshVertex2Hash(pj);
+        if (pj_idx > (*pathHash)[meshVertex2Hash(start)].size()-1){
+            qDebug() << "no new pj available";
+            pj.idx = -1;
+            return pj;
+        } else {
+            (*pathHash)[meshVertex2Hash(start)].erase((*pathHash)[meshVertex2Hash(start)].begin()+pj_idx);
+            return pj;
+        }
+        pj_idx ++;
+        pj = (*pathHash)[meshVertex2Hash(start)].at(pj_idx);
+    }*/
+
+    (*pathHash)[meshVertex2Hash(start)].erase((*pathHash)[meshVertex2Hash(start)].begin()+pj_idx);
+    return pj;
+}
+
+MeshVertex findAvailableMeshVertexFromContour(QHash<uint32_t, Path3D>* pathHash, vector<uint32_t>* hashList, Path3D* contour){
+    for (MeshVertex mv : *contour){
+        if ((*pathHash)[meshVertex2Hash(mv)].size()>=3){
+            return (*pathHash)[meshVertex2Hash(mv)].at(1);
+        }
+    }
+    MeshVertex temp_mv;
+    temp_mv.idx = -1;
+    return temp_mv;
+}
+
+
 // construct closed contour using segments created from identify step
 Paths3D contourConstruct(Paths3D hole_edges){
+    // new trial if there's 분기점
     Paths3D contourList;
 
     QHash<uint32_t, Path3D> pathHash;
@@ -656,9 +712,111 @@ Paths3D contourConstruct(Paths3D hole_edges){
         pathHash[path_hash_v].push_back(p[0]);
     }
 
+    for (uint32_t hash : hashList){
+        qDebug() << "hash " <<hash << " path size : "<< pathHash[hash].size();
+    }
+
+    qDebug() << "hashList.size : " << hashList.size();
+
+    while (pathHash.size() > 0){
+        qDebug() << "new contour start" << "chosen from "<< hashList.size();
+        MeshVertex start, pj_prev, pj, pj_next, last, u, v;
+        Path3D contour;
+        start = pathHash[hashList[0]][0];
+        contour.push_back(start);
+        qDebug() << "inserted pj : " << start.position;
+        pj_prev = start;
+        Path3D* dest = &(pathHash[hashList[0]]);
+        qDebug() << "new contour dest size : " << dest->size();
+
+        pj = findAvailableMeshVertex(&pathHash, &hashList, start);
+        last = findAvailableMeshVertex(&pathHash, &hashList, start);
+
+        if (pj.idx == -1 || last.idx == -1){
+            qDebug() << "initial vertex wrong start";
+            pathHash.remove(meshVertex2Hash(start));
+            findAndDeleteHash(&hashList, meshVertex2Hash(start));
+            continue;
+        }
+        qDebug() << "current selected pj : " << pj.position;
+        qDebug() << "current selected last : " << last.position;
+
+        if (pathHash[meshVertex2Hash(start)].size() <= 2){
+            pathHash.remove(meshVertex2Hash(start));
+            findAndDeleteHash(&hashList, meshVertex2Hash(start));
+        }
+
+        while (pj != last){
+            contour.push_back(pj);
+            qDebug() << "inserted pj : " << pj.position;
+            qDebug() << "current contour size :" << contour.size();
+            for (MeshVertex mv : pathHash[meshVertex2Hash(pj)]){
+                qDebug() << "current adding meshvertex neighbors : "<< mv.position;
+            }
+            u = findAvailableMeshVertex(&pathHash, &hashList, pj);
+            v = findAvailableMeshVertex(&pathHash, &hashList, pj);
+
+            if (u.idx == -1 || v.idx == -1){
+                qDebug() << "initial vertex wrong";
+                pathHash.remove(meshVertex2Hash(pj));
+                findAndDeleteHash(&hashList, meshVertex2Hash(pj));
+                // select new pj from contour, not from new meshvertex
+                pj = findAvailableMeshVertexFromContour(&pathHash, &hashList, &contour);
+                if (pj.idx == -1){
+                    qDebug() << "cannot find available MeshVertex from contour : " << pj.idx;
+                    break;
+                }
+                qDebug() << "found available MeshVertex" << pj.idx;
+                continue;
+            }
+
+            if (pathHash[meshVertex2Hash(pj)].size() <= 2){
+                pathHash.remove(meshVertex2Hash(pj));
+                findAndDeleteHash(&hashList, meshVertex2Hash(pj));
+            }
+
+            qDebug() << "current selected u : " << u.position;
+            qDebug() << "current selected v : " << v.position;
+
+            if (u == pj_prev){
+                pj_next = v;
+            } else {
+                pj_next = u;
+            }
+            pj_prev = pj;
+            pj = pj_next;
+        }
+
+        uint32_t lastHash = meshVertex2Hash(last);
+        for (Path3D::iterator mv_it = pathHash[lastHash].begin(); mv_it != pathHash[lastHash].end();){
+            if (*mv_it == pj_prev || *mv_it == start)
+                mv_it = pathHash[lastHash].erase(mv_it);
+            else
+                mv_it ++;
+        }
+
+        if (pathHash[meshVertex2Hash(last)].size() <= 2){
+            pathHash.remove(meshVertex2Hash(last));
+            findAndDeleteHash(&hashList, meshVertex2Hash(last));
+        }
+
+        contour.push_back(last);
+        contour.push_back(start);
+        contourList.push_back(contour);
+    }
+
+    for (Paths3D::iterator ps_it = contourList.begin(); ps_it != contourList.end();){
+        Path3D contour1 = (*ps_it);
+        for (Paths3D::iterator ps2_it = contourList.begin(); ps2_it != contourList.end();){
+            Path3D contour2 = (*ps2_it);
+            if ((*contour1.end()) == (*contour2.begin())){}
+        }
+    }
+
+
 
     // Build Polygons
-    while(pathHash.size() >0){
+    /*while(pathHash.size() >0){
         Path3D contour;
         MeshVertex start, pj_prev, pj, pj_next, last;
 
@@ -704,9 +862,6 @@ Paths3D contourConstruct(Paths3D hole_edges){
                 break;
             } else if (dest->size() == 2){
                 start = (*dest)[0]; // itself
-                /*uint32_t endHash = meshVertex2Hash((*dest)[1]);
-                if (pathHash.contains(endHash))
-                    pathHash.remove(endHash); // maybe needless*/
                 uint32_t temp_hash = meshVertex2Hash(pj);
                 pathHash.remove(temp_hash);
                 findAndDeleteHash(&hashList, temp_hash);
@@ -771,7 +926,7 @@ Paths3D contourConstruct(Paths3D hole_edges){
         //}
 
         contourList.push_back(contour);
-    }
+    }*/
 
 
     return contourList;
