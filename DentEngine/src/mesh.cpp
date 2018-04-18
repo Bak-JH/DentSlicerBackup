@@ -729,15 +729,15 @@ Paths3D contourConstruct(Paths3D hole_edges){
         Path3D* dest = &(pathHash[hashList[0]]);
         qDebug() << "new contour dest size : " << dest->size();
 
-        pj = findAvailableMeshVertex(&pathHash, &hashList, start);
-        last = findAvailableMeshVertex(&pathHash, &hashList, start);
-
-        if (pj.idx == -1 || last.idx == -1){
-            qDebug() << "initial vertex wrong start";
+        if (pathHash[meshVertex2Hash(start)].size() <= 2){
             pathHash.remove(meshVertex2Hash(start));
             findAndDeleteHash(&hashList, meshVertex2Hash(start));
             continue;
         }
+
+        pj = findAvailableMeshVertex(&pathHash, &hashList, start);
+        last = findAvailableMeshVertex(&pathHash, &hashList, start);
+
         qDebug() << "current selected pj : " << pj.position;
         qDebug() << "current selected last : " << last.position;
 
@@ -753,22 +753,15 @@ Paths3D contourConstruct(Paths3D hole_edges){
             for (MeshVertex mv : pathHash[meshVertex2Hash(pj)]){
                 qDebug() << "current adding meshvertex neighbors : "<< mv.position;
             }
-            u = findAvailableMeshVertex(&pathHash, &hashList, pj);
-            v = findAvailableMeshVertex(&pathHash, &hashList, pj);
 
-            if (u.idx == -1 || v.idx == -1){
-                qDebug() << "initial vertex wrong";
+            if (pathHash[meshVertex2Hash(pj)].size() <= 2){
                 pathHash.remove(meshVertex2Hash(pj));
                 findAndDeleteHash(&hashList, meshVertex2Hash(pj));
-                // select new pj from contour, not from new meshvertex
-                pj = findAvailableMeshVertexFromContour(&pathHash, &hashList, &contour);
-                if (pj.idx == -1){
-                    qDebug() << "cannot find available MeshVertex from contour : " << pj.idx;
-                    break;
-                }
-                qDebug() << "found available MeshVertex" << pj.idx;
-                continue;
+                break;
             }
+
+            u = findAvailableMeshVertex(&pathHash, &hashList, pj);
+            v = findAvailableMeshVertex(&pathHash, &hashList, pj);
 
             if (pathHash[meshVertex2Hash(pj)].size() <= 2){
                 pathHash.remove(meshVertex2Hash(pj));
@@ -805,13 +798,13 @@ Paths3D contourConstruct(Paths3D hole_edges){
         contourList.push_back(contour);
     }
 
-    for (Paths3D::iterator ps_it = contourList.begin(); ps_it != contourList.end();){
+    /*for (Paths3D::iterator ps_it = contourList.begin(); ps_it != contourList.end();){
         Path3D contour1 = (*ps_it);
         for (Paths3D::iterator ps2_it = contourList.begin(); ps2_it != contourList.end();){
             Path3D contour2 = (*ps2_it);
             if ((*contour1.end()) == (*contour2.begin())){}
         }
-    }
+    }*/
 
 
 
