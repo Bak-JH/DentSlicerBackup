@@ -31,7 +31,7 @@ void QmlManager::initializeUI(QQmlApplicationEngine* e){
     QMetaObject::invokeMethod(mv, "initCamera");
     // model move componetns
     movePopup = FindItemByName(engine, "movePopup");
-    QObject::connect(movePopup, SIGNAL(runFeature(int,int,int)),this, SLOT(modelMoveByNumber(int,int)));
+    QObject::connect(movePopup, SIGNAL(runFeature(int,int,int)),this, SLOT(modelMoveByNumber(int,int,int)));
 
     // model rotate components
     rotatePopup = FindItemByName(engine, "rotatePopup");
@@ -44,12 +44,14 @@ void QmlManager::initializeUI(QQmlApplicationEngine* e){
     QObject::connect(rotateSphereobj, SIGNAL(rotateDone(int)),this, SLOT(modelRotateDone(int)));
     hideRotateSphere();
     // model rotate popup codes
-    QObject::connect(rotatePopup, SIGNAL(runFeature(int,int,int,int)),this, SLOT(modelRotateByNumber(int,int,int)));
+    QObject::connect(rotatePopup, SIGNAL(runFeature(int,int,int,int)),this, SLOT(modelRotateByNumber(int,int,int,int)));
     //rotateSphere->setEnabled(0);
     QObject *rotateButton = FindItemByName(engine, "rotateButton");
 
     partList = FindItemByName(engine, "partList");
 
+    // model layflat components
+    layflatPopup = FindItemByName(engine,"layflatPopup");
     // model cut components
     cutPopup = FindItemByName(engine, "cutPopup");
     curveButton = FindItemByName(engine, "curveButton");
@@ -98,6 +100,13 @@ void QmlManager::initializeUI(QQmlApplicationEngine* e){
     QObject *moveButton = FindItemByName(engine, "moveButton");
     QObject::connect(moveButton,SIGNAL(runGroupFeature(int,QString)),this,SLOT(runGroupFeature(int,QString)));
     QObject::connect(rotateButton,SIGNAL(runGroupFeature(int,QString)),this,SLOT(runGroupFeature(int,QString)));
+    orientButton = FindItemByName(engine, "orientButton");
+    QObject::connect(orientButton,SIGNAL(runGroupFeature(int,QString)),this,SLOT(runGroupFeature(int,QString)));
+    repairButton = FindItemByName(engine,"repairButton");
+    QObject::connect(repairButton,SIGNAL(runGroupFeature(int,QString)),this,SLOT(runGroupFeature(int,QString)));
+
+    layflatButton = FindItemByName(engine,"layflatButton");
+    QObject::connect(layflatButton,SIGNAL(runGroupFeature(int,QString)),this,SLOT(runGroupFeature(int,QString)));
 
     QObject *boxUpperTab = FindItemByName(engine, "boxUpperTab");
     QObject::connect(boxUpperTab,SIGNAL(runGroupFeature(int,QString)),this,SLOT(runGroupFeature(int,QString)));
@@ -132,7 +141,6 @@ void QmlManager::createModelFile(Mesh* target_mesh, QString fname) {
 
     // model selection codes, connect handlers later when model selected
     QObject::connect(glmodel->shadowModel, SIGNAL(modelSelected(int)), this, SLOT(modelSelected(int)));
-
     qDebug() << "connected model selected signal";
 
     // 승환 100%
@@ -174,6 +182,9 @@ void QmlManager::disconnectHandlers(GLModel* glmodel){
 
     // need to connect for every popup
     // model rotate popup codes
+    // model layflat popup codes
+    QObject::disconnect(layflatPopup, SIGNAL(openLayflat()), glmodel, SLOT(openLayflat()));
+    QObject::disconnect(layflatPopup, SIGNAL(closeLayflat()), glmodel, SLOT(closeLayflat()));
 
     // model cut popup codes
     QObject::disconnect(cutPopup,SIGNAL(modelCut()),glmodel->shadowModel , SLOT(modelCut()));
@@ -225,6 +236,11 @@ void QmlManager::connectHandlers(GLModel* glmodel){
     //QObject::connect(glmodel->ft, SIGNAL(loadPopup(QVariant)),orientPopup, SLOT(show_popup(QVariant)));
 
     // need to connect for every popup
+    // model layflat popup codes
+    QObject::connect(layflatPopup, SIGNAL(openLayflat()), glmodel, SLOT(openLayflat()));
+    QObject::connect(layflatPopup, SIGNAL(closeLayflat()), glmodel, SLOT(closeLayflat()));
+    QObject::connect(glmodel, SIGNAL(resetLayflat()), this, SLOT(resetLayflat()));
+
     // model cut popup codes
     QObject::connect(cutPopup,SIGNAL(modelCut()),glmodel->shadowModel , SLOT(modelCut()));
     QObject::connect(cutPopup,SIGNAL(cutModeSelected(int)),glmodel->shadowModel,SLOT(cutModeSelected(int)));
@@ -234,7 +250,6 @@ void QmlManager::connectHandlers(GLModel* glmodel){
 
     // auto orientation popup codes
     QObject::connect(orientPopup, SIGNAL(runFeature(int)), glmodel->ft, SLOT(setTypeAndStart(int)));
-
     // label popup codes
     QObject::connect(text3DInput, SIGNAL(sendTextChanged(QString, int)),glmodel->shadowModel,SLOT(getTextChanged(QString, int)));
     QObject::connect(labelPopup, SIGNAL(openLabelling()),glmodel->shadowModel,SLOT(openLabelling()));
@@ -266,9 +281,10 @@ void QmlManager::connectHandlers(GLModel* glmodel){
     // export button codes
     QObject::connect(exportOKButton, SIGNAL(runFeature(int, QVariant)), glmodel->ft, SLOT(setTypeAndRun(int, QVariant)));
     //QObject::connect(exportButton, SIGNAL(runFeature(int, QVariant)), glmodel->ft, SLOT(setTypeAndRun(int, QVariant)));
-
 }
-
+void QmlManager::cleanSelectedModel(int type){
+    //selectedModel = nullptr;
+}
 // slicing information
 void QmlManager::sendUpdateModelInfo(int printing_time, int layer, QString xyz, float volume){
     updateModelInfo(printing_time, layer, xyz, volume);
@@ -328,16 +344,28 @@ void QmlManager::modelSelected(int ID){
     // reset previous model texture
     if (selectedModel != nullptr){
         qDebug() << "resetting model" << selectedModel->ID;
-        selectedModel->m_meshMaterial->setDiffuse(QColor(173,215,218));
+        selectedModel->changecolor(0);
+        selectedModel->checkPrintingArea();
         QMetaObject::invokeMethod(partList, "unselectPartByModel", Q_ARG(QVariant, selectedModel->ID));
-        disconnectHandlers(selectedModel);
+        disconnectHandlers(selectedModel);  //check
         if (groupFunctionState == "active"){
             switch (groupFunctionIndex){
             case 5:
                 hideRotateSphere();
+                QMetaObject::invokeMethod(rotatePopup,"offApplyFinishButton");
                 break;
             case 4:
                 hideMoveArrow();
+                QMetaObject::invokeMethod(movePopup,"offApplyFinishButton");
+                break;
+            case 6:
+                QMetaObject::invokeMethod(layflatPopup,"offApplyFinishButton");
+                break;
+            case 8:
+                QMetaObject::invokeMethod(orientPopup,"offApplyFinishButton");
+                break;
+            case 10:
+                QMetaObject::invokeMethod(repairPopup,"offApplyFinishButton");
                 break;
             }
         }
@@ -345,17 +373,29 @@ void QmlManager::modelSelected(int ID){
     if (selectedModel != target){
         // change selectedModel
         selectedModel = target;
-        selectedModel->m_meshMaterial->setDiffuse(QColor(100,255,100));
+        selectedModel->changecolor(3);
+        selectedModel->changecolor(1);
         QMetaObject::invokeMethod(partList, "selectPartByModel", Q_ARG(QVariant, selectedModel->ID));
         qDebug() << "changing model" << selectedModel->ID;
         connectHandlers(selectedModel);
         if (groupFunctionState == "active"){
             switch (groupFunctionIndex){
             case 5:
+                QMetaObject::invokeMethod(rotatePopup,"onApplyFinishButton");
                 showRotateSphere();
                 break;
             case 4:
+                QMetaObject::invokeMethod(movePopup,"onApplyFinishButton");
                 showMoveArrow();
+                break;
+            case 6:
+                QMetaObject::invokeMethod(layflatPopup,"onApplyFinishButton");
+                break;
+            case 8:
+                QMetaObject::invokeMethod(orientPopup,"onApplyFinishButton");
+                break;
+            case 10:
+                QMetaObject::invokeMethod(repairPopup,"onApplyFinishButton");
                 break;
             }
         }
@@ -394,8 +434,6 @@ void QmlManager::unselectPart(int ID){
     selectedModel = nullptr;
 
 }
-
-
 void QmlManager::modelVisible(int ID, bool isVisible){
     GLModel* target;
     for(int i=0; i<glmodels.size();i++){
@@ -451,6 +489,7 @@ void QmlManager::modelMoveDone(int Axis){
         return;
     QQmlProperty::write(moveArrowobj,"center",selectedModel->m_transform->translation());
     mouseHack();
+    selectedModel->checkPrintingArea();
 }
 void QmlManager::modelRotateDone(int Axis){
     if (selectedModel == nullptr)
@@ -495,6 +534,7 @@ void QmlManager::modelMove(int Axis, int Distance){
         break;
     }
     }
+    selectedModel->checkPrintingArea();
 }
 void QmlManager::modelRotate(int Axis, int Angle){
     if (selectedModel == nullptr)
@@ -518,14 +558,15 @@ void QmlManager::modelRotate(int Axis, int Angle){
     }
     }
 }
-void QmlManager::modelMoveByNumber(int X, int Y){
+void QmlManager::modelMoveByNumber(int axis, int X, int Y){
     if (selectedModel == nullptr)
         return;
     QVector3D tmp = selectedModel->m_transform->translation();
+    qDebug() << X << Y;
+    qDebug() << tmp;
     selectedModel->m_transform->setTranslation(QVector3D(tmp.x()+X,tmp.y()+Y,tmp.z()));
-
 }
-void QmlManager::modelRotateByNumber(int X, int Y, int Z){
+void QmlManager::modelRotateByNumber(int axis,  int X, int Y, int Z){
     if (selectedModel == nullptr)
         return;
     Qt3DCore::QTransform* tmp = new Qt3DCore::QTransform();
@@ -535,6 +576,9 @@ void QmlManager::modelRotateByNumber(int X, int Y, int Z){
     selectedModel->rotateModelMesh(tmp->matrix());
     showRotateSphere();
     mouseHack();
+}
+void QmlManager::resetLayflat(){
+    QMetaObject::invokeMethod(layflatPopup,"onApplyFinishButton");
 }
 void QmlManager::runGroupFeature(int ftrType, QString state){
     groupFunctionIndex = ftrType;
@@ -548,6 +592,12 @@ void QmlManager::runGroupFeature(int ftrType, QString state){
 
         }else if(state == "active"){
             showRotateSphere();
+            if (selectedModel == nullptr){
+                QMetaObject::invokeMethod(rotatePopup,"offApplyFinishButton");
+            }else{
+                QMetaObject::invokeMethod(rotatePopup,"onApplyFinishButton");
+            }
+
         }
         break;
     }
@@ -558,6 +608,48 @@ void QmlManager::runGroupFeature(int ftrType, QString state){
             moveArrow->setEnabled(0);
         }else if(state == "active"){
             showMoveArrow();
+            if (selectedModel == nullptr){
+                QMetaObject::invokeMethod(movePopup,"offApplyFinishButton");
+            }else{
+                QMetaObject::invokeMethod(movePopup,"onApplyFinishButton");
+            }
+        }
+        break;
+    }
+    case 6:
+    {
+        if (state == "active"){
+            if (selectedModel == nullptr){
+                QMetaObject::invokeMethod(layflatPopup,"offApplyFinishButton");
+            }else{
+                QMetaObject::invokeMethod(layflatPopup,"onApplyFinishButton");
+            }
+        }else if (state == "inactive"){
+            QApplication::restoreOverrideCursor();
+        }
+        break;
+    }
+    case 8:  //orient
+    {
+        qDebug()<<state;
+        if (state == "active"){
+            if (selectedModel == nullptr){
+                QMetaObject::invokeMethod(orientPopup,"offApplyFinishButton");
+            }else{
+                QMetaObject::invokeMethod(orientPopup,"onApplyFinishButton");
+            }
+        }
+        break;
+    }
+    case 10:  //orient
+    {
+        qDebug()<<state;
+        if (state == "active"){
+            if (selectedModel == nullptr){
+                QMetaObject::invokeMethod(repairPopup,"offApplyFinishButton");
+            }else{
+                QMetaObject::invokeMethod(repairPopup,"onApplyFinishButton");
+            }
         }
         break;
     }

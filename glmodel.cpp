@@ -78,11 +78,7 @@ GLModel::GLModel(QObject* mainWindow, QNode *parent, Mesh* loadMesh, QString fna
     }
 
     m_meshMaterial = new QPhongMaterial();
-    m_meshMaterial->setAmbient(QColor(77,128,135));
-    m_meshMaterial->setDiffuse(QColor(173,215,218));
-    m_meshMaterial->setSpecular(QColor(182,237,246));
-    m_meshMaterial->setShininess(0.0f);
-
+    this->changecolor(0);
     if (filename != "" && !EndsWith(filename.toStdString(), std::string("_left").c_str()) && !EndsWith(filename.toStdString(),  std::string("_right").c_str())){
         mesh = new Mesh();
         loadMeshSTL(mesh, filename.toStdString().c_str());
@@ -139,7 +135,53 @@ GLModel::GLModel(QObject* mainWindow, QNode *parent, Mesh* loadMesh, QString fna
     */
     qmlManager->addPart(getFileName(fname.toStdString().c_str()), ID);
 }
-
+void GLModel::changecolor(int mode){
+    if (mode == -1) mode = colorMode;
+    switch(mode){
+    case 0: // default
+        m_meshMaterial->setAmbient(QColor(130,130,140));;
+        m_meshMaterial->setDiffuse(QColor(131,206,220));
+        m_meshMaterial->setDiffuse(QColor(97,185,192));
+        m_meshMaterial->setSpecular(QColor(0,0,0));
+        m_meshMaterial->setShininess(0.0f);
+        colorMode = 0;
+        break;
+    case 1:
+        //m_meshMaterial->setAmbient(QColor(180,180,180));
+        m_meshMaterial->setDiffuse(QColor(100,255,100));
+        m_meshMaterial->setDiffuse(QColor(130,208,125));
+        m_meshMaterial->setSpecular(QColor(0,0,0));
+        m_meshMaterial->setShininess(0.0f);
+        colorMode = 1;
+        break;
+    case 2:
+        m_meshMaterial->setAmbient(QColor(0,0,0));
+        //m_meshMaterial->setDiffuse(QColor(205,84,84));
+        break;
+    case 3:
+        m_meshMaterial->setAmbient(QColor(160,160,160));;
+        break;
+    }
+}
+void GLModel::checkPrintingArea(){
+    float printing_x = 100;
+    float printing_y = 80;
+    float printing_z = 120;
+    float printing_safegap = 1;
+    // is it inside the printing area or not?
+    QVector3D tmp = m_transform->translation();
+    if ((tmp.x() + mesh->x_min) < printing_safegap - printing_x/2 |
+        (tmp.x() + mesh->x_max) > printing_x/2 - printing_safegap|
+        (tmp.y() + mesh->y_min) <  printing_safegap - printing_y/2|
+        (tmp.y() + mesh->y_max) > printing_y/2 - printing_safegap|
+        (tmp.z() + mesh->z_max) > printing_z){
+        this->changecolor(2);
+    }else{
+        this->changecolor(-1);
+        this->changecolor(3);
+    }
+//    qDebug() << tmp << mesh->x_max << mesh->x_min << mesh->y_max << mesh->y_min << mesh->z_max;
+}
 void GLModel::moveModelMesh(QVector3D direction){
     mesh->vertexMove(direction);
     if (shadowModel != NULL)
@@ -210,6 +252,7 @@ void GLModel::updateModelMesh(){
     float zlength = mesh->z_max - mesh->z_min;
     if (shadowModel != NULL) // since shadow model transformed twice
         m_transform->setTranslation(QVector3D(tmp.x(),tmp.y(),zlength/2));
+    checkPrintingArea();
 }
 
 featureThread::featureThread(GLModel* glmodel, int type){
@@ -678,7 +721,7 @@ void GLModel::addIndexes(vector<int> indexes){
 
 void GLModel::handlePickerClicked(QPickEvent *pick)
 {
-    if (!cutActive && !extensionActive && !labellingActive)
+    if (!cutActive && !extensionActive && !labellingActive && !layflatActive)
         emit modelSelected(parentModel->ID);
     qDebug() << "model selected emit";
 
@@ -730,8 +773,34 @@ void GLModel::handlePickerClicked(QPickEvent *pick)
     } else {
         parentModel->uncolorExtensionFaces();
     }
+    /*if (layflatActive){
+        m_objectPicker->setEnabled(false);
+        this->parentModel->m_objectPicker = new Qt3DRender::QObjectPicker(this->parentModel);
+        QObject::connect(this->parentModel->m_objectPicker, SIGNAL(clicked(Qt3DRender::QPickEvent*)), this->parentModel, SLOT(handlePickerClickedLayflat(Qt3DRender::QPickEvent*)));
+        this->parentModel->addComponent(this->parentModel->m_objectPicker);
+    }*/
 }
-
+void GLModel::handlePickerClickedLayflat(QPickEvent *pick){
+    qDebug() << "layflat picker!";
+    QPickTriangleEvent *trianglePick = static_cast<QPickTriangleEvent*>(pick);
+    MeshFace shadow_meshface = mesh->faces[trianglePick->triangleIndex()];
+    QVector3D tmp_fn = shadow_meshface.fn;
+    Qt3DCore::QTransform* tmp = new Qt3DCore::QTransform();
+    float x= tmp_fn.x();
+    float y= tmp_fn.y();
+    float z=tmp_fn.z();
+    float angleX = qAtan2(y,z)*180/M_PI;
+    if (z>0) angleX+=180;
+    float angleY = qAtan2(x,z)*180/M_PI;
+    tmp->setRotationX(angleX);
+    tmp->setRotationY(angleY);
+    rotateModelMesh(tmp->matrix());
+    QObject::disconnect(m_objectPicker,SIGNAL(clicked(Qt3DRender::QPickEvent*)), this, SLOT(handlePickerClickedLayflat(Qt3DRender::QPickEvent*)));
+    delete m_objectPicker;
+    shadowModel->m_objectPicker->setEnabled(true);
+    closeLayflat();
+    emit resetLayflat();
+}
 void GLModel::bisectModel(Plane plane){
     QFuture<void> future = QtConcurrent::run(this, &bisectModel_internal, plane);
 }
@@ -1171,7 +1240,6 @@ void GLModel::generateText3DMesh()
         outNormals.push_back(vertices[2 * indices[3*i + 1] + 1]);
         outNormals.push_back(vertices[2 * indices[3*i + 0] + 1]);
     }
-
     if (GLModel* glmodel = qobject_cast<GLModel*>(parent())) {
         glmodel->addVertices(outVertices);
         glmodel->addNormalVertices(outNormals);
@@ -1217,7 +1285,20 @@ void GLModel::generateExtensionFaces(double distance){
     extendMesh(mesh, targetMeshFace, distance);
     emit _updateModelMesh();
 }
+void GLModel::openLayflat(){
+    QApplication::setOverrideCursor(QCursor(Qt::UpArrowCursor));
+    shadowModel->m_objectPicker->setEnabled(false);
+    m_objectPicker = new Qt3DRender::QObjectPicker(this);
+    QObject::connect(m_objectPicker,SIGNAL(clicked(Qt3DRender::QPickEvent*)), this, SLOT(handlePickerClickedLayflat(Qt3DRender::QPickEvent*)));
+    this->addComponent(m_objectPicker);
+    this->shadowModel->layflatActive = true;
 
+}
+void GLModel::closeLayflat(){
+    qDebug() << "closelayflat called";
+    this->shadowModel->layflatActive = false;
+    //layflatActive = false;
+}
 void GLModel::openExtension(){
     extensionActive = true;
 }

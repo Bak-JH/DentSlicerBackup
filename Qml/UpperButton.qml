@@ -24,6 +24,15 @@ Rectangle{
         case "Rotate":
             buttonClicked();
             break;
+        case "Orient":
+            buttonClicked();
+            break;
+        case "Auto Repair":
+            buttonClicked();
+            break;
+        case "Lay Flat":
+            buttonClicked();
+            break;
         default:
             //console.log(functionname);
             break;

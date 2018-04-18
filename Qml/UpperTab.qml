@@ -276,14 +276,19 @@ Rectangle {
             onButtonClicked:{
                    runGroupFeature(ftrRotate, state);
             }
+
         }
         UpperButton{
             id : second_tab_button_layflat
-
+            objectName: "layflatButton"
             anchors.left: second_tab_button_rotate.right
             iconSource1: "qrc:/resource/upper_layflat.png"
             iconSource2: "qrc:/Resource/upper2_layflat.png"
-            iconText: "Lay flat"
+            iconText: "Lay Flat"
+            signal runGroupFeature(int type, string state);
+            onButtonClicked:{
+                   runGroupFeature(ftrLayFlat, state);
+            }
         }
         UpperButton{
             id : second_tab_button_arrange
@@ -295,11 +300,15 @@ Rectangle {
         }
         UpperButton{
             id : second_tab_button_orient
-
+            objectName: "orientButton"
             anchors.left: second_tab_button_arrange.right
             iconSource1: "qrc:/resource/upper_orientation.png"
             iconSource2: "qrc:/Resource/upper2_orient.png"
             iconText: "Orient"
+            signal runGroupFeature(int type, string state);
+            onButtonClicked:{
+                   runGroupFeature(ftrOrient, state);
+            }
         }
 
         Rectangle{
@@ -352,6 +361,7 @@ Rectangle {
 
         UpperButton{
             id : third_tab_button_autorepair
+            objectName: "repairButton"
             anchors.left: third_tab_button_scale.right
             iconSource1: "qrc:/resource/upper_autorepair.png"
             iconSource2: "qrc:/Resource/upper2_autorepair.png"
@@ -363,7 +373,10 @@ Rectangle {
             }
             visible: if(box_uppertab.box != iconText) return false;
             */
-
+            signal runGroupFeature(int type, string state);
+            onButtonClicked:{
+                   runGroupFeature(ftrRepair, state);
+            }
         }
 
         UpperButton{
@@ -539,6 +552,13 @@ Rectangle {
             onFinishClicked:{
                 runGroupFeature(ftrMove, state);
             }
+
+            function onApplyFinishButton(){
+                popup_move.colorApplyFinishButton(1)
+            }
+            function offApplyFinishButton(){
+                popup_move.colorApplyFinishButton(0);
+            }
         }
 
         //5. PopUp - Rotate
@@ -574,11 +594,18 @@ Rectangle {
                 runGroupFeature(ftrRotate, state);
             }
             state: second_tab_button_rotate.state=="active" ? "active" : "inactive"
+            function onApplyFinishButton(){
+                popup_rotate.colorApplyFinishButton(1)
+            }
+            function offApplyFinishButton(){
+                popup_rotate.colorApplyFinishButton(0);
+            }
         }
 
         //6. PopUp - Lay Flat
         PopUp {
             id: popup_layflat
+            objectName: "layflatPopup"
             funcname: "Lay flat"
             height: 220
             detail1: "Click the surface to face it down."
@@ -587,12 +614,30 @@ Rectangle {
             detailline1_vis: false
             detailline2_vis: false
             imageHeight: 76
-            applyfinishbutton_vis: false
+            applyfinishbutton_vis: true
             okbutton_vis: false
-            applybutton_vis: true
+            applybutton_vis: false
+            applybutton_action: false
+            applyfinishbutton_text:"Select"
             applybutton_text: "Finish"
             descriptionimage_vis: true
             state: second_tab_button_layflat.state=="active" ? "active" : "inactive"
+            signal runFeature();
+            signal openLayflat()
+            onApplyClicked: {
+                console.log("layflat");
+                //runFeature();
+                openLayflat()
+            }
+            onFinishClicked: {
+                closeLayflat()
+            }
+            function onApplyFinishButton(){
+                popup_layflat.colorApplyFinishButton(1)
+            }
+            function offApplyFinishButton(){
+                popup_layflat.colorApplyFinishButton(0);
+            }
         }
 
         //7. PopUp - Arrange
@@ -625,7 +670,6 @@ Rectangle {
             objectName: "orientPopup"
             id: popup_orient
             funcname: "Orient"
-
             height: 220
             detail1: "Click Apply to rotate the model."
             //detail2: ""
@@ -642,6 +686,13 @@ Rectangle {
                 console.log("auto orientation")
                 runFeature(ftrOrient);
             }
+            function onApplyFinishButton(){
+                popup_orient.colorApplyFinishButton(1)
+            }
+            function offApplyFinishButton(){
+                popup_orient.colorApplyFinishButton(0);
+            }
+
             state: second_tab_button_orient.state=="active" ? "active" : "inactive"
         }
 
@@ -721,6 +772,14 @@ Rectangle {
             onApplyClicked: {
                 console.log("auto repair");
                 runFeature(ftrRepair);
+            }
+            function onApplyFinishButton(){
+                console.log("r-on")
+                popup_autorepair.colorApplyFinishButton(1)
+            }
+            function offApplyFinishButton(){
+                console.log("r-off")
+                popup_autorepair.colorApplyFinishButton(0);
             }
         }
 
