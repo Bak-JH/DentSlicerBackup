@@ -444,9 +444,12 @@ Rectangle {
         id: viewModeGroup
     }
 
+    signal radioClicked(int value);
+
     RadioButton {
         id: radiobutton1
         visible: false
+        checked: true
         anchors.bottom: parent.bottom
         anchors.bottomMargin: 90
         anchors.left: parent.left
@@ -475,6 +478,9 @@ Rectangle {
                 font.family: mainFont.name
                 font.pixelSize: 14
             }
+        }
+        onClicked: {
+            radioClicked(1);
         }
     }
 
@@ -510,17 +516,24 @@ Rectangle {
                 font.pixelSize: 14
             }
         }
+        onClicked: {
+            radioClicked(2);
+        }
     }
 
+    signal planeSliderValueChanged(double value);
     Planeslider {
         id: slider
         visible: false
-        anchors.right: parent.left
-        anchors.rightMargin: 20
-        anchors.bottom: parent.bottom
-        anchors.bottomMargin: -20
-    }
+        anchors.right: parent.right
+        anchors.rightMargin: -60
+        anchors.top: parent.top
+        anchors.topMargin: 0
 
+        onSliderValueChanged: {
+            planeSliderValueChanged(value);
+        }
+    }
 
     //Number write down button
     Item{

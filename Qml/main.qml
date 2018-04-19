@@ -8,7 +8,7 @@ import "glcode.js" as GLCode
 import QtQuick.Dialogs 1.2
 Item{
     ApplicationWindow {
-        title: qsTr("DLPslicer")
+        title: qsTr("DentStudio")
         id : window
         width: 1280
         height: 768

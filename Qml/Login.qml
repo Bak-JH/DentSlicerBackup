@@ -107,6 +107,7 @@ ApplicationWindow {
 
                 TextField {
                     id: idbox_text
+                    width: parent.width-90
                     anchors.right: parent.right
                     anchors.rightMargin: 5
                     anchors.verticalCenter: parent.verticalCenter
@@ -179,6 +180,7 @@ ApplicationWindow {
                 */
                 TextField {
                     id: pwbox_text
+                    width: parent.width-90
                     anchors.right: parent.right
                     anchors.rightMargin: 5
                     anchors.verticalCenter: parent.verticalCenter

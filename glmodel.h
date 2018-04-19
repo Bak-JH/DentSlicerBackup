@@ -194,6 +194,7 @@ private:
     Mesh* toSparse(Mesh* mesh);
 
     int cutMode = 0;
+    int cutFillMode = 1;
     bool labellingActive = false;
     bool extensionActive = false;
     bool cutActive = false;
@@ -228,6 +229,7 @@ public slots:
     void removePlane();
     void modelCut();
     void cutModeSelected(int type);
+    void cutFillModeSelected(int type);
     void getSliderSignal(double value);
     void generateRLModel();
     void openCut();
