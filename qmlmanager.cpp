@@ -432,8 +432,15 @@ void QmlManager::unselectPart(int ID){
     }
 
     selectedModel = nullptr;
-
 }
+
+bool QmlManager::isSelected(){
+    if(selectedModel == nullptr)
+        return false;
+    else
+        return true;
+}
+
 void QmlManager::modelVisible(int ID, bool isVisible){
     GLModel* target;
     for(int i=0; i<glmodels.size();i++){

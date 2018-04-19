@@ -7,6 +7,7 @@ import QtQuick.Controls.Styles 1.4
 import "glcode.js" as GLCode
 import QtQuick.Dialogs 1.2
 import QtWinExtras 1.0
+import Qt3D.Input 2.0
 ApplicationWindow {
     width: 356
     height: 440
@@ -22,6 +23,14 @@ ApplicationWindow {
 
         color: "#CCCCCC"
     }
+    /*
+    Rectangle{//main
+        width: parent.width-2
+        height: parent.height-2
+        anchors.top: parent.top
+        anchors.left: parent.left
+        color: "#ffffff"
+    }*/
 
     Rectangle{//main
         id : contentRect
@@ -31,6 +40,19 @@ ApplicationWindow {
         anchors.left: parent.left
 
         color: "#ffffff"
+
+        Keys.onPressed: {
+            if (event.key == Qt.Key_Enter) {
+                loginButton.loginTrial(idbox_text.text, pwbox_text.text);
+            }
+        }
+        /*
+        Rectangle{//color
+            width: parent.width
+            height: parent.height
+            anchors.centerIn: parent
+            color: "white"
+        }*/
 
         Image{
             width : 136
@@ -82,22 +104,28 @@ ApplicationWindow {
                     }
                 }
                 */
-                TextInput {
+
+                TextField {
                     id: idbox_text
                     anchors.right: parent.right
                     anchors.rightMargin: 5
                     anchors.verticalCenter: parent.verticalCenter
-                    text: "Enter"
-                    //maximumLength:
+                    horizontalAlignment: TextInput.AlignRight
+                    placeholderText: "Enter ID"
                     font.pixelSize: 12
                     font.family: mainFont.name
-                    color: focus ? "black" : "#737375"
+                    textColor: focus ? "black" : "#737375"
                     selectByMouse: true
 
-                    onEditingFinished:  {
-
+                    style: TextFieldStyle {
+                        textColor: "black"
+                        background: Rectangle {
+                            border.width: 0
+                        }
                     }
                 }
+
+
                 Rectangle{
                     width: parent.width
                     height: 1
@@ -149,20 +177,25 @@ ApplicationWindow {
                     }
                 }
                 */
-                TextInput {
+                TextField {
                     id: pwbox_text
                     anchors.right: parent.right
                     anchors.rightMargin: 5
                     anchors.verticalCenter: parent.verticalCenter
-                    text: "Enter"
-                    //maximumLength:
+                    horizontalAlignment: TextInput.AlignRight
+                    placeholderText: "Enter Password"
+
                     font.pixelSize: 12
                     font.family: mainFont.name
-                    color: focus ? "black" : "#737375"
+                    textColor: focus ? "black" : "#737375"
                     selectByMouse: true
                     echoMode: TextInput.Password
-                    onEditingFinished:  {
 
+                    style: TextFieldStyle {
+                        textColor: "black"
+                        background: Rectangle {
+                            border.width: 0
+                        }
                     }
                 }
                 Rectangle{
@@ -177,10 +210,8 @@ ApplicationWindow {
         }
 
 
-
-
-
         Rectangle { // login button
+            id : loginButton
             objectName: "loginButton"
             width: 128
             height: 36
@@ -207,6 +238,7 @@ ApplicationWindow {
                 color: "white"
             }
             MouseArea {
+                cursorShape: Qt.PointingHandCursor
                 anchors.fill: parent
                 hoverEnabled: true
                 onClicked: {
@@ -249,6 +281,7 @@ ApplicationWindow {
             }
 
             MouseArea {
+                cursorShape: Qt.PointingHandCursor
                 anchors.fill: parent
                 hoverEnabled: true
                 onClicked: {
@@ -261,4 +294,8 @@ ApplicationWindow {
     TaskbarButton {
             overlay.iconSource: "qrc:/icon-32.ico"
     }
+
+
+
+
 }

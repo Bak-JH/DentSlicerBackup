@@ -85,7 +85,7 @@ Item {
                 anchors.leftMargin: 8
 
                 inputWidth: 160
-                inputData: "00h 20min"
+                inputData: "00h 00min"
                 inputSource: "qrc:/resource/slicing_clock.png"
             }
             SlicingDataElement{
@@ -96,7 +96,7 @@ Item {
                 anchors.leftMargin: 8
 
                 inputWidth: 160
-                inputData: "10.0 X 10.0 X 5.0 mm"
+                inputData: "0.0 X 0.0 X 0.0 mm"
                 inputSource: "qrc:/resource/slicing_size.png"
             }
             SlicingDataElement{
@@ -107,7 +107,7 @@ Item {
                 anchors.leftMargin: 8
 
                 inputWidth: 100
-                inputData: "145 layer"
+                inputData: "0 layer"
                 inputSource: "qrc:/resource/slicing_layer.png"
             }
             SlicingDataElement{
@@ -118,7 +118,7 @@ Item {
                 anchors.leftMargin: 8
 
                 inputWidth: 100
-                inputData: "26 ml"
+                inputData: "0 ml"
                 inputSource: "qrc:/resource/slicing_volume.png"
             }
 

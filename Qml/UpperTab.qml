@@ -355,6 +355,10 @@ Rectangle {
             */
 
             //state: if(box_uppertab.box != "Scale") return "inactive";
+            onButtonClicked:{
+                if(!qm.isSelected() && (state == "active"))
+                    window.resultPopUp.openResultPopUp("","You must select at least one model.","")
+            }
 
 
         }
@@ -375,7 +379,10 @@ Rectangle {
             */
             signal runGroupFeature(int type, string state);
             onButtonClicked:{
-                   runGroupFeature(ftrRepair, state);
+                if(!qm.isSelected() && (state == "active"))
+                    window.resultPopUp.openResultPopUp("","You must select at least one model.","")
+                else
+                    runGroupFeature(ftrRepair, state);
             }
         }
 
@@ -389,6 +396,11 @@ Rectangle {
             iconSource1: "qrc:/resource/upper_cut.png"
             iconSource2: "qrc:/Resource/upper2_cut.png"
             iconText: "Cut"
+            onButtonClicked:{
+                if(!qm.isSelected()&& (state == "active"))
+                    window.resultPopUp.openResultPopUp("","You must select at least one model.","")
+            }
+
         }
             
         UpperButton{
@@ -398,6 +410,11 @@ Rectangle {
             iconSource1: "qrc:/resource/upper_shelloffset.png"
             iconSource2: "qrc:/Resource/upper2_shelloffset.png"
             iconText: "Shell Offset"
+            onButtonClicked:{
+                if(!qm.isSelected() && (state == "active"))
+                    window.resultPopUp.openResultPopUp("","You must select at least one model.","")
+            }
+
         }
 
         Rectangle{
@@ -431,6 +448,11 @@ Rectangle {
             iconSource1: "qrc:/Resource/upper_extend.png"
             iconSource2: "qrc:/Resource/upper2_extend.png"
             iconText: "Extend"
+            onButtonClicked:{
+                if(!qm.isSelected() && (state == "active"))
+                    window.resultPopUp.openResultPopUp("","You must select at least one model.","")
+            }
+
         }
 
         UpperButton{
@@ -441,6 +463,10 @@ Rectangle {
             iconSource2: "qrc:/Resource/upper2_support.png"
             iconText: "Support"
 
+            onButtonClicked:{
+                window.resultPopUp.openResultPopUp("This function is currently unavailable.","","Please check back later.")
+            }
+
         }
         UpperButton{
             id : fourth_tab_button_label
@@ -449,6 +475,11 @@ Rectangle {
             iconSource1: "qrc:/resource/upper_label.png"
             iconSource2: "qrc:/Resource/upper2_label.png"
             iconText: "Label"
+            onButtonClicked:{
+                if(!qm.isSelected() && (state == "active"))
+                    window.resultPopUp.openResultPopUp("","You must select at least one model.","")
+            }
+
         }
 
         Rectangle{
@@ -719,7 +750,13 @@ Rectangle {
             numberbox_y: 75
             //numbox_default: 0
             numbox_total_height: 120
-            state: third_tab_button_scale.state=="active" ? "active" : "inactive"
+            //state: third_tab_button_scale.state=="active" ? "active" : "inactive"
+            state: {
+                if (third_tab_button_scale.state=="active" && qm.isSelected())
+                    return "active"
+                else
+                    return "inactive"
+            }
 
             //detail1 - size lock
             Rectangle {
@@ -767,7 +804,13 @@ Rectangle {
             applybutton_vis: false
             okbutton_vis: false
             descriptionimage_vis: true
-            state: third_tab_button_autorepair.state=="active" ? "active" : "inactive"
+            //state: third_tab_button_autorepair.state=="active" ? "active" : "inactive"
+            state: {
+                if (third_tab_button_autorepair.state=="active" && qm.isSelected())
+                    return "active"
+                else
+                    return "inactive"
+            }
             signal runFeature(int type);
             onApplyClicked: {
                 console.log("auto repair");
@@ -804,7 +847,7 @@ Rectangle {
             slider_vis: true
             imageHeight: 70
             state: {
-                if (third_tab_button_cut.state=="active") {
+                if (third_tab_button_cut.state=="active" && qm.isSelected()) {
                     openCut()
                     return "active"
                 }
@@ -869,7 +912,7 @@ Rectangle {
             numbox_detail2_default: 1.0
             numbox_updown_scale: 0.25
             state: {
-                if (third_tab_button_shelloffset.state == "active"){
+                if (third_tab_button_shelloffset.state == "active" && qm.isSelected()){
                     //openShellOffset();
                     return "active";
                 } else {
@@ -942,7 +985,7 @@ Rectangle {
             numbox_detail2_default: 10.0
             numbox_updown_scale: 0.5
             state: { //fourth_tab_button_extend.state=="active" ? "active" : "inactive"
-                if (fourth_tab_button_extend.state == "active"){
+                if (fourth_tab_button_extend.state == "active" && qm.isSelected()){
                     openExtension();
                     return "active";
                 } else {
@@ -1358,7 +1401,7 @@ Rectangle {
             applyfinishbutton_vis: false
             applybutton_vis: true
             state: {
-                if (fourth_tab_button_label.state=="active") {
+                if (fourth_tab_button_label.state=="active" && qm.isSelected()) {
                     openLabelling()
                     return "active"
                 }
