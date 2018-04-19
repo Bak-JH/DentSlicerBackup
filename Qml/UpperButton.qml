@@ -27,10 +27,28 @@ Rectangle{
         case "Orient":
             buttonClicked();
             break;
+        case "Lay Flat":
+            buttonClicked();
+            break;
+        case "Support":
+            buttonClicked();
+            break;
+        case "Scale":
+            buttonClicked();
+            break;
         case "Auto Repair":
             buttonClicked();
             break;
-        case "Lay Flat":
+        case "Cut":
+            buttonClicked();
+            break;
+        case "Shell Offset":
+            buttonClicked();
+            break;
+        case "Extend":
+            buttonClicked();
+            break;
+        case "Label":
             buttonClicked();
             break;
         default:

@@ -45,7 +45,7 @@ Rectangle {
             anchors.topMargin: 30
             anchors.horizontalCenter: parent.horizontalCenter
             verticalAlignment: Text.AlignTop
-            font.pixelSize: 19
+            font.pixelSize: 16
             color: "#0DA3B2"
             font.family: mainFont.name
         }
@@ -59,7 +59,7 @@ Rectangle {
             anchors.topMargin: 44
             anchors.horizontalCenter: parent.horizontalCenter
             verticalAlignment: Text.AlignTop
-            font.pixelSize: 19
+            font.pixelSize: 16
             color: "#0DA3B2"
             font.family: mainFont.name
         }
@@ -73,7 +73,7 @@ Rectangle {
             anchors.topMargin: 58
             anchors.horizontalCenter: parent.horizontalCenter
             verticalAlignment: Text.AlignTop
-            font.pixelSize: 19
+            font.pixelSize: 16
             color: "#0DA3B2"
             font.family: mainFont.name
         }

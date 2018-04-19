@@ -18,6 +18,8 @@ Item{
         property alias lefttab: lefttab
         property alias lefttabExport: lefttabExport
         property alias progressPopUp: progressPopUp
+        property alias resultPopUp: resultPopUp
+
 
         property alias mainFont : mainFont
 
