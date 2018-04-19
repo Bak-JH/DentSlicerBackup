@@ -151,6 +151,8 @@ public slots:
     void runArrange();
     void applyArrangeResult(vector<QVector3D>, vector<float>);
     void cleanSelectedModel(int);
+    void extensionSelect();
+    void extensionUnSelect();
 
 };
 

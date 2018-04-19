@@ -205,6 +205,8 @@ signals:
     void resetLayflat();
     void bisectDone();
     void _updateModelMesh();
+    void extensionSelect();
+    void extensionUnSelect();
 
 public slots:
     // object picker parts

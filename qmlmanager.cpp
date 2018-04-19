@@ -212,6 +212,8 @@ void QmlManager::disconnectHandlers(GLModel* glmodel){
     QObject::disconnect(extensionPopup, SIGNAL(openExtension()), glmodel->shadowModel, SLOT(openExtension()));
     QObject::disconnect(extensionPopup, SIGNAL(closeExtension()), glmodel->shadowModel, SLOT(closeExtension()));
     QObject::disconnect(extensionPopup, SIGNAL(generateExtensionFaces(double)), glmodel, SLOT(generateExtensionFaces(double)));
+    QObject::disconnect(glmodel->shadowModel,SIGNAL(extensionSelect()),this,SLOT(extensionSelect()));
+    QObject::disconnect(glmodel->shadowModel,SIGNAL(extensionUnSelect()),this,SLOT(extensionUnSelect()));
 
     // shelloffset popup codes
     QObject::disconnect(shelloffsetPopup, SIGNAL(shellOffset(double)), glmodel, SLOT(generateShellOffset(double)));
@@ -266,7 +268,8 @@ void QmlManager::connectHandlers(GLModel* glmodel){
     QObject::connect(extensionPopup, SIGNAL(openExtension()), glmodel->shadowModel, SLOT(openExtension()));
     QObject::connect(extensionPopup, SIGNAL(closeExtension()), glmodel->shadowModel, SLOT(closeExtension()));
     QObject::connect(extensionPopup, SIGNAL(generateExtensionFaces(double)), glmodel, SLOT(generateExtensionFaces(double)));
-
+    QObject::connect(glmodel->shadowModel,SIGNAL(extensionSelect()),this,SLOT(extensionSelect()));
+    QObject::connect(glmodel->shadowModel,SIGNAL(extensionUnSelect()),this,SLOT(extensionUnSelect()));
     // shelloffset popup codes
     QObject::connect(shelloffsetPopup, SIGNAL(shellOffset(double)), glmodel, SLOT(generateShellOffset(double)));
 
@@ -408,7 +411,12 @@ void QmlManager::modelSelected(int ID){
     }
 
 }
-
+void QmlManager::extensionSelect(){
+    QMetaObject::invokeMethod(extensionPopup,"onApplyFinishButton");
+}
+void QmlManager::extensionUnSelect(){
+    QMetaObject::invokeMethod(extensionPopup,"offApplyFinishButton");
+}
 void QmlManager::selectPart(int ID){
     emit modelSelected(ID);
 }
