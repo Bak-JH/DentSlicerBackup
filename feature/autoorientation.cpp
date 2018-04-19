@@ -117,7 +117,7 @@ rotateResult* autoorientation::Tweak(Mesh* mesh, bool bi_algorithmic,int CA,bool
         return NULL;
     }
     //━━━━━━━━━━━━━━━━━━━━ 내용 출력 ━━━━━━━━━━━━━━━━━━━
-    if(true){//필요 시 verbose를 추가해도 됩니다.
+    if(false){//필요 시 verbose를 추가해도 됩니다.
         qDebug()<<"Examine "<<best_n+1<<" orientations:";
         qDebug("  %-35s%-16s%-16s%-16s%-16s","Area Vector:","Touching Area:","Overhang:","Line length:","Unprintability:");
         for(int i=0;i<best_n+1;i++){

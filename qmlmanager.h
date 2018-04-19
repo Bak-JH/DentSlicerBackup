@@ -59,7 +59,7 @@ public:
     QObject *cutPopup;
     QObject *curveButton;
     QObject *flatButton;
-    QObject *slider;
+    QObject *cutSlider;
 
     // labelling components
     QObject *text3DInput;

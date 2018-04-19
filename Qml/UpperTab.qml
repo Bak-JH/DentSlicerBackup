@@ -847,7 +847,7 @@ Rectangle {
             rightselectimage_vis: true
             radiobutton1_vis: true
             radiobutton2_vis: true
-            slider_vis: true
+            slider_vis: false
             imageHeight: 70
             state: {
                 if (third_tab_button_cut.state=="active" && qm.isSelected()) {
@@ -855,42 +855,54 @@ Rectangle {
                     return "active"
                 }
                 else {
-                    closeCut()
+                    slider_vis = false;
+                    closeCut();
                     return "inactive"
                 }
             }
 
             onFlatModeClicked: {
                 console.log("flat mode selected");
+                slider_vis = true;
                 cutModeSelected(1);
             }
 
             onCurveModeClicked: {
                 console.log("curve mode selected");
+                slider_vis = false;
                 cutModeSelected(2);
             }
 
+            onPlaneSliderValueChanged: {
+                resultSliderValueChanged(value);
+            }
+
+            onRadioClicked: {
+                cutFillModeSelected(value);
+            }
+
             onApplyClicked: {
-                console.log("ApplyClicked")
-                //runFeature(ftrCut);
-                //generatePlane();
                 modelCut();
+                slider_vis = false;
             }
 
             // on Finish Clicked:
             onFinishClicked: {
                 console.log("Finish Clicked");
                 closeCut();
-                //modelCutFinish();
+                slider_vis = false;
             }
 
+            signal resultSliderValueChanged(double value);
             signal cutModeSelected(int type);
+            signal cutFillModeSelected(int type);
             signal runFeature(int type);
             signal modelCut();
             //signal generatePlane();
             //signal modelCutFinish();
             signal openCut();
             signal closeCut();
+            //Planeslider{id:slider;anchors.right: parent.left;anchors.rightMargin:20;anchors.bottom:parent.bottom;anchors.bottomMargin:-20;}
         }
 
 

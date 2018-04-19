@@ -56,7 +56,7 @@ void QmlManager::initializeUI(QQmlApplicationEngine* e){
     cutPopup = FindItemByName(engine, "cutPopup");
     curveButton = FindItemByName(engine, "curveButton");
     flatButton = FindItemByName(engine, "flatButton");
-    slider = FindItemByName(engine, "slider");
+    cutSlider = FindItemByName(engine, "cutSlider");
 
     // labelling components
     text3DInput = FindItemByName(engine, "text3DInput");
@@ -188,14 +188,14 @@ void QmlManager::disconnectHandlers(GLModel* glmodel){
     // model rotate popup codes
     // model layflat popup codes
     QObject::disconnect(layflatPopup, SIGNAL(openLayflat()), glmodel, SLOT(openLayflat()));
-    QObject::disconnect(layflatPopup, SIGNAL(closeLayflat()), glmodel, SLOT(closeLayflat()));
 
     // model cut popup codes
     QObject::disconnect(cutPopup,SIGNAL(modelCut()),glmodel->shadowModel , SLOT(modelCut()));
     QObject::disconnect(cutPopup,SIGNAL(cutModeSelected(int)),glmodel->shadowModel,SLOT(cutModeSelected(int)));
+    QObject::disconnect(cutPopup,SIGNAL(cutFillModeSelected(int)),glmodel->shadowModel,SLOT(cutFillModeSelected(int)));
     QObject::disconnect(cutPopup, SIGNAL(openCut()), glmodel->shadowModel, SLOT(openCut()));
     QObject::disconnect(cutPopup, SIGNAL(closeCut()), glmodel->shadowModel, SLOT(closeCut()));
-    QObject::disconnect(slider, SIGNAL(govalue(double)), glmodel->shadowModel, SLOT(getSliderSignal(double)));
+    QObject::disconnect(cutPopup, SIGNAL(resultSliderValueChanged(double)), glmodel->shadowModel, SLOT(getSliderSignal(double)));
 
     // auto orientation popup codes
     QObject::disconnect(orientPopup, SIGNAL(runFeature(int)), glmodel->ft, SLOT(setTypeAndStart(int)));
@@ -244,15 +244,15 @@ void QmlManager::connectHandlers(GLModel* glmodel){
     // need to connect for every popup
     // model layflat popup codes
     QObject::connect(layflatPopup, SIGNAL(openLayflat()), glmodel, SLOT(openLayflat()));
-    QObject::connect(layflatPopup, SIGNAL(closeLayflat()), glmodel, SLOT(closeLayflat()));
     QObject::connect(glmodel, SIGNAL(resetLayflat()), this, SLOT(resetLayflat()));
 
     // model cut popup codes
     QObject::connect(cutPopup,SIGNAL(modelCut()),glmodel->shadowModel , SLOT(modelCut()));
     QObject::connect(cutPopup,SIGNAL(cutModeSelected(int)),glmodel->shadowModel,SLOT(cutModeSelected(int)));
+    QObject::connect(cutPopup,SIGNAL(cutFillModeSelected(int)),glmodel->shadowModel,SLOT(cutFillModeSelected(int)));
     QObject::connect(cutPopup, SIGNAL(openCut()), glmodel->shadowModel, SLOT(openCut()));
     QObject::connect(cutPopup, SIGNAL(closeCut()), glmodel->shadowModel, SLOT(closeCut()));
-    QObject::connect(slider, SIGNAL(govalue(double)), glmodel->shadowModel, SLOT(getSliderSignal(double)));
+    QObject::connect(cutPopup, SIGNAL(resultSliderValueChanged(double)), glmodel->shadowModel, SLOT(getSliderSignal(double)));
 
     // auto orientation popup codes
     QObject::connect(orientPopup, SIGNAL(runFeature(int)), glmodel->ft, SLOT(setTypeAndStart(int)));
@@ -603,7 +603,7 @@ void QmlManager::runGroupFeature(int ftrType, QString state){
     groupFunctionIndex = ftrType;
     groupFunctionState = state;
     switch(ftrType){
-    case 5: //rotate
+    case ftrRotate: //rotate
     {
         qDebug()<<state;
         if (state == "inactive"){
@@ -620,7 +620,7 @@ void QmlManager::runGroupFeature(int ftrType, QString state){
         }
         break;
     }
-    case 4:  //move
+    case ftrMove:  //move
     {
         qDebug()<<state;
         if (state == "inactive"){
@@ -635,7 +635,7 @@ void QmlManager::runGroupFeature(int ftrType, QString state){
         }
         break;
     }
-    case 6:
+    case ftrLayFlat:
     {
         if (state == "active"){
             if (selectedModel == nullptr){
@@ -648,7 +648,7 @@ void QmlManager::runGroupFeature(int ftrType, QString state){
         }
         break;
     }
-    case 8:  //orient
+    case ftrOrient:  //orient
     {
         qDebug()<<state;
         if (state == "active"){
@@ -660,7 +660,7 @@ void QmlManager::runGroupFeature(int ftrType, QString state){
         }
         break;
     }
-    case 10:  //repair
+    case ftrRepair:  //repair
     {
         qDebug()<<state;
         if (state == "active"){
@@ -672,7 +672,8 @@ void QmlManager::runGroupFeature(int ftrType, QString state){
         }
         break;
     }
-    case 13:
+    case ftrExtend:
+        qDebug() << "run groupfeature extend";
         qDebug()<<state;
         if (state == "active"){
             if (selectedModel != nullptr){
