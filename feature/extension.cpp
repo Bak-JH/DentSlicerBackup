@@ -5,7 +5,7 @@ void extendMesh(Mesh* mesh, MeshFace* mf, double distance){
     qDebug() << normal;
 
     vector<MeshFace*> extension_faces;
-    detectExtensionFaces(mesh, normal, mf, mf, &extension_faces);
+    detectExtensionFaces(mesh, normal, mf, mf, &extension_faces,nullptr);
     qDebug() << "detected extension faces" << extension_faces.size();
     for (MeshFace* emf : extension_faces){
         //mesh->addFace(mesh->idx2MV(emf->mesh_vertex[0]).position+normal*2,mesh->idx2MV(emf->mesh_vertex[1]).position+normal*2,mesh->idx2MV(emf->mesh_vertex[2]).position+normal*2);
@@ -27,10 +27,43 @@ void extendMesh(Mesh* mesh, MeshFace* mf, double distance){
     coverCap(mesh, normal, extension_faces, distance);
     mesh->connectFaces();
 }
+void resetColorMesh(Mesh* mesh, Qt3DRender::QBuffer * colorbuffer, vector<int> extendFaces){
+    QByteArray colorVertexArray;
+    colorVertexArray.resize(sizeof(float)*3);
+    float * reVertexArray = reinterpret_cast<float*>(colorVertexArray.data());
+    for (int i=0;i<extendFaces.size();i++){
+        reVertexArray[0] = 0.278;
+        reVertexArray[1] = 0.670;
+        reVertexArray[2] = 0.706;
+        colorbuffer->updateData(extendFaces.at(i)*sizeof(float)*9,colorVertexArray);
+        colorbuffer->updateData(extendFaces.at(i)*sizeof(float)*9+3*sizeof(float),colorVertexArray);
+        colorbuffer->updateData(extendFaces.at(i)*sizeof(float)*9+6*sizeof(float),colorVertexArray);
+    }
+}
+void extendColorMesh(Mesh* mesh, MeshFace* mf, Qt3DRender::QBuffer * colorbuffer, vector<int>* extendFaces){
+    vector<MeshFace*> extension_faces;
+    //vector<int> extendFaces;
+    extendFaces->clear();
+    QVector3D normal = mf->fn;
+    detectExtensionFaces(mesh, normal, mf, mf, &extension_faces, extendFaces);
+    QByteArray colorVertexArray;
+    colorVertexArray.resize(sizeof(float)*3);
+    float * reVertexArray = reinterpret_cast<float*>(colorVertexArray.data());
+    for (int i=0;i<extendFaces->size();i++){
+        reVertexArray[0] = 0.901;
+        reVertexArray[1] = 0.843;
+        reVertexArray[2] = 0.133;
+        colorbuffer->updateData(extendFaces->at(i)*sizeof(float)*9,colorVertexArray);
+        colorbuffer->updateData(extendFaces->at(i)*sizeof(float)*9+3*sizeof(float),colorVertexArray);
+        colorbuffer->updateData(extendFaces->at(i)*sizeof(float)*9+6*sizeof(float),colorVertexArray);
+    }
 
-void detectExtensionFaces(Mesh* mesh, QVector3D normal, MeshFace* original_mf, MeshFace* mf, vector<MeshFace*>* result){
+}
+void detectExtensionFaces(Mesh* mesh, QVector3D normal, MeshFace* original_mf, MeshFace* mf, vector<MeshFace*>* result, vector<int>* result_idx){
     result->push_back(mf);
-
+    if (result_idx != nullptr){
+        result_idx->push_back(mf->idx);
+    }
     for (vector<MeshFace*> neighbors : mf->neighboring_faces){
         for (MeshFace* neighbor : neighbors){
             // check if neighbor already checked
@@ -41,14 +74,13 @@ void detectExtensionFaces(Mesh* mesh, QVector3D normal, MeshFace* original_mf, M
             }
             if (cont)
                 continue;
-
             // check if neighbor close to normal
             if ((neighbor->fn - normal).length() > 0.5 ||\
                     mesh->idx2MV(neighbor->mesh_vertex[0]).position.distanceToPoint(mesh->idx2MV(original_mf->mesh_vertex[0]).position) > 10)
                 continue;
             qDebug() << mesh->idx2MV(neighbor->mesh_vertex[0]).position.distanceToPoint(mesh->idx2MV(original_mf->mesh_vertex[0]).position);
             qDebug() << "looking for " << neighbor->idx;
-            detectExtensionFaces(mesh, normal, original_mf, neighbor, result);
+            detectExtensionFaces(mesh, normal, original_mf, neighbor, result, result_idx);
         }
     }
 

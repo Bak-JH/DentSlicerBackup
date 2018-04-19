@@ -73,7 +73,7 @@ public:
     QObject* orientButton;
     // extension components
     QObject* extensionPopup;
-
+    QObject* extensionButton;
     // shell offset components;
     QObject* shelloffsetPopup;
 

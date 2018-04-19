@@ -78,6 +78,8 @@ GLModel::GLModel(QObject* mainWindow, QNode *parent, Mesh* loadMesh, QString fna
     }
 
     m_meshMaterial = new QPhongMaterial();
+    m_meshVertexMaterial = new QPerVertexColorMaterial();
+
     this->changecolor(0);
     if (filename != "" && !EndsWith(filename.toStdString(), std::string("_left").c_str()) && !EndsWith(filename.toStdString(),  std::string("_right").c_str())){
         mesh = new Mesh();
@@ -592,8 +594,6 @@ void GLModel::addVertices(Mesh* mesh, bool CW)
                 result_vcs.push_back(QVector3D(1.0f, 0.0f, 0.0f));
             }
         }
-
-
         addColorVertices(result_vcs);
     }
 }
@@ -679,11 +679,14 @@ void GLModel::addColorVertices(vector<QVector3D> vertices){
     float * reVertexArray = reinterpret_cast<float*>(appendVertexArray.data());
 
     for (int i=0; i<vertex_color_cnt; i++){
-
         //coordinates of left vertex
-        reVertexArray[3*i+0] = vertices[i].x();
-        reVertexArray[3*i+1] = vertices[i].y();
-        reVertexArray[3*i+2] = vertices[i].z();
+        //97 185 192
+        //reVertexArray[3*i+0] = 0.38;
+        //reVertexArray[3*i+1] = 0.725;
+        //reVertexArray[3*i+2] = 0.753;
+        reVertexArray[3*i+0] = 0.278;
+        reVertexArray[3*i+1] = 0.670;
+        reVertexArray[3*i+2] = 0.706;
     }
 
     uint vertexColorCount = colorAttribute->count();
@@ -758,20 +761,18 @@ void GLModel::handlePickerClicked(QPickEvent *pick)
     }
 
     if (extensionActive){
-        MeshFace shadow_meshface = mesh->faces[trianglePick->triangleIndex()];
-        qDebug() << "found parent meshface" << shadow_meshface.parent_idx;
-
-        parentModel->uncolorExtensionFaces();
-        parentModel->targetMeshFace = &parentModel->mesh->faces[shadow_meshface.parent_idx];
-        /*qDebug() << trianglePick->localIntersection() \
-                 << parentModel->mesh->idx2MV(parentModel->targetMeshFace->mesh_vertex[0]).position\
-                << parentModel->mesh->idx2MV(parentModel->targetMeshFace->mesh_vertex[1]).position\
-                << parentModel->mesh->idx2MV(parentModel->targetMeshFace->mesh_vertex[2]).position;
-        */
-        // << parentModel->targetMeshFace->mesh_vertex[1] << parentModel->targetMeshFace->mesh_vertex[2];
-        parentModel->colorExtensionFaces();
-    } else {
-        parentModel->uncolorExtensionFaces();
+            MeshFace shadow_meshface = mesh->faces[trianglePick->triangleIndex()];
+            qDebug() << "found parent meshface" << shadow_meshface.parent_idx;
+            parentModel->uncolorExtensionFaces();
+            parentModel->targetMeshFace = &parentModel->mesh->faces[shadow_meshface.parent_idx];
+            parentModel->generateColorAttributes();
+            /*qDebug() << trianglePick->localIntersection() \
+                     << parentModel->mesh->idx2MV(parentModel->targetMeshFace->mesh_vertex[0]).position\
+                    << parentModel->mesh->idx2MV(parentModel->targetMeshFace->mesh_vertex[1]).position\
+                    << parentModel->mesh->idx2MV(parentModel->targetMeshFace->mesh_vertex[2]).position;
+            */
+            // << parentModel->targetMeshFace->mesh_vertex[1] << parentModel->targetMeshFace->mesh_vertex[2];
+            parentModel->colorExtensionFaces();
     }
     /*if (layflatActive){
         m_objectPicker->setEnabled(false);
@@ -1251,7 +1252,8 @@ void GLModel::generateText3DMesh()
 void GLModel::colorExtensionFaces(){
     if (targetMeshFace == NULL)
         return;
-
+    removeComponent(m_meshMaterial);
+    addComponent(m_meshVertexMaterial);
     /*
     QVector3D normal = targetMeshFace->fn;
 
@@ -1267,6 +1269,9 @@ void GLModel::colorExtensionFaces(){
 void GLModel:: uncolorExtensionFaces(){
     if (targetMeshFace == NULL)
         return;
+    resetColorMesh(mesh, vertexColorBuffer, extendFaces);
+    removeComponent(m_meshVertexMaterial);
+    addComponent(m_meshMaterial);
 
     /*QVector3D normal = targetMeshFace->fn;
 
@@ -1280,7 +1285,9 @@ void GLModel:: uncolorExtensionFaces(){
     // do uncolor thing
     */
 }
-
+void GLModel::generateColorAttributes(){
+    extendColorMesh(mesh,targetMeshFace,vertexColorBuffer,&extendFaces);
+}
 void GLModel::generateExtensionFaces(double distance){
     extendMesh(mesh, targetMeshFace, distance);
     emit _updateModelMesh();

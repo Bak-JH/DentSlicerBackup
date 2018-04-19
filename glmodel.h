@@ -102,6 +102,9 @@ public:
 
     bool appropriately_rotated=false;
     QPhongMaterial *m_meshMaterial;
+    QPerVertexColorMaterial *m_meshVertexMaterial;
+
+    //QPhongMaterial *m_meshMaterial;
     Qt3DRender::QBuffer *vertexBuffer;
     Qt3DRender::QBuffer *vertexNormalBuffer;
     Qt3DRender::QBuffer *vertexColorBuffer;
@@ -116,6 +119,8 @@ public:
     Qt3DCore::QTransform *m_transform;
 
     //Qt3DCore::QEntity *parentEntity;
+    //model extends
+    vector<int> extendFaces;
 
     std::vector<QVector3D> cuttingPoints;
     Plane cuttingPlane;
@@ -238,6 +243,7 @@ public slots:
     void closeExtension();
     void colorExtensionFaces();
     void uncolorExtensionFaces();
+    void generateColorAttributes();
     void generateExtensionFaces(double distance);
 
     // ShellOffset
