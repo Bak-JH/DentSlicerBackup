@@ -443,14 +443,19 @@ Rectangle {
 
         UpperButton{
             id : fourth_tab_button_extend
-
+            objectName: "extendButton"
             anchors.left: parent.left
             iconSource1: "qrc:/Resource/upper_extend.png"
             iconSource2: "qrc:/Resource/upper2_extend.png"
             iconText: "Extend"
+            signal runGroupFeature(int type, string state);
             onButtonClicked:{
-                if(!qm.isSelected() && (state == "active"))
+                if(!qm.isSelected() && (state == "active")){
                     window.resultPopUp.openResultPopUp("","You must select at least one model.","")
+                }else{
+                    runGroupFeature(ftrExtend, state);
+                }
+
             }
 
         }

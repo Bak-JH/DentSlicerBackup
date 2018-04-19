@@ -51,6 +51,8 @@ Rectangle{
         case "Label":
             buttonClicked();
             break;
+        case "Extend":
+            buttonClicked();
         default:
             //console.log(functionname);
             break;

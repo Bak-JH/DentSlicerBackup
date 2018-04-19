@@ -69,6 +69,7 @@ void QmlManager::initializeUI(QQmlApplicationEngine* e){
     result_popup = FindItemByName(engine, "result_popup");
 
     // extension components
+    extensionButton = FindItemByName(engine,"extendButton");
     extensionPopup = FindItemByName(engine, "extensionPopup");
 
     // shell offset components
@@ -104,6 +105,9 @@ void QmlManager::initializeUI(QQmlApplicationEngine* e){
     QObject::connect(orientButton,SIGNAL(runGroupFeature(int,QString)),this,SLOT(runGroupFeature(int,QString)));
     repairButton = FindItemByName(engine,"repairButton");
     QObject::connect(repairButton,SIGNAL(runGroupFeature(int,QString)),this,SLOT(runGroupFeature(int,QString)));
+
+    QObject::connect(extensionButton,SIGNAL(runGroupFeature(int,QString)),this,SLOT(runGroupFeature(int,QString)));
+
 
     layflatButton = FindItemByName(engine,"layflatButton");
     QObject::connect(layflatButton,SIGNAL(runGroupFeature(int,QString)),this,SLOT(runGroupFeature(int,QString)));
@@ -648,7 +652,7 @@ void QmlManager::runGroupFeature(int ftrType, QString state){
         }
         break;
     }
-    case 10:  //orient
+    case 10:  //repair
     {
         qDebug()<<state;
         if (state == "active"){
@@ -660,10 +664,21 @@ void QmlManager::runGroupFeature(int ftrType, QString state){
         }
         break;
     }
+    case 13:
+        qDebug()<<state;
+        if (state == "active"){
+            if (selectedModel != nullptr){
+                selectedModel->uncolorExtensionFaces();
+                selectedModel->colorExtensionFaces();
+            }
+        }else if (state == "inactive"){
+            if (selectedModel != nullptr){
+                selectedModel->uncolorExtensionFaces();
+            }
+        }
+        break;
     }
-
 }
-
 void QmlManager::addPart(QString fileName, int ID){
     QMetaObject::invokeMethod(partList, "addPart",
         Q_ARG(QVariant, fileName),
