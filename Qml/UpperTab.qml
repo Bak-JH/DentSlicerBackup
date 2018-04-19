@@ -455,9 +455,7 @@ Rectangle {
                 }else{
                     runGroupFeature(ftrExtend, state);
                 }
-
             }
-
         }
 
         UpperButton{
@@ -997,6 +995,12 @@ Rectangle {
                     closeExtension();
                     return "inactive";
                 }
+            }
+            function onApplyFinishButton(){
+                popup_extend.colorApplyFinishButton(1)
+            }
+            function offApplyFinishButton(){
+                popup_extend.colorApplyFinishButton(0);
             }
             onApplyClicked: {
                 console.log("extension");
