@@ -38,6 +38,7 @@ ApplicationWindow {
         height: parent.height-2
         anchors.top: parent.top
         anchors.left: parent.left
+        focus: true
 
         color: "#ffffff"
 
@@ -46,13 +47,7 @@ ApplicationWindow {
                 loginButton.loginTrial(idbox_text.text, pwbox_text.text);
             }
         }
-        /*
-        Rectangle{//color
-            width: parent.width
-            height: parent.height
-            anchors.centerIn: parent
-            color: "white"
-        }*/
+
 
         Image{
             width : 136
@@ -62,6 +57,22 @@ ApplicationWindow {
             anchors.topMargin: 60
 
             source: "qrc:/Resource/login_logo.png"
+        }
+
+        Text{
+            id : loginErrorText
+            anchors.top : parent.top
+            anchors.horizontalCenter: parent.horizontalCenter
+            anchors.topMargin: 170
+
+            text : "Please check your ID & Password"
+
+            font.pixelSize: 14
+            font.family: mainFont.name
+            horizontalAlignment: Text.AlignHCenter
+            verticalAlignment: Text.AlignVCenter
+            color: "red"
+            visible: false
         }
 
         //ID Box
@@ -253,6 +264,9 @@ ApplicationWindow {
             function loginSuccess(){
                 loginWindow.close()
                 window.visible = true;
+            }
+            function loginFail(){
+                loginErrorText.visible = true;
             }
         }
 

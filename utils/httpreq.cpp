@@ -113,6 +113,7 @@ void httpreq::replyFinished(QNetworkReply *reply)
         get_csrf_token();
         //QMessageBox::information(w, "암호화 에러", "서버에서 요청을 처리할 수 없습니다.");
         qDebug() << "some error on http_req" << encoded;
+        QMetaObject::invokeMethod(qmlManager->loginButton, "loginFail");
     }
 
 }
