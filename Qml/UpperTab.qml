@@ -448,6 +448,7 @@ Rectangle {
             iconSource1: "qrc:/Resource/upper_extend.png"
             iconSource2: "qrc:/Resource/upper2_extend.png"
             iconText: "Extend"
+
             signal runGroupFeature(int type, string state);
             onButtonClicked:{
                 if(!qm.isSelected() && (state == "active")){

@@ -51,6 +51,15 @@ Rectangle{
         case "Label":
             buttonClicked();
             break;
+        case "Shell Offset":
+            buttonClicked();
+            break;
+        case "Extend":
+            buttonClicked();
+            break;
+        case "Label":
+            buttonClicked();
+            break;
         case "Extend":
             buttonClicked();
         default:
