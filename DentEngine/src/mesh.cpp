@@ -687,7 +687,9 @@ MeshVertex findAvailableMeshVertexFromContour(QHash<uint32_t, Path3D>* pathHash,
 // construct closed contour using segments created from identify step
 Paths3D contourConstruct(Paths3D hole_edges){
     int prev_hole_size = 0;
+    int iter = 0;
     while (hole_edges.size() != prev_hole_size){
+        qDebug() << iter;
         prev_hole_size = hole_edges.size();
         Paths3D::iterator hole_edge1_it;
         Paths3D::iterator hole_edge2_it;
@@ -701,19 +703,18 @@ Paths3D contourConstruct(Paths3D hole_edges){
 
                 Path3D hole_edge1 = *hole_edge1_it;
                 Path3D hole_edge2 = *hole_edge2_it;
+                //qDebug() << meshVertex2Hash(*hole_edge1.end()) << meshVertex2Hash(*hole_edge2.begin());
 
                 // prolong hole_edge 1 if end and start matches
-                /*if (meshVertex2Hash(*hole_edge1.end()) == meshVertex2Hash(*hole_edge2.begin())){
+                if (meshVertex2Hash(hole_edge1[hole_edge1.size()-1]) == meshVertex2Hash(hole_edge2[0])){
                     hole_edge1_it->insert(hole_edge1_it->end(), hole_edge2_it->begin(), hole_edge2_it->end());
                     hole_edge2_it = hole_edges.erase(hole_edge2_it);
                 } else {
                     hole_edge2_it ++;
-                }*/
-
-                hole_edge2_it ++;
+                }
             }
         }
-        qDebug() << "hole edges size " << hole_edges.size();
+        qDebug() << "hole edges size " << prev_hole_size << hole_edges.size();
     }
 
     return hole_edges;
