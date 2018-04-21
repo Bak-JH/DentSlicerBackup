@@ -11,7 +11,8 @@
 
 httpreq::httpreq()
 {
-    main_url = "http://hixworld.com:8014/";
+    main_url = "http://18.184.77.105:8014/";
+    //main_url = "http://hixworld.com:8014/";
     //userid = "dentstudio";
     //passwd = "dentstudio1234!";
 
@@ -109,6 +110,7 @@ void httpreq::replyFinished(QNetworkReply *reply)
         //QMessageBox::information(w, "암호화 에러", "서버에서 요청을 거부했습니다.");
         qDebug() << "request failure";
     } else {
+        get_csrf_token();
         //QMessageBox::information(w, "암호화 에러", "서버에서 요청을 처리할 수 없습니다.");
         qDebug() << "some error on http_req" << encoded;
     }
