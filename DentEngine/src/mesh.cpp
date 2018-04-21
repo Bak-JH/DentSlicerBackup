@@ -686,7 +686,38 @@ MeshVertex findAvailableMeshVertexFromContour(QHash<uint32_t, Path3D>* pathHash,
 
 // construct closed contour using segments created from identify step
 Paths3D contourConstruct(Paths3D hole_edges){
-    // new trial if there's 분기점
+    int prev_hole_size = 0;
+    while (hole_edges.size() != prev_hole_size){
+        prev_hole_size = hole_edges.size();
+        Paths3D::iterator hole_edge1_it;
+        Paths3D::iterator hole_edge2_it;
+
+        for (hole_edge1_it = hole_edges.begin(); hole_edge1_it != hole_edges.end(); hole_edge1_it ++){
+            for (hole_edge2_it = hole_edges.begin(); hole_edge2_it != hole_edges.end();){
+                if (hole_edge1_it == hole_edge2_it){
+                    hole_edge2_it ++;
+                    continue;
+                }
+
+                Path3D hole_edge1 = *hole_edge1_it;
+                Path3D hole_edge2 = *hole_edge2_it;
+
+                // prolong hole_edge 1 if end and start matches
+                /*if (meshVertex2Hash(*hole_edge1.end()) == meshVertex2Hash(*hole_edge2.begin())){
+                    hole_edge1_it->insert(hole_edge1_it->end(), hole_edge2_it->begin(), hole_edge2_it->end());
+                    hole_edge2_it = hole_edges.erase(hole_edge2_it);
+                } else {
+                    hole_edge2_it ++;
+                }*/
+
+                hole_edge2_it ++;
+            }
+        }
+        qDebug() << "hole edges size " << hole_edges.size();
+    }
+
+    return hole_edges;
+    /*// new trial if there's 분기점
     Paths3D contourList;
 
     QHash<uint32_t, Path3D> pathHash;
@@ -832,131 +863,7 @@ Paths3D contourConstruct(Paths3D hole_edges){
         contourList.push_back(contour);
     }
 
-    /*for (Paths3D::iterator ps_it = contourList.begin(); ps_it != contourList.end();){
-        Path3D contour1 = (*ps_it);
-        for (Paths3D::iterator ps2_it = contourList.begin(); ps2_it != contourList.end();){
-            Path3D contour2 = (*ps2_it);
-            if ((*contour1.end()) == (*contour2.begin())){}
-        }
-    }*/
-
-
-
-    // Build Polygons
-    /*while(pathHash.size() >0){
-        Path3D contour;
-        MeshVertex start, pj_prev, pj, pj_next, last;
-
-        start = pathHash[hashList[0]][0];// pathHash.begin().value()[0];
-        pj_prev = start;
-        contour.push_back(start);
-        Path3D* dest = &(pathHash[hashList[0]]);//pathHash.begin().value());
-        if (dest->size() == 0|| dest->size() == 1){
-            uint32_t temp_hash = meshVertex2Hash(pj_prev);
-            pathHash.remove(temp_hash);
-            findAndDeleteHash(&hashList, temp_hash); //hashList.remove(temp_hash);
-            continue;
-        } else if (dest->size() ==2){
-            pj = (*dest)[1];
-            last = (*dest)[0]; // pj_prev itself
-            pj_next = (*dest)[0];
-            uint32_t temp_hash = meshVertex2Hash(pj_prev);
-            pathHash.remove(temp_hash);
-            findAndDeleteHash(&hashList, temp_hash);
-        } else {
-            pj = (*dest)[1];
-            last = (*dest)[2];
-
-            dest->erase(dest->begin()+1);
-            dest->erase(dest->begin()+1);
-
-            if (dest->size() == 1){
-                uint32_t temp_hash = meshVertex2Hash(pj_prev);
-                pathHash.remove(temp_hash);
-                findAndDeleteHash(&hashList, temp_hash);
-                pj_next = last;
-                contour.push_back(pj);
-            }
-        }
-        while(pj_next != last){
-            contour.push_back(pj);
-            dest = &(pathHash[meshVertex2Hash(pj)]);
-
-            if (dest->size() == 0|| dest->size() == 1){
-                uint32_t temp_hash = meshVertex2Hash(pj);
-                pathHash.remove(temp_hash);
-                findAndDeleteHash(&hashList, temp_hash);
-                break;
-            } else if (dest->size() == 2){
-                start = (*dest)[0]; // itself
-                uint32_t temp_hash = meshVertex2Hash(pj);
-                pathHash.remove(temp_hash);
-                findAndDeleteHash(&hashList, temp_hash);
-                pj_next = last;
-                pj = pj_next;
-                pj_prev = contour[0];
-                last = start;
-                reverse(contour.begin(), contour.end());
-                continue;
-            }
-
-            // find pj_prev and choose another pj_next and remove pj_prev, pj_next from H[pj]
-            for (int d=1; d<dest->size(); d++){
-                if ((*dest)[d] == pj_prev){
-                    dest->erase(dest->begin()+d);
-                    break;
-                }
-            }
-            pj_next = (*dest)[1];
-            dest->erase(dest->begin()+1);
-            if (dest->size() == 1){
-                uint32_t temp_hash = meshVertex2Hash(pj);
-                pathHash.remove(temp_hash);
-                findAndDeleteHash(&hashList, temp_hash);
-            }
-
-            pj_prev = pj;
-            pj = pj_next;
-        }
-
-        contour.push_back(last);
-        contour.push_back(start);
-
-        uint32_t last_hash = meshVertex2Hash(last);
-        if (pathHash.contains(last_hash)){
-            dest = &(pathHash[last_hash]);
-            for (int d=1; d<dest->size(); d++){
-                if ((*dest)[d] == pj_prev){
-                    dest->erase(dest->begin()+d);
-                    break;
-                }
-            }
-            for (int d=1; d<dest->size(); d++){
-                if ((*dest)[d] == start){
-                    dest->erase(dest->begin()+d);
-                    break;
-                }
-            }
-            if (dest->size() == 1){
-                pathHash.remove(last_hash);
-                findAndDeleteHash(&hashList, last_hash);
-            }
-        }
-
-        // remove 2-vertices-contours
-        if (contour.size() == 2){
-            continue;
-        }
-
-        //if (Orientation(contour)){
-        //    ReversePath(contour);
-        //}
-
-        contourList.push_back(contour);
-    }*/
-
-
-    return contourList;
+    return contourList;*/
 }
 
 vector<std::array<QVector3D, 3>> interpolate(Path3D from, Path3D to){
