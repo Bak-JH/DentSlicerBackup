@@ -94,7 +94,8 @@ public:
     vector<GLModel*> glmodels;
     GLModel* selectedModel = nullptr;
 
-
+    int rotateSnapAngle = 0;
+    int rotateSnapStartAngle = 0;
     int groupFunctionIndex;
     QString groupFunctionState;
     float progress = 0;

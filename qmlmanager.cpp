@@ -537,6 +537,7 @@ void QmlManager::modelRotateDone(int Axis){
     //glmodel->m_transform->setTranslation(QVector3D(0,0,zlength/2));
     showRotateSphere();
     mouseHack();
+    rotateSnapAngle = 0;
 }
 void QmlManager::modelMove(int Axis, int Distance){
     if (selectedModel == nullptr)
@@ -558,21 +559,70 @@ void QmlManager::modelMove(int Axis, int Distance){
 void QmlManager::modelRotate(int Axis, int Angle){
     if (selectedModel == nullptr)
         return;
-
+    rotateSnapAngle = (rotateSnapAngle + Angle +360) % 360;
     switch(Axis){
     case 1:{  //X
         float tmpx = selectedModel->m_transform->rotationX();
-        selectedModel->m_transform->setRotationX(tmpx+Angle);
+
+        if (QApplication::queryKeyboardModifiers() & Qt::ShiftModifier){// snap mode
+            if(rotateSnapAngle>0 && rotateSnapAngle<90){
+                selectedModel->m_transform->setRotationX(rotateSnapStartAngle + 0);
+            }
+            else if(rotateSnapAngle>90 && rotateSnapAngle<180){
+                selectedModel->m_transform->setRotationX(rotateSnapStartAngle + 90);
+            }
+
+            else if(rotateSnapAngle>180 && rotateSnapAngle<270){
+                selectedModel->m_transform->setRotationX(rotateSnapStartAngle + 180);
+            }
+            else if(rotateSnapAngle>270 && rotateSnapAngle<360){
+                selectedModel->m_transform->setRotationX(rotateSnapStartAngle + 270);
+            }
+        }
+        else
+            selectedModel->m_transform->setRotationX(tmpx+Angle);
+
         break;
     }
     case 2:{  //Y
         float tmpy = selectedModel->m_transform->rotationY();
-        selectedModel->m_transform->setRotationY(tmpy+Angle);
+
+        if (QApplication::queryKeyboardModifiers() & Qt::ShiftModifier){// snap mode
+            if(rotateSnapAngle>0 && rotateSnapAngle<90){
+                selectedModel->m_transform->setRotationY(rotateSnapStartAngle + 0);
+            }
+            else if(rotateSnapAngle>90 && rotateSnapAngle<180){
+                selectedModel->m_transform->setRotationY(rotateSnapStartAngle + 90);
+            }
+            else if(rotateSnapAngle>180 && rotateSnapAngle<270){
+                selectedModel->m_transform->setRotationY(rotateSnapStartAngle + 180);
+            }
+            else if(rotateSnapAngle>270 && rotateSnapAngle<360){
+                selectedModel->m_transform->setRotationY(rotateSnapStartAngle + 270);
+            }
+        }
+        else
+            selectedModel->m_transform->setRotationY(tmpy+Angle);
         break;
     }
     case 3:{  //Z
         float tmpz = selectedModel->m_transform->rotationZ();
-        selectedModel->m_transform->setRotationZ(tmpz+Angle);
+        if (QApplication::queryKeyboardModifiers() & Qt::ShiftModifier){// snap mode
+            if(rotateSnapAngle>0 && rotateSnapAngle<90){
+                selectedModel->m_transform->setRotationZ(rotateSnapStartAngle + 0);
+            }
+            else if(rotateSnapAngle>90 && rotateSnapAngle<180){
+                selectedModel->m_transform->setRotationZ(rotateSnapStartAngle + 90);
+            }
+            else if(rotateSnapAngle>180 && rotateSnapAngle<270){
+                selectedModel->m_transform->setRotationZ(rotateSnapStartAngle + 180);
+            }
+            else if(rotateSnapAngle>270 && rotateSnapAngle<360){
+                selectedModel->m_transform->setRotationZ(rotateSnapStartAngle + 270);
+            }
+        }
+        else
+            selectedModel->m_transform->setRotationZ(tmpz+Angle);
         break;
     }
     }
