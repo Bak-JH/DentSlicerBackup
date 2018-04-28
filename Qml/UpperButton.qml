@@ -62,6 +62,11 @@ Rectangle{
             break;
         case "Extend":
             buttonClicked();
+            break;
+        case "Arrange":
+            buttonClicked();
+            break;
+
         default:
             //console.log(functionname);
             break;

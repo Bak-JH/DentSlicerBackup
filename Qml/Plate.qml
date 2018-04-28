@@ -23,6 +23,8 @@ Entity {
     }
 
 
+
+
     Entity{
         Mesh{
             id: platePlaneMesh
@@ -50,5 +52,10 @@ Entity {
         }
         components: [ plateMesh, plateTransform, plateMaterial ]
     }
+
+
+
+
+
 
 }
