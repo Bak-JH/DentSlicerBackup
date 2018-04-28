@@ -95,7 +95,7 @@ ApplicationWindow {
                     height: parent.height
                     anchors.centerIn: parent
 
-                    text : "ID"
+                    text : qsTr("ID")
 
                     font.pixelSize: 20
                     font.family: mainFont.name
@@ -169,7 +169,7 @@ ApplicationWindow {
                     height: parent.height
                     anchors.centerIn: parent
 
-                    text : "Password"
+                    text : qsTr("Password")
 
                     font.pixelSize: 20
                     font.family: mainFont.name
