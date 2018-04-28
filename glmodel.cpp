@@ -726,13 +726,16 @@ void GLModel::addIndexes(vector<int> indexes){
 
 void GLModel::handlePickerClicked(QPickEvent *pick)
 {
+    if (!parentModel)
+        return;
+
     if (!cutActive && !extensionActive && !labellingActive && !layflatActive)
         emit modelSelected(parentModel->ID);
     qDebug() << "model selected emit";
 
-    QPickTriangleEvent *trianglePick = static_cast<QPickTriangleEvent*>(pick);
+    QPickTriangleEvent *trianglePick = qobject_cast<QPickTriangleEvent*>(pick);
 
-    if (labellingActive) {
+    if (labellingActive && trianglePick) {
         MeshFace shadow_meshface = mesh->faces[trianglePick->triangleIndex()];
 
         parentModel->targetMeshFace = &parentModel->mesh->faces[shadow_meshface.parent_idx];
@@ -767,7 +770,7 @@ void GLModel::handlePickerClicked(QPickEvent *pick)
         }
     }
 
-    if (extensionActive){
+    if (extensionActive && trianglePick){
             MeshFace shadow_meshface = mesh->faces[trianglePick->triangleIndex()];
             qDebug() << "found parent meshface" << shadow_meshface.parent_idx;
             parentModel->uncolorExtensionFaces();
