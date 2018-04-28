@@ -686,38 +686,87 @@ MeshVertex findAvailableMeshVertexFromContour(QHash<uint32_t, Path3D>* pathHash,
 
 // construct closed contour using segments created from identify step
 Paths3D contourConstruct(Paths3D hole_edges){
-    int prev_hole_size = 0;
     int iter = 0;
-    while (hole_edges.size() != prev_hole_size){
+    vector<Paths3D::iterator> checked_its;
+    bool dirty = true; // checks if iteration erased some contour
+
+    while (dirty){
+        dirty = false;
         qDebug() << iter;
-        prev_hole_size = hole_edges.size();
         Paths3D::iterator hole_edge1_it;
         Paths3D::iterator hole_edge2_it;
 
-        for (hole_edge1_it = hole_edges.begin(); hole_edge1_it != hole_edges.end(); hole_edge1_it ++){
+        qDebug() << "hole edge size : " << hole_edges.size() << int(hole_edges.end() - hole_edges.begin());
+        /*int cnt1 =0, cnt2 =0;
+        for (hole_edge1_it = hole_edges.begin(); hole_edge1_it != hole_edges.end(); ++hole_edge1_it){
+            cnt2 = 0;
+            for (hole_edge2_it = hole_edges.begin(); hole_edge2_it != hole_edges.end(); ++hole_edge2_it){
+                qDebug() << "checking" << cnt1 << cnt2;
+                cnt2 ++;
+            }
+            cnt1 ++;
+        }*/
+        for (hole_edge1_it = hole_edges.begin(); hole_edge1_it != hole_edges.end();){
+            bool checked = false;
+            for (Paths3D::iterator checked_it : checked_its){
+                if (checked_it == hole_edge1_it){
+                    checked = true;
+                }
+            }
+            if (checked){
+                hole_edge1_it ++;
+                continue;
+            }
+
             for (hole_edge2_it = hole_edges.begin(); hole_edge2_it != hole_edges.end();){
-                if (hole_edge1_it == hole_edge2_it){
+                checked = false;
+                for (Paths3D::iterator checked_it : checked_its){
+                    if (checked_it == hole_edge2_it){
+                        checked = true;
+                    }
+                }
+                if (checked){
                     hole_edge2_it ++;
                     continue;
                 }
 
-                Path3D hole_edge1 = *hole_edge1_it;
-                Path3D hole_edge2 = *hole_edge2_it;
-                //qDebug() << meshVertex2Hash(*hole_edge1.end()) << meshVertex2Hash(*hole_edge2.begin());
+                if (hole_edges.size() == 1)
+                    return hole_edges;
+                if (hole_edge1_it == hole_edge2_it){
+                    qDebug() << "same edge it";
+                    hole_edge2_it ++;
+                    continue;
+                }
+
+                //qDebug() << meshVertex2Hash(*(hole_edge1.end()-1)) << meshVertex2Hash(*hole_edge2.begin());
 
                 // prolong hole_edge 1 if end and start matches
-                if (meshVertex2Hash(hole_edge1[hole_edge1.size()-1]) == meshVertex2Hash(hole_edge2[0])){
+                if (meshVertex2Hash(*(hole_edge1_it->end()-1)) == meshVertex2Hash(*hole_edge2_it->begin())){
+                    qDebug() << "erase";
+                    dirty = true;
                     hole_edge1_it->insert(hole_edge1_it->end(), hole_edge2_it->begin(), hole_edge2_it->end());
-                    hole_edge2_it = hole_edges.erase(hole_edge2_it);
-                } else {
-                    hole_edge2_it ++;
+                    checked_its.push_back(hole_edge2_it);
+                    //hole_edge2_it = hole_edges.erase(hole_edge2_it);
+                    qDebug() << "erased";
                 }
+                hole_edge2_it ++;
             }
+            hole_edge1_it ++;
         }
-        qDebug() << "hole edges size " << prev_hole_size << hole_edges.size();
+        qDebug() << "hole edges size " << hole_edges.size();
     }
 
-    return hole_edges;
+    // select contour if size > 2
+    Paths3D result_edges;
+    for (Path3D hole_edge : hole_edges){
+        if (hole_edge.size() > 2){
+            result_edges.push_back(hole_edge);
+            qDebug() << "hole_edge size : " << hole_edge.size();
+        }
+    }
+    qDebug() << "result edges : " << result_edges.size();
+
+    return result_edges;
     /*// new trial if there's 분기점
     Paths3D contourList;
 
