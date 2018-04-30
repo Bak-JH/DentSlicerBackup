@@ -744,7 +744,16 @@ Paths3D contourConstruct(Paths3D hole_edges){
                 if (meshVertex2Hash(*(hole_edge1_it->end()-1)) == meshVertex2Hash(*hole_edge2_it->begin())){
                     qDebug() << "erase";
                     dirty = true;
-                    hole_edge1_it->insert(hole_edge1_it->end(), hole_edge2_it->begin(), hole_edge2_it->end());
+                    hole_edge1_it->insert(hole_edge1_it->end(), hole_edge2_it->begin()+1, hole_edge2_it->end());
+                    checked_its.push_back(hole_edge2_it);
+                    //hole_edge2_it = hole_edges.erase(hole_edge2_it);
+                    qDebug() << "erased";
+                } else if (meshVertex2Hash(*(hole_edge1_it->end()-1)) == meshVertex2Hash(*(hole_edge2_it->end()-1))){
+                    qDebug() << "erase";
+                    dirty = true;
+                    std::reverse(hole_edge2_it->begin(), hole_edge2_it->end());
+
+                    hole_edge1_it->insert(hole_edge1_it->end(), hole_edge2_it->begin()+1, hole_edge2_it->end());
                     checked_its.push_back(hole_edge2_it);
                     //hole_edge2_it = hole_edges.erase(hole_edge2_it);
                     qDebug() << "erased";
