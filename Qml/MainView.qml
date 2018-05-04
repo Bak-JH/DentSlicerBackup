@@ -49,27 +49,12 @@ Entity {
             id: meshEntity4
             //inputSource:"file:///D:/Dev/DLPSlicer/DLPslicer/resource/mesh/lowerjaw.obj"
         }
-        Entity{
-            Mesh{
-                id: boxMesh
-                source: "qrc:/Resource/mesh/box05mm.stl"
-            }
 
-            Transform{
-                id: boxTransform
-                translation: Qt.vector3d(0,0,0)
-
-                //rotation: fromAxisAndAngle(Qt.vector3d(1,0, 0), 90)
-            }
-            PhongMaterial{
-                id : boxMaterial
-                ambient: Qt.rgba(100/255, 100/255, 255/255, 1 )
-                diffuse: Qt.rgba(100/255, 100/255, 100/255, 1 )
-                specular: Qt.rgba(100/255, 100/255, 100/255, 1 )
-                shininess: 0
-            }
-            components: [ boxMesh, boxTransform, boxMaterial ]
+        MeshBoundedBox{
+            objectName: "boundedBox"
+            enabled: false
         }
+
         Entity{
             objectName: "rotateSphereEntity"
             MeshTransformerRotate{
@@ -85,7 +70,6 @@ Entity {
 
         CoordinateMesh{}
     }
-
 
 
     KeyboardDevice{
