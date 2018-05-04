@@ -718,6 +718,7 @@ Paths3D contourConstruct(Paths3D hole_edges){
                 continue;
             }
 
+
             for (hole_edge2_it = hole_edges.begin(); hole_edge2_it != hole_edges.end();){
                 checked = false;
                 for (Paths3D::iterator checked_it : checked_its){
@@ -733,30 +734,29 @@ Paths3D contourConstruct(Paths3D hole_edges){
                 if (hole_edges.size() == 1)
                     return hole_edges;
                 if (hole_edge1_it == hole_edge2_it){
-                    qDebug() << "same edge it";
+                    //qDebug() << "same edge it";
                     hole_edge2_it ++;
                     continue;
                 }
-
-                //qDebug() << meshVertex2Hash(*(hole_edge1.end()-1)) << meshVertex2Hash(*hole_edge2.begin());
-
                 // prolong hole_edge 1 if end and start matches
-                if (meshVertex2Hash(*(hole_edge1_it->end()-1)) == meshVertex2Hash(*hole_edge2_it->begin())){
-                    qDebug() << "erase";
+                if ((hole_edge1_it->end()-1)->position.distanceToPoint(hole_edge2_it->begin()->position) < 0.0000001){
+                //if (meshVertex2Hash(*(hole_edge1_it->end()-1)) == meshVertex2Hash(*hole_edge2_it->begin())){
+                    //qDebug() << "erase";
                     dirty = true;
                     hole_edge1_it->insert(hole_edge1_it->end(), hole_edge2_it->begin()+1, hole_edge2_it->end());
                     checked_its.push_back(hole_edge2_it);
                     //hole_edge2_it = hole_edges.erase(hole_edge2_it);
-                    qDebug() << "erased";
-                } else if (meshVertex2Hash(*(hole_edge1_it->end()-1)) == meshVertex2Hash(*(hole_edge2_it->end()-1))){
-                    qDebug() << "erase";
+                    //qDebug() << "erased";
+                } else if ((hole_edge1_it->end()-1)->position.distanceToPoint((hole_edge2_it->end()-1)->position) < 0.0000001){
+                //} else if (meshVertex2Hash(*(hole_edge1_it->end()-1)) == meshVertex2Hash(*(hole_edge2_it->end()-1))){
+                    //qDebug() << "erase";
                     dirty = true;
                     std::reverse(hole_edge2_it->begin(), hole_edge2_it->end());
 
                     hole_edge1_it->insert(hole_edge1_it->end(), hole_edge2_it->begin()+1, hole_edge2_it->end());
                     checked_its.push_back(hole_edge2_it);
                     //hole_edge2_it = hole_edges.erase(hole_edge2_it);
-                    qDebug() << "erased";
+                    //qDebug() << "erased";
                 }
                 hole_edge2_it ++;
             }
@@ -767,12 +767,32 @@ Paths3D contourConstruct(Paths3D hole_edges){
 
     // select contour if size > 2
     Paths3D result_edges;
-    for (Path3D hole_edge : hole_edges){
+
+    for (Paths3D::iterator hole_edge_it = hole_edges.begin(); hole_edge_it != hole_edges.end();){
+        bool checked = false;
+        for (Paths3D::iterator checked_it : checked_its){
+            if (checked_it == hole_edge_it){
+                checked = true;
+            }
+        }
+        if (!checked){
+            result_edges.push_back(*hole_edge_it);
+            qDebug() << "result_edge : " << hole_edge_it->begin()->position << (hole_edge_it->end()-1)->position;
+        }
+        hole_edge_it ++;
+    }
+
+    for (Path3D result_edge : result_edges){
+        qDebug() << "hole_edge size : " << result_edge.size();
+    }
+
+    /*for (Path3D hole_edge : hole_edges){
         if (hole_edge.size() > 2){
             result_edges.push_back(hole_edge);
             qDebug() << "hole_edge size : " << hole_edge.size();
         }
-    }
+    }*/
+
     qDebug() << "result edges : " << result_edges.size();
 
     return result_edges;
