@@ -167,6 +167,7 @@ void GLModel::changecolor(int mode){
         break;
     }
 }
+
 void GLModel::checkPrintingArea(){
     float printing_x = 100;
     float printing_y = 80;
@@ -846,6 +847,7 @@ void GLModel::bisectModel_internal(Plane plane){
             cuttingEdges.push_back(intersection);
             vector<QVector3D> upper;
             vector<QVector3D> lower;
+
             for (int i=0; i<3; i++){
                 if (target_plane[i].distanceToPlane(plane[0],plane[1],plane[2]) >0)
                     upper.push_back(target_plane[i]);
@@ -856,7 +858,7 @@ void GLModel::bisectModel_internal(Plane plane){
             QVector3D target_plane_normal = QVector3D::normal(target_plane[0], target_plane[1], target_plane[2]);
 
             if (upper.size() == 2){
-                bool facingNormal = abs((target_plane_normal- QVector3D::normal(lower[0], intersection[0].position, intersection[1].position)).length())<0.1;
+                bool facingNormal = abs((target_plane_normal- QVector3D::normal(lower[0], intersection[0].position, intersection[1].position)).length())<1;
 
                 if (facingNormal){
                     rightMesh->addFace(upper[1], upper[0], intersection[1].position);
@@ -868,7 +870,7 @@ void GLModel::bisectModel_internal(Plane plane){
                     leftMesh->addFace(intersection[0].position, lower[0], intersection[1].position);
                 }
             } else if (lower.size() == 2){
-                bool facingNormal = abs((target_plane_normal- QVector3D::normal(lower[0], intersection[1].position, intersection[0].position)).length())<0.1;
+                bool facingNormal = abs((target_plane_normal- QVector3D::normal(lower[0], intersection[1].position, intersection[0].position)).length())<1;
 
                 if (facingNormal){
                     leftMesh->addFace(lower[0], intersection[1].position, intersection[0].position);
@@ -888,6 +890,49 @@ void GLModel::bisectModel_internal(Plane plane){
             leftMesh->addFace(mesh->vertices[mf.mesh_vertex[0]].position, mesh->vertices[mf.mesh_vertex[1]].position, mesh->vertices[mf.mesh_vertex[2]].position);
         } else if (faceRightToPlane){
             rightMesh->addFace(mesh->vertices[mf.mesh_vertex[0]].position, mesh->vertices[mf.mesh_vertex[1]].position, mesh->vertices[mf.mesh_vertex[2]].position);
+        }
+    }
+
+
+    Paths3D contours = contourConstruct(cuttingEdges);
+
+
+    qDebug() << "after cutting edges :" << contours.size();
+
+    for (Path3D contour : contours){
+        if (contour.size() <=2){
+            continue;
+        }
+
+        QVector3D centerOfMass = QVector3D(0,0,0);
+        for (MeshVertex mv : contour){
+            centerOfMass += mv.position;
+        }
+        centerOfMass /= contour.size();
+        //QVector3D centerOfMass = (contour[0].position + contour[contour.size()-1].position) /2;
+
+        QVector3D plane_normal = QVector3D::normal(plane[0], plane[1], plane[2]);
+        QVector3D current_plane_normal = QVector3D::normal(contour[1].position, centerOfMass, contour[0].position);
+        bool ccw = true;
+        if (QVector3D::dotProduct(current_plane_normal, plane_normal)>=0){
+            ccw = false;
+        }
+
+        for (int i=0; i<contour.size()-1; i++){
+            if (ccw){
+                leftMesh->addFace(contour[i].position, centerOfMass, contour[i+1].position);
+                rightMesh->addFace(contour[i+1].position, centerOfMass, contour[i].position);
+            } else {
+                leftMesh->addFace(contour[i+1].position, centerOfMass, contour[i].position);
+                rightMesh->addFace(contour[i].position, centerOfMass, contour[i+1].position);
+            }
+        }
+        if (ccw){
+            leftMesh->addFace(contour[contour.size()-1].position, centerOfMass, contour[0].position);
+            rightMesh->addFace(contour[0].position, centerOfMass, contour[contour.size()-1].position);
+        } else {
+            leftMesh->addFace(contour[0].position, centerOfMass, contour[contour.size()-1].position);
+            rightMesh->addFace(contour[contour.size()-1].position, centerOfMass, contour[0].position);
         }
     }
 
@@ -915,21 +960,6 @@ void GLModel::bisectModel_internal(Plane plane){
         }
     }
 
-    /*Paths3D contours = contourConstruct(cuttingEdges);
-
-    qDebug() << "after cutting edges :" << contours.size();
-
-    for (Path3D contour : contours){
-        QVector3D centerOfMass = (contour[0].position + contour[contour.size()-1].position) /2;
-
-
-        for (int i=0; i<contour.size()-1; i++){
-            leftMesh->addFace(contour[i].position, centerOfMass, contour[i+1].position);
-            rightMesh->addFace(contour[i+1].position, centerOfMass, contour[i].position);
-        }
-        leftMesh->addFace(contour[contour.size()-1].position, centerOfMass, contour[0].position);
-        rightMesh->addFace(contour[0].position, centerOfMass, contour[contour.size()-1].position);
-    }*/
 
     qDebug() << "done bisect";
     // 승환 30%

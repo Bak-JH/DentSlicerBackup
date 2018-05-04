@@ -1017,7 +1017,7 @@ Rectangle {
             }
             onApplyClicked: {
                 console.log("extension");
-                generateExtensionFaces(numbox_detail2_default);
+                generateExtensionFaces(numbox_value_detail2);
             }
             signal generateExtensionFaces(double distance);
             signal openExtension()

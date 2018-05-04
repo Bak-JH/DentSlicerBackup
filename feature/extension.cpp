@@ -76,7 +76,7 @@ void detectExtensionFaces(Mesh* mesh, QVector3D normal, MeshFace* original_mf, M
                 continue;
             // check if neighbor close to normal
             if ((neighbor->fn - normal).length() > 0.5 ||\
-                    mesh->idx2MV(neighbor->mesh_vertex[0]).position.distanceToPoint(mesh->idx2MV(original_mf->mesh_vertex[0]).position) > 10)
+                    mesh->idx2MV(neighbor->mesh_vertex[0]).position.distanceToPoint(mesh->idx2MV(original_mf->mesh_vertex[0]).position) > 30)
                 continue;
             qDebug() << mesh->idx2MV(neighbor->mesh_vertex[0]).position.distanceToPoint(mesh->idx2MV(original_mf->mesh_vertex[0]).position);
             qDebug() << "looking for " << neighbor->idx;
@@ -170,4 +170,3 @@ void coverCap(Mesh* mesh, QVector3D normal, vector<MeshFace*> extension_faces, d
                 mesh->idx2MV(mf->mesh_vertex[2]).position + distance*normal);
     }
 }
-
