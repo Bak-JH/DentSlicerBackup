@@ -33,6 +33,8 @@ void QmlManager::initializeUI(QQmlApplicationEngine* e){
     movePopup = FindItemByName(engine, "movePopup");
     QObject::connect(movePopup, SIGNAL(runFeature(int,int,int)),this, SLOT(modelMoveByNumber(int,int,int)));
 
+    boundedBox = (QEntity *)FindItemByName(engine, "boundedBox");
+
     // model rotate components
     rotatePopup = FindItemByName(engine, "rotatePopup");
     rotateSphere = (QEntity *)FindItemByName(engine, "rotateSphereEntity");
@@ -337,6 +339,9 @@ void QmlManager::applyArrangeResult(vector<QVector3D> translations, vector<float
     }
     qmlManager->setProgressText("Done");
     qmlManager->openResultPopUp("","Arrangement done","");
+    if(selectedModel != nullptr){
+        QMetaObject::invokeMethod(boundedBox, "setPosition", Q_ARG(QVariant, QVector3D(selectedModel->m_transform->translation())));
+    }
 }
 void QmlManager::modelSelected(int ID){
     qDebug() << "model id :" << ID ;
@@ -355,6 +360,8 @@ void QmlManager::modelSelected(int ID){
         selectedModel->checkPrintingArea();
         QMetaObject::invokeMethod(partList, "unselectPartByModel", Q_ARG(QVariant, selectedModel->ID));
         disconnectHandlers(selectedModel);  //check
+
+        QMetaObject::invokeMethod(boundedBox, "hideBox"); // Bounded Box
         if (groupFunctionState == "active"){
             switch (groupFunctionIndex){
             case 5:
@@ -385,6 +392,24 @@ void QmlManager::modelSelected(int ID){
         QMetaObject::invokeMethod(partList, "selectPartByModel", Q_ARG(QVariant, selectedModel->ID));
         qDebug() << "changing model" << selectedModel->ID;
         connectHandlers(selectedModel);
+
+        // Set BoundedBox
+        float xmid = (selectedModel->mesh->x_max + selectedModel->mesh->x_min)/2;
+        float ymid = (selectedModel->mesh->y_max + selectedModel->mesh->y_min)/2;
+        float zmid = (selectedModel->mesh->z_max + selectedModel->mesh->z_min)/2;
+        //QVector3D center = (xmid, ymid, zmid);
+
+        qDebug() << "b box center" << xmid << " " << ymid << " " << zmid ;
+        QMetaObject::invokeMethod(boundedBox, "showBox");
+        QMetaObject::invokeMethod(boundedBox, "setPosition", Q_ARG(QVariant, QVector3D(selectedModel->m_transform->translation())));
+        QMetaObject::invokeMethod(boundedBox, "setSize", Q_ARG(QVariant, selectedModel->mesh->x_max - selectedModel->mesh->x_min),
+                                                         Q_ARG(QVariant, selectedModel->mesh->y_max - selectedModel->mesh->y_min),
+                                                         Q_ARG(QVariant, selectedModel->mesh->z_max - selectedModel->mesh->z_min));
+
+        qDebug() << "scale value   " << selectedModel->mesh->x_max - selectedModel->mesh->x_min;
+
+
+
         if (groupFunctionState == "active"){
             switch (groupFunctionIndex){
             case 5:
@@ -409,6 +434,8 @@ void QmlManager::modelSelected(int ID){
     } else {
         selectedModel = nullptr;
     }
+
+
 
 }
 void QmlManager::extensionSelect(){
@@ -442,8 +469,8 @@ void QmlManager::unselectPart(int ID){
             break;
         }
     }
-
     selectedModel = nullptr;
+    QMetaObject::invokeMethod(boundedBox, "hideBox"); // Bounded Box
 }
 
 bool QmlManager::isSelected(){
@@ -508,7 +535,12 @@ void QmlManager::modelMoveDone(int Axis){
         return;
     QQmlProperty::write(moveArrowobj,"center",selectedModel->m_transform->translation());
     mouseHack();
+
     selectedModel->checkPrintingArea();
+
+    if(selectedModel != nullptr)
+        QMetaObject::invokeMethod(boundedBox, "setPosition", Q_ARG(QVariant, QVector3D(selectedModel->m_transform->translation())));
+
 }
 void QmlManager::modelRotateDone(int Axis){
     if (selectedModel == nullptr)
@@ -538,6 +570,12 @@ void QmlManager::modelRotateDone(int Axis){
     showRotateSphere();
     mouseHack();
     rotateSnapAngle = 0;
+    if(selectedModel != nullptr){
+        QMetaObject::invokeMethod(boundedBox, "setPosition", Q_ARG(QVariant, QVector3D(selectedModel->m_transform->translation())));
+        QMetaObject::invokeMethod(boundedBox, "setSize", Q_ARG(QVariant, selectedModel->mesh->x_max - selectedModel->mesh->x_min),
+                                                         Q_ARG(QVariant, selectedModel->mesh->y_max - selectedModel->mesh->y_min),
+                                                         Q_ARG(QVariant, selectedModel->mesh->z_max - selectedModel->mesh->z_min));
+    }
 }
 void QmlManager::modelMove(int Axis, int Distance){
     if (selectedModel == nullptr)
@@ -546,11 +584,28 @@ void QmlManager::modelMove(int Axis, int Distance){
     case 1:{  //X
         QVector3D tmp = selectedModel->m_transform->translation();
         selectedModel->m_transform->setTranslation(QVector3D(tmp.x()+Distance,tmp.y(),tmp.z()));
+
+        if(tmp.x() + selectedModel->mesh->x_max +1 > 100/2 )
+            selectedModel->m_transform->setTranslation(QVector3D(tmp.x() - (tmp.x() + selectedModel->mesh->x_max - 100/2 + 1),tmp.y(),tmp.z()));
+            //qDebug() << "Case X 1 " << tmp.x() << " " << selectedModel->mesh->x_max << ;
+
+        if(tmp.x() + selectedModel->mesh->x_min -1 < - 100/2 )
+            selectedModel->m_transform->setTranslation(QVector3D(tmp.x() - (tmp.x() + selectedModel->mesh->x_min + 100/2 - 1),tmp.y(),tmp.z()));
+            //qDebug() << "Case X 2 " << tmp.x() << " " << selectedModel->mesh->x_min;
+
         break;
     }
     case 2:{  //Y
         QVector3D tmp = selectedModel->m_transform->translation();
         selectedModel->m_transform->setTranslation(QVector3D(tmp.x(),tmp.y()+Distance,tmp.z()));
+
+
+        if(tmp.y() + selectedModel->mesh->y_max +1 > 80/2 )
+            selectedModel->m_transform->setTranslation(QVector3D(tmp.x(), tmp.y() - (tmp.y() + selectedModel->mesh->y_max - 80/2 + 1), tmp.z()));
+            //qDebug() << "Case Y 3 " << tmp.y() << " " << selectedModel->mesh->y_max;
+        if(tmp.y() + selectedModel->mesh->y_min -1 < - 80/2 )
+            selectedModel->m_transform->setTranslation(QVector3D(tmp.x(), tmp.y() - (tmp.y() + selectedModel->mesh->y_min + 80/2 - 1), tmp.z()));
+            //qDebug() << "Case Y 4 " << tmp.y() << " " << selectedModel->mesh->y_min;
         break;
     }
     }

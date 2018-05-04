@@ -33,6 +33,8 @@ public:
     QObject* loginButton;
     QEntity* models;
     QObject* mv;
+    Qt3DCore::QEntity *boundedBox;
+
     // model rotate components
     QObject *rotatePopup;
     QObject *rotateSphereobj;

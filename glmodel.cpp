@@ -167,6 +167,7 @@ void GLModel::changecolor(int mode){
         break;
     }
 }
+
 void GLModel::checkPrintingArea(){
     float printing_x = 100;
     float printing_y = 80;

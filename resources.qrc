@@ -110,5 +110,6 @@
         <file>lang_ko.qm</file>
         <file>Resource/mesh/box1mm.stl</file>
         <file>Resource/mesh/box05mm.stl</file>
+        <file>Resource/mesh/boundedBox.stl</file>
     </qresource>
 </RCC>
