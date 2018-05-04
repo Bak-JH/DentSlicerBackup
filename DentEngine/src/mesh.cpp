@@ -739,7 +739,7 @@ Paths3D contourConstruct(Paths3D hole_edges){
                     continue;
                 }
                 // prolong hole_edge 1 if end and start matches
-                if ((hole_edge1_it->end()-1)->position.distanceToPoint(hole_edge2_it->begin()->position) < 0.0000001){
+                if ((hole_edge1_it->end()-1)->position.distanceToPoint(hole_edge2_it->begin()->position) < scfg->vertex_inbound_distance*0.05/scfg->resolution){
                 //if (meshVertex2Hash(*(hole_edge1_it->end()-1)) == meshVertex2Hash(*hole_edge2_it->begin())){
                     //qDebug() << "erase";
                     dirty = true;
@@ -747,7 +747,7 @@ Paths3D contourConstruct(Paths3D hole_edges){
                     checked_its.push_back(hole_edge2_it);
                     //hole_edge2_it = hole_edges.erase(hole_edge2_it);
                     //qDebug() << "erased";
-                } else if ((hole_edge1_it->end()-1)->position.distanceToPoint((hole_edge2_it->end()-1)->position) < 0.0000001){
+                } else if ((hole_edge1_it->end()-1)->position.distanceToPoint((hole_edge2_it->end()-1)->position) < scfg->vertex_inbound_distance*0.05/scfg->resolution){
                 //} else if (meshVertex2Hash(*(hole_edge1_it->end()-1)) == meshVertex2Hash(*(hole_edge2_it->end()-1))){
                     //qDebug() << "erase";
                     dirty = true;
