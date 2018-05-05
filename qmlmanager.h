@@ -33,6 +33,8 @@ public:
     QObject* loginButton;
     QEntity* models;
     QObject* mv;
+    Qt3DCore::QEntity *boundedBox;
+
     // model rotate components
     QObject *rotatePopup;
     QObject *rotateSphereobj;
@@ -94,7 +96,8 @@ public:
     vector<GLModel*> glmodels;
     GLModel* selectedModel = nullptr;
 
-
+    int rotateSnapAngle = 0;
+    int rotateSnapStartAngle = 0;
     int groupFunctionIndex;
     QString groupFunctionState;
     float progress = 0;

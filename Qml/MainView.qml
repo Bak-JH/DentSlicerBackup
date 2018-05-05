@@ -49,6 +49,12 @@ Entity {
             id: meshEntity4
             //inputSource:"file:///D:/Dev/DLPSlicer/DLPslicer/resource/mesh/lowerjaw.obj"
         }
+
+        MeshBoundedBox{
+            objectName: "boundedBox"
+            enabled: false
+        }
+
         Entity{
             objectName: "rotateSphereEntity"
             MeshTransformerRotate{
@@ -64,7 +70,6 @@ Entity {
 
         CoordinateMesh{}
     }
-
 
 
     KeyboardDevice{

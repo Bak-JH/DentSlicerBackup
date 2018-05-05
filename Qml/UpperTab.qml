@@ -162,7 +162,8 @@ Rectangle {
             //anchors.left: parent.left
             iconSource1: "qrc:/resource/upper_open.png"
             iconSource2: "qrc:/Resource/upper2_open.png"
-            iconText: "Open"
+            //iconText: "Open"
+            iconText: qsTr("Open")
             MouseArea{
                 anchors.fill: parent
                 onClicked:{
@@ -178,7 +179,7 @@ Rectangle {
             anchors.left: first_tab_button_open.right
             iconSource1: "qrc:/resource/upper_save.png"
             iconSource2: "qrc:/Resource/upper2_save.png"
-            iconText: "Save"
+            iconText: qsTr("Save")
             signal runFeature(int type);
             MouseArea{
                 anchors.fill: parent
@@ -196,7 +197,7 @@ Rectangle {
             anchors.left: first_tab_button_save.right
             iconSource1: "qrc:/resource/upper_export.png"
             iconSource2: "qrc:/Resource/upper2_export.png"
-            iconText: "Export"
+            iconText: qsTr("Export")
 
             MouseArea{
                 anchors.fill: parent
@@ -259,7 +260,7 @@ Rectangle {
             anchors.left: parent.left
             iconSource1: "qrc:/resource/upper_move.png"
             iconSource2: "qrc:/Resource/upper2_move.png"
-            iconText: "Move"
+            iconText: qsTr("Move")
             signal runGroupFeature(int type, string state);
             onButtonClicked:{
                    runGroupFeature(ftrMove, state);
@@ -271,7 +272,7 @@ Rectangle {
             anchors.left: second_tab_button_move.right
             iconSource1: "qrc:/resource/upper_rotate.png"
             iconSource2: "qrc:/Resource/upper2_rotate.png"
-            iconText: "Rotate"
+            iconText: qsTr("Rotate")
             signal runGroupFeature(int type, string state);
             onButtonClicked:{
                    runGroupFeature(ftrRotate, state);
@@ -284,7 +285,7 @@ Rectangle {
             anchors.left: second_tab_button_rotate.right
             iconSource1: "qrc:/resource/upper_layflat.png"
             iconSource2: "qrc:/Resource/upper2_layflat.png"
-            iconText: "Lay Flat"
+            iconText: qsTr("Lay Flat")
             signal runGroupFeature(int type, string state);
             onButtonClicked:{
                    runGroupFeature(ftrLayFlat, state);
@@ -292,11 +293,16 @@ Rectangle {
         }
         UpperButton{
             id : second_tab_button_arrange
-
+            objectName: "arrangeButton"
             anchors.left: second_tab_button_layflat.right
             iconSource1: "qrc:/resource/upper_arrange.png"
             iconSource2: "qrc:/Resource/upper2_arrange.png"
-            iconText: "Arrange"
+            iconText: qsTr("Arrange")
+            onButtonClicked:{
+                arrangePopUp.visible = true
+                console.log("arrange clcllclclcick")
+
+            }
         }
         UpperButton{
             id : second_tab_button_orient
@@ -304,7 +310,7 @@ Rectangle {
             anchors.left: second_tab_button_arrange.right
             iconSource1: "qrc:/resource/upper_orientation.png"
             iconSource2: "qrc:/Resource/upper2_orient.png"
-            iconText: "Orient"
+            iconText: qsTr("Orient")
             signal runGroupFeature(int type, string state);
             onButtonClicked:{
                    runGroupFeature(ftrOrient, state);
@@ -340,7 +346,7 @@ Rectangle {
             anchors.left: parent.left
             iconSource1: "qrc:/resource/upper_scale.png"
             iconSource2: "qrc:/Resource/upper2_scale.png"
-            iconText: "Scale"
+            iconText: qsTr("Scale")
             /*
             Connections {
                 target: box_uppertab
@@ -369,7 +375,7 @@ Rectangle {
             anchors.left: third_tab_button_scale.right
             iconSource1: "qrc:/resource/upper_autorepair.png"
             iconSource2: "qrc:/Resource/upper2_autorepair.png"
-            iconText: "Auto Repair"
+            iconText: qsTr("Auto Repair")
             /*
             Connections {
                 target: box_uppertab
@@ -395,7 +401,7 @@ Rectangle {
             //anchors.bottomMargin: 3
             iconSource1: "qrc:/resource/upper_cut.png"
             iconSource2: "qrc:/Resource/upper2_cut.png"
-            iconText: "Cut"
+            iconText: qsTr("Cut")
             onButtonClicked:{
                 if(!qm.isSelected()&& (state == "active"))
                     window.resultPopUp.openResultPopUp("","You must select at least one model.","")
@@ -447,7 +453,7 @@ Rectangle {
             anchors.left: parent.left
             iconSource1: "qrc:/Resource/upper_extend.png"
             iconSource2: "qrc:/Resource/upper2_extend.png"
-            iconText: "Extend"
+            iconText: qsTr("Extend")
 
             signal runGroupFeature(int type, string state);
             onButtonClicked:{
@@ -465,7 +471,7 @@ Rectangle {
             anchors.left: fourth_tab_button_extend.right
             iconSource1: "qrc:/resource/upper_support.png"
             iconSource2: "qrc:/Resource/upper2_support.png"
-            iconText: "Support"
+            iconText: qsTr("Support")
 
             onButtonClicked:{
                 window.resultPopUp.openResultPopUp("This function is currently unavailable.","","Please check back later.")
@@ -478,7 +484,7 @@ Rectangle {
             anchors.left: fourth_tab_button_support.right
             iconSource1: "qrc:/resource/upper_label.png"
             iconSource2: "qrc:/Resource/upper2_label.png"
-            iconText: "Label"
+            iconText: qsTr("Label")
             onButtonClicked:{
                 if(!qm.isSelected() && (state == "active"))
                     window.resultPopUp.openResultPopUp("","You must select at least one model.","")
@@ -517,7 +523,7 @@ Rectangle {
             //anchors.left: parent.left
             iconSource1: "qrc:/Resource/upper_feedback.png"
             iconSource2: "qrc:/Resource/upper2_feedback.png"
-            iconText: "Feedback"
+            iconText: qsTr("Feedback")
             MouseArea{
                 anchors.fill: parent
                 onClicked:{
@@ -675,7 +681,8 @@ Rectangle {
             }
         }
 
-        //7. PopUp - Arrange
+        //7. PopUp - Arrange => main.qml
+        /*
         PopUp {
             id: popup_arrange
             objectName: "arrangePopup"
@@ -697,7 +704,9 @@ Rectangle {
                 console.log("arrange");
                 runFeature();
             }
-        }
+        }*/
+
+
 
         //8. PopUp - Orient
 

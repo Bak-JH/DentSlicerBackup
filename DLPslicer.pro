@@ -6,6 +6,7 @@ CONFIG += c++11 resources_big
 
 TARGET = DentStudio
 
+
 RC_ICONS = icon-32.ico
 RC_FILE = DLPslicer.rc
 
@@ -76,6 +77,9 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 win32:QMAKE_LFLAGS *= -Wl,--dynamicbase -Wl,--nxcompat
 # enable GCC large addresss aware linker flag
 win32:QMAKE_LFLAGS *= -Wl,--large-address-aware
+
+
+TRANSLATIONS += lang_ko.ts
 
 HEADERS += \
     quaternionhelper.h \

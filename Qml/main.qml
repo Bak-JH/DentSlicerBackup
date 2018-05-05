@@ -266,6 +266,13 @@ Item{
         }
 
 
+        ArrangePopup{
+            id : arrangePopUp
+            objectName: "arrangePopup"
+
+            visible: false
+        }
+
         ProgressPopUp{
             id : progressPopUp
         }
