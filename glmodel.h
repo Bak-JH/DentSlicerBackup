@@ -198,6 +198,7 @@ private:
     bool labellingActive = false;
     bool extensionActive = false;
     bool cutActive = false;
+    bool hollowShellActive = false;
     bool layflatActive = false;
 
 signals:
@@ -235,6 +236,11 @@ public slots:
     void openCut();
     void closeCut();
 
+    // Hollow Shell
+    void hollowShell(double radius);
+    void openHollowShell();
+    void closeHollowShell();
+
     // Labelling
     void getTextChanged(QString text, int contentWidth);
     void openLabelling();
@@ -252,7 +258,6 @@ public slots:
 
     // ShellOffset
     void generateShellOffset(double factor);
-
 
     // Model Mesh info update
     void updateModelMesh();

@@ -1138,6 +1138,13 @@ void GLModel::generateRLModel(){
     qmlManager->runArrange();
 }
 
+// hollow shell part
+void GLModel::hollowShell(double radius){
+    qDebug() << "hollow shell called" << radius;
+    qmlManager->openProgressPopUp();
+    parentModel->hollowShell(radius);
+}
+
 GLModel::~GLModel(){
     /*delete m_transform;
     delete m_objectPicker;
@@ -1234,27 +1241,31 @@ void GLModel::cutFillModeSelected(int type){
 }
 
 void GLModel::getSliderSignal(double value){
-    float zlength = parentModel->mesh->z_max - parentModel->mesh->z_min;
-    QVector3D v1(1,0, -zlength/2 + value*zlength/1.8);
-    QVector3D v2(1,1, -zlength/2 + value*zlength/1.8);
-    QVector3D v3(2,0, -zlength/2 + value*zlength/1.8);
+    if (cutActive){
+        float zlength = parentModel->mesh->z_max - parentModel->mesh->z_min;
+        QVector3D v1(1,0, -zlength/2 + value*zlength/1.8);
+        QVector3D v2(1,1, -zlength/2 + value*zlength/1.8);
+        QVector3D v3(2,0, -zlength/2 + value*zlength/1.8);
 
-    QVector3D world_origin(0,0,0);
-    QVector3D original_normal(0,1,0);
-    QVector3D desire_normal(QVector3D::normal(v1,v2,v3)); //size=1
-    float angle = qAcos(QVector3D::dotProduct(original_normal,desire_normal))*180/M_PI+(value-1)*30;
-    QVector3D crossproduct_vector(QVector3D::crossProduct(original_normal,desire_normal));
+        QVector3D world_origin(0,0,0);
+        QVector3D original_normal(0,1,0);
+        QVector3D desire_normal(QVector3D::normal(v1,v2,v3)); //size=1
+        float angle = qAcos(QVector3D::dotProduct(original_normal,desire_normal))*180/M_PI+(value-1)*30;
+        QVector3D crossproduct_vector(QVector3D::crossProduct(original_normal,desire_normal));
 
-    QVector3D tmp = parentModel->m_transform->translation();
+        QVector3D tmp = parentModel->m_transform->translation();
 
-    for (int i=0;i<2;i++){
-        parentModel->planeTransform[i]->setTranslation(desire_normal*(-world_origin.distanceToPlane(v1,v2,v3)) +QVector3D(tmp.x(),tmp.y(),zlength/2));
-        parentModel->planeEntity[i]->addComponent(parentModel->planeTransform[i]);
+        for (int i=0;i<2;i++){
+            parentModel->planeTransform[i]->setTranslation(desire_normal*(-world_origin.distanceToPlane(v1,v2,v3)) +QVector3D(tmp.x(),tmp.y(),zlength/2));
+            parentModel->planeEntity[i]->addComponent(parentModel->planeTransform[i]);
+        }
+
+        parentModel->cuttingPlane[0] = v1;
+        parentModel->cuttingPlane[1] = v2;
+        parentModel->cuttingPlane[2] = v3;
+    } else if (hollowShellActive){
+        // change radius of hollowShellSphere
     }
-
-    parentModel->cuttingPlane[0] = v1;
-    parentModel->cuttingPlane[1] = v2;
-    parentModel->cuttingPlane[2] = v3;
 }
 
 
@@ -1494,3 +1505,15 @@ void GLModel::closeCut(){
     removePlane();
     parentModel->removeCuttingPoints();
 }
+
+void GLModel::openHollowShell(){
+    qDebug() << "open HollowShell called";
+    hollowShellActive = true;
+}
+
+void GLModel::closeHollowShell(){
+    qDebug() << "close HollowShell called";
+    hollowShellActive = false;
+    // remove hollowing sphere
+}
+

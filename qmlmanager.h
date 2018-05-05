@@ -63,6 +63,10 @@ public:
     QObject *flatButton;
     QObject *cutSlider;
 
+    // hollow shell components
+    QObject *hollowShellPopup;
+    QObject *hollowShellSlider;
+
     // labelling components
     QObject *text3DInput;
     QObject *labelPopup;
