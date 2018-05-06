@@ -206,7 +206,7 @@ void QmlManager::disconnectHandlers(GLModel* glmodel){
     // hollow shell popup codes
     QObject::disconnect(hollowShellPopup, SIGNAL(hollowShell(double)), glmodel->shadowModel, SLOT(hollowShell(double)));
     QObject::disconnect(hollowShellPopup, SIGNAL(openHollowShell()), glmodel->shadowModel, SLOT(openHollowShell()));
-    QObject::disconnect(hollowShellPopup, SIGNAL(closeHollowShell()), glmodel->shadowModel, SLOT(closeHollowShell()));
+    QObject::disconnect(hollowShellPopup, SIGNAL(hollowShell(double)), glmodel, SLOT(indentHollowShell(double)));
     QObject::disconnect(hollowShellPopup, SIGNAL(resultSliderValueChanged(double)), glmodel->shadowModel, SLOT(getSliderSignal(double)));
 
     // auto orientation popup codes
@@ -267,9 +267,9 @@ void QmlManager::connectHandlers(GLModel* glmodel){
     QObject::connect(cutPopup, SIGNAL(resultSliderValueChanged(double)), glmodel->shadowModel, SLOT(getSliderSignal(double)));
 
     // hollow shell popup codes
-    QObject::connect(hollowShellPopup, SIGNAL(hollowShell(double)), glmodel->shadowModel, SLOT(hollowShell(double)));
     QObject::connect(hollowShellPopup, SIGNAL(openHollowShell()), glmodel->shadowModel, SLOT(openHollowShell()));
     QObject::connect(hollowShellPopup, SIGNAL(closeHollowShell()), glmodel->shadowModel, SLOT(closeHollowShell()));
+    QObject::connect(hollowShellPopup, SIGNAL(hollowShell(double)), glmodel, SLOT(indentHollowShell(double)));
     QObject::connect(hollowShellPopup, SIGNAL(resultSliderValueChanged(double)), glmodel->shadowModel, SLOT(getSliderSignal(double)));
 
 
@@ -451,9 +451,6 @@ void QmlManager::modelSelected(int ID){
     } else {
         selectedModel = nullptr;
     }
-
-
-
 }
 void QmlManager::extensionSelect(){
     QMetaObject::invokeMethod(extensionPopup,"onApplyFinishButton");

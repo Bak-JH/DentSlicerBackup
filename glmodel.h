@@ -22,6 +22,7 @@
 #include "feature/autoarrange.h"
 #include "feature/stlexporter.h"
 #include "feature/extension.h"
+#include "feature/hollowshell.h"
 
 
 #define MAX_BUF_LEN 2000000
@@ -237,7 +238,7 @@ public slots:
     void closeCut();
 
     // Hollow Shell
-    void hollowShell(double radius);
+    void indentHollowShell(double radius);
     void openHollowShell();
     void closeHollowShell();
 

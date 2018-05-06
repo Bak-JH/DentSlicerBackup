@@ -769,20 +769,29 @@ void GLModel::handlePickerClicked(QPickEvent *pick)
     }
 
     if (extensionActive){
-            MeshFace shadow_meshface = mesh->faces[trianglePick->triangleIndex()];
-            qDebug() << "found parent meshface" << shadow_meshface.parent_idx;
-            parentModel->uncolorExtensionFaces();
-            emit extensionSelect();
-            parentModel->targetMeshFace = &parentModel->mesh->faces[shadow_meshface.parent_idx];
-            parentModel->generateColorAttributes();
-            /*qDebug() << trianglePick->localIntersection() \
-                     << parentModel->mesh->idx2MV(parentModel->targetMeshFace->mesh_vertex[0]).position\
-                    << parentModel->mesh->idx2MV(parentModel->targetMeshFace->mesh_vertex[1]).position\
-                    << parentModel->mesh->idx2MV(parentModel->targetMeshFace->mesh_vertex[2]).position;
-            */
-            // << parentModel->targetMeshFace->mesh_vertex[1] << parentModel->targetMeshFace->mesh_vertex[2];
-            parentModel->colorExtensionFaces();
+        MeshFace shadow_meshface = mesh->faces[trianglePick->triangleIndex()];
+        qDebug() << "found parent meshface" << shadow_meshface.parent_idx;
+        parentModel->uncolorExtensionFaces();
+        emit extensionSelect();
+        parentModel->targetMeshFace = &parentModel->mesh->faces[shadow_meshface.parent_idx];
+        parentModel->generateColorAttributes();
+        /*qDebug() << trianglePick->localIntersection() \
+                 << parentModel->mesh->idx2MV(parentModel->targetMeshFace->mesh_vertex[0]).position\
+                << parentModel->mesh->idx2MV(parentModel->targetMeshFace->mesh_vertex[1]).position\
+                << parentModel->mesh->idx2MV(parentModel->targetMeshFace->mesh_vertex[2]).position;
+        */
+        // << parentModel->targetMeshFace->mesh_vertex[1] << parentModel->targetMeshFace->mesh_vertex[2];
+        parentModel->colorExtensionFaces();
     }
+
+    if (hollowShellActive){
+        qDebug() << "getting handle picker clicked signal hollow shell active";
+        MeshFace shadow_meshface = mesh->faces[trianglePick->triangleIndex()];
+        qDebug() << "found parent meshface" << shadow_meshface.parent_idx;
+        parentModel->targetMeshFace = &parentModel->mesh->faces[shadow_meshface.parent_idx];
+        // emit hollowShellSelect();
+    }
+
     /*if (layflatActive){
         m_objectPicker->setEnabled(false);
         this->parentModel->m_objectPicker = new Qt3DRender::QObjectPicker(this->parentModel);
@@ -1139,10 +1148,11 @@ void GLModel::generateRLModel(){
 }
 
 // hollow shell part
-void GLModel::hollowShell(double radius){
+void GLModel::indentHollowShell(double radius){
     qDebug() << "hollow shell called" << radius;
-    qmlManager->openProgressPopUp();
-    parentModel->hollowShell(radius);
+
+    QVector3D center = (mesh->idx2MV(targetMeshFace->mesh_vertex[0]).position +mesh->idx2MV(targetMeshFace->mesh_vertex[1]).position + mesh->idx2MV(targetMeshFace->mesh_vertex[2]).position)/3;
+    hollowShell(mesh, targetMeshFace, center, radius);
 }
 
 GLModel::~GLModel(){
@@ -1265,6 +1275,7 @@ void GLModel::getSliderSignal(double value){
         parentModel->cuttingPlane[2] = v3;
     } else if (hollowShellActive){
         // change radius of hollowShellSphere
+        qDebug() << "getting slider signal: current radius is " << value;
     }
 }
 
