@@ -945,6 +945,15 @@ Paths3D contourConstruct(Paths3D hole_edges){
     return contourList;*/
 }
 
+bool cpIncp(containmentPath target, containmentPath in){
+    for (IntPoint ip : target.projection){
+        if (PointInPolygon(ip, in.projection)==0){ // if ip is not contained in in
+            return false;
+        }
+    }
+    return true;
+}
+
 vector<std::array<QVector3D, 3>> interpolate(Path3D from, Path3D to){
     vector<std::array<QVector3D, 3>> result_faces;
     if (from.size() != to.size()){

@@ -94,12 +94,24 @@ public :
     MeshVertex idx2MV(int idx);
 };
 
+
+
 uint32_t vertexHash(QVector3D v);
 float vertexDistance(QVector3D, QVector3D);
 
 // construct closed contour using segments created from identify step
 Paths contourConstruct(Paths);
 Paths3D contourConstruct(Paths3D hole_edges);
+
+class containmentPath{
+public:
+    Path projection;
+    vector<containmentPath> inner;
+    vector<containmentPath> outer;
+};
+
+bool cpIncp(containmentPath target, containmentPath in);
+
 vector<std::array<QVector3D, 3>> interpolate(Path3D from, Path3D to);
 
 uint32_t intPoint2Hash(IntPoint u);
