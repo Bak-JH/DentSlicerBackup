@@ -934,7 +934,7 @@ Rectangle {
             id : hollow_shell
             funcname: "Hollow Shell"
 
-            slider_vis: false
+            slider_vis: true
             height: 265
             detail1: "Hollow Shell"
             detail2: "Offset value"
@@ -952,6 +952,7 @@ Rectangle {
             numbox_updown_scale: 0.25
             state: {
                 if (third_tab_button_hollowshell.state == "active" && qm.isSelected()){
+                    slider_vis = true;
                     openHollowShell()
                     return "active";
                 } else {

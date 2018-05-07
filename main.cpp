@@ -60,7 +60,7 @@ int main(int argc, char **argv)
     splash->close();
 
     //qmlManager->mainWindow->setProperty("visible",true);
-    qmlManager->loginWindow->setProperty("visible",true);
+    //qmlManager->loginWindow->setProperty("visible",true);
 
     engine.retranslate();
 
