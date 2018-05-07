@@ -789,7 +789,13 @@ void GLModel::handlePickerClicked(QPickEvent *pick)
         MeshFace shadow_meshface = mesh->faces[trianglePick->triangleIndex()];
         qDebug() << "found parent meshface" << shadow_meshface.parent_idx;
         parentModel->targetMeshFace = &parentModel->mesh->faces[shadow_meshface.parent_idx];
-        parentModel->indentHollowShell();
+        // translate hollowShellSphere to mouse position
+        QVector3D v = pick->localIntersection();
+        QVector3D tmp = m_transform->translation();
+        float zlength = mesh->z_max - mesh->z_min;
+        qmlManager->hollowShellSphereTransform->setTranslation(v + QVector3D(tmp.x(),tmp.y(),zlength/2));
+
+        //parentModel->indentHollowShell(10);
         // emit hollowShellSelect();
     }
 
@@ -903,9 +909,27 @@ void GLModel::bisectModel_internal(Plane plane){
         }
     }
 
-
     Paths3D contours = contourConstruct(cuttingEdges);
 
+    /*// copy paths3d to vector<containmentPath*>
+    vector<containmentPath*> containmentPaths;
+    for (Path3D contour : contours){
+        containmentPath* cp = new containmentPath();
+        for (MeshVertex mv : contour){
+            ct->projection.push_back(mv.position);
+        }
+        containmentPaths.push_back(cp);
+    }
+
+    // search for containment tree construction
+    for (containmentPath* target_cp : containmentPaths){
+        for (containmentPath* in_cp : containmentPaths){
+            if (cpIncp(target_cp,in_cp)){
+                target_cp->outer.push_back(in_cp);
+                in_cp->inner.push_back(target_cp);
+            }
+        }
+    }*/
 
     qDebug() << "after cutting edges :" << contours.size();
 
@@ -947,6 +971,7 @@ void GLModel::bisectModel_internal(Plane plane){
     }
 
     if (cutFillMode == 2){ // if fill holes
+
         qDebug() << "cutting edges size :" << cuttingEdges.size();
 
         QVector3D centerOfMass(0,0,0);
@@ -1276,6 +1301,9 @@ void GLModel::getSliderSignal(double value){
         parentModel->cuttingPlane[2] = v3;
     } else if (hollowShellActive){
         // change radius of hollowShellSphere
+        hollowShellRadius = value;
+        qmlManager->hollowShellSphereMesh->setRadius(hollowShellRadius);
+
         qDebug() << "getting slider signal: current radius is " << value;
     }
 }
@@ -1521,11 +1549,12 @@ void GLModel::closeCut(){
 void GLModel::openHollowShell(){
     qDebug() << "open HollowShell called";
     hollowShellActive = true;
+    qmlManager->hollowShellSphereEntity->setProperty("visible", true);
 }
 
 void GLModel::closeHollowShell(){
     qDebug() << "close HollowShell called";
     hollowShellActive = false;
-    // remove hollowing sphere
+    qmlManager->hollowShellSphereEntity->setProperty("visible", false);
 }
 

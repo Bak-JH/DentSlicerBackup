@@ -119,8 +119,10 @@ public:
     Qt3DRender::QObjectPicker *m_objectPicker;
     Qt3DCore::QTransform *m_transform;
 
-    //Qt3DCore::QEntity *parentEntity;
-    //model extends
+    // feature hollowshell
+    float hollowShellRadius = 0;
+
+    // feature extension
     vector<int> extendFaces;
 
     std::vector<QVector3D> cuttingPoints;

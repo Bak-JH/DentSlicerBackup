@@ -50,6 +50,17 @@ void QmlManager::initializeUI(QQmlApplicationEngine* e){
     //rotateSphere->setEnabled(0);
     QObject *rotateButton = FindItemByName(engine, "rotateButton");
 
+    // create hollowShellSphere and make it invisible
+    hollowShellSphereEntity = new Qt3DCore::QEntity(models);
+    hollowShellSphereMesh = new Qt3DExtras::QSphereMesh;
+    hollowShellSphereTransform = new Qt3DCore::QTransform;
+    hollowShellSphereMaterial = new Qt3DExtras::QPhongMaterial();
+    hollowShellSphereEntity->addComponent(hollowShellSphereMesh);
+    hollowShellSphereEntity->addComponent(hollowShellSphereTransform);
+    hollowShellSphereEntity->addComponent(hollowShellSphereMaterial);
+    hollowShellSphereMesh->setRadius(0);
+    hollowShellSphereEntity->setProperty("visible", false);
+
     partList = FindItemByName(engine, "partList");
 
     // model layflat components
