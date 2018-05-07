@@ -789,6 +789,7 @@ void GLModel::handlePickerClicked(QPickEvent *pick)
         MeshFace shadow_meshface = mesh->faces[trianglePick->triangleIndex()];
         qDebug() << "found parent meshface" << shadow_meshface.parent_idx;
         parentModel->targetMeshFace = &parentModel->mesh->faces[shadow_meshface.parent_idx];
+        parentModel->indentHollowShell();
         // emit hollowShellSelect();
     }
 
