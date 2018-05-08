@@ -12,7 +12,7 @@ Item{
         id : window
         width: 1280
         height: 768
-        visible: true
+        visible: false
 
         objectName: "mainWindow"
         property alias lefttab: lefttab

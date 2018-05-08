@@ -837,7 +837,6 @@ void GLModel::bisectModel_internal(Plane plane){
     Mesh* leftMesh = lmesh;
     Mesh* rightMesh = rmesh;
     // do bisecting mesh
-    qDebug() << "in bisect";
     leftMesh->faces.reserve(mesh->faces.size()*3);
     leftMesh->vertices.reserve(mesh->faces.size()*3);
     rightMesh->faces.reserve(mesh->faces.size()*3);
@@ -909,88 +908,92 @@ void GLModel::bisectModel_internal(Plane plane){
         }
     }
 
-    Paths3D contours = contourConstruct(cuttingEdges);
-
-    /*// copy paths3d to vector<containmentPath*>
-    vector<containmentPath*> containmentPaths;
-    for (Path3D contour : contours){
-        containmentPath* cp = new containmentPath();
-        for (MeshVertex mv : contour){
-            ct->projection.push_back(mv.position);
-        }
-        containmentPaths.push_back(cp);
-    }
-
-    // search for containment tree construction
-    for (containmentPath* target_cp : containmentPaths){
-        for (containmentPath* in_cp : containmentPaths){
-            if (cpIncp(target_cp,in_cp)){
-                target_cp->outer.push_back(in_cp);
-                in_cp->inner.push_back(target_cp);
-            }
-        }
-    }*/
-
-    qDebug() << "after cutting edges :" << contours.size();
-
-    for (Path3D contour : contours){
-        if (contour.size() <=2){
-            continue;
-        }
-
-        QVector3D centerOfMass = QVector3D(0,0,0);
-        for (MeshVertex mv : contour){
-            centerOfMass += mv.position;
-        }
-        centerOfMass /= contour.size();
-        //QVector3D centerOfMass = (contour[0].position + contour[contour.size()-1].position) /2;
-
-        QVector3D plane_normal = QVector3D::normal(plane[0], plane[1], plane[2]);
-        QVector3D current_plane_normal = QVector3D::normal(contour[1].position, centerOfMass, contour[0].position);
-        bool ccw = true;
-        if (QVector3D::dotProduct(current_plane_normal, plane_normal)>=0){
-            ccw = false;
-        }
-
-        for (int i=0; i<contour.size()-1; i++){
-            if (ccw){
-                leftMesh->addFace(contour[i].position, centerOfMass, contour[i+1].position);
-                rightMesh->addFace(contour[i+1].position, centerOfMass, contour[i].position);
-            } else {
-                leftMesh->addFace(contour[i+1].position, centerOfMass, contour[i].position);
-                rightMesh->addFace(contour[i].position, centerOfMass, contour[i+1].position);
-            }
-        }
-        if (ccw){
-            leftMesh->addFace(contour[contour.size()-1].position, centerOfMass, contour[0].position);
-            rightMesh->addFace(contour[0].position, centerOfMass, contour[contour.size()-1].position);
-        } else {
-            leftMesh->addFace(contour[0].position, centerOfMass, contour[contour.size()-1].position);
-            rightMesh->addFace(contour[contour.size()-1].position, centerOfMass, contour[0].position);
-        }
-    }
 
     if (cutFillMode == 2){ // if fill holes
+        // contour construction
+        Paths3D contours = contourConstruct(cuttingEdges);
 
-        qDebug() << "cutting edges size :" << cuttingEdges.size();
-
-        QVector3D centerOfMass(0,0,0);
-        for (Path3D cuttingEdge : cuttingEdges){
-            centerOfMass += cuttingEdge[0].position;
+        // copy paths3d to vector<containmentPath*>
+        for (int c=0; c<contours.size(); c++){
+        //for (Path3D contour : contours){
+            for (MeshVertex mv : contours[c]){
+                IntPoint ip;
+                ip.X = round(mv.position.x()*scfg->resolution);
+                ip.Y = round(mv.position.y()*scfg->resolution);
+                contours[c].projection.push_back(ip);
+            }
         }
-        centerOfMass /= (float) cuttingEdges.size();
 
-        QVector3D plane_normal = QVector3D::normal(plane[0], plane[1], plane[2]);
+        // search for containment tree construction
+        for (int target_idx=0; target_idx<contours.size(); target_idx++){
+            for (int in_idx=0; in_idx<contours.size(); in_idx++){
+            //for (Path3D in_path : contours){
+                if ((target_idx != in_idx) && (pathInpath(contours[target_idx], contours[in_idx]))){
+                    contours[target_idx].outer.push_back(contours[in_idx]);
+                    contours[in_idx].inner.push_back(contours[target_idx]);
+                }
+            }
+        }
 
-        for (Path3D cuttingEdge : cuttingEdges){
-            bool facingNormal = abs((plane_normal- QVector3D::normal(cuttingEdge[0].position, centerOfMass, cuttingEdge[1].position)).length())<1;
+        qDebug() << "after cutting edges :" << contours.size();
 
-            if (facingNormal){
-                leftMesh->addFace(cuttingEdge[0].position, centerOfMass, cuttingEdge[1].position);
-                rightMesh->addFace(cuttingEdge[1].position, centerOfMass, cuttingEdge[0].position);
-            } else {
-                leftMesh->addFace(cuttingEdge[1].position, centerOfMass, cuttingEdge[0].position);
-                rightMesh->addFace(cuttingEdge[0].position, centerOfMass, cuttingEdge[1].position);
+        for (Path3D contour : contours){
+            if (contour.size() <=2){
+                continue;
+            }
+
+            if (contour.inner.size() != 0){
+                // connect between inner outer
+                qDebug() << "contour inner size : " << contour.inner[0].size() << "contour size : " << contour.size();
+                for (int inner_mv_idx =0; inner_mv_idx<contour.inner[0].size()-1; inner_mv_idx++){ // find minimum distance position
+                    float min_distance = 99999;
+                    int min_inner_mv_idx = -1;
+                    for (int contour_mv_idx =0; contour_mv_idx<contour.size(); contour_mv_idx++){
+                        float cur_distance =contour[contour_mv_idx].position.distanceToPoint(contour.inner[0][inner_mv_idx].position);
+                        if (min_distance > cur_distance){
+                            min_distance = cur_distance;
+                            min_inner_mv_idx = contour_mv_idx;
+                            break;
+                        }
+                    }
+                    // push triangle from inner to outer
+                }
+                continue;
+            } else { // no inner exists
+                if (contour.outer.size() != 0){
+                    continue;
+                } // no outer exists, closed contour
+
+                QVector3D centerOfMass = QVector3D(0,0,0);
+                for (MeshVertex mv : contour){
+                    centerOfMass += mv.position;
+                }
+                centerOfMass /= contour.size();
+                //QVector3D centerOfMass = (contour[0].position + contour[contour.size()-1].position) /2;
+
+                QVector3D plane_normal = QVector3D::normal(plane[0], plane[1], plane[2]);
+                QVector3D current_plane_normal = QVector3D::normal(contour[1].position, centerOfMass, contour[0].position);
+                bool ccw = true;
+                if (QVector3D::dotProduct(current_plane_normal, plane_normal)>=0){
+                    ccw = false;
+                }
+
+                for (int i=0; i<contour.size()-1; i++){
+                    if (ccw){
+                        leftMesh->addFace(contour[i].position, centerOfMass, contour[i+1].position);
+                        rightMesh->addFace(contour[i+1].position, centerOfMass, contour[i].position);
+                    } else {
+                        leftMesh->addFace(contour[i+1].position, centerOfMass, contour[i].position);
+                        rightMesh->addFace(contour[i].position, centerOfMass, contour[i+1].position);
+                    }
+                }
+                if (ccw){
+                    leftMesh->addFace(contour[contour.size()-1].position, centerOfMass, contour[0].position);
+                    rightMesh->addFace(contour[0].position, centerOfMass, contour[contour.size()-1].position);
+                } else {
+                    leftMesh->addFace(contour[0].position, centerOfMass, contour[contour.size()-1].position);
+                    rightMesh->addFace(contour[contour.size()-1].position, centerOfMass, contour[0].position);
+                }
             }
         }
     }
