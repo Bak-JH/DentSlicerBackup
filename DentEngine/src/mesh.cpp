@@ -945,7 +945,7 @@ Paths3D contourConstruct(Paths3D hole_edges){
     return contourList;*/
 }
 
-bool cpIncp(containmentPath target, containmentPath in){
+bool pathInpath(Path3D target, Path3D in){
     for (IntPoint ip : target.projection){
         if (PointInPolygon(ip, in.projection)==0){ // if ip is not contained in in
             return false;

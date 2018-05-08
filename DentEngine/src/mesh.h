@@ -52,7 +52,14 @@ public:
     }
 };
 
-typedef vector<MeshVertex> Path3D;
+//typedef vector<MeshVertex> Path3D;
+class Path3D : public vector<MeshVertex>{
+    public:
+        Path projection;
+        vector<Path3D> inner;
+        vector<Path3D> outer;
+};
+
 typedef vector<Path3D> Paths3D;
 
 class Mesh{
@@ -103,14 +110,14 @@ float vertexDistance(QVector3D, QVector3D);
 Paths contourConstruct(Paths);
 Paths3D contourConstruct(Paths3D hole_edges);
 
-class containmentPath{
+/* class containmentPath{
 public:
     Path projection;
     vector<containmentPath> inner;
     vector<containmentPath> outer;
-};
+}; */
 
-bool cpIncp(containmentPath target, containmentPath in);
+bool pathInpath(Path3D target, Path3D in);
 
 vector<std::array<QVector3D, 3>> interpolate(Path3D from, Path3D to);
 
