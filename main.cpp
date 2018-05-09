@@ -54,15 +54,15 @@ int main(int argc, char **argv)
 
     engine.load(QUrl(QStringLiteral("qrc:/Qml/main.qml")));
 
+    engine.retranslate();
 
     qmlManager->initializeUI(&engine);
     //qmlManager->openModelFile("C:/Users/diridiri/Desktop/DLP/DLPslicer/partial2_flip.stl");//DLPslicer/partial2_flip.stl");
     splash->close();
 
     //qmlManager->mainWindow->setProperty("visible",true);
-    qmlManager->loginWindow->setProperty("visible",true);
+    //qmlManager->loginWindow->setProperty("visible",true);
 
-    engine.retranslate();
 
     return app.exec();
 }

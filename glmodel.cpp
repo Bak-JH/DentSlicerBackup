@@ -769,20 +769,36 @@ void GLModel::handlePickerClicked(QPickEvent *pick)
     }
 
     if (extensionActive){
-            MeshFace shadow_meshface = mesh->faces[trianglePick->triangleIndex()];
-            qDebug() << "found parent meshface" << shadow_meshface.parent_idx;
-            parentModel->uncolorExtensionFaces();
-            emit extensionSelect();
-            parentModel->targetMeshFace = &parentModel->mesh->faces[shadow_meshface.parent_idx];
-            parentModel->generateColorAttributes();
-            /*qDebug() << trianglePick->localIntersection() \
-                     << parentModel->mesh->idx2MV(parentModel->targetMeshFace->mesh_vertex[0]).position\
-                    << parentModel->mesh->idx2MV(parentModel->targetMeshFace->mesh_vertex[1]).position\
-                    << parentModel->mesh->idx2MV(parentModel->targetMeshFace->mesh_vertex[2]).position;
-            */
-            // << parentModel->targetMeshFace->mesh_vertex[1] << parentModel->targetMeshFace->mesh_vertex[2];
-            parentModel->colorExtensionFaces();
+        MeshFace shadow_meshface = mesh->faces[trianglePick->triangleIndex()];
+        qDebug() << "found parent meshface" << shadow_meshface.parent_idx;
+        parentModel->uncolorExtensionFaces();
+        emit extensionSelect();
+        parentModel->targetMeshFace = &parentModel->mesh->faces[shadow_meshface.parent_idx];
+        parentModel->generateColorAttributes();
+        /*qDebug() << trianglePick->localIntersection() \
+                 << parentModel->mesh->idx2MV(parentModel->targetMeshFace->mesh_vertex[0]).position\
+                << parentModel->mesh->idx2MV(parentModel->targetMeshFace->mesh_vertex[1]).position\
+                << parentModel->mesh->idx2MV(parentModel->targetMeshFace->mesh_vertex[2]).position;
+        */
+        // << parentModel->targetMeshFace->mesh_vertex[1] << parentModel->targetMeshFace->mesh_vertex[2];
+        parentModel->colorExtensionFaces();
     }
+
+    if (hollowShellActive){
+        qDebug() << "getting handle picker clicked signal hollow shell active";
+        MeshFace shadow_meshface = mesh->faces[trianglePick->triangleIndex()];
+        qDebug() << "found parent meshface" << shadow_meshface.parent_idx;
+        parentModel->targetMeshFace = &parentModel->mesh->faces[shadow_meshface.parent_idx];
+        // translate hollowShellSphere to mouse position
+        QVector3D v = pick->localIntersection();
+        QVector3D tmp = m_transform->translation();
+        float zlength = mesh->z_max - mesh->z_min;
+        qmlManager->hollowShellSphereTransform->setTranslation(v + QVector3D(tmp.x(),tmp.y(),zlength/2));
+
+        //parentModel->indentHollowShell(10);
+        // emit hollowShellSelect();
+    }
+
     /*if (layflatActive){
         m_objectPicker->setEnabled(false);
         this->parentModel->m_objectPicker = new Qt3DRender::QObjectPicker(this->parentModel);
@@ -821,7 +837,6 @@ void GLModel::bisectModel_internal(Plane plane){
     Mesh* leftMesh = lmesh;
     Mesh* rightMesh = rmesh;
     // do bisecting mesh
-    qDebug() << "in bisect";
     leftMesh->faces.reserve(mesh->faces.size()*3);
     leftMesh->vertices.reserve(mesh->faces.size()*3);
     rightMesh->faces.reserve(mesh->faces.size()*3);
@@ -847,6 +862,7 @@ void GLModel::bisectModel_internal(Plane plane){
             cuttingEdges.push_back(intersection);
             vector<QVector3D> upper;
             vector<QVector3D> lower;
+
             for (int i=0; i<3; i++){
                 if (target_plane[i].distanceToPlane(plane[0],plane[1],plane[2]) >0)
                     upper.push_back(target_plane[i]);
@@ -857,7 +873,7 @@ void GLModel::bisectModel_internal(Plane plane){
             QVector3D target_plane_normal = QVector3D::normal(target_plane[0], target_plane[1], target_plane[2]);
 
             if (upper.size() == 2){
-                bool facingNormal = abs((target_plane_normal- QVector3D::normal(lower[0], intersection[0].position, intersection[1].position)).length())<0.1;
+                bool facingNormal = abs((target_plane_normal- QVector3D::normal(lower[0], intersection[0].position, intersection[1].position)).length())<1;
 
                 if (facingNormal){
                     rightMesh->addFace(upper[1], upper[0], intersection[1].position);
@@ -869,7 +885,7 @@ void GLModel::bisectModel_internal(Plane plane){
                     leftMesh->addFace(intersection[0].position, lower[0], intersection[1].position);
                 }
             } else if (lower.size() == 2){
-                bool facingNormal = abs((target_plane_normal- QVector3D::normal(lower[0], intersection[1].position, intersection[0].position)).length())<0.1;
+                bool facingNormal = abs((target_plane_normal- QVector3D::normal(lower[0], intersection[1].position, intersection[0].position)).length())<1;
 
                 if (facingNormal){
                     leftMesh->addFace(lower[0], intersection[1].position, intersection[0].position);
@@ -892,45 +908,105 @@ void GLModel::bisectModel_internal(Plane plane){
         }
     }
 
-    if (cutFillMode == 2){ // if fill holes
-        qDebug() << "cutting edges size :" << cuttingEdges.size();
 
-        QVector3D centerOfMass(0,0,0);
-        for (Path3D cuttingEdge : cuttingEdges){
-            centerOfMass += cuttingEdge[0].position;
-        }
-        centerOfMass /= (float) cuttingEdges.size();
+    if (cutFillMode == 2){ // if fill holes
+        // contour construction
+        Paths3D contours = contourConstruct(cuttingEdges);
 
         QVector3D plane_normal = QVector3D::normal(plane[0], plane[1], plane[2]);
 
-        for (Path3D cuttingEdge : cuttingEdges){
-            bool facingNormal = abs((plane_normal- QVector3D::normal(cuttingEdge[0].position, centerOfMass, cuttingEdge[1].position)).length())<1;
+        // copy paths3d to vector<containmentPath*>
+        for (int c=0; c<contours.size(); c++){
+        //for (Path3D contour : contours){
+            for (MeshVertex mv : contours[c]){
+                IntPoint ip;
+                ip.X = round(mv.position.x()*scfg->resolution);
+                ip.Y = round(mv.position.y()*scfg->resolution);
+                contours[c].projection.push_back(ip);
+            }
+        }
 
-            if (facingNormal){
-                leftMesh->addFace(cuttingEdge[0].position, centerOfMass, cuttingEdge[1].position);
-                rightMesh->addFace(cuttingEdge[1].position, centerOfMass, cuttingEdge[0].position);
-            } else {
-                leftMesh->addFace(cuttingEdge[1].position, centerOfMass, cuttingEdge[0].position);
-                rightMesh->addFace(cuttingEdge[0].position, centerOfMass, cuttingEdge[1].position);
+        // search for containment tree construction
+        for (int target_idx=0; target_idx<contours.size(); target_idx++){
+            for (int in_idx=0; in_idx<contours.size(); in_idx++){
+            //for (Path3D in_path : contours){
+                if ((contours[in_idx].size()>3) && (contours[target_idx].size()>3)
+                        && (target_idx != in_idx) && (pathInpath(contours[target_idx], contours[in_idx]))){
+                    contours[target_idx].outer.push_back(contours[in_idx]);
+                    contours[in_idx].inner.push_back(contours[target_idx]);
+                }
+            }
+        }
+
+        qDebug() << "after cutting edges :" << contours.size();
+
+
+        /*// contour 2 polygon done by poly2tri
+        std::vector<p2t::Point*> ContourPoints;
+
+        for (Path3D contour : contours){
+            for (MeshVertex mv : contour){
+                //ContourPoints.push_back(new p2t::Point(mv.position.x(), mv.position.y()));
+                ContourPoints.push_back(new p2t::Point(mv.position.y(), mv.position.z()));
+            }
+        }
+        qDebug() << "putted contourPoints";
+
+        float d = plane_normal.x()*plane[0].x() +
+                plane_normal.y()*plane[0].y() +
+                plane_normal.z()*plane[0].z();
+
+        p2t::CDT cdt(ContourPoints);
+        cdt.Triangulate();
+        std::vector<p2t::Triangle*> triangles = cdt.GetTriangles();
+        qDebug() << "done triangulation";
+
+        for (p2t::Triangle* triangle : triangles){
+            leftMesh->addFace(QVector3D(triangle->GetPoint(0)->x, triangle->GetPoint(0)->y,
+                                        0),//(d - (plane_normal.x()*triangle->GetPoint(0)->x) - (plane_normal.y()*triangle->GetPoint(0)->y))/plane_normal.z()),
+                              QVector3D(triangle->GetPoint(1)->x, triangle->GetPoint(1)->y,
+                                        0),//(d - (plane_normal.x()*triangle->GetPoint(1)->x) - (plane_normal.y()*triangle->GetPoint(1)->y))/plane_normal.z()),
+                              QVector3D(triangle->GetPoint(2)->x, triangle->GetPoint(2)->y,
+                                        0));//(d - (plane_normal.x()*triangle->GetPoint(2)->x) - (plane_normal.y()*triangle->GetPoint(2)->y))/plane_normal.z()));
+            rightMesh->addFace(QVector3D(triangle->GetPoint(1)->x, triangle->GetPoint(1)->y,
+                                         0),//(d - (plane_normal.x()*triangle->GetPoint(1)->x) - (plane_normal.y()*triangle->GetPoint(1)->y))/plane_normal.z()),
+                               QVector3D(triangle->GetPoint(0)->x, triangle->GetPoint(0)->y,
+                                         0),//(d - (plane_normal.x()*triangle->GetPoint(0)->x) - (plane_normal.y()*triangle->GetPoint(0)->y))/plane_normal.z()),
+                               QVector3D(triangle->GetPoint(2)->x, triangle->GetPoint(2)->y,
+                                         0));//(d - (plane_normal.x()*triangle->GetPoint(2)->x) - (plane_normal.y()*triangle->GetPoint(2)->y))/plane_normal.z()));
+        }*/
+
+
+
+        for (Path3D contour : contours){
+            if (contour.size() <= 2){
+                continue;
+            }
+            QVector3D centerOfMass = QVector3D(0,0,0);
+            for (MeshVertex mv : contour){
+                centerOfMass += mv.position;
+            }
+            centerOfMass /= contour.size();
+
+            // get orientation
+            bool ccw = true;
+            QVector3D current_plane_normal = QVector3D::normal(contour[1].position, centerOfMass, contour[0].position);
+            if (QVector3D::dotProduct(current_plane_normal, plane_normal)>=0){
+                ccw = false;
+            }
+
+            for (int i=0; i<contour.size(); i++){
+                if (ccw){
+                    leftMesh->addFace(contour[i].position, centerOfMass, contour[(i+1)%contour.size()].position);
+                    rightMesh->addFace(contour[(i+1)%contour.size()].position, centerOfMass, contour[i].position);
+                } else {
+                    leftMesh->addFace(contour[(i+1)%contour.size()].position, centerOfMass, contour[i].position);
+                    rightMesh->addFace(contour[i].position, centerOfMass, contour[(i+1)%contour.size()].position);
+                }
             }
         }
     }
 
-    /*Paths3D contours = contourConstruct(cuttingEdges);
-
-    qDebug() << "after cutting edges :" << contours.size();
-
-    for (Path3D contour : contours){
-        QVector3D centerOfMass = (contour[0].position + contour[contour.size()-1].position) /2;
-
-
-        for (int i=0; i<contour.size()-1; i++){
-            leftMesh->addFace(contour[i].position, centerOfMass, contour[i+1].position);
-            rightMesh->addFace(contour[i+1].position, centerOfMass, contour[i].position);
-        }
-        leftMesh->addFace(contour[contour.size()-1].position, centerOfMass, contour[0].position);
-        rightMesh->addFace(contour[0].position, centerOfMass, contour[contour.size()-1].position);
-    }*/
 
     qDebug() << "done bisect";
     // 승환 30%
@@ -1109,6 +1185,14 @@ void GLModel::generateRLModel(){
     qmlManager->runArrange();
 }
 
+// hollow shell part
+void GLModel::indentHollowShell(double radius){
+    qDebug() << "hollow shell called" << radius;
+
+    QVector3D center = (mesh->idx2MV(targetMeshFace->mesh_vertex[0]).position +mesh->idx2MV(targetMeshFace->mesh_vertex[1]).position + mesh->idx2MV(targetMeshFace->mesh_vertex[2]).position)/3;
+    hollowShell(mesh, targetMeshFace, center, radius);
+}
+
 GLModel::~GLModel(){
     /*delete m_transform;
     delete m_objectPicker;
@@ -1205,27 +1289,35 @@ void GLModel::cutFillModeSelected(int type){
 }
 
 void GLModel::getSliderSignal(double value){
-    float zlength = parentModel->mesh->z_max - parentModel->mesh->z_min;
-    QVector3D v1(1,0, -zlength/2 + value*zlength/1.8);
-    QVector3D v2(1,1, -zlength/2 + value*zlength/1.8);
-    QVector3D v3(2,0, -zlength/2 + value*zlength/1.8);
+    if (cutActive){
+        float zlength = parentModel->mesh->z_max - parentModel->mesh->z_min;
+        QVector3D v1(1,0, -zlength/2 + value*zlength/1.8);
+        QVector3D v2(1,1, -zlength/2 + value*zlength/1.8);
+        QVector3D v3(2,0, -zlength/2 + value*zlength/1.8);
 
-    QVector3D world_origin(0,0,0);
-    QVector3D original_normal(0,1,0);
-    QVector3D desire_normal(QVector3D::normal(v1,v2,v3)); //size=1
-    float angle = qAcos(QVector3D::dotProduct(original_normal,desire_normal))*180/M_PI+(value-1)*30;
-    QVector3D crossproduct_vector(QVector3D::crossProduct(original_normal,desire_normal));
+        QVector3D world_origin(0,0,0);
+        QVector3D original_normal(0,1,0);
+        QVector3D desire_normal(QVector3D::normal(v1,v2,v3)); //size=1
+        float angle = qAcos(QVector3D::dotProduct(original_normal,desire_normal))*180/M_PI+(value-1)*30;
+        QVector3D crossproduct_vector(QVector3D::crossProduct(original_normal,desire_normal));
 
-    QVector3D tmp = parentModel->m_transform->translation();
+        QVector3D tmp = parentModel->m_transform->translation();
 
-    for (int i=0;i<2;i++){
-        parentModel->planeTransform[i]->setTranslation(desire_normal*(-world_origin.distanceToPlane(v1,v2,v3)) +QVector3D(tmp.x(),tmp.y(),zlength/2));
-        parentModel->planeEntity[i]->addComponent(parentModel->planeTransform[i]);
+        for (int i=0;i<2;i++){
+            parentModel->planeTransform[i]->setTranslation(desire_normal*(-world_origin.distanceToPlane(v1,v2,v3)) +QVector3D(tmp.x(),tmp.y(),zlength/2));
+            parentModel->planeEntity[i]->addComponent(parentModel->planeTransform[i]);
+        }
+
+        parentModel->cuttingPlane[0] = v1;
+        parentModel->cuttingPlane[1] = v2;
+        parentModel->cuttingPlane[2] = v3;
+    } else if (hollowShellActive){
+        // change radius of hollowShellSphere
+        hollowShellRadius = value;
+        qmlManager->hollowShellSphereMesh->setRadius(hollowShellRadius);
+
+        qDebug() << "getting slider signal: current radius is " << value;
     }
-
-    parentModel->cuttingPlane[0] = v1;
-    parentModel->cuttingPlane[1] = v2;
-    parentModel->cuttingPlane[2] = v3;
 }
 
 
@@ -1465,3 +1557,16 @@ void GLModel::closeCut(){
     removePlane();
     parentModel->removeCuttingPoints();
 }
+
+void GLModel::openHollowShell(){
+    qDebug() << "open HollowShell called";
+    hollowShellActive = true;
+    qmlManager->hollowShellSphereEntity->setProperty("visible", true);
+}
+
+void GLModel::closeHollowShell(){
+    qDebug() << "close HollowShell called";
+    hollowShellActive = false;
+    qmlManager->hollowShellSphereEntity->setProperty("visible", false);
+}
+

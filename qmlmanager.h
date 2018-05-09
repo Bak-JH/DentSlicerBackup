@@ -63,6 +63,14 @@ public:
     QObject *flatButton;
     QObject *cutSlider;
 
+    // hollow shell components
+    QObject *hollowShellPopup;
+    QObject *hollowShellSlider;
+    Qt3DExtras::QSphereMesh* hollowShellSphereMesh;
+    Qt3DCore::QEntity* hollowShellSphereEntity;
+    Qt3DCore::QTransform* hollowShellSphereTransform;
+    QPhongMaterial* hollowShellSphereMaterial;
+
     // labelling components
     QObject *text3DInput;
     QObject *labelPopup;
