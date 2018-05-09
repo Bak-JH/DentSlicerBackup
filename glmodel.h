@@ -22,6 +22,7 @@
 #include "feature/autoarrange.h"
 #include "feature/stlexporter.h"
 #include "feature/extension.h"
+#include "feature/hollowshell.h"
 
 
 #define MAX_BUF_LEN 2000000
@@ -118,8 +119,10 @@ public:
     Qt3DRender::QObjectPicker *m_objectPicker;
     Qt3DCore::QTransform *m_transform;
 
-    //Qt3DCore::QEntity *parentEntity;
-    //model extends
+    // feature hollowshell
+    float hollowShellRadius = 0;
+
+    // feature extension
     vector<int> extendFaces;
 
     std::vector<QVector3D> cuttingPoints;
@@ -198,6 +201,7 @@ private:
     bool labellingActive = false;
     bool extensionActive = false;
     bool cutActive = false;
+    bool hollowShellActive = false;
     bool layflatActive = false;
 
 signals:
@@ -235,6 +239,11 @@ public slots:
     void openCut();
     void closeCut();
 
+    // Hollow Shell
+    void indentHollowShell(double radius);
+    void openHollowShell();
+    void closeHollowShell();
+
     // Labelling
     void getTextChanged(QString text, int contentWidth);
     void openLabelling();
@@ -252,7 +261,6 @@ public slots:
 
     // ShellOffset
     void generateShellOffset(double factor);
-
 
     // Model Mesh info update
     void updateModelMesh();

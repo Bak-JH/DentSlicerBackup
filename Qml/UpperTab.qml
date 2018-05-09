@@ -45,6 +45,7 @@ Rectangle {
         runGroupFeature(ftrRotate,"inactive");
         third_tab_button_autorepair.state = "inactive";
         third_tab_button_cut.state = "inactive";
+        third_tab_button_hollowshell.state = "inactive";
         third_tab_button_shelloffset.state = "inactive";
         third_tab_button_scale.state = "inactive";
         fourth_tab_button_extend.state = "inactive";
@@ -332,7 +333,7 @@ Rectangle {
 
     Item{
         id : thirdtab
-        width : buttonWidth * 4 + 1
+        width : buttonWidth * 5 + 1
         height: buttonHeight
 
         anchors.left : secondtab.right
@@ -410,9 +411,21 @@ Rectangle {
         }
             
         UpperButton{
+            id : third_tab_button_hollowshell
+            anchors.left : third_tab_button_cut.right
+            iconSource1: "qrc:/resource/upper_cut.png"
+            iconSource2: "qrc:/Resource/upper2_cut.png"
+            iconText: qsTr("Hollow Shell")
+            onButtonClicked: {
+                if(!qm.isSelected()&& (state == "active"))
+                    window.resultPopUp.openResultPopUp("","You must select at least one model.","")
+            }
+        }
+
+        UpperButton{
             id : third_tab_button_shelloffset
 
-            anchors.left: third_tab_button_cut.right
+            anchors.left: third_tab_button_hollowshell.right
             iconSource1: "qrc:/resource/upper_shelloffset.png"
             iconSource2: "qrc:/Resource/upper2_shelloffset.png"
             iconText: "Shell Offset"
@@ -915,6 +928,98 @@ Rectangle {
             //Planeslider{id:slider;anchors.right: parent.left;anchors.rightMargin:20;anchors.bottom:parent.bottom;anchors.bottomMargin:-20;}
         }
 
+        //12.5 PopUp - Hollow Shell
+        PopUp {
+            objectName: "hollowShellPopup"
+            id : hollow_shell
+            funcname: "Hollow Shell"
+
+            slider_vis: true
+            height: 265
+            detail1: "Hollow Shell"
+            detail2: "Offset value"
+            //image: ""
+            detailline1_vis: true
+            detailline2_vis: true
+            imageHeight: 40
+            applyfinishbutton_vis: true
+            okbutton_vis: false
+            applybutton_vis: false
+            descriptionimage_vis: false
+            numbox_detail2_vis: true
+            numberbox_detail2_y: 170
+            numbox_detail2_default: 1.0
+            numbox_updown_scale: 0.25
+            state: {
+                if (third_tab_button_hollowshell.state == "active" && qm.isSelected()){
+                    slider_vis = true;
+                    openHollowShell()
+                    return "active";
+                } else {
+                    slider_vis = false;
+                    closeHollowShell()
+                    return "inactive";
+                }
+            }
+
+
+            onPlaneSliderValueChanged: {
+                resultSliderValueChanged(value);
+            }
+
+            onApplyClicked: {
+                console.log("hollowShellClicked ");
+                hollowShell();
+                slider_vis = false;
+            }
+
+            onFinishClicked: {
+                console.log("Finish Clicked");
+                closeHollowShell();
+                slider_vis = false;
+            }
+
+            signal resultSliderValueChanged(double value);
+            signal runFeature(int type);
+            signal hollowShell(double factor);
+            signal openHollowShell();
+            signal closeHollowShell();
+
+            //switch button
+            Rectangle {
+                width: 165
+                height: 24
+                anchors.left: parent.left
+                anchors.top: parent.top
+                anchors.leftMargin: 35
+                anchors.topMargin: 85
+                color: "transparent"
+                Rectangle {
+                    width: 26
+                    height: 24
+                    anchors.left: parent.left
+                    color: parent.color
+                    Image {
+                        anchors.fill: parent
+                        source: mousearea_shelloffset_switch.containsMouse
+                                ? "qrc:/Resource/popup_image/shelloffset_switch_hover.png"
+                                : "qrc:/Resource/popup_image/shelloffset_switch.png"
+                    }
+                    MouseArea {
+                        id: mousearea_hollowshell_switch
+                        anchors.fill: parent
+                        hoverEnabled: true
+                    }
+                }
+                Text {
+                    anchors.right: parent.right
+                    anchors.verticalCenter: parent.verticalCenter
+                    text: "Switch the direction"
+                    font.family: mainFont.name
+                    font.pixelSize: 12
+                }
+            }
+        }
 
         //12. PopUp - Shell Offset
         PopUp {
@@ -1026,7 +1131,7 @@ Rectangle {
             }
             onApplyClicked: {
                 console.log("extension");
-                generateExtensionFaces(numbox_detail2_default);
+                generateExtensionFaces(numbox_value_detail2);
             }
             signal generateExtensionFaces(double distance);
             signal openExtension()
