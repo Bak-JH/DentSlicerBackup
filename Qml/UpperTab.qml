@@ -333,7 +333,7 @@ Rectangle {
 
     Item{
         id : thirdtab
-        width : buttonWidth * 5 + 1
+        width : buttonWidth * 4 + 1
         height: buttonHeight
 
         anchors.left : secondtab.right
@@ -410,7 +410,7 @@ Rectangle {
 
         }
             
-        UpperButton{
+        /*UpperButton{
             id : third_tab_button_hollowshell
             anchors.left : third_tab_button_cut.right
             iconSource1: "qrc:/resource/upper_cut.png"
@@ -420,12 +420,12 @@ Rectangle {
                 if(!qm.isSelected()&& (state == "active"))
                     window.resultPopUp.openResultPopUp("","You must select at least one model.","")
             }
-        }
+        }*/
 
         UpperButton{
             id : third_tab_button_shelloffset
 
-            anchors.left: third_tab_button_hollowshell.right
+            anchors.left: third_tab_button_cut.right
             iconSource1: "qrc:/resource/upper_shelloffset.png"
             iconSource2: "qrc:/Resource/upper2_shelloffset.png"
             iconText: "Shell Offset"
