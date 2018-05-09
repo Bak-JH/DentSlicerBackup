@@ -187,3 +187,40 @@ void httpreq::post_key_info(QString id, QString pw, QString usage, QString admin
 
     reply = manager->post(request, params.toEncoded().split('?')[1]);
 }
+
+
+void httpreq::get_iv(QString key){
+    QNetworkRequest request;
+    QNetworkReply *reply = NULL;
+    QSslConfiguration config = QSslConfiguration::defaultConfiguration();
+    config.setProtocol(QSsl::TlsV1_2OrLater);
+
+    request.setSslConfiguration(config);
+
+    request.setUrl(QUrl(main_url+"authenticate_serial/"));
+    request.setHeader(QNetworkRequest::ContentTypeHeader, "application/x-www-form-urlencoded");
+    QString cookiestring ="csrftoken="+csrftoken+";" + "sessionid="+sessionid+";";
+
+    request.setRawHeader((QByteArray) "Cookie", cookiestring.toUtf8());
+    request.setRawHeader("Referer", "https://twinsmilelibrary.co.kr");
+
+    QString uuid = get_hash().mid(0,32);
+    qDebug()<< uuid;
+    QString ip = "";
+    foreach (const QHostAddress &address, QNetworkInterface::allAddresses()) {
+        if (address.protocol() == QAbstractSocket::IPv4Protocol && address != QHostAddress(QHostAddress::LocalHost))
+             ip = address.toString();
+    }
+    qDebug() << ip;
+
+    QUrlQuery qu;
+    qu.addQueryItem("serial", key);
+    qu.addQueryItem("uuid", uuid);
+    qu.addQueryItem("ip", ip);
+    qu.addQueryItem("csrfmiddlewaretoken", csrftoken);
+
+    QUrl params;
+    params.setQuery(qu);
+
+    reply = manager->post(request, params.toEncoded().split('?')[1]);
+}

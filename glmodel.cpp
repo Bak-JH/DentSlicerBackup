@@ -941,7 +941,6 @@ void GLModel::bisectModel_internal(Plane plane){
         qDebug() << "after cutting edges :" << contours.size();
 
 
-        /*
         // contour 2 polygon done by poly2tri
         std::vector<p2t::Point*> ContourPoints;
 
@@ -976,10 +975,9 @@ void GLModel::bisectModel_internal(Plane plane){
                                QVector3D(triangle->GetPoint(2)->x, triangle->GetPoint(2)->y,
                                          0));//(d - (plane_normal.x()*triangle->GetPoint(2)->x) - (plane_normal.y()*triangle->GetPoint(2)->y))/plane_normal.z()));
         }
-        */
 
 
-        for (Path3D contour : contours){
+        /*for (Path3D contour : contours){
             if (contour.size() <= 2){
                 continue;
             }
@@ -1005,7 +1003,7 @@ void GLModel::bisectModel_internal(Plane plane){
                     rightMesh->addFace(contour[i].position, centerOfMass, contour[(i+1)%contour.size()].position);
                 }
             }
-        }
+        }*/
 
         /*for (Path3D contour : contours){
             if (contour.size() <=2){

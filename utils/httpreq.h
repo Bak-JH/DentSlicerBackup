@@ -21,6 +21,7 @@ public:
 
     void get_csrf_token();
     void post_key_info(QString id, QString pw, QString usage, QString phone, QString admin, QString email);
+    void get_iv(QString key);
 
 public slots:
     void login(QString id, QString pw);
