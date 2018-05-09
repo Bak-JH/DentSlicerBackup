@@ -111,5 +111,6 @@
         <file>Resource/mesh/box1mm.stl</file>
         <file>Resource/mesh/box05mm.stl</file>
         <file>Resource/mesh/boundedBox.stl</file>
+        <file>Resource/mesh/boundedBox2.stl</file>
     </qresource>
 </RCC>
