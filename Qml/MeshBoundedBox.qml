@@ -25,7 +25,7 @@ Entity{
 
     Mesh{
         id: boundedBoxMesh
-        source: "qrc:/Resource/mesh/boundedBox.stl"
+        source: "qrc:/Resource/mesh/boundedBox2.stl"
     }
 
     Transform {
@@ -36,9 +36,9 @@ Entity{
 
     PhongMaterial{
         id : boundedBoxMaterial
-        ambient: Qt.rgba(50/255, 50/255, 240/255, 1)
-        diffuse: Qt.rgba(150/255, 150/255, 150/255, 1)
-        specular:  Qt.rgba(150/255, 150/255, 150/255, 1)
+        ambient: Qt.rgba(240/255, 249/255, 70/255, 1)
+        diffuse: Qt.rgba(240/255, 249/255, 70/255, 1)
+        specular:  Qt.rgba(240/255, 249/255, 70/255, 1)
         shininess: 0
     }
 
@@ -54,7 +54,7 @@ Entity{
     }
 
     function setSize(x,y,z){
-        boundedBoxTransform.scale3D = Qt.vector3d(x/10,y/10,z/10)
+        boundedBoxTransform.scale3D = Qt.vector3d(x/100,y/100,z/100)
     }
 
     function setPosition(center){

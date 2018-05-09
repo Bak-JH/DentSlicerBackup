@@ -83,7 +83,7 @@ void QmlManager::initializeUI(QQmlApplicationEngine* e){
     // arrange components
     arrangePopup = FindItemByName(engine, "arrangePopup");
     progress_popup = FindItemByName(engine, "progress_popup");
-    QObject::connect(arrangePopup, SIGNAL(runFeature()), this, SLOT(runArrange()));
+    //QObject::connect(arrangePopup, SIGNAL(runFeature()), this, SLOT(runArrange()));
 
     // save component
     saveButton = FindItemByName(engine, "saveBtn");
