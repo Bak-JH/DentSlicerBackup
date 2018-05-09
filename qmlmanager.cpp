@@ -135,7 +135,8 @@ void QmlManager::initializeUI(QQmlApplicationEngine* e){
     QObject::connect(this, SIGNAL(arrangeDone(vector<QVector3D>, vector<float>)), this, SLOT(applyArrangeResult(vector<QVector3D>, vector<float>)));
 
     httpreq* hr = new httpreq();
-    QObject::connect(loginButton, SIGNAL(loginTrial(QString, QString)), hr, SLOT(login(QString,QString)));
+    QObject::connect(loginButton, SIGNAL(loginTrial(QString)), hr, SLOT(get_iv(QString)));
+    //QObject::connect(loginButton, SIGNAL(loginTrial(QString, QString)), hr, SLOT(login(QString,QString)));
     //openModelFile(QDir::currentPath()+"/Models/partial1.stl");
     //openModelFile("c:/Users/user/Desktop/asdfasf.stl");
 }

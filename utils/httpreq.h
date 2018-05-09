@@ -14,6 +14,10 @@ public:
     QString passwd; // need to pass it at compile time
     QString csrftoken;
     QString sessionid;
+    QString uuid;
+    QString stored_serial;
+
+    bool first_login = true;
 
     QByteArray req_reply;
     httpreq();
@@ -21,10 +25,13 @@ public:
 
     void get_csrf_token();
     void post_key_info(QString id, QString pw, QString usage, QString phone, QString admin, QString email);
-    void get_iv(QString key);
+    void get_uuid();
+    QString get_hash();
+    void check_stored_serial();
 
 public slots:
     void login(QString id, QString pw);
+    void get_iv(QString key);
     void replyFinished(QNetworkReply *reply);
 };
 

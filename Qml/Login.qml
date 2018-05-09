@@ -44,7 +44,7 @@ ApplicationWindow {
 
         Keys.onPressed: {
             if (event.key == Qt.Key_Enter) {
-                loginButton.loginTrial(idbox_text.text, pwbox_text.text);
+                loginButton.loginTrial(idbox_text.text);//, pwbox_text.text);
             }
         }
 
@@ -259,7 +259,7 @@ ApplicationWindow {
                     parent.loginTrial(idbox_text.text, pwbox_text.text);
                 }
             }
-            signal loginTrial(string id, string pw);
+            signal loginTrial(string id);//, string pw);
 
             function loginSuccess(){
                 loginWindow.close()

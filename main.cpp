@@ -60,7 +60,7 @@ int main(int argc, char **argv)
     //qmlManager->openModelFile("C:/Users/diridiri/Desktop/DLP/DLPslicer/partial2_flip.stl");//DLPslicer/partial2_flip.stl");
     splash->close();
 
-    qmlManager->mainWindow->setProperty("visible",true);
+    //qmlManager->mainWindow->setProperty("visible",true);
     //qmlManager->loginWindow->setProperty("visible",true);
 
 

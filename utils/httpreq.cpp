@@ -8,10 +8,11 @@
 #include <QSsl>
 #include <QMessageBox>
 #include "qmlmanager.h"
+#include <QCryptographicHash>
 
 httpreq::httpreq()
 {
-    main_url = "http://18.184.77.105:8014/";
+    main_url = "http://18.184.77.105:8008/";
     //main_url = "http://hixworld.com:8014/";
     //userid = "dentstudio";
     //passwd = "dentstudio1234!";
@@ -32,64 +33,31 @@ void httpreq::replyFinished(QNetworkReply *reply)
 {
     req_reply = reply->readAll();
     QString encoded = QString::fromUtf8(req_reply);
-    qDebug() << req_reply;
+    qDebug() << "req_reply : " << req_reply;
     if (strstr(req_reply, "authorized")){
+        // if serial is not stored in env, save it
+        QString serial_path = QStandardPaths::writableLocation(QStandardPaths::DataLocation);
+        QDir dir(serial_path );
+        if (!dir.exists())
+            dir.mkpath(serial_path );
+        if (!dir.exists("infos"))
+            dir.mkdir("infos");
+
+        QString serial_key = req_reply.split('#')[0].split('=')[1];
+
+        dir.cd("infos");
+        serial_path = dir.absoluteFilePath("stored_serial.txt");
+        // create serial
+        QFile file(serial_path);
+        if (file.open(QIODevice::ReadWrite | QIODevice::Truncate | QIODevice::Text)){
+            QTextStream stream(&file);
+            qDebug() << "serial : " << serial_key;
+            stream << serial_key;
+        }
+
         qDebug() << "authorized";
+
         QMetaObject::invokeMethod(qmlManager->loginButton, "loginSuccess");
-
-
-        /*if (strstr(req_reply, "authorized") == 0){
-            QMessageBox::information(w, "암호화 에러", "시리얼 키를 받아오지 못했습니다.");
-            return; // req failure
-        }
-
-        string serial_key = req_reply.split('#')[0].split('=')[1].data();
-        string iv = req_reply.split('#')[1].split('=')[1].data();
-
-        bool err;
-        string errMsg;
-        QString infoldername = w->enc_inpath;
-        QString outfoldername = w->enc_outpath;
-        list<QString> filelist = findFiles(infoldername);
-        list<QString> folderlist = findFolders(infoldername);
-
-        w->reset_progressbar(filelist.size());
-
-
-        list<QString>::iterator ptr;
-        for (ptr = folderlist.begin(); ptr != folderlist.end() ; ptr++){
-            QString folderpath = (QString)(*ptr);
-            QString foldername = folderpath.mid(infoldername.length(), folderpath.length());
-            if (strstr(foldername.toStdString().c_str(), "/."))
-                    continue;
-            QDir dir(outfoldername+foldername);
-            if (!dir.exists()) {
-                dir.mkpath(".");
-            }
-        }
-
-
-        int cnt = 0;
-        for( ptr = filelist.begin() ; ptr != filelist.end() ; ptr++)
-        {
-            QApplication::processEvents();
-            cnt ++;
-            QString filepath = (QString)(*ptr);
-            QString filename = filepath.mid(infoldername.length(), filepath.length());
-            QString encfilename = filename+".enc";
-
-            c->run(filepath.toStdString(), outfoldername.toStdString()+encfilename.toStdString(), serial_key, iv);
-        }
-
-        //w->change_error(QString::fromStdString(serial_key).mid(0,16));
-        QString serial_split_key;
-        for (int i=0; i<4; i++){
-            serial_split_key += QString::fromStdString(serial_key).mid(4*i, 4) + "-";
-        }
-        serial_split_key.remove(serial_split_key.size()-1, 1);
-        w->show_key(serial_split_key);
-        //w->encryption_finished();
-        */
     } else if (strstr(req_reply, "csrftoken")){ // sets session cookie and csrf token
         QVariant cookieVar = reply->header(QNetworkRequest::SetCookieHeader);
         if (cookieVar.isValid()) {
@@ -101,20 +69,32 @@ void httpreq::replyFinished(QNetworkReply *reply)
                     sessionid = cookie.value();
                 }
             }
+            if (first_login){
+                check_stored_serial();
+                first_login = false;
+            }
         } else {
             //QMessageBox::information(w, "암호화 에러", "csrftoken을 받아오지 못했습니다.");
         }
 
-    } else if (strstr(req_reply, "None:false")){
+    } else if (strstr(req_reply, "None:violation")){
       // req failure
         //QMessageBox::information(w, "암호화 에러", "서버에서 요청을 거부했습니다.");
-        qDebug() << "request failure";
+        qDebug() << "violation occured";
+
+        QMetaObject::invokeMethod(qmlManager->loginButton, "loginFail");
+
+        // open login
+        qmlManager->loginWindow->setProperty("visible",true);
     } else {
         get_csrf_token();
         //QMessageBox::information(w, "암호화 에러", "서버에서 요청을 처리할 수 없습니다.");
         qDebug() << "some error on http_req" << encoded << req_reply;
 
         QMetaObject::invokeMethod(qmlManager->loginButton, "loginFail");
+
+        // open login
+        qmlManager->loginWindow->setProperty("visible",true);
     }
 
 }
@@ -189,6 +169,64 @@ void httpreq::post_key_info(QString id, QString pw, QString usage, QString admin
 }
 
 
+void httpreq::get_uuid(){
+
+    QString uuid_path = QStandardPaths::writableLocation(QStandardPaths::DataLocation);
+    QDir dir(uuid_path );
+    if (!dir.exists())
+        dir.mkpath(uuid_path );
+    if (!dir.exists("infos"))
+        dir.mkdir("infos");
+
+    dir.cd("infos");
+    uuid_path = dir.absoluteFilePath("uuid.txt");
+
+    if (QFile::exists(uuid_path )){
+        // get uuid
+        QFile file(uuid_path);
+        if (file.open(QIODevice::ReadWrite)){
+            QTextStream stream(&file);
+            uuid = stream.readLine();
+        }
+        qDebug() << "uuid : " << uuid;
+    }
+    else {
+        // create uuid
+        QFile file(uuid_path);
+        if (file.open(QIODevice::ReadWrite)){
+            QTextStream stream(&file);
+            extern QUuid quuid;
+            uuid = quuid.createUuid().toString();
+            uuid.replace("{", "");
+            uuid.replace("}", "");
+            uuid.replace("-", "");
+            qDebug() << "uuid : " << uuid;
+            stream << uuid;
+        }
+    }
+}
+
+QString httpreq::get_hash(){
+
+    get_uuid();
+
+    QString name = qgetenv("USER");
+    if (name.isEmpty())
+        name = qgetenv("USERNAME");
+
+    //SHA256 hash;
+    string message = uuid.toStdString() + name.toStdString();
+    QByteArray byteArray(message.c_str(), message.length());
+    //string digest;
+
+    QString hash = QCryptographicHash::hash(byteArray, QCryptographicHash::Sha256).toHex();
+    qDebug () << "hash : " << hash;
+    /*StringSource s(message, true, new HashFilter(hash, new HexEncoder(new StringSink(digest))));
+
+    return QString::fromStdString(digest);*/
+    return hash;
+}
+
 void httpreq::get_iv(QString key){
     QNetworkRequest request;
     QNetworkReply *reply = NULL;
@@ -202,7 +240,7 @@ void httpreq::get_iv(QString key){
     QString cookiestring ="csrftoken="+csrftoken+";" + "sessionid="+sessionid+";";
 
     request.setRawHeader((QByteArray) "Cookie", cookiestring.toUtf8());
-    request.setRawHeader("Referer", "https://twinsmilelibrary.co.kr");
+    request.setRawHeader("Referer", "http://18.184.77.105");
 
     QString uuid = get_hash().mid(0,32);
     qDebug()<< uuid;
@@ -223,4 +261,32 @@ void httpreq::get_iv(QString key){
     params.setQuery(qu);
 
     reply = manager->post(request, params.toEncoded().split('?')[1]);
+}
+
+void httpreq::check_stored_serial(){
+    QString serial_path = QStandardPaths::writableLocation(QStandardPaths::DataLocation);
+    QDir dir(serial_path );
+    if (!dir.exists())
+        dir.mkpath(serial_path );
+    if (!dir.exists("infos"))
+        dir.mkdir("infos");
+
+    dir.cd("infos");
+    serial_path = dir.absoluteFilePath("stored_serial.txt");
+
+    if (QFile::exists(serial_path)){
+        // get serial
+        QFile file(serial_path);
+        if (file.open(QIODevice::ReadWrite)){
+            QTextStream stream(&file);
+            stored_serial = stream.readLine();
+        }
+        qDebug() << "stored_serial : " << stored_serial.mid(0,16);
+        get_iv(stored_serial.mid(0,16));
+    }
+    else {
+        // open login
+        qmlManager->loginWindow->setProperty("visible",true);
+    }
+
 }
