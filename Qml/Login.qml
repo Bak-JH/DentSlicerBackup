@@ -340,6 +340,8 @@ ApplicationWindow {
                 cursorShape: Qt.PointingHandCursor
                 anchors.fill: parent
                 hoverEnabled: true
+                onEntered : qm.setHandCursor();
+                onExited : qm.resetCursor();
                 onClicked: {
                     parent.loginTrial(serialbox_text1.text + serialbox_text2.text + serialbox_text3.text + serialbox_text4.text);
                 }
@@ -385,6 +387,8 @@ ApplicationWindow {
                 cursorShape: Qt.PointingHandCursor
                 anchors.fill: parent
                 hoverEnabled: true
+                onEntered : qm.setHandCursor();
+                onExited : qm.resetCursor();
                 onClicked: {
                     Qt.quit()
                 }

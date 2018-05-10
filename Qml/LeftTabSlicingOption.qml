@@ -60,6 +60,9 @@ Rectangle {
 
             MouseArea {
                     anchors.fill: parent
+                    hoverEnabled : true
+                    onEntered : qm.setHandCursor();
+                    onExited : qm.resetCursor();
                     onClicked: { ltso.state == 'open' ? ltso.state = "close" : ltso.state = 'open';}
             }
         }

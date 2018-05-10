@@ -79,8 +79,14 @@ Rectangle {
             MouseArea {
                 anchors.fill: parent
                 hoverEnabled: true
-                onEntered: parent.color = "#BCBCBE"
-                onExited: parent.color = "#A3A3A5"
+                onEntered:{
+                    qm.setHandCursor();
+                    parent.color = "#BCBCBE"
+                }
+                onExited:{
+                    qm.resetCursor();
+                    parent.color = "#A3A3A5"
+                }
                 onPressed: parent.color = "#3ea6b7"
                 onReleased: {
                     qm.runArrange();
@@ -112,8 +118,14 @@ Rectangle {
             MouseArea {
                 anchors.fill: parent
                 hoverEnabled: true
-                onEntered: parent.color = "#BCBCBE"
-                onExited: parent.color = "#A3A3A5"
+                onEntered:{
+                    qm.setHandCursor();
+                    parent.color = "#BCBCBE"
+                }
+                onExited:{
+                    qm.resetCursor();
+                    parent.color = "#A3A3A5"
+                }
                 onPressed: parent.color = "#3ea6b7"
                 onReleased: {
                     closePopUp();
