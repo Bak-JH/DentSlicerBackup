@@ -39,6 +39,9 @@ Item {
 
         MouseArea {
             anchors.fill: parent
+            hoverEnabled : true
+            onEntered : qm.setHandCursor();
+            onExited : qm.resetCursor();
             onClicked: {
                 if(icon.parent.state == 'on')
                     icon.parent.state = 'off';

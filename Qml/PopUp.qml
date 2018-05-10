@@ -286,6 +286,8 @@ Rectangle {
             hoverEnabled: true
             //onEntered: parent.color = "#b5b5b5"
             //onExited: parent.color = "#999999"
+            onEntered : qm.setHandCursor();
+            onExited : qm.resetCursor();
             onPressed: parent.color = applybutton_action ? "#3ea6b7" : "#999999"
             onReleased: {applyClicked(); focus_all_off(); numbox_reset(); parent.color = "#999999"}
         }
@@ -313,8 +315,14 @@ Rectangle {
                 id: mousearea_ok
                 anchors.fill: parent
                 hoverEnabled: true
-                onEntered: parent.color = "#BCBCBE"
-                onExited: parent.color = "#999999"
+                onEntered:{
+                    qm.setHandCursor();
+                    parent.color = "#BCBCBE"
+                }
+                onExited:{
+                    qm.resetCursor();
+                    parent.color = "#999999"
+                }
                 onPressed: parent.color = "#3ea6b7"
                 onReleased: {destroy_popup();focus_all_off(); numbox_reset();  parent.color = "#999999"}
             }
@@ -361,6 +369,8 @@ Rectangle {
             id: mousearea_applyfinish_apply
             anchors.fill: parent
             hoverEnabled: true
+            onEntered : qm.setHandCursor();
+            onExited : qm.resetCursor();
             //onEntered: parent.color = "#BCBCBE"
             //onExited: parent.color = "#999999"
             //onPressed: parent.color = "#3ea6b7"
@@ -388,8 +398,14 @@ Rectangle {
             id: mousearea_applyfinish_finish
             anchors.fill: parent
             hoverEnabled: true
-            onEntered: parent.color = "#BCBCBE"
-            onExited: parent.color = "#999999"
+            onEntered:{
+                qm.setHandCursor();
+                parent.color = "#BCBCBE"
+            }
+            onExited:{
+                qm.resetCursor();
+                parent.color = "#999999"
+            }
             onPressed: parent.color = "#3ea6b7"
             onReleased: {finishClicked(); all_off(); focus_all_off(); numbox_reset(); parent.color = "#999999"}
         }
@@ -413,6 +429,9 @@ Rectangle {
 
         MouseArea {
             anchors.fill: parent
+            hoverEnabled : true
+            onEntered : qm.setHandCursor();
+            onExited : qm.resetCursor();
             onClicked: flatModeClicked()
         }
     }
@@ -435,6 +454,9 @@ Rectangle {
         }
         MouseArea {
             anchors.fill: parent
+            hoverEnabled : true
+            onEntered : qm.setHandCursor();
+            onExited : qm.resetCursor();
             onClicked: curveModeClicked();
         }
     }
@@ -561,12 +583,15 @@ Rectangle {
                 MouseArea {
                     anchors.fill: parent
                     hoverEnabled: true
+                    onEntered : qm.setHandCursor();
+                    onExited : qm.resetCursor();
+                    /*
                     onEntered: {
                     ///    numberbox1.color =  "#f5f5f5"
                     }
                     onExited: {
                     //    numberbox1.color = "#ffffff"
-                    }
+                    }*/
 
                 }
                 TextField {
@@ -641,6 +666,8 @@ Rectangle {
                 MouseArea {
                     anchors.fill: parent
                     hoverEnabled: true
+                    onEntered : qm.setHandCursor();
+                    onExited : qm.resetCursor();
                     onPressed: {
                         numberbox1_text.focus = false;
                         numbox_value_x = numbox_value_x + numbox_updown_scale;
@@ -667,6 +694,8 @@ Rectangle {
                 MouseArea {
                     anchors.fill: parent
                     hoverEnabled: true
+                    onEntered : qm.setHandCursor();
+                    onExited : qm.resetCursor();
                     onPressed: {
                         numberbox1_text.focus = false;
                         numbox_value_x = numbox_value_x - numbox_updown_scale;
@@ -697,12 +726,15 @@ Rectangle {
                 MouseArea {
                     anchors.fill: parent
                     hoverEnabled: true
+                    onEntered : qm.setHandCursor();
+                    onExited : qm.resetCursor();
+                    /*
                     onEntered: {
                     //    numberbox2.color =  "#f5f5f5"
                     }
                     onExited: {
                     //    numberbox2.color = "#ffffff"
-                    }
+                    }*/
 
                 }
                 TextField {
@@ -771,6 +803,8 @@ Rectangle {
                 MouseArea {
                     anchors.fill: parent
                     hoverEnabled: true
+                    onEntered : qm.setHandCursor();
+                    onExited : qm.resetCursor();
                     onPressed: {
                         numberbox2_text.focus = false;
                         numbox_value_y = numbox_value_y + numbox_updown_scale;
@@ -796,6 +830,8 @@ Rectangle {
                 MouseArea {
                     anchors.fill: parent
                     hoverEnabled: true
+                    onEntered : qm.setHandCursor();
+                    onExited : qm.resetCursor();
                     onPressed: {
                         numberbox2_text.focus = false;
                         numbox_value_y = numbox_value_y - numbox_updown_scale;
@@ -825,12 +861,15 @@ Rectangle {
                 MouseArea {
                     anchors.fill: parent
                     hoverEnabled: true
+                    onEntered : qm.setHandCursor();
+                    onExited : qm.resetCursor();
+                    /*
                     onEntered: {
                     //    numberbox3.color =  "#f5f5f5"
                     }
                     onExited: {
                     //    numberbox3.color = "#ffffff"
-                    }
+                    }*/
                 }
                 TextField {
                     id: numberbox3_text
@@ -901,6 +940,8 @@ Rectangle {
                 MouseArea {
                     anchors.fill: parent
                     hoverEnabled: true
+                    onEntered : qm.setHandCursor();
+                    onExited : qm.resetCursor();
                     onPressed: {
                         numberbox3_text.focus = false;
                         numbox_value_z = numbox_value_z + numbox_updown_scale;
@@ -926,6 +967,8 @@ Rectangle {
                 MouseArea {
                     anchors.fill: parent
                     hoverEnabled: true
+                    onEntered : qm.setHandCursor();
+                    onExited : qm.resetCursor();
                     onPressed: {
                         numberbox3_text.focus = false;
                         numbox_value_z = numbox_value_z - numbox_updown_scale;
@@ -1054,6 +1097,8 @@ Rectangle {
             MouseArea {
                 anchors.fill: parent
                 hoverEnabled: true
+                onEntered : qm.setHandCursor();
+                onExited : qm.resetCursor();
                 onPressed: {
                     numberbox_detail2_text.focus = false;
                     numbox_value_detail2 = numbox_value_detail2 + numbox_updown_scale;
@@ -1078,6 +1123,8 @@ Rectangle {
             MouseArea {
                 anchors.fill: parent
                 hoverEnabled: true
+                onEntered : qm.setHandCursor();
+                onExited : qm.resetCursor();
                 onPressed: {
                     numberbox_detail2_text.focus = false;
                     numbox_value_detail2 = numbox_value_detail2 - numbox_updown_scale;

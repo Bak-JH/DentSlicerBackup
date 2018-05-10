@@ -49,6 +49,9 @@ Rectangle {
 
             MouseArea {
                     anchors.fill: parent
+                    hoverEnabled : true
+                    onEntered : qm.setHandCursor();
+                    onExited : qm.resetCursor();
                     onClicked: { ltvm.state == 'open' ? ltvm.state = "close" : ltvm.state = 'open';}
             }
         }

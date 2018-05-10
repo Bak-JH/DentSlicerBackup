@@ -102,8 +102,14 @@ Rectangle {
         MouseArea {
             anchors.fill: parent
             hoverEnabled: true
-            onEntered: parent.color = "#b5b5b5"
-            onExited: parent.color = "#999999"
+            onEntered: {
+                qm.setHandCursor();
+                parent.color = "#b5b5b5"
+            }
+            onExited: {
+                qm.resetCursor();
+                parent.color = "#999999"
+            }
             onPressed: parent.color = "#3ea6b7"
             onReleased: {
                 parent.color = "#999999"
@@ -158,8 +164,14 @@ Rectangle {
         MouseArea {
             anchors.fill: parent
             hoverEnabled: true
-            onEntered: parent.color = "#b5b5b5"
-            onExited: parent.color = "#999999"
+            onEntered:{
+                qm.setHandCursor();
+                parent.color = "#b5b5b5"
+            }
+            onExited:{
+                qm.resetCursor();
+                parent.color = "#999999"
+            }
             onPressed: parent.color = "#3ea6b7"
             onReleased: {
                 lefttabExport.visible = false;

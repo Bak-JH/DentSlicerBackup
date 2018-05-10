@@ -35,9 +35,9 @@ int main(int argc, char **argv)
     QSplashScreen *splash = new QSplashScreen(pixmap);
     splash->show();
 
-    QCursor cursorTarget1 = QCursor(QPixmap(":/resource/cursor.png"));
-    QCursor cursorTarget2 = QCursor(QPixmap(":/resource/pen.png"));
-    app.setOverrideCursor(cursorTarget1);
+    //QCursor cursorTarget1 = QCursor(QPixmap(":/resource/cursor.png"));
+    //QCursor cursorTarget2 = QCursor(QPixmap(":/resource/pen.png"));
+    //app.setOverrideCursor(cursorTarget2);
 
     //app.changeOverrideCursor(cursorTarget2);
     QScopedPointer<QuaternionHelper> qq(new QuaternionHelper);
