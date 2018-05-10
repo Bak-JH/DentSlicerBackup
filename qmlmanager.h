@@ -31,6 +31,7 @@ public:
     QObject* mainWindow;
     QObject* loginWindow;
     QObject* loginButton;
+    QObject* boxUpperTab;
     QEntity* models;
     QObject* mv;
     Qt3DCore::QEntity *boundedBox;

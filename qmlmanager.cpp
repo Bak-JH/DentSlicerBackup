@@ -129,7 +129,7 @@ void QmlManager::initializeUI(QQmlApplicationEngine* e){
     layflatButton = FindItemByName(engine,"layflatButton");
     QObject::connect(layflatButton,SIGNAL(runGroupFeature(int,QString)),this,SLOT(runGroupFeature(int,QString)));
 
-    QObject *boxUpperTab = FindItemByName(engine, "boxUpperTab");
+    boxUpperTab = FindItemByName(engine, "boxUpperTab");
     QObject::connect(boxUpperTab,SIGNAL(runGroupFeature(int,QString)),this,SLOT(runGroupFeature(int,QString)));
 
     QObject::connect(this, SIGNAL(arrangeDone(vector<QVector3D>, vector<float>)), this, SLOT(applyArrangeResult(vector<QVector3D>, vector<float>)));
@@ -380,6 +380,7 @@ void QmlManager::applyArrangeResult(vector<QVector3D> translations, vector<float
     }
 }
 void QmlManager::modelSelected(int ID){
+    QMetaObject::invokeMethod(boxUpperTab, "all_off");
     qDebug() << "model id :" << ID ;
     GLModel* target;
     for(int i=0; i<glmodels.size();i++){

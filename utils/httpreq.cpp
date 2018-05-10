@@ -13,9 +13,6 @@
 httpreq::httpreq()
 {
     main_url = "http://18.184.77.105:8014/";
-    //main_url = "http://hixworld.com:8014/";
-    //userid = "dentstudio";
-    //passwd = "dentstudio1234!";
 
     manager = new QNetworkAccessManager();
 
