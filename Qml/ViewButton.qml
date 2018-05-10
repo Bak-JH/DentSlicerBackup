@@ -26,9 +26,11 @@ Item {
                 hoverEnabled: true
                 onEntered: {
                     icon.color = "#E3E3E5"
+                    qm.setHandCursor();
                 }
                 onExited: {
                     icon.color = "#FFFFFF"
+                    qm.resetCursor();
                 }
             }
         }

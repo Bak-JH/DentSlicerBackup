@@ -331,6 +331,16 @@ void QmlManager::connectHandlers(GLModel* glmodel){
 void QmlManager::cleanSelectedModel(int type){
     //selectedModel = nullptr;
 }
+
+
+void QmlManager::setHandCursor(){
+    QApplication::setOverrideCursor(QCursor(Qt::PointingHandCursor));
+}
+void QmlManager::resetCursor(){
+    QApplication::restoreOverrideCursor();
+}
+
+
 // slicing information
 void QmlManager::sendUpdateModelInfo(int printing_time, int layer, QString xyz, float volume){
     updateModelInfo(printing_time, layer, xyz, volume);

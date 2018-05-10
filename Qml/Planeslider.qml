@@ -14,6 +14,26 @@ Slider {
     orientation:Qt.Vertical
     updateValueWhileDragging: true
     tickmarksEnabled : true
+
+    height:300
+
+    Rectangle{//shadow
+        width: parent.width
+        height: 2
+        anchors.left: parent.left
+        anchors.top : parent.bottom
+        anchors.leftMargin: 2
+        color: "#CCCCCC"
+    }
+    Rectangle{//shadow
+        width: 2
+        height: parent.height
+        anchors.left: parent.right
+        anchors.top : parent.top
+        anchors.topMargin: 2
+        color: "#CCCCCC"
+    }
+
     style: SliderStyle {
         groove: Image {
             source: "qrc:/resource/bar.png"

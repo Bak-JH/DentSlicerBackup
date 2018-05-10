@@ -25,6 +25,9 @@ Rectangle{
                     }
             MouseArea{
                 anchors.fill:parent
+                hoverEnabled : true
+                onEntered : qm.setHandCursor();
+                onExited : qm.resetCursor();
                 onClicked: flat.flatSignal()}}
     Item{
         id:curve
@@ -42,6 +45,9 @@ Rectangle{
                 }
             MouseArea{
                 anchors.fill:parent
+                hoverEnabled : true
+                onEntered : qm.setHandCursor();
+                onExited : qm.resetCursor();
                 onClicked: curve.curveSignal()}}
 
 
@@ -97,6 +103,9 @@ Rectangle{
                 }
             MouseArea{
                 anchors.fill:parent
+                hoverEnabled : true
+                onEntered : qm.setHandCursor();
+                onExited : qm.resetCursor();
                 onClicked:{
                     Qt.quit();
                     }
@@ -139,6 +148,9 @@ Rectangle{
                         anchors.verticalCenter:  parent.verticalCenter}
                     MouseArea{
                         anchors.fill:parent
+                        hoverEnabled : true
+                        onEntered : qm.setHandCursor();
+                        onExited : qm.resetCursor();
                         onClicked:{ item.qmlSignal()
                          applyBox.state == 'Activation' ? applyBox.state = 'Inactivation' : applyBox.state = 'Activation';}}}
                         }

@@ -940,60 +940,41 @@ void GLModel::bisectModel_internal(Plane plane){
 
         qDebug() << "after cutting edges :" << contours.size();
 
-        // ax + by + cz = d
+        /*// contour 2 polygon done by poly2tri
+        std::vector<p2t::Point*> ContourPoints;
+
+        for (Path3D contour : contours){
+            for (MeshVertex mv : contour){
+                //ContourPoints.push_back(new p2t::Point(mv.position.x(), mv.position.y()));
+                ContourPoints.push_back(new p2t::Point(mv.position.y(), mv.position.z()));
+            }
+        }
+        qDebug() << "putted contourPoints";
+
         float d = plane_normal.x()*plane[0].x() +
                 plane_normal.y()*plane[0].y() +
                 plane_normal.z()*plane[0].z();
 
-        /*// contour 2 polygon done by poly2tri
-        std::vector<p2t::Point*> ContourPoints;
+        p2t::CDT cdt(ContourPoints);
+        cdt.Triangulate();
+        std::vector<p2t::Triangle*> triangles = cdt.GetTriangles();
+        qDebug() << "done triangulation";
 
-        p2t::CDT* cdt;
+        for (p2t::Triangle* triangle : triangles){
+            leftMesh->addFace(QVector3D(triangle->GetPoint(0)->x, triangle->GetPoint(0)->y,
+                                        0),//(d - (plane_normal.x()*triangle->GetPoint(0)->x) - (plane_normal.y()*triangle->GetPoint(0)->y))/plane_normal.z()),
+                              QVector3D(triangle->GetPoint(1)->x, triangle->GetPoint(1)->y,
+                                        0),//(d - (plane_normal.x()*triangle->GetPoint(1)->x) - (plane_normal.y()*triangle->GetPoint(1)->y))/plane_normal.z()),
+                              QVector3D(triangle->GetPoint(2)->x, triangle->GetPoint(2)->y,
+                                        0));//(d - (plane_normal.x()*triangle->GetPoint(2)->x) - (plane_normal.y()*triangle->GetPoint(2)->y))/plane_normal.z()));
+            rightMesh->addFace(QVector3D(triangle->GetPoint(1)->x, triangle->GetPoint(1)->y,
+                                         0),//(d - (plane_normal.x()*triangle->GetPoint(1)->x) - (plane_normal.y()*triangle->GetPoint(1)->y))/plane_normal.z()),
+                               QVector3D(triangle->GetPoint(0)->x, triangle->GetPoint(0)->y,
+                                         0),//(d - (plane_normal.x()*triangle->GetPoint(0)->x) - (plane_normal.y()*triangle->GetPoint(0)->y))/plane_normal.z()),
+                               QVector3D(triangle->GetPoint(2)->x, triangle->GetPoint(2)->y,
+                                         0));//(d - (plane_normal.x()*triangle->GetPoint(2)->x) - (plane_normal.y()*triangle->GetPoint(2)->y))/plane_normal.z()));
+        }*/
 
-        int iter = 0;
-        for (Path3D contour : contours){
-            qDebug() << "iteration" << iter++;
-            ContourPoints.clear();
-            if (contour.outer.size()) // hole
-                continue;
-            for (MeshVertex mv : contour){
-                ContourPoints.push_back(new p2t::Point(mv.position.x(), mv.position.y()));
-                //ContourPoints.push_back(new p2t::Point(mv.position.y(), mv.position.z()));
-            }
-            qDebug() << "Contour Points size : " << ContourPoints.size();
-
-            cdt = new p2t::CDT(ContourPoints);
-            qDebug() << "create cdt object";
-            std::vector<p2t::Point*> holePoints;
-            for (Path3D hole : contour.inner){
-                holePoints.clear();
-                for (MeshVertex mv : hole){
-                    holePoints.push_back(new p2t::Point(mv.position.x(), mv.position.y()));
-                }
-                cdt->AddHole(holePoints);
-                qDebug() << "Adding Hole : " <<holePoints.size();
-            }
-            cdt->Triangulate();
-
-            std::vector<p2t::Triangle*> triangles = cdt->GetTriangles();
-            qDebug() << "done triangulation";
-
-            for (p2t::Triangle* triangle : triangles){
-                leftMesh->addFace(QVector3D(triangle->GetPoint(0)->x, triangle->GetPoint(0)->y,
-                                            0),//(d - (plane_normal.x()*triangle->GetPoint(0)->x) - (plane_normal.y()*triangle->GetPoint(0)->y))/plane_normal.z()),
-                                  QVector3D(triangle->GetPoint(1)->x, triangle->GetPoint(1)->y,
-                                            0),//(d - (plane_normal.x()*triangle->GetPoint(1)->x) - (plane_normal.y()*triangle->GetPoint(1)->y))/plane_normal.z()),
-                                  QVector3D(triangle->GetPoint(2)->x, triangle->GetPoint(2)->y,
-                                            0));//(d - (plane_normal.x()*triangle->GetPoint(2)->x) - (plane_normal.y()*triangle->GetPoint(2)->y))/plane_normal.z()));
-                rightMesh->addFace(QVector3D(triangle->GetPoint(1)->x, triangle->GetPoint(1)->y,
-                                             0),//(d - (plane_normal.x()*triangle->GetPoint(1)->x) - (plane_normal.y()*triangle->GetPoint(1)->y))/plane_normal.z()),
-                                   QVector3D(triangle->GetPoint(0)->x, triangle->GetPoint(0)->y,
-                                             0),//(d - (plane_normal.x()*triangle->GetPoint(0)->x) - (plane_normal.y()*triangle->GetPoint(0)->y))/plane_normal.z()),
-                                   QVector3D(triangle->GetPoint(2)->x, triangle->GetPoint(2)->y,
-                                             0));//(d - (plane_normal.x()*triangle->GetPoint(2)->x) - (plane_normal.y()*triangle->GetPoint(2)->y))/plane_normal.z()));
-            }
-        }
-        qDebug() << "putted contourPoints";*/
 
 
         for (Path3D contour : contours){
@@ -1212,6 +1193,14 @@ void GLModel::generateRLModel(){
 
     // 승환 100%
     qmlManager->setProgress(1);
+}
+
+// hollow shell part
+void GLModel::indentHollowShell(double radius){
+    qDebug() << "hollow shell called" << radius;
+
+    QVector3D center = (mesh->idx2MV(targetMeshFace->mesh_vertex[0]).position +mesh->idx2MV(targetMeshFace->mesh_vertex[1]).position + mesh->idx2MV(targetMeshFace->mesh_vertex[2]).position)/3;
+    hollowShell(mesh, targetMeshFace, center, radius);
 }
 
 // hollow shell part

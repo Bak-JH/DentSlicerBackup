@@ -1,4 +1,4 @@
-import QtQuick 2.0
+import QtQuick 2.4
 
 
 import QtQuick.Controls 1.2
@@ -50,6 +50,11 @@ Item {
             }
             MouseArea{
                 anchors.fill: parent
+
+                hoverEnabled : true
+                onEntered : qm.setHandCursor();
+                onExited : qm.resetCursor();
+
                 onClicked: {
                     views.visible = !views.visible
                 }

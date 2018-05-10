@@ -130,6 +130,8 @@ public:
 
     GLModel* findGLModelByName(QString filename);
 
+    Q_INVOKABLE void setHandCursor();
+    Q_INVOKABLE void resetCursor();
     Q_INVOKABLE bool isSelected();
     Q_INVOKABLE void selectPart(int ID);
     Q_INVOKABLE void unselectPart(int ID);

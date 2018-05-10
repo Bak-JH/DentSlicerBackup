@@ -153,9 +153,11 @@ Rectangle{
         hoverEnabled: true
         onEntered: {
             basicbutton.color = "#3EABBA"
+            qm.setHandCursor();
         }
         onExited: {
             basicbutton.color = parent.color
+            qm.resetCursor();
         }
 
         onClicked:{
