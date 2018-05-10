@@ -1183,11 +1183,21 @@ void GLModel::modelCut(){
 
 void GLModel::generateRLModel(){
     qmlManager->createModelFile(lmesh, filename+"_left");
+    qDebug() <<"generating RLModel" <<filename+"_left";
     // 승환 70%
     qmlManager->setProgress(0.72);
     qmlManager->createModelFile(rmesh, filename+"_right");
     // 승환 90%
     qmlManager->setProgress(0.91);
+
+    if (shadowModel->shellOffsetActive){
+        GLModel* leftmodel = qmlManager->findGLModelByName(filename+"_left");
+        GLModel* rightmodel = qmlManager->findGLModelByName(filename+"_right");
+        qDebug() << "came to here" << leftmodel;
+        shellOffset(leftmodel, (float)shellOffsetFactor);
+        qmlManager->deleteModelFile(rightmodel->ID);
+        QMetaObject::invokeMethod(qmlManager->boxUpperTab, "all_off");
+    }
 
     //parentModel->deleteLater();
     shadowModel->removePlane();
@@ -1564,10 +1574,11 @@ void GLModel::generateShellOffset(double factor){
     qmlManager->openProgressPopUp();
     QString original_filename = filename;
 
+    cutFillMode = 1;
+    shellOffsetFactor = factor;
+
     shadowModel->modelCut();
-    GLModel* leftmodel = qmlManager->findGLModelByName(original_filename+"_left");
-    qDebug() << "came to here";
-    //shellOffset(leftmodel, (float)factor);
+
 }
 
 void GLModel::openCut(){

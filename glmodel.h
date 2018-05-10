@@ -125,6 +125,9 @@ public:
     // feature extension
     vector<int> extendFaces;
 
+    // feature offset
+    double shellOffsetFactor;
+
     std::vector<QVector3D> cuttingPoints;
     Plane cuttingPlane;
 

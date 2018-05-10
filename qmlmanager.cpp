@@ -383,6 +383,7 @@ void QmlManager::applyArrangeResult(vector<QVector3D> translations, vector<float
 
 GLModel* QmlManager::findGLModelByName(QString filename){
     for (int i=0; i<glmodels.size(); i++){
+        qDebug() << "finding " << filename << glmodels.at(i)->filename;
         if (glmodels.at(i)->filename == filename){
             return glmodels.at(i);
         }

@@ -80,7 +80,7 @@ win32:QMAKE_LFLAGS *= -Wl,--dynamicbase -Wl,--nxcompat
 win32:QMAKE_LFLAGS *= -Wl,--large-address-aware
 
 
-TRANSLATIONS += lang_ko.ts
+#TRANSLATIONS += lang_ko.ts
 
 HEADERS += \
     quaternionhelper.h \
