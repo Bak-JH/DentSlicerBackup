@@ -1289,7 +1289,7 @@ void GLModel::cutFillModeSelected(int type){
 }
 
 void GLModel::getSliderSignal(double value){
-    if (cutActive){
+    if (cutActive||shellOffsetActive){
         float zlength = parentModel->mesh->z_max - parentModel->mesh->z_min;
         QVector3D v1(1,0, -zlength/2 + value*zlength/1.8);
         QVector3D v2(1,1, -zlength/2 + value*zlength/1.8);
@@ -1570,3 +1570,19 @@ void GLModel::closeHollowShell(){
     qmlManager->hollowShellSphereEntity->setProperty("visible", false);
 }
 
+void GLModel::openShellOffset(){
+    qDebug() << "openShelloffset";
+    shellOffsetActive = true;
+
+    parentModel->addCuttingPoint(QVector3D(1,0,0));
+    parentModel->addCuttingPoint(QVector3D(1,1,0));
+    parentModel->addCuttingPoint(QVector3D(2,0,0));
+    generatePlane();
+}
+
+void GLModel::closeShellOffset(){
+    qDebug() << "closeShelloffset";
+    shellOffsetActive = false;
+    removePlane();
+    parentModel->removeCuttingPoints();
+}

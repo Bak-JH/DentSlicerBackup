@@ -1041,22 +1041,32 @@ Rectangle {
             numberbox_detail2_y: 170
             numbox_detail2_default: 1.0
             numbox_updown_scale: 0.25
+            slider_vis:false
             state: {
                 if (third_tab_button_shelloffset.state == "active" && qm.isSelected()){
-                    //openShellOffset();
+                    slider_vis = true;
+                    openShellOffset();
                     return "active";
                 } else {
-                    //closeShellOffset();
+                    slider_vis = false;
+                    closeShellOffset();
                     return "inactive";
                 }
             }
 
             //signal runFeature(int type);
+            signal openShellOffset();
+            signal closeShellOffset();
             signal shellOffset(double factor);
+            signal resultSliderValueChanged(double value);
 
             onApplyClicked: {
                 console.log("shell offset -" + numbox_detail2_default);
                 shellOffset(-numbox_detail2_default);//runFeature(ftrShellOffset);
+            }
+
+            onPlaneSliderValueChanged: {
+                resultSliderValueChanged(value);
             }
 
             //switch button
@@ -1134,8 +1144,8 @@ Rectangle {
                 generateExtensionFaces(numbox_value_detail2);
             }
             signal generateExtensionFaces(double distance);
-            signal openExtension()
-            signal closeExtension()
+            signal openExtension();
+            signal closeExtension();
 
         }
 

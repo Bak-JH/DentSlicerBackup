@@ -240,7 +240,10 @@ void QmlManager::disconnectHandlers(GLModel* glmodel){
     QObject::disconnect(glmodel->shadowModel,SIGNAL(extensionUnSelect()),this,SLOT(extensionUnSelect()));
 
     // shelloffset popup codes
+    QObject::disconnect(shelloffsetPopup, SIGNAL(openShellOffset()), glmodel->shadowModel, SLOT(openShellOffset()));
+    QObject::disconnect(shelloffsetPopup, SIGNAL(closeShellOffset()), glmodel->shadowModel, SLOT(closeShellOffset()));
     QObject::disconnect(shelloffsetPopup, SIGNAL(shellOffset(double)), glmodel, SLOT(generateShellOffset(double)));
+    QObject::disconnect(shelloffsetPopup, SIGNAL(resultSliderValueChanged(double)), glmodel->shadowModel, SLOT(getSliderSignal(double)));
 
 
     // auto Repair popup codes
@@ -301,8 +304,12 @@ void QmlManager::connectHandlers(GLModel* glmodel){
     QObject::connect(extensionPopup, SIGNAL(generateExtensionFaces(double)), glmodel, SLOT(generateExtensionFaces(double)));
     QObject::connect(glmodel->shadowModel,SIGNAL(extensionSelect()),this,SLOT(extensionSelect()));
     QObject::connect(glmodel->shadowModel,SIGNAL(extensionUnSelect()),this,SLOT(extensionUnSelect()));
+
     // shelloffset popup codes
+    QObject::connect(shelloffsetPopup, SIGNAL(openShellOffset()), glmodel->shadowModel, SLOT(openShellOffset()));
+    QObject::connect(shelloffsetPopup, SIGNAL(closeShellOffset()), glmodel->shadowModel, SLOT(closeShellOffset()));
     QObject::connect(shelloffsetPopup, SIGNAL(shellOffset(double)), glmodel, SLOT(generateShellOffset(double)));
+    QObject::connect(shelloffsetPopup, SIGNAL(resultSliderValueChanged(double)), glmodel->shadowModel, SLOT(getSliderSignal(double)));
 
 
     // auto Repair popup codes
