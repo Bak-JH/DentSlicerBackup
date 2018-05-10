@@ -945,7 +945,7 @@ void GLModel::bisectModel_internal(Plane plane){
                 plane_normal.y()*plane[0].y() +
                 plane_normal.z()*plane[0].z();
 
-        // contour 2 polygon done by poly2tri
+        /*// contour 2 polygon done by poly2tri
         std::vector<p2t::Point*> ContourPoints;
 
         p2t::CDT* cdt;
@@ -993,40 +993,41 @@ void GLModel::bisectModel_internal(Plane plane){
                                              0));//(d - (plane_normal.x()*triangle->GetPoint(2)->x) - (plane_normal.y()*triangle->GetPoint(2)->y))/plane_normal.z()));
             }
         }
-        qDebug() << "putted contourPoints";
+        qDebug() << "putted contourPoints";*/
 
 
 
 
 
+        if (cutMode == 2){
+            for (Path3D contour : contours){
+                if (contour.size() <= 2){
+                    continue;
+                }
+                QVector3D centerOfMass = QVector3D(0,0,0);
+                for (MeshVertex mv : contour){
+                    centerOfMass += mv.position;
+                }
+                centerOfMass /= contour.size();
 
-        /*for (Path3D contour : contours){
-            if (contour.size() <= 2){
-                continue;
-            }
-            QVector3D centerOfMass = QVector3D(0,0,0);
-            for (MeshVertex mv : contour){
-                centerOfMass += mv.position;
-            }
-            centerOfMass /= contour.size();
+                // get orientation
+                bool ccw = true;
+                QVector3D current_plane_normal = QVector3D::normal(contour[1].position, centerOfMass, contour[0].position);
+                if (QVector3D::dotProduct(current_plane_normal, plane_normal)>=0){
+                    ccw = false;
+                }
 
-            // get orientation
-            bool ccw = true;
-            QVector3D current_plane_normal = QVector3D::normal(contour[1].position, centerOfMass, contour[0].position);
-            if (QVector3D::dotProduct(current_plane_normal, plane_normal)>=0){
-                ccw = false;
-            }
-
-            for (int i=0; i<contour.size(); i++){
-                if (ccw){
-                    leftMesh->addFace(contour[i].position, centerOfMass, contour[(i+1)%contour.size()].position);
-                    rightMesh->addFace(contour[(i+1)%contour.size()].position, centerOfMass, contour[i].position);
-                } else {
-                    leftMesh->addFace(contour[(i+1)%contour.size()].position, centerOfMass, contour[i].position);
-                    rightMesh->addFace(contour[i].position, centerOfMass, contour[(i+1)%contour.size()].position);
+                for (int i=0; i<contour.size(); i++){
+                    if (ccw){
+                        leftMesh->addFace(contour[i].position, centerOfMass, contour[(i+1)%contour.size()].position);
+                        rightMesh->addFace(contour[(i+1)%contour.size()].position, centerOfMass, contour[i].position);
+                    } else {
+                        leftMesh->addFace(contour[(i+1)%contour.size()].position, centerOfMass, contour[i].position);
+                        rightMesh->addFace(contour[i].position, centerOfMass, contour[(i+1)%contour.size()].position);
+                    }
                 }
             }
-        }*/
+        }
     }
 
 
@@ -1545,8 +1546,8 @@ void GLModel::openLayflat(){
     QObject::connect(m_objectPicker,SIGNAL(clicked(Qt3DRender::QPickEvent*)), this, SLOT(handlePickerClickedLayflat(Qt3DRender::QPickEvent*)));
     this->addComponent(m_objectPicker);
     this->shadowModel->layflatActive = true;
-
 }
+
 void GLModel::closeLayflat(){
     qDebug() << "closelayflat called";
     this->shadowModel->layflatActive = false;
@@ -1565,6 +1566,8 @@ void GLModel::closeExtension(){
 // for shell offset
 void GLModel::generateShellOffset(double factor){
     qmlManager->openProgressPopUp();
+    //shadowModel->modelCut();
+    bisectModel_internal();
     shellOffset(this, (float)factor);
 }
 
@@ -1599,6 +1602,7 @@ void GLModel::openShellOffset(){
     parentModel->addCuttingPoint(QVector3D(1,0,0));
     parentModel->addCuttingPoint(QVector3D(1,1,0));
     parentModel->addCuttingPoint(QVector3D(2,0,0));
+
     generatePlane();
 }
 
