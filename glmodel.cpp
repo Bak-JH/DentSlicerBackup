@@ -996,35 +996,30 @@ void GLModel::bisectModel_internal(Plane plane){
         qDebug() << "putted contourPoints";*/
 
 
+        for (Path3D contour : contours){
+            if (contour.size() <= 2){
+                continue;
+            }
+            QVector3D centerOfMass = QVector3D(0,0,0);
+            for (MeshVertex mv : contour){
+                centerOfMass += mv.position;
+            }
+            centerOfMass /= contour.size();
 
+            // get orientation
+            bool ccw = true;
+            QVector3D current_plane_normal = QVector3D::normal(contour[1].position, centerOfMass, contour[0].position);
+            if (QVector3D::dotProduct(current_plane_normal, plane_normal)>=0){
+                ccw = false;
+            }
 
-
-        if (cutMode == 2){
-            for (Path3D contour : contours){
-                if (contour.size() <= 2){
-                    continue;
-                }
-                QVector3D centerOfMass = QVector3D(0,0,0);
-                for (MeshVertex mv : contour){
-                    centerOfMass += mv.position;
-                }
-                centerOfMass /= contour.size();
-
-                // get orientation
-                bool ccw = true;
-                QVector3D current_plane_normal = QVector3D::normal(contour[1].position, centerOfMass, contour[0].position);
-                if (QVector3D::dotProduct(current_plane_normal, plane_normal)>=0){
-                    ccw = false;
-                }
-
-                for (int i=0; i<contour.size(); i++){
-                    if (ccw){
-                        leftMesh->addFace(contour[i].position, centerOfMass, contour[(i+1)%contour.size()].position);
-                        rightMesh->addFace(contour[(i+1)%contour.size()].position, centerOfMass, contour[i].position);
-                    } else {
-                        leftMesh->addFace(contour[(i+1)%contour.size()].position, centerOfMass, contour[i].position);
-                        rightMesh->addFace(contour[i].position, centerOfMass, contour[(i+1)%contour.size()].position);
-                    }
+            for (int i=0; i<contour.size(); i++){
+                if (ccw){
+                    leftMesh->addFace(contour[i].position, centerOfMass, contour[(i+1)%contour.size()].position);
+                    rightMesh->addFace(contour[(i+1)%contour.size()].position, centerOfMass, contour[i].position);
+                } else {
+                    leftMesh->addFace(contour[(i+1)%contour.size()].position, centerOfMass, contour[i].position);
+                    rightMesh->addFace(contour[i].position, centerOfMass, contour[(i+1)%contour.size()].position);
                 }
             }
         }
@@ -1201,11 +1196,12 @@ void GLModel::generateRLModel(){
     // delete original model
     qmlManager->deleteModelFile(ID);
 
-    // 승환 100%
-    qmlManager->setProgress(1);
-
     // do auto arrange
     qmlManager->runArrange();
+    QMetaObject::invokeMethod(qmlManager->boundedBox, "hideBox");
+
+    // 승환 100%
+    qmlManager->setProgress(1);
 }
 
 // hollow shell part
@@ -1566,9 +1562,12 @@ void GLModel::closeExtension(){
 // for shell offset
 void GLModel::generateShellOffset(double factor){
     qmlManager->openProgressPopUp();
-    //shadowModel->modelCut();
-    bisectModel_internal();
-    shellOffset(this, (float)factor);
+    QString original_filename = filename;
+
+    shadowModel->modelCut();
+    GLModel* leftmodel = qmlManager->findGLModelByName(original_filename+"_left");
+    qDebug() << "came to here";
+    //shellOffset(leftmodel, (float)factor);
 }
 
 void GLModel::openCut(){

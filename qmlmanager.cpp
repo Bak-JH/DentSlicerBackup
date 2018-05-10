@@ -380,6 +380,16 @@ void QmlManager::applyArrangeResult(vector<QVector3D> translations, vector<float
         QMetaObject::invokeMethod(boundedBox, "setPosition", Q_ARG(QVariant, QVector3D(selectedModel->m_transform->translation())));
     }
 }
+
+GLModel* QmlManager::findGLModelByName(QString filename){
+    for (int i=0; i<glmodels.size(); i++){
+        if (glmodels.at(i)->filename == filename){
+            return glmodels.at(i);
+        }
+    }
+    return NULL;
+}
+
 void QmlManager::modelSelected(int ID){
     QMetaObject::invokeMethod(boxUpperTab, "all_off");
     qDebug() << "model id :" << ID ;
