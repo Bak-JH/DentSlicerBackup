@@ -45,7 +45,7 @@ Rectangle {
         runGroupFeature(ftrRotate,"inactive");
         third_tab_button_autorepair.state = "inactive";
         third_tab_button_cut.state = "inactive";
-        third_tab_button_hollowshell.state = "inactive";
+        //third_tab_button_hollowshell.state = "inactive";
         third_tab_button_shelloffset.state = "inactive";
         third_tab_button_scale.state = "inactive";
         fourth_tab_button_extend.state = "inactive";
