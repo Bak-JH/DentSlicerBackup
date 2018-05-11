@@ -277,6 +277,7 @@ void Mesh::addPoint(float x, float y, Path *path)
     path->push_back(ip);
 }
 
+
 Path3D Mesh::intersectionPath(Plane base_plane, Plane target_plane) {
     Path3D p;
 
@@ -685,7 +686,7 @@ MeshVertex findAvailableMeshVertexFromContour(QHash<uint32_t, Path3D>* pathHash,
 
 
 // construct closed contour using segments created from identify step
-Paths3D contourConstruct(Paths3D hole_edges){
+Paths3D contourConstruct3D(Paths3D hole_edges){
     int iter = 0;
     vector<Paths3D::iterator> checked_its;
     bool dirty = true; // checks if iteration erased some contour

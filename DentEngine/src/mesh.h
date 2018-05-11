@@ -109,7 +109,7 @@ float vertexDistance(QVector3D, QVector3D);
 
 // construct closed contour using segments created from identify step
 Paths contourConstruct(Paths);
-Paths3D contourConstruct(Paths3D hole_edges);
+Paths3D contourConstruct3D(Paths3D hole_edges);
 
 /* class containmentPath{
 public:
