@@ -31,6 +31,7 @@ public:
     QObject* mainWindow;
     QObject* loginWindow;
     QObject* loginButton;
+    QObject* boxUpperTab;
     QEntity* models;
     QObject* mv;
     Qt3DCore::QEntity *boundedBox;
@@ -126,6 +127,8 @@ public:
     void openResultPopUp(string inputText_h, string inputText_m, string inputText_l);
     void setProgress(float value);
     void setProgressText(string inputText);
+
+    GLModel* findGLModelByName(QString filename);
 
     Q_INVOKABLE void setHandCursor();
     Q_INVOKABLE void resetCursor();

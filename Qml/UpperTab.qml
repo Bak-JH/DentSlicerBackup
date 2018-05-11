@@ -45,7 +45,7 @@ Rectangle {
         runGroupFeature(ftrRotate,"inactive");
         third_tab_button_autorepair.state = "inactive";
         third_tab_button_cut.state = "inactive";
-        third_tab_button_hollowshell.state = "inactive";
+        //third_tab_button_hollowshell.state = "inactive";
         third_tab_button_shelloffset.state = "inactive";
         third_tab_button_scale.state = "inactive";
         fourth_tab_button_extend.state = "inactive";
@@ -333,7 +333,7 @@ Rectangle {
 
     Item{
         id : thirdtab
-        width : buttonWidth * 5 + 1
+        width : buttonWidth * 4 + 1
         height: buttonHeight
 
         anchors.left : secondtab.right
@@ -410,7 +410,7 @@ Rectangle {
 
         }
             
-        UpperButton{
+        /*UpperButton{
             id : third_tab_button_hollowshell
             anchors.left : third_tab_button_cut.right
             iconSource1: "qrc:/resource/upper_cut.png"
@@ -420,12 +420,13 @@ Rectangle {
                 if(!qm.isSelected()&& (state == "active"))
                     window.resultPopUp.openResultPopUp("","You must select at least one model.","")
             }
-        }
+        }*/
+
 
         UpperButton{
             id : third_tab_button_shelloffset
 
-            anchors.left: third_tab_button_hollowshell.right
+            anchors.left: third_tab_button_cut.right
             iconSource1: "qrc:/resource/upper_shelloffset.png"
             iconSource2: "qrc:/Resource/upper2_shelloffset.png"
             iconText: "Shell Offset"
@@ -1041,22 +1042,32 @@ Rectangle {
             numberbox_detail2_y: 170
             numbox_detail2_default: 1.0
             numbox_updown_scale: 0.25
+            slider_vis:false
             state: {
                 if (third_tab_button_shelloffset.state == "active" && qm.isSelected()){
-                    //openShellOffset();
+                    slider_vis = true;
+                    openShellOffset();
                     return "active";
                 } else {
-                    //closeShellOffset();
+                    slider_vis = false;
+                    closeShellOffset();
                     return "inactive";
                 }
             }
 
             //signal runFeature(int type);
+            signal openShellOffset();
+            signal closeShellOffset();
             signal shellOffset(double factor);
+            signal resultSliderValueChanged(double value);
 
             onApplyClicked: {
                 console.log("shell offset -" + numbox_detail2_default);
                 shellOffset(-numbox_detail2_default);//runFeature(ftrShellOffset);
+            }
+
+            onPlaneSliderValueChanged: {
+                resultSliderValueChanged(value);
             }
 
             //switch button
@@ -1134,8 +1145,8 @@ Rectangle {
                 generateExtensionFaces(numbox_value_detail2);
             }
             signal generateExtensionFaces(double distance);
-            signal openExtension()
-            signal closeExtension()
+            signal openExtension();
+            signal closeExtension();
 
         }
 
