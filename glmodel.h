@@ -125,6 +125,9 @@ public:
     // feature extension
     vector<int> extendFaces;
 
+    // feature offset
+    double shellOffsetFactor;
+
     std::vector<QVector3D> cuttingPoints;
     Plane cuttingPlane;
 
@@ -202,6 +205,7 @@ private:
     bool extensionActive = false;
     bool cutActive = false;
     bool hollowShellActive = false;
+    bool shellOffsetActive = false;
     bool layflatActive = false;
 
 signals:
@@ -260,6 +264,8 @@ public slots:
     void generateExtensionFaces(double distance);
 
     // ShellOffset
+    void openShellOffset();
+    void closeShellOffset();
     void generateShellOffset(double factor);
 
     // Model Mesh info update

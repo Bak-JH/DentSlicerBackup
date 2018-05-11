@@ -873,7 +873,7 @@ void GLModel::bisectModel_internal(Plane plane){
             QVector3D target_plane_normal = QVector3D::normal(target_plane[0], target_plane[1], target_plane[2]);
 
             if (upper.size() == 2){
-                bool facingNormal = abs((target_plane_normal- QVector3D::normal(lower[0], intersection[0].position, intersection[1].position)).length())<1;
+                bool facingNormal = QVector3D::dotProduct(target_plane_normal, QVector3D::normal(lower[0], intersection[0].position, intersection[1].position))>0;//abs((target_plane_normal- QVector3D::normal(lower[0], intersection[0].position, intersection[1].position)).length())<1;
 
                 if (facingNormal){
                     rightMesh->addFace(upper[1], upper[0], intersection[1].position);
@@ -885,7 +885,8 @@ void GLModel::bisectModel_internal(Plane plane){
                     leftMesh->addFace(intersection[0].position, lower[0], intersection[1].position);
                 }
             } else if (lower.size() == 2){
-                bool facingNormal = abs((target_plane_normal- QVector3D::normal(lower[0], intersection[1].position, intersection[0].position)).length())<1;
+                bool facingNormal = QVector3D::dotProduct(target_plane_normal, QVector3D::normal(lower[0], intersection[1].position, intersection[0].position))>0;
+                        //abs((target_plane_normal- QVector3D::normal(lower[0], intersection[1].position, intersection[0].position)).length())<1;
 
                 if (facingNormal){
                     leftMesh->addFace(lower[0], intersection[1].position, intersection[0].position);
@@ -911,7 +912,7 @@ void GLModel::bisectModel_internal(Plane plane){
 
     if (cutFillMode == 2){ // if fill holes
         // contour construction
-        Paths3D contours = contourConstruct(cuttingEdges);
+        Paths3D contours = contourConstruct3D(cuttingEdges);
 
         QVector3D plane_normal = QVector3D::normal(plane[0], plane[1], plane[2]);
 
@@ -939,7 +940,6 @@ void GLModel::bisectModel_internal(Plane plane){
         }
 
         qDebug() << "after cutting edges :" << contours.size();
-
 
         /*// contour 2 polygon done by poly2tri
         std::vector<p2t::Point*> ContourPoints;
@@ -991,7 +991,7 @@ void GLModel::bisectModel_internal(Plane plane){
             // get orientation
             bool ccw = true;
             QVector3D current_plane_normal = QVector3D::normal(contour[1].position, centerOfMass, contour[0].position);
-            if (QVector3D::dotProduct(current_plane_normal, plane_normal)>=0){
+            if (QVector3D::dotProduct(current_plane_normal, plane_normal)>0){
                 ccw = false;
             }
 
@@ -1165,11 +1165,21 @@ void GLModel::modelCut(){
 
 void GLModel::generateRLModel(){
     qmlManager->createModelFile(lmesh, filename+"_left");
+    qDebug() <<"generating RLModel" <<filename+"_left";
     // 승환 70%
     qmlManager->setProgress(0.72);
     qmlManager->createModelFile(rmesh, filename+"_right");
     // 승환 90%
     qmlManager->setProgress(0.91);
+
+    if (shadowModel->shellOffsetActive){
+        GLModel* leftmodel = qmlManager->findGLModelByName(filename+"_left");
+        GLModel* rightmodel = qmlManager->findGLModelByName(filename+"_right");
+        qDebug() << "came to here" << leftmodel;
+        shellOffset(leftmodel, (float)shellOffsetFactor);
+        qmlManager->deleteModelFile(rightmodel->ID);
+        QMetaObject::invokeMethod(qmlManager->boxUpperTab, "all_off");
+    }
 
     //parentModel->deleteLater();
     shadowModel->removePlane();
@@ -1178,11 +1188,12 @@ void GLModel::generateRLModel(){
     // delete original model
     qmlManager->deleteModelFile(ID);
 
-    // 승환 100%
-    qmlManager->setProgress(1);
-
     // do auto arrange
     qmlManager->runArrange();
+    QMetaObject::invokeMethod(qmlManager->boundedBox, "hideBox");
+
+    // 승환 100%
+    qmlManager->setProgress(1);
 }
 
 // hollow shell part
@@ -1289,7 +1300,7 @@ void GLModel::cutFillModeSelected(int type){
 }
 
 void GLModel::getSliderSignal(double value){
-    if (cutActive){
+    if (cutActive||shellOffsetActive){
         float zlength = parentModel->mesh->z_max - parentModel->mesh->z_min;
         QVector3D v1(1,0, -zlength/2 + value*zlength/1.8);
         QVector3D v2(1,1, -zlength/2 + value*zlength/1.8);
@@ -1523,8 +1534,8 @@ void GLModel::openLayflat(){
     QObject::connect(m_objectPicker,SIGNAL(clicked(Qt3DRender::QPickEvent*)), this, SLOT(handlePickerClickedLayflat(Qt3DRender::QPickEvent*)));
     this->addComponent(m_objectPicker);
     this->shadowModel->layflatActive = true;
-
 }
+
 void GLModel::closeLayflat(){
     qDebug() << "closelayflat called";
     this->shadowModel->layflatActive = false;
@@ -1543,7 +1554,13 @@ void GLModel::closeExtension(){
 // for shell offset
 void GLModel::generateShellOffset(double factor){
     qmlManager->openProgressPopUp();
-    shellOffset(this, (float)factor);
+    QString original_filename = filename;
+
+    cutFillMode = 1;
+    shellOffsetFactor = factor;
+
+    shadowModel->modelCut();
+
 }
 
 void GLModel::openCut(){
@@ -1570,3 +1587,20 @@ void GLModel::closeHollowShell(){
     qmlManager->hollowShellSphereEntity->setProperty("visible", false);
 }
 
+void GLModel::openShellOffset(){
+    qDebug() << "openShelloffset";
+    shellOffsetActive = true;
+
+    parentModel->addCuttingPoint(QVector3D(1,0,0));
+    parentModel->addCuttingPoint(QVector3D(1,1,0));
+    parentModel->addCuttingPoint(QVector3D(2,0,0));
+
+    generatePlane();
+}
+
+void GLModel::closeShellOffset(){
+    qDebug() << "closeShelloffset";
+    shellOffsetActive = false;
+    removePlane();
+    parentModel->removeCuttingPoints();
+}
