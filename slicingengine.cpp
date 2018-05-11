@@ -47,6 +47,11 @@ void SlicingEngine::slice (QVariant cfg, Mesh* mesh, QString filename){
 
     // 승환 100%
     qmlManager->setProgress(1);
+    QStringList name_word = filename.split("/");
+
+    qmlManager->openResultPopUp("",
+                                QString(name_word[name_word.size()-1]+" slicing done.").toStdString(),
+                                "");
 }
 
 /*
