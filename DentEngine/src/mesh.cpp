@@ -532,8 +532,8 @@ Paths contourConstruct(Paths pathList){
             dest->erase(dest->begin()+1);
             if (dest->size() == 1){
                 pathHash.remove(intPoint2Hash(pj_prev));
-                pj_next = last;
-                contour.push_back(pj);
+                //pj_next = last;
+                //contour.push_back(pj);
             }
         }
         while(pj_next != last){
@@ -547,7 +547,7 @@ Paths contourConstruct(Paths pathList){
                 start = (*dest)[0]; // itself
                 /*uint32_t endHash = intPoint2Hash((*dest)[1]);
                 if (pathHash.contains(endHash))
-                    pathHash.remove(endHash); // maybe needless*/
+                    pathHash.remove(endHash);*/ // maybe needless
 
                 pathHash.remove(intPoint2Hash(pj));
                 pj_next = last;
