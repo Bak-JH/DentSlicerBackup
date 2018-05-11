@@ -873,7 +873,7 @@ void GLModel::bisectModel_internal(Plane plane){
             QVector3D target_plane_normal = QVector3D::normal(target_plane[0], target_plane[1], target_plane[2]);
 
             if (upper.size() == 2){
-                bool facingNormal = abs((target_plane_normal- QVector3D::normal(lower[0], intersection[0].position, intersection[1].position)).length())<1;
+                bool facingNormal = QVector3D::dotProduct(target_plane_normal, QVector3D::normal(lower[0], intersection[0].position, intersection[1].position))>0;//abs((target_plane_normal- QVector3D::normal(lower[0], intersection[0].position, intersection[1].position)).length())<1;
 
                 if (facingNormal){
                     rightMesh->addFace(upper[1], upper[0], intersection[1].position);
@@ -885,7 +885,8 @@ void GLModel::bisectModel_internal(Plane plane){
                     leftMesh->addFace(intersection[0].position, lower[0], intersection[1].position);
                 }
             } else if (lower.size() == 2){
-                bool facingNormal = abs((target_plane_normal- QVector3D::normal(lower[0], intersection[1].position, intersection[0].position)).length())<1;
+                bool facingNormal = QVector3D::dotProduct(target_plane_normal, QVector3D::normal(lower[0], intersection[1].position, intersection[0].position))>0;
+                        //abs((target_plane_normal- QVector3D::normal(lower[0], intersection[1].position, intersection[0].position)).length())<1;
 
                 if (facingNormal){
                     leftMesh->addFace(lower[0], intersection[1].position, intersection[0].position);
@@ -911,7 +912,7 @@ void GLModel::bisectModel_internal(Plane plane){
 
     if (cutFillMode == 2){ // if fill holes
         // contour construction
-        Paths3D contours = contourConstruct(cuttingEdges);
+        Paths3D contours = contourConstruct3D(cuttingEdges);
 
         QVector3D plane_normal = QVector3D::normal(plane[0], plane[1], plane[2]);
 
@@ -990,7 +991,7 @@ void GLModel::bisectModel_internal(Plane plane){
             // get orientation
             bool ccw = true;
             QVector3D current_plane_normal = QVector3D::normal(contour[1].position, centerOfMass, contour[0].position);
-            if (QVector3D::dotProduct(current_plane_normal, plane_normal)>=0){
+            if (QVector3D::dotProduct(current_plane_normal, plane_normal)>0){
                 ccw = false;
             }
 

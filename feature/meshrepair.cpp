@@ -122,7 +122,7 @@ void identifyHoles(Mesh* mesh){
     qDebug()<< "hole edges coutn : " << hole_edges.size();
 
     // get closed contour from hole_edges
-    mesh->holes = contourConstruct(hole_edges);
+    mesh->holes = contourConstruct3D(hole_edges);
     for (Paths3D::iterator ps_it = mesh->holes.begin(); ps_it != mesh->holes.end();){
         if (ps_it->size() <3)
             ps_it = mesh->holes.erase(ps_it);
