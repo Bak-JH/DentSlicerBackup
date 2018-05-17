@@ -759,8 +759,8 @@ void GLModel::handlePickerClicked(QPickEvent *pick)
             qDebug() << pick->localIntersection()<<"pick";
             QVector3D v = pick->localIntersection();
             parentModel->addCuttingPoint(v);
-            if (parentModel->numPoints >= 3)
-                generatePlane();
+            /*if (parentModel->numPoints >= 3)
+                generatePlane();*/
             //parentModel->ft->ct->addCuttingPoint(parentModel, v);
         } else if (cutMode == 9999){
             qDebug() << "current cut mode :" << cutMode;

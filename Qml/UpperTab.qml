@@ -951,7 +951,7 @@ Rectangle {
             numberbox_detail2_y: 170
             numbox_detail2_default: 1.0
             numbox_updown_scale: 0.25
-            state: {
+            /*state: {
                 if (third_tab_button_hollowshell.state == "active" && qm.isSelected()){
                     slider_vis = true;
                     openHollowShell()
@@ -961,7 +961,7 @@ Rectangle {
                     closeHollowShell()
                     return "inactive";
                 }
-            }
+            }*/
 
 
             onPlaneSliderValueChanged: {
