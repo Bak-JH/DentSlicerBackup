@@ -65,7 +65,7 @@ ApplicationWindow {
             anchors.horizontalCenter: parent.horizontalCenter
             anchors.topMargin: 170
 
-            text : "Please check your ID & Password"
+            text : "Please check your serial number"
 
             font.pixelSize: 14
             font.family: mainFont.name
