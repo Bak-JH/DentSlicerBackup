@@ -192,7 +192,7 @@ void QmlManager::deleteModelFile(int ID){
             gl_it ++;
     }
     qDebug() << "deleteModelFile" << glmodels.size();
-
+    QMetaObject::invokeMethod(qmlManager->boundedBox, "hideBox");
     deletePart(ID);
 }
 
@@ -552,6 +552,10 @@ void QmlManager::doDelete(){
         return;
 
     deleteModelFile(selectedModel->ID);
+}
+
+void QmlManager::doDeletebyID(int ID){
+    deleteModelFile(ID);
 }
 
 void QmlManager::showMoveArrow(){

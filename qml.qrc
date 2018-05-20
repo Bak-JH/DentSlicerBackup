@@ -48,5 +48,6 @@
         <file>Resource/mesh/box.stl</file>
         <file>Resource/mesh/box2.stl</file>
         <file>Qml/MeshBoundedBox.qml</file>
+        <file>Qml/DeletePopup.qml</file>
     </qresource>
 </RCC>
