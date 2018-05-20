@@ -137,6 +137,7 @@ public:
     Q_INVOKABLE void unselectPart(int ID);
     Q_INVOKABLE void modelVisible(int ID, bool isVisible);
     Q_INVOKABLE void doDelete();
+    Q_INVOKABLE void doDeletebyID(int ID);
 
 
 private:

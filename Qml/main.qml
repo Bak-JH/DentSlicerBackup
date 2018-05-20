@@ -19,6 +19,7 @@ Item{
         property alias lefttabExport: lefttabExport
         property alias progressPopUp: progressPopUp
         property alias resultPopUp: resultPopUp
+        property alias deletePopUp: deletePopUp
 
 
         property alias mainFont : mainFont
@@ -30,6 +31,41 @@ Item{
         FontLoader{
             id : mediumFont
             source: "qrc:/Resource/font/NotoSans-SemiCondensedMedium.ttf"
+        }
+
+        DropArea {
+            id: drop
+            anchors.fill: parent
+            property var dragList : []
+
+            onEntered: {
+                console.log("[Droparea] entered");
+                for(var i = 0; i < drag.urls.length; i++)
+                    dragList.push(drag.urls[i])
+            }
+
+            onExited: {
+                dragList = []
+                console.log("[Droparea] exited")
+            }
+
+            onDropped: {
+                console.log("[Droparea] dropped")
+                for(var i = 0; i < dragList.length; i++)
+                    validateFileExtension(dragList[i])
+            }
+
+            // Only STLs
+            function validateFileExtension(filePath) {
+                console.log(filePath);
+                var filepath = filePath.toString().replace(/^(file:\/{3})/,"");
+                console.log("opening" + filepath);
+
+                if(filePath.split('.').pop() === "stl")
+                    qm.openModelFile(filepath);
+
+                return filePath.split('.').pop() === "stl"
+            }
         }
 
         /* hidden for beta
@@ -279,6 +315,10 @@ Item{
 
         ResultPopup{
             id : resultPopUp
+        }
+
+        DeletePopup{
+            id : deletePopUp
         }
     }
 

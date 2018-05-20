@@ -60,6 +60,35 @@ Item {
             }
         }
     }
+
+    Rectangle{
+        id : deletePart
+        width: 20
+        anchors.right: parent.right
+        anchors.rightMargin: 8
+        height: parent.height
+        color: "transparent"
+
+        Image{
+            anchors.centerIn:parent
+            source: "qrc:/Resource/part_delete.png"
+        }
+
+        MouseArea {
+            anchors.fill: parent
+            hoverEnabled : true
+            onEntered : qm.setHandCursor();
+            onExited : qm.resetCursor();
+            onClicked: {
+                console.log("delete");
+                deletePopUp.visible = true;
+                deletePopUp.targetID = glModelID
+
+            }
+        }
+    }
+
+
     Rectangle{
         id:line
         width: 1
@@ -70,7 +99,7 @@ Item {
     }
     Rectangle{
         id : clickArea
-        width: parent.width-32
+        width: parent.width-32-28
         height: parent.height
         anchors.left: icon.right
         color: "transparent"
