@@ -277,6 +277,72 @@ void Mesh::addPoint(float x, float y, Path *path)
     path->push_back(ip);
 }
 
+float minDistanceToContour(QVector3D from, Path contour){
+    float min_distance = 0;
+    for (int i=0; i<contour.size()-1; i++){
+        Path temp_path;
+        temp_path.push_back(contour[i]);
+        temp_path.push_back(contour[i+1]);
+        QVector3D int2qv3 = QVector3D(((float)contour[i].X)/scfg->resolution, ((float)contour[i].Y)/scfg->resolution, from.z());
+        IntPoint directionInt = contour[i+1] - contour[i];
+        QVector3D direction = QVector3D(directionInt.X/scfg->resolution, directionInt.Y/scfg->resolution, 0);
+        float cur_distance = from.distanceToLine(int2qv3, direction);
+        if (abs(min_distance) > cur_distance){
+            min_distance = cur_distance;
+        }
+    }
+    return min_distance;
+}
+
+/*
+Paths3D Mesh::intersectionPaths(Path contour, Plane target_plane) {
+    Path3D p;
+
+    vector<QVector3D> upper;
+    vector<QVector3D> lower;
+    for (int i=0; i<3; i++){
+        if (PointInPolygon(IntPoint(target_plane[i].x(),target_plane[i].y()), contour)){
+            upper.push_back(target_plane[i]);
+        } else {
+            lower.push_back(target_plane[i]);
+        }
+    }
+
+    vector<QVector3D> majority;
+    vector<QVector3D> minority;
+
+    bool flip = false;
+    if (upper.size() == 2){
+        majority = upper;
+        minority = lower;
+    } else if (lower.size() == 2){
+        flip = true;
+        majority = lower;
+        minority = upper;
+    } else {
+        qDebug() << "wrong faces";
+        // size is 0
+        return p;
+    }
+
+    float minority_distance = abs(minDistanceToContour(minority[0], contour)); //abs(minority[0].distanceToPlane(base_plane[0],base_plane[1],base_plane[2]));
+    float majority1_distance = abs(minDistanceToContour(majority[0], contour));//abs(majority[0].distanceToPlane(base_plane[0],base_plane[1],base_plane[2]));
+    float majority2_distance = abs(minDistanceToContour(majority[1], contour));//abs(majority[1].distanceToPlane(base_plane[0],base_plane[1],base_plane[2]));
+
+    // calculate intersection points
+    MeshVertex mv1, mv2;
+    mv1.position = minority[0] + (majority[0] - minority[0])*(minority_distance/(majority1_distance+minority_distance));
+    mv2.position = minority[0] + (majority[1] - minority[0])*(minority_distance/(majority2_distance+minority_distance));
+
+    if (flip){
+        p.push_back(mv1);
+        p.push_back(mv2);
+    } else {
+        p.push_back(mv2);
+        p.push_back(mv1);
+    }
+    return p;
+}*/
 
 Path3D Mesh::intersectionPath(Plane base_plane, Plane target_plane) {
     Path3D p;

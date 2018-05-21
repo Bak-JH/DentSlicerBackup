@@ -89,6 +89,7 @@ public :
 
     /********************** Path Generation Functions **********************/
     void addPoint(float x, float y, Path *path);
+    Paths3D intersectionPaths(Path Contour, Plane target_plane);
     Path3D intersectionPath(Plane base_plane, Plane target_plane);
     Path intersectionPath(MeshFace mf, float z);
 
