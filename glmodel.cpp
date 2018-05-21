@@ -27,7 +27,6 @@ GLModel::GLModel(QObject* mainWindow, QNode *parent, Mesh* loadMesh, QString fna
     //, m_objectPicker(new Qt3DRender::QObjectPicker())
     , parentModel((GLModel*)(parent))
     , cutMode(0)
-    , numPoints(0)
 {
 
     // generates shadow model for object picking
@@ -755,12 +754,27 @@ void GLModel::handlePickerClicked(QPickEvent *pick)
         if (cutMode == 1){
             qDebug() << "cut mode 1";
 
-        } else if (cutMode == 2 && parentModel->numPoints< sizeof(parentModel->sphereEntity)/4) {
-            qDebug() << pick->localIntersection()<<"pick";
+        } else if (cutMode == 2){// && parentModel->numPoints< sizeof(parentModel->sphereEntity)/4) {
+            qDebug() << pick->localIntersection()<<"pick" << cuttingPoints.size() << parentModel->cuttingPoints.size();
             QVector3D v = pick->localIntersection();
             parentModel->addCuttingPoint(v);
-            /*if (parentModel->numPoints >= 3)
-                generatePlane();*/
+
+            if (parentModel->cuttingPoints.size() >= 8){
+                // create left, rightmesh
+                Mesh* leftMesh = parentModel->lmesh;
+                Mesh* rightMesh = parentModel->rmesh;
+                // do bisecting mesh
+                leftMesh->faces.reserve(mesh->faces.size()*3);
+                leftMesh->vertices.reserve(mesh->faces.size()*3);
+                rightMesh->faces.reserve(mesh->faces.size()*3);
+                rightMesh->vertices.reserve(mesh->faces.size()*3);
+
+                cutAway(leftMesh, rightMesh, parentModel->mesh, parentModel->cuttingPoints);
+                qDebug() << "executed cutaway";
+
+                emit parentModel->bisectDone();
+            }
+                //generatePlane();
             //parentModel->ft->ct->addCuttingPoint(parentModel, v);
         } else if (cutMode == 9999){
             qDebug() << "current cut mode :" << cutMode;
@@ -1109,22 +1123,18 @@ void GLModel::addCuttingPoint(QVector3D v){
     sphereEntity[sphereEntity.size()-1]->addComponent(sphereMesh[sphereMesh.size()-1]);
     sphereEntity[sphereEntity.size()-1]->addComponent(sphereTransform[sphereTransform.size()-1]);
     sphereEntity[sphereEntity.size()-1]->addComponent(sphereMaterial[sphereMaterial.size()-1]);
-
-    numPoints++;
 }
 
 void GLModel::removeCuttingPoints(){
 
     qDebug() << "in the removeCuttingPOints";
 
-    qDebug() << "numPoints:" << numPoints;
     qDebug() << "ok till here";
     for (int i=0; i<sphereEntity.size(); i++){
         sphereEntity[i]->removeComponent(sphereMesh[i]);
         sphereEntity[i]->removeComponent(sphereTransform[i]);
         sphereEntity[i]->removeComponent(sphereMaterial[i]);
     }
-    numPoints=0;
     cuttingPoints.clear();
 }
 

@@ -48,5 +48,8 @@ public slots:
 
 bool isLeftToPlane(Plane plane, QVector3D position);
 
+void interpolate(Mesh* mesh, Path3D contour1, Path3D contour2);
+void cutAway(Mesh* leftMesh, Mesh* rightMesh, Mesh* mesh, vector<QVector3D> cuttingPoints);
+
 
 #endif // MODELCUT_H

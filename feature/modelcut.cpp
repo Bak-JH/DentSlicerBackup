@@ -114,6 +114,140 @@ void modelcut::addCuttingPoint(Qt3DCore::QEntity* targetEntity, QVector3D v){
 
 }
 
+// interpolate between two random closed same oriented contours
+void interpolate(Mesh* mesh, Path3D contour1, Path3D contour2){
+    Path3D bigger = contour2;
+    Path3D smaller = contour1;
+    if (contour1.size() > contour2.size()){
+        bigger = contour1;
+        smaller = contour2;
+    }
+
+    int prev_min_distance_mv_idx = -1;
+    int min_distance_mv_idx;
+    float min_distance = 99999;
+
+    for (int ct1_idx =0; ct1_idx<bigger.size(); ct1_idx++){
+        MeshVertex bigger_mv = bigger[ct1_idx];
+        min_distance_mv_idx = 0;
+        min_distance = bigger_mv.position.distanceToPoint(smaller[min_distance_mv_idx].position);
+        for (int ct2_idx=0; ct2_idx<smaller.size();ct2_idx++){
+            float cur_distance =bigger_mv.position.distanceToPoint(smaller[ct2_idx].position);
+            if (cur_distance < min_distance){
+                min_distance_mv_idx = ct2_idx;
+                min_distance = cur_distance;
+            }
+        }
+
+        // add face to mesh
+        if (prev_min_distance_mv_idx == min_distance_mv_idx){
+            // add Face from bigger to smaller (smaller 1 bigger 2)
+            mesh->addFace(bigger[ct1_idx].position, bigger[(ct1_idx+1)%bigger.size()].position, smaller[min_distance_mv_idx].position);
+        } else {
+            // add face from smaller to bigger (bigger 1 smaller 2)
+            mesh->addFace(smaller[prev_min_distance_mv_idx].position,  bigger[ct1_idx].position, smaller[min_distance_mv_idx].position);
+        }
+        prev_min_distance_mv_idx = min_distance_mv_idx;
+    }
+}
+
+void cutAway(Mesh* leftMesh, Mesh* rightMesh, Mesh* mesh, vector<QVector3D> cuttingPoints){
+    Path contour;
+    Path3D cuttingContour;
+    Paths3D cuttingEdges;
+    int numPoints = cuttingPoints.size();
+
+    for (int i=0; i<numPoints; i++){
+        QVector3D cuttingPoint =cuttingPoints[i];
+        contour.push_back(IntPoint(cuttingPoint.x(),cuttingPoint.y()));
+        MeshVertex temp_mv;
+        temp_mv.position = QVector3D(cuttingPoint.x(), cuttingPoint.y(), cuttingPoint.z());
+        cuttingContour.push_back(temp_mv);
+    }
+
+    Paths3D innerContours, outerContours;
+
+    foreach (MeshFace mf, mesh->faces){
+        bool faceLeftToPlane = false;
+        bool faceRightToPlane = false;
+
+        Path3D leftContour;
+        Path3D rightContour;
+
+        Plane target_plane;
+        for (int vn=0; vn<3; vn++){
+            MeshVertex mv = mesh->vertices[mf.mesh_vertex[vn]];
+            target_plane.push_back(mv.position);
+
+            if (PointInPolygon(IntPoint(mv.position.x(), mv.position.y()), contour)){
+                faceLeftToPlane = true;
+                leftContour.push_back(mv);
+            } else {
+                faceRightToPlane = true;
+                rightContour.push_back(mv);
+            }
+        }
+
+        if (faceLeftToPlane && faceRightToPlane){ // cutting edge
+            if (leftContour.size() == 2){
+                innerContours.push_back(leftContour);
+                /*for (MeshVertex mvc : leftContour)
+                    innerContour.push_back(mvc);*/
+            } else if (rightContour.size() == 2) {
+                outerContours.push_back(rightContour);
+                /*for (MeshVertex mvc : rightContour)
+                    outerContour.push_back(mvc);*/
+            }
+        } else if (faceLeftToPlane){
+            leftMesh->addFace(mesh->vertices[mf.mesh_vertex[0]].position, mesh->vertices[mf.mesh_vertex[1]].position, mesh->vertices[mf.mesh_vertex[2]].position);
+        } else if (faceRightToPlane){
+            rightMesh->addFace(mesh->vertices[mf.mesh_vertex[0]].position, mesh->vertices[mf.mesh_vertex[1]].position, mesh->vertices[mf.mesh_vertex[2]].position);
+        }
+    }
+    Paths3D innerContours_c = contourConstruct3D(innerContours);
+    Paths3D outerContours_c = contourConstruct3D(outerContours);
+
+    for (Path3D innerContour : innerContours_c){ // connect inner contours
+        qDebug() << innerContour.size();
+        Path3D cuttingContour_c;
+
+        for (MeshVertex imv : innerContour){
+            float min_distance = 99999;
+            MeshVertex min_distance_cmv;
+            // find min distance cutting point and connect it
+            for (MeshVertex cmv : cuttingContour){
+                float cur_distance = cmv.position.distanceToPoint(imv.position);
+                if (cur_distance < min_distance){
+                    min_distance = cur_distance;
+                    min_distance_cmv = cmv;
+                }
+            }
+            min_distance_cmv.position = QVector3D(min_distance_cmv.position.x(), min_distance_cmv.position.y(), imv.position.z());
+            cuttingContour_c.push_back(min_distance_cmv);
+        }
+        interpolate(leftMesh, innerContour, cuttingContour_c);
+    }
+    for (Path3D outerContour : outerContours_c){
+        qDebug() << outerContour.size();
+        Path3D cuttingContour_c;
+
+        for (MeshVertex omv : outerContour){
+            float min_distance = 99999;
+            MeshVertex min_distance_cmv;
+            // find min distance cutting point and connect it
+            for (MeshVertex cmv : cuttingContour){
+                float cur_distance = cmv.position.distanceToPoint(omv.position);
+                if (cur_distance < min_distance){
+                    min_distance = cur_distance;
+                    min_distance_cmv = cmv;
+                }
+            }
+            min_distance_cmv.position = QVector3D(min_distance_cmv.position.x(), min_distance_cmv.position.y(), omv.position.z());
+            cuttingContour_c.push_back(min_distance_cmv);
+        }
+        interpolate(rightMesh, outerContour, cuttingContour_c);
+    }
+}
 
 void modelcut::removeCuttingPoints(){
 
