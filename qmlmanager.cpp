@@ -120,7 +120,8 @@ void QmlManager::initializeUI(QQmlApplicationEngine* e){
     httpreq* hr = new httpreq();
     QObject::connect(loginButton, SIGNAL(loginTrial(QString, QString)), hr, SLOT(login(QString,QString)));
     //openModelFile(QDir::currentPath()+"/Models/partial1.stl");
-    //openModelFile("c:/Users/user/Desktop/asdfasf.stl");
+    openModelFile("E:/workspace/DLPslicer/partial2_flip.stl");
+    // openModelFile("E:/workspace/sphere.stl");
 }
 
 void QmlManager::createModelFile(Mesh* target_mesh, QString fname) {
