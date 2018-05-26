@@ -255,24 +255,74 @@ void cutAway(Mesh* leftMesh, Mesh* rightMesh, Mesh* mesh, vector<QVector3D> cutt
         else
             selectedCuttingContour = cuttingContour_l;
 
+        //QHash<int, vector<MeshVertex>> cuttingContourConnections;
+        QMultiHash<int, MeshVertex> cuttingContourConnections;
+
         for (int imv_idx=0; imv_idx<innerContour.size(); imv_idx++){
             MeshVertex imv = innerContour[imv_idx];
             //for (MeshVertex imv : innerContour){
             float min_distance = 99999;
-            MeshVertex min_distance_cmv;
+            int min_distance_cmv_idx;
+            //MeshVertex min_distance_cmv;
             // find min distance cutting point and connect it
-            for (MeshVertex cmv : selectedCuttingContour){
+            for (int cmv_idx=0; cmv_idx<selectedCuttingContour.size(); cmv_idx++){
+                MeshVertex cmv = selectedCuttingContour[cmv_idx];
                 float cur_distance = cmv.position.distanceToPoint(imv.position);
                 if (cur_distance < min_distance){
                     min_distance = cur_distance;
-                    min_distance_cmv = cmv;
+                    min_distance_cmv_idx = cmv_idx;
                 }
             }
+            MeshVertex in1 = innerContour[imv_idx];
+            MeshVertex in2 = innerContour[(imv_idx+1)%innerContour.size()];
+            leftMesh->addFace(in1.position, in2.position, selectedCuttingContour[min_distance_cmv_idx].position);
+            leftMesh->addFace(in2.position, in1.position, selectedCuttingContour[min_distance_cmv_idx].position);
+
+            cuttingContourConnections.insert(min_distance_cmv_idx, in1);
+            cuttingContourConnections.insert(min_distance_cmv_idx, in2);
             //min_distance_cmv.position = QVector3D(min_distance_cmv.position.x(), min_distance_cmv.position.y(), imv.position.z());
-            cuttingContour_c.push_back(min_distance_cmv);
+            //cuttingContour_c.push_back(selectedCuttingContour[min_distance_cmv_idx]);
         }
+
+        for (int c_idx1=0; c_idx1<selectedCuttingContour.size(); c_idx1++){
+            for (int c_idx2=0; c_idx2<selectedCuttingContour.size(); c_idx2++){
+                if (c_idx1 == c_idx2)
+                    continue;
+                QMultiHash<int, MeshVertex>::iterator it1 = cuttingContourConnections.find(c_idx1);
+                QMultiHash<int, MeshVertex>::iterator it2 = cuttingContourConnections.find(c_idx2);
+                while (it1 != cuttingContourConnections.end() && it1.key() == c_idx1) {
+                    while (it2 != cuttingContourConnections.end() && it2.key() == c_idx2){
+                        if (it1.value() == it2.value())
+                        {
+                            leftMesh->addFace(selectedCuttingContour[c_idx1].position, selectedCuttingContour[c_idx2].position, it1.value().position);
+                            leftMesh->addFace(selectedCuttingContour[c_idx2].position, selectedCuttingContour[c_idx1].position, it1.value().position);
+                        }
+                        ++it2;
+                    }
+                    ++it1;
+                }
+            }
+        }
+        /*QHash<int, vector<MeshVertex>>::iterator cit1, cit2;
+        for (cit1=cuttingContourConnections.begin(); cit1!=cuttingContourConnections.end(); ++cit1){
+            for (cit2=cuttingContourConnections.begin(); cit2!=cuttingContourConnections.end(); ++cit2){
+                if (cit1.key() < cit2.key())
+                    continue;
+
+                // connect if has intersecting point
+                for (MeshVertex mv1 : cit1.value()){
+                    for (MeshVertex mv2: cit2.value()){
+                        if (mv1.position == mv2.position){
+                            leftMesh->addFace(selectedCuttingContour[cit1.key()].position, selectedCuttingContour[cit2.key()].position, mv1.position);
+                            leftMesh->addFace(selectedCuttingContour[cit2.key()].position, selectedCuttingContour[cit1.key()].position, mv1.position);
+                        }
+                    }
+                }
+            }
+        }*/
+
         qDebug() << "cutting Contour c size : " << cuttingContour_c.size();
-        for (int imv_idx=0; imv_idx<innerContour.size(); imv_idx ++){
+        /*for (int imv_idx=0; imv_idx<innerContour.size()-1; imv_idx ++){
             MeshVertex in1 = innerContour[imv_idx];
             MeshVertex in2 = innerContour[(imv_idx+1)%innerContour.size()];
             MeshVertex in3 = innerContour[(imv_idx+2)%innerContour.size()];
@@ -286,23 +336,23 @@ void cutAway(Mesh* leftMesh, Mesh* rightMesh, Mesh* mesh, vector<QVector3D> cutt
             leftMesh->addFace(cut1.position, in2.position, cut2.position);
             leftMesh->addFace(in2.position, cut1.position, cut2.position);
 
-            /*
-            QVector3D in_normal = QVector3D::normal(in1.position - in2.position,in1.position - in3.position);
-            if (QVector3D::dotProduct(in_normal, QVector3D::normal(in1.position - in2.position, in1.position - cut1.position)) > 0)
-                leftMesh->addFace(in1.position, in2.position, cut1.position);
-            else
-                leftMesh->addFace(in2.position, in1.position, cut1.position);
-            */
 
-            /*if (cut0.position == cut1.position)
-                continue;
+            //QVector3D in_normal = QVector3D::normal(in1.position - in2.position,in1.position - in3.position);
+            //if (QVector3D::dotProduct(in_normal, QVector3D::normal(in1.position - in2.position, in1.position - cut1.position)) > 0)
+            //    leftMesh->addFace(in1.position, in2.position, cut1.position);
+            //else
+            //    leftMesh->addFace(in2.position, in1.position, cut1.position);
 
-            if (QVector3D::dotProduct(in_normal, QVector3D::normal(cut1.position - in2.position, cut1.position - cut2.position)) > 0)
-                leftMesh->addFace(cut1.position, in2.position, cut2.position);
-            else
-                leftMesh->addFace(in2.position, cut1.position, cut2.position);*/
+
+            //if (cut0.position == cut1.position)
+            //    continue;
+
+            //if (QVector3D::dotProduct(in_normal, QVector3D::normal(cut1.position - in2.position, cut1.position - cut2.position)) > 0)
+            //    leftMesh->addFace(cut1.position, in2.position, cut2.position);
+            //else
+            //    leftMesh->addFace(in2.position, cut1.position, cut2.position);
             //if (cut0.position != cut1.position)
-        }
+        }***/
         //interpolate(leftMesh, innerContour, cuttingContour_c);
     }
     for (Path3D outerContour : outerContours_c){
@@ -314,21 +364,56 @@ void cutAway(Mesh* leftMesh, Mesh* rightMesh, Mesh* mesh, vector<QVector3D> cutt
         else
             selectedCuttingContour = cuttingContour_l;
 
-        for (MeshVertex omv : outerContour){
+        QMultiHash<int, MeshVertex> cuttingContourConnections;
+
+        for (int omv_idx=0; omv_idx<outerContour.size(); omv_idx++){
+            MeshVertex omv = outerContour[omv_idx];
+        //for (MeshVertex omv : outerContour){
             float min_distance = 99999;
-            MeshVertex min_distance_cmv;
+            int min_distance_cmv_idx;
+            //MeshVertex min_distance_cmv;
             // find min distance cutting point and connect it
-            for (MeshVertex cmv : selectedCuttingContour){
+            for (int cmv_idx=0; cmv_idx<selectedCuttingContour.size(); cmv_idx++){
+                MeshVertex cmv = selectedCuttingContour[cmv_idx];
                 float cur_distance = cmv.position.distanceToPoint(omv.position);
                 if (cur_distance < min_distance){
                     min_distance = cur_distance;
-                    min_distance_cmv = cmv;
+                    min_distance_cmv_idx = cmv_idx;
                 }
             }
+            MeshVertex on1 = outerContour[omv_idx];
+            MeshVertex on2 = outerContour[(omv_idx+1)%outerContour.size()];
+            rightMesh->addFace(on1.position, on2.position, selectedCuttingContour[min_distance_cmv_idx].position);
+            rightMesh->addFace(on2.position, on1.position, selectedCuttingContour[min_distance_cmv_idx].position);
+
+            cuttingContourConnections.insert(min_distance_cmv_idx, on1);
             //min_distance_cmv.position = QVector3D(min_distance_cmv.position.x(), min_distance_cmv.position.y(), omv.position.z());
-            cuttingContour_c.push_back(min_distance_cmv);
+            //cuttingContour_c.push_back(min_distance_cmv);
         }
-        for (int omv_idx=0; omv_idx<outerContour.size(); omv_idx ++){
+
+
+        for (int c_idx1=0; c_idx1<selectedCuttingContour.size(); c_idx1++){
+            for (int c_idx2=0; c_idx2<selectedCuttingContour.size(); c_idx2++){
+                if (c_idx1 == c_idx2)
+                    continue;
+                QMultiHash<int, MeshVertex>::iterator it1 = cuttingContourConnections.find(c_idx1);
+                QMultiHash<int, MeshVertex>::iterator it2 = cuttingContourConnections.find(c_idx2);
+                while (it1 != cuttingContourConnections.end() && it1.key() == c_idx1) {
+                    while (it2 != cuttingContourConnections.end() && it2.key() == c_idx2){
+                        if (it1.value() == it2.value())
+                        {
+                            rightMesh->addFace(selectedCuttingContour[c_idx1].position, selectedCuttingContour[c_idx2].position, it1.value().position);
+                            rightMesh->addFace(selectedCuttingContour[c_idx2].position, selectedCuttingContour[c_idx1].position, it1.value().position);
+                        }
+                        ++it2;
+                    }
+                    ++it1;
+                }
+            }
+        }
+
+        /*
+        for (int omv_idx=0; omv_idx<outerContour.size()-1; omv_idx ++){
             MeshVertex on1 = outerContour[omv_idx];
             MeshVertex on2 = outerContour[(omv_idx+1)%outerContour.size()];
             MeshVertex on3 = outerContour[(omv_idx+2)%outerContour.size()];
@@ -343,15 +428,15 @@ void cutAway(Mesh* leftMesh, Mesh* rightMesh, Mesh* mesh, vector<QVector3D> cutt
             rightMesh->addFace(cut1.position, on2.position, cut2.position);
             rightMesh->addFace(on2.position, cut1.position, cut2.position);
 
-            /*if (QVector3D::dotProduct(out_normal, QVector3D::normal(on1.position - on2.position, on1.position - cut1.position)) < 0)
-                rightMesh->addFace(on1.position, on2.position, cut1.position);
-            else
-                rightMesh->addFace(on2.position, on1.position, cut1.position);
-            if (QVector3D::dotProduct(out_normal, QVector3D::normal(cut1.position - on2.position, cut1.position - cut2.position)) < 0)
-                rightMesh->addFace(cut1.position, on2.position, cut2.position);
-            else
-                rightMesh->addFace(on2.position, cut1.position, cut2.position);*/
-        }
+//            if (QVector3D::dotProduct(out_normal, QVector3D::normal(on1.position - on2.position, on1.position - cut1.position)) < 0)
+//                rightMesh->addFace(on1.position, on2.position, cut1.position);
+//            else
+//                rightMesh->addFace(on2.position, on1.position, cut1.position);
+//            if (QVector3D::dotProduct(out_normal, QVector3D::normal(cut1.position - on2.position, cut1.position - cut2.position)) < 0)
+//                rightMesh->addFace(cut1.position, on2.position, cut2.position);
+//            else
+//                rightMesh->addFace(on2.position, cut1.position, cut2.position);
+        }*/
         //interpolate(rightMesh, outerContour, cuttingContour_c);
     }
     leftMesh->connectFaces();
