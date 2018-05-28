@@ -726,13 +726,16 @@ void GLModel::addIndexes(vector<int> indexes){
 
 void GLModel::handlePickerClicked(QPickEvent *pick)
 {
+    if (!parentModel)
+        return;
+
     if (!cutActive && !extensionActive && !labellingActive && !layflatActive)
         emit modelSelected(parentModel->ID);
     qDebug() << "model selected emit";
 
     QPickTriangleEvent *trianglePick = static_cast<QPickTriangleEvent*>(pick);
 
-    if (labellingActive) {
+    if (labellingActive && trianglePick) {
         MeshFace shadow_meshface = mesh->faces[trianglePick->triangleIndex()];
 
         parentModel->targetMeshFace = &parentModel->mesh->faces[shadow_meshface.parent_idx];
@@ -767,7 +770,7 @@ void GLModel::handlePickerClicked(QPickEvent *pick)
         }
     }
 
-    if (extensionActive){
+    if (extensionActive && trianglePick){
         MeshFace shadow_meshface = mesh->faces[trianglePick->triangleIndex()];
         qDebug() << "found parent meshface" << shadow_meshface.parent_idx;
         parentModel->uncolorExtensionFaces();
@@ -1454,18 +1457,22 @@ void GLModel::generateText3DMesh()
     QVector3D translation = labellingTextPreview->translation+ QVector3D(0,-0.3,0);
 
     Qt3DCore::QTransform transform, normalTransform;
+
+    QVector3D normal = labellingTextPreview->normal;
+
+    QVector3D ref = QVector3D(0,-1,0);
+    auto tangent = QVector3D::crossProduct(normal, ref);
+
+    tangent.normalize();
+    auto binormal = QVector3D::crossProduct(tangent, normal);
+    binormal.normalize();
+
+    QQuaternion quat = QQuaternion::fromAxes(tangent, normal, binormal);
+    QQuaternion quat2 = QQuaternion::fromAxisAndAngle(1, 0, 0, 90+180);
+
     transform.setScale(scale);
-    transform.setRotationX(90);
+    transform.setRotation(quat2 * quat);
     transform.setTranslation(translation);
-
-    /*auto axis = QVector3D::crossProduct(QVector3D(1, 0, 0), -labellingTextPreview->normal);
-    axis.normalize();
-    auto cos_t = QVector3D::dotProduct(QVector3D(1, 0, 0), -labellingTextPreview->normal);
-    auto sin_t = sqrtf(1 - cos_t * cos_t);
-    auto angle = atan2f(cos_t, sin_t) * 180 / M_PI;
-    normalTransform.setRotation(QQuaternion::fromAxisAndAngle(axis, angle + 180));*/
-
-    normalTransform.setRotationX(90);
 
     generateText3DGeometry(&vertices, &verticesSize,
                            &indices, &indicesSize,
@@ -1473,9 +1480,7 @@ void GLModel::generateText3DMesh()
                            labellingTextPreview->text,
                            depth,
                            mesh,
-                           //originalVertices,
-                           //originalVerticesSize,
-                           QVector3D(0, 1, 0),
+                           -labellingTextPreview->normal,
                            transform.matrix(),
                            normalTransform.matrix());
 
