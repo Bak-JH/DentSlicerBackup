@@ -759,21 +759,6 @@ void GLModel::handlePickerClicked(QPickEvent *pick)
             QVector3D v = pick->localIntersection();
             parentModel->addCuttingPoint(v);
 
-            if (parentModel->cuttingPoints.size() >= 8){
-                // create left, rightmesh
-                Mesh* leftMesh = parentModel->lmesh;
-                Mesh* rightMesh = parentModel->rmesh;
-                // do bisecting mesh
-                leftMesh->faces.reserve(mesh->faces.size()*3);
-                leftMesh->vertices.reserve(mesh->faces.size()*3);
-                rightMesh->faces.reserve(mesh->faces.size()*3);
-                rightMesh->vertices.reserve(mesh->faces.size()*3);
-
-                cutAway(leftMesh, rightMesh, parentModel->mesh, parentModel->cuttingPoints);
-                qDebug() << "executed cutaway";
-
-                emit parentModel->bisectDone();
-            }
                 //generatePlane();
             //parentModel->ft->ct->addCuttingPoint(parentModel, v);
         } else if (cutMode == 9999){
@@ -1164,13 +1149,34 @@ void GLModel::removeModelPartList(){
 }
 
 void GLModel::modelCut(){
-    qDebug() << "modelcut called";
+    qDebug() << "modelcut called" << cutMode;
     qmlManager->openProgressPopUp();
-    if (parentModel->cuttingPlane.size() != 3){
-        return;
-    }
 
-    parentModel->bisectModel(parentModel->cuttingPlane);
+    if (cutMode == 1){
+        if (parentModel->cuttingPlane.size() != 3){
+            return;
+        }
+
+        parentModel->bisectModel(parentModel->cuttingPlane);
+    } else if (cutMode == 2){
+        qDebug() << "parent model cutting points " << parentModel->cuttingPoints.size();
+        if (parentModel->cuttingPoints.size() >= 3){
+            qDebug() << "cut mode 2 done";
+            // create left, rightmesh
+            Mesh* leftMesh = parentModel->lmesh;
+            Mesh* rightMesh = parentModel->rmesh;
+            // do bisecting mesh
+            leftMesh->faces.reserve(mesh->faces.size()*3);
+            leftMesh->vertices.reserve(mesh->faces.size()*3);
+            rightMesh->faces.reserve(mesh->faces.size()*3);
+            rightMesh->vertices.reserve(mesh->faces.size()*3);
+
+            cutAway(leftMesh, rightMesh, parentModel->mesh, parentModel->cuttingPoints);
+            qDebug() << "executed cutaway";
+
+            emit parentModel->bisectDone();
+        }
+    }
 }
 
 void GLModel::generateRLModel(){
