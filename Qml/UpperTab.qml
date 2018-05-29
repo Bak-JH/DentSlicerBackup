@@ -30,6 +30,10 @@ Rectangle {
     property int ftrExtend : 13
     property int ftrSupport : 14
     property int ftrLabel : 15
+
+    property alias second_tab_button_move: second_tab_button_move
+    property alias second_tab_button_rotate: second_tab_button_rotate
+
     signal runGroupFeature(int type, string state);
     function all_off() {
         first_tab_button_open.state = "inactive";
@@ -265,6 +269,7 @@ Rectangle {
             signal runGroupFeature(int type, string state);
             onButtonClicked:{
                    runGroupFeature(ftrMove, state);
+                   console.log("run group featur mov " + ftrMove + "   " + state);
             }
         }
         UpperButton{
@@ -277,6 +282,7 @@ Rectangle {
             signal runGroupFeature(int type, string state);
             onButtonClicked:{
                    runGroupFeature(ftrRotate, state);
+                console.log("run group featur rot " + ftrRotate + "   " + state);
             }
 
         }

@@ -10,18 +10,6 @@ import QtGraphicalEffects 1.0
 Entity{
     id : boundedBox
     property vector3d center : Qt.vector3d( 0,0,0 )
-    property vector3d inputScale : Qt.vector3d(0.6,0.6,0.6)
-    property vector3d initScale : Qt.vector3d(0.3,0.3,0.3)
-
-    property vector3d intersect : Qt.vector3d(0,0,0)
-    property int moveAxis : 0 //0:none, 1:x, 2:y, 3:z
-    property vector2d mouseOrigin : Qt.vector2d(0,0)
-    property vector2d mouseCurrent : Qt.vector2d(0,0)
-    property int moveDirection : 0
-
-    property int pastDistance :0
-    property int pastAxis :0
-
 
     Mesh{
         id: boundedBoxMesh
@@ -42,7 +30,7 @@ Entity{
         shininess: 0
     }
 
-    components: [ boundedBoxMesh, boundedBoxTransform, boundedBoxMaterial]
+    components: [boundedBoxMesh, boundedBoxTransform, boundedBoxMaterial]
 
 
     function hideBox(){

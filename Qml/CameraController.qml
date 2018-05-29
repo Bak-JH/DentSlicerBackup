@@ -100,9 +100,10 @@ Entity {
                     //var target = axisAngle2Quaternion(rotationSpeed * rotateXAxis.value * dt,qq.rotatedVector(systemTransform.rotation,zdown))
                     //cm.camera.rotateAboutViewCenter(qq.multiplyQuaternion(target,systemTransform.rotation));
                     sceneRoot.systemTransform.rotationX += rotationSpeed * (-1) * rotateYAxis.value * dt;
-
+                    mttab.updatePosition()
                 }
             }
+
         }
     ]
 
@@ -118,9 +119,11 @@ Entity {
             var scaleTmp = sceneRoot.systemTransform.scale3D;
             if(d>0){// mouse wheel zoom
                 sceneRoot.systemTransform.scale3D = scaleTmp.times(1.08);
+                mttab.updatePosition()
             }
             else if(d<0){
                 sceneRoot.systemTransform.scale3D = scaleTmp.times(0.92);
+                mttab.updatePosition()
             }
 
         }
