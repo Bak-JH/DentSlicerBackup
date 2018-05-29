@@ -51,6 +51,7 @@ void httpreq::replyFinished(QNetworkReply *reply)
             qDebug() << "serial : " << serial_key;
             stream << serial_key;
         }
+        file.close();
 
         qDebug() << "authorized";
 

@@ -123,11 +123,12 @@ void identifyHoles(Mesh* mesh){
 
     // get closed contour from hole_edges
     mesh->holes = contourConstruct3D(hole_edges);
-    for (Paths3D::iterator ps_it = mesh->holes.begin(); ps_it != mesh->holes.end();){
+    qDebug() << "hole detected";
+    /*for (Paths3D::iterator ps_it = mesh->holes.begin(); ps_it != mesh->holes.end();){
         if (ps_it->size() <3)
             ps_it = mesh->holes.erase(ps_it);
         ps_it++;
-    }
+    }*/
     qDebug() << "mesh hole count :" << mesh->holes.size();
     return;
 }
@@ -136,24 +137,41 @@ void identifyHoles(Mesh* mesh){
 // detects hole and remove them
 void fillHoles(Mesh* mesh){
     for (Path3D hole : mesh->holes){
+        qDebug() << "filling hole" << hole.size() << "sized";
         if (hole.size() <= 2) { // if edge is less than 3 (no hole)
             continue;
         }
 
         QVector3D centerOfMass = QVector3D(0,0,0);
-        for (MeshVertex mv : contour){
+        for (MeshVertex mv : hole){
             centerOfMass += mv.position;
         }
-        centerOfMass /= contour.size();
+        centerOfMass /= hole.size();
 
         // get orientation
-        bool ccw = true;
-        QVector3D current_plane_normal = QVector3D::normal(contour[1].position, centerOfMass, contour[0].position);
+        /*bool ccw = true;
+        QVector3D current_plane_normal = QVector3D::normal(hole[1].position, centerOfMass, hole[0].position);
         if (QVector3D::dotProduct(current_plane_normal, plane_normal)>0){
             ccw = false;
-        }
+        }*/
 
-        for (int i=0; i<contour.size(); i++){
+        for (int i=0; i<hole.size(); i++){
+            mesh->addFace(hole[i].position, centerOfMass, hole[(i+1)%hole.size()].position);
+            mesh->addFace(hole[(i+1)%hole.size()].position, centerOfMass, hole[i].position);
+        }
+        /*mesh->addFace(QVector3D(0,0,0), QVector3D(100,100,0), QVector3D(100,0,0));
+        mesh->addFace(QVector3D(0,0,0), QVector3D(1000,100,0), QVector3D(100,0,0));*/
+/*
+        for (int i=0; i<hole.size(); i++){
+            if (ccw){
+                mesh->addFace(hole[i].position, centerOfMass, hole[(i+1)%hole.size()].position);
+            } else {
+                mesh->addFace(hole[(i+1)%hole.size()].position, centerOfMass, hole[i].position);
+            }
+        }
+        */
+
+        /*for (int i=0; i<contour.size(); i++){
             if (ccw){
                 leftMesh->addFace(contour[i].position, centerOfMass, contour[(i+1)%contour.size()].position);
                 rightMesh->addFace(contour[(i+1)%contour.size()].position, centerOfMass, contour[i].position);
@@ -161,7 +179,8 @@ void fillHoles(Mesh* mesh){
                 leftMesh->addFace(contour[(i+1)%contour.size()].position, centerOfMass, contour[i].position);
                 rightMesh->addFace(contour[i].position, centerOfMass, contour[(i+1)%contour.size()].position);
             }
-        }
+        }*/
+
         /*
         qDebug() << "ok till here1";
         // fill holes

@@ -353,6 +353,8 @@ void featureThread::run(){
             {
                 qmlManager->openProgressPopUp();
                 repairMesh(m_glmodel->mesh);
+
+                emit m_glmodel->_updateModelMesh();
                 break;
             }
         case ftrCut:
