@@ -20,7 +20,7 @@ void repairMesh(Mesh* mesh){
     qmlManager->setProgress(0.5);
 
     // fill holes
-    //fillHoles(mesh);
+    fillHoles(mesh);
     qDebug() << "filled holes";
     qmlManager->setProgress(0.7);
 
@@ -140,6 +140,29 @@ void fillHoles(Mesh* mesh){
             continue;
         }
 
+        QVector3D centerOfMass = QVector3D(0,0,0);
+        for (MeshVertex mv : contour){
+            centerOfMass += mv.position;
+        }
+        centerOfMass /= contour.size();
+
+        // get orientation
+        bool ccw = true;
+        QVector3D current_plane_normal = QVector3D::normal(contour[1].position, centerOfMass, contour[0].position);
+        if (QVector3D::dotProduct(current_plane_normal, plane_normal)>0){
+            ccw = false;
+        }
+
+        for (int i=0; i<contour.size(); i++){
+            if (ccw){
+                leftMesh->addFace(contour[i].position, centerOfMass, contour[(i+1)%contour.size()].position);
+                rightMesh->addFace(contour[(i+1)%contour.size()].position, centerOfMass, contour[i].position);
+            } else {
+                leftMesh->addFace(contour[(i+1)%contour.size()].position, centerOfMass, contour[i].position);
+                rightMesh->addFace(contour[i].position, centerOfMass, contour[(i+1)%contour.size()].position);
+            }
+        }
+        /*
         qDebug() << "ok till here1";
         // fill holes
         qDebug() << "ok till here2";
@@ -147,6 +170,8 @@ void fillHoles(Mesh* mesh){
             mesh->addFace(face[0],face[1],face[2]);
         }
         qDebug() << "ok till here3";
+
+        */
 
         /*Path3D prev_path;
         Path3D cur_path;
