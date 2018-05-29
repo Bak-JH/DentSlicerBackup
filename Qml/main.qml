@@ -20,7 +20,7 @@ Item{
         property alias progressPopUp: progressPopUp
         property alias resultPopUp: resultPopUp
         property alias deletePopUp: deletePopUp
-
+        property alias mttab : mttab
 
         property alias mainFont : mainFont
 
@@ -144,6 +144,7 @@ Item{
             anchors.top: uppertab.bottom
             anchors.left: parent.left
         }
+
         LeftTabExport{
             id : lefttabExport
             width : 264
@@ -152,6 +153,13 @@ Item{
             anchors.top: uppertab.bottom
             anchors.left: parent.left
             visible: false
+        }
+
+        MeshTransformerTab{
+            id:mttab
+            objectName: "mttab"
+            anchors.left: lefttab.right
+            anchors.top : uppertab.bottom
         }
 
         UICore{
@@ -183,6 +191,7 @@ Item{
             }
             onReleased:  {
                 isDrag = false
+                mttab.updatePosition()
             }
 
             onPositionChanged: {

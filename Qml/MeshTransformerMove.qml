@@ -159,6 +159,7 @@ Entity{
             moveArrowYMaterial.diffuse = Qt.rgba(150/255,150/255,150/255,1)
             moveArrowYMaterial.specular = Qt.rgba(150/255,150/255,150/255,1)
         }
+        mttab.updatePosition();
     }
 
     MouseDevice{

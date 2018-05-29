@@ -727,9 +727,21 @@ void GLModel::addIndexes(vector<int> indexes){
 
 void GLModel::handlePickerClicked(QPickEvent *pick)
 {
+    if(qmlManager->selectedModel != nullptr && (pick->button() & Qt::RightButton)){ // when right button clicked
+        //qmlManager->mttab->setEnabled(!qmlManager->mttab->isEnabled());
+        QMetaObject::invokeMethod(qmlManager->mttab, "tabOnOff");
+
+        return;
+    }
+
+
     if (!cutActive && !extensionActive && !labellingActive && !layflatActive)
         emit modelSelected(parentModel->ID);
     qDebug() << "model selected emit";
+
+    if(pick->button() & Qt::RightButton){
+        QMetaObject::invokeMethod(qmlManager->mttab, "tabOnOff");
+    }
 
     QPickTriangleEvent *trianglePick = static_cast<QPickTriangleEvent*>(pick);
 
