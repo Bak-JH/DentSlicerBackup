@@ -27,7 +27,6 @@ GLModel::GLModel(QObject* mainWindow, QNode *parent, Mesh* loadMesh, QString fna
     //, m_objectPicker(new Qt3DRender::QObjectPicker())
     , parentModel((GLModel*)(parent))
     , cutMode(0)
-    , numPoints(0)
 {
 
     // generates shadow model for object picking
@@ -354,6 +353,8 @@ void featureThread::run(){
             {
                 qmlManager->openProgressPopUp();
                 repairMesh(m_glmodel->mesh);
+
+                emit m_glmodel->_updateModelMesh();
                 break;
             }
         case ftrCut:
@@ -727,13 +728,15 @@ void GLModel::addIndexes(vector<int> indexes){
 
 void GLModel::handlePickerClicked(QPickEvent *pick)
 {
+    if (!parentModel)
+        return;
+
     if(qmlManager->selectedModel != nullptr && (pick->button() & Qt::RightButton)){ // when right button clicked
         //qmlManager->mttab->setEnabled(!qmlManager->mttab->isEnabled());
         QMetaObject::invokeMethod(qmlManager->mttab, "tabOnOff");
 
         return;
     }
-
 
     if (!cutActive && !extensionActive && !labellingActive && !layflatActive)
         emit modelSelected(parentModel->ID);
@@ -745,7 +748,7 @@ void GLModel::handlePickerClicked(QPickEvent *pick)
 
     QPickTriangleEvent *trianglePick = static_cast<QPickTriangleEvent*>(pick);
 
-    if (labellingActive) {
+    if (labellingActive && trianglePick) {
         MeshFace shadow_meshface = mesh->faces[trianglePick->triangleIndex()];
 
         parentModel->targetMeshFace = &parentModel->mesh->faces[shadow_meshface.parent_idx];
@@ -767,12 +770,12 @@ void GLModel::handlePickerClicked(QPickEvent *pick)
         if (cutMode == 1){
             qDebug() << "cut mode 1";
 
-        } else if (cutMode == 2 && parentModel->numPoints< sizeof(parentModel->sphereEntity)/4) {
-            qDebug() << pick->localIntersection()<<"pick";
+        } else if (cutMode == 2){// && parentModel->numPoints< sizeof(parentModel->sphereEntity)/4) {
+            qDebug() << pick->localIntersection()<<"pick" << cuttingPoints.size() << parentModel->cuttingPoints.size();
             QVector3D v = pick->localIntersection();
             parentModel->addCuttingPoint(v);
-            if (parentModel->numPoints >= 3)
-                generatePlane();
+
+                //generatePlane();
             //parentModel->ft->ct->addCuttingPoint(parentModel, v);
         } else if (cutMode == 9999){
             qDebug() << "current cut mode :" << cutMode;
@@ -780,7 +783,7 @@ void GLModel::handlePickerClicked(QPickEvent *pick)
         }
     }
 
-    if (extensionActive){
+    if (extensionActive && trianglePick){
         MeshFace shadow_meshface = mesh->faces[trianglePick->triangleIndex()];
         qDebug() << "found parent meshface" << shadow_meshface.parent_idx;
         parentModel->uncolorExtensionFaces();
@@ -989,11 +992,12 @@ void GLModel::bisectModel_internal(Plane plane){
         }*/
 
 
-
         for (Path3D contour : contours){
+            qDebug() << "contour size : " << contour.size();
             if (contour.size() <= 2){
                 continue;
             }
+
             QVector3D centerOfMass = QVector3D(0,0,0);
             for (MeshVertex mv : contour){
                 centerOfMass += mv.position;
@@ -1021,13 +1025,15 @@ void GLModel::bisectModel_internal(Plane plane){
 
 
     qDebug() << "done bisect";
+
     // 승환 30%
     qmlManager->setProgress(0.22);
-
     leftMesh->connectFaces();
+
     // 승환 40%
     qmlManager->setProgress(0.41);
     rightMesh->connectFaces();
+
     // 승환 50%
     qmlManager->setProgress(0.56);
     qDebug() << "done connecting";
@@ -1121,22 +1127,18 @@ void GLModel::addCuttingPoint(QVector3D v){
     sphereEntity[sphereEntity.size()-1]->addComponent(sphereMesh[sphereMesh.size()-1]);
     sphereEntity[sphereEntity.size()-1]->addComponent(sphereTransform[sphereTransform.size()-1]);
     sphereEntity[sphereEntity.size()-1]->addComponent(sphereMaterial[sphereMaterial.size()-1]);
-
-    numPoints++;
 }
 
 void GLModel::removeCuttingPoints(){
 
     qDebug() << "in the removeCuttingPOints";
 
-    qDebug() << "numPoints:" << numPoints;
     qDebug() << "ok till here";
     for (int i=0; i<sphereEntity.size(); i++){
         sphereEntity[i]->removeComponent(sphereMesh[i]);
         sphereEntity[i]->removeComponent(sphereTransform[i]);
         sphereEntity[i]->removeComponent(sphereMaterial[i]);
     }
-    numPoints=0;
     cuttingPoints.clear();
 }
 
@@ -1166,13 +1168,34 @@ void GLModel::removeModelPartList(){
 }
 
 void GLModel::modelCut(){
-    qDebug() << "modelcut called";
+    qDebug() << "modelcut called" << cutMode;
     qmlManager->openProgressPopUp();
-    if (parentModel->cuttingPlane.size() != 3){
-        return;
-    }
 
-    parentModel->bisectModel(parentModel->cuttingPlane);
+    if (cutMode == 1){
+        if (parentModel->cuttingPlane.size() != 3){
+            return;
+        }
+
+        parentModel->bisectModel(parentModel->cuttingPlane);
+    } else if (cutMode == 2){
+        qDebug() << "parent model cutting points " << parentModel->cuttingPoints.size();
+        if (parentModel->cuttingPoints.size() >= 3){
+            qDebug() << "cut mode 2 done";
+            // create left, rightmesh
+            Mesh* leftMesh = parentModel->lmesh;
+            Mesh* rightMesh = parentModel->rmesh;
+            // do bisecting mesh
+            leftMesh->faces.reserve(mesh->faces.size()*3);
+            leftMesh->vertices.reserve(mesh->faces.size()*3);
+            rightMesh->faces.reserve(mesh->faces.size()*3);
+            rightMesh->vertices.reserve(mesh->faces.size()*3);
+
+            cutAway(leftMesh, rightMesh, parentModel->mesh, parentModel->cuttingPoints, parentModel->cutFillMode);
+            qDebug() << "executed cutaway";
+
+            emit parentModel->bisectDone();
+        }
+    }
 }
 
 void GLModel::generateRLModel(){
@@ -1450,18 +1473,22 @@ void GLModel::generateText3DMesh()
     QVector3D translation = labellingTextPreview->translation+ QVector3D(0,-0.3,0);
 
     Qt3DCore::QTransform transform, normalTransform;
+
+    QVector3D normal = labellingTextPreview->normal;
+
+    QVector3D ref = QVector3D(0,-1,0);
+    auto tangent = QVector3D::crossProduct(normal, ref);
+
+    tangent.normalize();
+    auto binormal = QVector3D::crossProduct(tangent, normal);
+    binormal.normalize();
+
+    QQuaternion quat = QQuaternion::fromAxes(tangent, normal, binormal);
+    QQuaternion quat2 = QQuaternion::fromAxisAndAngle(1, 0, 0, 90+180);
+
     transform.setScale(scale);
-    transform.setRotationX(90);
+    transform.setRotation(quat2 * quat);
     transform.setTranslation(translation);
-
-    /*auto axis = QVector3D::crossProduct(QVector3D(1, 0, 0), -labellingTextPreview->normal);
-    axis.normalize();
-    auto cos_t = QVector3D::dotProduct(QVector3D(1, 0, 0), -labellingTextPreview->normal);
-    auto sin_t = sqrtf(1 - cos_t * cos_t);
-    auto angle = atan2f(cos_t, sin_t) * 180 / M_PI;
-    normalTransform.setRotation(QQuaternion::fromAxisAndAngle(axis, angle + 180));*/
-
-    normalTransform.setRotationX(90);
 
     generateText3DGeometry(&vertices, &verticesSize,
                            &indices, &indicesSize,
@@ -1469,9 +1496,7 @@ void GLModel::generateText3DMesh()
                            labellingTextPreview->text,
                            depth,
                            mesh,
-                           //originalVertices,
-                           //originalVerticesSize,
-                           QVector3D(0, 1, 0),
+                           -labellingTextPreview->normal,
                            transform.matrix(),
                            normalTransform.matrix());
 

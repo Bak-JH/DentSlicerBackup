@@ -181,7 +181,6 @@ public:
     void addVertices(Mesh* mesh, bool CW);
 
 private:
-    int numPoints;
     int colorMode;
     float x,y,z;
     int v_cnt;
