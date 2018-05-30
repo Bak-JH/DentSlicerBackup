@@ -219,6 +219,11 @@ void QmlManager::deleteModelFile(int ID){
     qDebug() << "deleteModelFile" << glmodels.size();
     QMetaObject::invokeMethod(qmlManager->boundedBox, "hideBox");
     deletePart(ID);
+
+    // UI
+    hideMoveArrow();
+    hideRotateSphere();
+    QMetaObject::invokeMethod(boxUpperTab, "all_off");
 }
 
 void QmlManager::disconnectHandlers(GLModel* glmodel){

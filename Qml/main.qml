@@ -54,6 +54,8 @@ Item{
                 console.log("[Droparea] dropped")
                 for(var i = 0; i < dragList.length; i++)
                     validateFileExtension(dragList[i])
+
+                dragList = []
             }
 
             // Only STLs
@@ -62,10 +64,10 @@ Item{
                 var filepath = filePath.toString().replace(/^(file:\/{3})/,"");
                 console.log("opening" + filepath);
 
-                if(filePath.split('.').pop() === "stl")
+                if(filePath.split('.').pop().toLowerCase() === "stl")
                     qm.openModelFile(filepath);
 
-                return filePath.split('.').pop() === "stl"
+                return filePath.split('.').pop().toLowerCase() === "stl"
             }
         }
 
