@@ -19,6 +19,7 @@ Item{
         property alias lefttabExport: lefttabExport
         property alias progressPopUp: progressPopUp
         property alias resultPopUp: resultPopUp
+        property alias yesnoPopUp: yesnoPopUp
         property alias deletePopUp: deletePopUp
         property alias mttab : mttab
 
@@ -326,6 +327,10 @@ Item{
 
         ResultPopup{
             id : resultPopUp
+        }
+
+        YesNoPopup{
+            id : yesnoPopUp
         }
 
         DeletePopup{

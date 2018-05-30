@@ -38,12 +38,12 @@ Rectangle{
         anchors.bottomMargin: 160
         objectName: "curve"
         signal curveSignal()
-            Image{
+            Image {
                 id:curved
                 anchors.fill: parent
                 source: "qrc:/resource/curve.png"
                 }
-            MouseArea{
+            MouseArea {
                 anchors.fill:parent
                 hoverEnabled : true
                 onEntered : qm.setHandCursor();

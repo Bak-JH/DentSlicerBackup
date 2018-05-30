@@ -64,6 +64,10 @@ void QmlManager::initializeUI(QQmlApplicationEngine* e){
 
     partList = FindItemByName(engine, "partList");
 
+    // selection popup
+    yesno_popup = FindItemByName(engine, "yesno_popup");
+    result_popup = FindItemByName(engine, "result_popup");
+
     // model layflat components
     layflatPopup = FindItemByName(engine,"layflatPopup");
     // model cut components
@@ -84,7 +88,7 @@ void QmlManager::initializeUI(QQmlApplicationEngine* e){
     // orientation components
     orientPopup = FindItemByName(engine, "orientPopup");
     progress_popup = FindItemByName(engine, "progress_popup");
-    result_popup = FindItemByName(engine, "result_popup");
+
 
     // extension components
     extensionButton = FindItemByName(engine,"extendButton");
@@ -174,8 +178,27 @@ void QmlManager::createModelFile(Mesh* target_mesh, QString fname) {
 void QmlManager::openModelFile(QString fname){
     createModelFile(nullptr, fname);
 
+    // check for defects
+    checkModelFile(glmodels[glmodels.size()-1]->ID);
+
     // do auto arrange
     runArrange();
+}
+
+void QmlManager::checkModelFile(int ID){
+    GLModel* target;
+    for(int i=0; i<glmodels.size();i++){
+        if(glmodels.at(i)->ID == ID){
+            target = glmodels.at(i);
+            break;
+        }
+    }
+
+    identifyHoles(target->mesh);
+    if (target->mesh->holes.size() != 0){
+        selectPart(ID);
+        qmlManager->openYesNoPopUp("Model has flaws.", "", "Do you want to fix the model?", ftrRepair);
+    }
 }
 
 void QmlManager::deleteModelFile(int ID){
@@ -365,6 +388,15 @@ int QmlManager::getSelectedModelID(){
     result = selectedModel->ID;
 
     return result;
+}
+
+void QmlManager::fixMesh(){
+    if (selectedModel == nullptr)
+        return;
+
+    openProgressPopUp();
+    repairMesh(selectedModel->mesh);
+    emit selectedModel->_updateModelMesh();
 }
 
 void QmlManager::setHandCursor(){
@@ -901,6 +933,14 @@ void QmlManager::deletePart(int ID){
 void QmlManager::openProgressPopUp(){
     progress = 0;
     QMetaObject::invokeMethod(progress_popup, "openPopUp");
+}
+
+void QmlManager::openYesNoPopUp(string inputText_h, string inputText_m, string inputText_l, int inputPopupType){
+    QMetaObject::invokeMethod(yesno_popup, "openYesNoPopUp",
+                              Q_ARG(QVariant, QString::fromStdString(inputText_h)),
+                              Q_ARG(QVariant, QString::fromStdString(inputText_m)),
+                              Q_ARG(QVariant, QString::fromStdString(inputText_l)),
+                              Q_ARG(QVariant, inputPopupType));
 }
 
 void QmlManager::openResultPopUp(string inputText_h, string inputText_m, string inputText_l){
