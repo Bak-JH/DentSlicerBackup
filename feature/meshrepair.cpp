@@ -101,7 +101,7 @@ void identifyHoles(Mesh* mesh){
         if (face_idx %100 ==0)
             QCoreApplication::processEvents();
 
-        qDebug() << "neighbors " << mf.neighboring_faces[0].size() << mf.neighboring_faces[1].size() << mf.neighboring_faces[2].size();
+        //qDebug() << "neighbors " << mf.neighboring_faces[0].size() << mf.neighboring_faces[1].size() << mf.neighboring_faces[2].size();
         if (mf.neighboring_faces[0].size() == 0){ // edge 0 is unconnected
             Path3D temp_edge;
             temp_edge.push_back(mesh->idx2MV(mf.mesh_vertex[0]));
