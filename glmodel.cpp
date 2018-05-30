@@ -981,11 +981,12 @@ void GLModel::bisectModel_internal(Plane plane){
         }*/
 
 
-
         for (Path3D contour : contours){
+            qDebug() << "contour size : " << contour.size();
             if (contour.size() <= 2){
                 continue;
             }
+
             QVector3D centerOfMass = QVector3D(0,0,0);
             for (MeshVertex mv : contour){
                 centerOfMass += mv.position;
@@ -1013,13 +1014,15 @@ void GLModel::bisectModel_internal(Plane plane){
 
 
     qDebug() << "done bisect";
+
     // 승환 30%
     qmlManager->setProgress(0.22);
-
     leftMesh->connectFaces();
+
     // 승환 40%
     qmlManager->setProgress(0.41);
     rightMesh->connectFaces();
+
     // 승환 50%
     qmlManager->setProgress(0.56);
     qDebug() << "done connecting";

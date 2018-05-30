@@ -6,12 +6,12 @@ void repairMesh(Mesh* mesh){
 
     qDebug() << "mesh repair start from mesh size :" << mesh->faces.size();
     // remove Unconnected
-    removeUnconnected(mesh);
+    //removeUnconnected(mesh);
     qDebug() << "removed unconnected";
     qmlManager->setProgress(0.1);
 
     // remove degenerate
-    removeDegenerate(mesh);
+    //removeDegenerate(mesh);
     qDebug() << "removed degenerate";
     qmlManager->setProgress(0.25);
 
@@ -30,7 +30,7 @@ void repairMesh(Mesh* mesh){
     qmlManager->setProgress(0.8);
 
     // remove gaps
-    removeGaps(mesh);
+    //removeGaps(mesh);
     qDebug() << "removed gaps";
     qmlManager->setProgress(1);
 }
@@ -94,35 +94,37 @@ void removeDegenerate(Mesh* mesh){
 
 void identifyHoles(Mesh* mesh){
     int face_idx = 0;
-    Paths3D hole_edges;
+    mesh->holes.clear();
 
     for (MeshFace &mf : mesh->faces){
         face_idx ++;
         if (face_idx %100 ==0)
             QCoreApplication::processEvents();
+
+        qDebug() << "neighbors " << mf.neighboring_faces[0].size() << mf.neighboring_faces[1].size() << mf.neighboring_faces[2].size();
         if (mf.neighboring_faces[0].size() == 0){ // edge 0 is unconnected
             Path3D temp_edge;
             temp_edge.push_back(mesh->idx2MV(mf.mesh_vertex[0]));
             temp_edge.push_back(mesh->idx2MV(mf.mesh_vertex[1]));
-            hole_edges.push_back(temp_edge);
+            mesh->holes.push_back(temp_edge);
         }
         if (mf.neighboring_faces[1].size() == 0){ // edge 1 is unconnected
             Path3D temp_edge;
             temp_edge.push_back(mesh->idx2MV(mf.mesh_vertex[1]));
             temp_edge.push_back(mesh->idx2MV(mf.mesh_vertex[2]));
-            hole_edges.push_back(temp_edge);
+            mesh->holes.push_back(temp_edge);
         }
         if (mf.neighboring_faces[2].size() == 0){ // edge 2 is unconnected
             Path3D temp_edge;
             temp_edge.push_back(mesh->idx2MV(mf.mesh_vertex[2]));
             temp_edge.push_back(mesh->idx2MV(mf.mesh_vertex[0]));
-            hole_edges.push_back(temp_edge);
+            mesh->holes.push_back(temp_edge);
         }
     }
-    qDebug()<< "hole edges coutn : " << hole_edges.size();
+    qDebug()<< "hole edges coutn : " << mesh->holes.size();
 
     // get closed contour from hole_edges
-    mesh->holes = contourConstruct3D(hole_edges);
+    mesh->holes = contourConstruct3D(mesh->holes);
     qDebug() << "hole detected";
     /*for (Paths3D::iterator ps_it = mesh->holes.begin(); ps_it != mesh->holes.end();){
         if (ps_it->size() <3)
