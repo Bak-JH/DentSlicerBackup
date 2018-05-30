@@ -5,7 +5,7 @@
 void repairMesh(Mesh* mesh){
 
     qDebug() << "mesh repair start from mesh size :" << mesh->faces.size();
-    // remove Unconnected
+    /*// remove Unconnected
     //removeUnconnected(mesh);
     qDebug() << "removed unconnected";
     qmlManager->setProgress(0.1);
@@ -13,16 +13,16 @@ void repairMesh(Mesh* mesh){
     // remove degenerate
     //removeDegenerate(mesh);
     qDebug() << "removed degenerate";
-    qmlManager->setProgress(0.25);
+    qmlManager->setProgress(0.25);*/
 
     // find holes
     identifyHoles(mesh);
-    qmlManager->setProgress(0.5);
+    qmlManager->setProgress(0.3);
 
     // fill holes
     fillHoles(mesh);
     qDebug() << "filled holes";
-    qmlManager->setProgress(0.7);
+    qmlManager->setProgress(0.5);
 
     // fix normal orientations
     fixNormalOrientations(mesh);

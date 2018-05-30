@@ -53,6 +53,10 @@ public:
     Qt3DCore::QEntity *moveArrowY;
     QObject *moveArrowobj;
 
+    // selection popup
+    QObject* yesno_popup;
+    QObject* result_popup;
+
     // model layflat components;
     QObject *layflatPopup;
     QObject *layflatButton;
@@ -81,8 +85,8 @@ public:
     // orientation components
     QObject* orientPopup;
     QObject* progress_popup;
-    QObject* result_popup;
     QObject* orientButton;
+
     // extension components
     QObject* extensionPopup;
     QObject* extensionButton;
@@ -125,6 +129,7 @@ public:
     void addPart(QString fileName, int ID);
     void deletePart(int ID);
     void openProgressPopUp();
+    void openYesNoPopUp(string inputText_h, string inputText_m, string inputText_l, int inputPopupType);
     void openResultPopUp(string inputText_h, string inputText_m, string inputText_l);
     void setProgress(float value);
     void setProgressText(string inputText);
@@ -134,6 +139,7 @@ public:
     Q_INVOKABLE QVector3D getSelectedCenter();
     Q_INVOKABLE QVector3D getSelectedSize();
     Q_INVOKABLE int getSelectedModelID();
+    Q_INVOKABLE void fixMesh();
     Q_INVOKABLE void setHandCursor();
     Q_INVOKABLE void resetCursor();
     Q_INVOKABLE bool isSelected();
@@ -142,6 +148,7 @@ public:
     Q_INVOKABLE void modelVisible(int ID, bool isVisible);
     Q_INVOKABLE void doDelete();
     Q_INVOKABLE void doDeletebyID(int ID);
+    Q_INVOKABLE void runArrange();
 
 
 private:
@@ -158,6 +165,7 @@ public slots:
     void sendUpdateModelInfo(int, int, QString, float);
     void createModelFile(Mesh* target_mesh, QString filename);
     void openModelFile(QString filename);
+    void checkModelFile(int ID);
     void deleteModelFile(int ID);
     void runGroupFeature(int,QString);
     void modelSelected(int);
@@ -169,7 +177,6 @@ public slots:
     void modelMoveDone(int);
     void modelRotateDone(int);
     void resetLayflat();
-    void runArrange();
     void applyArrangeResult(vector<QVector3D>, vector<float>);
     void cleanSelectedModel(int);
     void extensionSelect();

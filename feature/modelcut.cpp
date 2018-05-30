@@ -151,7 +151,7 @@ void interpolate(Mesh* mesh, Path3D contour1, Path3D contour2){
     }
 }
 
-void cutAway(Mesh* leftMesh, Mesh* rightMesh, Mesh* mesh, vector<QVector3D> cuttingPoints){
+void cutAway(Mesh* leftMesh, Mesh* rightMesh, Mesh* mesh, vector<QVector3D> cuttingPoints, int cutFillMode){
     Path contour;
     Path3D cuttingContour;
     Paths3D cuttingEdges;
@@ -432,27 +432,29 @@ void cutAway(Mesh* leftMesh, Mesh* rightMesh, Mesh* mesh, vector<QVector3D> cutt
         }
     }*/
 
-    QVector3D normal_direction = QVector3D::normal(cuttingContour_u[0].position-cuttingContour_u[1].position, cuttingContour_u[2].position-cuttingContour_u[1].position);
-    for (int u_idx=0; u_idx<cuttingContour_u.size(); u_idx++){
-        MeshVertex umv1 = cuttingContour_u[u_idx];
-        MeshVertex umv2 = cuttingContour_u[(u_idx+1)%cuttingContour_u.size()];
+    if (cutFillMode = 2){
+        QVector3D normal_direction = QVector3D::normal(cuttingContour_u[0].position-cuttingContour_u[1].position, cuttingContour_u[2].position-cuttingContour_u[1].position);
+        for (int u_idx=0; u_idx<cuttingContour_u.size(); u_idx++){
+            MeshVertex umv1 = cuttingContour_u[u_idx];
+            MeshVertex umv2 = cuttingContour_u[(u_idx+1)%cuttingContour_u.size()];
 
-        MeshVertex lmv1 = cuttingContour_l[u_idx];
-        MeshVertex lmv2 = cuttingContour_l[(u_idx+1)%cuttingContour_l.size()];
+            MeshVertex lmv1 = cuttingContour_l[u_idx];
+            MeshVertex lmv2 = cuttingContour_l[(u_idx+1)%cuttingContour_l.size()];
 
-        if (normal_direction.z()>0){
-            rightMesh->addFace(umv2.position, umv1.position, lmv1.position);
-            rightMesh->addFace(umv2.position, lmv1.position, lmv2.position);
-            leftMesh->addFace(umv1.position, umv2.position, lmv1.position);
-            leftMesh->addFace(lmv1.position, umv2.position, lmv2.position);
-        } else {
-            rightMesh->addFace(umv1.position, umv2.position, lmv1.position);
-            rightMesh->addFace(lmv1.position, umv2.position, lmv2.position);
-            leftMesh->addFace(umv2.position, umv1.position, lmv1.position);
-            leftMesh->addFace(umv2.position, lmv1.position, lmv2.position);
+            if (normal_direction.z()>0){
+                rightMesh->addFace(umv2.position, umv1.position, lmv1.position);
+                rightMesh->addFace(umv2.position, lmv1.position, lmv2.position);
+                leftMesh->addFace(umv1.position, umv2.position, lmv1.position);
+                leftMesh->addFace(lmv1.position, umv2.position, lmv2.position);
+            } else {
+                rightMesh->addFace(umv1.position, umv2.position, lmv1.position);
+                rightMesh->addFace(lmv1.position, umv2.position, lmv2.position);
+                leftMesh->addFace(umv2.position, umv1.position, lmv1.position);
+                leftMesh->addFace(umv2.position, lmv1.position, lmv2.position);
+            }
         }
-
     }
+
     leftMesh->connectFaces();
     rightMesh->connectFaces();
 }

@@ -1190,7 +1190,7 @@ void GLModel::modelCut(){
             rightMesh->faces.reserve(mesh->faces.size()*3);
             rightMesh->vertices.reserve(mesh->faces.size()*3);
 
-            cutAway(leftMesh, rightMesh, parentModel->mesh, parentModel->cuttingPoints);
+            cutAway(leftMesh, rightMesh, parentModel->mesh, parentModel->cuttingPoints, parentModel->cutFillMode);
             qDebug() << "executed cutaway";
 
             emit parentModel->bisectDone();
