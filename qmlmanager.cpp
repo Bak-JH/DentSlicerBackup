@@ -28,6 +28,7 @@ void QmlManager::initializeUI(QQmlApplicationEngine* e){
     Lights* lights = new Lights(models);
 
     mv = FindItemByName(engine, "MainView");
+    mttab = (QEntity *)FindItemByName(engine, "mttab");
     QMetaObject::invokeMethod(mv, "initCamera");
     // model move componetns
     movePopup = FindItemByName(engine, "movePopup");
@@ -116,6 +117,7 @@ void QmlManager::initializeUI(QQmlApplicationEngine* e){
     hideMoveArrow();
     //moveArrow->setEnabled(0);
     QObject *moveButton = FindItemByName(engine, "moveButton");
+    QObject::connect(mttab,SIGNAL(runGroupFeature(int,QString)),this,SLOT(runGroupFeature(int,QString)));
     QObject::connect(moveButton,SIGNAL(runGroupFeature(int,QString)),this,SLOT(runGroupFeature(int,QString)));
     QObject::connect(rotateButton,SIGNAL(runGroupFeature(int,QString)),this,SLOT(runGroupFeature(int,QString)));
     orientButton = FindItemByName(engine, "orientButton");
@@ -192,7 +194,7 @@ void QmlManager::deleteModelFile(int ID){
             gl_it ++;
     }
     qDebug() << "deleteModelFile" << glmodels.size();
-
+    QMetaObject::invokeMethod(qmlManager->boundedBox, "hideBox");
     deletePart(ID);
 }
 
@@ -332,6 +334,33 @@ void QmlManager::cleanSelectedModel(int type){
     //selectedModel = nullptr;
 }
 
+QVector3D QmlManager::getSelectedCenter(){
+    QVector3D result = QVector3D(0,0,0);
+
+    if(selectedModel != nullptr)
+        result = selectedModel->m_transform->translation();
+
+    return result;
+}
+QVector3D QmlManager::getSelectedSize(){
+    QVector3D result = QVector3D(0,0,0);
+
+    if(selectedModel != nullptr){
+        result = selectedModel->m_transform->translation();
+        result.setX(selectedModel->mesh->x_max - selectedModel->mesh->x_min);
+        result.setY(selectedModel->mesh->y_max - selectedModel->mesh->y_min);
+        result.setZ(selectedModel->mesh->z_max - selectedModel->mesh->z_min);
+    }
+
+    return result;
+}
+
+int QmlManager::getSelectedModelID(){
+    int result = -1;
+    result = selectedModel->ID;
+
+    return result;
+}
 
 void QmlManager::setHandCursor(){
     QApplication::setOverrideCursor(QCursor(Qt::PointingHandCursor));
@@ -419,6 +448,7 @@ void QmlManager::modelSelected(int ID){
         selectedModel->checkPrintingArea();
         QMetaObject::invokeMethod(partList, "unselectPartByModel", Q_ARG(QVariant, selectedModel->ID));
         disconnectHandlers(selectedModel);  //check
+        QMetaObject::invokeMethod(qmlManager->mttab, "hideTab"); // off MeshTransformer Tab
 
         QMetaObject::invokeMethod(boundedBox, "hideBox"); // Bounded Box
         if (groupFunctionState == "active"){
@@ -552,6 +582,10 @@ void QmlManager::doDelete(){
         return;
 
     deleteModelFile(selectedModel->ID);
+}
+
+void QmlManager::doDeletebyID(int ID){
+    deleteModelFile(ID);
 }
 
 void QmlManager::showMoveArrow(){

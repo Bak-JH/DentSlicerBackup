@@ -35,6 +35,7 @@ public:
     QEntity* models;
     QObject* mv;
     Qt3DCore::QEntity *boundedBox;
+    Qt3DCore::QEntity *mttab;
 
     // model rotate components
     QObject *rotatePopup;
@@ -130,6 +131,9 @@ public:
 
     GLModel* findGLModelByName(QString filename);
 
+    Q_INVOKABLE QVector3D getSelectedCenter();
+    Q_INVOKABLE QVector3D getSelectedSize();
+    Q_INVOKABLE int getSelectedModelID();
     Q_INVOKABLE void setHandCursor();
     Q_INVOKABLE void resetCursor();
     Q_INVOKABLE bool isSelected();
@@ -137,6 +141,7 @@ public:
     Q_INVOKABLE void unselectPart(int ID);
     Q_INVOKABLE void modelVisible(int ID, bool isVisible);
     Q_INVOKABLE void doDelete();
+    Q_INVOKABLE void doDeletebyID(int ID);
 
 
 private:
