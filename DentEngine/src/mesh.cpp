@@ -773,7 +773,12 @@ Paths3D contourConstruct3D(Paths3D hole_edges){
             }
             cnt1 ++;
         }*/
+        int edge_lookup = 0;
         for (hole_edge1_it = hole_edges.begin(); hole_edge1_it != hole_edges.end();){
+            if (edge_lookup %50 ==0)
+                QCoreApplication::processEvents();
+            edge_lookup ++;
+
             bool checked = false;
             for (Paths3D::iterator checked_it : checked_its){
                 if (checked_it == hole_edge1_it){
