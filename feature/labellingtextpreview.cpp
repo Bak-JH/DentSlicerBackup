@@ -97,7 +97,7 @@ void LabellingTextPreview::setNormal(const QVector3D& n)
 
 void LabellingTextPreview::updateTransform()
 {
-    QVector3D ref = QVector3D(0, -1, 0);
+    QVector3D ref = QVector3D(0, 0, 1);
     auto tangent = QVector3D::crossProduct(normal, ref);
     tangent.normalize();
     auto binormal = QVector3D::crossProduct(tangent, normal);
@@ -106,6 +106,6 @@ void LabellingTextPreview::updateTransform()
     qDebug() << QVector3D(width / minimumWidth, 1.0f, ratioY) * scaleY;
 
     planeTransform->setTranslation(translation + normal * 0.5f);
-    planeTransform->setRotation(QQuaternion::fromAxes(tangent, normal, binormal));
+    planeTransform->setRotation(QQuaternion::fromAxes(tangent, normal, binormal) * QQuaternion::fromAxisAndAngle(QVector3D(0, 1, 0), 180));
     planeTransform->setScale3D(QVector3D(width / minimumWidth, 1.0f, ratioY) * scaleY);
 }

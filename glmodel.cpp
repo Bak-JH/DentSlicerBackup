@@ -1339,17 +1339,18 @@ void GLModel::generateText3DMesh()
     Qt3DCore::QTransform transform, normalTransform;
 
     QVector3D normal = labellingTextPreview->normal;
-    QVector3D ref = QVector3D(0, -1, 0);
+    QVector3D ref = QVector3D(0, 0, 1);
     auto tangent = QVector3D::crossProduct(normal, ref);
     tangent.normalize();
     auto binormal = QVector3D::crossProduct(tangent, normal);
     binormal.normalize();
 
-    QQuaternion quat = QQuaternion::fromAxes(tangent, normal, binormal);
-    QQuaternion quat2 = QQuaternion::fromAxisAndAngle(1, 0, 0, 90 + 180);
+    QQuaternion quat = QQuaternion::fromAxes(tangent, normal, binormal)
+            * QQuaternion::fromAxisAndAngle(QVector3D(0, 0, 1), 180)
+            * QQuaternion::fromAxisAndAngle(QVector3D(1, 0, 0), 90);
 
     transform.setScale(scale);
-    transform.setRotation(quat2 * quat);
+    transform.setRotation(quat);
     transform.setTranslation(translation);
 
     generateText3DGeometry(&vertices, &verticesSize,
