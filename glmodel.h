@@ -213,13 +213,15 @@ signals:
     void resetLayflat();
     void bisectDone();
     void _updateModelMesh();
+    void layFlatSelect();
+    void layFlatUnSelect();
     void extensionSelect();
     void extensionUnSelect();
 
 public slots:
     // object picker parts
     void handlePickerClicked(Qt3DRender::QPickEvent*);
-    void handlePickerClickedLayflat(Qt3DRender::QPickEvent*);
+    void handlePickerClickedLayflat(MeshFace shadow_meshface);
     void mgoo(Qt3DRender::QPickEvent*);
     void pgoo(Qt3DRender::QPickEvent*);
     void rgoo(Qt3DRender::QPickEvent*);
@@ -230,6 +232,7 @@ public slots:
     // Lay Flat
     void openLayflat();
     void closeLayflat();
+    void generateLayFlat();
 
     // Model Cut
     void generatePlane();

@@ -181,6 +181,8 @@ public slots:
     void cleanSelectedModel(int);
     void extensionSelect();
     void extensionUnSelect();
+    void layFlatSelect();
+    void layFlatUnSelect();
 
 };
 
