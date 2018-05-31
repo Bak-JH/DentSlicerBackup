@@ -157,6 +157,11 @@ void cutAway(Mesh* leftMesh, Mesh* rightMesh, Mesh* mesh, vector<QVector3D> cutt
     Paths3D cuttingEdges;
     int numPoints = cuttingPoints.size();
 
+    leftMesh->faces.reserve(mesh->faces.size()*2);
+    leftMesh->vertices.reserve(mesh->faces.size()*2);
+    rightMesh->faces.reserve(mesh->faces.size()*2);
+    rightMesh->vertices.reserve(mesh->faces.size()*2);
+
     for (int i=0; i<numPoints; i++){
         QVector3D cuttingPoint =cuttingPoints[i];
         contour.push_back(IntPoint(cuttingPoint.x()*scfg->resolution
