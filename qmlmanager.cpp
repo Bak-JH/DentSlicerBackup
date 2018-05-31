@@ -235,7 +235,12 @@ void QmlManager::disconnectHandlers(GLModel* glmodel){
     // need to connect for every popup
     // model rotate popup codes
     // model layflat popup codes
-    QObject::disconnect(layflatPopup, SIGNAL(openLayflat()), glmodel, SLOT(openLayflat()));
+    QObject::disconnect(layflatPopup, SIGNAL(openLayflat()), glmodel->shadowModel, SLOT(openLayflat()));
+    QObject::disconnect(layflatPopup, SIGNAL(closeLayflat()), glmodel->shadowModel, SLOT(closeLayflat()));
+    QObject::disconnect(extensionPopup, SIGNAL(generateLayFlat()), glmodel, SLOT(generateLayFlat()));
+    QObject::disconnect(glmodel->shadowModel,SIGNAL(layFlatSelect()),this,SLOT(layFlatSelect()));
+    QObject::disconnect(glmodel->shadowModel,SIGNAL(layFlatUnSelect()),this,SLOT(layFlatUnSelect()));
+    //QObject::disconnect(layflatPopup, SIGNAL(openLayflat()), glmodel, SLOT(openLayflat()));
 
     // model cut popup codes
     QObject::disconnect(cutPopup,SIGNAL(modelCut()),glmodel->shadowModel , SLOT(modelCut()));
@@ -301,8 +306,15 @@ void QmlManager::connectHandlers(GLModel* glmodel){
 
     // need to connect for every popup
     // model layflat popup codes
+    /*
     QObject::connect(layflatPopup, SIGNAL(openLayflat()), glmodel, SLOT(openLayflat()));
     QObject::connect(glmodel, SIGNAL(resetLayflat()), this, SLOT(resetLayflat()));
+    */
+    QObject::connect(layflatPopup, SIGNAL(openLayflat()), glmodel->shadowModel, SLOT(openLayflat()));
+    QObject::connect(layflatPopup, SIGNAL(closeLayflat()), glmodel->shadowModel, SLOT(closeLayflat()));
+    QObject::connect(layflatPopup, SIGNAL(generateLayFlat()), glmodel, SLOT(generateLayFlat()));
+    QObject::connect(glmodel->shadowModel,SIGNAL(layFlatSelect()),this,SLOT(layFlatSelect()));
+    QObject::connect(glmodel->shadowModel,SIGNAL(layFlatUnSelect()),this,SLOT(layFlatUnSelect()));
 
     // model cut popup codes
     QObject::connect(cutPopup,SIGNAL(modelCut()),glmodel->shadowModel , SLOT(modelCut()));
@@ -561,12 +573,20 @@ void QmlManager::modelSelected(int ID){
         selectedModel = nullptr;
     }
 }
+void QmlManager::layFlatSelect(){
+    QMetaObject::invokeMethod(layflatPopup,"onApplyFinishButton");
+}
+void QmlManager::layFlatUnSelect(){
+    QMetaObject::invokeMethod(layflatPopup,"offApplyFinishButton");
+}
+
 void QmlManager::extensionSelect(){
     QMetaObject::invokeMethod(extensionPopup,"onApplyFinishButton");
 }
 void QmlManager::extensionUnSelect(){
     QMetaObject::invokeMethod(extensionPopup,"offApplyFinishButton");
 }
+
 void QmlManager::selectPart(int ID){
     emit modelSelected(ID);
 }
@@ -868,7 +888,7 @@ void QmlManager::runGroupFeature(int ftrType, QString state){
         break;
     }
     case ftrLayFlat:
-    {
+    {   /*
         if (state == "active"){
             if (selectedModel == nullptr){
                 QMetaObject::invokeMethod(layflatPopup,"offApplyFinishButton");
@@ -877,6 +897,19 @@ void QmlManager::runGroupFeature(int ftrType, QString state){
             }
         }else if (state == "inactive"){
             QApplication::restoreOverrideCursor();
+        }
+        */
+        qDebug() << "run groupfeature lay flat";
+        qDebug()<<state;
+        if (state == "active"){
+            if (selectedModel != nullptr){
+                selectedModel->uncolorExtensionFaces();
+                selectedModel->colorExtensionFaces();
+            }
+        }else if (state == "inactive"){
+            if (selectedModel != nullptr){
+                selectedModel->uncolorExtensionFaces();
+            }
         }
         break;
     }

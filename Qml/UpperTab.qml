@@ -682,6 +682,7 @@ Rectangle {
             applyfinishbutton_text:"Select"
             applybutton_text: "Finish"
             descriptionimage_vis: true
+            /*
             state: second_tab_button_layflat.state=="active" ? "active" : "inactive"
             signal runFeature();
             signal openLayflat()
@@ -699,6 +700,29 @@ Rectangle {
             function offApplyFinishButton(){
                 popup_layflat.colorApplyFinishButton(0);
             }
+            */
+            state: { //fourth_tab_button_extend.state=="active" ? "active" : "inactive"
+                if (second_tab_button_layflat.state == "active" && qm.isSelected()){
+                    openLayflat();
+                    return "active";
+                } else {
+                    closeLayflat();
+                    return "inactive";
+                }
+            }
+            function onApplyFinishButton(){
+                popup_layflat.colorApplyFinishButton(1)
+            }
+            function offApplyFinishButton(){
+                popup_layflat.colorApplyFinishButton(0);
+            }
+            onApplyClicked: {
+                console.log("lay  flat");
+                generateLayFlat();
+            }
+            signal generateLayFlat();
+            signal openLayflat();
+            signal closeLayflat();
         }
 
         //7. PopUp - Arrange => main.qml
