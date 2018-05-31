@@ -738,8 +738,10 @@ void GLModel::handlePickerClicked(QPickEvent *pick)
         return;
     }
 
+
     if (!cutActive && !extensionActive && !labellingActive && !layflatActive)
         emit modelSelected(parentModel->ID);
+
     qDebug() << "model selected emit";
 
     if(pick->button() & Qt::RightButton){
@@ -814,17 +816,35 @@ void GLModel::handlePickerClicked(QPickEvent *pick)
         // emit hollowShellSelect();
     }
 
-    /*if (layflatActive){
+    if (layflatActive){
+        /*
         m_objectPicker->setEnabled(false);
         this->parentModel->m_objectPicker = new Qt3DRender::QObjectPicker(this->parentModel);
         QObject::connect(this->parentModel->m_objectPicker, SIGNAL(clicked(Qt3DRender::QPickEvent*)), this->parentModel, SLOT(handlePickerClickedLayflat(Qt3DRender::QPickEvent*)));
         this->parentModel->addComponent(this->parentModel->m_objectPicker);
-    }*/
+        */
+
+        MeshFace shadow_meshface = mesh->faces[trianglePick->triangleIndex()];
+        qDebug() << "found parent meshface" << shadow_meshface.parent_idx;
+        parentModel->uncolorExtensionFaces();
+        emit layFlatSelect();
+        parentModel->targetMeshFace = &parentModel->mesh->faces[shadow_meshface.parent_idx];
+        parentModel->generateColorAttributes();
+        /*qDebug() << trianglePick->localIntersection() \
+                 << parentModel->mesh->idx2MV(parentModel->targetMeshFace->mesh_vertex[0]).position\
+                << parentModel->mesh->idx2MV(parentModel->targetMeshFace->mesh_vertex[1]).position\
+                << parentModel->mesh->idx2MV(parentModel->targetMeshFace->mesh_vertex[2]).position;
+        */
+        // << parentModel->targetMeshFace->mesh_vertex[1] << parentModel->targetMeshFace->mesh_vertex[2];
+        parentModel->colorExtensionFaces();
+    }
 }
-void GLModel::handlePickerClickedLayflat(QPickEvent *pick){
+void GLModel::handlePickerClickedLayflat(MeshFace shadow_meshface){
+    /*
     qDebug() << "layflat picker!";
     QPickTriangleEvent *trianglePick = static_cast<QPickTriangleEvent*>(pick);
     MeshFace shadow_meshface = mesh->faces[trianglePick->triangleIndex()];
+    */
     QVector3D tmp_fn = shadow_meshface.fn;
     Qt3DCore::QTransform* tmp = new Qt3DCore::QTransform();
     float x= tmp_fn.x();
@@ -1564,19 +1584,49 @@ void GLModel::generateExtensionFaces(double distance){
     extendMesh(mesh, targetMeshFace, distance);
     emit _updateModelMesh();
 }
+
+void GLModel::generateLayFlat(){
+    //MeshFace shadow_meshface = *targetMeshFace;
+    QVector3D tmp_fn = parentModel->targetMeshFace->fn;
+    Qt3DCore::QTransform* tmp = new Qt3DCore::QTransform();
+    float x= tmp_fn.x();
+    float y= tmp_fn.y();
+    float z=tmp_fn.z();
+    float angleX = qAtan2(y,z)*180/M_PI;
+    if (z>0) angleX+=180;
+    float angleY = qAtan2(x,z)*180/M_PI;
+    tmp->setRotationX(angleX);
+    tmp->setRotationY(angleY);
+    rotateModelMesh(tmp->matrix());
+
+    //closeLayflat();
+    emit resetLayflat();
+
+    QMetaObject::invokeMethod(qmlManager->boundedBox, "setPosition", Q_ARG(QVariant, QVector3D(m_transform->translation())));
+    QMetaObject::invokeMethod(qmlManager->boundedBox, "setSize", Q_ARG(QVariant, mesh->x_max - mesh->x_min),
+                                                     Q_ARG(QVariant, mesh->y_max - mesh->y_min),
+                                                     Q_ARG(QVariant, mesh->z_max - mesh->z_min));
+}
+
+
 void GLModel::openLayflat(){
+    qDebug() << "open layflat called";
+    layflatActive = true;
+    qDebug() << "open layflat called end  " << layflatActive;
+    /*
     QApplication::setOverrideCursor(QCursor(Qt::UpArrowCursor));
     shadowModel->m_objectPicker->setEnabled(false);
     m_objectPicker = new Qt3DRender::QObjectPicker(this);
     QObject::connect(m_objectPicker,SIGNAL(clicked(Qt3DRender::QPickEvent*)), this, SLOT(handlePickerClickedLayflat(Qt3DRender::QPickEvent*)));
     this->addComponent(m_objectPicker);
     this->shadowModel->layflatActive = true;
+    */
 }
 
 void GLModel::closeLayflat(){
-    qDebug() << "closelayflat called";
-    this->shadowModel->layflatActive = false;
-    //layflatActive = false;
+    layflatActive = false;
+    parentModel->uncolorExtensionFaces();
+    parentModel->targetMeshFace = nullptr;
 }
 void GLModel::openExtension(){
     extensionActive = true;
