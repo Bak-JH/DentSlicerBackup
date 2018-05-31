@@ -237,7 +237,7 @@ void QmlManager::disconnectHandlers(GLModel* glmodel){
     // model layflat popup codes
     QObject::disconnect(layflatPopup, SIGNAL(openLayflat()), glmodel->shadowModel, SLOT(openLayflat()));
     QObject::disconnect(layflatPopup, SIGNAL(closeLayflat()), glmodel->shadowModel, SLOT(closeLayflat()));
-    QObject::disconnect(extensionPopup, SIGNAL(generateLayFlat()), glmodel, SLOT(generateLayFlat()));
+    QObject::disconnect(layflatPopup, SIGNAL(generateLayFlat()), glmodel, SLOT(generateLayFlat()));
     QObject::disconnect(glmodel->shadowModel,SIGNAL(layFlatSelect()),this,SLOT(layFlatSelect()));
     QObject::disconnect(glmodel->shadowModel,SIGNAL(layFlatUnSelect()),this,SLOT(layFlatUnSelect()));
     //QObject::disconnect(layflatPopup, SIGNAL(openLayflat()), glmodel, SLOT(openLayflat()));

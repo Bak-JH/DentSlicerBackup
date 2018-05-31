@@ -824,6 +824,8 @@ void GLModel::handlePickerClicked(QPickEvent *pick)
         */
 
         MeshFace shadow_meshface = mesh->faces[trianglePick->triangleIndex()];
+        qDebug() << "target 1 " <<shadow_meshface.fn ;
+
         qDebug() << "found parent meshface" << shadow_meshface.parent_idx;
         parentModel->uncolorExtensionFaces();
         emit layFlatSelect();
@@ -1586,25 +1588,43 @@ void GLModel::generateExtensionFaces(double distance){
 
 void GLModel::generateLayFlat(){
     //MeshFace shadow_meshface = *targetMeshFace;
-    QVector3D tmp_fn = parentModel->targetMeshFace->fn;
-    Qt3DCore::QTransform* tmp = new Qt3DCore::QTransform();
+
+    QVector3D tmp_fn = targetMeshFace->fn;
+    qDebug() << "target 2 " << tmp_fn;
+
     float x= tmp_fn.x();
     float y= tmp_fn.y();
     float z=tmp_fn.z();
-    float angleX = qAtan2(y,z)*180/M_PI;
-    if (z>0) angleX+=180;
-    float angleY = qAtan2(x,z)*180/M_PI;
-    tmp->setRotationX(angleX);
-    tmp->setRotationY(angleY);
-    rotateModelMesh(tmp->matrix());
 
-    //closeLayflat();
+    float angleX = 0;
+    float angleY = 0;
+    qDebug() << "aqtan2" << qAtan2(z,y)*180/M_PI << "aqtan2" << qAtan2(z,x)*180/M_PI;
+    angleX = (qAtan2(z,y)*180/M_PI);
+    angleX = 90 + angleX;
+    z = (-1)*qSqrt(qPow(z,2) + qPow(y,2));
+    angleY = (qAtan2(z,x)*180/M_PI);
+    angleY = -90 - angleY;
+    //qDebug() << "angle" << angleX << angleY;
+    Qt3DCore::QTransform* tmp = new Qt3DCore::QTransform();
+    tmp->setRotationX(angleX);
+    tmp->setRotationY(0);
+    tmp->setRotationZ(0);
+    //qDebug() << "lay flat 0      ";
+    rotateModelMesh(tmp->matrix());
+    tmp->setRotationX(0);
+    tmp->setRotationY(angleY);
+    tmp->setRotationZ(0);
+    rotateModelMesh(tmp->matrix());
+    //qDebug() << "lay flat 1      ";
+    closeLayflat();
     emit resetLayflat();
 
     QMetaObject::invokeMethod(qmlManager->boundedBox, "setPosition", Q_ARG(QVariant, QVector3D(m_transform->translation())));
     QMetaObject::invokeMethod(qmlManager->boundedBox, "setSize", Q_ARG(QVariant, mesh->x_max - mesh->x_min),
                                                      Q_ARG(QVariant, mesh->y_max - mesh->y_min),
                                                      Q_ARG(QVariant, mesh->z_max - mesh->z_min));
+    qDebug() << "lay flat 2      ";
+
 }
 
 
@@ -1624,8 +1644,8 @@ void GLModel::openLayflat(){
 
 void GLModel::closeLayflat(){
     layflatActive = false;
-    parentModel->uncolorExtensionFaces();
-    parentModel->targetMeshFace = nullptr;
+    //parentModel->uncolorExtensionFaces();
+    //parentModel->targetMeshFace = nullptr;
 }
 void GLModel::openExtension(){
     extensionActive = true;
