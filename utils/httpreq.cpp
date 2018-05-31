@@ -44,14 +44,35 @@ void httpreq::replyFinished(QNetworkReply *reply)
 
         dir.cd("infos");
         serial_path = dir.absoluteFilePath("stored_serial.txt");
-        // create serial
-        QFile file(serial_path);
-        if (file.open(QIODevice::ReadWrite | QIODevice::Truncate | QIODevice::Text)){
-            QTextStream stream(&file);
-            qDebug() << "serial : " << serial_key;
-            stream << serial_key;
+
+        if (QFile::exists(serial_path)){
+            // get serial
+            QFile file(serial_path);
+            if (file.open(QIODevice::ReadWrite)){
+                QTextStream stream(&file);
+                stored_serial = stream.readLine();
+            }
+            qDebug() << "stored_serial : " << stored_serial.mid(0,16);
+
+            // create serial if serial key doesn't match stored_serial
+            if (stored_serial.mid(0,16) !=serial_key.mid(0,16)){
+                QFile file(serial_path);
+                if (file.open(QIODevice::ReadWrite | QIODevice::Truncate | QIODevice::Text)){
+                    QTextStream stream(&file);
+                    qDebug() << "rewriting serial : " << serial_key;
+                    stream << serial_key;
+                }
+                file.close();
+            }
+        } else {
+            QFile file(serial_path);
+            if (file.open(QIODevice::ReadWrite | QIODevice::Truncate | QIODevice::Text)){
+                QTextStream stream(&file);
+                qDebug() << "serial : " << serial_key;
+                stream << serial_key;
+            }
+            file.close();
         }
-        file.close();
 
         qDebug() << "authorized";
 
