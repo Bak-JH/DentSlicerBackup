@@ -682,6 +682,7 @@ Rectangle {
             applyfinishbutton_text:"Select"
             applybutton_text: "Finish"
             descriptionimage_vis: true
+            /*
             state: second_tab_button_layflat.state=="active" ? "active" : "inactive"
             signal runFeature();
             signal openLayflat()
@@ -699,6 +700,29 @@ Rectangle {
             function offApplyFinishButton(){
                 popup_layflat.colorApplyFinishButton(0);
             }
+            */
+            state: { //fourth_tab_button_extend.state=="active" ? "active" : "inactive"
+                if (second_tab_button_layflat.state == "active" && qm.isSelected()){
+                    openLayflat();
+                    return "active";
+                } else {
+                    closeLayflat();
+                    return "inactive";
+                }
+            }
+            function onApplyFinishButton(){
+                popup_layflat.colorApplyFinishButton(1)
+            }
+            function offApplyFinishButton(){
+                popup_layflat.colorApplyFinishButton(0);
+            }
+            onApplyClicked: {
+                console.log("lay  flat");
+                generateLayFlat();
+            }
+            signal generateLayFlat();
+            signal openLayflat();
+            signal closeLayflat();
         }
 
         //7. PopUp - Arrange => main.qml
@@ -901,6 +925,7 @@ Rectangle {
                 console.log("curve mode selected");
                 slider_vis = false;
                 cutModeSelected(2);
+                viewUp();
             }
 
             onPlaneSliderValueChanged: {
@@ -932,6 +957,17 @@ Rectangle {
             //signal modelCutFinish();
             signal openCut();
             signal closeCut();
+
+            function viewUp(){
+                sceneRoot.systemTransform.scale3D = Qt.vector3d(0.004,0.004,0.004)
+                sceneRoot.systemTransform.rotationX = 0
+                sceneRoot.systemTransform.rotationY = 0
+                sceneRoot.systemTransform.rotationZ = 0
+
+                sceneRoot.cm.camera.translateWorld(sceneRoot.cm.camera.viewCenter.times(-1))
+                sceneRoot.cm.camera.translateWorld(Qt.vector3d(0.025,-0.25,0))
+
+            }
             //Planeslider{id:slider;anchors.right: parent.left;anchors.rightMargin:20;anchors.bottom:parent.bottom;anchors.bottomMargin:-20;}
         }
 
