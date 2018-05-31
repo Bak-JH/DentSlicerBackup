@@ -657,6 +657,7 @@ void QmlManager::mouseHack(){
     //QCoreApplication::postEvent(this->parent(),evt2);
     QCoreApplication::postEvent(mainWindow,evt2);
 }
+
 void QmlManager::modelMoveDone(int Axis){
     if (selectedModel == nullptr)
         return;

@@ -1321,7 +1321,7 @@ void GLModel::cutModeSelected(int type){
         parentModel->addCuttingPoint(QVector3D(2,0,0));
         generatePlane();
     } else if (cutMode == 2){
-
+        qDebug() << QCursor::pos();
     } else {
 
     }
