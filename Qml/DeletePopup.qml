@@ -40,7 +40,7 @@ Rectangle {
             height:20
             id: result_text_mid
 
-            text: "Are you sure you want to delete?"
+            text: "Are you sure to delete this model?"
             anchors.top: parent.top
             anchors.topMargin: 44
             anchors.horizontalCenter: parent.horizontalCenter
