@@ -754,7 +754,9 @@ void GLModel::handlePickerClicked(QPickEvent *pick)
 
         parentModel->targetMeshFace = &parentModel->mesh->faces[shadow_meshface.parent_idx];
 
+        QString label_text = "";
         if (labellingTextPreview){
+            label_text = labellingTextPreview->text;
             labellingTextPreview->deleteLater();
             labellingTextPreview = nullptr;
         }
@@ -764,6 +766,8 @@ void GLModel::handlePickerClicked(QPickEvent *pick)
         if (labellingTextPreview && labellingTextPreview->isEnabled()) {
             labellingTextPreview->setTranslation(pick->localIntersection() + parentModel->targetMeshFace->fn);
             labellingTextPreview->setNormal(parentModel->targetMeshFace->fn);
+            if (label_text != "")
+                labellingTextPreview->setText(label_text, label_text.size());
         }
     }
 
@@ -1451,9 +1455,23 @@ Mesh* GLModel::toSparse(Mesh* mesh){
 
 void GLModel::getTextChanged(QString text, int contentWidth)
 {
-    qDebug() << "text:" << text;
-    if (labellingTextPreview)
-        labellingTextPreview->setText(text, contentWidth);
+
+    QString label_text = "";
+    QVector3D translation = labellingTextPreview->translation;
+    if (labellingTextPreview){
+        label_text = labellingTextPreview->text;
+        labellingTextPreview->deleteLater();
+        labellingTextPreview = nullptr;
+    }
+    labellingTextPreview = new LabellingTextPreview(this);
+    labellingTextPreview->setEnabled(true);
+
+    if (labellingTextPreview && labellingTextPreview->isEnabled()) {
+        labellingTextPreview->setTranslation(translation);
+        labellingTextPreview->setNormal(parentModel->targetMeshFace->fn);
+        if (label_text != "")
+            labellingTextPreview->setText(label_text, label_text.size());
+    }
 }
 
 void GLModel::openLabelling()
@@ -1497,18 +1515,17 @@ void GLModel::generateText3DMesh()
 
     QVector3D normal = labellingTextPreview->normal;
 
-    QVector3D ref = QVector3D(0,-1,0);
+    QVector3D ref = QVector3D(0, 0, 1);
     auto tangent = QVector3D::crossProduct(normal, ref);
 
     tangent.normalize();
     auto binormal = QVector3D::crossProduct(tangent, normal);
     binormal.normalize();
 
-    QQuaternion quat = QQuaternion::fromAxes(tangent, normal, binormal);
-    QQuaternion quat2 = QQuaternion::fromAxisAndAngle(1, 0, 0, 90+180);
+    QQuaternion quat = QQuaternion::fromAxes(tangent, normal, binormal) * QQuaternion::fromAxisAndAngle(QVector3D(0, 0, 1), 180)* QQuaternion::fromAxisAndAngle(QVector3D(1, 0, 0), 90);
 
     transform.setScale(scale);
-    transform.setRotation(quat2 * quat);
+    transform.setRotation(quat);
     transform.setTranslation(translation);
 
     generateText3DGeometry(&vertices, &verticesSize,
