@@ -144,6 +144,7 @@ rotateResult* autoorientation::Tweak(Mesh* mesh, bool bi_algorithmic,int CA,bool
 
     qmlManager->setProgress(1);
     qmlManager->setProgressText("Done");
+
     qmlManager->openResultPopUp("","Orientation Done","");
     return result;
 }

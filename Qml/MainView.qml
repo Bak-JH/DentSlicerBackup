@@ -83,7 +83,12 @@ Entity {
         onPressed: {
             if (event.key === Qt.Key_Delete) {
                 console.log("deleeeeee")
-                qm.doDelete()
+                //qm.doDelete()
+
+                deletePopUp.visible = true
+                deletePopUp.targetID = qm.getSelectedModelID()
+
+                hideTab()
 
             }
         }
