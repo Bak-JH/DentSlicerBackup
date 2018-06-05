@@ -45,12 +45,12 @@ void LabellingTextPreview::setText(QString text, int contentWidth)
         texture->removeTextureImage(textureImage);
     }
 
-    width = contentWidth * 12;
+    width = contentWidth * this->fontSize;
     qDebug() << "width : " << width;
     if (width < minimumWidth)
         width = minimumWidth;
 
-    textureImage = new TextureImage(width, 16, 8.0f, text, fontName);
+    textureImage = new TextureImage(width, this->fontSize+4, 8.0f, text, fontName);
     textureImage->update();
 
     texture->addTextureImage(textureImage);
@@ -66,12 +66,33 @@ void LabellingTextPreview::setFontName(QString fontName)
         texture->removeTextureImage(textureImage);
     }
 
-    width = text.size() * 12;
+    width = text.size() * this->fontSize;
 
     if (width < minimumWidth)
         width = minimumWidth;
 
-    textureImage = new TextureImage(width, 16, 8.0f, text, fontName);
+    textureImage = new TextureImage(width, this->fontSize+4, 8.0f, text, this->fontName);
+    textureImage->update();
+
+    texture->addTextureImage(textureImage);
+
+    updateTransform();
+}
+
+void LabellingTextPreview::setFontSize(int fontSize)
+{
+    this->fontSize = fontSize;
+
+    if (textureImage) {
+        texture->removeTextureImage(textureImage);
+    }
+
+    width = text.size() * this->fontSize;
+
+    if (width < minimumWidth)
+        width = minimumWidth;
+
+    textureImage = new TextureImage(width, this->fontSize+4, 8.0f, text, this->fontName);
     textureImage->update();
 
     texture->addTextureImage(textureImage);

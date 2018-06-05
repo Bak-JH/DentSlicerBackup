@@ -81,6 +81,7 @@ public:
     QObject *text3DInput;
     QObject *labelPopup;
     QObject *labelFontBox;
+    QObject *labelFontSizeBox;
 
     // orientation components
     QObject* orientPopup;

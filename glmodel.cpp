@@ -1495,6 +1495,12 @@ void GLModel::getFontNameChanged(QString fontName)
         labellingTextPreview->setFontName(fontName);
 }
 
+void GLModel::getFontSizeChanged(int fontSize)
+{
+    if (labellingTextPreview)
+        labellingTextPreview->setFontSize(fontSize);
+}
+
 void GLModel::generateText3DMesh()
 {
     if (!labellingTextPreview)
@@ -1530,7 +1536,7 @@ void GLModel::generateText3DMesh()
 
     generateText3DGeometry(&vertices, &verticesSize,
                            &indices, &indicesSize,
-                           QFont(labellingTextPreview->fontName),
+                           QFont(labellingTextPreview->fontName, 12),
                            labellingTextPreview->text,
                            depth,
                            mesh,
