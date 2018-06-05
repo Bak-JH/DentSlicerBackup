@@ -1459,7 +1459,7 @@ void GLModel::getTextChanged(QString text, int contentWidth)
     QString label_text = "";
     QVector3D translation = labellingTextPreview->translation;
     if (labellingTextPreview){
-        label_text = labellingTextPreview->text;
+        label_text = text;
         labellingTextPreview->deleteLater();
         labellingTextPreview = nullptr;
     }
