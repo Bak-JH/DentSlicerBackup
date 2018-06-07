@@ -31,7 +31,7 @@ class LabellingTextPreview : public Qt3DCore::QEntity
             painter->eraseRect(0, 0, w, h);
             painter->fillRect(0, 0, w, h, QColor(255, 255, 255, 128));
             painter->setPen(QColor(0, 0, 0));
-            painter->setFont(QFont(fontName, 12 * scale, QFont::Normal, false));
+            painter->setFont(QFont(fontName, fontSize * scale, fontWeight, false));
             painter->drawText(QRectF(0, 0, w, h), text, Qt::AlignHCenter | Qt::AlignVCenter);
         }
 
@@ -40,6 +40,7 @@ class LabellingTextPreview : public Qt3DCore::QEntity
         QString text;
         QString fontName;
         int fontSize = 12;
+        int fontWeight = QFont::Normal;
     };
 
 public:
@@ -47,6 +48,7 @@ public:
 
     void setText(QString text, int contentWidth);
     void setFontName(QString fontName);
+    void setFontBold(bool isbold);
     void setFontSize(int fontSize);
     void setTranslation(const QVector3D& t);
     void setNormal(const QVector3D& n);
@@ -58,6 +60,7 @@ public:
     QVector3D normal;
     QString text;
     QString fontName = "Arial";
+    int fontWeight = QFont::Normal;
     int fontSize = 12;
     int contentWidth = 30;
 

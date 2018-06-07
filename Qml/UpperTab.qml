@@ -1411,7 +1411,7 @@ Rectangle {
             objectName: "labelPopup"
             id:popup_label
             funcname: "Label"
-            height: 350 // 282
+            height: 370//350 // 282
             imageHeight: 76
             detail1: "Type letters on the surface."
             detail2: "Font"
@@ -1433,7 +1433,7 @@ Rectangle {
                 width: 194
                 height: 24
 
-                y: 300
+                y: 320
 
                 color: "#ffffffff"
 
@@ -1696,6 +1696,24 @@ Rectangle {
                     ListElement { text: "56" }
                     ListElement { text: "64" }
                     ListElement { text: "100" }
+                }
+            }
+
+            CheckBox {
+                objectName: "labelFontBoldBox"
+                id:labelFontBoldBox
+                text: qsTr("Bold")
+                checked: false
+                width: 194
+                height: 24
+
+                anchors.horizontalCenter: parent.horizontalCenter
+                anchors.top: parent.top
+                anchors.topMargin: 265
+
+                signal sendFontBold(bool fontBold)
+                onCheckedStateChanged: {
+                    sendFontBold(checked);
                 }
             }
 

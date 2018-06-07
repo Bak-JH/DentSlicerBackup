@@ -736,11 +736,13 @@ void GLModel::handlePickerClicked(QPickEvent *pick)
 
         QString label_text = "";
         QString label_font = "";
+        bool label_font_bold = false;
         int label_size = 12;
         int contentWidth = 64;
         if (labellingTextPreview){
             label_text = labellingTextPreview->text;
             label_font = labellingTextPreview->fontName;
+            label_font_bold = (labellingTextPreview->fontWeight==QFont::Bold)? true:false;
             label_size = labellingTextPreview->fontSize;
             contentWidth = labellingTextPreview->contentWidth;
             labellingTextPreview->deleteLater();
@@ -754,6 +756,7 @@ void GLModel::handlePickerClicked(QPickEvent *pick)
             labellingTextPreview->setNormal(parentModel->targetMeshFace->fn);
             if (label_text != ""){
                 labellingTextPreview->setFontName(label_font);
+                labellingTextPreview->setFontBold(label_font_bold);
                 labellingTextPreview->setFontSize(label_size);
                 labellingTextPreview->setText(label_text, contentWidth);
             }
@@ -1447,7 +1450,7 @@ Mesh* GLModel::toSparse(Mesh* mesh){
 void GLModel::getTextChanged(QString text, int contentWidth)
 {
     if (labellingTextPreview && labellingTextPreview->isEnabled()){
-        applyLabelInfo(text, contentWidth, labellingTextPreview->fontName, labellingTextPreview->fontSize);
+        applyLabelInfo(text, contentWidth, labellingTextPreview->fontName, (labellingTextPreview->fontWeight==QFont::Bold)? true:false, labellingTextPreview->fontSize);
     }
 }
 
@@ -1469,18 +1472,24 @@ void GLModel::closeLabelling()
 void GLModel::getFontNameChanged(QString fontName)
 {
     if (labellingTextPreview && labellingTextPreview->isEnabled()){
-        applyLabelInfo(labellingTextPreview->text, labellingTextPreview->contentWidth, fontName, labellingTextPreview->fontSize);
+        applyLabelInfo(labellingTextPreview->text, labellingTextPreview->contentWidth, fontName, (labellingTextPreview->fontWeight==QFont::Bold)? true:false, labellingTextPreview->fontSize);
+    }
+}
+
+void GLModel::getFontBoolChanged(bool isbold){
+    if (labellingTextPreview && labellingTextPreview->isEnabled()){
+        applyLabelInfo(labellingTextPreview->text, labellingTextPreview->contentWidth, labellingTextPreview->fontName, isbold, labellingTextPreview->fontSize);
     }
 }
 
 void GLModel::getFontSizeChanged(int fontSize)
 {
     if (labellingTextPreview && labellingTextPreview->isEnabled()){
-        applyLabelInfo(labellingTextPreview->text, labellingTextPreview->contentWidth, labellingTextPreview->fontName, fontSize);
+        applyLabelInfo(labellingTextPreview->text, labellingTextPreview->contentWidth, labellingTextPreview->fontName, (labellingTextPreview->fontWeight==QFont::Bold)? true:false, fontSize);
     }
 }
 
-void GLModel::applyLabelInfo(QString text, int contentWidth, QString fontName, int fontSize){
+void GLModel::applyLabelInfo(QString text, int contentWidth, QString fontName, bool isBold, int fontSize){
     QVector3D translation;
 
     if (labellingTextPreview && labellingTextPreview->isEnabled()){
@@ -1497,6 +1506,7 @@ void GLModel::applyLabelInfo(QString text, int contentWidth, QString fontName, i
         if (text != ""){
             //labellingTextPreview->setText(label_text, label_text.size());
             labellingTextPreview->setFontName(fontName);
+            labellingTextPreview->setFontBold(isBold);
             labellingTextPreview->setFontSize(fontSize);
             labellingTextPreview->setText(text, contentWidth);
         }

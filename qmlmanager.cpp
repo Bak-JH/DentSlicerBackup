@@ -84,6 +84,7 @@ void QmlManager::initializeUI(QQmlApplicationEngine* e){
     text3DInput = FindItemByName(engine, "text3DInput");
     labelPopup = FindItemByName(engine, "labelPopup");
     labelFontBox = FindItemByName(engine, "labelFontBox");
+    labelFontBoolBox = FindItemByName(engine, "labelFontBoolBox");
     labelFontSizeBox = FindItemByName(engine, "labelFontSizeBox");
 
     // orientation components
@@ -271,6 +272,7 @@ void QmlManager::disconnectHandlers(GLModel* glmodel){
     //QObject::connect(labelPopup, SIGNAL(runFeature(int)),glmodel->ft, SLOT(setTypeAndStart(int)));
     QObject::disconnect(labelPopup, SIGNAL(generateText3DMesh()), glmodel->shadowModel, SLOT(generateText3DMesh()));
     QObject::disconnect(labelFontBox, SIGNAL(sendFontName(QString)),glmodel->shadowModel, SLOT(getFontNameChanged(QString)));
+    QObject::disconnect(labelFontBoolBox, SIGNAL(sendFontBool(bool)),glmodel->shadowModel, SLOT(getFontBoldChanged(bool)));
     QObject::disconnect(labelFontSizeBox, SIGNAL(sendFontSize(int)),glmodel->shadowModel, SLOT(getFontSizeChanged(int)));
 
     // extension popup codes
@@ -345,6 +347,7 @@ void QmlManager::connectHandlers(GLModel* glmodel){
     //QObject::connect(labelPopup, SIGNAL(runFeature(int)),glmodel->ft, SLOT(setTypeAndStart(int)));
     QObject::connect(labelPopup, SIGNAL(generateText3DMesh()), glmodel->shadowModel, SLOT(generateText3DMesh()));
     QObject::connect(labelFontBox, SIGNAL(sendFontName(QString)),glmodel->shadowModel, SLOT(getFontNameChanged(QString)));
+    QObject::connect(labelFontBoolBox, SIGNAL(sendFontBool(bool)),glmodel->shadowModel, SLOT(getFontBoldChanged(bool)));
     QObject::connect(labelFontSizeBox, SIGNAL(sendFontSize(int)),glmodel->shadowModel, SLOT(getFontSizeChanged(int)));
 
     // extension popup codes
