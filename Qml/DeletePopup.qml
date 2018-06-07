@@ -133,7 +133,6 @@ Rectangle {
 
 
     function openResultPopUp(inputText_h, inputText_m, inputText_l){
-        console.log("open resulttttttttttttttt")
         deletePopUp.visible = true
         high_text = inputText_h
         mid_text = inputText_m

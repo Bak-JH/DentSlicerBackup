@@ -18,6 +18,8 @@ Rectangle {
     property string low_text: low_text
     property int popup_type: popup_type
 
+    property bool isFlawOpen: false
+
     Rectangle{//shadow
         id : shadowRect
         width: parent.width-2
@@ -178,22 +180,30 @@ Rectangle {
 
 
 
-
-
-
-
     function openYesNoPopUp(inputText_h, inputText_m, inputText_l, inputPopupType){
-        console.log("open resulttttttttttttttt")
         yesnoPopUp.visible = true
         high_text = inputText_h
         mid_text = inputText_m
         low_text = inputText_l
         popup_type = inputPopupType
+
+        isFlawOpen = isFlawPopupOpen()
     }
 
     function closePopUp(){
         yesnoPopUp.visible = false
+        isFlawOpen = false
     }
 
+    function isFlawPopupOpen(){
+        var result = false
+        if(yesnoPopUp.visible){
+            if(high_text.indexOf("flaw") > 0){
+                result = true
+            }
+        }
+
+        return result
+    }
 
 }
