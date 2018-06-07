@@ -1061,9 +1061,9 @@ Rectangle {
                 onTextChanged: {
                     console.log(text);
                     if (text.length == 1){
-                        text = text.replace(/[^-|0-9]/g,'');
+                        text = text.replace(/[^0-9.]/g,'');
                     }else{
-                        text = text.charAt(0).replace(/[^-|1-9]/g,'')+text.substring(1,text.length).replace(/[^0-9]/g, '');
+                        text = text.charAt(0).replace(/[^1-9.]/g,'')+text.substring(1,text.length).replace(/[^0-9]/g, '');
                     }
                     console.log(text);
                     numbox_value_detail2 = parseFloat(text)

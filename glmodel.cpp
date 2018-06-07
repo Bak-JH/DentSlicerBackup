@@ -26,7 +26,7 @@ GLModel::GLModel(QObject* mainWindow, QNode *parent, Mesh* loadMesh, QString fna
     , m_transform(new Qt3DCore::QTransform())
     //, m_objectPicker(new Qt3DRender::QObjectPicker())
     , parentModel((GLModel*)(parent))
-    , cutMode(0)
+    , cutMode(1)
 {
 
     // generates shadow model for object picking

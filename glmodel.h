@@ -198,7 +198,7 @@ private:
     void onTimerUpdate();
     Mesh* toSparse(Mesh* mesh);
 
-    int cutMode = 0;
+    int cutMode = 1;
     int cutFillMode = 1;
     bool labellingActive = false;
     bool extensionActive = false;
