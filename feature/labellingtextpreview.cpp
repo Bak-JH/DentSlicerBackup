@@ -68,6 +68,7 @@ void LabellingTextPreview::setFontName(QString fontName)
 
 void LabellingTextPreview::setFontBold(bool isbold){
     if (isbold){
+        qDebug() << "set font bold";
         this->fontWeight = QFont::Bold;
     } else {
         this->fontWeight = QFont::Normal;

@@ -1476,7 +1476,7 @@ void GLModel::getFontNameChanged(QString fontName)
     }
 }
 
-void GLModel::getFontBoolChanged(bool isbold){
+void GLModel::getFontBoldChanged(bool isbold){
     if (labellingTextPreview && labellingTextPreview->isEnabled()){
         applyLabelInfo(labellingTextPreview->text, labellingTextPreview->contentWidth, labellingTextPreview->fontName, isbold, labellingTextPreview->fontSize);
     }
@@ -1549,7 +1549,7 @@ void GLModel::generateText3DMesh()
 
     generateText3DGeometry(&vertices, &verticesSize,
                            &indices, &indicesSize,
-                           QFont(labellingTextPreview->fontName, 12),
+                           QFont(labellingTextPreview->fontName, labellingTextPreview->fontSize, labellingTextPreview->fontWeight, false),
                            labellingTextPreview->text,
                            depth,
                            mesh,
