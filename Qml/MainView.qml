@@ -82,9 +82,6 @@ Entity {
 
         onPressed: {
             if (event.key === Qt.Key_Delete) {
-                console.log("deleeeeee")
-                //qm.doDelete()
-
                 deletePopUp.visible = true
                 deletePopUp.targetID = qm.getSelectedModelID()
 
@@ -116,8 +113,6 @@ Entity {
     }
 
     function openFile(){
-        //fileDialog.open()
-        console.log("button")
         var compo = Qt.createComponent("Model.qml");
 
         var loadmodel = compo.createObject(total, {});

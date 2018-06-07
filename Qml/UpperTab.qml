@@ -681,7 +681,7 @@ Rectangle {
             okbutton_vis: false
             applybutton_vis: false
             applybutton_action: false
-            applyfinishbutton_text:"Select"
+            applyfinishbutton_text:"Apply"
             applybutton_text: "Finish"
             descriptionimage_vis: true
             /*

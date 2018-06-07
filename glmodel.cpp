@@ -708,6 +708,9 @@ void GLModel::handlePickerClicked(QPickEvent *pick)
     if (!parentModel)
         return;
 
+    if (qmlManager->yesno_popup->property("isFlawOpen").toBool())
+        return;
+
     if(qmlManager->selectedModel != nullptr && (pick->button() & Qt::RightButton)){ // when right button clicked
         //qmlManager->mttab->setEnabled(!qmlManager->mttab->isEnabled());
         QMetaObject::invokeMethod(qmlManager->mttab, "tabOnOff");
@@ -1167,6 +1170,8 @@ void GLModel::removeModelPartList(){
 
 void GLModel::modelCut(){
     qDebug() << "modelcut called" << cutMode;
+    if(cutMode == 0)
+        return ;
     qmlManager->openProgressPopUp();
 
     if (cutMode == 1){
@@ -1566,6 +1571,9 @@ void GLModel::generateExtensionFaces(double distance){
 void GLModel::generateLayFlat(){
     //MeshFace shadow_meshface = *targetMeshFace;
 
+    if(targetMeshFace == NULL)
+        return;
+
     QVector3D tmp_fn = targetMeshFace->fn;
     qDebug() << "target 2 " << tmp_fn;
 
@@ -1582,16 +1590,17 @@ void GLModel::generateLayFlat(){
     angleY = (qAtan2(z,x)*180/M_PI);
     angleY = -90 - angleY;
     //qDebug() << "angle" << angleX << angleY;
-    Qt3DCore::QTransform* tmp = new Qt3DCore::QTransform();
-    tmp->setRotationX(angleX);
-    tmp->setRotationY(0);
-    tmp->setRotationZ(0);
+    Qt3DCore::QTransform* tmp1 = new Qt3DCore::QTransform();
+    Qt3DCore::QTransform* tmp2 = new Qt3DCore::QTransform();
+    tmp1->setRotationX(angleX);
+    tmp1->setRotationY(0);
+    tmp1->setRotationZ(0);
     //qDebug() << "lay flat 0      ";
-    rotateModelMesh(tmp->matrix());
-    tmp->setRotationX(0);
-    tmp->setRotationY(angleY);
-    tmp->setRotationZ(0);
-    rotateModelMesh(tmp->matrix());
+    //rotateModelMesh(tmp->matrix());
+    tmp2->setRotationX(0);
+    tmp2->setRotationY(angleY);
+    tmp2->setRotationZ(0);
+    rotateModelMesh(tmp1->matrix() * tmp2->matrix());
     //qDebug() << "lay flat 1      ";
     closeLayflat();
     emit resetLayflat();
