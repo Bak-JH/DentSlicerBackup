@@ -258,7 +258,6 @@ public slots:
     void getFontBoldChanged(bool isBold);
     void getFontSizeChanged(int fontSize);
     void applyLabelInfo(QString text, int contentWidth, QString fontName, bool isBold, int fontSize);
-
     void generateText3DMesh();
 
     // Extension

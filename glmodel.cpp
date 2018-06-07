@@ -1479,6 +1479,7 @@ void GLModel::getFontNameChanged(QString fontName)
 void GLModel::getFontBoldChanged(bool isbold){
     if (labellingTextPreview && labellingTextPreview->isEnabled()){
         applyLabelInfo(labellingTextPreview->text, labellingTextPreview->contentWidth, labellingTextPreview->fontName, isbold, labellingTextPreview->fontSize);
+
     }
 }
 
