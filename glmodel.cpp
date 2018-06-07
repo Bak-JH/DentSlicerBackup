@@ -755,8 +755,14 @@ void GLModel::handlePickerClicked(QPickEvent *pick)
         parentModel->targetMeshFace = &parentModel->mesh->faces[shadow_meshface.parent_idx];
 
         QString label_text = "";
+        QString label_font = "";
+        int label_size = 12;
+        int contentWidth = 64;
         if (labellingTextPreview){
             label_text = labellingTextPreview->text;
+            label_font = labellingTextPreview->fontName;
+            label_size = labellingTextPreview->fontSize;
+            contentWidth = labellingTextPreview->contentWidth;
             labellingTextPreview->deleteLater();
             labellingTextPreview = nullptr;
         }
@@ -766,8 +772,11 @@ void GLModel::handlePickerClicked(QPickEvent *pick)
         if (labellingTextPreview && labellingTextPreview->isEnabled()) {
             labellingTextPreview->setTranslation(pick->localIntersection() + parentModel->targetMeshFace->fn);
             labellingTextPreview->setNormal(parentModel->targetMeshFace->fn);
-            if (label_text != "")
-                labellingTextPreview->setText(label_text, label_text.size());
+            if (label_text != ""){
+                labellingTextPreview->setFontName(label_font);
+                labellingTextPreview->setFontSize(label_size);
+                labellingTextPreview->setText(label_text, contentWidth);
+            }
         }
     }
 
@@ -1457,20 +1466,29 @@ void GLModel::getTextChanged(QString text, int contentWidth)
 {
 
     QString label_text = "";
-    QVector3D translation = labellingTextPreview->translation;
-    if (labellingTextPreview){
+    QString label_font = "";
+    int label_size = 12;
+    QVector3D translation;
+    if (labellingTextPreview && labellingTextPreview->isEnabled()){
         label_text = text;
+        label_font = labellingTextPreview->fontName;
+        label_size = labellingTextPreview->fontSize;
+        translation = labellingTextPreview->translation;
         labellingTextPreview->deleteLater();
         labellingTextPreview = nullptr;
     }
     labellingTextPreview = new LabellingTextPreview(this);
     labellingTextPreview->setEnabled(true);
 
-    if (labellingTextPreview && labellingTextPreview->isEnabled()) {
+    if (labellingTextPreview && labellingTextPreview->isEnabled() && parentModel->targetMeshFace !=nullptr) {
         labellingTextPreview->setTranslation(translation);
         labellingTextPreview->setNormal(parentModel->targetMeshFace->fn);
-        if (label_text != "")
-            labellingTextPreview->setText(label_text, label_text.size());
+        if (label_text != ""){
+            //labellingTextPreview->setText(label_text, label_text.size());
+            labellingTextPreview->setFontName(label_font);
+            labellingTextPreview->setFontSize(label_size);
+            labellingTextPreview->setText(label_text, contentWidth);
+        }
     }
 }
 
@@ -1497,8 +1515,33 @@ void GLModel::getFontNameChanged(QString fontName)
 
 void GLModel::getFontSizeChanged(int fontSize)
 {
-    if (labellingTextPreview)
-        labellingTextPreview->setFontSize(fontSize);
+    QString label_text = "";
+    QString label_font = "";
+    int label_size = 12;
+    int contentWidth = 64;
+    QVector3D translation;
+    if (labellingTextPreview && labellingTextPreview->isEnabled()){
+        label_text = labellingTextPreview->text;
+        label_font = labellingTextPreview->fontName;
+        label_size = fontSize;
+        contentWidth = labellingTextPreview->contentWidth;
+        translation = labellingTextPreview->translation;
+        labellingTextPreview->deleteLater();
+        labellingTextPreview = nullptr;
+    }
+    labellingTextPreview = new LabellingTextPreview(this);
+    labellingTextPreview->setEnabled(true);
+
+    if (labellingTextPreview && labellingTextPreview->isEnabled() && parentModel->targetMeshFace !=nullptr) {
+        labellingTextPreview->setTranslation(translation);
+        labellingTextPreview->setNormal(parentModel->targetMeshFace->fn);
+        if (label_text != ""){
+            //labellingTextPreview->setText(label_text, label_text.size());
+            labellingTextPreview->setFontName(label_font);
+            labellingTextPreview->setFontSize(label_size);
+            labellingTextPreview->setText(label_text, contentWidth);
+        }
+    }
 }
 
 void GLModel::generateText3DMesh()

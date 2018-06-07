@@ -1469,9 +1469,13 @@ Rectangle {
                     placeholderText: qsTr("Enter text")
                     font.family: mainFont.name
                     onTextChanged: {
-                        console.log("content width changed ");
+                        //console.log("content width changed ");
+                        //console.log(hiddenText.text.length);
+                        console.log("content width : ");
                         console.log(hiddenText.text.length);
-                        sendTextChanged(text, hiddenText.text.length)
+                        console.log(hiddenText.contentWidth);
+                        sendTextChanged(text, hiddenText.contentWidth);
+                        //sendTextChanged(text, hiddenText.text.length)
                     }
                 }
             }
