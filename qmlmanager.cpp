@@ -224,6 +224,7 @@ void QmlManager::deleteModelFile(int ID){
     // UI
     hideMoveArrow();
     hideRotateSphere();
+    QMetaObject::invokeMethod(qmlManager->mttab, "hideTab");
     QMetaObject::invokeMethod(boxUpperTab, "all_off");
 }
 
@@ -418,7 +419,7 @@ void QmlManager::setHandCursor(){
     QApplication::setOverrideCursor(QCursor(Qt::PointingHandCursor));
 }
 void QmlManager::resetCursor(){
-    QApplication::restoreOverrideCursor();
+    QApplication::setOverrideCursor(QCursor(Qt::ArrowCursor));
 }
 
 
@@ -640,7 +641,7 @@ void QmlManager::modelVisible(int ID, bool isVisible){
 void QmlManager::doDelete(){
     if(selectedModel == nullptr)
         return;
-
+    qDebug("selected     " + selectedModel->ID);
     deleteModelFile(selectedModel->ID);
 }
 

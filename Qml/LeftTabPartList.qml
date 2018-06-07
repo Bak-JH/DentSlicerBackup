@@ -123,6 +123,7 @@ Rectangle {
 
     function addPart(fileName, ID){ // add in list with filename
         var newComponent = Qt.createComponent("LeftTabPartListElement.qml")
+
         var newPart = newComponent.createObject(partListColumn, {"modelName" : fileName, "state" : "on", "objectName" : "qwer", "glModelID" : ID})
         console.log("glmodel  glglgl  : " + ID);
     }

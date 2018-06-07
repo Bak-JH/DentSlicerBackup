@@ -124,13 +124,14 @@ Item {
 
     Text{
         id : modelNameText
-        text : modelName
+        text : trimName(modelName)
         anchors.left: line.right
         anchors.verticalCenter: parent.verticalCenter
         anchors.leftMargin: 10
 
         font.family: mainFont.name
         font.pixelSize: 14
+
     }
 
     states: [
@@ -162,6 +163,16 @@ Item {
     }
     function unselectPart(ID){ // select Model in PartList by ID
         qm.unselectPart(ID);
+    }
+
+
+
+
+    function trimName(modelName){
+        if(modelName.length > 22)
+            modelName = modelName.substr(0,20) +"..."
+
+        return modelName
     }
 
 }

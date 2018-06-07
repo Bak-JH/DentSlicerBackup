@@ -55,6 +55,8 @@ Rectangle {
         fourth_tab_button_extend.state = "inactive";
         fourth_tab_button_label.state = "inactive";
         fourth_tab_button_support.state = "inactive";
+
+        arrangePopUp.closePopUp();
         console.log("all off");
     }
 
@@ -679,7 +681,7 @@ Rectangle {
             okbutton_vis: false
             applybutton_vis: false
             applybutton_action: false
-            applyfinishbutton_text:"Select"
+            applyfinishbutton_text:"Apply"
             applybutton_text: "Finish"
             descriptionimage_vis: true
             /*

@@ -40,7 +40,7 @@ Rectangle {
             height:20
             id: result_text_mid
 
-            text: "Are you sure you want to delete?"
+            text: "Are you sure to delete this model?"
             anchors.top: parent.top
             anchors.topMargin: 44
             anchors.horizontalCenter: parent.horizontalCenter
@@ -133,7 +133,6 @@ Rectangle {
 
 
     function openResultPopUp(inputText_h, inputText_m, inputText_l){
-        console.log("open resulttttttttttttttt")
         deletePopUp.visible = true
         high_text = inputText_h
         mid_text = inputText_m

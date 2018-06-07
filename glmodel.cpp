@@ -342,7 +342,10 @@ void featureThread::run(){
                 qmlManager->openProgressPopUp();
                 rotateResult* rotateres= ot->Tweak(m_glmodel->mesh,true,45,&m_glmodel->appropriately_rotated);
                 m_glmodel->rotateModelMesh(rotateres->R);
-
+                QMetaObject::invokeMethod(qmlManager->boundedBox, "setPosition", Q_ARG(QVariant, QVector3D(qmlManager->selectedModel->m_transform->translation())));
+                QMetaObject::invokeMethod(qmlManager->boundedBox, "setSize", Q_ARG(QVariant, qmlManager->selectedModel->mesh->x_max - qmlManager->selectedModel->mesh->x_min),
+                                                                 Q_ARG(QVariant, qmlManager->selectedModel->mesh->y_max - qmlManager->selectedModel->mesh->y_min),
+                                                                 Q_ARG(QVariant, qmlManager->selectedModel->mesh->z_max - qmlManager->selectedModel->mesh->z_min));
                 break;
             }
         case ftrScale:
@@ -382,32 +385,6 @@ void featureThread::run(){
             }
     }
 }
-/*
-void featureThread::openProgressPopUp(){
-    QList<QObject*> temp;
-    temp.append(m_glmodel->mainWindow);
-    QObject *progressPopUp = (QEntity *)FindItemByName(temp, "progress_popup");
-    QMetaObject::invokeMethod(progressPopUp, "openPopUp");
-}
-
-void featureThread::openResultPopUp(string inputText_h, string inputText_m, string inputText_l){
-    QList<QObject*> temp;
-    temp.append(m_glmodel->mainWindow);
-    QObject *resultPopUp = (QEntity *)FindItemByName(temp, "result_popup");
-    QMetaObject::invokeMethod(resultPopUp, "openResultPopUp",
-                              Q_ARG(QVariant, QString::fromStdString(inputText_h)),
-                              Q_ARG(QVariant, QString::fromStdString(inputText_m)),
-                              Q_ARG(QVariant, QString::fromStdString(inputText_l)));
-}
-
-
-void featureThread::progressChanged(float value){
-    emit featureThread::setProgress(value);
-    if(value == 1)
-        openResultPopUp("testttttttttttt","","2line");
-        //openResultPopUp("","Orientation done","");
-}*/
-
 
 arrangeSignalSender::arrangeSignalSender(){
 
@@ -729,6 +706,9 @@ void GLModel::addIndexes(vector<int> indexes){
 void GLModel::handlePickerClicked(QPickEvent *pick)
 {
     if (!parentModel)
+        return;
+
+    if (qmlManager->yesno_popup->property("isFlawOpen").toBool())
         return;
 
     if(qmlManager->selectedModel != nullptr && (pick->button() & Qt::RightButton)){ // when right button clicked
@@ -1203,6 +1183,8 @@ void GLModel::removeModelPartList(){
 
 void GLModel::modelCut(){
     qDebug() << "modelcut called" << cutMode;
+    if(cutMode == 0)
+        return ;
     qmlManager->openProgressPopUp();
 
     if (cutMode == 1){
@@ -1655,6 +1637,9 @@ void GLModel::generateExtensionFaces(double distance){
 void GLModel::generateLayFlat(){
     //MeshFace shadow_meshface = *targetMeshFace;
 
+    if(targetMeshFace == NULL)
+        return;
+
     QVector3D tmp_fn = targetMeshFace->fn;
     qDebug() << "target 2 " << tmp_fn;
 
@@ -1671,16 +1656,17 @@ void GLModel::generateLayFlat(){
     angleY = (qAtan2(z,x)*180/M_PI);
     angleY = -90 - angleY;
     //qDebug() << "angle" << angleX << angleY;
-    Qt3DCore::QTransform* tmp = new Qt3DCore::QTransform();
-    tmp->setRotationX(angleX);
-    tmp->setRotationY(0);
-    tmp->setRotationZ(0);
+    Qt3DCore::QTransform* tmp1 = new Qt3DCore::QTransform();
+    Qt3DCore::QTransform* tmp2 = new Qt3DCore::QTransform();
+    tmp1->setRotationX(angleX);
+    tmp1->setRotationY(0);
+    tmp1->setRotationZ(0);
     //qDebug() << "lay flat 0      ";
-    rotateModelMesh(tmp->matrix());
-    tmp->setRotationX(0);
-    tmp->setRotationY(angleY);
-    tmp->setRotationZ(0);
-    rotateModelMesh(tmp->matrix());
+    //rotateModelMesh(tmp->matrix());
+    tmp2->setRotationX(0);
+    tmp2->setRotationY(angleY);
+    tmp2->setRotationZ(0);
+    rotateModelMesh(tmp1->matrix() * tmp2->matrix());
     //qDebug() << "lay flat 1      ";
     closeLayflat();
     emit resetLayflat();
