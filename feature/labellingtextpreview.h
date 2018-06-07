@@ -39,6 +39,7 @@ class LabellingTextPreview : public Qt3DCore::QEntity
         float scale;
         QString text;
         QString fontName;
+        int fontSize = 12;
     };
 
 public:
@@ -46,6 +47,7 @@ public:
 
     void setText(QString text, int contentWidth);
     void setFontName(QString fontName);
+    void setFontSize(int fontSize);
     void setTranslation(const QVector3D& t);
     void setNormal(const QVector3D& n);
 
@@ -56,6 +58,8 @@ public:
     QVector3D normal;
     QString text;
     QString fontName = "Arial";
+    int fontSize = 12;
+    int contentWidth = 30;
 
     float minimumScaleX = 1.0f;
     float minimumWidth = 64;

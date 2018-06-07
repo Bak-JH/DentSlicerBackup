@@ -32,26 +32,27 @@ LabellingTextPreview::LabellingTextPreview(Qt3DCore::QNode* parent)
     planeEntity->addComponent(planeMaterial);
     planeEntity->addComponent(planeTransform);
 
-    setText("Enter text", QString("Enter text").size());
     setFontName("Arial");
+    setFontSize(12);
     setTranslation(QVector3D(0, 0, 0));
     setNormal(QVector3D(0, 0, 1));
+    setText("Enter text", 64);
 }
 void LabellingTextPreview::setText(QString text, int contentWidth)
 {
     this->text = text;
+    this->contentWidth = contentWidth;
 
     if (textureImage) {
         texture->removeTextureImage(textureImage);
     }
 
-    width = contentWidth * 2;
-    qDebug() << width;
-
+    width = this->contentWidth*2;// * this->fontSize;
+    qDebug() << "text : " << text << "contentWidth: " << contentWidth << "width : " << width;
     if (width < minimumWidth)
         width = minimumWidth;
 
-    textureImage = new TextureImage(width, 16, 8.0f, text, fontName);
+    textureImage = new TextureImage(width, this->fontSize/(1+1.1*log(this->fontSize/12)), 8.0f, text, fontName);
     textureImage->update();
 
     texture->addTextureImage(textureImage);
@@ -62,22 +63,47 @@ void LabellingTextPreview::setText(QString text, int contentWidth)
 void LabellingTextPreview::setFontName(QString fontName)
 {
     this->fontName = fontName;
-
+/*
     if (textureImage) {
         texture->removeTextureImage(textureImage);
     }
 
-    width = text.size() * 12;
+    width = this->contentWidth*2;// * this->fontSize;
 
     if (width < minimumWidth)
         width = minimumWidth;
 
-    textureImage = new TextureImage(width, 16, 8.0f, text, fontName);
+    textureImage = new TextureImage(width, this->fontSize+4, 8.0f, text, this->fontName);
     textureImage->update();
 
     texture->addTextureImage(textureImage);
 
-    updateTransform();
+    updateTransform();*/
+}
+
+void LabellingTextPreview::setFontSize(int fontSize)
+{
+    scaleY = fontSize*scaleY/this->fontSize;
+    //ratioY = fontSize*ratioY/this->fontSize;
+
+    this->fontSize = fontSize;
+
+    /*if (textureImage) {
+        texture->removeTextureImage(textureImage);
+    }
+
+    width = this->contentWidth*2;// * this->fontSize;
+    qDebug() << "current font size : " << this->fontSize << "width :" << width;
+
+    if (width < minimumWidth)
+        width = minimumWidth;
+
+    textureImage = new TextureImage(width, this->fontSize+4, 8.0f, text, this->fontName);
+    textureImage->update();
+
+    texture->addTextureImage(textureImage);
+
+    updateTransform();*/
 }
 
 void LabellingTextPreview::setTranslation(const QVector3D& t)
@@ -97,15 +123,13 @@ void LabellingTextPreview::setNormal(const QVector3D& n)
 
 void LabellingTextPreview::updateTransform()
 {
-    QVector3D ref = QVector3D(0, -1, 0);
+    QVector3D ref = QVector3D(0, 0, 1);
     auto tangent = QVector3D::crossProduct(normal, ref);
     tangent.normalize();
     auto binormal = QVector3D::crossProduct(tangent, normal);
     binormal.normalize();
-
-    qDebug() << QVector3D(width / minimumWidth, 1.0f, ratioY) * scaleY;
-
+    qDebug() << QVector3D(width / minimumWidth, 1.0f, ratioY) * scaleY << scaleY;
     planeTransform->setTranslation(translation + normal * 0.5f);
-    planeTransform->setRotation(QQuaternion::fromAxes(tangent, normal, binormal));
-    planeTransform->setScale3D(QVector3D(width / minimumWidth, 1.0f, ratioY) * scaleY);
+    planeTransform->setRotation(QQuaternion::fromAxes(tangent, normal, binormal) * QQuaternion::fromAxisAndAngle(QVector3D(0, 1, 0), 180));
+    planeTransform->setScale3D(QVector3D(width / minimumWidth, 2.0f, ratioY) * scaleY);
 }

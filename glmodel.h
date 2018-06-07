@@ -255,6 +255,7 @@ public slots:
     void openLabelling();
     void closeLabelling();
     void getFontNameChanged(QString fontName);
+    void getFontSizeChanged(int fontSize);
     void generateText3DMesh();
 
     // Extension

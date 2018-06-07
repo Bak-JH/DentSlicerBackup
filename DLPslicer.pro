@@ -11,7 +11,6 @@ RC_ICONS = icon-32.ico
 RC_FILE = DLPslicer.rc
 
 SOURCES += main.cpp \
-    quaternionhelper.cpp \
     slicingengine.cpp \
     glmodel.cpp \
     qmlmanager.cpp \
@@ -24,6 +23,7 @@ SOURCES += main.cpp \
     feature/convex_hull.cpp \
     feature/text3dgeometrygenerator.cpp \
     feature/labellingtextpreview.cpp \
+    utils/quaternionhelper.cpp \
     utils/mathutils.cpp \
     utils/qtriangulator.cpp \
     feature/stlexporter.cpp \
@@ -83,7 +83,6 @@ win32:QMAKE_LFLAGS *= -Wl,--large-address-aware
 #TRANSLATIONS += lang_ko.ts
 
 HEADERS += \
-    quaternionhelper.h \
     slicingengine.h \
     glmodel.h \
     qmlmanager.h \
@@ -96,6 +95,7 @@ HEADERS += \
     feature/convex_hull.h \
     feature/labellingtextpreview.h \
     feature/text3dgeometrygenerator.h \
+    utils/quaternionhelper.h \
     utils/mathutils.h \
     utils/qbezier.h \
     utils/qdatabuffer_p.h \

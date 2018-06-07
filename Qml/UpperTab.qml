@@ -1411,7 +1411,7 @@ Rectangle {
             objectName: "labelPopup"
             id:popup_label
             funcname: "Label"
-            height: 320 // 282
+            height: 350 // 282
             imageHeight: 76
             detail1: "Type letters on the surface."
             detail2: "Font"
@@ -1444,7 +1444,7 @@ Rectangle {
 
                 //anchors.leftMargin: 25
                 //anchors.rightMargin: 25
-                anchors.bottomMargin: 60
+                anchors.bottomMargin: 55
 
                 Text {
                     id: hiddenText
@@ -1471,7 +1471,13 @@ Rectangle {
                     placeholderText: qsTr("Enter text")
                     font.family: mainFont.name
                     onTextChanged: {
-                        sendTextChanged(text, hiddenText.contentWidth)
+                        //console.log("content width changed ");
+                        //console.log(hiddenText.text.length);
+                        console.log("content width : ");
+                        console.log(hiddenText.text.length);
+                        console.log(hiddenText.contentWidth);
+                        sendTextChanged(text, hiddenText.contentWidth);
+                        //sendTextChanged(text, hiddenText.text.length)
                     }
                 }
             }
@@ -1582,6 +1588,114 @@ Rectangle {
                     ListElement { text: "Arial8" }
                     ListElement { text: "Arial9" }
                     ListElement { text: "Arial10" }
+                }
+            }
+
+            ComboBox {
+                objectName: "labelFontSizeBox"
+                id: labelFontSizeBox
+                currentIndex: 0
+                activeFocusOnPress: true
+                width: 194
+                height: 24
+
+                anchors.horizontalCenter: parent.horizontalCenter
+                anchors.top: parent.top
+                anchors.topMargin: 230
+
+
+                signal sendFontSize(int fontSize)
+
+                onCurrentTextChanged: sendFontSize(parseInt(currentText))
+
+                Image {
+                    width: 12
+                    height: 8
+                    anchors.right: parent.right
+                    anchors.rightMargin: 8
+                    anchors.verticalCenter: parent.verticalCenter
+
+                    source: "qrc:/resource/combo_arrow.png"
+
+                }
+
+                style: ComboBoxStyle {
+                    background: Rectangle {     //box style (not drop-down part)
+//                            implicitWidth: 176
+//                            implicitHeight: 24
+                        width: parent.width
+                        height: parent.height
+                        radius: 2
+                        color: "#f9f9f9"
+                        border.color: labelFontBox.hovered ? "light blue" : "transparent"
+                    }
+
+                    label: Text {
+                        text: control.currentText
+                        font.family: mainFont.name
+                        font.pixelSize: 12
+                    }
+
+                    //drop-down customization
+                    property Component __dropDownStyle: MenuStyle {
+                        __maxPopupHeight: 120
+                        __menuItemType: "comboboxitem"
+
+                        frame: Rectangle {      //drop-down box style
+                            color: "#f9f9f9"
+                            width: 174
+                            radius: 2
+                        }
+                        itemDelegate.label:     //item text
+                            Text {
+                                text: styleData.text
+                                font.family: mainFont.name
+                                font.pixelSize: 12
+                                color: styleData.selected ? "#666666" : "#303030"
+//                                    color: styleData.selected ? "red" : "blue"
+                            }
+                        itemDelegate.background: Rectangle {
+                            color: styleData.selected ? "#eaeaea" : "#f9f9f9"
+                        }
+
+                        //scroller customization
+                        __scrollerStyle: ScrollViewStyle {
+                            scrollBarBackground: Rectangle {
+                                color: "#eaeaea"
+                                implicitWidth: 7
+                                implicitHeight: 110
+                            }
+                            handle: Rectangle {
+                                color: "#b7b7b7"
+                                implicitWidth: 9
+                                implicitHeight: 45
+                                radius: 2
+                            }
+                            minimumHandleLength: 35
+                            incrementControl: Rectangle {
+                                implicitWidth: 0
+                                implicitHeight: 0
+                            }
+                            decrementControl: Rectangle {
+                                implicitWidth: 0
+                                implicitHeight: 0
+                            }
+                        }
+                    }
+                }
+
+                //fonts list
+                model: ListModel {
+                    id: fontsizeItems
+                    ListElement { text: "12" }
+                    ListElement { text: "14" }
+                    ListElement { text: "18" }
+                    ListElement { text: "24" }
+                    ListElement { text: "36" }
+                    ListElement { text: "44" }
+                    ListElement { text: "56" }
+                    ListElement { text: "64" }
+                    ListElement { text: "100" }
                 }
             }
 
