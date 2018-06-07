@@ -207,6 +207,8 @@ void QmlManager::deleteModelFile(int ID){
     qDebug() << "deletemodelfile" << glmodels.size();
     for (vector<GLModel*>::iterator gl_it = glmodels.begin(); gl_it != glmodels.end();){
         if((*gl_it)->ID == ID){
+            (*gl_it)->removeCuttingPoints();
+            (*gl_it)->shadowModel->removePlane();
             disconnectHandlers((*gl_it));
             (*gl_it)->shadowModel->deleteLater();
             (*gl_it)->deleteLater();

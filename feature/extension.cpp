@@ -1,6 +1,8 @@
 #include "extension.h"
 
 void extendMesh(Mesh* mesh, MeshFace* mf, double distance){
+    if (mf == nullptr)
+        return;
     QVector3D normal = mf->fn;
     qDebug() << normal;
 
