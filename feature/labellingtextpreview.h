@@ -16,8 +16,8 @@ class LabellingTextPreview : public Qt3DCore::QEntity
     class TextureImage : public Qt3DRender::QPaintedTextureImage {
         friend class LabellingTextPreview;
     public:
-        TextureImage(int w, int h, float scale, QString text, QString fontName)
-            : scale(scale), text(text), fontName(fontName)
+        TextureImage(int w, int h, float scale, QString text, QString fontName, int fontWeight)
+            : scale(scale), text(text), fontName(fontName), fontWeight(fontWeight)
         {
             setSize(QSize(w * scale, h * scale));
         }

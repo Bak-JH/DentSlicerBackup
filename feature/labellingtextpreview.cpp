@@ -53,7 +53,7 @@ void LabellingTextPreview::setText(QString text, int contentWidth)
     if (width < minimumWidth)
         width = minimumWidth;
 
-    textureImage = new TextureImage(width, this->fontSize/(1+1.1*log(this->fontSize/12)), 8.0f, text, fontName);
+    textureImage = new TextureImage(width, this->fontSize/(1+1.1*log(this->fontSize/12)), 8.0f, text, fontName, fontWeight);
     textureImage->update();
 
     texture->addTextureImage(textureImage);
