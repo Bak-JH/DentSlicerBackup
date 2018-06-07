@@ -198,7 +198,7 @@ private:
     void onTimerUpdate();
     Mesh* toSparse(Mesh* mesh);
 
-    int cutMode = 0;
+    int cutMode = 1;
     int cutFillMode = 1;
     bool labellingActive = false;
     bool extensionActive = false;
@@ -256,6 +256,8 @@ public slots:
     void closeLabelling();
     void getFontNameChanged(QString fontName);
     void getFontSizeChanged(int fontSize);
+    void applyLabelInfo(QString text, int contentWidth, QString fontName, int fontSize);
+
     void generateText3DMesh();
 
     // Extension
