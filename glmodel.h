@@ -256,6 +256,7 @@ public slots:
     void closeLabelling();
     void getFontNameChanged(QString fontName);
     void getFontSizeChanged(int fontSize);
+    void applyLabelInfo(QString text, int contentWidth, QString fontName, int fontSize);
     void generateText3DMesh();
 
     // Extension

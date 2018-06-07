@@ -1446,31 +1446,8 @@ Mesh* GLModel::toSparse(Mesh* mesh){
 
 void GLModel::getTextChanged(QString text, int contentWidth)
 {
-
-    QString label_text = "";
-    QString label_font = "";
-    int label_size = 12;
-    QVector3D translation;
     if (labellingTextPreview && labellingTextPreview->isEnabled()){
-        label_text = text;
-        label_font = labellingTextPreview->fontName;
-        label_size = labellingTextPreview->fontSize;
-        translation = labellingTextPreview->translation;
-        labellingTextPreview->deleteLater();
-        labellingTextPreview = nullptr;
-    }
-    labellingTextPreview = new LabellingTextPreview(this);
-    labellingTextPreview->setEnabled(true);
-
-    if (labellingTextPreview && labellingTextPreview->isEnabled() && parentModel->targetMeshFace !=nullptr) {
-        labellingTextPreview->setTranslation(translation);
-        labellingTextPreview->setNormal(parentModel->targetMeshFace->fn);
-        if (label_text != ""){
-            //labellingTextPreview->setText(label_text, label_text.size());
-            labellingTextPreview->setFontName(label_font);
-            labellingTextPreview->setFontSize(label_size);
-            labellingTextPreview->setText(label_text, contentWidth);
-        }
+        applyLabelInfo(text, contentWidth, labellingTextPreview->fontName, labellingTextPreview->fontSize);
     }
 }
 
@@ -1491,22 +1468,22 @@ void GLModel::closeLabelling()
 
 void GLModel::getFontNameChanged(QString fontName)
 {
-    if (labellingTextPreview)
-        labellingTextPreview->setFontName(fontName);
+    if (labellingTextPreview && labellingTextPreview->isEnabled()){
+        applyLabelInfo(labellingTextPreview->text, labellingTextPreview->contentWidth, fontName, labellingTextPreview->fontSize);
+    }
 }
 
 void GLModel::getFontSizeChanged(int fontSize)
 {
-    QString label_text = "";
-    QString label_font = "";
-    int label_size = 12;
-    int contentWidth = 64;
-    QVector3D translation;
     if (labellingTextPreview && labellingTextPreview->isEnabled()){
-        label_text = labellingTextPreview->text;
-        label_font = labellingTextPreview->fontName;
-        label_size = fontSize;
-        contentWidth = labellingTextPreview->contentWidth;
+        applyLabelInfo(labellingTextPreview->text, labellingTextPreview->contentWidth, labellingTextPreview->fontName, fontSize);
+    }
+}
+
+void GLModel::applyLabelInfo(QString text, int contentWidth, QString fontName, int fontSize){
+    QVector3D translation;
+
+    if (labellingTextPreview && labellingTextPreview->isEnabled()){
         translation = labellingTextPreview->translation;
         labellingTextPreview->deleteLater();
         labellingTextPreview = nullptr;
@@ -1517,11 +1494,11 @@ void GLModel::getFontSizeChanged(int fontSize)
     if (labellingTextPreview && labellingTextPreview->isEnabled() && parentModel->targetMeshFace !=nullptr) {
         labellingTextPreview->setTranslation(translation);
         labellingTextPreview->setNormal(parentModel->targetMeshFace->fn);
-        if (label_text != ""){
+        if (text != ""){
             //labellingTextPreview->setText(label_text, label_text.size());
-            labellingTextPreview->setFontName(label_font);
-            labellingTextPreview->setFontSize(label_size);
-            labellingTextPreview->setText(label_text, contentWidth);
+            labellingTextPreview->setFontName(fontName);
+            labellingTextPreview->setFontSize(fontSize);
+            labellingTextPreview->setText(text, contentWidth);
         }
     }
 }
