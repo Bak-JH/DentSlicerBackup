@@ -1503,6 +1503,7 @@ void GLModel::applyLabelInfo(QString text, int contentWidth, QString fontName, i
     }
 }
 
+
 void GLModel::generateText3DMesh()
 {
     if (!labellingTextPreview)
