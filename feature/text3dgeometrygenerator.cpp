@@ -7,6 +7,7 @@
 #include <QTime>
 #include <cfloat>
 #include <cmath>
+#include <QCoreApplication>
 
 #include "utils/qtriangulator_p.h"
 #include "feature/text3dgeometrygenerator.h"
@@ -63,6 +64,7 @@ TriangulationData triangulate(const QString &text, const QFont &font)
            ++lastIndex;
        }
     }
+    QCoreApplication::processEvents();
 
     const QTriangleSet triangles = qTriangulate(path, QTransform(), 1, true);
     result.indices.resize(result.indices.size() + triangles.indices.size());
@@ -70,10 +72,12 @@ TriangulationData triangulate(const QString &text, const QFont &font)
     for (int i = prevNumIndices, m = result.indices.size(); i < m; ++i)
         result.indices[i] += result.vertices.size();
 
+    QCoreApplication::processEvents();
     result.vertices.reserve(triangles.vertices.size() / 2);
     for (int i = 0, m = triangles.vertices.size(); i < m; i += 2)
            result.vertices.push_back(QVector3D(triangles.vertices[i] / font.pointSizeF(), triangles.vertices[i + 1] / font.pointSizeF(), 0.0f));
 
+    QCoreApplication::processEvents();
     return result;
 }
 
@@ -113,19 +117,28 @@ void generateText3DGeometry(QVector3D** vertices, int* verticesSize,
         My = v.y() > My ? v.y() : My;
     }
 
+    QCoreApplication::processEvents();
+
     for (QVector3D &v : data.vertices) {
         v.setX(v.x() - (Mx - mx) * 0.5f);
         v.setY(v.y() - (My - my) * 0.5f);
         v = v / (My - my);
     }
 
+    QCoreApplication::processEvents();
     for (QVector3D &v : data.vertices) {
         v = transform * v;
     }
+    QCoreApplication::processEvents();
 
+    int processCnt=0;
     // TODO: keep 'vertices.size()' small when extruding
     internalVertices.reserve(data.vertices.size() * 2);
     for (QVector3D &v : data.vertices) { // front face
+        if (processCnt %10 ==0)
+            QCoreApplication::processEvents();
+
+        processCnt++;
         QVector3D outIntersectionPoint;
         QVector3D minimumLength(FLT_MAX, FLT_MAX, FLT_MAX);
 
@@ -174,9 +187,11 @@ void generateText3DGeometry(QVector3D** vertices, int* verticesSize,
                              normalVector }); // normal
     }
 
+    QCoreApplication::processEvents();
     for (auto& v : internalVertices) {
         qDebug() << "2:" << v.position;
     }
+    QCoreApplication::processEvents();
 
     for (int i = 0, verticesIndex = internalVertices.size(); i < data.outlines.size(); ++i) {
         const int begin = data.outlines[i].begin;
@@ -233,6 +248,7 @@ void generateText3DGeometry(QVector3D** vertices, int* verticesSize,
     IndexType *indicesFaces = internalIndices.data() + indicesOffset;
     memcpy(indicesFaces, data.indices.data(), numIndices * sizeof(IndexType));
 
+    QCoreApplication::processEvents();
     // insert values for front face and flip triangles
     for (int j = 0; j < numIndices; j += 3)
     {
@@ -240,6 +256,7 @@ void generateText3DGeometry(QVector3D** vertices, int* verticesSize,
         indicesFaces[numIndices + j + 1] = indicesFaces[j + 2] + numVertices;
         indicesFaces[numIndices + j + 2] = indicesFaces[j + 1] + numVertices;
     }
+    QCoreApplication::processEvents();
 
     *vertices = new QVector3D[internalVertices.size() * 2];
     memcpy(*vertices, internalVertices.data(), sizeof(QVector3D) * internalVertices.size() * 2);
