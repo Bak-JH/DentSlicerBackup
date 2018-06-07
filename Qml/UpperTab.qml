@@ -1409,7 +1409,7 @@ Rectangle {
             objectName: "labelPopup"
             id:popup_label
             funcname: "Label"
-            height: 320 // 282
+            height: 350 // 282
             imageHeight: 76
             detail1: "Type letters on the surface."
             detail2: "Font"
@@ -1442,7 +1442,7 @@ Rectangle {
 
                 //anchors.leftMargin: 25
                 //anchors.rightMargin: 25
-                anchors.bottomMargin: 60
+                anchors.bottomMargin: 55
 
                 Text {
                     id: hiddenText

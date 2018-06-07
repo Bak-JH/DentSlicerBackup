@@ -34,6 +34,7 @@ LabellingTextPreview::LabellingTextPreview(Qt3DCore::QNode* parent)
 
     setText("Enter text", QString("Enter text").size());
     setFontName("Arial");
+    setFontSize(12);
     setTranslation(QVector3D(0, 0, 0));
     setNormal(QVector3D(0, 0, 1));
 }
@@ -81,6 +82,9 @@ void LabellingTextPreview::setFontName(QString fontName)
 
 void LabellingTextPreview::setFontSize(int fontSize)
 {
+    float scale = fontSize* scaleY/this->fontSize;
+    scaleY = scale;
+    qDebug() << "changed scale to " << scaleY;
     this->fontSize = fontSize;
 
     if (textureImage) {
@@ -88,6 +92,7 @@ void LabellingTextPreview::setFontSize(int fontSize)
     }
 
     width = text.size() * this->fontSize;
+    qDebug() << "current font size : " << this->fontSize << "width :" << width;
 
     if (width < minimumWidth)
         width = minimumWidth;
@@ -122,7 +127,6 @@ void LabellingTextPreview::updateTransform()
     tangent.normalize();
     auto binormal = QVector3D::crossProduct(tangent, normal);
     binormal.normalize();
-
     qDebug() << QVector3D(width / minimumWidth, 1.0f, ratioY) * scaleY;
 
     planeTransform->setTranslation(translation + normal * 0.5f);
