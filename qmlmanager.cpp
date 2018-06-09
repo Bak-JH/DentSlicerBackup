@@ -167,6 +167,8 @@ void QmlManager::createModelFile(Mesh* target_mesh, QString fname) {
                            (-1)*xmid,
                            (-1)*ymid,
                            (-1)*zmid));
+
+    glmodel->m_translation = glmodel->m_transform->translation();
     qDebug() << "moved model to right place";
 
     // model selection codes, connect handlers later when model selected
@@ -236,6 +238,8 @@ void QmlManager::disconnectHandlers(GLModel* glmodel){
     //QObject::disconnect(glmodel->ft, SIGNAL(setProgress(QVariant)),progress_popup, SLOT(updateNumber(QVariant)));
     //QObject::disconnect(glmodel->ft, SIGNAL(loadPopup(QVariant)),orientPopup, SLOT(show_popup(QVariant)));
 
+    QObject::disconnect(mv, SIGNAL(unDo()), glmodel, SLOT(loadPrevState()));
+    QObject::disconnect(mv, SIGNAL(reDo()), glmodel, SLOT(loadNextState()));
 
     // need to connect for every popup
     // model rotate popup codes
@@ -317,6 +321,10 @@ void QmlManager::connectHandlers(GLModel* glmodel){
     QObject::connect(layflatPopup, SIGNAL(openLayflat()), glmodel, SLOT(openLayflat()));
     QObject::connect(glmodel, SIGNAL(resetLayflat()), this, SLOT(resetLayflat()));
     */
+
+    QObject::connect(mv, SIGNAL(unDo()), glmodel, SLOT(loadPrevState()));
+    QObject::connect(mv, SIGNAL(reDo()), glmodel, SLOT(loadNextState()));
+
     QObject::connect(layflatPopup, SIGNAL(openLayflat()), glmodel->shadowModel, SLOT(openLayflat()));
     QObject::connect(layflatPopup, SIGNAL(closeLayflat()), glmodel->shadowModel, SLOT(closeLayflat()));
     QObject::connect(layflatPopup, SIGNAL(generateLayFlat()), glmodel, SLOT(generateLayFlat()));
@@ -690,6 +698,17 @@ void QmlManager::mouseHack(){
 void QmlManager::modelMoveDone(int Axis){
     if (selectedModel == nullptr)
         return;
+
+    selectedModel->savePrevState();
+
+    qDebug() << "translation current : "<<selectedModel->m_transform->translation();
+
+    QVector3D translationDiff = selectedModel->m_transform->translation()-selectedModel->m_translation;
+
+    // move translation back to original
+    selectedModel->m_transform->setTranslation(selectedModel->m_translation);
+    selectedModel->moveModelMesh(translationDiff);
+
     QQmlProperty::write(moveArrowobj,"center",selectedModel->m_transform->translation());
     mouseHack();
 
@@ -702,6 +721,8 @@ void QmlManager::modelMoveDone(int Axis){
 void QmlManager::modelRotateDone(int Axis){
     if (selectedModel == nullptr)
         return;
+
+    selectedModel->savePrevState();
 
     float angle;
     switch(Axis){
@@ -737,6 +758,7 @@ void QmlManager::modelRotateDone(int Axis){
 void QmlManager::modelMove(int Axis, int Distance){
     if (selectedModel == nullptr)
         return;
+
     switch(Axis){
     case 1:{  //X
         QVector3D tmp = selectedModel->m_transform->translation();
@@ -771,6 +793,7 @@ void QmlManager::modelMove(int Axis, int Distance){
 void QmlManager::modelRotate(int Axis, int Angle){
     if (selectedModel == nullptr)
         return;
+
     rotateSnapAngle = (rotateSnapAngle + Angle +360) % 360;
     switch(Axis){
     case 1:{  //X
@@ -864,6 +887,7 @@ void QmlManager::resetLayflat(){
 void QmlManager::runGroupFeature(int ftrType, QString state){
     groupFunctionIndex = ftrType;
     groupFunctionState = state;
+
     switch(ftrType){
     case ftrRotate: //rotate
     {

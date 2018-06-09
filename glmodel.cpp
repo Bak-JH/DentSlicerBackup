@@ -186,10 +186,50 @@ void GLModel::checkPrintingArea(){
     }
 //    qDebug() << tmp << mesh->x_max << mesh->x_min << mesh->y_max << mesh->y_min << mesh->z_max;
 }
+
+void GLModel::savePrevState(){
+    // need to change to memcpy or something
+    qDebug () << "save prev mesh";
+
+    // copy current Mesh as temporary prev_mesh
+    Mesh* temp_prev_mesh = new Mesh();
+    temp_prev_mesh->faces.reserve(mesh->faces.size()*3);
+    temp_prev_mesh->vertices.reserve(mesh->faces.size()*3);
+    foreach (MeshFace mf, mesh->faces){
+        temp_prev_mesh->addFace(mesh->vertices[mf.mesh_vertex[0]].position,
+                mesh->vertices[mf.mesh_vertex[1]].position,
+                mesh->vertices[mf.mesh_vertex[2]].position);
+    }
+    temp_prev_mesh->connectFaces();
+
+    temp_prev_mesh->prevMesh = mesh->prevMesh;
+    temp_prev_mesh->nextMesh = mesh;
+    mesh->prevMesh = temp_prev_mesh;
+    // for model cut, shell offset
+    lmesh->prevMesh = temp_prev_mesh;
+    rmesh->prevMesh = temp_prev_mesh;
+}
+
+void GLModel::loadPrevState(){
+    if (mesh->prevMesh != nullptr){
+        qDebug() << "loading prevmesh";
+        mesh = mesh->prevMesh;
+        emit _updateModelMesh();
+    }
+}
+
+void GLModel::loadNextState(){
+    if (mesh->nextMesh != nullptr){
+        mesh = mesh->nextMesh;
+        emit _updateModelMesh();
+    }
+}
+
 void GLModel::moveModelMesh(QVector3D direction){
     mesh->vertexMove(direction);
     if (shadowModel != NULL)
         shadowModel->moveModelMesh(direction);
+
     qDebug() << "moved vertex";
     emit _updateModelMesh();
 }
@@ -197,6 +237,7 @@ void GLModel::scaleModelMesh(float scale){
     mesh->vertexScale(scale);
     if (shadowModel != NULL)
         shadowModel->scaleModelMesh(scale);
+
     emit _updateModelMesh();
 }
 void GLModel::rotateModelMesh(int Axis, float Angle){
@@ -251,6 +292,7 @@ void GLModel::updateModelMesh(){
     shadowModel=new GLModel(this->mainWindow, this, mesh, filename, true);
     shadowModel->m_objectPicker = op;
     temp->removeModel();*/
+    // need to reenable objectPicker
 
     QVector3D tmp = m_transform->translation();
     float zlength = mesh->z_max - mesh->z_min;
@@ -350,6 +392,7 @@ void featureThread::run(){
             }
         case ftrScale:
             {
+                //m_glmodel->scaleModelMesh(scale);
                 break;
             }
         case ftrRepair:
@@ -1188,6 +1231,8 @@ void GLModel::modelCut(){
     qDebug() << "modelcut called" << cutMode;
     if(cutMode == 0)
         return ;
+    parentModel
+
     qmlManager->openProgressPopUp();
 
     if (cutMode == 1){
@@ -1700,6 +1745,7 @@ void GLModel::closeExtension(){
 
 // for shell offset
 void GLModel::generateShellOffset(double factor){
+    savePrevState();
     qmlManager->openProgressPopUp();
     QString original_filename = filename;
 
