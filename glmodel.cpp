@@ -203,8 +203,11 @@ void GLModel::savePrevState(){
     temp_prev_mesh->connectFaces();
 
     temp_prev_mesh->prevMesh = mesh->prevMesh;
+    if (mesh->prevMesh != nullptr)
+        mesh->prevMesh->nextMesh = temp_prev_mesh;
     temp_prev_mesh->nextMesh = mesh;
     mesh->prevMesh = temp_prev_mesh;
+
     // for model cut, shell offset
     lmesh->prevMesh = temp_prev_mesh;
     rmesh->prevMesh = temp_prev_mesh;
@@ -287,8 +290,14 @@ void GLModel::updateModelMesh(){
     qDebug() << "applied geometries";
 
     // create new object picker, shadowmodel, remove prev shadowmodel
-    /*Qt3DRender::QObjectPicker* op = shadowModel->m_objectPicker;
-    GLModel* temp = shadowModel;
+    /*shadowModel->deleteLater();
+    shadowModel=new GLModel(this->mainWindow, this, mesh, filename, true);*/
+
+    /*shadowModel->m_objectPicker->deleteLater();
+    Qt3DRender::QObjectPicker* op = new Qt3DRender::QObjectPicker(shadowModel);
+    shadowModel->m_objectPicker = op;*/
+
+    /*GLModel* temp = shadowModel;
     shadowModel=new GLModel(this->mainWindow, this, mesh, filename, true);
     shadowModel->m_objectPicker = op;
     temp->removeModel();*/
@@ -1231,7 +1240,8 @@ void GLModel::modelCut(){
     qDebug() << "modelcut called" << cutMode;
     if(cutMode == 0)
         return ;
-    parentModel
+
+    parentModel->savePrevState();
 
     qmlManager->openProgressPopUp();
 
@@ -1664,6 +1674,7 @@ void GLModel::generateColorAttributes(){
     extendColorMesh(mesh,targetMeshFace,vertexColorBuffer,&extendFaces);
 }
 void GLModel::generateExtensionFaces(double distance){
+    savePrevState();
     extendMesh(mesh, targetMeshFace, distance);
     emit _updateModelMesh();
 }
