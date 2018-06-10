@@ -22,7 +22,6 @@ typedef vector<QVector3D> Plane;
 class MeshFace {
 public:
     MeshFace() {}
-    //MeshFace() {neighboring_faces.reserve(10);}
 
     int idx;
     int parent_idx = -1;
@@ -69,6 +68,10 @@ public :
     std::vector<MeshVertex> vertices;
     QHash<uint32_t, MeshVertex> vertices_hash;
     std::vector<MeshFace> faces;
+
+    // for undo & redo
+    Mesh* prevMesh = nullptr;
+    Mesh* nextMesh = nullptr;
 
     // used for auto repair steps
     Paths3D holes;
