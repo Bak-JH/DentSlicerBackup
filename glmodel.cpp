@@ -283,8 +283,6 @@ void GLModel::rotateModelMesh(int Axis, float Angle){
 
 void GLModel::rotateModelMesh(QMatrix4x4 matrix){
     mesh->vertexRotate(matrix);
-    /*if (shadowModel != NULL)
-        shadowModel->rotateModelMesh(matrix);*/
     emit _updateModelMesh();
 }
 
@@ -345,10 +343,14 @@ void GLModel::updateModelMesh(){
 
     QVector3D tmp = m_transform->translation();
     float zlength = mesh->z_max - mesh->z_min;
-    if (shadowModel != NULL) // since shadow model transformed twice
-        m_transform->setTranslation(QVector3D(tmp.x(),tmp.y(),zlength/2));
+    //if (shadowModel != NULL) // since shadow model transformed twice
+    m_transform->setTranslation(QVector3D(tmp.x(),tmp.y(),-mesh->z_min));
     checkPrintingArea();
     qDebug() << "model transform :" <<m_transform->translation() << mesh->x_max << mesh->x_min << mesh->y_max << mesh->y_min << mesh->z_max << mesh->z_min;
+    QMetaObject::invokeMethod(qmlManager->boundedBox, "setPosition", Q_ARG(QVariant, m_transform->translation()+QVector3D((mesh->x_max+mesh->x_min)/2,(mesh->y_max+mesh->y_min)/2,(mesh->z_max+mesh->z_min)/2)));
+    QMetaObject::invokeMethod(qmlManager->boundedBox, "setSize", Q_ARG(QVariant, mesh->x_max - mesh->x_min),
+                                                     Q_ARG(QVariant, mesh->y_max - mesh->y_min),
+                                                     Q_ARG(QVariant, mesh->z_max - mesh->z_min));
 }
 
 featureThread::featureThread(GLModel* glmodel, int type){
@@ -434,10 +436,6 @@ void featureThread::run(){
                 qmlManager->openProgressPopUp();
                 rotateResult* rotateres= ot->Tweak(m_glmodel->mesh,true,45,&m_glmodel->appropriately_rotated);
                 m_glmodel->rotateModelMesh(rotateres->R);
-                QMetaObject::invokeMethod(qmlManager->boundedBox, "setPosition", Q_ARG(QVariant, QVector3D(qmlManager->selectedModel->m_transform->translation())));
-                QMetaObject::invokeMethod(qmlManager->boundedBox, "setSize", Q_ARG(QVariant, qmlManager->selectedModel->mesh->x_max - qmlManager->selectedModel->mesh->x_min),
-                                                                 Q_ARG(QVariant, qmlManager->selectedModel->mesh->y_max - qmlManager->selectedModel->mesh->y_min),
-                                                                 Q_ARG(QVariant, qmlManager->selectedModel->mesh->z_max - qmlManager->selectedModel->mesh->z_min));
                 break;
             }
         case ftrScale:
@@ -898,7 +896,7 @@ void GLModel::handlePickerClicked(QPickEvent *pick)
         QVector3D v = pick->localIntersection();
         QVector3D tmp = m_transform->translation();
         float zlength = mesh->z_max - mesh->z_min;
-        qmlManager->hollowShellSphereTransform->setTranslation(v + QVector3D(tmp.x(),tmp.y(),zlength/2));
+        qmlManager->hollowShellSphereTransform->setTranslation(v + QVector3D(tmp.x(),tmp.y(),-mesh->z_min));
 
         //parentModel->indentHollowShell(10);
         // emit hollowShellSelect();
@@ -1194,7 +1192,7 @@ void GLModel::generatePlane(){
         parentModel->planeTransform[i]->setScale(2.0f);
         parentModel->planeTransform[i]->setRotation(QQuaternion::fromAxisAndAngle(crossproduct_vector, angle+180*i));
         float zlength = parentModel->mesh->z_max - parentModel->mesh->z_min;
-        parentModel->planeTransform[i]->setTranslation(desire_normal*(-world_origin.distanceToPlane(v1,v2,v3))+QVector3D(tmp.x(),tmp.y(),zlength/2));
+        parentModel->planeTransform[i]->setTranslation(desire_normal*(-world_origin.distanceToPlane(v1,v2,v3))+QVector3D(tmp.x(),tmp.y(),-parentModel->mesh->z_min));
 
         parentModel->planeEntity[i] = new Qt3DCore::QEntity(parentModel->parentModel);
         parentModel->planeEntity[i]->addComponent(parentModel->clipPlane[i]);
@@ -1226,7 +1224,7 @@ void GLModel::addCuttingPoint(QVector3D v){
     sphereMesh.push_back(new Qt3DExtras::QSphereMesh);
     sphereMesh[sphereMesh.size()-1]->setRadius(0.5);
     sphereTransform.push_back(new Qt3DCore::QTransform);
-    sphereTransform[sphereTransform.size()-1]->setTranslation(v + QVector3D(tmp.x(),tmp.y(),zlength/2));
+    sphereTransform[sphereTransform.size()-1]->setTranslation(v + QVector3D(tmp.x(),tmp.y(), -mesh->z_min));
 
     sphereMaterial.push_back(new Qt3DExtras::QPhongMaterial());
     sphereMaterial[sphereMaterial.size()-1]->setAmbient(QColor(QRgb(0x0049FF)));
@@ -1466,7 +1464,7 @@ void GLModel::getSliderSignal(double value){
         QVector3D tmp = parentModel->m_transform->translation();
 
         for (int i=0;i<2;i++){
-            parentModel->planeTransform[i]->setTranslation(desire_normal*(-world_origin.distanceToPlane(v1,v2,v3)) +QVector3D(tmp.x(),tmp.y(),zlength/2));
+            parentModel->planeTransform[i]->setTranslation(desire_normal*(-world_origin.distanceToPlane(v1,v2,v3)) +QVector3D(tmp.x(),tmp.y(),-parentModel->mesh->z_min));
             parentModel->planeEntity[i]->addComponent(parentModel->planeTransform[i]);
         }
 
@@ -1758,13 +1756,6 @@ void GLModel::generateLayFlat(){
     uncolorExtensionFaces();
     //closeLayflat();
     emit resetLayflat();
-
-    QMetaObject::invokeMethod(qmlManager->boundedBox, "setPosition", Q_ARG(QVariant, QVector3D(m_transform->translation())));
-    QMetaObject::invokeMethod(qmlManager->boundedBox, "setSize", Q_ARG(QVariant, mesh->x_max - mesh->x_min),
-                                                     Q_ARG(QVariant, mesh->y_max - mesh->y_min),
-                                                     Q_ARG(QVariant, mesh->z_max - mesh->z_min));
-    qDebug() << "lay flat 2      ";
-
 }
 
 

@@ -482,7 +482,10 @@ void QmlManager::applyArrangeResult(vector<QVector3D> translations, vector<float
     qmlManager->setProgressText("Done");
     qmlManager->openResultPopUp("","Arrangement done","");
     if(selectedModel != nullptr){
-        QMetaObject::invokeMethod(boundedBox, "setPosition", Q_ARG(QVariant, QVector3D(selectedModel->m_transform->translation())));
+        QMetaObject::invokeMethod(boundedBox, "setPosition", Q_ARG(QVariant, selectedModel->m_transform->translation()+QVector3D((selectedModel->mesh->x_max+selectedModel->mesh->x_min)/2,(selectedModel->mesh->y_max+selectedModel->mesh->y_min)/2,(selectedModel->mesh->z_max+selectedModel->mesh->z_min)/2)));
+        QMetaObject::invokeMethod(boundedBox, "setSize", Q_ARG(QVariant, selectedModel->mesh->x_max - selectedModel->mesh->x_min),
+                                                         Q_ARG(QVariant, selectedModel->mesh->y_max - selectedModel->mesh->y_min),
+                                                         Q_ARG(QVariant, selectedModel->mesh->z_max - selectedModel->mesh->z_min));
     }
 }
 
@@ -557,7 +560,11 @@ void QmlManager::modelSelected(int ID){
 
         qDebug() << "b box center" << xmid << " " << ymid << " " << zmid ;
         QMetaObject::invokeMethod(boundedBox, "showBox");
-        QMetaObject::invokeMethod(boundedBox, "setPosition", Q_ARG(QVariant, QVector3D(selectedModel->m_transform->translation())));
+//        QMetaObject::invokeMethod(boundedBox, "setPosition", Q_ARG(QVariant, QVector3D(selectedModel->m_transform->translation())));
+//        QMetaObject::invokeMethod(boundedBox, "setSize", Q_ARG(QVariant, selectedModel->mesh->x_max - selectedModel->mesh->x_min),
+//                                                         Q_ARG(QVariant, selectedModel->mesh->y_max - selectedModel->mesh->y_min),
+//                                                         Q_ARG(QVariant, selectedModel->mesh->z_max - selectedModel->mesh->z_min));
+        QMetaObject::invokeMethod(boundedBox, "setPosition", Q_ARG(QVariant, selectedModel->m_transform->translation()+QVector3D((selectedModel->mesh->x_max+selectedModel->mesh->x_min)/2,(selectedModel->mesh->y_max+selectedModel->mesh->y_min)/2,(selectedModel->mesh->z_max+selectedModel->mesh->z_min)/2)));
         QMetaObject::invokeMethod(boundedBox, "setSize", Q_ARG(QVariant, selectedModel->mesh->x_max - selectedModel->mesh->x_min),
                                                          Q_ARG(QVariant, selectedModel->mesh->y_max - selectedModel->mesh->y_min),
                                                          Q_ARG(QVariant, selectedModel->mesh->z_max - selectedModel->mesh->z_min));
@@ -715,8 +722,8 @@ void QmlManager::modelMoveDone(int Axis){
 
     selectedModel->checkPrintingArea();
 
-    if(selectedModel != nullptr)
-        QMetaObject::invokeMethod(boundedBox, "setPosition", Q_ARG(QVariant, QVector3D(selectedModel->m_transform->translation())));
+//    if(selectedModel != nullptr)
+//        QMetaObject::invokeMethod(boundedBox, "setPosition", Q_ARG(QVariant, QVector3D(selectedModel->m_transform->translation())));
 
 }
 void QmlManager::modelRotateDone(int Axis){
@@ -749,12 +756,12 @@ void QmlManager::modelRotateDone(int Axis){
     showRotateSphere();
     mouseHack();
     rotateSnapAngle = 0;
-    if(selectedModel != nullptr){
-        QMetaObject::invokeMethod(boundedBox, "setPosition", Q_ARG(QVariant, QVector3D(selectedModel->m_transform->translation())));
-        QMetaObject::invokeMethod(boundedBox, "setSize", Q_ARG(QVariant, selectedModel->mesh->x_max - selectedModel->mesh->x_min),
-                                                         Q_ARG(QVariant, selectedModel->mesh->y_max - selectedModel->mesh->y_min),
-                                                         Q_ARG(QVariant, selectedModel->mesh->z_max - selectedModel->mesh->z_min));
-    }
+//    if(selectedModel != nullptr){
+//        QMetaObject::invokeMethod(boundedBox, "setPosition", Q_ARG(QVariant, QVector3D(selectedModel->m_transform->translation())));
+//        QMetaObject::invokeMethod(boundedBox, "setSize", Q_ARG(QVariant, selectedModel->mesh->x_max - selectedModel->mesh->x_min),
+//                                                         Q_ARG(QVariant, selectedModel->mesh->y_max - selectedModel->mesh->y_min),
+//                                                         Q_ARG(QVariant, selectedModel->mesh->z_max - selectedModel->mesh->z_min));
+//    }
 }
 void QmlManager::modelMove(int Axis, int Distance){
     if (selectedModel == nullptr)
