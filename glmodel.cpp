@@ -48,22 +48,9 @@ GLModel::GLModel(QObject* mainWindow, QNode *parent, Mesh* loadMesh, QString fna
         m_meshMaterial->setSpecular(QColor(182,237,246));
         m_meshMaterial->setShininess(0.0f);
 
-        addComponent(m_meshMaterial);
-        */
+        addComponent(m_meshMaterial);*/
 
-
-        m_objectPicker = new Qt3DRender::QObjectPicker(this);
-
-        m_objectPicker->setHoverEnabled(true);
-        //m_objectPicker->setDragEnabled(true);
-        // add only m_objectPicker
-        QObject::connect(m_objectPicker, SIGNAL(clicked(Qt3DRender::QPickEvent*)), this, SLOT(handlePickerClicked(Qt3DRender::QPickEvent*)));
-        QObject::connect(m_objectPicker, SIGNAL(moved(Qt3DRender::QPickEvent*)), this, SLOT(mgoo(Qt3DRender::QPickEvent*)));
-        QObject::connect(m_objectPicker, SIGNAL(pressed(Qt3DRender::QPickEvent*)), this, SLOT(pgoo(Qt3DRender::QPickEvent*)));
-        QObject::connect(m_objectPicker, SIGNAL(released(Qt3DRender::QPickEvent*)), this, SLOT(rgoo(Qt3DRender::QPickEvent*)));
-        QObject::connect(m_objectPicker, SIGNAL(entered()), this, SLOT(engoo()));
-        QObject::connect(m_objectPicker, SIGNAL(exited()), this, SLOT(exgoo()));
-        addComponent(m_objectPicker);
+        addMouseHandlers();
 
         QObject::connect(this,SIGNAL(_updateModelMesh()),this,SLOT(updateModelMesh()));
 
@@ -138,6 +125,38 @@ GLModel::GLModel(QObject* mainWindow, QNode *parent, Mesh* loadMesh, QString fna
     */
     qmlManager->addPart(getFileName(fname.toStdString().c_str()), ID);
 }
+
+void GLModel::addMouseHandlers(){
+
+    m_objectPicker = new Qt3DRender::QObjectPicker(this);
+
+    m_objectPicker->setHoverEnabled(true);
+    //m_objectPicker->setDragEnabled(true);
+    // add only m_objectPicker
+    QObject::connect(m_objectPicker, SIGNAL(clicked(Qt3DRender::QPickEvent*)), this, SLOT(handlePickerClicked(Qt3DRender::QPickEvent*)));
+    QObject::connect(m_objectPicker, SIGNAL(moved(Qt3DRender::QPickEvent*)), this, SLOT(mgoo(Qt3DRender::QPickEvent*)));
+    QObject::connect(m_objectPicker, SIGNAL(pressed(Qt3DRender::QPickEvent*)), this, SLOT(pgoo(Qt3DRender::QPickEvent*)));
+    QObject::connect(m_objectPicker, SIGNAL(released(Qt3DRender::QPickEvent*)), this, SLOT(rgoo(Qt3DRender::QPickEvent*)));
+    QObject::connect(m_objectPicker, SIGNAL(entered()), this, SLOT(engoo()));
+    QObject::connect(m_objectPicker, SIGNAL(exited()), this, SLOT(exgoo()));
+    addComponent(m_objectPicker);
+}
+
+void GLModel::removeMouseHandlers(){
+    if (m_objectPicker == nullptr)
+        return;
+    //m_objectPicker->setDragEnabled(true);
+    // add only m_objectPicker
+    QObject::disconnect(m_objectPicker, SIGNAL(clicked(Qt3DRender::QPickEvent*)), this, SLOT(handlePickerClicked(Qt3DRender::QPickEvent*)));
+    QObject::disconnect(m_objectPicker, SIGNAL(moved(Qt3DRender::QPickEvent*)), this, SLOT(mgoo(Qt3DRender::QPickEvent*)));
+    QObject::disconnect(m_objectPicker, SIGNAL(pressed(Qt3DRender::QPickEvent*)), this, SLOT(pgoo(Qt3DRender::QPickEvent*)));
+    QObject::disconnect(m_objectPicker, SIGNAL(released(Qt3DRender::QPickEvent*)), this, SLOT(rgoo(Qt3DRender::QPickEvent*)));
+    QObject::disconnect(m_objectPicker, SIGNAL(entered()), this, SLOT(engoo()));
+    QObject::disconnect(m_objectPicker, SIGNAL(exited()), this, SLOT(exgoo()));
+    removeComponent(m_objectPicker);
+    m_objectPicker->deleteLater();
+}
+
 void GLModel::changecolor(int mode){
     if (mode == -1) mode = colorMode;
     switch(mode){
@@ -230,16 +249,16 @@ void GLModel::loadNextState(){
 
 void GLModel::moveModelMesh(QVector3D direction){
     mesh->vertexMove(direction);
-    if (shadowModel != NULL)
-        shadowModel->moveModelMesh(direction);
+    /*if (shadowModel != NULL)
+        shadowModel->moveModelMesh(direction);*/
 
     qDebug() << "moved vertex";
     emit _updateModelMesh();
 }
 void GLModel::scaleModelMesh(float scale){
     mesh->vertexScale(scale);
-    if (shadowModel != NULL)
-        shadowModel->scaleModelMesh(scale);
+    /*if (shadowModel != NULL)
+        shadowModel->scaleModelMesh(scale);*/
 
     emit _updateModelMesh();
 }
@@ -264,12 +283,13 @@ void GLModel::rotateModelMesh(int Axis, float Angle){
 
 void GLModel::rotateModelMesh(QMatrix4x4 matrix){
     mesh->vertexRotate(matrix);
-    if (shadowModel != NULL)
-        shadowModel->rotateModelMesh(matrix);
+    /*if (shadowModel != NULL)
+        shadowModel->rotateModelMesh(matrix);*/
     emit _updateModelMesh();
 }
 
 void GLModel::updateModelMesh(){
+    qDebug() << "update Model Mesh";
     // delete allocated buffers, geometry
     delete vertexBuffer;
     delete vertexColorBuffer;
@@ -280,22 +300,25 @@ void GLModel::updateModelMesh(){
     removeComponent(m_geometryRenderer);
     delete m_geometry;
     delete m_geometryRenderer;
-    qDebug() << "deleted buffers";
     // reinitialize with updated mesh
     initialize(mesh);
-    qDebug() << "reinitialized";
     addVertices(mesh, false);
-    qDebug() << "added vertices";
     applyGeometry();
-    qDebug() << "applied geometries";
 
     // create new object picker, shadowmodel, remove prev shadowmodel
-    /*shadowModel->deleteLater();
-    shadowModel=new GLModel(this->mainWindow, this, mesh, filename, true);*/
+    qDebug() << "shadowmodel connection disconnected : "<< QObject::disconnect(shadowModel, SIGNAL(modelSelected(int)), qmlManager, SLOT(modelSelected(int)));
+    shadowModel->removeMouseHandlers();
+    shadowModel->deleteLater();
+    shadowModel=new GLModel(this->mainWindow, this, mesh, filename, true);
+    QObject::connect(shadowModel, SIGNAL(modelSelected(int)), qmlManager, SLOT(modelSelected(int)));
 
-    /*shadowModel->m_objectPicker->deleteLater();
-    Qt3DRender::QObjectPicker* op = new Qt3DRender::QObjectPicker(shadowModel);
-    shadowModel->m_objectPicker = op;*/
+
+    //m_objectPicker->setDragEnabled(true);
+    // add only m_objectPicker
+    /*if (shadowModel == NULL){ // it is shadowmodel itself
+        removeMouseHandlers();
+        addMouseHandlers();
+    }*/
 
     /*GLModel* temp = shadowModel;
     shadowModel=new GLModel(this->mainWindow, this, mesh, filename, true);
@@ -308,6 +331,7 @@ void GLModel::updateModelMesh(){
     if (shadowModel != NULL) // since shadow model transformed twice
         m_transform->setTranslation(QVector3D(tmp.x(),tmp.y(),zlength/2));
     checkPrintingArea();
+    qDebug() << "model transform :" <<m_transform->translation() << mesh->x_max << mesh->x_min << mesh->y_max << mesh->y_min << mesh->z_max << mesh->z_min;
 }
 
 featureThread::featureThread(GLModel* glmodel, int type){
@@ -773,7 +797,7 @@ void GLModel::handlePickerClicked(QPickEvent *pick)
     if (!cutActive && !extensionActive && !labellingActive && !layflatActive)
         emit modelSelected(parentModel->ID);
 
-    qDebug() << "model selected emit";
+    qDebug() << "model selected emit" << pick->position() << parentModel->ID;
 
     if(pick->button() & Qt::RightButton){
         QMetaObject::invokeMethod(qmlManager->mttab, "tabOnOff");

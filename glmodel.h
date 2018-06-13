@@ -151,6 +151,10 @@ public:
     void removeModelPartList();
 
     LabellingTextPreview* labellingTextPreview = nullptr;
+
+    void addMouseHandlers();
+    void removeMouseHandlers();
+
     // changeColor
     void changecolor(int mode); //0 default, 1 selected, 2 outofarea
 

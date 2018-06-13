@@ -158,6 +158,10 @@ void QmlManager::createModelFile(Mesh* target_mesh, QString fname) {
     qDebug() << "created new model file";
     glmodels.push_back(glmodel);
 
+    // model selection codes, connect handlers later when model selected
+    QObject::connect(glmodel->shadowModel, SIGNAL(modelSelected(int)), this, SLOT(modelSelected(int)));
+    qDebug() << "connected model selected signal";
+
     // set initial position
     float xmid = (glmodel->mesh->x_max + glmodel->mesh->x_min)/2;
     float ymid = (glmodel->mesh->y_max + glmodel->mesh->y_min)/2;
@@ -170,10 +174,6 @@ void QmlManager::createModelFile(Mesh* target_mesh, QString fname) {
 
     glmodel->m_translation = glmodel->m_transform->translation();
     qDebug() << "moved model to right place";
-
-    // model selection codes, connect handlers later when model selected
-    QObject::connect(glmodel->shadowModel, SIGNAL(modelSelected(int)), this, SLOT(modelSelected(int)));
-    qDebug() << "connected model selected signal";
 
     // 승환 100%
     qmlManager->setProgress(1);
@@ -502,6 +502,7 @@ void QmlManager::modelSelected(int ID){
     GLModel* target;
     for(int i=0; i<glmodels.size();i++){
         if(glmodels.at(i)->ID == ID){
+            qDebug() << "found id";
             target = glmodels.at(i);
             break;
         }
