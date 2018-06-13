@@ -17,7 +17,6 @@ void extendMesh(Mesh* mesh, MeshFace* mf, double distance){
     Paths3D extension_outlines = detectExtensionOutline(mesh, extension_faces);
     qDebug() << "detected extension outlines" << extension_outlines.size();
 
-    // delete extension_faces
 
     qDebug() << "mesh size : "<< mesh->faces.size();
     //mesh->addFace(mesh->idx2MV(mf->mesh_vertex[0]).position+normal*2,mesh->idx2MV(mf->mesh_vertex[1]).position+normal*2,mesh->idx2MV(mf->mesh_vertex[2]).position+normal*2);
@@ -27,6 +26,17 @@ void extendMesh(Mesh* mesh, MeshFace* mf, double distance){
     qDebug() << "mesh size : "<< mesh->faces.size();
 
     coverCap(mesh, normal, extension_faces, distance);
+
+    // delete extension_faces
+    /*for (MeshFace* mf : extension_faces){
+        for (vector<MeshFace>::iterator f_it=mesh->faces.begin(); f_it!=mesh->faces.end();){
+            if (f_it->idx == mf->idx){
+                f_it = mesh->faces.erase(f_it);
+            } else {
+                f_it++;
+            }
+        }
+    }*/
     mesh->connectFaces();
 }
 void resetColorMesh(Mesh* mesh, Qt3DRender::QBuffer * colorbuffer, vector<int> extendFaces){

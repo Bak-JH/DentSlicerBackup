@@ -320,10 +320,12 @@ void GLModel::updateModelMesh(){
     if (shadowModel !=NULL){
         qDebug() << "shadowmodel connection disconnected : "<< QObject::disconnect(shadowModel, SIGNAL(modelSelected(int)), qmlManager, SLOT(modelSelected(int)));
         shadowModel->removeMouseHandlers();
+        qmlManager->disconnectHandlers(this);
         GLModel* prevShadowModel = shadowModel;
         shadowModel=new GLModel(this->mainWindow, this, mesh, filename, true);
         shadowModel->copyModelAttributeFrom(prevShadowModel);
         prevShadowModel->deleteLater();
+        qmlManager->connectHandlers(this);
         //shadowModel->m_transform->setTranslation(translation);
         QObject::connect(shadowModel, SIGNAL(modelSelected(int)), qmlManager, SLOT(modelSelected(int)));
     }
@@ -351,6 +353,7 @@ void GLModel::updateModelMesh(){
     QMetaObject::invokeMethod(qmlManager->boundedBox, "setSize", Q_ARG(QVariant, mesh->x_max - mesh->x_min),
                                                      Q_ARG(QVariant, mesh->y_max - mesh->y_min),
                                                      Q_ARG(QVariant, mesh->z_max - mesh->z_min));
+
 }
 
 featureThread::featureThread(GLModel* glmodel, int type){
@@ -1451,9 +1454,9 @@ void GLModel::cutFillModeSelected(int type){
 void GLModel::getSliderSignal(double value){
     if (cutActive||shellOffsetActive){
         float zlength = parentModel->mesh->z_max - parentModel->mesh->z_min;
-        QVector3D v1(1,0, -zlength/2 + value*zlength/1.8);
-        QVector3D v2(1,1, -zlength/2 + value*zlength/1.8);
-        QVector3D v3(2,0, -zlength/2 + value*zlength/1.8);
+        QVector3D v1(1,0, parentModel->mesh->z_min + value*zlength/1.8);
+        QVector3D v2(1,1, parentModel->mesh->z_min + value*zlength/1.8);
+        QVector3D v3(2,0, parentModel->mesh->z_min + value*zlength/1.8);
 
         QVector3D world_origin(0,0,0);
         QVector3D original_normal(0,1,0);
