@@ -249,16 +249,16 @@ void GLModel::loadNextState(){
 
 void GLModel::moveModelMesh(QVector3D direction){
     mesh->vertexMove(direction);
-    /*if (shadowModel != NULL)
-        shadowModel->moveModelMesh(direction);*/
+    if (shadowModel != NULL)
+        shadowModel->moveModelMesh(direction);
 
     qDebug() << "moved vertex";
     emit _updateModelMesh();
 }
 void GLModel::scaleModelMesh(float scale){
     mesh->vertexScale(scale);
-    /*if (shadowModel != NULL)
-        shadowModel->scaleModelMesh(scale);*/
+    if (shadowModel != NULL)
+        shadowModel->scaleModelMesh(scale);
 
     emit _updateModelMesh();
 }
@@ -283,8 +283,8 @@ void GLModel::rotateModelMesh(int Axis, float Angle){
 
 void GLModel::rotateModelMesh(QMatrix4x4 matrix){
     mesh->vertexRotate(matrix);
-    /*if (shadowModel != NULL)
-        shadowModel->rotateModelMesh(matrix);*/
+    if (shadowModel != NULL)
+        shadowModel->rotateModelMesh(matrix);
     emit _updateModelMesh();
 }
 
@@ -306,12 +306,15 @@ void GLModel::updateModelMesh(){
     applyGeometry();
 
     // create new object picker, shadowmodel, remove prev shadowmodel
-    qDebug() << "shadowmodel connection disconnected : "<< QObject::disconnect(shadowModel, SIGNAL(modelSelected(int)), qmlManager, SLOT(modelSelected(int)));
-    shadowModel->removeMouseHandlers();
-    shadowModel->deleteLater();
-    shadowModel=new GLModel(this->mainWindow, this, mesh, filename, true);
-    QObject::connect(shadowModel, SIGNAL(modelSelected(int)), qmlManager, SLOT(modelSelected(int)));
-
+    //QVector3D translation = shadowModel->m_transform->translation();
+    /*if (shadowModel !=NULL){
+        qDebug() << "shadowmodel connection disconnected : "<< QObject::disconnect(shadowModel, SIGNAL(modelSelected(int)), qmlManager, SLOT(modelSelected(int)));
+        shadowModel->removeMouseHandlers();
+        shadowModel->deleteLater();
+        shadowModel=new GLModel(this->mainWindow, this, mesh, filename, true);
+        //shadowModel->m_transform->setTranslation(translation);
+        QObject::connect(shadowModel, SIGNAL(modelSelected(int)), qmlManager, SLOT(modelSelected(int)));
+    }*/
 
     //m_objectPicker->setDragEnabled(true);
     // add only m_objectPicker
