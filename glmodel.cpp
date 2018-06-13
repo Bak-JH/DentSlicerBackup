@@ -249,16 +249,16 @@ void GLModel::loadNextState(){
 
 void GLModel::moveModelMesh(QVector3D direction){
     mesh->vertexMove(direction);
-    if (shadowModel != NULL)
-        shadowModel->moveModelMesh(direction);
+    /*if (shadowModel != NULL)
+        shadowModel->moveModelMesh(direction);*/
 
     qDebug() << "moved vertex";
     emit _updateModelMesh();
 }
 void GLModel::scaleModelMesh(float scale){
     mesh->vertexScale(scale);
-    if (shadowModel != NULL)
-        shadowModel->scaleModelMesh(scale);
+    /*if (shadowModel != NULL)
+        shadowModel->scaleModelMesh(scale);*/
 
     emit _updateModelMesh();
 }
@@ -283,9 +283,21 @@ void GLModel::rotateModelMesh(int Axis, float Angle){
 
 void GLModel::rotateModelMesh(QMatrix4x4 matrix){
     mesh->vertexRotate(matrix);
-    if (shadowModel != NULL)
-        shadowModel->rotateModelMesh(matrix);
+    /*if (shadowModel != NULL)
+        shadowModel->rotateModelMesh(matrix);*/
     emit _updateModelMesh();
+}
+
+void GLModel::copyModelAttributeFrom(GLModel* from){
+    cutMode = from->cutMode;
+    cutFillMode = from->cutFillMode;
+    labellingActive = from->labellingActive;
+    extensionActive = from->extensionActive;
+    cutActive = from->cutActive;
+    hollowShellActive = from->hollowShellActive;
+    shellOffsetActive = from->shellOffsetActive;
+    layflatActive = from->layflatActive;
+
 }
 
 void GLModel::updateModelMesh(){
@@ -307,14 +319,16 @@ void GLModel::updateModelMesh(){
 
     // create new object picker, shadowmodel, remove prev shadowmodel
     //QVector3D translation = shadowModel->m_transform->translation();
-    /*if (shadowModel !=NULL){
+    if (shadowModel !=NULL){
         qDebug() << "shadowmodel connection disconnected : "<< QObject::disconnect(shadowModel, SIGNAL(modelSelected(int)), qmlManager, SLOT(modelSelected(int)));
         shadowModel->removeMouseHandlers();
-        shadowModel->deleteLater();
+        GLModel* prevShadowModel = shadowModel;
         shadowModel=new GLModel(this->mainWindow, this, mesh, filename, true);
+        shadowModel->copyModelAttributeFrom(prevShadowModel);
+        prevShadowModel->deleteLater();
         //shadowModel->m_transform->setTranslation(translation);
         QObject::connect(shadowModel, SIGNAL(modelSelected(int)), qmlManager, SLOT(modelSelected(int)));
-    }*/
+    }
 
     //m_objectPicker->setDragEnabled(true);
     // add only m_objectPicker
@@ -921,6 +935,7 @@ void GLModel::handlePickerClickedLayflat(MeshFace shadow_meshface){
     QPickTriangleEvent *trianglePick = static_cast<QPickTriangleEvent*>(pick);
     MeshFace shadow_meshface = mesh->faces[trianglePick->triangleIndex()];
     */
+    uncolorExtensionFaces();
     QVector3D tmp_fn = shadow_meshface.fn;
     Qt3DCore::QTransform* tmp = new Qt3DCore::QTransform();
     float x= tmp_fn.x();
@@ -935,7 +950,7 @@ void GLModel::handlePickerClickedLayflat(MeshFace shadow_meshface){
     QObject::disconnect(m_objectPicker,SIGNAL(clicked(Qt3DRender::QPickEvent*)), this, SLOT(handlePickerClickedLayflat(Qt3DRender::QPickEvent*)));
     delete m_objectPicker;
     shadowModel->m_objectPicker->setEnabled(true);
-    closeLayflat();
+    //closeLayflat();
     emit resetLayflat();
 }
 void GLModel::bisectModel(Plane plane){
@@ -1740,7 +1755,8 @@ void GLModel::generateLayFlat(){
     tmp2->setRotationZ(0);
     rotateModelMesh(tmp1->matrix() * tmp2->matrix());
     //qDebug() << "lay flat 1      ";
-    closeLayflat();
+    uncolorExtensionFaces();
+    //closeLayflat();
     emit resetLayflat();
 
     QMetaObject::invokeMethod(qmlManager->boundedBox, "setPosition", Q_ARG(QVariant, QVector3D(m_transform->translation())));
@@ -1768,8 +1784,8 @@ void GLModel::openLayflat(){
 
 void GLModel::closeLayflat(){
     layflatActive = false;
-    //parentModel->uncolorExtensionFaces();
-    //parentModel->targetMeshFace = nullptr;
+    parentModel->uncolorExtensionFaces();
+    parentModel->targetMeshFace = nullptr;
 }
 void GLModel::openExtension(){
     extensionActive = true;

@@ -152,6 +152,8 @@ public:
 
     LabellingTextPreview* labellingTextPreview = nullptr;
 
+    void copyModelAttributeFrom(GLModel* from);
+
     void addMouseHandlers();
     void removeMouseHandlers();
 

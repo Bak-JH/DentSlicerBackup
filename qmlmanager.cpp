@@ -944,6 +944,7 @@ void QmlManager::runGroupFeature(int ftrType, QString state){
         }else if (state == "inactive"){
             if (selectedModel != nullptr){
                 selectedModel->uncolorExtensionFaces();
+                selectedModel->shadowModel->closeLayflat();
             }
         }
         break;
@@ -983,6 +984,7 @@ void QmlManager::runGroupFeature(int ftrType, QString state){
         }else if (state == "inactive"){
             if (selectedModel != nullptr){
                 selectedModel->uncolorExtensionFaces();
+                selectedModel->shadowModel->closeExtension();
             }
         }
         break;

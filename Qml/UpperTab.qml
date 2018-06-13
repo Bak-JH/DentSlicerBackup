@@ -41,6 +41,7 @@ Rectangle {
         first_tab_button_save.state = "inactive";
         second_tab_button_arrange.state = "inactive";
         second_tab_button_layflat.state = "inactive";
+        runGroupFeature(ftrLayFlat, "inactive");
 
         second_tab_button_move.state = "inactive";
         runGroupFeature(ftrMove,"inactive");
@@ -53,6 +54,7 @@ Rectangle {
         third_tab_button_shelloffset.state = "inactive";
         third_tab_button_scale.state = "inactive";
         fourth_tab_button_extend.state = "inactive";
+        runGroupFeature(ftrExtend, "inactive");
         fourth_tab_button_label.state = "inactive";
         fourth_tab_button_support.state = "inactive";
 
@@ -1175,6 +1177,7 @@ Rectangle {
                     return "active";
                 } else {
                     closeExtension();
+                    console.log("close extension called");
                     return "inactive";
                 }
             }
