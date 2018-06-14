@@ -676,7 +676,8 @@ void QmlManager::showMoveArrow(){
     moveArrow->setEnabled(1);
     moveArrowX->setEnabled(1);
     moveArrowY->setEnabled(1);
-    QQmlProperty::write(moveArrowobj,"center",selectedModel->m_transform->translation());
+
+    QQmlProperty::write(moveArrowobj,"center",selectedModel->m_transform->translation()+QVector3D((selectedModel->mesh->x_max+selectedModel->mesh->x_min)/2,(selectedModel->mesh->y_max+selectedModel->mesh->y_min)/2,(selectedModel->mesh->z_max+selectedModel->mesh->z_min)/2));
 }
 void QmlManager::hideMoveArrow(){
     moveArrow->setEnabled(0);
@@ -691,7 +692,7 @@ void QmlManager::showRotateSphere(){
     rotateSphereX->setEnabled(1);
     rotateSphereY->setEnabled(1);
     rotateSphereZ->setEnabled(1);
-    QQmlProperty::write(rotateSphereobj,"center",selectedModel->m_transform->translation());
+    QQmlProperty::write(rotateSphereobj,"center",selectedModel->m_transform->translation()+QVector3D((selectedModel->mesh->x_max+selectedModel->mesh->x_min)/2,(selectedModel->mesh->y_max+selectedModel->mesh->y_min)/2,(selectedModel->mesh->z_max+selectedModel->mesh->z_min)/2));
 }
 void QmlManager::mouseHack(){
     const QPointF tmp_cor(265,105);
@@ -717,7 +718,7 @@ void QmlManager::modelMoveDone(int Axis){
     selectedModel->m_transform->setTranslation(selectedModel->m_translation);
     selectedModel->moveModelMesh(translationDiff);
 
-    QQmlProperty::write(moveArrowobj,"center",selectedModel->m_transform->translation());
+    QQmlProperty::write(moveArrowobj,"center",selectedModel->m_transform->translation()+QVector3D((selectedModel->mesh->x_max+selectedModel->mesh->x_min)/2,(selectedModel->mesh->y_max+selectedModel->mesh->y_min)/2,(selectedModel->mesh->z_max+selectedModel->mesh->z_min)/2));
     mouseHack();
 
     selectedModel->checkPrintingArea();
@@ -874,9 +875,11 @@ void QmlManager::modelMoveByNumber(int axis, int X, int Y){
     if (selectedModel == nullptr)
         return;
     QVector3D tmp = selectedModel->m_transform->translation();
-    qDebug() << X << Y;
-    qDebug() << tmp;
-    selectedModel->m_transform->setTranslation(QVector3D(tmp.x()+X,tmp.y()+Y,tmp.z()));
+    //QQmlProperty::write(moveArrowobj,"center",selectedModel->m_transform->translation()+QVector3D((selectedModel->mesh->x_max+selectedModel->mesh->x_min)/2,(selectedModel->mesh->y_max+selectedModel->mesh->y_min)/2,(selectedModel->mesh->z_max+selectedModel->mesh->z_min)/2));
+    //mouseHack();
+    selectedModel->moveModelMesh(QVector3D(tmp.x()+X,tmp.y()+Y,tmp.z()));
+    //selectedModel->checkPrintingArea();
+    //selectedModel->m_transform->setTranslation(QVector3D(tmp.x()+X,tmp.y()+Y,tmp.z()));
 }
 void QmlManager::modelRotateByNumber(int axis,  int X, int Y, int Z){
     if (selectedModel == nullptr)

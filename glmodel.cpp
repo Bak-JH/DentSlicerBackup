@@ -255,8 +255,8 @@ void GLModel::moveModelMesh(QVector3D direction){
     qDebug() << "moved vertex";
     emit _updateModelMesh();
 }
-void GLModel::scaleModelMesh(float scale){
-    mesh->vertexScale(scale);
+void GLModel::scaleModelMesh(float scaleX, float scaleY, float scaleZ){
+    mesh->vertexScale(scaleX, scaleY, scaleZ);
     /*if (shadowModel != NULL)
         shadowModel->scaleModelMesh(scale);*/
 
@@ -1678,11 +1678,12 @@ void GLModel::generateText3DMesh()
 // for extension
 
 void GLModel::colorExtensionFaces(){
-    if (targetMeshFace == NULL)
-        return;
+
     removeComponent(m_meshMaterial);
     addComponent(m_meshVertexMaterial);
     /*
+    if (targetMeshFace == NULL)
+        return;
     QVector3D normal = targetMeshFace->fn;
 
     vector<MeshFace*> extension_faces;
@@ -1695,13 +1696,16 @@ void GLModel::colorExtensionFaces(){
 }
 
 void GLModel:: uncolorExtensionFaces(){
-    if (targetMeshFace == NULL)
-        return;
     resetColorMesh(mesh, vertexColorBuffer, extendFaces);
     removeComponent(m_meshVertexMaterial);
     addComponent(m_meshMaterial);
 
-    /*QVector3D normal = targetMeshFace->fn;
+    /*
+
+    if (targetMeshFace == NULL)
+        return;
+
+    QVector3D normal = targetMeshFace->fn;
 
     vector<MeshFace*> extension_faces;
     detectExtensionFaces(mesh, normal, targetMeshFace, targetMeshFace, &extension_faces);
@@ -1722,7 +1726,7 @@ void GLModel::generateExtensionFaces(double distance){
 
     savePrevState();
     extendMesh(mesh, targetMeshFace, distance);
-    //targetMeshFace = NULL;
+    targetMeshFace = NULL;
     emit _updateModelMesh();
 }
 
