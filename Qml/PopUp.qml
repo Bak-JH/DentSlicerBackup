@@ -416,15 +416,16 @@ Rectangle {
     Item {
         id: leftselectimage
         visible: false
-        width: 94
-        height: 66
+        width: 40
+        height: 40
         anchors.left: parent.left
-        anchors.leftMargin: 17
+        anchors.leftMargin: 50
         anchors.top: parent.top
-        anchors.topMargin: 70
+        anchors.topMargin: 85
         objectName: "flatButton"
         Image {
-            source: "qrc:/resource/flat.png"
+            anchors.fill: parent
+            source: "qrc:/Resource/flat_cut.png"
         }
 
         MouseArea {
@@ -434,6 +435,15 @@ Rectangle {
             onExited : qm.resetCursor();
             onClicked: flatModeClicked()
         }
+        Text {
+            text: "Flat Cut"
+            font.family: mainFont.name
+            styleColor: "#000000"
+            font.pixelSize: 13
+            anchors.top:  parent.bottom
+            anchors.topMargin: 5
+            anchors.horizontalCenter: parent.horizontalCenter
+            }
     }
 
     signal curveModeClicked();
@@ -441,16 +451,16 @@ Rectangle {
     Item {
         id: rightselectimage
         visible: false
-        width: 94
-        height: 66
+        width: 40
+        height: 40
         anchors.right: parent.right
-        anchors.rightMargin: 17
+        anchors.rightMargin: 50
         anchors.top: parent.top
-        anchors.topMargin: 70
+        anchors.topMargin: 85
         objectName: "curveButton"
         Image {
             anchors.fill: parent
-            source: "qrc:/resource/curve.png"
+            source: "qrc:/Resource/free_cut.png"
         }
         MouseArea {
             anchors.fill: parent
@@ -459,6 +469,15 @@ Rectangle {
             onExited : qm.resetCursor();
             onClicked: curveModeClicked();
         }
+        Text {
+            text: "Free Cut"
+            font.family: mainFont.name
+            styleColor: "#000000"
+            font.pixelSize: 13
+            anchors.top:  parent.bottom
+            anchors.topMargin: 5
+            anchors.horizontalCenter: parent.horizontalCenter
+            }
     }
 
 

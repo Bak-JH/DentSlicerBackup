@@ -8,8 +8,23 @@ void extendMesh(Mesh* mesh, MeshFace* mf, double distance){
 
     vector<MeshFace*> extension_faces;
     detectExtensionFaces(mesh, normal, mf, mf, &extension_faces,nullptr);
+
+    // delete extension_faces
+    /*for (MeshFace* mf : extension_faces){
+        for (vector<MeshFace>::iterator f_it=mesh->faces.begin(); f_it!=mesh->faces.end();){
+            if (f_it->idx == mf->idx){
+                //f_it = mesh->faces.erase(f_it);
+                mesh->removeFace(mf);
+            } else {
+                f_it++;
+            }
+        }
+        //mesh->removeFace(mf);
+    }*/
+
     qDebug() << "detected extension faces" << extension_faces.size();
     for (MeshFace* emf : extension_faces){
+        qDebug() << emf->idx;
         //mesh->addFace(mesh->idx2MV(emf->mesh_vertex[0]).position+normal*2,mesh->idx2MV(emf->mesh_vertex[1]).position+normal*2,mesh->idx2MV(emf->mesh_vertex[2]).position+normal*2);
         qDebug() << "distance from selected extension_faces " << mesh->idx2MV(mf->mesh_vertex[0]).position.distanceToPoint(mesh->idx2MV(emf->mesh_vertex[0]).position);
     }
@@ -27,16 +42,8 @@ void extendMesh(Mesh* mesh, MeshFace* mf, double distance){
 
     coverCap(mesh, normal, extension_faces, distance);
 
-    // delete extension_faces
-    /*for (MeshFace* mf : extension_faces){
-        for (vector<MeshFace>::iterator f_it=mesh->faces.begin(); f_it!=mesh->faces.end();){
-            if (f_it->idx == mf->idx){
-                f_it = mesh->faces.erase(f_it);
-            } else {
-                f_it++;
-            }
-        }
-    }*/
+    qDebug() << "mf idx : " << mf->idx;
+
     mesh->connectFaces();
 }
 void resetColorMesh(Mesh* mesh, Qt3DRender::QBuffer * colorbuffer, vector<int> extendFaces){
@@ -88,7 +95,7 @@ void detectExtensionFaces(Mesh* mesh, QVector3D normal, MeshFace* original_mf, M
                 continue;
             // check if neighbor close to normal
             if ((neighbor->fn - normal).length() > 0.5 ||\
-                    mesh->idx2MV(neighbor->mesh_vertex[0]).position.distanceToPoint(mesh->idx2MV(original_mf->mesh_vertex[0]).position) > 30)
+                    mesh->idx2MV(neighbor->mesh_vertex[0]).position.distanceToPoint(mesh->idx2MV(original_mf->mesh_vertex[0]).position) > 100)
                 continue;
             qDebug() << mesh->idx2MV(neighbor->mesh_vertex[0]).position.distanceToPoint(mesh->idx2MV(original_mf->mesh_vertex[0]).position);
             qDebug() << "looking for " << neighbor->idx;

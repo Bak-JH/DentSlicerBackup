@@ -1717,8 +1717,12 @@ void GLModel::generateColorAttributes(){
     extendColorMesh(mesh,targetMeshFace,vertexColorBuffer,&extendFaces);
 }
 void GLModel::generateExtensionFaces(double distance){
+    if (targetMeshFace == NULL)
+        return;
+
     savePrevState();
     extendMesh(mesh, targetMeshFace, distance);
+    //targetMeshFace = NULL;
     emit _updateModelMesh();
 }
 
