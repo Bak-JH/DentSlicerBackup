@@ -394,9 +394,13 @@ void QmlManager::cleanSelectedModel(int type){
 QVector3D QmlManager::getSelectedCenter(){
     QVector3D result = QVector3D(0,0,0);
 
-    if(selectedModel != nullptr)
-        result = selectedModel->m_transform->translation();
-
+    if(selectedModel != nullptr){
+        // set initial position
+        float xmid = (selectedModel->mesh->x_max + selectedModel->mesh->x_min)/2;
+        float ymid = (selectedModel->mesh->y_max + selectedModel->mesh->y_min)/2;
+        float zmid = (selectedModel->mesh->z_max + selectedModel->mesh->z_min)/2;
+        result = QVector3D(xmid,ymid,-zmid-selectedModel->mesh->z_min);//QVector3D(selectedModel->m_transform->translation().x(), selectedModel->m_transform->translation().y(), -selectedModel->mesh->z_min);
+    }
     return result;
 }
 QVector3D QmlManager::getSelectedSize(){
@@ -804,71 +808,87 @@ void QmlManager::modelRotate(int Axis, int Angle){
         return;
 
     rotateSnapAngle = (rotateSnapAngle + Angle +360) % 360;
+    QVector3D transl = selectedModel->m_transform->translation();
+    selectedModel->m_transform->setTranslation(selectedModel->m_translation);
+    QVector3D rot_center = QVector3D((selectedModel->mesh->x_max+selectedModel->mesh->x_min)/2,
+                                              (selectedModel->mesh->y_max+selectedModel->mesh->y_min)/2,
+                                              (selectedModel->mesh->z_max+selectedModel->mesh->z_min)/2);
     switch(Axis){
     case 1:{  //X
         float tmpx = selectedModel->m_transform->rotationX();
 
+        QMatrix4x4 rot;
         if (QApplication::queryKeyboardModifiers() & Qt::ShiftModifier){// snap mode
             if(rotateSnapAngle>0 && rotateSnapAngle<90){
-                selectedModel->m_transform->setRotationX(rotateSnapStartAngle + 0);
+                rot = selectedModel->m_transform->rotateAround(rot_center,rotateSnapStartAngle+0,QVector3D(1,0,0));
+                //selectedModel->m_transform->setRotationX(rotateSnapStartAngle + 0);
             }
             else if(rotateSnapAngle>90 && rotateSnapAngle<180){
-                selectedModel->m_transform->setRotationX(rotateSnapStartAngle + 90);
+                rot = selectedModel->m_transform->rotateAround(rot_center,rotateSnapStartAngle+90,QVector3D(1,0,0));
+                //selectedModel->m_transform->setRotationX(rotateSnapStartAngle + 90);
             }
 
             else if(rotateSnapAngle>180 && rotateSnapAngle<270){
-                selectedModel->m_transform->setRotationX(rotateSnapStartAngle + 180);
+                rot = selectedModel->m_transform->rotateAround(rot_center,rotateSnapStartAngle+180,QVector3D(1,0,0));
+                //selectedModel->m_transform->setRotationX(rotateSnapStartAngle + 180);
             }
             else if(rotateSnapAngle>270 && rotateSnapAngle<360){
-                selectedModel->m_transform->setRotationX(rotateSnapStartAngle + 270);
+                rot = selectedModel->m_transform->rotateAround(rot_center,rotateSnapStartAngle+270,QVector3D(1,0,0));
+                //selectedModel->m_transform->setRotationX(rotateSnapStartAngle + 270);
             }
         }
         else
-            selectedModel->m_transform->setRotationX(tmpx+Angle);
-
+            rot = selectedModel->m_transform->rotateAround(rot_center,tmpx+Angle,QVector3D(1,0,0));
+        selectedModel->m_transform->setMatrix(rot);
         break;
     }
     case 2:{  //Y
         float tmpy = selectedModel->m_transform->rotationY();
 
+        QMatrix4x4 rot;
         if (QApplication::queryKeyboardModifiers() & Qt::ShiftModifier){// snap mode
             if(rotateSnapAngle>0 && rotateSnapAngle<90){
-                selectedModel->m_transform->setRotationY(rotateSnapStartAngle + 0);
+                rot = selectedModel->m_transform->rotateAround(rot_center,rotateSnapStartAngle+0,QVector3D(0,1,0));
             }
             else if(rotateSnapAngle>90 && rotateSnapAngle<180){
-                selectedModel->m_transform->setRotationY(rotateSnapStartAngle + 90);
+                rot = selectedModel->m_transform->rotateAround(rot_center,rotateSnapStartAngle+90,QVector3D(0,1,0));
             }
             else if(rotateSnapAngle>180 && rotateSnapAngle<270){
-                selectedModel->m_transform->setRotationY(rotateSnapStartAngle + 180);
+                rot = selectedModel->m_transform->rotateAround(rot_center,rotateSnapStartAngle+180,QVector3D(0,1,0));
             }
             else if(rotateSnapAngle>270 && rotateSnapAngle<360){
-                selectedModel->m_transform->setRotationY(rotateSnapStartAngle + 270);
+                rot = selectedModel->m_transform->rotateAround(rot_center,rotateSnapStartAngle+270,QVector3D(0,1,0));
             }
         }
         else
-            selectedModel->m_transform->setRotationY(tmpy+Angle);
+            rot = selectedModel->m_transform->rotateAround(rot_center,tmpy+Angle,QVector3D(0,1,0));
+        selectedModel->m_transform->setMatrix(rot);
         break;
     }
     case 3:{  //Z
         float tmpz = selectedModel->m_transform->rotationZ();
+
+        QMatrix4x4 rot;
         if (QApplication::queryKeyboardModifiers() & Qt::ShiftModifier){// snap mode
             if(rotateSnapAngle>0 && rotateSnapAngle<90){
-                selectedModel->m_transform->setRotationZ(rotateSnapStartAngle + 0);
+                rot = selectedModel->m_transform->rotateAround(rot_center,rotateSnapStartAngle+0,QVector3D(0,0,1));
             }
             else if(rotateSnapAngle>90 && rotateSnapAngle<180){
-                selectedModel->m_transform->setRotationZ(rotateSnapStartAngle + 90);
+                rot = selectedModel->m_transform->rotateAround(rot_center,rotateSnapStartAngle+90,QVector3D(0,0,1));
             }
             else if(rotateSnapAngle>180 && rotateSnapAngle<270){
-                selectedModel->m_transform->setRotationZ(rotateSnapStartAngle + 180);
+                rot = selectedModel->m_transform->rotateAround(rot_center,rotateSnapStartAngle+180,QVector3D(0,0,1));
             }
             else if(rotateSnapAngle>270 && rotateSnapAngle<360){
-                selectedModel->m_transform->setRotationZ(rotateSnapStartAngle + 270);
+                rot = selectedModel->m_transform->rotateAround(rot_center,rotateSnapStartAngle+270,QVector3D(0,0,1));
             }
         }
         else
-            selectedModel->m_transform->setRotationZ(tmpz+Angle);
+            rot = selectedModel->m_transform->rotateAround(rot_center,tmpz+Angle,QVector3D(0,0,1));
+        selectedModel->m_transform->setMatrix(rot);
         break;
     }
+
     }
 }
 void QmlManager::modelMoveByNumber(int axis, int X, int Y){
