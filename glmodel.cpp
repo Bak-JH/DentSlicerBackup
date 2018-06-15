@@ -206,7 +206,7 @@ void GLModel::checkPrintingArea(){
 //    qDebug() << tmp << mesh->x_max << mesh->x_min << mesh->y_max << mesh->y_min << mesh->z_max;
 }
 
-void GLModel::savePrevState(){
+void GLModel::saveUndoState(){
     // need to change to memcpy or something
     qDebug () << "save prev mesh";
 
@@ -232,7 +232,7 @@ void GLModel::savePrevState(){
     rmesh->prevMesh = temp_prev_mesh;
 }
 
-void GLModel::loadPrevState(){
+void GLModel::loadUndoState(){
     if (mesh->prevMesh != nullptr){
         qDebug() << "loading prevmesh";
         mesh = mesh->prevMesh;
@@ -240,7 +240,7 @@ void GLModel::loadPrevState(){
     }
 }
 
-void GLModel::loadNextState(){
+void GLModel::loadRedoState(){
     if (mesh->nextMesh != nullptr){
         mesh = mesh->nextMesh;
         emit _updateModelMesh();
@@ -436,7 +436,7 @@ void featureThread::run(){
             }
         case ftrOrient:
             {
-                m_glmodel->savePrevState();
+                m_glmodel->saveUndoState();
                 qmlManager->openProgressPopUp();
                 rotateResult* rotateres= ot->Tweak(m_glmodel->mesh,true,45,&m_glmodel->appropriately_rotated);
                 m_glmodel->rotateModelMesh(rotateres->R);
@@ -449,7 +449,7 @@ void featureThread::run(){
             }
         case ftrRepair:
             {
-                m_glmodel->savePrevState();
+                m_glmodel->saveUndoState();
                 qmlManager->openProgressPopUp();
                 repairMesh(m_glmodel->mesh);
 
@@ -463,7 +463,7 @@ void featureThread::run(){
             }
         case ftrShellOffset:
             {
-                //m_glmodel->savePrevState();
+                //m_glmodel->saveUndoState();
                 shellOffset(m_glmodel, -0.5);
                 break;
             }
@@ -1287,7 +1287,7 @@ void GLModel::modelCut(){
     if(cutMode == 0)
         return ;
 
-    parentModel->savePrevState();
+    parentModel->saveUndoState();
 
     qmlManager->openProgressPopUp();
 
@@ -1621,7 +1621,7 @@ void GLModel::generateText3DMesh()
     if (!labellingTextPreview)
         return;
 
-    parentModel->savePrevState();
+    parentModel->saveUndoState();
 
     QVector3D* originalVertices = reinterpret_cast<QVector3D*>(vertexBuffer->data().data());
     int originalVerticesSize = vertexBuffer->data().size() / sizeof(float) / 3;
@@ -1732,7 +1732,7 @@ void GLModel::generateExtensionFaces(double distance){
     if (targetMeshFace == NULL)
         return;
 
-    savePrevState();
+    saveUndoState();
     extendMesh(mesh, targetMeshFace, distance);
     targetMeshFace = NULL;
     emit _updateModelMesh();
@@ -1809,7 +1809,7 @@ void GLModel::closeExtension(){
 
 // for shell offset
 void GLModel::generateShellOffset(double factor){
-    savePrevState();
+    saveUndoState();
     qmlManager->openProgressPopUp();
     QString original_filename = filename;
 

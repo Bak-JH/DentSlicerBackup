@@ -241,10 +241,10 @@ void QmlManager::disconnectHandlers(GLModel* glmodel){
     //QObject::disconnect(glmodel->ft, SIGNAL(setProgress(QVariant)),progress_popup, SLOT(updateNumber(QVariant)));
     //QObject::disconnect(glmodel->ft, SIGNAL(loadPopup(QVariant)),orientPopup, SLOT(show_popup(QVariant)));
 
-    QObject::disconnect(undoRedoButton, SIGNAL(unDo()), glmodel, SLOT(loadPrevState()));
-    QObject::disconnect(undoRedoButton, SIGNAL(reDo()), glmodel, SLOT(loadNextState()));
-    QObject::disconnect(mv, SIGNAL(unDo()), glmodel, SLOT(loadPrevState()));
-    QObject::disconnect(mv, SIGNAL(reDo()), glmodel, SLOT(loadNextState()));
+    QObject::disconnect(undoRedoButton, SIGNAL(unDo()), glmodel, SLOT(loadUndoState()));
+    QObject::disconnect(undoRedoButton, SIGNAL(reDo()), glmodel, SLOT(loadRedoState()));
+    QObject::disconnect(mv, SIGNAL(unDo()), glmodel, SLOT(loadUndoState()));
+    QObject::disconnect(mv, SIGNAL(reDo()), glmodel, SLOT(loadRedoState()));
 
     // need to connect for every popup
     // model rotate popup codes
@@ -327,10 +327,10 @@ void QmlManager::connectHandlers(GLModel* glmodel){
     QObject::connect(glmodel, SIGNAL(resetLayflat()), this, SLOT(resetLayflat()));
     */
 
-    QObject::connect(undoRedoButton, SIGNAL(unDo()), glmodel, SLOT(loadPrevState()));
-    QObject::connect(undoRedoButton, SIGNAL(reDo()), glmodel, SLOT(loadNextState()));
-    QObject::connect(mv, SIGNAL(unDo()), glmodel, SLOT(loadPrevState()));
-    QObject::connect(mv, SIGNAL(reDo()), glmodel, SLOT(loadNextState()));
+    QObject::connect(undoRedoButton, SIGNAL(unDo()), glmodel, SLOT(loadUndoState()));
+    QObject::connect(undoRedoButton, SIGNAL(reDo()), glmodel, SLOT(loadRedoState()));
+    QObject::connect(mv, SIGNAL(unDo()), glmodel, SLOT(loadUndoState()));
+    QObject::connect(mv, SIGNAL(reDo()), glmodel, SLOT(loadRedoState()));
 
     QObject::connect(layflatPopup, SIGNAL(openLayflat()), glmodel->shadowModel, SLOT(openLayflat()));
     QObject::connect(layflatPopup, SIGNAL(closeLayflat()), glmodel->shadowModel, SLOT(closeLayflat()));
@@ -719,7 +719,7 @@ void QmlManager::modelMoveDone(int Axis){
     if (selectedModel == nullptr)
         return;
 
-    selectedModel->savePrevState();
+    selectedModel->saveUndoState();
 
     qDebug() << "translation current : "<<selectedModel->m_transform->translation();
 
@@ -742,7 +742,7 @@ void QmlManager::modelRotateDone(int Axis){
     if (selectedModel == nullptr)
         return;
 
-    selectedModel->savePrevState();
+    selectedModel->saveUndoState();
 
     float angle;
     switch(Axis){

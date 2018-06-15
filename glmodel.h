@@ -231,9 +231,9 @@ signals:
 
 public slots:
     // Model Undo & Redo
-    void savePrevState();
-    void loadPrevState();
-    void loadNextState();
+    void saveUndoState();
+    void loadUndoState();
+    void loadRedoState();
 
     // object picker parts
     void handlePickerClicked(Qt3DRender::QPickEvent*);
