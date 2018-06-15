@@ -12,28 +12,30 @@ Rectangle{
 
     Item{
         id:flat
-        width:94;height:66
+        width:10;height:66
         anchors.left:parent.left
-        anchors.leftMargin: 17
+        anchors.leftMargin: 30
         anchors.bottom:parent.bottom
         anchors.bottomMargin: 160
         objectName: "flat"
         signal flatSignal()
             Image{
                 id:flatd
-                source: "qrc:/resource/flat.png"
+                source: "qrc:/Resource/flat_cut.png"
                     }
             MouseArea{
                 anchors.fill:parent
                 hoverEnabled : true
                 onEntered : qm.setHandCursor();
                 onExited : qm.resetCursor();
-                onClicked: flat.flatSignal()}}
+                onClicked: flat.flatSignal()}
+    }
+
     Item{
         id:curve
-        width:94;height:66
+        width:66;height:66
         anchors.right:parent.right
-        anchors.rightMargin:17
+        anchors.rightMargin:30
         anchors.bottom:parent.bottom
         anchors.bottomMargin: 160
         objectName: "curve"
@@ -41,7 +43,7 @@ Rectangle{
             Image {
                 id:curved
                 anchors.fill: parent
-                source: "qrc:/resource/curve.png"
+                source: "qrc:/Resource/free_cut.png"
                 }
             MouseArea {
                 anchors.fill:parent

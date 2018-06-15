@@ -33,6 +33,7 @@ LabellingTextPreview::LabellingTextPreview(Qt3DCore::QNode* parent)
     planeEntity->addComponent(planeTransform);
 
     setFontName("Arial");
+    setFontBold(false);
     setFontSize(12);
     setTranslation(QVector3D(0, 0, 0));
     setNormal(QVector3D(0, 0, 1));
@@ -52,7 +53,7 @@ void LabellingTextPreview::setText(QString text, int contentWidth)
     if (width < minimumWidth)
         width = minimumWidth;
 
-    textureImage = new TextureImage(width, this->fontSize/(1+1.1*log(this->fontSize/12)), 8.0f, text, fontName);
+    textureImage = new TextureImage(width, this->fontSize/(1+1.1*log(this->fontSize/12)), 8.0f, text, fontName, fontWeight);
     textureImage->update();
 
     texture->addTextureImage(textureImage);
@@ -63,47 +64,22 @@ void LabellingTextPreview::setText(QString text, int contentWidth)
 void LabellingTextPreview::setFontName(QString fontName)
 {
     this->fontName = fontName;
-/*
-    if (textureImage) {
-        texture->removeTextureImage(textureImage);
+}
+
+void LabellingTextPreview::setFontBold(bool isbold){
+    if (isbold){
+        qDebug() << "set font bold";
+        this->fontWeight = QFont::Bold;
+    } else {
+        this->fontWeight = QFont::Normal;
     }
-
-    width = this->contentWidth*2;// * this->fontSize;
-
-    if (width < minimumWidth)
-        width = minimumWidth;
-
-    textureImage = new TextureImage(width, this->fontSize+4, 8.0f, text, this->fontName);
-    textureImage->update();
-
-    texture->addTextureImage(textureImage);
-
-    updateTransform();*/
 }
 
 void LabellingTextPreview::setFontSize(int fontSize)
 {
     scaleY = fontSize*scaleY/this->fontSize;
-    //ratioY = fontSize*ratioY/this->fontSize;
 
     this->fontSize = fontSize;
-
-    /*if (textureImage) {
-        texture->removeTextureImage(textureImage);
-    }
-
-    width = this->contentWidth*2;// * this->fontSize;
-    qDebug() << "current font size : " << this->fontSize << "width :" << width;
-
-    if (width < minimumWidth)
-        width = minimumWidth;
-
-    textureImage = new TextureImage(width, this->fontSize+4, 8.0f, text, this->fontName);
-    textureImage->update();
-
-    texture->addTextureImage(textureImage);
-
-    updateTransform();*/
 }
 
 void LabellingTextPreview::setTranslation(const QVector3D& t)

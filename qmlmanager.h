@@ -36,6 +36,7 @@ public:
     QObject* mv;
     Qt3DCore::QEntity *boundedBox;
     Qt3DCore::QEntity *mttab;
+    QObject* undoRedoButton;
 
     // model rotate components
     QObject *rotatePopup;
@@ -81,6 +82,7 @@ public:
     QObject *text3DInput;
     QObject *labelPopup;
     QObject *labelFontBox;
+    QObject *labelFontBoldBox;
     QObject *labelFontSizeBox;
 
     // orientation components
