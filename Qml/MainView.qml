@@ -75,6 +75,10 @@ Entity {
     KeyboardDevice{
         id : keyboardDevice
     }
+
+    signal unDo();
+    signal reDo();
+
     KeyboardHandler{
         focus : true
         id : keyboardHandler
@@ -86,6 +90,20 @@ Entity {
                 deletePopUp.targetID = qm.getSelectedModelID()
 
                 hideTab()
+
+            } else if (event.matches(StandardKey.Undo)){
+                // do undo
+                console.log("undo called");
+                unDo();
+            } else if (event.matches(StandardKey.Redo)){
+                // do redo
+                console.log("redo called");
+                reDo();
+            } else if (event.matches(StandardKey.Open)){
+                openFile();
+            } else if (event.matches(StandardKey.Copy)){
+
+            } else if (event.matches(StandardKey.Paste)){
 
             }
         }

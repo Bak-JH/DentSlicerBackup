@@ -99,6 +99,11 @@ public:
     GLModel *leftModel = NULL;
     GLModel *rightModel = NULL;
 
+    // Core mesh structures
+    Mesh* mesh;
+    Mesh* lmesh;
+    Mesh* rmesh;
+
     MeshFace *targetMeshFace = NULL; // used for object selection (specific area, like extension or labelling)
 
     bool appropriately_rotated=false;
@@ -118,6 +123,7 @@ public:
     QGeometryRenderer* m_geometryRenderer;
     Qt3DRender::QObjectPicker *m_objectPicker;
     Qt3DCore::QTransform *m_transform;
+    QVector3D m_translation;
 
     // feature hollowshell
     float hollowShellRadius = 0;
@@ -145,15 +151,23 @@ public:
     void removeModelPartList();
 
     LabellingTextPreview* labellingTextPreview = nullptr;
+
+    void copyModelAttributeFrom(GLModel* from);
+
+    void addMouseHandlers();
+    void removeMouseHandlers();
+
     // changeColor
     void changecolor(int mode); //0 default, 1 selected, 2 outofarea
+
+
     // Model Mesh move
     void moveModelMesh(QVector3D direction);
     // Model Mesh rotate
     void rotateModelMesh(int Axis, float Angle);
     void rotateModelMesh(QMatrix4x4 matrix);
     // Model Mesh scale
-    void scaleModelMesh(float scale);
+    void scaleModelMesh(float scaleX, float scaleY, float scaleZ);
     // Model Cut
     void addCuttingPoint(QVector3D v);
     void removeCuttingPoints();
@@ -167,9 +181,6 @@ public:
     QString getFileName(const string& s);
     QVector3D spreadPoint(QVector3D endpoint,QVector3D startpoint,int factor);
 
-    Mesh* mesh;
-    Mesh* lmesh;
-    Mesh* rmesh;
 
     featureThread* ft;
     //arrangeSignalSender* arsignal; //unused, signal from qml goes right into QmlManager.runArrange
@@ -219,6 +230,11 @@ signals:
     void extensionUnSelect();
 
 public slots:
+    // Model Undo & Redo
+    void savePrevState();
+    void loadPrevState();
+    void loadNextState();
+
     // object picker parts
     void handlePickerClicked(Qt3DRender::QPickEvent*);
     void handlePickerClickedLayflat(MeshFace shadow_meshface);
@@ -255,9 +271,9 @@ public slots:
     void openLabelling();
     void closeLabelling();
     void getFontNameChanged(QString fontName);
+    void getFontBoldChanged(bool isBold);
     void getFontSizeChanged(int fontSize);
-    void applyLabelInfo(QString text, int contentWidth, QString fontName, int fontSize);
-
+    void applyLabelInfo(QString text, int contentWidth, QString fontName, bool isBold, int fontSize);
     void generateText3DMesh();
 
     // Extension

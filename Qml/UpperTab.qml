@@ -41,6 +41,7 @@ Rectangle {
         first_tab_button_save.state = "inactive";
         second_tab_button_arrange.state = "inactive";
         second_tab_button_layflat.state = "inactive";
+        runGroupFeature(ftrLayFlat, "inactive");
 
         second_tab_button_move.state = "inactive";
         runGroupFeature(ftrMove,"inactive");
@@ -53,6 +54,7 @@ Rectangle {
         third_tab_button_shelloffset.state = "inactive";
         third_tab_button_scale.state = "inactive";
         fourth_tab_button_extend.state = "inactive";
+        runGroupFeature(ftrExtend, "inactive");
         fourth_tab_button_label.state = "inactive";
         fourth_tab_button_support.state = "inactive";
 
@@ -1411,7 +1413,7 @@ Rectangle {
             objectName: "labelPopup"
             id:popup_label
             funcname: "Label"
-            height: 350 // 282
+            height: 370//350 // 282
             imageHeight: 76
             detail1: "Type letters on the surface."
             detail2: "Font"
@@ -1433,7 +1435,7 @@ Rectangle {
                 width: 194
                 height: 24
 
-                y: 300
+                y: 320
 
                 color: "#ffffffff"
 
@@ -1696,6 +1698,24 @@ Rectangle {
                     ListElement { text: "56" }
                     ListElement { text: "64" }
                     ListElement { text: "100" }
+                }
+            }
+
+            CheckBox {
+                objectName: "labelFontBoldBox"
+                id:labelFontBoldBox
+                text: qsTr("Bold")
+                checked: false
+                width: 194
+                height: 24
+
+                anchors.horizontalCenter: parent.horizontalCenter
+                anchors.top: parent.top
+                anchors.topMargin: 265
+
+                signal sendFontBold(bool fontBold)
+                onCheckedStateChanged: {
+                    sendFontBold(checked);
                 }
             }
 
