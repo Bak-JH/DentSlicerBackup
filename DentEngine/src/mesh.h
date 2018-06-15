@@ -82,12 +82,13 @@ public :
     void vertexOffset(float factor);
     void vertexMove(QVector3D direction);
     void vertexRotate(QMatrix4x4 tmpmatrix);
-    void vertexScale(float scale);
+    void vertexScale(float scaleX, float scaleY, float scaleZ);
 
     /********************** Mesh Generation Functions **********************/
     void addFace(QVector3D v0, QVector3D v1, QVector3D v2);
     void addFace(QVector3D v0, QVector3D v1, QVector3D v2, int parent_idx);
     vector<MeshFace>::iterator removeFace(vector<MeshFace>::iterator f_it);
+    void removeFace(MeshFace* mf);
     void connectFaces();
 
     /********************** Path Generation Functions **********************/

@@ -78,7 +78,7 @@ void Mesh::vertexRotate(QMatrix4x4 tmpmatrix){
     }
 }
 
-void Mesh::vertexScale(float scale){
+void Mesh::vertexScale(float scaleX=1, float scaleY=1, float scaleZ=1){
     int numberofVertices = vertices.size();
     x_min = 99999;
     x_max = 99999;
@@ -90,9 +90,9 @@ void Mesh::vertexScale(float scale){
         if (i%100 == 0)
             QCoreApplication::processEvents();
         QVector3D tmp;
-        tmp.setX(vertices[i].position.x() * scale);
-        tmp.setY(vertices[i].position.y() * scale);
-        tmp.setZ(vertices[i].position.z() * scale);
+        tmp.setX(vertices[i].position.x() * scaleX);
+        tmp.setY(vertices[i].position.y() * scaleY);
+        tmp.setZ(vertices[i].position.z() * scaleZ);
         vertices[i].position = tmp;
         updateMinMax(vertices[i].position);
     }
@@ -158,6 +158,15 @@ void Mesh::addFace(QVector3D v0, QVector3D v1, QVector3D v2, int parent_idx){
     }
 }
 
+void Mesh::removeFace(MeshFace* mf){
+    for (vector<MeshFace>::iterator f_it=faces.begin(); f_it!=faces.end(); ++f_it){
+        if (f_it->mesh_vertex == mf->mesh_vertex){
+            f_it = removeFace(f_it);
+        }
+    }
+    return;
+}
+
 vector<MeshFace>::iterator Mesh::removeFace(vector<MeshFace>::iterator f_it){
     MeshFace &mf = (*f_it);
     //MeshFace &mf = faces[f_idx];
@@ -176,12 +185,12 @@ vector<MeshFace>::iterator Mesh::removeFace(vector<MeshFace>::iterator f_it){
                 nf_ptr_it = nfs.erase(nf_ptr_it);
                 continue;
             }
-            for (int i=0; i<3; i++){
-                vector<MeshFace*>::iterator nf_nf_ptr_it = nf_ptr->neighboring_faces[i].begin();
-                while (nf_nf_ptr_it != nf_ptr->neighboring_faces[i].end()){
+            for (vector<MeshFace*> neighboring_faces : nf_ptr->neighboring_faces){
+                vector<MeshFace*>::iterator nf_nf_ptr_it = neighboring_faces.begin();
+                while (nf_nf_ptr_it != neighboring_faces.end()){
                     MeshFace* nf_nf_ptr = (*nf_nf_ptr_it);
                     if (nf_nf_ptr == &mf) {
-                        nf_nf_ptr_it = nf_ptr->neighboring_faces[i].erase(nf_nf_ptr_it);
+                        nf_nf_ptr_it = neighboring_faces.erase(nf_nf_ptr_it);
                         break;
                     } else {
                         nf_nf_ptr_it ++;
