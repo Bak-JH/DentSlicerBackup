@@ -42,8 +42,6 @@ void extendMesh(Mesh* mesh, MeshFace* mf, double distance){
 
     coverCap(mesh, normal, extension_faces, distance);
 
-    qDebug() << "mf idx : " << mf->idx;
-
     mesh->connectFaces();
 }
 void resetColorMesh(Mesh* mesh, Qt3DRender::QBuffer * colorbuffer, vector<int> extendFaces){
