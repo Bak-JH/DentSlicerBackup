@@ -64,6 +64,9 @@ void QmlManager::initializeUI(QQmlApplicationEngine* e){
 
     partList = FindItemByName(engine, "partList");
 
+    undoRedoButton = FindItemByName(engine, "undoRedoButton");
+
+
     // selection popup
     yesno_popup = FindItemByName(engine, "yesno_popup");
     result_popup = FindItemByName(engine, "result_popup");
@@ -238,6 +241,8 @@ void QmlManager::disconnectHandlers(GLModel* glmodel){
     //QObject::disconnect(glmodel->ft, SIGNAL(setProgress(QVariant)),progress_popup, SLOT(updateNumber(QVariant)));
     //QObject::disconnect(glmodel->ft, SIGNAL(loadPopup(QVariant)),orientPopup, SLOT(show_popup(QVariant)));
 
+    QObject::disconnect(undoRedoButton, SIGNAL(unDo()), glmodel, SLOT(loadPrevState()));
+    QObject::disconnect(undoRedoButton, SIGNAL(reDo()), glmodel, SLOT(loadNextState()));
     QObject::disconnect(mv, SIGNAL(unDo()), glmodel, SLOT(loadPrevState()));
     QObject::disconnect(mv, SIGNAL(reDo()), glmodel, SLOT(loadNextState()));
 
@@ -322,6 +327,8 @@ void QmlManager::connectHandlers(GLModel* glmodel){
     QObject::connect(glmodel, SIGNAL(resetLayflat()), this, SLOT(resetLayflat()));
     */
 
+    QObject::connect(undoRedoButton, SIGNAL(unDo()), glmodel, SLOT(loadPrevState()));
+    QObject::connect(undoRedoButton, SIGNAL(reDo()), glmodel, SLOT(loadNextState()));
     QObject::connect(mv, SIGNAL(unDo()), glmodel, SLOT(loadPrevState()));
     QObject::connect(mv, SIGNAL(reDo()), glmodel, SLOT(loadNextState()));
 
@@ -890,6 +897,8 @@ void QmlManager::modelRotate(int Axis, int Angle){
     }
 
     }
+    selectedModel->m_transform->setTranslation(selectedModel->m_transform->translation()+QVector3D(0,0,-selectedModel->mesh->z_min));
+
 }
 void QmlManager::modelMoveByNumber(int axis, int X, int Y){
     if (selectedModel == nullptr)

@@ -113,5 +113,9 @@
         <file>Resource/part_delete.png</file>
         <file>Resource/flat_cut.png</file>
         <file>Resource/free_cut.png</file>
+        <file>Resource/redo.png</file>
+        <file>Resource/undo.png</file>
+        <file>Resource/redo_icon.png</file>
+        <file>Resource/undo_icon.png</file>
     </qresource>
 </RCC>

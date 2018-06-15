@@ -436,6 +436,7 @@ void featureThread::run(){
             }
         case ftrOrient:
             {
+                m_glmodel->savePrevState();
                 qmlManager->openProgressPopUp();
                 rotateResult* rotateres= ot->Tweak(m_glmodel->mesh,true,45,&m_glmodel->appropriately_rotated);
                 m_glmodel->rotateModelMesh(rotateres->R);
@@ -448,6 +449,7 @@ void featureThread::run(){
             }
         case ftrRepair:
             {
+                m_glmodel->savePrevState();
                 qmlManager->openProgressPopUp();
                 repairMesh(m_glmodel->mesh);
 
@@ -461,6 +463,7 @@ void featureThread::run(){
             }
         case ftrShellOffset:
             {
+                //m_glmodel->savePrevState();
                 shellOffset(m_glmodel, -0.5);
                 break;
             }
@@ -1618,6 +1621,8 @@ void GLModel::generateText3DMesh()
     if (!labellingTextPreview)
         return;
 
+    parentModel->savePrevState();
+
     QVector3D* originalVertices = reinterpret_cast<QVector3D*>(vertexBuffer->data().data());
     int originalVerticesSize = vertexBuffer->data().size() / sizeof(float) / 3;
 
@@ -1669,9 +1674,12 @@ void GLModel::generateText3DMesh()
         outNormals.push_back(vertices[2 * indices[3*i + 1] + 1]);
         outNormals.push_back(vertices[2 * indices[3*i + 0] + 1]);
     }
+    parentModel->mesh->connectFaces();
     if (GLModel* glmodel = qobject_cast<GLModel*>(parent())) {
         glmodel->addVertices(outVertices);
         glmodel->addNormalVertices(outNormals);
+
+        emit glmodel->_updateModelMesh();
     }
 }
 

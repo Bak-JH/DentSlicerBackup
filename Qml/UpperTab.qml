@@ -1177,7 +1177,6 @@ Rectangle {
                     return "active";
                 } else {
                     closeExtension();
-                    console.log("close extension called");
                     return "inactive";
                 }
             }
