@@ -368,9 +368,7 @@ featureThread::featureThread(GLModel* glmodel, int type){
     ste = new STLexporter();
     se = new SlicingEngine();
 
-    //connect(ot, SIGNAL(progressChanged(float)), this, SLOT(progressChanged(float)));
-    //connect(ct, SIGNAL(progressChanged(float)), this, SLOT(progressChanged(float)));
-    //connect(ar, SIGNAL(progressChanged(float)), this, SLOT(progressChanged(float)));
+    QObject::connect(se, SIGNAL(updateModelInfo(int,int,QString,float)), qmlManager, SLOT(sendUpdateModelInfo(int,int,QString,float)));
 
 }
 

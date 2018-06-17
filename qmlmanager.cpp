@@ -449,6 +449,7 @@ void QmlManager::resetCursor(){
 
 // slicing information
 void QmlManager::sendUpdateModelInfo(int printing_time, int layer, QString xyz, float volume){
+    qDebug() << "sent update model Info";
     updateModelInfo(printing_time, layer, xyz, volume);
 }
 
