@@ -16,7 +16,7 @@ class SVGexporter
 public:
     SVGexporter(){};
 
-    void exportSVG(Slices contourLists, QString outfoldername);
+    QString exportSVG(Slices contourLists, QString outfoldername);
 
     void writePolygon(ofstream& outfile, Path contour);
     void writePolygon(ofstream& outfile, PolyNode* contour);
