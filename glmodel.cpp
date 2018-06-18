@@ -809,10 +809,11 @@ void GLModel::handlePickerClicked(QPickEvent *pick)
         return;
 
     if(qmlManager->selectedModel != nullptr && (pick->button() & Qt::RightButton)){ // when right button clicked
-        //qmlManager->mttab->setEnabled(!qmlManager->mttab->isEnabled());
-        QMetaObject::invokeMethod(qmlManager->mttab, "tabOnOff");
+        if(qmlManager->selectedModel->ID == parentModel->ID){
+            QMetaObject::invokeMethod(qmlManager->mttab, "tabOnOff");
+            return;
+        }
 
-        return;
     }
 
     if (!cutActive && !extensionActive && !labellingActive && !layflatActive)
