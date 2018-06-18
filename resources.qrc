@@ -54,8 +54,6 @@
         <file>resource/cut_curved.png</file>
         <file>resource/cut_act.png</file>
         <file>resource/cut_flat.png</file>
-        <file>resource/curve.png</file>
-        <file>resource/flat.png</file>
         <file>resource/bar.png</file>
         <file>resource/downTriangle.png</file>
         <file>resource/upTriangle.png</file>
@@ -113,5 +111,11 @@
         <file>Resource/mesh/boundedBox.stl</file>
         <file>Resource/mesh/boundedBox2.stl</file>
         <file>Resource/part_delete.png</file>
+        <file>Resource/flat_cut.png</file>
+        <file>Resource/free_cut.png</file>
+        <file>Resource/redo.png</file>
+        <file>Resource/undo.png</file>
+        <file>Resource/redo_icon.png</file>
+        <file>Resource/undo_icon.png</file>
     </qresource>
 </RCC>

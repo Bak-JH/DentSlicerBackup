@@ -59,6 +59,15 @@ Item {
     }
     */
 
+    UndoRedoButton{
+        id: undoRedoButton
+        objectName: "undoRedoButton"
+        anchors.top : parent.top
+        anchors.right : parent.right
+        anchors.topMargin: 32
+        anchors.rightMargin: 86
+    }
+
     ViewChange{
         anchors.top : parent.top
         anchors.right : parent.right
