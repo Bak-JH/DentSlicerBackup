@@ -8,7 +8,7 @@ SlicingEngine::SlicingEngine()
 
 QProcess *slicing_process;
 
-void SlicingEngine::slice (QVariant cfg, Mesh* mesh, QString filename){
+Slicer* SlicingEngine::slice (QVariant cfg, Mesh* mesh, QString filename){
 
     QVariantMap config = cfg.toMap();
     for(QVariantMap::const_iterator iter = config.begin(); iter != config.end(); ++iter) {
@@ -52,6 +52,8 @@ void SlicingEngine::slice (QVariant cfg, Mesh* mesh, QString filename){
     qmlManager->openResultPopUp("",
                                 QString(name_word[name_word.size()-1]+" slicing done.").toStdString(),
                                 "");
+
+    return slicer;
 }
 
 /*

@@ -79,6 +79,7 @@ Rectangle {
 
                 ExclusiveGroup { id: viewModeGroup }
                 RadioButton {
+                    objectName: "viewObjectButton"
                     checked: true
                     exclusiveGroup: viewModeGroup
 
@@ -106,8 +107,14 @@ Rectangle {
                             font.pixelSize: 14
                         }
                     }
+
+                    signal onChanged(bool checked);
+                    onCheckedChanged: {
+                        onChanged(checked);
+                    }
                 }
                 RadioButton {
+                    objectName: "viewSupportButton"
                     text: "Support View"
                     exclusiveGroup: viewModeGroup
                     style: RadioButtonStyle {
@@ -134,9 +141,15 @@ Rectangle {
                             font.pixelSize: 14
                         }
                     }
+
+                    signal onChanged(bool checked);
+                    onCheckedChanged: {
+                        onChanged(checked);
+                    }
                 }
                 RadioButton {
                     //text: "Layer View"
+                    objectName: "viewLayerButton"
                     exclusiveGroup: viewModeGroup
                     style: RadioButtonStyle {
                         indicator: Rectangle {
@@ -161,6 +174,11 @@ Rectangle {
                             font.family: mainFont.name
                             font.pixelSize: 14
                         }
+                    }
+
+                    signal onChanged(bool checked);
+                    onCheckedChanged: {
+                        onChanged(checked);
                     }
                 }
             }

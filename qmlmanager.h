@@ -108,6 +108,14 @@ public:
     //QObject* exportButton;
     QObject* exportOKButton;
 
+    // view mode buttons
+    QObject* viewObjectButton;
+    QObject* viewSupportButton;
+    QObject* viewLayerButton;
+
+    QObject* layerViewPopup;
+    QObject* layerViewSlider;
+
     vector<GLModel*> glmodels;
     GLModel* selectedModel = nullptr;
 
@@ -185,6 +193,9 @@ public slots:
     void layFlatSelect();
     void layFlatUnSelect();
 
+    void viewObjectChanged(bool checked);
+    void viewSupportChanged(bool checked);
+    void viewLayerChanged(bool checked);
 };
 
 

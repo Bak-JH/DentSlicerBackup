@@ -12,6 +12,7 @@
 
 #include "qmlmanager.h"
 #include "lights.h"
+#include <QRadioButton>
 
 QmlManager::QmlManager(QObject *parent) : QObject(parent)
 {
@@ -140,6 +141,15 @@ void QmlManager::initializeUI(QQmlApplicationEngine* e){
     QObject::connect(boxUpperTab,SIGNAL(runGroupFeature(int,QString)),this,SLOT(runGroupFeature(int,QString)));
 
     QObject::connect(this, SIGNAL(arrangeDone(vector<QVector3D>, vector<float>)), this, SLOT(applyArrangeResult(vector<QVector3D>, vector<float>)));
+
+    layerViewPopup = FindItemByName(engine, "layerViewPopup");
+    layerViewSlider = FindItemByName(engine, "layerViewSlider");
+    viewObjectButton = FindItemByName(engine, "viewObjectButton");
+    QObject::connect(viewObjectButton, SIGNAL(onChanged(bool)), this, SLOT(viewObjectChanged(bool)));
+    viewSupportButton = FindItemByName(engine, "viewSupportButton");
+    QObject::connect(viewSupportButton, SIGNAL(onChanged(bool)), this, SLOT(viewSupportChanged(bool)));
+    viewLayerButton = FindItemByName(engine, "viewLayerButton");
+    QObject::connect(viewLayerButton, SIGNAL(onChanged(bool)), this, SLOT(viewLayerChanged(bool)));
 
     httpreq* hr = new httpreq();
     QObject::connect(loginButton, SIGNAL(loginTrial(QString)), hr, SLOT(get_iv(QString)));
@@ -301,6 +311,11 @@ void QmlManager::disconnectHandlers(GLModel* glmodel){
     // export button codes
     QObject::disconnect(exportOKButton, SIGNAL(runFeature(int, QVariant)), glmodel->ft, SLOT(setTypeAndRun(int, QVariant)));
     //QObject::disconnect(exportButton, SIGNAL(runFeature(int, QVariant)), glmodel->ft, SLOT(setTypeAndRun(int, QVariant)));
+
+    // view mode buttons
+    QObject::disconnect(viewObjectButton, SIGNAL(onChanged(bool)), this, SLOT(viewObjectChanged(bool)));
+    QObject::disconnect(viewSupportButton, SIGNAL(onChanged(bool)), this, SLOT(viewSupportChanged(bool)));
+    QObject::disconnect(viewLayerButton, SIGNAL(onChanged(bool)), this, SLOT(viewLayerChanged(bool)));
 }
 
 void QmlManager::connectHandlers(GLModel* glmodel){
@@ -375,6 +390,11 @@ void QmlManager::connectHandlers(GLModel* glmodel){
     // export button codes
     QObject::connect(exportOKButton, SIGNAL(runFeature(int, QVariant)), glmodel->ft, SLOT(setTypeAndRun(int, QVariant)));
     //QObject::connect(exportButton, SIGNAL(runFeature(int, QVariant)), glmodel->ft, SLOT(setTypeAndRun(int, QVariant)));
+
+    // view mode buttons
+    QObject::connect(viewObjectButton, SIGNAL(onChanged(bool)), this, SLOT(viewObjectChanged(bool)));
+    QObject::connect(viewSupportButton, SIGNAL(onChanged(bool)), this, SLOT(viewSupportChanged(bool)));
+    QObject::connect(viewLayerButton, SIGNAL(onChanged(bool)), this, SLOT(viewLayerChanged(bool)));
 }
 void QmlManager::cleanSelectedModel(int type){
     //selectedModel = nullptr;
@@ -1003,7 +1023,22 @@ void QmlManager::setProgressText(string inputText){
                               Q_ARG(QVariant, QString::fromStdString(inputText)));
 }
 
+void QmlManager::viewObjectChanged(bool checked){
+    qInfo() << "viewObjectChanged" << checked;
+}
 
+void QmlManager::viewSupportChanged(bool checked){
+    qInfo() << "viewSupportChanged" << checked;
+    if( selectedModel != nullptr ) {
+        selectedModel->toggleSupport(checked);
+    }
+}
+
+void QmlManager::viewLayerChanged(bool checked){
+    qInfo() << "viewLayerChanged" << checked;
+    layerViewPopup->setProperty("visible", checked);
+    layerViewSlider->setProperty("visible", checked);
+}
 
 QObject* FindItemByName(QList<QObject*> nodes, const QString& name)
 {

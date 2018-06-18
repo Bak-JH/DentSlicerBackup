@@ -50,5 +50,6 @@
         <file>Qml/MeshBoundedBox.qml</file>
         <file>Qml/DeletePopup.qml</file>
         <file>Qml/YesNoPopup.qml</file>
+        <file>Qml/LayerViewPopup.qml</file>
     </qresource>
 </RCC>

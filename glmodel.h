@@ -50,6 +50,7 @@ using namespace std;
 #define ftrLabel 15
 
 class GLModel;
+class OverhangPoint;
 
 class featureThread: public QThread
 {
@@ -166,10 +167,20 @@ public:
     bool EndsWith(const string& a, const string& b);
     QString getFileName(const string& s);
     QVector3D spreadPoint(QVector3D endpoint,QVector3D startpoint,int factor);
+    // support
+    void generateCylinder(OverhangPoint *point);
+    void toggleSupport(bool isOn);
 
     Mesh* mesh;
     Mesh* lmesh;
     Mesh* rmesh;
+
+    // support
+    std::vector<Qt3DExtras::QCylinderMesh *> supportMesh;
+    std::vector<Qt3DCore::QTransform *> supportTransform;
+    std::vector<Qt3DCore::QEntity *> supportEntity;
+    Qt3DExtras::QPhongMaterial * supportMaterial;
+    Slicer* slicer;
 
     featureThread* ft;
     //arrangeSignalSender* arsignal; //unused, signal from qml goes right into QmlManager.runArrange
@@ -213,6 +224,7 @@ signals:
     void resetLayflat();
     void bisectDone();
     void _updateModelMesh();
+    void _generateSupport();
     void layFlatSelect();
     void layFlatUnSelect();
     void extensionSelect();
@@ -275,6 +287,9 @@ public slots:
 
     // Model Mesh info update
     void updateModelMesh();
+
+    // Generate support mesh
+    void generateSupport();
 };
 
 

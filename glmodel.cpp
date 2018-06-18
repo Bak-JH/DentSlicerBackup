@@ -11,6 +11,8 @@
 #include <QFuture>
 #include <QFileDialog>
 
+#include <Qt3DExtras/QCylinderMesh>
+
 int GLModel::globalID = 0;
 
 
@@ -66,6 +68,7 @@ GLModel::GLModel(QObject* mainWindow, QNode *parent, Mesh* loadMesh, QString fna
         addComponent(m_objectPicker);
 
         QObject::connect(this,SIGNAL(_updateModelMesh()),this,SLOT(updateModelMesh()));
+        QObject::connect(this,SIGNAL(_generateSupport()),this,SLOT(generateSupport()));
 
         /*labellingTextPreview = new LabellingTextPreview(this);
         labellingTextPreview->setEnabled(false);
@@ -118,7 +121,7 @@ GLModel::GLModel(QObject* mainWindow, QNode *parent, Mesh* loadMesh, QString fna
 
     QObject::connect(this,SIGNAL(bisectDone()),this,SLOT(generateRLModel()));
     QObject::connect(this,SIGNAL(_updateModelMesh()),this,SLOT(updateModelMesh()));
-
+    QObject::connect(this,SIGNAL(_generateSupport()),this,SLOT(generateSupport()));
 
     qDebug() << "created shadow model";
 
@@ -316,7 +319,10 @@ void featureThread::run(){
 
                 // slice file
                 qmlManager->openProgressPopUp();
-                QFuture<void> future = QtConcurrent::run(se, &SlicingEngine::slice, data, m_glmodel->mesh, m_glmodel->filename);
+                QFuture<Slicer*> future = QtConcurrent::run(se, &SlicingEngine::slice, data, m_glmodel->mesh, m_glmodel->filename);
+                m_glmodel->slicer = future.result();
+
+                emit m_glmodel->_generateSupport();
                 break;
             }
         case ftrMove:
@@ -1107,6 +1113,58 @@ void GLModel::generatePlane(){
 
     parentModel->removeCuttingPoints();
     //modelCut();
+}
+
+void GLModel::generateSupport(){
+
+    supportMaterial = new Qt3DExtras::QPhongMaterial();
+    supportMaterial->setAmbient(QColor(QRgb(0x42BFCC)));
+    supportMaterial->setDiffuse(QColor(QRgb(0x42BFCC)));
+    //supportMaterial->setSpecular(QColor(QRgb(0x42BFCC)));
+
+    for( auto iter = slicer->slices.overhang_points.begin() ; iter != slicer->slices.overhang_points.end() ; iter++ ) {
+        qDebug() << "overhang points radius:" << (*iter)->radius <<
+                    "height:" << (*iter)->height <<
+                    "branchable: " << (*iter)->branchable <<
+                    "v(" << (*iter)->position.X << "," << (*iter)->position.Y << "," << (*iter)->position.Z << ")";
+        generateCylinder((*iter));
+    }
+}
+
+void GLModel::generateCylinder(OverhangPoint *point){
+
+    qDebug() << point->branching_overhang_point;
+
+    // Cylinder shape data
+    Qt3DExtras::QCylinderMesh *cylinder = new Qt3DExtras::QCylinderMesh();
+    cylinder->setRadius((float)point->radius / scfg->resolution);
+    cylinder->setLength((float)point->height);
+    //cylinder->setRings(100);
+    //cylinder->setSlices(20);
+    supportMesh.push_back(cylinder);
+
+    // CylinderMesh Transform
+    Qt3DCore::QTransform *cylinderTransform = new Qt3DCore::QTransform;
+    cylinderTransform->setRotationX(90);
+    cylinderTransform->setTranslation(QVector3D((float)point->position.X / scfg->resolution,
+                                                (float)point->position.Y / scfg->resolution,
+                                                (float)point->position.Z / scfg->resolution - (float)point->height * 0.5f));
+    supportTransform.push_back(cylinderTransform);
+
+    // Cylinder
+    Qt3DCore::QEntity *cylinderEntity = new Qt3DCore::QEntity(parentModel);
+    cylinderEntity->addComponent(cylinder);
+    cylinderEntity->addComponent(cylinderTransform);
+    cylinderEntity->addComponent(supportMaterial);
+    supportEntity.push_back(cylinderEntity);
+    cylinderEntity->setEnabled(false);
+}
+
+void GLModel::toggleSupport(bool isOn)
+{
+    for( auto iter = supportEntity.begin() ; iter != supportEntity.end() ; iter++ ) {
+        (*iter)->setEnabled(isOn);
+    }
 }
 
 void GLModel::removePlane(){
