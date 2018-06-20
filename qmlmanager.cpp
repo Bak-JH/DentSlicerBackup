@@ -65,6 +65,7 @@ void QmlManager::initializeUI(QQmlApplicationEngine* e){
     partList = FindItemByName(engine, "partList");
 
     undoRedoButton = FindItemByName(engine, "undoRedoButton");
+    slicingData = FindItemByName(engine, "slicingData");
 
 
     // selection popup
@@ -449,6 +450,7 @@ void QmlManager::resetCursor(){
 
 // slicing information
 void QmlManager::sendUpdateModelInfo(int printing_time, int layer, QString xyz, float volume){
+    qDebug() << "sent update model Info";
     updateModelInfo(printing_time, layer, xyz, volume);
 }
 
@@ -528,6 +530,10 @@ void QmlManager::modelSelected(int ID){
         selectedModel->changecolor(0);
         selectedModel->checkPrintingArea();
         QMetaObject::invokeMethod(partList, "unselectPartByModel", Q_ARG(QVariant, selectedModel->ID));
+
+        // set slicing info box property visible true if slicing info exists
+        slicingData->setProperty("visible",false);
+
         disconnectHandlers(selectedModel);  //check
         QMetaObject::invokeMethod(qmlManager->mttab, "hideTab"); // off MeshTransformer Tab
 
@@ -557,11 +563,15 @@ void QmlManager::modelSelected(int ID){
     if (selectedModel != target){
         // change selectedModel
         selectedModel = target;
+
+        //remove dupllicate hanlders
+        disconnectHandlers(selectedModel);
+        connectHandlers(selectedModel);
+
         selectedModel->changecolor(3);
         selectedModel->changecolor(1);
         QMetaObject::invokeMethod(partList, "selectPartByModel", Q_ARG(QVariant, selectedModel->ID));
         qDebug() << "changing model" << selectedModel->ID;
-        connectHandlers(selectedModel);
 
         // Set BoundedBox
         float xmid = (selectedModel->mesh->x_max + selectedModel->mesh->x_min)/2;
@@ -579,6 +589,13 @@ void QmlManager::modelSelected(int ID){
         QMetaObject::invokeMethod(boundedBox, "setSize", Q_ARG(QVariant, selectedModel->mesh->x_max - selectedModel->mesh->x_min),
                                                          Q_ARG(QVariant, selectedModel->mesh->y_max - selectedModel->mesh->y_min),
                                                          Q_ARG(QVariant, selectedModel->mesh->z_max - selectedModel->mesh->z_min));
+
+        // set slicing info box property visible true if slicing info exists
+        if (selectedModel->slicingInfo != NULL){
+            slicingData->setProperty("visible", true);
+        } else {
+            slicingData->setProperty("visible", false);
+        }
 
         qDebug() << "scale value   " << selectedModel->mesh->x_max - selectedModel->mesh->x_min;
 
@@ -732,7 +749,7 @@ void QmlManager::modelMoveDone(int Axis){
     QQmlProperty::write(moveArrowobj,"center",selectedModel->m_transform->translation()+QVector3D((selectedModel->mesh->x_max+selectedModel->mesh->x_min)/2,(selectedModel->mesh->y_max+selectedModel->mesh->y_min)/2,(selectedModel->mesh->z_max+selectedModel->mesh->z_min)/2));
     mouseHack();
 
-    selectedModel->checkPrintingArea();
+    //selectedModel->checkPrintingArea();
 
 //    if(selectedModel != nullptr)
 //        QMetaObject::invokeMethod(boundedBox, "setPosition", Q_ARG(QVariant, QVector3D(selectedModel->m_transform->translation())));
