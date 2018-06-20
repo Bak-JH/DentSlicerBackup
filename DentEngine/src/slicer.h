@@ -50,6 +50,7 @@ class Slicer : public QThread
 public:
     Slicer() {};
     Slices slices;
+    QString slicingInfo;
 
     /****************** Entire Slicing Step *******************/
     Slices slice(Mesh* mesh);
