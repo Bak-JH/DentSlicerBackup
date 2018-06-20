@@ -234,6 +234,7 @@ Rectangle {
                     //se.slice(cfg);
                     parent.runFeature(ftrExport, cfg);
                     */
+                    all_off();
                     lefttabExport.visible = true;
                 }
             }

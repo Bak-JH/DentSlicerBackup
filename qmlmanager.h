@@ -37,6 +37,7 @@ public:
     Qt3DCore::QEntity *boundedBox;
     Qt3DCore::QEntity *mttab;
     QObject* undoRedoButton;
+    QObject* slicingData;
 
     // model rotate components
     QObject *rotatePopup;

@@ -184,11 +184,13 @@ public:
 
     featureThread* ft;
     //arrangeSignalSender* arsignal; //unused, signal from qml goes right into QmlManager.runArrange
+    QFutureWatcher<Slicer*> futureWatcher; // future watcher for feature thread results returned
 
     int ID; //for use in Part List
     static int globalID;
     QString filename;
     QObject* mainWindow;
+    QString slicingInfo;
     void addVertices(Mesh* mesh, bool CW);
 
 private:
@@ -291,6 +293,8 @@ public slots:
 
     // Model Mesh info update
     void updateModelMesh();
+
+    void slicingDone();
 };
 
 

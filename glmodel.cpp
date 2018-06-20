@@ -28,6 +28,7 @@ GLModel::GLModel(QObject* mainWindow, QNode *parent, Mesh* loadMesh, QString fna
     , parentModel((GLModel*)(parent))
     , cutMode(1)
 {
+    connect(&futureWatcher, SIGNAL(finished()), this, SLOT(slicingDone()));
 
     // generates shadow model for object picking
     if (isShadow){
@@ -318,14 +319,17 @@ void GLModel::updateModelMesh(){
     // create new object picker, shadowmodel, remove prev shadowmodel
     //QVector3D translation = shadowModel->m_transform->translation();
     if (shadowModel !=NULL){
-        qDebug() << "shadowmodel connection disconnected : "<< QObject::disconnect(shadowModel, SIGNAL(modelSelected(int)), qmlManager, SLOT(modelSelected(int)));
+        QObject::disconnect(shadowModel, SIGNAL(modelSelected(int)), qmlManager, SLOT(modelSelected(int)));
         shadowModel->removeMouseHandlers();
         qmlManager->disconnectHandlers(this);
         GLModel* prevShadowModel = shadowModel;
         shadowModel=new GLModel(this->mainWindow, this, mesh, filename, true);
         shadowModel->copyModelAttributeFrom(prevShadowModel);
         prevShadowModel->deleteLater();
-        qmlManager->connectHandlers(this);
+
+        // reconnect handler if current selected model is updated
+        if (qmlManager->selectedModel==this)
+            qmlManager->connectHandlers(this);
         //shadowModel->m_transform->setTranslation(translation);
         QObject::connect(shadowModel, SIGNAL(modelSelected(int)), qmlManager, SLOT(modelSelected(int)));
     }
@@ -354,6 +358,12 @@ void GLModel::updateModelMesh(){
                                                      Q_ARG(QVariant, mesh->y_max - mesh->y_min),
                                                      Q_ARG(QVariant, mesh->z_max - mesh->z_min));
 
+}
+
+void GLModel::slicingDone(){
+    QString result = futureWatcher.result()->slicingInfo;
+    slicingInfo = result;
+    qmlManager->slicingData->setProperty("visible", true);
 }
 
 featureThread::featureThread(GLModel* glmodel, int type){
@@ -411,7 +421,8 @@ void featureThread::run(){
 
                 // slice file
                 qmlManager->openProgressPopUp();
-                QFuture<void> future = QtConcurrent::run(se, &SlicingEngine::slice, data, m_glmodel->mesh, m_glmodel->filename);
+                QFuture<Slicer*> future = QtConcurrent::run(se, &SlicingEngine::slice, data, m_glmodel->mesh, m_glmodel->filename);
+                m_glmodel->futureWatcher.setFuture(future);
                 break;
             }
         case ftrMove:
