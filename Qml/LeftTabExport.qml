@@ -135,6 +135,7 @@ Rectangle {
                 var cfg = collectConfigurations();
                 //se.slice(cfg);
                 parent.runFeature(ftrExport, cfg);
+                lefttabExport.visible = false;
 
             }
         }
