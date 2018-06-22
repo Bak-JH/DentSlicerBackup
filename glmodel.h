@@ -178,6 +178,7 @@ public:
     void bisectModel_internal(Plane plane);
     void checkPrintingArea();
     bool EndsWith(const string& a, const string& b);
+    QVector2D world2Screen(QVector3D target);
     QString getFileName(const string& s);
     QVector3D spreadPoint(QVector3D endpoint,QVector3D startpoint,int factor);
 
@@ -197,7 +198,8 @@ private:
     int v_cnt;
     int f_cnt;
     QNode* m_parent;
-    QVector3D lastpoint;
+    QVector3D lastpoint;    
+    QVector2D prevPoint;
     void initialize(const Mesh* mesh);
     void applyGeometry();
     void addVertex(QVector3D vertex);

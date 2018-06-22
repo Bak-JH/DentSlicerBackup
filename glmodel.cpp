@@ -1386,21 +1386,66 @@ void GLModel::exgoo(){
 }
 void GLModel::mgoo(Qt3DRender::QPickEvent* v)
 {
-    qDebug() << "Moved";
+    qmlManager->setClosedHandCursor();
+    QVector2D currentPoint = (QVector2D)v->position();
 
+    QList<QVector3D> targetPoints;
+
+    targetPoints.append(lastpoint + QVector3D(-5,-5,0));
+    targetPoints.append(lastpoint + QVector3D(5,-5,0));
+    targetPoints.append(lastpoint + QVector3D(0,0,0));
+    targetPoints.append(lastpoint + QVector3D(-5,5,0));
+    targetPoints.append(lastpoint + QVector3D(5,5,0));
     /*
-    QVector3D endpoint(v->localIntersection());
+    qDebug() << "answer   " << targetPoints.at(0) << targetPoints.at(1);
+    qDebug() << "answer              " << targetPoints.at(2);
+    qDebug() << "answer   " << targetPoints.at(3) << targetPoints.at(4);
 
-    qDebug() << endpoint;
+    qDebug() << "--------------------------------------------------";
+
+    qDebug() << "answer   " << world2Screen(targetPoints.at(0)) << world2Screen(targetPoints.at(1));
+    qDebug() << "answer              " << world2Screen(targetPoints.at(2));
+    qDebug() << "answer   " << world2Screen(targetPoints.at(3)) << world2Screen(targetPoints.at(4));
+
+    qDebug() << "--------------------------------------------------";
     */
 
-    // drawLine(endpoint);
+    QVector2D xAxis = (world2Screen(targetPoints.at(4)) - world2Screen(targetPoints.at(3))) / 10;
+    QVector2D yAxis = (world2Screen(targetPoints.at(0)) - world2Screen(targetPoints.at(3))) / 10;
+    QVector2D target = prevPoint - currentPoint;
+
+    QVector3D calculateX, calculateY;
+    if(xAxis.length() != 0)
+        calculateX = (targetPoints.at(4) - targetPoints.at(3)) * QVector2D::dotProduct(xAxis,target) /xAxis.length() / 100;
+    else
+        calculateX = QVector3D(0,0,0);
+
+    if(yAxis.length() != 0)
+        calculateY = (targetPoints.at(0) - targetPoints.at(3)) * QVector2D::dotProduct(yAxis,target) /yAxis.length() / 100;
+    else
+        calculateY = QVector3D(0,0,0);
+    qDebug() << "calculate X   " << calculateX;
+    qDebug() << "calculate Y   " << calculateY;
+
+    float scaleFactor = qmlManager->systemTransform->scale3D().x() / 0.004f;
+    qmlManager->modelMove(1,-(calculateX.x() + calculateY.x()) * 1.5 / scaleFactor);
+    qmlManager->modelMove(2,-(calculateX.y() + calculateY.y()) * 1.5 / scaleFactor);
+
+    prevPoint = currentPoint;
 }
+
 void GLModel::pgoo(Qt3DRender::QPickEvent* v){
+    qDebug() << "Pressed   " << v->position();
+    m_objectPicker->setDragEnabled(true);
     lastpoint=v->localIntersection();
+    prevPoint = (QVector2D) v->position();
+    
 }
 
 void GLModel::rgoo(Qt3DRender::QPickEvent* v){
+    qDebug() << "Released";
+    m_objectPicker->setDragEnabled(false);
+    qmlManager->resetCursor();
 }
 
 /*void GLModel::drawLine(QVector3D endpoint)
@@ -1489,7 +1534,16 @@ void GLModel::getSliderSignal(double value){
 
 
 /** HELPER functions **/
+QVector2D GLModel::world2Screen(QVector3D target){
+    QVariant value;
+    qRegisterMetaType<QVariant>("QVariant");
+    QMetaObject::invokeMethod(qmlManager->mttab, "world2Screen", Qt::DirectConnection, Q_RETURN_ARG(QVariant,value),
+                              Q_ARG(QVariant, target));
 
+    QVector2D result = qvariant_cast<QVector2D>(value);
+
+    return result;
+}
 bool GLModel::EndsWith(const string& a, const string& b) {
     if (b.size() > a.size()) return false;
     return std::equal(a.begin() + a.size() - b.size(), a.end(), b.begin());
