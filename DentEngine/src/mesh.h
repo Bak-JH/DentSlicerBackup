@@ -76,6 +76,9 @@ public :
     // used for auto repair steps
     Paths3D holes;
 
+    // used for freecut, autoarrange elsewhere
+    Path convexHull;
+
     float x_min = 99999, x_max = 99999, y_min = 99999, y_max = 99999, z_min = 99999, z_max = 99999;
 
     /********************** Mesh Edit Functions***********************/
