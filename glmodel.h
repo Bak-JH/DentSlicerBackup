@@ -99,11 +99,13 @@ public:
     GLModel *shadowModel = NULL; // GLmodel's sparse mesh that gets picker input
     GLModel *leftModel = NULL;
     GLModel *rightModel = NULL;
+    GLModel *supportModel = NULL;
 
     // Core mesh structures
     Mesh* mesh;
     Mesh* lmesh;
     Mesh* rmesh;
+    Mesh* supportMesh;
 
     MeshFace *targetMeshFace = NULL; // used for object selection (specific area, like extension or labelling)
 
@@ -182,15 +184,10 @@ public:
     QString getFileName(const string& s);
     QVector3D spreadPoint(QVector3D endpoint,QVector3D startpoint,int factor);
     // support
-    void generateCylinder(OverhangPoint *point);
+    void generateCylinder(OverhangPoint *point, OverhangPoint *parent = nullptr);
     void toggleSupport(bool isOn);
 
-
     // support
-    std::vector<Qt3DExtras::QCylinderMesh *> supportMesh;
-    std::vector<Qt3DCore::QTransform *> supportTransform;
-    std::vector<Qt3DCore::QEntity *> supportEntity;
-    Qt3DExtras::QPhongMaterial * supportMaterial;
     Slicer* slicer;
 
     featureThread* ft;

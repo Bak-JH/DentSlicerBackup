@@ -1094,6 +1094,9 @@ void QmlManager::setProgressText(string inputText){
 
 void QmlManager::viewObjectChanged(bool checked){
     qInfo() << "viewObjectChanged" << checked;
+    if( checked == false ) {
+        QMetaObject::invokeMethod(qmlManager->boxUpperTab, "all_off");
+    }
 }
 
 void QmlManager::viewSupportChanged(bool checked){

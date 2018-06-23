@@ -36,6 +36,7 @@ GLModel::GLModel(QObject* mainWindow, QNode *parent, Mesh* loadMesh, QString fna
 
         lmesh = new Mesh();
         rmesh = new Mesh();
+        supportMesh = new Mesh();
 
         mesh = toSparse(parentModel->mesh);
         initialize(mesh);
@@ -70,7 +71,7 @@ GLModel::GLModel(QObject* mainWindow, QNode *parent, Mesh* loadMesh, QString fna
     m_meshVertexMaterial = new QPerVertexColorMaterial();
 
     this->changecolor(0);
-    if (filename != "" && !EndsWith(filename.toStdString(), std::string("_left").c_str()) && !EndsWith(filename.toStdString(),  std::string("_right").c_str()) && !EndsWith(filename.toStdString(),  std::string("_offset").c_str())){
+    if (filename != "" && !EndsWith(filename.toStdString(), std::string("_left").c_str()) && !EndsWith(filename.toStdString(),  std::string("_right").c_str()) && !EndsWith(filename.toStdString(),  std::string("_offset").c_str()) && !EndsWith(filename.toStdString(),  std::string("_support").c_str())){
         mesh = new Mesh();
         loadMeshSTL(mesh, filename.toStdString().c_str());
     } else {
@@ -82,6 +83,7 @@ GLModel::GLModel(QObject* mainWindow, QNode *parent, Mesh* loadMesh, QString fna
 
     lmesh = new Mesh();
     rmesh = new Mesh();
+    supportMesh = new Mesh();
 
     initialize(mesh);
     addVertices(mesh, false);
@@ -1218,53 +1220,83 @@ void GLModel::generatePlane(){
 
 void GLModel::generateSupport(){
 
-    supportMaterial = new Qt3DExtras::QPhongMaterial();
-    supportMaterial->setAmbient(QColor(QRgb(0x42BFCC)));
-    supportMaterial->setDiffuse(QColor(QRgb(0x42BFCC)));
-    //supportMaterial->setSpecular(QColor(QRgb(0x42BFCC)));
-
+    // generate cylinders
     for( auto iter = slicer->slices.overhang_points.begin() ; iter != slicer->slices.overhang_points.end() ; iter++ ) {
-        qDebug() << "overhang points radius:" << (*iter)->radius <<
-                    "height:" << (*iter)->height <<
-                    "branchable: " << (*iter)->branchable <<
-                    "v(" << (*iter)->position.X << "," << (*iter)->position.Y << "," << (*iter)->position.Z << ")";
-        generateCylinder((*iter));
+        qDebug() << "-------" << (*iter);
+        generateCylinder(*iter);
     }
+
+    qmlManager->createModelFile(supportMesh, filename+"_support");
+    supportModel = qmlManager->findGLModelByName(filename+"_support");
+    supportModel->m_meshMaterial->setAmbient(QColor(QRgb(0x42BFCC)));
+    supportModel->m_meshMaterial->setDiffuse(QColor(QRgb(0x42BFCC)));
+    supportModel->setEnabled(false);
 }
 
-void GLModel::generateCylinder(OverhangPoint *point){
+void GLModel::generateCylinder(OverhangPoint *point, OverhangPoint *parent){
 
-    qDebug() << point->branching_overhang_point;
+    qDebug() << point << point->branching_overhang_point << point->target_branching_overhang_point << parent;
+    qDebug() << "height:" << point->height <<
+                "branchable:" << point->branchable <<
+                "v(" << point->position.X << "," << point->position.Y << "," << point->position.Z << ")";
 
-    // Cylinder shape data
-    Qt3DExtras::QCylinderMesh *cylinder = new Qt3DExtras::QCylinderMesh();
-    cylinder->setRadius((float)point->radius / scfg->resolution);
-    cylinder->setLength((float)point->height);
-    //cylinder->setRings(100);
-    //cylinder->setSlices(20);
-    supportMesh.push_back(cylinder);
+    float height = (float)point->height;
+    float radius = (float)point->radius / scfg->resolution;
+    QVector3D position = QVector3D((float)point->position.X / scfg->resolution,
+            (float)point->position.Y / scfg->resolution,
+            (float)point->position.Z / scfg->resolution - height);
+    QVector3D positionTop = QVector3D((float)point->position.X / scfg->resolution,
+            (float)point->position.Y / scfg->resolution,
+            (float)point->position.Z / scfg->resolution);
 
-    // CylinderMesh Transform
-    Qt3DCore::QTransform *cylinderTransform = new Qt3DCore::QTransform;
-    cylinderTransform->setRotationX(90);
-    cylinderTransform->setTranslation(QVector3D((float)point->position.X / scfg->resolution,
-                                                (float)point->position.Y / scfg->resolution,
-                                                (float)point->position.Z / scfg->resolution - (float)point->height * 0.5f));
-    supportTransform.push_back(cylinderTransform);
+    if( parent == nullptr ) {
 
-    // Cylinder
-    Qt3DCore::QEntity *cylinderEntity = new Qt3DCore::QEntity(parentModel);
-    cylinderEntity->addComponent(cylinder);
-    cylinderEntity->addComponent(cylinderTransform);
-    cylinderEntity->addComponent(supportMaterial);
-    supportEntity.push_back(cylinderEntity);
-    cylinderEntity->setEnabled(false);
+        vector<QVector3D> top;
+        vector<QVector3D> bottom;
+        for( float i = 0.0f ; i <= 360.0f ; i += 10.0f ) {
+            float t = i / 180.0f * M_PI;
+            top.push_back(QVector3D(qCos(t) * radius + position.x(), qSin(t) * radius + position.y(), positionTop.z()));
+            bottom.push_back(QVector3D(qCos(t) * radius + position.x(), qSin(t) * radius + position.y(), position.z()));
+        }
+
+        // top circle
+        QVector3D *lastTop;
+        for( auto iter = top.begin() ; iter != top.end() ; iter++ ) {
+            if( iter != top.begin() ) {
+                supportMesh->addFace(*lastTop, (*iter), positionTop);
+            }
+            lastTop = &(*iter);
+        }
+
+        // bottom circle
+        QVector3D *lastBottom;
+        for( auto iter = bottom.begin() ; iter != bottom.end() ; iter++ ) {
+            if( iter != bottom.begin() ) {
+                supportMesh->addFace((*iter), *lastBottom, position);
+            }
+            lastBottom = &(*iter);
+        }
+
+        // pillar
+        for( auto iterTop = top.begin(), iterBottom = bottom.begin(); iterTop != top.end() ; iterTop++, iterBottom++ ) {
+            if( iterTop != top.begin() ) {
+                supportMesh->addFace((*iterTop), *lastTop, (*iterBottom));
+                supportMesh->addFace(*lastTop, *lastBottom, (*iterBottom));
+            }
+            lastTop = &(*iterTop);
+            lastBottom = &(*iterBottom);
+        }
+    }
+
+    if( point->branching_overhang_point != nullptr ) {
+        generateCylinder(point->branching_overhang_point, point);
+    }
 }
 
 void GLModel::toggleSupport(bool isOn)
 {
-    for( auto iter = supportEntity.begin() ; iter != supportEntity.end() ; iter++ ) {
-        (*iter)->setEnabled(isOn);
+    if( supportModel != nullptr ) {
+        supportModel->setEnabled(isOn);
     }
 }
 
