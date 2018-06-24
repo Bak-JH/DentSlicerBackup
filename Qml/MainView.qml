@@ -88,8 +88,9 @@ Entity {
             if (event.key === Qt.Key_Delete) {
                 deletePopUp.visible = true
                 deletePopUp.targetID = qm.getSelectedModelID()
-
-                hideTab()
+                if (deletePopUp.targetID != -1){
+                    hideTab();
+                }
 
             } else if (event.matches(StandardKey.Undo)){
                 // do undo

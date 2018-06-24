@@ -809,8 +809,19 @@ void GLModel::addIndexes(vector<int> indexes){
     return;
 }
 
+void GLModel::handlePickerClickedFreeCut(Qt3DRender::QPickEvent* pick)
+{
+    qDebug() << "handle picker clicked freecut";
+    qDebug() << pick->localIntersection()<<"pick" << cuttingPoints.size() << parentModel->cuttingPoints.size();
+    QVector3D v = pick->localIntersection();
+    QVector3D result_v = QVector3D(v.x(), -v.z(), v.y());
+    result_v = result_v*2;
+    parentModel->addCuttingPoint(result_v);
+}
+
 void GLModel::handlePickerClicked(QPickEvent *pick)
 {
+
     if (!parentModel)
         return;
 
@@ -1164,6 +1175,13 @@ void GLModel::bisectModel_internal(Plane plane){
     emit bisectDone();
 }
 
+void GLModel::generateClickablePlane(){
+    generatePlane();
+    for (int i=0;i<2;i++){
+       qDebug() << "generated clickable plane";
+    }
+    return;
+}
 
 void GLModel::generatePlane(){
     removePlane();
@@ -1199,7 +1217,8 @@ void GLModel::generatePlane(){
     QVector3D crossproduct_vector(QVector3D::crossProduct(original_normal,desire_normal));
 
     for (int i=0;i<2;i++){
-        parentModel->clipPlane[i]=new Qt3DExtras::QPlaneMesh();
+        parentModel->planeEntity[i] = new Qt3DCore::QEntity(parentModel->parentModel);
+        parentModel->clipPlane[i]=new Qt3DExtras::QPlaneMesh(this);
         parentModel->clipPlane[i]->setHeight(100.0);
         parentModel->clipPlane[i]->setWidth(100.0);
 
@@ -1209,10 +1228,17 @@ void GLModel::generatePlane(){
         float zlength = parentModel->mesh->z_max - parentModel->mesh->z_min;
         parentModel->planeTransform[i]->setTranslation(desire_normal*(-world_origin.distanceToPlane(v1,v2,v3))+QVector3D(tmp.x(),tmp.y(),-parentModel->mesh->z_min));
 
-        parentModel->planeEntity[i] = new Qt3DCore::QEntity(parentModel->parentModel);
+        parentModel->planeObjectPicker[i] = new Qt3DRender::QObjectPicker;//parentModel->planeEntity[i]);
+
+        parentModel->planeObjectPicker[i]->setHoverEnabled(true);
+        parentModel->planeObjectPicker[i]->setEnabled(true);
+        //QObject::connect(parentModel->planeObjectPicker[i], SIGNAL(clicked(Qt3DRender::QPickEvent*)), this, SLOT(handlePickerClicked(Qt3DRender::QPickEvent*)));
+        QObject::connect(parentModel->planeObjectPicker[i], SIGNAL(clicked(Qt3DRender::QPickEvent*)), this, SLOT(handlePickerClickedFreeCut(Qt3DRender::QPickEvent*)));//SLOT(handlePickerClicked(Qt3DRender::QPickEvent*)));
+
         parentModel->planeEntity[i]->addComponent(parentModel->clipPlane[i]);
         parentModel->planeEntity[i]->addComponent(parentModel->planeTransform[i]);
         parentModel->planeEntity[i]->addComponent(parentModel->planeMaterial);
+        parentModel->planeEntity[i]->addComponent(parentModel->planeObjectPicker[i]);
     }
 
     parentModel->removeCuttingPoints();
@@ -1227,6 +1253,8 @@ void GLModel::removePlane(){
     for (int i=0;i<2;i++){
         delete parentModel->clipPlane[i];
         delete parentModel->planeTransform[i];
+        QObject::disconnect(parentModel->planeObjectPicker[i], SIGNAL(clicked(Qt3DRender::QPickEvent*)), this, SLOT(handlePickerClickedFreeCut(Qt3DRender::QPickEvent*)));
+        delete parentModel->planeObjectPicker[i];
         delete parentModel->planeEntity[i];
     }
 }
@@ -1328,30 +1356,37 @@ void GLModel::modelCut(){
 }
 
 void GLModel::generateRLModel(){
-    qmlManager->createModelFile(lmesh, filename+"_left");
+    if (lmesh->faces.size() != 0)
+        qmlManager->createModelFile(lmesh, filename+"_left");
     qDebug() <<"generating RLModel" <<filename+"_left";
+
     // 승환 70%
     qmlManager->setProgress(0.72);
-    qmlManager->createModelFile(rmesh, filename+"_right");
+    if (rmesh->faces.size() != 0)
+        qmlManager->createModelFile(rmesh, filename+"_right");
+
     // 승환 90%
     qmlManager->setProgress(0.91);
 
     if (shadowModel->shellOffsetActive){
         GLModel* leftmodel = qmlManager->findGLModelByName(filename+"_left");
         GLModel* rightmodel = qmlManager->findGLModelByName(filename+"_right");
-        qDebug() << "came to here" << leftmodel;
         shellOffset(leftmodel, (float)shellOffsetFactor);
         qmlManager->deleteModelFile(rightmodel->ID);
         QMetaObject::invokeMethod(qmlManager->boxUpperTab, "all_off");
     }
 
+    qDebug() << "left right generated";
+
     //parentModel->deleteLater();
     shadowModel->removePlane();
     removeCuttingPoints();
 
+    qDebug() << "removed cutting plane";
     // delete original model
     qmlManager->deleteModelFile(ID);
 
+    qDebug() << "deleted original model";
     // do auto arrange
     qmlManager->runArrange();
     QMetaObject::invokeMethod(qmlManager->boundedBox, "hideBox");
@@ -1451,6 +1486,10 @@ void GLModel::cutModeSelected(int type){
         generatePlane();
     } else if (cutMode == 2){
         qDebug() << QCursor::pos();
+        parentModel->addCuttingPoint(QVector3D(1,0,0));
+        parentModel->addCuttingPoint(QVector3D(1,1,0));
+        parentModel->addCuttingPoint(QVector3D(2,0,0));
+        generateClickablePlane(); // plane is also clickable
     } else {
 
     }

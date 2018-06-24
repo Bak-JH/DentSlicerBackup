@@ -426,7 +426,8 @@ QVector3D QmlManager::getSelectedSize(){
 
 int QmlManager::getSelectedModelID(){
     int result = -1;
-    result = selectedModel->ID;
+    if (selectedModel != nullptr)
+        result = selectedModel->ID;
 
     return result;
 }
