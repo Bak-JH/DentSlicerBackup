@@ -189,8 +189,8 @@ void cutAway(Mesh* leftMesh, Mesh* rightMesh, Mesh* mesh, vector<QVector3D> cutt
     IntPoint enterIP;
     IntPoint exitIP;
 
-    float enter_min_distance;
-    float exit_min_distance;
+    float enter_min_distance = 99999;
+    float exit_min_distance = 99999;
     MeshVertex enterIntersection;
     MeshVertex exitIntersection;
     Path contour_copy;
@@ -264,6 +264,7 @@ void cutAway(Mesh* leftMesh, Mesh* rightMesh, Mesh* mesh, vector<QVector3D> cutt
                 if (cur_distance < enter_min_distance){
                     enter_min_distance = cur_distance;
                     enterIntersection = mv;
+                    qDebug() << "found enterIntersection : " << mv << enter_min_distance;
                 }
 
                 // check distance from exitIP
@@ -271,6 +272,7 @@ void cutAway(Mesh* leftMesh, Mesh* rightMesh, Mesh* mesh, vector<QVector3D> cutt
                 if (cur_distance < exit_min_distance){
                     exit_min_distance = cur_distance;
                     exitIntersection = mv;
+                    qDebug() << "found exitIntersection : "<< mv << exit_min_distance;
                 }
             }
 
@@ -285,6 +287,7 @@ void cutAway(Mesh* leftMesh, Mesh* rightMesh, Mesh* mesh, vector<QVector3D> cutt
             rightMesh->addFace(mesh->vertices[mf.mesh_vertex[0]].position, mesh->vertices[mf.mesh_vertex[1]].position, mesh->vertices[mf.mesh_vertex[2]].position);
         }
     }
+    qDebug() << "exit, enter intersection : " << exitIntersection.position << enterIntersection.position;
     //Paths3D innerContours_c = contourConstruct3D(innerContours);
     //Paths3D outerContours_c = contourConstruct3D(outerContours);
 
@@ -329,6 +332,8 @@ void cutAway(Mesh* leftMesh, Mesh* rightMesh, Mesh* mesh, vector<QVector3D> cutt
         }
     }
 
+    qDebug() << "intersections : " << enterIntersection.position << exitIntersection.position;
+
 
     if (intersectionExists){ // insert exit intersection
         cuttingContour_u.insert(cuttingContour_u.begin(), enterIntersection);
@@ -360,7 +365,7 @@ void cutAway(Mesh* leftMesh, Mesh* rightMesh, Mesh* mesh, vector<QVector3D> cutt
         qDebug() << "inner Contour size : " << innerContour.size();
         Path3D* selectedCuttingContour;
         QMultiHash<int, MeshVertex>* selectedCuttingContourConnections;
-        if (abs(innerContour[0].position.z()-cuttingContour_u[0].position.z()) < abs(innerContour[0].position.z()-cuttingContour_l[0].position.z())){
+        if (abs(innerContour[0].position.z()-cuttingContour_u[1].position.z()) < abs(innerContour[1].position.z()-cuttingContour_l[1].position.z())){
             selectedCuttingContour = &cuttingContour_u;
             selectedCuttingContourConnections = &cuttingContourConnections_u;
         } else {
@@ -433,7 +438,7 @@ void cutAway(Mesh* leftMesh, Mesh* rightMesh, Mesh* mesh, vector<QVector3D> cutt
         qDebug() << "outer Contour size : " << outerContour.size();
         Path3D* selectedCuttingContour;
         QMultiHash<int, MeshVertex>* selectedCuttingContourConnections;
-        if (abs(outerContour[0].position.z()-cuttingContour_u[0].position.z()) < abs(outerContour[0].position.z()-cuttingContour_l[0].position.z())){
+        if (abs(outerContour[0].position.z()-cuttingContour_u[1].position.z()) < abs(outerContour[0].position.z()-cuttingContour_l[1].position.z())){
             selectedCuttingContour = &cuttingContour_u;
             selectedCuttingContourConnections = &cuttingContourConnections_u;
         } else {
@@ -504,15 +509,17 @@ void cutAway(Mesh* leftMesh, Mesh* rightMesh, Mesh* mesh, vector<QVector3D> cutt
     }
 
     if (cutFillMode = 2 && cuttingContour_u.size() >= 3){
-        //QVector3D normal_direction = QVector3D::normal(cuttingContour_u[0].position-cuttingContour_u[1].position, cuttingContour_u[2].position-cuttingContour_u[1].position);
+        QVector3D normal_direction = QVector3D::normal(cuttingContour_u[0].position-cuttingContour_u[1].position, cuttingContour_u[2].position-cuttingContour_u[1].position);
         for (int u_idx=0; u_idx<cuttingContour_u.size(); u_idx++){
+            if (u_idx == cuttingContour_u.size()-1 && intersectionExists)
+                continue;
             MeshVertex umv1 = cuttingContour_u[u_idx];
             MeshVertex umv2 = cuttingContour_u[(u_idx+1)%cuttingContour_u.size()];
 
             MeshVertex lmv1 = cuttingContour_l[u_idx];
             MeshVertex lmv2 = cuttingContour_l[(u_idx+1)%cuttingContour_l.size()];
 
-            /*if (normal_direction.z()>0){
+            if (normal_direction.z()>0){
                 rightMesh->addFace(umv2.position, umv1.position, lmv1.position);
                 rightMesh->addFace(umv2.position, lmv1.position, lmv2.position);
                 leftMesh->addFace(umv1.position, umv2.position, lmv1.position);
@@ -522,9 +529,37 @@ void cutAway(Mesh* leftMesh, Mesh* rightMesh, Mesh* mesh, vector<QVector3D> cutt
                 rightMesh->addFace(lmv1.position, umv2.position, lmv2.position);
                 leftMesh->addFace(umv2.position, umv1.position, lmv1.position);
                 leftMesh->addFace(umv2.position, lmv1.position, lmv2.position);
-            }*/
+            }
+        }
+
+        if (intersectionExists){ // fill 대칭
+            MeshVertex umv_enter = cuttingContour_u[0];
+            MeshVertex umv1 = cuttingContour_u[1];
+            MeshVertex lmv1 = cuttingContour_l[1];
+            MeshVertex umv_exit = cuttingContour_u[cuttingContour_u.size()-1];
+            MeshVertex umv_1 = cuttingContour_u[cuttingContour_u.size()-2];
+            MeshVertex lmv_1 = cuttingContour_l[cuttingContour_l.size()-2];
+
+            if (normal_direction.z()>0){
+                qDebug() << "normal direction plus";
+                /*rightMesh->addFace(umv_enter.position, umv_exit.position, lmv_exit.position);
+                rightMesh->addFace(umv_enter.position, lmv_exit.position, lmv_enter.position);
+                leftMesh->addFace(umv_exit.position, umv_enter.position, lmv_exit.position);
+                leftMesh->addFace(lmv_exit.position, umv_enter.position, lmv_enter.position);*/
+            } else {
+                qDebug() << "normal direction minus" << umv_enter.position << umv_exit.position;
+                rightMesh->addFace(umv_enter.position, umv1.position, lmv1.position);
+                rightMesh->addFace(umv_1.position, umv_exit.position, lmv_1.position);
+                leftMesh->addFace(umv1.position, umv_enter.position, lmv1.position);
+                leftMesh->addFace(umv_exit.position, umv_1.position, lmv_1.position);
+                /*rightMesh->addFace(umv_exit.position, umv_enter.position, lmv_exit.position);
+                rightMesh->addFace(lmv_exit.position, umv_enter.position, lmv_enter.position);
+                leftMesh->addFace(umv_enter.position, umv_exit.position, lmv_exit.position);
+                leftMesh->addFace(umv_enter.position, lmv_exit.position, lmv_enter.position);*/
+            }
         }
     }
+
 
     qDebug() << "right wall constructed";
 

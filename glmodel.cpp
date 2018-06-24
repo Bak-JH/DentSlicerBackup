@@ -821,7 +821,7 @@ void GLModel::handlePickerClickedFreeCut(Qt3DRender::QPickEvent* pick)
 
 void GLModel::handlePickerClicked(QPickEvent *pick)
 {
-
+    qDebug() << "handle Picker clicked";
     if (!parentModel)
         return;
 
