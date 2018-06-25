@@ -266,7 +266,6 @@ void cutAway(Mesh* leftMesh, Mesh* rightMesh, Mesh* mesh, vector<QVector3D> cutt
                 // check if vertex earned from intersection
                 for (int vn=0; vn<3; vn++){
                     QVector3D mv = mesh->vertices[mf.mesh_vertex[vn]].position;
-                    IntPoint intmv = IntPoint(mv.x()*scfg->resolution, mv.y()*scfg->resolution);
                     QVector3D enterQV3 = QVector3D(enterIP.X/scfg->resolution, enterIP.Y/scfg->resolution, 0);
                     Plane plane;
                     plane.push_back(enterQV3);
@@ -295,7 +294,6 @@ void cutAway(Mesh* leftMesh, Mesh* rightMesh, Mesh* mesh, vector<QVector3D> cutt
                 // check if vertex earned from intersection
                 for (int vn=0; vn<3; vn++){
                     QVector3D mv = mesh->vertices[mf.mesh_vertex[vn]].position;
-                    IntPoint intmv = IntPoint(mv.x()*scfg->resolution, mv.y()*scfg->resolution);
                     QVector3D exitQV3 = QVector3D(exitIP.X/scfg->resolution, exitIP.Y/scfg->resolution, 0);
                     Plane plane;
                     plane.push_back(exitQV3);
@@ -554,7 +552,7 @@ void cutAway(Mesh* leftMesh, Mesh* rightMesh, Mesh* mesh, vector<QVector3D> cutt
     if (cutFillMode = 2 && cuttingContour_u.size() >= 3){
         QVector3D normal_direction = QVector3D::normal(cuttingContour_u[0].position-cuttingContour_u[1].position, cuttingContour_u[2].position-cuttingContour_u[1].position);
         for (int u_idx=0; u_idx<cuttingContour_u.size(); u_idx++){
-            if (u_idx == cuttingContour_u.size()-1 && intersectionExists)
+            if ((u_idx == 0 || u_idx == cuttingContour_u.size()-1) && intersectionExists)
                 continue;
             MeshVertex umv1 = cuttingContour_u[u_idx];
             MeshVertex umv2 = cuttingContour_u[(u_idx+1)%cuttingContour_u.size()];
@@ -583,23 +581,28 @@ void cutAway(Mesh* leftMesh, Mesh* rightMesh, Mesh* mesh, vector<QVector3D> cutt
             MeshVertex umv_1 = cuttingContour_u[cuttingContour_u.size()-2];
             MeshVertex lmv_1 = cuttingContour_l[cuttingContour_l.size()-2];
 
+            rightMesh->addFace(umv1.position, umv_enter.position, lmv1.position);
+            rightMesh->addFace(umv_exit.position, umv_1.position, lmv_1.position);
+            leftMesh->addFace(umv_enter.position, umv1.position, lmv1.position);
+            leftMesh->addFace(umv_1.position, umv_exit.position, lmv_1.position);
+            rightMesh->addFace(umv_enter.position, umv1.position, lmv1.position);
+            rightMesh->addFace(umv_1.position, umv_exit.position, lmv_1.position);
+            leftMesh->addFace(umv1.position, umv_enter.position, lmv1.position);
+            leftMesh->addFace(umv_exit.position, umv_1.position, lmv_1.position);
+            /*
             if (normal_direction.z()>0){
-                qDebug() << "normal direction plus";
-                /*rightMesh->addFace(umv_enter.position, umv_exit.position, lmv_exit.position);
-                rightMesh->addFace(umv_enter.position, lmv_exit.position, lmv_enter.position);
-                leftMesh->addFace(umv_exit.position, umv_enter.position, lmv_exit.position);
-                leftMesh->addFace(lmv_exit.position, umv_enter.position, lmv_enter.position);*/
+                qDebug() << "normal direction plus" << umv_enter.position << umv_exit.position;
+                rightMesh->addFace(umv1.position, umv_enter.position, lmv1.position);
+                rightMesh->addFace(umv_exit.position, umv_1.position, lmv_1.position);
+                leftMesh->addFace(umv_enter.position, umv1.position, lmv1.position);
+                leftMesh->addFace(umv_1.position, umv_exit.position, lmv_1.position);
             } else {
                 qDebug() << "normal direction minus" << umv_enter.position << umv_exit.position;
                 rightMesh->addFace(umv_enter.position, umv1.position, lmv1.position);
                 rightMesh->addFace(umv_1.position, umv_exit.position, lmv_1.position);
                 leftMesh->addFace(umv1.position, umv_enter.position, lmv1.position);
                 leftMesh->addFace(umv_exit.position, umv_1.position, lmv_1.position);
-                /*rightMesh->addFace(umv_exit.position, umv_enter.position, lmv_exit.position);
-                rightMesh->addFace(lmv_exit.position, umv_enter.position, lmv_enter.position);
-                leftMesh->addFace(umv_enter.position, umv_exit.position, lmv_exit.position);
-                leftMesh->addFace(umv_enter.position, lmv_exit.position, lmv_enter.position);*/
-            }
+            }*/
         }
     }
 
