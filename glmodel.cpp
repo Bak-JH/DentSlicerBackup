@@ -11,8 +11,6 @@
 #include <QFuture>
 #include <QFileDialog>
 
-#include <Qt3DExtras/QCylinderMesh>
-
 int GLModel::globalID = 0;
 
 
@@ -30,6 +28,7 @@ GLModel::GLModel(QObject* mainWindow, QNode *parent, Mesh* loadMesh, QString fna
     , parentModel((GLModel*)(parent))
     , cutMode(1)
 {
+    connect(&futureWatcher, SIGNAL(finished()), this, SLOT(slicingDone()));
 
     // generates shadow model for object picking
     if (isShadow){
@@ -71,7 +70,7 @@ GLModel::GLModel(QObject* mainWindow, QNode *parent, Mesh* loadMesh, QString fna
     m_meshVertexMaterial = new QPerVertexColorMaterial();
 
     this->changecolor(0);
-    if (filename != "" && !EndsWith(filename.toStdString(), std::string("_left").c_str()) && !EndsWith(filename.toStdString(),  std::string("_right").c_str()) && !EndsWith(filename.toStdString(),  std::string("_offset").c_str()) && !EndsWith(filename.toStdString(),  std::string("_support").c_str())){
+    if (filename != "" && !EndsWith(filename.toStdString(), std::string("_left").c_str()) && !EndsWith(filename.toStdString(),  std::string("_right").c_str()) && !EndsWith(filename.toStdString(),  std::string("_offset").c_str())){
         mesh = new Mesh();
         loadMeshSTL(mesh, filename.toStdString().c_str());
     } else {
@@ -323,14 +322,17 @@ void GLModel::updateModelMesh(){
     // create new object picker, shadowmodel, remove prev shadowmodel
     //QVector3D translation = shadowModel->m_transform->translation();
     if (shadowModel !=NULL){
-        qDebug() << "shadowmodel connection disconnected : "<< QObject::disconnect(shadowModel, SIGNAL(modelSelected(int)), qmlManager, SLOT(modelSelected(int)));
+        QObject::disconnect(shadowModel, SIGNAL(modelSelected(int)), qmlManager, SLOT(modelSelected(int)));
         shadowModel->removeMouseHandlers();
         qmlManager->disconnectHandlers(this);
         GLModel* prevShadowModel = shadowModel;
         shadowModel=new GLModel(this->mainWindow, this, mesh, filename, true);
         shadowModel->copyModelAttributeFrom(prevShadowModel);
         prevShadowModel->deleteLater();
-        qmlManager->connectHandlers(this);
+
+        // reconnect handler if current selected model is updated
+        if (qmlManager->selectedModel==this)
+            qmlManager->connectHandlers(this);
         //shadowModel->m_transform->setTranslation(translation);
         QObject::connect(shadowModel, SIGNAL(modelSelected(int)), qmlManager, SLOT(modelSelected(int)));
     }
@@ -361,6 +363,12 @@ void GLModel::updateModelMesh(){
 
 }
 
+void GLModel::slicingDone(){
+    QString result = futureWatcher.result()->slicingInfo;
+    slicingInfo = result;
+    qmlManager->slicingData->setProperty("visible", true);
+}
+
 featureThread::featureThread(GLModel* glmodel, int type){
     qDebug() << "feature thread created" << type;
     m_glmodel = glmodel;
@@ -373,9 +381,7 @@ featureThread::featureThread(GLModel* glmodel, int type){
     ste = new STLexporter();
     se = new SlicingEngine();
 
-    //connect(ot, SIGNAL(progressChanged(float)), this, SLOT(progressChanged(float)));
-    //connect(ct, SIGNAL(progressChanged(float)), this, SLOT(progressChanged(float)));
-    //connect(ar, SIGNAL(progressChanged(float)), this, SLOT(progressChanged(float)));
+    QObject::connect(se, SIGNAL(updateModelInfo(int,int,QString,float)), qmlManager, SLOT(sendUpdateModelInfo(int,int,QString,float)));
 
 }
 
@@ -419,9 +425,7 @@ void featureThread::run(){
                 // slice file
                 qmlManager->openProgressPopUp();
                 QFuture<Slicer*> future = QtConcurrent::run(se, &SlicingEngine::slice, data, m_glmodel->mesh, m_glmodel->filename);
-                m_glmodel->slicer = future.result();
-
-                emit m_glmodel->_generateSupport();
+                m_glmodel->futureWatcher.setFuture(future);
                 break;
             }
         case ftrMove:

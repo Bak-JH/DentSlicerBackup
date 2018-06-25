@@ -43,15 +43,27 @@ Slicer* SlicingEngine::slice (QVariant cfg, Mesh* mesh, QString filename){
 
     // Export to SVG
     SVGexporter* exporter = new SVGexporter();
-    exporter->exportSVG(contourLists, filename+"_export");
+    QString export_info = exporter->exportSVG(contourLists, filename+"_export");
 
     // 승환 100%
     qmlManager->setProgress(1);
     QStringList name_word = filename.split("/");
 
+    QStringList infos = export_info.trimmed().split(":");
+    int time = infos[1].toInt();
+    int layer = infos[2].toInt();
+    QString size;
+    float x = infos[3].toFloat(), y=infos[4].toFloat(), z=infos[5].toFloat(); // x = text.trimmed().split(":")
+    size.sprintf("%.1f X %.1f X %.1f mm",x,y,z);
+    float volume = infos[6].toFloat();
+
+    emit updateModelInfo(time, layer, size, volume);
+
     qmlManager->openResultPopUp("",
                                 QString(name_word[name_word.size()-1]+" slicing done.").toStdString(),
                                 "");
+
+    slicer->slicingInfo = export_info;
 
     return slicer;
 }
