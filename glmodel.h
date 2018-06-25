@@ -222,6 +222,8 @@ private:
     bool shellOffsetActive = false;
     bool layflatActive = false;
 
+    bool isMoved = false;
+
 signals:
 
     void modelSelected(int);

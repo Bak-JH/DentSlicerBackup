@@ -211,6 +211,8 @@ void GLModel::saveUndoState(){
     // need to change to memcpy or something
     qDebug () << "save prev mesh";
 
+    qDebug () << "current selected  0" << qmlManager->selectedModel;
+
     // copy current Mesh as temporary prev_mesh
     Mesh* temp_prev_mesh = new Mesh();
     temp_prev_mesh->faces.reserve(mesh->faces.size()*3);
@@ -221,7 +223,7 @@ void GLModel::saveUndoState(){
                 mesh->vertices[mf.mesh_vertex[2]].position);
     }
     temp_prev_mesh->connectFaces();
-
+    qDebug () << "current selected  1" << qmlManager->selectedModel;
     temp_prev_mesh->prevMesh = mesh->prevMesh;
     if (mesh->prevMesh != nullptr)
         mesh->prevMesh->nextMesh = temp_prev_mesh;
@@ -231,6 +233,8 @@ void GLModel::saveUndoState(){
     // for model cut, shell offset
     lmesh->prevMesh = temp_prev_mesh;
     rmesh->prevMesh = temp_prev_mesh;
+
+    qDebug () << "current selected 2 " << qmlManager->selectedModel;
 }
 
 void GLModel::loadUndoState(){
@@ -1396,6 +1400,7 @@ void GLModel::exgoo(){
 void GLModel::mgoo(Qt3DRender::QPickEvent* v)
 {
     qmlManager->setClosedHandCursor();
+    isMoved = true;
     QVector2D currentPoint = (QVector2D)v->position();
 
     QList<QVector3D> targetPoints;
@@ -1437,8 +1442,8 @@ void GLModel::mgoo(Qt3DRender::QPickEvent* v)
     qDebug() << "calculate Y   " << calculateY;
 
     float scaleFactor = qmlManager->systemTransform->scale3D().x() / 0.004f;
-    qmlManager->modelMove(1,-(calculateX.x() + calculateY.x()) * 1.5 / scaleFactor);
-    qmlManager->modelMove(2,-(calculateX.y() + calculateY.y()) * 1.5 / scaleFactor);
+    qmlManager->modelMoveF(1,-(calculateX.x() + calculateY.x()) * 1.5 / scaleFactor);
+    qmlManager->modelMoveF(2,-(calculateX.y() + calculateY.y()) * 1.5 / scaleFactor);
 
     prevPoint = currentPoint;
 }
@@ -1455,6 +1460,10 @@ void GLModel::rgoo(Qt3DRender::QPickEvent* v){
     qDebug() << "Released";
     m_objectPicker->setDragEnabled(false);
     qmlManager->resetCursor();
+
+    if(isMoved)
+        qmlManager->modelMoveDone(3);
+    isMoved = false;
 }
 
 /*void GLModel::drawLine(QVector3D endpoint)

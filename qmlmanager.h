@@ -54,7 +54,7 @@ public:
     Qt3DCore::QEntity *moveArrow;
     Qt3DCore::QEntity *moveArrowX;
     Qt3DCore::QEntity *moveArrowY;
-    QObject *moveArrowobj;
+    Qt3DCore::QEntity *moveArrowobj;
 
     // selection popup
     QObject* yesno_popup;
@@ -178,7 +178,8 @@ public slots:
     void modelRotate(int,int);
 
     void modelRotateByNumber(int axis, int, int, int);
-    void modelMove(int,float);
+    void modelMove(int,int);
+    void modelMoveF(int,float);
     void modelMoveByNumber(int axis, int, int);
     void modelMoveDone(int);
     void modelRotateDone(int);
