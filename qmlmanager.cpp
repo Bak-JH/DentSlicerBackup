@@ -752,13 +752,8 @@ void QmlManager::modelMoveDone(int Axis){
     if(Axis != 3)
         QQmlProperty::write(moveArrowobj,"center",selectedModel->m_transform->translation()+QVector3D((selectedModel->mesh->x_max+selectedModel->mesh->x_min)/2,(selectedModel->mesh->y_max+selectedModel->mesh->y_min)/2,(selectedModel->mesh->z_max+selectedModel->mesh->z_min)/2));
     mouseHack();
-
-    //selectedModel->checkPrintingArea();
-
-//    if(selectedModel != nullptr)
-//        QMetaObject::invokeMethod(boundedBox, "setPosition", Q_ARG(QVariant, QVector3D(selectedModel->m_transform->translation())));
-
 }
+
 void QmlManager::modelRotateDone(int Axis){
     if (selectedModel == nullptr)
         return;

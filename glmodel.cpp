@@ -211,8 +211,6 @@ void GLModel::saveUndoState(){
     // need to change to memcpy or something
     qDebug () << "save prev mesh";
 
-    qDebug () << "current selected  0" << qmlManager->selectedModel;
-
     // copy current Mesh as temporary prev_mesh
     Mesh* temp_prev_mesh = new Mesh();
     temp_prev_mesh->faces.reserve(mesh->faces.size()*3);
@@ -223,7 +221,6 @@ void GLModel::saveUndoState(){
                 mesh->vertices[mf.mesh_vertex[2]].position);
     }
     temp_prev_mesh->connectFaces();
-    qDebug () << "current selected  1" << qmlManager->selectedModel;
     temp_prev_mesh->prevMesh = mesh->prevMesh;
     if (mesh->prevMesh != nullptr)
         mesh->prevMesh->nextMesh = temp_prev_mesh;
@@ -234,7 +231,6 @@ void GLModel::saveUndoState(){
     lmesh->prevMesh = temp_prev_mesh;
     rmesh->prevMesh = temp_prev_mesh;
 
-    qDebug () << "current selected 2 " << qmlManager->selectedModel;
 }
 
 void GLModel::loadUndoState(){
@@ -320,6 +316,11 @@ void GLModel::updateModelMesh(){
     addVertices(mesh, false);
     applyGeometry();
 
+    QMetaObject::invokeMethod(qmlManager->boundedBox, "setPosition", Q_ARG(QVariant, m_transform->translation()+QVector3D((mesh->x_max+mesh->x_min)/2,(mesh->y_max+mesh->y_min)/2,(mesh->z_max+mesh->z_min)/2)));
+    QMetaObject::invokeMethod(qmlManager->boundedBox, "setSize", Q_ARG(QVariant, mesh->x_max - mesh->x_min),
+                                                     Q_ARG(QVariant, mesh->y_max - mesh->y_min),
+                                                     Q_ARG(QVariant, mesh->z_max - mesh->z_min));
+
     // create new object picker, shadowmodel, remove prev shadowmodel
     //QVector3D translation = shadowModel->m_transform->translation();
     if (shadowModel !=NULL){
@@ -354,13 +355,13 @@ void GLModel::updateModelMesh(){
     QVector3D tmp = m_transform->translation();
     float zlength = mesh->z_max - mesh->z_min;
     //if (shadowModel != NULL) // since shadow model transformed twice
+
+
+
     m_transform->setTranslation(QVector3D(tmp.x(),tmp.y(),-mesh->z_min));
     checkPrintingArea();
     qDebug() << "model transform :" <<m_transform->translation() << mesh->x_max << mesh->x_min << mesh->y_max << mesh->y_min << mesh->z_max << mesh->z_min;
-    QMetaObject::invokeMethod(qmlManager->boundedBox, "setPosition", Q_ARG(QVariant, m_transform->translation()+QVector3D((mesh->x_max+mesh->x_min)/2,(mesh->y_max+mesh->y_min)/2,(mesh->z_max+mesh->z_min)/2)));
-    QMetaObject::invokeMethod(qmlManager->boundedBox, "setSize", Q_ARG(QVariant, mesh->x_max - mesh->x_min),
-                                                     Q_ARG(QVariant, mesh->y_max - mesh->y_min),
-                                                     Q_ARG(QVariant, mesh->z_max - mesh->z_min));
+
 
 }
 
@@ -829,7 +830,7 @@ void GLModel::handlePickerClicked(QPickEvent *pick)
 
     }
 
-    if (!cutActive && !extensionActive && !labellingActive && !layflatActive)
+    if (!cutActive && !extensionActive && !labellingActive && !layflatActive && !isMoved)
         emit modelSelected(parentModel->ID);
 
     qDebug() << "model selected emit" << pick->position() << parentModel->ID;
