@@ -635,7 +635,11 @@ Rectangle {
                         }else{
                             text = text.charAt(0).replace(/[^-|1-9]/g,'')+text.substring(1,text.length).replace(/[^0-9]/g, '');
                         }
-                    //    numberbox1.color = "#ffffff"
+
+                        if (text.length > 3){
+                            text = text.substring(0,3)
+                        }
+
                         if (text === "") text = "0"
                         numberbox1_number = parseInt(text,10)
                         console.log(numberbox1_number);
@@ -776,6 +780,11 @@ Rectangle {
                         }else{
                             text = text.charAt(0).replace(/[^-|1-9]/g,'')+text.substring(1,text.length).replace(/[^0-9]/g, '');
                         }
+
+                        if (text.length > 3){
+                            text = text.substring(0,3)
+                        }
+
                         if (text === "") text = "0"
                         numberbox2_number = parseInt(text,10)
                      //   if (numberbox2_number != 0 ) applyfinishbutton.color = "#3ea6b7"
@@ -912,7 +921,11 @@ Rectangle {
                         }else{
                             text = text.charAt(0).replace(/[^-|1-9]/g,'')+text.substring(1,text.length).replace(/[^0-9]/g, '');
                         }
-                    //    numberbox3.color = "#ffffff"
+
+                        if (text.length > 3){
+                            text = text.substring(0,3)
+                        }
+
                         if (text === "") text = "0"
                         numberbox3_number = parseInt(text,10)
                        // if (numberbox3_number != 0 ) applyfinishbutton.color = "#3ea6b7"

@@ -747,6 +747,7 @@ void QmlManager::modelMoveDone(int Axis){
 
     // move translation back to original
     selectedModel->m_transform->setTranslation(selectedModel->m_translation);
+    qDebug() << "test 1    " << selectedModel->m_transform->translation();
     selectedModel->moveModelMesh(translationDiff);
 
     if(Axis != 3)
@@ -956,6 +957,8 @@ void QmlManager::modelMoveByNumber(int axis, int X, int Y){
     selectedModel->moveModelMesh(QVector3D(tmp.x()+X,tmp.y()+Y,tmp.z()));
     //selectedModel->checkPrintingArea();
     //selectedModel->m_transform->setTranslation(QVector3D(tmp.x()+X,tmp.y()+Y,tmp.z()));
+
+    modelMoveDone(1);
 }
 void QmlManager::modelRotateByNumber(int axis,  int X, int Y, int Z){
     if (selectedModel == nullptr)
