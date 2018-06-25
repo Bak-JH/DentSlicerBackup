@@ -587,7 +587,7 @@ Rectangle {
             id: popup_move
             objectName: "movePopup"
             funcname: "Move"
-            height: 250
+            height: 200
             //detail1: ""
             //detail2: ""
             //image: ""
@@ -600,6 +600,7 @@ Rectangle {
             //applybutton_text: "Finish"
             descriptionimage_vis: false
             numberbox_vis: true
+            numberboxset3_vis : false
             numberbox_nameing_vis: true
             numberbox_width: 110
             numberbox_y: 45

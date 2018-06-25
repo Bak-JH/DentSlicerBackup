@@ -1050,6 +1050,7 @@ Rectangle {
                 anchors.bottom: parent.bottom
                 anchors.left: parent.left
                 color: "transparent"
+                visible: numberboxset3_vis
                 Text {
                     anchors.verticalCenter: parent.verticalCenter
                     anchors.left: parent.left
