@@ -1077,7 +1077,7 @@ Rectangle {
         Rectangle {
             width: 158
             height: 24
-            color: "#f5f5f5"
+            color: "transparent"
             anchors.verticalCenter: parent.verticalCenter
 
             TextField {
@@ -1087,6 +1087,7 @@ Rectangle {
                 anchors.verticalCenter: parent.verticalCenter
                 horizontalAlignment: TextInput.AlignRight
                 placeholderText: numbox_value_detail2
+                maximumLength: 2
                 font.pixelSize: 12
                 font.family: mainFont.name
                 textColor: focus ? "black" : "#595959"
@@ -1115,6 +1116,14 @@ Rectangle {
                 anchors.right: parent.right
                 anchors.verticalCenter: parent.verticalCenter
                 color: "#111"
+            }
+            Rectangle{
+                width: parent.width
+                height: 1
+                color: "#3f3f3f"
+                anchors.top : numberbox_detail2_text.bottom
+                anchors.right: parent.right
+                anchors.rightMargin: 0
             }
         }
         //up-button
