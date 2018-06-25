@@ -59,6 +59,9 @@ Rectangle {
         fourth_tab_button_support.state = "inactive";
 
         arrangePopUp.closePopUp();
+        resultPopUp.closePopUp();
+        deletePopUp.closePopUp();
+
         console.log("all off");
     }
 
