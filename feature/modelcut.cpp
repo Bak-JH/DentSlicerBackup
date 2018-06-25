@@ -259,20 +259,63 @@ void cutAway(Mesh* leftMesh, Mesh* rightMesh, Mesh* mesh, vector<QVector3D> cutt
                 QVector3D mv = mesh->vertices[mf.mesh_vertex[0]].position;
                 IntPoint intmv = IntPoint(mv.x()*scfg->resolution, mv.y()*scfg->resolution);
 
-                // check distance from enterIP
-                float cur_distance = pointDistance(enterIP, intmv);
-                if (cur_distance < enter_min_distance){
-                    enter_min_distance = cur_distance;
-                    enterIntersection = mv;
-                    qDebug() << "found enterIntersection : " << mv << enter_min_distance;
+
+                bool faceLeftToPlane_int = false;
+                bool faceRightToPlane_int = false;
+
+                // check if vertex earned from intersection
+                for (int vn=0; vn<3; vn++){
+                    QVector3D mv = mesh->vertices[mf.mesh_vertex[vn]].position;
+                    IntPoint intmv = IntPoint(mv.x()*scfg->resolution, mv.y()*scfg->resolution);
+                    QVector3D enterQV3 = QVector3D(enterIP.X/scfg->resolution, enterIP.Y/scfg->resolution, 0);
+                    Plane plane;
+                    plane.push_back(enterQV3);
+                    plane.push_back(cuttingContour[1].position);
+                    plane.push_back(QVector3D(enterQV3.x(),enterQV3.y(),1));
+                    if (isLeftToPlane(plane, mv)) // if one vertex is left to plane, append to left vertices part
+                        faceLeftToPlane_int = true;
+                    else {
+                        faceRightToPlane_int = true;
+                    }
                 }
 
-                // check distance from exitIP
-                cur_distance = pointDistance(exitIP, intmv);
-                if (cur_distance < exit_min_distance){
-                    exit_min_distance = cur_distance;
-                    exitIntersection = mv;
-                    qDebug() << "found exitIntersection : "<< mv << exit_min_distance;
+                if (faceLeftToPlane_int && faceRightToPlane_int){ // current mesh face is earned from intersection
+                    // check distance from enterIP
+                    float cur_distance = pointDistance(enterIP, intmv);
+                    if (cur_distance < enter_min_distance){
+                        enter_min_distance = cur_distance;
+                        enterIntersection = mv;
+                        qDebug() << "found enterIntersection : " << mv <<enterIP.X << enterIP.Y << enter_min_distance;
+                    }
+                }
+
+                faceLeftToPlane_int = false;
+                faceRightToPlane_int = false;
+
+                // check if vertex earned from intersection
+                for (int vn=0; vn<3; vn++){
+                    QVector3D mv = mesh->vertices[mf.mesh_vertex[vn]].position;
+                    IntPoint intmv = IntPoint(mv.x()*scfg->resolution, mv.y()*scfg->resolution);
+                    QVector3D exitQV3 = QVector3D(exitIP.X/scfg->resolution, exitIP.Y/scfg->resolution, 0);
+                    Plane plane;
+                    plane.push_back(exitQV3);
+                    plane.push_back(cuttingContour[cuttingContour.size()-2].position);
+                    plane.push_back(QVector3D(exitQV3.x(),exitQV3.y(),1));
+                    if (isLeftToPlane(plane, mv)) // if one vertex is left to plane, append to left vertices part
+                        faceLeftToPlane_int = true;
+                    else {
+                        faceRightToPlane_int = true;
+                    }
+                }
+
+                if (faceLeftToPlane_int && faceRightToPlane_int){ // current mesh face is earned from intersection
+                    // check distance from exitIP
+                    float cur_distance = pointDistance(exitIP, intmv);
+                    if (cur_distance < exit_min_distance){
+                        exit_min_distance = cur_distance;
+                        exitIntersection = mv;
+                        qDebug() << "found exitIntersection : "<< mv << exitIP.X << exitIP.Y << exit_min_distance;
+                    }
                 }
             }
 
