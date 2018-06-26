@@ -523,6 +523,12 @@ Rectangle {
         onClicked: {
             radioClicked(1);
         }
+        onHoveredChanged: {
+            if(hovered)
+                qm.setHandCursor();
+            else
+                qm.resetCursor();
+        }
     }
 
     RadioButton {
@@ -559,6 +565,12 @@ Rectangle {
         }
         onClicked: {
             radioClicked(2);
+        }
+        onHoveredChanged: {
+            if(hovered)
+                qm.setHandCursor();
+            else
+                qm.resetCursor();
         }
     }
 
