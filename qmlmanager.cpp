@@ -155,6 +155,7 @@ void QmlManager::initializeUI(QQmlApplicationEngine* e){
     QObject::connect(viewSupportButton, SIGNAL(onChanged(bool)), this, SLOT(viewSupportChanged(bool)));
     viewLayerButton = FindItemByName(engine, "viewLayerButton");
     QObject::connect(viewLayerButton, SIGNAL(onChanged(bool)), this, SLOT(viewLayerChanged(bool)));
+    setViewMode(VIEW_MODE_OBJECT);
 
     httpreq* hr = new httpreq();
     QObject::connect(loginButton, SIGNAL(loginTrial(QString)), hr, SLOT(get_iv(QString)));
@@ -1111,22 +1112,38 @@ void QmlManager::setProgressText(string inputText){
 
 void QmlManager::viewObjectChanged(bool checked){
     qInfo() << "viewObjectChanged" << checked;
-    if( checked == false ) {
+    if( checked ) {
+        setViewMode(VIEW_MODE_OBJECT);
+    } else {
         QMetaObject::invokeMethod(qmlManager->boxUpperTab, "all_off");
     }
 }
 
 void QmlManager::viewSupportChanged(bool checked){
     qInfo() << "viewSupportChanged" << checked;
+    if( checked ) {
+        setViewMode(VIEW_MODE_SUPPORT);
+    }
     if( selectedModel != nullptr ) {
-        selectedModel->toggleSupport(checked);
+        emit selectedModel->_updateModelMesh();
     }
 }
 
 void QmlManager::viewLayerChanged(bool checked){
     qInfo() << "viewLayerChanged" << checked;
+    if( checked ) {
+        setViewMode(VIEW_MODE_LAYER);
+    }
     layerViewPopup->setProperty("visible", checked);
     layerViewSlider->setProperty("visible", checked);
+}
+
+void QmlManager::setViewMode(int viewMode) {
+    this->viewMode = viewMode;
+}
+
+int QmlManager::getViewMode() {
+    return viewMode;
 }
 
 QObject* FindItemByName(QList<QObject*> nodes, const QString& name)

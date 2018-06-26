@@ -99,7 +99,6 @@ public:
     GLModel *shadowModel = NULL; // GLmodel's sparse mesh that gets picker input
     GLModel *leftModel = NULL;
     GLModel *rightModel = NULL;
-    GLModel *supportModel = NULL;
 
     // Core mesh structures
     Mesh* mesh;
@@ -183,9 +182,6 @@ public:
     bool EndsWith(const string& a, const string& b);
     QString getFileName(const string& s);
     QVector3D spreadPoint(QVector3D endpoint,QVector3D startpoint,int factor);
-    // support
-    void generateCylinder(OverhangPoint *point, OverhangPoint *parent = nullptr);
-    void toggleSupport(bool isOn);
 
     // support
     Slicer* slicer;
@@ -208,7 +204,7 @@ private:
     int f_cnt;
     QNode* m_parent;
     QVector3D lastpoint;
-    void initialize(const Mesh* mesh);
+    void initialize(const int& faces);
     void applyGeometry();
     void addVertex(QVector3D vertex);
     void addVertices(vector<QVector3D> vertices);

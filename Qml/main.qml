@@ -345,7 +345,7 @@ Item{
             visible: false
         }
 
-        Planeslider {
+        LayerViewSlider {
             id: layerViewSlider
             objectName: "layerViewSlider"
             anchors.right: parent.right

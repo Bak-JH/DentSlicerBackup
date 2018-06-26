@@ -7,6 +7,7 @@
 #include "qmlmanager.h"
 #include "feature/text3dgeometrygenerator.h"
 #include "feature/shelloffset.h"
+#include "feature/supportview.h"
 #include <QtConcurrent/QtConcurrent>
 #include <QFuture>
 #include <QFileDialog>
@@ -38,7 +39,7 @@ GLModel::GLModel(QObject* mainWindow, QNode *parent, Mesh* loadMesh, QString fna
         supportMesh = new Mesh();
 
         mesh = toSparse(parentModel->mesh);
-        initialize(mesh);
+        initialize(mesh->faces.size());
         addVertices(mesh, false);
         applyGeometry();
 
@@ -69,7 +70,56 @@ GLModel::GLModel(QObject* mainWindow, QNode *parent, Mesh* loadMesh, QString fna
     m_meshMaterial = new QPhongMaterial();
     m_meshVertexMaterial = new QPerVertexColorMaterial();
 
+//    QEffect *effect = new QEffect();
+
+//    // Create technique, render pass and shader
+//    QTechnique *gl3Technique = new QTechnique();
+//    QRenderPass *gl3Pass = new QRenderPass();
+//    QShaderProgram *glShader = new QShaderProgram();
+
+//    // Set the shader on the render pass
+//    string str = "\
+//            uniform highp mat4 qt_Matrix;\
+//            attribute highp vec4 qt_Vertex;\
+//            attribute highp vec2 qt_MultiTexCoord0;\
+//            varying highp vec2 qt_TexCoord0;\
+//            void main() {\
+//                qt_TexCoord0 = qt_MultiTexCoord0;\
+//                gl_Position = qt_Matrix * qt_Vertex;\
+//            }";
+//    QByteArray byteArray(str.c_str(), str.length());
+//    glShader->setVertexShaderCode(byteArray);
+//    string strFrag = "\
+//            varying highp vec2 qt_TexCoord0;\
+//            uniform sampler2D source;\
+//            uniform lowp float qt_Opacity;\
+//            void main() {\
+//                gl_FragColor = texture2D(source, qt_TexCoord0) * qt_Opacity;\
+//            }";
+//    QByteArray byteFrag(strFrag.c_str(), strFrag.length());
+//    glShader->setFragmentShaderCode(byteFrag);
+//    gl3Pass->setShaderProgram(glShader);
+
+//    // Add the pass to the technique
+//    gl3Technique->addRenderPass(gl3Pass);
+
+//    // Set the targeted GL version for the technique
+//    gl3Technique->graphicsApiFilter()->setApi(QGraphicsApiFilter::OpenGL);
+//    gl3Technique->graphicsApiFilter()->setMajorVersion(3);
+//    gl3Technique->graphicsApiFilter()->setMinorVersion(1);
+//    gl3Technique->graphicsApiFilter()->setProfile(QGraphicsApiFilter::CoreProfile);
+
+
+//    // Add the technique to the effect
+//    effect->addTechnique(gl3Technique);
+//    effect = qobject_cast<QEffect*>(qmlManager->effect);
+//    qDebug() << "effect ----";
+//    qDebug() << effect;
+//    qDebug() << qmlManager->effect;
+//    //m_meshMaterial->setEffect(qobject_cast<QEffect*>(qmlManager->effect));
+
     this->changecolor(0);
+
     if (filename != "" && !EndsWith(filename.toStdString(), std::string("_left").c_str()) && !EndsWith(filename.toStdString(),  std::string("_right").c_str()) && !EndsWith(filename.toStdString(),  std::string("_offset").c_str())){
         mesh = new Mesh();
         loadMeshSTL(mesh, filename.toStdString().c_str());
@@ -84,7 +134,7 @@ GLModel::GLModel(QObject* mainWindow, QNode *parent, Mesh* loadMesh, QString fna
     rmesh = new Mesh();
     supportMesh = new Mesh();
 
-    initialize(mesh);
+    initialize(mesh->faces.size());
     addVertices(mesh, false);
     applyGeometry();
 
@@ -315,8 +365,16 @@ void GLModel::updateModelMesh(){
     delete m_geometry;
     delete m_geometryRenderer;
     // reinitialize with updated mesh
-    initialize(mesh);
+
+    //Mesh* mesh = qmlManager->getViewMode() == VIEW_MODE_SUPPORT ? this->supportMesh : this->mesh;
+    initialize(mesh->faces.size() + qmlManager->getViewMode() == VIEW_MODE_SUPPORT ? supportMesh->faces.size() : 0);
     addVertices(mesh, false);
+    if( qmlManager->getViewMode() == VIEW_MODE_SUPPORT ) {
+        QVector3D t = m_transform->translation();
+        t.setZ(mesh->z_min);
+        supportMesh->vertexMove(t);
+        addVertices(supportMesh, false);
+    }
     applyGeometry();
 
     // create new object picker, shadowmodel, remove prev shadowmodel
@@ -367,6 +425,9 @@ void GLModel::slicingDone(){
     QString result = futureWatcher.result()->slicingInfo;
     slicingInfo = result;
     qmlManager->slicingData->setProperty("visible", true);
+
+    slicer = futureWatcher.result();
+    emit _generateSupport();
 }
 
 featureThread::featureThread(GLModel* glmodel, int type){
@@ -499,26 +560,27 @@ arrangeSignalSender::arrangeSignalSender(){
 
 }
 
-void GLModel::initialize(const Mesh* mesh){
+void GLModel::initialize(const int& faces){
+    qDebug() << "faces:" << faces;
 
     m_geometryRenderer = new QGeometryRenderer();
     m_geometry = new QGeometry(m_geometryRenderer);
 
 
     QByteArray vertexArray;
-    vertexArray.resize(mesh->faces.size()*3*(3)*sizeof(float));
+    vertexArray.resize(faces*3*(3)*sizeof(float));
     vertexBuffer = new Qt3DRender::QBuffer(Qt3DRender::QBuffer::VertexBuffer,m_geometry);
     vertexBuffer->setUsage(Qt3DRender::QBuffer::DynamicDraw);
     vertexBuffer->setData(vertexArray);
 
     QByteArray vertexNormalArray;
-    vertexNormalArray.resize(mesh->faces.size()*3*(3)*sizeof(float));
+    vertexNormalArray.resize(faces*3*(3)*sizeof(float));
     vertexNormalBuffer = new Qt3DRender::QBuffer(Qt3DRender::QBuffer::VertexBuffer,m_geometry);
     vertexNormalBuffer->setUsage(Qt3DRender::QBuffer::DynamicDraw);
     vertexNormalBuffer->setData(vertexNormalArray);
 
     QByteArray vertexColorArray;
-    vertexColorArray.resize(mesh->faces.size()*3*(3)*sizeof(float));
+    vertexColorArray.resize(faces*3*(3)*sizeof(float));
     vertexColorBuffer = new Qt3DRender::QBuffer(Qt3DRender::QBuffer::VertexBuffer,m_geometry);
     vertexColorBuffer->setUsage(Qt3DRender::QBuffer::DynamicDraw);
     vertexColorBuffer->setData(vertexColorArray);
@@ -1227,81 +1289,10 @@ void GLModel::generateSupport(){
     // generate cylinders
     for( auto iter = slicer->slices.overhang_points.begin() ; iter != slicer->slices.overhang_points.end() ; iter++ ) {
         qDebug() << "-------" << (*iter);
-        generateCylinder(*iter);
+        generateCylinder(supportMesh, *iter);
     }
 
-    qmlManager->createModelFile(supportMesh, filename+"_support");
-    supportModel = qmlManager->findGLModelByName(filename+"_support");
-    supportModel->m_meshMaterial->setAmbient(QColor(QRgb(0x42BFCC)));
-    supportModel->m_meshMaterial->setDiffuse(QColor(QRgb(0x42BFCC)));
-    supportModel->setEnabled(false);
-}
-
-void GLModel::generateCylinder(OverhangPoint *point, OverhangPoint *parent){
-
-    qDebug() << point << point->branching_overhang_point << point->target_branching_overhang_point << parent;
-    qDebug() << "height:" << point->height <<
-                "branchable:" << point->branchable <<
-                "v(" << point->position.X << "," << point->position.Y << "," << point->position.Z << ")";
-
-    float height = (float)point->height;
-    float radius = (float)point->radius / scfg->resolution;
-    QVector3D position = QVector3D((float)point->position.X / scfg->resolution,
-            (float)point->position.Y / scfg->resolution,
-            (float)point->position.Z / scfg->resolution - height);
-    QVector3D positionTop = QVector3D((float)point->position.X / scfg->resolution,
-            (float)point->position.Y / scfg->resolution,
-            (float)point->position.Z / scfg->resolution);
-
-    if( parent == nullptr ) {
-
-        vector<QVector3D> top;
-        vector<QVector3D> bottom;
-        for( float i = 0.0f ; i <= 360.0f ; i += 10.0f ) {
-            float t = i / 180.0f * M_PI;
-            top.push_back(QVector3D(qCos(t) * radius + position.x(), qSin(t) * radius + position.y(), positionTop.z()));
-            bottom.push_back(QVector3D(qCos(t) * radius + position.x(), qSin(t) * radius + position.y(), position.z()));
-        }
-
-        // top circle
-        QVector3D *lastTop;
-        for( auto iter = top.begin() ; iter != top.end() ; iter++ ) {
-            if( iter != top.begin() ) {
-                supportMesh->addFace(*lastTop, (*iter), positionTop);
-            }
-            lastTop = &(*iter);
-        }
-
-        // bottom circle
-        QVector3D *lastBottom;
-        for( auto iter = bottom.begin() ; iter != bottom.end() ; iter++ ) {
-            if( iter != bottom.begin() ) {
-                supportMesh->addFace((*iter), *lastBottom, position);
-            }
-            lastBottom = &(*iter);
-        }
-
-        // pillar
-        for( auto iterTop = top.begin(), iterBottom = bottom.begin(); iterTop != top.end() ; iterTop++, iterBottom++ ) {
-            if( iterTop != top.begin() ) {
-                supportMesh->addFace((*iterTop), *lastTop, (*iterBottom));
-                supportMesh->addFace(*lastTop, *lastBottom, (*iterBottom));
-            }
-            lastTop = &(*iterTop);
-            lastBottom = &(*iterBottom);
-        }
-    }
-
-    if( point->branching_overhang_point != nullptr ) {
-        generateCylinder(point->branching_overhang_point, point);
-    }
-}
-
-void GLModel::toggleSupport(bool isOn)
-{
-    if( supportModel != nullptr ) {
-        supportModel->setEnabled(isOn);
-    }
+    emit _updateModelMesh();
 }
 
 void GLModel::removePlane(){

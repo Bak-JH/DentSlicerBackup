@@ -49,7 +49,8 @@ SOURCES += main.cpp \
     DentEngine/src/polyclipping/poly2tri/sweep/sweep.cpp \
     DentEngine/src/polyclipping/poly2tri/sweep/sweep_context.cpp \
     utils/httpreq.cpp \
-    feature/hollowshell.cpp
+    feature/hollowshell.cpp \
+    feature/supportview.cpp
 
 
 RESOURCES += qml.qrc \
@@ -127,7 +128,8 @@ HEADERS += \
     DentEngine/src/polyclipping/poly2tri/sweep/sweep_context.h \
     DentEngine/src/polyclipping/poly2tri/poly2tri.h \
     utils/httpreq.h \
-    feature/hollowshell.h
+    feature/hollowshell.h \
+    feature/supportview.h
 
 #LIBS += -lOpengl32
 

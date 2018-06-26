@@ -20,6 +20,10 @@
 #include "QFuture"
 #include "utils/httpreq.h"
 
+#define VIEW_MODE_OBJECT 0
+#define VIEW_MODE_SUPPORT 1
+#define VIEW_MODE_LAYER 2
+
 class QmlManager : public QObject
 {
     Q_OBJECT
@@ -137,6 +141,7 @@ public:
     void runArrange_internal();
     void disconnectHandlers(GLModel* glmodel);
     void connectHandlers(GLModel* glmodel);
+    void setViewMode(int viewMode);
 
     void addPart(QString fileName, int ID);
     void deletePart(int ID);
@@ -161,11 +166,12 @@ public:
     Q_INVOKABLE void doDelete();
     Q_INVOKABLE void doDeletebyID(int ID);
     Q_INVOKABLE void runArrange();
+    Q_INVOKABLE int getViewMode();
 
 
 private:
     //bool glmodels_arranged;
-
+    int viewMode;
 
 
 signals:

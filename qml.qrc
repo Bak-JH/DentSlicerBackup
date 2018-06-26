@@ -52,5 +52,6 @@
         <file>Qml/YesNoPopup.qml</file>
         <file>Qml/LayerViewPopup.qml</file>
         <file>Qml/UndoRedoButton.qml</file>
+        <file>Qml/LayerViewSlider.qml</file>
     </qresource>
 </RCC>
