@@ -1087,7 +1087,7 @@ Rectangle {
                 anchors.verticalCenter: parent.verticalCenter
                 horizontalAlignment: TextInput.AlignRight
                 placeholderText: numbox_value_detail2
-                maximumLength: 2
+                maximumLength: 3
                 font.pixelSize: 12
                 font.family: mainFont.name
                 textColor: focus ? "black" : "#595959"
