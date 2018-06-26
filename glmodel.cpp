@@ -1400,6 +1400,10 @@ void GLModel::exgoo(){
 }
 void GLModel::mgoo(Qt3DRender::QPickEvent* v)
 {
+    if(v->buttons()>1){
+        return;
+    }
+
     qmlManager->setClosedHandCursor();
     isMoved = true;
     QVector2D currentPoint = (QVector2D)v->position();
@@ -1450,6 +1454,9 @@ void GLModel::mgoo(Qt3DRender::QPickEvent* v)
 }
 
 void GLModel::pgoo(Qt3DRender::QPickEvent* v){
+    if(v->buttons()>1) // pass if click with right mouse
+        return;
+
     qDebug() << "Pressed   " << v->position();
     m_objectPicker->setDragEnabled(true);
     lastpoint=v->localIntersection();
