@@ -413,71 +413,138 @@ Rectangle {
 
     signal flatModeClicked();
 
-    Item {
+    Rectangle {
         id: leftselectimage
         visible: false
-        width: 40
-        height: 40
+        width: 92
+        height: 64
         anchors.left: parent.left
-        anchors.leftMargin: 50
+        anchors.leftMargin: 20
         anchors.top: parent.top
-        anchors.topMargin: 85
+        anchors.topMargin: 80
         objectName: "flatButton"
+
+        color: "white"
+        border.width: 1
+        border.color: "#CCCCCC"
+        radius: 1
+
+        property string image_source : "qrc:/Resource/flat_cut.png"
+        property color text_color : "#000000"
+
         Image {
-            anchors.fill: parent
-            source: "qrc:/Resource/flat_cut.png"
+            width: 36
+            height: 36
+            anchors.horizontalCenter: parent.horizontalCenter
+            anchors.top: parent.top
+            anchors.topMargin: 8
+            source: leftselectimage.image_source
         }
 
         MouseArea {
             anchors.fill: parent
             hoverEnabled : true
-            onEntered : qm.setHandCursor();
-            onExited : qm.resetCursor();
-            onClicked: flatModeClicked()
+            onEntered : {
+                if(leftselectimage.border.color === "CCCCCC")
+                    leftselectimage.color = "#E3E3E5"
+                qm.setHandCursor();
+            }
+            onExited : {
+                if(leftselectimage.border.color === "CCCCCC")
+                    leftselectimage.color = "#FFFFFF"
+                qm.resetCursor();
+            }
+            onClicked: {
+                leftselectimage.image_source = "qrc:/Resource/flat_cut_select.png"
+                leftselectimage.text_color = "white"
+                leftselectimage.color = "#3EABBA"
+                leftselectimage.border.color =  "#3EABBA"
+
+                rightselectimage.image_source = "qrc:/Resource/free_cut.png"
+                rightselectimage.text_color ="black"
+                rightselectimage.color = "#FFFFFF"
+                rightselectimage.border.color =  "#CCCCCC"
+
+                flatModeClicked()
+            }
         }
         Text {
             text: "Flat Cut"
             font.family: mainFont.name
-            styleColor: "#000000"
+            color: leftselectimage.text_color
             font.pixelSize: 13
-            anchors.top:  parent.bottom
-            anchors.topMargin: 5
+            anchors.bottom:  parent.bottom
+            anchors.bottomMargin: 4
             anchors.horizontalCenter: parent.horizontalCenter
-            }
+        }
     }
 
     signal curveModeClicked();
 
-    Item {
+    Rectangle {
         id: rightselectimage
         visible: false
-        width: 40
-        height: 40
+        width: 92
+        height: 64
         anchors.right: parent.right
-        anchors.rightMargin: 50
+        anchors.rightMargin: 20
         anchors.top: parent.top
-        anchors.topMargin: 85
+        anchors.topMargin: 80
         objectName: "curveButton"
+
+        color: "white"
+        border.width: 1
+        border.color: "#CCCCCC"
+        radius: 1
+
+        property string image_source : "qrc:/Resource/free_cut.png"
+        property color text_color : "#000000"
+
         Image {
-            anchors.fill: parent
-            source: "qrc:/Resource/free_cut.png"
+            width: 36
+            height: 36
+            anchors.horizontalCenter: parent.horizontalCenter
+            anchors.top: parent.top
+            anchors.topMargin: 8
+
+            source: rightselectimage.image_source
         }
         MouseArea {
             anchors.fill: parent
             hoverEnabled : true
-            onEntered : qm.setHandCursor();
-            onExited : qm.resetCursor();
-            onClicked: curveModeClicked();
+            onEntered : {
+                if(rightselectimage.border.color === "CCCCCC")
+                    rightselectimage.color = "#E3E3E5"
+                qm.setHandCursor();
+            }
+            onExited : {
+                if(rightselectimage.border.color === "CCCCCC")
+                    rightselectimage.color = "#FFFFFF"
+                qm.resetCursor();
+            }
+            onClicked: {
+                rightselectimage.image_source = "qrc:/Resource/free_cut_select.png"
+                rightselectimage.text_color ="white"
+                rightselectimage.color = "#3EABBA"
+                rightselectimage.border.color =  "#3EABBA"
+
+                leftselectimage.image_source = "qrc:/Resource/flat_cut.png"
+                leftselectimage.text_color ="black"
+                leftselectimage.color = "#FFFFFF"
+                leftselectimage.border.color =  "#CCCCCC"
+
+                curveModeClicked();
+            }
         }
         Text {
             text: "Free Cut"
             font.family: mainFont.name
-            styleColor: "#000000"
+            color: rightselectimage.text_color
             font.pixelSize: 13
-            anchors.top:  parent.bottom
-            anchors.topMargin: 5
+            anchors.bottom:  parent.bottom
+            anchors.bottomMargin: 4
             anchors.horizontalCenter: parent.horizontalCenter
-            }
+        }
     }
 
 
@@ -658,6 +725,13 @@ Rectangle {
                         //if (numberbox1_number != 0 ) applyfinishbutton.color = "#3ea6b7"
                         console.log(applyfinishbutton.color);
                         //if (numberbox1_number == 0 && numberbox2_number == 0 && numberbox3_number==0 ) applyfinishbutton.color = "#999999"
+
+                        if (numberbox1_text.text === "0" && numberbox2_text.text === "0" && numberbox3_text.text === "0"){
+                            colorApplyFinishButton(0)
+                        }
+                        else{
+                            colorApplyFinishButton(1)
+                        }
                     }
                     style: TextFieldStyle {
                         textColor: "black"
@@ -801,6 +875,13 @@ Rectangle {
                         numberbox2_number = parseInt(text,10)
                      //   if (numberbox2_number != 0 ) applyfinishbutton.color = "#3ea6b7"
                      //   if (numberbox1_number == 0 && numberbox2_number == 0 && numberbox3_number==0 ) applyfinishbutton.color = "#999999"
+
+                        if (numberbox1_text.text === "0" && numberbox2_text.text === "0" && numberbox3_text.text === "0"){
+                            colorApplyFinishButton(0)
+                        }
+                        else{
+                            colorApplyFinishButton(1)
+                        }
                     }
                     style: TextFieldStyle {
                         textColor: "black"
@@ -942,6 +1023,12 @@ Rectangle {
                         numberbox3_number = parseInt(text,10)
                        // if (numberbox3_number != 0 ) applyfinishbutton.color = "#3ea6b7"
                        // if (numberbox1_number == 0 && numberbox2_number == 0 && numberbox3_number==0 ) applyfinishbutton.color = "#999999"
+                        if (numberbox1_text.text === "0" && numberbox2_text.text === "0" && numberbox3_text.text === "0"){
+                            colorApplyFinishButton(0)
+                        }
+                        else{
+                            colorApplyFinishButton(1)
+                        }
                     }
                     style: TextFieldStyle {
                         textColor: "black"

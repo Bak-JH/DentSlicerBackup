@@ -741,6 +741,9 @@ void QmlManager::modelMoveDone(int Axis){
     if (selectedModel == nullptr)
         return;
 
+    QMetaObject::invokeMethod(boundedBox, "hideBox"); // Bounded Box
+    hideMoveArrow();
+
     selectedModel->saveUndoState();
     qDebug() << "translation current : "<<selectedModel->m_transform->translation();
 
@@ -748,12 +751,16 @@ void QmlManager::modelMoveDone(int Axis){
 
     // move translation back to original
     selectedModel->m_transform->setTranslation(selectedModel->m_translation);
-    qDebug() << "test 1    " << selectedModel->m_transform->translation();
     selectedModel->moveModelMesh(translationDiff);
-
-    if(Axis != 3)
+    QMetaObject::invokeMethod(boundedBox, "showBox"); // Bounded Box
+    if(Axis != 3){
+        showMoveArrow();
         QQmlProperty::write(moveArrowobj,"center",selectedModel->m_transform->translation()+QVector3D((selectedModel->mesh->x_max+selectedModel->mesh->x_min)/2,(selectedModel->mesh->y_max+selectedModel->mesh->y_min)/2,(selectedModel->mesh->z_max+selectedModel->mesh->z_min)/2));
+
+    }
     mouseHack();
+
+
 }
 
 void QmlManager::modelRotateDone(int Axis){
