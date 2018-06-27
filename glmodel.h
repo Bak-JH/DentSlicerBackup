@@ -104,6 +104,7 @@ public:
     Mesh* lmesh;
     Mesh* rmesh;
 
+
     MeshFace *targetMeshFace = NULL; // used for object selection (specific area, like extension or labelling)
 
     bool appropriately_rotated=false;
@@ -141,6 +142,7 @@ public:
     Qt3DCore::QEntity* planeEntity[2];
     Qt3DCore::QTransform *planeTransform[2];
     Qt3DExtras::QPhongAlphaMaterial *planeMaterial = nullptr;
+    QObjectPicker* planeObjectPicker[2];
 
     vector<Qt3DExtras::QSphereMesh*> sphereMesh;
     vector<Qt3DCore::QEntity*> sphereEntity;
@@ -184,11 +186,13 @@ public:
 
     featureThread* ft;
     //arrangeSignalSender* arsignal; //unused, signal from qml goes right into QmlManager.runArrange
+    QFutureWatcher<Slicer*> futureWatcher; // future watcher for feature thread results returned
 
     int ID; //for use in Part List
     static int globalID;
     QString filename;
     QObject* mainWindow;
+    QString slicingInfo;
     void addVertices(Mesh* mesh, bool CW);
 
 private:
@@ -236,6 +240,7 @@ public slots:
     void loadRedoState();
 
     // object picker parts
+    void handlePickerClickedFreeCut(Qt3DRender::QPickEvent*);
     void handlePickerClicked(Qt3DRender::QPickEvent*);
     void handlePickerClickedLayflat(MeshFace shadow_meshface);
     void mgoo(Qt3DRender::QPickEvent*);
@@ -251,6 +256,7 @@ public slots:
     void generateLayFlat();
 
     // Model Cut
+    void generateClickablePlane();
     void generatePlane();
     void removePlane();
     void modelCut();
@@ -291,6 +297,8 @@ public slots:
 
     // Model Mesh info update
     void updateModelMesh();
+
+    void slicingDone();
 };
 
 

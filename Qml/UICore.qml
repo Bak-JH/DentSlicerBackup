@@ -77,6 +77,7 @@ Item {
 
     SlicingData{
         id : slicing_data
+        objectName: "slicingData"
         anchors.bottom: parent.bottom
         anchors.right: parent.right
 
