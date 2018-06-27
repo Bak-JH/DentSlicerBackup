@@ -45,8 +45,8 @@ Entity{
         boundedBoxTransform.scale3D = Qt.vector3d(x/100,y/100,z/100)
     }
 
-    function setPosition(center){
-        boundedBoxTransform.translation = center
+    function setPosition(target){
+        boundedBoxTransform.translation = target
     }
 
 
