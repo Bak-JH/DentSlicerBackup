@@ -68,7 +68,6 @@ rotateResult* autoorientation::Tweak(Mesh* mesh, bool bi_algorithmic,int CA,bool
         liste[i].isActive=true;
         free(temp);
         qmlManager->setProgress(i*0.04/(best_n+1)+0.95);
-        qmlManager->setProgressText("number ");
     }
 
     qmlManager->setProgress(0.99);

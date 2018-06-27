@@ -1,103 +1,159 @@
 import QtQuick 2.0
 Item{
-    width: 104
+    width: 116
     height: 52
-    anchors.top : parent.top
-    anchors.right : parent.right
+    //anchors.top : parent.top
+    //anchors.right : parent.right
 
     signal unDo();
     signal reDo();
 
-    Rectangle{//shadow
-        id : shadowRect
-        width: parent.width-2
-        height: parent.height-2
-        anchors.bottom: parent.bottom
-        anchors.right: parent.right
 
-        color: "#CCCCCC"
-    }
-
-    Rectangle{//main
-        id : contentRect
-        width: parent.width-2
-        height: parent.height-2
-        anchors.top: parent.top
+    Rectangle{
+        id:undo
+        width: 50
+        height: parent.height
         anchors.left: parent.left
 
+        color: "transparent"
 
-        color: "#ffffff"
-
-        Image{
-            id:undo_icon
-            width: 32
-            height: 32
-            anchors.left: parent.left
-            anchors.leftMargin:8
+        Rectangle{//shadow
+            width: parent.width-2
+            height: parent.height-2
             anchors.bottom: parent.bottom
-            anchors.bottomMargin: 0
-            source:"qrc:/Resource/undo_icon.png"
+            anchors.right: parent.right
+
+            color: "#CCCCCC"
         }
-        Text{
-            text:"UNDO"
-            anchors.top : parent.top
-            anchors.horizontalCenter: undo_icon.horizontalCenter
-            anchors.topMargin: 5
 
-            font.family: mainFont.name
-            font.pixelSize: 12
+        Rectangle{//main
+            width: parent.width-2
+            height: parent.height-2
+            anchors.top: parent.top
+            anchors.left: parent.left
 
-        }
-        MouseArea{
-            anchors.fill: undo_icon
+            color: "#ffffff"
 
-            hoverEnabled : true
-            onEntered : qm.setHandCursor();
-            onExited : qm.resetCursor();
+            Rectangle{
+                id : undo_button
+                width : 48
+                height: 50
+                anchors.left : parent.left
+                anchors.top: parent.top
 
-            onClicked: {
-                unDo();
-                //views.visible = !views.visible
+                Image{
+                    id:undo_icon
+                    width: 26
+                    height: 24
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    anchors.top: parent.top
+                    anchors.topMargin: 8
+                    source:"qrc:/Resource/undo_icon.png"
+                }
+                Text{
+                    id:undo_text
+                    text:"UNDO"
+                    anchors.bottom : parent.bottom
+                    anchors.horizontalCenter: undo_icon.horizontalCenter
+                    anchors.topMargin: 0
+
+                    font.family: mainFont.name
+                    font.pixelSize: 12
+
+                }
+
+                MouseArea{
+                    anchors.fill: undo_button
+
+                    hoverEnabled : true
+
+                    onClicked: {
+                        unDo();
+                        //views.visible = !views.visible
+                    }
+                    onEntered: {
+                        undo_button.color = "#3ea6b7"
+                        undo_icon.source = "qrc:/Resource/undo_icon_select.png"
+                        undo_text.color = "#ffffff"
+                        qm.setHandCursor()
+                    }
+                    onExited: {
+                        undo_button.color = "#ffffff"
+                        undo_icon.source = "qrc:/Resource/undo_icon.png"
+                        undo_text.color = "black"
+                        qm.resetCursor()
+                    }
+                }
             }
         }
+    }
 
-        Rectangle{
-            width: 2
-            height: parent.height-6
-            anchors.verticalCenter: parent.verticalCenter
-            anchors.horizontalCenter: parent.horizontalCenter
-            color:"#eaeaea"
-        }
 
-        Image{
-            id:redo_icon
-            width: 32
-            height: 32
-            anchors.right: parent.right
-            anchors.rightMargin : 8
+    Rectangle{
+        id:redo
+        width: 50
+        height: parent.height
+        anchors.right: parent.right
+
+        color: "transparent"
+
+        Rectangle{//shadow
+            width: parent.width-2
+            height: parent.height-2
             anchors.bottom: parent.bottom
-            anchors.bottomMargin: 0
-            source:"qrc:/Resource/redo_icon.png"
+            anchors.right: parent.right
+
+            color: "#CCCCCC"
         }
-        Text{
-            text:"REDO"
-            anchors.top : parent.top
-            anchors.horizontalCenter: redo_icon.horizontalCenter
-            anchors.topMargin: 5
 
-            font.family: mainFont.name
-            font.pixelSize: 12
+        Rectangle{//main
+            id : redo_button
+            width: parent.width-2
+            height: parent.height-2
+            anchors.top: parent.top
+            anchors.left: parent.left
 
-        }
-        MouseArea{
-            anchors.fill: redo_icon
+            color: "#ffffff"
 
-            hoverEnabled : true
-            onEntered : qm.setHandCursor();
-            onExited : qm.resetCursor();
+            Image{
+                id:redo_icon
+                width: 26
+                height: 24
+                anchors.horizontalCenter: parent.horizontalCenter
+                anchors.top: parent.top
+                anchors.topMargin: 8
+                source:"qrc:/Resource/redo_icon.png"
+            }
+            Text{
+                id:redo_text
+                text:"REDO"
+                anchors.bottom: parent.bottom
+                anchors.horizontalCenter: redo_icon.horizontalCenter
+                anchors.bottomMargin: 0
 
-            onClicked: {
-                reDo();
+                font.family: mainFont.name
+                font.pixelSize: 12
+
+            }
+            MouseArea{
+                anchors.fill: redo_button
+                hoverEnabled : true
+
+                onClicked: {
+                    reDo();
+                }
+                onEntered: {
+                    redo_button.color = "#3ea6b7"
+                    redo_icon.source = "qrc:/Resource/redo_icon_select.png"
+                    redo_text.color = "#ffffff"
+                    qm.setHandCursor()
+                }
+                onExited: {
+                    redo_button.color = "#ffffff"
+                    redo_icon.source = "qrc:/Resource/redo_icon.png"
+                    redo_text.color = "black"
+                    qm.resetCursor()
+                }
             }
         }
     }

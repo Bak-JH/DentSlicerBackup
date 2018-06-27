@@ -224,7 +224,6 @@ void GLModel::saveUndoState(){
                 mesh->vertices[mf.mesh_vertex[2]].position);
     }
     temp_prev_mesh->connectFaces();
-
     temp_prev_mesh->prevMesh = mesh->prevMesh;
     if (mesh->prevMesh != nullptr)
         mesh->prevMesh->nextMesh = temp_prev_mesh;
@@ -245,9 +244,7 @@ void GLModel::saveUndoState(){
 
     // for model cut, shell offset
     lmesh->prevMesh = temp_prev_mesh;
-    lmesh->undoCnt = mesh->undoCnt;
     rmesh->prevMesh = temp_prev_mesh;
-    lmesh->undoCnt = mesh->undoCnt;
 }
 
 void GLModel::loadUndoState(){
@@ -332,6 +329,11 @@ void GLModel::updateModelMesh(){
     addVertices(mesh, false);
     applyGeometry();
 
+    QMetaObject::invokeMethod(qmlManager->boundedBox, "setPosition", Q_ARG(QVariant, m_transform->translation()+QVector3D((mesh->x_max+mesh->x_min)/2,(mesh->y_max+mesh->y_min)/2,(mesh->z_max+mesh->z_min)/2)));
+    QMetaObject::invokeMethod(qmlManager->boundedBox, "setSize", Q_ARG(QVariant, mesh->x_max - mesh->x_min),
+                                                     Q_ARG(QVariant, mesh->y_max - mesh->y_min),
+                                                     Q_ARG(QVariant, mesh->z_max - mesh->z_min));
+
     // create new object picker, shadowmodel, remove prev shadowmodel
     //QVector3D translation = shadowModel->m_transform->translation();
     if (shadowModel !=NULL){
@@ -366,13 +368,13 @@ void GLModel::updateModelMesh(){
     QVector3D tmp = m_transform->translation();
     float zlength = mesh->z_max - mesh->z_min;
     //if (shadowModel != NULL) // since shadow model transformed twice
+
+
+
     m_transform->setTranslation(QVector3D(tmp.x(),tmp.y(),-mesh->z_min));
     checkPrintingArea();
     qDebug() << "model transform :" <<m_transform->translation() << mesh->x_max << mesh->x_min << mesh->y_max << mesh->y_min << mesh->z_max << mesh->z_min;
-    QMetaObject::invokeMethod(qmlManager->boundedBox, "setPosition", Q_ARG(QVariant, m_transform->translation()+QVector3D((mesh->x_max+mesh->x_min)/2,(mesh->y_max+mesh->y_min)/2,(mesh->z_max+mesh->z_min)/2)));
-    QMetaObject::invokeMethod(qmlManager->boundedBox, "setSize", Q_ARG(QVariant, mesh->x_max - mesh->x_min),
-                                                     Q_ARG(QVariant, mesh->y_max - mesh->y_min),
-                                                     Q_ARG(QVariant, mesh->z_max - mesh->z_min));
+
 
 }
 
@@ -845,13 +847,14 @@ void GLModel::handlePickerClicked(QPickEvent *pick)
         return;
 
     if(qmlManager->selectedModel != nullptr && (pick->button() & Qt::RightButton)){ // when right button clicked
-        //qmlManager->mttab->setEnabled(!qmlManager->mttab->isEnabled());
-        QMetaObject::invokeMethod(qmlManager->mttab, "tabOnOff");
+        if(qmlManager->selectedModel->ID == parentModel->ID){
+            QMetaObject::invokeMethod(qmlManager->mttab, "tabOnOff");
+            return;
+        }
 
-        return;
     }
 
-    if (!cutActive && !extensionActive && !labellingActive && !layflatActive)
+    if (!cutActive && !extensionActive && !labellingActive && !layflatActive && !isMoved)
         emit modelSelected(parentModel->ID);
 
     qDebug() << "model selected emit" << pick->position() << parentModel->ID;
@@ -1446,21 +1449,78 @@ void GLModel::exgoo(){
 }
 void GLModel::mgoo(Qt3DRender::QPickEvent* v)
 {
-    qDebug() << "Moved";
+    if(v->buttons()>1){
+        return;
+    }
 
+    qmlManager->setClosedHandCursor();
+    isMoved = true;
+    QVector2D currentPoint = (QVector2D)v->position();
+
+    QList<QVector3D> targetPoints;
+
+    targetPoints.append(lastpoint + QVector3D(-5,-5,0));
+    targetPoints.append(lastpoint + QVector3D(5,-5,0));
+    targetPoints.append(lastpoint + QVector3D(0,0,0));
+    targetPoints.append(lastpoint + QVector3D(-5,5,0));
+    targetPoints.append(lastpoint + QVector3D(5,5,0));
     /*
-    QVector3D endpoint(v->localIntersection());
+    qDebug() << "answer   " << targetPoints.at(0) << targetPoints.at(1);
+    qDebug() << "answer              " << targetPoints.at(2);
+    qDebug() << "answer   " << targetPoints.at(3) << targetPoints.at(4);
 
-    qDebug() << endpoint;
+    qDebug() << "--------------------------------------------------";
+
+    qDebug() << "answer   " << world2Screen(targetPoints.at(0)) << world2Screen(targetPoints.at(1));
+    qDebug() << "answer              " << world2Screen(targetPoints.at(2));
+    qDebug() << "answer   " << world2Screen(targetPoints.at(3)) << world2Screen(targetPoints.at(4));
+
+    qDebug() << "--------------------------------------------------";
     */
 
-    // drawLine(endpoint);
+    QVector2D xAxis = (world2Screen(targetPoints.at(4)) - world2Screen(targetPoints.at(3))) / 10;
+    QVector2D yAxis = (world2Screen(targetPoints.at(0)) - world2Screen(targetPoints.at(3))) / 10;
+    QVector2D target = prevPoint - currentPoint;
+
+    QVector3D calculateX, calculateY;
+    if(xAxis.length() != 0)
+        calculateX = (targetPoints.at(4) - targetPoints.at(3)) * QVector2D::dotProduct(xAxis,target) /xAxis.length() / 100;
+    else
+        calculateX = QVector3D(0,0,0);
+
+    if(yAxis.length() != 0)
+        calculateY = (targetPoints.at(0) - targetPoints.at(3)) * QVector2D::dotProduct(yAxis,target) /yAxis.length() / 100;
+    else
+        calculateY = QVector3D(0,0,0);
+    qDebug() << "calculate X   " << calculateX;
+    qDebug() << "calculate Y   " << calculateY;
+
+    float scaleFactor = qmlManager->systemTransform->scale3D().x() / 0.004f;
+    qmlManager->modelMoveF(1,-(calculateX.x() + calculateY.x()) * 1.5 / scaleFactor);
+    qmlManager->modelMoveF(2,-(calculateX.y() + calculateY.y()) * 1.5 / scaleFactor);
+
+    prevPoint = currentPoint;
 }
+
 void GLModel::pgoo(Qt3DRender::QPickEvent* v){
+    if(v->buttons()>1) // pass if click with right mouse
+        return;
+
+    qDebug() << "Pressed   " << v->position();
+    m_objectPicker->setDragEnabled(true);
     lastpoint=v->localIntersection();
+    prevPoint = (QVector2D) v->position();
+    
 }
 
 void GLModel::rgoo(Qt3DRender::QPickEvent* v){
+    qDebug() << "Released";
+    m_objectPicker->setDragEnabled(false);
+    qmlManager->resetCursor();
+
+    if(isMoved)
+        qmlManager->modelMoveDone(3);
+    isMoved = false;
 }
 
 /*void GLModel::drawLine(QVector3D endpoint)
@@ -1552,7 +1612,16 @@ void GLModel::getSliderSignal(double value){
 
 
 /** HELPER functions **/
+QVector2D GLModel::world2Screen(QVector3D target){
+    QVariant value;
+    qRegisterMetaType<QVariant>("QVariant");
+    QMetaObject::invokeMethod(qmlManager->mttab, "world2Screen", Qt::DirectConnection, Q_RETURN_ARG(QVariant,value),
+                              Q_ARG(QVariant, target));
 
+    QVector2D result = qvariant_cast<QVector2D>(value);
+
+    return result;
+}
 bool GLModel::EndsWith(const string& a, const string& b) {
     if (b.size() > a.size()) return false;
     return std::equal(a.begin() + a.size() - b.size(), a.end(), b.begin());
