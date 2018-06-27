@@ -211,6 +211,9 @@ void GLModel::saveUndoState(){
     // need to change to memcpy or something
     qDebug () << "save prev mesh";
 
+    // need to remove redo State since it contains
+    mesh->nextMesh = nullptr;
+
     // copy current Mesh as temporary prev_mesh
     Mesh* temp_prev_mesh = new Mesh();
     temp_prev_mesh->faces.reserve(mesh->faces.size()*3);
@@ -226,16 +229,29 @@ void GLModel::saveUndoState(){
     if (mesh->prevMesh != nullptr)
         mesh->prevMesh->nextMesh = temp_prev_mesh;
     temp_prev_mesh->nextMesh = mesh;
+
+    Mesh* deleteTargetMesh = mesh;
+    for (int i=0; i<10; i++){ // maximal undo count is 10
+        if (deleteTargetMesh != nullptr)
+            deleteTargetMesh = deleteTargetMesh->prevMesh;
+    }
+    if (deleteTargetMesh != nullptr){
+        deleteTargetMesh->nextMesh->prevMesh = nullptr;
+        delete deleteTargetMesh;
+    }
+
     mesh->prevMesh = temp_prev_mesh;
+
 
     // for model cut, shell offset
     lmesh->prevMesh = temp_prev_mesh;
+    lmesh->undoCnt = mesh->undoCnt;
     rmesh->prevMesh = temp_prev_mesh;
+    lmesh->undoCnt = mesh->undoCnt;
 }
 
 void GLModel::loadUndoState(){
     if (mesh->prevMesh != nullptr){
-        qDebug() << "loading prevmesh";
         mesh = mesh->prevMesh;
         emit _updateModelMesh();
     }
@@ -809,8 +825,19 @@ void GLModel::addIndexes(vector<int> indexes){
     return;
 }
 
+void GLModel::handlePickerClickedFreeCut(Qt3DRender::QPickEvent* pick)
+{
+    qDebug() << "handle picker clicked freecut";
+    qDebug() << pick->localIntersection()<<"pick" << cuttingPoints.size() << parentModel->cuttingPoints.size();
+    QVector3D v = pick->localIntersection();
+    QVector3D result_v = QVector3D(v.x(), -v.z(), v.y());
+    result_v = result_v*2;
+    parentModel->addCuttingPoint(result_v);
+}
+
 void GLModel::handlePickerClicked(QPickEvent *pick)
 {
+    qDebug() << "handle Picker clicked";
     if (!parentModel)
         return;
 
@@ -1012,26 +1039,30 @@ void GLModel::bisectModel_internal(Plane plane){
             QVector3D target_plane_normal = QVector3D::normal(target_plane[0], target_plane[1], target_plane[2]);
 
             if (upper.size() == 2){
-                bool facingNormal = QVector3D::dotProduct(target_plane_normal, QVector3D::normal(lower[0], intersection[0].position, intersection[1].position))>0;//abs((target_plane_normal- QVector3D::normal(lower[0], intersection[0].position, intersection[1].position)).length())<1;
-
-                if (facingNormal){
+                float dotproduct = QVector3D::dotProduct(target_plane_normal, QVector3D::normal(upper[1],upper[0],intersection[1].position));
+                bool facingNormal = dotproduct>0;//QVector3D::normal(lower[0], intersection[0].position, intersection[1].position))>0;//abs((target_plane_normal- QVector3D::normal(lower[0], intersection[0].position, intersection[1].position)).length())<1;
+                bool facingNormalAmbiguous = abs(dotproduct)<0.1;
+                if (facingNormal || facingNormalAmbiguous){
                     rightMesh->addFace(upper[1], upper[0], intersection[1].position);
                     rightMesh->addFace(intersection[1].position, intersection[0].position, upper[1]);
                     leftMesh->addFace(lower[0], intersection[0].position, intersection[1].position);
-                } else {
+                }
+                if (!facingNormal || facingNormalAmbiguous) {
                     rightMesh->addFace(upper[0], upper[1], intersection[1].position);
                     rightMesh->addFace(intersection[0].position, intersection[1].position, upper[1]);
                     leftMesh->addFace(intersection[0].position, lower[0], intersection[1].position);
                 }
             } else if (lower.size() == 2){
-                bool facingNormal = QVector3D::dotProduct(target_plane_normal, QVector3D::normal(lower[0], intersection[1].position, intersection[0].position))>0;
-                        //abs((target_plane_normal- QVector3D::normal(lower[0], intersection[1].position, intersection[0].position)).length())<1;
+                float dotproduct = QVector3D::dotProduct(target_plane_normal, QVector3D::normal(lower[0], intersection[1].position, intersection[0].position));
+                bool facingNormal = dotproduct>0;
+                bool facingNormalAmbiguous = abs(dotproduct)<0.1;
 
-                if (facingNormal){
+                if (facingNormal || facingNormalAmbiguous){
                     leftMesh->addFace(lower[0], intersection[1].position, intersection[0].position);
                     leftMesh->addFace(lower[0], lower[1], intersection[1].position);
                     rightMesh->addFace(upper[0], intersection[0].position, intersection[1].position);
-                } else {
+                }
+                if (!facingNormal || facingNormalAmbiguous){
                     leftMesh->addFace(intersection[1].position, lower[0], intersection[0].position);
                     leftMesh->addFace(lower[1], lower[0], intersection[1].position);
                     rightMesh->addFace(intersection[0].position, upper[0], intersection[1].position);
@@ -1164,6 +1195,13 @@ void GLModel::bisectModel_internal(Plane plane){
     emit bisectDone();
 }
 
+void GLModel::generateClickablePlane(){
+    generatePlane();
+    for (int i=0;i<2;i++){
+       qDebug() << "generated clickable plane";
+    }
+    return;
+}
 
 void GLModel::generatePlane(){
     removePlane();
@@ -1199,7 +1237,8 @@ void GLModel::generatePlane(){
     QVector3D crossproduct_vector(QVector3D::crossProduct(original_normal,desire_normal));
 
     for (int i=0;i<2;i++){
-        parentModel->clipPlane[i]=new Qt3DExtras::QPlaneMesh();
+        parentModel->planeEntity[i] = new Qt3DCore::QEntity(parentModel->parentModel);
+        parentModel->clipPlane[i]=new Qt3DExtras::QPlaneMesh(this);
         parentModel->clipPlane[i]->setHeight(100.0);
         parentModel->clipPlane[i]->setWidth(100.0);
 
@@ -1209,10 +1248,17 @@ void GLModel::generatePlane(){
         float zlength = parentModel->mesh->z_max - parentModel->mesh->z_min;
         parentModel->planeTransform[i]->setTranslation(desire_normal*(-world_origin.distanceToPlane(v1,v2,v3))+QVector3D(tmp.x(),tmp.y(),-parentModel->mesh->z_min));
 
-        parentModel->planeEntity[i] = new Qt3DCore::QEntity(parentModel->parentModel);
+        parentModel->planeObjectPicker[i] = new Qt3DRender::QObjectPicker;//parentModel->planeEntity[i]);
+
+        parentModel->planeObjectPicker[i]->setHoverEnabled(true);
+        parentModel->planeObjectPicker[i]->setEnabled(true);
+        //QObject::connect(parentModel->planeObjectPicker[i], SIGNAL(clicked(Qt3DRender::QPickEvent*)), this, SLOT(handlePickerClicked(Qt3DRender::QPickEvent*)));
+        QObject::connect(parentModel->planeObjectPicker[i], SIGNAL(clicked(Qt3DRender::QPickEvent*)), this, SLOT(handlePickerClickedFreeCut(Qt3DRender::QPickEvent*)));//SLOT(handlePickerClicked(Qt3DRender::QPickEvent*)));
+
         parentModel->planeEntity[i]->addComponent(parentModel->clipPlane[i]);
         parentModel->planeEntity[i]->addComponent(parentModel->planeTransform[i]);
         parentModel->planeEntity[i]->addComponent(parentModel->planeMaterial);
+        parentModel->planeEntity[i]->addComponent(parentModel->planeObjectPicker[i]);
     }
 
     parentModel->removeCuttingPoints();
@@ -1227,6 +1273,8 @@ void GLModel::removePlane(){
     for (int i=0;i<2;i++){
         delete parentModel->clipPlane[i];
         delete parentModel->planeTransform[i];
+        QObject::disconnect(parentModel->planeObjectPicker[i], SIGNAL(clicked(Qt3DRender::QPickEvent*)), this, SLOT(handlePickerClickedFreeCut(Qt3DRender::QPickEvent*)));
+        delete parentModel->planeObjectPicker[i];
         delete parentModel->planeEntity[i];
     }
 }
@@ -1307,9 +1355,8 @@ void GLModel::modelCut(){
 
         parentModel->bisectModel(parentModel->cuttingPlane);
     } else if (cutMode == 2){
-        qDebug() << "parent model cutting points " << parentModel->cuttingPoints.size();
         if (parentModel->cuttingPoints.size() >= 3){
-            qDebug() << "cut mode 2 done";
+
             // create left, rightmesh
             Mesh* leftMesh = parentModel->lmesh;
             Mesh* rightMesh = parentModel->rmesh;
@@ -1320,7 +1367,6 @@ void GLModel::modelCut(){
             rightMesh->vertices.reserve(mesh->faces.size()*3);
 
             cutAway(leftMesh, rightMesh, parentModel->mesh, parentModel->cuttingPoints, parentModel->cutFillMode);
-            qDebug() << "executed cutaway";
 
             emit parentModel->bisectDone();
         }
@@ -1328,30 +1374,36 @@ void GLModel::modelCut(){
 }
 
 void GLModel::generateRLModel(){
-    qmlManager->createModelFile(lmesh, filename+"_left");
-    qDebug() <<"generating RLModel" <<filename+"_left";
+    if (lmesh->faces.size() != 0)
+        qmlManager->createModelFile(lmesh, filename+"_left");
+
     // 승환 70%
     qmlManager->setProgress(0.72);
-    qmlManager->createModelFile(rmesh, filename+"_right");
+    if (rmesh->faces.size() != 0)
+        qmlManager->createModelFile(rmesh, filename+"_right");
+
     // 승환 90%
     qmlManager->setProgress(0.91);
 
     if (shadowModel->shellOffsetActive){
         GLModel* leftmodel = qmlManager->findGLModelByName(filename+"_left");
         GLModel* rightmodel = qmlManager->findGLModelByName(filename+"_right");
-        qDebug() << "came to here" << leftmodel;
         shellOffset(leftmodel, (float)shellOffsetFactor);
         qmlManager->deleteModelFile(rightmodel->ID);
         QMetaObject::invokeMethod(qmlManager->boxUpperTab, "all_off");
     }
 
+    qDebug() << "left right generated";
+
     //parentModel->deleteLater();
     shadowModel->removePlane();
     removeCuttingPoints();
 
+    qDebug() << "removed cutting plane";
     // delete original model
     qmlManager->deleteModelFile(ID);
 
+    qDebug() << "deleted original model";
     // do auto arrange
     qmlManager->runArrange();
     QMetaObject::invokeMethod(qmlManager->boundedBox, "hideBox");
@@ -1451,6 +1503,10 @@ void GLModel::cutModeSelected(int type){
         generatePlane();
     } else if (cutMode == 2){
         qDebug() << QCursor::pos();
+        parentModel->addCuttingPoint(QVector3D(1,0,0));
+        parentModel->addCuttingPoint(QVector3D(1,1,0));
+        parentModel->addCuttingPoint(QVector3D(2,0,0));
+        generateClickablePlane(); // plane is also clickable
     } else {
 
     }
@@ -1458,7 +1514,6 @@ void GLModel::cutModeSelected(int type){
 }
 
 void GLModel::cutFillModeSelected(int type){
-    qDebug() << "cut fill mode selected" << type;
     parentModel->cutFillMode = type;
     return;
 }
