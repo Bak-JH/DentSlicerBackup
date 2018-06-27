@@ -657,7 +657,8 @@ void QmlManager::unselectPart(int ID){
     }
 
     qDebug() << "resetting model" << ID;
-    target->m_meshMaterial->setDiffuse(QColor(173,215,218));
+    target->changecolor(0);
+    target->checkPrintingArea();
     disconnectHandlers(target);
     if (groupFunctionState == "active"){
         switch (groupFunctionIndex){
