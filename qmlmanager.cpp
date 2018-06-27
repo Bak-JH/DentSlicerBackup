@@ -584,6 +584,7 @@ void QmlManager::modelSelected(int ID){
     if (selectedModel != target){
         // change selectedModel
         selectedModel = target;
+        selectedModel->changeViewMode(this->viewMode);
 
         //remove dupllicate hanlders
         disconnectHandlers(selectedModel);
@@ -1124,9 +1125,6 @@ void QmlManager::viewSupportChanged(bool checked){
     if( checked ) {
         setViewMode(VIEW_MODE_SUPPORT);
     }
-    if( selectedModel != nullptr ) {
-        emit selectedModel->_updateModelMesh();
-    }
 }
 
 void QmlManager::viewLayerChanged(bool checked){
@@ -1140,6 +1138,12 @@ void QmlManager::viewLayerChanged(bool checked){
 
 void QmlManager::setViewMode(int viewMode) {
     this->viewMode = viewMode;
+
+    if( selectedModel != nullptr ) {
+        this->selectedModel->changeViewMode(viewMode);
+
+        emit selectedModel->_updateModelMesh();
+    }
 }
 
 int QmlManager::getViewMode() {

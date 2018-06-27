@@ -46,6 +46,7 @@ GLModel::GLModel(QObject* mainWindow, QNode *parent, Mesh* loadMesh, QString fna
         addComponent(m_transform);
 
         m_meshMaterial = new QPhongMaterial();
+        m_meshAlphaMaterial = new QPhongAlphaMaterial();
         /*m_meshMaterial->setAmbient(QColor(255,0,0));
         m_meshMaterial->setDiffuse(QColor(173,215,218));
         m_meshMaterial->setSpecular(QColor(182,237,246));
@@ -68,6 +69,7 @@ GLModel::GLModel(QObject* mainWindow, QNode *parent, Mesh* loadMesh, QString fna
     }
 
     m_meshMaterial = new QPhongMaterial();
+    m_meshAlphaMaterial = new QPhongAlphaMaterial();
     m_meshVertexMaterial = new QPerVertexColorMaterial();
 
 //    QEffect *effect = new QEffect();
@@ -220,6 +222,12 @@ void GLModel::changecolor(int mode){
         m_meshMaterial->setDiffuse(QColor(97,185,192));
         m_meshMaterial->setSpecular(QColor(0,0,0));
         m_meshMaterial->setShininess(0.0f);
+
+        m_meshAlphaMaterial->setAmbient(QColor(130,130,140));;
+        m_meshAlphaMaterial->setDiffuse(QColor(131,206,220));
+        m_meshAlphaMaterial->setDiffuse(QColor(97,185,192));
+        m_meshAlphaMaterial->setSpecular(QColor(0,0,0));
+        m_meshAlphaMaterial->setShininess(0.0f);
         colorMode = 0;
         break;
     case 1:
@@ -228,6 +236,11 @@ void GLModel::changecolor(int mode){
         m_meshMaterial->setDiffuse(QColor(130,208,125));
         m_meshMaterial->setSpecular(QColor(0,0,0));
         m_meshMaterial->setShininess(0.0f);
+
+        m_meshAlphaMaterial->setDiffuse(QColor(100,255,100));
+        m_meshAlphaMaterial->setDiffuse(QColor(130,208,125));
+        m_meshAlphaMaterial->setSpecular(QColor(0,0,0));
+        m_meshAlphaMaterial->setShininess(0.0f);
         colorMode = 1;
         break;
     case 2:
@@ -367,13 +380,20 @@ void GLModel::updateModelMesh(){
     // reinitialize with updated mesh
 
     //Mesh* mesh = qmlManager->getViewMode() == VIEW_MODE_SUPPORT ? this->supportMesh : this->mesh;
-    initialize(mesh->faces.size() + qmlManager->getViewMode() == VIEW_MODE_SUPPORT ? supportMesh->faces.size() : 0);
-    addVertices(mesh, false);
-    if( qmlManager->getViewMode() == VIEW_MODE_SUPPORT ) {
-        QVector3D t = m_transform->translation();
-        t.setZ(mesh->z_min);
-        supportMesh->vertexMove(t);
+    int viewMode = qmlManager->getViewMode();
+    switch( viewMode ) {
+    case VIEW_MODE_OBJECT:
+        initialize(mesh->faces.size());
+        addVertices(mesh, false);
+        break;
+    case VIEW_MODE_SUPPORT:
+        initialize(supportMesh->faces.size());
         addVertices(supportMesh, false);
+        break;
+    case VIEW_MODE_LAYER:
+        initialize(supportMesh->faces.size());
+        addVertices(supportMesh, false);
+        break;
     }
     applyGeometry();
 
@@ -1286,11 +1306,30 @@ void GLModel::generatePlane(){
 
 void GLModel::generateSupport(){
 
+//    if(supportMesh != nullptr) {
+//        delete supportMesh;
+//    }
+
+    // copy mesh data from original mesh
+    supportMesh = new Mesh;
+    supportMesh->faces.reserve(mesh->faces.size()*2);
+    supportMesh->vertices.reserve(mesh->vertices.size()*2);
+    foreach (MeshFace mf, mesh->faces){
+        supportMesh->addFace(mesh->idx2MV(mf.mesh_vertex[0]).position, mesh->idx2MV(mf.mesh_vertex[1]).position, mesh->idx2MV(mf.mesh_vertex[2]).position, mf.idx);
+    }
+
+    QVector3D t = m_transform->translation();
+    t.setZ(mesh->z_min * -1.0f);
+    supportMesh->vertexMove(t);
+
     // generate cylinders
     for( auto iter = slicer->slices.overhang_points.begin() ; iter != slicer->slices.overhang_points.end() ; iter++ ) {
         qDebug() << "-------" << (*iter);
         generateCylinder(supportMesh, *iter);
     }
+
+    t.setZ(mesh->z_min);
+    supportMesh->vertexMove(t);
 
     emit _updateModelMesh();
 }
@@ -1945,4 +1984,21 @@ void GLModel::closeShellOffset(){
     shellOffsetActive = false;
     removePlane();
     parentModel->removeCuttingPoints();
+}
+
+void GLModel::changeViewMode(int viewMode) {
+    switch( viewMode ) {
+    case VIEW_MODE_OBJECT:
+        addComponent(m_meshMaterial);
+        removeComponent(m_meshAlphaMaterial);
+        break;
+    case VIEW_MODE_SUPPORT:
+        addComponent(m_meshMaterial);
+        removeComponent(m_meshAlphaMaterial);
+        break;
+    case VIEW_MODE_LAYER:
+        removeComponent(m_meshMaterial);
+        addComponent(m_meshAlphaMaterial);
+        break;
+    }
 }

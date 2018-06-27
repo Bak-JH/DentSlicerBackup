@@ -110,6 +110,7 @@ public:
 
     bool appropriately_rotated=false;
     QPhongMaterial *m_meshMaterial;
+    QPhongAlphaMaterial *m_meshAlphaMaterial;
     QPerVertexColorMaterial *m_meshVertexMaterial;
 
     //QPhongMaterial *m_meshMaterial;
@@ -182,6 +183,7 @@ public:
     bool EndsWith(const string& a, const string& b);
     QString getFileName(const string& s);
     QVector3D spreadPoint(QVector3D endpoint,QVector3D startpoint,int factor);
+    void changeViewMode(int viewMode);
 
     // support
     Slicer* slicer;
