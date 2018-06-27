@@ -106,6 +106,12 @@ Rectangle {
                             font.pixelSize: 14
                         }
                     }
+                    onHoveredChanged: {
+                        if(hovered)
+                            qm.setHandCursor();
+                        else
+                            qm.resetCursor();
+                    }
                 }
                 RadioButton {
                     text: "Support View"
@@ -134,6 +140,12 @@ Rectangle {
                             font.pixelSize: 14
                         }
                     }
+                    onHoveredChanged: {
+                        if(hovered)
+                            qm.setHandCursor();
+                        else
+                            qm.resetCursor();
+                    }
                 }
                 RadioButton {
                     //text: "Layer View"
@@ -161,6 +173,12 @@ Rectangle {
                             font.family: mainFont.name
                             font.pixelSize: 14
                         }
+                    }
+                    onHoveredChanged: {
+                        if(hovered)
+                            qm.setHandCursor();
+                        else
+                            qm.resetCursor();
                     }
                 }
             }

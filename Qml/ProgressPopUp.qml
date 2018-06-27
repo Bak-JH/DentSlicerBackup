@@ -52,7 +52,7 @@ Rectangle {
             text: "Calculating..."
             anchors.top : parent.top
             anchors.horizontalCenter: parent.horizontalCenter
-            anchors.topMargin: 50
+            anchors.topMargin: 48
             font.pixelSize: 18
             color: "#666666"
             font.family: mainFont.name

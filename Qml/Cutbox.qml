@@ -186,8 +186,14 @@ Rectangle{
                 font.family: mainFont.name
                 font.pixelSize: 14
                 }
-                }
-                }
+        }
+        onHoveredChanged: {
+            if(hovered)
+                qm.setHandCursor();
+            else
+                qm.resetCursor();
+        }
+    }
 
     RadioButton {
         anchors.bottom: parent.bottom
@@ -217,7 +223,13 @@ Rectangle{
                 font.family: mainFont.name
                 font.pixelSize: 14
                 }
-                }
-                }
+        }
+        onHoveredChanged: {
+            if(hovered)
+                qm.setHandCursor();
+            else
+                qm.resetCursor();
+        }
+    }
     Planeslider{id:slider;anchors.right: parent.left;anchors.rightMargin:20;anchors.bottom:parent.bottom;anchors.bottomMargin:-20;}
 }

@@ -117,5 +117,9 @@
         <file>Resource/undo.png</file>
         <file>Resource/redo_icon.png</file>
         <file>Resource/undo_icon.png</file>
+        <file>Resource/redo_icon_select.png</file>
+        <file>Resource/undo_icon_select.png</file>
+        <file>Resource/flat_cut_select.png</file>
+        <file>Resource/free_cut_select.png</file>
     </qresource>
 </RCC>
