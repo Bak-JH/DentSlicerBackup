@@ -1023,26 +1023,30 @@ void GLModel::bisectModel_internal(Plane plane){
             QVector3D target_plane_normal = QVector3D::normal(target_plane[0], target_plane[1], target_plane[2]);
 
             if (upper.size() == 2){
-                bool facingNormal = QVector3D::dotProduct(target_plane_normal, QVector3D::normal(lower[0], intersection[0].position, intersection[1].position))>0;//abs((target_plane_normal- QVector3D::normal(lower[0], intersection[0].position, intersection[1].position)).length())<1;
-
-                if (facingNormal){
+                float dotproduct = QVector3D::dotProduct(target_plane_normal, QVector3D::normal(upper[1],upper[0],intersection[1].position));
+                bool facingNormal = dotproduct>0;//QVector3D::normal(lower[0], intersection[0].position, intersection[1].position))>0;//abs((target_plane_normal- QVector3D::normal(lower[0], intersection[0].position, intersection[1].position)).length())<1;
+                bool facingNormalAmbiguous = abs(dotproduct)<0.1;
+                if (facingNormal || facingNormalAmbiguous){
                     rightMesh->addFace(upper[1], upper[0], intersection[1].position);
                     rightMesh->addFace(intersection[1].position, intersection[0].position, upper[1]);
                     leftMesh->addFace(lower[0], intersection[0].position, intersection[1].position);
-                } else {
+                }
+                if (!facingNormal || facingNormalAmbiguous) {
                     rightMesh->addFace(upper[0], upper[1], intersection[1].position);
                     rightMesh->addFace(intersection[0].position, intersection[1].position, upper[1]);
                     leftMesh->addFace(intersection[0].position, lower[0], intersection[1].position);
                 }
             } else if (lower.size() == 2){
-                bool facingNormal = QVector3D::dotProduct(target_plane_normal, QVector3D::normal(lower[0], intersection[1].position, intersection[0].position))>0;
-                        //abs((target_plane_normal- QVector3D::normal(lower[0], intersection[1].position, intersection[0].position)).length())<1;
+                float dotproduct = QVector3D::dotProduct(target_plane_normal, QVector3D::normal(lower[0], intersection[1].position, intersection[0].position));
+                bool facingNormal = dotproduct>0;
+                bool facingNormalAmbiguous = abs(dotproduct)<0.1;
 
-                if (facingNormal){
+                if (facingNormal || facingNormalAmbiguous){
                     leftMesh->addFace(lower[0], intersection[1].position, intersection[0].position);
                     leftMesh->addFace(lower[0], lower[1], intersection[1].position);
                     rightMesh->addFace(upper[0], intersection[0].position, intersection[1].position);
-                } else {
+                }
+                if (!facingNormal || facingNormalAmbiguous){
                     leftMesh->addFace(intersection[1].position, lower[0], intersection[0].position);
                     leftMesh->addFace(lower[1], lower[0], intersection[1].position);
                     rightMesh->addFace(intersection[0].position, upper[0], intersection[1].position);
@@ -1335,9 +1339,8 @@ void GLModel::modelCut(){
 
         parentModel->bisectModel(parentModel->cuttingPlane);
     } else if (cutMode == 2){
-        qDebug() << "parent model cutting points " << parentModel->cuttingPoints.size();
         if (parentModel->cuttingPoints.size() >= 3){
-            qDebug() << "cut mode 2 done";
+
             // create left, rightmesh
             Mesh* leftMesh = parentModel->lmesh;
             Mesh* rightMesh = parentModel->rmesh;
@@ -1348,7 +1351,6 @@ void GLModel::modelCut(){
             rightMesh->vertices.reserve(mesh->faces.size()*3);
 
             cutAway(leftMesh, rightMesh, parentModel->mesh, parentModel->cuttingPoints, parentModel->cutFillMode);
-            qDebug() << "executed cutaway";
 
             emit parentModel->bisectDone();
         }
@@ -1358,7 +1360,6 @@ void GLModel::modelCut(){
 void GLModel::generateRLModel(){
     if (lmesh->faces.size() != 0)
         qmlManager->createModelFile(lmesh, filename+"_left");
-    qDebug() <<"generating RLModel" <<filename+"_left";
 
     // 승환 70%
     qmlManager->setProgress(0.72);
@@ -1497,7 +1498,6 @@ void GLModel::cutModeSelected(int type){
 }
 
 void GLModel::cutFillModeSelected(int type){
-    qDebug() << "cut fill mode selected" << type;
     parentModel->cutFillMode = type;
     return;
 }

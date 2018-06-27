@@ -257,6 +257,10 @@ void cutAway(Mesh* leftMesh, Mesh* rightMesh, Mesh* mesh, vector<QVector3D> cutt
             if (intersectionExists){
                 // calculate intersection point (least distance intpoint from enterIP, exitIPs)
                 QVector3D mv = mesh->vertices[mf.mesh_vertex[0]].position;
+                QVector3D commv = (mesh->vertices[mf.mesh_vertex[0]].position +
+                        mesh->vertices[mf.mesh_vertex[1]].position +
+                        mesh->vertices[mf.mesh_vertex[2]].position)/3;
+
                 IntPoint intmv = IntPoint(mv.x()*scfg->resolution, mv.y()*scfg->resolution);
 
 
@@ -266,10 +270,10 @@ void cutAway(Mesh* leftMesh, Mesh* rightMesh, Mesh* mesh, vector<QVector3D> cutt
                 // check if vertex earned from intersection
                 for (int vn=0; vn<3; vn++){
                     QVector3D mv = mesh->vertices[mf.mesh_vertex[vn]].position;
-                    QVector3D enterQV3 = QVector3D(enterIP.X/scfg->resolution, enterIP.Y/scfg->resolution, 0);
+                    QVector3D enterQV3 = QVector3D(((float)enterIP.X)/((float)scfg->resolution), ((float)enterIP.Y)/((float)scfg->resolution), 0);
                     Plane plane;
                     plane.push_back(enterQV3);
-                    plane.push_back(cuttingContour[1].position);
+                    plane.push_back(cuttingContour[0].position);
                     plane.push_back(QVector3D(enterQV3.x(),enterQV3.y(),1));
                     if (isLeftToPlane(plane, mv)) // if one vertex is left to plane, append to left vertices part
                         faceLeftToPlane_int = true;
@@ -283,7 +287,7 @@ void cutAway(Mesh* leftMesh, Mesh* rightMesh, Mesh* mesh, vector<QVector3D> cutt
                     float cur_distance = pointDistance(enterIP, intmv);
                     if (cur_distance < enter_min_distance){
                         enter_min_distance = cur_distance;
-                        enterIntersection = mv;
+                        enterIntersection = commv;
                         qDebug() << "found enterIntersection : " << mv <<enterIP.X << enterIP.Y << enter_min_distance;
                     }
                 }
@@ -294,10 +298,10 @@ void cutAway(Mesh* leftMesh, Mesh* rightMesh, Mesh* mesh, vector<QVector3D> cutt
                 // check if vertex earned from intersection
                 for (int vn=0; vn<3; vn++){
                     QVector3D mv = mesh->vertices[mf.mesh_vertex[vn]].position;
-                    QVector3D exitQV3 = QVector3D(exitIP.X/scfg->resolution, exitIP.Y/scfg->resolution, 0);
+                    QVector3D exitQV3 = QVector3D(((float)exitIP.X)/((float)scfg->resolution), ((float)exitIP.Y)/((float)scfg->resolution), 0);
                     Plane plane;
                     plane.push_back(exitQV3);
-                    plane.push_back(cuttingContour[cuttingContour.size()-2].position);
+                    plane.push_back(cuttingContour[cuttingContour.size()-1].position);
                     plane.push_back(QVector3D(exitQV3.x(),exitQV3.y(),1));
                     if (isLeftToPlane(plane, mv)) // if one vertex is left to plane, append to left vertices part
                         faceLeftToPlane_int = true;
@@ -311,7 +315,7 @@ void cutAway(Mesh* leftMesh, Mesh* rightMesh, Mesh* mesh, vector<QVector3D> cutt
                     float cur_distance = pointDistance(exitIP, intmv);
                     if (cur_distance < exit_min_distance){
                         exit_min_distance = cur_distance;
-                        exitIntersection = mv;
+                        exitIntersection = commv;
                         qDebug() << "found exitIntersection : "<< mv << exitIP.X << exitIP.Y << exit_min_distance;
                     }
                 }
@@ -406,7 +410,7 @@ void cutAway(Mesh* leftMesh, Mesh* rightMesh, Mesh* mesh, vector<QVector3D> cutt
         qDebug() << "inner Contour size : " << innerContour.size();
         Path3D* selectedCuttingContour;
         QMultiHash<int, MeshVertex>* selectedCuttingContourConnections;
-        if (abs(innerContour[0].position.z()-cuttingContour_u[1].position.z()) < abs(innerContour[1].position.z()-cuttingContour_l[1].position.z())){
+        if (abs(innerContour[0].position.z()-cuttingContour_u[1].position.z()) < abs(innerContour[0].position.z()-cuttingContour_l[1].position.z())){
             selectedCuttingContour = &cuttingContour_u;
             selectedCuttingContourConnections = &cuttingContourConnections_u;
         } else {
@@ -427,9 +431,11 @@ void cutAway(Mesh* leftMesh, Mesh* rightMesh, Mesh* mesh, vector<QVector3D> cutt
         }
         MeshVertex in1 = innerContour[0];
         MeshVertex in2 = innerContour[1];
-        leftMesh->addFace(in1.position, in2.position, (*selectedCuttingContour)[min_distance_cmv_idx].position);
-        leftMesh->addFace(in2.position, in1.position, (*selectedCuttingContour)[min_distance_cmv_idx].position);
 
+        if (!intersectionExists || cutFillMode==2){
+            leftMesh->addFace(in1.position, in2.position, (*selectedCuttingContour)[min_distance_cmv_idx].position);
+            leftMesh->addFace(in2.position, in1.position, (*selectedCuttingContour)[min_distance_cmv_idx].position);
+        }
         selectedCuttingContourConnections->insert(min_distance_cmv_idx, in1);
         selectedCuttingContourConnections->insert(min_distance_cmv_idx, in2);
         qDebug() << "after insertion" << min_distance_cmv_idx << selectedCuttingContourConnections->values(min_distance_cmv_idx).size();
@@ -438,6 +444,7 @@ void cutAway(Mesh* leftMesh, Mesh* rightMesh, Mesh* mesh, vector<QVector3D> cutt
 
     qDebug() << "cuttingContour_u size : " << cuttingContour_u.size();
 
+    if (!intersectionExists || cutFillMode==2){
     for (int c_idx1=0; c_idx1<cuttingContour_u.size(); c_idx1++){
         for (int c_idx2=0; c_idx2<cuttingContour_u.size(); c_idx2++){
             if (c_idx1 == c_idx2)
@@ -454,7 +461,9 @@ void cutAway(Mesh* leftMesh, Mesh* rightMesh, Mesh* mesh, vector<QVector3D> cutt
             }
         }
     }
+    }
 
+    if (!intersectionExists || cutFillMode==2){
     for (int c_idx1=0; c_idx1<cuttingContour_l.size(); c_idx1++){
         for (int c_idx2=0; c_idx2<cuttingContour_l.size(); c_idx2++){
             if (c_idx1 == c_idx2)
@@ -471,6 +480,8 @@ void cutAway(Mesh* leftMesh, Mesh* rightMesh, Mesh* mesh, vector<QVector3D> cutt
             }
         }
     }
+    }
+
 
     cuttingContourConnections_u.clear();
     cuttingContourConnections_l.clear();
@@ -500,12 +511,13 @@ void cutAway(Mesh* leftMesh, Mesh* rightMesh, Mesh* mesh, vector<QVector3D> cutt
         }
         MeshVertex on1 = outerContour[0];
         MeshVertex on2 = outerContour[1];
-        rightMesh->addFace(on1.position, on2.position, (*selectedCuttingContour)[min_distance_cmv_idx].position);
-        rightMesh->addFace(on2.position, on1.position, (*selectedCuttingContour)[min_distance_cmv_idx].position);
-
+        if (!intersectionExists || cutFillMode==2){
+            rightMesh->addFace(on1.position, on2.position, (*selectedCuttingContour)[min_distance_cmv_idx].position);
+            rightMesh->addFace(on2.position, on1.position, (*selectedCuttingContour)[min_distance_cmv_idx].position);
+        }
         selectedCuttingContourConnections->insert(min_distance_cmv_idx, on1);
         selectedCuttingContourConnections->insert(min_distance_cmv_idx, on2);
-        if (abs(outerContour[0].position.z()-cuttingContour_u[0].position.z()) < abs(outerContour[0].position.z()-cuttingContour_l[0].position.z())){
+        if (abs(outerContour[0].position.z()-cuttingContour_u[1].position.z()) < abs(outerContour[0].position.z()-cuttingContour_l[1].position.z())){
             qDebug() << "after insertion" << min_distance_cmv_idx << cuttingContourConnections_u.values(min_distance_cmv_idx).size() << on1.position << on2.position;
         }
     }
@@ -513,6 +525,7 @@ void cutAway(Mesh* leftMesh, Mesh* rightMesh, Mesh* mesh, vector<QVector3D> cutt
 
     qDebug() << "cuttingContour_u size : " << cuttingContour_u.size();
 
+    if (!intersectionExists || cutFillMode==2){
     for (int c_idx1=0; c_idx1<cuttingContour_u.size(); c_idx1++){
         for (int c_idx2=0; c_idx2<cuttingContour_u.size(); c_idx2++){
             if (c_idx1 == c_idx2)
@@ -530,7 +543,9 @@ void cutAway(Mesh* leftMesh, Mesh* rightMesh, Mesh* mesh, vector<QVector3D> cutt
             }
         }
     }
+    }
 
+    if (!intersectionExists || cutFillMode==2){
     for (int c_idx1=0; c_idx1<cuttingContour_l.size(); c_idx1++){
         for (int c_idx2=0; c_idx2<cuttingContour_l.size(); c_idx2++){
             if (c_idx1 == c_idx2)
@@ -548,8 +563,9 @@ void cutAway(Mesh* leftMesh, Mesh* rightMesh, Mesh* mesh, vector<QVector3D> cutt
             }
         }
     }
+    }
 
-    if (cutFillMode = 2 && cuttingContour_u.size() >= 3){
+    if (cutFillMode == 2 && cuttingContour_u.size() >= 3){
         QVector3D normal_direction = QVector3D::normal(cuttingContour_u[0].position-cuttingContour_u[1].position, cuttingContour_u[2].position-cuttingContour_u[1].position);
         for (int u_idx=0; u_idx<cuttingContour_u.size(); u_idx++){
             if ((u_idx == 0 || u_idx == cuttingContour_u.size()-1) && intersectionExists)
@@ -589,8 +605,8 @@ void cutAway(Mesh* leftMesh, Mesh* rightMesh, Mesh* mesh, vector<QVector3D> cutt
             rightMesh->addFace(umv_1.position, umv_exit.position, lmv_1.position);
             leftMesh->addFace(umv1.position, umv_enter.position, lmv1.position);
             leftMesh->addFace(umv_exit.position, umv_1.position, lmv_1.position);
-            /*
-            if (normal_direction.z()>0){
+
+            /*if (normal_direction.z()>0){
                 qDebug() << "normal direction plus" << umv_enter.position << umv_exit.position;
                 rightMesh->addFace(umv1.position, umv_enter.position, lmv1.position);
                 rightMesh->addFace(umv_exit.position, umv_1.position, lmv_1.position);
@@ -605,9 +621,6 @@ void cutAway(Mesh* leftMesh, Mesh* rightMesh, Mesh* mesh, vector<QVector3D> cutt
             }*/
         }
     }
-
-
-    qDebug() << "right wall constructed";
 
     if (leftMesh->faces.size() != 0)
         leftMesh->connectFaces();
