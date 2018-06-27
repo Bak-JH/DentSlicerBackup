@@ -6,8 +6,8 @@ Slider {
     id:slider
     objectName: "cutSlider"
     property string name:"slider"
-    maximumValue: 2
-    minimumValue: -0.2
+    maximumValue: 10
+    minimumValue: -1
     value: 1
 
     visible: false
@@ -42,25 +42,30 @@ Slider {
             source:"qrc:/resource/switch.png"
         }
     }
+    onPressedChanged: {
+        txtValue.enabled = pressed;
+    }
+
     onValueChanged: {
-        if(value>1.8)
-            value=1.8
+        if(value > 9)
+            value = 9
         else if(value<0)
             value=0
-        sliderValueChanged(value);
+        sliderValueChanged(value / 9);
         txtValue.text = value.toString();
+        txtValue.y = height - height * value / 12 - 50;
     }
     signal sliderValueChanged(double value);
 
     Text{
         id : txtMin
         height: 20
-        anchors.topMargin: 20
-        anchors.top: parent.top
+        anchors.bottomMargin: 6
+        anchors.bottom: parent.bottom
         anchors.left: parent.left
         anchors.right: parent.right
 
-        font.pixelSize: 20
+        font.pixelSize: 14
         font.family: mainFont.name
         font.bold: true
         horizontalAlignment: Text.AlignHCenter
@@ -72,15 +77,15 @@ Slider {
     Text{
         id : txtMax
         height: 20
-        anchors.bottomMargin: 20
-        anchors.bottom: parent.bottom
+        anchors.topMargin: 6
+        anchors.top: parent.top
         anchors.left: parent.left
         anchors.right: parent.right
 
-        font.pixelSize: 20
+        font.pixelSize: 14
         font.family: mainFont.name
         font.bold: true
-        horizontalAlignment: Text.AlignLeft
+        horizontalAlignment: Text.AlignHCenter
         verticalAlignment: Text.AlignVCenter
         color: "#000000"
         text: "max"
@@ -90,13 +95,14 @@ Slider {
         id : txtValue
         x: 15
         y: 15
-        width: 300
+        width: 30
         height: 20
 
-        font.pixelSize: 20
+        font.pixelSize: 16
         font.family: mainFont.name
         font.bold: true
-        horizontalAlignment: Text.AlignLeft
+        anchors.right: parent.left
+        horizontalAlignment: Text.AlignRight
         verticalAlignment: Text.AlignVCenter
         color: "#666666"
         text: "Color scheme"
