@@ -211,6 +211,9 @@ void GLModel::saveUndoState(){
     // need to change to memcpy or something
     qDebug () << "save prev mesh";
 
+    // need to remove redo State since it contains
+    mesh->nextMesh = nullptr;
+
     // copy current Mesh as temporary prev_mesh
     Mesh* temp_prev_mesh = new Mesh();
     temp_prev_mesh->faces.reserve(mesh->faces.size()*3);
@@ -226,16 +229,29 @@ void GLModel::saveUndoState(){
     if (mesh->prevMesh != nullptr)
         mesh->prevMesh->nextMesh = temp_prev_mesh;
     temp_prev_mesh->nextMesh = mesh;
+
+    Mesh* deleteTargetMesh = mesh;
+    for (int i=0; i<10; i++){ // maximal undo count is 10
+        if (deleteTargetMesh != nullptr)
+            deleteTargetMesh = deleteTargetMesh->prevMesh;
+    }
+    if (deleteTargetMesh != nullptr){
+        deleteTargetMesh->nextMesh->prevMesh = nullptr;
+        delete deleteTargetMesh;
+    }
+
     mesh->prevMesh = temp_prev_mesh;
+
 
     // for model cut, shell offset
     lmesh->prevMesh = temp_prev_mesh;
+    lmesh->undoCnt = mesh->undoCnt;
     rmesh->prevMesh = temp_prev_mesh;
+    lmesh->undoCnt = mesh->undoCnt;
 }
 
 void GLModel::loadUndoState(){
     if (mesh->prevMesh != nullptr){
-        qDebug() << "loading prevmesh";
         mesh = mesh->prevMesh;
         emit _updateModelMesh();
     }
