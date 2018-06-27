@@ -43,14 +43,15 @@ Item{
 
                 Image{
                     id:undo_icon
-                    width: 32
-                    height: 32
+                    width: 26
+                    height: 24
                     anchors.horizontalCenter: parent.horizontalCenter
                     anchors.top: parent.top
-                    anchors.topMargin: 4
+                    anchors.topMargin: 8
                     source:"qrc:/Resource/undo_icon.png"
                 }
                 Text{
+                    id:undo_text
                     text:"UNDO"
                     anchors.bottom : parent.bottom
                     anchors.horizontalCenter: undo_icon.horizontalCenter
@@ -65,12 +66,22 @@ Item{
                     anchors.fill: undo_button
 
                     hoverEnabled : true
-                    onEntered : qm.setHandCursor();
-                    onExited : qm.resetCursor();
 
                     onClicked: {
                         unDo();
                         //views.visible = !views.visible
+                    }
+                    onEntered: {
+                        undo_button.color = "#3ea6b7"
+                        undo_icon.source = "qrc:/Resource/undo_icon_select.png"
+                        undo_text.color = "#ffffff"
+                        qm.setHandCursor()
+                    }
+                    onExited: {
+                        undo_button.color = "#ffffff"
+                        undo_icon.source = "qrc:/Resource/undo_icon.png"
+                        undo_text.color = "black"
+                        qm.resetCursor()
                     }
                 }
             }
@@ -106,14 +117,15 @@ Item{
 
             Image{
                 id:redo_icon
-                width: 32
-                height: 32
+                width: 26
+                height: 24
                 anchors.horizontalCenter: parent.horizontalCenter
                 anchors.top: parent.top
-                anchors.topMargin: 4
+                anchors.topMargin: 8
                 source:"qrc:/Resource/redo_icon.png"
             }
             Text{
+                id:redo_text
                 text:"REDO"
                 anchors.bottom: parent.bottom
                 anchors.horizontalCenter: redo_icon.horizontalCenter
@@ -125,13 +137,22 @@ Item{
             }
             MouseArea{
                 anchors.fill: redo_button
-
                 hoverEnabled : true
-                onEntered : qm.setHandCursor();
-                onExited : qm.resetCursor();
 
                 onClicked: {
                     reDo();
+                }
+                onEntered: {
+                    redo_button.color = "#3ea6b7"
+                    redo_icon.source = "qrc:/Resource/redo_icon_select.png"
+                    redo_text.color = "#ffffff"
+                    qm.setHandCursor()
+                }
+                onExited: {
+                    redo_button.color = "#ffffff"
+                    redo_icon.source = "qrc:/Resource/redo_icon.png"
+                    redo_text.color = "black"
+                    qm.resetCursor()
                 }
             }
         }

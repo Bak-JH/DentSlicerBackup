@@ -50,5 +50,9 @@
         <file>Qml/DeletePopup.qml</file>
         <file>Qml/YesNoPopup.qml</file>
         <file>Qml/UndoRedoButton.qml</file>
+        <file>Resource/redo_icon.png</file>
+        <file>Resource/redo_icon_select.png</file>
+        <file>Resource/undo_icon.png</file>
+        <file>Resource/undo_icon_select.png</file>
     </qresource>
 </RCC>
