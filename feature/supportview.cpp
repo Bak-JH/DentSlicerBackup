@@ -5,14 +5,15 @@ void generateCylinder(Mesh* mesh, OverhangPoint *point, OverhangPoint *parent){
 
     qDebug() << point << point->branching_overhang_point << point->target_branching_overhang_point << parent;
     qDebug() << "height:" << point->height <<
+                "radius:" << point->radius <<
                 "branchable:" << point->branchable <<
                 "v(" << point->position.X << "," << point->position.Y << "," << point->position.Z << ")";
 
-    float height = (float)point->height;
+    float height = point->height;
     float radius = (float)point->radius / scfg->resolution;
     QVector3D position = QVector3D((float)point->position.X / scfg->resolution,
             (float)point->position.Y / scfg->resolution,
-            (float)point->position.Z / scfg->resolution - height);
+            (float)(point->position.Z - (int)point->height * 1000) / scfg->resolution);
     QVector3D positionTop = QVector3D((float)point->position.X / scfg->resolution,
             (float)point->position.Y / scfg->resolution,
             (float)point->position.Z / scfg->resolution);
@@ -33,10 +34,10 @@ void generateCylinder(Mesh* mesh, OverhangPoint *point, OverhangPoint *parent){
                     (float)point->position.Y / scfg->resolution,
                     (float)point->position.Z / scfg->resolution);
         }
-
-        qDebug() << "v1(" << position.x() << "," << position.y() << "," << position.z() << ")";
-        qDebug() << "v2(" << positionTop.x() << "," << positionTop.y() << "," << positionTop.z() << ")";
     }
+
+    qDebug() << "v1(" << position.x() << "," << position.y() << "," << position.z() << ")";
+    qDebug() << "v2(" << positionTop.x() << "," << positionTop.y() << "," << positionTop.z() << ")";
 
     vector<QVector3D> top;
     vector<QVector3D> bottom;
@@ -74,7 +75,7 @@ void generateCylinder(Mesh* mesh, OverhangPoint *point, OverhangPoint *parent){
         lastBottom = &(*iterBottom);
     }
 
-    if( point->target_branching_overhang_point != nullptr ) {
+    if( point->target_branching_overhang_point != nullptr && parent == nullptr ) {
         generateCylinder(mesh, point->target_branching_overhang_point, point);
     }
 }
