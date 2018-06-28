@@ -373,6 +373,7 @@ void GLModel::updateModelMesh(){
 
     m_transform->setTranslation(QVector3D(tmp.x(),tmp.y(),-mesh->z_min));
     checkPrintingArea();
+    QMetaObject::invokeMethod(qmlManager->scalePopup, "updateSizeInfo", Q_ARG(QVariant, mesh->x_max-mesh->x_min), Q_ARG(QVariant, mesh->y_max-mesh->y_min), Q_ARG(QVariant, mesh->z_max-mesh->z_min));
     qDebug() << "model transform :" <<m_transform->translation() << mesh->x_max << mesh->x_min << mesh->y_max << mesh->y_min << mesh->z_max << mesh->z_min;
 
 
@@ -402,6 +403,15 @@ featureThread::featureThread(GLModel* glmodel, int type){
 
 void featureThread::setTypeAndRun(int type){
     optype = type;
+    run();
+}
+
+void featureThread::setTypeAndRun(int type, double value1=1, double value2=1, double value3=1){
+    optype = type;
+    arg1 = value1;
+    arg2 = value2;
+    arg3 = value3;
+    qDebug() << "settypeandrun 4";
     run();
 }
 
@@ -471,7 +481,11 @@ void featureThread::run(){
             }
         case ftrScale:
             {
-                //m_glmodel->scaleModelMesh(scale);
+                m_glmodel->saveUndoState();
+                float scaleX = arg1;
+                float scaleY = arg2;
+                float scaleZ = arg3;
+                m_glmodel->scaleModelMesh(scaleX, scaleY, scaleZ);
                 break;
             }
         case ftrRepair:
@@ -829,6 +843,9 @@ void GLModel::addIndexes(vector<int> indexes){
 
 void GLModel::handlePickerClickedFreeCut(Qt3DRender::QPickEvent* pick)
 {
+    if (pick->position().x() < 260 && pick->position().y() < 330) // cut panel
+        return;
+    qDebug() << pick->position();
     qDebug() << "handle picker clicked freecut";
     qDebug() << pick->localIntersection()<<"pick" << cuttingPoints.size() << parentModel->cuttingPoints.size();
     QVector3D v = pick->localIntersection();
@@ -1452,6 +1469,8 @@ void GLModel::mgoo(Qt3DRender::QPickEvent* v)
     if(v->buttons()>1){
         return;
     }
+    if (cutActive || extensionActive || labellingActive || layflatActive)
+        return;
 
     qmlManager->setClosedHandCursor();
     isMoved = true;
@@ -1938,6 +1957,15 @@ void GLModel::closeExtension(){
     extensionActive = false;
     parentModel->uncolorExtensionFaces();
     parentModel->targetMeshFace = nullptr;
+}
+
+void GLModel::openScale(){
+    qDebug() << "open scale";
+    QMetaObject::invokeMethod(qmlManager->scalePopup, "updateSizeInfo", Q_ARG(QVariant, parentModel->mesh->x_max-parentModel->mesh->x_min), Q_ARG(QVariant, parentModel->mesh->y_max-parentModel->mesh->y_min), Q_ARG(QVariant, parentModel->mesh->z_max-parentModel->mesh->z_min));
+}
+
+void GLModel::closeScale(){
+    qDebug() << "close scale";
 }
 
 // for shell offset

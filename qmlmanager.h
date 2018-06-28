@@ -92,6 +92,9 @@ public:
     QObject* progress_popup;
     QObject* orientButton;
 
+    // scale components
+    QObject* scalePopup;
+
     // extension components
     QObject* extensionPopup;
     QObject* extensionButton;

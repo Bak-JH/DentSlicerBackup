@@ -796,6 +796,7 @@ Rectangle {
         //9. PopUp - Scale
         PopUp {
             id: popup_scale
+            objectName: "scalePopup"
             funcname: "Scale"
             height: 330
             detail1: "Current size"
@@ -816,12 +817,45 @@ Rectangle {
             numberbox_y: 75
             //numbox_default: 0
             numbox_total_height: 120
-            //state: third_tab_button_scale.state=="active" ? "active" : "inactive"
+
+            signal openScale();
+            signal closeScale();
+            signal runFeature(int type, double scaleX, double scaleY, double scaleZ);
+
             state: {
-                if (third_tab_button_scale.state=="active" && qm.isSelected())
+                if (third_tab_button_scale.state=="active" && qm.isSelected()){
+                    console.log("state changed");
+                    openScale();
                     return "active"
-                else
+                } else {
+                    closeScale();
                     return "inactive"
+                }
+            }
+
+
+
+            function updateSizeInfo(x,y,z){
+                if (numberbox1_number_origin != x || numberbox2_number_origin != y || numberbox3_number_origin != z){ // except for initial open, we don't call it
+                    numberbox1_number_origin = x;
+                    numberbox2_number_origin = y;
+                    numberbox3_number_origin = z;
+                    numberbox1_text.text = x.toString();
+                    numberbox2_text.text = y.toString();
+                    numberbox3_text.text = z.toString();
+                }
+
+                console.log("update model info called " + x.toString() + y.toString() + z.toString() + numberbox1_number + numberbox2_number + numberbox3_number);
+            }
+
+            onApplyClicked: {
+                console.log("scale called x y z" + numberbox1_number + numberbox2_number + numberbox3_number);
+                console.log("scale called" + numbox_value_detail2);
+                if (numbox_value_detail2 != 100) // scale by scale value
+                    runFeature(ftrScale, numbox_value_detail2/100, numbox_value_detail2/100, numbox_value_detail2/100);
+                else // scale by definite mm
+                    runFeature(ftrScale, numberbox1_number/numberbox1_number_origin, numberbox2_number/numberbox2_number_origin, numberbox3_number/numberbox3_number_origin);
+                // update scale info
             }
 
             //detail1 - size lock
