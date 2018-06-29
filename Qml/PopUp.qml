@@ -57,11 +57,19 @@ Rectangle {
     property alias numbox_detail2_vis: numberbox_detail2.visible
     property int numberbox_detail2_y
     property real numbox_updown_scale
+    property alias text3DInputBackground_vis : text3DInputBackground.visible
 
     //------------------------------------------------data
-    property int numberbox1_number:0
-    property int numberbox2_number:0
-    property int numberbox3_number:0
+    property real numberbox1_number:0
+    property real numberbox2_number:0
+    property real numberbox3_number:0
+    property real numberbox1_number_origin:0
+    property real numberbox2_number_origin:0
+    property real numberbox3_number_origin:0
+    property alias numberbox1_text: numberbox1_text
+    property alias numberbox2_text: numberbox2_text
+    property alias numberbox3_text: numberbox3_text
+
 
     /*
     function possible_calculate(unit,lastvalue,input){
@@ -146,19 +154,20 @@ Rectangle {
         numberbox2_text.focus = false;
         numberbox3_text.focus = false;
         numberbox_detail2_text.focus = false;
+        text3DInput.focus = false;
     }
 
     function numbox_reset() {
         applyfinishbutton.color = "#BBB"
         numbox_value_x = numbox_default;
-        numberbox1_text.text = numbox_value_x;
-        numberbox1_number = numbox_value_x;
+        numberbox1_text.text = numberbox1_number_origin;
+        numberbox1_number = numberbox1_number_origin;
         numbox_value_y = numbox_default;
-        numberbox2_text.text = numbox_value_y;
-        numberbox2_number = numbox_value_x;
+        numberbox2_text.text = numberbox2_number_origin;
+        numberbox2_number = numberbox2_number_origin;
         numbox_value_z = numbox_default;
-        numberbox3_text.text = numbox_value_z;
-        numberbox3_number = numbox_value_x;
+        numberbox3_text.text = numberbox3_number_origin;
+        numberbox3_number = numberbox3_number_origin;
         numbox_value_detail2 = numbox_detail2_default;
         numberbox_detail2_text.text = numbox_value_detail2;
     }
@@ -709,18 +718,22 @@ Rectangle {
                     //        numberbox1.color = "#f5f5f5"
                     }
                     onTextChanged: {
+                        console.log("on text changed called" + text);
                         if (text.length == 1){
-                            text = text.replace(/[^-|0-9]/g,'');
+                            text = text.replace(/[^-|0-9.]/g,'');
                         }else{
-                            text = text.charAt(0).replace(/[^-|1-9]/g,'')+text.substring(1,text.length).replace(/[^0-9]/g, '');
+                            text = text.charAt(0).replace(/[^-|1-9.]/g,'')+text.substring(1,text.length).replace(/[^0-9.]/g, '');
                         }
 
-                        if (text.length > 3){
-                            text = text.substring(0,3)
+                        console.log("on text changed ok 1 ")
+
+                        if (text.length > 6){
+                            text = text.substring(0,6)
                         }
 
                         if (text === "") text = "0"
-                        numberbox1_number = parseInt(text,10)
+                        numberbox1_number = parseFloat(text)
+                        //numberbox1_number = parseInt(text,10)
                         console.log(numberbox1_number);
                         //if (numberbox1_number != 0 ) applyfinishbutton.color = "#3ea6b7"
                         console.log(applyfinishbutton.color);
@@ -862,17 +875,18 @@ Rectangle {
                     }
                     onTextChanged: {
                         if (text.length == 1){
-                            text = text.replace(/[^-|0-9]/g,'');
+                            text = text.replace(/[^-|0-9.]/g,'');
                         }else{
-                            text = text.charAt(0).replace(/[^-|1-9]/g,'')+text.substring(1,text.length).replace(/[^0-9]/g, '');
+                            text = text.charAt(0).replace(/[^-|1-9.]/g,'')+text.substring(1,text.length).replace(/[^0-9.]/g, '');
                         }
 
-                        if (text.length > 3){
-                            text = text.substring(0,3)
+                        if (text.length > 6){
+                            text = text.substring(0,6)
                         }
 
                         if (text === "") text = "0"
-                        numberbox2_number = parseInt(text,10)
+                        //numberbox2_number = parseInt(text,10)
+                        numberbox2_number = parseFloat(text)
                      //   if (numberbox2_number != 0 ) applyfinishbutton.color = "#3ea6b7"
                      //   if (numberbox1_number == 0 && numberbox2_number == 0 && numberbox3_number==0 ) applyfinishbutton.color = "#999999"
 
@@ -1010,17 +1024,17 @@ Rectangle {
                     }
                     onTextChanged: {
                         if (text.length == 1){
-                            text = text.replace(/[^-|0-9]/g,'');
+                            text = text.replace(/[^-|0-9.]/g,'');
                         }else{
-                            text = text.charAt(0).replace(/[^-|1-9]/g,'')+text.substring(1,text.length).replace(/[^0-9]/g, '');
+                            text = text.charAt(0).replace(/[^-|1-9.]/g,'')+text.substring(1,text.length).replace(/[^0-9.]/g, '');
                         }
-
-                        if (text.length > 3){
-                            text = text.substring(0,3)
+                        if (text.length > 6){
+                            text = text.substring(0,6)
                         }
 
                         if (text === "") text = "0"
-                        numberbox3_number = parseInt(text,10)
+                        //numberbox3_number = parseInt(text,10)
+                        numberbox3_number = parseFloat(text)
                        // if (numberbox3_number != 0 ) applyfinishbutton.color = "#3ea6b7"
                        // if (numberbox1_number == 0 && numberbox2_number == 0 && numberbox3_number==0 ) applyfinishbutton.color = "#999999"
                         if (numberbox1_text.text === "0" && numberbox2_text.text === "0" && numberbox3_text.text === "0"){
@@ -1192,13 +1206,11 @@ Rectangle {
                 textColor: focus ? "black" : "#595959"
                 selectByMouse: true
                 onTextChanged: {
-                    console.log(text);
                     if (text.length == 1){
                         text = text.replace(/[^0-9.]/g,'');
                     }else{
                         text = text.charAt(0).replace(/[^1-9.]/g,'')+text.substring(1,text.length).replace(/[^0-9.]/g, '');
                     }
-                    console.log(text);
                     numbox_value_detail2 = parseFloat(text)
                 }
                 style: TextFieldStyle {
@@ -1275,6 +1287,66 @@ Rectangle {
                     detail2_downbutton_image1.source = "qrc:/Resource/popup_image/down_button_hover.png"
                 }
                 onReleased: { detail2_downbutton_image1.source = "qrc:/Resource/popup_image/down_button.png"}
+            }
+        }
+    }
+
+    // text3d input
+    Rectangle {
+        id: text3DInputBackground
+        width: 194
+        height: 24
+        visible: false
+
+        y: 320
+
+        color: "#ffffffff"
+
+        //anchors.left: parent.left
+        //anchors.right : parent.right
+        anchors.bottom: parent.bottom
+        anchors.horizontalCenter: parent.horizontalCenter
+
+        //anchors.leftMargin: 25
+        //anchors.rightMargin: 25
+        anchors.bottomMargin: 55
+
+        Text {
+            id: hiddenText
+            anchors.fill: text3DInput
+            text: text3DInput.text
+            font.pixelSize: text3DInput.font.pixelSize
+            visible: false
+        }
+
+        TextField {
+            id:text3DInput
+            objectName: "text3DInput"
+            anchors.fill: parent
+            style: TextFieldStyle {
+                textColor: "#333333"
+                background: Rectangle {
+                    radius: 2
+                    border.color: "#CCC"
+                    border.width: 1
+                }
+            }
+            selectByMouse: true
+            onFocusChanged: {
+            //    if(numberbox1_text.focus)
+            //        numberbox1.color = "#f5f5f5"
+            }
+            signal sendTextChanged(string text, int contentWidth)
+            placeholderText: qsTr("Enter text")
+            font.family: mainFont.name
+            onTextChanged: {
+                //console.log("content width changed ");
+                //console.log(hiddenText.text.length);
+                console.log("content width : ");
+                console.log(hiddenText.text.length);
+                console.log(hiddenText.contentWidth);
+                sendTextChanged(text, hiddenText.contentWidth);
+                //sendTextChanged(text, hiddenText.text.length)
             }
         }
     }

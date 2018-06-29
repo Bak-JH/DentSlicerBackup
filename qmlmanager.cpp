@@ -96,6 +96,8 @@ void QmlManager::initializeUI(QQmlApplicationEngine* e){
     orientPopup = FindItemByName(engine, "orientPopup");
     progress_popup = FindItemByName(engine, "progress_popup");
 
+    // scale components
+    scalePopup = FindItemByName(engine, "scalePopup");
 
     // extension components
     extensionButton = FindItemByName(engine,"extendButton");
@@ -276,6 +278,11 @@ void QmlManager::disconnectHandlers(GLModel* glmodel){
     // auto orientation popup codes
     QObject::disconnect(orientPopup, SIGNAL(runFeature(int)), glmodel->ft, SLOT(setTypeAndStart(int)));
 
+    // scale popup codes
+    QObject::disconnect(scalePopup, SIGNAL(runFeature(int,double,double,double)), glmodel->ft, SLOT(setTypeAndRun(int, double, double, double)));
+    QObject::disconnect(scalePopup, SIGNAL(openScale()), glmodel->shadowModel, SLOT(openScale()));
+    QObject::disconnect(scalePopup, SIGNAL(closeScale()), glmodel->shadowModel, SLOT(closeScale()));
+
     // label popup codes
     QObject::disconnect(text3DInput, SIGNAL(sendTextChanged(QString, int)),glmodel->shadowModel,SLOT(getTextChanged(QString, int)));
     QObject::disconnect(labelPopup, SIGNAL(openLabelling()),glmodel->shadowModel,SLOT(openLabelling()));
@@ -357,6 +364,12 @@ void QmlManager::connectHandlers(GLModel* glmodel){
 
     // auto orientation popup codes
     QObject::connect(orientPopup, SIGNAL(runFeature(int)), glmodel->ft, SLOT(setTypeAndStart(int)));
+
+    // scale popup codes
+    QObject::connect(scalePopup, SIGNAL(runFeature(int,double,double,double)), glmodel->ft, SLOT(setTypeAndRun(int, double, double, double)));
+    QObject::connect(scalePopup, SIGNAL(openScale()), glmodel->shadowModel, SLOT(openScale()));
+    QObject::connect(scalePopup, SIGNAL(closeScale()), glmodel->shadowModel, SLOT(closeScale()));
+
     // label popup codes
     QObject::connect(text3DInput, SIGNAL(sendTextChanged(QString, int)),glmodel->shadowModel,SLOT(getTextChanged(QString, int)));
     QObject::connect(labelPopup, SIGNAL(openLabelling()),glmodel->shadowModel,SLOT(openLabelling()));
@@ -1085,6 +1098,10 @@ void QmlManager::runGroupFeature(int ftrType, QString state){
                 selectedModel->shadowModel->closeExtension();
             }
         }
+        break;
+    case ftrScale:
+        qDebug() << "run feature scale";
+
         break;
     }
 }
