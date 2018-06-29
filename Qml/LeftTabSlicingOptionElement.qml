@@ -22,7 +22,7 @@ Item {
 
         font.pixelSize: 14
         //font.bold: true
-        anchors.leftMargin:16
+        anchors.leftMargin:14
         text: columnName
         font.family: mainFont.name
 
@@ -62,7 +62,7 @@ Item {
             label: Text {
                 verticalAlignment: Text.AlignVCenter
                 anchors.left: parent.left
-                anchors.leftMargin: 16
+                anchors.leftMargin: 8
 
                 font.pixelSize: 14
                 font.family: mainFont.name
@@ -90,7 +90,7 @@ Item {
                         verticalAlignment: Text.AlignVCenter
                         //horizontalAlignment: Text.AlignHCenter
                         anchors.left: parent.left
-                        anchors.leftMargin: 16
+                        anchors.leftMargin: 8
 
                         font.pixelSize: 14
                         font.family: mainFont.name

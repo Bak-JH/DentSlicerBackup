@@ -821,27 +821,22 @@ void QmlManager::modelMove(int Axis, int Distance){ // for QML Signal -> float i
     switch(Axis){
         case 1:{  //X
             QVector3D tmp = selectedModel->m_transform->translation();
+
+            if(tmp.x() + selectedModel->mesh->x_max +1 + Distance > 100/2 )
+                return ;
+            if(tmp.x() + selectedModel->mesh->x_min -1 + Distance < - 100/2 )
+                return ;
+
             selectedModel->m_transform->setTranslation(QVector3D(tmp.x()+Distance,tmp.y(),tmp.z()));
-
-            if(tmp.x() + selectedModel->mesh->x_max +1 > 100/2 )
-                selectedModel->m_transform->setTranslation(QVector3D(tmp.x() - (tmp.x() + selectedModel->mesh->x_max - 100/2 + 1),tmp.y(),tmp.z()));
-                //qDebug() << "Case X 1 " << tmp.x() << " " << selectedModel->mesh->x_max ;
-            if(tmp.x() + selectedModel->mesh->x_min -1 < - 100/2 )
-                selectedModel->m_transform->setTranslation(QVector3D(tmp.x() - (tmp.x() + selectedModel->mesh->x_min + 100/2 - 1),tmp.y(),tmp.z()));
-                //qDebug() << "Case X 2 " << tmp.x() << " " << selectedModel->mesh->x_min;
-
             break;
         }
         case 2:{  //Y
             QVector3D tmp = selectedModel->m_transform->translation();
+            if(tmp.y() + selectedModel->mesh->y_max +1 + Distance> 80/2 )
+                return;
+            if(tmp.y() + selectedModel->mesh->y_min -1 + Distance< - 80/2 )
+                return;
             selectedModel->m_transform->setTranslation(QVector3D(tmp.x(),tmp.y()+Distance,tmp.z()));
-
-            if(tmp.y() + selectedModel->mesh->y_max +1 > 80/2 )
-                selectedModel->m_transform->setTranslation(QVector3D(tmp.x(), tmp.y() - (tmp.y() + selectedModel->mesh->y_max - 80/2 + 1), tmp.z()));
-                //qDebug() << "Case Y 3 " << tmp.y() << " " << selectedModel->mesh->y_max;
-            if(tmp.y() + selectedModel->mesh->y_min -1 < - 80/2 )
-                selectedModel->m_transform->setTranslation(QVector3D(tmp.x(), tmp.y() - (tmp.y() + selectedModel->mesh->y_min + 80/2 - 1), tmp.z()));
-                //qDebug() << "Case Y 4 " << tmp.y() << " " << selectedModel->mesh->y_min;
             break;
         }
     }
@@ -974,11 +969,23 @@ void QmlManager::modelMoveByNumber(int axis, int X, int Y){
     if (selectedModel == nullptr)
         return;
     QVector3D tmp = selectedModel->m_transform->translation();
-    //QQmlProperty::write(moveArrowobj,"center",selectedModel->m_transform->translation()+QVector3D((selectedModel->mesh->x_max+selectedModel->mesh->x_min)/2,(selectedModel->mesh->y_max+selectedModel->mesh->y_min)/2,(selectedModel->mesh->z_max+selectedModel->mesh->z_min)/2));
-    //mouseHack();
-    selectedModel->moveModelMesh(QVector3D(tmp.x()+X,tmp.y()+Y,tmp.z()));
-    //selectedModel->checkPrintingArea();
-    //selectedModel->m_transform->setTranslation(QVector3D(tmp.x()+X,tmp.y()+Y,tmp.z()));
+    int targetX, targetY;
+
+    targetX = tmp.x() + X;
+    targetY = tmp.y() + Y;
+
+    if(tmp.x() + selectedModel->mesh->x_max +1 + X> 80/2 )
+        targetX = tmp.x() - (tmp.x() + selectedModel->mesh->x_max - 100/2 + 1);
+    if(tmp.x() + selectedModel->mesh->x_min -1 + X< - 80/2 )
+        targetX = tmp.x() - (tmp.x() + selectedModel->mesh->x_min + 100/2 - 1);
+
+
+    if(tmp.y() + selectedModel->mesh->y_max +1 + Y> 80/2 )
+        targetY = tmp.y() - (tmp.y() + selectedModel->mesh->y_max - 80/2 + 1);
+    if(tmp.y() + selectedModel->mesh->y_min -1 + Y< - 80/2 )
+        targetY = tmp.y() - (tmp.y() + selectedModel->mesh->y_min + 80/2 - 1);
+
+    selectedModel->moveModelMesh(QVector3D(targetX,targetY,tmp.z()));
 
     modelMoveDone(1);
 }
