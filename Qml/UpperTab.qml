@@ -84,7 +84,7 @@ Rectangle {
         anchors.left : parent.left
         //anchors.right : parent.right
         anchors.bottom: parent.bottom
-        color: "#E6E6E6"
+        color: "#D4D6D9"
     }
     /*
     Rectangle{
@@ -253,7 +253,7 @@ Rectangle {
             anchors.top : parent.top
             //anchors.bottom : tabgroupname.top
 
-            color : "#E6E6E6"
+            color : "#D4D6D9"
         }
     }
 
@@ -340,7 +340,7 @@ Rectangle {
             anchors.right: parent.right
             anchors.top : parent.top
             //anchors.bottom : tabgroupname.top
-            color : "#E6E6E6"
+            color : "#D4D6D9"
         }
 
     }
@@ -379,6 +379,7 @@ Rectangle {
             onButtonClicked:{
                 if(!qm.isSelected() && (state == "active"))
                     window.resultPopUp.openResultPopUp("","You must select at least one model.","")
+
             }
 
 
@@ -460,7 +461,7 @@ Rectangle {
             anchors.top : parent.top
             //anchors.bottom : tabgroupname.top
 
-            color : "#E6E6E6"
+            color : "#D4D6D9"
         }
 
 
@@ -529,7 +530,7 @@ Rectangle {
             anchors.top : parent.top
             //anchors.bottom : tabgroupname.top
 
-            color : "#E6E6E6"
+            color : "#D4D6D9"
         }
     }
 

@@ -62,8 +62,18 @@ Item {
                 color: "#FFFFFF"
             }
 
-
+            MouseArea{
+                anchors.fill: parent
+                hoverEnabled: true
+                onEntered:{
+                    qm.setHandCursor();
+                }
+                onExited:{
+                    qm.resetCursor();
+                }
+            }
         }
+
         Rectangle{
             id:data
             width: 280
@@ -75,7 +85,7 @@ Item {
             color: "transparent"
 
             border.width: 1
-            border.color: "#E0E0E0"
+            border.color: "transparent"
 
             SlicingDataElement{
                 id:sdupleft

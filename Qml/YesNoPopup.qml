@@ -99,7 +99,7 @@ Rectangle {
                 anchors.horizontalCenter: parent.horizontalCenter
                 text: "YES"
                 color: "#ffffff"
-                font.pixelSize: 24
+                font.pixelSize: 20
                 font.family: mainFont.name
             }
             MouseArea {
@@ -155,7 +155,7 @@ Rectangle {
                 anchors.horizontalCenter: parent.horizontalCenter
                 text: "NO"
                 color: "#ffffff"
-                font.pixelSize: 24
+                font.pixelSize: 20
                 font.family: mainFont.name
             }
             MouseArea {

@@ -22,7 +22,7 @@ Item {
 
         font.pixelSize: 14
         //font.bold: true
-        anchors.leftMargin:16
+        anchors.leftMargin:14
         //text: columnName
         font.family: mainFont.name
         verticalAlignment: Text.AlignBottom
@@ -62,6 +62,7 @@ Item {
                 anchors.leftMargin: 16
                 anchors.verticalCenter: parent.verticalCenter
                 text: "50%"
+                maximumLength: 4
                 //maximumLength:
                 font.pixelSize: 14
                 font.family: mainFont.name

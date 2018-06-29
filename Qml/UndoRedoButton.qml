@@ -47,7 +47,7 @@ Item{
                     height: 24
                     anchors.horizontalCenter: parent.horizontalCenter
                     anchors.top: parent.top
-                    anchors.topMargin: 8
+                    anchors.topMargin: 6
                     source:"qrc:/Resource/undo_icon.png"
                 }
                 Text{
@@ -55,7 +55,7 @@ Item{
                     text:"UNDO"
                     anchors.bottom : parent.bottom
                     anchors.horizontalCenter: undo_icon.horizontalCenter
-                    anchors.topMargin: 0
+                    anchors.bottomMargin: 2
 
                     font.family: mainFont.name
                     font.pixelSize: 12
@@ -121,7 +121,7 @@ Item{
                 height: 24
                 anchors.horizontalCenter: parent.horizontalCenter
                 anchors.top: parent.top
-                anchors.topMargin: 8
+                anchors.topMargin: 6
                 source:"qrc:/Resource/redo_icon.png"
             }
             Text{
@@ -129,7 +129,7 @@ Item{
                 text:"REDO"
                 anchors.bottom: parent.bottom
                 anchors.horizontalCenter: redo_icon.horizontalCenter
-                anchors.bottomMargin: 0
+                anchors.bottomMargin: 2
 
                 font.family: mainFont.name
                 font.pixelSize: 12
