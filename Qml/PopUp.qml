@@ -57,6 +57,7 @@ Rectangle {
     property alias numbox_detail2_vis: numberbox_detail2.visible
     property int numberbox_detail2_y
     property real numbox_updown_scale
+    property alias text3DInputBackground_vis : text3DInputBackground.visible
 
     //------------------------------------------------data
     property real numberbox1_number:0
@@ -153,6 +154,7 @@ Rectangle {
         numberbox2_text.focus = false;
         numberbox3_text.focus = false;
         numberbox_detail2_text.focus = false;
+        text3DInput.focus = false;
     }
 
     function numbox_reset() {
@@ -1285,6 +1287,66 @@ Rectangle {
                     detail2_downbutton_image1.source = "qrc:/Resource/popup_image/down_button_hover.png"
                 }
                 onReleased: { detail2_downbutton_image1.source = "qrc:/Resource/popup_image/down_button.png"}
+            }
+        }
+    }
+
+    // text3d input
+    Rectangle {
+        id: text3DInputBackground
+        width: 194
+        height: 24
+        visible: false
+
+        y: 320
+
+        color: "#ffffffff"
+
+        //anchors.left: parent.left
+        //anchors.right : parent.right
+        anchors.bottom: parent.bottom
+        anchors.horizontalCenter: parent.horizontalCenter
+
+        //anchors.leftMargin: 25
+        //anchors.rightMargin: 25
+        anchors.bottomMargin: 55
+
+        Text {
+            id: hiddenText
+            anchors.fill: text3DInput
+            text: text3DInput.text
+            font.pixelSize: text3DInput.font.pixelSize
+            visible: false
+        }
+
+        TextField {
+            id:text3DInput
+            objectName: "text3DInput"
+            anchors.fill: parent
+            style: TextFieldStyle {
+                textColor: "#333333"
+                background: Rectangle {
+                    radius: 2
+                    border.color: "#CCC"
+                    border.width: 1
+                }
+            }
+            selectByMouse: true
+            onFocusChanged: {
+            //    if(numberbox1_text.focus)
+            //        numberbox1.color = "#f5f5f5"
+            }
+            signal sendTextChanged(string text, int contentWidth)
+            placeholderText: qsTr("Enter text")
+            font.family: mainFont.name
+            onTextChanged: {
+                //console.log("content width changed ");
+                //console.log(hiddenText.text.length);
+                console.log("content width : ");
+                console.log(hiddenText.text.length);
+                console.log(hiddenText.contentWidth);
+                sendTextChanged(text, hiddenText.contentWidth);
+                //sendTextChanged(text, hiddenText.text.length)
             }
         }
     }

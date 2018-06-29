@@ -68,9 +68,14 @@ GLModel::GLModel(QObject* mainWindow, QNode *parent, Mesh* loadMesh, QString fna
     m_meshVertexMaterial = new QPerVertexColorMaterial();
 
     this->changecolor(0);
-    if (filename != "" && !EndsWith(filename.toStdString(), std::string("_left").c_str()) && !EndsWith(filename.toStdString(),  std::string("_right").c_str()) && !EndsWith(filename.toStdString(),  std::string("_offset").c_str())){
+    if (filename != "" && (filename.contains(".stl")||filename.contains(".STL"))\
+            && !EndsWith(filename.toStdString(), std::string("_left").c_str()) && !EndsWith(filename.toStdString(),  std::string("_right").c_str()) && !EndsWith(filename.toStdString(),  std::string("_offset").c_str())){
         mesh = new Mesh();
         loadMeshSTL(mesh, filename.toStdString().c_str());
+    } else if (filename != "" && (filename.contains(".obj")||filename.contains(".OBJ"))\
+            && !EndsWith(filename.toStdString(), std::string("_left").c_str()) && !EndsWith(filename.toStdString(),  std::string("_right").c_str()) && !EndsWith(filename.toStdString(),  std::string("_offset").c_str())){
+        mesh = new Mesh();
+        loadMeshOBJ(mesh, filename.toStdString().c_str());
     } else {
         mesh = loadMesh;
     }
@@ -1960,7 +1965,6 @@ void GLModel::closeExtension(){
 }
 
 void GLModel::openScale(){
-    qDebug() << "open scale";
     QMetaObject::invokeMethod(qmlManager->scalePopup, "updateSizeInfo", Q_ARG(QVariant, parentModel->mesh->x_max-parentModel->mesh->x_min), Q_ARG(QVariant, parentModel->mesh->y_max-parentModel->mesh->y_min), Q_ARG(QVariant, parentModel->mesh->z_max-parentModel->mesh->z_min));
 }
 
