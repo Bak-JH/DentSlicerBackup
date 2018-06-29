@@ -171,6 +171,22 @@ Rectangle {
         numbox_value_detail2 = numbox_detail2_default;
         numberbox_detail2_text.text = numbox_value_detail2;
     }
+
+    function cut_reset(){
+        leftselectimage.image_source = "qrc:/Resource/flat_cut_select.png"
+        leftselectimage.text_color = "white"
+        leftselectimage.color = "#3EABBA"
+        leftselectimage.border.color =  "#3EABBA"
+
+        rightselectimage.image_source = "qrc:/Resource/free_cut.png"
+        rightselectimage.text_color ="black"
+        rightselectimage.color = "#FFFFFF"
+        rightselectimage.border.color =  "#CCCCCC"
+
+        flatModeClicked()
+        radiobutton1.checked = true;
+    }
+
     function colorApplyFinishButton(mode){
         console.log(mode)
         if (mode === 1){
