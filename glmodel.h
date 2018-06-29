@@ -60,6 +60,9 @@ public:
     int progress;
     int optype; // defines typeofoperation
     QVariant data;
+    double arg1;
+    double arg2;
+    double arg3;
     autoorientation* ot;
     modelcut* ct;
     autoarrange* ar;
@@ -71,6 +74,7 @@ signals:
 
 public slots:
     void setTypeAndRun(int type);
+    void setTypeAndRun(int type, double arg1, double arg2, double arg3);
     void setTypeAndRun(int type, QVariant data);
     void setTypeAndStart(int type);
 private:
@@ -253,6 +257,9 @@ public slots:
     void engoo();
     void exgoo();
 
+    // Scale
+    void openScale();
+    void closeScale();
 
     // Lay Flat
     void openLayflat();

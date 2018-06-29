@@ -1,6 +1,7 @@
 #include "fileloader.h"
 #include <QCoreApplication>
 #include <QDebug>
+#include <QFile>
 
 FileLoader::FileLoader()
 {
@@ -200,4 +201,74 @@ bool loadMeshSTL(Mesh* mesh, const char* filename)
         return true;
     }
     return loadMeshSTL_binary(mesh, filename);
+}
+
+bool loadMeshOBJ(Mesh* mesh, const char* filename){
+    FILE *f;
+    char c;
+    int lines = 0;
+
+    f = fopen(filename, "r");
+
+    if(f == NULL)
+        return 0;
+
+    while((c = fgetc(f)) != EOF)
+        if(c == '\n')
+            lines++;
+
+    fclose(f);
+
+    if(c != '\n')
+        lines++;
+
+    mesh->faces.reserve(lines*2);
+    mesh->vertices.reserve(lines*2);
+
+    FILE * file = fopen(filename, "r");
+    if( file == nullptr )
+        return false;
+
+    vector<QVector3D> temp_vertices;
+    temp_vertices.reserve(lines);
+
+    while( 1 ){
+
+        char lineHeader[128];
+        // read the first word of the line
+        int res = fscanf(file, "%s", lineHeader);
+        if (res == EOF)
+            break; // EOF = End Of File. Quit the loop.
+
+        // else : parse lineHeader
+
+        if ( strcmp( lineHeader, "v" ) == 0 ){
+            float v_x, v_y, v_z;
+            fscanf(file, "%f %f %f\n", &v_x, &v_y, &v_z );
+            QVector3D vertex = QVector3D(v_x,v_y,v_z);
+            temp_vertices.push_back(vertex);
+        } else if ( strcmp( lineHeader, "f" ) == 0 ){
+            std::string vertex1, vertex2, vertex3;
+            unsigned int vertexIndex[3], uvIndex[3], normalIndex[3];
+            int matches = fscanf(file, "%d/%d/%d %d/%d/%d %d/%d/%d\n", &vertexIndex[0], &uvIndex[0], &normalIndex[0], &vertexIndex[1], &uvIndex[1], &normalIndex[1], &vertexIndex[2], &uvIndex[2], &normalIndex[2] );
+            if (matches != 9){
+                fclose(file);
+                return false;
+            }
+
+            QVector3D v0 = temp_vertices[vertexIndex[0]-1];
+            QVector3D v1 = temp_vertices[vertexIndex[1]-1];
+            QVector3D v2 = temp_vertices[vertexIndex[2]-1];
+            mesh->addFace(v0, v1, v2);
+        } else{
+            // Probably a comment, eat up the rest of the line
+            char stupidBuffer[1000];
+            fgets(stupidBuffer, 1000, file);
+        }
+
+    }
+    fclose(file);
+    mesh->connectFaces();
+    scfg->origin = QVector3D((mesh->x_min+mesh->x_max)/2, (mesh->y_min+mesh->y_max)/2, (mesh->z_min+mesh->z_max)/2);
+    return true;
 }
