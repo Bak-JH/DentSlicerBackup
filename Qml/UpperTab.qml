@@ -948,7 +948,8 @@ Rectangle {
             imageHeight: 70
             state: {
                 if (third_tab_button_cut.state=="active" && qm.isSelected()) {
-                    openCut()
+                    cut_reset();
+                    openCut();
                     return "active"
                 }
                 else {
