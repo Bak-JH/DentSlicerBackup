@@ -22,7 +22,7 @@ Item {
 
         font.pixelSize: 14
         //font.bold: true
-        anchors.leftMargin:16
+        anchors.leftMargin:14
         text: columnName
         font.family: mainFont.name
         verticalAlignment: Text.AlignBottom

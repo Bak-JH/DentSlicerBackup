@@ -93,7 +93,7 @@ Rectangle {
                 anchors.horizontalCenter: parent.horizontalCenter
                 text: "OK"
                 color: "#ffffff"
-                font.pixelSize: 24
+                font.pixelSize: 20
                 font.family: mainFont.name
             }
             MouseArea {
@@ -110,6 +110,8 @@ Rectangle {
                 onPressed: parent.color = "#3ea6b7"
                 onReleased: {
                     closePopUp();
+                    if(mid_text.includes("at least one model"))
+                        uppertab.all_off()
                     parent.color = "#A3A3A5"
                 }
             }

@@ -68,7 +68,7 @@ Rectangle {
                 anchors.horizontalCenter: parent.horizontalCenter
                 text: "OK"
                 color: "#ffffff"
-                font.pixelSize: 24
+                font.pixelSize: 20
                 font.family: mainFont.name
             }
             MouseArea {
@@ -106,7 +106,7 @@ Rectangle {
                 anchors.horizontalCenter: parent.horizontalCenter
                 text: "Cancel"
                 color: "#ffffff"
-                font.pixelSize: 24
+                font.pixelSize: 20
                 font.family: mainFont.name
             }
             MouseArea {
