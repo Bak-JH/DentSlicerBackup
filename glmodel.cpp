@@ -1296,11 +1296,16 @@ void GLModel::removePlane(){
     delete parentModel->planeMaterial;
     parentModel->planeMaterial = nullptr;
     for (int i=0;i<2;i++){
-        delete parentModel->clipPlane[i];
-        delete parentModel->planeTransform[i];
-        QObject::disconnect(parentModel->planeObjectPicker[i], SIGNAL(clicked(Qt3DRender::QPickEvent*)), this, SLOT(handlePickerClickedFreeCut(Qt3DRender::QPickEvent*)));
-        delete parentModel->planeObjectPicker[i];
-        delete parentModel->planeEntity[i];
+        if (parentModel->clipPlane[i] != nullptr)
+            delete parentModel->clipPlane[i];
+        if (parentModel->planeTransform[i] != nullptr)
+            delete parentModel->planeTransform[i];
+        if (parentModel->planeObjectPicker[i] != nullptr)
+            QObject::disconnect(parentModel->planeObjectPicker[i], SIGNAL(clicked(Qt3DRender::QPickEvent*)), this, SLOT(handlePickerClickedFreeCut(Qt3DRender::QPickEvent*)));
+        if (parentModel->planeObjectPicker[i] != nullptr)
+            delete parentModel->planeObjectPicker[i];
+        if (parentModel->planeEntity[i] != nullptr)
+            delete parentModel->planeEntity[i];
     }
 }
 
@@ -1474,7 +1479,8 @@ void GLModel::mgoo(Qt3DRender::QPickEvent* v)
     if(v->buttons()>1){
         return;
     }
-    if (cutActive || extensionActive || labellingActive || layflatActive)
+
+    if (qmlManager->selectedModel != nullptr && (qmlManager->selectedModel->shadowModel->cutActive || qmlManager->selectedModel->shadowModel->extensionActive || qmlManager->selectedModel->shadowModel->labellingActive || qmlManager->selectedModel->shadowModel->layflatActive))
         return;
 
     qmlManager->setClosedHandCursor();
@@ -1539,6 +1545,7 @@ void GLModel::pgoo(Qt3DRender::QPickEvent* v){
 
 void GLModel::rgoo(Qt3DRender::QPickEvent* v){
     qDebug() << "Released";
+
     m_objectPicker->setDragEnabled(false);
     qmlManager->resetCursor();
 
