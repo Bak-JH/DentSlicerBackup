@@ -824,7 +824,6 @@ Rectangle {
 
             state: {
                 if (third_tab_button_scale.state=="active" && qm.isSelected()){
-                    console.log("state changed");
                     openScale();
                     return "active"
                 } else {
@@ -1456,6 +1455,7 @@ Rectangle {
             imageHeight: 76
             detail1: "Type letters on the surface."
             detail2: "Font"
+            text3DInputBackground_vis: true
             image: "qrc:/Resource/label_description.png"
 
             //signal runFeature(int type);
@@ -1469,59 +1469,7 @@ Rectangle {
                 generateText3DMesh()
             }
 
-            Rectangle {
-                id: text3DInputBackground
-                width: 194
-                height: 24
 
-                y: 320
-
-                color: "#ffffffff"
-
-                //anchors.left: parent.left
-                //anchors.right : parent.right
-                anchors.bottom: parent.bottom
-                anchors.horizontalCenter: parent.horizontalCenter
-
-                //anchors.leftMargin: 25
-                //anchors.rightMargin: 25
-                anchors.bottomMargin: 55
-
-                Text {
-                    id: hiddenText
-                    anchors.fill: text3DInput
-                    text: text3DInput.text
-                    font.pixelSize: text3DInput.font.pixelSize
-                    visible: false
-                }
-
-                TextField {
-                    id:text3DInput
-                    objectName: "text3DInput"
-                    anchors.fill: parent
-                    style: TextFieldStyle {
-                        textColor: "#333333"
-                        background: Rectangle {
-                            radius: 2
-                            border.color: "#CCC"
-                            border.width: 1
-                        }
-                    }
-
-                    signal sendTextChanged(string text, int contentWidth)
-                    placeholderText: qsTr("Enter text")
-                    font.family: mainFont.name
-                    onTextChanged: {
-                        //console.log("content width changed ");
-                        //console.log(hiddenText.text.length);
-                        console.log("content width : ");
-                        console.log(hiddenText.text.length);
-                        console.log(hiddenText.contentWidth);
-                        sendTextChanged(text, hiddenText.contentWidth);
-                        //sendTextChanged(text, hiddenText.text.length)
-                    }
-                }
-            }
 
             ComboBox {
                 objectName: "labelFontBox"
@@ -1770,6 +1718,8 @@ Rectangle {
                     return "active"
                 }
                 else {
+                    //text3DInput.focus = false;
+                    //sceneRoot.keyboardHandler.focus = true;
                     closeLabelling()
                     return "inactive"
                 }
