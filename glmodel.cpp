@@ -28,6 +28,9 @@ GLModel::GLModel(QObject* mainWindow, QNode *parent, Mesh* loadMesh, QString fna
     //, m_objectPicker(new Qt3DRender::QObjectPicker())
     , parentModel((GLModel*)(parent))
     , cutMode(1)
+    , layerMesh(nullptr)
+    , layerSupportMesh(nullptr)
+    , layerRaftMesh(nullptr)
 {
     connect(&futureWatcher, SIGNAL(finished()), this, SLOT(slicingDone()));
 
@@ -36,7 +39,6 @@ GLModel::GLModel(QObject* mainWindow, QNode *parent, Mesh* loadMesh, QString fna
 
         lmesh = new Mesh();
         rmesh = new Mesh();
-        supportMesh = new Mesh();
 
         mesh = toSparse(parentModel->mesh);
         initialize(mesh->faces.size());
@@ -93,7 +95,6 @@ GLModel::GLModel(QObject* mainWindow, QNode *parent, Mesh* loadMesh, QString fna
 
     lmesh = new Mesh();
     rmesh = new Mesh();
-    supportMesh = new Mesh();
 
     initialize(mesh->faces.size());
     addVertices(mesh, false);
@@ -351,7 +352,6 @@ void GLModel::updateModelMesh(){
     delete m_geometryRenderer;
     // reinitialize with updated mesh
 
-    //Mesh* mesh = qmlManager->getViewMode() == VIEW_MODE_SUPPORT ? this->supportMesh : this->mesh;
     int viewMode = qmlManager->getViewMode();
     switch( viewMode ) {
     case VIEW_MODE_OBJECT:
@@ -359,12 +359,24 @@ void GLModel::updateModelMesh(){
         addVertices(mesh, false);
         break;
     case VIEW_MODE_SUPPORT:
-        initialize(supportMesh->faces.size());
-        addVertices(supportMesh, false);
+        if( layerMesh != nullptr ) {
+            initialize(layerMesh->faces.size() + layerSupportMesh->faces.size());
+            addVertices(layerMesh, false);
+            addVertices(layerSupportMesh, false);
+        } else {
+            initialize(mesh->faces.size());
+            addVertices(mesh, false);
+        }
         break;
     case VIEW_MODE_LAYER:
-        initialize(mesh->faces.size());
-        addVertices(mesh, false);
+        if( layerMesh != nullptr ) {
+            initialize(layerMesh->faces.size() + layerSupportMesh->faces.size());
+            addVertices(layerMesh, false);
+            addVertices(layerSupportMesh, false);
+        } else {
+            initialize(mesh->faces.size());
+            addVertices(mesh, false);
+        }
         break;
     }
     applyGeometry();
@@ -1331,30 +1343,27 @@ void GLModel::generatePlane(){
 
 void GLModel::generateSupport(){
 
-//    if(supportMesh != nullptr) {
-//        delete supportMesh;
-//    }
-
     // copy mesh data from original mesh
-    supportMesh = new Mesh;
-    supportMesh->faces.reserve(mesh->faces.size()*2);
-    supportMesh->vertices.reserve(mesh->vertices.size()*2);
+    layerMesh = new Mesh;
+    layerMesh->faces.reserve(mesh->faces.size()*2);
+    layerMesh->vertices.reserve(mesh->vertices.size()*2);
     foreach (MeshFace mf, mesh->faces){
-        supportMesh->addFace(mesh->idx2MV(mf.mesh_vertex[0]).position, mesh->idx2MV(mf.mesh_vertex[1]).position, mesh->idx2MV(mf.mesh_vertex[2]).position, mf.idx);
+        layerMesh->addFace(mesh->idx2MV(mf.mesh_vertex[0]).position, mesh->idx2MV(mf.mesh_vertex[1]).position, mesh->idx2MV(mf.mesh_vertex[2]).position, mf.idx);
     }
 
+    layerSupportMesh = new Mesh;
     QVector3D t = m_transform->translation();
     t.setZ(mesh->z_min * -1.0f);
-    supportMesh->vertexMove(t);
+    layerSupportMesh->vertexMove(t);
 
     // generate cylinders
     for( auto iter = slicer->slices.overhang_points.begin() ; iter != slicer->slices.overhang_points.end() ; iter++ ) {
         qDebug() << "-------" << (*iter);
-        generateCylinder(supportMesh, *iter);
+        generateCylinder(layerSupportMesh, *iter);
     }
 
     t.setZ(mesh->z_min);
-    supportMesh->vertexMove(t);
+    layerSupportMesh->vertexMove(t);
 
     emit _updateModelMesh();
 }

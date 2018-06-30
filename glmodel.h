@@ -108,8 +108,11 @@ public:
     Mesh* mesh;
     Mesh* lmesh;
     Mesh* rmesh;
-    Mesh* supportMesh;
 
+    // layer view
+    Mesh* layerMesh;
+    Mesh* layerSupportMesh;
+    Mesh* layerRaftMesh;
 
     MeshFace *targetMeshFace = NULL; // used for object selection (specific area, like extension or labelling)
 
