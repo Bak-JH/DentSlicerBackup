@@ -47,6 +47,7 @@ GLModel::GLModel(QObject* mainWindow, QNode *parent, Mesh* loadMesh, QString fna
 
         m_meshMaterial = new QPhongMaterial();
         m_meshAlphaMaterial = new QPhongAlphaMaterial();
+        m_layerMaterial = new QPhongMaterial();
         /*m_meshMaterial->setAmbient(QColor(255,0,0));
         m_meshMaterial->setDiffuse(QColor(173,215,218));
         m_meshMaterial->setSpecular(QColor(182,237,246));
@@ -72,53 +73,7 @@ GLModel::GLModel(QObject* mainWindow, QNode *parent, Mesh* loadMesh, QString fna
     m_meshAlphaMaterial = new QPhongAlphaMaterial();
     m_meshVertexMaterial = new QPerVertexColorMaterial();
 
-//    QEffect *effect = new QEffect();
-
-//    // Create technique, render pass and shader
-//    QTechnique *gl3Technique = new QTechnique();
-//    QRenderPass *gl3Pass = new QRenderPass();
-//    QShaderProgram *glShader = new QShaderProgram();
-
-//    // Set the shader on the render pass
-//    string str = "\
-//            uniform highp mat4 qt_Matrix;\
-//            attribute highp vec4 qt_Vertex;\
-//            attribute highp vec2 qt_MultiTexCoord0;\
-//            varying highp vec2 qt_TexCoord0;\
-//            void main() {\
-//                qt_TexCoord0 = qt_MultiTexCoord0;\
-//                gl_Position = qt_Matrix * qt_Vertex;\
-//            }";
-//    QByteArray byteArray(str.c_str(), str.length());
-//    glShader->setVertexShaderCode(byteArray);
-//    string strFrag = "\
-//            varying highp vec2 qt_TexCoord0;\
-//            uniform sampler2D source;\
-//            uniform lowp float qt_Opacity;\
-//            void main() {\
-//                gl_FragColor = texture2D(source, qt_TexCoord0) * qt_Opacity;\
-//            }";
-//    QByteArray byteFrag(strFrag.c_str(), strFrag.length());
-//    glShader->setFragmentShaderCode(byteFrag);
-//    gl3Pass->setShaderProgram(glShader);
-
-//    // Add the pass to the technique
-//    gl3Technique->addRenderPass(gl3Pass);
-
-//    // Set the targeted GL version for the technique
-//    gl3Technique->graphicsApiFilter()->setApi(QGraphicsApiFilter::OpenGL);
-//    gl3Technique->graphicsApiFilter()->setMajorVersion(3);
-//    gl3Technique->graphicsApiFilter()->setMinorVersion(1);
-//    gl3Technique->graphicsApiFilter()->setProfile(QGraphicsApiFilter::CoreProfile);
-
-
-//    // Add the technique to the effect
-//    effect->addTechnique(gl3Technique);
-//    effect = qobject_cast<QEffect*>(qmlManager->effect);
-//    qDebug() << "effect ----";
-//    qDebug() << effect;
-//    qDebug() << qmlManager->effect;
-//    //m_meshMaterial->setEffect(qobject_cast<QEffect*>(qmlManager->effect));
+    generateLayerViewMaterial();
 
     this->changecolor(0);
 
@@ -391,8 +346,8 @@ void GLModel::updateModelMesh(){
         addVertices(supportMesh, false);
         break;
     case VIEW_MODE_LAYER:
-        initialize(supportMesh->faces.size());
-        addVertices(supportMesh, false);
+        initialize(mesh->faces.size());
+        addVertices(mesh, false);
         break;
     }
     applyGeometry();
@@ -1610,6 +1565,11 @@ void GLModel::getSliderSignal(double value){
     }
 }
 
+void GLModel::getLayerViewSliderSignal(double value) {
+    float height = (mesh->z_max - mesh->z_min) * value + mesh->z_min;
+    m_layerMaterialHeight->setValue(QVariant::fromValue(height));
+}
+
 
 /** HELPER functions **/
 
@@ -1990,15 +1950,168 @@ void GLModel::changeViewMode(int viewMode) {
     switch( viewMode ) {
     case VIEW_MODE_OBJECT:
         addComponent(m_meshMaterial);
-        removeComponent(m_meshAlphaMaterial);
+        removeComponent(m_layerMaterial);
         break;
     case VIEW_MODE_SUPPORT:
         addComponent(m_meshMaterial);
-        removeComponent(m_meshAlphaMaterial);
+        removeComponent(m_layerMaterial);
         break;
     case VIEW_MODE_LAYER:
+        addComponent(m_layerMaterial);
         removeComponent(m_meshMaterial);
-        addComponent(m_meshAlphaMaterial);
         break;
     }
+}
+
+void GLModel::generateLayerViewMaterial() {
+
+    m_layerMaterial = new QMaterial();
+
+    // setup material for layer view
+    QEffect *effect = new QEffect();
+    QDepthTest *depthTest;
+    QNoDepthMask *depthMask;
+    QBlendEquation *blendEquation;
+    QBlendEquationArguments *beArgs;
+    QCullFace *cullFace;
+    // first rendering
+    // Create technique, render pass and shader
+    QTechnique *gl3Technique = new QTechnique();
+    QRenderPass *gl3Pass = new QRenderPass();
+    QShaderProgram *glShader = new QShaderProgram();
+
+    // Set the shader on the render pass
+    QOpenGLShader *vert = new QOpenGLShader(QOpenGLShader::Vertex);
+    if( vert->compileSourceFile(":/shaders/layerview_bottom.vert") ) {
+        qDebug() << "vert compiled" << vert->sourceCode();
+        glShader->setVertexShaderCode(vert->sourceCode());
+    } else {
+        qDebug() << "vert compile failed";
+    }
+    QOpenGLShader *frag = new QOpenGLShader(QOpenGLShader::Fragment);
+    if( frag->compileSourceFile(":/shaders/layerview_bottom.frag") ) {
+        qDebug() << "frag compiled" << frag->sourceCode();
+        glShader->setFragmentShaderCode(frag->sourceCode());
+    } else {
+        qDebug() << "frag compile failed";
+    }
+    gl3Pass->setShaderProgram(glShader);
+
+    QStencilMask *stencilMask = new QStencilMask();
+    QStencilTest *stencilTest = new QStencilTest();
+//    gl3Pass->addRenderState(stencilMask);
+//    stencilTest->back()->setComparisonMask(Qt3DRender::QStencilTestArguments::Back);
+//    stencilTest->back()->setStencilFunction(Qt3DRender::QStencilTestArguments::Always);
+//    stencilTest->front()->setComparisonMask(Qt3DRender::QStencilTestArguments::Front);
+//    stencilTest->front()->setStencilFunction(Qt3DRender::QStencilTestArguments::Always);
+//    gl3Pass->addRenderState(stencilTest);
+
+    // Add the pass to the technique
+    gl3Technique->addRenderPass(gl3Pass);
+
+    // second rendering
+    // Create technique, render pass and shader
+    gl3Pass = new QRenderPass();
+    glShader = new QShaderProgram();
+
+    // Set the shader on the render pass
+    vert = new QOpenGLShader(QOpenGLShader::Vertex);
+    if( vert->compileSourceFile(":/shaders/layerview_top.vert") ) {
+        qDebug() << "vert compiled" << vert->sourceCode();
+        glShader->setVertexShaderCode(vert->sourceCode());
+    } else {
+        qDebug() << "vert compile failed";
+    }
+    frag = new QOpenGLShader(QOpenGLShader::Fragment);
+    if( frag->compileSourceFile(":/shaders/layerview_top.frag") ) {
+        qDebug() << "frag compiled" << frag->sourceCode();
+        glShader->setFragmentShaderCode(frag->sourceCode());
+    } else {
+        qDebug() << "frag compile failed";
+    }
+    gl3Pass->setShaderProgram(glShader);
+
+    depthTest = new QDepthTest();
+    depthMask = new QNoDepthMask();
+    depthTest->setDepthFunction(QDepthTest::DepthFunction::Less);
+    gl3Pass->addRenderState(depthTest);
+    gl3Pass->addRenderState(depthMask);
+
+    blendEquation = new QBlendEquation();
+    beArgs = new QBlendEquationArguments();
+    blendEquation->setBlendFunction(QBlendEquation::Add);
+    gl3Pass->addRenderState(blendEquation);
+    beArgs->setSourceRgb(QBlendEquationArguments::Blending::SourceAlpha);
+    beArgs->setDestinationRgb(QBlendEquationArguments::Blending::OneMinusSourceAlpha);
+    gl3Pass->addRenderState(beArgs);
+
+//    stencilMask = new QStencilMask();
+//    stencilTest = new QStencilTest();
+//    gl3Pass->addRenderState(stencilMask);
+//    stencilTest->back()->setComparisonMask(Qt3DRender::QStencilTestArguments::Back);
+//    stencilTest->back()->setStencilFunction(Qt3DRender::QStencilTestArguments::Always);
+//    stencilTest->front()->setComparisonMask(Qt3DRender::QStencilTestArguments::Front);
+//    stencilTest->front()->setStencilFunction(Qt3DRender::QStencilTestArguments::Always);
+//    gl3Pass->addRenderState(stencilTest);
+
+    // Add the pass to the technique
+    gl3Technique->addRenderPass(gl3Pass);
+
+    // third rendering
+    // Create technique, render pass and shader
+    gl3Pass = new QRenderPass();
+    glShader = new QShaderProgram();
+
+    // Set the shader on the render pass
+    vert = new QOpenGLShader(QOpenGLShader::Vertex);
+    if( vert->compileSourceFile(":/shaders/layerview_inner.vert") ) {
+        qDebug() << "vert compiled" << vert->sourceCode();
+        glShader->setVertexShaderCode(vert->sourceCode());
+    } else {
+        qDebug() << "vert compile failed";
+    }
+    frag = new QOpenGLShader(QOpenGLShader::Fragment);
+    if( frag->compileSourceFile(":/shaders/layerview_inner.frag") ) {
+        qDebug() << "frag compiled" << frag->sourceCode();
+        glShader->setFragmentShaderCode(frag->sourceCode());
+    } else {
+        qDebug() << "frag compile failed";
+    }
+    gl3Pass->setShaderProgram(glShader);
+
+    cullFace = new QCullFace();
+    cullFace->setMode(QCullFace::CullingMode::NoCulling);
+    gl3Pass->addRenderState(cullFace);
+
+//    stencilMask = new QStencilMask();
+//    stencilTest = new QStencilTest();
+//    gl3Pass->addRenderState(stencilMask);
+//    stencilTest->back()->setComparisonMask(Qt3DRender::QStencilTestArguments::Back);
+//    stencilTest->back()->setStencilFunction(Qt3DRender::QStencilTestArguments::Always);
+//    stencilTest->front()->setComparisonMask(Qt3DRender::QStencilTestArguments::Front);
+//    stencilTest->front()->setStencilFunction(Qt3DRender::QStencilTestArguments::Always);
+//    gl3Pass->addRenderState(stencilTest);
+
+    // Add the pass to the technique
+    gl3Technique->addRenderPass(gl3Pass);
+
+    // Set the targeted GL version for the technique
+    gl3Technique->graphicsApiFilter()->setApi(QGraphicsApiFilter::OpenGL);
+    gl3Technique->graphicsApiFilter()->setMajorVersion(3);
+    gl3Technique->graphicsApiFilter()->setMinorVersion(1);
+    gl3Technique->graphicsApiFilter()->setProfile(QGraphicsApiFilter::CoreProfile);
+
+    QFilterKey *filterKey = new QFilterKey();
+    filterKey->setName(QStringLiteral("renderingStyle"));
+    filterKey->setValue(QStringLiteral("forward"));
+    gl3Technique->addFilterKey(filterKey);
+
+    // Add the technique to the effect
+    effect->addTechnique(gl3Technique);
+
+    m_layerMaterial->setEffect(effect);
+    const QString parameterName = QStringLiteral("height");
+    m_layerMaterialHeight = new QParameter(parameterName, QVariant::fromValue(0.0f));
+    m_layerMaterial->addParameter(m_layerMaterialHeight);
+
 }

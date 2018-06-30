@@ -12,7 +12,6 @@
 
 #include "qmlmanager.h"
 #include "lights.h"
-#include <QRadioButton>
 
 QmlManager::QmlManager(QObject *parent) : QObject(parent)
 {
@@ -329,6 +328,8 @@ void QmlManager::disconnectHandlers(GLModel* glmodel){
     QObject::disconnect(viewObjectButton, SIGNAL(onChanged(bool)), this, SLOT(viewObjectChanged(bool)));
     QObject::disconnect(viewSupportButton, SIGNAL(onChanged(bool)), this, SLOT(viewSupportChanged(bool)));
     QObject::disconnect(viewLayerButton, SIGNAL(onChanged(bool)), this, SLOT(viewLayerChanged(bool)));
+
+    QObject::disconnect(layerViewSlider, SIGNAL(sliderValueChanged(double)), glmodel, SLOT(getLayerViewSliderSignal(double)));
 }
 
 void QmlManager::connectHandlers(GLModel* glmodel){
@@ -415,6 +416,8 @@ void QmlManager::connectHandlers(GLModel* glmodel){
     QObject::connect(viewObjectButton, SIGNAL(onChanged(bool)), this, SLOT(viewObjectChanged(bool)));
     QObject::connect(viewSupportButton, SIGNAL(onChanged(bool)), this, SLOT(viewSupportChanged(bool)));
     QObject::connect(viewLayerButton, SIGNAL(onChanged(bool)), this, SLOT(viewLayerChanged(bool)));
+
+    QObject::connect(layerViewSlider, SIGNAL(sliderValueChanged(double)), glmodel, SLOT(getLayerViewSliderSignal(double)));
 }
 void QmlManager::cleanSelectedModel(int type){
     //selectedModel = nullptr;
@@ -1115,14 +1118,13 @@ void QmlManager::viewObjectChanged(bool checked){
     qInfo() << "viewObjectChanged" << checked;
     if( checked ) {
         setViewMode(VIEW_MODE_OBJECT);
-    } else {
-        QMetaObject::invokeMethod(qmlManager->boxUpperTab, "all_off");
     }
 }
 
 void QmlManager::viewSupportChanged(bool checked){
     qInfo() << "viewSupportChanged" << checked;
     if( checked ) {
+        QMetaObject::invokeMethod(qmlManager->boxUpperTab, "all_off");
         setViewMode(VIEW_MODE_SUPPORT);
     }
 }
@@ -1130,6 +1132,7 @@ void QmlManager::viewSupportChanged(bool checked){
 void QmlManager::viewLayerChanged(bool checked){
     qInfo() << "viewLayerChanged" << checked;
     if( checked ) {
+        QMetaObject::invokeMethod(qmlManager->boxUpperTab, "all_off");
         setViewMode(VIEW_MODE_LAYER);
     }
     layerViewPopup->setProperty("visible", checked);

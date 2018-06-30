@@ -4,7 +4,7 @@ import QtQuick.Controls.Styles 1.0
 
 Slider {
     id:slider
-    objectName: "cutSlider"
+    objectName: "layerViewSlider"
     property string name:"slider"
     maximumValue: 10
     minimumValue: -1

@@ -112,6 +112,8 @@ public:
     QPhongMaterial *m_meshMaterial;
     QPhongAlphaMaterial *m_meshAlphaMaterial;
     QPerVertexColorMaterial *m_meshVertexMaterial;
+    QMaterial *m_layerMaterial;
+    QParameter *m_layerMaterialHeight;
 
     //QPhongMaterial *m_meshMaterial;
     Qt3DRender::QBuffer *vertexBuffer;
@@ -216,6 +218,7 @@ private:
     void clearVertices();
     void onTimerUpdate();
     Mesh* toSparse(Mesh* mesh);
+    void generateLayerViewMaterial();
 
     int cutMode = 1;
     int cutFillMode = 1;
@@ -266,6 +269,7 @@ public slots:
     void cutModeSelected(int type);
     void cutFillModeSelected(int type);
     void getSliderSignal(double value);
+    void getLayerViewSliderSignal(double value);
     void generateRLModel();
     void openCut();
     void closeCut();
