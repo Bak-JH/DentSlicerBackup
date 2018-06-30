@@ -176,7 +176,7 @@ void GLModel::changecolor(int mode){
     if (mode == -1) mode = colorMode;
     switch(mode){
     case 0: // default
-        m_meshMaterial->setAmbient(QColor(130,130,140));;
+        m_meshMaterial->setAmbient(QColor(130,130,140));
         m_meshMaterial->setDiffuse(QColor(131,206,220));
         m_meshMaterial->setDiffuse(QColor(97,185,192));
         m_meshMaterial->setSpecular(QColor(0,0,0));
@@ -2284,5 +2284,7 @@ void GLModel::generateLayerViewMaterial() {
     const QString parameterName = QStringLiteral("height");
     m_layerMaterialHeight = new QParameter(parameterName, QVariant::fromValue(0.0f));
     m_layerMaterial->addParameter(m_layerMaterialHeight);
-
+    m_layerMaterial->addParameter(new QParameter(QStringLiteral("ambient"), QColor(130, 130, 140)));
+    m_layerMaterial->addParameter(new QParameter(QStringLiteral("diffuse"), QColor(131, 206, 220)));
+    m_layerMaterial->addParameter(new QParameter(QStringLiteral("specular"), QColor(0, 0, 0)));
 }
