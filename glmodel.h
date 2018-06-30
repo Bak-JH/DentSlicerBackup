@@ -216,7 +216,7 @@ private:
     QNode* m_parent;
     QVector3D lastpoint;    
     QVector2D prevPoint;
-    void initialize(const Mesh* mesh);
+    void initialize(const int& faces);
     void applyGeometry();
     void addVertex(QVector3D vertex);
     void addVertices(vector<QVector3D> vertices);
