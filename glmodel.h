@@ -61,6 +61,9 @@ public:
     int progress;
     int optype; // defines typeofoperation
     QVariant data;
+    double arg1;
+    double arg2;
+    double arg3;
     autoorientation* ot;
     modelcut* ct;
     autoarrange* ar;
@@ -72,6 +75,7 @@ signals:
 
 public slots:
     void setTypeAndRun(int type);
+    void setTypeAndRun(int type, double arg1, double arg2, double arg3);
     void setTypeAndRun(int type, QVariant data);
     void setTypeAndStart(int type);
 private:
@@ -105,6 +109,7 @@ public:
     Mesh* lmesh;
     Mesh* rmesh;
     Mesh* supportMesh;
+
 
     MeshFace *targetMeshFace = NULL; // used for object selection (specific area, like extension or labelling)
 
@@ -146,6 +151,7 @@ public:
     Qt3DCore::QEntity* planeEntity[2];
     Qt3DCore::QTransform *planeTransform[2];
     Qt3DExtras::QPhongAlphaMaterial *planeMaterial = nullptr;
+    QObjectPicker* planeObjectPicker[2];
 
     vector<Qt3DExtras::QSphereMesh*> sphereMesh;
     vector<Qt3DCore::QEntity*> sphereEntity;
@@ -183,6 +189,7 @@ public:
     void bisectModel_internal(Plane plane);
     void checkPrintingArea();
     bool EndsWith(const string& a, const string& b);
+    QVector2D world2Screen(QVector3D target);
     QString getFileName(const string& s);
     QVector3D spreadPoint(QVector3D endpoint,QVector3D startpoint,int factor);
     void changeViewMode(int viewMode);
@@ -207,8 +214,9 @@ private:
     int v_cnt;
     int f_cnt;
     QNode* m_parent;
-    QVector3D lastpoint;
-    void initialize(const int& faces);
+    QVector3D lastpoint;    
+    QVector2D prevPoint;
+    void initialize(const Mesh* mesh);
     void applyGeometry();
     void addVertex(QVector3D vertex);
     void addVertices(vector<QVector3D> vertices);
@@ -229,6 +237,8 @@ private:
     bool shellOffsetActive = false;
     bool layflatActive = false;
 
+    bool isMoved = false;
+
 signals:
 
     void modelSelected(int);
@@ -248,6 +258,7 @@ public slots:
     void loadRedoState();
 
     // object picker parts
+    void handlePickerClickedFreeCut(Qt3DRender::QPickEvent*);
     void handlePickerClicked(Qt3DRender::QPickEvent*);
     void handlePickerClickedLayflat(MeshFace shadow_meshface);
     void mgoo(Qt3DRender::QPickEvent*);
@@ -256,6 +267,9 @@ public slots:
     void engoo();
     void exgoo();
 
+    // Scale
+    void openScale();
+    void closeScale();
 
     // Lay Flat
     void openLayflat();
@@ -263,6 +277,7 @@ public slots:
     void generateLayFlat();
 
     // Model Cut
+    void generateClickablePlane();
     void generatePlane();
     void removePlane();
     void modelCut();

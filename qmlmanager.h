@@ -37,6 +37,7 @@ public:
     QObject* loginButton;
     QObject* boxUpperTab;
     QEntity* models;
+    Qt3DCore::QTransform* systemTransform;
     QObject* mv;
     Qt3DCore::QEntity *boundedBox;
     Qt3DCore::QEntity *mttab;
@@ -57,7 +58,7 @@ public:
     Qt3DCore::QEntity *moveArrow;
     Qt3DCore::QEntity *moveArrowX;
     Qt3DCore::QEntity *moveArrowY;
-    QObject *moveArrowobj;
+    Qt3DCore::QEntity *moveArrowobj;
 
     // selection popup
     QObject* yesno_popup;
@@ -94,6 +95,9 @@ public:
     QObject* orientPopup;
     QObject* progress_popup;
     QObject* orientButton;
+
+    // scale components
+    QObject* scalePopup;
 
     // extension components
     QObject* extensionPopup;
@@ -158,6 +162,7 @@ public:
     Q_INVOKABLE int getSelectedModelID();
     Q_INVOKABLE void fixMesh();
     Q_INVOKABLE void setHandCursor();
+    Q_INVOKABLE void setClosedHandCursor();
     Q_INVOKABLE void resetCursor();
     Q_INVOKABLE bool isSelected();
     Q_INVOKABLE void selectPart(int ID);
@@ -191,6 +196,7 @@ public slots:
 
     void modelRotateByNumber(int axis, int, int, int);
     void modelMove(int,int);
+    void modelMoveF(int,float);
     void modelMoveByNumber(int axis, int, int);
     void modelMoveDone(int);
     void modelRotateDone(int);

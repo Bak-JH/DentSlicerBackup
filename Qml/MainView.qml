@@ -21,6 +21,7 @@ Entity {
     property alias total: total
     property alias cm: cm
     property alias systemTransform: systemTransform
+    property alias keyboardHandler: keyboardHandler
 
     //CoordinateMesh{} // 기준좌표 체크
 
@@ -32,7 +33,7 @@ Entity {
         objectName:"total"
         Transform{
             id: systemTransform
-
+            objectName : "systemTransform"
             scale3D: Qt.vector3d(0.004,0.004,0.004)
             rotationX : -70
             rotationY : 0
@@ -85,11 +86,13 @@ Entity {
         sourceDevice: keyboardDevice
 
         onPressed: {
+            console.log(event.key);
             if (event.key === Qt.Key_Delete) {
                 deletePopUp.visible = true
                 deletePopUp.targetID = qm.getSelectedModelID()
-
-                hideTab()
+                if (deletePopUp.targetID != -1){
+                    hideTab();
+                }
 
             } else if (event.matches(StandardKey.Undo)){
                 // do undo

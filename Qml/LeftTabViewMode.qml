@@ -112,6 +112,13 @@ Rectangle {
                     onCheckedChanged: {
                         onChanged(checked);
                     }
+
+                    onHoveredChanged: {
+                        if(hovered)
+                            qm.setHandCursor();
+                        else
+                            qm.resetCursor();
+                    }
                 }
                 RadioButton {
                     objectName: "viewSupportButton"
@@ -146,6 +153,13 @@ Rectangle {
                     onCheckedChanged: {
                         onChanged(checked);
                     }
+
+                    onHoveredChanged: {
+                        if(hovered)
+                            qm.setHandCursor();
+                        else
+                            qm.resetCursor();
+                    }
                 }
                 RadioButton {
                     //text: "Layer View"
@@ -179,6 +193,13 @@ Rectangle {
                     signal onChanged(bool checked);
                     onCheckedChanged: {
                         onChanged(checked);
+                    }
+
+                    onHoveredChanged: {
+                        if(hovered)
+                            qm.setHandCursor();
+                        else
+                            qm.resetCursor();
                     }
                 }
             }

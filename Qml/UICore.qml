@@ -62,10 +62,16 @@ Item {
     UndoRedoButton{
         id: undoRedoButton
         objectName: "undoRedoButton"
+        /*
         anchors.top : parent.top
         anchors.right : parent.right
         anchors.topMargin: 32
         anchors.rightMargin: 86
+        */
+        anchors.left: parent.left
+        anchors.bottom : parent.bottom
+        anchors.leftMargin: 22
+        anchors.bottomMargin: 22
     }
 
     ViewChange{
