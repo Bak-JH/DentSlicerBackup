@@ -24,6 +24,10 @@
 #define VIEW_MODE_SUPPORT 1
 #define VIEW_MODE_LAYER 2
 
+#define LAYER_INFILL 0x01
+#define LAYER_SUPPORTERS 0x02
+#define LAYER_RAFT 0x04
+
 class QmlManager : public QObject
 {
     Q_OBJECT
@@ -120,11 +124,15 @@ public:
     QObject* exportOKButton;
 
     // view mode buttons
+    QObject* leftTabViewMode;
     QObject* viewObjectButton;
     QObject* viewSupportButton;
     QObject* viewLayerButton;
 
     QObject* layerViewPopup;
+    QObject* layerInfillButton;
+    QObject* layerSupportersButton;
+    QObject* layerRaftButton;
     QObject* layerViewSlider;
 
     vector<GLModel*> glmodels;
@@ -145,7 +153,6 @@ public:
     void runArrange_internal();
     void disconnectHandlers(GLModel* glmodel);
     void connectHandlers(GLModel* glmodel);
-    void setViewMode(int viewMode);
 
     void addPart(QString fileName, int ID);
     void deletePart(int ID);
@@ -154,6 +161,7 @@ public:
     void openResultPopUp(string inputText_h, string inputText_m, string inputText_l);
     void setProgress(float value);
     void setProgressText(string inputText);
+    int getLayerViewFlags();
 
     GLModel* findGLModelByName(QString filename);
 
@@ -171,12 +179,14 @@ public:
     Q_INVOKABLE void doDelete();
     Q_INVOKABLE void doDeletebyID(int ID);
     Q_INVOKABLE void runArrange();
+    Q_INVOKABLE void setViewMode(int viewMode);
     Q_INVOKABLE int getViewMode();
 
 
 private:
     //bool glmodels_arranged;
     int viewMode;
+    int layerViewFlags;
 
 
 signals:
@@ -211,6 +221,10 @@ public slots:
     void viewObjectChanged(bool checked);
     void viewSupportChanged(bool checked);
     void viewLayerChanged(bool checked);
+
+    void layerInfillButtonChanged(bool chacked);
+    void layerSupportersButtonChanged(bool chacked);
+    void layerRaftButtonChanged(bool chacked);
 };
 
 

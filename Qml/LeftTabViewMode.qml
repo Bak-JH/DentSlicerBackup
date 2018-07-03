@@ -13,6 +13,18 @@ Rectangle {
 
     state : "open"
 
+    function setObjectView() {
+        viewObjectButton.checked = true;
+    }
+
+    function setEnable(enable) {
+        viewObjectButton.checked = true;
+        viewSupportButton.enabled = enable;
+        viewLayerButton.enabled = enable;
+
+        qm.setViewMode(0);
+    }
+
     Rectangle{
         id : tab
         width: parent.width
@@ -79,6 +91,7 @@ Rectangle {
 
                 ExclusiveGroup { id: viewModeGroup }
                 RadioButton {
+                    id: viewObjectButton
                     objectName: "viewObjectButton"
                     checked: true
                     exclusiveGroup: viewModeGroup
@@ -121,9 +134,12 @@ Rectangle {
                     }
                 }
                 RadioButton {
+                    id: viewSupportButton
                     objectName: "viewSupportButton"
                     text: "Support View"
                     exclusiveGroup: viewModeGroup
+                    enabled: false
+
                     style: RadioButtonStyle {
                         indicator: Rectangle {
                             implicitWidth: 16
@@ -140,9 +156,11 @@ Rectangle {
                             }
                         }
                         label: Text {
+                            id: txtSupport
                             text: "Support View"
                             anchors.left : parent.left
                             anchors.leftMargin: 10
+                            color: control.enabled ? "#000000" : "#888888"
 
                             font.family: mainFont.name
                             font.pixelSize: 14
@@ -163,8 +181,11 @@ Rectangle {
                 }
                 RadioButton {
                     //text: "Layer View"
+                    id: viewLayerButton
                     objectName: "viewLayerButton"
                     exclusiveGroup: viewModeGroup
+                    enabled: false
+
                     style: RadioButtonStyle {
                         indicator: Rectangle {
                             implicitWidth: 16
@@ -184,6 +205,7 @@ Rectangle {
                             text: "Layer View"
                             anchors.left : parent.left
                             anchors.leftMargin: 10
+                            color: control.enabled ? "#000000" : "#888888"
 
                             font.family: mainFont.name
                             font.pixelSize: 14

@@ -30,6 +30,8 @@ Rectangle {
     property int ftrExtend : 13
     property int ftrSupport : 14
     property int ftrLabel : 15
+    property int ftrSupportViewMode : 16
+    property int ftrLayerViewMode : 17
 
     property alias second_tab_button_move: second_tab_button_move
     property alias second_tab_button_rotate: second_tab_button_rotate

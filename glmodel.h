@@ -48,6 +48,8 @@ using namespace std;
 #define ftrExtend 13
 #define ftrSupport 14
 #define ftrLabel 15
+#define ftrSupportViewMode 16
+#define ftrLayerViewMode 17
 
 class GLModel;
 class OverhangPoint;
@@ -241,6 +243,8 @@ private:
     bool layflatActive = false;
 
     bool isMoved = false;
+
+    int viewMode = -1;
 
 signals:
 

@@ -54,13 +54,14 @@ Item {
         }
 
         CheckBox {
-            id: checkBox
+            id: layerInfillButton
+            objectName: "layerInfillButton"
             x: 30
             y: 60
             width: 212
             height: 19
             text: qsTr("Infill")
-            checked: false
+            checked: true
 
             Rectangle {
                 id: rectangle
@@ -97,24 +98,43 @@ Item {
                 border.color: "#6eed32"
                 border.width: 0
             }
+
+            signal onChanged(bool checked);
+            onCheckedChanged: {
+                onChanged(checked);
+            }
         }
 
         CheckBox {
-            id: checkBox1
+            id: layerSupportersButton
+            objectName: "layerSupportersButton"
             x: 30
             y: 85
             width: 212
             height: 19
             text: qsTr("Supporters")
+            checked: true
+
+            signal onChanged(bool checked);
+            onCheckedChanged: {
+                onChanged(checked);
+            }
         }
 
         CheckBox {
-            id: checkBox2
+            id: layerRaftButton
+            objectName: "layerRaftButton"
             x: 30
             y: 110
             width: 212
             height: 19
             text: qsTr("Raft")
+            checked: true
+
+            signal onChanged(bool checked);
+            onCheckedChanged: {
+                onChanged(checked);
+            }
         }
 
 

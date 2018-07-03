@@ -1,41 +1,7 @@
 #include "supportview.h"
 #include <QtMath>
 
-void generateCylinder(Mesh* mesh, OverhangPoint *point, OverhangPoint *parent){
-
-    qDebug() << point << point->branching_overhang_point << point->target_branching_overhang_point << parent;
-    qDebug() << "height:" << point->height <<
-                "radius:" << point->radius <<
-                "branchable:" << point->branchable <<
-                "v(" << point->position.X << "," << point->position.Y << "," << point->position.Z << ")";
-
-    float height = point->height;
-    float radius = (float)point->radius / scfg->resolution;
-    QVector3D position = QVector3D((float)point->position.X / scfg->resolution,
-            (float)point->position.Y / scfg->resolution,
-            (float)(point->position.Z - (int)point->height * 1000) / scfg->resolution);
-    QVector3D positionTop = QVector3D((float)point->position.X / scfg->resolution,
-            (float)point->position.Y / scfg->resolution,
-            (float)point->position.Z / scfg->resolution);
-
-    if( parent != nullptr ) {
-        if( parent->position.Z > point->position.Z ) {
-            position = QVector3D((float)point->position.X / scfg->resolution,
-                    (float)point->position.Y / scfg->resolution,
-                    (float)point->position.Z / scfg->resolution);
-            positionTop = QVector3D((float)parent->position.X / scfg->resolution,
-                    (float)parent->position.Y / scfg->resolution,
-                    (float)parent->position.Z / scfg->resolution);
-        } else {
-            position = QVector3D((float)parent->position.X / scfg->resolution,
-                    (float)parent->position.Y / scfg->resolution,
-                    (float)parent->position.Z / scfg->resolution);
-            positionTop = QVector3D((float)point->position.X / scfg->resolution,
-                    (float)point->position.Y / scfg->resolution,
-                    (float)point->position.Z / scfg->resolution);
-        }
-    }
-
+void generateCylinder(Mesh* mesh, const QVector3D& position, const QVector3D& positionTop, const float& radius) {
     qDebug() << "v1(" << position.x() << "," << position.y() << "," << position.z() << ")";
     qDebug() << "v2(" << positionTop.x() << "," << positionTop.y() << "," << positionTop.z() << ")";
 
@@ -74,8 +40,65 @@ void generateCylinder(Mesh* mesh, OverhangPoint *point, OverhangPoint *parent){
         lastTop = &(*iterTop);
         lastBottom = &(*iterBottom);
     }
+}
+
+void generateSupporter(Mesh* mesh, OverhangPoint *point, OverhangPoint *parent) {
+
+    qDebug() << point << point->branching_overhang_point << point->target_branching_overhang_point << parent;
+    qDebug() << "height:" << point->height <<
+                "radius:" << point->radius <<
+                "branchable:" << point->branchable <<
+                "v(" << point->position.X << "," << point->position.Y << "," << point->position.Z << ")";
+
+    float radius = (float)point->radius / scfg->resolution;
+    QVector3D position = QVector3D((float)point->position.X / scfg->resolution,
+            (float)point->position.Y / scfg->resolution,
+            (float)(point->position.Z - (int)point->height * 1000) / scfg->resolution);
+    QVector3D positionTop = QVector3D((float)point->position.X / scfg->resolution,
+            (float)point->position.Y / scfg->resolution,
+            (float)point->position.Z / scfg->resolution);
+
+    if( parent != nullptr ) {
+        if( parent->position.Z > point->position.Z ) {
+            position = QVector3D((float)point->position.X / scfg->resolution,
+                    (float)point->position.Y / scfg->resolution,
+                    (float)point->position.Z / scfg->resolution);
+            positionTop = QVector3D((float)parent->position.X / scfg->resolution,
+                    (float)parent->position.Y / scfg->resolution,
+                    (float)parent->position.Z / scfg->resolution);
+        } else {
+            position = QVector3D((float)parent->position.X / scfg->resolution,
+                    (float)parent->position.Y / scfg->resolution,
+                    (float)parent->position.Z / scfg->resolution);
+            positionTop = QVector3D((float)point->position.X / scfg->resolution,
+                    (float)point->position.Y / scfg->resolution,
+                    (float)point->position.Z / scfg->resolution);
+        }
+    }
+
+    generateCylinder(mesh, position, positionTop, radius);
 
     if( point->target_branching_overhang_point != nullptr && parent == nullptr ) {
-        generateCylinder(mesh, point->target_branching_overhang_point, point);
+        generateSupporter(mesh, point->target_branching_overhang_point, point);
     }
+}
+
+void generateRaft(Mesh* mesh, OverhangPoint *point) {
+
+    qDebug() << point << point->branching_overhang_point << point->target_branching_overhang_point;
+    qDebug() << "height:" << point->height <<
+                "radius:" << point->radius <<
+                "branchable:" << point->branchable <<
+                "v(" << point->position.X << "," << point->position.Y << "," << point->position.Z << ")";
+
+    float bottom = (float)(point->position.Z - (int)point->height * 1000) / scfg->resolution;
+    float radius = (float)scfg->raft_base_radius / (float)scfg->resolution;
+    QVector3D position = QVector3D((float)point->position.X / scfg->resolution,
+            (float)point->position.Y / scfg->resolution,
+            bottom);
+    QVector3D positionTop = QVector3D((float)point->position.X / scfg->resolution,
+            (float)point->position.Y / scfg->resolution,
+            bottom + scfg->raft_thickness / scfg->resolution);
+
+    generateCylinder(mesh, position, positionTop, radius);
 }

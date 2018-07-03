@@ -4,6 +4,7 @@
 #include "DentEngine/src/mesh.h"
 #include "DentEngine/src/support.h"
 
-void generateCylinder(Mesh* mesh, OverhangPoint *point, OverhangPoint *parent = nullptr);
+void generateSupporter(Mesh* mesh, OverhangPoint *point, OverhangPoint *parent = nullptr);
+void generateRaft(Mesh* mesh, OverhangPoint *point);
 
 #endif // SUPPORTVIEW_H

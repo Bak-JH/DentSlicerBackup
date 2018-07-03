@@ -31,6 +31,7 @@ GLModel::GLModel(QObject* mainWindow, QNode *parent, Mesh* loadMesh, QString fna
     , layerMesh(nullptr)
     , layerSupportMesh(nullptr)
     , layerRaftMesh(nullptr)
+    , slicer(nullptr)
 {
     connect(&futureWatcher, SIGNAL(finished()), this, SLOT(slicingDone()));
 
@@ -370,9 +371,17 @@ void GLModel::updateModelMesh(){
         break;
     case VIEW_MODE_LAYER:
         if( layerMesh != nullptr ) {
-            initialize(layerMesh->faces.size() + layerSupportMesh->faces.size());
+            int faces = layerMesh->faces.size() +
+                    (qmlManager->getLayerViewFlags() & LAYER_SUPPORTERS != 0 ? layerSupportMesh->faces.size() : 0) +
+                    (qmlManager->getLayerViewFlags() & LAYER_RAFT != 0 ? layerRaftMesh->faces.size() : 0);
+            initialize(faces);
             addVertices(layerMesh, false);
-            addVertices(layerSupportMesh, false);
+            if( qmlManager->getLayerViewFlags() & LAYER_SUPPORTERS ) {
+                addVertices(layerSupportMesh, false);
+            }
+            if( qmlManager->getLayerViewFlags() & LAYER_RAFT) {
+                addVertices(layerRaftMesh, false);
+            }
         } else {
             initialize(mesh->faces.size());
             addVertices(mesh, false);
@@ -1352,18 +1361,24 @@ void GLModel::generateSupport(){
     }
 
     layerSupportMesh = new Mesh;
+    layerRaftMesh = new Mesh;
     QVector3D t = m_transform->translation();
     t.setZ(mesh->z_min * -1.0f);
     layerSupportMesh->vertexMove(t);
+    t.setZ(mesh->z_min * -1.0f - scfg->raft_thickness / (float)scfg->resolution);
+    layerRaftMesh->vertexMove(t);
 
     // generate cylinders
     for( auto iter = slicer->slices.overhang_points.begin() ; iter != slicer->slices.overhang_points.end() ; iter++ ) {
         qDebug() << "-------" << (*iter);
-        generateCylinder(layerSupportMesh, *iter);
+        generateSupporter(layerSupportMesh, *iter);
+        generateRaft(layerRaftMesh, *iter);
     }
 
     t.setZ(mesh->z_min);
     layerSupportMesh->vertexMove(t);
+    t.setZ(mesh->z_min + scfg->raft_thickness / (float)scfg->resolution);
+    layerRaftMesh->vertexMove(t);
 
     emit _updateModelMesh();
 }
@@ -2127,6 +2142,12 @@ void GLModel::closeShellOffset(){
 }
 
 void GLModel::changeViewMode(int viewMode) {
+    if( this->viewMode == viewMode ) {
+        return;
+    }
+
+    this->viewMode = viewMode;
+
     switch( viewMode ) {
     case VIEW_MODE_OBJECT:
         addComponent(m_meshMaterial);
@@ -2141,6 +2162,8 @@ void GLModel::changeViewMode(int viewMode) {
         removeComponent(m_meshMaterial);
         break;
     }
+
+    emit _updateModelMesh();
 }
 
 void GLModel::generateLayerViewMaterial() {
