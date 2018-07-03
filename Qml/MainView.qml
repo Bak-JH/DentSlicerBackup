@@ -88,13 +88,14 @@ Entity {
         onPressed: {
             console.log(event.key);
             if (event.key === Qt.Key_Delete) {
-                deletePopUp.visible = true
                 deletePopUp.targetID = qm.getSelectedModelID()
                 if (deletePopUp.targetID != -1){
-                    hideTab();
+                    deletePopUp.visible = true
+                    mttab.hideTab();
                 }
-
-            } else if (event.matches(StandardKey.Undo)){
+            } else if (event.key === Qt.Key_Escape) {
+                uppertab.all_off()
+            }else if (event.matches(StandardKey.Undo)){
                 // do undo
                 console.log("undo called");
                 unDo();
