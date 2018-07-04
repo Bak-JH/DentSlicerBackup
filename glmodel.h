@@ -211,7 +211,7 @@ public:
     QString filename;
     QObject* mainWindow;
     QString slicingInfo;
-    void addVertices(Mesh* mesh, bool CW);
+    void addVertices(Mesh* mesh, bool CW, QVector3D color = QVector3D(1.0f, 0.0f, 0.0f));
 
 private:
     int colorMode;

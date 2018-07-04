@@ -380,7 +380,7 @@ void GLModel::updateModelMesh(){
                 addVertices(layerSupportMesh, false);
             }
             if( qmlManager->getLayerViewFlags() & LAYER_RAFT) {
-                addVertices(layerRaftMesh, false);
+                addVertices(layerRaftMesh, false, QVector3D(0.0f, 0.0f, 0.0f));
             }
         } else {
             initialize(mesh->faces.size());
@@ -696,7 +696,7 @@ void GLModel::clearVertices(){
     return;
 }
 
-void GLModel::addVertices(Mesh* mesh, bool CW)
+void GLModel::addVertices(Mesh* mesh, bool CW, QVector3D vertexColor)
 {
     int face_size = mesh->faces.size();
     int face_idx = 0;
@@ -771,11 +771,11 @@ void GLModel::addVertices(Mesh* mesh, bool CW)
         vector<QVector3D> result_vcs;
         if (CW){
             for (int fn=2; fn>=0; fn--){
-                result_vcs.push_back(QVector3D(1.0f, 0.0f, 0.0f));
+                result_vcs.push_back(vertexColor);
             }
         } else {
             for (int fn=0; fn<=2; fn++){
-                result_vcs.push_back(QVector3D(1.0f, 0.0f, 0.0f));
+                result_vcs.push_back(vertexColor);
             }
         }
         addColorVertices(result_vcs);
@@ -862,15 +862,22 @@ void GLModel::addColorVertices(vector<QVector3D> vertices){
     appendVertexArray.resize(vertex_color_cnt*3*sizeof(float));
     float * reVertexArray = reinterpret_cast<float*>(appendVertexArray.data());
 
-    for (int i=0; i<vertex_color_cnt; i++){
-        //coordinates of left vertex
-        //97 185 192
-        //reVertexArray[3*i+0] = 0.38;
-        //reVertexArray[3*i+1] = 0.725;
-        //reVertexArray[3*i+2] = 0.753;
-        reVertexArray[3*i+0] = 0.278;
-        reVertexArray[3*i+1] = 0.670;
-        reVertexArray[3*i+2] = 0.706;
+//    for (int i=0; i<vertex_color_cnt; i++){
+//        //coordinates of left vertex
+//        //97 185 192
+//        //reVertexArray[3*i+0] = 0.38;
+//        //reVertexArray[3*i+1] = 0.725;
+//        //reVertexArray[3*i+2] = 0.753;
+//        reVertexArray[3*i+0] = 0.278;
+//        reVertexArray[3*i+1] = 0.670;
+//        reVertexArray[3*i+2] = 0.706;
+//    }
+
+    int i = 0;
+    for( auto iter = vertices.begin() ; iter != vertices.end() ; iter++, i++ ) {
+        reVertexArray[3*i+0] = (*iter).x();
+        reVertexArray[3*i+1] = (*iter).y();
+        reVertexArray[3*i+2] = (*iter).z();
     }
 
     uint vertexColorCount = colorAttribute->count();
