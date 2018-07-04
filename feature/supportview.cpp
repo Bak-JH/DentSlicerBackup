@@ -92,13 +92,13 @@ void generateRaft(Mesh* mesh, OverhangPoint *point) {
                 "v(" << point->position.X << "," << point->position.Y << "," << point->position.Z << ")";
 
     float bottom = (float)(point->position.Z - (int)point->height * 1000) / scfg->resolution;
-    float radius = (float)scfg->raft_base_radius / (float)scfg->resolution;
+    float radius = (float)scfg->raft_offset_radius / (float)scfg->resolution;
     QVector3D position = QVector3D((float)point->position.X / scfg->resolution,
             (float)point->position.Y / scfg->resolution,
-            bottom);
+            bottom - scfg->raft_thickness);
     QVector3D positionTop = QVector3D((float)point->position.X / scfg->resolution,
             (float)point->position.Y / scfg->resolution,
-            bottom + scfg->raft_thickness / scfg->resolution);
+            bottom);
 
     generateCylinder(mesh, position, positionTop, radius);
 }

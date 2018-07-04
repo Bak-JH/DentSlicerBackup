@@ -1370,9 +1370,9 @@ void GLModel::generateSupport(){
     layerSupportMesh = new Mesh;
     layerRaftMesh = new Mesh;
     QVector3D t = m_transform->translation();
+
     t.setZ(mesh->z_min * -1.0f);
     layerSupportMesh->vertexMove(t);
-    t.setZ(mesh->z_min * -1.0f - scfg->raft_thickness / (float)scfg->resolution);
     layerRaftMesh->vertexMove(t);
 
     // generate cylinders
@@ -1381,10 +1381,10 @@ void GLModel::generateSupport(){
         generateSupporter(layerSupportMesh, *iter);
         generateRaft(layerRaftMesh, *iter);
     }
-
-    t.setZ(mesh->z_min);
+    t.setZ(scfg->raft_thickness);
+    layerMesh->vertexMove(t);
+    t.setZ(mesh->z_min + scfg->raft_thickness);
     layerSupportMesh->vertexMove(t);
-    t.setZ(mesh->z_min + scfg->raft_thickness / (float)scfg->resolution);
     layerRaftMesh->vertexMove(t);
 
     emit _updateModelMesh();
@@ -1749,7 +1749,7 @@ void GLModel::getSliderSignal(double value){
 }
 
 void GLModel::getLayerViewSliderSignal(double value) {
-    float height = (mesh->z_max - mesh->z_min) * value + mesh->z_min;
+    float height = (mesh->z_max - mesh->z_min) * value + mesh->z_min + scfg->raft_thickness;
     m_layerMaterialHeight->setValue(QVariant::fromValue(height));
 }
 
