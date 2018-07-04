@@ -67,8 +67,9 @@ Entity {
                     normalizedRect: Qt.rect(0, 0, 1, 1)
 
                     ClearBuffers {
-                        buffers: ClearBuffers.ColorDepthBuffer
+                        buffers: ClearBuffers.ColorDepthStencilBuffer
                         clearColor: Qt.rgba(0.6, 0.6, 0.6, 1.0)
+                        clearStencilValue: 0
                     }
 
                     Viewport {
@@ -77,8 +78,9 @@ Entity {
                         CameraSelector {
                             camera:camera
                             ClearBuffers {
-                               buffers: ClearBuffers.ColorDepthBuffer
+                               buffers: ClearBuffers.ColorDepthStencilBuffer
                                clearColor: "#E5E5E5"
+                               clearStencilValue: 0
                             }
                             SortPolicy {
                                 sortTypes: [

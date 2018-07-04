@@ -124,6 +124,7 @@ public:
     QPerVertexColorMaterial *m_meshVertexMaterial;
     QMaterial *m_layerMaterial;
     QParameter *m_layerMaterialHeight;
+    QParameter *m_layerMaterialRaftHeight;
 
     //QPhongMaterial *m_meshMaterial;
     Qt3DRender::QBuffer *vertexBuffer;

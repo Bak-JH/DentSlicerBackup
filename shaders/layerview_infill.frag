@@ -1,7 +1,6 @@
 #version 330 core
 
 uniform float height;
-uniform float raftHeight;
 
 in LayerViewVertex {
     vec3 position;
@@ -13,7 +12,7 @@ out vec4 fragColor;
 
 void main()
 {
-    if( fs_in.worldPos.z > height || fs_in.worldPos.z < raftHeight ) {
+    if( fs_in.worldPos.z < height ) {
         discard;//fragColor = vec4(1, 0, 0, 0.5);
     } else {
         fragColor = fs_in.color;

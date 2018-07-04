@@ -15,7 +15,7 @@ uniform mat4 mvp;
 
 void main()
 {
-    vs_out.color = vec4(1, 1, 0.5, 1);
+    vs_out.color = vec4(1, 1, 0, 1);
     vs_out.position = vec3( modelView * vec4( vertexPosition, 1.0 ) );
     vs_out.worldPos = vertexPosition;
     gl_Position = mvp * vec4( vertexPosition, 1.0 );

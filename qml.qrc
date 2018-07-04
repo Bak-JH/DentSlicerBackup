@@ -56,5 +56,7 @@
         <file>shaders/layerview_top.frag</file>
         <file>shaders/layerview_inner.vert</file>
         <file>shaders/layerview_inner.frag</file>
+        <file>shaders/layerview_infill.vert</file>
+        <file>shaders/layerview_infill.frag</file>
     </qresource>
 </RCC>
