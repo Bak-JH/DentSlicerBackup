@@ -38,27 +38,8 @@ Entity {
 
         property vector3d temp : Qt.vector3d( 0.0, 0.0, 0.0 )
 
-        //onPositionChanged: {
-            //cameraLightTransform.translation = camera.position.times(0.2)
-            //cameraLight.localDirection = camera.viewCenter.minus(camera.position).times(100)
-        //}
     }
 
-    Entity {
-        components: [
-            /*SpotLight {
-                id: cameraLight
-                localDirection: Qt.vector3d(0.0, 0.0, -5.0)
-                color: "white"
-                intensity: 0.6
-            },
-            Transform {
-                id: cameraLightTransform
-                translation: Qt.vector3d(0.0, 0.0, 5.0)
-
-            }*/
-        ]
-    }
     Entity {
         components: [
             DirectionalLight {

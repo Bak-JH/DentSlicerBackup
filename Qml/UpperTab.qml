@@ -64,6 +64,8 @@ Rectangle {
         resultPopUp.closePopUp();
         deletePopUp.closePopUp();
 
+        scene3d.forceActiveFocus();
+
         console.log("all off");
     }
 

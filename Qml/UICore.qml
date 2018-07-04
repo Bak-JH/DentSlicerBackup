@@ -47,16 +47,6 @@ Item {
         visible: isMove
     }
 
-    MeshTransformerRotateTest{
-        id : mtr
-
-        anchors.top: parent.top
-        anchors.left: parent.left
-
-        anchors.topMargin: 100
-        anchors.leftMargin: 100
-        visible: isRotate
-    }
     */
 
     UndoRedoButton{
