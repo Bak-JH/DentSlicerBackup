@@ -658,6 +658,7 @@ void QmlManager::modelSelected(int ID){
         QMetaObject::invokeMethod(boundedBox, "setSize", Q_ARG(QVariant, selectedModel->mesh->x_max - selectedModel->mesh->x_min),
                                                          Q_ARG(QVariant, selectedModel->mesh->y_max - selectedModel->mesh->y_min),
                                                          Q_ARG(QVariant, selectedModel->mesh->z_max - selectedModel->mesh->z_min));
+        QMetaObject::invokeMethod(layerViewSlider, "setHeight", Q_ARG(QVariant, selectedModel->mesh->z_max - selectedModel->mesh->z_min));
 
         // set slicing info box property visible true if slicing info exists
         if (selectedModel->slicingInfo != NULL){

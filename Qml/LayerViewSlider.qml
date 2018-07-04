@@ -6,6 +6,8 @@ Slider {
     id:slider
     objectName: "layerViewSlider"
     property string name:"slider"
+    property real modelHeight: modelHeight
+
     maximumValue: 10
     minimumValue: -1
     value: 1
@@ -42,18 +44,23 @@ Slider {
             source:"qrc:/resource/switch.png"
         }
     }
+
     onPressedChanged: {
-        txtValue.enabled = pressed;
+        rectValue.visible = pressed;
     }
 
     onValueChanged: {
-        if(value > 9)
+        if(value > 9) {
             value = 9
-        else if(value<0)
-            value=0
-        sliderValueChanged(value / 9);
-        txtValue.text = value.toString();
-        txtValue.y = height - height * value / 12 - 50;
+        } else if(value < 0) {
+            value = 0
+        }
+
+        var t = value / 9;
+        sliderValueChanged(t);
+        txtValue.text = Math.round(t * modelHeight).toString();
+        // 0 ~ 9 -> 25 ~ 255
+        rectValue.y = 255 - value * 230 / 9;
     }
     signal sliderValueChanged(double value);
 
@@ -91,21 +98,47 @@ Slider {
         text: "max"
     }
 
-    Text{
-        id : txtValue
-        x: 15
+    Rectangle{
+        id : rectValue
+        x: 0
         y: 15
         width: 30
         height: 20
-
-        font.pixelSize: 16
-        font.family: mainFont.name
-        font.bold: true
         anchors.right: parent.left
-        horizontalAlignment: Text.AlignRight
-        verticalAlignment: Text.AlignVCenter
-        color: "#666666"
-        text: "Color scheme"
+        color: "#5ccbd0"
+        anchors.rightMargin: -5
+        visible: false
+
+        Text{
+            id : txtValue
+
+            font.pixelSize: 12
+            font.family: mainFont.name
+            font.bold: true
+            horizontalAlignment: Text.AlignHCenter
+            verticalAlignment: Text.AlignVCenter
+            color: "#ffffff"
+            text: "0"
+            anchors.fill: parent
+        }
+
+        Image{
+            id : arrow
+            x: 28
+            source: "qrc:/resource/triangle.png"
+            width : 6
+            height : 10
+            rotation: 90
+
+            anchors.verticalCenter: parent.verticalCenter
+            anchors.right : parent.right
+            anchors.rightMargin: -6
+        }
+    }
+
+    function setHeight(v) {
+        modelHeight = v;
+        txtMax.text = Math.round(modelHeight);
     }
 }
 
