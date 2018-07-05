@@ -242,6 +242,8 @@ private:
     bool hollowShellActive = false;
     bool shellOffsetActive = false;
     bool layflatActive = false;
+    bool layerViewActive = false;
+    bool supportViewActive = false;
 
     bool isMoved = false;
 

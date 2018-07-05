@@ -336,6 +336,8 @@ void GLModel::copyModelAttributeFrom(GLModel* from){
     hollowShellActive = from->hollowShellActive;
     shellOffsetActive = from->shellOffsetActive;
     layflatActive = from->layflatActive;
+    layerViewActive = from->layerViewActive;
+    supportViewActive = from->supportViewActive;
 
 }
 
@@ -943,7 +945,7 @@ void GLModel::handlePickerClicked(QPickEvent *pick)
 
     }
 
-    if (!cutActive && !extensionActive && !labellingActive && !layflatActive && !isMoved)
+    if (!cutActive && !extensionActive && !labellingActive && !layflatActive && !isMoved)// && !layerViewActive && !supportViewActive)
         emit modelSelected(parentModel->ID);
 
     qDebug() << "model selected emit" << pick->position() << parentModel->ID;
@@ -1587,7 +1589,14 @@ void GLModel::mgoo(Qt3DRender::QPickEvent* v)
         return;
     }
 
-    if (qmlManager->selectedModel != nullptr && (qmlManager->selectedModel->shadowModel->cutActive || qmlManager->selectedModel->shadowModel->extensionActive || qmlManager->selectedModel->shadowModel->labellingActive || qmlManager->selectedModel->shadowModel->layflatActive))
+    qDebug()<< qmlManager->selectedModel;
+
+    if (qmlManager->selectedModel != nullptr && (qmlManager->selectedModel->shadowModel->cutActive
+                                                 || qmlManager->selectedModel->shadowModel->extensionActive
+                                                 || qmlManager->selectedModel->shadowModel->labellingActive
+                                                 || qmlManager->selectedModel->shadowModel->layflatActive
+                                                 || qmlManager->selectedModel->shadowModel->layerViewActive
+                                                 || qmlManager->selectedModel->shadowModel->supportViewActive))
         return;
 
     qmlManager->setClosedHandCursor();
@@ -2158,17 +2167,24 @@ void GLModel::changeViewMode(int viewMode) {
     }
 
     this->viewMode = viewMode;
+    QMetaObject::invokeMethod(qmlManager->boxUpperTab, "all_off");
 
     switch( viewMode ) {
     case VIEW_MODE_OBJECT:
+        shadowModel->layerViewActive = false;
+        shadowModel->supportViewActive = false;
         addComponent(m_meshMaterial);
         removeComponent(m_layerMaterial);
         break;
     case VIEW_MODE_SUPPORT:
+        shadowModel->layerViewActive = false;
+        shadowModel->supportViewActive = true;
         addComponent(m_meshMaterial);
         removeComponent(m_layerMaterial);
         break;
     case VIEW_MODE_LAYER:
+        shadowModel->layerViewActive = true;
+        shadowModel->supportViewActive = false;
         addComponent(m_layerMaterial);
         removeComponent(m_meshMaterial);
         break;
