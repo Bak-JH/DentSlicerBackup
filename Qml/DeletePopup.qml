@@ -76,17 +76,15 @@ Rectangle {
                 hoverEnabled: true
                 onEntered: {
                     qm.setHandCursor();
-                    parent.color = "#BCBCBE"
+                    parent.color = "#3ea6b7"
                 }
                 onExited: {
                     qm.resetCursor();
-                    parent.color = "#A3A3A5"
+                    parent.color = "#999999"
                 }
-                onPressed: parent.color = "#3ea6b7"
                 onReleased: {
                     qm.doDeletebyID(targetID)
                     closePopUp();
-                    parent.color = "#A3A3A5"
                 }
             }
         }
@@ -114,16 +112,14 @@ Rectangle {
                 hoverEnabled: true
                 onEntered: {
                     qm.setHandCursor();
-                    parent.color = "#BCBCBE"
+                    parent.color = "#3ea6b7"
                 }
                 onExited: {
                     qm.resetCursor();
-                    parent.color = "#A3A3A5"
+                    parent.color = "#999999"
                 }
-                onPressed: parent.color = "#3ea6b7"
                 onReleased: {
                     closePopUp();
-                    parent.color = "#A3A3A5"
                 }
             }
         }
