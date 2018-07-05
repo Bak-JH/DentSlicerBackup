@@ -10,7 +10,8 @@ Item {
     width : 224
     height: 20
 
-    anchors.horizontalCenter: parent.horizontalCenter
+    Layout.alignment: Qt.AlignHCenter
+    //anchors.horizontalCenter: parent.horizontalCenter
     property string columnName
     property string columnContent
 

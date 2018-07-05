@@ -61,6 +61,8 @@ Rectangle {
         arrangePopUp.closePopUp();
         resultPopUp.closePopUp();
         deletePopUp.closePopUp();
+        if(yesnoPopUp.isFlawOpen)
+            yesnoPopUp.closePopUp();
 
         scene3d.forceActiveFocus();
 
@@ -599,10 +601,9 @@ Rectangle {
             //image: ""
             detailline1_vis: false
             detailline2_vis: false
-            applyfinishbutton_vis: true
-
             okbutton_vis: false
             applybutton_vis: false
+            applyfinishbutton_vis: true
             //applybutton_text: "Finish"
             descriptionimage_vis: false
             numberbox_vis: true
@@ -627,7 +628,7 @@ Rectangle {
             }
 
             function onApplyFinishButton(){
-                popup_move.colorApplyFinishButton(1)
+                popup_move.colorApplyFinishButton(0)
             }
             function offApplyFinishButton(){
                 popup_move.colorApplyFinishButton(0);
@@ -646,8 +647,8 @@ Rectangle {
             detailline1_vis: false
             detailline2_vis: false
             okbutton_vis: false
-            applyfinishbutton_vis: true
             applybutton_vis: false
+            applyfinishbutton_vis: true
             //applybutton_text: "Finish"
             descriptionimage_vis: false
             numberbox_vis: true
@@ -668,7 +669,7 @@ Rectangle {
             }
             state: second_tab_button_rotate.state=="active" ? "active" : "inactive"
             function onApplyFinishButton(){
-                popup_rotate.colorApplyFinishButton(1)
+                popup_rotate.colorApplyFinishButton(0)
             }
             function offApplyFinishButton(){
                 popup_rotate.colorApplyFinishButton(0);
@@ -687,9 +688,9 @@ Rectangle {
             detailline1_vis: false
             detailline2_vis: false
             imageHeight: 76
-            applyfinishbutton_vis: true
             okbutton_vis: false
             applybutton_vis: false
+            applyfinishbutton_vis: true
             applybutton_action: false
             applyfinishbutton_text:"Apply"
             applybutton_text: "Finish"
@@ -723,7 +724,7 @@ Rectangle {
                 }
             }
             function onApplyFinishButton(){
-                popup_layflat.colorApplyFinishButton(1)
+                popup_layflat.colorApplyFinishButton(0)
             }
             function offApplyFinishButton(){
                 popup_layflat.colorApplyFinishButton(0);
@@ -750,9 +751,9 @@ Rectangle {
             detailline1_vis: false
             detailline2_vis: false
             imageHeight: 76
-            applyfinishbutton_vis: true
             okbutton_vis: false
             applybutton_vis: false
+            applyfinishbutton_vis: true
             descriptionimage_vis: true
             state: second_tab_button_arrange.state=="active" ? "active" : "inactive"
             signal runFeature();
@@ -765,7 +766,6 @@ Rectangle {
 
 
         //8. PopUp - Orient
-
         PopUp {
             objectName: "orientPopup"
             id: popup_orient
@@ -787,7 +787,7 @@ Rectangle {
                 runFeature(ftrOrient);
             }
             function onApplyFinishButton(){
-                popup_orient.colorApplyFinishButton(1)
+                popup_orient.colorApplyFinishButton(0)
             }
             function offApplyFinishButton(){
                 popup_orient.colorApplyFinishButton(0);
@@ -805,12 +805,12 @@ Rectangle {
             detail1: "Current size"
             detail2: "Scale"
             //image: ""
-            detailline1_vis: true
-            detailline2_vis: true
+            detailline1_vis: false
+            detailline2_vis: false
             imageHeight: 112
-            applyfinishbutton_vis: false
             okbutton_vis: false
-            applybutton_vis: true
+            applybutton_vis: false
+            applyfinishbutton_vis: true
             applybutton_text: "Finish"
             descriptionimage_vis: false
             numberbox_vis: true
@@ -834,7 +834,6 @@ Rectangle {
                     return "inactive"
                 }
             }
-
 
 
             function updateSizeInfo(x,y,z){
@@ -901,10 +900,10 @@ Rectangle {
             image: "qrc:/Resource/popup_image/image_autorepair.png"
             detailline1_vis: false
             detailline2_vis: false
-            imageHeight: 76
-            applyfinishbutton_vis: true
-            applybutton_vis: false
+            imageHeight: 76            
             okbutton_vis: false
+            applybutton_vis: false
+            applyfinishbutton_vis: true
             descriptionimage_vis: true
             //state: third_tab_button_autorepair.state=="active" ? "active" : "inactive"
             state: {
@@ -920,7 +919,7 @@ Rectangle {
             }
             function onApplyFinishButton(){
                 console.log("r-on")
-                popup_autorepair.colorApplyFinishButton(1)
+                popup_autorepair.colorApplyFinishButton(0)
             }
             function offApplyFinishButton(){
                 console.log("r-off")
@@ -936,11 +935,11 @@ Rectangle {
             height: 300
             detail1: "Cutting Surface"
             detail2: "After treatment"
-            detailline1_vis: true
-            detailline2_vis: true
-            applyfinishbutton_vis: true
-            applybutton_vis: false
+            detailline1_vis: false
+            detailline2_vis: false
             okbutton_vis:false
+            applybutton_vis: false
+            applyfinishbutton_vis: true
             descriptionimage_vis: false
             leftselectimage_vis: true
             rightselectimage_vis: true
@@ -965,6 +964,7 @@ Rectangle {
                 console.log("flat mode selected");
                 slider_vis = true;
                 cutModeSelected(1);
+                viewCenter();
             }
 
             onCurveModeClicked: {
@@ -1014,6 +1014,15 @@ Rectangle {
                 sceneRoot.cm.camera.translateWorld(Qt.vector3d(0.025,-0.25,0))
 
             }
+            function viewCenter(){
+                sceneRoot.systemTransform.scale3D = Qt.vector3d(0.004,0.004,0.004)
+                sceneRoot.systemTransform.rotationX = -70
+                sceneRoot.systemTransform.rotationY = 0
+                sceneRoot.systemTransform.rotationZ = -40
+
+                sceneRoot.cm.camera.translateWorld(sceneRoot.cm.camera.viewCenter.times(-1))
+                sceneRoot.cm.camera.translateWorld(Qt.vector3d(-0.015,-0.16,0))
+            }
             //Planeslider{id:slider;anchors.right: parent.left;anchors.rightMargin:20;anchors.bottom:parent.bottom;anchors.bottomMargin:-20;}
         }
 
@@ -1028,12 +1037,12 @@ Rectangle {
             detail1: "Hollow Shell"
             detail2: "Offset value"
             //image: ""
-            detailline1_vis: true
-            detailline2_vis: true
+            detailline1_vis: false
+            detailline2_vis: false
             imageHeight: 40
-            applyfinishbutton_vis: true
             okbutton_vis: false
             applybutton_vis: false
+            applyfinishbutton_vis: true
             descriptionimage_vis: false
             numbox_detail2_vis: true
             numberbox_detail2_y: 170
@@ -1119,12 +1128,12 @@ Rectangle {
             detail1: "Direction"
             detail2: "Offset value"
             //image: ""
-            detailline1_vis: true
-            detailline2_vis: true
+            detailline1_vis: false
+            detailline2_vis: false
             imageHeight: 40
-            applyfinishbutton_vis: true
             okbutton_vis: false
             applybutton_vis: false
+            applyfinishbutton_vis: true
             descriptionimage_vis: false
             numbox_detail2_vis: true
             numberbox_detail2_y: 170
@@ -1203,11 +1212,11 @@ Rectangle {
             detail1: "Extend Value"
             detail2: ""
             //image: ""
-            detailline1_vis: true
+            detailline1_vis: false
             detailline2_vis: false
             okbutton_vis: false
-            applyfinishbutton_vis: true
             applybutton_vis: false
+            applyfinishbutton_vis: true
             descriptionimage_vis: false
             numbox_detail2_vis: true
             numberbox_detail2_y: 90
@@ -1223,7 +1232,7 @@ Rectangle {
                 }
             }
             function onApplyFinishButton(){
-                popup_extend.colorApplyFinishButton(1)
+                popup_extend.colorApplyFinishButton(0)
             }
             function offApplyFinishButton(){
                 popup_extend.colorApplyFinishButton(0);
@@ -1248,9 +1257,9 @@ Rectangle {
             //image: ""
             detailline1_vis: false
             detailline2_vis: false
-            applyfinishbutton_vis: false
             okbutton_vis: false
             applybutton_vis: true
+            applyfinishbutton_vis: false
             descriptionimage_vis: false
             state: fourth_tab_button_support.state=="active" ? "active" : "inactive"
         }*/
@@ -1431,8 +1440,9 @@ Rectangle {
                         detailline1_vis: true
                         detailline2_vis: true
                         okbutton_vis: false
-                        applyfinishbutton_vis: false
                         applybutton_vis: true
+                        applyfinishbutton_vis: false
+
                     }
 
         //15. PopUp - Label
@@ -1445,9 +1455,9 @@ Rectangle {
             //image: ""
             detailline1_vis: false
             detailline2_vis: false
-            applyfinishbutton_vis: false
             okbutton_vis: false
             applybutton_vis: true
+            applyfinishbutton_vis: false
             descriptionimage_vis: false
             state: fourth_tab_button_label.state=="active" ? "active" : "inactive"
         }*/
@@ -1712,10 +1722,11 @@ Rectangle {
 
             descriptionimage_vis: true
             detailline1_vis: false
-            detailline2_vis: true
+            detailline2_vis: false
             okbutton_vis:false
-            applyfinishbutton_vis: false
             applybutton_vis: true
+            applyfinishbutton_vis: false
+
             state: {
                 if (fourth_tab_button_label.state=="active" && qm.isSelected()) {
                     openLabelling()

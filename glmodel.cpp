@@ -334,10 +334,7 @@ void GLModel::updateModelMesh(){
     addVertices(mesh, false);
     applyGeometry();
 
-    QMetaObject::invokeMethod(qmlManager->boundedBox, "setPosition", Q_ARG(QVariant, m_transform->translation()+QVector3D((mesh->x_max+mesh->x_min)/2,(mesh->y_max+mesh->y_min)/2,(mesh->z_max+mesh->z_min)/2)));
-    QMetaObject::invokeMethod(qmlManager->boundedBox, "setSize", Q_ARG(QVariant, mesh->x_max - mesh->x_min),
-                                                     Q_ARG(QVariant, mesh->y_max - mesh->y_min),
-                                                     Q_ARG(QVariant, mesh->z_max - mesh->z_min));
+
 
     // create new object picker, shadowmodel, remove prev shadowmodel
     //QVector3D translation = shadowModel->m_transform->translation();
@@ -374,12 +371,16 @@ void GLModel::updateModelMesh(){
     float zlength = mesh->z_max - mesh->z_min;
     //if (shadowModel != NULL) // since shadow model transformed twice
 
-
-
     m_transform->setTranslation(QVector3D(tmp.x(),tmp.y(),-mesh->z_min));
+    QMetaObject::invokeMethod(qmlManager->boundedBox, "setPosition", Q_ARG(QVariant, m_transform->translation()+QVector3D((mesh->x_max+mesh->x_min)/2,(mesh->y_max+mesh->y_min)/2,(mesh->z_max+mesh->z_min)/2)));
+    QMetaObject::invokeMethod(qmlManager->boundedBox, "setSize", Q_ARG(QVariant, mesh->x_max - mesh->x_min),
+                                                     Q_ARG(QVariant, mesh->y_max - mesh->y_min),
+                                                     Q_ARG(QVariant, mesh->z_max - mesh->z_min));
+
     checkPrintingArea();
     QMetaObject::invokeMethod(qmlManager->scalePopup, "updateSizeInfo", Q_ARG(QVariant, mesh->x_max-mesh->x_min), Q_ARG(QVariant, mesh->y_max-mesh->y_min), Q_ARG(QVariant, mesh->z_max-mesh->z_min));
     qDebug() << "model transform :" <<m_transform->translation() << mesh->x_max << mesh->x_min << mesh->y_max << mesh->y_min << mesh->z_max << mesh->z_min;
+
 
 
 }
@@ -1529,8 +1530,6 @@ void GLModel::mgoo(Qt3DRender::QPickEvent* v)
         calculateY = (targetPoints.at(0) - targetPoints.at(3)) * QVector2D::dotProduct(yAxis,target) /yAxis.length() / 100;
     else
         calculateY = QVector3D(0,0,0);
-    qDebug() << "calculate X   " << calculateX;
-    qDebug() << "calculate Y   " << calculateY;
 
     float scaleFactor = qmlManager->systemTransform->scale3D().x() / 0.004f;
     qmlManager->modelMoveF(1,-(calculateX.x() + calculateY.x()) * 1.5 / scaleFactor);
@@ -2003,7 +2002,7 @@ void GLModel::openCut(){
     qDebug() << "opencut called";
     cutActive = true;
 
-    cutModeSelected(1);
+    cutModeSelected(0);
 }
 
 void GLModel::closeCut(){
