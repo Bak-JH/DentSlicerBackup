@@ -17,7 +17,7 @@ Rectangle {
 
     visible: false
     color : "transparent"
-    signal runGroupFeature(int type, string state);
+    signal runGroupFeature(int type, string state, double arg1, double arg2, double arg3);
 
     Rectangle{//shadow
         width: 34
@@ -235,7 +235,7 @@ Rectangle {
 
         uppertab.all_off()
         uppertab.second_tab_button_move.state = "active"
-        mttab.runGroupFeature(4, "active");
+        mttab.runGroupFeature(4, "active", 0, 0, 0);
 
         hideTab()
     }
@@ -245,7 +245,7 @@ Rectangle {
 
         uppertab.all_off()
         uppertab.second_tab_button_rotate.state = "active"
-        mttab.runGroupFeature(5, "active");
+        mttab.runGroupFeature(5, "active", 0, 0, 0);
 
         hideTab()
     }
@@ -258,7 +258,7 @@ Rectangle {
 
     function selectDelete(){
         deletePopUp.visible = true
-        deletePopUp.targetID = qm.getSelectedModelID()
+        deletePopUp.targetID = qm.getselectedModelID()
 
         hideTab()
     }

@@ -121,5 +121,6 @@
         <file>Resource/undo_icon_select.png</file>
         <file>Resource/flat_cut_select.png</file>
         <file>Resource/free_cut_select.png</file>
+        <file>Resource/pem/dsa_pub.pem</file>
     </qresource>
 </RCC>

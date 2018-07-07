@@ -83,7 +83,7 @@ Rectangle {
                     parent.color = "#999999"
                 }
                 onReleased: {
-                    qm.doDeletebyID(targetID)
+                    qm.doDelete()
                     closePopUp();
                 }
             }
