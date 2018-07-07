@@ -102,6 +102,7 @@ public:
     GLModel *shadowModel = NULL; // GLmodel's sparse mesh that gets picker input
     GLModel *leftModel = NULL;
     GLModel *rightModel = NULL;
+    GLModel *twinModel = NULL; // saves cut right for left, left for right models
 
     // Core mesh structures
     Mesh* mesh;

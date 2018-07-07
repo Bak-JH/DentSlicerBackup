@@ -124,13 +124,12 @@ Rectangle {
     function addPart(fileName, ID){ // add in list with filename
         var newComponent = Qt.createComponent("LeftTabPartListElement.qml")
 
+        console.log("added part " + fileName);
         var newPart = newComponent.createObject(partListColumn, {"modelName" : fileName, "state" : "on", "objectName" : "qwer", "glModelID" : ID})
-        console.log("glmodel  glglgl  : " + ID);
     }
 
     function deletePart(ID){ // delete in list by ID
         for(var i=0 ; i<partListColumn.children.length; i++){
-            console.log("iddididididid   " + partListColumn.children[i].glModelID)
             if(partListColumn.children[i].glModelID === ID){
                 partListColumn.children[i].destroy()
             }

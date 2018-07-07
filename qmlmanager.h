@@ -116,12 +116,16 @@ public:
     QObject* exportOKButton;
 
     vector<GLModel*> glmodels;
-    GLModel* selectedModel = nullptr;
+    vector<GLModel*> selectedModels;
+    vector<Mesh*> copyMeshes;
+
+
 
     int rotateSnapAngle = 0;
     int rotateSnapStartAngle = 0;
-    int groupFunctionIndex;
+    bool groupSelectionActive = false;
     QString groupFunctionState;
+    int groupFunctionIndex;
     float progress = 0;
     void showRotateSphere();
     void showMoveArrow();
@@ -146,7 +150,7 @@ public:
 
     Q_INVOKABLE QVector3D getSelectedCenter();
     Q_INVOKABLE QVector3D getSelectedSize();
-    Q_INVOKABLE int getSelectedModelID();
+    Q_INVOKABLE int getselectedModelID();
     Q_INVOKABLE void fixMesh();
     Q_INVOKABLE void setHandCursor();
     Q_INVOKABLE void setClosedHandCursor();
@@ -176,10 +180,13 @@ public slots:
     void openModelFile(QString filename);
     void checkModelFile(int ID);
     void deleteModelFile(int ID);
-    void runGroupFeature(int,QString);
+    void copyModel();
+    void pasteModel();
+    void groupSelectionActivate(bool);
+    void runGroupFeature(int,QString, double, double, double);
+    void multipleModelSelected(int ID);
     void modelSelected(int);
     void modelRotate(int,int);
-
     void modelRotateByNumber(int axis, int, int, int);
     void modelMove(int,int);
     void modelMoveF(int,float);
@@ -188,7 +195,7 @@ public slots:
     void modelRotateDone(int);
     void resetLayflat();
     void applyArrangeResult(vector<QVector3D>, vector<float>);
-    void cleanSelectedModel(int);
+    void cleanselectedModel(int);
     void extensionSelect();
     void extensionUnSelect();
     void layFlatSelect();

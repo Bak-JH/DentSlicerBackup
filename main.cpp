@@ -11,10 +11,12 @@
 #include "QtConcurrent/QtConcurrent"
 #include "QFuture"
 #include <QSplashScreen>
+#include "utils/updatechecker.h"
 //#include <QTranslator>
 
 using namespace Qt3DCore;
 QmlManager *qmlManager;
+
 
 int main(int argc, char **argv)
 {
@@ -52,6 +54,12 @@ int main(int argc, char **argv)
 
     engine.load(QUrl(QStringLiteral("qrc:/Qml/main.qml")));
 
+    // update module codes
+    UpdateChecker* up = new UpdateChecker();
+    up->checkForUpdates();
+    //initWinSparkle();
+    //checkForUpdates();
+
     //engine.retranslate();
 
     qmlManager->initializeUI(&engine);
@@ -64,4 +72,3 @@ int main(int argc, char **argv)
 
     return app.exec();
 }
-

@@ -34,27 +34,28 @@ Rectangle {
     property alias second_tab_button_move: second_tab_button_move
     property alias second_tab_button_rotate: second_tab_button_rotate
 
-    signal runGroupFeature(int type, string state);
+    signal runGroupFeature(int type, string state, double arg1, double arg2, double arg3);
     function all_off() {
         first_tab_button_open.state = "inactive";
         first_tab_button_export.state = "inactive";
         first_tab_button_save.state = "inactive";
         second_tab_button_arrange.state = "inactive";
         second_tab_button_layflat.state = "inactive";
-        runGroupFeature(ftrLayFlat, "inactive");
+        runGroupFeature(ftrLayFlat, "inactive", 0, 0, 0);
 
         second_tab_button_move.state = "inactive";
-        runGroupFeature(ftrMove,"inactive");
+        runGroupFeature(ftrMove,"inactive", 0, 0, 0);
         second_tab_button_orient.state = "inactive";
         second_tab_button_rotate.state = "inactive";
-        runGroupFeature(ftrRotate,"inactive");
+        runGroupFeature(ftrRotate,"inactive", 0, 0, 0);
         third_tab_button_autorepair.state = "inactive";
         third_tab_button_cut.state = "inactive";
         //third_tab_button_hollowshell.state = "inactive";
         third_tab_button_shelloffset.state = "inactive";
         third_tab_button_scale.state = "inactive";
+        runGroupFeature(ftrScale, "inactive", 0, 0, 0);
         fourth_tab_button_extend.state = "inactive";
-        runGroupFeature(ftrExtend, "inactive");
+        runGroupFeature(ftrExtend, "inactive", 0, 0, 0);
         fourth_tab_button_label.state = "inactive";
         fourth_tab_button_support.state = "inactive";
 
@@ -278,9 +279,9 @@ Rectangle {
             iconSource1: "qrc:/resource/upper_move.png"
             iconSource2: "qrc:/Resource/upper2_move.png"
             iconText: qsTr("Move")
-            signal runGroupFeature(int type, string state);
+            signal runGroupFeature(int type, string state, double arg1, double arg2, double arg3);
             onButtonClicked:{
-                   runGroupFeature(ftrMove, state);
+                   runGroupFeature(ftrMove, state, 0, 0, 0);
                    console.log("run group featur mov " + ftrMove + "   " + state);
             }
         }
@@ -291,9 +292,9 @@ Rectangle {
             iconSource1: "qrc:/resource/upper_rotate.png"
             iconSource2: "qrc:/Resource/upper2_rotate.png"
             iconText: qsTr("Rotate")
-            signal runGroupFeature(int type, string state);
+            signal runGroupFeature(int type, string state, double arg1, double arg2, double arg3);
             onButtonClicked:{
-                   runGroupFeature(ftrRotate, state);
+                   runGroupFeature(ftrRotate, state, 0, 0, 0);
                 console.log("run group featur rot " + ftrRotate + "   " + state);
             }
 
@@ -305,9 +306,9 @@ Rectangle {
             iconSource1: "qrc:/resource/upper_layflat.png"
             iconSource2: "qrc:/Resource/upper2_layflat.png"
             iconText: qsTr("Lay Flat")
-            signal runGroupFeature(int type, string state);
+            signal runGroupFeature(int type, string state, double arg1, double arg2, double arg3);
             onButtonClicked:{
-                   runGroupFeature(ftrLayFlat, state);
+                   runGroupFeature(ftrLayFlat, state, 0, 0, 0);
             }
         }
         UpperButton{
@@ -330,9 +331,9 @@ Rectangle {
             iconSource1: "qrc:/resource/upper_orientation.png"
             iconSource2: "qrc:/Resource/upper2_orient.png"
             iconText: qsTr("Orient")
-            signal runGroupFeature(int type, string state);
+            signal runGroupFeature(int type, string state, double arg1, double arg2, double arg3);
             onButtonClicked:{
-                   runGroupFeature(ftrOrient, state);
+                   runGroupFeature(ftrOrient, state, 0, 0, 0);
             }
         }
 
@@ -403,12 +404,12 @@ Rectangle {
             }
             visible: if(box_uppertab.box != iconText) return false;
             */
-            signal runGroupFeature(int type, string state);
+            signal runGroupFeature(int type, string state, double arg1, double arg2, double arg3);
             onButtonClicked:{
                 if(!qm.isSelected() && (state == "active"))
                     window.resultPopUp.openResultPopUp("","You must select at least one model.","")
                 else
-                    runGroupFeature(ftrRepair, state);
+                    runGroupFeature(ftrRepair, state, 0, 0, 0);
             }
         }
 
@@ -488,12 +489,12 @@ Rectangle {
             iconSource2: "qrc:/Resource/upper2_extend.png"
             iconText: qsTr("Extend")
 
-            signal runGroupFeature(int type, string state);
+            signal runGroupFeature(int type, string state, double arg1, double arg2, double arg3);
             onButtonClicked:{
                 if(!qm.isSelected() && (state == "active")){
                     window.resultPopUp.openResultPopUp("","You must select at least one model.","")
                 }else{
-                    runGroupFeature(ftrExtend, state);
+                    runGroupFeature(ftrExtend, state, 0, 0, 0);
                 }
             }
         }
@@ -622,9 +623,9 @@ Rectangle {
                 console.log("move")
                 runFeature(ftrMove,popup_move.numberbox1_number,popup_move.numberbox2_number);
             }
-            signal runGroupFeature(int type, string state);
+            signal runGroupFeature(int type, string state, double arg1, double arg2, double arg3);
             onFinishClicked:{
-                runGroupFeature(ftrMove, state);
+                runGroupFeature(ftrMove, state, 0, 0, 0);
             }
 
             function onApplyFinishButton(){
@@ -663,9 +664,9 @@ Rectangle {
                 console.log("rotate")
                 runFeature(ftrRotate,popup_rotate.numberbox1_number,popup_rotate.numberbox2_number,popup_rotate.numberbox3_number);
             }
-            signal runGroupFeature(int type, string state);
+            signal runGroupFeature(int type, string state, double arg1, double arg2, double arg3);
             onFinishClicked:{
-                runGroupFeature(ftrRotate, state);
+                runGroupFeature(ftrRotate, state, 0, 0, 0);
             }
             state: second_tab_button_rotate.state=="active" ? "active" : "inactive"
             function onApplyFinishButton(){
@@ -823,8 +824,8 @@ Rectangle {
 
             signal openScale();
             signal closeScale();
-            signal runFeature(int type, double scaleX, double scaleY, double scaleZ);
-
+            //signal runFeature(int type, double scaleX, double scaleY, double scaleZ);
+            signal runGroupFeature(int type, string state, double arg1, double arg2, double arg3);
             state: {
                 if (third_tab_button_scale.state=="active" && qm.isSelected()){
                     openScale();
@@ -853,9 +854,11 @@ Rectangle {
                 console.log("scale called x y z" + numberbox1_number + numberbox2_number + numberbox3_number);
                 console.log("scale called" + numbox_value_detail2);
                 if (numbox_value_detail2 != 100) // scale by scale value
-                    runFeature(ftrScale, numbox_value_detail2/100, numbox_value_detail2/100, numbox_value_detail2/100);
+                    runGroupFeature(ftrScale, state, numbox_value_detail2/100, numbox_value_detail2/100, numbox_value_detail2/100);
+                    //runFeature(ftrScale, numbox_value_detail2/100, numbox_value_detail2/100, numbox_value_detail2/100);
                 else // scale by definite mm
-                    runFeature(ftrScale, numberbox1_number/numberbox1_number_origin, numberbox2_number/numberbox2_number_origin, numberbox3_number/numberbox3_number_origin);
+                    runGroupFeature(ftrScale, state, numberbox1_number/numberbox1_number_origin, numberbox2_number/numberbox2_number_origin, numberbox3_number/numberbox3_number_origin);
+                    //runFeature(ftrScale, numberbox1_number/numberbox1_number_origin, numberbox2_number/numberbox2_number_origin, numberbox3_number/numberbox3_number_origin);
                 // update scale info
             }
 

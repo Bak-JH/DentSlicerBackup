@@ -125,6 +125,7 @@ Rectangle {
                     //popup_orient.autoOrientSignal();
                     break;
                 case "Scale":
+                    applyClicked();
                     break;
                 case "Auto Repair":
                     applyClicked();
@@ -1228,9 +1229,9 @@ Rectangle {
                     }else{
                         text = text.charAt(0).replace(/[^1-9.]/g,'')+text.substring(1,text.length).replace(/[^0-9.]/g, '');
                     }
-                    if (parseFloat(text) > 100){
+                    /*if (parseFloat(text) > 100){
                         text = text.slice(0,-1)
-                    }
+                    }*/
 
                     numbox_value_detail2 = parseFloat(text)
                 }

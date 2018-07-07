@@ -69,11 +69,13 @@ GLModel::GLModel(QObject* mainWindow, QNode *parent, Mesh* loadMesh, QString fna
 
     this->changecolor(0);
     if (filename != "" && (filename.contains(".stl")||filename.contains(".STL"))\
-            && !EndsWith(filename.toStdString(), std::string("_left").c_str()) && !EndsWith(filename.toStdString(),  std::string("_right").c_str()) && !EndsWith(filename.toStdString(),  std::string("_offset").c_str())){
+            && !EndsWith(filename.toStdString(), std::string("_left").c_str()) && !EndsWith(filename.toStdString(),  std::string("_right").c_str())
+            && !EndsWith(filename.toStdString(),  std::string("_offset").c_str())){
         mesh = new Mesh();
         loadMeshSTL(mesh, filename.toStdString().c_str());
     } else if (filename != "" && (filename.contains(".obj")||filename.contains(".OBJ"))\
-            && !EndsWith(filename.toStdString(), std::string("_left").c_str()) && !EndsWith(filename.toStdString(),  std::string("_right").c_str()) && !EndsWith(filename.toStdString(),  std::string("_offset").c_str())){
+            && !EndsWith(filename.toStdString(), std::string("_left").c_str()) && !EndsWith(filename.toStdString(),  std::string("_right").c_str())
+               && !EndsWith(filename.toStdString(),  std::string("_offset").c_str())){
         mesh = new Mesh();
         loadMeshOBJ(mesh, filename.toStdString().c_str());
     } else {
@@ -129,6 +131,8 @@ GLModel::GLModel(QObject* mainWindow, QNode *parent, Mesh* loadMesh, QString fna
         Q_ARG(QVariant, getFileName(fname.toStdString().c_str())),
         Q_ARG(QVariant, ID));
     */
+
+    qDebug() << "adding part " << fname.toStdString().c_str();
     qmlManager->addPart(getFileName(fname.toStdString().c_str()), ID);
 }
 
@@ -254,6 +258,9 @@ void GLModel::saveUndoState(){
 
 void GLModel::loadUndoState(){
     if (mesh->prevMesh != nullptr){
+        if (twinModel != NULL && mesh->prevMesh == twinModel->mesh->prevMesh){ // same parent, cut generated
+            qmlManager->deleteModelFile(twinModel->ID);
+        }
         mesh = mesh->prevMesh;
         emit _updateModelMesh();
     }
@@ -348,7 +355,7 @@ void GLModel::updateModelMesh(){
         prevShadowModel->deleteLater();
 
         // reconnect handler if current selected model is updated
-        if (qmlManager->selectedModel==this)
+        if (qmlManager->selectedModels[0]==this)
             qmlManager->connectHandlers(this);
         //shadowModel->m_transform->setTranslation(translation);
         QObject::connect(shadowModel, SIGNAL(modelSelected(int)), qmlManager, SLOT(modelSelected(int)));
@@ -869,8 +876,8 @@ void GLModel::handlePickerClicked(QPickEvent *pick)
     if (qmlManager->yesno_popup->property("isFlawOpen").toBool())
         return;
 
-    if(qmlManager->selectedModel != nullptr && (pick->button() & Qt::RightButton)){ // when right button clicked
-        if(qmlManager->selectedModel->ID == parentModel->ID){
+    if(qmlManager->selectedModels[0] != nullptr && (pick->button() & Qt::RightButton)){ // when right button clicked
+        if(qmlManager->selectedModels[0]->ID == parentModel->ID){
             QMetaObject::invokeMethod(qmlManager->mttab, "tabOnOff");
             return;
         }
@@ -1421,11 +1428,13 @@ void GLModel::generateRLModel(){
         qmlManager->createModelFile(rmesh, filename+"_right");
 
     // 승환 90%
+    GLModel* leftmodel = qmlManager->findGLModelByName(filename+"_left");
+    GLModel* rightmodel = qmlManager->findGLModelByName(filename+"_right");
+    leftmodel->twinModel = rightmodel;
+    rightmodel->twinModel = leftmodel;
     qmlManager->setProgress(0.91);
 
     if (shadowModel->shellOffsetActive){
-        GLModel* leftmodel = qmlManager->findGLModelByName(filename+"_left");
-        GLModel* rightmodel = qmlManager->findGLModelByName(filename+"_right");
         shellOffset(leftmodel, (float)shellOffsetFactor);
         qmlManager->deleteModelFile(rightmodel->ID);
         QMetaObject::invokeMethod(qmlManager->boxUpperTab, "all_off");
@@ -1488,7 +1497,7 @@ void GLModel::mgoo(Qt3DRender::QPickEvent* v)
         return;
     }
 
-    if (qmlManager->selectedModel != nullptr && (qmlManager->selectedModel->shadowModel->cutActive || qmlManager->selectedModel->shadowModel->extensionActive || qmlManager->selectedModel->shadowModel->labellingActive || qmlManager->selectedModel->shadowModel->layflatActive))
+    if (qmlManager->selectedModels[0] != nullptr && (qmlManager->selectedModels[0]->shadowModel->cutActive || qmlManager->selectedModels[0]->shadowModel->extensionActive || qmlManager->selectedModels[0]->shadowModel->labellingActive || qmlManager->selectedModels[0]->shadowModel->layflatActive))
         return;
 
     qmlManager->setClosedHandCursor();
@@ -1987,7 +1996,7 @@ void GLModel::closeScale(){
 
 // for shell offset
 void GLModel::generateShellOffset(double factor){
-    saveUndoState();
+    //saveUndoState();
     qmlManager->openProgressPopUp();
     QString original_filename = filename;
 
