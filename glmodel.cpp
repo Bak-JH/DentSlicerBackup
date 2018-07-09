@@ -55,7 +55,7 @@ GLModel::GLModel(QObject* mainWindow, QNode *parent, Mesh* loadMesh, QString fna
 
         QObject::connect(this,SIGNAL(_updateModelMesh()),this,SLOT(updateModelMesh()));
 
-        /*labellingTextPreview = new LabellingTextPreview(this);
+        /*labellingTextPreview = new LabellingTextPreview(this->parentModel);
         labellingTextPreview->setEnabled(false);
 
         labellingTextPreview->setTranslation(QVector3D(100,0,0));
@@ -914,7 +914,7 @@ void GLModel::handlePickerClicked(QPickEvent *pick)
             labellingTextPreview->deleteLater();
             labellingTextPreview = nullptr;
         }
-        labellingTextPreview = new LabellingTextPreview(this);
+        labellingTextPreview = new LabellingTextPreview(this->parentModel);
         labellingTextPreview->setEnabled(true);
 
         if (labellingTextPreview && labellingTextPreview->isEnabled()) {
@@ -1778,7 +1778,7 @@ void GLModel::applyLabelInfo(QString text, int contentWidth, QString fontName, b
         labellingTextPreview->deleteLater();
         labellingTextPreview = nullptr;
     }
-    labellingTextPreview = new LabellingTextPreview(this);
+    labellingTextPreview = new LabellingTextPreview(this->parentModel);
     labellingTextPreview->setEnabled(true);
 
     if (labellingTextPreview && labellingTextPreview->isEnabled() && parentModel->targetMeshFace !=nullptr) {

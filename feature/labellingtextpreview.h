@@ -3,11 +3,11 @@
 
 #include <QEntity>
 #include <Qt3DCore/QTransform>
-#include <QNormalDiffuseMapAlphaMaterial>
 
 #include <QPaintedTextureImage>
 #include <QPainter>
 #include <QFont>
+#include <QDiffuseMapMaterial>
 
 class LabellingTextPreview : public Qt3DCore::QEntity
 {
@@ -72,8 +72,7 @@ public:
 
 private:
 
-    Qt3DCore::QEntity* planeEntity = nullptr;
-    Qt3DExtras::QNormalDiffuseMapAlphaMaterial* planeMaterial = nullptr;
+    Qt3DExtras::QDiffuseMapMaterial* planeMaterial = nullptr;
 
     Qt3DRender::QAbstractTexture* texture = nullptr;
     TextureImage* textureImage = nullptr;
