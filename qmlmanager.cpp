@@ -1299,6 +1299,7 @@ void QmlManager::setViewMode(int viewMode) {
         layerViewSlider->setProperty("visible", this->viewMode == VIEW_MODE_LAYER);
 
         if( selectedModel != nullptr ) {
+            QMetaObject::invokeMethod(layerViewSlider, "setHeight", Q_ARG(QVariant, selectedModel->mesh->z_max - selectedModel->mesh->z_min));
             this->selectedModel->changeViewMode(viewMode);
         }
     }

@@ -139,6 +139,8 @@ Slider {
     function setHeight(v) {
         modelHeight = v;
         txtMax.text = Math.round(modelHeight);
+
+        slider.value = 9;
     }
 }
 
