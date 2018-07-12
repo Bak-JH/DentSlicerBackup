@@ -4,7 +4,6 @@ import QtQuick.Controls 1.2
 import QtQuick.Layouts 1.3
 
 Rectangle {
-
     property alias option_resolution: option_resolution
     property alias option_layer_height: option_layer_height
     property alias option_bed_number: option_bed_number

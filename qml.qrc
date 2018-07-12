@@ -48,5 +48,6 @@
         <file>Qml/DeletePopup.qml</file>
         <file>Qml/YesNoPopup.qml</file>
         <file>Qml/UndoRedoButton.qml</file>
+        <file>Qml/SettingPopup.qml</file>
     </qresource>
 </RCC>
