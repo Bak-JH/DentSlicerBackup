@@ -122,5 +122,7 @@
         <file>Resource/flat_cut_select.png</file>
         <file>Resource/free_cut_select.png</file>
         <file>Resource/pem/dsa_pub.pem</file>
+        <file>Resource/upper_setting.png</file>
+        <file>Resource/upper2_setting.png</file>
     </qresource>
 </RCC>

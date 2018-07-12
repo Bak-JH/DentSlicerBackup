@@ -203,11 +203,16 @@ Rectangle {
     function destroy_popup(){
         popup_target.state="inactive";
     }
+
     /*
     function isApplyClickable(){
 
-    }*/
+        if(okbutton_vis){
 
+        }else if(applybutton_vis){
+
+        }else if(applyfinishbutton_vis){
+    }*/
 
     states: [
         State{
@@ -763,7 +768,7 @@ Rectangle {
                         if (text === "") text = "0"
                         numberbox1_number = parseFloat(text)
 
-                        if (numberbox1_text.text === "0" && numberbox2_text.text === "0" && (numberbox3_text.text === "0" || !numberboxset3.visible)){
+                        if ((numberbox1_text.text === "0" || numberbox1_text.text === "") && (numberbox2_text.text === "0" || numberbox2_text.text === "") && (numberbox3_text.text === "0" || numberbox3_text.text === "" || !numberboxset3.visible)){
                             colorApplyFinishButton(0)
                         }
                         else{
@@ -911,7 +916,7 @@ Rectangle {
                         if (text === "") text = "0";
                         numberbox2_number = parseFloat(text)
 
-                        if (numberbox1_text.text === "0" && numberbox2_text.text === "0" && (numberbox3_text.text === "0" || !numberboxset3.visible)){
+                        if ((numberbox1_text.text === "0" || numberbox1_text.text === "") && (numberbox2_text.text === "0" || numberbox2_text.text === "") && (numberbox3_text.text === "0" || numberbox3_text.text === "" || !numberboxset3.visible)){
                             colorApplyFinishButton(0)
                         }
                         else{
@@ -1056,7 +1061,7 @@ Rectangle {
                         if (text === "") text = "0";
                         numberbox3_number = parseFloat(text)
 
-                        if (numberbox1_text.text === "0" && numberbox2_text.text === "0" && (numberbox3_text.text === "0" || !numberboxset3.visible)){
+                        if ((numberbox1_text.text === "0" || numberbox1_text.text === "") && (numberbox2_text.text === "0" || numberbox2_text.text === "") && (numberbox3_text.text === "0" || numberbox3_text.text === "" || !numberboxset3.visible)){
                             colorApplyFinishButton(0)
                         }
                         else{
@@ -1229,6 +1234,7 @@ Rectangle {
                     }else{
                         text = text.charAt(0).replace(/[^1-9.]/g,'')+text.substring(1,text.length).replace(/[^0-9.]/g, '');
                     }
+
                     /*if (parseFloat(text) > 100){
                         text = text.slice(0,-1)
                     }*/

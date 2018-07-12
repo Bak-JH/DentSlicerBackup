@@ -308,7 +308,9 @@ Rectangle {
             iconText: qsTr("Lay Flat")
             signal runGroupFeature(int type, string state, double arg1, double arg2, double arg3);
             onButtonClicked:{
-                   runGroupFeature(ftrLayFlat, state, 0, 0, 0);
+                if(!qm.isSelected()&& (state == "active"))
+                    window.resultPopUp.openResultPopUp("","You must select at least one model.","")
+                 //runGroupFeature(ftrLayFlat, state, 0, 0, 0);
             }
         }
         UpperButton{
@@ -335,6 +337,7 @@ Rectangle {
             onButtonClicked:{
                    runGroupFeature(ftrOrient, state, 0, 0, 0);
             }
+
         }
 
         Rectangle{
@@ -552,9 +555,24 @@ Rectangle {
 
 
         UpperButton{
+            id : fifth_tab_button_setting
+            objectName : "Setting"
+            //anchors.left: parent.left
+            iconSource1: "qrc:/Resource/upper_setting.png"
+            iconSource2: "qrc:/Resource/upper2_setting.png"
+            iconText: qsTr("Setting")
+            MouseArea{
+                anchors.fill: parent
+                onClicked:{
+                    settingPopup.visible = true;
+                }
+            }
+        }
+
+        UpperButton{
             id : fifth_tab_button_feedback
             objectName : "Feedback"
-            //anchors.left: parent.left
+            anchors.left: fifth_tab_button_setting.right
             iconSource1: "qrc:/Resource/upper_feedback.png"
             iconSource2: "qrc:/Resource/upper2_feedback.png"
             iconText: qsTr("Feedback")
@@ -725,7 +743,7 @@ Rectangle {
                 }
             }
             function onApplyFinishButton(){
-                popup_layflat.colorApplyFinishButton(0)
+                popup_layflat.colorApplyFinishButton(2)
             }
             function offApplyFinishButton(){
                 popup_layflat.colorApplyFinishButton(0);
@@ -788,7 +806,7 @@ Rectangle {
                 runFeature(ftrOrient);
             }
             function onApplyFinishButton(){
-                popup_orient.colorApplyFinishButton(0)
+                popup_orient.colorApplyFinishButton(2)
             }
             function offApplyFinishButton(){
                 popup_orient.colorApplyFinishButton(0);
@@ -922,7 +940,7 @@ Rectangle {
             }
             function onApplyFinishButton(){
                 console.log("r-on")
-                popup_autorepair.colorApplyFinishButton(0)
+                popup_autorepair.colorApplyFinishButton(2)
             }
             function offApplyFinishButton(){
                 console.log("r-off")
@@ -968,6 +986,7 @@ Rectangle {
                 slider_vis = true;
                 cutModeSelected(1);
                 viewCenter();
+                popup_autorepair.colorApplyFinishButton(2)
             }
 
             onCurveModeClicked: {
@@ -975,6 +994,7 @@ Rectangle {
                 slider_vis = false;
                 cutModeSelected(2);
                 viewUp();
+                popup_autorepair.colorApplyFinishButton(2)
             }
 
             onPlaneSliderValueChanged: {
@@ -1235,7 +1255,7 @@ Rectangle {
                 }
             }
             function onApplyFinishButton(){
-                popup_extend.colorApplyFinishButton(0)
+                popup_extend.colorApplyFinishButton(2)
             }
             function offApplyFinishButton(){
                 popup_extend.colorApplyFinishButton(0);
@@ -1742,6 +1762,10 @@ Rectangle {
                     return "inactive"
                 }
             }
+        }
+        SettingPopup{
+            id:settingPopup
+            visible: false
         }
         FeedbackPopUp{
             id:feedbackPopUp
