@@ -662,7 +662,7 @@ void QmlManager::modelSelected(int ID){
         }
     }
 
-    if (!groupSelectionActive){ // remove selected models
+    if (selectedModels.size() >= 2){ // remove selected models if multiple selected previously
         for (vector<GLModel*>::iterator it=selectedModels.begin(); it!=selectedModels.end(); ++it){
             // unselect Model
             if (*it == nullptr)
@@ -702,10 +702,7 @@ void QmlManager::modelSelected(int ID){
         }
         selectedModels.clear();
         selectedModels.push_back(nullptr);
-    }
-
-    // reset previous model texture
-    if (selectedModels[0] != nullptr){
+    } else if (selectedModels.size() == 1 && selectedModels[0] != nullptr){
         qDebug() << "resetting model" << selectedModels[0]->ID;
         selectedModels[0]->changecolor(0);
         selectedModels[0]->checkPrintingArea();
