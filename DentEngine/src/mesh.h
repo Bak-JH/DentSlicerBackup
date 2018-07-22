@@ -7,6 +7,7 @@
 #include "configuration.h"
 #include "polyclipping/clipper/clipper.hpp"
 #include "polyclipping/poly2tri/poly2tri.h"
+#include <QTransform>
 
 #define cos50 0.64278761
 #define cos100 -0.17364818
@@ -73,6 +74,9 @@ public :
     Mesh* prevMesh = nullptr;
     Mesh* nextMesh = nullptr;
 
+    QVector3D m_translation;
+    QMatrix4x4 m_matrix;
+
     // used for auto repair steps
     Paths3D holes;
 
@@ -86,6 +90,7 @@ public :
     void vertexMove(QVector3D direction);
     void vertexRotate(QMatrix4x4 tmpmatrix);
     void vertexScale(float scaleX, float scaleY, float scaleZ);
+    void reverseFaces();
 
     /********************** Mesh Generation Functions **********************/
     void addFace(QVector3D v0, QVector3D v1, QVector3D v2);

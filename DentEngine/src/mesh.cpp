@@ -97,6 +97,15 @@ void Mesh::vertexScale(float scaleX=1, float scaleY=1, float scaleZ=1){
         updateMinMax(vertices[i].position);
     }
 }
+
+void Mesh::reverseFaces(){
+    for (int i=0; i<faces.size(); i++){
+        int last = faces[i].mesh_vertex[2];
+        faces[i].mesh_vertex[2] = faces[i].mesh_vertex[0];
+        faces[i].mesh_vertex[0] = last;
+    }
+}
+
 /********************** Mesh Generation Functions **********************/
 
 void Mesh::addFace(QVector3D v0, QVector3D v1, QVector3D v2){
