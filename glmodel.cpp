@@ -1534,6 +1534,7 @@ void GLModel::mgoo(Qt3DRender::QPickEvent* v)
              qmlManager->rotateActive))
         return;
 
+    qmlManager->moveButton->setProperty("state", "active");
     qmlManager->setClosedHandCursor();
     isMoved = true;
     QVector2D currentPoint = (QVector2D)v->position();

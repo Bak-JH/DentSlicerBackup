@@ -49,6 +49,7 @@ public:
     Qt3DCore::QEntity *rotateSphereZ;
 
     // model move components
+    QObject *moveButton;
     QObject *movePopup;
     Qt3DCore::QEntity *managerModel;
     Qt3DCore::QEntity *moveArrow;
@@ -206,6 +207,7 @@ public slots:
     void layFlatUnSelect();
     void openRotate();
     void closeRotate();
+    void closeMove();
 
 };
 

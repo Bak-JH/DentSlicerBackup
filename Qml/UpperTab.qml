@@ -635,7 +635,19 @@ Rectangle {
             numbox_value_x: move_x_value
             numbox_value_y: move_y_value
             numbox_value_z: move_z_value
-            state: second_tab_button_move.state=="active" ? "active" : "inactive"
+
+            signal openMove();
+            signal closeMove();
+
+            state: {
+                if (second_tab_button_move.state=="active"){
+                    //openMove();
+                    return "active";
+                } else {
+                    closeMove();
+                    return "inactive";
+                }
+            }
             signal runFeature(int type, int X, int Y);
             onApplyClicked: {
                 console.log("move")

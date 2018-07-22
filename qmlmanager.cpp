@@ -32,9 +32,12 @@ void QmlManager::initializeUI(QQmlApplicationEngine* e){
     systemTransform = (Qt3DCore::QTransform *) FindItemByName(engine, "systemTransform");
     mttab = (QEntity *)FindItemByName(engine, "mttab");
     QMetaObject::invokeMethod(mv, "initCamera");
+
     // model move componetns
+    moveButton = FindItemByName(engine, "moveButton");
     movePopup = FindItemByName(engine, "movePopup");
     QObject::connect(movePopup, SIGNAL(runFeature(int,int,int)),this, SLOT(modelMoveByNumber(int,int,int)));
+    QObject::connect(movePopup, SIGNAL(closeMove()), this, SLOT(closeMove()));
 
     boundedBox = (QEntity *)FindItemByName(engine, "boundedBox");
 
@@ -939,7 +942,23 @@ void QmlManager::modelMoveDone(int Axis){
 }
 
 void QmlManager::totalMoveDone(){
+    for (GLModel* curModel : selectedModels){
+        if (curModel->m_transform->translation().isNull()){
+            qDebug() << "equals identity so don't save";
+            continue;
+        }
 
+        //curModel->saveUndoState();
+
+        curModel->moveModelMesh(curModel->m_transform->translation());
+        curModel->m_transform->setTranslation(QVector3D(0,0,0));
+
+        /*QVector3D translationDiff = curModel->m_transform->translation()-curModel->m_translation;
+
+        // move translation back to original
+        curModel->m_transform->setTranslation(curModel->m_translation);
+        curModel->moveModelMesh(translationDiff);*/
+    }
 }
 
 void QmlManager::modelRotateInit(){
@@ -1001,13 +1020,10 @@ void QmlManager::totalRotateDone(){
             qDebug() << "equals identity so don't save";
             continue;
         }
-        qDebug() << "1";
+
         // remove last undo state and resave undo state
         //selectedModels[i]->saveUndoState();
-        qDebug() << "2";
 
-        Qt3DCore::QTransform* tmp = new Qt3DCore::QTransform();
-        qDebug() << "3";
 
         /*tmp->setRotationX(-selectedModels[i]->m_transform->rotationX());
         tmp->setRotationY(-selectedModels[i]->m_transform->rotationY());
@@ -1426,6 +1442,13 @@ void QmlManager::setProgress(float value){
     }
 
 }
+
+void QmlManager::closeMove(){
+    qDebug() << "close move";
+    totalMoveDone();
+    return;
+}
+
 
 void QmlManager::openRotate(){
     qDebug() << "open Rotate";
