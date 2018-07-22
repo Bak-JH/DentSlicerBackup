@@ -95,7 +95,6 @@ Entity {
                 if (deletePopUp.targetID != -1){
                     uppertab.all_off();
                     deletePopUp.visible = true
-                    deletePopUp.targetID = qm.getselectedModelID()
                     mttab.hideTab();
                 }
             } else if (event.key === Qt.Key_Escape) {
