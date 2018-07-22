@@ -455,6 +455,8 @@ void featureThread::run(){
             {
                 qDebug() << "file save called";
                 QString fileName = QFileDialog::getSaveFileName(nullptr, tr("Save to STL file"), "", tr("3D Model file (*.stl)"));
+                if(fileName == "")
+                    return;
                 qmlManager->openProgressPopUp();
                 QFuture<void> future = QtConcurrent::run(ste, &STLexporter::exportSTL, m_glmodel->mesh,fileName);
                 break;

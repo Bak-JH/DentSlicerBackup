@@ -207,7 +207,7 @@ bool loadMeshOBJ(Mesh* mesh, const char* filename){
     FILE *f;
     char c;
     int lines = 0;
-
+    qDebug() << "test 0";
     f = fopen(filename, "r");
 
     if(f == NULL)
@@ -221,7 +221,7 @@ bool loadMeshOBJ(Mesh* mesh, const char* filename){
 
     if(c != '\n')
         lines++;
-
+    qDebug()<< "test 1";
     mesh->faces.reserve(lines*2);
     mesh->vertices.reserve(lines*2);
 
@@ -231,9 +231,8 @@ bool loadMeshOBJ(Mesh* mesh, const char* filename){
 
     vector<QVector3D> temp_vertices;
     temp_vertices.reserve(lines);
-
+    qDebug() << "test 2";
     while( 1 ){
-
         char lineHeader[128];
         // read the first word of the line
         int res = fscanf(file, "%s", lineHeader);
@@ -267,6 +266,7 @@ bool loadMeshOBJ(Mesh* mesh, const char* filename){
         }
 
     }
+    qDebug() << "test 3";
     fclose(file);
     mesh->connectFaces();
     scfg->origin = QVector3D((mesh->x_min+mesh->x_max)/2, (mesh->y_min+mesh->y_max)/2, (mesh->z_min+mesh->z_max)/2);

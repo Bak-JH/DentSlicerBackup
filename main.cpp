@@ -37,16 +37,12 @@ int main(int argc, char **argv)
     QSplashScreen *splash = new QSplashScreen(pixmap);
     splash->show();
 
-    //QCursor cursorTarget1 = QCursor(QPixmap(":/resource/cursor.png"));
-    //QCursor cursorTarget2 = QCursor(QPixmap(":/resource/pen.png"));
-    //app.setOverrideCursor(cursorTarget2);
 
-    //app.changeOverrideCursor(cursorTarget2);
     QScopedPointer<QuaternionHelper> qq(new QuaternionHelper);
     qmlManager = new QmlManager();
     QScopedPointer<QmlManager> qm(qmlManager);
 
-    //engine.rootContext()->setContextProperty("qm", qm.data());
+
     engine.rootContext()->setContextProperty("qm", qm.data());
     //FindItemByName(&engine, "slicing_data")->setContextProperty("qm", qmlManager);
     engine.rootContext()->setContextProperty("qq",qq.data());
@@ -60,10 +56,11 @@ int main(int argc, char **argv)
     //initWinSparkle();
     //checkForUpdates();
 
+
+    //language patch
     //engine.retranslate();
 
     qmlManager->initializeUI(&engine);
-    //qmlManager->openModelFile("C:/Users/diridiri/Desktop/DLP/DLPslicer/partial2_flip.stl");//DLPslicer/partial2_flip.stl");
     splash->close();
 
     //qmlManager->mainWindow->setProperty("visible",true);
