@@ -238,6 +238,7 @@ void GLModel::saveUndoState(){
         mesh->prevMesh->nextMesh = temp_prev_mesh;
     temp_prev_mesh->nextMesh = mesh;
     temp_prev_mesh->m_translation = m_transform->translation();
+    temp_prev_mesh->m_matrix = m_transform->matrix();
 
     Mesh* deleteTargetMesh = mesh;
     for (int i=0; i<10; i++){ // maximal undo count is 10
@@ -266,6 +267,7 @@ void GLModel::loadUndoState(){
         emit _updateModelMesh();
 
         m_transform->setTranslation(mesh->m_translation);
+        m_transform->setMatrix(mesh->m_matrix);
     }
 }
 
@@ -275,6 +277,7 @@ void GLModel::loadRedoState(){
         emit _updateModelMesh();
 
         m_transform->setTranslation(mesh->m_translation);
+        m_transform->setMatrix(mesh->m_matrix);
     }
 }
 
@@ -1936,6 +1939,8 @@ void GLModel::generateLayFlat(){
 
     if(targetMeshFace == NULL)
         return;
+
+    saveUndoState();
 
     QVector3D tmp_fn = targetMeshFace->fn;
     qDebug() << "target 2 " << tmp_fn;

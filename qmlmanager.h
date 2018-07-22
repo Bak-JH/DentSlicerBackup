@@ -194,6 +194,7 @@ public slots:
     void modelMoveByNumber(int axis, int, int);
     void modelMoveDone(int);
     void totalMoveDone();
+    void modelRotateInit();
     void modelRotateDone(int);
     void totalRotateDone();
     void resetLayflat();
