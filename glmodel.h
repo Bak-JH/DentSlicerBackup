@@ -129,7 +129,7 @@ public:
     QGeometryRenderer* m_geometryRenderer;
     Qt3DRender::QObjectPicker *m_objectPicker;
     Qt3DCore::QTransform *m_transform;
-    QVector3D m_translation;
+    //QVector3D m_translation;
 
     // feature hollowshell
     float hollowShellRadius = 0;
@@ -172,6 +172,7 @@ public:
     void moveModelMesh(QVector3D direction);
     // Model Mesh rotate
     void rotateModelMesh(int Axis, float Angle);
+    void rotateModelMesh(QMatrix3x3 matrix);
     void rotateModelMesh(QMatrix4x4 matrix);
     // Model Mesh scale
     void scaleModelMesh(float scaleX, float scaleY, float scaleZ);
@@ -208,6 +209,7 @@ private:
     int f_cnt;
     QNode* m_parent;
     QVector3D lastpoint;    
+    QVector3D lastTranslation;
     QVector2D prevPoint;
     void initialize(const Mesh* mesh);
     void applyGeometry();

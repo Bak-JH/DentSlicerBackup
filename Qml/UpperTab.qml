@@ -665,10 +665,21 @@ Rectangle {
                 runFeature(ftrRotate,popup_rotate.numberbox1_number,popup_rotate.numberbox2_number,popup_rotate.numberbox3_number);
             }
             signal runGroupFeature(int type, string state, double arg1, double arg2, double arg3);
+            signal closeRotate();
+            signal openRotate();
+
             onFinishClicked:{
                 runGroupFeature(ftrRotate, state, 0, 0, 0);
             }
-            state: second_tab_button_rotate.state=="active" ? "active" : "inactive"
+            state: {
+                if (second_tab_button_rotate.state=="active"){
+                    openRotate();
+                    return "active";
+                } else {
+                    closeRotate();
+                    return "inactive";
+                }
+            }
             function onApplyFinishButton(){
                 popup_rotate.colorApplyFinishButton(0)
             }

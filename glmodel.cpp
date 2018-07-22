@@ -237,6 +237,7 @@ void GLModel::saveUndoState(){
     if (mesh->prevMesh != nullptr)
         mesh->prevMesh->nextMesh = temp_prev_mesh;
     temp_prev_mesh->nextMesh = mesh;
+    temp_prev_mesh->m_translation = m_transform->translation();
 
     Mesh* deleteTargetMesh = mesh;
     for (int i=0; i<10; i++){ // maximal undo count is 10
@@ -263,6 +264,8 @@ void GLModel::loadUndoState(){
         }
         mesh = mesh->prevMesh;
         emit _updateModelMesh();
+
+        m_transform->setTranslation(mesh->m_translation);
     }
 }
 
@@ -270,6 +273,8 @@ void GLModel::loadRedoState(){
     if (mesh->nextMesh != nullptr){
         mesh = mesh->nextMesh;
         emit _updateModelMesh();
+
+        m_transform->setTranslation(mesh->m_translation);
     }
 }
 
@@ -288,6 +293,7 @@ void GLModel::scaleModelMesh(float scaleX, float scaleY, float scaleZ){
 
     emit _updateModelMesh();
 }
+
 void GLModel::rotateModelMesh(int Axis, float Angle){
     Qt3DCore::QTransform* tmp = new Qt3DCore::QTransform();
     switch(Axis){
@@ -307,6 +313,7 @@ void GLModel::rotateModelMesh(int Axis, float Angle){
     rotateModelMesh(tmp->matrix());
 }
 
+
 void GLModel::rotateModelMesh(QMatrix4x4 matrix){
     mesh->vertexRotate(matrix);
     emit _updateModelMesh();
@@ -321,7 +328,6 @@ void GLModel::copyModelAttributeFrom(GLModel* from){
     hollowShellActive = from->hollowShellActive;
     shellOffsetActive = from->shellOffsetActive;
     layflatActive = from->layflatActive;
-
 }
 
 void GLModel::updateModelMesh(){
@@ -876,8 +882,8 @@ void GLModel::handlePickerClicked(QPickEvent *pick)
     if (qmlManager->yesno_popup->property("isFlawOpen").toBool())
         return;
 
-    if(qmlManager->selectedModels[0] != nullptr && (pick->button() & Qt::RightButton)){ // when right button clicked
-        if(qmlManager->selectedModels[0]->ID == parentModel->ID){
+    if (qmlManager->selectedModels[0] != nullptr && (pick->button() & Qt::RightButton)){ // when right button clicked
+        if (qmlManager->selectedModels[0]->ID == parentModel->ID){
             QMetaObject::invokeMethod(qmlManager->mttab, "tabOnOff");
             return;
         }
@@ -1497,7 +1503,12 @@ void GLModel::mgoo(Qt3DRender::QPickEvent* v)
         return;
     }
 
-    if (qmlManager->selectedModels[0] != nullptr && (qmlManager->selectedModels[0]->shadowModel->cutActive || qmlManager->selectedModels[0]->shadowModel->extensionActive || qmlManager->selectedModels[0]->shadowModel->labellingActive || qmlManager->selectedModels[0]->shadowModel->layflatActive))
+    if (qmlManager->selectedModels[0] != nullptr &&
+            (qmlManager->selectedModels[0]->shadowModel->cutActive ||
+             qmlManager->selectedModels[0]->shadowModel->extensionActive ||
+             qmlManager->selectedModels[0]->shadowModel->labellingActive ||
+             qmlManager->selectedModels[0]->shadowModel->layflatActive ||
+             qmlManager->rotateActive))
         return;
 
     qmlManager->setClosedHandCursor();
@@ -1554,8 +1565,9 @@ void GLModel::pgoo(Qt3DRender::QPickEvent* v){
     qDebug() << "Pressed   " << v->position();
     m_objectPicker->setDragEnabled(true);
     lastpoint=v->localIntersection();
+    lastTranslation = m_transform->translation();
     prevPoint = (QVector2D) v->position();
-    
+
 }
 
 void GLModel::rgoo(Qt3DRender::QPickEvent* v){
