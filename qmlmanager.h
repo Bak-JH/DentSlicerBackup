@@ -128,7 +128,6 @@ public:
     QString groupFunctionState;
     int groupFunctionIndex;
     float progress = 0;
-    float prevRotAngle = 0;
     void showRotateSphere();
     void showMoveArrow();
     void hideRotateSphere();
@@ -195,7 +194,6 @@ public slots:
     void modelMoveByNumber(int axis, int, int);
     void modelMoveDone(int);
     void totalMoveDone();
-    void modelRotateInit(int);
     void modelRotateDone(int);
     void totalRotateDone();
     void resetLayflat();

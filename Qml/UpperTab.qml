@@ -669,7 +669,7 @@ Rectangle {
             signal openRotate();
 
             onFinishClicked:{
-                runGroupFeature(ftrRotate, state, 0, 0, 0);
+                closeRotate();
             }
             state: {
                 if (second_tab_button_rotate.state=="active"){

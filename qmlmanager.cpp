@@ -45,7 +45,7 @@ void QmlManager::initializeUI(QQmlApplicationEngine* e){
     rotateSphereY = (QEntity *)FindItemByName(engine, "rotateSphereTorusY");
     rotateSphereZ = (QEntity *)FindItemByName(engine, "rotateSphereTorusZ");
     rotateSphereobj = FindItemByName(engine, "rotateSphere");
-    QObject::connect(rotateSphereobj, SIGNAL(rotateInit(int)),this, SLOT(modelRotateInit(int)));
+    //QObject::connect(rotateSphereobj, SIGNAL(rotateInit(int)),this, SLOT(modelRotateInit(int)));
     QObject::connect(rotateSphereobj, SIGNAL(rotateSignal(int,int)),this, SLOT(modelRotate(int,int)));
     QObject::connect(rotateSphereobj, SIGNAL(rotateDone(int)),this, SLOT(modelRotateDone(int)));
     hideRotateSphere();
@@ -945,20 +945,6 @@ void QmlManager::totalMoveDone(){
 
 }
 
-void QmlManager::modelRotateInit(int Axis){
-    switch(Axis){
-    case 1:
-        prevRotAngle = selectedModels[0]->m_transform->rotationX();
-        break;
-    case 2:
-        prevRotAngle = selectedModels[0]->m_transform->rotationY();
-        break;
-    case 3:
-        prevRotAngle = selectedModels[0]->m_transform->rotationZ();
-        break;
-    }
-}
-
 void QmlManager::modelRotateDone(int Axis){
     if (selectedModels[0] == nullptr)
         return;
@@ -1006,13 +992,17 @@ QMatrix4x4 quatToMat(QQuaternion q)
 }
 
 void QmlManager::totalRotateDone(){
-    qDebug() << "total rotate done";
+    qDebug() << "total rotate done" << selectedModels.size();
     for (int i=0; i<selectedModels.size(); i++){
+        qDebug() << selectedModels[i]->m_transform->rotation();
         if (selectedModels[i]->m_transform->rotation().isIdentity())
             continue;
+        qDebug() << "1";
         selectedModels[i]->saveUndoState();
+        qDebug() << "2";
 
         Qt3DCore::QTransform* tmp = new Qt3DCore::QTransform();
+        qDebug() << "3";
 
         /*tmp->setRotationX(-selectedModels[i]->m_transform->rotationX());
         tmp->setRotationY(-selectedModels[i]->m_transform->rotationY());
@@ -1022,9 +1012,13 @@ void QmlManager::totalRotateDone(){
         selectedModels[i]->m_transform->setRotationZ(0);*/
 
         selectedModels[i]->rotateModelMesh(quatToMat(selectedModels[i]->m_transform->rotation()).inverted());
+        qDebug() << "4";
         selectedModels[i]->m_transform->setRotationX(0);
+        qDebug() << "5";
         selectedModels[i]->m_transform->setRotationY(0);
+        qDebug() << "6";
         selectedModels[i]->m_transform->setRotationZ(0);
+        qDebug() << "7";
         //selectedModels[i]->rotateModelMesh(tmp->matrix());
     }
 }
@@ -1441,6 +1435,7 @@ void QmlManager::openRotate(){
 void QmlManager::closeRotate(){
     qDebug() << "close Rotate";
     rotateActive = false;
+    totalRotateDone();
     return;
 }
 

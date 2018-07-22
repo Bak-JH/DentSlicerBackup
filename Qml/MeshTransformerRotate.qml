@@ -336,7 +336,6 @@ Entity {
         return Qt.vector2d(point2.x,point2.y)
     }
 
-    signal rotateInit(int Axis)
     signal rotateSignal(int Axis, int angle)
     signal rotateDone(int Axis)
     FrameAction{
@@ -352,7 +351,7 @@ Entity {
                 }
                 if (rotateAxis != 0 && pastAxis == 0){
                     console.log("rotate start qml")
-                    rotateInit(rotateAxis);
+                    //rotateInit(rotateAxis);
                 }
 
                 pastAxis = rotateAxis
