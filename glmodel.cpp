@@ -264,20 +264,42 @@ void GLModel::loadUndoState(){
             qmlManager->deleteModelFile(twinModel->ID);
         }
         mesh = mesh->prevMesh;
+        // move model mesh and rotate model mesh
+        /*mesh->vertexMove(mesh->m_translation);
+        mesh->vertexRotate(mesh->m_matrix);*/
+        if (!mesh->m_matrix.isIdentity()){
+            mesh->vertexRotate(mesh->m_matrix.inverted());
+            mesh->m_matrix = QMatrix4x4();
+        }
+
         emit _updateModelMesh();
 
         m_transform->setTranslation(mesh->m_translation);
-        m_transform->setMatrix(mesh->m_matrix);
+        //m_transform->setMatrix(mesh->m_matrix);
+        m_transform->setRotationX(0);
+        m_transform->setRotationY(0);
+        m_transform->setRotationZ(0);
     }
 }
 
 void GLModel::loadRedoState(){
     if (mesh->nextMesh != nullptr){
         mesh = mesh->nextMesh;
+        // move model mesh and rotate model mesh
+        /*mesh->vertexMove(mesh->m_translation);
+        mesh->vertexRotate(mesh->m_matrix);*/
+        if (!mesh->m_matrix.isIdentity()){
+            mesh->vertexRotate(mesh->m_matrix.inverted());
+            mesh->m_matrix = QMatrix4x4();
+        }
+
         emit _updateModelMesh();
 
         m_transform->setTranslation(mesh->m_translation);
-        m_transform->setMatrix(mesh->m_matrix);
+        //m_transform->setMatrix(mesh->m_matrix);
+        m_transform->setRotationX(0);
+        m_transform->setRotationY(0);
+        m_transform->setRotationZ(0);
     }
 }
 
