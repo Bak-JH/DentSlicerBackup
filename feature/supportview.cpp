@@ -86,14 +86,7 @@ void generateSupporter(Mesh* mesh, OverhangPoint *point, OverhangPoint *parent, 
 
         points->push_back(point);
 
-        bool found = false;
-        for( vector<OverhangPoint *>::iterator iter = points->begin() ; iter != points->end() ; iter++ ) {
-            if( (*iter) == point->target_branching_overhang_point ) {
-                found = true;
-                break;
-            }
-        }
-        if( found == false ) {
+        if( std::find(points->begin(), points->end(), point) == points->end() ) {
             generateSupporter(mesh, point->target_branching_overhang_point, point, points);
         }
 
