@@ -209,7 +209,9 @@ void QmlManager::openModelFile(QString fname){
     checkModelFile(glmodels[glmodels.size()-1]->ID);
 
     // do auto arrange
-    runArrange();
+    if (glmodels.size() >= 2)
+        openArrange();
+    //runArrange();
 }
 
 void QmlManager::checkModelFile(int ID){
@@ -491,6 +493,9 @@ void QmlManager::sendUpdateModelInfo(int printing_time, int layer, QString xyz, 
     updateModelInfo(printing_time, layer, xyz, volume);
 }
 
+void QmlManager::openArrange(){
+    arrangePopup->setProperty("visible", true);
+}
 
 void QmlManager::runArrange(){
     QFuture<void> future = QtConcurrent::run(this, &runArrange_internal);

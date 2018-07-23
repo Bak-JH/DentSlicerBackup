@@ -139,6 +139,7 @@ public:
     void mouseHack();
     void initializeUI(QQmlApplicationEngine *e);
     void openModelFile_internal(QString filename);
+    void openArrange();
     void runArrange_internal();
     void disconnectHandlers(GLModel* glmodel);
     void connectHandlers(GLModel* glmodel);

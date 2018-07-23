@@ -217,7 +217,8 @@ void GLModel::checkPrintingArea(){
 }
 
 void GLModel::saveUndoState(){
-    QFuture<void> future = QtConcurrent::run(this, &saveUndoState_internal);
+    saveUndoState_internal();
+    //QFuture<void> future = QtConcurrent::run(this, &saveUndoState_internal);
 }
 
 void GLModel::saveUndoState_internal(){
@@ -231,12 +232,14 @@ void GLModel::saveUndoState_internal(){
     Mesh* temp_prev_mesh = new Mesh();
     temp_prev_mesh->faces.reserve(mesh->faces.size()*3);
     temp_prev_mesh->vertices.reserve(mesh->faces.size()*3);
+
     foreach (MeshFace mf, mesh->faces){
         temp_prev_mesh->addFace(mesh->vertices[mf.mesh_vertex[0]].position,
                 mesh->vertices[mf.mesh_vertex[1]].position,
                 mesh->vertices[mf.mesh_vertex[2]].position);
     }
-    temp_prev_mesh->connectFaces();
+    //temp_prev_mesh->connectFaces();
+
     temp_prev_mesh->prevMesh = mesh->prevMesh;
     if (mesh->prevMesh != nullptr)
         mesh->prevMesh->nextMesh = temp_prev_mesh;
@@ -245,7 +248,10 @@ void GLModel::saveUndoState_internal(){
     temp_prev_mesh->m_matrix = m_transform->matrix();
 
     Mesh* deleteTargetMesh = mesh;
-    for (int i=0; i<10; i++){ // maximal undo count is 10
+
+    int saveCnt = (mesh->faces.size()>100000)? 3: 10;
+
+    for (int i=0; i<saveCnt; i++){ // maximal undo count is 10
         if (deleteTargetMesh != nullptr)
             deleteTargetMesh = deleteTargetMesh->prevMesh;
     }
@@ -268,6 +274,7 @@ void GLModel::loadUndoState(){
             qmlManager->deleteModelFile(twinModel->ID);
         }
         mesh = mesh->prevMesh;
+
         // move model mesh and rotate model mesh
         /*mesh->vertexMove(mesh->m_translation);
         mesh->vertexRotate(mesh->m_matrix);*/
