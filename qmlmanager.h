@@ -126,9 +126,12 @@ public:
     int rotateSnapStartAngle = 0;
     bool groupSelectionActive = false;
     bool rotateActive = false;
+    bool orientationActive = false;
+
     QString groupFunctionState;
     int groupFunctionIndex;
     float progress = 0;
+    void showRotatingSphere();
     void showRotateSphere();
     void showMoveArrow();
     void hideRotateSphere();
@@ -208,6 +211,8 @@ public slots:
     void openRotate();
     void closeRotate();
     void closeMove();
+    void openOrientation();
+    void closeOrientation();
 
 };
 

@@ -846,8 +846,19 @@ Rectangle {
             function offApplyFinishButton(){
                 popup_orient.colorApplyFinishButton(0);
             }
+            signal openOrientation();
+            signal closeOrientation();
 
             state: second_tab_button_orient.state=="active" ? "active" : "inactive"
+            onStateChanged: {
+                if (state == "active"){
+                    console.log("orientation active");
+                    openOrientation();
+                } else {
+                    console.log("orientation inactive");
+                    closeOrientation();
+                }
+            }
         }
 
         //9. PopUp - Scale

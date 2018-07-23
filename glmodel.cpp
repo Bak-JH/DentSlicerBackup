@@ -1531,6 +1531,7 @@ void GLModel::mgoo(Qt3DRender::QPickEvent* v)
              qmlManager->selectedModels[0]->shadowModel->extensionActive ||
              qmlManager->selectedModels[0]->shadowModel->labellingActive ||
              qmlManager->selectedModels[0]->shadowModel->layflatActive ||
+             qmlManager->orientationActive ||
              qmlManager->rotateActive))
         return;
 
@@ -1993,7 +1994,6 @@ void GLModel::generateLayFlat(){
     //closeLayflat();
     emit resetLayflat();
 }
-
 
 void GLModel::openLayflat(){
     qDebug() << "open layflat called";
