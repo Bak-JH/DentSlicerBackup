@@ -247,6 +247,7 @@ signals:
 public slots:
     // Model Undo & Redo
     void saveUndoState();
+    void saveUndoState_internal();
     void loadUndoState();
     void loadRedoState();
 

@@ -217,6 +217,10 @@ void GLModel::checkPrintingArea(){
 }
 
 void GLModel::saveUndoState(){
+    QFuture<void> future = QtConcurrent::run(this, &saveUndoState_internal);
+}
+
+void GLModel::saveUndoState_internal(){
     // need to change to memcpy or something
     qDebug () << "save prev mesh";
 
