@@ -490,6 +490,49 @@ int Mesh::getVertexIdx(QVector3D v){
     return vertex_idx;
 }
 
+float* Mesh::calculateMinMax(QMatrix4x4 rotmatrix){
+    qDebug()<< "calculate minmax";
+    float *minmax = (float*) malloc(sizeof(float) * 7);
+    float origin_minmax[6];
+    // remember min maxes;
+    origin_minmax[0] = x_min;
+    origin_minmax[1] = x_max;
+    origin_minmax[2] = y_min;
+    origin_minmax[3] = y_max;
+    origin_minmax[4] = z_min;
+    origin_minmax[5] = z_max;
+
+
+    x_min = 99999, x_max = 99999, y_min = 99999, y_max = 99999, z_min = 99999, z_max = 99999;
+
+    int numberofVertices = vertices.size();
+    int numberofFaces = faces.size();
+    QVector4D tmpVertex;
+    QVector3D tmpVertex2;
+    for (int i=0;i<numberofVertices;i++){
+        if (i%100 == 0)
+            QCoreApplication::processEvents();
+        tmpVertex =vertices[i].position.toVector4D();
+        updateMinMax(QVector3D(QVector4D::dotProduct(tmpVertex,rotmatrix.column(0)), QVector4D::dotProduct(tmpVertex,rotmatrix.column(1)), QVector4D::dotProduct(tmpVertex,rotmatrix.column(2))));
+    }
+    minmax[0] = x_min;
+    minmax[1] = x_max;
+    minmax[2] = y_min;
+    minmax[3] = y_max;
+    minmax[4] = z_min;
+    minmax[5] = z_max;
+
+    // restore min maxes;
+    x_min = origin_minmax[0];
+    x_max = origin_minmax[1];
+    y_min = origin_minmax[2];
+    y_max = origin_minmax[3];
+    z_min = origin_minmax[4];
+    z_max = origin_minmax[5];
+
+    return minmax;
+}
+
 // updates mesh's min max
 void Mesh::updateMinMax(QVector3D v){
     if (v.x() > x_max || x_max == 99999)

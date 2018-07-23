@@ -107,6 +107,7 @@ public :
 
     /********************** Helper Functions **********************/
     int getVertexIdx(QVector3D v);
+    float* calculateMinMax(QMatrix4x4 rotmatrix);
     void updateMinMax(QVector3D v);
     vector<MeshFace*> findFaceWith2Vertices(int v0_idx, int v1_idx, MeshFace self_f);
     float getFaceZmin(MeshFace mf);
