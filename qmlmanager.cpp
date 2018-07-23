@@ -902,7 +902,7 @@ void QmlManager::showRotateSphere(){
     rotateSphereX->setEnabled(1);
     rotateSphereY->setEnabled(1);
     rotateSphereZ->setEnabled(1);
-    QQmlProperty::write(rotateSphereobj,"center",selectedModels[0]->m_transform->translation()+QVector3D((selectedModels[0]->mesh->x_max+selectedModels[0]->mesh->x_min)/2,(selectedModels[0]->mesh->y_max+selectedModels[0]->mesh->y_min)/2,(selectedModels[0]->mesh->z_max+selectedModels[0]->mesh->z_min)/2));
+    QQmlProperty::write(rotateSphereobj,"center",selectedModels[0]->m_transform->translation());//+QVector3D((selectedModels[0]->mesh->x_max+selectedModels[0]->mesh->x_min)/2,(selectedModels[0]->mesh->y_max+selectedModels[0]->mesh->y_min)/2,(selectedModels[0]->mesh->z_max+selectedModels[0]->mesh->z_min)/2));
 }
 void QmlManager::mouseHack(){
     const QPointF tmp_cor(265,105);
@@ -933,16 +933,21 @@ void QmlManager::modelMoveDone(int Axis){
     }
 
     QMetaObject::invokeMethod(boundedBox, "showBox"); // Bounded Box
-    if(Axis != 3){
+    QMetaObject::invokeMethod(boundedBox, "setPosition", Q_ARG(QVariant, selectedModels[0]->m_transform->translation()+QVector3D((selectedModels[0]->mesh->x_max+selectedModels[0]->mesh->x_min)/2,(selectedModels[0]->mesh->y_max+selectedModels[0]->mesh->y_min)/2,(selectedModels[0]->mesh->z_max+selectedModels[0]->mesh->z_min)/2)));
+    QMetaObject::invokeMethod(boundedBox, "setSize", Q_ARG(QVariant, selectedModels[0]->mesh->x_max - selectedModels[0]->mesh->x_min),
+                                                     Q_ARG(QVariant, selectedModels[0]->mesh->y_max - selectedModels[0]->mesh->y_min),
+                                                     Q_ARG(QVariant, selectedModels[0]->mesh->z_max - selectedModels[0]->mesh->z_min));
+    //if(Axis != 3){
         showMoveArrow();
         QQmlProperty::write(moveArrowobj,"center",selectedModels[0]->m_transform->translation()+QVector3D((selectedModels[0]->mesh->x_max+selectedModels[0]->mesh->x_min)/2,(selectedModels[0]->mesh->y_max+selectedModels[0]->mesh->y_min)/2,(selectedModels[0]->mesh->z_max+selectedModels[0]->mesh->z_min)/2));
-
-    }
+    //}
     mouseHack();
 }
 
 void QmlManager::totalMoveDone(){
     for (GLModel* curModel : selectedModels){
+        if (curModel == nullptr)
+            continue;
         if (curModel->m_transform->translation().isNull()){
             qDebug() << "equals identity so don't save";
             continue;
@@ -958,6 +963,7 @@ void QmlManager::totalMoveDone(){
         // move translation back to original
         curModel->m_transform->setTranslation(curModel->m_translation);
         curModel->moveModelMesh(translationDiff);*/
+        emit curModel->_updateModelMesh();
     }
 }
 
@@ -1015,6 +1021,8 @@ QMatrix4x4 quatToMat(QQuaternion q)
 void QmlManager::totalRotateDone(){
     qDebug() << "total rotate done" << selectedModels.size();
     for (int i=0; i<selectedModels.size(); i++){
+        if (selectedModels[i] == nullptr)
+            continue;
         qDebug() << selectedModels[i]->m_transform->rotation();
         if (selectedModels[i]->m_transform->rotation().isIdentity()){
             qDebug() << "equals identity so don't save";
@@ -1036,6 +1044,8 @@ void QmlManager::totalRotateDone(){
         selectedModels[i]->m_transform->setRotationX(0);
         selectedModels[i]->m_transform->setRotationY(0);
         selectedModels[i]->m_transform->setRotationZ(0);
+
+        emit selectedModels[i]->_updateModelMesh();
         //selectedModels[i]->rotateModelMesh(tmp->matrix());
     }
 }

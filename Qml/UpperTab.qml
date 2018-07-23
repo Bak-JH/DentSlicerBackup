@@ -641,13 +641,19 @@ Rectangle {
 
             state: {
                 if (second_tab_button_move.state=="active"){
-                    //openMove();
                     return "active";
                 } else {
-                    closeMove();
                     return "inactive";
                 }
             }
+
+            onStateChanged: {
+                if (state == "active")
+                    openMove();
+                else
+                    closeMove();
+            }
+
             signal runFeature(int type, int X, int Y);
             onApplyClicked: {
                 console.log("move")
@@ -703,13 +709,19 @@ Rectangle {
             }
             state: {
                 if (second_tab_button_rotate.state=="active"){
-                    openRotate();
                     return "active";
                 } else {
-                    closeRotate();
                     return "inactive";
                 }
             }
+
+            onStateChanged: {
+                if (state == "active")
+                    openRotate();
+                else
+                    closeRotate();
+            }
+
             function onApplyFinishButton(){
                 popup_rotate.colorApplyFinishButton(0)
             }
@@ -869,12 +881,18 @@ Rectangle {
             signal runGroupFeature(int type, string state, double arg1, double arg2, double arg3);
             state: {
                 if (third_tab_button_scale.state=="active" && qm.isSelected()){
-                    openScale();
+                    //openScale();
                     return "active"
                 } else {
-                    closeScale();
+                    //closeScale();
                     return "inactive"
                 }
+            }
+            onStateChanged: {
+                if (state == "active")
+                    openScale();
+                else
+                    closeScale();
             }
 
 
