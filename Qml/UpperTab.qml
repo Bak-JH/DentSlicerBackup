@@ -65,7 +65,7 @@ Rectangle {
         if(yesnoPopUp.isFlawOpen)
             yesnoPopUp.closePopUp();
 
-        scene3d.forceActiveFocus();
+        //scene3d.forceActiveFocus();
 
         console.log("all off");
     }

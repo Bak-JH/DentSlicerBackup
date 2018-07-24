@@ -55,7 +55,7 @@ GLModel::GLModel(QObject* mainWindow, QNode *parent, Mesh* loadMesh, QString fna
 
         QObject::connect(this,SIGNAL(_updateModelMesh()),this,SLOT(updateModelMesh()));
 
-        /*labellingTextPreview = new LabellingTextPreview(this->parentModel);
+        /*labellingTextPreview = new LabellingTextPreview(this);
         labellingTextPreview->setEnabled(false);
 
         labellingTextPreview->setTranslation(QVector3D(100,0,0));
@@ -954,7 +954,7 @@ void GLModel::handlePickerClicked(QPickEvent *pick)
             labellingTextPreview->deleteLater();
             labellingTextPreview = nullptr;
         }
-        labellingTextPreview = new LabellingTextPreview(this->parentModel);
+        labellingTextPreview = new LabellingTextPreview(this);
         labellingTextPreview->setEnabled(true);
 
         if (labellingTextPreview && labellingTextPreview->isEnabled()) {
@@ -1601,7 +1601,6 @@ void GLModel::pgoo(Qt3DRender::QPickEvent* v){
     qDebug() << "Pressed   " << v->position();
     m_objectPicker->setDragEnabled(true);
     lastpoint=v->localIntersection();
-    lastTranslation = m_transform->translation();
     prevPoint = (QVector2D) v->position();
 
 }
@@ -1826,7 +1825,7 @@ void GLModel::applyLabelInfo(QString text, int contentWidth, QString fontName, b
         labellingTextPreview->deleteLater();
         labellingTextPreview = nullptr;
     }
-    labellingTextPreview = new LabellingTextPreview(this->parentModel);
+    labellingTextPreview = new LabellingTextPreview(this);
     labellingTextPreview->setEnabled(true);
 
     if (labellingTextPreview && labellingTextPreview->isEnabled() && parentModel->targetMeshFace !=nullptr) {
@@ -1907,6 +1906,10 @@ void GLModel::generateText3DMesh()
         glmodel->addNormalVertices(outNormals);
 
         emit glmodel->_updateModelMesh();
+    }
+    if (labellingTextPreview){
+        labellingTextPreview->deleteLater();
+        labellingTextPreview = nullptr;
     }
 }
 

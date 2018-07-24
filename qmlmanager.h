@@ -124,7 +124,9 @@ public:
 
     int rotateSnapAngle = 0;
     int rotateSnapStartAngle = 0;
+    int rotateSnapQuotient = 0;
     bool groupSelectionActive = false;
+    //bool moveActive = false;
     bool rotateActive = false;
     bool orientationActive = false;
 
@@ -211,6 +213,7 @@ public slots:
     void layFlatUnSelect();
     void openRotate();
     void closeRotate();
+    void openMove();
     void closeMove();
     void openOrientation();
     void closeOrientation();

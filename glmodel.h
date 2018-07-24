@@ -208,8 +208,7 @@ private:
     int v_cnt;
     int f_cnt;
     QNode* m_parent;
-    QVector3D lastpoint;    
-    QVector3D lastTranslation;
+    QVector3D lastpoint;
     QVector2D prevPoint;
     void initialize(const Mesh* mesh);
     void applyGeometry();
