@@ -127,13 +127,8 @@ Rectangle {
 
     }
 
-
-    function openResultPopUp(inputText_h, inputText_m, inputText_l){
+    function openDeletePopUp(){
         deletePopUp.visible = true
-        high_text = inputText_h
-        mid_text = inputText_m
-        low_text = inputText_l
-
     }
 
     function closePopUp(){

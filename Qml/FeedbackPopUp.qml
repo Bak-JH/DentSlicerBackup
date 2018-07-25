@@ -143,4 +143,8 @@ Item {
         }
 
     }
+
+    function closePopUp(){
+        feedbackPopUp.visible = false
+    }
 }

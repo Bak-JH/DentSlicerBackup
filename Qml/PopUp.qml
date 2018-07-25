@@ -69,6 +69,7 @@ Rectangle {
     property alias numberbox1_text: numberbox1_text
     property alias numberbox2_text: numberbox2_text
     property alias numberbox3_text: numberbox3_text
+    property alias slider_value : slider.value
 
 
     /*
