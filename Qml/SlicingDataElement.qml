@@ -1,6 +1,6 @@
 import QtQuick 2.0
 
-Item {
+Rectangle {
     property int inputWidth
     property string inputSource
     property string inputData
@@ -15,6 +15,7 @@ Item {
         anchors.verticalCenter: parent.verticalCenter
 
         source: inputSource
+        visible: true
     }
 
     Text{

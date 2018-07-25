@@ -272,4 +272,9 @@ Item {
         }
 
     }
+
+    function closePopUp(){
+        settingPopup.visible = false
+    }
+
 }

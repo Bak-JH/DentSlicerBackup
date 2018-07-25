@@ -13,7 +13,7 @@ Item {
 
 
     Text{
-        id:text
+        id : elemnt3_text
         width: 116
         height: parent.height
         anchors.left: parent.left
@@ -34,7 +34,7 @@ Item {
         width: 116
         height: parent.height
         anchors.top: parent.top
-        anchors.left : text.right
+        anchors.left : elemnt3_text.right
         property alias numberBox_text: numberBox_text
         //number box
         Rectangle {
@@ -61,17 +61,34 @@ Item {
                 anchors.left: parent.left
                 anchors.leftMargin: 16
                 anchors.verticalCenter: parent.verticalCenter
+                maximumLength: 7
                 text: "50%"
-                maximumLength: 4
-                //maximumLength:
                 font.pixelSize: 14
                 font.family: mainFont.name
-                color: focus ? "black" : "black"
+                //color: focus ? "black" : "black"
                 selectByMouse: true
                 onEditingFinished:  {
                     if(!numberBox_text.text.toString().includes("%"))
                         numberBox_text.text = numberBox_text.text+"%"
                     density = numberBox_text.text
+                }
+
+                onTextChanged: {
+                    console.log("text   " + text);
+
+                    if (text.length === 1){
+                        text = text.replace(/[^0-9.]\%/g,'');
+                    }else{
+                        text = text.charAt(0).replace(/[^1-9.]\%/g,'')+text.substring(1,text.length).replace(/[^0-9.]\%/g, '');
+                    }
+                    /*
+                    if(!numberBox_text.text.toString().includes("%"))
+                        numberBox_text.text = numberBox_text.text+"%"
+
+                    */
+                    if (parseFloat(text) > 100){
+                        text = text.slice(0,-1)
+                    }
                 }
 
             }

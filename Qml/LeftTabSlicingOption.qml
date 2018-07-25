@@ -1,4 +1,4 @@
-    import QtQuick 2.0
+import QtQuick 2.0
 
 import QtQuick.Controls 1.2
 import QtQuick.Layouts 1.3
@@ -84,27 +84,38 @@ Rectangle {
             anchors.topMargin: 16
 
             ColumnLayout {
-                spacing: 8
+                spacing: 2
                 LeftTabSlicingOptionElement{
                     id:option_resolution
                     columnName: "Resolution"
                     columnContents: ["1920*1080","1024*768"]
-
                 }
+
+                Item{width:parent.width;height:2}//spacer
+
                 LeftTabSlicingOptionElement{
                     id:option_layer_height
                     columnName: "Layer height"
                     columnContents: ["0.1","0.2","0.05"]
                 }
+
+                Item{width:parent.width;height:2}//spacer
+
                 LeftTabSlicingOptionElement{
                     id:option_bed_number
                     columnName: "Bed number"
                     columnContents: ["1","2","3"]
                 }
+
+                Item{width:parent.width;height:2}//spacer
+
                 LeftTabSlicingOptionElement{
                     id:option_raft
                     columnName: "Raft"
                     columnContents: ["general","none"]
+
+                    Item{width:parent.width;height:2}//spacer
+
                 }
                 LeftTabSlicingOptionElement2{
                     columnName: "Support"
@@ -123,6 +134,9 @@ Rectangle {
                 LeftTabSlicingOptionElement3{
                     id:option_support_density
                 }
+
+                Item{width:parent.width;height:2}//spacer
+
                 LeftTabSlicingOptionElement2{
                     columnName: "Infill"
                     columnText: "Type"
