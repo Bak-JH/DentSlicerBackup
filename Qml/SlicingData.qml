@@ -1,6 +1,6 @@
 import QtQuick 2.0
 
-Item {
+Rectangle {
     id: slicing_data
     width: 360
     height: 82
@@ -34,27 +34,28 @@ Item {
         color: "#ffffff"
 
         Rectangle{
-            id:icon
+            id:slicing_icon
             width:68
             height: 60
             anchors.left : parent.left
             anchors.top : parent.top
             anchors.topMargin: 10
-
-            color: "transparent"
+            visible: true
+            color: "white"
 
             Image{
                 width: 50
-                height: 62
+                height: parent.height
                 anchors.top: parent.top
                 anchors.horizontalCenter: parent.horizontalCenter
+                visible: true
                 source: "qrc:/resource/slicing_refresh.png"
             }
-
             Text{
                 text:"Refresh"
                 anchors.bottom: parent.bottom
                 anchors.horizontalCenter: parent.horizontalCenter
+                anchors.bottomMargin: 2
 
                 font.family: mainFont.name
                 font.pixelSize: 11
@@ -65,6 +66,7 @@ Item {
             MouseArea{
                 anchors.fill: parent
                 hoverEnabled: true
+
                 onEntered:{
                     qm.setHandCursor();
                 }
@@ -72,13 +74,14 @@ Item {
                     qm.resetCursor();
                 }
             }
+
         }
 
         Rectangle{
             id:data
             width: 280
             height: 60
-            anchors.left : icon.right
+            anchors.left : slicing_icon.right
             anchors.top : parent.top
             anchors.topMargin: 10
 

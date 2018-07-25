@@ -905,6 +905,11 @@ void GLModel::handlePickerClickedFreeCut(Qt3DRender::QPickEvent* pick)
     QVector3D result_v = QVector3D(v.x(), -v.z(), v.y());
     result_v = result_v*2;
     parentModel->addCuttingPoint(result_v);
+    if (parentModel->cuttingPoints.size() > 2)
+        QMetaObject::invokeMethod(qmlManager->cutPopup, "colorApplyFinishButton", Q_ARG(QVariant, 2));
+    else
+        QMetaObject::invokeMethod(qmlManager->cutPopup, "colorApplyFinishButton", Q_ARG(QVariant, 0));
+
 }
 
 void GLModel::handlePickerClicked(QPickEvent *pick)
@@ -1427,6 +1432,8 @@ void GLModel::removeModelPartList(){
 void GLModel::modelCut(){
     qDebug() << "modelcut called" << cutMode;
     if(cutMode == 0)
+        return ;
+    if(cutMode == 2 && parentModel->cuttingPoints.size() < 3)
         return ;
 
     parentModel->saveUndoState();

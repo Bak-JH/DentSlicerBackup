@@ -22,8 +22,8 @@
         <file>resource/model_move_select.png</file>
         <file>resource/model_rotate.png</file>
         <file>resource/model_rotate_select.png</file>
-        <file>resource/model_zoom.png</file>
-        <file>resource/model_zoom_select.png</file>
+        <file>resource/model_scale.png</file>
+        <file>resource/model_scale_select.png</file>
         <file>resource/part_off.png</file>
         <file>resource/part_on.png</file>
         <file>resource/slicing_clock.png</file>

@@ -33,6 +33,8 @@ Rectangle {
 
     property alias second_tab_button_move: second_tab_button_move
     property alias second_tab_button_rotate: second_tab_button_rotate
+    property alias third_tab_button_scale: third_tab_button_scale
+
 
     signal runGroupFeature(int type, string state, double arg1, double arg2, double arg3);
     function all_off() {
@@ -62,6 +64,9 @@ Rectangle {
         arrangePopUp.closePopUp();
         resultPopUp.closePopUp();
         deletePopUp.closePopUp();
+        settingPopup.closePopUp();
+        feedbackPopUp.closePopUp();
+        resultPopUp.closePopUp();
         if(yesnoPopUp.isFlawOpen)
             yesnoPopUp.closePopUp();
 
@@ -890,6 +895,7 @@ Rectangle {
             signal closeScale();
             //signal runFeature(int type, double scaleX, double scaleY, double scaleZ);
             signal runGroupFeature(int type, string state, double arg1, double arg2, double arg3);
+
             state: {
                 if (third_tab_button_scale.state=="active" && qm.isSelected()){
                     //openScale();
@@ -1038,7 +1044,9 @@ Rectangle {
                 slider_vis = true;
                 cutModeSelected(1);
                 viewCenter();
-                popup_autorepair.colorApplyFinishButton(2)
+
+                slider_value = 1
+                popup_cut.colorApplyFinishButton(2)
             }
 
             onCurveModeClicked: {
@@ -1046,7 +1054,7 @@ Rectangle {
                 slider_vis = false;
                 cutModeSelected(2);
                 viewUp();
-                popup_autorepair.colorApplyFinishButton(2)
+                popup_cut.colorApplyFinishButton(0)
             }
 
             onPlaneSliderValueChanged: {
@@ -1339,186 +1347,186 @@ Rectangle {
             state: fourth_tab_button_support.state=="active" ? "active" : "inactive"
         }*/
         PopUp {
-                        id:popup_Support
-                        funcname: "Support"
-                        height: 320
-                        imageHeight: 34
-                        detail1: "Automatic Generation"
-                        Rectangle {
-                            id: support_autoButton
-                            color: parent.color
-                            width: 178
-                            height: 32
-                            radius: 2
-                            border.color: "#cccccc"
-                            anchors.horizontalCenter: parent.horizontalCenter
-                            anchors.top: parent.top
-                            anchors.topMargin: 72
-                            Text {
-                                id: generateText
-                                text: "Generate supports"
-                                anchors.horizontalCenter: parent.horizontalCenter
-                                anchors.verticalCenter: parent.verticalCenter
-                                font.family: mainFont.name
-                                font.pixelSize: 9
-                            }
-                            MouseArea {
-                                anchors.fill: parent
-                                hoverEnabled: true
-                                onEntered: {
-                                    parent.color = "#f9f9f9"
-                                    generateText.color = "#888888"
-                                }
-                                onExited: {
-                                    if (support_autoButton.state == "clicked") {
-                                        parent.color = "#f9f9f9"
-                                        generateText.color = "#888888"
-                                    }
-                                    else {
-                                        parent.color = "#e5e5e5"
-                                        generateText.color = "black"
-                                    }
-                                }
-                                onClicked: {
-                                    support_autoButton.state = "clicked"
-                                    support_addButton.state = "unclicked"
-                                    support_removeButton.state = "unclicked"
-                                }
-                            }
-                            states: [
-                                State {
-                                    name: "clicked"
-                                    PropertyChanges { target: support_autoButton; color: "#f9f9f9" }
-                                    PropertyChanges { target: generateText; color: "#888888" }
-                                },
-                                State {
-                                    name: "unclicked"
-                                    PropertyChanges { target: support_autoButton; color: "#e5e5e5" }
-                                    PropertyChanges { target: generateText; color: "black" }
-                                }
-                            ]
-                        }
-
-                        detail2: "Manual Generation"
-                        Rectangle {
-                            id: support_addButton
-                            color: parent.color
-                            width: 178
-                            height: 32
-                            radius: 2
-                            border.color: "#cccccc"
-                            anchors.horizontalCenter: parent.horizontalCenter
-                            anchors.top: parent.top
-                            anchors.topMargin: 173
-                            Text {
-                                id: addText
-                                text: "Add supports"
-                                anchors.horizontalCenter: parent.horizontalCenter
-                                anchors.verticalCenter: parent.verticalCenter
-                                font.family: mainFont.name
-                                font.pixelSize: 9
-                            }
-                            MouseArea {
-                                anchors.fill: parent
-                                hoverEnabled: true
-                                onEntered: {
-                                    parent.color = "#f9f9f9"
-                                    addText.color = "#888888"
-                                }
-                                onExited: {
-                                    if (support_addButton.state == "clicked") {
-                                        parent.color = "#f9f9f9"
-                                        addText.color = "#888888"
-                                    }
-                                    else {
-                                        parent.color = "#e5e5e5"
-                                        addText.color = "black"
-                                    }
-                                }
-                                onClicked: {
-                                    support_addButton.state = "clicked"
-                                    support_autoButton.state = "unclicked"
-                                    support_removeButton.state = "unclicked"
-                                }
-                            }
-                            states: [
-                                State {
-                                    name: "clicked"
-                                    PropertyChanges { target: support_addButton; color: "#f9f9f9" }
-                                    PropertyChanges { target: addText; color: "#888888" }
-                                },
-                                State {
-                                    name: "unclicked"
-                                    PropertyChanges { target: support_addButton; color: "#e5e5e5" }
-                                    PropertyChanges { target: addText; color: "black" }
-                                }
-                            ]
-                        }
-
-                        Rectangle {
-                            id: support_removeButton
-                            color: parent.color
-                            width: 178
-                            height: 32
-                            radius: 2
-                            border.color: "#cccccc"
-                            anchors.horizontalCenter: parent.horizontalCenter
-                            anchors.top: support_addButton.bottom
-                            anchors.topMargin: 20
-                            Text {
-                                id: removeText
-                                text: "Remove supports"
-                                anchors.horizontalCenter: parent.horizontalCenter
-                                anchors.verticalCenter: parent.verticalCenter
-                                font.family: mainFont.name
-                                font.pixelSize: 9
-                            }
-                            MouseArea {
-                                anchors.fill: parent
-                                hoverEnabled: true
-                                onEntered: {
-                                    parent.color = "#f9f9f9"
-                                    removeText.color = "#888888"
-                                }
-                                onExited: {
-                                    if (support_removeButton.state == "clicked") {
-                                        parent.color = "#f9f9f9"
-                                        removeText.color = "#888888"
-                                    }
-                                    else {
-                                        parent.color = "#e5e5e5"
-                                        removeText.color = "black"
-                                    }
-                                }
-                                onClicked:  {
-                                    support_removeButton.state = "clicked"
-                                    support_addButton.state = "unclicked"
-                                    support_autoButton.state = "unclicked"
-                                }
-                            }
-                            states: [
-                                State {
-                                    name: "clicked"
-                                    PropertyChanges { target: support_removeButton; color: "#f9f9f9" }
-                                    PropertyChanges { target: removeText; color: "#888888" }
-
-                                },
-                                State {
-                                    name: "unclicked"
-                                    PropertyChanges { target: support_removeButton; color: "#e5e5e5" }
-                                    PropertyChanges { target: removeText; color: "black" }
-                                }
-
-                            ]
-                        }
-                        descriptionimage_vis: true
-                        detailline1_vis: true
-                        detailline2_vis: true
-                        okbutton_vis: false
-                        applybutton_vis: true
-                        applyfinishbutton_vis: false
-
+            id:popup_Support
+            funcname: "Support"
+            height: 320
+            imageHeight: 34
+            detail1: "Automatic Generation"
+            Rectangle {
+                id: support_autoButton
+                color: parent.color
+                width: 178
+                height: 32
+                radius: 2
+                border.color: "#cccccc"
+                anchors.horizontalCenter: parent.horizontalCenter
+                anchors.top: parent.top
+                anchors.topMargin: 72
+                Text {
+                    id: generateText
+                    text: "Generate supports"
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    anchors.verticalCenter: parent.verticalCenter
+                    font.family: mainFont.name
+                    font.pixelSize: 9
+                }
+                MouseArea {
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    onEntered: {
+                        parent.color = "#f9f9f9"
+                        generateText.color = "#888888"
                     }
+                    onExited: {
+                        if (support_autoButton.state == "clicked") {
+                            parent.color = "#f9f9f9"
+                            generateText.color = "#888888"
+                        }
+                        else {
+                            parent.color = "#e5e5e5"
+                            generateText.color = "black"
+                        }
+                    }
+                    onClicked: {
+                        support_autoButton.state = "clicked"
+                        support_addButton.state = "unclicked"
+                        support_removeButton.state = "unclicked"
+                    }
+                }
+                states: [
+                    State {
+                        name: "clicked"
+                        PropertyChanges { target: support_autoButton; color: "#f9f9f9" }
+                        PropertyChanges { target: generateText; color: "#888888" }
+                    },
+                    State {
+                        name: "unclicked"
+                        PropertyChanges { target: support_autoButton; color: "#e5e5e5" }
+                        PropertyChanges { target: generateText; color: "black" }
+                    }
+                ]
+            }
+
+            detail2: "Manual Generation"
+            Rectangle {
+                id: support_addButton
+                color: parent.color
+                width: 178
+                height: 32
+                radius: 2
+                border.color: "#cccccc"
+                anchors.horizontalCenter: parent.horizontalCenter
+                anchors.top: parent.top
+                anchors.topMargin: 173
+                Text {
+                    id: addText
+                    text: "Add supports"
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    anchors.verticalCenter: parent.verticalCenter
+                    font.family: mainFont.name
+                    font.pixelSize: 9
+                }
+                MouseArea {
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    onEntered: {
+                        parent.color = "#f9f9f9"
+                        addText.color = "#888888"
+                    }
+                    onExited: {
+                        if (support_addButton.state == "clicked") {
+                            parent.color = "#f9f9f9"
+                            addText.color = "#888888"
+                        }
+                        else {
+                            parent.color = "#e5e5e5"
+                            addText.color = "black"
+                        }
+                    }
+                    onClicked: {
+                        support_addButton.state = "clicked"
+                        support_autoButton.state = "unclicked"
+                        support_removeButton.state = "unclicked"
+                    }
+                }
+                states: [
+                    State {
+                        name: "clicked"
+                        PropertyChanges { target: support_addButton; color: "#f9f9f9" }
+                        PropertyChanges { target: addText; color: "#888888" }
+                    },
+                    State {
+                        name: "unclicked"
+                        PropertyChanges { target: support_addButton; color: "#e5e5e5" }
+                        PropertyChanges { target: addText; color: "black" }
+                    }
+                ]
+            }
+
+            Rectangle {
+                id: support_removeButton
+                color: parent.color
+                width: 178
+                height: 32
+                radius: 2
+                border.color: "#cccccc"
+                anchors.horizontalCenter: parent.horizontalCenter
+                anchors.top: support_addButton.bottom
+                anchors.topMargin: 20
+                Text {
+                    id: removeText
+                    text: "Remove supports"
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    anchors.verticalCenter: parent.verticalCenter
+                    font.family: mainFont.name
+                    font.pixelSize: 9
+                }
+                MouseArea {
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    onEntered: {
+                        parent.color = "#f9f9f9"
+                        removeText.color = "#888888"
+                    }
+                    onExited: {
+                        if (support_removeButton.state == "clicked") {
+                            parent.color = "#f9f9f9"
+                            removeText.color = "#888888"
+                        }
+                        else {
+                            parent.color = "#e5e5e5"
+                            removeText.color = "black"
+                        }
+                    }
+                    onClicked:  {
+                        support_removeButton.state = "clicked"
+                        support_addButton.state = "unclicked"
+                        support_autoButton.state = "unclicked"
+                    }
+                }
+                states: [
+                    State {
+                        name: "clicked"
+                        PropertyChanges { target: support_removeButton; color: "#f9f9f9" }
+                        PropertyChanges { target: removeText; color: "#888888" }
+
+                    },
+                    State {
+                        name: "unclicked"
+                        PropertyChanges { target: support_removeButton; color: "#e5e5e5" }
+                        PropertyChanges { target: removeText; color: "black" }
+                    }
+
+                ]
+            }
+            descriptionimage_vis: true
+            detailline1_vis: true
+            detailline2_vis: true
+            okbutton_vis: false
+            applybutton_vis: true
+            applyfinishbutton_vis: false
+
+        }
 
         //15. PopUp - Label
         /*PopUp {
