@@ -1104,6 +1104,12 @@ void QmlManager::modelMove(int Axis, int Distance){ // for QML Signal -> float i
         }
         selectedModels[i]->checkPrintingArea();
     }
+
+    QMetaObject::invokeMethod(boundedBox, "setPosition", Q_ARG(QVariant, selectedModels[0]->m_transform->translation()+QVector3D((selectedModels[0]->mesh->x_max+selectedModels[0]->mesh->x_min)/2,(selectedModels[0]->mesh->y_max+selectedModels[0]->mesh->y_min)/2,(selectedModels[0]->mesh->z_max+selectedModels[0]->mesh->z_min)/2)));
+    QMetaObject::invokeMethod(boundedBox, "setSize", Q_ARG(QVariant, selectedModels[0]->mesh->x_max - selectedModels[0]->mesh->x_min),
+                                                     Q_ARG(QVariant, selectedModels[0]->mesh->y_max - selectedModels[0]->mesh->y_min),
+                                                     Q_ARG(QVariant, selectedModels[0]->mesh->z_max - selectedModels[0]->mesh->z_min));
+
 }
 void QmlManager::modelMoveF(int Axis, float Distance){
     if (selectedModels[0] == nullptr)
@@ -1139,6 +1145,11 @@ void QmlManager::modelMoveF(int Axis, float Distance){
         }
         selectedModels[i]->checkPrintingArea();
     }
+    QMetaObject::invokeMethod(boundedBox, "setPosition", Q_ARG(QVariant, selectedModels[0]->m_transform->translation()+QVector3D((selectedModels[0]->mesh->x_max+selectedModels[0]->mesh->x_min)/2,(selectedModels[0]->mesh->y_max+selectedModels[0]->mesh->y_min)/2,(selectedModels[0]->mesh->z_max+selectedModels[0]->mesh->z_min)/2)));
+    QMetaObject::invokeMethod(boundedBox, "setSize", Q_ARG(QVariant, selectedModels[0]->mesh->x_max - selectedModels[0]->mesh->x_min),
+                                                     Q_ARG(QVariant, selectedModels[0]->mesh->y_max - selectedModels[0]->mesh->y_min),
+                                                     Q_ARG(QVariant, selectedModels[0]->mesh->z_max - selectedModels[0]->mesh->z_min));
+
 }
 void QmlManager::modelRotate(int Axis, int Angle){
     if (selectedModels[0] == nullptr)
