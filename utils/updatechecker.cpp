@@ -13,7 +13,7 @@ void UpdateChecker::initWinSparkle(){
     // resource. See the "psdk" example and its .rc file for an example of that
     // (these calls wouldn't be needed then).
     win_sparkle_set_appcast_url("http://18.184.77.105/appcast/appcast.xml");
-    wchar_t* version_w = L"1.1.0";
+    wchar_t* version_w = L"1.1.3";
     current_version = QString::fromWCharArray(version_w);
     win_sparkle_set_app_details(L"HiX.org", L"DentStudioSetup", version_w);
 
@@ -32,7 +32,8 @@ void UpdateChecker::checkForUpdates(){
     manager->get(QNetworkRequest(QUrl("http://18.184.77.105/appcast/appcast.xml")));
 
     //win_sparkle_check_update_with_ui_and_install();
-    win_sparkle_check_update_without_ui();
+    //win_sparkle_check_update_without_ui();
+    win_sparkle_check_update_with_ui();
 }
 
 void UpdateChecker::parseUpdateInfo(QNetworkReply* reply){

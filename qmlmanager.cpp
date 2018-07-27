@@ -32,9 +32,13 @@ void QmlManager::initializeUI(QQmlApplicationEngine* e){
     systemTransform = (Qt3DCore::QTransform *) FindItemByName(engine, "systemTransform");
     mttab = (QEntity *)FindItemByName(engine, "mttab");
     QMetaObject::invokeMethod(mv, "initCamera");
+
     // model move componetns
+    moveButton = FindItemByName(engine, "moveButton");
     movePopup = FindItemByName(engine, "movePopup");
     QObject::connect(movePopup, SIGNAL(runFeature(int,int,int)),this, SLOT(modelMoveByNumber(int,int,int)));
+    QObject::connect(movePopup, SIGNAL(closeMove()), this, SLOT(closeMove()));
+    QObject::connect(movePopup, SIGNAL(openMove()), this, SLOT(openMove()));
 
     boundedBox = (QEntity *)FindItemByName(engine, "boundedBox");
 
@@ -45,13 +49,17 @@ void QmlManager::initializeUI(QQmlApplicationEngine* e){
     rotateSphereY = (QEntity *)FindItemByName(engine, "rotateSphereTorusY");
     rotateSphereZ = (QEntity *)FindItemByName(engine, "rotateSphereTorusZ");
     rotateSphereobj = FindItemByName(engine, "rotateSphere");
+    QObject::connect(rotateSphereobj, SIGNAL(rotateInit()),this, SLOT(modelRotateInit()));
     QObject::connect(rotateSphereobj, SIGNAL(rotateSignal(int,int)),this, SLOT(modelRotate(int,int)));
     QObject::connect(rotateSphereobj, SIGNAL(rotateDone(int)),this, SLOT(modelRotateDone(int)));
     hideRotateSphere();
     // model rotate popup codes
     QObject::connect(rotatePopup, SIGNAL(runFeature(int,int,int,int)),this, SLOT(modelRotateByNumber(int,int,int,int)));
+    QObject::connect(rotatePopup, SIGNAL(openRotate()), this, SLOT(openRotate()));
+    QObject::connect(rotatePopup, SIGNAL(closeRotate()), this, SLOT(closeRotate()));
     //rotateSphere->setEnabled(0);
     QObject *rotateButton = FindItemByName(engine, "rotateButton");
+
 
     // create hollowShellSphere and make it invisible
     hollowShellSphereEntity = new Qt3DCore::QEntity(models);
@@ -96,6 +104,8 @@ void QmlManager::initializeUI(QQmlApplicationEngine* e){
     // orientation components
     orientPopup = FindItemByName(engine, "orientPopup");
     progress_popup = FindItemByName(engine, "progress_popup");
+    QObject::connect(orientPopup, SIGNAL(openOrientation()), this, SLOT(openOrientation()));
+    QObject::connect(orientPopup, SIGNAL(closeOrientation()), this, SLOT(closeOrientation()));
 
     // scale components
     scalePopup = FindItemByName(engine, "scalePopup");
@@ -186,7 +196,7 @@ void QmlManager::createModelFile(Mesh* target_mesh, QString fname) {
                            (-1)*ymid,
                            (-1)*zmid));
 
-    glmodel->m_translation = glmodel->m_transform->translation();
+    //glmodel->m_translation = glmodel->m_transform->translation();
     qDebug() << "moved model to right place";
 
     // 승환 100%
@@ -200,7 +210,9 @@ void QmlManager::openModelFile(QString fname){
     checkModelFile(glmodels[glmodels.size()-1]->ID);
 
     // do auto arrange
-    runArrange();
+    if (glmodels.size() >= 2)
+        openArrange();
+    //runArrange();
 }
 
 void QmlManager::checkModelFile(int ID){
@@ -259,6 +271,9 @@ void QmlManager::disconnectHandlers(GLModel* glmodel){
 
     // need to connect for every popup
     // model rotate popup codes
+
+
+
     // model layflat popup codes
     QObject::disconnect(layflatPopup, SIGNAL(openLayflat()), glmodel->shadowModel, SLOT(openLayflat()));
     QObject::disconnect(layflatPopup, SIGNAL(closeLayflat()), glmodel->shadowModel, SLOT(closeLayflat()));
@@ -479,6 +494,9 @@ void QmlManager::sendUpdateModelInfo(int printing_time, int layer, QString xyz, 
     updateModelInfo(printing_time, layer, xyz, volume);
 }
 
+void QmlManager::openArrange(){
+    arrangePopup->setProperty("visible", true);
+}
 
 void QmlManager::runArrange(){
     QFuture<void> future = QtConcurrent::run(this, &runArrange_internal);
@@ -656,7 +674,7 @@ void QmlManager::modelSelected(int ID){
         }
     }
 
-    if (!groupSelectionActive){ // remove selected models
+    if (selectedModels.size() >= 2){ // remove selected models if multiple selected previously
         for (vector<GLModel*>::iterator it=selectedModels.begin(); it!=selectedModels.end(); ++it){
             // unselect Model
             if (*it == nullptr)
@@ -696,10 +714,7 @@ void QmlManager::modelSelected(int ID){
         }
         selectedModels.clear();
         selectedModels.push_back(nullptr);
-    }
-
-    // reset previous model texture
-    if (selectedModels[0] != nullptr){
+    } else if (selectedModels.size() == 1 && selectedModels[0] != nullptr){
         qDebug() << "resetting model" << selectedModels[0]->ID;
         selectedModels[0]->changecolor(0);
         selectedModels[0]->checkPrintingArea();
@@ -883,12 +898,29 @@ void QmlManager::showMoveArrow(){
 
     QQmlProperty::write(moveArrowobj,"center",selectedModels[0]->m_transform->translation()+QVector3D((selectedModels[0]->mesh->x_max+selectedModels[0]->mesh->x_min)/2,(selectedModels[0]->mesh->y_max+selectedModels[0]->mesh->y_min)/2,(selectedModels[0]->mesh->z_max+selectedModels[0]->mesh->z_min)/2));
 }
+
 void QmlManager::hideMoveArrow(){
     moveArrow->setEnabled(0);
 }
+
 void QmlManager::hideRotateSphere(){
     rotateSphere->setEnabled(0);
 }
+
+void QmlManager::showRotatingSphere(){
+    if (selectedModels[0] == nullptr)
+        return;
+    rotateSphere->setEnabled(1);
+    rotateSphereX->setEnabled(1);
+    rotateSphereY->setEnabled(1);
+    rotateSphereZ->setEnabled(1);
+
+    QQmlProperty::write(rotateSphereobj,"center", //QVector3D(0,0,selectedModels[0]->m_transform->translation().z())+
+            QVector3D((selectedModels[0]->mesh->x_max+selectedModels[0]->mesh->x_min)/2,
+            (selectedModels[0]->mesh->y_max+selectedModels[0]->mesh->y_min)/2,
+            (selectedModels[0]->mesh->z_max-selectedModels[0]->mesh->z_min)/2));
+}
+
 void QmlManager::showRotateSphere(){
     if (selectedModels[0] == nullptr)
         return;
@@ -896,8 +928,13 @@ void QmlManager::showRotateSphere(){
     rotateSphereX->setEnabled(1);
     rotateSphereY->setEnabled(1);
     rotateSphereZ->setEnabled(1);
-    QQmlProperty::write(rotateSphereobj,"center",selectedModels[0]->m_transform->translation()+QVector3D((selectedModels[0]->mesh->x_max+selectedModels[0]->mesh->x_min)/2,(selectedModels[0]->mesh->y_max+selectedModels[0]->mesh->y_min)/2,(selectedModels[0]->mesh->z_max+selectedModels[0]->mesh->z_min)/2));
+
+    QQmlProperty::write(rotateSphereobj,"center",selectedModels[0]->m_transform->translation()+
+            QVector3D((selectedModels[0]->mesh->x_max+selectedModels[0]->mesh->x_min)/2,
+            (selectedModels[0]->mesh->y_max+selectedModels[0]->mesh->y_min)/2,
+            (selectedModels[0]->mesh->z_max+selectedModels[0]->mesh->z_min)/2));
 }
+
 void QmlManager::mouseHack(){
     const QPointF tmp_cor(265,105);
     QMouseEvent* evt = new QMouseEvent(QEvent::MouseButtonPress,tmp_cor,Qt::LeftButton, Qt::LeftButton,0);
@@ -912,71 +949,137 @@ void QmlManager::modelMoveDone(int Axis){
     if (selectedModels[0] == nullptr)
         return;
 
-    qDebug() << "running group feature";
-
     QMetaObject::invokeMethod(boundedBox, "hideBox"); // Bounded Box
     hideMoveArrow();
 
     for (GLModel* curModel : selectedModels){
         curModel->saveUndoState();
-        qDebug() << "translation current : "<<curModel->m_transform->translation();
 
-        QVector3D translationDiff = curModel->m_transform->translation()-curModel->m_translation;
+        /*QVector3D translationDiff = curModel->m_transform->translation()-curModel->m_translation;
 
         // move translation back to original
         curModel->m_transform->setTranslation(curModel->m_translation);
-        curModel->moveModelMesh(translationDiff);
+        curModel->moveModelMesh(translationDiff);*/
     }
 
     QMetaObject::invokeMethod(boundedBox, "showBox"); // Bounded Box
-    if(Axis != 3){
+    QMetaObject::invokeMethod(boundedBox, "setPosition", Q_ARG(QVariant, selectedModels[0]->m_transform->translation()+QVector3D((selectedModels[0]->mesh->x_max+selectedModels[0]->mesh->x_min)/2,(selectedModels[0]->mesh->y_max+selectedModels[0]->mesh->y_min)/2,(selectedModels[0]->mesh->z_max+selectedModels[0]->mesh->z_min)/2)));
+    QMetaObject::invokeMethod(boundedBox, "setSize", Q_ARG(QVariant, selectedModels[0]->mesh->x_max - selectedModels[0]->mesh->x_min),
+                                                     Q_ARG(QVariant, selectedModels[0]->mesh->y_max - selectedModels[0]->mesh->y_min),
+                                                     Q_ARG(QVariant, selectedModels[0]->mesh->z_max - selectedModels[0]->mesh->z_min));
+    //if(Axis != 3){
         showMoveArrow();
         QQmlProperty::write(moveArrowobj,"center",selectedModels[0]->m_transform->translation()+QVector3D((selectedModels[0]->mesh->x_max+selectedModels[0]->mesh->x_min)/2,(selectedModels[0]->mesh->y_max+selectedModels[0]->mesh->y_min)/2,(selectedModels[0]->mesh->z_max+selectedModels[0]->mesh->z_min)/2));
-
-    }
+    //}
     mouseHack();
+}
+
+void QmlManager::totalMoveDone(){
+    for (GLModel* curModel : selectedModels){
+        if (curModel == nullptr)
+            continue;
+        if (curModel->m_transform->translation().isNull()){
+            qDebug() << "equals identity so don't save";
+            continue;
+        }
+
+        //curModel->saveUndoState();
+
+        //curModel->moveModelMesh(curModel->m_transform->translation());
+        curModel->mesh->vertexMove(curModel->m_transform->translation());
+        curModel->m_transform->setTranslation(QVector3D(0,0,0));
+
+        /*QVector3D translationDiff = curModel->m_transform->translation()-curModel->m_translation;
+
+        // move translation back to original
+        curModel->m_transform->setTranslation(curModel->m_translation);
+        curModel->moveModelMesh(translationDiff);*/
+        emit curModel->_updateModelMesh();
+    }
+}
+
+void QmlManager::modelRotateInit(){
+    qDebug() << "model rotate init";
+    for (GLModel* curModel : selectedModels){
+        curModel->saveUndoState();
+    }
+    return;
+}
+
+QMatrix4x4 quatToMat(QQuaternion q)
+{
+    //based on algorithm on wikipedia
+    // http://en.wikipedia.org/wiki/Rotation_matrix#Quaternion
+    float w = q.scalar ();
+    float x = q.x();
+    float y = q.y();
+    float z = q.z();
+
+    float n = q.lengthSquared();
+    float s =  n == 0?  0 : 2 / n;
+    float wx = s * w * x, wy = s * w * y, wz = s * w * z;
+    float xx = s * x * x, xy = s * x * y, xz = s * x * z;
+    float yy = s * y * y, yz = s * y * z, zz = s * z * z;
+
+    float m[16] = { 1 - (yy + zz),         xy + wz ,         xz - wy ,0,
+                         xy - wz ,    1 - (xx + zz),         yz + wx ,0,
+                         xz + wy ,         yz - wx ,    1 - (xx + yy),0,
+                               0 ,               0 ,               0 ,1  };
+    QMatrix4x4 result =  QMatrix4x4(m,4,4);
+    result.optimize ();
+    return result;
 }
 
 void QmlManager::modelRotateDone(int Axis){
     if (selectedModels[0] == nullptr)
         return;
 
+    QMetaObject::invokeMethod(boundedBox, "hideBox"); // Bounded Box
+    float* minmax;
+    minmax = selectedModels[0]->mesh->calculateMinMax(quatToMat(selectedModels[0]->m_transform->rotation()).inverted());
 
-    for (int i=0; i<selectedModels.size(); i++){
-        selectedModels[i]->saveUndoState();
-
-        float angle;
-        switch(Axis){
-            case 1:{
-                angle = selectedModels[i]->m_transform->rotationX();
-                selectedModels[i]->m_transform->setRotationX(0);
-                break;
-            }
-            case 2:{
-                angle = selectedModels[i]->m_transform->rotationY();
-                selectedModels[i]->m_transform->setRotationY(0);
-                break;
-            }
-            case 3:{
-                angle = selectedModels[i]->m_transform->rotationZ();
-                selectedModels[i]->m_transform->setRotationZ(0);
-                break;
-            }
-        }
-        selectedModels[i]->rotateModelMesh(Axis,-angle);
-    }
-        //float zlength = (glmodel->mesh->z_max - glmodel->mesh->z_min);
-        //glmodel->m_transform->setTranslation(QVector3D(0,0,zlength/2));
-    showRotateSphere();
+    QMetaObject::invokeMethod(boundedBox, "showBox"); // Bounded Box
+    QMetaObject::invokeMethod(boundedBox, "setPosition", Q_ARG(QVariant, QVector3D(selectedModels[0]->m_transform->translation().x(),
+                                                               selectedModels[0]->m_transform->translation().y(),
+                                                               -minmax[4])+QVector3D((minmax[0]+minmax[1])/2,(minmax[2]+minmax[3])/2,(minmax[4]+minmax[5])/2)));
+    QMetaObject::invokeMethod(boundedBox, "setSize", Q_ARG(QVariant, minmax[1]-minmax[0]),
+                                                     Q_ARG(QVariant, minmax[3]-minmax[2]),
+                                                     Q_ARG(QVariant, minmax[5]-minmax[4]));
+    selectedModels[0]->m_transform->setTranslation(QVector3D(selectedModels[0]->m_transform->translation().x(),
+                                                   selectedModels[0]->m_transform->translation().y(),
+                                                   - minmax[4])
+                                                   );
+    showRotatingSphere();
     mouseHack();
     rotateSnapAngle = 0;
-//    if(selectedModels[0] != nullptr){
-//        QMetaObject::invokeMethod(boundedBox, "setPosition", Q_ARG(QVariant, QVector3D(selectedModels[0]->m_transform->translation())));
-//        QMetaObject::invokeMethod(boundedBox, "setSize", Q_ARG(QVariant, selectedModels[0]->mesh->x_max - selectedModels[0]->mesh->x_min),
-//                                                         Q_ARG(QVariant, selectedModels[0]->mesh->y_max - selectedModels[0]->mesh->y_min),
-//                                                         Q_ARG(QVariant, selectedModels[0]->mesh->z_max - selectedModels[0]->mesh->z_min));
-//    }
 }
+
+void QmlManager::totalRotateDone(){
+    qDebug() << "total rotate done" << selectedModels.size();
+    for (int i=0; i<selectedModels.size(); i++){
+        if (selectedModels[i] == nullptr)
+            continue;
+        qDebug() << selectedModels[i]->m_transform->rotation();
+        if (selectedModels[i]->m_transform->rotation().isIdentity()){
+            qDebug() << "equals identity so don't save";
+            continue;
+        }
+
+        // remove last undo state and resave undo state
+        //selectedModels[i]->saveUndoState();
+
+        selectedModels[i]->mesh->vertexRotate(quatToMat(selectedModels[i]->m_transform->rotation()).inverted());
+        selectedModels[i]->m_transform->setRotationX(0);
+        selectedModels[i]->m_transform->setRotationY(0);
+        selectedModels[i]->m_transform->setRotationZ(0);
+
+        selectedModels[i]->mesh->vertexMove(selectedModels[i]->m_transform->translation());
+        selectedModels[i]->m_transform->setTranslation(QVector3D(0,0,0));
+        emit selectedModels[i]->_updateModelMesh();
+    }
+}
+
+
 void QmlManager::modelMove(int Axis, int Distance){ // for QML Signal -> float is not working in qml signal parameter
     if (selectedModels[0] == nullptr)
         return;
@@ -1006,6 +1109,12 @@ void QmlManager::modelMove(int Axis, int Distance){ // for QML Signal -> float i
         }
         selectedModels[i]->checkPrintingArea();
     }
+
+    QMetaObject::invokeMethod(boundedBox, "setPosition", Q_ARG(QVariant, selectedModels[0]->m_transform->translation()+QVector3D((selectedModels[0]->mesh->x_max+selectedModels[0]->mesh->x_min)/2,(selectedModels[0]->mesh->y_max+selectedModels[0]->mesh->y_min)/2,(selectedModels[0]->mesh->z_max+selectedModels[0]->mesh->z_min)/2)));
+    QMetaObject::invokeMethod(boundedBox, "setSize", Q_ARG(QVariant, selectedModels[0]->mesh->x_max - selectedModels[0]->mesh->x_min),
+                                                     Q_ARG(QVariant, selectedModels[0]->mesh->y_max - selectedModels[0]->mesh->y_min),
+                                                     Q_ARG(QVariant, selectedModels[0]->mesh->z_max - selectedModels[0]->mesh->z_min));
+
 }
 void QmlManager::modelMoveF(int Axis, float Distance){
     if (selectedModels[0] == nullptr)
@@ -1041,6 +1150,11 @@ void QmlManager::modelMoveF(int Axis, float Distance){
         }
         selectedModels[i]->checkPrintingArea();
     }
+    QMetaObject::invokeMethod(boundedBox, "setPosition", Q_ARG(QVariant, selectedModels[0]->m_transform->translation()+QVector3D((selectedModels[0]->mesh->x_max+selectedModels[0]->mesh->x_min)/2,(selectedModels[0]->mesh->y_max+selectedModels[0]->mesh->y_min)/2,(selectedModels[0]->mesh->z_max+selectedModels[0]->mesh->z_min)/2)));
+    QMetaObject::invokeMethod(boundedBox, "setSize", Q_ARG(QVariant, selectedModels[0]->mesh->x_max - selectedModels[0]->mesh->x_min),
+                                                     Q_ARG(QVariant, selectedModels[0]->mesh->y_max - selectedModels[0]->mesh->y_min),
+                                                     Q_ARG(QVariant, selectedModels[0]->mesh->z_max - selectedModels[0]->mesh->z_min));
+
 }
 void QmlManager::modelRotate(int Axis, int Angle){
     if (selectedModels[0] == nullptr)
@@ -1049,90 +1163,100 @@ void QmlManager::modelRotate(int Axis, int Angle){
     for (int i=0; i<selectedModels.size(); i++){
         rotateSnapAngle = (rotateSnapAngle + Angle +360) % 360;
         QVector3D transl = selectedModels[i]->m_transform->translation();
-        selectedModels[i]->m_transform->setTranslation(selectedModels[i]->m_translation);
+        //selectedModels[i]->m_transform->setTranslation(selectedModels[i]->m_translation);
         QVector3D rot_center = QVector3D((selectedModels[i]->mesh->x_max+selectedModels[i]->mesh->x_min)/2,
                                                   (selectedModels[i]->mesh->y_max+selectedModels[i]->mesh->y_min)/2,
                                                   (selectedModels[i]->mesh->z_max+selectedModels[i]->mesh->z_min)/2);
+
+        QMatrix4x4 rot;
+
         switch(Axis){
-        case 1:{  //X
-            float tmpx = selectedModels[i]->m_transform->rotationX();
+            case 1:{  //X
+                float tmpx = selectedModels[i]->m_transform->rotationX();
 
-            QMatrix4x4 rot;
-            if (QApplication::queryKeyboardModifiers() & Qt::ShiftModifier){// snap mode
-                if(rotateSnapAngle>0 && rotateSnapAngle<90){
-                    rot = selectedModels[i]->m_transform->rotateAround(rot_center,rotateSnapStartAngle+0,QVector3D(1,0,0));
-                    //selectedModels[0]->m_transform->setRotationX(rotateSnapStartAngle + 0);
+                if (QApplication::queryKeyboardModifiers() & Qt::ShiftModifier){// snap mode
+                    if(rotateSnapAngle>0 && rotateSnapAngle<90){
+                        rot = selectedModels[i]->m_transform->rotateAround(rot_center,rotateSnapAngle-tmpx,(QVector3D(1,0,0).toVector4D()*selectedModels[i]->m_transform->matrix()).toVector3D());
+    //                    selectedModels[i]->m_transform->setRotationX(rotateSnapStartAngle + 0);
+                    }
+                    else if(rotateSnapAngle>90 && rotateSnapAngle<180){
+                        rot = selectedModels[i]->m_transform->rotateAround(rot_center,rotateSnapAngle+90-tmpx,(QVector3D(1,0,0).toVector4D()*selectedModels[i]->m_transform->matrix()).toVector3D());
+    //                    selectedModels[i]->m_transform->setRotationX(rotateSnapStartAngle + 90);
+                    }
+                    else if(rotateSnapAngle>180 && rotateSnapAngle<270){
+                        rot = selectedModels[i]->m_transform->rotateAround(rot_center,rotateSnapAngle+180-tmpx,(QVector3D(1,0,0).toVector4D()*selectedModels[i]->m_transform->matrix()).toVector3D());
+    //                    selectedModels[i]->m_transform->setRotationX(rotateSnapStartAngle + 180);
+                    }
+                    else if(rotateSnapAngle>270 && rotateSnapAngle<360){
+                        rot = selectedModels[i]->m_transform->rotateAround(rot_center,rotateSnapAngle+270-tmpx,(QVector3D(1,0,0).toVector4D()*selectedModels[i]->m_transform->matrix()).toVector3D());
+    //                    selectedModels[i]->m_transform->setRotationX(rotateSnapStartAngle + 270);
+                    }
                 }
-                else if(rotateSnapAngle>90 && rotateSnapAngle<180){
-                    rot = selectedModels[i]->m_transform->rotateAround(rot_center,rotateSnapStartAngle+90,QVector3D(1,0,0));
-                    //selectedModels[0]->m_transform->setRotationX(rotateSnapStartAngle + 90);
-                }
-
-                else if(rotateSnapAngle>180 && rotateSnapAngle<270){
-                    rot = selectedModels[i]->m_transform->rotateAround(rot_center,rotateSnapStartAngle+180,QVector3D(1,0,0));
-                    //selectedModels[0]->m_transform->setRotationX(rotateSnapStartAngle + 180);
-                }
-                else if(rotateSnapAngle>270 && rotateSnapAngle<360){
-                    rot = selectedModels[i]->m_transform->rotateAround(rot_center,rotateSnapStartAngle+270,QVector3D(1,0,0));
-                    //selectedModels[0]->m_transform->setRotationX(rotateSnapStartAngle + 270);
-                }
+                else
+    //                selectedModels[i]->m_transform->setRotationX(tmpx+Angle);
+                    rot = selectedModels[i]->m_transform->rotateAround(rot_center,Angle,(QVector3D(1,0,0).toVector4D()*selectedModels[i]->m_transform->matrix()).toVector3D());
+                selectedModels[i]->m_transform->setMatrix(selectedModels[i]->m_transform->matrix()*rot);
+                break;
             }
-            else
-                rot = selectedModels[i]->m_transform->rotateAround(rot_center,tmpx+Angle,QVector3D(1,0,0));
-            selectedModels[i]->m_transform->setMatrix(rot);
-            break;
-        }
-        case 2:{  //Y
-            float tmpy = selectedModels[i]->m_transform->rotationY();
+            case 2:{  //Y
+                float tmpy = selectedModels[i]->m_transform->rotationY();
 
-            QMatrix4x4 rot;
-            if (QApplication::queryKeyboardModifiers() & Qt::ShiftModifier){// snap mode
-                if(rotateSnapAngle>0 && rotateSnapAngle<90){
-                    rot = selectedModels[i]->m_transform->rotateAround(rot_center,rotateSnapStartAngle+0,QVector3D(0,1,0));
+                if (QApplication::queryKeyboardModifiers() & Qt::ShiftModifier){// snap mode
+                    if(rotateSnapAngle>0 && rotateSnapAngle<90){
+                        rot = selectedModels[i]->m_transform->rotateAround(rot_center,rotateSnapAngle-tmpy,(QVector3D(0,1,0).toVector4D()*selectedModels[i]->m_transform->matrix()).toVector3D());
+    //                    selectedModels[i]->m_transform->setRotationY(rotateSnapStartAngle + 0);
+                    }
+                    else if(rotateSnapAngle>90 && rotateSnapAngle<180){
+                        rot = selectedModels[i]->m_transform->rotateAround(rot_center,rotateSnapAngle+90-tmpy,(QVector3D(0,1,0).toVector4D()*selectedModels[i]->m_transform->matrix()).toVector3D());
+    //                    selectedModels[i]->m_transform->setRotationY(rotateSnapStartAngle + 90);
+                    }
+                    else if(rotateSnapAngle>180 && rotateSnapAngle<270){
+                        rot = selectedModels[i]->m_transform->rotateAround(rot_center,rotateSnapAngle+180-tmpy,(QVector3D(0,1,0).toVector4D()*selectedModels[i]->m_transform->matrix()).toVector3D());
+    //                    selectedModels[i]->m_transform->setRotationY(rotateSnapStartAngle + 180);
+                    }
+                    else if(rotateSnapAngle>270 && rotateSnapAngle<360){
+                        rot = selectedModels[i]->m_transform->rotateAround(rot_center,rotateSnapAngle+270-tmpy,(QVector3D(0,1,0).toVector4D()*selectedModels[i]->m_transform->matrix()).toVector3D());
+    //                    selectedModels[i]->m_transform->setRotationY(rotateSnapStartAngle + 270);
+                    }
                 }
-                else if(rotateSnapAngle>90 && rotateSnapAngle<180){
-                    rot = selectedModels[i]->m_transform->rotateAround(rot_center,rotateSnapStartAngle+90,QVector3D(0,1,0));
-                }
-                else if(rotateSnapAngle>180 && rotateSnapAngle<270){
-                    rot = selectedModels[i]->m_transform->rotateAround(rot_center,rotateSnapStartAngle+180,QVector3D(0,1,0));
-                }
-                else if(rotateSnapAngle>270 && rotateSnapAngle<360){
-                    rot = selectedModels[i]->m_transform->rotateAround(rot_center,rotateSnapStartAngle+270,QVector3D(0,1,0));
-                }
+                else
+    //                selectedModels[i]->m_transform->setRotationY(tmpy+Angle);
+                    rot = selectedModels[i]->m_transform->rotateAround(rot_center,Angle,(QVector3D(0,1,0).toVector4D()*selectedModels[i]->m_transform->matrix()).toVector3D());
+                selectedModels[i]->m_transform->setMatrix(selectedModels[i]->m_transform->matrix()*rot);
+                break;
             }
-            else
-                rot = selectedModels[i]->m_transform->rotateAround(rot_center,tmpy+Angle,QVector3D(0,1,0));
-            selectedModels[i]->m_transform->setMatrix(rot);
-            break;
-        }
-        case 3:{  //Z
-            float tmpz = selectedModels[i]->m_transform->rotationZ();
+            case 3:{  //Z
+                float tmpz = selectedModels[i]->m_transform->rotationZ();
 
-            QMatrix4x4 rot;
-            if (QApplication::queryKeyboardModifiers() & Qt::ShiftModifier){// snap mode
-                if(rotateSnapAngle>0 && rotateSnapAngle<90){
-                    rot = selectedModels[i]->m_transform->rotateAround(rot_center,rotateSnapStartAngle+0,QVector3D(0,0,1));
+                if (QApplication::queryKeyboardModifiers() & Qt::ShiftModifier){// snap mode
+                    if(rotateSnapAngle>0 && rotateSnapAngle<90){
+                        rot = selectedModels[i]->m_transform->rotateAround(rot_center,rotateSnapAngle-tmpz,(QVector3D(0,0,1).toVector4D()*selectedModels[i]->m_transform->matrix()).toVector3D());
+    //                    selectedModels[i]->m_transform->setRotationZ(rotateSnapStartAngle + 0);
+                    }
+                    else if(rotateSnapAngle>90 && rotateSnapAngle<180){
+                        rot = selectedModels[i]->m_transform->rotateAround(rot_center,rotateSnapAngle+90-tmpz,(QVector3D(0,0,1).toVector4D()*selectedModels[i]->m_transform->matrix()).toVector3D());
+    //                    selectedModels[i]->m_transform->setRotationZ(rotateSnapStartAngle + 90);
+                    }
+                    else if(rotateSnapAngle>180 && rotateSnapAngle<270){
+                        rot = selectedModels[i]->m_transform->rotateAround(rot_center,rotateSnapAngle+180-tmpz,(QVector3D(0,0,1).toVector4D()*selectedModels[i]->m_transform->matrix()).toVector3D());
+    //                    selectedModels[i]->m_transform->setRotationZ(rotateSnapStartAngle + 180);
+                    }
+                    else if(rotateSnapAngle>270 && rotateSnapAngle<360){
+                        rot = selectedModels[i]->m_transform->rotateAround(rot_center,rotateSnapAngle+270-tmpz,(QVector3D(0,0,1).toVector4D()*selectedModels[i]->m_transform->matrix()).toVector3D());
+    //                    selectedModels[i]->m_transform->setRotationZ(rotateSnapStartAngle + 270);
+                    }
                 }
-                else if(rotateSnapAngle>90 && rotateSnapAngle<180){
-                    rot = selectedModels[i]->m_transform->rotateAround(rot_center,rotateSnapStartAngle+90,QVector3D(0,0,1));
-                }
-                else if(rotateSnapAngle>180 && rotateSnapAngle<270){
-                    rot = selectedModels[i]->m_transform->rotateAround(rot_center,rotateSnapStartAngle+180,QVector3D(0,0,1));
-                }
-                else if(rotateSnapAngle>270 && rotateSnapAngle<360){
-                    rot = selectedModels[i]->m_transform->rotateAround(rot_center,rotateSnapStartAngle+270,QVector3D(0,0,1));
-                }
+                else
+    //                selectedModels[i]->m_transform->setRotationZ(tmpz+Angle);
+                    rot = selectedModels[i]->m_transform->rotateAround(rot_center,Angle,(QVector3D(0,0,1).toVector4D()*selectedModels[i]->m_transform->matrix()).toVector3D());
+                selectedModels[i]->m_transform->setMatrix(selectedModels[i]->m_transform->matrix()*rot);
+                break;
             }
-            else
-                rot = selectedModels[i]->m_transform->rotateAround(rot_center,tmpz+Angle,QVector3D(0,0,1));
-            selectedModels[i]->m_transform->setMatrix(rot);
-            break;
         }
-
-        }
-        selectedModels[i]->m_transform->setTranslation(selectedModels[i]->m_transform->translation()+QVector3D(0,0,-selectedModels[i]->mesh->z_min));
+        //selectedModels[i]->m_transform->setTranslation(selectedModels[i]->m_transform->translation()+QVector3D(0,0,-selectedModels[i]->mesh->z_min));
     }
 }
+
 void QmlManager::modelMoveByNumber(int axis, int X, int Y){
     if (selectedModels[0] == nullptr)
         return;
@@ -1165,13 +1289,28 @@ void QmlManager::modelRotateByNumber(int axis,  int X, int Y, int Z){
         return;
 
     for (int i=0; i<selectedModels.size(); i++){
-        Qt3DCore::QTransform* tmp = new Qt3DCore::QTransform();
-        tmp->setRotationX(X);
-        tmp->setRotationY(Y);
-        tmp->setRotationZ(Z);
-        selectedModels[i]->rotateModelMesh(tmp->matrix());
+        QVector3D rot_center = QVector3D((selectedModels[i]->mesh->x_max+selectedModels[i]->mesh->x_min)/2,
+                                                  (selectedModels[i]->mesh->y_max+selectedModels[i]->mesh->y_min)/2,
+                                                  (selectedModels[i]->mesh->z_max+selectedModels[i]->mesh->z_min)/2);
+
+        QMatrix4x4 rot;
+
+        rot1 = selectedModels[i]->m_transform->rotateAround(rot_center,X,(QVector3D(1,0,0).toVector4D()*selectedModels[i]->m_transform->matrix()).toVector3D());
+        selectedModels[i]->m_transform->setMatrix(selectedModels[i]->m_transform->matrix()*rot);
+        rot2 = selectedModels[i]->m_transform->rotateAround(rot_center,Y,(QVector3D(0,1,0).toVector4D()*selectedModels[i]->m_transform->matrix()).toVector3D());
+        selectedModels[i]->m_transform->setMatrix(selectedModels[i]->m_transform->matrix()*rot);
+        rot3 = selectedModels[i]->m_transform->rotateAround(rot_center,Z,(QVector3D(0,0,1).toVector4D()*selectedModels[i]->m_transform->matrix()).toVector3D());
+        selectedModels[i]->m_transform->setMatrix(selectedModels[i]->m_transform->matrix()*rot);
+
+        selectedModels[i]->mesh->vertexRotate(quatToMat(selectedModels[i]->m_transform->rotation()).inverted());
+        selectedModels[i]->m_transform->setRotationX(0);
+        selectedModels[i]->m_transform->setRotationY(0);
+        selectedModels[i]->m_transform->setRotationZ(0);
+        selectedModels[i]->mesh->vertexMove(selectedModels[i]->m_transform->translation());
+        selectedModels[i]->m_transform->setTranslation(QVector3D(0,0,0));
+        emit selectedModels[i]->_updateModelMesh();
     }
-    showRotateSphere();
+    //showRotateSphere();
     mouseHack();
 }
 void QmlManager::resetLayflat(){
@@ -1367,6 +1506,44 @@ void QmlManager::setProgress(float value){
         progress = value;
     }
 
+}
+
+void QmlManager::openMove(){
+    //moveActive = true;
+    return;
+}
+
+void QmlManager::closeMove(){
+    qDebug() << "close move";
+    totalMoveDone();
+    return;
+}
+
+
+void QmlManager::openRotate(){
+    qDebug() << "open Rotate";
+    //QMetaObject::invokeMethod(qmlManager->boundedBox, "hideBox");
+    rotateActive = true;
+    return;
+}
+
+void QmlManager::closeRotate(){
+    qDebug() << "close Rotate";
+    rotateActive = false;
+    totalRotateDone();
+    return;
+}
+
+void QmlManager::openOrientation(){
+    qDebug() << "open orientation";
+    orientationActive = true;
+    return;
+}
+
+void QmlManager::closeOrientation(){
+    qDebug() << "close orientation";
+    orientationActive = false;
+    return;
 }
 
 void QmlManager::setProgressText(string inputText){

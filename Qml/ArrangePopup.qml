@@ -36,7 +36,7 @@ Rectangle {
             height:20
             id: result_text
 
-            text: "Click Apply to arrange the models."
+            text: "Click Apply to auto-arrange models"
             anchors.top: parent.top
             anchors.topMargin: 28
             anchors.horizontalCenter: parent.horizontalCenter

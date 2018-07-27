@@ -49,6 +49,7 @@ public:
     Qt3DCore::QEntity *rotateSphereZ;
 
     // model move components
+    QObject *moveButton;
     QObject *movePopup;
     Qt3DCore::QEntity *managerModel;
     Qt3DCore::QEntity *moveArrow;
@@ -123,10 +124,16 @@ public:
 
     int rotateSnapAngle = 0;
     int rotateSnapStartAngle = 0;
+    int rotateSnapQuotient = 0;
     bool groupSelectionActive = false;
+    //bool moveActive = false;
+    bool rotateActive = false;
+    bool orientationActive = false;
+
     QString groupFunctionState;
     int groupFunctionIndex;
     float progress = 0;
+    void showRotatingSphere();
     void showRotateSphere();
     void showMoveArrow();
     void hideRotateSphere();
@@ -134,6 +141,7 @@ public:
     void mouseHack();
     void initializeUI(QQmlApplicationEngine *e);
     void openModelFile_internal(QString filename);
+    void openArrange();
     void runArrange_internal();
     void disconnectHandlers(GLModel* glmodel);
     void connectHandlers(GLModel* glmodel);
@@ -192,7 +200,10 @@ public slots:
     void modelMoveF(int,float);
     void modelMoveByNumber(int axis, int, int);
     void modelMoveDone(int);
+    void totalMoveDone();
+    void modelRotateInit();
     void modelRotateDone(int);
+    void totalRotateDone();
     void resetLayflat();
     void applyArrangeResult(vector<QVector3D>, vector<float>);
     void cleanselectedModel(int);
@@ -200,6 +211,12 @@ public slots:
     void extensionUnSelect();
     void layFlatSelect();
     void layFlatUnSelect();
+    void openRotate();
+    void closeRotate();
+    void openMove();
+    void closeMove();
+    void openOrientation();
+    void closeOrientation();
 
 };
 

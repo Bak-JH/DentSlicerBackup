@@ -260,6 +260,7 @@ Rectangle {
     }
 
     function selectDelete(){
+        uppertab.all_off();
         deletePopUp.visible = true
         deletePopUp.targetID = qm.getselectedModelID()
 

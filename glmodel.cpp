@@ -55,7 +55,7 @@ GLModel::GLModel(QObject* mainWindow, QNode *parent, Mesh* loadMesh, QString fna
 
         QObject::connect(this,SIGNAL(_updateModelMesh()),this,SLOT(updateModelMesh()));
 
-        /*labellingTextPreview = new LabellingTextPreview(this->parentModel);
+        /*labellingTextPreview = new LabellingTextPreview(this);
         labellingTextPreview->setEnabled(false);
 
         labellingTextPreview->setTranslation(QVector3D(100,0,0));
@@ -217,6 +217,11 @@ void GLModel::checkPrintingArea(){
 }
 
 void GLModel::saveUndoState(){
+    saveUndoState_internal();
+    //QFuture<void> future = QtConcurrent::run(this, &saveUndoState_internal);
+}
+
+void GLModel::saveUndoState_internal(){
     // need to change to memcpy or something
     qDebug () << "save prev mesh";
 
@@ -227,19 +232,37 @@ void GLModel::saveUndoState(){
     Mesh* temp_prev_mesh = new Mesh();
     temp_prev_mesh->faces.reserve(mesh->faces.size()*3);
     temp_prev_mesh->vertices.reserve(mesh->faces.size()*3);
-    foreach (MeshFace mf, mesh->faces){
+
+    // only need to copy faces, verticesHash, vertices
+    foreach(MeshVertex mv, mesh->vertices){
+        temp_prev_mesh->vertices.push_back(mv);
+    }
+    foreach(MeshFace mf, mesh->faces){
+        temp_prev_mesh->faces.push_back(mf);
+    }
+    for (QHash<uint32_t, MeshVertex>::iterator it = mesh->vertices_hash.begin(); it!=mesh->vertices_hash.end(); ++it){
+        temp_prev_mesh->vertices_hash.insert(it.key(), it.value());
+    }
+
+    /*foreach (MeshFace mf, mesh->faces){
         temp_prev_mesh->addFace(mesh->vertices[mf.mesh_vertex[0]].position,
                 mesh->vertices[mf.mesh_vertex[1]].position,
                 mesh->vertices[mf.mesh_vertex[2]].position);
-    }
-    temp_prev_mesh->connectFaces();
+    }*/
+    //temp_prev_mesh->connectFaces();
+
     temp_prev_mesh->prevMesh = mesh->prevMesh;
     if (mesh->prevMesh != nullptr)
         mesh->prevMesh->nextMesh = temp_prev_mesh;
     temp_prev_mesh->nextMesh = mesh;
+    temp_prev_mesh->m_translation = m_transform->translation();
+    temp_prev_mesh->m_matrix = m_transform->matrix();
 
     Mesh* deleteTargetMesh = mesh;
-    for (int i=0; i<10; i++){ // maximal undo count is 10
+
+    int saveCnt = (mesh->faces.size()>100000)? 3: 10;
+
+    for (int i=0; i<saveCnt; i++){ // maximal undo count is 10
         if (deleteTargetMesh != nullptr)
             deleteTargetMesh = deleteTargetMesh->prevMesh;
     }
@@ -262,6 +285,18 @@ void GLModel::loadUndoState(){
             qmlManager->deleteModelFile(twinModel->ID);
         }
         mesh = mesh->prevMesh;
+
+        // move model mesh and rotate model mesh
+        /*mesh->vertexMove(mesh->m_translation);
+        mesh->vertexRotate(mesh->m_matrix);*/
+        if (!mesh->m_matrix.isIdentity()){
+            mesh->vertexRotate(mesh->m_matrix.inverted());
+            mesh->m_matrix = QMatrix4x4();
+        }
+        m_transform->setTranslation(mesh->m_translation);
+        m_transform->setRotationX(0);
+        m_transform->setRotationY(0);
+        m_transform->setRotationZ(0);
         emit _updateModelMesh();
     }
 }
@@ -269,6 +304,19 @@ void GLModel::loadUndoState(){
 void GLModel::loadRedoState(){
     if (mesh->nextMesh != nullptr){
         mesh = mesh->nextMesh;
+        // move model mesh and rotate model mesh
+        /*mesh->vertexMove(mesh->m_translation);
+        mesh->vertexRotate(mesh->m_matrix);*/
+        if (!mesh->m_matrix.isIdentity()){
+            mesh->vertexRotate(mesh->m_matrix.inverted());
+            mesh->m_matrix = QMatrix4x4();
+        }
+
+
+        m_transform->setTranslation(mesh->m_translation);
+        m_transform->setRotationX(0);
+        m_transform->setRotationY(0);
+        m_transform->setRotationZ(0);
         emit _updateModelMesh();
     }
 }
@@ -288,6 +336,7 @@ void GLModel::scaleModelMesh(float scaleX, float scaleY, float scaleZ){
 
     emit _updateModelMesh();
 }
+
 void GLModel::rotateModelMesh(int Axis, float Angle){
     Qt3DCore::QTransform* tmp = new Qt3DCore::QTransform();
     switch(Axis){
@@ -307,6 +356,7 @@ void GLModel::rotateModelMesh(int Axis, float Angle){
     rotateModelMesh(tmp->matrix());
 }
 
+
 void GLModel::rotateModelMesh(QMatrix4x4 matrix){
     mesh->vertexRotate(matrix);
     emit _updateModelMesh();
@@ -321,7 +371,6 @@ void GLModel::copyModelAttributeFrom(GLModel* from){
     hollowShellActive = from->hollowShellActive;
     shellOffsetActive = from->shellOffsetActive;
     layflatActive = from->layflatActive;
-
 }
 
 void GLModel::updateModelMesh(){
@@ -883,8 +932,8 @@ void GLModel::handlePickerClicked(QPickEvent *pick)
     if (qmlManager->yesno_popup->property("isFlawOpen").toBool())
         return;
 
-    if(qmlManager->selectedModels[0] != nullptr && (pick->button() & Qt::RightButton)){ // when right button clicked
-        if(qmlManager->selectedModels[0]->ID == parentModel->ID){
+    if (qmlManager->selectedModels[0] != nullptr && (pick->button() & Qt::RightButton)){ // when right button clicked
+        if (qmlManager->selectedModels[0]->ID == parentModel->ID){
             QMetaObject::invokeMethod(qmlManager->mttab, "tabOnOff");
             return;
         }
@@ -921,7 +970,7 @@ void GLModel::handlePickerClicked(QPickEvent *pick)
             labellingTextPreview->deleteLater();
             labellingTextPreview = nullptr;
         }
-        labellingTextPreview = new LabellingTextPreview(this->parentModel);
+        labellingTextPreview = new LabellingTextPreview(this);
         labellingTextPreview->setEnabled(true);
 
         if (labellingTextPreview && labellingTextPreview->isEnabled()) {
@@ -1506,9 +1555,16 @@ void GLModel::mgoo(Qt3DRender::QPickEvent* v)
         return;
     }
 
-    if (qmlManager->selectedModels[0] != nullptr && (qmlManager->selectedModels[0]->shadowModel->cutActive || qmlManager->selectedModels[0]->shadowModel->extensionActive || qmlManager->selectedModels[0]->shadowModel->labellingActive || qmlManager->selectedModels[0]->shadowModel->layflatActive))
+    if (qmlManager->selectedModels[0] != nullptr &&
+            (qmlManager->selectedModels[0]->shadowModel->cutActive ||
+             qmlManager->selectedModels[0]->shadowModel->extensionActive ||
+             qmlManager->selectedModels[0]->shadowModel->labellingActive ||
+             qmlManager->selectedModels[0]->shadowModel->layflatActive ||
+             qmlManager->orientationActive ||
+             qmlManager->rotateActive))
         return;
 
+    qmlManager->moveButton->setProperty("state", "active");
     qmlManager->setClosedHandCursor();
     isMoved = true;
     QVector2D currentPoint = (QVector2D)v->position();
@@ -1564,7 +1620,7 @@ void GLModel::pgoo(Qt3DRender::QPickEvent* v){
     m_objectPicker->setDragEnabled(true);
     lastpoint=v->localIntersection();
     prevPoint = (QVector2D) v->position();
-    
+
 }
 
 void GLModel::rgoo(Qt3DRender::QPickEvent* v){
@@ -1787,7 +1843,7 @@ void GLModel::applyLabelInfo(QString text, int contentWidth, QString fontName, b
         labellingTextPreview->deleteLater();
         labellingTextPreview = nullptr;
     }
-    labellingTextPreview = new LabellingTextPreview(this->parentModel);
+    labellingTextPreview = new LabellingTextPreview(this);
     labellingTextPreview->setEnabled(true);
 
     if (labellingTextPreview && labellingTextPreview->isEnabled() && parentModel->targetMeshFace !=nullptr) {
@@ -1869,6 +1925,10 @@ void GLModel::generateText3DMesh()
 
         emit glmodel->_updateModelMesh();
     }
+    if (labellingTextPreview){
+        labellingTextPreview->deleteLater();
+        labellingTextPreview = nullptr;
+    }
 }
 
 // for extension
@@ -1932,6 +1992,8 @@ void GLModel::generateLayFlat(){
     if(targetMeshFace == NULL)
         return;
 
+    saveUndoState();
+
     QVector3D tmp_fn = targetMeshFace->fn;
     qDebug() << "target 2 " << tmp_fn;
 
@@ -1964,7 +2026,6 @@ void GLModel::generateLayFlat(){
     //closeLayflat();
     emit resetLayflat();
 }
-
 
 void GLModel::openLayflat(){
     qDebug() << "open layflat called";
