@@ -16,6 +16,11 @@ Rectangle {
     property string mid_text: mid_text
     property var targetID: -1
 
+    function popupDelete(){
+        uppertab.all_off();
+        deletePopUp.visible = true;
+    }
+
     Rectangle{//shadow
         id : shadowRect
         width: parent.width-2

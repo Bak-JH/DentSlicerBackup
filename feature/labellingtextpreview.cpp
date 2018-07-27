@@ -19,17 +19,18 @@ LabellingTextPreview::LabellingTextPreview(Qt3DCore::QNode* parent)
     texture->setMagnificationFilter(QAbstractTexture::Filter::Linear);
     texture->setFormat(QAbstractTexture::TextureFormat::RGBAFormat);
 
-    auto* planeMesh = new Qt3DExtras::QPlaneMesh();
+    auto* planeMesh = new Qt3DExtras::QPlaneMesh(this);
 
     planeTransform = new Qt3DCore::QTransform(this);
 
-    planeMaterial = new Qt3DExtras::QDiffuseMapMaterial();
+    planeMaterial = new Qt3DExtras::QNormalDiffuseMapAlphaMaterial(this);
     planeMaterial->setAmbient(QColor(255, 255, 255, 128));
     planeMaterial->setDiffuse(texture);
 
-    addComponent(planeMesh);
-    addComponent(planeMaterial);
-    addComponent(planeTransform);
+    planeEntity = new Qt3DCore::QEntity(this);
+    planeEntity->addComponent(planeMesh);
+    planeEntity->addComponent(planeMaterial);
+    planeEntity->addComponent(planeTransform);
 
     setFontName("Arial");
     setFontBold(false);
@@ -56,7 +57,7 @@ void LabellingTextPreview::setText(QString text, int contentWidth)
     textureImage->update();
 
     texture->addTextureImage(textureImage);
-    planeMaterial->setDiffuse(texture);
+    //planeMaterial->setDiffuse(texture);
     updateTransform();
 }
 

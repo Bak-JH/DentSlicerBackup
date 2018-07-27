@@ -336,6 +336,7 @@ Entity {
         return Qt.vector2d(point2.x,point2.y)
     }
 
+    signal rotateInit();
     signal rotateSignal(int Axis, int angle)
     signal rotateDone(int Axis)
     FrameAction{
@@ -345,9 +346,15 @@ Entity {
                 var syszoom = Qt.vector3d(0,0,0)
                 syszoom = sceneRoot.systemTransform.scale3D
                 if (rotateAxis == 0 && pastAxis != 0){
+                    console.log("rotate done qml");
                     rotateDone(pastAxis);
                     pastAxis = 0;
                 }
+                if (rotateAxis != 0 && pastAxis == 0){
+                    console.log("rotate start qml")
+                    rotateInit();
+                }
+
                 pastAxis = rotateAxis
                 if (rotateAxis != 0){
                     var Origin = world2Screen(center)

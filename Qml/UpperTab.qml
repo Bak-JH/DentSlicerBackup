@@ -70,7 +70,7 @@ Rectangle {
         if(yesnoPopUp.isFlawOpen)
             yesnoPopUp.closePopUp();
 
-        scene3d.forceActiveFocus();
+        //scene3d.forceActiveFocus();
 
         console.log("all off");
     }
@@ -640,7 +640,25 @@ Rectangle {
             numbox_value_x: move_x_value
             numbox_value_y: move_y_value
             numbox_value_z: move_z_value
-            state: second_tab_button_move.state=="active" ? "active" : "inactive"
+
+            signal openMove();
+            signal closeMove();
+
+            state: {
+                if (second_tab_button_move.state=="active"){
+                    return "active";
+                } else {
+                    return "inactive";
+                }
+            }
+
+            onStateChanged: {
+                if (state == "active")
+                    openMove();
+                else
+                    closeMove();
+            }
+
             signal runFeature(int type, int X, int Y);
             onApplyClicked: {
                 console.log("move")
@@ -688,10 +706,27 @@ Rectangle {
                 runFeature(ftrRotate,popup_rotate.numberbox1_number,popup_rotate.numberbox2_number,popup_rotate.numberbox3_number);
             }
             signal runGroupFeature(int type, string state, double arg1, double arg2, double arg3);
+            signal closeRotate();
+            signal openRotate();
+
             onFinishClicked:{
-                runGroupFeature(ftrRotate, state, 0, 0, 0);
+                closeRotate();
             }
-            state: second_tab_button_rotate.state=="active" ? "active" : "inactive"
+            state: {
+                if (second_tab_button_rotate.state=="active"){
+                    return "active";
+                } else {
+                    return "inactive";
+                }
+            }
+
+            onStateChanged: {
+                if (state == "active")
+                    openRotate();
+                else
+                    closeRotate();
+            }
+
             function onApplyFinishButton(){
                 popup_rotate.colorApplyFinishButton(0)
             }
@@ -816,8 +851,19 @@ Rectangle {
             function offApplyFinishButton(){
                 popup_orient.colorApplyFinishButton(0);
             }
+            signal openOrientation();
+            signal closeOrientation();
 
             state: second_tab_button_orient.state=="active" ? "active" : "inactive"
+            onStateChanged: {
+                if (state == "active"){
+                    console.log("orientation active");
+                    openOrientation();
+                } else {
+                    console.log("orientation inactive");
+                    closeOrientation();
+                }
+            }
         }
 
         //9. PopUp - Scale
@@ -849,7 +895,23 @@ Rectangle {
             signal closeScale();
             //signal runFeature(int type, double scaleX, double scaleY, double scaleZ);
             signal runGroupFeature(int type, string state, double arg1, double arg2, double arg3);
-            state: third_tab_button_scale.state=="active" ? "active" : "inactive"
+
+            state: {
+                if (third_tab_button_scale.state=="active" && qm.isSelected()){
+                    //openScale();
+                    return "active"
+                } else {
+                    //closeScale();
+                    return "inactive"
+                }
+            }
+            onStateChanged: {
+                if (state == "active")
+                    openScale();
+                else
+                    closeScale();
+            }
+
 
             function updateSizeInfo(x,y,z){
                 if (numberbox1_number_origin != x || numberbox2_number_origin != y || numberbox3_number_origin != z){ // except for initial open, we don't call it

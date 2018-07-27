@@ -93,6 +93,7 @@ Entity {
             if (event.key === Qt.Key_Delete) {
                 deletePopUp.targetID = qm.getselectedModelID()
                 if (deletePopUp.targetID != -1){
+                    uppertab.all_off();
                     deletePopUp.visible = true
                     mttab.hideTab();
                 }
