@@ -1037,15 +1037,6 @@ void QmlManager::modelRotateDone(int Axis){
     QMetaObject::invokeMethod(boundedBox, "hideBox"); // Bounded Box
     float* minmax;
     minmax = selectedModels[0]->mesh->calculateMinMax(quatToMat(selectedModels[0]->m_transform->rotation()).inverted());
-    Qt3DCore::QTransform* temp_transform = new Qt3DCore::QTransform();
-    temp_transform->setMatrix(selectedModels[0]->m_transform->matrix());
-    qDebug() << "temp_transform translation : " << temp_transform->translation();
-    temp_transform->setTranslation(selectedModels[0]->m_transform->translation());
-    qDebug() << "temp_transform translation : " << temp_transform->translation();
-    temp_transform->setRotationX(0);
-    temp_transform->setRotationY(0);
-    temp_transform->setRotationZ(0);
-    qDebug() << "temp_transform translation : " << temp_transform->translation();
 
     QMetaObject::invokeMethod(boundedBox, "showBox"); // Bounded Box
     QMetaObject::invokeMethod(boundedBox, "setPosition", Q_ARG(QVariant, QVector3D(selectedModels[0]->m_transform->translation().x(),
@@ -1054,7 +1045,6 @@ void QmlManager::modelRotateDone(int Axis){
     QMetaObject::invokeMethod(boundedBox, "setSize", Q_ARG(QVariant, minmax[1]-minmax[0]),
                                                      Q_ARG(QVariant, minmax[3]-minmax[2]),
                                                      Q_ARG(QVariant, minmax[5]-minmax[4]));
-    qDebug() << "selected model transform : " << selectedModels[0]->m_transform->translation();
     selectedModels[0]->m_transform->setTranslation(QVector3D(selectedModels[0]->m_transform->translation().x(),
                                                    selectedModels[0]->m_transform->translation().y(),
                                                    - minmax[4])
@@ -1299,11 +1289,20 @@ void QmlManager::modelRotateByNumber(int axis,  int X, int Y, int Z){
         return;
 
     for (int i=0; i<selectedModels.size(); i++){
-        Qt3DCore::QTransform* tmp = new Qt3DCore::QTransform();
-        tmp->setRotationX(X);
-        tmp->setRotationY(Y);
-        tmp->setRotationZ(Z);
-        selectedModels[i]->mesh->vertexRotate(tmp->matrix()*quatToMat(selectedModels[i]->m_transform->rotation()).inverted());
+        QVector3D rot_center = QVector3D((selectedModels[i]->mesh->x_max+selectedModels[i]->mesh->x_min)/2,
+                                                  (selectedModels[i]->mesh->y_max+selectedModels[i]->mesh->y_min)/2,
+                                                  (selectedModels[i]->mesh->z_max+selectedModels[i]->mesh->z_min)/2);
+
+        QMatrix4x4 rot;
+
+        rot1 = selectedModels[i]->m_transform->rotateAround(rot_center,X,(QVector3D(1,0,0).toVector4D()*selectedModels[i]->m_transform->matrix()).toVector3D());
+        selectedModels[i]->m_transform->setMatrix(selectedModels[i]->m_transform->matrix()*rot);
+        rot2 = selectedModels[i]->m_transform->rotateAround(rot_center,Y,(QVector3D(0,1,0).toVector4D()*selectedModels[i]->m_transform->matrix()).toVector3D());
+        selectedModels[i]->m_transform->setMatrix(selectedModels[i]->m_transform->matrix()*rot);
+        rot3 = selectedModels[i]->m_transform->rotateAround(rot_center,Z,(QVector3D(0,0,1).toVector4D()*selectedModels[i]->m_transform->matrix()).toVector3D());
+        selectedModels[i]->m_transform->setMatrix(selectedModels[i]->m_transform->matrix()*rot);
+
+        selectedModels[i]->mesh->vertexRotate(quatToMat(selectedModels[i]->m_transform->rotation()).inverted());
         selectedModels[i]->m_transform->setRotationX(0);
         selectedModels[i]->m_transform->setRotationY(0);
         selectedModels[i]->m_transform->setRotationZ(0);
@@ -1311,7 +1310,7 @@ void QmlManager::modelRotateByNumber(int axis,  int X, int Y, int Z){
         selectedModels[i]->m_transform->setTranslation(QVector3D(0,0,0));
         emit selectedModels[i]->_updateModelMesh();
     }
-    showRotateSphere();
+    //showRotateSphere();
     mouseHack();
 }
 void QmlManager::resetLayflat(){
