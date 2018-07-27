@@ -233,11 +233,22 @@ void GLModel::saveUndoState_internal(){
     temp_prev_mesh->faces.reserve(mesh->faces.size()*3);
     temp_prev_mesh->vertices.reserve(mesh->faces.size()*3);
 
-    foreach (MeshFace mf, mesh->faces){
+    // only need to copy faces, verticesHash, vertices
+    foreach(MeshVertex mv, mesh->vertices){
+        temp_prev_mesh->vertices.push_back(mv);
+    }
+    foreach(MeshFace mf, mesh->faces){
+        temp_prev_mesh->faces.push_back(mf);
+    }
+    for (QHash<uint32_t, MeshVertex>::iterator it = mesh->vertices_hash.begin(); it!=mesh->vertices_hash.end(); ++it){
+        temp_prev_mesh->vertices_hash.insert(it.key(), it.value());
+    }
+
+    /*foreach (MeshFace mf, mesh->faces){
         temp_prev_mesh->addFace(mesh->vertices[mf.mesh_vertex[0]].position,
                 mesh->vertices[mf.mesh_vertex[1]].position,
                 mesh->vertices[mf.mesh_vertex[2]].position);
-    }
+    }*/
     //temp_prev_mesh->connectFaces();
 
     temp_prev_mesh->prevMesh = mesh->prevMesh;
