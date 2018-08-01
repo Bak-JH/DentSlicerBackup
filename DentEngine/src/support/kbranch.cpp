@@ -169,10 +169,17 @@ void generateKBranch(Slices& slices){
             }
         }
 
+        slice.support = circle_paths;
+
         clpr.Clear();
         clpr.AddPaths(slice.outershell, ptSubject, true);
         clpr.AddPaths(circle_paths, ptClip, true);
         clpr.Execute(ctUnion, slice.outershell, pftEvenOdd, pftPositive);
+    }
+
+
+    for (int layer_idx=slices.size()-1; layer_idx>=0; layer_idx--){
+        qDebug() << "generate circle supports : " << slices[layer_idx].support.size();
     }
 
     // predict weight containing infill
