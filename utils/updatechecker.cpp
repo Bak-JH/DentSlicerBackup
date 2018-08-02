@@ -32,8 +32,8 @@ void UpdateChecker::checkForUpdates(){
     manager->get(QNetworkRequest(QUrl("http://18.184.77.105/appcast/appcast.xml")));
 
     //win_sparkle_check_update_with_ui_and_install();
-    //win_sparkle_check_update_without_ui();
-    win_sparkle_check_update_with_ui();
+    win_sparkle_check_update_without_ui();
+    //win_sparkle_check_update_with_ui();
 }
 
 void UpdateChecker::parseUpdateInfo(QNetworkReply* reply){

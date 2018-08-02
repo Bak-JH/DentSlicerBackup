@@ -915,7 +915,33 @@ void GLModel::handlePickerClickedFreeCut(Qt3DRender::QPickEvent* pick)
     QVector3D v = pick->localIntersection();
     QVector3D result_v = QVector3D(v.x(), -v.z(), v.y());
     result_v = result_v*2;
-    parentModel->addCuttingPoint(result_v);
+
+    bool found_nearby_v = false;
+    for (int i=0; i<parentModel->cuttingPoints.size(); i++){
+        if (result_v.distanceToPoint(parentModel->cuttingPoints[i]) <0.5f){
+            parentModel->removeCuttingPoint(i);
+            found_nearby_v = true;
+            break;
+        }
+    }
+
+    if (!found_nearby_v){
+        parentModel->addCuttingPoint(result_v);
+    }
+
+    /*if (result_v.distanceToPoint(parentModel->cuttingPoints[parentModel->cuttingPoints.size()-1]) < 0.5f){
+        qDebug() << "removing cutting point";
+        parentModel->removeCuttingPoint();
+    } else {
+        parentModel->addCuttingPoint(result_v);
+    }*/
+
+    // remove cutting contour and redraw cutting contour
+    if (parentModel->cuttingPoints.size() >=2){
+        parentModel->removeCuttingContour();
+        parentModel->generateCuttingContour(parentModel->cuttingPoints);
+    }
+
     if (parentModel->cuttingPoints.size() > 2)
         QMetaObject::invokeMethod(qmlManager->cutPopup, "colorApplyFinishButton", Q_ARG(QVariant, 2));
     else
@@ -992,7 +1018,33 @@ void GLModel::handlePickerClicked(QPickEvent *pick)
         } else if (cutMode == 2){// && parentModel->numPoints< sizeof(parentModel->sphereEntity)/4) {
             qDebug() << pick->localIntersection()<<"pick" << cuttingPoints.size() << parentModel->cuttingPoints.size();
             QVector3D v = pick->localIntersection();
-            parentModel->addCuttingPoint(v);
+            qDebug() << v.distanceToPoint(parentModel->cuttingPoints[parentModel->cuttingPoints.size()-1]);
+
+            bool found_nearby_v = false;
+            for (int i=0; i<parentModel->cuttingPoints.size(); i++){
+                if (v.distanceToPoint(parentModel->cuttingPoints[i]) <0.5f){
+                    parentModel->removeCuttingPoint(i);
+                    found_nearby_v = true;
+                    break;
+                }
+            }
+
+            if (!found_nearby_v){
+                parentModel->addCuttingPoint(v);
+            }
+
+            /*if (v.distanceToPoint(parentModel->cuttingPoints[parentModel->cuttingPoints.size()-1]) < 0.5f){
+                qDebug() << "removing cutting point";
+                //parentModel->removeCuttingPoint();
+            } else {
+                parentModel->addCuttingPoint(v);
+            }*/
+
+            // remove cutting contour and redraw cutting contour
+            if (parentModel->cuttingPoints.size() >=2){
+                parentModel->removeCuttingContour();
+                parentModel->generateCuttingContour(parentModel->cuttingPoints);
+            }
 
                 //generatePlane();
             //parentModel->ft->ct->addCuttingPoint(parentModel, v);
@@ -1281,6 +1333,7 @@ void GLModel::bisectModel_internal(Plane plane){
     // 승환 50%
     qmlManager->setProgress(0.56);
     qDebug() << "done connecting";
+
     emit bisectDone();
 }
 
@@ -1290,6 +1343,62 @@ void GLModel::generateClickablePlane(){
        qDebug() << "generated clickable plane";
     }
     return;
+}
+
+void GLModel::removeCuttingContour(){
+    qDebug() << "in the remove cutting contour " << cuttingContourCylinders.size();
+
+    for (int i=0; i<cuttingContourCylinders.size(); i++){
+        cuttingContourCylinders[i]->deleteLater();
+    }
+    cuttingContourCylinders.clear();
+}
+
+void GLModel::generateCuttingContour(vector<QVector3D> cuttingContour){
+
+    for (int cvi=0; cvi<cuttingContour.size()-1; cvi++){
+        QVector3D to = cuttingContour[cvi];
+        to = QVector3D(to.x(), to.y(), 100.0f);
+        QVector3D from = cuttingContour[(cvi+1)%cuttingContour.size()];
+        from = QVector3D(from.x(), from.y(), 100.0f);
+        double w, h, d, l, tx, ty, tz, lxz, anglex, angley;
+        w = to.x() - from.x();
+        h = to.y() - from.y();
+        d = to.z() - from.z();
+        l = sqrt(w*w + h*h + d*d);
+        lxz = sqrt(w*w + d*d);
+        tx = from.x() + w/2;
+        ty = from.y() + h/2;
+        tz = from.z() + d/2;
+        anglex = acos(h/l)*180/3.14159265;
+        angley = acos(d/lxz)*180/3.14159265;
+        QVector3D QVx(static_cast<float>(1), static_cast<float>(0), static_cast<float>(0));
+        QVector3D QVy(static_cast<float>(0), static_cast<float>(((w<0)?-1:1)), static_cast<float>(0));
+
+        // Cylinder shape data
+        Qt3DExtras::QCylinderMesh *cylinder = new Qt3DExtras::QCylinderMesh();
+        cylinder->setRadius(.2f);
+
+        cylinder->setLength(static_cast<float>(l));
+        cylinder->setRings(100);
+        cylinder->setSlices(20);
+
+        // CylinderMesh Transform
+        Qt3DCore::QTransform *cylinderTransform = new Qt3DCore::QTransform();
+        cylinderTransform->setScale(1.0f);
+        cylinderTransform->setRotation(Qt3DCore::QTransform::fromAxesAndAngles(QVx,static_cast<float>(anglex), QVy, static_cast<float>(angley)));
+        cylinderTransform->setTranslation(QVector3D(static_cast<float>(tx), static_cast<float>(ty), static_cast<float>(tz)));
+
+        Qt3DExtras::QDiffuseSpecularMaterial *cylinderMaterial = new Qt3DExtras::QDiffuseSpecularMaterial();
+        cylinderMaterial->setDiffuse(QColor(QRgb(0xffffff)));
+
+        // Cylinder
+        QEntity* m_cylinderEntity = new Qt3DCore::QEntity(this);
+        m_cylinderEntity->addComponent(cylinder);
+        m_cylinderEntity->addComponent(cylinderMaterial);
+        m_cylinderEntity->addComponent(cylinderTransform);
+        cuttingContourCylinders.push_back(m_cylinderEntity);
+    }
 }
 
 void GLModel::generatePlane(){
@@ -1387,6 +1496,7 @@ void GLModel::addCuttingPoint(QVector3D v){
 
     sphereMesh.push_back(new Qt3DExtras::QSphereMesh);
     sphereMesh[sphereMesh.size()-1]->setRadius(0.5);
+
     sphereTransform.push_back(new Qt3DCore::QTransform);
     sphereTransform[sphereTransform.size()-1]->setTranslation(v + QVector3D(tmp.x(),tmp.y(), -mesh->z_min));
 
@@ -1400,6 +1510,37 @@ void GLModel::addCuttingPoint(QVector3D v){
     sphereEntity[sphereEntity.size()-1]->addComponent(sphereMesh[sphereMesh.size()-1]);
     sphereEntity[sphereEntity.size()-1]->addComponent(sphereTransform[sphereTransform.size()-1]);
     sphereEntity[sphereEntity.size()-1]->addComponent(sphereMaterial[sphereMaterial.size()-1]);
+}
+
+void GLModel::removeCuttingPoint(int idx){
+    qDebug()<< "cutting points : " << cuttingPoints.size();
+
+    /*int mesh_idx, transform_idx, material_idx;
+    mesh_idx = sphereMesh.size()-sphereEntity.size()+idx;
+    transform_idx = sphereTransform.size()-sphereEntity.size()+idx;
+    material_idx = sphereMaterial.size()-sphereEntity.size()+idx;
+
+    sphereEntity[idx]->removeComponent(sphereMesh[mesh_idx]);
+    sphereEntity[idx]->removeComponent(sphereTransform[transform_idx]);
+    sphereEntity[idx]->removeComponent(sphereMaterial[material_idx]);
+    sphereEntity[idx]->deleteLater();
+    sphereMesh[mesh_idx]->deleteLater();
+    sphereTransform[transform_idx]->deleteLater();
+    sphereMaterial[material_idx]->deleteLater();
+    sphereEntity.erase(sphereEntity.begin()+idx);
+    sphereMesh.erase(sphereMesh.begin()+mesh_idx);
+    sphereTransform.erase(sphereTransform.begin()+transform_idx);
+    sphereMaterial.erase(sphereMaterial.begin()+material_idx);
+    cuttingPoints.erase(cuttingPoints.begin()+idx);*/
+
+    sphereEntity[sphereEntity.size()-1]->removeComponent(sphereMesh[sphereMesh.size()-1]);
+    sphereEntity[sphereEntity.size()-1]->removeComponent(sphereTransform[sphereTransform.size()-1]);
+    sphereEntity[sphereEntity.size()-1]->removeComponent(sphereMaterial[sphereMaterial.size()-1]);
+    sphereEntity.pop_back();
+    sphereMesh.pop_back();
+    sphereTransform.pop_back();
+    sphereMaterial.pop_back();
+    cuttingPoints.pop_back();
 }
 
 void GLModel::removeCuttingPoints(){
@@ -1471,6 +1612,15 @@ void GLModel::modelCut(){
 
             cutAway(leftMesh, rightMesh, parentModel->mesh, parentModel->cuttingPoints, parentModel->cutFillMode);
 
+
+
+            if (leftMesh->faces.size() == 0 || rightMesh->faces.size() == 0){
+                qDebug() << "cutting contour selected not cutting";
+                qmlManager->setProgress(1);
+                cutModeSelected(9999); // reset
+                return;
+            }
+
             emit parentModel->bisectDone();
         }
     }
@@ -1503,6 +1653,7 @@ void GLModel::generateRLModel(){
     //parentModel->deleteLater();
     shadowModel->removePlane();
     removeCuttingPoints();
+    removeCuttingContour();
 
     qDebug() << "removed cutting plane";
     // delete original model
@@ -1665,6 +1816,7 @@ void GLModel::cutModeSelected(int type){
     parentModel->removeCuttingPoints();
     qDebug() << "cut mode selected2" << type;
     removePlane();
+    parentModel->removeCuttingContour();
     qDebug() << "cut mode selected3" << type;
     cutMode = type;
     if (cutMode == 1){
@@ -1757,7 +1909,7 @@ QVector3D GLModel::spreadPoint(QVector3D endPoint,QVector3D startPoint,int facto
 
 Mesh* GLModel::toSparse(Mesh* mesh){
     int i=0;
-    int jump = (mesh->faces.size()<30000) ? 1:mesh->faces.size()/30000; // 30000 is chosen for 800000 mesh, 30
+    int jump = (mesh->faces.size()<100000) ? 1:mesh->faces.size()/30000; // 30000 is chosen for 800000 mesh, 30
     int factor = (jump ==1) ? 1:3*log(jump);
 
     Mesh* newMesh = new Mesh;
@@ -2089,6 +2241,7 @@ void GLModel::closeCut(){
     cutActive = false;
     removePlane();
     parentModel->removeCuttingPoints();
+    parentModel->removeCuttingContour();
 }
 
 void GLModel::openHollowShell(){
@@ -2119,4 +2272,5 @@ void GLModel::closeShellOffset(){
     shellOffsetActive = false;
     removePlane();
     parentModel->removeCuttingPoints();
+    parentModel->removeCuttingContour();
 }
