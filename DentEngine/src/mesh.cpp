@@ -137,9 +137,9 @@ void Mesh::addFace(QVector3D v0, QVector3D v1, QVector3D v2, int parent_idx){
     mf->fn_unnorm = QVector3D::crossProduct(vertices[v1_idx].position-vertices[v0_idx].position,vertices[v2_idx].position-vertices[v0_idx].position);
     faces.emplace_back(*mf);
 
-    vertices[v0_idx].connected_faces.emplace_back(mf);
-    vertices[v1_idx].connected_faces.emplace_back(mf);
-    vertices[v2_idx].connected_faces.emplace_back(mf);
+    vertices[v0_idx].connected_faces.emplace_back(&faces[new_idx]);
+    vertices[v1_idx].connected_faces.emplace_back(&faces[new_idx]);
+    vertices[v2_idx].connected_faces.emplace_back(&faces[new_idx]);
 
 
     if (vertices[v0_idx].connected_faces.size()>=3){
