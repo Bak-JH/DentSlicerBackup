@@ -237,6 +237,7 @@ void QmlManager::deleteModelFile(int ID){
     for (vector<GLModel*>::iterator gl_it = glmodels.begin(); gl_it != glmodels.end();){
         if((*gl_it)->ID == ID){
             (*gl_it)->removeCuttingPoints();
+            (*gl_it)->removeCuttingContour();
             (*gl_it)->shadowModel->removePlane();
             disconnectHandlers((*gl_it));
             (*gl_it)->shadowModel->deleteLater();
@@ -1295,11 +1296,11 @@ void QmlManager::modelRotateByNumber(int axis,  int X, int Y, int Z){
 
         QMatrix4x4 rot;
 
-        rot1 = selectedModels[i]->m_transform->rotateAround(rot_center,X,(QVector3D(1,0,0).toVector4D()*selectedModels[i]->m_transform->matrix()).toVector3D());
+        rot = selectedModels[i]->m_transform->rotateAround(rot_center,X,(QVector3D(1,0,0).toVector4D()*selectedModels[i]->m_transform->matrix()).toVector3D());
         selectedModels[i]->m_transform->setMatrix(selectedModels[i]->m_transform->matrix()*rot);
-        rot2 = selectedModels[i]->m_transform->rotateAround(rot_center,Y,(QVector3D(0,1,0).toVector4D()*selectedModels[i]->m_transform->matrix()).toVector3D());
+        rot = selectedModels[i]->m_transform->rotateAround(rot_center,Y,(QVector3D(0,1,0).toVector4D()*selectedModels[i]->m_transform->matrix()).toVector3D());
         selectedModels[i]->m_transform->setMatrix(selectedModels[i]->m_transform->matrix()*rot);
-        rot3 = selectedModels[i]->m_transform->rotateAround(rot_center,Z,(QVector3D(0,0,1).toVector4D()*selectedModels[i]->m_transform->matrix()).toVector3D());
+        rot = selectedModels[i]->m_transform->rotateAround(rot_center,Z,(QVector3D(0,0,1).toVector4D()*selectedModels[i]->m_transform->matrix()).toVector3D());
         selectedModels[i]->m_transform->setMatrix(selectedModels[i]->m_transform->matrix()*rot);
 
         selectedModels[i]->mesh->vertexRotate(quatToMat(selectedModels[i]->m_transform->rotation()).inverted());

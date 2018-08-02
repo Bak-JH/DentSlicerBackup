@@ -141,6 +141,7 @@ public:
     double shellOffsetFactor;
 
     std::vector<QVector3D> cuttingPoints;
+    vector<QEntity*> cuttingContourCylinders;
     Plane cuttingPlane;
 
     Qt3DExtras::QPlaneMesh* clipPlane[2];
@@ -178,6 +179,7 @@ public:
     void scaleModelMesh(float scaleX, float scaleY, float scaleZ);
     // Model Cut
     void addCuttingPoint(QVector3D v);
+    void removeCuttingPoint(int idx);
     void removeCuttingPoints();
     void drawLine(QVector3D endpoint);
     //void bisectModel(Mesh* mesh, Plane plane, Mesh* leftMesh, Mesh* rightMesh);
@@ -270,6 +272,8 @@ public slots:
     void generateLayFlat();
 
     // Model Cut
+    void removeCuttingContour();
+    void generateCuttingContour(vector<QVector3D> cuttingContour);
     void generateClickablePlane();
     void generatePlane();
     void removePlane();
