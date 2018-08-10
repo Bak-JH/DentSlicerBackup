@@ -207,6 +207,7 @@ Entity{
         return Qt.vector2d(point2.x,point2.y)
     }
 
+    signal moveInit()
     signal moveSignal(int Axis, int distance)
     signal moveDone(int Axis)
     FrameAction{
@@ -218,7 +219,10 @@ Entity{
                 if (moveAxis == 0 && pastAxis != 0){
                     moveDone(pastAxis);
                     pastAxis = 0;
+                } else if (moveAxis != 0 && pastAxis == 0){
+                    moveInit();
                 }
+
                 pastAxis = moveAxis
                 if (moveAxis != 0){
                     var Origin = world2Screen(center)

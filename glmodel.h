@@ -233,6 +233,7 @@ private:
     bool layflatActive = false;
 
     bool isMoved = false;
+    bool isReleased = true;
 
 signals:
 
@@ -258,7 +259,6 @@ public slots:
     void handlePickerClickedLayflat(MeshFace shadow_meshface);
     void mgoo(Qt3DRender::QPickEvent*);
     void pgoo(Qt3DRender::QPickEvent*);
-    void rgoo(Qt3DRender::QPickEvent*);
     void engoo();
     void exgoo();
 
