@@ -49,5 +49,4 @@ Entity{
         boundedBoxTransform.translation = target
     }
 
-
 }

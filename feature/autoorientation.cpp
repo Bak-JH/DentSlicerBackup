@@ -43,7 +43,7 @@ rotateResult* autoorientation::Tweak(Mesh* mesh, bool bi_algorithmic,int CA,bool
           orientations=remove_duplicates(orientations,&orientCnt);
           //orientation의 중복을 제거합니다. 그래서 orientation의 최솟값이 8이 아니라
           //더 떨어질 수도 있습니다.
-          free(plusVertex);
+          //free(plusVertex);
     }
     best_n+=orientCnt;
     //갯수 업데이트, false일 때는 값 변화가 없습니다.

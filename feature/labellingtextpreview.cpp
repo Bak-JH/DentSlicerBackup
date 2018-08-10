@@ -57,7 +57,7 @@ void LabellingTextPreview::setText(QString text, int contentWidth)
     textureImage->update();
 
     texture->addTextureImage(textureImage);
-
+    //planeMaterial->setDiffuse(texture);
     updateTransform();
 }
 

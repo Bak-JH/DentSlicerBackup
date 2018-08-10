@@ -16,6 +16,11 @@ Rectangle {
     property string mid_text: mid_text
     property var targetID: -1
 
+    function popupDelete(){
+        uppertab.all_off();
+        deletePopUp.visible = true;
+    }
+
     Rectangle{//shadow
         id : shadowRect
         width: parent.width-2
@@ -76,17 +81,15 @@ Rectangle {
                 hoverEnabled: true
                 onEntered: {
                     qm.setHandCursor();
-                    parent.color = "#BCBCBE"
+                    parent.color = "#3ea6b7"
                 }
                 onExited: {
                     qm.resetCursor();
-                    parent.color = "#A3A3A5"
+                    parent.color = "#999999"
                 }
-                onPressed: parent.color = "#3ea6b7"
                 onReleased: {
-                    qm.doDeletebyID(targetID)
+                    qm.doDelete()
                     closePopUp();
-                    parent.color = "#A3A3A5"
                 }
             }
         }
@@ -114,16 +117,14 @@ Rectangle {
                 hoverEnabled: true
                 onEntered: {
                     qm.setHandCursor();
-                    parent.color = "#BCBCBE"
+                    parent.color = "#3ea6b7"
                 }
                 onExited: {
                     qm.resetCursor();
-                    parent.color = "#A3A3A5"
+                    parent.color = "#999999"
                 }
-                onPressed: parent.color = "#3ea6b7"
                 onReleased: {
                     closePopUp();
-                    parent.color = "#A3A3A5"
                 }
             }
         }
@@ -131,13 +132,8 @@ Rectangle {
 
     }
 
-
-    function openResultPopUp(inputText_h, inputText_m, inputText_l){
+    function openDeletePopUp(){
         deletePopUp.visible = true
-        high_text = inputText_h
-        mid_text = inputText_m
-        low_text = inputText_l
-
     }
 
     function closePopUp(){

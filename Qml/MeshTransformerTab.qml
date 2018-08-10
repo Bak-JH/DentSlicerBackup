@@ -17,7 +17,7 @@ Rectangle {
 
     visible: false
     color : "transparent"
-    signal runGroupFeature(int type, string state);
+    signal runGroupFeature(int type, string state, double arg1, double arg2, double arg3);
 
     Rectangle{//shadow
         width: 34
@@ -107,7 +107,7 @@ Rectangle {
         color: "#CCCCCC"
     }
     Image {
-        id: model_zoom
+        id: model_scale
         width: 34
         height: 34
 
@@ -115,22 +115,22 @@ Rectangle {
         anchors.left: parent.left
         anchors.topMargin: 8
 
-        source: "qrc:/resource/model_zoom.png"
+        source: "qrc:/resource/model_scale.png"
 
         MouseArea {
             anchors.fill: parent
             hoverEnabled : true
             onEntered : {
-                model_zoom.source = "qrc:/resource/model_zoom_select.png"
+                model_scale.source = "qrc:/resource/model_scale_select.png"
                 qm.setHandCursor();
             }
             onExited : {
-                model_zoom.source = "qrc:/resource/model_zoom.png"
+                model_scale.source = "qrc:/resource/model_scale.png"
                 qm.resetCursor();
             }
             onClicked: {
                 deselectAll()
-                selectZoom()
+                selectScale()
             }
         }
     }
@@ -138,7 +138,7 @@ Rectangle {
     Rectangle{//shadow
         width: 34
         height: 34
-        anchors.top : model_zoom.bottom
+        anchors.top : model_scale.bottom
         anchors.left: parent.left
         anchors.topMargin: 10
         anchors.leftMargin: 2
@@ -151,7 +151,7 @@ Rectangle {
         width: 34
         height: 34
 
-        anchors.top : model_zoom.bottom
+        anchors.top : model_scale.bottom
         anchors.left: parent.left
         anchors.topMargin: 8
 
@@ -227,7 +227,7 @@ Rectangle {
     function deselectAll(){
         model_move.source = "qrc:/resource/model_move.png"
         model_rotate.source = "qrc:/resource/model_rotate.png"
-        model_zoom.source = "qrc:/resource/model_zoom.png"
+        model_scale.source = "qrc:/resource/model_scale.png"
     }
 
     function selectMove(){
@@ -235,7 +235,7 @@ Rectangle {
 
         uppertab.all_off()
         uppertab.second_tab_button_move.state = "active"
-        mttab.runGroupFeature(4, "active");
+        mttab.runGroupFeature(4, "active", 0, 0, 0);
 
         hideTab()
     }
@@ -245,20 +245,24 @@ Rectangle {
 
         uppertab.all_off()
         uppertab.second_tab_button_rotate.state = "active"
-        mttab.runGroupFeature(5, "active");
+        mttab.runGroupFeature(5, "active", 0, 0, 0);
 
         hideTab()
     }
 
-    function selectZoom(){
-        model_zoom.source = "qrc:/resource/model_zoom_select.png"
+    function selectScale(){
+        model_scale.source = "qrc:/resource/model_scale_select.png"
 
-        var point = world2Screen(Qt.vector3d(0,0,0))
+        uppertab.all_off()
+        uppertab.third_tab_button_scale.state = "active"
+
+        hideTab()
     }
 
     function selectDelete(){
+        uppertab.all_off();
         deletePopUp.visible = true
-        deletePopUp.targetID = qm.getSelectedModelID()
+        deletePopUp.targetID = qm.getselectedModelID()
 
         hideTab()
     }

@@ -57,6 +57,7 @@ public:
     Qt3DCore::QEntity *rotateSphereZ;
 
     // model move components
+    QObject *moveButton;
     QObject *movePopup;
     Qt3DCore::QEntity *managerModel;
     Qt3DCore::QEntity *moveArrow;
@@ -136,13 +137,23 @@ public:
     QObject* layerViewSlider;
 
     vector<GLModel*> glmodels;
-    GLModel* selectedModel = nullptr;
+    vector<GLModel*> selectedModels;
+    vector<Mesh*> copyMeshes;
+
+
 
     int rotateSnapAngle = 0;
     int rotateSnapStartAngle = 0;
-    int groupFunctionIndex;
+    int rotateSnapQuotient = 0;
+    bool groupSelectionActive = false;
+    //bool moveActive = false;
+    bool rotateActive = false;
+    bool orientationActive = false;
+
     QString groupFunctionState;
+    int groupFunctionIndex;
     float progress = 0;
+    void showRotatingSphere();
     void showRotateSphere();
     void showMoveArrow();
     void hideRotateSphere();
@@ -150,6 +161,7 @@ public:
     void mouseHack();
     void initializeUI(QQmlApplicationEngine *e);
     void openModelFile_internal(QString filename);
+    void openArrange();
     void runArrange_internal();
     void disconnectHandlers(GLModel* glmodel);
     void connectHandlers(GLModel* glmodel);
@@ -167,7 +179,7 @@ public:
 
     Q_INVOKABLE QVector3D getSelectedCenter();
     Q_INVOKABLE QVector3D getSelectedSize();
-    Q_INVOKABLE int getSelectedModelID();
+    Q_INVOKABLE int getselectedModelID();
     Q_INVOKABLE void fixMesh();
     Q_INVOKABLE void setHandCursor();
     Q_INVOKABLE void setClosedHandCursor();
@@ -181,6 +193,7 @@ public:
     Q_INVOKABLE void runArrange();
     Q_INVOKABLE void setViewMode(int viewMode);
     Q_INVOKABLE int getViewMode();
+    Q_INVOKABLE void sendUpdateModelInfo();
 
 
 private:
@@ -200,23 +213,36 @@ public slots:
     void openModelFile(QString filename);
     void checkModelFile(int ID);
     void deleteModelFile(int ID);
-    void runGroupFeature(int,QString);
+    void copyModel();
+    void pasteModel();
+    void groupSelectionActivate(bool);
+    void runGroupFeature(int,QString, double, double, double);
+    void multipleModelSelected(int ID);
     void modelSelected(int);
     void modelRotate(int,int);
-
     void modelRotateByNumber(int axis, int, int, int);
     void modelMove(int,int);
     void modelMoveF(int,float);
     void modelMoveByNumber(int axis, int, int);
+    void modelMoveInit();
     void modelMoveDone(int);
+    void totalMoveDone();
+    void modelRotateInit();
     void modelRotateDone(int);
+    void totalRotateDone();
     void resetLayflat();
     void applyArrangeResult(vector<QVector3D>, vector<float>);
-    void cleanSelectedModel(int);
+    void cleanselectedModel(int);
     void extensionSelect();
     void extensionUnSelect();
     void layFlatSelect();
     void layFlatUnSelect();
+    void openRotate();
+    void closeRotate();
+    void openMove();
+    void closeMove();
+    void openOrientation();
+    void closeOrientation();
 
     void viewObjectChanged(bool checked);
     void viewSupportChanged(bool checked);

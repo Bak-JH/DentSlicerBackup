@@ -35,36 +35,44 @@ Rectangle {
 
     property alias second_tab_button_move: second_tab_button_move
     property alias second_tab_button_rotate: second_tab_button_rotate
+    property alias third_tab_button_scale: third_tab_button_scale
 
-    signal runGroupFeature(int type, string state);
+
+    signal runGroupFeature(int type, string state, double arg1, double arg2, double arg3);
     function all_off() {
         first_tab_button_open.state = "inactive";
         first_tab_button_export.state = "inactive";
         first_tab_button_save.state = "inactive";
         second_tab_button_arrange.state = "inactive";
         second_tab_button_layflat.state = "inactive";
-        runGroupFeature(ftrLayFlat, "inactive");
+        runGroupFeature(ftrLayFlat, "inactive", 0, 0, 0);
 
         second_tab_button_move.state = "inactive";
-        runGroupFeature(ftrMove,"inactive");
+        runGroupFeature(ftrMove,"inactive", 0, 0, 0);
         second_tab_button_orient.state = "inactive";
         second_tab_button_rotate.state = "inactive";
-        runGroupFeature(ftrRotate,"inactive");
+        runGroupFeature(ftrRotate,"inactive", 0, 0, 0);
         third_tab_button_autorepair.state = "inactive";
         third_tab_button_cut.state = "inactive";
         //third_tab_button_hollowshell.state = "inactive";
         third_tab_button_shelloffset.state = "inactive";
         third_tab_button_scale.state = "inactive";
+        runGroupFeature(ftrScale, "inactive", 0, 0, 0);
         fourth_tab_button_extend.state = "inactive";
-        runGroupFeature(ftrExtend, "inactive");
+        runGroupFeature(ftrExtend, "inactive", 0, 0, 0);
         fourth_tab_button_label.state = "inactive";
         fourth_tab_button_support.state = "inactive";
 
         arrangePopUp.closePopUp();
         resultPopUp.closePopUp();
         deletePopUp.closePopUp();
+        settingPopup.closePopUp();
+        feedbackPopUp.closePopUp();
+        resultPopUp.closePopUp();
+        if(yesnoPopUp.isFlawOpen)
+            yesnoPopUp.closePopUp();
 
-        scene3d.forceActiveFocus();
+        //scene3d.forceActiveFocus();
 
         console.log("all off");
     }
@@ -278,9 +286,9 @@ Rectangle {
             iconSource1: "qrc:/resource/upper_move.png"
             iconSource2: "qrc:/Resource/upper2_move.png"
             iconText: qsTr("Move")
-            signal runGroupFeature(int type, string state);
+            signal runGroupFeature(int type, string state, double arg1, double arg2, double arg3);
             onButtonClicked:{
-                   runGroupFeature(ftrMove, state);
+                   runGroupFeature(ftrMove, state, 0, 0, 0);
                    console.log("run group featur mov " + ftrMove + "   " + state);
             }
         }
@@ -291,9 +299,9 @@ Rectangle {
             iconSource1: "qrc:/resource/upper_rotate.png"
             iconSource2: "qrc:/Resource/upper2_rotate.png"
             iconText: qsTr("Rotate")
-            signal runGroupFeature(int type, string state);
+            signal runGroupFeature(int type, string state, double arg1, double arg2, double arg3);
             onButtonClicked:{
-                   runGroupFeature(ftrRotate, state);
+                   runGroupFeature(ftrRotate, state, 0, 0, 0);
                 console.log("run group featur rot " + ftrRotate + "   " + state);
             }
 
@@ -305,9 +313,11 @@ Rectangle {
             iconSource1: "qrc:/resource/upper_layflat.png"
             iconSource2: "qrc:/Resource/upper2_layflat.png"
             iconText: qsTr("Lay Flat")
-            signal runGroupFeature(int type, string state);
+            signal runGroupFeature(int type, string state, double arg1, double arg2, double arg3);
             onButtonClicked:{
-                   runGroupFeature(ftrLayFlat, state);
+                if(!qm.isSelected()&& (state == "active"))
+                    window.resultPopUp.openResultPopUp("","You must select at least one model.","")
+                 //runGroupFeature(ftrLayFlat, state, 0, 0, 0);
             }
         }
         UpperButton{
@@ -330,10 +340,11 @@ Rectangle {
             iconSource1: "qrc:/resource/upper_orientation.png"
             iconSource2: "qrc:/Resource/upper2_orient.png"
             iconText: qsTr("Orient")
-            signal runGroupFeature(int type, string state);
+            signal runGroupFeature(int type, string state, double arg1, double arg2, double arg3);
             onButtonClicked:{
-                   runGroupFeature(ftrOrient, state);
+                   runGroupFeature(ftrOrient, state, 0, 0, 0);
             }
+
         }
 
         Rectangle{
@@ -403,12 +414,12 @@ Rectangle {
             }
             visible: if(box_uppertab.box != iconText) return false;
             */
-            signal runGroupFeature(int type, string state);
+            signal runGroupFeature(int type, string state, double arg1, double arg2, double arg3);
             onButtonClicked:{
                 if(!qm.isSelected() && (state == "active"))
                     window.resultPopUp.openResultPopUp("","You must select at least one model.","")
                 else
-                    runGroupFeature(ftrRepair, state);
+                    runGroupFeature(ftrRepair, state, 0, 0, 0);
             }
         }
 
@@ -488,12 +499,12 @@ Rectangle {
             iconSource2: "qrc:/Resource/upper2_extend.png"
             iconText: qsTr("Extend")
 
-            signal runGroupFeature(int type, string state);
+            signal runGroupFeature(int type, string state, double arg1, double arg2, double arg3);
             onButtonClicked:{
                 if(!qm.isSelected() && (state == "active")){
                     window.resultPopUp.openResultPopUp("","You must select at least one model.","")
                 }else{
-                    runGroupFeature(ftrExtend, state);
+                    runGroupFeature(ftrExtend, state, 0, 0, 0);
                 }
             }
         }
@@ -551,9 +562,24 @@ Rectangle {
 
 
         UpperButton{
+            id : fifth_tab_button_setting
+            objectName : "Setting"
+            //anchors.left: parent.left
+            iconSource1: "qrc:/Resource/upper_setting.png"
+            iconSource2: "qrc:/Resource/upper2_setting.png"
+            iconText: qsTr("Setting")
+            MouseArea{
+                anchors.fill: parent
+                onClicked:{
+                    settingPopup.visible = true;
+                }
+            }
+        }
+
+        UpperButton{
             id : fifth_tab_button_feedback
             objectName : "Feedback"
-            //anchors.left: parent.left
+            anchors.left: fifth_tab_button_setting.right
             iconSource1: "qrc:/Resource/upper_feedback.png"
             iconSource2: "qrc:/Resource/upper2_feedback.png"
             iconText: qsTr("Feedback")
@@ -601,10 +627,9 @@ Rectangle {
             //image: ""
             detailline1_vis: false
             detailline2_vis: false
-            applyfinishbutton_vis: true
-
             okbutton_vis: false
             applybutton_vis: false
+            applyfinishbutton_vis: true
             //applybutton_text: "Finish"
             descriptionimage_vis: false
             numberbox_vis: true
@@ -617,19 +642,37 @@ Rectangle {
             numbox_value_x: move_x_value
             numbox_value_y: move_y_value
             numbox_value_z: move_z_value
-            state: second_tab_button_move.state=="active" ? "active" : "inactive"
+
+            signal openMove();
+            signal closeMove();
+
+            state: {
+                if (second_tab_button_move.state=="active"){
+                    return "active";
+                } else {
+                    return "inactive";
+                }
+            }
+
+            onStateChanged: {
+                if (state == "active")
+                    openMove();
+                else
+                    closeMove();
+            }
+
             signal runFeature(int type, int X, int Y);
             onApplyClicked: {
                 console.log("move")
                 runFeature(ftrMove,popup_move.numberbox1_number,popup_move.numberbox2_number);
             }
-            signal runGroupFeature(int type, string state);
+            signal runGroupFeature(int type, string state, double arg1, double arg2, double arg3);
             onFinishClicked:{
-                runGroupFeature(ftrMove, state);
+                runGroupFeature(ftrMove, state, 0, 0, 0);
             }
 
             function onApplyFinishButton(){
-                popup_move.colorApplyFinishButton(1)
+                popup_move.colorApplyFinishButton(0)
             }
             function offApplyFinishButton(){
                 popup_move.colorApplyFinishButton(0);
@@ -648,8 +691,8 @@ Rectangle {
             detailline1_vis: false
             detailline2_vis: false
             okbutton_vis: false
-            applyfinishbutton_vis: true
             applybutton_vis: false
+            applyfinishbutton_vis: true
             //applybutton_text: "Finish"
             descriptionimage_vis: false
             numberbox_vis: true
@@ -664,13 +707,30 @@ Rectangle {
                 console.log("rotate")
                 runFeature(ftrRotate,popup_rotate.numberbox1_number,popup_rotate.numberbox2_number,popup_rotate.numberbox3_number);
             }
-            signal runGroupFeature(int type, string state);
+            signal runGroupFeature(int type, string state, double arg1, double arg2, double arg3);
+            signal closeRotate();
+            signal openRotate();
+
             onFinishClicked:{
-                runGroupFeature(ftrRotate, state);
+                closeRotate();
             }
-            state: second_tab_button_rotate.state=="active" ? "active" : "inactive"
+            state: {
+                if (second_tab_button_rotate.state=="active"){
+                    return "active";
+                } else {
+                    return "inactive";
+                }
+            }
+
+            onStateChanged: {
+                if (state == "active")
+                    openRotate();
+                else
+                    closeRotate();
+            }
+
             function onApplyFinishButton(){
-                popup_rotate.colorApplyFinishButton(1)
+                popup_rotate.colorApplyFinishButton(0)
             }
             function offApplyFinishButton(){
                 popup_rotate.colorApplyFinishButton(0);
@@ -689,9 +749,9 @@ Rectangle {
             detailline1_vis: false
             detailline2_vis: false
             imageHeight: 76
-            applyfinishbutton_vis: true
             okbutton_vis: false
             applybutton_vis: false
+            applyfinishbutton_vis: true
             applybutton_action: false
             applyfinishbutton_text:"Apply"
             applybutton_text: "Finish"
@@ -725,7 +785,7 @@ Rectangle {
                 }
             }
             function onApplyFinishButton(){
-                popup_layflat.colorApplyFinishButton(1)
+                popup_layflat.colorApplyFinishButton(2)
             }
             function offApplyFinishButton(){
                 popup_layflat.colorApplyFinishButton(0);
@@ -752,9 +812,9 @@ Rectangle {
             detailline1_vis: false
             detailline2_vis: false
             imageHeight: 76
-            applyfinishbutton_vis: true
             okbutton_vis: false
             applybutton_vis: false
+            applyfinishbutton_vis: true
             descriptionimage_vis: true
             state: second_tab_button_arrange.state=="active" ? "active" : "inactive"
             signal runFeature();
@@ -767,7 +827,6 @@ Rectangle {
 
 
         //8. PopUp - Orient
-
         PopUp {
             objectName: "orientPopup"
             id: popup_orient
@@ -789,13 +848,24 @@ Rectangle {
                 runFeature(ftrOrient);
             }
             function onApplyFinishButton(){
-                popup_orient.colorApplyFinishButton(1)
+                popup_orient.colorApplyFinishButton(2)
             }
             function offApplyFinishButton(){
                 popup_orient.colorApplyFinishButton(0);
             }
+            signal openOrientation();
+            signal closeOrientation();
 
             state: second_tab_button_orient.state=="active" ? "active" : "inactive"
+            onStateChanged: {
+                if (state == "active"){
+                    console.log("orientation active");
+                    openOrientation();
+                } else {
+                    console.log("orientation inactive");
+                    closeOrientation();
+                }
+            }
         }
 
         //9. PopUp - Scale
@@ -807,12 +877,12 @@ Rectangle {
             detail1: "Current size"
             detail2: "Scale"
             //image: ""
-            detailline1_vis: true
-            detailline2_vis: true
+            detailline1_vis: false
+            detailline2_vis: false
             imageHeight: 112
-            applyfinishbutton_vis: false
             okbutton_vis: false
-            applybutton_vis: true
+            applybutton_vis: false
+            applyfinishbutton_vis: true
             applybutton_text: "Finish"
             descriptionimage_vis: false
             numberbox_vis: true
@@ -825,18 +895,24 @@ Rectangle {
 
             signal openScale();
             signal closeScale();
-            signal runFeature(int type, double scaleX, double scaleY, double scaleZ);
+            //signal runFeature(int type, double scaleX, double scaleY, double scaleZ);
+            signal runGroupFeature(int type, string state, double arg1, double arg2, double arg3);
 
             state: {
                 if (third_tab_button_scale.state=="active" && qm.isSelected()){
-                    openScale();
+                    //openScale();
                     return "active"
                 } else {
-                    closeScale();
+                    //closeScale();
                     return "inactive"
                 }
             }
-
+            onStateChanged: {
+                if (state == "active")
+                    openScale();
+                else
+                    closeScale();
+            }
 
 
             function updateSizeInfo(x,y,z){
@@ -856,9 +932,11 @@ Rectangle {
                 console.log("scale called x y z" + numberbox1_number + numberbox2_number + numberbox3_number);
                 console.log("scale called" + numbox_value_detail2);
                 if (numbox_value_detail2 != 100) // scale by scale value
-                    runFeature(ftrScale, numbox_value_detail2/100, numbox_value_detail2/100, numbox_value_detail2/100);
+                    runGroupFeature(ftrScale, state, numbox_value_detail2/100, numbox_value_detail2/100, numbox_value_detail2/100);
+                    //runFeature(ftrScale, numbox_value_detail2/100, numbox_value_detail2/100, numbox_value_detail2/100);
                 else // scale by definite mm
-                    runFeature(ftrScale, numberbox1_number/numberbox1_number_origin, numberbox2_number/numberbox2_number_origin, numberbox3_number/numberbox3_number_origin);
+                    runGroupFeature(ftrScale, state, numberbox1_number/numberbox1_number_origin, numberbox2_number/numberbox2_number_origin, numberbox3_number/numberbox3_number_origin);
+                    //runFeature(ftrScale, numberbox1_number/numberbox1_number_origin, numberbox2_number/numberbox2_number_origin, numberbox3_number/numberbox3_number_origin);
                 // update scale info
             }
 
@@ -903,10 +981,10 @@ Rectangle {
             image: "qrc:/Resource/popup_image/image_autorepair.png"
             detailline1_vis: false
             detailline2_vis: false
-            imageHeight: 76
-            applyfinishbutton_vis: true
-            applybutton_vis: false
+            imageHeight: 76            
             okbutton_vis: false
+            applybutton_vis: false
+            applyfinishbutton_vis: true
             descriptionimage_vis: true
             //state: third_tab_button_autorepair.state=="active" ? "active" : "inactive"
             state: {
@@ -922,7 +1000,7 @@ Rectangle {
             }
             function onApplyFinishButton(){
                 console.log("r-on")
-                popup_autorepair.colorApplyFinishButton(1)
+                popup_autorepair.colorApplyFinishButton(2)
             }
             function offApplyFinishButton(){
                 console.log("r-off")
@@ -938,11 +1016,11 @@ Rectangle {
             height: 300
             detail1: "Cutting Surface"
             detail2: "After treatment"
-            detailline1_vis: true
-            detailline2_vis: true
-            applyfinishbutton_vis: true
-            applybutton_vis: false
+            detailline1_vis: false
+            detailline2_vis: false
             okbutton_vis:false
+            applybutton_vis: false
+            applyfinishbutton_vis: true
             descriptionimage_vis: false
             leftselectimage_vis: true
             rightselectimage_vis: true
@@ -967,6 +1045,10 @@ Rectangle {
                 console.log("flat mode selected");
                 slider_vis = true;
                 cutModeSelected(1);
+                viewCenter();
+
+                slider_value = 1
+                popup_cut.colorApplyFinishButton(2)
             }
 
             onCurveModeClicked: {
@@ -974,6 +1056,7 @@ Rectangle {
                 slider_vis = false;
                 cutModeSelected(2);
                 viewUp();
+                popup_cut.colorApplyFinishButton(0)
             }
 
             onPlaneSliderValueChanged: {
@@ -1016,6 +1099,15 @@ Rectangle {
                 sceneRoot.cm.camera.translateWorld(Qt.vector3d(0.025,-0.25,0))
 
             }
+            function viewCenter(){
+                sceneRoot.systemTransform.scale3D = Qt.vector3d(0.004,0.004,0.004)
+                sceneRoot.systemTransform.rotationX = -70
+                sceneRoot.systemTransform.rotationY = 0
+                sceneRoot.systemTransform.rotationZ = -40
+
+                sceneRoot.cm.camera.translateWorld(sceneRoot.cm.camera.viewCenter.times(-1))
+                sceneRoot.cm.camera.translateWorld(Qt.vector3d(-0.015,-0.16,0))
+            }
             //Planeslider{id:slider;anchors.right: parent.left;anchors.rightMargin:20;anchors.bottom:parent.bottom;anchors.bottomMargin:-20;}
         }
 
@@ -1030,12 +1122,12 @@ Rectangle {
             detail1: "Hollow Shell"
             detail2: "Offset value"
             //image: ""
-            detailline1_vis: true
-            detailline2_vis: true
+            detailline1_vis: false
+            detailline2_vis: false
             imageHeight: 40
-            applyfinishbutton_vis: true
             okbutton_vis: false
             applybutton_vis: false
+            applyfinishbutton_vis: true
             descriptionimage_vis: false
             numbox_detail2_vis: true
             numberbox_detail2_y: 170
@@ -1121,12 +1213,12 @@ Rectangle {
             detail1: "Direction"
             detail2: "Offset value"
             //image: ""
-            detailline1_vis: true
-            detailline2_vis: true
+            detailline1_vis: false
+            detailline2_vis: false
             imageHeight: 40
-            applyfinishbutton_vis: true
             okbutton_vis: false
             applybutton_vis: false
+            applyfinishbutton_vis: true
             descriptionimage_vis: false
             numbox_detail2_vis: true
             numberbox_detail2_y: 170
@@ -1205,11 +1297,11 @@ Rectangle {
             detail1: "Extend Value"
             detail2: ""
             //image: ""
-            detailline1_vis: true
+            detailline1_vis: false
             detailline2_vis: false
             okbutton_vis: false
-            applyfinishbutton_vis: true
             applybutton_vis: false
+            applyfinishbutton_vis: true
             descriptionimage_vis: false
             numbox_detail2_vis: true
             numberbox_detail2_y: 90
@@ -1225,7 +1317,7 @@ Rectangle {
                 }
             }
             function onApplyFinishButton(){
-                popup_extend.colorApplyFinishButton(1)
+                popup_extend.colorApplyFinishButton(2)
             }
             function offApplyFinishButton(){
                 popup_extend.colorApplyFinishButton(0);
@@ -1250,192 +1342,193 @@ Rectangle {
             //image: ""
             detailline1_vis: false
             detailline2_vis: false
-            applyfinishbutton_vis: false
             okbutton_vis: false
             applybutton_vis: true
+            applyfinishbutton_vis: false
             descriptionimage_vis: false
             state: fourth_tab_button_support.state=="active" ? "active" : "inactive"
         }*/
         PopUp {
-                        id:popup_Support
-                        funcname: "Support"
-                        height: 320
-                        imageHeight: 34
-                        detail1: "Automatic Generation"
-                        Rectangle {
-                            id: support_autoButton
-                            color: parent.color
-                            width: 178
-                            height: 32
-                            radius: 2
-                            border.color: "#cccccc"
-                            anchors.horizontalCenter: parent.horizontalCenter
-                            anchors.top: parent.top
-                            anchors.topMargin: 72
-                            Text {
-                                id: generateText
-                                text: "Generate supports"
-                                anchors.horizontalCenter: parent.horizontalCenter
-                                anchors.verticalCenter: parent.verticalCenter
-                                font.family: mainFont.name
-                                font.pixelSize: 9
-                            }
-                            MouseArea {
-                                anchors.fill: parent
-                                hoverEnabled: true
-                                onEntered: {
-                                    parent.color = "#f9f9f9"
-                                    generateText.color = "#888888"
-                                }
-                                onExited: {
-                                    if (support_autoButton.state == "clicked") {
-                                        parent.color = "#f9f9f9"
-                                        generateText.color = "#888888"
-                                    }
-                                    else {
-                                        parent.color = "#e5e5e5"
-                                        generateText.color = "black"
-                                    }
-                                }
-                                onClicked: {
-                                    support_autoButton.state = "clicked"
-                                    support_addButton.state = "unclicked"
-                                    support_removeButton.state = "unclicked"
-                                }
-                            }
-                            states: [
-                                State {
-                                    name: "clicked"
-                                    PropertyChanges { target: support_autoButton; color: "#f9f9f9" }
-                                    PropertyChanges { target: generateText; color: "#888888" }
-                                },
-                                State {
-                                    name: "unclicked"
-                                    PropertyChanges { target: support_autoButton; color: "#e5e5e5" }
-                                    PropertyChanges { target: generateText; color: "black" }
-                                }
-                            ]
-                        }
-
-                        detail2: "Manual Generation"
-                        Rectangle {
-                            id: support_addButton
-                            color: parent.color
-                            width: 178
-                            height: 32
-                            radius: 2
-                            border.color: "#cccccc"
-                            anchors.horizontalCenter: parent.horizontalCenter
-                            anchors.top: parent.top
-                            anchors.topMargin: 173
-                            Text {
-                                id: addText
-                                text: "Add supports"
-                                anchors.horizontalCenter: parent.horizontalCenter
-                                anchors.verticalCenter: parent.verticalCenter
-                                font.family: mainFont.name
-                                font.pixelSize: 9
-                            }
-                            MouseArea {
-                                anchors.fill: parent
-                                hoverEnabled: true
-                                onEntered: {
-                                    parent.color = "#f9f9f9"
-                                    addText.color = "#888888"
-                                }
-                                onExited: {
-                                    if (support_addButton.state == "clicked") {
-                                        parent.color = "#f9f9f9"
-                                        addText.color = "#888888"
-                                    }
-                                    else {
-                                        parent.color = "#e5e5e5"
-                                        addText.color = "black"
-                                    }
-                                }
-                                onClicked: {
-                                    support_addButton.state = "clicked"
-                                    support_autoButton.state = "unclicked"
-                                    support_removeButton.state = "unclicked"
-                                }
-                            }
-                            states: [
-                                State {
-                                    name: "clicked"
-                                    PropertyChanges { target: support_addButton; color: "#f9f9f9" }
-                                    PropertyChanges { target: addText; color: "#888888" }
-                                },
-                                State {
-                                    name: "unclicked"
-                                    PropertyChanges { target: support_addButton; color: "#e5e5e5" }
-                                    PropertyChanges { target: addText; color: "black" }
-                                }
-                            ]
-                        }
-
-                        Rectangle {
-                            id: support_removeButton
-                            color: parent.color
-                            width: 178
-                            height: 32
-                            radius: 2
-                            border.color: "#cccccc"
-                            anchors.horizontalCenter: parent.horizontalCenter
-                            anchors.top: support_addButton.bottom
-                            anchors.topMargin: 20
-                            Text {
-                                id: removeText
-                                text: "Remove supports"
-                                anchors.horizontalCenter: parent.horizontalCenter
-                                anchors.verticalCenter: parent.verticalCenter
-                                font.family: mainFont.name
-                                font.pixelSize: 9
-                            }
-                            MouseArea {
-                                anchors.fill: parent
-                                hoverEnabled: true
-                                onEntered: {
-                                    parent.color = "#f9f9f9"
-                                    removeText.color = "#888888"
-                                }
-                                onExited: {
-                                    if (support_removeButton.state == "clicked") {
-                                        parent.color = "#f9f9f9"
-                                        removeText.color = "#888888"
-                                    }
-                                    else {
-                                        parent.color = "#e5e5e5"
-                                        removeText.color = "black"
-                                    }
-                                }
-                                onClicked:  {
-                                    support_removeButton.state = "clicked"
-                                    support_addButton.state = "unclicked"
-                                    support_autoButton.state = "unclicked"
-                                }
-                            }
-                            states: [
-                                State {
-                                    name: "clicked"
-                                    PropertyChanges { target: support_removeButton; color: "#f9f9f9" }
-                                    PropertyChanges { target: removeText; color: "#888888" }
-
-                                },
-                                State {
-                                    name: "unclicked"
-                                    PropertyChanges { target: support_removeButton; color: "#e5e5e5" }
-                                    PropertyChanges { target: removeText; color: "black" }
-                                }
-
-                            ]
-                        }
-                        descriptionimage_vis: true
-                        detailline1_vis: true
-                        detailline2_vis: true
-                        okbutton_vis: false
-                        applyfinishbutton_vis: false
-                        applybutton_vis: true
+            id:popup_Support
+            funcname: "Support"
+            height: 320
+            imageHeight: 34
+            detail1: "Automatic Generation"
+            Rectangle {
+                id: support_autoButton
+                color: parent.color
+                width: 178
+                height: 32
+                radius: 2
+                border.color: "#cccccc"
+                anchors.horizontalCenter: parent.horizontalCenter
+                anchors.top: parent.top
+                anchors.topMargin: 72
+                Text {
+                    id: generateText
+                    text: "Generate supports"
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    anchors.verticalCenter: parent.verticalCenter
+                    font.family: mainFont.name
+                    font.pixelSize: 9
+                }
+                MouseArea {
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    onEntered: {
+                        parent.color = "#f9f9f9"
+                        generateText.color = "#888888"
                     }
+                    onExited: {
+                        if (support_autoButton.state == "clicked") {
+                            parent.color = "#f9f9f9"
+                            generateText.color = "#888888"
+                        }
+                        else {
+                            parent.color = "#e5e5e5"
+                            generateText.color = "black"
+                        }
+                    }
+                    onClicked: {
+                        support_autoButton.state = "clicked"
+                        support_addButton.state = "unclicked"
+                        support_removeButton.state = "unclicked"
+                    }
+                }
+                states: [
+                    State {
+                        name: "clicked"
+                        PropertyChanges { target: support_autoButton; color: "#f9f9f9" }
+                        PropertyChanges { target: generateText; color: "#888888" }
+                    },
+                    State {
+                        name: "unclicked"
+                        PropertyChanges { target: support_autoButton; color: "#e5e5e5" }
+                        PropertyChanges { target: generateText; color: "black" }
+                    }
+                ]
+            }
+
+            detail2: "Manual Generation"
+            Rectangle {
+                id: support_addButton
+                color: parent.color
+                width: 178
+                height: 32
+                radius: 2
+                border.color: "#cccccc"
+                anchors.horizontalCenter: parent.horizontalCenter
+                anchors.top: parent.top
+                anchors.topMargin: 173
+                Text {
+                    id: addText
+                    text: "Add supports"
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    anchors.verticalCenter: parent.verticalCenter
+                    font.family: mainFont.name
+                    font.pixelSize: 9
+                }
+                MouseArea {
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    onEntered: {
+                        parent.color = "#f9f9f9"
+                        addText.color = "#888888"
+                    }
+                    onExited: {
+                        if (support_addButton.state == "clicked") {
+                            parent.color = "#f9f9f9"
+                            addText.color = "#888888"
+                        }
+                        else {
+                            parent.color = "#e5e5e5"
+                            addText.color = "black"
+                        }
+                    }
+                    onClicked: {
+                        support_addButton.state = "clicked"
+                        support_autoButton.state = "unclicked"
+                        support_removeButton.state = "unclicked"
+                    }
+                }
+                states: [
+                    State {
+                        name: "clicked"
+                        PropertyChanges { target: support_addButton; color: "#f9f9f9" }
+                        PropertyChanges { target: addText; color: "#888888" }
+                    },
+                    State {
+                        name: "unclicked"
+                        PropertyChanges { target: support_addButton; color: "#e5e5e5" }
+                        PropertyChanges { target: addText; color: "black" }
+                    }
+                ]
+            }
+
+            Rectangle {
+                id: support_removeButton
+                color: parent.color
+                width: 178
+                height: 32
+                radius: 2
+                border.color: "#cccccc"
+                anchors.horizontalCenter: parent.horizontalCenter
+                anchors.top: support_addButton.bottom
+                anchors.topMargin: 20
+                Text {
+                    id: removeText
+                    text: "Remove supports"
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    anchors.verticalCenter: parent.verticalCenter
+                    font.family: mainFont.name
+                    font.pixelSize: 9
+                }
+                MouseArea {
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    onEntered: {
+                        parent.color = "#f9f9f9"
+                        removeText.color = "#888888"
+                    }
+                    onExited: {
+                        if (support_removeButton.state == "clicked") {
+                            parent.color = "#f9f9f9"
+                            removeText.color = "#888888"
+                        }
+                        else {
+                            parent.color = "#e5e5e5"
+                            removeText.color = "black"
+                        }
+                    }
+                    onClicked:  {
+                        support_removeButton.state = "clicked"
+                        support_addButton.state = "unclicked"
+                        support_autoButton.state = "unclicked"
+                    }
+                }
+                states: [
+                    State {
+                        name: "clicked"
+                        PropertyChanges { target: support_removeButton; color: "#f9f9f9" }
+                        PropertyChanges { target: removeText; color: "#888888" }
+
+                    },
+                    State {
+                        name: "unclicked"
+                        PropertyChanges { target: support_removeButton; color: "#e5e5e5" }
+                        PropertyChanges { target: removeText; color: "black" }
+                    }
+
+                ]
+            }
+            descriptionimage_vis: true
+            detailline1_vis: true
+            detailline2_vis: true
+            okbutton_vis: false
+            applybutton_vis: true
+            applyfinishbutton_vis: false
+
+        }
 
         //15. PopUp - Label
         /*PopUp {
@@ -1447,9 +1540,9 @@ Rectangle {
             //image: ""
             detailline1_vis: false
             detailline2_vis: false
-            applyfinishbutton_vis: false
             okbutton_vis: false
             applybutton_vis: true
+            applyfinishbutton_vis: false
             descriptionimage_vis: false
             state: fourth_tab_button_label.state=="active" ? "active" : "inactive"
         }*/
@@ -1714,10 +1807,11 @@ Rectangle {
 
             descriptionimage_vis: true
             detailline1_vis: false
-            detailline2_vis: true
+            detailline2_vis: false
             okbutton_vis:false
-            applyfinishbutton_vis: false
             applybutton_vis: true
+            applyfinishbutton_vis: false
+
             state: {
                 if (fourth_tab_button_label.state=="active" && qm.isSelected()) {
                     openLabelling()
@@ -1730,6 +1824,10 @@ Rectangle {
                     return "inactive"
                 }
             }
+        }
+        SettingPopup{
+            id:settingPopup
+            visible: false
         }
         FeedbackPopUp{
             id:feedbackPopUp

@@ -69,6 +69,7 @@ Rectangle {
     property alias numberbox1_text: numberbox1_text
     property alias numberbox2_text: numberbox2_text
     property alias numberbox3_text: numberbox3_text
+    property alias slider_value : slider.value
 
 
     /*
@@ -125,6 +126,7 @@ Rectangle {
                     //popup_orient.autoOrientSignal();
                     break;
                 case "Scale":
+                    applyClicked();
                     break;
                 case "Auto Repair":
                     applyClicked();
@@ -173,26 +175,28 @@ Rectangle {
     }
 
     function cut_reset(){
-        leftselectimage.image_source = "qrc:/Resource/flat_cut_select.png"
-        leftselectimage.text_color = "white"
-        leftselectimage.color = "#3EABBA"
-        leftselectimage.border.color =  "#3EABBA"
+        leftselectimage.image_source = "qrc:/Resource/flat_cut.png"
+        leftselectimage.text_color = "black"
+        leftselectimage.color = "#FFFFFF"
+        leftselectimage.border.color =  "#CCCCCC"
 
         rightselectimage.image_source = "qrc:/Resource/free_cut.png"
         rightselectimage.text_color ="black"
         rightselectimage.color = "#FFFFFF"
         rightselectimage.border.color =  "#CCCCCC"
 
-        flatModeClicked()
+        //flatModeClicked()
         radiobutton1.checked = true;
     }
 
     function colorApplyFinishButton(mode){
-        console.log(mode)
+        console.log("colorApplyFinishButton mode " + mode)
         if (mode === 1){
             applyfinishbutton.color="#3ea6b7"
-        }else{
+        }else if(mode === 0){
             applyfinishbutton.color="#BBB"
+        }else{
+            applyfinishbutton.color="#999"
         }
 
     }
@@ -201,7 +205,15 @@ Rectangle {
         popup_target.state="inactive";
     }
 
+    /*
+    function isApplyClickable(){
 
+        if(okbutton_vis){
+
+        }else if(applybutton_vis){
+
+        }else if(applyfinishbutton_vis){
+    }*/
 
     states: [
         State{
@@ -245,7 +257,6 @@ Rectangle {
         anchors.left: funcname.left
         anchors.leftMargin: 10
         font.pixelSize: 15
-        //color: "#999999"
         color: "#3EA6B7"
         font.family: mainFont.name
     }
@@ -269,7 +280,6 @@ Rectangle {
         anchors.left: funcname.left
         anchors.leftMargin: 10
         font.pixelSize: 15
-        //color: "#999999"
         color: "#3EA6B7"
 
         font.family: mainFont.name
@@ -309,49 +319,53 @@ Rectangle {
             id: mousearea_apply
             anchors.fill: parent
             hoverEnabled: true
-            //onEntered: parent.color = "#b5b5b5"
-            //onExited: parent.color = "#999999"
-            onEntered : qm.setHandCursor();
-            onExited : qm.resetCursor();
-            onPressed: parent.color = applybutton_action ? "#3ea6b7" : "#999999"
-            onReleased: {applyClicked(); focus_all_off(); numbox_reset(); parent.color = "#999999"}
+            onEntered : {
+                if(parent.color.toString().indexOf("#bbb") < 0)
+                    parent.color = "#3ea6b7"
+                qm.setHandCursor();
+            }
+            onExited : {
+                parent.color = "#999999"
+                qm.resetCursor();
+            }
+            onReleased: {applyClicked(); focus_all_off(); numbox_reset();}
         }
     }
 
     //OK button
-        Rectangle {
-            id: okbutton
-            width: 90
-            height: 20
-            color: "#999999"
-            anchors.bottom: parent.bottom
-            anchors.bottomMargin: 15
+    Rectangle {
+        id: okbutton
+        width: 90
+        height: 20
+        color: "#999999"
+        anchors.bottom: parent.bottom
+        anchors.bottomMargin: 15
+        anchors.horizontalCenter: parent.horizontalCenter
+        Text {
+            id: okbutton_text
+            anchors.verticalCenter: parent.verticalCenter
             anchors.horizontalCenter: parent.horizontalCenter
-            Text {
-                id: okbutton_text
-                anchors.verticalCenter: parent.verticalCenter
-                anchors.horizontalCenter: parent.horizontalCenter
-                text: "OK"
-                color: "#ffffff"
-                font.pixelSize: 16
-                font.family: mainFont.name
-            }
-            MouseArea {
-                id: mousearea_ok
-                anchors.fill: parent
-                hoverEnabled: true
-                onEntered:{
-                    qm.setHandCursor();
-                    parent.color = "#BCBCBE"
-                }
-                onExited:{
-                    qm.resetCursor();
-                    parent.color = "#999999"
-                }
-                onPressed: parent.color = "#3ea6b7"
-                onReleased: {destroy_popup();focus_all_off(); numbox_reset();  parent.color = "#999999"}
-            }
+            text: "OK"
+            color: "#ffffff"
+            font.pixelSize: 16
+            font.family: mainFont.name
         }
+        MouseArea {
+            id: mousearea_ok
+            anchors.fill: parent
+            hoverEnabled: true
+            onEntered:{
+                qm.setHandCursor();
+                if(parent.color.toString().indexOf("#bbb") < 0)
+                    parent.color = "#3ea6b7"
+            }
+            onExited:{
+                qm.resetCursor();
+                parent.color = "#999999"
+            }
+            onReleased: {destroy_popup();focus_all_off(); numbox_reset();}
+        }
+    }
 
     //Description image
     Rectangle {
@@ -372,7 +386,6 @@ Rectangle {
 
     //Apply-Finish button
     Rectangle {
-
         id: applyfinishbutton
         width: 111.6
         height: 30.7
@@ -381,6 +394,7 @@ Rectangle {
         anchors.bottomMargin: 7
         anchors.right: parent.horizontalCenter
         anchors.rightMargin: 3.5
+        property color beforeHorver : "#BBBBBB";
         Text {
             id: applyfinishbutton_text
             anchors.verticalCenter: parent.verticalCenter
@@ -394,12 +408,17 @@ Rectangle {
             id: mousearea_applyfinish_apply
             anchors.fill: parent
             hoverEnabled: true
-            onEntered : qm.setHandCursor();
-            onExited : qm.resetCursor();
-            //onEntered: parent.color = "#BCBCBE"
-            //onExited: parent.color = "#999999"
-            //onPressed: parent.color = "#3ea6b7"
-            onReleased: {do_apply(funcname.text); /*all_off();*/ focus_all_off() ;numbox_reset();parent.color = "#BBB"}
+            onEntered : {
+                qm.setHandCursor();
+                parent.beforeHorver = parent.color
+                if(parent.color.toString().indexOf("#bbb") < 0)
+                    parent.color = "#3ea6b7"
+            }
+            onExited : {
+                qm.resetCursor();
+                parent.color = parent.beforeHorver
+            }
+            onReleased: {do_apply(funcname.text); /*all_off();*/ focus_all_off() ;numbox_reset()}
         }
     }
     Rectangle {
@@ -425,14 +444,14 @@ Rectangle {
             hoverEnabled: true
             onEntered:{
                 qm.setHandCursor();
-                parent.color = "#BCBCBE"
+                if(parent.color.toString().indexOf("#bbb") < 0)
+                    parent.color = "#3ea6b7"
             }
             onExited:{
                 qm.resetCursor();
                 parent.color = "#999999"
             }
-            onPressed: parent.color = "#3ea6b7"
-            onReleased: {finishClicked(); all_off(); focus_all_off(); numbox_reset(); parent.color = "#999999"}
+            onReleased: {finishClicked(); all_off(); focus_all_off(); numbox_reset();}
         }
     }
 
@@ -749,17 +768,12 @@ Rectangle {
 
                         if (text === "") text = "0"
                         numberbox1_number = parseFloat(text)
-                        //numberbox1_number = parseInt(text,10)
-                        console.log(numberbox1_number);
-                        //if (numberbox1_number != 0 ) applyfinishbutton.color = "#3ea6b7"
-                        console.log(applyfinishbutton.color);
-                        //if (numberbox1_number == 0 && numberbox2_number == 0 && numberbox3_number==0 ) applyfinishbutton.color = "#999999"
 
-                        if (numberbox1_text.text === "0" && numberbox2_text.text === "0" && numberbox3_text.text === "0"){
+                        if ((numberbox1_text.text === "0" || numberbox1_text.text === "") && (numberbox2_text.text === "0" || numberbox2_text.text === "") && (numberbox3_text.text === "0" || numberbox3_text.text === "" || !numberboxset3.visible)){
                             colorApplyFinishButton(0)
                         }
                         else{
-                            colorApplyFinishButton(1)
+                            colorApplyFinishButton(2)
                         }
                     }
                     style: TextFieldStyle {
@@ -900,17 +914,14 @@ Rectangle {
                             text = text.substring(0,6)
                         }
 
-                        if (text === "") text = "0"
-                        //numberbox2_number = parseInt(text,10)
+                        if (text === "") text = "0";
                         numberbox2_number = parseFloat(text)
-                     //   if (numberbox2_number != 0 ) applyfinishbutton.color = "#3ea6b7"
-                     //   if (numberbox1_number == 0 && numberbox2_number == 0 && numberbox3_number==0 ) applyfinishbutton.color = "#999999"
 
-                        if (numberbox1_text.text === "0" && numberbox2_text.text === "0" && numberbox3_text.text === "0"){
+                        if ((numberbox1_text.text === "0" || numberbox1_text.text === "") && (numberbox2_text.text === "0" || numberbox2_text.text === "") && (numberbox3_text.text === "0" || numberbox3_text.text === "" || !numberboxset3.visible)){
                             colorApplyFinishButton(0)
                         }
                         else{
-                            colorApplyFinishButton(1)
+                            colorApplyFinishButton(2)
                         }
                     }
                     style: TextFieldStyle {
@@ -1048,16 +1059,14 @@ Rectangle {
                             text = text.substring(0,6)
                         }
 
-                        if (text === "") text = "0"
-                        //numberbox3_number = parseInt(text,10)
+                        if (text === "") text = "0";
                         numberbox3_number = parseFloat(text)
-                       // if (numberbox3_number != 0 ) applyfinishbutton.color = "#3ea6b7"
-                       // if (numberbox1_number == 0 && numberbox2_number == 0 && numberbox3_number==0 ) applyfinishbutton.color = "#999999"
-                        if (numberbox1_text.text === "0" && numberbox2_text.text === "0" && numberbox3_text.text === "0"){
+
+                        if ((numberbox1_text.text === "0" || numberbox1_text.text === "") && (numberbox2_text.text === "0" || numberbox2_text.text === "") && (numberbox3_text.text === "0" || numberbox3_text.text === "" || !numberboxset3.visible)){
                             colorApplyFinishButton(0)
                         }
                         else{
-                            colorApplyFinishButton(1)
+                            colorApplyFinishButton(2)
                         }
                     }
                     style: TextFieldStyle {
@@ -1216,7 +1225,6 @@ Rectangle {
                 anchors.verticalCenter: parent.verticalCenter
                 horizontalAlignment: TextInput.AlignRight
                 placeholderText: numbox_value_detail2
-                maximumLength: 3
                 font.pixelSize: 12
                 font.family: mainFont.name
                 textColor: focus ? "black" : "#595959"
@@ -1227,6 +1235,11 @@ Rectangle {
                     }else{
                         text = text.charAt(0).replace(/[^1-9.]/g,'')+text.substring(1,text.length).replace(/[^0-9.]/g, '');
                     }
+
+                    /*if (parseFloat(text) > 100){
+                        text = text.slice(0,-1)
+                    }*/
+
                     numbox_value_detail2 = parseFloat(text)
                 }
                 style: TextFieldStyle {

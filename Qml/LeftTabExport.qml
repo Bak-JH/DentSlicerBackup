@@ -104,16 +104,13 @@ Rectangle {
             hoverEnabled: true
             onEntered: {
                 qm.setHandCursor();
-                parent.color = "#b5b5b5"
+                parent.color = "#3ea6b7"
             }
             onExited: {
                 qm.resetCursor();
                 parent.color = "#999999"
             }
-            onPressed: parent.color = "#3ea6b7"
             onReleased: {
-                parent.color = "#999999"
-
                 function collectConfigurations(){
                     var configurations = {};
 
@@ -167,16 +164,14 @@ Rectangle {
             hoverEnabled: true
             onEntered:{
                 qm.setHandCursor();
-                parent.color = "#b5b5b5"
+                parent.color = "#3ea6b7"
             }
             onExited:{
                 qm.resetCursor();
                 parent.color = "#999999"
             }
-            onPressed: parent.color = "#3ea6b7"
             onReleased: {
                 lefttabExport.visible = false;
-                parent.color = "#999999"
             }
         }
     }

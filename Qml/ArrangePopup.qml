@@ -36,7 +36,7 @@ Rectangle {
             height:20
             id: result_text
 
-            text: "Click Apply to arrange the models."
+            text: "Click Apply to auto-arrange models"
             anchors.top: parent.top
             anchors.topMargin: 28
             anchors.horizontalCenter: parent.horizontalCenter
@@ -81,18 +81,16 @@ Rectangle {
                 hoverEnabled: true
                 onEntered:{
                     qm.setHandCursor();
-                    parent.color = "#BCBCBE"
+                    parent.color = "#3ea6b7"
                 }
                 onExited:{
                     qm.resetCursor();
-                    parent.color = "#A3A3A5"
+                    parent.color = "#999999"
                 }
-                onPressed: parent.color = "#3ea6b7"
                 onReleased: {
                     qm.runArrange();
                     closePopUp();
                     uppertab.all_off();
-                    parent.color = "#A3A3A5"
                 }
             }
         }
@@ -120,17 +118,15 @@ Rectangle {
                 hoverEnabled: true
                 onEntered:{
                     qm.setHandCursor();
-                    parent.color = "#BCBCBE"
+                    parent.color = "#3ea6b7"
                 }
                 onExited:{
                     qm.resetCursor();
-                    parent.color = "#A3A3A5"
+                    parent.color = "#999999"
                 }
-                onPressed: parent.color = "#3ea6b7"
                 onReleased: {
                     closePopUp();
                     uppertab.all_off();
-                    parent.color = "#A3A3A5"
                 }
             }
         }

@@ -105,6 +105,7 @@ public:
     GLModel *shadowModel = NULL; // GLmodel's sparse mesh that gets picker input
     GLModel *leftModel = NULL;
     GLModel *rightModel = NULL;
+    GLModel *twinModel = NULL; // saves cut right for left, left for right models
 
     // Core mesh structures
     Mesh* mesh;
@@ -139,7 +140,7 @@ public:
     QGeometryRenderer* m_geometryRenderer;
     Qt3DRender::QObjectPicker *m_objectPicker;
     Qt3DCore::QTransform *m_transform;
-    QVector3D m_translation;
+    //QVector3D m_translation;
 
     // feature hollowshell
     float hollowShellRadius = 0;
@@ -151,6 +152,7 @@ public:
     double shellOffsetFactor;
 
     std::vector<QVector3D> cuttingPoints;
+    vector<QEntity*> cuttingContourCylinders;
     Plane cuttingPlane;
 
     Qt3DExtras::QPlaneMesh* clipPlane[2];
@@ -182,11 +184,13 @@ public:
     void moveModelMesh(QVector3D direction);
     // Model Mesh rotate
     void rotateModelMesh(int Axis, float Angle);
+    void rotateModelMesh(QMatrix3x3 matrix);
     void rotateModelMesh(QMatrix4x4 matrix);
     // Model Mesh scale
     void scaleModelMesh(float scaleX, float scaleY, float scaleZ);
     // Model Cut
     void addCuttingPoint(QVector3D v);
+    void removeCuttingPoint(int idx);
     void removeCuttingPoints();
     void drawLine(QVector3D endpoint);
     //void bisectModel(Mesh* mesh, Plane plane, Mesh* leftMesh, Mesh* rightMesh);
@@ -220,7 +224,7 @@ private:
     int v_cnt;
     int f_cnt;
     QNode* m_parent;
-    QVector3D lastpoint;    
+    QVector3D lastpoint;
     QVector2D prevPoint;
     void initialize(const int& faces);
     void applyGeometry();
@@ -246,6 +250,7 @@ private:
     bool supportViewActive = false;
 
     bool isMoved = false;
+    bool isReleased = true;
 
     int viewMode = -1;
 
@@ -264,6 +269,7 @@ signals:
 public slots:
     // Model Undo & Redo
     void saveUndoState();
+    void saveUndoState_internal();
     void loadUndoState();
     void loadRedoState();
 
@@ -273,7 +279,6 @@ public slots:
     void handlePickerClickedLayflat(MeshFace shadow_meshface);
     void mgoo(Qt3DRender::QPickEvent*);
     void pgoo(Qt3DRender::QPickEvent*);
-    void rgoo(Qt3DRender::QPickEvent*);
     void engoo();
     void exgoo();
 
@@ -287,6 +292,8 @@ public slots:
     void generateLayFlat();
 
     // Model Cut
+    void removeCuttingContour();
+    void generateCuttingContour(vector<QVector3D> cuttingContour);
     void generateClickablePlane();
     void generatePlane();
     void removePlane();

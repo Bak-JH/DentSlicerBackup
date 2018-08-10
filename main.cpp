@@ -11,10 +11,12 @@
 #include "QtConcurrent/QtConcurrent"
 #include "QFuture"
 #include <QSplashScreen>
+#include "utils/updatechecker.h"
 //#include <QTranslator>
 
 using namespace Qt3DCore;
 QmlManager *qmlManager;
+
 
 int main(int argc, char **argv)
 {
@@ -35,16 +37,12 @@ int main(int argc, char **argv)
     QSplashScreen *splash = new QSplashScreen(pixmap);
     splash->show();
 
-    //QCursor cursorTarget1 = QCursor(QPixmap(":/resource/cursor.png"));
-    //QCursor cursorTarget2 = QCursor(QPixmap(":/resource/pen.png"));
-    //app.setOverrideCursor(cursorTarget2);
 
-    //app.changeOverrideCursor(cursorTarget2);
     QScopedPointer<QuaternionHelper> qq(new QuaternionHelper);
     qmlManager = new QmlManager();
     QScopedPointer<QmlManager> qm(qmlManager);
 
-    //engine.rootContext()->setContextProperty("qm", qm.data());
+
     engine.rootContext()->setContextProperty("qm", qm.data());
     //FindItemByName(&engine, "slicing_data")->setContextProperty("qm", qmlManager);
     engine.rootContext()->setContextProperty("qq",qq.data());
@@ -52,13 +50,20 @@ int main(int argc, char **argv)
 
     engine.load(QUrl(QStringLiteral("qrc:/Qml/main.qml")));
 
+    // update module codes
+    UpdateChecker* up = new UpdateChecker();
+    up->checkForUpdates();
+    //initWinSparkle();
+    //checkForUpdates();
+
+
+    //language patch
     //engine.retranslate();
 
     qmlManager->initializeUI(&engine);
-    //qmlManager->openModelFile("C:/Users/diridiri/Desktop/DLP/DLPslicer/partial2_flip.stl");//DLPslicer/partial2_flip.stl");
     splash->close();
 
-    //qmlManager->mainWindow->setProperty("visible",true);
+    qmlManager->mainWindow->setProperty("visible",true);
     //qmlManager->loginWindow->setProperty("visible",true);
 
     QSurfaceFormat format;
@@ -77,4 +82,3 @@ int main(int argc, char **argv)
 
     return app.exec();
 }
-

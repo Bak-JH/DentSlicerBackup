@@ -7,7 +7,8 @@ import QtQuick.Controls.Private 1.0
 
 Item {
     width: parent.width
-    height: 14
+    height: 24 //14
+
 
     property string columnName
     property string columnText
@@ -17,7 +18,6 @@ Item {
         width: 116
         height: parent.height
         anchors.left: parent.left
-        anchors.bottom: parent.bottom
         anchors.verticalCenter: parent.verticalCenter
 
         font.pixelSize: 14

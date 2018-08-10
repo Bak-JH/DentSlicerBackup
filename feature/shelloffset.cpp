@@ -7,6 +7,8 @@ void shellOffset(GLModel* glmodel, float factor){
     Mesh* offsetMesh = new Mesh();
     offsetMesh->faces.reserve(glmodel->mesh->faces.size()*4);
     offsetMesh->vertices.reserve(glmodel->mesh->faces.size()*4);
+    offsetMesh->prevMesh = glmodel->mesh->prevMesh;
+    offsetMesh->nextMesh = glmodel->mesh->nextMesh;
 
     vector<MeshFace> unconnectedMeshFaces;
     vector<MeshFace> unconnectedOffsetMeshFaces;

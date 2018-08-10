@@ -77,8 +77,11 @@ Entity {
         id : keyboardDevice
     }
 
+    signal copy();
+    signal paste();
     signal unDo();
     signal reDo();
+    signal groupSelectionActivate(bool b);
 
     KeyboardHandler{
         focus : true
@@ -88,8 +91,9 @@ Entity {
         onPressed: {
             console.log(event.key);
             if (event.key === Qt.Key_Delete) {
-                deletePopUp.targetID = qm.getSelectedModelID()
+                deletePopUp.targetID = qm.getselectedModelID()
                 if (deletePopUp.targetID != -1){
+                    uppertab.all_off();
                     deletePopUp.visible = true
                     mttab.hideTab();
                 }
@@ -106,9 +110,18 @@ Entity {
             } else if (event.matches(StandardKey.Open)){
                 openFile();
             } else if (event.matches(StandardKey.Copy)){
-
+                copy();
             } else if (event.matches(StandardKey.Paste)){
-
+                paste();
+            } else if (event.key === Qt.Key_Shift){
+                console.log("shift pressed");
+                groupSelectionActivate(true);
+            }
+        }
+        onReleased:{
+            if (event.key === Qt.Key_Shift){
+                console.log("shift released");
+                groupSelectionActivate(false);
             }
         }
     }
