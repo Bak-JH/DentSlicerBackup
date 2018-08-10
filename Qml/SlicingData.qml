@@ -70,6 +70,9 @@ Rectangle {
                 onEntered:{
                     qm.setHandCursor();
                 }
+                onClicked:{
+                    qm.sendUpdateModelInfo();
+                }
                 onExited:{
                     qm.resetCursor();
                 }
@@ -138,12 +141,18 @@ Rectangle {
             Connections {
                 target: qm
                 onUpdateModelInfo:{
-                    slicing_time.inputData = parseInt(printing_time/60)+"h "+printing_time%60+"m";
-                    slicing_layer.inputData = layer+" layer";
-
-                    slicing_size.inputData = xyz;
-                    slicing_volume.inputData = volume.toFixed(1)+ " ml";
-
+                    if (printing_time != 0){
+                        slicing_time.inputData = parseInt(printing_time/60)+"h "+printing_time%60+"m";
+                    }
+                    if (layer != 0){
+                        slicing_layer.inputData = layer+" layer";
+                    }
+                    if (xyz != ""){
+                        slicing_size.inputData = xyz;
+                    }
+                    if (volume != 0){
+                        slicing_volume.inputData = volume.toFixed(1)+ " ml";
+                    }
                 }
             }
         }

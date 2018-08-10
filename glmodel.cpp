@@ -133,6 +133,16 @@ GLModel::GLModel(QObject* mainWindow, QNode *parent, Mesh* loadMesh, QString fna
     */
 
     qDebug() << "adding part " << fname.toStdString().c_str();
+
+
+    // reserve cutting points, contours
+    sphereEntity.reserve(50);
+    sphereMesh.reserve(50);
+    sphereMaterial.reserve(50);
+    sphereTransform.reserve(50);
+    cuttingPoints.reserve(50);
+    cuttingContourCylinders.reserve(50);
+
     qmlManager->addPart(getFileName(fname.toStdString().c_str()), ID);
 }
 
@@ -143,10 +153,9 @@ void GLModel::addMouseHandlers(){
     m_objectPicker->setHoverEnabled(true);
     //m_objectPicker->setDragEnabled(true);
     // add only m_objectPicker
-    QObject::connect(m_objectPicker, SIGNAL(clicked(Qt3DRender::QPickEvent*)), this, SLOT(handlePickerClicked(Qt3DRender::QPickEvent*)));
+    QObject::connect(m_objectPicker, SIGNAL(released(Qt3DRender::QPickEvent*)), this, SLOT(handlePickerClicked(Qt3DRender::QPickEvent*)));
     QObject::connect(m_objectPicker, SIGNAL(moved(Qt3DRender::QPickEvent*)), this, SLOT(mgoo(Qt3DRender::QPickEvent*)));
     QObject::connect(m_objectPicker, SIGNAL(pressed(Qt3DRender::QPickEvent*)), this, SLOT(pgoo(Qt3DRender::QPickEvent*)));
-    QObject::connect(m_objectPicker, SIGNAL(released(Qt3DRender::QPickEvent*)), this, SLOT(rgoo(Qt3DRender::QPickEvent*)));
     QObject::connect(m_objectPicker, SIGNAL(entered()), this, SLOT(engoo()));
     QObject::connect(m_objectPicker, SIGNAL(exited()), this, SLOT(exgoo()));
     addComponent(m_objectPicker);
@@ -157,10 +166,9 @@ void GLModel::removeMouseHandlers(){
         return;
     //m_objectPicker->setDragEnabled(true);
     // add only m_objectPicker
-    QObject::disconnect(m_objectPicker, SIGNAL(clicked(Qt3DRender::QPickEvent*)), this, SLOT(handlePickerClicked(Qt3DRender::QPickEvent*)));
+    QObject::disconnect(m_objectPicker, SIGNAL(released(Qt3DRender::QPickEvent*)), this, SLOT(handlePickerClicked(Qt3DRender::QPickEvent*)));
     QObject::disconnect(m_objectPicker, SIGNAL(moved(Qt3DRender::QPickEvent*)), this, SLOT(mgoo(Qt3DRender::QPickEvent*)));
     QObject::disconnect(m_objectPicker, SIGNAL(pressed(Qt3DRender::QPickEvent*)), this, SLOT(pgoo(Qt3DRender::QPickEvent*)));
-    QObject::disconnect(m_objectPicker, SIGNAL(released(Qt3DRender::QPickEvent*)), this, SLOT(rgoo(Qt3DRender::QPickEvent*)));
     QObject::disconnect(m_objectPicker, SIGNAL(entered()), this, SLOT(engoo()));
     QObject::disconnect(m_objectPicker, SIGNAL(exited()), this, SLOT(exgoo()));
     removeComponent(m_objectPicker);
@@ -432,7 +440,6 @@ void GLModel::updateModelMesh(){
     QMetaObject::invokeMethod(qmlManager->boundedBox, "setSize", Q_ARG(QVariant, mesh->x_max - mesh->x_min),
                                                      Q_ARG(QVariant, mesh->y_max - mesh->y_min),
                                                      Q_ARG(QVariant, mesh->z_max - mesh->z_min));
-
     checkPrintingArea();
     QMetaObject::invokeMethod(qmlManager->scalePopup, "updateSizeInfo", Q_ARG(QVariant, mesh->x_max-mesh->x_min), Q_ARG(QVariant, mesh->y_max-mesh->y_min), Q_ARG(QVariant, mesh->z_max-mesh->z_min));
     qDebug() << "model transform :" <<m_transform->translation() << mesh->x_max << mesh->x_min << mesh->y_max << mesh->y_min << mesh->z_max << mesh->z_min;
@@ -907,7 +914,7 @@ void GLModel::addIndexes(vector<int> indexes){
 
 void GLModel::handlePickerClickedFreeCut(Qt3DRender::QPickEvent* pick)
 {
-    if ((pick->position().x() < 260 && pick->position().y() < 330)|| cutMode == 1) // cut panel and if cut mode isn't freecut
+    if ((pick->position().x() < 260 && pick->position().y() < 330)|| cutMode == 1 || pick->button() != Qt3DRender::QPickEvent::Buttons::LeftButton) // cut panel and if cut mode isn't freecut
         return;
     qDebug() << pick->position();
     qDebug() << "handle picker clicked freecut";
@@ -917,6 +924,7 @@ void GLModel::handlePickerClickedFreeCut(Qt3DRender::QPickEvent* pick)
     result_v = result_v*2;
 
     bool found_nearby_v = false;
+
     for (int i=0; i<parentModel->cuttingPoints.size(); i++){
         if (result_v.distanceToPoint(parentModel->cuttingPoints[i]) <0.5f){
             parentModel->removeCuttingPoint(i);
@@ -942,7 +950,7 @@ void GLModel::handlePickerClickedFreeCut(Qt3DRender::QPickEvent* pick)
         parentModel->generateCuttingContour(parentModel->cuttingPoints);
     }
 
-    if (parentModel->cuttingPoints.size() > 2)
+    if (parentModel->cuttingPoints.size() >= 2)
         QMetaObject::invokeMethod(qmlManager->cutPopup, "colorApplyFinishButton", Q_ARG(QVariant, 2));
     else
         QMetaObject::invokeMethod(qmlManager->cutPopup, "colorApplyFinishButton", Q_ARG(QVariant, 0));
@@ -951,9 +959,26 @@ void GLModel::handlePickerClickedFreeCut(Qt3DRender::QPickEvent* pick)
 
 void GLModel::handlePickerClicked(QPickEvent *pick)
 {
-    qDebug() << "handle Picker clicked";
+    qDebug() << "handle Picker clicked" << pick->buttons() << pick->button();
     if (!parentModel)
         return;
+
+
+    //---------------- rgoo routine init --------------------
+    m_objectPicker->setDragEnabled(false);
+    m_transform->setScale3D(QVector3D(1,1,1));
+    qmlManager->resetCursor();
+
+    isReleased = true;
+    qDebug() << "Released";
+
+    if (isMoved){
+        qmlManager->modelMoveDone(3);
+        isMoved = false;
+        return;
+    }
+
+    //---------------- rgoo routine end --------------------
 
     if (qmlManager->yesno_popup->property("isFlawOpen").toBool())
         return;
@@ -1128,7 +1153,7 @@ void GLModel::handlePickerClickedLayflat(MeshFace shadow_meshface){
     tmp->setRotationX(angleX);
     tmp->setRotationY(angleY);
     rotateModelMesh(tmp->matrix());
-    QObject::disconnect(m_objectPicker,SIGNAL(clicked(Qt3DRender::QPickEvent*)), this, SLOT(handlePickerClickedLayflat(Qt3DRender::QPickEvent*)));
+    QObject::disconnect(m_objectPicker,SIGNAL(released(Qt3DRender::QPickEvent*)), this, SLOT(handlePickerClickedLayflat(Qt3DRender::QPickEvent*)));
     delete m_objectPicker;
     shadowModel->m_objectPicker->setEnabled(true);
     //closeLayflat();
@@ -1370,8 +1395,9 @@ void GLModel::generateCuttingContour(vector<QVector3D> cuttingContour){
         tx = from.x() + w/2;
         ty = from.y() + h/2;
         tz = from.z() + d/2;
-        anglex = acos(h/l)*180/3.14159265;
-        angley = acos(d/lxz)*180/3.14159265;
+        anglex = (l==0)? 90:acos(h/l)*180/3.14159265;
+        angley = (lxz==0)? 90:acos(d/lxz)*180/3.14159265;
+
         QVector3D QVx(static_cast<float>(1), static_cast<float>(0), static_cast<float>(0));
         QVector3D QVy(static_cast<float>(0), static_cast<float>(((w<0)?-1:1)), static_cast<float>(0));
 
@@ -1451,7 +1477,7 @@ void GLModel::generatePlane(){
         parentModel->planeObjectPicker[i]->setHoverEnabled(true);
         parentModel->planeObjectPicker[i]->setEnabled(true);
         //QObject::connect(parentModel->planeObjectPicker[i], SIGNAL(clicked(Qt3DRender::QPickEvent*)), this, SLOT(handlePickerClicked(Qt3DRender::QPickEvent*)));
-        QObject::connect(parentModel->planeObjectPicker[i], SIGNAL(clicked(Qt3DRender::QPickEvent*)), this, SLOT(handlePickerClickedFreeCut(Qt3DRender::QPickEvent*)));//SLOT(handlePickerClicked(Qt3DRender::QPickEvent*)));
+        QObject::connect(parentModel->planeObjectPicker[i], SIGNAL(released(Qt3DRender::QPickEvent*)), this, SLOT(handlePickerClickedFreeCut(Qt3DRender::QPickEvent*)));//SLOT(handlePickerClicked(Qt3DRender::QPickEvent*)));
         parentModel->planeEntity[i]->addComponent(parentModel->planeObjectPicker[i]);
 
         parentModel->planeEntity[i]->addComponent(parentModel->clipPlane[i]);
@@ -1515,36 +1541,30 @@ void GLModel::addCuttingPoint(QVector3D v){
 void GLModel::removeCuttingPoint(int idx){
     qDebug()<< "cutting points : " << cuttingPoints.size();
 
-    /*int mesh_idx, transform_idx, material_idx;
-    mesh_idx = sphereMesh.size()-sphereEntity.size()+idx;
-    transform_idx = sphereTransform.size()-sphereEntity.size()+idx;
-    material_idx = sphereMaterial.size()-sphereEntity.size()+idx;
-
-    sphereEntity[idx]->removeComponent(sphereMesh[mesh_idx]);
-    sphereEntity[idx]->removeComponent(sphereTransform[transform_idx]);
-    sphereEntity[idx]->removeComponent(sphereMaterial[material_idx]);
+    sphereEntity[idx]->removeComponent(sphereMesh[idx]);
+    sphereEntity[idx]->removeComponent(sphereTransform[idx]);
+    sphereEntity[idx]->removeComponent(sphereMaterial[idx]);
     sphereEntity[idx]->deleteLater();
-    sphereMesh[mesh_idx]->deleteLater();
-    sphereTransform[transform_idx]->deleteLater();
-    sphereMaterial[material_idx]->deleteLater();
+    sphereMesh[idx]->deleteLater();
+    sphereTransform[idx]->deleteLater();
+    sphereMaterial[idx]->deleteLater();
     sphereEntity.erase(sphereEntity.begin()+idx);
-    sphereMesh.erase(sphereMesh.begin()+mesh_idx);
-    sphereTransform.erase(sphereTransform.begin()+transform_idx);
-    sphereMaterial.erase(sphereMaterial.begin()+material_idx);
-    cuttingPoints.erase(cuttingPoints.begin()+idx);*/
+    sphereMesh.erase(sphereMesh.begin()+idx);
+    sphereTransform.erase(sphereTransform.begin()+idx);
+    sphereMaterial.erase(sphereMaterial.begin()+idx);
+    cuttingPoints.erase(cuttingPoints.begin()+idx);
 
-    sphereEntity[sphereEntity.size()-1]->removeComponent(sphereMesh[sphereMesh.size()-1]);
+    /*sphereEntity[sphereEntity.size()-1]->removeComponent(sphereMesh[sphereMesh.size()-1]);
     sphereEntity[sphereEntity.size()-1]->removeComponent(sphereTransform[sphereTransform.size()-1]);
     sphereEntity[sphereEntity.size()-1]->removeComponent(sphereMaterial[sphereMaterial.size()-1]);
     sphereEntity.pop_back();
     sphereMesh.pop_back();
     sphereTransform.pop_back();
     sphereMaterial.pop_back();
-    cuttingPoints.pop_back();
+    cuttingPoints.pop_back();*/
 }
 
 void GLModel::removeCuttingPoints(){
-
     qDebug() << "in the removeCuttingPOints";
 
     qDebug() << "ok till here";
@@ -1552,7 +1572,15 @@ void GLModel::removeCuttingPoints(){
         sphereEntity[i]->removeComponent(sphereMesh[i]);
         sphereEntity[i]->removeComponent(sphereTransform[i]);
         sphereEntity[i]->removeComponent(sphereMaterial[i]);
+        sphereEntity[i]->deleteLater();
+        sphereMesh[i]->deleteLater();
+        sphereTransform[i]->deleteLater();
+        sphereMaterial[i]->deleteLater();
     }
+    sphereEntity.clear();
+    sphereMesh.clear();
+    sphereTransform.clear();
+    sphereMaterial.clear();
     cuttingPoints.clear();
 }
 
@@ -1717,49 +1745,29 @@ void GLModel::mgoo(Qt3DRender::QPickEvent* v)
 
     qmlManager->moveButton->setProperty("state", "active");
     qmlManager->setClosedHandCursor();
-    isMoved = true;
+
+    if (!isMoved){ // called only once on dragged
+        parentModel->saveUndoState();
+        isMoved = true;
+    }
+
     QVector2D currentPoint = (QVector2D)v->position();
 
-    QList<QVector3D> targetPoints;
+    QVector3D xAxis3D = QVector3D(1,0,0);
+    QVector3D yAxis3D =  QVector3D(0,1,0);
+    QVector2D xAxis2D = (world2Screen(lastpoint+xAxis3D) - world2Screen(lastpoint));
+    QVector2D yAxis2D = (world2Screen(lastpoint+yAxis3D) - world2Screen(lastpoint));
+    QVector2D target = currentPoint - prevPoint;
 
-    targetPoints.append(lastpoint + QVector3D(-5,-5,0));
-    targetPoints.append(lastpoint + QVector3D(5,-5,0));
-    targetPoints.append(lastpoint + QVector3D(0,0,0));
-    targetPoints.append(lastpoint + QVector3D(-5,5,0));
-    targetPoints.append(lastpoint + QVector3D(5,5,0));
-    /*
-    qDebug() << "answer   " << targetPoints.at(0) << targetPoints.at(1);
-    qDebug() << "answer              " << targetPoints.at(2);
-    qDebug() << "answer   " << targetPoints.at(3) << targetPoints.at(4);
+    float b = (target.y()*xAxis2D.x() - target.x()*xAxis2D.y())/
+            (xAxis2D.x()*yAxis2D.y()-xAxis2D.y()*yAxis2D.x());
+    float a = (target.x() - b*yAxis2D.x())/xAxis2D.x();
 
-    qDebug() << "--------------------------------------------------";
+    // move ax + by amount
+    qmlManager->modelMoveF(1,a);
+    qmlManager->modelMoveF(2,b);
 
-    qDebug() << "answer   " << world2Screen(targetPoints.at(0)) << world2Screen(targetPoints.at(1));
-    qDebug() << "answer              " << world2Screen(targetPoints.at(2));
-    qDebug() << "answer   " << world2Screen(targetPoints.at(3)) << world2Screen(targetPoints.at(4));
-
-    qDebug() << "--------------------------------------------------";
-    */
-
-    QVector2D xAxis = (world2Screen(targetPoints.at(4)) - world2Screen(targetPoints.at(3))) / 10;
-    QVector2D yAxis = (world2Screen(targetPoints.at(0)) - world2Screen(targetPoints.at(3))) / 10;
-    QVector2D target = prevPoint - currentPoint;
-
-    QVector3D calculateX, calculateY;
-    if(xAxis.length() != 0)
-        calculateX = (targetPoints.at(4) - targetPoints.at(3)) * QVector2D::dotProduct(xAxis,target) /xAxis.length() / 100;
-    else
-        calculateX = QVector3D(0,0,0);
-
-    if(yAxis.length() != 0)
-        calculateY = (targetPoints.at(0) - targetPoints.at(3)) * QVector2D::dotProduct(yAxis,target) /yAxis.length() / 100;
-    else
-        calculateY = QVector3D(0,0,0);
-
-    float scaleFactor = qmlManager->systemTransform->scale3D().x() / 0.004f;
-    qmlManager->modelMoveF(1,-(calculateX.x() + calculateY.x()) * 1.5 / scaleFactor);
-    qmlManager->modelMoveF(2,-(calculateX.y() + calculateY.y()) * 1.5 / scaleFactor);
-
+    qmlManager->showMoveArrow();
     prevPoint = currentPoint;
 }
 
@@ -1767,23 +1775,21 @@ void GLModel::pgoo(Qt3DRender::QPickEvent* v){
     if(v->buttons()>1) // pass if click with right mouse
         return;
 
+    if (!isReleased) // to remove double click on release problem
+        return;
+    else
+        isReleased = false;
+
     qDebug() << "Pressed   " << v->position();
     m_objectPicker->setDragEnabled(true);
+
+    // for mgoo out problem
+    m_transform->setScale3D(QVector3D(10,10,10));
+
     lastpoint=v->localIntersection();
     prevPoint = (QVector2D) v->position();
-
 }
 
-void GLModel::rgoo(Qt3DRender::QPickEvent* v){
-    qDebug() << "Released";
-
-    m_objectPicker->setDragEnabled(false);
-    qmlManager->resetCursor();
-
-    if(isMoved)
-        qmlManager->modelMoveDone(3);
-    isMoved = false;
-}
 
 /*void GLModel::drawLine(QVector3D endpoint)
 {

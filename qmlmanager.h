@@ -170,6 +170,7 @@ public:
     Q_INVOKABLE void doDelete();
     Q_INVOKABLE void doDeletebyID(int ID);
     Q_INVOKABLE void runArrange();
+    Q_INVOKABLE void sendUpdateModelInfo();
 
 
 private:
@@ -199,6 +200,7 @@ public slots:
     void modelMove(int,int);
     void modelMoveF(int,float);
     void modelMoveByNumber(int axis, int, int);
+    void modelMoveInit();
     void modelMoveDone(int);
     void totalMoveDone();
     void modelRotateInit();
