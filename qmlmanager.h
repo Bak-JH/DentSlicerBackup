@@ -189,6 +189,8 @@ public slots:
     void openModelFile(QString filename);
     void checkModelFile(int ID);
     void deleteModelFile(int ID);
+    void unDo();
+    void reDo();
     void copyModel();
     void pasteModel();
     void groupSelectionActivate(bool);

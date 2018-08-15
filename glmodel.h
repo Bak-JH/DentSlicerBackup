@@ -240,7 +240,7 @@ signals:
     void modelSelected(int);
     void resetLayflat();
     void bisectDone();
-    void _updateModelMesh();
+    void _updateModelMesh(bool);
     void layFlatSelect();
     void layFlatUnSelect();
     void extensionSelect();
@@ -314,7 +314,7 @@ public slots:
     void generateShellOffset(double factor);
 
     // Model Mesh info update
-    void updateModelMesh();
+    void updateModelMesh(bool);
 
     void slicingDone();
 };
