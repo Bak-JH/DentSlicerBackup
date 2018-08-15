@@ -37,6 +37,25 @@ void Mesh::vertexMove(QVector3D direction){
     }
 }
 
+Mesh* Mesh::vertexMoved(QVector3D direction){
+    Mesh* coppied = copyMesh();
+    coppied->vertexMove(direction);
+    return coppied;
+}
+
+void Mesh::centerMesh(){
+    float x_center = (x_max+x_min)/2;
+    float y_center = (y_max+y_min)/2;
+    float z_center = (z_max+z_min)/2;
+    vertexMove(-QVector3D(x_center, y_center, z_center));
+    x_max = x_max - x_center;
+    x_min = x_min - x_center;
+    y_max = y_max - y_center;
+    y_min = y_min - y_center;
+    z_max = z_max - z_center;
+    z_min = z_min - z_center;
+}
+
 void Mesh::vertexRotate(QMatrix4x4 tmpmatrix){
     int numberofVertices = vertices.size();
     int numberofFaces = faces.size();
@@ -96,6 +115,33 @@ void Mesh::vertexScale(float scaleX=1, float scaleY=1, float scaleZ=1){
         vertices[i].position = tmp;
         updateMinMax(vertices[i].position);
     }
+}
+
+Mesh* Mesh::copyMesh(){
+    Mesh* copyMesh = new Mesh();
+    copyMesh->faces.reserve(faces.size()*3);
+    copyMesh->vertices.reserve(vertices.size()*3);
+
+    // only need to copy faces, verticesHash, vertices
+    foreach(MeshVertex mv, vertices){
+        copyMesh->vertices.push_back(mv);
+    }
+    foreach(MeshFace mf, faces){
+        copyMesh->faces.push_back(mf);
+    }
+    for (QHash<uint32_t, MeshVertex>::iterator it = vertices_hash.begin(); it!=vertices_hash.end(); ++it){
+        copyMesh->vertices_hash.insert(it.key(), it.value());
+    }
+    copyMesh->connectFaces();
+
+    copyMesh->x_max = x_max;
+    copyMesh->x_min = x_min;
+    copyMesh->y_max = y_max;
+    copyMesh->y_min = y_min;
+    copyMesh->z_max = z_max;
+    copyMesh->z_min = z_min;
+
+    return copyMesh;
 }
 
 void Mesh::reverseFaces(){

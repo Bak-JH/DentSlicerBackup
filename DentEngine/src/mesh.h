@@ -8,6 +8,7 @@
 #include "polyclipping/clipper/clipper.hpp"
 #include "polyclipping/poly2tri/poly2tri.h"
 #include <QTransform>
+#include <QTime>
 
 #define cos50 0.64278761
 #define cos100 -0.17364818
@@ -74,6 +75,7 @@ public :
     Mesh* prevMesh = nullptr;
     Mesh* nextMesh = nullptr;
 
+    QTime time;
     QVector3D m_translation;
     QMatrix4x4 m_matrix;
 
@@ -88,8 +90,11 @@ public :
     /********************** Mesh Edit Functions***********************/
     void vertexOffset(float factor);
     void vertexMove(QVector3D direction);
+    Mesh* vertexMoved(QVector3D direction);
+    void centerMesh();
     void vertexRotate(QMatrix4x4 tmpmatrix);
     void vertexScale(float scaleX, float scaleY, float scaleZ);
+    Mesh* copyMesh();
     void reverseFaces();
 
     /********************** Mesh Generation Functions **********************/
