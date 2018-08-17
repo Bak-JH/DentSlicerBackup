@@ -1320,6 +1320,8 @@ Rectangle {
         }
     }
 
+    signal labelTextChanged(string text, int contentWidth)
+
     // text3d input
     Rectangle {
         id: text3DInputBackground
@@ -1365,7 +1367,6 @@ Rectangle {
             //    if(numberbox1_text.focus)
             //        numberbox1.color = "#f5f5f5"
             }
-            signal sendTextChanged(string text, int contentWidth)
             placeholderText: qsTr("Enter text")
             font.family: mainFont.name
             onTextChanged: {
@@ -1374,7 +1375,7 @@ Rectangle {
                 console.log("content width : ");
                 console.log(hiddenText.text.length);
                 console.log(hiddenText.contentWidth);
-                sendTextChanged(text, hiddenText.contentWidth);
+                labelTextChanged(text, hiddenText.contentWidth);
                 //sendTextChanged(text, hiddenText.text.length)
             }
         }
