@@ -1559,6 +1559,7 @@ Rectangle {
             signal generateText3DMesh()
             signal openLabelling()
             signal closeLabelling()
+            signal sendTextChanged(string text, int contentWidth);
 
             onApplyClicked: {
                 console.log("ApplyClicked")
@@ -1566,7 +1567,10 @@ Rectangle {
                 generateText3DMesh()
             }
 
-
+            onLabelTextChanged: {
+                console.log("sendTextChanged");
+                sendTextChanged(text, contentWidth);
+            }
 
             ComboBox {
                 objectName: "labelFontBox"
