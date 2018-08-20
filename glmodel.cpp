@@ -1014,7 +1014,7 @@ void GLModel::handlePickerClicked(QPickEvent *pick)
 
     QPickTriangleEvent *trianglePick = static_cast<QPickTriangleEvent*>(pick);
 
-    if (labellingActive && trianglePick) {
+    if (labellingActive && trianglePick && trianglePick->localIntersection() != QVector3D(0,0,0)) {
         MeshFace shadow_meshface = mesh->faces[trianglePick->triangleIndex()];
 
         parentModel->targetMeshFace = &parentModel->mesh->faces[shadow_meshface.parent_idx];
@@ -1623,13 +1623,13 @@ void GLModel::modelCut(){
 
     qmlManager->openProgressPopUp();
 
-    if (cutMode == 1){
+    if (cutMode == 1){ // flat cut
         if (parentModel->cuttingPlane.size() != 3){
             return;
         }
 
         parentModel->bisectModel(parentModel->cuttingPlane);
-    } else if (cutMode == 2){
+    } else if (cutMode == 2){ // free cut
         if (parentModel->cuttingPoints.size() >= 3){
 
             // create left, rightmesh
@@ -2037,7 +2037,7 @@ void GLModel::generateText3DMesh()
     int indicesSize;
     float depth = 0.5f;
     float scale = labellingTextPreview->ratioY * labellingTextPreview->scaleY;
-    QVector3D translation = labellingTextPreview->translation+ QVector3D(0,-0.3,0);
+    QVector3D translation = m_transform->translation()+labellingTextPreview->translation + QVector3D(0,-0.3,0);
 
     Qt3DCore::QTransform transform, normalTransform;
 
@@ -2061,7 +2061,7 @@ void GLModel::generateText3DMesh()
                            QFont(labellingTextPreview->fontName, labellingTextPreview->fontSize, labellingTextPreview->fontWeight, false),
                            labellingTextPreview->text,
                            depth,
-                           mesh,
+                           parentModel->mesh,
                            -labellingTextPreview->normal,
                            transform.matrix(),
                            normalTransform.matrix());

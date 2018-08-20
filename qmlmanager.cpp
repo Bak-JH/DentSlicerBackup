@@ -23,7 +23,7 @@ void QmlManager::initializeUI(QQmlApplicationEngine* e){
     mainWindow = FindItemByName(engine, "mainWindow");
     loginWindow = FindItemByName(engine, "loginWindow");
     loginButton = FindItemByName(engine, "loginButton");
-
+    keyboardHandler = (Qt3DInput::QKeyboardHandler*)FindItemByName(engine, "keyboardHandler");
     models = (QEntity *)FindItemByName(engine, "Models");
     selectedModels.push_back(nullptr);
     Lights* lights = new Lights(models);
@@ -473,6 +473,12 @@ int QmlManager::getselectedModelID(){
         result = selectedModels[0]->ID;
 
     return result;
+}
+
+void QmlManager::keyboardHandlerFocus(){
+    qDebug() << "keyboard focus on";
+    keyboardHandler->setFocus(true);
+    qDebug() << "keyboard handler focus : " << keyboardHandler->focus();
 }
 
 void QmlManager::fixMesh(){
@@ -1521,6 +1527,8 @@ void QmlManager::copyModel(){
 
     qDebug() << "copying current selected Models";
     for (GLModel* model : selectedModels){
+        if (model == nullptr)
+            continue;
         Mesh* copied = model->mesh->copyMesh();
 
         copyMeshes.push_back(copied);

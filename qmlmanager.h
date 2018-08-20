@@ -19,6 +19,7 @@
 #include "QtConcurrent/QtConcurrentRun"
 #include "QFuture"
 #include "utils/httpreq.h"
+#include <QKeyboardHandler>
 
 class QmlManager : public QObject
 {
@@ -39,6 +40,7 @@ public:
     Qt3DCore::QEntity *mttab;
     QObject* undoRedoButton;
     QObject* slicingData;
+    Qt3DInput::QKeyboardHandler* keyboardHandler;
 
     // model rotate components
     QObject *rotatePopup;
@@ -156,6 +158,7 @@ public:
 
     GLModel* findGLModelByName(QString filename);
 
+    Q_INVOKABLE void keyboardHandlerFocus();
     Q_INVOKABLE QVector3D getSelectedCenter();
     Q_INVOKABLE QVector3D getSelectedSize();
     Q_INVOKABLE int getselectedModelID();

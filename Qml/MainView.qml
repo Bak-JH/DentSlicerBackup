@@ -86,6 +86,7 @@ Entity {
     KeyboardHandler{
         focus : true
         id : keyboardHandler
+        objectName: "keyboardHandler"
         sourceDevice: keyboardDevice
 
         onPressed: {

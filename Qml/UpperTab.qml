@@ -70,6 +70,7 @@ Rectangle {
         if(yesnoPopUp.isFlawOpen)
             yesnoPopUp.closePopUp();
 
+        //qm.keyboardHandlerFocus();
         //scene3d.forceActiveFocus();
 
         console.log("all off");
