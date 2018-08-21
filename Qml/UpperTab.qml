@@ -1821,6 +1821,7 @@ Rectangle {
                     return "active"
                 }
                 else {
+
                     //text3DInput.focus = false;
                     //sceneRoot.keyboardHandler.focus = true;
                     closeLabelling()

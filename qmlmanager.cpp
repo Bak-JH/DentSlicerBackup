@@ -478,6 +478,7 @@ int QmlManager::getselectedModelID(){
 void QmlManager::keyboardHandlerFocus(){
     qDebug() << "keyboard focus on";
     keyboardHandler->setFocus(true);
+    QMetaObject::invokeMethod(mv, "forceFocus");
     qDebug() << "keyboard handler focus : " << keyboardHandler->focus();
 }
 
