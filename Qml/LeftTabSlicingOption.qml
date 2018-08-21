@@ -53,9 +53,11 @@ Rectangle {
             //transform:Rotation{origin.x: arrow.width/2; origin.y: arrow.height/2; axis { x: 1; y: 0; z: 0 } angle: 0 }
             rotation: 0
 
-            anchors.verticalCenter: parent.verticalCenter
+//            anchors.verticalCenter: parent.verticalCenter
             anchors.right : parent.right
             anchors.rightMargin: 12
+            anchors.top: parent.top
+            anchors.topMargin: 10
 
             MouseArea {
                     anchors.fill: parent
@@ -81,7 +83,7 @@ Rectangle {
             anchors.left: parent.left
             anchors.top : parent.top
 
-            anchors.topMargin: 16
+            anchors.topMargin: 8
 
             ColumnLayout {
                 spacing: 2

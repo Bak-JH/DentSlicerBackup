@@ -32,7 +32,6 @@
         <file>resource/slicing_volume.png</file>
         <file>resource/view.png</file>
         <file>resource/view_background.png</file>
-        <file>resource/slicing_refresh.png</file>
         <file>resource/view_back.png</file>
         <file>resource/view_bottom.png</file>
         <file>resource/view_center.png</file>
@@ -76,7 +75,6 @@
         <file>Resource/upper2_scale.png</file>
         <file>Resource/upper2_shelloffset.png</file>
         <file>Resource/upper2_support.png</file>
-        <file>Resource/popup_image/image_arrange.png</file>
         <file>Resource/popup_image/image_autorepair.png</file>
         <file>Resource/popup_image/image_layflat.png</file>
         <file>Resource/popup_image/image_orient.png</file>
@@ -124,5 +122,8 @@
         <file>Resource/pem/dsa_pub.pem</file>
         <file>Resource/upper_setting.png</file>
         <file>Resource/upper2_setting.png</file>
+        <file>Resource/popup_image/image_arrange.png</file>
+        <file>Resource/slicing_refresh.png</file>
+        <file>Resource/slicing_refresh_hover.png</file>
     </qresource>
 </RCC>

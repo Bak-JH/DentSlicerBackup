@@ -58,6 +58,8 @@ Item {
             background: Rectangle {
                 radius:1
                 color: "#F9F9F9"
+//                border.color: combo.hovered ? "light blue" : "transparent"
+                border.color: combo.hovered ? "#42bfcc" : "transparent"
             }
             label: Text {
                 verticalAlignment: Text.AlignVCenter

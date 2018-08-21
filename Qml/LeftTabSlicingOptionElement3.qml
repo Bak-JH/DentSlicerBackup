@@ -42,6 +42,15 @@ Item {
             width: parent.width
             height: parent.height
             color: "#F9F9F9"
+//            border.color: hovercheck.containsMouse ? "lightblue" : "transparent"
+            border.color: hovercheck.containsMouse ? "#42bfcc" : "transparent"
+
+            MouseArea{
+                id: hovercheck
+                anchors.fill: parent
+                hoverEnabled: true
+            }
+
             property alias numberBox_text: numberBox_text
             Text{
                 width: parent.width

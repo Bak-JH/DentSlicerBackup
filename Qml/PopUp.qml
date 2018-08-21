@@ -278,7 +278,7 @@ Rectangle {
     Text {
         id: detail2
         anchors.top: descriptionimage.bottom
-        anchors.topMargin: 15
+        anchors.topMargin: 14
         anchors.left: funcname.left
         anchors.leftMargin: 10
         font.pixelSize: 15
@@ -302,7 +302,7 @@ Rectangle {
     Rectangle {
         id: applybutton
         width: 230
-        height: 30.7
+        height: 30
         color: "#999999"
         anchors.bottom: parent.bottom
         anchors.bottomMargin: 7
@@ -389,13 +389,13 @@ Rectangle {
     //Apply-Finish button
     Rectangle {
         id: applyfinishbutton
-        width: 111.6
-        height: 30.7
+        width: 111 //111.6
+        height: 30
         color: "#BBB"
         anchors.bottom: parent.bottom
         anchors.bottomMargin: 7
         anchors.right: parent.horizontalCenter
-        anchors.rightMargin: 3.5
+        anchors.rightMargin: 3 //3.5
         property color beforeHorver : "#BBBBBB";
         Text {
             id: applyfinishbutton_text
@@ -425,13 +425,13 @@ Rectangle {
     }
     Rectangle {
         visible: applyfinishbutton.visible
-        width: 111.6
-        height: 30.7
+        width: 111
+        height: 30
         color: "#999999"
         anchors.bottom: parent.bottom
         anchors.bottomMargin: 7
         anchors.left: parent.horizontalCenter
-        anchors.leftMargin: 3.5
+        anchors.leftMargin: 3
         Text {
             anchors.verticalCenter: parent.verticalCenter
             anchors.horizontalCenter: parent.horizontalCenter
@@ -605,7 +605,7 @@ Rectangle {
         visible: false
         checked: true
         anchors.bottom: parent.bottom
-        anchors.bottomMargin: 90
+        anchors.bottomMargin: 85
         anchors.left: parent.left
         anchors.leftMargin: 30
         exclusiveGroup: viewModeGroup
@@ -648,7 +648,7 @@ Rectangle {
         id: radiobutton2
         visible: false
         anchors.bottom: parent.bottom
-        anchors.bottomMargin: 65
+        anchors.bottomMargin: 60
         anchors.left: parent.left
         anchors.leftMargin: 30
         exclusiveGroup: viewModeGroup
@@ -669,7 +669,7 @@ Rectangle {
                 }
             }
             label: Text {
-                text: "Gernerate Surface"
+                text: "Generate Surface"
                 anchors.left: parent.left
                 anchors.leftMargin: 10
                 font.family: mainFont.name
@@ -741,12 +741,12 @@ Rectangle {
                 TextField {
                     id: numberbox1_text
                     anchors.right: parent.right
-                    anchors.rightMargin: 8*number_unit.length
+                    anchors.rightMargin: 10*number_unit.length
                     anchors.verticalCenter: parent.verticalCenter
                     horizontalAlignment: TextInput.AlignRight
                     //text: numbox_value_z + number_unit
                     placeholderText: numbox_value_x
-                    font.pixelSize: 12
+                    font.pixelSize: 14
                     font.family: mainFont.name
                     textColor: focus ? "black" : "#595959"
                     selectByMouse: true
@@ -786,7 +786,7 @@ Rectangle {
                     }
                 }
                 Text{
-                    font.pixelSize: 12
+                    font.pixelSize: 14
                     font.family: mainFont.name
                     text:number_unit
                     anchors.right: parent.right
@@ -894,12 +894,12 @@ Rectangle {
                 TextField {
                     id: numberbox2_text
                     anchors.right: parent.right
-                    anchors.rightMargin: 8*number_unit.length
+                    anchors.rightMargin: 10*number_unit.length
                     anchors.verticalCenter: parent.verticalCenter
                     horizontalAlignment: TextInput.AlignRight
                     //text: numbox_value_z + number_unit
                     placeholderText: numbox_value_y
-                    font.pixelSize: 12
+                    font.pixelSize: 14
                     font.family: mainFont.name
                     textColor: focus ? "black" : "#595959"
                     selectByMouse: true
@@ -934,7 +934,7 @@ Rectangle {
                     }
                 }
                 Text{
-                    font.pixelSize: 12
+                    font.pixelSize: 14
                     font.family: mainFont.name
                     text:number_unit
                     anchors.right: parent.right
@@ -1038,12 +1038,12 @@ Rectangle {
                 TextField {
                     id: numberbox3_text
                     anchors.right: parent.right
-                    anchors.rightMargin: 8*number_unit.length
+                    anchors.rightMargin: 10*number_unit.length
                     anchors.verticalCenter: parent.verticalCenter
                     horizontalAlignment: TextInput.AlignRight
                     //text: numbox_value_z + number_unit
                     placeholderText: numbox_value_z
-                    font.pixelSize: 12
+                    font.pixelSize: 14
                     font.family: mainFont.name
                     textColor: focus ? "black" : "#595959"
                     selectByMouse: true
@@ -1079,7 +1079,7 @@ Rectangle {
                     }
                 }
                 Text{
-                    font.pixelSize: 12
+                    font.pixelSize: 14
                     font.family: mainFont.name
                     text:number_unit
                     anchors.right: parent.right
@@ -1127,7 +1127,7 @@ Rectangle {
             Rectangle {
                 visible: numbox_updown_vis
                 width: 17
-                height: 14.5
+                height: 15
                 anchors.right: parent.right
                 anchors.bottom: parent.bottom
                 color: "transparent"
@@ -1166,7 +1166,7 @@ Rectangle {
                     anchors.verticalCenter: parent.verticalCenter
                     anchors.left: parent.left
                     text: "X :"
-                    font.pixelSize: 12
+                    font.pixelSize: 14
                     font.family: mainFont.name
                 }
             }
@@ -1180,7 +1180,7 @@ Rectangle {
                     anchors.verticalCenter: parent.verticalCenter
                     anchors.left: parent.left
                     text: "Y :"
-                    font.pixelSize: 12
+                    font.pixelSize: 14
                     font.family: mainFont.name
                 }
             }
@@ -1195,7 +1195,7 @@ Rectangle {
                     anchors.verticalCenter: parent.verticalCenter
                     anchors.left: parent.left
                     text: "Z :"
-                    font.pixelSize: 12
+                    font.pixelSize: 14
                     font.family: mainFont.name
                 }
             }
@@ -1223,11 +1223,11 @@ Rectangle {
             TextField {
                 id: numberbox_detail2_text
                 anchors.right: parent.right
-                anchors.rightMargin: 8*number_unit_detail2.length
+                anchors.rightMargin: 10*number_unit_detail2.length
                 anchors.verticalCenter: parent.verticalCenter
                 horizontalAlignment: TextInput.AlignRight
                 placeholderText: numbox_value_detail2
-                font.pixelSize: 12
+                font.pixelSize: 14
                 font.family: mainFont.name
                 textColor: focus ? "black" : "#595959"
                 selectByMouse: true
@@ -1252,7 +1252,7 @@ Rectangle {
                 }
             }
             Text{
-                font.pixelSize: 12
+                font.pixelSize: 14
                 font.family: mainFont.name
                 text:number_unit_detail2
                 anchors.right: parent.right
@@ -1371,6 +1371,7 @@ Rectangle {
             }
             placeholderText: qsTr("Enter text")
             font.family: mainFont.name
+            font.pixelSize: 14
             onTextChanged: {
                 //console.log("content width changed ");
                 //console.log(hiddenText.text.length);

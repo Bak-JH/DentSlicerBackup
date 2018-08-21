@@ -570,6 +570,7 @@ Rectangle {
             MouseArea{
                 anchors.fill: parent
                 onClicked:{
+                    all_off();
                     settingPopup.visible = true;
                 }
             }
@@ -585,6 +586,7 @@ Rectangle {
             MouseArea{
                 anchors.fill: parent
                 onClicked:{
+                    all_off();
                     feedbackPopUp.visible = true;
                 }
             }
@@ -1282,7 +1284,7 @@ Rectangle {
                     anchors.verticalCenter: parent.verticalCenter
                     text: "Switch the direction"
                     font.family: mainFont.name
-                    font.pixelSize: 12
+                    font.pixelSize: 14
                 }
             }
         }
@@ -1608,8 +1610,10 @@ Rectangle {
                         width: parent.width
                         height: parent.height
                         radius: 2
-                        color: "#f9f9f9"
-                        border.color: labelFontBox.hovered ? "light blue" : "transparent"
+//                        color: "#f9f9f9"
+                        color: "#eeeeee"
+//                        border.color: labelFontBox.hovered ? "light blue" : "transparent"
+                        border.color: labelFontBox.hovered ? "#42bfcc" : "transparent"
                     }
 
                     label: Text {
@@ -1624,7 +1628,8 @@ Rectangle {
                         __menuItemType: "comboboxitem"
 
                         frame: Rectangle {      //drop-down box style
-                            color: "#f9f9f9"
+//                            color: "#f9f9f9"
+                            color: "#eaeaea"
                             width: 174
                             radius: 2
                         }
@@ -1690,10 +1695,13 @@ Rectangle {
                 width: 194
                 height: 24
 
+//                hovered: {
+//                    console.log("hover hahaha");
+//                }
+
                 anchors.horizontalCenter: parent.horizontalCenter
                 anchors.top: parent.top
                 anchors.topMargin: 230
-
 
                 signal sendFontSize(int fontSize)
 
@@ -1710,6 +1718,7 @@ Rectangle {
 
                 }
 
+
                 style: ComboBoxStyle {
                     background: Rectangle {     //box style (not drop-down part)
 //                            implicitWidth: 176
@@ -1717,8 +1726,10 @@ Rectangle {
                         width: parent.width
                         height: parent.height
                         radius: 2
-                        color: "#f9f9f9"
-                        border.color: labelFontBox.hovered ? "light blue" : "transparent"
+//                        color: "#f9f9f9"
+                        color: "#eeeeee"
+//                        border.color: labelFontSizeBox.hovered ? "light blue" : "transparent"
+                        border.color: labelFontSizeBox.hovered ? "#42bfcc" : "transparent"
                     }
 
                     label: Text {
@@ -1733,7 +1744,8 @@ Rectangle {
                         __menuItemType: "comboboxitem"
 
                         frame: Rectangle {      //drop-down box style
-                            color: "#f9f9f9"
+//                            color: "#f9f9f9"
+                            color: "#eaeaea"
                             width: 174
                             radius: 2
                         }
@@ -1793,7 +1805,14 @@ Rectangle {
             CheckBox {
                 objectName: "labelFontBoldBox"
                 id:labelFontBoldBox
-                text: qsTr("Bold")
+//                text: qsTr("Bold")
+                style: CheckBoxStyle{
+                    label: Text {
+                        text: "Bold"
+                        font.family: mainFont.name
+                        font.pixelSize: 14
+                    }
+                }
                 checked: false
                 width: 194
                 height: 24

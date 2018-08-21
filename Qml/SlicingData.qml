@@ -44,12 +44,13 @@ Rectangle {
             color: "white"
 
             Image{
+                id: slicing_img
                 width: 50
                 height: parent.height
                 anchors.top: parent.top
                 anchors.horizontalCenter: parent.horizontalCenter
                 visible: true
-                source: "qrc:/resource/slicing_refresh.png"
+                source: "qrc:/Resource/slicing_refresh.png"
             }
             Text{
                 text:"Refresh"
@@ -58,7 +59,7 @@ Rectangle {
                 anchors.bottomMargin: 2
 
                 font.family: mainFont.name
-                font.pixelSize: 11
+                font.pixelSize: 12
                 verticalAlignment: Text.AlignBottom
                 color: "#FFFFFF"
             }
@@ -68,12 +69,14 @@ Rectangle {
                 hoverEnabled: true
 
                 onEntered:{
+                    slicing_img.source = "qrc:/Resource/slicing_refresh_hover.png"
                     qm.setHandCursor();
                 }
                 onClicked:{
                     qm.sendUpdateModelInfo();
                 }
                 onExited:{
+                    slicing_img.source = "qrc:/Resource/slicing_refresh.png"
                     qm.resetCursor();
                 }
             }
