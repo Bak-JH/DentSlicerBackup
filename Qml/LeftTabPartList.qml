@@ -45,9 +45,11 @@ Rectangle {
             width : 12
             height : 10
 
-            anchors.verticalCenter: parent.verticalCenter
+//            anchors.verticalCenter: parent.verticalCenter
             anchors.right : parent.right
             anchors.rightMargin: 12
+            anchors.top: parent.top
+            anchors.topMargin: 10
 
             MouseArea {
                     anchors.fill: parent

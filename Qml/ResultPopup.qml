@@ -81,10 +81,10 @@ Rectangle {
         Rectangle {
             id: okButton
             width: 138
-            height: 34
+            height: 32
             color: "#A3A3A5"
             anchors.bottom: parent.bottom
-            anchors.bottomMargin: 23
+            anchors.bottomMargin: 25
             anchors.horizontalCenter: parent.horizontalCenter
 
             Text {
@@ -93,7 +93,7 @@ Rectangle {
                 anchors.horizontalCenter: parent.horizontalCenter
                 text: "OK"
                 color: "#ffffff"
-                font.pixelSize: 20
+                font.pixelSize: 18
                 font.family: mainFont.name
             }
             MouseArea {

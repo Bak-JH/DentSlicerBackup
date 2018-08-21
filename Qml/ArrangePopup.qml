@@ -36,12 +36,12 @@ Rectangle {
             height:20
             id: result_text
 
-            text: "Click Apply to auto-arrange models"
+            text: "Click Apply to auto-arrange models."
             anchors.top: parent.top
             anchors.topMargin: 28
             anchors.horizontalCenter: parent.horizontalCenter
             verticalAlignment: Text.AlignTop
-            font.pixelSize: 20
+            font.pixelSize: 15
             color: "#0DA3B2"
             font.family: mainFont.name
         }
@@ -59,21 +59,21 @@ Rectangle {
 
         Rectangle {
             id: applyButton
-            width: 120
-            height: 32
+            width: 132
+            height: 30
             color: "#A3A3A5"
             anchors.left : parent.left
             anchors.bottom: parent.bottom
-            anchors.bottomMargin: 20
+            anchors.bottomMargin: 22
             anchors.leftMargin: 32
 
 
             Text {
                 anchors.verticalCenter: parent.verticalCenter
                 anchors.horizontalCenter: parent.horizontalCenter
-                text: "OK"
+                text: "Apply"
                 color: "#ffffff"
-                font.pixelSize: 20
+                font.pixelSize: 16
                 font.family: mainFont.name
             }
             MouseArea {
@@ -97,12 +97,12 @@ Rectangle {
 
         Rectangle {
             id: cancelButton
-            width: 120
+            width: 132
             height: 32
             color: "#A3A3A5"
             anchors.right: parent.right
             anchors.bottom: parent.bottom
-            anchors.bottomMargin: 20
+            anchors.bottomMargin: 22
             anchors.rightMargin: 32
 
             Text {
@@ -110,7 +110,7 @@ Rectangle {
                 anchors.horizontalCenter: parent.horizontalCenter
                 text: "Cancel"
                 color: "#ffffff"
-                font.pixelSize: 20
+                font.pixelSize: 16
                 font.family: mainFont.name
             }
             MouseArea {

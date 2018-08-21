@@ -43,9 +43,11 @@ Rectangle {
             height : 10
             rotation: 0
 
-            anchors.verticalCenter: parent.verticalCenter
+//            anchors.verticalCenter: parent.verticalCenter
             anchors.right : parent.right
             anchors.rightMargin: 12
+            anchors.top: parent.top
+            anchors.topMargin: 10
 
             MouseArea {
                     anchors.fill: parent
@@ -72,7 +74,8 @@ Rectangle {
             anchors.left: parent.left
             anchors.top : parent.top
             anchors.leftMargin: 16
-            anchors.topMargin: 12
+            anchors.topMargin: 8
+//            anchors.topMargin: 12
 
             ColumnLayout {
                 spacing: 10
@@ -81,14 +84,15 @@ Rectangle {
                 RadioButton {
                     checked: true
                     exclusiveGroup: viewModeGroup
-
+                    id: radio_ObjectView
                     style: RadioButtonStyle {
                         indicator: Rectangle {
                             implicitWidth: 16
                             implicitHeight: 16
                             radius: 9
-                            border.color: control.activeFocus ? "darkblue" : "gray"
-                            border.width: 0
+//                            border.color: control.activeFocus ? "darkblue" : "gray"
+                            border.color: radio_ObjectView.hovered ? "#42bfcc" : "transparent"
+//                            border.width: 0
                             Rectangle {
                                 anchors.fill: parent
                                 visible: control.checked
@@ -114,15 +118,17 @@ Rectangle {
                     }
                 }
                 RadioButton {
-                    text: "Support View"
+//                    text: "Support View"
+                    id: radio_SupportView
                     exclusiveGroup: viewModeGroup
                     style: RadioButtonStyle {
                         indicator: Rectangle {
                             implicitWidth: 16
                             implicitHeight: 16
                             radius: 9
-                            border.color: control.activeFocus ? "darkblue" : "gray"
-                            border.width: 0
+//                            border.color: control.activeFocus ? "darkblue" : "gray"
+                            border.color: radio_SupportView.hovered ? "#42bfcc" : "transparent"
+//                            border.width: 1
                             Rectangle {
                                 anchors.fill: parent
                                 visible: control.checked
@@ -150,13 +156,15 @@ Rectangle {
                 RadioButton {
                     //text: "Layer View"
                     exclusiveGroup: viewModeGroup
+                    id: radio_LayerView
                     style: RadioButtonStyle {
                         indicator: Rectangle {
                             implicitWidth: 16
                             implicitHeight: 16
                             radius: 9
-                            border.color: control.activeFocus ? "darkblue" : "gray"
-                            border.width: 0
+                            border.color: radio_LayerView.hovered ? "#42bfcc" : "transparent"
+//                            border.color: control.activeFocus ? "darkblue" : "gray"
+//                            border.width: 0
                             Rectangle {
                                 anchors.fill: parent
                                 visible: control.checked
