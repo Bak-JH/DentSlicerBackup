@@ -176,7 +176,7 @@ Rectangle {
         numberbox_detail2_text.text = numbox_value_detail2;
     }
 
-    function cut_reset(){
+    function cut_reset() {
         leftselectimage.image_source = "qrc:/Resource/flat_cut.png"
         leftselectimage.text_color = "black"
         leftselectimage.color = "#FFFFFF"
