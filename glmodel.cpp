@@ -10,6 +10,7 @@
 #include <QtConcurrent/QtConcurrent>
 #include <QFuture>
 #include <QFileDialog>
+#include <iostream>
 
 int GLModel::globalID = 0;
 
@@ -69,6 +70,10 @@ GLModel::GLModel(QObject* mainWindow, QNode *parent, Mesh* loadMesh, QString fna
 
     // Add to Part List
     ID = globalID++;
+//    std::cout<<"############fromGlmodel1111##########"<<std::endl;
+//    cout<<filename.toLocal8Bit().constData()<<endl;
+//    std::cout<<"############fromGlmodel2222##########"<<std::endl;
+//    cout<<fname.toLocal8Bit().constData()<<endl;
     qmlManager->addPart(getFileName(fname.toStdString().c_str()), ID);
 
     m_meshMaterial = new QPhongMaterial();
@@ -79,12 +84,14 @@ GLModel::GLModel(QObject* mainWindow, QNode *parent, Mesh* loadMesh, QString fna
             && !EndsWith(filename.toStdString(), std::string("_left").c_str()) && !EndsWith(filename.toStdString(),  std::string("_right").c_str())
             && !EndsWith(filename.toStdString(),  std::string("_offset").c_str())){
         mesh = new Mesh();
-        loadMeshSTL(mesh, filename.toStdString().c_str());
+//        std::cout<<"############fromGlmodel##########"<<std::endl;
+//        cout<<filename.toLocal8Bit().constData()<<endl;
+        loadMeshSTL(mesh, filename.toLocal8Bit().constData());
     } else if (filename != "" && (filename.contains(".obj")||filename.contains(".OBJ"))\
             && !EndsWith(filename.toStdString(), std::string("_left").c_str()) && !EndsWith(filename.toStdString(),  std::string("_right").c_str())
                && !EndsWith(filename.toStdString(),  std::string("_offset").c_str())){
         mesh = new Mesh();
-        loadMeshOBJ(mesh, filename.toStdString().c_str());
+        loadMeshOBJ(mesh, filename.toLocal8Bit().constData());
     } else {
         mesh = loadMesh;
     }

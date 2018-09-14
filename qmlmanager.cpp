@@ -12,6 +12,11 @@
 
 #include "qmlmanager.h"
 #include "lights.h"
+#include <iostream>
+#include <ctype.h>
+#include <QCoreApplication>
+#include <QTextStream>
+
 
 QmlManager::QmlManager(QObject *parent) : QObject(parent)
 {
@@ -181,8 +186,11 @@ void QmlManager::initializeUI(QQmlApplicationEngine* e){
 
 void QmlManager::createModelFile(Mesh* target_mesh, QString fname) {
     openProgressPopUp();
-
+//    std::cout<<"############createModelFile111##########"<<std::endl;
+//    cout<<fname.toLocal8Bit().constData()<<endl;
     GLModel* glmodel = new GLModel(mainWindow, models, target_mesh, fname, false);
+//    std::cout<<"############createModelFile222##########"<<std::endl;
+//    cout<<fname.toLocal8Bit().constData()<<endl;
     // 승환 GLModel constructor 안쪽
 
     qDebug() << "created new model file";
@@ -210,6 +218,12 @@ void QmlManager::createModelFile(Mesh* target_mesh, QString fname) {
 }
 
 void QmlManager::openModelFile(QString fname){
+//    std::cout<<"############openModelFile111##########"<<std::endl;
+//    cout<<fname.toStdString().c_str()<<endl;
+//    std::cout<<"############openModelFile222##########"<<std::endl;
+//    cout<<fname.toLatin1().constData()<<endl;
+//    std::cout<<"############openModelFile333##########"<<std::endl;
+//    cout<<fname.toLocal8Bit().constData()<<endl;
     createModelFile(nullptr, fname);
 
     // check for defects

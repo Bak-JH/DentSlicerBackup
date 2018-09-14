@@ -2,6 +2,7 @@
 #include <QCoreApplication>
 #include <QDebug>
 #include <QFile>
+#include <iostream>
 
 FileLoader::FileLoader()
 {
@@ -152,6 +153,8 @@ bool loadMeshSTL_binary(Mesh* mesh, const char* filename){
 bool loadMeshSTL(Mesh* mesh, const char* filename)
 {
     FILE* f = fopen(filename, "r");
+//    std::cout<<"############filename1##########"<<std::endl;
+//    cout<<filename<<endl;
     if (f == nullptr)
     {
         return false;
@@ -209,6 +212,8 @@ bool loadMeshOBJ(Mesh* mesh, const char* filename){
     int lines = 0;
     qDebug() << "test 0";
     f = fopen(filename, "r");
+//    std::cout<<"############filename2##########"<<std::endl;
+//    cout<<filename<<endl;
 
     if(f == NULL)
         return 0;
