@@ -1,4 +1,5 @@
-import QtQuick 2.0
+//import QtQuick 2.0
+import QtQuick 2.11
 
 Item {
     width: 240
@@ -8,13 +9,25 @@ Item {
     property int glModelID
     property Item container;
 
-//    focus: true
-    Keys.onPressed: {
-        if(event.key === Qt.Key_Escape) {
-            icon.parent.state = 'on'
-            unselectPart(glModelID)
-            event.accepted = true;
-        }
+    focus: true
+//    Keys.onPressed: {
+//        if(event.key === Qt.Key_Escape) {
+//            icon.parent.state = 'on'
+////            unselectPart(glModelID)
+//            event.accepted = true;
+//            console.log("왜어째서~~~반응이 없니~~~")
+//        }
+//        console.log("여기 무슨일이 일어난거니 오우워어")
+//    }
+    Keys.onEscapePressed: {
+        console.log("이제는 될꺼야우워우")
+        console.log(icon.parent.state)
+        icon.parent.state = 'on'
+        console.log(icon.parent.state)
+        console.log(icon.parent.children)
+        console.log(icon.parent.objectName)
+        console.log(icon.parent.children.objectName)
+        console.log(icon.parent.children.state)
     }
 
     Rectangle{
@@ -50,13 +63,17 @@ Item {
         MouseArea {
             anchors.fill: parent
             hoverEnabled : true
-            onEntered : qm.setHandCursor();
+            onEntered : {
+                qm.setHandCursor();
+            }
             onExited : qm.resetCursor();
             onClicked: {
-                if(icon.parent.state == 'on')
+                if(icon.parent.state == 'on'){
                     icon.parent.state = 'off';
-                else if(icon.parent.state == 'off')
+                }
+                else if(icon.parent.state == 'off'){
                     icon.parent.state = 'on';
+                }
                 else if(icon.parent.state == 'select'){
                     icon.parent.state = 'off';
                     unselectPart(glModelID)
@@ -69,6 +86,7 @@ Item {
                     qm.modelVisible(glModelID,false);
             }
         }
+
     }
 
     Rectangle{
@@ -131,7 +149,6 @@ Item {
                     icon.parent.state = 'on'
                     unselectPart(glModelID)
                 }
-
             }
         }
     }
