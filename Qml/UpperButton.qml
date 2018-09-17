@@ -167,6 +167,7 @@ Rectangle{
                 console.log("active" + iconText);
             }
             else {
+                all_off();
                 parent.state = "inactive";
                 console.log("inactive" + iconText);
             }

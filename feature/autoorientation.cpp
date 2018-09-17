@@ -139,7 +139,7 @@ rotateResult* autoorientation::Tweak(Mesh* mesh, bool bi_algorithmic,int CA,bool
         qDebug(" Unprintability:        %-9f",Unprintability);
     }
     //━━━━━━━━━━━━━━━━━━━━ 내용 출력 ━━━━━━━━━━━━━━━━━━━
-    free(orientations);
+    //free(orientations);
 
     qmlManager->setProgress(1);
     qmlManager->setProgressText("Done");

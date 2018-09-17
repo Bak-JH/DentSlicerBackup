@@ -1,6 +1,6 @@
 import QtQuick 2.0
 
-import QtQuick.Controls 1.2
+import QtQuick.Controls 2.4
 import QtQuick.Controls.Styles 1.4
 import QtQuick.Layouts 1.3
 
@@ -10,20 +10,21 @@ Rectangle {
     width : 264
     height : originalHeight
 
-    color: "transparent"
+    color: "#efefef"
 
     state : "open"
 
     /************************** upper **************************/
     Rectangle{
+        z: 10
         id : tab
         width: parent.width
         height: 28
         anchors.left : parent.left
         anchors.top :  parent.top
 
-        //color: "#CECECE"
-        color: "transparent"
+        color: "#efefef"
+//        color: "transparent"
 
         Text{
             height: parent.height
@@ -52,11 +53,11 @@ Rectangle {
             anchors.topMargin: 10
 
             MouseArea {
-                    anchors.fill: parent
-                    hoverEnabled : true
-                    onEntered : qm.setHandCursor();
-                    onExited : qm.resetCursor();
-                    onClicked: { ltpl.state == 'open' ? ltpl.state = "close" : ltpl.state = 'open';}
+                anchors.fill: parent
+                hoverEnabled : true
+                onEntered : qm.setHandCursor();
+                onExited : qm.resetCursor();
+                onClicked: { ltpl.state == 'open' ? ltpl.state = "close" : ltpl.state = 'open';}
             }
         }
 
@@ -67,15 +68,16 @@ Rectangle {
     Rectangle{
         id : content
         width: parent.width
-        height: parent.height - 24
+        height: parent.height - 42
         anchors.left : parent.left
         anchors.top :  tab.bottom
-
-        color:"transparent"
+        color: "#efefef"
+//        color:"transparent"
 
         Rectangle{
+            id: partbox
             width : 240
-            height: 294
+            height: 290
 
             anchors.top : content.top
             anchors.horizontalCenter: parent.horizontalCenter
@@ -92,6 +94,7 @@ Rectangle {
                 //anchors.leftMargin: 16
 
                 ColumnLayout {
+                    y: -vbar.position * height
                     id: partListColumn
                     spacing:0
                     /*
@@ -103,9 +106,25 @@ Rectangle {
                     }*/
                 }
             }
-
-
+            ScrollBar {
+                id: vbar
+                hoverEnabled: true
+                active: hovered || pressed
+                orientation: Qt.Vertical
+                size: (content.height - 40) / partListColumn.height
+                anchors.top: parent.top
+                anchors.right: parent.right
+                anchors.bottom: parent.bottom
+            }
         }
+    }
+    Rectangle {
+        width: parent.width
+        height: 14
+        anchors.left: parent.left
+        anchors.top: content.bottom
+        color: "#efefef"
+        z:10
     }
 
     states: [
@@ -125,9 +144,8 @@ Rectangle {
 
     function addPart(fileName, ID){ // add in list with filename
         var newComponent = Qt.createComponent("LeftTabPartListElement.qml")
-
-        console.log("added part " + fileName);
         var newPart = newComponent.createObject(partListColumn, {"modelName" : fileName, "state" : "on", "objectName" : "qwer", "glModelID" : ID})
+        console.log("added part " + fileName);
     }
 
     function deletePart(ID){ // delete in list by ID

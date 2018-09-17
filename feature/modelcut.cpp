@@ -56,41 +56,41 @@ void modelcut::generatePlane(Qt3DCore::QEntity* targetEntity){
     v1=cuttingPoints[cuttingPoints.size()-3];
     v2=cuttingPoints[cuttingPoints.size()-2];
     v3=cuttingPoints[cuttingPoints.size()-1];
-        planeMaterial = new Qt3DExtras::QPhongAlphaMaterial();
-        planeMaterial->setAmbient(QColor(QRgb(0xF4F4F4)));
-        planeMaterial->setDiffuse(QColor(QRgb(0xF4F4F4)));
-        planeMaterial->setSpecular(QColor(QRgb(0xF4F4F4)));
-        planeMaterial->setAlpha(0.5f);
+    planeMaterial = new Qt3DExtras::QPhongAlphaMaterial();
+    planeMaterial->setAmbient(QColor(QRgb(0xF4F4F4)));
+    planeMaterial->setDiffuse(QColor(QRgb(0xF4F4F4)));
+    planeMaterial->setSpecular(QColor(QRgb(0xF4F4F4)));
+    planeMaterial->setAlpha(0.5f);
 
 
-        //To manipulate plane color, change the QRgb(0x~~~~~~).
-        QVector3D world_origin(0,0,0);
-        QVector3D original_normal(0,1,0);
-        QVector3D desire_normal(QVector3D::normal(v1,v2,v3)); //size=1
-        float angle = qAcos(QVector3D::dotProduct(original_normal,desire_normal))*180/M_PI;
-        QVector3D crossproduct_vector(QVector3D::crossProduct(original_normal,desire_normal));
+    //To manipulate plane color, change the QRgb(0x~~~~~~).
+    QVector3D world_origin(0,0,0);
+    QVector3D original_normal(0,1,0);
+    QVector3D desire_normal(QVector3D::normal(v1,v2,v3)); //size=1
+    float angle = qAcos(QVector3D::dotProduct(original_normal,desire_normal))*180/M_PI;
+    QVector3D crossproduct_vector(QVector3D::crossProduct(original_normal,desire_normal));
 
-        for (int i=0;i<2;i++){
-            clipPlane[i]=new Qt3DExtras::QPlaneMesh();
-            clipPlane[i]->setHeight(30.0);
-            clipPlane[i]->setWidth(30.0);
+    for (int i=0;i<2;i++){
+        clipPlane[i]=new Qt3DExtras::QPlaneMesh();
+        clipPlane[i]->setHeight(30.0);
+        clipPlane[i]->setWidth(30.0);
 
-            planeTransform[i]=new Qt3DCore::QTransform();
-            planeTransform[i]->setScale(2.0f);
-            planeTransform[i]->setRotation(QQuaternion::fromAxisAndAngle(crossproduct_vector, angle+180*i));
-            planeTransform[i]->setTranslation(desire_normal*(-world_origin.distanceToPlane(v1,v2,v3)));
+        planeTransform[i]=new Qt3DCore::QTransform();
+        planeTransform[i]->setScale(2.0f);
+        planeTransform[i]->setRotation(QQuaternion::fromAxisAndAngle(crossproduct_vector, angle+180*i));
+        planeTransform[i]->setTranslation(desire_normal*(-world_origin.distanceToPlane(v1,v2,v3)));
 
-            qDebug() << "before target generation";
-            moveToThread(targetEntity->thread());
-            qDebug() << thread();
-            qDebug() << targetEntity->thread();
+        qDebug() << "before target generation";
+        moveToThread(targetEntity->thread());
+        qDebug() << thread();
+        qDebug() << targetEntity->thread();
 
-            planeEntity[i] = new Qt3DCore::QEntity(targetEntity);
-            planeEntity[i]->addComponent(clipPlane[i]);
-            planeEntity[i]->addComponent(planeTransform[i]);
-            planeEntity[i]->addComponent(planeMaterial);
-            qDebug() << "after target generation";
-        }
+        planeEntity[i] = new Qt3DCore::QEntity(targetEntity);
+        planeEntity[i]->addComponent(clipPlane[i]);
+        planeEntity[i]->addComponent(planeTransform[i]);
+        planeEntity[i]->addComponent(planeMaterial);
+        qDebug() << "after target generation";
+    }
 }
 
 void modelcut::addCuttingPoint(Qt3DCore::QEntity* targetEntity, QVector3D v){

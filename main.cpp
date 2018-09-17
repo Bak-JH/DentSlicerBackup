@@ -13,11 +13,40 @@
 #include <QSplashScreen>
 #include "utils/updatechecker.h"
 //#include <QTranslator>
+//#include <windows.h>
+//#include <dbghelp.h>
+//#include <QQuickItem>
 
 using namespace Qt3DCore;
 QmlManager *qmlManager;
 
-
+//void exceptionFilter()
+//{
+//    QString applicationPath = QApplication::applicationDirPath();
+//    QString logPath = applicationPath + QString("/log/");
+//    QDir dir(logPath);
+//    dir.mkpath(logPath);
+//     QString time = QDateTime::currentDateTime().toString(Qt::ISODate);
+//    QString logFileName = logPath + QString("error") + "[" + time + "]" + QString(".log");
+//    QFile outFile(logFileName);
+//    outFile.open(QIODevice::WriteOnly | QIODevice::Append);
+//    QTextStream ts(&outFile);
+//     void         * stack[15];
+//    unsigned short frames;
+//    SYMBOL_INFO    symbol;
+//    HANDLE         process;
+//     process = GetCurrentProcess();
+//    SymInitialize( process, NULL, TRUE ); // Error
+//     frames = CaptureStackBackTrace( 0, 15, stack, NULL );
+//     for(int i = 0; i < frames; i++ )
+//    {
+//        SymFromAddr( process, ( DWORD64 )( stack[ i ] ), 0, &symbol ); // Error
+//         ts << symbol.Name << endl;
+//    }
+//    outFile.close();
+//    exit(-1);
+//    qApp->quit();
+//}
 int main(int argc, char **argv)
 {
     QApplication app(argc, argv);
@@ -66,6 +95,6 @@ int main(int argc, char **argv)
     qmlManager->mainWindow->setProperty("visible",true);
 //    qmlManager->loginWindow->setProperty("visible",false);
 
-
+//    exceptionFilter();
     return app.exec();
 }

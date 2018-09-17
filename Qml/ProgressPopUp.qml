@@ -90,7 +90,7 @@ Rectangle {
     function updateNumber(value){
         progress_value.value=value;
         progress_text1.text=Math.round(value*100) + "% complete";
-        if(value==1){
+        if(value===1){
             progressPopUp.visible = false
             progress_text1.text = "0% complete"
             //result_orient.state="active";

@@ -12,6 +12,8 @@ Item{
         id : window
         width: 1280
         height: 768
+        minimumWidth: 1440
+        minimumHeight: 960
         visible: false
 
         objectName: "mainWindow"
@@ -32,6 +34,11 @@ Item{
         FontLoader{
             id : mediumFont
             source: "qrc:/Resource/font/NotoSans-SemiCondensedMedium.ttf"
+        }
+
+        LeftTabPartListElement {
+            id : statechanger
+            container: window
         }
 
         DropArea {

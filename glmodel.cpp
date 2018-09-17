@@ -1496,7 +1496,8 @@ void GLModel::generatePlane(){
         parentModel->planeObjectPicker[i]->setHoverEnabled(true);
         parentModel->planeObjectPicker[i]->setEnabled(true);
         //QObject::connect(parentModel->planeObjectPicker[i], SIGNAL(clicked(Qt3DRender::QPickEvent*)), this, SLOT(handlePickerClicked(Qt3DRender::QPickEvent*)));
-        QObject::connect(parentModel->planeObjectPicker[i], SIGNAL(released(Qt3DRender::QPickEvent*)), this, SLOT(handlePickerClickedFreeCut(Qt3DRender::QPickEvent*)));//SLOT(handlePickerClicked(Qt3DRender::QPickEvent*)));
+        QObject::connect(parentModel->planeObjectPicker[i], SIGNAL(released(Qt3DRender::QPickEvent*)), this, SLOT(handlePickerClickedFreeCut(Qt3DRender::QPickEvent*)));
+        //SLOT(handlePickerClicked(Qt3DRender::QPickEvent*)));
         parentModel->planeEntity[i]->addComponent(parentModel->planeObjectPicker[i]);
 
         parentModel->planeEntity[i]->addComponent(parentModel->clipPlane[i]);

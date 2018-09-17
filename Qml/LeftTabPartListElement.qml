@@ -6,6 +6,16 @@ Item {
 
     property string modelName
     property int glModelID
+    property Item container;
+
+//    focus: true
+    Keys.onPressed: {
+        if(event.key === Qt.Key_Escape) {
+            icon.parent.state = 'on'
+            unselectPart(glModelID)
+            event.accepted = true;
+        }
+    }
 
     Rectangle{
         id:background
@@ -81,7 +91,11 @@ Item {
             onExited : qm.resetCursor();
             onClicked: {
                 console.log("delete");
-                deletePopUp.popupDelete();
+                if(icon.parent.state == 'on'){
+                    icon.parent.state = 'select';
+                    selectPart(glModelId);
+                }
+                deletePopUp.visible = true;
                 deletePopUp.targetID = glModelID;
 
             }

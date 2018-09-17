@@ -18,7 +18,7 @@ Rectangle {
     width : 264
     height : 180
 
-    color : "transparent"
+    color : "#efefef"
 
     state : "open"
 
@@ -28,8 +28,9 @@ Rectangle {
         height: 28
         anchors.left : parent.left
         anchors.top :  parent.top
+        z:10
 
-        color: "transparent"
+        color: "#efefef"
 
         Text{
             height: parent.height
@@ -76,7 +77,7 @@ Rectangle {
         anchors.left : parent.left
         anchors.top :  tab.bottom
 
-        color:"Transparent"
+        color:"#efefef"
         Item {
             width: parent.width
             height: parent.height

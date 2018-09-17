@@ -59,6 +59,7 @@ RESOURCES += qml.qrc \
 # Additional import path used to resolve QML modules in Qt Creator's code model
 #QML_IMPORT_PATH =
 LIB_DIR=utils/winsparkle
+LIBS += -ldbghelp
 
 INCLUDEPATH += $$_PRO_FILE_PWD_/$$LIB_DIR
 LIBS += -L$$_PRO_FILE_PWD_/$$LIB_DIR -lWinSparkle
