@@ -1,4 +1,5 @@
 #include "supportview.h"
+#include "earcut.hpp"
 #include <QtMath>
 
 void generateCylinder(Mesh* mesh, const QVector3D& position, const QVector3D& positionTop, const float& radius) {
@@ -39,6 +40,29 @@ void generateCylinder(Mesh* mesh, const QVector3D& position, const QVector3D& po
         }
         lastTop = &(*iterTop);
         lastBottom = &(*iterBottom);
+    }
+}
+
+void generateFace(Mesh* mesh, Path path, float z) {
+    // Create array
+    std::vector<std::vector<std::array<float, 2>>> polygon;
+    std::vector<std::array<float, 2>> points;
+    for( auto point : path ) {
+        points.push_back({(float)point.X / scfg->resolution, (float)point.Y / scfg->resolution});
+    }
+    polygon.push_back(points);
+    // Run tessellation
+    // Returns array of indices that refer to the vertices of the input polygon.
+    // e.g: the index 6 would refer to {25, 75} in this example.
+    // Three subsequent indices form a triangle. Output triangles are clockwise.
+    std::vector<uint32_t> indices = mapbox::earcut<uint32_t>(polygon);
+    for (auto iter = indices.begin() ; iter != indices.end() ; ) {
+        int n1 = (*iter); iter++;
+        int n2 = (*iter); iter++;
+        int n3 = (*iter); iter++;
+        mesh->addFace(QVector3D(points.at(n3).at(0), points.at(n3).at(1), z),
+                      QVector3D(points.at(n2).at(0), points.at(n2).at(1), z),
+                      QVector3D(points.at(n1).at(0), points.at(n1).at(1), z));
     }
 }
 
@@ -107,4 +131,10 @@ void generateRaft(Mesh* mesh, OverhangPoint *point) {
             bottom);
 
     generateCylinder(mesh, position, positionTop, radius);
+}
+
+void generateInfill(Mesh* mesh, Slice* slice) {
+    for( auto iter = slice->outershell.begin() ; iter != slice->outershell.end() ; iter++ ) {
+        generateFace(mesh, (*iter), slice->z);
+    }
 }

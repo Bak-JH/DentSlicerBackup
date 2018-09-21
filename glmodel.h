@@ -116,6 +116,7 @@ public:
     Mesh* layerMesh;
     Mesh* layerSupportMesh;
     Mesh* layerRaftMesh;
+    Mesh* layerInfillMesh;
 
     MeshFace *targetMeshFace = NULL; // used for object selection (specific area, like extension or labelling)
 

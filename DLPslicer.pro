@@ -135,7 +135,8 @@ HEADERS += \
     utils/httpreq.h \
     feature/hollowshell.h \
     feature/supportview.h \
-    utils/updatechecker.h
+    utils/updatechecker.h \
+    feature/earcut.hpp
 
 #LIBS += -lOpengl32
 

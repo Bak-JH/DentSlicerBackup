@@ -12,7 +12,7 @@ out vec4 fragColor;
 
 void main()
 {
-    if( fs_in.worldPos.z < height ) {
+    if( fs_in.worldPos.z > height + 0.1 || fs_in.worldPos.z < height ) {
         discard;//fragColor = vec4(1, 0, 0, 0.5);
     } else {
         fragColor = fs_in.color;

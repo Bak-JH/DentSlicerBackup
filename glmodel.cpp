@@ -29,6 +29,7 @@ GLModel::GLModel(QObject* mainWindow, QNode *parent, Mesh* loadMesh, QString fna
     , parentModel((GLModel*)(parent))
     , cutMode(1)
     , layerMesh(nullptr)
+    , layerInfillMesh(nullptr)
     , layerSupportMesh(nullptr)
     , layerRaftMesh(nullptr)
     , slicer(nullptr)
@@ -438,10 +439,14 @@ void GLModel::updateModelMesh(){
     case VIEW_MODE_LAYER:
         if( layerMesh != nullptr ) {
             int faces = layerMesh->faces.size() +
+                    (qmlManager->getLayerViewFlags() & LAYER_INFILL != 0 ? layerInfillMesh->faces.size() : 0) +
                     (qmlManager->getLayerViewFlags() & LAYER_SUPPORTERS != 0 ? layerSupportMesh->faces.size() : 0) +
                     (qmlManager->getLayerViewFlags() & LAYER_RAFT != 0 ? layerRaftMesh->faces.size() : 0);
             initialize(faces);
             addVertices(layerMesh, false);
+            if( qmlManager->getLayerViewFlags() & LAYER_INFILL ) {
+                addVertices(layerInfillMesh, false, QVector3D(1.0f, 1.0f, 0.0f));
+            }
             if( qmlManager->getLayerViewFlags() & LAYER_SUPPORTERS ) {
                 addVertices(layerSupportMesh, false);
             }
@@ -1568,11 +1573,13 @@ void GLModel::generateSupport(){
         layerMesh->addFace(mesh->idx2MV(mf.mesh_vertex[0]).position, mesh->idx2MV(mf.mesh_vertex[1]).position, mesh->idx2MV(mf.mesh_vertex[2]).position, mf.idx);
     }
 
+    layerInfillMesh = new Mesh;
     layerSupportMesh = new Mesh;
     layerRaftMesh = new Mesh;
     QVector3D t = m_transform->translation();
 
     t.setZ(mesh->z_min * -1.0f);
+    layerInfillMesh->vertexMove(t);
     layerSupportMesh->vertexMove(t);
     layerRaftMesh->vertexMove(t);
 
@@ -1582,9 +1589,16 @@ void GLModel::generateSupport(){
         generateSupporter(layerSupportMesh, *iter);
         generateRaft(layerRaftMesh, *iter);
     }
+
+    for( auto iter = slicer->slices.begin() ; iter != slicer->slices.end() ; iter++ ) {
+        qDebug() << "infile" << iter->infill.size() << "outershell" << iter->outershell.size() << "support" << iter->support.size() << "z" << iter->z;
+        generateInfill(layerInfillMesh, &(*iter));
+    }
+
     t.setZ(scfg->raft_thickness);
     layerMesh->vertexMove(t);
     t.setZ(mesh->z_min + scfg->raft_thickness);
+    layerInfillMesh->vertexMove(t);
     layerSupportMesh->vertexMove(t);
     layerRaftMesh->vertexMove(t);
 
@@ -2446,59 +2460,6 @@ void GLModel::generateLayerViewMaterial() {
     // Create technique
     QTechnique *gl3Technique = new QTechnique();
 
-    //====================== inner rendering ======================//
-    // Create technique, render pass and shader
-    gl3Pass = new QRenderPass();
-    glShader = new QShaderProgram();
-
-    // Set the shader on the render pass
-    vert = new QOpenGLShader(QOpenGLShader::Vertex);
-    if( vert->compileSourceFile(":/shaders/layerview_inner.vert") ) {
-        qDebug() << "vert compiled" << vert->sourceCode();
-        glShader->setVertexShaderCode(vert->sourceCode());
-    } else {
-        qDebug() << "vert compile failed";
-    }
-    frag = new QOpenGLShader(QOpenGLShader::Fragment);
-    if( frag->compileSourceFile(":/shaders/layerview_inner.frag") ) {
-        qDebug() << "frag compiled" << frag->sourceCode();
-        glShader->setFragmentShaderCode(frag->sourceCode());
-    } else {
-        qDebug() << "frag compile failed";
-    }
-    gl3Pass->setShaderProgram(glShader);
-
-    depthTest = new QDepthTest();
-    depthTest->setDepthFunction(QDepthTest::DepthFunction::Always);
-    gl3Pass->addRenderState(depthTest);
-
-    cullFace = new QCullFace();
-    cullFace->setMode(QCullFace::CullingMode::Front);
-    gl3Pass->addRenderState(cullFace);
-
-    stencilMask = new QStencilMask();
-    stencilMask->setBackOutputMask(1);
-    gl3Pass->addRenderState(stencilMask);
-    stencilTest = new QStencilTest();
-    stencilTest->front()->setReferenceValue(1);
-    stencilTest->front()->setComparisonMask(1);
-    stencilTest->front()->setStencilFunction(Qt3DRender::QStencilTestArguments::Always);
-    stencilTest->back()->setReferenceValue(1);
-    stencilTest->back()->setComparisonMask(1);
-    stencilTest->back()->setStencilFunction(Qt3DRender::QStencilTestArguments::Always);
-    gl3Pass->addRenderState(stencilTest);
-    stencilOp = new QStencilOperation();
-    stencilOp->front()->setAllTestsPassOperation(QStencilOperationArguments::Operation::Replace);
-    stencilOp->front()->setDepthTestFailureOperation(QStencilOperationArguments::Operation::Replace);
-    stencilOp->front()->setStencilTestFailureOperation(QStencilOperationArguments::Operation::Replace);
-    stencilOp->back()->setAllTestsPassOperation(QStencilOperationArguments::Operation::Replace);
-    stencilOp->back()->setDepthTestFailureOperation(QStencilOperationArguments::Operation::Replace);
-    stencilOp->back()->setStencilTestFailureOperation(QStencilOperationArguments::Operation::Replace);
-    gl3Pass->addRenderState(stencilOp);
-
-    // Add the pass to the technique
-    gl3Technique->addRenderPass(gl3Pass);
-
     //====================== outer rendering ======================//
     gl3Pass = new QRenderPass();
     glShader = new QShaderProgram();
@@ -2520,13 +2481,54 @@ void GLModel::generateLayerViewMaterial() {
     }
     gl3Pass->setShaderProgram(glShader);
 
+    cullFace = new QCullFace();
+    cullFace->setMode(QCullFace::CullingMode::Back);
+    gl3Pass->addRenderState(cullFace);
+
     depthTest = new QDepthTest();
     depthTest->setDepthFunction(QDepthTest::DepthFunction::Less);
     gl3Pass->addRenderState(depthTest);
 
+    // Add the pass to the technique
+    gl3Technique->addRenderPass(gl3Pass);
+
+    //====================== top rendering ======================//
+    // Create technique, render pass and shader
+    gl3Pass = new QRenderPass();
+    glShader = new QShaderProgram();
+
+    // Set the shader on the render pass
+    vert = new QOpenGLShader(QOpenGLShader::Vertex);
+    if( vert->compileSourceFile(":/shaders/layerview_top.vert") ) {
+        qDebug() << "vert compiled" << vert->sourceCode();
+        glShader->setVertexShaderCode(vert->sourceCode());
+    } else {
+        qDebug() << "vert compile failed";
+    }
+    frag = new QOpenGLShader(QOpenGLShader::Fragment);
+    if( frag->compileSourceFile(":/shaders/layerview_top.frag") ) {
+        qDebug() << "frag compiled" << frag->sourceCode();
+        glShader->setFragmentShaderCode(frag->sourceCode());
+    } else {
+        qDebug() << "frag compile failed";
+    }
+    gl3Pass->setShaderProgram(glShader);
+
     cullFace = new QCullFace();
     cullFace->setMode(QCullFace::CullingMode::Back);
     gl3Pass->addRenderState(cullFace);
+
+    depthTest = new QDepthTest();
+    depthTest->setDepthFunction(QDepthTest::DepthFunction::Less);
+    gl3Pass->addRenderState(depthTest);
+
+    QBlendEquationArguments* blendState = new QBlendEquationArguments();
+    QBlendEquation* blendEquation = new QBlendEquation();
+    blendState->setSourceRgb(QBlendEquationArguments::SourceAlpha);
+    blendState->setDestinationRgb(QBlendEquationArguments::OneMinusSourceAlpha);
+    blendEquation->setBlendFunction(QBlendEquation::Add);
+    gl3Pass->addRenderState(blendState);
+    gl3Pass->addRenderState(blendEquation);
 
     // Add the pass to the technique
     gl3Technique->addRenderPass(gl3Pass);
@@ -2554,42 +2556,12 @@ void GLModel::generateLayerViewMaterial() {
     gl3Pass->setShaderProgram(glShader);
 
     cullFace = new QCullFace();
-    cullFace->setMode(QCullFace::CullingMode::Back);
+    cullFace->setMode(QCullFace::CullingMode::Front);
     gl3Pass->addRenderState(cullFace);
 
-    stencilTest = new QStencilTest();
-    stencilTest->front()->setReferenceValue(1);
-    stencilTest->front()->setComparisonMask(1);
-    stencilTest->front()->setStencilFunction(Qt3DRender::QStencilTestArguments::Equal);
-    stencilTest->back()->setReferenceValue(1);
-    stencilTest->back()->setComparisonMask(1);
-    stencilTest->back()->setStencilFunction(Qt3DRender::QStencilTestArguments::Equal);
-    gl3Pass->addRenderState(stencilTest);
-
-    // Add the pass to the technique
-    gl3Technique->addRenderPass(gl3Pass);
-
-    //====================== top rendering ======================//
-    // Create technique, render pass and shader
-    gl3Pass = new QRenderPass();
-    glShader = new QShaderProgram();
-
-    // Set the shader on the render pass
-    vert = new QOpenGLShader(QOpenGLShader::Vertex);
-    if( vert->compileSourceFile(":/shaders/layerview_top.vert") ) {
-        qDebug() << "vert compiled" << vert->sourceCode();
-        glShader->setVertexShaderCode(vert->sourceCode());
-    } else {
-        qDebug() << "vert compile failed";
-    }
-    frag = new QOpenGLShader(QOpenGLShader::Fragment);
-    if( frag->compileSourceFile(":/shaders/layerview_top.frag") ) {
-        qDebug() << "frag compiled" << frag->sourceCode();
-        glShader->setFragmentShaderCode(frag->sourceCode());
-    } else {
-        qDebug() << "frag compile failed";
-    }
-    gl3Pass->setShaderProgram(glShader);
+    depthTest = new QDepthTest();
+    depthTest->setDepthFunction(QDepthTest::DepthFunction::Always);
+    gl3Pass->addRenderState(depthTest);
 
     // Add the pass to the technique
     gl3Technique->addRenderPass(gl3Pass);

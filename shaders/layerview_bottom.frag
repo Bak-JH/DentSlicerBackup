@@ -31,7 +31,7 @@ void calcLight( vec3 position, vec3 norm, out vec3 amb, out vec3 diff, out vec3 
 
 void main()
 {
-    if( fs_in.worldPos.z > height ) {
+    if( fs_in.worldPos.z > height || dot(fs_in.worldPos - vec3(0, 0, height), vec3(0, 0, 1)) > 0 ) {
         discard;//fragColor = vec4(1, 0, 0, 0.5);
     } else {
         vec3 amb, diff, spec;
