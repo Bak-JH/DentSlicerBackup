@@ -526,14 +526,15 @@ void featureThread::run(){
             }
         case ftrExport:
             {
-                // save to file
-                /*QString fileName = QFileDialog::getSaveFileName(nullptr, tr("Save to STL file"), "", tr("3D Model file (*.stl)"));
-                ste->exportSTL(m_glmodel->mesh, fileName);
-                */
+                // export to file
+                QString fileName = QFileDialog::getSaveFileName(nullptr, tr("Export sliced file"), "");
+                //ste->exportSTL(m_glmodel->mesh, fileName);
+                if(fileName == "")
+                    return;
 
                 // slice file
                 qmlManager->openProgressPopUp();
-                QFuture<Slicer*> future = QtConcurrent::run(se, &SlicingEngine::slice, data, m_glmodel->mesh, m_glmodel->filename);
+                QFuture<Slicer*> future = QtConcurrent::run(se, &SlicingEngine::slice, data, m_glmodel->mesh, fileName + "/" + m_glmodel->filename.split("/").last() );
                 m_glmodel->futureWatcher.setFuture(future);
                 break;
             }
@@ -956,10 +957,11 @@ void GLModel::handlePickerClickedFreeCut(Qt3DRender::QPickEvent* pick)
     }*/
 
     // remove cutting contour and redraw cutting contour
+    parentModel->removeCuttingContour();
     if (parentModel->cuttingPoints.size() >=2){
-        parentModel->removeCuttingContour();
         parentModel->generateCuttingContour(parentModel->cuttingPoints);
     }
+
 
     if (parentModel->cuttingPoints.size() >= 2)
         QMetaObject::invokeMethod(qmlManager->cutPopup, "colorApplyFinishButton", Q_ARG(QVariant, 2));
@@ -1078,12 +1080,12 @@ void GLModel::handlePickerClicked(QPickEvent *pick)
             }*/
 
             // remove cutting contour and redraw cutting contour
+            parentModel->removeCuttingContour();
             if (parentModel->cuttingPoints.size() >=2){
-                parentModel->removeCuttingContour();
                 parentModel->generateCuttingContour(parentModel->cuttingPoints);
             }
 
-                //generatePlane();
+            //generatePlane();
             //parentModel->ft->ct->addCuttingPoint(parentModel, v);
         } else if (cutMode == 9999){
             qDebug() << "current cut mode :" << cutMode;
@@ -1568,9 +1570,6 @@ void GLModel::removeCuttingPoint(int idx){
 }
 
 void GLModel::removeCuttingPoints(){
-    qDebug() << "in the removeCuttingPOints";
-
-    qDebug() << "ok till here";
     for (int i=0; i<sphereEntity.size(); i++){
         sphereEntity[i]->removeComponent(sphereMesh[i]);
         sphereEntity[i]->removeComponent(sphereTransform[i]);
