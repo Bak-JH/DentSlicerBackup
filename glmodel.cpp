@@ -249,8 +249,28 @@ void GLModel::saveUndoState_internal(){
     foreach(MeshVertex mv, mesh->vertices){
         temp_prev_mesh->vertices.push_back(mv);
     }
+
+    for (vector<MeshFace>::iterator it = mesh->faces.begin(); it!= mesh->faces.end(); ++it){
+        qDebug() << it->neighboring_faces.size();
+        temp_prev_mesh->faces.push_back((*it));
+        // clear and copy neighboring faces
+        /*temp_prev_mesh->faces.end()->neighboring_faces[0].clear();
+        temp_prev_mesh->faces.end()->neighboring_faces[1].clear();
+        temp_prev_mesh->faces.end()->neighboring_faces[2].clear();*/
+        /*temp_prev_mesh->faces.end()->neighboring_faces[0].insert(temp_prev_mesh->faces.end()->neighboring_faces[0].end(), mf.neighboring_faces[0].begin(), mf.neighboring_faces[0].end());
+        temp_prev_mesh->faces.end()->neighboring_faces[1].insert(temp_prev_mesh->faces.end()->neighboring_faces[1].end(), mf.neighboring_faces[1].begin(), mf.neighboring_faces[1].end());
+        temp_prev_mesh->faces.end()->neighboring_faces[2].insert(temp_prev_mesh->faces.end()->neighboring_faces[2].end(), mf.neighboring_faces[2].begin(), mf.neighboring_faces[2].end());*/
+    }
     foreach(MeshFace mf, mesh->faces){
-        temp_prev_mesh->faces.push_back(mf);
+        //temp_prev_mesh->faces.push_back(mf);
+        // clear and copy neighboring faces
+        /*temp_prev_mesh->faces.end()->neighboring_faces[0].clear();
+        temp_prev_mesh->faces.end()->neighboring_faces[1].clear();
+        temp_prev_mesh->faces.end()->neighboring_faces[2].clear();*/
+        /*temp_prev_mesh->faces.end()->neighboring_faces[0].insert(temp_prev_mesh->faces.end()->neighboring_faces[0].end(), mf.neighboring_faces[0].begin(), mf.neighboring_faces[0].end());
+        temp_prev_mesh->faces.end()->neighboring_faces[1].insert(temp_prev_mesh->faces.end()->neighboring_faces[1].end(), mf.neighboring_faces[1].begin(), mf.neighboring_faces[1].end());
+        temp_prev_mesh->faces.end()->neighboring_faces[2].insert(temp_prev_mesh->faces.end()->neighboring_faces[2].end(), mf.neighboring_faces[2].begin(), mf.neighboring_faces[2].end());*/
+
     }
     for (QHash<uint32_t, MeshVertex>::iterator it = mesh->vertices_hash.begin(); it!=mesh->vertices_hash.end(); ++it){
         temp_prev_mesh->vertices_hash.insert(it.key(), it.value());
@@ -326,6 +346,7 @@ void GLModel::loadUndoState(){
         m_transform->setRotationY(0);
         m_transform->setRotationZ(0);
         emit _updateModelMesh(true);
+        //emit _updateModelMesh(true, true);
     } else {
         qDebug() << "no undo state";
     }
@@ -349,6 +370,7 @@ void GLModel::loadRedoState(){
         m_transform->setRotationY(0);
         m_transform->setRotationZ(0);
         emit _updateModelMesh(true);
+        //emit _updateModelMesh(true, true);
     } else {
         qDebug() << "no redo status";
     }
@@ -407,6 +429,7 @@ void GLModel::copyModelAttributeFrom(GLModel* from){
 }
 
 void GLModel::updateModelMesh(bool shadowUpdate){
+    // shadowUpdate updates shadow model of current Model
     qDebug() << "update Model Mesh";
     // delete allocated buffers, geometry
     delete vertexBuffer;
@@ -557,9 +580,12 @@ void featureThread::run(){
             }
         case ftrOrient:
             {
+                qDebug() << "ftr orientation run";
                 m_glmodel->saveUndoState();
                 qmlManager->openProgressPopUp();
+                qDebug() << "tweak start";
                 rotateResult* rotateres= ot->Tweak(m_glmodel->mesh,true,45,&m_glmodel->appropriately_rotated);
+                qDebug() << "got rotate result";
                 m_glmodel->rotateModelMesh(rotateres->R);
                 break;
             }

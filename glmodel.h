@@ -202,6 +202,7 @@ public:
     QString filename;
     QObject* mainWindow;
     QString slicingInfo;
+    bool updateLock = false;
     void addVertices(Mesh* mesh, bool CW);
 
 private:

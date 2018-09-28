@@ -66,7 +66,7 @@ rotateResult* autoorientation::Tweak(Mesh* mesh, bool bi_algorithmic,int CA,bool
         liste[i].overhangA=overhangA;
         liste[i].lineL=lineL;
         liste[i].isActive=true;
-        free(temp);
+        //free(temp);
         qmlManager->setProgress(i*0.04/(best_n+1)+0.95);
     }
 
@@ -139,7 +139,7 @@ rotateResult* autoorientation::Tweak(Mesh* mesh, bool bi_algorithmic,int CA,bool
         qDebug(" Unprintability:        %-9f",Unprintability);
     }
     //━━━━━━━━━━━━━━━━━━━━ 내용 출력 ━━━━━━━━━━━━━━━━━━━
-    free(orientations);
+    //free(orientations);
 
     qmlManager->setProgress(1);
     qmlManager->setProgressText("Done");
@@ -389,7 +389,7 @@ Orient* autoorientation::egde_plus_vertex(Mesh* mesh, int best_n){
                 QString::number(QVariant(randomNormal[2]).toFloat());
         lst[key]=lst[key]+it;
 
-        free(randomNormal);
+        //free(randomNormal);
         if(i%3000==0){
             qmlManager->setProgress((float)i*0.80/(vcount*it)+0.15);
             qmlManager->setProgressText("orientation.....");
