@@ -121,6 +121,7 @@ public:
     vector<GLModel*> glmodels;
     vector<GLModel*> selectedModels;
     vector<Mesh*> copyMeshes;
+    vector<QString> copyMeshNames;
 
 
 
@@ -131,6 +132,8 @@ public:
     //bool moveActive = false;
     bool rotateActive = false;
     bool orientationActive = false;
+    bool freecutActive = false;
+
 
     QString groupFunctionState;
     int groupFunctionIndex;

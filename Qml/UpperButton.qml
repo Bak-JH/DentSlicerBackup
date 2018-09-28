@@ -66,6 +66,14 @@ Rectangle{
         case "Arrange":
             buttonClicked();
             break;
+        case "Setting":
+            buttonClicked();
+            break;
+        case "Feedback":
+            buttonClicked();
+            break;
+
+
 
         default:
             //console.log(functionname);
