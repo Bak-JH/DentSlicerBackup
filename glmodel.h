@@ -202,7 +202,11 @@ public:
     QString filename;
     QObject* mainWindow;
     QString slicingInfo;
-    bool updateLock = false;
+
+    // implement lock as bool variable
+    bool updateLock;
+    //QMutex functionLock;
+    //QMutex updateLock;
     void addVertices(Mesh* mesh, bool CW);
 
 private:

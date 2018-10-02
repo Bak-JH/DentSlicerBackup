@@ -251,7 +251,7 @@ void GLModel::saveUndoState_internal(){
     }
 
     for (vector<MeshFace>::iterator it = mesh->faces.begin(); it!= mesh->faces.end(); ++it){
-        qDebug() << it->neighboring_faces.size();
+        //qDebug() << it->neighboring_faces.size();
         temp_prev_mesh->faces.push_back((*it));
         // clear and copy neighboring faces
         /*temp_prev_mesh->faces.end()->neighboring_faces[0].clear();
@@ -346,7 +346,6 @@ void GLModel::loadUndoState(){
         m_transform->setRotationY(0);
         m_transform->setRotationZ(0);
         emit _updateModelMesh(true);
-        //emit _updateModelMesh(true, true);
     } else {
         qDebug() << "no undo state";
     }
@@ -370,7 +369,6 @@ void GLModel::loadRedoState(){
         m_transform->setRotationY(0);
         m_transform->setRotationZ(0);
         emit _updateModelMesh(true);
-        //emit _updateModelMesh(true, true);
     } else {
         qDebug() << "no redo status";
     }
@@ -481,6 +479,7 @@ void GLModel::updateModelMesh(bool shadowUpdate){
             qmlManager->connectHandlers(this);
         //shadowModel->m_transform->setTranslation(translation);
         QObject::connect(shadowModel, SIGNAL(modelSelected(int)), qmlManager, SLOT(modelSelected(int)));
+        updateLock = false;
     }
 }
 
@@ -582,6 +581,9 @@ void featureThread::run(){
         case ftrOrient:
             {
                 qDebug() << "ftr orientation run";
+                while (m_glmodel->updateLock); // if it is not locked
+
+                m_glmodel->updateLock = true;
                 m_glmodel->saveUndoState();
                 qmlManager->openProgressPopUp();
                 qDebug() << "tweak start";
