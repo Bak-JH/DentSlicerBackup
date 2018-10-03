@@ -28,6 +28,8 @@ public:
     explicit QmlManager(QObject *parent = nullptr);
     QQmlApplicationEngine* engine;
 
+    QString version = "0.0.1";
+
     // UI components
     QObject* mainWindow;
     QObject* loginWindow;
@@ -161,6 +163,7 @@ public:
 
     GLModel* findGLModelByName(QString filename);
 
+    Q_INVOKABLE QString getVersion();
     Q_INVOKABLE void keyboardHandlerFocus();
     Q_INVOKABLE QVector3D getSelectedCenter();
     Q_INVOKABLE QVector3D getSelectedSize();

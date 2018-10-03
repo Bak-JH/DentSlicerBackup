@@ -475,6 +475,10 @@ int QmlManager::getselectedModelID(){
     return result;
 }
 
+
+QString QmlManager::getVersion(){
+    return version;
+}
 void QmlManager::keyboardHandlerFocus(){
     qDebug() << "keyboard focus on";
     keyboardHandler->setFocus(true);

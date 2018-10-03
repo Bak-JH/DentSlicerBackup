@@ -5,6 +5,8 @@ import QtQuick.Controls 1.0
 //import QtQuick.Controls.Styles 1.0
 import QtQuick.Controls.Styles 1.4
 
+
+
 Rectangle {
     id: box_uppertab
     objectName: "boxUpperTab"
@@ -1682,6 +1684,7 @@ Rectangle {
                 }
 
                 //fonts list
+                /*
                 model: ListModel {
                     id: fontItems
                     ListElement { text: "Arial" }
@@ -1695,6 +1698,8 @@ Rectangle {
                     ListElement { text: "Arial9" }
                     ListElement { text: "Arial10" }
                 }
+                */
+                model : Qt.fontFamilies();
             }
 
             ComboBox {
