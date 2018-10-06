@@ -208,6 +208,14 @@ void GLModel::changecolor(int mode){
         break;
     }
 }
+bool GLModel::modelSelectChangable(){
+    bool result = false;
+    qDebug() << cutActive << extensionActive << labellingActive << layflatActive << isMoved;
+    if (!cutActive && !extensionActive && !labellingActive && !layflatActive && !isMoved)
+        result = true;
+
+    return result;
+}
 
 void GLModel::checkPrintingArea(){
     float printing_x = 100;
@@ -958,7 +966,9 @@ void GLModel::addIndexes(vector<int> indexes){
 
 void GLModel::handlePickerEnteredFreeCutSphere()
 {
-    QApplication::setOverrideCursor(QCursor(Qt::WhatsThisCursor));
+    QCursor cursorEraser = QCursor(QPixmap(":/Resource/cursor_eraser.png"));
+    QApplication::setOverrideCursor(cursorEraser);
+
 }
 
 void GLModel::handlePickerExitedFreeCutSphere()
@@ -1038,7 +1048,6 @@ void GLModel::handlePickerClicked(QPickEvent *pick)
     qDebug() << "handle Picker clicked" << pick->buttons() << pick->button();
     if (!parentModel)
         return;
-
 
     //---------------- rgoo routine init --------------------
     m_objectPicker->setDragEnabled(false);
@@ -1858,6 +1867,8 @@ void GLModel::mgoo(Qt3DRender::QPickEvent* v)
 }
 
 void GLModel::pgoo(Qt3DRender::QPickEvent* v){
+    qDebug() << "pgoo";
+    qmlManager->modelClicked = true;
     if(v->buttons()>1) // pass if click with right mouse
         return;
 
