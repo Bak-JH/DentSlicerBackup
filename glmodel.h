@@ -222,7 +222,7 @@ public:
     // implement lock as bool variable
     bool updateLock;
 
-    void addVertices(Mesh* mesh, bool CW, QVector3D color = QVector3D(1.0f, 0.0f, 0.0f));
+    void addVertices(Mesh* mesh, bool CW, QVector3D color=QVector3D(0.278f, 0.670f, 0.706f));
 
 
 private:
