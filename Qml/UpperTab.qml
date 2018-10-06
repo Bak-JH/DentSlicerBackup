@@ -32,6 +32,8 @@ Rectangle {
     property int ftrExtend : 13
     property int ftrSupport : 14
     property int ftrLabel : 15
+    property int ftrSupportViewMode : 16
+    property int ftrLayerViewMode : 17
 
     property alias second_tab_button_move: second_tab_button_move
     property alias second_tab_button_rotate: second_tab_button_rotate
@@ -521,7 +523,7 @@ Rectangle {
             iconText: qsTr("Support")
 
             onButtonClicked:{
-                window.resultPopUp.openResultPopUp("This function is currently unavailable.","","Please check back later.")
+                //window.resultPopUp.openResultPopUp("This function is currently unavailable.","","Please check back later.")
             }
 
         }
@@ -1362,11 +1364,21 @@ Rectangle {
             state: fourth_tab_button_support.state=="active" ? "active" : "inactive"
         }*/
         PopUp {
+            objectName:"manualSupportPopup"
             id:popup_Support
             funcname: "Support"
             height: 320
             imageHeight: 34
             detail1: "Automatic Generation"
+            state: { //fourth_tab_button_extend.state=="active" ? "active" : "inactive"
+                if (fourth_tab_button_support.state == "active" && qm.isSelected()){
+                    //openExtension();
+                    return "active";
+                } else {
+                    //closeExtension();
+                    return "inactive";
+                }
+            }
             Rectangle {
                 id: support_autoButton
                 color: parent.color

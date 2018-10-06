@@ -169,6 +169,10 @@ Rectangle{
         }
 
         onClicked:{
+            if( qm.getViewMode() !== 0 ) {
+                return;
+            }
+
             if (parent.state == "inactive"){
                 all_off();
                 parent.state = "active";

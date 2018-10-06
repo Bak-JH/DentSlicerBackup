@@ -109,6 +109,31 @@ Rectangle {
                 onClicked:{
 
                     switch (popup_type){
+                        case uppertab.ftrSupportViewMode:
+                        case uppertab.ftrLayerViewMode:
+                            function collectConfigurations(){
+                                var options = uppertab.options;
+                                var configurations = {};
+
+                                // do collecting things
+                                // configurations[key] = value;
+                                configurations["resolution"] = options[0];
+                                configurations["layer_height"] = options[1];
+                                configurations["support_type"] = options[2];
+                                configurations["infill_type"] = options[3];
+                                configurations["raft_type"] = options[4];
+                                return configurations;
+                            }
+                            var cfg = collectConfigurations();
+
+                            if( popup_type == uppertab.ftrSupportViewMode ) {
+                                qm.setViewMode(1);
+                            } else if( popup_type == uppertab.ftrLayerViewMode ) {
+                                qm.setViewMode(2);
+                            }
+
+                            yesnoPopUp.runFeature(uppertab.ftrExport, cfg);
+                            break;
                         case uppertab.ftrRepair:
                             qm.fixMesh();
                             console.log("repair called");
@@ -168,6 +193,12 @@ Rectangle {
                     parent.color = "#999999"
                 }
                 onReleased: {
+
+                    if( popup_type == uppertab.ftrSupportViewMode ||
+                        popup_type == uppertab.ftrLayerViewMode ) {
+                        qm.setViewMode(0);
+                    }
+
                     closePopUp();
                 }
             }
@@ -201,5 +232,7 @@ Rectangle {
 
         return result
     }
+
+    signal runFeature(int type, var config);
 
 }
