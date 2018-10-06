@@ -25,20 +25,19 @@ rotateResult* autoorientation::Tweak(Mesh* mesh, bool bi_algorithmic,int CA,bool
     else
         best_n=5;
     Liste liste[best_n+additional_n];//orientation 의 계산값들을 저장및 출력하기 위해 사용
-    Orient* orientations=area_cumulation(mesh, n,bi_algorithmic);
+    vector<Orient*> orientations=area_cumulation(mesh, n,bi_algorithmic);
     //bi_algorithmic이 false: 6개, true:8개의 orientation 값이 리턴됩니다.
     int orientCnt=0;
     //edge_plus_vertex로 추가된 orient갯수 카운터
 
+    qDebug() << "dbg 1";
     if(bi_algorithmic){
-          Orient* plusVertex=egde_plus_vertex(mesh,additional_n);
+          vector<Orient*> plusVertex=egde_plus_vertex(mesh,additional_n);
           //additional_n 이하의 갯수의 orientation이 추가됩니다.
-          while(plusVertex[orientCnt].val>2){
-              orientCnt++;
-          }
-          for(int i=0;i<orientCnt;i++){
-              orientations[8+i]=plusVertex[i];
-          }//추가된 orientation을 원본 뒤에 붙입니다.
+
+          qDebug() << "dbg 2";
+          orientations.insert(orientations.end(),plusVertex.begin(), plusVertex.end());
+          //추가된 orientation을 원본 뒤에 붙입니다.
           qDebug()<<"total orientation: "<<orientCnt+8;
           orientations=remove_duplicates(orientations,&orientCnt);
           //orientation의 중복을 제거합니다. 그래서 orientation의 최솟값이 8이 아니라
@@ -46,11 +45,13 @@ rotateResult* autoorientation::Tweak(Mesh* mesh, bool bi_algorithmic,int CA,bool
           //free(plusVertex);
     }
     best_n+=orientCnt;
+    qDebug() << "dbg 3";
+
     //갯수 업데이트, false일 때는 값 변화가 없습니다.
     for(int i=0; i<best_n+1;i++){
-        float orientation[] ={-orientations[i].label[0],
-                             -orientations[i].label[1],
-                             -orientations[i].label[2]};
+        float orientation[] ={-orientations[i]->label[0],
+                             -orientations[i]->label[1],
+                             -orientations[i]->label[2]};
         float amin=approachvertex(mesh,orientation);
         float *temp=lithograph(mesh,orientation,amin,CA);
         //bottom,overhang,line을 구합니다.
@@ -69,6 +70,7 @@ rotateResult* autoorientation::Tweak(Mesh* mesh, bool bi_algorithmic,int CA,bool
         //free(temp);
         qmlManager->setProgress(i*0.04/(best_n+1)+0.95);
     }
+    qDebug() << "dbg 4";
 
     qmlManager->setProgress(0.99);
     qmlManager->setProgressText("99");
@@ -107,14 +109,21 @@ rotateResult* autoorientation::Tweak(Mesh* mesh, bool bi_algorithmic,int CA,bool
         }
         //저장.
     }
+    qDebug() << "dbg 5";
     rotateResult* result;// Tweak의 return값입니다. axis,phi,R로 구성되어있습니다.
     if(bestside.isActive){
         *appropriately_rotated=true;
         result=euler(bestside);
     }else{
         *appropriately_rotated=false;
+        qDebug() << "fuck";
+        qmlManager->setProgress(1);
+        qmlManager->setProgressText("Done");
+
+        qmlManager->openResultPopUp("","Orientation Done","");
         return NULL;
     }
+    qDebug() << "dbg 6";
     //━━━━━━━━━━━━━━━━━━━━ 내용 출력 ━━━━━━━━━━━━━━━━━━━
     if(false){//필요 시 verbose를 추가해도 됩니다.
         qDebug()<<"Examine "<<best_n+1<<" orientations:";
@@ -274,7 +283,7 @@ float autoorientation::get_touching_line(Mesh* mesh,float a[],int i,float touchi
     }
     return length;
 }
-Orient* autoorientation::area_cumulation(Mesh* mesh,float n[],bool bi_algorithmic){
+vector<Orient*> autoorientation::area_cumulation(Mesh* mesh,float n[],bool bi_algorithmic){
     //bi_algorithmic이 false:6개 true:8개의 orientataion*을 만들어 리턴합니다.
     int best_n;
     if(bi_algorithmic)
@@ -345,23 +354,27 @@ Orient* autoorientation::area_cumulation(Mesh* mesh,float n[],bool bi_algorithmi
             val_n[index]=it_map->first;
         }
     }
-    Orient* result = new Orient[best_n+1];
-    result[0].val=0;
-    result[0].label[0]=n[0];
-    result[0].label[1]=n[1];
-    result[0].label[2]=n[2];
+    vector<Orient*> result;
+    for (int i=0; i<best_n+1;i++){
+        result.push_back(new Orient);
+    }
+    //Orient* result = new Orient[best_n+1];
+    result[0]->val=0;
+    result[0]->label[0]=n[0];
+    result[0]->label[1]=n[1];
+    result[0]->label[2]=n[2];
     //0,0,1을 처음에 추가합니다.
     for(int i=1;i<best_n+1;i++){
         QStringList temp=val_n[i-1].split(',');
-        result[i].val=val[i-1];
-        result[i].label[0]=temp[0].toFloat();
-        result[i].label[1]=temp[1].toFloat();
-        result[i].label[2]=temp[2].toFloat();
+        result[i]->val=val[i-1];
+        result[i]->label[0]=temp[0].toFloat();
+        result[i]->label[1]=temp[1].toFloat();
+        result[i]->label[2]=temp[2].toFloat();
     }
     //가장 가중치가 높은 orientation들도 추가합니다.
     return result;
 }
-Orient* autoorientation::egde_plus_vertex(Mesh* mesh, int best_n){
+vector<Orient*> autoorientation::egde_plus_vertex(Mesh* mesh, int best_n){
     //orientation을 추가로 더할 때 씁니다. best_n 갯수만큼 return 하긴 하지만,
     //호출한 Tweak() 에서 val>2인 orientation만 원본 orientation에 추가하므로,
     //실제로 추가되는 값은 그보다 작을 수 있습니다.
@@ -373,7 +386,7 @@ Orient* autoorientation::egde_plus_vertex(Mesh* mesh, int best_n){
     if(vcount < 10000) it = 5;
     else if(vcount < 25000) it = 2;
     else it = 1;
-
+    qDebug() << "dbg 1-1";
     map<QString,float> lst;
     //area_cummulation처럼 map을 만들고, value 기준 상위 best_n개 만 뽑아냅니다.
     //단, map을 만드는 요소를 mesh 내에서 random하게 추가로 생성합니다.
@@ -395,6 +408,7 @@ Orient* autoorientation::egde_plus_vertex(Mesh* mesh, int best_n){
             qmlManager->setProgressText("orientation.....");
         }
     }
+    qDebug() << "dbg 1-2";
 
     qmlManager->setProgress(0.95);
     qmlManager->setProgressText("orientation.....");
@@ -405,6 +419,7 @@ Orient* autoorientation::egde_plus_vertex(Mesh* mesh, int best_n){
         val[i]=0;
         val_n[i]="";
     }
+    qDebug() << "dbg 1-3";
     for(it_map=lst.begin(); it_map !=lst.end() ; ++it_map){
         if(it_map->second > val[best_n-1]){
             int index=best_n-2;
@@ -426,14 +441,20 @@ Orient* autoorientation::egde_plus_vertex(Mesh* mesh, int best_n){
             val_n[index]=it_map->first;
         }
     }
-    Orient* result = new Orient[best_n];
+    qDebug() << "dbg 1-4";
+    vector<Orient*> result;
+    for (int i=0; i<best_n;i++){
+        result.push_back(new Orient);
+    }
+
     for(int i=0;i<best_n;i++){
         QStringList temp=val_n[i].split(',');
-        result[i].val=val[i];
-        result[i].label[0]=temp[0].toFloat();
-        result[i].label[1]=temp[1].toFloat();
-        result[i].label[2]=temp[2].toFloat();
+        result[i]->val=val[i];
+        result[i]->label[0]=temp[0].toFloat();
+        result[i]->label[1]=temp[1].toFloat();
+        result[i]->label[2]=temp[2].toFloat();
     }
+    qDebug() << "dbg 1-5";
     //추가할 orientation best_n개를 리턴합니다.
     return result;
 
@@ -483,20 +504,25 @@ float* autoorientation::calc_random_normal(Mesh* mesh,int i){
         return NULL;
     }
 }
-Orient* autoorientation::remove_duplicates(Orient* o,int *orientCnt){
+vector<Orient*> autoorientation::remove_duplicates(vector<Orient*> o,int *orientCnt){
     //중복을 제거합니다.
     int initIndex=*orientCnt+8;
     int count=0;
-    Orient* orientation=(Orient*)malloc(sizeof(Orient)*(initIndex));
+    vector<Orient*> orientation;
+    for (int i=0; i<initIndex;i++){
+        orientation.push_back(new Orient);
+    }
+
+    //Orient* orientation=(Orient*)malloc(sizeof(Orient)*(initIndex));
     orientation[count]=o[count];
     count++;
     for(int i=1;i<initIndex;i++){
         bool overlapFlag = false;
         for(int j=0; j<count;j++){
             //orientation이 같은 지 여부는, 유클리드 거리로 측정합니다.
-            float dif=sqrtf((o[i].label.x()-orientation[j].label.x())*(o[i].label.x()-orientation[j].label.x())
-                            +(o[i].label.y()-orientation[j].label.y())*(o[i].label.y()-orientation[j].label.y())
-                            +(o[i].label.z()-orientation[j].label.z())*(o[i].label.z()-orientation[j].label.z()));
+            float dif=sqrtf((o[i]->label.x()-orientation[j]->label.x())*(o[i]->label.x()-orientation[j]->label.x())
+                            +(o[i]->label.y()-orientation[j]->label.y())*(o[i]->label.y()-orientation[j]->label.y())
+                            +(o[i]->label.z()-orientation[j]->label.z())*(o[i]->label.z()-orientation[j]->label.z()));
             if(dif<0.001){
                 overlapFlag=true;
                 break;

@@ -590,7 +590,10 @@ void featureThread::run(){
                 qDebug() << "tweak start";
                 rotateResult* rotateres= ot->Tweak(m_glmodel->mesh,true,45,&m_glmodel->appropriately_rotated);
                 qDebug() << "got rotate result";
-                m_glmodel->rotateModelMesh(rotateres->R);
+                if (rotateres == NULL)
+                    break;
+                else
+                    m_glmodel->rotateModelMesh(rotateres->R);
                 break;
             }
         case ftrScale:
