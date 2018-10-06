@@ -189,6 +189,7 @@ public:
     void bisectModel_internal(Plane plane);
     void checkPrintingArea();
     bool EndsWith(const string& a, const string& b);
+    bool modelSelectChangable();
     QVector2D world2Screen(QVector3D target);
     QString getFileName(const string& s);
     QVector3D spreadPoint(QVector3D endpoint,QVector3D startpoint,int factor);
