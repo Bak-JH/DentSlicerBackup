@@ -135,6 +135,7 @@ public:
     bool rotateActive = false;
     bool orientationActive = false;
     bool freecutActive = false;
+    bool modelClicked = false;
 
 
     QString groupFunctionState;
@@ -180,6 +181,8 @@ public:
     Q_INVOKABLE void doDeletebyID(int ID);
     Q_INVOKABLE void runArrange();
     Q_INVOKABLE void sendUpdateModelInfo();
+    Q_INVOKABLE void backgroundClickCheck();
+    Q_INVOKABLE void setModelClickFalse();
 
 
 private:

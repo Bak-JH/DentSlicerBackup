@@ -246,9 +246,6 @@ Rectangle {
                         return configurations;
                     }
 
-                    console.log(parent.id);
-                    console.log(parent.parent.id);
-
                     console.log("exporting");
                     // collect configurations
                     var cfg = collectConfigurations();
