@@ -1590,10 +1590,10 @@ void GLModel::generateSupport(){
         generateRaft(layerRaftMesh, *iter);
     }
 
-    for( auto iter = slicer->slices.begin() ; iter != slicer->slices.end() ; iter++ ) {
+    /*for( auto iter = slicer->slices.begin() ; iter != slicer->slices.end() ; iter++ ) {
         qDebug() << "infile" << iter->infill.size() << "outershell" << iter->outershell.size() << "support" << iter->support.size() << "z" << iter->z;
         generateInfill(layerInfillMesh, &(*iter));
-    }
+    }*/
 
     t.setZ(scfg->raft_thickness);
     layerMesh->vertexMove(t);
