@@ -5,6 +5,8 @@ import QtQuick.Controls 1.0
 //import QtQuick.Controls.Styles 1.0
 import QtQuick.Controls.Styles 1.4
 
+
+
 Rectangle {
     id: box_uppertab
     objectName: "boxUpperTab"
@@ -63,6 +65,10 @@ Rectangle {
         fourth_tab_button_label.state = "inactive";
         fourth_tab_button_support.state = "inactive";
 
+        fifth_tab_button_setting.state = "inactive";
+        fifth_tab_button_feedback.state = "inactive";
+
+
         arrangePopUp.closePopUp();
         resultPopUp.closePopUp();
         deletePopUp.closePopUp();
@@ -72,7 +78,9 @@ Rectangle {
         if(yesnoPopUp.isFlawOpen)
             yesnoPopUp.closePopUp();
 
+        //qm.keyboardHandlerFocus();
         //scene3d.forceActiveFocus();
+        qm.freecutActive = false;
 
         console.log("all off");
     }
@@ -328,8 +336,10 @@ Rectangle {
             iconSource2: "qrc:/Resource/upper2_arrange.png"
             iconText: qsTr("Arrange")
             onButtonClicked:{
-                arrangePopUp.visible = true
-                console.log("arrange clcllclclcick")
+                if(state == "active")
+                    arrangePopUp.visible = true
+                else
+                    arrangePopUp.visible = false
 
             }
         }
@@ -503,8 +513,6 @@ Rectangle {
             onButtonClicked:{
                 if(!qm.isSelected() && (state == "active")){
                     window.resultPopUp.openResultPopUp("","You must select at least one model.","")
-                }else{
-                    runGroupFeature(ftrExtend, state, 0, 0, 0);
                 }
             }
         }
@@ -568,11 +576,12 @@ Rectangle {
             iconSource1: "qrc:/Resource/upper_setting.png"
             iconSource2: "qrc:/Resource/upper2_setting.png"
             iconText: qsTr("Setting")
-            MouseArea{
-                anchors.fill: parent
-                onClicked:{
-                    settingPopup.visible = true;
-                }
+
+            onButtonClicked:{
+                if(state == "active")
+                    settingPopup.visible = true
+                else
+                    settingPopup.visible = false
             }
         }
 
@@ -583,11 +592,19 @@ Rectangle {
             iconSource1: "qrc:/Resource/upper_feedback.png"
             iconSource2: "qrc:/Resource/upper2_feedback.png"
             iconText: qsTr("Feedback")
+            /*
             MouseArea{
                 anchors.fill: parent
                 onClicked:{
                     feedbackPopUp.visible = true;
                 }
+            }
+            */
+            onButtonClicked:{
+                if(state == "active")
+                    feedbackPopUp.visible = true
+                else
+                    feedbackPopUp.visible = false
             }
         }
 
@@ -1046,9 +1063,9 @@ Rectangle {
                 slider_vis = true;
                 cutModeSelected(1);
                 viewCenter();
-
                 slider_value = 1
                 popup_cut.colorApplyFinishButton(2)
+                qm.freecutActive = false;
             }
 
             onCurveModeClicked: {
@@ -1057,6 +1074,7 @@ Rectangle {
                 cutModeSelected(2);
                 viewUp();
                 popup_cut.colorApplyFinishButton(0)
+                qm.freecutActive = true
             }
 
             onPlaneSliderValueChanged: {
@@ -1561,6 +1579,7 @@ Rectangle {
             signal generateText3DMesh()
             signal openLabelling()
             signal closeLabelling()
+            signal sendTextChanged(string text, int contentWidth);
 
             onApplyClicked: {
                 console.log("ApplyClicked")
@@ -1568,7 +1587,10 @@ Rectangle {
                 generateText3DMesh()
             }
 
-
+            onLabelTextChanged: {
+                console.log("sendTextChanged");
+                sendTextChanged(text, contentWidth);
+            }
 
             ComboBox {
                 objectName: "labelFontBox"
@@ -1664,6 +1686,7 @@ Rectangle {
                 }
 
                 //fonts list
+                /*
                 model: ListModel {
                     id: fontItems
                     ListElement { text: "Arial" }
@@ -1677,6 +1700,8 @@ Rectangle {
                     ListElement { text: "Arial9" }
                     ListElement { text: "Arial10" }
                 }
+                */
+                model : Qt.fontFamilies();
             }
 
             ComboBox {
@@ -1818,6 +1843,7 @@ Rectangle {
                     return "active"
                 }
                 else {
+
                     //text3DInput.focus = false;
                     //sceneRoot.keyboardHandler.focus = true;
                     closeLabelling()

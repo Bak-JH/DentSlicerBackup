@@ -45,10 +45,10 @@ private:
     float target_function(float touching,float overhang,float line);
     float* lithograph(Mesh* mesh, float n[], float amin, int CA);
     float get_touching_line(Mesh* mesh,float a[],int i,float touching_height);
-    Orient* area_cumulation(Mesh* mesh,float n[],bool bi_algorithmic);
-    Orient* egde_plus_vertex(Mesh* mesh, int bsvest_n);
+    vector<Orient*> area_cumulation(Mesh* mesh,float n[],bool bi_algorithmic);
+    vector<Orient*> egde_plus_vertex(Mesh* mesh, int bsvest_n);
     float* calc_random_normal(Mesh* mesh,int i);
-    Orient* remove_duplicates(Orient* o,int *orientCnt);
+    vector<Orient*> remove_duplicates(vector<Orient*> o,int *orientCnt);
     rotateResult* euler(Liste bestside);
 signals:
     void progressChanged(float);

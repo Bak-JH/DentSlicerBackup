@@ -24,7 +24,7 @@ void QmlManager::initializeUI(QQmlApplicationEngine* e){
     mainWindow = FindItemByName(engine, "mainWindow");
     loginWindow = FindItemByName(engine, "loginWindow");
     loginButton = FindItemByName(engine, "loginButton");
-
+    keyboardHandler = (Qt3DInput::QKeyboardHandler*)FindItemByName(engine, "keyboardHandler");
     models = (QEntity *)FindItemByName(engine, "Models");
     selectedModels.push_back(nullptr);
     Lights* lights = new Lights(models);
@@ -181,6 +181,11 @@ void QmlManager::initializeUI(QQmlApplicationEngine* e){
     layerRaftButton = FindItemByName(engine, "layerRaftButton");
     QObject::connect(layerRaftButton, SIGNAL(onChanged(bool)), this, SLOT(layerRaftButtonChanged(bool)));
 
+    QObject::connect(undoRedoButton, SIGNAL(unDo()), this, SLOT(unDo()));
+    QObject::connect(undoRedoButton, SIGNAL(reDo()), this, SLOT(reDo()));
+    QObject::connect(mv, SIGNAL(unDo()), this, SLOT(unDo()));
+    QObject::connect(mv, SIGNAL(reDo()), this, SLOT(reDo()));
+
     httpreq* hr = new httpreq();
     QObject::connect(loginButton, SIGNAL(loginTrial(QString)), hr, SLOT(get_iv(QString)));
     //QObject::connect(loginButton, SIGNAL(loginTrial(QString, QString)), hr, SLOT(login(QString,QString)));
@@ -290,10 +295,10 @@ void QmlManager::disconnectHandlers(GLModel* glmodel){
 
     QObject::disconnect(yesno_popup, SIGNAL(runFeature(int, QVariant)), glmodel->ft, SLOT(setTypeAndRun(int, QVariant)));
 
-    QObject::disconnect(undoRedoButton, SIGNAL(unDo()), glmodel, SLOT(loadUndoState()));
+    /*QObject::disconnect(undoRedoButton, SIGNAL(unDo()), glmodel, SLOT(loadUndoState()));
     QObject::disconnect(undoRedoButton, SIGNAL(reDo()), glmodel, SLOT(loadRedoState()));
     QObject::disconnect(mv, SIGNAL(unDo()), glmodel, SLOT(loadUndoState()));
-    QObject::disconnect(mv, SIGNAL(reDo()), glmodel, SLOT(loadRedoState()));
+    QObject::disconnect(mv, SIGNAL(reDo()), glmodel, SLOT(loadRedoState()));*/
 
     // need to connect for every popup
     // model rotate popup codes
@@ -332,7 +337,7 @@ void QmlManager::disconnectHandlers(GLModel* glmodel){
     QObject::disconnect(scalePopup, SIGNAL(closeScale()), glmodel->shadowModel, SLOT(closeScale()));
 
     // label popup codes
-    QObject::disconnect(text3DInput, SIGNAL(sendTextChanged(QString, int)),glmodel->shadowModel,SLOT(getTextChanged(QString, int)));
+    QObject::disconnect(labelPopup, SIGNAL(sendTextChanged(QString, int)),glmodel->shadowModel,SLOT(getTextChanged(QString, int)));
     QObject::disconnect(labelPopup, SIGNAL(openLabelling()),glmodel->shadowModel,SLOT(openLabelling()));
     QObject::disconnect(labelPopup, SIGNAL(closeLabelling()),glmodel->shadowModel,SLOT(closeLabelling()));
     //QObject::connect(labelPopup, SIGNAL(runFeature(int)),glmodel->ft, SLOT(setTypeAndStart(int)));
@@ -397,10 +402,10 @@ void QmlManager::connectHandlers(GLModel* glmodel){
 
     QObject::connect(yesno_popup, SIGNAL(runFeature(int, QVariant)), glmodel->ft, SLOT(setTypeAndRun(int, QVariant)));
 
-    QObject::connect(undoRedoButton, SIGNAL(unDo()), glmodel, SLOT(loadUndoState()));
+    /*QObject::connect(undoRedoButton, SIGNAL(unDo()), glmodel, SLOT(loadUndoState()));
     QObject::connect(undoRedoButton, SIGNAL(reDo()), glmodel, SLOT(loadRedoState()));
     QObject::connect(mv, SIGNAL(unDo()), glmodel, SLOT(loadUndoState()));
-    QObject::connect(mv, SIGNAL(reDo()), glmodel, SLOT(loadRedoState()));
+    QObject::connect(mv, SIGNAL(reDo()), glmodel, SLOT(loadRedoState()));*/
 
     QObject::connect(layflatPopup, SIGNAL(openLayflat()), glmodel->shadowModel, SLOT(openLayflat()));
     QObject::connect(layflatPopup, SIGNAL(closeLayflat()), glmodel->shadowModel, SLOT(closeLayflat()));
@@ -432,7 +437,7 @@ void QmlManager::connectHandlers(GLModel* glmodel){
     QObject::connect(scalePopup, SIGNAL(closeScale()), glmodel->shadowModel, SLOT(closeScale()));
 
     // label popup codes
-    QObject::connect(text3DInput, SIGNAL(sendTextChanged(QString, int)),glmodel->shadowModel,SLOT(getTextChanged(QString, int)));
+    QObject::connect(labelPopup, SIGNAL(sendTextChanged(QString, int)),glmodel->shadowModel,SLOT(getTextChanged(QString, int)));
     QObject::connect(labelPopup, SIGNAL(openLabelling()),glmodel->shadowModel,SLOT(openLabelling()));
     QObject::connect(labelPopup, SIGNAL(closeLabelling()),glmodel->shadowModel,SLOT(closeLabelling()));
     //QObject::connect(labelPopup, SIGNAL(runFeature(int)),glmodel->ft, SLOT(setTypeAndStart(int)));
@@ -518,13 +523,24 @@ int QmlManager::getselectedModelID(){
     return result;
 }
 
+
+QString QmlManager::getVersion(){
+    return version;
+}
+void QmlManager::keyboardHandlerFocus(){
+    qDebug() << "keyboard focus on";
+    keyboardHandler->setFocus(true);
+    QMetaObject::invokeMethod(mv, "forceFocus");
+    qDebug() << "keyboard handler focus : " << keyboardHandler->focus();
+}
+
 void QmlManager::fixMesh(){
     if (selectedModels[0] == nullptr)
         return;
 
     openProgressPopUp();
     repairMesh(selectedModels[0]->mesh);
-    emit selectedModels[0]->_updateModelMesh();
+    emit selectedModels[0]->_updateModelMesh(true);
 }
 
 void QmlManager::setHandCursor(){
@@ -1009,6 +1025,9 @@ void QmlManager::showRotateSphere(){
 }
 
 void QmlManager::mouseHack(){
+    //temporarily unuse. If no more bug about mouse release, delete this function.
+    return ;
+
     const QPointF tmp_cor(265,105);
     QMouseEvent* evt = new QMouseEvent(QEvent::MouseButtonPress,tmp_cor,Qt::LeftButton, Qt::LeftButton,0);
     //QCoreApplication::postEvent(this->parent(),evt);
@@ -1052,6 +1071,8 @@ void QmlManager::modelMoveDone(int Axis){
         QQmlProperty::write(moveArrowobj,"center",selectedModels[0]->m_transform->translation()+QVector3D((selectedModels[0]->mesh->x_max+selectedModels[0]->mesh->x_min)/2,(selectedModels[0]->mesh->y_max+selectedModels[0]->mesh->y_min)/2,(selectedModels[0]->mesh->z_max+selectedModels[0]->mesh->z_min)/2));
     //}
     mouseHack();
+
+
 }
 
 void QmlManager::totalMoveDone(){
@@ -1065,16 +1086,11 @@ void QmlManager::totalMoveDone(){
 
         //curModel->saveUndoState();
 
-        //curModel->moveModelMesh(curModel->m_transform->translation());
         curModel->mesh->vertexMove(curModel->m_transform->translation());
+        curModel->shadowModel->m_transform->setTranslation(curModel->shadowModel->m_transform->translation()+curModel->m_transform->translation());
         curModel->m_transform->setTranslation(QVector3D(0,0,0));
-
-        /*QVector3D translationDiff = curModel->m_transform->translation()-curModel->m_translation;
-
-        // move translation back to original
-        curModel->m_transform->setTranslation(curModel->m_translation);
-        curModel->moveModelMesh(translationDiff);*/
-        emit curModel->_updateModelMesh();
+        // need to only update shadowModel & mesh
+        emit curModel->_updateModelMesh(false);
     }
 }
 
@@ -1161,7 +1177,7 @@ void QmlManager::totalRotateDone(){
 
         selectedModels[i]->mesh->vertexMove(selectedModels[i]->m_transform->translation());
         selectedModels[i]->m_transform->setTranslation(QVector3D(0,0,0));
-        emit selectedModels[i]->_updateModelMesh();
+        emit selectedModels[i]->_updateModelMesh(true);
     }
 }
 
@@ -1356,7 +1372,6 @@ void QmlManager::modelMoveByNumber(int axis, int X, int Y){
         if(tmp.x() + selectedModels[i]->mesh->x_min -1 + X< - 80/2 )
             targetX = tmp.x() - (tmp.x() + selectedModels[i]->mesh->x_min + 100/2 - 1);
 
-
         if(tmp.y() + selectedModels[i]->mesh->y_max +1 + Y> 80/2 )
             targetY = tmp.y() - (tmp.y() + selectedModels[i]->mesh->y_max - 80/2 + 1);
         if(tmp.y() + selectedModels[i]->mesh->y_min -1 + Y< - 80/2 )
@@ -1392,7 +1407,7 @@ void QmlManager::modelRotateByNumber(int axis,  int X, int Y, int Z){
         selectedModels[i]->m_transform->setRotationZ(0);
         selectedModels[i]->mesh->vertexMove(selectedModels[i]->m_transform->translation());
         selectedModels[i]->m_transform->setTranslation(QVector3D(0,0,0));
-        emit selectedModels[i]->_updateModelMesh();
+        emit selectedModels[i]->_updateModelMesh(true);
     }
     //showRotateSphere();
     mouseHack();
@@ -1526,30 +1541,90 @@ void QmlManager::runGroupFeature(int ftrType, QString state, double arg1, double
     }
 }
 
+void QmlManager::unDo(){
+    if (selectedModels.size() == 1 && selectedModels[0] == nullptr && glmodels.size()>=1){
+        // do global undo
+        GLModel* recentModel = nullptr;
+        // find global recent model
+        for (GLModel* glmodel : glmodels){
+            if (glmodel->mesh->prevMesh == nullptr || glmodel->mesh->prevMesh->time.isNull())
+                continue;
+            else if (recentModel == nullptr)
+                recentModel = glmodel;
+            else if (glmodel->mesh->prevMesh->time >= recentModel->mesh->prevMesh->time){
+                recentModel = glmodel;
+            }
+        }
+
+        // undo recentModel
+        if (recentModel != nullptr)
+            recentModel->loadUndoState();
+    } else if (glmodels.size()>=1){
+        // do local undo
+        selectedModels[0]->loadUndoState();
+    }
+    return;
+}
+
+void QmlManager::reDo(){
+    if (selectedModels.size() == 1 && selectedModels[0] == nullptr && glmodels.size()>=1){
+        // do global redo
+        GLModel* recentModel = nullptr;
+        // find global recent model
+        for (GLModel* glmodel : glmodels){
+            if (glmodel->mesh->nextMesh == nullptr || glmodel->mesh->nextMesh->time.isNull())
+                continue;
+            else if (recentModel == nullptr)
+                recentModel = glmodel;
+            else if (glmodel->mesh->nextMesh->time >= recentModel->mesh->nextMesh->time){
+                recentModel = glmodel;
+            }
+        }
+        // undo recentModel
+        if (recentModel != nullptr)
+            recentModel->loadRedoState();
+    } else if (glmodels.size()>=1) {
+        // do local redo
+        selectedModels[0]->loadRedoState();
+    }
+    return;
+}
 
 void QmlManager::copyModel(){
     copyMeshes.clear();
+    copyMeshNames.clear();
 
     qDebug() << "copying current selected Models";
     for (GLModel* model : selectedModels){
-        Mesh* copyMesh = new Mesh();
-        copyMesh->faces.reserve(model->mesh->faces.size()*2);
-        copyMesh->vertices.reserve(model->mesh->vertices.size()*2);
-        foreach (MeshFace mf, model->mesh->faces){
+        if (model == nullptr)
+            continue;
+        Mesh* copied = model->mesh->copyMesh();
+
+        copyMeshes.push_back(copied);
+        copyMeshNames.push_back(model->filename);
+        /*foreach (MeshFace mf, model->mesh->faces){
             copyMesh->addFace(model->mesh->idx2MV(mf.mesh_vertex[0]).position, model->mesh->idx2MV(mf.mesh_vertex[1]).position, model->mesh->idx2MV(mf.mesh_vertex[2]).position, mf.idx);
         }
-        copyMeshes.push_back(copyMesh);
+        copyMesh->connectFaces();
+        copyMeshes.push_back(copyMesh);*/
     }
     return;
 }
 
 void QmlManager::pasteModel(){
+    if(copyMeshes.size() < 1) // clipboard check
+        return ;
+
     qDebug() << "pasting current saved selected Meshes";
+    int counter = 0;
     for (Mesh* copyMesh : copyMeshes){
-        createModelFile(copyMesh, "/copy_"+QString::number(GLModel::globalID));
+        QString temp = copyMeshNames.at(counter).split(".").first() + QString::fromStdString("_copy_") + QString::number(GLModel::globalID);
+
+        createModelFile(copyMesh, temp);
+        counter++;
     }
 
-    runArrange();
+    openArrange();
 
     return;
 }
@@ -1679,7 +1754,7 @@ void QmlManager::layerInfillButtonChanged(bool checked){
     }
 
     if( selectedModels[0] != nullptr ) {
-        emit selectedModels[0]->_updateModelMesh();
+        emit selectedModels[0]->_updateModelMesh(true);
     }
 }
 
@@ -1692,7 +1767,7 @@ void QmlManager::layerSupportersButtonChanged(bool checked){
     }
 
     if( selectedModels[0] != nullptr ) {
-        emit selectedModels[0]->_updateModelMesh();
+        emit selectedModels[0]->_updateModelMesh(true);
     }
 }
 
@@ -1707,7 +1782,7 @@ void QmlManager::layerRaftButtonChanged(bool checked){
     qInfo() << "layerRaftButtonChanged" << checked << layerViewFlags;
 
     if( selectedModels[0] != nullptr ) {
-        emit selectedModels[0]->_updateModelMesh();
+        emit selectedModels[0]->_updateModelMesh(true);
     }
 }
 

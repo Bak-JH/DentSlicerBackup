@@ -19,6 +19,7 @@
 #include "QtConcurrent/QtConcurrentRun"
 #include "QFuture"
 #include "utils/httpreq.h"
+#include <QKeyboardHandler>
 
 #define VIEW_MODE_OBJECT 0
 #define VIEW_MODE_SUPPORT 1
@@ -35,6 +36,8 @@ public:
     explicit QmlManager(QObject *parent = nullptr);
     QQmlApplicationEngine* engine;
 
+    QString version = "0.0.1";
+
     // UI components
     QObject* mainWindow;
     QObject* loginWindow;
@@ -47,6 +50,7 @@ public:
     Qt3DCore::QEntity *mttab;
     QObject* undoRedoButton;
     QObject* slicingData;
+    Qt3DInput::QKeyboardHandler* keyboardHandler;
 
     // model rotate components
     QObject *rotatePopup;
@@ -139,6 +143,7 @@ public:
     vector<GLModel*> glmodels;
     vector<GLModel*> selectedModels;
     vector<Mesh*> copyMeshes;
+    vector<QString> copyMeshNames;
 
 
 
@@ -149,6 +154,8 @@ public:
     //bool moveActive = false;
     bool rotateActive = false;
     bool orientationActive = false;
+    bool freecutActive = false;
+
 
     QString groupFunctionState;
     int groupFunctionIndex;
@@ -177,6 +184,8 @@ public:
 
     GLModel* findGLModelByName(QString filename);
 
+    Q_INVOKABLE QString getVersion();
+    Q_INVOKABLE void keyboardHandlerFocus();
     Q_INVOKABLE QVector3D getSelectedCenter();
     Q_INVOKABLE QVector3D getSelectedSize();
     Q_INVOKABLE int getselectedModelID();
@@ -213,6 +222,8 @@ public slots:
     void openModelFile(QString filename);
     void checkModelFile(int ID);
     void deleteModelFile(int ID);
+    void unDo();
+    void reDo();
     void copyModel();
     void pasteModel();
     void groupSelectionActivate(bool);

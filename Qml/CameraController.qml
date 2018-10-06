@@ -96,6 +96,8 @@ Entity {
             property real rotationSpeed : 2000
             onTriggered: {
                 if (rotateAction.active) {// mouse right rotate
+                    if (qm.freecutActive)
+                        return ;
                     sceneRoot.systemTransform.rotationZ += rotationSpeed * rotateXAxis.value * dt;
                     //var target = axisAngle2Quaternion(rotationSpeed * rotateXAxis.value * dt,qq.rotatedVector(systemTransform.rotation,zdown))
                     //cm.camera.rotateAboutViewCenter(qq.multiplyQuaternion(target,systemTransform.rotation));

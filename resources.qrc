@@ -124,5 +124,6 @@
         <file>Resource/pem/dsa_pub.pem</file>
         <file>Resource/upper_setting.png</file>
         <file>Resource/upper2_setting.png</file>
+        <file>Resource/splash_final.png</file>
     </qresource>
 </RCC>

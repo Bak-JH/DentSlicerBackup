@@ -99,7 +99,7 @@ Rectangle {
     }
 
     function updateText(inputText){
-        console.log("upupuputtttt " + inputText);
+        //console.log("upupuputtttt " + inputText);
         progress_text2.text = inputText;
     }
 

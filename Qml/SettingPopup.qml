@@ -159,8 +159,7 @@ Item {
                     anchors.rightMargin: 18
                     anchors.topMargin: 14
 
-
-                    text : "v1.1.1"
+                    text : "v" + qm.getVersion()
 
                     font.pixelSize: 14
                     font.family: mainFont.name
@@ -230,9 +229,6 @@ Item {
             }
 
         }
-
-
-
 
 
         Rectangle { // login button

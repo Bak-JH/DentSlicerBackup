@@ -165,6 +165,7 @@ public:
     vector<Qt3DExtras::QSphereMesh*> sphereMesh;
     vector<Qt3DCore::QEntity*> sphereEntity;
     vector<Qt3DCore::QTransform*> sphereTransform;
+    vector<Qt3DRender::QObjectPicker*> sphereObjectPicker;
     vector<QPhongMaterial*> sphereMaterial;
 
     void removeModel();
@@ -217,7 +218,12 @@ public:
     QString filename;
     QObject* mainWindow;
     QString slicingInfo;
+
+    // implement lock as bool variable
+    bool updateLock;
+
     void addVertices(Mesh* mesh, bool CW, QVector3D color = QVector3D(1.0f, 0.0f, 0.0f));
+
 
 private:
     int colorMode;
@@ -227,7 +233,7 @@ private:
     QNode* m_parent;
     QVector3D lastpoint;
     QVector2D prevPoint;
-    void initialize(const int& faces);
+    void initialize(const int& faces_cnt);
     void applyGeometry();
     void addVertex(QVector3D vertex);
     void addVertices(vector<QVector3D> vertices);
@@ -260,8 +266,8 @@ signals:
     void modelSelected(int);
     void resetLayflat();
     void bisectDone();
-    void _updateModelMesh();
     void _generateSupport();
+    void _updateModelMesh(bool);
     void layFlatSelect();
     void layFlatUnSelect();
     void extensionSelect();
@@ -275,6 +281,9 @@ public slots:
     void loadRedoState();
 
     // object picker parts
+    void handlePickerEnteredFreeCutSphere();
+    void handlePickerExitedFreeCutSphere();
+    void handlePickerClickedFreeCutSphere(Qt3DRender::QPickEvent*);
     void handlePickerClickedFreeCut(Qt3DRender::QPickEvent*);
     void handlePickerClicked(Qt3DRender::QPickEvent*);
     void handlePickerClickedLayflat(MeshFace shadow_meshface);
@@ -336,7 +345,7 @@ public slots:
     void generateShellOffset(double factor);
 
     // Model Mesh info update
-    void updateModelMesh();
+    void updateModelMesh(bool);
 
     // Generate support mesh
     void generateSupport();
