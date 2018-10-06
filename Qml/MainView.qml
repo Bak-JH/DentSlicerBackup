@@ -83,10 +83,20 @@ Entity {
     signal reDo();
     signal groupSelectionActivate(bool b);
 
+    function forceFocus(){
+        console.log("force focus");
+        keyboardHandler.forceKeyboardFocus();
+    }
+
+
     KeyboardHandler{
         focus : true
         id : keyboardHandler
+        objectName: "keyboardHandler"
         sourceDevice: keyboardDevice
+        function forceKeyboardFocus() {
+            forceActiveFocus();
+        }
 
         onPressed: {
             console.log(event.key);
@@ -99,7 +109,7 @@ Entity {
                 }
             } else if (event.key === Qt.Key_Escape) {
                 uppertab.all_off()
-            }else if (event.matches(StandardKey.Undo)){
+            } else if (event.matches(StandardKey.Undo)){
                 // do undo
                 console.log("undo called");
                 unDo();

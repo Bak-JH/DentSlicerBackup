@@ -336,6 +336,7 @@ Item{
         DeletePopup{
             id : deletePopUp
         }
+
     }
 
     Login{
