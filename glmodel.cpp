@@ -2086,12 +2086,12 @@ void GLModel::getSliderSignal(double value){
 }
 
 void GLModel::getLayerViewSliderSignal(double value) {
-    float height = (mesh->z_max - mesh->z_min) * value + mesh->z_min + scfg->raft_thickness;
+    float height = (mesh->z_max - mesh->z_min + scfg->raft_thickness) * value + mesh->z_min;
     m_layerMaterialHeight->setValue(QVariant::fromValue(height));
 
     m_layerMaterialRaftHeight->setValue(QVariant::fromValue(qmlManager->getLayerViewFlags() & LAYER_INFILL != 0 ?
-                mesh->z_min + scfg->raft_thickness :
-                mesh->z_max + scfg->raft_thickness));
+                mesh->z_min :
+                mesh->z_max));
 }
 
 

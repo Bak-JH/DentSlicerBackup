@@ -7,10 +7,12 @@ Slider {
     objectName: "layerViewSlider"
     property string name:"slider"
     property real modelHeight: modelHeight
+    property double layerThickness: 0
 
     maximumValue: 10
     minimumValue: -1
     value: 1
+
 
     visible: false
     orientation:Qt.Vertical
@@ -58,7 +60,7 @@ Slider {
 
         var t = value / 9;
         sliderValueChanged(t);
-        txtValue.text = Math.round(t * modelHeight).toString();
+        txtValue.text = Math.round(t * modelHeight/layerThickness).toString();
         // 0 ~ 9 -> 25 ~ 255
         rectValue.y = 255 - value * 230 / 9;
     }
@@ -136,9 +138,13 @@ Slider {
         }
     }
 
+    function setThickness(t){
+        layerThickness = t;
+    }
+
     function setHeight(v) {
         modelHeight = v;
-        txtMax.text = Math.round(modelHeight);
+        txtMax.text = Math.round(modelHeight/layerThickness);
 
         slider.value = 9;
     }
