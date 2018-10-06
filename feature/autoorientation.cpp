@@ -30,12 +30,10 @@ rotateResult* autoorientation::Tweak(Mesh* mesh, bool bi_algorithmic,int CA,bool
     int orientCnt=0;
     //edge_plus_vertex로 추가된 orient갯수 카운터
 
-    qDebug() << "dbg 1";
     if(bi_algorithmic){
           vector<Orient*> plusVertex=egde_plus_vertex(mesh,additional_n);
           //additional_n 이하의 갯수의 orientation이 추가됩니다.
 
-          qDebug() << "dbg 2";
           orientations.insert(orientations.end(),plusVertex.begin(), plusVertex.end());
           //추가된 orientation을 원본 뒤에 붙입니다.
           qDebug()<<"total orientation: "<<orientCnt+8;
@@ -45,7 +43,6 @@ rotateResult* autoorientation::Tweak(Mesh* mesh, bool bi_algorithmic,int CA,bool
           //free(plusVertex);
     }
     best_n+=orientCnt;
-    qDebug() << "dbg 3";
 
     //갯수 업데이트, false일 때는 값 변화가 없습니다.
     for(int i=0; i<best_n+1;i++){
@@ -70,7 +67,6 @@ rotateResult* autoorientation::Tweak(Mesh* mesh, bool bi_algorithmic,int CA,bool
         //free(temp);
         qmlManager->setProgress(i*0.04/(best_n+1)+0.95);
     }
-    qDebug() << "dbg 4";
 
     qmlManager->setProgress(0.99);
     qmlManager->setProgressText("99");
@@ -109,7 +105,6 @@ rotateResult* autoorientation::Tweak(Mesh* mesh, bool bi_algorithmic,int CA,bool
         }
         //저장.
     }
-    qDebug() << "dbg 5";
     rotateResult* result;// Tweak의 return값입니다. axis,phi,R로 구성되어있습니다.
     if(bestside.isActive){
         *appropriately_rotated=true;
@@ -123,7 +118,6 @@ rotateResult* autoorientation::Tweak(Mesh* mesh, bool bi_algorithmic,int CA,bool
         qmlManager->openResultPopUp("","Orientation Done","");
         return NULL;
     }
-    qDebug() << "dbg 6";
     //━━━━━━━━━━━━━━━━━━━━ 내용 출력 ━━━━━━━━━━━━━━━━━━━
     if(false){//필요 시 verbose를 추가해도 됩니다.
         qDebug()<<"Examine "<<best_n+1<<" orientations:";
@@ -386,7 +380,6 @@ vector<Orient*> autoorientation::egde_plus_vertex(Mesh* mesh, int best_n){
     if(vcount < 10000) it = 5;
     else if(vcount < 25000) it = 2;
     else it = 1;
-    qDebug() << "dbg 1-1";
     map<QString,float> lst;
     //area_cummulation처럼 map을 만들고, value 기준 상위 best_n개 만 뽑아냅니다.
     //단, map을 만드는 요소를 mesh 내에서 random하게 추가로 생성합니다.
@@ -408,7 +401,6 @@ vector<Orient*> autoorientation::egde_plus_vertex(Mesh* mesh, int best_n){
             qmlManager->setProgressText("orientation.....");
         }
     }
-    qDebug() << "dbg 1-2";
 
     qmlManager->setProgress(0.95);
     qmlManager->setProgressText("orientation.....");
@@ -419,7 +411,6 @@ vector<Orient*> autoorientation::egde_plus_vertex(Mesh* mesh, int best_n){
         val[i]=0;
         val_n[i]="";
     }
-    qDebug() << "dbg 1-3";
     for(it_map=lst.begin(); it_map !=lst.end() ; ++it_map){
         if(it_map->second > val[best_n-1]){
             int index=best_n-2;
@@ -441,7 +432,6 @@ vector<Orient*> autoorientation::egde_plus_vertex(Mesh* mesh, int best_n){
             val_n[index]=it_map->first;
         }
     }
-    qDebug() << "dbg 1-4";
     vector<Orient*> result;
     for (int i=0; i<best_n;i++){
         result.push_back(new Orient);
@@ -454,7 +444,6 @@ vector<Orient*> autoorientation::egde_plus_vertex(Mesh* mesh, int best_n){
         result[i]->label[1]=temp[1].toFloat();
         result[i]->label[2]=temp[2].toFloat();
     }
-    qDebug() << "dbg 1-5";
     //추가할 orientation best_n개를 리턴합니다.
     return result;
 
