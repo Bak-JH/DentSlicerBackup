@@ -46,7 +46,7 @@ using namespace std;
 #define ftrCut 11
 #define ftrShellOffset 12
 #define ftrExtend 13
-#define ftrSupport 14
+#define ftrManualSupport 14
 #define ftrLabel 15
 #define ftrSupportViewMode 16
 #define ftrLayerViewMode 17
@@ -254,6 +254,7 @@ private:
     bool hollowShellActive = false;
     bool shellOffsetActive = false;
     bool layflatActive = false;
+    bool manualSupportActive = false;
     bool layerViewActive = false;
     bool supportViewActive = false;
 
@@ -344,6 +345,10 @@ public slots:
     void openShellOffset();
     void closeShellOffset();
     void generateShellOffset(double factor);
+
+    // Manual Support
+    void openManualSupport();
+    void closeManualSupport();
 
     // Model Mesh info update
     void updateModelMesh(bool);

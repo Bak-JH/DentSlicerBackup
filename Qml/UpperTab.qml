@@ -30,7 +30,7 @@ Rectangle {
     property int ftrCut : 11
     property int ftrShellOffset : 12
     property int ftrExtend : 13
-    property int ftrSupport : 14
+    property int ftrManualSupport : 14
     property int ftrLabel : 15
     property int ftrSupportViewMode : 16
     property int ftrLayerViewMode : 17
@@ -523,6 +523,8 @@ Rectangle {
             iconText: qsTr("Support")
 
             onButtonClicked:{
+                if(!qm.isSelected()&& (state == "active"))
+                    window.resultPopUp.openResultPopUp("","You must select at least one model.","")
                 //window.resultPopUp.openResultPopUp("This function is currently unavailable.","","Please check back later.")
             }
 
@@ -1365,17 +1367,17 @@ Rectangle {
         }*/
         PopUp {
             objectName:"manualSupportPopup"
-            id:popup_Support
+            id:popup_manualSupport
             funcname: "Support"
             height: 320
             imageHeight: 34
             detail1: "Automatic Generation"
             state: { //fourth_tab_button_extend.state=="active" ? "active" : "inactive"
                 if (fourth_tab_button_support.state == "active" && qm.isSelected()){
-                    //openExtension();
+                    openManualSupport();
                     return "active";
                 } else {
-                    //closeExtension();
+                    closeManualSupport();
                     return "inactive";
                 }
             }
@@ -1553,6 +1555,15 @@ Rectangle {
             applybutton_vis: true
             applyfinishbutton_vis: false
 
+            signal openManualSupport();
+            signal closeManualSupport();
+
+            function onApplyFinishButton(){
+                popup_manualSupport.colorApplyFinishButton(0)
+            }
+            function offApplyFinishButton(){
+                popup_manualSupport.colorApplyFinishButton(0);
+            }
         }
 
         //15. PopUp - Label

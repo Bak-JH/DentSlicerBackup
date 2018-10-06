@@ -234,7 +234,7 @@ void GLModel::changecolor(int mode){
 bool GLModel::modelSelectChangable(){
     bool result = false;
     qDebug() << cutActive << extensionActive << labellingActive << layflatActive << isMoved;
-    if (!cutActive && !extensionActive && !labellingActive && !layflatActive && !isMoved)
+    if (!cutActive && !extensionActive && !labellingActive && !layflatActive && !manualSupportActive && !isMoved)
         result = true;
 
     return result;
@@ -458,6 +458,7 @@ void GLModel::copyModelAttributeFrom(GLModel* from){
     hollowShellActive = from->hollowShellActive;
     shellOffsetActive = from->shellOffsetActive;
     layflatActive = from->layflatActive;
+    manualSupportActive = from->manualSupportActive;
     layerViewActive = from->layerViewActive;
     supportViewActive = from->supportViewActive;
 }
@@ -710,7 +711,7 @@ void featureThread::run(){
 
                 break;
             }
-        case ftrSupport:
+        case ftrManualSupport:
             {
                 break;
             }
@@ -1156,7 +1157,7 @@ void GLModel::handlePickerClicked(QPickEvent *pick)
 
     }
 
-    if (!cutActive && !extensionActive && !labellingActive && !layflatActive && !isMoved)// && !layerViewActive && !supportViewActive)
+    if (!cutActive && !extensionActive && !labellingActive && !layflatActive && !manualSupportActive && !isMoved)// && !layerViewActive && !supportViewActive)
         emit modelSelected(parentModel->ID);
 
     qDebug() << "model selected emit" << pick->position() << parentModel->ID;
@@ -1291,12 +1292,16 @@ void GLModel::handlePickerClicked(QPickEvent *pick)
         emit layFlatSelect();
         parentModel->targetMeshFace = &parentModel->mesh->faces[shadow_meshface.parent_idx];
         parentModel->generateColorAttributes();
-        /*qDebug() << trianglePick->localIntersection() \
-                 << parentModel->mesh->idx2MV(parentModel->targetMeshFace->mesh_vertex[0]).position\
-                << parentModel->mesh->idx2MV(parentModel->targetMeshFace->mesh_vertex[1]).position\
-                << parentModel->mesh->idx2MV(parentModel->targetMeshFace->mesh_vertex[2]).position;
-        */
-        // << parentModel->targetMeshFace->mesh_vertex[1] << parentModel->targetMeshFace->mesh_vertex[2];
+        parentModel->colorExtensionFaces();
+    }
+
+    if (manualSupportActive && trianglePick){
+        MeshFace shadow_meshface = mesh->faces[trianglePick->triangleIndex()];
+        qDebug() << "found parent meshface" << shadow_meshface.parent_idx;
+        parentModel->uncolorExtensionFaces();
+        emit extensionSelect();
+        parentModel->targetMeshFace = &parentModel->mesh->faces[shadow_meshface.parent_idx];
+        parentModel->generateColorAttributes();
         parentModel->colorExtensionFaces();
     }
 }
@@ -1954,6 +1959,7 @@ void GLModel::mgoo(Qt3DRender::QPickEvent* v)
              qmlManager->selectedModels[0]->shadowModel->labellingActive ||
              qmlManager->selectedModels[0]->shadowModel->layflatActive ||
              qmlManager->selectedModels[0]->shadowModel->layerViewActive ||
+             qmlManager->selectedModels[0]->shadowModel->manualSupportActive ||
              qmlManager->selectedModels[0]->shadowModel->supportViewActive ||
              qmlManager->orientationActive ||
              qmlManager->rotateActive))
@@ -2438,6 +2444,20 @@ void GLModel::closeExtension(){
     extensionActive = false;
     parentModel->uncolorExtensionFaces();
     parentModel->targetMeshFace = nullptr;
+}
+
+void GLModel::openManualSupport(){
+    manualSupportActive = true;
+    // change to support view
+    QMetaObject::invokeMethod(qmlManager->leftTabViewMode, "setViewMode", Q_ARG(QVariant, 1));
+    qDebug() << "open manual support";
+}
+
+void GLModel::closeManualSupport(){
+    manualSupportActive = false;
+    parentModel->uncolorExtensionFaces();
+    parentModel->targetMeshFace = nullptr;
+    qDebug() << "close manual support";
 }
 
 void GLModel::openScale(){
