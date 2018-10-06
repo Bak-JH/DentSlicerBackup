@@ -172,11 +172,9 @@ Rectangle{
             if (parent.state == "inactive"){
                 all_off();
                 parent.state = "active";
-                console.log("active" + iconText);
             }
             else {
                 parent.state = "inactive";
-                console.log("inactive" + iconText);
             }
             do_buttonclick(iconText)
         }

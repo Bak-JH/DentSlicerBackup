@@ -21,6 +21,13 @@ Entity {
         specular: Qt.rgba(255/255, 255/255, 255/255, 1 )
         alpha: 1
     }
+    PhongAlphaMaterial{
+        id : plateLogoMaterial
+        ambient: Qt.rgba(255/255, 0/255, 0/255, 1 )
+        diffuse: Qt.rgba(255/255, 0/255, 0/255, 1 )
+        specular: Qt.rgba(255/255, 0/255, 0/255, 1 )
+        alpha: 1
+    }
 
 
 
@@ -53,5 +60,31 @@ Entity {
         components: [ plateMesh, plateTransform, plateMaterial ]
     }
 
+    Entity{
+        Mesh{
+            id: plateLogoPlaneMesh
+            source: "qrc:/Resource/mesh/plate_plane.stl"
+        }
 
+        Transform{
+            id: plateLogoPlaneTransform
+            translation: Qt.vector3d(0,-43,0)
+            scale3D: Qt.vector3d(30/100,6/80,0)
+
+        }
+        components: [ plateLogoPlaneMesh, plateLogoPlaneTransform, platePlaneMaterial ]
+    }
+    Entity{
+        Mesh{
+            id: plateLogoMesh
+            source: "qrc:/Resource/mesh/plate_logo.stl"
+        }
+
+        Transform{
+            id: plateLogoTransform
+            translation: Qt.vector3d(0,-40,0)
+
+        }
+        components: [ plateLogoMesh, plateLogoTransform, plateMaterial ]
+    }
 }

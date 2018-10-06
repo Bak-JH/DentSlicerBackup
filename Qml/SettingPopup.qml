@@ -177,7 +177,7 @@ Item {
                     anchors.topMargin: 38
 
 
-                    text : "v1.1.1"
+                    text : "v1.0.0"
 
                     font.pixelSize: 14
                     font.family: mainFont.name

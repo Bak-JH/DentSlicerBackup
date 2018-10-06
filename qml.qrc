@@ -49,5 +49,6 @@
         <file>Qml/YesNoPopup.qml</file>
         <file>Qml/UndoRedoButton.qml</file>
         <file>Qml/SettingPopup.qml</file>
+        <file>Resource/mesh/plate_logo.stl</file>
     </qresource>
 </RCC>

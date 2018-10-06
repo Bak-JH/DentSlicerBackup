@@ -125,5 +125,9 @@
         <file>Resource/upper_setting.png</file>
         <file>Resource/upper2_setting.png</file>
         <file>Resource/splash_final.png</file>
+<<<<<<< HEAD
+        <file>Resource/cursor_eraser.png</file>
+=======
+>>>>>>> ac0354d2ecb7d23ca297099ac92fbab11b643ae6
     </qresource>
 </RCC>
