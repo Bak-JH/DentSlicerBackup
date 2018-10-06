@@ -14,6 +14,7 @@
 #include "lights.h"
 
 QmlManager::QmlManager(QObject *parent) : QObject(parent)
+  ,layerViewFlags(LAYER_INFILL | LAYER_SUPPORTERS | LAYER_RAFT)
 {
 
 }
@@ -162,6 +163,24 @@ void QmlManager::initializeUI(QQmlApplicationEngine* e){
 
     QObject::connect(this, SIGNAL(arrangeDone(vector<QVector3D>, vector<float>)), this, SLOT(applyArrangeResult(vector<QVector3D>, vector<float>)));
 
+    leftTabViewMode = FindItemByName(engine, "ltvm");
+    layerViewPopup = FindItemByName(engine, "layerViewPopup");
+    layerViewSlider = FindItemByName(engine, "layerViewSlider");
+    viewObjectButton = FindItemByName(engine, "viewObjectButton");
+    QObject::connect(viewObjectButton, SIGNAL(onChanged(bool)), this, SLOT(viewObjectChanged(bool)));
+    viewSupportButton = FindItemByName(engine, "viewSupportButton");
+    QObject::connect(viewSupportButton, SIGNAL(onChanged(bool)), this, SLOT(viewSupportChanged(bool)));
+    viewLayerButton = FindItemByName(engine, "viewLayerButton");
+    QObject::connect(viewLayerButton, SIGNAL(onChanged(bool)), this, SLOT(viewLayerChanged(bool)));
+    setViewMode(VIEW_MODE_OBJECT);
+
+    layerInfillButton = FindItemByName(engine, "layerInfillButton");
+    QObject::connect(layerInfillButton, SIGNAL(onChanged(bool)), this, SLOT(layerInfillButtonChanged(bool)));
+    layerSupportersButton = FindItemByName(engine, "layerSupportersButton");
+    QObject::connect(layerSupportersButton, SIGNAL(onChanged(bool)), this, SLOT(layerSupportersButtonChanged(bool)));
+    layerRaftButton = FindItemByName(engine, "layerRaftButton");
+    QObject::connect(layerRaftButton, SIGNAL(onChanged(bool)), this, SLOT(layerRaftButtonChanged(bool)));
+
     QObject::connect(undoRedoButton, SIGNAL(unDo()), this, SLOT(unDo()));
     QObject::connect(undoRedoButton, SIGNAL(reDo()), this, SLOT(reDo()));
     QObject::connect(mv, SIGNAL(unDo()), this, SLOT(unDo()));
@@ -248,8 +267,10 @@ void QmlManager::deleteModelFile(int ID){
             disconnectHandlers((*gl_it));
             (*gl_it)->shadowModel->deleteLater();
             (*gl_it)->deleteLater();
-            if (selectedModels[0] != nullptr && selectedModels[0]->ID == ID)
+            if (selectedModels[0] != nullptr && selectedModels[0]->ID == ID) {
                 selectedModels[0] = nullptr;
+                QMetaObject::invokeMethod(leftTabViewMode, "setEnable", Q_ARG(QVariant, false));
+            }
             gl_it = glmodels.erase(gl_it);
             break;
         } else
@@ -264,12 +285,15 @@ void QmlManager::deleteModelFile(int ID){
     hideRotateSphere();
     QMetaObject::invokeMethod(qmlManager->mttab, "hideTab");
     QMetaObject::invokeMethod(boxUpperTab, "all_off");
+    QMetaObject::invokeMethod(leftTabViewMode, "setObjectView");
 }
 
 void QmlManager::disconnectHandlers(GLModel* glmodel){
 
     //QObject::disconnect(glmodel->ft, SIGNAL(setProgress(QVariant)),progress_popup, SLOT(updateNumber(QVariant)));
     //QObject::disconnect(glmodel->ft, SIGNAL(loadPopup(QVariant)),orientPopup, SLOT(show_popup(QVariant)));
+
+    QObject::disconnect(yesno_popup, SIGNAL(runFeature(int, QVariant)), glmodel->ft, SLOT(setTypeAndRun(int, QVariant)));
 
     /*QObject::disconnect(undoRedoButton, SIGNAL(unDo()), glmodel, SLOT(loadUndoState()));
     QObject::disconnect(undoRedoButton, SIGNAL(reDo()), glmodel, SLOT(loadRedoState()));
@@ -350,6 +374,17 @@ void QmlManager::disconnectHandlers(GLModel* glmodel){
     // export button codes
     QObject::disconnect(exportOKButton, SIGNAL(runFeature(int, QVariant)), glmodel->ft, SLOT(setTypeAndRun(int, QVariant)));
     //QObject::disconnect(exportButton, SIGNAL(runFeature(int, QVariant)), glmodel->ft, SLOT(setTypeAndRun(int, QVariant)));
+
+    // view mode buttons
+    QObject::disconnect(viewObjectButton, SIGNAL(onChanged(bool)), this, SLOT(viewObjectChanged(bool)));
+    QObject::disconnect(viewSupportButton, SIGNAL(onChanged(bool)), this, SLOT(viewSupportChanged(bool)));
+    QObject::disconnect(viewLayerButton, SIGNAL(onChanged(bool)), this, SLOT(viewLayerChanged(bool)));
+
+    QObject::disconnect(layerInfillButton, SIGNAL(onChanged(bool)), this, SLOT(layerInfillButtonChanged(bool)));
+    QObject::disconnect(layerSupportersButton, SIGNAL(onChanged(bool)), this, SLOT(layerSupportersButtonChanged(bool)));
+    QObject::disconnect(layerRaftButton, SIGNAL(onChanged(bool)), this, SLOT(layerRaftButtonChanged(bool)));
+
+    QObject::disconnect(layerViewSlider, SIGNAL(sliderValueChanged(double)), glmodel, SLOT(getLayerViewSliderSignal(double)));
 }
 
 void QmlManager::connectHandlers(GLModel* glmodel){
@@ -364,6 +399,8 @@ void QmlManager::connectHandlers(GLModel* glmodel){
     QObject::connect(layflatPopup, SIGNAL(openLayflat()), glmodel, SLOT(openLayflat()));
     QObject::connect(glmodel, SIGNAL(resetLayflat()), this, SLOT(resetLayflat()));
     */
+
+    QObject::connect(yesno_popup, SIGNAL(runFeature(int, QVariant)), glmodel->ft, SLOT(setTypeAndRun(int, QVariant)));
 
     /*QObject::connect(undoRedoButton, SIGNAL(unDo()), glmodel, SLOT(loadUndoState()));
     QObject::connect(undoRedoButton, SIGNAL(reDo()), glmodel, SLOT(loadRedoState()));
@@ -437,6 +474,17 @@ void QmlManager::connectHandlers(GLModel* glmodel){
     // export button codes
     QObject::connect(exportOKButton, SIGNAL(runFeature(int, QVariant)), glmodel->ft, SLOT(setTypeAndRun(int, QVariant)));
     //QObject::connect(exportButton, SIGNAL(runFeature(int, QVariant)), glmodel->ft, SLOT(setTypeAndRun(int, QVariant)));
+
+    // view mode buttons
+    QObject::connect(viewObjectButton, SIGNAL(onChanged(bool)), this, SLOT(viewObjectChanged(bool)));
+    QObject::connect(viewSupportButton, SIGNAL(onChanged(bool)), this, SLOT(viewSupportChanged(bool)));
+    QObject::connect(viewLayerButton, SIGNAL(onChanged(bool)), this, SLOT(viewLayerChanged(bool)));
+
+    QObject::connect(layerInfillButton, SIGNAL(onChanged(bool)), this, SLOT(layerInfillButtonChanged(bool)));
+    QObject::connect(layerSupportersButton, SIGNAL(onChanged(bool)), this, SLOT(layerSupportersButtonChanged(bool)));
+    QObject::connect(layerRaftButton, SIGNAL(onChanged(bool)), this, SLOT(layerRaftButtonChanged(bool)));
+
+    QObject::connect(layerViewSlider, SIGNAL(sliderValueChanged(double)), glmodel, SLOT(getLayerViewSliderSignal(double)));
 }
 void QmlManager::cleanselectedModel(int type){
     //selectedModels[0] = nullptr;
@@ -730,6 +778,7 @@ void QmlManager::modelSelected(int ID){
     }
 
     QMetaObject::invokeMethod(boxUpperTab, "all_off");
+    QMetaObject::invokeMethod(leftTabViewMode, "setObjectView");
     GLModel* target;
     for(int i=0; i<glmodels.size();i++){
         if(glmodels.at(i)->ID == ID){
@@ -813,6 +862,7 @@ void QmlManager::modelSelected(int ID){
                 break;
             }
         }
+        selectedModels[0]->changeViewMode(VIEW_MODE_OBJECT);
     }
     if (selectedModels[0] != target){
         // change selectedModels[0]
@@ -843,6 +893,8 @@ void QmlManager::modelSelected(int ID){
         QMetaObject::invokeMethod(boundedBox, "setSize", Q_ARG(QVariant, selectedModels[0]->mesh->x_max - selectedModels[0]->mesh->x_min),
                                                          Q_ARG(QVariant, selectedModels[0]->mesh->y_max - selectedModels[0]->mesh->y_min),
                                                          Q_ARG(QVariant, selectedModels[0]->mesh->z_max - selectedModels[0]->mesh->z_min));
+        QMetaObject::invokeMethod(layerViewSlider, "setThickness", Q_ARG(QVariant, (scfg->layer_height)));
+        QMetaObject::invokeMethod(layerViewSlider, "setHeight", Q_ARG(QVariant, (selectedModels[0]->mesh->z_max - selectedModels[0]->mesh->z_min + scfg->raft_thickness)));
 
         // set slicing info box property visible true if slicing info exists
         slicingData->setProperty("visible", true);
@@ -881,6 +933,8 @@ void QmlManager::modelSelected(int ID){
     } else {
         selectedModels[0] = nullptr;
     }
+
+    QMetaObject::invokeMethod(leftTabViewMode, "setEnable", Q_ARG(QVariant, selectedModels[0] != nullptr));
 }
 void QmlManager::layFlatSelect(){
     QMetaObject::invokeMethod(layflatPopup,"onApplyFinishButton");
@@ -922,7 +976,12 @@ void QmlManager::unselectPart(int ID){
                 break;
         }
     }
+    if( selectedModels[0] != nullptr ) {
+        selectedModels[0]->changeViewMode(VIEW_MODE_OBJECT);
+    }
+
     selectedModels[0] = nullptr;
+    QMetaObject::invokeMethod(leftTabViewMode, "setEnable", Q_ARG(QVariant, false));
     QMetaObject::invokeMethod(boundedBox, "hideBox"); // Bounded Box
 }
 
@@ -1688,7 +1747,111 @@ void QmlManager::setProgressText(string inputText){
                               Q_ARG(QVariant, QString::fromStdString(inputText)));
 }
 
+void QmlManager::viewObjectChanged(bool checked){
+    qInfo() << "viewObjectChanged" << checked;
+    if( checked ) {
+        setViewMode(VIEW_MODE_OBJECT);
+    }
+}
 
+void QmlManager::viewSupportChanged(bool checked){
+    qInfo() << "viewSupportChanged" << checked;
+    if( checked ) {
+        if( selectedModels[0] != nullptr ) {
+            if( selectedModels[0]->slicer == nullptr ) {
+                qmlManager->openYesNoPopUp("The model should be sliced for support view.", "", "Would you like to continue?", ftrSupportViewMode);
+            } else {
+                QMetaObject::invokeMethod(qmlManager->boxUpperTab, "all_off");
+                setViewMode(VIEW_MODE_SUPPORT);
+            }
+        }
+    }
+}
+
+void QmlManager::viewLayerChanged(bool checked){
+    qInfo() << "viewLayerChanged" << checked;
+    if( checked ) {
+        if( selectedModels[0] != nullptr ) {
+            if( selectedModels[0]->slicer == nullptr ) {
+                qmlManager->openYesNoPopUp("The model should be sliced for layer view.", "", "Would you like to continue?", ftrLayerViewMode);
+            } else {
+                QMetaObject::invokeMethod(qmlManager->boxUpperTab, "all_off");
+                setViewMode(VIEW_MODE_LAYER);
+            }
+        }
+    }
+}
+
+void QmlManager::layerInfillButtonChanged(bool checked){
+    qInfo() << "layerInfillButtonChanged" << checked;
+    if( checked ) {
+        layerViewFlags |= LAYER_INFILL;
+    } else {
+        layerViewFlags &= ~LAYER_INFILL;
+    }
+
+    if( selectedModels[0] != nullptr ) {
+        emit selectedModels[0]->_updateModelMesh(true);
+    }
+}
+
+void QmlManager::layerSupportersButtonChanged(bool checked){
+    qInfo() << "layerSupportersButtonChanged" << checked;
+    if( checked ) {
+        layerViewFlags |= LAYER_SUPPORTERS;
+    } else {
+        layerViewFlags &= ~LAYER_SUPPORTERS;
+    }
+
+    if( selectedModels[0] != nullptr ) {
+        emit selectedModels[0]->_updateModelMesh(true);
+    }
+}
+
+void QmlManager::layerRaftButtonChanged(bool checked){
+    qInfo() << "layerRaftButtonChanged" << checked << layerViewFlags;
+    if( checked ) {
+        layerViewFlags |= LAYER_RAFT;
+    } else {
+        layerViewFlags &= ~LAYER_RAFT;
+    }
+    qInfo() << LAYER_INFILL << LAYER_SUPPORTERS << LAYER_RAFT;
+    qInfo() << "layerRaftButtonChanged" << checked << layerViewFlags;
+
+    if( selectedModels[0] != nullptr ) {
+        emit selectedModels[0]->_updateModelMesh(true);
+    }
+}
+
+void QmlManager::setViewMode(int viewMode) {
+    qInfo() << "setViewMode" << viewMode;
+
+    if( this->viewMode != viewMode ) {
+        this->viewMode = viewMode;
+        layerViewPopup->setProperty("visible", this->viewMode == VIEW_MODE_LAYER);
+        layerViewSlider->setProperty("visible", this->viewMode == VIEW_MODE_LAYER);
+
+        if( selectedModels[0] != nullptr ) {
+            QMetaObject::invokeMethod(layerViewSlider, "setThickness", Q_ARG(QVariant, (scfg->layer_height)));
+            QMetaObject::invokeMethod(layerViewSlider, "setHeight", Q_ARG(QVariant, (selectedModels[0]->mesh->z_max - selectedModels[0]->mesh->z_min + scfg->raft_thickness)));
+            this->selectedModels[0]->changeViewMode(viewMode);
+        }
+    }
+
+    if( this->viewMode == VIEW_MODE_OBJECT ) {
+        QMetaObject::invokeMethod(leftTabViewMode, "setObjectView");
+    } else {
+        QMetaObject::invokeMethod(qmlManager->boundedBox, "hideBox");
+    }
+}
+
+int QmlManager::getViewMode() {
+    return viewMode;
+}
+
+int QmlManager::getLayerViewFlags() {
+    return layerViewFlags;
+}
 
 QObject* FindItemByName(QList<QObject*> nodes, const QString& name)
 {

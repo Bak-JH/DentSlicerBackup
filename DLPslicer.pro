@@ -50,6 +50,7 @@ SOURCES += main.cpp \
     DentEngine/src/polyclipping/poly2tri/sweep/sweep_context.cpp \
     utils/httpreq.cpp \
     feature/hollowshell.cpp \
+    feature/supportview.cpp \
     utils/updatechecker.cpp
 
 
@@ -133,7 +134,9 @@ HEADERS += \
     DentEngine/src/polyclipping/poly2tri/poly2tri.h \
     utils/httpreq.h \
     feature/hollowshell.h \
-    utils/updatechecker.h
+    feature/supportview.h \
+    utils/updatechecker.h \
+    feature/earcut.hpp
 
 #LIBS += -lOpengl32
 

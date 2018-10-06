@@ -1,4 +1,4 @@
-#include <QRenderSettings>
+﻿#include <QRenderSettings>
 #include "glmodel.h"
 #include <QString>
 #include <QtMath>
@@ -7,6 +7,7 @@
 #include "qmlmanager.h"
 #include "feature/text3dgeometrygenerator.h"
 #include "feature/shelloffset.h"
+#include "feature/supportview.h"
 #include <QtConcurrent/QtConcurrent>
 #include <QFuture>
 #include <QFileDialog>
@@ -27,6 +28,11 @@ GLModel::GLModel(QObject* mainWindow, QNode *parent, Mesh* loadMesh, QString fna
     //, m_objectPicker(new Qt3DRender::QObjectPicker())
     , parentModel((GLModel*)(parent))
     , cutMode(1)
+    , layerMesh(nullptr)
+    , layerInfillMesh(nullptr)
+    , layerSupportMesh(nullptr)
+    , layerRaftMesh(nullptr)
+    , slicer(nullptr)
 {
     connect(&futureWatcher, SIGNAL(finished()), this, SLOT(slicingDone()));
 
@@ -40,13 +46,15 @@ GLModel::GLModel(QObject* mainWindow, QNode *parent, Mesh* loadMesh, QString fna
         m_transform->setTranslation(QVector3D((mesh->x_max+mesh->x_min)/2, (mesh->y_max+mesh->y_min)/2, (mesh->z_max+mesh->z_min)/2));
         mesh->centerMesh();
 
-        initialize(mesh);
+        initialize(mesh->faces.size());
         addVertices(mesh, false);
         applyGeometry();
 
         addComponent(m_transform);
 
         m_meshMaterial = new QPhongMaterial();
+        m_meshAlphaMaterial = new QPhongAlphaMaterial();
+        m_layerMaterial = new QPhongMaterial();
         /*m_meshMaterial->setAmbient(QColor(255,0,0));
         m_meshMaterial->setDiffuse(QColor(173,215,218));
         m_meshMaterial->setSpecular(QColor(182,237,246));
@@ -56,6 +64,7 @@ GLModel::GLModel(QObject* mainWindow, QNode *parent, Mesh* loadMesh, QString fna
 
         addMouseHandlers();
 
+        QObject::connect(this,SIGNAL(_generateSupport()),this,SLOT(generateSupport()));
         QObject::connect(this,SIGNAL(_updateModelMesh(bool)),this,SLOT(updateModelMesh(bool)));
 
         /*labellingTextPreview = new LabellingTextPreview(this);
@@ -72,7 +81,10 @@ GLModel::GLModel(QObject* mainWindow, QNode *parent, Mesh* loadMesh, QString fna
     qmlManager->addPart(getFileName(fname.toStdString().c_str()), ID);
 
     m_meshMaterial = new QPhongMaterial();
+    m_meshAlphaMaterial = new QPhongAlphaMaterial();
     m_meshVertexMaterial = new QPerVertexColorMaterial();
+
+    generateLayerViewMaterial();
 
     this->changecolor(0);
     if (filename != "" && (filename.contains(".stl")||filename.contains(".STL"))\
@@ -95,7 +107,7 @@ GLModel::GLModel(QObject* mainWindow, QNode *parent, Mesh* loadMesh, QString fna
     lmesh = new Mesh();
     rmesh = new Mesh();
 
-    initialize(mesh);
+    initialize(mesh->faces.size());
     addVertices(mesh, false);
     applyGeometry();
 
@@ -119,8 +131,8 @@ GLModel::GLModel(QObject* mainWindow, QNode *parent, Mesh* loadMesh, QString fna
     qmlManager->setProgress(0.73);
 
     QObject::connect(this,SIGNAL(bisectDone()),this,SLOT(generateRLModel()));
+    QObject::connect(this,SIGNAL(_generateSupport()),this,SLOT(generateSupport()));
     QObject::connect(this,SIGNAL(_updateModelMesh(bool)),this,SLOT(updateModelMesh(bool)));
-
 
     qDebug() << "created shadow model";
 
@@ -184,11 +196,17 @@ void GLModel::changecolor(int mode){
     if (mode == -1) mode = colorMode;
     switch(mode){
     case 0: // default
-        m_meshMaterial->setAmbient(QColor(130,130,140));;
+        m_meshMaterial->setAmbient(QColor(130,130,140));
         m_meshMaterial->setDiffuse(QColor(131,206,220));
         m_meshMaterial->setDiffuse(QColor(97,185,192));
         m_meshMaterial->setSpecular(QColor(0,0,0));
         m_meshMaterial->setShininess(0.0f);
+
+        m_meshAlphaMaterial->setAmbient(QColor(130,130,140));;
+        m_meshAlphaMaterial->setDiffuse(QColor(131,206,220));
+        m_meshAlphaMaterial->setDiffuse(QColor(97,185,192));
+        m_meshAlphaMaterial->setSpecular(QColor(0,0,0));
+        m_meshAlphaMaterial->setShininess(0.0f);
         colorMode = 0;
         break;
     case 1:
@@ -197,6 +215,11 @@ void GLModel::changecolor(int mode){
         m_meshMaterial->setDiffuse(QColor(130,208,125));
         m_meshMaterial->setSpecular(QColor(0,0,0));
         m_meshMaterial->setShininess(0.0f);
+
+        m_meshAlphaMaterial->setDiffuse(QColor(100,255,100));
+        m_meshAlphaMaterial->setDiffuse(QColor(130,208,125));
+        m_meshAlphaMaterial->setSpecular(QColor(0,0,0));
+        m_meshAlphaMaterial->setShininess(0.0f);
         colorMode = 1;
         break;
     case 2:
@@ -246,6 +269,9 @@ void GLModel::saveUndoState_internal(){
     // need to change to memcpy or something
     qDebug () << "save prev mesh";
 
+    // reset slicing view since model has been updated
+    slicer = nullptr;
+
     // need to remove redo State since it contains
     mesh->nextMesh = nullptr;
 
@@ -270,17 +296,7 @@ void GLModel::saveUndoState_internal(){
         temp_prev_mesh->faces.end()->neighboring_faces[1].insert(temp_prev_mesh->faces.end()->neighboring_faces[1].end(), mf.neighboring_faces[1].begin(), mf.neighboring_faces[1].end());
         temp_prev_mesh->faces.end()->neighboring_faces[2].insert(temp_prev_mesh->faces.end()->neighboring_faces[2].end(), mf.neighboring_faces[2].begin(), mf.neighboring_faces[2].end());*/
     }
-    foreach(MeshFace mf, mesh->faces){
-        //temp_prev_mesh->faces.push_back(mf);
-        // clear and copy neighboring faces
-        /*temp_prev_mesh->faces.end()->neighboring_faces[0].clear();
-        temp_prev_mesh->faces.end()->neighboring_faces[1].clear();
-        temp_prev_mesh->faces.end()->neighboring_faces[2].clear();*/
-        /*temp_prev_mesh->faces.end()->neighboring_faces[0].insert(temp_prev_mesh->faces.end()->neighboring_faces[0].end(), mf.neighboring_faces[0].begin(), mf.neighboring_faces[0].end());
-        temp_prev_mesh->faces.end()->neighboring_faces[1].insert(temp_prev_mesh->faces.end()->neighboring_faces[1].end(), mf.neighboring_faces[1].begin(), mf.neighboring_faces[1].end());
-        temp_prev_mesh->faces.end()->neighboring_faces[2].insert(temp_prev_mesh->faces.end()->neighboring_faces[2].end(), mf.neighboring_faces[2].begin(), mf.neighboring_faces[2].end());*/
 
-    }
     for (QHash<uint32_t, MeshVertex>::iterator it = mesh->vertices_hash.begin(); it!=mesh->vertices_hash.end(); ++it){
         temp_prev_mesh->vertices_hash.insert(it.key(), it.value());
     }
@@ -330,6 +346,14 @@ void GLModel::saveUndoState_internal(){
 }
 
 void GLModel::loadUndoState(){
+    //while (updateLock); // if it is not locked
+    if (updateLock)
+        return;
+    updateLock = true;
+    qDebug() << this << "achieved lock";
+
+    QMetaObject::invokeMethod(qmlManager->boxUpperTab, "all_off");
+
     if (mesh->prevMesh != nullptr){
         qDebug() << "load undo state";
         if (twinModel != NULL && mesh->prevMesh == twinModel->mesh->prevMesh){ // same parent, cut generated
@@ -356,6 +380,7 @@ void GLModel::loadUndoState(){
         m_transform->setRotationZ(0);
         emit _updateModelMesh(true);
     } else {
+        updateLock = false;
         qDebug() << "no undo state";
     }
 }
@@ -433,6 +458,8 @@ void GLModel::copyModelAttributeFrom(GLModel* from){
     hollowShellActive = from->hollowShellActive;
     shellOffsetActive = from->shellOffsetActive;
     layflatActive = from->layflatActive;
+    layerViewActive = from->layerViewActive;
+    supportViewActive = from->supportViewActive;
 }
 
 void GLModel::updateModelMesh(bool shadowUpdate){
@@ -449,8 +476,47 @@ void GLModel::updateModelMesh(bool shadowUpdate){
     delete m_geometry;
     delete m_geometryRenderer;
     // reinitialize with updated mesh
-    initialize(mesh);
-    addVertices(mesh, false);
+
+    int viewMode = qmlManager->getViewMode();
+    switch( viewMode ) {
+    case VIEW_MODE_OBJECT:
+        initialize(mesh->faces.size());
+        addVertices(mesh, false);
+        break;
+    case VIEW_MODE_SUPPORT:
+        if( layerMesh != nullptr ) {
+            initialize(layerMesh->faces.size() + layerSupportMesh->faces.size());
+            addVertices(layerMesh, false);
+            addVertices(layerSupportMesh, false);
+            addVertices(layerRaftMesh, false);
+        } else {
+            initialize(mesh->faces.size());
+            addVertices(mesh, false);
+        }
+        break;
+    case VIEW_MODE_LAYER:
+        if( layerMesh != nullptr ) {
+            int faces = layerMesh->faces.size() +
+                    (qmlManager->getLayerViewFlags() & LAYER_INFILL != 0 ? layerInfillMesh->faces.size() : 0) +
+                    (qmlManager->getLayerViewFlags() & LAYER_SUPPORTERS != 0 ? layerSupportMesh->faces.size() : 0) +
+                    (qmlManager->getLayerViewFlags() & LAYER_RAFT != 0 ? layerRaftMesh->faces.size() : 0);
+            initialize(faces);
+            addVertices(layerMesh, false);
+            if( qmlManager->getLayerViewFlags() & LAYER_INFILL ) {
+                addVertices(layerInfillMesh, false, QVector3D(1.0f, 1.0f, 0.0f));
+            }
+            if( qmlManager->getLayerViewFlags() & LAYER_SUPPORTERS ) {
+                addVertices(layerSupportMesh, false);
+            }
+            if( qmlManager->getLayerViewFlags() & LAYER_RAFT) {
+                addVertices(layerRaftMesh, false, QVector3D(0.0f, 0.0f, 0.0f));
+            }
+        } else {
+            initialize(mesh->faces.size());
+            addVertices(mesh, false);
+        }
+        break;
+    }
     applyGeometry();
 
     QVector3D tmp = m_transform->translation();
@@ -488,14 +554,18 @@ void GLModel::updateModelMesh(bool shadowUpdate){
             qmlManager->connectHandlers(this);
         //shadowModel->m_transform->setTranslation(translation);
         QObject::connect(shadowModel, SIGNAL(modelSelected(int)), qmlManager, SLOT(modelSelected(int)));
-        updateLock = false;
     }
+    updateLock = false;
+    qDebug() << this << "released lock";
 }
 
 void GLModel::slicingDone(){
     QString result = futureWatcher.result()->slicingInfo;
     slicingInfo = result;
     qmlManager->slicingData->setProperty("visible", true);
+
+    slicer = futureWatcher.result();
+    emit _generateSupport();
 }
 
 featureThread::featureThread(GLModel* glmodel, int type){
@@ -590,9 +660,11 @@ void featureThread::run(){
         case ftrOrient:
             {
                 qDebug() << "ftr orientation run";
-                while (m_glmodel->updateLock); // if it is not locked
-
+                //while (m_glmodel->updateLock); // if it is not locked
+                if (m_glmodel->updateLock)
+                    return;
                 m_glmodel->updateLock = true;
+
                 m_glmodel->saveUndoState();
                 qmlManager->openProgressPopUp();
                 qDebug() << "tweak start";
@@ -653,24 +725,24 @@ arrangeSignalSender::arrangeSignalSender(){
 
 }
 
-void GLModel::initialize(const Mesh* mesh){
+void GLModel::initialize(const int& faces_cnt){
     m_geometryRenderer = new QGeometryRenderer();
     m_geometry = new QGeometry(m_geometryRenderer);
 
     QByteArray vertexArray;
-    vertexArray.resize(mesh->faces.size()*3*(3)*sizeof(float));
+    vertexArray.resize(faces_cnt*3*(3)*sizeof(float));
     vertexBuffer = new Qt3DRender::QBuffer(Qt3DRender::QBuffer::VertexBuffer,m_geometry);
     vertexBuffer->setUsage(Qt3DRender::QBuffer::DynamicDraw);
     vertexBuffer->setData(vertexArray);
 
     QByteArray vertexNormalArray;
-    vertexNormalArray.resize(mesh->faces.size()*3*(3)*sizeof(float));
+    vertexNormalArray.resize(faces_cnt*3*(3)*sizeof(float));
     vertexNormalBuffer = new Qt3DRender::QBuffer(Qt3DRender::QBuffer::VertexBuffer,m_geometry);
     vertexNormalBuffer->setUsage(Qt3DRender::QBuffer::DynamicDraw);
     vertexNormalBuffer->setData(vertexNormalArray);
 
     QByteArray vertexColorArray;
-    vertexColorArray.resize(mesh->faces.size()*3*(3)*sizeof(float));
+    vertexColorArray.resize(faces_cnt*3*(3)*sizeof(float));
     vertexColorBuffer = new Qt3DRender::QBuffer(Qt3DRender::QBuffer::VertexBuffer,m_geometry);
     vertexColorBuffer->setUsage(Qt3DRender::QBuffer::DynamicDraw);
     vertexColorBuffer->setData(vertexColorArray);
@@ -754,7 +826,7 @@ void GLModel::clearVertices(){
     return;
 }
 
-void GLModel::addVertices(Mesh* mesh, bool CW)
+void GLModel::addVertices(Mesh* mesh, bool CW, QVector3D vertexColor)
 {
     int face_size = mesh->faces.size();
     int face_idx = 0;
@@ -829,11 +901,11 @@ void GLModel::addVertices(Mesh* mesh, bool CW)
         vector<QVector3D> result_vcs;
         if (CW){
             for (int fn=2; fn>=0; fn--){
-                result_vcs.push_back(QVector3D(1.0f, 0.0f, 0.0f));
+                result_vcs.push_back(vertexColor);
             }
         } else {
             for (int fn=0; fn<=2; fn++){
-                result_vcs.push_back(QVector3D(1.0f, 0.0f, 0.0f));
+                result_vcs.push_back(vertexColor);
             }
         }
         addColorVertices(result_vcs);
@@ -920,15 +992,22 @@ void GLModel::addColorVertices(vector<QVector3D> vertices){
     appendVertexArray.resize(vertex_color_cnt*3*sizeof(float));
     float * reVertexArray = reinterpret_cast<float*>(appendVertexArray.data());
 
-    for (int i=0; i<vertex_color_cnt; i++){
-        //coordinates of left vertex
-        //97 185 192
-        //reVertexArray[3*i+0] = 0.38;
-        //reVertexArray[3*i+1] = 0.725;
-        //reVertexArray[3*i+2] = 0.753;
-        reVertexArray[3*i+0] = 0.278;
-        reVertexArray[3*i+1] = 0.670;
-        reVertexArray[3*i+2] = 0.706;
+//    for (int i=0; i<vertex_color_cnt; i++){
+//        //coordinates of left vertex
+//        //97 185 192
+//        //reVertexArray[3*i+0] = 0.38;
+//        //reVertexArray[3*i+1] = 0.725;
+//        //reVertexArray[3*i+2] = 0.753;
+//        reVertexArray[3*i+0] = 0.278;
+//        reVertexArray[3*i+1] = 0.670;
+//        reVertexArray[3*i+2] = 0.706;
+//    }
+
+    int i = 0;
+    for( auto iter = vertices.begin() ; iter != vertices.end() ; iter++, i++ ) {
+        reVertexArray[3*i+0] = (*iter).x();
+        reVertexArray[3*i+1] = (*iter).y();
+        reVertexArray[3*i+2] = (*iter).z();
     }
 
     uint vertexColorCount = colorAttribute->count();
@@ -1077,7 +1156,7 @@ void GLModel::handlePickerClicked(QPickEvent *pick)
 
     }
 
-    if (!cutActive && !extensionActive && !labellingActive && !layflatActive && !isMoved)
+    if (!cutActive && !extensionActive && !labellingActive && !layflatActive && !isMoved)// && !layerViewActive && !supportViewActive)
         emit modelSelected(parentModel->ID);
 
     qDebug() << "model selected emit" << pick->position() << parentModel->ID;
@@ -1577,6 +1656,48 @@ void GLModel::generatePlane(){
     //modelCut();
 }
 
+void GLModel::generateSupport(){
+
+    // copy mesh data from original mesh
+    layerMesh = new Mesh;
+    layerMesh->faces.reserve(mesh->faces.size()*2);
+    layerMesh->vertices.reserve(mesh->vertices.size()*2);
+    foreach (MeshFace mf, mesh->faces){
+        layerMesh->addFace(mesh->idx2MV(mf.mesh_vertex[0]).position, mesh->idx2MV(mf.mesh_vertex[1]).position, mesh->idx2MV(mf.mesh_vertex[2]).position, mf.idx);
+    }
+
+    layerInfillMesh = new Mesh;
+    layerSupportMesh = new Mesh;
+    layerRaftMesh = new Mesh;
+    QVector3D t = m_transform->translation();
+
+    t.setZ(mesh->z_min * -1.0f);
+    layerInfillMesh->vertexMove(t);
+    layerSupportMesh->vertexMove(t);
+    layerRaftMesh->vertexMove(t);
+
+    // generate cylinders
+    for( auto iter = slicer->slices.overhang_points.begin() ; iter != slicer->slices.overhang_points.end() ; iter++ ) {
+        qDebug() << "-------" << (*iter);
+        generateSupporter(layerSupportMesh, *iter);
+        generateRaft(layerRaftMesh, *iter);
+    }
+
+    /*for( auto iter = slicer->slices.begin() ; iter != slicer->slices.end() ; iter++ ) {
+        qDebug() << "infile" << iter->infill.size() << "outershell" << iter->outershell.size() << "support" << iter->support.size() << "z" << iter->z;
+        generateInfill(layerInfillMesh, &(*iter));
+    }*/
+
+    t.setZ(scfg->raft_thickness);
+    layerMesh->vertexMove(t);
+    t.setZ(mesh->z_min + scfg->raft_thickness);
+    layerInfillMesh->vertexMove(t);
+    layerSupportMesh->vertexMove(t);
+    layerRaftMesh->vertexMove(t);
+
+    emit _updateModelMesh(true);
+}
+
 void GLModel::removePlane(){
     if (parentModel->planeMaterial == nullptr)
         return;
@@ -1832,6 +1953,8 @@ void GLModel::mgoo(Qt3DRender::QPickEvent* v)
              qmlManager->selectedModels[0]->shadowModel->extensionActive ||
              qmlManager->selectedModels[0]->shadowModel->labellingActive ||
              qmlManager->selectedModels[0]->shadowModel->layflatActive ||
+             qmlManager->selectedModels[0]->shadowModel->layerViewActive ||
+             qmlManager->selectedModels[0]->shadowModel->supportViewActive ||
              qmlManager->orientationActive ||
              qmlManager->rotateActive))
         return;
@@ -1971,6 +2094,15 @@ void GLModel::getSliderSignal(double value){
 
         qDebug() << "getting slider signal: current radius is " << value;
     }
+}
+
+void GLModel::getLayerViewSliderSignal(double value) {
+    float height = (mesh->z_max - mesh->z_min + scfg->raft_thickness) * value + mesh->z_min;
+    m_layerMaterialHeight->setValue(QVariant::fromValue(height));
+
+    m_layerMaterialRaftHeight->setValue(QVariant::fromValue(qmlManager->getLayerViewFlags() & LAYER_INFILL != 0 ?
+                mesh->z_min :
+                mesh->z_max));
 }
 
 
@@ -2373,4 +2505,190 @@ void GLModel::closeShellOffset(){
     removePlane();
     parentModel->removeCuttingPoints();
     parentModel->removeCuttingContour();
+}
+
+void GLModel::changeViewMode(int viewMode) {
+    if( this->viewMode == viewMode ) {
+        return;
+    }
+
+    this->viewMode = viewMode;
+    QMetaObject::invokeMethod(qmlManager->boxUpperTab, "all_off");
+
+    switch( viewMode ) {
+    case VIEW_MODE_OBJECT:
+        shadowModel->layerViewActive = false;
+        shadowModel->supportViewActive = false;
+        addComponent(m_meshMaterial);
+        removeComponent(m_layerMaterial);
+        break;
+    case VIEW_MODE_SUPPORT:
+        shadowModel->layerViewActive = false;
+        shadowModel->supportViewActive = true;
+        addComponent(m_meshMaterial);
+        removeComponent(m_layerMaterial);
+        break;
+    case VIEW_MODE_LAYER:
+        shadowModel->layerViewActive = true;
+        shadowModel->supportViewActive = false;
+        addComponent(m_layerMaterial);
+        removeComponent(m_meshMaterial);
+        break;
+    }
+
+    emit _updateModelMesh(true);
+}
+
+void GLModel::generateLayerViewMaterial() {
+
+    m_layerMaterial = new QMaterial();
+
+    // setup material for layer view
+    QEffect *effect = new QEffect();
+    QDepthTest *depthTest;
+    QCullFace *cullFace;
+    QStencilMask *stencilMask;
+    QStencilTest *stencilTest;
+    QStencilOperation *stencilOp;
+
+    QRenderPass* gl3Pass;
+    QShaderProgram *glShader;
+    QOpenGLShader *vert;
+    QOpenGLShader *frag;
+
+    // Create technique
+    QTechnique *gl3Technique = new QTechnique();
+
+    //====================== outer rendering ======================//
+    gl3Pass = new QRenderPass();
+    glShader = new QShaderProgram();
+
+    // Set the shader on the render pass
+    vert = new QOpenGLShader(QOpenGLShader::Vertex);
+    if( vert->compileSourceFile(":/shaders/layerview_bottom.vert") ) {
+        qDebug() << "vert compiled" << vert->sourceCode();
+        glShader->setVertexShaderCode(vert->sourceCode());
+    } else {
+        qDebug() << "vert compile failed";
+    }
+    frag = new QOpenGLShader(QOpenGLShader::Fragment);
+    if( frag->compileSourceFile(":/shaders/layerview_bottom.frag") ) {
+        qDebug() << "frag compiled" << frag->sourceCode();
+        glShader->setFragmentShaderCode(frag->sourceCode());
+    } else {
+        qDebug() << "frag compile failed";
+    }
+    gl3Pass->setShaderProgram(glShader);
+
+    cullFace = new QCullFace();
+    cullFace->setMode(QCullFace::CullingMode::Back);
+    gl3Pass->addRenderState(cullFace);
+
+    depthTest = new QDepthTest();
+    depthTest->setDepthFunction(QDepthTest::DepthFunction::Less);
+    gl3Pass->addRenderState(depthTest);
+
+    // Add the pass to the technique
+    gl3Technique->addRenderPass(gl3Pass);
+
+    //====================== top rendering ======================//
+    // Create technique, render pass and shader
+    gl3Pass = new QRenderPass();
+    glShader = new QShaderProgram();
+
+    // Set the shader on the render pass
+    vert = new QOpenGLShader(QOpenGLShader::Vertex);
+    if( vert->compileSourceFile(":/shaders/layerview_top.vert") ) {
+        qDebug() << "vert compiled" << vert->sourceCode();
+        glShader->setVertexShaderCode(vert->sourceCode());
+    } else {
+        qDebug() << "vert compile failed";
+    }
+    frag = new QOpenGLShader(QOpenGLShader::Fragment);
+    if( frag->compileSourceFile(":/shaders/layerview_top.frag") ) {
+        qDebug() << "frag compiled" << frag->sourceCode();
+        glShader->setFragmentShaderCode(frag->sourceCode());
+    } else {
+        qDebug() << "frag compile failed";
+    }
+    gl3Pass->setShaderProgram(glShader);
+
+    cullFace = new QCullFace();
+    cullFace->setMode(QCullFace::CullingMode::Back);
+    gl3Pass->addRenderState(cullFace);
+
+    depthTest = new QDepthTest();
+    depthTest->setDepthFunction(QDepthTest::DepthFunction::Less);
+    gl3Pass->addRenderState(depthTest);
+
+    QBlendEquationArguments* blendState = new QBlendEquationArguments();
+    QBlendEquation* blendEquation = new QBlendEquation();
+    blendState->setSourceRgb(QBlendEquationArguments::SourceAlpha);
+    blendState->setDestinationRgb(QBlendEquationArguments::OneMinusSourceAlpha);
+    blendEquation->setBlendFunction(QBlendEquation::Add);
+    gl3Pass->addRenderState(blendState);
+    gl3Pass->addRenderState(blendEquation);
+
+    // Add the pass to the technique
+    gl3Technique->addRenderPass(gl3Pass);
+
+    //====================== infill rendering ======================//
+    // Create technique, render pass and shader
+    gl3Pass = new QRenderPass();
+    glShader = new QShaderProgram();
+
+    // Set the shader on the render pass
+    vert = new QOpenGLShader(QOpenGLShader::Vertex);
+    if( vert->compileSourceFile(":/shaders/layerview_infill.vert") ) {
+        qDebug() << "vert compiled" << vert->sourceCode();
+        glShader->setVertexShaderCode(vert->sourceCode());
+    } else {
+        qDebug() << "vert compile failed";
+    }
+    frag = new QOpenGLShader(QOpenGLShader::Fragment);
+    if( frag->compileSourceFile(":/shaders/layerview_infill.frag") ) {
+        qDebug() << "frag compiled" << frag->sourceCode();
+        glShader->setFragmentShaderCode(frag->sourceCode());
+    } else {
+        qDebug() << "frag compile failed";
+    }
+    gl3Pass->setShaderProgram(glShader);
+
+    cullFace = new QCullFace();
+    cullFace->setMode(QCullFace::CullingMode::Front);
+    gl3Pass->addRenderState(cullFace);
+
+    depthTest = new QDepthTest();
+    depthTest->setDepthFunction(QDepthTest::DepthFunction::Always);
+    gl3Pass->addRenderState(depthTest);
+
+    // Add the pass to the technique
+    gl3Technique->addRenderPass(gl3Pass);
+
+    // Set the targeted GL version for the technique
+    gl3Technique->graphicsApiFilter()->setApi(QGraphicsApiFilter::OpenGL);
+    gl3Technique->graphicsApiFilter()->setMajorVersion(3);
+    gl3Technique->graphicsApiFilter()->setMinorVersion(1);
+    gl3Technique->graphicsApiFilter()->setProfile(QGraphicsApiFilter::CoreProfile);
+
+    QFilterKey *filterKey = new QFilterKey();
+    filterKey->setName(QStringLiteral("renderingStyle"));
+    filterKey->setValue(QStringLiteral("forward"));
+    gl3Technique->addFilterKey(filterKey);
+
+    // Add the technique to the effect
+    effect->addTechnique(gl3Technique);
+
+    m_layerMaterial->setEffect(effect);
+
+    //====================== add parameters ======================//
+    m_layerMaterialHeight = new QParameter(QStringLiteral("height"), QVariant::fromValue(0.0f));
+    m_layerMaterial->addParameter(m_layerMaterialHeight);
+
+    m_layerMaterialRaftHeight = new QParameter(QStringLiteral("raftHeight"), QVariant::fromValue(scfg->raft_thickness));
+    m_layerMaterial->addParameter(m_layerMaterialRaftHeight);
+
+    m_layerMaterial->addParameter(new QParameter(QStringLiteral("ambient"), QColor(130, 130, 140)));
+    m_layerMaterial->addParameter(new QParameter(QStringLiteral("diffuse"), QColor(131, 206, 220)));
+    m_layerMaterial->addParameter(new QParameter(QStringLiteral("specular"), QColor(0, 0, 0)));
 }

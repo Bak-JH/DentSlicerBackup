@@ -32,6 +32,7 @@ Rectangle {
 
     LeftTabViewMode{
         id : ltvm
+        objectName: "ltvm"
         anchors.top : line1.bottom
         anchors.left : parent.left
     }

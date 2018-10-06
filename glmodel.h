@@ -48,8 +48,11 @@ using namespace std;
 #define ftrExtend 13
 #define ftrSupport 14
 #define ftrLabel 15
+#define ftrSupportViewMode 16
+#define ftrLayerViewMode 17
 
 class GLModel;
+class OverhangPoint;
 
 class featureThread: public QThread
 {
@@ -109,12 +112,21 @@ public:
     Mesh* lmesh;
     Mesh* rmesh;
 
+    // layer view
+    Mesh* layerMesh;
+    Mesh* layerSupportMesh;
+    Mesh* layerRaftMesh;
+    Mesh* layerInfillMesh;
 
     MeshFace *targetMeshFace = NULL; // used for object selection (specific area, like extension or labelling)
 
     bool appropriately_rotated=false;
     QPhongMaterial *m_meshMaterial;
+    QPhongAlphaMaterial *m_meshAlphaMaterial;
     QPerVertexColorMaterial *m_meshVertexMaterial;
+    QMaterial *m_layerMaterial;
+    QParameter *m_layerMaterialHeight;
+    QParameter *m_layerMaterialRaftHeight;
 
     //QPhongMaterial *m_meshMaterial;
     Qt3DRender::QBuffer *vertexBuffer;
@@ -193,7 +205,10 @@ public:
     QVector2D world2Screen(QVector3D target);
     QString getFileName(const string& s);
     QVector3D spreadPoint(QVector3D endpoint,QVector3D startpoint,int factor);
+    void changeViewMode(int viewMode);
 
+    // support
+    Slicer* slicer;
 
     featureThread* ft;
     //arrangeSignalSender* arsignal; //unused, signal from qml goes right into QmlManager.runArrange
@@ -207,9 +222,9 @@ public:
 
     // implement lock as bool variable
     bool updateLock;
-    //QMutex functionLock;
-    //QMutex updateLock;
-    void addVertices(Mesh* mesh, bool CW);
+
+    void addVertices(Mesh* mesh, bool CW, QVector3D color=QVector3D(0.278f, 0.670f, 0.706f));
+
 
 private:
     int colorMode;
@@ -219,7 +234,7 @@ private:
     QNode* m_parent;
     QVector3D lastpoint;
     QVector2D prevPoint;
-    void initialize(const Mesh* mesh);
+    void initialize(const int& faces_cnt);
     void applyGeometry();
     void addVertex(QVector3D vertex);
     void addVertices(vector<QVector3D> vertices);
@@ -229,6 +244,7 @@ private:
     void clearVertices();
     void onTimerUpdate();
     Mesh* toSparse(Mesh* mesh);
+    void generateLayerViewMaterial();
 
     int cutMode = 1;
     int cutFillMode = 1;
@@ -238,15 +254,20 @@ private:
     bool hollowShellActive = false;
     bool shellOffsetActive = false;
     bool layflatActive = false;
+    bool layerViewActive = false;
+    bool supportViewActive = false;
 
     bool isMoved = false;
     bool isReleased = true;
+
+    int viewMode = -1;
 
 signals:
 
     void modelSelected(int);
     void resetLayflat();
     void bisectDone();
+    void _generateSupport();
     void _updateModelMesh(bool);
     void layFlatSelect();
     void layFlatUnSelect();
@@ -291,6 +312,7 @@ public slots:
     void cutModeSelected(int type);
     void cutFillModeSelected(int type);
     void getSliderSignal(double value);
+    void getLayerViewSliderSignal(double value);
     void generateRLModel();
     void openCut();
     void closeCut();
@@ -326,6 +348,8 @@ public slots:
     // Model Mesh info update
     void updateModelMesh(bool);
 
+    // Generate support mesh
+    void generateSupport();
     void slicingDone();
 };
 

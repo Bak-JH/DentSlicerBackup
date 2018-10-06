@@ -21,6 +21,7 @@ Item{
         property alias resultPopUp: resultPopUp
         property alias yesnoPopUp: yesnoPopUp
         property alias deletePopUp: deletePopUp
+        property alias layerViewPopup: layerViewPopup
         property alias mttab : mttab
 
         property alias mainFont : mainFont
@@ -337,6 +338,20 @@ Item{
             id : deletePopUp
         }
 
+        LayerViewPopup {
+            id: layerViewPopup
+            objectName: "layerViewPopup"
+
+            visible: false
+        }
+
+        LayerViewSlider {
+            id: layerViewSlider
+            objectName: "layerViewSlider"
+            anchors.right: parent.right
+            anchors.rightMargin:20
+            anchors.verticalCenter: parent.verticalCenter
+        }
     }
 
     Login{
