@@ -261,6 +261,9 @@ void GLModel::saveUndoState_internal(){
     // need to change to memcpy or something
     qDebug () << "save prev mesh";
 
+    // reset slicing view since model has been updated
+    slicer = nullptr;
+
     // need to remove redo State since it contains
     mesh->nextMesh = nullptr;
 
@@ -285,17 +288,7 @@ void GLModel::saveUndoState_internal(){
         temp_prev_mesh->faces.end()->neighboring_faces[1].insert(temp_prev_mesh->faces.end()->neighboring_faces[1].end(), mf.neighboring_faces[1].begin(), mf.neighboring_faces[1].end());
         temp_prev_mesh->faces.end()->neighboring_faces[2].insert(temp_prev_mesh->faces.end()->neighboring_faces[2].end(), mf.neighboring_faces[2].begin(), mf.neighboring_faces[2].end());*/
     }
-    foreach(MeshFace mf, mesh->faces){
-        //temp_prev_mesh->faces.push_back(mf);
-        // clear and copy neighboring faces
-        /*temp_prev_mesh->faces.end()->neighboring_faces[0].clear();
-        temp_prev_mesh->faces.end()->neighboring_faces[1].clear();
-        temp_prev_mesh->faces.end()->neighboring_faces[2].clear();*/
-        /*temp_prev_mesh->faces.end()->neighboring_faces[0].insert(temp_prev_mesh->faces.end()->neighboring_faces[0].end(), mf.neighboring_faces[0].begin(), mf.neighboring_faces[0].end());
-        temp_prev_mesh->faces.end()->neighboring_faces[1].insert(temp_prev_mesh->faces.end()->neighboring_faces[1].end(), mf.neighboring_faces[1].begin(), mf.neighboring_faces[1].end());
-        temp_prev_mesh->faces.end()->neighboring_faces[2].insert(temp_prev_mesh->faces.end()->neighboring_faces[2].end(), mf.neighboring_faces[2].begin(), mf.neighboring_faces[2].end());*/
 
-    }
     for (QHash<uint32_t, MeshVertex>::iterator it = mesh->vertices_hash.begin(); it!=mesh->vertices_hash.end(); ++it){
         temp_prev_mesh->vertices_hash.insert(it.key(), it.value());
     }
@@ -345,6 +338,14 @@ void GLModel::saveUndoState_internal(){
 }
 
 void GLModel::loadUndoState(){
+    //while (updateLock); // if it is not locked
+    if (updateLock)
+        return;
+    updateLock = true;
+    qDebug() << this << "achieved lock";
+
+    QMetaObject::invokeMethod(qmlManager->boxUpperTab, "all_off");
+
     if (mesh->prevMesh != nullptr){
         qDebug() << "load undo state";
         if (twinModel != NULL && mesh->prevMesh == twinModel->mesh->prevMesh){ // same parent, cut generated
@@ -371,6 +372,7 @@ void GLModel::loadUndoState(){
         m_transform->setRotationZ(0);
         emit _updateModelMesh(true);
     } else {
+        updateLock = false;
         qDebug() << "no undo state";
     }
 }
@@ -478,6 +480,7 @@ void GLModel::updateModelMesh(bool shadowUpdate){
             initialize(layerMesh->faces.size() + layerSupportMesh->faces.size());
             addVertices(layerMesh, false);
             addVertices(layerSupportMesh, false);
+            addVertices(layerRaftMesh, false);
         } else {
             initialize(mesh->faces.size());
             addVertices(mesh, false);
@@ -543,8 +546,9 @@ void GLModel::updateModelMesh(bool shadowUpdate){
             qmlManager->connectHandlers(this);
         //shadowModel->m_transform->setTranslation(translation);
         QObject::connect(shadowModel, SIGNAL(modelSelected(int)), qmlManager, SLOT(modelSelected(int)));
-        updateLock = false;
     }
+    updateLock = false;
+    qDebug() << this << "released lock";
 }
 
 void GLModel::slicingDone(){
@@ -648,9 +652,11 @@ void featureThread::run(){
         case ftrOrient:
             {
                 qDebug() << "ftr orientation run";
-                while (m_glmodel->updateLock); // if it is not locked
-
+                //while (m_glmodel->updateLock); // if it is not locked
+                if (m_glmodel->updateLock)
+                    return;
                 m_glmodel->updateLock = true;
+
                 m_glmodel->saveUndoState();
                 qmlManager->openProgressPopUp();
                 qDebug() << "tweak start";

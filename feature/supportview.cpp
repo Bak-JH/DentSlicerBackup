@@ -2,7 +2,7 @@
 #include "earcut.hpp"
 #include <QtMath>
 
-void generateCylinder(Mesh* mesh, const QVector3D& position, const QVector3D& positionTop, const float& radius) {
+void generateCustomCylinder(Mesh* mesh, const QVector3D& position, const QVector3D& positionTop, const float& radiusTop, const float& radiusBottom){
     qDebug() << "v1(" << position.x() << "," << position.y() << "," << position.z() << ")";
     qDebug() << "v2(" << positionTop.x() << "," << positionTop.y() << "," << positionTop.z() << ")";
 
@@ -10,8 +10,8 @@ void generateCylinder(Mesh* mesh, const QVector3D& position, const QVector3D& po
     vector<QVector3D> bottom;
     for( float i = 0.0f ; i <= 360.0f ; i += 10.0f ) {
         float t = i / 180.0f * M_PI;
-        top.push_back(QVector3D(qCos(t) * radius + positionTop.x(), qSin(t) * radius + positionTop.y(), positionTop.z()));
-        bottom.push_back(QVector3D(qCos(t) * radius + position.x(), qSin(t) * radius + position.y(), position.z()));
+        top.push_back(QVector3D(qCos(t) * radiusTop + positionTop.x(), qSin(t) * radiusTop + positionTop.y(), positionTop.z()));
+        bottom.push_back(QVector3D(qCos(t) * radiusBottom + position.x(), qSin(t) * radiusBottom + position.y(), position.z()));
     }
 
     // top circle
@@ -41,6 +41,10 @@ void generateCylinder(Mesh* mesh, const QVector3D& position, const QVector3D& po
         lastTop = &(*iterTop);
         lastBottom = &(*iterBottom);
     }
+}
+
+void generateCylinder(Mesh* mesh, const QVector3D& position, const QVector3D& positionTop, const float& radius) {
+    generateCustomCylinder(mesh, position, positionTop, radius, radius);
 }
 
 void generateFace(Mesh* mesh, Path path, float z) {
@@ -77,7 +81,8 @@ void generateSupporter(Mesh* mesh, OverhangPoint *point, OverhangPoint *parent, 
     float radius = (float)point->radius / scfg->resolution;
     QVector3D position = QVector3D((float)point->position.X / scfg->resolution,
             (float)point->position.Y / scfg->resolution,
-            (float)(point->position.Z - (int)point->height * 1000) / scfg->resolution);
+                                   0);
+            //(float)(point->position.Z - (int)point->height * 1000) / scfg->resolution);
     QVector3D positionTop = QVector3D((float)point->position.X / scfg->resolution,
             (float)point->position.Y / scfg->resolution,
             (float)point->position.Z / scfg->resolution);
@@ -100,7 +105,13 @@ void generateSupporter(Mesh* mesh, OverhangPoint *point, OverhangPoint *parent, 
         }
     }
 
+    float coneHeight = 1.4;
+    QVector3D positionConeTop = QVector3D(positionTop.x(),positionTop.y(),max(positionTop.z(),coneHeight));
+    positionTop = QVector3D(positionTop.x(),positionTop.y(),max(positionTop.z()-coneHeight, 0.0f));
+
     generateCylinder(mesh, position, positionTop, radius);
+    generateCustomCylinder(mesh, positionTop, positionConeTop, 0.1, radius);
+
 
     if( point->target_branching_overhang_point != nullptr ) {
 
@@ -121,16 +132,19 @@ void generateSupporter(Mesh* mesh, OverhangPoint *point, OverhangPoint *parent, 
 }
 
 void generateRaft(Mesh* mesh, OverhangPoint *point) {
-    float bottom = (float)(point->position.Z - (int)point->height * 1000) / scfg->resolution;
+    float bottom = (float)-3.0;//(point->position.Z - (int)point->height * 1000) / scfg->resolution;
     float radius = (float)scfg->raft_offset_radius / (float)scfg->resolution;
-    QVector3D position = QVector3D((float)point->position.X / scfg->resolution,
-            (float)point->position.Y / scfg->resolution,
-            bottom - scfg->raft_thickness);
-    QVector3D positionTop = QVector3D((float)point->position.X / scfg->resolution,
+    QVector3D positionBottom = QVector3D((float)point->position.X / scfg->resolution,
             (float)point->position.Y / scfg->resolution,
             bottom);
-
-    generateCylinder(mesh, position, positionTop, radius);
+    QVector3D positionMiddle = QVector3D((float)point->position.X / scfg->resolution,
+                                         (float)point->position.Y / scfg->resolution,
+                                         bottom/2);
+    QVector3D positionTop = QVector3D((float)point->position.X / scfg->resolution,
+            (float)point->position.Y / scfg->resolution,
+            0);
+    generateCustomCylinder(mesh, positionBottom, positionMiddle, radius, radius*2);
+    generateCustomCylinder(mesh, positionMiddle, positionTop, radius*2, radius);
 }
 
 void generateInfill(Mesh* mesh, Slice* slice) {

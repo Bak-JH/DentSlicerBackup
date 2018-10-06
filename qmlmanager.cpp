@@ -857,7 +857,7 @@ void QmlManager::modelSelected(int ID){
         QMetaObject::invokeMethod(boundedBox, "setSize", Q_ARG(QVariant, selectedModels[0]->mesh->x_max - selectedModels[0]->mesh->x_min),
                                                          Q_ARG(QVariant, selectedModels[0]->mesh->y_max - selectedModels[0]->mesh->y_min),
                                                          Q_ARG(QVariant, selectedModels[0]->mesh->z_max - selectedModels[0]->mesh->z_min));
-        QMetaObject::invokeMethod(layerViewSlider, "setHeight", Q_ARG(QVariant, selectedModels[0]->mesh->z_max - selectedModels[0]->mesh->z_min));
+        QMetaObject::invokeMethod(layerViewSlider, "setHeight", Q_ARG(QVariant, (selectedModels[0]->mesh->z_max - selectedModels[0]->mesh->z_min)/scfg->layer_height));
 
         // set slicing info box property visible true if slicing info exists
         slicingData->setProperty("visible", true);
@@ -1802,6 +1802,8 @@ void QmlManager::setViewMode(int viewMode) {
 
     if( this->viewMode == VIEW_MODE_OBJECT ) {
         QMetaObject::invokeMethod(leftTabViewMode, "setObjectView");
+    } else {
+        QMetaObject::invokeMethod(qmlManager->boundedBox, "hideBox");
     }
 }
 
