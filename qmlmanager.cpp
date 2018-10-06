@@ -288,7 +288,7 @@ void QmlManager::deleteModelFile(int ID){
     hideRotateSphere();
     QMetaObject::invokeMethod(qmlManager->mttab, "hideTab");
     QMetaObject::invokeMethod(boxUpperTab, "all_off");
-    QMetaObject::invokeMethod(leftTabViewMode, "setViewMode", Q_ARG(QVariant, 0));
+    QMetaObject::invokeMethod(leftTabViewMode, "setObjectView");
 }
 
 void QmlManager::disconnectHandlers(GLModel* glmodel){
@@ -788,7 +788,7 @@ void QmlManager::modelSelected(int ID){
     }
 
     QMetaObject::invokeMethod(boxUpperTab, "all_off");
-    QMetaObject::invokeMethod(leftTabViewMode, "setViewMode", Q_ARG(QVariant, 0));
+    QMetaObject::invokeMethod(leftTabViewMode, "setObjectView");
     GLModel* target;
     for(int i=0; i<glmodels.size();i++){
         if(glmodels.at(i)->ID == ID){
@@ -1856,7 +1856,7 @@ void QmlManager::setViewMode(int viewMode) {
     }
 
     if( this->viewMode == VIEW_MODE_OBJECT ) {
-        QMetaObject::invokeMethod(leftTabViewMode, "setViewMode", Q_ARG(QVariant, 0));
+        QMetaObject::invokeMethod(leftTabViewMode, "setObjectView");
     } else {
         QMetaObject::invokeMethod(qmlManager->boundedBox, "hideBox");
     }

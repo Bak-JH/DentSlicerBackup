@@ -13,6 +13,10 @@ Rectangle {
 
     state : "open"
 
+    function setObjectView() {
+        viewObjectButton.checked = true;
+    }
+
     function setViewMode(mode){
         viewObjectButton.checked = false;
         viewSupportButton.checked = false;
