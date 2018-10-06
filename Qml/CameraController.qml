@@ -129,6 +129,19 @@ Entity {
             }
 
         }
+
+        onPressed: {
+            if(mouse.button ===1){ //left click
+                qm.setModelClickFalse();
+            }
+
+        }
+
+        onReleased: {
+            if(mouse.button ===1){ //left click
+                qm.backgroundClickCheck();
+            }
+        }
     }
 
     /***************************************** Mouse Wheel Move *****************************************/

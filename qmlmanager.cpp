@@ -631,13 +631,50 @@ GLModel* QmlManager::findGLModelByName(QString filename){
     return NULL;
 }
 
+void QmlManager::setModelClickFalse(){
+    modelClicked = false;
+}
+
+void QmlManager::backgroundClickCheck(){
+    return;
+    qDebug() << "bcc 0";
+    if(selectedModels.size() == 1 && selectedModels[0] == nullptr)
+        return;
+    qDebug() << "bcc 0.5";
+    if(!selectedModels[0]->modelSelectChangable())
+        return;
+
+    qDebug() << "bcc 1";
+
+    if(!modelClicked){ // backgroundclicked
+        qDebug() << "bcc 2           " << selectedModels.size() << selectedModels[0];
+        int temp = selectedModels.size();
+        for(int i=0; i<temp; i++)
+        {
+            qDebug() << "bcc 3           "  << selectedModels[0];
+            if(selectedModels[0] != nullptr){
+                qDebug() << "bcc 4";
+                modelSelected(selectedModels[0]->ID);
+            }
+        }
+        /*
+        while(selectedModels[0] != nullptr){
+            modelSelected(selectedModels[0]->ID);
+            qDebug() << selectedModels[0];
+
+        }
+        */
+
+    }
+    modelClicked = false;
+}
+
 void QmlManager::multipleModelSelected(int ID){
+    //modelClicked = true;
     QMetaObject::invokeMethod(boxUpperTab, "all_off");
-    qDebug() << "model id :" << ID ;
     GLModel* target;
     for(int i=0; i<glmodels.size();i++){
         if(glmodels.at(i)->ID == ID){
-            qDebug() << "found id";
             target = glmodels.at(i);
             break;
         }
@@ -742,7 +779,6 @@ void QmlManager::modelSelected(int ID){
 
     QMetaObject::invokeMethod(boxUpperTab, "all_off");
     QMetaObject::invokeMethod(leftTabViewMode, "setObjectView");
-    qDebug() << "model id :" << ID ;
     GLModel* target;
     for(int i=0; i<glmodels.size();i++){
         if(glmodels.at(i)->ID == ID){

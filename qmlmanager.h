@@ -155,6 +155,7 @@ public:
     bool rotateActive = false;
     bool orientationActive = false;
     bool freecutActive = false;
+    bool modelClicked = false;
 
 
     QString groupFunctionState;
@@ -203,6 +204,8 @@ public:
     Q_INVOKABLE void setViewMode(int viewMode);
     Q_INVOKABLE int getViewMode();
     Q_INVOKABLE void sendUpdateModelInfo();
+    Q_INVOKABLE void backgroundClickCheck();
+    Q_INVOKABLE void setModelClickFalse();
 
 
 private:
