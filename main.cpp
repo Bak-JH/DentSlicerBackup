@@ -21,6 +21,7 @@ QmlManager *qmlManager;
 int main(int argc, char **argv)
 {
     QApplication app(argc, argv);
+    QString version = "1.0.0";
 
     /* Language patch
     QTranslator translator ;
@@ -32,7 +33,17 @@ int main(int argc, char **argv)
     qRegisterMetaType<vector<QVector3D>>("vector<QVector3D>");
     qRegisterMetaType<vector<float>>("vector<float>");
 
-    QPixmap pixmap(":/Resource/splash2.png");
+    /** Splash Image **/
+    QPixmap pixmap(":/Resource/splash_final.png");
+    QPainter painter(&pixmap);
+    QPen penHText(QColor("#ffffff"));
+    painter.setFont(QFont("Arial",9));
+    painter.setPen(penHText);
+
+    painter.drawText(QPoint(32,290), "Dental 3D Printing Solution");
+    painter.drawText(QPoint(32,310), "Version");
+    painter.drawText(QPoint(88,310), version);
+    painter.drawText(QPoint(32,330), "Developed by HiX Inc.");
 
     QSplashScreen *splash = new QSplashScreen(pixmap);
     splash->show();
@@ -40,7 +51,9 @@ int main(int argc, char **argv)
 
     QScopedPointer<QuaternionHelper> qq(new QuaternionHelper);
     qmlManager = new QmlManager();
+    qmlManager->version = version;
     QScopedPointer<QmlManager> qm(qmlManager);
+
 
 
     engine.rootContext()->setContextProperty("qm", qm.data());

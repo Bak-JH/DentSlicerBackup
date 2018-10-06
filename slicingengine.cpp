@@ -9,7 +9,6 @@ SlicingEngine::SlicingEngine()
 QProcess *slicing_process;
 
 Slicer* SlicingEngine::slice (QVariant cfg, Mesh* mesh, QString filename){
-
     QVariantMap config = cfg.toMap();
     for(QVariantMap::const_iterator iter = config.begin(); iter != config.end(); ++iter) {
         qDebug() << iter.key() << iter.value().toString();

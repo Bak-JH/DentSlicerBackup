@@ -153,6 +153,7 @@ public:
     vector<Qt3DExtras::QSphereMesh*> sphereMesh;
     vector<Qt3DCore::QEntity*> sphereEntity;
     vector<Qt3DCore::QTransform*> sphereTransform;
+    vector<Qt3DRender::QObjectPicker*> sphereObjectPicker;
     vector<QPhongMaterial*> sphereMaterial;
 
     void removeModel();
@@ -202,6 +203,11 @@ public:
     QString filename;
     QObject* mainWindow;
     QString slicingInfo;
+
+    // implement lock as bool variable
+    bool updateLock;
+    //QMutex functionLock;
+    //QMutex updateLock;
     void addVertices(Mesh* mesh, bool CW);
 
 private:
@@ -254,6 +260,9 @@ public slots:
     void loadRedoState();
 
     // object picker parts
+    void handlePickerEnteredFreeCutSphere();
+    void handlePickerExitedFreeCutSphere();
+    void handlePickerClickedFreeCutSphere(Qt3DRender::QPickEvent*);
     void handlePickerClickedFreeCut(Qt3DRender::QPickEvent*);
     void handlePickerClicked(Qt3DRender::QPickEvent*);
     void handlePickerClickedLayflat(MeshFace shadow_meshface);

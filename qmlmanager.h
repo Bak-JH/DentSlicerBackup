@@ -19,6 +19,7 @@
 #include "QtConcurrent/QtConcurrentRun"
 #include "QFuture"
 #include "utils/httpreq.h"
+#include <QKeyboardHandler>
 
 class QmlManager : public QObject
 {
@@ -26,6 +27,8 @@ class QmlManager : public QObject
 public:
     explicit QmlManager(QObject *parent = nullptr);
     QQmlApplicationEngine* engine;
+
+    QString version = "0.0.1";
 
     // UI components
     QObject* mainWindow;
@@ -39,6 +42,7 @@ public:
     Qt3DCore::QEntity *mttab;
     QObject* undoRedoButton;
     QObject* slicingData;
+    Qt3DInput::QKeyboardHandler* keyboardHandler;
 
     // model rotate components
     QObject *rotatePopup;
@@ -119,6 +123,7 @@ public:
     vector<GLModel*> glmodels;
     vector<GLModel*> selectedModels;
     vector<Mesh*> copyMeshes;
+    vector<QString> copyMeshNames;
 
 
 
@@ -129,6 +134,8 @@ public:
     //bool moveActive = false;
     bool rotateActive = false;
     bool orientationActive = false;
+    bool freecutActive = false;
+
 
     QString groupFunctionState;
     int groupFunctionIndex;
@@ -156,6 +163,8 @@ public:
 
     GLModel* findGLModelByName(QString filename);
 
+    Q_INVOKABLE QString getVersion();
+    Q_INVOKABLE void keyboardHandlerFocus();
     Q_INVOKABLE QVector3D getSelectedCenter();
     Q_INVOKABLE QVector3D getSelectedSize();
     Q_INVOKABLE int getselectedModelID();

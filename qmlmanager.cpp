@@ -23,7 +23,7 @@ void QmlManager::initializeUI(QQmlApplicationEngine* e){
     mainWindow = FindItemByName(engine, "mainWindow");
     loginWindow = FindItemByName(engine, "loginWindow");
     loginButton = FindItemByName(engine, "loginButton");
-
+    keyboardHandler = (Qt3DInput::QKeyboardHandler*)FindItemByName(engine, "keyboardHandler");
     models = (QEntity *)FindItemByName(engine, "Models");
     selectedModels.push_back(nullptr);
     Lights* lights = new Lights(models);
@@ -473,6 +473,17 @@ int QmlManager::getselectedModelID(){
         result = selectedModels[0]->ID;
 
     return result;
+}
+
+
+QString QmlManager::getVersion(){
+    return version;
+}
+void QmlManager::keyboardHandlerFocus(){
+    qDebug() << "keyboard focus on";
+    keyboardHandler->setFocus(true);
+    QMetaObject::invokeMethod(mv, "forceFocus");
+    qDebug() << "keyboard handler focus : " << keyboardHandler->focus();
 }
 
 void QmlManager::fixMesh(){
@@ -956,6 +967,9 @@ void QmlManager::showRotateSphere(){
 }
 
 void QmlManager::mouseHack(){
+    //temporarily unuse. If no more bug about mouse release, delete this function.
+    return ;
+
     const QPointF tmp_cor(265,105);
     QMouseEvent* evt = new QMouseEvent(QEvent::MouseButtonPress,tmp_cor,Qt::LeftButton, Qt::LeftButton,0);
     //QCoreApplication::postEvent(this->parent(),evt);
@@ -999,6 +1013,8 @@ void QmlManager::modelMoveDone(int Axis){
         QQmlProperty::write(moveArrowobj,"center",selectedModels[0]->m_transform->translation()+QVector3D((selectedModels[0]->mesh->x_max+selectedModels[0]->mesh->x_min)/2,(selectedModels[0]->mesh->y_max+selectedModels[0]->mesh->y_min)/2,(selectedModels[0]->mesh->z_max+selectedModels[0]->mesh->z_min)/2));
     //}
     mouseHack();
+
+
 }
 
 void QmlManager::totalMoveDone(){
@@ -1518,13 +1534,16 @@ void QmlManager::reDo(){
 
 void QmlManager::copyModel(){
     copyMeshes.clear();
+    copyMeshNames.clear();
 
     qDebug() << "copying current selected Models";
     for (GLModel* model : selectedModels){
+        if (model == nullptr)
+            continue;
         Mesh* copied = model->mesh->copyMesh();
 
         copyMeshes.push_back(copied);
-
+        copyMeshNames.push_back(model->filename);
         /*foreach (MeshFace mf, model->mesh->faces){
             copyMesh->addFace(model->mesh->idx2MV(mf.mesh_vertex[0]).position, model->mesh->idx2MV(mf.mesh_vertex[1]).position, model->mesh->idx2MV(mf.mesh_vertex[2]).position, mf.idx);
         }
@@ -1535,9 +1554,16 @@ void QmlManager::copyModel(){
 }
 
 void QmlManager::pasteModel(){
+    if(copyMeshes.size() < 1) // clipboard check
+        return ;
+
     qDebug() << "pasting current saved selected Meshes";
+    int counter = 0;
     for (Mesh* copyMesh : copyMeshes){
-        createModelFile(copyMesh, "/copy_"+QString::number(GLModel::globalID));
+        QString temp = copyMeshNames.at(counter).split(".").first() + QString::fromStdString("_copy_") + QString::number(GLModel::globalID);
+
+        createModelFile(copyMesh, temp);
+        counter++;
     }
 
     openArrange();
