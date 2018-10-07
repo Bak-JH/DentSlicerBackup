@@ -1089,6 +1089,7 @@ void GLModel::handlePickerClickedFreeCutSphere(Qt3DRender::QPickEvent* pick)
     removeCuttingContour();
     if (cuttingPoints.size() >=2){
         generateCuttingContour(cuttingPoints);
+        regenerateCuttingPoint(cuttingPoints);
     }
 
     if (cuttingPoints.size() >= 2)
@@ -1124,7 +1125,9 @@ void GLModel::handlePickerClickedFreeCut(Qt3DRender::QPickEvent* pick)
     // remove cutting contour and redraw cutting contour
     parentModel->removeCuttingContour();
     if (parentModel->cuttingPoints.size() >=2){
+        qDebug() << "tt";
         parentModel->generateCuttingContour(parentModel->cuttingPoints);
+        parentModel->regenerateCuttingPoint(parentModel->cuttingPoints);
     }
 
 
@@ -1234,7 +1237,9 @@ void GLModel::handlePickerClicked(QPickEvent *pick)
             }
 
             if (!found_nearby_v){
+                qDebug() << "Check 0 " << parentModel->cuttingPoints.size();
                 parentModel->addCuttingPoint(v+m_transform->translation());
+                qDebug() << "Check 1 " << parentModel->cuttingPoints.size();
             }
 
             /*if (v.distanceToPoint(parentModel->cuttingPoints[parentModel->cuttingPoints.size()-1]) < 0.5f){
@@ -1247,7 +1252,18 @@ void GLModel::handlePickerClicked(QPickEvent *pick)
             // remove cutting contour and redraw cutting contour
             parentModel->removeCuttingContour();
             if (parentModel->cuttingPoints.size() >=2){
+                qDebug() << "TTTTTTTTTTTTTTTTt";
                 parentModel->generateCuttingContour(parentModel->cuttingPoints);
+
+                int temp = cuttingPoints.size();
+                /*
+                for (int i=0 ;  i<temp; i++){
+                    addCuttingPoint(sphereTransform[i]->translation());
+                    removeCuttingPoint(0);
+                }
+                */
+
+                parentModel->regenerateCuttingPoint(parentModel->cuttingPoints);
             }
 
             //generatePlane();
@@ -1562,9 +1578,25 @@ void GLModel::removeCuttingContour(){
     }
     cuttingContourCylinders.clear();
 }
+void GLModel::regenerateCuttingPoint(vector<QVector3D> points){
+    int temp = cuttingPoints.size();
+
+
+    /* This function is working with strange logic(make 3 times more point and delete ),  fix it later */
+  \
+
+    for (int i=0; i<temp*3; i++){
+        addCuttingPoint((QVector3D)sphereTransform[i]->translation());
+    }
+
+    for (int i=0; i<temp*3; i++){
+        qDebug() << "remove";
+        removeCuttingPoint(0);
+    }
+
+}
 
 void GLModel::generateCuttingContour(vector<QVector3D> cuttingContour){
-
     for (int cvi=0; cvi<cuttingContour.size()-1; cvi++){
         QVector3D to = cuttingContour[cvi];
         to = QVector3D(to.x(), to.y(), 100.0f);
@@ -1587,7 +1619,7 @@ void GLModel::generateCuttingContour(vector<QVector3D> cuttingContour){
 
         // Cylinder shape data
         Qt3DExtras::QCylinderMesh *cylinder = new Qt3DExtras::QCylinderMesh();
-        cylinder->setRadius(.2f);
+        cylinder->setRadius(.1f);
 
         cylinder->setLength(static_cast<float>(l));
         cylinder->setRings(100);
@@ -1599,9 +1631,17 @@ void GLModel::generateCuttingContour(vector<QVector3D> cuttingContour){
         cylinderTransform->setRotation(Qt3DCore::QTransform::fromAxesAndAngles(QVx,static_cast<float>(anglex), QVy, static_cast<float>(angley)));
         cylinderTransform->setTranslation(QVector3D(static_cast<float>(tx), static_cast<float>(ty), static_cast<float>(tz)));
 
-        Qt3DExtras::QDiffuseSpecularMaterial *cylinderMaterial = new Qt3DExtras::QDiffuseSpecularMaterial();
-        cylinderMaterial->setDiffuse(QColor(QRgb(0xffffff)));
+        Qt3DExtras::QPhongMaterial *cylinderMaterial = new Qt3DExtras::QPhongMaterial();
 
+        cylinderMaterial->setAmbient(QColor(QRgb(0x0086AA)));
+        cylinderMaterial->setDiffuse(QColor(QRgb(0x0086AA)));
+        cylinderMaterial->setSpecular(QColor(QRgb(0x0086AA)));
+        /*
+        cylinderMaterial->setAmbient(QColor(QRgb(0x004F6B)));
+        cylinderMaterial->setDiffuse(QColor(QRgb(0x004F6B)));
+        cylinderMaterial->setSpecular(QColor(QRgb(0x004F6B)));
+        */
+        cylinderMaterial->setShininess(0.0f);
         // Cylinder
         QEntity* m_cylinderEntity = new Qt3DCore::QEntity(this);
         m_cylinderEntity->addComponent(cylinder);
@@ -1749,15 +1789,15 @@ void GLModel::addCuttingPoint(QVector3D v){
     cuttingPoints.push_back(v);
 
     sphereMesh.push_back(new Qt3DExtras::QSphereMesh);
-    sphereMesh[sphereMesh.size()-1]->setRadius(0.5);
+    sphereMesh[sphereMesh.size()-1]->setRadius(0.4);
 
     sphereTransform.push_back(new Qt3DCore::QTransform);
     sphereTransform[sphereTransform.size()-1]->setTranslation(v + QVector3D(tmp.x(),tmp.y(), -mesh->z_min));
 
     sphereMaterial.push_back(new Qt3DExtras::QPhongMaterial());
-    sphereMaterial[sphereMaterial.size()-1]->setAmbient(QColor(QRgb(0x0049FF)));
-    sphereMaterial[sphereMaterial.size()-1]->setDiffuse(QColor(QRgb(0x0049FF)));
-    sphereMaterial[sphereMaterial.size()-1]->setSpecular(QColor(QRgb(0x0049FF)));
+    sphereMaterial[sphereMaterial.size()-1]->setAmbient(QColor(QRgb(0x000000)));
+    sphereMaterial[sphereMaterial.size()-1]->setDiffuse(QColor(QRgb(0x000000)));
+    sphereMaterial[sphereMaterial.size()-1]->setSpecular(QColor(QRgb(0x000000)));
     sphereMaterial[sphereMaterial.size()-1]->setShininess(0.0f);
 
     sphereObjectPicker.push_back(new Qt3DRender::QObjectPicker);

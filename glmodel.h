@@ -306,6 +306,7 @@ public slots:
     // Model Cut
     void removeCuttingContour();
     void generateCuttingContour(vector<QVector3D> cuttingContour);
+    void regenerateCuttingPoint(vector<QVector3D> cuttingContour);
     void generateClickablePlane();
     void generatePlane();
     void removePlane();
