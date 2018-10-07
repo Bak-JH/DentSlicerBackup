@@ -12,6 +12,8 @@ Item{
         id : window
         width: 1280
         height: 768
+        minimumWidth: 1500
+        minimumHeight: 960
         visible: false
 
         objectName: "mainWindow"

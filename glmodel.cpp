@@ -11,6 +11,7 @@
 #include <QtConcurrent/QtConcurrent>
 #include <QFuture>
 #include <QFileDialog>
+#include <iostream>
 
 int GLModel::globalID = 0;
 
@@ -91,12 +92,12 @@ GLModel::GLModel(QObject* mainWindow, QNode *parent, Mesh* loadMesh, QString fna
             && !EndsWith(filename.toStdString(), std::string("_left").c_str()) && !EndsWith(filename.toStdString(),  std::string("_right").c_str())
             && !EndsWith(filename.toStdString(),  std::string("_offset").c_str())){
         mesh = new Mesh();
-        loadMeshSTL(mesh, filename.toStdString().c_str());
+        loadMeshSTL(mesh, filename.toLocal8Bit().constData());
     } else if (filename != "" && (filename.contains(".obj")||filename.contains(".OBJ"))\
             && !EndsWith(filename.toStdString(), std::string("_left").c_str()) && !EndsWith(filename.toStdString(),  std::string("_right").c_str())
                && !EndsWith(filename.toStdString(),  std::string("_offset").c_str())){
         mesh = new Mesh();
-        loadMeshOBJ(mesh, filename.toStdString().c_str());
+        loadMeshOBJ(mesh, filename.toLocal8Bit().constData());
     } else {
         mesh = loadMesh;
     }

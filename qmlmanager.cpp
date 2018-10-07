@@ -12,6 +12,10 @@
 
 #include "qmlmanager.h"
 #include "lights.h"
+#include <iostream>
+#include <ctype.h>
+#include <QCoreApplication>
+#include <QTextStream>
 
 QmlManager::QmlManager(QObject *parent) : QObject(parent)
   ,layerViewFlags(LAYER_INFILL | LAYER_SUPPORTERS | LAYER_RAFT)
