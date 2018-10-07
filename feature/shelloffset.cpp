@@ -95,7 +95,7 @@ void shellOffset(GLModel* glmodel, float factor){
     */
 
     qmlManager->deleteModelFile(glmodel->ID);
-    qmlManager->createModelFile(offsetMesh, glmodel->filename+"_offset");
+    qmlManager->createModelFile(offsetMesh, glmodel->filename);
     // 승환 100%
     qmlManager->setProgress(1);
 
