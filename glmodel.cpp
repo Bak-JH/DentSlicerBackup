@@ -167,7 +167,7 @@ void GLModel::addMouseHandlers(){
 
     m_objectPicker = new Qt3DRender::QObjectPicker(this);
 
-    m_objectPicker->setHoverEnabled(true);
+    m_objectPicker->setHoverEnabled(false); // to reduce drag load
     //m_objectPicker->setDragEnabled(true);
     // add only m_objectPicker
     QObject::connect(m_objectPicker, SIGNAL(released(Qt3DRender::QPickEvent*)), this, SLOT(handlePickerClicked(Qt3DRender::QPickEvent*)));
@@ -486,7 +486,7 @@ void GLModel::updateModelMesh(bool shadowUpdate){
         break;
     case VIEW_MODE_SUPPORT:
         if( layerMesh != nullptr ) {
-            initialize(layerMesh->faces.size() + layerSupportMesh->faces.size());
+            initialize(layerMesh->faces.size() + layerSupportMesh->faces.size() + layerRaftMesh->faces.size());
             addVertices(layerMesh, false);
             addVertices(layerSupportMesh, false);
             addVertices(layerRaftMesh, false);
@@ -541,7 +541,18 @@ void GLModel::updateModelMesh(bool shadowUpdate){
         shadowModel->removeMouseHandlers();
         qmlManager->disconnectHandlers(this);
         GLModel* prevShadowModel = shadowModel;
-        shadowModel=new GLModel(this->mainWindow, this, mesh, filename, true);
+        switch( viewMode ) {
+            case VIEW_MODE_OBJECT:
+                shadowModel=new GLModel(this->mainWindow, this, mesh, filename, true);
+                break;
+            case VIEW_MODE_SUPPORT:
+                shadowModel=new GLModel(this->mainWindow, this, layerMesh, filename, true);
+                shadowModel->m_transform->setTranslation(shadowModel->m_transform->translation()+QVector3D(0,0,scfg->raft_thickness));
+                break;
+            case VIEW_MODE_LAYER:
+                shadowModel=new GLModel(this->mainWindow, this, mesh, filename, true);
+                break;
+        }
         /*float mesh_x_center = m_transform->translation().x()+(mesh->x_max +mesh->x_min)/2;
         float mesh_y_center = m_transform->translation().y()+(mesh->y_max +mesh->y_min)/2;
         float mesh_z_center = m_transform->translation().z()+(mesh->z_max +mesh->z_min)/2;
@@ -555,6 +566,7 @@ void GLModel::updateModelMesh(bool shadowUpdate){
             qmlManager->connectHandlers(this);
         //shadowModel->m_transform->setTranslation(translation);
         QObject::connect(shadowModel, SIGNAL(modelSelected(int)), qmlManager, SLOT(modelSelected(int)));
+        qDebug() << "updated shadow model";
     }
     updateLock = false;
     qDebug() << this << "released lock";
@@ -1167,7 +1179,7 @@ void GLModel::handlePickerClicked(QPickEvent *pick)
     }
 
     QPickTriangleEvent *trianglePick = static_cast<QPickTriangleEvent*>(pick);
-
+    qDebug() << "trianglePick : " << trianglePick;
     if (labellingActive && trianglePick && trianglePick->localIntersection() != QVector3D(0,0,0)) {
         MeshFace shadow_meshface = mesh->faces[trianglePick->triangleIndex()];
 
@@ -1245,7 +1257,7 @@ void GLModel::handlePickerClicked(QPickEvent *pick)
         }
     }
 
-    if (extensionActive && trianglePick){
+    if (extensionActive && trianglePick  && trianglePick->localIntersection() != QVector3D(0,0,0)){
         MeshFace shadow_meshface = mesh->faces[trianglePick->triangleIndex()];
         qDebug() << "found parent meshface" << shadow_meshface.parent_idx;
         parentModel->uncolorExtensionFaces();
@@ -1276,7 +1288,7 @@ void GLModel::handlePickerClicked(QPickEvent *pick)
         // emit hollowShellSelect();
     }
 
-    if (layflatActive){
+    if (layflatActive && trianglePick && trianglePick->localIntersection() != QVector3D(0,0,0)){
         /*
         m_objectPicker->setEnabled(false);
         this->parentModel->m_objectPicker = new Qt3DRender::QObjectPicker(this->parentModel);
@@ -1295,7 +1307,8 @@ void GLModel::handlePickerClicked(QPickEvent *pick)
         parentModel->colorExtensionFaces();
     }
 
-    if (manualSupportActive && trianglePick){
+    if (manualSupportActive && trianglePick  && trianglePick->localIntersection() != QVector3D(0,0,0)){
+        qDebug() << "manual support handle picker clicked";
         MeshFace shadow_meshface = mesh->faces[trianglePick->triangleIndex()];
         qDebug() << "found parent meshface" << shadow_meshface.parent_idx;
         parentModel->uncolorExtensionFaces();
@@ -2448,8 +2461,6 @@ void GLModel::closeExtension(){
 
 void GLModel::openManualSupport(){
     manualSupportActive = true;
-    // change to support view
-    QMetaObject::invokeMethod(qmlManager->leftTabViewMode, "setViewMode", Q_ARG(QVariant, 1));
     qDebug() << "open manual support";
 }
 
