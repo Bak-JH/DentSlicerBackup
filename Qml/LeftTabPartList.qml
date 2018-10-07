@@ -50,11 +50,11 @@ Rectangle {
             anchors.rightMargin: 12
 
             MouseArea {
-                    anchors.fill: parent
-                    hoverEnabled : true
-                    onEntered : qm.setHandCursor();
-                    onExited : qm.resetCursor();
-                    onClicked: { ltpl.state == 'open' ? ltpl.state = "close" : ltpl.state = 'open';}
+                anchors.fill: parent
+                hoverEnabled : true
+                onEntered : qm.setHandCursor();
+                onExited : qm.resetCursor();
+                onClicked: { ltpl.state == 'open' ? ltpl.state = "close" : ltpl.state = 'open';}
             }
         }
 
