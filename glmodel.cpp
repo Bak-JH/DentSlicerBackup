@@ -382,6 +382,8 @@ void GLModel::loadUndoState(){
     } else {
         updateLock = false;
         qDebug() << "no undo state";
+        int saveCnt = (mesh->faces.size()>100000)? 3: 10;
+        qmlManager->openResultPopUp("Undo state doesn't exist.","","Maximum "+QVariant(saveCnt).toString().toStdString()+" states are saved for this model.");
     }
 }
 
