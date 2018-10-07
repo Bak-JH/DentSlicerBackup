@@ -568,7 +568,6 @@ void GLModel::updateModelMesh(bool shadowUpdate){
             qmlManager->connectHandlers(this);
         //shadowModel->m_transform->setTranslation(translation);
         QObject::connect(shadowModel, SIGNAL(modelSelected(int)), qmlManager, SLOT(modelSelected(int)));
-        qDebug() << "updated shadow model";
     }
     updateLock = false;
     qDebug() << this << "released lock";
