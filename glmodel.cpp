@@ -2471,6 +2471,25 @@ void GLModel::closeManualSupport(){
     qDebug() << "close manual support";
 }
 
+void GLModel::generateManualSupport(){
+    qDebug() << "generateManual support called";
+    if (targetMeshFace == NULL)
+        return;
+    //saveUndoState();
+    qDebug() << "total z_min "<< layerSupportMesh->z_min;
+    QVector3D t = m_transform->translation();
+    t.setZ(mesh->z_min+scfg->raft_thickness);
+    QVector3D targetPosition = mesh->idx2MV(targetMeshFace->mesh_vertex[0]).position- t;
+    OverhangPoint* targetOverhangPosition = new OverhangPoint(targetPosition.x()*scfg->resolution,
+                                                              targetPosition.y()*scfg->resolution,
+                                                              targetPosition.z()*scfg->resolution,
+                                                              scfg->default_support_radius);
+
+    generateSupporter(layerSupportMesh, targetOverhangPosition, nullptr, nullptr, layerSupportMesh->z_min);
+    targetMeshFace = NULL;
+    emit _updateModelMesh(true);
+}
+
 void GLModel::openScale(){
     QMetaObject::invokeMethod(qmlManager->scalePopup, "updateSizeInfo", Q_ARG(QVariant, parentModel->mesh->x_max-parentModel->mesh->x_min), Q_ARG(QVariant, parentModel->mesh->y_max-parentModel->mesh->y_min), Q_ARG(QVariant, parentModel->mesh->z_max-parentModel->mesh->z_min));
 }

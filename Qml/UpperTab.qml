@@ -1559,12 +1559,17 @@ Rectangle {
 
             signal openManualSupport();
             signal closeManualSupport();
+            signal generateManualSupport();
 
             function onApplyFinishButton(){
                 popup_manualSupport.colorApplyFinishButton(0)
             }
             function offApplyFinishButton(){
                 popup_manualSupport.colorApplyFinishButton(0);
+            }
+            onApplyClicked: {
+                console.log("manual Support");
+                generateManualSupport();
             }
         }
 

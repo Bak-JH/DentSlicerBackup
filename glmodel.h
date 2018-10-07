@@ -349,6 +349,7 @@ public slots:
     // Manual Support
     void openManualSupport();
     void closeManualSupport();
+    void generateManualSupport();
 
     // Model Mesh info update
     void updateModelMesh(bool);

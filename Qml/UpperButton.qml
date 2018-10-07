@@ -18,10 +18,6 @@ Rectangle{
     signal buttonClicked()
     function do_buttonclick(iconText){
 
-        if( qm.getViewMode() !== 0  && iconText !== "Support") {
-            return;
-        }
-
         switch(iconText){
         case "Move":
             buttonClicked();
@@ -174,6 +170,9 @@ Rectangle{
         }
 
         onClicked:{
+            if( qm.getViewMode() !== 0  && iconText !== "Support") {
+                return;
+            }
 
             if (parent.state == "inactive"){
                 all_off();
