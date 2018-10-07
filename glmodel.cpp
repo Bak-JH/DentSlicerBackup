@@ -89,13 +89,11 @@ GLModel::GLModel(QObject* mainWindow, QNode *parent, Mesh* loadMesh, QString fna
 
     this->changecolor(0);
     if (filename != "" && (filename.contains(".stl")||filename.contains(".STL"))\
-            && !EndsWith(filename.toStdString(), std::string("_left").c_str()) && !EndsWith(filename.toStdString(),  std::string("_right").c_str())
-            && !EndsWith(filename.toStdString(),  std::string("_offset").c_str())){
+            && loadMesh == nullptr){
         mesh = new Mesh();
         loadMeshSTL(mesh, filename.toLocal8Bit().constData());
     } else if (filename != "" && (filename.contains(".obj")||filename.contains(".OBJ"))\
-            && !EndsWith(filename.toStdString(), std::string("_left").c_str()) && !EndsWith(filename.toStdString(),  std::string("_right").c_str())
-               && !EndsWith(filename.toStdString(),  std::string("_offset").c_str())){
+            && loadMesh == nullptr){
         mesh = new Mesh();
         loadMeshOBJ(mesh, filename.toLocal8Bit().constData());
     } else {
@@ -1928,24 +1926,35 @@ void GLModel::modelCut(){
 }
 
 void GLModel::generateRLModel(){
-    if (lmesh->faces.size() != 0)
-        qmlManager->createModelFile(lmesh, filename+"_left");
-
+    if (lmesh->faces.size() != 0){
+        qmlManager->createModelFile(lmesh, filename+"_l");
+        qDebug() << "leftmodel created";
+    }
     // 승환 70%
     qmlManager->setProgress(0.72);
-    if (rmesh->faces.size() != 0)
-        qmlManager->createModelFile(rmesh, filename+"_right");
+    if (rmesh->faces.size() != 0){
+        qmlManager->createModelFile(rmesh, filename+"_r");
+        qDebug() << "rightmodel created";
+    }
+
+    qDebug() << "finding models";
 
     // 승환 90%
-    GLModel* leftmodel = qmlManager->findGLModelByName(filename+"_left");
-    GLModel* rightmodel = qmlManager->findGLModelByName(filename+"_right");
-    leftmodel->twinModel = rightmodel;
-    rightmodel->twinModel = leftmodel;
+    GLModel* leftmodel = qmlManager->findGLModelByName(filename+"_l");
+    GLModel* rightmodel = qmlManager->findGLModelByName(filename+"_r");
+    qDebug() << "found models : " << leftmodel << rightmodel;
+    if (leftmodel != nullptr && rightmodel != nullptr){
+        leftmodel->twinModel = rightmodel;
+        rightmodel->twinModel = leftmodel;
+    }
+
     qmlManager->setProgress(0.91);
 
     if (shadowModel->shellOffsetActive){
-        shellOffset(leftmodel, (float)shellOffsetFactor);
-        qmlManager->deleteModelFile(rightmodel->ID);
+        if (leftmodel != nullptr)
+            shellOffset(leftmodel, (float)shellOffsetFactor);
+        if (rightmodel != nullptr)
+            qmlManager->deleteModelFile(rightmodel->ID);
         QMetaObject::invokeMethod(qmlManager->boxUpperTab, "all_off");
     }
 
@@ -2541,6 +2550,7 @@ void GLModel::closeScale(){
 // for shell offset
 void GLModel::generateShellOffset(double factor){
     //saveUndoState();
+    qDebug() << "generate shell Offset";
     qmlManager->openProgressPopUp();
     QString original_filename = filename;
 
