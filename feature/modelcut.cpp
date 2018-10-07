@@ -274,7 +274,7 @@ void cutAway(Mesh* leftMesh, Mesh* rightMesh, Mesh* mesh, vector<QVector3D> cutt
                     Plane plane;
                     plane.push_back(enterQV3);
                     plane.push_back(cuttingContour[0].position);
-                    plane.push_back(QVector3D(enterQV3.x(),enterQV3.y(),1));
+                    plane.push_back(QVector3D(enterQV3.x(),enterQV3.y(),300));
                     if (isLeftToPlane(plane, mv)) // if one vertex is left to plane, append to left vertices part
                         faceLeftToPlane_int = true;
                     else {
@@ -302,7 +302,7 @@ void cutAway(Mesh* leftMesh, Mesh* rightMesh, Mesh* mesh, vector<QVector3D> cutt
                     Plane plane;
                     plane.push_back(exitQV3);
                     plane.push_back(cuttingContour[cuttingContour.size()-1].position);
-                    plane.push_back(QVector3D(exitQV3.x(),exitQV3.y(),1));
+                    plane.push_back(QVector3D(exitQV3.x(),exitQV3.y(),300));
                     if (isLeftToPlane(plane, mv)) // if one vertex is left to plane, append to left vertices part
                         faceLeftToPlane_int = true;
                     else {

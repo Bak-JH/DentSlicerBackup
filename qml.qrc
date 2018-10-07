@@ -58,5 +58,6 @@
         <file>shaders/layerview_infill.vert</file>
         <file>shaders/layerview_infill.frag</file>
         <file>Resource/mesh/plate_logo.stl</file>
+        <file>Resource/mesh/boundedBox3.stl</file>
     </qresource>
 </RCC>

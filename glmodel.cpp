@@ -1079,11 +1079,13 @@ void GLModel::handlePickerClickedFreeCutSphere(Qt3DRender::QPickEvent* pick)
     int minIdx = 0;
     float min = world2Screen(cuttingPoints[0]).distanceToPoint(pickPosition);
     for (int i=0; i<cuttingPoints.size(); i++){
+
         if (world2Screen(cuttingPoints[i]).distanceToPoint(pickPosition) < min){
             minIdx = i;
             min = world2Screen(cuttingPoints[i]).distanceToPoint(pickPosition);
         }
     }
+    qDebug() << "min idx  " << minIdx;
     removeCuttingPoint(minIdx);
     removeCuttingContour();
     if (cuttingPoints.size() >=2){
@@ -1253,15 +1255,6 @@ void GLModel::handlePickerClicked(QPickEvent *pick)
             if (parentModel->cuttingPoints.size() >=2){
                 qDebug() << "TTTTTTTTTTTTTTTTt";
                 parentModel->generateCuttingContour(parentModel->cuttingPoints);
-
-                int temp = cuttingPoints.size();
-                /*
-                for (int i=0 ;  i<temp; i++){
-                    addCuttingPoint(sphereTransform[i]->translation());
-                    removeCuttingPoint(0);
-                }
-                */
-
                 parentModel->regenerateCuttingPoint(parentModel->cuttingPoints);
             }
 
@@ -1578,17 +1571,21 @@ void GLModel::removeCuttingContour(){
     cuttingContourCylinders.clear();
 }
 void GLModel::regenerateCuttingPoint(vector<QVector3D> points){
-    int temp = cuttingPoints.size();
-
-
+    return;
+    int temp = points.size();
     /* This function is working with strange logic(make 3 times more point and delete ),  fix it later */
   \
 
-    for (int i=0; i<temp*3; i++){
-        addCuttingPoint((QVector3D)sphereTransform[i]->translation());
+    for (int i=0; i<temp; i++){
+        QVector3D temp = points[i] + QVector3D(0,0,110);
+
+        addCuttingPoint(temp);
+        //addCuttingPoint((QVector3D)sphereTransform[i]->translation());
+
+        qDebug() << "tttt    " << points[i] << (QVector3D)sphereTransform[i]->translation();
     }
 
-    for (int i=0; i<temp*3; i++){
+    for (int i=0; i<temp; i++){
         qDebug() << "remove";
         removeCuttingPoint(0);
     }
@@ -1596,6 +1593,10 @@ void GLModel::regenerateCuttingPoint(vector<QVector3D> points){
 }
 
 void GLModel::generateCuttingContour(vector<QVector3D> cuttingContour){
+    for (int cvi=0; cvi<cuttingContour.size(); cvi++){
+        qDebug() << "pos   " << cvi;
+    }
+
     for (int cvi=0; cvi<cuttingContour.size()-1; cvi++){
         QVector3D to = cuttingContour[cvi];
         to = QVector3D(to.x(), to.y(), 100.0f);
@@ -1628,7 +1629,8 @@ void GLModel::generateCuttingContour(vector<QVector3D> cuttingContour){
         Qt3DCore::QTransform *cylinderTransform = new Qt3DCore::QTransform();
         cylinderTransform->setScale(1.0f);
         cylinderTransform->setRotation(Qt3DCore::QTransform::fromAxesAndAngles(QVx,static_cast<float>(anglex), QVy, static_cast<float>(angley)));
-        cylinderTransform->setTranslation(QVector3D(static_cast<float>(tx), static_cast<float>(ty), static_cast<float>(tz)));
+        //cylinderTransform->setTranslation(QVector3D(static_cast<float>(tx), static_cast<float>(ty), static_cast<float>(tz)));
+        cylinderTransform->setTranslation(QVector3D(static_cast<float>(tx), static_cast<float>(ty), 100));
 
         Qt3DExtras::QPhongMaterial *cylinderMaterial = new Qt3DExtras::QPhongMaterial();
 
@@ -1791,7 +1793,9 @@ void GLModel::addCuttingPoint(QVector3D v){
     sphereMesh[sphereMesh.size()-1]->setRadius(0.4);
 
     sphereTransform.push_back(new Qt3DCore::QTransform);
-    sphereTransform[sphereTransform.size()-1]->setTranslation(v + QVector3D(tmp.x(),tmp.y(), -mesh->z_min));
+    //sphereTransform[sphereTransform.size()-1]->setTranslation(v + QVector3D(tmp.x(),tmp.y(), -mesh->z_min));
+    //v = QVector3D(v.x(),v.y(),0);
+    sphereTransform[sphereTransform.size()-1]->setTranslation(v + QVector3D(tmp.x(),tmp.y(), 200));
 
     sphereMaterial.push_back(new Qt3DExtras::QPhongMaterial());
     sphereMaterial[sphereMaterial.size()-1]->setAmbient(QColor(QRgb(0x000000)));
