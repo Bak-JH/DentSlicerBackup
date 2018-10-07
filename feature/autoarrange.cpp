@@ -1,5 +1,5 @@
 #include "autoarrange.h"
-#define ANGLE_UNIT 270
+#define ANGLE_UNIT 45
 #define STAGE_WIDTH 95000
 #define STAGE_HEIGHT 75000
 #define OFFSET 2000
@@ -13,9 +13,11 @@ autoarrange::autoarrange()
 Paths autoarrange::getMeshRecArea(Mesh& mesh){//getting rectangle area of mesh in XY Plane, OFFSET included
     Paths outline;
     Path vertices;//all vertices in mesh
+    Path vertices45rot;//45 degree check
     for(MeshVertex vertex : mesh.vertices){
         QVector3D v_pos = vertex.position;
         mesh.addPoint(v_pos.x(), v_pos.y(), &vertices);
+        mesh.addPoint(round(v_pos.x()*cosf(M_PI/4) - v_pos.y()*sinf(M_PI/4)), round(v_pos.x()*sinf(M_PI/4) + v_pos.y()*cosf(M_PI/4)), &vertices45rot);//45 degree check
     }
     int max_x = getMaxX(vertices) + OFFSET;
     int max_y = getMaxY(vertices) + OFFSET;
@@ -25,7 +27,27 @@ Paths autoarrange::getMeshRecArea(Mesh& mesh){//getting rectangle area of mesh i
                   IntPoint(min_x, max_y),
                   IntPoint(min_x, min_y),
                   IntPoint(max_x, min_y)};
-    outline.push_back(recArea);
+    int tmp = (max_x-min_x)*(max_y-min_y);
+
+    max_x = getMaxX(vertices45rot) + OFFSET;
+    max_y = getMaxY(vertices45rot) + OFFSET;
+    min_x = getMinX(vertices45rot) - OFFSET;
+    min_y = getMinY(vertices45rot) - OFFSET;
+    Path recArea45rot = {IntPoint(max_x, max_y),
+                        IntPoint(min_x, max_y),
+                        IntPoint(min_x, min_y),
+                        IntPoint(max_x, min_y)};
+    int tmp45rot = (max_x-min_x)*(max_y-min_y);
+
+    if(tmp<=tmp45rot){
+        outline.push_back(recArea);
+
+    }else{
+        outline.push_back(recArea45rot);
+        outline = rotatePaths(outline,-45);
+    }
+
+    //outline.push_back(recArea);
     /**/qDebug() << "got MeshRecArea";
     /**/debugPaths(outline);
     return outline;
