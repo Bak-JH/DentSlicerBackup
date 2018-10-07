@@ -2475,8 +2475,6 @@ void GLModel::generateManualSupport(){
     qDebug() << "generateManual support called";
     if (targetMeshFace == NULL)
         return;
-    //saveUndoState();
-    qDebug() << "total z_min "<< layerSupportMesh->z_min;
     QVector3D t = m_transform->translation();
     t.setZ(mesh->z_min+scfg->raft_thickness);
     QVector3D targetPosition = mesh->idx2MV(targetMeshFace->mesh_vertex[0]).position- t;
