@@ -13,7 +13,7 @@ Entity{
 
     Mesh{
         id: boundedBoxMesh
-        source: "qrc:/Resource/mesh/boundedBox2.stl"
+        source: "qrc:/Resource/mesh/boundedBox3.stl"
     }
 
     Transform {
