@@ -583,12 +583,11 @@ Rectangle {
             iconSource1: "qrc:/Resource/upper_feedback.png"
             iconSource2: "qrc:/Resource/upper2_feedback.png"
             iconText: qsTr("Feedback")
-            MouseArea{
-                anchors.fill: parent
-                onClicked:{
-                    all_off();
-                    feedbackPopUp.visible = true;
-                }
+            onButtonClicked:{
+                if(state == "active")
+                    settingPopup.visible = true
+                else
+                    settingPopup.visible = false
             }
         }
 

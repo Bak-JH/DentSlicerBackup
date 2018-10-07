@@ -21,6 +21,13 @@
 #include "utils/httpreq.h"
 #include <QKeyboardHandler>
 
+#define VIEW_MODE_OBJECT 0
+#define VIEW_MODE_SUPPORT 1
+#define VIEW_MODE_LAYER 2
+
+#define LAYER_INFILL 0x01
+#define LAYER_SUPPORTERS 0x02
+#define LAYER_RAFT 0x04
 class QmlManager : public QObject
 {
     Q_OBJECT

@@ -1378,8 +1378,7 @@ Rectangle {
                 console.log("content width : ");
                 console.log(hiddenText.text.length);
                 console.log(hiddenText.contentWidth);
-                sendTextChanged(text, hiddenText.contentWidth);
-                //labelTextChanged(text, hiddenText.contentWidth);
+                labelTextChanged(text, hiddenText.contentWidth);
                 //sendTextChanged(text, hiddenText.text.length)
             }
         }

@@ -120,8 +120,9 @@ Rectangle {
                     }
                 }
                 RadioButton {
-//                    text: "Support View"
-                    id: radio_SupportView
+                    id: viewSupportButton
+                    objectName: "viewSupportButton"
+                    text: "Support View"
                     exclusiveGroup: viewModeGroup
                     style: RadioButtonStyle {
                         indicator: Rectangle {
@@ -158,7 +159,7 @@ Rectangle {
                 RadioButton {
                     //text: "Layer View"
                     exclusiveGroup: viewModeGroup
-                    id: radio_LayerView
+                    enabled: false
                     style: RadioButtonStyle {
                         indicator: Rectangle {
                             implicitWidth: 16

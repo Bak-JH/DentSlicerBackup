@@ -93,8 +93,20 @@ int main(int argc, char **argv)
     splash->close();
 
     qmlManager->mainWindow->setProperty("visible",true);
-//    qmlManager->loginWindow->setProperty("visible",false);
+//    qmlManager->loginWindow->setProperty("visible",true);
+    QSurfaceFormat format;
+    format.setMajorVersion(3);
+    format.setMinorVersion(1);
+    format.setProfile(QSurfaceFormat::CoreProfile);
 
+    QOpenGLContext gl_ctx;
+    gl_ctx.setFormat(format);
+    if (!gl_ctx.create())
+      throw std::runtime_error("context creation failed");
+
+    QOffscreenSurface surface;
+    surface.create();
+    gl_ctx.makeCurrent(&surface);
 //    exceptionFilter();
     return app.exec();
 }
