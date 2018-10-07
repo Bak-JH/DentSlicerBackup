@@ -118,6 +118,9 @@ void QmlManager::initializeUI(QQmlApplicationEngine* e){
     // shell offset components
     shelloffsetPopup = FindItemByName(engine, "shelloffsetPopup");
 
+    // manual support components
+    manualSupportPopup = FindItemByName(engine, "manualSupportPopup");
+
     // repair components
     repairPopup = FindItemByName(engine, "repairPopup");
 
@@ -359,6 +362,11 @@ void QmlManager::disconnectHandlers(GLModel* glmodel){
     QObject::disconnect(shelloffsetPopup, SIGNAL(shellOffset(double)), glmodel, SLOT(generateShellOffset(double)));
     QObject::disconnect(shelloffsetPopup, SIGNAL(resultSliderValueChanged(double)), glmodel->shadowModel, SLOT(getSliderSignal(double)));
 
+    // manual support popup codes
+    QObject::disconnect(manualSupportPopup, SIGNAL(openManualSupport()), glmodel->shadowModel, SLOT(openManualSupport()));
+    QObject::disconnect(manualSupportPopup, SIGNAL(closeManualSupport()), glmodel->shadowModel, SLOT(closeManualSupport()));
+    QObject::disconnect(manualSupportPopup, SIGNAL(generateManualSupport()), glmodel, SLOT(generateManualSupport()));
+
 
     // auto Repair popup codes
     QObject::disconnect(repairPopup, SIGNAL(runFeature(int)), glmodel->ft, SLOT(setTypeAndStart(int)));
@@ -459,6 +467,10 @@ void QmlManager::connectHandlers(GLModel* glmodel){
     QObject::connect(shelloffsetPopup, SIGNAL(shellOffset(double)), glmodel, SLOT(generateShellOffset(double)));
     QObject::connect(shelloffsetPopup, SIGNAL(resultSliderValueChanged(double)), glmodel->shadowModel, SLOT(getSliderSignal(double)));
 
+    // manual support popup codes
+    QObject::connect(manualSupportPopup, SIGNAL(openManualSupport()), glmodel->shadowModel, SLOT(openManualSupport()));
+    QObject::connect(manualSupportPopup, SIGNAL(closeManualSupport()), glmodel->shadowModel, SLOT(closeManualSupport()));
+    QObject::connect(manualSupportPopup, SIGNAL(generateManualSupport()), glmodel, SLOT(generateManualSupport()));
 
     // auto Repair popup codes
     QObject::connect(repairPopup, SIGNAL(runFeature(int)), glmodel->ft, SLOT(setTypeAndStart(int)));
@@ -948,6 +960,13 @@ void QmlManager::extensionSelect(){
 }
 void QmlManager::extensionUnSelect(){
     QMetaObject::invokeMethod(extensionPopup,"offApplyFinishButton");
+}
+
+void QmlManager::manualSupportSelect(){
+    QMetaObject::invokeMethod(manualSupportPopup,"onApplyFinishButton");
+}
+void QmlManager::manualSupportUnselect(){
+    QMetaObject::invokeMethod(manualSupportPopup,"offApplyFinishButton");
 }
 
 void QmlManager::selectPart(int ID){
