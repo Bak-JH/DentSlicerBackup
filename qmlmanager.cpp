@@ -245,6 +245,7 @@ void QmlManager::openModelFile(QString fname){
     if (glmodels.size() >= 2)
         openArrange();
     //runArrange();
+    QApplication::setOverrideCursor(QCursor(Qt::ArrowCursor));
 }
 
 void QmlManager::checkModelFile(int ID){
