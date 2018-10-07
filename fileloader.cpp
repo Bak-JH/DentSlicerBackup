@@ -2,6 +2,7 @@
 #include <QCoreApplication>
 #include <QDebug>
 #include <QFile>
+#include <iostream>
 
 FileLoader::FileLoader()
 {
