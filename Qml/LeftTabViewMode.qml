@@ -17,6 +17,18 @@ Rectangle {
         viewObjectButton.checked = true;
     }
 
+    function setViewMode(mode){
+        viewObjectButton.checked = false;
+        viewSupportButton.checked = false;
+        viewLayerButton.checked = false;
+        if (mode === 0)
+            viewObjectButton.checked = true;
+        else if (mode === 1)
+            viewSupportButton.checked = true;
+        else if (mode === 2)
+            viewLayerButton.checked = true;
+    }
+
     function setEnable(enable) {
         viewObjectButton.checked = true;
         viewSupportButton.enabled = enable;

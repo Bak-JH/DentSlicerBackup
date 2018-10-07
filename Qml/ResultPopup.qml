@@ -109,7 +109,7 @@ Rectangle {
                 }
                 onReleased: {
                     closePopUp();
-                    if(mid_text.includes("at least one model"))
+                    if(mid_text.includes("at least one model") || mid_text.includes("change to"))
                         uppertab.all_off()
                 }
             }

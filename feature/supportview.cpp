@@ -70,7 +70,7 @@ void generateFace(Mesh* mesh, Path path, float z) {
     }
 }
 
-void generateSupporter(Mesh* mesh, OverhangPoint *point, OverhangPoint *parent, vector<OverhangPoint *> *points) {
+void generateSupporter(Mesh* mesh, OverhangPoint *point, OverhangPoint *parent, vector<OverhangPoint *> *points, float support_z_min) {
 
     qDebug() << point << point->target_branching_overhang_point << parent;
     qDebug() << "height:" << point->height <<
@@ -81,7 +81,7 @@ void generateSupporter(Mesh* mesh, OverhangPoint *point, OverhangPoint *parent, 
     float radius = (float)point->radius / scfg->resolution;
     QVector3D position = QVector3D((float)point->position.X / scfg->resolution,
             (float)point->position.Y / scfg->resolution,
-                                   0);
+                                   support_z_min);
             //(float)(point->position.Z - (int)point->height * 1000) / scfg->resolution);
     QVector3D positionTop = QVector3D((float)point->position.X / scfg->resolution,
             (float)point->position.Y / scfg->resolution,
@@ -106,8 +106,8 @@ void generateSupporter(Mesh* mesh, OverhangPoint *point, OverhangPoint *parent, 
     }
 
     float coneHeight = 1.4;
-    QVector3D positionConeTop = QVector3D(positionTop.x(),positionTop.y(),max(positionTop.z(),coneHeight));
-    positionTop = QVector3D(positionTop.x(),positionTop.y(),max(positionTop.z()-coneHeight, 0.0f));
+    QVector3D positionConeTop = QVector3D(positionTop.x(),positionTop.y(), max(positionTop.z(),support_z_min + coneHeight));
+    positionTop = QVector3D(positionTop.x(),positionTop.y(), max(positionTop.z()-coneHeight, support_z_min));
 
     generateCylinder(mesh, position, positionTop, radius);
     generateCustomCylinder(mesh, positionTop, positionConeTop, 0.1, radius);
@@ -122,7 +122,7 @@ void generateSupporter(Mesh* mesh, OverhangPoint *point, OverhangPoint *parent, 
         points->push_back(point);
 
         if( std::find(points->begin(), points->end(), point) == points->end() ) {
-            generateSupporter(mesh, point->target_branching_overhang_point, point, points);
+            generateSupporter(mesh, point->target_branching_overhang_point, point, points, support_z_min);
         }
 
         if( parent == nullptr ) {

@@ -167,7 +167,7 @@ void GLModel::addMouseHandlers(){
 
     m_objectPicker = new Qt3DRender::QObjectPicker(this);
 
-    m_objectPicker->setHoverEnabled(true);
+    m_objectPicker->setHoverEnabled(false); // to reduce drag load
     //m_objectPicker->setDragEnabled(true);
     // add only m_objectPicker
     QObject::connect(m_objectPicker, SIGNAL(released(Qt3DRender::QPickEvent*)), this, SLOT(handlePickerClicked(Qt3DRender::QPickEvent*)));
@@ -234,7 +234,7 @@ void GLModel::changecolor(int mode){
 bool GLModel::modelSelectChangable(){
     bool result = false;
     qDebug() << cutActive << extensionActive << labellingActive << layflatActive << isMoved;
-    if (!cutActive && !extensionActive && !labellingActive && !layflatActive && !isMoved)
+    if (!cutActive && !extensionActive && !labellingActive && !layflatActive && !manualSupportActive && !isMoved)
         result = true;
 
     return result;
@@ -382,6 +382,8 @@ void GLModel::loadUndoState(){
     } else {
         updateLock = false;
         qDebug() << "no undo state";
+        int saveCnt = (mesh->faces.size()>100000)? 3: 10;
+        qmlManager->openResultPopUp("Undo state doesn't exist.","","Maximum "+QVariant(saveCnt).toString().toStdString()+" states are saved for this model.");
     }
 }
 
@@ -458,6 +460,7 @@ void GLModel::copyModelAttributeFrom(GLModel* from){
     hollowShellActive = from->hollowShellActive;
     shellOffsetActive = from->shellOffsetActive;
     layflatActive = from->layflatActive;
+    manualSupportActive = from->manualSupportActive;
     layerViewActive = from->layerViewActive;
     supportViewActive = from->supportViewActive;
 }
@@ -485,7 +488,7 @@ void GLModel::updateModelMesh(bool shadowUpdate){
         break;
     case VIEW_MODE_SUPPORT:
         if( layerMesh != nullptr ) {
-            initialize(layerMesh->faces.size() + layerSupportMesh->faces.size());
+            initialize(layerMesh->faces.size() + layerSupportMesh->faces.size() + layerRaftMesh->faces.size());
             addVertices(layerMesh, false);
             addVertices(layerSupportMesh, false);
             addVertices(layerRaftMesh, false);
@@ -540,7 +543,18 @@ void GLModel::updateModelMesh(bool shadowUpdate){
         shadowModel->removeMouseHandlers();
         qmlManager->disconnectHandlers(this);
         GLModel* prevShadowModel = shadowModel;
-        shadowModel=new GLModel(this->mainWindow, this, mesh, filename, true);
+        switch( viewMode ) {
+            case VIEW_MODE_OBJECT:
+                shadowModel=new GLModel(this->mainWindow, this, mesh, filename, true);
+                break;
+            case VIEW_MODE_SUPPORT:
+                shadowModel=new GLModel(this->mainWindow, this, layerMesh, filename, true);
+                shadowModel->m_transform->setTranslation(shadowModel->m_transform->translation()+QVector3D(0,0,scfg->raft_thickness));
+                break;
+            case VIEW_MODE_LAYER:
+                shadowModel=new GLModel(this->mainWindow, this, mesh, filename, true);
+                break;
+        }
         /*float mesh_x_center = m_transform->translation().x()+(mesh->x_max +mesh->x_min)/2;
         float mesh_y_center = m_transform->translation().y()+(mesh->y_max +mesh->y_min)/2;
         float mesh_z_center = m_transform->translation().z()+(mesh->z_max +mesh->z_min)/2;
@@ -710,7 +724,7 @@ void featureThread::run(){
 
                 break;
             }
-        case ftrSupport:
+        case ftrManualSupport:
             {
                 break;
             }
@@ -1156,7 +1170,7 @@ void GLModel::handlePickerClicked(QPickEvent *pick)
 
     }
 
-    if (!cutActive && !extensionActive && !labellingActive && !layflatActive && !isMoved)// && !layerViewActive && !supportViewActive)
+    if (!cutActive && !extensionActive && !labellingActive && !layflatActive && !manualSupportActive && !isMoved)// && !layerViewActive && !supportViewActive)
         emit modelSelected(parentModel->ID);
 
     qDebug() << "model selected emit" << pick->position() << parentModel->ID;
@@ -1166,7 +1180,7 @@ void GLModel::handlePickerClicked(QPickEvent *pick)
     }
 
     QPickTriangleEvent *trianglePick = static_cast<QPickTriangleEvent*>(pick);
-
+    qDebug() << "trianglePick : " << trianglePick;
     if (labellingActive && trianglePick && trianglePick->localIntersection() != QVector3D(0,0,0)) {
         MeshFace shadow_meshface = mesh->faces[trianglePick->triangleIndex()];
 
@@ -1244,7 +1258,7 @@ void GLModel::handlePickerClicked(QPickEvent *pick)
         }
     }
 
-    if (extensionActive && trianglePick){
+    if (extensionActive && trianglePick  && trianglePick->localIntersection() != QVector3D(0,0,0)){
         MeshFace shadow_meshface = mesh->faces[trianglePick->triangleIndex()];
         qDebug() << "found parent meshface" << shadow_meshface.parent_idx;
         parentModel->uncolorExtensionFaces();
@@ -1275,7 +1289,7 @@ void GLModel::handlePickerClicked(QPickEvent *pick)
         // emit hollowShellSelect();
     }
 
-    if (layflatActive){
+    if (layflatActive && trianglePick && trianglePick->localIntersection() != QVector3D(0,0,0)){
         /*
         m_objectPicker->setEnabled(false);
         this->parentModel->m_objectPicker = new Qt3DRender::QObjectPicker(this->parentModel);
@@ -1291,12 +1305,17 @@ void GLModel::handlePickerClicked(QPickEvent *pick)
         emit layFlatSelect();
         parentModel->targetMeshFace = &parentModel->mesh->faces[shadow_meshface.parent_idx];
         parentModel->generateColorAttributes();
-        /*qDebug() << trianglePick->localIntersection() \
-                 << parentModel->mesh->idx2MV(parentModel->targetMeshFace->mesh_vertex[0]).position\
-                << parentModel->mesh->idx2MV(parentModel->targetMeshFace->mesh_vertex[1]).position\
-                << parentModel->mesh->idx2MV(parentModel->targetMeshFace->mesh_vertex[2]).position;
-        */
-        // << parentModel->targetMeshFace->mesh_vertex[1] << parentModel->targetMeshFace->mesh_vertex[2];
+        parentModel->colorExtensionFaces();
+    }
+
+    if (manualSupportActive && trianglePick  && trianglePick->localIntersection() != QVector3D(0,0,0)){
+        qDebug() << "manual support handle picker clicked";
+        MeshFace shadow_meshface = mesh->faces[trianglePick->triangleIndex()];
+        qDebug() << "found parent meshface" << shadow_meshface.parent_idx;
+        parentModel->uncolorExtensionFaces();
+        emit extensionSelect();
+        parentModel->targetMeshFace = &parentModel->mesh->faces[shadow_meshface.parent_idx];
+        parentModel->generateColorAttributes();
         parentModel->colorExtensionFaces();
     }
 }
@@ -1954,6 +1973,7 @@ void GLModel::mgoo(Qt3DRender::QPickEvent* v)
              qmlManager->selectedModels[0]->shadowModel->labellingActive ||
              qmlManager->selectedModels[0]->shadowModel->layflatActive ||
              qmlManager->selectedModels[0]->shadowModel->layerViewActive ||
+             qmlManager->selectedModels[0]->shadowModel->manualSupportActive ||
              qmlManager->selectedModels[0]->shadowModel->supportViewActive ||
              qmlManager->orientationActive ||
              qmlManager->rotateActive))
@@ -2438,6 +2458,35 @@ void GLModel::closeExtension(){
     extensionActive = false;
     parentModel->uncolorExtensionFaces();
     parentModel->targetMeshFace = nullptr;
+}
+
+void GLModel::openManualSupport(){
+    manualSupportActive = true;
+    qDebug() << "open manual support";
+}
+
+void GLModel::closeManualSupport(){
+    manualSupportActive = false;
+    parentModel->uncolorExtensionFaces();
+    parentModel->targetMeshFace = nullptr;
+    qDebug() << "close manual support";
+}
+
+void GLModel::generateManualSupport(){
+    qDebug() << "generateManual support called";
+    if (targetMeshFace == NULL)
+        return;
+    QVector3D t = m_transform->translation();
+    t.setZ(mesh->z_min+scfg->raft_thickness);
+    QVector3D targetPosition = mesh->idx2MV(targetMeshFace->mesh_vertex[0]).position- t;
+    OverhangPoint* targetOverhangPosition = new OverhangPoint(targetPosition.x()*scfg->resolution,
+                                                              targetPosition.y()*scfg->resolution,
+                                                              targetPosition.z()*scfg->resolution,
+                                                              scfg->default_support_radius);
+
+    generateSupporter(layerSupportMesh, targetOverhangPosition, nullptr, nullptr, layerSupportMesh->z_min);
+    targetMeshFace = NULL;
+    emit _updateModelMesh(true);
 }
 
 void GLModel::openScale(){

@@ -111,8 +111,12 @@ public:
     // extension components
     QObject* extensionPopup;
     QObject* extensionButton;
-    // shell offset components;
+
+    // shell offset components
     QObject* shelloffsetPopup;
+
+    // manual support components
+    QObject* manualSupportPopup;
 
     // auto repair components
     QObject* repairPopup;
@@ -251,6 +255,8 @@ public slots:
     void extensionUnSelect();
     void layFlatSelect();
     void layFlatUnSelect();
+    void manualSupportSelect();
+    void manualSupportUnselect();
     void openRotate();
     void closeRotate();
     void openMove();
