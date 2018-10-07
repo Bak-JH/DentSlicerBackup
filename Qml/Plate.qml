@@ -82,7 +82,7 @@ Entity {
 
         Transform{
             id: plateLogoTransform
-            translation: Qt.vector3d(0,-40,0)
+            translation: Qt.vector3d(0,-43,0)
 
         }
         components: [ plateLogoMesh, plateLogoTransform, plateMaterial ]
