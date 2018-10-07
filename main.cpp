@@ -93,7 +93,7 @@ int main(int argc, char **argv)
     splash->close();
 
     qmlManager->mainWindow->setProperty("visible",true);
-//    qmlManager->loginWindow->setProperty("visible",true);
+    //qmlManager->loginWindow->setProperty("visible",true);
     QSurfaceFormat format;
     format.setMajorVersion(3);
     format.setMinorVersion(1);
@@ -107,6 +107,6 @@ int main(int argc, char **argv)
     QOffscreenSurface surface;
     surface.create();
     gl_ctx.makeCurrent(&surface);
-//    exceptionFilter();
+
     return app.exec();
 }

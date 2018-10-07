@@ -1020,7 +1020,7 @@ void GLModel::handlePickerClicked(QPickEvent *pick)
     }
 
     QPickTriangleEvent *trianglePick = static_cast<QPickTriangleEvent*>(pick);
-
+    qDebug() << "trianglePick : " << trianglePick;
     if (labellingActive && trianglePick && trianglePick->localIntersection() != QVector3D(0,0,0)) {
         MeshFace shadow_meshface = mesh->faces[trianglePick->triangleIndex()];
 

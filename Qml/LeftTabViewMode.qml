@@ -160,6 +160,7 @@ Rectangle {
                     //text: "Layer View"
                     exclusiveGroup: viewModeGroup
                     enabled: false
+
                     style: RadioButtonStyle {
                         indicator: Rectangle {
                             implicitWidth: 16

@@ -567,12 +567,11 @@ Rectangle {
             iconSource1: "qrc:/Resource/upper_setting.png"
             iconSource2: "qrc:/Resource/upper2_setting.png"
             iconText: qsTr("Setting")
-            MouseArea{
-                anchors.fill: parent
-                onClicked:{
-                    all_off();
-                    settingPopup.visible = true;
-                }
+            onButtonClicked:{
+                if(state == "active")
+                    settingPopup.visible = true
+                else
+                    settingPopup.visible = false
             }
         }
 
@@ -583,11 +582,12 @@ Rectangle {
             iconSource1: "qrc:/Resource/upper_feedback.png"
             iconSource2: "qrc:/Resource/upper2_feedback.png"
             iconText: qsTr("Feedback")
-            onButtonClicked:{
-                if(state == "active")
-                    settingPopup.visible = true
-                else
-                    settingPopup.visible = false
+            MouseArea{
+                anchors.fill: parent
+                onClicked:{
+                    all_off();
+                    feedbackPopUp.visible = true;
+                }
             }
         }
 
