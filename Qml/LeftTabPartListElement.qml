@@ -6,6 +6,7 @@ Item {
 
     property string modelName
     property int glModelID
+    property Item container;
 
     Rectangle{
         id:background
