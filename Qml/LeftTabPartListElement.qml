@@ -82,6 +82,11 @@ Item {
             onExited : qm.resetCursor();
             onClicked: {
                 console.log("delete");
+                if(icon.parent.state == 'on'){
+                    icon.parent.state = 'select';
+                    selectPart(glModelID);
+                }
+                deletePopUp.visible = true;
                 deletePopUp.popupDelete();
                 deletePopUp.targetID = glModelID;
 
