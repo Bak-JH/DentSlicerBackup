@@ -37,6 +37,11 @@ Item{
             source: "qrc:/Resource/font/NotoSans-SemiCondensedMedium.ttf"
         }
 
+//        LeftTabPartListElement {
+//            id: statechanger
+//            container: window
+//        }
+
         DropArea {
             id: drop
             anchors.fill: parent
