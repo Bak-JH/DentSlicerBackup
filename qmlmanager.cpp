@@ -208,6 +208,17 @@ void QmlManager::initializeUI(QQmlApplicationEngine* e){
 void QmlManager::createModelFile(Mesh* target_mesh, QString fname) {
     openProgressPopUp();
 
+    // load file if not loaded mesh
+    if (target_mesh == nullptr){
+        if (fname != "" && (fname.contains(".stl")||fname.contains(".STL"))){
+            target_mesh = new Mesh();
+            loadMeshSTL(target_mesh, fname.toLocal8Bit().constData());
+        } else if (fname != "" && (fname.contains(".obj")||fname.contains(".OBJ"))){
+            target_mesh = new Mesh();
+            loadMeshOBJ(target_mesh, fname.toLocal8Bit().constData());
+        }
+    }
+
     GLModel* glmodel = new GLModel(mainWindow, models, target_mesh, fname, false);
     // 승환 GLModel constructor 안쪽
 

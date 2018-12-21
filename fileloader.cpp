@@ -38,7 +38,7 @@ static inline int stringcasecompare(const char* a, const char* b)
     return *a - *b;
 }
 
-bool loadMeshSTL_ascii(Mesh* mesh, const char* filename)
+bool loadMeshSTL_ascii(Mesh* mesh, const char* filename)//(Mesh* mesh, const char* filename)
 {
     FILE* f = fopen(filename, "rt");
     char buffer[1024];
@@ -93,7 +93,7 @@ bool loadMeshSTL_ascii(Mesh* mesh, const char* filename)
     return true;
 }
 
-bool loadMeshSTL_binary(Mesh* mesh, const char* filename){
+bool loadMeshSTL_binary(Mesh* mesh, const char* filename){//(Mesh* mesh, const char* filename){
     FILE* f = fopen(filename, "rb");
 
     fseek(f, 0L, SEEK_END);
@@ -150,7 +150,7 @@ bool loadMeshSTL_binary(Mesh* mesh, const char* filename){
     return true;
 }
 
-bool loadMeshSTL(Mesh* mesh, const char* filename)
+bool loadMeshSTL(Mesh* mesh, const char* filename)//(Mesh* mesh, const char* filename)
 {
     FILE* f = fopen(filename, "r");
     if (f == nullptr)
@@ -204,11 +204,10 @@ bool loadMeshSTL(Mesh* mesh, const char* filename)
     return loadMeshSTL_binary(mesh, filename);
 }
 
-bool loadMeshOBJ(Mesh* mesh, const char* filename){
+bool loadMeshOBJ(Mesh* mesh, const char* filename){//(Mesh* mesh, const char* filename){
     FILE *f;
     char c;
     int lines = 0;
-    qDebug() << "test 0";
     f = fopen(filename, "r");
 
     if(f == NULL)
@@ -222,7 +221,6 @@ bool loadMeshOBJ(Mesh* mesh, const char* filename){
 
     if(c != '\n')
         lines++;
-    qDebug()<< "test 1";
     mesh->faces.reserve(lines*2);
     mesh->vertices.reserve(lines*2);
 
@@ -232,7 +230,6 @@ bool loadMeshOBJ(Mesh* mesh, const char* filename){
 
     vector<QVector3D> temp_vertices;
     temp_vertices.reserve(lines);
-    qDebug() << "test 2";
     while( 1 ){
         char lineHeader[128];
         // read the first word of the line
@@ -265,9 +262,7 @@ bool loadMeshOBJ(Mesh* mesh, const char* filename){
             char stupidBuffer[1000];
             fgets(stupidBuffer, 1000, file);
         }
-
     }
-    qDebug() << "test 3";
     fclose(file);
     mesh->connectFaces();
     scfg->origin = QVector3D((mesh->x_min+mesh->x_max)/2, (mesh->y_min+mesh->y_max)/2, (mesh->z_min+mesh->z_max)/2);

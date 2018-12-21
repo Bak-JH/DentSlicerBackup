@@ -88,6 +88,10 @@ GLModel::GLModel(QObject* mainWindow, QNode *parent, Mesh* loadMesh, QString fna
     generateLayerViewMaterial();
 
     this->changecolor(0);
+
+    mesh = loadMesh;
+
+    /*
     if (filename != "" && (filename.contains(".stl")||filename.contains(".STL"))\
             && loadMesh == nullptr){
         mesh = new Mesh();
@@ -98,7 +102,7 @@ GLModel::GLModel(QObject* mainWindow, QNode *parent, Mesh* loadMesh, QString fna
         loadMeshOBJ(mesh, filename.toLocal8Bit().constData());
     } else {
         mesh = loadMesh;
-    }
+    }*/
 
     // 승환 25%
     qmlManager->setProgress(0.23);
@@ -150,6 +154,9 @@ GLModel::GLModel(QObject* mainWindow, QNode *parent, Mesh* loadMesh, QString fna
 
     qDebug() << "adding part " << fname.toStdString().c_str();
 
+    for (int i=0; i<200; i++){
+
+    }
 
     // reserve cutting points, contours
     sphereEntity.reserve(50);
@@ -745,8 +752,14 @@ void GLModel::initialize(const int& faces_cnt){
     QByteArray vertexArray;
     vertexArray.resize(faces_cnt*3*(3)*sizeof(float));
     vertexBuffer = new Qt3DRender::QBuffer(Qt3DRender::QBuffer::VertexBuffer,m_geometry);
+    //vertexBuffer = new QBuffer::QBuffer(QBuffer::VertexBuffer, m_geometry);
     vertexBuffer->setUsage(Qt3DRender::QBuffer::DynamicDraw);
+    //vertexBuffer->setBuffer(vertexArray);
     vertexBuffer->setData(vertexArray);
+
+    // sharing rendering vertex Buffer with mesh
+    mesh->updateVertexBuffer = vertexBuffer;
+    mesh->updatePositionAttribute = positionAttribute;
 
     QByteArray vertexNormalArray;
     vertexNormalArray.resize(faces_cnt*3*(3)*sizeof(float));
@@ -829,6 +842,31 @@ void GLModel::addVertex(QVector3D vertex){
     vertexBuffer->updateData(vertexCount*6*sizeof(float),appendVertexArray);
     positionAttribute->setCount(vertexCount+1);
 
+    return;
+}
+
+void GLModel::editVertex(int idx, QVector3D vertex){
+    //update geometry
+    QByteArray appendVertexArray;
+    appendVertexArray.resize(1*3*sizeof(float));
+    float* reVertexArray = reinterpret_cast<float*>(appendVertexArray.data());
+
+    //coordinates of left vertex
+    reVertexArray[0] = x;
+    reVertexArray[1] = y;
+    reVertexArray[2] = z;
+    vertexBuffer->updateData(idx*6*sizeof(float), appendVertexArray);
+
+    return;
+}
+
+// idx value is MeshVertex idx in vertices array
+void GLModel::removeVertex(int idx){
+    QByteArray sampleArray;
+    sampleArray = vertexBuffer->data();
+    sampleArray.remove(idx*6*sizeof(float), 6*sizeof(float));
+    vertexBuffer->setData(sampleArray);
+    //vertexBuffer->data().remove(idx*6*sizeof(float), 6*sizeof(float));
     return;
 }
 
@@ -1079,12 +1117,12 @@ void GLModel::handlePickerClickedFreeCutSphere(Qt3DRender::QPickEvent* pick)
     int minIdx = 0;
     float min = world2Screen(cuttingPoints[0]).distanceToPoint(pickPosition);
     for (int i=0; i<cuttingPoints.size(); i++){
-
         if (world2Screen(cuttingPoints[i]).distanceToPoint(pickPosition) < min){
             minIdx = i;
             min = world2Screen(cuttingPoints[i]).distanceToPoint(pickPosition);
         }
     }
+
     qDebug() << "min idx  " << minIdx;
     removeCuttingPoint(minIdx);
     removeCuttingContour();

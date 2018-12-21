@@ -6,7 +6,6 @@
 #include <QString>
 #include <QProcess>
 #include "feature/stlexporter.h"
-#include "fileloader.h"
 #include "DentEngine/src/slicer.h"
 #include "DentEngine/src/configuration.h"
 #include "DentEngine/src/svgexporter.h"

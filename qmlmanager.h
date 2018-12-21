@@ -19,6 +19,7 @@
 #include "QtConcurrent/QtConcurrentRun"
 #include "QFuture"
 #include "utils/httpreq.h"
+#include "fileloader.h"
 #include <QKeyboardHandler>
 
 #define VIEW_MODE_OBJECT 0

@@ -13,7 +13,6 @@
 #include <QCursor>
 #include <iostream>
 #include "DentEngine/src/mesh.h"
-#include "fileloader.h"
 #include "slicingengine.h"
 #include "feature/modelcut.h"
 #include "feature/labellingtextpreview.h"
@@ -25,12 +24,13 @@
 #include "feature/hollowshell.h"
 
 
-#define MAX_BUF_LEN 2000000
 
 using namespace Qt3DCore;
 using namespace Qt3DRender;
 using namespace Qt3DExtras;
 using namespace std;
+
+#define MAX_BUF_LEN 2000000
 
 /* feature thread */
 #define ftrOpen 1
@@ -237,6 +237,8 @@ private:
     void initialize(const int& faces_cnt);
     void applyGeometry();
     void addVertex(QVector3D vertex);
+    void editVertex(int idx, QVector3D vertex);
+    void removeVertex(int idx);
     void addVertices(vector<QVector3D> vertices);
     void addNormalVertices(vector<QVector3D> vertices);
     void addColorVertices(vector<QVector3D> vertices);
