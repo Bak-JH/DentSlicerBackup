@@ -208,18 +208,23 @@ void QmlManager::initializeUI(QQmlApplicationEngine* e){
 void QmlManager::createModelFile(Mesh* target_mesh, QString fname) {
     openProgressPopUp();
 
+    GLModel* glmodel;
+
     // load file if not loaded mesh
     if (target_mesh == nullptr){
+        target_mesh = new Mesh();
+        glmodel = new GLModel(mainWindow, models, target_mesh, fname, false);
         if (fname != "" && (fname.contains(".stl")||fname.contains(".STL"))){
-            target_mesh = new Mesh();
             loadMeshSTL(target_mesh, fname.toLocal8Bit().constData());
         } else if (fname != "" && (fname.contains(".obj")||fname.contains(".OBJ"))){
-            target_mesh = new Mesh();
             loadMeshOBJ(target_mesh, fname.toLocal8Bit().constData());
         }
-    }
+    } else
+        glmodel = new GLModel(mainWindow, models, target_mesh, fname, false);
 
-    GLModel* glmodel = new GLModel(mainWindow, models, target_mesh, fname, false);
+    glmodel->renderMesh();
+    glmodel->createShadowModel();
+
     // 승환 GLModel constructor 안쪽
 
     qDebug() << "created new model file";

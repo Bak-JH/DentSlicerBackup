@@ -47,10 +47,6 @@ GLModel::GLModel(QObject* mainWindow, QNode *parent, Mesh* loadMesh, QString fna
         m_transform->setTranslation(QVector3D((mesh->x_max+mesh->x_min)/2, (mesh->y_max+mesh->y_min)/2, (mesh->z_max+mesh->z_min)/2));
         mesh->centerMesh();
 
-        initialize(mesh->faces.size());
-        addVertices(mesh, false);
-        applyGeometry();
-
         addComponent(m_transform);
 
         m_meshMaterial = new QPhongMaterial();
@@ -73,6 +69,8 @@ GLModel::GLModel(QObject* mainWindow, QNode *parent, Mesh* loadMesh, QString fna
 
         labellingTextPreview->setTranslation(QVector3D(100,0,0));
         */
+
+        renderMesh();
 
         return;
     }
@@ -162,14 +160,17 @@ GLModel::GLModel(QObject* mainWindow, QNode *parent, Mesh* loadMesh, QString fna
     cuttingPoints.reserve(50);
     cuttingContourCylinders.reserve(50);
 
-    renderMesh();
+    //renderMesh();
+    //createShadowModel();
 }
 
 void GLModel::renderMesh(){
     initialize(mesh->faces.size());
     addVertices(mesh, false);
     applyGeometry();
+}
 
+void GLModel::createShadowModel(){
     // create shadow model to handle picking settings
     shadowModel = new GLModel(this->mainWindow, this, mesh, filename, true);
 }
