@@ -175,6 +175,8 @@ public:
 
     void copyModelAttributeFrom(GLModel* from);
 
+    void renderMesh();
+
     void addMouseHandlers();
     void removeMouseHandlers();
 

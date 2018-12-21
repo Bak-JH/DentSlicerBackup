@@ -110,9 +110,6 @@ GLModel::GLModel(QObject* mainWindow, QNode *parent, Mesh* loadMesh, QString fna
     lmesh = new Mesh();
     rmesh = new Mesh();
 
-    initialize(mesh->faces.size());
-    addVertices(mesh, false);
-    applyGeometry();
 
     // 승환 50%
     qmlManager->setProgress(0.49);
@@ -128,8 +125,6 @@ GLModel::GLModel(QObject* mainWindow, QNode *parent, Mesh* loadMesh, QString fna
 
     //repairMesh(mesh);
 
-    // create shadow model to handle picking settings
-    shadowModel = new GLModel(this->mainWindow, this, mesh, filename, true);
     // 승환 75%
     qmlManager->setProgress(0.73);
 
@@ -167,6 +162,16 @@ GLModel::GLModel(QObject* mainWindow, QNode *parent, Mesh* loadMesh, QString fna
     cuttingPoints.reserve(50);
     cuttingContourCylinders.reserve(50);
 
+    renderMesh();
+}
+
+void GLModel::renderMesh(){
+    initialize(mesh->faces.size());
+    addVertices(mesh, false);
+    applyGeometry();
+
+    // create shadow model to handle picking settings
+    shadowModel = new GLModel(this->mainWindow, this, mesh, filename, true);
 }
 
 void GLModel::addMouseHandlers(){
