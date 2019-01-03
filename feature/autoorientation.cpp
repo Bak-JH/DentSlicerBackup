@@ -26,6 +26,8 @@ rotateResult* autoorientation::Tweak(Mesh* mesh, bool bi_algorithmic,int CA,bool
         best_n=5;
     Liste liste[best_n+additional_n];//orientation 의 계산값들을 저장및 출력하기 위해 사용
     vector<Orient*> orientations=area_cumulation(mesh, n,bi_algorithmic);
+    if (orientations.size() < best_n) best_n = orientations.size();
+
     //bi_algorithmic이 false: 6개, true:8개의 orientation 값이 리턴됩니다.
     int orientCnt=0;
     //edge_plus_vertex로 추가된 orient갯수 카운터
@@ -320,6 +322,9 @@ vector<Orient*> autoorientation::area_cumulation(Mesh* mesh,float n[],bool bi_al
     //map에 있는 값들의 value를 오름차순해서, 상위 best_n개를 뽑아야합니다.
     //python 원문에서는 Counter(map).most_common(best_n)으로 간단히 구현되는 것이지만,
     //역시 c++에는 없으므로 만들었습니다.
+
+    if (orient.size() < best_n) best_n = orient.size();
+
     map<QString,float>::iterator it_map;
     float val[best_n];
     QString val_n[best_n];
@@ -327,6 +332,7 @@ vector<Orient*> autoorientation::area_cumulation(Mesh* mesh,float n[],bool bi_al
         val[i]=0;
         val_n[i]="";
     }
+
     for(it_map=orient.begin(); it_map !=orient.end() ; ++it_map){
         if(it_map->second > val[best_n-1]){
             int index=best_n-2;
