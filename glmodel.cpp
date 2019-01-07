@@ -418,7 +418,10 @@ void GLModel::moveModelMesh(QVector3D direction){
     emit _updateModelMesh(true);
 }
 void GLModel::scaleModelMesh(float scaleX, float scaleY, float scaleZ){
-    mesh->vertexScale(scaleX, scaleY, scaleZ);
+    /* To fix center of the model */
+    float centerX = (mesh->x_max + mesh->x_min)/2;
+    float centerY = (mesh->y_max + mesh->y_min)/2;
+    mesh->vertexScale(scaleX, scaleY, scaleZ, centerX, centerY);
     /*if (shadowModel != NULL)
         shadowModel->scaleModelMesh(scale);*/
 

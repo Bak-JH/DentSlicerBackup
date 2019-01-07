@@ -1252,20 +1252,25 @@ void QmlManager::modelMove(int Axis, int Distance){ // for QML Signal -> float i
             case 1:{  //X
                 QVector3D tmp = selectedModels[i]->m_transform->translation();
 
-                if(tmp.x() + selectedModels[i]->mesh->x_max +1 + Distance > 100/2 )
-                    return ;
-                if(tmp.x() + selectedModels[i]->mesh->x_min -1 + Distance < - 100/2 )
-                    return ;
-
+                if ((tmp.x() + selectedModels[i]->mesh->x_max + 1 < 100/2)
+                        && (tmp.x() + selectedModels[i]->mesh->x_min - 1 > -100/2)) {
+                    if(tmp.x() + selectedModels[i]->mesh->x_max +1 + Distance > 100/2 )
+                        return ;
+                    if(tmp.x() + selectedModels[i]->mesh->x_min -1 + Distance < - 100/2 )
+                        return ;
+                }
                 selectedModels[i]->m_transform->setTranslation(QVector3D(tmp.x()+Distance,tmp.y(),tmp.z()));
                 break;
             }
             case 2:{  //Y
                 QVector3D tmp = selectedModels[i]->m_transform->translation();
-                if(tmp.y() + selectedModels[i]->mesh->y_max +1 + Distance> 80/2 )
-                    return;
-                if(tmp.y() + selectedModels[i]->mesh->y_min -1 + Distance< - 80/2 )
-                    return;
+                if ((tmp.y() + selectedModels[i]->mesh->y_max + 1 < 80/2)
+                        && (tmp.y() + selectedModels[i]->mesh->y_min - 1 > -80/2)) {
+                    if(tmp.y() + selectedModels[i]->mesh->y_max +1 + Distance > 80/2 )
+                        return;
+                    if(tmp.y() + selectedModels[i]->mesh->y_min -1 + Distance < - 80/2 )
+                        return;
+                }
                 selectedModels[i]->m_transform->setTranslation(QVector3D(tmp.x(),tmp.y()+Distance,tmp.z()));
                 break;
             }
@@ -1289,22 +1294,25 @@ void QmlManager::modelMoveF(int Axis, float Distance){
             case 1:{  //X
                 QVector3D tmp = selectedModels[i]->m_transform->translation();
 
-                if(tmp.x() + selectedModels[i]->mesh->x_max +1 + Distance > 100/2 )
-                    return;
-                if(tmp.x() + selectedModels[i]->mesh->x_min -1 + Distance < - 100/2 )
-                    return;
-
+                if ((tmp.x() + selectedModels[i]->mesh->x_max + 1 < 100/2)
+                        && (tmp.x() + selectedModels[i]->mesh->x_min - 1 > -100/2)) {
+                    if(tmp.x() + selectedModels[i]->mesh->x_max +1 + Distance > 100/2 )
+                        return;
+                    if(tmp.x() + selectedModels[i]->mesh->x_min -1 + Distance < - 100/2 )
+                        return;
+                }
                 selectedModels[i]->m_transform->setTranslation(QVector3D(tmp.x()+Distance, tmp.y(), tmp.z()));
                 break;
             }
             case 2:{  //Y
                 QVector3D tmp = selectedModels[i]->m_transform->translation();
-
-                if(tmp.y() + selectedModels[i]->mesh->y_max +1 + Distance > 80/2 )
-                    return;
-                if(tmp.y() + selectedModels[i]->mesh->y_min -1 + Distance < - 80/2 )
-                    return;
-
+                if ((tmp.y() + selectedModels[i]->mesh->y_max + 1 < 80/2)
+                        && (tmp.y() + selectedModels[i]->mesh->y_min - 1 > -80/2)) {
+                    if(tmp.y() + selectedModels[i]->mesh->y_max +1 + Distance > 80/2 )
+                        return;
+                    if(tmp.y() + selectedModels[i]->mesh->y_min -1 + Distance < - 80/2 )
+                        return;
+                }
                 selectedModels[i]->m_transform->setTranslation(QVector3D(tmp.x(), tmp.y()+Distance, tmp.z()));
                 break;
             }
