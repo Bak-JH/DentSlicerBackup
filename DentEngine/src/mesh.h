@@ -93,7 +93,7 @@ public :
     Mesh* vertexMoved(QVector3D direction);
     void centerMesh();
     void vertexRotate(QMatrix4x4 tmpmatrix);
-    void vertexScale(float scaleX, float scaleY, float scaleZ);
+    void vertexScale(float scaleX, float scaleY, float scaleZ, float centerX, float centerY);
     Mesh* copyMesh();
     void reverseFaces();
 
