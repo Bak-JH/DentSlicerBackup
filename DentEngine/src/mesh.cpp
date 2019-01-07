@@ -97,7 +97,7 @@ void Mesh::vertexRotate(QMatrix4x4 tmpmatrix){
     }
 }
 
-void Mesh::vertexScale(float scaleX=1, float scaleY=1, float scaleZ=1){
+void Mesh::vertexScale(float scaleX=1, float scaleY=1, float scaleZ=1, float centerX=0, float centerY=0){
     int numberofVertices = vertices.size();
     x_min = 99999;
     x_max = 99999;
@@ -105,12 +105,17 @@ void Mesh::vertexScale(float scaleX=1, float scaleY=1, float scaleZ=1){
     y_max = 99999;
     z_min = 99999;
     z_max = 99999;
+
+    /* need to fix center of the model */
+    float fixCenterX = centerX - (centerX*scaleX);
+    float fixCenterY = centerY - (centerY*scaleY);
+
     for (int i=0;i<numberofVertices;i++){
         if (i%100 == 0)
             QCoreApplication::processEvents();
         QVector3D tmp;
-        tmp.setX(vertices[i].position.x() * scaleX);
-        tmp.setY(vertices[i].position.y() * scaleY);
+        tmp.setX(vertices[i].position.x() * scaleX + fixCenterX);
+        tmp.setY(vertices[i].position.y() * scaleY + fixCenterY);
         tmp.setZ(vertices[i].position.z() * scaleZ);
         vertices[i].position = tmp;
         updateMinMax(vertices[i].position);
