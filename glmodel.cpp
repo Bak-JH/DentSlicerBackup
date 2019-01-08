@@ -1187,7 +1187,7 @@ void GLModel::handlePickerClicked(QPickEvent *pick)
     }
 
     QPickTriangleEvent *trianglePick = static_cast<QPickTriangleEvent*>(pick);
-    qDebug() << "trianglePick : " << trianglePick;
+    qDebug() << "trianglePick : " << trianglePick << qmlManager->selectedModels.size() << qmlManager;
     if (labellingActive && trianglePick && trianglePick->localIntersection() != QVector3D(0,0,0)) {
         MeshFace shadow_meshface = mesh->faces[trianglePick->triangleIndex()];
 
@@ -1656,6 +1656,7 @@ void GLModel::generateCuttingContour(vector<QVector3D> cuttingContour){
 }
 
 void GLModel::generatePlane(){
+    qDebug() << "generate plane called";
     removePlane();
     if (parentModel->cuttingPoints.size()<3){
         qDebug()<<"Error: There is not enough vectors to render a plane.";
@@ -1762,8 +1763,11 @@ void GLModel::generateSupport(){
 }
 
 void GLModel::removePlane(){
-    if (parentModel->planeMaterial == nullptr)
+    //qDebug() << "--remove plane called--" << this << parentModel;
+    if (parentModel->planeMaterial == nullptr){
+        qDebug() << "## parentModel have no planeMaterial";
         return;
+    }
     delete parentModel->planeMaterial;
     parentModel->planeMaterial = nullptr;
     for (int i=0;i<2;i++){
@@ -1785,6 +1789,7 @@ void GLModel::removePlane(){
             parentModel->planeEntity[i] = nullptr;
         }
     }
+
 }
 
 void GLModel::addCuttingPoint(QVector3D v){
@@ -1933,6 +1938,7 @@ void GLModel::modelCut(){
 }
 
 void GLModel::generateRLModel(){
+    qDebug() << "** generateRLModel" << this;
     if (lmesh->faces.size() != 0){
         qmlManager->createModelFile(lmesh, filename+"_l");
         qDebug() << "leftmodel created";
@@ -1969,6 +1975,7 @@ void GLModel::generateRLModel(){
 
     //parentModel->deleteLater();
     shadowModel->removePlane();
+
     removeCuttingPoints();
     removeCuttingContour();
 
@@ -2112,12 +2119,14 @@ void GLModel::pgoo(Qt3DRender::QPickEvent* v){
 }*/
 
 void GLModel::cutModeSelected(int type){
+
     qDebug() << "cut mode selected1" << type;
     parentModel->removeCuttingPoints();
     qDebug() << "cut mode selected2" << type;
-    removePlane();
+    //removePlane();
     parentModel->removeCuttingContour();
     qDebug() << "cut mode selected3" << type;
+    //parentModel->removePlane();
     cutMode = type;
     if (cutMode == 1){
         parentModel->addCuttingPoint(QVector3D(1,0,0));
@@ -2569,7 +2578,6 @@ void GLModel::generateShellOffset(double factor){
 }
 
 void GLModel::openCut(){
-    qDebug() << "opencut called";
     cutActive = true;
 
     cutModeSelected(0);
@@ -2598,7 +2606,6 @@ void GLModel::closeHollowShell(){
 void GLModel::openShellOffset(){
     qDebug() << "openShelloffset";
     shellOffsetActive = true;
-
     parentModel->addCuttingPoint(QVector3D(1,0,0));
     parentModel->addCuttingPoint(QVector3D(1,1,0));
     parentModel->addCuttingPoint(QVector3D(2,0,0));
