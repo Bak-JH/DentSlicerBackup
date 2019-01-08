@@ -192,7 +192,7 @@ Rectangle {
     }
 
     function colorApplyFinishButton(mode){
-        console.log("colorApplyFinishButton mode " + mode)
+        //console.log("colorApplyFinishButton mode " + mode)
         if (mode === 1){
             applyfinishbutton.color="#3ea6b7"
         }else if(mode === 0){

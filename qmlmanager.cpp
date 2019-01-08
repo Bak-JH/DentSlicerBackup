@@ -846,7 +846,7 @@ void QmlManager::modelSelected(int ID){
         selectedModels.clear();
         selectedModels.push_back(nullptr);
     } else if (selectedModels.size() == 1 && selectedModels[0] != nullptr){
-        qDebug() << "resetting model" << selectedModels[0]->ID;
+        //qDebug() << "resetting model" << selectedModels[0]->ID;
         selectedModels[0]->changecolor(0);
         selectedModels[0]->checkPrintingArea();
         QMetaObject::invokeMethod(partList, "unselectPartByModel", Q_ARG(QVariant, selectedModels[0]->ID));
@@ -883,10 +883,12 @@ void QmlManager::modelSelected(int ID){
     }
     if (selectedModels[0] != target){
         // change selectedModels[0]
+        if (selectedModels[0] != nullptr)
+            disconnectHandlers(selectedModels[0]);
         selectedModels[0] = target;
 
         //remove dupllicate hanlders
-        disconnectHandlers(selectedModels[0]);
+        //disconnectHandlers(selectedModels[0]);
         connectHandlers(selectedModels[0]);
 
         selectedModels[0]->changecolor(3);
