@@ -81,7 +81,6 @@ Rectangle {
 
     function openPopUp(){
         progress_value.value=0
-        console.log("open tttttttttttttt")
         progressPopUp.visible = true
         progress_text1.text = "0% complete"
         progress_text2.text = "Working..."
