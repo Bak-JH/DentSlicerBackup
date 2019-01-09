@@ -276,7 +276,9 @@ void QmlManager::deleteModelFile(int ID){
             (*gl_it)->shadowModel->deleteLater();
             (*gl_it)->deleteLater();
             if (selectedModels[0] != nullptr && selectedModels[0]->ID == ID) {
-                selectedModels[0] = nullptr;
+                selectedModels.clear();
+                selectedModels.push_back(nullptr);
+                //selectedModels[0] = nullptr;
                 QMetaObject::invokeMethod(leftTabViewMode, "setEnable", Q_ARG(QVariant, false));
             }
             gl_it = glmodels.erase(gl_it);
@@ -686,20 +688,36 @@ void QmlManager::backgroundClickCheck(){
     modelClicked = false;
 }
 
-void QmlManager::multipleModelSelected(int ID){
+bool QmlManager::multipleModelSelected(int ID){
     //modelClicked = true;
     QMetaObject::invokeMethod(boxUpperTab, "all_off");
-    GLModel* target;
+    GLModel* target = nullptr;
+
     for(int i=0; i<glmodels.size();i++){
         if(glmodels.at(i)->ID == ID){
             target = glmodels.at(i);
             break;
         }
     }
+    /*
+    qDebug() << "multipleModelSelected():" << target << target->shadowModel;
+    qDebug() << "-- printing selectedModels --" <<selectedModels.size();
+    int i = 0;
+    for (vector<GLModel*>::iterator it_ = selectedModels.begin(); it_ != selectedModels.end() ; ++it_){
+        qDebug() << "model" << i << ":" <<*it_ ;
+        i++;
+    }
+    qDebug() <<"------------------------";
+    */
 
     // if target is already in selectedModels
     for (vector<GLModel*>::iterator it=selectedModels.begin(); it!= selectedModels.end(); ++it){
-        if ((*it)->ID == ID){
+        /* when selectedModels is an empty vector */
+        if ((*it) == nullptr) {
+            if (selectedModels.size() == 1)
+                return false;
+        }
+        else if ((*it)->ID == ID){
             // do unselect model
 
             it = selectedModels.erase(it);
@@ -735,15 +753,16 @@ void QmlManager::multipleModelSelected(int ID){
                     break;
                 }
             }
-            return;
+            return true;
         }
+
     }
 
     selectedModels.push_back(target);
-
     connectHandlers(target);
     target->changecolor(3);
     target->changecolor(1);
+    qDebug() << "multipleModelSelected invoke";
     QMetaObject::invokeMethod(partList, "selectPartByModel", Q_ARG(QVariant, target->ID));
     // Set BoundedBox
     float xmid = (target->mesh->x_max + target->mesh->x_min)/2;
@@ -786,12 +805,14 @@ void QmlManager::multipleModelSelected(int ID){
 
     if (selectedModels.size() >= 2)
         groupFunctionState = "active";
+    return true;
 }
 
 void QmlManager::modelSelected(int ID){
+    //qDebug() << "modelSelected()";
     if (groupSelectionActive){
-        multipleModelSelected(ID);
-        return;
+        if (multipleModelSelected(ID))
+            return;
     }
 
     QMetaObject::invokeMethod(boxUpperTab, "all_off");
@@ -808,8 +829,9 @@ void QmlManager::modelSelected(int ID){
     if (selectedModels.size() >= 2){ // remove selected models if multiple selected previously
         for (vector<GLModel*>::iterator it=selectedModels.begin(); it!=selectedModels.end(); ++it){
             // unselect Model
-            if (*it == nullptr)
+            if (*it == nullptr) {
                 break;
+            }
             (*it)->changecolor(0);
             (*it)->checkPrintingArea();
             QMetaObject::invokeMethod(partList, "unselectPartByModel", Q_ARG(QVariant, (*it)->ID));
@@ -893,6 +915,7 @@ void QmlManager::modelSelected(int ID){
 
         selectedModels[0]->changecolor(3);
         selectedModels[0]->changecolor(1);
+        qDebug() << "modelSelected invoke";
         QMetaObject::invokeMethod(partList, "selectPartByModel", Q_ARG(QVariant, selectedModels[0]->ID));
         qDebug() << "changing model" << selectedModels[0]->ID;
 
@@ -950,7 +973,9 @@ void QmlManager::modelSelected(int ID){
             }
         }
     } else {
-        selectedModels[0] = nullptr;
+        //selectedModels[0] = nullptr;
+        selectedModels.clear();
+        selectedModels.push_back(nullptr);
     }
 
     QMetaObject::invokeMethod(leftTabViewMode, "setEnable", Q_ARG(QVariant, selectedModels[0] != nullptr));
@@ -1006,7 +1031,9 @@ void QmlManager::unselectPart(int ID){
         selectedModels[0]->changeViewMode(VIEW_MODE_OBJECT);
     }
 
-    selectedModels[0] = nullptr;
+    selectedModels.clear();
+    selectedModels.push_back(nullptr);
+    //selectedModels[0] = nullptr;
     QMetaObject::invokeMethod(leftTabViewMode, "setEnable", Q_ARG(QVariant, false));
     QMetaObject::invokeMethod(boundedBox, "hideBox"); // Bounded Box
 }
@@ -1499,10 +1526,10 @@ void QmlManager::runGroupFeature(int ftrType, QString state, double arg1, double
     groupFunctionIndex = ftrType;
     groupFunctionState = state;
 
+    qDebug()<< "runGroupFeature | type:"<<ftrType<<"| state:" <<state;
     switch(ftrType){
     case ftrRotate: //rotate
     {
-        qDebug()<<state;
         if (state == "inactive"){
             hideRotateSphere();
 
@@ -1519,7 +1546,6 @@ void QmlManager::runGroupFeature(int ftrType, QString state, double arg1, double
     }
     case ftrMove:  //move
     {
-        qDebug()<<state;
         if (state == "inactive"){
             moveArrow->setEnabled(0);
         }else if(state == "active"){
@@ -1545,7 +1571,6 @@ void QmlManager::runGroupFeature(int ftrType, QString state, double arg1, double
         }
         */
         qDebug() << "run groupfeature lay flat";
-        qDebug()<<state;
         if (state == "active"){
             if (selectedModels[0] != nullptr){
                 selectedModels[0]->uncolorExtensionFaces();
@@ -1561,7 +1586,6 @@ void QmlManager::runGroupFeature(int ftrType, QString state, double arg1, double
     }
     case ftrOrient:  //orient
     {
-        qDebug()<<state;
         if (state == "active"){
             if (selectedModels[0] == nullptr){
                 QMetaObject::invokeMethod(orientPopup,"offApplyFinishButton");
@@ -1573,7 +1597,6 @@ void QmlManager::runGroupFeature(int ftrType, QString state, double arg1, double
     }
     case ftrRepair:  //repair
     {
-        qDebug()<<state;
         if (state == "active"){
             if (selectedModels[0] == nullptr){
                 QMetaObject::invokeMethod(repairPopup,"offApplyFinishButton");
@@ -1585,7 +1608,6 @@ void QmlManager::runGroupFeature(int ftrType, QString state, double arg1, double
     }
     case ftrExtend:
         qDebug() << "run groupfeature extend";
-        qDebug()<<state;
         if (state == "active"){
             if (selectedModels[0] != nullptr){
                 selectedModels[0]->uncolorExtensionFaces();
@@ -1597,6 +1619,7 @@ void QmlManager::runGroupFeature(int ftrType, QString state, double arg1, double
                 selectedModels[0]->shadowModel->closeExtension();
             }
         }
+        qDebug() << "groupfeature done";
         break;
     case ftrScale:
         qDebug() << "run feature scale" << selectedModels.size();
