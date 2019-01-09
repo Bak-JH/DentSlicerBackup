@@ -235,7 +235,7 @@ public slots:
     void pasteModel();
     void groupSelectionActivate(bool);
     void runGroupFeature(int,QString, double, double, double);
-    void multipleModelSelected(int ID);
+    bool multipleModelSelected(int ID);
     void modelSelected(int);
     void modelRotate(int,int);
     void modelRotateByNumber(int axis, int, int, int);
