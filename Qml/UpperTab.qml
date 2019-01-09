@@ -42,6 +42,7 @@ Rectangle {
 
     signal runGroupFeature(int type, string state, double arg1, double arg2, double arg3);
     function all_off() {
+        console.log("all of starting")
         first_tab_button_open.state = "inactive";
         first_tab_button_export.state = "inactive";
         first_tab_button_save.state = "inactive";

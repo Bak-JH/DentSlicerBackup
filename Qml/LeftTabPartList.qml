@@ -156,6 +156,7 @@ Rectangle {
     }
 
     function selectPartByModel(ID){
+        console.log("selectPartByModel: " + partListColumn.children.length);
         for(var i=0 ; i<partListColumn.children.length; i++){
             console.log("selsel   " + partListColumn.children[i].glModelID)
             if(partListColumn.children[i].glModelID === ID){

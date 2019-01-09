@@ -2627,6 +2627,7 @@ void GLModel::changeViewMode(int viewMode) {
     }
 
     this->viewMode = viewMode;
+    qDebug() << "changeViewMode";
     QMetaObject::invokeMethod(qmlManager->boxUpperTab, "all_off");
 
     switch( viewMode ) {
