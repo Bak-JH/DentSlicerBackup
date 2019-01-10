@@ -2274,6 +2274,12 @@ void GLModel::getTextChanged(QString text, int contentWidth)
 void GLModel::openLabelling()
 {
     labellingActive = true;
+
+    qmlManager->lastModelSelected();
+    if ((qmlManager->selectedModels[0] != nullptr) && (qmlManager->selectedModels[0] != this)
+            && (qmlManager->selectedModels[0]->shadowModel != this))
+        labellingActive = false;
+
 }
 
 void GLModel::closeLabelling()
@@ -2500,14 +2506,15 @@ void GLModel::generateLayFlat(){
 }
 
 void GLModel::openLayflat(){
-    qDebug() << "open layflat called" << this << this->shadowModel;
+    //qDebug() << "open layflat called" << this << this->shadowModel;
     layflatActive = true;
 
-    qmlManager->leaveOneModel();
+    qmlManager->lastModelSelected();
     if ((qmlManager->selectedModels[0] != nullptr) && (qmlManager->selectedModels[0] != this)
             && (qmlManager->selectedModels[0]->shadowModel != this))
         layflatActive = false;
-    qDebug() << "open layflat called end  " << layflatActive;
+    //qDebug() << "open layflat called end  " << layflatActive;
+
     /*
     QApplication::setOverrideCursor(QCursor(Qt::UpArrowCursor));
     shadowModel->m_objectPicker->setEnabled(false);
@@ -2525,6 +2532,12 @@ void GLModel::closeLayflat(){
 }
 void GLModel::openExtension(){
     extensionActive = true;
+
+    qmlManager->lastModelSelected();
+    if ((qmlManager->selectedModels[0] != nullptr) && (qmlManager->selectedModels[0] != this)
+            && (qmlManager->selectedModels[0]->shadowModel != this))
+        extensionActive = false;
+
 }
 
 void GLModel::closeExtension(){
