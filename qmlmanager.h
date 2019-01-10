@@ -187,8 +187,6 @@ public:
     void setProgressText(string inputText);
     int getLayerViewFlags();
 
-    void leaveOneModel();
-
     GLModel* findGLModelByName(QString filename);
 
     Q_INVOKABLE QString getVersion();
@@ -238,6 +236,7 @@ public slots:
     void groupSelectionActivate(bool);
     void runGroupFeature(int,QString, double, double, double);
     bool multipleModelSelected(int ID);
+    void lastModelSelected();
     void modelSelected(int);
     void modelRotate(int,int);
     void modelRotateByNumber(int axis, int, int, int);
