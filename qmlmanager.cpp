@@ -1672,11 +1672,6 @@ void QmlManager::runGroupFeature(int ftrType, QString state, double arg1, double
     }
     case ftrExtend:
         qDebug() << "run groupfeature extend";
-/*        if (selectedModels[0] != nullptr) {
-            selectedModels[selectedModels.size() - 1]->uncolorExtensionFaces();
-            selectedModels[selectedModels.size() - 1]->shadowModel->closeLayflat();
-        }
-  */
         if (state == "active"){
             if (selectedModels[0] != nullptr){
                 selectedModels[0]->uncolorExtensionFaces();
