@@ -187,6 +187,8 @@ public:
     void setProgressText(string inputText);
     int getLayerViewFlags();
 
+    void leaveOneModel();
+
     GLModel* findGLModelByName(QString filename);
 
     Q_INVOKABLE QString getVersion();

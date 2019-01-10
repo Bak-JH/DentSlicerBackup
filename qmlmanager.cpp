@@ -1526,7 +1526,7 @@ void QmlManager::runGroupFeature(int ftrType, QString state, double arg1, double
     groupFunctionIndex = ftrType;
     groupFunctionState = state;
 
-    qDebug()<< "runGroupFeature | type:"<<ftrType<<"| state:" <<state;
+    qDebug()<< "runGroupFeature | type:"<<ftrType<<"| state:" <<state << selectedModels.size();
     switch(ftrType){
     case ftrRotate: //rotate
     {
@@ -1571,6 +1571,22 @@ void QmlManager::runGroupFeature(int ftrType, QString state, double arg1, double
         }
         */
         qDebug() << "run groupfeature lay flat";
+
+        /*
+        if (selectedModels[0] != nullptr) {
+            selectedModels[0]->uncolorExtensionFaces();
+            selectedModels[0]->shadowModel->closeLayflat();
+        }
+        */
+
+
+        if (selectedModels[0] != nullptr) {
+            //leaveOneModel();
+            selectedModels[selectedModels.size() - 1]->uncolorExtensionFaces();
+            selectedModels[selectedModels.size() - 1]->shadowModel->closeLayflat();
+        }
+
+        /*
         if (state == "active"){
             if (selectedModels[0] != nullptr){
                 selectedModels[0]->uncolorExtensionFaces();
@@ -1582,6 +1598,7 @@ void QmlManager::runGroupFeature(int ftrType, QString state, double arg1, double
                 selectedModels[0]->shadowModel->closeLayflat();
             }
         }
+        */
         break;
     }
     case ftrOrient:  //orient
@@ -1608,6 +1625,7 @@ void QmlManager::runGroupFeature(int ftrType, QString state, double arg1, double
     }
     case ftrExtend:
         qDebug() << "run groupfeature extend";
+        //selectedModels[0]->colorExtensionFaces();
         if (state == "active"){
             if (selectedModels[0] != nullptr){
                 selectedModels[0]->uncolorExtensionFaces();
@@ -1910,6 +1928,64 @@ int QmlManager::getLayerViewFlags() {
     return layerViewFlags;
 }
 
+void QmlManager::leaveOneModel(){
+    qDebug() << "leaveOneModel() ++++++++++++++++++++++++++++++++" << selectedModels.size();
+
+    /* leaves only last model clicked */
+    int size = selectedModels.size();
+
+    /* if selected Models has only one element or none */
+    if (size < 2)
+        return;
+
+    GLModel *last = selectedModels[size - 1];
+    selectedModels.pop_back();
+
+    qDebug() << "leave:" << last << last->shadowModel;
+
+    /* remove all elements from the list */
+    for (vector<GLModel*>::iterator it = selectedModels.begin() ; it != selectedModels.end() ; ++it) {
+        if (*it == nullptr) {
+            // just in case
+            break;
+        }
+        /* it is simillar to selectModel() */
+        (*it)->changecolor(0);
+        (*it)->checkPrintingArea();
+        QMetaObject::invokeMethod(partList, "unselectPartByModel", Q_ARG(QVariant, (*it)->ID));
+
+        slicingData->setProperty("visible", false);
+
+        disconnectHandlers((*it));
+        QMetaObject::invokeMethod(qmlManager->mttab, "hideTab");
+        QMetaObject::invokeMethod(boundedBox, "hideBox");
+
+        if(groupFunctionState == "active") {
+            switch (groupFunctionIndex) {
+            case 4:
+                hideMoveArrow();
+                QMetaObject::invokeMethod(movePopup, "offApplyFinishButton");
+                break;
+            case 5:
+                hideRotateSphere();
+                QMetaObject::invokeMethod(rotatePopup, "offApplyFinishButton");
+                break;
+            case 6:
+                QMetaObject::invokeMethod(layflatPopup, "offApplyFinishButton");
+                break;
+            case 8:
+                QMetaObject::invokeMethod(orientPopup, "offApplyFinishButton");
+                break;
+            case 10:
+                QMetaObject::invokeMethod(repairPopup, "offApplyFinishButton");
+                break;
+            }
+        }
+    }
+    selectedModels.clear();
+    selectedModels.push_back(last);
+}
+
 QObject* FindItemByName(QList<QObject*> nodes, const QString& name)
 {
     for(int i = 0; i < nodes.size(); i++){
@@ -1932,3 +2008,4 @@ QObject* FindItemByName(QQmlApplicationEngine* engine, const QString& name)
 {
     return FindItemByName(engine->rootObjects(), name);
 }
+
