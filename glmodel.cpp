@@ -1177,6 +1177,8 @@ void GLModel::handlePickerClicked(QPickEvent *pick)
 
     }
 
+
+
     if (!cutActive && !extensionActive && !labellingActive && !layflatActive && !manualSupportActive && !isMoved)// && !layerViewActive && !supportViewActive)
         emit modelSelected(parentModel->ID);
 
@@ -2498,8 +2500,13 @@ void GLModel::generateLayFlat(){
 }
 
 void GLModel::openLayflat(){
-    qDebug() << "open layflat called";
+    qDebug() << "open layflat called" << this << this->shadowModel;
     layflatActive = true;
+
+    qmlManager->leaveOneModel();
+    if ((qmlManager->selectedModels[0] != nullptr) && (qmlManager->selectedModels[0] != this)
+            && (qmlManager->selectedModels[0]->shadowModel != this))
+        layflatActive = false;
     qDebug() << "open layflat called end  " << layflatActive;
     /*
     QApplication::setOverrideCursor(QCursor(Qt::UpArrowCursor));
