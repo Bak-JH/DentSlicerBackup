@@ -1722,6 +1722,7 @@ void QmlManager::unDo(){
         // do local undo
         selectedModels[0]->loadUndoState();
     }
+    sendUpdateModelInfo();
     return;
 }
 
@@ -1746,6 +1747,7 @@ void QmlManager::reDo(){
         // do local redo
         selectedModels[0]->loadRedoState();
     }
+    sendUpdateModelInfo();
     return;
 }
 
