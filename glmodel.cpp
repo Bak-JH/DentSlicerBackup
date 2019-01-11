@@ -1146,6 +1146,10 @@ void GLModel::handlePickerClickedFreeCut(Qt3DRender::QPickEvent* pick)
 void GLModel::handlePickerClicked(QPickEvent *pick)
 {
     qDebug() << "handle Picker clicked" << pick->buttons() << pick->button();
+
+    if (pick->button() == Qt::RightButton)
+        return;
+
     if (!parentModel)
         return;
 
