@@ -2,7 +2,7 @@ import QtQuick 2.0
 
 Rectangle {
     id: slicing_data
-    width: 360
+    width: sddownleft.width + 200
     height: 82
 
     property alias slicing_layer:slicing_layer
@@ -82,7 +82,7 @@ Rectangle {
 
         Rectangle{
             id:data
-            width: 280
+            width: sddownleft.width + 120
             height: 60
             anchors.left : slicing_icon.right
             anchors.top : parent.top
@@ -104,6 +104,7 @@ Rectangle {
                 inputData: "00h 00min"
                 inputSource: "qrc:/resource/slicing_clock.png"
             }
+
             SlicingDataElement{
                 id:sddownleft
                 anchors.bottom : parent.bottom
@@ -115,10 +116,12 @@ Rectangle {
                 inputData: "0.0 X 0.0 X 0.0 mm"
                 inputSource: "qrc:/resource/slicing_size.png"
             }
+
+
             SlicingDataElement{
                 id : slicing_layer
                 anchors.top : parent.top
-                anchors.left: sdupleft.right
+                anchors.right: parent.right
                 anchors.topMargin: 3
                 anchors.leftMargin: 8
 
@@ -126,10 +129,11 @@ Rectangle {
                 inputData: "0 layer"
                 inputSource: "qrc:/resource/slicing_layer.png"
             }
+
             SlicingDataElement{
                 id: slicing_volume
                 anchors.bottom : parent.bottom
-                anchors.left: sddownleft.right
+                anchors.right: parent.right
                 anchors.bottomMargin: 3
                 anchors.leftMargin: 8
 
