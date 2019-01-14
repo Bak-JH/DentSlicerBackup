@@ -289,6 +289,7 @@ void QmlManager::deleteModelFile(int ID){
     qDebug() << "deleteModelFile" << glmodels.size();
     QMetaObject::invokeMethod(qmlManager->boundedBox, "hideBox");
     deletePart(ID);
+    sendUpdateModelInfo(0, 0, "0.0 X 0.0 X 0.0 mm", 0);
 
     // UI
     hideMoveArrow();
@@ -1691,10 +1692,10 @@ void QmlManager::runGroupFeature(int ftrType, QString state, double arg1, double
             for (GLModel* model : selectedModels){
                 model->ft->setTypeAndRun(ftrType, arg1, arg2, arg3);
             }
+            sendUpdateModelInfo();
         } else {
 
         }
-
         break;
     }
 }
@@ -1721,6 +1722,7 @@ void QmlManager::unDo(){
         // do local undo
         selectedModels[0]->loadUndoState();
     }
+    sendUpdateModelInfo();
     return;
 }
 
@@ -1745,6 +1747,7 @@ void QmlManager::reDo(){
         // do local redo
         selectedModels[0]->loadRedoState();
     }
+    sendUpdateModelInfo();
     return;
 }
 
