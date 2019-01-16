@@ -68,9 +68,11 @@ GLModel::GLModel(QObject* mainWindow, QNode *parent, Mesh* loadMesh, QString fna
         QObject::connect(this,SIGNAL(_generateSupport()),this,SLOT(generateSupport()));
         QObject::connect(this,SIGNAL(_updateModelMesh(bool)),this,SLOT(updateModelMesh(bool)));
 
-        /*labellingTextPreview = new LabellingTextPreview(this);
-        labellingTextPreview->setEnabled(false);
+        //qDebug() << "shadow model made _______________________________"<<this<< "parent:"<<this->parentModel<<"shadow:"<<this->shadowModel;
 
+        /*
+        labellingTextPreview = new LabellingTextPreview(this);
+        labellingTextPreview->setEnabled(false);
         labellingTextPreview->setTranslation(QVector3D(100,0,0));
         */
 
@@ -1194,10 +1196,14 @@ void GLModel::handlePickerClicked(QPickEvent *pick)
 
     QPickTriangleEvent *trianglePick = static_cast<QPickTriangleEvent*>(pick);
     qDebug() << "trianglePick : " << trianglePick << qmlManager->selectedModels.size() << qmlManager;
+
     if (labellingActive && trianglePick && trianglePick->localIntersection() != QVector3D(0,0,0)) {
         MeshFace shadow_meshface = mesh->faces[trianglePick->triangleIndex()];
 
+        //parentModel->uncolorExtensionFaces();
         parentModel->targetMeshFace = &parentModel->mesh->faces[shadow_meshface.parent_idx];
+        //parentModel->generateColorAttributes();
+        //parentModel->colorExtensionFaces();
 
         QString label_text = "";
         QString label_font = "";
@@ -1213,6 +1219,7 @@ void GLModel::handlePickerClicked(QPickEvent *pick)
             labellingTextPreview->deleteLater();
             labellingTextPreview = nullptr;
         }
+        //qDebug() << "me:"<<this << "parent:"<<this->parentModel<<"shadow:"<<this->shadowModel;
         labellingTextPreview = new LabellingTextPreview(this);
         labellingTextPreview->setEnabled(true);
 
@@ -1224,8 +1231,15 @@ void GLModel::handlePickerClicked(QPickEvent *pick)
                 labellingTextPreview->setFontBold(label_font_bold);
                 labellingTextPreview->setFontSize(label_size);
                 labellingTextPreview->setText(label_text, contentWidth);
+
             }
+            labellingTextPreview->planeSelected = true;
+
         }
+        else {
+            labellingTextPreview->planeSelected = false;
+        }
+
     }
 
     if (cutActive){
@@ -1336,6 +1350,7 @@ void GLModel::handlePickerClicked(QPickEvent *pick)
         parentModel->colorExtensionFaces();
     }
 }
+
 void GLModel::handlePickerClickedLayflat(MeshFace shadow_meshface){
     /*
     qDebug() << "layflat picker!";
@@ -1697,6 +1712,7 @@ void GLModel::generatePlane(){
 
     for (int i=0;i<2;i++){
         parentModel->planeEntity[i] = new Qt3DCore::QEntity(parentModel->parentModel);
+        qDebug() << "generatePlane---------------------==========-=-==-" << parentModel->parentModel;
         parentModel->clipPlane[i]=new Qt3DExtras::QPlaneMesh(this);
         parentModel->clipPlane[i]->setHeight(100.0);
         parentModel->clipPlane[i]->setWidth(100.0);
@@ -1718,7 +1734,7 @@ void GLModel::generatePlane(){
         parentModel->planeEntity[i]->addComponent(parentModel->planeObjectPicker[i]);
 
         parentModel->planeEntity[i]->addComponent(parentModel->clipPlane[i]);
-        parentModel->planeEntity[i]->addComponent(parentModel->planeTransform[i]);
+        parentModel->planeEntity[i]->addComponent(parentModel->planeTransform[i]); //jj
         parentModel->planeEntity[i]->addComponent(parentModel->planeMaterial);
     }
 
@@ -2281,19 +2297,30 @@ void GLModel::openLabelling()
 
     qmlManager->lastModelSelected();
     if ((qmlManager->selectedModels[0] != nullptr) && (qmlManager->selectedModels[0] != this)
-            && (qmlManager->selectedModels[0]->shadowModel != this))
+            && (qmlManager->selectedModels[0]->shadowModel != this)) {
         labellingActive = false;
+        if (labellingTextPreview) {
+            labellingTextPreview->planeSelected = false;
+            labellingTextPreview->deleteLater();
+            labellingTextPreview = nullptr;
+        }
+    }
 
 }
 
 void GLModel::closeLabelling()
 {
+    qDebug() << "close labelling ******************";
     labellingActive = false;
     if (labellingTextPreview){
+        labellingTextPreview->planeSelected = false;
         labellingTextPreview->deleteLater();
         labellingTextPreview = nullptr;
     }
     parentModel->targetMeshFace = nullptr;
+
+    QMetaObject::invokeMethod(qmlManager->mainWindow, "forceFocus");
+    (qmlManager->keyboardHandler)->setFocus(false);
 }
 
 void GLModel::getFontNameChanged(QString fontName)
@@ -2320,6 +2347,7 @@ void GLModel::getFontSizeChanged(int fontSize)
 void GLModel::applyLabelInfo(QString text, int contentWidth, QString fontName, bool isBold, int fontSize){
     QVector3D translation;
 
+    qDebug() << "applyLabelInfo +++++++++++++++++++++++++";
     if (labellingTextPreview && labellingTextPreview->isEnabled()){
         translation = labellingTextPreview->translation;
         labellingTextPreview->deleteLater();
@@ -2344,10 +2372,26 @@ void GLModel::applyLabelInfo(QString text, int contentWidth, QString fontName, b
 
 void GLModel::generateText3DMesh()
 {
-    if (!labellingTextPreview)
+    //qDebug() << "generateText3DMesh +++++++++++++++++++++++++";
+    if (!labellingTextPreview){
+        QMetaObject::invokeMethod(qmlManager->labelPopup, "noModel");
         return;
+    }
+
+    if (!labellingTextPreview->planeSelected) {
+        if (labellingTextPreview){
+            labellingTextPreview->deleteLater();
+            labellingTextPreview = nullptr;
+        }
+        QMetaObject::invokeMethod(qmlManager->labelPopup, "noModel");
+        return;
+    }
+    labellingTextPreview->planeSelected = false;
 
     parentModel->saveUndoState();
+
+    qDebug() <<m_transform->translation();
+    qDebug() << labellingTextPreview->translation;
 
     QVector3D* originalVertices = reinterpret_cast<QVector3D*>(vertexBuffer->data().data());
     int originalVerticesSize = vertexBuffer->data().size() / sizeof(float) / 3;
@@ -2395,11 +2439,12 @@ void GLModel::generateText3DMesh()
         outVertices.push_back(vertices[2 * indices[3*i + 1] + 0]);
         outVertices.push_back(vertices[2 * indices[3*i + 0] + 0]);
         parentModel->mesh->addFace(vertices[2 * indices[3*i + 2] + 0], vertices[2 * indices[3*i + 1] + 0], vertices[2 * indices[3*i + 0] + 0]);
-
+        //qDebug() << vertices[2 * indices[3*i + 2] + 0]<< vertices[2 * indices[3*i + 1] + 0]<< vertices[2 * indices[3*i + 0] + 0];
         outNormals.push_back(vertices[2 * indices[3*i + 2] + 1]);
         outNormals.push_back(vertices[2 * indices[3*i + 1] + 1]);
         outNormals.push_back(vertices[2 * indices[3*i + 0] + 1]);
     }
+
     parentModel->mesh->connectFaces();
     if (GLModel* glmodel = qobject_cast<GLModel*>(parent())) {
         glmodel->addVertices(outVertices);
@@ -2407,10 +2452,12 @@ void GLModel::generateText3DMesh()
 
         emit glmodel->_updateModelMesh(true);
     }
+
     if (labellingTextPreview){
         labellingTextPreview->deleteLater();
         labellingTextPreview = nullptr;
     }
+
 }
 
 // for extension

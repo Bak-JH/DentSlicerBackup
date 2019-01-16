@@ -189,7 +189,7 @@ void generateText3DGeometry(QVector3D** vertices, int* verticesSize,
 
     QCoreApplication::processEvents();
     for (auto& v : internalVertices) {
-        qDebug() << "2:" << v.position;
+        //qDebug() << "2:" << v.position;
     }
     QCoreApplication::processEvents();
 

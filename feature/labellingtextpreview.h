@@ -6,6 +6,7 @@
 
 #include <QPaintedTextureImage>
 #include <QPainter>
+#include <QPlaneMesh>
 #include <QFont>
 #include <QNormalDiffuseMapAlphaMaterial>
 
@@ -70,7 +71,10 @@ public:
     float scaleY = 5.0f;
     float ratioY = 16.0f / 64;
 
+    bool planeSelected;
+
 private:
+    Qt3DExtras::QPlaneMesh* planeMesh = nullptr;
     Qt3DCore::QEntity* planeEntity = nullptr;
     Qt3DExtras::QNormalDiffuseMapAlphaMaterial* planeMaterial = nullptr;
 
