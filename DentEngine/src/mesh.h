@@ -13,7 +13,7 @@
 #define cos50 0.64278761
 #define cos100 -0.17364818
 #define cos150 -0.8660254
-
+#define FZERO 0.00001f
 
 using namespace std;
 using namespace ClipperLib;

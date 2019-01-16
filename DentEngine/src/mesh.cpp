@@ -1,4 +1,5 @@
 #include "mesh.h"
+#include "qmlmanager.h"
 #include <QDebug>
 #include <QCoreApplication>
 
@@ -98,6 +99,12 @@ void Mesh::vertexRotate(QMatrix4x4 tmpmatrix){
 }
 
 void Mesh::vertexScale(float scaleX=1, float scaleY=1, float scaleZ=1, float centerX=0, float centerY=0){
+
+    if(fabs(scaleX) < FZERO || fabs(scaleY) < FZERO || fabs(scaleZ) < FZERO) {
+        qmlManager->openResultPopUp("","Scale cannot be 0", "");
+        return;
+    }
+
     int numberofVertices = vertices.size();
     x_min = 99999;
     x_max = 99999;
