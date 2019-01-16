@@ -1,5 +1,5 @@
 #include "feature/labellingtextpreview.h"
-
+#include "glmodel.h"
 #include <QTexture>
 #include <QAbstractTexture>
 #include <QPlaneMesh>
@@ -14,12 +14,13 @@ using namespace Qt3DExtras;
 LabellingTextPreview::LabellingTextPreview(Qt3DCore::QNode* parent)
     : Qt3DCore::QEntity(parent)
 {
-    texture = new QTexture2D(this);
-    texture->setMinificationFilter(QAbstractTexture::Filter::Linear);
+    texture = new QTexture2D(parent->parentNode());
+    texture->setMinificationFilter(QAbstractTexture::Filter::Linear);//Linear
     texture->setMagnificationFilter(QAbstractTexture::Filter::Linear);
-    texture->setFormat(QAbstractTexture::TextureFormat::RGBAFormat);
+    texture->setFormat(QAbstractTexture::TextureFormat::RGBAFormat); //RGBAFormat
 
-    auto* planeMesh = new Qt3DExtras::QPlaneMesh(this);
+    planeMesh = new Qt3DExtras::QPlaneMesh(parent->parentNode());
+    //qDebug() << "parent:" << parent << "parent's parent:" << parent->parentNode() << "parent*3"<<parent->parentNode()->parentNode();
 
     planeTransform = new Qt3DCore::QTransform(this);
 
@@ -28,9 +29,9 @@ LabellingTextPreview::LabellingTextPreview(Qt3DCore::QNode* parent)
     planeMaterial->setDiffuse(texture);
 
     planeEntity = new Qt3DCore::QEntity(this);
-    planeEntity->addComponent(planeMesh);
-    planeEntity->addComponent(planeMaterial);
-    planeEntity->addComponent(planeTransform);
+    planeEntity->addComponent(this->planeMesh);
+    planeEntity->addComponent(this->planeTransform);
+    planeEntity->addComponent(this->planeMaterial);
 
     setFontName("Arial");
     setFontBold(false);
@@ -38,6 +39,8 @@ LabellingTextPreview::LabellingTextPreview(Qt3DCore::QNode* parent)
     setTranslation(QVector3D(0, 0, 0));
     setNormal(QVector3D(0, 0, 1));
     setText("Enter text", 64);
+
+    planeSelected = false;
 }
 void LabellingTextPreview::setText(QString text, int contentWidth)
 {
