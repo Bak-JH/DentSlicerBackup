@@ -635,13 +635,19 @@ void featureThread::run(){
             }
         case ftrSave:
             {
-                qDebug() << "file save called";
+                break;
+                /*qDebug() << "file save called";
+                if (qmlManager->selectedModels.size() == 1 && qmlManager->selectedModels[0] == nullptr) {
+                    qDebug() << "need popup";
+                    return;
+                }
                 QString fileName = QFileDialog::getSaveFileName(nullptr, tr("Save to STL file"), "", tr("3D Model file (*.stl)"));
                 if(fileName == "")
                     return;
                 qmlManager->openProgressPopUp();
                 QFuture<void> future = QtConcurrent::run(ste, &STLexporter::exportSTL, m_glmodel->mesh,fileName);
                 break;
+                */
             }
         case ftrExport:
             {
@@ -2062,7 +2068,8 @@ void GLModel::mgoo(Qt3DRender::QPickEvent* v)
              qmlManager->selectedModels[0]->shadowModel->manualSupportActive ||
              qmlManager->selectedModels[0]->shadowModel->supportViewActive ||
              qmlManager->orientationActive ||
-             qmlManager->rotateActive))
+             qmlManager->rotateActive ||
+             qmlManager->saveActive))
         return;
 
     qmlManager->moveButton->setProperty("state", "active");

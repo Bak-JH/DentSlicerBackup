@@ -109,6 +109,9 @@ Rectangle {
 
     function do_apply(functionname){
         switch(functionname){
+                case "Save":
+                    applyClicked();
+                    break;
                 case "Move":
                     applyClicked();
                     break;
