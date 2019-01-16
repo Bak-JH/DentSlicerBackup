@@ -1618,6 +1618,10 @@ Rectangle {
                 sendTextChanged(text, contentWidth);
             }
 
+            function noModel(){
+                window.resultPopUp.openResultPopUp("","You must select the location of label.","");
+            }
+
             ComboBox {
                 objectName: "labelFontBox"
                 id: labelFontBox
