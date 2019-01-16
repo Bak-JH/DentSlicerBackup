@@ -42,10 +42,11 @@ Rectangle {
 
     signal runGroupFeature(int type, string state, double arg1, double arg2, double arg3);
     function all_off() {
-        console.log("all of starting")
+        console.log("all off starting")
         first_tab_button_open.state = "inactive";
         first_tab_button_export.state = "inactive";
         first_tab_button_save.state = "inactive";
+        runGroupFeature(ftrSave, "inactive", 0, 0, 0);
         second_tab_button_arrange.state = "inactive";
         second_tab_button_layflat.state = "inactive";
         runGroupFeature(ftrLayFlat, "inactive", 0, 0, 0);
@@ -68,7 +69,6 @@ Rectangle {
 
         fifth_tab_button_setting.state = "inactive";
         fifth_tab_button_feedback.state = "inactive";
-
 
         arrangePopUp.closePopUp();
         resultPopUp.closePopUp();
@@ -213,14 +213,30 @@ Rectangle {
             iconSource1: "qrc:/resource/upper_save.png"
             iconSource2: "qrc:/Resource/upper2_save.png"
             iconText: qsTr("Save")
+
+            signal runGroupFeature(int type, string state, double arg1, double arg2, double arg3)
+            onButtonClicked:{
+                /*
+                if(state == "active")
+                    savePopUp.visible = true
+                else
+                    savePopUp.visible = false
+                */
+                runGroupFeature(ftrSave, state, 0, 0, 0)
+                console.log("run group featur save " + ftrSave + "   " + state)
+            }
+
+/*
             signal runFeature(int type);
             MouseArea{
                 anchors.fill: parent
                 onClicked:{
-                    parent.runFeature(ftrSave);
+                    if (!qm.isSelected() && (state == "active"))
+                        window.resultPopUp.openResultPopUp("","You must select at least one model.","")
+                    else parent.runFeature(ftrSave);
                 }
-
             }
+*/
         }
 
 
@@ -634,6 +650,60 @@ Rectangle {
         anchors.leftMargin: 280
         //color: "transparent"
 
+        //2. PopUp - Save
+        PopUp {
+            objectName: "savePopup"
+            id: popup_save
+            funcname: "Save"
+            width: 320
+            height: 120
+            detail1: "Click Apply to save selected models in a file."
+            detailline1_vis: false
+            detailline2_vis: false
+            okbutton_vis: false
+            applybutton_vis: false
+            applyfinishbutton_vis: true
+
+            signal runFeature(int type);
+            onApplyClicked: {
+                console.log("save")
+                runFeature(ftrSave);
+            }
+
+            signal runGroupFeature(int type, string state, double arg1, double arg2, double arg3);
+            signal openSave();
+            signal closeSave();
+
+            onFinishClicked:{
+                closeSave();
+            }
+
+            state: {
+                if (first_tab_button_save.state=="active"){
+                    return "active";
+                } else {
+                    return "inactive";
+                }
+            }
+
+            onStateChanged: {
+                if (state == "active") {
+                    console.log("save active")
+                    openSave()
+                } else {
+                    console.log("save inactive")
+                    closeSave()
+                }
+            }
+
+            function onApplyFinishButton(){
+                popup_save.colorApplyFinishButton(2)
+            }
+
+            function offApplyFinishButton(){
+                popup_save.colorApplyFinishButton(0)
+            }
+        }
 
         //4. PopUp - Move
         PopUp {

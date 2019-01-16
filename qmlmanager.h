@@ -127,6 +127,7 @@ public:
 
     // save components
     QObject* saveButton;
+    QObject* savePopup;
 
     // export components
     //QObject* exportButton;
@@ -156,6 +157,7 @@ public:
     int rotateSnapQuotient = 0;
     bool groupSelectionActive = false;
     //bool moveActive = false;
+    bool saveActive = false;
     bool rotateActive = false;
     bool orientationActive = false;
     bool freecutActive = false;
@@ -264,6 +266,9 @@ public slots:
     void closeMove();
     void openOrientation();
     void closeOrientation();
+    void openSave();
+    void closeSave();
+    void save();
 
     void viewObjectChanged(bool checked);
     void viewSupportChanged(bool checked);

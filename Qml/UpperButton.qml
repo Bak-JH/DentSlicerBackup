@@ -19,6 +19,9 @@ Rectangle{
     function do_buttonclick(iconText){
 
         switch(iconText){
+        case "Save":
+            buttonClicked();
+            break;
         case "Move":
             buttonClicked();
             break;

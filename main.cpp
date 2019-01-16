@@ -43,8 +43,8 @@ int main(int argc, char **argv)
     painter.setPen(penHText);
 
     painter.drawText(QPoint(32,290), "Dental 3D Printing Solution");
-    painter.drawText(QPoint(32,310), "Version");
-    painter.drawText(QPoint(88,310), version);
+    painter.drawText(QPoint(32,310), "Version " + version);
+    //painter.drawText(QPoint(88,310), version);
     painter.drawText(QPoint(32,330), "Developed by HiX Inc.");
 
     QSplashScreen *splash = new QSplashScreen(pixmap);
