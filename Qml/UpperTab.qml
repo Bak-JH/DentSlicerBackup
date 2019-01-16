@@ -953,7 +953,26 @@ Rectangle {
                 if (numbox_value_detail2 != 100) // scale by scale value
                     runGroupFeature(ftrScale, state, numbox_value_detail2/100, numbox_value_detail2/100, numbox_value_detail2/100);
                     //runFeature(ftrScale, numbox_value_detail2/100, numbox_value_detail2/100, numbox_value_detail2/100);
-                else // scale by definite mm
+                else if (scale_lock.source == "qrc:/Resource/popup_image/scale_lock.png"){ // scale by definite mm with locked
+                    console.log("scale is locked");
+                    if(numberbox1_number != numberbox1_number_origin) {
+                        runGroupFeature(ftrScale, state,
+                                        numberbox1_number/numberbox1_number_origin,
+                                        numberbox1_number/numberbox1_number_origin,
+                                        numberbox1_number/numberbox1_number_origin);
+                    } else if (numberbox2_number != numberbox2_number_origin) {
+                        runGroupFeature(ftrScale, state,
+                                        numberbox2_number/numberbox2_number_origin,
+                                        numberbox2_number/numberbox2_number_origin,
+                                        numberbox2_number/numberbox2_number_origin);
+                    } else {
+                        runGroupFeature(ftrScale, state,
+                                        numberbox3_number/numberbox3_number_origin,
+                                        numberbox3_number/numberbox3_number_origin,
+                                        numberbox3_number/numberbox3_number_origin);
+                    }
+                }
+                else // scale by definite mm with unlocked
                     runGroupFeature(ftrScale, state, numberbox1_number/numberbox1_number_origin, numberbox2_number/numberbox2_number_origin, numberbox3_number/numberbox3_number_origin);
                     //runFeature(ftrScale, numberbox1_number/numberbox1_number_origin, numberbox2_number/numberbox2_number_origin, numberbox3_number/numberbox3_number_origin);
                 // update scale info
