@@ -69,6 +69,10 @@ Entity {
             }
         }
 
+        function forceKeyboardFocusOut() {
+            forceActiveFocus();
+            //console.log(keyboardHandler.focus);
+        }
         CoordinateMesh{}
     }
 
@@ -84,9 +88,15 @@ Entity {
     signal groupSelectionActivate(bool b);
 
     function forceFocus(){
-        console.log("force focus");
+        //console.log("force focus");
         keyboardHandler.forceKeyboardFocus();
     }
+
+    function forceFocusOut(){
+        //console.log("focus out");
+        total.forceKeyboardFocusOut();
+    }
+
 
 
     KeyboardHandler{
@@ -96,7 +106,10 @@ Entity {
         sourceDevice: keyboardDevice
         function forceKeyboardFocus() {
             forceActiveFocus();
+            //console.log(keyboardHandler.focus);
         }
+
+
 
         onPressed: {
             console.log(event.key);
