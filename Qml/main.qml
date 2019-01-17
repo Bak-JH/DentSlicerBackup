@@ -68,14 +68,19 @@ Item{
 
             // Only STLs
             function validateFileExtension(filePath) {
-                console.log(filePath);
-                var filepath = filePath.toString().replace(/^(file:\/{3})/,"");
-                console.log("opening" + filepath);
+                console.log(filePath)
+                var filepath = filePath.toString().replace(/^(file:\/{3})/,"")
+                console.log("opening" + filepath)
 
-                if(filePath.split('.').pop().toLowerCase() === "stl")
-                    qm.openModelFile(filepath);
+                if(filePath.split('.').pop().toLowerCase() === "stl") {
+                    qm.openModelFile(filepath)
+                    return filePath.split('.').pop().toLowerCase() === "stl"
+                }
+                else if(filePath.split('.').pop().toLowerCase() === "obj") {
+                    qm.openModelFile(filepath)
+                    return filePath.split('.').pop().toLowerCase() === "obj"
+                }
 
-                return filePath.split('.').pop().toLowerCase() === "stl"
             }
         }
 

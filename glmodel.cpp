@@ -531,12 +531,14 @@ void GLModel::updateModelMesh(bool shadowUpdate){
     //if (shadowModel != NULL) // since shadow model transformed twice
 
     m_transform->setTranslation(QVector3D(tmp.x(),tmp.y(),-mesh->z_min));
-    QMetaObject::invokeMethod(qmlManager->boundedBox, "setPosition", Q_ARG(QVariant, m_transform->translation()+QVector3D((mesh->x_max+mesh->x_min)/2,(mesh->y_max+mesh->y_min)/2,(mesh->z_max+mesh->z_min)/2)));
-    QMetaObject::invokeMethod(qmlManager->boundedBox, "setSize", Q_ARG(QVariant, mesh->x_max - mesh->x_min),
-                                                     Q_ARG(QVariant, mesh->y_max - mesh->y_min),
-                                                     Q_ARG(QVariant, mesh->z_max - mesh->z_min));
+    //QMetaObject::invokeMethod(qmlManager->boundedBox, "setPosition", Q_ARG(QVariant, m_transform->translation()+QVector3D((mesh->x_max+mesh->x_min)/2,(mesh->y_max+mesh->y_min)/2,(mesh->z_max+mesh->z_min)/2)));
+    //QMetaObject::invokeMethod(qmlManager->boundedBox, "setSize", Q_ARG(QVariant, mesh->x_max - mesh->x_min),
+    //                                                 Q_ARG(QVariant, mesh->y_max - mesh->y_min),
+    //                                                 Q_ARG(QVariant, mesh->z_max - mesh->z_min));
+    qmlManager->sendUpdateModelInfo();
+
     checkPrintingArea();
-    QMetaObject::invokeMethod(qmlManager->scalePopup, "updateSizeInfo", Q_ARG(QVariant, mesh->x_max-mesh->x_min), Q_ARG(QVariant, mesh->y_max-mesh->y_min), Q_ARG(QVariant, mesh->z_max-mesh->z_min));
+    //QMetaObject::invokeMethod(qmlManager->scalePopup, "updateSizeInfo", Q_ARG(QVariant, mesh->x_max-mesh->x_min), Q_ARG(QVariant, mesh->y_max-mesh->y_min), Q_ARG(QVariant, mesh->z_max-mesh->z_min));
     qDebug() << "model transform :" <<m_transform->translation() << mesh->x_max << mesh->x_min << mesh->y_max << mesh->y_min << mesh->z_max << mesh->z_min;
 
 
@@ -2634,10 +2636,12 @@ void GLModel::generateManualSupport(){
 }
 
 void GLModel::openScale(){
-    QMetaObject::invokeMethod(qmlManager->scalePopup, "updateSizeInfo", Q_ARG(QVariant, parentModel->mesh->x_max-parentModel->mesh->x_min), Q_ARG(QVariant, parentModel->mesh->y_max-parentModel->mesh->y_min), Q_ARG(QVariant, parentModel->mesh->z_max-parentModel->mesh->z_min));
+    qmlManager->sendUpdateModelInfo();
+    //QMetaObject::invokeMethod(qmlManager->scalePopup, "updateSizeInfo", Q_ARG(QVariant, parentModel->mesh->x_max-parentModel->mesh->x_min), Q_ARG(QVariant, parentModel->mesh->y_max-parentModel->mesh->y_min), Q_ARG(QVariant, parentModel->mesh->z_max-parentModel->mesh->z_min));
 }
 
 void GLModel::closeScale(){
+    qmlManager->sendUpdateModelInfo();
     qDebug() << "close scale";
 }
 
