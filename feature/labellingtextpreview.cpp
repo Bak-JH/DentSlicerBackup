@@ -14,6 +14,7 @@ using namespace Qt3DExtras;
 LabellingTextPreview::LabellingTextPreview(Qt3DCore::QNode* parent)
     : Qt3DCore::QEntity(parent)
 {
+    //qDebug() << "new labellingTextPreview ^ ^ ^ ^ ^ ^";
     texture = new QTexture2D(parent->parentNode());
     texture->setMinificationFilter(QAbstractTexture::Filter::Linear);//Linear
     texture->setMagnificationFilter(QAbstractTexture::Filter::Linear);

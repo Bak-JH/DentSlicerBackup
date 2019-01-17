@@ -31,6 +31,14 @@ Rectangle {
     property bool applybutton_action:true
 
     //----------------------------------------------------------------
+    // properties for label info
+    property string labelTextContent:labelTextContent
+    property int labelContentWidth:labelContentWidth
+    property string labelFontName:labelFontName
+    property bool labelIsBold:labelIsBold
+    property int labelFontSize:labelFontSize
+
+    //----------------------------------------------------------------
 
     property int imageHeight
 
@@ -1378,9 +1386,9 @@ Rectangle {
             onTextChanged: {
                 //console.log("content width changed ");
                 //console.log(hiddenText.text.length);
-                console.log("content width : ");
-                console.log(hiddenText.text.length);
-                console.log(hiddenText.contentWidth);
+                //console.log("content width : ");
+                //console.log(hiddenText.text.length);
+                //console.log(hiddenText.contentWidth);
                 labelTextChanged(text, hiddenText.contentWidth);
                 //sendTextChanged(text, hiddenText.text.length)
             }
