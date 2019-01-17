@@ -127,6 +127,7 @@ public:
 
     // save components
     QObject* saveButton;
+    QObject* savePopup;
 
     // export components
     //QObject* exportButton;
@@ -156,6 +157,7 @@ public:
     int rotateSnapQuotient = 0;
     bool groupSelectionActive = false;
     //bool moveActive = false;
+    bool saveActive = false;
     bool rotateActive = false;
     bool orientationActive = false;
     bool freecutActive = false;
@@ -211,6 +213,13 @@ public:
     Q_INVOKABLE void backgroundClickCheck();
     Q_INVOKABLE void setModelClickFalse();
 
+    float selected_x_max(size_t selectedNum);
+    float selected_x_min(size_t selectedNum);
+    float selected_y_max(size_t selectedNum);
+    float selected_y_min(size_t selectedNum);
+    float selected_z_max(size_t selectedNum);
+    float selected_z_min(size_t selectedNum);
+    void updateBoundedBox();
 
 private:
     //bool glmodels_arranged;
@@ -264,6 +273,9 @@ public slots:
     void closeMove();
     void openOrientation();
     void closeOrientation();
+    void openSave();
+    void closeSave();
+    void save();
 
     void viewObjectChanged(bool checked);
     void viewSupportChanged(bool checked);

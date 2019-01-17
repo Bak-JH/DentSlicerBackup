@@ -117,6 +117,9 @@ Rectangle {
 
     function do_apply(functionname){
         switch(functionname){
+                case "Save":
+                    applyClicked();
+                    break;
                 case "Move":
                     applyClicked();
                     break;
@@ -1321,7 +1324,8 @@ Rectangle {
                 onExited : qm.resetCursor();
                 onPressed: {
                     numberbox_detail2_text.focus = false;
-                    numbox_value_detail2 = numbox_value_detail2 - numbox_updown_scale;
+                    if (numbox_value_detail2 - numbox_updown_scale)
+                        numbox_value_detail2 = numbox_value_detail2 - numbox_updown_scale;
                     numberbox_detail2_text.text = numbox_value_detail2 + number_unit_detail2;
                     detail2_downbutton_image1.source = "qrc:/Resource/popup_image/down_button_hover.png"
                 }

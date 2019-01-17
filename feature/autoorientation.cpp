@@ -113,7 +113,7 @@ rotateResult* autoorientation::Tweak(Mesh* mesh, bool bi_algorithmic,int CA,bool
         result=euler(bestside);
     }else{
         *appropriately_rotated=false;
-        qDebug() << "fuck";
+        qDebug() << "?";
         qmlManager->setProgress(1);
         qmlManager->setProgressText("Done");
 
@@ -145,7 +145,6 @@ rotateResult* autoorientation::Tweak(Mesh* mesh, bool bi_algorithmic,int CA,bool
     }
     //━━━━━━━━━━━━━━━━━━━━ 내용 출력 ━━━━━━━━━━━━━━━━━━━
     //free(orientations);
-
     qmlManager->setProgress(1);
     qmlManager->setProgressText("Done");
 

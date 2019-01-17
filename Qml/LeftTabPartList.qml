@@ -121,7 +121,8 @@ Rectangle {
         height: 14
         anchors.left: parent.left
         anchors.top: content.bottom
-        color: "#efefef"
+        //color: "#efefef"
+        color: "transparent"
         z: 10
     }
 
