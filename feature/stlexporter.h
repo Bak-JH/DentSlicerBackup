@@ -7,6 +7,7 @@ class STLexporter
 {
 public:
     STLexporter();
+    Mesh* mergeSelectedModels();
     void exportSTL(Mesh* mesh, QString outfilename);
     void writeFace(ofstream& outfile, Mesh* mesh, MeshFace mf);
     void writeHeader(ofstream& outfile);
