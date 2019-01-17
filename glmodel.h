@@ -328,6 +328,7 @@ public slots:
     void getTextChanged(QString text, int contentWidth);
     void openLabelling();
     void closeLabelling();
+    void stateChangeLabelling();
     void getFontNameChanged(QString fontName);
     void getFontBoldChanged(bool isBold);
     void getFontSizeChanged(int fontSize);
