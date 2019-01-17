@@ -1600,12 +1600,19 @@ Rectangle {
             detail2: "Font"
             text3DInputBackground_vis: true
             image: "qrc:/Resource/label_description.png"
+            labelTextContent: "Enter text"
+            labelFontName:"Alias"
+            labelContentWidth: 0
+            labelIsBold: false
+            labelFontSize: 12
 
             //signal runFeature(int type);
             signal generateText3DMesh()
             signal openLabelling()
             signal closeLabelling()
+            signal stateChangeLabelling()
             signal sendTextChanged(string text, int contentWidth);
+            signal sendLabelUpdate(string text, int contentWidth, string fontName, bool isBold, int fontSize);
 
             onApplyClicked: {
                 console.log("ApplyClicked")
@@ -1615,11 +1622,25 @@ Rectangle {
 
             onLabelTextChanged: {
                 console.log("sendTextChanged");
+                popup_label.labelTextContent = text;
+                popup_label.labelContentWidth = contentWidth;
                 sendTextChanged(text, contentWidth);
             }
 
+            onStateChanged: {
+                if (state != "active") {
+                    stateChangeLabelling();
+                }
+            }
+
+
             function noModel(){
                 window.resultPopUp.openResultPopUp("","You must select the location of label.","");
+            }
+
+            function labelUpdate() {
+                sendLabelUpdate(popup_label.labelTextContent, popup_label.labelContentWidth
+                                ,popup_label.labelFontName, popup_label.labelIsBold, popup_label.labelFontSize);
             }
 
             ComboBox {
@@ -1637,7 +1658,10 @@ Rectangle {
 
                 signal sendFontName(string fontName)
 
-                onCurrentTextChanged: sendFontName(currentText)
+                onCurrentTextChanged: {
+                    popup_label.labelFontName = currentText;
+                    sendFontName(currentText);
+                }
 
                 Image {
                     width: 12
@@ -1749,8 +1773,10 @@ Rectangle {
 
                 signal sendFontSize(int fontSize)
 
-                onCurrentTextChanged: sendFontSize(parseInt(currentText))
-
+                onCurrentTextChanged: {
+                    popup_label.labelFontSize = parseInt(currentText);
+                    sendFontSize(parseInt(currentText));
+                }
                 Image {
                     width: 12
                     height: 8
@@ -1856,6 +1882,7 @@ Rectangle {
 
                 signal sendFontBold(bool fontBold)
                 onCheckedStateChanged: {
+                    popup_label.labelIsBold = checked;
                     sendFontBold(checked);
                 }
             }
