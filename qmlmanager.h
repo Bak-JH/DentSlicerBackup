@@ -213,6 +213,13 @@ public:
     Q_INVOKABLE void backgroundClickCheck();
     Q_INVOKABLE void setModelClickFalse();
 
+    float selected_x_max(size_t selectedNum);
+    float selected_x_min(size_t selectedNum);
+    float selected_y_max(size_t selectedNum);
+    float selected_y_min(size_t selectedNum);
+    float selected_z_max(size_t selectedNum);
+    float selected_z_min(size_t selectedNum);
+    void updateBoundedBox();
 
 private:
     //bool glmodels_arranged;
