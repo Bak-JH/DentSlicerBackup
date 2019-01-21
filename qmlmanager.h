@@ -123,11 +123,11 @@ public:
     QObject* repairButton;
 
     // auto arrange components
-    QObject* arrangePopup;
+    //QObject* arrangePopup;
 
     // save components
     QObject* saveButton;
-    QObject* savePopup;
+    //QObject* savePopup;
 
     // export components
     //QObject* exportButton;
@@ -183,7 +183,7 @@ public:
     void addPart(QString fileName, int ID);
     void deletePart(int ID);
     void openProgressPopUp();
-    void openYesNoPopUp(string inputText_h, string inputText_m, string inputText_l, int inputPopupType);
+    void openYesNoPopUp(bool selectedList_vis, string inputText_h, string inputText_m, string inputText_l, int inputText_fontsize, string image_source, int inputPopupType, int yesNo_okCancel);
     void openResultPopUp(string inputText_h, string inputText_m, string inputText_l);
     void setProgress(float value);
     void setProgressText(string inputText);
@@ -212,6 +212,7 @@ public:
     Q_INVOKABLE void sendUpdateModelInfo();
     Q_INVOKABLE void backgroundClickCheck();
     Q_INVOKABLE void setModelClickFalse();
+    Q_INVOKABLE void deleteList(int ID);
 
     float selected_x_max(size_t selectedNum);
     float selected_x_min(size_t selectedNum);

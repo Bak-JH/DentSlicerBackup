@@ -84,12 +84,14 @@ Rectangle {
             color : "#F9F9F9"
             border.width: 1
             border.color:"#C6C6C6"
-            Item {
+            // Item {
+            ScrollView {
                 width: parent.width
                 height: parent.height
                 anchors.left: parent.left
                 anchors.top : parent.top
                 //anchors.leftMargin: 16
+                clip: true
 
                 ColumnLayout {
                     y: -vbar.position * height
@@ -104,6 +106,7 @@ Rectangle {
                     }*/
                 }
             }
+            /*
             ScrollBar {
                 id: vbar
                 hoverEnabled: true
@@ -114,6 +117,7 @@ Rectangle {
                 anchors.right: parent.right
                 anchors.bottom: parent.bottom
             }
+            */
         }
     }
     Rectangle {
@@ -145,7 +149,7 @@ Rectangle {
         var newComponent = Qt.createComponent("LeftTabPartListElement.qml")
 
         console.log("added part " + fileName);
-        var newPart = newComponent.createObject(partListColumn, {"modelName" : fileName, "state" : "on", "objectName" : "qwer", "glModelID" : ID})
+        var newPart = newComponent.createObject(partListColumn, {"modelName" : fileName, "state" : "on", "objectName" : "qwer", "glModelID" : ID, "trimLength" : 22, "vis" : true, "fontsize" : 14})
     }
 
     function deletePart(ID){ // delete in list by ID
