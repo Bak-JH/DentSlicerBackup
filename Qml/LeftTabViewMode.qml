@@ -137,6 +137,7 @@ Rectangle {
 
                     signal onChanged(bool checked);
                     onCheckedChanged: {
+                        console.log("Object View Selected")
                         onChanged(checked);
                     }
 
@@ -183,6 +184,7 @@ Rectangle {
 
                     signal onChanged(bool checked);
                     onCheckedChanged: {
+                        console.log("Support View Selected")
                         onChanged(checked);
                     }
 
@@ -228,6 +230,7 @@ Rectangle {
 
                     signal onChanged(bool checked);
                     onCheckedChanged: {
+                        console.log("Layer View Selected")
                         onChanged(checked);
                     }
 

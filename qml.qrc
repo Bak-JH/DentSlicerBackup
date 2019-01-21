@@ -41,7 +41,6 @@
         <file>Qml/FeedbackPopUp.qml</file>
         <file>Qml/LeftTabSlicingOptionElement2.qml</file>
         <file>Qml/LeftTabSlicingOptionElement3.qml</file>
-        <file>Qml/ArrangePopup.qml</file>
         <file>Resource/mesh/box.stl</file>
         <file>Resource/mesh/box2.stl</file>
         <file>Qml/MeshBoundedBox.qml</file>
