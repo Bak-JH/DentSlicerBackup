@@ -46,7 +46,7 @@ Rectangle {
         first_tab_button_open.state = "inactive";
         first_tab_button_export.state = "inactive";
         first_tab_button_save.state = "inactive";
-        runGroupFeature(ftrSave, "inactive", 0, 0, 0);
+        //runGroupFeature(ftrSave, "inactive", 0, 0, 0);
         second_tab_button_arrange.state = "inactive";
         second_tab_button_layflat.state = "inactive";
         runGroupFeature(ftrLayFlat, "inactive", 0, 0, 0);
@@ -70,20 +70,20 @@ Rectangle {
         fifth_tab_button_setting.state = "inactive";
         fifth_tab_button_feedback.state = "inactive";
 
-        arrangePopUp.closePopUp();
+        //arrangePopUp.closePopUp();
         resultPopUp.closePopUp();
         deletePopUp.closePopUp();
         settingPopup.closePopUp();
         feedbackPopUp.closePopUp();
         resultPopUp.closePopUp();
-        if(yesnoPopUp.isFlawOpen)
+        //if(yesnoPopUp.isFlawOpen)
             yesnoPopUp.closePopUp();
 
         //qm.keyboardHandlerFocus();
         scene3d.forceActiveFocus();
         qm.freecutActive = false;
 
-        console.log("all off");
+        console.log("all off done");
     }
 
     property real move_x_value
@@ -216,14 +216,17 @@ Rectangle {
 
             signal runGroupFeature(int type, string state, double arg1, double arg2, double arg3)
             onButtonClicked:{
+                if(!qm.isSelected() && (state == "active"))
+                    window.resultPopUp.openResultPopUp("","You must select at least one model.","")
+                else if(state == "active") {
+                    qm.openSave()
+                    yesnoPopUp.openYesNoPopUp(true, "", "Save selected models as a STL file.", "", 18, "", ftrSave, 1)
+                } else
+                    yesnoPopUp.visible = false
                 /*
-                if(state == "active")
-                    savePopUp.visible = true
-                else
-                    savePopUp.visible = false
-                */
                 runGroupFeature(ftrSave, state, 0, 0, 0)
                 console.log("run group featur save " + ftrSave + "   " + state)
+                */
             }
 
 /*
@@ -350,11 +353,13 @@ Rectangle {
             iconSource2: "qrc:/Resource/upper2_arrange.png"
             iconText: qsTr("Arrange")
             onButtonClicked:{
-                if(state == "active")
-                    arrangePopUp.visible = true
+                if(state == "active") {
+                    //arrangePopUp.visible = true
+                    yesnoPopUp.openYesNoPopUp(false, "Click OK to auto-arrange models.", "", "", 18, "qrc:/Resource/popup_image/image_arrange.png", ftrArrange, 1)
+                }
                 else
-                    arrangePopUp.visible = false
-
+                    //arrangePopUp.visible = false
+                    yesnoPopUp.visible = false
             }
         }
         UpperButton{
@@ -650,6 +655,7 @@ Rectangle {
         anchors.leftMargin: 280
         //color: "transparent"
 
+        /*
         //2. PopUp - Save
         PopUp {
             objectName: "savePopup"
@@ -704,6 +710,7 @@ Rectangle {
                 popup_save.colorApplyFinishButton(0)
             }
         }
+        */
 
         //4. PopUp - Move
         PopUp {
