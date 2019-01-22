@@ -17,6 +17,8 @@ Entity {
         source: inputSource
     }*/
 
+
+
     Transform {
         id: meshTransform
         property quaternion objectRotation : fromAxisAndAngle(Qt.vector3d(0,0, 1), 60)

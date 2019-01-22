@@ -80,7 +80,7 @@ Rectangle {
             yesnoPopUp.closePopUp();
 
         //qm.keyboardHandlerFocus();
-        //scene3d.forceActiveFocus();
+        scene3d.forceActiveFocus();
         qm.freecutActive = false;
 
         console.log("all off done");
@@ -1717,7 +1717,6 @@ Rectangle {
             }
 
             onLabelTextChanged: {
-                console.log("sendTextChanged");
                 popup_label.labelTextContent = text;
                 popup_label.labelContentWidth = contentWidth;
                 sendTextChanged(text, contentWidth);
@@ -1743,7 +1742,7 @@ Rectangle {
                 objectName: "labelFontBox"
                 id: labelFontBox
                 currentIndex: 0
-                activeFocusOnPress: true
+                activeFocusOnPress: false
                 width: 194
                 height: 24
 
@@ -1858,7 +1857,7 @@ Rectangle {
                 objectName: "labelFontSizeBox"
                 id: labelFontSizeBox
                 currentIndex: 0
-                activeFocusOnPress: true
+                activeFocusOnPress: false
                 width: 194
                 height: 24
 

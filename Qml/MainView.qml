@@ -1,3 +1,12 @@
+//import QtQuick 2.4
+import QtQuick.Controls 1.4
+import QtQuick.Scene3D 2.0
+import QtQuick.Window 2.2
+import QtCanvas3D 1.1
+import QtQuick.Controls.Styles 1.4
+import "glcode.js" as GLCode
+import QtQuick.Dialogs 1.2
+
 
 import Qt3D.Core 2.0
 import Qt3D.Render 2.0
@@ -26,6 +35,7 @@ Entity {
     //CoordinateMesh{} // 기준좌표 체크
 
     CameraManager{id : cm}
+
 
 
     Entity{
@@ -69,10 +79,7 @@ Entity {
             }
         }
 
-        function forceKeyboardFocusOut() {
-            forceActiveFocus();
-            //console.log(keyboardHandler.focus);
-        }
+
         CoordinateMesh{}
     }
 
@@ -88,14 +95,10 @@ Entity {
     signal groupSelectionActivate(bool b);
 
     function forceFocus(){
-        //console.log("force focus");
-        keyboardHandler.forceKeyboardFocus();
+        console.log("force focus");
+        focusItem.forceKeyboardFocus();
     }
 
-    function forceFocusOut(){
-        //console.log("focus out");
-        total.forceKeyboardFocusOut();
-    }
 
 
 
@@ -104,9 +107,14 @@ Entity {
         id : keyboardHandler
         objectName: "keyboardHandler"
         sourceDevice: keyboardDevice
-        function forceKeyboardFocus() {
-            forceActiveFocus();
-            //console.log(keyboardHandler.focus);
+
+        Item {
+            id: focusItem
+            focus: true
+            function forceKeyboardFocus() {
+                forceActiveFocus();
+                keyboardHandler.focus = true;
+            }
         }
 
 
@@ -147,7 +155,9 @@ Entity {
                 groupSelectionActivate(false);
             }
         }
+
     }
+
 
     function axisAngle2Quaternion(angle, axis){
         var result = Qt.quaternion(0,0,0,0);
