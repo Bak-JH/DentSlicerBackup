@@ -163,7 +163,7 @@ Rectangle {
     }
 
     function focus_all_off() {
-        console.log("focus all off");
+        console.log("focus all off ***********************************");
         numberbox1_text.focus = false;
         numberbox2_text.focus = false;
         numberbox3_text.focus = false;
@@ -431,7 +431,7 @@ Rectangle {
                 qm.resetCursor();
                 parent.color = parent.beforeHorver
             }
-            onReleased: {do_apply(funcname.text); /*all_off();*/ focus_all_off() ;numbox_reset()}
+            onReleased: {do_apply(funcname.text); /*all_off();*/ focus_all_off() ;numbox_reset();}
         }
     }
     Rectangle {
@@ -1368,6 +1368,8 @@ Rectangle {
             id:text3DInput
             objectName: "text3DInput"
             anchors.fill: parent
+//            activeFocusOnPress: true
+ //           activeFocusOnPress: false
             style: TextFieldStyle {
                 textColor: "#333333"
                 background: Rectangle {
@@ -1377,7 +1379,9 @@ Rectangle {
                 }
             }
             selectByMouse: true
+
             onFocusChanged: {
+                console.log("focus changed: ", text3DInput.focus, text3DInputBackground.focus);
             //    if(numberbox1_text.focus)
             //        numberbox1.color = "#f5f5f5"
             }
@@ -1390,9 +1394,31 @@ Rectangle {
                 //console.log(hiddenText.text.length);
                 //console.log(hiddenText.contentWidth);
                 labelTextChanged(text, hiddenText.contentWidth);
+
                 //sendTextChanged(text, hiddenText.text.length)
             }
+
+
+
         }
+
+        /*
+        MouseArea {
+            anchors.fill: parent
+            hoverEnabled: true
+            focus: false
+            onEntered: {
+                text3DInput.focus = true;
+                text3DInput.activeFocusOnPress = true;
+                console.log("entered ^^^^", text3DInput.activeFocusOnPress);
+            }
+            onExited: {
+                text3DInput.focus = false;
+                text3DInput.activeFocusOnPress = false;
+                console.log("exited ^^^^", text3DInput.activeFocusOnPress);
+            }
+        }
+        */
     }
 
     Rectangle{//shadow

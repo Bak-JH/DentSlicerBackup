@@ -28,9 +28,19 @@ Item{
 
         property alias mainFont : mainFont
 
+        /*
+        onActiveFocusItemChanged: {
+            console.log("does window has chain", activeFocusOnTab);
+            console.log("activeFocusItem &&&&&&&&&&&&&&& ", activeFocusItem);
+            console.log("parent: ", activeFocusItem.parent);
+
+        }
+        */
+
         FontLoader{
             id : mainFont
             source: "qrc:/Resource/font/NotoSans-SemiCondensed.ttf"
+
         }
         FontLoader{
             id : mediumFont
@@ -396,5 +406,7 @@ Item{
         }
     }
     */
+
+
 }
 
