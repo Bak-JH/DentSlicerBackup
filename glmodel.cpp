@@ -1220,10 +1220,10 @@ void GLModel::handlePickerClicked(QPickEvent *pick)
     if (labellingActive && trianglePick && trianglePick->localIntersection() != QVector3D(0,0,0)) {
         MeshFace shadow_meshface = mesh->faces[trianglePick->triangleIndex()];
 
-        parentModel->uncolorExtensionFaces();
+        //parentModel->uncolorExtensionFaces();
         parentModel->targetMeshFace = &parentModel->mesh->faces[shadow_meshface.parent_idx];
-        parentModel->generateColorAttributes();
-        parentModel->colorExtensionFaces();
+        //parentModel->generateColorAttributes();
+        //parentModel->colorExtensionFaces();
 
         QMetaObject::invokeMethod(qmlManager->labelPopup, "labelUpdate");
 
