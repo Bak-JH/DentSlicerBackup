@@ -21,7 +21,6 @@
 QmlManager::QmlManager(QObject *parent) : QObject(parent)
   ,layerViewFlags(LAYER_INFILL | LAYER_SUPPORTERS | LAYER_RAFT)
 {
-
 }
 
 void QmlManager::initializeUI(QQmlApplicationEngine* e){
