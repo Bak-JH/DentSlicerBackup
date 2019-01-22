@@ -163,7 +163,6 @@ Rectangle {
     }
 
     function focus_all_off() {
-        console.log("focus all off ***********************************");
         numberbox1_text.focus = false;
         numberbox2_text.focus = false;
         numberbox3_text.focus = false;
