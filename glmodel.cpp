@@ -1745,7 +1745,7 @@ void GLModel::generatePlane(){
 
     for (int i=0;i<2;i++){
         parentModel->planeEntity[i] = new Qt3DCore::QEntity(parentModel->parentModel);
-        qDebug() << "generatePlane---------------------==========-=-==-" << parentModel->parentModel;
+        //qDebug() << "generatePlane---------------------==========-=-==-" << parentModel->parentModel;
         parentModel->clipPlane[i]=new Qt3DExtras::QPlaneMesh(this);
         parentModel->clipPlane[i]->setHeight(100.0);
         parentModel->clipPlane[i]->setWidth(100.0);
@@ -2347,7 +2347,7 @@ void GLModel::openLabelling()
 
 void GLModel::closeLabelling()
 {
-    //qDebug() << "close labelling ******************";
+    qDebug() << "close labelling ******************";
     labellingActive = false;
     /*
     if (labellingTextPreview){
@@ -2363,8 +2363,8 @@ void GLModel::closeLabelling()
 
 void GLModel::stateChangeLabelling() {
     //qDebug() << "labelling state changeD!!!!!!!!!!!!!!";
-    QMetaObject::invokeMethod(qmlManager->mv, "forceFocusOut");
-    (qmlManager->keyboardHandler)->setFocus(false);
+    qmlManager->keyboardHandlerFocus();
+    (qmlManager->keyboardHandler)->setFocus(true);
 }
 
 void GLModel::getFontNameChanged(QString fontName)

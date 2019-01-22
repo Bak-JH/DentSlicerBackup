@@ -53,7 +53,7 @@ void LabellingTextPreview::setText(QString text, int contentWidth)
     }
 
     width = this->contentWidth*2;// * this->fontSize;
-    qDebug() << "text : " << text << "contentWidth: " << contentWidth << "width : " << width;
+    //qDebug() << "text : " << text << "contentWidth: " << contentWidth << "width : " << width;
     if (width < minimumWidth)
         width = minimumWidth;
 
@@ -72,7 +72,7 @@ void LabellingTextPreview::setFontName(QString fontName)
 
 void LabellingTextPreview::setFontBold(bool isbold){
     if (isbold){
-        qDebug() << "set font bold";
+        //qDebug() << "set font bold";
         this->fontWeight = QFont::Bold;
     } else {
         this->fontWeight = QFont::Normal;
