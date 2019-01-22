@@ -1942,9 +1942,11 @@ void GLModel::removeModelPartList(){
     QList<QObject*> temp;
     temp.append(mainWindow);
     QObject *partList = (QEntity *)FindItemByName(temp, "partList");
+    QObject *yesno_popup = (QEntity *)FindItemByName(temp, "yesno_popup");
 
     qDebug() <<"remove ID   " << ID;
     QMetaObject::invokeMethod(partList, "deletePart", Q_ARG(QVariant, ID));
+    QMetaObject::invokeMethod(yesno_popup, "deletePart", Q_ARG(QVariant, ID));
 }
 
 void GLModel::modelCut(){

@@ -129,16 +129,16 @@ void QmlManager::initializeUI(QQmlApplicationEngine* e){
     repairPopup = FindItemByName(engine, "repairPopup");
 
     // arrange components
-    arrangePopup = FindItemByName(engine, "arrangePopup");
+    //arrangePopup = FindItemByName(engine, "arrangePopup");
     progress_popup = FindItemByName(engine, "progress_popup");
     //QObject::connect(arrangePopup, SIGNAL(runFeature()), this, SLOT(runArrange()));
 
     // save component
     saveButton = FindItemByName(engine, "saveBtn");
-    savePopup = FindItemByName(engine, "savePopup");
-    QObject::connect(savePopup, SIGNAL(runFeature(int)),this, SLOT(save()));
-    QObject::connect(savePopup, SIGNAL(openSave()), this, SLOT(openSave()));
-    QObject::connect(savePopup, SIGNAL(closeSave()), this, SLOT(closeSave()));
+    //savePopup = FindItemByName(engine, "savePopup");
+    //QObject::connect(savePopup, SIGNAL(runFeature(int)),this, SLOT(save()));
+    //QObject::connect(savePopup, SIGNAL(openSave()), this, SLOT(openSave()));
+    //QObject::connect(savePopup, SIGNAL(closeSave()), this, SLOT(closeSave()));
 
     QObject::connect(saveButton, SIGNAL(runGroupFeature(int,QString, double,double,double)) , this, SLOT(runGroupFeature(int,QString,double,double,double)));
 
@@ -208,7 +208,6 @@ void QmlManager::initializeUI(QQmlApplicationEngine* e){
     QObject::connect(mv, SIGNAL(copy()), this, SLOT(copyModel()));
     QObject::connect(mv, SIGNAL(paste()), this, SLOT(pasteModel()));
     QObject::connect(mv, SIGNAL(groupSelectionActivate(bool)), this, SLOT(groupSelectionActivate(bool)));
-
 }
 
 void QmlManager::createModelFile(Mesh* target_mesh, QString fname) {
@@ -266,7 +265,7 @@ void QmlManager::checkModelFile(int ID){
     identifyHoles(target->mesh);
     if (target->mesh->holes.size() != 0){
         selectPart(ID);
-        qmlManager->openYesNoPopUp("Model has flaws.", "", "Do you want to fix the model?", ftrRepair);
+        qmlManager->openYesNoPopUp(false, "Model has flaws.", "", "Do you want to fix the model?", 16, "", ftrRepair, 0);
     }
 }
 
@@ -306,6 +305,7 @@ void QmlManager::deleteModelFile(int ID){
 }
 
 void QmlManager::disconnectHandlers(GLModel* glmodel){
+    qDebug() << "disconnectHandlers(GLModel* glmodel)";
 
     //QObject::disconnect(glmodel->ft, SIGNAL(setProgress(QVariant)),progress_popup, SLOT(updateNumber(QVariant)));
     //QObject::disconnect(glmodel->ft, SIGNAL(loadPopup(QVariant)),orientPopup, SLOT(show_popup(QVariant)));
@@ -399,14 +399,7 @@ void QmlManager::disconnectHandlers(GLModel* glmodel){
     QObject::disconnect(exportOKButton, SIGNAL(runFeature(int, QVariant)), glmodel->ft, SLOT(setTypeAndRun(int, QVariant)));
     //QObject::disconnect(exportButton, SIGNAL(runFeature(int, QVariant)), glmodel->ft, SLOT(setTypeAndRun(int, QVariant)));
 
-    // view mode buttons
-    QObject::disconnect(viewObjectButton, SIGNAL(onChanged(bool)), this, SLOT(viewObjectChanged(bool)));
-    QObject::disconnect(viewSupportButton, SIGNAL(onChanged(bool)), this, SLOT(viewSupportChanged(bool)));
-    QObject::disconnect(viewLayerButton, SIGNAL(onChanged(bool)), this, SLOT(viewLayerChanged(bool)));
 
-    QObject::disconnect(layerInfillButton, SIGNAL(onChanged(bool)), this, SLOT(layerInfillButtonChanged(bool)));
-    QObject::disconnect(layerSupportersButton, SIGNAL(onChanged(bool)), this, SLOT(layerSupportersButtonChanged(bool)));
-    QObject::disconnect(layerRaftButton, SIGNAL(onChanged(bool)), this, SLOT(layerRaftButtonChanged(bool)));
 
     QObject::disconnect(layerViewSlider, SIGNAL(sliderValueChanged(double)), glmodel, SLOT(getLayerViewSliderSignal(double)));
 }
@@ -505,14 +498,6 @@ void QmlManager::connectHandlers(GLModel* glmodel){
     QObject::connect(exportOKButton, SIGNAL(runFeature(int, QVariant)), glmodel->ft, SLOT(setTypeAndRun(int, QVariant)));
     //QObject::connect(exportButton, SIGNAL(runFeature(int, QVariant)), glmodel->ft, SLOT(setTypeAndRun(int, QVariant)));
 
-    // view mode buttons
-    QObject::connect(viewObjectButton, SIGNAL(onChanged(bool)), this, SLOT(viewObjectChanged(bool)));
-    QObject::connect(viewSupportButton, SIGNAL(onChanged(bool)), this, SLOT(viewSupportChanged(bool)));
-    QObject::connect(viewLayerButton, SIGNAL(onChanged(bool)), this, SLOT(viewLayerChanged(bool)));
-
-    QObject::connect(layerInfillButton, SIGNAL(onChanged(bool)), this, SLOT(layerInfillButtonChanged(bool)));
-    QObject::connect(layerSupportersButton, SIGNAL(onChanged(bool)), this, SLOT(layerSupportersButtonChanged(bool)));
-    QObject::connect(layerRaftButton, SIGNAL(onChanged(bool)), this, SLOT(layerRaftButtonChanged(bool)));
 
     QObject::connect(layerViewSlider, SIGNAL(sliderValueChanged(double)), glmodel, SLOT(getLayerViewSliderSignal(double)));
 }
@@ -689,7 +674,8 @@ void QmlManager::sendUpdateModelInfo(int printing_time, int layer, QString xyz, 
 }
 
 void QmlManager::openArrange(){
-    arrangePopup->setProperty("visible", true);
+    //arrangePopup->setProperty("visible", true);
+    openYesNoPopUp(false, "Click OK to auto-arrange models.", "", "", 18, "qrc:/Resource/popup_image/image_arrange.png", ftrArrange, 1);
 }
 
 void QmlManager::runArrange(){
@@ -702,7 +688,7 @@ void QmlManager::runArrange_internal(){
         vector<Mesh> meshes_to_arrange;
         vector<XYArrangement> arng_result_set;
         vector<Qt3DCore::QTransform*> m_transform_set;
-        for (int i=0; i<glmodels.size(); i++){
+        for (size_t i=0; i<glmodels.size(); i++){
             meshes_to_arrange.push_back(*(glmodels[i]->mesh));
             m_transform_set.push_back(glmodels[i]->m_transform);
         }
@@ -710,7 +696,7 @@ void QmlManager::runArrange_internal(){
         arng_result_set = ar->arngMeshes(meshes_to_arrange);
         vector<QVector3D> translations;
         vector<float> rotations;
-        for (int i=0; i<arng_result_set.size(); i++){
+        for (size_t i=0; i<arng_result_set.size(); i++){
             XYArrangement arng_result = arng_result_set[i];
             QVector3D trans_vec = QVector3D(arng_result.first.X/scfg->resolution, arng_result.first.Y/scfg->resolution, 0);
             translations.push_back(trans_vec);
@@ -824,6 +810,7 @@ bool QmlManager::multipleModelSelected(int ID){
             target->changecolor(0);
             target->checkPrintingArea();
             QMetaObject::invokeMethod(partList, "unselectPartByModel", Q_ARG(QVariant, target->ID));
+            QMetaObject::invokeMethod(yesno_popup, "deletePart", Q_ARG(QVariant, target->ID));
 
             // set slicing info box property visible true if slicing info exists
             //slicingData->setProperty("visible", false);
@@ -834,9 +821,9 @@ bool QmlManager::multipleModelSelected(int ID){
 
             if (groupFunctionState == "active"){
                 switch (groupFunctionIndex){
-                case 2:
-                    QMetaObject::invokeMethod(savePopup, "offApplyFinishButton");
-                    break;
+                //case 2:
+                //    QMetaObject::invokeMethod(savePopup, "offApplyFinishButton");
+                //    break;
                 case 5:
                     hideRotateSphere();
                     QMetaObject::invokeMethod(rotatePopup,"offApplyFinishButton");
@@ -867,6 +854,7 @@ bool QmlManager::multipleModelSelected(int ID){
     target->changecolor(1);
     qDebug() << "multipleModelSelected invoke";
     QMetaObject::invokeMethod(partList, "selectPartByModel", Q_ARG(QVariant, target->ID));
+    QMetaObject::invokeMethod(yesno_popup, "addPart", Q_ARG(QVariant, target->getFileName(target->filename.toStdString().c_str())), Q_ARG(QVariant, target->ID));
     // Set BoundedBox
 //    float xmid = (target->mesh->x_max + target->mesh->x_min)/2;
 //    float ymid = (target->mesh->y_max + target->mesh->y_min)/2;
@@ -888,9 +876,9 @@ bool QmlManager::multipleModelSelected(int ID){
     sendUpdateModelInfo();
     if (groupFunctionState == "active"){
         switch (groupFunctionIndex){
-        case 2:
-            QMetaObject::invokeMethod(savePopup, "onApplyFinishButton");
-            break;
+        //case 2:
+        //    QMetaObject::invokeMethod(savePopup, "onApplyFinishButton");
+        //    break;
         case 5:
             QMetaObject::invokeMethod(rotatePopup,"onApplyFinishButton");
             showRotateSphere();
@@ -941,6 +929,7 @@ void QmlManager::lastModelSelected(){
         (*it)->changecolor(0);
         (*it)->checkPrintingArea();
         QMetaObject::invokeMethod(partList, "unselectPartByModel", Q_ARG(QVariant, (*it)->ID));
+        QMetaObject::invokeMethod(yesno_popup, "deletePart", Q_ARG(QVariant, (*it)->ID));
 
         slicingData->setProperty("visible", false);
 
@@ -950,9 +939,9 @@ void QmlManager::lastModelSelected(){
 
         if(groupFunctionState == "active") {
             switch (groupFunctionIndex) {
-            case 2:
-                QMetaObject::invokeMethod(savePopup, "offApplyFinishButton");
-                break;
+            //case 2:
+            //    QMetaObject::invokeMethod(savePopup, "offApplyFinishButton");
+            //    break;
             case 4:
                 hideMoveArrow();
                 QMetaObject::invokeMethod(movePopup, "offApplyFinishButton");
@@ -1005,6 +994,7 @@ void QmlManager::modelSelected(int ID){
             (*it)->changecolor(0);
             (*it)->checkPrintingArea();
             QMetaObject::invokeMethod(partList, "unselectPartByModel", Q_ARG(QVariant, (*it)->ID));
+            QMetaObject::invokeMethod(yesno_popup, "deletePart", Q_ARG(QVariant, (*it)->ID));
 
             // set slicing info box property visible true if slicing info exists
             slicingData->setProperty("visible",false);
@@ -1015,9 +1005,9 @@ void QmlManager::modelSelected(int ID){
             QMetaObject::invokeMethod(boundedBox, "hideBox"); // Bounded Box
             if (groupFunctionState == "active"){
                 switch (groupFunctionIndex){
-                case 2:
-                    QMetaObject::invokeMethod(savePopup, "offApplyFinishButton");
-                    break;
+                //case 2:
+                //    QMetaObject::invokeMethod(savePopup, "offApplyFinishButton");
+                //    break;
                 case 5:
                     hideRotateSphere();
                     QMetaObject::invokeMethod(rotatePopup,"offApplyFinishButton");
@@ -1045,6 +1035,7 @@ void QmlManager::modelSelected(int ID){
         selectedModels[0]->changecolor(0);
         selectedModels[0]->checkPrintingArea();
         QMetaObject::invokeMethod(partList, "unselectPartByModel", Q_ARG(QVariant, selectedModels[0]->ID));
+        QMetaObject::invokeMethod(yesno_popup, "deletePart", Q_ARG(QVariant, selectedModels[0]->ID));
 
         // set slicing info box property visible true if slicing info exists
         slicingData->setProperty("visible",false);
@@ -1055,9 +1046,9 @@ void QmlManager::modelSelected(int ID){
         QMetaObject::invokeMethod(boundedBox, "hideBox"); // Bounded Box
         if (groupFunctionState == "active"){
             switch (groupFunctionIndex){
-            case 2:
-                QMetaObject::invokeMethod(savePopup, "offApplyFinishButton");
-                break;
+            //case 2:
+            //    QMetaObject::invokeMethod(savePopup, "offApplyFinishButton");
+            //    break;
             case 5:
                 hideRotateSphere();
                 QMetaObject::invokeMethod(rotatePopup,"offApplyFinishButton");
@@ -1093,6 +1084,7 @@ void QmlManager::modelSelected(int ID){
         selectedModels[0]->changecolor(1);
         qDebug() << "modelSelected invoke";
         QMetaObject::invokeMethod(partList, "selectPartByModel", Q_ARG(QVariant, selectedModels[0]->ID));
+        QMetaObject::invokeMethod(yesno_popup, "addPart", Q_ARG(QVariant, selectedModels[0]->getFileName(selectedModels[0]->filename.toStdString().c_str())), Q_ARG(QVariant, ID));
         qDebug() << "changing model" << selectedModels[0]->ID;
 
         // Set BoundedBox
@@ -1130,9 +1122,9 @@ void QmlManager::modelSelected(int ID){
 
         if (groupFunctionState == "active"){
             switch (groupFunctionIndex){
-            case 2:
-                QMetaObject::invokeMethod(savePopup, "onApplyFinishButton");
-                break;
+            //case 2:
+            //    QMetaObject::invokeMethod(savePopup, "onApplyFinishButton");
+            //    break;
             case 5:
                 QMetaObject::invokeMethod(rotatePopup,"onApplyFinishButton");
                 showRotateSphere();
@@ -1722,14 +1714,19 @@ void QmlManager::save() {
 
     qDebug() << "file save called";
     if (qmlManager->selectedModels.size() == 1 && qmlManager->selectedModels[0] == nullptr) {
-        qDebug() << "need popup";
+        qmlManager->closeSave();
+        QMetaObject::invokeMethod(boxUpperTab, "all_off");
         return;
     }
     QString fileName = QFileDialog::getSaveFileName(nullptr, tr("Save to STL file"), "", tr("3D Model file (*.stl)"));
-    if(fileName == "")
+    if(fileName == "") {
+        qmlManager->closeSave();
+        QMetaObject::invokeMethod(boxUpperTab, "all_off");
         return;
+    }
     qmlManager->openProgressPopUp();
     QFuture<void> future = QtConcurrent::run(ste, &STLexporter::exportSTL, qmlManager->selectedModels[0]->mesh,fileName);
+    return;
 }
 
 void QmlManager::groupSelectionActivate(bool active){
@@ -1746,6 +1743,7 @@ void QmlManager::runGroupFeature(int ftrType, QString state, double arg1, double
 
     qDebug()<< "runGroupFeature | type:"<<ftrType<<"| state:" <<state << selectedModels.size();
     switch(ftrType){
+    /*
     case ftrSave:
     {
         if (state == "active") {
@@ -1760,6 +1758,7 @@ void QmlManager::runGroupFeature(int ftrType, QString state, double arg1, double
         }
         break;
     }
+    */
     case ftrRotate: //rotate
     {
         if (state == "inactive"){
@@ -1963,13 +1962,17 @@ void QmlManager::pasteModel(){
 }
 
 void QmlManager::addPart(QString fileName, int ID){
-    QMetaObject::invokeMethod(partList, "addPart",
-        Q_ARG(QVariant, fileName),
-        Q_ARG(QVariant, ID));
+    QMetaObject::invokeMethod(partList, "addPart", Q_ARG(QVariant, fileName), Q_ARG(QVariant, ID));
 }
 
 void QmlManager::deletePart(int ID){
     QMetaObject::invokeMethod(partList, "deletePart", Q_ARG(QVariant, ID));
+    QMetaObject::invokeMethod(yesno_popup, "deletePart", Q_ARG(QVariant, ID));
+}
+
+void QmlManager::deleteList(int ID) {
+    qDebug() << "deleteList";
+    QMetaObject::invokeMethod(yesno_popup, "deletePart", Q_ARG(QVariant, ID));
 }
 
 void QmlManager::openProgressPopUp(){
@@ -1977,12 +1980,16 @@ void QmlManager::openProgressPopUp(){
     QMetaObject::invokeMethod(progress_popup, "openPopUp");
 }
 
-void QmlManager::openYesNoPopUp(string inputText_h, string inputText_m, string inputText_l, int inputPopupType){
+void QmlManager::openYesNoPopUp(bool selectedList_vis, string inputText_h, string inputText_m, string inputText_l, int inputText_fontsize, string image_source, int inputPopupType, int yesNo_okCancel){
     QMetaObject::invokeMethod(yesno_popup, "openYesNoPopUp",
+                              Q_ARG(QVariant, selectedList_vis),
                               Q_ARG(QVariant, QString::fromStdString(inputText_h)),
                               Q_ARG(QVariant, QString::fromStdString(inputText_m)),
                               Q_ARG(QVariant, QString::fromStdString(inputText_l)),
-                              Q_ARG(QVariant, inputPopupType));
+                              Q_ARG(QVariant, inputText_fontsize),
+                              Q_ARG(QVariant, QString::fromStdString(image_source)),
+                              Q_ARG(QVariant, inputPopupType),
+                              Q_ARG(QVariant, yesNo_okCancel));
 }
 
 void QmlManager::openResultPopUp(string inputText_h, string inputText_m, string inputText_l){
@@ -2059,6 +2066,7 @@ void QmlManager::setProgressText(string inputText){
 
 void QmlManager::viewObjectChanged(bool checked){
     qInfo() << "viewObjectChanged" << checked;
+    qDebug() << "selected Num = " << selectedModels.size();
     if( checked ) {
         setViewMode(VIEW_MODE_OBJECT);
     }
@@ -2066,10 +2074,11 @@ void QmlManager::viewObjectChanged(bool checked){
 
 void QmlManager::viewSupportChanged(bool checked){
     qInfo() << "viewSupportChanged" << checked;
+    qDebug() << "selected Num = " << selectedModels.size();
     if( checked ) {
         if( selectedModels[0] != nullptr ) {
             if( selectedModels[0]->slicer == nullptr ) {
-                qmlManager->openYesNoPopUp("The model should be sliced for support view.", "", "Would you like to continue?", ftrSupportViewMode);
+                qmlManager->openYesNoPopUp(false, "The model should be sliced for support view.", "", "Would you like to continue?", 16, "", ftrSupportViewMode, 0);
             } else {
                 QMetaObject::invokeMethod(qmlManager->boxUpperTab, "all_off");
                 setViewMode(VIEW_MODE_SUPPORT);
@@ -2080,10 +2089,11 @@ void QmlManager::viewSupportChanged(bool checked){
 
 void QmlManager::viewLayerChanged(bool checked){
     qInfo() << "viewLayerChanged" << checked;
+    qDebug() << "selected Num = " << selectedModels.size();
     if( checked ) {
         if( selectedModels[0] != nullptr ) {
             if( selectedModels[0]->slicer == nullptr ) {
-                qmlManager->openYesNoPopUp("The model should be sliced for layer view.", "", "Would you like to continue?", ftrLayerViewMode);
+                qmlManager->openYesNoPopUp(false, "The model should be sliced for layer view.", "", "Would you like to continue?", 16, "", ftrLayerViewMode, 0);
             } else {
                 QMetaObject::invokeMethod(qmlManager->boxUpperTab, "all_off");
                 setViewMode(VIEW_MODE_LAYER);
@@ -2149,6 +2159,7 @@ void QmlManager::setViewMode(int viewMode) {
     }
 
     if( this->viewMode == VIEW_MODE_OBJECT ) {
+        QMetaObject::invokeMethod(yesno_popup, "closePopUp");
         QMetaObject::invokeMethod(leftTabViewMode, "setObjectView");
     } else {
         QMetaObject::invokeMethod(qmlManager->boundedBox, "hideBox");
