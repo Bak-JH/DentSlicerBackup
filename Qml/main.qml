@@ -22,7 +22,7 @@ Item{
         property alias progressPopUp: progressPopUp
         property alias resultPopUp: resultPopUp
         property alias yesnoPopUp: yesnoPopUp
-        property alias deletePopUp: deletePopUp
+        //property alias deletePopUp: deletePopUp
         property alias layerViewPopup: layerViewPopup
         property alias mttab : mttab
 
@@ -356,9 +356,9 @@ Item{
             id : yesnoPopUp
         }
 
-        DeletePopup{
-            id : deletePopUp
-        }
+        //DeletePopup{
+        //    id : deletePopUp
+        //}
 
         LayerViewPopup {
             id: layerViewPopup

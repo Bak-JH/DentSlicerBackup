@@ -32,6 +32,8 @@ Entity {
     property alias systemTransform: systemTransform
     property alias keyboardHandler: keyboardHandler
 
+    property int ftrDelete : 18
+
     //CoordinateMesh{} // 기준좌표 체크
 
     CameraManager{id : cm}
@@ -122,12 +124,14 @@ Entity {
         onPressed: {
             console.log(event.key);
             if (event.key === Qt.Key_Delete) {
-                deletePopUp.targetID = qm.getselectedModelID()
-                if (deletePopUp.targetID != -1){
-                    uppertab.all_off();
-                    deletePopUp.visible = true
-                    mttab.hideTab();
-                }
+                console.log("delete called by keyboard")
+                yesnoPopUp.openYesNoPopUp(false, "", "Are you sure to delete these models?", "", 18, "", ftrDelete, 0)
+                //deletePopUp.targetID = qm.getselectedModelID()
+                //if (deletePopUp.targetID != -1){
+                //    uppertab.all_off();
+                //    deletePopUp.visible = true
+                //    mttab.hideTab();
+                //}
             } else if (event.key === Qt.Key_Escape) {
                 uppertab.all_off()
             } else if (event.matches(StandardKey.Undo)){

@@ -1,6 +1,6 @@
 .TEMPLATE = app
 
-QT += qml quick opengl 3dcore 3drender 3dinput 3dextras concurrent widgets
+QT += qml quick opengl 3dcore 3drender 3dinput 3dextras concurrent widgets core
 
 CONFIG += c++11 resources_big
 

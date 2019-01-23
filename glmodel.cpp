@@ -12,6 +12,7 @@
 #include <QFuture>
 #include <QFileDialog>
 #include <iostream>
+#include <QDir>
 
 int GLModel::globalID = 0;
 
@@ -642,6 +643,7 @@ void featureThread::setTypeAndStart(int type){
 }
 
 void featureThread::run(){
+    qDebug() << "run()";
     switch (optype){
         case ftrOpen:
             {
@@ -664,12 +666,20 @@ void featureThread::run(){
                 */
             }
         case ftrExport:
+        case ftrTempExport: // support view & layer view
             {
-                // export to file
-                QString fileName = QFileDialog::getSaveFileName(nullptr, tr("Export sliced file"), "");
-                //ste->exportSTL(m_glmodel->mesh, fileName);
-                if(fileName == "")
-                    return;
+                QString fileName;
+                if (optype == ftrExport) {
+                    qDebug() << "export to file";
+                    fileName = QFileDialog::getSaveFileName(nullptr, tr("Export sliced file"), "");
+                    //ste->exportSTL(m_glmodel->mesh, fileName);
+                    if(fileName == "")
+                        return;
+                } else { // optype == ftrTempExport
+                    qDebug() << "export to temp file";
+                    fileName =  QDir::tempPath();
+                    qDebug() << fileName;
+                }
 
                 // slice file
                 qmlManager->openProgressPopUp();
