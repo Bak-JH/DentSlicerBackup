@@ -177,7 +177,7 @@ Rectangle {
                                 qm.setViewMode(2);
                             }
 
-                            yesnoPopUp.runFeature(uppertab.ftrExport, cfg);
+                            yesnoPopUp.runFeature(uppertab.ftrTempExport, cfg);
                             break;
                         case uppertab.ftrSave:
                             qm.save();
@@ -193,6 +193,10 @@ Rectangle {
                             qm.runArrange();
                             console.log("arrange called by YesNoPopup");
                             uppertab.all_off();
+                            break;
+                        case uppertab.ftrDelete:
+                            qm.deleteSelectedModels();
+                            console.log("delete called by YesNoPopup");
                             break;
                         default:
                             break; 

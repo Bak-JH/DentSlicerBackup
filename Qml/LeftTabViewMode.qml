@@ -136,7 +136,9 @@ Rectangle {
                     }
 
                     signal onChanged(bool checked);
-                    onCheckedChanged: {
+
+                    //onCheckedChanged: {
+                    onClicked: {
                         console.log("Object View Selected")
                         onChanged(checked);
                     }
@@ -183,9 +185,16 @@ Rectangle {
                     }
 
                     signal onChanged(bool checked);
-                    onCheckedChanged: {
+
+                    //onCheckedChanged: {
+                    onClicked: {
                         console.log("Support View Selected")
                         onChanged(checked);
+                        if (qm.getViewMode() === 0) {
+                            viewObjectButton.checked = true
+                        } else if (qm.getViewMode() === 2) {
+                            viewLayerButton.checked = true
+                        }
                     }
 
                     onHoveredChanged: {
@@ -229,9 +238,16 @@ Rectangle {
                     }
 
                     signal onChanged(bool checked);
-                    onCheckedChanged: {
+                    
+                    //onCheckedChanged: {
+                    onClicked: {
                         console.log("Layer View Selected")
                         onChanged(checked);
+                        if (qm.getViewMode() === 0) {
+                            viewObjectButton.checked = true
+                        } else if (qm.getViewMode() === 1) {
+                            viewSupportButton.checked = true
+                        }
                     }
 
                     onHoveredChanged: {
