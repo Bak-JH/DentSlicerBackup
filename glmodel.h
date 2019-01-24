@@ -50,6 +50,8 @@ using namespace std;
 #define ftrLabel 15
 #define ftrSupportViewMode 16
 #define ftrLayerViewMode 17
+#define ftrDelete 18
+#define ftrTempExport 19
 
 class GLModel;
 class OverhangPoint;

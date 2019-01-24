@@ -11,6 +11,8 @@ Item {
     property bool vis
     property int fontsize
 
+    property int ftrDelete : 18
+
     Rectangle{
         id:background
         width:parent.width-2
@@ -89,13 +91,15 @@ Item {
             onExited : qm.resetCursor();
             onClicked: {
                 console.log("delete");
-                if(icon.parent.state == 'on'){
-                    icon.parent.state = 'select';
-                    selectPart(glModelID);
-                }
-                deletePopUp.visible = true;
-                deletePopUp.popupDelete();
-                deletePopUp.targetID = glModelID;
+                //if (icon.parent.state == "on") {
+                if (qm.getSelectedModelsSize() !== 1) selectPart(glModelID)
+                else if (icon.parent.state != "select") selectPart(glModelID)
+                icon.parent.state = "select"
+                //}
+                //deletePopUp.visible = true;
+                //deletePopUp.popupDelete();
+                //deletePopUp.targetID = glModelID;
+                yesnoPopUp.openYesNoPopUp(false, "", "Are you sure to delete this model?", "", 18, "", ftrDelete, 0)
 
             }
         }
@@ -128,9 +132,14 @@ Item {
                 else if(icon.parent.state == 'off')
                     return;
                 else if(icon.parent.state == 'select'){
-                    icon.parent.state = 'on'
-                    unselectPart(glModelID)
-                    qm.deleteList(glModelID)
+                    console.log("group selection active =" + qm.getGroupSelectionActive()) // shift pressed
+                    if (qm.getSelectedModelsSize() > 1 && !qm.getGroupSelectionActive()) {
+                        selectPart(glModelID)
+                    } else {
+                        icon.parent.state = 'on'
+                        unselectPart(glModelID)
+                        qm.deleteList(glModelID)
+                    }
                 }
 
             }

@@ -269,9 +269,7 @@ void QmlManager::checkModelFile(int ID){
     }
 }
 
-void QmlManager::deleteModelFile(int ID){
-    //for(int i=0; i<glmodels.size();i++){
-    qDebug() << "deletemodelfile" << glmodels.size();
+void QmlManager::deleteOneModelFile(int ID) {
     for (vector<GLModel*>::iterator gl_it = glmodels.begin(); gl_it != glmodels.end();){
         if((*gl_it)->ID == ID){
             (*gl_it)->removeCuttingPoints();
@@ -280,20 +278,21 @@ void QmlManager::deleteModelFile(int ID){
             disconnectHandlers((*gl_it));
             (*gl_it)->shadowModel->deleteLater();
             (*gl_it)->deleteLater();
-            if (selectedModels[0] != nullptr && selectedModels[0]->ID == ID) {
-                selectedModels.clear();
-                selectedModels.push_back(nullptr);
-                //selectedModels[0] = nullptr;
-                QMetaObject::invokeMethod(leftTabViewMode, "setEnable", Q_ARG(QVariant, false));
-            }
             gl_it = glmodels.erase(gl_it);
             break;
         } else
             gl_it ++;
     }
-    qDebug() << "deleteModelFile" << glmodels.size();
-    QMetaObject::invokeMethod(qmlManager->boundedBox, "hideBox");
     deletePart(ID);
+}
+
+void QmlManager::deleteModelFileDone() {
+    selectedModels.clear();
+    selectedModels.push_back(nullptr);
+    QMetaObject::invokeMethod(leftTabViewMode, "setEnable", Q_ARG(QVariant, false));
+
+    QMetaObject::invokeMethod(qmlManager->boundedBox, "hideBox");
+
     updateModelInfo(0, 0, "0.0 X 0.0 X 0.0 mm", 0);
 
     // UI
@@ -302,6 +301,31 @@ void QmlManager::deleteModelFile(int ID){
     QMetaObject::invokeMethod(qmlManager->mttab, "hideTab");
     QMetaObject::invokeMethod(boxUpperTab, "all_off");
     QMetaObject::invokeMethod(leftTabViewMode, "setObjectView");
+}
+
+void QmlManager::deleteModelFile(int ID){
+    qDebug() << "deletemodelfile" << glmodels.size();
+    deleteOneModelFile(ID);
+    deleteModelFileDone();
+}
+
+void QmlManager::deleteSelectedModels() {
+    qDebug() << "deleteSelectedModels()";
+
+    if (selectedModels.size() == 0 || selectedModels[0] == nullptr) {
+        deleteModelFileDone();
+        return;
+    }
+
+    int ID;
+    for (size_t i = 0; i < selectedModels.size(); i++) {
+        ID = selectedModels[i]->ID;
+        deleteOneModelFile(ID);
+    }
+
+    deleteModelFileDone();
+
+    return;
 }
 
 void QmlManager::disconnectHandlers(GLModel* glmodel){
@@ -538,6 +562,14 @@ int QmlManager::getselectedModelID(){
     return result;
 }
 
+int QmlManager::getSelectedModelsSize() {
+    if (selectedModels.size() == 0 || selectedModels[0] == nullptr) return 0;
+    return selectedModels.size();
+}
+
+bool QmlManager::getGroupSelectionActive() {
+    return groupSelectionActive;
+}
 
 QString QmlManager::getVersion(){
     return version;
@@ -968,7 +1000,7 @@ void QmlManager::lastModelSelected(){
 }
 
 void QmlManager::modelSelected(int ID){
-    //qDebug() << "modelSelected()";
+    qDebug() << "modelSelected()";
     if (groupSelectionActive){
         if (multipleModelSelected(ID))
             return;
@@ -1151,6 +1183,8 @@ void QmlManager::modelSelected(int ID){
     }
 
     QMetaObject::invokeMethod(leftTabViewMode, "setEnable", Q_ARG(QVariant, selectedModels[0] != nullptr));
+
+    sendUpdateModelInfo();
 }
 
 void QmlManager::layFlatSelect(){
@@ -1204,8 +1238,15 @@ void QmlManager::unselectPart(int ID){
         selectedModels[0]->changeViewMode(VIEW_MODE_OBJECT);
     }
 
-    selectedModels.clear();
-    selectedModels.push_back(nullptr);
+    for (vector<GLModel*>::iterator it=selectedModels.begin(); it!= selectedModels.end(); ++it){
+        if ((*it)->ID == ID) {
+            selectedModels.erase(it);
+            break;
+        }
+    }
+    if (selectedModels.size() == 0) selectedModels.push_back(nullptr);
+    //selectedModels.clear();
+    //selectedModels.push_back(nullptr);
     //selectedModels[0] = nullptr;
     QMetaObject::invokeMethod(leftTabViewMode, "setEnable", Q_ARG(QVariant, false));
     //QMetaObject::invokeMethod(boundedBox, "hideBox"); // Bounded Box
@@ -2145,8 +2186,13 @@ void QmlManager::layerRaftButtonChanged(bool checked){
 
 void QmlManager::setViewMode(int viewMode) {
     qInfo() << "setViewMode" << viewMode;
+    qDebug() << "current mode" << this->viewMode;
 
     if( this->viewMode != viewMode ) {
+        //if (viewMode == 0) viewObjectButton->setProperty("checked", true);
+        if (viewMode == 1) viewSupportButton->setProperty("checked", true);
+        else if (viewMode == 2) viewLayerButton->setProperty("checked", true);
+
         this->viewMode = viewMode;
         layerViewPopup->setProperty("visible", this->viewMode == VIEW_MODE_LAYER);
         layerViewSlider->setProperty("visible", this->viewMode == VIEW_MODE_LAYER);

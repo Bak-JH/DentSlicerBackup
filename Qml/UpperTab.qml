@@ -34,6 +34,8 @@ Rectangle {
     property int ftrLabel : 15
     property int ftrSupportViewMode : 16
     property int ftrLayerViewMode : 17
+    property int ftrDelete : 18
+    property int ftrTempExport : 19
 
     property alias second_tab_button_move: second_tab_button_move
     property alias second_tab_button_rotate: second_tab_button_rotate
@@ -72,7 +74,7 @@ Rectangle {
 
         //arrangePopUp.closePopUp();
         resultPopUp.closePopUp();
-        deletePopUp.closePopUp();
+        //deletePopUp.closePopUp();
         settingPopup.closePopUp();
         feedbackPopUp.closePopUp();
         resultPopUp.closePopUp();
@@ -200,6 +202,7 @@ Rectangle {
             MouseArea{
                 anchors.fill: parent
                 onClicked:{
+                    all_off()
                     filedialogload.open();
                 }
             }
