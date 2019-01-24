@@ -11,6 +11,7 @@ Rectangle {
 
     property int leftPos: 0
     property int topPos: 0
+    property int ftrDelete : 18
 
     anchors.leftMargin: leftPos
     anchors.topMargin: topPos
@@ -261,8 +262,9 @@ Rectangle {
 
     function selectDelete(){
         uppertab.all_off();
-        deletePopUp.visible = true
-        deletePopUp.targetID = qm.getselectedModelID()
+        yesnoPopUp.openYesNoPopUp(false, "", "Are you sure to delete these models?", "", 18, "", ftrDelete, 0)
+        //deletePopUp.visible = true
+        //deletePopUp.targetID = qm.getselectedModelID()
 
         hideTab()
     }

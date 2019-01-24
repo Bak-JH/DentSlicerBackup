@@ -196,6 +196,8 @@ public:
     Q_INVOKABLE QVector3D getSelectedCenter();
     Q_INVOKABLE QVector3D getSelectedSize();
     Q_INVOKABLE int getselectedModelID();
+    Q_INVOKABLE int getSelectedModelsSize();
+    Q_INVOKABLE bool getGroupSelectionActive();
     Q_INVOKABLE void fixMesh();
     Q_INVOKABLE void setHandCursor();
     Q_INVOKABLE void setClosedHandCursor();
@@ -213,6 +215,7 @@ public:
     Q_INVOKABLE void backgroundClickCheck();
     Q_INVOKABLE void setModelClickFalse();
     Q_INVOKABLE void deleteList(int ID);
+    Q_INVOKABLE void deleteSelectedModels();
 
     float selected_x_max(size_t selectedNum);
     float selected_x_min(size_t selectedNum);
@@ -238,6 +241,8 @@ public slots:
     void createModelFile(Mesh* target_mesh, QString filename);
     void openModelFile(QString filename);
     void checkModelFile(int ID);
+    void deleteOneModelFile(int ID);
+    void deleteModelFileDone();
     void deleteModelFile(int ID);
     void unDo();
     void reDo();
