@@ -130,6 +130,7 @@ Item{
 
             width: (window.width - lefttab.width) * 1
             height: (window.width - lefttab.width) * 1
+            //height: (window.height - uppertab.height) * 1
             anchors.top : uppertab.bottom
             anchors.left : lefttab.right
 
@@ -228,7 +229,49 @@ Item{
                     sceneRoot.cm.camera.translateWorld(Qt.vector3d(0,(1)*(currPosition.y - prevPosition.y)/1000,0),0);
     //                scene3d.anchors.leftMargin = scene3d.anchors.leftMargin + (currPosition.x - prevPosition.x);
     //                scene3d.anchors.topMargin = scene3d.anchors.topMargin + (currPosition.y - prevPosition.y);
+                    //console.log(Qt.vector3d((-1)*(currPosition.x - prevPosition.x)/1000,(1)*(currPosition.y - prevPosition.y)/1000,0));
                     prevPosition = currPosition;
+                }
+            }
+
+            onWheel: {
+                // mouse wheel scaling: model and bed zooms, camera moves to mouse pointer direction
+                var d = wheel.angleDelta.y;
+                var scaleTmp = sceneRoot.systemTransform.scale3D;
+
+                var v_c = sceneRoot.cm.camera.position.plus(Qt.vector3d(0.015, 0.16, -100));
+                var v_m = {};                               // absolute position of mouse pointer
+                var v_relative = Qt.vector3d(0,0,0);        // relative position of mouse pointer based on camera
+
+                v_m.x = wheel.x - lefttab.width;
+                v_m.y = wheel.y - uppertab.height;
+
+                var height3d = (window.height - uppertab.height)
+
+                v_relative.x = (v_m.x / scene3d.width) - 0.5;
+                v_relative.y = - ((v_m.y + ((scene3d.width - height3d)/2)) / scene3d.width) + 0.5;
+
+                v_relative.z = 0;
+
+                /*
+                console.log("\n----------------\n    scale:", scaleTmp);
+                console.log("mouse:", v_m.x, v_m.y);
+                console.log("cm.camera:", v_c);
+                */
+
+                if (d>0) {
+                    sceneRoot.systemTransform.scale3D = scaleTmp.times(1.08);
+                    v_c = v_c.plus(v_relative);
+                    sceneRoot.cm.camera.translateWorld(v_c.times(0.08));
+
+                    mttab.updatePosition();
+                }
+                else {
+                    sceneRoot.systemTransform.scale3D = scaleTmp.times(0.92);
+                    v_c = v_c.plus(v_relative);
+                    sceneRoot.cm.camera.translateWorld(v_c.times(-0.08));
+
+                    mttab.updatePosition();
                 }
             }
         }
