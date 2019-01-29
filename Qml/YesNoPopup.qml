@@ -60,7 +60,6 @@ Rectangle {
                 clip: true
 
                 ColumnLayout {
-                    y: -vbar.position * height
                     id: partListColumn
                     spacing:0
                 }
@@ -162,6 +161,7 @@ Rectangle {
 
                                 // do collecting things
                                 // configurations[key] = value;
+                                console.log("collectConfigurations")
                                 configurations["resolution"] = options[0];
                                 configurations["layer_height"] = options[1];
                                 configurations["support_type"] = options[2];

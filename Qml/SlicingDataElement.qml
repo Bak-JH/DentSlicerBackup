@@ -4,7 +4,7 @@ Rectangle {
     property int inputWidth
     property string inputSource
     property string inputData
-    width : inputWidth > data.width + 15 ? inputWidth : data.width + 15
+    width: inputWidth > data.width + 22 ? inputWidth : data.width + 22
     height: 26
 
     Image{

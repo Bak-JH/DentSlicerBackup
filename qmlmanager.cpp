@@ -695,7 +695,7 @@ void QmlManager::sendUpdateModelInfo(){
     QMetaObject::invokeMethod(boundedBox, "showBox");
     QMetaObject::invokeMethod(boundedBox, "setPosition", Q_ARG(QVariant, QVector3D((x_max + x_min)/2, (y_max + y_min)/2, (z_max + z_min)/2)));
     QMetaObject::invokeMethod(boundedBox, "setSize", Q_ARG(QVariant, x_max - x_min), Q_ARG(QVariant, y_max - y_min), Q_ARG(QVariant, z_max - z_min));
-    updateModelInfo(0,0,size,0);
+    updateModelInfo(-1,-1,size,-1);
     QMetaObject::invokeMethod(scalePopup, "updateSizeInfo", Q_ARG(QVariant, x_max - x_min), Q_ARG(QVariant, y_max - y_min), Q_ARG(QVariant, z_max - z_min));
 }
 

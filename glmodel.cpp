@@ -1795,9 +1795,24 @@ void GLModel::generateSupport(){
         layerMesh->addFace(mesh->idx2MV(mf.mesh_vertex[0]).position, mesh->idx2MV(mf.mesh_vertex[1]).position, mesh->idx2MV(mf.mesh_vertex[2]).position, mf.idx);
     }
 
+    float x_length = mesh->x_max - mesh->x_min;
+    float y_length = mesh->y_max - mesh->y_min;
+    float z_length = mesh->z_max - mesh->z_min;
+    size_t xy_reserve = x_length * y_length;
+    size_t xyz_reserve = xy_reserve * z_length;
+    qDebug() << "********************xy_reserve = " << xy_reserve;
+    qDebug() << "********************faces_reserve = " << mesh->faces.size();
+    qDebug() << "********************vertices_reserve = " << mesh->vertices.size();
+
     layerInfillMesh = new Mesh;
+    layerInfillMesh->faces.reserve(xyz_reserve * scfg->infill_density); // infill 되면 다시 기준잡기
+    layerInfillMesh->vertices.reserve(xyz_reserve * scfg->infill_density);
     layerSupportMesh = new Mesh;
+    layerSupportMesh->faces.reserve(xy_reserve * 300 * scfg->support_density);
+    layerSupportMesh->vertices.reserve(xy_reserve * 300 * scfg->support_density);
     layerRaftMesh = new Mesh;
+    layerRaftMesh->faces.reserve(xy_reserve * 300 * scfg->support_density);
+    layerRaftMesh->vertices.reserve(xy_reserve * 300 * scfg->support_density);
     QVector3D t = m_transform->translation();
 
     t.setZ(mesh->z_min * -1.0f);
@@ -1823,6 +1838,12 @@ void GLModel::generateSupport(){
     layerInfillMesh->vertexMove(t);
     layerSupportMesh->vertexMove(t);
     layerRaftMesh->vertexMove(t);
+
+
+    layerInfillMesh->connectFaces();
+    layerSupportMesh->connectFaces();
+    layerRaftMesh->connectFaces();
+
 
     emit _updateModelMesh(true);
 }
