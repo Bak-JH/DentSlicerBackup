@@ -35,7 +35,6 @@ Rectangle {
     property int ftrSupportViewMode : 16
     property int ftrLayerViewMode : 17
     property int ftrDelete : 18
-    property int ftrTempExport : 19
 
     property alias second_tab_button_move: second_tab_button_move
     property alias second_tab_button_rotate: second_tab_button_rotate
@@ -257,28 +256,11 @@ Rectangle {
             MouseArea{
                 anchors.fill: parent
                 onClicked:{
-                    /*
-                    function collectConfigurations(){
-                        var configurations = {};
-
-                        // do collecting things
-                        // configurations[key] = value;
-                        configurations["resolution"] = options[0];
-                        configurations["layer_height"] = options[1];
-                        configurations["support_type"] = options[2];
-                        configurations["infill_type"] = options[3];
-                        configurations["raft_type"] = options[4];
-                        return configurations;
-                    }
-
-                    console.log("exporting");
-                    // collect configurations
-                    var cfg = collectConfigurations();
-                    //se.slice(cfg);
-                    parent.runFeature(ftrExport, cfg);
-                    */
                     all_off();
                     lefttabExport.visible = true;
+
+                    // yesno popup을 거쳐 확인하고 슬라이스
+                    yesnoPopUp.openYesNoPopUp(false, "Exporting process may take time.", "", "Would you like to continue?", 16, "", ftrExport, 0);
                 }
             }
             signal runFeature(int type, var config);

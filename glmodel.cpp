@@ -665,17 +665,28 @@ void featureThread::run(){
                 break;
                 */
             }
-        case ftrExport:
-        case ftrTempExport: // support view & layer view
+        case ftrExport: // support view & layer view & export // on export, temporary variable = true;
             {
+                // look for data if it is temporary
+                QVariantMap config = data.toMap();
+                bool isTemporary = false;
+                for (QVariantMap::const_iterator iter = config.begin(); iter != config.end(); ++iter){
+                    if (!strcmp(iter.key().toStdString().c_str(), "temporary")){
+                        qDebug() << "iter value : " << iter.value().toString();
+                        if (iter.value().toString() == "true"){
+                            isTemporary = true;
+                        }
+                    }
+                }
+
                 QString fileName;
-                if (optype == ftrExport) {
+                if (! isTemporary){ // export view
                     qDebug() << "export to file";
                     fileName = QFileDialog::getSaveFileName(nullptr, tr("Export sliced file"), "");
                     //ste->exportSTL(m_glmodel->mesh, fileName);
                     if(fileName == "")
                         return;
-                } else { // optype == ftrTempExport
+                } else { // support view & layerview
                     qDebug() << "export to temp file";
                     fileName =  QDir::tempPath();
                     qDebug() << fileName;

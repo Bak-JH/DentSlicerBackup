@@ -153,6 +153,7 @@ Rectangle {
                 onClicked:{
 
                     switch (popup_type){
+                        case uppertab.ftrExport:
                         case uppertab.ftrSupportViewMode:
                         case uppertab.ftrLayerViewMode:
                             function collectConfigurations(){
@@ -171,13 +172,19 @@ Rectangle {
                             }
                             var cfg = collectConfigurations();
 
-                            if( popup_type == uppertab.ftrSupportViewMode ) {
+                            if (popup_type == uppertab.ftrExport){
+                                cfg["temporary"] = "false";
+                                yesnoPopUp.runFeature(uppertab.ftrExport, cfg);
+                            } else if( popup_type == uppertab.ftrSupportViewMode ) {
+                                cfg["temporary"] = "true";
                                 qm.setViewMode(1);
+                                yesnoPopUp.runFeature(uppertab.ftrExport, cfg);
                             } else if( popup_type == uppertab.ftrLayerViewMode ) {
+                                cfg["temporary"] = "true";
                                 qm.setViewMode(2);
+                                yesnoPopUp.runFeature(uppertab.ftrExport, cfg);
                             }
 
-                            yesnoPopUp.runFeature(uppertab.ftrTempExport, cfg);
                             break;
                         case uppertab.ftrSave:
                             qm.save();
