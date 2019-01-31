@@ -59,18 +59,20 @@ bool compareIntPoint(IntPoint a, IntPoint b){
     return a.X < b.X;
 }
 
-Path grahamScan(Path path)    {
+Path grahamScan(Path* path)    {
 
-    IntPoint points[path.size()];
-    for(int point_idx=0; point_idx<path.size(); point_idx++){//
-        points[point_idx] = path[point_idx];
+    Path points;
+    points.reserve(path->size());
+    for(int point_idx=0; point_idx<path->size(); point_idx++){//
+        points.push_back((*path)[point_idx]);
+        //points[point_idx] = (*path)[point_idx];
     }
     //*qDebug() << "path to arr" << path.size() << sizeof(points)/sizeof(points[0]);
-    int N = path.size();
+    int N = path->size();
     stack<IntPoint> hull;
     Path hull_path;
 
-    if (N < 3) return path;
+    if (N < 3) return *path;
 
     // find the point having the least y coordinate (pivot),
     // ties are broken in favor of lower x coordinate
@@ -88,7 +90,7 @@ Path grahamScan(Path path)    {
 
     // sort the remaining point according to polar order about the pivot
     pivot = points[0];
-    sort(points + 1, points + N, POLAR_ORDER);
+    sort(points.begin(), points.end(), POLAR_ORDER);
     //*qDebug() << "POLAR_ORDER sort";
 
     hull.push(points[0]);
@@ -115,7 +117,7 @@ Path grahamScan(Path path)    {
 Path getConvexHull(Path* path){
     //*qDebug() << "getConvexHull";
     //*qDebug() << "path orient" << Orientation(*path);
-    Path convex_hull = grahamScan(*path);
+    Path convex_hull = grahamScan(path);
     //*qDebug() << "got convex_hull";
     if(!Orientation(convex_hull)) ReversePath(convex_hull);
     //*qDebug() << "convexHull orient" << Orientation(convex_hull);
