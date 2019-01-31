@@ -18,6 +18,8 @@ public:
 
     QString exportSVG(Slices contourLists, QString outfoldername);
 
+    void parsePolyTreeAndWrite(PolyNode* pn, std::ofstream& outfile);
+
     void writePolygon(ofstream& outfile, Path contour);
     void writePolygon(ofstream& outfile, PolyNode* contour);
     void writeGroupHeader(ofstream& outfile, int layer_idx, float z);

@@ -12,6 +12,21 @@
 //#define tan_theta 11.430052302761343067210855549163 // tan(85)
 //#define tan_theta 100
 
+
+
+/*
+ * resin_type : 1 - temporarycrown, 2 - transparent, 3 - castable
+ * contraction_ratio : 1 - 0.98522, 2 - 0.99009, 3 -
+ */
+
+#define TEMPORARY_RESIN 1
+#define TRANSPARENT_RESIN 2
+#define CASTABLE_RESIN 3
+
+#define TEMPORARY_CONTRACTION_RATIO 0.98814
+#define TRANSPARENT_CONTRACTION_RATIO 0.99504 //0.99009
+#define CASTABLE_CONTRACTION_RATIO 0.99009
+
 #include <stdio.h>
 #include <math.h>
 #include <QVector3D>
@@ -46,7 +61,8 @@ public:
     float overhang_threshold = layer_height/tan_theta;
     float overhang_poll_threshold = support_density * 100; // unit region as 1cm^2
 
-    int resin_type = 1;
+    int resin_type = TEMPORARY_RESIN;
+    float contraction_ratio = TEMPORARY_CONTRACTION_RATIO;
 
     int support_type = 2;
     int infill_type = 1;

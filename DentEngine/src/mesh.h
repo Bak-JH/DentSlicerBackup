@@ -122,9 +122,13 @@ public :
 };
 
 
+float round(float num, int precision);
+bool doubleAreSame(double a, double b);
 
 uint32_t vertexHash(QVector3D v);
 float vertexDistance(QVector3D, QVector3D);
+
+QHash<uint32_t, Path>::iterator findSmallestPathHash(QHash<uint32_t, Path> pathHash);
 
 // construct closed contour using segments created from identify step
 Paths contourConstruct(Paths);
@@ -137,6 +141,7 @@ public:
     vector<containmentPath> outer;
 }; */
 
+bool intPointInPath(IntPoint ip, Path p);
 bool pathInpath(Path3D target, Path3D in);
 
 vector<std::array<QVector3D, 3>> interpolate(Path3D from, Path3D to);

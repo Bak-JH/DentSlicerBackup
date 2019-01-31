@@ -45,11 +45,9 @@ QString SVGexporter::exportSVG(Slices contourLists, QString outfoldername){
             writeGroupHeader(outfile, i, scfg->layer_height*(i+1));
 
         PolyTree slice_polytree = contourLists[i].polytree;
-        PolyNode* pn = slice_polytree.GetFirst();
-        while (pn != NULL){
-            area += Area(pn->Contour);
-            writePolygon(outfile, pn);
-            pn = pn->GetNext();
+        qDebug() << "slice polytree's child count : " << slice_polytree.ChildCount();
+        for (int j=0; j<slice_polytree.ChildCount(); j++){
+            parsePolyTreeAndWrite(slice_polytree.Childs[j], outfile);
         }
 
         writeGroupFooter(outfile);
@@ -65,7 +63,7 @@ QString SVGexporter::exportSVG(Slices contourLists, QString outfoldername){
     float y = contourLists.mesh->y_max-contourLists.mesh->y_min;
     float z = contourLists.mesh->z_max-contourLists.mesh->z_min;
 
-    float volume = ((float)(area/pow(scfg->pixel_per_mm,2))/1000000)*scfg->layer_height;
+    float volume = ((float)(area/pow(scfg->pixel_per_mm/scfg->contraction_ratio,2))/1000000)*scfg->layer_height;
     QString result_str;
     result_str.sprintf("info:%d:%d:%.1f:%.1f:%.1f:%.1f\n",printing_time,layer,x,y,z,volume);
     //fflush(stdout);
@@ -74,10 +72,25 @@ QString SVGexporter::exportSVG(Slices contourLists, QString outfoldername){
     return result_str;
 }
 
+void SVGexporter::parsePolyTreeAndWrite(PolyNode* pn, std::ofstream& outfile){
+    writePolygon(outfile, pn);
+    for (int i=0; i<pn->ChildCount(); i++){
+        PolyNode* new_pn = pn->Childs[i];
+        parsePolyTreeAndWrite(new_pn, outfile);
+    }
+
+    /*while (pn != NULL){
+        //area += Area(pn->Contour);
+
+        pn = pn->GetNext();
+    }*/
+
+}
+
 void SVGexporter::writePolygon(ofstream& outfile, PolyNode* contour){
     outfile << "      <polygon contour:type=\"contour\" points=\"";
     for (IntPoint point: contour->Contour){
-        outfile << std::fixed << (float)(point.X-origin_x)*scfg->pixel_per_mm/scfg->resolution + scfg->resolution_x/2 << "," << std::fixed << (float)(point.Y-origin_y)*scfg->pixel_per_mm/scfg->resolution + scfg->resolution_y/2 << " "; // doesn't need 100 actually
+        outfile << std::fixed << (float)(point.X-origin_x)*scfg->pixel_per_mm/(scfg->resolution*scfg->contraction_ratio) + scfg->resolution_x/2 << "," << std::fixed << (float)(point.Y-origin_y)*scfg->pixel_per_mm/(scfg->resolution*scfg->contraction_ratio) + scfg->resolution_y/2 << " "; // doesn't need 100 actually
 
         // just fit to origin
         //outfile << std::fixed << (float)point.X/scfg->resolution - scfg->origin.x() << "," << std::fixed << (float)point.Y/scfg->resolution - scfg->origin.y() << " ";
@@ -93,7 +106,7 @@ void SVGexporter::writePolygon(ofstream& outfile, PolyNode* contour){
 void SVGexporter::writePolygon(ofstream& outfile, Path contour){
     outfile << "      <polygon contour:type=\"contour\" points=\"";
     for (IntPoint point: contour){
-        outfile << std::fixed << (float)(point.X-origin_x)*scfg->pixel_per_mm/scfg->resolution + scfg->resolution_x/2 << "," << std::fixed << (float)(point.Y-origin_y)*scfg->pixel_per_mm/scfg->resolution + scfg->resolution_y/2 << " "; // doesn't need 100 actually
+        outfile << std::fixed << (float)(point.X-origin_x)*scfg->pixel_per_mm/(scfg->resolution*scfg->contraction_ratio) + scfg->resolution_x/2 << "," << std::fixed << (float)(point.Y-origin_y)*scfg->pixel_per_mm/(scfg->resolution*scfg->contraction_ratio) + scfg->resolution_y/2 << " "; // doesn't need 100 actually
 
         // just fit to origin
         //outfile << std::fixed << (float)point.X/scfg->resolution - scfg->origin.x() << "," << std::fixed << (float)point.Y/scfg->resolution - scfg->origin.y() << " ";

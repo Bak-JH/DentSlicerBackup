@@ -350,6 +350,7 @@ void Mesh::addPoint(float x, float y, Path *path)
     IntPoint ip;
     ip.X = round(x*scfg->resolution);
     ip.Y = round(y*scfg->resolution);
+    //qDebug() << "addPoint called with x " << x << " y " << y << " rounding " << ip.X;
     path->push_back(ip);
 }
 
@@ -474,26 +475,56 @@ Path Mesh::intersectionPath(MeshFace mf, float z){
 
     vector<MeshVertex> upper;
     vector<MeshVertex> lower;
+    vector<MeshVertex> middle;
+
     for (int i=0; i<3; i++){
-        if (idx2MV(mf.mesh_vertex[i]).position.z() >= z)
+        if (idx2MV(mf.mesh_vertex[i]).position.z() > z){
             upper.push_back(idx2MV(mf.mesh_vertex[i]));
-        else
+        } else if (doubleAreSame(idx2MV(mf.mesh_vertex[i]).position.z(),z)){
+            middle.push_back(idx2MV(mf.mesh_vertex[i]));
+        } else
             lower.push_back(idx2MV(mf.mesh_vertex[i]));
     }
 
     vector<MeshVertex> majority;
     vector<MeshVertex> minority;
 
-    if (upper.size() == 2){
+    if (upper.size() == 2 && lower.size() == 1){
         majority = upper;
         minority = lower;
-    } else if (lower.size() == 2){
+    } else if (lower.size() == 2 && upper.size() == 1){
         majority = lower;
         minority = upper;
     } else{
-        if (getFaceZmin(mf) != z)
-            qDebug() << "intersection error at layer "<< getFaceZmax(mf) << getFaceZmin(mf) << z<< upper.size() << lower.size();
+        if (lower.size() == 2 && middle.size() == 1){
+            //qDebug() << "intersection error 1 in z line";
+            return p;
+        } else if (upper.size() == 1 && lower.size() == 1 && middle.size() == 1){
+            //qDebug() << "intersection error 1 in z line";
+            addPoint(middle[0].position.x(), middle[0].position.y(), &p);
 
+            //add intermediate position
+            float x_0, y_0;
+            x_0 = ((upper[0].position.z()-z)*lower[0].position.x() + (z-lower[0].position.z())*upper[0].position.x())/(upper[0].position.z()-lower[0].position.z());
+            y_0 = ((upper[0].position.z()-z)*lower[0].position.y() + (z-lower[0].position.z())*upper[0].position.y())/(upper[0].position.z()-lower[0].position.z());
+
+            addPoint(x_0,y_0,&p);
+
+            return p;
+        } else if (middle.size() == 2){
+            //qDebug() << "intersection error 2 in z line";
+            addPoint(middle[0].position.x(), middle[0].position.y(), &p);
+            addPoint(middle[1].position.x(), middle[1].position.y(), &p);
+            return p;
+        } else if (middle.size() == 3){
+            //qDebug() << "intersection error all in one";
+            return p;
+        }
+
+        /*if (doubleAreSame(getFaceZmin(mf),z))
+        //if (getFaceZmin(mf) != z)
+            qDebug() << "intersection error at layer "<< getFaceZmax(mf) << getFaceZmin(mf) << z<< upper.size() << lower.size();
+        */
         return p;
     }
 
@@ -518,11 +549,21 @@ Path Mesh::intersectionPath(MeshFace mf, float z){
 
 /********************** Helper Functions **********************/
 
+float round(float num, int precision)
+{
+    return floorf(num * pow(10.0f,precision) + .5f)/pow(10.0f,precision);
+}
+
+bool doubleAreSame(double a, double b) {
+    return std::fabs(a - b) < std::numeric_limits<double>::epsilon();
+}
+
 uint32_t vertexHash(QVector3D v) // max build size = 1000mm, resolution = 1 micron
 {
-    return (uint32_t((v.x() / SlicingConfiguration::vertex_inbound_distance)) ^\
-            (uint32_t((v.y() / SlicingConfiguration::vertex_inbound_distance)) << 10) ^\
-            (uint32_t((v.z() / SlicingConfiguration::vertex_inbound_distance)) << 20));
+    //qDebug() << "vertexHash" << v.x() << v.x()/SlicingConfiguration::vertex_inbound_distance;
+    return (uint32_t(((v.x()+SlicingConfiguration::vertex_inbound_distance/2) / SlicingConfiguration::vertex_inbound_distance)) ^\
+            (uint32_t(((v.y()+SlicingConfiguration::vertex_inbound_distance/2) / SlicingConfiguration::vertex_inbound_distance)) << 10) ^\
+            (uint32_t(((v.z()+SlicingConfiguration::vertex_inbound_distance/2) / SlicingConfiguration::vertex_inbound_distance)) << 20));
 }
 
 int Mesh::getVertexIdx(QVector3D v){
@@ -655,6 +696,18 @@ float vertexDistance(QVector3D a, QVector3D b){
     return distance;
 }
 
+QHash<uint32_t, Path>::iterator findSmallestPathHash(QHash<uint32_t, Path> pathHash){
+    //QHashIterator<uint32_t, Path> j(pathHash);
+    //QHashIterator<uint32_t, Path> prev_j(pathHash);
+    QHash<uint32_t, Path>::iterator i = pathHash.begin();
+    QHash<uint32_t, Path>::iterator biggest_i = pathHash.begin();
+    for (i = pathHash.begin(); i!= pathHash.end(); ++i){
+        if (biggest_i.value().size() >= i.value().size())
+            biggest_i = i;
+    }
+    return biggest_i;
+}
+
 // construct closed contour using segments created from meshSlice step
 Paths contourConstruct(Paths pathList){
     Paths contourList;
@@ -673,9 +726,13 @@ Paths contourConstruct(Paths pathList){
 
     int debug_count=0;
 
+    // pathHash Construction
     for (int i=0; i<pathList.size(); i++){
         Path p = pathList[i];
         //insertPathHash(pathHash, p[0], p[1]); // inserts opposite too
+
+        if (p[0] == p[1])
+            continue;
 
         uint32_t path_hash_u = intPoint2Hash(p[0]);
         uint32_t path_hash_v = intPoint2Hash(p[1]);
@@ -692,20 +749,53 @@ Paths contourConstruct(Paths pathList){
         pathHash[path_hash_v].push_back(p[0]);
     }
 
+    // remove duplicate IntPoint Loop xyzzw (5) / zww (3)
+    QHashIterator<uint32_t, Path> i(pathHash);
+    while (i.hasNext()) {
+        i.next();
+        if (i.value().size() == 3 && i.value()[1] == i.value()[2]){
+            qDebug() << "same one found ";
+            for (IntPoint ip : i.value()){
+                qDebug() << "ip value : " << ip.X << ip.Y;
+            }
+            vector<IntPoint>* dest = &(pathHash[intPoint2Hash(i.value()[1])]);
+            vector<IntPoint>::iterator dest_it = dest->begin();
+            while ( dest_it != dest->end()){
+                if ((*dest_it) == i.value()[0])
+                    dest_it = dest->erase(dest_it);
+                else
+                    ++dest_it;
+            }
+
+            if (dest->size() == 1){
+                pathHash.remove(intPoint2Hash(*(dest->begin())));
+            }
+            pathHash.remove(intPoint2Hash(i.value()[0]));
+        }
+    }
+
     // Build Polygons
     while(pathHash.size() >0){
         Path contour;
         IntPoint start, pj_prev, pj, pj_next, last;
 
-        pj_prev = pathHash.begin().value()[0];
+        QHash<uint32_t, Path>::iterator smallestPathHash = pathHash.begin();//findSmallestPathHash(pathHash);
+
+        pj_prev = smallestPathHash.value()[0];
         start = pj_prev;
         contour.push_back(pj_prev);
-        vector<IntPoint>* dest = &(pathHash.begin().value());
+        vector<IntPoint>* dest = &(smallestPathHash.value());
 
-        if (dest->size() == 0|| dest->size() == 1){
+        if (dest->size() == 0){
+            qDebug() << "dest->size() == 0";
+            pathHash.remove(intPoint2Hash(pj_prev));
+            continue;
+        } else if (dest->size() == 1) {
+            qDebug() << "dest->size() == 1";
             pathHash.remove(intPoint2Hash(pj_prev));
             continue;
         } else if (dest->size() ==2){
+            qDebug() << "dest->size() == 2";
             pj = (*dest)[1];
             last = (*dest)[0]; // pj_prev itself
             pathHash.remove(intPoint2Hash(pj_prev));
@@ -725,10 +815,16 @@ Paths contourConstruct(Paths pathList){
             contour.push_back(pj);
             dest = &(pathHash[intPoint2Hash(pj)]);
 
-            if (dest->size() == 0|| dest->size() == 1){
+            if (dest->size() == 0){
+                qDebug() << "dest->size() == 0 from loop";
+                pathHash.remove(intPoint2Hash(pj));
+                break;
+            } else if (dest->size() == 1){
+                qDebug() << "dest->size() == 1 from loop";
                 pathHash.remove(intPoint2Hash(pj));
                 break;
             } else if (dest->size() == 2){
+                qDebug() << "dest->size() == 2 from loop";
                 start = (*dest)[0]; // itself
                 /*uint32_t endHash = intPoint2Hash((*dest)[1]);
                 if (pathHash.contains(endHash))
@@ -750,6 +846,7 @@ Paths contourConstruct(Paths pathList){
                     break;
                 }
             }
+
             pj_next = (*dest)[1];
             dest->erase(dest->begin()+1);
             if (dest->size() == 1)
@@ -763,6 +860,7 @@ Paths contourConstruct(Paths pathList){
         contour.push_back(last);
         contour.push_back(start);
 
+        // collect last vertex's connectedness
         uint32_t last_hash = intPoint2Hash(last);
         if (pathHash.contains(last_hash)){
             dest = &(pathHash[last_hash]);
@@ -1135,6 +1233,15 @@ Paths3D contourConstruct3D(Paths3D hole_edges){
 
     return contourList;*/
 }
+
+bool intPointInPath(IntPoint ip, Path p){
+    for (IntPoint i : p){
+        if ((ip.X == i.X) && (ip.Y == i.Y)){
+            return true;
+        }
+    }
+    return false;
+};
 
 bool pathInpath(Path3D target, Path3D in){
     for (IntPoint ip : target.projection){

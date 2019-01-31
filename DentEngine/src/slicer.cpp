@@ -17,7 +17,8 @@ Slices Slicer::slice(Mesh* mesh){
 
     printf("meshslice done\n");
     fflush(stdout);
-    // contour construction step
+
+    // contour construction step per layer
     for (int i=0; i< meshslices.size(); i++){
         //qDebug() << "constructing contour" << i+1 << "/" << meshslices.size() << "offset" << -(scfg->wall_thickness+scfg->nozzle_width)/2;
         Slice meshslice;
@@ -28,6 +29,11 @@ Slices Slicer::slice(Mesh* mesh){
         // flaw exists if contour overlaps
         //meshslice.outerShellOffset(-(scfg->wall_thickness+scfg->nozzle_width)/2, jtRound);
         slices.push_back(meshslice);
+        qDebug() << i << "th meshslice.outershell.size() = " << meshslice.outershell.size();
+
+        for (int j=0; j<meshslice.outershell.size(); j++){
+            qDebug() << meshslice.outershell[j].size();
+        }
     }
     //승환 40%
     qmlManager->setProgress(0.4);
@@ -53,8 +59,8 @@ Slices Slicer::slice(Mesh* mesh){
 
     // below steps need to be done in parallel way
     // infill generation step
-    Infill infill(scfg->infill_type);
-    infill.generate(slices);
+    //Infill infill(scfg->infill_type);
+    //infill.generate(slices);
     printf("infill done\n");
     fflush(stdout);
     //cout << "infill done" <<endl;
@@ -62,8 +68,8 @@ Slices Slicer::slice(Mesh* mesh){
     qmlManager->setProgress(0.7);
 
     // support generation step
-    Support support(scfg->support_type);
-    support.generate(slices);
+    //Support support(scfg->support_type);
+    //support.generate(slices);
     printf("support done\n");
     fflush(stdout);
     //cout << "support done" <<endl;
@@ -71,8 +77,8 @@ Slices Slicer::slice(Mesh* mesh){
     qmlManager->setProgress(0.8);
 
     // raft generation step
-    Raft raft(scfg->raft_type);
-    raft.generate(slices);
+    //Raft raft(scfg->raft_type);
+    //raft.generate(slices);
     printf("raft done\n");
     fflush(stdout);
     //cout << "raft done" <<endl;
@@ -93,19 +99,21 @@ vector<Paths> Slicer::meshSlice(Mesh* mesh){
 
     vector<float> planes;
 
-    if (! strcmp(scfg->slicing_mode, "uniform")){
+    if (! strcmp(scfg->slicing_mode, "uniform")) {
         planes = buildUniformPlanes(mesh->z_min, mesh->z_max, delta);
     } else if (scfg->slicing_mode == "adaptive") {
         // adaptive slice
         planes = buildAdaptivePlanes(mesh->z_min, mesh->z_max);
     }
 
+    // build triangle list per layer height
     vector<vector<int>> triangleLists = buildTriangleLists(mesh, planes, delta);
     vector<Paths> pathLists;
 
     vector<int> A;
+    A.reserve(mesh->faces.size());
+
     for (int i=0; i<planes.size(); i++){
-        qDebug() << "slicing layer " << i << "/" << planes.size();
         A.insert(A.end(), triangleLists[i].begin(), triangleLists[i].end()); // union
         Paths paths;
 
@@ -116,7 +124,7 @@ vector<Paths> Slicer::meshSlice(Mesh* mesh){
                 t_idx --;
             }
             else{
-                // compute intersection
+                // compute intersection including on same line 2 points or 1 point
                 Path intersection = mesh->intersectionPath(cur_mf, planes[i]);
                 if (intersection.size()>0){
                     paths.push_back(intersection);
@@ -200,11 +208,13 @@ vector<vector<int>> Slicer::buildTriangleLists(Mesh* mesh, vector<float> planes,
     return list_list_triangle;
 }
 
+
 vector<float> Slicer::buildUniformPlanes(float z_min, float z_max, float delta){
     vector<float> planes;
     int idx_max = ceil((z_max-z_min)/delta);
     for (int idx=0; idx<=idx_max; idx++){
-        float plane_z = z_min+delta*idx;
+        float plane_z = round(z_min+delta*idx,2);
+        qDebug() << "build Uniform Planes at height z "<< plane_z;
         //float plane_z = (idx == idx_max) ? z_min+delta*(idx-1)+delta/2:z_min + delta*idx;
         planes.push_back(plane_z);
     }
@@ -260,7 +270,7 @@ void zfillone(IntPoint& e1bot, IntPoint& e1top, IntPoint& e2bot, IntPoint& e2top
 /****************** Deprecated functions *******************/
 
 void Slicer::containmentTreeConstruct(){
-    /*Clipper clpr;
+    Clipper clpr;
 
     for (int idx=0; idx<slices.size(); idx++){ // divide into parallel threads
         Slice* slice = &(slices[idx]);
@@ -271,11 +281,11 @@ void Slicer::containmentTreeConstruct(){
         for (PolyNode* pn : slice->polytree.Childs){
             qDebug() << pn->IsHole() << pn->Parent << pn->Parent->Parent;
         }
-    }*/
+    }
 
     // vector<vector<IntPoint>> to vector<vector<Point>>
 
-    for (int idx=0; idx<slices.size(); idx++){
+    /*for (int idx=0; idx<slices.size(); idx++){
         Slice* slice = &(slices[idx]);
 
         vector<vector<c2t::Point>> pointPaths;
@@ -289,10 +299,12 @@ void Slicer::containmentTreeConstruct(){
             }
             pointPaths.push_back(pointPath);
         }
+
         clip2tri ct;
 
         ct.mergePolysToPolyTree(pointPaths, slice->polytree);
-    }
+        qDebug() << "in slice " << idx << ", constructing polytree with " << slice->outershell.size() << " to " << pointPaths.size() << " point pathes" << " total tree : " << slice->polytree.Total();
+    }*/
 }
 
 
