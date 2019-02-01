@@ -175,15 +175,18 @@ Rectangle {
 
                             if (popup_type == uppertab.ftrExport){
                                 cfg["temporary"] = "false";
-                                yesnoPopUp.runFeature(uppertab.ftrExport, cfg);
+                                yesnoPopUp.runGroupFeature(uppertab.ftrExport, "", 0, 0, 0, cfg);
+                                //yesnoPopUp.runFeature(uppertab.ftrExport, cfg);
                             } else if( popup_type == uppertab.ftrSupportViewMode ) {
                                 cfg["temporary"] = "true";
                                 qm.setViewMode(1);
-                                yesnoPopUp.runFeature(uppertab.ftrExport, cfg);
+                                yesnoPopUp.runGroupFeature(uppertab.ftrExport, "", 0, 0, 0, cfg);
+                                //yesnoPopUp.runFeature(uppertab.ftrExport, cfg);
                             } else if( popup_type == uppertab.ftrLayerViewMode ) {
                                 cfg["temporary"] = "true";
                                 qm.setViewMode(2);
-                                yesnoPopUp.runFeature(uppertab.ftrExport, cfg);
+                                yesnoPopUp.runGroupFeature(uppertab.ftrExport, "", 0, 0, 0, cfg);
+                                //yesnoPopUp.runFeature(uppertab.ftrExport, cfg);
                             }
 
                             break;
@@ -318,7 +321,8 @@ Rectangle {
         noButton_text.text = "Cancel"
     }
 
-    signal runFeature(int type, var config);
+    signal runGroupFeature(int type, string state, double arg1, double arg2, double arg3, var data);
+    //signal runFeature(int type, var config);
 
     function addPart(fileName, ID){ // add in list with filename
         var newComponent = Qt.createComponent("LeftTabPartListElement.qml")

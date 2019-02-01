@@ -47,6 +47,7 @@ Slicer* SlicingEngine::slice(QVariant cfg, Mesh* mesh, QString filename){
 
     // Load mesh
     Mesh* loaded_mesh = mesh;
+    qDebug() << "loadedMesh : " << loaded_mesh->faces.size();
     /*Mesh* loaded_mesh = new Mesh();
     loadMeshSTL(loaded_mesh, filename.toStdString().c_str());
     */
