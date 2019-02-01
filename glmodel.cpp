@@ -170,7 +170,7 @@ void GLModel::addMouseHandlers(){
     m_objectPicker = new Qt3DRender::QObjectPicker(this);
 
     m_objectPicker->setHoverEnabled(false); // to reduce drag load
-    //m_objectPicker->setDragEnabled(true);
+    m_objectPicker->setDragEnabled(false);
     // add only m_objectPicker
     QObject::connect(m_objectPicker, SIGNAL(released(Qt3DRender::QPickEvent*)), this, SLOT(handlePickerClicked(Qt3DRender::QPickEvent*)));
     QObject::connect(m_objectPicker, SIGNAL(moved(Qt3DRender::QPickEvent*)), this, SLOT(mgoo(Qt3DRender::QPickEvent*)));
