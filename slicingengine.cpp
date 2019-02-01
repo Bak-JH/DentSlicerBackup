@@ -20,6 +20,7 @@ Slicer* SlicingEngine::slice(QVariant cfg, Mesh* mesh, QString filename){
         } else if (!strcmp(iter.key().toStdString().c_str(), "raft_type")){
             (*scfg)[iter.key().toStdString().c_str()] = 2;//iter.value().toString();
         } else if (!strcmp(iter.key().toStdString().c_str(), "layer_height")){
+            scfg->layer_height = iter.value().toFloat();
             //(*scfg)[iter.key().toStdString().c_str()] = 2;//iter.value().toString();
         } else if (!strcmp(iter.key().toStdString().c_str(), "resolution")){
             //(*scfg)[iter.key().toStdString().c_str()] = 2;//iter.value().toString();
