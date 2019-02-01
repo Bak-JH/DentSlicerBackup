@@ -1298,6 +1298,8 @@ void QmlManager::showMoveArrow(){
 
 void QmlManager::hideMoveArrow(){
     moveArrow->setEnabled(0);
+    moveArrowX->setEnabled(0);
+    moveArrowY->setEnabled(0);
 }
 
 void QmlManager::hideRotateSphere(){

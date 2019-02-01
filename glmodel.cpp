@@ -55,10 +55,10 @@ GLModel::GLModel(QObject* mainWindow, QNode *parent, Mesh* loadMesh, QString fna
 
         addComponent(m_transform);
 
-        m_meshMaterial = new QPhongMaterial();
+        /*m_meshMaterial = new QPhongMaterial();
         m_meshAlphaMaterial = new QPhongAlphaMaterial();
         m_layerMaterial = new QPhongMaterial();
-        /*m_meshMaterial->setAmbient(QColor(255,0,0));
+        m_meshMaterial->setAmbient(QColor(255,0,0));
         m_meshMaterial->setDiffuse(QColor(173,215,218));
         m_meshMaterial->setSpecular(QColor(182,237,246));
         m_meshMaterial->setShininess(0.0f);
@@ -1201,6 +1201,7 @@ void GLModel::handlePickerClicked(QPickEvent *pick)
     m_transform->setScale(1.0f);
     qDebug() << "setting scale back to 1.0";
     qmlManager->resetCursor();
+    qmlManager->showMoveArrow();
 
     isReleased = true;
     qDebug() << "Released";
@@ -2122,6 +2123,7 @@ void GLModel::engoo(){
 
 void GLModel::exgoo(){
     m_meshMaterial->setAmbient(QColor(81,200,242));
+    qDebug() << "exgoo";
 }
 
 void GLModel::mgoo(Qt3DRender::QPickEvent* v)
@@ -2143,13 +2145,36 @@ void GLModel::mgoo(Qt3DRender::QPickEvent* v)
              qmlManager->saveActive))
         return;
 
+
+    // if not selected by qmlmanager, return
+    bool modelSelected = false;
+    for (GLModel* glm : qmlManager->selectedModels){
+        if (glm == this->parentModel){
+            modelSelected = true;
+        }
+    }
+    if (!modelSelected){
+        m_objectPicker->setDragEnabled(false);
+        isReleased = true;
+        qmlManager->modelClicked = false;
+        return;
+    }
+
     qmlManager->moveButton->setProperty("state", "active");
     qmlManager->setClosedHandCursor();
 
     if (!isMoved){ // called only once on dragged
         parentModel->saveUndoState();
+        qmlManager->hideMoveArrow();
+        qDebug() << "hiding move arrow";
         // for mgoo out problem
-        m_transform->setScale(10.0f);
+        float x_diff = parentModel->mesh->x_max - parentModel->mesh->x_min;
+        float y_diff = parentModel->mesh->y_max - parentModel->mesh->y_min;
+        float z_diff = parentModel->mesh->z_max - parentModel->mesh->z_min;
+        float biggest = x_diff>y_diff? x_diff : y_diff;
+        biggest = z_diff>biggest? z_diff : biggest;
+        float scale_val = biggest > 50.0f ? 1.0f : 100.0f/biggest;
+        m_transform->setScale(scale_val);
         isMoved = true;
     }
 
@@ -2169,7 +2194,7 @@ void GLModel::mgoo(Qt3DRender::QPickEvent* v)
     qmlManager->modelMoveF(1,a);
     qmlManager->modelMoveF(2,b);
 
-    qmlManager->showMoveArrow();
+    //qmlManager->showMoveArrow();
     prevPoint = currentPoint;
 }
 
