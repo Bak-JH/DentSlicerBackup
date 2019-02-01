@@ -55,8 +55,8 @@ GLModel::GLModel(QObject* mainWindow, QNode *parent, Mesh* loadMesh, QString fna
 
         addComponent(m_transform);
 
-        /*m_meshMaterial = new QPhongMaterial();
-        m_meshAlphaMaterial = new QPhongAlphaMaterial();
+        m_meshMaterial = new QPhongMaterial();
+        /*m_meshAlphaMaterial = new QPhongAlphaMaterial();
         m_layerMaterial = new QPhongMaterial();
         m_meshMaterial->setAmbient(QColor(255,0,0));
         m_meshMaterial->setDiffuse(QColor(173,215,218));
