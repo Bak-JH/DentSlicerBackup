@@ -18,7 +18,7 @@ Rectangle {
 
     visible: false
     color : "transparent"
-    signal runGroupFeature(int type, string state, double arg1, double arg2, double arg3);
+    signal runGroupFeature(int type, string state, double arg1, double arg2, double arg3, var config);
 
     Rectangle{//shadow
         width: 34
@@ -236,7 +236,7 @@ Rectangle {
 
         uppertab.all_off()
         uppertab.second_tab_button_move.state = "active"
-        mttab.runGroupFeature(4, "active", 0, 0, 0);
+        mttab.runGroupFeature(4, "active", 0, 0, 0, null);
 
         hideTab()
     }
@@ -246,7 +246,7 @@ Rectangle {
 
         uppertab.all_off()
         uppertab.second_tab_button_rotate.state = "active"
-        mttab.runGroupFeature(5, "active", 0, 0, 0);
+        mttab.runGroupFeature(5, "active", 0, 0, 0, null);
 
         hideTab()
     }

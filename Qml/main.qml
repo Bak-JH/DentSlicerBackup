@@ -236,6 +236,7 @@ Item{
             }
 
             onWheel: {
+                qm.disableObjectPickers();
                 // mouse wheel scaling: model and bed zooms, camera moves to mouse pointer direction
                 var d = wheel.angleDelta.y;
                 var scaleTmp = sceneRoot.systemTransform.scale3D;
@@ -274,6 +275,7 @@ Item{
 
                     mttab.updatePosition();
                 }
+                qm.enableObjectPickers();
             }
         }
         /*
