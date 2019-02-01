@@ -153,14 +153,18 @@ void interpolate(Mesh* mesh, Path3D contour1, Path3D contour2){
 void cutAway(Mesh* leftMesh, Mesh* rightMesh, Mesh* mesh, vector<QVector3D> cuttingPoints, int cutFillMode){
     Path contour; // real cutting points in intpoint form
     Path3D cuttingContour; // real cutting points line qvector3d form
+
     Paths3D cuttingEdges;
     int numPoints = cuttingPoints.size();
 
+    // reserve mesh faces, vertices
     leftMesh->faces.reserve(mesh->faces.size()*2);
     leftMesh->vertices.reserve(mesh->faces.size()*2);
     rightMesh->faces.reserve(mesh->faces.size()*2);
     rightMesh->vertices.reserve(mesh->faces.size()*2);
 
+
+    // collect cutting points, convert to Path (IntPoints)
     for (int i=0; i<numPoints; i++){
         QVector3D cuttingPoint =cuttingPoints[i];
         contour.push_back(IntPoint(cuttingPoint.x()*scfg->resolution
@@ -170,11 +174,14 @@ void cutAway(Mesh* leftMesh, Mesh* rightMesh, Mesh* mesh, vector<QVector3D> cutt
         cuttingContour.push_back(temp_mv);
     }
 
+    // project mesh's vertices to IntPoints
     Path IntPoints;
     IntPoints.reserve(mesh->vertices.size()*2);
     for (MeshVertex mv : mesh->vertices){
         IntPoints.push_back(IntPoint(mv.position.x()*scfg->resolution, mv.position.y()*scfg->resolution));
     }
+
+    // convexHull used for point containment
     mesh->convexHull = getConvexHull(&IntPoints);
 
 

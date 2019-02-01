@@ -165,9 +165,10 @@ Rectangle {
                                 console.log("collectConfigurations")
                                 configurations["resolution"] = options[0];
                                 configurations["layer_height"] = options[1];
-                                configurations["support_type"] = options[2];
-                                configurations["infill_type"] = options[3];
-                                configurations["raft_type"] = options[4];
+                                configurations["resin_type"] = options[2];
+                                configurations["support_type"] = options[3];
+                                configurations["infill_type"] = options[4];
+                                configurations["raft_type"] = options[5];
                                 return configurations;
                             }
                             var cfg = collectConfigurations();
