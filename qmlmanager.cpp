@@ -590,6 +590,20 @@ void QmlManager::fixMesh(){
     emit selectedModels[0]->_updateModelMesh(true);
 }
 
+void QmlManager::disableObjectPickers(){
+    for (GLModel* glm : qmlManager->glmodels){
+        if (glm->shadowModel->m_objectPicker->isEnabled())
+            glm->shadowModel->m_objectPicker->setEnabled(false);
+    }
+}
+
+void QmlManager::enableObjectPickers(){
+    for (GLModel* glm : qmlManager->glmodels){
+        if (!glm->shadowModel->m_objectPicker->isEnabled())
+            glm->shadowModel->m_objectPicker->setEnabled(true);
+    }
+}
+
 void QmlManager::setHandCursor(){
     QApplication::setOverrideCursor(QCursor(Qt::PointingHandCursor));
 }
