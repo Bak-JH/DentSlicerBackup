@@ -199,6 +199,8 @@ public:
     Q_INVOKABLE int getSelectedModelsSize();
     Q_INVOKABLE bool getGroupSelectionActive();
     Q_INVOKABLE void fixMesh();
+    Q_INVOKABLE void disableObjectPickers();
+    Q_INVOKABLE void enableObjectPickers();
     Q_INVOKABLE void setHandCursor();
     Q_INVOKABLE void setClosedHandCursor();
     Q_INVOKABLE void resetCursor();
