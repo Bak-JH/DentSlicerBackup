@@ -7,6 +7,7 @@ Rectangle {
     property alias option_resolution: option_resolution
     property alias option_layer_height: option_layer_height
     property alias option_bed_number: option_bed_number
+    property alias option_resin_type: option_resin_type
     property alias option_raft: option_raft
     property alias option_support: option_support
     property alias option_support_density: option_support_density
@@ -106,6 +107,14 @@ Rectangle {
                     id:option_bed_number
                     columnName: "Bed number"
                     columnContents: ["1","2","3"]
+                }
+
+                Item{width:parent.width;height:2}//spacer
+
+                LeftTabSlicingOptionElement{
+                    id:option_resin_type
+                    columnName: "Resin Type"
+                    columnContents: ["Temporary","Clear","Castable"]
                 }
 
                 Item{width:parent.width;height:2}//spacer
