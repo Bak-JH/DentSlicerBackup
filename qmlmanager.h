@@ -12,7 +12,7 @@
 #include <QEvent>
 #include <QPointF>
 #include <QCursor>
-#include <QQmlProperty>0269
+#include <QQmlProperty>
 #include "feature/autoarrange.h"
 #include "feature/shelloffset.h"
 #include "glmodel.h"
@@ -251,7 +251,7 @@ public slots:
     void copyModel();
     void pasteModel();
     void groupSelectionActivate(bool);
-    void runGroupFeature(int,QString, double, double, double);
+    void runGroupFeature(int,QString, double, double, double, QVariant);
     bool multipleModelSelected(int ID);
     void lastModelSelected();
     void modelSelected(int);
