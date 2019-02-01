@@ -98,11 +98,14 @@ Entity {
                 if (rotateAction.active) {// mouse right rotate
                     if (qm.freecutActive)
                         return ;
+                    qm.disableObjectPickers();
                     sceneRoot.systemTransform.rotationZ += rotationSpeed * rotateXAxis.value * dt;
                     //var target = axisAngle2Quaternion(rotationSpeed * rotateXAxis.value * dt,qq.rotatedVector(systemTransform.rotation,zdown))
                     //cm.camera.rotateAboutViewCenter(qq.multiplyQuaternion(target,systemTransform.rotation));
                     sceneRoot.systemTransform.rotationX += rotationSpeed * (-1) * rotateYAxis.value * dt;
                     mttab.updatePosition()
+                } else {
+                    qm.enableObjectPickers();
                 }
             }
 
