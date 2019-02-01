@@ -99,10 +99,13 @@ Entity {
                     if (qm.freecutActive)
                         return ;
                     qm.disableObjectPickers();
-                    sceneRoot.systemTransform.rotationZ += rotationSpeed * rotateXAxis.value * dt;
+
+                    var proper_dt = (dt > 0.1)? 0 : dt;
+
+                    sceneRoot.systemTransform.rotationZ += rotationSpeed * rotateXAxis.value * proper_dt;
                     //var target = axisAngle2Quaternion(rotationSpeed * rotateXAxis.value * dt,qq.rotatedVector(systemTransform.rotation,zdown))
                     //cm.camera.rotateAboutViewCenter(qq.multiplyQuaternion(target,systemTransform.rotation));
-                    sceneRoot.systemTransform.rotationX += rotationSpeed * (-1) * rotateYAxis.value * dt;
+                    sceneRoot.systemTransform.rotationX += rotationSpeed * (-1) * rotateYAxis.value * proper_dt;
                     mttab.updatePosition()
                 } else {
                     qm.enableObjectPickers();
