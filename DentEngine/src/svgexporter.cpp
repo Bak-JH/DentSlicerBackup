@@ -20,6 +20,10 @@ QString SVGexporter::exportSVG(Slices contourLists, QString outfoldername){
     jsonObject["curing_time"] = 2100; // depends on scfg->resin_type
     jsonObject["mirror_rot_time"] = 2000;
     jsonObject["z_hop_height"] = 15;
+    jsonObject["move_up_feedrate"] = 350;
+    jsonObject["move_down_feedrate"] = 500;
+    jsonObject["resin_type"] = scfg->resin_type;
+    jsonObject["contraction_ratio"] = scfg->contraction_ratio;
     QJsonDocument jsonDocument(jsonObject);
     QByteArray jsonBytes = jsonDocument.toJson();
 

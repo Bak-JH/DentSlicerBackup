@@ -781,6 +781,10 @@ Paths contourConstruct(Paths pathList){
 
         QHash<uint32_t, Path>::iterator smallestPathHash = pathHash.begin();//findSmallestPathHash(pathHash);
 
+        if (smallestPathHash.value().size() == 0){
+            pathHash.erase(smallestPathHash);
+            break;
+        }
         pj_prev = smallestPathHash.value()[0];
         start = pj_prev;
         contour.push_back(pj_prev);
