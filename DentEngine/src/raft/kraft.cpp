@@ -18,6 +18,10 @@ void generateKRaft(Slices& slices){
 
     int layer_count = scfg->raft_thickness/scfg->layer_height;
 
+    for (int first_layer_idx=0; first_layer_idx*scfg->layer_height< scfg->raft_thickness; first_layer_idx ++){
+        slices.insert(slices.begin(), first_slice);
+    }
+
     for (int layer_idx=0; layer_idx*scfg->layer_height<scfg->raft_thickness; layer_idx ++){
         qDebug() << "generating raft " << layer_idx << layer_count << layer_idx*scfg->layer_height;
 

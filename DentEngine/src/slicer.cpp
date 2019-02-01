@@ -68,8 +68,8 @@ Slices Slicer::slice(Mesh* mesh){
     qmlManager->setProgress(0.7);
 
     // support generation step
-    //Support support(scfg->support_type);
-    //support.generate(slices);
+    Support support(scfg->support_type);
+    support.generate(slices);
     printf("support done\n");
     fflush(stdout);
     //cout << "support done" <<endl;
@@ -77,8 +77,8 @@ Slices Slicer::slice(Mesh* mesh){
     qmlManager->setProgress(0.8);
 
     // raft generation step
-    //Raft raft(scfg->raft_type);
-    //raft.generate(slices);
+    Raft raft(scfg->raft_type);
+    raft.generate(slices);
     printf("raft done\n");
     fflush(stdout);
     //cout << "raft done" <<endl;

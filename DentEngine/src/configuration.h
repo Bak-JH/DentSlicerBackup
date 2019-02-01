@@ -20,11 +20,11 @@
  */
 
 #define TEMPORARY_RESIN 1
-#define TRANSPARENT_RESIN 2
+#define CLEAR_RESIN 2
 #define CASTABLE_RESIN 3
 
-#define TEMPORARY_CONTRACTION_RATIO 0.98814
-#define TRANSPARENT_CONTRACTION_RATIO 0.99504 //0.99009
+#define TEMPORARY_CONTRACTION_RATIO 1.005//1.005//0.99502//0.98814
+#define CLEAR_CONTRACTION_RATIO 0.99504 //0.99009
 #define CASTABLE_CONTRACTION_RATIO 0.99009
 
 #include <stdio.h>
@@ -42,7 +42,7 @@ public:
     static constexpr float vertex_inbound_distance = 0.002;//0.03;//(float)1/resolution; // resolution in mm (0.0001 and 0.0009 are same, 1 micron)
 
     char* slicing_mode = "uniform"; // uniform OR adaptive
-    float layer_height = 0.1; // in mm
+    float layer_height = 0.05; // in mm
     float nozzle_width = 0; // in mm (diameter) , for printers with nozzles
     float wall_thickness = 2; // in mm
     float fill_thickness = 1; // in mm

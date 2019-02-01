@@ -36,6 +36,7 @@ void overhangDetect(Slices& slices){
 
     // calculate overhang regions
     for (int idx=slices.size()-1; idx>=0; idx--){
+    //for (int idx=2; idx>=0; idx--){
         //if (idx % checking_layers != 0)
         //    continue;
         qDebug() << "overhang region detect" << idx << "/" << slices.size();
@@ -564,6 +565,10 @@ Paths areaSubdivision(Path area, float criterion){
 }
 
 void clusterPoints(vector<OverhangPoint*>& points){
+    if (points.size() == 0){
+        return;
+    }
+
     vector<OverhangPoint*> unclassified_points;
     vector<OverhangPoint*> classified_points;
 
