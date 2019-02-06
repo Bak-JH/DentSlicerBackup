@@ -1190,8 +1190,8 @@ void GLModel::handlePickerClicked(QPickEvent *pick)
 {
     qDebug() << "handle Picker clicked" << pick->buttons() << pick->button();
 
-    if (pick->button() == Qt::RightButton)
-        return;
+    /*if (pick->button() == Qt::RightButton)
+        return;*/
 
     if (!parentModel)
         return;
@@ -1201,7 +1201,6 @@ void GLModel::handlePickerClicked(QPickEvent *pick)
     m_transform->setScale(1.0f);
     qDebug() << "setting scale back to 1.0";
     qmlManager->resetCursor();
-    qmlManager->showMoveArrow();
 
     isReleased = true;
     qDebug() << "Released";
@@ -1220,6 +1219,7 @@ void GLModel::handlePickerClicked(QPickEvent *pick)
     if (qmlManager->selectedModels[0] != nullptr && (pick->button() & Qt::RightButton)){ // when right button clicked
         if (qmlManager->selectedModels[0]->ID == parentModel->ID){
             QMetaObject::invokeMethod(qmlManager->mttab, "tabOnOff");
+            m_objectPicker->setEnabled(false);
             return;
         }
 
