@@ -90,7 +90,7 @@ Rectangle {
                 LeftTabSlicingOptionElement{
                     id:option_resolution
                     columnName: "Resolution"
-                    columnContents: ["1920*1080","1024*768"]
+                    columnContents: ["1920*1080", "1280*800", "1024*768"]
                 }
 
                 Item{width:parent.width;height:2}//spacer
