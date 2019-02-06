@@ -1959,16 +1959,8 @@ void QmlManager::runGroupFeature(int ftrType, QString state, double arg1, double
 
         Mesh* mergedMesh = ste->mergeSelectedModels();
         qDebug() << "Merged Mesh" << mergedMesh->faces.size();
-        /*QFuture<Mesh*> future = QtConcurrent::run(ste, &STLexporter::mergeSelectedModels);
-        QFutureWatcher<Mesh*> fw;
-        fw.setFuture(future);
-        fw.waitForFinished();
-        Mesh* mergedMesh = future.result();*/
-        //QtConcurrent::run(ste, &STLexporter::exportSTL, qmlManager->selectedModels[0]->mesh,fileName);
-        //QFuture
-
-        se->slice(data, mergedMesh, fileName);
-        //QFuture<Slicer*> future = QtConcurrent::run(se, &SlicingEngine::slice, data, mergedMesh, fileName);
+        //se->slice(data, mergedMesh, fileName);
+        QFuture<Slicer*> future = QtConcurrent::run(se, &SlicingEngine::slice, data, mergedMesh, fileName);
         //m_glmodel->futureWatcher.setFuture(future);
         break;
     }
