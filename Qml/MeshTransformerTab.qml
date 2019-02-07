@@ -286,6 +286,7 @@ Rectangle {
 
 
     function world2Screen(target){
+
         var tmp = Qt.vector3d(0,0,0)
         tmp = target
         target = tmp.times(sceneRoot.systemTransform.scale3D)
@@ -307,7 +308,9 @@ Rectangle {
         point2.x = (point2.x+1) * scene3d.width/2;
         point2.y = (-1 * point2.y+1) * scene3d.height/2;
         return Qt.vector2d(point2.x,point2.y)
+
     }
+
 
 }
 
