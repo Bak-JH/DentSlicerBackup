@@ -3,6 +3,7 @@
 #include <QtMath>
 
 void generateCustomCylinder(Mesh* mesh, const QVector3D& position, const QVector3D& positionTop, const float& radiusTop, const float& radiusBottom){
+    //qDebug() << "generateCustomCylinder";
     qDebug() << "v1(" << position.x() << "," << position.y() << "," << position.z() << ")";
     qDebug() << "v2(" << positionTop.x() << "," << positionTop.y() << "," << positionTop.z() << ")";
 
@@ -18,7 +19,7 @@ void generateCustomCylinder(Mesh* mesh, const QVector3D& position, const QVector
     QVector3D *lastTop;
     for( auto iter = top.begin() ; iter != top.end() ; iter++ ) {
         if( iter != top.begin() ) {
-            mesh->addFace(*lastTop, (*iter), positionTop);
+            mesh->addFace(*lastTop, *iter, positionTop);
         }
         lastTop = &(*iter);
     }
@@ -27,20 +28,22 @@ void generateCustomCylinder(Mesh* mesh, const QVector3D& position, const QVector
     QVector3D *lastBottom;
     for( auto iter = bottom.begin() ; iter != bottom.end() ; iter++ ) {
         if( iter != bottom.begin() ) {
-            mesh->addFace((*iter), *lastBottom, position);
+            mesh->addFace(*iter, *lastBottom, position);
         }
         lastBottom = &(*iter);
     }
 
     // pillar
+    qDebug() << "pillar";
     for( auto iterTop = top.begin(), iterBottom = bottom.begin(); iterTop != top.end() ; iterTop++, iterBottom++ ) {
         if( iterTop != top.begin() ) {
-            mesh->addFace((*iterTop), *lastTop, (*iterBottom));
-            mesh->addFace(*lastTop, *lastBottom, (*iterBottom));
+            mesh->addFace(*iterTop, *lastTop, *iterBottom);
+            mesh->addFace(*lastTop, *lastBottom, *iterBottom);
         }
         lastTop = &(*iterTop);
         lastBottom = &(*iterBottom);
     }
+    //mesh->connectFaces();
 }
 
 void generateCylinder(Mesh* mesh, const QVector3D& position, const QVector3D& positionTop, const float& radius) {
@@ -71,7 +74,6 @@ void generateFace(Mesh* mesh, Path path, float z) {
 }
 
 void generateSupporter(Mesh* mesh, OverhangPoint *point, OverhangPoint *parent, vector<OverhangPoint *> *points, float support_z_min) {
-
     qDebug() << point << point->target_branching_overhang_point << parent;
     qDebug() << "height:" << point->height <<
                 "radius:" << point->radius <<

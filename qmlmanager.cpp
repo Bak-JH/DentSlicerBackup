@@ -129,18 +129,12 @@ void QmlManager::initializeUI(QQmlApplicationEngine* e){
     repairPopup = FindItemByName(engine, "repairPopup");
 
     // arrange components
-    //arrangePopup = FindItemByName(engine, "arrangePopup");
     progress_popup = FindItemByName(engine, "progress_popup");
-    //QObject::connect(arrangePopup, SIGNAL(runFeature()), this, SLOT(runArrange()));
 
     // save component
     saveButton = FindItemByName(engine, "saveBtn");
-    //savePopup = FindItemByName(engine, "savePopup");
-    //QObject::connect(savePopup, SIGNAL(runFeature(int)),this, SLOT(save()));
-    //QObject::connect(savePopup, SIGNAL(openSave()), this, SLOT(openSave()));
-    //QObject::connect(savePopup, SIGNAL(closeSave()), this, SLOT(closeSave()));
 
-    QObject::connect(saveButton, SIGNAL(runGroupFeature(int,QString, double,double,double)) , this, SLOT(runGroupFeature(int,QString,double,double,double)));
+    QObject::connect(saveButton, SIGNAL(runGroupFeature(int,QString, double,double,double,QVariant)) , this, SLOT(runGroupFeature(int,QString,double,double,double,QVariant)));
 
     // export component
     //exportButton = FindItemByName(engine, "exportBtn");
@@ -156,23 +150,23 @@ void QmlManager::initializeUI(QQmlApplicationEngine* e){
     hideMoveArrow();
     //moveArrow->setEnabled(0);
     QObject *moveButton = FindItemByName(engine, "moveButton");
-    QObject::connect(mttab,SIGNAL(runGroupFeature(int,QString, double, double, double)),this,SLOT(runGroupFeature(int,QString, double, double, double)));
-    QObject::connect(moveButton,SIGNAL(runGroupFeature(int,QString, double, double, double)),this,SLOT(runGroupFeature(int,QString, double, double, double)));
-    QObject::connect(rotateButton,SIGNAL(runGroupFeature(int,QString, double, double, double)),this,SLOT(runGroupFeature(int,QString, double, double, double)));
+    QObject::connect(mttab,SIGNAL(runGroupFeature(int,QString, double, double, double,QVariant)),this,SLOT(runGroupFeature(int,QString, double, double, double, QVariant)));
+    QObject::connect(moveButton,SIGNAL(runGroupFeature(int,QString, double, double, double,QVariant)),this,SLOT(runGroupFeature(int,QString, double, double, double, QVariant)));
+    QObject::connect(rotateButton,SIGNAL(runGroupFeature(int,QString, double, double, double, QVariant)),this,SLOT(runGroupFeature(int,QString, double, double, double, QVariant)));
     orientButton = FindItemByName(engine, "orientButton");
-    QObject::connect(orientButton,SIGNAL(runGroupFeature(int,QString, double, double, double)),this,SLOT(runGroupFeature(int,QString, double, double, double)));
+    QObject::connect(orientButton,SIGNAL(runGroupFeature(int,QString, double, double, double, QVariant)),this,SLOT(runGroupFeature(int,QString, double, double, double, QVariant)));
     repairButton = FindItemByName(engine,"repairButton");
-    QObject::connect(repairButton,SIGNAL(runGroupFeature(int,QString, double, double, double)),this,SLOT(runGroupFeature(int,QString, double, double, double)));
+    QObject::connect(repairButton,SIGNAL(runGroupFeature(int,QString, double, double, double, QVariant)),this,SLOT(runGroupFeature(int,QString, double, double, double, QVariant)));
 
-    QObject::connect(extensionButton,SIGNAL(runGroupFeature(int,QString, double, double, double)),this,SLOT(runGroupFeature(int,QString, double, double, double)));
+    QObject::connect(extensionButton,SIGNAL(runGroupFeature(int,QString, double, double, double, QVariant)),this,SLOT(runGroupFeature(int,QString, double, double, double, QVariant)));
 
-    QObject::connect(scalePopup, SIGNAL(runGroupFeature(int,QString,double, double, double)), this, SLOT(runGroupFeature(int,QString, double, double, double)));
+    QObject::connect(scalePopup, SIGNAL(runGroupFeature(int,QString,double, double, double, QVariant)), this, SLOT(runGroupFeature(int,QString, double, double, double, QVariant)));
 
     layflatButton = FindItemByName(engine,"layflatButton");
-    QObject::connect(layflatButton,SIGNAL(runGroupFeature(int,QString, double, double, double)),this,SLOT(runGroupFeature(int,QString, double, double, double)));
+    QObject::connect(layflatButton,SIGNAL(runGroupFeature(int,QString, double, double, double, QVariant)),this,SLOT(runGroupFeature(int,QString, double, double, double, QVariant)));
 
     boxUpperTab = FindItemByName(engine, "boxUpperTab");
-    QObject::connect(boxUpperTab,SIGNAL(runGroupFeature(int,QString, double, double, double)),this,SLOT(runGroupFeature(int,QString, double, double, double)));
+    QObject::connect(boxUpperTab,SIGNAL(runGroupFeature(int,QString, double, double, double, QVariant)),this,SLOT(runGroupFeature(int,QString, double, double, double, QVariant)));
 
     QObject::connect(this, SIGNAL(arrangeDone(vector<QVector3D>, vector<float>)), this, SLOT(applyArrangeResult(vector<QVector3D>, vector<float>)));
 
@@ -208,6 +202,8 @@ void QmlManager::initializeUI(QQmlApplicationEngine* e){
     QObject::connect(mv, SIGNAL(copy()), this, SLOT(copyModel()));
     QObject::connect(mv, SIGNAL(paste()), this, SLOT(pasteModel()));
     QObject::connect(mv, SIGNAL(groupSelectionActivate(bool)), this, SLOT(groupSelectionActivate(bool)));
+
+    QObject::connect(yesno_popup, SIGNAL(runGroupFeature(int, QString, double, double, double, QVariant)),this,SLOT(runGroupFeature(int,QString, double, double, double, QVariant)));
 }
 
 void QmlManager::createModelFile(Mesh* target_mesh, QString fname) {
@@ -334,7 +330,8 @@ void QmlManager::disconnectHandlers(GLModel* glmodel){
     //QObject::disconnect(glmodel->ft, SIGNAL(setProgress(QVariant)),progress_popup, SLOT(updateNumber(QVariant)));
     //QObject::disconnect(glmodel->ft, SIGNAL(loadPopup(QVariant)),orientPopup, SLOT(show_popup(QVariant)));
 
-    QObject::disconnect(yesno_popup, SIGNAL(runFeature(int, QVariant)), glmodel->ft, SLOT(setTypeAndRun(int, QVariant)));
+    //QObject::disconnect(yesno_popup, SIGNAL(runGroupFeature(int, QString, double, double, double, QVariant)),this,SLOT(runGroupFeature(int,QString, double, double, double, QVariant))); //glmodel->ft, SLOT(setTypeAndRun(int, QVariant)));
+    //QObject::disconnect(yesno_popup, SIGNAL(runFeature(int, QVariant)), glmodel->ft, SLOT(setTypeAndRun(int, QVariant)));
 
     /*QObject::disconnect(undoRedoButton, SIGNAL(unDo()), glmodel, SLOT(loadUndoState()));
     QObject::disconnect(undoRedoButton, SIGNAL(reDo()), glmodel, SLOT(loadRedoState()));
@@ -420,7 +417,7 @@ void QmlManager::disconnectHandlers(GLModel* glmodel){
     //QObject::disconnect(saveButton, SIGNAL(runFeature(int)), glmodel->ft, SLOT(setTypeAndRun(int)));
 
     // export button codes
-    QObject::disconnect(exportOKButton, SIGNAL(runFeature(int, QVariant)), glmodel->ft, SLOT(setTypeAndRun(int, QVariant)));
+    //QObject::disconnect(exportOKButton, SIGNAL(runGroupFeature(int, QString, double, double, double, QVariant)),this,SLOT(runGroupFeature(int,QString, double, double, double, QVariant))); //glmodel->ft, SLOT(setTypeAndRun(int, QVariant)));
     //QObject::disconnect(exportButton, SIGNAL(runFeature(int, QVariant)), glmodel->ft, SLOT(setTypeAndRun(int, QVariant)));
 
 
@@ -441,7 +438,7 @@ void QmlManager::connectHandlers(GLModel* glmodel){
     QObject::connect(glmodel, SIGNAL(resetLayflat()), this, SLOT(resetLayflat()));
     */
 
-    QObject::connect(yesno_popup, SIGNAL(runFeature(int, QVariant)), glmodel->ft, SLOT(setTypeAndRun(int, QVariant)));
+    //QObject::connect(yesno_popup, SIGNAL(runFeature(int, QVariant)), glmodel->ft, SLOT(setTypeAndRun(int, QVariant)));
 
     /*QObject::connect(undoRedoButton, SIGNAL(unDo()), glmodel, SLOT(loadUndoState()));
     QObject::connect(undoRedoButton, SIGNAL(reDo()), glmodel, SLOT(loadRedoState()));
@@ -519,7 +516,7 @@ void QmlManager::connectHandlers(GLModel* glmodel){
     //QObject::connect(saveButton, SIGNAL(runFeature(int)), glmodel->ft, SLOT(setTypeAndRun(int)));
 
     // export button codes
-    QObject::connect(exportOKButton, SIGNAL(runFeature(int, QVariant)), glmodel->ft, SLOT(setTypeAndRun(int, QVariant)));
+    //QObject::connect(exportOKButton, SIGNAL(runGroupFeature(int, QString, double, double, double, QVariant)),this,SLOT(runGroupFeature(int,QString, double, double, double, QVariant)));
     //QObject::connect(exportButton, SIGNAL(runFeature(int, QVariant)), glmodel->ft, SLOT(setTypeAndRun(int, QVariant)));
 
 
@@ -588,6 +585,20 @@ void QmlManager::fixMesh(){
     openProgressPopUp();
     repairMesh(selectedModels[0]->mesh);
     emit selectedModels[0]->_updateModelMesh(true);
+}
+
+void QmlManager::disableObjectPickers(){
+    for (GLModel* glm : qmlManager->glmodels){
+        if (glm->shadowModel->m_objectPicker->isEnabled())
+            glm->shadowModel->m_objectPicker->setEnabled(false);
+    }
+}
+
+void QmlManager::enableObjectPickers(){
+    for (GLModel* glm : qmlManager->glmodels){
+        if (!glm->shadowModel->m_objectPicker->isEnabled())
+            glm->shadowModel->m_objectPicker->setEnabled(true);
+    }
 }
 
 void QmlManager::setHandCursor(){
@@ -695,7 +706,7 @@ void QmlManager::sendUpdateModelInfo(){
     QMetaObject::invokeMethod(boundedBox, "showBox");
     QMetaObject::invokeMethod(boundedBox, "setPosition", Q_ARG(QVariant, QVector3D((x_max + x_min)/2, (y_max + y_min)/2, (z_max + z_min)/2)));
     QMetaObject::invokeMethod(boundedBox, "setSize", Q_ARG(QVariant, x_max - x_min), Q_ARG(QVariant, y_max - y_min), Q_ARG(QVariant, z_max - z_min));
-    updateModelInfo(0,0,size,0);
+    updateModelInfo(-1,-1,size,-1);
     QMetaObject::invokeMethod(scalePopup, "updateSizeInfo", Q_ARG(QVariant, x_max - x_min), Q_ARG(QVariant, y_max - y_min), Q_ARG(QVariant, z_max - z_min));
 }
 
@@ -1298,6 +1309,8 @@ void QmlManager::showMoveArrow(){
 
 void QmlManager::hideMoveArrow(){
     moveArrow->setEnabled(0);
+    moveArrowX->setEnabled(0);
+    moveArrowY->setEnabled(0);
 }
 
 void QmlManager::hideRotateSphere(){
@@ -1766,7 +1779,7 @@ void QmlManager::save() {
         return;
     }
     qmlManager->openProgressPopUp();
-    QFuture<void> future = QtConcurrent::run(ste, &STLexporter::exportSTL, qmlManager->selectedModels[0]->mesh,fileName);
+    QFuture<void> future = QtConcurrent::run(ste, &STLexporter::exportSTL, fileName);
     return;
 }
 
@@ -1778,7 +1791,7 @@ void QmlManager::groupSelectionActivate(bool active){
     }
 }
 
-void QmlManager::runGroupFeature(int ftrType, QString state, double arg1, double arg2, double arg3){
+void QmlManager::runGroupFeature(int ftrType, QString state, double arg1, double arg2, double arg3, QVariant data){
     groupFunctionIndex = ftrType;
     groupFunctionState = state;
 
@@ -1908,6 +1921,49 @@ void QmlManager::runGroupFeature(int ftrType, QString state, double arg1, double
         } else {
 
         }
+        break;
+    case ftrExport:
+        // save to temporary folder
+        qDebug() << "file export called";
+        QString fileName;
+
+        // look for data if it is temporary
+        QVariantMap config = data.toMap();
+        bool isTemporary = false;
+        for (QVariantMap::const_iterator iter = config.begin(); iter != config.end(); ++iter){
+            if (!strcmp(iter.key().toStdString().c_str(), "temporary")){
+                qDebug() << "iter value : " << iter.value().toString();
+                if (iter.value().toString() == "true"){
+                    isTemporary = true;
+                }
+            }
+        }
+
+        if (! isTemporary){ // export view
+            qDebug() << "export to file";
+            fileName = QFileDialog::getSaveFileName(nullptr, tr("Export sliced file"), "");
+            //ste->exportSTL(m_glmodel->mesh, fileName);
+            if(fileName == "")
+                return;
+        } else { // support view & layerview
+            qDebug() << "export to temp file";
+            fileName =  QDir::tempPath();
+            qDebug() << fileName;
+        }
+
+
+        STLexporter* ste = new STLexporter();
+        SlicingEngine* se = new SlicingEngine();
+
+        qmlManager->openProgressPopUp();
+
+        Mesh* mergedMesh = ste->mergeSelectedModels();
+        qDebug() << "Merged Mesh" << mergedMesh->faces.size();
+
+        //se->slice(data, mergedMesh, fileName);
+        QFuture<Slicer*> future = QtConcurrent::run(se, &SlicingEngine::slice, data, mergedMesh, fileName);
+
+        //m_glmodel->futureWatcher.setFuture(future);
         break;
     }
 }
