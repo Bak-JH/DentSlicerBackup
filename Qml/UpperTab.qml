@@ -35,37 +35,36 @@ Rectangle {
     property int ftrSupportViewMode : 16
     property int ftrLayerViewMode : 17
     property int ftrDelete : 18
-    property int ftrTempExport : 19
 
     property alias second_tab_button_move: second_tab_button_move
     property alias second_tab_button_rotate: second_tab_button_rotate
     property alias third_tab_button_scale: third_tab_button_scale
 
 
-    signal runGroupFeature(int type, string state, double arg1, double arg2, double arg3);
+    signal runGroupFeature(int type, string state, double arg1, double arg2, double arg3, var config);
     function all_off() {
         console.log("all off starting")
         first_tab_button_open.state = "inactive";
         first_tab_button_export.state = "inactive";
         first_tab_button_save.state = "inactive";
-        //runGroupFeature(ftrSave, "inactive", 0, 0, 0);
+        //runGroupFeature(ftrSave, "inactive", 0, 0, 0, null);
         second_tab_button_arrange.state = "inactive";
         second_tab_button_layflat.state = "inactive";
-        runGroupFeature(ftrLayFlat, "inactive", 0, 0, 0);
+        runGroupFeature(ftrLayFlat, "inactive", 0, 0, 0, null);
 
         second_tab_button_move.state = "inactive";
-        runGroupFeature(ftrMove,"inactive", 0, 0, 0);
+        runGroupFeature(ftrMove,"inactive", 0, 0, 0, null);
         second_tab_button_orient.state = "inactive";
         second_tab_button_rotate.state = "inactive";
-        runGroupFeature(ftrRotate,"inactive", 0, 0, 0);
+        runGroupFeature(ftrRotate,"inactive", 0, 0, 0, null);
         third_tab_button_autorepair.state = "inactive";
         third_tab_button_cut.state = "inactive";
         //third_tab_button_hollowshell.state = "inactive";
         third_tab_button_shelloffset.state = "inactive";
         third_tab_button_scale.state = "inactive";
-        runGroupFeature(ftrScale, "inactive", 0, 0, 0);
+        runGroupFeature(ftrScale, "inactive", 0, 0, 0, null);
         fourth_tab_button_extend.state = "inactive";
-        runGroupFeature(ftrExtend, "inactive", 0, 0, 0);
+        runGroupFeature(ftrExtend, "inactive", 0, 0, 0, null);
         fourth_tab_button_label.state = "inactive";
         fourth_tab_button_support.state = "inactive";
 
@@ -217,7 +216,7 @@ Rectangle {
             iconSource2: "qrc:/Resource/upper2_save.png"
             iconText: qsTr("Save")
 
-            signal runGroupFeature(int type, string state, double arg1, double arg2, double arg3)
+            signal runGroupFeature(int type, string state, double arg1, double arg2, double arg3, var config)
             onButtonClicked:{
                 if(!qm.isSelected() && (state == "active"))
                     window.resultPopUp.openResultPopUp("","You must select at least one model.","")
@@ -227,7 +226,7 @@ Rectangle {
                 } else
                     yesnoPopUp.visible = false
                 /*
-                runGroupFeature(ftrSave, state, 0, 0, 0)
+                runGroupFeature(ftrSave, state, 0, 0, 0, null)
                 console.log("run group featur save " + ftrSave + "   " + state)
                 */
             }
@@ -257,31 +256,14 @@ Rectangle {
             MouseArea{
                 anchors.fill: parent
                 onClicked:{
-                    /*
-                    function collectConfigurations(){
-                        var configurations = {};
-
-                        // do collecting things
-                        // configurations[key] = value;
-                        configurations["resolution"] = options[0];
-                        configurations["layer_height"] = options[1];
-                        configurations["support_type"] = options[2];
-                        configurations["infill_type"] = options[3];
-                        configurations["raft_type"] = options[4];
-                        return configurations;
-                    }
-
-                    console.log("exporting");
-                    // collect configurations
-                    var cfg = collectConfigurations();
-                    //se.slice(cfg);
-                    parent.runFeature(ftrExport, cfg);
-                    */
                     all_off();
                     lefttabExport.visible = true;
+
+                    // yesno popup을 거쳐 확인하고 슬라이스
+                    yesnoPopUp.openYesNoPopUp(false, "Exporting process may take time.", "", "Would you like to continue?", 16, "", ftrExport, 0);
                 }
             }
-            signal runFeature(int type, var config);
+            //signal runGroup(int type, var config);
         }
 
         Rectangle{
@@ -314,9 +296,9 @@ Rectangle {
             iconSource1: "qrc:/resource/upper_move.png"
             iconSource2: "qrc:/Resource/upper2_move.png"
             iconText: qsTr("Move")
-            signal runGroupFeature(int type, string state, double arg1, double arg2, double arg3);
+            signal runGroupFeature(int type, string state, double arg1, double arg2, double arg3, var config);
             onButtonClicked:{
-                   runGroupFeature(ftrMove, state, 0, 0, 0);
+                   runGroupFeature(ftrMove, state, 0, 0, 0, null);
                    console.log("run group featur mov " + ftrMove + "   " + state);
             }
         }
@@ -327,9 +309,9 @@ Rectangle {
             iconSource1: "qrc:/resource/upper_rotate.png"
             iconSource2: "qrc:/Resource/upper2_rotate.png"
             iconText: qsTr("Rotate")
-            signal runGroupFeature(int type, string state, double arg1, double arg2, double arg3);
+            signal runGroupFeature(int type, string state, double arg1, double arg2, double arg3, var config);
             onButtonClicked:{
-                   runGroupFeature(ftrRotate, state, 0, 0, 0);
+                   runGroupFeature(ftrRotate, state, 0, 0, 0, null);
                 console.log("run group featur rot " + ftrRotate + "   " + state);
             }
 
@@ -341,11 +323,11 @@ Rectangle {
             iconSource1: "qrc:/resource/upper_layflat.png"
             iconSource2: "qrc:/Resource/upper2_layflat.png"
             iconText: qsTr("Lay Flat")
-            signal runGroupFeature(int type, string state, double arg1, double arg2, double arg3);
+            signal runGroupFeature(int type, string state, double arg1, double arg2, double arg3, var config);
             onButtonClicked:{
                 if(!qm.isSelected()&& (state == "active"))
                     window.resultPopUp.openResultPopUp("","You must select at least one model.","")
-                 //runGroupFeature(ftrLayFlat, state, 0, 0, 0);
+                 //runGroupFeature(ftrLayFlat, state, 0, 0, 0, null);
             }
         }
         UpperButton{
@@ -372,9 +354,9 @@ Rectangle {
             iconSource1: "qrc:/resource/upper_orientation.png"
             iconSource2: "qrc:/Resource/upper2_orient.png"
             iconText: qsTr("Orient")
-            signal runGroupFeature(int type, string state, double arg1, double arg2, double arg3);
+            signal runGroupFeature(int type, string state, double arg1, double arg2, double arg3, var config);
             onButtonClicked:{
-                   runGroupFeature(ftrOrient, state, 0, 0, 0);
+                   runGroupFeature(ftrOrient, state, 0, 0, 0, null);
             }
 
         }
@@ -446,12 +428,12 @@ Rectangle {
             }
             visible: if(box_uppertab.box != iconText) return false;
             */
-            signal runGroupFeature(int type, string state, double arg1, double arg2, double arg3);
+            signal runGroupFeature(int type, string state, double arg1, double arg2, double arg3, var config);
             onButtonClicked:{
                 if(!qm.isSelected() && (state == "active"))
                     window.resultPopUp.openResultPopUp("","You must select at least one model.","")
                 else
-                    runGroupFeature(ftrRepair, state, 0, 0, 0);
+                    runGroupFeature(ftrRepair, state, 0, 0, 0, null);
             }
         }
 
@@ -531,7 +513,7 @@ Rectangle {
             iconSource2: "qrc:/Resource/upper2_extend.png"
             iconText: qsTr("Extend")
 
-            signal runGroupFeature(int type, string state, double arg1, double arg2, double arg3);
+            signal runGroupFeature(int type, string state, double arg1, double arg2, double arg3, var config);
             onButtonClicked:{
                 if(!qm.isSelected() && (state == "active")){
                     window.resultPopUp.openResultPopUp("","You must select at least one model.","")
@@ -679,7 +661,7 @@ Rectangle {
                 runFeature(ftrSave);
             }
 
-            signal runGroupFeature(int type, string state, double arg1, double arg2, double arg3);
+            signal runGroupFeature(int type, string state, double arg1, double arg2, double arg3, var config);
             signal openSave();
             signal closeSave();
 
@@ -765,9 +747,9 @@ Rectangle {
                 console.log("move")
                 runFeature(ftrMove,popup_move.numberbox1_number,popup_move.numberbox2_number);
             }
-            signal runGroupFeature(int type, string state, double arg1, double arg2, double arg3);
+            signal runGroupFeature(int type, string state, double arg1, double arg2, double arg3, var config);
             onFinishClicked:{
-                runGroupFeature(ftrMove, state, 0, 0, 0);
+                runGroupFeature(ftrMove, state, 0, 0, 0, null);
             }
 
             function onApplyFinishButton(){
@@ -806,7 +788,7 @@ Rectangle {
                 console.log("rotate")
                 runFeature(ftrRotate,popup_rotate.numberbox1_number,popup_rotate.numberbox2_number,popup_rotate.numberbox3_number);
             }
-            signal runGroupFeature(int type, string state, double arg1, double arg2, double arg3);
+            signal runGroupFeature(int type, string state, double arg1, double arg2, double arg3, var config);
             signal closeRotate();
             signal openRotate();
 
@@ -995,7 +977,7 @@ Rectangle {
             signal openScale();
             signal closeScale();
             //signal runFeature(int type, double scaleX, double scaleY, double scaleZ);
-            signal runGroupFeature(int type, string state, double arg1, double arg2, double arg3);
+            signal runGroupFeature(int type, string state, double arg1, double arg2, double arg3, var config);
 
             state: {
                 if (third_tab_button_scale.state=="active" && qm.isSelected()){
@@ -1031,7 +1013,7 @@ Rectangle {
                 console.log("scale called x y z" + numberbox1_number + numberbox2_number + numberbox3_number);
                 console.log("scale called" + numbox_value_detail2);
                 if (numbox_value_detail2 != 100) // scale by scale value
-                    runGroupFeature(ftrScale, state, numbox_value_detail2/100, numbox_value_detail2/100, numbox_value_detail2/100);
+                    runGroupFeature(ftrScale, state, numbox_value_detail2/100, numbox_value_detail2/100, numbox_value_detail2/100, null);
                     //runFeature(ftrScale, numbox_value_detail2/100, numbox_value_detail2/100, numbox_value_detail2/100);
                 else if (scale_lock.source == "qrc:/Resource/popup_image/scale_lock.png"){ // scale by definite mm with locked
                     console.log("scale is locked");
@@ -1039,21 +1021,21 @@ Rectangle {
                         runGroupFeature(ftrScale, state,
                                         numberbox1_number/numberbox1_number_origin,
                                         numberbox1_number/numberbox1_number_origin,
-                                        numberbox1_number/numberbox1_number_origin);
+                                        numberbox1_number/numberbox1_number_origin, null);
                     } else if (numberbox2_number != numberbox2_number_origin) {
                         runGroupFeature(ftrScale, state,
                                         numberbox2_number/numberbox2_number_origin,
                                         numberbox2_number/numberbox2_number_origin,
-                                        numberbox2_number/numberbox2_number_origin);
+                                        numberbox2_number/numberbox2_number_origin, null);
                     } else {
                         runGroupFeature(ftrScale, state,
                                         numberbox3_number/numberbox3_number_origin,
                                         numberbox3_number/numberbox3_number_origin,
-                                        numberbox3_number/numberbox3_number_origin);
+                                        numberbox3_number/numberbox3_number_origin, null);
                     }
                 }
                 else // scale by definite mm with unlocked
-                    runGroupFeature(ftrScale, state, numberbox1_number/numberbox1_number_origin, numberbox2_number/numberbox2_number_origin, numberbox3_number/numberbox3_number_origin);
+                    runGroupFeature(ftrScale, state, numberbox1_number/numberbox1_number_origin, numberbox2_number/numberbox2_number_origin, numberbox3_number/numberbox3_number_origin, null);
                     //runFeature(ftrScale, numberbox1_number/numberbox1_number_origin, numberbox2_number/numberbox2_number_origin, numberbox3_number/numberbox3_number_origin);
                 // update scale info
             }
