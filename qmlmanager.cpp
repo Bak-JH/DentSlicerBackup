@@ -2096,13 +2096,11 @@ void QmlManager::openResultPopUp(string inputText_h, string inputText_m, string 
                               Q_ARG(QVariant, QString::fromStdString(inputText_l)));
 }
 void QmlManager::setProgress(float value){
-    //qDebug() << "set progress @@@: " << value;
     if (value == 0 || value >= progress){
         QMetaObject::invokeMethod(progress_popup, "updateNumber",
                                       Q_ARG(QVariant, value));
         progress = value;
     }
-
 }
 
 void QmlManager::openSave() {
