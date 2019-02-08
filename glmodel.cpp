@@ -1339,6 +1339,7 @@ void GLModel::handlePickerClicked(QPickEvent *pick)
             //parentModel->ft->ct->addCuttingPoint(parentModel, v);
         } else if (cutMode == 9999){
             qDebug() << "current cut mode :" << cutMode;
+            qmlManager->setProgress(1);
             //return;
         }
     }
@@ -2004,9 +2005,7 @@ void GLModel::modelCut(){
         return ;
 
     parentModel->saveUndoState();
-
     qmlManager->openProgressPopUp();
-
     if (cutMode == 1){ // flat cut
         if (parentModel->cuttingPlane.size() != 3){
             return;
@@ -2030,10 +2029,10 @@ void GLModel::modelCut(){
             if (leftMesh->faces.size() == 0 || rightMesh->faces.size() == 0){
                 qDebug() << "cutting contour selected not cutting";
                 qmlManager->setProgress(1);
-                cutModeSelected(9999); // reset
+                //cutModeSelected(9999);
+                cutModeSelected(2); // reset
                 return;
             }
-
             emit parentModel->bisectDone();
         }
     }
