@@ -56,9 +56,9 @@ GLModel::GLModel(QObject* mainWindow, QNode *parent, Mesh* loadMesh, QString fna
         addComponent(m_transform);
 
         m_meshMaterial = new QPhongMaterial();
-        m_meshAlphaMaterial = new QPhongAlphaMaterial();
+        /*m_meshAlphaMaterial = new QPhongAlphaMaterial();
         m_layerMaterial = new QPhongMaterial();
-        /*m_meshMaterial->setAmbient(QColor(255,0,0));
+        m_meshMaterial->setAmbient(QColor(255,0,0));
         m_meshMaterial->setDiffuse(QColor(173,215,218));
         m_meshMaterial->setSpecular(QColor(182,237,246));
         m_meshMaterial->setShininess(0.0f);
@@ -170,7 +170,7 @@ void GLModel::addMouseHandlers(){
     m_objectPicker = new Qt3DRender::QObjectPicker(this);
 
     m_objectPicker->setHoverEnabled(false); // to reduce drag load
-    //m_objectPicker->setDragEnabled(true);
+    m_objectPicker->setDragEnabled(false);
     // add only m_objectPicker
     QObject::connect(m_objectPicker, SIGNAL(released(Qt3DRender::QPickEvent*)), this, SLOT(handlePickerClicked(Qt3DRender::QPickEvent*)));
     QObject::connect(m_objectPicker, SIGNAL(moved(Qt3DRender::QPickEvent*)), this, SLOT(mgoo(Qt3DRender::QPickEvent*)));
@@ -665,17 +665,28 @@ void featureThread::run(){
                 break;
                 */
             }
-        case ftrExport:
-        case ftrTempExport: // support view & layer view
+        case ftrExport: // support view & layer view & export // on export, temporary variable = true;
             {
+                // look for data if it is temporary
+                QVariantMap config = data.toMap();
+                bool isTemporary = false;
+                for (QVariantMap::const_iterator iter = config.begin(); iter != config.end(); ++iter){
+                    if (!strcmp(iter.key().toStdString().c_str(), "temporary")){
+                        qDebug() << "iter value : " << iter.value().toString();
+                        if (iter.value().toString() == "true"){
+                            isTemporary = true;
+                        }
+                    }
+                }
+
                 QString fileName;
-                if (optype == ftrExport) {
+                if (! isTemporary){ // export view
                     qDebug() << "export to file";
                     fileName = QFileDialog::getSaveFileName(nullptr, tr("Export sliced file"), "");
                     //ste->exportSTL(m_glmodel->mesh, fileName);
                     if(fileName == "")
                         return;
-                } else { // optype == ftrTempExport
+                } else { // support view & layerview
                     qDebug() << "export to temp file";
                     fileName =  QDir::tempPath();
                     qDebug() << fileName;
@@ -1179,8 +1190,8 @@ void GLModel::handlePickerClicked(QPickEvent *pick)
 {
     qDebug() << "handle Picker clicked" << pick->buttons() << pick->button();
 
-    if (pick->button() == Qt::RightButton)
-        return;
+    /*if (pick->button() == Qt::RightButton)
+        return;*/
 
     if (!parentModel)
         return;
@@ -1208,6 +1219,7 @@ void GLModel::handlePickerClicked(QPickEvent *pick)
     if (qmlManager->selectedModels[0] != nullptr && (pick->button() & Qt::RightButton)){ // when right button clicked
         if (qmlManager->selectedModels[0]->ID == parentModel->ID){
             QMetaObject::invokeMethod(qmlManager->mttab, "tabOnOff");
+            m_objectPicker->setEnabled(false);
             return;
         }
 
@@ -1795,9 +1807,24 @@ void GLModel::generateSupport(){
         layerMesh->addFace(mesh->idx2MV(mf.mesh_vertex[0]).position, mesh->idx2MV(mf.mesh_vertex[1]).position, mesh->idx2MV(mf.mesh_vertex[2]).position, mf.idx);
     }
 
+    float x_length = mesh->x_max - mesh->x_min;
+    float y_length = mesh->y_max - mesh->y_min;
+    float z_length = mesh->z_max - mesh->z_min;
+    size_t xy_reserve = x_length * y_length;
+    size_t xyz_reserve = xy_reserve * z_length;
+    qDebug() << "********************xy_reserve = " << xy_reserve;
+    qDebug() << "********************faces_reserve = " << mesh->faces.size();
+    qDebug() << "********************vertices_reserve = " << mesh->vertices.size();
+
     layerInfillMesh = new Mesh;
+    layerInfillMesh->faces.reserve(xyz_reserve * scfg->infill_density); // infill 되면 다시 기준잡기
+    layerInfillMesh->vertices.reserve(xyz_reserve * scfg->infill_density);
     layerSupportMesh = new Mesh;
+    layerSupportMesh->faces.reserve(xy_reserve * 300 * scfg->support_density);
+    layerSupportMesh->vertices.reserve(xy_reserve * 300 * scfg->support_density);
     layerRaftMesh = new Mesh;
+    layerRaftMesh->faces.reserve(xy_reserve * 300 * scfg->support_density);
+    layerRaftMesh->vertices.reserve(xy_reserve * 300 * scfg->support_density);
     QVector3D t = m_transform->translation();
 
     t.setZ(mesh->z_min * -1.0f);
@@ -1823,6 +1850,12 @@ void GLModel::generateSupport(){
     layerInfillMesh->vertexMove(t);
     layerSupportMesh->vertexMove(t);
     layerRaftMesh->vertexMove(t);
+
+
+    layerInfillMesh->connectFaces();
+    layerSupportMesh->connectFaces();
+    layerRaftMesh->connectFaces();
+
 
     emit _updateModelMesh(true);
 }
@@ -2088,6 +2121,7 @@ void GLModel::engoo(){
 
 void GLModel::exgoo(){
     m_meshMaterial->setAmbient(QColor(81,200,242));
+    qDebug() << "exgoo";
 }
 
 void GLModel::mgoo(Qt3DRender::QPickEvent* v)
@@ -2109,13 +2143,36 @@ void GLModel::mgoo(Qt3DRender::QPickEvent* v)
              qmlManager->saveActive))
         return;
 
+
+    // if not selected by qmlmanager, return
+    bool modelSelected = false;
+    for (GLModel* glm : qmlManager->selectedModels){
+        if (glm == this->parentModel){
+            modelSelected = true;
+        }
+    }
+    if (!modelSelected){
+        m_objectPicker->setDragEnabled(false);
+        isReleased = true;
+        qmlManager->modelClicked = false;
+        return;
+    }
+
     qmlManager->moveButton->setProperty("state", "active");
     qmlManager->setClosedHandCursor();
 
     if (!isMoved){ // called only once on dragged
         parentModel->saveUndoState();
+        qmlManager->hideMoveArrow();
+        qDebug() << "hiding move arrow";
         // for mgoo out problem
-        m_transform->setScale(10.0f);
+        float x_diff = parentModel->mesh->x_max - parentModel->mesh->x_min;
+        float y_diff = parentModel->mesh->y_max - parentModel->mesh->y_min;
+        float z_diff = parentModel->mesh->z_max - parentModel->mesh->z_min;
+        float biggest = x_diff>y_diff? x_diff : y_diff;
+        biggest = z_diff>biggest? z_diff : biggest;
+        float scale_val = biggest > 50.0f ? 1.0f : 100.0f/biggest;
+        m_transform->setScale(scale_val);
         isMoved = true;
     }
 
@@ -2135,7 +2192,7 @@ void GLModel::mgoo(Qt3DRender::QPickEvent* v)
     qmlManager->modelMoveF(1,a);
     qmlManager->modelMoveF(2,b);
 
-    qmlManager->showMoveArrow();
+    //qmlManager->showMoveArrow();
     prevPoint = currentPoint;
 }
 

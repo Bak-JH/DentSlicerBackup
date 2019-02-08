@@ -153,6 +153,7 @@ Item{
             options: [
                  lefttab.ltso.option_resolution.currentText ,
                  lefttab.ltso.option_layer_height.currentText,
+                 lefttab.ltso.option_resin_type.currentText,
                  lefttab.ltso.option_support.currentText,
                  lefttab.ltso.option_infill.currentText,
                  lefttab.ltso.option_raft.currentText]
@@ -235,6 +236,7 @@ Item{
             }
 
             onWheel: {
+                qm.disableObjectPickers();
                 // mouse wheel scaling: model and bed zooms, camera moves to mouse pointer direction
                 var d = wheel.angleDelta.y;
                 var scaleTmp = sceneRoot.systemTransform.scale3D;
@@ -273,6 +275,7 @@ Item{
 
                     mttab.updatePosition();
                 }
+                qm.enableObjectPickers();
             }
         }
         /*

@@ -12,7 +12,7 @@
 #include <QEvent>
 #include <QPointF>
 #include <QCursor>
-#include <QQmlProperty>0269
+#include <QQmlProperty>
 #include "feature/autoarrange.h"
 #include "feature/shelloffset.h"
 #include "glmodel.h"
@@ -199,6 +199,8 @@ public:
     Q_INVOKABLE int getSelectedModelsSize();
     Q_INVOKABLE bool getGroupSelectionActive();
     Q_INVOKABLE void fixMesh();
+    Q_INVOKABLE void disableObjectPickers();
+    Q_INVOKABLE void enableObjectPickers();
     Q_INVOKABLE void setHandCursor();
     Q_INVOKABLE void setClosedHandCursor();
     Q_INVOKABLE void resetCursor();
@@ -249,7 +251,7 @@ public slots:
     void copyModel();
     void pasteModel();
     void groupSelectionActivate(bool);
-    void runGroupFeature(int,QString, double, double, double);
+    void runGroupFeature(int,QString, double, double, double, QVariant);
     bool multipleModelSelected(int ID);
     void lastModelSelected();
     void modelSelected(int);

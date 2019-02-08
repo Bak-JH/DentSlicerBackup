@@ -60,7 +60,6 @@ Rectangle {
                 clip: true
 
                 ColumnLayout {
-                    y: -vbar.position * height
                     id: partListColumn
                     spacing:0
                 }
@@ -154,6 +153,7 @@ Rectangle {
                 onClicked:{
 
                     switch (popup_type){
+                        case uppertab.ftrExport:
                         case uppertab.ftrSupportViewMode:
                         case uppertab.ftrLayerViewMode:
                             function collectConfigurations(){
@@ -162,22 +162,33 @@ Rectangle {
 
                                 // do collecting things
                                 // configurations[key] = value;
+                                console.log("collectConfigurations")
                                 configurations["resolution"] = options[0];
                                 configurations["layer_height"] = options[1];
-                                configurations["support_type"] = options[2];
-                                configurations["infill_type"] = options[3];
-                                configurations["raft_type"] = options[4];
+                                configurations["resin_type"] = options[2];
+                                configurations["support_type"] = options[3];
+                                configurations["infill_type"] = options[4];
+                                configurations["raft_type"] = options[5];
                                 return configurations;
                             }
                             var cfg = collectConfigurations();
 
-                            if( popup_type == uppertab.ftrSupportViewMode ) {
+                            if (popup_type == uppertab.ftrExport){
+                                cfg["temporary"] = "false";
+                                yesnoPopUp.runGroupFeature(uppertab.ftrExport, "", 0, 0, 0, cfg);
+                                //yesnoPopUp.runFeature(uppertab.ftrExport, cfg);
+                            } else if( popup_type == uppertab.ftrSupportViewMode ) {
+                                cfg["temporary"] = "true";
                                 qm.setViewMode(1);
+                                yesnoPopUp.runGroupFeature(uppertab.ftrExport, "", 0, 0, 0, cfg);
+                                //yesnoPopUp.runFeature(uppertab.ftrExport, cfg);
                             } else if( popup_type == uppertab.ftrLayerViewMode ) {
+                                cfg["temporary"] = "true";
                                 qm.setViewMode(2);
+                                yesnoPopUp.runGroupFeature(uppertab.ftrExport, "", 0, 0, 0, cfg);
+                                //yesnoPopUp.runFeature(uppertab.ftrExport, cfg);
                             }
 
-                            yesnoPopUp.runFeature(uppertab.ftrTempExport, cfg);
                             break;
                         case uppertab.ftrSave:
                             qm.save();
@@ -310,7 +321,8 @@ Rectangle {
         noButton_text.text = "Cancel"
     }
 
-    signal runFeature(int type, var config);
+    signal runGroupFeature(int type, string state, double arg1, double arg2, double arg3, var data);
+    //signal runFeature(int type, var config);
 
     function addPart(fileName, ID){ // add in list with filename
         var newComponent = Qt.createComponent("LeftTabPartListElement.qml")

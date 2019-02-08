@@ -8,6 +8,8 @@ STLexporter::STLexporter()
 
 Mesh* STLexporter::mergeSelectedModels() {
     if (qmlManager->selectedModels.size() == 1 && qmlManager->selectedModels[0] == nullptr) return nullptr;
+    else if (qmlManager->selectedModels.size() == 1)
+        return qmlManager->selectedModels[0]->mesh;
 
     size_t faceNum = 0;
     size_t verNum = 0;
@@ -28,6 +30,23 @@ Mesh* STLexporter::mergeSelectedModels() {
 
     foreach (GLModel* model, qmlManager->selectedModels) {
         QVector3D trans = model->m_transform->translation();
+
+        MeshFace newFace;
+        for (vector<MeshFace>::iterator it = model->mesh->faces.begin(); it != model->mesh->faces.end(); ++it) {
+            newFace = (*it);
+            QVector3D v1 = model->mesh->idx2MV(newFace.mesh_vertex[0]).position+trans;
+            QVector3D v2 = model->mesh->idx2MV(newFace.mesh_vertex[1]).position+trans;
+            QVector3D v3 = model->mesh->idx2MV(newFace.mesh_vertex[2]).position+trans;
+            mergedMesh->addFace(v1,v2,v3);
+        }
+
+        faceNum += model->mesh->faces.size();
+        verNum += model->mesh->vertices.size();
+
+        if (faceNum % 100 == 0) qmlManager->setProgress((float)(0.1 + 0.3*(faceNum/totalFaceNum)));
+
+
+/*
         model->mesh->vertexMove(trans);
 
         MeshVertex newVer;
@@ -57,18 +76,32 @@ Mesh* STLexporter::mergeSelectedModels() {
         faceNum += model->mesh->faces.size();
         verNum += model->mesh->vertices.size();
 
-        if (faceNum % 100 == 0) qmlManager->setProgress((float)(0.1 + 0.3*(faceNum/totalFaceNum)));
+        if (faceNum % 100 == 0) qmlManager->setProgress((float)(0.1 + 0.3*(faceNum/totalFaceNum)));*/
     }
+
+    float xmid = (mergedMesh->x_max + mergedMesh->x_min)/2;
+    float ymid = (mergedMesh->y_max + mergedMesh->y_min)/2;
+    float zmid = (mergedMesh->z_max + mergedMesh->z_min)/2;
+
+    mergedMesh->vertexMove(QVector3D(
+                           (-1)*xmid,
+                           (-1)*ymid,
+                           (-1)*zmid));
+
+    mergedMesh->connectFaces();
 
     return mergedMesh;
 }
 
-void STLexporter::exportSTL(Mesh* mesh, QString outfilename){
+void STLexporter::exportSTL(QString outfilename){
+    Mesh* mesh;
+
     qmlManager->setProgress(0);
     qmlManager->setProgressText("saving");
 
     size_t num = qmlManager->selectedModels.size();
     if (num > 1) mesh = mergeSelectedModels();
+    else mesh = qmlManager->selectedModels[0]->mesh;
 
     qDebug() << "export STL";
 

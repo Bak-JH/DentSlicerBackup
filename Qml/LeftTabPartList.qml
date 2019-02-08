@@ -94,7 +94,7 @@ Rectangle {
                 clip: true
 
                 ColumnLayout {
-                    y: -vbar.position * height
+                    //y: -vbar.position * height
                     id: partListColumn
                     spacing:0
                     /*
