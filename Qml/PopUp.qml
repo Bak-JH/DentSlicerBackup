@@ -15,13 +15,13 @@ Rectangle {
     color: "#ffffff"
     //border.width: 1
     //border.color: "#cccccc"
-/*
+
     MouseArea {
         id: popup_area
         anchors.fill: parent
         //hoverEnabled: true
     }
-*/
+
     property alias funcname: funcname.text
     property alias detail1: detail1.text
     property alias detail2: detail2.text
