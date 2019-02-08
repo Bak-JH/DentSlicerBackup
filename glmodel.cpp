@@ -1138,11 +1138,12 @@ void GLModel::handlePickerClickedFreeCutSphere(Qt3DRender::QPickEvent* pick)
         generateCuttingContour(cuttingPoints);
         regenerateCuttingPoint(cuttingPoints);
     }
-
-    if (cuttingPoints.size() >= 2)
+/*
+    if (cuttingPoints.size() >= 3)
         QMetaObject::invokeMethod(qmlManager->cutPopup, "colorApplyFinishButton", Q_ARG(QVariant, 2));
     else
         QMetaObject::invokeMethod(qmlManager->cutPopup, "colorApplyFinishButton", Q_ARG(QVariant, 0));
+*/
 }
 
 void GLModel::handlePickerClickedFreeCut(Qt3DRender::QPickEvent* pick)
@@ -1175,14 +1176,13 @@ void GLModel::handlePickerClickedFreeCut(Qt3DRender::QPickEvent* pick)
         qDebug() << "tt";
         parentModel->generateCuttingContour(parentModel->cuttingPoints);
         parentModel->regenerateCuttingPoint(parentModel->cuttingPoints);
-    }
+    }   
 
 
-    if (parentModel->cuttingPoints.size() >= 2)
+    if (parentModel->cuttingPoints.size() >= 3)
         QMetaObject::invokeMethod(qmlManager->cutPopup, "colorApplyFinishButton", Q_ARG(QVariant, 2));
     else
         QMetaObject::invokeMethod(qmlManager->cutPopup, "colorApplyFinishButton", Q_ARG(QVariant, 0));
-
 
 }
 
@@ -1329,17 +1329,17 @@ void GLModel::handlePickerClicked(QPickEvent *pick)
             }*/
 
             // remove cutting contour and redraw cutting contour
+
             parentModel->removeCuttingContour();
-            if (parentModel->cuttingPoints.size() >=2){
-                qDebug() << "TTTTTTTTTTTTTTTTt";
+            if (parentModel->cuttingPoints.size() >= 2){
                 parentModel->generateCuttingContour(parentModel->cuttingPoints);
                 parentModel->regenerateCuttingPoint(parentModel->cuttingPoints);
             }
-
             //generatePlane();
             //parentModel->ft->ct->addCuttingPoint(parentModel, v);
         } else if (cutMode == 9999){
             qDebug() << "current cut mode :" << cutMode;
+            qmlManager->setProgress(1);
             //return;
         }
     }
@@ -1648,6 +1648,8 @@ void GLModel::removeCuttingContour(){
         cuttingContourCylinders[i]->deleteLater();
     }
     cuttingContourCylinders.clear();
+    if (cuttingPoints.size() < 3)
+        QMetaObject::invokeMethod(qmlManager->cutPopup, "colorApplyFinishButton", Q_ARG(QVariant, 0));
 }
 void GLModel::regenerateCuttingPoint(vector<QVector3D> points){
     return;
@@ -1729,6 +1731,9 @@ void GLModel::generateCuttingContour(vector<QVector3D> cuttingContour){
         m_cylinderEntity->addComponent(cylinderTransform);
         cuttingContourCylinders.push_back(m_cylinderEntity);
     }
+
+    if (cuttingPoints.size() >= 3)
+        QMetaObject::invokeMethod(qmlManager->cutPopup, "colorApplyFinishButton", Q_ARG(QVariant, 2));
 }
 
 void GLModel::generatePlane(){
@@ -2000,9 +2005,7 @@ void GLModel::modelCut(){
         return ;
 
     parentModel->saveUndoState();
-
     qmlManager->openProgressPopUp();
-
     if (cutMode == 1){ // flat cut
         if (parentModel->cuttingPlane.size() != 3){
             return;
@@ -2023,15 +2026,13 @@ void GLModel::modelCut(){
 
             cutAway(leftMesh, rightMesh, parentModel->mesh, parentModel->cuttingPoints, parentModel->cutFillMode);
 
-
-
             if (leftMesh->faces.size() == 0 || rightMesh->faces.size() == 0){
                 qDebug() << "cutting contour selected not cutting";
                 qmlManager->setProgress(1);
-                cutModeSelected(9999); // reset
+                //cutModeSelected(9999);
+                cutModeSelected(2); // reset
                 return;
             }
-
             emit parentModel->bisectDone();
         }
     }
@@ -2247,10 +2248,8 @@ void GLModel::cutModeSelected(int type){
 
     qDebug() << "cut mode selected1" << type;
     parentModel->removeCuttingPoints();
-    qDebug() << "cut mode selected2" << type;
     //removePlane();
     parentModel->removeCuttingContour();
-    qDebug() << "cut mode selected3" << type;
     //parentModel->removePlane();
     cutMode = type;
     if (cutMode == 1){

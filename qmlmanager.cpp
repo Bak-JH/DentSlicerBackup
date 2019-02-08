@@ -2101,7 +2101,6 @@ void QmlManager::setProgress(float value){
                                       Q_ARG(QVariant, value));
         progress = value;
     }
-
 }
 
 void QmlManager::openSave() {
