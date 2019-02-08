@@ -1156,7 +1156,7 @@ Rectangle {
                 slider_vis = false;
                 cutModeSelected(2);
                 viewUp();
-                popup_cut.colorApplyFinishButton(0)
+                popup_cut.colorApplyFinishButton(0);
                 qm.freecutActive = true
             }
 
@@ -1328,6 +1328,7 @@ Rectangle {
             slider_vis:false
             state: {
                 if (third_tab_button_shelloffset.state == "active" && qm.isSelected()){
+                    popup_shelloffset.colorApplyFinishButton(2);
                     slider_vis = true;
                     openShellOffset();
                     return "active";
