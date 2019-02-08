@@ -2,8 +2,11 @@ import QtQuick 2.0
 
 Rectangle {
     id: slicing_data
-    width: sddownleft.width + 200
+    width: slicing_left + slicing_right + 100
     height: 82
+
+    property real slicing_left : (sdupleft.width > sddownleft.width) ? sdupleft.width : sddownleft.width
+    property real slicing_right : (slicing_layer.width > slicing_volume) ? slicing_layer.width : slicing_volume.width
 
     property alias slicing_layer:slicing_layer
     property alias slicing_volume:slicing_volume
@@ -82,7 +85,7 @@ Rectangle {
 
         Rectangle{
             id:data
-            width: sddownleft.width + 120
+            width: slicing_left + slicing_right + 20
             height: 60
             anchors.left : slicing_icon.right
             anchors.top : parent.top
@@ -98,9 +101,9 @@ Rectangle {
                 anchors.top : parent.top
                 anchors.left: parent.left
                 anchors.topMargin: 3
-                anchors.leftMargin: 8
+                anchors.leftMargin: 5
 
-                inputWidth: 160
+                inputWidth: 100
                 inputData: "00h 00min"
                 inputSource: "qrc:/resource/slicing_clock.png"
             }
@@ -110,9 +113,9 @@ Rectangle {
                 anchors.bottom : parent.bottom
                 anchors.left: parent.left
                 anchors.bottomMargin: 3
-                anchors.leftMargin: 8
+                anchors.leftMargin: 5
 
-                inputWidth: 160
+                inputWidth: 100
                 inputData: "0.0 X 0.0 X 0.0 mm"
                 inputSource: "qrc:/resource/slicing_size.png"
             }
@@ -123,7 +126,6 @@ Rectangle {
                 anchors.top : parent.top
                 anchors.right: parent.right
                 anchors.topMargin: 3
-                anchors.leftMargin: 8
 
                 inputWidth: 100
                 inputData: "0 layer"
@@ -133,9 +135,8 @@ Rectangle {
             SlicingDataElement{
                 id: slicing_volume
                 anchors.bottom : parent.bottom
-                anchors.right: parent.right
+                anchors.left: slicing_layer.left
                 anchors.bottomMargin: 3
-                anchors.leftMargin: 8
 
                 inputWidth: 100
                 inputData: "0 ml"
@@ -145,16 +146,16 @@ Rectangle {
             Connections {
                 target: qm
                 onUpdateModelInfo:{
-                    if (printing_time != 0){
+                    if (printing_time != -1){
                         slicing_time.inputData = parseInt(printing_time/60)+"h "+printing_time%60+"m";
                     }
-                    if (layer != 0){
+                    if (layer != -1){
                         slicing_layer.inputData = layer+" layer";
                     }
                     if (xyz != ""){
                         slicing_size.inputData = xyz;
                     }
-                    if (volume != 0){
+                    if (volume != -1){
                         slicing_volume.inputData = volume.toFixed(1)+ " ml";
                     }
                 }
