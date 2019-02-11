@@ -2141,12 +2141,15 @@ void GLModel::exgoo(){
 
 void GLModel::mgoo(Qt3DRender::QPickEvent* v)
 {
+
     if(v->buttons()>1){
         return;
     }
 
     if (qmlManager->selectedModels[0] != nullptr &&
-            (qmlManager->selectedModels[0]->shadowModel->cutActive ||
+            (qmlManager->selectedModels[0]->shadowModel->scaleActive ||
+             qmlManager->selectedModels[0]->shadowModel->cutActive ||
+             qmlManager->selectedModels[0]->shadowModel->shellOffsetActive ||
              qmlManager->selectedModels[0]->shadowModel->extensionActive ||
              qmlManager->selectedModels[0]->shadowModel->labellingActive ||
              qmlManager->selectedModels[0]->shadowModel->layflatActive ||
@@ -2157,7 +2160,6 @@ void GLModel::mgoo(Qt3DRender::QPickEvent* v)
              qmlManager->rotateActive ||
              qmlManager->saveActive))
         return;
-
 
     // if not selected by qmlmanager, return
     bool modelSelected = false;
@@ -2767,11 +2769,13 @@ void GLModel::generateManualSupport(){
 }
 
 void GLModel::openScale(){
+    scaleActive = true;
     qmlManager->sendUpdateModelInfo();
     //QMetaObject::invokeMethod(qmlManager->scalePopup, "updateSizeInfo", Q_ARG(QVariant, parentModel->mesh->x_max-parentModel->mesh->x_min), Q_ARG(QVariant, parentModel->mesh->y_max-parentModel->mesh->y_min), Q_ARG(QVariant, parentModel->mesh->z_max-parentModel->mesh->z_min));
 }
 
 void GLModel::closeScale(){
+    scaleActive = false;
     qmlManager->sendUpdateModelInfo();
     qDebug() << "close scale";
 }
