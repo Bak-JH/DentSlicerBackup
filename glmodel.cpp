@@ -56,14 +56,14 @@ GLModel::GLModel(QObject* mainWindow, QNode *parent, Mesh* loadMesh, QString fna
         addComponent(m_transform);
 
         m_meshMaterial = new QPhongMaterial();
-        /*m_meshAlphaMaterial = new QPhongAlphaMaterial();
+        /*m_meshAlphaMaterial = new QPhongAlphaMaterial(); // from here @@@@@@@@@
         m_layerMaterial = new QPhongMaterial();
         m_meshMaterial->setAmbient(QColor(255,0,0));
         m_meshMaterial->setDiffuse(QColor(173,215,218));
         m_meshMaterial->setSpecular(QColor(182,237,246));
         m_meshMaterial->setShininess(0.0f);
 
-        addComponent(m_meshMaterial);*/
+        addComponent(m_meshMaterial);*/ // to here @@@@@@@@@@@
 
         addMouseHandlers();
 
@@ -1436,6 +1436,17 @@ void GLModel::bisectModel(Plane plane){
 
 // need to create new mesh object liek Mesh* leftMesh = new Mesh();
 void GLModel::bisectModel_internal(Plane plane){
+    // if the cutting plane is at min or max, it will not going to cut and just end
+    if (isFlatcutEdge){
+        //qDebug() << "@@@@ flat edge @@@@";
+        shadowModel->removePlane();
+        removeCuttingPoints();
+        removeCuttingContour();
+        QMetaObject::invokeMethod(qmlManager->boxUpperTab, "all_off");
+        qmlManager->setProgress(1);
+        QMetaObject::invokeMethod(qmlManager->boundedBox, "hideBox");
+        return;
+    }
 
     Mesh* leftMesh = lmesh;
     Mesh* rightMesh = rmesh;
@@ -1613,6 +1624,7 @@ void GLModel::bisectModel_internal(Plane plane){
                 }
             }
         }
+
     }
 
 
@@ -2276,6 +2288,11 @@ void GLModel::cutFillModeSelected(int type){
 
 void GLModel::getSliderSignal(double value){
     if (cutActive||shellOffsetActive){
+        if (value == 0.0 || value == 1.8)
+            parentModel->isFlatcutEdge = true;
+        else {
+            parentModel->isFlatcutEdge = false;
+        }
         float zlength = parentModel->mesh->z_max - parentModel->mesh->z_min;
         QVector3D v1(1,0, parentModel->mesh->z_min + value*zlength/1.8);
         QVector3D v2(1,1, parentModel->mesh->z_min + value*zlength/1.8);

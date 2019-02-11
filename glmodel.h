@@ -263,6 +263,8 @@ private:
     bool isMoved = false;
     bool isReleased = true;
 
+    bool isFlatcutEdge = false;
+
     int viewMode = -1;
 
 signals:
