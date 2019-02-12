@@ -56,14 +56,19 @@ GLModel::GLModel(QObject* mainWindow, QNode *parent, Mesh* loadMesh, QString fna
         addComponent(m_transform);
 
         m_meshMaterial = new QPhongMaterial();
-        /*m_meshAlphaMaterial = new QPhongAlphaMaterial(); // from here @@@@@@@@@
+
+        /*
+        // from here @@@@@@@@@
+        m_meshAlphaMaterial = new QPhongAlphaMaterial();
         m_layerMaterial = new QPhongMaterial();
         m_meshMaterial->setAmbient(QColor(255,0,0));
         m_meshMaterial->setDiffuse(QColor(173,215,218));
         m_meshMaterial->setSpecular(QColor(182,237,246));
         m_meshMaterial->setShininess(0.0f);
 
-        addComponent(m_meshMaterial);*/ // to here @@@@@@@@@@@
+        addComponent(m_meshMaterial);
+        // to here @@@@@@@@@@@
+*/
 
         addMouseHandlers();
 
@@ -166,7 +171,6 @@ GLModel::GLModel(QObject* mainWindow, QNode *parent, Mesh* loadMesh, QString fna
 }
 
 void GLModel::addMouseHandlers(){
-
     m_objectPicker = new Qt3DRender::QObjectPicker(this);
 
     m_objectPicker->setHoverEnabled(false); // to reduce drag load
@@ -469,6 +473,7 @@ void GLModel::copyModelAttributeFrom(GLModel* from){
     manualSupportActive = from->manualSupportActive;
     layerViewActive = from->layerViewActive;
     supportViewActive = from->supportViewActive;
+    scaleActive = from->scaleActive;
 
     // labelling info
     if (from->labellingTextPreview) {
@@ -1437,8 +1442,7 @@ void GLModel::bisectModel(Plane plane){
 // need to create new mesh object liek Mesh* leftMesh = new Mesh();
 void GLModel::bisectModel_internal(Plane plane){
     // if the cutting plane is at min or max, it will not going to cut and just end
-    if (isFlatcutEdge){
-        //qDebug() << "@@@@ flat edge @@@@";
+    if (isFlatcutEdge && !shadowModel->shellOffsetActive){
         shadowModel->removePlane();
         removeCuttingPoints();
         removeCuttingContour();
@@ -2022,7 +2026,9 @@ void GLModel::modelCut(){
         if (parentModel->cuttingPlane.size() != 3){
             return;
         }
-
+        if (this->shellOffsetActive && parentModel->isFlatcutEdge == true) {
+            getSliderSignal(0.0);
+        }
         parentModel->bisectModel(parentModel->cuttingPlane);
     } else if (cutMode == 2){ // free cut
         if (parentModel->cuttingPoints.size() >= 3){
@@ -2141,7 +2147,6 @@ void GLModel::exgoo(){
 
 void GLModel::mgoo(Qt3DRender::QPickEvent* v)
 {
-
     if(v->buttons()>1){
         return;
     }
@@ -2211,6 +2216,7 @@ void GLModel::mgoo(Qt3DRender::QPickEvent* v)
 
     //qmlManager->showMoveArrow();
     prevPoint = currentPoint;
+
 }
 
 void GLModel::pgoo(Qt3DRender::QPickEvent* v){
@@ -2290,8 +2296,9 @@ void GLModel::cutFillModeSelected(int type){
 
 void GLModel::getSliderSignal(double value){
     if (cutActive||shellOffsetActive){
-        if (value == 0.0 || value == 1.8)
+        if (value == 0.0 || value == 1.8){
             parentModel->isFlatcutEdge = true;
+        }
         else {
             parentModel->isFlatcutEdge = false;
         }
@@ -2828,6 +2835,8 @@ void GLModel::openShellOffset(){
     parentModel->addCuttingPoint(QVector3D(2,0,0));
 
     generatePlane();
+    m_objectPicker->setHoverEnabled(false); // to reduce drag load
+    m_objectPicker->setDragEnabled(false);
 }
 
 void GLModel::closeShellOffset(){
