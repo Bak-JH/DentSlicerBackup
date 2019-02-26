@@ -56,14 +56,19 @@ GLModel::GLModel(QObject* mainWindow, QNode *parent, Mesh* loadMesh, QString fna
         addComponent(m_transform);
 
         m_meshMaterial = new QPhongMaterial();
-        /*m_meshAlphaMaterial = new QPhongAlphaMaterial();
+
+        /*
+        // from here @@@@@@@@@
+        m_meshAlphaMaterial = new QPhongAlphaMaterial();
         m_layerMaterial = new QPhongMaterial();
         m_meshMaterial->setAmbient(QColor(255,0,0));
         m_meshMaterial->setDiffuse(QColor(173,215,218));
         m_meshMaterial->setSpecular(QColor(182,237,246));
         m_meshMaterial->setShininess(0.0f);
 
-        addComponent(m_meshMaterial);*/
+        addComponent(m_meshMaterial);
+        // to here @@@@@@@@@@@
+*/
 
         addMouseHandlers();
 
@@ -166,7 +171,6 @@ GLModel::GLModel(QObject* mainWindow, QNode *parent, Mesh* loadMesh, QString fna
 }
 
 void GLModel::addMouseHandlers(){
-
     m_objectPicker = new Qt3DRender::QObjectPicker(this);
 
     m_objectPicker->setHoverEnabled(false); // to reduce drag load
@@ -469,6 +473,7 @@ void GLModel::copyModelAttributeFrom(GLModel* from){
     manualSupportActive = from->manualSupportActive;
     layerViewActive = from->layerViewActive;
     supportViewActive = from->supportViewActive;
+    scaleActive = from->scaleActive;
 
     // labelling info
     if (from->labellingTextPreview) {
@@ -1436,6 +1441,16 @@ void GLModel::bisectModel(Plane plane){
 
 // need to create new mesh object liek Mesh* leftMesh = new Mesh();
 void GLModel::bisectModel_internal(Plane plane){
+    // if the cutting plane is at min or max, it will not going to cut and just end
+    if (isFlatcutEdge && !shadowModel->shellOffsetActive){
+        shadowModel->removePlane();
+        removeCuttingPoints();
+        removeCuttingContour();
+        QMetaObject::invokeMethod(qmlManager->boxUpperTab, "all_off");
+        qmlManager->setProgress(1);
+        QMetaObject::invokeMethod(qmlManager->boundedBox, "hideBox");
+        return;
+    }
 
     Mesh* leftMesh = lmesh;
     Mesh* rightMesh = rmesh;
@@ -1613,6 +1628,7 @@ void GLModel::bisectModel_internal(Plane plane){
                 }
             }
         }
+
     }
 
 
@@ -2010,7 +2026,9 @@ void GLModel::modelCut(){
         if (parentModel->cuttingPlane.size() != 3){
             return;
         }
-
+        if (this->shellOffsetActive && parentModel->isFlatcutEdge == true) {
+            getSliderSignal(0.0);
+        }
         parentModel->bisectModel(parentModel->cuttingPlane);
     } else if (cutMode == 2){ // free cut
         if (parentModel->cuttingPoints.size() >= 3){
@@ -2134,7 +2152,9 @@ void GLModel::mgoo(Qt3DRender::QPickEvent* v)
     }
 
     if (qmlManager->selectedModels[0] != nullptr &&
-            (qmlManager->selectedModels[0]->shadowModel->cutActive ||
+            (qmlManager->selectedModels[0]->shadowModel->scaleActive ||
+             qmlManager->selectedModels[0]->shadowModel->cutActive ||
+             qmlManager->selectedModels[0]->shadowModel->shellOffsetActive ||
              qmlManager->selectedModels[0]->shadowModel->extensionActive ||
              qmlManager->selectedModels[0]->shadowModel->labellingActive ||
              qmlManager->selectedModels[0]->shadowModel->layflatActive ||
@@ -2145,7 +2165,6 @@ void GLModel::mgoo(Qt3DRender::QPickEvent* v)
              qmlManager->rotateActive ||
              qmlManager->saveActive))
         return;
-
 
     // if not selected by qmlmanager, return
     bool modelSelected = false;
@@ -2197,6 +2216,7 @@ void GLModel::mgoo(Qt3DRender::QPickEvent* v)
 
     //qmlManager->showMoveArrow();
     prevPoint = currentPoint;
+
 }
 
 void GLModel::pgoo(Qt3DRender::QPickEvent* v){
@@ -2276,6 +2296,12 @@ void GLModel::cutFillModeSelected(int type){
 
 void GLModel::getSliderSignal(double value){
     if (cutActive||shellOffsetActive){
+        if (value == 0.0 || value == 1.8){
+            parentModel->isFlatcutEdge = true;
+        }
+        else {
+            parentModel->isFlatcutEdge = false;
+        }
         float zlength = parentModel->mesh->z_max - parentModel->mesh->z_min;
         QVector3D v1(1,0, parentModel->mesh->z_min + value*zlength/1.8);
         QVector3D v2(1,1, parentModel->mesh->z_min + value*zlength/1.8);
@@ -2750,11 +2776,13 @@ void GLModel::generateManualSupport(){
 }
 
 void GLModel::openScale(){
+    scaleActive = true;
     qmlManager->sendUpdateModelInfo();
     //QMetaObject::invokeMethod(qmlManager->scalePopup, "updateSizeInfo", Q_ARG(QVariant, parentModel->mesh->x_max-parentModel->mesh->x_min), Q_ARG(QVariant, parentModel->mesh->y_max-parentModel->mesh->y_min), Q_ARG(QVariant, parentModel->mesh->z_max-parentModel->mesh->z_min));
 }
 
 void GLModel::closeScale(){
+    scaleActive = false;
     qmlManager->sendUpdateModelInfo();
     qDebug() << "close scale";
 }
@@ -2807,6 +2835,8 @@ void GLModel::openShellOffset(){
     parentModel->addCuttingPoint(QVector3D(2,0,0));
 
     generatePlane();
+    m_objectPicker->setHoverEnabled(false); // to reduce drag load
+    m_objectPicker->setDragEnabled(false);
 }
 
 void GLModel::closeShellOffset(){
