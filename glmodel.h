@@ -259,9 +259,12 @@ private:
     bool manualSupportActive = false;
     bool layerViewActive = false;
     bool supportViewActive = false;
+    bool scaleActive = false;
 
     bool isMoved = false;
     bool isReleased = true;
+
+    bool isFlatcutEdge = false;
 
     int viewMode = -1;
 
