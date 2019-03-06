@@ -14,6 +14,7 @@
 #include "QFuture"
 #include <QSplashScreen>
 #include "utils/updatechecker.h"
+#include "utils/gridmesh.h"
 //#include <QTranslator>
 
 using namespace Qt3DCore;
@@ -34,6 +35,8 @@ int main(int argc, char **argv)
     QQmlApplicationEngine engine;
     qRegisterMetaType<vector<QVector3D>>("vector<QVector3D>");
     qRegisterMetaType<vector<float>>("vector<float>");
+    qmlRegisterType<GridMesh>("DentStudio", 1, 0, "GridMesh");
+    //qmlRegisterType<SlicingConfiguration>("DentStudio", 1, 0, "SlicingConfiguration");
 
     /** Splash Image **/
     QPixmap pixmap(":/Resource/splash_final.png");
