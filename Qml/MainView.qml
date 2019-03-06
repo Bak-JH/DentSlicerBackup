@@ -13,6 +13,7 @@ import Qt3D.Render 2.0
 import Qt3D.Input 2.0
 import Qt3D.Extras 2.0
 import QtQuick 2.7
+import DentStudio 1.0
 //import GLQML 1.0
 
 
@@ -38,6 +39,9 @@ Entity {
 
     CameraManager{id : cm}
 
+    /*SlicingConfiguration {
+        id : slicingConfiguration
+    }*/
 
 
     Entity{
@@ -54,7 +58,34 @@ Entity {
 
         components: [systemTransform]
 
-        Plate{
+
+        PhongMaterial{
+            id : meshMaterial
+            ambient: Qt.rgba(100/255, 100/255, 100/255, 1 )
+            diffuse: Qt.rgba(100/255, 100/255, 100/255, 1 )
+            specular: Qt.rgba(100/255, 100/255, 100/255, 1 )
+            shininess: 0
+        }
+
+        Entity {
+            id: gridEntity
+            GridMesh {
+                id: gridMesh
+                meshResolution: Qt.size(Math.floor(qm.getBedXSize()/5),
+                                        Math.floor(qm.getBedYSize()/5))
+            }
+
+            Transform {
+                id: gridMeshTransform
+                translation : Qt.vector3d(-qm.getBedXSize()/2, -qm.getBedYSize()/2, 0)
+                scale3D: Qt.vector3d(qm.getBedXSize(),
+                                     qm.getBedYSize(),
+                                     1)
+            }
+            components:[gridMesh, gridMeshTransform, meshMaterial]
+        }
+
+        Plate {
             id: planeEntity
         }
 

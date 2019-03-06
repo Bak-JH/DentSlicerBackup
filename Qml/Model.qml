@@ -32,7 +32,7 @@ Entity {
     PhongMaterial {
         id: testMaterial
         property int counter : 0
-        ambient: Qt.rgba(81/255,200/255,242/255,1.0)
+        ambient: Qt.rgba(255/255,200/255,242/255,1.0)
 
     }
 

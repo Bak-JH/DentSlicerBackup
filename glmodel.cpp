@@ -90,7 +90,7 @@ GLModel::GLModel(QObject* mainWindow, QNode *parent, Mesh* loadMesh, QString fna
     qmlManager->addPart(getFileName(fname.toStdString().c_str()), ID);
 
     m_meshMaterial = new QPhongMaterial();
-    m_meshAlphaMaterial = new QPhongAlphaMaterial();
+    //m_meshAlphaMaterial = new QPhongAlphaMaterial();
     m_meshVertexMaterial = new QPerVertexColorMaterial();
 
     generateLayerViewMaterial();
@@ -203,29 +203,29 @@ void GLModel::changecolor(int mode){
     switch(mode){
     case 0: // default
         m_meshMaterial->setAmbient(QColor(130,130,140));
-        m_meshMaterial->setDiffuse(QColor(131,206,220));
+        //m_meshMaterial->setDiffuse(QColor(131,206,220));
         m_meshMaterial->setDiffuse(QColor(97,185,192));
-        m_meshMaterial->setSpecular(QColor(0,0,0));
+        m_meshMaterial->setSpecular(QColor(150,150,150));
         m_meshMaterial->setShininess(0.0f);
 
-        m_meshAlphaMaterial->setAmbient(QColor(130,130,140));;
+        /*m_meshAlphaMaterial->setAmbient(QColor(130,130,140));;
         m_meshAlphaMaterial->setDiffuse(QColor(131,206,220));
         m_meshAlphaMaterial->setDiffuse(QColor(97,185,192));
         m_meshAlphaMaterial->setSpecular(QColor(0,0,0));
-        m_meshAlphaMaterial->setShininess(0.0f);
+        m_meshAlphaMaterial->setShininess(0.0f);*/
         colorMode = 0;
         break;
     case 1:
-        //m_meshMaterial->setAmbient(QColor(180,180,180));
-        m_meshMaterial->setDiffuse(QColor(100,255,100));
+        m_meshMaterial->setAmbient(QColor(230,230,230));
+        //m_meshMaterial->setDiffuse(QColor(100,255,100));
         m_meshMaterial->setDiffuse(QColor(130,208,125));
-        m_meshMaterial->setSpecular(QColor(0,0,0));
+        m_meshMaterial->setSpecular(QColor(150,150,150));
         m_meshMaterial->setShininess(0.0f);
 
-        m_meshAlphaMaterial->setDiffuse(QColor(100,255,100));
+        /*m_meshAlphaMaterial->setDiffuse(QColor(100,255,100));
         m_meshAlphaMaterial->setDiffuse(QColor(130,208,125));
         m_meshAlphaMaterial->setSpecular(QColor(0,0,0));
-        m_meshAlphaMaterial->setShininess(0.0f);
+        m_meshAlphaMaterial->setShininess(0.0f);*/
         colorMode = 1;
         break;
     case 2:
@@ -247,8 +247,8 @@ bool GLModel::modelSelectChangable(){
 }
 
 void GLModel::checkPrintingArea(){
-    float printing_x = 100;
-    float printing_y = 80;
+    float printing_x = scfg->bed_x;
+    float printing_y = scfg->bed_y;
     float printing_z = 120;
     float printing_safegap = 1;
     // is it inside the printing area or not?
@@ -259,7 +259,7 @@ void GLModel::checkPrintingArea(){
         (tmp.y() + mesh->y_max) > printing_y/2 - printing_safegap|
         (tmp.z() + mesh->z_max) > printing_z){
         this->changecolor(2);
-    }else{
+    } else {
         this->changecolor(-1);
         this->changecolor(3);
     }

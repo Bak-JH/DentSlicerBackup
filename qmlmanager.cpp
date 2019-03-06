@@ -564,6 +564,23 @@ int QmlManager::getSelectedModelsSize() {
     return selectedModels.size();
 }
 
+float QmlManager::getBedXSize(){
+    return scfg->bed_x;
+}
+
+float QmlManager::getBedYSize(){
+    return scfg->bed_y;
+}
+
+void QmlManager::setBedXSize(float x){
+    scfg->bed_x = x;
+}
+
+void QmlManager::setBedYSize(float y){
+    scfg->bed_y = y;
+}
+
+
 bool QmlManager::getGroupSelectionActive() {
     return groupSelectionActive;
 }
@@ -1530,11 +1547,11 @@ void QmlManager::modelMove(int Axis, int Distance){ // for QML Signal -> float i
             case 1:{  //X
                 QVector3D tmp = selectedModels[i]->m_transform->translation();
 
-                if ((tmp.x() + selectedModels[i]->mesh->x_max + 1 < 100/2)
-                        && (tmp.x() + selectedModels[i]->mesh->x_min - 1 > -100/2)) {
-                    if(tmp.x() + selectedModels[i]->mesh->x_max +1 + Distance > 100/2 )
+                if ((tmp.x() + selectedModels[i]->mesh->x_max + 1 < scfg->bed_x/2)
+                        && (tmp.x() + selectedModels[i]->mesh->x_min - 1 > -scfg->bed_x/2)) {
+                    if(tmp.x() + selectedModels[i]->mesh->x_max +1 + Distance > scfg->bed_x/2 )
                         return ;
-                    if(tmp.x() + selectedModels[i]->mesh->x_min -1 + Distance < - 100/2 )
+                    if(tmp.x() + selectedModels[i]->mesh->x_min -1 + Distance < - scfg->bed_x/2 )
                         return ;
                 }
                 selectedModels[i]->m_transform->setTranslation(QVector3D(tmp.x()+Distance,tmp.y(),tmp.z()));
@@ -1542,11 +1559,11 @@ void QmlManager::modelMove(int Axis, int Distance){ // for QML Signal -> float i
             }
             case 2:{  //Y
                 QVector3D tmp = selectedModels[i]->m_transform->translation();
-                if ((tmp.y() + selectedModels[i]->mesh->y_max + 1 < 80/2)
-                        && (tmp.y() + selectedModels[i]->mesh->y_min - 1 > -80/2)) {
-                    if(tmp.y() + selectedModels[i]->mesh->y_max +1 + Distance > 80/2 )
+                if ((tmp.y() + selectedModels[i]->mesh->y_max + 1 < scfg->bed_y/2)
+                        && (tmp.y() + selectedModels[i]->mesh->y_min - 1 > -scfg->bed_y/2)) {
+                    if(tmp.y() + selectedModels[i]->mesh->y_max +1 + Distance > scfg->bed_y/2 )
                         return;
-                    if(tmp.y() + selectedModels[i]->mesh->y_min -1 + Distance < - 80/2 )
+                    if(tmp.y() + selectedModels[i]->mesh->y_min -1 + Distance < - scfg->bed_y/2 )
                         return;
                 }
                 selectedModels[i]->m_transform->setTranslation(QVector3D(tmp.x(),tmp.y()+Distance,tmp.z()));
@@ -1574,11 +1591,11 @@ void QmlManager::modelMoveF(int Axis, float Distance){
             case 1:{  //X
                 QVector3D tmp = selectedModels[i]->m_transform->translation();
 
-                if ((tmp.x() + selectedModels[i]->mesh->x_max + 1 < 100/2)
-                        && (tmp.x() + selectedModels[i]->mesh->x_min - 1 > -100/2)) {
-                    if(tmp.x() + selectedModels[i]->mesh->x_max +1 + Distance > 100/2 )
+                if ((tmp.x() + selectedModels[i]->mesh->x_max + 1 < scfg->bed_x/2)
+                        && (tmp.x() + selectedModels[i]->mesh->x_min - 1 > -scfg->bed_x/2)) {
+                    if(tmp.x() + selectedModels[i]->mesh->x_max +1 + Distance > scfg->bed_x/2 )
                         return;
-                    if(tmp.x() + selectedModels[i]->mesh->x_min -1 + Distance < - 100/2 )
+                    if(tmp.x() + selectedModels[i]->mesh->x_min -1 + Distance < - scfg->bed_x/2 )
                         return;
                 }
                 selectedModels[i]->m_transform->setTranslation(QVector3D(tmp.x()+Distance, tmp.y(), tmp.z()));
@@ -1586,11 +1603,11 @@ void QmlManager::modelMoveF(int Axis, float Distance){
             }
             case 2:{  //Y
                 QVector3D tmp = selectedModels[i]->m_transform->translation();
-                if ((tmp.y() + selectedModels[i]->mesh->y_max + 1 < 80/2)
-                        && (tmp.y() + selectedModels[i]->mesh->y_min - 1 > -80/2)) {
-                    if(tmp.y() + selectedModels[i]->mesh->y_max +1 + Distance > 80/2 )
+                if ((tmp.y() + selectedModels[i]->mesh->y_max + 1 < scfg->bed_y/2)
+                        && (tmp.y() + selectedModels[i]->mesh->y_min - 1 > -scfg->bed_y/2)) {
+                    if(tmp.y() + selectedModels[i]->mesh->y_max +1 + Distance > scfg->bed_y/2 )
                         return;
-                    if(tmp.y() + selectedModels[i]->mesh->y_min -1 + Distance < - 80/2 )
+                    if(tmp.y() + selectedModels[i]->mesh->y_min -1 + Distance < - scfg->bed_y/2 )
                         return;
                 }
                 selectedModels[i]->m_transform->setTranslation(QVector3D(tmp.x(), tmp.y()+Distance, tmp.z()));
@@ -1715,14 +1732,14 @@ void QmlManager::modelMoveByNumber(int axis, int X, int Y){
         targetY = tmp.y() + Y;
 
         if(tmp.x() + selectedModels[i]->mesh->x_max +1 + X> 80/2 )
-            targetX = tmp.x() - (tmp.x() + selectedModels[i]->mesh->x_max - 100/2 + 1);
+            targetX = tmp.x() - (tmp.x() + selectedModels[i]->mesh->x_max - scfg->bed_x/2 + 1);
         if(tmp.x() + selectedModels[i]->mesh->x_min -1 + X< - 80/2 )
-            targetX = tmp.x() - (tmp.x() + selectedModels[i]->mesh->x_min + 100/2 - 1);
+            targetX = tmp.x() - (tmp.x() + selectedModels[i]->mesh->x_min + scfg->bed_x/2 - 1);
 
         if(tmp.y() + selectedModels[i]->mesh->y_max +1 + Y> 80/2 )
-            targetY = tmp.y() - (tmp.y() + selectedModels[i]->mesh->y_max - 80/2 + 1);
+            targetY = tmp.y() - (tmp.y() + selectedModels[i]->mesh->y_max - scfg->bed_y/2 + 1);
         if(tmp.y() + selectedModels[i]->mesh->y_min -1 + Y< - 80/2 )
-            targetY = tmp.y() - (tmp.y() + selectedModels[i]->mesh->y_min + 80/2 - 1);
+            targetY = tmp.y() - (tmp.y() + selectedModels[i]->mesh->y_min + scfg->bed_y/2 - 1);
 
         selectedModels[i]->m_transform->setTranslation(QVector3D(targetX, targetY, tmp.z()));
         //selectedModels[i]->moveModelMesh(QVector3D(targetX,targetY,tmp.z()));
