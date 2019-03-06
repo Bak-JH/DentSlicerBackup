@@ -197,6 +197,10 @@ public:
     Q_INVOKABLE QVector3D getSelectedSize();
     Q_INVOKABLE int getselectedModelID();
     Q_INVOKABLE int getSelectedModelsSize();
+    Q_INVOKABLE float getBedXSize();
+    Q_INVOKABLE float getBedYSize();
+    Q_INVOKABLE void setBedXSize(float x);
+    Q_INVOKABLE void setBedYSize(float y);
     Q_INVOKABLE bool getGroupSelectionActive();
     Q_INVOKABLE void fixMesh();
     Q_INVOKABLE void disableObjectPickers();

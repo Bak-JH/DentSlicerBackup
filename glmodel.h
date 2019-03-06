@@ -124,6 +124,7 @@ public:
 
     bool appropriately_rotated=false;
     QPhongMaterial *m_meshMaterial;
+    //QMaterial *m_meshMaterial;
     QPhongAlphaMaterial *m_meshAlphaMaterial;
     QPerVertexColorMaterial *m_meshVertexMaterial;
     QMaterial *m_layerMaterial;
