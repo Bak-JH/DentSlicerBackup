@@ -59,6 +59,9 @@ Entity {
         components: [systemTransform]
 
 
+
+        /* Grid Mesh */
+
         PhongMaterial{
             id : meshMaterial
             ambient: Qt.rgba(100/255, 100/255, 100/255, 1 )
@@ -85,9 +88,14 @@ Entity {
             components:[gridMesh, gridMeshTransform, meshMaterial]
         }
 
+        /* White plate and logo on bed */
+
         Plate {
             id: planeEntity
         }
+
+
+        /* Model */
 
         Model{
             id: meshEntity4

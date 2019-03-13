@@ -13,6 +13,7 @@
 #include <QFileDialog>
 #include <iostream>
 #include <QDir>
+#include <QMatrix3x3>
 
 int GLModel::globalID = 0;
 
@@ -85,7 +86,7 @@ GLModel::GLModel(QObject* mainWindow, QNode *parent, Mesh* loadMesh, QString fna
     qmlManager->addPart(getFileName(fname.toStdString().c_str()), ID);
 
     m_meshMaterial = new QPhongMaterial();
-    //m_meshAlphaMaterial = new QPhongAlphaMaterial();
+    m_meshAlphaMaterial = new QPhongAlphaMaterial();
     m_meshVertexMaterial = new QPerVertexColorMaterial();
 
     generateLayerViewMaterial();
@@ -199,29 +200,29 @@ void GLModel::changecolor(int mode){
     switch(mode){
     case 0: // default
         m_meshMaterial->setAmbient(QColor(130,130,140));
-        //m_meshMaterial->setDiffuse(QColor(131,206,220));
+        m_meshMaterial->setDiffuse(QColor(131,206,220));
         m_meshMaterial->setDiffuse(QColor(97,185,192));
         m_meshMaterial->setSpecular(QColor(150,150,150));
         m_meshMaterial->setShininess(0.0f);
 
-        /*m_meshAlphaMaterial->setAmbient(QColor(130,130,140));;
+        m_meshAlphaMaterial->setAmbient(QColor(130,130,140));;
         m_meshAlphaMaterial->setDiffuse(QColor(131,206,220));
         m_meshAlphaMaterial->setDiffuse(QColor(97,185,192));
         m_meshAlphaMaterial->setSpecular(QColor(0,0,0));
-        m_meshAlphaMaterial->setShininess(0.0f);*/
+        m_meshAlphaMaterial->setShininess(0.0f);
         colorMode = 0;
         break;
     case 1:
-        m_meshMaterial->setAmbient(QColor(230,230,230));
-        //m_meshMaterial->setDiffuse(QColor(100,255,100));
+        //m_meshMaterial->setAmbient(QColor(230,230,230));
+        m_meshMaterial->setDiffuse(QColor(100,255,100));
         m_meshMaterial->setDiffuse(QColor(130,208,125));
-        m_meshMaterial->setSpecular(QColor(150,150,150));
+        m_meshMaterial->setSpecular(QColor(0,0,0));
         m_meshMaterial->setShininess(0.0f);
 
-        /*m_meshAlphaMaterial->setDiffuse(QColor(100,255,100));
+        m_meshAlphaMaterial->setDiffuse(QColor(100,255,100));
         m_meshAlphaMaterial->setDiffuse(QColor(130,208,125));
         m_meshAlphaMaterial->setSpecular(QColor(0,0,0));
-        m_meshAlphaMaterial->setShininess(0.0f);*/
+        m_meshAlphaMaterial->setShininess(0.0f);
         colorMode = 1;
         break;
     case 2:
@@ -1835,9 +1836,10 @@ void GLModel::generateSupport(){
     // generate cylinders
     for( auto iter = slicer->slices.overhang_points.begin() ; iter != slicer->slices.overhang_points.end() ; iter++ ) {
         qDebug() << "-------" << (*iter);
-        generateSupporter(layerSupportMesh, *iter);
-        generateRaft(layerRaftMesh, *iter);
+        //generateSupporter(layerSupportMesh, *iter);
+        //generateRaft(layerRaftMesh, *iter);
     }
+    generateRaft(layerRaftMesh, &(slicer->slices));
 
     /*for( auto iter = slicer->slices.begin() ; iter != slicer->slices.end() ; iter++ ) {
         qDebug() << "infile" << iter->infill.size() << "outershell" << iter->outershell.size() << "support" << iter->support.size() << "z" << iter->z;
@@ -2216,33 +2218,6 @@ void GLModel::pgoo(Qt3DRender::QPickEvent* v){
     prevPoint = (QVector2D) v->position();
 }
 
-
-/*void GLModel::drawLine(QVector3D endpoint)
-{
-    if (cutMode == 2){
-        float line_length=endpoint.distanceToPoint(lastpoint);
-        QVector3D original_normal(0,1,0);
-        QVector3D desire_normal(endpoint-lastpoint);
-        desire_normal.normalize();//size=1
-        float angle = qAcos(QVector3D::dotProduct(original_normal,desire_normal))*180/M_PI;
-        QVector3D crossproduct_vector(QVector3D::crossProduct(original_normal,desire_normal));
-        QVector3D desire_point=(endpoint+lastpoint)/2;
-        Qt3DExtras::QCylinderMesh* line = new Qt3DExtras::QCylinderMesh;
-        line->setRadius(0.05);
-        line->setLength(line_length);
-        Qt3DCore::QTransform * lineTransform = new Qt3DCore::QTransform;
-        lineTransform->setRotation(QQuaternion::fromAxisAndAngle(crossproduct_vector, angle));
-        lineTransform->setTranslation(desire_point);
-        Qt3DExtras::QPhongMaterial * lineMaterial = new Qt3DExtras::QPhongMaterial();
-        lineMaterial->setDiffuse(QColor(QRgb(0x00aa00)));
-        Qt3DCore::QEntity* lineEntity = new Qt3DCore::QEntity(parentModel);
-        lineEntity->addComponent(line);
-        lineEntity->addComponent(lineTransform);
-        lineEntity->addComponent(lineMaterial);
-        lastpoint=endpoint;
-    }
-}*/
-
 void GLModel::cutModeSelected(int type){
 
     qDebug() << "cut mode selected1" << type;
@@ -2308,14 +2283,45 @@ void GLModel::getSliderSignal(double value){
 }
 
 void GLModel::getLayerViewSliderSignal(double value) {
-    float height = (mesh->z_max - mesh->z_min + scfg->raft_thickness) * value + mesh->z_min;
-    m_layerMaterialHeight->setValue(QVariant::fromValue(height));
+    if (!shadowModel->layerViewActive)
+        return;
+
+    float height = (mesh->z_max - mesh->z_min + scfg->raft_thickness) * value;
+    int layer_num = int(height/scfg->layer_height)+1;
+    if (value <= 0.002f)
+        layer_num = 0;
+
+    changeLayerViewNumber(layer_num);
+
+    // change phong material of original model
+    float h = (mesh->z_max - mesh->z_min + scfg->raft_thickness) * value + mesh->z_min;
+    m_layerMaterialHeight->setValue(QVariant::fromValue(h));
 
     m_layerMaterialRaftHeight->setValue(QVariant::fromValue(qmlManager->getLayerViewFlags() & LAYER_INFILL != 0 ?
                 mesh->z_min :
                 mesh->z_max));
 }
 
+void GLModel::changeLayerViewNumber(int layer_num){
+    //layerViewPlaneMaterial = new Qt3DExtras::QTextureMaterial();
+    layerViewPlaneTextureLoader = new Qt3DRender::QTextureLoader();
+    QDir dir(QDir::tempPath()+"_export");//(qmlManager->selectedModels[0]->filename + "_export")
+    if (dir.exists()){
+        QString filename = dir.path()+"/"+QString::number(layer_num)+".svg";
+        qDebug() << filename;
+        layerViewPlaneTextureLoader->setSource(QUrl::fromLocalFile(filename));//"C:\\Users\\User\\Desktop\\sliced\\11111_export\\100.svg"));
+    }
+    layerViewPlaneMaterial->setTexture(layerViewPlaneTextureLoader);
+    float rotation_values[] = { // rotate by 90 deg
+        0, 1, 0,
+        -1, 0, 0,
+        0, 0, 1
+    };
+    QMatrix3x3 rotation_matrix(rotation_values);
+
+    layerViewPlaneMaterial->setTextureTransform(rotation_matrix);
+    layerViewPlaneTransform[0]->setTranslation(QVector3D(0,0,layer_num*scfg->layer_height));
+}
 
 /** HELPER functions **/
 QVector2D GLModel::world2Screen(QVector3D target){
@@ -2429,7 +2435,6 @@ void GLModel::closeLabelling()
 }
 
 void GLModel::stateChangeLabelling() {
-    //qDebug() << "labelling state changeD!!!!!!!!!!!!!!";
     qmlManager->keyboardHandlerFocus();
     (qmlManager->keyboardHandler)->setFocus(true);
 }
@@ -2587,44 +2592,14 @@ void GLModel::generateText3DMesh()
 // for extension
 
 void GLModel::colorExtensionFaces(){
-
     removeComponent(m_meshMaterial);
     addComponent(m_meshVertexMaterial);
-    /*
-    if (targetMeshFace == NULL)
-        return;
-    QVector3D normal = targetMeshFace->fn;
-
-    vector<MeshFace*> extension_faces;
-    detectExtensionFaces(mesh, normal, targetMeshFace, targetMeshFace, &extension_faces);
-    qDebug() << "detected extension faces" << extension_faces.size();
-
-    Paths3D extension_outlines = detectExtensionOutline(mesh, extension_faces);
-    qDebug() << "detected extension outlines" << extension_outlines.size();
-    */
 }
 
 void GLModel:: uncolorExtensionFaces(){
     resetColorMesh(mesh, vertexColorBuffer, extendFaces);
     removeComponent(m_meshVertexMaterial);
     addComponent(m_meshMaterial);
-
-    /*
-
-    if (targetMeshFace == NULL)
-        return;
-
-    QVector3D normal = targetMeshFace->fn;
-
-    vector<MeshFace*> extension_faces;
-    detectExtensionFaces(mesh, normal, targetMeshFace, targetMeshFace, &extension_faces);
-    qDebug() << "detected extension faces" << extension_faces.size();
-
-    Paths3D extension_outlines = detectExtensionOutline(mesh, extension_faces);
-    qDebug() << "detected extension outlines" << extension_outlines.size();
-
-    // do uncolor thing
-    */
 }
 void GLModel::generateColorAttributes(){
     extendColorMesh(mesh,targetMeshFace,vertexColorBuffer,&extendFaces);
@@ -2680,6 +2655,39 @@ void GLModel::generateLayFlat(){
     emit resetLayflat();
 }
 
+
+void GLModel::generateManualSupport(){
+    qDebug() << "generateManual support called";
+    if (targetMeshFace == NULL)
+        return;
+    QVector3D t = m_transform->translation();
+    t.setZ(mesh->z_min+scfg->raft_thickness);
+    QVector3D targetPosition = mesh->idx2MV(targetMeshFace->mesh_vertex[0]).position- t;
+    OverhangPoint* targetOverhangPosition = new OverhangPoint(targetPosition.x()*scfg->resolution,
+                                                              targetPosition.y()*scfg->resolution,
+                                                              targetPosition.z()*scfg->resolution,
+                                                              scfg->default_support_radius);
+
+    generateSupporter(layerSupportMesh, targetOverhangPosition, nullptr, nullptr, layerSupportMesh->z_min);
+    targetMeshFace = NULL;
+    emit _updateModelMesh(true);
+}
+
+// for shell offset
+void GLModel::generateShellOffset(double factor){
+    //saveUndoState();
+    qDebug() << "generate shell Offset";
+    qmlManager->openProgressPopUp();
+    QString original_filename = filename;
+
+    cutFillMode = 1;
+    shellOffsetFactor = factor;
+
+    shadowModel->modelCut();
+
+}
+
+
 void GLModel::openLayflat(){
     //qDebug() << "open layflat called" << this << this->shadowModel;
     layflatActive = true;
@@ -2733,23 +2741,6 @@ void GLModel::closeManualSupport(){
     qDebug() << "close manual support";
 }
 
-void GLModel::generateManualSupport(){
-    qDebug() << "generateManual support called";
-    if (targetMeshFace == NULL)
-        return;
-    QVector3D t = m_transform->translation();
-    t.setZ(mesh->z_min+scfg->raft_thickness);
-    QVector3D targetPosition = mesh->idx2MV(targetMeshFace->mesh_vertex[0]).position- t;
-    OverhangPoint* targetOverhangPosition = new OverhangPoint(targetPosition.x()*scfg->resolution,
-                                                              targetPosition.y()*scfg->resolution,
-                                                              targetPosition.z()*scfg->resolution,
-                                                              scfg->default_support_radius);
-
-    generateSupporter(layerSupportMesh, targetOverhangPosition, nullptr, nullptr, layerSupportMesh->z_min);
-    targetMeshFace = NULL;
-    emit _updateModelMesh(true);
-}
-
 void GLModel::openScale(){
     qmlManager->sendUpdateModelInfo();
     //QMetaObject::invokeMethod(qmlManager->scalePopup, "updateSizeInfo", Q_ARG(QVariant, parentModel->mesh->x_max-parentModel->mesh->x_min), Q_ARG(QVariant, parentModel->mesh->y_max-parentModel->mesh->y_min), Q_ARG(QVariant, parentModel->mesh->z_max-parentModel->mesh->z_min));
@@ -2758,20 +2749,6 @@ void GLModel::openScale(){
 void GLModel::closeScale(){
     qmlManager->sendUpdateModelInfo();
     qDebug() << "close scale";
-}
-
-// for shell offset
-void GLModel::generateShellOffset(double factor){
-    //saveUndoState();
-    qDebug() << "generate shell Offset";
-    qmlManager->openProgressPopUp();
-    QString original_filename = filename;
-
-    cutFillMode = 1;
-    shellOffsetFactor = factor;
-
-    shadowModel->modelCut();
-
 }
 
 void GLModel::openCut(){
@@ -2824,7 +2801,7 @@ void GLModel::changeViewMode(int viewMode) {
     }
 
     this->viewMode = viewMode;
-    qDebug() << "changeViewMode";
+    qDebug() << "changeViewMode" << viewMode;
     QMetaObject::invokeMethod(qmlManager->boxUpperTab, "all_off");
 
     switch( viewMode ) {
@@ -2833,22 +2810,54 @@ void GLModel::changeViewMode(int viewMode) {
         shadowModel->supportViewActive = false;
         addComponent(m_meshMaterial);
         removeComponent(m_layerMaterial);
+
+        // remove layer view components
+        removeLayerViewComponents();
         break;
     case VIEW_MODE_SUPPORT:
         shadowModel->layerViewActive = false;
         shadowModel->supportViewActive = true;
         addComponent(m_meshMaterial);
         removeComponent(m_layerMaterial);
+
+        // remove layer view components
+        removeLayerViewComponents();
         break;
     case VIEW_MODE_LAYER:
         shadowModel->layerViewActive = true;
         shadowModel->supportViewActive = false;
         addComponent(m_layerMaterial);
+
+        // generate layer view plane materials
+        layerViewPlaneMaterial = new Qt3DExtras::QTextureMaterial();
+        layerViewPlaneEntity[0] = new Qt3DCore::QEntity(parentModel);
+        layerViewPlane[0]=new Qt3DExtras::QPlaneMesh(this);
+        layerViewPlane[0]->setHeight(scfg->bed_x);
+        layerViewPlane[0]->setWidth(scfg->bed_y);
+        layerViewPlaneTransform[0]=new Qt3DCore::QTransform();
+        layerViewPlaneTransform[0]->setRotationZ(-90.0f);
+        layerViewPlaneTransform[0]->setRotationY(90.0f);
+        layerViewPlaneTransform[0]->setScale(1.0f);
+        layerViewPlaneEntity[0]->addComponent(layerViewPlane[0]);
+        layerViewPlaneEntity[0]->addComponent(layerViewPlaneTransform[0]); //jj
+        layerViewPlaneEntity[0]->addComponent(layerViewPlaneMaterial);
+
         removeComponent(m_meshMaterial);
         break;
     }
 
     emit _updateModelMesh(true);
+}
+
+void GLModel::removeLayerViewComponents(){
+    layerViewPlaneEntity[0]->removeComponent(layerViewPlane[0]);
+    layerViewPlaneEntity[0]->removeComponent(layerViewPlaneTransform[0]); //jj
+    layerViewPlaneEntity[0]->removeComponent(layerViewPlaneMaterial);
+    layerViewPlaneEntity[0]->deleteLater();
+    layerViewPlane[0]->deleteLater();
+    layerViewPlaneTransform[0]->deleteLater();
+    layerViewPlaneMaterial->deleteLater();
+    layerViewPlaneTextureLoader->deleteLater();
 }
 
 void GLModel::generateLayerViewMaterial() {
@@ -3003,4 +3012,5 @@ void GLModel::generateLayerViewMaterial() {
     m_layerMaterial->addParameter(new QParameter(QStringLiteral("ambient"), QColor(130, 130, 140)));
     m_layerMaterial->addParameter(new QParameter(QStringLiteral("diffuse"), QColor(131, 206, 220)));
     m_layerMaterial->addParameter(new QParameter(QStringLiteral("specular"), QColor(0, 0, 0)));
+    m_layerMaterial->addParameter(new QParameter(QStringLiteral("alpha"), 0.0f));
 }

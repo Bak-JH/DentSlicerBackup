@@ -52,36 +52,21 @@ Entity {
     }
 
     Entity{
-        id: plateLogoFrontPlaneEntity
+        id: plateLogoPlaneEntity
         Mesh{
-            id: plateLogoFrontPlaneMesh
+            id: plateLogoPlaneMesh
             source: "qrc:/Resource/mesh/plate_plane.stl"
         }
 
         Transform{
-            id: plateLogoFrontPlaneTransform
+            id: plateLogoPlaneTransform
             translation: Qt.vector3d(0,-qm.getBedYSize()/2-3,0)
             scale3D: Qt.vector3d(30/100,6/80,0)
 
         }
-        components: [ plateLogoFrontPlaneMesh, plateLogoFrontPlaneTransform, platePlaneMaterial ]
+        components: [ plateLogoPlaneMesh, plateLogoPlaneTransform, platePlaneMaterial ]
     }
 
-    Entity{
-        id: plateLogoBackPlaneEntity
-        Mesh{
-            id: plateLogoBackPlaneMesh
-            source: "qrc:/Resource/mesh/plate_plane.stl"
-        }
-
-        Transform{
-            id: plateLogoBackPlaneTransform
-            translation: Qt.vector3d(0,-qm.getBedYSize()/2-3,0)
-            scale3D: Qt.vector3d(30/100,6/80,0)
-            rotationX : -180
-        }
-        components: [ plateLogoBackPlaneMesh, plateLogoBackPlaneTransform, platePlaneMaterial ]
-    }
 
     Entity{
         id : plateLogoEntity

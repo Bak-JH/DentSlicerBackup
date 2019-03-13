@@ -159,6 +159,16 @@ public:
     vector<QEntity*> cuttingContourCylinders;
     Plane cuttingPlane;
 
+    // used for layer view
+    Qt3DExtras:: QPlaneMesh* layerViewPlane[1];
+    Qt3DCore::QEntity* layerViewPlaneEntity[1];
+    Qt3DCore::QTransform *layerViewPlaneTransform[1];
+    Qt3DRender::QTextureLoader* layerViewPlaneTextureLoader;
+    Qt3DExtras::QTextureMaterial* layerViewPlaneMaterial;
+    //Qt3DExtras::QPhongAlphaMaterial *layerViewPlaneMaterial = nullptr;
+    //QObjectPicker* planeObjectPicker[2];
+
+
     Qt3DExtras::QPlaneMesh* clipPlane[2];
     Qt3DCore::QEntity* planeEntity[2];
     Qt3DCore::QTransform *planeTransform[2];
@@ -205,6 +215,7 @@ public:
     void checkPrintingArea();
     bool EndsWith(const string& a, const string& b);
     bool modelSelectChangable();
+    void changeLayerViewNumber(int layer_num);
     QVector2D world2Screen(QVector3D target);
     QString getFileName(const string& s);
     QVector3D spreadPoint(QVector3D endpoint,QVector3D startpoint,int factor);
@@ -247,6 +258,7 @@ private:
     void clearVertices();
     void onTimerUpdate();
     Mesh* toSparse(Mesh* mesh);
+    void removeLayerViewComponents();
     void generateLayerViewMaterial();
 
     int cutMode = 1;

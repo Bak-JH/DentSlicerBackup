@@ -6,7 +6,7 @@
 
 void generateSupporter(Mesh* mesh, OverhangPoint *point, OverhangPoint *parent = nullptr, vector<OverhangPoint *> *points = nullptr, float support_z_min=0.0f);
 void generateFace(Mesh* mesh, Path path, float z);
-void generateRaft(Mesh* mesh, OverhangPoint *point);
+void generateRaft(Mesh* mesh, Slices* slices);
 void generateInfill(Mesh* mesh, Slice* slice);
 
 #endif // SUPPORTVIEW_H
