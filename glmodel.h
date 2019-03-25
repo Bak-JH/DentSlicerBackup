@@ -113,6 +113,7 @@ public:
     Mesh* mesh;
     Mesh* lmesh;
     Mesh* rmesh;
+    QSphereMesh* dragMesh;
 
     // layer view
     Mesh* layerMesh;

@@ -116,28 +116,9 @@ Entity {
         }
     ]
 
-    /***************************************** Mouse Wheel Zoom *****************************************/
-    // => the function moved to main.qml
-    /*
     MouseHandler{
         id : mouseHandler
         sourceDevice: mouse
-
-        onWheel: {
-            //console.log(wheel.x, wheel.y);
-            //var Camera_position, average, temp, Camera_radius
-            var d = wheel.angleDelta.y ;
-            var scaleTmp = sceneRoot.systemTransform.scale3D;
-
-            if(d>0){// mouse wheel zoom
-                sceneRoot.systemTransform.scale3D = scaleTmp.times(1.08);
-                mttab.updatePosition();
-            }
-            else if(d<0){
-                sceneRoot.systemTransform.scale3D = scaleTmp.times(0.92);
-                mttab.updatePosition();
-            }
-        }
 
         onPressed: {
             if(mouse.button ===1){ //left click
@@ -148,11 +129,11 @@ Entity {
 
         onReleased: {
             if(mouse.button ===1){ //left click
-                qm.backgroundClickCheck();
+                qm.backgroundClicked();
             }
         }
     }
-    */
+
 
     /***************************************** Mouse Wheel Move *****************************************/
     // => main.qml MouseArea
