@@ -508,6 +508,12 @@ void GLModel::updateModelMesh(bool shadowUpdate){
         addVertices(mesh, false);
         break;
     case VIEW_MODE_SUPPORT:
+        if (supportMesh != nullptr) {
+            initialize(supportMesh->faces.size());
+            addVertices(supportMesh, false);
+        } else initialize(mesh->faces.size());
+        addVertices(mesh, false);
+        /*
         if( layerMesh != nullptr ) {
             initialize(layerMesh->faces.size() + layerSupportMesh->faces.size() + layerRaftMesh->faces.size());
             addVertices(layerMesh, false);
@@ -517,6 +523,7 @@ void GLModel::updateModelMesh(bool shadowUpdate){
             initialize(mesh->faces.size());
             addVertices(mesh, false);
         }
+        */
         break;
     case VIEW_MODE_LAYER:
         if( layerMesh != nullptr ) {
@@ -1861,7 +1868,7 @@ void GLModel::generateSupport(){
 
     // generate cylinders
     for( auto iter = slicer->slices.overhang_points.begin() ; iter != slicer->slices.overhang_points.end() ; iter++ ) {
-        qDebug() << "-------" << (*iter);
+        qDebug() << "-------" << (*iter)->position.X << (*iter)->position.Y << (*iter)->position.Z;
         generateSupporter(layerSupportMesh, *iter);
         generateRaft(layerRaftMesh, *iter);
     }
@@ -1877,7 +1884,6 @@ void GLModel::generateSupport(){
     layerInfillMesh->vertexMove(t);
     layerSupportMesh->vertexMove(t);
     layerRaftMesh->vertexMove(t);
-
 
     layerInfillMesh->connectFaces();
     layerSupportMesh->connectFaces();

@@ -53,7 +53,8 @@ SOURCES += main.cpp \
     feature/supportview.cpp \
     utils/updatechecker.cpp \
     utils/gridmesh.cpp \
-    utils/linemeshgeometry.cpp
+    utils/linemeshgeometry.cpp \
+    feature/generatesupport.cpp
 
 
 RESOURCES += qml.qrc \
@@ -140,7 +141,8 @@ HEADERS += \
     utils/updatechecker.h \
     feature/earcut.hpp \
     utils/gridmesh.h \
-    utils/linemeshgeometry.h
+    utils/linemeshgeometry.h \
+    feature/generatesupport.h
 
 #LIBS += -lOpengl32
 
