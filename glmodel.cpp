@@ -27,6 +27,7 @@ GLModel::GLModel(QObject* mainWindow, QNode *parent, Mesh* loadMesh, QString fna
     , v_cnt(0)
     , f_cnt(0)
     , m_transform(new Qt3DCore::QTransform())
+    , dragMesh(new Qt3DExtras::QSphereMesh())
     //, m_objectPicker(new Qt3DRender::QObjectPicker())
     , parentModel((GLModel*)(parent))
     , cutMode(1)
@@ -55,10 +56,9 @@ GLModel::GLModel(QObject* mainWindow, QNode *parent, Mesh* loadMesh, QString fna
 
         addComponent(m_transform);
 
-        m_meshMaterial = new QPhongMaterial();
-
+        /// This block is for shadowModel testing ///
         /*
-        // from here @@@@@@@@@
+        m_meshMaterial = new QPhongMaterial();
         m_meshAlphaMaterial = new QPhongAlphaMaterial();
         m_layerMaterial = new QPhongMaterial();
         m_meshMaterial->setAmbient(QColor(255,0,0));
@@ -67,8 +67,7 @@ GLModel::GLModel(QObject* mainWindow, QNode *parent, Mesh* loadMesh, QString fna
         m_meshMaterial->setShininess(0.0f);
 
         addComponent(m_meshMaterial);
-        // to here @@@@@@@@@@@
-*/
+        */
 
         addMouseHandlers();
 
@@ -1211,10 +1210,17 @@ void GLModel::handlePickerClicked(QPickEvent *pick)
     qDebug() << "Released";
 
     if (isMoved){
-        qmlManager->modelMoveDone(3);
+        if(components().size() > 4)
+        {
+            removeComponent(dragMesh);
+            qmlManager->fixMesh();
+            qDebug() << "dragMesh removed";
+        }
+        qmlManager->modelMoveDone();
         isMoved = false;
         return;
     }
+
 
     //---------------- rgoo routine end --------------------
 
@@ -1436,7 +1442,7 @@ void GLModel::handlePickerClickedLayflat(MeshFace shadow_meshface){
     emit resetLayflat();
 }
 void GLModel::bisectModel(Plane plane){
-    QFuture<void> future = QtConcurrent::run(this, &bisectModel_internal, plane);
+    QFuture<void> future = QtConcurrent::run(this, &GLModel::bisectModel_internal, plane);
 }
 
 // need to create new mesh object liek Mesh* leftMesh = new Mesh();
@@ -2195,6 +2201,13 @@ void GLModel::mgoo(Qt3DRender::QPickEvent* v)
         biggest = z_diff>biggest? z_diff : biggest;
         float scale_val = biggest > 50.0f ? 1.0f : 100.0f/biggest;
         m_transform->setScale(scale_val);
+        if(components().size() < 5)
+        {
+            dragMesh->setRadius(biggest);
+            addComponent(dragMesh);
+            qDebug() << "COMPONENTS(A): " << components();
+            qDebug() << "dragMesh added";
+        }
         isMoved = true;
     }
 
@@ -2231,10 +2244,15 @@ void GLModel::pgoo(Qt3DRender::QPickEvent* v){
         isReleased = false;
 
     qDebug() << "Pressed   " << v->position() << m_transform->translation();
+    qmlManager->lastModelSelected();
+
+    if(qmlManager->selectedModels[0] != nullptr) {
     m_objectPicker->setDragEnabled(true);
 
     lastpoint=v->localIntersection();
     prevPoint = (QVector2D) v->position();
+    qDebug() << "Dragged";
+    }
 }
 
 

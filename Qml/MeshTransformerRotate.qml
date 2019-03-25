@@ -270,12 +270,11 @@ Entity {
                 rotateAxis = 0;
             }
         }
-        onReleased: {
-                torusRelease();
-                rotateAxis = 0;
-        }
         onPositionChanged: {
             mouseCurrent = Qt.vector2d(mouse.x,mouse.y)
+        }
+        onReleased: {
+            torusRelease()
         }
     }
     function torusRelease(){
@@ -357,6 +356,7 @@ Entity {
 
                 pastAxis = rotateAxis
                 if (rotateAxis != 0){
+                    qm.setModelClickTrue();
                     var Origin = world2Screen(center)
                     var ccwvar = vertexccw(mouseOrigin.x,mouseOrigin.y,Origin.x,Origin.y,mouseCurrent.x,mouseCurrent.y)
                     var mouseOrigin_Origin = mouseOrigin.minus(Origin).length()

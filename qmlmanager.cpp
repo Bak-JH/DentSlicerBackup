@@ -146,7 +146,7 @@ void QmlManager::initializeUI(QQmlApplicationEngine* e){
     moveArrowobj = (QEntity *)FindItemByName(engine, "moveArrow");
     QObject::connect(moveArrowobj, SIGNAL(moveInit()),this, SLOT(modelMoveInit()));
     QObject::connect(moveArrowobj, SIGNAL(moveSignal(int,int)),this, SLOT(modelMove(int,int)));
-    QObject::connect(moveArrowobj, SIGNAL(moveDone(int)),this, SLOT(modelMoveDone(int)));
+    QObject::connect(moveArrowobj, SIGNAL(moveDone()),this, SLOT(modelMoveDone()));
     hideMoveArrow();
     //moveArrow->setEnabled(0);
     QObject *moveButton = FindItemByName(engine, "moveButton");
@@ -739,7 +739,7 @@ void QmlManager::openArrange(){
 }
 
 void QmlManager::runArrange(){
-    QFuture<void> future = QtConcurrent::run(this, &runArrange_internal);
+    QFuture<void> future = QtConcurrent::run(this, &QmlManager::runArrange_internal);
 }
 
 void QmlManager::runArrange_internal(){
@@ -796,11 +796,24 @@ GLModel* QmlManager::findGLModelByName(QString filename){
     return NULL;
 }
 
+void QmlManager::setModelClickTrue(){
+    modelClicked = true;
+}
+
 void QmlManager::setModelClickFalse(){
     modelClicked = false;
 }
 
-void QmlManager::backgroundClickCheck(){
+void QmlManager::backgroundClicked(){
+    if(!modelClicked){
+        if(boundedBox->isEnabled()){
+            for(GLModel* curModel : selectedModels){
+                unselectPart(curModel->ID);
+            }
+        }
+    }
+
+    /*
     return;
     qDebug() << "bcc 0";
     if(selectedModels.size() == 1 && selectedModels[0] == nullptr)
@@ -822,16 +835,17 @@ void QmlManager::backgroundClickCheck(){
                 modelSelected(selectedModels[0]->ID);
             }
         }
-        /*
+
         while(selectedModels[0] != nullptr){
             modelSelected(selectedModels[0]->ID);
             qDebug() << selectedModels[0];
 
         }
-        */
+
 
     }
     modelClicked = false;
+    */
 }
 
 bool QmlManager::multipleModelSelected(int ID){
@@ -1039,7 +1053,7 @@ void QmlManager::modelSelected(int ID){
     GLModel* target;
     for(int i=0; i<glmodels.size();i++){
         if(glmodels.at(i)->ID == ID){
-            qDebug() << "found id";
+            qDebug() << "found id" << ID;
             target = glmodels.at(i);
             break;
         }
@@ -1391,7 +1405,7 @@ void QmlManager::modelMoveInit(){
     }
 }
 
-void QmlManager::modelMoveDone(int Axis){
+void QmlManager::modelMoveDone(){
     if (selectedModels[0] == nullptr)
         return;
 
@@ -1399,6 +1413,7 @@ void QmlManager::modelMoveDone(int Axis){
     hideMoveArrow();
 
     for (GLModel* curModel : selectedModels){
+        curModel->shadowModel->m_objectPicker->setEnabled(true);
         //curModel->saveUndoState();
 
         /*QVector3D translationDiff = curModel->m_transform->translation()-curModel->m_translation;
@@ -1543,6 +1558,7 @@ void QmlManager::modelMove(int Axis, int Distance){ // for QML Signal -> float i
         return;
 
     for (int i=0; i<selectedModels.size(); i++){
+        selectedModels[i]->shadowModel->m_objectPicker->setEnabled(false);
         switch(Axis){
             case 1:{  //X
                 QVector3D tmp = selectedModels[i]->m_transform->translation();
@@ -1745,7 +1761,7 @@ void QmlManager::modelMoveByNumber(int axis, int X, int Y){
         //selectedModels[i]->moveModelMesh(QVector3D(targetX,targetY,tmp.z()));
     }
 
-    modelMoveDone(1);
+    modelMoveDone();
 }
 void QmlManager::modelRotateByNumber(int axis,  int X, int Y, int Z){
     if (selectedModels[0] == nullptr)
