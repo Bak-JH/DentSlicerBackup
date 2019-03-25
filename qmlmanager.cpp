@@ -17,6 +17,7 @@
 #include <QCoreApplication>
 #include <QTextStream>
 #include <QFileDialog>
+#include <feature/generatesupport.h>
 
 QmlManager::QmlManager(QObject *parent) : QObject(parent)
   ,layerViewFlags(LAYER_INFILL | LAYER_SUPPORTERS | LAYER_RAFT)
@@ -2206,8 +2207,11 @@ void QmlManager::viewSupportChanged(bool checked){
     qDebug() << "selected Num = " << selectedModels.size();
     if( checked ) {
         if( selectedModels[0] != nullptr ) {
-            if( selectedModels[0]->slicer == nullptr ) {
+            /*if( selectedModels[0]->slicer == nullptr ) {
                 qmlManager->openYesNoPopUp(false, "The model should be sliced for support view.", "", "Would you like to continue?", 16, "", ftrSupportViewMode, 0);
+            }*/
+            if (selectedModels[0]->supportMesh == nullptr) {
+                qmlManager->openYesNoPopUp(false, "[Support View]", "", "Would you like to continue?", 16, "", ftrSupportViewMode, 0);
             } else {
                 QMetaObject::invokeMethod(qmlManager->boxUpperTab, "all_off");
                 setViewMode(VIEW_MODE_SUPPORT);
@@ -2297,6 +2301,8 @@ void QmlManager::setViewMode(int viewMode) {
         QMetaObject::invokeMethod(leftTabViewMode, "setObjectView");
     } else {
         QMetaObject::invokeMethod(qmlManager->boundedBox, "hideBox");
+        GenerateSupport generatesupport;
+        generatesupport.generateSupport(selectedModels[0]);
     }
 }
 

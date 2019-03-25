@@ -115,6 +115,8 @@ public:
     Mesh* rmesh;
     QSphereMesh* dragMesh;
 
+    Mesh* supportMesh = nullptr;
+
     // layer view
     Mesh* layerMesh;
     Mesh* layerSupportMesh;
