@@ -170,6 +170,16 @@ public:
     vector<Qt3DRender::QObjectPicker*> sphereObjectPicker;
     vector<QPhongMaterial*> sphereMaterial;
 
+    // Dragbox
+    Qt3DExtras::QSphereMesh* dragSphere;
+    //Qt3DExtras::QText2DEntity* dragSphere;
+    //Qt3DExtras::QExtrudedTextMesh* dragSphere;
+    //Qt3DExtras::QPlaneMesh* dragSphere;
+    Qt3DCore::QEntity* dragEntity;
+    Qt3DCore::QTransform* dragTransform;
+    Qt3DExtras::QPhongAlphaMaterial *dragMaterial = nullptr;
+    QObjectPicker *dragObjectPicker;
+
     void removeModel();
     void removeModelPartList();
 
@@ -364,6 +374,9 @@ public slots:
     // Generate support mesh
     void generateSupport();
     void slicingDone();
+
+    // Generate Dragbox mesh
+    void generateDragbox();
 };
 
 
