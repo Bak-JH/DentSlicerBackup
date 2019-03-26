@@ -58,8 +58,6 @@ Entity {
 
         components: [systemTransform]
 
-
-
         /* Grid Mesh */
 
         PhongMaterial{

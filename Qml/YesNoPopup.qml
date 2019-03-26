@@ -153,8 +153,11 @@ Rectangle {
                 onClicked:{
 
                     switch (popup_type){
-                        case uppertab.ftrExport:
                         case uppertab.ftrSupportViewMode:
+                            qm.setViewMode(1);
+                            break;
+                        case uppertab.ftrExport:
+                        // case uppertab.ftrSupportViewMode:
                         case uppertab.ftrLayerViewMode:
                             function collectConfigurations(){
                                 var options = uppertab.options;
@@ -177,12 +180,12 @@ Rectangle {
                                 cfg["temporary"] = "false";
                                 yesnoPopUp.runGroupFeature(uppertab.ftrExport, "", 0, 0, 0, cfg);
                                 //yesnoPopUp.runFeature(uppertab.ftrExport, cfg);
-                            } else if( popup_type == uppertab.ftrSupportViewMode ) {
+                            } /* else if( popup_type == uppertab.ftrSupportViewMode ) {
                                 cfg["temporary"] = "true";
                                 qm.setViewMode(1);
                                 yesnoPopUp.runGroupFeature(uppertab.ftrExport, "", 0, 0, 0, cfg);
                                 //yesnoPopUp.runFeature(uppertab.ftrExport, cfg);
-                            } else if( popup_type == uppertab.ftrLayerViewMode ) {
+                            } */ else if( popup_type == uppertab.ftrLayerViewMode ) {
                                 cfg["temporary"] = "true";
                                 qm.setViewMode(2);
                                 yesnoPopUp.runGroupFeature(uppertab.ftrExport, "", 0, 0, 0, cfg);

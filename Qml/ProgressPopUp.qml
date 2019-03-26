@@ -3,6 +3,7 @@ import QtQuick.Controls 1.4
 import QtQuick.Controls.Styles 1.4
 
 Rectangle {
+    id: progress_popup
     objectName: "progress_popup"
     width: 462
     height: 110
@@ -80,18 +81,18 @@ Rectangle {
     }
 
     function openPopUp(){
-        progress_value.value=0
-        progressPopUp.visible = true
-        progress_text1.text = "0% complete"
-        progress_text2.text = "Working..."
+        progress_value.value=0;
+        progress_popup.visible = true;
+        progress_text1.text = "0% complete";
+        progress_text2.text = "Working...";
     }
 
     function updateNumber(value){
         progress_value.value=value;
         progress_text1.text=Math.round(value*100) + "% complete";
-        if(value==1){
-            progressPopUp.visible = false
-            progress_text1.text = "0% complete"
+        if(value===1){
+            progress_popup.visible = false;
+            progress_text1.text = "0% complete";
             //result_orient.state="active";
             //result_text.text="Orientation Complete.";
         }
