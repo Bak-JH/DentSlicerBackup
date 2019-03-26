@@ -4,3 +4,6 @@ GenerateRaft::GenerateRaft()
 {
 
 }
+
+void GenerateRaft::generateRaft(GLModel* glmodel) {
+}

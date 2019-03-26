@@ -8,6 +8,7 @@
 #include "feature/text3dgeometrygenerator.h"
 #include "feature/shelloffset.h"
 #include "feature/supportview.h"
+#include "feature/stlexporter.h"
 #include <QtConcurrent/QtConcurrent>
 #include <QFuture>
 #include <QFileDialog>
@@ -1868,11 +1869,11 @@ void GLModel::generateSupport(){
     layerRaftMesh->vertexMove(t);
 
     // generate cylinders
-    for( auto iter = slicer->slices.overhang_points.begin() ; iter != slicer->slices.overhang_points.end() ; iter++ ) {
+    /*for( auto iter = slicer->slices.overhang_points.begin() ; iter != slicer->slices.overhang_points.end() ; iter++ ) {
         qDebug() << "-------" << (*iter)->position.X << (*iter)->position.Y << (*iter)->position.Z;
         generateSupporter(layerSupportMesh, *iter);
         generateRaft(layerRaftMesh, *iter);
-    }
+    }*/
 
     /*for( auto iter = slicer->slices.begin() ; iter != slicer->slices.end() ; iter++ ) {
         qDebug() << "infile" << iter->infill.size() << "outershell" << iter->outershell.size() << "support" << iter->support.size() << "z" << iter->z;
@@ -2853,22 +2854,25 @@ void GLModel::changeViewMode(int viewMode) {
 
     switch( viewMode ) {
     case VIEW_MODE_OBJECT:
+        if (shadowModel->layerViewActive){
+            // remove layer view components
+            removeLayerViewComponents();
+        }
         shadowModel->layerViewActive = false;
         shadowModel->supportViewActive = false;
         addComponent(m_meshMaterial);
         removeComponent(m_layerMaterial);
-
-        // remove layer view components
-        removeLayerViewComponents();
         break;
     case VIEW_MODE_SUPPORT:
+        if (shadowModel->layerViewActive){
+            // remove layer view components
+            removeLayerViewComponents();
+        }
         shadowModel->layerViewActive = false;
         shadowModel->supportViewActive = true;
         addComponent(m_meshMaterial);
         removeComponent(m_layerMaterial);
 
-        // remove layer view components
-        removeLayerViewComponents();
         break;
     case VIEW_MODE_LAYER:
         shadowModel->layerViewActive = true;

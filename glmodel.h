@@ -20,7 +20,6 @@
 #include "feature/autoorientation.h"
 #include "feature/meshrepair.h"
 #include "feature/autoarrange.h"
-#include "feature/stlexporter.h"
 #include "feature/extension.h"
 #include "feature/hollowshell.h"
 
@@ -114,8 +113,6 @@ public:
     Mesh* lmesh;
     Mesh* rmesh;
     QSphereMesh* dragMesh;
-
-    Mesh* supportMesh = nullptr;
 
     Mesh* supportMesh = nullptr;
     Mesh* raftMesh = nullptr;

@@ -54,7 +54,7 @@ Entity {
     Entity{
         id: plateLogoPlaneEntity
         Mesh{
-            id: plateLogoBackPlaneMesh
+            id: plateLogoPlaneMesh
             source: "qrc:/Resource/mesh/plate_plane.stl"
         }
 
@@ -64,7 +64,7 @@ Entity {
             scale3D: Qt.vector3d(30/100,6/80,0)
             rotationX : -180
         }
-        components: [ plateLogoBackPlaneMesh, plateLogoBackPlaneTransform, platePlaneMaterial ]
+        components: [ plateLogoPlaneMesh, plateLogoPlaneTransform, platePlaneMaterial ]
     }
 
     Entity{

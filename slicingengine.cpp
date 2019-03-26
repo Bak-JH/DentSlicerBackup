@@ -43,8 +43,7 @@ Slicer* SlicingEngine::slice(QVariant cfg, Mesh* shellMesh, Mesh* supportMesh, M
     }
     qDebug() << "done parsing arguments";
 
-    // 승환 25%
-    qmlManager->setProgress(0.25);
+    qmlManager->setProgress(0.1);
 
     //Mesh* loaded_mesh = mesh;
     //qDebug() << "loadedMesh : " << loaded_mesh->faces.size();
@@ -56,13 +55,16 @@ Slicer* SlicingEngine::slice(QVariant cfg, Mesh* shellMesh, Mesh* supportMesh, M
     Slicer* slicer = new Slicer();
     Slices shellSlices = slicer->slice(shellMesh);
     qDebug() << "Shell Slicing Done\n";
+    qmlManager->setProgress(0.4);
     Slices supportSlices = slicer->slice(supportMesh);
     qDebug() << "Support Slicing Done\n";
+    qmlManager->setProgress(0.6);
     Slices raftSlices = slicer->slice(raftMesh);
     qDebug() << "Raft Slicing Done\n";
-    Slices contourLists = slicer->mergeSlices(shellSlices, supportSlices, raftSlices);
-
-    // 승환 slice 안쪽
+    qmlManager->setProgress(0.8);
+    //Slices contourLists = slicer->mergeSlices(shellSlices, supportSlices, raftSlices);
+    Slices contourLists = supportSlices;
+    qmlManager->setProgress(0.9);
 
     // Export to SVG
     SVGexporter* exporter = new SVGexporter();
