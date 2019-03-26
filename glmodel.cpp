@@ -3,7 +3,6 @@
 #include <QString>
 #include <QtMath>
 #include <cfloat>
-
 #include "qmlmanager.h"
 #include "feature/text3dgeometrygenerator.h"
 #include "feature/shelloffset.h"
@@ -57,7 +56,7 @@ GLModel::GLModel(QObject* mainWindow, QNode *parent, Mesh* loadMesh, QString fna
 
         m_meshMaterial = new QPhongMaterial();
 
-        /*
+/*
         // from here @@@@@@@@@
         m_meshAlphaMaterial = new QPhongAlphaMaterial();
         m_layerMaterial = new QPhongMaterial();
@@ -70,21 +69,22 @@ GLModel::GLModel(QObject* mainWindow, QNode *parent, Mesh* loadMesh, QString fna
         // to here @@@@@@@@@@@
 */
 
+        generateDragbox();
         addMouseHandlers();
 
         QObject::connect(this,SIGNAL(_generateSupport()),this,SLOT(generateSupport()));
         QObject::connect(this,SIGNAL(_updateModelMesh(bool)),this,SLOT(updateModelMesh(bool)));
 
-        labellingTextPreview = new LabellingTextPreview(this);
+        //labellingTextPreview = new LabellingTextPreview(this);
         /*
         labellingTextPreview = new LabellingTextPreview(this);
         labellingTextPreview->setEnabled(false);
         labellingTextPreview->setTranslation(QVector3D(100,0,0));
         */
 
+
         return;
     }
-
     // Add to Part List
     ID = globalID++;
     qmlManager->addPart(getFileName(fname.toStdString().c_str()), ID);
@@ -157,6 +157,8 @@ GLModel::GLModel(QObject* mainWindow, QNode *parent, Mesh* loadMesh, QString fna
     */
 
     qDebug() << "adding part " << fname.toStdString().c_str();
+
+    labellingTextPreview = new LabellingTextPreview(this);
 
 
     // reserve cutting points, contours
@@ -1248,7 +1250,9 @@ void GLModel::handlePickerClicked(QPickEvent *pick)
         MeshFace shadow_meshface = mesh->faces[trianglePick->triangleIndex()];
 
         //parentModel->uncolorExtensionFaces();
+
         parentModel->targetMeshFace = &parentModel->mesh->faces[shadow_meshface.parent_idx];
+
         //parentModel->generateColorAttributes();
         //parentModel->colorExtensionFaces();
 
@@ -2147,6 +2151,7 @@ void GLModel::exgoo(){
 
 void GLModel::mgoo(Qt3DRender::QPickEvent* v)
 {
+    qDebug() << "mgoo @@@@";
     if(v->buttons()>1){
         return;
     }
@@ -2485,7 +2490,7 @@ void GLModel::applyLabelInfo(QString text, int contentWidth, QString fontName, b
     QVector3D translation;
     bool selected = false;
 
-    //qDebug() << "applyLabelInfo +++++++++++++++++++++++++ "<<text<<contentWidth<<fontName<<isBold<<fontSize << labellingTextPreview->isEnabled();
+    qDebug() << "applyLabelInfo +++++++++++++++++++++++++ " << text << translation << contentWidth;
 
     if (labellingTextPreview && labellingTextPreview->isEnabled()){
         translation = labellingTextPreview->translation;
@@ -2556,6 +2561,7 @@ void GLModel::generateText3DMesh()
     float depth = 0.5f;
     float scale = labellingTextPreview->ratioY * labellingTextPreview->scaleY;
     QVector3D translation = m_transform->translation()+labellingTextPreview->translation + QVector3D(0,-0.3,0);
+
 
     Qt3DCore::QTransform transform, normalTransform;
 
@@ -3033,3 +3039,76 @@ void GLModel::generateLayerViewMaterial() {
     m_layerMaterial->addParameter(new QParameter(QStringLiteral("diffuse"), QColor(131, 206, 220)));
     m_layerMaterial->addParameter(new QParameter(QStringLiteral("specular"), QColor(0, 0, 0)));
 }
+
+void GLModel::generateDragbox() {
+    qDebug() << "generating Dragbox @@@@";
+    parentModel->dragEntity = new Qt3DCore::QEntity(parentModel->parentModel);
+    //parentModel->dragSphere = new Qt3DExtras::QExtrudedTextMesh(this);
+    //parentModel->dragSphere->setDepth(float(1.0));
+    //parentModel->dragSphere->setFont(QFont("Arial"));
+    //parentModel->dragSphere->setText("asdffff");
+    //parentModel->dragSphere = new Qt3DExtras::QText2DEntity(parentModel->parentModel);
+
+    parentModel->dragSphere = new Qt3DExtras::QSphereMesh(this);
+    parentModel->dragSphere->setRadius(0.0);//20.0);
+
+    /*
+    parentModel->dragSphere = new Qt3DExtras::QPlaneMesh(this);
+    parentModel->dragSphere->setHeight(1000.0);
+    parentModel->dragSphere->setWidth(200.0);
+    */
+    /*
+    parentModel->dragSphere->setFont(QFont("Courier New", 60));
+    parentModel->dragSphere->setHeight(20);
+    parentModel->dragSphere->setWidth(100);
+    parentModel->dragSphere->setText("monospace");
+    parentModel->dragSphere->setColor(QColor(QRgb(0xF4F4F4)));
+    */
+
+    parentModel->dragMaterial = new Qt3DExtras::QPhongAlphaMaterial();
+    parentModel->dragMaterial->setAmbient(QColor(QColor(255,0,0)));
+    parentModel->dragMaterial->setDiffuse(QColor(QRgb(0xF4F4F4)));
+    parentModel->dragMaterial->setSpecular(QColor(QRgb(0xF4F4F4)));
+    parentModel->dragMaterial->setShininess(0.5f);
+
+    //parentModel->dragTransform = new Qt3DCore::QTransform();
+    parentModel->dragTransform = new Qt3DCore::QTransform();
+    //Mesh *mesh = toSparse(parentModel->mesh);
+    //parentModel->dragTransform->setTranslation(
+    //            QVector3D((mesh->x_max+mesh->x_min)/2, (mesh->y_max+mesh->y_min)/2, (mesh->z_max+mesh->z_min)/2));
+    /*
+    parentModel->dragTransform->setTranslation(QVector3D(0.5,0,5));
+    parentModel->dragTransform->setScale(0.125f);
+    parentModel->dragSphere->addComponent(parentModel->dragTransform);
+
+    parentModel->dragObjectPicker = new Qt3DRender::QObjectPicker;
+    parentModel->dragObjectPicker->setHoverEnabled(false);
+    parentModel->dragObjectPicker->setEnabled(false);
+
+    parentModel->dragEntity->addComponent(parentModel->dragObjectPicker);
+    */
+
+    //parentModel->dragTransform->setRotation(QQuaternion::fromAxisAndAngle(QVector3D(0,0,0), 0));
+
+
+    Mesh *mesh = toSparse(parentModel->mesh);
+    parentModel->dragTransform->setTranslation(
+                QVector3D((mesh->x_max+mesh->x_min)/2, (mesh->y_max+mesh->y_min)/2, (mesh->z_max+mesh->z_min)/2));
+
+    //parentModel->dragTransform->setScale(0.125f);
+    parentModel->dragTransform->setScale(2.0f);
+
+    qDebug() << "@@@@" << QVector3D((mesh->x_max+mesh->x_min)/2, (mesh->y_max+mesh->y_min)/2, (mesh->z_max+mesh->z_min)/2);
+
+    parentModel->dragObjectPicker = new Qt3DRender::QObjectPicker;
+    parentModel->dragObjectPicker->setHoverEnabled(false);
+    parentModel->dragObjectPicker->setEnabled(false);
+
+    parentModel->dragEntity->addComponent(parentModel->dragObjectPicker);
+    parentModel->dragEntity->addComponent(parentModel->dragSphere);
+    parentModel->dragEntity->addComponent(parentModel->dragTransform);
+    parentModel->dragEntity->addComponent(parentModel->dragMaterial);
+
+}
+
+
