@@ -8,9 +8,8 @@
 #include "raft.h"
 #include <list>
 #include <QThread>
-#include <qDebug>
+#include <QDebug>
 #include "polyclipping/clip2tri/clip2tri.h"
-
 
 //using namespace std;
 using namespace ClipperLib;
@@ -43,18 +42,25 @@ public:
     //    vector<QVector3D> overhang_points;
     //vector<IntPoint> intersectionPoints;
     Path raft_points;
+
+    void containmentTreeConstruct();
 };
 
 class Slicer : public QThread
 {
 public:
     Slicer() {};
-    Slices slices;
+    //Slices slices;
     QString slicingInfo;
+
+    Slices totalSlices;
+    Slices shellSlices;
+    Slices supportSlices;
+    Slices raftSlices;
 
     /****************** Entire Slicing Step *******************/
     Slices slice(Mesh* mesh);
-
+    Slices mergeSlices(Slices shellSlices, Slices supportSlices, Slices raftSlices);
 
     /****************** Mesh Slicing Step *******************/
     vector<Paths> meshSlice(Mesh* mesh); // totally k elements

@@ -7,8 +7,13 @@
 using namespace ClipperLib;
 
 Slices Slicer::slice(Mesh* mesh){
+    Slices slices;
 
     slices.mesh = mesh;
+
+    if (mesh == nullptr){
+        return slices;
+    }
 
     // mesh slicing step
     vector<Paths> meshslices = meshSlice(mesh);
@@ -68,28 +73,55 @@ Slices Slicer::slice(Mesh* mesh){
     qmlManager->setProgress(0.7);
 
     // support generation step
-    Support support(scfg->support_type);
+    /*Support support(scfg->support_type);
     support.generate(slices);
     printf("support done\n");
-    fflush(stdout);
+    fflush(stdout);*/
     //cout << "support done" <<endl;
     // 승환 80%
     qmlManager->setProgress(0.8);
 
     // raft generation step
-    Raft raft(scfg->raft_type);
+    /*Raft raft(scfg->raft_type);
     raft.generate(slices);
     printf("raft done\n");
-    fflush(stdout);
+    fflush(stdout);*/
     //cout << "raft done" <<endl;
     // 승환 90%
     qmlManager->setProgress(0.9);
 
-    containmentTreeConstruct();
+    slices.containmentTreeConstruct();
     printf("ctreeconstruct done\n");
     fflush(stdout);
     return slices;
 }
+
+Slices Slicer::mergeSlices(Slices shellslices, Slices supportslices, Slices raftslices){
+    Clipper clpr;
+
+    shellSlices = shellslices;
+    supportSlices = supportslices;
+    raftSlices = raftslices;
+
+    // append shellSlices to totalSlices
+    totalSlices.insert(totalSlices.begin(), shellSlices.begin(), shellSlices.end());
+
+
+    // merge supportSlices to totalSlices
+    for (int slice_idx = 0; slice_idx < supportSlices.size(); slice_idx++){
+        clpr.Clear();
+        clpr.AddPaths(totalSlices[slice_idx].outershell, ptSubject, true);
+        clpr.AddPaths(supportSlices[slice_idx].outershell, ptClip, true);
+        clpr.Execute(ctUnion, totalSlices[slice_idx].outershell, pftEvenOdd, pftPositive);
+    }
+
+    // append raftSlices to totalSlices
+    totalSlices.insert(totalSlices.begin(), raftSlices.begin(), raftSlices.end());
+
+    totalSlices.containmentTreeConstruct();
+    return totalSlices;
+}
+
 
 /****************** Mesh Slicing Step *******************/
 
@@ -269,11 +301,11 @@ void zfillone(IntPoint& e1bot, IntPoint& e1top, IntPoint& e2bot, IntPoint& e2top
 
 /****************** Deprecated functions *******************/
 
-void Slicer::containmentTreeConstruct(){
+void Slices::containmentTreeConstruct(){
     Clipper clpr;
 
-    for (int idx=0; idx<slices.size(); idx++){ // divide into parallel threads
-        Slice* slice = &(slices[idx]);
+    for (int idx=0; idx<this->size(); idx++){ // divide into parallel threads
+        Slice* slice = &((*this)[idx]);
         clpr.Clear();
         clpr.AddPaths(slice->outershell, ptSubject, true);
         clpr.Execute(ctUnion, slice->polytree);

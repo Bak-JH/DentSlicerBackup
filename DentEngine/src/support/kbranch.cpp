@@ -54,8 +54,8 @@ void generateKBranch(Slices& slices){
     }
 
     // process branching
-    for (int layer_idx=slices.size()-1; layer_idx>=0; layer_idx--){
-    //for (int layer_idx=0; layer_idx>=0; layer_idx--){
+    //for (int layer_idx=slices.size()-1; layer_idx>=0; layer_idx--){
+    for (int layer_idx=0; layer_idx>=0; layer_idx--){
         qDebug() << "branching layers " << layer_idx << "/" << slices.size();
         Slice& slice = slices[layer_idx];
         Paths circle_paths;
