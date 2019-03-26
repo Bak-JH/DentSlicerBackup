@@ -1974,11 +1974,13 @@ void QmlManager::runGroupFeature(int ftrType, QString state, double arg1, double
 
         qmlManager->openProgressPopUp();
 
-        Mesh* mergedMesh = ste->mergeSelectedModels();
-        qDebug() << "Merged Mesh" << mergedMesh->faces.size();
+        // need to generate support, raft
+        Mesh* mergedShellMesh = ste->mergeSelectedModels();
+        Mesh* mergedSupportMesh;
+        Mesh* mergedRaftMesh;
 
         //se->slice(data, mergedMesh, fileName);
-        QFuture<Slicer*> future = QtConcurrent::run(se, &SlicingEngine::slice, data, mergedMesh, fileName);
+        QFuture<Slicer*> future = QtConcurrent::run(se, &SlicingEngine::slice, data, mergedShellMesh, mergedSupportMesh, mergedRaftMesh, fileName);
 
         //m_glmodel->futureWatcher.setFuture(future);
         break;

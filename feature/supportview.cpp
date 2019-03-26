@@ -133,12 +133,11 @@ void generateSupporter(Mesh* mesh, OverhangPoint *point, OverhangPoint *parent, 
     }
 }
 
-void generateRaft(Mesh* mesh, Slices* slices){
-
+/*void generateRaft(Mesh* mesh, Slices* slices){
     for (int s_idx=0; s_idx<slices->size(); s_idx++){
 
     }
-}
+}*/
 
 /*void generateRaft(Mesh* mesh, OverhangPoint *point) {
     float bottom = (float)-3.0;//(point->position.Z - (int)point->height * 1000) / scfg->resolution;

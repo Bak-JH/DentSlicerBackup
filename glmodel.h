@@ -114,6 +114,9 @@ public:
     Mesh* lmesh;
     Mesh* rmesh;
 
+    Mesh* supportMesh = nullptr;
+    Mesh* raftMesh = nullptr;
+
     // layer view
     Mesh* layerMesh;
     Mesh* layerSupportMesh;
@@ -215,7 +218,6 @@ public:
     void checkPrintingArea();
     bool EndsWith(const string& a, const string& b);
     bool modelSelectChangable();
-    void changeLayerViewNumber(int layer_num);
     QVector2D world2Screen(QVector3D target);
     QString getFileName(const string& s);
     QVector3D spreadPoint(QVector3D endpoint,QVector3D startpoint,int factor);

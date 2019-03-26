@@ -1,6 +1,7 @@
-#include "slicingengine.h"
+//#include "slicingengine.h"
 #include <QDir>
 #include "qmlmanager.h"
+#include "glmodel.h"
 
 SlicingEngine::SlicingEngine()
 {
@@ -8,8 +9,8 @@ SlicingEngine::SlicingEngine()
 
 QProcess *slicing_process;
 
-Slicer* SlicingEngine::slice(QVariant cfg, Mesh* mesh, QString filename){
-    qDebug() << "slice" << cfg << mesh << filename;
+Slicer* SlicingEngine::slice(QVariant cfg, Mesh* shellMesh, Mesh* supportMesh, Mesh* raftMesh, QString filename){
+    qDebug() << "slice" << cfg << shellMesh << filename;
     QVariantMap config = cfg.toMap();
     for(QVariantMap::const_iterator iter = config.begin(); iter != config.end(); ++iter) {
         qDebug() << iter.key() << iter.value().toString();
@@ -45,16 +46,22 @@ Slicer* SlicingEngine::slice(QVariant cfg, Mesh* mesh, QString filename){
     // 승환 25%
     qmlManager->setProgress(0.25);
 
-    // Load mesh
-    Mesh* loaded_mesh = mesh;
-    qDebug() << "loadedMesh : " << loaded_mesh->faces.size();
+    //Mesh* loaded_mesh = mesh;
+    //qDebug() << "loadedMesh : " << loaded_mesh->faces.size();
     /*Mesh* loaded_mesh = new Mesh();
     loadMeshSTL(loaded_mesh, filename.toStdString().c_str());
     */
 
     // Slice
     Slicer* slicer = new Slicer();
-    Slices contourLists = slicer->slice(loaded_mesh);
+    Slices shellSlices = slicer->slice(shellMesh);
+    qDebug() << "Shell Slicing Done\n";
+    Slices supportSlices = slicer->slice(supportMesh);
+    qDebug() << "Support Slicing Done\n";
+    Slices raftSlices = slicer->slice(raftMesh);
+    qDebug() << "Raft Slicing Done\n";
+    Slices contourLists = slicer->mergeSlices(shellSlices, supportSlices, raftSlices);
+
     // 승환 slice 안쪽
 
     // Export to SVG

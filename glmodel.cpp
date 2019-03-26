@@ -695,7 +695,7 @@ void featureThread::run(){
 
                 // slice file
                 qmlManager->openProgressPopUp();
-                QFuture<Slicer*> future = QtConcurrent::run(se, &SlicingEngine::slice, data, m_glmodel->mesh, fileName + "/" + m_glmodel->filename.split("/").last() );
+                QFuture<Slicer*> future = QtConcurrent::run(se, &SlicingEngine::slice, data, m_glmodel->mesh, m_glmodel->supportMesh, m_glmodel->raftMesh, fileName + "/" + m_glmodel->filename.split("/").last() );
                 m_glmodel->futureWatcher.setFuture(future);
                 break;
             }
@@ -1834,12 +1834,12 @@ void GLModel::generateSupport(){
     layerRaftMesh->vertexMove(t);
 
     // generate cylinders
-    for( auto iter = slicer->slices.overhang_points.begin() ; iter != slicer->slices.overhang_points.end() ; iter++ ) {
+    /*for( auto iter = slicer->slices.overhang_points.begin() ; iter != slicer->slices.overhang_points.end() ; iter++ ) {
         qDebug() << "-------" << (*iter);
         //generateSupporter(layerSupportMesh, *iter);
         //generateRaft(layerRaftMesh, *iter);
-    }
-    generateRaft(layerRaftMesh, &(slicer->slices));
+    }*/
+    //generateRaft(layerRaftMesh, &(slicer->slices));
 
     /*for( auto iter = slicer->slices.begin() ; iter != slicer->slices.end() ; iter++ ) {
         qDebug() << "infile" << iter->infill.size() << "outershell" << iter->outershell.size() << "support" << iter->support.size() << "z" << iter->z;
@@ -2291,19 +2291,6 @@ void GLModel::getLayerViewSliderSignal(double value) {
     if (value <= 0.002f)
         layer_num = 0;
 
-    changeLayerViewNumber(layer_num);
-
-    // change phong material of original model
-    float h = (mesh->z_max - mesh->z_min + scfg->raft_thickness) * value + mesh->z_min;
-    m_layerMaterialHeight->setValue(QVariant::fromValue(h));
-
-    m_layerMaterialRaftHeight->setValue(QVariant::fromValue(qmlManager->getLayerViewFlags() & LAYER_INFILL != 0 ?
-                mesh->z_min :
-                mesh->z_max));
-}
-
-void GLModel::changeLayerViewNumber(int layer_num){
-    //layerViewPlaneMaterial = new Qt3DExtras::QTextureMaterial();
     layerViewPlaneTextureLoader = new Qt3DRender::QTextureLoader();
     QDir dir(QDir::tempPath()+"_export");//(qmlManager->selectedModels[0]->filename + "_export")
     if (dir.exists()){
@@ -2321,6 +2308,14 @@ void GLModel::changeLayerViewNumber(int layer_num){
 
     layerViewPlaneMaterial->setTextureTransform(rotation_matrix);
     layerViewPlaneTransform[0]->setTranslation(QVector3D(0,0,layer_num*scfg->layer_height));
+
+    // change phong material of original model
+    float h = (mesh->z_max - mesh->z_min + scfg->raft_thickness) * value + mesh->z_min;
+    m_layerMaterialHeight->setValue(QVariant::fromValue(h));
+
+    m_layerMaterialRaftHeight->setValue(QVariant::fromValue(qmlManager->getLayerViewFlags() & LAYER_INFILL != 0 ?
+                mesh->z_min :
+                mesh->z_max));
 }
 
 /** HELPER functions **/
@@ -2830,6 +2825,7 @@ void GLModel::changeViewMode(int viewMode) {
 
         // generate layer view plane materials
         layerViewPlaneMaterial = new Qt3DExtras::QTextureMaterial();
+        //layerViewPlaneMaterial->setAlphaBlendingEnabled(true);
         layerViewPlaneEntity[0] = new Qt3DCore::QEntity(parentModel);
         layerViewPlane[0]=new Qt3DExtras::QPlaneMesh(this);
         layerViewPlane[0]->setHeight(scfg->bed_x);
@@ -3011,6 +3007,7 @@ void GLModel::generateLayerViewMaterial() {
 
     m_layerMaterial->addParameter(new QParameter(QStringLiteral("ambient"), QColor(130, 130, 140)));
     m_layerMaterial->addParameter(new QParameter(QStringLiteral("diffuse"), QColor(131, 206, 220)));
+    m_layerMaterial->addParameter(new QParameter(QStringLiteral("diffuse"), QColor(97, 185, 192)));
     m_layerMaterial->addParameter(new QParameter(QStringLiteral("specular"), QColor(0, 0, 0)));
-    m_layerMaterial->addParameter(new QParameter(QStringLiteral("alpha"), 0.0f));
+    //m_layerMaterial->addParameter(new QParameter(QStringLiteral("alpha"), 0.0f));
 }
