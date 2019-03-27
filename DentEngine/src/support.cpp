@@ -35,8 +35,8 @@ void overhangDetect(Slices& slices){
     //qDebug() << "Checking layers per " << checking_layers << "layers";
 
     // calculate overhang regions
-    for (int idx=slices.size()-1; idx>=0; idx--){
-    //for (int idx=2; idx>=0; idx--){
+    //for (int idx=slices.size()-1; idx>=0; idx--){
+    for (int idx=2; idx>=0; idx--){
         //if (idx % checking_layers != 0)
         //    continue;
         qDebug() << "overhang region detect" << idx << "/" << slices.size();

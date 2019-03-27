@@ -16,7 +16,7 @@ class SVGexporter
 public:
     SVGexporter(){};
 
-    QString exportSVG(Slices contourLists, QString outfoldername);
+    QString exportSVG(Slices shellSlices, Slices supportSlices, Slices raftSlices, QString outfoldername);
 
     void parsePolyTreeAndWrite(PolyNode* pn, std::ofstream& outfile);
 

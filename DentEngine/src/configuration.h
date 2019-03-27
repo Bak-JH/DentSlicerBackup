@@ -23,7 +23,7 @@
 #define CLEAR_RESIN 2
 #define CASTABLE_RESIN 3
 
-#define TEMPORARY_CONTRACTION_RATIO 1.005//1.005//0.99502//0.98814
+#define TEMPORARY_CONTRACTION_RATIO 1.01//1.005//0.99502//0.98814
 #define CLEAR_CONTRACTION_RATIO 0.99504 //0.99009
 #define CASTABLE_CONTRACTION_RATIO 0.99009
 
@@ -37,12 +37,12 @@ class SlicingConfiguration : public QVariantMap
 public:
     // configurations
     static constexpr int resolution_scale = 3;
-    static constexpr int resolution = pow(10,resolution_scale); // resolution range from 1000 to 1
-    static constexpr float max_buildsize_x = 1000000/resolution;
+    static constexpr int resolution = 1000;//pow(10,resolution_scale); // resolution range from 1000 to 1
+    static constexpr float max_buildsize_x = 1000;//1000000/resolution;
     static constexpr float vertex_inbound_distance = 0.002;//0.03;//(float)1/resolution; // resolution in mm (0.0001 and 0.0009 are same, 1 micron)
 
     char* slicing_mode = "uniform"; // uniform OR adaptive
-    float layer_height = 0.05; // in mm
+    float layer_height = 0.1; // in mm
     float nozzle_width = 0; // in mm (diameter) , for printers with nozzles
     float wall_thickness = 2; // in mm
     float fill_thickness = 1; // in mm
@@ -69,7 +69,7 @@ public:
     int raft_type = 2;
 
     // raft settings
-    float raft_thickness = 3;
+    float raft_thickness = 0;//3;
     int raft_base_radius = 3000;
     int raft_offset_radius = 1800; // in microns
 

@@ -7,13 +7,16 @@
 using namespace ClipperLib;
 
 Slices Slicer::slice(Mesh* mesh){
-
+    Slices slices;
     slices.mesh = mesh;
+
+    if (mesh == nullptr || mesh->faces.size() ==0){
+        return slices;
+    }
 
     // mesh slicing step
     vector<Paths> meshslices = meshSlice(mesh);
-    // 승환 30%
-    qmlManager->setProgress(0.3);
+
 
     printf("meshslice done\n");
     fflush(stdout);
@@ -35,9 +38,6 @@ Slices Slicer::slice(Mesh* mesh){
             qDebug() << meshslice.outershell[j].size();
         }
     }
-    //승환 40%
-    qmlManager->setProgress(0.4);
-    fflush(stdout);
     //printf("meshslice done\n");
 
     //QTextStream(stdout) << "meshslice done" <<endl;
@@ -45,49 +45,33 @@ Slices Slicer::slice(Mesh* mesh){
     //qCritical() << "meshslice done";
 
     // overhang detection step
-    overhangDetect(slices);
-    printf("overhangdetect done\n");
-    fflush(stdout);
+    //overhangDetect(slices);
     //cout << "overhangdetect done" <<endl;
 
-    // 승환 50%
-    qmlManager->setProgress(0.5);
 
     //containmentTreeConstruct();
-    // 승환 60%
-    qmlManager->setProgress(0.6);
 
     // below steps need to be done in parallel way
     // infill generation step
     //Infill infill(scfg->infill_type);
     //infill.generate(slices);
-    printf("infill done\n");
-    fflush(stdout);
     //cout << "infill done" <<endl;
-    // 승환 70%
-    qmlManager->setProgress(0.7);
 
     // support generation step
-    Support support(scfg->support_type);
+    /*Support support(scfg->support_type);
     support.generate(slices);
     printf("support done\n");
-    fflush(stdout);
+    fflush(stdout);*/
     //cout << "support done" <<endl;
-    // 승환 80%
-    qmlManager->setProgress(0.8);
 
     // raft generation step
-    Raft raft(scfg->raft_type);
+    /*Raft raft(scfg->raft_type);
     raft.generate(slices);
     printf("raft done\n");
-    fflush(stdout);
+    fflush(stdout);*/
     //cout << "raft done" <<endl;
-    // 승환 90%
-    qmlManager->setProgress(0.9);
 
-    containmentTreeConstruct();
-    printf("ctreeconstruct done\n");
-    fflush(stdout);
+    slices.containmentTreeConstruct();
     return slices;
 }
 
@@ -269,11 +253,11 @@ void zfillone(IntPoint& e1bot, IntPoint& e1top, IntPoint& e2bot, IntPoint& e2top
 
 /****************** Deprecated functions *******************/
 
-void Slicer::containmentTreeConstruct(){
+void Slices::containmentTreeConstruct(){
     Clipper clpr;
 
-    for (int idx=0; idx<slices.size(); idx++){ // divide into parallel threads
-        Slice* slice = &(slices[idx]);
+    for (int idx=0; idx<this->size(); idx++){ // divide into parallel threads
+        Slice* slice = &((*this)[idx]);
         clpr.Clear();
         clpr.AddPaths(slice->outershell, ptSubject, true);
         clpr.Execute(ctUnion, slice->polytree);
