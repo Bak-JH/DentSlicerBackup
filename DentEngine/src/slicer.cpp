@@ -10,7 +10,7 @@ Slices Slicer::slice(Mesh* mesh){
     Slices slices;
     slices.mesh = mesh;
 
-    if (mesh == nullptr){
+    if (mesh == nullptr || mesh->faces.size() ==0){
         return slices;
     }
 

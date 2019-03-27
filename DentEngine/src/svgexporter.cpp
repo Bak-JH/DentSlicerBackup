@@ -4,10 +4,13 @@ int origin_x;
 int origin_y;
 int origin_z;
 
-QString SVGexporter::exportSVG(Slices contourLists, QString outfoldername){
+QString SVGexporter::exportSVG(Slices shellSlices, Slices supportSlices, Slices raftSlices, QString outfoldername){
     qDebug() << "export svg at "<< outfoldername;
     QDir dir(outfoldername);
     if (!dir.exists()) {
+        dir.mkpath(".");
+    } else {
+        dir.removeRecursively();
         dir.mkpath(".");
     }
 
@@ -15,7 +18,7 @@ QString SVGexporter::exportSVG(Slices contourLists, QString outfoldername){
     ofstream infofile(infofilename.toStdString().c_str(), ios::out);
     QJsonObject jsonObject;
     jsonObject["layer_height"] = round(scfg->layer_height*100)/100;
-    jsonObject["total_layer"] = int(contourLists.size());
+    jsonObject["total_layer"] = int(shellSlices.size());
     jsonObject["bed_curing_time"] = 15000; // depends on scfg->resin_type
     jsonObject["curing_time"] = 2100; // depends on scfg->resin_type
     jsonObject["mirror_rot_time"] = 2000;
@@ -35,36 +38,73 @@ QString SVGexporter::exportSVG(Slices contourLists, QString outfoldername){
     origin_z = scfg->origin.z()*scfg->resolution;
 
     int64_t area = 0;
+    int currentSlice_idx = 0;
 
-    for (int i=0; i<contourLists.size(); i++){
-        QString outfilename = outfoldername + "/" + QString::number(i) + ".svg";
+    for (int i=0; i<raftSlices.size(); i++){
+        QString outfilename = outfoldername + "/" + QString::number(currentSlice_idx) + ".svg";
 
         ofstream outfile(outfilename.toStdString().c_str(), ios::out);
 
         writeHeader(outfile);
         if (scfg->slicing_mode == "uniform")
-            writeGroupHeader(outfile, i, scfg->layer_height*(i+1));
+            writeGroupHeader(outfile, currentSlice_idx, scfg->layer_height*(currentSlice_idx+1));
         else
-            writeGroupHeader(outfile, i, scfg->layer_height*(i+1));
+            writeGroupHeader(outfile, currentSlice_idx, scfg->layer_height*(currentSlice_idx+1));
 
-        PolyTree slice_polytree = contourLists[i].polytree;
-        qDebug() << "slice polytree's child count : " << slice_polytree.ChildCount();
-        for (int j=0; j<slice_polytree.ChildCount(); j++){
-            parsePolyTreeAndWrite(slice_polytree.Childs[j], outfile);
+        PolyTree raftSlice_polytree = raftSlices[i].polytree;
+        for (int j=0; j<raftSlice_polytree.ChildCount(); j++){
+            parsePolyTreeAndWrite(raftSlice_polytree.Childs[j], outfile);
         }
 
         writeGroupFooter(outfile);
         writeFooter(outfile);
 
         outfile.close();
+
+        currentSlice_idx += 1;
     }
+
+    qDebug() << "Raft Slices : " << currentSlice_idx;
+
+    for (int i=0; i<shellSlices.size(); i++){
+        QString outfilename = outfoldername + "/" + QString::number(currentSlice_idx) + ".svg";
+
+        ofstream outfile(outfilename.toStdString().c_str(), ios::out);
+
+        writeHeader(outfile);
+        if (scfg->slicing_mode == "uniform")
+            writeGroupHeader(outfile, currentSlice_idx, scfg->layer_height*(currentSlice_idx+1));
+        else
+            writeGroupHeader(outfile, currentSlice_idx, scfg->layer_height*(currentSlice_idx+1));
+
+        PolyTree shellSlice_polytree = shellSlices[i].polytree;
+        qDebug() << "slice polytree's child count : " << shellSlice_polytree.ChildCount();
+        for (int j=0; j<shellSlice_polytree.ChildCount(); j++){
+            parsePolyTreeAndWrite(shellSlice_polytree.Childs[j], outfile);
+        }
+
+        // write support slices
+        if (supportSlices.size() > i){
+
+            for (int j=0; j<supportSlices[i].outershell.size(); j++){
+                writePolygon(outfile, supportSlices[i].outershell[j]);
+            }
+        }
+
+        writeGroupFooter(outfile);
+        writeFooter(outfile);
+
+        outfile.close();
+        currentSlice_idx += 1;
+    }
+
     //printf("slicing done\n");
-    int layer = contourLists.size();
+    int layer = shellSlices.size();
     int printing_time = layer*15/60;
 
-    float x = contourLists.mesh->x_max-contourLists.mesh->x_min;
-    float y = contourLists.mesh->y_max-contourLists.mesh->y_min;
-    float z = contourLists.mesh->z_max-contourLists.mesh->z_min;
+    float x = shellSlices.mesh->x_max-shellSlices.mesh->x_min;
+    float y = shellSlices.mesh->y_max-shellSlices.mesh->y_min;
+    float z = shellSlices.mesh->z_max-shellSlices.mesh->z_min;
 
     float volume = ((float)(area/pow(scfg->pixel_per_mm/scfg->contraction_ratio,2))/1000000)*scfg->layer_height;
     QString result_str;
@@ -74,6 +114,7 @@ QString SVGexporter::exportSVG(Slices contourLists, QString outfoldername){
     //exit(0);
     return result_str;
 }
+
 
 void SVGexporter::parsePolyTreeAndWrite(PolyNode* pn, std::ofstream& outfile){
     writePolygon(outfile, pn);
@@ -103,7 +144,6 @@ void SVGexporter::writePolygon(ofstream& outfile, PolyNode* contour){
     } else {
         outfile << "\" style=\"fill: #00000000\" />\n";
     }
-
 }
 
 void SVGexporter::writePolygon(ofstream& outfile, Path contour){
@@ -114,12 +154,7 @@ void SVGexporter::writePolygon(ofstream& outfile, Path contour){
         // just fit to origin
         //outfile << std::fixed << (float)point.X/scfg->resolution - scfg->origin.x() << "," << std::fixed << (float)point.Y/scfg->resolution - scfg->origin.y() << " ";
     }
-    if (Orientation(contour)){
-        outfile << "\" style=\"fill: white\" />\n";
-    } else {
-        outfile << "\" style=\"fill: #00000000\" />\n";
-    }
-
+    outfile << "\" style=\"fill: white\" />\n";
 }
 
 void SVGexporter:: writeGroupHeader(ofstream& outfile, int layer_idx, float z){
@@ -131,7 +166,7 @@ void SVGexporter:: writeGroupFooter(ofstream& outfile){
 }
 
 void SVGexporter::writeHeader(ofstream& outfile){
-    outfile << "<svg width='" << scfg->resolution_x << "' height='" << scfg->resolution_y << "' xmlns='http://www.w3.org/2000/svg' xmlns:contour='http://hix.co.kr' style='background-color: #00000000;'>\n";
+    outfile << "<svg width='" << scfg->resolution_x << "' height='" << scfg->resolution_y << "' xmlns='http://www.w3.org/2000/svg' xmlns:contour='http://hix.co.kr' style='background-color: #000000;'>\n";
 }
 
 void SVGexporter::writeFooter(ofstream& outfile){
