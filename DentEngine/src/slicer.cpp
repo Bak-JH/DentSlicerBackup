@@ -75,33 +75,6 @@ Slices Slicer::slice(Mesh* mesh){
     return slices;
 }
 
-Slices Slicer::mergeSlices(Slices shellslices, Slices supportslices, Slices raftslices){
-    Clipper clpr;
-
-    shellSlices = shellslices;
-    supportSlices = supportslices;
-    raftSlices = raftslices;
-
-    // append shellSlices to totalSlices
-    totalSlices.insert(totalSlices.begin(), shellSlices.begin(), shellSlices.end());
-
-
-    // merge supportSlices to totalSlices
-    for (int slice_idx = 0; slice_idx < supportSlices.size(); slice_idx++){
-        clpr.Clear();
-        clpr.AddPaths(totalSlices[slice_idx].outershell, ptSubject, true);
-        clpr.AddPaths(supportSlices[slice_idx].outershell, ptClip, true);
-        clpr.Execute(ctUnion, totalSlices[slice_idx].outershell, pftEvenOdd, pftPositive);
-    }
-
-    // append raftSlices to totalSlices
-    totalSlices.insert(totalSlices.begin(), raftSlices.begin(), raftSlices.end());
-
-    totalSlices.containmentTreeConstruct();
-    return totalSlices;
-}
-
-
 /****************** Mesh Slicing Step *******************/
 
 // slices mesh into segments

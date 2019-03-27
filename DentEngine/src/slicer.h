@@ -60,7 +60,6 @@ public:
 
     /****************** Entire Slicing Step *******************/
     Slices slice(Mesh* mesh);
-    Slices mergeSlices(Slices shellSlices, Slices supportSlices, Slices raftSlices);
 
     /****************** Mesh Slicing Step *******************/
     vector<Paths> meshSlice(Mesh* mesh); // totally k elements
