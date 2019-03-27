@@ -7,7 +7,7 @@ class GenerateRaft
 {
 public:
     GenerateRaft();
-    void generateRaft(GLModel* glmodel);
+    Mesh* generateRaft(Mesh* shellmesh);
 };
 
 #endif // GENERATERAFT_H

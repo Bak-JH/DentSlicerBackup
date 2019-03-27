@@ -5,5 +5,7 @@ GenerateRaft::GenerateRaft()
 
 }
 
-void GenerateRaft::generateRaft(GLModel* glmodel) {
+Mesh* GenerateRaft::generateRaft(Mesh* shellmesh) {
+    Mesh* raftmesh = new Mesh();
+    return raftmesh;
 }

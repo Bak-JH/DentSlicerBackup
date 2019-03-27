@@ -62,13 +62,12 @@ Slicer* SlicingEngine::slice(QVariant cfg, Mesh* shellMesh, Mesh* supportMesh, M
     Slices raftSlices = slicer->slice(raftMesh);
     qDebug() << "Raft Slicing Done\n";
     qmlManager->setProgress(0.8);
-    //Slices contourLists = slicer->mergeSlices(shellSlices, supportSlices, raftSlices);
     Slices contourLists = supportSlices;
     qmlManager->setProgress(0.9);
 
     // Export to SVG
     SVGexporter* exporter = new SVGexporter();
-    QString export_info = exporter->exportSVG(contourLists, filename+"_export");
+    QString export_info = exporter->exportSVG(shellSlices, supportSlices, raftSlices, filename+"_export");
 
     // 승환 100%
     qmlManager->setProgress(1);

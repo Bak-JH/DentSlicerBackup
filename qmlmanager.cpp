@@ -1993,25 +1993,25 @@ void QmlManager::runGroupFeature(int ftrType, QString state, double arg1, double
         qmlManager->openProgressPopUp();
 
         // merge selected models
-        Mesh* mergedMesh = ste->mergeSelectedModels();//ste->mergeModels(qmlManager->selectedModels);
-        GLModel* mergedModel =  new GLModel(mainWindow, models, mergedMesh, "temporary", false);
+        Mesh* mergedShellMesh = ste->mergeSelectedModels();//ste->mergeModels(qmlManager->selectedModels);
+        //GLModel* mergedModel = new GLModel(mainWindow, models, mergedMesh, "temporary", false);
 
+        qDebug() << "1111";
         // generate support
         GenerateSupport generatesupport;
-        generatesupport.generateSupport(mergedModel);
+        Mesh* mergedSupportMesh = generatesupport.generateSupport(mergedShellMesh);
 
+        qDebug() << "2222";
         // generate raft
         GenerateRaft generateraft;
-        generateraft.generateRaft(mergedModel);
+        Mesh* mergedRaftMesh = generateraft.generateRaft(mergedShellMesh);
 
+        qDebug() << "3333";
         // need to generate support, raft
-        Mesh* mergedShellMesh = mergedModel->mesh;
-        Mesh* mergedSupportMesh = mergedModel->supportMesh;
-        Mesh* mergedRaftMesh = mergedModel->raftMesh;
 
         //se->slice(data, mergedMesh, fileName);
         QFuture<Slicer*> future = QtConcurrent::run(se, &SlicingEngine::slice, data, mergedShellMesh, mergedSupportMesh, mergedRaftMesh, fileName);
-        deleteOneModelFile(mergedModel->ID);
+        //deleteOneModelFile(mergedModel->ID);
 
         //m_glmodel->futureWatcher.setFuture(future);
         break;
@@ -2318,7 +2318,8 @@ void QmlManager::setViewMode(int viewMode) {
     } else if (this->viewMode == VIEW_MODE_SUPPORT){
         QMetaObject::invokeMethod(qmlManager->boundedBox, "hideBox");
         GenerateSupport generatesupport;
-        generatesupport.generateSupport(selectedModels[0]);
+        selectedModels[0]->supportMesh = generatesupport.generateSupport(selectedModels[0]->mesh);
+        emit selectedModels[0]->_updateModelMesh(true);
     } else if (this->viewMode == VIEW_MODE_LAYER){
         qDebug() << "view mode layer called";
         QMetaObject::invokeMethod(qmlManager->boundedBox, "hideBox");
