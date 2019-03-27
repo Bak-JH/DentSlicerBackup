@@ -35,16 +35,16 @@ GenerateSupport::GenerateSupport()
 
 }
 
-void GenerateSupport::generateSupport(GLModel* glmodel) {
-    Mesh* mesh = glmodel->mesh;
+Mesh* GenerateSupport::generateSupport(Mesh* shellmesh) {
+    Mesh* mesh = shellmesh;
     // 하나의 face에 여러 overhangpoint가 들어가면 reserve 값도 바꿔주어야 함
-    overhangPoints.reserve((glmodel->mesh->vertices.size() + glmodel->mesh->faces.size())*2); //
-    supportPoints.reserve((glmodel->mesh->vertices.size() + glmodel->mesh->faces.size())*2); //
+    overhangPoints.reserve((mesh->vertices.size() + mesh->faces.size())*2); //
+    supportPoints.reserve((mesh->vertices.size() + mesh->faces.size())*2); //
     overhangDetect(mesh);
 
-    glmodel->supportMesh = new Mesh();
-    glmodel->supportMesh->faces.reserve(overhangPoints.size()*50); // overhangpoints * 2 * 24
-    glmodel->supportMesh->vertices.reserve(overhangPoints.size()*50); //
+    Mesh* supportMesh = new Mesh();
+    supportMesh->faces.reserve(overhangPoints.size()*50); // overhangpoints * 2 * 24
+    supportMesh->vertices.reserve(overhangPoints.size()*50); //
 
     vector<OverhangPoint_>::iterator iter = overhangPoints.begin();
     while (iter != overhangPoints.end() - 1 && iter != overhangPoints.end()) {
@@ -60,41 +60,42 @@ void GenerateSupport::generateSupport(GLModel* glmodel) {
         OverhangPoint_ meshIntersection2 = coneNmeshIntersection(mesh, *pt2);
         if ((pt1->position - meshIntersection1.position).length() < (pt1->position - intersection.position).length()
             || intersection.position == QVector3D(99999,99999,99999)) {
-            generateStem(glmodel->supportMesh, pt1, &meshIntersection1); // connect with mesh or bed
+            generateStem(supportMesh, pt1, &meshIntersection1); // connect with mesh or bed
             iter++;
             continue;
         }
         if ((pt2->position - meshIntersection2.position).length() < (pt2->position - intersection.position).length()) {
-            generateStem(glmodel->supportMesh, pt2, &meshIntersection2); // connect with mesh or bed
+            generateStem(supportMesh, pt2, &meshIntersection2); // connect with mesh or bed
             *iter = *pt2;
             *(iter+1) = *pt1;
             iter++;
             continue;
         }
         if (intersection.position == pt1->position) {
-            generateStem(glmodel->supportMesh, pt2, pt1);
+            generateStem(supportMesh, pt2, pt1);
             overhangPoints.push_back(intersection);
         } else if (intersection.position == pt2->position) {
-            generateStem(glmodel->supportMesh, pt1, pt2);
+            generateStem(supportMesh, pt1, pt2);
             overhangPoints.push_back(intersection);
         /*} else if (intersection.position == QVector3D(99999, 99999, 99999)) {
             generateStem(glmodel->supportMesh, pt1, &meshIntersection1);
             generateStem(glmodel->supportMesh, pt2, &meshIntersection2);*/
         } else {
-            generateBranch(glmodel->supportMesh, pt1, pt2, &intersection);
+            generateBranch(supportMesh, pt1, pt2, &intersection);
             overhangPoints.push_back(intersection);
         }
         iter += 2;
     }
     while (iter != overhangPoints.end()) { // iter가 2씩 증가
         OverhangPoint_ meshIntersection = coneNmeshIntersection(mesh, *iter);
-        generateStem(glmodel->supportMesh, &*iter, &meshIntersection);
+        generateStem(supportMesh, &*iter, &meshIntersection);
         iter++;
     }
-    glmodel->supportMesh->connectFaces();
+    supportMesh->connectFaces();
     // mergeSupportMesh(glmodel);
-    emit glmodel->_updateModelMesh(true);
+    //emit glmodel->_updateModelMesh(true);
     qDebug() << "generateSupport Done";
+    return supportMesh;
 }
 
 void GenerateSupport::overhangDetect(Mesh* mesh) {

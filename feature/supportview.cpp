@@ -132,7 +132,13 @@ void generateSupporter(Mesh* mesh, OverhangPoint *point, OverhangPoint *parent, 
     }
 }
 
-void generateRaft(Mesh* mesh, OverhangPoint *point) {
+/*void generateRaft(Mesh* mesh, Slices* slices){
+    for (int s_idx=0; s_idx<slices->size(); s_idx++){
+
+    }
+}*/
+
+/*void generateRaft(Mesh* mesh, OverhangPoint *point) {
     float bottom = (float)-3.0;//(point->position.Z - (int)point->height * 1000) / scfg->resolution;
     float radius = (float)scfg->raft_offset_radius / (float)scfg->resolution;
     QVector3D positionBottom = QVector3D((float)point->position.X / scfg->resolution,
@@ -146,7 +152,7 @@ void generateRaft(Mesh* mesh, OverhangPoint *point) {
             0);
     generateCustomCylinder(mesh, positionBottom, positionMiddle, radius, radius*2);
     generateCustomCylinder(mesh, positionMiddle, positionTop, radius*2, radius);
-}
+}*/
 
 void generateInfill(Mesh* mesh, Slice* slice) {
     for( auto iter = slice->outershell.begin() ; iter != slice->outershell.end() ; iter++ ) {
