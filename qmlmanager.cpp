@@ -18,6 +18,7 @@
 #include <QTextStream>
 #include <QFileDialog>
 #include <feature/generatesupport.h>
+#include <feature/generateraft.h>
 
 QmlManager::QmlManager(QObject *parent) : QObject(parent)
   ,layerViewFlags(LAYER_INFILL | LAYER_SUPPORTERS | LAYER_RAFT)
@@ -697,7 +698,7 @@ void QmlManager::updateBoundedBox(){
 
 void QmlManager::sendUpdateModelInfo(){
     qDebug() << "send update model info";
-    if (selectedModels.size() == 0 || selectedModels[0] == nullptr){
+    if (selectedModels.size() == 0 || selectedModels[0] == nullptr || this->viewMode == VIEW_MODE_LAYER || this->viewMode == VIEW_MODE_SUPPORT){
         qDebug() << "sendUpdateModelInfo() - no selected model";
 
         slicingData->setProperty("visible", false);
@@ -1991,11 +1992,26 @@ void QmlManager::runGroupFeature(int ftrType, QString state, double arg1, double
 
         qmlManager->openProgressPopUp();
 
-        Mesh* mergedMesh = ste->mergeSelectedModels();
-        qDebug() << "Merged Mesh" << mergedMesh->faces.size();
+        // merge selected models
+        Mesh* mergedShellMesh = ste->mergeSelectedModels();//ste->mergeModels(qmlManager->selectedModels);
+        //GLModel* mergedModel = new GLModel(mainWindow, models, mergedMesh, "temporary", false);
+
+        qDebug() << "1111";
+        // generate support
+        GenerateSupport generatesupport;
+        Mesh* mergedSupportMesh = generatesupport.generateSupport(mergedShellMesh);
+
+        qDebug() << "2222";
+        // generate raft
+        GenerateRaft generateraft;
+        Mesh* mergedRaftMesh = generateraft.generateRaft(mergedShellMesh);
+
+        qDebug() << "3333";
+        // need to generate support, raft
 
         //se->slice(data, mergedMesh, fileName);
-        QFuture<Slicer*> future = QtConcurrent::run(se, &SlicingEngine::slice, data, mergedMesh, fileName);
+        QFuture<Slicer*> future = QtConcurrent::run(se, &SlicingEngine::slice, data, mergedShellMesh, mergedSupportMesh, mergedRaftMesh, fileName);
+        //deleteOneModelFile(mergedModel->ID);
 
         //m_glmodel->futureWatcher.setFuture(future);
         break;
@@ -2299,10 +2315,17 @@ void QmlManager::setViewMode(int viewMode) {
     if( this->viewMode == VIEW_MODE_OBJECT ) {
         QMetaObject::invokeMethod(yesno_popup, "closePopUp");
         QMetaObject::invokeMethod(leftTabViewMode, "setObjectView");
-    } else {
+    } else if (this->viewMode == VIEW_MODE_SUPPORT){
         QMetaObject::invokeMethod(qmlManager->boundedBox, "hideBox");
         GenerateSupport generatesupport;
-        generatesupport.generateSupport(selectedModels[0]);
+        selectedModels[0]->supportMesh = generatesupport.generateSupport(selectedModels[0]->mesh);
+        emit selectedModels[0]->_updateModelMesh(true);
+    } else if (this->viewMode == VIEW_MODE_LAYER){
+        qDebug() << "view mode layer called";
+        QMetaObject::invokeMethod(qmlManager->boundedBox, "hideBox");
+    } else {
+        qDebug() << "view mode layer called";
+        QMetaObject::invokeMethod(qmlManager->boundedBox, "hideBox");
     }
 }
 

@@ -32,7 +32,7 @@ public:
     float minZ = 1;
     float minLength = 3;
 
-    void generateSupport(GLModel* glmodel);
+    Mesh* generateSupport(Mesh* shellMesh);
 
     void overhangDetect(Mesh* mesh);
     void pointOverhangDetect(Mesh* mesh);

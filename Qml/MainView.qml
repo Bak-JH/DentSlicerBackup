@@ -58,6 +58,7 @@ Entity {
 
         components: [systemTransform]
 
+        /* Grid Mesh */
 
         PhongMaterial{
             id : meshMaterial
@@ -85,9 +86,14 @@ Entity {
             components:[gridMesh, gridMeshTransform, meshMaterial]
         }
 
+        /* White plate and logo on bed */
+
         Plate {
             id: planeEntity
         }
+
+
+        /* Model */
 
         Model{
             id: meshEntity4

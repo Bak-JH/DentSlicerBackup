@@ -664,3 +664,4 @@ void modelcut::getSliderSignal(double value){
         planeEntity[i]->addComponent(planeTransform[i]);
     }
 }
+

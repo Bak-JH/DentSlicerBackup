@@ -185,7 +185,7 @@ Rectangle {
                                 qm.setViewMode(1);
                                 yesnoPopUp.runGroupFeature(uppertab.ftrExport, "", 0, 0, 0, cfg);
                                 //yesnoPopUp.runFeature(uppertab.ftrExport, cfg);
-                            } */ else if( popup_type == uppertab.ftrLayerViewMode ) {
+                            } */ else if( popup_type == uppertab.ftrLayerViewMode ){
                                 cfg["temporary"] = "true";
                                 qm.setViewMode(2);
                                 yesnoPopUp.runGroupFeature(uppertab.ftrExport, "", 0, 0, 0, cfg);
