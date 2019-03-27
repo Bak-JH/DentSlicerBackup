@@ -2347,6 +2347,9 @@ void GLModel::getLayerViewSliderSignal(double value) {
         qDebug() << filename;
         layerViewPlaneTextureLoader->setSource(QUrl::fromLocalFile(filename));//"C:\\Users\\User\\Desktop\\sliced\\11111_export\\100.svg"));
     }
+    //qDebug() << "layer view plane material texture format : " << layerViewPlaneTextureLoader->format();
+    //layerViewPlaneTextureLoader->setFormat(QAbstractTexture::RGBA32F);
+    //qDebug() << "layer view plane material texture format : " << layerViewPlaneTextureLoader->format();
     layerViewPlaneMaterial->setTexture(layerViewPlaneTextureLoader);
     float rotation_values[] = { // rotate by 90 deg
         0, 1, 0,
@@ -2881,7 +2884,7 @@ void GLModel::changeViewMode(int viewMode) {
 
         // generate layer view plane materials
         layerViewPlaneMaterial = new Qt3DExtras::QTextureMaterial();
-        //layerViewPlaneMaterial->setAlphaBlendingEnabled(true);
+        layerViewPlaneMaterial->setAlphaBlendingEnabled(false);
         layerViewPlaneEntity[0] = new Qt3DCore::QEntity(parentModel);
         layerViewPlane[0]=new Qt3DExtras::QPlaneMesh(this);
         layerViewPlane[0]->setHeight(scfg->bed_x);
@@ -2996,8 +2999,9 @@ void GLModel::generateLayerViewMaterial() {
 
     QBlendEquationArguments* blendState = new QBlendEquationArguments();
     QBlendEquation* blendEquation = new QBlendEquation();
-    blendState->setSourceRgb(QBlendEquationArguments::SourceAlpha);
-    blendState->setDestinationRgb(QBlendEquationArguments::OneMinusSourceAlpha);
+    blendState->setSourceRgba(QBlendEquationArguments::SourceAlpha);
+    blendState->setDestinationRgba(QBlendEquationArguments::OneMinusSourceAlpha);
+    //blendState->setBufferIndex(2);
     blendEquation->setBlendFunction(QBlendEquation::Add);
     gl3Pass->addRenderState(blendState);
     gl3Pass->addRenderState(blendEquation);
