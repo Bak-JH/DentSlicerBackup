@@ -51,7 +51,11 @@ SOURCES += main.cpp \
     utils/httpreq.cpp \
     feature/hollowshell.cpp \
     feature/supportview.cpp \
-    utils/updatechecker.cpp
+    utils/updatechecker.cpp \
+    utils/gridmesh.cpp \
+    utils/linemeshgeometry.cpp \
+    feature/generateraft.cpp \
+    feature/generatesupport.cpp
 
 
 RESOURCES += qml.qrc \
@@ -136,11 +140,15 @@ HEADERS += \
     feature/hollowshell.h \
     feature/supportview.h \
     utils/updatechecker.h \
-    feature/earcut.hpp
+    feature/earcut.hpp \
+    utils/gridmesh.h \
+    utils/linemeshgeometry.h \
+    feature/generateraft.h \
+    feature/generatesupport.h
 
 #LIBS += -lOpengl32
 
 DISTFILES += \
     icon-32.ico \
     DLPslicer.rc \
-    icon.ico
+    icon.ico \

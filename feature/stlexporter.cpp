@@ -40,6 +40,10 @@ Mesh* STLexporter::mergeSelectedModels() {
             mergedMesh->addFace(v1,v2,v3);
         }
 
+        faceNum += model->mesh->faces.size();
+        verNum += model->mesh->vertices.size();
+
+        if (faceNum % 100 == 0) qmlManager->setProgress((float)(0.1 + 0.3*(faceNum/totalFaceNum)));
 
 
 /*
@@ -97,6 +101,7 @@ void STLexporter::exportSTL(QString outfilename){
 
     size_t num = qmlManager->selectedModels.size();
     if (num > 1) mesh = mergeSelectedModels();
+    else mesh = qmlManager->selectedModels[0]->mesh;
 
     qDebug() << "export STL";
 

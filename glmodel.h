@@ -20,7 +20,6 @@
 #include "feature/autoorientation.h"
 #include "feature/meshrepair.h"
 #include "feature/autoarrange.h"
-#include "feature/stlexporter.h"
 #include "feature/extension.h"
 #include "feature/hollowshell.h"
 
@@ -113,6 +112,10 @@ public:
     Mesh* mesh;
     Mesh* lmesh;
     Mesh* rmesh;
+    QSphereMesh* dragMesh;
+
+    Mesh* supportMesh = nullptr;
+    Mesh* raftMesh = nullptr;
 
     // layer view
     Mesh* layerMesh;
@@ -124,6 +127,7 @@ public:
 
     bool appropriately_rotated=false;
     QPhongMaterial *m_meshMaterial;
+    //QMaterial *m_meshMaterial;
     QPhongAlphaMaterial *m_meshAlphaMaterial;
     QPerVertexColorMaterial *m_meshVertexMaterial;
     QMaterial *m_layerMaterial;
@@ -157,6 +161,16 @@ public:
     std::vector<QVector3D> cuttingPoints;
     vector<QEntity*> cuttingContourCylinders;
     Plane cuttingPlane;
+
+    // used for layer view
+    Qt3DExtras:: QPlaneMesh* layerViewPlane[1];
+    Qt3DCore::QEntity* layerViewPlaneEntity[1];
+    Qt3DCore::QTransform *layerViewPlaneTransform[1];
+    Qt3DRender::QTextureLoader* layerViewPlaneTextureLoader;
+    Qt3DExtras::QTextureMaterial* layerViewPlaneMaterial;
+    //Qt3DExtras::QPhongAlphaMaterial *layerViewPlaneMaterial = nullptr;
+    //QObjectPicker* planeObjectPicker[2];
+
 
     Qt3DExtras::QPlaneMesh* clipPlane[2];
     Qt3DCore::QEntity* planeEntity[2];
@@ -246,6 +260,7 @@ private:
     void clearVertices();
     void onTimerUpdate();
     Mesh* toSparse(Mesh* mesh);
+    void removeLayerViewComponents();
     void generateLayerViewMaterial();
 
     int cutMode = 1;
@@ -259,9 +274,12 @@ private:
     bool manualSupportActive = false;
     bool layerViewActive = false;
     bool supportViewActive = false;
+    bool scaleActive = false;
 
     bool isMoved = false;
     bool isReleased = true;
+
+    bool isFlatcutEdge = false;
 
     int viewMode = -1;
 

@@ -9,8 +9,8 @@ void generateCustomCylinder(Mesh* mesh, const QVector3D& position, const QVector
 
     vector<QVector3D> top;
     vector<QVector3D> bottom;
-    for( float i = 0.0f ; i <= 360.0f ; i += 10.0f ) {
-        float t = i / 180.0f * M_PI;
+    for( double i = 0.0 ; i <= 360.0 ; i += 10.0 ) {
+        double t = i / 180.0 * M_PI;
         top.push_back(QVector3D(qCos(t) * radiusTop + positionTop.x(), qSin(t) * radiusTop + positionTop.y(), positionTop.z()));
         bottom.push_back(QVector3D(qCos(t) * radiusBottom + position.x(), qSin(t) * radiusBottom + position.y(), position.z()));
     }
@@ -34,7 +34,6 @@ void generateCustomCylinder(Mesh* mesh, const QVector3D& position, const QVector
     }
 
     // pillar
-    qDebug() << "pillar";
     for( auto iterTop = top.begin(), iterBottom = bottom.begin(); iterTop != top.end() ; iterTop++, iterBottom++ ) {
         if( iterTop != top.begin() ) {
             mesh->addFace(*iterTop, *lastTop, *iterBottom);
@@ -82,12 +81,12 @@ void generateSupporter(Mesh* mesh, OverhangPoint *point, OverhangPoint *parent, 
 
     float radius = (float)point->radius / scfg->resolution;
     QVector3D position = QVector3D((float)point->position.X / scfg->resolution,
-            (float)point->position.Y / scfg->resolution,
+                                   (float)point->position.Y / scfg->resolution,
                                    support_z_min);
             //(float)(point->position.Z - (int)point->height * 1000) / scfg->resolution);
     QVector3D positionTop = QVector3D((float)point->position.X / scfg->resolution,
-            (float)point->position.Y / scfg->resolution,
-            (float)point->position.Z / scfg->resolution);
+                                      (float)point->position.Y / scfg->resolution,
+                                      (float)point->position.Z / scfg->resolution);
 
     if( parent != nullptr ) {
         if( parent->position.Z > point->position.Z ) {
@@ -112,7 +111,7 @@ void generateSupporter(Mesh* mesh, OverhangPoint *point, OverhangPoint *parent, 
     positionTop = QVector3D(positionTop.x(),positionTop.y(), max(positionTop.z()-coneHeight, support_z_min));
 
     generateCylinder(mesh, position, positionTop, radius);
-    generateCustomCylinder(mesh, positionTop, positionConeTop, 0.1, radius);
+    generateCustomCylinder(mesh, positionTop, positionConeTop, 0.1f, radius);
 
 
     if( point->target_branching_overhang_point != nullptr ) {
@@ -133,7 +132,13 @@ void generateSupporter(Mesh* mesh, OverhangPoint *point, OverhangPoint *parent, 
     }
 }
 
-void generateRaft(Mesh* mesh, OverhangPoint *point) {
+/*void generateRaft(Mesh* mesh, Slices* slices){
+    for (int s_idx=0; s_idx<slices->size(); s_idx++){
+
+    }
+}*/
+
+/*void generateRaft(Mesh* mesh, OverhangPoint *point) {
     float bottom = (float)-3.0;//(point->position.Z - (int)point->height * 1000) / scfg->resolution;
     float radius = (float)scfg->raft_offset_radius / (float)scfg->resolution;
     QVector3D positionBottom = QVector3D((float)point->position.X / scfg->resolution,
@@ -147,7 +152,7 @@ void generateRaft(Mesh* mesh, OverhangPoint *point) {
             0);
     generateCustomCylinder(mesh, positionBottom, positionMiddle, radius, radius*2);
     generateCustomCylinder(mesh, positionMiddle, positionTop, radius*2, radius);
-}
+}*/
 
 void generateInfill(Mesh* mesh, Slice* slice) {
     for( auto iter = slice->outershell.begin() ; iter != slice->outershell.end() ; iter++ ) {

@@ -197,6 +197,10 @@ public:
     Q_INVOKABLE QVector3D getSelectedSize();
     Q_INVOKABLE int getselectedModelID();
     Q_INVOKABLE int getSelectedModelsSize();
+    Q_INVOKABLE float getBedXSize();
+    Q_INVOKABLE float getBedYSize();
+    Q_INVOKABLE void setBedXSize(float x);
+    Q_INVOKABLE void setBedYSize(float y);
     Q_INVOKABLE bool getGroupSelectionActive();
     Q_INVOKABLE void fixMesh();
     Q_INVOKABLE void disableObjectPickers();
@@ -214,7 +218,8 @@ public:
     Q_INVOKABLE void setViewMode(int viewMode);
     Q_INVOKABLE int getViewMode();
     Q_INVOKABLE void sendUpdateModelInfo();
-    Q_INVOKABLE void backgroundClickCheck();
+    Q_INVOKABLE void backgroundClicked();
+    Q_INVOKABLE void setModelClickTrue();
     Q_INVOKABLE void setModelClickFalse();
     Q_INVOKABLE void deleteList(int ID);
     Q_INVOKABLE void deleteSelectedModels();
@@ -261,7 +266,7 @@ public slots:
     void modelMoveF(int,float);
     void modelMoveByNumber(int axis, int, int);
     void modelMoveInit();
-    void modelMoveDone(int);
+    void modelMoveDone();
     void totalMoveDone();
     void modelRotateInit();
     void modelRotateDone(int);
