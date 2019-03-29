@@ -59,8 +59,8 @@ GLModel::GLModel(QObject* mainWindow, QNode *parent, Mesh* loadMesh, QString fna
         addComponent(m_transform);
 
         /// This block is for shadowModel testing ///
-        /*
-        m_meshMaterial = new QPhongMaterial();
+
+        /*m_meshMaterial = new QPhongMaterial();
         m_meshAlphaMaterial = new QPhongAlphaMaterial();
         m_layerMaterial = new QPhongMaterial();
         m_meshMaterial->setAmbient(QColor(255,0,0));
@@ -68,8 +68,7 @@ GLModel::GLModel(QObject* mainWindow, QNode *parent, Mesh* loadMesh, QString fna
         m_meshMaterial->setSpecular(QColor(182,237,246));
         m_meshMaterial->setShininess(0.0f);
 
-        addComponent(m_meshMaterial);
-        */
+        addComponent(m_meshMaterial);*/
 
         addMouseHandlers();
 
@@ -528,25 +527,29 @@ void GLModel::updateModelMesh(bool shadowUpdate){
         */
         break;
     case VIEW_MODE_LAYER:
+        qDebug() << "in the glmodel view mode layer" << qmlManager->getLayerViewFlags() << " " << (qmlManager->getLayerViewFlags() & LAYER_SUPPORTERS);
         if( layerMesh != nullptr ) {
-            int faces = layerMesh->faces.size() +
-                    (qmlManager->getLayerViewFlags() & LAYER_INFILL != 0 ? layerInfillMesh->faces.size() : 0) +
-                    (qmlManager->getLayerViewFlags() & LAYER_SUPPORTERS != 0 ? layerSupportMesh->faces.size() : 0) +
-                    (qmlManager->getLayerViewFlags() & LAYER_RAFT != 0 ? layerRaftMesh->faces.size() : 0);
+            int faces = layerMesh->faces.size()*2 +
+                    (qmlManager->getLayerViewFlags() & LAYER_INFILL != 0 ? layerInfillMesh->faces.size()*2 : 0) +
+                    (qmlManager->getLayerViewFlags() & LAYER_SUPPORTERS != 0 ? supportMesh->faces.size()*2 : 0) +
+                    (qmlManager->getLayerViewFlags() & LAYER_RAFT != 0 ? layerRaftMesh->faces.size()*2 : 0);
             initialize(faces);
             addVertices(layerMesh, false);
             if( qmlManager->getLayerViewFlags() & LAYER_INFILL ) {
                 addVertices(layerInfillMesh, false, QVector3D(1.0f, 1.0f, 0.0f));
             }
             if( qmlManager->getLayerViewFlags() & LAYER_SUPPORTERS ) {
-                addVertices(layerSupportMesh, false);
+                addVertices(supportMesh, false);
             }
             if( qmlManager->getLayerViewFlags() & LAYER_RAFT) {
                 addVertices(layerRaftMesh, false, QVector3D(0.0f, 0.0f, 0.0f));
             }
         } else {
-            initialize(mesh->faces.size());
+            int faces = mesh->faces.size()*2 + ((supportMesh!=nullptr) ? supportMesh->faces.size()*2:0);
+            initialize(faces);
             addVertices(mesh, false);
+            if (supportMesh != nullptr)
+                addVertices(supportMesh, false);
         }
         break;
     }
@@ -680,6 +683,12 @@ void featureThread::run(){
             }
         case ftrExport: // support view & layer view & export // on export, temporary variable = true;
             {
+
+                if (m_glmodel->updateLock){
+                    qDebug() << "still updating";
+                    return;
+                }
+                m_glmodel->updateLock = true;
                 // look for data if it is temporary
                 QVariantMap config = data.toMap();
                 bool isTemporary = false;
@@ -709,6 +718,7 @@ void featureThread::run(){
                 qmlManager->openProgressPopUp();
                 QFuture<Slicer*> future = QtConcurrent::run(se, &SlicingEngine::slice, data, m_glmodel->mesh, m_glmodel->supportMesh, m_glmodel->raftMesh, fileName + "/" + m_glmodel->filename.split("/").last() );
                 m_glmodel->futureWatcher.setFuture(future);
+                m_glmodel->updateLock = false;
                 break;
             }
         case ftrMove:
@@ -1225,6 +1235,8 @@ void GLModel::handlePickerClicked(QPickEvent *pick)
             qmlManager->fixMesh();
             qDebug() << "dragMesh removed";
         }
+        //removeComponent(dragMesh);
+
         qmlManager->modelMoveDone();
         isMoved = false;
         return;
@@ -1236,8 +1248,9 @@ void GLModel::handlePickerClicked(QPickEvent *pick)
     if (qmlManager->yesno_popup->property("isFlawOpen").toBool())
         return;
 
-    if (qmlManager->selectedModels[0] != nullptr && (pick->button() & Qt::RightButton)){ // when right button clicked
+    if (qmlManager->selectedModels[0] != nullptr && !(pick->button() & Qt::LeftButton)){ // when right button clicked
         if (qmlManager->selectedModels[0]->ID == parentModel->ID){
+            qDebug() << "mttab alive 1";
             QMetaObject::invokeMethod(qmlManager->mttab, "tabOnOff");
             m_objectPicker->setEnabled(false);
             return;
@@ -1251,8 +1264,10 @@ void GLModel::handlePickerClicked(QPickEvent *pick)
         emit modelSelected(parentModel->ID);
 
     qDebug() << "model selected emit" << pick->position() << parentModel->ID;
+    qDebug() << "pick button : " << !(pick->button() & Qt::LeftButton) << pick->button();
 
-    if(pick->button() & Qt::RightButton){
+    if (!(pick->button() & Qt::LeftButton)){
+        qDebug() << "mttab alive";
         QMetaObject::invokeMethod(qmlManager->mttab, "tabOnOff");
     }
 
@@ -2151,11 +2166,11 @@ GLModel::~GLModel(){
 }
 
 void GLModel::engoo(){
-    m_meshMaterial->setAmbient(QColor(10,200,10));
+    //m_meshMaterial->setAmbient(QColor(10,200,10));
 }
 
 void GLModel::exgoo(){
-    m_meshMaterial->setAmbient(QColor(81,200,242));
+    //m_meshMaterial->setAmbient(QColor(81,200,242));
     qDebug() << "exgoo";
 }
 
@@ -2190,7 +2205,6 @@ void GLModel::mgoo(Qt3DRender::QPickEvent* v)
     if (!modelSelected){
         m_objectPicker->setDragEnabled(false);
         isReleased = true;
-        qmlManager->modelClicked = false;
         return;
     }
 
@@ -2202,6 +2216,7 @@ void GLModel::mgoo(Qt3DRender::QPickEvent* v)
         qmlManager->hideMoveArrow();
         qDebug() << "hiding move arrow";
         // for mgoo out problem
+
         float x_diff = parentModel->mesh->x_max - parentModel->mesh->x_min;
         float y_diff = parentModel->mesh->y_max - parentModel->mesh->y_min;
         float z_diff = parentModel->mesh->z_max - parentModel->mesh->z_min;
@@ -2209,13 +2224,15 @@ void GLModel::mgoo(Qt3DRender::QPickEvent* v)
         biggest = z_diff>biggest? z_diff : biggest;
         float scale_val = biggest > 50.0f ? 1.0f : 100.0f/biggest;
         m_transform->setScale(scale_val);
-        if(components().size() < 5)
-        {
+
+        if (components().size() < 5){
+            //removeComponent(dragMesh);
             dragMesh->setRadius(biggest);
             addComponent(dragMesh);
-            qDebug() << "COMPONENTS(A): " << components();
-            qDebug() << "dragMesh added";
+            //qDebug() << "COMPONENTS(A): " << components();
+            //qDebug() << "dragMesh added";
         }
+
         isMoved = true;
     }
 
@@ -2242,7 +2259,6 @@ void GLModel::mgoo(Qt3DRender::QPickEvent* v)
 
 void GLModel::pgoo(Qt3DRender::QPickEvent* v){
     qDebug() << "pgoo";
-    qmlManager->modelClicked = true;
     if(v->buttons()>1) // pass if click with right mouse
         return;
 
@@ -2252,14 +2268,14 @@ void GLModel::pgoo(Qt3DRender::QPickEvent* v){
         isReleased = false;
 
     qDebug() << "Pressed   " << v->position() << m_transform->translation();
-    qmlManager->lastModelSelected();
+    //qmlManager->lastModelSelected();
 
     if(qmlManager->selectedModels[0] != nullptr) {
-    m_objectPicker->setDragEnabled(true);
+        m_objectPicker->setDragEnabled(true);
 
-    lastpoint=v->localIntersection();
-    prevPoint = (QVector2D) v->position();
-    qDebug() << "Dragged";
+        lastpoint=v->localIntersection();
+        prevPoint = (QVector2D) v->position();
+        qDebug() << "Dragged";
     }
 }
 
@@ -2347,6 +2363,10 @@ void GLModel::getLayerViewSliderSignal(double value) {
         qDebug() << filename;
         layerViewPlaneTextureLoader->setSource(QUrl::fromLocalFile(filename));//"C:\\Users\\User\\Desktop\\sliced\\11111_export\\100.svg"));
     }
+    //qDebug() << "layer view plane material texture format : " << layerViewPlaneTextureLoader->format();
+    //layerViewPlaneTextureLoader->setFormat(QAbstractTexture::RGBA32F);
+    //qDebug() << "layer view plane material texture format : " << layerViewPlaneTextureLoader->format();
+
     layerViewPlaneMaterial->setTexture(layerViewPlaneTextureLoader);
     float rotation_values[] = { // rotate by 90 deg
         0, 1, 0,
@@ -2881,7 +2901,7 @@ void GLModel::changeViewMode(int viewMode) {
 
         // generate layer view plane materials
         layerViewPlaneMaterial = new Qt3DExtras::QTextureMaterial();
-        //layerViewPlaneMaterial->setAlphaBlendingEnabled(true);
+        layerViewPlaneMaterial->setAlphaBlendingEnabled(false);
         layerViewPlaneEntity[0] = new Qt3DCore::QEntity(parentModel);
         layerViewPlane[0]=new Qt3DExtras::QPlaneMesh(this);
         layerViewPlane[0]->setHeight(scfg->bed_x);
@@ -2893,6 +2913,7 @@ void GLModel::changeViewMode(int viewMode) {
         layerViewPlaneEntity[0]->addComponent(layerViewPlane[0]);
         layerViewPlaneEntity[0]->addComponent(layerViewPlaneTransform[0]); //jj
         layerViewPlaneEntity[0]->addComponent(layerViewPlaneMaterial);
+        getLayerViewSliderSignal(1);
 
         removeComponent(m_meshMaterial);
         break;
@@ -2996,8 +3017,9 @@ void GLModel::generateLayerViewMaterial() {
 
     QBlendEquationArguments* blendState = new QBlendEquationArguments();
     QBlendEquation* blendEquation = new QBlendEquation();
-    blendState->setSourceRgb(QBlendEquationArguments::SourceAlpha);
-    blendState->setDestinationRgb(QBlendEquationArguments::OneMinusSourceAlpha);
+    blendState->setSourceRgba(QBlendEquationArguments::SourceAlpha);
+    blendState->setDestinationRgba(QBlendEquationArguments::OneMinusSourceAlpha);
+    //blendState->setBufferIndex(2);
     blendEquation->setBlendFunction(QBlendEquation::Add);
     gl3Pass->addRenderState(blendState);
     gl3Pass->addRenderState(blendEquation);
