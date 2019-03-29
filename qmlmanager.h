@@ -161,7 +161,6 @@ public:
     bool rotateActive = false;
     bool orientationActive = false;
     bool freecutActive = false;
-    bool modelClicked = false;
 
 
     QString groupFunctionState;
@@ -211,6 +210,7 @@ public:
     Q_INVOKABLE bool isSelected();
     Q_INVOKABLE void selectPart(int ID);
     Q_INVOKABLE void unselectPart(int ID);
+    Q_INVOKABLE void unselectAll();
     Q_INVOKABLE void modelVisible(int ID, bool isVisible);
     Q_INVOKABLE void doDelete();
     Q_INVOKABLE void doDeletebyID(int ID);
@@ -219,8 +219,6 @@ public:
     Q_INVOKABLE int getViewMode();
     Q_INVOKABLE void sendUpdateModelInfo();
     Q_INVOKABLE void backgroundClicked();
-    Q_INVOKABLE void setModelClickTrue();
-    Q_INVOKABLE void setModelClickFalse();
     Q_INVOKABLE void deleteList(int ID);
     Q_INVOKABLE void deleteSelectedModels();
 

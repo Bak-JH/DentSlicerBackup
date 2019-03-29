@@ -39,6 +39,7 @@ void main()
 
         fragColor = vec4( amb + diff, 1 ) * fs_in.color + vec4( spec, 1 );
         fragColor.a = fs_in.color.a;
+        fragColor = vec4(0.0, 0.0, 0.0, 0.0);
     }
 
 }
