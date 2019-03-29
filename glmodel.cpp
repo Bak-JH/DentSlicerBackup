@@ -2366,6 +2366,7 @@ void GLModel::getLayerViewSliderSignal(double value) {
     //qDebug() << "layer view plane material texture format : " << layerViewPlaneTextureLoader->format();
     //layerViewPlaneTextureLoader->setFormat(QAbstractTexture::RGBA32F);
     //qDebug() << "layer view plane material texture format : " << layerViewPlaneTextureLoader->format();
+
     layerViewPlaneMaterial->setTexture(layerViewPlaneTextureLoader);
     float rotation_values[] = { // rotate by 90 deg
         0, 1, 0,
