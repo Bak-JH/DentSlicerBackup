@@ -798,56 +798,9 @@ GLModel* QmlManager::findGLModelByName(QString filename){
     return NULL;
 }
 
-void QmlManager::setModelClickTrue(){
-    modelClicked = true;
-}
-
-void QmlManager::setModelClickFalse(){
-    modelClicked = false;
-}
-
 void QmlManager::backgroundClicked(){
-    if(!modelClicked){
-        if(boundedBox->isEnabled()){
-            for(GLModel* curModel : selectedModels){
-                unselectPart(curModel->ID);
-            }
-        }
-    }
-
-    /*
-    return;
-    qDebug() << "bcc 0";
-    if(selectedModels.size() == 1 && selectedModels[0] == nullptr)
-        return;
-    qDebug() << "bcc 0.5";
-    if(!selectedModels[0]->modelSelectChangable())
-        return;
-
-    qDebug() << "bcc 1";
-
-    if(!modelClicked){ // backgroundclicked
-        qDebug() << "bcc 2           " << selectedModels.size() << selectedModels[0];
-        int temp = selectedModels.size();
-        for(int i=0; i<temp; i++)
-        {
-            qDebug() << "bcc 3           "  << selectedModels[0];
-            if(selectedModels[0] != nullptr){
-                qDebug() << "bcc 4";
-                modelSelected(selectedModels[0]->ID);
-            }
-        }
-
-        while(selectedModels[0] != nullptr){
-            modelSelected(selectedModels[0]->ID);
-            qDebug() << selectedModels[0];
-
-        }
-
-
-    }
-    modelClicked = false;
-    */
+    qDebug() << "background clicked";
+    unselectAll();
 }
 
 bool QmlManager::multipleModelSelected(int ID){
@@ -1295,6 +1248,21 @@ void QmlManager::unselectPart(int ID){
     QMetaObject::invokeMethod(leftTabViewMode, "setEnable", Q_ARG(QVariant, false));
     //QMetaObject::invokeMethod(boundedBox, "hideBox"); // Bounded Box
     sendUpdateModelInfo();
+}
+
+void QmlManager::unselectAll(){
+    for(GLModel* curModel : selectedModels){
+        if (curModel != nullptr){
+            unselectPart(curModel->ID);
+            //QMetaObject::invokeMethod(partList, "unselectPartByModel", Q_ARG(QVariant, curModel->ID));
+        }
+    }
+    hideMoveArrow();
+    hideRotateSphere();
+    QMetaObject::invokeMethod(qmlManager->mttab, "hideTab");
+    QMetaObject::invokeMethod(boxUpperTab, "all_off");
+    QMetaObject::invokeMethod(boundedBox, "hideBox");
+    QMetaObject::invokeMethod(leftTabViewMode, "setObjectView");
 }
 
 bool QmlManager::isSelected(){
@@ -2273,6 +2241,7 @@ void QmlManager::layerSupportersButtonChanged(bool checked){
     }
 
     if( selectedModels[0] != nullptr ) {
+        qDebug() << "calling updatemodelmesh ";
         emit selectedModels[0]->_updateModelMesh(true);
     }
 }
@@ -2323,6 +2292,10 @@ void QmlManager::setViewMode(int viewMode) {
     } else if (this->viewMode == VIEW_MODE_LAYER){
         qDebug() << "view mode layer called";
         QMetaObject::invokeMethod(qmlManager->boundedBox, "hideBox");
+        GenerateSupport generatesupport;
+        selectedModels[0]->supportMesh = generatesupport.generateSupport(selectedModels[0]->mesh);
+        qDebug() << "generated support";
+        emit selectedModels[0]->_updateModelMesh(true);
     } else {
         qDebug() << "view mode layer called";
         QMetaObject::invokeMethod(qmlManager->boundedBox, "hideBox");

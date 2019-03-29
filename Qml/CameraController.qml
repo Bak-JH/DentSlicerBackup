@@ -30,7 +30,7 @@
 import Qt3D.Core 2.0
 import Qt3D.Input 2.0
 import Qt3D.Logic 2.0
-import Qt3D.Render 2.0
+import Qt3D.Render 2.11
 
 Entity {
     id: root
@@ -116,23 +116,7 @@ Entity {
         }
     ]
 
-    MouseHandler{
-        id : mouseHandler
-        sourceDevice: mouse
 
-        onPressed: {
-            if(mouse.button ===1){ //left click
-                qm.setModelClickFalse();
-            }
-
-        }
-
-        onReleased: {
-            if(mouse.button ===1){ //left click
-                qm.backgroundClicked();
-            }
-        }
-    }
 
 
     /***************************************** Mouse Wheel Move *****************************************/
