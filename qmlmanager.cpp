@@ -1251,6 +1251,7 @@ void QmlManager::unselectPart(int ID){
 }
 
 void QmlManager::unselectAll(){
+    setViewMode(VIEW_MODE_OBJECT);
     for(GLModel* curModel : selectedModels){
         if (curModel != nullptr){
             unselectPart(curModel->ID);
@@ -1262,7 +1263,6 @@ void QmlManager::unselectAll(){
     QMetaObject::invokeMethod(qmlManager->mttab, "hideTab");
     QMetaObject::invokeMethod(boxUpperTab, "all_off");
     QMetaObject::invokeMethod(boundedBox, "hideBox");
-    QMetaObject::invokeMethod(leftTabViewMode, "setObjectView");
 }
 
 bool QmlManager::isSelected(){

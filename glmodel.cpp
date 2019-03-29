@@ -7,7 +7,7 @@
 #include "qmlmanager.h"
 #include "feature/text3dgeometrygenerator.h"
 #include "feature/shelloffset.h"
-#include "feature/supportview.h"
+//#include "feature/supportview.h"
 #include "feature/stlexporter.h"
 #include <QtConcurrent/QtConcurrent>
 #include <QFuture>
@@ -2727,12 +2727,12 @@ void GLModel::generateManualSupport(){
     QVector3D t = m_transform->translation();
     t.setZ(mesh->z_min+scfg->raft_thickness);
     QVector3D targetPosition = mesh->idx2MV(targetMeshFace->mesh_vertex[0]).position- t;
-    OverhangPoint* targetOverhangPosition = new OverhangPoint(targetPosition.x()*scfg->resolution,
+    /*OverhangPoint* targetOverhangPosition = new OverhangPoint(targetPosition.x()*scfg->resolution,
                                                               targetPosition.y()*scfg->resolution,
                                                               targetPosition.z()*scfg->resolution,
                                                               scfg->default_support_radius);
 
-    generateSupporter(layerSupportMesh, targetOverhangPosition, nullptr, nullptr, layerSupportMesh->z_min);
+    generateSupporter(layerSupportMesh, targetOverhangPosition, nullptr, nullptr, layerSupportMesh->z_min);*/
     targetMeshFace = NULL;
     emit _updateModelMesh(true);
 }
