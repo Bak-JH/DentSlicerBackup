@@ -3,9 +3,8 @@
 #include "polyclipping/clipper/clipper.hpp"
 #include "configuration.h"
 #include "mesh.h"
-#include "support.h"
-#include "infill.h"
-#include "raft.h"
+//#include "support.h"
+//#include "infill.h"
 #include <list>
 #include <QThread>
 #include <QDebug>
