@@ -4,28 +4,28 @@
 #include "DentEngine/src/configuration.h"
 #include <QtMath>
 
-OverhangPoint_::OverhangPoint_()
+OverhangPoint::OverhangPoint()
 {
     position = QVector3D(99999, 99999, 99999);
 }
 
-OverhangPoint_::OverhangPoint_(QVector3D point)
+OverhangPoint::OverhangPoint(QVector3D point)
 {
     position = point;
 }
 
-OverhangPoint_::OverhangPoint_(QVector3D point, bool top) {
+OverhangPoint::OverhangPoint(QVector3D point, bool top) {
     position = point;
     topPoint = top;
 }
 
-OverhangPoint_::OverhangPoint_(QVector3D point, bool meshInt, bool supportInt) {
+OverhangPoint::OverhangPoint(QVector3D point, bool meshInt, bool supportInt) {
     position = point;
     meshInterPoint = meshInt;
     supportInterPoint = supportInt;
 }
 
-OverhangPoint_::OverhangPoint_(QVector3D point, float r) {
+OverhangPoint::OverhangPoint(QVector3D point, float r) {
     position = point;
     radius = r;
 }
@@ -46,18 +46,18 @@ Mesh* GenerateSupport::generateSupport(Mesh* shellmesh) {
     supportMesh->faces.reserve(overhangPoints.size()*50); // overhangpoints * 2 * 24
     supportMesh->vertices.reserve(overhangPoints.size()*50); //
 
-    vector<OverhangPoint_>::iterator iter = overhangPoints.begin();
+    vector<OverhangPoint>::iterator iter = overhangPoints.begin();
     while (iter != overhangPoints.end() - 1 && iter != overhangPoints.end()) {
-        OverhangPoint_ *pt1 = &*iter;
-        OverhangPoint_ *pt2 = &*(iter+1);
+        OverhangPoint *pt1 = &*iter;
+        OverhangPoint *pt2 = &*(iter+1);
         /*while (pt1->topPoint && pt2->topPoint && iter != overhangPoints.end() - 1
                && (pt1->position - pt2->position).length() < 2) { // 2 -> variable
             iter++;
             pt2 = &*(iter+1);
         }*/ // sorting algorithm
-        OverhangPoint_ intersection = coneNconeIntersection(mesh, *pt1, *pt2);
-        OverhangPoint_ meshIntersection1 = coneNmeshIntersection(mesh, *pt1);
-        OverhangPoint_ meshIntersection2 = coneNmeshIntersection(mesh, *pt2);
+        OverhangPoint intersection = coneNconeIntersection(mesh, *pt1, *pt2);
+        OverhangPoint meshIntersection1 = coneNmeshIntersection(mesh, *pt1);
+        OverhangPoint meshIntersection2 = coneNmeshIntersection(mesh, *pt2);
         if ((pt1->position - meshIntersection1.position).length() < (pt1->position - intersection.position).length()
             || intersection.position == QVector3D(99999,99999,99999)) {
             generateStem(supportMesh, pt1, &meshIntersection1); // connect with mesh or bed
@@ -87,7 +87,7 @@ Mesh* GenerateSupport::generateSupport(Mesh* shellmesh) {
         iter += 2;
     }
     while (iter != overhangPoints.end()) { // iter가 2씩 증가
-        OverhangPoint_ meshIntersection = coneNmeshIntersection(mesh, *iter);
+        OverhangPoint meshIntersection = coneNmeshIntersection(mesh, *iter);
         generateStem(supportMesh, &*iter, &meshIntersection);
         iter++;
     }
@@ -133,7 +133,7 @@ void GenerateSupport::pointOverhangDetect(Mesh* mesh) {
 
     // MeshVertex to QVector3D
     for (size_t i = 0; i < pointOverhang.size(); i++) {
-        overhangPoints.push_back(OverhangPoint_(pointOverhang[i].position, true));
+        overhangPoints.push_back(OverhangPoint(pointOverhang[i].position, true));
         //qDebug() << "pointOverhang" << pointOverhang[i].position;
     }
 
@@ -171,7 +171,7 @@ void GenerateSupport::faceOverhangDetect(Mesh* mesh) {
             }
         }
         if ((overhangPoint.z() - mesh->z_min) >= minZ && !close) //
-            overhangPoints.push_back(OverhangPoint_(overhangPoint, true));
+            overhangPoints.push_back(OverhangPoint(overhangPoint, true));
         //qDebug() << "faceOverhang" << overhangPoint;
     }
 }
@@ -181,8 +181,8 @@ void GenerateSupport::edgeOverhangDetect(Mesh* mesh) {
 }
 
 void GenerateSupport::sortOverhangPoints() {
-    OverhangPoint_ current;
-    OverhangPoint_ next;
+    OverhangPoint current;
+    OverhangPoint next;
     size_t idx;
     for (size_t i = 1; i < overhangPoints.size() - 1; i++) {
         current = overhangPoints[i-1];
@@ -199,7 +199,7 @@ void GenerateSupport::sortOverhangPoints() {
     }
 }
 
-OverhangPoint_ GenerateSupport::coneNconeIntersection(Mesh* mesh, OverhangPoint_ coneApex1, OverhangPoint_ coneApex2) {
+OverhangPoint GenerateSupport::coneNconeIntersection(Mesh* mesh, OverhangPoint coneApex1, OverhangPoint coneApex2) {
     // qDebug() << "coneNconeIntersection" << coneApex1.position << coneApex2.position;
     float x1 = coneApex1.position.x();
     float y1 = coneApex1.position.y();
@@ -231,7 +231,7 @@ OverhangPoint_ GenerateSupport::coneNconeIntersection(Mesh* mesh, OverhangPoint_
     }
 }
 
-OverhangPoint_ GenerateSupport::coneNmeshIntersection(Mesh *mesh, OverhangPoint_ coneApex) {
+OverhangPoint GenerateSupport::coneNmeshIntersection(Mesh *mesh, OverhangPoint coneApex) {
     // qDebug() << "coneNMeshIntersection";
     QVector3D nearest = QVector3D(99999, 99999, 99999);
     bool meshInt = false;
@@ -277,7 +277,7 @@ OverhangPoint_ GenerateSupport::coneNmeshIntersection(Mesh *mesh, OverhangPoint_
         meshInt = false;
     }
 
-    return OverhangPoint_(nearest, meshInt, supportInt);
+    return OverhangPoint(nearest, meshInt, supportInt);
 }
 
 float GenerateSupport::calculateRadius(float mesh_height, float bottom_height, float branch_length) {
@@ -289,7 +289,7 @@ float GenerateSupport::calculateRadius(float mesh_height, float bottom_height, f
 }
 
 /*
-void GenerateSupport::generateTip(Mesh* mesh, OverhangPoint_ *position, float height) {
+void GenerateSupport::generateTip(Mesh* mesh, OverhangPoint *position, float height) {
     QVector3D center = position->position - QVector3D(0, 0, height);
     float radius = calculateRadius(mesh->z_max - mesh->z_min, center.z() - mesh->z_min, height);
     position->radius = radius;
@@ -307,7 +307,7 @@ void GenerateSupport::generateTip(Mesh* mesh, OverhangPoint_ *position, float he
 }
 */
 
-void GenerateSupport::generateBottomFace(Mesh* mesh, OverhangPoint_* center) {
+void GenerateSupport::generateBottomFace(Mesh* mesh, OverhangPoint* center) {
     float radius = center->radius;
     for (size_t i = 0; i < 6; i ++) {
         mesh->addFace(center->position, center->position + radius * QVector3D(qCos(M_PI * (i+1) / 3), qSin(M_PI * (i+1) / 3), 0),
@@ -315,7 +315,7 @@ void GenerateSupport::generateBottomFace(Mesh* mesh, OverhangPoint_* center) {
     }
 }
 
-void GenerateSupport::generateBranch(Mesh* mesh, OverhangPoint_* leaf1, OverhangPoint_* leaf2, OverhangPoint_* stem) {
+void GenerateSupport::generateBranch(Mesh* mesh, OverhangPoint* leaf1, OverhangPoint* leaf2, OverhangPoint* stem) {
     // vertex 추가도
     /*
     if (leaf1->topTip) {
@@ -356,16 +356,16 @@ void GenerateSupport::generateBranch(Mesh* mesh, OverhangPoint_* leaf1, Overhang
 
     supportPoints.push_back(*stem);
     if ((leaf1->position - stem->position).length() >= 8)
-        supportPoints.push_back(OverhangPoint_((leaf1->position + stem->position)/2, (radius1 + bottomRadius)/2));
+        supportPoints.push_back(OverhangPoint((leaf1->position + stem->position)/2, (radius1 + bottomRadius)/2));
     if ((leaf2->position - stem->position).length() >= 8)
-        supportPoints.push_back(OverhangPoint_((leaf2->position + stem->position)/2, (radius2 + bottomRadius)/2));
+        supportPoints.push_back(OverhangPoint((leaf2->position + stem->position)/2, (radius2 + bottomRadius)/2));
 }
 
-void GenerateSupport::generateNShapeBranch(Mesh* mesh, OverhangPoint_* pt1, OverhangPoint_* pt2, size_t diameter_mm, size_t thickness_mm) {
+void GenerateSupport::generateNShapeBranch(Mesh* mesh, OverhangPoint* pt1, OverhangPoint* pt2, size_t diameter_mm, size_t thickness_mm) {
 
 }
 
-void GenerateSupport::generateStem(Mesh* mesh, OverhangPoint_* top, OverhangPoint_* bottom) {
+void GenerateSupport::generateStem(Mesh* mesh, OverhangPoint* top, OverhangPoint* bottom) {
     /*
     if (top->topTip) {
         generateTip(mesh, top, supportTipHeight); // glmodel->supportMesh
@@ -375,10 +375,10 @@ void GenerateSupport::generateStem(Mesh* mesh, OverhangPoint_* top, OverhangPoin
 
     if (top->topPoint && bottom->meshInterPoint && (top->position - bottom->position).length() < minLength) return;
 
-    OverhangPoint_ origin_bottom = *bottom;
+    OverhangPoint origin_bottom = *bottom;
     if (bottom->meshInterPoint) {
-        if ((top->position - bottom->position).length() <= 5) *bottom = OverhangPoint_(internalDiv(*top, *bottom, 1, 1), bottom->radius);
-        else *bottom = OverhangPoint_(internalDiv(*top, *bottom, 3, 1), bottom->radius);
+        if ((top->position - bottom->position).length() <= 5) *bottom = OverhangPoint(internalDiv(*top, *bottom, 1, 1), bottom->radius);
+        else *bottom = OverhangPoint(internalDiv(*top, *bottom, 3, 1), bottom->radius);
     }
 
     float topRadius = top->radius;
@@ -390,7 +390,7 @@ void GenerateSupport::generateStem(Mesh* mesh, OverhangPoint_* top, OverhangPoin
     if (origin_bottom.meshInterPoint) {
         supportPoints.push_back(*bottom);
         if ((top->position - bottom->position).length() >= 8)
-            supportPoints.push_back(OverhangPoint_((top->position + bottom->position)/2, (topRadius + bottomRadius)/2));
+            supportPoints.push_back(OverhangPoint((top->position + bottom->position)/2, (topRadius + bottomRadius)/2));
     }
 
     for (size_t i = 0; i < 6; i++) {
@@ -415,8 +415,8 @@ void GenerateSupport::generateStem(Mesh* mesh, OverhangPoint_* top, OverhangPoin
 }
 
 /*
-void GenerateSupport::generateStem(Mesh* mesh, OverhangPoint_* stem) {
-    OverhangPoint_ bottom = OverhangPoint_(stem->position.x(), stem->position.y(), mesh->z_min);
+void GenerateSupport::generateStem(Mesh* mesh, OverhangPoint* stem) {
+    OverhangPoint bottom = OverhangPoint(stem->position.x(), stem->position.y(), mesh->z_min);
     generateStem(mesh, stem, &bottom);
 }
 
@@ -436,7 +436,7 @@ void GenerateSupport::mergeSupportMesh(GLModel* glmodel) {
 }
 */
 
-QVector3D GenerateSupport::internalDiv(OverhangPoint_ a, OverhangPoint_ b, float m, float n) {
+QVector3D GenerateSupport::internalDiv(OverhangPoint a, OverhangPoint b, float m, float n) {
     return (m * b.position + n * a.position) / (m + n);
 }
 
