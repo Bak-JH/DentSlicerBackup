@@ -166,7 +166,7 @@ void SVGexporter:: writeGroupFooter(ofstream& outfile){
 }
 
 void SVGexporter::writeHeader(ofstream& outfile){
-    outfile << "<svg width='" << scfg->resolution_x << "' height='" << scfg->resolution_y << "' xmlns='http://www.w3.org/2000/svg' xmlns:contour='http://hix.co.kr' style='background-color: #000000;'>\n";
+    outfile << "<svg width='" << scfg->resolution_x << "' height='" << scfg->resolution_y << "' xmlns='http://www.w3.org/2000/svg' xmlns:contour='http://hix.co.kr' style='background-color: #00000000;'>\n";
 }
 
 void SVGexporter::writeFooter(ofstream& outfile){
