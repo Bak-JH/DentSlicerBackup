@@ -1,4 +1,4 @@
-#include "supportview.h"
+#include "manualsupport.h"
 #include "earcut.hpp"
 #include <QtMath>
 
@@ -49,7 +49,7 @@ void generateCylinder(Mesh* mesh, const QVector3D& position, const QVector3D& po
     generateCustomCylinder(mesh, position, positionTop, radius, radius);
 }
 
-void generateFace(Mesh* mesh, Path path, float z) {
+/*void generateFace(Mesh* mesh, Path path, float z) {
     // Create array
     std::vector<std::vector<std::array<float, 2>>> polygon;
     std::vector<std::array<float, 2>> points;
@@ -70,67 +70,8 @@ void generateFace(Mesh* mesh, Path path, float z) {
                       QVector3D(points.at(n2).at(0), points.at(n2).at(1), z),
                       QVector3D(points.at(n1).at(0), points.at(n1).at(1), z));
     }
-}
+}*/
 
-void generateSupporter(Mesh* mesh, OverhangPoint *point, OverhangPoint *parent, vector<OverhangPoint *> *points, float support_z_min) {
-    qDebug() << point << point->target_branching_overhang_point << parent;
-    qDebug() << "height:" << point->height <<
-                "radius:" << point->radius <<
-                "branchable:" << point->branchable <<
-                "v(" << point->position.X << "," << point->position.Y << "," << point->position.Z << ")";
-
-    float radius = (float)point->radius / scfg->resolution;
-    QVector3D position = QVector3D((float)point->position.X / scfg->resolution,
-                                   (float)point->position.Y / scfg->resolution,
-                                   support_z_min);
-            //(float)(point->position.Z - (int)point->height * 1000) / scfg->resolution);
-    QVector3D positionTop = QVector3D((float)point->position.X / scfg->resolution,
-                                      (float)point->position.Y / scfg->resolution,
-                                      (float)point->position.Z / scfg->resolution);
-
-    if( parent != nullptr ) {
-        if( parent->position.Z > point->position.Z ) {
-            position = QVector3D((float)point->position.X / scfg->resolution,
-                    (float)point->position.Y / scfg->resolution,
-                    (float)point->position.Z / scfg->resolution);
-            positionTop = QVector3D((float)parent->position.X / scfg->resolution,
-                    (float)parent->position.Y / scfg->resolution,
-                    (float)parent->position.Z / scfg->resolution);
-        } else {
-            position = QVector3D((float)parent->position.X / scfg->resolution,
-                    (float)parent->position.Y / scfg->resolution,
-                    (float)parent->position.Z / scfg->resolution);
-            positionTop = QVector3D((float)point->position.X / scfg->resolution,
-                    (float)point->position.Y / scfg->resolution,
-                    (float)point->position.Z / scfg->resolution);
-        }
-    }
-
-    float coneHeight = 1.4;
-    QVector3D positionConeTop = QVector3D(positionTop.x(),positionTop.y(), max(positionTop.z(),support_z_min + coneHeight));
-    positionTop = QVector3D(positionTop.x(),positionTop.y(), max(positionTop.z()-coneHeight, support_z_min));
-
-    generateCylinder(mesh, position, positionTop, radius);
-    generateCustomCylinder(mesh, positionTop, positionConeTop, 0.1f, radius);
-
-
-    if( point->target_branching_overhang_point != nullptr ) {
-
-        if( parent == nullptr ) {
-            points = new vector<OverhangPoint *>();
-        }
-
-        points->push_back(point);
-
-        if( std::find(points->begin(), points->end(), point) == points->end() ) {
-            generateSupporter(mesh, point->target_branching_overhang_point, point, points, support_z_min);
-        }
-
-        if( parent == nullptr ) {
-            delete points;
-        }
-    }
-}
 
 /*void generateRaft(Mesh* mesh, Slices* slices){
     for (int s_idx=0; s_idx<slices->size(); s_idx++){
@@ -154,8 +95,8 @@ void generateSupporter(Mesh* mesh, OverhangPoint *point, OverhangPoint *parent, 
     generateCustomCylinder(mesh, positionMiddle, positionTop, radius*2, radius);
 }*/
 
-void generateInfill(Mesh* mesh, Slice* slice) {
+/*void generateInfill(Mesh* mesh, Slice* slice) {
     for( auto iter = slice->outershell.begin() ; iter != slice->outershell.end() ; iter++ ) {
         generateFace(mesh, (*iter), slice->z);
     }
-}
+}*/
