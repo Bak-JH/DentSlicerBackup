@@ -17,6 +17,8 @@
 #include <QCoreApplication>
 #include <QTextStream>
 #include <QFileDialog>
+#include <feature/generatesupport.h>
+#include <feature/generateraft.h>
 
 QmlManager::QmlManager(QObject *parent) : QObject(parent)
   ,layerViewFlags(LAYER_INFILL | LAYER_SUPPORTERS | LAYER_RAFT)
@@ -146,7 +148,7 @@ void QmlManager::initializeUI(QQmlApplicationEngine* e){
     moveArrowobj = (QEntity *)FindItemByName(engine, "moveArrow");
     QObject::connect(moveArrowobj, SIGNAL(moveInit()),this, SLOT(modelMoveInit()));
     QObject::connect(moveArrowobj, SIGNAL(moveSignal(int,int)),this, SLOT(modelMove(int,int)));
-    QObject::connect(moveArrowobj, SIGNAL(moveDone(int)),this, SLOT(modelMoveDone(int)));
+    QObject::connect(moveArrowobj, SIGNAL(moveDone()),this, SLOT(modelMoveDone()));
     hideMoveArrow();
     //moveArrow->setEnabled(0);
     QObject *moveButton = FindItemByName(engine, "moveButton");
@@ -564,6 +566,23 @@ int QmlManager::getSelectedModelsSize() {
     return selectedModels.size();
 }
 
+float QmlManager::getBedXSize(){
+    return scfg->bed_x;
+}
+
+float QmlManager::getBedYSize(){
+    return scfg->bed_y;
+}
+
+void QmlManager::setBedXSize(float x){
+    scfg->bed_x = x;
+}
+
+void QmlManager::setBedYSize(float y){
+    scfg->bed_y = y;
+}
+
+
 bool QmlManager::getGroupSelectionActive() {
     return groupSelectionActive;
 }
@@ -679,7 +698,7 @@ void QmlManager::updateBoundedBox(){
 
 void QmlManager::sendUpdateModelInfo(){
     qDebug() << "send update model info";
-    if (selectedModels.size() == 0 || selectedModels[0] == nullptr){
+    if (selectedModels.size() == 0 || selectedModels[0] == nullptr || this->viewMode == VIEW_MODE_LAYER || this->viewMode == VIEW_MODE_SUPPORT){
         qDebug() << "sendUpdateModelInfo() - no selected model";
 
         slicingData->setProperty("visible", false);
@@ -722,7 +741,7 @@ void QmlManager::openArrange(){
 }
 
 void QmlManager::runArrange(){
-    QFuture<void> future = QtConcurrent::run(this, &runArrange_internal);
+    QFuture<void> future = QtConcurrent::run(this, &QmlManager::runArrange_internal);
 }
 
 void QmlManager::runArrange_internal(){
@@ -779,42 +798,9 @@ GLModel* QmlManager::findGLModelByName(QString filename){
     return NULL;
 }
 
-void QmlManager::setModelClickFalse(){
-    modelClicked = false;
-}
-
-void QmlManager::backgroundClickCheck(){
-    return;
-    qDebug() << "bcc 0";
-    if(selectedModels.size() == 1 && selectedModels[0] == nullptr)
-        return;
-    qDebug() << "bcc 0.5";
-    if(!selectedModels[0]->modelSelectChangable())
-        return;
-
-    qDebug() << "bcc 1";
-
-    if(!modelClicked){ // backgroundclicked
-        qDebug() << "bcc 2           " << selectedModels.size() << selectedModels[0];
-        int temp = selectedModels.size();
-        for(int i=0; i<temp; i++)
-        {
-            qDebug() << "bcc 3           "  << selectedModels[0];
-            if(selectedModels[0] != nullptr){
-                qDebug() << "bcc 4";
-                modelSelected(selectedModels[0]->ID);
-            }
-        }
-        /*
-        while(selectedModels[0] != nullptr){
-            modelSelected(selectedModels[0]->ID);
-            qDebug() << selectedModels[0];
-
-        }
-        */
-
-    }
-    modelClicked = false;
+void QmlManager::backgroundClicked(){
+    qDebug() << "background clicked";
+    unselectAll();
 }
 
 bool QmlManager::multipleModelSelected(int ID){
@@ -1022,7 +1008,7 @@ void QmlManager::modelSelected(int ID){
     GLModel* target;
     for(int i=0; i<glmodels.size();i++){
         if(glmodels.at(i)->ID == ID){
-            qDebug() << "found id";
+            qDebug() << "found id" << ID;
             target = glmodels.at(i);
             break;
         }
@@ -1264,6 +1250,21 @@ void QmlManager::unselectPart(int ID){
     sendUpdateModelInfo();
 }
 
+void QmlManager::unselectAll(){
+    setViewMode(VIEW_MODE_OBJECT);
+    for(GLModel* curModel : selectedModels){
+        if (curModel != nullptr){
+            unselectPart(curModel->ID);
+            //QMetaObject::invokeMethod(partList, "unselectPartByModel", Q_ARG(QVariant, curModel->ID));
+        }
+    }
+    hideMoveArrow();
+    hideRotateSphere();
+    QMetaObject::invokeMethod(qmlManager->mttab, "hideTab");
+    QMetaObject::invokeMethod(boxUpperTab, "all_off");
+    QMetaObject::invokeMethod(boundedBox, "hideBox");
+}
+
 bool QmlManager::isSelected(){
     if(selectedModels[0] == nullptr)
         return false;
@@ -1374,7 +1375,7 @@ void QmlManager::modelMoveInit(){
     }
 }
 
-void QmlManager::modelMoveDone(int Axis){
+void QmlManager::modelMoveDone(){
     if (selectedModels[0] == nullptr)
         return;
 
@@ -1382,6 +1383,7 @@ void QmlManager::modelMoveDone(int Axis){
     hideMoveArrow();
 
     for (GLModel* curModel : selectedModels){
+        curModel->shadowModel->m_objectPicker->setEnabled(true);
         //curModel->saveUndoState();
 
         /*QVector3D translationDiff = curModel->m_transform->translation()-curModel->m_translation;
@@ -1526,15 +1528,16 @@ void QmlManager::modelMove(int Axis, int Distance){ // for QML Signal -> float i
         return;
 
     for (int i=0; i<selectedModels.size(); i++){
+        selectedModels[i]->shadowModel->m_objectPicker->setEnabled(false);
         switch(Axis){
             case 1:{  //X
                 QVector3D tmp = selectedModels[i]->m_transform->translation();
 
-                if ((tmp.x() + selectedModels[i]->mesh->x_max + 1 < 100/2)
-                        && (tmp.x() + selectedModels[i]->mesh->x_min - 1 > -100/2)) {
-                    if(tmp.x() + selectedModels[i]->mesh->x_max +1 + Distance > 100/2 )
+                if ((tmp.x() + selectedModels[i]->mesh->x_max + 1 < scfg->bed_x/2)
+                        && (tmp.x() + selectedModels[i]->mesh->x_min - 1 > -scfg->bed_x/2)) {
+                    if(tmp.x() + selectedModels[i]->mesh->x_max +1 + Distance > scfg->bed_x/2 )
                         return ;
-                    if(tmp.x() + selectedModels[i]->mesh->x_min -1 + Distance < - 100/2 )
+                    if(tmp.x() + selectedModels[i]->mesh->x_min -1 + Distance < - scfg->bed_x/2 )
                         return ;
                 }
                 selectedModels[i]->m_transform->setTranslation(QVector3D(tmp.x()+Distance,tmp.y(),tmp.z()));
@@ -1542,11 +1545,11 @@ void QmlManager::modelMove(int Axis, int Distance){ // for QML Signal -> float i
             }
             case 2:{  //Y
                 QVector3D tmp = selectedModels[i]->m_transform->translation();
-                if ((tmp.y() + selectedModels[i]->mesh->y_max + 1 < 80/2)
-                        && (tmp.y() + selectedModels[i]->mesh->y_min - 1 > -80/2)) {
-                    if(tmp.y() + selectedModels[i]->mesh->y_max +1 + Distance > 80/2 )
+                if ((tmp.y() + selectedModels[i]->mesh->y_max + 1 < scfg->bed_y/2)
+                        && (tmp.y() + selectedModels[i]->mesh->y_min - 1 > -scfg->bed_y/2)) {
+                    if(tmp.y() + selectedModels[i]->mesh->y_max +1 + Distance > scfg->bed_y/2 )
                         return;
-                    if(tmp.y() + selectedModels[i]->mesh->y_min -1 + Distance < - 80/2 )
+                    if(tmp.y() + selectedModels[i]->mesh->y_min -1 + Distance < - scfg->bed_y/2 )
                         return;
                 }
                 selectedModels[i]->m_transform->setTranslation(QVector3D(tmp.x(),tmp.y()+Distance,tmp.z()));
@@ -1574,11 +1577,11 @@ void QmlManager::modelMoveF(int Axis, float Distance){
             case 1:{  //X
                 QVector3D tmp = selectedModels[i]->m_transform->translation();
 
-                if ((tmp.x() + selectedModels[i]->mesh->x_max + 1 < 100/2)
-                        && (tmp.x() + selectedModels[i]->mesh->x_min - 1 > -100/2)) {
-                    if(tmp.x() + selectedModels[i]->mesh->x_max +1 + Distance > 100/2 )
+                if ((tmp.x() + selectedModels[i]->mesh->x_max + 1 < scfg->bed_x/2)
+                        && (tmp.x() + selectedModels[i]->mesh->x_min - 1 > -scfg->bed_x/2)) {
+                    if(tmp.x() + selectedModels[i]->mesh->x_max +1 + Distance > scfg->bed_x/2 )
                         return;
-                    if(tmp.x() + selectedModels[i]->mesh->x_min -1 + Distance < - 100/2 )
+                    if(tmp.x() + selectedModels[i]->mesh->x_min -1 + Distance < - scfg->bed_x/2 )
                         return;
                 }
                 selectedModels[i]->m_transform->setTranslation(QVector3D(tmp.x()+Distance, tmp.y(), tmp.z()));
@@ -1586,11 +1589,11 @@ void QmlManager::modelMoveF(int Axis, float Distance){
             }
             case 2:{  //Y
                 QVector3D tmp = selectedModels[i]->m_transform->translation();
-                if ((tmp.y() + selectedModels[i]->mesh->y_max + 1 < 80/2)
-                        && (tmp.y() + selectedModels[i]->mesh->y_min - 1 > -80/2)) {
-                    if(tmp.y() + selectedModels[i]->mesh->y_max +1 + Distance > 80/2 )
+                if ((tmp.y() + selectedModels[i]->mesh->y_max + 1 < scfg->bed_y/2)
+                        && (tmp.y() + selectedModels[i]->mesh->y_min - 1 > -scfg->bed_y/2)) {
+                    if(tmp.y() + selectedModels[i]->mesh->y_max +1 + Distance > scfg->bed_y/2 )
                         return;
-                    if(tmp.y() + selectedModels[i]->mesh->y_min -1 + Distance < - 80/2 )
+                    if(tmp.y() + selectedModels[i]->mesh->y_min -1 + Distance < - scfg->bed_y/2 )
                         return;
                 }
                 selectedModels[i]->m_transform->setTranslation(QVector3D(tmp.x(), tmp.y()+Distance, tmp.z()));
@@ -1715,20 +1718,20 @@ void QmlManager::modelMoveByNumber(int axis, int X, int Y){
         targetY = tmp.y() + Y;
 
         if(tmp.x() + selectedModels[i]->mesh->x_max +1 + X> 80/2 )
-            targetX = tmp.x() - (tmp.x() + selectedModels[i]->mesh->x_max - 100/2 + 1);
+            targetX = tmp.x() - (tmp.x() + selectedModels[i]->mesh->x_max - scfg->bed_x/2 + 1);
         if(tmp.x() + selectedModels[i]->mesh->x_min -1 + X< - 80/2 )
-            targetX = tmp.x() - (tmp.x() + selectedModels[i]->mesh->x_min + 100/2 - 1);
+            targetX = tmp.x() - (tmp.x() + selectedModels[i]->mesh->x_min + scfg->bed_x/2 - 1);
 
         if(tmp.y() + selectedModels[i]->mesh->y_max +1 + Y> 80/2 )
-            targetY = tmp.y() - (tmp.y() + selectedModels[i]->mesh->y_max - 80/2 + 1);
+            targetY = tmp.y() - (tmp.y() + selectedModels[i]->mesh->y_max - scfg->bed_y/2 + 1);
         if(tmp.y() + selectedModels[i]->mesh->y_min -1 + Y< - 80/2 )
-            targetY = tmp.y() - (tmp.y() + selectedModels[i]->mesh->y_min + 80/2 - 1);
+            targetY = tmp.y() - (tmp.y() + selectedModels[i]->mesh->y_min + scfg->bed_y/2 - 1);
 
         selectedModels[i]->m_transform->setTranslation(QVector3D(targetX, targetY, tmp.z()));
         //selectedModels[i]->moveModelMesh(QVector3D(targetX,targetY,tmp.z()));
     }
 
-    modelMoveDone(1);
+    modelMoveDone();
 }
 void QmlManager::modelRotateByNumber(int axis,  int X, int Y, int Z){
     if (selectedModels[0] == nullptr)
@@ -1957,11 +1960,26 @@ void QmlManager::runGroupFeature(int ftrType, QString state, double arg1, double
 
         qmlManager->openProgressPopUp();
 
-        Mesh* mergedMesh = ste->mergeSelectedModels();
-        qDebug() << "Merged Mesh" << mergedMesh->faces.size();
+        // merge selected models
+        Mesh* mergedShellMesh = ste->mergeSelectedModels();//ste->mergeModels(qmlManager->selectedModels);
+        //GLModel* mergedModel = new GLModel(mainWindow, models, mergedMesh, "temporary", false);
+
+        qDebug() << "1111";
+        // generate support
+        GenerateSupport generatesupport;
+        Mesh* mergedSupportMesh = generatesupport.generateSupport(mergedShellMesh);
+
+        qDebug() << "2222";
+        // generate raft
+        GenerateRaft generateraft;
+        Mesh* mergedRaftMesh = generateraft.generateRaft(mergedShellMesh);
+
+        qDebug() << "3333";
+        // need to generate support, raft
 
         //se->slice(data, mergedMesh, fileName);
-        QFuture<Slicer*> future = QtConcurrent::run(se, &SlicingEngine::slice, data, mergedMesh, fileName);
+        QFuture<Slicer*> future = QtConcurrent::run(se, &SlicingEngine::slice, data, mergedShellMesh, mergedSupportMesh, mergedRaftMesh, fileName);
+        //deleteOneModelFile(mergedModel->ID);
 
         //m_glmodel->futureWatcher.setFuture(future);
         break;
@@ -2173,8 +2191,11 @@ void QmlManager::viewSupportChanged(bool checked){
     qDebug() << "selected Num = " << selectedModels.size();
     if( checked ) {
         if( selectedModels[0] != nullptr ) {
-            if( selectedModels[0]->slicer == nullptr ) {
+            /*if( selectedModels[0]->slicer == nullptr ) {
                 qmlManager->openYesNoPopUp(false, "The model should be sliced for support view.", "", "Would you like to continue?", 16, "", ftrSupportViewMode, 0);
+            }*/
+            if (selectedModels[0]->supportMesh == nullptr) {
+                qmlManager->openYesNoPopUp(false, "[Support View]", "", "Would you like to continue?", 16, "", ftrSupportViewMode, 0);
             } else {
                 QMetaObject::invokeMethod(qmlManager->boxUpperTab, "all_off");
                 setViewMode(VIEW_MODE_SUPPORT);
@@ -2220,6 +2241,7 @@ void QmlManager::layerSupportersButtonChanged(bool checked){
     }
 
     if( selectedModels[0] != nullptr ) {
+        qDebug() << "calling updatemodelmesh ";
         emit selectedModels[0]->_updateModelMesh(true);
     }
 }
@@ -2262,7 +2284,20 @@ void QmlManager::setViewMode(int viewMode) {
     if( this->viewMode == VIEW_MODE_OBJECT ) {
         QMetaObject::invokeMethod(yesno_popup, "closePopUp");
         QMetaObject::invokeMethod(leftTabViewMode, "setObjectView");
+    } else if (this->viewMode == VIEW_MODE_SUPPORT){
+        QMetaObject::invokeMethod(qmlManager->boundedBox, "hideBox");
+        GenerateSupport generatesupport;
+        selectedModels[0]->supportMesh = generatesupport.generateSupport(selectedModels[0]->mesh);
+        emit selectedModels[0]->_updateModelMesh(true);
+    } else if (this->viewMode == VIEW_MODE_LAYER){
+        qDebug() << "view mode layer called";
+        QMetaObject::invokeMethod(qmlManager->boundedBox, "hideBox");
+        GenerateSupport generatesupport;
+        selectedModels[0]->supportMesh = generatesupport.generateSupport(selectedModels[0]->mesh);
+        qDebug() << "generated support";
+        emit selectedModels[0]->_updateModelMesh(true);
     } else {
+        qDebug() << "view mode layer called";
         QMetaObject::invokeMethod(qmlManager->boundedBox, "hideBox");
     }
 }

@@ -14,9 +14,10 @@
 class SlicingEngine : public QObject
 {
     Q_OBJECT
+
 public:
     SlicingEngine();
-    Q_INVOKABLE Slicer* slice (QVariant cfg, Mesh* mesh=nullptr, QString filename = "");
+    Q_INVOKABLE Slicer* slice (QVariant cfg, Mesh* shellMesh=nullptr, Mesh* supportMesh=nullptr, Mesh* raftMesh=nullptr, QString filename = "");
 
 public slots:
     void slicingStarted();
