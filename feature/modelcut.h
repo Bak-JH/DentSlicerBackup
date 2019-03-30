@@ -2,7 +2,7 @@
 #define MODELCUT_H
 #include "DentEngine/src/mesh.h"
 #include "feature/convex_hull.h"
-#include "DentEngine/src/support.h"
+#include "DentEngine/src/utils/metric.h"
 #include <QObject>
 #include <Qt3DCore>
 #include <Qt3DRender>

@@ -1,12 +1,13 @@
 #ifndef STLEXPORTER_H
 #define STLEXPORTER_H
-#include "DentEngine/src/mesh.h"
 #include <fstream>
+#include "DentEngine/src/mesh.h"
 
 class STLexporter
 {
 public:
     STLexporter();
+    //GLModel* mergeModels(vector<GLModel*> models);
     Mesh* mergeSelectedModels();
     void exportSTL(QString outfilename);
     void writeFace(ofstream& outfile, Mesh* mesh, MeshFace mf);
