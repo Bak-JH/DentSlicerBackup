@@ -31,12 +31,17 @@ LabellingTextPreview::LabellingTextPreview(Qt3DCore::QNode* parent)
     planeMesh->setDepth(10.0f);
     planeMesh->setText("");
 
+
+    planeMesh = new Qt3DExtras::QExtrudedTextMesh(parent->parentNode());
+    planeMesh->setDepth(1.2f);
+    //planeMesh->setText("asdfasdfasdf");
+
     planeTransform = new Qt3DCore::QTransform(this);
 
     planeMaterial = new Qt3DExtras::QPhongAlphaMaterial();
     planeMaterial->setAmbient(QColor(255,255,0,255));
     planeMaterial->setDiffuse(QColor(255,0,0,255));
-    planeMaterial->setSpecular(QColor(255,255,255,255));
+    planeMaterial->setSpecular(QColor(0,255,255,255));
     planeMaterial->setAlpha(0.5f);
 
     planeEntity = new Qt3DCore::QEntity(parent->parentNode());
@@ -115,6 +120,7 @@ void LabellingTextPreview::updateTransform()
         return;
     }
     planeMesh->setDepth(10.0f);
+
     //checking if it is shadow model is needed
     QFont font( this->fontName );
     font.setPointSize( this->fontSize );
