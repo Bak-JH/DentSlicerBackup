@@ -76,12 +76,6 @@ GLModel::GLModel(QObject* mainWindow, QNode *parent, Mesh* loadMesh, QString fna
         QObject::connect(this,SIGNAL(_updateModelMesh(bool)),this,SLOT(updateModelMesh(bool)));
 
         //labellingTextPreview = new LabellingTextPreview(this);
-        /*
-        labellingTextPreview = new LabellingTextPreview(this);
-        labellingTextPreview->setEnabled(false);
-        labellingTextPreview->setTranslation(QVector3D(100,0,0));
-        */
-
 
         return;
     }
@@ -598,6 +592,8 @@ void GLModel::updateModelMesh(bool shadowUpdate){
         shadowModel=new GLModel(this->mainWindow, this, mesh->vertexMoved(-QVector3D(mesh_x_center,mesh_y_center,mesh_z_center)), filename, true);
         shadowModel->m_transform->setTranslation(QVector3D(mesh_x_center, mesh_y_center, 0));*/
         shadowModel->copyModelAttributeFrom(prevShadowModel);
+        if (prevShadowModel->labellingTextPreview != nullptr)
+            prevShadowModel->labellingTextPreview->deleteLabel();
         prevShadowModel->deleteLater();
 
         // reconnect handler if current selected model is updated
@@ -1277,62 +1273,26 @@ void GLModel::handlePickerClicked(QPickEvent *pick)
     qDebug() << "trianglePick : " << trianglePick << qmlManager->selectedModels.size() << qmlManager;
 
     if (labellingActive && trianglePick && trianglePick->localIntersection() != QVector3D(0,0,0)) {
+        //qDebug() << "handle Picker - labelling @@@@" << this << this->parentModel;
         MeshFace shadow_meshface = mesh->faces[trianglePick->triangleIndex()];
 
         //parentModel->uncolorExtensionFaces();
 
         parentModel->targetMeshFace = &parentModel->mesh->faces[shadow_meshface.parent_idx];
-
         //parentModel->generateColorAttributes();
         //parentModel->colorExtensionFaces();
 
         QMetaObject::invokeMethod(qmlManager->labelPopup, "labelUpdate");
-
         if (labellingTextPreview && labellingTextPreview->isEnabled()) {
+            //qDebug() << "@@@@ @@@@ 4" << pick->localIntersection() << parentModel->targetMeshFace->fn;
             labellingTextPreview->setTranslation(pick->localIntersection() + parentModel->targetMeshFace->fn);
             labellingTextPreview->setNormal(parentModel->targetMeshFace->fn);
+            labellingTextPreview->updateTransform();
             labellingTextPreview->planeSelected = true;
         }
         else {
             labellingTextPreview->planeSelected = false;
         }
-/*
-        QString label_text = "";
-        QString label_font = "";
-        bool label_font_bold = false;
-        int label_size = 12;
-        int contentWidth = 64;
-        if (labellingTextPreview){
-            label_text = labellingTextPreview->text;
-            label_font = labellingTextPreview->fontName;
-            label_font_bold = (labellingTextPreview->fontWeight==QFont::Bold)? true:false;
-            label_size = labellingTextPreview->fontSize;
-            contentWidth = labellingTextPreview->contentWidth;
-            labellingTextPreview->deleteLater();
-            labellingTextPreview = nullptr;
-            qDebug() << "labelling Text existed!" << label_text << label_font << label_size;
-        }
-        else
-            qDebug()<<"no labelling text";
-        //qDebug() << "me:"<<this << "parent:"<<this->parentModel<<"shadow:"<<this->shadowModel;
-        labellingTextPreview = new LabellingTextPreview(this);
-        labellingTextPreview->setEnabled(true);
-
-        if (labellingTextPreview && labellingTextPreview->isEnabled()) {
-            labellingTextPreview->setTranslation(pick->localIntersection() + parentModel->targetMeshFace->fn);
-            labellingTextPreview->setNormal(parentModel->targetMeshFace->fn);
-            if (label_text != ""){
-                labellingTextPreview->setFontName(label_font);
-                labellingTextPreview->setFontBold(label_font_bold);
-                labellingTextPreview->setFontSize(label_size);
-                labellingTextPreview->setText(label_text, contentWidth);
-            }
-            labellingTextPreview->planeSelected = true;
-        }
-        else {
-            qDebug() << "pinpin ^^^^^^^^^^^^^^^^^ 1";
-            labellingTextPreview->planeSelected = false;
-        }*/
     }
 
 
@@ -2464,6 +2424,7 @@ Mesh* GLModel::toSparse(Mesh* mesh){
 
 void GLModel::getTextChanged(QString text, int contentWidth)
 {
+    qDebug() << "@@@@ getTexyChanged";
     if (labellingTextPreview && labellingTextPreview->isEnabled()){
         applyLabelInfo(text, contentWidth, labellingTextPreview->fontName, (labellingTextPreview->fontWeight==QFont::Bold)? true:false, labellingTextPreview->fontSize);
     }
@@ -2491,13 +2452,14 @@ void GLModel::closeLabelling()
 {
     qDebug() << "close labelling ******************";
     labellingActive = false;
-    /*
+
     if (labellingTextPreview){
         qDebug() << "pinpin ^^^^^^^^^^^^^^^^^ 3";
         labellingTextPreview->planeSelected = false;
+        labellingTextPreview->deleteLabel();
         labellingTextPreview->deleteLater();
         labellingTextPreview = nullptr;
-    }*/
+    }
     parentModel->targetMeshFace = nullptr;
 
 //    stateChangeLabelling();
@@ -2510,12 +2472,14 @@ void GLModel::stateChangeLabelling() {
 
 void GLModel::getFontNameChanged(QString fontName)
 {
+    qDebug() << "@@@@ getFontNameChanged";
     if (labellingTextPreview && labellingTextPreview->isEnabled()){
         applyLabelInfo(labellingTextPreview->text, labellingTextPreview->contentWidth, fontName, (labellingTextPreview->fontWeight==QFont::Bold)? true:false, labellingTextPreview->fontSize);
     }
 }
 
 void GLModel::getFontBoldChanged(bool isbold){
+    qDebug() << "@@@@ getBoldChanged";
     if (labellingTextPreview && labellingTextPreview->isEnabled()){
         applyLabelInfo(labellingTextPreview->text, labellingTextPreview->contentWidth, labellingTextPreview->fontName, isbold, labellingTextPreview->fontSize);
 
@@ -2524,6 +2488,7 @@ void GLModel::getFontBoldChanged(bool isbold){
 
 void GLModel::getFontSizeChanged(int fontSize)
 {
+    qDebug() << "@@@@ getSizeChanged";
     if (labellingTextPreview && labellingTextPreview->isEnabled()){
         applyLabelInfo(labellingTextPreview->text, labellingTextPreview->contentWidth, labellingTextPreview->fontName, (labellingTextPreview->fontWeight==QFont::Bold)? true:false, fontSize);
     }
@@ -2534,48 +2499,44 @@ void GLModel::applyLabelInfo(QString text, int contentWidth, QString fontName, b
     QVector3D translation;
     bool selected = false;
 
-    qDebug() << "applyLabelInfo +++++++++++++++++++++++++ " << text << translation << contentWidth;
+    qDebug() << "applyLabelInfo +++++++++++++++++++++++++ " << text  << contentWidth << this;
+    if (text != "")
+        contentWidth = 0;
 
     if (labellingTextPreview && labellingTextPreview->isEnabled()){
         translation = labellingTextPreview->translation;
         selected = labellingTextPreview->planeSelected;
+        labellingTextPreview->deleteLabel();
         labellingTextPreview->deleteLater();
         labellingTextPreview = nullptr;
     }
     labellingTextPreview = new LabellingTextPreview(this);
     labellingTextPreview->setEnabled(true);
 
-    labellingTextPreview->setFontName(fontName);
-    labellingTextPreview->setFontSize(fontSize);
-    labellingTextPreview->setFontBold(isBold);
-    labellingTextPreview->setText(text, contentWidth);
+    //labellingTextPreview->setFontName(fontName);
+    //labellingTextPreview->setFontSize(fontSize);
+    //labellingTextPreview->setFontBold(isBold);
+    //labellingTextPreview->setText(text, contentWidth);
     labellingTextPreview->planeSelected = selected;
 
+
     if (parentModel->targetMeshFace != nullptr) {
-        labellingTextPreview->setTranslation(translation);
-        labellingTextPreview->setNormal(parentModel->targetMeshFace->fn);
+        labellingTextPreview->updateChange(text, contentWidth, fontName, isBold, fontSize, translation, parentModel->targetMeshFace->fn);
+        //labellingTextPreview->setTranslation(translation);
+        //labellingTextPreview->setNormal(parentModel->targetMeshFace->fn);
     }
-   /*
-    if (labellingTextPreview && labellingTextPreview->isEnabled() && parentModel->targetMeshFace !=nullptr) {
-        labellingTextPreview->setTranslation(translation);
-        labellingTextPreview->setNormal(parentModel->targetMeshFace->fn);
-        if (text != ""){
-            //labellingTextPreview->setText(label_text, label_text.size());
-            labellingTextPreview->setFontName(fontName);
-            labellingTextPreview->setFontBold(isBold);
-            labellingTextPreview->setFontSize(fontSize);
-            labellingTextPreview->setText(text, contentWidth);
-        }
-        labellingTextPreview->planeSelected = selected;
+    else {
+        labellingTextPreview->updateChange(text, contentWidth, fontName, isBold, fontSize, labellingTextPreview->translation, QVector3D(0,0,0));
     }
-    */
+
+
 
 }
 
 
 void GLModel::generateText3DMesh()
 {
-    qDebug() << "generateText3DMesh +++++++++++++++++++++++++";
+    //qDebug() << "generateText3DMesh @@@@@" << this << this->parentModel;
     if (!labellingTextPreview){
         qDebug() << "no labellingTextPreview";
         QMetaObject::invokeMethod(qmlManager->labelPopup, "noModel");
@@ -2652,10 +2613,11 @@ void GLModel::generateText3DMesh()
     if (GLModel* glmodel = qobject_cast<GLModel*>(parent())) {
         glmodel->addVertices(outVertices);
         glmodel->addNormalVertices(outNormals);
-
+        glmodel->labellingTextPreview->hideLabel();
         emit glmodel->_updateModelMesh(true);
     }
-
+    //if (this->shadowModel->labellingTextPreview != nullptr)
+      //  this->shadowModel->labellingTextPreview->hideLabel();
 
 }
 
@@ -3097,29 +3059,14 @@ void GLModel::generateLayerViewMaterial() {
 }
 
 void GLModel::generateDragbox() {
+ /*
     qDebug() << "generating Dragbox @@@@";
     parentModel->dragEntity = new Qt3DCore::QEntity(parentModel->parentModel);
-    //parentModel->dragSphere = new Qt3DExtras::QExtrudedTextMesh(this);
-    //parentModel->dragSphere->setDepth(float(1.0));
-    //parentModel->dragSphere->setFont(QFont("Arial"));
-    //parentModel->dragSphere->setText("asdffff");
-    //parentModel->dragSphere = new Qt3DExtras::QText2DEntity(parentModel->parentModel);
 
     parentModel->dragSphere = new Qt3DExtras::QSphereMesh(this);
     parentModel->dragSphere->setRadius(0.0);//20.0);
 
-    /*
-    parentModel->dragSphere = new Qt3DExtras::QPlaneMesh(this);
-    parentModel->dragSphere->setHeight(1000.0);
-    parentModel->dragSphere->setWidth(200.0);
-    */
-    /*
-    parentModel->dragSphere->setFont(QFont("Courier New", 60));
-    parentModel->dragSphere->setHeight(20);
-    parentModel->dragSphere->setWidth(100);
-    parentModel->dragSphere->setText("monospace");
-    parentModel->dragSphere->setColor(QColor(QRgb(0xF4F4F4)));
-    */
+
 
     parentModel->dragMaterial = new Qt3DExtras::QPhongAlphaMaterial();
     parentModel->dragMaterial->setAmbient(QColor(QColor(255,0,0)));
@@ -3132,17 +3079,7 @@ void GLModel::generateDragbox() {
     //Mesh *mesh = toSparse(parentModel->mesh);
     //parentModel->dragTransform->setTranslation(
     //            QVector3D((mesh->x_max+mesh->x_min)/2, (mesh->y_max+mesh->y_min)/2, (mesh->z_max+mesh->z_min)/2));
-    /*
-    parentModel->dragTransform->setTranslation(QVector3D(0.5,0,5));
-    parentModel->dragTransform->setScale(0.125f);
-    parentModel->dragSphere->addComponent(parentModel->dragTransform);
 
-    parentModel->dragObjectPicker = new Qt3DRender::QObjectPicker;
-    parentModel->dragObjectPicker->setHoverEnabled(false);
-    parentModel->dragObjectPicker->setEnabled(false);
-
-    parentModel->dragEntity->addComponent(parentModel->dragObjectPicker);
-    */
 
     //parentModel->dragTransform->setRotation(QQuaternion::fromAxisAndAngle(QVector3D(0,0,0), 0));
 
@@ -3164,7 +3101,7 @@ void GLModel::generateDragbox() {
     parentModel->dragEntity->addComponent(parentModel->dragSphere);
     parentModel->dragEntity->addComponent(parentModel->dragTransform);
     parentModel->dragEntity->addComponent(parentModel->dragMaterial);
-
+*/
 }
 
 

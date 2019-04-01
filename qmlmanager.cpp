@@ -275,7 +275,10 @@ void QmlManager::deleteOneModelFile(int ID) {
             (*gl_it)->shadowModel->removePlane();
             disconnectHandlers((*gl_it));
             (*gl_it)->shadowModel->deleteLater();
+            if ((*gl_it)->shadowModel->labellingTextPreview != nullptr)
+                (*gl_it)->shadowModel->labellingTextPreview->deleteLabel();
             (*gl_it)->deleteLater();
+            (*gl_it)->labellingTextPreview->deleteLabel();
             gl_it = glmodels.erase(gl_it);
             break;
         } else
@@ -1074,6 +1077,7 @@ void QmlManager::modelSelected(int ID){
 
         QMetaObject::invokeMethod(boundedBox, "hideBox"); // Bounded Box
         if (groupFunctionState == "active"){
+            //qDebug() << "@@@@ selected @@@@" << groupFunctionIndex;
             switch (groupFunctionIndex){
             //case 2:
             //    QMetaObject::invokeMethod(savePopup, "offApplyFinishButton");
@@ -1150,6 +1154,7 @@ void QmlManager::modelSelected(int ID){
 
 
         if (groupFunctionState == "active"){
+            qDebug() << "@@@@ selected2 @@@@" << groupFunctionIndex;
             switch (groupFunctionIndex){
             //case 2:
             //    QMetaObject::invokeMethod(savePopup, "onApplyFinishButton");
@@ -1175,6 +1180,7 @@ void QmlManager::modelSelected(int ID){
         }
     } else {
         //selectedModels[0] = nullptr;
+        //qDebug() << "@@@@ clear selected Models @@@@";
         selectedModels.clear();
         selectedModels.push_back(nullptr);
     }
