@@ -60,7 +60,7 @@ GLModel::GLModel(QObject* mainWindow, QNode *parent, Mesh* loadMesh, QString fna
 
         /// This block is for shadowModel testing ///
 
-        /*m_meshMaterial = new QPhongMaterial();
+        m_meshMaterial = new QPhongMaterial();
         m_meshAlphaMaterial = new QPhongAlphaMaterial();
         m_layerMaterial = new QPhongMaterial();
         m_meshMaterial->setAmbient(QColor(255,0,0));
@@ -68,7 +68,7 @@ GLModel::GLModel(QObject* mainWindow, QNode *parent, Mesh* loadMesh, QString fna
         m_meshMaterial->setSpecular(QColor(182,237,246));
         m_meshMaterial->setShininess(0.0f);
 
-        addComponent(m_meshMaterial);*/
+        addComponent(m_meshMaterial);
 
         addMouseHandlers();
 
@@ -1229,12 +1229,12 @@ void GLModel::handlePickerClicked(QPickEvent *pick)
     qDebug() << "Released";
 
     if (isMoved){
-        if(components().size() > 4)
-        {
-            removeComponent(dragMesh);
-            qmlManager->fixMesh();
-            qDebug() << "dragMesh removed";
-        }
+        //if(components().size() > 4)
+        //{
+            //removeComponent(dragMesh);
+            //qmlManager->fixMesh();
+            //qDebug() << "dragMesh removed";
+        //}
         //removeComponent(dragMesh);
 
         qmlManager->modelMoveDone();
@@ -2225,13 +2225,13 @@ void GLModel::mgoo(Qt3DRender::QPickEvent* v)
         float scale_val = biggest > 50.0f ? 1.0f : 100.0f/biggest;
         m_transform->setScale(scale_val);
 
-        if (components().size() < 5){
+        //if (components().size() < 5){
             //removeComponent(dragMesh);
-            dragMesh->setRadius(biggest);
-            addComponent(dragMesh);
+            /*dragMesh->setRadius(biggest);
+            addComponent(dragMesh);*/
             //qDebug() << "COMPONENTS(A): " << components();
             //qDebug() << "dragMesh added";
-        }
+        //}
 
         isMoved = true;
     }

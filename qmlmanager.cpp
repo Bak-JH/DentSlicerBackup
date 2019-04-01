@@ -1236,7 +1236,7 @@ void QmlManager::unselectPart(int ID){
     }
 
     for (vector<GLModel*>::iterator it=selectedModels.begin(); it!= selectedModels.end(); ++it){
-        if ((*it)->ID == ID) {
+        if (((*it) != nullptr) && (*it)->ID == ID) {
             selectedModels.erase(it);
             break;
         }
@@ -1252,17 +1252,19 @@ void QmlManager::unselectPart(int ID){
 
 void QmlManager::unselectAll(){
     setViewMode(VIEW_MODE_OBJECT);
-    for(GLModel* curModel : selectedModels){
-        if (curModel != nullptr){
-            unselectPart(curModel->ID);
-            //QMetaObject::invokeMethod(partList, "unselectPartByModel", Q_ARG(QVariant, curModel->ID));
-        }
-    }
     hideMoveArrow();
     hideRotateSphere();
     QMetaObject::invokeMethod(qmlManager->mttab, "hideTab");
     QMetaObject::invokeMethod(boxUpperTab, "all_off");
     QMetaObject::invokeMethod(boundedBox, "hideBox");
+
+    for(vector<GLModel*>::iterator it=selectedModels.begin(); it!= selectedModels.end(); ++it){ // curModel : selectedModels){
+        GLModel* curModel = (*it);
+        if (curModel != nullptr){
+            QMetaObject::invokeMethod(partList, "unselectPartByModel", Q_ARG(QVariant, curModel->ID));
+            unselectPart(curModel->ID);
+        }
+    }
 }
 
 bool QmlManager::isSelected(){
