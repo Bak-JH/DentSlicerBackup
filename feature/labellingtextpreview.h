@@ -56,6 +56,11 @@ public:
     void setNormal(const QVector3D& n);
 
     void updateTransform();
+    void deleteLabel();
+
+    void updateChange(QString text, int contentWidth, QString fontName,
+                      bool isbold,int fontSize,const QVector3D& t, const QVector3D& n);
+    void hideLabel();
 
     Qt3DCore::QTransform* planeTransform = nullptr;
     QVector3D translation;
@@ -76,6 +81,7 @@ public:
     bool planeSelected;
 
 private:
+    Qt3DCore::QNode* labelParent;
     //Qt3DExtras::QPlaneMesh* planeMesh = nullptr;
     Qt3DExtras::QExtrudedTextMesh* planeMesh = nullptr;
     Qt3DCore::QEntity* planeEntity = nullptr;

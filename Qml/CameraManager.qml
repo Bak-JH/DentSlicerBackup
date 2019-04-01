@@ -116,10 +116,12 @@ Entity {
             qm.backgroundClicked();
         }
 
+        /*
         for (var i=0; i<hits.length; i++) {
             console.log("  " + hits[i].entity.objectName + " / ", hits[i].distance,
                         hits[i].worldIntersection.x, hits[i].worldIntersection.y, hits[i].worldIntersection.z)
         }
+        */
     }
 
     function initCamera(){
