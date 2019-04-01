@@ -1260,8 +1260,10 @@ void GLModel::handlePickerClicked(QPickEvent *pick)
 
 
 
-    if (!cutActive && !extensionActive && !labellingActive && !layflatActive && !manualSupportActive && !isMoved)// && !layerViewActive && !supportViewActive)
+    if (!cutActive && !extensionActive && !labellingActive && !layflatActive && !manualSupportActive && !isMoved){// && !layerViewActive && !supportViewActive)
+        qDebug() << "handler Picker clicked and is not moved";
         emit modelSelected(parentModel->ID);
+    }
 
     qDebug() << "model selected emit" << pick->position() << parentModel->ID;
     qDebug() << "pick button : " << !(pick->button() & Qt::LeftButton) << pick->button();

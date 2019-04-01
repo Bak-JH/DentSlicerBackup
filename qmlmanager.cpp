@@ -2064,12 +2064,13 @@ void QmlManager::pasteModel(){
     if(copyMeshes.size() < 1) // clipboard check
         return ;
 
-    qDebug() << "pasting current saved selected Meshes";
+    qDebug() << "pasting current saved selected Meshes" << copyMeshes.size();
     int counter = 0;
     for (Mesh* copyMesh : copyMeshes){
         QString temp = copyMeshNames.at(counter).split(".").first() + QString::fromStdString("_copy_") + QString::number(GLModel::globalID);
 
         createModelFile(copyMesh, temp);
+        checkModelFile(glmodels[glmodels.size()-1]->ID);
         counter++;
     }
 
