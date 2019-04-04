@@ -489,6 +489,8 @@ void GLModel::copyModelAttributeFrom(GLModel* from){
 
 void GLModel::updateModelMesh(bool shadowUpdate){
     // shadowUpdate updates shadow model of current Model
+    QMetaObject::invokeMethod(qmlManager->boxUpperTab, "disableUppertab");
+    QMetaObject::invokeMethod(qmlManager->boxLeftTab, "disableLefttab");
     qDebug() << "update Model Mesh";
     // delete allocated buffers, geometry
     delete vertexBuffer;
@@ -565,7 +567,6 @@ void GLModel::updateModelMesh(bool shadowUpdate){
     //                                                 Q_ARG(QVariant, mesh->y_max - mesh->y_min),
     //                                                 Q_ARG(QVariant, mesh->z_max - mesh->z_min));
     qmlManager->sendUpdateModelInfo();
-
     checkPrintingArea();
     //QMetaObject::invokeMethod(qmlManager->scalePopup, "updateSizeInfo", Q_ARG(QVariant, mesh->x_max-mesh->x_min), Q_ARG(QVariant, mesh->y_max-mesh->y_min), Q_ARG(QVariant, mesh->z_max-mesh->z_min));
     qDebug() << "model transform :" <<m_transform->translation() << mesh->x_max << mesh->x_min << mesh->y_max << mesh->y_min << mesh->z_max << mesh->z_min;
@@ -606,6 +607,8 @@ void GLModel::updateModelMesh(bool shadowUpdate){
     }
     updateLock = false;
     qDebug() << this << "released lock";
+    QMetaObject::invokeMethod(qmlManager->boxUpperTab, "enableUppertab");
+    QMetaObject::invokeMethod(qmlManager->boxLeftTab, "enableLefttab");
 }
 
 void GLModel::slicingDone(){
