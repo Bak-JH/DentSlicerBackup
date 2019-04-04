@@ -168,6 +168,7 @@ void QmlManager::initializeUI(QQmlApplicationEngine* e){
     QObject::connect(layflatButton,SIGNAL(runGroupFeature(int,QString, double, double, double, QVariant)),this,SLOT(runGroupFeature(int,QString, double, double, double, QVariant)));
 
     boxUpperTab = FindItemByName(engine, "boxUpperTab");
+    boxLeftTab = FindItemByName(engine, "boxLeftTab");
     QObject::connect(boxUpperTab,SIGNAL(runGroupFeature(int,QString, double, double, double, QVariant)),this,SLOT(runGroupFeature(int,QString, double, double, double, QVariant)));
 
     QObject::connect(this, SIGNAL(arrangeDone(vector<QVector3D>, vector<float>)), this, SLOT(applyArrangeResult(vector<QVector3D>, vector<float>)));
@@ -1226,6 +1227,7 @@ void QmlManager::unselectPart(int ID){
     qDebug() << "resetting model" << ID;
     target->changecolor(0);
     target->checkPrintingArea();
+    target->shadowModel->inactivateFeatures();
     disconnectHandlers(target);
     if (groupFunctionState == "active"){
         switch (groupFunctionIndex){
@@ -1247,6 +1249,7 @@ void QmlManager::unselectPart(int ID){
             break;
         }
     }
+
     if (selectedModels.size() == 0) selectedModels.push_back(nullptr);
     //selectedModels.clear();
     //selectedModels.push_back(nullptr);
