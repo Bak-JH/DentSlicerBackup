@@ -183,6 +183,16 @@ public:
     vector<Qt3DRender::QObjectPicker*> sphereObjectPicker;
     vector<QPhongMaterial*> sphereMaterial;
 
+    // Dragbox
+    Qt3DExtras::QSphereMesh* dragSphere;
+    //Qt3DExtras::QText2DEntity* dragSphere;
+    //Qt3DExtras::QExtrudedTextMesh* dragSphere;
+    //Qt3DExtras::QPlaneMesh* dragSphere;
+    Qt3DCore::QEntity* dragEntity;
+    Qt3DCore::QTransform* dragTransform;
+    Qt3DExtras::QPhongAlphaMaterial *dragMaterial = nullptr;
+    QObjectPicker *dragObjectPicker;
+
     void removeModel();
     void removeModelPartList();
 
@@ -221,6 +231,7 @@ public:
     QString getFileName(const string& s);
     QVector3D spreadPoint(QVector3D endpoint,QVector3D startpoint,int factor);
     void changeViewMode(int viewMode);
+    void inactivateFeatures();
 
     // support
     Slicer* slicer;
@@ -378,6 +389,9 @@ public slots:
     // Generate support mesh
     void generateSupport();
     void slicingDone();
+
+    // Generate Dragbox mesh
+    void generateDragbox();
 };
 
 
