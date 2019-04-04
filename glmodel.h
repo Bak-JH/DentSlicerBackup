@@ -113,7 +113,6 @@ public:
     Mesh* lmesh;
     Mesh* rmesh;
     QSphereMesh* dragMesh;
-
     Mesh* supportMesh = nullptr;
     Mesh* raftMesh = nullptr;
 

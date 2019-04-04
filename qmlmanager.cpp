@@ -168,6 +168,7 @@ void QmlManager::initializeUI(QQmlApplicationEngine* e){
     QObject::connect(layflatButton,SIGNAL(runGroupFeature(int,QString, double, double, double, QVariant)),this,SLOT(runGroupFeature(int,QString, double, double, double, QVariant)));
 
     boxUpperTab = FindItemByName(engine, "boxUpperTab");
+    boxLeftTab = FindItemByName(engine, "boxLeftTab");
     QObject::connect(boxUpperTab,SIGNAL(runGroupFeature(int,QString, double, double, double, QVariant)),this,SLOT(runGroupFeature(int,QString, double, double, double, QVariant)));
 
     QObject::connect(this, SIGNAL(arrangeDone(vector<QVector3D>, vector<float>)), this, SLOT(applyArrangeResult(vector<QVector3D>, vector<float>)));
@@ -1251,6 +1252,7 @@ void QmlManager::unselectPart(int ID){
 }
 
 void QmlManager::unselectAll(){
+    setViewMode(VIEW_MODE_OBJECT);
     for(GLModel* curModel : selectedModels){
         if (curModel != nullptr){
             unselectPart(curModel->ID);
@@ -1262,7 +1264,6 @@ void QmlManager::unselectAll(){
     QMetaObject::invokeMethod(qmlManager->mttab, "hideTab");
     QMetaObject::invokeMethod(boxUpperTab, "all_off");
     QMetaObject::invokeMethod(boundedBox, "hideBox");
-    QMetaObject::invokeMethod(leftTabViewMode, "setObjectView");
 }
 
 bool QmlManager::isSelected(){
