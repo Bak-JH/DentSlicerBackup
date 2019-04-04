@@ -87,6 +87,14 @@ Rectangle {
         console.log("all off done");
     }
 
+    function disableUppertab(){
+        uppertab.enabled = false
+    }
+
+    function enableUppertab(){
+        uppertab.enabled = true
+    }
+
     property real move_x_value
     property real move_y_value
     property real move_z_value
