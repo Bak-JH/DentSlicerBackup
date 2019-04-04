@@ -113,7 +113,6 @@ public:
     Mesh* lmesh;
     Mesh* rmesh;
     QSphereMesh* dragMesh;
-
     Mesh* supportMesh = nullptr;
     Mesh* raftMesh = nullptr;
 
@@ -232,6 +231,7 @@ public:
     QString getFileName(const string& s);
     QVector3D spreadPoint(QVector3D endpoint,QVector3D startpoint,int factor);
     void changeViewMode(int viewMode);
+    void inactivateFeatures();
 
     // support
     Slicer* slicer;
