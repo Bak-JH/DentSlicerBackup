@@ -60,7 +60,7 @@ GLModel::GLModel(QObject* mainWindow, QNode *parent, Mesh* loadMesh, QString fna
 
         /// This block is for shadowModel testing ///
 
-        m_meshMaterial = new QPhongMaterial();
+        /*m_meshMaterial = new QPhongMaterial();
         m_meshAlphaMaterial = new QPhongAlphaMaterial();
         m_layerMaterial = new QPhongMaterial();
         m_meshMaterial->setAmbient(QColor(255,0,0));
@@ -68,7 +68,7 @@ GLModel::GLModel(QObject* mainWindow, QNode *parent, Mesh* loadMesh, QString fna
         m_meshMaterial->setSpecular(QColor(182,237,246));
         m_meshMaterial->setShininess(0.0f);
 
-        addComponent(m_meshMaterial);
+        addComponent(m_meshMaterial);*/
 
         addMouseHandlers();
 
