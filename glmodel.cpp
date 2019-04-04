@@ -1232,8 +1232,8 @@ void GLModel::handlePickerClicked(QPickEvent *pick)
     if (isMoved){
         if(components().size() > 4)
         {
-            removeComponent(dragMesh);
-            qmlManager->fixMesh();
+            /*removeComponent(dragMesh);
+            qmlManager->fixMesh();*/
             qDebug() << "dragMesh removed";
         }
         //removeComponent(dragMesh);
@@ -2195,8 +2195,8 @@ void GLModel::mgoo(Qt3DRender::QPickEvent* v)
 
         if (components().size() < 5){
             //removeComponent(dragMesh);
-            dragMesh->setRadius(biggest);
-            addComponent(dragMesh);
+            /*dragMesh->setRadius(biggest);
+            addComponent(dragMesh);*/
             //qDebug() << "COMPONENTS(A): " << components();
             //qDebug() << "dragMesh added";
         }
