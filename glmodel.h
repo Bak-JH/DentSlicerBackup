@@ -232,6 +232,7 @@ public:
     QString getFileName(const string& s);
     QVector3D spreadPoint(QVector3D endpoint,QVector3D startpoint,int factor);
     void changeViewMode(int viewMode);
+    void inactivateFeatures();
 
     // support
     Slicer* slicer;

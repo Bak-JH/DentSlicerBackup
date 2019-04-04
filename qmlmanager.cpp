@@ -1226,6 +1226,7 @@ void QmlManager::unselectPart(int ID){
     qDebug() << "resetting model" << ID;
     target->changecolor(0);
     target->checkPrintingArea();
+    target->shadowModel->inactivateFeatures();
     disconnectHandlers(target);
     if (groupFunctionState == "active"){
         switch (groupFunctionIndex){
@@ -1247,6 +1248,7 @@ void QmlManager::unselectPart(int ID){
             break;
         }
     }
+
     if (selectedModels.size() == 0) selectedModels.push_back(nullptr);
     //selectedModels.clear();
     //selectedModels.push_back(nullptr);
