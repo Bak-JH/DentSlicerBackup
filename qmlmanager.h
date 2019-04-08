@@ -43,6 +43,7 @@ public:
     QObject* loginWindow;
     QObject* loginButton;
     QObject* boxUpperTab;
+    QObject* boxLeftTab;
     QEntity* models;
     Qt3DCore::QTransform* systemTransform;
     QObject* mv;
