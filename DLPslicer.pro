@@ -69,6 +69,20 @@ LIBS += -L$$_PRO_FILE_PWD_/$$LIB_DIR -lWinSparkle
 # deprecated API in order to know how to port your code away from it.
 DEFINES += QT_DEPRECATED_WARNINGS
 
+# add CGAL
+LIBS += -LC:/CGAL/lib/ -llibCGAL.dll
+LIBS += -LC:/boost_1_62_0/stage/lib -llibboost_system-mgw53-mt-1_62
+LIBS += -LC:/boost_1_62_0/stage/lib -llibboost_thread-mgw53-mt-1_62
+LIBS += -LC:/CGAL-4.11/auxiliary/gmp/lib -lgmp-10 -lmpfr-4
+
+INCLUDEPATH += C:/CGAL-4.11/include
+INCLUDEPATH += C:/CGAL-4.11/auxiliary/gmp/include
+INCLUDEPATH += C:/CGAL-4.11/auxiliary/gmp
+INCLUDEPATH += C:/boost_1_62_0
+INCLUDEPATH += C:/CGAL/include
+
+
+
 # You can also make your code fail to compile if you use deprecated APIs.
 # In order to do so, uncomment the following line.
 # You can also select to disable deprecated APIs only up to a certain version of Qt.

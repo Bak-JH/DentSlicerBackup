@@ -603,14 +603,16 @@ void QmlManager::runArrange_internal(){
         for (int i=0; i<glmodels.size(); i++){
             meshes_to_arrange.push_back(*(glmodels[i]->mesh));
             m_transform_set.push_back(glmodels[i]->m_transform);
+            glmodels[i]->m_transform->translation();
+            glmodels[i]->m_transform->rotation();
         }
         autoarrange* ar;
-        arng_result_set = ar->arngMeshes(meshes_to_arrange);
+        arng_result_set = ar->arngMeshes(meshes_to_arrange, m_transform_set);
         vector<QVector3D> translations;
         vector<float> rotations;
         for (int i=0; i<arng_result_set.size(); i++){
             XYArrangement arng_result = arng_result_set[i];
-            QVector3D trans_vec = QVector3D(arng_result.first.X/scfg->resolution, arng_result.first.Y/scfg->resolution, 0);
+            QVector3D trans_vec = QVector3D(arng_result.first.X/100, arng_result.first.Y/100, 0);
             translations.push_back(trans_vec);
             rotations.push_back(arng_result.second);
         }

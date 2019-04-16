@@ -25,7 +25,7 @@ public:
     autoarrange();
 
     vector<XYArrangement> simpArngMeshes(vector<Mesh>& meshes);
-    vector<XYArrangement> arngMeshes(vector<Mesh>& meshes);
+    vector<XYArrangement> arngMeshes(vector<Mesh> meshes, vector<Qt3DCore::QTransform*> m_transform_set);
     void arrangeQt3D(vector<Qt3DCore::QTransform*> m_transform_set, vector<XYArrangement> arng_result_set);
     //void arrangeGlmodels(vector< GLModel* > * glmodels);
 

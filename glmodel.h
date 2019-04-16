@@ -237,6 +237,8 @@ private:
     void initialize(const int& faces_cnt);
     void applyGeometry();
     void addVertex(QVector3D vertex);
+    void editVertex(int idx, QVector3D vertex);
+    void removeVertex(int idx);
     void addVertices(vector<QVector3D> vertices);
     void addNormalVertices(vector<QVector3D> vertices);
     void addColorVertices(vector<QVector3D> vertices);
