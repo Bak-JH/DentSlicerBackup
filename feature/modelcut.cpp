@@ -291,7 +291,6 @@ bool isLeftToPlane(Plane plane, QVector3D position){
 }
 
 void modelcut::generatePlane(Qt3DCore::QEntity* targetEntity){
-
     if (cuttingPoints.size()<3){
         qDebug()<<"Error: There is not enough vectors to render a plane.";
         QCoreApplication::quit();

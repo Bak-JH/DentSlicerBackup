@@ -30,7 +30,7 @@
 import Qt3D.Core 2.0
 import Qt3D.Input 2.0
 import Qt3D.Logic 2.0
-import Qt3D.Render 2.0
+import Qt3D.Render 2.11
 
 Entity {
     id: root
@@ -98,51 +98,26 @@ Entity {
                 if (rotateAction.active) {// mouse right rotate
                     if (qm.freecutActive)
                         return ;
-                    sceneRoot.systemTransform.rotationZ += rotationSpeed * rotateXAxis.value * dt;
+                    qm.disableObjectPickers();
+
+                    var proper_dt = (dt > 0.1)? 0 : dt;
+
+                    sceneRoot.systemTransform.rotationZ += rotationSpeed * rotateXAxis.value * proper_dt;
+
                     //var target = axisAngle2Quaternion(rotationSpeed * rotateXAxis.value * dt,qq.rotatedVector(systemTransform.rotation,zdown))
                     //cm.camera.rotateAboutViewCenter(qq.multiplyQuaternion(target,systemTransform.rotation));
-                    sceneRoot.systemTransform.rotationX += rotationSpeed * (-1) * rotateYAxis.value * dt;
+                    sceneRoot.systemTransform.rotationX += rotationSpeed * (-1) * rotateYAxis.value * proper_dt;
                     mttab.updatePosition()
+                } else {
+                    qm.enableObjectPickers();
                 }
             }
 
         }
     ]
 
-    /***************************************** Mouse Wheel Zoom *****************************************/
-    MouseHandler{
-        id : mouseHandler
-        sourceDevice: mouse
 
-        onWheel: {
-            var Camera_position, average, temp, Camera_radius
-            var d = wheel.angleDelta.y ;
 
-            var scaleTmp = sceneRoot.systemTransform.scale3D;
-            if(d>0){// mouse wheel zoom
-                sceneRoot.systemTransform.scale3D = scaleTmp.times(1.08);
-                mttab.updatePosition()
-            }
-            else if(d<0){
-                sceneRoot.systemTransform.scale3D = scaleTmp.times(0.92);
-                mttab.updatePosition()
-            }
-
-        }
-
-        onPressed: {
-            if(mouse.button ===1){ //left click
-                qm.setModelClickFalse();
-            }
-
-        }
-
-        onReleased: {
-            if(mouse.button ===1){ //left click
-                qm.backgroundClickCheck();
-            }
-        }
-    }
 
     /***************************************** Mouse Wheel Move *****************************************/
     // => main.qml MouseArea

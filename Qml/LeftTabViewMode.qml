@@ -5,11 +5,12 @@ import QtQuick.Controls.Styles 1.4
 import QtQuick.Layouts 1.3
 
 Rectangle {
+    z: 10
     property real originalHeight: 126
     width : 264
     height : originalHeight
 
-    color : "transparent"
+    color : "#efefef"
 
     state : "open"
 
@@ -43,8 +44,9 @@ Rectangle {
         height: 28
         anchors.left : parent.left
         anchors.top :  parent.top
+        z: 10
 
-        color: "transparent"
+        color: "#efefef"
 
         Text{
             height: parent.height
@@ -84,11 +86,11 @@ Rectangle {
     Rectangle{
         id : content
         width: parent.width
-        height: parent.height - 24
+        height: parent.height - 28
         anchors.left : parent.left
         anchors.top :  tab.bottom
 
-        color: "transparent"
+        color: "#efefef"
 
         Item{
             width: parent.width
@@ -134,7 +136,10 @@ Rectangle {
                     }
 
                     signal onChanged(bool checked);
-                    onCheckedChanged: {
+
+                    //onCheckedChanged: {
+                    onClicked: {
+                        console.log("Object View Selected")
                         onChanged(checked);
                     }
 
@@ -180,8 +185,16 @@ Rectangle {
                     }
 
                     signal onChanged(bool checked);
-                    onCheckedChanged: {
+
+                    //onCheckedChanged: {
+                    onClicked: {
+                        console.log("Support View Selected")
                         onChanged(checked);
+                        if (qm.getViewMode() === 0) {
+                            viewObjectButton.checked = true
+                        } else if (qm.getViewMode() === 2) {
+                            viewLayerButton.checked = true
+                        }
                     }
 
                     onHoveredChanged: {
@@ -225,8 +238,16 @@ Rectangle {
                     }
 
                     signal onChanged(bool checked);
-                    onCheckedChanged: {
+                    
+                    //onCheckedChanged: {
+                    onClicked: {
+                        console.log("Layer View Selected")
                         onChanged(checked);
+                        if (qm.getViewMode() === 0) {
+                            viewObjectButton.checked = true
+                        } else if (qm.getViewMode() === 1) {
+                            viewSupportButton.checked = true
+                        }
                     }
 
                     onHoveredChanged: {

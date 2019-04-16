@@ -1,3 +1,5 @@
+
+
 #include <QApplication>
 #include <QQmlApplicationEngine>
 #include <QQmlEngine>
@@ -12,6 +14,7 @@
 #include "QFuture"
 #include <QSplashScreen>
 #include "utils/updatechecker.h"
+#include "utils/gridmesh.h"
 //#include <QTranslator>
 
 using namespace Qt3DCore;
@@ -31,6 +34,8 @@ int main(int argc, char **argv)
     QQmlApplicationEngine engine;
     qRegisterMetaType<vector<QVector3D>>("vector<QVector3D>");
     qRegisterMetaType<vector<float>>("vector<float>");
+    qmlRegisterType<GridMesh>("DentStudio", 1, 0, "GridMesh");
+    //qmlRegisterType<SlicingConfiguration>("DentStudio", 1, 0, "SlicingConfiguration");
 
     /** Splash Image **/
     QPixmap pixmap(":/Resource/splash_final.png");
@@ -40,8 +45,8 @@ int main(int argc, char **argv)
     painter.setPen(penHText);
 
     painter.drawText(QPoint(32,290), "Dental 3D Printing Solution");
-    painter.drawText(QPoint(32,310), "Version");
-    painter.drawText(QPoint(88,310), version);
+    painter.drawText(QPoint(32,310), "Version " + version);
+    //painter.drawText(QPoint(88,310), version);
     painter.drawText(QPoint(32,330), "Developed by HiX Inc.");
 
     QSplashScreen *splash = new QSplashScreen(pixmap);

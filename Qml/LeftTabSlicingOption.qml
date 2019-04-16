@@ -7,6 +7,7 @@ Rectangle {
     property alias option_resolution: option_resolution
     property alias option_layer_height: option_layer_height
     property alias option_bed_number: option_bed_number
+    property alias option_resin_type: option_resin_type
     property alias option_raft: option_raft
     property alias option_support: option_support
     property alias option_support_density: option_support_density
@@ -18,7 +19,7 @@ Rectangle {
     width : 264
     height : 180
 
-    color : "transparent"
+    color : "#efefef"
 
     state : "open"
 
@@ -28,8 +29,9 @@ Rectangle {
         height: 28
         anchors.left : parent.left
         anchors.top :  parent.top
+        z: 10
 
-        color: "transparent"
+        color: "#efefef"
 
         Text{
             height: parent.height
@@ -74,7 +76,7 @@ Rectangle {
         anchors.left : parent.left
         anchors.top :  tab.bottom
 
-        color:"Transparent"
+        color:"#efefef"
         Item {
             width: parent.width
             height: parent.height
@@ -88,7 +90,7 @@ Rectangle {
                 LeftTabSlicingOptionElement{
                     id:option_resolution
                     columnName: "Resolution"
-                    columnContents: ["1920*1080","1024*768"]
+                    columnContents: ["1920*1080", "1280*800", "1024*768"]
                 }
 
                 Item{width:parent.width;height:2}//spacer
@@ -105,6 +107,14 @@ Rectangle {
                     id:option_bed_number
                     columnName: "Bed number"
                     columnContents: ["1","2","3"]
+                }
+
+                Item{width:parent.width;height:2}//spacer
+
+                LeftTabSlicingOptionElement{
+                    id:option_resin_type
+                    columnName: "Resin Type"
+                    columnContents: ["Temporary","Clear","Castable"]
                 }
 
                 Item{width:parent.width;height:2}//spacer

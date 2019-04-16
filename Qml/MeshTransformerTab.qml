@@ -11,13 +11,14 @@ Rectangle {
 
     property int leftPos: 0
     property int topPos: 0
+    property int ftrDelete : 18
 
     anchors.leftMargin: leftPos
     anchors.topMargin: topPos
 
     visible: false
     color : "transparent"
-    signal runGroupFeature(int type, string state, double arg1, double arg2, double arg3);
+    signal runGroupFeature(int type, string state, double arg1, double arg2, double arg3, var config);
 
     Rectangle{//shadow
         width: 34
@@ -235,7 +236,7 @@ Rectangle {
 
         uppertab.all_off()
         uppertab.second_tab_button_move.state = "active"
-        mttab.runGroupFeature(4, "active", 0, 0, 0);
+        mttab.runGroupFeature(4, "active", 0, 0, 0, null);
 
         hideTab()
     }
@@ -245,7 +246,7 @@ Rectangle {
 
         uppertab.all_off()
         uppertab.second_tab_button_rotate.state = "active"
-        mttab.runGroupFeature(5, "active", 0, 0, 0);
+        mttab.runGroupFeature(5, "active", 0, 0, 0, null);
 
         hideTab()
     }
@@ -261,8 +262,9 @@ Rectangle {
 
     function selectDelete(){
         uppertab.all_off();
-        deletePopUp.visible = true
-        deletePopUp.targetID = qm.getselectedModelID()
+        yesnoPopUp.openYesNoPopUp(false, "", "Are you sure to delete these models?", "", 18, "", ftrDelete, 0)
+        //deletePopUp.visible = true
+        //deletePopUp.targetID = qm.getselectedModelID()
 
         hideTab()
     }
@@ -284,6 +286,7 @@ Rectangle {
 
 
     function world2Screen(target){
+
         var tmp = Qt.vector3d(0,0,0)
         tmp = target
         target = tmp.times(sceneRoot.systemTransform.scale3D)
@@ -305,7 +308,9 @@ Rectangle {
         point2.x = (point2.x+1) * scene3d.width/2;
         point2.y = (-1 * point2.y+1) * scene3d.height/2;
         return Qt.vector2d(point2.x,point2.y)
+
     }
+
 
 }
 

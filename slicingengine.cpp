@@ -1,6 +1,7 @@
-#include "slicingengine.h"
+//#include "slicingengine.h"
 #include <QDir>
 #include "qmlmanager.h"
+#include "glmodel.h"
 
 SlicingEngine::SlicingEngine()
 {
@@ -8,7 +9,8 @@ SlicingEngine::SlicingEngine()
 
 QProcess *slicing_process;
 
-Slicer* SlicingEngine::slice (QVariant cfg, Mesh* mesh, QString filename){
+Slicer* SlicingEngine::slice(QVariant cfg, Mesh* shellMesh, Mesh* supportMesh, Mesh* raftMesh, QString filename){
+    qDebug() << "slice" << cfg << shellMesh << filename;
     QVariantMap config = cfg.toMap();
     for(QVariantMap::const_iterator iter = config.begin(); iter != config.end(); ++iter) {
         qDebug() << iter.key() << iter.value().toString();
@@ -19,30 +21,53 @@ Slicer* SlicingEngine::slice (QVariant cfg, Mesh* mesh, QString filename){
         } else if (!strcmp(iter.key().toStdString().c_str(), "raft_type")){
             (*scfg)[iter.key().toStdString().c_str()] = 2;//iter.value().toString();
         } else if (!strcmp(iter.key().toStdString().c_str(), "layer_height")){
+            scfg->layer_height = iter.value().toFloat();
             //(*scfg)[iter.key().toStdString().c_str()] = 2;//iter.value().toString();
         } else if (!strcmp(iter.key().toStdString().c_str(), "resolution")){
             //(*scfg)[iter.key().toStdString().c_str()] = 2;//iter.value().toString();
+        } else if (!strcmp(iter.key().toStdString().c_str(), "resin_type")){
+            if (iter.value().toString() == "Temporary"){
+                scfg->resin_type = TEMPORARY_RESIN;
+                scfg->contraction_ratio = TEMPORARY_CONTRACTION_RATIO;
+            } else if (iter.value().toString() == "Clear"){
+                scfg->resin_type = CLEAR_RESIN;
+                scfg->contraction_ratio = CLEAR_CONTRACTION_RATIO;
+            } else {
+                scfg->resin_type = CASTABLE_RESIN;
+                scfg->contraction_ratio = CASTABLE_CONTRACTION_RATIO;
+            }
+            (*scfg)[iter.key().toStdString().c_str()] = iter.value().toString();
         } else {
+
         }
     }
+    qDebug() << "done parsing arguments";
 
-    // 승환 25%
-    qmlManager->setProgress(0.25);
+    qmlManager->setProgress(0.1);
 
-    // Load mesh
-    Mesh* loaded_mesh = mesh;
+    //Mesh* loaded_mesh = mesh;
+    //qDebug() << "loadedMesh : " << loaded_mesh->faces.size();
     /*Mesh* loaded_mesh = new Mesh();
     loadMeshSTL(loaded_mesh, filename.toStdString().c_str());
     */
 
     // Slice
     Slicer* slicer = new Slicer();
-    Slices contourLists = slicer->slice(loaded_mesh);
-    // 승환 slice 안쪽
+    Slices shellSlices = slicer->slice(shellMesh);
+    qDebug() << "Shell Slicing Done\n";
+    qmlManager->setProgress(0.4);
+    Slices supportSlices = slicer->slice(supportMesh);
+    qDebug() << "Support Slicing Done\n";
+    qmlManager->setProgress(0.6);
+    Slices raftSlices = slicer->slice(raftMesh);
+    qDebug() << "Raft Slicing Done\n";
+    qmlManager->setProgress(0.8);
+    Slices contourLists = supportSlices;
+    qmlManager->setProgress(0.9);
 
     // Export to SVG
     SVGexporter* exporter = new SVGexporter();
-    QString export_info = exporter->exportSVG(contourLists, filename+"_export");
+    QString export_info = exporter->exportSVG(shellSlices, supportSlices, raftSlices, filename+"_export");
 
     // 승환 100%
     qmlManager->setProgress(1);

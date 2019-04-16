@@ -16,6 +16,12 @@ Rectangle {
     //border.width: 1
     //border.color: "#cccccc"
 
+    MouseArea {
+        id: popup_area
+        anchors.fill: parent
+        //hoverEnabled: true
+    }
+
     property alias funcname: funcname.text
     property alias detail1: detail1.text
     property alias detail2: detail2.text
@@ -29,6 +35,14 @@ Rectangle {
     property alias applybutton_text: applybutton_text.text
     property alias applyfinishbutton_text:applyfinishbutton_text.text
     property bool applybutton_action:true
+
+    //----------------------------------------------------------------
+    // properties for label info
+    property string labelTextContent:labelTextContent
+    property int labelContentWidth:labelContentWidth
+    property string labelFontName:labelFontName
+    property bool labelIsBold:labelIsBold
+    property int labelFontSize:labelFontSize
 
     //----------------------------------------------------------------
 
@@ -109,6 +123,9 @@ Rectangle {
 
     function do_apply(functionname){
         switch(functionname){
+                case "Save":
+                    applyClicked();
+                    break;
                 case "Move":
                     applyClicked();
                     break;
@@ -152,7 +169,6 @@ Rectangle {
     }
 
     function focus_all_off() {
-        console.log("focus all off");
         numberbox1_text.focus = false;
         numberbox2_text.focus = false;
         numberbox3_text.focus = false;
@@ -192,7 +208,7 @@ Rectangle {
     }
 
     function colorApplyFinishButton(mode){
-        console.log("colorApplyFinishButton mode " + mode)
+        //console.log("colorApplyFinishButton mode " + mode)
         if (mode === 1){
             applyfinishbutton.color="#3ea6b7"
         }else if(mode === 0){
@@ -420,7 +436,7 @@ Rectangle {
                 qm.resetCursor();
                 parent.color = parent.beforeHorver
             }
-            onReleased: {do_apply(funcname.text); /*all_off();*/ focus_all_off() ;numbox_reset()}
+            onReleased: {do_apply(funcname.text); /*all_off();*/ focus_all_off() ;numbox_reset();}
         }
     }
     Rectangle {
@@ -1313,7 +1329,8 @@ Rectangle {
                 onExited : qm.resetCursor();
                 onPressed: {
                     numberbox_detail2_text.focus = false;
-                    numbox_value_detail2 = numbox_value_detail2 - numbox_updown_scale;
+                    if (numbox_value_detail2 - numbox_updown_scale)
+                        numbox_value_detail2 = numbox_value_detail2 - numbox_updown_scale;
                     numberbox_detail2_text.text = numbox_value_detail2 + number_unit_detail2;
                     detail2_downbutton_image1.source = "qrc:/Resource/popup_image/down_button_hover.png"
                 }
@@ -1356,6 +1373,8 @@ Rectangle {
             id:text3DInput
             objectName: "text3DInput"
             anchors.fill: parent
+//            activeFocusOnPress: true
+ //           activeFocusOnPress: false
             style: TextFieldStyle {
                 textColor: "#333333"
                 background: Rectangle {
@@ -1365,7 +1384,9 @@ Rectangle {
                 }
             }
             selectByMouse: true
+
             onFocusChanged: {
+                console.log("focus changed: ", text3DInput.focus, text3DInputBackground.focus);
             //    if(numberbox1_text.focus)
             //        numberbox1.color = "#f5f5f5"
             }
@@ -1374,13 +1395,35 @@ Rectangle {
             onTextChanged: {
                 //console.log("content width changed ");
                 //console.log(hiddenText.text.length);
-                console.log("content width : ");
-                console.log(hiddenText.text.length);
-                console.log(hiddenText.contentWidth);
+                //console.log("content width : ");
+                //console.log(hiddenText.text.length);
+                //console.log(hiddenText.contentWidth);
                 labelTextChanged(text, hiddenText.contentWidth);
+
                 //sendTextChanged(text, hiddenText.text.length)
             }
+
+
+
         }
+
+        /*
+        MouseArea {
+            anchors.fill: parent
+            hoverEnabled: true
+            focus: false
+            onEntered: {
+                text3DInput.focus = true;
+                text3DInput.activeFocusOnPress = true;
+                console.log("entered ^^^^", text3DInput.activeFocusOnPress);
+            }
+            onExited: {
+                text3DInput.focus = false;
+                text3DInput.activeFocusOnPress = false;
+                console.log("exited ^^^^", text3DInput.activeFocusOnPress);
+            }
+        }
+        */
     }
 
     Rectangle{//shadow

@@ -34,55 +34,65 @@ Rectangle {
     property int ftrLabel : 15
     property int ftrSupportViewMode : 16
     property int ftrLayerViewMode : 17
+    property int ftrDelete : 18
 
     property alias second_tab_button_move: second_tab_button_move
     property alias second_tab_button_rotate: second_tab_button_rotate
     property alias third_tab_button_scale: third_tab_button_scale
 
 
-    signal runGroupFeature(int type, string state, double arg1, double arg2, double arg3);
+    signal runGroupFeature(int type, string state, double arg1, double arg2, double arg3, var config);
     function all_off() {
+        console.log("all off starting")
         first_tab_button_open.state = "inactive";
         first_tab_button_export.state = "inactive";
         first_tab_button_save.state = "inactive";
+        //runGroupFeature(ftrSave, "inactive", 0, 0, 0, null);
         second_tab_button_arrange.state = "inactive";
         second_tab_button_layflat.state = "inactive";
-        runGroupFeature(ftrLayFlat, "inactive", 0, 0, 0);
+        runGroupFeature(ftrLayFlat, "inactive", 0, 0, 0, null);
 
         second_tab_button_move.state = "inactive";
-        runGroupFeature(ftrMove,"inactive", 0, 0, 0);
+        runGroupFeature(ftrMove,"inactive", 0, 0, 0, null);
         second_tab_button_orient.state = "inactive";
         second_tab_button_rotate.state = "inactive";
-        runGroupFeature(ftrRotate,"inactive", 0, 0, 0);
+        runGroupFeature(ftrRotate,"inactive", 0, 0, 0, null);
         third_tab_button_autorepair.state = "inactive";
         third_tab_button_cut.state = "inactive";
         //third_tab_button_hollowshell.state = "inactive";
         third_tab_button_shelloffset.state = "inactive";
         third_tab_button_scale.state = "inactive";
-        runGroupFeature(ftrScale, "inactive", 0, 0, 0);
+        runGroupFeature(ftrScale, "inactive", 0, 0, 0, null);
         fourth_tab_button_extend.state = "inactive";
-        runGroupFeature(ftrExtend, "inactive", 0, 0, 0);
+        runGroupFeature(ftrExtend, "inactive", 0, 0, 0, null);
         fourth_tab_button_label.state = "inactive";
         fourth_tab_button_support.state = "inactive";
 
         fifth_tab_button_setting.state = "inactive";
         fifth_tab_button_feedback.state = "inactive";
 
-
-        arrangePopUp.closePopUp();
+        //arrangePopUp.closePopUp();
         resultPopUp.closePopUp();
-        deletePopUp.closePopUp();
+        //deletePopUp.closePopUp();
         settingPopup.closePopUp();
         feedbackPopUp.closePopUp();
         resultPopUp.closePopUp();
-        if(yesnoPopUp.isFlawOpen)
+        //if(yesnoPopUp.isFlawOpen)
             yesnoPopUp.closePopUp();
 
         //qm.keyboardHandlerFocus();
-        //scene3d.forceActiveFocus();
+        scene3d.forceActiveFocus();
         qm.freecutActive = false;
 
-        console.log("all off");
+        console.log("all off done");
+    }
+
+    function disableUppertab(){
+        uppertab.enabled = false
+    }
+
+    function enableUppertab(){
+        uppertab.enabled = true
     }
 
     property real move_x_value
@@ -199,6 +209,7 @@ Rectangle {
             MouseArea{
                 anchors.fill: parent
                 onClicked:{
+                    all_off()
                     filedialogload.open();
                 }
             }
@@ -212,14 +223,33 @@ Rectangle {
             iconSource1: "qrc:/resource/upper_save.png"
             iconSource2: "qrc:/Resource/upper2_save.png"
             iconText: qsTr("Save")
+
+            signal runGroupFeature(int type, string state, double arg1, double arg2, double arg3, var config)
+            onButtonClicked:{
+                if(!qm.isSelected() && (state == "active"))
+                    window.resultPopUp.openResultPopUp("","You must select at least one model.","")
+                else if(state == "active") {
+                    qm.openSave()
+                    yesnoPopUp.openYesNoPopUp(true, "", "Save selected models as a STL file.", "", 18, "", ftrSave, 1)
+                } else
+                    yesnoPopUp.visible = false
+                /*
+                runGroupFeature(ftrSave, state, 0, 0, 0, null)
+                console.log("run group featur save " + ftrSave + "   " + state)
+                */
+            }
+
+/*
             signal runFeature(int type);
             MouseArea{
                 anchors.fill: parent
                 onClicked:{
-                    parent.runFeature(ftrSave);
+                    if (!qm.isSelected() && (state == "active"))
+                        window.resultPopUp.openResultPopUp("","You must select at least one model.","")
+                    else parent.runFeature(ftrSave);
                 }
-
             }
+*/
         }
 
 
@@ -234,31 +264,14 @@ Rectangle {
             MouseArea{
                 anchors.fill: parent
                 onClicked:{
-                    /*
-                    function collectConfigurations(){
-                        var configurations = {};
-
-                        // do collecting things
-                        // configurations[key] = value;
-                        configurations["resolution"] = options[0];
-                        configurations["layer_height"] = options[1];
-                        configurations["support_type"] = options[2];
-                        configurations["infill_type"] = options[3];
-                        configurations["raft_type"] = options[4];
-                        return configurations;
-                    }
-
-                    console.log("exporting");
-                    // collect configurations
-                    var cfg = collectConfigurations();
-                    //se.slice(cfg);
-                    parent.runFeature(ftrExport, cfg);
-                    */
                     all_off();
                     lefttabExport.visible = true;
+
+                    // yesno popup을 거쳐 확인하고 슬라이스
+                    yesnoPopUp.openYesNoPopUp(false, "Exporting process may take time.", "", "Would you like to continue?", 16, "", ftrExport, 0);
                 }
             }
-            signal runFeature(int type, var config);
+            //signal runGroup(int type, var config);
         }
 
         Rectangle{
@@ -291,9 +304,9 @@ Rectangle {
             iconSource1: "qrc:/resource/upper_move.png"
             iconSource2: "qrc:/Resource/upper2_move.png"
             iconText: qsTr("Move")
-            signal runGroupFeature(int type, string state, double arg1, double arg2, double arg3);
+            signal runGroupFeature(int type, string state, double arg1, double arg2, double arg3, var config);
             onButtonClicked:{
-                   runGroupFeature(ftrMove, state, 0, 0, 0);
+                   runGroupFeature(ftrMove, state, 0, 0, 0, null);
                    console.log("run group featur mov " + ftrMove + "   " + state);
             }
         }
@@ -304,9 +317,9 @@ Rectangle {
             iconSource1: "qrc:/resource/upper_rotate.png"
             iconSource2: "qrc:/Resource/upper2_rotate.png"
             iconText: qsTr("Rotate")
-            signal runGroupFeature(int type, string state, double arg1, double arg2, double arg3);
+            signal runGroupFeature(int type, string state, double arg1, double arg2, double arg3, var config);
             onButtonClicked:{
-                   runGroupFeature(ftrRotate, state, 0, 0, 0);
+                   runGroupFeature(ftrRotate, state, 0, 0, 0, null);
                 console.log("run group featur rot " + ftrRotate + "   " + state);
             }
 
@@ -318,11 +331,11 @@ Rectangle {
             iconSource1: "qrc:/resource/upper_layflat.png"
             iconSource2: "qrc:/Resource/upper2_layflat.png"
             iconText: qsTr("Lay Flat")
-            signal runGroupFeature(int type, string state, double arg1, double arg2, double arg3);
+            signal runGroupFeature(int type, string state, double arg1, double arg2, double arg3, var config);
             onButtonClicked:{
                 if(!qm.isSelected()&& (state == "active"))
                     window.resultPopUp.openResultPopUp("","You must select at least one model.","")
-                 //runGroupFeature(ftrLayFlat, state, 0, 0, 0);
+                 //runGroupFeature(ftrLayFlat, state, 0, 0, 0, null);
             }
         }
         UpperButton{
@@ -333,11 +346,13 @@ Rectangle {
             iconSource2: "qrc:/Resource/upper2_arrange.png"
             iconText: qsTr("Arrange")
             onButtonClicked:{
-                if(state == "active")
-                    arrangePopUp.visible = true
+                if(state == "active") {
+                    //arrangePopUp.visible = true
+                    yesnoPopUp.openYesNoPopUp(false, "Click OK to auto-arrange models.", "", "", 18, "qrc:/Resource/popup_image/image_arrange.png", ftrArrange, 1)
+                }
                 else
-                    arrangePopUp.visible = false
-
+                    //arrangePopUp.visible = false
+                    yesnoPopUp.visible = false
             }
         }
         UpperButton{
@@ -347,9 +362,9 @@ Rectangle {
             iconSource1: "qrc:/resource/upper_orientation.png"
             iconSource2: "qrc:/Resource/upper2_orient.png"
             iconText: qsTr("Orient")
-            signal runGroupFeature(int type, string state, double arg1, double arg2, double arg3);
+            signal runGroupFeature(int type, string state, double arg1, double arg2, double arg3, var config);
             onButtonClicked:{
-                   runGroupFeature(ftrOrient, state, 0, 0, 0);
+                   runGroupFeature(ftrOrient, state, 0, 0, 0, null);
             }
 
         }
@@ -421,12 +436,12 @@ Rectangle {
             }
             visible: if(box_uppertab.box != iconText) return false;
             */
-            signal runGroupFeature(int type, string state, double arg1, double arg2, double arg3);
+            signal runGroupFeature(int type, string state, double arg1, double arg2, double arg3, var config);
             onButtonClicked:{
                 if(!qm.isSelected() && (state == "active"))
                     window.resultPopUp.openResultPopUp("","You must select at least one model.","")
                 else
-                    runGroupFeature(ftrRepair, state, 0, 0, 0);
+                    runGroupFeature(ftrRepair, state, 0, 0, 0, null);
             }
         }
 
@@ -506,7 +521,7 @@ Rectangle {
             iconSource2: "qrc:/Resource/upper2_extend.png"
             iconText: qsTr("Extend")
 
-            signal runGroupFeature(int type, string state, double arg1, double arg2, double arg3);
+            signal runGroupFeature(int type, string state, double arg1, double arg2, double arg3, var config);
             onButtonClicked:{
                 if(!qm.isSelected() && (state == "active")){
                     window.resultPopUp.openResultPopUp("","You must select at least one model.","")
@@ -633,6 +648,62 @@ Rectangle {
         anchors.leftMargin: 280
         //color: "transparent"
 
+        /*
+        //2. PopUp - Save
+        PopUp {
+            objectName: "savePopup"
+            id: popup_save
+            funcname: "Save"
+            width: 320
+            height: 120
+            detail1: "Click Apply to save selected models in a file."
+            detailline1_vis: false
+            detailline2_vis: false
+            okbutton_vis: false
+            applybutton_vis: false
+            applyfinishbutton_vis: true
+
+            signal runFeature(int type);
+            onApplyClicked: {
+                console.log("save")
+                runFeature(ftrSave);
+            }
+
+            signal runGroupFeature(int type, string state, double arg1, double arg2, double arg3, var config);
+            signal openSave();
+            signal closeSave();
+
+            onFinishClicked:{
+                closeSave();
+            }
+
+            state: {
+                if (first_tab_button_save.state=="active"){
+                    return "active";
+                } else {
+                    return "inactive";
+                }
+            }
+
+            onStateChanged: {
+                if (state == "active") {
+                    console.log("save active")
+                    openSave()
+                } else {
+                    console.log("save inactive")
+                    closeSave()
+                }
+            }
+
+            function onApplyFinishButton(){
+                popup_save.colorApplyFinishButton(2)
+            }
+
+            function offApplyFinishButton(){
+                popup_save.colorApplyFinishButton(0)
+            }
+        }
+        */
 
         //4. PopUp - Move
         PopUp {
@@ -684,9 +755,9 @@ Rectangle {
                 console.log("move")
                 runFeature(ftrMove,popup_move.numberbox1_number,popup_move.numberbox2_number);
             }
-            signal runGroupFeature(int type, string state, double arg1, double arg2, double arg3);
+            signal runGroupFeature(int type, string state, double arg1, double arg2, double arg3, var config);
             onFinishClicked:{
-                runGroupFeature(ftrMove, state, 0, 0, 0);
+                runGroupFeature(ftrMove, state, 0, 0, 0, null);
             }
 
             function onApplyFinishButton(){
@@ -725,7 +796,7 @@ Rectangle {
                 console.log("rotate")
                 runFeature(ftrRotate,popup_rotate.numberbox1_number,popup_rotate.numberbox2_number,popup_rotate.numberbox3_number);
             }
-            signal runGroupFeature(int type, string state, double arg1, double arg2, double arg3);
+            signal runGroupFeature(int type, string state, double arg1, double arg2, double arg3, var config);
             signal closeRotate();
             signal openRotate();
 
@@ -914,7 +985,7 @@ Rectangle {
             signal openScale();
             signal closeScale();
             //signal runFeature(int type, double scaleX, double scaleY, double scaleZ);
-            signal runGroupFeature(int type, string state, double arg1, double arg2, double arg3);
+            signal runGroupFeature(int type, string state, double arg1, double arg2, double arg3, var config);
 
             state: {
                 if (third_tab_button_scale.state=="active" && qm.isSelected()){
@@ -950,10 +1021,29 @@ Rectangle {
                 console.log("scale called x y z" + numberbox1_number + numberbox2_number + numberbox3_number);
                 console.log("scale called" + numbox_value_detail2);
                 if (numbox_value_detail2 != 100) // scale by scale value
-                    runGroupFeature(ftrScale, state, numbox_value_detail2/100, numbox_value_detail2/100, numbox_value_detail2/100);
+                    runGroupFeature(ftrScale, state, numbox_value_detail2/100, numbox_value_detail2/100, numbox_value_detail2/100, null);
                     //runFeature(ftrScale, numbox_value_detail2/100, numbox_value_detail2/100, numbox_value_detail2/100);
-                else // scale by definite mm
-                    runGroupFeature(ftrScale, state, numberbox1_number/numberbox1_number_origin, numberbox2_number/numberbox2_number_origin, numberbox3_number/numberbox3_number_origin);
+                else if (scale_lock.source == "qrc:/Resource/popup_image/scale_lock.png"){ // scale by definite mm with locked
+                    console.log("scale is locked");
+                    if(numberbox1_number != numberbox1_number_origin) {
+                        runGroupFeature(ftrScale, state,
+                                        numberbox1_number/numberbox1_number_origin,
+                                        numberbox1_number/numberbox1_number_origin,
+                                        numberbox1_number/numberbox1_number_origin, null);
+                    } else if (numberbox2_number != numberbox2_number_origin) {
+                        runGroupFeature(ftrScale, state,
+                                        numberbox2_number/numberbox2_number_origin,
+                                        numberbox2_number/numberbox2_number_origin,
+                                        numberbox2_number/numberbox2_number_origin, null);
+                    } else {
+                        runGroupFeature(ftrScale, state,
+                                        numberbox3_number/numberbox3_number_origin,
+                                        numberbox3_number/numberbox3_number_origin,
+                                        numberbox3_number/numberbox3_number_origin, null);
+                    }
+                }
+                else // scale by definite mm with unlocked
+                    runGroupFeature(ftrScale, state, numberbox1_number/numberbox1_number_origin, numberbox2_number/numberbox2_number_origin, numberbox3_number/numberbox3_number_origin, null);
                     //runFeature(ftrScale, numberbox1_number/numberbox1_number_origin, numberbox2_number/numberbox2_number_origin, numberbox3_number/numberbox3_number_origin);
                 // update scale info
             }
@@ -1074,7 +1164,7 @@ Rectangle {
                 slider_vis = false;
                 cutModeSelected(2);
                 viewUp();
-                popup_cut.colorApplyFinishButton(0)
+                popup_cut.colorApplyFinishButton(0);
                 qm.freecutActive = true
             }
 
@@ -1246,6 +1336,7 @@ Rectangle {
             slider_vis:false
             state: {
                 if (third_tab_button_shelloffset.state == "active" && qm.isSelected()){
+                    popup_shelloffset.colorApplyFinishButton(2);
                     slider_vis = true;
                     openShellOffset();
                     return "active";
@@ -1599,12 +1690,19 @@ Rectangle {
             detail2: "Font"
             text3DInputBackground_vis: true
             image: "qrc:/Resource/label_description.png"
+            labelTextContent: "Enter text"
+            labelFontName:"Alias"
+            labelContentWidth: 0
+            labelIsBold: false
+            labelFontSize: 12
 
             //signal runFeature(int type);
             signal generateText3DMesh()
             signal openLabelling()
             signal closeLabelling()
+            signal stateChangeLabelling()
             signal sendTextChanged(string text, int contentWidth);
+            signal sendLabelUpdate(string text, int contentWidth, string fontName, bool isBold, int fontSize);
 
             onApplyClicked: {
                 console.log("ApplyClicked")
@@ -1613,15 +1711,32 @@ Rectangle {
             }
 
             onLabelTextChanged: {
-                console.log("sendTextChanged");
+                popup_label.labelTextContent = text;
+                popup_label.labelContentWidth = contentWidth;
                 sendTextChanged(text, contentWidth);
+            }
+
+            onStateChanged: {
+                if (state != "active") {
+                    stateChangeLabelling();
+                }
+            }
+
+
+            function noModel(){
+                window.resultPopUp.openResultPopUp("","You must select the location of label.","");
+            }
+
+            function labelUpdate() {
+                sendLabelUpdate(popup_label.labelTextContent, popup_label.labelContentWidth
+                                ,popup_label.labelFontName, popup_label.labelIsBold, popup_label.labelFontSize);
             }
 
             ComboBox {
                 objectName: "labelFontBox"
                 id: labelFontBox
                 currentIndex: 0
-                activeFocusOnPress: true
+                activeFocusOnPress: false
                 width: 194
                 height: 24
 
@@ -1632,7 +1747,10 @@ Rectangle {
 
                 signal sendFontName(string fontName)
 
-                onCurrentTextChanged: sendFontName(currentText)
+                onCurrentTextChanged: {
+                    popup_label.labelFontName = currentText;
+                    sendFontName(currentText);
+                }
 
                 Image {
                     width: 12
@@ -1733,7 +1851,7 @@ Rectangle {
                 objectName: "labelFontSizeBox"
                 id: labelFontSizeBox
                 currentIndex: 0
-                activeFocusOnPress: true
+                activeFocusOnPress: false
                 width: 194
                 height: 24
 
@@ -1744,8 +1862,10 @@ Rectangle {
 
                 signal sendFontSize(int fontSize)
 
-                onCurrentTextChanged: sendFontSize(parseInt(currentText))
-
+                onCurrentTextChanged: {
+                    popup_label.labelFontSize = parseInt(currentText);
+                    sendFontSize(parseInt(currentText));
+                }
                 Image {
                     width: 12
                     height: 8
@@ -1851,6 +1971,7 @@ Rectangle {
 
                 signal sendFontBold(bool fontBold)
                 onCheckedStateChanged: {
+                    popup_label.labelIsBold = checked;
                     sendFontBold(checked);
                 }
             }

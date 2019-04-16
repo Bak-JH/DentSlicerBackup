@@ -65,6 +65,10 @@ Rectangle {
                     columnContent : lefttab.ltso.option_bed_number.currentText
                 }
                 LeftTabExportElement{
+                    columnName: "Resin Type"
+                    columnContent : lefttab.ltso.option_resin_type.currentText
+                }
+                LeftTabExportElement{
                     columnName: "Raft"
                     columnContent : lefttab.ltso.option_raft.currentText
                 }
@@ -118,9 +122,10 @@ Rectangle {
                     // configurations[key] = value;
                     configurations["resolution"] = options[0];
                     configurations["layer_height"] = options[1];
-                    configurations["support_type"] = options[2];
-                    configurations["infill_type"] = options[3];
-                    configurations["raft_type"] = options[4];
+                    configurations["resin_type"] = options[2];
+                    configurations["support_type"] = options[3];
+                    configurations["infill_type"] = options[4];
+                    configurations["raft_type"] = options[5];
                     return configurations;
                 }
 
