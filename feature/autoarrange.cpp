@@ -1,4 +1,6 @@
 #include "autoarrange.h"
+#include <cstdlib>
+#include <ctime>
 #define ANGLE_UNIT 270
 #define STAGE_WIDTH 95000
 #define STAGE_HEIGHT 75000
@@ -412,19 +414,335 @@ vector<XYArrangement> autoarrange::simpArngMeshes(vector<Mesh>& meshes){
     return arng2D(outlines);
 }
 
-vector<XYArrangement> autoarrange::arngMeshes(vector<Mesh>& meshes){
-    vector<Paths> outlines;
+typedef struct LLIPoint {
+    long long int x, y;
+} LLIPoint;
+
+#define max2(x,y) ((x)>(y)?(x):(y))
+#define min2(x,y) ((x)<(y)?(x):(y))
+
+bool is_valid_range(int y, int x, int k){
+    return 0<=y && y<=k && 0<=x && x<=k;
+}
+
+bool make_outline(int y, int x, int startY, int startX, int depth, int direction, vector<vector<bool> > *block, vector<vector<bool> > *outline, vector<pair<int, int> > *vertice, int k) {
+    int dy[8] = {0, -1, -1, -1, 0, 1, 1, 1}, dx[8] = {1, 1, 0, -1, -1, -1, 0, 1};
+    (*outline)[y][x] = true;
+    if (depth != 0 && y == startY && x == startX) {
+        return true;
+    }
+    for (int kk=direction+2; kk>=direction-2; kk--){
+        if (is_valid_range(y+dy[(kk+8)%8], x+dx[(kk+8)%8], k) && (*block)[y+dy[(kk+8)%8]][x+dx[(kk+8)%8]]) {
+            if (direction != kk)
+                vertice->push_back(make_pair(y, x));
+            if (make_outline(y+dy[(kk+8)%8], x+dx[(kk+8)%8], startY, startX, depth+1, (kk+8)%8, block, outline, vertice, k))
+                return true;
+            if (direction != kk)
+                vertice->pop_back();
+        }
+    }
+    return false;
+}
+vector<LLIPoint> getPaddedProj(Mesh *mesh, int floatPointPadding) {
+    long long int INF=10000000000000;
+    int k=100, padding=2;
+    vector<pair<LLIPoint, LLIPoint> > edges;
+    vector<vector<bool> > block, padding_block, outline;
+    vector<pair<int, int> > vertice;
+    vector<LLIPoint> result;
+
+    qDebug() << "make edges";
+    for (MeshFace mf :mesh->faces){
+        vector<LLIPoint> vs;
+        for (int i = 0; i < 3; i++) {
+            LLIPoint temp;
+            QVector3D vertex = mesh->idx2MV(mf.mesh_vertex[i]).position;
+            temp.x = int(vertex.x() * floatPointPadding); temp.y = int(vertex.y() * floatPointPadding);
+            vs.push_back(temp);
+        }
+        for (int i = 0, j = 2; i < 3; j=i++) {
+            if (vs[i].x < vs[j].x)
+                edges.push_back(make_pair(vs[i], vs[j]));
+            else if (vs[i].x == vs[j].x && vs[i].y < vs[j].y)
+                edges.push_back(make_pair(vs[i], vs[j]));
+        }
+    }
+
+    qDebug() << "initialize";
+    for (int i = 0; i <= k; i++){
+        std::vector<bool> temp;
+        for (int j = 0; j <= k; j++){
+            temp.push_back(false);
+        }
+        block.push_back(temp);
+        outline.push_back(temp);
+        padding_block.push_back(temp);
+    }
+
+    qDebug() << "fill block";
+    int edgeCnt = edges.size();
+    long long int minx = INF, maxx = -INF, miny = INF, maxy = -INF, blockX, blockY, ttt;
+    for (int i = 0; i < edgeCnt; i++){
+        minx = min2(minx, min2(edges[i].first.x, edges[i].second.x));
+        miny = min2(miny, min2(edges[i].first.y, edges[i].second.y));
+        maxx = max2(maxx, max2(edges[i].first.x, edges[i].second.x));
+        maxy = max2(maxy, max2(edges[i].first.y, edges[i].second.y));
+    }
+    ttt = (maxx-minx)/33; minx-=ttt; maxx+=ttt;
+    ttt = (maxy-miny)/33; miny-=ttt; maxy+=ttt;
+    blockX = (maxx-minx)/k;
+    blockY = (maxy-miny)/k;
+
+    qDebug() << minx << " " << maxx << " " << miny << " " << maxy;
+    qDebug() << blockX << " " << blockY;
+    for (int i = 0; i < edgeCnt; i++) {
+        int startXBlock = int((edges[i].first.x - minx) / blockX);
+        int endXBlock = int((edges[i].second.x - minx) / blockX);
+        int startYBlock = int((edges[i].first.y - miny) / blockY);
+        int endYBlock;
+
+        while(true){
+            if (startXBlock == endXBlock)
+                break;
+
+            long long int endXcor = minx + (startXBlock+1) * blockX;
+            long long int endYcor = (edges[i].first.y + (edges[i].second.y - edges[i].first.y) * (endXcor - edges[i].first.x) / (edges[i].second.x - edges[i].first.x));
+            endYBlock = int((endYcor - miny) / blockY);
+            for (int j = min2(startYBlock, endYBlock); j <= max2(startYBlock, endYBlock); j++){
+                block[j][startXBlock] = true;
+            }
+
+            startXBlock ++;
+            startYBlock = endYBlock;
+        }
+        endYBlock = int((edges[i].second.y - miny) / blockY);
+        for (int j = min2(startYBlock, endYBlock); j <= max2(startYBlock, endYBlock); j++){
+            block[j][startXBlock] = true;
+        }
+    }
+
+    qDebug() << "make padding";
+    for (int i = 0; i <= k; i++){
+        for (int j = 0; j <= k; j++) {
+            if (block[i][j]) {
+                int iMax = min2(k, i+padding), iMin = max2(0, i-padding);
+                int jMax = min2(k, j+padding), jMin = max2(0, j-padding);
+                for (int h = jMin; h <= jMax; h++){
+                    padding_block[iMin][h] = true;
+                    padding_block[iMax][h] = true;
+                }
+                for (int h = iMin; h <= iMax; h++){
+                    padding_block[h][jMin] = true;
+                    padding_block[h][jMax] = true;
+                }
+            }
+        }
+    }
+    block = padding_block;
+
+    qDebug() << "find dfs start point";
+    int startY=k, startX=k;
+    for (int i = 0; i <= k; i++) {
+        for (int j = 0; j <= k; j++) {
+            if (block[i][j]) {
+                if (i < startY) {
+                    startY = i; startX = j;
+                } else if (i == startY && j < startX){
+                    startY = i; startX = j;
+                }
+            }
+        }
+    }
+
+    qDebug() << "get outline";
+    vertice.push_back(make_pair(startY, startX));
+    if (block[startY][startX+1])
+        make_outline(startY, startX, startY, startX, 0, 0, &block, &outline, &vertice, k);
+    else if (block[startY+1][startX+1])
+        make_outline(startY, startX, startY, startX, 0, 7, &block, &outline, &vertice, k);
+    else if (block[startY+1][startX])
+        make_outline(startY, startX, startY, startX, 0, 6, &block, &outline, &vertice, k);
+    else
+        startX /= 0;
+
+//    char tttttt[400];
+//    for (int i = k; i >= 0; i--){
+//        for (int j = 0; j <=k ; j++){
+//            if (outline[i][j]) {
+//                tttttt[j*2] = 'O';
+//                tttttt[j*2+1] = ' ';
+//            } else {
+//                tttttt[j*2] = ' ';
+//                tttttt[j*2+1] = ' ';
+//            }
+//        }
+//        tttttt[k*2+1] = '\0';
+//        qDebug() << tttttt;
+//    }
+
+    qDebug() << "make summarized outline";
+
+    int vn = vertice.size();
+    for (int i = 0; i < vn; i++){
+        int y1 = vertice[(i-1+vn)%vn].first-vertice[(i-2+vn)%vn].first;
+        int x1 = vertice[(i-1+vn)%vn].second-vertice[(i-2+vn)%vn].second;
+        int y2 = vertice[(i+1)%vn].first-vertice[i].first;
+        int x2 = vertice[(i+1)%vn].second-vertice[i].second;
+        int y3 = vertice[i].first-vertice[(i-1+vn)%vn].first;
+        int x3 = vertice[i].second-vertice[(i-1+vn)%vn].second;
+        int y4 = vertice[(i+2)%vn].first-vertice[(i+1)%vn].first;
+        int x4 = vertice[(i+2)%vn].second-vertice[(i+1)%vn].second;
+        if (y1 != y2 || x1 != x2 || y3 != y4 || x3 != x4 || (y1 * y1 + x1 * x1 != 1 && y3 * y3 + x3 * x3 != 1)) {
+            LLIPoint tt;
+            tt.y = miny + vertice[i].first * blockY;
+            tt.x = minx + vertice[i].second * blockX;
+            result.push_back(tt);
+        }
+    }
+
+    return result;
+}
+
+int CCW(LLIPoint p1, LLIPoint p2, LLIPoint p3) {
+    long long int ccw = p1.x*p2.y+p2.x*p3.y+p3.x*p1.y - p1.y*p2.x-p2.y*p3.x-p3.y*p1.x;
+    if (ccw > 0)
+        return 1;
+    if (ccw < 0)
+        return -1;
+    return 0;
+}
+
+bool isIntersectedLines(LLIPoint A, LLIPoint B, LLIPoint C, LLIPoint D) {
+    return (CCW(A,C,D) != CCW(B,C,D) && CCW(A,B,C) != CCW(A,B,D));
+}
+
+long long int getConvexHullSizeIfNotCollision(vector<vector<LLIPoint> > *outlines, vector<LLIPoint> *centers, vector<LLIPoint> *translational_motions, vector<float> *rotates) {
+    int meshCnt = outlines->size();
+
+    vector<vector<LLIPoint> > newOutLines;
+    for (int i = 0; i < meshCnt; i++){
+        vector<LLIPoint> newOutLine;
+        float rad_angle = -(*rotates)[i] * M_PI / 180;
+        float cosq = cos(rad_angle), sinq = sin(rad_angle);
+        int vertexCnt = (*outlines)[i].size();
+        for (int j = 0; j < vertexCnt; j++) {
+            LLIPoint newPoint;
+            newPoint.x = ((*outlines)[i][j].x - (*centers)[i].x) * cosq - ((*outlines)[i][j].y - (*centers)[i].y) * sinq + (*centers)[i].x + (*translational_motions)[i].x;
+            newPoint.y = ((*outlines)[i][j].y - (*centers)[i].y) * cosq + ((*outlines)[i][j].x - (*centers)[i].x) * sinq + (*centers)[i].y + (*translational_motions)[i].y;
+            newOutLine.push_back(newPoint);
+        }
+        newOutLines.push_back(newOutLine);
+    }
+
+    for (int i = 0; i < meshCnt - 1; i++){
+        int j = meshCnt - 1;
+        // because moved target mesh is last mesh
+        int iCnt = newOutLines[i].size();
+        int jCnt = newOutLines[j].size();
+        for (int i1=0, i2=iCnt-1; i1 < iCnt; i2=i1++){
+            for (int j1=0, j2=jCnt-1; j1 < jCnt; j2=j1++){
+                if (isIntersectedLines(newOutLines[i][i1], newOutLines[i][i2], newOutLines[j][j1], newOutLines[j][j2]))
+                    return 100000000000000000;
+            }
+        }
+    }
+    Path ppp;
+    for (int i = 0; i < meshCnt; i++){
+        int vertexCnt = newOutLines[i].size();
+        for (int j = 0; j < vertexCnt; j++) {
+            ppp.push_back(IntPoint(newOutLines[i][j].x, newOutLines[i][j].y, 0));
+        }
+    }
+    Path convex = getConvexHull(&ppp);
+    int convexVertexCnt = convex.size();
+    long long int cx=0, cy=0, area=0, temp;
+    for (int i = 0; i < convexVertexCnt; i++){
+        cx += convex[i].X;
+        cy += convex[i].Y;
+    }
+    cx /= convexVertexCnt;
+    cy /= convexVertexCnt;
+
+    for (int i =0, j = convexVertexCnt-1; i < convexVertexCnt; j = i++){
+        temp = (cx*convex[j].Y+convex[j].X*convex[i].Y+convex[i].X*cy - cy*convex[j].X-convex[j].Y*convex[i].X-convex[i].Y*cx)/2;
+        if (temp < 0)
+            area -= temp;
+        else
+            area += temp;
+    }
+
+    return area;
+}
+
+
+vector<XYArrangement> autoarrange::arngMeshes(vector<Mesh> meshes, vector<Qt3DCore::QTransform*> m_transform_set){
+    vector<vector<LLIPoint> > outlines;
+    vector<LLIPoint> centers;
+    vector<LLIPoint> translational_motions;
+    vector<float> rotates;
+    vector<XYArrangement> result;
+    srand((unsigned int)time(NULL));
+    int meshCnt = meshes.size();
+
+    int floatPointPadding = 100;
     /**/qDebug() << "Arrange start";
     qmlManager->setProgress(0);
     qmlManager->setProgressText("Getting projection of meshes on work plane...");
-    for(int idx=0; idx<meshes.size(); idx++){
-        //outlines.push_back(project(& meshes[idx]));
-        //RDPSimpPaths(&outlines[idx]);
-        //offsetPath(&outlines[idx]);
-        outlines.push_back(getMeshRecArea(meshes[idx]));
-        qmlManager->setProgress(0.5*idx/meshes.size());
+
+    qDebug() << "get padded projected outlines";
+    for(int idx=0; idx<meshCnt; idx++){
+        LLIPoint temp;
+        temp.x = (meshes[idx].x_max + meshes[idx].x_min) / 2 * floatPointPadding;
+        temp.y = (meshes[idx].y_max + meshes[idx].y_min) / 2 * floatPointPadding;
+        centers.push_back(temp);
+        QVector3D t1 = m_transform_set[idx]->translation();
+        temp.x = t1.x() * floatPointPadding; temp.y = t1.y() * floatPointPadding;
+        translational_motions.push_back(temp);
+        rotates.push_back(0.0);
+        outlines.push_back(getPaddedProj(&(meshes[idx]), floatPointPadding));
+        qDebug() << "complete get padded projection" << " size: " << outlines[idx].size();
+        qmlManager->setProgress(0.5*idx/meshCnt);
     }
-    return arng2D(outlines);
+
+    qDebug() << "start";
+    for (int trycnt = 0; trycnt < 30; trycnt++) {
+        int targetIdx = meshCnt-1;
+        LLIPoint origin_translational_motion = translational_motions[targetIdx], best_translational_motion;
+        long long int optimal_v = 100000000000000000;
+        float origin_rotate = rotates[targetIdx], best_rotate;
+
+        float dx[10] = {0, -0.1, 0.1, -1, 1, -5, -10, 10, 50, -50}, dy[10] = {0, -0.1, 0.1, -1, 1, -5, -10, 10, 50, -50}, dr[11] = {0, -1, 1, -5, 5, -10, 10, -30, 30, -90, 90};
+
+        for (int xcase = 0; xcase < 10; xcase++) {
+            for (int ycase = 0; ycase < 10; ycase++) {
+                for (int rcase = 0; rcase < 11; rcase++) {
+                    translational_motions[targetIdx].x = origin_translational_motion.x + dx[xcase] * floatPointPadding;
+                    translational_motions[targetIdx].y = origin_translational_motion.y + dy[ycase] * floatPointPadding;
+                    rotates[targetIdx] = origin_rotate + dr[rcase];
+                    long long int value = getConvexHullSizeIfNotCollision(&outlines, &centers, &translational_motions, &rotates);
+                    if (value < optimal_v) {
+                        optimal_v = value;
+                        best_translational_motion = translational_motions[targetIdx];
+                        best_rotate = rotates[targetIdx];
+                    }
+                }
+            }
+        }
+        if (optimal_v != 100000000000000000) {
+            translational_motions[targetIdx] = best_translational_motion;
+            rotates[targetIdx] = best_rotate;
+        }
+        qDebug() << "best value: " << optimal_v;
+        qDebug() << best_translational_motion.x << best_translational_motion.y;
+        qDebug() << best_rotate;
+        if (best_translational_motion.x == origin_translational_motion.x && best_translational_motion.y == origin_translational_motion.y && origin_rotate == rotates[targetIdx])
+            break;
+    }
+
+    for(int idx=0; idx<meshCnt; idx++){
+        result.push_back(make_pair(IntPoint(translational_motions[idx].x, translational_motions[idx].y, 0), rotates[idx]));
+    }
+    return result;
 }
 
 bool compareArea(pair<Paths*, int>& fig1, pair<Paths*, int>& fig2){//used for sort

@@ -1,5 +1,253 @@
 #include "modelcut.h"
+#include <algorithm>
+#include <queue>
+#include <map>
+#include <string.h>
+#include <stdlib.h>
 
+#include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
+#include <CGAL/Constrained_Delaunay_triangulation_2.h>
+#include <CGAL/Delaunay_mesh_vertex_base_2.h>
+#include <CGAL/Delaunay_mesh_face_base_2.h>
+#include <CGAL/Delaunay_mesh_size_criteria_2.h>
+#include <vector>
+#include <CGAL/Delaunay_mesher_2.h>
+#include <math.h>
+
+typedef CGAL::Exact_predicates_inexact_constructions_kernel  Kernel;
+typedef Kernel::Point_2            Point_2;
+typedef CGAL::Delaunay_mesh_vertex_base_2<Kernel>     Vb;
+typedef CGAL::Delaunay_mesh_face_base_2<Kernel>      Fb;
+typedef CGAL::Triangulation_data_structure_2<Vb, Fb>   Tds;
+typedef CGAL::Constrained_Delaunay_triangulation_2<Kernel, Tds>  CDT;
+typedef CDT::Vertex_handle          Vertex_handle;
+typedef CGAL::Delaunay_mesh_size_criteria_2<CDT>    Criteria;
+
+
+class BigInteger {
+
+#define BigIntegermaxSize 70
+#define BigIntegermaxLen 30
+
+public :
+    bool IsZero(char *A);
+    bool BiggerThan(char *A, char *B);
+    void SwapCharArr(char **A, char **B);
+    void fill(int *a, char *A);
+    int * add(char *A, char *B, int *buf);
+    int * subtract(char *A, char *B, int *buf);
+    int * multiply(char *A, char *B, int *buf);
+    int * divide(char *A, char *B, int *buf);
+    void doOper(char *a, char *b, char oper, char *result);
+    long long int char2int(char *a);
+    void int2char(long long int a, char *b);
+};
+bool BigInteger::IsZero(char *A) {
+    for(int i=0; A[i]; i++) {
+        if(A[i] != '0') return false;
+    }
+    return true;
+}
+bool BigInteger::BiggerThan(char *A, char *B) {
+    int len1 = strlen(A), len2 = strlen(B);
+    if(len1 > len2) return true;
+    if(len1 < len2) return false;
+    for(int i=0; A[i]; i++) {
+        if(A[i] > B[i]) return true;
+        if(A[i] < B[i]) return false;
+    }
+    return false;
+}
+void BigInteger::SwapCharArr(char **A, char **B) {
+    char *temp = *A;
+    *A = *B;
+    *B = temp;
+}
+void BigInteger::fill(int *a, char *A) {
+    int len = strlen(A);
+    for(int i=BigIntegermaxSize-len+1, j=0; i<=BigIntegermaxSize; i++, j++)
+        a[i] = A[j] - '0';
+}
+int* BigInteger::add(char *A, char *B, int *buf) {
+    int len1 = strlen(A), len2 = strlen(B), i;
+    int a[BigIntegermaxSize+1]={}, b[BigIntegermaxSize+1]={};
+    for (i=0;i<=BigIntegermaxSize;i++) {a[i]=0; b[i]=0;}
+    fill(a, A); fill(b, B);
+    for(i=BigIntegermaxSize; i>=1; i--) {
+        buf[i] += a[i] + b[i];
+        if(buf[i] > 9) {
+            buf[i] -= 10;
+            buf[i-1] ++;
+        }
+    }
+    for(i=0; i<BigIntegermaxSize && buf[i] == 0; i++);
+    return buf + i;
+}
+int* BigInteger::subtract(char *A, char *B, int *buf) {
+    if(BiggerThan(B, A))
+        SwapCharArr(&A, &B);
+    int len1 = strlen(A), len2 = strlen(B), i;
+    int a[BigIntegermaxSize+1]={}, b[BigIntegermaxSize+1]={};
+    for (i=0;i<=BigIntegermaxSize;i++) {a[i]=0; b[i]=0;}
+    fill(a, A); fill(b, B);
+    for(i=BigIntegermaxSize; i>=1; i--) {
+        buf[i] += a[i] - b[i];
+        if(buf[i] < 0) {
+            buf[i] += 10;
+            buf[i-1]--;
+        }
+    }
+
+    for(i=0; i<BigIntegermaxSize && buf[i] == 0; i++);
+    return buf + i;
+}
+int* BigInteger::multiply(char *A, char *B, int *buf) {
+    int len1 = strlen(A), len2 = strlen(B), i, j;
+    int a[BigIntegermaxSize+1]={}, b[BigIntegermaxSize+1]={};
+    for (i=0;i<=BigIntegermaxSize;i++) {a[i]=0; b[i]=0;}
+    fill(a, A); fill(b, B);
+    int blank = 0;
+    for(j=BigIntegermaxSize; j>=BigIntegermaxSize-BigIntegermaxLen; j--) {
+        for(i=BigIntegermaxSize; i>=BigIntegermaxSize-BigIntegermaxLen; i--) {
+            buf[i-blank] += a[i] * b[j];
+            if(buf[i-blank] >= 10) {
+                buf[i-blank-1] += buf[i-blank] / 10;
+                buf[i-blank] %= 10;
+            }
+        }
+        blank++;
+    }
+
+    for(i=0; i<BigIntegermaxSize && buf[i] == 0; i++);
+    return buf + i;
+}
+int* BigInteger::divide(char *A, char *B, int *buf) {
+    int len1 = strlen(A), len2 = strlen(B), i, j;
+    int a[BigIntegermaxSize+1]={}, b[BigIntegermaxSize+1]={};
+    for (i=0;i<=BigIntegermaxSize;i++) {a[i]=0; b[i]=0;}
+    fill(a, A); fill(b, B);
+    for(j=BigIntegermaxLen; j>=0; j--) {
+        int k;
+        for(k=0; k<=9; k++) {
+            int flag = 0;
+            for(i=0; i<=BigIntegermaxSize-j; i++) {
+                if(a[i] < b[i+j]) {
+                    flag=1; break;
+                }
+                if(a[i] > b[i+j]) break;
+            }
+            if(flag == 1) break;
+
+            buf[BigIntegermaxSize-j]++;
+            for(i=BigIntegermaxSize-j; i>=1; i--) {
+                a[i] -= b[i+j];
+                if(a[i] < 0) {
+                    a[i] += 10;
+                    a[i-1] --;
+                }
+            }
+        }
+    }
+
+    for(i=0; i<BigIntegermaxSize && buf[i] == 0; i++);
+    return buf + i;
+}
+void BigInteger::doOper(char *a, char *b, char oper, char *result) {
+    bool isMinus = false;
+    int *buf = NULL, *res = NULL;
+    buf = (int *)malloc(sizeof(int) * (BigIntegermaxSize+2));
+    for (int i=0; i<=BigIntegermaxSize; i++)
+        buf[i]=0;
+    buf[BigIntegermaxSize+1] = -1;
+
+    if(oper == '+') { // 0 일때 부호 안붙게
+        if(a[0] == '-' && b[0] == '-') {
+            if(!IsZero(a+1) || !IsZero(b+1)) isMinus=true;
+            res = add(a+1, b+1, buf);
+        } else if(a[0] == '-') {
+            if(BiggerThan(a+1, b)) isMinus=true;
+            res = subtract(b, a+1, buf);
+        } else if(b[0] == '-') {
+            if(BiggerThan(b+1, a)) isMinus=true;
+            res = subtract(a, b+1, buf);
+        } else {
+            res = add(a, b, buf);
+        }
+    }
+    else if(oper == '-') { // 0 일때 부호 안붙게
+        if(a[0] == '-' && b[0] == '-') {
+            if(BiggerThan(a+1, b+1)) isMinus=true;
+            res = subtract(a+1, b+1, buf);
+        } else if(a[0] == '-') {
+            if(!IsZero(a+1) || !IsZero(b)) isMinus=true;
+            res = add(a+1, b, buf);
+        } else if(b[0] == '-') {
+            res = add(a, b+1, buf);
+        } else {
+            if(BiggerThan(b, a)) isMinus=true;
+            res = subtract(a, b, buf);
+        }
+    }
+    else if(oper == '*') { // 0 일때 부호 안붙게
+        if(a[0] == '-' && b[0] == '-') {
+            res = multiply(a+1, b+1, buf);
+        } else if(a[0] == '-') {
+            if(!IsZero(a+1) && !IsZero(b)) isMinus=true;
+            res = multiply(a+1, b, buf);
+        } else if(b[0] == '-') {
+            if(!IsZero(a) && !IsZero(b+1)) isMinus=true;
+            res = multiply(a, b+1, buf);
+        } else {
+            res = multiply(a, b, buf);
+        }
+    }
+    else { // 0일때 부호 안붙게
+        if(a[0] == '-' && b[0] == '-') {
+            res = divide(a+1, b+1, buf);
+        } else if(a[0] == '-') {
+            if(!BiggerThan(b, a+1)) isMinus=true;
+            res = divide(a+1, b, buf);
+        } else if(b[0] == '-') {
+            if(!BiggerThan(b+1, a)) isMinus=true;
+            res = divide(a, b+1, buf);
+        } else {
+            res = divide(a, b, buf);
+        }
+    }
+
+    int resultCnt=0;
+    if (isMinus) result[resultCnt++] = '-';
+    for(int i=0;res[i] >= 0; i++, resultCnt++) {
+        result[resultCnt] = res[i] + '0';
+    }
+    result[resultCnt] = '\0';
+    free(buf);
+}
+long long int BigInteger::char2int(char *a){
+    int st = 0;
+    long long int result = 0;
+    bool isMinus = (a[0]=='-');
+    if (isMinus) st++;
+    for(int i=st; a[i] != '\0'; i++) {
+        result *= 10;
+        result += a[i]-'0';
+    }
+    if (isMinus) result = -result;
+    return result;
+}
+void BigInteger::int2char(long long int a, char *b){
+    int i = 0;
+    long long int ii=1;
+    bool isMinus = (a<0);
+    if (isMinus) {a = -a; b[i++] = '-';}
+    while(a/ii>0) ii*=10;
+    while(ii!=1) {
+        ii/=10;
+        b[i++] = (a/ii) + '0';
+        a %= ii;
+    }
+    b[i] = '\0';
+}
 
 modelcut::modelcut(){
     numPoints = 0;
@@ -151,481 +399,999 @@ void interpolate(Mesh* mesh, Path3D contour1, Path3D contour2){
     }
 }
 
+typedef struct Custom3DPoint{
+     long long int x, y, z;
+     Custom3DPoint() {}
+     Custom3DPoint(long long int x, long long int y, long long int z) : x(x), y(y), z(z) {}
+     Custom3DPoint operator+(const Custom3DPoint& a) const
+     {
+         return Custom3DPoint(a.x+x, a.y+y, a.z+z);
+     }
+     Custom3DPoint operator-(const Custom3DPoint& a) const
+     {
+         return Custom3DPoint(a.x-x, a.y-y, a.z-z);
+     }
+
+     bool operator==(const Custom3DPoint& a) const
+     {
+         return (x == a.x && y == a.y && z == a.z);
+     }
+     bool operator<(const Custom3DPoint& a) const
+     {
+         if (x == a.x) {
+             if (y == a.y)
+                 return z < a.z;
+             return y < a.y;
+         }
+         return x < a.x;
+     }
+     Custom3DPoint operator / (int c)     const { return Custom3DPoint(x/c, y/c, z/c); }
+}Custom3DPoint;
+
+Custom3DPoint custom3DCross(Custom3DPoint v1, Custom3DPoint v2)
+{
+    return Custom3DPoint(v1.y*v2.z - v1.z*v2.y, v1.z*v2.x - v1.x*v2.z, v1.x*v2.y - v1.y*v2.x);
+}
+
+bool isNegativeCustom3DDot(Custom3DPoint v1, Custom3DPoint v2)
+{
+    BigInteger bi;
+
+    char x1[BigIntegermaxLen], y1[BigIntegermaxLen], z1[BigIntegermaxLen], x2[BigIntegermaxLen], y2[BigIntegermaxLen], z2[BigIntegermaxLen];
+    char tmp1[BigIntegermaxLen], tmp2[BigIntegermaxLen], tmp3[BigIntegermaxLen], tmp4[BigIntegermaxLen], dot[BigIntegermaxLen];
+
+    bi.int2char(v1.x, x1);
+    bi.int2char(v1.y, y1);
+    bi.int2char(v1.z, z1);
+
+    bi.int2char(v2.x, x2);
+    bi.int2char(v2.y, y2);
+    bi.int2char(v2.z, z2);
+
+    bi.doOper(x1, x2, '*', tmp1);
+    bi.doOper(y1, y2, '*', tmp2);
+    bi.doOper(z1, z2, '*', tmp3);
+    bi.doOper(tmp1, tmp2, '+', tmp4);
+    bi.doOper(tmp4, tmp3, '+', dot);
+
+    return dot[0] == '-';
+}
+
+/*
+ * 0 inner
+ * 1 outter
+ * 2 boundary
+ *
+ * control padding value
+ */
+int relationPointWithCuttingPolygon(Custom3DPoint p, std::vector<Custom3DPoint> polygon, long long int padding_v = 0) {
+    unsigned int i, j, numPoints = polygon.size();
+
+    int c = 1;
+    long long int x = p.x, y = p.y;
+    for (i = 0, j = numPoints-1; i < numPoints; j = i++) {
+        if (abs(polygon[i].x - x) <= padding_v && abs(polygon[j].x - x) <= padding_v) {
+            if (min(polygon[i].y, polygon[j].y) - padding_v <= y && y <= max(polygon[i].y, polygon[j].y) + padding_v)
+                return 2;
+        }
+
+        if ((polygon[i].x > x) != (polygon[j].x > x)) {
+            long long int padded_ymin = min( (polygon[j].x - polygon[i].x) * (y + padding_v), (polygon[j].x - polygon[i].x) * (y - padding_v) );
+            long long int padded_ymax = min( (polygon[j].x - polygon[i].x) * (y + padding_v), (polygon[j].x - polygon[i].x) * (y - padding_v) );
+            if (padded_ymin <= (polygon[j].y - polygon[i].y) * x + (polygon[j].x * polygon[i].y - polygon[i].x * polygon[j].y)  && (polygon[j].y - polygon[i].y) * x + (polygon[j].x * polygon[i].y - polygon[i].x * polygon[j].y) <= padded_ymax)
+                return 2;
+
+            if ((polygon[j].x - polygon[i].x) > 0) {
+                if ((polygon[j].y - polygon[i].y) * x + (polygon[j].x * polygon[i].y - polygon[i].x * polygon[j].y) < (polygon[j].x - polygon[i].x) * y)
+                    c = !c;
+            } else {
+                if ((polygon[j].y - polygon[i].y) * x + (polygon[j].x * polygon[i].y - polygon[i].x * polygon[j].y) > (polygon[j].x - polygon[i].x) * y)
+                    c = !c;
+            }
+        }
+    }
+    return c;
+}
+int relationPoint2DPolygon(float x, float y, std::vector<Point_2> polygon) {
+    unsigned int i, j, numPoints = polygon.size();
+    float maxx, minx, maxy, miny, intersect_y;
+    float padding_v = 0.05;
+    bool c = false;
+
+    if (numPoints < 3) return 1;
+
+    for(i = 0, j = numPoints - 1; i < numPoints; j = i++) {
+        maxx = max(polygon[i].x(), polygon[j].x()); minx = min(polygon[i].x(), polygon[j].x());
+        maxy = max(polygon[i].y(), polygon[j].y()); miny = min(polygon[i].y(), polygon[j].y());
+
+        if (!(minx < x && x <= maxx)){
+            if (minx == maxx && miny <= y && y <= maxy)
+                return 2;
+            continue;
+        }
+
+        intersect_y = (polygon[j].y() - polygon[i].y()) * x;
+        intersect_y += (polygon[j].x() * polygon[i].y() - polygon[i].x() * polygon[j].y());
+        intersect_y /= (polygon[j].x() - polygon[i].x());
+
+        if (abs(y-intersect_y) <= padding_v)
+            return 2;
+
+        if (y <= intersect_y)
+            c = !c;
+    }
+
+    if (c)
+        return 0;
+    return 1;
+}
+
+Custom3DPoint getInter(Custom3DPoint pp1, Custom3DPoint pp2, Custom3DPoint cp1, Custom3DPoint cp2) {
+    Custom3DPoint p1, p2;
+    if (pp1.x == pp2.x){
+        if (pp1.y < pp2.y) {
+            p1 = pp1; p2 = pp2;
+        } else {
+            p1 = pp2; p2 = pp1;
+        }
+    } else if (pp1.x < pp2.x) {
+        p1 = pp1; p2 = pp2;
+    } else {
+        p1 = pp2; p2 = pp1;
+    }
+
+    Custom3DPoint inter;
+    BigInteger bi;
+
+    char a1[BigIntegermaxLen], b1[BigIntegermaxLen], c1[BigIntegermaxLen], a2[BigIntegermaxLen], b2[BigIntegermaxLen], c2[BigIntegermaxLen], determinant[BigIntegermaxLen];
+    char tmp1[BigIntegermaxLen], tmp2[BigIntegermaxLen], tmp3[BigIntegermaxLen], interX[BigIntegermaxLen], interY[BigIntegermaxLen];
+
+    bi.int2char(p2.y-p1.y, a1);
+    bi.int2char(p1.x-p2.x, b1);
+    bi.int2char((p2.y-p1.y)*p1.x + (p1.x-p2.x)*p1.y, c1);
+
+    bi.int2char(cp2.y-cp1.y, a2);
+    bi.int2char(cp1.x-cp2.x, b2);
+    bi.int2char((cp2.y-cp1.y)*cp1.x + (cp1.x-cp2.x)*cp1.y, c2);
+
+    bi.int2char((p2.y-p1.y)*(cp1.x-cp2.x) - (cp2.y-cp1.y)*(p1.x-p2.x), determinant);
+
+    bi.doOper(b2, c1, '*', tmp1);
+    bi.doOper(b1, c2, '*', tmp2);
+    bi.doOper(tmp1, tmp2, '-', tmp3);
+    bi.doOper(tmp3, determinant, '/', interX);
+    inter.x = bi.char2int(interX);
+
+    bi.doOper(a1, c2, '*', tmp1);
+    bi.doOper(a2, c1, '*', tmp2);
+    bi.doOper(tmp1, tmp2, '-', tmp3);
+    bi.doOper(tmp3, determinant, '/', interY);
+    inter.y = bi.char2int(interY);
+
+    double inter_d = sqrt((inter.y-p1.y)*(inter.y-p1.y) + (inter.x-p1.x)*(inter.x-p1.x));
+    double d = sqrt(((p2.y-p1.y)*(p2.y-p1.y) + (p1.x-p2.x)*(p1.x-p2.x)));
+
+    inter.z = p1.z + (p2.z - p1.z) * inter_d / d;
+
+    return inter;
+}
+
+std::vector<QVector3D> sortByCorrectOrder(QVector3D p1, QVector3D p2, QVector3D p3, QVector3D mv1, QVector3D mv2, QVector3D mv3) {
+    std::vector<QVector3D> result;
+
+    float dotProductV = QVector3D::dotProduct(QVector3D::normal(p1, p2, p3), QVector3D::normal(mv1, mv2, mv3));
+
+    if (dotProductV >= 0.0){
+        result.push_back(p1);
+        result.push_back(p2);
+        result.push_back(p3);
+    } else {
+        result.push_back(p3);
+        result.push_back(p2);
+        result.push_back(p1);
+    }
+    return result;
+}
+
+std::vector<Custom3DPoint> sortByCorrectOrderCustom3D(Custom3DPoint p1, Custom3DPoint p2, Custom3DPoint p3, Custom3DPoint mv1, Custom3DPoint mv2, Custom3DPoint mv3) {
+    std::vector<Custom3DPoint> result;
+
+    if (!isNegativeCustom3DDot(custom3DCross(p2 - p1, p3- p1), custom3DCross(mv2 - mv1, mv3- mv1))){
+        result.push_back(p1);
+        result.push_back(p2);
+        result.push_back(p3);
+    } else {
+        result.push_back(p3);
+        result.push_back(p2);
+        result.push_back(p1);
+    }
+    return result;
+}
+
+std::vector<Custom3DPoint> convert2vector(Custom3DPoint p1, Custom3DPoint p2, Custom3DPoint p3) {
+    std::vector<Custom3DPoint> result;
+    result.push_back(p1);
+    result.push_back(p2);
+    result.push_back(p3);
+    return result;
+}
+
+Custom3DPoint getTargetZPoint(long long int targetZ, Custom3DPoint mv1, Custom3DPoint mv2) {
+    if (mv1.z > mv2.z) {
+        Custom3DPoint temp = mv1; mv1 = mv2; mv2 = temp;
+    }
+    // should be mv1.z() < targetZ < mv2.z()
+    long long int targetX, targetY;
+    if (targetZ - mv1.z >= mv2.z - targetZ) {
+        targetX = mv1.x + (mv2.x - mv1.x) * (targetZ - mv1.z) / (mv2.z - mv1.z);
+        targetY = mv1.y + (mv2.y - mv1.y) * (targetZ - mv1.z) / (mv2.z - mv1.z);
+    } else {
+        targetX = mv2.x + (mv1.x - mv2.x) * (mv2.z - targetZ) / (mv2.z - mv1.z);
+        targetY = mv2.y + (mv1.y - mv2.y) * (mv2.z - targetZ) / (mv2.z - mv1.z);
+    }
+    return Custom3DPoint(targetX, targetY, targetZ);
+}
+
+Point_2 findHolePoint(std::vector<Point_2> polygon, std::vector<Point_2> parentPolygon) {
+    // I assume that any two polygons do not overlap.
+    int polygonN = polygon.size();
+    int polygonNstep = max(1, polygonN/100);
+    int polygonPN = parentPolygon.size();
+    int polygonPNstep = max(1, polygonPN/100);
+    int candiX, candiY;
+
+    for (int i = 0; i < polygonN; i+=polygonNstep){
+        for (int j = 0; j < polygonPN; j+=polygonPNstep) {
+            candiX = (polygon[i].x() + parentPolygon[j].x())/2; candiY = (polygon[i].y() + parentPolygon[j].y())/2;
+
+            if (relationPoint2DPolygon(candiX, candiY, parentPolygon) == 0 && relationPoint2DPolygon(candiX, candiY, polygon) == 1)
+                return Point_2(candiX, candiY);
+        }
+    }
+    return Point_2(polygon[0].x()+0.00001, polygon[0].y());
+}
+
+void bisectModelByPlane(Mesh* leftMesh, Mesh* rightMesh, Mesh* mesh, Plane plane, int cutFillMode){
+    std::multimap<Custom3DPoint, Custom3DPoint> boundaryEdges;
+
+    std::queue<std::vector<Custom3DPoint> > meshFaceQueue;
+    Custom3DPoint mv1, mv2, mv3;
+
+    double padding = 1000000.0;
+    long long int targetZ = int(plane[0].z() * padding);
+
+    // each z axis coordinate values are should same
+    if (plane[0].z() != plane[1].z() || plane[0].z() != plane[2].z() || plane[1].z() != plane[2].z()) {
+        qDebug() << "z value of points of Plane are different";
+        return;
+    }
+    qDebug() << "mesh faces" << mesh->faces.size();
+
+    qDebug() << "make meshFace Queue";
+    std::vector<Custom3DPoint> meshVertices, parentMesh;
+    for (MeshFace mf :mesh->faces){
+        meshVertices.clear();
+        for (int i = 0; i < 3; i++) {
+            QVector3D vertex = mesh->idx2MV(mf.mesh_vertex[i]).position;
+            Custom3DPoint customVertex;
+            customVertex.x = int(vertex.x() * padding); customVertex.y = int(vertex.y() * padding); customVertex.z = int(vertex.z() * padding);
+            meshVertices.push_back(customVertex);
+        }
+        meshFaceQueue.push(meshVertices);
+    }
+
+    while (!meshFaceQueue.empty()){
+        meshVertices = meshFaceQueue.front(); meshFaceQueue.pop();
+
+        mv1 = meshVertices[0]; mv2 = meshVertices[1]; mv3 = meshVertices[2];
+
+        if (((mv1.z > targetZ) != (mv2.z > targetZ)) && targetZ != mv1.z && targetZ != mv2.z) {
+            Custom3DPoint inter = getTargetZPoint(targetZ, mv1, mv2);
+
+            meshFaceQueue.push(convert2vector(mv1, inter, mv3));
+            meshFaceQueue.push(convert2vector(inter, mv2, mv3));
+            continue;
+        }
+        if (((mv2.z > targetZ) != (mv3.z > targetZ)) && targetZ != mv2.z && targetZ != mv3.z) {
+            Custom3DPoint inter = getTargetZPoint(targetZ, mv2, mv3);
+
+            meshFaceQueue.push(convert2vector(mv2, inter, mv1));
+            meshFaceQueue.push(convert2vector(inter, mv3, mv1));
+            continue;
+        }
+        if (((mv3.z > targetZ) != (mv1.z > targetZ)) && targetZ != mv3.z && targetZ != mv1.z) {
+            Custom3DPoint inter = getTargetZPoint(targetZ, mv3, mv1);
+
+            meshFaceQueue.push(convert2vector(mv3, inter, mv2));
+            meshFaceQueue.push(convert2vector(inter, mv1, mv2));
+            continue;
+        }
+
+        // didn't cutted mesh
+        int innerOutter = 0;
+
+        if (mv1.z + mv2.z > targetZ * 2) innerOutter--;
+        else innerOutter++;
+
+        if (mv2.z + mv3.z > targetZ * 2) innerOutter--;
+        else innerOutter++;
+
+        if (mv3.z + mv1.z > targetZ * 2) innerOutter--;
+        else innerOutter++;
+
+        QVector3D addingMesh1 = QVector3D(mv1.x/padding, mv1.y/padding, mv1.z/padding);
+        QVector3D addingMesh2 = QVector3D(mv2.x/padding, mv2.y/padding, mv2.z/padding);
+        QVector3D addingMesh3 = QVector3D(mv3.x/padding, mv3.y/padding, mv3.z/padding);
+        if (innerOutter > 0)
+            rightMesh->addFace(addingMesh1,addingMesh2,addingMesh3);
+        else {
+            leftMesh->addFace(addingMesh1,addingMesh2,addingMesh3);
+
+            /*
+             * 1. z == targetZ
+             *
+             * if Mesh edge's vertice are both included on 1
+             * => that edge is boundary edge
+             */
+            if (mv1.z == targetZ && mv2.z == targetZ) {
+                boundaryEdges.insert(make_pair(mv1, mv2));
+                boundaryEdges.insert(make_pair(mv2, mv1));
+            }
+            if (mv2.z == targetZ && mv3.z == targetZ) {
+                boundaryEdges.insert(make_pair(mv2, mv3));
+                boundaryEdges.insert(make_pair(mv3, mv2));
+            }
+            if (mv3.z == targetZ && mv1.z == targetZ) {
+                boundaryEdges.insert(make_pair(mv3, mv1));
+                boundaryEdges.insert(make_pair(mv1, mv3));
+            }
+        }
+    }
+
+    if (cutFillMode == 1) {
+        // get contour
+        qDebug() << "get contour";
+        std::set<Custom3DPoint> checker;
+        std::multimap<Custom3DPoint, Custom3DPoint>::iterator iter, targetIter, edgeIter;
+        std::vector<std::vector<Point_2>> contours;
+        Custom3DPoint prevPoint, currPoint;
+        for (iter = boundaryEdges.begin(); iter != boundaryEdges.end(); iter++){
+//            int edgeCounter = 0;
+//            for (edgeIter = boundaryEdges.lower_bound(iter->first); edgeIter != boundaryEdges.upper_bound(iter->first); edgeIter++){
+//                edgeCounter++;
+//            }
+//            if (edgeCounter!=2) {
+//                qDebug() << "fuck1 " << iter->first.x << " " << iter->first.y;
+//                qDebug() << "fuck2 " << iter->second.x << " " << iter->second.y;
+//            }
+
+            if (checker.find(iter->first) == checker.end()) {
+                std::vector<Point_2> contour;
+                // new contour
+                prevPoint = iter->first;
+                currPoint = iter->second;
+                contour.push_back(Point_2(prevPoint.x/padding, prevPoint.y/padding));
+                checker.insert(prevPoint);
+                while(true){
+                    prevPoint = currPoint;
+                    contour.push_back(Point_2(prevPoint.x/padding, prevPoint.y/padding));
+                    checker.insert(prevPoint);
+
+                    bool findFlag = false;
+
+                    for (targetIter = boundaryEdges.lower_bound(prevPoint); targetIter != boundaryEdges.upper_bound(prevPoint); targetIter++){
+                        currPoint = targetIter->second;
+                        if (checker.find(currPoint) == checker.end()){
+                            findFlag = true;
+                            break;
+                        }
+                    }
+
+                    if (!findFlag) {
+                        break;
+                    }
+                }
+                qDebug() << "complete make contour";
+                qDebug() << contour.size();
+                contours.push_back(contour);
+            }
+        }
+        qDebug() << contours.size();
+
+        int contourN = contours.size();
+
+        // add polygon and constraints on CDT
+        CDT cdt;
+        for (unsigned int i = 0; i < contourN; i++) {
+            std::vector<Vertex_handle> vhs;
+            size_t numPoints = contours[i].size();
+
+            for (unsigned int j = 0; j < numPoints; j++)
+                vhs.push_back(cdt.insert(contours[i][j]));
+
+            for (unsigned int j = 0; j < numPoints; j++)
+                cdt.insert_constraint(vhs[j], vhs[(j+1)%numPoints]);
+        }
+
+        // I assumed that the maximum number of contours is 100.
+        int directedInclusionRelationship[100][100];
+        for (int contourI=0; contourI < contourN; contourI++) {
+            for (int contourJ=0; contourJ < contourN; contourJ++) {
+                directedInclusionRelationship[contourI][contourJ] = 0;
+            }
+        }
+        // make directed adjacency matrix
+        for (int contourI=0; contourI < contourN; contourI++) {
+            for (int contourJ=0; contourJ < contourN; contourJ++) {
+                if (contourI == contourJ) continue;
+
+                int relation;
+                for (int kkk=0; kkk<=contours[contourJ].size(); kkk++){
+                    relation = relationPoint2DPolygon(contours[contourJ][kkk].x(), contours[contourJ][kkk].y(), contours[contourI]);
+                    if (relation != 2){
+                        break;
+                    }
+                }
+                if (relation == 0) {
+                    directedInclusionRelationship[contourI][contourJ] = 1;
+                }
+            }
+        }
+
+        // using Flody-Warshall get topology
+        for (int contourI=0; contourI < contourN; contourI++) {
+            for (int contourJ=0; contourJ < contourN; contourJ++) {
+                if (contourI == contourJ) continue;
+                for (int contourK=0; contourK < contourN; contourK++) {
+                    if (contourI == contourK || contourJ == contourK) continue;
+                    if (directedInclusionRelationship[contourI][contourK] > 0 && directedInclusionRelationship[contourK][contourJ] > 0){
+                        directedInclusionRelationship[contourI][contourJ] = directedInclusionRelationship[contourI][contourK] + directedInclusionRelationship[contourK][contourJ];
+                    }
+                }
+            }
+        }
+
+        // find root nodes
+        std::queue<pair<pair<int, bool>, int> > contourQ;
+        for (int contourI=0; contourI < contourN; contourI++) {
+            int contourJ;
+            for (contourJ=0; contourJ < contourN; contourJ++) {
+                if (directedInclusionRelationship[contourJ][contourI] != 0)
+                    break;
+            }
+            if (contourJ >= contourN) {
+                contourQ.push(make_pair(make_pair(contourI, true), -1));
+            }
+        }
+
+        // bfs for get hole point
+        std::list<Point_2> list_of_seeds;
+        pair<pair<int, bool>, int> qFront;
+        pair<int, bool> contourT;
+        int contourParent;
+        while(!contourQ.empty()) {
+            bool itHasChild = false;
+            qFront = contourQ.front(); contourQ.pop();
+            contourT = qFront.first; contourParent = qFront.second;
+            qDebug() << contours[contourT.first].size() << " " << contourT.second;
+            if (contourT.second && contourParent != -1) {
+                // find hole point
+                Point_2 holePoint = findHolePoint(contours[contourT.first], contours[contourParent]);
+                list_of_seeds.push_back(holePoint);
+            }
+            for (int contourI=0; contourI < contourN; contourI++) {
+                if (directedInclusionRelationship[contourT.first][contourI] == 1) {
+                    itHasChild = true;
+                    contourQ.push(make_pair(make_pair(contourI, !contourT.second), contourT.first));
+                }
+            }
+            if ((!itHasChild) && (!contourT.second)) {
+                // find hole point
+                std::vector<Point_2> onePoint;
+                onePoint.push_back(contours[contourT.first][0]);
+                Point_2 holePoint = findHolePoint(onePoint, contours[contourT.first]);
+                list_of_seeds.push_back(holePoint);
+            }
+        }
+
+        // triangular
+        qDebug() << "Triangular";
+        if (list_of_seeds.size() > 0)
+            CGAL::refine_Delaunay_mesh_2(cdt, list_of_seeds.begin(), list_of_seeds.end(), Criteria(0.125, 1.5), false);
+        else
+            CGAL::refine_Delaunay_mesh_2(cdt, Criteria(0.125, 1.5));
+
+        std::vector<QVector3D> orderedQV;
+        QVector3D mmv1, mmv2, mmv3;
+        // add face
+        qDebug() << "Add face";
+        for (CDT::Finite_faces_iterator fit = cdt.finite_faces_begin(); fit != cdt.finite_faces_end(); fit++) {
+            if (fit->is_in_domain()) {
+                mmv1 = QVector3D(float(cdt.triangle(fit)[0].x()), float(cdt.triangle(fit)[0].y()), targetZ/padding);
+                mmv2 = QVector3D(float(cdt.triangle(fit)[1].x()), float(cdt.triangle(fit)[1].y()), targetZ/padding);
+                mmv3 = QVector3D(float(cdt.triangle(fit)[2].x()), float(cdt.triangle(fit)[2].y()), targetZ/padding);
+
+                orderedQV = sortByCorrectOrder(mmv1, mmv2, mmv3, QVector3D(0.0, 0.0, 0.0), QVector3D(1.0, 0.0, 0.0), QVector3D(1.0, 1.0, 0.0));
+                rightMesh->addFace(orderedQV[0], orderedQV[1], orderedQV[2]);
+                leftMesh->addFace(orderedQV[2], orderedQV[1], orderedQV[0]);
+            }
+        }
+    }
+}
+
+void printCustomPoints(Custom3DPoint p1, Custom3DPoint p2, Custom3DPoint p3) {
+    qDebug() << "(" << p1.x << ", " << p1.y << ", " << p1.z << ") " << "(" << p2.x << ", " << p2.y << ", " << p2.z << ") " << "(" << p3.x << ", " << p3.y << ", " << p3.z << ")";
+}
+
+int CCW(Custom3DPoint p1, Custom3DPoint p2, Custom3DPoint p3) {
+    long long int ccw = p1.x*p2.y+p2.x*p3.y+p3.x*p1.y - p1.y*p2.x-p2.y*p3.x-p3.y*p1.x;
+    if (ccw > 0)
+        return 1;
+    if (ccw < 0)
+        return -1;
+    return 0;
+}
+
+bool isIntersectedLines(Custom3DPoint A, Custom3DPoint B, Custom3DPoint C, Custom3DPoint D) {
+    return CCW(A,C,D) != CCW(B,C,D) && CCW(A,B,C) != CCW(A,B,D) && CCW(A,C,D) * CCW(B,C,D) * CCW(A,B,C) * CCW(A,B,D) != 0;
+}
+
 void cutAway(Mesh* leftMesh, Mesh* rightMesh, Mesh* mesh, vector<QVector3D> cuttingPoints, int cutFillMode){
-    Path contour; // real cutting points in intpoint form
-    Path3D cuttingContour; // real cutting points line qvector3d form
-    Paths3D cuttingEdges;
-    int numPoints = cuttingPoints.size();
+    std::queue<pair<std::vector<Custom3DPoint>, std::vector<Custom3DPoint> > > meshFaceQueue;
+    std::vector<Custom3DPoint> customCuttingPts;
+    std::multimap<pair<Custom3DPoint, int>, pair<Custom3DPoint, int> > boundaryEdges;
+    Custom3DPoint mv1, mv2, mv3;
+    // calculated intersected Point with cutting line
+    std::set<pair<Custom3DPoint, int> > meshCuttedChecker;
+    double padding = 1000000.0;
+    size_t cuttingPointCnt = cuttingPoints.size();
+    bool isCutted;
+    int i, j, k;
 
-    leftMesh->faces.reserve(mesh->faces.size()*2);
-    leftMesh->vertices.reserve(mesh->faces.size()*2);
-    rightMesh->faces.reserve(mesh->faces.size()*2);
-    rightMesh->vertices.reserve(mesh->faces.size()*2);
+    qDebug() << "cuttingPoint size";
+    qDebug() << cuttingPointCnt;
 
-    for (int i=0; i<numPoints; i++){
-        QVector3D cuttingPoint =cuttingPoints[i];
-        contour.push_back(IntPoint(cuttingPoint.x()*scfg->resolution
-                                   ,cuttingPoint.y()*scfg->resolution));
-        MeshVertex temp_mv;
-        temp_mv.position = QVector3D(cuttingPoint.x(), cuttingPoint.y(), cuttingPoint.z());
-        cuttingContour.push_back(temp_mv);
+    for (i = 0; i < cuttingPointCnt; i++){
+        Custom3DPoint customVertex;
+        customVertex.x = int(cuttingPoints[i].x() * padding); customVertex.y = int(cuttingPoints[i].y() * padding); customVertex.z = int(cuttingPoints[i].z() * padding);
+        customCuttingPts.push_back(customVertex);
     }
 
-    Path IntPoints;
-    IntPoints.reserve(mesh->vertices.size()*2);
-    for (MeshVertex mv : mesh->vertices){
-        IntPoints.push_back(IntPoint(mv.position.x()*scfg->resolution, mv.position.y()*scfg->resolution));
+    qDebug() << "make meshFace Queue";
+    std::vector<Custom3DPoint> meshVertices, parentMesh;
+    for (MeshFace mf :mesh->faces){
+        meshVertices.clear();
+        for (i = 0; i < 3; i++) {
+            QVector3D vertex = mesh->idx2MV(mf.mesh_vertex[i]).position;
+            Custom3DPoint customVertex;
+            customVertex.x = int(vertex.x() * padding); customVertex.y = int(vertex.y() * padding); customVertex.z = int(vertex.z() * padding);
+            meshVertices.push_back(customVertex);
+        }
+        meshFaceQueue.push(make_pair(meshVertices, meshVertices));
     }
-    mesh->convexHull = getConvexHull(&IntPoints);
 
+    while (!meshFaceQueue.empty()){
+        pair<std::vector<Custom3DPoint>, std::vector<Custom3DPoint> > qFront;
+        qFront = meshFaceQueue.front(); meshFaceQueue.pop();
+        meshVertices = qFront.first; parentMesh = qFront.second;
+        isCutted = false;
 
-    //freecut intersection detect from here
+        mv1 = meshVertices[0]; mv2 = meshVertices[1]; mv3 = meshVertices[2];
 
-    bool intersectionExists = false;
-    bool cpInsideHull = false;
-    bool cpOutsideHull = false;
-
-    // saves entering position of cp
-    IntPoint enterIP;
-    IntPoint exitIP;
-
-    float enter_min_distance = 99999;
-    float exit_min_distance = 99999;
-    MeshVertex enterIntersection;
-    MeshVertex exitIntersection;
-    Path contour_copy;
-    Path3D cuttingContour_copy;
-
-    // find enter IP , exitIP
-    for (int i=0; i<contour.size(); i++){
-        if (PointInPolygon(contour[i], mesh->convexHull)){ // inside of hull
-            if (!cpInsideHull && !PointInPolygon(contour[(i-1)%contour.size()], mesh->convexHull)){
-                cpInsideHull = true;
-                enterIP = contour[(i-1)%contour.size()];
-                //cuttingContour_copy.push_back(cuttingContour[(i-1)%cuttingContour.size()]);
-                contour_copy.push_back(contour[(i-1)%contour.size()]);
-            }
-            cuttingContour_copy.push_back(cuttingContour[i]);
-            contour_copy.push_back(contour[i]);
-        } else { // outside of hull
-            if (!cpOutsideHull && PointInPolygon(contour[(i-1)%contour.size()], mesh->convexHull)){
-                cpOutsideHull = true;
-                exitIP = contour[i];
-                //cuttingContour_copy.push_back(cuttingContour[i]);
-                contour_copy.push_back(contour[i]);
+        // check if cutting point in mesh
+        for (i = 0; i < cuttingPointCnt; i++){
+            if (relationPointWithCuttingPolygon(customCuttingPts[i], meshVertices) == 0){
+                // cutting Point In Mesh
+                customCuttingPts[i].z = (mv1.z + mv2.z + mv3.z)/3;
+                meshFaceQueue.push(make_pair(convert2vector(mv1, mv2, customCuttingPts[i]), parentMesh));
+                meshFaceQueue.push(make_pair(convert2vector(mv2, mv3, customCuttingPts[i]), parentMesh));
+                meshFaceQueue.push(make_pair(convert2vector(mv3, mv1, customCuttingPts[i]), parentMesh));
+                break;
             }
         }
-    }
+        // cutting point in mesh
+        if (i < cuttingPointCnt)
+            continue;
 
-    qDebug() << "found exit, enter ip" <<exitIP.X << enterIP.X;
-
-    cuttingContour = cuttingContour_copy;
-    Path contour_all = contour;
-    contour = contour_copy;
-
-    if (cpInsideHull && cpOutsideHull)
-        intersectionExists = true;
-
-    // find intersection if it exists
-
-    // freecut detection done till here
-
-
-    Paths3D innerContours, outerContours;
-
-    foreach (MeshFace mf, mesh->faces){
-        bool faceLeftToPlane = false;
-        bool faceRightToPlane = false;
-
-        Path3D leftContour;
-        Path3D rightContour;
-
-        for (int vn=0; vn<3; vn++){
-            MeshVertex mv = mesh->vertices[mf.mesh_vertex[vn]];
-
-            if (PointInPolygon(IntPoint(mv.position.x()*scfg->resolution, mv.position.y()*scfg->resolution), contour_all)){
-                faceLeftToPlane = true;
-                leftContour.push_back(mv);
-            } else {
-                faceRightToPlane = true;
-                rightContour.push_back(mv);
-            }
-        }
-
-        if (faceLeftToPlane && faceRightToPlane){ // cutting edge
-
-            if (intersectionExists){
-                // calculate intersection point (least distance intpoint from enterIP, exitIPs)
-                QVector3D mv = mesh->vertices[mf.mesh_vertex[0]].position;
-                QVector3D commv = (mesh->vertices[mf.mesh_vertex[0]].position +
-                        mesh->vertices[mf.mesh_vertex[1]].position +
-                        mesh->vertices[mf.mesh_vertex[2]].position)/3;
-
-                IntPoint intmv = IntPoint(mv.x()*scfg->resolution, mv.y()*scfg->resolution);
-
-
-                bool faceLeftToPlane_int = false;
-                bool faceRightToPlane_int = false;
-
-                // check if vertex earned from intersection
-                for (int vn=0; vn<3; vn++){
-                    QVector3D mv = mesh->vertices[mf.mesh_vertex[vn]].position;
-                    QVector3D enterQV3 = QVector3D(((float)enterIP.X)/((float)scfg->resolution), ((float)enterIP.Y)/((float)scfg->resolution), 0);
-                    Plane plane;
-                    plane.push_back(enterQV3);
-                    plane.push_back(cuttingContour[0].position);
-                    plane.push_back(QVector3D(enterQV3.x(),enterQV3.y(),300));
-                    if (isLeftToPlane(plane, mv)) // if one vertex is left to plane, append to left vertices part
-                        faceLeftToPlane_int = true;
-                    else {
-                        faceRightToPlane_int = true;
-                    }
-                }
-
-                if (faceLeftToPlane_int && faceRightToPlane_int){ // current mesh face is earned from intersection
-                    // check distance from enterIP
-                    float cur_distance = pointDistance(enterIP, intmv);
-                    if (cur_distance < enter_min_distance){
-                        enter_min_distance = cur_distance;
-                        enterIntersection = commv;
-                        qDebug() << "found enterIntersection : " << mv <<enterIP.X << enterIP.Y << enter_min_distance;
-                    }
-                }
-
-                faceLeftToPlane_int = false;
-                faceRightToPlane_int = false;
-
-                // check if vertex earned from intersection
-                for (int vn=0; vn<3; vn++){
-                    QVector3D mv = mesh->vertices[mf.mesh_vertex[vn]].position;
-                    QVector3D exitQV3 = QVector3D(((float)exitIP.X)/((float)scfg->resolution), ((float)exitIP.Y)/((float)scfg->resolution), 0);
-                    Plane plane;
-                    plane.push_back(exitQV3);
-                    plane.push_back(cuttingContour[cuttingContour.size()-1].position);
-                    plane.push_back(QVector3D(exitQV3.x(),exitQV3.y(),300));
-                    if (isLeftToPlane(plane, mv)) // if one vertex is left to plane, append to left vertices part
-                        faceLeftToPlane_int = true;
-                    else {
-                        faceRightToPlane_int = true;
-                    }
-                }
-
-                if (faceLeftToPlane_int && faceRightToPlane_int){ // current mesh face is earned from intersection
-                    // check distance from exitIP
-                    float cur_distance = pointDistance(exitIP, intmv);
-                    if (cur_distance < exit_min_distance){
-                        exit_min_distance = cur_distance;
-                        exitIntersection = commv;
-                        qDebug() << "found exitIntersection : "<< mv << exitIP.X << exitIP.Y << exit_min_distance;
-                    }
-                }
-            }
-
-            if (leftContour.size() == 2){
-                innerContours.push_back(leftContour);
-            } else if (rightContour.size() == 2) {
-                outerContours.push_back(rightContour);
-            }
-        } else if (faceLeftToPlane){
-            leftMesh->addFace(mesh->vertices[mf.mesh_vertex[0]].position, mesh->vertices[mf.mesh_vertex[1]].position, mesh->vertices[mf.mesh_vertex[2]].position);
-        } else if (faceRightToPlane){
-            rightMesh->addFace(mesh->vertices[mf.mesh_vertex[0]].position, mesh->vertices[mf.mesh_vertex[1]].position, mesh->vertices[mf.mesh_vertex[2]].position);
-        }
-    }
-    qDebug() << "exit, enter intersection : " << exitIntersection.position << enterIntersection.position;
-    //Paths3D innerContours_c = contourConstruct3D(innerContours);
-    //Paths3D outerContours_c = contourConstruct3D(outerContours);
-
-
-    // find maximal, minimal position of cuttingContour
-    Path3D cuttingContour_u;
-    Path3D cuttingContour_l;
-
-    for (int ctc_idx=0; ctc_idx<cuttingContour.size(); ctc_idx++){
-        cuttingContour_u.push_back(cuttingContour[ctc_idx]);
-        cuttingContour_l.push_back(cuttingContour[ctc_idx]);
-    }
-
-    for (int ctc_idx=0; ctc_idx<cuttingContour.size(); ctc_idx++){
-        MeshVertex qv = cuttingContour[ctc_idx];
-
-        // find maximal position
-        for (MeshFace mf : mesh->faces){
-            // if projection of mf to xy coordinates contains qv and upper than current qv's position, get qv
-            MeshVertex mfv1 = mesh->idx2MV(mf.mesh_vertex[0]);
-            MeshVertex mfv2 = mesh->idx2MV(mf.mesh_vertex[1]);
-            MeshVertex mfv3 = mesh->idx2MV(mf.mesh_vertex[2]);
-            Path mf_projection;
-            mf_projection.push_back(IntPoint(mfv1.position.x()*scfg->resolution, mfv1.position.y()*scfg->resolution));
-            mf_projection.push_back(IntPoint(mfv2.position.x()*scfg->resolution, mfv2.position.y()*scfg->resolution));
-            mf_projection.push_back(IntPoint(mfv3.position.x()*scfg->resolution, mfv3.position.y()*scfg->resolution));
-            if (PointInPolygon(IntPoint(qv.position.x()*scfg->resolution, qv.position.y()*scfg->resolution), mf_projection)){
-                qDebug() << "point in polygon";
-                // get intersection point and compare its height
-                QVector3D face_normal = QVector3D::normal(mfv1.position, mfv2.position, mfv3.position);
-                float height = (face_normal.x()*mfv1.position.x() + face_normal.y()*mfv1.position.y() + face_normal.z()*mfv1.position.z()
-                        - face_normal.x()*qv.position.x() - face_normal.y()*qv.position.y())/face_normal.z();
-
-                //qDebug() << "height : " <<height << mfv1.position.z() << mfv2.position.z() << mfv3.position.z();
-                if (height > cuttingContour_u[ctc_idx].position.z()){
-                    cuttingContour_u[ctc_idx].position = QVector3D(cuttingContour_u[ctc_idx].position.x(), cuttingContour_u[ctc_idx].position.y(), height);
-                }
-                if (height <= cuttingContour_l[ctc_idx].position.z()) {
-                    cuttingContour_l[ctc_idx].position = QVector3D(cuttingContour_l[ctc_idx].position.x(), cuttingContour_l[ctc_idx].position.y(), height);
-                }
-            }
-        }
-    }
-
-    qDebug() << "intersections : " << enterIntersection.position << exitIntersection.position;
-
-
-    if (intersectionExists){ // insert exit intersection
-        cuttingContour_u.insert(cuttingContour_u.begin(), enterIntersection);
-        cuttingContour_l.insert(cuttingContour_l.begin(), enterIntersection);
-    }
-
-
-    if (intersectionExists){ // insert exit intersection
-        cuttingContour_u.push_back(exitIntersection);
-        cuttingContour_l.push_back(exitIntersection);
-    }
-
-    qDebug() << "upper";
-    for (int i=0; i<cuttingContour_u.size(); i++){
-        qDebug() << i << cuttingContour_u[i].position;
-    }
-
-    qDebug() << "lower";
-    for (int i=0; i<cuttingContour_l.size(); i++){
-        qDebug() << i << cuttingContour_l[i].position;
-    }
-
-    //qDebug() << "constructed inner outer contours : " << innerContours_c.size() << outerContours_c.size();
-
-    QMultiHash<int, MeshVertex> cuttingContourConnections_u;
-    QMultiHash<int, MeshVertex> cuttingContourConnections_l;
-
-    for (Path3D innerContour : innerContours){ // connect inner contours
-        qDebug() << "inner Contour size : " << innerContour.size();
-        Path3D* selectedCuttingContour;
-        QMultiHash<int, MeshVertex>* selectedCuttingContourConnections;
-        if (abs(innerContour[0].position.z()-cuttingContour_u[1].position.z()) < abs(innerContour[0].position.z()-cuttingContour_l[1].position.z())){
-            selectedCuttingContour = &cuttingContour_u;
-            selectedCuttingContourConnections = &cuttingContourConnections_u;
-        } else {
-            selectedCuttingContour = &cuttingContour_l;
-            selectedCuttingContourConnections = &cuttingContourConnections_l;
-        }
-
-        float min_distance = 99999;
-        int min_distance_cmv_idx;
-        // find min distance cutting point and connect it
-        for (int cmv_idx=0; cmv_idx<selectedCuttingContour->size(); cmv_idx++){
-            MeshVertex cmv = (*selectedCuttingContour)[cmv_idx];
-            float cur_distance = abs(cmv.position.distanceToPoint(innerContour[0].position));
-            if (cur_distance < min_distance){
-                min_distance = cur_distance;
-                min_distance_cmv_idx = cmv_idx;
-            }
-        }
-        MeshVertex in1 = innerContour[0];
-        MeshVertex in2 = innerContour[1];
-
-        if (!intersectionExists || cutFillMode==2){
-            leftMesh->addFace(in1.position, in2.position, (*selectedCuttingContour)[min_distance_cmv_idx].position);
-            leftMesh->addFace(in2.position, in1.position, (*selectedCuttingContour)[min_distance_cmv_idx].position);
-        }
-        selectedCuttingContourConnections->insert(min_distance_cmv_idx, in1);
-        selectedCuttingContourConnections->insert(min_distance_cmv_idx, in2);
-        qDebug() << "after insertion" << min_distance_cmv_idx << selectedCuttingContourConnections->values(min_distance_cmv_idx).size();
-    }
-
-
-    qDebug() << "cuttingContour_u size : " << cuttingContour_u.size();
-
-    if (!intersectionExists || cutFillMode==2){
-    for (int c_idx1=0; c_idx1<cuttingContour_u.size(); c_idx1++){
-        for (int c_idx2=0; c_idx2<cuttingContour_u.size(); c_idx2++){
-            if (c_idx1 == c_idx2)
+        // check if cutting point boundary on mesh
+        for (i = 0; i < cuttingPointCnt; i++){
+            Custom3DPoint double1, one1, one2;
+            bool cuttingPointOnMesh = false;
+            if ((customCuttingPts[i].x == mv1.x && customCuttingPts[i].y == mv1.y) || (customCuttingPts[i].x == mv2.x && customCuttingPts[i].y == mv2.y) || (customCuttingPts[i].x == mv3.x && customCuttingPts[i].y == mv3.y))
                 continue;
-            QList<MeshVertex> cpts1 = cuttingContourConnections_u.values(c_idx1);
-            QList<MeshVertex> cpts2 = cuttingContourConnections_u.values(c_idx2);
-            foreach(MeshVertex cpt1 , cpts1){
-                foreach (MeshVertex cpt2 , cpts2){
-                    if (cpt1.position == cpt2.position){ // if contains vertex in common
-                        leftMesh->addFace(cuttingContour_u[c_idx1].position, cuttingContour_u[c_idx2].position, cpt1.position);
-                        leftMesh->addFace(cuttingContour_u[c_idx2].position, cuttingContour_u[c_idx1].position, cpt1.position);
+
+            if (min(mv1.x, mv2.x) <= customCuttingPts[i].x && customCuttingPts[i].x <= max(mv1.x, mv2.x) && min(mv1.y, mv2.y) <= customCuttingPts[i].y && customCuttingPts[i].y <= max(mv1.y, mv2.y) && CCW(mv1, mv2, customCuttingPts[i]) == 0){
+                double1 = mv3; one1 = mv1; one2 = mv2; cuttingPointOnMesh = true;
+            } else if (min(mv2.x, mv3.x) <= customCuttingPts[i].x && customCuttingPts[i].x <= max(mv2.x, mv3.x) && min(mv2.y, mv3.y) <= customCuttingPts[i].y && customCuttingPts[i].y <= max(mv2.y, mv3.y) && CCW(mv2, mv3, customCuttingPts[i]) == 0){
+                double1 = mv1; one1 = mv2; one2 = mv3; cuttingPointOnMesh = true;
+            } else if (min(mv3.x, mv1.x) <= customCuttingPts[i].x && customCuttingPts[i].x <= max(mv3.x, mv1.x) && min(mv3.y, mv1.y) <= customCuttingPts[i].y && customCuttingPts[i].y <= max(mv3.y, mv1.y) && CCW(mv3, mv1, customCuttingPts[i]) == 0){
+                double1 = mv2; one1 = mv3; one2 = mv1; cuttingPointOnMesh = true;
+            }
+            if ( cuttingPointOnMesh) {
+                customCuttingPts[i].z = (one1.z + one2.z)/2;
+                meshFaceQueue.push(make_pair(convert2vector(double1, one1, customCuttingPts[i]), parentMesh));
+                meshFaceQueue.push(make_pair(convert2vector(double1, one2, customCuttingPts[i]), parentMesh));
+                break;
+            }
+        }
+        // cutting point on mesh
+        if (i < cuttingPointCnt)
+            continue;
+
+        for (i = 0, j = cuttingPointCnt - 1; i < cuttingPointCnt; j = i++){
+            if (isIntersectedLines(mv1, mv2, customCuttingPts[i], customCuttingPts[j]) && meshCuttedChecker.find(make_pair(mv1, i)) == meshCuttedChecker.end() && meshCuttedChecker.find(make_pair(mv2, i)) == meshCuttedChecker.end()) {
+                Custom3DPoint inter = getInter(mv1, mv2, customCuttingPts[i], customCuttingPts[j]);
+
+                meshCuttedChecker.insert(make_pair(inter, i));
+
+                meshFaceQueue.push(make_pair(convert2vector(mv1, inter, mv3), parentMesh));
+                meshFaceQueue.push(make_pair(convert2vector(mv2, inter, mv3), parentMesh));
+                break;
+            }
+            if (isIntersectedLines(mv2, mv3, customCuttingPts[i], customCuttingPts[j]) && meshCuttedChecker.find(make_pair(mv2, i)) == meshCuttedChecker.end() && meshCuttedChecker.find(make_pair(mv3, i)) == meshCuttedChecker.end()) {
+                Custom3DPoint inter = getInter(mv2, mv3, customCuttingPts[i], customCuttingPts[j]);
+
+                meshCuttedChecker.insert(make_pair(inter, i));
+
+                meshFaceQueue.push(make_pair(convert2vector(mv2, inter, mv1), parentMesh));
+                meshFaceQueue.push(make_pair(convert2vector(mv3, inter, mv1), parentMesh));
+                break;
+            }
+            if (isIntersectedLines(mv3, mv1, customCuttingPts[i], customCuttingPts[j]) && meshCuttedChecker.find(make_pair(mv3, i)) == meshCuttedChecker.end() && meshCuttedChecker.find(make_pair(mv1, i)) == meshCuttedChecker.end()) {
+                Custom3DPoint inter = getInter(mv3, mv1, customCuttingPts[i], customCuttingPts[j]);
+
+                meshCuttedChecker.insert(make_pair(inter, i));
+
+                meshFaceQueue.push(make_pair(convert2vector(mv3, inter, mv2), parentMesh));
+                meshFaceQueue.push(make_pair(convert2vector(mv1, inter, mv2), parentMesh));
+                break;
+            }
+        }
+
+        // didn't cutted mesh
+        if (i >= cuttingPointCnt) {
+            int innerOutter = 0;
+            int isOnLine;
+
+            isOnLine = relationPointWithCuttingPolygon((mv1+mv2)/2, customCuttingPts, 5);
+            if (isOnLine == 1) innerOutter++;
+            else if (isOnLine == 0) innerOutter--;
+
+            isOnLine = relationPointWithCuttingPolygon((mv2+mv3)/2, customCuttingPts, 5);
+            if (isOnLine == 1) innerOutter++;
+            else if (isOnLine == 0) innerOutter--;
+
+            isOnLine = relationPointWithCuttingPolygon((mv3+mv1)/2, customCuttingPts, 5);
+            if (isOnLine == 1) innerOutter++;
+            else if (isOnLine == 0) innerOutter--;
+
+            std::vector<Custom3DPoint> correctOrder = sortByCorrectOrderCustom3D(mv1, mv2, mv3, parentMesh[0], parentMesh[1], parentMesh[2]);
+
+            QVector3D addingMesh1 = QVector3D(correctOrder[0].x/padding, correctOrder[0].y/padding, correctOrder[0].z/padding);
+            QVector3D addingMesh2 = QVector3D(correctOrder[1].x/padding, correctOrder[1].y/padding, correctOrder[1].z/padding);
+            QVector3D addingMesh3 = QVector3D(correctOrder[2].x/padding, correctOrder[2].y/padding, correctOrder[2].z/padding);
+            if (innerOutter > 0)
+                rightMesh->addFace(addingMesh1,addingMesh2,addingMesh3);
+            else {
+                leftMesh->addFace(addingMesh1,addingMesh2,addingMesh3);
+
+                /*
+                 * 1. slide by cutting line -> intersection point (in Mesh Cutted Checker)
+                 * 2. ccw == 0 with cutting line also, point should be contained in cp1(x,y) cp2(x,y) box
+                 *
+                 * if Mesh edge's vertice are both included on 1 or 2 (cutting point is included in 2)
+                 * => that edge is boundary edge
+                 */
+                for (i = 0, j = cuttingPointCnt - 1; i < cuttingPointCnt; j = i++){
+                    std::vector<Custom3DPoint> boundaryVertice;
+                    for (k = 0; k < 3; k++){
+                        if (meshCuttedChecker.find(make_pair(correctOrder[k], i)) != meshCuttedChecker.end()){
+                            boundaryVertice.push_back(correctOrder[k]);
+                        } else if (CCW(customCuttingPts[i], customCuttingPts[j], correctOrder[k]) == 0 && min(customCuttingPts[i].x, customCuttingPts[j].x) <= correctOrder[k].x && correctOrder[k].x <= max(customCuttingPts[i].x, customCuttingPts[j].x) && min(customCuttingPts[i].y, customCuttingPts[j].y) <= correctOrder[k].y && correctOrder[k].y <= max(customCuttingPts[i].y, customCuttingPts[j].y)) {
+                            boundaryVertice.push_back(correctOrder[k]);
+                        }
+                    }
+                    if (boundaryVertice.size() == 2) {
+                        boundaryEdges.insert(make_pair(make_pair(boundaryVertice[0], i), make_pair(boundaryVertice[1], i)));
+                        boundaryEdges.insert(make_pair(make_pair(boundaryVertice[1], i), make_pair(boundaryVertice[0], i)));
                     }
                 }
             }
         }
     }
-    }
 
-    if (!intersectionExists || cutFillMode==2){
-    for (int c_idx1=0; c_idx1<cuttingContour_l.size(); c_idx1++){
-        for (int c_idx2=0; c_idx2<cuttingContour_l.size(); c_idx2++){
-            if (c_idx1 == c_idx2)
-                continue;
-            QList<MeshVertex> cpts1 = cuttingContourConnections_l.values(c_idx1);
-            QList<MeshVertex> cpts2 = cuttingContourConnections_l.values(c_idx2);
-            foreach(MeshVertex cpt1 , cpts1){
-                foreach (MeshVertex cpt2 , cpts2){
-                    if (cpt1.position == cpt2.position){ // if contains vertex in common
-                        leftMesh->addFace(cuttingContour_l[c_idx1].position, cuttingContour_l[c_idx2].position, cpt1.position);
-                        leftMesh->addFace(cuttingContour_l[c_idx2].position, cuttingContour_l[c_idx1].position, cpt1.position);
+    // hole filling
+    qDebug() << "boundary Edge " << boundaryEdges.size();
+
+    for (i = 0, j = cuttingPointCnt-1; i < cuttingPointCnt; j = i++) {
+        qDebug() << "cutting edge" << i;
+        bool isCandidate;
+        std::set<Custom3DPoint> checker;
+        std::multimap<pair<Custom3DPoint, int>, pair<Custom3DPoint, int> >::iterator iter, targetIter;
+        std::vector<std::vector<Custom3DPoint>> contours;
+        pair<Custom3DPoint, int> prevPoint, currPoint;
+        
+        // find start with cutting point
+        for (iter = boundaryEdges.begin(); iter != boundaryEdges.end(); iter++){
+            isCandidate = (iter->first.second == i) && ((customCuttingPts[i].x == iter->first.first.x) && (customCuttingPts[i].y == iter->first.first.y) || ((customCuttingPts[j].x == iter->first.first.x) && (customCuttingPts[j].y == iter->first.first.y)));
+            if (isCandidate && checker.find(iter->first.first) == checker.end()) {
+                std::vector<Custom3DPoint> contour;
+                // new contour
+                prevPoint = iter->first;
+                currPoint = iter->second;
+                contour.push_back(prevPoint.first);
+                checker.insert(prevPoint.first);
+                while(true){
+                    prevPoint = currPoint;
+                    contour.push_back(prevPoint.first);
+                    checker.insert(prevPoint.first);
+
+                    bool findFlag = false;
+
+                    for (targetIter = boundaryEdges.lower_bound(prevPoint); targetIter != boundaryEdges.upper_bound(prevPoint); targetIter++){
+                        currPoint = targetIter->second;
+                        if (checker.find(currPoint.first) == checker.end()){
+                            findFlag = true;
+                            break;
+                        }
+                    }
+
+                    if (!findFlag) {
+                        break;
+                    }
+                }
+                qDebug() << "cutting edge start >> " << contour.size();
+                contours.push_back(contour);
+            }
+        }
+        
+        // find non start with cutting point
+        for (iter = boundaryEdges.begin(); iter != boundaryEdges.end(); iter++){
+            isCandidate = iter->first.second == i;
+            if (isCandidate && checker.find(iter->first.first) == checker.end()) {
+                std::vector<Custom3DPoint> contour;
+                // new contour
+                prevPoint = iter->first;
+                currPoint = iter->second;
+                contour.push_back(prevPoint.first);
+                checker.insert(prevPoint.first);
+                while(true){
+                    prevPoint = currPoint;
+                    contour.push_back(prevPoint.first);
+                    checker.insert(prevPoint.first);
+
+                    bool findFlag = false;
+
+                    for (targetIter = boundaryEdges.lower_bound(prevPoint); targetIter != boundaryEdges.upper_bound(prevPoint); targetIter++){
+                        currPoint = targetIter->second;
+                        if (checker.find(currPoint.first) == checker.end()){
+                            findFlag = true;
+                            break;
+                        }
+                    }
+
+                    if (!findFlag) {
+                        break;
+                    }
+                }
+                qDebug() << "plane start >> " << contour.size();
+                contours.push_back(contour);
+            }
+        }
+        qDebug() << "total contours : " << contours.size();
+
+        qDebug() << "get seperated contour";
+        std::vector<int> seperatedContourIdxs;
+        for (k=0; k<contours.size(); k++){
+            if ((customCuttingPts[i].x == contours[k][0].x) && (customCuttingPts[i].y == contours[k][0].y) && (customCuttingPts[j].x == contours[k].back().x) && (customCuttingPts[j].y == contours[k].back().y)) {
+                seperatedContourIdxs.push_back(k);
+            } else if ((customCuttingPts[j].x == contours[k][0].x) && (customCuttingPts[j].y == contours[k][0].y) && (customCuttingPts[i].x == contours[k].back().x) && (customCuttingPts[i].y == contours[k].back().y)) {
+                std::reverse(contours[k].begin(), contours[k].end());
+                seperatedContourIdxs.push_back(k);
+            }
+        }
+        qDebug() << seperatedContourIdxs.size();
+
+        qDebug() << "start to connect seperated contour";
+        int minIdx, maxIdx, originMinIdx, originMaxIdx;
+        long long int minz, maxz;
+        while (seperatedContourIdxs.size() > 1) {
+            qDebug() << seperatedContourIdxs.size();
+            minz = 10000000000; maxz = -10000000000;
+            for (k = 0; k < seperatedContourIdxs.size(); k++) {
+                if (contours[seperatedContourIdxs[k]][0].z < minz) {
+                    minz = contours[seperatedContourIdxs[k]][0].z;
+                    minIdx = k;
+                }
+                if (contours[seperatedContourIdxs[k]][0].z > maxz) {
+                    maxz = contours[seperatedContourIdxs[k]][0].z;
+                    maxIdx = k;
+                }
+            }
+            qDebug() << minIdx << " " << minz;
+            qDebug() << maxIdx << " " << maxz;
+            originMinIdx = seperatedContourIdxs[minIdx]; seperatedContourIdxs[minIdx] = seperatedContourIdxs.back(); seperatedContourIdxs.pop_back();
+            originMaxIdx = seperatedContourIdxs[maxIdx]; seperatedContourIdxs[maxIdx] = seperatedContourIdxs.back(); seperatedContourIdxs.pop_back();
+
+            qDebug() << "fuck1";
+            std::reverse(contours[originMinIdx].begin(), contours[originMinIdx].end());
+//            qDebug() << "min index";
+//            for (int ijk = 0 ; ijk < contours[minIdx].size() ; ijk++) {
+//                qDebug() << contours[minIdx][ijk].x << "   " << contours[minIdx][ijk].y << "   " << contours[minIdx][ijk].z;
+//            }
+//            qDebug() << "max index";
+//            for (int ijk = 0 ; ijk < contours[maxIdx].size() ; ijk++) {
+//                qDebug() << contours[maxIdx][ijk].x << "   " << contours[maxIdx][ijk].y << "   " << contours[maxIdx][ijk].z;
+//            }
+            qDebug() << "fuck2";
+            contours[originMaxIdx].insert(contours[originMaxIdx].end(), contours[originMinIdx].begin(), contours[originMinIdx].end());
+//            qDebug() << "total index";
+//            for (int ijk = 0 ; ijk < contours[maxIdx].size() ; ijk++) {
+//                qDebug() << contours[maxIdx][ijk].x << "   " << contours[maxIdx][ijk].y << "   " << contours[maxIdx][ijk].z;
+//            }
+            qDebug() << "fuck3";
+            contours[originMinIdx] = contours.back(); contours.pop_back();
+        }
+        qDebug() << "complete connect seperated contour => " << contours.size();
+
+//        if (contours.size() > 0){
+//            for (int ijk = 0 ; ijk < contours[0].size() ; ijk++) {
+//                qDebug() << contours[0][ijk].x << "   " << contours[0][ijk].y << "   " << contours[0][ijk].z;
+//            }
+//        }
+
+
+        // if size of contour less than 3 -> remove
+        int contourN = contours.size();
+        for (int k = 0; k < contourN; k++) {
+            if (contours[k].size() < 3) {
+                contours[k] = contours.back();
+                contours.pop_back();
+                contourN--;
+                k--;
+            }
+        }
+
+        qDebug() << "make projected contours";
+        std::vector<std::vector<Point_2> > projContours;
+        for (unsigned int k = 0; k < contourN; k++) {
+            std::vector<Point_2> projContour;
+            int nn = contours[k].size();
+            for (unsigned int h = 0; h < nn; h++){
+                if (abs(customCuttingPts[i].x - customCuttingPts[j].x) >= abs(customCuttingPts[i].y - customCuttingPts[j].y))
+                    projContour.push_back(Point_2(contours[k][h].x/padding, contours[k][h].z/padding));
+                else
+                    projContour.push_back(Point_2(contours[k][h].y/padding, contours[k][h].z/padding));
+            }
+            contours[k].clear();
+            projContours.push_back(projContour);
+        }
+        contours.clear();
+
+        qDebug() << "make cdt";
+        // add polygon and constraints on CDT
+        CDT cdt;
+        for (unsigned int k = 0; k < contourN; k++) {
+            std::vector<Vertex_handle> vhs;
+            size_t numPoints = projContours[k].size();
+
+            for (unsigned int h = 0; h < numPoints; h++){
+                vhs.push_back(cdt.insert(projContours[k][h]));
+            }
+
+            for (unsigned int h = 0; h < numPoints; h++)
+                cdt.insert_constraint(vhs[h], vhs[(h+1)%numPoints]);
+        }
+
+        qDebug() << "contour relation initialize";
+        // I assumed that the maximum number of contours is 100.
+        int directedInclusionRelationship[100][100];
+        for (int contourI=0; contourI < contourN; contourI++) {
+            for (int contourJ=0; contourJ < contourN; contourJ++) {
+                directedInclusionRelationship[contourI][contourJ] = 0;
+            }
+        }
+        qDebug() << "contour relation make";
+        // make directed adjacency matrix
+        for (int contourI=0; contourI < contourN; contourI++) {
+            for (int contourJ=0; contourJ < contourN; contourJ++) {
+                if (contourI == contourJ) continue;
+                int relation;
+                for (int kkk=0; kkk<=projContours[contourJ].size(); kkk++){
+                    relation = relationPoint2DPolygon(projContours[contourJ][kkk].x(), projContours[contourJ][kkk].y(), projContours[contourI]);
+                    if (relation != 2){
+                        break;
+                    }
+                }
+                if (relation == 0) {
+                    directedInclusionRelationship[contourI][contourJ] = 1;
+                }
+            }
+        }
+        // using Flody-Warshall get topology
+        qDebug() << "contour topology";
+        for (int contourI=0; contourI < contourN; contourI++) {
+            for (int contourJ=0; contourJ < contourN; contourJ++) {
+                if (contourI == contourJ) continue;
+                for (int contourK=0; contourK < contourN; contourK++) {
+                    if (contourI == contourK || contourJ == contourK) continue;
+                    if (directedInclusionRelationship[contourI][contourK] > 0 && directedInclusionRelationship[contourK][contourJ] > 0){
+                        directedInclusionRelationship[contourI][contourJ] = directedInclusionRelationship[contourI][contourK] + directedInclusionRelationship[contourK][contourJ];
                     }
                 }
             }
         }
-    }
-    }
 
-
-    cuttingContourConnections_u.clear();
-    cuttingContourConnections_l.clear();
-
-    for (Path3D outerContour : outerContours){ // connect inner contours
-        qDebug() << "outer Contour size : " << outerContour.size();
-        Path3D* selectedCuttingContour;
-        QMultiHash<int, MeshVertex>* selectedCuttingContourConnections;
-        if (abs(outerContour[0].position.z()-cuttingContour_u[1].position.z()) < abs(outerContour[0].position.z()-cuttingContour_l[1].position.z())){
-            selectedCuttingContour = &cuttingContour_u;
-            selectedCuttingContourConnections = &cuttingContourConnections_u;
-        } else {
-            selectedCuttingContour = &cuttingContour_l;
-            selectedCuttingContourConnections = &cuttingContourConnections_l;
-        }
-
-        float min_distance = 99999;
-        int min_distance_cmv_idx;
-        // find min distance cutting point and connect it
-        for (int cmv_idx=0; cmv_idx<selectedCuttingContour->size(); cmv_idx++){
-            MeshVertex cmv = (*selectedCuttingContour)[cmv_idx];
-            float cur_distance = abs(cmv.position.distanceToPoint(outerContour[0].position));
-            if (cur_distance < min_distance){
-                min_distance = cur_distance;
-                min_distance_cmv_idx = cmv_idx;
+        // find root nodes
+        std::queue<pair<pair<int, bool>, int> > contourQ;
+        for (int contourI=0; contourI < contourN; contourI++) {
+            int contourJ;
+            for (contourJ=0; contourJ < contourN; contourJ++) {
+                if (directedInclusionRelationship[contourJ][contourI] != 0)
+                    break;
+            }
+            if (contourJ >= contourN) {
+                contourQ.push(make_pair(make_pair(contourI, true), -1));
             }
         }
-        MeshVertex on1 = outerContour[0];
-        MeshVertex on2 = outerContour[1];
-        if (!intersectionExists || cutFillMode==2){
-            rightMesh->addFace(on1.position, on2.position, (*selectedCuttingContour)[min_distance_cmv_idx].position);
-            rightMesh->addFace(on2.position, on1.position, (*selectedCuttingContour)[min_distance_cmv_idx].position);
-        }
-        selectedCuttingContourConnections->insert(min_distance_cmv_idx, on1);
-        selectedCuttingContourConnections->insert(min_distance_cmv_idx, on2);
-        if (abs(outerContour[0].position.z()-cuttingContour_u[1].position.z()) < abs(outerContour[0].position.z()-cuttingContour_l[1].position.z())){
-            qDebug() << "after insertion" << min_distance_cmv_idx << cuttingContourConnections_u.values(min_distance_cmv_idx).size() << on1.position << on2.position;
-        }
-    }
 
-
-    qDebug() << "cuttingContour_u size : " << cuttingContour_u.size();
-
-    if (!intersectionExists || cutFillMode==2){
-    for (int c_idx1=0; c_idx1<cuttingContour_u.size(); c_idx1++){
-        for (int c_idx2=0; c_idx2<cuttingContour_u.size(); c_idx2++){
-            if (c_idx1 == c_idx2)
-                continue;
-            QList<MeshVertex> cpts1 = cuttingContourConnections_u.values(c_idx1);
-            QList<MeshVertex> cpts2 = cuttingContourConnections_u.values(c_idx2);
-            foreach(MeshVertex cpt1 , cpts1){
-                foreach (MeshVertex cpt2 , cpts2){
-                    if (cpt1.position == cpt2.position){
-                        qDebug() << "exists jump " << cpt1.position;
-                        rightMesh->addFace(cuttingContour_u[c_idx1].position, cuttingContour_u[c_idx2].position, cpt1.position);
-                        rightMesh->addFace(cuttingContour_u[c_idx2].position, cuttingContour_u[c_idx1].position, cpt1.position);
-                    }
+        qDebug() << "contour tree bfs -> hole point";
+        // bfs for get hole point
+        std::list<Point_2> list_of_seeds;
+        pair<pair<int, bool>, int> qFront;
+        pair<int, bool> contourT;
+        int contourParent;
+        while(!contourQ.empty()) {
+            qFront = contourQ.front(); contourQ.pop();
+            contourT = qFront.first; contourParent = qFront.second;
+            qDebug() << projContours[contourT.first].size() << " " << contourT.second;
+            if (contourT.second && contourParent != -1) {
+                // find hole point
+                Point_2 holePoint = findHolePoint(projContours[contourT.first], projContours[contourParent]);
+                list_of_seeds.push_back(holePoint);
+            }
+            for (int contourI=0; contourI < contourN; contourI++) {
+                if (directedInclusionRelationship[contourT.first][contourI] == 1) {
+                    contourQ.push(make_pair(make_pair(contourI, !contourT.second), contourT.first));
                 }
             }
         }
-    }
-    }
 
-    if (!intersectionExists || cutFillMode==2){
-    for (int c_idx1=0; c_idx1<cuttingContour_l.size(); c_idx1++){
-        for (int c_idx2=0; c_idx2<cuttingContour_l.size(); c_idx2++){
-            if (c_idx1 == c_idx2)
-                continue;
-            QList<MeshVertex> cpts1 = cuttingContourConnections_l.values(c_idx1);
-            QList<MeshVertex> cpts2 = cuttingContourConnections_l.values(c_idx2);
-            foreach(MeshVertex cpt1 , cpts1){
-                foreach (MeshVertex cpt2 , cpts2){
-                    if (cpt1.position == cpt2.position){
-                        qDebug() << "exists jump " << cpt1.position;
-                        rightMesh->addFace(cuttingContour_l[c_idx1].position, cuttingContour_l[c_idx2].position, cpt1.position);
-                        rightMesh->addFace(cuttingContour_l[c_idx2].position, cuttingContour_l[c_idx1].position, cpt1.position);
-                    }
+        // triangular
+        qDebug() << "Triangular";
+        if (list_of_seeds.size() > 0)
+            CGAL::refine_Delaunay_mesh_2(cdt, list_of_seeds.begin(), list_of_seeds.end(), Criteria(0.125, 1.5), false);
+        else
+            CGAL::refine_Delaunay_mesh_2(cdt, Criteria(0.125, 1.5));
+
+        // add face
+        QVector3D mesh1, mesh2, mesh3;
+        qDebug() << "Add face";
+        for (CDT::Finite_faces_iterator fit = cdt.finite_faces_begin(); fit != cdt.finite_faces_end(); fit++) {
+            if (fit->is_in_domain()) {
+                if (abs(cuttingPoints[i].x() - cuttingPoints[j].x()) >= abs(cuttingPoints[i].y() - cuttingPoints[j].y())) {
+                    mesh1 = QVector3D(float(cdt.triangle(fit)[0].x()), (float(cdt.triangle(fit)[0].x()) - cuttingPoints[j].x()) * (cuttingPoints[i].y() - cuttingPoints[j].y()) / (cuttingPoints[i].x() - cuttingPoints[j].x()) + cuttingPoints[j].y(), float(cdt.triangle(fit)[0].y()));
+                    mesh2 = QVector3D(float(cdt.triangle(fit)[1].x()), (float(cdt.triangle(fit)[1].x()) - cuttingPoints[j].x()) * (cuttingPoints[i].y() - cuttingPoints[j].y()) / (cuttingPoints[i].x() - cuttingPoints[j].x()) + cuttingPoints[j].y(), float(cdt.triangle(fit)[1].y()));
+                    mesh3 = QVector3D(float(cdt.triangle(fit)[2].x()), (float(cdt.triangle(fit)[2].x()) - cuttingPoints[j].x()) * (cuttingPoints[i].y() - cuttingPoints[j].y()) / (cuttingPoints[i].x() - cuttingPoints[j].x()) + cuttingPoints[j].y(), float(cdt.triangle(fit)[2].y()));
+                } else {
+                    mesh1 = QVector3D((float(cdt.triangle(fit)[0].x()) - cuttingPoints[j].y()) * (cuttingPoints[i].x() - cuttingPoints[j].x()) / (cuttingPoints[i].y() - cuttingPoints[j].y()) + cuttingPoints[j].x(), float(cdt.triangle(fit)[0].x()), float(cdt.triangle(fit)[0].y()));
+                    mesh2 = QVector3D((float(cdt.triangle(fit)[1].x()) - cuttingPoints[j].y()) * (cuttingPoints[i].x() - cuttingPoints[j].x()) / (cuttingPoints[i].y() - cuttingPoints[j].y()) + cuttingPoints[j].x(), float(cdt.triangle(fit)[1].x()), float(cdt.triangle(fit)[1].y()));
+                    mesh3 = QVector3D((float(cdt.triangle(fit)[2].x()) - cuttingPoints[j].y()) * (cuttingPoints[i].x() - cuttingPoints[j].x()) / (cuttingPoints[i].y() - cuttingPoints[j].y()) + cuttingPoints[j].x(), float(cdt.triangle(fit)[2].x()), float(cdt.triangle(fit)[2].y()));
                 }
+                rightMesh->addFace(mesh1, mesh2, mesh3);
+                rightMesh->addFace(mesh3, mesh2, mesh1);
+                leftMesh->addFace(mesh1, mesh2, mesh3);
+                leftMesh->addFace(mesh3, mesh2, mesh1);
             }
         }
-    }
-    }
-
-    if (cutFillMode == 2 && cuttingContour_u.size() >= 3){
-        QVector3D normal_direction = QVector3D::normal(cuttingContour_u[0].position-cuttingContour_u[1].position, cuttingContour_u[2].position-cuttingContour_u[1].position);
-        for (int u_idx=0; u_idx<cuttingContour_u.size(); u_idx++){
-            if ((u_idx == 0 || u_idx == cuttingContour_u.size()-1) && intersectionExists)
-                continue;
-            MeshVertex umv1 = cuttingContour_u[u_idx];
-            MeshVertex umv2 = cuttingContour_u[(u_idx+1)%cuttingContour_u.size()];
-
-            MeshVertex lmv1 = cuttingContour_l[u_idx];
-            MeshVertex lmv2 = cuttingContour_l[(u_idx+1)%cuttingContour_l.size()];
-
-            if (normal_direction.z()>0){
-                rightMesh->addFace(umv2.position, umv1.position, lmv1.position);
-                rightMesh->addFace(umv2.position, lmv1.position, lmv2.position);
-                leftMesh->addFace(umv1.position, umv2.position, lmv1.position);
-                leftMesh->addFace(lmv1.position, umv2.position, lmv2.position);
-            } else {
-                rightMesh->addFace(umv1.position, umv2.position, lmv1.position);
-                rightMesh->addFace(lmv1.position, umv2.position, lmv2.position);
-                leftMesh->addFace(umv2.position, umv1.position, lmv1.position);
-                leftMesh->addFace(umv2.position, lmv1.position, lmv2.position);
-            }
-        }
-
-        if (intersectionExists){ // fill 대칭
-            MeshVertex umv_enter = cuttingContour_u[0];
-            MeshVertex umv1 = cuttingContour_u[1];
-            MeshVertex lmv1 = cuttingContour_l[1];
-            MeshVertex umv_exit = cuttingContour_u[cuttingContour_u.size()-1];
-            MeshVertex umv_1 = cuttingContour_u[cuttingContour_u.size()-2];
-            MeshVertex lmv_1 = cuttingContour_l[cuttingContour_l.size()-2];
-
-            rightMesh->addFace(umv1.position, umv_enter.position, lmv1.position);
-            rightMesh->addFace(umv_exit.position, umv_1.position, lmv_1.position);
-            leftMesh->addFace(umv_enter.position, umv1.position, lmv1.position);
-            leftMesh->addFace(umv_1.position, umv_exit.position, lmv_1.position);
-            rightMesh->addFace(umv_enter.position, umv1.position, lmv1.position);
-            rightMesh->addFace(umv_1.position, umv_exit.position, lmv_1.position);
-            leftMesh->addFace(umv1.position, umv_enter.position, lmv1.position);
-            leftMesh->addFace(umv_exit.position, umv_1.position, lmv_1.position);
-
-            /*if (normal_direction.z()>0){
-                qDebug() << "normal direction plus" << umv_enter.position << umv_exit.position;
-                rightMesh->addFace(umv1.position, umv_enter.position, lmv1.position);
-                rightMesh->addFace(umv_exit.position, umv_1.position, lmv_1.position);
-                leftMesh->addFace(umv_enter.position, umv1.position, lmv1.position);
-                leftMesh->addFace(umv_1.position, umv_exit.position, lmv_1.position);
-            } else {
-                qDebug() << "normal direction minus" << umv_enter.position << umv_exit.position;
-                rightMesh->addFace(umv_enter.position, umv1.position, lmv1.position);
-                rightMesh->addFace(umv_1.position, umv_exit.position, lmv_1.position);
-                leftMesh->addFace(umv1.position, umv_enter.position, lmv1.position);
-                leftMesh->addFace(umv_exit.position, umv_1.position, lmv_1.position);
-            }*/
-        }
+        qDebug() << "add face complete";
     }
 
-    if (leftMesh->faces.size() != 0)
-        leftMesh->connectFaces();
-    if (rightMesh->faces.size() != 0)
-        rightMesh->connectFaces();
+
+    qDebug() << "complete!!!";
+//    leftMesh->connectFaces();
+//    rightMesh->connectFaces();
+//    qDebug() << "complete2!!!";
 }
 
 void modelcut::removeCuttingPoints(){
@@ -658,3 +1424,4 @@ void modelcut::getSliderSignal(double value){
         planeEntity[i]->addComponent(planeTransform[i]);
     }
 }
+

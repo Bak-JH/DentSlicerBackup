@@ -150,6 +150,9 @@ GLModel::GLModel(QObject* mainWindow, QNode *parent, Mesh* loadMesh, QString fna
 
     qDebug() << "adding part " << fname.toStdString().c_str();
 
+    for (int i=0; i<200; i++){
+
+    }
 
     // reserve cutting points, contours
     sphereEntity.reserve(50);
@@ -745,7 +748,9 @@ void GLModel::initialize(const int& faces_cnt){
     QByteArray vertexArray;
     vertexArray.resize(faces_cnt*3*(3)*sizeof(float));
     vertexBuffer = new Qt3DRender::QBuffer(Qt3DRender::QBuffer::VertexBuffer,m_geometry);
+    //vertexBuffer = new QBuffer::QBuffer(QBuffer::VertexBuffer, m_geometry);
     vertexBuffer->setUsage(Qt3DRender::QBuffer::DynamicDraw);
+    //vertexBuffer->setBuffer(vertexArray);
     vertexBuffer->setData(vertexArray);
 
     QByteArray vertexNormalArray;
@@ -828,6 +833,27 @@ void GLModel::addVertex(QVector3D vertex){
     uint vertexCount = positionAttribute->count();
     vertexBuffer->updateData(vertexCount*6*sizeof(float),appendVertexArray);
     positionAttribute->setCount(vertexCount+1);
+
+    return;
+}
+
+void GLModel::editVertex(int idx, QVector3D vertex){
+    //update geometry
+    QByteArray appendVertexArray;
+    appendVertexArray.resize(1*3*sizeof(float));
+    float* reVertexArray = reinterpret_cast<float*>(appendVertexArray.data());
+
+    //coordinates of left vertex
+    reVertexArray[0] = x;
+    reVertexArray[1] = y;
+    reVertexArray[2] = z;
+    vertexBuffer->updateData(idx*6*sizeof(float), appendVertexArray);
+
+    return;
+}
+
+void GLModel::removeVertex(int idx){
+    vertexBuffer->data().remove(idx*6*sizeof(float), 6*sizeof(float));
 
     return;
 }
@@ -1079,12 +1105,12 @@ void GLModel::handlePickerClickedFreeCutSphere(Qt3DRender::QPickEvent* pick)
     int minIdx = 0;
     float min = world2Screen(cuttingPoints[0]).distanceToPoint(pickPosition);
     for (int i=0; i<cuttingPoints.size(); i++){
-
         if (world2Screen(cuttingPoints[i]).distanceToPoint(pickPosition) < min){
             minIdx = i;
             min = world2Screen(cuttingPoints[i]).distanceToPoint(pickPosition);
         }
     }
+
     qDebug() << "min idx  " << minIdx;
     removeCuttingPoint(minIdx);
     removeCuttingContour();
@@ -1900,7 +1926,19 @@ void GLModel::modelCut(){
             return;
         }
 
-        parentModel->bisectModel(parentModel->cuttingPlane);
+        // create left, rightmesh
+        Mesh* leftMesh = parentModel->lmesh;
+        Mesh* rightMesh = parentModel->rmesh;
+        // do bisecting mesh
+        leftMesh->faces.reserve(parentModel->mesh->faces.size()*3);
+        leftMesh->vertices.reserve(parentModel->mesh->faces.size()*9);
+        rightMesh->faces.reserve(parentModel->mesh->faces.size()*3);
+        rightMesh->vertices.reserve(parentModel->mesh->faces.size()*9);
+
+        bisectModelByPlane(leftMesh, rightMesh, parentModel->mesh, parentModel->cuttingPlane, parentModel->cutFillMode);
+
+        emit parentModel->bisectDone();
+
     } else if (cutMode == 2){ // free cut
         if (parentModel->cuttingPoints.size() >= 3){
 
@@ -1908,10 +1946,10 @@ void GLModel::modelCut(){
             Mesh* leftMesh = parentModel->lmesh;
             Mesh* rightMesh = parentModel->rmesh;
             // do bisecting mesh
-            leftMesh->faces.reserve(mesh->faces.size()*3);
-            leftMesh->vertices.reserve(mesh->faces.size()*3);
-            rightMesh->faces.reserve(mesh->faces.size()*3);
-            rightMesh->vertices.reserve(mesh->faces.size()*3);
+            leftMesh->faces.reserve(parentModel->mesh->faces.size()*10);
+            leftMesh->vertices.reserve(parentModel->mesh->faces.size()*30);
+            rightMesh->faces.reserve(parentModel->mesh->faces.size()*10);
+            rightMesh->vertices.reserve(parentModel->mesh->faces.size()*30);
 
             cutAway(leftMesh, rightMesh, parentModel->mesh, parentModel->cuttingPoints, parentModel->cutFillMode);
 
