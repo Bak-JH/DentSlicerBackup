@@ -12,7 +12,7 @@
 #include <QEvent>
 #include <QPointF>
 #include <QCursor>
-#include <QQmlProperty>0269
+#include <QQmlProperty>
 #include "feature/autoarrange.h"
 #include "feature/shelloffset.h"
 #include "glmodel.h"
@@ -43,6 +43,7 @@ public:
     QObject* loginWindow;
     QObject* loginButton;
     QObject* boxUpperTab;
+    QObject* boxLeftTab;
     QEntity* models;
     Qt3DCore::QTransform* systemTransform;
     QObject* mv;
@@ -123,10 +124,11 @@ public:
     QObject* repairButton;
 
     // auto arrange components
-    QObject* arrangePopup;
+    //QObject* arrangePopup;
 
     // save components
     QObject* saveButton;
+    //QObject* savePopup;
 
     // export components
     //QObject* exportButton;
@@ -156,10 +158,10 @@ public:
     int rotateSnapQuotient = 0;
     bool groupSelectionActive = false;
     //bool moveActive = false;
+    bool saveActive = false;
     bool rotateActive = false;
     bool orientationActive = false;
     bool freecutActive = false;
-    bool modelClicked = false;
 
 
     QString groupFunctionState;
@@ -181,7 +183,7 @@ public:
     void addPart(QString fileName, int ID);
     void deletePart(int ID);
     void openProgressPopUp();
-    void openYesNoPopUp(string inputText_h, string inputText_m, string inputText_l, int inputPopupType);
+    void openYesNoPopUp(bool selectedList_vis, string inputText_h, string inputText_m, string inputText_l, int inputText_fontsize, string image_source, int inputPopupType, int yesNo_okCancel);
     void openResultPopUp(string inputText_h, string inputText_m, string inputText_l);
     void setProgress(float value);
     void setProgressText(string inputText);
@@ -194,13 +196,22 @@ public:
     Q_INVOKABLE QVector3D getSelectedCenter();
     Q_INVOKABLE QVector3D getSelectedSize();
     Q_INVOKABLE int getselectedModelID();
+    Q_INVOKABLE int getSelectedModelsSize();
+    Q_INVOKABLE float getBedXSize();
+    Q_INVOKABLE float getBedYSize();
+    Q_INVOKABLE void setBedXSize(float x);
+    Q_INVOKABLE void setBedYSize(float y);
+    Q_INVOKABLE bool getGroupSelectionActive();
     Q_INVOKABLE void fixMesh();
+    Q_INVOKABLE void disableObjectPickers();
+    Q_INVOKABLE void enableObjectPickers();
     Q_INVOKABLE void setHandCursor();
     Q_INVOKABLE void setClosedHandCursor();
     Q_INVOKABLE void resetCursor();
     Q_INVOKABLE bool isSelected();
     Q_INVOKABLE void selectPart(int ID);
     Q_INVOKABLE void unselectPart(int ID);
+    Q_INVOKABLE void unselectAll();
     Q_INVOKABLE void modelVisible(int ID, bool isVisible);
     Q_INVOKABLE void doDelete();
     Q_INVOKABLE void doDeletebyID(int ID);
@@ -208,9 +219,17 @@ public:
     Q_INVOKABLE void setViewMode(int viewMode);
     Q_INVOKABLE int getViewMode();
     Q_INVOKABLE void sendUpdateModelInfo();
-    Q_INVOKABLE void backgroundClickCheck();
-    Q_INVOKABLE void setModelClickFalse();
+    Q_INVOKABLE void backgroundClicked();
+    Q_INVOKABLE void deleteList(int ID);
+    Q_INVOKABLE void deleteSelectedModels();
 
+    float selected_x_max(size_t selectedNum);
+    float selected_x_min(size_t selectedNum);
+    float selected_y_max(size_t selectedNum);
+    float selected_y_min(size_t selectedNum);
+    float selected_z_max(size_t selectedNum);
+    float selected_z_min(size_t selectedNum);
+    void updateBoundedBox();
 
 private:
     //bool glmodels_arranged;
@@ -228,14 +247,17 @@ public slots:
     void createModelFile(Mesh* target_mesh, QString filename);
     void openModelFile(QString filename);
     void checkModelFile(int ID);
+    void deleteOneModelFile(int ID);
+    void deleteModelFileDone();
     void deleteModelFile(int ID);
     void unDo();
     void reDo();
     void copyModel();
     void pasteModel();
     void groupSelectionActivate(bool);
-    void runGroupFeature(int,QString, double, double, double);
-    void multipleModelSelected(int ID);
+    void runGroupFeature(int,QString, double, double, double, QVariant);
+    bool multipleModelSelected(int ID);
+    void lastModelSelected();
     void modelSelected(int);
     void modelRotate(int,int);
     void modelRotateByNumber(int axis, int, int, int);
@@ -243,7 +265,7 @@ public slots:
     void modelMoveF(int,float);
     void modelMoveByNumber(int axis, int, int);
     void modelMoveInit();
-    void modelMoveDone(int);
+    void modelMoveDone();
     void totalMoveDone();
     void modelRotateInit();
     void modelRotateDone(int);
@@ -263,6 +285,9 @@ public slots:
     void closeMove();
     void openOrientation();
     void closeOrientation();
+    void openSave();
+    void closeSave();
+    void save();
 
     void viewObjectChanged(bool checked);
     void viewSupportChanged(bool checked);

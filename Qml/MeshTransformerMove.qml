@@ -146,13 +146,13 @@ Entity{
         components: [ moveArrowMesh, movearrowYTransform, moveArrowYMaterial,moveArrowobjectPickerY]
     }
     function arrowRelease(){
-        if (moveAxis == 1){
+        if (moveAxis == 1){ // X
             moveAxis = 0;
             moveArrowY.setEnabled(true)
             moveArrowXMaterial.ambient = Qt.rgba(150/255,150/255,150/255,1)
             moveArrowXMaterial.diffuse = Qt.rgba(150/255,150/255,150/255,1)
             moveArrowXMaterial.specular = Qt.rgba(150/255,150/255,150/255,1)
-        }else if (moveAxis == 2){
+        }else if (moveAxis == 2){ // Y
             moveAxis = 0;
             moveArrowX.setEnabled(true)
             moveArrowYMaterial.ambient = Qt.rgba(150/255,150/255,150/255,1)
@@ -175,15 +175,11 @@ Entity{
                 moveAxis = 0;
             }
         }
-        onReleased: {
-            arrowRelease();
-            //moveAxis = 0;
-
-            //moveArrowXMaterial.ambient = Qt.rgba(150/255,150/255,150/255,1)
-            //moveArrowYMaterial.ambient = Qt.rgba(150/255,150/255,150/255,1)
-        }
         onPositionChanged: {
             mouseCurrent = Qt.vector2d(mouse.x,mouse.y)
+        }
+        onReleased: {
+            arrowRelease()
         }
     }
     function world2Screen(target){
@@ -209,7 +205,7 @@ Entity{
 
     signal moveInit()
     signal moveSignal(int Axis, int distance)
-    signal moveDone(int Axis)
+    signal moveDone()
     FrameAction{
         id : moveFrameAction
         onTriggered: {
@@ -217,7 +213,7 @@ Entity{
                 var syszoom = Qt.vector3d(0,0,0)
                 syszoom = sceneRoot.systemTransform.scale3D
                 if (moveAxis == 0 && pastAxis != 0){
-                    moveDone(pastAxis);
+                    moveDone();
                     pastAxis = 0;
                 } else if (moveAxis != 0 && pastAxis == 0){
                     moveInit();

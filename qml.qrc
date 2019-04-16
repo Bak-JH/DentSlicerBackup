@@ -41,11 +41,9 @@
         <file>Qml/FeedbackPopUp.qml</file>
         <file>Qml/LeftTabSlicingOptionElement2.qml</file>
         <file>Qml/LeftTabSlicingOptionElement3.qml</file>
-        <file>Qml/ArrangePopup.qml</file>
         <file>Resource/mesh/box.stl</file>
         <file>Resource/mesh/box2.stl</file>
         <file>Qml/MeshBoundedBox.qml</file>
-        <file>Qml/DeletePopup.qml</file>
         <file>Qml/YesNoPopup.qml</file>
         <file>Qml/LayerViewPopup.qml</file>
         <file>Qml/UndoRedoButton.qml</file>
@@ -59,5 +57,6 @@
         <file>shaders/layerview_infill.frag</file>
         <file>Resource/mesh/plate_logo.stl</file>
         <file>Resource/mesh/boundedBox3.stl</file>
+        <file>Qml/MeshPlate.qml</file>
     </qresource>
 </RCC>

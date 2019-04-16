@@ -66,7 +66,7 @@ Rectangle {
 
         Text {
             height:20
-            id: result_low
+            id: result_text_low
 
             text: low_text
             anchors.top: parent.top
@@ -109,8 +109,13 @@ Rectangle {
                 }
                 onReleased: {
                     closePopUp();
+                    //uppertab.all_off();
                     if(mid_text.includes("at least one model") || mid_text.includes("change to"))
                         uppertab.all_off()
+                    if (mid_text.includes("Saved")) {
+                        qm.closeSave()
+                        uppertab.all_off()
+                    }
                 }
             }
         }

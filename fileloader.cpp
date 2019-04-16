@@ -25,6 +25,31 @@ void* fgets_(char* ptr, size_t len, FILE* f)
     return nullptr;
 }
 
+char* readFace(char* ptr, size_t len, FILE* f, char* save)
+{
+    while(len && fread(ptr, 1, 1, f) > 0)
+    {
+        char c = *ptr;
+        if (c == '\n' || c == '\r')
+        {
+            *ptr = '\0';
+            return nullptr;
+        }
+        else if (c == ' ' || c == '/' || c == '0' || c == '1' || c == '2' || c == '3' || c == '4' || c == '5' || c == '6' || c == '7' || c == '8' || c == '9')
+        {
+            ptr++;
+            len--;
+        }
+        else {
+            *save = *ptr;
+            *ptr = '\0';
+            return ptr;
+        }
+    }
+    return nullptr;
+}
+
+
 //c++11 no longer supplies a strcasecmp, so define our own version.
 static inline int stringcasecompare(const char* a, const char* b)
 {
@@ -248,18 +273,72 @@ bool loadMeshOBJ(Mesh* mesh, const char* filename){
             QVector3D vertex = QVector3D(v_x,v_y,v_z);
             temp_vertices.push_back(vertex);
         } else if ( strcmp( lineHeader, "f" ) == 0 ){
-            std::string vertex1, vertex2, vertex3;
-            unsigned int vertexIndex[3], uvIndex[3], normalIndex[3];
-            int matches = fscanf(file, "%d/%d/%d %d/%d/%d %d/%d/%d\n", &vertexIndex[0], &uvIndex[0], &normalIndex[0], &vertexIndex[1], &uvIndex[1], &normalIndex[1], &vertexIndex[2], &uvIndex[2], &normalIndex[2] );
-            if (matches != 9){
-                fclose(file);
-                return false;
+            size_t line_len = 100;
+            char line[line_len];
+            char save;
+            char *f = readFace(line, line_len, file, &save);
+
+            char *startptr = line + 1;
+            char *endptr;
+            unsigned int vertexIndex[3];
+            QVector3D v0, v1, v2;
+
+            /*
+             * (1) f v1/vt1 v2/vt2 v3/vt3 ...
+             * (2) f v1/vt1/vn1 v2/vt2/vn2 v3/vt3/vn3 ...
+             * (3) f v1//vn1 v2//vn2 v3//vn3 ...
+             */
+            if ((endptr = strchr(startptr, '/'))) {
+                *endptr = '\0';
+                vertexIndex[0] = atoi(startptr);
+                v0 = temp_vertices[vertexIndex[0]-1];
+
+                startptr = strchr(endptr + 1, ' ') + 1;
+                endptr = strchr(startptr, '/');
+                *endptr = '\0';
+                vertexIndex[1] = atoi(startptr);
+                v1 = temp_vertices[vertexIndex[1]-1];
+
+                while ( (startptr = strchr(endptr + 1, ' ')) && *(startptr += 1)) {
+                    endptr = strchr(startptr, '/');
+                    *endptr = '\0';
+                    vertexIndex[2] = atoi(startptr);
+                    v2 = temp_vertices[vertexIndex[2]-1];
+                    mesh->addFace(v0, v1, v2);
+                    v1 = v2;
+                }
+            }
+            /* f v1 v2 v3 ... */
+            else {
+                endptr = strchr(startptr, ' ');
+                *endptr = '\0';
+                vertexIndex[0] = atoi(startptr);
+                v0 = temp_vertices[vertexIndex[0]-1];
+
+                startptr = endptr + 1;
+                endptr = strchr(startptr, ' ');
+                *endptr = '\0';
+                vertexIndex[1] = atoi(startptr);
+                v1 = temp_vertices[vertexIndex[1]-1];
+
+                bool flag = true;
+                while ( flag ) {
+                    startptr = endptr + 1;
+                    endptr = strchr(startptr, ' ');
+                    if ( !endptr || !(*(endptr + 1)) ) flag = false;
+                    else *endptr = '\0';
+                    vertexIndex[2] = atoi(startptr);
+                    v2 = temp_vertices[vertexIndex[2]-1];
+                    mesh->addFace(v0, v1, v2);
+                    v1 = v2;
+                }
             }
 
-            QVector3D v0 = temp_vertices[vertexIndex[0]-1];
-            QVector3D v1 = temp_vertices[vertexIndex[1]-1];
-            QVector3D v2 = temp_vertices[vertexIndex[2]-1];
-            mesh->addFace(v0, v1, v2);
+            if (f) { /* if no line separation (ex. f v1 v2 v3f v'1 v'2 v'3s n1...) */
+                *f = save;
+                fseek(file, -1, SEEK_CUR);
+            }
+
         } else{
             // Probably a comment, eat up the rest of the line
             char stupidBuffer[1000];

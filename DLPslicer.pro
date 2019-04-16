@@ -1,6 +1,6 @@
 .TEMPLATE = app
 
-QT += qml quick opengl 3dcore 3drender 3dinput 3dextras concurrent widgets
+QT += qml quick opengl 3dcore 3drender 3dinput 3dextras concurrent widgets core 3dquick 3dlogic 3dquickextras
 
 CONFIG += c++11 resources_big
 
@@ -31,16 +31,9 @@ SOURCES += main.cpp \
     feature/shelloffset.cpp \
     DentEngine/src/cmdlineparser.cpp \
     DentEngine/src/configuration.cpp \
-    DentEngine/src/infill.cpp \
     DentEngine/src/mesh.cpp \
-    DentEngine/src/raft.cpp \
     DentEngine/src/slicer.cpp \
-    DentEngine/src/support.cpp \
     DentEngine/src/svgexporter.cpp \
-    DentEngine/src/support/generalbranch.cpp \
-    DentEngine/src/support/kbranch.cpp \
-    DentEngine/src/raft/generalraft.cpp \
-    DentEngine/src/raft/kraft.cpp \
     DentEngine/src/polyclipping/clipper/clipper.cpp \
     DentEngine/src/polyclipping/clip2tri/clip2tri.cpp \
     DentEngine/src/polyclipping/poly2tri/common/shapes.cpp \
@@ -50,8 +43,13 @@ SOURCES += main.cpp \
     DentEngine/src/polyclipping/poly2tri/sweep/sweep_context.cpp \
     utils/httpreq.cpp \
     feature/hollowshell.cpp \
-    feature/supportview.cpp \
-    utils/updatechecker.cpp
+    utils/updatechecker.cpp \
+    utils/gridmesh.cpp \
+    utils/linemeshgeometry.cpp \
+    feature/generateraft.cpp \
+    feature/generatesupport.cpp \
+    DentEngine/src/utils/metric.cpp \
+    feature/manualsupport.cpp
 
 
 RESOURCES += qml.qrc \
@@ -127,16 +125,9 @@ HEADERS += \
     feature/shelloffset.h \
     DentEngine/src/cmdlineparser.h \
     DentEngine/src/configuration.h \
-    DentEngine/src/infill.h \
     DentEngine/src/mesh.h \
-    DentEngine/src/raft.h \
     DentEngine/src/slicer.h \
-    DentEngine/src/support.h \
     DentEngine/src/svgexporter.h \
-    DentEngine/src/support/generalbranch.h \
-    DentEngine/src/support/kbranch.h \
-    DentEngine/src/raft/generalraft.h \
-    DentEngine/src/raft/kraft.h \
     DentEngine/src/polyclipping/clipper/clipper.hpp \
     DentEngine/src/polyclipping/clip2tri/clip2tri.h \
     DentEngine/src/polyclipping/poly2tri/common/shapes.h \
@@ -148,13 +139,18 @@ HEADERS += \
     DentEngine/src/polyclipping/poly2tri/poly2tri.h \
     utils/httpreq.h \
     feature/hollowshell.h \
-    feature/supportview.h \
     utils/updatechecker.h \
-    feature/earcut.hpp
+    feature/earcut.hpp \
+    utils/gridmesh.h \
+    utils/linemeshgeometry.h \
+    feature/generateraft.h \
+    feature/generatesupport.h \
+    DentEngine/src/utils/metric.h \
+    feature/manualsupport.h
 
 #LIBS += -lOpengl32
 
 DISTFILES += \
     icon-32.ico \
     DLPslicer.rc \
-    icon.ico
+    icon.ico \

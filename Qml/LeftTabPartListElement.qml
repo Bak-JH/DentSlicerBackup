@@ -6,6 +6,12 @@ Item {
 
     property string modelName
     property int glModelID
+    property Item container
+    property int trimLength
+    property bool vis
+    property int fontsize
+
+    property int ftrDelete : 18
 
     Rectangle{
         id:background
@@ -17,6 +23,7 @@ Item {
     }
 
     Rectangle{
+        visible: vis
         width : parent.width
         height: 1
         anchors.bottom: parent.bottom
@@ -26,6 +33,7 @@ Item {
 
     Rectangle{
         id : icon
+        visible: vis
         width: 32
         anchors.left: parent.left
         height: parent.height
@@ -50,6 +58,7 @@ Item {
                 else if(icon.parent.state == 'select'){
                     icon.parent.state = 'off';
                     unselectPart(glModelID)
+                    qm.deleteList(glModelID)
                 }
 
 
@@ -63,6 +72,7 @@ Item {
 
     Rectangle{
         id : deletePart
+        visible: vis
         width: 20
         anchors.right: parent.right
         anchors.rightMargin: 8
@@ -81,8 +91,15 @@ Item {
             onExited : qm.resetCursor();
             onClicked: {
                 console.log("delete");
-                deletePopUp.popupDelete();
-                deletePopUp.targetID = glModelID;
+                //if (icon.parent.state == "on") {
+                if (qm.getSelectedModelsSize() !== 1) selectPart(glModelID)
+                else if (icon.parent.state != "select") selectPart(glModelID)
+                icon.parent.state = "select"
+                //}
+                //deletePopUp.visible = true;
+                //deletePopUp.popupDelete();
+                //deletePopUp.targetID = glModelID;
+                yesnoPopUp.openYesNoPopUp(false, "", "Are you sure to delete this model?", "", 18, "", ftrDelete, 0)
 
             }
         }
@@ -91,6 +108,7 @@ Item {
 
     Rectangle{
         id:line
+        visible: vis
         width: 1
         height: parent.height
         anchors.left:icon.right
@@ -114,8 +132,14 @@ Item {
                 else if(icon.parent.state == 'off')
                     return;
                 else if(icon.parent.state == 'select'){
-                    icon.parent.state = 'on'
-                    unselectPart(glModelID)
+                    console.log("group selection active =" + qm.getGroupSelectionActive()) // shift pressed
+                    if (qm.getSelectedModelsSize() > 1 && !qm.getGroupSelectionActive()) {
+                        selectPart(glModelID)
+                    } else {
+                        icon.parent.state = 'on'
+                        unselectPart(glModelID)
+                        qm.deleteList(glModelID)
+                    }
                 }
 
             }
@@ -124,14 +148,14 @@ Item {
 
     Text{
         id : modelNameText
-        text : trimName(modelName)
-        anchors.left: line.right
+        text : vis ? trimName(modelName, trimLength) : "· " + trimName(modelName, trimLength)
+        anchors.left: parent.left
         anchors.verticalCenter: parent.verticalCenter
-        anchors.leftMargin: 10
+        anchors.leftMargin: vis ? 43 : 13
 
         font.family: mainFont.name
-        font.pixelSize: 14
-
+        //font.pixelSize: 14
+        font.pixelSize: fontsize
     }
 
     states: [
@@ -149,12 +173,17 @@ Item {
             name:"select"
             PropertyChanges { target: iconimage; source:"qrc:/Resource/part_select.png" }
             PropertyChanges { target: background; color:"#EAEAEA" }
-            PropertyChanges { target: modelNameText; color:"#0DA3B2" }
+            PropertyChanges { target: modelNameText; color: "#0DA3B2" }
             /*
             StateChangeScript {
                 script: selectPart(glModelID);
             }
             */
+        },
+        State{
+            name: "list"
+            PropertyChanges { target: modelNameText; color: "#888D8E" }
+            PropertyChanges { target: modelNameText; font.bold: true }
         }
     ]
 
@@ -168,9 +197,8 @@ Item {
 
 
 
-    function trimName(modelName){
-        if(modelName.length > 22)
-            modelName = modelName.substr(0,20) +"..."
+    function trimName(modelName, length){
+        if (modelName.length > length) modelName = modelName.substr(0, length-2) + "..."
 
         return modelName
     }
