@@ -67,34 +67,15 @@ typedef vector<Path3D> Paths3D;
 class Mesh{
 public :
     Mesh() {};
-    std::vector<MeshVertex> vertices;
-    QHash<uint32_t, MeshVertex> vertices_hash;
-    std::vector<MeshFace> faces;
-
-    // for undo & redo
-    Mesh* prevMesh = nullptr;
-    Mesh* nextMesh = nullptr;
-
-    QTime time;
-    QVector3D m_translation;
-    QMatrix4x4 m_matrix;
-
-    // used for auto repair steps
-    Paths3D holes;
-
-    // used for freecut, autoarrange elsewhere
-    Path convexHull;
-
-    float x_min = 99999, x_max = 99999, y_min = 99999, y_max = 99999, z_min = 99999, z_max = 99999;
-
+    Mesh(size_t vertCount, size_t faceCount);
     /********************** Mesh Edit Functions***********************/
     void vertexOffset(float factor);
     void vertexMove(QVector3D direction);
-    Mesh* vertexMoved(QVector3D direction);
+    Mesh* vertexMoved(QVector3D direction)const;
     void centerMesh();
     void vertexRotate(QMatrix4x4 tmpmatrix);
     void vertexScale(float scaleX, float scaleY, float scaleZ, float centerX, float centerY);
-    Mesh* copyMesh();
+    Mesh* copyMesh()const;
     void reverseFaces();
 
     /********************** Mesh Generation Functions **********************/
@@ -105,20 +86,72 @@ public :
     void connectFaces();
 
     /********************** Path Generation Functions **********************/
-    void addPoint(float x, float y, Path *path);
-    Paths3D intersectionPaths(Path Contour, Plane target_plane);
-    Path3D intersectionPath(Plane base_plane, Plane target_plane);
-    Path intersectionPath(MeshFace mf, float z);
+    static void addPoint(float x, float y, Path *path);
+    Paths3D intersectionPaths(Path Contour, Plane target_plane)const;
+    Path3D intersectionPath(Plane base_plane, Plane target_plane)const;
+    Path intersectionPath(MeshFace mf, float z)const;
 
     /********************** Helper Functions **********************/
-    int getVertexIdx(QVector3D v);
-    float* calculateMinMax(QMatrix4x4 rotmatrix);
-    void updateMinMax(QVector3D v);
+    static void updateMinMax(QVector3D v, std::array<float,6>& minMax);
+
+    std::array<float,6> calculateMinMax(QMatrix4x4 rotmatrix)const;
+    float getFaceZmin(MeshFace mf)const;
+    float getFaceZmax(MeshFace mf)const;
+    MeshFace idx2MF(int idx)const;
+    MeshVertex idx2MV(int idx)const;
+
+    /********************** Getters **********************/
+    const std::vector<MeshVertex> getVertices()const;
+    const std::vector<MeshFace> getFaces()const;
+    float x_min()const;
+    float x_max()const;
+    float y_min()const;
+    float y_max()const;
+    float z_min()const;
+    float z_max()const;
+    const Mesh* getPrev()const;
+    const Mesh* getNext()const;
+    QTime getTime()const;
+private:
+    /********************** Helper Functions **********************/
     vector<MeshFace*> findFaceWith2Vertices(int v0_idx, int v1_idx, MeshFace self_f);
-    float getFaceZmin(MeshFace mf);
-    float getFaceZmax(MeshFace mf);
-    MeshFace idx2MF(int idx);
-    MeshVertex idx2MV(int idx);
+    int addFaceVertex(QVector3D v);
+    void updateMinMax(QVector3D v);
+
+    std::vector<MeshVertex> vertices;
+    QHash<uint32_t, MeshVertex> vertices_hash;
+    std::vector<MeshFace> faces;
+
+    // for undo & redo
+    Mesh* prevMesh = nullptr;
+    Mesh* nextMesh = nullptr;
+
+    QVector3D m_translation;
+    QMatrix4x4 m_matrix;
+    QTime time;
+
+
+
+    // used for freecut, autoarrange elsewhere
+    Path convexHull;
+
+    float _x_min = 99999, _x_max = 99999, _y_min = 99999, _y_max = 99999, _z_min = 99999, _z_max = 99999;
+
+    friend class FileLoader;
+    friend class GLModel;
+    //TODO: these friends should be removed so that operations on Mesh is controlled.
+    friend class SVGexporter;
+    friend class modelcut;
+    friend class autoorientation;
+    friend class modelcut;
+    friend class MeshRepair;
+    friend class GenerateSupport;
+    friend class ShellOffset;
+
+
+
+
+
 };
 
 

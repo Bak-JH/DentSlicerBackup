@@ -10,7 +10,7 @@ Slices Slicer::slice(Mesh* mesh){
     Slices slices;
     slices.mesh = mesh;
 
-    if (mesh == nullptr || mesh->faces.size() ==0){
+    if (mesh == nullptr || mesh->getFaces().size() ==0){
         return slices;
     }
 
@@ -84,10 +84,10 @@ vector<Paths> Slicer::meshSlice(Mesh* mesh){
     vector<float> planes;
 
     if (! strcmp(scfg->slicing_mode, "uniform")) {
-        planes = buildUniformPlanes(mesh->z_min, mesh->z_max, delta);
+        planes = buildUniformPlanes(mesh->z_min(), mesh->z_max(), delta);
     } else if (scfg->slicing_mode == "adaptive") {
         // adaptive slice
-        planes = buildAdaptivePlanes(mesh->z_min, mesh->z_max);
+        planes = buildAdaptivePlanes(mesh->z_min(), mesh->z_max());
     }
 
     // build triangle list per layer height
@@ -95,7 +95,7 @@ vector<Paths> Slicer::meshSlice(Mesh* mesh){
     vector<Paths> pathLists;
 
     vector<int> A;
-    A.reserve(mesh->faces.size());
+    A.reserve(mesh->getFaces().size());
 
     for (int i=0; i<planes.size(); i++){
         A.insert(A.end(), triangleLists[i].begin(), triangleLists[i].end()); // union
@@ -168,7 +168,7 @@ vector<vector<int>> Slicer::buildTriangleLists(Mesh* mesh, vector<float> planes,
 
     // Uniform Slicing O(n)
     if (delta>0){
-        for (int f_idx=0; f_idx < mesh->faces.size(); f_idx++){
+        for (int f_idx=0; f_idx < mesh->getFaces().size(); f_idx++){
             int llt_idx;
             MeshFace mf = mesh->idx2MF(f_idx);
             float z_min = mesh->getFaceZmin(mf);
