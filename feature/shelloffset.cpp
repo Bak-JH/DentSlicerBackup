@@ -98,6 +98,7 @@ Mesh* ShellOffset::shellOffset(Mesh* mesh, float factor){
     qmlManager->setProgress(1);
 
     qDebug() << "shell offsetting done";
+	return offsetMesh;
 }
 
 void ShellOffset::connectHoles(Mesh* target_mesh, Paths3D from_holes, Paths3D to_holes){
