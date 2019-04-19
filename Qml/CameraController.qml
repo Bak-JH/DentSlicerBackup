@@ -30,7 +30,7 @@
 import Qt3D.Core 2.0
 import Qt3D.Input 2.0
 import Qt3D.Logic 2.0
-import Qt3D.Render 2.0
+import Qt3D.Render 2.11
 
 Entity {
     id: root
@@ -116,43 +116,8 @@ Entity {
         }
     ]
 
-    /***************************************** Mouse Wheel Zoom *****************************************/
-    // => the function moved to main.qml
-    /*
-    MouseHandler{
-        id : mouseHandler
-        sourceDevice: mouse
 
-        onWheel: {
-            //console.log(wheel.x, wheel.y);
-            //var Camera_position, average, temp, Camera_radius
-            var d = wheel.angleDelta.y ;
-            var scaleTmp = sceneRoot.systemTransform.scale3D;
 
-            if(d>0){// mouse wheel zoom
-                sceneRoot.systemTransform.scale3D = scaleTmp.times(1.08);
-                mttab.updatePosition();
-            }
-            else if(d<0){
-                sceneRoot.systemTransform.scale3D = scaleTmp.times(0.92);
-                mttab.updatePosition();
-            }
-        }
-
-        onPressed: {
-            if(mouse.button ===1){ //left click
-                qm.setModelClickFalse();
-            }
-
-        }
-
-        onReleased: {
-            if(mouse.button ===1){ //left click
-                qm.backgroundClickCheck();
-            }
-        }
-    }
-    */
 
     /***************************************** Mouse Wheel Move *****************************************/
     // => main.qml MouseArea

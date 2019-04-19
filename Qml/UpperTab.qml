@@ -87,6 +87,14 @@ Rectangle {
         console.log("all off done");
     }
 
+    function disableUppertab(){
+        uppertab.enabled = false
+    }
+
+    function enableUppertab(){
+        uppertab.enabled = true
+    }
+
     property real move_x_value
     property real move_y_value
     property real move_z_value
@@ -1156,7 +1164,7 @@ Rectangle {
                 slider_vis = false;
                 cutModeSelected(2);
                 viewUp();
-                popup_cut.colorApplyFinishButton(0)
+                popup_cut.colorApplyFinishButton(0);
                 qm.freecutActive = true
             }
 
@@ -1328,6 +1336,7 @@ Rectangle {
             slider_vis:false
             state: {
                 if (third_tab_button_shelloffset.state == "active" && qm.isSelected()){
+                    popup_shelloffset.colorApplyFinishButton(2);
                     slider_vis = true;
                     openShellOffset();
                     return "active";

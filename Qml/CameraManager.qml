@@ -1,7 +1,7 @@
 import QtQuick 2.0
 
 import Qt3D.Core 2.0
-import Qt3D.Render 2.0
+import Qt3D.Render 2.11
 import Qt3D.Input 2.0
 import Qt3D.Extras 2.0
 import QtQuick 2.7 as QQ2
@@ -91,8 +91,36 @@ Entity {
             }
         },
 
-        InputSettings {}
+        InputSettings {},
+
+        ScreenRayCaster {
+            id: screenRayCaster
+
+            onHitsChanged: printHits("ScreenRayCaster hits", hits)
+        },
+
+        MouseHandler {
+            id: mouseHandler
+            sourceDevice:  MouseDevice {}
+            onReleased: {
+                if (mouse.button ===1){ // left click
+                    screenRayCaster.trigger(Qt.point(mouse.x, mouse.y));
+                }
+            }
+        }
     ]
+
+    function printHits(desc, hits) {
+        console.log(desc, hits.length)
+        if (hits.length <= 1){
+            qm.backgroundClicked();
+        }
+
+        for (var i=0; i<hits.length; i++) {
+            console.log("  " + hits[i].entity.objectName + " / ", hits[i].distance,
+                        hits[i].worldIntersection.x, hits[i].worldIntersection.y, hits[i].worldIntersection.z)
+        }
+    }
 
     function initCamera(){
         sceneRoot.cm.camera.translateWorld(sceneRoot.cm.camera.viewCenter.times(-1))
