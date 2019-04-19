@@ -41,7 +41,7 @@ public:
     static constexpr float max_buildsize_x = 1000;//1000000/resolution;
     static constexpr float vertex_inbound_distance = 0.002;//0.03;//(float)1/resolution; // resolution in mm (0.0001 and 0.0009 are same, 1 micron)
 
-    char* slicing_mode = "uniform"; // uniform OR adaptive
+    const char* slicing_mode = "uniform"; // uniform OR adaptive
     float layer_height = 0.1; // in mm
     float nozzle_width = 0; // in mm (diameter) , for printers with nozzles
     float wall_thickness = 2; // in mm
