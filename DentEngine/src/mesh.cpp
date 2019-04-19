@@ -3,15 +3,19 @@
 #include <QDebug>
 #include <QCoreApplication>
 
+
+Mesh::Mesh(size_t vertCount, size_t faceCount): vertices(vertCount), faces(faceCount)
+{
+}
 /********************** Mesh Edit Functions***********************/
 void Mesh::vertexOffset(float factor){
     int numberofVertices = vertices.size();
-    x_min = 99999;
-    x_max = 99999;
-    y_min = 99999;
-    y_max = 99999;
-    z_min = 99999;
-    z_max = 99999;
+    _x_min = 99999;
+    _x_max = 99999;
+    _y_min = 99999;
+    _y_max = 99999;
+    _z_min = 99999;
+    _z_max = 99999;
     for (int i=0;i<numberofVertices;i++){
         if (i%100 == 0)
             QCoreApplication::processEvents();
@@ -23,12 +27,12 @@ void Mesh::vertexOffset(float factor){
 
 void Mesh::vertexMove(QVector3D direction){
     int numberofVertices = vertices.size();
-    x_min = 99999;
-    x_max = 99999;
-    y_min = 99999;
-    y_max = 99999;
-    z_min = 99999;
-    z_max = 99999;
+    _x_min = 99999;
+    _x_max = 99999;
+    _y_min = 99999;
+    _y_max = 99999;
+    _z_min = 99999;
+    _z_max = 99999;
     for (int i=0;i<numberofVertices;i++){
         if (i%100 == 0)
             QCoreApplication::processEvents();
@@ -38,34 +42,35 @@ void Mesh::vertexMove(QVector3D direction){
     }
 }
 
-Mesh* Mesh::vertexMoved(QVector3D direction){
+Mesh* Mesh::vertexMoved(QVector3D direction)const
+{
     Mesh* coppied = copyMesh();
     coppied->vertexMove(direction);
     return coppied;
 }
 
 void Mesh::centerMesh(){
-    float x_center = (x_max+x_min)/2;
-    float y_center = (y_max+y_min)/2;
-    float z_center = (z_max+z_min)/2;
+    float x_center = (_x_max+_x_min)/2;
+    float y_center = (_y_max+_y_min)/2;
+    float z_center = (_z_max+_z_min)/2;
     vertexMove(-QVector3D(x_center, y_center, z_center));
-    x_max = x_max - x_center;
-    x_min = x_min - x_center;
-    y_max = y_max - y_center;
-    y_min = y_min - y_center;
-    z_max = z_max - z_center;
-    z_min = z_min - z_center;
+    _x_max = _x_max - x_center;
+    _x_min = _x_min - x_center;
+    _y_max = _y_max - y_center;
+    _y_min = _y_min - y_center;
+    _z_max = _z_max - z_center;
+    _z_min = _z_min - z_center;
 }
 
 void Mesh::vertexRotate(QMatrix4x4 tmpmatrix){
     int numberofVertices = vertices.size();
     int numberofFaces = faces.size();
-    x_min = 99999;
-    x_max = 99999;
-    y_min = 99999;
-    y_max = 99999;
-    z_min = 99999;
-    z_max = 99999;
+    _x_min = 99999;
+    _x_max = 99999;
+    _y_min = 99999;
+    _y_max = 99999;
+    _z_min = 99999;
+    _z_max = 99999;
     QVector4D tmpVertex;
     QVector3D tmpVertex2;
     for (int i=0;i<numberofVertices;i++){
@@ -106,12 +111,12 @@ void Mesh::vertexScale(float scaleX=1, float scaleY=1, float scaleZ=1, float cen
     }
 
     int numberofVertices = vertices.size();
-    x_min = 99999;
-    x_max = 99999;
-    y_min = 99999;
-    y_max = 99999;
-    z_min = 99999;
-    z_max = 99999;
+    _x_min = 99999;
+    _x_max = 99999;
+    _y_min = 99999;
+    _y_max = 99999;
+    _z_min = 99999;
+    _z_max = 99999;
 
     /* need to fix center of the model */
     float fixCenterX = centerX - (centerX*scaleX);
@@ -129,7 +134,8 @@ void Mesh::vertexScale(float scaleX=1, float scaleY=1, float scaleZ=1, float cen
     }
 }
 
-Mesh* Mesh::copyMesh(){
+Mesh* Mesh::copyMesh()const
+{
     Mesh* copyMesh = new Mesh();
     copyMesh->faces.reserve(faces.size()*3);
     copyMesh->vertices.reserve(vertices.size()*3);
@@ -141,17 +147,17 @@ Mesh* Mesh::copyMesh(){
     foreach(MeshFace mf, faces){
         copyMesh->faces.push_back(mf);
     }
-    for (QHash<uint32_t, MeshVertex>::iterator it = vertices_hash.begin(); it!=vertices_hash.end(); ++it){
+    for (auto it = vertices_hash.begin(); it!=vertices_hash.end(); ++it){
         copyMesh->vertices_hash.insert(it.key(), it.value());
     }
     copyMesh->connectFaces();
 
-    copyMesh->x_max = x_max;
-    copyMesh->x_min = x_min;
-    copyMesh->y_max = y_max;
-    copyMesh->y_min = y_min;
-    copyMesh->z_max = z_max;
-    copyMesh->z_min = z_min;
+    copyMesh->_x_max = _x_max;
+    copyMesh->_x_min = _x_min;
+    copyMesh->_y_max = _y_max;
+    copyMesh->_y_min = _y_min;
+    copyMesh->_z_max = _z_max;
+    copyMesh->_z_min = _z_min;
 
     return copyMesh;
 }
@@ -171,9 +177,9 @@ void Mesh::addFace(QVector3D v0, QVector3D v1, QVector3D v2){
 }
 
 void Mesh::addFace(QVector3D v0, QVector3D v1, QVector3D v2, int parent_idx){
-    int v0_idx = getVertexIdx(v0);
-    int v1_idx = getVertexIdx(v1);
-    int v2_idx = getVertexIdx(v2);
+    int v0_idx = addFaceVertex(v0);
+    int v1_idx = addFaceVertex(v1);
+    int v2_idx = addFaceVertex(v2);
 //
     MeshFace* mf = new MeshFace();
 
@@ -421,7 +427,8 @@ Paths3D Mesh::intersectionPaths(Path contour, Plane target_plane) {
     return p;
 }*/
 
-Path3D Mesh::intersectionPath(Plane base_plane, Plane target_plane) {
+Path3D Mesh::intersectionPath(Plane base_plane, Plane target_plane)const
+{
     Path3D p;
 
     vector<QVector3D> upper;
@@ -470,7 +477,8 @@ Path3D Mesh::intersectionPath(Plane base_plane, Plane target_plane) {
     return p;
 }
 
-Path Mesh::intersectionPath(MeshFace mf, float z){
+Path Mesh::intersectionPath(MeshFace mf, float z) const
+{
     Path p;
 
     vector<MeshVertex> upper;
@@ -566,7 +574,8 @@ uint32_t vertexHash(QVector3D v) // max build size = 1000mm, resolution = 1 micr
             (uint32_t(((v.z()+SlicingConfiguration::vertex_inbound_distance/2) / SlicingConfiguration::vertex_inbound_distance)) << 20));
 }
 
-int Mesh::getVertexIdx(QVector3D v){
+
+int Mesh::addFaceVertex(QVector3D v){
     int vertex_idx = -1;
     uint32_t vertex_hash = vertexHash(v);
 
@@ -589,21 +598,10 @@ int Mesh::getVertexIdx(QVector3D v){
     return vertex_idx;
 }
 
-float* Mesh::calculateMinMax(QMatrix4x4 rotmatrix){
+
+std::array<float,6> Mesh::calculateMinMax(QMatrix4x4 rotmatrix)const {
     qDebug()<< "calculate minmax";
-    float *minmax = (float*) malloc(sizeof(float) * 7);
-    float origin_minmax[6];
-    // remember min maxes;
-    origin_minmax[0] = x_min;
-    origin_minmax[1] = x_max;
-    origin_minmax[2] = y_min;
-    origin_minmax[3] = y_max;
-    origin_minmax[4] = z_min;
-    origin_minmax[5] = z_max;
-
-
-    x_min = 99999, x_max = 99999, y_min = 99999, y_max = 99999, z_min = 99999, z_max = 99999;
-
+    std::array<float,6> minmax{99999};
     int numberofVertices = vertices.size();
     int numberofFaces = faces.size();
     QVector4D tmpVertex;
@@ -612,40 +610,43 @@ float* Mesh::calculateMinMax(QMatrix4x4 rotmatrix){
         if (i%100 == 0)
             QCoreApplication::processEvents();
         tmpVertex =vertices[i].position.toVector4D();
-        updateMinMax(QVector3D(QVector4D::dotProduct(tmpVertex,rotmatrix.column(0)), QVector4D::dotProduct(tmpVertex,rotmatrix.column(1)), QVector4D::dotProduct(tmpVertex,rotmatrix.column(2))));
+        QVector3D v = QVector3D(QVector4D::dotProduct(tmpVertex,rotmatrix.column(0)), QVector4D::dotProduct(tmpVertex,rotmatrix.column(1)), QVector4D::dotProduct(tmpVertex,rotmatrix.column(2)));
+        updateMinMax(v, minmax);
     }
-    minmax[0] = x_min;
-    minmax[1] = x_max;
-    minmax[2] = y_min;
-    minmax[3] = y_max;
-    minmax[4] = z_min;
-    minmax[5] = z_max;
-
-    // restore min maxes;
-    x_min = origin_minmax[0];
-    x_max = origin_minmax[1];
-    y_min = origin_minmax[2];
-    y_max = origin_minmax[3];
-    z_min = origin_minmax[4];
-    z_max = origin_minmax[5];
-
     return minmax;
 }
 
-// updates mesh's min max
-void Mesh::updateMinMax(QVector3D v){
-    if (v.x() > x_max || x_max == 99999)
-        x_max = v.x();
-    if (v.x() < x_min || x_min == 99999)
-        x_min = v.x();
-    if (v.y() > y_max || y_max == 99999)
-        y_max = v.y();
-    if (v.y() < y_min || y_min == 99999)
-        y_min = v.y();
-    if (v.z() > z_max || z_max == 99999)
-        z_max = v.z();
-    if (v.z() < z_min || z_min == 99999)
-        z_min = v.z();
+void Mesh::updateMinMax(QVector3D v)
+{
+    if (v.x() > _x_max || _x_max == 99999)
+        _x_max = v.x();
+    if (v.x() < _x_min || _x_min == 99999)
+        _x_min = v.x();
+    if (v.y() > _y_max || _y_max == 99999)
+        _y_max = v.y();
+    if (v.y() < _y_min || _y_min == 99999)
+        _y_min = v.y();
+    if (v.z() > _z_max || _z_max == 99999)
+        _z_max = v.z();
+    if (v.z() < _z_min || _z_min == 99999)
+        _z_min = v.z();
+}
+
+
+void Mesh::updateMinMax(QVector3D v, std::array<float,6>& minMax){
+//array order: _x_min, _x_max...._z_min, _z_max
+    if (v.x() < minMax[0] || minMax[0] == 99999)
+        minMax[0] = v.x();
+    if (v.x() > minMax[1] || minMax[1] == 99999)
+        minMax[1] = v.x();
+    if (v.y() < minMax[2] || minMax[2] == 99999)
+        minMax[2] = v.y();
+    if (v.y() > minMax[3] || minMax[3] == 99999)
+        minMax[3] = v.y();
+    if (v.z() < minMax[4] || minMax[4] == 99999)
+        minMax[4] = v.z();
+    if (v.z() > minMax[5] || minMax[5] == 99999)
+        minMax[5] = v.z();
 }
 
 // find face containing 2 vertices presented as arguments
@@ -662,31 +663,43 @@ vector<MeshFace*> Mesh::findFaceWith2Vertices(int v0_idx, int v1_idx, MeshFace s
     return candidates;
 }
 
-float Mesh::getFaceZmin(MeshFace mf){
-    float face_z_min=1000;//scfg->max_buildsize_x;
+float Mesh::getFaceZmin(MeshFace mf)const{
+    float face__z_min=1000;//scfg->max_buildsize_x;
     for (int i=0; i<3; i++){
-        float temp_z_min = idx2MV(mf.mesh_vertex[i]).position.z();
-        if (temp_z_min<face_z_min)
-            face_z_min = temp_z_min;
+        float temp__z_min = idx2MV(mf.mesh_vertex[i]).position.z();
+        if (temp__z_min<face__z_min)
+            face__z_min = temp__z_min;
     }
-    return face_z_min;
+    return face__z_min;
 }
 
-float Mesh::getFaceZmax(MeshFace mf){
-    float face_z_max=-1000;//-scfg->max_buildsize_x;
+float Mesh::getFaceZmax(MeshFace mf)const{
+    float face__z_max=-1000;//-scfg->max_buildsize_x;
     for (int i=0; i<3; i++){
-        float temp_z_max = idx2MV(mf.mesh_vertex[i]).position.z();
-        if (temp_z_max>face_z_max)
-            face_z_max = temp_z_max;
+        float temp__z_max = idx2MV(mf.mesh_vertex[i]).position.z();
+        if (temp__z_max>face__z_max)
+            face__z_max = temp__z_max;
     }
-    return face_z_max;
+    return face__z_max;
+}
+QTime Mesh::getTime()const
+{
+    return time;
 }
 
-MeshFace Mesh::idx2MF(int idx){
+const Mesh* Mesh::getPrev()const
+{
+    return prevMesh;
+}
+const Mesh* Mesh::getNext()const
+{
+    return nextMesh;
+}
+MeshFace Mesh::idx2MF(int idx)const{
     return faces[idx];
 }
 
-MeshVertex Mesh::idx2MV(int idx){
+MeshVertex Mesh::idx2MV(int idx)const{
     return vertices[idx];
 }
 
@@ -1335,3 +1348,41 @@ uint32_t meshVertex2Hash(MeshVertex u){
     return path_hash_u;
 }
 
+
+const std::vector<MeshVertex> Mesh::getVertices()const
+{
+    return vertices;
+}
+const std::vector<MeshFace> Mesh::getFaces()const
+{
+    return faces;
+}
+
+float Mesh::x_min()const
+{
+    return _x_min;
+}
+float Mesh::x_max()const
+{
+    return _x_max;
+
+}
+float Mesh::y_min()const
+{
+    return _y_min;
+
+}
+float Mesh::y_max()const
+{
+    return _y_max;
+
+}
+float Mesh::z_min()const
+{
+    return _z_min;
+}
+float Mesh::z_max()const
+{
+    return _z_max;
+
+}

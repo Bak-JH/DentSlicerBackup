@@ -102,9 +102,9 @@ QString SVGexporter::exportSVG(Slices shellSlices, Slices supportSlices, Slices 
     int layer = shellSlices.size();
     int printing_time = layer*15/60;
 
-    float x = shellSlices.mesh->x_max-shellSlices.mesh->x_min;
-    float y = shellSlices.mesh->y_max-shellSlices.mesh->y_min;
-    float z = shellSlices.mesh->z_max-shellSlices.mesh->z_min;
+    float x = shellSlices.mesh->x_max()-shellSlices.mesh->x_min();
+    float y = shellSlices.mesh->y_max()-shellSlices.mesh->y_min();
+    float z = shellSlices.mesh->z_max()-shellSlices.mesh->z_min();
 
     float volume = ((float)(area/pow(scfg->pixel_per_mm/scfg->contraction_ratio,2))/1000000)*scfg->layer_height;
     QString result_str;
