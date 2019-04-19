@@ -4,13 +4,8 @@
 #include <QFile>
 #include <iostream>
 
-FileLoader::FileLoader()
-{
-
-}
-
 /* Custom fgets function to support Mac line-ends in Ascii STL files. OpenSCAD produces this when used on Mac */
-void* fgets_(char* ptr, size_t len, FILE* f)
+void* FileLoader::fgets_(char* ptr, size_t len, FILE* f)
 {
     while(len && fread(ptr, 1, 1, f) > 0)
     {
@@ -25,7 +20,7 @@ void* fgets_(char* ptr, size_t len, FILE* f)
     return nullptr;
 }
 
-char* readFace(char* ptr, size_t len, FILE* f, char* save)
+inline char* readFace(char* ptr, size_t len, FILE* f, char* save)
 {
     while(len && fread(ptr, 1, 1, f) > 0)
     {
@@ -51,7 +46,7 @@ char* readFace(char* ptr, size_t len, FILE* f, char* save)
 
 
 //c++11 no longer supplies a strcasecmp, so define our own version.
-static inline int stringcasecompare(const char* a, const char* b)
+inline int stringcasecompare(const char* a, const char* b)
 {
     while(*a && *b)
     {
@@ -63,7 +58,7 @@ static inline int stringcasecompare(const char* a, const char* b)
     return *a - *b;
 }
 
-bool loadMeshSTL_ascii(Mesh* mesh, const char* filename)
+bool FileLoader::loadMeshSTL_ascii(Mesh* mesh, const char* filename)
 {
     FILE* f = fopen(filename, "rt");
     char buffer[1024];
@@ -114,11 +109,11 @@ bool loadMeshSTL_ascii(Mesh* mesh, const char* filename)
     }
     fclose(f);
     mesh->connectFaces();
-    scfg->origin = QVector3D((mesh->x_min+mesh->x_max)/2, (mesh->y_min+mesh->y_max)/2, (mesh->z_min+mesh->z_max)/2);
+    scfg->origin = QVector3D((mesh->x_min()+mesh->x_max())/2, (mesh->y_min()+mesh->y_max())/2, (mesh->z_min()+mesh->z_max())/2);
     return true;
 }
 
-bool loadMeshSTL_binary(Mesh* mesh, const char* filename){
+bool FileLoader::loadMeshSTL_binary(Mesh* mesh, const char* filename){
     FILE* f = fopen(filename, "rb");
 
     fseek(f, 0L, SEEK_END);
@@ -171,11 +166,11 @@ bool loadMeshSTL_binary(Mesh* mesh, const char* filename){
     }
     fclose(f);
     mesh->connectFaces();
-    scfg->origin = QVector3D((mesh->x_min+mesh->x_max)/2, (mesh->y_min+mesh->y_max)/2, (mesh->z_min+mesh->z_max)/2);
+    scfg->origin = QVector3D((mesh->x_min()+mesh->x_max())/2, (mesh->y_min()+mesh->y_max())/2, (mesh->z_min()+mesh->z_max())/2);
     return true;
 }
 
-bool loadMeshSTL(Mesh* mesh, const char* filename)
+bool FileLoader::loadMeshSTL(Mesh* mesh, const char* filename)
 {
     FILE* f = fopen(filename, "r");
     if (f == nullptr)
@@ -229,7 +224,7 @@ bool loadMeshSTL(Mesh* mesh, const char* filename)
     return loadMeshSTL_binary(mesh, filename);
 }
 
-bool loadMeshOBJ(Mesh* mesh, const char* filename){
+bool FileLoader::loadMeshOBJ(Mesh* mesh, const char* filename){
     FILE *f;
     char c;
     int lines = 0;
@@ -349,6 +344,6 @@ bool loadMeshOBJ(Mesh* mesh, const char* filename){
     qDebug() << "test 3";
     fclose(file);
     mesh->connectFaces();
-    scfg->origin = QVector3D((mesh->x_min+mesh->x_max)/2, (mesh->y_min+mesh->y_max)/2, (mesh->z_min+mesh->z_max)/2);
+    scfg->origin = QVector3D((mesh->x_min()+mesh->x_max())/2, (mesh->y_min()+mesh->y_max())/2, (mesh->z_min()+mesh->z_max())/2);
     return true;
 }

@@ -31,6 +31,12 @@ public:
     Qt3DCore::QTransform *planeTransform[2];
     Qt3DExtras::QPhongAlphaMaterial *planeMaterial;
 
+    static bool isLeftToPlane(Plane plane, QVector3D position);
+
+    static void interpolate(Mesh* mesh, Path3D contour1, Path3D contour2);
+    static void cutAway(Mesh* leftMesh, Mesh* rightMesh, Mesh* mesh, vector<QVector3D> cuttingPoints, int cutFillMode);
+
+
     int numPoints;
 //private:
     //float target_function(float touching,float overhang,float line);
@@ -47,11 +53,6 @@ signals:
 public slots:
     void getSliderSignal(double value);
 };
-
-bool isLeftToPlane(Plane plane, QVector3D position);
-
-void interpolate(Mesh* mesh, Path3D contour1, Path3D contour2);
-void cutAway(Mesh* leftMesh, Mesh* rightMesh, Mesh* mesh, vector<QVector3D> cuttingPoints, int cutFillMode);
 
 
 #endif // MODELCUT_H

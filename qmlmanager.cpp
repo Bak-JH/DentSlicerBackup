@@ -223,9 +223,9 @@ void QmlManager::createModelFile(Mesh* target_mesh, QString fname) {
     qDebug() << "connected model selected signal";
 
     // set initial position
-    float xmid = (glmodel->mesh->x_max + glmodel->mesh->x_min)/2;
-    float ymid = (glmodel->mesh->y_max + glmodel->mesh->y_min)/2;
-    float zmid = (glmodel->mesh->z_max + glmodel->mesh->z_min)/2;
+    float xmid = (glmodel->getMesh()->x_max() + glmodel->getMesh()->x_min())/2;
+    float ymid = (glmodel->getMesh()->y_max() + glmodel->getMesh()->y_min())/2;
+    float zmid = (glmodel->getMesh()->z_max() + glmodel->getMesh()->z_min())/2;
 
     glmodel->moveModelMesh(QVector3D(
                            (-1)*xmid,
@@ -261,8 +261,8 @@ void QmlManager::checkModelFile(int ID){
         }
     }
 
-    identifyHoles(target->mesh);
-    if (target->mesh->holes.size() != 0){
+    size_t holesCount = MeshRepair::identifyHoles(target->getMesh()).size();
+    if (holesCount!= 0){
         selectPart(ID);
         qmlManager->openYesNoPopUp(false, "Model has flaws.", "", "Do you want to fix the model?", 16, "", ftrRepair, 0);
     }
@@ -534,10 +534,10 @@ QVector3D QmlManager::getSelectedCenter(){
 
     if(selectedModels[0] != nullptr){
         // set initial position
-        float xmid = (selectedModels[0]->mesh->x_max + selectedModels[0]->mesh->x_min)/2;
-        float ymid = (selectedModels[0]->mesh->y_max + selectedModels[0]->mesh->y_min)/2;
-        float zmid = (selectedModels[0]->mesh->z_max + selectedModels[0]->mesh->z_min)/2;
-        result = selectedModels[0]->m_transform->translation()+QVector3D(xmid,ymid,zmid);//QVector3D(selectedModels[0]->m_transform->translation().x(), selectedModels[0]->m_transform->translation().y(), -selectedModels[0]->mesh->z_min);
+        float xmid = (selectedModels[0]->getMesh()->x_max() + selectedModels[0]->getMesh()->x_min())/2;
+        float ymid = (selectedModels[0]->getMesh()->y_max() + selectedModels[0]->getMesh()->y_min())/2;
+        float zmid = (selectedModels[0]->getMesh()->z_max() + selectedModels[0]->getMesh()->z_min())/2;
+        result = selectedModels[0]->m_transform->translation()+QVector3D(xmid,ymid,zmid);//QVector3D(selectedModels[0]->m_transform->translation().x(), selectedModels[0]->m_transform->translation().y(), -selectedModels[0]->getMesh()->z_min());
     }
     return result;
 }
@@ -546,9 +546,9 @@ QVector3D QmlManager::getSelectedSize(){
 
     if(selectedModels[0] != nullptr){
         result = selectedModels[0]->m_transform->translation();
-        result.setX(selectedModels[0]->mesh->x_max - selectedModels[0]->mesh->x_min);
-        result.setY(selectedModels[0]->mesh->y_max - selectedModels[0]->mesh->y_min);
-        result.setZ(selectedModels[0]->mesh->z_max - selectedModels[0]->mesh->z_min);
+        result.setX(selectedModels[0]->getMesh()->x_max() - selectedModels[0]->getMesh()->x_min());
+        result.setY(selectedModels[0]->getMesh()->y_max() - selectedModels[0]->getMesh()->y_min());
+        result.setZ(selectedModels[0]->getMesh()->z_max() - selectedModels[0]->getMesh()->z_min());
     }
 
     return result;
@@ -603,8 +603,8 @@ void QmlManager::fixMesh(){
         return;
 
     openProgressPopUp();
-    repairMesh(selectedModels[0]->mesh);
-    emit selectedModels[0]->_updateModelMesh(true);
+    selectedModels[0]->repairMesh();
+
 }
 
 void QmlManager::disableObjectPickers(){
@@ -632,55 +632,55 @@ void QmlManager::resetCursor(){
 }
 
 float QmlManager::selected_x_max(size_t selectedNum) {
-    float x_max = selectedModels[0]->m_transform->translation().x() + selectedModels[0]->mesh->x_max;
+    float x_max = selectedModels[0]->m_transform->translation().x() + selectedModels[0]->getMesh()->x_max();
     for (size_t i = 1; i < selectedNum; i++) {
-        if (x_max < selectedModels[i]->m_transform->translation().x() + selectedModels[i]->mesh->x_max)
-            x_max = selectedModels[i]->m_transform->translation().x() + selectedModels[i]->mesh->x_max;
+        if (x_max < selectedModels[i]->m_transform->translation().x() + selectedModels[i]->getMesh()->x_max())
+            x_max = selectedModels[i]->m_transform->translation().x() + selectedModels[i]->getMesh()->x_max();
     }
     return x_max;
 }
 
 float QmlManager::selected_x_min(size_t selectedNum) {
-    float x_min = selectedModels[0]->m_transform->translation().x() + selectedModels[0]->mesh->x_min;
+    float x_min = selectedModels[0]->m_transform->translation().x() + selectedModels[0]->getMesh()->x_min();
     for (size_t i = 1; i < selectedNum; i++) {
-        if (x_min > selectedModels[i]->m_transform->translation().x() + selectedModels[i]->mesh->x_min)
-            x_min = selectedModels[i]->m_transform->translation().x() + selectedModels[i]->mesh->x_min;
+        if (x_min > selectedModels[i]->m_transform->translation().x() + selectedModels[i]->getMesh()->x_min())
+            x_min = selectedModels[i]->m_transform->translation().x() + selectedModels[i]->getMesh()->x_min();
     }
     return x_min;
 }
 
 float QmlManager::selected_y_max(size_t selectedNum) {
-    float y_max = selectedModels[0]->m_transform->translation().y() + selectedModels[0]->mesh->y_max;
+    float y_max = selectedModels[0]->m_transform->translation().y() + selectedModels[0]->getMesh()->y_max();
     for (size_t i = 1; i < selectedNum; i++) {
-        if (y_max < selectedModels[i]->m_transform->translation().y() + selectedModels[i]->mesh->y_max)
-            y_max = selectedModels[i]->m_transform->translation().y() + selectedModels[i]->mesh->y_max;
+        if (y_max < selectedModels[i]->m_transform->translation().y() + selectedModels[i]->getMesh()->y_max())
+            y_max = selectedModels[i]->m_transform->translation().y() + selectedModels[i]->getMesh()->y_max();
     }
     return y_max;
 }
 
 float QmlManager::selected_y_min(size_t selectedNum) {
-    float y_min = selectedModels[0]->m_transform->translation().y() + selectedModels[0]->mesh->y_min;
+    float y_min = selectedModels[0]->m_transform->translation().y() + selectedModels[0]->getMesh()->y_min();
     for (size_t i = 1; i < selectedNum; i++) {
-        if (y_min > selectedModels[i]->m_transform->translation().y() + selectedModels[i]->mesh->y_min)
-            y_min = selectedModels[i]->m_transform->translation().y() + selectedModels[i]->mesh->y_min;
+        if (y_min > selectedModels[i]->m_transform->translation().y() + selectedModels[i]->getMesh()->y_min())
+            y_min = selectedModels[i]->m_transform->translation().y() + selectedModels[i]->getMesh()->y_min();
     }
     return y_min;
 }
 
 float QmlManager::selected_z_max(size_t selectedNum) {
-    float z_max = selectedModels[0]->m_transform->translation().z() + selectedModels[0]->mesh->z_max;
+    float z_max = selectedModels[0]->m_transform->translation().z() + selectedModels[0]->getMesh()->z_max();
     for (size_t i = 1; i < selectedNum; i++) {
-        if (z_max < selectedModels[i]->m_transform->translation().z() + selectedModels[i]->mesh->z_max)
-            z_max = selectedModels[i]->m_transform->translation().z() + selectedModels[i]->mesh->z_max;
+        if (z_max < selectedModels[i]->m_transform->translation().z() + selectedModels[i]->getMesh()->z_max())
+            z_max = selectedModels[i]->m_transform->translation().z() + selectedModels[i]->getMesh()->z_max();
     }
     return z_max;
 }
 
 float QmlManager::selected_z_min(size_t selectedNum) {
-    float z_min = selectedModels[0]->m_transform->translation().z() + selectedModels[0]->mesh->z_min;
+    float z_min = selectedModels[0]->m_transform->translation().z() + selectedModels[0]->getMesh()->z_min();
     for (size_t i = 1; i < selectedNum; i++) {
-        if (z_min > selectedModels[i]->m_transform->translation().z() + selectedModels[i]->mesh->z_min)
-            z_min = selectedModels[i]->m_transform->translation().z() + selectedModels[i]->mesh->z_min;
+        if (z_min > selectedModels[i]->m_transform->translation().z() + selectedModels[i]->getMesh()->z_min())
+            z_min = selectedModels[i]->m_transform->translation().z() + selectedModels[i]->getMesh()->z_min();
     }
     return z_min;
 }
@@ -752,7 +752,7 @@ void QmlManager::runArrange_internal(){
         vector<XYArrangement> arng_result_set;
         vector<Qt3DCore::QTransform*> m_transform_set;
         for (size_t i=0; i<glmodels.size(); i++){
-            meshes_to_arrange.push_back(*(glmodels[i]->mesh));
+            meshes_to_arrange.push_back(*(glmodels[i]->getMesh()));
             m_transform_set.push_back(glmodels[i]->m_transform);
         }
         autoarrange* ar;
@@ -781,10 +781,10 @@ void QmlManager::applyArrangeResult(vector<QVector3D> translations, vector<float
     qmlManager->setProgressText("Done");
     qmlManager->openResultPopUp("","Arrangement done","");
     if(selectedModels[0] != nullptr){
-        //QMetaObject::invokeMethod(boundedBox, "setPosition", Q_ARG(QVariant, selectedModels[0]->m_transform->translation()+QVector3D((selectedModels[0]->mesh->x_max+selectedModels[0]->mesh->x_min)/2,(selectedModels[0]->mesh->y_max+selectedModels[0]->mesh->y_min)/2,(selectedModels[0]->mesh->z_max+selectedModels[0]->mesh->z_min)/2)));
-        //QMetaObject::invokeMethod(boundedBox, "setSize", Q_ARG(QVariant, selectedModels[0]->mesh->x_max - selectedModels[0]->mesh->x_min),
-        //                                                 Q_ARG(QVariant, selectedModels[0]->mesh->y_max - selectedModels[0]->mesh->y_min),
-        //                                                 Q_ARG(QVariant, selectedModels[0]->mesh->z_max - selectedModels[0]->mesh->z_min));
+        //QMetaObject::invokeMethod(boundedBox, "setPosition", Q_ARG(QVariant, selectedModels[0]->m_transform->translation()+QVector3D((selectedModels[0]->getMesh()->x_max()+selectedModels[0]->getMesh()->x_min())/2,(selectedModels[0]->getMesh()->y_max()+selectedModels[0]->getMesh()->y_min())/2,(selectedModels[0]->getMesh()->z_max()+selectedModels[0]->getMesh()->z_min())/2)));
+        //QMetaObject::invokeMethod(boundedBox, "setSize", Q_ARG(QVariant, selectedModels[0]->getMesh()->x_max() - selectedModels[0]->getMesh()->x_min()),
+        //                                                 Q_ARG(QVariant, selectedModels[0]->getMesh()->y_max() - selectedModels[0]->getMesh()->y_min()),
+        //                                                 Q_ARG(QVariant, selectedModels[0]->getMesh()->z_max() - selectedModels[0]->getMesh()->z_min()));
         sendUpdateModelInfo();
     }
 }
@@ -886,22 +886,22 @@ bool QmlManager::multipleModelSelected(int ID){
     QMetaObject::invokeMethod(partList, "selectPartByModel", Q_ARG(QVariant, target->ID));
     QMetaObject::invokeMethod(yesno_popup, "addPart", Q_ARG(QVariant, target->getFileName(target->filename.toStdString().c_str())), Q_ARG(QVariant, target->ID));
     // Set BoundedBox
-//    float xmid = (target->mesh->x_max + target->mesh->x_min)/2;
-//    float ymid = (target->mesh->y_max + target->mesh->y_min)/2;
-//    float zmid = (target->mesh->z_max + target->mesh->z_min)/2;
+//    float xmid = (target->getMesh()->x_max() + target->getMesh()->x_min())/2;
+//    float ymid = (target->getMesh()->y_max() + target->getMesh()->y_min())/2;
+//    float zmid = (target->getMesh()->z_max() + target->getMesh()->z_min())/2;
     //QVector3D center = (xmid, ymid, zmid);
 
     qDebug() << "[multi model selected] b box center"; //<< xmid << " " << ymid << " " << zmid ;
 //    QMetaObject::invokeMethod(boundedBox, "showBox");
 //        QMetaObject::invokeMethod(boundedBox, "setPosition", Q_ARG(QVariant, QVector3D(selectedModels[0]->m_transform->translation())));
-//        QMetaObject::invokeMethod(boundedBox, "setSize", Q_ARG(QVariant, selectedModels[0]->mesh->x_max - selectedModels[0]->mesh->x_min),
-//                                                         Q_ARG(QVariant, selectedModels[0]->mesh->y_max - selectedModels[0]->mesh->y_min),
-//                                                         Q_ARG(QVariant, selectedModels[0]->mesh->z_max - selectedModels[0]->mesh->z_min));
-//    QMetaObject::invokeMethod(boundedBox, "setPosition", Q_ARG(QVariant, target->m_transform->translation()+QVector3D((target->mesh->x_max+target->mesh->x_min)/2,(target->mesh->y_max+target->mesh->y_min)/2,(target->mesh->z_max+target->mesh->z_min)/2)));
+//        QMetaObject::invokeMethod(boundedBox, "setSize", Q_ARG(QVariant, selectedModels[0]->getMesh()->x_max() - selectedModels[0]->getMesh()->x_min()),
+//                                                         Q_ARG(QVariant, selectedModels[0]->getMesh()->y_max() - selectedModels[0]->getMesh()->y_min()),
+//                                                         Q_ARG(QVariant, selectedModels[0]->getMesh()->z_max() - selectedModels[0]->getMesh()->z_min()));
+//    QMetaObject::invokeMethod(boundedBox, "setPosition", Q_ARG(QVariant, target->m_transform->translation()+QVector3D((target->getMesh()->x_max()+target->getMesh()->x_min())/2,(target->getMesh()->y_max()+target->getMesh()->y_min())/2,(target->getMesh()->z_max()+target->getMesh()->z_min())/2)));
 /*
-    QMetaObject::invokeMethod(boundedBox, "setSize", Q_ARG(QVariant, target->mesh->x_max - target->mesh->x_min),
-                                                     Q_ARG(QVariant, target->mesh->y_max - target->mesh->y_min),
-                                                     Q_ARG(QVariant, target->mesh->z_max - target->mesh->z_min));
+    QMetaObject::invokeMethod(boundedBox, "setSize", Q_ARG(QVariant, target->getMesh()->x_max() - target->getMesh()->x_min()),
+                                                     Q_ARG(QVariant, target->getMesh()->y_max() - target->getMesh()->y_min()),
+                                                     Q_ARG(QVariant, target->getMesh()->z_max() - target->getMesh()->z_min()));
 */
     sendUpdateModelInfo();
     if (groupFunctionState == "active"){
@@ -1118,24 +1118,24 @@ void QmlManager::modelSelected(int ID){
         qDebug() << "changing model" << selectedModels[0]->ID;
 
         // Set BoundedBox
-//        float xmid = (selectedModels[0]->mesh->x_max + selectedModels[0]->mesh->x_min)/2;
-//        float ymid = (selectedModels[0]->mesh->y_max + selectedModels[0]->mesh->y_min)/2;
-//        float zmid = (selectedModels[0]->mesh->z_max + selectedModels[0]->mesh->z_min)/2;
+//        float xmid = (selectedModels[0]->getMesh()->x_max() + selectedModels[0]->getMesh()->x_min())/2;
+//        float ymid = (selectedModels[0]->getMesh()->y_max() + selectedModels[0]->getMesh()->y_min())/2;
+//        float zmid = (selectedModels[0]->getMesh()->z_max() + selectedModels[0]->getMesh()->z_min())/2;
         //QVector3D center = (xmid, ymid, zmid);
 
         qDebug() << "[model selected] b box center"; //<< xmid << " " << ymid << " " << zmid ;
 //        QMetaObject::invokeMethod(boundedBox, "showBox");
 //        QMetaObject::invokeMethod(boundedBox, "setPosition", Q_ARG(QVariant, QVector3D(selectedModels[0]->m_transform->translation())));
-//        QMetaObject::invokeMethod(boundedBox, "setSize", Q_ARG(QVariant, selectedModels[0]->mesh->x_max - selectedModels[0]->mesh->x_min),
-//                                                         Q_ARG(QVariant, selectedModels[0]->mesh->y_max - selectedModels[0]->mesh->y_min),
-//                                                         Q_ARG(QVariant, selectedModels[0]->mesh->z_max - selectedModels[0]->mesh->z_min));
-/*        QMetaObject::invokeMethod(boundedBox, "setPosition", Q_ARG(QVariant, selectedModels[0]->m_transform->translation()+QVector3D((selectedModels[0]->mesh->x_max+selectedModels[0]->mesh->x_min)/2,(selectedModels[0]->mesh->y_max+selectedModels[0]->mesh->y_min)/2,(selectedModels[0]->mesh->z_max+selectedModels[0]->mesh->z_min)/2)));
-        QMetaObject::invokeMethod(boundedBox, "setSize", Q_ARG(QVariant, selectedModels[0]->mesh->x_max - selectedModels[0]->mesh->x_min),
-                                                         Q_ARG(QVariant, selectedModels[0]->mesh->y_max - selectedModels[0]->mesh->y_min),
-                                                         Q_ARG(QVariant, selectedModels[0]->mesh->z_max - selectedModels[0]->mesh->z_min));
+//        QMetaObject::invokeMethod(boundedBox, "setSize", Q_ARG(QVariant, selectedModels[0]->getMesh()->x_max() - selectedModels[0]->getMesh()->x_min()),
+//                                                         Q_ARG(QVariant, selectedModels[0]->getMesh()->y_max() - selectedModels[0]->getMesh()->y_min()),
+//                                                         Q_ARG(QVariant, selectedModels[0]->getMesh()->z_max() - selectedModels[0]->getMesh()->z_min()));
+/*        QMetaObject::invokeMethod(boundedBox, "setPosition", Q_ARG(QVariant, selectedModels[0]->m_transform->translation()+QVector3D((selectedModels[0]->getMesh()->x_max()+selectedModels[0]->getMesh()->x_min())/2,(selectedModels[0]->getMesh()->y_max()+selectedModels[0]->getMesh()->y_min())/2,(selectedModels[0]->getMesh()->z_max()+selectedModels[0]->getMesh()->z_min())/2)));
+        QMetaObject::invokeMethod(boundedBox, "setSize", Q_ARG(QVariant, selectedModels[0]->getMesh()->x_max() - selectedModels[0]->getMesh()->x_min()),
+                                                         Q_ARG(QVariant, selectedModels[0]->getMesh()->y_max() - selectedModels[0]->getMesh()->y_min()),
+                                                         Q_ARG(QVariant, selectedModels[0]->getMesh()->z_max() - selectedModels[0]->getMesh()->z_min()));
 */
         QMetaObject::invokeMethod(layerViewSlider, "setThickness", Q_ARG(QVariant, (scfg->layer_height)));
-        QMetaObject::invokeMethod(layerViewSlider, "setHeight", Q_ARG(QVariant, (selectedModels[0]->mesh->z_max - selectedModels[0]->mesh->z_min + scfg->raft_thickness)));
+        QMetaObject::invokeMethod(layerViewSlider, "setHeight", Q_ARG(QVariant, (selectedModels[0]->getMesh()->z_max() - selectedModels[0]->getMesh()->z_min() + scfg->raft_thickness)));
 
         // set slicing info box property visible true if slicing info exists
 //        slicingData->setProperty("visible", true);
@@ -1146,7 +1146,7 @@ void QmlManager::modelSelected(int ID){
             slicingData->setProperty("visible", false);
         }*/
 
-        qDebug() << "scale value   " << selectedModels[0]->mesh->x_max - selectedModels[0]->mesh->x_min;
+        qDebug() << "scale value   " << selectedModels[0]->getMesh()->x_max() - selectedModels[0]->getMesh()->x_min();
 
 
 
@@ -1333,9 +1333,9 @@ void QmlManager::showRotatingSphere(){
 //                                                             (selected_z_max(selectedNum) + selected_z_min(selectedNum))/2));
 
     QQmlProperty::write(rotateSphereobj,"center", //QVector3D(0,0,selectedModels[0]->m_transform->translation().z())+
-            QVector3D((selectedModels[0]->mesh->x_max+selectedModels[0]->mesh->x_min)/2,
-            (selectedModels[0]->mesh->y_max+selectedModels[0]->mesh->y_min)/2,
-            (selectedModels[0]->mesh->z_max-selectedModels[0]->mesh->z_min)/2));
+            QVector3D((selectedModels[0]->getMesh()->x_max()+selectedModels[0]->getMesh()->x_min())/2,
+            (selectedModels[0]->getMesh()->y_max()+selectedModels[0]->getMesh()->y_min())/2,
+            (selectedModels[0]->getMesh()->z_max()-selectedModels[0]->getMesh()->z_min())/2));
 }
 
 void QmlManager::showRotateSphere(){
@@ -1352,9 +1352,9 @@ void QmlManager::showRotateSphere(){
 //                                                             (selected_z_max(selectedNum) + selected_z_min(selectedNum))/2));
 
     QQmlProperty::write(rotateSphereobj,"center",selectedModels[0]->m_transform->translation()+
-            QVector3D((selectedModels[0]->mesh->x_max+selectedModels[0]->mesh->x_min)/2,
-            (selectedModels[0]->mesh->y_max+selectedModels[0]->mesh->y_min)/2,
-            (selectedModels[0]->mesh->z_max+selectedModels[0]->mesh->z_min)/2));
+            QVector3D((selectedModels[0]->getMesh()->x_max()+selectedModels[0]->getMesh()->x_min())/2,
+            (selectedModels[0]->getMesh()->y_max()+selectedModels[0]->getMesh()->y_min())/2,
+            (selectedModels[0]->getMesh()->z_max()+selectedModels[0]->getMesh()->z_min())/2));
 }
 
 void QmlManager::mouseHack(){
@@ -1395,14 +1395,14 @@ void QmlManager::modelMoveDone(){
     }
 
 //    QMetaObject::invokeMethod(boundedBox, "showBox"); // Bounded Box
-//    QMetaObject::invokeMethod(boundedBox, "setPosition", Q_ARG(QVariant, selectedModels[0]->m_transform->translation()+QVector3D((selectedModels[0]->mesh->x_max+selectedModels[0]->mesh->x_min)/2,(selectedModels[0]->mesh->y_max+selectedModels[0]->mesh->y_min)/2,(selectedModels[0]->mesh->z_max+selectedModels[0]->mesh->z_min)/2)));
-//    QMetaObject::invokeMethod(boundedBox, "setSize", Q_ARG(QVariant, selectedModels[0]->mesh->x_max - selectedModels[0]->mesh->x_min),
-//                                                     Q_ARG(QVariant, selectedModels[0]->mesh->y_max - selectedModels[0]->mesh->y_min),
-//                                                     Q_ARG(QVariant, selectedModels[0]->mesh->z_max - selectedModels[0]->mesh->z_min));
+//    QMetaObject::invokeMethod(boundedBox, "setPosition", Q_ARG(QVariant, selectedModels[0]->m_transform->translation()+QVector3D((selectedModels[0]->getMesh()->x_max()+selectedModels[0]->getMesh()->x_min())/2,(selectedModels[0]->getMesh()->y_max()+selectedModels[0]->getMesh()->y_min())/2,(selectedModels[0]->getMesh()->z_max()+selectedModels[0]->getMesh()->z_min())/2)));
+//    QMetaObject::invokeMethod(boundedBox, "setSize", Q_ARG(QVariant, selectedModels[0]->getMesh()->x_max() - selectedModels[0]->getMesh()->x_min()),
+//                                                     Q_ARG(QVariant, selectedModels[0]->getMesh()->y_max() - selectedModels[0]->getMesh()->y_min()),
+//                                                     Q_ARG(QVariant, selectedModels[0]->getMesh()->z_max() - selectedModels[0]->getMesh()->z_min()));
     sendUpdateModelInfo();
     //if(Axis != 3){
         showMoveArrow();
-        //QQmlProperty::write(moveArrowobj,"center",selectedModels[0]->m_transform->translation()+QVector3D((selectedModels[0]->mesh->x_max+selectedModels[0]->mesh->x_min)/2,(selectedModels[0]->mesh->y_max+selectedModels[0]->mesh->y_min)/2,(selectedModels[0]->mesh->z_max+selectedModels[0]->mesh->z_min)/2));
+        //QQmlProperty::write(moveArrowobj,"center",selectedModels[0]->m_transform->translation()+QVector3D((selectedModels[0]->getMesh()->x_max()+selectedModels[0]->getMesh()->x_min())/2,(selectedModels[0]->getMesh()->y_max()+selectedModels[0]->getMesh()->y_min())/2,(selectedModels[0]->getMesh()->z_max()+selectedModels[0]->getMesh()->z_min())/2));
     //}
     mouseHack();
 
@@ -1420,10 +1420,10 @@ void QmlManager::totalMoveDone(){
 
         //curModel->saveUndoState();
 
-        curModel->mesh->vertexMove(curModel->m_transform->translation());
+        curModel->moveModelMesh(curModel->m_transform->translation(), false);
         curModel->shadowModel->m_transform->setTranslation(curModel->shadowModel->m_transform->translation()+curModel->m_transform->translation());
         curModel->m_transform->setTranslation(QVector3D(0,0,0));
-        // need to only update shadowModel & mesh
+        // need to only update shadowModel & getMesh()
         emit curModel->_updateModelMesh(false);
     }
     sendUpdateModelInfo();
@@ -1437,40 +1437,16 @@ void QmlManager::modelRotateInit(){
     return;
 }
 
-QMatrix4x4 quatToMat(QQuaternion q)
-{
-    //based on algorithm on wikipedia
-    // http://en.wikipedia.org/wiki/Rotation_matrix#Quaternion
-    float w = q.scalar ();
-    float x = q.x();
-    float y = q.y();
-    float z = q.z();
-
-    float n = q.lengthSquared();
-    float s =  n == 0?  0 : 2 / n;
-    float wx = s * w * x, wy = s * w * y, wz = s * w * z;
-    float xx = s * x * x, xy = s * x * y, xz = s * x * z;
-    float yy = s * y * y, yz = s * y * z, zz = s * z * z;
-
-    float m[16] = { 1 - (yy + zz),         xy + wz ,         xz - wy ,0,
-                         xy - wz ,    1 - (xx + zz),         yz + wx ,0,
-                         xz + wy ,         yz - wx ,    1 - (xx + yy),0,
-                               0 ,               0 ,               0 ,1  };
-    QMatrix4x4 result =  QMatrix4x4(m,4,4);
-    result.optimize ();
-    return result;
-}
-
 void QmlManager::modelRotateDone(int Axis){
     if (selectedModels[0] == nullptr)
         return;
 
 //    QMetaObject::invokeMethod(boundedBox, "hideBox"); // Bounded Box
 
-    float* minmax;
+    std::array<float,6> minmax;
     size_t selectedNum = selectedModels.size();
     for (size_t i=0; i < selectedNum; i++) {
-        minmax = selectedModels[i]->mesh->calculateMinMax(quatToMat(selectedModels[i]->m_transform->rotation()).inverted());
+        minmax = selectedModels[i]->getMesh()->calculateMinMax(quatToMat(selectedModels[i]->m_transform->rotation()).inverted());
         selectedModels[i]->m_transform->setTranslation(QVector3D(selectedModels[i]->m_transform->translation().x(),
                                                                  selectedModels[i]->m_transform->translation().y(),
                                                                  - minmax[4]));
@@ -1506,18 +1482,7 @@ void QmlManager::totalRotateDone(){
             qDebug() << "equals identity so don't save";
             continue;
         }
-
-        // remove last undo state and resave undo state
-        //selectedModels[i]->saveUndoState();
-
-        selectedModels[i]->mesh->vertexRotate(quatToMat(selectedModels[i]->m_transform->rotation()).inverted());
-        selectedModels[i]->m_transform->setRotationX(0);
-        selectedModels[i]->m_transform->setRotationY(0);
-        selectedModels[i]->m_transform->setRotationZ(0);
-
-        selectedModels[i]->mesh->vertexMove(selectedModels[i]->m_transform->translation());
-        selectedModels[i]->m_transform->setTranslation(QVector3D(0,0,0));
-        emit selectedModels[i]->_updateModelMesh(true);
+        selectedModels[i]->rotationDone();
     }
 
     sendUpdateModelInfo();
@@ -1534,11 +1499,11 @@ void QmlManager::modelMove(int Axis, int Distance){ // for QML Signal -> float i
             case 1:{  //X
                 QVector3D tmp = selectedModels[i]->m_transform->translation();
 
-                if ((tmp.x() + selectedModels[i]->mesh->x_max + 1 < scfg->bed_x/2)
-                        && (tmp.x() + selectedModels[i]->mesh->x_min - 1 > -scfg->bed_x/2)) {
-                    if(tmp.x() + selectedModels[i]->mesh->x_max +1 + Distance > scfg->bed_x/2 )
+                if ((tmp.x() + selectedModels[i]->getMesh()->x_max() + 1 < scfg->bed_x/2)
+                        && (tmp.x() + selectedModels[i]->getMesh()->x_min() - 1 > -scfg->bed_x/2)) {
+                    if(tmp.x() + selectedModels[i]->getMesh()->x_max() +1 + Distance > scfg->bed_x/2 )
                         return ;
-                    if(tmp.x() + selectedModels[i]->mesh->x_min -1 + Distance < - scfg->bed_x/2 )
+                    if(tmp.x() + selectedModels[i]->getMesh()->x_min() -1 + Distance < - scfg->bed_x/2 )
                         return ;
                 }
                 selectedModels[i]->m_transform->setTranslation(QVector3D(tmp.x()+Distance,tmp.y(),tmp.z()));
@@ -1546,11 +1511,11 @@ void QmlManager::modelMove(int Axis, int Distance){ // for QML Signal -> float i
             }
             case 2:{  //Y
                 QVector3D tmp = selectedModels[i]->m_transform->translation();
-                if ((tmp.y() + selectedModels[i]->mesh->y_max + 1 < scfg->bed_y/2)
-                        && (tmp.y() + selectedModels[i]->mesh->y_min - 1 > -scfg->bed_y/2)) {
-                    if(tmp.y() + selectedModels[i]->mesh->y_max +1 + Distance > scfg->bed_y/2 )
+                if ((tmp.y() + selectedModels[i]->getMesh()->y_max() + 1 < scfg->bed_y/2)
+                        && (tmp.y() + selectedModels[i]->getMesh()->y_min() - 1 > -scfg->bed_y/2)) {
+                    if(tmp.y() + selectedModels[i]->getMesh()->y_max() +1 + Distance > scfg->bed_y/2 )
                         return;
-                    if(tmp.y() + selectedModels[i]->mesh->y_min -1 + Distance < - scfg->bed_y/2 )
+                    if(tmp.y() + selectedModels[i]->getMesh()->y_min() -1 + Distance < - scfg->bed_y/2 )
                         return;
                 }
                 selectedModels[i]->m_transform->setTranslation(QVector3D(tmp.x(),tmp.y()+Distance,tmp.z()));
@@ -1563,10 +1528,10 @@ void QmlManager::modelMove(int Axis, int Distance){ // for QML Signal -> float i
     // update bounded box position, size
     updateBoundedBox();
 
-    //QMetaObject::invokeMethod(boundedBox, "setPosition", Q_ARG(QVariant, selectedModels[0]->m_transform->translation()+QVector3D((selectedModels[0]->mesh->x_max+selectedModels[0]->mesh->x_min)/2,(selectedModels[0]->mesh->y_max+selectedModels[0]->mesh->y_min)/2,(selectedModels[0]->mesh->z_max+selectedModels[0]->mesh->z_min)/2)));
-    //QMetaObject::invokeMethod(boundedBox, "setSize", Q_ARG(QVariant, selectedModels[0]->mesh->x_max - selectedModels[0]->mesh->x_min),
-    //                                                 Q_ARG(QVariant, selectedModels[0]->mesh->y_max - selectedModels[0]->mesh->y_min),
-    //                                                 Q_ARG(QVariant, selectedModels[0]->mesh->z_max - selectedModels[0]->mesh->z_min));
+    //QMetaObject::invokeMethod(boundedBox, "setPosition", Q_ARG(QVariant, selectedModels[0]->m_transform->translation()+QVector3D((selectedModels[0]->getMesh()->x_max()+selectedModels[0]->getMesh()->x_min())/2,(selectedModels[0]->getMesh()->y_max()+selectedModels[0]->getMesh()->y_min())/2,(selectedModels[0]->getMesh()->z_max()+selectedModels[0]->getMesh()->z_min())/2)));
+    //QMetaObject::invokeMethod(boundedBox, "setSize", Q_ARG(QVariant, selectedModels[0]->getMesh()->x_max() - selectedModels[0]->getMesh()->x_min()),
+    //                                                 Q_ARG(QVariant, selectedModels[0]->getMesh()->y_max() - selectedModels[0]->getMesh()->y_min()),
+    //                                                 Q_ARG(QVariant, selectedModels[0]->getMesh()->z_max() - selectedModels[0]->getMesh()->z_min()));
 }
 
 void QmlManager::modelMoveF(int Axis, float Distance){
@@ -1578,11 +1543,11 @@ void QmlManager::modelMoveF(int Axis, float Distance){
             case 1:{  //X
                 QVector3D tmp = selectedModels[i]->m_transform->translation();
 
-                if ((tmp.x() + selectedModels[i]->mesh->x_max + 1 < scfg->bed_x/2)
-                        && (tmp.x() + selectedModels[i]->mesh->x_min - 1 > -scfg->bed_x/2)) {
-                    if(tmp.x() + selectedModels[i]->mesh->x_max +1 + Distance > scfg->bed_x/2 )
+                if ((tmp.x() + selectedModels[i]->getMesh()->x_max() + 1 < scfg->bed_x/2)
+                        && (tmp.x() + selectedModels[i]->getMesh()->x_min() - 1 > -scfg->bed_x/2)) {
+                    if(tmp.x() + selectedModels[i]->getMesh()->x_max() +1 + Distance > scfg->bed_x/2 )
                         return;
-                    if(tmp.x() + selectedModels[i]->mesh->x_min -1 + Distance < - scfg->bed_x/2 )
+                    if(tmp.x() + selectedModels[i]->getMesh()->x_min() -1 + Distance < - scfg->bed_x/2 )
                         return;
                 }
                 selectedModels[i]->m_transform->setTranslation(QVector3D(tmp.x()+Distance, tmp.y(), tmp.z()));
@@ -1590,11 +1555,11 @@ void QmlManager::modelMoveF(int Axis, float Distance){
             }
             case 2:{  //Y
                 QVector3D tmp = selectedModels[i]->m_transform->translation();
-                if ((tmp.y() + selectedModels[i]->mesh->y_max + 1 < scfg->bed_y/2)
-                        && (tmp.y() + selectedModels[i]->mesh->y_min - 1 > -scfg->bed_y/2)) {
-                    if(tmp.y() + selectedModels[i]->mesh->y_max +1 + Distance > scfg->bed_y/2 )
+                if ((tmp.y() + selectedModels[i]->getMesh()->y_max() + 1 < scfg->bed_y/2)
+                        && (tmp.y() + selectedModels[i]->getMesh()->y_min() - 1 > -scfg->bed_y/2)) {
+                    if(tmp.y() + selectedModels[i]->getMesh()->y_max() +1 + Distance > scfg->bed_y/2 )
                         return;
-                    if(tmp.y() + selectedModels[i]->mesh->y_min -1 + Distance < - scfg->bed_y/2 )
+                    if(tmp.y() + selectedModels[i]->getMesh()->y_min() -1 + Distance < - scfg->bed_y/2 )
                         return;
                 }
                 selectedModels[i]->m_transform->setTranslation(QVector3D(tmp.x(), tmp.y()+Distance, tmp.z()));
@@ -1614,9 +1579,9 @@ void QmlManager::modelRotate(int Axis, int Angle){
         rotateSnapAngle = (rotateSnapAngle + Angle +360) % 360;
         QVector3D transl = selectedModels[i]->m_transform->translation();
         //selectedModels[i]->m_transform->setTranslation(selectedModels[i]->m_translation);
-        QVector3D rot_center = QVector3D((selectedModels[i]->mesh->x_max+selectedModels[i]->mesh->x_min)/2,
-                                                  (selectedModels[i]->mesh->y_max+selectedModels[i]->mesh->y_min)/2,
-                                                  (selectedModels[i]->mesh->z_max+selectedModels[i]->mesh->z_min)/2);
+        QVector3D rot_center = QVector3D((selectedModels[i]->getMesh()->x_max()+selectedModels[i]->getMesh()->x_min())/2,
+                                                  (selectedModels[i]->getMesh()->y_max()+selectedModels[i]->getMesh()->y_min())/2,
+                                                  (selectedModels[i]->getMesh()->z_max()+selectedModels[i]->getMesh()->z_min())/2);
 
         QMatrix4x4 rot;
 
@@ -1703,7 +1668,7 @@ void QmlManager::modelRotate(int Axis, int Angle){
                 break;
             }
         }
-        //selectedModels[i]->m_transform->setTranslation(selectedModels[i]->m_transform->translation()+QVector3D(0,0,-selectedModels[i]->mesh->z_min));
+        //selectedModels[i]->m_transform->setTranslation(selectedModels[i]->m_transform->translation()+QVector3D(0,0,-selectedModels[i]->getMesh()->z_min()));
     }
 }
 
@@ -1718,15 +1683,15 @@ void QmlManager::modelMoveByNumber(int axis, int X, int Y){
         targetX = tmp.x() + X;
         targetY = tmp.y() + Y;
 
-        if(tmp.x() + selectedModels[i]->mesh->x_max +1 + X> 80/2 )
-            targetX = tmp.x() - (tmp.x() + selectedModels[i]->mesh->x_max - scfg->bed_x/2 + 1);
-        if(tmp.x() + selectedModels[i]->mesh->x_min -1 + X< - 80/2 )
-            targetX = tmp.x() - (tmp.x() + selectedModels[i]->mesh->x_min + scfg->bed_x/2 - 1);
+        if(tmp.x() + selectedModels[i]->getMesh()->x_max() +1 + X> 80/2 )
+            targetX = tmp.x() - (tmp.x() + selectedModels[i]->getMesh()->x_max() - scfg->bed_x/2 + 1);
+        if(tmp.x() + selectedModels[i]->getMesh()->x_min() -1 + X< - 80/2 )
+            targetX = tmp.x() - (tmp.x() + selectedModels[i]->getMesh()->x_min() + scfg->bed_x/2 - 1);
 
-        if(tmp.y() + selectedModels[i]->mesh->y_max +1 + Y> 80/2 )
-            targetY = tmp.y() - (tmp.y() + selectedModels[i]->mesh->y_max - scfg->bed_y/2 + 1);
-        if(tmp.y() + selectedModels[i]->mesh->y_min -1 + Y< - 80/2 )
-            targetY = tmp.y() - (tmp.y() + selectedModels[i]->mesh->y_min + scfg->bed_y/2 - 1);
+        if(tmp.y() + selectedModels[i]->getMesh()->y_max() +1 + Y> 80/2 )
+            targetY = tmp.y() - (tmp.y() + selectedModels[i]->getMesh()->y_max() - scfg->bed_y/2 + 1);
+        if(tmp.y() + selectedModels[i]->getMesh()->y_min() -1 + Y< - 80/2 )
+            targetY = tmp.y() - (tmp.y() + selectedModels[i]->getMesh()->y_min() + scfg->bed_y/2 - 1);
 
         selectedModels[i]->m_transform->setTranslation(QVector3D(targetX, targetY, tmp.z()));
         //selectedModels[i]->moveModelMesh(QVector3D(targetX,targetY,tmp.z()));
@@ -1739,26 +1704,11 @@ void QmlManager::modelRotateByNumber(int axis,  int X, int Y, int Z){
         return;
 
     for (int i=0; i<selectedModels.size(); i++){
-        QVector3D rot_center = QVector3D((selectedModels[i]->mesh->x_max+selectedModels[i]->mesh->x_min)/2,
-                                                  (selectedModels[i]->mesh->y_max+selectedModels[i]->mesh->y_min)/2,
-                                                  (selectedModels[i]->mesh->z_max+selectedModels[i]->mesh->z_min)/2);
+        QVector3D rot_center = QVector3D((selectedModels[i]->getMesh()->x_max()+selectedModels[i]->getMesh()->x_min())/2,
+                                                  (selectedModels[i]->getMesh()->y_max()+selectedModels[i]->getMesh()->y_min())/2,
+                                                  (selectedModels[i]->getMesh()->z_max()+selectedModels[i]->getMesh()->z_min())/2);
 
-        QMatrix4x4 rot;
-
-        rot = selectedModels[i]->m_transform->rotateAround(rot_center,X,(QVector3D(1,0,0).toVector4D()*selectedModels[i]->m_transform->matrix()).toVector3D());
-        selectedModels[i]->m_transform->setMatrix(selectedModels[i]->m_transform->matrix()*rot);
-        rot = selectedModels[i]->m_transform->rotateAround(rot_center,Y,(QVector3D(0,1,0).toVector4D()*selectedModels[i]->m_transform->matrix()).toVector3D());
-        selectedModels[i]->m_transform->setMatrix(selectedModels[i]->m_transform->matrix()*rot);
-        rot = selectedModels[i]->m_transform->rotateAround(rot_center,Z,(QVector3D(0,0,1).toVector4D()*selectedModels[i]->m_transform->matrix()).toVector3D());
-        selectedModels[i]->m_transform->setMatrix(selectedModels[i]->m_transform->matrix()*rot);
-
-        selectedModels[i]->mesh->vertexRotate(quatToMat(selectedModels[i]->m_transform->rotation()).inverted());
-        selectedModels[i]->m_transform->setRotationX(0);
-        selectedModels[i]->m_transform->setRotationY(0);
-        selectedModels[i]->m_transform->setRotationZ(0);
-        selectedModels[i]->mesh->vertexMove(selectedModels[i]->m_transform->translation());
-        selectedModels[i]->m_transform->setTranslation(QVector3D(0,0,0));
-        emit selectedModels[i]->_updateModelMesh(true);
+        selectedModels[i]->rotateByNumber(rot_center, X, Y, Z);
     }
     //showRotateSphere();
     mouseHack();
@@ -1946,7 +1896,7 @@ void QmlManager::runGroupFeature(int ftrType, QString state, double arg1, double
         if (! isTemporary){ // export view
             qDebug() << "export to file";
             fileName = QFileDialog::getSaveFileName(nullptr, tr("Export sliced file"), "");
-            //ste->exportSTL(m_glmodel->mesh, fileName);
+            //ste->exportSTL(m_glmodel->getMesh(), fileName);
             if(fileName == "")
                 return;
         } else { // support view & layerview
@@ -1993,11 +1943,11 @@ void QmlManager::unDo(){
         GLModel* recentModel = nullptr;
         // find global recent model
         for (GLModel* glmodel : glmodels){
-            if (glmodel->mesh->prevMesh == nullptr || glmodel->mesh->prevMesh->time.isNull())
+            if (glmodel->getMesh()->getPrev() == nullptr || glmodel->getMesh()->getPrev()->getTime().isNull())
                 continue;
             else if (recentModel == nullptr)
                 recentModel = glmodel;
-            else if (glmodel->mesh->prevMesh->time >= recentModel->mesh->prevMesh->time){
+            else if (glmodel->getMesh()->getPrev()->getTime() >= recentModel->getMesh()->getPrev()->getTime()){
                 recentModel = glmodel;
             }
         }
@@ -2019,11 +1969,11 @@ void QmlManager::reDo(){
         GLModel* recentModel = nullptr;
         // find global recent model
         for (GLModel* glmodel : glmodels){
-            if (glmodel->mesh->nextMesh == nullptr || glmodel->mesh->nextMesh->time.isNull())
+            if (glmodel->getMesh()->getNext() == nullptr || glmodel->getMesh()->getNext()->getTime().isNull())
                 continue;
             else if (recentModel == nullptr)
                 recentModel = glmodel;
-            else if (glmodel->mesh->nextMesh->time >= recentModel->mesh->nextMesh->time){
+            else if (glmodel->getMesh()->getNext()->getTime() >= recentModel->getMesh()->getNext()->getTime()){
                 recentModel = glmodel;
             }
         }
@@ -2046,12 +1996,12 @@ void QmlManager::copyModel(){
     for (GLModel* model : selectedModels){
         if (model == nullptr)
             continue;
-        Mesh* copied = model->mesh->copyMesh();
+        Mesh* copied = model->getMesh()->copyMesh();
 
         copyMeshes.push_back(copied);
         copyMeshNames.push_back(model->filename);
-        /*foreach (MeshFace mf, model->mesh->faces){
-            copyMesh->addFace(model->mesh->idx2MV(mf.mesh_vertex[0]).position, model->mesh->idx2MV(mf.mesh_vertex[1]).position, model->mesh->idx2MV(mf.mesh_vertex[2]).position, mf.idx);
+        /*foreach (MeshFace mf, model->getMesh()->faces){
+            copyMesh->addFace(model->getMesh()->idx2MV(mf.mesh_vertex[0]).position, model->getMesh()->idx2MV(mf.mesh_vertex[1]).position, model->getMesh()->idx2MV(mf.mesh_vertex[2]).position, mf.idx);
         }
         copyMesh->connectFaces();
         copyMeshes.push_back(copyMesh);*/
@@ -2195,7 +2145,7 @@ void QmlManager::viewSupportChanged(bool checked){
             /*if( selectedModels[0]->slicer == nullptr ) {
                 qmlManager->openYesNoPopUp(false, "The model should be sliced for support view.", "", "Would you like to continue?", 16, "", ftrSupportViewMode, 0);
             }*/
-            if (selectedModels[0]->supportMesh == nullptr) {
+            if (selectedModels[0]->getSupport() == nullptr) {
                 qmlManager->openYesNoPopUp(false, "[Support View]", "", "Would you like to continue?", 16, "", ftrSupportViewMode, 0);
             } else {
                 QMetaObject::invokeMethod(qmlManager->boxUpperTab, "all_off");
@@ -2277,7 +2227,7 @@ void QmlManager::setViewMode(int viewMode) {
 
         if( selectedModels[0] != nullptr ) {
             QMetaObject::invokeMethod(layerViewSlider, "setThickness", Q_ARG(QVariant, (scfg->layer_height)));
-            QMetaObject::invokeMethod(layerViewSlider, "setHeight", Q_ARG(QVariant, (selectedModels[0]->mesh->z_max - selectedModels[0]->mesh->z_min + scfg->raft_thickness)));
+            QMetaObject::invokeMethod(layerViewSlider, "setHeight", Q_ARG(QVariant, (selectedModels[0]->getMesh()->z_max() - selectedModels[0]->getMesh()->z_min() + scfg->raft_thickness)));
             this->selectedModels[0]->changeViewMode(viewMode);
         }
     }
@@ -2287,14 +2237,12 @@ void QmlManager::setViewMode(int viewMode) {
         QMetaObject::invokeMethod(leftTabViewMode, "setObjectView");
     } else if (this->viewMode == VIEW_MODE_SUPPORT){
         QMetaObject::invokeMethod(qmlManager->boundedBox, "hideBox");
-        GenerateSupport generatesupport;
-        selectedModels[0]->supportMesh = generatesupport.generateSupport(selectedModels[0]->mesh);
-        emit selectedModels[0]->_updateModelMesh(true);
+        selectedModels[0]->setSupport();
+        emit  selectedModels[0]->_updateModelMesh(true);
     } else if (this->viewMode == VIEW_MODE_LAYER){
         qDebug() << "view mode layer called";
         QMetaObject::invokeMethod(qmlManager->boundedBox, "hideBox");
-        GenerateSupport generatesupport;
-        selectedModels[0]->supportMesh = generatesupport.generateSupport(selectedModels[0]->mesh);
+        selectedModels[0]->setSupport();
         qDebug() << "generated support";
         emit selectedModels[0]->_updateModelMesh(true);
     } else {
