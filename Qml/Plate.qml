@@ -5,29 +5,26 @@ import Qt3D.Input 2.0
 import Qt3D.Extras 2.0
 
 Entity {
-    PhongAlphaMaterial{
+    PhongMaterial{
         id : plateMaterial
         ambient: Qt.rgba(100/255, 100/255, 100/255, 1 )
         diffuse: Qt.rgba(100/255, 100/255, 100/255, 1 )
         specular: Qt.rgba(100/255, 100/255, 100/255, 1 )
         shininess: 0
-        alpha: 1
     }
 
-    PhongAlphaMaterial{
+    PhongMaterial{
         id : platePlaneMaterial
         ambient: Qt.rgba(255/255, 255/255, 255/255, 1 )
         diffuse: Qt.rgba(255/255, 255/255, 255/255, 1 )
         specular: Qt.rgba(255/255, 255/255, 255/255, 1 )
-        alpha: 1
     }
 
-    PhongAlphaMaterial{
+    PhongMaterial{
         id : plateLogoMaterial
         ambient: Qt.rgba(255/255, 0/255, 0/255, 1 )
         diffuse: Qt.rgba(255/255, 0/255, 0/255, 1 )
         specular: Qt.rgba(255/255, 0/255, 0/255, 1 )
-        alpha: 1
     }
 
 
@@ -52,35 +49,19 @@ Entity {
     }
 
     Entity{
-        id: plateLogoFrontPlaneEntity
+        id: plateLogoPlaneEntity
         Mesh{
-            id: plateLogoFrontPlaneMesh
+            id: plateLogoPlaneMesh
             source: "qrc:/Resource/mesh/plate_plane.stl"
         }
 
         Transform{
-            id: plateLogoFrontPlaneTransform
-            translation: Qt.vector3d(0,-qm.getBedYSize()/2-3,0)
-            scale3D: Qt.vector3d(30/100,6/80,0)
-
-        }
-        components: [ plateLogoFrontPlaneMesh, plateLogoFrontPlaneTransform, platePlaneMaterial ]
-    }
-
-    Entity{
-        id: plateLogoBackPlaneEntity
-        Mesh{
-            id: plateLogoBackPlaneMesh
-            source: "qrc:/Resource/mesh/plate_plane.stl"
-        }
-
-        Transform{
-            id: plateLogoBackPlaneTransform
+            id: plateLogoPlaneTransform
             translation: Qt.vector3d(0,-qm.getBedYSize()/2-3,0)
             scale3D: Qt.vector3d(30/100,6/80,0)
             rotationX : -180
         }
-        components: [ plateLogoBackPlaneMesh, plateLogoBackPlaneTransform, platePlaneMaterial ]
+        components: [ plateLogoPlaneMesh, plateLogoPlaneTransform, platePlaneMaterial ]
     }
 
     Entity{

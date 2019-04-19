@@ -2,9 +2,9 @@
 #include "modelcut.h"
 #include "qmlmanager.h"
 
-void repairMesh(Mesh* mesh){
+void MeshRepair::repairMesh(Mesh* mesh){
 
-    qDebug() << "mesh repair start from mesh size :" << mesh->faces.size();
+    qDebug() << "mesh repair start from mesh size :" << mesh->getFaces().size();
     /*// remove Unconnected
     //removeUnconnected(mesh);
     qDebug() << "removed unconnected";
@@ -16,11 +16,11 @@ void repairMesh(Mesh* mesh){
     qmlManager->setProgress(0.25);*/
 
     // find holes
-    identifyHoles(mesh);
+    auto holes = identifyHoles(mesh);
     qmlManager->setProgress(0.3);
 
     // fill holes
-    fillHoles(mesh);
+    fillHoles(mesh, holes);
     qDebug() << "filled holes";
     qmlManager->setProgress(0.5);
 
@@ -39,7 +39,7 @@ void repairMesh(Mesh* mesh){
 // no need to remove unused vertices since it iterates faces
 // removes totally unconnected faces
 // if 2 edges are unconnected or 1 edge is unconnected, goto fillhole
-void removeUnconnected(Mesh* mesh){
+void MeshRepair::removeUnconnected(Mesh* mesh){
     int unconnected_cnt = 0;
     int face_idx = 0;
 
@@ -68,7 +68,7 @@ void removeUnconnected(Mesh* mesh){
 }
 
 // removes zero area triangles
-void removeDegenerate(Mesh* mesh){
+void MeshRepair::removeDegenerate(Mesh* mesh){
     int degenerate_cnt = 0;
     int face_idx = 0;
 
@@ -92,11 +92,13 @@ void removeDegenerate(Mesh* mesh){
     qDebug() << degenerate_cnt << "degenerate faces found, faces cnt :" << mesh->faces.size();
 }
 
-void identifyHoles(Mesh* mesh){
-    int face_idx = 0;
-    mesh->holes.clear();
+Paths3D MeshRepair::identifyHoles(const Mesh* mesh){
 
-    for (MeshFace &mf : mesh->faces){
+    // used for auto repair steps
+    Paths3D holes;
+    int face_idx = 0;
+
+    for (const MeshFace &mf : mesh->getFaces()){
         face_idx ++;
         if (face_idx %100 ==0)
             QCoreApplication::processEvents();
@@ -106,25 +108,25 @@ void identifyHoles(Mesh* mesh){
             Path3D temp_edge;
             temp_edge.push_back(mesh->idx2MV(mf.mesh_vertex[0]));
             temp_edge.push_back(mesh->idx2MV(mf.mesh_vertex[1]));
-            mesh->holes.push_back(temp_edge);
+            holes.push_back(temp_edge);
         }
         if (mf.neighboring_faces[1].size() == 0){ // edge 1 is unconnected
             Path3D temp_edge;
             temp_edge.push_back(mesh->idx2MV(mf.mesh_vertex[1]));
             temp_edge.push_back(mesh->idx2MV(mf.mesh_vertex[2]));
-            mesh->holes.push_back(temp_edge);
+            holes.push_back(temp_edge);
         }
         if (mf.neighboring_faces[2].size() == 0){ // edge 2 is unconnected
             Path3D temp_edge;
             temp_edge.push_back(mesh->idx2MV(mf.mesh_vertex[2]));
             temp_edge.push_back(mesh->idx2MV(mf.mesh_vertex[0]));
-            mesh->holes.push_back(temp_edge);
+            holes.push_back(temp_edge);
         }
     }
-    qDebug()<< "hole edges coutn : " << mesh->holes.size();
+    qDebug()<< "hole edges coutn : " << holes.size();
 
     // get closed contour from hole_edges
-    mesh->holes = contourConstruct3D(mesh->holes);
+    holes = contourConstruct3D(holes);
     qDebug() << "hole detected";
 
     /*for (Paths3D::iterator ps_it = mesh->holes.begin(); ps_it != mesh->holes.end();){
@@ -133,14 +135,14 @@ void identifyHoles(Mesh* mesh){
             ps_it = mesh->holes.erase(ps_it);
         ps_it++;
     }*/
-    qDebug() << "mesh hole count :" << mesh->holes.size();
-    return;
+    qDebug() << "mesh hole count :" << holes.size();
+    return holes;
 }
 
 
 // detects hole and remove them
-void fillHoles(Mesh* mesh){
-    for (Path3D hole : mesh->holes){
+void MeshRepair::fillHoles(Mesh* mesh, const Paths3D& holes){
+    for (Path3D hole : holes){
         qDebug() << "filling hole" << hole.size() << "sized";
         if (hole.size() <= 2) { // if edge is less than 3 (no hole)
             continue;
@@ -223,7 +225,7 @@ void fillHoles(Mesh* mesh){
     qDebug() << "ok till here4";
 }
 
-vector<std::array<QVector3D, 3>> fillPath(Path3D path){
+vector<std::array<QVector3D, 3>> MeshRepair::fillPath(Path3D path){
     vector<std::array<QVector3D, 3>> result;
     result.reserve(path.size()*10);
 
@@ -237,7 +239,7 @@ vector<std::array<QVector3D, 3>> fillPath(Path3D path){
 
     qDebug() << "fill path debug 1";
     for (MeshVertex mv : path){
-        if (isLeftToPlane(maximal_plane, mv.position)){
+        if (modelcut::isLeftToPlane(maximal_plane, mv.position)){
             // move plane to normal direction with distance from mv
             QVector3D plane_normal = QVector3D::normal(maximal_plane[0],maximal_plane[1],maximal_plane[2]);
             float distance = mv.position.distanceToPlane(maximal_plane[0],maximal_plane[1],maximal_plane[2]);
@@ -303,7 +305,7 @@ vector<std::array<QVector3D, 3>> fillPath(Path3D path){
 }
 
 
-int suggestDivisionCnt(Path3D e1,Path3D e2){
+int MeshRepair::suggestDivisionCnt(Path3D e1,Path3D e2){
     QVector3D e1_diff = e1[1].position-e1[0].position;
     QVector3D e2_diff = e2[1].position-e2[0].position;
 
@@ -326,12 +328,12 @@ int suggestDivisionCnt(Path3D e1,Path3D e2){
 }
 
 // detects orientation defects, which induces normal vector errors and render errors
-void fixNormalOrientations(Mesh* mesh){
+void MeshRepair::fixNormalOrientations(Mesh* mesh){
 
 }
 
 // future works
-void removeGaps(Mesh* mesh){
+void MeshRepair::removeGaps(Mesh* mesh){
 
 }
 

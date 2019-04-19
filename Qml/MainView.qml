@@ -4,6 +4,7 @@ import QtQuick.Scene3D 2.0
 import QtQuick.Window 2.2
 import QtCanvas3D 1.1
 import QtQuick.Controls.Styles 1.4
+import "glcode.js" as GLCode
 import QtQuick.Dialogs 1.2
 
 
@@ -57,6 +58,7 @@ Entity {
 
         components: [systemTransform]
 
+        /* Grid Mesh */
 
         PhongMaterial{
             id : meshMaterial
@@ -84,9 +86,14 @@ Entity {
             components:[gridMesh, gridMeshTransform, meshMaterial]
         }
 
+        /* White plate and logo on bed */
+
         Plate {
             id: planeEntity
         }
+
+
+        /* Model */
 
         Model{
             id: meshEntity4

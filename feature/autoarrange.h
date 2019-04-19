@@ -30,30 +30,30 @@ public:
     //void arrangeGlmodels(vector< GLModel* > * glmodels);
 
 private:
-    Paths getMeshRecArea(Mesh& mesh);
-    Paths getMeshConvexHull(Mesh& mesh);
-    Paths spreadingCheck(Mesh* mesh, bool* check, int chking_start, bool is_chking_pos);
-    int getPathHead(MeshFace* mf, int side, bool is_chking_pos);
-    Path buildOutline(Mesh* mesh, bool* check, int chking, int path_head, bool is_chking_pos);
-    bool isEdgeBound(MeshFace* mf, int side, bool is_chking_pos);
-    bool isNbrOrientSame(MeshFace* mf, int side);
-    int searchVtxInFace(MeshFace* mf, int vertexIdx);
-    vector<int> arrToVect(int arr[]);
-    int getNbrVtx(MeshFace* mf, int base, int xth);
-    Path idxsToPath(Mesh* mesh, vector<int> path_by_idx);
-    Paths project(Mesh* mesh);
+    Paths getMeshRecArea(const Mesh& mesh);
+    Paths getMeshConvexHull(const Mesh& mesh);
+    Paths spreadingCheck(const Mesh* mesh, std::vector<bool>& check, int chking_start, bool is_chking_pos);
+    int getPathHead(const MeshFace* mf, int side, bool is_chking_pos);
+    Path buildOutline(const Mesh* mesh, std::vector<bool>& check, int chking, int path_head, bool is_chking_pos);
+    bool isEdgeBound(const MeshFace* mf, int side, bool is_chking_pos);
+    bool isNbrOrientSame(const MeshFace* mf, int side);
+    int searchVtxInFace(const MeshFace* mf, int vertexIdx);
+    vector<int> arrToVect(const int arr[]);
+    int getNbrVtx(const MeshFace* mf, int base, int xth);
+    Path idxsToPath(const Mesh* mesh, vector<int> path_by_idx);
+    Paths project(const Mesh* mesh);
     Paths clipOutlines(vector<Paths> outline_sets);
-    bool checkFNZ(MeshFace* face, bool is_chking_pos);
+    bool checkFNZ(const MeshFace* face, bool is_chking_pos);
     void debugPaths(Paths paths);
     void debugPath(Path path);
-    void debugFaces(Mesh* mesh, vector<int> face_list);
-    void debugFace(Mesh* mesh, int face_idx);
-    int findVertexWithIntpoint(IntPoint p, Mesh* mesh);
-    int findVertexWithIntXY(int x, int y, Mesh* mesh);
+    void debugFaces(const Mesh* mesh, vector<int> face_list);
+    void debugFace(const Mesh* mesh, int face_idx);
+    int findVertexWithIntpoint(IntPoint p, const Mesh* mesh);
+    int findVertexWithIntXY(int x, int y, const Mesh* mesh);
 
     void RDPSimpPaths(Paths* paths);
     void RDPSimp(Path* path);
-    void RDPSimpIter(Path* path, int start, int end, bool* keepingPointMrkArr);
+    void RDPSimpIter(Path* path, int start, int end, std::vector<bool>& keepingPointMrkArr);
     float distL2P(IntPoint* line_p1, IntPoint* line_p2, IntPoint* p);
 
     void offsetPath(Paths* paths);
@@ -96,15 +96,15 @@ private:
 bool compareArea(pair<Paths*, int>& fig1, pair<Paths*, int>& fig2);
 
 
-Paths3D spreadingCheckExt(Mesh& mesh, int chking_start);
-int getExtPathHead(MeshFace& mf, int side);
-Path3D buildOutlineExt(Mesh& mesh, bool* outer_check, int chking, int path_head);
-int getNbrVtxExt(MeshFace& mf, int base, int xth);
-bool isEdgeBoundExt(MeshFace& mf, int side);
-bool isNbrOrientSameExt(MeshFace& mf, int side);
-bool meetNbrCondExt(MeshFace& mf);
-Path3D idxsToPathExt(Mesh& mesh, vector<int> path_by_idx);
-int searchVtxInFaceExt(MeshFace& mf, int vertexIdx);
-vector<int> arrToVectExt(int arr[]);
+Paths3D spreadingCheckExt(const Mesh& mesh, int chking_start);
+int getExtPathHead(const MeshFace& mf, int side);
+Path3D buildOutlineExt(const Mesh& mesh, std::vector<bool>& outer_check, int chking, int path_head);
+int getNbrVtxExt(const MeshFace& mf, int base, int xth);
+bool isEdgeBoundExt(const MeshFace& mf, int side);
+bool isNbrOrientSameExt(const MeshFace& mf, int side);
+bool meetNbrCondExt(const MeshFace& mf);
+Path3D idxsToPathExt(const Mesh& mesh, vector<int> path_by_idx);
+int searchVtxInFaceExt(const MeshFace& mf, int vertexIdx);
+vector<int> arrToVectExt(const int arr[]);
 
 #endif // ARRANGE_H

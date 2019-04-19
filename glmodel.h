@@ -20,7 +20,6 @@
 #include "feature/autoorientation.h"
 #include "feature/meshrepair.h"
 #include "feature/autoarrange.h"
-#include "feature/stlexporter.h"
 #include "feature/extension.h"
 #include "feature/hollowshell.h"
 
@@ -103,24 +102,12 @@ public:
     GLModel(QObject* mainWindow=nullptr, QNode* parent=nullptr, Mesh* loadMesh=nullptr, QString fname="", bool isShadow=false); // main constructor for mainmesh and shadowmesh
     ~GLModel();
 
+    //TODO: Turn these into privates as well
     GLModel *parentModel = NULL;
     GLModel *shadowModel = NULL; // GLmodel's sparse mesh that gets picker input
     GLModel *leftModel = NULL;
     GLModel *rightModel = NULL;
     GLModel *twinModel = NULL; // saves cut right for left, left for right models
-
-    // Core mesh structures
-    Mesh* mesh;
-    Mesh* lmesh;
-    Mesh* rmesh;
-
-    // layer view
-    Mesh* layerMesh;
-    Mesh* layerSupportMesh;
-    Mesh* layerRaftMesh;
-    Mesh* layerInfillMesh;
-
-    MeshFace *targetMeshFace = NULL; // used for object selection (specific area, like extension or labelling)
 
     bool appropriately_rotated=false;
     QPhongMaterial *m_meshMaterial;
@@ -159,6 +146,16 @@ public:
     vector<QEntity*> cuttingContourCylinders;
     Plane cuttingPlane;
 
+    // used for layer view
+    Qt3DExtras:: QPlaneMesh* layerViewPlane[1];
+    Qt3DCore::QEntity* layerViewPlaneEntity[1];
+    Qt3DCore::QTransform *layerViewPlaneTransform[1];
+    Qt3DRender::QTextureLoader* layerViewPlaneTextureLoader;
+    Qt3DExtras::QTextureMaterial* layerViewPlaneMaterial;
+    //Qt3DExtras::QPhongAlphaMaterial *layerViewPlaneMaterial = nullptr;
+    //QObjectPicker* planeObjectPicker[2];
+
+
     Qt3DExtras::QPlaneMesh* clipPlane[2];
     Qt3DCore::QEntity* planeEntity[2];
     Qt3DCore::QTransform *planeTransform[2];
@@ -184,13 +181,17 @@ public:
     // changeColor
     void changecolor(int mode); //0 default, 1 selected, 2 outofarea
 
+    void setSupport();
+
 
     // Model Mesh move
-    void moveModelMesh(QVector3D direction);
+    void repairMesh();
+    void moveModelMesh(QVector3D direction, bool update = true);
     // Model Mesh rotate
-    void rotateModelMesh(int Axis, float Angle);
-    void rotateModelMesh(QMatrix3x3 matrix);
-    void rotateModelMesh(QMatrix4x4 matrix);
+    void rotationDone();
+    void rotateByNumber(QVector3D& rot_center, int X, int Y, int Z);
+    void rotateModelMesh(int Axis, float Angle, bool update = true);
+    void rotateModelMesh(QMatrix4x4 matrix, bool update = true);
     // Model Mesh scale
     void scaleModelMesh(float scaleX, float scaleY, float scaleZ);
     // Model Cut
@@ -207,7 +208,7 @@ public:
     bool modelSelectChangable();
     QVector2D world2Screen(QVector3D target);
     QString getFileName(const string& s);
-    QVector3D spreadPoint(QVector3D endpoint,QVector3D startpoint,int factor);
+    static QVector3D spreadPoint(QVector3D endpoint,QVector3D startpoint,int factor);
     void changeViewMode(int viewMode);
 
     // support
@@ -227,8 +228,8 @@ public:
     bool updateLock;
 
     void addVertices(Mesh* mesh, bool CW, QVector3D color=QVector3D(0.278f, 0.670f, 0.706f));
-
-
+    const Mesh* getMesh();
+    const Mesh* getSupport();
 private:
     int colorMode;
     float x,y,z;
@@ -246,8 +247,9 @@ private:
     void addIndexes(vector<int> vertices);
     void clearVertices();
     void onTimerUpdate();
-    Mesh* toSparse(Mesh* mesh);
+    void removeLayerViewComponents();
     void generateLayerViewMaterial();
+    static Mesh* toSparse(Mesh* mesh);
 
     int cutMode = 1;
     int cutFillMode = 1;
@@ -260,11 +262,31 @@ private:
     bool manualSupportActive = false;
     bool layerViewActive = false;
     bool supportViewActive = false;
+    bool scaleActive = false;
 
     bool isMoved = false;
     bool isReleased = true;
 
+    bool isFlatcutEdge = false;
+
     int viewMode = -1;
+
+    // Core mesh structures
+    Mesh* mesh;
+    Mesh* lmesh;
+    Mesh* rmesh;
+    QSphereMesh* dragMesh;
+    Mesh* supportMesh = nullptr;
+    Mesh* raftMesh = nullptr;
+
+    // layer view
+    Mesh* layerMesh;
+    Mesh* layerSupportMesh;
+    Mesh* layerRaftMesh;
+    Mesh* layerInfillMesh;
+
+    MeshFace *targetMeshFace = NULL; // used for object selection (specific area, like extension or labelling)
+
 
 signals:
 
@@ -362,7 +384,35 @@ public slots:
     // Generate support mesh
     void generateSupport();
     void slicingDone();
+
+    //TODO: get rid of this
+    friend class featureThread;
+    friend class STLexporter;
 };
+
+inline QMatrix4x4 quatToMat(QQuaternion q)
+{
+    //based on algorithm on wikipedia
+    // http://en.wikipedia.org/wiki/Rotation_matrix#Quaternion
+    float w = q.scalar ();
+    float x = q.x();
+    float y = q.y();
+    float z = q.z();
+
+    float n = q.lengthSquared();
+    float s =  n == 0?  0 : 2 / n;
+    float wx = s * w * x, wy = s * w * y, wz = s * w * z;
+    float xx = s * x * x, xy = s * x * y, xz = s * x * z;
+    float yy = s * y * y, yz = s * y * z, zz = s * z * z;
+
+    float m[16] = { 1 - (yy + zz),         xy + wz ,         xz - wy ,0,
+                         xy - wz ,    1 - (xx + zz),         yz + wx ,0,
+                         xz + wy ,         yz - wx ,    1 - (xx + yy),0,
+                               0 ,               0 ,               0 ,1  };
+    QMatrix4x4 result =  QMatrix4x4(m,4,4);
+    result.optimize ();
+    return result;
+}
 
 
 #endif // GLMODEL_H

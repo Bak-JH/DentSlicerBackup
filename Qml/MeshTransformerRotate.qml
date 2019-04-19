@@ -270,12 +270,11 @@ Entity {
                 rotateAxis = 0;
             }
         }
-        onReleased: {
-                torusRelease();
-                rotateAxis = 0;
-        }
         onPositionChanged: {
             mouseCurrent = Qt.vector2d(mouse.x,mouse.y)
+        }
+        onReleased: {
+            torusRelease()
         }
     }
     function torusRelease(){
