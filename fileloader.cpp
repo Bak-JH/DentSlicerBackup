@@ -268,10 +268,9 @@ bool FileLoader::loadMeshOBJ(Mesh* mesh, const char* filename){
             QVector3D vertex = QVector3D(v_x,v_y,v_z);
             temp_vertices.push_back(vertex);
         } else if ( strcmp( lineHeader, "f" ) == 0 ){
-            size_t line_len = 100;
-            char line[line_len];
+			char line[100]{ 0 };
             char save;
-            char *f = readFace(line, line_len, file, &save);
+            char *f = readFace(line, 100, file, &save);
 
             char *startptr = line + 1;
             char *endptr;
