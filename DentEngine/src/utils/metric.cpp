@@ -1,5 +1,5 @@
 #include "metric.h"
-
+#include <QtMath>
 /****************** Helper Functions For Overhang Detection Step *******************/
 
 float pointDistance3D(IntPoint A, IntPoint B){
