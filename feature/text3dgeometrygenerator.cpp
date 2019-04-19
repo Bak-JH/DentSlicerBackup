@@ -144,7 +144,7 @@ void generateText3DGeometry(QVector3D** vertices, int* verticesSize,
 
         bool isIntersected = false;
 
-        for (MeshFace mf : mesh->faces){
+        for (const auto& mf : mesh->getFaces()){
             bool isIntersectedNow = false;
 
             auto vertex = v;

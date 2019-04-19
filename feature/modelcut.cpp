@@ -12,7 +12,7 @@ void modelcut::bisectModel(Mesh* mesh, Plane plane, Mesh* leftMesh, Mesh* rightM
     rightMesh->faces.reserve(mesh->faces.size()*2);
     rightMesh->vertices.reserve(mesh->faces.size()*2);
 
-    foreach (MeshFace mf, mesh->faces){
+    foreach (const auto& mf, mesh->getFaces()){
         bool faceLeftToPlane = true;
         for (int vn=0; vn<3; vn++){
             MeshVertex mv = mesh->vertices[mf.mesh_vertex[vn]];
@@ -32,7 +32,7 @@ void modelcut::bisectModel(Mesh* mesh, Plane plane, Mesh* leftMesh, Mesh* rightM
     qDebug() << "done connecting";
 }
 
-bool isLeftToPlane(Plane plane, QVector3D position){
+bool modelcut::isLeftToPlane(Plane plane, QVector3D position){
     // determine if position is left to plane or not
     if(position.distanceToPlane(plane[0],plane[1],plane[2])==0){
         qDebug() << "distance to plane 0";
@@ -114,7 +114,7 @@ void modelcut::addCuttingPoint(Qt3DCore::QEntity* targetEntity, QVector3D v){
 }
 
 // interpolate between two random closed same oriented contours
-void interpolate(Mesh* mesh, Path3D contour1, Path3D contour2){
+void modelcut::interpolate(Mesh* mesh, Path3D contour1, Path3D contour2){
     Path3D bigger = contour2;
     Path3D smaller = contour1;
     if (contour1.size() > contour2.size()){
@@ -150,7 +150,7 @@ void interpolate(Mesh* mesh, Path3D contour1, Path3D contour2){
     }
 }
 
-void cutAway(Mesh* leftMesh, Mesh* rightMesh, Mesh* mesh, vector<QVector3D> cuttingPoints, int cutFillMode){
+void modelcut::cutAway(Mesh* leftMesh, Mesh* rightMesh, Mesh* mesh, vector<QVector3D> cuttingPoints, int cutFillMode){
     Path contour; // real cutting points in intpoint form
     Path3D cuttingContour; // real cutting points line qvector3d form
 
