@@ -12,6 +12,7 @@
 #include <QObjectPicker>
 #include <QCursor>
 #include <iostream>
+#include <memory>
 #include "DentEngine/src/mesh.h"
 #include "fileloader.h"
 #include "slicingengine.h"
@@ -94,21 +95,40 @@ signals:
     void runArrange();
 };
 
+
+
 class GLModel : public QEntity
 {
     Q_OBJECT
 public:
+
     // load teeth model default
-    GLModel(QObject* mainWindow=nullptr, QNode* parent=nullptr, Mesh* loadMesh=nullptr, QString fname="", bool isShadow=false); // main constructor for mainmesh and shadowmesh
-    ~GLModel();
+    GLModel(QObject* mainWindow=nullptr, QNode* parent=nullptr, Mesh* loadMesh=nullptr, QString fname="", bool isShadow=false, int id = 0); // main constructor for mainmesh and shadowmesh
+    virtual ~GLModel();
+
+    // //move copy assignment const
+    // GLModel(GLModel&& other) : v(std::move(other.v))
+    // {
+    // }
+    // GLModel& operator=(GLModel other)
+    // {
+    //     //use const GLModel& when resource can be reused.
+    //     std::swap(v, other.v);
+    //     return *this;
+    // }
+    // GLModel& operator=(GLModel&& other)
+    // {
+    //     v = std::move(other.v);
+    //     return *this;
+    // }
 
     //TODO: Turn these into privates as well
-    GLModel *parentModel = NULL;
-    GLModel *shadowModel = NULL; // GLmodel's sparse mesh that gets picker input
-    GLModel *leftModel = NULL;
-    GLModel *rightModel = NULL;
-    GLModel *twinModel = NULL; // saves cut right for left, left for right models
-
+    GLModel *parentModel = nullptr;
+    GLModel *leftModel = nullptr;
+    GLModel *rightModel = nullptr;
+    GLModel *twinModel = nullptr; // saves cut right for left, left for right models
+    GLModel *shadowModel = nullptr;
+//    std::unique_ptr<GLModel> shadowModel;
     bool appropriately_rotated=false;
     QPhongMaterial *m_meshMaterial;
     //QMaterial *m_meshMaterial;
@@ -218,8 +238,7 @@ public:
     //arrangeSignalSender* arsignal; //unused, signal from qml goes right into QmlManager.runArrange
     QFutureWatcher<Slicer*> futureWatcher; // future watcher for feature thread results returned
 
-    int ID; //for use in Part List
-    static int globalID;
+    const int ID; //for use in Part List
     QString filename;
     QObject* mainWindow;
     QString slicingInfo;

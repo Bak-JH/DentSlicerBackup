@@ -21,7 +21,7 @@
 #include <feature/generateraft.h>
 
 QmlManager::QmlManager(QObject *parent) : QObject(parent)
-  ,layerViewFlags(LAYER_INFILL | LAYER_SUPPORTERS | LAYER_RAFT)
+  ,layerViewFlags(LAYER_INFILL | LAYER_SUPPORTERS | LAYER_RAFT), modelIDCounter(0)
 {
 }
 
@@ -211,23 +211,21 @@ void QmlManager::initializeUI(QQmlApplicationEngine* e){
 
 void QmlManager::createModelFile(Mesh* target_mesh, QString fname) {
     openProgressPopUp();
-
-    GLModel* glmodel = new GLModel(mainWindow, models, target_mesh, fname, false);
-    // 승환 GLModel constructor 안쪽
-
+    std::pair<int, int>test(modelIDCounter, 22);
+    auto res = glmodels.emplace(GLModel(mainWindow, models, target_mesh, fname, false, modelIDCounter));
+    ++modelIDCounter;
+    _latest = &(res.first->second);
     qDebug() << "created new model file";
-    glmodels.push_back(glmodel);
-
     // model selection codes, connect handlers later when model selected
-    QObject::connect(glmodel->shadowModel, SIGNAL(modelSelected(int)), this, SLOT(modelSelected(int)));
+    QObject::connect(_latest->shadowModel.get(), SIGNAL(modelSelected(int)), this, SLOT(modelSelected(int)));
     qDebug() << "connected model selected signal";
 
     // set initial position
-    float xmid = (glmodel->getMesh()->x_max() + glmodel->getMesh()->x_min())/2;
-    float ymid = (glmodel->getMesh()->y_max() + glmodel->getMesh()->y_min())/2;
-    float zmid = (glmodel->getMesh()->z_max() + glmodel->getMesh()->z_min())/2;
+    float xmid = (_latest->getMesh()->x_max() + _latest->getMesh()->x_min())/2;
+    float ymid = (_latest->getMesh()->y_max() + _latest->getMesh()->y_min())/2;
+    float zmid = (_latest->getMesh()->z_max() + _latest->getMesh()->z_min())/2;
 
-    glmodel->moveModelMesh(QVector3D(
+    _latest->moveModelMesh(QVector3D(
                            (-1)*xmid,
                            (-1)*ymid,
                            (-1)*zmid));
@@ -238,12 +236,11 @@ void QmlManager::createModelFile(Mesh* target_mesh, QString fname) {
     // 승환 100%
     qmlManager->setProgress(1);
 }
-
 void QmlManager::openModelFile(QString fname){
     createModelFile(nullptr, fname);
 
     // check for defects
-    checkModelFile(glmodels[glmodels.size()-1]->ID);
+    checkModelFile(_latest);
 
     // do auto arrange
     if (glmodels.size() >= 2)
@@ -252,36 +249,27 @@ void QmlManager::openModelFile(QString fname){
     QApplication::setOverrideCursor(QCursor(Qt::ArrowCursor));
 }
 
-void QmlManager::checkModelFile(int ID){
-    GLModel* target;
-    for(int i=0; i<glmodels.size();i++){
-        if(glmodels.at(i)->ID == ID){
-            target = glmodels.at(i);
-            break;
-        }
-    }
+void QmlManager::checkModelFile(GLModel* target){
+    ;
 
     size_t holesCount = MeshRepair::identifyHoles(target->getMesh()).size();
     if (holesCount!= 0){
-        selectPart(ID);
+        selectPart(target->ID);
         qmlManager->openYesNoPopUp(false, "Model has flaws.", "", "Do you want to fix the model?", 16, "", ftrRepair, 0);
     }
 }
 
 void QmlManager::deleteOneModelFile(int ID) {
-    for (vector<GLModel*>::iterator gl_it = glmodels.begin(); gl_it != glmodels.end();){
-        if((*gl_it)->ID == ID){
-            (*gl_it)->removeCuttingPoints();
-            (*gl_it)->removeCuttingContour();
-            (*gl_it)->shadowModel->removePlane();
-            disconnectHandlers((*gl_it));
-            (*gl_it)->shadowModel->deleteLater();
-            (*gl_it)->deleteLater();
-            gl_it = glmodels.erase(gl_it);
-            break;
-        } else
-            gl_it ++;
-    }
+    auto target = &glmodels[ID];
+
+    //TODO: move these into glmodel destructor
+    target->removeCuttingPoints();
+    target->removeCuttingContour();
+    target->shadowModel->removePlane();
+    disconnectHandlers(target);
+//    target->shadowModel->deleteLater();
+//    target->deleteLater();
+    glmodels.erase(ID);
     deletePart(ID);
 }
 
@@ -751,9 +739,11 @@ void QmlManager::runArrange_internal(){
         vector<Mesh> meshes_to_arrange;
         vector<XYArrangement> arng_result_set;
         vector<Qt3DCore::QTransform*> m_transform_set;
-        for (size_t i=0; i<glmodels.size(); i++){
-            meshes_to_arrange.push_back(*(glmodels[i]->getMesh()));
-            m_transform_set.push_back(glmodels[i]->m_transform);
+        for(auto& pair : glmodels)
+        {
+            auto model = &pair.second;
+            meshes_to_arrange.push_back(*(model->getMesh()));
+            m_transform_set.push_back(model->m_transform);
         }
         autoarrange* ar;
         arng_result_set = ar->arngMeshes(meshes_to_arrange);
@@ -774,10 +764,15 @@ void QmlManager::runArrange_internal(){
 
 void QmlManager::applyArrangeResult(vector<QVector3D> translations, vector<float> rotations){
     qDebug() << "apply arrange result ";
-    for (int i=0; i<glmodels.size(); i++){
-        glmodels[i]->m_transform->setTranslation(translations[i]);
-        glmodels[i]->rotateModelMesh(3, rotations[i]);
+    size_t index = 0;
+    for(auto& pair : glmodels)
+    {
+        auto model = &pair.second;
+        model->m_transform->setTranslation(translations[index]);
+        model->rotateModelMesh(3, rotations[index]);
+        ++index;
     }
+
     qmlManager->setProgressText("Done");
     qmlManager->openResultPopUp("","Arrangement done","");
     if(selectedModels[0] != nullptr){
@@ -790,10 +785,13 @@ void QmlManager::applyArrangeResult(vector<QVector3D> translations, vector<float
 }
 
 GLModel* QmlManager::findGLModelByName(QString filename){
-    for (int i=0; i<glmodels.size(); i++){
-        qDebug() << "finding " << filename << glmodels.at(i)->filename;
-        if (glmodels.at(i)->filename == filename){
-            return glmodels.at(i);
+
+    for(auto& pair : glmodels)
+    {
+        auto model = &pair.second;
+        qDebug() << "finding " << filename << model->filename;
+        if (model->filename == filename){
+            return model;
         }
     }
     return NULL;
@@ -809,12 +807,15 @@ bool QmlManager::multipleModelSelected(int ID){
     QMetaObject::invokeMethod(boxUpperTab, "all_off");
     GLModel* target = nullptr;
 
-    for(int i=0; i<glmodels.size();i++){
+    for(auto& pair : glmodels)
+    {
+        auto model = &pair.second;
         if(glmodels.at(i)->ID == ID){
             target = glmodels.at(i);
             break;
         }
     }
+
     /*
     qDebug() << "multipleModelSelected():" << target << target->shadowModel;
     qDebug() << "-- printing selectedModels --" <<selectedModels.size();
@@ -1210,45 +1211,10 @@ void QmlManager::selectPart(int ID){
     emit modelSelected(ID);
 }
 void QmlManager::unselectPart(int ID){
-    GLModel* target;
-    for(int i=0; i<glmodels.size();i++){
-        if(glmodels.at(i)->ID == ID){
-            target = glmodels.at(i);
-            break;
-        }
-    }
-
+    GLModel* target = &glmodels[ID];
     qDebug() << "resetting model" << ID;
-    target->changecolor(0);
-    target->checkPrintingArea();
-    disconnectHandlers(target);
-    if (groupFunctionState == "active"){
-        switch (groupFunctionIndex){
-            case 5:
-                hideRotateSphere();
-                break;
-            case 4:
-                hideMoveArrow();
-                break;
-        }
-    }
-    if( selectedModels[0] != nullptr ) {
-        selectedModels[0]->changeViewMode(VIEW_MODE_OBJECT);
-    }
 
-    for (vector<GLModel*>::iterator it=selectedModels.begin(); it!= selectedModels.end(); ++it){
-        if ((*it)->ID == ID) {
-            selectedModels.erase(it);
-            break;
-        }
-    }
-    if (selectedModels.size() == 0) selectedModels.push_back(nullptr);
-    //selectedModels.clear();
-    //selectedModels.push_back(nullptr);
-    //selectedModels[0] = nullptr;
-    QMetaObject::invokeMethod(leftTabViewMode, "setEnable", Q_ARG(QVariant, false));
-    //QMetaObject::invokeMethod(boundedBox, "hideBox"); // Bounded Box
-    sendUpdateModelInfo();
+    unselectPartImpl(target);
 }
 
 void QmlManager::unselectAll(){
@@ -1274,14 +1240,8 @@ bool QmlManager::isSelected(){
 }
 
 void QmlManager::modelVisible(int ID, bool isVisible){
-    GLModel* target;
-    for(int i=0; i<glmodels.size();i++){
-        if(glmodels.at(i)->ID == ID){
-            target = glmodels.at(i);
-            break;
-        }
-    }
-    target->setEnabled(isVisible);
+    GLModel* target = glmodels[ID];
+    modelVisibleImpl(target, isVisible);
 }
 
 void QmlManager::doDelete(){
@@ -2027,7 +1987,7 @@ void QmlManager::pasteModel(){
     return;
 }
 
-void QmlManager::addPart(QString fileName, int ID){
+void QmlManager::addPart(QString fileName){
     QMetaObject::invokeMethod(partList, "addPart", Q_ARG(QVariant, fileName), Q_ARG(QVariant, ID));
 }
 
@@ -2283,3 +2243,50 @@ QObject* FindItemByName(QQmlApplicationEngine* engine, const QString& name)
     return FindItemByName(engine->rootObjects(), name);
 }
 
+//void QmlManager::selectPartImpl(GLModel* target)
+//{
+
+//}
+void QmlManager::unselectPartImpl(GLModel* target)
+{
+
+    target->changecolor(0);
+    target->checkPrintingArea();
+    disconnectHandlers(target);
+    if (groupFunctionState == "active"){
+        switch (groupFunctionIndex){
+            case 5:
+                hideRotateSphere();
+                break;
+            case 4:
+                hideMoveArrow();
+                break;
+        }
+    }
+    if( selectedModels[0] != nullptr ) {
+        selectedModels[0]->changeViewMode(VIEW_MODE_OBJECT);
+    }
+
+    for (vector<GLModel*>::iterator it=selectedModels.begin(); it!= selectedModels.end(); ++it){
+        if ((*it)->ID == ID) {
+            selectedModels.erase(it);
+            break;
+        }
+    }
+    if (selectedModels.size() == 0) selectedModels.push_back(nullptr);
+    //selectedModels.clear();
+    //selectedModels.push_back(nullptr);
+    //selectedModels[0] = nullptr;
+    QMetaObject::invokeMethod(leftTabViewMode, "setEnable", Q_ARG(QVariant, false));
+    //QMetaObject::invokeMethod(boundedBox, "hideBox"); // Bounded Box
+    sendUpdateModelInfo();
+}
+
+void QmlManager::modelVisibleImpl(GLModel* target, bool isVisible)
+{
+    target->setEnabled(isVisible);
+}
+void QmlManager::deleteListImpl(GLModel* target)
+{
+
+}
