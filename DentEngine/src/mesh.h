@@ -9,6 +9,7 @@
 #include "polyclipping/poly2tri/poly2tri.h"
 #include <QTransform>
 #include <QTime>
+#include <array>
 
 #define cos50 0.64278761
 #define cos100 -0.17364818
