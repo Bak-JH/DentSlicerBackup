@@ -24,7 +24,7 @@ rotateResult* autoorientation::Tweak(Mesh* mesh, bool bi_algorithmic,int CA,bool
         best_n=7;
     else
         best_n=5;
-    Liste liste[best_n+additional_n];//orientation 의 계산값들을 저장및 출력하기 위해 사용
+    std::vector<Liste> liste(best_n+additional_n);//orientation 의 계산값들을 저장및 출력하기 위해 사용
     vector<Orient*> orientations=area_cumulation(mesh, n,bi_algorithmic);
     if (orientations.size() < best_n) best_n = orientations.size();
 
@@ -76,7 +76,7 @@ rotateResult* autoorientation::Tweak(Mesh* mesh, bool bi_algorithmic,int CA,bool
     //qt에서 최댓값이 얼마인지 몰라 flag로 만들었습니다.
     float Unprintability;
     // 프린트 불가능성. 이게 최소가 되는 orientation을 선택합니다.
-    float tempUnprintability[best_n+2]; //출력을 위해 임시저장용로 만든 것입니다.
+    std::vector<float> tempUnprintability(best_n+2); //출력을 위해 임시저장용로 만든 것입니다.
     Liste bestside; //Unprintability가 최소일 때 orientation과 bottom,hangover,line을 저장합니다.
     for(int i=0;i<best_n+1;i++){
         float F = target_function(liste[i].bottomA,liste[i].overhangA,liste[i].lineL);
@@ -325,8 +325,8 @@ vector<Orient*> autoorientation::area_cumulation(Mesh* mesh,float n[],bool bi_al
     if (orient.size() < best_n) best_n = orient.size();
 
     map<QString,float>::iterator it_map;
-    float val[best_n];
-    QString val_n[best_n];
+    std::vector<float> val(best_n);
+	std::vector <QString> val_n(best_n);
     for(int i=0;i<best_n;i++){
         val[i]=0;
         val_n[i]="";
@@ -410,8 +410,8 @@ vector<Orient*> autoorientation::egde_plus_vertex(Mesh* mesh, int best_n){
     qmlManager->setProgress(0.95);
     qmlManager->setProgressText("orientation.....");
     map<QString,float>::iterator it_map;
-    float val[best_n];
-    QString val_n[best_n];
+    std::vector<float> val(best_n);
+	std::vector<QString> val_n(best_n);
     for(int i=0;i<best_n;i++){
         val[i]=0;
         val_n[i]="";
