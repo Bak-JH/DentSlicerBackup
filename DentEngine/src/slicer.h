@@ -1,18 +1,18 @@
 #ifndef SLICER_H
 #define SLICER_H
-#include "polyclipping/clipper.hpp"
+#include "polyclipping/clipper/clipper.hpp"
 #include "configuration.h"
 #include "mesh.h"
-#include "support.h"
-#include "infill.h"
-#include "raft.h"
+//#include "support.h"
+//#include "infill.h"
 #include <list>
 #include <QThread>
-#include <qDebug>
-
+#include <QDebug>
+#include "polyclipping/clip2tri/clip2tri.h"
 
 //using namespace std;
 using namespace ClipperLib;
+using namespace c2t;
 
 class OverhangPoint;
 
@@ -41,25 +41,30 @@ public:
     //    vector<QVector3D> overhang_points;
     //vector<IntPoint> intersectionPoints;
     Path raft_points;
+
+    void containmentTreeConstruct();
 };
 
 class Slicer : public QThread
 {
 public:
     Slicer() {};
-    Slices slices;
+    //Slices slices;
+    QString slicingInfo;
+
+    Slices totalSlices;
+    Slices shellSlices;
+    Slices supportSlices;
+    Slices raftSlices;
 
     /****************** Entire Slicing Step *******************/
     Slices slice(Mesh* mesh);
-
 
     /****************** Mesh Slicing Step *******************/
     vector<Paths> meshSlice(Mesh* mesh); // totally k elements
 
 
     /****************** Contour Construction Step *******************/
-    Paths contourConstruct(Paths);
-
 
 
 
@@ -71,7 +76,6 @@ public:
 
     /****************** Helper Functions For Contour Construction Step *******************/
     void insertPathHash(QHash<uint32_t, Path>& pathHash, IntPoint u, IntPoint v);
-    uint32_t intPoint2Hash(IntPoint u);
 
 
 

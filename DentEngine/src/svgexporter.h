@@ -1,6 +1,6 @@
 #ifndef SVGEXPORTER_H
 #define SVGEXPORTER_H
-#include "polyclipping/clipper.hpp"
+#include "polyclipping/clipper/clipper.hpp"
 #include "configuration.h"
 #include "slicer.h"
 #include <fstream>
@@ -16,7 +16,9 @@ class SVGexporter
 public:
     SVGexporter(){};
 
-    void exportSVG(Slices contourLists, QString outfoldername);
+    QString exportSVG(Slices shellSlices, Slices supportSlices, Slices raftSlices, QString outfoldername);
+
+    void parsePolyTreeAndWrite(PolyNode* pn, std::ofstream& outfile);
 
     void writePolygon(ofstream& outfile, Path contour);
     void writePolygon(ofstream& outfile, PolyNode* contour);

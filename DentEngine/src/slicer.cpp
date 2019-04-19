@@ -2,31 +2,42 @@
 #include <QHash>
 #include <QElapsedTimer>
 #include <QTextStream>
+#include "qmlmanager.h"
 
 using namespace ClipperLib;
 
 Slices Slicer::slice(Mesh* mesh){
-
+    Slices slices;
     slices.mesh = mesh;
+
+    if (mesh == nullptr || mesh->getFaces().size() ==0){
+        return slices;
+    }
 
     // mesh slicing step
     vector<Paths> meshslices = meshSlice(mesh);
 
+
     printf("meshslice done\n");
     fflush(stdout);
-    // contour construction step
+
+    // contour construction step per layer
     for (int i=0; i< meshslices.size(); i++){
-        //qDebug() << "constructing contour" << i+1 << "/" << meshslices.size() << "offset" << -(cfg->wall_thickness+cfg->nozzle_width)/2;
+        //qDebug() << "constructing contour" << i+1 << "/" << meshslices.size() << "offset" << -(scfg->wall_thickness+scfg->nozzle_width)/2;
         Slice meshslice;
         meshslice.outershell = contourConstruct(meshslices[i]);
         int prev_size = meshslice.outershell.size();
-        meshslice.z = cfg->layer_height*i;
+        meshslice.z = scfg->layer_height*i;
 
         // flaw exists if contour overlaps
-        //meshslice.outerShellOffset(-(cfg->wall_thickness+cfg->nozzle_width)/2, jtRound);
+        //meshslice.outerShellOffset(-(scfg->wall_thickness+scfg->nozzle_width)/2, jtRound);
         slices.push_back(meshslice);
+        qDebug() << i << "th meshslice.outershell.size() = " << meshslice.outershell.size();
+
+        for (int j=0; j<meshslice.outershell.size(); j++){
+            qDebug() << meshslice.outershell[j].size();
+        }
     }
-    fflush(stdout);
     //printf("meshslice done\n");
 
     //QTextStream(stdout) << "meshslice done" <<endl;
@@ -34,38 +45,33 @@ Slices Slicer::slice(Mesh* mesh){
     //qCritical() << "meshslice done";
 
     // overhang detection step
-    overhangDetect(slices);
-    printf("overhangdetect done\n");
-    fflush(stdout);
+    //overhangDetect(slices);
     //cout << "overhangdetect done" <<endl;
 
-    containmentTreeConstruct();
+
+    //containmentTreeConstruct();
 
     // below steps need to be done in parallel way
     // infill generation step
-    Infill infill(cfg->infill_type);
-    infill.generate(slices);
-    printf("infill done\n");
-    fflush(stdout);
+    //Infill infill(scfg->infill_type);
+    //infill.generate(slices);
     //cout << "infill done" <<endl;
 
     // support generation step
-    Support support(cfg->support_type);
+    /*Support support(scfg->support_type);
     support.generate(slices);
     printf("support done\n");
-    fflush(stdout);
+    fflush(stdout);*/
     //cout << "support done" <<endl;
 
     // raft generation step
-    Raft raft(cfg->raft_type);
+    /*Raft raft(scfg->raft_type);
     raft.generate(slices);
     printf("raft done\n");
-    fflush(stdout);
+    fflush(stdout);*/
     //cout << "raft done" <<endl;
 
-    containmentTreeConstruct();
-    printf("ctreeconstruct done\n");
-    fflush(stdout);
+    slices.containmentTreeConstruct();
     return slices;
 }
 
@@ -73,23 +79,25 @@ Slices Slicer::slice(Mesh* mesh){
 
 // slices mesh into segments
 vector<Paths> Slicer::meshSlice(Mesh* mesh){
-    float delta = cfg->layer_height;
+    float delta = scfg->layer_height;
 
     vector<float> planes;
 
-    if (! strcmp(cfg->slicing_mode, "uniform")){
-        planes = buildUniformPlanes(mesh->z_min, mesh->z_max, delta);
-    } else if (cfg->slicing_mode == "adaptive") {
+    if (! strcmp(scfg->slicing_mode, "uniform")) {
+        planes = buildUniformPlanes(mesh->z_min(), mesh->z_max(), delta);
+    } else if (scfg->slicing_mode == "adaptive") {
         // adaptive slice
-        planes = buildAdaptivePlanes(mesh->z_min, mesh->z_max);
+        planes = buildAdaptivePlanes(mesh->z_min(), mesh->z_max());
     }
 
+    // build triangle list per layer height
     vector<vector<int>> triangleLists = buildTriangleLists(mesh, planes, delta);
     vector<Paths> pathLists;
 
     vector<int> A;
+    A.reserve(mesh->getFaces().size());
+
     for (int i=0; i<planes.size(); i++){
-        qDebug() << "slicing layer " << i << "/" << planes.size();
         A.insert(A.end(), triangleLists[i].begin(), triangleLists[i].end()); // union
         Paths paths;
 
@@ -100,7 +108,7 @@ vector<Paths> Slicer::meshSlice(Mesh* mesh){
                 t_idx --;
             }
             else{
-                // compute intersection
+                // compute intersection including on same line 2 points or 1 point
                 Path intersection = mesh->intersectionPath(cur_mf, planes[i]);
                 if (intersection.size()>0){
                     paths.push_back(intersection);
@@ -117,144 +125,6 @@ vector<Paths> Slicer::meshSlice(Mesh* mesh){
 
 /****************** Contour Construction Step *******************/
 
-// construct closed contour using segments created from meshSlice step
-Paths Slicer::contourConstruct(Paths pathList){
-    Paths contourList;
-
-    QHash<uint32_t, Path> pathHash;
-
-    if (pathList.size() == 0)
-        return contourList;
-
-    int pathCnt = 0;
-    for (int i=0; i<pathList.size(); i++){
-        pathCnt += pathList[i].size();
-    }
-    qDebug() << pathCnt;
-    pathHash.reserve(pathCnt*10);
-
-    int debug_count=0;
-
-    for (int i=0; i<pathList.size(); i++){
-        Path p = pathList[i];
-        //insertPathHash(pathHash, p[0], p[1]); // inserts opposite too
-
-        uint32_t path_hash_u = intPoint2Hash(p[0]);
-        uint32_t path_hash_v = intPoint2Hash(p[1]);
-
-        if (! pathHash.contains(path_hash_u)){
-            debug_count ++;
-            pathHash[path_hash_u].push_back(p[0]);
-        }
-        if (! pathHash.contains(path_hash_v)){
-            debug_count ++;
-            pathHash[path_hash_v].push_back(p[1]);
-        }
-        pathHash[path_hash_u].push_back(p[1]);
-        pathHash[path_hash_v].push_back(p[0]);
-    }
-
-    // Build Polygons
-    while(pathHash.size() >0){
-        Path contour;
-        IntPoint start, pj_prev, pj, pj_next, last;
-
-        pj_prev = pathHash.begin().value()[0];
-        start = pj_prev;
-        contour.push_back(pj_prev);
-        vector<IntPoint>* dest = &(pathHash.begin().value());
-
-        if (dest->size() == 0|| dest->size() == 1){
-            pathHash.remove(intPoint2Hash(pj_prev));
-            continue;
-        } else if (dest->size() ==2){
-            pj = (*dest)[1];
-            last = (*dest)[0]; // pj_prev itself
-            pathHash.remove(intPoint2Hash(pj_prev));
-        } else {
-            pj = (*dest)[1];
-            last = (*dest)[2];
-
-            dest->erase(dest->begin()+1);
-            dest->erase(dest->begin()+2);
-            if (dest->size() == 1)
-                pathHash.remove(intPoint2Hash(pj_prev));
-        }
-        while(pj_next != last){
-            contour.push_back(pj);
-            dest = &(pathHash[intPoint2Hash(pj)]);
-
-            if (dest->size() == 0|| dest->size() == 1){
-                pathHash.remove(intPoint2Hash(pj));
-                break;
-            } else if (dest->size() == 2){
-                start = (*dest)[0]; // itself
-                uint32_t endHash = intPoint2Hash((*dest)[1]);
-                if (pathHash.contains(endHash))
-                    pathHash.remove(endHash); // maybe needless
-
-                pathHash.remove(intPoint2Hash(pj));
-                pj_next = last;
-                pj = pj_next;
-                pj_prev = contour[0];
-                last = start;
-                reverse(contour.begin(), contour.end());
-                continue;
-            }
-
-            // find pj_prev and choose another pj_next and remove pj_prev, pj_next from H[pj]
-            for (int d=1; d<dest->size(); d++){
-                if ((*dest)[d] == pj_prev){
-                    dest->erase(dest->begin()+d);
-                    break;
-                }
-            }
-            pj_next = (*dest)[1];
-            dest->erase(dest->begin()+1);
-            if (dest->size() == 1)
-                pathHash.remove(intPoint2Hash(pj));
-
-
-            pj_prev = pj;
-            pj = pj_next;
-        }
-
-        contour.push_back(last);
-        contour.push_back(start);
-
-        uint32_t last_hash = intPoint2Hash(last);
-        if (pathHash.contains(last_hash)){
-            dest = &(pathHash[last_hash]);
-            for (int d=1; d<dest->size(); d++){
-                if ((*dest)[d] == pj_prev){
-                    dest->erase(dest->begin()+d);
-                    break;
-                }
-            }
-            for (int d=1; d<dest->size(); d++){
-                if ((*dest)[d] == start){
-                    dest->erase(dest->begin()+d);
-                    break;
-                }
-            }
-            if (dest->size() == 1)
-                pathHash.remove(last_hash);
-        }
-
-        // remove 2-vertices-contours
-        if (contour.size() == 2)
-            continue;
-
-        /*if (Orientation(contour)){
-            ReversePath(contour);
-        }*/
-
-        contourList.push_back(contour);
-    }
-
-
-    return contourList;
-}
 
 
 
@@ -298,7 +168,7 @@ vector<vector<int>> Slicer::buildTriangleLists(Mesh* mesh, vector<float> planes,
 
     // Uniform Slicing O(n)
     if (delta>0){
-        for (int f_idx=0; f_idx < mesh->faces.size(); f_idx++){
+        for (int f_idx=0; f_idx < mesh->getFaces().size(); f_idx++){
             int llt_idx;
             MeshFace mf = mesh->idx2MF(f_idx);
             float z_min = mesh->getFaceZmin(mf);
@@ -322,11 +192,13 @@ vector<vector<int>> Slicer::buildTriangleLists(Mesh* mesh, vector<float> planes,
     return list_list_triangle;
 }
 
+
 vector<float> Slicer::buildUniformPlanes(float z_min, float z_max, float delta){
     vector<float> planes;
     int idx_max = ceil((z_max-z_min)/delta);
     for (int idx=0; idx<=idx_max; idx++){
-        float plane_z = z_min+delta*idx;
+        float plane_z = round(z_min+delta*idx,2);
+        qDebug() << "build Uniform Planes at height z "<< plane_z;
         //float plane_z = (idx == idx_max) ? z_min+delta*(idx-1)+delta/2:z_min + delta*idx;
         planes.push_back(plane_z);
     }
@@ -366,11 +238,6 @@ void Slicer::insertPathHash(QHash<uint32_t, Path>& pathHash, IntPoint u, IntPoin
     return;
 }
 
-uint32_t Slicer::intPoint2Hash(IntPoint u){
-    QVector3D u_qv3 = QVector3D(u.X, u.Y, 0);
-    uint32_t path_hash_u = vertexHash(u_qv3);
-    return path_hash_u;
-}
 
 /****************** ZFill method on intersection point *******************/
 
@@ -386,11 +253,11 @@ void zfillone(IntPoint& e1bot, IntPoint& e1top, IntPoint& e2bot, IntPoint& e2top
 
 /****************** Deprecated functions *******************/
 
-void Slicer::containmentTreeConstruct(){
+void Slices::containmentTreeConstruct(){
     Clipper clpr;
 
-    for (int idx=0; idx<slices.size(); idx++){ // divide into parallel threads
-        Slice* slice = &(slices[idx]);
+    for (int idx=0; idx<this->size(); idx++){ // divide into parallel threads
+        Slice* slice = &((*this)[idx]);
         clpr.Clear();
         clpr.AddPaths(slice->outershell, ptSubject, true);
         clpr.Execute(ctUnion, slice->polytree);
@@ -399,6 +266,29 @@ void Slicer::containmentTreeConstruct(){
             qDebug() << pn->IsHole() << pn->Parent << pn->Parent->Parent;
         }
     }
+
+    // vector<vector<IntPoint>> to vector<vector<Point>>
+
+    /*for (int idx=0; idx<slices.size(); idx++){
+        Slice* slice = &(slices[idx]);
+
+        vector<vector<c2t::Point>> pointPaths;
+        pointPaths.reserve(slice->outershell.size());
+
+        for (Path p : slice->outershell){
+            vector<c2t::Point> pointPath;
+            pointPath.reserve(p.size());
+            for (IntPoint ip : p){
+                pointPath.push_back(c2t::Point((float)ip.X/scfg->resolution,(float)ip.Y/scfg->resolution));
+            }
+            pointPaths.push_back(pointPath);
+        }
+
+        clip2tri ct;
+
+        ct.mergePolysToPolyTree(pointPaths, slice->polytree);
+        qDebug() << "in slice " << idx << ", constructing polytree with " << slice->outershell.size() << " to " << pointPaths.size() << " point pathes" << " total tree : " << slice->polytree.Total();
+    }*/
 }
 
 

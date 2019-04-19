@@ -1,3 +1,7 @@
 #include "configuration.h"
+//#include "viewer3d.h"
 
-Configuration* cfg = new Configuration();
+#include <QQmlContext>
+#include <QTimer>
+
+SlicingConfiguration* scfg = new SlicingConfiguration();
