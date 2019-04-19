@@ -18,10 +18,8 @@
 #include <feature/generatesupport.h>
 
 
-int GLModel::globalID = 0;
 
-
-GLModel::GLModel(QObject* mainWindow, QNode *parent, Mesh* loadMesh, QString fname, bool isShadow)
+GLModel::GLModel(QObject* mainWindow, QNode *parent, Mesh* loadMesh, QString fname, bool isShadow, int id)
     : QEntity(parent)
     , filename(fname)
     , mainWindow(mainWindow)
@@ -40,9 +38,10 @@ GLModel::GLModel(QObject* mainWindow, QNode *parent, Mesh* loadMesh, QString fna
     , layerSupportMesh(nullptr)
     , layerRaftMesh(nullptr)
     , slicer(nullptr)
+    , ID(id)
 {
     connect(&futureWatcher, SIGNAL(finished()), this, SLOT(slicingDone()));
-    qDebug() << "new model made _______________________________"<<this<< "parent:"<<this->parentModel<<"shadow:"<<this->shadowModel;
+    qDebug() << "new model made _______________________________"<<this<< "parent:"<<this->parentModel<<"shadow:"<<this->shadowModel.get();
 
     // generates shadow model for object picking
     if (isShadow){
@@ -88,8 +87,7 @@ GLModel::GLModel(QObject* mainWindow, QNode *parent, Mesh* loadMesh, QString fna
     }
 
     // Add to Part List
-    ID = globalID++;
-    qmlManager->addPart(getFileName(fname.toStdString().c_str()), ID);
+    qmlManager->addPart(getFileName(fname.toStdString().c_str()));
 
     m_meshMaterial = new QPhongMaterial();
     //m_meshAlphaMaterial = new QPhongAlphaMaterial();
@@ -624,17 +622,17 @@ void GLModel::updateModelMesh(bool shadowUpdate){
         QObject::disconnect(shadowModel, SIGNAL(modelSelected(int)), qmlManager, SLOT(modelSelected(int)));
         shadowModel->removeMouseHandlers();
         qmlManager->disconnectHandlers(this);
-        GLModel* prevShadowModel = shadowModel;
+        GLModel* prevShadowModel = shadowModel.get();
         switch( viewMode ) {
             case VIEW_MODE_OBJECT:
-                shadowModel=new GLModel(this->mainWindow, this, mesh, filename, true);
+                shadowMode = new GLModel(this->mainWindow, this, mesh, filename, true);
                 break;
             case VIEW_MODE_SUPPORT:
-                shadowModel=new GLModel(this->mainWindow, this, layerMesh, filename, true);
+                shadowModel = new GLModel(this->mainWindow, this, layerMesh, filename, true);
                 shadowModel->m_transform->setTranslation(shadowModel->m_transform->translation()+QVector3D(0,0,scfg->raft_thickness));
                 break;
             case VIEW_MODE_LAYER:
-                shadowModel=new GLModel(this->mainWindow, this, mesh, filename, true);
+                shadowModel = new GLModel(this->mainWindow, this, mesh, filename, true);
                 break;
         }
         /*float mesh_x_center = m_transform->translation().x()+(mesh->x_max() +mesh->x_min())/2;
@@ -2220,6 +2218,8 @@ GLModel::~GLModel(){
     delete vertexBuffer;
     delete m_geometry;
     delete m_geometryRenderer;*/
+    if(shadowModel)
+        delete shadowModel;
 }
 
 void GLModel::engoo(){

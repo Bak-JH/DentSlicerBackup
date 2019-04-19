@@ -146,8 +146,12 @@ public:
     QObject* layerRaftButton;
     QObject* layerViewSlider;
 
-    vector<GLModel*> glmodels;
-    vector<GLModel*> selectedModels;
+    std::map<int, GLModel> glmodels;
+    //TODO: combine this with glmodels
+    std::map<int, GLModel> secondaryModels;
+
+    //const pointers
+    vector<GLModel* const> selectedModels;
     vector<Mesh*> copyMeshes;
     vector<QString> copyMeshNames;
 
@@ -179,8 +183,7 @@ public:
     void runArrange_internal();
     void disconnectHandlers(GLModel* glmodel);
     void connectHandlers(GLModel* glmodel);
-
-    void addPart(QString fileName, int ID);
+    void addPart(QString fileName);
     void deletePart(int ID);
     void openProgressPopUp();
     void openYesNoPopUp(bool selectedList_vis, string inputText_h, string inputText_m, string inputText_l, int inputText_fontsize, string image_source, int inputPopupType, int yesNo_okCancel);
@@ -232,9 +235,16 @@ public:
     void updateBoundedBox();
 
 private:
+//    void selectPartImpl(GLModel* target);
+    void unselectPartImpl(GLModel* target);
+    void modelVisibleImpl(GLModel* target, bool isVisible);
+    void doDeletebyIDImpl(GLModel* target);
+    void deleteListImpl(GLModel* target);
     //bool glmodels_arranged;
     int viewMode;
     int layerViewFlags;
+    int modelIDCounter;
+    GLModel* _latest;
 
 
 signals:
@@ -246,7 +256,7 @@ public slots:
     void sendUpdateModelInfo(int, int, QString, float);
     void createModelFile(Mesh* target_mesh, QString filename);
     void openModelFile(QString filename);
-    void checkModelFile(int ID);
+    void checkModelFile(GLModel* model);
     void deleteOneModelFile(int ID);
     void deleteModelFileDone();
     void deleteModelFile(int ID);
