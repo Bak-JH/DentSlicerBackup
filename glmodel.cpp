@@ -41,7 +41,7 @@ GLModel::GLModel(QObject* mainWindow, QNode *parent, Mesh* loadMesh, QString fna
     , ID(id)
 {
     connect(&futureWatcher, SIGNAL(finished()), this, SLOT(slicingDone()));
-    qDebug() << "new model made _______________________________"<<this<< "parent:"<<this->parentModel<<"shadow:"<<this->shadowModel.get();
+    qDebug() << "new model made _______________________________"<<this<< "parent:"<<this->parentModel<<"shadow:"<<this->shadowModel;
 
     // generates shadow model for object picking
     if (isShadow){
@@ -87,7 +87,7 @@ GLModel::GLModel(QObject* mainWindow, QNode *parent, Mesh* loadMesh, QString fna
     }
 
     // Add to Part List
-    qmlManager->addPart(getFileName(fname.toStdString().c_str()));
+    qmlManager->addPart(getFileName(fname.toStdString().c_str()), ID);
 
     m_meshMaterial = new QPhongMaterial();
     //m_meshAlphaMaterial = new QPhongAlphaMaterial();
@@ -622,10 +622,10 @@ void GLModel::updateModelMesh(bool shadowUpdate){
         QObject::disconnect(shadowModel, SIGNAL(modelSelected(int)), qmlManager, SLOT(modelSelected(int)));
         shadowModel->removeMouseHandlers();
         qmlManager->disconnectHandlers(this);
-        GLModel* prevShadowModel = shadowModel.get();
+        GLModel* prevShadowModel = shadowModel;
         switch( viewMode ) {
             case VIEW_MODE_OBJECT:
-                shadowMode = new GLModel(this->mainWindow, this, mesh, filename, true);
+				shadowModel = new GLModel(this->mainWindow, this, mesh, filename, true);
                 break;
             case VIEW_MODE_SUPPORT:
                 shadowModel = new GLModel(this->mainWindow, this, layerMesh, filename, true);

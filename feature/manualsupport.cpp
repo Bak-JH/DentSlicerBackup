@@ -7,8 +7,8 @@ void generateCustomCylinder(Mesh* mesh, const QVector3D& position, const QVector
     qDebug() << "v1(" << position.x() << "," << position.y() << "," << position.z() << ")";
     qDebug() << "v2(" << positionTop.x() << "," << positionTop.y() << "," << positionTop.z() << ")";
 
-    vector<QVector3D> top;
-    vector<QVector3D> bottom;
+    std::vector<QVector3D> top;
+    std::vector<QVector3D> bottom;
     for( double i = 0.0 ; i <= 360.0 ; i += 10.0 ) {
         double t = i / 180.0 * M_PI;
         top.push_back(QVector3D(qCos(t) * radiusTop + positionTop.x(), qSin(t) * radiusTop + positionTop.y(), positionTop.z()));

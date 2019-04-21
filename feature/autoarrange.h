@@ -13,7 +13,7 @@
 #include "DentEngine/src/polyclipping/clipper/clipper.hpp"
 #include "convex_hull.h"
 
-using namespace std;
+//using namespace std;
 using namespace ClipperLib;
 
 typedef pair<IntPoint, float> XYArrangement;
