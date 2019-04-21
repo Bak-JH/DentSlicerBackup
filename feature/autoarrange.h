@@ -16,18 +16,18 @@
 //using namespace std;
 using namespace ClipperLib;
 
-typedef pair<IntPoint, float> XYArrangement;
-typedef vector<IntPoint> Vecs;
+typedef std::pair<IntPoint, float> XYArrangement;
+typedef std::vector<IntPoint> Vecs;
 
 class autoarrange : public QObject {
     Q_OBJECT
 public:
     autoarrange();
 
-    vector<XYArrangement> simpArngMeshes(vector<Mesh>& meshes);
-    vector<XYArrangement> arngMeshes(vector<Mesh>& meshes);
-    void arrangeQt3D(vector<Qt3DCore::QTransform*> m_transform_set, vector<XYArrangement> arng_result_set);
-    //void arrangeGlmodels(vector< GLModel* > * glmodels);
+    std::vector<XYArrangement> simpArngMeshes(std::vector<Mesh>& meshes);
+    std::vector<XYArrangement> arngMeshes(std::vector<Mesh>& meshes);
+    void arrangeQt3D(std::vector<Qt3DCore::QTransform*> m_transform_set, std::vector<XYArrangement> arng_result_set);
+    //void arrangeGlmodels(std::vector< GLModel* > * glmodels);
 
 private:
     Paths getMeshRecArea(const Mesh& mesh);
@@ -38,15 +38,15 @@ private:
     bool isEdgeBound(const MeshFace* mf, int side, bool is_chking_pos);
     bool isNbrOrientSame(const MeshFace* mf, int side);
     int searchVtxInFace(const MeshFace* mf, int vertexIdx);
-    vector<int> arrToVect(const int arr[]);
+    std::vector<int> arrToVect(const int arr[]);
     int getNbrVtx(const MeshFace* mf, int base, int xth);
-    Path idxsToPath(const Mesh* mesh, vector<int> path_by_idx);
+    Path idxsToPath(const Mesh* mesh, std::vector<int> path_by_idx);
     Paths project(const Mesh* mesh);
-    Paths clipOutlines(vector<Paths> outline_sets);
+    Paths clipOutlines(std::vector<Paths> outline_sets);
     bool checkFNZ(const MeshFace* face, bool is_chking_pos);
     void debugPaths(Paths paths);
     void debugPath(Path path);
-    void debugFaces(const Mesh* mesh, vector<int> face_list);
+    void debugFaces(const Mesh* mesh, std::vector<int> face_list);
     void debugFace(const Mesh* mesh, int face_idx);
     int findVertexWithIntpoint(IntPoint p, const Mesh* mesh);
     int findVertexWithIntXY(int x, int y, const Mesh* mesh);
@@ -59,7 +59,7 @@ private:
     void offsetPath(Paths* paths);
     void offsetPaths_rec(Paths& paths);
 
-    vector<XYArrangement> arng2D(vector<Paths>& figs);
+    std::vector<XYArrangement> arng2D(std::vector<Paths>& figs);
     void initStage(Paths& cum_outline);
     XYArrangement newArngFig(Paths& cum_outline, Paths& fig);
     XYArrangement arngFig(Paths& cum_outline, Paths& fig);
@@ -76,7 +76,7 @@ private:
     Paths getNFP(Paths& subject, Paths& object);
     Paths simplyfyRawNFP(Paths& raw_nfp_set, Paths& subject);
     Paths mergeNFP(Paths& separate_nfp_set);
-    vector<Vecs> getObjVecsInRegions(Vecs& sub_vecs, Vecs& obj_vecs);
+    std::vector<Vecs> getObjVecsInRegions(Vecs& sub_vecs, Vecs& obj_vecs);
     bool isVecAlign(const IntPoint& a, const IntPoint& b);
     bool isCCW(const IntPoint& a, const IntPoint& b, const IntPoint& c);
     bool isVecCCW(const IntPoint& a, const IntPoint& b, const IntPoint& c);
@@ -93,7 +93,7 @@ private:
 
 };
 
-bool compareArea(pair<Paths*, int>& fig1, pair<Paths*, int>& fig2);
+bool compareArea(std::pair<Paths*, int>& fig1, std::pair<Paths*, int>& fig2);
 
 
 Paths3D spreadingCheckExt(const Mesh& mesh, int chking_start);
@@ -103,8 +103,8 @@ int getNbrVtxExt(const MeshFace& mf, int base, int xth);
 bool isEdgeBoundExt(const MeshFace& mf, int side);
 bool isNbrOrientSameExt(const MeshFace& mf, int side);
 bool meetNbrCondExt(const MeshFace& mf);
-Path3D idxsToPathExt(const Mesh& mesh, vector<int> path_by_idx);
+Path3D idxsToPathExt(const Mesh& mesh, std::vector<int> path_by_idx);
 int searchVtxInFaceExt(const MeshFace& mf, int vertexIdx);
-vector<int> arrToVectExt(const int arr[]);
+std::vector<int> arrToVectExt(const int arr[]);
 
 #endif // ARRANGE_H

@@ -291,7 +291,7 @@ void GLModel::saveUndoState_internal(){
         temp_prev_mesh->vertices.push_back(mv);
     }
 
-    for (vector<MeshFace>::iterator it = mesh->faces.begin(); it!= mesh->faces.end(); ++it){
+    for (std::vector<MeshFace>::iterator it = mesh->faces.begin(); it!= mesh->faces.end(); ++it){
         //qDebug() << it->neighboring_faces.size();
         temp_prev_mesh->faces.push_back((*it));
         // clear and copy neighboring faces
@@ -963,7 +963,7 @@ void GLModel::addVertices(Mesh* mesh, bool CW, QVector3D vertexColor)
     int face_idx = 0;
     /*foreach (MeshFace mf , mesh->faces){
 
-        vector<int> result_vs;
+        std::vector<int> result_vs;
         for (int fn=2; fn>=0; fn--){
             result_vs.push_back(mf.mesh_vertex[fn]);
         }
@@ -974,7 +974,7 @@ void GLModel::addVertices(Mesh* mesh, bool CW, QVector3D vertexColor)
         if (face_idx %100 ==0)
             QCoreApplication::processEvents();
 
-        vector<QVector3D> result_vs;
+        std::vector<QVector3D> result_vs;
         if (CW){
             for (int fn=2; fn>=0; fn--){
                 result_vs.push_back(mesh->idx2MV(mf.mesh_vertex[fn]).position);
@@ -994,7 +994,7 @@ void GLModel::addVertices(Mesh* mesh, bool CW, QVector3D vertexColor)
         if (face_idx %100 ==0)
             QCoreApplication::processEvents();
 
-        vector<QVector3D> result_vns;
+        std::vector<QVector3D> result_vns;
         if (CW){
             for (int fn=2; fn>=0; fn--){
                 result_vns.push_back(mesh->idx2MV(mf.mesh_vertex[fn]).vn);
@@ -1029,7 +1029,7 @@ void GLModel::addVertices(Mesh* mesh, bool CW, QVector3D vertexColor)
         if (face_idx %100 ==0)
             QCoreApplication::processEvents();
 
-        vector<QVector3D> result_vcs;
+        std::vector<QVector3D> result_vcs;
         if (CW){
             for (int fn=2; fn>=0; fn--){
                 result_vcs.push_back(vertexColor);
@@ -1043,7 +1043,7 @@ void GLModel::addVertices(Mesh* mesh, bool CW, QVector3D vertexColor)
     }
 }
 
-void GLModel::addVertices(vector<QVector3D> vertices){
+void GLModel::addVertices(std::vector<QVector3D> vertices){
 
     int appendVertexCount = vertices.size();
     QByteArray appendVertexArray;
@@ -1086,7 +1086,7 @@ const Mesh* GLModel::getMesh()
 
 
 
-void GLModel::addNormalVertices(vector<QVector3D> vertices){
+void GLModel::addNormalVertices(std::vector<QVector3D> vertices){
     int vertex_normal_cnt = vertices.size();
     QByteArray appendVertexArray;
     appendVertexArray.resize(vertex_normal_cnt*3*sizeof(float));
@@ -1123,7 +1123,7 @@ void GLModel::addNormalVertices(vector<QVector3D> vertices){
     return;
 }
 
-void GLModel::addColorVertices(vector<QVector3D> vertices){
+void GLModel::addColorVertices(std::vector<QVector3D> vertices){
     int vertex_color_cnt = vertices.size();
     QByteArray appendVertexArray;
     appendVertexArray.resize(vertex_color_cnt*3*sizeof(float));
@@ -1171,7 +1171,7 @@ void GLModel::addColorVertices(vector<QVector3D> vertices){
 }
 
 
-void GLModel::addIndexes(vector<int> indexes){
+void GLModel::addIndexes(std::vector<int> indexes){
     int idx_cnt = indexes.size();
     QByteArray* appendIdxArray = new QByteArray(reinterpret_cast<char*>(indexes.data()), indexes.size());
     uint indexCount = indexAttribute->count();
@@ -1563,8 +1563,8 @@ void GLModel::bisectModel_internal(Plane plane){
         if (faceLeftToPlane && faceRightToPlane){ // cutting edge
             Path3D intersection = mesh->intersectionPath(plane, target_plane);
             cuttingEdges.push_back(intersection);
-            vector<QVector3D> upper;
-            vector<QVector3D> lower;
+            std::vector<QVector3D> upper;
+            std::vector<QVector3D> lower;
 
             for (int i=0; i<3; i++){
                 if (target_plane[i].distanceToPlane(plane[0],plane[1],plane[2]) >0)
@@ -1623,7 +1623,7 @@ void GLModel::bisectModel_internal(Plane plane){
 
         QVector3D plane_normal = QVector3D::normal(plane[0], plane[1], plane[2]);
 
-        // copy paths3d to vector<containmentPath*>
+        // copy paths3d to std::vector<containmentPath*>
         for (int c=0; c<contours.size(); c++){
         //for (Path3D contour : contours){
             for (MeshVertex mv : contours[c]){
@@ -1752,7 +1752,7 @@ void GLModel::removeCuttingContour(){
     if (cuttingPoints.size() < 3)
         QMetaObject::invokeMethod(qmlManager->cutPopup, "colorApplyFinishButton", Q_ARG(QVariant, 0));
 }
-void GLModel::regenerateCuttingPoint(vector<QVector3D> points){
+void GLModel::regenerateCuttingPoint(std::vector<QVector3D> points){
     return;
     int temp = points.size();
     /* This function is working with strange logic(make 3 times more point and delete ),  fix it later */
@@ -1774,7 +1774,7 @@ void GLModel::regenerateCuttingPoint(vector<QVector3D> points){
 
 }
 
-void GLModel::generateCuttingContour(vector<QVector3D> cuttingContour){
+void GLModel::generateCuttingContour(std::vector<QVector3D> cuttingContour){
     for (int cvi=0; cvi<cuttingContour.size(); cvi++){
         qDebug() << "pos   " << cvi;
     }
@@ -2455,16 +2455,16 @@ QVector2D GLModel::world2Screen(QVector3D target){
 
     return result;
 }
-bool GLModel::EndsWith(const string& a, const string& b) {
+bool GLModel::EndsWith(const std::string& a, const std::string& b) {
     if (b.size() > a.size()) return false;
     return std::equal(a.begin() + a.size() - b.size(), a.end(), b.begin());
 }
 
-QString GLModel::getFileName(const string& s){
+QString GLModel::getFileName(const std::string& s){
    char sep = '/';
 
    size_t i = s.rfind(sep, s.length());
-   if (i != string::npos) {
+   if (i != std::string::npos) {
       return QString::fromStdString(s.substr(i+1, s.length() - i));
    }
 

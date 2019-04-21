@@ -25,7 +25,7 @@ rotateResult* autoorientation::Tweak(Mesh* mesh, bool bi_algorithmic,int CA,bool
     else
         best_n=5;
     std::vector<Liste> liste(best_n+additional_n);//orientation 의 계산값들을 저장및 출력하기 위해 사용
-    vector<Orient*> orientations=area_cumulation(mesh, n,bi_algorithmic);
+    std::vector<Orient*> orientations=area_cumulation(mesh, n,bi_algorithmic);
     if (orientations.size() < best_n) best_n = orientations.size();
 
     //bi_algorithmic이 false: 6개, true:8개의 orientation 값이 리턴됩니다.
@@ -33,7 +33,7 @@ rotateResult* autoorientation::Tweak(Mesh* mesh, bool bi_algorithmic,int CA,bool
     //edge_plus_vertex로 추가된 orient갯수 카운터
 
     if(bi_algorithmic){
-          vector<Orient*> plusVertex=egde_plus_vertex(mesh,additional_n);
+          std::vector<Orient*> plusVertex=egde_plus_vertex(mesh,additional_n);
           //additional_n 이하의 갯수의 orientation이 추가됩니다.
 
           orientations.insert(orientations.end(),plusVertex.begin(), plusVertex.end());
@@ -180,7 +180,7 @@ float autoorientation::approachvertex(Mesh* mesh,float n[]){
                 mesh->vertices[idx[2]].position.z()*n[2];
         //orientation의 방향과 계산을 한 뒤 최솟값을 구합니다.
         //예상으론 oriestation방향으로 들어오는 평면과 가장 가까운 점의 거리를 구하는게 아닐까 싶습니다.
-        float an = min(min(a1,a2),a3);
+        float an = std::min(std::min(a1,a2),a3);
 
         if(minFlag){
             amin=an;
@@ -219,7 +219,7 @@ float* autoorientation::lithograph(Mesh* mesh, float n[], float amin, int CA){
             float a3 = mesh->vertices[idx[2]].position.x()*n[0]+
                     mesh->vertices[idx[2]].position.y()*n[1]+
                     mesh->vertices[idx[2]].position.z()*n[2];
-            float an = min(min(a1,a2),a3);
+            float an = std::min(std::min(a1,a2),a3);
             float ali=fabs(a.x()*n[0]+a.y()*n[1]+a.z()*n[2])/2;
 
 
@@ -278,7 +278,7 @@ float autoorientation::get_touching_line(Mesh* mesh,float a[],int i,float touchi
     }
     return length;
 }
-vector<Orient*> autoorientation::area_cumulation(Mesh* mesh,float n[],bool bi_algorithmic){
+std::vector<Orient*> autoorientation::area_cumulation(Mesh* mesh,float n[],bool bi_algorithmic){
     //bi_algorithmic이 false:6개 true:8개의 orientataion*을 만들어 리턴합니다.
     int best_n;
     if(bi_algorithmic)
@@ -286,7 +286,7 @@ vector<Orient*> autoorientation::area_cumulation(Mesh* mesh,float n[],bool bi_al
     else
         best_n=5;
     //5,7 로 써있지만, (0,0,1)한개 더 처음에 추가합니다.
-    map<QString,float> orient;
+    std::map<QString,float> orient;
     //리턴되는 값은 단순 random은 아니며, 가장 가중치가 높은 순서대로 best_n개를 뽑아냅니다.
     for(int i=0 ; i<mesh->faces.size();i++){
         QVector3D an = mesh->faces[i].fn_unnorm;
@@ -324,7 +324,7 @@ vector<Orient*> autoorientation::area_cumulation(Mesh* mesh,float n[],bool bi_al
 
     if (orient.size() < best_n) best_n = orient.size();
 
-    map<QString,float>::iterator it_map;
+    std::map<QString,float>::iterator it_map;
     std::vector<float> val(best_n);
 	std::vector <QString> val_n(best_n);
     for(int i=0;i<best_n;i++){
@@ -353,7 +353,7 @@ vector<Orient*> autoorientation::area_cumulation(Mesh* mesh,float n[],bool bi_al
             val_n[index]=it_map->first;
         }
     }
-    vector<Orient*> result;
+    std::vector<Orient*> result;
     for (int i=0; i<best_n+1;i++){
         result.push_back(new Orient);
     }
@@ -373,7 +373,7 @@ vector<Orient*> autoorientation::area_cumulation(Mesh* mesh,float n[],bool bi_al
     //가장 가중치가 높은 orientation들도 추가합니다.
     return result;
 }
-vector<Orient*> autoorientation::egde_plus_vertex(Mesh* mesh, int best_n){
+std::vector<Orient*> autoorientation::egde_plus_vertex(Mesh* mesh, int best_n){
     //orientation을 추가로 더할 때 씁니다. best_n 갯수만큼 return 하긴 하지만,
     //호출한 Tweak() 에서 val>2인 orientation만 원본 orientation에 추가하므로,
     //실제로 추가되는 값은 그보다 작을 수 있습니다.
@@ -385,7 +385,7 @@ vector<Orient*> autoorientation::egde_plus_vertex(Mesh* mesh, int best_n){
     if(vcount < 10000) it = 5;
     else if(vcount < 25000) it = 2;
     else it = 1;
-    map<QString,float> lst;
+    std::map<QString,float> lst;
     //area_cummulation처럼 map을 만들고, value 기준 상위 best_n개 만 뽑아냅니다.
     //단, map을 만드는 요소를 mesh 내에서 random하게 추가로 생성합니다.
     for(int i=0;i<vcount*it;i++){
@@ -409,7 +409,7 @@ vector<Orient*> autoorientation::egde_plus_vertex(Mesh* mesh, int best_n){
 
     qmlManager->setProgress(0.95);
     qmlManager->setProgressText("orientation.....");
-    map<QString,float>::iterator it_map;
+    std::map<QString,float>::iterator it_map;
     std::vector<float> val(best_n);
 	std::vector<QString> val_n(best_n);
     for(int i=0;i<best_n;i++){
@@ -437,7 +437,7 @@ vector<Orient*> autoorientation::egde_plus_vertex(Mesh* mesh, int best_n){
             val_n[index]=it_map->first;
         }
     }
-    vector<Orient*> result;
+    std::vector<Orient*> result;
     for (int i=0; i<best_n;i++){
         result.push_back(new Orient);
     }
@@ -498,11 +498,11 @@ float* autoorientation::calc_random_normal(Mesh* mesh,int i){
         return NULL;
     }
 }
-vector<Orient*> autoorientation::remove_duplicates(vector<Orient*> o,int *orientCnt){
+std::vector<Orient*> autoorientation::remove_duplicates(std::vector<Orient*> o,int *orientCnt){
     //중복을 제거합니다.
     int initIndex=*orientCnt+8;
     int count=0;
-    vector<Orient*> orientation;
+    std::vector<Orient*> orientation;
     for (int i=0; i<initIndex;i++){
         orientation.push_back(new Orient);
     }

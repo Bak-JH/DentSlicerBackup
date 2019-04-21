@@ -25,9 +25,9 @@ public:
     static void fillHoles(Mesh* mesh, const Paths3D& holes);
 
     // fill hole path with faces
-    static vector<std::array<QVector3D, 3>> fillPath(Path3D path);
+    static std::vector<std::array<QVector3D, 3>> fillPath(Path3D path);
 
-    // detects orientation defects, which induces normal vector errors and render errors
+    // detects orientation defects, which induces normal std::vector errors and render errors
     static void fixNormalOrientations(Mesh* mesh);
 
     // future works

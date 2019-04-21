@@ -250,7 +250,7 @@ bool FileLoader::loadMeshOBJ(Mesh* mesh, const char* filename){
     if( file == nullptr )
         return false;
 
-    vector<QVector3D> temp_vertices;
+    std::vector<QVector3D> temp_vertices;
     temp_vertices.reserve(lines);
     qDebug() << "test 2";
     while( 1 ){

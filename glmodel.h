@@ -157,13 +157,13 @@ public:
     float hollowShellRadius = 0;
 
     // feature extension
-    vector<int> extendFaces;
+    std::vector<int> extendFaces;
 
     // feature offset
     double shellOffsetFactor;
 
     std::vector<QVector3D> cuttingPoints;
-    vector<QEntity*> cuttingContourCylinders;
+    std::vector<QEntity*> cuttingContourCylinders;
     Plane cuttingPlane;
 
     // used for layer view
@@ -182,11 +182,11 @@ public:
     Qt3DExtras::QPhongAlphaMaterial *planeMaterial = nullptr;
     QObjectPicker* planeObjectPicker[2];
 
-    vector<Qt3DExtras::QSphereMesh*> sphereMesh;
-    vector<Qt3DCore::QEntity*> sphereEntity;
-    vector<Qt3DCore::QTransform*> sphereTransform;
-    vector<Qt3DRender::QObjectPicker*> sphereObjectPicker;
-    vector<QPhongMaterial*> sphereMaterial;
+    std::vector<Qt3DExtras::QSphereMesh*> sphereMesh;
+    std::vector<Qt3DCore::QEntity*> sphereEntity;
+    std::vector<Qt3DCore::QTransform*> sphereTransform;
+    std::vector<Qt3DRender::QObjectPicker*> sphereObjectPicker;
+    std::vector<QPhongMaterial*> sphereMaterial;
 
     void removeModel();
     void removeModelPartList();
@@ -224,10 +224,10 @@ public:
     void bisectModel(Plane plane);
     void bisectModel_internal(Plane plane);
     void checkPrintingArea();
-    bool EndsWith(const string& a, const string& b);
+    bool EndsWith(const std::string& a, const std::string& b);
     bool modelSelectChangable();
     QVector2D world2Screen(QVector3D target);
-    QString getFileName(const string& s);
+    QString getFileName(const std::string& s);
     static QVector3D spreadPoint(QVector3D endpoint,QVector3D startpoint,int factor);
     void changeViewMode(int viewMode);
 
@@ -260,10 +260,10 @@ private:
     void initialize(const int& faces_cnt);
     void applyGeometry();
     void addVertex(QVector3D vertex);
-    void addVertices(vector<QVector3D> vertices);
-    void addNormalVertices(vector<QVector3D> vertices);
-    void addColorVertices(vector<QVector3D> vertices);
-    void addIndexes(vector<int> vertices);
+    void addVertices(std::vector<QVector3D> vertices);
+    void addNormalVertices(std::vector<QVector3D> vertices);
+    void addColorVertices(std::vector<QVector3D> vertices);
+    void addIndexes(std::vector<int> vertices);
     void clearVertices();
     void onTimerUpdate();
     void removeLayerViewComponents();
@@ -349,8 +349,8 @@ public slots:
 
     // Model Cut
     void removeCuttingContour();
-    void generateCuttingContour(vector<QVector3D> cuttingContour);
-    void regenerateCuttingPoint(vector<QVector3D> cuttingContour);
+    void generateCuttingContour(std::vector<QVector3D> cuttingContour);
+    void regenerateCuttingPoint(std::vector<QVector3D> cuttingContour);
     void generateClickablePlane();
     void generatePlane();
     void removePlane();

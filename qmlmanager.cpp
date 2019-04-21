@@ -176,7 +176,7 @@ void QmlManager::initializeUI(QQmlApplicationEngine* e){
     boxLeftTab = FindItemByName(engine, "boxLeftTab");
     QObject::connect(boxUpperTab,SIGNAL(runGroupFeature(int,QString, double, double, double, QVariant)),this,SLOT(runGroupFeature(int,QString, double, double, double, QVariant)));
 
-    QObject::connect(this, SIGNAL(arrangeDone(vector<QVector3D>, vector<float>)), this, SLOT(applyArrangeResult(vector<QVector3D>, vector<float>)));
+    QObject::connect(this, SIGNAL(arrangeDone(std::vector<QVector3D>, std::vector<float>)), this, SLOT(applyArrangeResult(std::vector<QVector3D>, std::vector<float>)));
 
     leftTabViewMode = FindItemByName(engine, "ltvm");
     layerViewPopup = FindItemByName(engine, "layerViewPopup");
@@ -761,9 +761,9 @@ void QmlManager::runArrange(){
 void QmlManager::runArrange_internal(){
     qDebug() << "run arrange glmodels size : " <<glmodels.size();
     if (glmodels.size()>=2){
-        vector<Mesh> meshes_to_arrange;
-        vector<XYArrangement> arng_result_set;
-        vector<Qt3DCore::QTransform*> m_transform_set;
+        std::vector<Mesh> meshes_to_arrange;
+        std::vector<XYArrangement> arng_result_set;
+        std::vector<Qt3DCore::QTransform*> m_transform_set;
         for(auto& pair : glmodels)
         {
             auto model = &pair.second;
@@ -772,8 +772,8 @@ void QmlManager::runArrange_internal(){
         }
         autoarrange* ar;
         arng_result_set = ar->arngMeshes(meshes_to_arrange);
-        vector<QVector3D> translations;
-        vector<float> rotations;
+        std::vector<QVector3D> translations;
+        std::vector<float> rotations;
         for (size_t i=0; i<arng_result_set.size(); i++){
             XYArrangement arng_result = arng_result_set[i];
             QVector3D trans_vec = QVector3D(arng_result.first.X/scfg->resolution, arng_result.first.Y/scfg->resolution, 0);
@@ -787,7 +787,7 @@ void QmlManager::runArrange_internal(){
     }
 }
 
-void QmlManager::applyArrangeResult(vector<QVector3D> translations, vector<float> rotations){
+void QmlManager::applyArrangeResult(std::vector<QVector3D> translations, std::vector<float> rotations){
     qDebug() << "apply arrange result ";
     size_t index = 0;
     for(auto& pair : glmodels)
@@ -841,7 +841,7 @@ bool QmlManager::multipleModelSelected(int ID){
     qDebug() << "multipleModelSelected():" << target << target->shadowModel;
     qDebug() << "-- printing selectedModels --" <<selectedModels.size();
     int i = 0;
-    for (vector<GLModel*>::iterator it_ = selectedModels.begin(); it_ != selectedModels.end() ; ++it_){
+    for (std::vector<GLModel*>::iterator it_ = selectedModels.begin(); it_ != selectedModels.end() ; ++it_){
         qDebug() << "model" << i << ":" <<*it_ ;
         i++;
     }
@@ -850,7 +850,7 @@ bool QmlManager::multipleModelSelected(int ID){
 
     // if target is already in selectedModels
     for (auto it=selectedModels.begin(); it!= selectedModels.end(); ++it){
-        /* when selectedModels is an empty vector */
+        /* when selectedModels is an empty std::vector */
         if ((*it) == nullptr) {
             if (selectedModels.size() == 1)
                 return false;
@@ -2028,7 +2028,7 @@ void QmlManager::openProgressPopUp(){
     QMetaObject::invokeMethod(progress_popup, "openPopUp");
 }
 
-void QmlManager::openYesNoPopUp(bool selectedList_vis, string inputText_h, string inputText_m, string inputText_l, int inputText_fontsize, string image_source, int inputPopupType, int yesNo_okCancel){
+void QmlManager::openYesNoPopUp(bool selectedList_vis, std::string inputText_h, std::string inputText_m, std::string inputText_l, int inputText_fontsize, std::string image_source, int inputPopupType, int yesNo_okCancel){
     QMetaObject::invokeMethod(yesno_popup, "openYesNoPopUp",
                               Q_ARG(QVariant, selectedList_vis),
                               Q_ARG(QVariant, QString::fromStdString(inputText_h)),
@@ -2040,7 +2040,7 @@ void QmlManager::openYesNoPopUp(bool selectedList_vis, string inputText_h, strin
                               Q_ARG(QVariant, yesNo_okCancel));
 }
 
-void QmlManager::openResultPopUp(string inputText_h, string inputText_m, string inputText_l){
+void QmlManager::openResultPopUp(std::string inputText_h, std::string inputText_m, std::string inputText_l){
     QMetaObject::invokeMethod(result_popup, "openResultPopUp",
                               Q_ARG(QVariant, QString::fromStdString(inputText_h)),
                               Q_ARG(QVariant, QString::fromStdString(inputText_m)),
@@ -2106,7 +2106,7 @@ void QmlManager::closeOrientation(){
     return;
 }
 
-void QmlManager::setProgressText(string inputText){
+void QmlManager::setProgressText(std::string inputText){
     QMetaObject::invokeMethod(progress_popup, "updateText",
                               Q_ARG(QVariant, QString::fromStdString(inputText)));
 }
