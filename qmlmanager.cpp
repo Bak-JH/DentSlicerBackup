@@ -266,7 +266,7 @@ void QmlManager::checkModelFile(GLModel* target){
 GLModel* QmlManager::getModelByID(int ID)
 {
 	auto modelItr = glmodels.find(ID);
-	if (modelItr == glmodels.end());
+	if (modelItr == glmodels.end())
 	{
 #ifdef _STRICT_DEBUG
 		throw std::exception("getModelByID failed");
