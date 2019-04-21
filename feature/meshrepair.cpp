@@ -43,7 +43,7 @@ void MeshRepair::removeUnconnected(Mesh* mesh){
     int unconnected_cnt = 0;
     int face_idx = 0;
 
-    vector<MeshFace>::iterator mf_it = mesh->faces.begin();
+    std::vector<MeshFace>::iterator mf_it = mesh->faces.begin();
 
     while (mf_it != mesh->faces.end()){
         face_idx ++;
@@ -72,7 +72,7 @@ void MeshRepair::removeDegenerate(Mesh* mesh){
     int degenerate_cnt = 0;
     int face_idx = 0;
 
-    vector<MeshFace>::iterator mf_it = mesh->faces.begin();
+    std::vector<MeshFace>::iterator mf_it = mesh->faces.begin();
     while (mf_it != mesh->faces.end()){
         face_idx ++;
         if (face_idx %100 ==0)
@@ -191,7 +191,7 @@ void MeshRepair::fillHoles(Mesh* mesh, const Paths3D& holes){
         qDebug() << "ok till here1";
         // fill holes
         qDebug() << "ok till here2";
-        for (array<QVector3D,3> face : fillPath(hole)){
+        for (std::array<QVector3D,3> face : fillPath(hole)){
             mesh->addFace(face[0],face[1],face[2]);
         }
         qDebug() << "ok till here3";
@@ -225,8 +225,8 @@ void MeshRepair::fillHoles(Mesh* mesh, const Paths3D& holes){
     qDebug() << "ok till here4";
 }
 
-vector<std::array<QVector3D, 3>> MeshRepair::fillPath(Path3D path){
-    vector<std::array<QVector3D, 3>> result;
+std::vector<std::array<QVector3D, 3>> MeshRepair::fillPath(Path3D path){
+    std::vector<std::array<QVector3D, 3>> result;
     result.reserve(path.size()*10);
 
     if (path.size() <3)
@@ -266,10 +266,10 @@ vector<std::array<QVector3D, 3>> MeshRepair::fillPath(Path3D path){
     }
     qDebug() << "fill path debug 4";
 
-    //vector<QVector3D> interpolated = interpolate(path, target_path);
+    //std::vector<QVector3D> interpolated = interpolate(path, target_path);
     //qDebug() << "interpolated size : " << interpolated.size();
     // interpolate between path and target path
-    for (array<QVector3D, 3> face : interpolate(path, target_path)){
+    for (std::array<QVector3D, 3> face : interpolate(path, target_path)){
         result.push_back(face);
     }
 
@@ -280,7 +280,7 @@ vector<std::array<QVector3D, 3>> MeshRepair::fillPath(Path3D path){
 
     // fill hole really
     for (int i=0; i<half_path_size-1; i++){
-        array<QVector3D,3> temp_face;
+        std::array<QVector3D,3> temp_face;
         temp_face[0] = path[i].position;
         temp_face[1] = path[path.size()-i-2].position;
         temp_face[2] = path[i+1].position;
@@ -293,7 +293,7 @@ vector<std::array<QVector3D, 3>> MeshRepair::fillPath(Path3D path){
     qDebug() << "fill path debug 6";
 
     if (path.size()%2 != 0){
-        array<QVector3D,3> temp_face;
+        std::array<QVector3D,3> temp_face;
         temp_face[0] = path[0].position;
         temp_face[1] = path[path.size()-1].position;
         temp_face[2] = path[path.size()-2].position;
@@ -327,7 +327,7 @@ int MeshRepair::suggestDivisionCnt(Path3D e1,Path3D e2){
     return 4;
 }
 
-// detects orientation defects, which induces normal vector errors and render errors
+// detects orientation defects, which induces normal std::vector errors and render errors
 void MeshRepair::fixNormalOrientations(Mesh* mesh){
 
 }

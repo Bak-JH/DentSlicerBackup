@@ -10,8 +10,8 @@ Mesh* ShellOffset::shellOffset(Mesh* mesh, float factor){
     offsetMesh->prevMesh = mesh->prevMesh;
     offsetMesh->nextMesh = mesh->nextMesh;
 
-    vector<MeshFace> unconnectedMeshFaces;
-    vector<MeshFace> unconnectedOffsetMeshFaces;
+    std::vector<MeshFace> unconnectedMeshFaces;
+    std::vector<MeshFace> unconnectedOffsetMeshFaces;
 
     // copy original mesh for innershell in CCW order
     foreach (MeshFace mf, mesh->faces){

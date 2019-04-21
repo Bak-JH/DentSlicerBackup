@@ -69,7 +69,7 @@ Path grahamScan(Path* path)    {
     }
     //*qDebug() << "path to arr" << path.size() << sizeof(points)/sizeof(points[0]);
     int N = path->size();
-    stack<IntPoint> hull;
+    std::stack<IntPoint> hull;
     Path hull_path;
 
     if (N < 3) return *path;

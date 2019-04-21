@@ -150,7 +150,7 @@ void modelcut::interpolate(Mesh* mesh, Path3D contour1, Path3D contour2){
     }
 }
 
-void modelcut::cutAway(Mesh* leftMesh, Mesh* rightMesh, Mesh* mesh, vector<QVector3D> cuttingPoints, int cutFillMode){
+void modelcut::cutAway(Mesh* leftMesh, Mesh* rightMesh, Mesh* mesh, std::vector<QVector3D> cuttingPoints, int cutFillMode){
     Path contour; // real cutting points in intpoint form
     Path3D cuttingContour; // real cutting points line qvector3d form
 

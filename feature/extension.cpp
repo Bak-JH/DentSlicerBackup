@@ -6,12 +6,12 @@ void extendMesh(Mesh* mesh, MeshFace* mf, double distance){
     QVector3D normal = mf->fn;
     qDebug() << normal;
 
-    vector<MeshFace*> extension_faces;
+    std::vector<MeshFace*> extension_faces;
     detectExtensionFaces(mesh, normal, mf, mf, &extension_faces,nullptr);
 
     // delete extension_faces
     /*for (MeshFace* mf : extension_faces){
-        for (vector<MeshFace>::iterator f_it=mesh->faces.begin(); f_it!=mesh->faces.end();){
+        for (std::vector<MeshFace>::iterator f_it=mesh->faces.begin(); f_it!=mesh->faces.end();){
             if (f_it->idx == mf->idx){
                 //f_it = mesh->faces.erase(f_it);
                 mesh->removeFace(mf);
@@ -46,7 +46,7 @@ void extendMesh(Mesh* mesh, MeshFace* mf, double distance){
 
     mesh->connectFaces();
 }
-void resetColorMesh(Mesh* mesh, Qt3DRender::QBuffer * colorbuffer, vector<int> extendFaces){
+void resetColorMesh(Mesh* mesh, Qt3DRender::QBuffer * colorbuffer, std::vector<int> extendFaces){
     QByteArray colorVertexArray;
     colorVertexArray.resize(sizeof(float)*3);
     float * reVertexArray = reinterpret_cast<float*>(colorVertexArray.data());
@@ -59,9 +59,9 @@ void resetColorMesh(Mesh* mesh, Qt3DRender::QBuffer * colorbuffer, vector<int> e
         colorbuffer->updateData(extendFaces.at(i)*sizeof(float)*9+6*sizeof(float),colorVertexArray);
     }
 }
-void extendColorMesh(Mesh* mesh, MeshFace* mf, Qt3DRender::QBuffer * colorbuffer, vector<int>* extendFaces){
-    vector<MeshFace*> extension_faces;
-    //vector<int> extendFaces;
+void extendColorMesh(Mesh* mesh, MeshFace* mf, Qt3DRender::QBuffer * colorbuffer, std::vector<int>* extendFaces){
+    std::vector<MeshFace*> extension_faces;
+    //std::vector<int> extendFaces;
     extendFaces->clear();
     QVector3D normal = mf->fn;
     detectExtensionFaces(mesh, normal, mf, mf, &extension_faces, extendFaces);
@@ -78,12 +78,12 @@ void extendColorMesh(Mesh* mesh, MeshFace* mf, Qt3DRender::QBuffer * colorbuffer
     }
 
 }
-void detectExtensionFaces(Mesh* mesh, QVector3D normal, MeshFace* original_mf, MeshFace* mf, vector<MeshFace*>* result, vector<int>* result_idx){
+void detectExtensionFaces(Mesh* mesh, QVector3D normal, MeshFace* original_mf, MeshFace* mf, std::vector<MeshFace*>* result, std::vector<int>* result_idx){
     result->push_back(mf);
     if (result_idx != nullptr){
         result_idx->push_back(mf->idx);
     }
-    for (vector<MeshFace*> neighbors : mf->neighboring_faces){
+    for (std::vector<MeshFace*> neighbors : mf->neighboring_faces){
         for (MeshFace* neighbor : neighbors){
             // check if neighbor already checked
             bool cont = false;
@@ -106,7 +106,7 @@ void detectExtensionFaces(Mesh* mesh, QVector3D normal, MeshFace* original_mf, M
     return;
 }
 
-Paths3D detectExtensionOutline(Mesh* mesh, vector<MeshFace*> meshfaces){
+Paths3D detectExtensionOutline(Mesh* mesh, std::vector<MeshFace*> meshfaces){
     Mesh* temp_mesh;
 
     temp_mesh = new Mesh();
@@ -182,7 +182,7 @@ void extendAlongOutline(Mesh* mesh, QVector3D normal, Paths3D selectedPaths, dou
     }
 }
 
-void coverCap(Mesh* mesh, QVector3D normal, vector<MeshFace*> extension_faces, double distance){
+void coverCap(Mesh* mesh, QVector3D normal, std::vector<MeshFace*> extension_faces, double distance){
     for (MeshFace* mf : extension_faces){
         mesh->addFace(mesh->idx2MV(mf->mesh_vertex[0]).position + distance*normal,
                 mesh->idx2MV(mf->mesh_vertex[1]).position + distance*normal,

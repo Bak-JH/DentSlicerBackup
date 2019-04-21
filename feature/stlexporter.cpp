@@ -54,7 +54,7 @@ Mesh* STLexporter::mergeSelectedModels() {
         model->mesh->vertexMove(-trans);
 
         MeshFace newFace;
-        for (vector<MeshFace>::iterator it = model->mesh->faces.begin(); it != model->mesh->faces.end(); ++it) {
+        for (std::vector<MeshFace>::iterator it = model->mesh->faces.begin(); it != model->mesh->faces.end(); ++it) {
             newFace = (*it);
             newFace.idx += faceNum;
             if (newFace.parent_idx != -1) newFace.parent_idx += faceNum;
@@ -100,7 +100,7 @@ void STLexporter::exportSTL(QString outfilename){
 
     qDebug() << "export STL";
 
-    ofstream outfile(outfilename.toStdString().c_str(), ios::out);
+    std::ofstream outfile(outfilename.toStdString().c_str(), std::ios::out);
 
     writeHeader(outfile);
     qmlManager->setProgress(0.5);
@@ -131,7 +131,7 @@ void STLexporter::exportSTL(QString outfilename){
     return;
 }
 
-void STLexporter::writeFace(ofstream& outfile,const Mesh* mesh, MeshFace mf){
+void STLexporter::writeFace(std::ofstream& outfile,const Mesh* mesh, MeshFace mf){
 
     outfile << "facet normal "<< mf.fn.x() <<" "<< mf.fn.y()<<" "<< mf.fn.z() << "\n";
     outfile << "    outer loop\n";
@@ -145,10 +145,10 @@ void STLexporter::writeFace(ofstream& outfile,const Mesh* mesh, MeshFace mf){
     outfile << "endfacet\n";
 }
 
-void STLexporter::writeHeader(ofstream& outfile){
+void STLexporter::writeHeader(std::ofstream& outfile){
     outfile << "solid diridiri\n";
 }
 
-void STLexporter::writeFooter(ofstream& outfile){
+void STLexporter::writeFooter(std::ofstream& outfile){
     outfile << "endsolid diridiri";
 }

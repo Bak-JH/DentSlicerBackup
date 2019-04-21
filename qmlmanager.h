@@ -150,11 +150,11 @@ public:
     //TODO: combine this with glmodels
     std::map<int, GLModel> secondaryModels;
 
-    //TODO:const pointers, need to use list instead of vector because vector elements moves around
+    //TODO:const pointers, need to use list instead of std::vector because std::vector elements moves around
     //std::list<GLModel* const> selectedModels;
 	std::vector<GLModel*> selectedModels;
-    vector<Mesh*> copyMeshes;
-    vector<QString> copyMeshNames;
+    std::vector<Mesh*> copyMeshes;
+    std::vector<QString> copyMeshNames;
 
 
 
@@ -187,10 +187,10 @@ public:
     void addPart(QString fileName, int ID);
     void deletePart(int ID);
     void openProgressPopUp();
-    void openYesNoPopUp(bool selectedList_vis, string inputText_h, string inputText_m, string inputText_l, int inputText_fontsize, string image_source, int inputPopupType, int yesNo_okCancel);
-    void openResultPopUp(string inputText_h, string inputText_m, string inputText_l);
+    void openYesNoPopUp(bool selectedList_vis, std::string inputText_h, std::string inputText_m, std::string inputText_l, int inputText_fontsize, std::string image_source, int inputPopupType, int yesNo_okCancel);
+    void openResultPopUp(std::string inputText_h, std::string inputText_m, std::string inputText_l);
     void setProgress(float value);
-    void setProgressText(string inputText);
+    void setProgressText(std::string inputText);
     int getLayerViewFlags();
 
     GLModel* findGLModelByName(QString filename);
@@ -251,7 +251,7 @@ private:
 
 signals:
     void updateModelInfo(int printing_time, int layer, QString xyz, float volume);
-    void arrangeDone(vector<QVector3D>, vector<float>);
+    void arrangeDone(std::vector<QVector3D>, std::vector<float>);
 
 
 public slots:
@@ -283,7 +283,7 @@ public slots:
     void modelRotateDone(int);
     void totalRotateDone();
     void resetLayflat();
-    void applyArrangeResult(vector<QVector3D>, vector<float>);
+    void applyArrangeResult(std::vector<QVector3D>, std::vector<float>);
     void cleanselectedModel(int);
     void extensionSelect();
     void extensionUnSelect();

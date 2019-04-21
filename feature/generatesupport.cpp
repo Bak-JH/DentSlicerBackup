@@ -47,7 +47,7 @@ Mesh* GenerateSupport::generateSupport(Mesh* shellmesh) {
 
     overhangDetect(mesh);
 
-    vector<OverhangPoint>::iterator iter = overhangPoints.begin();
+    std::vector<OverhangPoint>::iterator iter = overhangPoints.begin();
     while (iter != overhangPoints.end() - 1 && iter != overhangPoints.end()) {
         OverhangPoint pt1 = *iter;
         OverhangPoint pt2 = *(iter+1);
@@ -108,7 +108,7 @@ void GenerateSupport::overhangDetect(Mesh* mesh) {
  *   (local or global minimum)
  */
 void GenerateSupport::pointOverhangDetect(Mesh* mesh) {
-    vector<MeshVertex> pointOverhang;
+    std::vector<MeshVertex> pointOverhang;
     for (size_t ver_idx = 0; ver_idx < mesh->vertices.size(); ver_idx++) {
         bool local_min = true;
         float z = mesh->vertices[ver_idx].position.z();
@@ -144,7 +144,7 @@ void GenerateSupport::pointOverhangDetect(Mesh* mesh) {
  * : a face s.t. the angle btw the face and the printing direction (z-axis) is higher than the critical angle
  */
 void GenerateSupport::faceOverhangDetect(Mesh* mesh) {
-    vector<MeshFace> faceOverhang;
+    std::vector<MeshFace> faceOverhang;
     QVector3D printingDirection = QVector3D(0,0,1);
     QVector3D faceNormal;
     for (size_t face_idx = 0; face_idx < mesh->faces.size(); face_idx++) {
@@ -321,9 +321,9 @@ void GenerateSupport::generateFaces(Mesh* mesh, OverhangPoint top, OverhangPoint
 
 void GenerateSupport::generateBranch(Mesh* mesh, OverhangPoint leaf1, OverhangPoint leaf2, OverhangPoint* stem) {
     float bottomRadius = calculateRadius(mesh->z_max() - mesh->z_min(), stem->position.z() - mesh->z_min(),
-                         max((leaf1.position - stem->position).length(), (leaf2.position - stem->position).length()));
-    if (bottomRadius < max(max(leaf1.radius, leaf2.radius), stem->radius))
-        bottomRadius = max(max(leaf1.radius, leaf2.radius), stem->radius);
+                         std::max((leaf1.position - stem->position).length(), (leaf2.position - stem->position).length()));
+    if (bottomRadius < std::max(std::max(leaf1.radius, leaf2.radius), stem->radius))
+        bottomRadius = std::max(std::max(leaf1.radius, leaf2.radius), stem->radius);
 
     // generate top tip
 
@@ -358,8 +358,8 @@ void GenerateSupport::generateStem(Mesh* mesh, OverhangPoint top, OverhangPoint*
 
     float bottomRadius = calculateRadius(mesh->z_max() - mesh->z_min(), bottom->position.z() - mesh->z_min(),
                                          top.position.z() - bottom->position.z());
-    if (bottomRadius < max(top.radius, origin_bottom.radius))
-        bottomRadius = max(top.radius, bottom->radius);
+    if (bottomRadius < std::max(top.radius, origin_bottom.radius))
+        bottomRadius = std::max(top.radius, bottom->radius);
     if (origin_bottom.supportInterPoint && (origin_bottom.radius > radiusMin) && (bottomRadius > origin_bottom.radius))
          bottomRadius = origin_bottom.radius;
     bottom->radius = bottomRadius;
