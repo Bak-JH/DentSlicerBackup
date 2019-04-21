@@ -9,7 +9,6 @@
 #include <QJsonDocument>
 
 using namespace ClipperLib;
-using namespace std;
 
 class SVGexporter
 {
@@ -20,12 +19,12 @@ public:
 
     void parsePolyTreeAndWrite(PolyNode* pn, std::ofstream& outfile);
 
-    void writePolygon(ofstream& outfile, Path contour);
-    void writePolygon(ofstream& outfile, PolyNode* contour);
-    void writeGroupHeader(ofstream& outfile, int layer_idx, float z);
-    void writeGroupFooter(ofstream& outfile);
-    void writeHeader(ofstream& outfile);
-    void writeFooter(ofstream& outfile);
+    void writePolygon(std::ofstream& outfile, Path contour);
+    void writePolygon(std::ofstream& outfile, PolyNode* contour);
+    void writeGroupHeader(std::ofstream& outfile, int layer_idx, float z);
+    void writeGroupFooter(std::ofstream& outfile);
+    void writeHeader(std::ofstream& outfile);
+    void writeFooter(std::ofstream& outfile);
 };
 
 #endif // SVGEXPORTER_H

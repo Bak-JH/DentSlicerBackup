@@ -16,11 +16,10 @@
 #define cos150 -0.8660254
 #define FZERO 0.00001f
 
-using namespace std;
 using namespace ClipperLib;
 
 // plane contains at least 3 vertices contained in the plane in clockwise direction
-typedef vector<QVector3D> Plane;
+typedef std::vector<QVector3D> Plane;
 
 class MeshFace {
 public:
@@ -31,7 +30,7 @@ public:
     int mesh_vertex[3] = {-1,-1,-1};
     //int connected_face_idx[3];
 
-    vector<vector<MeshFace*>> neighboring_faces;
+    std::vector<std::vector<MeshFace*>> neighboring_faces;
 
     QVector3D fn;
     QVector3D fn_unnorm;
@@ -55,18 +54,19 @@ public:
     }
 };
 
-//typedef vector<MeshVertex> Path3D;
-class Path3D : public vector<MeshVertex>{
+//typedef std::vector<MeshVertex> Path3D;
+class Path3D : public std::vector<MeshVertex>{
     public:
         Path projection;
-        vector<Path3D> inner;
-        vector<Path3D> outer;
+        std::vector<Path3D> inner;
+        std::vector<Path3D> outer;
 };
 
-typedef vector<Path3D> Paths3D;
+typedef std::vector<Path3D> Paths3D;
 
 class Mesh{
 public :
+	Mesh(size_t vertCount, size_t faceCount, const Mesh* origin);
     Mesh() {};
     Mesh(size_t vertCount, size_t faceCount);
     /********************** Mesh Edit Functions***********************/
@@ -82,7 +82,7 @@ public :
     /********************** Mesh Generation Functions **********************/
     void addFace(QVector3D v0, QVector3D v1, QVector3D v2);
     void addFace(QVector3D v0, QVector3D v1, QVector3D v2, int parent_idx);
-    vector<MeshFace>::iterator removeFace(vector<MeshFace>::iterator f_it);
+    std::vector<MeshFace>::iterator removeFace(std::vector<MeshFace>::iterator f_it);
     void removeFace(MeshFace* mf);
     void connectFaces();
 
@@ -102,8 +102,8 @@ public :
     MeshVertex idx2MV(int idx)const;
 
     /********************** Getters **********************/
-    const std::vector<MeshVertex> getVertices()const;
-    const std::vector<MeshFace> getFaces()const;
+    const std::vector<MeshVertex>* getVertices()const;
+    const std::vector<MeshFace>* getFaces()const;
     float x_min()const;
     float x_max()const;
     float y_min()const;
@@ -115,7 +115,7 @@ public :
     QTime getTime()const;
 private:
     /********************** Helper Functions **********************/
-    vector<MeshFace*> findFaceWith2Vertices(int v0_idx, int v1_idx, MeshFace self_f);
+    std::vector<MeshFace*> findFaceWith2Vertices(int v0_idx, int v1_idx, MeshFace self_f);
     int addFaceVertex(QVector3D v);
     void updateMinMax(QVector3D v);
 
@@ -147,7 +147,6 @@ private:
     friend class modelcut;
     friend class MeshRepair;
     friend class GenerateSupport;
-    friend class ShellOffset;
 
 
 
@@ -171,14 +170,14 @@ Paths3D contourConstruct3D(Paths3D hole_edges);
 /* class containmentPath{
 public:
     Path projection;
-    vector<containmentPath> inner;
-    vector<containmentPath> outer;
+    std::vector<containmentPath> inner;
+    std::vector<containmentPath> outer;
 }; */
 
 bool intPointInPath(IntPoint ip, Path p);
 bool pathInpath(Path3D target, Path3D in);
 
-vector<std::array<QVector3D, 3>> interpolate(Path3D from, Path3D to);
+std::vector<std::array<QVector3D, 3>> interpolate(Path3D from, Path3D to);
 
 uint32_t intPoint2Hash(IntPoint u);
 uint32_t meshVertex2Hash(MeshVertex u);

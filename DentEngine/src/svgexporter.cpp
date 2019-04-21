@@ -15,7 +15,7 @@ QString SVGexporter::exportSVG(Slices shellSlices, Slices supportSlices, Slices 
     }
 
     QString infofilename = outfoldername + "/" + "info.json";
-    ofstream infofile(infofilename.toStdString().c_str(), ios::out);
+    std::ofstream infofile(infofilename.toStdString().c_str(), std::ios::out);
     QJsonObject jsonObject;
     jsonObject["layer_height"] = round(scfg->layer_height*100)/100;
     jsonObject["total_layer"] = int(shellSlices.size());
@@ -43,7 +43,7 @@ QString SVGexporter::exportSVG(Slices shellSlices, Slices supportSlices, Slices 
     for (int i=0; i<raftSlices.size(); i++){
         QString outfilename = outfoldername + "/" + QString::number(currentSlice_idx) + ".svg";
 
-        ofstream outfile(outfilename.toStdString().c_str(), ios::out);
+        std::ofstream outfile(outfilename.toStdString().c_str(), std::ios::out);
 
         writeHeader(outfile);
         if (scfg->slicing_mode == "uniform")
@@ -69,7 +69,7 @@ QString SVGexporter::exportSVG(Slices shellSlices, Slices supportSlices, Slices 
     for (int i=0; i<shellSlices.size(); i++){
         QString outfilename = outfoldername + "/" + QString::number(currentSlice_idx) + ".svg";
 
-        ofstream outfile(outfilename.toStdString().c_str(), ios::out);
+        std::ofstream outfile(outfilename.toStdString().c_str(), std::ios::out);
 
         writeHeader(outfile);
         if (scfg->slicing_mode == "uniform")
@@ -131,7 +131,7 @@ void SVGexporter::parsePolyTreeAndWrite(PolyNode* pn, std::ofstream& outfile){
 
 }
 
-void SVGexporter::writePolygon(ofstream& outfile, PolyNode* contour){
+void SVGexporter::writePolygon(std::ofstream& outfile, PolyNode* contour){
     outfile << "      <polygon contour:type=\"contour\" points=\"";
     for (IntPoint point: contour->Contour){
         outfile << std::fixed << (float)(point.X-origin_x)*scfg->pixel_per_mm/(scfg->resolution*scfg->contraction_ratio) + scfg->resolution_x/2 << "," << std::fixed << -(float)(point.Y-origin_y)*scfg->pixel_per_mm/(scfg->resolution*scfg->contraction_ratio) + scfg->resolution_y/2 << " "; // doesn't need 100 actually
@@ -146,7 +146,7 @@ void SVGexporter::writePolygon(ofstream& outfile, PolyNode* contour){
     }
 }
 
-void SVGexporter::writePolygon(ofstream& outfile, Path contour){
+void SVGexporter::writePolygon(std::ofstream& outfile, Path contour){
     outfile << "      <polygon contour:type=\"contour\" points=\"";
     for (IntPoint point: contour){
         outfile << std::fixed << (float)(point.X-origin_x)*scfg->pixel_per_mm/(scfg->resolution*scfg->contraction_ratio) + scfg->resolution_x/2 << "," << std::fixed << -(float)(point.Y-origin_y)*scfg->pixel_per_mm/(scfg->resolution*scfg->contraction_ratio) + scfg->resolution_y/2 << " "; // doesn't need 100 actually
@@ -157,19 +157,19 @@ void SVGexporter::writePolygon(ofstream& outfile, Path contour){
     outfile << "\" style=\"fill: white\" />\n";
 }
 
-void SVGexporter:: writeGroupHeader(ofstream& outfile, int layer_idx, float z){
+void SVGexporter:: writeGroupHeader(std::ofstream& outfile, int layer_idx, float z){
     outfile << "    <g id=\"layer" << layer_idx << "\" contour:z=\""<< std::fixed << z << "\">\n";
 }
 
-void SVGexporter:: writeGroupFooter(ofstream& outfile){
+void SVGexporter:: writeGroupFooter(std::ofstream& outfile){
     outfile << "    </g>\n";
 }
 
-void SVGexporter::writeHeader(ofstream& outfile){
+void SVGexporter::writeHeader(std::ofstream& outfile){
     outfile << "<svg width='" << scfg->resolution_x << "' height='" << scfg->resolution_y << "' xmlns='http://www.w3.org/2000/svg' xmlns:contour='http://hix.co.kr' style='background-color: #00000000;'>\n";
 }
 
-void SVGexporter::writeFooter(ofstream& outfile){
+void SVGexporter::writeFooter(std::ofstream& outfile){
     outfile << "</svg>";
 }
 
