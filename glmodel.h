@@ -30,7 +30,7 @@
 using namespace Qt3DCore;
 using namespace Qt3DRender;
 using namespace Qt3DExtras;
-//using namespace std;
+
 
 /* feature thread */
 #define ftrOpen 1

@@ -8,7 +8,6 @@
 #include <string>
 #include <QTime>
 
-//using namespace std;
 
 class rotateResult{
 public:
