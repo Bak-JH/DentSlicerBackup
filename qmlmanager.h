@@ -237,12 +237,7 @@ public:
 
 private:
 	GLModel* getModelByID(int ID);
-//    void selectPartImpl(GLModel* target);
     void unselectPartImpl(GLModel* target);
-    void modelVisibleImpl(GLModel* target, bool isVisible);
-    //void doDeletebyIDImpl(GLModel* target);
-    //void deleteListImpl(GLModel* target);
-    //bool glmodels_arranged;
     int viewMode;
     int layerViewFlags;
     int modelIDCounter;

@@ -2219,7 +2219,11 @@ GLModel::~GLModel(){
     delete m_geometry;
     delete m_geometryRenderer;*/
     if(shadowModel)
+	{
         delete shadowModel;
+		shadowModel = nullptr;
+	}
+
 }
 
 void GLModel::engoo(){

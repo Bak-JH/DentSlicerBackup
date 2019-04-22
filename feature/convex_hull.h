@@ -6,7 +6,6 @@
 #include "DentEngine/src/polyclipping/clipper/clipper.hpp"
 #include "autoarrange.h"
 
-//using namespace std;
 using namespace ClipperLib;
 
 int ccw(const IntPoint& a, const IntPoint& b, const IntPoint& c);

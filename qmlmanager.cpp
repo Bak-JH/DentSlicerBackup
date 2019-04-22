@@ -1260,7 +1260,7 @@ void QmlManager::modelVisible(int ID, bool isVisible){
 	auto target = getModelByID(ID);
 	if (target)
 	{
-		modelVisibleImpl(target, isVisible);
+    	target->setEnabled(isVisible);
 	}    
 }
 
@@ -2265,10 +2265,6 @@ QObject* FindItemByName(QQmlApplicationEngine* engine, const QString& name)
     return FindItemByName(engine->rootObjects(), name);
 }
 
-//void QmlManager::selectPartImpl(GLModel* target)
-//{
-
-//}
 void QmlManager::unselectPartImpl(GLModel* target)
 {
 
@@ -2304,11 +2300,4 @@ void QmlManager::unselectPartImpl(GLModel* target)
     sendUpdateModelInfo();
 }
 
-void QmlManager::modelVisibleImpl(GLModel* target, bool isVisible)
-{
-    target->setEnabled(isVisible);
-}
-//void QmlManager::deleteListImpl(GLModel* target)
-//{
-//
-//}
+
