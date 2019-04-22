@@ -132,8 +132,6 @@ GLModel::GLModel(QObject* mainWindow, QNode *parent, Mesh* loadMesh, QString fna
 
     //repairMesh(mesh);
 
-    // create shadow model to handle picking settings
-    shadowModel = new GLModel(this->mainWindow, this, mesh, filename, true);
     // 승환 75%
     qmlManager->setProgress(0.73);
 
@@ -619,35 +617,35 @@ void GLModel::updateModelMesh(bool shadowUpdate){
     // create new object picker, shadowmodel, remove prev shadowmodel
     //QVector3D translation = shadowModel->m_transform->translation();
     if (shadowModel !=NULL && shadowUpdate){
-        QObject::disconnect(shadowModel, SIGNAL(modelSelected(int)), qmlManager, SLOT(modelSelected(int)));
-        shadowModel->removeMouseHandlers();
-        qmlManager->disconnectHandlers(this);
-        GLModel* prevShadowModel = shadowModel;
+        //QObject::disconnect(shadowModel, SIGNAL(modelSelected(int)), qmlManager, SLOT(modelSelected(int)));
+        //shadowModel->removeMouseHandlers();
+        //qmlManager->disconnectHandlers(this);
+        //GLModel* prevShadowModel = shadowModel;
         switch( viewMode ) {
             case VIEW_MODE_OBJECT:
-				shadowModel = new GLModel(this->mainWindow, this, mesh, filename, true);
+				addShadowModel(mesh);
                 break;
             case VIEW_MODE_SUPPORT:
-                shadowModel = new GLModel(this->mainWindow, this, layerMesh, filename, true);
+				addShadowModel(layerMesh);
                 shadowModel->m_transform->setTranslation(shadowModel->m_transform->translation()+QVector3D(0,0,scfg->raft_thickness));
                 break;
             case VIEW_MODE_LAYER:
-                shadowModel = new GLModel(this->mainWindow, this, mesh, filename, true);
+				addShadowModel(mesh);
                 break;
         }
         /*float mesh_x_center = m_transform->translation().x()+(mesh->x_max() +mesh->x_min())/2;
         float mesh_y_center = m_transform->translation().y()+(mesh->y_max() +mesh->y_min())/2;
         float mesh_z_center = m_transform->translation().z()+(mesh->z_max() +mesh->z_min())/2;
-        shadowModel=new GLModel(this->mainWindow, this, mesh->vertexMoved(-QVector3D(mesh_x_center,mesh_y_center,mesh_z_center)), filename, true);
+        addShadowModel(mesh->vertexMoved(-QVector3D(mesh_x_center,mesh_y_center,mesh_z_center)));
         shadowModel->m_transform->setTranslation(QVector3D(mesh_x_center, mesh_y_center, 0));*/
-        shadowModel->copyModelAttributeFrom(prevShadowModel);
-        prevShadowModel->deleteLater();
+        //shadowModel->copyModelAttributeFrom(prevShadowModel);
+        //prevShadowModel->deleteLater();
 
-        // reconnect handler if current selected model is updated
-        if (qmlManager->selectedModels[0]==this)
-            qmlManager->connectHandlers(this);
+        //// reconnect handler if current selected model is updated
+        //if (qmlManager->selectedModels[0]==this)
+        //    qmlManager->connectHandlers(this);
         //shadowModel->m_transform->setTranslation(translation);
-        QObject::connect(shadowModel, SIGNAL(modelSelected(int)), qmlManager, SLOT(modelSelected(int)));
+        //QObject::connect(shadowModel, SIGNAL(modelSelected(int)), qmlManager, SLOT(modelSelected(int)));
     }
     updateLock = false;
     qDebug() << this << "released lock";
@@ -2093,8 +2091,8 @@ void GLModel::removeModelPartList(){
     QObject *yesno_popup = (QEntity *)FindItemByName(temp, "yesno_popup");
 
     qDebug() <<"remove ID   " << ID;
-    QMetaObject::invokeMethod(partList, "deletePart", Q_ARG(QVariant, ID));
-    QMetaObject::invokeMethod(yesno_popup, "deletePart", Q_ARG(QVariant, ID));
+    QMetaObject::invokeMethod(partList, "deletePartListItem", Q_ARG(QVariant, ID));
+    QMetaObject::invokeMethod(yesno_popup, "deletePartListItem", Q_ARG(QVariant, ID));
 }
 
 void GLModel::modelCut(){
@@ -2218,12 +2216,7 @@ GLModel::~GLModel(){
     delete vertexBuffer;
     delete m_geometry;
     delete m_geometryRenderer;*/
-    if(shadowModel)
-	{
-        delete shadowModel;
-		shadowModel = nullptr;
-	}
-
+	deleteShadowModel();
 }
 
 void GLModel::engoo(){
@@ -2409,7 +2402,7 @@ void GLModel::getSliderSignal(double value){
 }
 
 void GLModel::getLayerViewSliderSignal(double value) {
-    if (!shadowModel->layerViewActive)
+    if (!shadowModel || !shadowModel->layerViewActive)
         return;
 
     float height = (mesh->z_max() - mesh->z_min() + scfg->raft_thickness) * value;
@@ -3149,6 +3142,33 @@ void GLModel::generateLayerViewMaterial() {
     m_layerMaterial->addParameter(new QParameter(QStringLiteral("diffuse"), QColor(97, 185, 192)));
     m_layerMaterial->addParameter(new QParameter(QStringLiteral("specular"), QColor(0, 0, 0)));
     //m_layerMaterial->addParameter(new QParameter(QStringLiteral("alpha"), 0.0f));
+}
+
+void GLModel::addShadowModel(Mesh* mesh)
+{
+	auto newShadowModel = new GLModel(this->mainWindow, this, mesh, filename, true);
+
+	//copy attributes from previous shadow if there was one
+	if (shadowModel)
+	{
+		newShadowModel->copyModelAttributeFrom(shadowModel);
+	}
+	//delete and disconnect previous shadowModel
+	deleteShadowModel();
+	shadowModel = newShadowModel;
+	qmlManager->connectShadow(shadowModel);
+
+}
+
+void GLModel::deleteShadowModel()
+{
+	if (shadowModel)
+	{
+		shadowModel->removeMouseHandlers();
+		qmlManager->disconnectShadow(this);
+		delete shadowModel;
+		shadowModel = nullptr;
+	}
 }
 
 void GLModel::setSupport()

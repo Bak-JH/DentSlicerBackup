@@ -221,7 +221,6 @@ void QmlManager::createModelFile(Mesh* target_mesh, QString fname) {
     _latest = &(res.first->second);
     qDebug() << "created new model file";
     // model selection codes, connect handlers later when model selected
-    QObject::connect(_latest->shadowModel, SIGNAL(modelSelected(int)), this, SLOT(modelSelected(int)));
     qDebug() << "connected model selected signal";
 
     // set initial position
@@ -291,7 +290,7 @@ void QmlManager::deleteOneModelFile(int ID) {
 		//    target->shadowModel->deleteLater();
 		//    target->deleteLater();
 		glmodels.erase(ID);
-		deletePart(ID);
+		deletePartListItem(ID);
 	}
 
 }
@@ -358,69 +357,40 @@ void QmlManager::disconnectHandlers(GLModel* glmodel){
 
 
     // model layflat popup codes
-    QObject::disconnect(layflatPopup, SIGNAL(openLayflat()), glmodel->shadowModel, SLOT(openLayflat()));
-    QObject::disconnect(layflatPopup, SIGNAL(closeLayflat()), glmodel->shadowModel, SLOT(closeLayflat()));
-    QObject::disconnect(layflatPopup, SIGNAL(generateLayFlat()), glmodel, SLOT(generateLayFlat()));
-    QObject::disconnect(glmodel->shadowModel,SIGNAL(layFlatSelect()),this,SLOT(layFlatSelect()));
-    QObject::disconnect(glmodel->shadowModel,SIGNAL(layFlatUnSelect()),this,SLOT(layFlatUnSelect()));
-    //QObject::disconnect(layflatPopup, SIGNAL(openLayflat()), glmodel, SLOT(openLayflat()));
+	QObject::disconnect(layflatPopup, SIGNAL(generateLayFlat()), glmodel, SLOT(generateLayFlat()));
+	//QObject::disconnect(layflatPopup, SIGNAL(openLayflat()), glmodel, SLOT(openLayflat()));
 
-    // model cut popup codes
-    QObject::disconnect(cutPopup,SIGNAL(modelCut()),glmodel->shadowModel , SLOT(modelCut()));
-    QObject::disconnect(cutPopup,SIGNAL(cutModeSelected(int)),glmodel->shadowModel,SLOT(cutModeSelected(int)));
-    QObject::disconnect(cutPopup,SIGNAL(cutFillModeSelected(int)),glmodel->shadowModel,SLOT(cutFillModeSelected(int)));
-    QObject::disconnect(cutPopup, SIGNAL(openCut()), glmodel->shadowModel, SLOT(openCut()));
-    QObject::disconnect(cutPopup, SIGNAL(closeCut()), glmodel->shadowModel, SLOT(closeCut()));
-    QObject::disconnect(cutPopup, SIGNAL(resultSliderValueChanged(double)), glmodel->shadowModel, SLOT(getSliderSignal(double)));
+	// hollow shell popup codes
+	//QObject::disconnect(hollowShellPopup, SIGNAL(hollowShell(double)), glmodel, SLOT(indentHollowShell(double)));
 
-    /*// hollow shell popup codes
-    QObject::disconnect(hollowShellPopup, SIGNAL(hollowShell(double)), glmodel->shadowModel, SLOT(hollowShell(double)));
-    QObject::disconnect(hollowShellPopup, SIGNAL(openHollowShell()), glmodel->shadowModel, SLOT(openHollowShell()));
-    QObject::disconnect(hollowShellPopup, SIGNAL(hollowShell(double)), glmodel, SLOT(indentHollowShell(double)));
-    QObject::disconnect(hollowShellPopup, SIGNAL(resultSliderValueChanged(double)), glmodel->shadowModel, SLOT(getSliderSignal(double)));
-    */
+	// auto orientation popup codes
+	QObject::disconnect(orientPopup, SIGNAL(runFeature(int)), glmodel->ft, SLOT(setTypeAndStart(int)));
 
-    // auto orientation popup codes
-    QObject::disconnect(orientPopup, SIGNAL(runFeature(int)), glmodel->ft, SLOT(setTypeAndStart(int)));
+	// scale popup codes
+	//QObject::disconnect(scalePopup, SIGNAL(runFeature(int,double,double,double)), glmodel->ft, SLOT(setTypeAndRun(int, double, double, double)));
 
-    // scale popup codes
-    //QObject::disconnect(scalePopup, SIGNAL(runFeature(int,double,double,double)), glmodel->ft, SLOT(setTypeAndRun(int, double, double, double)));
-    QObject::disconnect(scalePopup, SIGNAL(openScale()), glmodel->shadowModel, SLOT(openScale()));
-    QObject::disconnect(scalePopup, SIGNAL(closeScale()), glmodel->shadowModel, SLOT(closeScale()));
+	// label popup codes
+	QObject::disconnect(labelPopup, SIGNAL(stateChangeLabelling()), glmodel, SLOT(stateChangeLabelling()));
+	QObject::disconnect(labelPopup, SIGNAL(sendLabelUpdate(QString, int, QString, bool, int)), glmodel, SLOT(applyLabelInfo(QString, int, QString, bool, int)));
+	//QObject::connect(labelPopup, SIGNAL(runFeature(int)),glmodel->ft, SLOT(setTypeAndStart(int)));
+	
+	// extension popup codes
+	QObject::disconnect(extensionPopup, SIGNAL(generateExtensionFaces(double)), glmodel, SLOT(generateExtensionFaces(double)));
 
-    // label popup codes
-    QObject::disconnect(labelPopup, SIGNAL(sendTextChanged(QString, int)),glmodel->shadowModel,SLOT(getTextChanged(QString, int)));
-    QObject::disconnect(labelPopup, SIGNAL(openLabelling()),glmodel->shadowModel,SLOT(openLabelling()));
-    QObject::disconnect(labelPopup, SIGNAL(closeLabelling()),glmodel->shadowModel,SLOT(closeLabelling()));
-    QObject::disconnect(labelPopup, SIGNAL(stateChangeLabelling()), glmodel, SLOT(stateChangeLabelling()));
-    QObject::disconnect(labelPopup, SIGNAL(sendLabelUpdate(QString, int, QString, bool, int)), glmodel, SLOT(applyLabelInfo(QString, int, QString, bool, int)));
-    //QObject::connect(labelPopup, SIGNAL(runFeature(int)),glmodel->ft, SLOT(setTypeAndStart(int)));
-    QObject::disconnect(labelPopup, SIGNAL(generateText3DMesh()), glmodel->shadowModel, SLOT(generateText3DMesh()));
-    QObject::disconnect(labelFontBox, SIGNAL(sendFontName(QString)),glmodel->shadowModel, SLOT(getFontNameChanged(QString)));
-    QObject::disconnect(labelFontBoldBox, SIGNAL(sendFontBold(bool)),glmodel->shadowModel, SLOT(getFontBoldChanged(bool)));
-    QObject::disconnect(labelFontSizeBox, SIGNAL(sendFontSize(int)),glmodel->shadowModel, SLOT(getFontSizeChanged(int)));
+	// shelloffset popup codes
+	QObject::disconnect(shelloffsetPopup, SIGNAL(shellOffset(double)), glmodel, SLOT(generateShellOffset(double)));
 
-    // extension popup codes
-    QObject::disconnect(extensionPopup, SIGNAL(openExtension()), glmodel->shadowModel, SLOT(openExtension()));
-    QObject::disconnect(extensionPopup, SIGNAL(closeExtension()), glmodel->shadowModel, SLOT(closeExtension()));
-    QObject::disconnect(extensionPopup, SIGNAL(generateExtensionFaces(double)), glmodel, SLOT(generateExtensionFaces(double)));
-    QObject::disconnect(glmodel->shadowModel,SIGNAL(extensionSelect()),this,SLOT(extensionSelect()));
-    QObject::disconnect(glmodel->shadowModel,SIGNAL(extensionUnSelect()),this,SLOT(extensionUnSelect()));
+	// manual support popup codes
+	QObject::disconnect(manualSupportPopup, SIGNAL(generateManualSupport()), glmodel, SLOT(generateManualSupport()));
 
-    // shelloffset popup codes
-    QObject::disconnect(shelloffsetPopup, SIGNAL(openShellOffset()), glmodel->shadowModel, SLOT(openShellOffset()));
-    QObject::disconnect(shelloffsetPopup, SIGNAL(closeShellOffset()), glmodel->shadowModel, SLOT(closeShellOffset()));
-    QObject::disconnect(shelloffsetPopup, SIGNAL(shellOffset(double)), glmodel, SLOT(generateShellOffset(double)));
-    QObject::disconnect(shelloffsetPopup, SIGNAL(resultSliderValueChanged(double)), glmodel->shadowModel, SLOT(getSliderSignal(double)));
+	// auto Repair popup codes
+	QObject::disconnect(repairPopup, SIGNAL(runFeature(int)), glmodel->ft, SLOT(setTypeAndStart(int)));
+	
+	//shadow model
+	disconnectShadow(glmodel);
 
-    // manual support popup codes
-    QObject::disconnect(manualSupportPopup, SIGNAL(openManualSupport()), glmodel->shadowModel, SLOT(openManualSupport()));
-    QObject::disconnect(manualSupportPopup, SIGNAL(closeManualSupport()), glmodel->shadowModel, SLOT(closeManualSupport()));
-    QObject::disconnect(manualSupportPopup, SIGNAL(generateManualSupport()), glmodel, SLOT(generateManualSupport()));
+	
 
-
-    // auto Repair popup codes
-    QObject::disconnect(repairPopup, SIGNAL(runFeature(int)), glmodel->ft, SLOT(setTypeAndStart(int)));
 
     // auto arrange popup codes
     //unused, signal from qml goes right into QmlManager.runArrange
@@ -437,6 +407,59 @@ void QmlManager::disconnectHandlers(GLModel* glmodel){
 
 
     QObject::disconnect(layerViewSlider, SIGNAL(sliderValueChanged(double)), glmodel, SLOT(getLayerViewSliderSignal(double)));
+}
+
+void QmlManager::disconnectShadow(GLModel* glmodel)
+{
+	// model layflat popup codes
+	QObject::disconnect(layflatPopup, SIGNAL(openLayflat()), glmodel->shadowModel, SLOT(openLayflat()));
+	QObject::disconnect(layflatPopup, SIGNAL(closeLayflat()), glmodel->shadowModel, SLOT(closeLayflat()));
+	QObject::disconnect(glmodel->shadowModel, SIGNAL(layFlatSelect()), this, SLOT(layFlatSelect()));
+	QObject::disconnect(glmodel->shadowModel, SIGNAL(layFlatUnSelect()), this, SLOT(layFlatUnSelect()));
+
+	// model cut popup codes
+	QObject::disconnect(cutPopup, SIGNAL(modelCut()), glmodel->shadowModel, SLOT(modelCut()));
+	QObject::disconnect(cutPopup, SIGNAL(cutModeSelected(int)), glmodel->shadowModel, SLOT(cutModeSelected(int)));
+	QObject::disconnect(cutPopup, SIGNAL(cutFillModeSelected(int)), glmodel->shadowModel, SLOT(cutFillModeSelected(int)));
+	QObject::disconnect(cutPopup, SIGNAL(openCut()), glmodel->shadowModel, SLOT(openCut()));
+	QObject::disconnect(cutPopup, SIGNAL(closeCut()), glmodel->shadowModel, SLOT(closeCut()));
+	QObject::disconnect(cutPopup, SIGNAL(resultSliderValueChanged(double)), glmodel->shadowModel, SLOT(getSliderSignal(double)));
+
+	//// hollow shell popup codes
+	//QObject::disconnect(hollowShellPopup, SIGNAL(hollowShell(double)), glmodel->shadowModel, SLOT(hollowShell(double)));
+	//QObject::disconnect(hollowShellPopup, SIGNAL(openHollowShell()), glmodel->shadowModel, SLOT(openHollowShell()));
+	//QObject::disconnect(hollowShellPopup, SIGNAL(resultSliderValueChanged(double)), glmodel->shadowModel, SLOT(getSliderSignal(double)));
+
+
+	// scale popup codes
+	QObject::disconnect(scalePopup, SIGNAL(openScale()), glmodel->shadowModel, SLOT(openScale()));
+	QObject::disconnect(scalePopup, SIGNAL(closeScale()), glmodel->shadowModel, SLOT(closeScale()));
+
+	// label popup codes
+	QObject::disconnect(labelPopup, SIGNAL(sendTextChanged(QString, int)), glmodel->shadowModel, SLOT(getTextChanged(QString, int)));
+	QObject::disconnect(labelPopup, SIGNAL(openLabelling()), glmodel->shadowModel, SLOT(openLabelling()));
+	QObject::disconnect(labelPopup, SIGNAL(closeLabelling()), glmodel->shadowModel, SLOT(closeLabelling()));
+	QObject::disconnect(labelPopup, SIGNAL(generateText3DMesh()), glmodel->shadowModel, SLOT(generateText3DMesh()));
+	QObject::disconnect(labelFontBox, SIGNAL(sendFontName(QString)), glmodel->shadowModel, SLOT(getFontNameChanged(QString)));
+	QObject::disconnect(labelFontBoldBox, SIGNAL(sendFontBold(bool)), glmodel->shadowModel, SLOT(getFontBoldChanged(bool)));
+	QObject::disconnect(labelFontSizeBox, SIGNAL(sendFontSize(int)), glmodel->shadowModel, SLOT(getFontSizeChanged(int)));
+
+	// extension popup codes
+	QObject::disconnect(extensionPopup, SIGNAL(openExtension()), glmodel->shadowModel, SLOT(openExtension()));
+	QObject::disconnect(extensionPopup, SIGNAL(closeExtension()), glmodel->shadowModel, SLOT(closeExtension()));
+	QObject::disconnect(glmodel->shadowModel, SIGNAL(extensionSelect()), this, SLOT(extensionSelect()));
+	QObject::disconnect(glmodel->shadowModel, SIGNAL(extensionUnSelect()), this, SLOT(extensionUnSelect()));
+
+	// shelloffset popup codes
+	QObject::disconnect(shelloffsetPopup, SIGNAL(openShellOffset()), glmodel->shadowModel, SLOT(openShellOffset()));
+	QObject::disconnect(shelloffsetPopup, SIGNAL(closeShellOffset()), glmodel->shadowModel, SLOT(closeShellOffset()));
+	QObject::disconnect(shelloffsetPopup, SIGNAL(resultSliderValueChanged(double)), glmodel->shadowModel, SLOT(getSliderSignal(double)));
+
+	// manual support popup codes
+	QObject::disconnect(manualSupportPopup, SIGNAL(openManualSupport()), glmodel->shadowModel, SLOT(openManualSupport()));
+	QObject::disconnect(manualSupportPopup, SIGNAL(closeManualSupport()), glmodel->shadowModel, SLOT(closeManualSupport()));
+
+
 }
 
 void QmlManager::connectHandlers(GLModel* glmodel){
@@ -629,7 +652,7 @@ void QmlManager::disableObjectPickers(){
 void QmlManager::enableObjectPickers(){
 	for (auto& pair : glmodels) {
 		auto glm = &pair.second;
-        if (!glm->shadowModel->m_objectPicker->isEnabled())
+        if (glm->shadowModel && !glm->shadowModel->m_objectPicker->isEnabled())
             glm->shadowModel->m_objectPicker->setEnabled(true);
     }
 }
@@ -822,6 +845,12 @@ GLModel* QmlManager::findGLModelByName(QString filename){
     return NULL;
 }
 
+void QmlManager::connectShadow(GLModel* shadowModel)
+{
+	QObject::connect(shadowModel, SIGNAL(modelSelected(int)), this, SLOT(modelSelected(int)));
+
+}
+
 void QmlManager::backgroundClicked(){
     qDebug() << "background clicked";
     unselectAll();
@@ -862,7 +891,7 @@ bool QmlManager::multipleModelSelected(int ID){
             target->changecolor(0);
             target->checkPrintingArea();
             QMetaObject::invokeMethod(partList, "unselectPartByModel", Q_ARG(QVariant, target->ID));
-            QMetaObject::invokeMethod(yesno_popup, "deletePart", Q_ARG(QVariant, target->ID));
+            QMetaObject::invokeMethod(yesno_popup, "deletePartListItem", Q_ARG(QVariant, target->ID));
 
             // set slicing info box property visible true if slicing info exists
             //slicingData->setProperty("visible", false);
@@ -981,7 +1010,7 @@ void QmlManager::lastModelSelected(){
         (*it)->changecolor(0);
         (*it)->checkPrintingArea();
         QMetaObject::invokeMethod(partList, "unselectPartByModel", Q_ARG(QVariant, (*it)->ID));
-        QMetaObject::invokeMethod(yesno_popup, "deletePart", Q_ARG(QVariant, (*it)->ID));
+        QMetaObject::invokeMethod(yesno_popup, "deletePartListItem", Q_ARG(QVariant, (*it)->ID));
 
         slicingData->setProperty("visible", false);
 
@@ -1039,7 +1068,7 @@ void QmlManager::modelSelected(int ID){
             (*it)->changecolor(0);
             (*it)->checkPrintingArea();
             QMetaObject::invokeMethod(partList, "unselectPartByModel", Q_ARG(QVariant, (*it)->ID));
-            QMetaObject::invokeMethod(yesno_popup, "deletePart", Q_ARG(QVariant, (*it)->ID));
+            QMetaObject::invokeMethod(yesno_popup, "deletePartListItem", Q_ARG(QVariant, (*it)->ID));
 
             // set slicing info box property visible true if slicing info exists
             slicingData->setProperty("visible",false);
@@ -1080,7 +1109,7 @@ void QmlManager::modelSelected(int ID){
         selectedModels[0]->changecolor(0);
         selectedModels[0]->checkPrintingArea();
         QMetaObject::invokeMethod(partList, "unselectPartByModel", Q_ARG(QVariant, selectedModels[0]->ID));
-        QMetaObject::invokeMethod(yesno_popup, "deletePart", Q_ARG(QVariant, selectedModels[0]->ID));
+        QMetaObject::invokeMethod(yesno_popup, "deletePartListItem", Q_ARG(QVariant, selectedModels[0]->ID));
 
         // set slicing info box property visible true if slicing info exists
         slicingData->setProperty("visible",false);
@@ -2013,9 +2042,9 @@ void QmlManager::addPart(QString fileName, int ID){
     QMetaObject::invokeMethod(partList, "addPart", Q_ARG(QVariant, fileName), Q_ARG(QVariant, ID));
 }
 
-void QmlManager::deletePart(int ID){
-    QMetaObject::invokeMethod(partList, "deletePart", Q_ARG(QVariant, ID));
-    QMetaObject::invokeMethod(yesno_popup, "deletePart", Q_ARG(QVariant, ID));
+void QmlManager::deletePartListItem(int ID){
+    QMetaObject::invokeMethod(partList, "deletePartListItem", Q_ARG(QVariant, ID));
+    QMetaObject::invokeMethod(yesno_popup, "deletePartListItem", Q_ARG(QVariant, ID));
 }
 
 void QmlManager::deleteList(int ID) {
