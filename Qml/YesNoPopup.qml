@@ -334,8 +334,8 @@ Rectangle {
         var newPart = newComponent.createObject(partListColumn, {"modelName" : fileName, "state" : "list", "objectName" : "qwer", "glModelID" : ID, "trimLength" : 37, "vis" : false,"fontsize" : 17})
     }
 
-    function deletePart(ID){ // delete in list by ID
-        console.log("yesno_popup: deletePart")
+    function deletePartListItem(ID){ // delete in list by ID
+        console.log("yesno_popup: deletePartListItem")
         for(var i=0 ; i<partListColumn.children.length; i++){
             if(partListColumn.children[i].glModelID === ID){
                 partListColumn.children[i].destroy()

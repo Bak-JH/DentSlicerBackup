@@ -128,7 +128,8 @@ public:
     GLModel *rightModel = nullptr;
     GLModel *twinModel = nullptr; // saves cut right for left, left for right models
     GLModel *shadowModel = nullptr;
-//    std::unique_ptr<GLModel> shadowModel;
+
+
     bool appropriately_rotated=false;
     QPhongMaterial *m_meshMaterial;
     //QMaterial *m_meshMaterial;
@@ -269,6 +270,8 @@ private:
     void removeLayerViewComponents();
     void generateLayerViewMaterial();
     static Mesh* toSparse(Mesh* mesh);
+	void addShadowModel(Mesh* mesh);
+	void deleteShadowModel();
 
     int cutMode = 1;
     int cutFillMode = 1;

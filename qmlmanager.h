@@ -183,9 +183,10 @@ public:
     void openArrange();
     void runArrange_internal();
     void disconnectHandlers(GLModel* glmodel);
+	void disconnectShadow(GLModel* glmodel);
     void connectHandlers(GLModel* glmodel);
     void addPart(QString fileName, int ID);
-    void deletePart(int ID);
+    void deletePartListItem(int ID);
     void openProgressPopUp();
     void openYesNoPopUp(bool selectedList_vis, std::string inputText_h, std::string inputText_m, std::string inputText_l, int inputText_fontsize, std::string image_source, int inputPopupType, int yesNo_okCancel);
     void openResultPopUp(std::string inputText_h, std::string inputText_m, std::string inputText_l);
@@ -194,7 +195,7 @@ public:
     int getLayerViewFlags();
 
     GLModel* findGLModelByName(QString filename);
-
+	void connectShadow(GLModel* shadowModel);
     Q_INVOKABLE QString getVersion();
     Q_INVOKABLE void keyboardHandlerFocus();
     Q_INVOKABLE QVector3D getSelectedCenter();

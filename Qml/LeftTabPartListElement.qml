@@ -71,7 +71,7 @@ Item {
     }
 
     Rectangle{
-        id : deletePart
+        id : deletePartTool
         visible: vis
         width: 20
         anchors.right: parent.right
