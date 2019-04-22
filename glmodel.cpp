@@ -17,6 +17,9 @@
 #include <QMatrix3x3>
 #include <feature/generatesupport.h>
 
+#ifdef _DEBUG
+#define _STRICT_GLMODEL
+#endif
 
 
 GLModel::GLModel(QObject* mainWindow, QNode *parent, Mesh* loadMesh, QString fname, bool isShadow, int id)
@@ -39,50 +42,25 @@ GLModel::GLModel(QObject* mainWindow, QNode *parent, Mesh* loadMesh, QString fna
     , layerRaftMesh(nullptr)
     , slicer(nullptr)
     , ID(id)
+    ,m_meshMaterial(nullptr)
+    ,m_geometryRenderer(nullptr)
 {
     connect(&futureWatcher, SIGNAL(finished()), this, SLOT(slicingDone()));
     qDebug() << "new model made _______________________________"<<this<< "parent:"<<this->parentModel<<"shadow:"<<this->shadowModel;
 
     // generates shadow model for object picking
     if (isShadow){
+		lmesh = new Mesh();
+		rmesh = new Mesh();
 
-        lmesh = new Mesh();
-        rmesh = new Mesh();
+		updateShadowModelImpl();
 
-        mesh = toSparse(parentModel->mesh);
-        m_transform->setTranslation(QVector3D((mesh->x_max()+mesh->x_min())/2, (mesh->y_max()+mesh->y_min())/2, (mesh->z_max()+mesh->z_min())/2));
-        mesh->centerMesh();
+		addComponent(m_transform);
+		addMouseHandlers();
+		QObject::connect(this, SIGNAL(_generateSupport()), this, SLOT(generateSupport()));
+		QObject::connect(this, SIGNAL(_updateModelMesh(bool)), this, SLOT(updateModelMesh(bool)));
 
-        initialize(mesh->faces.size());
-        addVertices(mesh, false);
-        applyGeometry();
-
-        addComponent(m_transform);
-
-        /// This block is for shadowModel testing ///
-
-        /*m_meshMaterial = new QPhongMaterial();
-        m_meshAlphaMaterial = new QPhongAlphaMaterial();
-        m_layerMaterial = new QPhongMaterial();
-        m_meshMaterial->setAmbient(QColor(255,0,0));
-        m_meshMaterial->setDiffuse(QColor(173,215,218));
-        m_meshMaterial->setSpecular(QColor(182,237,246));
-        m_meshMaterial->setShininess(0.0f);
-
-        addComponent(m_meshMaterial);*/
-
-        addMouseHandlers();
-
-        QObject::connect(this,SIGNAL(_generateSupport()),this,SLOT(generateSupport()));
-        QObject::connect(this,SIGNAL(_updateModelMesh(bool)),this,SLOT(updateModelMesh(bool)));
-
-        labellingTextPreview = new LabellingTextPreview(this);
-        /*
-        labellingTextPreview = new LabellingTextPreview(this);
-        labellingTextPreview->setEnabled(false);
-        labellingTextPreview->setTranslation(QVector3D(100,0,0));
-        */
-
+		labellingTextPreview = new LabellingTextPreview(this);
         return;
     }
 
@@ -131,6 +109,7 @@ GLModel::GLModel(QObject* mainWindow, QNode *parent, Mesh* loadMesh, QString fna
     qDebug() << "created original model";
 
     //repairMesh(mesh);
+	addShadowModel(mesh);
 
     // 승환 75%
     qmlManager->setProgress(0.73);
@@ -167,6 +146,8 @@ GLModel::GLModel(QObject* mainWindow, QNode *parent, Mesh* loadMesh, QString fna
     cuttingContourCylinders.reserve(50);
 
 }
+
+
 
 void GLModel::addMouseHandlers(){
     m_objectPicker = new Qt3DRender::QObjectPicker(this);
@@ -535,15 +516,16 @@ void GLModel::updateModelMesh(bool shadowUpdate){
     QMetaObject::invokeMethod(qmlManager->boxLeftTab, "disableLefttab");
     qDebug() << "update Model Mesh";
     // delete allocated buffers, geometry
-    delete vertexBuffer;
-    delete vertexColorBuffer;
-    delete vertexNormalBuffer;
-    delete positionAttribute;
-    delete normalAttribute;
-    delete colorAttribute;
-    removeComponent(m_geometryRenderer);
-    delete m_geometry;
-    delete m_geometryRenderer;
+    //delete vertexBuffer;
+    //delete vertexColorBuffer;
+    //delete vertexNormalBuffer;
+    //delete positionAttribute;
+    //delete normalAttribute;
+    //delete colorAttribute;
+    //removeComponent(m_geometryRenderer);
+    //delete m_geometry;
+    //delete m_geometryRenderer;
+	freeMem();
     // reinitialize with updated mesh
 
     int viewMode = qmlManager->getViewMode();
@@ -616,21 +598,24 @@ void GLModel::updateModelMesh(bool shadowUpdate){
 
     // create new object picker, shadowmodel, remove prev shadowmodel
     //QVector3D translation = shadowModel->m_transform->translation();
-    if (shadowModel !=NULL && shadowUpdate){
+    if (shadowUpdate){
         //QObject::disconnect(shadowModel, SIGNAL(modelSelected(int)), qmlManager, SLOT(modelSelected(int)));
         //shadowModel->removeMouseHandlers();
         //qmlManager->disconnectHandlers(this);
         //GLModel* prevShadowModel = shadowModel;
         switch( viewMode ) {
             case VIEW_MODE_OBJECT:
-				addShadowModel(mesh);
+				//addShadowModel(mesh);
+				shadowModel->updateShadowModelImpl();
                 break;
             case VIEW_MODE_SUPPORT:
-				addShadowModel(layerMesh);
+				//addShadowModel(layerMesh);
+				shadowModel->updateShadowModelImpl();
                 shadowModel->m_transform->setTranslation(shadowModel->m_transform->translation()+QVector3D(0,0,scfg->raft_thickness));
                 break;
             case VIEW_MODE_LAYER:
-				addShadowModel(mesh);
+				shadowModel->updateShadowModelImpl();
+				//addShadowModel(mesh);
                 break;
         }
         /*float mesh_x_center = m_transform->translation().x()+(mesh->x_max() +mesh->x_min())/2;
@@ -2069,18 +2054,18 @@ void GLModel::removeCuttingPoints(){
 }
 
 void GLModel::removeModel(){
-    delete vertexBuffer;
-    delete vertexNormalBuffer;
-    delete vertexColorBuffer;
-    delete positionAttribute;
-    delete normalAttribute;
-    delete colorAttribute;
-    removeComponent(m_geometryRenderer);
-    removeComponent(m_meshMaterial);
-    delete m_geometry;
-    delete m_geometryRenderer;
+//    delete vertexBuffer;
+//    delete vertexNormalBuffer;
+//    delete vertexColorBuffer;
+//    delete positionAttribute;
+//    delete normalAttribute;
+//    delete colorAttribute;
+//    removeComponent(m_geometryRenderer);
+//    removeComponent(m_meshMaterial);
+//    delete m_geometry;
+//    delete m_geometryRenderer;
 
-    deleteLater();
+//    deleteLater();
 }
 
 void GLModel::removeModelPartList(){
@@ -2202,20 +2187,7 @@ void GLModel::indentHollowShell(double radius){
 }
 
 GLModel::~GLModel(){
-    /*delete m_transform;
-    delete m_objectPicker;
-    delete m_meshMaterial;
-    delete mesh;
-    delete rmesh;
-    delete lmesh;
-    delete colorAttribute;
-    delete normalAttribute;
-    delete positionAttribute;
-    delete vertexColorBuffer;
-    delete vertexNormalBuffer;
-    delete vertexBuffer;
-    delete m_geometry;
-    delete m_geometryRenderer;*/
+	freeMem();
 	deleteShadowModel();
 }
 
@@ -3146,19 +3118,21 @@ void GLModel::generateLayerViewMaterial() {
 
 void GLModel::addShadowModel(Mesh* mesh)
 {
-	auto newShadowModel = new GLModel(this->mainWindow, this, mesh, filename, true);
-
-	//copy attributes from previous shadow if there was one
-	if (shadowModel)
-	{
-		newShadowModel->copyModelAttributeFrom(shadowModel);
-	}
+    if (shadowModel)
+    {
+#ifdef _STRICT_GLMODEL
+        throw std::exception("Shadow model added twice ");
+#endif
+    }
+	//set ID of shadow model to -ID of the parent for debugging purposes
+    int shadowModelID = -1*ID;
+    shadowModel = new GLModel(this->mainWindow, this, mesh, filename, true, shadowModelID);
 	//delete and disconnect previous shadowModel
-	deleteShadowModel();
-	shadowModel = newShadowModel;
 	qmlManager->connectShadow(shadowModel);
 
 }
+
+
 
 void GLModel::deleteShadowModel()
 {
@@ -3169,6 +3143,46 @@ void GLModel::deleteShadowModel()
 		delete shadowModel;
 		shadowModel = nullptr;
 	}
+}
+
+void GLModel::updateShadowModelImpl()
+{
+
+	if (m_objectPicker)
+	{
+		freeMem();
+	}
+
+	mesh = toSparse(parentModel->mesh);
+	m_transform->setTranslation(QVector3D((mesh->x_max() + mesh->x_min()) / 2, (mesh->y_max() + mesh->y_min()) / 2, (mesh->z_max() + mesh->z_min()) / 2));
+	mesh->centerMesh();
+
+
+	initialize(mesh->faces.size());
+	addVertices(mesh, false);
+	applyGeometry();
+
+
+}
+
+void GLModel::freeMem()
+{
+	delete vertexBuffer;
+	delete vertexNormalBuffer;
+	delete vertexColorBuffer;
+	delete positionAttribute;
+	delete normalAttribute;
+	delete colorAttribute;
+	if (m_geometryRenderer)
+	{
+		removeComponent(m_geometryRenderer);
+	}
+	if (m_meshMaterial)
+	{
+		removeComponent(m_meshMaterial);
+	}
+	delete m_geometry;
+	delete m_geometryRenderer;
 }
 
 void GLModel::setSupport()

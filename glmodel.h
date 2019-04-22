@@ -150,7 +150,7 @@ public:
     QAttribute *indexAttribute;
     QGeometry* m_geometry;
     QGeometryRenderer* m_geometryRenderer;
-    Qt3DRender::QObjectPicker *m_objectPicker;
+    Qt3DRender::QObjectPicker *m_objectPicker = nullptr;
     Qt3DCore::QTransform *m_transform;
     //QVector3D m_translation;
 
@@ -271,7 +271,10 @@ private:
     void generateLayerViewMaterial();
     static Mesh* toSparse(Mesh* mesh);
 	void addShadowModel(Mesh* mesh);
+	void updateShadowModel(Mesh* mesh);
 	void deleteShadowModel();
+	void updateShadowModelImpl(); // main constructor for mainmesh and shadowmesh
+	void freeMem();
 
     int cutMode = 1;
     int cutFillMode = 1;
@@ -295,8 +298,8 @@ private:
 
     // Core mesh structures
     Mesh* mesh;
-    Mesh* lmesh;
-    Mesh* rmesh;
+    Mesh* lmesh = nullptr;
+    Mesh* rmesh = nullptr;
     QSphereMesh* dragMesh;
     Mesh* supportMesh = nullptr;
     Mesh* raftMesh = nullptr;
