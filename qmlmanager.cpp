@@ -387,7 +387,7 @@ void QmlManager::disconnectHandlers(GLModel* glmodel){
 	QObject::disconnect(repairPopup, SIGNAL(runFeature(int)), glmodel->ft, SLOT(setTypeAndStart(int)));
 	
 	//shadow model
-	disconnectShadow(glmodel);
+    disconnectShadow(glmodel);
 
 	
 
