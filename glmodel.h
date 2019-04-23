@@ -269,7 +269,6 @@ private:
     QVector3D lastpoint;
     QVector2D prevPoint;
     void resizeMem(const int& faces_cnt);
-    void applyGeometry();
     void addVertex(QVector3D vertex);
     void addVertices(std::vector<QVector3D> vertices);
     void addNormalVertices(std::vector<QVector3D> vertices);

@@ -106,80 +106,72 @@ GLModel::GLModel(QObject* mainWindow, QNode *parent, Mesh* loadMesh, QString fna
         QObject::connect(this, SIGNAL(_updateModelMesh(bool)), this, SLOT(updateModelMesh(bool)));
 
         labellingTextPreview = new LabellingTextPreview(this);
-        return;
     }
+	else
+	{
+		// Add to Part List
+		qmlManager->addPart(getFileName(fname.toStdString().c_str()), ID);
 
-    // Add to Part List
-    qmlManager->addPart(getFileName(fname.toStdString().c_str()), ID);
+		m_meshMaterial = new QPhongMaterial();
+		m_meshVertexMaterial = new QPerVertexColorMaterial();
 
-    m_meshMaterial = new QPhongMaterial();
-    m_meshVertexMaterial = new QPerVertexColorMaterial();
+		generateLayerViewMaterial();
 
-    generateLayerViewMaterial();
+		this->changecolor(0);
+		if (filename != "" && (filename.contains(".stl") || filename.contains(".STL"))\
+			&& loadMesh == nullptr) {
+			mesh = new Mesh();
+			FileLoader::loadMeshSTL(mesh, filename.toLocal8Bit().constData());
+		}
+		else if (filename != "" && (filename.contains(".obj") || filename.contains(".OBJ"))\
+			&& loadMesh == nullptr) {
+			mesh = new Mesh();
+			FileLoader::loadMeshOBJ(mesh, filename.toLocal8Bit().constData());
+		}
+		else {
+			mesh = loadMesh;
+		}
 
-    this->changecolor(0);
-    if (filename != "" && (filename.contains(".stl")||filename.contains(".STL"))\
-            && loadMesh == nullptr){
-        mesh = new Mesh();
-        FileLoader::loadMeshSTL(mesh, filename.toLocal8Bit().constData());
-    } else if (filename != "" && (filename.contains(".obj")||filename.contains(".OBJ"))\
-            && loadMesh == nullptr){
-        mesh = new Mesh();
-        FileLoader::loadMeshOBJ(mesh, filename.toLocal8Bit().constData());
-    } else {
-        mesh = loadMesh;
-    }
+		// 승환 25%
+		qmlManager->setProgress(0.23);
+		resizeMem(mesh->faces.size());
+		addVertices(mesh, false);
+		//applyGeometry();
 
-    // 승환 25%
-    qmlManager->setProgress(0.23);
-    resizeMem(mesh->faces.size());
-    addVertices(mesh, false);
-    applyGeometry();
+		// 승환 50%
+		qmlManager->setProgress(0.49);
+		Qt3DExtras::QDiffuseMapMaterial* diffuseMapMaterial = new Qt3DExtras::QDiffuseMapMaterial();
 
-    // 승환 50%
-    qmlManager->setProgress(0.49);
-    Qt3DExtras::QDiffuseMapMaterial *diffuseMapMaterial = new Qt3DExtras::QDiffuseMapMaterial();
+		addComponent(m_meshMaterial);
 
-    addComponent(m_meshMaterial);
+		qDebug() << "created original model";
 
-    qDebug() << "created original model";
+		//repairMesh(mesh);
+		addShadowModel(mesh);
 
-    //repairMesh(mesh);
-    addShadowModel(mesh);
+		// 승환 75%
+		qmlManager->setProgress(0.73);
 
-    // 승환 75%
-    qmlManager->setProgress(0.73);
+		QObject::connect(this, SIGNAL(bisectDone()), this, SLOT(generateRLModel()));
+		QObject::connect(this, SIGNAL(_generateSupport()), this, SLOT(generateSupport()));
+		QObject::connect(this, SIGNAL(_updateModelMesh(bool)), this, SLOT(updateModelMesh(bool)));
 
-    QObject::connect(this,SIGNAL(bisectDone()),this,SLOT(generateRLModel()));
-    QObject::connect(this,SIGNAL(_generateSupport()),this,SLOT(generateSupport()));
-    QObject::connect(this,SIGNAL(_updateModelMesh(bool)),this,SLOT(updateModelMesh(bool)));
+		qDebug() << "created shadow model";
 
-    qDebug() << "created shadow model";
-
-    ft = new featureThread(this, 0);
-    //arsignal = new arrangeSignalSender();//unused, signal from qml goes right into QmlManager.runArrange
-
-
-    /*QList<QObject*> temp;
-    temp.append(mainWindow);
-    QObject *partList = (QEntity *)FindItemByName(temp, "partList");
-
-    QMetaObject::invokeMethod(partList, "addPart",
-        Q_ARG(QVariant, getFileName(fname.toStdString().c_str())),
-        Q_ARG(QVariant, ID));
-    */
-
-    qDebug() << "adding part " << fname.toStdString().c_str();
+		ft = new featureThread(this, 0);
+		qDebug() << "adding part " << fname.toStdString().c_str();
 
 
-    // reserve cutting points, contours
-    sphereEntity.reserve(50);
-    sphereMesh.reserve(50);
-    sphereMaterial.reserve(50);
-    sphereTransform.reserve(50);
-    sphereObjectPicker.reserve(50);
-    cuttingPoints.reserve(50);
-    cuttingContourCylinders.reserve(50);
+		// reserve cutting points, contours
+		sphereEntity.reserve(50);
+		sphereMesh.reserve(50);
+		sphereMaterial.reserve(50);
+		sphereTransform.reserve(50);
+		sphereObjectPicker.reserve(50);
+		cuttingPoints.reserve(50);
+		cuttingContourCylinders.reserve(50);
+
+	}
 
 }
 
@@ -563,8 +555,12 @@ void GLModel::updateModelMesh(bool shadowUpdate){
         if (supportMesh != nullptr) {
             resizeMem(supportMesh->faces.size());
             addVertices(supportMesh, false);
-        } else resizeMem(mesh->faces.size());
-        addVertices(mesh, false);
+        }
+        else
+        {
+            resizeMem(mesh->faces.size());
+            addVertices(mesh, false);
+        }
         /*
         if( layerMesh != nullptr ) {
             initialize(layerMesh->faces.size() + layerSupportMesh->faces.size() + layerRaftMesh->faces.size());
@@ -868,18 +864,19 @@ void GLModel::resizeMem(const int& faces_cnt){
     vertexArray.resize(faces_cnt*3*(3)*sizeof(float));
     vertexNormalArray.resize(faces_cnt*3*(3)*sizeof(float));
     vertexColorArray.resize(faces_cnt*3*(3)*sizeof(float));
+
+	//TODO: WHY !!!!!!!!!!!!!!
+	if (ID != -1)
+	{
+		vertexBuffer.setData(vertexArray);
+		vertexNormalBuffer.setData(vertexNormalArray);
+		vertexColorBuffer.setData(vertexColorArray);
+
+		positionAttribute.setCount(0);
+		normalAttribute.setCount(0);
+		colorAttribute.setCount(0);
+	}
 }
-
-void GLModel::applyGeometry(){
-
-    m_geometryRenderer.setInstanceCount(1);
-    m_geometryRenderer.setFirstVertex(0);
-    m_geometryRenderer.setFirstInstance(0);
-
-
-    return;
-}
-
 void GLModel::addVertex(QVector3D vertex){
 
     //update geometry
@@ -1232,20 +1229,19 @@ void GLModel::handlePickerClicked(QPickEvent *pick)
     isReleased = true;
     qDebug() << "Released";
 
-    if (isMoved){
-        //if(components().size() > 4)
-        //{
+	if (isMoved) {
+		if (components().size() > 4)
+		{
+			removeComponent(dragMesh);
+			qmlManager->fixMesh();
+			qDebug() << "dragMesh removed";
+		}
+		//removeComponent(dragMesh);
 
-        //}
-		removeComponent(dragMesh);
-		//qmlManager->fixMesh();
-		qDebug() << "dragMesh removed";
-        //removeComponent(dragMesh);
-
-        qmlManager->modelMoveDone();
-        isMoved = false;
-        return;
-    }
+		qmlManager->modelMoveDone();
+		isMoved = false;
+		return;
+	}
 
 
     //---------------- rgoo routine end --------------------
@@ -2215,14 +2211,13 @@ void GLModel::mgoo(Qt3DRender::QPickEvent* v)
         float scale_val = biggest > 50.0f ? 1.0f : 100.0f/biggest;
         m_transform.setScale(scale_val);
 
-        //if (components().size() < 5){
-
-        //}
-		//removeComponent(dragMesh);
-		dragMesh->setRadius(biggest);
-		addComponent(dragMesh);
-		//qDebug() << "COMPONENTS(A): " << components();
-		qDebug() << "dragMesh added";
+		if (components().size() < 5) {
+			//removeComponent(dragMesh);
+			dragMesh->setRadius(biggest);
+			addComponent(dragMesh);
+			//qDebug() << "COMPONENTS(A): " << components();
+			//qDebug() << "dragMesh added";
+		}
         isMoved = true;
     }
 
@@ -3088,8 +3083,9 @@ void GLModel::addShadowModel(Mesh* mesh)
         throw std::exception("Shadow model added twice ");
 #endif
     }
+    qDebug() << "shadowmodel added";
     //set ID of shadow model to -ID of the parent for debugging purposes
-    int shadowModelID = -1*ID;
+    int shadowModelID = -1;
     shadowModel = new GLModel(this->mainWindow, this, mesh, filename, true, shadowModelID);
     //delete and disconnect previous shadowModel
     qmlManager->connectShadow(shadowModel);
@@ -3102,6 +3098,7 @@ void GLModel::deleteShadowModel()
 {
     if (shadowModel)
     {
+        qDebug()<< "shadowmodel removed";
         shadowModel->removeMouseHandlers();
         qmlManager->disconnectShadow(this);
         delete shadowModel;
@@ -3116,7 +3113,7 @@ void GLModel::updateShadowModelImpl()
     mesh->centerMesh();
     resizeMem(mesh->faces.size());
     addVertices(mesh, false);
-    applyGeometry();
+    //applyGeometry();
 }
 
 void GLModel::setSupport()
