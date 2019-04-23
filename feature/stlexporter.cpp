@@ -25,7 +25,7 @@ Mesh* STLexporter::mergeSelectedModels() {
     verNum = 0;
 
     foreach (GLModel* model, qmlManager->selectedModels) {
-        QVector3D trans = model->m_transform->translation();
+        QVector3D trans = model->m_transform.translation();
 
         MeshFace newFace;
         for (const auto& newFace : model->getMesh()->getFaces()) {

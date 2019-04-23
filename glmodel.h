@@ -139,19 +139,10 @@ public:
     QParameter *m_layerMaterialHeight;
     QParameter *m_layerMaterialRaftHeight;
 
-    //QPhongMaterial *m_meshMaterial;
-    Qt3DRender::QBuffer *vertexBuffer;
-    Qt3DRender::QBuffer *vertexNormalBuffer;
-    Qt3DRender::QBuffer *vertexColorBuffer;
-    Qt3DRender::QBuffer *indexBuffer;
-    QAttribute *positionAttribute;
-    QAttribute *normalAttribute;
-    QAttribute *colorAttribute;
-    QAttribute *indexAttribute;
-    QGeometry* m_geometry;
-    QGeometryRenderer* m_geometryRenderer;
+
+
     Qt3DRender::QObjectPicker *m_objectPicker = nullptr;
-    Qt3DCore::QTransform *m_transform;
+    Qt3DCore::QTransform m_transform;
     //QVector3D m_translation;
 
     // feature hollowshell
@@ -191,7 +182,6 @@ public:
 
     void removeModel();
     void removeModelPartList();
-
     LabellingTextPreview* labellingTextPreview = nullptr;
 
     void copyModelAttributeFrom(GLModel* from);
@@ -251,6 +241,26 @@ public:
     const Mesh* getMesh();
     const Mesh* getSupport();
 private:
+    //Order is important! Look at the initializer list in constructor
+
+    QGeometryRenderer m_geometryRenderer;
+    QGeometry m_geometry;
+
+    QByteArray vertexArray;
+    QByteArray vertexNormalArray;
+    QByteArray vertexColorArray;
+    QByteArray appendIdxArray;
+
+    Qt3DRender::QBuffer vertexBuffer;
+    Qt3DRender::QBuffer vertexNormalBuffer;
+    Qt3DRender::QBuffer vertexColorBuffer;
+    Qt3DRender::QBuffer indexBuffer;
+
+    QAttribute positionAttribute;
+    QAttribute normalAttribute;
+    QAttribute colorAttribute;
+    QAttribute indexAttribute;
+
     int colorMode;
     float x,y,z;
     int v_cnt;
@@ -258,7 +268,7 @@ private:
     QNode* m_parent;
     QVector3D lastpoint;
     QVector2D prevPoint;
-    void initialize(const int& faces_cnt);
+    void resizeMem(const int& faces_cnt);
     void applyGeometry();
     void addVertex(QVector3D vertex);
     void addVertices(std::vector<QVector3D> vertices);
@@ -274,7 +284,6 @@ private:
 	void updateShadowModel(Mesh* mesh);
 	void deleteShadowModel();
 	void updateShadowModelImpl(); // main constructor for mainmesh and shadowmesh
-	void freeMem();
 
     int cutMode = 1;
     int cutFillMode = 1;
@@ -296,10 +305,12 @@ private:
 
     int viewMode = -1;
 
+	//only use pointer/heap when you don't know if you are going to make a member attribute
+	Mesh lmesh;
+	Mesh rmesh;
     // Core mesh structures
     Mesh* mesh;
-    Mesh* lmesh = nullptr;
-    Mesh* rmesh = nullptr;
+
     QSphereMesh* dragMesh;
     Mesh* supportMesh = nullptr;
     Mesh* raftMesh = nullptr;
