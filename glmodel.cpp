@@ -3,6 +3,7 @@
 #include <QString>
 #include <QtMath>
 #include <cfloat>
+#include <exception>
 
 #include "qmlmanager.h"
 #include "feature/text3dgeometrygenerator.h"
@@ -180,35 +181,18 @@ GLModel::GLModel(QObject* mainWindow, QNode *parent, Mesh* loadMesh, QString fna
 
 
 void GLModel::addMouseHandlers(){
-	if (m_objectPicker)
-	{
-		m_objectPicker = new Qt3DRender::QObjectPicker(this);
 
-		m_objectPicker->setHoverEnabled(false); // to reduce drag load
-		m_objectPicker->setDragEnabled(false);
-		// add only m_objectPicker
-		QObject::connect(m_objectPicker, SIGNAL(released(Qt3DRender::QPickEvent*)), this, SLOT(handlePickerClicked(Qt3DRender::QPickEvent*)));
-		QObject::connect(m_objectPicker, SIGNAL(moved(Qt3DRender::QPickEvent*)), this, SLOT(mgoo(Qt3DRender::QPickEvent*)));
-		QObject::connect(m_objectPicker, SIGNAL(pressed(Qt3DRender::QPickEvent*)), this, SLOT(pgoo(Qt3DRender::QPickEvent*)));
-		QObject::connect(m_objectPicker, SIGNAL(entered()), this, SLOT(engoo()));
-		QObject::connect(m_objectPicker, SIGNAL(exited()), this, SLOT(exgoo()));
-		addComponent(m_objectPicker);
-	}
-	else
-	{
-		m_objectPicker = new Qt3DRender::QObjectPicker(this);
+	m_objectPicker = new Qt3DRender::QObjectPicker(this);
 
-		m_objectPicker->setHoverEnabled(false); // to reduce drag load
-		m_objectPicker->setDragEnabled(false);
-		// add only m_objectPicker
-		QObject::connect(m_objectPicker, SIGNAL(released(Qt3DRender::QPickEvent*)), this, SLOT(handlePickerClicked(Qt3DRender::QPickEvent*)));
-		QObject::connect(m_objectPicker, SIGNAL(moved(Qt3DRender::QPickEvent*)), this, SLOT(mgoo(Qt3DRender::QPickEvent*)));
-		QObject::connect(m_objectPicker, SIGNAL(pressed(Qt3DRender::QPickEvent*)), this, SLOT(pgoo(Qt3DRender::QPickEvent*)));
-		QObject::connect(m_objectPicker, SIGNAL(entered()), this, SLOT(engoo()));
-		QObject::connect(m_objectPicker, SIGNAL(exited()), this, SLOT(exgoo()));
-		addComponent(m_objectPicker);
-	}
-
+	m_objectPicker->setHoverEnabled(false); // to reduce drag load
+	m_objectPicker->setDragEnabled(false);
+	// add only m_objectPicker
+	QObject::connect(m_objectPicker, SIGNAL(released(Qt3DRender::QPickEvent*)), this, SLOT(handlePickerClicked(Qt3DRender::QPickEvent*)));
+	QObject::connect(m_objectPicker, SIGNAL(moved(Qt3DRender::QPickEvent*)), this, SLOT(mgoo(Qt3DRender::QPickEvent*)));
+	QObject::connect(m_objectPicker, SIGNAL(pressed(Qt3DRender::QPickEvent*)), this, SLOT(pgoo(Qt3DRender::QPickEvent*)));
+	QObject::connect(m_objectPicker, SIGNAL(entered()), this, SLOT(engoo()));
+	QObject::connect(m_objectPicker, SIGNAL(exited()), this, SLOT(exgoo()));
+	addComponent(m_objectPicker);
 }
 
 void GLModel::removeMouseHandlers(){
@@ -566,6 +550,8 @@ void GLModel::updateModelMesh(bool shadowUpdate){
     qDebug() << "update Model Mesh";
     // reinitialize with updated mesh
 
+    if(ID == -1)
+        throw std::runtime_error("shadow model running updateModelMesh");
     int viewMode = qmlManager->getViewMode();
     switch( viewMode ) {
     case VIEW_MODE_OBJECT:
