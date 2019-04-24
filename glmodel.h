@@ -285,6 +285,8 @@ private:
 	void updateShadowModel(Mesh* mesh);
 	void deleteShadowModel();
 	void updateShadowModelImpl(); // main constructor for mainmesh and shadowmesh
+	void disableMouseHandlers();
+	void reenableMouseHandlers();
 
     int cutMode = 1;
     int cutFillMode = 1;
