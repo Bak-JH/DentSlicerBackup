@@ -101,7 +101,7 @@ GLModel::GLModel(QObject* mainWindow, QNode *parent, Mesh* loadMesh, QString fna
 
     // generates shadow model for object picking
     if (isShadow){
-		addMouseHandlers();
+		//addMouseHandlers();
 
         updateShadowModelImpl();
 
@@ -137,7 +137,7 @@ GLModel::GLModel(QObject* mainWindow, QNode *parent, Mesh* loadMesh, QString fna
 
 		// 승환 25%
 		qmlManager->setProgress(0.23);
-		resizeMem(mesh->faces.size());
+		clearMem();
 		addVertices(mesh, false);
 		//applyGeometry();
 
@@ -555,17 +555,17 @@ void GLModel::updateModelMesh(bool shadowUpdate){
     int viewMode = qmlManager->getViewMode();
     switch( viewMode ) {
     case VIEW_MODE_OBJECT:
-        resizeMem(mesh->faces.size());
+		clearMem();
         addVertices(mesh, false);
         break;
     case VIEW_MODE_SUPPORT:
         if (supportMesh != nullptr) {
-            resizeMem(supportMesh->faces.size());
+			clearMem();
             addVertices(supportMesh, false);
         }
         else
         {
-            resizeMem(mesh->faces.size());
+			clearMem();
             addVertices(mesh, false);
         }
         /*
@@ -587,7 +587,7 @@ void GLModel::updateModelMesh(bool shadowUpdate){
                     (qmlManager->getLayerViewFlags() & LAYER_INFILL != 0 ? layerInfillMesh->faces.size()*2 : 0) +
                     (qmlManager->getLayerViewFlags() & LAYER_SUPPORTERS != 0 ? supportMesh->faces.size()*2 : 0) +
                     (qmlManager->getLayerViewFlags() & LAYER_RAFT != 0 ? layerRaftMesh->faces.size()*2 : 0);
-            resizeMem(faces);
+			clearMem();
             addVertices(layerMesh, false);
             if( qmlManager->getLayerViewFlags() & LAYER_INFILL ) {
                 addVertices(layerInfillMesh, false, QVector3D(1.0f, 1.0f, 0.0f));
@@ -600,7 +600,7 @@ void GLModel::updateModelMesh(bool shadowUpdate){
             }
         } else {
             int faces = mesh->faces.size()*2 + ((supportMesh!=nullptr) ? supportMesh->faces.size()*2:0);
-            resizeMem(faces);
+			clearMem();
             addVertices(mesh, false);
             if (supportMesh != nullptr)
                 addVertices(supportMesh, false);
@@ -867,19 +867,16 @@ arrangeSignalSender::arrangeSignalSender(){
 
 }
 
-void GLModel::resizeMem(const int& faces_cnt){
-    vertexArray.resize(faces_cnt*3*(3)*sizeof(float));
-    vertexNormalArray.resize(faces_cnt*3*(3)*sizeof(float));
-    vertexColorArray.resize(faces_cnt*3*(3)*sizeof(float));
-	vertexBuffer.setData(vertexArray);
-	vertexNormalBuffer.setData(vertexNormalArray);
-	vertexColorBuffer.setData(vertexColorArray);
-
+void GLModel::clearMem(){
+    QByteArray newVertexArray(vertexBuffer.data().size(), 0);
+    QByteArray newVertexNormalArray(vertexNormalBuffer.data().size(), 0);
+    QByteArray newVertexColorArray(vertexColorBuffer.data().size(), 0);
+    vertexBuffer.updateData(0, newVertexArray);
+    vertexNormalBuffer.updateData(0, newVertexNormalArray);
+    vertexColorBuffer.updateData(0, newVertexColorArray);
 	positionAttribute.setCount(0);
 	normalAttribute.setCount(0);
 	colorAttribute.setCount(0);
-	//TODO: WHY !!!!!!!!!!!!!!
-
 }
 void GLModel::addVertex(QVector3D vertex){
 
@@ -3114,24 +3111,26 @@ void GLModel::updateShadowModelImpl()
 {
 	disableMouseHandlers();
     mesh = toSparse(parentModel->mesh);
-    m_transform.setTranslation(QVector3D((mesh->x_max() + mesh->x_min()) / 2, (mesh->y_max() + mesh->y_min()) / 2, (mesh->z_max() + mesh->z_min()) / 2));
-    mesh->centerMesh();
-    resizeMem(mesh->faces.size());
+	m_transform.setTranslation(QVector3D((mesh->x_max() + mesh->x_min()) / 2, (mesh->y_max() + mesh->y_min()) / 2, (mesh->z_max() + mesh->z_min()) / 2));
+	mesh->centerMesh();
+	clearMem();
     addVertices(mesh, false);
 	reenableMouseHandlers();
 }
 
 void GLModel::disableMouseHandlers()
 {
-	removeComponent(m_objectPicker);
-	m_objectPicker->setEnabled(false);
+	//removeComponent(m_objectPicker);
+	//m_objectPicker->setEnabled(false);
 	//m_objectPicker->setParent(nullptr);
+	removeMouseHandlers();
 }
 
 void GLModel::reenableMouseHandlers()
 {
-	addComponent(m_objectPicker);
-	m_objectPicker->setEnabled(true);
+	//addComponent(m_objectPicker);
+	//m_objectPicker->setEnabled(true);
+	addMouseHandlers();
 
 }
 

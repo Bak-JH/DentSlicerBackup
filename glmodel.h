@@ -270,7 +270,7 @@ private:
     QNode* m_parent;
     QVector3D lastpoint;
     QVector2D prevPoint;
-    void resizeMem(const int& faces_cnt);
+    void clearMem();
     void addVertex(QVector3D vertex);
     void addVertices(std::vector<QVector3D> vertices);
     void addNormalVertices(std::vector<QVector3D> vertices);
