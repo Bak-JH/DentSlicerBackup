@@ -33,12 +33,12 @@ void extendMesh(Mesh* mesh, MeshFace* mf, double distance){
     qDebug() << "detected extension outlines" << extension_outlines.size();
 
 
-    qDebug() << "mesh size : "<< mesh->getFaces().size();
+    qDebug() << "mesh size : "<< mesh->getFaces()->size();
     //mesh->addFace(mesh->idx2MV(mf->mesh_vertex[0]).position+normal*2,mesh->idx2MV(mf->mesh_vertex[1]).position+normal*2,mesh->idx2MV(mf->mesh_vertex[2]).position+normal*2);
     //mesh->connectFaces();
     extendAlongOutline(mesh, normal, extension_outlines, distance);
     qDebug() << "extended along outline";
-    qDebug() << "mesh size : "<< mesh->getFaces().size();
+    qDebug() << "mesh size : "<< mesh->getFaces()->size();
 
     coverCap(mesh, normal, extension_faces, distance);
 
@@ -119,7 +119,7 @@ Paths3D detectExtensionOutline(Mesh* mesh, std::vector<MeshFace*> meshfaces){
 
     Paths3D temp_edges;
 
-    for (MeshFace mf : temp_mesh->getFaces()){
+    for (MeshFace mf : (*temp_mesh->getFaces())){
         if (mf.neighboring_faces[0].size() == 0){ // edge 0 is unconnected
             Path3D temp_edge;
             temp_edge.push_back(temp_mesh->idx2MV(mf.mesh_vertex[0]));

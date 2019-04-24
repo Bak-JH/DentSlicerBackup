@@ -12,7 +12,8 @@ void modelcut::bisectModel(Mesh* mesh, Plane plane, Mesh* leftMesh, Mesh* rightM
     rightMesh->faces.reserve(mesh->faces.size()*2);
     rightMesh->vertices.reserve(mesh->faces.size()*2);
 
-    foreach (const auto& mf, mesh->getFaces()){
+    for (const auto& mf : (*mesh->getFaces()))
+	{
         bool faceLeftToPlane = true;
         for (int vn=0; vn<3; vn++){
             MeshVertex mv = mesh->vertices[mf.mesh_vertex[vn]];
