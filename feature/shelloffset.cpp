@@ -4,11 +4,7 @@
 // offset shell with mm
 Mesh* ShellOffset::shellOffset(Mesh* mesh, float factor){
     int cnt=0;
-    Mesh* offsetMesh = new Mesh();
-    offsetMesh->faces.reserve(mesh->faces.size()*4);
-    offsetMesh->vertices.reserve(mesh->faces.size()*4);
-    offsetMesh->prevMesh = mesh->prevMesh;
-    offsetMesh->nextMesh = mesh->nextMesh;
+    Mesh* offsetMesh = new Mesh(mesh->getFaces()->size() * 4, mesh->getFaces()->size() * 4, mesh);
 
     std::vector<MeshFace> unconnectedMeshFaces;
     std::vector<MeshFace> unconnectedOffsetMeshFaces;
