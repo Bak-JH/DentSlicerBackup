@@ -425,29 +425,6 @@ public slots:
     friend class STLexporter;
 };
 
-inline QMatrix4x4 quatToMat(QQuaternion q)
-{
-    //based on algorithm on wikipedia
-    // http://en.wikipedia.org/wiki/Rotation_matrix#Quaternion
-    float w = q.scalar ();
-    float x = q.x();
-    float y = q.y();
-    float z = q.z();
-
-    float n = q.lengthSquared();
-    float s =  n == 0?  0 : 2 / n;
-    float wx = s * w * x, wy = s * w * y, wz = s * w * z;
-    float xx = s * x * x, xy = s * x * y, xz = s * x * z;
-    float yy = s * y * y, yz = s * y * z, zz = s * z * z;
-
-    float m[16] = { 1 - (yy + zz),         xy + wz ,         xz - wy ,0,
-                         xy - wz ,    1 - (xx + zz),         yz + wx ,0,
-                         xz + wy ,         yz - wx ,    1 - (xx + yy),0,
-                               0 ,               0 ,               0 ,1  };
-    QMatrix4x4 result =  QMatrix4x4(m,4,4);
-    result.optimize ();
-    return result;
-}
 
 
 #endif // GLMODEL_H

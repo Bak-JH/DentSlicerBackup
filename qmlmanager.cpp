@@ -24,6 +24,7 @@
 #include <feature/generatesupport.h>
 #include <feature/generateraft.h>
 #include <exception>
+#include "utils/utils.h"
 
 QmlManager::QmlManager(QObject *parent) : QObject(parent)
   ,layerViewFlags(LAYER_INFILL | LAYER_SUPPORTERS | LAYER_RAFT), modelIDCounter(0)
@@ -1455,7 +1456,7 @@ void QmlManager::modelRotateDone(int Axis){
     std::array<float,6> minmax;
     size_t selectedNum = selectedModels.size();
     for (size_t i=0; i < selectedNum; i++) {
-        minmax = selectedModels[i]->getMesh()->calculateMinMax(quatToMat(selectedModels[i]->m_transform.rotation()).inverted());
+        minmax = selectedModels[i]->getMesh()->calculateMinMax(Utils::Math::quatToMat(selectedModels[i]->m_transform.rotation()).inverted());
         selectedModels[i]->m_transform.setTranslation(QVector3D(selectedModels[i]->m_transform.translation().x(),
                                                                  selectedModels[i]->m_transform.translation().y(),
                                                                  - minmax[4]));

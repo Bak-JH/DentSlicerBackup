@@ -153,7 +153,7 @@ void generateText3DGeometry(QVector3D** vertices, int* verticesSize,
             auto v2 = mesh->idx2MV(mf.mesh_vertex[2]).position;
 
 
-            isIntersectedNow = RayIntersectsTriangle(vertex - normalVector * 0.5f, normalVector,
+            isIntersectedNow = Utils::Math::RayIntersectsTriangle(vertex - normalVector * 0.5f, normalVector,
                                       v0, v1, v2,
                                       outIntersectionPoint);
             if (isIntersectedNow) {

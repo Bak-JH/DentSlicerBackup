@@ -9,6 +9,7 @@
 #include "feature/shelloffset.h"
 //#include "feature/supportview.h"
 #include "feature/stlexporter.h"
+#include "utils/utils.h"
 #include <QtConcurrent/QtConcurrent>
 #include <QFuture>
 #include <QFileDialog>
@@ -21,6 +22,7 @@
 #define _STRICT_GLMODEL
 #endif
 
+using namespace Utils::Math;
 
 GLModel::GLModel(QObject* mainWindow, QNode *parent, Mesh* loadMesh, QString fname, bool isShadow, int id)
     : QEntity(parent)
