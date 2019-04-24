@@ -10,7 +10,7 @@ Slices Slicer::slice(Mesh* mesh){
     Slices slices;
     slices.mesh = mesh;
 
-    if (mesh == nullptr || mesh->getFaces().size() ==0){
+    if (mesh == nullptr || mesh->getFaces()->size() ==0){
         return slices;
     }
 
@@ -95,7 +95,7 @@ std::vector<Paths> Slicer::meshSlice(Mesh* mesh){
     std::vector<Paths> pathLists;
 
     std::vector<int> A;
-    A.reserve(mesh->getFaces().size());
+    A.reserve(mesh->getFaces()->size());
 
     for (int i=0; i<planes.size(); i++){
         A.insert(A.end(), triangleLists[i].begin(), triangleLists[i].end()); // union
@@ -168,7 +168,7 @@ std::vector<std::vector<int>> Slicer::buildTriangleLists(Mesh* mesh, std::vector
 
     // Uniform Slicing O(n)
     if (delta>0){
-        for (int f_idx=0; f_idx < mesh->getFaces().size(); f_idx++){
+        for (int f_idx=0; f_idx < mesh->getFaces()->size(); f_idx++){
             int llt_idx;
             MeshFace mf = mesh->idx2MF(f_idx);
             float z_min = mesh->getFaceZmin(mf);

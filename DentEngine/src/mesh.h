@@ -23,14 +23,15 @@ typedef std::vector<QVector3D> Plane;
 
 class MeshFace {
 public:
-    MeshFace() {}
+	MeshFace() : neighboring_faces{ std::vector<size_t>(), std::vector<size_t>(), std::vector<size_t>() }
+	{}
 
     int idx;
     int parent_idx = -1;
-    int mesh_vertex[3] = {-1,-1,-1};
+    std::array<int, 3> mesh_vertex{-1,-1,-1};
     //int connected_face_idx[3];
 
-    std::vector<std::vector<MeshFace*>> neighboring_faces;
+    std::array<std::vector<size_t>, 3> neighboring_faces;
 
     QVector3D fn;
     QVector3D fn_unnorm;
@@ -42,7 +43,7 @@ public:
     int idx;
     QVector3D position;
     QVector3D vn;
-    std::vector<MeshFace*> connected_faces;
+    std::vector<size_t> connected_faces;
     MeshVertex(QVector3D position): position(position) {}//connected_faces.reserve(8);}
 
     friend inline bool operator== (const MeshVertex& a, const MeshVertex& b){
@@ -115,7 +116,7 @@ public :
     QTime getTime()const;
 private:
     /********************** Helper Functions **********************/
-    std::vector<MeshFace*> findFaceWith2Vertices(int v0_idx, int v1_idx, MeshFace self_f);
+    std::vector<size_t> findFaceWith2Vertices(size_t v0_idx, size_t v1_idx, MeshFace self_f);
     int addFaceVertex(QVector3D v);
     void updateMinMax(QVector3D v);
 
@@ -147,6 +148,9 @@ private:
     friend class modelcut;
     friend class MeshRepair;
     friend class GenerateSupport;
+	friend class autoarrnge;
+	friend class HollowShell;
+
 
 
 
