@@ -1,6 +1,6 @@
 #include "hollowshell.h"
 
-void hollowShell(Mesh* mesh, MeshFace* mf, QVector3D center, float radius){
+void HollowShell::hollowShell(Mesh* mesh, MeshFace* mf, QVector3D center, float radius){
     std::vector<MeshFace*> hollow_shell_faces;
     QVector3D normal = mf->fn;
     detectHollowShellFaces(mesh, normal, mf, mf, &hollow_shell_faces);
@@ -8,10 +8,11 @@ void hollowShell(Mesh* mesh, MeshFace* mf, QVector3D center, float radius){
 
 }
 
-void detectHollowShellFaces(Mesh* mesh, QVector3D normal, MeshFace* original_mf, MeshFace* mf, std::vector<MeshFace*>* result){
+void HollowShell::detectHollowShellFaces(Mesh* mesh, QVector3D normal, MeshFace* original_mf, MeshFace* mf, std::vector<MeshFace*>* result){
     result->push_back(mf);
-    for (std::vector<MeshFace*> neighbors : mf->neighboring_faces){
-        for (MeshFace* neighbor : neighbors){
+    for (std::vector<size_t> neighbors : mf->neighboring_faces){
+        for (size_t neighborIdx : neighbors){
+			MeshFace* neighbor = &mesh->faces[neighborIdx];
             // check if neighbor already checked
             bool cont = false;
             for (MeshFace* elem : (*result)){
@@ -33,7 +34,7 @@ void detectHollowShellFaces(Mesh* mesh, QVector3D normal, MeshFace* original_mf,
     return;
 }
 
-void offsetHollowShellFaces(Mesh* mesh, std::vector<MeshFace*>* hollow_shell_faces, QVector3D center, float radius){
+void HollowShell::offsetHollowShellFaces(Mesh* mesh, std::vector<MeshFace*>* hollow_shell_faces, QVector3D center, float radius){
     // offset faces from center with radius distance
 
     for (MeshFace* mf : *hollow_shell_faces){
