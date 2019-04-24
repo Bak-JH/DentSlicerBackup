@@ -240,6 +240,8 @@ public:
     void addVertices(Mesh* mesh, bool CW, QVector3D color=QVector3D(0.278f, 0.670f, 0.706f));
     const Mesh* getMesh();
     const Mesh* getSupport();
+
+	void enablePicking(bool isEnable);
 private:
     //Order is important! Look at the initializer list in constructor
 

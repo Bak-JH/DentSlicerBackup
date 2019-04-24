@@ -103,7 +103,6 @@ GLModel::GLModel(QObject* mainWindow, QNode *parent, Mesh* loadMesh, QString fna
 
         updateShadowModelImpl();
 
-        addMouseHandlers();
         QObject::connect(this, SIGNAL(_generateSupport()), this, SLOT(generateSupport()));
         QObject::connect(this, SIGNAL(_updateModelMesh(bool)), this, SLOT(updateModelMesh(bool)));
 
@@ -204,7 +203,8 @@ void GLModel::removeMouseHandlers(){
     QObject::disconnect(m_objectPicker, SIGNAL(entered()), this, SLOT(engoo()));
     QObject::disconnect(m_objectPicker, SIGNAL(exited()), this, SLOT(exgoo()));
     removeComponent(m_objectPicker);
-    m_objectPicker->deleteLater();
+    delete m_objectPicker;
+	m_objectPicker = nullptr;
 }
 
 void GLModel::changecolor(int mode){
@@ -866,18 +866,15 @@ void GLModel::resizeMem(const int& faces_cnt){
     vertexArray.resize(faces_cnt*3*(3)*sizeof(float));
     vertexNormalArray.resize(faces_cnt*3*(3)*sizeof(float));
     vertexColorArray.resize(faces_cnt*3*(3)*sizeof(float));
+	vertexBuffer.setData(vertexArray);
+	vertexNormalBuffer.setData(vertexNormalArray);
+	vertexColorBuffer.setData(vertexColorArray);
 
+	positionAttribute.setCount(0);
+	normalAttribute.setCount(0);
+	colorAttribute.setCount(0);
 	//TODO: WHY !!!!!!!!!!!!!!
-	if (ID != -1)
-	{
-		vertexBuffer.setData(vertexArray);
-		vertexNormalBuffer.setData(vertexNormalArray);
-		vertexColorBuffer.setData(vertexColorArray);
 
-		positionAttribute.setCount(0);
-		normalAttribute.setCount(0);
-		colorAttribute.setCount(0);
-	}
 }
 void GLModel::addVertex(QVector3D vertex){
 
@@ -3110,12 +3107,17 @@ void GLModel::deleteShadowModel()
 
 void GLModel::updateShadowModelImpl()
 {
+	if (m_objectPicker)
+	{
+		removeMouseHandlers();
+	}
     mesh = toSparse(parentModel->mesh);
     m_transform.setTranslation(QVector3D((mesh->x_max() + mesh->x_min()) / 2, (mesh->y_max() + mesh->y_min()) / 2, (mesh->z_max() + mesh->z_min()) / 2));
     mesh->centerMesh();
     resizeMem(mesh->faces.size());
     addVertices(mesh, false);
-    //applyGeometry();
+	
+	addMouseHandlers();
 }
 
 void GLModel::setSupport()
@@ -3127,5 +3129,13 @@ void GLModel::setSupport()
 const Mesh* GLModel::getSupport()
 {
     return supportMesh;
+}
+
+void GLModel::enablePicking(bool isEnable)
+{
+	if (shadowModel && shadowModel->m_objectPicker && shadowModel->m_objectPicker->isEnabled() != isEnable)
+	{
+		shadowModel->m_objectPicker->setEnabled(isEnable);
+	}
 }
 

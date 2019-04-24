@@ -645,16 +645,15 @@ void QmlManager::fixMesh(){
 void QmlManager::disableObjectPickers(){
     for (auto& pair : glmodels){
 		auto glm = &pair.second;
-        if (glm->shadowModel->m_objectPicker->isEnabled())
-            glm->shadowModel->m_objectPicker->setEnabled(false);
+		glm->enablePicking(false);
+
     }
 }
 
 void QmlManager::enableObjectPickers(){
 	for (auto& pair : glmodels) {
 		auto glm = &pair.second;
-        if (glm->shadowModel && !glm->shadowModel->m_objectPicker->isEnabled())
-            glm->shadowModel->m_objectPicker->setEnabled(true);
+		glm->enablePicking(true);
     }
 }
 
