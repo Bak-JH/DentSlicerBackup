@@ -105,6 +105,7 @@ HEADERS += \
     utils/qrbtree.h \
     utils/qtriangulator_p.h \
     utils/qvectorpath_p.h \
+    utils/utils.h \
     utils/winsparkle/winsparkle.h \
     feature/stlexporter.h \
     feature/extension.h \
