@@ -2145,7 +2145,7 @@ void GLModel::indentHollowShell(double radius){
     qDebug() << "hollow shell called" << radius;
 
     QVector3D center = (mesh->idx2MV(targetMeshFace->mesh_vertex[0]).position +mesh->idx2MV(targetMeshFace->mesh_vertex[1]).position + mesh->idx2MV(targetMeshFace->mesh_vertex[2]).position)/3;
-    hollowShell(mesh, targetMeshFace, center, radius);
+	HollowShell::hollowShell(mesh, targetMeshFace, center, radius);
 }
 
 GLModel::~GLModel(){

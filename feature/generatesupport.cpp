@@ -114,7 +114,8 @@ void GenerateSupport::pointOverhangDetect(Mesh* mesh) {
         float z = mesh->vertices[ver_idx].position.z();
         for (size_t face_idx = 0; face_idx < mesh->vertices[ver_idx].connected_faces.size() && local_min; face_idx++) {
             for (size_t i = 0; i < 3; i++) {
-                if ((mesh->idx2MV(mesh->vertices[ver_idx].connected_faces[face_idx]->mesh_vertex[i])).position.z() < z) {
+				size_t connectedFaceIndex = mesh->vertices[ver_idx].connected_faces[face_idx];
+                if ((mesh->idx2MV(mesh->faces[connectedFaceIndex].mesh_vertex[i])).position.z() < z) {
                     local_min = false;
                     break;
                 }
