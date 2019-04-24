@@ -4,7 +4,7 @@
 
 void MeshRepair::repairMesh(Mesh* mesh){
 
-    qDebug() << "mesh repair start from mesh size :" << mesh->getFaces().size();
+    qDebug() << "mesh repair start from mesh size :" << mesh->getFaces()->size();
     /*// remove Unconnected
     //removeUnconnected(mesh);
     qDebug() << "removed unconnected";
@@ -98,7 +98,7 @@ Paths3D MeshRepair::identifyHoles(const Mesh* mesh){
     Paths3D holes;
     int face_idx = 0;
 
-    for (const MeshFace &mf : mesh->getFaces()){
+    for (const MeshFace &mf : (*mesh->getFaces())){
         face_idx ++;
         if (face_idx %100 ==0)
             QCoreApplication::processEvents();

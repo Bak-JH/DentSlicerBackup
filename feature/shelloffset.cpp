@@ -10,7 +10,7 @@ Mesh* ShellOffset::shellOffset(Mesh* mesh, float factor){
     std::vector<MeshFace> unconnectedOffsetMeshFaces;
 
     // copy original mesh for innershell in CCW order
-    foreach (MeshFace mf, mesh->faces){
+    for (const auto& mf: (*mesh->getFaces())){
         if (cnt%100 ==0)
             QCoreApplication::processEvents();
         cnt++;
@@ -22,7 +22,7 @@ Mesh* ShellOffset::shellOffset(Mesh* mesh, float factor){
         // will connect later on
         if (mf.neighboring_faces[0].size() == 0 || mf.neighboring_faces[1].size() == 0 || mf.neighboring_faces[2].size() == 0){ // edge 0 is unconnected
             unconnectedMeshFaces.push_back(mf);
-            unconnectedOffsetMeshFaces.push_back(offsetMesh->faces[offsetMesh->faces.size()-1]);
+            unconnectedOffsetMeshFaces.push_back((*offsetMesh->getFaces())[offsetMesh->getFaces()->size()-1]);
         }
     }
     // 승환 20%
@@ -34,7 +34,7 @@ Mesh* ShellOffset::shellOffset(Mesh* mesh, float factor){
     qmlManager->setProgress(0.42);
 
     // copy original mesh for outer shell
-    foreach (MeshFace mf, mesh->faces){
+    for (const auto& mf: *mesh->getFaces()){
         if (cnt%100 ==0)
             QCoreApplication::processEvents();
         cnt++;

@@ -14,9 +14,9 @@ Mesh* STLexporter::mergeSelectedModels() {
     size_t faceNum = 0;
     size_t verNum = 0;
     size_t totalFaceNum = 0;
-    foreach (GLModel* model, qmlManager->selectedModels) {
-        faceNum += model->getMesh()->getFaces().size();
-        verNum += model->getMesh()->getVertices().size();
+    for (GLModel* model: qmlManager->selectedModels) {
+        faceNum += model->getMesh()->getFaces()->size();
+        verNum += model->getMesh()->getVertices()->size();
     }
 
     Mesh* mergedMesh = new Mesh(verNum, faceNum);
@@ -24,19 +24,19 @@ Mesh* STLexporter::mergeSelectedModels() {
     faceNum = 0;
     verNum = 0;
 
-    foreach (GLModel* model, qmlManager->selectedModels) {
+    for (GLModel* model: qmlManager->selectedModels) {
         QVector3D trans = model->m_transform.translation();
 
         MeshFace newFace;
-        for (const auto& newFace : model->getMesh()->getFaces()) {
+        for (const auto& newFace : *model->getMesh()->getFaces()) {
             QVector3D v1 = model->getMesh()->idx2MV(newFace.mesh_vertex[0]).position+trans;
             QVector3D v2 = model->getMesh()->idx2MV(newFace.mesh_vertex[1]).position+trans;
             QVector3D v3 = model->getMesh()->idx2MV(newFace.mesh_vertex[2]).position+trans;
             mergedMesh->addFace(v1,v2,v3);
         }
 
-        faceNum += model->getMesh()->getFaces().size();
-        verNum += model->getMesh()->getVertices().size();
+        faceNum += model->getMesh()->getFaces()->size();
+        verNum += model->getMesh()->getVertices()->size();
 
         if (faceNum % 100 == 0) qmlManager->setProgress((float)(0.1 + 0.3*(faceNum/totalFaceNum)));
 
@@ -107,9 +107,9 @@ void STLexporter::exportSTL(QString outfilename){
     //qmlManager->setProgress(0.1);
     QCoreApplication::processEvents();
 
-    size_t total_cnt = mesh->getFaces().size();
+    size_t total_cnt = mesh->getFaces()->size();
     size_t cnt = 0;
-    for (MeshFace mf : mesh->getFaces()){
+    for (const auto& mf : *mesh->getFaces()){
         writeFace(outfile, mesh, mf);
 
         if (cnt %100 == 0){
