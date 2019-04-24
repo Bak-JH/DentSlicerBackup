@@ -2112,8 +2112,12 @@ void GLModel::generateRLModel(){
     qmlManager->setProgress(0.91);
 
     if (shadowModel->shellOffsetActive){
-        if (leftmodel != nullptr)
-            ShellOffset::shellOffset(leftmodel->mesh, (float)shellOffsetFactor);
+		if (leftmodel != nullptr)
+		{
+			auto offsetLeftMesh = ShellOffset::shellOffset(leftmodel->mesh, (float)shellOffsetFactor);
+			qmlManager->createModelFile(offsetLeftMesh, leftmodel->filename);
+			qmlManager->deleteModelFile(leftmodel->ID);
+		}
         if (rightmodel != nullptr)
             qmlManager->deleteModelFile(rightmodel->ID);
         QMetaObject::invokeMethod(qmlManager->boxUpperTab, "all_off");
