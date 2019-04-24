@@ -339,7 +339,7 @@ void GLModel::saveUndoState_internal(){
     temp_prev_mesh->m_translation = m_transform.translation();
     temp_prev_mesh->m_matrix = m_transform.matrix();
 
-    Mesh* deleteTargetMesh = mesh;
+    const Mesh* deleteTargetMesh = mesh;
 
     int saveCnt = (mesh->faces.size()>100000)? 3: 10;
 
