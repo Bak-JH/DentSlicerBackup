@@ -550,8 +550,6 @@ void GLModel::updateModelMesh(bool shadowUpdate){
     qDebug() << "update Model Mesh";
     // reinitialize with updated mesh
 
-    if(ID == -1)
-        throw std::runtime_error("shadow model running updateModelMesh");
     int viewMode = qmlManager->getViewMode();
     switch( viewMode ) {
     case VIEW_MODE_OBJECT:
@@ -3090,7 +3088,7 @@ void GLModel::addShadowModel(Mesh* mesh)
     }
     qDebug() << "shadowmodel added";
     //set ID of shadow model to -ID of the parent for debugging purposes
-    int shadowModelID = -1;
+    int shadowModelID = -2;
     shadowModel = new GLModel(this->mainWindow, this, mesh, filename, true, shadowModelID);
     //delete and disconnect previous shadowModel
     qmlManager->connectShadow(shadowModel);
