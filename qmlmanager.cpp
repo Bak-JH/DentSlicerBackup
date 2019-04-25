@@ -801,7 +801,9 @@ GLModel* QmlManager::findGLModelByName(QString filename){
 
 void QmlManager::backgroundClicked(){
     qDebug() << "background clicked";
-    unselectAll();
+    if (viewMode == VIEW_MODE_SUPPORT)
+        openYesNoPopUp(false, "", "Support will disappear.", "", 18, "", ftrSupportDisappear, 1);
+    else unselectAll();
 }
 
 bool QmlManager::multipleModelSelected(int ID){
@@ -1256,7 +1258,7 @@ void QmlManager::unselectAll(){
     for(GLModel* curModel : selectedModels){
         if (curModel != nullptr){
             unselectPart(curModel->ID);
-            //QMetaObject::invokeMethod(partList, "unselectPartByModel", Q_ARG(QVariant, curModel->ID));
+            // QMetaObject::invokeMethod(partList, "unselectPartByModel", Q_ARG(QVariant, curModel->ID));
         }
     }
     hideMoveArrow();
@@ -2146,7 +2148,7 @@ void QmlManager::viewSupportChanged(bool checked){
                 qmlManager->openYesNoPopUp(false, "The model should be sliced for support view.", "", "Would you like to continue?", 16, "", ftrSupportViewMode, 0);
             }*/
             if (selectedModels[0]->getSupport() == nullptr) {
-                qmlManager->openYesNoPopUp(false, "[Support View]", "", "Would you like to continue?", 16, "", ftrSupportViewMode, 0);
+                qmlManager->openYesNoPopUp(false, "Support will be generated.", "", "Would you like to continue?", 16, "", ftrSupportViewMode, 0);
             } else {
                 QMetaObject::invokeMethod(qmlManager->boxUpperTab, "all_off");
                 setViewMode(VIEW_MODE_SUPPORT);
