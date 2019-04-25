@@ -68,7 +68,7 @@ public:
 
 
     /****************** Helper Functions For Mesh Slicing Step *******************/
-    std::vector<std::vector<int>> buildTriangleLists(Mesh* mesh, std::vector<float> planes, float delta);
+	std::vector<std::vector<const MeshFace*>> buildTriangleLists(Mesh* mesh, std::vector<float> planes, float delta);
     std::vector<float> buildUniformPlanes(float z_min, float z_max, float delta);
     std::vector<float> buildAdaptivePlanes(float z_min, float z_max);
 

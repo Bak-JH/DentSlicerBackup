@@ -91,10 +91,10 @@ std::vector<Paths> Slicer::meshSlice(Mesh* mesh){
     }
 
     // build triangle list per layer height
-    std::vector<std::vector<int>> triangleLists = buildTriangleLists(mesh, planes, delta);
+    std::vector<std::vector<const MeshFace*>> triangleLists = buildTriangleLists(mesh, planes, delta);
     std::vector<Paths> pathLists;
 
-    std::vector<int> A;
+    std::vector<const MeshFace*> A;
     A.reserve(mesh->getFaces()->size());
 
     for (int i=0; i<planes.size(); i++){
@@ -102,7 +102,7 @@ std::vector<Paths> Slicer::meshSlice(Mesh* mesh){
         Paths paths;
 
         for (int t_idx=0; t_idx<A.size(); t_idx++){
-            MeshFace cur_mf = mesh->idx2MF(A[t_idx]);
+            const MeshFace& cur_mf = *A[t_idx];
             if (mesh->getFaceZmax(cur_mf) < planes[i]){
                 A.erase(A.begin()+t_idx);
                 t_idx --;
@@ -157,20 +157,19 @@ void Slice::outerShellOffset(float delta, JoinType join_type){
 /****************** Helper Functions For Mesh Slicing Step *******************/
 
 // builds std::vector of std::vector of triangle idxs sorted by z_min
-std::vector<std::vector<int>> Slicer::buildTriangleLists(Mesh* mesh, std::vector<float> planes, float delta){
+std::vector<std::vector<const MeshFace*>> Slicer::buildTriangleLists(Mesh* mesh, std::vector<float> planes, float delta){
 
     // Create List of list
-    std::vector<std::vector<int>> list_list_triangle;
+    std::vector<std::vector<const MeshFace*>> list_list_triangle;
     for (int l_idx=0; l_idx < planes.size()+1; l_idx ++){
-        std::vector<int>* triangles_per_layer = new std::vector<int>;
-        list_list_triangle.push_back(* triangles_per_layer);
+        list_list_triangle.push_back(std::vector< const MeshFace*>());
     }
 
     // Uniform Slicing O(n)
     if (delta>0){
-        for (int f_idx=0; f_idx < mesh->getFaces()->size(); f_idx++){
-            int llt_idx;
-            MeshFace mf = mesh->idx2MF(f_idx);
+		for(const auto& mf : *mesh->getFaces())
+		{
+			int llt_idx;
             float z_min = mesh->getFaceZmin(mf);
             if (z_min < planes[0])
                 llt_idx = 0;
@@ -180,7 +179,7 @@ std::vector<std::vector<int>> Slicer::buildTriangleLists(Mesh* mesh, std::vector
                 llt_idx = (int)((z_min - planes[0])/delta) +1;
 
 
-            list_list_triangle[llt_idx].push_back(f_idx);
+            list_list_triangle[llt_idx].push_back(&mf);
         }
     }
 
