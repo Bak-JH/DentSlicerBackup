@@ -245,6 +245,7 @@ public:
 	void enablePicking(bool isEnable);
 private:
     //Order is important! Look at the initializer list in constructor
+	std::vector<MeshFace*> _renderOrderFaces;
 
     QGeometryRenderer m_geometryRenderer;
     QGeometry m_geometry;
@@ -325,7 +326,7 @@ private:
     Mesh* layerRaftMesh;
     Mesh* layerInfillMesh;
 
-    MeshFace *targetMeshFace = NULL; // used for object selection (specific area, like extension or labelling)
+    const MeshFace *targetMeshFace = NULL; // used for object selection (specific area, like extension or labelling)
 
 
 signals:

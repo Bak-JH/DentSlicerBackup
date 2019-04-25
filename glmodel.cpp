@@ -289,73 +289,7 @@ void GLModel::saveUndoState_internal(){
 
     // reset slicing view since model has been updated
     slicer = nullptr;
-
-    // need to remove redo State since it contains
-    mesh->nextMesh = nullptr;
-
-    // copy current Mesh as temporary prev_mesh
-    Mesh* temp_prev_mesh = new Mesh();
-    temp_prev_mesh->faces.reserve(mesh->faces.size()*3);
-    temp_prev_mesh->vertices.reserve(mesh->faces.size()*3);
-
-    // only need to copy faces, verticesHash, vertices
-    foreach(MeshVertex mv, mesh->vertices){
-        temp_prev_mesh->vertices.push_back(mv);
-    }
-
-    for (std::vector<MeshFace>::iterator it = mesh->faces.begin(); it!= mesh->faces.end(); ++it){
-        //qDebug() << it->neighboring_faces.size();
-        temp_prev_mesh->faces.push_back((*it));
-        // clear and copy neighboring faces
-        /*temp_prev_mesh->faces.end()->neighboring_faces[0].clear();
-        temp_prev_mesh->faces.end()->neighboring_faces[1].clear();
-        temp_prev_mesh->faces.end()->neighboring_faces[2].clear();*/
-        /*temp_prev_mesh->faces.end()->neighboring_faces[0].insert(temp_prev_mesh->faces.end()->neighboring_faces[0].end(), mf.neighboring_faces[0].begin(), mf.neighboring_faces[0].end());
-        temp_prev_mesh->faces.end()->neighboring_faces[1].insert(temp_prev_mesh->faces.end()->neighboring_faces[1].end(), mf.neighboring_faces[1].begin(), mf.neighboring_faces[1].end());
-        temp_prev_mesh->faces.end()->neighboring_faces[2].insert(temp_prev_mesh->faces.end()->neighboring_faces[2].end(), mf.neighboring_faces[2].begin(), mf.neighboring_faces[2].end());*/
-    }
-
-    for (QHash<uint32_t, MeshVertex>::iterator it = mesh->vertices_hash.begin(); it!=mesh->vertices_hash.end(); ++it){
-        temp_prev_mesh->vertices_hash.insert(it.key(), it.value());
-    }
-
-    temp_prev_mesh->_x_max = mesh->x_max();
-    temp_prev_mesh->_x_min = mesh->x_min();
-    temp_prev_mesh->_y_max = mesh->y_max();
-    temp_prev_mesh->_y_min = mesh->y_min();
-    temp_prev_mesh->_z_max = mesh->z_max();
-    temp_prev_mesh->_z_min = mesh->z_min();
-
-    // it takes too long
-    /*foreach (MeshFace mf, mesh->faces){
-        temp_prev_mesh->addFace(mesh->vertices[mf.mesh_vertex[0]].position,
-                mesh->vertices[mf.mesh_vertex[1]].position,
-                mesh->vertices[mf.mesh_vertex[2]].position);
-    }*/
-    //temp_prev_mesh->connectFaces();
-
-    temp_prev_mesh->prevMesh = mesh->prevMesh;
-    if (mesh->prevMesh != nullptr)
-        mesh->prevMesh->nextMesh = temp_prev_mesh;
-    temp_prev_mesh->nextMesh = mesh;
-    temp_prev_mesh->time = QTime::currentTime();
-    temp_prev_mesh->m_translation = m_transform.translation();
-    temp_prev_mesh->m_matrix = m_transform.matrix();
-
-    const Mesh* deleteTargetMesh = mesh;
-
-    int saveCnt = (mesh->faces.size()>100000)? 3: 10;
-
-    for (int i=0; i<saveCnt; i++){ // maximal undo count is 10
-        if (deleteTargetMesh != nullptr)
-            deleteTargetMesh = deleteTargetMesh->prevMesh;
-    }
-    if (deleteTargetMesh != nullptr){
-        deleteTargetMesh->nextMesh->prevMesh = nullptr;
-        delete deleteTargetMesh;
-    }
-
-    mesh->prevMesh = temp_prev_mesh;
+	auto temp_prev_mesh =  mesh->saveUndoState(m_transform);
 
 
     // for model cut, shell offset
@@ -914,7 +848,8 @@ void GLModel::addVertices(Mesh* mesh, bool CW, QVector3D vertexColor)
         }
         addIndexes(result_vs);
     }*/
-    foreach (MeshFace mf , mesh->faces){
+    for (MeshFace& mf : mesh->faces){
+		_renderOrderFaces.push_back(&mf);
         face_idx ++;
         if (face_idx %100 ==0)
             QCoreApplication::processEvents();
@@ -922,11 +857,11 @@ void GLModel::addVertices(Mesh* mesh, bool CW, QVector3D vertexColor)
         std::vector<QVector3D> result_vs;
         if (CW){
             for (int fn=2; fn>=0; fn--){
-                result_vs.push_back(mesh->idx2MV(mf.mesh_vertex[fn]).position);
+                result_vs.push_back(mf.mesh_vertex[fn]->position);
             }
         } else {
             for (int fn=0; fn<=2; fn++){
-                result_vs.push_back(mesh->idx2MV(mf.mesh_vertex[fn]).position);
+                result_vs.push_back(mf.mesh_vertex[fn]->position);
             }
         }
 
@@ -942,11 +877,11 @@ void GLModel::addVertices(Mesh* mesh, bool CW, QVector3D vertexColor)
         std::vector<QVector3D> result_vns;
         if (CW){
             for (int fn=2; fn>=0; fn--){
-                result_vns.push_back(mesh->idx2MV(mf.mesh_vertex[fn]).vn);
+                result_vns.push_back(mf.mesh_vertex[fn]->vn);
 
-                if(mesh->idx2MV(mf.mesh_vertex[fn]).vn[0] == 0 &&\
-                        mesh->idx2MV(mf.mesh_vertex[fn]).vn[1] == 0 &&\
-                        mesh->idx2MV(mf.mesh_vertex[fn]).vn[2] == 0)
+                if(mf.mesh_vertex[fn]->vn[0] == 0 &&\
+                        mf.mesh_vertex[fn]->vn[1] == 0 &&\
+                        mf.mesh_vertex[fn]->vn[2] == 0)
                         {
                             result_vns.pop_back();
                             result_vns.push_back(QVector3D(1,1,1));
@@ -954,11 +889,11 @@ void GLModel::addVertices(Mesh* mesh, bool CW, QVector3D vertexColor)
             }
         } else {
             for (int fn=0; fn<=2; fn++){
-                result_vns.push_back(mesh->idx2MV(mf.mesh_vertex[fn]).vn);
+                result_vns.push_back(mf.mesh_vertex[fn]->vn);
 
-                if(mesh->idx2MV(mf.mesh_vertex[fn]).vn[0] == 0 &&\
-                        mesh->idx2MV(mf.mesh_vertex[fn]).vn[1] == 0 &&\
-                        mesh->idx2MV(mf.mesh_vertex[fn]).vn[2] == 0)
+                if(mf.mesh_vertex[fn]->vn[0] == 0 &&\
+                        mf.mesh_vertex[fn]->vn[1] == 0 &&\
+                        mf.mesh_vertex[fn]->vn[2] == 0)
                         {
                             result_vns.pop_back();
                             result_vns.push_back(QVector3D(1,1,1));
@@ -1278,12 +1213,13 @@ void GLModel::handlePickerClicked(QPickEvent *pick)
 
     QPickTriangleEvent *trianglePick = static_cast<QPickTriangleEvent*>(pick);
     qDebug() << "trianglePick : " << trianglePick << qmlManager->selectedModels.size() << qmlManager;
+	MeshFace* shadow_meshface = _renderOrderFaces[trianglePick->triangleIndex()];
+	parentModel->targetMeshFace = shadow_meshface->parentFace;
+	qDebug() << "found parent meshface" << shadow_meshface->parentFace->idx;
 
     if (labellingActive && trianglePick && trianglePick->localIntersection() != QVector3D(0,0,0)) {
-        MeshFace shadow_meshface = mesh->faces[trianglePick->triangleIndex()];
 
         //parentModel->uncolorExtensionFaces();
-        parentModel->targetMeshFace = &parentModel->mesh->faces[shadow_meshface.parent_idx];
         //parentModel->generateColorAttributes();
         //parentModel->colorExtensionFaces();
 
@@ -1385,16 +1321,14 @@ void GLModel::handlePickerClicked(QPickEvent *pick)
     }
 
     if (extensionActive && trianglePick  && trianglePick->localIntersection() != QVector3D(0,0,0)){
-        MeshFace shadow_meshface = mesh->faces[trianglePick->triangleIndex()];
-        qDebug() << "found parent meshface" << shadow_meshface.parent_idx;
+        qDebug() << "found parent meshface" << shadow_meshface->parentFace->idx;
         parentModel->uncolorExtensionFaces();
         emit extensionSelect();
-        parentModel->targetMeshFace = &parentModel->mesh->faces[shadow_meshface.parent_idx];
         parentModel->generateColorAttributes();
         /*qDebug() << trianglePick->localIntersection() \
-                 << parentModel->mesh->idx2MV(parentModel->targetMeshFace->mesh_vertex[0]).position\
-                << parentModel->mesh->idx2MV(parentModel->targetMeshFace->mesh_vertex[1]).position\
-                << parentModel->mesh->idx2MV(parentModel->targetMeshFace->mesh_vertex[2]).position;
+                 << parentModel->parentModel->targetMeshFace->mesh_vertex[0]->position\
+                << parentModel->parentModel->targetMeshFace->mesh_vertex[1]->position\
+                << parentModel->parentModel->targetMeshFace->mesh_vertex[2]->position;
         */
         // << parentModel->targetMeshFace->mesh_vertex[1] << parentModel->targetMeshFace->mesh_vertex[2];
         parentModel->colorExtensionFaces();
@@ -1402,9 +1336,7 @@ void GLModel::handlePickerClicked(QPickEvent *pick)
 
     if (hollowShellActive){
         qDebug() << "getting handle picker clicked signal hollow shell active";
-        MeshFace shadow_meshface = mesh->faces[trianglePick->triangleIndex()];
-        qDebug() << "found parent meshface" << shadow_meshface.parent_idx;
-        parentModel->targetMeshFace = &parentModel->mesh->faces[shadow_meshface.parent_idx];
+        qDebug() << "found parent meshface" << shadow_meshface->parentFace->idx;
         // translate hollowShellSphere to mouse position
         QVector3D v = pick->localIntersection();
         QVector3D tmp = m_transform.translation();
@@ -1423,24 +1355,18 @@ void GLModel::handlePickerClicked(QPickEvent *pick)
         this->parentModel->addComponent(this->parentModel->m_objectPicker);
         */
 
-        MeshFace shadow_meshface = mesh->faces[trianglePick->triangleIndex()];
-        qDebug() << "target 1 " <<shadow_meshface.fn ;
+        qDebug() << "target 1 " <<shadow_meshface->fn ;
 
-        qDebug() << "found parent meshface" << shadow_meshface.parent_idx;
         parentModel->uncolorExtensionFaces();
         emit layFlatSelect();
-        parentModel->targetMeshFace = &parentModel->mesh->faces[shadow_meshface.parent_idx];
         parentModel->generateColorAttributes();
         parentModel->colorExtensionFaces();
     }
 
     if (manualSupportActive && trianglePick  && trianglePick->localIntersection() != QVector3D(0,0,0)){
         qDebug() << "manual support handle picker clicked";
-        MeshFace shadow_meshface = mesh->faces[trianglePick->triangleIndex()];
-        qDebug() << "found parent meshface" << shadow_meshface.parent_idx;
         parentModel->uncolorExtensionFaces();
         emit extensionSelect();
-        parentModel->targetMeshFace = &parentModel->mesh->faces[shadow_meshface.parent_idx];
         parentModel->generateColorAttributes();
         parentModel->colorExtensionFaces();
     }
@@ -1488,19 +1414,15 @@ void GLModel::bisectModel_internal(Plane plane){
     }
 
     // do bisecting mesh
-    lmesh.faces.reserve(mesh->faces.size()*3);
-    lmesh.vertices.reserve(mesh->faces.size()*3);
-    rmesh.faces.reserve(mesh->faces.size()*3);
-    rmesh.vertices.reserve(mesh->faces.size()*3);
 
     Paths3D cuttingEdges;
 
-    foreach (MeshFace mf, mesh->faces){
+    for (MeshFace& mf : mesh->faces){
         bool faceLeftToPlane = false;
         bool faceRightToPlane = false;
         Plane target_plane;
         for (int vn=0; vn<3; vn++){
-            MeshVertex mv = mesh->vertices[mf.mesh_vertex[vn]];
+            MeshVertex& mv = *mf.mesh_vertex[vn];
             target_plane.push_back(mv.position);
             if (modelcut::isLeftToPlane(plane, mv.position)) // if one vertex is left to plane, append to left vertices part
                 faceLeftToPlane = true;
@@ -1558,9 +1480,9 @@ void GLModel::bisectModel_internal(Plane plane){
 
 
         } else if (faceLeftToPlane){
-            lmesh.addFace(mesh->vertices[mf.mesh_vertex[0]].position, mesh->vertices[mf.mesh_vertex[1]].position, mesh->vertices[mf.mesh_vertex[2]].position);
-        } else if (faceRightToPlane){
-            rmesh.addFace(mesh->vertices[mf.mesh_vertex[0]].position, mesh->vertices[mf.mesh_vertex[1]].position, mesh->vertices[mf.mesh_vertex[2]].position);
+            lmesh.addFace(mf.mesh_vertex[0]->position, mf.mesh_vertex[1]->position, mf.mesh_vertex[2]->position);
+        } else if (faceRightToPlane){											   							   
+            rmesh.addFace(mf.mesh_vertex[0]->position, mf.mesh_vertex[1]->position, mf.mesh_vertex[2]->position);
         }
     }
 
@@ -1855,10 +1777,8 @@ void GLModel::generateSupport(){
 
     // copy mesh data from original mesh
     layerMesh = new Mesh;
-    layerMesh->faces.reserve(mesh->faces.size()*2);
-    layerMesh->vertices.reserve(mesh->vertices.size()*2);
-    foreach (MeshFace mf, mesh->faces){
-        layerMesh->addFace(mesh->idx2MV(mf.mesh_vertex[0]).position, mesh->idx2MV(mf.mesh_vertex[1]).position, mesh->idx2MV(mf.mesh_vertex[2]).position, mf.idx);
+	for (const MeshFace& mf : mesh->faces) {
+		layerMesh->addFace(mf.mesh_vertex[0]->position, mf.mesh_vertex[1]->position, mf.mesh_vertex[2]->position, &mf);
     }
 
     float x_length = mesh->x_max() - mesh->x_min();
@@ -1871,14 +1791,9 @@ void GLModel::generateSupport(){
     qDebug() << "********************vertices_reserve = " << mesh->vertices.size();
 
     layerInfillMesh = new Mesh;
-    layerInfillMesh->faces.reserve(xyz_reserve * scfg->infill_density); // infill 되면 다시 기준잡기
-    layerInfillMesh->vertices.reserve(xyz_reserve * scfg->infill_density);
     layerSupportMesh = new Mesh;
-    layerSupportMesh->faces.reserve(xy_reserve * 300 * scfg->support_density);
-    layerSupportMesh->vertices.reserve(xy_reserve * 300 * scfg->support_density);
     layerRaftMesh = new Mesh;
-    layerRaftMesh->faces.reserve(xy_reserve * 300 * scfg->support_density);
-    layerRaftMesh->vertices.reserve(xy_reserve * 300 * scfg->support_density);
+
     QVector3D t = m_transform.translation();
 
     t.setZ(mesh->z_min() * -1.0f);
@@ -2069,10 +1984,6 @@ void GLModel::modelCut(){
             Mesh* leftMesh = &parentModel->lmesh;
             Mesh* rightMesh = &parentModel->rmesh;
             // do bisecting mesh
-            leftMesh->faces.reserve(mesh->faces.size()*3);
-            leftMesh->vertices.reserve(mesh->faces.size()*3);
-            rightMesh->faces.reserve(mesh->faces.size()*3);
-            rightMesh->vertices.reserve(mesh->faces.size()*3);
 
             modelcut::cutAway(leftMesh, rightMesh, parentModel->mesh, parentModel->cuttingPoints, parentModel->cutFillMode);
 
@@ -2151,7 +2062,7 @@ void GLModel::generateRLModel(){
 void GLModel::indentHollowShell(double radius){
     qDebug() << "hollow shell called" << radius;
 
-    QVector3D center = (mesh->idx2MV(targetMeshFace->mesh_vertex[0]).position +mesh->idx2MV(targetMeshFace->mesh_vertex[1]).position + mesh->idx2MV(targetMeshFace->mesh_vertex[2]).position)/3;
+    QVector3D center = (targetMeshFace->mesh_vertex[0]->position +targetMeshFace->mesh_vertex[1]->position + targetMeshFace->mesh_vertex[2]->position)/3;
 	HollowShell::hollowShell(mesh, targetMeshFace, center, radius);
 }
 
@@ -2421,27 +2332,25 @@ Mesh* GLModel::toSparse(Mesh* mesh){
     Mesh* newMesh = new Mesh;
 
     if (jump == 1){ // if mesh face count is less than 30000
-        newMesh->faces.reserve(mesh->faces.size()*2);
-        newMesh->vertices.reserve(mesh->vertices.size()*2);
-        foreach (MeshFace mf, mesh->faces){
-            newMesh->addFace(mesh->idx2MV(mf.mesh_vertex[0]).position, mesh->idx2MV(mf.mesh_vertex[1]).position, mesh->idx2MV(mf.mesh_vertex[2]).position, mf.idx);
+
+        for (const MeshFace& mf : mesh->faces){
+            newMesh->addFace(mf.mesh_vertex[0]->position, mf.mesh_vertex[1]->position, mf.mesh_vertex[2]->position, &mf);
         }
     } else {
-        newMesh->faces.reserve(mesh->faces.size());
-        newMesh->vertices.reserve(mesh->faces.size());
-        foreach (MeshFace mf , mesh->faces){
-            if (i%jump==0){
+
+		for (const MeshFace& mf : mesh->faces) {
+			if (i%jump==0){
                 QCoreApplication::processEvents();
 
-                QVector3D point1 =mesh->idx2MV(mf.mesh_vertex[0]).position;
-                QVector3D point2 =mesh->idx2MV(mf.mesh_vertex[1]).position;
-                QVector3D point3 =mesh->idx2MV(mf.mesh_vertex[2]).position;
+                QVector3D point1 =mf.mesh_vertex[0]->position;
+                QVector3D point2 =mf.mesh_vertex[1]->position;
+                QVector3D point3 =mf.mesh_vertex[2]->position;
                 QVector3D CenterOfMass = (point1+point2+point3)/3;
                 point1=GLModel::spreadPoint(point1,CenterOfMass,factor);
                 point2=GLModel::spreadPoint(point2,CenterOfMass,factor);
                 point3=GLModel::spreadPoint(point3,CenterOfMass,factor);
-                //newMesh->addFace(mesh->idx2MV(mf.mesh_vertex[0]).position, mesh->idx2MV(mf.mesh_vertex[1]).position, mesh->idx2MV(mf.mesh_vertex[2]).position);
-                newMesh->addFace(point1,point2,point3, mf.idx);
+                //newMesh->addFace(mf.mesh_vertex[0]->position, mf.mesh_vertex[1]->position, mf.mesh_vertex[2]->position);
+                newMesh->addFace(point1,point2,point3, &mf);
             }
             i+=1;
         }
@@ -2719,7 +2628,7 @@ void GLModel::generateManualSupport(){
         return;
     QVector3D t = m_transform.translation();
     t.setZ(mesh->z_min()+scfg->raft_thickness);
-    QVector3D targetPosition = mesh->idx2MV(targetMeshFace->mesh_vertex[0]).position- t;
+    QVector3D targetPosition = targetMeshFace->mesh_vertex[0]->position- t;
     /*OverhangPoint* targetOverhangPosition = new OverhangPoint(targetPosition.x()*scfg->resolution,
                                                               targetPosition.y()*scfg->resolution,
                                                               targetPosition.z()*scfg->resolution,
