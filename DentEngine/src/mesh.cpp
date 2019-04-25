@@ -8,8 +8,13 @@ Mesh::Mesh(size_t vertCount, size_t faceCount, const Mesh* origin):Mesh(vertCoun
 	prevMesh = origin->prevMesh;
 	nextMesh = origin->nextMesh;
 }
-Mesh::Mesh(size_t vertCount, size_t faceCount): vertices(vertCount), faces(faceCount)
+Mesh::Mesh(size_t vertCount, size_t faceCount)
 {
+	//this is no longer necessary as we don't use the pointer to vector elements anymore.
+	//ie) memory does not have to be contiguous
+	vertices.reserve(vertCount);
+	faces.reserve(faceCount);
+
 }
 
 /********************** Mesh Edit Functions***********************/
@@ -173,6 +178,11 @@ void Mesh::reverseFaces(){
         faces[i].mesh_vertex[2] = faces[i].mesh_vertex[0];
         faces[i].mesh_vertex[0] = last;
     }
+}
+
+void Mesh::setVertex(size_t index, const MeshVertex& value)
+{
+	vertices[index] = value;
 }
 
 /********************** Mesh Generation Functions **********************/

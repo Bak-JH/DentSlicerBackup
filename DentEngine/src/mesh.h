@@ -73,12 +73,15 @@ public :
     /********************** Mesh Edit Functions***********************/
     void vertexOffset(float factor);
     void vertexMove(QVector3D direction);
-    Mesh* vertexMoved(QVector3D direction)const;
     void centerMesh();
     void vertexRotate(QMatrix4x4 tmpmatrix);
     void vertexScale(float scaleX, float scaleY, float scaleZ, float centerX, float centerY);
-    Mesh* copyMesh()const;
     void reverseFaces();
+	void setVertex(size_t index, const MeshVertex& value);
+
+	/********************** Mesh Modify and Copy Functions***********************/
+	Mesh* copyMesh()const;
+	Mesh* vertexMoved(QVector3D direction)const;
 
     /********************** Mesh Generation Functions **********************/
     void addFace(QVector3D v0, QVector3D v1, QVector3D v2);
@@ -146,10 +149,8 @@ private:
     friend class modelcut;
     friend class autoorientation;
     friend class modelcut;
-    friend class MeshRepair;
-    friend class GenerateSupport;
-	friend class autoarrnge;
-	friend class HollowShell;
+
+	friend class GenerateSupport;
 
 
 
