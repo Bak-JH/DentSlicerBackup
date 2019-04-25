@@ -153,6 +153,9 @@ Rectangle {
                 onClicked:{
 
                     switch (popup_type){
+                        case uppertab.ftrSupportDisappear:
+                            qm.unselectAll();
+                            break;
                         case uppertab.ftrSupportViewMode:
                             qm.setViewMode(1);
                             break;

@@ -51,6 +51,7 @@ using namespace std;
 #define ftrLayerViewMode 17
 #define ftrDelete 18
 #define ftrTempExport 19
+#define ftrSupportDisappear 20
 
 class GLModel;
 class OverhangPoint;
