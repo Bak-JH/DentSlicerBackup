@@ -43,13 +43,13 @@ void MeshRepair::removeUnconnected(Mesh* mesh){
     int unconnected_cnt = 0;
     int face_idx = 0;
 
-    std::vector<MeshFace>::iterator mf_it = mesh->faces.begin();
+    std::vector<MeshFace>::const_iterator mf_it = mesh->getFaces()->cbegin();
 
-    while (mf_it != mesh->faces.end()){
+    while (mf_it != mesh->getFaces()->cend()){
         face_idx ++;
         if (face_idx %100 ==0)
             QCoreApplication::processEvents();
-        MeshFace& mf = (*mf_it);
+        const MeshFace& mf = (*mf_it);
         int neighbor_cnt = 0;
 
         for (int i=0; i<3; i++){
