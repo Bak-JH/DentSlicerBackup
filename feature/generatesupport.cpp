@@ -39,47 +39,53 @@ GenerateSupport::GenerateSupport()
 Mesh* GenerateSupport::generateSupport(Mesh* shellmesh) {
     Mesh* mesh = shellmesh;
     // 하나의 face에 여러 overhangpoint가 들어가면 reserve 값도 바꿔주어야 함
-    overhangPoints.reserve((mesh->vertices.size() + mesh->faces.size())*2); //
-    supportPoints.reserve((mesh->vertices.size() + mesh->faces.size())*2); //
+    overhangPoints.reserve((mesh->vertices.size() + mesh->faces.size())*2);
+    supportPoints.reserve((mesh->vertices.size() + mesh->faces.size())*2);
     Mesh* supportMesh = new Mesh();
+
+    overhangDetect(mesh);
+
     supportMesh->faces.reserve(overhangPoints.size()*50); // overhangpoints * 2 * 24
     supportMesh->vertices.reserve(overhangPoints.size()*50);
 
-    overhangDetect(mesh);
+    size_t idx = 0;
+    findNearestPoint(idx);
 
     std::vector<OverhangPoint>::iterator iter = overhangPoints.begin();
     while (iter != overhangPoints.end() - 1 && iter != overhangPoints.end()) {
         OverhangPoint pt1 = *iter;
         OverhangPoint pt2 = *(iter+1);
-        /*while (pt1->topPoint && pt2->topPoint && iter != overhangPoints.end() - 1
-               && (pt1->position - pt2->position).length() < 2) { // 2 -> variable
-            iter++;
-            pt2 = &*(iter+1);
-        }*/ // sorting algorithm
         OverhangPoint intersection = coneNconeIntersection(mesh, pt1, pt2);
         OverhangPoint meshIntersection1 = coneNmeshIntersection(mesh, pt1);
         OverhangPoint meshIntersection2 = coneNmeshIntersection(mesh, pt2);
+
         if ((pt1.position - meshIntersection1.position).length() < (pt1.position - intersection.position).length()
             || intersection.position == QVector3D(99999,99999,99999)) {
             generateStem(supportMesh, pt1, &meshIntersection1); // connect with mesh or bed
             iter++;
+            findNearestPoint(++idx);
         } else if ((pt2.position - meshIntersection2.position).length() < (pt2.position - intersection.position).length()) {
             generateStem(supportMesh, pt2, &meshIntersection2); // connect with mesh or bed
             *iter = pt2;
             *(iter+1) = pt1;
             iter++;
+            findNearestPoint(++idx);
         } else if (intersection.position == pt1.position) {
             generateStem(supportMesh, pt2, &pt1);
             *iter = pt2;
             *(iter+1) = pt1;
             iter++;
+            findNearestPoint(++idx);
         } else if (intersection.position == pt2.position) {
             generateStem(supportMesh, pt1, &pt2);
             iter++;
+            findNearestPoint(++idx);
         } else {
             generateBranch(supportMesh, pt1, pt2, &intersection);
             overhangPoints.push_back(intersection);
             iter += 2;
+            findNearestPoint(++idx);
+            findNearestPoint(++idx);
         }
     }
     while (iter != overhangPoints.end()) {
@@ -100,7 +106,7 @@ void GenerateSupport::overhangDetect(Mesh* mesh) {
     faceOverhangDetect(mesh);
     edgeOverhangDetect(mesh);
 
-    sortOverhangPoints(); // 다른 알고리즘?
+    // sortOverhangPoints(); // 다른 알고리즘?
 }
 
 /* Point overhang
@@ -136,9 +142,18 @@ void GenerateSupport::pointOverhangDetect(Mesh* mesh) {
 
     // MeshVertex to OverhangPoint
     for (size_t i = 0; i < pointOverhang.size(); i++) {
-        overhangPoints.push_back(OverhangPoint(pointOverhang[i].position, true));
+        QVector3D overhangPoint = pointOverhang[i].position;
+        bool close = false;
+        for (size_t idx = 0; idx < overhangPoints.size(); idx++) {
+            if (abs(overhangPoints[idx].position.z() - overhangPoint.z()) <= 1 // 1->variable
+                && (overhangPoints[idx].position - overhangPoint).length() <= 2) { // 2->variable
+                close = true;
+                break;
+            }
+        }
+        if ((overhangPoint.z() - mesh->z_min()) >= minZ && !close) //
+            overhangPoints.push_back(OverhangPoint(overhangPoint, true));
     }
-
 }
 
 /* Face overhang
@@ -194,6 +209,7 @@ void GenerateSupport::edgeOverhangDetect(Mesh* mesh) {
 
 }
 
+/*
 void GenerateSupport::sortOverhangPoints() {
     OverhangPoint current;
     OverhangPoint next;
@@ -211,6 +227,20 @@ void GenerateSupport::sortOverhangPoints() {
         overhangPoints[idx] = overhangPoints[i];
         overhangPoints[i] = next;
     }
+}
+*/
+
+void GenerateSupport::findNearestPoint(size_t index) {
+    if (index >= overhangPoints.size() - 2) return;
+
+    QVector3D pt = overhangPoints[index].position;
+    size_t nearest = index + 1;
+    for (size_t i = index + 2; i < overhangPoints.size(); i++) {
+        if ((overhangPoints[i].position - pt).length() < (overhangPoints[nearest].position - pt).length()) {
+            nearest = i;
+        }
+    }
+    swap(overhangPoints[index+1], overhangPoints[nearest]);
 }
 
 OverhangPoint GenerateSupport::coneNconeIntersection(Mesh* mesh, OverhangPoint coneApex1, OverhangPoint coneApex2) {

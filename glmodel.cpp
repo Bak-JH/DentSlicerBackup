@@ -1219,6 +1219,11 @@ void GLModel::handlePickerClicked(QPickEvent *pick)
     if (!parentModel)
         return;
 
+    if (qmlManager->getViewMode() == VIEW_MODE_SUPPORT) {
+        qmlManager->openYesNoPopUp(false, "", "Support will disappear.", "", 18, "", ftrSupportDisappear, 1);
+        return;
+    }
+
     //---------------- rgoo routine init --------------------
     m_objectPicker->setDragEnabled(false);
     m_transform.setScale(1.0f);
