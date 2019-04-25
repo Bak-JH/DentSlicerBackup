@@ -38,15 +38,9 @@ GenerateSupport::GenerateSupport()
 
 Mesh* GenerateSupport::generateSupport(Mesh* shellmesh) {
     Mesh* mesh = shellmesh;
-    // 하나의 face에 여러 overhangpoint가 들어가면 reserve 값도 바꿔주어야 함
-    overhangPoints.reserve((mesh->vertices.size() + mesh->faces.size())*2);
-    supportPoints.reserve((mesh->vertices.size() + mesh->faces.size())*2);
     Mesh* supportMesh = new Mesh();
 
     overhangDetect(mesh);
-
-    supportMesh->faces.reserve(overhangPoints.size()*50); // overhangpoints * 2 * 24
-    supportMesh->vertices.reserve(overhangPoints.size()*50);
 
     size_t idx = 0;
     findNearestPoint(idx);
@@ -115,28 +109,69 @@ void GenerateSupport::overhangDetect(Mesh* mesh) {
  */
 void GenerateSupport::pointOverhangDetect(Mesh* mesh) {
     std::vector<MeshVertex> pointOverhang;
-    for (size_t ver_idx = 0; ver_idx < mesh->vertices.size(); ver_idx++) {
+
+	//auto vertexFunctor = [this, &pointOverhang](const Mesh & mesh, MeshVertex & vertex, size_t count)->bool
+	//{
+	bool local_min;
+	const auto& vertices = *mesh->getVertices();
+	for (const auto& vertex : vertices)
+	{
+		local_min = true;
+		float z = vertex.position.z();
+		for (size_t face_idx = 0; face_idx < vertex.connected_faces.size() && local_min; face_idx++) {
+			for (size_t i = 0; i < 3; i++) {
+				const MeshFace* connectedFace = vertex.connected_faces[face_idx];
+				if (connectedFace->mesh_vertex[i]->position.z() < z)
+				{
+					local_min = false;
+					break;
+				}
+			}
+		}
+		if (local_min && (vertex.position.z() - mesh->z_min()) >= minZ) { //
+			bool close = false;
+			for (size_t idx = 0; idx < overhangPoints.size(); idx++) {
+				if (abs(overhangPoints[idx].position.z() - vertex.position.z()) <= 1 // 1->variable
+					&& (overhangPoints[idx].position - vertex.position).length() <= 2) { // 2->variable
+					close = true;
+					break;
+				}
+			}
+			if (!close) pointOverhang.push_back(vertex);
+		}
+	}
+
+	//	return true;
+	//};
+	//mesh->conditionalModifyVertices(vertexFunctor);
+
+
+
+
+    //for (size_t ver_idx = 0; ver_idx < mesh->vertices.size(); ver_idx++) {
+	for (const auto& vertex : vertices)
+	{
         bool local_min = true;
-        float z = mesh->vertices[ver_idx].position.z();
-        for (size_t face_idx = 0; face_idx < mesh->vertices[ver_idx].connected_faces.size() && local_min; face_idx++) {
+        float z = vertex.position.z();
+        for (size_t face_idx = 0; face_idx < vertex.connected_faces.size() && local_min; face_idx++) {
             for (size_t i = 0; i < 3; i++) {
-				size_t connectedFaceIndex = mesh->vertices[ver_idx].connected_faces[face_idx];
-                if ((mesh->idx2MV(mesh->faces[connectedFaceIndex].mesh_vertex[i])).position.z() < z) {
+				const auto connectedFace = vertex.connected_faces[face_idx];
+                if (connectedFace->mesh_vertex[i]->position.z() < z) {
                     local_min = false;
                     break;
                 }
             }
         }
-        if (local_min && (mesh->vertices[ver_idx].position.z() - mesh->z_min()) >= minZ) { //
+        if (local_min && (vertex.position.z() - mesh->z_min()) >= minZ) { //
             bool close = false;
             for (size_t idx = 0; idx < overhangPoints.size(); idx++) {
-                if (abs(overhangPoints[idx].position.z() - mesh->vertices[ver_idx].position.z()) <= 1 // 1->variable
-                    && (overhangPoints[idx].position - mesh->vertices[ver_idx].position).length() <= 2) { // 2->variable
+                if (abs(overhangPoints[idx].position.z() - vertex.position.z()) <= 1 // 1->variable
+                    && (overhangPoints[idx].position - vertex.position).length() <= 2) { // 2->variable
                     close = true;
                     break;
                 }
             }
-            if (!close) pointOverhang.push_back(mesh->vertices[ver_idx]);
+            if (!close) pointOverhang.push_back(vertex);
         }
     }
 
@@ -163,20 +198,23 @@ void GenerateSupport::faceOverhangDetect(Mesh* mesh) {
     std::vector<MeshFace> faceOverhang;
     QVector3D printingDirection = QVector3D(0,0,1);
     QVector3D faceNormal;
-    for (size_t face_idx = 0; face_idx < mesh->faces.size(); face_idx++) {
-        faceNormal = mesh->faces[face_idx].fn;
-        if (faceNormal.z() > 0) continue;
-        float cos = QVector3D::dotProduct(faceNormal, printingDirection);
-        if (qAbs(cos) > qAbs(qCos(critical_angle_radian))) {
-            faceOverhang.push_back(mesh->faces[face_idx]);
-        }
-    }
+
+	const auto& faces(*mesh->getFaces());
+	for (const MeshFace& face : faces)
+	{
+		faceNormal = face.fn;
+		if (faceNormal.z() > 0) continue;
+		float cos = QVector3D::dotProduct(faceNormal, printingDirection);
+		if (qAbs(cos) > qAbs(qCos(critical_angle_radian))) {
+			faceOverhang.push_back(face);
+		}
+	}
 
     // MeshFace to OverhangPoint
     for (size_t i = 0 ; i < faceOverhang.size(); i++) {
-        QVector3D v0 = mesh->idx2MV(faceOverhang[i].mesh_vertex[0]).position;
-        QVector3D v1 = mesh->idx2MV(faceOverhang[i].mesh_vertex[1]).position;
-        QVector3D v2 = mesh->idx2MV(faceOverhang[i].mesh_vertex[2]).position;
+        QVector3D v0 = faceOverhang[i].mesh_vertex[0]->position;
+        QVector3D v1 = faceOverhang[i].mesh_vertex[1]->position;
+        QVector3D v2 = faceOverhang[i].mesh_vertex[2]->position;
         faceOverhangPoint(mesh, v0, v1, v2);
     }
 }
@@ -240,7 +278,7 @@ void GenerateSupport::findNearestPoint(size_t index) {
             nearest = i;
         }
     }
-    swap(overhangPoints[index+1], overhangPoints[nearest]);
+    std::swap(overhangPoints[index+1], overhangPoints[nearest]);
 }
 
 OverhangPoint GenerateSupport::coneNconeIntersection(Mesh* mesh, OverhangPoint coneApex1, OverhangPoint coneApex2) {
@@ -283,33 +321,35 @@ OverhangPoint GenerateSupport::coneNmeshIntersection(Mesh *mesh, OverhangPoint c
     float radius = radiusMin;
 
     // mesh
-    for (vertex = 0; vertex < mesh->vertices.size(); vertex++) {
-        if (mesh->vertices[vertex].position.z() >= coneApex.position.z()) continue;
-        tmp = mesh->vertices[vertex].position - coneApex.position;
+
+	const auto& vertices = *mesh->getVertices();
+	for (const MeshVertex& vertex : vertices){
+		if (vertex.position.z() >= coneApex.position.z()) continue;
+        tmp = vertex.position - coneApex.position;
         if (QVector3D::dotProduct(tmp, QVector3D(0, 0, -1)) / tmp.length() < qCos(critical_angle_mesh_radian)) continue;
-        nearest = mesh->vertices[vertex].position;
+        nearest = vertex.position;
         meshInt = true;
         break;
     }
 
-    for (vertex++; vertex < mesh->vertices.size(); vertex++) {
-        if (mesh->vertices[vertex].position.z() >= coneApex.position.z()) continue;
-        tmp = mesh->vertices[vertex].position - coneApex.position;
+	for (const MeshVertex& vertex : vertices){
+		if (vertex.position.z() >= coneApex.position.z()) continue;
+        tmp = vertex.position - coneApex.position;
         if (tmp.length() < (coneApex.position - nearest).length() &&
             QVector3D::dotProduct(tmp, QVector3D(0, 0, -1)) / tmp.length() >= qCos(critical_angle_mesh_radian)) {
-            nearest = mesh->vertices[vertex].position;
+            nearest = vertex.position;
             meshInt = true;
         }
     }
 
     // supportMesh
-    for (vertex = 0; vertex < supportPoints.size(); vertex++) {
-        if (supportPoints[vertex].position.z() >= coneApex.position.z()) continue;
-        tmp = supportPoints[vertex].position - coneApex.position;
+    for (size_t vertexId = 0; vertexId < supportPoints.size(); vertexId++) {
+        if (supportPoints[vertexId].position.z() >= coneApex.position.z()) continue;
+        tmp = supportPoints[vertexId].position - coneApex.position;
         if (tmp.length() < (coneApex.position - nearest).length() &&
             QVector3D::dotProduct(tmp, QVector3D(0, 0, -1)) / tmp.length() >= qCos(critical_angle_radian)) {
-            nearest = supportPoints[vertex].position;
-            radius = supportPoints[vertex].radius;
+            nearest = supportPoints[vertexId].position;
+            radius = supportPoints[vertexId].radius;
             meshInt = false;
             supportInt = true;
         }

@@ -19,7 +19,7 @@ Mesh* STLexporter::mergeSelectedModels() {
         verNum += model->getMesh()->getVertices()->size();
     }
 
-    Mesh* mergedMesh = new Mesh(verNum, faceNum);
+    Mesh* mergedMesh = new Mesh();
     totalFaceNum = faceNum;
     faceNum = 0;
     verNum = 0;
@@ -27,11 +27,10 @@ Mesh* STLexporter::mergeSelectedModels() {
     for (GLModel* model: qmlManager->selectedModels) {
         QVector3D trans = model->m_transform.translation();
 
-        MeshFace newFace;
-        for (const auto& newFace : *model->getMesh()->getFaces()) {
-            QVector3D v1 = model->getMesh()->idx2MV(newFace.mesh_vertex[0]).position+trans;
-            QVector3D v2 = model->getMesh()->idx2MV(newFace.mesh_vertex[1]).position+trans;
-            QVector3D v3 = model->getMesh()->idx2MV(newFace.mesh_vertex[2]).position+trans;
+        for (const auto& each : *model->getMesh()->getFaces()) {
+            QVector3D v1 = each.mesh_vertex[0]->position+trans;
+            QVector3D v2 = each.mesh_vertex[1]->position+trans;
+            QVector3D v3 = each.mesh_vertex[2]->position+trans;
             mergedMesh->addFace(v1,v2,v3);
         }
 
@@ -135,9 +134,9 @@ void STLexporter::writeFace(std::ofstream& outfile,const Mesh* mesh, MeshFace mf
 
     outfile << "facet normal "<< mf.fn.x() <<" "<< mf.fn.y()<<" "<< mf.fn.z() << "\n";
     outfile << "    outer loop\n";
-    MeshVertex mv1 = mesh->idx2MV(mf.mesh_vertex[0]);
-    MeshVertex mv2 = mesh->idx2MV(mf.mesh_vertex[1]);
-    MeshVertex mv3 = mesh->idx2MV(mf.mesh_vertex[2]);
+    MeshVertex mv1 = *mf.mesh_vertex[0];
+    MeshVertex mv2 = *mf.mesh_vertex[1];
+    MeshVertex mv3 = *mf.mesh_vertex[2];
     outfile << "        vertex "<< mv1.position.x()<<" "<< mv1.position.y()<<" "<< mv1.position.z()<<"\n";
     outfile << "        vertex "<< mv2.position.x()<<" "<< mv2.position.y()<<" "<< mv2.position.z()<<"\n";
     outfile << "        vertex "<< mv3.position.x()<<" "<< mv3.position.y()<<" "<< mv3.position.z()<<"\n";

@@ -41,14 +41,17 @@ void MeshRepair::repairMesh(Mesh* mesh){
 // if 2 edges are unconnected or 1 edge is unconnected, goto fillhole
 void MeshRepair::removeUnconnected(Mesh* mesh){
     int unconnected_cnt = 0;
-    int face_idx = 0;
+    size_t face_idx = 0;
 
-    std::vector<MeshFace>::const_iterator mf_it = mesh->getFaces()->cbegin();
+    std::list<MeshFace>::const_iterator mf_it = mesh->getFaces()->cbegin();
 
     while (mf_it != mesh->getFaces()->cend()){
         face_idx ++;
-        if (face_idx %100 ==0)
-            QCoreApplication::processEvents();
+		if (face_idx % 100 == 0)
+		{
+			//don't hog UI thread too long;
+			QCoreApplication::processEvents();
+		}
         const MeshFace& mf = (*mf_it);
         int neighbor_cnt = 0;
 
@@ -64,7 +67,7 @@ void MeshRepair::removeUnconnected(Mesh* mesh){
             mf_it ++;
         }
     }
-    qDebug() << unconnected_cnt << "unconnected faces found, faces cnt :" << mesh->faces.size();
+    qDebug() << unconnected_cnt << "unconnected faces found, faces cnt :" << mesh->getFaces()->size();
 }
 
 // removes zero area triangles
@@ -72,12 +75,12 @@ void MeshRepair::removeDegenerate(Mesh* mesh){
     int degenerate_cnt = 0;
     int face_idx = 0;
 
-    std::vector<MeshFace>::iterator mf_it = mesh->faces.begin();
-    while (mf_it != mesh->faces.end()){
+    std::list<MeshFace>::const_iterator mf_it = mesh->getFaces()->cbegin();
+    while (mf_it != mesh->getFaces()->cend()){
         face_idx ++;
         if (face_idx %100 ==0)
             QCoreApplication::processEvents();
-        MeshFace &mf = (*mf_it);
+        const MeshFace &mf = (*mf_it);
 
         // one vertice && 2 vertices case
         if (mf.mesh_vertex[0] == mf.mesh_vertex[1] || mf.mesh_vertex[1] == mf.mesh_vertex[2] || mf.mesh_vertex[2] == mf.mesh_vertex[0]){
@@ -89,7 +92,7 @@ void MeshRepair::removeDegenerate(Mesh* mesh){
             mf_it ++;
         }
     }
-    qDebug() << degenerate_cnt << "degenerate faces found, faces cnt :" << mesh->faces.size();
+    qDebug() << degenerate_cnt << "degenerate faces found, faces cnt :" << mesh->getFaces()->size();
 }
 
 Paths3D MeshRepair::identifyHoles(const Mesh* mesh){
@@ -106,20 +109,20 @@ Paths3D MeshRepair::identifyHoles(const Mesh* mesh){
         //qDebug() << "neighbors " << mf.neighboring_faces[0].size() << mf.neighboring_faces[1].size() << mf.neighboring_faces[2].size();
         if (mf.neighboring_faces[0].size() == 0){ // edge 0 is unconnected
             Path3D temp_edge;
-            temp_edge.push_back(mesh->idx2MV(mf.mesh_vertex[0]));
-            temp_edge.push_back(mesh->idx2MV(mf.mesh_vertex[1]));
+            temp_edge.push_back(*mf.mesh_vertex[0]);
+            temp_edge.push_back(*mf.mesh_vertex[1]);
             holes.push_back(temp_edge);
         }
         if (mf.neighboring_faces[1].size() == 0){ // edge 1 is unconnected
             Path3D temp_edge;
-            temp_edge.push_back(mesh->idx2MV(mf.mesh_vertex[1]));
-            temp_edge.push_back(mesh->idx2MV(mf.mesh_vertex[2]));
+            temp_edge.push_back(*mf.mesh_vertex[1]);
+            temp_edge.push_back(*mf.mesh_vertex[2]);
             holes.push_back(temp_edge);
         }
         if (mf.neighboring_faces[2].size() == 0){ // edge 2 is unconnected
             Path3D temp_edge;
-            temp_edge.push_back(mesh->idx2MV(mf.mesh_vertex[2]));
-            temp_edge.push_back(mesh->idx2MV(mf.mesh_vertex[0]));
+            temp_edge.push_back(*mf.mesh_vertex[2]);
+            temp_edge.push_back(*mf.mesh_vertex[0]);
             holes.push_back(temp_edge);
         }
     }

@@ -72,9 +72,6 @@ bool FileLoader::loadMeshSTL_ascii(Mesh* mesh, const char* filename)
     rewind(f); //Seek back to start.
     size_t face_count = (file_size - 14) / 87; //Subtract the size of the header and conclusion. Every face uses more than 87 bytes.
 
-    mesh->faces.reserve(face_count*4);
-    mesh->vertices.reserve(face_count*4);
-
     int face_cnt = 0;
 
     while(fgets_(buffer, sizeof(buffer), f))
@@ -145,8 +142,7 @@ bool FileLoader::loadMeshSTL_binary(Mesh* mesh, const char* filename){
     //For each face read:
     //float(x,y,z) = normal, float(X,Y,Z)*3 = vertexes, uint16_t = flags
     // Every Face is 50 Bytes: Normal(3*float), Vertices(9*float), 2 Bytes Spacer
-    mesh->faces.reserve(face_count*4);
-    mesh->vertices.reserve(face_count*4);
+
     for (unsigned int i = 0; i < face_count; i++)
     {
         if (i%1000==0)
@@ -243,8 +239,6 @@ bool FileLoader::loadMeshOBJ(Mesh* mesh, const char* filename){
     if(c != '\n')
         lines++;
     qDebug()<< "test 1";
-    mesh->faces.reserve(lines*2);
-    mesh->vertices.reserve(lines*2);
 
     FILE * file = fopen(filename, "r");
     if( file == nullptr )
