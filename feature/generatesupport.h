@@ -44,6 +44,7 @@ public:
     void edgeOverhangDetect(Mesh* mesh);
 
     void sortOverhangPoints();
+    void findNearestPoint(size_t index);
     OverhangPoint coneNconeIntersection(Mesh* mesh, OverhangPoint coneApex1, OverhangPoint coneApex2);
     OverhangPoint coneNmeshIntersection(Mesh* mesh, OverhangPoint coneApex);
     float calculateRadius(float mesh_height, float bottom_height, float branch_length);
