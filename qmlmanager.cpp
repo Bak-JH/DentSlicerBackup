@@ -1955,11 +1955,11 @@ void QmlManager::unDo(){
         // find global recent model
         for (auto& pair : glmodels){
 			auto glmodel = &pair.second;
-            if (glmodel->getMesh()->getPrev() == nullptr || glmodel->getMesh()->getPrev()->getTime().isNull())
+            if (glmodel->getMesh()->getPrev() == nullptr || glmodel->getMesh()->getPrev()->time.isNull())
                 continue;
             else if (recentModel == nullptr)
                 recentModel = glmodel;
-            else if (glmodel->getMesh()->getPrev()->getTime() >= recentModel->getMesh()->getPrev()->getTime()){
+            else if (glmodel->getMesh()->getPrev()->time >= recentModel->getMesh()->getPrev()->time){
                 recentModel = glmodel;
             }
         }
@@ -1982,11 +1982,11 @@ void QmlManager::reDo(){
         // find global recent model
 		for (auto& pair : glmodels) {
 			auto glmodel = &pair.second;
-            if (glmodel->getMesh()->getNext() == nullptr || glmodel->getMesh()->getNext()->getTime().isNull())
+            if (glmodel->getMesh()->getNext() == nullptr || glmodel->getMesh()->getNext()->time.isNull())
                 continue;
             else if (recentModel == nullptr)
                 recentModel = glmodel;
-            else if (glmodel->getMesh()->getNext()->getTime() >= recentModel->getMesh()->getNext()->getTime()){
+            else if (glmodel->getMesh()->getNext()->time >= recentModel->getMesh()->getNext()->time){
                 recentModel = glmodel;
             }
         }
