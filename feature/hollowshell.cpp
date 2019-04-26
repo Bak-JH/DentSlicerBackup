@@ -11,7 +11,7 @@ void HollowShell::hollowShell(Mesh* mesh,const MeshFace* mf, QVector3D center, f
 void HollowShell::detectHollowShellFaces(Mesh* mesh, QVector3D normal,const MeshFace* original_mf, const MeshFace* mf, std::vector<const MeshFace*>* result){
     result->push_back(mf);
 	const auto& faces(*mesh->getFaces());
-    for (std::vector<MeshFace*> neighbors : mf->neighboring_faces){
+    for (std::vector<const MeshFace*> neighbors : mf->neighboring_faces){
         for (const MeshFace* neighbor : neighbors){
             // check if neighbor already checked
             bool cont = false;

@@ -1422,7 +1422,7 @@ void GLModel::bisectModel_internal(Plane plane){
         bool faceRightToPlane = false;
         Plane target_plane;
         for (int vn=0; vn<3; vn++){
-            MeshVertex& mv = *mf.mesh_vertex[vn];
+            const MeshVertex& mv = *mf.mesh_vertex[vn];
             target_plane.push_back(mv.position);
             if (modelcut::isLeftToPlane(plane, mv.position)) // if one vertex is left to plane, append to left vertices part
                 faceLeftToPlane = true;

@@ -83,7 +83,7 @@ void detectExtensionFaces(const Mesh* mesh, QVector3D normal,const MeshFace* ori
     if (result_idx != nullptr){
         result_idx->push_back(mf->idx);
     }
-    for (std::vector<MeshFace*> neighbors : mf->neighboring_faces){
+    for (std::vector<const MeshFace*> neighbors : mf->neighboring_faces){
 		const auto& faces(*mesh->getFaces());
         for (const MeshFace* neighbor : neighbors){
             // check if neighbor already checked

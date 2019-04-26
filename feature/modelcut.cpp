@@ -236,7 +236,7 @@ void modelcut::cutAway(Mesh* leftMesh, Mesh* rightMesh, Mesh* mesh, std::vector<
         Path3D rightContour;
 
         for (int vn=0; vn<3; vn++){
-            MeshVertex& mv = *mf.mesh_vertex[vn];
+            const MeshVertex& mv = *mf.mesh_vertex[vn];
 
             if (PointInPolygon(IntPoint(mv.position.x()*scfg->resolution, mv.position.y()*scfg->resolution), contour_all)){
                 faceLeftToPlane = true;
@@ -347,9 +347,9 @@ void modelcut::cutAway(Mesh* leftMesh, Mesh* rightMesh, Mesh* mesh, std::vector<
         // find maximal position
         for (MeshFace& mf : mesh->faces){
             // if projection of mf to xy coordinates contains qv and upper than current qv's position, get qv
-            MeshVertex& mfv1 = *mf.mesh_vertex[0];
-            MeshVertex& mfv2 = *mf.mesh_vertex[1];
-            MeshVertex& mfv3 = *mf.mesh_vertex[2];
+            const MeshVertex& mfv1 = *mf.mesh_vertex[0];
+            const MeshVertex& mfv2 = *mf.mesh_vertex[1];
+            const MeshVertex& mfv3 = *mf.mesh_vertex[2];
             Path mf_projection;
             mf_projection.push_back(IntPoint(mfv1.position.x()*scfg->resolution, mfv1.position.y()*scfg->resolution));
             mf_projection.push_back(IntPoint(mfv2.position.x()*scfg->resolution, mfv2.position.y()*scfg->resolution));

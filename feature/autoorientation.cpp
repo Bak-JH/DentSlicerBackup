@@ -166,7 +166,7 @@ float autoorientation::approachvertex(Mesh* mesh,float n[]){
     float amin;
 	for (const auto& face : *mesh->getFaces())
 	{
-		MeshVertex* idx[3] = { face.mesh_vertex[0],
+		const MeshVertex* idx[3] = { face.mesh_vertex[0],
 		   face.mesh_vertex[1],
 		   face.mesh_vertex[2] };
 		//한 삼각형의 세 점 index를 받아옵니다.
@@ -212,7 +212,7 @@ float* autoorientation::lithograph(Mesh* mesh, float n[], float amin, int CA){
         if(norma == 0)
             continue;
         if(alpha > (a[0]*n[0] + a[1]*n[1] +a[2]*n[2])/norma){
-			MeshVertex* idx[3] ={face.mesh_vertex[0],
+			const MeshVertex* idx[3] ={face.mesh_vertex[0],
                        face.mesh_vertex[1],
                        face.mesh_vertex[2]};
             float a1 = idx[0]->position.x()*n[0]+
@@ -250,7 +250,7 @@ float* autoorientation::lithograph(Mesh* mesh, float n[], float amin, int CA){
 }
 float autoorientation::get_touching_line(Mesh* mesh,float a[], const MeshFace& face,float touching_height){
     std::vector<const MeshVertex*> touch_list;
-	MeshVertex* idx[3]={ face.mesh_vertex[0],
+	const MeshVertex* idx[3]={ face.mesh_vertex[0],
                 face.mesh_vertex[1],
 				face.mesh_vertex[2]};
     for(int j=0;j<3;j++){

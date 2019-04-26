@@ -8,7 +8,6 @@
 
 autoarrange::autoarrange()
 {
-
 }
 
 Paths autoarrange::getMeshRecArea(const Mesh& mesh){//getting rectangle area of mesh in XY Plane, OFFSET included
@@ -49,8 +48,10 @@ Paths autoarrange::getMeshRecArea(const Mesh& mesh){//getting rectangle area of 
     }
 
     //outline.push_back(recArea);
-    /**/qDebug() << "got MeshRecArea";
-    /**/debugPaths(outline);
+#ifdef _DEBUG_AUTO_ARRANGE
+    qDebug() << "got MeshRecArea";
+    debugPaths(outline);
+#endif
     return outline;
 }
 
@@ -66,18 +67,18 @@ Paths autoarrange::getMeshConvexHull(const Mesh& mesh){//getting convex hull are
     return outline;
 }
 
-Paths autoarrange::spreadingCheck(const Mesh* mesh, std::vector<bool>& check, size_t chking_start, bool is_chking_pos){
+Paths autoarrange::spreadingCheck(const Mesh* mesh, std::map<const MeshFace*, bool>& check, const MeshFace* chking_start, bool is_chking_pos){
     /**/qDebug() << "SpreadingCheck started from" << chking_start;
     Paths paths;
-    int chking = -1;
-    std::vector<size_t> toCheck;
+	const MeshFace* chking = nullptr;
+    std::vector<const MeshFace*> toCheck;
 	toCheck.push_back(chking_start);
 	const auto& faces(*mesh->getFaces());
     while(toCheck.size()>0){
         //**qDebug() << "New spreadingCheck generation (" << to_check.size() << "faces)";
-        std::vector<size_t> nextIndexToCheck;
+        std::vector<const MeshFace*> nextIndexToCheck;
         for(int i=0; i< toCheck.size(); i++){
-            chking = faces[toCheck[i]].idx;
+			chking = toCheck[i];
             /*Debug
             qDebug() << "to_check" << i << "(Face" << chking << ")";
             for(int side=0; side<3; side++){
@@ -88,20 +89,20 @@ Paths autoarrange::spreadingCheck(const Mesh* mesh, std::vector<bool>& check, si
             }//*/
             if(check[chking]) continue;
             check[chking] = true;
-            const MeshFace* mf = &faces[toCheck[i]];
+            const MeshFace* mf = toCheck[i];
             size_t side;
             bool outline_checked = false;
             for(side=0; side<3; side++){
                 if(isEdgeBound(mesh, mf, side, is_chking_pos)){
                     if(!outline_checked){
-                        int path_head = getPathHead(mesh, mf, side, is_chking_pos);
+						const MeshVertex* path_head = getPathHead(mesh, mf, side, is_chking_pos);
                         Path path = buildOutline(mesh, check, chking, path_head, is_chking_pos);
                         if(path.size()==0) return {};
                         paths.push_back(path);
                         outline_checked = true;
                     }
                 }else{//법선 방향 조건이 만족되는 이웃만 to_check에 추가하는 것이 맞을지 검토
-                    std::vector<size_t> neighborsIndex = mf->neighboring_faces[side];
+                    std::vector<const MeshFace*> neighborsIndex = mf->neighboring_faces[side];
 					nextIndexToCheck.insert(nextIndexToCheck.end(), neighborsIndex.begin(), neighborsIndex.end());
                 }
             }
@@ -112,35 +113,35 @@ Paths autoarrange::spreadingCheck(const Mesh* mesh, std::vector<bool>& check, si
     return paths;
 }
 
-size_t autoarrange::getPathHead(const Mesh* mesh, const MeshFace* mf, size_t side, bool is_chking_pos){
+const MeshVertex* autoarrange::getPathHead(const Mesh* mesh, const MeshFace* mf, size_t side, bool is_chking_pos){
     if(side==0 && isEdgeBound(mesh, mf, 2, is_chking_pos)) {
-        if(isEdgeBound(mesh, mf, 1, is_chking_pos)) return -1;//all side of chking face is bound, face is alone
+        if(isEdgeBound(mesh, mf, 1, is_chking_pos)) return nullptr;//all side of chking face is bound, face is alone
         else return mf->mesh_vertex[2];
     }
     return mf->mesh_vertex[side];
 }
 
-Path autoarrange::buildOutline(const Mesh* mesh, std::vector<bool>& check, size_t chking, size_t path_head, bool is_chking_pos){
+Path autoarrange::buildOutline(const Mesh* mesh, std::map<const MeshFace*, bool>& check, const MeshFace* chking, const MeshVertex* path_head, bool is_chking_pos){
     //**qDebug() << "buildOutline from" << chking;
-    std::vector<size_t> path_by_idx;
-    if(path_head==-1){//혼자있는 면의 경우 오리엔테이션 확인 방법이 마련되어있지 않음
+    std::vector<const MeshVertex* > path_by_idx;
+    if(path_head== nullptr){//혼자있는 면의 경우 오리엔테이션 확인 방법이 마련되어있지 않음
         check[chking] = true;
-		auto& meshVertices = (*mesh->getFaces())[chking].mesh_vertex;
+		auto& meshVertices = chking->mesh_vertex;
 		path_by_idx.insert(path_by_idx.end(), meshVertices.begin(), meshVertices.end());
         //**qDebug() << "buildOutline done";
         return idxsToPath(mesh, path_by_idx);
     }
     bool outline_closed = false;
-	size_t from;
-	size_t nxt_chk;
-    int path_tail = path_head;
+	const MeshFace* from;
+	const MeshFace* nxt_chk;
+    auto path_tail = path_head;
     while(!outline_closed){
         if(check[chking]){
             qDebug() << "mesh error";
             return {};
         }
         //**qDebug() << "chking" << chking;
-        const MeshFace* mf = & (*mesh->getFaces())[chking];
+        const MeshFace* mf = chking;
         int outline_edge_cnt = 0;
         int tail_idx;//The index that path_tail has in the mf->mesh_vertex
         for(int i=0; i<3; i++){
@@ -152,21 +153,21 @@ Path autoarrange::buildOutline(const Mesh* mesh, std::vector<bool>& check, size_
             check[chking] = true;
             if(outline_edge_cnt==1){
                 path_tail = getNbrVtx(mf, tail_idx, 1);
-				const MeshFace*  face = &(*mesh->getFaces())[mf->neighboring_faces[(tail_idx + 1) % 3][0]];
-                nxt_chk = face->idx;
+				const MeshFace*  face =mf->neighboring_faces[(tail_idx + 1) % 3][0];
+                nxt_chk = face;
             }else{//outline_edge_cnt==2
                 path_by_idx.push_back(getNbrVtx(mf, tail_idx, 1));
                 path_tail = getNbrVtx(mf, tail_idx, 2);
-				const MeshFace* face = &(*mesh->getFaces())[mf->neighboring_faces[(tail_idx + 2) % 3][0]];
-                nxt_chk = face->idx;
+				const MeshFace* face = mf->neighboring_faces[(tail_idx + 2) % 3][0];
+                nxt_chk = face;
             }
             if(path_tail == path_head) outline_closed = true;
         }else{//if not isEdgeBound(mf, tail_idx), the face doesn't share any bound edge with current outline
             //the face may share some bound edge with other outline, so we do not mark it checked
-			const MeshFace* faceA = &(*mesh->getFaces())[mf->neighboring_faces[tail_idx][0]];
-			const MeshFace* faceB = &(*mesh->getFaces())[mf->neighboring_faces[(tail_idx + 2) % 3][0]];
-            if(faceA->idx==from) nxt_chk = faceB->idx;
-            else nxt_chk = faceA->idx;
+			const MeshFace* faceA = mf->neighboring_faces[tail_idx][0];
+			const MeshFace* faceB = mf->neighboring_faces[(tail_idx + 2) % 3][0];
+            if(faceA == from) nxt_chk = faceB;
+            else nxt_chk = faceA;
         }
         from = chking;
         chking = nxt_chk;
@@ -182,62 +183,71 @@ bool autoarrange::isEdgeBound(const Mesh* mesh, const MeshFace* mf, size_t side,
     //3. multiple neighbor
     //4. opposit orientation
     if(mf->neighboring_faces[side].size() != 1) return true;
-    const MeshFace* neighbor = &(*mesh->getFaces())[mf->neighboring_faces[side][0]];
+    const MeshFace* neighbor = mf->neighboring_faces[side][0];
     if(!checkFNZ(neighbor, is_chking_pos)) return true;
     if(!isNbrOrientSame(mesh, mf, side)) return true;
     return false;
 }
 
 bool autoarrange::isNbrOrientSame(const Mesh* mesh, const MeshFace* mf, size_t side){
-    const MeshFace* nbr = &(*mesh->getFaces())[mf->neighboring_faces[side][0]];
+    const MeshFace* nbr = mf->neighboring_faces[side][0];
     if(getNbrVtx(nbr, searchVtxInFace(nbr, mf->mesh_vertex[side]), 2) == getNbrVtx(mf, side, 1)) return true;
     return false;
 }
 
-size_t autoarrange::searchVtxInFace(const MeshFace* mf, size_t vertexIdx){
+
+size_t autoarrange::searchVtxInFace(const MeshFace* mf, const MeshVertex* vertex){
     for(size_t i=0; i<3; i++){
-        if(mf->mesh_vertex[i] == vertexIdx) return i;
+        if(mf->mesh_vertex[i] == vertex) return i;
     }
 	throw std::runtime_error("searchVtxInFace not found");
 }
 
-size_t autoarrange::getNbrVtx(const MeshFace* mf, size_t base, size_t xth){//getNeighborVtx
+const MeshVertex* autoarrange::getNbrVtx(const MeshFace* mf, size_t base, size_t xth){//getNeighborVtx
     if(xth>0) return mf->mesh_vertex[(base+xth+3)%3];
 	//Throw here, because later when people use the -1 return that was here, it's gonna crash anyway!
 	throw std::runtime_error("getNbrVtx not found");
 
 }
 
-Path autoarrange::idxsToPath(const Mesh* mesh, std::vector<size_t> path_by_idx){
+Path autoarrange::idxsToPath(const Mesh* mesh, std::vector<const MeshVertex* > path_by_idx){
     Path path;
-    for(size_t idx : path_by_idx){
-        QVector3D vertex = (*mesh->getVertices())[idx].position;
+    for(const MeshVertex* vtx : path_by_idx){
+        QVector3D vertex = vtx->position;
         mesh->Mesh::addPoint(vertex.x(), vertex.y(), &path);
     }
     return path;
 }
 
 Paths autoarrange::project(const Mesh* mesh){
-	size_t faces_size = mesh->getFaces()->size();
     std::vector<Paths> outline_sets;
     bool is_chking_pos = false;
     bool mesh_error = false;
-    for(size_t i=0; i<2; i++){
-        is_chking_pos = !is_chking_pos;
-        bool check_done = false;
-        std::vector<bool> face_checked(faces_size,false); //한 번 확인한 것은 체크리스트에서 제거되는 자료구조 도입 필요(법선 확인이 반복시행됨)
-        /****/qDebug() << "Get outline(is_chking_pos:" << is_chking_pos << ")";
-        while(!check_done && !mesh_error){
-            for(size_t face_idx=0; face_idx<faces_size; face_idx++){
-                if(checkFNZ(& (*mesh->getFaces())[face_idx], is_chking_pos) && !face_checked[face_idx]){
-                    outline_sets.push_back(spreadingCheck(mesh, face_checked, face_idx, is_chking_pos));
-                    if(outline_sets[outline_sets.size()-1].size()==0) mesh_error = true;
-                    break;
-                }else if(face_idx==faces_size-1) check_done = true;
-            }
-        }
-        if(mesh_error) break;
-    }
+	std::map<const MeshFace*, bool> face_checked;
+
+	size_t faces_size = mesh->getFaces()->size();
+	for (int i = 0; i < 2; i++)
+	{
+		is_chking_pos = !is_chking_pos;
+		bool check_done = false;
+		face_checked.clear();//한 번 확인한 것은 체크리스트에서 제거되는 자료구조 도입 필요(법선 확인이 반복시행됨)
+		/****/qDebug() << "Get outline(is_chking_pos:" << is_chking_pos << ")";
+		while (!check_done && !mesh_error) {
+			for (const auto& face : *mesh->getFaces())
+			{
+				if (checkFNZ(&face, is_chking_pos) && !face_checked[&face])
+				{
+					outline_sets.push_back(spreadingCheck(mesh, face_checked, &face, is_chking_pos));
+					if (outline_sets[outline_sets.size() - 1].size() == 0) 
+						mesh_error = true;
+					break;
+				}
+			}
+			check_done = true;
+
+		}
+		if (mesh_error) break;
+	}
     if(mesh_error){
         return getMeshConvexHull(*mesh);
     }
@@ -275,74 +285,19 @@ bool autoarrange::checkFNZ(const MeshFace* face, bool is_chking_pos){
     }
 }
 
-void autoarrange::debugPaths(Paths paths){
-    qDebug() << "===============";
-    for(size_t i=0; i<paths.size(); i++){
-        qDebug() << "";
-        //qDebug() << "path" << i;
-        for(size_t j=0; j<paths[i].size(); j++){
-            qDebug()<< paths[i][j].X << paths[i][j].Y;
-        }
-    }
-    qDebug() << "===============";
-}
 
-void autoarrange::debugPath(Path path){
-    qDebug() << "===============";
-    for(size_t i=0; i<path.size(); i++){
-        qDebug()<< path[i].X << path[i].Y;
-    }
-    qDebug() << "===============";
-}
-
-void autoarrange::debugFaces(const Mesh* mesh, std::vector<size_t> face_list){
-    for(size_t i=0; i<face_list.size(); i++){
-        debugFace(mesh, face_list[i]);
-    }
-}
-
-void autoarrange::debugFace(const Mesh* mesh, size_t face_idx){
-        const MeshFace* mf = & (*mesh->getFaces())[face_idx];
-        qDebug() << "face #" << face_idx;
-        for(size_t side=0; side<3; side++){
-            QVector3D vtx = (*mesh->getVertices())[mf->mesh_vertex[side]].position;
-            float x_f = vtx.x();
-            float y_f = vtx.y();
-            float z_f = vtx.z();
-            int x_int = round(x_f*scfg->resolution);
-            int y_int = round(y_f*scfg->resolution);
-            int z_int = round(z_f*scfg->resolution);
-            qDebug() << "(" << x_f << "," << y_f << "," << z_f << ")";
-        }
-        qDebug() << "face normal:" << "(" << mf->fn.x() << "," << mf->fn.y() << "," << mf->fn.z() << ")";
-        for(size_t side=0; side<3; side++){
-            if(mf->neighboring_faces[side].size()==1){
-                const MeshFace* neighbor = &((*mesh->getFaces())[mf->neighboring_faces[side][0]]);
-                if(neighbor->fn.z()>=0){
-                    if(isNbrOrientSame(mesh, mf, side)) qDebug() << "side" << side << ": nbr" << neighbor->idx;
-                    else qDebug() << "side" << side << ": bound(ornt diff)";
-                }else{
-                    if(isNbrOrientSame(mesh, mf, side)) qDebug() << "side" << side << ": bound(fn.z diff)";
-                    else qDebug() << "side" << side << ": bound(fn.z diff, ornt diff)";
-                }
-            }else if(mf->neighboring_faces[side].size()==0){
-                qDebug() << "side" << side << ": bound(no neighbor)";
-            }else{
-                qDebug() << "side" << side << ": bound(multi-neighbor" << mf->neighboring_faces[side].size() << ")";
-            }
-        }
-}
-
-size_t autoarrange::findVertexWithIntpoint(IntPoint p, const Mesh* mesh){
+const MeshVertex* autoarrange::findVertexWithIntpoint(IntPoint p, const Mesh* mesh){
     return findVertexWithIntXY(p.X, p.Y, mesh);
 }
 
-size_t autoarrange::findVertexWithIntXY(size_t x, size_t y, const Mesh* mesh){
-    for(size_t vtx_idx=0; vtx_idx<mesh->getVertices()->size(); vtx_idx++){
-        QVector3D vtx_pos = (*mesh->getVertices())[vtx_idx].position;
+const MeshVertex* autoarrange::findVertexWithIntXY(size_t x, size_t y, const Mesh* mesh){
+
+	for(const auto& vertex : *mesh->getVertices())
+	{
+        QVector3D vtx_pos = vertex.position;
         int x_int = round(vtx_pos.x()*scfg->resolution);
         int y_int = round(vtx_pos.y()*scfg->resolution);
-        if(x_int==x && y_int==y) return vtx_idx;
+        if(x_int==x && y_int==y) return &vertex;
     }
 }
 
@@ -481,9 +436,11 @@ std::vector<XYArrangement> autoarrange::arng2D(std::vector<Paths>& figs){
         /**/qDebug() << "- fig" << fig_with_idx.second << "arngd";
         qmlManager->setProgress(0.5 + 0.5*(++progress)/figs_with_idx.size());
     }
-    /**/qDebug() << "Arrange all done";
+	/**/qDebug() << "Arrange all done";
+
+#ifdef _DEBUG_AUTO_ARRANGE
     /**/debugPaths(cum_outline);
-    //test position
+#endif
     return arng_result_set;
 }
 
@@ -663,9 +620,10 @@ int autoarrange::getMinY(Path& path){
 
 Paths autoarrange::getNFP(Paths& subject, Paths& object){
     Path convex_obj = getConvexHull(&object[0]);
+#ifdef _DEBUG_AUTO_ARRANGE
     /**/qDebug() << "- got object convexHull" << checkConvex(convex_obj);
     //*debugPath(convex_obj);
-
+#endif
     std::vector<Vecs> sub_vecs;
     sub_vecs.resize(subject.size());
     for(int path_idx=0; path_idx<subject.size(); path_idx++){//path_idx0 is univesal_plane
@@ -837,17 +795,17 @@ IntPoint autoarrange::getFirstNFPPoint(const IntPoint& first_sub_vec, const IntP
 //arrange Qt3D
 //=========================================
 
-void autoarrange::arrangeQt3D(std::vector<Qt3DCore::QTransform*> m_transform_set, std::vector<XYArrangement> arng_result_set){
-    for(int idx=0; idx<arng_result_set.size(); idx++){
-        arrangeSingleQt3D(m_transform_set[idx], arng_result_set[idx]);
-    }
-}
-
-void autoarrange::arrangeSingleQt3D(Qt3DCore::QTransform* m_transform, XYArrangement arng_result){
-    QVector3D trans_vec = QVector3D(arng_result.first.X/scfg->resolution, arng_result.first.Y/scfg->resolution, m_transform->translation().z());
-    m_transform->setTranslation(trans_vec);
-    m_transform->setRotationZ(arng_result.second);
-}
+//void autoarrange::arrangeQt3D(std::vector<Qt3DCore::QTransform*> m_transform_set, std::vector<XYArrangement> arng_result_set){
+//    for(int idx=0; idx<arng_result_set.size(); idx++){
+//        arrangeSingleQt3D(m_transform_set[idx], arng_result_set[idx]);
+//    }
+//}
+//
+//void autoarrange::arrangeSingleQt3D(Qt3DCore::QTransform* m_transform, XYArrangement arng_result){
+//    QVector3D trans_vec = QVector3D(arng_result.first.X/scfg->resolution, arng_result.first.Y/scfg->resolution, m_transform->translation().z());
+//    m_transform->setTranslation(trans_vec);
+//    m_transform->setRotationZ(arng_result.second);
+//}
 
 /*void autoarrange::arrangeGlmodels(std::vector<GLModel*>* glmodels){
     std::vector<Mesh> meshes_to_arrange;
@@ -860,6 +818,8 @@ void autoarrange::arrangeSingleQt3D(Qt3DCore::QTransform* m_transform, XYArrange
     arng_result_set = arngMeshes(&meshes_to_arrange);
     arrangeQt3D(m_transform_set, arng_result_set);
 }*/
+
+#ifdef _DEBUG_AUTO_ARRANGE
 
 //=========================================
 //check
@@ -970,3 +930,69 @@ void autoarrange::testOffset(){
     //offsetPath(&path1);
     debugPath(path1);
 }
+
+
+
+
+void autoarrange::debugPaths(Paths paths) {
+	qDebug() << "===============";
+	for (size_t i = 0; i < paths.size(); i++) {
+		qDebug() << "";
+		//qDebug() << "path" << i;
+		for (size_t j = 0; j < paths[i].size(); j++) {
+			qDebug() << paths[i][j].X << paths[i][j].Y;
+		}
+	}
+	qDebug() << "===============";
+}
+
+void autoarrange::debugPath(Path path) {
+	qDebug() << "===============";
+	for (size_t i = 0; i < path.size(); i++) {
+		qDebug() << path[i].X << path[i].Y;
+	}
+	qDebug() << "===============";
+}
+
+void autoarrange::debugFaces(const Mesh* mesh, std::vector<const MeshFace*> face_list) {
+	for (size_t i = 0; i < face_list.size(); i++) {
+		debugFace(mesh, face_list[i]);
+	}
+}
+
+void autoarrange::debugFace(const Mesh* mesh, const MeshFace* face) {
+    const MeshFace* mf = face;
+	qDebug() << "face #" << face->idx;
+	for (size_t side = 0; side < 3; side++) {
+		QVector3D vtx = mf->mesh_vertex[side]->position;
+		float x_f = vtx.x();
+		float y_f = vtx.y();
+		float z_f = vtx.z();
+		int x_int = round(x_f * scfg->resolution);
+		int y_int = round(y_f * scfg->resolution);
+		int z_int = round(z_f * scfg->resolution);
+		qDebug() << "(" << x_f << "," << y_f << "," << z_f << ")";
+	}
+	qDebug() << "face normal:" << "(" << mf->fn.x() << "," << mf->fn.y() << "," << mf->fn.z() << ")";
+	for (size_t side = 0; side < 3; side++) {
+		if (mf->neighboring_faces[side].size() == 1) {
+			const MeshFace* neighbor = mf->neighboring_faces[side][0];
+			if (neighbor->fn.z() >= 0) {
+				if (isNbrOrientSame(mesh, mf, side)) qDebug() << "side" << side << ": nbr" << neighbor->idx;
+				else qDebug() << "side" << side << ": bound(ornt diff)";
+			}
+			else {
+				if (isNbrOrientSame(mesh, mf, side)) qDebug() << "side" << side << ": bound(fn.z diff)";
+				else qDebug() << "side" << side << ": bound(fn.z diff, ornt diff)";
+			}
+		}
+		else if (mf->neighboring_faces[side].size() == 0) {
+			qDebug() << "side" << side << ": bound(no neighbor)";
+		}
+		else {
+			qDebug() << "side" << side << ": bound(multi-neighbor" << mf->neighboring_faces[side].size() << ")";
+		}
+	}
+}
+
+#endif
