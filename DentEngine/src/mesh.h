@@ -132,7 +132,6 @@ public :
 	void connectFaces();
 	void modifyVertex(const MeshVertex* vertex, const QVector3D& newValue);
 	Mesh* saveUndoState(const Qt3DCore::QTransform& transform);
-
 	//void modifyFace(const MeshFace* vertex, const QVector3D& newValue);
 
 	/********************** Faces & Vertices std::for_each style edit***********************/
@@ -198,22 +197,11 @@ private:
     QMatrix4x4 m_matrix;
     QTime time;
 
-
-
-    // used for freecut, autoarrange elsewhere
-    Path convexHull;
-
     float _x_min = 99999, _x_max = 99999, _y_min = 99999, _y_max = 99999, _z_min = 99999, _z_max = 99999;
 
+	//fileloader should be a factory pattern?
     friend class FileLoader;
     friend class GLModel;
-    //TODO: these friends should be removed so that operations on Mesh is controlled.
-    friend class SVGexporter;
-    friend class modelcut;
-    friend class autoorientation;
-    friend class modelcut;
-
-
 
 
 
