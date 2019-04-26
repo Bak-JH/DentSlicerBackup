@@ -118,7 +118,13 @@ public :
 
 	Mesh(const Mesh* origin);
     Mesh() {};
-    /********************** Mesh Edit Functions***********************/
+
+	/********************** Undo state functions***********************/
+	void setNextMesh( Mesh* mesh);
+	void setPrevMesh( Mesh* mesh);
+
+
+	/********************** Mesh Edit Functions***********************/
     void vertexOffset(float factor);
     void vertexMove(QVector3D direction);
     void centerMesh();
@@ -135,10 +141,6 @@ public :
 	//void modifyFace(const MeshFace* vertex, const QVector3D& newValue);
 
 	/********************** Faces & Vertices std::for_each style edit***********************/
-	//returns changed/deleted elements count
-	//size_t doForEachFace(ForEachOperation operationType, FaceForEachFunction forEachFunction);
-	//size_t doForEachVertex(ForEachOperation operationType, VertexForEachFunction forEachFunction);
-
 	size_t conditionalDelteFaces(FaceForEachFunction forEachFunction);
 	size_t conditionalModifyFaces(FaceForEachFunction forEachFunction);
 
@@ -176,9 +178,15 @@ public :
     float y_max()const;
     float z_min()const;
     float z_max()const;
-    const Mesh* getPrev()const;
-    const Mesh* getNext()const;
-    QTime getTime()const;
+    Mesh* getPrev()const;
+    Mesh* getNext()const;
+	/********************** Stuff that can be public **********************/
+
+	QTime time;
+	QVector3D m_translation;
+	QMatrix4x4 m_matrix;
+
+
 private:
     /********************** Helper Functions **********************/
     std::vector<const MeshFace*> findFaceWith2Vertices(const MeshVertex * v0, const MeshVertex* v1,const MeshFace& self_f) const;
@@ -193,15 +201,12 @@ private:
     Mesh* prevMesh = nullptr;
     Mesh* nextMesh = nullptr;
 
-    QVector3D m_translation;
-    QMatrix4x4 m_matrix;
-    QTime time;
 
     float _x_min = 99999, _x_max = 99999, _y_min = 99999, _y_max = 99999, _z_min = 99999, _z_max = 99999;
 
 	//fileloader should be a factory pattern?
     friend class FileLoader;
-    friend class GLModel;
+    //friend class GLModel;
 
 
 

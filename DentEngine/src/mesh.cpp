@@ -11,6 +11,16 @@ Mesh::Mesh( const Mesh* origin)
 /********************** Mesh Edit Functions***********************/
 
 
+void Mesh::setNextMesh( Mesh* mesh)
+{
+	nextMesh = mesh;
+}
+
+void Mesh::setPrevMesh( Mesh* mesh)
+{
+	prevMesh = mesh;
+}
+
 void Mesh::vertexOffset(float factor){
     int numberofVertices = vertices.size();
     _x_min = 99999;
@@ -382,15 +392,16 @@ void Mesh::connectFaces(){
 
 void Mesh::modifyVertex(const MeshVertex* vertex, const QVector3D& newValue)
 {
-	if (vertex->Owner != this)
-		throw std::runtime_error("trying to modify unowned vertex by mesh");
-	if (vertex->position != newValue)
+	auto modAble = vertex->modifiedByOwner(this);
+	if (modAble)
 	{
-		MeshVertex* mod = const_cast<MeshVertex*>(vertex);
-		mod->position = newValue;
+		modAble->position = newValue;
 		// do mirroring operation here
 	}
-
+	else
+	{
+		throw std::runtime_error("Mesh trying to modify unowned vertex");
+	}
 }
 
 Mesh* Mesh::saveUndoState(const Qt3DCore::QTransform& transform)
@@ -806,16 +817,12 @@ float Mesh::getFaceZmax(MeshFace mf)const{
     }
     return face__z_max;
 }
-QTime Mesh::getTime()const
-{
-    return time;
-}
 
-const Mesh* Mesh::getPrev()const
+Mesh* Mesh::getPrev()const
 {
     return prevMesh;
 }
-const Mesh* Mesh::getNext()const
+Mesh* Mesh::getNext()const
 {
     return nextMesh;
 }
