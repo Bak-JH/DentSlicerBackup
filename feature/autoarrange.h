@@ -12,6 +12,9 @@
 #include "DentEngine/src/mesh.h"
 #include "DentEngine/src/polyclipping/clipper/clipper.hpp"
 #include "convex_hull.h"
+#if  defined(QT_DEBUG) || defined(_DEBUG)
+#define _DEBUG_AUTO_ARRANGE
+#endif
 
 using namespace ClipperLib;
 
@@ -25,29 +28,26 @@ public:
 
     std::vector<XYArrangement> simpArngMeshes(std::vector<Mesh>& meshes);
     std::vector<XYArrangement> arngMeshes(std::vector<Mesh>& meshes);
-    void arrangeQt3D(std::vector<Qt3DCore::QTransform*> m_transform_set, std::vector<XYArrangement> arng_result_set);
+    //void arrangeQt3D(std::vector<Qt3DCore::QTransform*> m_transform_set, std::vector<XYArrangement> arng_result_set);
     //void arrangeGlmodels(std::vector< GLModel* > * glmodels);
 
 private:
     Paths getMeshRecArea(const Mesh& mesh);
     Paths getMeshConvexHull(const Mesh& mesh);
-    Paths spreadingCheck(const Mesh* mesh, std::vector<bool>& check, size_t chking_start, bool is_chking_pos);
-	size_t getPathHead(const Mesh* mesh, const MeshFace* mf, size_t side, bool is_chking_pos);
-    Path buildOutline(const Mesh* mesh, std::vector<bool>& check, size_t chking, size_t path_head, bool is_chking_pos);
+    Paths spreadingCheck(const Mesh* mesh, std::map<const MeshFace*, bool>& check, const MeshFace* chking_start, bool is_chking_pos);
+	const MeshVertex* getPathHead(const Mesh* mesh, const MeshFace* mf, size_t side, bool is_chking_pos);
+    Path buildOutline(const Mesh* mesh, std::map<const MeshFace*, bool>& check, const MeshFace* chking, const MeshVertex* path_head, bool is_chking_pos);
     bool isEdgeBound(const Mesh* mesh, const MeshFace* mf, size_t side, bool is_chking_pos);
     bool isNbrOrientSame(const Mesh* mesh, const MeshFace* mf, size_t side);
-	size_t searchVtxInFace(const MeshFace* mf, size_t vertexIdx);
-	size_t getNbrVtx(const MeshFace* mf, size_t base, size_t xth);
-    Path idxsToPath(const Mesh* mesh, std::vector<size_t> path_by_idx);
+	size_t searchVtxInFace(const MeshFace* mf, const MeshVertex* vertex);
+	const MeshVertex* getNbrVtx(const MeshFace* mf, size_t base, size_t xth);
+    Path idxsToPath(const Mesh* mesh, std::vector<const MeshVertex* > path_by_idx);
     Paths project(const Mesh* mesh);
     Paths clipOutlines(std::vector<Paths> outline_sets);
     bool checkFNZ(const MeshFace* face, bool is_chking_pos);
-    void debugPaths(Paths paths);
-    void debugPath(Path path);
-    void debugFaces(const Mesh* mesh, std::vector<size_t> face_list);
-    void debugFace(const Mesh* mesh, size_t face_idx);
-	size_t findVertexWithIntpoint(IntPoint p, const Mesh* mesh);
-	size_t findVertexWithIntXY(size_t x, size_t y, const Mesh* mesh);
+
+	const MeshVertex* findVertexWithIntpoint(IntPoint p, const Mesh* mesh);
+	const MeshVertex* findVertexWithIntXY(size_t x, size_t y, const Mesh* mesh);
 
     void RDPSimpPaths(Paths* paths);
     void RDPSimp(Path* path);
@@ -81,13 +81,20 @@ private:
     IntPoint getEdgeVec(const Path& path, int edge_idx, bool isForward);
     IntPoint getFirstNFPPoint(const IntPoint& first_sub_vec, const IntPoint& first_sub_vtx, const Path& obj, const Vecs& obj_vecs);
 
-    void arrangeSingleQt3D(Qt3DCore::QTransform* m_transform, XYArrangement arng_result);
+    //void arrangeSingleQt3D(Qt3DCore::QTransform* m_transform, XYArrangement arng_result);
 
-    bool checkConvex(Path& path);
 
-    void testSimplifyPolygon();
-    void testClip();
-    void testOffset();
+
+#ifdef  _DEBUG_AUTO_ARRANGE
+	bool checkConvex(Path& path);
+	void testSimplifyPolygon();
+	void testClip();
+	void testOffset();
+	void debugPaths(Paths paths);
+	void debugPath(Path path);
+	void debugFaces(const Mesh* mesh, std::vector<const MeshFace*> face_list);
+	void debugFace(const Mesh* mesh, const MeshFace* face);
+#endif
 
 };
 
