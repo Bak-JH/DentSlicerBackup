@@ -165,14 +165,13 @@ void modelcut::cutAway(Mesh* leftMesh, Mesh* rightMesh, Mesh* mesh, std::vector<
 
     // project mesh's vertices to IntPoints
     Path IntPoints;
-    IntPoints.reserve(mesh->vertices.size()*2);
-    for (MeshVertex& mv : mesh->vertices){
+    IntPoints.reserve(mesh->getVertices()->size()*2);
+    for (const MeshVertex& mv : *mesh->getVertices()){
         IntPoints.push_back(IntPoint(mv.position.x()*scfg->resolution, mv.position.y()*scfg->resolution));
     }
 
     // convexHull used for point containment
-    mesh->convexHull = getConvexHull(&IntPoints);
-
+	Path convexHull;
 
     //freecut intersection detect from here
 
@@ -193,8 +192,8 @@ void modelcut::cutAway(Mesh* leftMesh, Mesh* rightMesh, Mesh* mesh, std::vector<
 
     // find enter IP , exitIP
     for (int i=0; i<contour.size(); i++){
-        if (PointInPolygon(contour[i], mesh->convexHull)){ // inside of hull
-            if (!cpInsideHull && !PointInPolygon(contour[(i-1)%contour.size()], mesh->convexHull)){
+        if (PointInPolygon(contour[i], convexHull)){ // inside of hull
+            if (!cpInsideHull && !PointInPolygon(contour[(i-1)%contour.size()], convexHull)){
                 cpInsideHull = true;
                 enterIP = contour[(i-1)%contour.size()];
                 //cuttingContour_copy.push_back(cuttingContour[(i-1)%cuttingContour.size()]);
@@ -203,7 +202,7 @@ void modelcut::cutAway(Mesh* leftMesh, Mesh* rightMesh, Mesh* mesh, std::vector<
             cuttingContour_copy.push_back(cuttingContour[i]);
             contour_copy.push_back(contour[i]);
         } else { // outside of hull
-            if (!cpOutsideHull && PointInPolygon(contour[(i-1)%contour.size()], mesh->convexHull)){
+            if (!cpOutsideHull && PointInPolygon(contour[(i-1)%contour.size()], convexHull)){
                 cpOutsideHull = true;
                 exitIP = contour[i];
                 //cuttingContour_copy.push_back(cuttingContour[i]);
@@ -228,7 +227,7 @@ void modelcut::cutAway(Mesh* leftMesh, Mesh* rightMesh, Mesh* mesh, std::vector<
 
     Paths3D innerContours, outerContours;
 
-    for (MeshFace& mf : mesh->faces){
+    for (const MeshFace& mf : *mesh->getFaces()){
         bool faceLeftToPlane = false;
         bool faceRightToPlane = false;
 
@@ -345,8 +344,8 @@ void modelcut::cutAway(Mesh* leftMesh, Mesh* rightMesh, Mesh* mesh, std::vector<
         MeshVertex& qv = cuttingContour[ctc_idx];
 
         // find maximal position
-        for (MeshFace& mf : mesh->faces){
-            // if projection of mf to xy coordinates contains qv and upper than current qv's position, get qv
+		for (const MeshFace& mf : *mesh->getFaces()) {
+			// if projection of mf to xy coordinates contains qv and upper than current qv's position, get qv
             const MeshVertex& mfv1 = *mf.mesh_vertex[0];
             const MeshVertex& mfv2 = *mf.mesh_vertex[1];
             const MeshVertex& mfv3 = *mf.mesh_vertex[2];
@@ -617,9 +616,9 @@ void modelcut::cutAway(Mesh* leftMesh, Mesh* rightMesh, Mesh* mesh, std::vector<
         }
     }
 
-    if (leftMesh->faces.size() != 0)
+    if (leftMesh->getFaces()->size() != 0)
         leftMesh->connectFaces();
-    if (rightMesh->faces.size() != 0)
+    if (rightMesh->getFaces()->size() != 0)
         rightMesh->connectFaces();
 }
 
