@@ -318,7 +318,7 @@ std::vector<Orient*> autoorientation::area_cumulation(Mesh* mesh,float n[],bool 
         }
 		//?!
         if(i%3000==0){
-            qmlManager->setProgress((float)i*0.15/mesh->faces.size());
+            qmlManager->setProgress((float)i*0.15/mesh->getFaces()->size());
             qmlManager->setProgressText("orientation.....");
         }
 		++i;
@@ -385,7 +385,7 @@ std::vector<Orient*> autoorientation::egde_plus_vertex(Mesh* mesh, int best_n){
     //orientation을 추가로 더할 때 씁니다. best_n 갯수만큼 return 하긴 하지만,
     //호출한 Tweak() 에서 val>2인 orientation만 원본 orientation에 추가하므로,
     //실제로 추가되는 값은 그보다 작을 수 있습니다.
-    int vcount = mesh->faces.size()*3;
+    int vcount = mesh->getFaces()->size()*3;
     //원문에서는 face 안에 vertexindex가 있다고 생각하지 않고,
     //vertexlist를 계속 나열한 채로 저장하였으므로, 비슷하게 구현하기 위해서 *3을 해줍니다.
     //그냥 다른 함수처럼 faces[i].mesh_vertex[0] 1, 2 이런식으로 구한 결과와 같습니다.
@@ -481,7 +481,7 @@ float* autoorientation::calc_random_normal(Mesh* mesh, int i,  const MeshFace& f
         v=face.mesh_vertex[2]->position;
         w=face.mesh_vertex[0]->position;
     }
-    int randomIndex=qrand() % mesh->faces.size();
+    int randomIndex=qrand() % mesh->getFaces()->size();
 
     //QVector3D r_v=mesh->vertices[mesh->faces[randomIndex/3].mesh_vertex[randomIndex%3]].position;
 

@@ -36,7 +36,7 @@ public:
     static void interpolate(Mesh* mesh, Path3D contour1, Path3D contour2);
     static void cutAway(Mesh* leftMesh, Mesh* rightMesh, Mesh* mesh, std::vector<QVector3D> cuttingPoints, int cutFillMode);
 
-
+	Path _convexHull;
     int numPoints;
 //private:
     //float target_function(float touching,float overhang,float line);
