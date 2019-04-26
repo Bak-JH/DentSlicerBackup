@@ -22,32 +22,49 @@ using namespace ClipperLib;
 typedef std::vector<QVector3D> Plane;
 class MeshVertex;
 class Mesh;
-class MeshFace {
+
+
+class MeshDataType {
+public:
+	MeshDataType(const Mesh* owner) :Owner(owner)
+	{}
+private:
+	virtual MeshDataType* modifiedByOwner(const Mesh* owner)const = 0;
+protected:
+	const Mesh* Owner;
+
+};
+class MeshFace: private MeshDataType {
 public:
     int idx;
 	const MeshFace* parentFace = nullptr;
-    std::array<MeshVertex*, 3> mesh_vertex{nullptr, nullptr, nullptr};
-    //int connected_face_idx[3];
-
-    std::array<std::vector<MeshFace*>, 3> neighboring_faces;
-
     QVector3D fn;
     QVector3D fn_unnorm;
+
+	std::array<std::vector<const MeshFace*>, 3> neighboring_faces;
+	std::array<const MeshVertex*, 3> mesh_vertex{ nullptr, nullptr, nullptr };
 private:
-	MeshFace(Mesh* mesh) : neighboring_faces{ std::vector<MeshFace*>(), std::vector<MeshFace*>(), std::vector<MeshFace*>() }, Owner(mesh)
+	MeshFace(Mesh* mesh) : neighboring_faces{ std::vector<const MeshFace*>(), std::vector<const MeshFace*>(), std::vector<const MeshFace*>() }, MeshDataType(mesh), idx(-1)
 	{}
 	std::list<MeshFace>::iterator itr;
-	const Mesh* Owner;
+	MeshFace* modifiedByOwner(const Mesh* owner)const override
+	{
+		if (owner == Owner)
+		{
+			return const_cast<MeshFace*>(this);
+		}
+		return nullptr;
+	}
+
 	friend class Mesh;
 };
 
-class MeshVertex {
+class MeshVertex : private MeshDataType {
 public:
 	int idx;
     QVector3D position;
     QVector3D vn;
-	MeshVertex():Owner(nullptr), idx(-1) {}
-    std::vector<MeshFace*> connected_faces;
+	MeshVertex():MeshDataType(nullptr), idx(-1) {}
 
     friend inline bool operator== (const MeshVertex& a, const MeshVertex& b){
         return a.position == b.position;
@@ -56,15 +73,25 @@ public:
     friend inline bool operator!= (const MeshVertex& a, const MeshVertex& b){
         return a.position != b.position;
     }
+
+	std::vector<const MeshFace*> connected_faces;
+
 private:
-	MeshVertex(Mesh* mesh, QVector3D position) : Owner(mesh), position(position) {}//connected_faces.reserve(8);}
-	MeshVertex(Mesh* mesh) : Owner(mesh) {}
+	MeshVertex(Mesh* mesh, QVector3D position) : MeshDataType(mesh), position(position) {}
+	MeshVertex(Mesh* mesh) : MeshDataType(mesh) {}
 	std::list<MeshVertex>::iterator itr;
-	const Mesh*  Owner;
+	MeshVertex* modifiedByOwner(const Mesh* owner)const override
+	{
+		if (owner == Owner)
+		{
+			return const_cast<MeshVertex*>(this);
+		}
+		return nullptr;
+	}
+
 	friend class Mesh;
 };
 
-//typedef std::vector<MeshVertex> Path3D;
 class Path3D : public std::vector<MeshVertex>{
     public:
         Path projection;
@@ -155,7 +182,7 @@ public :
     QTime getTime()const;
 private:
     /********************** Helper Functions **********************/
-    std::vector<MeshFace*> findFaceWith2Vertices(MeshVertex * v0, MeshVertex* v1,const MeshFace& self_f) const;
+    std::vector<const MeshFace*> findFaceWith2Vertices(const MeshVertex * v0, const MeshVertex* v1,const MeshFace& self_f) const;
 	MeshVertex* addFaceVertex(QVector3D v);
     void updateMinMax(QVector3D v);
 
