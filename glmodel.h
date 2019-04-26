@@ -245,7 +245,7 @@ public:
 	void enablePicking(bool isEnable);
 private:
     //Order is important! Look at the initializer list in constructor
-	std::vector<MeshFace*> _renderOrderFaces;
+	std::vector<const MeshFace*> _renderOrderFaces;
 
     QGeometryRenderer m_geometryRenderer;
     QGeometry m_geometry;
