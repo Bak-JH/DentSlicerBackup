@@ -114,7 +114,7 @@ public :
 	enum MeshOpOperand {
 		FaceRange = 0
 		,FaceSingle
-		,VerticeRange
+		//,VerticeRange this is meaningless as Mesh vertice indices and QGeometry indices are completely different!
 		,VertexSingle
 
 		//,SingleVertex
@@ -123,6 +123,7 @@ public :
 		MeshOpType Type;
 		MeshOpOperand Operand;
 		//pointers when modified, size_t for index of the deleted element, pair for multiple continous edits
+		//*ranges are [begin, end), end is not included;;
 		std::variant<std::pair<size_t, size_t>, size_t, const MeshVertex*, const MeshFace*> Data;
 	};
 
@@ -212,7 +213,7 @@ private:
     // for undo & redo
     Mesh* prevMesh = nullptr;
     Mesh* nextMesh = nullptr;
-	std::vector<MeshOp> _faceModifications;
+	std::vector<MeshOp> _meshModifications;
 
 
     float _x_min = 99999, _x_max = 99999, _y_min = 99999, _y_max = 99999, _z_min = 99999, _z_max = 99999;

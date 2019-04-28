@@ -274,7 +274,7 @@ void Mesh::addFace(QVector3D v0, QVector3D v1, QVector3D v2, const MeshFace* par
         mv.vn = QVector3D(0,0,0);
     }
 	_renderOrderFaces.push_back(&latest);
-	_faceModifications.push_back({ MeshOpType::Append, MeshOpOperand::FaceSingle, &latest });
+	_meshModifications.push_back({ MeshOpType::Append, MeshOpOperand::FaceSingle, &latest });
 
 }
 
@@ -368,7 +368,7 @@ std::list<MeshFace>::const_iterator Mesh::removeFace(std::list<MeshFace>::const_
             }
         }
     }
-	_faceModifications.push_back({ MeshOpType::Delete, MeshOpOperand::FaceSingle, f_it->idx});
+	_meshModifications.push_back({ MeshOpType::Delete, MeshOpOperand::FaceSingle, f_it->idx});
     auto afterDeleted =  faces.erase(f_it);
 	//update indexes
 	for (auto itr = afterDeleted; itr != faces.end(); ++itr)
@@ -411,7 +411,7 @@ void Mesh::modifyVertex(const MeshVertex* vertex, const QVector3D& newValue)
 	if (modAble)
 	{
 		modAble->position = newValue;
-		_faceModifications.push_back({ MeshOpType::Modify, MeshOpOperand::VertexSingle, vertex });
+		_meshModifications.push_back({ MeshOpType::Modify, MeshOpOperand::VertexSingle, vertex });
 
 		// do mirroring operation here
 	}
@@ -497,8 +497,8 @@ Mesh* Mesh::saveUndoState(const Qt3DCore::QTransform& transform)
 
 std::vector<Mesh::MeshOp> Mesh::flushChanges()
 {
-	auto copy = _faceModifications;
-	_faceModifications.clear();
+	auto copy = _meshModifications;
+	_meshModifications.clear();
 	return copy;
 }
 
@@ -1556,7 +1556,7 @@ size_t Mesh::conditionalModifyFaces(FaceForEachFunction forEachFunction)
 		isModified = forEachFunction(*this, each, currentIdx);
 		if (isModified)
 		{
-			//update QGeometry
+			++modified;
 		}
 		else
 		{
@@ -1576,7 +1576,7 @@ size_t Mesh::conditionalModifyFaces(FaceForEachFunction forEachFunction)
 	//submit changes to changes queue
 	for (auto& ranges : rangesChanged)
 	{
-		_faceModifications.push_back({ MeshOpType::Modify, MeshOpOperand::FaceRange, ranges });
+		_meshModifications.push_back({ MeshOpType::Modify, MeshOpOperand::FaceRange, ranges });
 	}
 	return modified;
 
@@ -1588,35 +1588,35 @@ size_t Mesh::conditionalModifyVertices(VertexForEachFunction forEachFunction)
 	size_t modified = 0;
 	bool isModified;
 	size_t currentIdx = 0;
-	size_t startRange = 0;
-	std::vector<std::pair<size_t, size_t>> rangesChanged;
+	std::vector<MeshOp> tmpMods;
+	auto vtxItr = getVertices()->begin();
 	for (auto& each : vertices)
 	{
 		isModified = forEachFunction(*this, each, currentIdx);
 		//update QGeometry
 		if (isModified)
 		{
+			++modified;
+			tmpMods.push_back({ MeshOpType::Modify, MeshOpOperand::VertexSingle, &*vtxItr });
+
 		}
-		else
-		{
-			if (currentIdx - startRange > 0)
-			{
-				rangesChanged.push_back(std::make_pair(startRange, currentIdx));
-			}
-			startRange = currentIdx;
-		}
+		++vtxItr;
 		++currentIdx;
 	}
-	if (currentIdx - startRange > 0)
-	{
-		rangesChanged.push_back(std::make_pair(startRange, currentIdx));
-	}
+
 
 	//submit changes to changes queue
-	for (auto& ranges : rangesChanged)
+	//for (auto& ranges : rangesChanged)
+	//{
+	//	_meshModifications.push_back({ MeshOpType::Modify, MeshOpOperand::VerticeRange, ranges });
+	//}
+	if (modified == vertices.size())
 	{
-		_faceModifications.push_back({ MeshOpType::Modify, MeshOpOperand::VerticeRange, ranges });
+		_meshModifications.push_back({ MeshOpType::Modify, MeshOpOperand::FaceRange, std::make_pair(0, faces.size()) });
 	}
-		
+	else
+	{
+		_meshModifications.insert(_meshModifications.end(), tmpMods.begin(), tmpMods.end());
+	}
 	return modified;
 }
