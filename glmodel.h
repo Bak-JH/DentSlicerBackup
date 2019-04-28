@@ -264,9 +264,8 @@ private:
     void appendNormalVertices(std::vector<QVector3D> vertices);
     void appendColorVertices(std::vector<QVector3D> vertices);
 
-	void deleteVertices(size_t from, size_t end);
 	void updateFace(const MeshFace* face);
-
+	void deleteAndShiftFaces(size_t start, size_t deleteAmount);
     void clearVertices();
     void onTimerUpdate();
     void removeLayerViewComponents();
