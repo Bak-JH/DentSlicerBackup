@@ -879,7 +879,6 @@ void GLModel::updateVertices(Mesh* mesh, QVector3D vertexColor)
 #ifdef _STRICT_GLMODEL
 				throw std::runtime_error("range for append operation not implemented");
 #endif
-
 			}
 		}
 		case Mesh::MeshOpType::Modify:
@@ -914,6 +913,15 @@ void GLModel::updateVertices(Mesh* mesh, QVector3D vertexColor)
 		{
 			if (operation.Operand == Mesh::MeshOpOperand::FaceSingle)
 			{
+				auto deleteIdx = std::get<size_t>(operation.Data);
+
+				deleteAndShiftFaces(deleteIdx, 1);
+			}
+			else if (operation.Operand == Mesh::MeshOpOperand::FaceRange)
+			{
+				auto deleteRange = std::get<std::pair<size_t, size_t>>(operation.Data);
+
+				deleteAndShiftFaces(deleteRange.first, deleteRange.second - deleteRange.first );
 			}
 			else
 			{
@@ -994,6 +1002,24 @@ void GLModel::updateFace(const MeshFace* face)
 		updateBuffer(normal, normalAttribute, vertexNormalBuffer, offset + i);
 		//updateBuffer(vtx->color, colorAttribute, vertexColorBuffer, offset + i);
 	}
+}
+
+inline void deleteAndShiftBuffer(QAttribute& attr, Qt3DRender::QBuffer& buffer, size_t index, size_t amount)
+{
+	size_t eraseAmount = amount * 3 * sizeof(float);
+
+	QByteArray copy = buffer.data();
+	copy.remove(index, eraseAmount);
+	buffer.setData(copy);
+	attr.setCount(attr.count() - eraseAmount);
+	return;
+}
+void GLModel::deleteAndShiftFaces(size_t start, size_t deleteAmount)
+{
+	deleteAndShiftBuffer(positionAttribute, vertexBuffer, start, deleteAmount);
+	deleteAndShiftBuffer(normalAttribute, vertexNormalBuffer, start, deleteAmount);
+	deleteAndShiftBuffer(colorAttribute, vertexColorBuffer, start, deleteAmount);
+
 }
 void GLModel::appendVertices(std::vector<QVector3D> vertices){
 
@@ -1122,9 +1148,6 @@ void GLModel::appendColorVertices(std::vector<QVector3D> vertices){
     return;
 }
 
-void GLModel::deleteVertices(size_t from, size_t end)
-{
-}
 
 
 
