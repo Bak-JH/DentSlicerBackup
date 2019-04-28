@@ -856,7 +856,7 @@ void GLModel::updateVertices(Mesh* mesh, QVector3D vertexColor)
 	for (auto& operation : operations)
 	{
 #ifdef _STRICT_GLMODEL
-		if (operation.Type != Mesh::MeshOpType::Modify && (operation.Operand == Mesh::MeshOpOperand::VertexSingle || operation.Operand == Mesh::MeshOpOperand::VerticeRange))
+		if (operation.Type != Mesh::MeshOpType::Modify && operation.Operand == Mesh::MeshOpOperand::VertexSingle)
 			throw std::runtime_error("invalid mesh operation vertex arument on non-Modify");
 #endif
 		switch (operation.Type)
@@ -884,11 +884,44 @@ void GLModel::updateVertices(Mesh* mesh, QVector3D vertexColor)
 		}
 		case Mesh::MeshOpType::Modify:
 		{
+			if (operation.Operand == Mesh::MeshOpOperand::FaceRange)
+			{
+				auto range = std::get< std::pair<size_t, size_t> >(operation.Data);
+				for (size_t i = range.first; i != range.second; ++i)
+				{
+					auto facePtr = (*mesh->getRenderOrderFaces())[i];
+					updateFace(facePtr);
+				}
+			}
 
+			else if (operation.Operand == Mesh::MeshOpOperand::FaceSingle)
+			{
+				auto facePtr = std::get< const MeshFace*  >(operation.Data);
+				updateFace(facePtr);
+
+			}
+			else
+			{
+				auto vtxPtr = std::get< const MeshVertex*  >(operation.Data);
+				auto faces = vtxPtr->connected_faces;
+				for (auto each : faces)
+				{
+					updateFace(each);
+				}
+			}
 		}
 		case Mesh::MeshOpType::Delete:
 		{
+			if (operation.Operand == Mesh::MeshOpOperand::FaceSingle)
+			{
+			}
+			else
+			{
+#ifdef _STRICT_GLMODEL
+				throw std::runtime_error("range for delete operation not implemented");
+#endif
 
+			}
 		}
 		}
 
@@ -896,7 +929,7 @@ void GLModel::updateVertices(Mesh* mesh, QVector3D vertexColor)
 }
 
 
-inline void appendOrResizeBuffer(QVector3D& data, QAttribute& attr, Qt3DRender::QBuffer& buffer)
+inline void appendOrResizeBuffer(const QVector3D& data, QAttribute& attr, Qt3DRender::QBuffer& buffer)
 {
 	//update geometry
 	QByteArray appendVertexArray;
@@ -930,6 +963,38 @@ void GLModel::addVertex(QVector3D pos, QVector3D normal, QVector3D color
 	appendOrResizeBuffer(pos, colorAttribute, vertexColorBuffer);
 }
 
+inline void updateBuffer(const QVector3D& data, QAttribute& attr, Qt3DRender::QBuffer& buffer, size_t offset)
+{
+	//update geometry
+	QByteArray appendVertexArray;
+	size_t newDataSize = 3 * sizeof(float);
+	appendVertexArray.resize(newDataSize);
+	float* reVertexArray = reinterpret_cast<float*>(appendVertexArray.data());
+
+	//coordinates of left vertex
+	reVertexArray[0] = data.x;
+	reVertexArray[1] = data.y;
+	reVertexArray[2] = data.z;
+
+	buffer.updateData(offset, appendVertexArray);
+	return;
+}
+void GLModel::updateFace(const MeshFace* face)
+{
+	size_t offset = face->idx * 3 * sizeof(float);
+	for (size_t i = 0; i < 3; ++i)
+	{
+		auto vtx = face->mesh_vertex[i];
+		updateBuffer(vtx->position, positionAttribute, vertexBuffer, offset + i);
+		QVector3D normal = vtx->vn;
+		if (vtx->vn == QVector3D{0, 0, 0})
+		{
+			normal = { 1,1,1 };
+		}
+		updateBuffer(normal, normalAttribute, vertexNormalBuffer, offset + i);
+		//updateBuffer(vtx->color, colorAttribute, vertexColorBuffer, offset + i);
+	}
+}
 void GLModel::appendVertices(std::vector<QVector3D> vertices){
 
     int appendVertexCount = vertices.size();
@@ -1061,9 +1126,8 @@ void GLModel::deleteVertices(size_t from, size_t end)
 {
 }
 
-void GLModel::modifyVertices(const std::vector<const MeshFace*> faces)
-{
-}
+
+
 
 void GLModel::handlePickerEnteredFreeCutSphere()
 {
