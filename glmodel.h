@@ -107,22 +107,6 @@ public:
     GLModel(QObject* mainWindow=nullptr, QNode* parent=nullptr, Mesh* loadMesh=nullptr, QString fname="", bool isShadow=false, int id = 0); // main constructor for mainmesh and shadowmesh
     virtual ~GLModel();
 
-    // //move copy assignment const
-    // GLModel(GLModel&& other) : v(std::move(other.v))
-    // {
-    // }
-    // GLModel& operator=(GLModel other)
-    // {
-    //     //use const GLModel& when resource can be reused.
-    //     std::swap(v, other.v);
-    //     return *this;
-    // }
-    // GLModel& operator=(GLModel&& other)
-    // {
-    //     v = std::move(other.v);
-    //     return *this;
-    // }
-
     //TODO: Turn these into privates as well
     GLModel *parentModel = nullptr;
     GLModel *leftModel = nullptr;
@@ -265,14 +249,15 @@ private:
     QAttribute indexAttribute;
 
     int colorMode;
-    float x,y,z;
+	//jesus wtf
+    //float x,y,z;
     int v_cnt;
     int f_cnt;
     QNode* m_parent;
     QVector3D lastpoint;
     QVector2D prevPoint;
     void clearMem();
-    void addVertex(QVector3D vertex);
+    void addVertex(QVector3D pos, QVector3D normal, QVector3D color );
     void appendVertices(std::vector<QVector3D> vertices);
     void appendNormalVertices(std::vector<QVector3D> vertices);
     void appendColorVertices(std::vector<QVector3D> vertices);
