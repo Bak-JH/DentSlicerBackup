@@ -9,7 +9,7 @@ STLexporter::STLexporter()
 Mesh* STLexporter::mergeSelectedModels() {
     if (qmlManager->selectedModels.size() == 1 && qmlManager->selectedModels[0] == nullptr) return nullptr;
     else if (qmlManager->selectedModels.size() == 1)
-        return qmlManager->selectedModels[0]->mesh;
+        return qmlManager->selectedModels[0]->_mesh;
 
     size_t faceNum = 0;
     size_t verNum = 0;

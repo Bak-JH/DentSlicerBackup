@@ -237,16 +237,15 @@ public:
 
     // implement lock as bool variable
     bool updateLock;
-
-    void addVertices(Mesh* mesh, bool CW, QVector3D color=QVector3D(0.278f, 0.670f, 0.706f));
+    void updateAllVertices(Mesh* mesh, QVector3D color=QVector3D(0.278f, 0.670f, 0.706f));
+	void updateVertices(Mesh* mesh, QVector3D color = QVector3D(0.278f, 0.670f, 0.706f));
     const Mesh* getMesh();
     const Mesh* getSupport();
 
 	void enablePicking(bool isEnable);
 private:
     //Order is important! Look at the initializer list in constructor
-	std::vector<const MeshFace*> _renderOrderFaces;
-
+	const Mesh* _currentVisibleMesh;
     QGeometryRenderer m_geometryRenderer;
     QGeometry m_geometry;
 
@@ -274,10 +273,13 @@ private:
     QVector2D prevPoint;
     void clearMem();
     void addVertex(QVector3D vertex);
-    void addVertices(std::vector<QVector3D> vertices);
-    void addNormalVertices(std::vector<QVector3D> vertices);
-    void addColorVertices(std::vector<QVector3D> vertices);
-    void addIndexes(std::vector<int> vertices);
+    void appendVertices(std::vector<QVector3D> vertices);
+    void appendNormalVertices(std::vector<QVector3D> vertices);
+    void appendColorVertices(std::vector<QVector3D> vertices);
+
+	void deleteVertices(size_t from, size_t end);
+	void modifyVertices(const std::vector <const MeshFace*> faces);
+
     void clearVertices();
     void onTimerUpdate();
     void removeLayerViewComponents();
@@ -314,7 +316,7 @@ private:
 	Mesh lmesh;
 	Mesh rmesh;
     // Core mesh structures
-    Mesh* mesh;
+    Mesh* _mesh;
 
     QSphereMesh* dragMesh;
     Mesh* supportMesh = nullptr;

@@ -173,7 +173,7 @@ void extendAlongOutline(Mesh* mesh, QVector3D normal, Paths3D selectedPaths, dou
     for (Path3D& edge : selectedPaths){
         bool exist = false;
         for (MeshVertex& mv : selectedPath){
-            if(mv.idx == edge[0].idx)
+            if(mv == edge[0])
                 exist = true;
         }
         if (!exist)
