@@ -104,14 +104,14 @@ typedef std::vector<Path3D> Paths3D;
 
 class Mesh{
 public :
-	enum FaceOpType {
+	enum MeshOpType {
 		Delete = 0
 		,Modify
 		,Append
 		//TODO: ModifyKeepNormal,
 
 	};
-	enum FaceOpOperand {
+	enum MeshOpOperand {
 		FaceRange = 0
 		,FaceSingle
 		,VerticeRange
@@ -119,11 +119,11 @@ public :
 
 		//,SingleVertex
 	};
-	struct FaceOp {
-		FaceOpType Type;
-		FaceOpOperand Operand;
+	struct MeshOp {
+		MeshOpType Type;
+		MeshOpOperand Operand;
 		//pointers when modified, size_t for index of the deleted element, pair for multiple continous edits
-		std::variant<std::pair<size_t, size_t>, const MeshVertex*, const MeshFace*, size_t> Data;
+		std::variant<std::pair<size_t, size_t>, size_t, const MeshVertex*, const MeshFace*> Data;
 	};
 
 	//For each operation, modifies MeshFace, returns whether modification actually occured or the element should be delete
@@ -152,7 +152,7 @@ public :
 	void removeFace(const MeshFace* mf);
 	void connectFaces();
 	void modifyVertex(const MeshVertex* vertex, const QVector3D& newValue);
-	std::vector<FaceOp> flushChanges();
+	std::vector<MeshOp> flushChanges();
 	/********************** Faces & Vertices std::for_each style edit***********************/
 	size_t conditionalModifyFaces(FaceForEachFunction forEachFunction);
 
@@ -212,7 +212,7 @@ private:
     // for undo & redo
     Mesh* prevMesh = nullptr;
     Mesh* nextMesh = nullptr;
-	std::vector<FaceOp> _faceModifications;
+	std::vector<MeshOp> _faceModifications;
 
 
     float _x_min = 99999, _x_max = 99999, _y_min = 99999, _y_max = 99999, _z_min = 99999, _z_max = 99999;

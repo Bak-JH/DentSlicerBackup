@@ -274,7 +274,7 @@ void Mesh::addFace(QVector3D v0, QVector3D v1, QVector3D v2, const MeshFace* par
         mv.vn = QVector3D(0,0,0);
     }
 	_renderOrderFaces.push_back(&latest);
-	_faceModifications.push_back({ FaceOpType::Append, FaceOpOperand::FaceSingle, &latest });
+	_faceModifications.push_back({ MeshOpType::Append, MeshOpOperand::FaceSingle, &latest });
 
 }
 
@@ -368,7 +368,7 @@ std::list<MeshFace>::const_iterator Mesh::removeFace(std::list<MeshFace>::const_
             }
         }
     }
-	_faceModifications.push_back({ FaceOpType::Delete, FaceOpOperand::FaceSingle, f_it->idx});
+	_faceModifications.push_back({ MeshOpType::Delete, MeshOpOperand::FaceSingle, f_it->idx});
     auto afterDeleted =  faces.erase(f_it);
 	//update indexes
 	for (auto itr = afterDeleted; itr != faces.end(); ++itr)
@@ -411,7 +411,7 @@ void Mesh::modifyVertex(const MeshVertex* vertex, const QVector3D& newValue)
 	if (modAble)
 	{
 		modAble->position = newValue;
-		_faceModifications.push_back({ FaceOpType::Modify, FaceOpOperand::VertexSingle, vertex });
+		_faceModifications.push_back({ MeshOpType::Modify, MeshOpOperand::VertexSingle, vertex });
 
 		// do mirroring operation here
 	}
@@ -495,7 +495,7 @@ Mesh* Mesh::saveUndoState(const Qt3DCore::QTransform& transform)
 
 }
 
-std::vector<Mesh::FaceOp> Mesh::flushChanges()
+std::vector<Mesh::MeshOp> Mesh::flushChanges()
 {
 	auto copy = _faceModifications;
 	_faceModifications.clear();
@@ -1576,7 +1576,7 @@ size_t Mesh::conditionalModifyFaces(FaceForEachFunction forEachFunction)
 	//submit changes to changes queue
 	for (auto& ranges : rangesChanged)
 	{
-		_faceModifications.push_back({ FaceOpType::Modify, FaceOpOperand::FaceRange, ranges });
+		_faceModifications.push_back({ MeshOpType::Modify, MeshOpOperand::FaceRange, ranges });
 	}
 	return modified;
 
@@ -1615,7 +1615,7 @@ size_t Mesh::conditionalModifyVertices(VertexForEachFunction forEachFunction)
 	//submit changes to changes queue
 	for (auto& ranges : rangesChanged)
 	{
-		_faceModifications.push_back({ FaceOpType::Modify, FaceOpOperand::VerticeRange, ranges });
+		_faceModifications.push_back({ MeshOpType::Modify, MeshOpOperand::VerticeRange, ranges });
 	}
 		
 	return modified;
