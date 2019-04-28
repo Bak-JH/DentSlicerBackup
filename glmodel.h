@@ -258,12 +258,14 @@ private:
     QVector2D prevPoint;
     void clearMem();
     void addVertex(QVector3D pos, QVector3D normal, QVector3D color );
+	void addVertex(QVector3D pos, QVector3D normal, QVector3D color);
+
     void appendVertices(std::vector<QVector3D> vertices);
     void appendNormalVertices(std::vector<QVector3D> vertices);
     void appendColorVertices(std::vector<QVector3D> vertices);
 
 	void deleteVertices(size_t from, size_t end);
-	void modifyVertices(const std::vector <const MeshFace*> faces);
+	void updateFace(const MeshFace* face);
 
     void clearVertices();
     void onTimerUpdate();
