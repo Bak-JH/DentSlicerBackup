@@ -19,7 +19,8 @@
 #include <QMatrix3x3>
 #include <feature/generatesupport.h>
 
-#ifdef _DEBUG
+#define ATTRIBUTE_SIZE_INCREMENT 200
+#if defined(_DEBUG) || defined(QT_DEBUG)
 #define _STRICT_GLMODEL
 #endif
 
@@ -800,24 +801,7 @@ void GLModel::clearMem(){
 	normalAttribute.setCount(0);
 	colorAttribute.setCount(0);
 }
-void GLModel::addVertex(QVector3D vertex){
 
-    //update geometry
-    QByteArray appendVertexArray;
-    appendVertexArray.resize(1*3*sizeof(float));
-    float* reVertexArray = reinterpret_cast<float*>(appendVertexArray.data());
-
-    //coordinates of left vertex
-    reVertexArray[0] = x;
-    reVertexArray[1] = y;
-    reVertexArray[2] = z;
-
-    uint vertexCount = positionAttribute.count();
-    vertexBuffer.updateData(vertexCount*6*sizeof(float),appendVertexArray);
-    positionAttribute.setCount(vertexCount+1);
-
-    return;
-}
 
 void GLModel::clearVertices(){
     //uint vertexCount = positionAttribute->count();
@@ -859,8 +843,8 @@ void GLModel::updateAllVertices(Mesh* mesh, QVector3D vertexColor)
 
 void GLModel::updateVertices(Mesh* mesh, QVector3D vertexColor)
 {
-	std::vector<Mesh::FaceOp> changes = mesh->flushChanges();
-	bool tooManyChanges = (changes.size() / (mesh->getFaces()->size() * 3)) > 0.8f;
+	std::vector<Mesh::MeshOp> operations = mesh->flushChanges();
+	bool tooManyChanges = (operations.size() / (mesh->getFaces()->size() * 3)) > 0.8f;
 	if (_currentVisibleMesh != mesh  || tooManyChanges)
 	{
 		//if the mesh being updated is not the same as the visible one, we need to redraw everything
@@ -869,25 +853,83 @@ void GLModel::updateVertices(Mesh* mesh, QVector3D vertexColor)
 		return;
 	}
 
-	for (auto& change : changes)
+	for (auto& operation : operations)
 	{
-		switch (change.Type)
+#ifdef _STRICT_GLMODEL
+		if (operation.Type != Mesh::MeshOpType::Modify && (operation.Operand == Mesh::MeshOpOperand::VertexSingle || operation.Operand == Mesh::MeshOpOperand::VerticeRange))
+			throw std::runtime_error("invalid mesh operation vertex arument on non-Modify");
+#endif
+		switch (operation.Type)
 		{
-		case Mesh::FaceOpType::Append:
+		case Mesh::MeshOpType::Append:
+		{
+			if (operation.Operand == Mesh::MeshOpOperand::FaceSingle)
+			{
+				auto facePtr = std::get< const MeshFace*>(operation.Data);
+				for (size_t i = 0; i < 3; ++i)
+				{
+					const auto& vtx = facePtr->mesh_vertex[i];
+					//sigh
+					addVertex(vtx->position, vtx->vn, QVector3D(0.278f, 0.670f, 0.706f));
+
+				}
+			}
+			else
+			{
+#ifdef _STRICT_GLMODEL
+				throw std::runtime_error("range for append operation not implemented");
+#endif
+
+			}
+		}
+		case Mesh::MeshOpType::Modify:
 		{
 
 		}
-		case Mesh::FaceOpType::Modify:
-		{
-
-		}
-		case Mesh::FaceOpType::Delete:
+		case Mesh::MeshOpType::Delete:
 		{
 
 		}
 		}
+
 	}
 }
+
+
+inline void appendOrResizeBuffer(QVector3D& data, QAttribute& attr, Qt3DRender::QBuffer& buffer)
+{
+	//update geometry
+	QByteArray appendVertexArray;
+	size_t newDataSize = 3 * sizeof(float);
+	appendVertexArray.resize(newDataSize);
+	float* reVertexArray = reinterpret_cast<float*>(appendVertexArray.data());
+
+	//coordinates of left vertex
+	reVertexArray[0] = data.x;
+	reVertexArray[1] = data.y;
+	reVertexArray[2] = data.z;
+
+	uint vertexCount = attr.count();
+	//if the attribute array is too small
+	if (attr.count() <= buffer.data().size())
+	{
+		auto oldData = buffer.data();
+		oldData.resize(oldData.size() + ATTRIBUTE_SIZE_INCREMENT);
+		buffer.setData(oldData);
+		;
+	}
+	buffer.updateData(vertexCount * 3 * sizeof(float), appendVertexArray);
+	attr.setCount(vertexCount + newDataSize);
+	return;
+}
+void GLModel::addVertex(QVector3D pos, QVector3D normal, QVector3D color
+) 
+{
+	appendOrResizeBuffer(pos, positionAttribute, vertexBuffer);
+	appendOrResizeBuffer(pos, normalAttribute, vertexNormalBuffer);
+	appendOrResizeBuffer(pos, colorAttribute, vertexColorBuffer);
+}
+
 void GLModel::appendVertices(std::vector<QVector3D> vertices){
 
     int appendVertexCount = vertices.size();
@@ -1013,6 +1055,14 @@ void GLModel::appendColorVertices(std::vector<QVector3D> vertices){
     vertexColorBuffer.updateData(vertexColorCount*3*sizeof(float), appendVertexArray);
     colorAttribute.setCount(vertexColorCount + vertex_color_cnt);
     return;
+}
+
+void GLModel::deleteVertices(size_t from, size_t end)
+{
+}
+
+void GLModel::modifyVertices(const std::vector<const MeshFace*> faces)
+{
 }
 
 void GLModel::handlePickerEnteredFreeCutSphere()
