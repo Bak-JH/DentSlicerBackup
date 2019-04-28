@@ -10,12 +10,14 @@
 #include <QTransform>
 #include <QTime>
 #include <array>
-
+#include <variant>
 #define cos50 0.64278761
 #define cos100 -0.17364818
 #define cos150 -0.8660254
 #define FZERO 0.00001f
-
+#if defined(_DEBUG) || defined(QT_DEBUG )
+#define ENFORCE_CONNECTED_FACES_TO_THREE
+#endif
 using namespace ClipperLib;
 
 // plane contains at least 3 vertices contained in the plane in clockwise direction
@@ -61,10 +63,9 @@ private:
 
 class MeshVertex : private MeshDataType {
 public:
-	int idx;
     QVector3D position;
     QVector3D vn;
-	MeshVertex():MeshDataType(nullptr), idx(-1) {}
+	MeshVertex():MeshDataType(nullptr) {}
 
     friend inline bool operator== (const MeshVertex& a, const MeshVertex& b){
         return a.position == b.position;
@@ -103,14 +104,27 @@ typedef std::vector<Path3D> Paths3D;
 
 class Mesh{
 public :
-	//enum ForEachOperation {
-	//	Delete = 0,
-	//	Modify
-	//};
-	////For each operation, checks and returns if the given face qualifies for delete/modify
-	//typedef std::function<bool(const Mesh&, const MeshFace&)> FaceCondtionalFunction;
-	////For each operation, checks and returns if the given vertex qualifies for delte/modify
-	//typedef std::function<bool(const Mesh&, const MeshVertex&)> VertexConditionalFunction;
+	enum FaceOpType {
+		Delete = 0
+		,Modify
+		,Append
+		//TODO: ModifyKeepNormal,
+
+	};
+	enum FaceOpOperand {
+		FaceRange = 0
+		,FaceSingle
+		,VerticeRange
+		,VertexSingle
+
+		//,SingleVertex
+	};
+	struct FaceOp {
+		FaceOpType Type;
+		FaceOpOperand Operand;
+		//pointers when modified, size_t for index of the deleted element, pair for multiple continous edits
+		std::variant<std::pair<size_t, size_t>, const MeshVertex*, const MeshFace*, size_t> Data;
+	};
 
 	//For each operation, modifies MeshFace, returns whether modification actually occured or the element should be delete
 	typedef std::function<bool(const Mesh&, MeshFace&, size_t)> FaceForEachFunction;
@@ -122,6 +136,7 @@ public :
 	/********************** Undo state functions***********************/
 	void setNextMesh( Mesh* mesh);
 	void setPrevMesh( Mesh* mesh);
+	Mesh* saveUndoState(const Qt3DCore::QTransform& transform);
 
 
 	/********************** Mesh Edit Functions***********************/
@@ -137,14 +152,10 @@ public :
 	void removeFace(const MeshFace* mf);
 	void connectFaces();
 	void modifyVertex(const MeshVertex* vertex, const QVector3D& newValue);
-	Mesh* saveUndoState(const Qt3DCore::QTransform& transform);
-	//void modifyFace(const MeshFace* vertex, const QVector3D& newValue);
-
+	std::vector<FaceOp> flushChanges();
 	/********************** Faces & Vertices std::for_each style edit***********************/
-	size_t conditionalDelteFaces(FaceForEachFunction forEachFunction);
 	size_t conditionalModifyFaces(FaceForEachFunction forEachFunction);
 
-	size_t conditionalDelteVertices(VertexForEachFunction forEachFunction);
 	size_t conditionalModifyVertices(VertexForEachFunction forEachFunction);
 
 
@@ -180,6 +191,7 @@ public :
     float z_max()const;
     Mesh* getPrev()const;
     Mesh* getNext()const;
+	const std::vector<const MeshFace*>* getRenderOrderFaces()const;
 	/********************** Stuff that can be public **********************/
 
 	QTime time;
@@ -200,6 +212,7 @@ private:
     // for undo & redo
     Mesh* prevMesh = nullptr;
     Mesh* nextMesh = nullptr;
+	std::vector<FaceOp> _faceModifications;
 
 
     float _x_min = 99999, _x_max = 99999, _y_min = 99999, _y_max = 99999, _z_min = 99999, _z_max = 99999;
@@ -208,6 +221,7 @@ private:
     friend class FileLoader;
     //friend class GLModel;
 
+	std::vector<const MeshFace*> _renderOrderFaces;
 
 
 

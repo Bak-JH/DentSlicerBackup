@@ -127,6 +127,11 @@ void Mesh::vertexRotate(QMatrix4x4 tmpmatrix){
 	{
         if (count %100 == 0)
             QCoreApplication::processEvents();
+#ifdef ENFORCE_CONNECTED_FACES_TO_THREE
+		if (vertex.connected_faces.size() > 3) {
+			throw std::runtime_error("More than 3 faces to a vertex");
+		}
+#endif
         if (vertex.connected_faces.size()>=3){
 			vertex.vn = QVector3D(vertex.connected_faces[0]->fn + vertex.connected_faces[1]->fn + vertex.connected_faces[2]->fn).normalized();
         } else {
@@ -237,11 +242,12 @@ void Mesh::addFace(QVector3D v0, QVector3D v1, QVector3D v2, const MeshFace* par
     mf.fn = QVector3D::normal(v0_idx->position,v1_idx->position,v2_idx->position);
     mf.fn_unnorm = QVector3D::crossProduct(v1_idx->position-v0_idx->position,v2_idx->position-v0_idx->position);
     faces.emplace_back(mf);
-	faces.back().itr = (--faces.end());
+	auto& latest = faces.back();
+	latest.itr = (--faces.end());
 
-   v0_idx->connected_faces.emplace_back(&faces.back()); //faces
-   v2_idx->connected_faces.emplace_back(&faces.back());
-   v1_idx->connected_faces.emplace_back(&faces.back());
+   v0_idx->connected_faces.emplace_back(&latest); //faces
+   v2_idx->connected_faces.emplace_back(&latest);
+   v1_idx->connected_faces.emplace_back(&latest);
 
 
     if (v0_idx->connected_faces.size()>=3){
@@ -267,6 +273,9 @@ void Mesh::addFace(QVector3D v0, QVector3D v1, QVector3D v2, const MeshFace* par
         MeshVertex &mv = *v2_idx;
         mv.vn = QVector3D(0,0,0);
     }
+	_renderOrderFaces.push_back(&latest);
+	_faceModifications.push_back({ FaceOpType::Append, FaceOpOperand::FaceSingle, &latest });
+
 }
 
 void Mesh::removeFace(const MeshFace* mf){
@@ -359,8 +368,14 @@ std::list<MeshFace>::const_iterator Mesh::removeFace(std::list<MeshFace>::const_
             }
         }
     }
-    return faces.erase(f_it);
-    //faces.erase(f_idx_it);
+	_faceModifications.push_back({ FaceOpType::Delete, FaceOpOperand::FaceSingle, f_it->idx});
+    auto afterDeleted =  faces.erase(f_it);
+	//update indexes
+	for (auto itr = afterDeleted; itr != faces.end(); ++itr)
+	{
+		itr->idx -= 1;
+	}
+	return afterDeleted;
 }
 
 // add connected face idx to each meshes
@@ -396,6 +411,8 @@ void Mesh::modifyVertex(const MeshVertex* vertex, const QVector3D& newValue)
 	if (modAble)
 	{
 		modAble->position = newValue;
+		_faceModifications.push_back({ FaceOpType::Modify, FaceOpOperand::VertexSingle, vertex });
+
 		// do mirroring operation here
 	}
 	else
@@ -476,6 +493,13 @@ Mesh* Mesh::saveUndoState(const Qt3DCore::QTransform& transform)
 	this->prevMesh = temp_prev_mesh;
 	return temp_prev_mesh;
 
+}
+
+std::vector<Mesh::FaceOp> Mesh::flushChanges()
+{
+	auto copy = _faceModifications;
+	_faceModifications.clear();
+	return copy;
 }
 
 
@@ -721,7 +745,6 @@ MeshVertex* Mesh::addFaceVertex(QVector3D v){
     }
 
     MeshVertex mv(this, v);
-    mv.idx = vertices.size();
     vertices.emplace_back(mv);
 	auto* last = &(vertices.back());
 	last->itr = (--vertices.end());
@@ -825,6 +848,11 @@ Mesh* Mesh::getPrev()const
 Mesh* Mesh::getNext()const
 {
     return nextMesh;
+}
+
+const std::vector<const MeshFace*>* Mesh::getRenderOrderFaces() const
+{
+	return &_renderOrderFaces;
 }
 
 //MeshFace Mesh::idx2MF(int idx)const{
@@ -1516,34 +1544,13 @@ float Mesh::z_max()const
 
 }
 
-
-size_t Mesh::conditionalDelteFaces(FaceForEachFunction forEachFunction)
-{
-	size_t deleted = 0;
-	size_t currentIdx = 0;
-	auto itr = faces.begin();
-
-	while (itr != faces.end())
-	{
-		if (forEachFunction(*this, *itr, currentIdx))
-		{
-			itr = faces.erase(itr);
-			++deleted;
-		}
-		else
-		{
-			++itr;
-		}
-		++currentIdx;
-	}
-	return deleted;
-}
 size_t Mesh::conditionalModifyFaces(FaceForEachFunction forEachFunction)
 {
 	size_t modified = 0;
 	bool isModified;
 	size_t currentIdx = 0;
-
+	size_t startRange = 0;
+	std::vector<std::pair<size_t, size_t>> rangesChanged;
 	for (auto& each : faces)
 	{
 		isModified = forEachFunction(*this, each, currentIdx);
@@ -1551,46 +1558,65 @@ size_t Mesh::conditionalModifyFaces(FaceForEachFunction forEachFunction)
 		{
 			//update QGeometry
 		}
-		++currentIdx;
-	}
-	return modified;
-}
-
-size_t Mesh::conditionalDelteVertices(VertexForEachFunction forEachFunction)
-{
-	size_t deleted = 0;
-	size_t currentIdx = 0;
-	auto itr = vertices.begin();
-
-	while (itr != vertices.end())
-	{
-		if (forEachFunction(*this, *itr, currentIdx))
-		{
-			itr = vertices.erase(itr);
-			++deleted;
-		}
 		else
 		{
-			++itr;
+			if (currentIdx - startRange > 0)
+			{
+				rangesChanged.push_back(std::make_pair(startRange, currentIdx));
+			}
+			startRange = currentIdx;
 		}
 		++currentIdx;
 	}
-	return deleted;
+	if (currentIdx - startRange > 0)
+	{
+		rangesChanged.push_back(std::make_pair(startRange, currentIdx));
+	}
+
+	//submit changes to changes queue
+	for (auto& ranges : rangesChanged)
+	{
+		_faceModifications.push_back({ FaceOpType::Modify, FaceOpOperand::FaceRange, ranges });
+	}
+	return modified;
+
 }
+
+
 size_t Mesh::conditionalModifyVertices(VertexForEachFunction forEachFunction)
 {
 	size_t modified = 0;
 	bool isModified;
 	size_t currentIdx = 0;
-
+	size_t startRange = 0;
+	std::vector<std::pair<size_t, size_t>> rangesChanged;
 	for (auto& each : vertices)
 	{
 		isModified = forEachFunction(*this, each, currentIdx);
+		//update QGeometry
 		if (isModified)
 		{
-			//update QGeometry
+		}
+		else
+		{
+			if (currentIdx - startRange > 0)
+			{
+				rangesChanged.push_back(std::make_pair(startRange, currentIdx));
+			}
+			startRange = currentIdx;
 		}
 		++currentIdx;
 	}
+	if (currentIdx - startRange > 0)
+	{
+		rangesChanged.push_back(std::make_pair(startRange, currentIdx));
+	}
+
+	//submit changes to changes queue
+	for (auto& ranges : rangesChanged)
+	{
+		_faceModifications.push_back({ FaceOpType::Modify, FaceOpOperand::VerticeRange, ranges });
+	}
+		
 	return modified;
 }
