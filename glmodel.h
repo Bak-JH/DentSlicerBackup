@@ -165,7 +165,6 @@ public:
     std::vector<Qt3DRender::QObjectPicker*> sphereObjectPicker;
     std::vector<QPhongMaterial*> sphereMaterial;
 
-    void removeModel();
     void removeModelPartList();
     LabellingTextPreview* labellingTextPreview = nullptr;
 
@@ -195,10 +194,8 @@ public:
     void removeCuttingPoint(int idx);
     void removeCuttingPoints();
     void drawLine(QVector3D endpoint);
-    //void bisectModel(Mesh* mesh, Plane plane, Mesh* leftMesh, Mesh* rightMesh);
-    //void bisectModel_internal(Mesh* mesh, Plane plane, Mesh* leftMesh, Mesh* rightMesh);
-    void bisectModel(Plane plane);
-    void bisectModel_internal(Plane plane);
+	void bisectModel(Plane plane, Mesh& lmesh, Mesh& rmesh);
+
     void checkPrintingArea();
     bool EndsWith(const std::string& a, const std::string& b);
     bool modelSelectChangable();
@@ -221,18 +218,22 @@ public:
 
     // implement lock as bool variable
     bool updateLock;
-    void updateAllVertices(Mesh* mesh, QVector3D color=QVector3D(0.278f, 0.670f, 0.706f));
-	void updateVertices(Mesh* mesh, QVector3D color = QVector3D(0.278f, 0.670f, 0.706f));
+
     const Mesh* getMesh();
     const Mesh* getSupport();
-
+	void setEnabled(bool isEnabled);
 	void enablePicking(bool isEnable);
 private:
+	bool _isEnabled;
+	static const QVector3D COLOR_DEFAULT_MESH;
+	static const QVector3D COLOR_INFILL;
+	static const QVector3D COLOR_RAFT;
+
     //Order is important! Look at the initializer list in constructor
 	const Mesh* _currentVisibleMesh;
     QGeometryRenderer m_geometryRenderer;
     QGeometry m_geometry;
-
+	QNode* _parent;
     QByteArray vertexArray;
     QByteArray vertexNormalArray;
     QByteArray vertexColorArray;
@@ -257,7 +258,6 @@ private:
     QVector3D lastpoint;
     QVector2D prevPoint;
     void clearMem();
-    void addVertex(QVector3D pos, QVector3D normal, QVector3D color );
 	void addVertex(QVector3D pos, QVector3D normal, QVector3D color);
 
     void appendVertices(std::vector<QVector3D> vertices);
@@ -277,6 +277,8 @@ private:
 	void updateShadowModelImpl(); // main constructor for mainmesh and shadowmesh
 	void disableMouseHandlers();
 	void reenableMouseHandlers();
+	void updateAllVertices(Mesh* mesh, QVector3D color = COLOR_DEFAULT_MESH);
+	void updateVertices(Mesh* mesh, QVector3D color = COLOR_DEFAULT_MESH);
 
     int cutMode = 1;
     int cutFillMode = 1;
@@ -298,9 +300,6 @@ private:
 
     int viewMode = -1;
 
-	//only use pointer/heap when you don't know if you are going to make a member attribute
-	Mesh lmesh;
-	Mesh rmesh;
     // Core mesh structures
     Mesh* _mesh;
 
@@ -321,7 +320,7 @@ signals:
 
     void modelSelected(int);
     void resetLayflat();
-    void bisectDone();
+    void bisectDone(Mesh*, Mesh*); //lmesh, rmesh
     void _generateSupport();
     void _updateModelMesh(bool);
     void layFlatSelect();
@@ -369,7 +368,7 @@ public slots:
     void cutFillModeSelected(int type);
     void getSliderSignal(double value);
     void getLayerViewSliderSignal(double value);
-    void generateRLModel();
+	void generateRLModel(Mesh* lmesh, Mesh* rmesh);
     void openCut();
     void closeCut();
 

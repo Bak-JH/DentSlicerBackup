@@ -26,8 +26,8 @@ class autoarrange : public QObject {
 public:
     autoarrange();
 
-    std::vector<XYArrangement> simpArngMeshes(std::vector<Mesh>& meshes);
-    std::vector<XYArrangement> arngMeshes(std::vector<Mesh>& meshes);
+    std::vector<XYArrangement> simpArngMeshes(std::vector<const Mesh*>& meshes);
+    std::vector<XYArrangement> arngMeshes(std::vector<const Mesh*>& meshes);
     //void arrangeQt3D(std::vector<Qt3DCore::QTransform*> m_transform_set, std::vector<XYArrangement> arng_result_set);
     //void arrangeGlmodels(std::vector< GLModel* > * glmodels);
 

@@ -784,13 +784,13 @@ void QmlManager::runArrange(){
 void QmlManager::runArrange_internal(){
     qDebug() << "run arrange glmodels size : " <<glmodels.size();
     if (glmodels.size()>=2){
-        std::vector<Mesh> meshes_to_arrange;
+        std::vector<const Mesh*> meshes_to_arrange;
         std::vector<XYArrangement> arng_result_set;
         std::vector<Qt3DCore::QTransform*> m_transform_set;
         for(auto& pair : glmodels)
         {
             auto model = &pair.second;
-            meshes_to_arrange.push_back(*(model->getMesh()));
+            meshes_to_arrange.push_back(model->getMesh());
             m_transform_set.push_back(&model->m_transform);
         }
         autoarrange* ar;

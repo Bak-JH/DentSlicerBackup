@@ -147,8 +147,6 @@ public:
     QObject* layerViewSlider;
 
     std::map<int, GLModel> glmodels;
-    //TODO: combine this with glmodels
-    std::map<int, GLModel> secondaryModels;
 
     //TODO:const pointers, need to use list instead of std::vector because std::vector elements moves around
     //std::list<GLModel* const> selectedModels;

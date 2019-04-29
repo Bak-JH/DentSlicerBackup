@@ -381,11 +381,11 @@ void autoarrange::offsetPaths_rec(Paths& paths){
 
 //typedef std::pair<IntPoint, float> XYArrangement;
 
-std::vector<XYArrangement> autoarrange::simpArngMeshes(std::vector<Mesh>& meshes){
+std::vector<XYArrangement> autoarrange::simpArngMeshes(std::vector<const Mesh*>& meshes){
     std::vector<Paths> outlines;
     /**/qDebug() << "Arrange start";
     for(int idx=0; idx<meshes.size(); idx++){
-        outlines.push_back(getMeshConvexHull(meshes[idx]));
+        outlines.push_back(getMeshConvexHull(*meshes[idx]));
         RDPSimpPaths(&outlines[idx]);
         offsetPath(&outlines[idx]);
     }
@@ -393,7 +393,7 @@ std::vector<XYArrangement> autoarrange::simpArngMeshes(std::vector<Mesh>& meshes
     return arng2D(outlines);
 }
 
-std::vector<XYArrangement> autoarrange::arngMeshes(std::vector<Mesh>& meshes){
+std::vector<XYArrangement> autoarrange::arngMeshes(std::vector<const Mesh*>& meshes){
     std::vector<Paths> outlines;
     /**/qDebug() << "Arrange start";
     qmlManager->setProgress(0);
@@ -402,7 +402,7 @@ std::vector<XYArrangement> autoarrange::arngMeshes(std::vector<Mesh>& meshes){
         //outlines.push_back(project(& meshes[idx]));
         //RDPSimpPaths(&outlines[idx]);
         //offsetPath(&outlines[idx]);
-        outlines.push_back(getMeshRecArea(meshes[idx]));
+        outlines.push_back(getMeshRecArea(*meshes[idx]));
         qmlManager->setProgress(0.5*idx/meshes.size());
     }
     return arng2D(outlines);
