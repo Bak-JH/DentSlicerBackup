@@ -127,16 +127,7 @@ void Mesh::vertexRotate(QMatrix4x4 tmpmatrix){
 	{
         if (count %100 == 0)
             QCoreApplication::processEvents();
-#ifdef ENFORCE_CONNECTED_FACES_TO_THREE
-		if (vertex.connected_faces.size() > 3) {
-			throw std::runtime_error("More than 3 faces to a vertex");
-		}
-#endif
-        if (vertex.connected_faces.size()>=3){
-			vertex.vn = QVector3D(vertex.connected_faces[0]->fn + vertex.connected_faces[1]->fn + vertex.connected_faces[2]->fn).normalized();
-        } else {
-			vertex.vn = QVector3D(0,0,0);
-        }
+		vertex.calculateNormalFromFaces();
 		return true;
 	};
 	conditionalModifyVertices(vertexFunctor2);
@@ -249,30 +240,10 @@ void Mesh::addFace(QVector3D v0, QVector3D v1, QVector3D v2, const MeshFace* par
    v2_idx->connected_faces.emplace_back(&latest);
    v1_idx->connected_faces.emplace_back(&latest);
 
+   v0_idx->calculateNormalFromFaces();
+   v1_idx->calculateNormalFromFaces();
+   v2_idx->calculateNormalFromFaces();
 
-    if (v0_idx->connected_faces.size()>=3){
-        MeshVertex &mv = *v0_idx;
-        mv.vn = QVector3D(mv.connected_faces[0]->fn +mv.connected_faces[1]->fn + mv.connected_faces[2]->fn).normalized();
-    } else {																				 
-        MeshVertex &mv = *v0_idx;															 
-        mv.vn = QVector3D(0,0,0);															 
-    }																						 
-																							 
-    if (v1_idx->connected_faces.size()>=3){													 
-        MeshVertex &mv = *v1_idx;															 
-        mv.vn = QVector3D(mv.connected_faces[0]->fn +mv.connected_faces[1]->fn + mv.connected_faces[2]->fn).normalized();
-    } else {
-        MeshVertex &mv = *v1_idx;
-        mv.vn = QVector3D(0,0,0);
-    }
-
-    if (v2_idx->connected_faces.size()>=3){
-        MeshVertex &mv = *v2_idx;
-        mv.vn = QVector3D(mv.connected_faces[0]->fn +mv.connected_faces[1]->fn +mv.connected_faces[2]->fn).normalized();
-    } else {
-        MeshVertex &mv = *v2_idx;
-        mv.vn = QVector3D(0,0,0);
-    }
 	_renderOrderFaces.push_back(&latest);
 	_meshModifications.push_back({ MeshOpType::Append, MeshOpOperand::FaceSingle, &latest });
 
@@ -1619,4 +1590,14 @@ size_t Mesh::conditionalModifyVertices(VertexForEachFunction forEachFunction)
 		_meshModifications.insert(_meshModifications.end(), tmpMods.begin(), tmpMods.end());
 	}
 	return modified;
+}
+
+void MeshVertex::calculateNormalFromFaces()
+{
+	vn = { 0,0,0 };
+	for (auto& face : connected_faces)
+	{
+		vn += face->fn;
+	}
+	vn.normalize();
 }

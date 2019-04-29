@@ -16,7 +16,6 @@
 #define cos150 -0.8660254
 #define FZERO 0.00001f
 #if defined(_DEBUG) || defined(QT_DEBUG )
-#define ENFORCE_CONNECTED_FACES_TO_THREE
 #endif
 using namespace ClipperLib;
 
@@ -74,6 +73,7 @@ public:
     friend inline bool operator!= (const MeshVertex& a, const MeshVertex& b){
         return a.position != b.position;
     }
+	void calculateNormalFromFaces();
 
 	std::vector<const MeshFace*> connected_faces;
 
