@@ -31,7 +31,6 @@ LabellingTextPreview::LabellingTextPreview(Qt3DCore::QNode* parent)
     planeMesh->setDepth(10.0f);
     planeMesh->setText("");
 
-
     planeMesh = new Qt3DExtras::QExtrudedTextMesh(parent->parentNode());
     planeMesh->setDepth(1.2f);
     //planeMesh->setText("asdfasdfasdf");
@@ -159,6 +158,8 @@ void LabellingTextPreview::updateTransform()
 
 void LabellingTextPreview::deleteLabel() {
     qDebug() << "@@@@ Delete" << this;
+
+    this->hideLabel();
     planeMesh->deleteLater();
 }
 
@@ -182,5 +183,17 @@ void LabellingTextPreview::updateChange(QString text, int contentWidth, QString 
 }
 
 void LabellingTextPreview::hideLabel() {
+    qDebug() << "@@@@@@@@@@@@@@@@@ hidelabel @@@@@@" << this;
+    /*
+    delete planeMaterial;
+    planeMaterial = new Qt3DExtras::QPhongAlphaMaterial();
+    planeMaterial->setAmbient(QColor(0,0,0,0));
+    planeMaterial->setDiffuse(QColor(0,0,0,0));
+    planeMaterial->setSpecular(QColor(0,0,0,0));
+    planeMaterial->setAlpha(0.0f);
+    planeEntity->addComponent(this->planeMaterial);
+    */
+    planeMaterial->setAlpha(0.0f);
     planeMesh->setDepth(0.0f);
+
 }

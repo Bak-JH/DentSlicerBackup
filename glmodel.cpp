@@ -593,12 +593,16 @@ void GLModel::updateModelMesh(bool shadowUpdate){
         shadowModel=new GLModel(this->mainWindow, this, mesh->vertexMoved(-QVector3D(mesh_x_center,mesh_y_center,mesh_z_center)), filename, true);
         shadowModel->m_transform->setTranslation(QVector3D(mesh_x_center, mesh_y_center, 0));*/
         shadowModel->copyModelAttributeFrom(prevShadowModel);
-        if (prevShadowModel->labellingTextPreview != nullptr)
+        if (prevShadowModel->labellingTextPreview != nullptr) {
+            qDebug() << "shadowmodel label hide #@@@@@@@@@@@@@@@@@";
+            prevShadowModel->labellingTextPreview->hideLabel();
             prevShadowModel->labellingTextPreview->deleteLabel();
+            prevShadowModel->labellingTextPreview->deleteLater();
+        }
         prevShadowModel->deleteLater();
 
         // reconnect handler if current selected model is updated
-        if (qmlManager->selectedModels[0]==this)
+        if (qmlManager->selectedModels[0] == this)
             qmlManager->connectHandlers(this);
         //shadowModel->m_transform->setTranslation(translation);
         QObject::connect(shadowModel, SIGNAL(modelSelected(int)), qmlManager, SLOT(modelSelected(int)));
@@ -1994,6 +1998,8 @@ void GLModel::removeModel(){
     delete m_geometry;
     delete m_geometryRenderer;
 
+//    labellingTextPreview->hideLabel();
+//    delete labellingTextPreview;
     deleteLater();
 }
 
@@ -2617,12 +2623,14 @@ void GLModel::generateText3DMesh()
     if (GLModel* glmodel = qobject_cast<GLModel*>(parent())) {
         glmodel->addVertices(outVertices);
         glmodel->addNormalVertices(outNormals);
-        glmodel->labellingTextPreview->hideLabel();
+        //glmodel->labellingTextPreview->hideLabel();
         emit glmodel->_updateModelMesh(true);
     }
-    //if (this->shadowModel->labellingTextPreview != nullptr)
-      //  this->shadowModel->labellingTextPreview->hideLabel();
 
+    if (this->parentModel->labellingTextPreview != nullptr){
+        qDebug() << "@@@@@@@@ shadowmodel labelling @@@@@@@@@";
+        this->parentModel->labellingTextPreview->hideLabel();
+    }
 }
 
 // for extension
