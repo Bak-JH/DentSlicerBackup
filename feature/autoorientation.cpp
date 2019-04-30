@@ -469,24 +469,40 @@ float* autoorientation::calc_random_normal(Mesh* mesh, int i,  const MeshFace& f
     qsrand((uint)time.msec());
     QVector3D v;
     QVector3D w;
-    if(i%3 == 0){
-        v=face.mesh_vertex[0]->position;
-        w=face.mesh_vertex[1]->position;
-    }
-    else if(i%3 == 1){
-        v=face.mesh_vertex[1]->position;
-        w=face.mesh_vertex[2]->position;
-    }
-    else{
-        v=face.mesh_vertex[2]->position;
-        w=face.mesh_vertex[0]->position;
-    }
+	int j = i / 3;
+    //if(i%3 == 0){
+
+    //    v=face.mesh_vertex[0]->position;
+    //    w=face.mesh_vertex[1]->position;
+    //}
+    //else if(i%3 == 1){
+    //    v=face.mesh_vertex[1]->position;
+    //    w=face.mesh_vertex[2]->position;
+    //}
+    //else{
+    //    v=face.mesh_vertex[2]->position;
+    //    w=face.mesh_vertex[0]->position;
+    //}
+	if (i % 3 == 0) {
+		v = (*mesh->getRenderOrderFaces())[j]->mesh_vertex[0]->position;
+		w = (*mesh->getRenderOrderFaces())[j]->mesh_vertex[1]->position;
+	}
+	else if (i % 3 == 1) {
+		v = (*mesh->getRenderOrderFaces())[j]->mesh_vertex[1]->position;
+		w = (*mesh->getRenderOrderFaces())[j]->mesh_vertex[2]->position;
+	}	    								 				 
+	else {  								 				 
+		v = (*mesh->getRenderOrderFaces())[j]->mesh_vertex[2]->position;
+		w = (*mesh->getRenderOrderFaces())[j]->mesh_vertex[0]->position;
+	}
+
     int randomIndex=qrand() % mesh->getFaces()->size();
+	QVector3D r_v = (*mesh->getRenderOrderFaces())[randomIndex / 3]->mesh_vertex[randomIndex % 3]->position;
 
     //QVector3D r_v=mesh->vertices[mesh->faces[randomIndex/3].mesh_vertex[randomIndex%3]].position;
 
 	//temp
-	QVector3D r_v = mesh->getVertices()->front().position;
+	//QVector3D r_v = mesh->getVertices()->front().position;
     v.setX(v.x()-r_v.x());
     v.setY(v.y()-r_v.y());
     v.setZ(v.z()-r_v.z());
