@@ -3081,7 +3081,7 @@ void GLModel::addShadowModel(Mesh* mesh)
     if (shadowModel)
     {
 #ifdef _STRICT_GLMODEL
-        throw std::exception("Shadow model added twice ");
+        throw std::runtime_error("Shadow model added twice ");
 #endif
     }
     qDebug() << "shadowmodel added";
