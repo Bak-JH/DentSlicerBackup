@@ -726,11 +726,11 @@ MeshVertex* Mesh::addFaceVertex(QVector3D v){
 }
 
 
-std::array<float,6> Mesh::calculateMinMax(QMatrix4x4 rotmatrix, const Mesh& mesh) {
+std::array<float,6> Mesh::calculateMinMax(QMatrix4x4 rotmatrix, const Mesh* mesh) {
 	qDebug() << "calculate minmax";
 	std::array<float, 6> minmax{ 99999 };
 	size_t count = 0;
-	auto &vertices = *mesh.getVertices();
+	const auto &vertices = *mesh->getVertices();
 	for (const auto& vertex : vertices)
 	{
 		QVector4D tmpVertex;

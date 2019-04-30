@@ -174,7 +174,7 @@ public :
 
     /********************** Helper Functions **********************/
     static void updateMinMax(QVector3D v, std::array<float,6>& minMax);
-	static std::array<float, 6> calculateMinMax(QMatrix4x4 rotmatrix, const Mesh& mesh);
+	static std::array<float, 6> calculateMinMax(QMatrix4x4 rotmatrix, const Mesh* mesh);
 
     float getFaceZmin(MeshFace mf)const;
     float getFaceZmax(MeshFace mf)const;
