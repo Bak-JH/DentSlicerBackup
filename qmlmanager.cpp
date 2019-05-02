@@ -16,7 +16,6 @@
 
 #include "qmlmanager.h"
 #include "lights.h"
-#include <iostream>
 #include <ctype.h>
 #include <QCoreApplication>
 #include <QTextStream>
@@ -33,6 +32,16 @@ QmlManager::QmlManager(QObject *parent) : QObject(parent)
 
 void QmlManager::initializeUI(QQmlApplicationEngine* e){
     engine = e;
+	//initialize ray casting mouse input controller
+	QEntity* camera = dynamic_cast<QEntity*>(FindItemByName(engine, "cm"));
+	_rayCastController.initialize(camera);
+	//QEntity* camera = dynamic_cast<QEntity*>(FindItemByName(engine, "cm"));
+	//auto rc = dynamic_cast<Qt3DRender::QScreenRayCaster*>(FindItemByName(engine, "screenRayCaster"));
+	//auto mh = dynamic_cast<Qt3DInput::QMouseHandler*>(FindItemByName(engine, "mouseHandler"));
+
+	//_rayCastController.initialize(rc, mh);
+
+
     mainWindow = FindItemByName(engine, "mainWindow");
     loginWindow = FindItemByName(engine, "loginWindow");
     loginButton = FindItemByName(engine, "loginButton");

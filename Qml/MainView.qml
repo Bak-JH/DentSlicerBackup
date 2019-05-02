@@ -36,7 +36,10 @@ Entity {
 
     //CoordinateMesh{} // 기준좌표 체크
 
-    CameraManager{id : cm}
+    CameraManager{
+        objectName: "cm"
+        id : cm
+    }
 
     /*SlicingConfiguration {
         id : slicingConfiguration
@@ -68,6 +71,7 @@ Entity {
         }
 
         Entity {
+			objectName: "PrintBedGrid"
             id: gridEntity
             GridMesh {
                 id: gridMesh
@@ -88,6 +92,7 @@ Entity {
         /* White plate and logo on bed */
 
         Plate {
+			objectName: "Plate"
             id: planeEntity
         }
 
