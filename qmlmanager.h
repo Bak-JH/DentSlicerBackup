@@ -20,6 +20,7 @@
 #include "QFuture"
 #include "utils/httpreq.h"
 #include <QKeyboardHandler>
+#include "raycastcontroller.h"
 
 #define VIEW_MODE_OBJECT 0
 #define VIEW_MODE_SUPPORT 1
@@ -241,7 +242,7 @@ private:
     int layerViewFlags;
     int modelIDCounter;
     GLModel* _latest;
-
+	RayCastController _rayCastController;
 
 signals:
     void updateModelInfo(int printing_time, int layer, QString xyz, float volume);

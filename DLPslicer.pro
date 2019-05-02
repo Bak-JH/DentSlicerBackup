@@ -11,6 +11,7 @@ RC_ICONS = icon-32.ico
 RC_FILE = DLPslicer.rc
 
 SOURCES += main.cpp \
+    raycastcontroller.cpp \
     slicingengine.cpp \
     glmodel.cpp \
     qmlmanager.cpp \
@@ -86,6 +87,7 @@ win32:QMAKE_LFLAGS *= -Wl,--large-address-aware
 #TRANSLATIONS += lang_ko.ts
 
 HEADERS += \
+    raycastcontroller.h \
     slicingengine.h \
     glmodel.h \
     qmlmanager.h \
