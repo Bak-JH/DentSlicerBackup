@@ -175,6 +175,7 @@ void QmlManager::initializeUI(QQmlApplicationEngine* e){
 
     boxUpperTab = FindItemByName(engine, "boxUpperTab");
     boxLeftTab = FindItemByName(engine, "boxLeftTab");
+    scene3d = FindItemByName(engine, "scene3d");
     QObject::connect(boxUpperTab,SIGNAL(runGroupFeature(int,QString, double, double, double, QVariant)),this,SLOT(runGroupFeature(int,QString, double, double, double, QVariant)));
 
     QObject::connect(this, SIGNAL(arrangeDone(std::vector<QVector3D>, std::vector<float>)), this, SLOT(applyArrangeResult(std::vector<QVector3D>, std::vector<float>)));
@@ -638,7 +639,8 @@ void QmlManager::fixMesh(){
         return;
 
     openProgressPopUp();
-    selectedModels[0]->repairMesh();
+    for(auto glm : selectedModels)
+        glm->repairMesh();
 
 }
 
@@ -1270,7 +1272,7 @@ void QmlManager::unselectAll(){
     for(GLModel* curModel : selectedModels){
         if (curModel != nullptr){
             unselectPart(curModel->ID);
-            // QMetaObject::invokeMethod(partList, "unselectPartByModel", Q_ARG(QVariant, curModel->ID));
+            QMetaObject::invokeMethod(partList, "unselectPartByModel", Q_ARG(QVariant, curModel->ID));
         }
     }
     hideMoveArrow();
@@ -1506,6 +1508,7 @@ void QmlManager::modelMove(int Axis, int Distance){ // for QML Signal -> float i
 
     for (int i=0; i<selectedModels.size(); i++){
         selectedModels[i]->shadowModel->m_objectPicker->setEnabled(false);
+
         switch(Axis){
             case 1:{  //X
                 QVector3D tmp = selectedModels[i]->m_transform.translation();

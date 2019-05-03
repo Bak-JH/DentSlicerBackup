@@ -268,6 +268,7 @@ private:
 	void deleteAndShiftFaces(size_t start, size_t deleteAmount);
     void clearVertices();
     void onTimerUpdate();
+
     void removeLayerViewComponents();
     void generateLayerViewMaterial();
     static Mesh* toSparse(Mesh* mesh);
