@@ -87,6 +87,7 @@ Rectangle {
         progress_text2.text = "Working...";
         uppertab.disableUppertab();
         lefttab.disableLefttab();
+        scene3d.disableScene3D();
     }
 
     function updateNumber(value){
@@ -97,6 +98,7 @@ Rectangle {
             progress_text1.text = "0% complete";
             uppertab.enableUppertab();
             lefttab.enableLefttab();
+            scene3d.enableScene3D();
             //result_orient.state="active";
             //result_text.text="Orientation Complete.";
         }

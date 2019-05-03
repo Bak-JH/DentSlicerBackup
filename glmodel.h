@@ -248,6 +248,7 @@ private:
     void addIndexes(vector<int> vertices);
     void clearVertices();
     void onTimerUpdate();
+
     void removeLayerViewComponents();
     void generateLayerViewMaterial();
     static Mesh* toSparse(Mesh* mesh);
