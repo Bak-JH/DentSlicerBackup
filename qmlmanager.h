@@ -44,6 +44,7 @@ public:
     QObject* loginButton;
     QObject* boxUpperTab;
     QObject* boxLeftTab;
+    QObject* scene3d;
     QEntity* models;
     Qt3DCore::QTransform* systemTransform;
     QObject* mv;

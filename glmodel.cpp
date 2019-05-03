@@ -17,7 +17,6 @@
 #include <QMatrix3x3>
 #include <feature/generatesupport.h>
 
-
 int GLModel::globalID = 0;
 
 
@@ -70,7 +69,8 @@ GLModel::GLModel(QObject* mainWindow, QNode *parent, Mesh* loadMesh, QString fna
         m_meshMaterial->setSpecular(QColor(182,237,246));
         m_meshMaterial->setShininess(0.0f);
 
-        addComponent(m_meshMaterial);*/
+        addComponent(m_meshMaterial);
+        */
 
         addMouseHandlers();
 
@@ -537,6 +537,7 @@ void GLModel::updateModelMesh(bool shadowUpdate){
     // shadowUpdate updates shadow model of current Model
     QMetaObject::invokeMethod(qmlManager->boxUpperTab, "disableUppertab");
     QMetaObject::invokeMethod(qmlManager->boxLeftTab, "disableLefttab");
+    QMetaObject::invokeMethod(qmlManager->scene3d, "disableScene3D");
     qDebug() << "update Model Mesh";
     // delete allocated buffers, geometry
     delete vertexBuffer;
@@ -655,6 +656,7 @@ void GLModel::updateModelMesh(bool shadowUpdate){
     qDebug() << this << "released lock";
     QMetaObject::invokeMethod(qmlManager->boxUpperTab, "enableUppertab");
     QMetaObject::invokeMethod(qmlManager->boxLeftTab, "enableLefttab");
+    QMetaObject::invokeMethod(qmlManager->scene3d, "enableScene3D");
 }
 
 void GLModel::slicingDone(){
@@ -1291,13 +1293,9 @@ void GLModel::handlePickerClicked(QPickEvent *pick)
     qDebug() << "Released";
 
     if (isMoved){
-        if(components().size() > 4)
-        {
-            removeComponent(dragMesh);
-            qmlManager->fixMesh();
-            qDebug() << "dragMesh removed";
-        }
-        //removeComponent(dragMesh);
+        removeComponent(dragMesh);
+        qmlManager->fixMesh();
+        qDebug() << "dragMesh removed";
 
         qmlManager->modelMoveDone();
         isMoved = false;
@@ -2287,13 +2285,9 @@ void GLModel::mgoo(Qt3DRender::QPickEvent* v)
         float scale_val = biggest > 50.0f ? 1.0f : 100.0f/biggest;
         m_transform->setScale(scale_val);
 
-        if (components().size() < 5){
-            //removeComponent(dragMesh);
-            dragMesh->setRadius(biggest);
-            addComponent(dragMesh);
-            //qDebug() << "COMPONENTS(A): " << components();
-            //qDebug() << "dragMesh added";
-        }
+        removeComponent(dragMesh);
+        dragMesh->setRadius(biggest);
+        addComponent(dragMesh);
 
         isMoved = true;
     }
@@ -2790,10 +2784,6 @@ void GLModel::generateManualSupport(){
     t.setZ(mesh->z_min()+scfg->raft_thickness);
     QVector3D targetPosition = mesh->idx2MV(targetMeshFace->mesh_vertex[0]).position- t;
     /*OverhangPoint* targetOverhangPosition = new OverhangPoint(targetPosition.x()*scfg->resolution,
-                                                              targetPosition.y()*scfg->resolution,
-                                                              targetPosition.z()*scfg->resolution,
-                                                              scfg->default_support_radius);
-
     generateSupporter(layerSupportMesh, targetOverhangPosition, nullptr, nullptr, layerSupportMesh->z_min());*/
     targetMeshFace = NULL;
     emit _updateModelMesh(true);

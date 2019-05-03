@@ -221,6 +221,7 @@ Entity{
 
                 pastAxis = moveAxis
                 if (moveAxis != 0){
+                    qm.setModelClickTrue();
                     var Origin = world2Screen(center)
                     var mouseOrigin_Origin = mouseOrigin.minus(Origin).length() //a
                     var mouseCurrent_Origin = mouseCurrent.minus(Origin).length() //b
