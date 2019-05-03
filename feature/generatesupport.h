@@ -27,8 +27,8 @@ public:
     double critical_angle_radian = M_PI * (critical_angle / 180.0);
     double critical_angle_mesh = 30; // critical angle for cone&mesh intersection
     double critical_angle_mesh_radian = M_PI * (critical_angle_mesh / 180.0);
-    vector<OverhangPoint> overhangPoints;
-    vector<OverhangPoint> supportPoints;
+    std::vector<OverhangPoint> overhangPoints;
+    std::vector<OverhangPoint> supportPoints;
     float supportRadiusMax = 1;
     float supportTipHeight = 0.1f; //크면 에러
     float minZ = 1;

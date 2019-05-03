@@ -25,7 +25,7 @@ rotateResult* autoorientation::Tweak(Mesh* mesh, bool bi_algorithmic,int CA,bool
     else
         best_n=5;
     std::vector<Liste> liste(best_n+additional_n);//orientation 의 계산값들을 저장및 출력하기 위해 사용
-    vector<Orient*> orientations=area_cumulation(mesh, n,bi_algorithmic);
+    std::vector<Orient*> orientations=area_cumulation(mesh, n,bi_algorithmic);
     if (orientations.size() < best_n) best_n = orientations.size();
 
     //bi_algorithmic이 false: 6개, true:8개의 orientation 값이 리턴됩니다.
@@ -33,7 +33,7 @@ rotateResult* autoorientation::Tweak(Mesh* mesh, bool bi_algorithmic,int CA,bool
     //edge_plus_vertex로 추가된 orient갯수 카운터
 
     if(bi_algorithmic){
-          vector<Orient*> plusVertex=egde_plus_vertex(mesh,additional_n);
+          std::vector<Orient*> plusVertex=egde_plus_vertex(mesh,additional_n);
           //additional_n 이하의 갯수의 orientation이 추가됩니다.
 
           orientations.insert(orientations.end(),plusVertex.begin(), plusVertex.end());
@@ -164,32 +164,35 @@ float autoorientation::approachvertex(Mesh* mesh,float n[]){
     //qt에서 최댓값이 얼마인지 몰라 flag로 만들었습니다.
 
     float amin;
-    for(int i=0;i<mesh->faces.size();i++){
-        int idx[3]={mesh->faces[i].mesh_vertex[0],
-                   mesh->faces[i].mesh_vertex[1],
-                   mesh->faces[i].mesh_vertex[2]};
-        //한 삼각형의 세 점 index를 받아옵니다.
-        float a1 = mesh->vertices[idx[0]].position.x()*n[0]+
-                mesh->vertices[idx[0]].position.y()*n[1]+
-                mesh->vertices[idx[0]].position.z()*n[2];
-        float a2 = mesh->vertices[idx[1]].position.x()*n[0]+
-                mesh->vertices[idx[1]].position.y()*n[1]+
-                mesh->vertices[idx[1]].position.z()*n[2];
-        float a3 = mesh->vertices[idx[2]].position.x()*n[0]+
-                mesh->vertices[idx[2]].position.y()*n[1]+
-                mesh->vertices[idx[2]].position.z()*n[2];
-        //orientation의 방향과 계산을 한 뒤 최솟값을 구합니다.
-        //예상으론 oriestation방향으로 들어오는 평면과 가장 가까운 점의 거리를 구하는게 아닐까 싶습니다.
-        float an = min(min(a1,a2),a3);
+	for (const auto& face : *mesh->getFaces())
+	{
+		const MeshVertex* idx[3] = { face.mesh_vertex[0],
+		   face.mesh_vertex[1],
+		   face.mesh_vertex[2] };
+		//한 삼각형의 세 점 index를 받아옵니다.
+		float a1 = idx[0]->position.x() * n[0] +
+			idx[0]->position.y() * n[1] +
+			idx[0]->position.z() * n[2];
+		float a2 = idx[1]->position.x() * n[0] +
+			idx[1]->position.y() * n[1] +
+			idx[1]->position.z() * n[2];
+		float a3 = idx[2]->position.x() * n[0] +
+			idx[2]->position.y() * n[1] +
+			idx[2]->position.z() * n[2];
+		//orientation의 방향과 계산을 한 뒤 최솟값을 구합니다.
+		//예상으론 oriestation방향으로 들어오는 평면과 가장 가까운 점의 거리를 구하는게 아닐까 싶습니다.
+		float an = std::min(std::min(a1, a2), a3);
 
-        if(minFlag){
-            amin=an;
-            minFlag=false;
-        }
-        else if(an<amin){
-            amin=an;
-        }
-    }
+		if (minFlag) {
+			amin = an;
+			minFlag = false;
+		}
+		else if (an < amin) {
+			amin = an;
+		}
+	}
+
+
     return amin;
 }
 float* autoorientation::lithograph(Mesh* mesh, float n[], float amin, int CA){
@@ -201,25 +204,27 @@ float* autoorientation::lithograph(Mesh* mesh, float n[], float amin, int CA){
     float touching_height = amin+15;
 
     float anti_n[3]={-n[0],-n[1],-n[2]};
-    for(int i=0 ; i<mesh->faces.size();i++){//mesh의 삼각형 갯수만큼 진행합니다.
-        QVector3D a = mesh->faces[i].fn_unnorm;//face에 추가된 인스턴스이며, 정규화되지 않은 노말벡터입니다.
+
+	for (const auto& face : *mesh->getFaces())
+	{
+        QVector3D a = face.fn_unnorm;//face에 추가된 인스턴스이며, 정규화되지 않은 노말벡터입니다.
         float norma = (float)sqrtf(a[0]*a[0]+a[1]*a[1]+a[2]*a[2]);
         if(norma == 0)
             continue;
         if(alpha > (a[0]*n[0] + a[1]*n[1] +a[2]*n[2])/norma){
-            int idx[3]={mesh->faces[i].mesh_vertex[0],
-                       mesh->faces[i].mesh_vertex[1],
-                       mesh->faces[i].mesh_vertex[2]};
-            float a1 = mesh->vertices[idx[0]].position.x()*n[0]+
-                    mesh->vertices[idx[0]].position.y()*n[1]+
-                    mesh->vertices[idx[0]].position.z()*n[2];
-            float a2 = mesh->vertices[idx[1]].position.x()*n[0]+
-                    mesh->vertices[idx[1]].position.y()*n[1]+
-                    mesh->vertices[idx[1]].position.z()*n[2];
-            float a3 = mesh->vertices[idx[2]].position.x()*n[0]+
-                    mesh->vertices[idx[2]].position.y()*n[1]+
-                    mesh->vertices[idx[2]].position.z()*n[2];
-            float an = min(min(a1,a2),a3);
+			const MeshVertex* idx[3] ={face.mesh_vertex[0],
+                       face.mesh_vertex[1],
+                       face.mesh_vertex[2]};
+            float a1 = idx[0]->position.x()*n[0]+
+                    idx[0]->position.y()*n[1]+
+                    idx[0]->position.z()*n[2];
+            float a2 = idx[1]->position.x()*n[0]+
+                    idx[1]->position.y()*n[1]+
+                    idx[1]->position.z()*n[2];
+            float a3 = idx[2]->position.x()*n[0]+
+                    idx[2]->position.y()*n[1]+
+                    idx[2]->position.z()*n[2];
+            float an = std::min(std::min(a1,a2),a3);
             float ali=fabs(a.x()*n[0]+a.y()*n[1]+a.z()*n[2])/2;
 
 
@@ -232,7 +237,7 @@ float* autoorientation::lithograph(Mesh* mesh, float n[], float amin, int CA){
             else{
                 float b[3]={a1,a2,a3};
                 bottomA += ali;
-                LineL += get_touching_line(mesh,b,i,touching_height);
+                LineL += get_touching_line(mesh,b,face,touching_height);
             }
         }
     }
@@ -243,25 +248,25 @@ float* autoorientation::lithograph(Mesh* mesh, float n[], float amin, int CA){
     temp[2]=LineL;
     return temp;
 }
-float autoorientation::get_touching_line(Mesh* mesh,float a[],int i,float touching_height){
-    QList<MeshVertex> touch_list;
-    int idx[3]={mesh->faces[i].mesh_vertex[0],
-                mesh->faces[i].mesh_vertex[1],
-                mesh->faces[i].mesh_vertex[2]};
+float autoorientation::get_touching_line(Mesh* mesh,float a[], const MeshFace& face,float touching_height){
+    std::vector<const MeshVertex*> touch_list;
+	const MeshVertex* idx[3]={ face.mesh_vertex[0],
+                face.mesh_vertex[1],
+				face.mesh_vertex[2]};
     for(int j=0;j<3;j++){
         if(a[j]<touching_height){
-            touch_list<<mesh->vertices[idx[j]];
+            touch_list.push_back(idx[j]);
         }
     }
-    QList<MeshVertex> combs;
+	std::vector<const MeshVertex*> combs;
     for(int j=0;j<touch_list.size();j++){
-        MeshVertex a1;
-        MeshVertex a2;
+        const MeshVertex* a1;
+		const MeshVertex* a2;
         a1=touch_list.at(j);
         for(int k=j+1;k<touch_list.size();k++){
             a2=touch_list.at(k);
-            combs<<a1;
-            combs<<a2;
+            combs.push_back(a1);
+			combs.push_back(a2);
         }
     }
     if(combs.size() <= 1){
@@ -269,16 +274,16 @@ float autoorientation::get_touching_line(Mesh* mesh,float a[],int i,float touchi
     }
     float length = 0;
     for(int j=0;j<combs.size();j++){
-        MeshVertex p1=combs.at(j);
+		const MeshVertex* p1=combs.at(j);
         j++;
-        MeshVertex p2=combs.at(j);
-        length+=sqrtf(        (p2.position.x()-p1.position.x())*(p2.position.x()-p1.position.x())+
-                              (p2.position.y()-p1.position.y())*(p2.position.y()-p1.position.y())+
-                              (p2.position.z()-p1.position.z())*(p2.position.z()-p1.position.z()));
+		const MeshVertex* p2=combs.at(j);
+        length+=sqrtf(        (p2->position.x()-p1->position.x())*(p2->position.x()-p1->position.x())+
+                              (p2->position.y()-p1->position.y())*(p2->position.y()-p1->position.y())+
+                              (p2->position.z()-p1->position.z())*(p2->position.z()-p1->position.z()));
     }
     return length;
 }
-vector<Orient*> autoorientation::area_cumulation(Mesh* mesh,float n[],bool bi_algorithmic){
+std::vector<Orient*> autoorientation::area_cumulation(Mesh* mesh,float n[],bool bi_algorithmic){
     //bi_algorithmic이 false:6개 true:8개의 orientataion*을 만들어 리턴합니다.
     int best_n;
     if(bi_algorithmic)
@@ -286,10 +291,12 @@ vector<Orient*> autoorientation::area_cumulation(Mesh* mesh,float n[],bool bi_al
     else
         best_n=5;
     //5,7 로 써있지만, (0,0,1)한개 더 처음에 추가합니다.
-    map<QString,float> orient;
+    std::map<QString,float> orient;
     //리턴되는 값은 단순 random은 아니며, 가장 가중치가 높은 순서대로 best_n개를 뽑아냅니다.
-    for(int i=0 ; i<mesh->faces.size();i++){
-        QVector3D an = mesh->faces[i].fn_unnorm;
+	size_t i = 0;
+	for (const auto& face : *mesh->getFaces())
+	{
+        QVector3D an = face.fn_unnorm;
         float A = sqrtf(an.x()*an.x()+an.y()*an.y()+an.z()*an.z());
         if(A>0){
             an.setX(an.x()/A);
@@ -309,11 +316,12 @@ vector<Orient*> autoorientation::area_cumulation(Mesh* mesh,float n[],bool bi_al
             }//해당 위치에 가중치를 더합니다.
 
         }
-
+		//?!
         if(i%3000==0){
-            qmlManager->setProgress((float)i*0.15/mesh->faces.size());
+            qmlManager->setProgress((float)i*0.15/mesh->getFaces()->size());
             qmlManager->setProgressText("orientation.....");
         }
+		++i;
     }
 
     qmlManager->setProgress(0.15);
@@ -324,7 +332,7 @@ vector<Orient*> autoorientation::area_cumulation(Mesh* mesh,float n[],bool bi_al
 
     if (orient.size() < best_n) best_n = orient.size();
 
-    map<QString,float>::iterator it_map;
+    std::map<QString,float>::iterator it_map;
     std::vector<float> val(best_n);
 	std::vector <QString> val_n(best_n);
     for(int i=0;i<best_n;i++){
@@ -353,7 +361,7 @@ vector<Orient*> autoorientation::area_cumulation(Mesh* mesh,float n[],bool bi_al
             val_n[index]=it_map->first;
         }
     }
-    vector<Orient*> result;
+    std::vector<Orient*> result;
     for (int i=0; i<best_n+1;i++){
         result.push_back(new Orient);
     }
@@ -373,11 +381,11 @@ vector<Orient*> autoorientation::area_cumulation(Mesh* mesh,float n[],bool bi_al
     //가장 가중치가 높은 orientation들도 추가합니다.
     return result;
 }
-vector<Orient*> autoorientation::egde_plus_vertex(Mesh* mesh, int best_n){
+std::vector<Orient*> autoorientation::egde_plus_vertex(Mesh* mesh, int best_n){
     //orientation을 추가로 더할 때 씁니다. best_n 갯수만큼 return 하긴 하지만,
     //호출한 Tweak() 에서 val>2인 orientation만 원본 orientation에 추가하므로,
     //실제로 추가되는 값은 그보다 작을 수 있습니다.
-    int vcount = mesh->faces.size()*3;
+    int vcount = mesh->getFaces()->size()*3;
     //원문에서는 face 안에 vertexindex가 있다고 생각하지 않고,
     //vertexlist를 계속 나열한 채로 저장하였으므로, 비슷하게 구현하기 위해서 *3을 해줍니다.
     //그냥 다른 함수처럼 faces[i].mesh_vertex[0] 1, 2 이런식으로 구한 결과와 같습니다.
@@ -385,11 +393,12 @@ vector<Orient*> autoorientation::egde_plus_vertex(Mesh* mesh, int best_n){
     if(vcount < 10000) it = 5;
     else if(vcount < 25000) it = 2;
     else it = 1;
-    map<QString,float> lst;
+    std::map<QString,float> lst;
     //area_cummulation처럼 map을 만들고, value 기준 상위 best_n개 만 뽑아냅니다.
     //단, map을 만드는 요소를 mesh 내에서 random하게 추가로 생성합니다.
+	auto faceItr = mesh->getFaces()->cbegin();
     for(int i=0;i<vcount*it;i++){
-        float* randomNormal = calc_random_normal(mesh,i%vcount);
+        float* randomNormal = calc_random_normal(mesh,i%vcount, *faceItr);
         //mesh 속 삼각형 중에서 랜덤 하게 하나를 골라 Normal을 전달받습니다.
         if(randomNormal==NULL){//randomNormal 크기가 0이 되는 경우를 제외합니다.
             continue;
@@ -405,11 +414,12 @@ vector<Orient*> autoorientation::egde_plus_vertex(Mesh* mesh, int best_n){
             qmlManager->setProgress((float)i*0.80/(vcount*it)+0.15);
             qmlManager->setProgressText("orientation.....");
         }
+		++faceItr;
     }
 
     qmlManager->setProgress(0.95);
     qmlManager->setProgressText("orientation.....");
-    map<QString,float>::iterator it_map;
+    std::map<QString,float>::iterator it_map;
     std::vector<float> val(best_n);
 	std::vector<QString> val_n(best_n);
     for(int i=0;i<best_n;i++){
@@ -437,7 +447,7 @@ vector<Orient*> autoorientation::egde_plus_vertex(Mesh* mesh, int best_n){
             val_n[index]=it_map->first;
         }
     }
-    vector<Orient*> result;
+    std::vector<Orient*> result;
     for (int i=0; i<best_n;i++){
         result.push_back(new Orient);
     }
@@ -453,29 +463,46 @@ vector<Orient*> autoorientation::egde_plus_vertex(Mesh* mesh, int best_n){
     return result;
 
 }
-float* autoorientation::calc_random_normal(Mesh* mesh,int i){
+float* autoorientation::calc_random_normal(Mesh* mesh, int i,  const MeshFace& face){
     //mesh 내의 random한 normal을 리턴합니다.
     QTime time = QTime::currentTime();
     qsrand((uint)time.msec());
     QVector3D v;
     QVector3D w;
-    int j=i/3;
-    if(i%3 == 0){
-        v=mesh->vertices[mesh->faces[j].mesh_vertex[0]].position;
-        w=mesh->vertices[mesh->faces[j].mesh_vertex[1]].position;
-    }
-    else if(i%3 == 1){
-        v=mesh->vertices[mesh->faces[j].mesh_vertex[1]].position;
-        w=mesh->vertices[mesh->faces[j].mesh_vertex[2]].position;
-    }
-    else{
-        v=mesh->vertices[mesh->faces[j].mesh_vertex[2]].position;
-        w=mesh->vertices[mesh->faces[j].mesh_vertex[0]].position;
-    }
-    int randomIndex=qrand() % mesh->faces.size();
+	int j = i / 3;
+    //if(i%3 == 0){
 
-    QVector3D r_v=mesh->vertices[mesh->faces[randomIndex/3].mesh_vertex[randomIndex%3]].position;
+    //    v=face.mesh_vertex[0]->position;
+    //    w=face.mesh_vertex[1]->position;
+    //}
+    //else if(i%3 == 1){
+    //    v=face.mesh_vertex[1]->position;
+    //    w=face.mesh_vertex[2]->position;
+    //}
+    //else{
+    //    v=face.mesh_vertex[2]->position;
+    //    w=face.mesh_vertex[0]->position;
+    //}
+	if (i % 3 == 0) {
+		v = (*mesh->getRenderOrderFaces())[j]->mesh_vertex[0]->position;
+		w = (*mesh->getRenderOrderFaces())[j]->mesh_vertex[1]->position;
+	}
+	else if (i % 3 == 1) {
+		v = (*mesh->getRenderOrderFaces())[j]->mesh_vertex[1]->position;
+		w = (*mesh->getRenderOrderFaces())[j]->mesh_vertex[2]->position;
+	}	    								 				 
+	else {  								 				 
+		v = (*mesh->getRenderOrderFaces())[j]->mesh_vertex[2]->position;
+		w = (*mesh->getRenderOrderFaces())[j]->mesh_vertex[0]->position;
+	}
 
+    int randomIndex=qrand() % mesh->getFaces()->size();
+	QVector3D r_v = (*mesh->getRenderOrderFaces())[randomIndex / 3]->mesh_vertex[randomIndex % 3]->position;
+
+    //QVector3D r_v=mesh->vertices[mesh->faces[randomIndex/3].mesh_vertex[randomIndex%3]].position;
+
+	//temp
+	//QVector3D r_v = mesh->getVertices()->front().position;
     v.setX(v.x()-r_v.x());
     v.setY(v.y()-r_v.y());
     v.setZ(v.z()-r_v.z());
@@ -498,11 +525,11 @@ float* autoorientation::calc_random_normal(Mesh* mesh,int i){
         return NULL;
     }
 }
-vector<Orient*> autoorientation::remove_duplicates(vector<Orient*> o,int *orientCnt){
+std::vector<Orient*> autoorientation::remove_duplicates(std::vector<Orient*> o,int *orientCnt){
     //중복을 제거합니다.
     int initIndex=*orientCnt+8;
     int count=0;
-    vector<Orient*> orientation;
+    std::vector<Orient*> orientation;
     for (int i=0; i<initIndex;i++){
         orientation.push_back(new Orient);
     }
