@@ -48,7 +48,6 @@ public:
     QEntity* models;
     Qt3DCore::QTransform* systemTransform;
     QObject* mv;
-    Qt3DCore::QEntity *boundedBox;
     Qt3DCore::QEntity *mttab;
     QObject* undoRedoButton;
     QObject* slicingData;
@@ -160,7 +159,6 @@ public:
     int rotateSnapAngle = 0;
     int rotateSnapStartAngle = 0;
     int rotateSnapQuotient = 0;
-    bool groupSelectionActive = false;
     //bool moveActive = false;
     bool saveActive = false;
     bool rotateActive = false;
@@ -192,6 +190,7 @@ public:
     void setProgress(float value);
     void setProgressText(std::string inputText);
     int getLayerViewFlags();
+	void modelSelected(int);
 
     GLModel* findGLModelByName(QString filename);
 	void connectShadow(GLModel* shadowModel);
@@ -236,8 +235,10 @@ public:
     void updateBoundedBox();
 
 private:
+
 	GLModel* getModelByID(int ID);
     void unselectPartImpl(GLModel* target);
+	bool groupSelectionActive = false;
     int viewMode;
     int layerViewFlags;
     int modelIDCounter;
@@ -265,7 +266,6 @@ public slots:
     void runGroupFeature(int,QString, double, double, double, QVariant);
     bool multipleModelSelected(int ID);
     void lastModelSelected();
-    void modelSelected(int);
     void modelRotate(int,int);
     void modelRotateByNumber(int axis, int, int, int);
     void modelMove(int,int);

@@ -23,7 +23,7 @@
 #include "feature/autoarrange.h"
 #include "feature/extension.h"
 #include "feature/hollowshell.h"
-
+#include "boundingbox.h"
 
 #define MAX_BUF_LEN 2000000
 
@@ -123,10 +123,6 @@ public:
     QMaterial *m_layerMaterial;
     QParameter *m_layerMaterialHeight;
     QParameter *m_layerMaterialRaftHeight;
-
-
-
-    Qt3DRender::QObjectPicker *m_objectPicker = nullptr;
     Qt3DCore::QTransform m_transform;
     //QVector3D m_translation;
 
@@ -170,8 +166,7 @@ public:
 
     void copyModelAttributeFrom(GLModel* from);
 
-    void addMouseHandlers();
-    void removeMouseHandlers();
+
 
     // changeColor
     void changecolor(int mode); //0 default, 1 selected, 2 outofarea
@@ -221,10 +216,12 @@ public:
 
     const Mesh* getMesh();
     const Mesh* getSupport();
-	void setEnabled(bool isEnabled);
-	void enablePicking(bool isEnable);
+	void setHitTestable(bool isEnabled);
+	bool isHitTestable();
+	void setBoundingBoxVisible(bool isEnabled);
+	//void setBoundingBox
 private:
-	bool _isEnabled;
+	bool _hitEnabled = true;
 	static const QVector3D COLOR_DEFAULT_MESH;
 	static const QVector3D COLOR_INFILL;
 	static const QVector3D COLOR_RAFT;
@@ -275,8 +272,6 @@ private:
 	void updateShadowModel(Mesh* mesh);
 	void deleteShadowModel();
 	void updateShadowModelImpl(); // main constructor for mainmesh and shadowmesh
-	void disableMouseHandlers();
-	void reenableMouseHandlers();
 	void updateAllVertices(Mesh* mesh, QVector3D color = COLOR_DEFAULT_MESH);
 	void updateVertices(Mesh* mesh, QVector3D color = COLOR_DEFAULT_MESH);
 
@@ -315,6 +310,8 @@ private:
 
     const MeshFace *targetMeshFace = NULL; // used for object selection (specific area, like extension or labelling)
 
+	//bounding box
+	BoundingBox _boundingBox;
 
 signals:
 
@@ -336,17 +333,14 @@ public slots:
     void loadRedoState();
 
     // object picker parts
-    void handlePickerEnteredFreeCutSphere();
-    void handlePickerExitedFreeCutSphere();
-    void handlePickerClickedFreeCutSphere(Qt3DRender::QPickEvent*);
-    void handlePickerClickedFreeCut(Qt3DRender::QPickEvent*);
-    void handlePickerClicked(Qt3DRender::QPickEvent*);
-    void handlePickerClickedLayflat(MeshFace shadow_meshface);
+    void mouseEnteredFreeCutSphere();
+    void mouseExitedFreeCutSphere();
+    void mouseClickedFreeCutSphere(Qt3DRender::QPickEvent*);
+    void mouseClickedFreeCut(Qt3DRender::QPickEvent*);
+    void mouseClicked(Qt3DRender::QPickEvent*);
+    void mouseClickedLayflat(MeshFace shadow_meshface);
     void mgoo(Qt3DRender::QPickEvent*);
     void pgoo(Qt3DRender::QPickEvent*);
-    void engoo();
-    void exgoo();
-
     // Scale
     void openScale();
     void closeScale();
