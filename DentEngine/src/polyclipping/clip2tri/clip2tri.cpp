@@ -71,8 +71,8 @@ clip2tri::~clip2tri()
 }
 
 
-void clip2tri::triangulate(const vector<vector<Point> > &inputPolygons, vector<Point> &outputTriangles,
-      const vector<Point> &boundingPolygon)
+void clip2tri::triangulate(const std::vector<std::vector<Point> > &inputPolygons, std::vector<Point> &outputTriangles,
+      const std::vector<Point> &boundingPolygon)
 {
    // Use clipper to clean.  This upscales the floating point input
    PolyTree solution;
@@ -178,7 +178,7 @@ int clip2tri::pointInPolygon(const IntPoint &pt, const Path &path)
     return PointInPolygon(pt, path);
 }
 
-Path clip2tri::upscaleClipperPoints(const vector<Point> &inputPolygon)
+Path clip2tri::upscaleClipperPoints(const std::vector<Point> &inputPolygon)
 {
    Path outputPolygon;
    outputPolygon.resize(inputPolygon.size());
@@ -190,7 +190,7 @@ Path clip2tri::upscaleClipperPoints(const vector<Point> &inputPolygon)
 }
 
 
-Paths clip2tri::upscaleClipperPoints(const vector<vector<Point> > &inputPolygons)
+Paths clip2tri::upscaleClipperPoints(const std::vector<std::vector<Point> > &inputPolygons)
 {
    Paths outputPolygons;
 
@@ -208,9 +208,9 @@ Paths clip2tri::upscaleClipperPoints(const vector<vector<Point> > &inputPolygons
 }
 
 
-vector<vector<Point> > clip2tri::downscaleClipperPoints(const Paths &inputPolygons)
+std::vector<std::vector<Point> > clip2tri::downscaleClipperPoints(const Paths &inputPolygons)
 {
-   vector<vector<Point> > outputPolygons;
+   std::vector<std::vector<Point> > outputPolygons;
 
    outputPolygons.resize(inputPolygons.size());
 
@@ -230,7 +230,7 @@ vector<vector<Point> > clip2tri::downscaleClipperPoints(const Paths &inputPolygo
 // NOTE: this does NOT downscale the Clipper points.  You must do this afterwards
 //
 // Here you add all your non-navigatable objects (e.g. walls, barriers, etc.)
-bool clip2tri::mergePolysToPolyTree(const vector<vector<Point> > &inputPolygons, PolyTree &solution)
+bool clip2tri::mergePolysToPolyTree(const std::vector<std::vector<Point> > &inputPolygons, PolyTree &solution)
 {
    Paths input = upscaleClipperPoints(inputPolygons);
 
@@ -251,8 +251,8 @@ bool clip2tri::mergePolysToPolyTree(const vector<vector<Point> > &inputPolygons,
 }
 
 
-// Delete all poly2tri points from a vector and clear the vector
-static void deleteAndClear(vector<p2t::Point*> &vec)
+// Delete all poly2tri points from a std::vector and clear the std::vector
+static void deleteAndClear(std::vector<p2t::Point*> &vec)
 {
    for(U32 i = 0; i < vec.size(); i++)
       delete vec[i];
@@ -297,13 +297,13 @@ static void edgeShrink(Path &path)
 //    http://javascript.poly2tri.googlecode.com/hg/index.html
 //
 // FIXME: what is ignoreFills and ignoreHoles for?  kaen?
-bool clip2tri::triangulateComplex(vector<Point> &outputTriangles, const Path &outline,
+bool clip2tri::triangulateComplex(std::vector<Point> &outputTriangles, const Path &outline,
       const PolyTree &polyTree, bool ignoreFills, bool ignoreHoles)
 {
    // Keep track of memory for all the poly2tri objects we create
-   vector<p2t::CDT*> cdtRegistry;
-   vector<vector<p2t::Point*> > holesRegistry;
-   vector<vector<p2t::Point*> > polylinesRegistry;
+   std::vector<p2t::CDT*> cdtRegistry;
+   std::vector<std::vector<p2t::Point*> > holesRegistry;
+   std::vector<std::vector<p2t::Point*> > polylinesRegistry;
 
 
    // Let's be tricky and add our outline to the root node (it should have none), it'll be
@@ -328,7 +328,7 @@ bool clip2tri::triangulateComplex(vector<Point> &outputTriangles, const Path &ou
          (!ignoreFills && !currentNode->IsHole()))
       {
          // Build up this polyline in poly2tri's format (downscale Clipper points)
-         vector<p2t::Point*> polyline;
+         std::vector<p2t::Point*> polyline;
          for(U32 j = 0; j < currentNode->Contour.size(); j++)
             polyline.push_back(new p2t::Point(F64(currentNode->Contour[j].X), F64(currentNode->Contour[j].Y)));
 
@@ -345,7 +345,7 @@ bool clip2tri::triangulateComplex(vector<Point> &outputTriangles, const Path &ou
             // Slightly modify the polygon to guarantee no duplicate points
             edgeShrink(childNode->Contour);
 
-            vector<p2t::Point*> hole;
+            std::vector<p2t::Point*> hole;
             for(U32 k = 0; k < childNode->Contour.size(); k++)
                hole.push_back(new p2t::Point(F64(childNode->Contour[k].X), F64(childNode->Contour[k].Y)));
 
@@ -358,7 +358,7 @@ bool clip2tri::triangulateComplex(vector<Point> &outputTriangles, const Path &ou
          cdt->Triangulate();
 
          // Add current output triangles to our total
-         vector<p2t::Triangle*> currentOutput = cdt->GetTriangles();
+         std::vector<p2t::Triangle*> currentOutput = cdt->GetTriangles();
 
          // Copy our data to TNL::Point and to our output Vector
          p2t::Triangle *currentTriangle;
@@ -384,14 +384,14 @@ bool clip2tri::triangulateComplex(vector<Point> &outputTriangles, const Path &ou
    // Free the polylines
    for(S32 i = 0; i < polylinesRegistry.size(); i++)
    {
-      vector<p2t::Point*> polyline = polylinesRegistry[i];
+      std::vector<p2t::Point*> polyline = polylinesRegistry[i];
       deleteAndClear(polyline);
    }
 
    // Free the holes
    for(S32 i = 0; i < holesRegistry.size(); i++)
    {
-      vector<p2t::Point*> hole = holesRegistry[i];
+      std::vector<p2t::Point*> hole = holesRegistry[i];
       deleteAndClear(hole);
    }
 

@@ -10,41 +10,61 @@
 #include <QTransform>
 #include <QTime>
 #include <array>
-
+#include <variant>
 #define cos50 0.64278761
 #define cos100 -0.17364818
 #define cos150 -0.8660254
 #define FZERO 0.00001f
-
-using namespace std;
+#if defined(_DEBUG) || defined(QT_DEBUG )
+#endif
 using namespace ClipperLib;
 
 // plane contains at least 3 vertices contained in the plane in clockwise direction
-typedef vector<QVector3D> Plane;
+typedef std::vector<QVector3D> Plane;
+class MeshVertex;
+class Mesh;
 
-class MeshFace {
+
+class MeshDataType {
 public:
-    MeshFace() {}
+	MeshDataType(const Mesh* owner) :Owner(owner)
+	{}
+private:
+	virtual MeshDataType* modifiedByOwner(const Mesh* owner)const = 0;
+protected:
+	const Mesh* Owner;
 
+};
+class MeshFace: private MeshDataType {
+public:
     int idx;
-    int parent_idx = -1;
-    int mesh_vertex[3] = {-1,-1,-1};
-    //int connected_face_idx[3];
-
-    vector<vector<MeshFace*>> neighboring_faces;
-
+	const MeshFace* parentFace = nullptr;
     QVector3D fn;
     QVector3D fn_unnorm;
+
+	std::array<std::vector<const MeshFace*>, 3> neighboring_faces;
+	std::array<const MeshVertex*, 3> mesh_vertex{ nullptr, nullptr, nullptr };
+private:
+	MeshFace(Mesh* mesh) : neighboring_faces{ std::vector<const MeshFace*>(), std::vector<const MeshFace*>(), std::vector<const MeshFace*>() }, MeshDataType(mesh), idx(-1)
+	{}
+	std::list<MeshFace>::iterator itr;
+	MeshFace* modifiedByOwner(const Mesh* owner)const override
+	{
+		if (owner == Owner)
+		{
+			return const_cast<MeshFace*>(this);
+		}
+		return nullptr;
+	}
+
+	friend class Mesh;
 };
 
-class MeshVertex {
+class MeshVertex : private MeshDataType {
 public:
-    MeshVertex(){}
-    int idx;
     QVector3D position;
     QVector3D vn;
-    std::vector<MeshFace*> connected_faces;
-    MeshVertex(QVector3D position): position(position) {}//connected_faces.reserve(8);}
+	MeshVertex():MeshDataType(nullptr) {}
 
     friend inline bool operator== (const MeshVertex& a, const MeshVertex& b){
         return a.position == b.position;
@@ -53,38 +73,98 @@ public:
     friend inline bool operator!= (const MeshVertex& a, const MeshVertex& b){
         return a.position != b.position;
     }
+	void calculateNormalFromFaces();
+
+	std::vector<const MeshFace*> connected_faces;
+
+private:
+	MeshVertex(Mesh* mesh, QVector3D position) : MeshDataType(mesh), position(position) {}
+	MeshVertex(Mesh* mesh) : MeshDataType(mesh) {}
+	std::list<MeshVertex>::iterator itr;
+	MeshVertex* modifiedByOwner(const Mesh* owner)const override
+	{
+		if (owner == Owner)
+		{
+			return const_cast<MeshVertex*>(this);
+		}
+		return nullptr;
+	}
+
+	friend class Mesh;
 };
 
-//typedef vector<MeshVertex> Path3D;
-class Path3D : public vector<MeshVertex>{
+class Path3D : public std::vector<MeshVertex>{
     public:
         Path projection;
-        vector<Path3D> inner;
-        vector<Path3D> outer;
+        std::vector<Path3D> inner;
+        std::vector<Path3D> outer;
 };
 
-typedef vector<Path3D> Paths3D;
+typedef std::vector<Path3D> Paths3D;
 
 class Mesh{
 public :
+	enum MeshOpType {
+		Delete = 0
+		,Modify
+		,Append
+		//TODO: ModifyKeepNormal,
+
+	};
+	enum MeshOpOperand {
+		FaceRange = 0
+		,FaceSingle
+		//,VerticeRange this is meaningless as Mesh vertice indices and QGeometry indices are completely different!
+		,VertexSingle
+
+		//,SingleVertex
+	};
+	struct MeshOp {
+		MeshOpType Type;
+		MeshOpOperand Operand;
+		//pointers when modified, size_t for index of the deleted element, pair for multiple continous edits
+		//*ranges are [begin, end), end is not included;;
+		std::variant<std::pair<size_t, size_t>, size_t, const MeshVertex*, const MeshFace*> Data;
+	};
+
+	//For each operation, modifies MeshFace, returns whether modification actually occured or the element should be delete
+	typedef std::function<bool(const Mesh&, MeshFace&, size_t)> FaceForEachFunction;
+	typedef std::function<bool(const Mesh&, MeshVertex&, size_t)> VertexForEachFunction;
+
+	Mesh(const Mesh* origin);
     Mesh() {};
-    Mesh(size_t vertCount, size_t faceCount);
-    /********************** Mesh Edit Functions***********************/
+
+	/********************** Undo state functions***********************/
+	void setNextMesh( Mesh* mesh);
+	void setPrevMesh( Mesh* mesh);
+	Mesh* saveUndoState(const Qt3DCore::QTransform& transform);
+
+
+	/********************** Mesh Edit Functions***********************/
     void vertexOffset(float factor);
     void vertexMove(QVector3D direction);
-    Mesh* vertexMoved(QVector3D direction)const;
     void centerMesh();
     void vertexRotate(QMatrix4x4 tmpmatrix);
     void vertexScale(float scaleX, float scaleY, float scaleZ, float centerX, float centerY);
-    Mesh* copyMesh()const;
     void reverseFaces();
+	void addFace(QVector3D v0, QVector3D v1, QVector3D v2);
+	void addFace(QVector3D v0, QVector3D v1, QVector3D v2, const MeshFace* parentface);
+	std::list<MeshFace>::const_iterator removeFace(std::list<MeshFace>::const_iterator f_it);
+	void removeFace(const MeshFace* mf);
+	void connectFaces();
+	void modifyVertex(const MeshVertex* vertex, const QVector3D& newValue);
+	std::vector<MeshOp> flushChanges();
+	/********************** Faces & Vertices std::for_each style edit***********************/
+	size_t conditionalModifyFaces(FaceForEachFunction forEachFunction);
 
-    /********************** Mesh Generation Functions **********************/
-    void addFace(QVector3D v0, QVector3D v1, QVector3D v2);
-    void addFace(QVector3D v0, QVector3D v1, QVector3D v2, int parent_idx);
-    vector<MeshFace>::iterator removeFace(vector<MeshFace>::iterator f_it);
-    void removeFace(MeshFace* mf);
-    void connectFaces();
+	size_t conditionalModifyVertices(VertexForEachFunction forEachFunction);
+
+
+
+	/********************** Mesh Modify and Copy Functions***********************/
+	Mesh* copyMesh()const;
+	Mesh* vertexMoved(QVector3D direction)const;
+
 
     /********************** Path Generation Functions **********************/
     static void addPoint(float x, float y, Path *path);
@@ -94,61 +174,55 @@ public :
 
     /********************** Helper Functions **********************/
     static void updateMinMax(QVector3D v, std::array<float,6>& minMax);
+	static std::array<float, 6> calculateMinMax(QMatrix4x4 rotmatrix, const Mesh* mesh);
 
-    std::array<float,6> calculateMinMax(QMatrix4x4 rotmatrix)const;
     float getFaceZmin(MeshFace mf)const;
     float getFaceZmax(MeshFace mf)const;
-    MeshFace idx2MF(int idx)const;
-    MeshVertex idx2MV(int idx)const;
+    //MeshFace idx2MF(int idx)const;
+    //MeshVertex idx2MV(int idx)const;
 
     /********************** Getters **********************/
-    const std::vector<MeshVertex> getVertices()const;
-    const std::vector<MeshFace> getFaces()const;
+    const std::list<MeshVertex>* getVertices()const;
+    const std::list<MeshFace>* getFaces()const;
     float x_min()const;
     float x_max()const;
     float y_min()const;
     float y_max()const;
     float z_min()const;
     float z_max()const;
-    const Mesh* getPrev()const;
-    const Mesh* getNext()const;
-    QTime getTime()const;
+    Mesh* getPrev()const;
+    Mesh* getNext()const;
+	const std::vector<const MeshFace*>* getRenderOrderFaces()const;
+	/********************** Stuff that can be public **********************/
+
+	QTime time;
+	QVector3D m_translation;
+	QMatrix4x4 m_matrix;
+
+
 private:
     /********************** Helper Functions **********************/
-    vector<MeshFace*> findFaceWith2Vertices(int v0_idx, int v1_idx, MeshFace self_f);
-    int addFaceVertex(QVector3D v);
+    std::vector<const MeshFace*> findFaceWith2Vertices(const MeshVertex * v0, const MeshVertex* v1,const MeshFace& self_f) const;
+	MeshVertex* addFaceVertex(QVector3D v);
     void updateMinMax(QVector3D v);
 
-    std::vector<MeshVertex> vertices;
-    QHash<uint32_t, MeshVertex> vertices_hash;
-    std::vector<MeshFace> faces;
+    std::list<MeshVertex> vertices;
+    QHash<uint32_t, MeshVertex*> vertices_hash;
+    std::list<MeshFace> faces;
 
     // for undo & redo
     Mesh* prevMesh = nullptr;
     Mesh* nextMesh = nullptr;
+	std::vector<MeshOp> _meshModifications;
 
-    QVector3D m_translation;
-    QMatrix4x4 m_matrix;
-    QTime time;
-
-
-
-    // used for freecut, autoarrange elsewhere
-    Path convexHull;
 
     float _x_min = 99999, _x_max = 99999, _y_min = 99999, _y_max = 99999, _z_min = 99999, _z_max = 99999;
 
+	//fileloader should be a factory pattern?
     friend class FileLoader;
-    friend class GLModel;
-    //TODO: these friends should be removed so that operations on Mesh is controlled.
-    friend class SVGexporter;
-    friend class modelcut;
-    friend class autoorientation;
-    friend class modelcut;
-    friend class MeshRepair;
-    friend class GenerateSupport;
-    friend class ShellOffset;
+    //friend class GLModel;
 
+	std::vector<const MeshFace*> _renderOrderFaces;
 
 
 
@@ -171,14 +245,14 @@ Paths3D contourConstruct3D(Paths3D hole_edges);
 /* class containmentPath{
 public:
     Path projection;
-    vector<containmentPath> inner;
-    vector<containmentPath> outer;
+    std::vector<containmentPath> inner;
+    std::vector<containmentPath> outer;
 }; */
 
 bool intPointInPath(IntPoint ip, Path p);
 bool pathInpath(Path3D target, Path3D in);
 
-vector<std::array<QVector3D, 3>> interpolate(Path3D from, Path3D to);
+std::vector<std::array<QVector3D, 3>> interpolate(Path3D from, Path3D to);
 
 uint32_t intPoint2Hash(IntPoint u);
 uint32_t meshVertex2Hash(MeshVertex u);

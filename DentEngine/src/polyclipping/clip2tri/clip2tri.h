@@ -32,7 +32,6 @@
 #include <vector>
 #include "../clipper/clipper.hpp"
 
-using namespace std;
 using namespace ClipperLib;
 
 namespace c2t
@@ -61,14 +60,14 @@ class clip2tri
 {
 private:
    //
-   Path upscaleClipperPoints(const vector<Point> &inputPolygon);
+   Path upscaleClipperPoints(const std::vector<Point> &inputPolygon);
 
-   // These operate on a vector of polygons
-   Paths upscaleClipperPoints(const vector<vector<Point> > &inputPolygons);
-   vector<vector<Point> > downscaleClipperPoints(const Paths &inputPolygons);
+   // These operate on a std::vector of polygons
+   Paths upscaleClipperPoints(const std::vector<std::vector<Point> > &inputPolygons);
+   std::vector<std::vector<Point> > downscaleClipperPoints(const Paths &inputPolygons);
 
 
-   bool triangulateComplex(vector<Point> &outputTriangles, const Path &outline,
+   bool triangulateComplex(std::vector<Point> &outputTriangles, const Path &outline,
          const PolyTree &polyTree, bool ignoreFills = true, bool ignoreHoles = false);
 
 public:
@@ -76,9 +75,9 @@ public:
    clip2tri();
    virtual ~clip2tri();
 
-   bool mergePolysToPolyTree(const vector<vector<Point> > &inputPolygons, PolyTree &solution);
-   void triangulate(const vector<vector<Point> > &inputPolygons, vector<Point> &outputTriangles,
-         const vector<Point> &boundingPolygon);
+   bool mergePolysToPolyTree(const std::vector<std::vector<Point> > &inputPolygons, PolyTree &solution);
+   void triangulate(const std::vector<std::vector<Point> > &inputPolygons, std::vector<Point> &outputTriangles,
+         const std::vector<Point> &boundingPolygon);
 
    // Clip polygons are intended as closed, even if the first and last vertex aren't the same.
    void addClipPolygon(const Path &path);

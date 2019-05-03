@@ -3,7 +3,6 @@
 #include "../polyclipping/clipper/clipper.hpp"
 #include <QVector3D>
 
-using namespace std;
 using namespace ClipperLib;
 
 float pointDistance(IntPoint A, IntPoint B);

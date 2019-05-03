@@ -10,12 +10,12 @@ Slices Slicer::slice(Mesh* mesh){
     Slices slices;
     slices.mesh = mesh;
 
-    if (mesh == nullptr || mesh->getFaces().size() ==0){
+    if (mesh == nullptr || mesh->getFaces()->size() ==0){
         return slices;
     }
 
     // mesh slicing step
-    vector<Paths> meshslices = meshSlice(mesh);
+    std::vector<Paths> meshslices = meshSlice(mesh);
 
 
     printf("meshslice done\n");
@@ -78,10 +78,10 @@ Slices Slicer::slice(Mesh* mesh){
 /****************** Mesh Slicing Step *******************/
 
 // slices mesh into segments
-vector<Paths> Slicer::meshSlice(Mesh* mesh){
+std::vector<Paths> Slicer::meshSlice(Mesh* mesh){
     float delta = scfg->layer_height;
 
-    vector<float> planes;
+    std::vector<float> planes;
 
     if (! strcmp(scfg->slicing_mode, "uniform")) {
         planes = buildUniformPlanes(mesh->z_min(), mesh->z_max(), delta);
@@ -91,18 +91,18 @@ vector<Paths> Slicer::meshSlice(Mesh* mesh){
     }
 
     // build triangle list per layer height
-    vector<vector<int>> triangleLists = buildTriangleLists(mesh, planes, delta);
-    vector<Paths> pathLists;
+    std::vector<std::vector<const MeshFace*>> triangleLists = buildTriangleLists(mesh, planes, delta);
+    std::vector<Paths> pathLists;
 
-    vector<int> A;
-    A.reserve(mesh->getFaces().size());
+    std::vector<const MeshFace*> A;
+    A.reserve(mesh->getFaces()->size());
 
     for (int i=0; i<planes.size(); i++){
         A.insert(A.end(), triangleLists[i].begin(), triangleLists[i].end()); // union
         Paths paths;
 
         for (int t_idx=0; t_idx<A.size(); t_idx++){
-            MeshFace cur_mf = mesh->idx2MF(A[t_idx]);
+            const MeshFace& cur_mf = *A[t_idx];
             if (mesh->getFaceZmax(cur_mf) < planes[i]){
                 A.erase(A.begin()+t_idx);
                 t_idx --;
@@ -156,21 +156,20 @@ void Slice::outerShellOffset(float delta, JoinType join_type){
 
 /****************** Helper Functions For Mesh Slicing Step *******************/
 
-// builds vector of vector of triangle idxs sorted by z_min
-vector<vector<int>> Slicer::buildTriangleLists(Mesh* mesh, vector<float> planes, float delta){
+// builds std::vector of std::vector of triangle idxs sorted by z_min
+std::vector<std::vector<const MeshFace*>> Slicer::buildTriangleLists(Mesh* mesh, std::vector<float> planes, float delta){
 
     // Create List of list
-    vector<vector<int>> list_list_triangle;
+    std::vector<std::vector<const MeshFace*>> list_list_triangle;
     for (int l_idx=0; l_idx < planes.size()+1; l_idx ++){
-        vector<int>* triangles_per_layer = new vector<int>;
-        list_list_triangle.push_back(* triangles_per_layer);
+        list_list_triangle.push_back(std::vector< const MeshFace*>());
     }
 
     // Uniform Slicing O(n)
     if (delta>0){
-        for (int f_idx=0; f_idx < mesh->getFaces().size(); f_idx++){
-            int llt_idx;
-            MeshFace mf = mesh->idx2MF(f_idx);
+		for(const auto& mf : *mesh->getFaces())
+		{
+			int llt_idx;
             float z_min = mesh->getFaceZmin(mf);
             if (z_min < planes[0])
                 llt_idx = 0;
@@ -180,7 +179,7 @@ vector<vector<int>> Slicer::buildTriangleLists(Mesh* mesh, vector<float> planes,
                 llt_idx = (int)((z_min - planes[0])/delta) +1;
 
 
-            list_list_triangle[llt_idx].push_back(f_idx);
+            list_list_triangle[llt_idx].push_back(&mf);
         }
     }
 
@@ -193,8 +192,8 @@ vector<vector<int>> Slicer::buildTriangleLists(Mesh* mesh, vector<float> planes,
 }
 
 
-vector<float> Slicer::buildUniformPlanes(float z_min, float z_max, float delta){
-    vector<float> planes;
+std::vector<float> Slicer::buildUniformPlanes(float z_min, float z_max, float delta){
+    std::vector<float> planes;
     int idx_max = ceil((z_max-z_min)/delta);
     for (int idx=0; idx<=idx_max; idx++){
         float plane_z = round(z_min+delta*idx,2);
@@ -205,8 +204,8 @@ vector<float> Slicer::buildUniformPlanes(float z_min, float z_max, float delta){
     return planes;
 }
 
-vector<float> Slicer::buildAdaptivePlanes(float z_min, float z_max){
-    vector<float> planes;
+std::vector<float> Slicer::buildAdaptivePlanes(float z_min, float z_max){
+    std::vector<float> planes;
     return planes;
 }
 
@@ -267,16 +266,16 @@ void Slices::containmentTreeConstruct(){
         }
     }
 
-    // vector<vector<IntPoint>> to vector<vector<Point>>
+    // std::vector<std::vector<IntPoint>> to std::vector<std::vector<Point>>
 
     /*for (int idx=0; idx<slices.size(); idx++){
         Slice* slice = &(slices[idx]);
 
-        vector<vector<c2t::Point>> pointPaths;
+        std::vector<std::vector<c2t::Point>> pointPaths;
         pointPaths.reserve(slice->outershell.size());
 
         for (Path p : slice->outershell){
-            vector<c2t::Point> pointPath;
+            std::vector<c2t::Point> pointPath;
             pointPath.reserve(p.size());
             for (IntPoint ip : p){
                 pointPath.push_back(c2t::Point((float)ip.X/scfg->resolution,(float)ip.Y/scfg->resolution));

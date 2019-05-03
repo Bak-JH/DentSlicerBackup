@@ -10,7 +10,6 @@
 #include <QDebug>
 #include "polyclipping/clip2tri/clip2tri.h"
 
-//using namespace std;
 using namespace ClipperLib;
 using namespace c2t;
 
@@ -33,13 +32,13 @@ public:
 };
 
 
-class Slices : public vector<Slice>{
+class Slices : public std::vector<Slice>{
 public:
     Mesh* mesh;
     Paths overhang_regions;
-    vector<OverhangPoint*> overhang_points;
-    //    vector<QVector3D> overhang_points;
-    //vector<IntPoint> intersectionPoints;
+    std::vector<OverhangPoint*> overhang_points;
+    //    std::vector<QVector3D> overhang_points;
+    //std::vector<IntPoint> intersectionPoints;
     Path raft_points;
 
     void containmentTreeConstruct();
@@ -61,7 +60,7 @@ public:
     Slices slice(Mesh* mesh);
 
     /****************** Mesh Slicing Step *******************/
-    vector<Paths> meshSlice(Mesh* mesh); // totally k elements
+    std::vector<Paths> meshSlice(Mesh* mesh); // totally k elements
 
 
     /****************** Contour Construction Step *******************/
@@ -69,9 +68,9 @@ public:
 
 
     /****************** Helper Functions For Mesh Slicing Step *******************/
-    vector<vector<int>> buildTriangleLists(Mesh* mesh, vector<float> planes, float delta);
-    vector<float> buildUniformPlanes(float z_min, float z_max, float delta);
-    vector<float> buildAdaptivePlanes(float z_min, float z_max);
+	std::vector<std::vector<const MeshFace*>> buildTriangleLists(Mesh* mesh, std::vector<float> planes, float delta);
+    std::vector<float> buildUniformPlanes(float z_min, float z_max, float delta);
+    std::vector<float> buildAdaptivePlanes(float z_min, float z_max);
 
 
     /****************** Helper Functions For Contour Construction Step *******************/
