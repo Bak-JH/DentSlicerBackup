@@ -2,7 +2,7 @@
 
 QT += qml quick opengl 3dcore 3drender 3dinput 3dextras concurrent widgets core 3dquick 3dlogic 3dquickextras
 
-CONFIG += c++11 resources_big
+CONFIG += c++17 resources_big
 
 TARGET = DentStudio
 
@@ -105,6 +105,7 @@ HEADERS += \
     utils/qrbtree.h \
     utils/qtriangulator_p.h \
     utils/qvectorpath_p.h \
+    utils/utils.h \
     utils/winsparkle/winsparkle.h \
     feature/stlexporter.h \
     feature/extension.h \

@@ -4,29 +4,25 @@
 // offset shell with mm
 Mesh* ShellOffset::shellOffset(Mesh* mesh, float factor){
     int cnt=0;
-    Mesh* offsetMesh = new Mesh();
-    offsetMesh->faces.reserve(mesh->faces.size()*4);
-    offsetMesh->vertices.reserve(mesh->faces.size()*4);
-    offsetMesh->prevMesh = mesh->prevMesh;
-    offsetMesh->nextMesh = mesh->nextMesh;
+    Mesh* offsetMesh = new Mesh(mesh);
 
-    vector<MeshFace> unconnectedMeshFaces;
-    vector<MeshFace> unconnectedOffsetMeshFaces;
+    std::vector<MeshFace> unconnectedMeshFaces;
+    std::vector<MeshFace> unconnectedOffsetMeshFaces;
 
     // copy original mesh for innershell in CCW order
-    foreach (MeshFace mf, mesh->faces){
+    for (const auto& mf: (*mesh->getFaces())){
         if (cnt%100 ==0)
             QCoreApplication::processEvents();
         cnt++;
-        QVector3D qv1 = mesh->idx2MV(mf.mesh_vertex[0]).position;
-        QVector3D qv2 = mesh->idx2MV(mf.mesh_vertex[1]).position;
-        QVector3D qv3 = mesh->idx2MV(mf.mesh_vertex[2]).position;
+        QVector3D qv1 = mf.mesh_vertex[0]->position;
+        QVector3D qv2 = mf.mesh_vertex[1]->position;
+        QVector3D qv3 = mf.mesh_vertex[2]->position;
         offsetMesh->addFace(qv3, qv2, qv1);
 
         // will connect later on
         if (mf.neighboring_faces[0].size() == 0 || mf.neighboring_faces[1].size() == 0 || mf.neighboring_faces[2].size() == 0){ // edge 0 is unconnected
             unconnectedMeshFaces.push_back(mf);
-            unconnectedOffsetMeshFaces.push_back(offsetMesh->faces[offsetMesh->faces.size()-1]);
+            unconnectedOffsetMeshFaces.push_back((*offsetMesh->getFaces()).back());
         }
     }
     // 승환 20%
@@ -38,13 +34,13 @@ Mesh* ShellOffset::shellOffset(Mesh* mesh, float factor){
     qmlManager->setProgress(0.42);
 
     // copy original mesh for outer shell
-    foreach (MeshFace mf, mesh->faces){
+    for (const auto& mf: *mesh->getFaces()){
         if (cnt%100 ==0)
             QCoreApplication::processEvents();
         cnt++;
-        QVector3D qv1 = mesh->idx2MV(mf.mesh_vertex[0]).position;
-        QVector3D qv2 = mesh->idx2MV(mf.mesh_vertex[1]).position;
-        QVector3D qv3 = mesh->idx2MV(mf.mesh_vertex[2]).position;
+        QVector3D qv1 = mf.mesh_vertex[0]->position;
+        QVector3D qv2 = mf.mesh_vertex[1]->position;
+        QVector3D qv3 = mf.mesh_vertex[2]->position;
         offsetMesh->addFace(qv1, qv2, qv3);
     }
     // 승환 60%
@@ -58,26 +54,26 @@ Mesh* ShellOffset::shellOffset(Mesh* mesh, float factor){
         MeshFace umf = unconnectedMeshFaces[i];
         MeshFace uomf = unconnectedOffsetMeshFaces[i];
         if (umf.neighboring_faces[0].size() == 0){ // edge 0 is unconnected
-            QVector3D qv0 = mesh->idx2MV(umf.mesh_vertex[0]).position;
-            QVector3D qv1 = mesh->idx2MV(umf.mesh_vertex[1]).position;
-            QVector3D qv0_in = offsetMesh->idx2MV(uomf.mesh_vertex[2]).position;
-            QVector3D qv1_in = offsetMesh->idx2MV(uomf.mesh_vertex[1]).position;
+            QVector3D qv0 = umf.mesh_vertex[0]->position;
+            QVector3D qv1 = umf.mesh_vertex[1]->position;
+            QVector3D qv0_in = uomf.mesh_vertex[2]->position;
+            QVector3D qv1_in = uomf.mesh_vertex[1]->position;
             offsetMesh->addFace(qv1, qv0, qv0_in);
             offsetMesh->addFace(qv1, qv0_in, qv1_in);
         }
         if (umf.neighboring_faces[1].size() == 0){ // edge 1 is unconnected
-            QVector3D qv1 = mesh->idx2MV(umf.mesh_vertex[1]).position;
-            QVector3D qv2 = mesh->idx2MV(umf.mesh_vertex[2]).position;
-            QVector3D qv1_in = offsetMesh->idx2MV(uomf.mesh_vertex[1]).position;
-            QVector3D qv2_in = offsetMesh->idx2MV(uomf.mesh_vertex[0]).position;
+            QVector3D qv1 = umf.mesh_vertex[1]->position;
+            QVector3D qv2 = umf.mesh_vertex[2]->position;
+            QVector3D qv1_in = uomf.mesh_vertex[1]->position;
+            QVector3D qv2_in = uomf.mesh_vertex[0]->position;
             offsetMesh->addFace(qv2, qv1, qv1_in);
             offsetMesh->addFace(qv2, qv1_in, qv2_in);
         }
         if (umf.neighboring_faces[2].size() == 0){ // edge 2 is unconnected
-            QVector3D qv0 = mesh->idx2MV(umf.mesh_vertex[0]).position;
-            QVector3D qv2 = mesh->idx2MV(umf.mesh_vertex[2]).position;
-            QVector3D qv0_in = offsetMesh->idx2MV(uomf.mesh_vertex[2]).position;
-            QVector3D qv2_in = offsetMesh->idx2MV(uomf.mesh_vertex[0]).position;
+            QVector3D qv0 = umf.mesh_vertex[0]->position;
+            QVector3D qv2 = umf.mesh_vertex[2]->position;
+            QVector3D qv0_in = uomf.mesh_vertex[2]->position;
+            QVector3D qv2_in = uomf.mesh_vertex[0]->position;
             offsetMesh->addFace(qv0_in, qv0, qv2_in);
             offsetMesh->addFace(qv0, qv2, qv2_in);
         }

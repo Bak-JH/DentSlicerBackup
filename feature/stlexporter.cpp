@@ -9,34 +9,33 @@ STLexporter::STLexporter()
 Mesh* STLexporter::mergeSelectedModels() {
     if (qmlManager->selectedModels.size() == 1 && qmlManager->selectedModels[0] == nullptr) return nullptr;
     else if (qmlManager->selectedModels.size() == 1)
-        return qmlManager->selectedModels[0]->mesh;
+        return qmlManager->selectedModels[0]->_mesh;
 
     size_t faceNum = 0;
     size_t verNum = 0;
     size_t totalFaceNum = 0;
-    foreach (GLModel* model, qmlManager->selectedModels) {
-        faceNum += model->getMesh()->getFaces().size();
-        verNum += model->getMesh()->getVertices().size();
+    for (GLModel* model: qmlManager->selectedModels) {
+        faceNum += model->getMesh()->getFaces()->size();
+        verNum += model->getMesh()->getVertices()->size();
     }
 
-    Mesh* mergedMesh = new Mesh(verNum, faceNum);
+    Mesh* mergedMesh = new Mesh();
     totalFaceNum = faceNum;
     faceNum = 0;
     verNum = 0;
 
-    foreach (GLModel* model, qmlManager->selectedModels) {
-        QVector3D trans = model->m_transform->translation();
+    for (GLModel* model: qmlManager->selectedModels) {
+        QVector3D trans = model->m_transform.translation();
 
-        MeshFace newFace;
-        for (const auto& newFace : model->getMesh()->getFaces()) {
-            QVector3D v1 = model->getMesh()->idx2MV(newFace.mesh_vertex[0]).position+trans;
-            QVector3D v2 = model->getMesh()->idx2MV(newFace.mesh_vertex[1]).position+trans;
-            QVector3D v3 = model->getMesh()->idx2MV(newFace.mesh_vertex[2]).position+trans;
+        for (const auto& each : *model->getMesh()->getFaces()) {
+            QVector3D v1 = each.mesh_vertex[0]->position+trans;
+            QVector3D v2 = each.mesh_vertex[1]->position+trans;
+            QVector3D v3 = each.mesh_vertex[2]->position+trans;
             mergedMesh->addFace(v1,v2,v3);
         }
 
-        faceNum += model->getMesh()->getFaces().size();
-        verNum += model->getMesh()->getVertices().size();
+        faceNum += model->getMesh()->getFaces()->size();
+        verNum += model->getMesh()->getVertices()->size();
 
         if (faceNum % 100 == 0) qmlManager->setProgress((float)(0.1 + 0.3*(faceNum/totalFaceNum)));
 
@@ -54,7 +53,7 @@ Mesh* STLexporter::mergeSelectedModels() {
         model->mesh->vertexMove(-trans);
 
         MeshFace newFace;
-        for (vector<MeshFace>::iterator it = model->mesh->faces.begin(); it != model->mesh->faces.end(); ++it) {
+        for (std::vector<MeshFace>::iterator it = model->mesh->faces.begin(); it != model->mesh->faces.end(); ++it) {
             newFace = (*it);
             newFace.idx += faceNum;
             if (newFace.parent_idx != -1) newFace.parent_idx += faceNum;
@@ -100,16 +99,16 @@ void STLexporter::exportSTL(QString outfilename){
 
     qDebug() << "export STL";
 
-    ofstream outfile(outfilename.toStdString().c_str(), ios::out);
+    std::ofstream outfile(outfilename.toStdString().c_str(), std::ios::out);
 
     writeHeader(outfile);
     qmlManager->setProgress(0.5);
     //qmlManager->setProgress(0.1);
     QCoreApplication::processEvents();
 
-    size_t total_cnt = mesh->getFaces().size();
+    size_t total_cnt = mesh->getFaces()->size();
     size_t cnt = 0;
-    for (MeshFace mf : mesh->getFaces()){
+    for (const auto& mf : *mesh->getFaces()){
         writeFace(outfile, mesh, mf);
 
         if (cnt %100 == 0){
@@ -131,13 +130,13 @@ void STLexporter::exportSTL(QString outfilename){
     return;
 }
 
-void STLexporter::writeFace(ofstream& outfile,const Mesh* mesh, MeshFace mf){
+void STLexporter::writeFace(std::ofstream& outfile,const Mesh* mesh, MeshFace mf){
 
     outfile << "facet normal "<< mf.fn.x() <<" "<< mf.fn.y()<<" "<< mf.fn.z() << "\n";
     outfile << "    outer loop\n";
-    MeshVertex mv1 = mesh->idx2MV(mf.mesh_vertex[0]);
-    MeshVertex mv2 = mesh->idx2MV(mf.mesh_vertex[1]);
-    MeshVertex mv3 = mesh->idx2MV(mf.mesh_vertex[2]);
+    MeshVertex mv1 = *mf.mesh_vertex[0];
+    MeshVertex mv2 = *mf.mesh_vertex[1];
+    MeshVertex mv3 = *mf.mesh_vertex[2];
     outfile << "        vertex "<< mv1.position.x()<<" "<< mv1.position.y()<<" "<< mv1.position.z()<<"\n";
     outfile << "        vertex "<< mv2.position.x()<<" "<< mv2.position.y()<<" "<< mv2.position.z()<<"\n";
     outfile << "        vertex "<< mv3.position.x()<<" "<< mv3.position.y()<<" "<< mv3.position.z()<<"\n";
@@ -145,10 +144,10 @@ void STLexporter::writeFace(ofstream& outfile,const Mesh* mesh, MeshFace mf){
     outfile << "endfacet\n";
 }
 
-void STLexporter::writeHeader(ofstream& outfile){
+void STLexporter::writeHeader(std::ofstream& outfile){
     outfile << "solid diridiri\n";
 }
 
-void STLexporter::writeFooter(ofstream& outfile){
+void STLexporter::writeFooter(std::ofstream& outfile){
     outfile << "endsolid diridiri";
 }

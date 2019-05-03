@@ -12,6 +12,7 @@
 #include <QObjectPicker>
 #include <QCursor>
 #include <iostream>
+#include <memory>
 #include "DentEngine/src/mesh.h"
 #include "fileloader.h"
 #include "slicingengine.h"
@@ -29,7 +30,7 @@
 using namespace Qt3DCore;
 using namespace Qt3DRender;
 using namespace Qt3DExtras;
-using namespace std;
+
 
 /* feature thread */
 #define ftrOpen 1
@@ -95,20 +96,24 @@ signals:
     void runArrange();
 };
 
+
+
 class GLModel : public QEntity
 {
     Q_OBJECT
 public:
+
     // load teeth model default
-    GLModel(QObject* mainWindow=nullptr, QNode* parent=nullptr, Mesh* loadMesh=nullptr, QString fname="", bool isShadow=false); // main constructor for mainmesh and shadowmesh
-    ~GLModel();
+    GLModel(QObject* mainWindow=nullptr, QNode* parent=nullptr, Mesh* loadMesh=nullptr, QString fname="", bool isShadow=false, int id = 0); // main constructor for mainmesh and shadowmesh
+    virtual ~GLModel();
 
     //TODO: Turn these into privates as well
-    GLModel *parentModel = NULL;
-    GLModel *shadowModel = NULL; // GLmodel's sparse mesh that gets picker input
-    GLModel *leftModel = NULL;
-    GLModel *rightModel = NULL;
-    GLModel *twinModel = NULL; // saves cut right for left, left for right models
+    GLModel *parentModel = nullptr;
+    GLModel *leftModel = nullptr;
+    GLModel *rightModel = nullptr;
+    GLModel *twinModel = nullptr; // saves cut right for left, left for right models
+    GLModel *shadowModel = nullptr;
+
 
     bool appropriately_rotated=false;
     QPhongMaterial *m_meshMaterial;
@@ -119,32 +124,23 @@ public:
     QParameter *m_layerMaterialHeight;
     QParameter *m_layerMaterialRaftHeight;
 
-    //QPhongMaterial *m_meshMaterial;
-    Qt3DRender::QBuffer *vertexBuffer;
-    Qt3DRender::QBuffer *vertexNormalBuffer;
-    Qt3DRender::QBuffer *vertexColorBuffer;
-    Qt3DRender::QBuffer *indexBuffer;
-    QAttribute *positionAttribute;
-    QAttribute *normalAttribute;
-    QAttribute *colorAttribute;
-    QAttribute *indexAttribute;
-    QGeometry* m_geometry;
-    QGeometryRenderer* m_geometryRenderer;
-    Qt3DRender::QObjectPicker *m_objectPicker;
-    Qt3DCore::QTransform *m_transform;
+
+
+    Qt3DRender::QObjectPicker *m_objectPicker = nullptr;
+    Qt3DCore::QTransform m_transform;
     //QVector3D m_translation;
 
     // feature hollowshell
     float hollowShellRadius = 0;
 
     // feature extension
-    vector<int> extendFaces;
+    std::vector<int> extendFaces;
 
     // feature offset
     double shellOffsetFactor;
 
     std::vector<QVector3D> cuttingPoints;
-    vector<QEntity*> cuttingContourCylinders;
+    std::vector<QEntity*> cuttingContourCylinders;
     Plane cuttingPlane;
 
     // used for layer view
@@ -163,15 +159,13 @@ public:
     Qt3DExtras::QPhongAlphaMaterial *planeMaterial = nullptr;
     QObjectPicker* planeObjectPicker[2];
 
-    vector<Qt3DExtras::QSphereMesh*> sphereMesh;
-    vector<Qt3DCore::QEntity*> sphereEntity;
-    vector<Qt3DCore::QTransform*> sphereTransform;
-    vector<Qt3DRender::QObjectPicker*> sphereObjectPicker;
-    vector<QPhongMaterial*> sphereMaterial;
+    std::vector<Qt3DExtras::QSphereMesh*> sphereMesh;
+    std::vector<Qt3DCore::QEntity*> sphereEntity;
+    std::vector<Qt3DCore::QTransform*> sphereTransform;
+    std::vector<Qt3DRender::QObjectPicker*> sphereObjectPicker;
+    std::vector<QPhongMaterial*> sphereMaterial;
 
-    void removeModel();
     void removeModelPartList();
-
     LabellingTextPreview* labellingTextPreview = nullptr;
 
     void copyModelAttributeFrom(GLModel* from);
@@ -200,15 +194,13 @@ public:
     void removeCuttingPoint(int idx);
     void removeCuttingPoints();
     void drawLine(QVector3D endpoint);
-    //void bisectModel(Mesh* mesh, Plane plane, Mesh* leftMesh, Mesh* rightMesh);
-    //void bisectModel_internal(Mesh* mesh, Plane plane, Mesh* leftMesh, Mesh* rightMesh);
-    void bisectModel(Plane plane);
-    void bisectModel_internal(Plane plane);
+	void bisectModel(Plane plane, Mesh& lmesh, Mesh& rmesh);
+
     void checkPrintingArea();
-    bool EndsWith(const string& a, const string& b);
+    bool EndsWith(const std::string& a, const std::string& b);
     bool modelSelectChangable();
     QVector2D world2Screen(QVector3D target);
-    QString getFileName(const string& s);
+    QString getFileName(const std::string& s);
     static QVector3D spreadPoint(QVector3D endpoint,QVector3D startpoint,int factor);
     void changeViewMode(int viewMode);
 
@@ -219,8 +211,7 @@ public:
     //arrangeSignalSender* arsignal; //unused, signal from qml goes right into QmlManager.runArrange
     QFutureWatcher<Slicer*> futureWatcher; // future watcher for feature thread results returned
 
-    int ID; //for use in Part List
-    static int globalID;
+    const int ID; //for use in Part List
     QString filename;
     QObject* mainWindow;
     QString slicingInfo;
@@ -228,30 +219,67 @@ public:
     // implement lock as bool variable
     bool updateLock;
 
-    void addVertices(Mesh* mesh, bool CW, QVector3D color=QVector3D(0.278f, 0.670f, 0.706f));
     const Mesh* getMesh();
     const Mesh* getSupport();
+	void setEnabled(bool isEnabled);
+	void enablePicking(bool isEnable);
 private:
+	bool _isEnabled;
+	static const QVector3D COLOR_DEFAULT_MESH;
+	static const QVector3D COLOR_INFILL;
+	static const QVector3D COLOR_RAFT;
+
+    //Order is important! Look at the initializer list in constructor
+	const Mesh* _currentVisibleMesh;
+    QGeometryRenderer m_geometryRenderer;
+    QGeometry m_geometry;
+	QNode* _parent;
+    QByteArray vertexArray;
+    QByteArray vertexNormalArray;
+    QByteArray vertexColorArray;
+    QByteArray appendIdxArray;
+
+    Qt3DRender::QBuffer vertexBuffer;
+    Qt3DRender::QBuffer vertexNormalBuffer;
+    Qt3DRender::QBuffer vertexColorBuffer;
+    Qt3DRender::QBuffer indexBuffer;
+
+    QAttribute positionAttribute;
+    QAttribute normalAttribute;
+    QAttribute colorAttribute;
+    QAttribute indexAttribute;
+
     int colorMode;
-    float x,y,z;
+	//jesus wtf
+    //float x,y,z;
     int v_cnt;
     int f_cnt;
     QNode* m_parent;
     QVector3D lastpoint;
     QVector2D prevPoint;
-    void initialize(const int& faces_cnt);
-    void applyGeometry();
-    void addVertex(QVector3D vertex);
-    void addVertices(vector<QVector3D> vertices);
-    void addNormalVertices(vector<QVector3D> vertices);
-    void addColorVertices(vector<QVector3D> vertices);
-    void addIndexes(vector<int> vertices);
+    void clearMem();
+	void addVertex(QVector3D pos, QVector3D normal, QVector3D color);
+
+    void appendVertices(std::vector<QVector3D> vertices);
+    void appendNormalVertices(std::vector<QVector3D> vertices);
+    void appendColorVertices(std::vector<QVector3D> vertices);
+
+	void updateFace(const MeshFace* face);
+	void deleteAndShiftFaces(size_t start, size_t deleteAmount);
     void clearVertices();
     void onTimerUpdate();
 
     void removeLayerViewComponents();
     void generateLayerViewMaterial();
     static Mesh* toSparse(Mesh* mesh);
+	void addShadowModel(Mesh* mesh);
+	void updateShadowModel(Mesh* mesh);
+	void deleteShadowModel();
+	void updateShadowModelImpl(); // main constructor for mainmesh and shadowmesh
+	void disableMouseHandlers();
+	void reenableMouseHandlers();
+	void updateAllVertices(Mesh* mesh, QVector3D color = COLOR_DEFAULT_MESH);
+	void updateVertices(Mesh* mesh, QVector3D color = COLOR_DEFAULT_MESH);
 
     int cutMode = 1;
     int cutFillMode = 1;
@@ -274,9 +302,8 @@ private:
     int viewMode = -1;
 
     // Core mesh structures
-    Mesh* mesh;
-    Mesh* lmesh;
-    Mesh* rmesh;
+    Mesh* _mesh;
+
     QSphereMesh* dragMesh;
     Mesh* supportMesh = nullptr;
     Mesh* raftMesh = nullptr;
@@ -287,14 +314,14 @@ private:
     Mesh* layerRaftMesh;
     Mesh* layerInfillMesh;
 
-    MeshFace *targetMeshFace = NULL; // used for object selection (specific area, like extension or labelling)
+    const MeshFace *targetMeshFace = NULL; // used for object selection (specific area, like extension or labelling)
 
 
 signals:
 
     void modelSelected(int);
     void resetLayflat();
-    void bisectDone();
+    void bisectDone(Mesh*, Mesh*); //lmesh, rmesh
     void _generateSupport();
     void _updateModelMesh(bool);
     void layFlatSelect();
@@ -332,8 +359,8 @@ public slots:
 
     // Model Cut
     void removeCuttingContour();
-    void generateCuttingContour(vector<QVector3D> cuttingContour);
-    void regenerateCuttingPoint(vector<QVector3D> cuttingContour);
+    void generateCuttingContour(std::vector<QVector3D> cuttingContour);
+    void regenerateCuttingPoint(std::vector<QVector3D> cuttingContour);
     void generateClickablePlane();
     void generatePlane();
     void removePlane();
@@ -342,7 +369,7 @@ public slots:
     void cutFillModeSelected(int type);
     void getSliderSignal(double value);
     void getLayerViewSliderSignal(double value);
-    void generateRLModel();
+	void generateRLModel(Mesh* lmesh, Mesh* rmesh);
     void openCut();
     void closeCut();
 
@@ -392,29 +419,6 @@ public slots:
     friend class STLexporter;
 };
 
-inline QMatrix4x4 quatToMat(QQuaternion q)
-{
-    //based on algorithm on wikipedia
-    // http://en.wikipedia.org/wiki/Rotation_matrix#Quaternion
-    float w = q.scalar ();
-    float x = q.x();
-    float y = q.y();
-    float z = q.z();
-
-    float n = q.lengthSquared();
-    float s =  n == 0?  0 : 2 / n;
-    float wx = s * w * x, wy = s * w * y, wz = s * w * z;
-    float xx = s * x * x, xy = s * x * y, xz = s * x * z;
-    float yy = s * y * y, yz = s * y * z, zz = s * z * z;
-
-    float m[16] = { 1 - (yy + zz),         xy + wz ,         xz - wy ,0,
-                         xy - wz ,    1 - (xx + zz),         yz + wx ,0,
-                         xz + wy ,         yz - wx ,    1 - (xx + yy),0,
-                               0 ,               0 ,               0 ,1  };
-    QMatrix4x4 result =  QMatrix4x4(m,4,4);
-    result.optimize ();
-    return result;
-}
 
 
 #endif // GLMODEL_H
