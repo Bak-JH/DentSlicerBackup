@@ -359,7 +359,7 @@ void autoarrange::RDPSimpPaths(Paths* paths){
 
 void autoarrange::RDPSimp(Path* path){
     int path_size = path->size();
-    bool keepingPointMrkArr[path_size] = {false};
+    bool keepingPointMrkArr[path_size] {false};
     keepingPointMrkArr[0] = true;
     keepingPointMrkArr[path_size-1] = true;
     RDPSimpIter(path, 0, path_size-1, keepingPointMrkArr);
@@ -491,9 +491,9 @@ vector<LLIPoint> getPaddedProj(Mesh *mesh, int floatPointPadding) {
     }
 
     qDebug() << "initialize";
-    for (int i = 0; i <= k; i++){
+    for (int i = 0; i <= k+5; i++){
         std::vector<bool> temp;
-        for (int j = 0; j <= k; j++){
+        for (int j = 0; j <= k+5; j++){
             temp.push_back(false);
         }
         block.push_back(temp);
@@ -522,14 +522,17 @@ vector<LLIPoint> getPaddedProj(Mesh *mesh, int floatPointPadding) {
         int endXBlock = int((edges[i].second.x - minx) / blockX);
         int startYBlock = int((edges[i].first.y - miny) / blockY);
         int endYBlock;
+//        qDebug() << "fill block error here1";
 
         while(true){
             if (startXBlock == endXBlock)
                 break;
 
+//            qDebug() << "fill block error here2";
             long long int endXcor = minx + (startXBlock+1) * blockX;
             long long int endYcor = (edges[i].first.y + (edges[i].second.y - edges[i].first.y) * (endXcor - edges[i].first.x) / (edges[i].second.x - edges[i].first.x));
             endYBlock = int((endYcor - miny) / blockY);
+//            qDebug() << "fill block error here3";
             for (int j = min2(startYBlock, endYBlock); j <= max2(startYBlock, endYBlock); j++){
                 block[j][startXBlock] = true;
             }
@@ -537,6 +540,7 @@ vector<LLIPoint> getPaddedProj(Mesh *mesh, int floatPointPadding) {
             startXBlock ++;
             startYBlock = endYBlock;
         }
+//        qDebug() << "fill block error here4";
         endYBlock = int((edges[i].second.y - miny) / blockY);
         for (int j = min2(startYBlock, endYBlock); j <= max2(startYBlock, endYBlock); j++){
             block[j][startXBlock] = true;
