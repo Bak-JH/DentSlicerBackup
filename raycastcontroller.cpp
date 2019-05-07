@@ -128,7 +128,24 @@ void RayCastController::hitsChanged(const Qt3DRender::QAbstractRayCaster::Hits& 
 			throw std::runtime_error("invalid layer count for ray caster");
 		if (_rayCaster->layers()[0] == &_boundingBoxLayer || _rayCaster->layers()[0] == &_modelLayer)
 #endif
-
+		//stage 1: only bound boxes are checked
+		if (_rayCaster->layers()[0] == &_boundingBoxLayer)
+		{
+			clearLayers();
+			for (auto& each : hits)
+			{
+				GLModel* model = dynamic_cast<GLModel*>(each.entity()->parent());
+				model->addComponent(&_modelLayer);
+				_boundBoxHitModels.push_back(model);
+			}
+			//switch to layer that only contains models whose boundboxes were hit
+			_rayCaster->addLayer(&_modelLayer);
+			//do the ray tracing again, with only bound checked models
+			_rayCaster->trigger(_releasePt);
+		}
+		//stage 2: only check models whose bound boxes were hit
+		else
+		{
 			bool hitGLModel = false;
 
 			for (auto& hit : hits)
@@ -147,6 +164,8 @@ void RayCastController::hitsChanged(const Qt3DRender::QAbstractRayCaster::Hits& 
 				//	qmlManager->modelSelected(glModel->ID);
 				//}
 
+
+			}
 
 			//if (!hitGLModel)
 			//{
