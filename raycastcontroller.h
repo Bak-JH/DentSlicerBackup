@@ -3,7 +3,10 @@
 #include <QAbstractRayCaster>
 #include <Qt3DRender>
 #include <qmouseevent.h>
+#include <vector>
 #include "common/Singleton.h"
+
+class GLModel;
 namespace Qt3DCore
 {
 	class QEntity;
@@ -40,10 +43,14 @@ private:
 	//click detection
 	std::chrono::time_point<std::chrono::system_clock> _pressedTime;
 	QPoint _pressedPt;
+	QPoint _releasePt;
+
 
 	//I wonder when qt deletes the event
-	Qt3DInput::QMouseEvent* _latestEvent;
+	//Qt3DInput::QMouseEvent* _latestEvent;
 
+	//for removing layer element
+	std::vector<GLModel*> _boundBoxHitModels;
 	static const std::chrono::milliseconds MAX_CLICK_DURATION;
 	static const size_t MIN_CLICK_MOVEMENT_SQRD;
 signals:

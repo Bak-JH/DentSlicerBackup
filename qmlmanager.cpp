@@ -245,6 +245,10 @@ void QmlManager::createModelFile(Mesh* target_mesh, QString fname) {
     //glmodel->m_translation = glmodel->getTransform()->translation();
     qDebug() << "moved model to right place";
 
+	//add to raytracer
+	//_latest->addBoundBoxLayer(&_rayCastController._boundingBoxLayer);
+	_latest->addBoundBoxLayer(&_rayCastController._modelLayer);
+
     // 승환 100%
     setProgress(1);
 }
@@ -264,11 +268,11 @@ void QmlManager::openModelFile(QString fname){
 void QmlManager::checkModelFile(GLModel* target){
     ;
 
-    size_t holesCount = MeshRepair::identifyHoles(target->getMesh()).size();
-    if (holesCount!= 0){
-        selectPart(target->ID);
-        qmlManager->openYesNoPopUp(false, "Model has flaws.", "", "Do you want to fix the model?", 16, "", ftrRepair, 0);
-    }
+    //size_t holesCount = MeshRepair::identifyHoles(target->getMesh()).size();
+    //if (holesCount!= 0){
+    //    selectPart(target->ID);
+    //    qmlManager->openYesNoPopUp(false, "Model has flaws.", "", "Do you want to fix the model?", 16, "", ftrRepair, 0);
+    //}
 }
 
 GLModel* QmlManager::getModelByID(int ID)
@@ -773,10 +777,8 @@ void QmlManager::runArrange(){
 void QmlManager::runArrange_internal(){
     qDebug() << "run arrange glmodels size : " <<glmodels.size();
     if (glmodels.size()>=2){
-        vector<XYArrangement> arng_result_set;
-            meshes_to_arrange.push_back(*(glmodels[i]->getMesh()));
-        std::vector<const Mesh*> meshes_to_arrange;
         std::vector<XYArrangement> arng_result_set;
+        std::vector<const Mesh*> meshes_to_arrange;
         for(auto& pair : glmodels)
         {
             auto model = &pair.second;
