@@ -155,7 +155,7 @@ GLModel::GLModel(QObject* mainWindow, QNode *parent, Mesh* loadMesh, QString fna
 		qDebug() << "created original model";
 
 		//repairMesh(_mesh);
-		addShadowModel(_mesh);
+		//addShadowModel(_mesh);
 
 		// 승환 75%
 		qmlManager->setProgress(0.73);
@@ -514,21 +514,21 @@ void GLModel::updateModelMesh(bool shadowUpdate){
 
 
     // create new object picker, shadowmodel, remove prev shadowmodel
-    if (shadowUpdate){
-        switch( viewMode ) {
-            case VIEW_MODE_OBJECT:
-                shadowModel->updateShadowModelImpl();
-                break;
-            case VIEW_MODE_SUPPORT:
-                shadowModel->updateShadowModelImpl();
-                shadowModel->m_transform.setTranslation(shadowModel->m_transform.translation()+QVector3D(0,0,scfg->raft_thickness));
-                break;
-            case VIEW_MODE_LAYER:
-                shadowModel->updateShadowModelImpl();
-                //addShadowModel(_mesh);
-                break;
-        }
-    }
+    //if (shadowUpdate){
+    //    switch( viewMode ) {
+    //        case VIEW_MODE_OBJECT:
+    //            shadowModel->updateShadowModelImpl();
+    //            break;
+    //        case VIEW_MODE_SUPPORT:
+    //            shadowModel->updateShadowModelImpl();
+    //            shadowModel->m_transform.setTranslation(shadowModel->m_transform.translation()+QVector3D(0,0,scfg->raft_thickness));
+    //            break;
+    //        case VIEW_MODE_LAYER:
+    //            shadowModel->updateShadowModelImpl();
+    //            //addShadowModel(_mesh);
+    //            break;
+    //    }
+    //}
     updateLock = false;
     qDebug() << this << "released lock";
     QMetaObject::invokeMethod(qmlManager->boxUpperTab, "enableUppertab");
@@ -2084,6 +2084,7 @@ void GLModel::indentHollowShell(double radius){
 }
 
 GLModel::~GLModel(){
+	removeBoundBoxLayer();
     deleteShadowModel();
 }
 
@@ -3072,5 +3073,27 @@ void GLModel::setMatrix(const QMatrix4x4& matrix)
 {
 	m_transform.setMatrix(matrix);
 	updateBoundingBox();
+}
+
+void GLModel::addBoundBoxLayer(QLayer* layer)
+{
+	if (layer)
+	{
+#ifdef _STRICT_GLMODEL
+		if (std::find(_boundBoxLayers.begin(), _boundBoxLayers.end(), layer) != _boundBoxLayers.end())
+			throw std::runtime_error("GLModel: layer already added");
+#endif
+		//_boundBoxLayers.push_back(layer);
+		//_boundingBox.addComponent(layer);
+		this->addComponent(layer);
+	}
+}
+
+void GLModel::removeBoundBoxLayer()
+{
+	for (auto& layer : _boundBoxLayers)
+	{
+		_boundingBox.removeComponent(layer);
+	}
 }
 

@@ -222,8 +222,13 @@ public:
 	void setTranslation(const QVector3D& t);
 	void setMatrix(const QMatrix4x4& matrix);
 
+	//ray tracing bounding box
+	void addBoundBoxLayer(QLayer* layer);
+	void removeBoundBoxLayer();
+
 	//void setBoundingBox
 private:
+	std::vector<QLayer*> _boundBoxLayers;
 	Qt3DCore::QTransform m_transform;
 	bool _hitEnabled = true;
 	static const QVector3D COLOR_DEFAULT_MESH;
