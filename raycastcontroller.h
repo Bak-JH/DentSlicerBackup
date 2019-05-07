@@ -1,16 +1,12 @@
 #pragma once
 
 #include <QAbstractRayCaster>
+#include <Qt3DRender>
 #include <qmouseevent.h>
 #include "common/Singleton.h"
 namespace Qt3DCore
 {
 	class QEntity;
-}
-namespace Qt3DRender
-{
-	class QScreenRayCaster;
-	class QAbstractRayCaster;
 }
 namespace Qt3DInput
 {
@@ -23,7 +19,11 @@ class RayCastController: public QObject, private Common::Singleton<RayCastContro
 public:
     RayCastController();
 	void initialize(Qt3DCore::QEntity* camera);
-	//void initialize(Qt3DRender::QScreenRayCaster* rayCaster, Qt3DInput::QMouseHandler* mouseHandler);
+
+
+	//for ray casting optimization using the bounding box
+	Qt3DRender::QLayer _boundingBoxLayer;
+	Qt3DRender::QLayer _modelLayer;
 public slots:
 	void mousePressed(Qt3DInput::QMouseEvent* mouse);
 	void mouseReleased(Qt3DInput::QMouseEvent* mouse);
@@ -31,9 +31,8 @@ public slots:
 
 	void hitsChanged(const Qt3DRender::QAbstractRayCaster::Hits& hits);
 
-
 private:
-
+	void clearLayers();
 	bool isClick(QPoint releasePt);
 	Qt3DRender::QScreenRayCaster* _rayCaster = nullptr;
 	Qt3DInput::QMouseHandler* _mouseHandler = nullptr;

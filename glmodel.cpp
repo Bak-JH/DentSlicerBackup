@@ -783,6 +783,7 @@ void GLModel::updateAllVertices(Mesh* mesh, QVector3D vertexColor)
 		appendNormalVertices(result_vns);
 		appendColorVertices(result_vcs);
     }
+	updateBoundingBox();
 }
 
 
@@ -883,6 +884,7 @@ void GLModel::updateVertices(Mesh* mesh, QVector3D vertexColor)
 		}
 
 	}
+	updateBoundingBox();
 }
 
 
@@ -934,6 +936,18 @@ inline void updateBuffer(const QVector3D& data, QAttribute& attr, Qt3DRender::QB
 
 	buffer.updateData(offset, appendVertexArray);
 	return;
+}
+void GLModel::updateBoundingBox()
+{
+	_boundingBox.setPos(m_transform.translation()+
+		QVector3D((getMesh()->x_max()+getMesh()->x_min())/2,
+		(getMesh()->y_max()+getMesh()->y_min())/2,
+		(getMesh()->z_max()+getMesh()->z_min())/2));
+	_boundingBox.setSize({
+		(getMesh()->x_max() - getMesh()->x_min()),
+		(getMesh()->y_max() - getMesh()->y_min()),
+		(getMesh()->z_max() - getMesh()->z_min())
+		});
 }
 void GLModel::updateFace(const MeshFace* face)
 {
@@ -3049,5 +3063,22 @@ bool GLModel::isHitTestable()
 void GLModel::setBoundingBoxVisible(bool isEnabled)
 {
 	_boundingBox.setEnabled(isEnabled);
+}
+
+const Qt3DCore::QTransform* GLModel::getTransform() const
+{
+	return &m_transform;
+}
+
+void GLModel::setTranslation(const QVector3D& t)
+{
+	m_transform.setTranslation(t);
+	updateBoundingBox();
+}
+
+void GLModel::setMatrix(const QMatrix4x4& matrix)
+{
+	m_transform.setMatrix(matrix);
+	updateBoundingBox();
 }
 

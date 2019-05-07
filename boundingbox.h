@@ -8,10 +8,10 @@ class BoundingBox: public Qt3DCore::QEntity
 public:
     BoundingBox(QNode* parent);
 
-	void setSize(const QVector3D& size);
+    void setSize(const QVector3D& size);
 	void setPos(const QVector3D& pos);
 
-private:
-	Qt3DCore::QTransform* _transform;
+protected:
+    Qt3DCore::QTransform* _transform;
 };
 

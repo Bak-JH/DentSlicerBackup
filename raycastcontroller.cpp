@@ -15,6 +15,9 @@ const size_t RayCastController::MIN_CLICK_MOVEMENT_SQRD = 40;
 
 RayCastController::RayCastController()
 {
+	_boundingBoxLayer.setRecursive(true);
+	_modelLayer.setRecursive(true);
+
 
 }
 
@@ -22,10 +25,13 @@ void RayCastController::initialize(QEntity* camera)
 {
 	_rayCaster = new QScreenRayCaster();
 	_mouseHandler = new QMouseHandler();
+
 	camera->addComponent(_rayCaster);
 	camera->addComponent(_mouseHandler);
-	auto dbg = camera->components();
 	_mouseHandler->setSourceDevice(new QMouseDevice());
+	_rayCaster->setFilterMode(QAbstractRayCaster::FilterMode::AcceptAnyMatchingLayers);
+
+
 	QObject::connect(_mouseHandler, SIGNAL(released(Qt3DInput::QMouseEvent *)), this, SLOT(mouseReleased(Qt3DInput::QMouseEvent *)));
 	QObject::connect(_mouseHandler, SIGNAL(pressed(Qt3DInput::QMouseEvent*)), this, SLOT(mousePressed(Qt3DInput::QMouseEvent*)));
 	QObject::connect(_mouseHandler, SIGNAL(positionChanged(Qt3DInput::QMouseEvent*)), this, SLOT(mousePositionChanged(Qt3DInput::QMouseEvent*)));
@@ -46,6 +52,19 @@ void RayCastController::initialize(QEntity* camera)
 //	QObject::connect(_rayCaster, SIGNAL(hitsChanged(const Qt3DRender::QAbstractRayCaster::Hits&)), this, SLOT(hitsChanged(const Qt3DRender::QAbstractRayCaster::Hits&)));
 //}
 
+
+void RayCastController::clearLayers()
+{
+	for (auto& layer : _rayCaster->layers())
+	{
+		_rayCaster->removeLayer(layer);
+	}
+
+	//also empties out model layer
+	GLModel* test;
+	test->addComponent(nullptr);
+	_modelLayer
+}
 
 bool RayCastController::isClick(QPoint releasePt)
 {
@@ -71,6 +90,8 @@ void RayCastController::mouseReleased(Qt3DInput::QMouseEvent* mouse)
 	_latestEvent = mouse;
 	if (isClick({ mouse->x(), mouse->y() }) && mouse->button() == Qt3DInput::QMouseEvent::Buttons::LeftButton)
 	{
+		clearLayers();
+		_rayCaster->addLayer(&_boundingBoxLayer);
 		_rayCaster->trigger(QPoint(mouse->x(), mouse->y()));
 	}
 }
@@ -83,7 +104,18 @@ void RayCastController::mousePositionChanged(Qt3DInput::QMouseEvent* mouse)
 
 void RayCastController::hitsChanged(const Qt3DRender::QAbstractRayCaster::Hits& hits)
 {
-	qDebug() << "ray cast hit detected: " << hits.size();
+	//if only picking boundry boxes
+	if (_rayCaster->layers()[0] == &_boundingBoxLayers)
+	{
+		if (hits.size() > 0)
+		{
+			for (auto& each : hits)
+			{
+				GLModel* model = dynamic_cast<GLModel*>(each.entity()->parent());
+				_modelLayer.a
+			}
+		}
+	}
 	bool hitGLModel = false;
 
 	for (auto& hit : hits)

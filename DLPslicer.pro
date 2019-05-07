@@ -13,6 +13,7 @@ RC_FILE = DLPslicer.rc
 SOURCES += main.cpp \
     boundingbox.cpp \
     raycastcontroller.cpp \
+    selectedboundingbox.cpp \
     slicingengine.cpp \
     glmodel.cpp \
     qmlmanager.cpp \
@@ -91,6 +92,7 @@ HEADERS += \
     boundingbox.h \
     common/Singleton.h \
     raycastcontroller.h \
+    selectedboundingbox.h \
     slicingengine.h \
     glmodel.h \
     qmlmanager.h \

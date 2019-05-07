@@ -123,7 +123,6 @@ public:
     QMaterial *m_layerMaterial;
     QParameter *m_layerMaterialHeight;
     QParameter *m_layerMaterialRaftHeight;
-    Qt3DCore::QTransform m_transform;
     //QVector3D m_translation;
 
     // feature hollowshell
@@ -219,8 +218,13 @@ public:
 	void setHitTestable(bool isEnabled);
 	bool isHitTestable();
 	void setBoundingBoxVisible(bool isEnabled);
+	const Qt3DCore::QTransform* getTransform() const;
+	void setTranslation(const QVector3D& t);
+	void setMatrix(const QMatrix4x4& matrix);
+
 	//void setBoundingBox
 private:
+	Qt3DCore::QTransform m_transform;
 	bool _hitEnabled = true;
 	static const QVector3D COLOR_DEFAULT_MESH;
 	static const QVector3D COLOR_INFILL;
@@ -261,6 +265,7 @@ private:
     void appendNormalVertices(std::vector<QVector3D> vertices);
     void appendColorVertices(std::vector<QVector3D> vertices);
 
+	void updateBoundingBox();
 	void updateFace(const MeshFace* face);
 	void deleteAndShiftFaces(size_t start, size_t deleteAmount);
     void clearVertices();

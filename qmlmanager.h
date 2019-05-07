@@ -232,7 +232,6 @@ public:
     float selected_y_min(size_t selectedNum);
     float selected_z_max(size_t selectedNum);
     float selected_z_min(size_t selectedNum);
-    void updateBoundedBox();
 
 private:
 
@@ -243,6 +242,8 @@ private:
     int layerViewFlags;
     int modelIDCounter;
     GLModel* _latest;
+	
+	//Ray cast
 	RayCastController _rayCastController;
 
 signals:
