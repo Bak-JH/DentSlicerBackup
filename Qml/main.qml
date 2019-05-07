@@ -126,6 +126,7 @@ Item{
 
         Scene3D {
             id: scene3d
+            objectName: "scene3d"
 
             width: (window.width - lefttab.width) * 1
             height: (window.width - lefttab.width) * 1
@@ -137,6 +138,15 @@ Item{
             hoverEnabled: true
             aspects: ["input", "logic"]
             cameraAspectRatioMode: Scene3D.AutomaticAspectRatio
+
+            function disableScene3D(){
+                scene3d.enabled = false;
+            }
+
+            function enableScene3D(){
+                scene3d.enabled = true;
+            }
+
             MainView {
                 objectName: "MainView"
                 id: sceneRoot
