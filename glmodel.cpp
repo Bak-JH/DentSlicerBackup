@@ -51,8 +51,8 @@ GLModel::GLModel(QObject* mainWindow, QNode *parent, Mesh* loadMesh, QString fna
     , m_meshMaterial(nullptr)
     , m_geometry(&m_geometryRenderer)
     ,vertexBuffer(Qt3DRender::QBuffer::VertexBuffer, &m_geometry)
-    ,vertexNormalBuffer(Qt3DRender::QBuffer::VertexBuffer, &m_geometry)
-    ,vertexColorBuffer(Qt3DRender::QBuffer::VertexBuffer, &m_geometry)
+	, indexBuffer(Qt3DRender::QBuffer::IndexBuffer)
+
 	, _boundingBox(this)
 {
     connect(&futureWatcher, SIGNAL(finished()), this, SLOT(slicingDone()));
@@ -60,42 +60,46 @@ GLModel::GLModel(QObject* mainWindow, QNode *parent, Mesh* loadMesh, QString fna
 
     //initialize vertex buffers etc
     vertexBuffer.setUsage(Qt3DRender::QBuffer::DynamicDraw);
-    vertexBuffer.setData(vertexArray);
-    vertexNormalBuffer.setUsage(Qt3DRender::QBuffer::DynamicDraw);
-    vertexNormalBuffer.setData(vertexNormalArray);
-    vertexColorBuffer.setUsage(Qt3DRender::QBuffer::DynamicDraw);
-    vertexColorBuffer.setData(vertexColorArray);
+	indexBuffer.setUsage(Qt3DRender::QBuffer::DynamicDraw);
 
     positionAttribute.setAttributeType(QAttribute::VertexAttribute);
     positionAttribute.setBuffer(&vertexBuffer);
     positionAttribute.setDataType(QAttribute::Float);
-    positionAttribute.setDataSize(3);
+    positionAttribute.setDataSize(POS_SIZE);
     positionAttribute.setByteOffset(0);
-    positionAttribute.setByteStride(3 * sizeof(float));
+    positionAttribute.setByteStride(VTX_SIZE * sizeof(float));
     positionAttribute.setCount(0);
     positionAttribute.setName(QAttribute::defaultPositionAttributeName());
 
     normalAttribute.setAttributeType(QAttribute::VertexAttribute);
-    normalAttribute.setBuffer(&vertexNormalBuffer);
+    normalAttribute.setBuffer(&vertexBuffer);
     normalAttribute.setDataType(QAttribute::Float);
-    normalAttribute.setDataSize(3);
-    normalAttribute.setByteOffset(0);
-    normalAttribute.setByteStride(3 * sizeof(float));
+    normalAttribute.setDataSize(NRM_SIZE);
+    normalAttribute.setByteOffset(POS_SIZE * sizeof(float));
+    normalAttribute.setByteStride(VTX_SIZE * sizeof(float));
     normalAttribute.setCount(0);
     normalAttribute.setName(QAttribute::defaultNormalAttributeName());
 
     colorAttribute.setAttributeType(QAttribute::VertexAttribute);
-    colorAttribute.setBuffer(&vertexColorBuffer);
+    colorAttribute.setBuffer(&vertexBuffer);
     colorAttribute.setDataType(QAttribute::Float);
-    colorAttribute.setDataSize(3);
-    colorAttribute.setByteOffset(0);
-    colorAttribute.setByteStride(3 * sizeof(float));
+    colorAttribute.setDataSize(COL_SIZE);
+    colorAttribute.setByteOffset((NRM_SIZE + POS_SIZE) * sizeof(float));
+    colorAttribute.setByteStride(VTX_SIZE * sizeof(float));
     colorAttribute.setCount(0);
     colorAttribute.setName(QAttribute::defaultColorAttributeName());
 
-    m_geometry.addAttribute(&positionAttribute);
-    m_geometry.addAttribute(&normalAttribute);
-    m_geometry.addAttribute(&colorAttribute);
+	indexAttribute.setVertexBaseType(QAttribute::VertexBaseType::UnsignedInt);
+	indexAttribute.setAttributeType(QAttribute::IndexAttribute);
+	indexAttribute.setBuffer(&indexBuffer);
+	indexAttribute.setDataType(QAttribute::UnsignedInt);
+	indexAttribute.setDataSize(1);
+	indexAttribute.setByteOffset(0);
+	indexAttribute.setByteStride(0);
+	indexAttribute.setCount(0);
+	indexAttribute.setVertexSize(1);
+
+
     m_geometryRenderer.setPrimitiveType(QGeometryRenderer::Triangles);
     m_geometryRenderer.setGeometry(&m_geometry);
     addComponent(&m_geometryRenderer);
@@ -180,6 +184,12 @@ GLModel::GLModel(QObject* mainWindow, QNode *parent, Mesh* loadMesh, QString fna
 		cuttingContourCylinders.reserve(50);
 
 	}
+
+	//rendering works in thread pool, so there is a chance of error occuring due to empty attributes...(especially for index)
+	m_geometry.addAttribute(&positionAttribute);
+	m_geometry.addAttribute(&normalAttribute);
+	m_geometry.addAttribute(&colorAttribute);
+	m_geometry.addAttribute(&indexAttribute);
 
 }
 
@@ -741,12 +751,18 @@ void GLModel::clearMem(){
     QByteArray newVertexArray(vertexBuffer.data().size(), 0);
     QByteArray newVertexNormalArray(vertexNormalBuffer.data().size(), 0);
     QByteArray newVertexColorArray(vertexColorBuffer.data().size(), 0);
+	QByteArray newIdxArray(indexBuffer.data().size(), 0);
+
     vertexBuffer.updateData(0, newVertexArray);
     vertexNormalBuffer.updateData(0, newVertexNormalArray);
     vertexColorBuffer.updateData(0, newVertexColorArray);
+	indexBuffer.updateData(0, newIdxArray);
+
 	positionAttribute.setCount(0);
 	normalAttribute.setCount(0);
 	colorAttribute.setCount(0);
+	indexAttribute.setCount(0);
+
 }
 
 
@@ -762,9 +778,15 @@ void GLModel::updateAllVertices(Mesh* mesh, QVector3D vertexColor)
 	mesh->flushChanges();
 	_currentVisibleMesh = mesh;
     int face_size = mesh->getFaces()->size();
+
+	appendFaceIndices(face_size);
+	auto buff = indexAttribute.buffer();
+	auto data = buff->data();
+	buff->setAccessType(Qt3DRender::QBuffer::AccessType::Read);
+	m_geometry.addAttribute(&indexAttribute);
+
     int face_idx = 0;
     for (const MeshFace& mf : *mesh->getFaces()){
-        face_idx ++;
         if (face_idx %100 ==0)
             QCoreApplication::processEvents();
         std::vector<QVector3D> result_vs;
@@ -773,19 +795,24 @@ void GLModel::updateAllVertices(Mesh* mesh, QVector3D vertexColor)
 		for (int fn = 0; fn <= 2; fn++) {
 			result_vcs.push_back(vertexColor);
 			result_vs.push_back(mf.mesh_vertex[fn]->position);
-			result_vns.push_back(mf.mesh_vertex[fn]->vn);
-			if (mf.mesh_vertex[fn]->vn[0] == 0 && \
-				mf.mesh_vertex[fn]->vn[1] == 0 && \
-				mf.mesh_vertex[fn]->vn[2] == 0)
-			{
-				result_vns.pop_back();
-				result_vns.push_back(QVector3D(1, 1, 1));
-			}
+			result_vns.push_back(QVector3D(1, 1, 1));
+
+			//result_vns.push_back(mf.mesh_vertex[fn]->vn);
+			//if (mf.mesh_vertex[fn]->vn[0] == 0 && \
+			//	mf.mesh_vertex[fn]->vn[1] == 0 && \
+			//	mf.mesh_vertex[fn]->vn[2] == 0)
+			//{
+			//	result_vns.pop_back();
+			//	result_vns.push_back(QVector3D(1, 1, 1));
+			//}
 		}
         appendVertices(result_vs);
 		appendNormalVertices(result_vns);
 		appendColorVertices(result_vcs);
+		face_idx++;
+
     }
+
 	updateBoundingBox();
 }
 
@@ -823,6 +850,8 @@ void GLModel::updateVertices(Mesh* mesh, QVector3D vertexColor)
 					addVertex(vtx->position, vtx->vn, vertexColor);
 
 				}
+				appendFaceIndices(1);
+
 			}
 			else
 			{
@@ -917,6 +946,7 @@ inline void appendOrResizeBuffer(const QVector3D& data, QAttribute& attr, Qt3DRe
 	attr.setCount(vertexCount + 1);
 	return;
 }
+
 void GLModel::addVertex(QVector3D pos, QVector3D normal, QVector3D color) 
 {
 	appendOrResizeBuffer(pos, positionAttribute, vertexBuffer);
@@ -942,6 +972,8 @@ inline void updateBuffer(const QVector3D& data, QAttribute& attr, Qt3DRender::QB
 }
 void GLModel::updateBoundingBox()
 {
+
+	return;
 	_boundingBox.setPos(m_transform.translation()+
 		QVector3D((getMesh()->x_max()+getMesh()->x_min())/2,
 		(getMesh()->y_max()+getMesh()->y_min())/2,
@@ -970,22 +1002,33 @@ void GLModel::updateFace(const MeshFace* face)
 		//updateBuffer(vtx->color, colorAttribute, vertexColorBuffer,  startingOffset + offset);
 	}
 }
-
-inline void deleteAndShiftBuffer(QAttribute& attr, Qt3DRender::QBuffer& buffer, size_t index, size_t amount)
+inline void eraseIndices(QAttribute& attr, Qt3DRender::QBuffer& buffer, size_t index, size_t amount, size_t dataSize, size_t dataStride)
 {
-	size_t eraseAmount = amount * 3 * 3 * sizeof(float);
+	size_t eraseAmount = amount * dataStride * dataSize;
 
 	QByteArray copy = buffer.data();
-	copy.remove(index*  3 * 3 * sizeof(float), eraseAmount);
+	copy.remove(copy.size() - eraseAmount, eraseAmount);
+	buffer.setData(copy);
+	attr.setCount(attr.count() - amount);
+	return;
+}
+inline void deleteAndShiftBuffer(QAttribute& attr, Qt3DRender::QBuffer& buffer, size_t index, size_t amount, size_t dataSize, size_t dataStride)
+{
+	size_t eraseAmount = amount * dataStride * dataSize;
+
+	QByteArray copy = buffer.data();
+	copy.remove(index* dataStride * dataSize, eraseAmount);
 	buffer.setData(copy);
 	attr.setCount(attr.count() - amount);
 	return;
 }
 void GLModel::deleteAndShiftFaces(size_t start, size_t deleteAmount)
 {
-	deleteAndShiftBuffer(positionAttribute, vertexBuffer, start, deleteAmount);
-	deleteAndShiftBuffer(normalAttribute, vertexNormalBuffer, start, deleteAmount);
-	deleteAndShiftBuffer(colorAttribute, vertexColorBuffer, start, deleteAmount);
+	deleteAndShiftBuffer(positionAttribute, vertexBuffer, start, deleteAmount, sizeof(float), 9);
+	deleteAndShiftBuffer(normalAttribute, vertexNormalBuffer, start, deleteAmount, sizeof(float), 9);
+	deleteAndShiftBuffer(colorAttribute, vertexColorBuffer, start, deleteAmount, sizeof(float), 9);
+	eraseIndices(indexAttribute, indexBuffer, start, deleteAmount, sizeof(unsigned int), 1);
+
 
 }
 void GLModel::appendVertices(std::vector<QVector3D> vertices){
@@ -1030,90 +1073,105 @@ const Mesh* GLModel::getMesh()
 }
 
 
-
-void GLModel::appendNormalVertices(std::vector<QVector3D> vertices){
-    int vertex_normal_cnt = vertices.size();
-    QByteArray appendVertexArray;
-    appendVertexArray.resize(vertex_normal_cnt*3*sizeof(float));
-    float * reVertexArray = reinterpret_cast<float*>(appendVertexArray.data());
-
-    for (int i=0; i<vertex_normal_cnt; i++){
-
-        //coordinates of left vertex
-        reVertexArray[3*i+0] = vertices[i].x();
-        reVertexArray[3*i+1] = vertices[i].y();
-        reVertexArray[3*i+2] = vertices[i].z();
-    }
-
-    uint vertexNormalCount = normalAttribute.count();
-
-    int offset = vertexNormalCount*3*sizeof(float);
-    int bytesSize = appendVertexArray.size();
-
-    if ((offset + bytesSize) > vertexNormalBuffer.data().size()) {
-        auto data = vertexNormalBuffer.data();
-
-        int countPowerOf2 = 1;
-        while (countPowerOf2 < data.size() + bytesSize) {
-            countPowerOf2 <<= 1;
-        }
-
-        data.resize(countPowerOf2);
-
-        vertexNormalBuffer.setData(data);
-    }
-
-    vertexNormalBuffer.updateData(offset, appendVertexArray);
-    normalAttribute.setCount(vertexNormalCount+ vertex_normal_cnt);
-    return;
+void GLModel::appendVtxAttributes()
+{
+	appendVtxAttributes(0, _mesh->getFaces()->size());
+}
+void GLModel::appendVtxAttributes(size_t offset, size_t count)
+{
+	auto appendedVertCount = count * 3;
+	//resize all buffers if needed
+	if(vertexBuffer.data().size() < appendedVertCount
 }
 
-void GLModel::appendColorVertices(std::vector<QVector3D> vertices){
-    int vertex_color_cnt = vertices.size();
-    QByteArray appendVertexArray;
-    appendVertexArray.resize(vertex_color_cnt*3*sizeof(float));
-    float * reVertexArray = reinterpret_cast<float*>(appendVertexArray.data());
+void appendVtxAttribute(std::vector<QVector3D> data, QAttribute* attr)
+{
+	size_t offset = attr->byteOffset();
+	size_t appendDataByteSize = data.size() * 3 * sizeof(float);
+	QByteArray appendVertexArray;
 
-//    for (int i=0; i<vertex_color_cnt; i++){
-//        //coordinates of left vertex
-//        //97 185 192
-//        //reVertexArray[3*i+0] = 0.38;
-//        //reVertexArray[3*i+1] = 0.725;
-//        //reVertexArray[3*i+2] = 0.753;
-//        reVertexArray[3*i+0] = 0.278;
-//        reVertexArray[3*i+1] = 0.670;
-//        reVertexArray[3*i+2] = 0.706;
-//    }
 
-    int i = 0;
-    for( auto iter = vertices.begin() ; iter != vertices.end() ; iter++, i++ ) {
-        reVertexArray[3*i+0] = (*iter).x();
-        reVertexArray[3*i+1] = (*iter).y();
-        reVertexArray[3*i+2] = (*iter).z();
-    }
+	appendVertexArray.resize(vertex_normal_cnt * 3 * sizeof(float));
+	float* reVertexArray = reinterpret_cast<float*>(appendVertexArray.data());
 
-    uint vertexColorCount = colorAttribute.count();
+	for (int i = 0; i < vertex_normal_cnt; i++) {
 
-    int offset = vertexColorCount*3*sizeof(float);
-    int bytesSize = appendVertexArray.size();
+		//coordinates of left vertex
+		reVertexArray[3 * i + 0] = vertices[i].x();
+		reVertexArray[3 * i + 1] = vertices[i].y();
+		reVertexArray[3 * i + 2] = vertices[i].z();
+	}
 
-    if ((offset + bytesSize) > vertexColorBuffer.data().size()) {
-        auto data = vertexColorBuffer.data();
+	uint vertexNormalCount = normalAttribute.count();
 
-        int countPowerOf2 = 1;
-        while (countPowerOf2 < data.size() + bytesSize) {
-            countPowerOf2 <<= 1;
-        }
+	int offset = vertexNormalCount * 3 * sizeof(float);
+	int bytesSize = appendVertexArray.size();
 
-        data.resize(countPowerOf2);
+	if ((offset + bytesSize) > vertexNormalBuffer.data().size()) {
+		auto data = vertexNormalBuffer.data();
 
-        vertexColorBuffer.setData(data);
-    }
+		int countPowerOf2 = 1;
+		while (countPowerOf2 < data.size() + bytesSize) {
+			countPowerOf2 <<= 1;
+		}
 
-    vertexColorBuffer.updateData(vertexColorCount*3*sizeof(float), appendVertexArray);
-    colorAttribute.setCount(vertexColorCount + vertex_color_cnt);
-    return;
+		data.resize(countPowerOf2);
+
+		vertexNormalBuffer.setData(data);
+	}
+
+	vertexNormalBuffer.updateData(offset, appendVertexArray);
+	normalAttribute.setCount(vertexNormalCount + vertex_normal_cnt);
+	return;
 }
+void swapByteOrder(unsigned int& ui)
+{
+	ui = (ui >> 24) |
+		((ui << 8) & 0x00FF0000) |
+		((ui >> 8) & 0x0000FF00) |
+		(ui << 24);
+}
+
+void GLModel::appendFaceIndices(size_t appendedFaceCnt)
+{
+	unsigned int verticeCount = appendedFaceCnt *3;
+	unsigned int currFaceCount = indexAttribute.count();
+
+	QByteArray appendIdxArray;
+	appendIdxArray.resize(verticeCount * sizeof(unsigned int));
+	unsigned int* reIdxArray = reinterpret_cast<unsigned int*>(appendIdxArray.data());
+	unsigned int newIdx;
+	for (size_t i = 0; i < verticeCount; ++i)
+	{
+		newIdx = currFaceCount + i;
+		//swapByteOrder(newIdx);
+		reIdxArray[i] = newIdx;
+		//this stores data in big endian, which is no good
+		//reIdxArray[i] = currFaceCount + i;
+		//for (size_t j = 0; j < 4; ++j)
+		//	reIdxArray[3 - j + i] = (currFaceCount + i >> (j * 8));
+	}
+
+	int offset = currFaceCount * sizeof(unsigned int);
+	int bytesSize = appendIdxArray.size();
+
+	if ((offset + bytesSize) > indexBuffer.data().size()) {
+		auto data = indexBuffer.data();
+
+		//int countPowerOf2 = 1;
+		//while (countPowerOf2 < data.size() + bytesSize) {
+		//	countPowerOf2 <<= 1;
+		//}
+
+		data.resize(offset + bytesSize);
+
+		indexBuffer.setData(data);
+	}
+
+	indexBuffer.updateData(currFaceCount * sizeof(unsigned int), appendIdxArray);
+	indexAttribute.setCount(verticeCount + currFaceCount);
+}
+
 
 
 
@@ -1271,7 +1329,7 @@ void GLModel::mouseClicked(QPickEvent *pick)
 	}
 	const MeshFace* shadow_meshface = (*_mesh->getRenderOrderFaces())[trianglePick->triangleIndex()];
 	parentModel->targetMeshFace = shadow_meshface->parentFace;
-	qDebug() << "found parent meshface" << shadow_meshface->parentFace->idx;
+	qDebug() << "found parent meshface";
 
     if (labellingActive && trianglePick && trianglePick->localIntersection() != QVector3D(0,0,0)) {
 
@@ -1368,7 +1426,7 @@ void GLModel::mouseClicked(QPickEvent *pick)
     }
 
     if (extensionActive && trianglePick  && trianglePick->localIntersection() != QVector3D(0,0,0)){
-        qDebug() << "found parent meshface" << shadow_meshface->parentFace->idx;
+		qDebug() << "found parent meshface";
         parentModel->uncolorExtensionFaces();
         emit extensionSelect();
         parentModel->generateColorAttributes();
@@ -1378,7 +1436,7 @@ void GLModel::mouseClicked(QPickEvent *pick)
 
     if (hollowShellActive){
         qDebug() << "getting handle picker clicked signal hollow shell active";
-        qDebug() << "found parent meshface" << shadow_meshface->parentFace->idx;
+        qDebug() << "found parent meshface";
         // translate hollowShellSphere to mouse position
         QVector3D v = pick->localIntersection();
         QVector3D tmp = m_transform.translation();

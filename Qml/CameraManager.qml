@@ -60,7 +60,8 @@ Entity {
         RenderSettings {
             id : rd
             pickingSettings.pickMethod: PickingSettings.TrianglePicking
-            pickingSettings.pickResultMode: PickingSettings.NearestPick
+            pickingSettings.pickResultMode: PickingSettings.AllPicks
+            pickingSettings.faceOrientationPickingMode: PickingSettings.FrontAndBackFace
 
             activeFrameGraph: RenderSurfaceSelector {
                 Viewport {

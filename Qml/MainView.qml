@@ -101,7 +101,7 @@ Entity {
 
         Model{
             id: meshEntity4
-            //inputSource:"file:///D:/Dev/DLPSlicer/DLPslicer/resource/mesh/lowerjaw.obj"
+            inputSource:"file:///C:/Users/user/Downloads/Spider_ascii.stl"
         }
 
 
