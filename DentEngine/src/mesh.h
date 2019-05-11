@@ -11,6 +11,7 @@
 #include <QTime>
 #include <array>
 #include <variant>
+#include "meshdatacontainer.h"
 #define cos50 0.64278761
 #define cos100 -0.17364818
 #define cos150 -0.8660254
@@ -20,78 +21,8 @@
 using namespace ClipperLib;
 
 // plane contains at least 3 vertices contained in the plane in clockwise direction
-typedef std::vector<QVector3D> Plane;
-class MeshVertex;
-class Mesh;
+typedef std::array<QVector3D, 3> Plane;
 
-
-class MeshDataType {
-public:
-	MeshDataType(const Mesh* owner) :Owner(owner)
-	{}
-private:
-	virtual MeshDataType* modifiedByOwner(const Mesh* owner)const = 0;
-protected:
-	const Mesh* Owner;
-
-};
-class MeshFace: private MeshDataType {
-public:
-    int idx;
-	const MeshFace* parentFace = nullptr;
-    QVector3D fn;
-    QVector3D fn_unnorm;
-
-	std::array<std::vector<const MeshFace*>, 3> neighboring_faces;
-	std::array<const MeshVertex*, 3> mesh_vertex{ nullptr, nullptr, nullptr };
-private:
-	MeshFace(Mesh* mesh) : neighboring_faces{ std::vector<const MeshFace*>(), std::vector<const MeshFace*>(), std::vector<const MeshFace*>() }, MeshDataType(mesh), idx(-1)
-	{}
-	std::list<MeshFace>::iterator itr;
-	MeshFace* modifiedByOwner(const Mesh* owner)const override
-	{
-		if (owner == Owner)
-		{
-			return const_cast<MeshFace*>(this);
-		}
-		return nullptr;
-	}
-
-	friend class Mesh;
-};
-
-class MeshVertex : private MeshDataType {
-public:
-    QVector3D position;
-    QVector3D vn;
-	MeshVertex():MeshDataType(nullptr) {}
-
-    friend inline bool operator== (const MeshVertex& a, const MeshVertex& b){
-        return a.position == b.position;
-    }
-
-    friend inline bool operator!= (const MeshVertex& a, const MeshVertex& b){
-        return a.position != b.position;
-    }
-	void calculateNormalFromFaces();
-
-	std::vector<const MeshFace*> connected_faces;
-
-private:
-	MeshVertex(Mesh* mesh, QVector3D position) : MeshDataType(mesh), position(position) {}
-	MeshVertex(Mesh* mesh) : MeshDataType(mesh) {}
-	std::list<MeshVertex>::iterator itr;
-	MeshVertex* modifiedByOwner(const Mesh* owner)const override
-	{
-		if (owner == Owner)
-		{
-			return const_cast<MeshVertex*>(this);
-		}
-		return nullptr;
-	}
-
-	friend class Mesh;
-};
 
 class Path3D : public std::vector<MeshVertex>{
     public:
@@ -104,13 +35,7 @@ typedef std::vector<Path3D> Paths3D;
 
 class Mesh{
 public :
-	enum MeshOpType {
-		Delete = 0
-		,Modify
-		,Append
-		//TODO: ModifyKeepNormal,
 
-	};
 	enum MeshOpOperand {
 		FaceRange = 0
 		,FaceSingle
@@ -178,8 +103,6 @@ public :
 
     float getFaceZmin(MeshFace mf)const;
     float getFaceZmax(MeshFace mf)const;
-    //MeshFace idx2MF(int idx)const;
-    //MeshVertex idx2MV(int idx)const;
 
     /********************** Getters **********************/
     const std::list<MeshVertex>* getVertices()const;
@@ -206,9 +129,9 @@ private:
 	MeshVertex* addFaceVertex(QVector3D v);
     void updateMinMax(QVector3D v);
 
-    std::list<MeshVertex> vertices;
+
     QHash<uint32_t, MeshVertex*> vertices_hash;
-    std::list<MeshFace> faces;
+
 
     // for undo & redo
     Mesh* prevMesh = nullptr;
@@ -222,7 +145,6 @@ private:
     friend class FileLoader;
     //friend class GLModel;
 
-	std::vector<const MeshFace*> _renderOrderFaces;
 
 
 

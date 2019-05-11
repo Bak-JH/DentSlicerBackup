@@ -705,15 +705,15 @@ MeshVertex* Mesh::addFaceVertex(QVector3D v){
     uint32_t vertex_hash = vertexHash(v);
 
 	//?!
-    QList<MeshVertex*> hashed_points = vertices_hash.values(vertex_hash);
-    for(unsigned int idx = 0; idx < hashed_points.size(); idx++)
-    {
-		const auto* vtx = hashed_points.at(idx);
-        if (vertexDistance(vtx->position, v)<=SlicingConfiguration::vertex_inbound_distance*SlicingConfiguration::vertex_inbound_distance)
-        {
-            return hashed_points[idx];
-        }
-    }
+  //  QList<MeshVertex*> hashed_points = vertices_hash.values(vertex_hash);
+  //  for(unsigned int idx = 0; idx < hashed_points.size(); idx++)
+  //  {
+		//const auto* vtx = hashed_points.at(idx);
+  //      if (vertexDistance(vtx->position, v)<=SlicingConfiguration::vertex_inbound_distance*SlicingConfiguration::vertex_inbound_distance)
+  //      {
+  //          return hashed_points[idx];
+  //      }
+  //  }
 
     MeshVertex mv(this, v);
     vertices.emplace_back(mv);
@@ -1592,12 +1592,3 @@ size_t Mesh::conditionalModifyVertices(VertexForEachFunction forEachFunction)
 	return modified;
 }
 
-void MeshVertex::calculateNormalFromFaces()
-{
-	vn = { 0,0,0 };
-	for (auto& face : connected_faces)
-	{
-		vn += face->fn;
-	}
-	vn.normalize();
-}
