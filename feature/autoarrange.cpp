@@ -962,7 +962,6 @@ void autoarrange::debugFaces(const Mesh* mesh, std::vector<const MeshFace*> face
 
 void autoarrange::debugFace(const Mesh* mesh, const MeshFace* face) {
     const MeshFace* mf = face;
-	qDebug() << "face #" << face->idx;
 	for (size_t side = 0; side < 3; side++) {
 		QVector3D vtx = mf->mesh_vertex[side]->position;
 		float x_f = vtx.x();
@@ -978,7 +977,7 @@ void autoarrange::debugFace(const Mesh* mesh, const MeshFace* face) {
 		if (mf->neighboring_faces[side].size() == 1) {
 			const MeshFace* neighbor = mf->neighboring_faces[side][0];
 			if (neighbor->fn.z() >= 0) {
-				if (isNbrOrientSame(mesh, mf, side)) qDebug() << "side" << side << ": nbr" << neighbor->idx;
+				if (isNbrOrientSame(mesh, mf, side)) qDebug() << "side" << side;
 				else qDebug() << "side" << side << ": bound(ornt diff)";
 			}
 			else {

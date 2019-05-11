@@ -7,7 +7,6 @@
 #include <Qt3DRender>
 #include <Qt3DExtras>
 #include <Qt3DInput>
-#include <vector>
 #include <QBuffer>
 #include <QObjectPicker>
 #include <QCursor>
@@ -228,6 +227,12 @@ public:
 
 	//void setBoundingBox
 private:
+	//consts
+	//for QAttributes
+	const size_t POS_SIZE = 3;
+	const size_t NRM_SIZE = 3;
+	const size_t COL_SIZE = 3;
+	const size_t VTX_SIZE = POS_SIZE + NRM_SIZE + COL_SIZE;
 	std::vector<QLayer*> _boundBoxLayers;
 	Qt3DCore::QTransform m_transform;
 	bool _hitEnabled = true;
@@ -240,14 +245,10 @@ private:
     QGeometryRenderer m_geometryRenderer;
     QGeometry m_geometry;
 	QNode* _parent;
-    QByteArray vertexArray;
-    QByteArray vertexNormalArray;
-    QByteArray vertexColorArray;
-    QByteArray appendIdxArray;
 
+	//3 vectors per data, each for position, normal, color
     Qt3DRender::QBuffer vertexBuffer;
-    Qt3DRender::QBuffer vertexNormalBuffer;
-    Qt3DRender::QBuffer vertexColorBuffer;
+	//defines mesh faces by 3 indices to the vertexArray
     Qt3DRender::QBuffer indexBuffer;
 
     QAttribute positionAttribute;
@@ -256,8 +257,6 @@ private:
     QAttribute indexAttribute;
 
     int colorMode;
-	//jesus wtf
-    //float x,y,z;
     int v_cnt;
     int f_cnt;
     QNode* m_parent;
@@ -266,10 +265,15 @@ private:
     void clearMem();
 	void addVertex(QVector3D pos, QVector3D normal, QVector3D color);
 
-    void appendVertices(std::vector<QVector3D> vertices);
-    void appendNormalVertices(std::vector<QVector3D> vertices);
-    void appendColorVertices(std::vector<QVector3D> vertices);
+	//append all
+	void appendVtxAttributes();
+	//append only from offset to count vertices, in terms of face count
+	void appendVtxAttributes(size_t offset, size_t count);
 
+    //void appendVertices(std::vector<QVector3D> vertices);
+    //void appendNormalVertices(std::vector<QVector3D> vertices);
+    //void appendColorVertices(std::vector<QVector3D> vertices);
+	void appendFaceIndices(size_t appendedFaceCnt);
 	void updateBoundingBox();
 	void updateFace(const MeshFace* face);
 	void deleteAndShiftFaces(size_t start, size_t deleteAmount);

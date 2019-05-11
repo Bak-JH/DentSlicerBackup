@@ -103,9 +103,7 @@ void RayCastController::mouseReleased(Qt3DInput::QMouseEvent* mouse)
 	//prevents event from being freed by invoker...for some events?!
 	if (isClick(_releasePt) && mouse->button() == Qt3DInput::QMouseEvent::Buttons::LeftButton)
 	{
-		clearLayers();
-		//_rayCaster->addLayer(&_boundingBoxLayer);
-		_rayCaster->addLayer(&_modelLayer);
+
 #ifdef LOG_RAYCAST_TIME
 		__startRayTraceTime = std::chrono::system_clock::now();
 #endif
@@ -121,57 +119,77 @@ void RayCastController::mousePositionChanged(Qt3DInput::QMouseEvent* mouse)
 
 void RayCastController::hitsChanged(const Qt3DRender::QAbstractRayCaster::Hits& hits)
 {
+	auto allHits = _rayCaster->hits();
 	if (hits.size() > 0)
 	{
-#ifdef RAYCAST_STRICT
-		if (_rayCaster->layers().size() != 1)
-			throw std::runtime_error("invalid layer count for ray caster");
-		if (_rayCaster->layers()[0] == &_boundingBoxLayer || _rayCaster->layers()[0] == &_modelLayer)
-#endif
-		//stage 1: only bound boxes are checked
-		if (_rayCaster->layers()[0] == &_boundingBoxLayer)
-		{
-			clearLayers();
-			for (auto& each : hits)
-			{
-				GLModel* model = dynamic_cast<GLModel*>(each.entity()->parent());
-				model->addComponent(&_modelLayer);
-				_boundBoxHitModels.push_back(model);
-			}
-			//switch to layer that only contains models whose boundboxes were hit
-			_rayCaster->addLayer(&_modelLayer);
-			//do the ray tracing again, with only bound checked models
-			_rayCaster->trigger(_releasePt);
-		}
-		//stage 2: only check models whose bound boxes were hit
-		else
-		{
-			bool hitGLModel = false;
+		bool hitGLModel = false;
 
-			for (auto& hit : hits)
+
+		for (auto& hit : hits)
+		{
+			auto etc = hit.entity();
+			auto mesh = dynamic_cast<QMesh*>(etc->components()[0]);
+			auto renderer = dynamic_cast<QGeometryRenderer*>(mesh);
+			if(renderer)
 			{
-				auto glModel = dynamic_cast<GLModel*>(hit.entity());
+				auto indBufferOffset = renderer->indexBufferByteOffset();
+				auto indOffset = renderer->indexOffset();
+				auto restart = renderer->restartIndexValue();
+
+				auto geo = renderer->geometry();
+				auto attrbts = geo->attributes();
+
+				QAttribute* pos = nullptr;
+				QAttribute* norm = nullptr;
+				QAttribute* colr = nullptr;
+				QAttribute* idx = nullptr;
+
+				for (auto& each : attrbts)
+				{
+					if (each->name() == QAttribute::defaultPositionAttributeName())
+					{
+						pos = each;
+					}
+					else if (each->name() == QAttribute::defaultNormalAttributeName())
+					{
+						norm = each;
+					}
+					else if (each->name() == QAttribute::defaultColorAttributeName())
+					{
+						colr = each;
+					}
+					else if (each->attributeType() == QAttribute::AttributeType::IndexAttribute)
+					{
+						idx = each;
+					}
+
+				}
+				auto count = idx->count();
+				auto normBuffer = norm->buffer();
+				auto normArr = normBuffer->data();
+				float* reNormArr = reinterpret_cast<float*>(normArr.data());
+
+
+				auto type = idx->vertexBaseType();
+				auto idxBuffer = idx->buffer();
+				auto bufferType = idxBuffer->type();
+				auto byteOffset = idx->byteOffset();
+				auto usage = idxBuffer->usage();
+
+				auto indxArray = idxBuffer->data();
+				auto stride = idx->byteStride();
 				size_t primitiveIdx = hit.primitiveIndex();
-#ifdef LOG_RAYCAST_TIME
-				auto endTime = std::chrono::system_clock::now() - __startRayTraceTime;
-				auto msTime = std::chrono::duration_cast<std::chrono::milliseconds>(endTime);
-
-				qDebug() << "ray trace took: " << msTime.count() << hit.type() << hit.entity();
-#endif
-				//if (glModel && glModel->isHitTestable())
-				//{
-				//	hitGLModel = true;
-				//	qmlManager->modelSelected(glModel->ID);
-				//}
-
-
+				
 			}
+			auto glModel = dynamic_cast<GLModel*>(hit.entity());
+			size_t primitiveIdx = hit.primitiveIndex();
+#ifdef LOG_RAYCAST_TIME
+			auto endTime = std::chrono::system_clock::now() - __startRayTraceTime;
+			auto msTime = std::chrono::duration_cast<std::chrono::milliseconds>(endTime);
 
-			//if (!hitGLModel)
-			//{
-			//	qmlManager->backgroundClicked();
+			qDebug() << "ray trace took: " << msTime.count() << hit.type() << hit.entity() << primitiveIdx;
+#endif
 
-			//}
 		}
 
 	}

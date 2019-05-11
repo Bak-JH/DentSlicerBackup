@@ -12,8 +12,8 @@ RC_FILE = DLPslicer.rc
 
 SOURCES += main.cpp \
     boundingbox.cpp \
+    meshdatacontainer.cpp \
     raycastcontroller.cpp \
-    selectedboundingbox.cpp \
     slicingengine.cpp \
     glmodel.cpp \
     qmlmanager.cpp \
@@ -91,8 +91,9 @@ win32:QMAKE_LFLAGS *= -Wl,--large-address-aware
 HEADERS += \
     boundingbox.h \
     common/Singleton.h \
+    common/indexedlist.h \
+    meshdatacontainer.h \
     raycastcontroller.h \
-    selectedboundingbox.h \
     slicingengine.h \
     glmodel.h \
     qmlmanager.h \
