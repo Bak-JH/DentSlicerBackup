@@ -45,6 +45,9 @@ Slicer* SlicingEngine::slice(QVariant cfg, Mesh* shellMesh, Mesh* supportMesh, M
 
     qmlManager->setProgress(0.1);
 
+    // configuration
+    scfg->origin = QVector3D((shellMesh->x_min()+shellMesh->x_max())/2, (shellMesh->y_min()+shellMesh->y_max())/2, (shellMesh->z_min()+shellMesh->z_max())/2);
+
     //Mesh* loaded_mesh = mesh;
     //qDebug() << "loadedMesh : " << loaded_mesh->faces.size();
     /*Mesh* loaded_mesh = new Mesh();
@@ -71,6 +74,7 @@ Slicer* SlicingEngine::slice(QVariant cfg, Mesh* shellMesh, Mesh* supportMesh, M
     qmlManager->setProgress(0.8);
     Slices contourLists = supportSlices;
     qmlManager->setProgress(0.9);
+
 
     // Export to SVG
     SVGexporter* exporter = new SVGexporter();
