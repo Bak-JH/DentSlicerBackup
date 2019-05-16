@@ -647,7 +647,7 @@ void QmlManager::fixMesh(){
 void QmlManager::disableObjectPickers(){
     for (auto& pair : glmodels){
 		auto glm = &pair.second;
-		glm->enablePicking(false);
+        glm->enablePicking(false);
     }
 }
 
@@ -1931,8 +1931,8 @@ void QmlManager::runGroupFeature(int ftrType, QString state, double arg1, double
         qDebug() << "1111" << mergedShellMesh->x_max() << mergedShellMesh->x_min();
         // generate support
         GenerateSupport generatesupport;
-        Mesh* mergedSupportMesh = nullptr;
-        //Mesh* mergedSupportMesh = generatesupport.generateSupport(mergedShellMesh);
+        //Mesh* mergedSupportMesh = nullptr;
+        Mesh* mergedSupportMesh = generatesupport.generateSupport(mergedShellMesh);
 
         qDebug() << "2222";
         // generate raft

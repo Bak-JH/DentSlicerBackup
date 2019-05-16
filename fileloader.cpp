@@ -106,7 +106,7 @@ bool FileLoader::loadMeshSTL_ascii(Mesh* mesh, const char* filename)
     }
     fclose(f);
     mesh->connectFaces();
-    scfg->origin = QVector3D((mesh->x_min()+mesh->x_max())/2, (mesh->y_min()+mesh->y_max())/2, (mesh->z_min()+mesh->z_max())/2);
+
     return true;
 }
 
@@ -162,7 +162,7 @@ bool FileLoader::loadMeshSTL_binary(Mesh* mesh, const char* filename){
     }
     fclose(f);
     mesh->connectFaces();
-    scfg->origin = QVector3D((mesh->x_min()+mesh->x_max())/2, (mesh->y_min()+mesh->y_max())/2, (mesh->z_min()+mesh->z_max())/2);
+
     return true;
 }
 
@@ -337,6 +337,6 @@ bool FileLoader::loadMeshOBJ(Mesh* mesh, const char* filename){
     qDebug() << "test 3";
     fclose(file);
     mesh->connectFaces();
-    scfg->origin = QVector3D((mesh->x_min()+mesh->x_max())/2, (mesh->y_min()+mesh->y_max())/2, (mesh->z_min()+mesh->z_max())/2);
+
     return true;
 }
