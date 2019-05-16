@@ -188,7 +188,7 @@ WIN_SPARKLE_API int __cdecl win_sparkle_set_dsa_pub_pem(const char *dsa_pub_pem)
     @param company_name  Company name of the vendor.
     @param app_name      Application name. This is both shown to the user
                          and used in HTTP User-Agent header.
-    @param app_version   Version of the app, as string (e.g. "1.2" or "1.2rc1").
+    @param app_version   Version of the app, as std::string (e.g. "1.2" or "1.2rc1").
 
     @note @a company_name and @a app_name are used to determine the location
           of WinSparkle settings in registry.

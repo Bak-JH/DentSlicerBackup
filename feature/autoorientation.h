@@ -8,7 +8,6 @@
 #include <string>
 #include <QTime>
 
-using namespace std;
 
 class rotateResult{
 public:
@@ -44,11 +43,11 @@ public:
 private:
     float target_function(float touching,float overhang,float line);
     float* lithograph(Mesh* mesh, float n[], float amin, int CA);
-    float get_touching_line(Mesh* mesh,float a[],int i,float touching_height);
-    vector<Orient*> area_cumulation(Mesh* mesh,float n[],bool bi_algorithmic);
-    vector<Orient*> egde_plus_vertex(Mesh* mesh, int bsvest_n);
-    float* calc_random_normal(Mesh* mesh,int i);
-    vector<Orient*> remove_duplicates(vector<Orient*> o,int *orientCnt);
+    float get_touching_line(Mesh* mesh,float a[], const MeshFace& face,float touching_height);
+    std::vector<Orient*> area_cumulation(Mesh* mesh,float n[],bool bi_algorithmic);
+    std::vector<Orient*> egde_plus_vertex(Mesh* mesh, int bsvest_n);
+    float* calc_random_normal(Mesh* mesh, int i,  const MeshFace& face);
+    std::vector<Orient*> remove_duplicates(std::vector<Orient*> o,int *orientCnt);
     rotateResult* euler(Liste bestside);
 signals:
     void progressChanged(float);

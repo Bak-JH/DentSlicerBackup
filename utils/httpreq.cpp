@@ -234,9 +234,9 @@ QString httpreq::get_hash(){
         name = qgetenv("USERNAME");
 
     //SHA256 hash;
-    string message = uuid.toStdString() + name.toStdString();
+    std::string message = uuid.toStdString() + name.toStdString();
     QByteArray byteArray(message.c_str(), message.length());
-    //string digest;
+    //std::string digest;
 
     QString hash = QCryptographicHash::hash(byteArray, QCryptographicHash::Sha256).toHex();
     qDebug () << "hash : " << hash;
