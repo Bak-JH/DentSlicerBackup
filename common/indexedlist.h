@@ -13,7 +13,6 @@
 
 template <class T, class A = std::allocator<T>>
 class IndexedList {
-	class iterator;
 
 public:
 	typedef A allocator_type;

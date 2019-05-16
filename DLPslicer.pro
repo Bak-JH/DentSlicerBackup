@@ -94,7 +94,6 @@ HEADERS += \
     common/Singleton.h \
     common/TrackedIndexedList.h \
     common/indexedlist.h \
-    meshdatacontainer.h \
     raycastcontroller.h \
     slicingengine.h \
     glmodel.h \
