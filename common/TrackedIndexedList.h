@@ -9,12 +9,9 @@ class TrackedIndexedList : public IndexedList<T, A> {
 
 	typedef typename IndexedList<T, A> parent_type;
 public:
-	//enum OperationType
-	//{
-	//	Insert = 0,
-	//	Delete,
-	//	Modify
-	//};
+	typedef typename std::variant<bool, std::set<size_t>> changes_type;
+	typedef typename parent_type::iterator iterator;
+	typedef typename parent_type::const_iterator const_iterator;
 
 	TrackedIndexedList()
 	{
@@ -45,9 +42,9 @@ public:
 		assign(iniList.begin(), iniList.end());
 		return *this;
 	}
-	std::variant<bool, std::set<size_t>> flushChanges()
+	changes_type flushChanges()
 	{
-		if (_changedAll)
+		if (_changedAll || _changedIndices.size() == size())
 		{
 			clearChanges();
 			return true;
