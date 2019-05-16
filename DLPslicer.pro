@@ -90,7 +90,9 @@ win32:QMAKE_LFLAGS *= -Wl,--large-address-aware
 
 HEADERS += \
     boundingbox.h \
+    common/Indexedlist.h \
     common/Singleton.h \
+    common/TrackedIndexedList.h \
     common/indexedlist.h \
     meshdatacontainer.h \
     raycastcontroller.h \
@@ -106,6 +108,9 @@ HEADERS += \
     feature/convex_hull.h \
     feature/labellingtextpreview.h \
     feature/text3dgeometrygenerator.h \
+    unitTest/catch.hpp \
+    unitTest/tests/IndexedListTest.h \
+    unitTest/tests/TrackedIndexedListTest.h \
     utils/quaternionhelper.h \
     utils/mathutils.h \
     utils/qbezier.h \

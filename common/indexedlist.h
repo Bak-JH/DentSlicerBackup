@@ -1,156 +1,622 @@
 #pragma once
+#include <memory>
+#include <deque>
+#include <utility>
+#include <algorithm>
+#include <functional>
+#include <map>
+#if  defined(QT_DEBUG) || defined(_DEBUG)
+#include <stdexcept>
+//enforce strict correctness
+#define _INDEXED_LIST_STRICT
+#endif
 
-template <class T, class A = std::allocator<T> >
-class X {
+template <class T, class A = std::allocator<T>>
+class IndexedList {
+	class iterator;
+
 public:
-    typedef A allocator_type;
-    typedef typename A::value_type value_type;
-    typedef typename A::reference reference;
-    typedef typename A::const_reference const_reference;
-    typedef typename A::difference_type difference_type;
-    typedef typename A::size_type size_type;
+	typedef A allocator_type;
+	typedef typename std::allocator_traits<A> A_trait;
+	typedef typename A_trait::value_type value_type;
+	typedef typename T& reference;
+	typedef typename const T& const_reference;
+	typedef typename A_trait::difference_type difference_type;
+	typedef typename A_trait::size_type size_type;
+	typedef typename std::deque<T, A> container_type;
+	typedef typename container_type::iterator container_iterator_type;
+	typedef typename container_type::const_iterator container_const_iterator_type;
+	typedef typename std::function<void(size_t, size_t)> indexChangedCallback;
+	class iterator {
+	public:
+		typedef typename A_trait::difference_type difference_type;
+		typedef typename A_trait::value_type value_type;
+		typedef typename T& reference;
+		typedef typename A_trait::pointer pointer;
+		typedef std::random_access_iterator_tag iterator_category; //or another tag
 
-    class iterator {
-    public:
-        typedef typename A::difference_type difference_type;
-        typedef typename A::value_type value_type;
-        typedef typename A::reference reference;
-        typedef typename A::pointer pointer;
-        typedef std::random_access_iterator_tag iterator_category; //or another tag
+		iterator()
+		{}
+		iterator(container_iterator_type containerItr, IndexedList* owner) : _containerItr(containerItr), _owner(owner)
+		{}
+		iterator(const iterator& o) : _containerItr(o._containerItr), _owner(o._owner)
+		{
+		}
+		~iterator()
+		{}
 
-        iterator();
-        iterator(const iterator&);
-        ~iterator();
+		iterator& operator=(const iterator& o)
+		{
+			_containerItr = o._containerItr;
+		}
+		bool operator==(const iterator& o) const
+		{
+			return _containerItr == o._containerItr;
+		}
+		bool operator!=(const iterator& o) const
+		{
+			return _containerItr != o._containerItr;
+		}
 
-        iterator& operator=(const iterator&);
-        bool operator==(const iterator&) const;
-        bool operator!=(const iterator&) const;
-        bool operator<(const iterator&) const; //optional
-        bool operator>(const iterator&) const; //optional
-        bool operator<=(const iterator&) const; //optional
-        bool operator>=(const iterator&) const; //optional
+		//random access iterator
+		bool operator< (const iterator& o) const
+		{
+			return _containerItr < o._containerItr;
+		}
+		bool operator> (const iterator& o) const
+		{
+			return _containerItr > o._containerItr;
+		}
+		bool operator<=(const iterator& o) const
+		{
+			return _containerItr <= o._containerItr;
+		}
+		bool operator>=(const iterator& o) const
+		{
+			return _containerItr >= o._containerItr;
+		} //optional
 
-        iterator& operator++();
-        iterator operator++(int); //optional
-        iterator& operator--(); //optional
-        iterator operator--(int); //optional
-        iterator& operator+=(size_type); //optional
-        iterator operator+(size_type) const; //optional
-        friend iterator operator+(size_type, const iterator&); //optional
-        iterator& operator-=(size_type); //optional
-        iterator operator-(size_type) const; //optional
-        difference_type operator-(iterator) const; //optional
+		//pre
+		iterator& operator++()
+		{
+			++_containerItr;
+			return *this;
+		}
+		iterator& operator--()
+		{
+			--_containerItr;
+			return *this;
+		}
+		//post
+		iterator operator++(int)
+		{
+			auto tmp = *this;
+			++_containerItr;
+			return tmp;
+		}
+		iterator operator--(int)
+		{
+			auto tmp = *this;
+			--_containerItr;
+			return tmp;
 
-        reference operator*() const;
-        pointer operator->() const;
-        reference operator[](size_type) const; //optional
-    };
-    class const_iterator {
-    public:
-        typedef typename A::difference_type difference_type;
-        typedef typename A::value_type value_type;
-        typedef typename const A::reference reference;
-        typedef typename const A::pointer pointer;
-        typedef std::random_access_iterator_tag iterator_category; //or another tag
+		}
 
-        const_iterator ();
-        const_iterator (const const_iterator&);
-        const_iterator (const iterator&);
-        ~const_iterator();
+		iterator& operator+=(size_type offset)
+		{
+			_containerItr += offset;
+			return *this;
+		}
+		iterator& operator-=(size_type offset)
+		{
+			_containerItr -= offset;
 
-        const_iterator& operator=(const const_iterator&);
-        bool operator==(const const_iterator&) const;
-        bool operator!=(const const_iterator&) const;
-        bool operator<(const const_iterator&) const; //optional
-        bool operator>(const const_iterator&) const; //optional
-        bool operator<=(const const_iterator&) const; //optional
-        bool operator>=(const const_iterator&) const; //optional
+			return *this;
+		}
+		iterator operator+(size_type offset) const
+		{
+			auto tmp = *this;
+			return tmp += offset;
+		}
+		friend iterator operator+(size_type offset, const iterator& itr)
+		{
+			return itr += offset;
 
-        const_iterator& operator++();
-        const_iterator operator++(int); //optional
-        const_iterator& operator--(); //optional
-        const_iterator operator--(int); //optional
-        const_iterator& operator+=(size_type); //optional
-        const_iterator operator+(size_type) const; //optional
-        friend const_iterator operator+(size_type, const const_iterator&); //optional
-        const_iterator& operator-=(size_type); //optional
-        const_iterator operator-(size_type) const; //optional
-        difference_type operator-(const_iterator) const; //optional
+		}
+		iterator operator-(size_type offset) const
+		{
+			auto tmp = *this;
+			return tmp -= offset;
+		}
+		difference_type operator-(const iterator& itr)
+		{
+			return _containerItr - itr._containerItr;
+		}
 
-        reference operator*() const;
-        pointer operator->() const;
-        reference operator[](size_type) const; //optional
-    };
+		reference operator*() const
+		{
+			_owner->modifiedElement(this);
+			return *_containerItr;
+		}
+		pointer operator->() const
+		{
+			_owner->modifiedElement(this);
+			return &(*_containerItr);
+		}
+		reference operator[](size_type offset) const
+		{
+			auto offsetItr = *this + offset;
+			_owner->modifiedElement(&offsetItr);
+			return *(_containerItr + offset);
+		}
+	private:
+		container_iterator_type _containerItr;
+		IndexedList* _owner;
 
-    typedef std::reverse_iterator<iterator> reverse_iterator; //optional
-    typedef std::reverse_iterator<const_iterator> const_reverse_iterator; //optional
+		friend class const_iterator;
+	};
+	class const_iterator {
+	public:
+		typedef typename A_trait::difference_type difference_type;
+		typedef typename A_trait::value_type value_type;
+		typedef typename const T& reference;
+		typedef typename const A_trait::const_pointer pointer;
 
-    X();
-    X(const X&);
-    ~X();
+		typedef std::random_access_iterator_tag iterator_category; //or another tag
 
-    X& operator=(const X&);
-    bool operator==(const X&) const;
-    bool operator!=(const X&) const;
-    bool operator<(const X&) const; //optional
-    bool operator>(const X&) const; //optional
-    bool operator<=(const X&) const; //optional
-    bool operator>=(const X&) const; //optional
+		const_iterator()
+		{}
+		const_iterator(container_const_iterator_type containerItr) : _containerItr(containerItr)
+		{}
+		const_iterator(const const_iterator& o) : _containerItr(o._containerItr)
+		{}
+		const_iterator(const iterator& o) : _containerItr(o._containerItr)
+		{}
+		~const_iterator()
+		{}
 
-    iterator begin();
-    const_iterator begin() const;
-    const_iterator cbegin() const;
-    iterator end();
-    const_iterator end() const;
-    const_iterator cend() const;
-    reverse_iterator rbegin(); //optional
-    const_reverse_iterator rbegin() const; //optional
-    const_reverse_iterator crbegin() const; //optional
-    reverse_iterator rend(); //optional
-    const_reverse_iterator rend() const; //optional
-    const_reverse_iterator crend() const; //optional
+		const_iterator& operator=(const const_iterator& o)
+		{
+			_containerItr = o._containerItr;
+			return *this;
 
-    reference front(); //optional
-    const_reference front() const; //optional
-    reference back(); //optional
-    const_reference back() const; //optional
-    template<class ...Args>
-    void emplace_front(Args&&...); //optional
-    template<class ...Args>
-    void emplace_back(Args&&...); //optional
-    void push_front(const T&); //optional
-    void push_front(T&&); //optional
-    void push_back(const T&); //optional
-    void push_back(T&&); //optional
-    void pop_front(); //optional
-    void pop_back(); //optional
-    reference operator[](size_type); //optional
-    const_reference operator[](size_type) const; //optional
-    reference at(size_type); //optional
-    const_reference at(size_type) const; //optional
+		}
+		bool operator==(const const_iterator& o) const
+		{
+			return _containerItr == o._containerItr;
+		}
+		bool operator!=(const const_iterator& o) const
+		{
+			return _containerItr != o._containerItr;
+		}
+		bool operator<(const const_iterator& o) const
+		{
+			return _containerItr < o._containerItr;
+		}
+		bool operator>(const const_iterator& o) const
+		{
+			return _containerItr > o._containerItr;
+		}
+		bool operator<=(const const_iterator& o) const
+		{
+			return _containerItr <= o._containerItr;
+		}
+		bool operator>=(const const_iterator& o) const
+		{
+			return _containerItr >= o._containerItr;
+		} //optional
+				//pre
+		const_iterator& operator++()
+		{
+			++_containerItr;
+			return *this;
+		}
+		const_iterator& operator--()
+		{
+			--_containerItr;
+			return *this;
+		}
+		//post
+		const_iterator operator++(int)
+		{
+			auto tmp = *this;
+			++_containerItr;
+			return tmp;
+		}
+		const_iterator operator--(int)
+		{
+			auto tmp = *this;
+			--_containerItr;
+			return tmp;
+		}
+		const_iterator& operator+=(size_type offset)
+		{
+			_containerItr += offset;
+			return *this;
+		}
+		const_iterator& operator-=(size_type offset)
+		{
+			_containerItr -= offset;
+			return *this;
+		}
+		const_iterator operator+(size_type offset) const
+		{
+			auto tmp = *this;
+			return tmp += offset;
+		}
+		friend const_iterator operator+(size_type offset, const const_iterator& itr)
+		{
+			return itr += offset;
 
-    template<class ...Args>
-    iterator emplace(const_iterator, Args&&...); //optional
-    iterator insert(const_iterator, const T&); //optional
-    iterator insert(const_iterator, T&&); //optional
-    iterator insert(const_iterator, size_type, T&); //optional
-    template<class iter>
-    iterator insert(const_iterator, iter, iter); //optional
-    iterator insert(const_iterator, std::initializer_list<T>); //optional
-    iterator erase(const_iterator); //optional
-    iterator erase(const_iterator, const_iterator); //optional
-    void clear(); //optional
-    template<class iter>
-    void assign(iter, iter); //optional
-    void assign(std::initializer_list<T>); //optional
-    void assign(size_type, const T&); //optional
+		}
+		const_iterator operator-(size_type offset) const
+		{
+			auto tmp = *this;
+			return tmp -= offset;
+		}
+		difference_type operator-(const const_iterator& itr)
+		{
+			return _containerItr - itr._containerItr;
+		}
 
-    void swap(X&);
-    size_type size() const;
-    size_type max_size() const;
-    bool empty() const;
+		reference operator*() const
+		{
+			return *_containerItr;
+		}
+		pointer operator->() const
+		{
+			return &(*_containerItr);
 
-    A get_allocator() const; //optional
+		}
+		reference operator[](size_type offset) const
+		{
+			return *( _containerItr + offset);
+		}
+	private:
+		container_const_iterator_type _containerItr;
+	};
+
+	typedef std::reverse_iterator<iterator> reverse_iterator; //optional
+	typedef std::reverse_iterator<const_iterator> const_reverse_iterator; //optional
+
+	IndexedList()
+	{
+
+	}
+	IndexedList(const IndexedList& o) :_container(o._container)
+	{
+	}
+	IndexedList(std::initializer_list<T> iniList) : IndexedList(iniList, std::allocator<T>())
+	{
+	}
+
+	IndexedList(std::initializer_list<T> iniList, const allocator_type& allocator) :_container(iniList, allocator)
+	{
+	}
+
+
+	virtual ~IndexedList()
+	{}
+
+	IndexedList& operator=(const IndexedList& o)
+	{
+		_container = o._container;
+	}
+
+	IndexedList& operator=(std::initializer_list<T> iniList) { // assign initializer_list
+		assign(iniList.begin(), iniList.end());
+		return *this;
+	}
+	bool operator==(const IndexedList& o) const
+	{
+		return _container == o._container;
+	}
+	bool operator!=(const IndexedList& o) const
+	{
+		return _container != o._container;
+
+	}
+	//simple equal and not equal comparison should be enough
+	//bool operator<(const IndexedList&) const; //optional
+	//bool operator>(const IndexedList&) const; //optional
+	//bool operator<=(const IndexedList&) const; //optional
+	//bool operator>=(const IndexedList&) const; //optional
+
+	//iterators
+	iterator begin()
+	{
+		return iterator(_container.begin(), this);
+	}
+	const_iterator begin() const
+	{
+		return const_iterator(_container.begin());
+	}
+	const_iterator cbegin() const
+	{
+		//auto jj = const_iterator(_container.begin());
+		return const_iterator(_container.cbegin());
+
+	}
+	iterator end()
+	{
+		return iterator(_container.end(), this);
+
+	}
+	const_iterator end() const
+	{
+		return const_iterator(_container.cend());
+
+	}
+	const_iterator cend() const
+	{
+		return const_iterator(_container.cend());
+	}
+	reverse_iterator rbegin()
+	{
+		reverse_iterator(end());
+	}
+	const_reverse_iterator rbegin() const
+	{
+		return const_reverse_iterator(end());
+
+	}
+	const_reverse_iterator crbegin() const
+	{
+		return const_reverse_iterator(end());
+	}
+	reverse_iterator rend()
+	{
+		return reverse_iterator(begin());
+
+	}
+	const_reverse_iterator rend() const
+	{
+		return const_reverse_iterator(begin());
+
+	}
+	const_reverse_iterator crend() const
+	{
+		return const_reverse_iterator(begin());
+
+	}
+
+
+	template<class ...Args>
+	void emplace_front(Args&& ... args)
+	{
+		_container.emplace_front(std::forward< Args>(args)...);
+		addedElement(0);
+	}
+	template<class ...Args>
+	void emplace_back(Args&& ... args)
+	{
+		addedElement(size());
+		_container.emplace_back(std::forward< Args>(args)...);
+	}
+	void push_front(const T& e)
+	{
+		_container.push_front(e);
+		addedElement(0);
+	}
+	void push_front(T&& e)
+	{
+		_container.push_front(std::forward<T>(e));
+		addedElement(0);
+
+	}
+	void push_back(const T& e)
+	{
+		addedElement(size());
+		_container.push_back(e);
+	}
+	void push_back(T&& e)
+	{
+		addedElement(size());
+		_container.push_back(std::forward<T>(e));
+	}
+	void pop_front()
+	{
+		_container.pop_front();
+		removedElement(0);
+	}
+	void pop_back()
+	{
+		removedElement(size());
+		_container.pop_back();
+	}
+
+	//doesn't swap if the element is at the front or back
+	iterator swapAndErase(const_iterator pos, bool allowPopFront = false)
+	{
+		auto nextItr = pos;
+		++nextItr;
+		removedElement(pos - cbegin());
+		return swapAndErase(pos, nextItr);
+
+	}
+	//doesn't swap if the element is at the front or back
+	iterator swapAndErase(const_iterator start, const_iterator end, bool allowPopFront = false)
+	{
+		size_t startedIndex = start - cbegin();
+		size_t count = end - start;
+		iterator currItr = begin() + startedIndex;
+		size_t index = 0;
+		size_t remaining = count;
+		// n amount of deletes, maximum n amounts of swaps
+		while(remaining)
+		{
+			//don't swap and just pop if the to be erased is at the back or front
+			if (currItr == this->end() - remaining)
+			{
+				while (remaining)
+				{
+					_container.pop_back();
+					removedElement(size());
+					--remaining;
+				}
+			}
+			else if (allowPopFront && currItr == begin())
+			{
+				while (remaining)
+				{
+					removedElement(0);
+					_container.pop_front();
+					--remaining;
+				}
+			}
+			else
+			{
+				index = currItr - begin();
+				std::swap(*(currItr), _container.back());
+				//in case index order is important, inform that an index was changed
+				indexChanged(_container.size() - 1, index);
+				modifiedElement(index);
+				_container.pop_back();
+				removedElement(size());
+				--remaining;
+				++currItr;
+			}
+
+		}
+		//iterator can be invalidated when deleted
+		return begin() + startedIndex;
+	}
+	void clear()
+	{
+		_container.clear();
+		removedAll();
+	}
+	template<class iter>
+	void assign(iter first, iter last)
+	{
+		_container.assign(first, last);
+		addedAll();
+	}
+	void assign(std::initializer_list<T> list)
+	{
+		_container.assign(std::forward<std::initializer_list<T>>(list));
+		addedAll();
+	}
+	void assign(size_type count, const T& e)
+	{
+		_container.assign(count, { 0, e });
+		addedAll();
+
+	}
+
+	void swap(IndexedList& o)
+	{
+		_container.swap(o._container);
+		addedAll();
+	}
+
+	//accessors
+
+	reference front()
+	{
+		modifiedElement((size_t)0);
+		return _container.front();
+	}
+	const_reference front() const
+	{
+		const auto* constCont = &_container;
+		return constCont->front();
+
+	}
+	reference back()
+	{
+		modifiedElement(size() - 1);
+		return _container.back();
+	}
+	const_reference back() const
+	{
+		return _container.back();
+	}
+	reference operator[](size_type index)
+	{
+		modifiedElement(index);
+		return _container[index];
+	}
+	const_reference operator[](size_type index) const
+	{
+		return _container[index];
+
+	}
+	reference at(size_type index)
+	{
+		modifiedElement(index);
+		return _container.at(index);
+	}
+	const_reference at(size_type index) const
+	{
+		return _container.at(index);
+
+	}
+
+	size_type size()
+	{
+		return _container.size();
+	}
+	size_type max_size() const
+	{
+		return _container.max_size();
+	}
+	bool empty() const
+	{
+		return _container.empty();
+	}
+
+	A get_allocator() const
+	{
+		return _container.get_allocator();
+
+	}
+	size_t addIndexChangedCallback(indexChangedCallback callback)
+	{
+		_indexChangedCallbacks[_indexChangedCallbackToken] = callback;
+		++_indexChangedCallbackToken;
+		return _indexChangedCallbackToken - 1;
+	}
+protected:
+	virtual void addedElement(size_t index)
+	{
+	}
+	virtual void addedAll()
+	{
+	}
+	virtual void removedElement(size_t index)
+	{
+	}
+	virtual void removedAll()
+	{
+	}
+	virtual void modifiedElement(size_t index)
+	{
+	}
+	void modifiedElement(const iterator* itr)
+	{
+		modifiedElement(getItrIndex(itr));
+	}
+private:
+	container_type _container;
+	std::map<size_t, indexChangedCallback> _indexChangedCallbacks;
+	size_t _indexChangedCallbackToken = 0;
+
+	void indexChanged(size_t oldIndex, size_t newIndex)
+	{
+		for (auto pair : _indexChangedCallbacks)
+		{
+			auto& callback = pair.second;
+			callback(oldIndex, newIndex);
+		}
+	}
+	inline difference_type getItrIndex(const iterator* itr)const
+	{
+		return const_iterator(*itr) - cbegin();
+	}
 };
 template <class T, class A = std::allocator<T> >
-void swap(X<T,A>&, X<T,A>&); //optional
+void swap(IndexedList<T, A> & a, IndexedList<T, A> & b)
+{
+	a.swap(b);
+}
