@@ -11,7 +11,7 @@
 #include <QTime>
 #include <array>
 #include <variant>
-#include "meshdatacontainer.h"
+#include "../common/TrackedIndexedList.h"
 #define cos50 0.64278761
 #define cos100 -0.17364818
 #define cos150 -0.8660254
@@ -21,43 +21,56 @@
 using namespace ClipperLib;
 
 // plane contains at least 3 vertices contained in the plane in clockwise direction
-typedef std::array<QVector3D, 3> Plane;
+typedef std::vector<QVector3D> Plane;
+struct MeshVertex;
+struct MeshEdge;
+struct Mesh;
 
+struct MeshFace {
+	MeshFace(){}
+    QVector3D fn;
+    QVector3D fn_unnorm;
+	//TODO: fix meshes with more than 3 faces that share an edge
+	std::array<MeshEdge, 3> edges;
+	std::array<size_t, 3> mesh_vertex;
+};
+
+struct MeshEdge {
+	//increasing order
+	std::array<size_t, 2> vertices;
+	std::set<size_t> faces;
+};
+
+struct MeshVertex {
+
+	MeshVertex() {}
+	MeshVertex(QVector3D position) : position(position) {}
+    friend inline bool operator== (const MeshVertex& a, const MeshVertex& b){
+        return a.position == b.position;
+    }
+    friend inline bool operator!= (const MeshVertex& a, const MeshVertex& b){
+        return a.position != b.position;
+    }
+	void calculateNormalFromFaces();
+	QVector3D position;
+	QVector3D vn;
+	std::set<size_t> connected_faces;
+	std::set<size_t> edges;
+};
 
 class Path3D : public std::vector<MeshVertex>{
-    public:
-        Path projection;
-        std::vector<Path3D> inner;
-        std::vector<Path3D> outer;
+public:
+    Path projection;
+    std::vector<Path3D> inner;
+    std::vector<Path3D> outer;
 };
 
 typedef std::vector<Path3D> Paths3D;
 
 class Mesh{
 public :
-
-	enum MeshOpOperand {
-		FaceRange = 0
-		,FaceSingle
-		//,VerticeRange this is meaningless as Mesh vertice indices and QGeometry indices are completely different!
-		,VertexSingle
-
-		//,SingleVertex
-	};
-	struct MeshOp {
-		MeshOpType Type;
-		MeshOpOperand Operand;
-		//pointers when modified, size_t for index of the deleted element, pair for multiple continous edits
-		//*ranges are [begin, end), end is not included;;
-		std::variant<std::pair<size_t, size_t>, size_t, const MeshVertex*, const MeshFace*> Data;
-	};
-
-	//For each operation, modifies MeshFace, returns whether modification actually occured or the element should be delete
-	typedef std::function<bool(const Mesh&, MeshFace&, size_t)> FaceForEachFunction;
-	typedef std::function<bool(const Mesh&, MeshVertex&, size_t)> VertexForEachFunction;
-
+	Mesh();
 	Mesh(const Mesh* origin);
-    Mesh() {};
 
 	/********************** Undo state functions***********************/
 	void setNextMesh( Mesh* mesh);
@@ -74,16 +87,10 @@ public :
     void reverseFaces();
 	void addFace(QVector3D v0, QVector3D v1, QVector3D v2);
 	void addFace(QVector3D v0, QVector3D v1, QVector3D v2, const MeshFace* parentface);
-	std::list<MeshFace>::const_iterator removeFace(std::list<MeshFace>::const_iterator f_it);
-	void removeFace(const MeshFace* mf);
+	TrackedIndexedList<MeshFace>::const_iterator removeFace(std::list<MeshFace>::const_iterator f_it);
 	void connectFaces();
-	void modifyVertex(const MeshVertex* vertex, const QVector3D& newValue);
-	std::vector<MeshOp> flushChanges();
-	/********************** Faces & Vertices std::for_each style edit***********************/
-	size_t conditionalModifyFaces(FaceForEachFunction forEachFunction);
-
-	size_t conditionalModifyVertices(VertexForEachFunction forEachFunction);
-
+	TrackedIndexedList<MeshVertex>& getVertices();
+	TrackedIndexedList<MeshFace>& getFaces();
 
 
 	/********************** Mesh Modify and Copy Functions***********************/
@@ -103,10 +110,13 @@ public :
 
     float getFaceZmin(MeshFace mf)const;
     float getFaceZmax(MeshFace mf)const;
+    //MeshFace idx2MF(int idx)const;
+    //MeshVertex idx2MV(int idx)const;
 
     /********************** Getters **********************/
-    const std::list<MeshVertex>* getVertices()const;
-    const std::list<MeshFace>* getFaces()const;
+	//const getter
+    const TrackedIndexedList<MeshVertex>& getVertices()const;
+    const TrackedIndexedList<MeshFace>& getFaces()const;
     float x_min()const;
     float x_max()const;
     float y_min()const;
@@ -115,7 +125,27 @@ public :
     float z_max()const;
     Mesh* getPrev()const;
     Mesh* getNext()const;
-	const std::vector<const MeshFace*>* getRenderOrderFaces()const;
+
+	/********************** index to data **********************/
+
+	inline MeshFace& idx2mf(size_t idx)
+	{
+		return faces[idx];
+	}
+	inline MeshVertex& idx2vtx(size_t idx)
+	{
+		return vertices[idx];
+	}
+
+	inline const MeshFace& idx2mf(size_t idx)const
+	{
+		return faces[idx];
+	}
+	inline const MeshVertex& idx2vtx(size_t idx)const
+	{
+		return vertices[idx];
+	}
+
 	/********************** Stuff that can be public **********************/
 
 	QTime time;
@@ -129,26 +159,22 @@ private:
 	MeshVertex* addFaceVertex(QVector3D v);
     void updateMinMax(QVector3D v);
 
-
+    TrackedIndexedList<MeshVertex> vertices;
     QHash<uint32_t, MeshVertex*> vertices_hash;
-
+	TrackedIndexedList<MeshFace> faces;
 
     // for undo & redo
     Mesh* prevMesh = nullptr;
     Mesh* nextMesh = nullptr;
-	std::vector<MeshOp> _meshModifications;
 
+	//index changed event callback
+	void vtxIndexChangedCallback(size_t oldIdx, size_t newIdx);
+	void faceIndexChangedCallback(size_t oldIdx, size_t newIdx);
 
     float _x_min = 99999, _x_max = 99999, _y_min = 99999, _y_max = 99999, _z_min = 99999, _z_max = 99999;
 
 	//fileloader should be a factory pattern?
     friend class FileLoader;
-    //friend class GLModel;
-
-
-
-
-
 };
 
 
@@ -163,13 +189,6 @@ QHash<uint32_t, Path>::iterator findSmallestPathHash(QHash<uint32_t, Path> pathH
 // construct closed contour using segments created from identify step
 Paths contourConstruct(Paths);
 Paths3D contourConstruct3D(Paths3D hole_edges);
-
-/* class containmentPath{
-public:
-    Path projection;
-    std::vector<containmentPath> inner;
-    std::vector<containmentPath> outer;
-}; */
 
 bool intPointInPath(IntPoint ip, Path p);
 bool pathInpath(Path3D target, Path3D in);

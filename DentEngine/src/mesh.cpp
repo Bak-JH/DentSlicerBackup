@@ -3,7 +3,12 @@
 #include <QDebug>
 #include <QCoreApplication>
 
-Mesh::Mesh( const Mesh* origin)
+
+Mesh::Mesh()
+{
+
+}
+Mesh::Mesh( const Mesh* origin): Mesh()
 {
 	prevMesh = origin->prevMesh;
 	nextMesh = origin->nextMesh;
@@ -29,17 +34,16 @@ void Mesh::vertexOffset(float factor){
     _y_max = 99999;
     _z_min = 99999;
     _z_max = 99999;
-
-	auto functor = [this, factor](const Mesh& mesh, MeshVertex& vertex, size_t count)->bool 
+	size_t count = 0;
+	for(auto vertex: vertices)
 	{
 		if (count % 100 == 0)
 			QCoreApplication::processEvents();
 		QVector3D tmp = vertex.position - vertex.vn * factor;
 		vertex.position = tmp;
 		this->updateMinMax(vertex.position);
-		return true;
+		++count;
 	};
-	conditionalModifyVertices(functor);
 }
 
 void Mesh::vertexMove(QVector3D direction){
@@ -50,17 +54,16 @@ void Mesh::vertexMove(QVector3D direction){
     _y_max = 99999;
     _z_min = 99999;
     _z_max = 99999;
-
-	auto functor = [this, direction](const Mesh & mesh, MeshVertex & vertex, size_t count)->bool
+	size_t count = 0;
+	for (auto vertex : vertices)
 	{
 		if (count % 100 == 0)
 			QCoreApplication::processEvents();
 		QVector3D tmp = direction + vertex.position;
 		vertex.position = tmp;
 		updateMinMax(vertex.position);
-		return true;
+		++count;
 	};
-	conditionalModifyVertices(functor);
 }
 
 Mesh* Mesh::vertexMoved(QVector3D direction)const
@@ -249,12 +252,8 @@ void Mesh::addFace(QVector3D v0, QVector3D v1, QVector3D v2, const MeshFace* par
 
 }
 
-void Mesh::removeFace(const MeshFace* mf){
-	removeFace(mf->itr);
-    return;
-}
 
-std::list<MeshFace>::const_iterator Mesh::removeFace(std::list<MeshFace>::const_iterator f_it){
+TrackedIndexedList<MeshFace>::const_iterator Mesh::removeFace(TrackedIndexedList<MeshFace>::const_iterator f_it){
     const MeshFace &mf = (*f_it);
     //MeshFace &mf = faces[f_idx];
     //std::vector<MeshFace>::iterator f_idx_it = faces.begin()+f_idx;
@@ -407,7 +406,7 @@ Mesh* Mesh::saveUndoState(const Qt3DCore::QTransform& transform)
 		temp_prev_mesh->vertices.push_back(mv);
 	}
 
-	for (std::list<MeshFace>::iterator it = this->faces.begin(); it != this->faces.end(); ++it) {
+	for (TrackedIndexedList<MeshFace>::iterator it = this->faces.begin(); it != this->faces.end(); ++it) {
 		//qDebug() << it->neighboring_faces.size();
 		temp_prev_mesh->faces.push_back((*it));
 		temp_prev_mesh->faces.back().itr = (--temp_prev_mesh->faces.end());
@@ -761,6 +760,61 @@ void Mesh::updateMinMax(QVector3D v)
 }
 
 
+void Mesh::vtxIndexChangedCallback(size_t oldIdx, size_t newIdx)
+{
+	//change face meshVtx indices to point to changed vtx idx
+	auto& vtx = vertices[newIdx];
+	for (size_t idx : vtx.connected_faces)
+	{
+		auto& connectedFace = faces[idx];
+		for (size_t& vtxIdx : connectedFace.mesh_vertex)
+		{
+			if (vtxIdx == oldIdx)
+			{
+				vtxIdx = newIdx;
+				break;
+			}
+		}
+	}
+}
+
+void Mesh::faceIndexChangedCallback(size_t oldIdx, size_t newIdx)
+{
+	//change vtx connectedFaces indices to point to changed face idx
+	auto& face = faces[newIdx];
+	for (size_t idx : face.mesh_vertex)
+	{
+		auto& meshVtx = vertices[idx];
+		for (size_t& faceIdx : meshVtx.connected_faces)
+		{
+			if (faceIdx == oldIdx)
+			{
+				faceIdx = newIdx;
+				break;
+			}
+		}
+	}
+	//update neighbouring faces
+	for (auto& edge : face.neighboring_faces)
+	{
+		for (size_t idx : edge)
+		{
+			auto& neigbor = faces[idx];
+
+		}
+		auto& meshVtx = vertices[idx];
+		for (size_t& faceIdx : meshVtx.connected_faces)
+		{
+			if (faceIdx == oldIdx)
+			{
+				faceIdx = newIdx;
+				break;
+			}
+		}
+	}
+}
+
+
 void Mesh::updateMinMax(QVector3D v, std::array<float,6>& minMax){
 //array order: _x_min, _x_max...._z_min, _z_max
     if (v.x() < minMax[0] || minMax[0] == 99999)
@@ -820,19 +874,6 @@ Mesh* Mesh::getNext()const
 {
     return nextMesh;
 }
-
-const std::vector<const MeshFace*>* Mesh::getRenderOrderFaces() const
-{
-	return &_renderOrderFaces;
-}
-
-//MeshFace Mesh::idx2MF(int idx)const{
-//    return faces[idx];
-//}
-//
-//MeshVertex Mesh::idx2MV(int idx)const{
-//    return vertices[idx];
-//}
 
 float vertexDistance(QVector3D a, QVector3D b){
     QVector3D dv = a-b;
@@ -1477,13 +1518,22 @@ uint32_t meshVertex2Hash(MeshVertex u){
 }
 
 
-const std::list<MeshVertex>* Mesh::getVertices()const
+const TrackedIndexedList<MeshVertex>& Mesh::getVertices()const
 {
-    return &vertices;
+	return vertices;
 }
-const std::list<MeshFace>* Mesh::getFaces()const
+const TrackedIndexedList<MeshFace>& Mesh::getFaces()const
 {
-    return &faces;
+	return faces;
+}
+
+TrackedIndexedList<MeshVertex>& Mesh::getVertices()
+{
+	return vertices;
+}
+TrackedIndexedList<MeshFace>& Mesh::getFaces()
+{
+	return faces;
 }
 
 float Mesh::x_min()const
@@ -1514,81 +1564,3 @@ float Mesh::z_max()const
     return _z_max;
 
 }
-
-size_t Mesh::conditionalModifyFaces(FaceForEachFunction forEachFunction)
-{
-	size_t modified = 0;
-	bool isModified;
-	size_t currentIdx = 0;
-	size_t startRange = 0;
-	std::vector<std::pair<size_t, size_t>> rangesChanged;
-	for (auto& each : faces)
-	{
-		isModified = forEachFunction(*this, each, currentIdx);
-		if (isModified)
-		{
-			++modified;
-		}
-		else
-		{
-			if (currentIdx - startRange > 0)
-			{
-				rangesChanged.push_back(std::make_pair(startRange, currentIdx));
-			}
-			startRange = currentIdx;
-		}
-		++currentIdx;
-	}
-	if (currentIdx - startRange > 0)
-	{
-		rangesChanged.push_back(std::make_pair(startRange, currentIdx));
-	}
-
-	//submit changes to changes queue
-	for (auto& ranges : rangesChanged)
-	{
-		_meshModifications.push_back({ MeshOpType::Modify, MeshOpOperand::FaceRange, ranges });
-	}
-	return modified;
-
-}
-
-
-size_t Mesh::conditionalModifyVertices(VertexForEachFunction forEachFunction)
-{
-	size_t modified = 0;
-	bool isModified;
-	size_t currentIdx = 0;
-	std::vector<MeshOp> tmpMods;
-	auto vtxItr = getVertices()->begin();
-	for (auto& each : vertices)
-	{
-		isModified = forEachFunction(*this, each, currentIdx);
-		//update QGeometry
-		if (isModified)
-		{
-			++modified;
-			tmpMods.push_back({ MeshOpType::Modify, MeshOpOperand::VertexSingle, &*vtxItr });
-
-		}
-		++vtxItr;
-		++currentIdx;
-	}
-
-
-	//submit changes to changes queue
-	//for (auto& ranges : rangesChanged)
-	//{
-	//	_meshModifications.push_back({ MeshOpType::Modify, MeshOpOperand::VerticeRange, ranges });
-	//}
-	if (modified == vertices.size())
-	{
-		_meshModifications.push_back({ MeshOpType::Modify, MeshOpOperand::FaceRange, std::make_pair(0, faces.size()) });
-	}
-	else
-	{
-		_meshModifications.insert(_meshModifications.end(), tmpMods.begin(), tmpMods.end());
-	}
-	return modified;
-}
-
