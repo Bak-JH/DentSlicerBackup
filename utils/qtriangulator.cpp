@@ -247,8 +247,8 @@ static QIntersectionPoint qIntersectionPoint(const QPodPoint &u1, const QPodPoin
     // v1 - v * d1/det | v1 <= v2 (component-wise)
     // v2 - v * d2/det | v2 < v1 (component-wise)
 
-    // Assuming 21 bits per vector component.
-    // TODO: Make code path for 31 bits per vector component.
+    // Assuming 21 bits per std::vector component.
+    // TODO: Make code path for 31 bits per std::vector component.
     if (v.x >= 0) {
         result.upperLeft.x = v1.x + (-v.x * d1) / det;
         result.xOffset = qFraction(quint64(-v.x * d1) % quint64(det), quint64(det));
@@ -1328,7 +1328,7 @@ void QTriangulator<T>::ComplexToSimple::calculateIntersections()
 }
 
 // Split an edge into two pieces at the given point.
-// The upper piece is pushed to the end of the 'm_edges' vector.
+// The upper piece is pushed to the end of the 'm_edges' std::vector.
 // The lower piece replaces the old edge.
 // Return the edge whose 'from' is 'pointIndex'.
 template <typename T>

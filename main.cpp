@@ -32,8 +32,8 @@ int main(int argc, char **argv)
     */
 
     QQmlApplicationEngine engine;
-    qRegisterMetaType<vector<QVector3D>>("vector<QVector3D>");
-    qRegisterMetaType<vector<float>>("vector<float>");
+    qRegisterMetaType<std::vector<QVector3D>>("std::vector<QVector3D>");
+    qRegisterMetaType<std::vector<float>>("std::vector<float>");
     qmlRegisterType<GridMesh>("DentStudio", 1, 0, "GridMesh");
     //qmlRegisterType<SlicingConfiguration>("DentStudio", 1, 0, "SlicingConfiguration");
 

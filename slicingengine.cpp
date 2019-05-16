@@ -53,13 +53,20 @@ Slicer* SlicingEngine::slice(QVariant cfg, Mesh* shellMesh, Mesh* supportMesh, M
 
     // Slice
     Slicer* slicer = new Slicer();
-    Slices shellSlices = slicer->slice(shellMesh);
+    Slices shellSlices;
+    qDebug() << "shell Mesh : " << shellMesh << shellSlices.mesh;
+    slicer->slice(shellMesh, &shellSlices);
+    //Slices shellSlices = slicer->slice(shellMesh);
     qDebug() << "Shell Slicing Done\n";
     qmlManager->setProgress(0.4);
-    Slices supportSlices = slicer->slice(supportMesh);
+    Slices supportSlices;
+    slicer->slice(supportMesh, &supportSlices);
+    //Slices supportSlices = slicer->slice(supportMesh);
     qDebug() << "Support Slicing Done\n";
     qmlManager->setProgress(0.6);
-    Slices raftSlices = slicer->slice(raftMesh);
+    Slices raftSlices;
+    slicer->slice(raftMesh, &raftSlices);
+    //Slices raftSlices = slicer->slice(raftMesh);
     qDebug() << "Raft Slicing Done\n";
     qmlManager->setProgress(0.8);
     Slices contourLists = supportSlices;

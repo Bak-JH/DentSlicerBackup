@@ -44,6 +44,7 @@ public:
     QObject* loginButton;
     QObject* boxUpperTab;
     QObject* boxLeftTab;
+    QObject* scene3d;
     QEntity* models;
     Qt3DCore::QTransform* systemTransform;
     QObject* mv;
@@ -146,10 +147,13 @@ public:
     QObject* layerRaftButton;
     QObject* layerViewSlider;
 
-    vector<GLModel*> glmodels;
-    vector<GLModel*> selectedModels;
-    vector<Mesh*> copyMeshes;
-    vector<QString> copyMeshNames;
+    std::map<int, GLModel> glmodels;
+
+    //TODO:const pointers, need to use list instead of std::vector because std::vector elements moves around
+    //std::list<GLModel* const> selectedModels;
+	std::vector<GLModel*> selectedModels;
+    std::vector<Mesh*> copyMeshes;
+    std::vector<QString> copyMeshNames;
 
 
 
@@ -178,19 +182,19 @@ public:
     void openArrange();
     void runArrange_internal();
     void disconnectHandlers(GLModel* glmodel);
+	void disconnectShadow(GLModel* glmodel);
     void connectHandlers(GLModel* glmodel);
-
     void addPart(QString fileName, int ID);
-    void deletePart(int ID);
+    void deletePartListItem(int ID);
     void openProgressPopUp();
-    void openYesNoPopUp(bool selectedList_vis, string inputText_h, string inputText_m, string inputText_l, int inputText_fontsize, string image_source, int inputPopupType, int yesNo_okCancel);
-    void openResultPopUp(string inputText_h, string inputText_m, string inputText_l);
+    void openYesNoPopUp(bool selectedList_vis, std::string inputText_h, std::string inputText_m, std::string inputText_l, int inputText_fontsize, std::string image_source, int inputPopupType, int yesNo_okCancel);
+    void openResultPopUp(std::string inputText_h, std::string inputText_m, std::string inputText_l);
     void setProgress(float value);
-    void setProgressText(string inputText);
+    void setProgressText(std::string inputText);
     int getLayerViewFlags();
 
     GLModel* findGLModelByName(QString filename);
-
+	void connectShadow(GLModel* shadowModel);
     Q_INVOKABLE QString getVersion();
     Q_INVOKABLE void keyboardHandlerFocus();
     Q_INVOKABLE QVector3D getSelectedCenter();
@@ -232,21 +236,24 @@ public:
     void updateBoundedBox();
 
 private:
-    //bool glmodels_arranged;
+	GLModel* getModelByID(int ID);
+    void unselectPartImpl(GLModel* target);
     int viewMode;
     int layerViewFlags;
+    int modelIDCounter;
+    GLModel* _latest;
 
 
 signals:
     void updateModelInfo(int printing_time, int layer, QString xyz, float volume);
-    void arrangeDone(vector<QVector3D>, vector<float>);
+    void arrangeDone(std::vector<QVector3D>, std::vector<float>);
 
 
 public slots:
     void sendUpdateModelInfo(int, int, QString, float);
     void createModelFile(Mesh* target_mesh, QString filename);
     void openModelFile(QString filename);
-    void checkModelFile(int ID);
+    void checkModelFile(GLModel* model);
     void deleteOneModelFile(int ID);
     void deleteModelFileDone();
     void deleteModelFile(int ID);
@@ -271,7 +278,7 @@ public slots:
     void modelRotateDone(int);
     void totalRotateDone();
     void resetLayflat();
-    void applyArrangeResult(vector<QVector3D>, vector<float>);
+    void applyArrangeResult(std::vector<QVector3D>, std::vector<float>);
     void cleanselectedModel(int);
     void extensionSelect();
     void extensionUnSelect();

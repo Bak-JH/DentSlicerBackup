@@ -7,12 +7,12 @@ class STLexporter
 {
 public:
     STLexporter();
-    //GLModel* mergeModels(vector<GLModel*> models);
+    //GLModel* mergeModels(std::vector<GLModel*> models);
     Mesh* mergeSelectedModels();
     void exportSTL(QString outfilename);
-    void writeFace(ofstream& outfile, Mesh* mesh, MeshFace mf);
-    void writeHeader(ofstream& outfile);
-    void writeFooter(ofstream& outfile);
+    void writeFace(std::ofstream& outfile, const Mesh* mesh, MeshFace mf);
+    void writeHeader(std::ofstream& outfile);
+    void writeFooter(std::ofstream& outfile);
 
 };
 

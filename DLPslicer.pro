@@ -2,7 +2,7 @@
 
 QT += qml quick opengl 3dcore 3drender 3dinput 3dextras concurrent widgets core 3dquick 3dlogic 3dquickextras
 
-CONFIG += c++11 resources_big
+CONFIG += c++17 resources_big
 
 TARGET = DentStudio
 
@@ -68,16 +68,15 @@ LIBS += -L$$_PRO_FILE_PWD_/$$LIB_DIR -lWinSparkle
 DEFINES += QT_DEPRECATED_WARNINGS
 
 # add CGAL
-LIBS += -LC:/CGAL/lib/ -llibCGAL.dll
-LIBS += -LC:/boost_1_62_0/stage/lib -llibboost_system-mgw53-mt-1_62
-LIBS += -LC:/boost_1_62_0/stage/lib -llibboost_thread-mgw53-mt-1_62
-LIBS += -LC:/CGAL-4.11/auxiliary/gmp/lib -lgmp-10 -lmpfr-4
+LIBS += -LC:/CGAL_build8/lib/ -llibCGAL.dll
+LIBS += -LC:/boost_1_59_0/stage/lib -llibboost_system-mgw73-mt-1_59
+LIBS += -LC:/boost_1_59_0/stage/lib -llibboost_thread-mgw73-mt-1_59
+LIBS += -LC:/dev/CGAL-4.11/auxiliary/gmp/lib -llibgmp-10 -llibmpfr-4
 
-INCLUDEPATH += C:/CGAL-4.11/include
-INCLUDEPATH += C:/CGAL-4.11/auxiliary/gmp/include
-INCLUDEPATH += C:/CGAL-4.11/auxiliary/gmp
-INCLUDEPATH += C:/boost_1_62_0
-INCLUDEPATH += C:/CGAL/include
+INCLUDEPATH += C:/dev/CGAL-4.11/include
+INCLUDEPATH += C:/dev/CGAL-4.11/auxiliary/gmp/include
+INCLUDEPATH += C:/boost_1_59_0
+INCLUDEPATH += C:/CGAL_build8/include
 
 
 
@@ -119,6 +118,7 @@ HEADERS += \
     utils/qrbtree.h \
     utils/qtriangulator_p.h \
     utils/qvectorpath_p.h \
+    utils/utils.h \
     utils/winsparkle/winsparkle.h \
     feature/stlexporter.h \
     feature/extension.h \
