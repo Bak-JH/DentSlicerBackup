@@ -75,10 +75,10 @@ public:
 
     // set configuration
     QVector3D origin;
-    int resolution_x = 1280;
-    int resolution_y = 800;
-    int bed_x = 131.2; // in mm
-    int bed_y = 82; // in mm
+    int resolution_x = 2560;
+    int resolution_y = 1440;
+    int bed_x = 120.96; // in mm
+    int bed_y = 68.04; // in mm
     float pixel_per_mm = float(resolution_x)/float(bed_x);
 };
 

@@ -15,7 +15,10 @@ QString SVGexporter::exportSVG(Slices shellSlices, Slices supportSlices, Slices 
     }
 
     QString infofilename = outfoldername + "/" + "info.json";
-    std::ofstream infofile(infofilename.toStdString().c_str(), std::ios::out);
+    QFile infofile(infofilename);
+    infofile.open(QFile::WriteOnly);
+
+    //std::ofstream infofile(infofilename.toStdString().c_str(), std::ios::out);
     QJsonObject jsonObject;
     jsonObject["layer_height"] = round(scfg->layer_height*100)/100;
     jsonObject["total_layer"] = int(shellSlices.size());
@@ -29,7 +32,7 @@ QString SVGexporter::exportSVG(Slices shellSlices, Slices supportSlices, Slices 
     jsonObject["contraction_ratio"] = scfg->contraction_ratio;
     QJsonDocument jsonDocument(jsonObject);
     QByteArray jsonBytes = jsonDocument.toJson();
-
+    infofile.write(jsonBytes);
     infofile.close();
     //qDebug() << jsonBytes;
 
@@ -166,7 +169,7 @@ void SVGexporter:: writeGroupFooter(std::ofstream& outfile){
 }
 
 void SVGexporter::writeHeader(std::ofstream& outfile){
-    outfile << "<svg width='" << scfg->resolution_x << "' height='" << scfg->resolution_y << "' xmlns='http://www.w3.org/2000/svg' xmlns:contour='http://hix.co.kr' style='background-color: #00000000;'>\n";
+    outfile << "<svg width='" << scfg->resolution_x << "' height='" << scfg->resolution_y << "' xmlns='http://www.w3.org/2000/svg' xmlns:contour='http://hix.co.kr' style='background-color: black;'>\n";
 }
 
 void SVGexporter::writeFooter(std::ofstream& outfile){
