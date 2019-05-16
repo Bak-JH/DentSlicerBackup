@@ -143,8 +143,8 @@ GLModel::GLModel(QObject* mainWindow, QNode *parent, Mesh* loadMesh, QString fna
 
 		// 승환 25%
 		qmlManager->setProgress(0.23);
-		clearMem();
-		updateAllVertices(_mesh);
+        clearMem();
+        updateAllVertices(_mesh);
 		//applyGeometry();
 
 		// 승환 50%
