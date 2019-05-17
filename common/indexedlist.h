@@ -378,6 +378,12 @@ public:
 		return const_reverse_iterator(begin());
 
 	}
+	//iterator conversions
+	iterator toNormItr(const_iterator itr)
+	{
+		size_t idx = itr - cbegin();
+		return  begin() + idx;
+	}
 
 
 	template<class ...Args>
