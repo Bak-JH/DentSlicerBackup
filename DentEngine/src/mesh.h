@@ -26,26 +26,19 @@ namespace Hix
 		// plane contains at least 3 vertices contained in the plane in clockwise direction
 		typedef std::vector<QVector3D> Plane;
 		struct Vertex;
-		struct Edge;
+		struct Face;
 		struct Mesh;
-		typedef typename 
+		typedef typename TrackedIndexedList<Vertex>::const_iterator VertexConstItr;
+		typedef typename TrackedIndexedList<Face>::const_iterator FaceConstItr;
+
+
 		struct Face {
 			Face() {}
 			QVector3D fn;
 			QVector3D fn_unnorm;
-
-			size_t edge;
-
-		};
-
-		struct HalfEdge {
-			//increasing order
-			size_t fromVtx;
-			size_t toVtx;
-			size_t twin;
-			size_t face;
-			size_t next;
-			size_t prev;
+			//TODO: fix meshes with more than 3 faces that share an edge
+			std::array<VertexConstItr, 3> mesh_vertex;
+			std::array<std::vector<FaceConstItr>, 3> neighboring_faces;
 		};
 
 		struct Vertex {
@@ -61,11 +54,9 @@ namespace Hix
 			void calculateNormalFromFaces();
 			QVector3D position;
 			QVector3D vn;
-			size_t leavingEdge;
-
-			//std::set<size_t> connected_faces;
-			//std::set<size_t> edges;
+			std::vector<FaceConstItr> connected_faces;
 		};
+
 
 		class Path3D : public std::vector<Vertex> {
 		public:
@@ -164,13 +155,12 @@ namespace Hix
 
 		private:
 			/********************** Helper Functions **********************/
-			std::vector<const Face*> findFaceWith2Vertices(const Vertex* v0, const Vertex* v1, const Face& self_f) const;
-			Vertex* addFaceVertex(QVector3D v);
+			std::vector<const Face*> findFaceWith2Vertices(const Vertex& v0, const Vertex& v1, const Face& self_f) const;
+			VertexConstItr addFaceVertex(QVector3D v);
 			void updateMinMax(QVector3D v);
 
 			QHash<uint32_t, const Vertex*> vertices_hash;
 
-			IndexedList<HalfEdge> hEdges;
 			TrackedIndexedList<Vertex> vertices;
 			TrackedIndexedList<Face> faces;
 
@@ -189,11 +179,7 @@ namespace Hix
 		};
 
 
-		float round(float num, int precision);
-		bool doubleAreSame(double a, double b);
-
 		uint32_t vertexHash(QVector3D v);
-		float vertexDistance(QVector3D, QVector3D);
 
 		QHash<uint32_t, Path>::iterator findSmallestPathHash(QHash<uint32_t, Path> pathHash);
 
