@@ -112,7 +112,10 @@ namespace Hix
 		class Mesh {
 		public:
 			Mesh();
+			//THIS IS NOT A COPY CONSTRUCTOR!
 			Mesh(const Mesh* origin);
+			//this is
+			Mesh(const Mesh&);
 			//copy assign
 			Mesh& operator=(const Mesh o);
 			/********************** Undo state functions***********************/
@@ -199,11 +202,12 @@ namespace Hix
 			/********************** Helper Functions **********************/
 
 			std::vector<HalfEdgeConstItr> setTwins(HalfEdgeItr edge);
-			VertexItr addFaceVertex(QVector3D v);
+			VertexItr addOrRetrieveFaceVertex(QVector3D v);
+			VertexConstItr getSimilarVertex(uint32_t digest, QVector3D v);
 			void addHalfEdgesToFace(std::array<VertexItr, 3> faceVertices, FaceConstItr face);
 			void updateMinMax(QVector3D v);
 
-			QHash<uint32_t, const Vertex*> vertices_hash;
+			QHash<uint32_t, VertexConstItr> vertices_hash;
 
 			TrackedIndexedList<Vertex> vertices;
 			TrackedIndexedList<HalfEdge> halfEdges;

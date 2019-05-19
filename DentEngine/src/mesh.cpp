@@ -6,6 +6,7 @@
 #include <list>
 
 #if defined(_DEBUG) || defined(QT_DEBUG )
+#define _STRICT_MESH
 #endif
 using namespace Utils::Math;
 using namespace Hix;
@@ -141,9 +142,29 @@ Mesh::Mesh( const Mesh* origin): Mesh()
 	prevMesh = origin->prevMesh;
 	nextMesh = origin->nextMesh;
 }
+Mesh::Mesh(const Mesh&)
+{
+
+	//QHash<uint32_t, VertexConstItr> vertices_hash;
+
+	//TrackedIndexedList<Vertex> vertices;
+	//TrackedIndexedList<HalfEdge> halfEdges;
+	//TrackedIndexedList<Face> faces;
+
+	//// for undo & redo
+	//Mesh* prevMesh = nullptr;
+	//Mesh* nextMesh = nullptr;
+
+	////index changed event callback
+	//void vtxIndexChangedCallback(size_t oldIdx, size_t newIdx);
+	//void faceIndexChangedCallback(size_t oldIdx, size_t newIdx);
+	//void hEdgeIndexChangedCallback(size_t oldIdx, size_t newIdx);
+
+	//float _x_min = 99999, _x_max = 99999, _y_min = 99999, _y_max = 99999, _z_min = 99999, _z_max = 99999;
+
+}
 Mesh& Mesh::operator=(const Mesh o)
 {
-	throw std::runtime_error("Not implemented yet");
 	Mesh* copyMesh = new Mesh();
 
 	// only need to copy faces, verticesHash, vertices
@@ -365,9 +386,12 @@ void Mesh::reverseFaces(){
 void Mesh::addFace(QVector3D v0, QVector3D v1, QVector3D v2){
 	std::array<VertexItr, 3> fVtx;
 
-    fVtx[0] = addFaceVertex(v0);
-	fVtx[1] = addFaceVertex(v1);
-	fVtx[2] = addFaceVertex(v2);
+    fVtx[0] = addOrRetrieveFaceVertex(v0);
+	fVtx[1] = addOrRetrieveFaceVertex(v1);
+	fVtx[2] = addOrRetrieveFaceVertex(v2);
+	//if the face is too small and slicing option collapsed a pair of its vertices, don't add.
+	if (fVtx[0] == fVtx[1] || fVtx[0] == fVtx[2] || fVtx[1] == fVtx[2])
+		return;
     Hix::Engine3D::Face mf;
 	mf.fn = QVector3D::normal(fVtx[0]->position, fVtx[1]->position, fVtx[2]->position);
 	mf.fn_unnorm = QVector3D::crossProduct(fVtx[1]->position - fVtx[0]->position, fVtx[1]->position - fVtx[0]->position);
@@ -627,7 +651,7 @@ Path3D Mesh::intersectionPath(Plane base_plane, Plane target_plane)const
     float majority2_distance = abs(majority[1].distanceToPlane(base_plane[0],base_plane[1],base_plane[2]));
 
     // calculate intersection points
-    Vertex mv1(nullptr), mv2(nullptr);
+    Vertex mv1, mv2;
     mv1.position = minority[0] + (majority[0] - minority[0])*(minority_distance/(majority1_distance+minority_distance));
     mv2.position = minority[0] + (majority[1] - minority[0])*(minority_distance/(majority2_distance+minority_distance));
 
@@ -645,21 +669,22 @@ Path Mesh::intersectionPath(Face mf, float z) const
 {
     Path p;
 
-    std::vector<const Vertex*> upper;
-    std::vector<const Vertex*> middle;
-    std::vector<const Vertex*> lower;
+    std::vector<VertexConstItr> upper;
+    std::vector<VertexConstItr> middle;
+    std::vector<VertexConstItr> lower;
 
+	auto mfVertices = mf.meshVertices();
     for (int i=0; i<3; i++){
-        if (mf.mesh_vertex[i]->position.z() > z){
-            upper.push_back(mf.mesh_vertex[i]);
-        } else if (doubleAreSame(mf.mesh_vertex[i]->position.z(),z)){
-            middle.push_back(mf.mesh_vertex[i]);
+        if (mfVertices[i]->position.z() > z){
+            upper.push_back(mfVertices[i]);
+        } else if (Utils::Math::doubleAreSame(mfVertices[i]->position.z(),z)){
+            middle.push_back(mfVertices[i]);
         } else
-            lower.push_back(mf.mesh_vertex[i]);
+            lower.push_back(mfVertices[i]);
     }
 
-    std::vector<const Vertex*> majority;
-    std::vector<const Vertex*> minority;
+    std::vector<VertexConstItr> majority;
+    std::vector<VertexConstItr> minority;
 
     if (upper.size() == 2 && lower.size() == 1){
         majority = upper;
@@ -739,6 +764,8 @@ uint32_t Hix::Engine3D::vertexHash(QVector3D v) // max build size = 1000mm, reso
 }
 
 
+
+
 std::vector<HalfEdgeConstItr> Hix::Engine3D::Mesh::setTwins(HalfEdgeItr subjectEdge)
 {
 
@@ -764,28 +791,41 @@ std::vector<HalfEdgeConstItr> Hix::Engine3D::Mesh::setTwins(HalfEdgeItr subjectE
 	}
 
 }
+VertexConstItr Mesh::getSimilarVertex(uint32_t digest, QVector3D v)
+{
+	QList<VertexConstItr> hashed_points = vertices_hash.values(digest);
+	for (unsigned int idx = 0; idx < hashed_points.size(); idx++)
+	{
+		const auto vtx = hashed_points.at(idx);
+		if (vtx->position.distanceToPoint(v) <= SlicingConfiguration::vertex_3D_distance)
+		{
+			return  hashed_points[idx];
 
-VertexItr Mesh::addFaceVertex(QVector3D v){
+			//if there is a useless vtx with no relations
+#ifdef _STRICT_MESH
+			throw std::runtime_error("useless dangling vtx");
+#endif
+		}
+	}
+	return vertices.cend();
+}
+
+VertexItr Mesh::addOrRetrieveFaceVertex(QVector3D v){
     uint32_t vertex_hash = vertexHash(v);
-
-	//?!
-  //  QList<Vertex*> hashed_points = vertices_hash.values(vertex_hash);
-  //  for(unsigned int idx = 0; idx < hashed_points.size(); idx++)
-  //  {
-		//const auto* vtx = hashed_points.at(idx);
-  //      if (vertexDistance(vtx->position, v)<=SlicingConfiguration::vertex_inbound_distance*SlicingConfiguration::vertex_inbound_distance)
-  //      {
-  //          return hashed_points[idx];
-  //      }
-  //  }
+	//find if existing vtx can be used
+	auto similarVtx = getSimilarVertex(vertex_hash, v);
+	if (similarVtx != vertices.cend())
+	{
+		return vertices.toNormItr(similarVtx);
+	}
 
     Vertex mv(v);
     vertices.emplace_back(mv);
-	auto* last = &(vertices.back());
+	auto last = vertices.end() - 1;
 	
     vertices_hash.insert(vertex_hash, last);
     updateMinMax(v);
-    return vertices.end() - 1;
+    return last;
 }
 
 void Hix::Engine3D::Mesh::addHalfEdgesToFace(std::array<VertexItr, 3> faceVertices, FaceConstItr face)
@@ -841,7 +881,7 @@ std::array<float,6> Mesh::calculateMinMax(QMatrix4x4 rotmatrix, const Mesh* mesh
 	qDebug() << "calculate minmax";
 	std::array<float, 6> minmax{ 99999 };
 	size_t count = 0;
-	const auto &vertices = *mesh->getVertices();
+	const auto &vertices = mesh->getVertices();
 	for (const auto& vertex : vertices)
 	{
 		QVector4D tmpVertex;
@@ -892,6 +932,18 @@ void Mesh::vtxIndexChangedCallback(size_t oldIdx, size_t newIdx)
 		modArrEdge->to = newIndexItr;
 	}
 
+	//update hash value
+	auto oldItr = vertices.cbegin() + oldIdx;
+	auto digest = vertexHash(vtx.position);
+	auto hashItr = vertices_hash.find(digest);
+	while (hashItr != vertices_hash.end() && hashItr.key() == digest) {
+		if (*hashItr == oldItr)
+		{
+			*hashItr = newIndexItr;
+			break;
+		}
+		++hashItr;
+	}
 }
 
 void Mesh::faceIndexChangedCallback(size_t oldIdx, size_t newIdx)
@@ -951,8 +1003,9 @@ void Mesh::updateMinMax(QVector3D v, std::array<float,6>& minMax){
 
 float Mesh::getFaceZmin(Face mf)const{
     float face__z_min=1000;//scfg->max_buildsize_x;
+	auto mfVertices = mf.meshVertices();
     for (int i=0; i<3; i++){
-        float temp__z_min = mf.mesh_vertex[i]->position.z();
+        float temp__z_min = mfVertices[i]->position.z();
         if (temp__z_min<face__z_min)
             face__z_min = temp__z_min;
     }
@@ -961,8 +1014,10 @@ float Mesh::getFaceZmin(Face mf)const{
 
 float Mesh::getFaceZmax(Face mf)const{
     float face__z_max=-1000;//-scfg->max_buildsize_x;
+	auto mfVertices = mf.meshVertices();
+
     for (int i=0; i<3; i++){
-        float temp__z_max = mf.mesh_vertex[i]->position.z();
+        float temp__z_max = mfVertices[i]->position.z();
         if (temp__z_max>face__z_max)
             face__z_max = temp__z_max;
     }
