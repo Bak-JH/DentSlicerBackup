@@ -105,8 +105,36 @@ std::vector<FaceConstItr> Hix::Engine3D::Vertex::connectedFaces()const
 	}
 	return result;
 }
+std::set< HalfEdgeConstItr>  Hix::Engine3D::Vertex::arrivingEdges()const
+{
+	std::set<HalfEdgeConstItr> result;
+	auto faces = connectedFaces();
+	for (auto face : faces)
+	{
+		auto circulator = face->edgeCirculator();
+		for (size_t i = 0; i < 3; ++i)
+		{
+			auto hEdge = circulator.toItr();
+			if (*(hEdge->to) == *this)
+			{
+				result.insert(hEdge);
+			}
+			++circulator;
+		}
+	}
+	return result;
+}
 
-void Vertex::calculateNormalFromFaces()
+bool Vertex::empty()const
+{
+	if (leavingEdges.empty() && arrivingEdges.empty())
+		return true;
+	else
+		false;
+}
+
+
+void Hix::Engine3D::Vertex::calculateNormalFromFaces()
 {
 	vn = { 0,0,0 };
 	auto faces = connectedFaces();
@@ -331,10 +359,6 @@ void Mesh::reverseFaces(){
 /********************** Mesh Generation Functions **********************/
 
 void Mesh::addFace(QVector3D v0, QVector3D v1, QVector3D v2){
-    addFace(v0,v1,v2,nullptr);
-}
-
-void Mesh::addFace(QVector3D v0, QVector3D v1, QVector3D v2){
 	std::array<VertexItr, 3> fVtx;
 
     fVtx[0] = addFaceVertex(v0);
@@ -348,105 +372,42 @@ void Mesh::addFace(QVector3D v0, QVector3D v1, QVector3D v2){
 
 	addHalfEdgesToFace(fVtx, faceItr);
 
-	v0_idx->calculateNormalFromFaces();
-	v1_idx->calculateNormalFromFaces();
-	v2_idx->calculateNormalFromFaces();
-
-
+	fVtx[0]->calculateNormalFromFaces();
+	fVtx[1]->calculateNormalFromFaces();
+	fVtx[2]->calculateNormalFromFaces();
 }
 
 
-TrackedIndexedList<Face>::const_iterator Mesh::removeFace(TrackedIndexedList<Face>::const_iterator f_it){
-    const Face &mf = (*f_it);
-    //Face &mf = faces[f_idx];
-    //std::vector<Face>::iterator f_idx_it = faces.begin()+f_idx;
-
-    const Vertex &mv0 = *mf.mesh_vertex[0];
-    const Vertex &mv1 = *mf.mesh_vertex[1];
-    const Vertex &mv2 = *mf.mesh_vertex[2];
-
-    // remove f_it face from its neighboring faces' neighboring faces list
-    for (auto& edge : mf.neighboring_faces){
-		for (auto nfsConstItrItr = edge.begin(); nfsConstItrItr != edge.end();)
-		{
-			FaceItr modifiable = faces.toNormItr(*nfsConstItrItr);
-			for (auto& neighboring_faces : modifiable->neighboring_faces) {
-				auto nf_nf_ptr_it = neighboring_faces.begin();
-				while (nf_nf_ptr_it != neighboring_faces.end()) {
-					//jesus wtf
-					FaceConstItr constItr = *nf_nf_ptr_it;
-					if (&*constItr == &mf) {
-						nf_nf_ptr_it = neighboring_faces.erase(nf_nf_ptr_it);
-						break;
-					}
-					else {
-						nf_nf_ptr_it++;
-					}
-				}
-			}
-			++nfIndexItr;
-		}
-    }
-
-	//jesus.....
-    if (mf.mesh_vertex[0] == mf.mesh_vertex[1] && mf.mesh_vertex[1] == mf.mesh_vertex[2]){
-		for (int c_idx = 0; c_idx < mv1.connected_faces.size(); c_idx++) {
-			const Face& cf(*mv1.connected_faces[c_idx]);
-            for (int v_idx=0; v_idx<3; v_idx ++){
-				if (cf.mesh_vertex[v_idx] == mf.mesh_vertex[1])
-				{
-					cf.modifiedByOwner(this)->mesh_vertex[v_idx] = mf.mesh_vertex[0];
-				}
-            }
-        }
-
-        for (int c_idx=0; c_idx < mv2.connected_faces.size(); c_idx ++){
-			const Face& cf(*mv2.connected_faces[c_idx]);
-
-            for (int v_idx=0; v_idx<3; v_idx ++){
-				if (cf.mesh_vertex[v_idx] == mf.mesh_vertex[2])
-				{
-					cf.modifiedByOwner(this)->mesh_vertex[v_idx] = mf.mesh_vertex[0];
-				}
-            }
-        }
-    } else if (mf.mesh_vertex[0] == mf.mesh_vertex[1]){ // replace 1 vertices in connected faces of 1 by 0
-        for (int c_idx=0; c_idx < mv1.connected_faces.size(); c_idx ++){
-			const Face& cf(*mv1.connected_faces[c_idx]);
-            for (int v_idx=0; v_idx<3; v_idx ++){
-                if (cf.mesh_vertex[v_idx] == mf.mesh_vertex[1])
-				{
-					cf.modifiedByOwner(this)->mesh_vertex[v_idx] = mf.mesh_vertex[0];
-				}
-            }
-        }
-    } else if (mf.mesh_vertex[1] == mf.mesh_vertex[2]){ // replace 2 by 1
-        for (int c_idx=0; c_idx < mv2.connected_faces.size(); c_idx ++){
-			const Face& cf(*mv2.connected_faces[c_idx]);
-            for (int v_idx=0; v_idx<3; v_idx ++){
-                if (cf.mesh_vertex[v_idx] == mf.mesh_vertex[2])
-				{
-					cf.modifiedByOwner(this)->mesh_vertex[v_idx] = mf.mesh_vertex[1];
-				}
-            }
-        }
-    } else if (mf.mesh_vertex[2] == mf.mesh_vertex[0]){ // replace 0 by 2
-        for (int c_idx=0; c_idx < mv0.connected_faces.size(); c_idx ++){
-			const Face& cf(*mv0.connected_faces[c_idx]);
-            for (int v_idx=0; v_idx<3; v_idx ++){
-                if (cf.mesh_vertex[v_idx] == mf.mesh_vertex[0])
-				{
-					cf.modifiedByOwner(this)->mesh_vertex[v_idx] = mf.mesh_vertex[2];
-				}
-            }
-        }
-    }
-	_meshModifications.push_back({ MeshOpType::Delete, MeshOpOperand::FaceSingle, f_it->idx});
-    auto afterDeleted =  faces.erase(f_it);
-	//update indexes
-	for (auto itr = afterDeleted; itr != faces.end(); ++itr)
+TrackedIndexedList<Face>::const_iterator Mesh::removeFace(FaceConstItr faceItr){
+	//for each half edge, remove vertex relations
+	auto edgeCirculator = faceItr->edgeCirculator();
+	for (size_t i = 0; i < 3; ++i)
 	{
-		itr->idx -= 1;
+		auto from = edgeCirculator->from;
+		auto to = edgeCirculator->to;
+
+		auto moddableLeavingVtx = vertices.toNormItr(from);
+		auto moddableArrivingVtx = vertices.toNormItr(to);
+
+		moddableLeavingVtx->leavingEdges.erase(edgeCirculator.toItr());
+		moddableArrivingVtx->arrivingEdges.erase(edgeCirculator.toItr());
+
+		//if the vertex is empty ie) there are no half edges connectint to it, delete the vertex
+		if (moddableLeavingVtx->empty())
+		{
+			vertices.swapAndErase(moddableLeavingVtx);
+		}
+		if (moddableArrivingVtx->empty())
+		{
+			vertices.swapAndErase(moddableArrivingVtx);
+		}
+		++edgeCirculator;
+	}
+	//remove all half edges belonging to the mesh
+	for (size_t i = 0; i < 3; ++i)
+	{
+		halfEdges.swapAndErase(edgeCirculator.toItr());
+		++edgeCirculator;
 	}
 	return afterDeleted;
 }
@@ -780,14 +741,16 @@ std::vector<HalfEdgeConstItr> Hix::Engine3D::Mesh::setTwins(HalfEdgeItr subjectE
 	auto to = subjectEdge->to;
 	for (auto& halfEdge : from->leavingEdges)
 	{
-		if (halfEdge != subjectEdge)
+		//if the leavingEdge is not the subject and traveling in same from -> same to
+		if (halfEdge != subjectEdge && halfEdge->to == to)
 		{
 			subjectEdge->twins.push_back(halfEdge);
 		}
 	}
 	for (auto& halfEdge : to->leavingEdges)
 	{
-		if (halfEdge != subjectEdge)
+		//if the leavingEdge is not the subject and traveling in opposite direction
+		if (halfEdge != subjectEdge && halfEdge->to == from)
 		{
 			subjectEdge->twins.push_back(halfEdge);
 		}
@@ -842,7 +805,8 @@ void Hix::Engine3D::Mesh::addHalfEdgesToFace(std::array<VertexItr, 3> faceVertic
 		itr->owningFace = face;
 
 		//for each vertices that the half edges are "leaving" from, add the half edge reference
-		faceVertices[faceIdx % 3]->leavingEdges.push_back(HalfEdgeConstItr(itr));
+		faceVertices[faceIdx % 3]->leavingEdges.insert(HalfEdgeConstItr(itr));
+		faceVertices[(faceIdx + 1) % 3]->arrivingEdges.insert(HalfEdgeConstItr(itr));
 
 		//add circular relationship for all half edges
 		nextItr = itr + 1;
@@ -903,63 +867,36 @@ void Mesh::updateMinMax(QVector3D v)
 
 void Mesh::vtxIndexChangedCallback(size_t oldIdx, size_t newIdx)
 {
-	//change face meshVtx indices to point to changed vtx idx
-	
+	//vertex whose index has been changed
 	auto& vtx = vertices[newIdx];
-	for (auto connectedFace : vtx.connected_faces)
+	auto& oldIdxVtx = vertices[oldIdx];
+	auto newIndexItr = vertices.cbegin() + newIdx;
+	//update leaving edges
+	for (auto leavingEdge : vtx.leavingEdges)
 	{
-		auto modableFace = faces.toNormItr(connectedFace);
-
-		for (auto& meshVtx : modableFace->mesh_vertex)
-		{
-			if (meshVtx == vertices.cbegin() + oldIdx)
-			{
-				meshVtx = vertices.cbegin() + newIdx;
-				break;
-			}
-		}
+		auto modLeavingEdge = halfEdges.toNormItr(leavingEdge);
+		modLeavingEdge->from = newIndexItr;
+		//get twin edges with opposite direction ie) arriving 
 	}
+	//update arrivingEdges
+	//remember, reference to vtx held by other elements still points to the old idx
+	auto arriveEdges = oldIdxVtx.arrivingEdges();
+	for (auto arrivingEdge : arriveEdges)
+	{
+		auto modLeavingEdge = halfEdges.toNormItr(leavingEdge);
+		modLeavingEdge->from = newIndexItr;
+		//get twin edges with opposite direction ie) arriving 
+	}
+
 }
 
 void Mesh::faceIndexChangedCallback(size_t oldIdx, size_t newIdx)
 {
-	//change vtx connectedFaces indices to point to changed face idx
-	auto& face = faces[newIdx];
-	for (auto vtxItr : face.mesh_vertex)
-	{
-		auto modableVtxItr = vertices.toNormItr(vtxItr);
+}
 
-		for (auto& faceItr : modableVtxItr->connected_faces)
-		{
-			if (faceItr == faces.cbegin() + oldIdx)
-			{
-				faceItr = faces.cbegin() + newIdx;
-				break;
-			}
-		}
-	}
-	// this is why neighbouring faces needs to die...
-	//update neighbouring faces
-	for (auto& edge : face.neighboring_faces)
-	{
-		for (auto& neighborItr : edge)
-		{
-			auto modableFace = faces.toNormItr(neighborItr);
+void Mesh::hEdgeIndexChangedCallback(size_t oldIdx, size_t newIdx)
+{
 
-			for (auto& nEdge : modableFace->neighboring_faces)
-			{
-				for (auto& nNeighborItr : nEdge)
-				{
-					if (nNeighborItr == faces.cbegin() + oldIdx)
-					{
-						nNeighborItr = faces.cbegin() + newIdx;
-						break;
-					}
-				}
-
-			}
-		}
-	}
 }
 
 

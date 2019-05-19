@@ -73,12 +73,15 @@ namespace Hix
 			friend inline bool operator!= (const Vertex& a, const Vertex& b) {
 				return a.position != b.position;
 			}
+			bool empty()const;
 			void calculateNormalFromFaces();
 			std::vector<FaceConstItr> connectedFaces()const;
-
 			QVector3D position;
 			QVector3D vn;
-			std::vector<HalfEdgeConstItr> leavingEdges;
+			std::set<HalfEdgeConstItr> leavingEdges;
+			std::set<HalfEdgeConstItr> arrivingEdges;
+
+
 		};
 		class HalfEdgeCirculator
 		{
@@ -125,8 +128,7 @@ namespace Hix
 			void vertexScale(float scaleX, float scaleY, float scaleZ, float centerX, float centerY);
 			void reverseFaces();
 			void addFace(QVector3D v0, QVector3D v1, QVector3D v2);
-			void addFace(QVector3D v0, QVector3D v1, QVector3D v2, const Face* parentface);
-			TrackedIndexedList<Face>::const_iterator removeFace(std::list<Face>::const_iterator f_it);
+			TrackedIndexedList<Face>::const_iterator removeFace(FaceConstItr f_it);
 			void connectFaces();
 			TrackedIndexedList<Vertex>& getVertices();
 			TrackedIndexedList<Face>& getFaces();
@@ -213,6 +215,7 @@ namespace Hix
 			//index changed event callback
 			void vtxIndexChangedCallback(size_t oldIdx, size_t newIdx);
 			void faceIndexChangedCallback(size_t oldIdx, size_t newIdx);
+			void hEdgeIndexChangedCallback(size_t oldIdx, size_t newIdx);
 
 			float _x_min = 99999, _x_max = 99999, _y_min = 99999, _y_max = 99999, _z_min = 99999, _z_max = 99999;
 
