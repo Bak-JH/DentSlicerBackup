@@ -387,8 +387,6 @@ public:
 		size_t idx = itr - cbegin();
 		return  begin() + idx;
 	}
-
-
 	template<class ...Args>
 	void emplace_front(Args&& ... args)
 	{
