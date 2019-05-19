@@ -16,8 +16,7 @@
 #define cos100 -0.17364818
 #define cos150 -0.8660254
 #define FZERO 0.00001f
-#if defined(_DEBUG) || defined(QT_DEBUG )
-#endif
+
 using namespace ClipperLib;
 namespace Hix
 {
@@ -195,7 +194,8 @@ namespace Hix
 
 		private:
 			/********************** Helper Functions **********************/
-			std::vector<const Face*> findFaceWith2Vertices(const Vertex& v0, const Vertex& v1, const Face& self_f) const;
+
+			std::vector<HalfEdgeConstItr> setTwins(HalfEdgeItr edge);
 			VertexItr addFaceVertex(QVector3D v);
 			void addHalfEdgesToFace(std::array<VertexItr, 3> faceVertices, FaceConstItr face);
 			void updateMinMax(QVector3D v);

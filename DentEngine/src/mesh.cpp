@@ -5,6 +5,8 @@
 #include "utils/mathutils.h"
 #include <list>
 
+#if defined(_DEBUG) || defined(QT_DEBUG )
+#endif
 using namespace Utils::Math;
 using namespace Hix;
 using namespace Hix::Engine3D;
@@ -332,7 +334,7 @@ void Mesh::addFace(QVector3D v0, QVector3D v1, QVector3D v2){
     addFace(v0,v1,v2,nullptr);
 }
 
-void Mesh::addFace(QVector3D v0, QVector3D v1, QVector3D v2, const Face* parentface){
+void Mesh::addFace(QVector3D v0, QVector3D v1, QVector3D v2){
 	std::array<VertexItr, 3> fVtx;
 
     fVtx[0] = addFaceVertex(v0);
@@ -451,29 +453,17 @@ TrackedIndexedList<Face>::const_iterator Mesh::removeFace(TrackedIndexedList<Fac
 
 //TODO: use changed history on face or vertex to only update faces which were added
 void Mesh::connectFaces(){
-
-
 	size_t count = 0;
-	for (auto& face : faces)
+
+	for (auto itr = halfEdges.begin(); itr != halfEdges.end(); ++itr)
 	{
+		setTwins(itr);
 		if (count % 100 == 0) {
 			QCoreApplication::processEvents();
 		}
 
-		// clear neighboring faces
-		face.neighboring_faces[0].clear();
-		face.neighboring_faces[1].clear();
-		face.neighboring_faces[2].clear();
-
-		std::vector<const Face*> faces1 = findFaceWith2Vertices(*face.mesh_vertex[0], *face.mesh_vertex[1], face);
-		std::vector<const Face*> faces2 = findFaceWith2Vertices(*face.mesh_vertex[1], *face.mesh_vertex[2], face);
-		std::vector<const Face*> faces3 = findFaceWith2Vertices(*face.mesh_vertex[2], *face.mesh_vertex[0], face);
-
-		face.neighboring_faces[0].insert(face.neighboring_faces[0].end(), faces1.begin(), faces1.end());
-		face.neighboring_faces[1].insert(face.neighboring_faces[1].end(), faces2.begin(), faces2.end());
-		face.neighboring_faces[2].insert(face.neighboring_faces[2].end(), faces3.begin(), faces3.end());
 		++count;
-	};
+	}
 }
 
 
@@ -781,6 +771,30 @@ uint32_t Hix::Engine3D::vertexHash(QVector3D v) // max build size = 1000mm, reso
 }
 
 
+std::vector<HalfEdgeConstItr> Hix::Engine3D::Mesh::setTwins(HalfEdgeItr subjectEdge)
+{
+
+	subjectEdge->twins.clear();
+	//TODO: there really should be only one twin, going in opposite direction
+	auto from = subjectEdge->from;
+	auto to = subjectEdge->to;
+	for (auto& halfEdge : from->leavingEdges)
+	{
+		if (halfEdge != subjectEdge)
+		{
+			subjectEdge->twins.push_back(halfEdge);
+		}
+	}
+	for (auto& halfEdge : to->leavingEdges)
+	{
+		if (halfEdge != subjectEdge)
+		{
+			subjectEdge->twins.push_back(halfEdge);
+		}
+	}
+
+}
+
 VertexItr Mesh::addFaceVertex(QVector3D v){
     uint32_t vertex_hash = vertexHash(v);
 
@@ -965,20 +979,6 @@ void Mesh::updateMinMax(QVector3D v, std::array<float,6>& minMax){
         minMax[5] = v.z();
 }
 
-// find face containing 2 vertices presented as arguments
-std::vector<const Face*> Mesh::findFaceWith2Vertices(const Vertex& v0, const  Vertex& v1, const Face& self_f) const
-{
-	std::vector<const Face*> candidates;
-    for (const Face* f: v0->connected_faces){
-        if (f->mesh_vertex[0] == self_f.mesh_vertex[0] && f->mesh_vertex[1] == self_f.mesh_vertex[1] && f->mesh_vertex[2] == self_f.mesh_vertex[2]){
-            continue;
-        }
-        if (f->mesh_vertex[0] == v1 || f->mesh_vertex[1] == v1 || f->mesh_vertex[2] == v1){
-            candidates.emplace_back(f);
-        }
-    }
-    return candidates;
-}
 
 float Mesh::getFaceZmin(Face mf)const{
     float face__z_min=1000;//scfg->max_buildsize_x;
