@@ -28,19 +28,42 @@ namespace Hix
 		struct Vertex;
 		struct Face;
 		struct Mesh;
+		struct HalfEdge;
+
+		typedef typename TrackedIndexedList<HalfEdge>::const_iterator HalfEdgeConstItr;
 		typedef typename TrackedIndexedList<Vertex>::const_iterator VertexConstItr;
 		typedef typename TrackedIndexedList<Face>::const_iterator FaceConstItr;
+		typedef typename TrackedIndexedList<HalfEdge>::iterator HalfEdgeItr;
+		typedef typename TrackedIndexedList<Vertex>::iterator VertexItr;
+		typedef typename TrackedIndexedList<Face>::iterator FaceItr;
 
 
+		
 		struct Face {
 			Face() {}
 			QVector3D fn;
 			QVector3D fn_unnorm;
-			//TODO: fix meshes with more than 3 faces that share an edge
-			std::array<VertexConstItr, 3> mesh_vertex;
-			std::array<std::vector<FaceConstItr>, 3> neighboring_faces;
+			HalfEdgeConstItr edge;
+			std::array<VertexConstItr, 3> meshVertices()const;
+			//std::array<std::vector<FaceConstItr>, 3> neighboring_faces;
+			HalfEdgeCirculator edgeCirculator()const;
+			std::array<size_t, 3> getVerticeIndices(const Mesh* owningMesh)const;
 		};
+		struct HalfEdge
+		{
+			
+			HalfEdgeConstItr next;
+			HalfEdgeConstItr prev;
+			VertexConstItr from;
+			VertexConstItr to;
+			FaceConstItr owningFace;
 
+			//TODO: guarantee no self intersection occurs and we can use this
+			//HalfEdgeConstItr twin;
+			std::vector<HalfEdgeConstItr> twins;
+
+			std::vector<FaceConstItr> nonOwningFaces()const;
+		};
 		struct Vertex {
 
 			Vertex() {}
@@ -52,11 +75,28 @@ namespace Hix
 				return a.position != b.position;
 			}
 			void calculateNormalFromFaces();
+			std::vector<FaceConstItr> connectedFaces()const;
+
 			QVector3D position;
 			QVector3D vn;
-			std::vector<FaceConstItr> connected_faces;
+			std::vector<HalfEdgeConstItr> leavingEdges;
 		};
-
+		class HalfEdgeCirculator
+		{
+		public:
+			HalfEdgeCirculator(HalfEdgeConstItr ptr);
+			//you need to double *, but it's worth it for indexing capability
+			HalfEdgeConstItr toItr()const;
+			const HalfEdge& operator*()const;
+			void operator++();
+			void operator--();
+			HalfEdgeCirculator operator--(int);
+			HalfEdgeCirculator operator++(int);
+			const HalfEdge* operator->() const;
+			
+		private:
+			HalfEdgeConstItr _hEdgeItr;
+		};
 
 		class Path3D : public std::vector<Vertex> {
 		public:
@@ -156,12 +196,14 @@ namespace Hix
 		private:
 			/********************** Helper Functions **********************/
 			std::vector<const Face*> findFaceWith2Vertices(const Vertex& v0, const Vertex& v1, const Face& self_f) const;
-			VertexConstItr addFaceVertex(QVector3D v);
+			VertexItr addFaceVertex(QVector3D v);
+			void addHalfEdgesToFace(std::array<VertexItr, 3> faceVertices, FaceConstItr face);
 			void updateMinMax(QVector3D v);
 
 			QHash<uint32_t, const Vertex*> vertices_hash;
 
 			TrackedIndexedList<Vertex> vertices;
+			TrackedIndexedList<HalfEdge> halfEdges;
 			TrackedIndexedList<Face> faces;
 
 			// for undo & redo

@@ -3,10 +3,119 @@
 #include <QDebug>
 #include <QCoreApplication>
 #include "utils/mathutils.h"
+#include <list>
 
 using namespace Utils::Math;
 using namespace Hix;
 using namespace Hix::Engine3D;
+
+//half edge circulator
+
+Hix::Engine3D::HalfEdgeCirculator::HalfEdgeCirculator(HalfEdgeConstItr itr): _hEdgeItr(itr)
+{
+}
+
+HalfEdgeConstItr Hix::Engine3D::HalfEdgeCirculator::toItr() const
+{
+	return _hEdgeItr;
+}
+
+const HalfEdge& Hix::Engine3D::HalfEdgeCirculator::operator*() const
+{
+	return *_hEdgeItr;
+}
+
+void Hix::Engine3D::HalfEdgeCirculator::operator++()
+{
+	_hEdgeItr = _hEdgeItr->next;
+}
+
+void Hix::Engine3D::HalfEdgeCirculator::operator--()
+{
+	_hEdgeItr = _hEdgeItr->prev;
+}
+
+HalfEdgeCirculator Hix::Engine3D::HalfEdgeCirculator::operator--(int)
+{
+	auto tmp = *this;
+	this->operator--();
+	return tmp;
+}
+
+HalfEdgeCirculator Hix::Engine3D::HalfEdgeCirculator::operator++(int)
+{
+	auto tmp = *this;
+	this->operator++();
+	return tmp;
+}
+
+const HalfEdge* Hix::Engine3D::HalfEdgeCirculator::operator->() const
+{
+	return _hEdgeItr.operator->();
+}
+
+
+std::array<VertexConstItr, 3> Hix::Engine3D::Face::meshVertices() const
+{
+	std::array<VertexConstItr, 3> result;
+	auto circulator = edgeCirculator();
+	for (size_t i = 0; i < 3; ++i)
+	{
+		result[i] = circulator->from;
+		++circulator;
+	}
+	return result;
+
+}
+
+HalfEdgeCirculator Hix::Engine3D::Face::edgeCirculator()const
+{
+	return HalfEdgeCirculator(edge);
+}
+
+std::array<size_t, 3> Hix::Engine3D::Face::getVerticeIndices(const Mesh* owningMesh)const
+{
+	std::array<size_t, 3> result;
+	auto faceVs = meshVertices();
+	for (size_t i = 0; i < 3; ++i)
+	{
+		result[i] = faceVs[i] - owningMesh->getVertices().cbegin();
+	}
+	return result;
+}
+
+std::vector<FaceConstItr> Hix::Engine3D::HalfEdge::nonOwningFaces()const
+{
+	std::vector<FaceConstItr> result;
+	for (auto each : twins)
+	{
+		result.push_back(each->owningFace);
+	}
+	return result;
+}
+
+std::vector<FaceConstItr> Hix::Engine3D::Vertex::connectedFaces()const
+{
+	std::vector<FaceConstItr> result;
+	for (auto each : leavingEdges)
+	{
+		result.push_back(each->owningFace);
+	}
+	return result;
+}
+
+void Vertex::calculateNormalFromFaces()
+{
+	vn = { 0,0,0 };
+	auto faces = connectedFaces();
+	for (auto& face : faces)
+	{
+		vn += face->fn;
+	}
+	vn.normalize();
+}
+
+
 Mesh::Mesh()
 {
 
@@ -224,32 +333,22 @@ void Mesh::addFace(QVector3D v0, QVector3D v1, QVector3D v2){
 }
 
 void Mesh::addFace(QVector3D v0, QVector3D v1, QVector3D v2, const Face* parentface){
-    auto v0_idx = addFaceVertex(v0);
-	auto v1_idx = addFaceVertex(v1);
-	auto v2_idx = addFaceVertex(v2);
+	std::array<VertexItr, 3> fVtx;
+
+    fVtx[0] = addFaceVertex(v0);
+	fVtx[1] = addFaceVertex(v1);
+	fVtx[2] = addFaceVertex(v2);
     Hix::Engine3D::Face mf;
-	
-    mf.mesh_vertex[0] = v0_idx;
-    mf.mesh_vertex[1] = v1_idx;
-    mf.mesh_vertex[2] = v2_idx;
+	mf.fn = QVector3D::normal(fVtx[0]->position, fVtx[1]->position, fVtx[2]->position);
+	mf.fn_unnorm = QVector3D::crossProduct(fVtx[1]->position - fVtx[0]->position, fVtx[1]->position - fVtx[0]->position);
+	faces.emplace_back(mf);
+	auto faceItr = faces.cend() - 1;
 
-    mf.fn = QVector3D::normal(v0_idx->position,v1_idx->position,v2_idx->position);
-    mf.fn_unnorm = QVector3D::crossProduct(v1_idx->position-v0_idx->position,v2_idx->position-v0_idx->position);
-    faces.emplace_back(mf);
-	auto latestFaceItr = faces.cend() - 1;
+	addHalfEdgesToFace(fVtx, faceItr);
 
-	auto modV0 = vertices.toNormItr(v0_idx);
-	auto modV1 = vertices.toNormItr(v1_idx);
-	auto modV2 = vertices.toNormItr(v2_idx);
-
-
-	modV0->connected_faces.push_back(latestFaceItr); //faces
-	modV1->connected_faces.push_back(latestFaceItr);
-	modV2->connected_faces.push_back(latestFaceItr);
-
-	modV0->calculateNormalFromFaces();
-	modV1->calculateNormalFromFaces();
-	modV2->calculateNormalFromFaces();
+	v0_idx->calculateNormalFromFaces();
+	v1_idx->calculateNormalFromFaces();
+	v2_idx->calculateNormalFromFaces();
 
 
 }
@@ -265,16 +364,16 @@ TrackedIndexedList<Face>::const_iterator Mesh::removeFace(TrackedIndexedList<Fac
     const Vertex &mv2 = *mf.mesh_vertex[2];
 
     // remove f_it face from its neighboring faces' neighboring faces list
-    for (auto& nfs : mf.neighboring_faces){
-		for (auto nfIndexItr = nfs.begin(); nfIndexItr != nfs.end();)
+    for (auto& edge : mf.neighboring_faces){
+		for (auto nfsConstItrItr = edge.begin(); nfsConstItrItr != edge.end();)
 		{
-			const Face* nf_ptr = *nfIndexItr;
-			auto modifiable = nf_ptr->modifiedByOwner(this);
-			for (std::vector<const Face*>& neighboring_faces : modifiable->neighboring_faces) {
+			FaceItr modifiable = faces.toNormItr(*nfsConstItrItr);
+			for (auto& neighboring_faces : modifiable->neighboring_faces) {
 				auto nf_nf_ptr_it = neighboring_faces.begin();
 				while (nf_nf_ptr_it != neighboring_faces.end()) {
 					//jesus wtf
-					if (*nf_nf_ptr_it == &mf) {
+					FaceConstItr constItr = *nf_nf_ptr_it;
+					if (&*constItr == &mf) {
 						nf_nf_ptr_it = neighboring_faces.erase(nf_nf_ptr_it);
 						break;
 					}
@@ -350,7 +449,7 @@ TrackedIndexedList<Face>::const_iterator Mesh::removeFace(TrackedIndexedList<Fac
 	return afterDeleted;
 }
 
-// add connected face idx to each meshes
+//TODO: use changed history on face or vertex to only update faces which were added
 void Mesh::connectFaces(){
 
 
@@ -682,7 +781,7 @@ uint32_t Hix::Engine3D::vertexHash(QVector3D v) // max build size = 1000mm, reso
 }
 
 
-VertexConstItr Mesh::addFaceVertex(QVector3D v){
+VertexItr Mesh::addFaceVertex(QVector3D v){
     uint32_t vertex_hash = vertexHash(v);
 
 	//?!
@@ -699,12 +798,58 @@ VertexConstItr Mesh::addFaceVertex(QVector3D v){
     Vertex mv(v);
     vertices.emplace_back(mv);
 	auto* last = &(vertices.back());
-	last->itr = (--vertices.end());
 	
     vertices_hash.insert(vertex_hash, last);
     updateMinMax(v);
-    return last;
+    return vertices.end() - 1;
 }
+
+void Hix::Engine3D::Mesh::addHalfEdgesToFace(std::array<VertexItr, 3> faceVertices, FaceConstItr face)
+{
+	//a mesh face aggregates half edges(3 to 1) so there is no need to hash half edges when adding them with new face
+	halfEdges.emplace_back(HalfEdge());
+	halfEdges.emplace_back(HalfEdge());
+	halfEdges.emplace_back(HalfEdge());
+
+	auto firstAddedItr = halfEdges.end() - 3;
+	size_t faceIdx;
+	
+	HalfEdgeConstItr nextItr;
+	HalfEdgeConstItr prevItr;
+
+	for (auto itr = firstAddedItr; itr != halfEdges.end(); ++itr)
+	{
+		//add vertices in (from, to) pairs, so (0,1) (1,2) (2,0)
+		itr->from = faceVertices[faceIdx % 3];
+		itr->to = faceVertices[(faceIdx + 1) % 3];
+		++faceIdx;
+
+		//add "owning" face or face that the hEdge circuit creates
+		itr->owningFace = face;
+
+		//for each vertices that the half edges are "leaving" from, add the half edge reference
+		faceVertices[faceIdx % 3]->leavingEdges.push_back(HalfEdgeConstItr(itr));
+
+		//add circular relationship for all half edges
+		nextItr = itr + 1;
+		prevItr = itr - 1;
+		//since we can't use % on itrs
+		if (nextItr == halfEdges.cend())
+		{
+			nextItr = firstAddedItr;
+		}
+		if (prevItr < firstAddedItr)
+		{
+			prevItr = firstAddedItr;
+		}
+		itr->next = nextItr;
+		itr->prev = prevItr;
+		//twins are not added here.
+	}
+
+
+}
+
 
 
 std::array<float,6> Mesh::calculateMinMax(QMatrix4x4 rotmatrix, const Mesh* mesh) {
@@ -1549,3 +1694,4 @@ float Mesh::z_max()const
     return _z_max;
 
 }
+
