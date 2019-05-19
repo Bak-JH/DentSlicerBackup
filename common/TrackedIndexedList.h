@@ -57,6 +57,16 @@ public:
 		}
 
 	}
+	//when you want to mark change in explicit manner
+	void markChanged(const_iterator itr)
+	{
+		markChanged(itr - cbegin());
+	}
+	void markChanged(size_t index)
+	{
+		_changedIndices.insert(index);
+
+	}
 
 protected:
 	void addedElement(size_t index) override
