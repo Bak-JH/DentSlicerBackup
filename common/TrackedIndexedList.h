@@ -44,7 +44,7 @@ public:
 	}
 	changes_type flushChanges()
 	{
-		if (_changedAll || _changedIndices.size() == size())
+		if (_changedAll)
 		{
 			clearChanges();
 			return true;

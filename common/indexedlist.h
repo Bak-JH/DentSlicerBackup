@@ -11,6 +11,9 @@
 #define _INDEXED_LIST_STRICT
 #endif
 
+template<class T, class A>
+class DeleteGuard;
+
 template <class T, class A = std::allocator<T>>
 class IndexedList {
 
@@ -582,6 +585,12 @@ public:
 		++_indexChangedCallbackToken;
 		return _indexChangedCallbackToken - 1;
 	}
+
+	DeleteGuard<T, A> getDeleteGuard()
+	{
+		return DeleteGuard<T, A>(this);
+	}
+
 protected:
 	virtual void addedElement(size_t index)
 	{
@@ -625,3 +634,59 @@ void swap(IndexedList<T, A> & a, IndexedList<T, A> & b)
 {
 	a.swap(b);
 }
+
+
+template<class T, class A>
+class DeleteGuard
+{
+public:
+	DeleteGuard(IndexedList<T, A>* listPtr) : _listPtr(listPtr)
+	{
+	}
+	~DeleteGuard()
+	{
+		flush();
+	}
+	DeleteGuard(const DeleteGuard&) = delete;
+	DeleteGuard& operator=(const DeleteGuard&) = delete;
+	DeleteGuard(DeleteGuard&& o) noexcept :
+		_listPtr(o._listPtr),       // explicit move of a member of class type
+		_indices(std::move(o._indices)),
+		_allowPopFront(o._allowPopFront)// explicit move of a member of non-class type
+	{
+		o._listPtr = nullptr;
+	}
+	DeleteGuard& operator=(DeleteGuard&& o)
+	{
+		flush();
+		_listPtr = o._listPtr;
+		o._listPtr = nullptr;
+		_indices(std::move(o._indices));
+		_allowPopFront = o._allowPopFront;
+	}
+	void deleteLater(typename IndexedList<T, A>::const_iterator itr)
+	{
+		size_t idx = itr - _listPtr->cbegin();
+		_indices.insert(idx);
+	}
+	void flush()
+	{
+		if (_listPtr)
+		{
+			for(auto idx: _indices)
+			{
+				_listPtr->swapAndErase(_listPtr->cbegin() + idx, _allowPopFront);
+			}
+			_indices.clear();
+		}
+	}
+	void allowPopFront(bool isEnabled)
+	{
+		_allowPopFront = isEnabled;
+	}
+private:
+	IndexedList<T, A>* _listPtr = nullptr;
+	//have to be decreasing order so that elements about to be deleted do not get swapped
+	std::set<size_t, std::greater<size_t>> _indices;
+	bool _allowPopFront = false;
+};
