@@ -47,6 +47,7 @@ namespace Hix
 			//std::array<std::vector<FaceConstItr>, 3> neighboring_faces;
 			HalfEdgeCirculator edgeCirculator()const;
 			std::array<size_t, 3> getVerticeIndices(const Mesh* owningMesh)const;
+
 		};
 		struct HalfEdge
 		{
@@ -56,7 +57,6 @@ namespace Hix
 			VertexConstItr from;
 			VertexConstItr to;
 			FaceConstItr owningFace;
-
 			//TODO: guarantee no self intersection occurs and we can use this
 			//HalfEdgeConstItr twin;
 			std::vector<HalfEdgeConstItr> twins;
@@ -113,7 +113,8 @@ namespace Hix
 		public:
 			Mesh();
 			Mesh(const Mesh* origin);
-
+			//copy assign
+			Mesh& operator=(const Mesh o);
 			/********************** Undo state functions***********************/
 			void setNextMesh(Mesh* mesh);
 			void setPrevMesh(Mesh* mesh);
@@ -126,6 +127,7 @@ namespace Hix
 			void centerMesh();
 			void vertexRotate(QMatrix4x4 tmpmatrix);
 			void vertexScale(float scaleX, float scaleY, float scaleZ, float centerX, float centerY);
+			void reverseFace(FaceConstItr faceItr);
 			void reverseFaces();
 			void addFace(QVector3D v0, QVector3D v1, QVector3D v2);
 			TrackedIndexedList<Face>::const_iterator removeFace(FaceConstItr f_it);
@@ -135,7 +137,6 @@ namespace Hix
 
 
 			/********************** Mesh Modify and Copy Functions***********************/
-			Mesh* copyMesh()const;
 			Mesh* vertexMoved(QVector3D direction)const;
 
 

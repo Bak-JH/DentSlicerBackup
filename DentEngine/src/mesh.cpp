@@ -105,25 +105,6 @@ std::vector<FaceConstItr> Hix::Engine3D::Vertex::connectedFaces()const
 	}
 	return result;
 }
-std::set< HalfEdgeConstItr>  Hix::Engine3D::Vertex::arrivingEdges()const
-{
-	std::set<HalfEdgeConstItr> result;
-	auto faces = connectedFaces();
-	for (auto face : faces)
-	{
-		auto circulator = face->edgeCirculator();
-		for (size_t i = 0; i < 3; ++i)
-		{
-			auto hEdge = circulator.toItr();
-			if (*(hEdge->to) == *this)
-			{
-				result.insert(hEdge);
-			}
-			++circulator;
-		}
-	}
-	return result;
-}
 
 bool Vertex::empty()const
 {
@@ -148,6 +129,11 @@ void Hix::Engine3D::Vertex::calculateNormalFromFaces()
 
 Mesh::Mesh()
 {
+	//add indexChanged callbacks for TrackedIndexLists
+
+	vertices.addIndexChangedCallback(std::bind(&Mesh::vtxIndexChangedCallback, this, std::placeholders::_1, std::placeholders::_2));
+	faces.addIndexChangedCallback(std::bind(&Mesh::faceIndexChangedCallback, this, std::placeholders::_1, std::placeholders::_2));
+	halfEdges.addIndexChangedCallback(std::bind(&Mesh::hEdgeIndexChangedCallback, this, std::placeholders::_1, std::placeholders::_2));
 
 }
 Mesh::Mesh( const Mesh* origin): Mesh()
@@ -155,6 +141,36 @@ Mesh::Mesh( const Mesh* origin): Mesh()
 	prevMesh = origin->prevMesh;
 	nextMesh = origin->nextMesh;
 }
+Mesh& Mesh::operator=(const Mesh o)
+{
+	throw std::runtime_error("Not implemented yet");
+	Mesh* copyMesh = new Mesh();
+
+	// only need to copy faces, verticesHash, vertices
+	for (Vertex mv : vertices) {
+		copyMesh->vertices.push_back(mv);
+		copyMesh->vertices.back() = copyMesh->vertices.back();
+	}
+	for (Face mf : faces) {
+		copyMesh->faces.push_back(mf);
+		copyMesh->faces.back() = copyMesh->faces.back();
+
+	}
+	for (auto it = vertices_hash.begin(); it != vertices_hash.end(); ++it) {
+		copyMesh->vertices_hash.insert(it.key(), it.value());
+	}
+	copyMesh->connectFaces();
+
+	copyMesh->_x_max = _x_max;
+	copyMesh->_x_min = _x_min;
+	copyMesh->_y_max = _y_max;
+	copyMesh->_y_min = _y_min;
+	copyMesh->_z_max = _z_max;
+	copyMesh->_z_min = _z_min;
+
+	return copyMesh;
+}
+
 /********************** Mesh Edit Functions***********************/
 
 
@@ -311,46 +327,34 @@ void Mesh::vertexScale(float scaleX=1, float scaleY=1, float scaleZ=1, float cen
 	}
 }
 
-Mesh* Mesh::copyMesh()const
+
+void Mesh::reverseFace(FaceConstItr faceItr)
 {
-    Mesh* copyMesh = new Mesh();
+	auto edgeCirc = faceItr->edgeCirculator();
+	HalfEdge* hEdge;
+	for (size_t i = 0; i < 3; ++i)
+	{
+		hEdge = &*halfEdges.toNormItr(edgeCirc.toItr());
+		auto tmpEdg = hEdge->next;
+		hEdge->next = hEdge->prev;
+		hEdge->prev = tmpEdg;
 
-    // only need to copy faces, verticesHash, vertices
-    for(Vertex mv: vertices){
-        copyMesh->vertices.push_back(mv);
-		copyMesh->vertices.back() = copyMesh->vertices.back();
-    }
-    for(Face mf: faces){
-        copyMesh->faces.push_back(mf);
-		copyMesh->faces.back() = copyMesh->faces.back();
-
-    }
-    for (auto it = vertices_hash.begin(); it!=vertices_hash.end(); ++it){
-        copyMesh->vertices_hash.insert(it.key(), it.value());
-    }
-    copyMesh->connectFaces();
-
-    copyMesh->_x_max = _x_max;
-    copyMesh->_x_min = _x_min;
-    copyMesh->_y_max = _y_max;
-    copyMesh->_y_min = _y_min;
-    copyMesh->_z_max = _z_max;
-    copyMesh->_z_min = _z_min;
-
-    return copyMesh;
+		auto oldFrom = hEdge->from;
+		hEdge->from = hEdge->to;
+		hEdge->to = oldFrom;
+	}
 }
+
 
 void Mesh::reverseFaces(){
 
 	size_t count = 0;
-	for (auto face : faces)
+	for(auto constItr = faces.cbegin(); constItr != faces.cend(); ++ constItr)
+
 	{
 		if (count % 100 == 0)
 			QCoreApplication::processEvents();
-		auto last = face.mesh_vertex[2];
-		face.mesh_vertex[2] = face.mesh_vertex[0];
-		face.mesh_vertex[0] = last;
-		++count;
+		reverseFace(constItr);
 	};
 
 }
@@ -381,6 +385,9 @@ void Mesh::addFace(QVector3D v0, QVector3D v1, QVector3D v2){
 TrackedIndexedList<Face>::const_iterator Mesh::removeFace(FaceConstItr faceItr){
 	//for each half edge, remove vertex relations
 	auto edgeCirculator = faceItr->edgeCirculator();
+	DeleteGuard<Vertex, std::allocator<Vertex>> vtxDelGuard = vertices.getDeleteGuard();
+	DeleteGuard<HalfEdge, std::allocator<HalfEdge>> hEdgeDelGuard = halfEdges.getDeleteGuard();
+
 	for (size_t i = 0; i < 3; ++i)
 	{
 		auto from = edgeCirculator->from;
@@ -395,21 +402,21 @@ TrackedIndexedList<Face>::const_iterator Mesh::removeFace(FaceConstItr faceItr){
 		//if the vertex is empty ie) there are no half edges connectint to it, delete the vertex
 		if (moddableLeavingVtx->empty())
 		{
-			vertices.swapAndErase(moddableLeavingVtx);
+			vtxDelGuard.deleteLater(moddableLeavingVtx);
 		}
 		if (moddableArrivingVtx->empty())
 		{
-			vertices.swapAndErase(moddableArrivingVtx);
+			vtxDelGuard.deleteLater(moddableArrivingVtx);
 		}
 		++edgeCirculator;
 	}
 	//remove all half edges belonging to the mesh
 	for (size_t i = 0; i < 3; ++i)
 	{
-		halfEdges.swapAndErase(edgeCirculator.toItr());
+		hEdgeDelGuard.deleteLater(edgeCirculator.toItr());
 		++edgeCirculator;
 	}
-	return afterDeleted;
+	return faces.swapAndErase(faceItr);
 }
 
 //TODO: use changed history on face or vertex to only update faces which were added
@@ -869,7 +876,7 @@ void Mesh::vtxIndexChangedCallback(size_t oldIdx, size_t newIdx)
 {
 	//vertex whose index has been changed
 	auto& vtx = vertices[newIdx];
-	auto& oldIdxVtx = vertices[oldIdx];
+	//new position for the shifted vtx;
 	auto newIndexItr = vertices.cbegin() + newIdx;
 	//update leaving edges
 	for (auto leavingEdge : vtx.leavingEdges)
@@ -879,24 +886,49 @@ void Mesh::vtxIndexChangedCallback(size_t oldIdx, size_t newIdx)
 		//get twin edges with opposite direction ie) arriving 
 	}
 	//update arrivingEdges
-	//remember, reference to vtx held by other elements still points to the old idx
-	auto arriveEdges = oldIdxVtx.arrivingEdges();
-	for (auto arrivingEdge : arriveEdges)
+	for (auto arrivingEdge : vtx.arrivingEdges)
 	{
-		auto modLeavingEdge = halfEdges.toNormItr(leavingEdge);
-		modLeavingEdge->from = newIndexItr;
-		//get twin edges with opposite direction ie) arriving 
+		auto modArrEdge = halfEdges.toNormItr(arrivingEdge);
+		modArrEdge->to = newIndexItr;
 	}
 
 }
 
 void Mesh::faceIndexChangedCallback(size_t oldIdx, size_t newIdx)
 {
+	//face whose index has been changed
+	auto& face = faces[newIdx];
+	//new position for the shifted face;
+	auto newIndexItr = faces.cbegin() + newIdx;
+	//for each half edges "owned" by this face, update the iterator
+	auto circ = face.edgeCirculator();
+	for (size_t i = 0; i < 3; ++i)
+	{
+		auto modHEdge = halfEdges.toNormItr(circ.toItr());
+		modHEdge->owningFace = newIndexItr;
+	}
 }
 
 void Mesh::hEdgeIndexChangedCallback(size_t oldIdx, size_t newIdx)
 {
-
+	//halfEdge whose index has been changed
+	auto& hEdge = halfEdges[newIdx];
+	//new position for the shifted halfEdge;
+	auto newIndexItr = halfEdges.cbegin() + newIdx;
+	//update face that owns this half edge only if the itr owned by the face is this one
+	if (hEdge.owningFace->edge != hEdge.next && hEdge.owningFace->edge != hEdge.prev)
+	{
+		auto modFace = faces.toNormItr(hEdge.owningFace);
+		modFace->edge = newIndexItr;
+	}
+	//update vertices that have reference to this edge
+	auto oldItr = halfEdges.cbegin() + oldIdx;
+	auto modFrom = &*vertices.toNormItr(hEdge.from);
+	modFrom->leavingEdges.erase(oldItr);
+	modFrom->leavingEdges.insert(newIndexItr);	
+	auto modTo = &*vertices.toNormItr(hEdge.to);
+	modTo->arrivingEdges.erase(oldItr);
+	modTo->arrivingEdges.insert(newIndexItr);
 }
 
 
