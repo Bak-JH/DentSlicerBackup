@@ -22,6 +22,13 @@ namespace Hix
 {
 	namespace Engine3D
 	{
+		template<class T, class A>
+		TrackedIndexedList<T, A>::const_iterator getEquivalentItr(const TrackedIndexedList<T, A>& b, const TrackedIndexedList<T, A>& a, const TrackedIndexedList<T, A>::const_iterator& aItr)
+		{
+			size_t idx = aItr - a.cbegin();
+			return b.cbegin() + idx;
+		}
+
 		// plane contains at least 3 vertices contained in the plane in clockwise direction
 		typedef std::vector<QVector3D> Plane;
 		struct Vertex;
@@ -78,8 +85,8 @@ namespace Hix
 			std::vector<FaceConstItr> connectedFaces()const;
 			QVector3D position;
 			QVector3D vn;
-			std::set<HalfEdgeConstItr> leavingEdges;
-			std::set<HalfEdgeConstItr> arrivingEdges;
+			std::vector<HalfEdgeConstItr> leavingEdges;
+			std::vector<HalfEdgeConstItr> arrivingEdges;
 
 
 		};
@@ -117,7 +124,7 @@ namespace Hix
 			//this is
 			Mesh(const Mesh&);
 			//copy assign
-			Mesh& operator=(const Mesh o);
+			//Mesh& operator=(const Mesh o);
 			/********************** Undo state functions***********************/
 			void setNextMesh(Mesh* mesh);
 			void setPrevMesh(Mesh* mesh);
@@ -203,6 +210,7 @@ namespace Hix
 
 			std::vector<HalfEdgeConstItr> setTwins(HalfEdgeItr edge);
 			VertexItr addOrRetrieveFaceVertex(QVector3D v);
+			void removeVertexHash(QVector3D pos);
 			VertexConstItr getSimilarVertex(uint32_t digest, QVector3D v);
 			void addHalfEdgesToFace(std::array<VertexItr, 3> faceVertices, FaceConstItr face);
 			void updateMinMax(QVector3D v);

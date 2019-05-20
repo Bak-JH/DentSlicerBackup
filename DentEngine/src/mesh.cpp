@@ -142,55 +142,78 @@ Mesh::Mesh( const Mesh* origin): Mesh()
 	prevMesh = origin->prevMesh;
 	nextMesh = origin->nextMesh;
 }
-Mesh::Mesh(const Mesh&)
+Mesh::Mesh(const Mesh& o)
 {
+	vertices_hash = o.vertices_hash;
 
-	//QHash<uint32_t, VertexConstItr> vertices_hash;
+	vertices = o.vertices;
+	halfEdges = o.halfEdges;
+	faces = o.faces;
 
-	//TrackedIndexedList<Vertex> vertices;
-	//TrackedIndexedList<HalfEdge> halfEdges;
-	//TrackedIndexedList<Face> faces;
+	prevMesh = o.prevMesh;
+	nextMesh = o.nextMesh;
 
-	//// for undo & redo
-	//Mesh* prevMesh = nullptr;
-	//Mesh* nextMesh = nullptr;
 
-	////index changed event callback
-	//void vtxIndexChangedCallback(size_t oldIdx, size_t newIdx);
-	//void faceIndexChangedCallback(size_t oldIdx, size_t newIdx);
-	//void hEdgeIndexChangedCallback(size_t oldIdx, size_t newIdx);
+	_x_min = o._x_min;
+	_x_max = o._x_max;
+	_y_min = o._y_min;
+	_y_max = o._y_max;
+	_z_min = o._z_min;
+	_z_max = o._z_max;
 
-	//float _x_min = 99999, _x_max = 99999, _y_min = 99999, _y_max = 99999, _z_min = 99999, _z_max = 99999;
+	time = o.time;
+	m_translation = o.m_translation;
+	m_matrix = o.m_matrix;
+
+
+	vertices.addIndexChangedCallback(std::bind(&Mesh::vtxIndexChangedCallback, this, std::placeholders::_1, std::placeholders::_2));
+	faces.addIndexChangedCallback(std::bind(&Mesh::faceIndexChangedCallback, this, std::placeholders::_1, std::placeholders::_2));
+	halfEdges.addIndexChangedCallback(std::bind(&Mesh::hEdgeIndexChangedCallback, this, std::placeholders::_1, std::placeholders::_2));
+
+	//update iterators to point to new containers
+	for (auto& face : faces)
+	{
+		face.edge = getEquivalentItr(halfEdges, o.halfEdges, face.edge);
+	}
+	for (auto& hEdge : halfEdges)
+	{
+		//next
+		hEdge.next = getEquivalentItr(halfEdges, o.halfEdges, hEdge.next);
+
+		//prev
+		hEdge.prev = getEquivalentItr(halfEdges, o.halfEdges, hEdge.prev);
+		//from
+		hEdge.from = getEquivalentItr(vertices, o.vertices, hEdge.from);
+		//to
+		hEdge.to = getEquivalentItr(vertices, o.vertices, hEdge.to);
+		//owningFace
+		hEdge.owningFace = getEquivalentItr(faces, o.faces, hEdge.owningFace);
+		//twins
+		for (auto& twin : hEdge.twins)
+		{
+			twin = getEquivalentItr(halfEdges, o.halfEdges, twin);
+		}
+	}
+	for (auto& vtx : vertices)
+	{
+		for (auto& hEdge : vtx.leavingEdges)
+		{
+			hEdge = getEquivalentItr(halfEdges, o.halfEdges, hEdge);
+		}
+		for (auto& hEdge : vtx.arrivingEdges)
+		{
+			hEdge = getEquivalentItr(halfEdges, o.halfEdges, hEdge);
+		}
+	}
+	for (auto& vtx : vertices_hash)
+	{
+		vtx = getEquivalentItr(vertices, o.vertices, vtx);
+	}
 
 }
-Mesh& Mesh::operator=(const Mesh o)
-{
-	Mesh* copyMesh = new Mesh();
-
-	// only need to copy faces, verticesHash, vertices
-	for (Vertex mv : vertices) {
-		copyMesh->vertices.push_back(mv);
-		copyMesh->vertices.back() = copyMesh->vertices.back();
-	}
-	for (Face mf : faces) {
-		copyMesh->faces.push_back(mf);
-		copyMesh->faces.back() = copyMesh->faces.back();
-
-	}
-	for (auto it = vertices_hash.begin(); it != vertices_hash.end(); ++it) {
-		copyMesh->vertices_hash.insert(it.key(), it.value());
-	}
-	copyMesh->connectFaces();
-
-	copyMesh->_x_max = _x_max;
-	copyMesh->_x_min = _x_min;
-	copyMesh->_y_max = _y_max;
-	copyMesh->_y_min = _y_min;
-	copyMesh->_z_max = _z_max;
-	copyMesh->_z_min = _z_min;
-
-	return copyMesh;
-}
+//Mesh& Mesh::operator=(const Mesh o)
+//{
+//}
 
 /********************** Mesh Edit Functions***********************/
 
@@ -247,7 +270,7 @@ void Mesh::vertexMove(QVector3D direction){
 
 Mesh* Mesh::vertexMoved(QVector3D direction)const
 {
-    Mesh* coppied = copyMesh();
+    Mesh* coppied = new Mesh(*this);
     coppied->vertexMove(direction);
     return coppied;
 }
@@ -274,13 +297,10 @@ void Mesh::vertexRotate(QMatrix4x4 tmpmatrix){
     _z_min = 99999;
     _z_max = 99999;
 
-	size_t count = 0;
 	for (auto& vertex : vertices)
 	{
 		QVector4D tmpVertex;
 		QVector3D tmpVertex2;
-		if (count % 100 == 0)
-			QCoreApplication::processEvents();
 		tmpVertex = vertex.position.toVector4D();
 		tmpVertex2.setX(QVector4D::dotProduct(tmpVertex, tmpmatrix.column(0)));
 		tmpVertex2.setY(QVector4D::dotProduct(tmpVertex, tmpmatrix.column(1)));
@@ -289,24 +309,18 @@ void Mesh::vertexRotate(QMatrix4x4 tmpmatrix){
 		updateMinMax(vertex.position);
 	};
 
-
-	count = 0;
 	for (auto& face : faces)
 	{
-		if (count % 100 == 0)
-			QCoreApplication::processEvents();
-		face.fn = QVector3D::normal(face.mesh_vertex[0]->position,
-		face.mesh_vertex[1]->position,
-		face.mesh_vertex[2]->position);
-		face.fn_unnorm = QVector3D::crossProduct(face.mesh_vertex[1]->position - face.mesh_vertex[0]->position,
-		face.mesh_vertex[2]->position - face.mesh_vertex[0]->position);
+		auto meshVertices = face.meshVertices();
+		face.fn = QVector3D::normal(meshVertices[0]->position,
+		meshVertices[1]->position,
+		meshVertices[2]->position);
+		face.fn_unnorm = QVector3D::crossProduct(meshVertices[1]->position - meshVertices[0]->position,
+		meshVertices[2]->position - meshVertices[0]->position);
 	};
 
-	count = 0;
 	for (auto& vertex : vertices)
 	{
-		if (count % 100 == 0)
-			QCoreApplication::processEvents();
 		vertex.calculateNormalFromFaces();
 	};
 
@@ -420,17 +434,24 @@ TrackedIndexedList<Face>::const_iterator Mesh::removeFace(FaceConstItr faceItr){
 		auto moddableLeavingVtx = vertices.toNormItr(from);
 		auto moddableArrivingVtx = vertices.toNormItr(to);
 
-		moddableLeavingVtx->leavingEdges.erase(edgeCirculator.toItr());
-		moddableArrivingVtx->arrivingEdges.erase(edgeCirculator.toItr());
+		auto& leavingVtx = *moddableLeavingVtx;
+		auto& arrivingVtx = *moddableArrivingVtx;
+
+		auto delVectorItr = std::find(leavingVtx.leavingEdges.begin(), leavingVtx.leavingEdges.end(), edgeCirculator.toItr());
+		leavingVtx.leavingEdges.erase(delVectorItr);
+		delVectorItr = std::find(leavingVtx.arrivingEdges.begin(), leavingVtx.arrivingEdges.end(), edgeCirculator.toItr());
+		arrivingVtx.arrivingEdges.erase(delVectorItr);
 
 		//if the vertex is empty ie) there are no half edges connectint to it, delete the vertex
-		if (moddableLeavingVtx->empty())
+		if (leavingVtx.empty())
 		{
 			vtxDelGuard.deleteLater(moddableLeavingVtx);
+			removeVertexHash(leavingVtx.position);
 		}
-		if (moddableArrivingVtx->empty())
+		if (arrivingVtx.empty())
 		{
 			vtxDelGuard.deleteLater(moddableArrivingVtx);
+			removeVertexHash(arrivingVtx.position);
 		}
 		++edgeCirculator;
 	}
@@ -466,48 +487,8 @@ Mesh* Mesh::saveUndoState(const Qt3DCore::QTransform& transform)
 	nextMesh = nullptr;
 
 	// copy current Mesh as temporary prev_mesh
-	Mesh* temp_prev_mesh = new Mesh();
+	Mesh* temp_prev_mesh = new Mesh(*this);
 
-
-	// only need to copy faces, verticesHash, vertices
-	for(Vertex& mv: vertices) {
-		temp_prev_mesh->vertices.push_back(mv);
-	}
-
-	for (TrackedIndexedList<Face>::iterator it = this->faces.begin(); it != this->faces.end(); ++it) {
-		//qDebug() << it->neighboring_faces.size();
-		temp_prev_mesh->faces.push_back((*it));
-		temp_prev_mesh->faces.back().itr = (--temp_prev_mesh->faces.end());
-
-		// clear and copy neighboring faces
-		/*temp_prev_mesh->faces.end()->neighboring_faces[0].clear();
-		temp_prev_mesh->faces.end()->neighboring_faces[1].clear();
-		temp_prev_mesh->faces.end()->neighboring_faces[2].clear();*/
-		/*temp_prev_mesh->faces.end()->neighboring_faces[0].insert(temp_prev_mesh->faces.end()->neighboring_faces[0].end(), mf.neighboring_faces[0].begin(), mf.neighboring_faces[0].end());
-		temp_prev_mesh->faces.end()->neighboring_faces[1].insert(temp_prev_mesh->faces.end()->neighboring_faces[1].end(), mf.neighboring_faces[1].begin(), mf.neighboring_faces[1].end());
-		temp_prev_mesh->faces.end()->neighboring_faces[2].insert(temp_prev_mesh->faces.end()->neighboring_faces[2].end(), mf.neighboring_faces[2].begin(), mf.neighboring_faces[2].end());*/
-	}
-
-	for (QHash<uint32_t, Vertex*>::iterator it = this->vertices_hash.begin(); it != this->vertices_hash.end(); ++it) {
-		temp_prev_mesh->vertices_hash.insert(it.key(), it.value());
-	}
-
-	temp_prev_mesh->_x_max = this->x_max();
-	temp_prev_mesh->_x_min = this->x_min();
-	temp_prev_mesh->_y_max = this->y_max();
-	temp_prev_mesh->_y_min = this->y_min();
-	temp_prev_mesh->_z_max = this->z_max();
-	temp_prev_mesh->_z_min = this->z_min();
-
-	// it takes too long
-	/*foreach (Face mf, mesh->faces){
-		temp_prev_mesh->addFace(mesh->vertices[mf.mesh_vertex[0]].position,
-				mesh->vertices[mf.mesh_vertex[1]].position,
-				mesh->vertices[mf.mesh_vertex[2]].position);
-	}*/
-	//temp_prev_mesh->connectFaces();
-
-	temp_prev_mesh->prevMesh = prevMesh;
 	if (prevMesh != nullptr)
 		prevMesh->nextMesh = temp_prev_mesh;
 	temp_prev_mesh->nextMesh = this;
@@ -810,6 +791,18 @@ VertexConstItr Mesh::getSimilarVertex(uint32_t digest, QVector3D v)
 	return vertices.cend();
 }
 
+void Mesh::removeVertexHash(QVector3D pos)
+{
+	auto digest = vertexHash(pos);
+	auto hashItr = vertices_hash.find(digest);
+	while (hashItr != vertices_hash.end() && hashItr.key() == digest) {
+		if (hashItr.value()->position == pos) {
+			vertices_hash.erase(hashItr);
+			break;
+		}
+	}
+}
+
 VertexItr Mesh::addOrRetrieveFaceVertex(QVector3D v){
     uint32_t vertex_hash = vertexHash(v);
 	//find if existing vtx can be used
@@ -852,8 +845,8 @@ void Hix::Engine3D::Mesh::addHalfEdgesToFace(std::array<VertexItr, 3> faceVertic
 		itr->owningFace = face;
 
 		//for each vertices that the half edges are "leaving" from, add the half edge reference
-		faceVertices[faceIdx % 3]->leavingEdges.insert(HalfEdgeConstItr(itr));
-		faceVertices[(faceIdx + 1) % 3]->arrivingEdges.insert(HalfEdgeConstItr(itr));
+		faceVertices[faceIdx % 3]->leavingEdges.push_back(HalfEdgeConstItr(itr));
+		faceVertices[(faceIdx + 1) % 3]->arrivingEdges.push_back(HalfEdgeConstItr(itr));
 
 		//add circular relationship for all half edges
 		nextItr = itr + 1;
@@ -976,11 +969,11 @@ void Mesh::hEdgeIndexChangedCallback(size_t oldIdx, size_t newIdx)
 	//update vertices that have reference to this edge
 	auto oldItr = halfEdges.cbegin() + oldIdx;
 	auto modFrom = &*vertices.toNormItr(hEdge.from);
-	modFrom->leavingEdges.erase(oldItr);
-	modFrom->leavingEdges.insert(newIndexItr);	
+	auto foundItr = std::find(modFrom->leavingEdges.begin(), modFrom->leavingEdges.end(), oldItr);
+	*foundItr = newIndexItr;
 	auto modTo = &*vertices.toNormItr(hEdge.to);
-	modTo->arrivingEdges.erase(oldItr);
-	modTo->arrivingEdges.insert(newIndexItr);
+	foundItr = std::find(modTo->arrivingEdges.begin(), modTo->arrivingEdges.end(), oldItr);
+	*foundItr = newIndexItr;
 }
 
 
