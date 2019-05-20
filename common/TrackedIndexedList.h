@@ -1,6 +1,6 @@
 #include "IndexedList.h"
 #include <vector>
-#include <set>
+#include <unordered_set>
 #include <numeric>
 #include <variant>
 
@@ -19,13 +19,16 @@ public:
 	}
 	TrackedIndexedList(const TrackedIndexedList& o) :parent_type(o)
 	{
+		_changedAll = true;
 	}
 	TrackedIndexedList(std::initializer_list<T> iniList) : TrackedIndexedList(iniList, std::allocator<T>())
 	{
+		_changedAll = true;
 	}
 
 	TrackedIndexedList(std::initializer_list<T> iniList, const parent_type::allocator_type& allocator) :parent_type(iniList, allocator)
 	{
+		_changedAll = true;
 	}
 
 
@@ -74,7 +77,10 @@ protected:
 		if (index == 0)
 			_changedAll = true;
 		else
-			_changedIndices.insert(index);
+		{
+			if(!_changedAll)
+				_changedIndices.insert(index);
+		}
 	}
 	void addedAll() override
 	{
@@ -92,7 +98,8 @@ protected:
 	}
 	void modifiedElement(size_t index) override
 	{
-		_changedIndices.insert(index);
+		if (!_changedAll)
+			_changedIndices.insert(index);		
 	}
 private:
 	inline void clearChanges()
@@ -101,5 +108,5 @@ private:
 		_changedIndices.clear();
 	}
 	bool _changedAll = false;
-	std::set<size_t> _changedIndices;
+	std::unordered_set<size_t> _changedIndices;
 };
