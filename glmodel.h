@@ -108,7 +108,6 @@ public:
     virtual ~GLModel();
 
     //TODO: Turn these into privates as well
-    GLModel *parentModel = nullptr;
     GLModel *leftModel = nullptr;
     GLModel *rightModel = nullptr;
     GLModel *twinModel = nullptr; // saves cut right for left, left for right models
@@ -224,7 +223,23 @@ public:
 	void setEnabled(bool isEnabled);
 	void enablePicking(bool isEnable);
 private:
+
+	enum ModelType
+	{
+		MainModel = 0,
+		Support,
+		RaftMesh,
+		LayerMesh,
+		LayerSupportMesh,
+		LayerRaftMesh,
+		LayerInfillMesh
+	};
+	ModelType _modelType;
+	std::string _tag;
+	std::map<ModelType, GLModel> _childModels;
 	bool _isEnabled;
+	GLModel* parentModel = nullptr;
+
 	static const QVector3D COLOR_DEFAULT_MESH;
 	static const QVector3D COLOR_INFILL;
 	static const QVector3D COLOR_RAFT;
@@ -305,15 +320,6 @@ private:
     Mesh* _mesh;
 
     QSphereMesh* dragMesh;
-    Mesh* supportMesh = nullptr;
-    Mesh* raftMesh = nullptr;
-
-    // layer view
-    Mesh* layerMesh;
-    Mesh* layerSupportMesh;
-    Mesh* layerRaftMesh;
-    Mesh* layerInfillMesh;
-
     const MeshFace *targetMeshFace = NULL; // used for object selection (specific area, like extension or labelling)
 
 
