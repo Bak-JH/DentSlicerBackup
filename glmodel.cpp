@@ -32,7 +32,7 @@ const QVector3D GLModel::COLOR_INFILL = QVector3D(1.0f, 1.0f, 0.0f);
 const QVector3D GLModel::COLOR_RAFT = QVector3D(0.0f, 0.0f, 0.0f);
 
 GLModel::GLModel(QObject* mainWindow, QNode *parent, Mesh* loadMesh, QString fname, bool isShadow, int id)
-    : QEntity()
+    : QEntity(parent)
 	, _parent(parent)
     , filename(fname)
     , mainWindow(mainWindow)
@@ -42,6 +42,10 @@ GLModel::GLModel(QObject* mainWindow, QNode *parent, Mesh* loadMesh, QString fna
     , dragMesh(new Qt3DExtras::QSphereMesh())
     , parentModel((GLModel*)(parent))
     , cutMode(1)
+    , layerMesh(nullptr)
+    , layerInfillMesh(nullptr)
+    , layerSupportMesh(nullptr)
+    , layerRaftMesh(nullptr)
     , slicer(nullptr)
     , ID(id)
     , m_meshMaterial(nullptr)
@@ -175,6 +179,7 @@ GLModel::GLModel(QObject* mainWindow, QNode *parent, Mesh* loadMesh, QString fna
 		sphereObjectPicker.reserve(50);
 		cuttingPoints.reserve(50);
 		cuttingContourCylinders.reserve(50);
+
 	}
 
 }
@@ -183,7 +188,7 @@ GLModel::GLModel(QObject* mainWindow, QNode *parent, Mesh* loadMesh, QString fna
 
 void GLModel::addMouseHandlers(){
 
-	m_objectPicker = new Qt3DRender::QObjectPicker();
+	m_objectPicker = new Qt3DRender::QObjectPicker(this);
 
 	m_objectPicker->setHoverEnabled(false); // to reduce drag load
 	m_objectPicker->setDragEnabled(false);
@@ -699,9 +704,7 @@ void featureThread::run(){
 
                 // slice file
                 qmlManager->openProgressPopUp();
-                QFuture<Slicer*> future = QtConcurrent::run(
-					se, &SlicingEngine::slice, data, m_glmodel->_mesh, m_glmodel->supportMesh, 
-					m_glmodel->raftMesh, fileName + "/" + m_glmodel->filename.split("/").last() );
+                QFuture<Slicer*> future = QtConcurrent::run(se, &SlicingEngine::slice, data, m_glmodel->_mesh, m_glmodel->supportMesh, m_glmodel->raftMesh, fileName + "/" + m_glmodel->filename.split("/").last() );
                 m_glmodel->futureWatcher.setFuture(future);
                 m_glmodel->updateLock = false;
                 break;
@@ -2208,7 +2211,7 @@ void GLModel::mgoo(Qt3DRender::QPickEvent* v)
         float biggest = x_diff>y_diff? x_diff : y_diff;
         biggest = z_diff>biggest? z_diff : biggest;
         float scale_val = biggest > 50.0f ? 1.0f : 100.0f/biggest;
-        m_transform.setScale(scale_val);
+        m_transform->setScale(scale_val);
 
         removeComponent(dragMesh);
         dragMesh->setRadius(biggest);
