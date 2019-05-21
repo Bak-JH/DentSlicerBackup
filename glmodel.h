@@ -279,6 +279,7 @@ private:
 	void reenableMouseHandlers();
 	void updateAllVertices(Mesh* mesh, QVector3D color = COLOR_DEFAULT_MESH);
 	void updateVertices(Mesh* mesh, QVector3D color = COLOR_DEFAULT_MESH);
+	void appendMesh(Mesh* mesh, QVector3D color = COLOR_DEFAULT_MESH);
 
     int cutMode = 1;
     int cutFillMode = 1;
