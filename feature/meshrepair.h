@@ -3,6 +3,7 @@
 #include "DentEngine/src/mesh.h"
 #include <QDebug>
 #include <QCoreApplication>
+using namespace Hix::Engine3D;
 
 namespace MeshRepair{
     void repairMesh(Mesh* mesh);

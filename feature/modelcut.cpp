@@ -7,18 +7,19 @@ modelcut::modelcut(){
 
 void modelcut::bisectModel(Mesh* mesh, Plane plane, Mesh* leftMesh, Mesh* rightMesh){
     // do bisecting mesh
-    for (const auto& mf : (*mesh->getFaces()))
+    for (const auto& mf : (mesh->getFaces()))
 	{
         bool faceLeftToPlane = true;
+		const auto& meshVertices = mf.meshVertices();
         for (int vn=0; vn<3; vn++){
-            const MeshVertex & mv(*mf.mesh_vertex[vn]);
-            if (!isLeftToPlane(plane, mv.position)) // if one vertex is left to plane, append to left vertices part
+            const VertexConstItr & mv(meshVertices[vn]);
+            if (!isLeftToPlane(plane, mv->position)) // if one vertex is left to plane, append to left vertices part
                 faceLeftToPlane = false;
         }
         if (faceLeftToPlane)
-            leftMesh->addFace(mf.mesh_vertex[0]->position, mf.mesh_vertex[1]->position, mf.mesh_vertex[2]->position);
+            leftMesh->addFace(meshVertices[0]->position, meshVertices[1]->position, meshVertices[2]->position);
         else
-            rightMesh->addFace(mf.mesh_vertex[0]->position, mf.mesh_vertex[1]->position, mf.mesh_vertex[2]->position);
+            rightMesh->addFace(meshVertices[0]->position, meshVertices[1]->position, meshVertices[2]->position);
     }
 
     qDebug() << "done bisect";
@@ -165,8 +166,7 @@ void modelcut::cutAway(Mesh* leftMesh, Mesh* rightMesh, Mesh* mesh, std::vector<
 
     // project mesh's vertices to IntPoints
     Path IntPoints;
-    IntPoints.reserve(mesh->getVertices()->size()*2);
-    for (const MeshVertex& mv : *mesh->getVertices()){
+    for (const MeshVertex& mv : mesh->getVertices()){
         IntPoints.push_back(IntPoint(mv.position.x()*scfg->resolution, mv.position.y()*scfg->resolution));
     }
 
@@ -227,22 +227,23 @@ void modelcut::cutAway(Mesh* leftMesh, Mesh* rightMesh, Mesh* mesh, std::vector<
 
     Paths3D innerContours, outerContours;
 
-    for (const MeshFace& mf : *mesh->getFaces()){
+    for (const MeshFace& mf : mesh->getFaces()){
         bool faceLeftToPlane = false;
         bool faceRightToPlane = false;
 
         Path3D leftContour;
         Path3D rightContour;
+		const auto& meshVertices = mf.meshVertices();
 
         for (int vn=0; vn<3; vn++){
-            const MeshVertex& mv = *mf.mesh_vertex[vn];
+            VertexConstItr mv = meshVertices[vn];
 
-            if (PointInPolygon(IntPoint(mv.position.x()*scfg->resolution, mv.position.y()*scfg->resolution), contour_all)){
+            if (PointInPolygon(IntPoint(mv->position.x()*scfg->resolution, mv->position.y()*scfg->resolution), contour_all)){
                 faceLeftToPlane = true;
-                leftContour.push_back(mv);
+                leftContour.push_back(*mv);
             } else {
                 faceRightToPlane = true;
-                rightContour.push_back(mv);
+                rightContour.push_back(*mv);
             }
         }
 
@@ -250,10 +251,10 @@ void modelcut::cutAway(Mesh* leftMesh, Mesh* rightMesh, Mesh* mesh, std::vector<
 
             if (intersectionExists){
                 // calculate intersection point (least distance intpoint from enterIP, exitIPs)
-                QVector3D mv = mf.mesh_vertex[0]->position;
-                QVector3D commv = (mf.mesh_vertex[0]->position +
-                        mf.mesh_vertex[1]->position +
-                        mf.mesh_vertex[2]->position)/3;
+                QVector3D mv = meshVertices[0]->position;
+                QVector3D commv = (meshVertices[0]->position +
+					meshVertices[1]->position +
+					meshVertices[2]->position)/3;
 
                 IntPoint intmv = IntPoint(mv.x()*scfg->resolution, mv.y()*scfg->resolution);
 
@@ -263,7 +264,7 @@ void modelcut::cutAway(Mesh* leftMesh, Mesh* rightMesh, Mesh* mesh, std::vector<
 
                 // check if vertex earned from intersection
                 for (int vn=0; vn<3; vn++){
-                    QVector3D mv = mf.mesh_vertex[vn]->position;
+                    QVector3D mv = meshVertices[vn]->position;
                     QVector3D enterQV3 = QVector3D(((float)enterIP.X)/((float)scfg->resolution), ((float)enterIP.Y)/((float)scfg->resolution), 0);
                     Plane plane;
                     plane.push_back(enterQV3);
@@ -291,7 +292,7 @@ void modelcut::cutAway(Mesh* leftMesh, Mesh* rightMesh, Mesh* mesh, std::vector<
 
                 // check if vertex earned from intersection
                 for (int vn=0; vn<3; vn++){
-                    QVector3D mv = mf.mesh_vertex[vn]->position;
+                    QVector3D mv = meshVertices[vn]->position;
                     QVector3D exitQV3 = QVector3D(((float)exitIP.X)/((float)scfg->resolution), ((float)exitIP.Y)/((float)scfg->resolution), 0);
                     Plane plane;
                     plane.push_back(exitQV3);
@@ -321,9 +322,9 @@ void modelcut::cutAway(Mesh* leftMesh, Mesh* rightMesh, Mesh* mesh, std::vector<
                 outerContours.push_back(rightContour);
             }
         } else if (faceLeftToPlane){
-            leftMesh->addFace(mf.mesh_vertex[0]->position, mf.mesh_vertex[1]->position, mf.mesh_vertex[2]->position);
+            leftMesh->addFace(meshVertices[0]->position, meshVertices[1]->position, meshVertices[2]->position);
         } else if (faceRightToPlane){
-            rightMesh->addFace(mf.mesh_vertex[0]->position, mf.mesh_vertex[1]->position, mf.mesh_vertex[2]->position);
+            rightMesh->addFace(meshVertices[0]->position, meshVertices[1]->position, meshVertices[2]->position);
         }
     }
     qDebug() << "exit, enter intersection : " << exitIntersection.position << enterIntersection.position;
@@ -344,11 +345,13 @@ void modelcut::cutAway(Mesh* leftMesh, Mesh* rightMesh, Mesh* mesh, std::vector<
         MeshVertex& qv = cuttingContour[ctc_idx];
 
         // find maximal position
-		for (const MeshFace& mf : *mesh->getFaces()) {
+		for (const MeshFace& mf : mesh->getFaces()) {
+			const auto& meshVertices = mf.meshVertices();
+
 			// if projection of mf to xy coordinates contains qv and upper than current qv's position, get qv
-            const MeshVertex& mfv1 = *mf.mesh_vertex[0];
-            const MeshVertex& mfv2 = *mf.mesh_vertex[1];
-            const MeshVertex& mfv3 = *mf.mesh_vertex[2];
+            const MeshVertex& mfv1 = *meshVertices[0];
+            const MeshVertex& mfv2 = *meshVertices[1];
+            const MeshVertex& mfv3 = *meshVertices[2];
             Path mf_projection;
             mf_projection.push_back(IntPoint(mfv1.position.x()*scfg->resolution, mfv1.position.y()*scfg->resolution));
             mf_projection.push_back(IntPoint(mfv2.position.x()*scfg->resolution, mfv2.position.y()*scfg->resolution));
@@ -616,10 +619,8 @@ void modelcut::cutAway(Mesh* leftMesh, Mesh* rightMesh, Mesh* mesh, std::vector<
         }
     }
 
-    if (leftMesh->getFaces()->size() != 0)
-        leftMesh->connectFaces();
-    if (rightMesh->getFaces()->size() != 0)
-        rightMesh->connectFaces();
+	leftMesh->connectFaces();
+	rightMesh->connectFaces();
 }
 
 void modelcut::removeCuttingPoints(){
