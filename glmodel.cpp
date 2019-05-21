@@ -502,12 +502,10 @@ void GLModel::updateModelMesh(bool shadowUpdate){
 		updateVertices(_mesh);
         break;
     case VIEW_MODE_SUPPORT:
-        if (supportMesh != nullptr) {
-			updateVertices(supportMesh);
-        }
-        else
-        {
-			updateVertices(_mesh);
+		updateVertices(_mesh);
+        if (supportMesh != nullptr)
+		{
+			appendMesh(supportMesh);
         }
         break;
     case VIEW_MODE_LAYER:
@@ -519,19 +517,19 @@ void GLModel::updateModelMesh(bool shadowUpdate){
                     (qmlManager->getLayerViewFlags() & LAYER_RAFT != 0 ? layerRaftMesh->getFaces()->size()*2 : 0);
 			updateVertices(layerMesh);
             if( qmlManager->getLayerViewFlags() & LAYER_INFILL ) {
-				updateVertices(layerInfillMesh, QVector3D(1.0f, 1.0f, 0.0f));
+				appendMesh(layerInfillMesh, QVector3D(1.0f, 1.0f, 0.0f));
             }
             if( qmlManager->getLayerViewFlags() & LAYER_SUPPORTERS ) {
-				updateVertices(supportMesh);
+				appendMesh(supportMesh);
             }
             if( qmlManager->getLayerViewFlags() & LAYER_RAFT) {
-				updateVertices(layerRaftMesh, QVector3D(0.0f, 0.0f, 0.0f));
+				appendMesh(layerRaftMesh, QVector3D(0.0f, 0.0f, 0.0f));
             }
         } else {
             int faces = _mesh->getFaces()->size()*2 + ((supportMesh!=nullptr) ? supportMesh->getFaces()->size()*2:0);
 			updateVertices(_mesh);
             if (supportMesh != nullptr)
-				updateVertices(supportMesh);
+				appendMesh(supportMesh);
         }
         break;
     }
@@ -703,7 +701,9 @@ void featureThread::run(){
 
                 // slice file
                 qmlManager->openProgressPopUp();
-                QFuture<Slicer*> future = QtConcurrent::run(se, &SlicingEngine::slice, data, m_glmodel->_mesh, m_glmodel->supportMesh, m_glmodel->raftMesh, fileName + "/" + m_glmodel->filename.split("/").last() );
+                QFuture<Slicer*> future = QtConcurrent::run(
+					se, &SlicingEngine::slice, data, m_glmodel->_mesh, m_glmodel->supportMesh, 
+					m_glmodel->raftMesh, fileName + "/" + m_glmodel->filename.split("/").last() );
                 m_glmodel->futureWatcher.setFuture(future);
                 m_glmodel->updateLock = false;
                 break;
@@ -812,14 +812,24 @@ void GLModel::clearMem(){
 void GLModel::updateAllVertices(Mesh* mesh, QVector3D vertexColor)
 {
 	mesh->flushChanges();
+	appendMesh(mesh, vertexColor);
+
+}
+
+
+void GLModel::appendMesh(Mesh* mesh, QVector3D vertexColor)
+{
 	_currentVisibleMesh = mesh;
-    int face_size = mesh->getFaces()->size();
-    int face_idx = 0;
-    for (const MeshFace& mf : *mesh->getFaces()){
-        face_idx ++;
-        if (face_idx %100 ==0)
-            QCoreApplication::processEvents();
-        std::vector<QVector3D> result_vs;
+	//if the QGeo hasn't been cleared, ie) combining two meshes, set current mesh pointer to nullptr
+	if (positionAttribute.count() != 0)
+		_currentVisibleMesh = nullptr;
+	int face_size = mesh->getFaces()->size();
+	int face_idx = 0;
+	for (const MeshFace& mf : *mesh->getFaces()) {
+		face_idx++;
+		if (face_idx % 100 == 0)
+			QCoreApplication::processEvents();
+		std::vector<QVector3D> result_vs;
 		std::vector<QVector3D> result_vns;
 		std::vector<QVector3D> result_vcs;
 		for (int fn = 0; fn <= 2; fn++) {
@@ -834,18 +844,19 @@ void GLModel::updateAllVertices(Mesh* mesh, QVector3D vertexColor)
 				result_vns.push_back(QVector3D(1, 1, 1));
 			}
 		}
-        appendVertices(result_vs);
+		appendVertices(result_vs);
 		appendNormalVertices(result_vns);
 		appendColorVertices(result_vcs);
-    }
+	}
 }
+
 
 
 void GLModel::updateVertices(Mesh* mesh, QVector3D vertexColor)
 {
 	std::vector<Mesh::MeshOp> operations = mesh->flushChanges();
 	bool tooManyChanges = (operations.size() / (mesh->getFaces()->size() * 3)) > 0.8f;
-	if (_currentVisibleMesh != mesh  || tooManyChanges)
+	if (_currentVisibleMesh != mesh || tooManyChanges)
 	{
 		//if the mesh being updated is not the same as the visible one, we need to redraw everything
 		//also update all if there are too many changes.
