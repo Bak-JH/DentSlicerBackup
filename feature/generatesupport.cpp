@@ -132,7 +132,7 @@ void GenerateSupport::pointOverhangDetect(Mesh* mesh) {
                 }
             }
         }
-        if (local_min && (vertex.position.z() - z_min) >= minZ) { // is local minima but not global min
+        if (local_min && (vertex.position.z() - z_min) >= z_min_minimal_diff) { // is local minima but not global min
             bool close = false;
             for (size_t idx = 0; idx < overhangPoints.size(); idx++) {
                 if (abs(overhangPoints[idx].position.z() - vertex.position.z()) <= 1 // 1->variable
@@ -162,7 +162,7 @@ void GenerateSupport::pointOverhangDetect(Mesh* mesh) {
                 break;
             }
         }
-        if ((overhangPoint.z() - z_min) >= minZ && !close) //
+        if ((overhangPoint.z() - z_min) >= z_min_minimal_diff && !close) //
             overhangPoints.push_back(OverhangPoint(overhangPoint, true));
     }
 }
@@ -215,7 +215,7 @@ void GenerateSupport::faceOverhangPoint(Mesh* mesh, QVector3D v0, QVector3D v1, 
             break;
         }
     }
-    if ((overhangPoint.z() - z_min) >= minZ && !close) //
+    if ((overhangPoint.z() - z_min) >= z_min_minimal_diff && !close) //
         overhangPoints.push_back(OverhangPoint(overhangPoint, true));
 }
 
@@ -294,7 +294,7 @@ OverhangPoint GenerateSupport::coneNmeshIntersection(Mesh *mesh, OverhangPoint c
     bool supportInt = false;
     QVector3D tmp;
     size_t vertex;
-    float radius = radiusMin;
+    float radius = supportRadiusMin;
 
     // mesh
 
@@ -342,8 +342,9 @@ OverhangPoint GenerateSupport::coneNmeshIntersection(Mesh *mesh, OverhangPoint c
 
 float GenerateSupport::calculateRadius(float mesh_height, float bottom_height, float branch_length) {
     // float radius = 0.2 * branch_length * (1 - pow((bottom_height / mesh_height), 5));
-    float radius = 0.2f * branch_length;
+    float radius = 0.3f * branch_length;
     if (radius > supportRadiusMax) radius = supportRadiusMax;
+    if (radius < supportRadiusMin) radius = supportRadiusMin;
     return radius;
 }
 
@@ -357,12 +358,12 @@ void GenerateSupport::generateBottomFace(Mesh* mesh, OverhangPoint center) {
 
 void GenerateSupport::generateFaces(Mesh* mesh, OverhangPoint top, OverhangPoint bottom) {
     for (size_t i = 0; i < 6; i++) {
-        mesh->addFace(top.position + top.radius * QVector3D(qCos(M_PI * (i+1) / 3), qSin(M_PI * (i+1) / 3), 0),
-                      top.position + top.radius * QVector3D(qCos(M_PI * i / 3), qSin(M_PI * i / 3), 0),
+        mesh->addFace(top.position + QVector3D(0,0,scfg->layer_height) + top.radius * QVector3D(qCos(M_PI * (i+1) / 3), qSin(M_PI * (i+1) / 3), 0),
+                      top.position + QVector3D(0,0,scfg->layer_height) + top.radius * QVector3D(qCos(M_PI * i / 3), qSin(M_PI * i / 3), 0),
                       bottom.position + bottom.radius * QVector3D(qCos(M_PI * i / 3), qSin(M_PI * i / 3), 0));
         mesh->addFace(bottom.position + bottom.radius * QVector3D(qCos(M_PI * i / 3), qSin(M_PI * i / 3), 0),
                       bottom.position + bottom.radius * QVector3D(qCos(M_PI * (i+1) / 3), qSin(M_PI * (i+1) / 3), 0),
-                      top.position + top.radius * QVector3D(qCos(M_PI * (i+1) / 3), qSin(M_PI * (i+1) / 3), 0));
+                      top.position + QVector3D(0,0,scfg->layer_height) + top.radius * QVector3D(qCos(M_PI * (i+1) / 3), qSin(M_PI * (i+1) / 3), 0));
     }
 }
 
@@ -407,7 +408,7 @@ void GenerateSupport::generateStem(Mesh* mesh, OverhangPoint top, OverhangPoint*
                                          top.position.z() - bottom->position.z());
     if (bottomRadius < std::max(top.radius, origin_bottom.radius))
         bottomRadius = std::max(top.radius, bottom->radius);
-    if (origin_bottom.supportInterPoint && (origin_bottom.radius > radiusMin) && (bottomRadius > origin_bottom.radius))
+    if (origin_bottom.supportInterPoint && (origin_bottom.radius > supportRadiusMin) && (bottomRadius > origin_bottom.radius))
          bottomRadius = origin_bottom.radius;
     bottom->radius = bottomRadius;
 
@@ -421,6 +422,7 @@ void GenerateSupport::generateStem(Mesh* mesh, OverhangPoint top, OverhangPoint*
 
     if (origin_bottom.meshInterPoint) // generate bottom tip
         generateFaces(mesh, *bottom, origin_bottom);
+
     else if (!bottom->supportInterPoint)
         generateBottomFace(mesh, *bottom);
 
@@ -429,9 +431,7 @@ void GenerateSupport::generateStem(Mesh* mesh, OverhangPoint top, OverhangPoint*
 
     if ((top.position - bottom->position).length() >= 8)
     {
-        OverhangPoint* sdfsf = new OverhangPoint[100]();
         supportPoints.push_back(OverhangPoint((top.position + bottom->position)/2, (top.radius + bottom->radius)/2));
-
     }
 }
 
