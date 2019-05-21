@@ -31,10 +31,12 @@ public:
     std::vector<OverhangPoint> supportPoints;
     float supportRadiusMax = 1;
     float supportTipHeight = 0.1f; //크면 에러
-    float minZ = 1;
-    float minLength = 3;
-    float radiusMin = 0.1f; // support tip radius 역할
+    float z_min;
+    float minZ = scfg->layer_height/2;
+    float minLength = scfg->support_base_height+1;
+    float radiusMin = 0.2f; // support tip radius 역할
 
+    float pointOverhangOffset = 0.2f;
     Mesh* generateSupport(Mesh* shellMesh);
 
     void overhangDetect(Mesh* mesh);
