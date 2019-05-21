@@ -39,11 +39,6 @@ GenerateSupport::GenerateSupport()
 Mesh* GenerateSupport::generateSupport(Mesh* shellmesh) {
     Mesh* mesh = shellmesh;
     Mesh* supportMesh = new Mesh();
-
-    /*overhangPoints.reserve(100000);
-    supportPoints.reserve(100000);*/
-
-
     z_min = mesh->z_min() - scfg->support_base_height;
 
     overhangDetect(mesh);
@@ -52,7 +47,7 @@ Mesh* GenerateSupport::generateSupport(Mesh* shellmesh) {
     findNearestPoint(idx);
 
     std::vector<OverhangPoint>::iterator iter = overhangPoints.begin();
-    while (iter != overhangPoints.end() - 1 && iter != overhangPoints.end()) {
+    while (iter < overhangPoints.end() - 1) {
         OverhangPoint pt1 = *iter;
         OverhangPoint pt2 = *(iter+1);
         OverhangPoint intersection = coneNconeIntersection(mesh, pt1, pt2);
@@ -82,8 +77,10 @@ Mesh* GenerateSupport::generateSupport(Mesh* shellmesh) {
             findNearestPoint(++idx);
         } else {
             generateBranch(supportMesh, pt1, pt2, &intersection);
-            overhangPoints.push_back(intersection);
-            iter += 2;
+			size_t index = iter - overhangPoints.begin();
+			overhangPoints.push_back(intersection);
+			//iterator might be invalidated due to resizing
+			iter = overhangPoints.begin() + index;
             findNearestPoint(++idx);
             findNearestPoint(++idx);
         }
