@@ -208,6 +208,8 @@ private:
 
     std::list<MeshVertex> vertices;
     QHash<uint32_t, MeshVertex*> vertices_hash;
+    //std::unordered_map<uint32_t, MeshVertex*> vertices_hash;
+
     std::list<MeshFace> faces;
 
     // for undo & redo

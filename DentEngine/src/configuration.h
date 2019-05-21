@@ -49,6 +49,7 @@ public:
     float support_density = 0.4;
     float infill_density = 0.3;
 
+    float support_base_height = 2.0;
     float subdivision_radius = 0.85; // in mm
     float duplication_radius = 4; // in mm
     int cluster_size = 2000;
@@ -69,9 +70,10 @@ public:
     int raft_type = 2;
 
     // raft settings
-    float raft_thickness = 0;//3;
-    int raft_base_radius = 3000;
-    int raft_offset_radius = 1800; // in microns
+    float raft_thickness = 3; // in mm
+    float raft_base_radius = 5; // in mm
+    float raft_offset_radius = 4; // in mm
+
 
     // set configuration
     QVector3D origin;

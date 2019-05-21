@@ -6,6 +6,7 @@ int origin_z;
 
 QString SVGexporter::exportSVG(Slices shellSlices, Slices supportSlices, Slices raftSlices, QString outfoldername){
     qDebug() << "export svg at "<< outfoldername;
+    qDebug() << "shellSlices : " << shellSlices.size() << "supportSlices : " << supportSlices.size();
     QDir dir(outfoldername);
     if (!dir.exists()) {
         dir.mkpath(".");
@@ -54,9 +55,8 @@ QString SVGexporter::exportSVG(Slices shellSlices, Slices supportSlices, Slices 
         else
             writeGroupHeader(outfile, currentSlice_idx, scfg->layer_height*(currentSlice_idx+1));
 
-        PolyTree raftSlice_polytree = raftSlices[i].polytree;
-        for (int j=0; j<raftSlice_polytree.ChildCount(); j++){
-            parsePolyTreeAndWrite(raftSlice_polytree.Childs[j], outfile);
+        for (int j=0; j<raftSlices[i].outershell.size(); j++){
+            writePolygon(outfile, raftSlices[i].outershell[j]);
         }
 
         writeGroupFooter(outfile);
@@ -69,12 +69,40 @@ QString SVGexporter::exportSVG(Slices shellSlices, Slices supportSlices, Slices 
 
     qDebug() << "Raft Slices : " << currentSlice_idx;
 
+    int support_base_layer_cnt = round(scfg->support_base_height/scfg->layer_height);
+
+    // add base support layers
+    for (int i=0; i<support_base_layer_cnt; i++){
+        QString outfilename = outfoldername + "/" + QString::number(currentSlice_idx) + ".svg";
+
+        std::ofstream outfile(outfilename.toStdString().c_str(), std::ios::out);
+
+        writeHeader(outfile);
+
+        if (scfg->slicing_mode == "uniform")
+            writeGroupHeader(outfile, currentSlice_idx, scfg->layer_height*(currentSlice_idx+1));
+        else
+            writeGroupHeader(outfile, currentSlice_idx, scfg->layer_height*(currentSlice_idx+1));
+
+        // write support slices
+        for (int j=0; j<supportSlices[i].outershell.size(); j++){
+            writePolygon(outfile, supportSlices[i].outershell[j]);
+        }
+
+        writeGroupFooter(outfile);
+        writeFooter(outfile);
+
+        outfile.close();
+        currentSlice_idx += 1;
+    }
+
     for (int i=0; i<shellSlices.size(); i++){
         QString outfilename = outfoldername + "/" + QString::number(currentSlice_idx) + ".svg";
 
         std::ofstream outfile(outfilename.toStdString().c_str(), std::ios::out);
 
         writeHeader(outfile);
+
         if (scfg->slicing_mode == "uniform")
             writeGroupHeader(outfile, currentSlice_idx, scfg->layer_height*(currentSlice_idx+1));
         else
@@ -87,10 +115,10 @@ QString SVGexporter::exportSVG(Slices shellSlices, Slices supportSlices, Slices 
         }
 
         // write support slices
-        if (supportSlices.size() > i){
+        if (supportSlices.size()-support_base_layer_cnt > i){
 
-            for (int j=0; j<supportSlices[i].outershell.size(); j++){
-                writePolygon(outfile, supportSlices[i].outershell[j]);
+            for (int j=0; j<supportSlices[i+support_base_layer_cnt].outershell.size(); j++){
+                writePolygon(outfile, supportSlices[i+support_base_layer_cnt].outershell[j]);
             }
         }
 
@@ -145,7 +173,7 @@ void SVGexporter::writePolygon(std::ofstream& outfile, PolyNode* contour){
     if (! contour->IsHole()){
         outfile << "\" style=\"fill: white\" />\n";
     } else {
-        outfile << "\" style=\"fill: #00000000\" />\n";
+        outfile << "\" style=\"fill: black\" />\n";
     }
 }
 

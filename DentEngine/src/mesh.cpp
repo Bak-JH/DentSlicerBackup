@@ -422,7 +422,7 @@ Mesh* Mesh::saveUndoState(const Qt3DCore::QTransform& transform)
 	}
 
 	for (QHash<uint32_t, MeshVertex*>::iterator it = this->vertices_hash.begin(); it != this->vertices_hash.end(); ++it) {
-		temp_prev_mesh->vertices_hash.insert(it.key(), it.value());
+        temp_prev_mesh->vertices_hash.insert(it.key(), it.value());
 	}
 
 	temp_prev_mesh->_x_max = this->x_max();
