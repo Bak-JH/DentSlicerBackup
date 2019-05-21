@@ -1935,9 +1935,9 @@ void QmlManager::runGroupFeature(int ftrType, QString state, double arg1, double
         Mesh* mergedSupportMesh = generatesupport.generateSupport(mergedShellMesh);
 
         qDebug() << "2222";
-        // generate raft
+        // generate raft according to support structure
         GenerateRaft generateraft;
-        Mesh* mergedRaftMesh = generateraft.generateRaft(mergedShellMesh);
+        Mesh* mergedRaftMesh = generateraft.generateRaft(mergedShellMesh, generatesupport.overhangPoints);
 
         qDebug() << "3333";
         // need to generate support, raft
