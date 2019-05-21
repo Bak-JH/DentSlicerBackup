@@ -17,7 +17,7 @@
 #endif
 
 using namespace ClipperLib;
-
+using namespace Hix::Engine3D;
 typedef std::pair<IntPoint, float> XYArrangement;
 typedef std::vector<IntPoint> Vecs;
 
