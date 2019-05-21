@@ -22,7 +22,7 @@ QString SVGexporter::exportSVG(Slices shellSlices, Slices supportSlices, Slices 
     //std::ofstream infofile(infofilename.toStdString().c_str(), std::ios::out);
     QJsonObject jsonObject;
     jsonObject["layer_height"] = round(scfg->layer_height*100)/100;
-    jsonObject["total_layer"] = int(shellSlices.size());
+    jsonObject["total_layer"] = int(shellSlices.size() + round(scfg->support_base_height/scfg->layer_height) + raftSlices.size());
     jsonObject["bed_curing_time"] = 15000; // depends on scfg->resin_type
     jsonObject["curing_time"] = 2100; // depends on scfg->resin_type
     jsonObject["mirror_rot_time"] = 2000;
@@ -43,6 +43,21 @@ QString SVGexporter::exportSVG(Slices shellSlices, Slices supportSlices, Slices 
 
     int64_t area = 0;
     int currentSlice_idx = 0;
+
+    // to prevent empty raftSlice[0]
+    if (raftSlices.size() != 0 && raftSlices[0].size() == 0){
+        raftSlices[0] = raftSlices[1];
+    }
+
+    // to prevent empty supportSlice[0]
+    if (supportSlices.size() != 0 && supportSlices[0].size() == 0){
+        supportSlices[0] = supportSlices[1];
+    }
+
+    // to prevent empty shellSlice[0]
+    if (shellSlices.size() != 0 && shellSlices[0].size() == 0){
+        shellSlices[0] = shellSlices[1];
+    }
 
     for (int i=0; i<raftSlices.size(); i++){
         QString outfilename = outfoldername + "/" + QString::number(currentSlice_idx) + ".svg";
