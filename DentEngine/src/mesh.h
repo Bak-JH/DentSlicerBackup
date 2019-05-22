@@ -218,7 +218,20 @@ namespace Hix
 			{
 				return vertices[idx];
 			}
+			/********************** opposite **********************/
 
+			inline size_t indexOf(HalfEdgeConstItr& itr)const
+			{
+				return itr - halfEdges.cbegin();
+			}
+			inline size_t indexOf(VertexConstItr& itr)const
+			{
+				return itr - vertices.cbegin();
+			}
+			inline size_t indexOf(FaceConstItr& itr)const
+			{
+				return itr - faces.cbegin();
+			}
 			/********************** Stuff that can be public **********************/
 
 			QTime time;
@@ -253,8 +266,6 @@ namespace Hix
 
 			float _x_min = 99999, _x_max = 99999, _y_min = 99999, _y_max = 99999, _z_min = 99999, _z_max = 99999;
 
-			//fileloader should be a factory pattern?
-			friend class FileLoader;
 		};
 
 

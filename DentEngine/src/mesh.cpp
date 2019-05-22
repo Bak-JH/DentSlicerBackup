@@ -7,6 +7,7 @@
 
 #if defined(_DEBUG) || defined(QT_DEBUG )
 #define _STRICT_MESH
+#define _STRICT_MESH_NO_SELF_INTERSECTION
 #endif
 using namespace Utils::Math;
 using namespace Hix;
@@ -781,6 +782,10 @@ void Hix::Engine3D::Mesh::setTwins(HalfEdgeItr subjectEdge)
 			subjectEdge->twins.push_back(halfEdge);
 		}
 	}
+#ifdef _STRICT_MESH_NO_SELF_INTERSECTION
+	if (subjectEdge->twins.size() > 1)
+		throw std::runtime_error("Mesh is self intersecting");
+#endif
 
 }
 VertexConstItr Mesh::getSimilarVertex(uint32_t digest, QVector3D v)
@@ -792,11 +797,6 @@ VertexConstItr Mesh::getSimilarVertex(uint32_t digest, QVector3D v)
 		if (vtx->position.distanceToPoint(v) <= SlicingConfiguration::vertex_3D_distance)
 		{
 			return  hashed_points[idx];
-
-			//if there is a useless vtx with no relations
-#ifdef _STRICT_MESH
-			throw std::runtime_error("useless dangling vtx");
-#endif
 		}
 	}
 	return vertices.cend();
