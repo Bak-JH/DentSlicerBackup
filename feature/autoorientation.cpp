@@ -164,11 +164,9 @@ float autoorientation::approachvertex(Mesh* mesh,float n[]){
     //qt에서 최댓값이 얼마인지 몰라 flag로 만들었습니다.
 
     float amin;
-	for (const auto& face : *mesh->getFaces())
+	for (const auto& face : mesh->getFaces())
 	{
-		const MeshVertex* idx[3] = { face.mesh_vertex[0],
-		   face.mesh_vertex[1],
-		   face.mesh_vertex[2] };
+		auto idx = face.meshVertices();
 		//한 삼각형의 세 점 index를 받아옵니다.
 		float a1 = idx[0]->position.x() * n[0] +
 			idx[0]->position.y() * n[1] +
@@ -205,16 +203,14 @@ float* autoorientation::lithograph(Mesh* mesh, float n[], float amin, int CA){
 
     float anti_n[3]={-n[0],-n[1],-n[2]};
 
-	for (const auto& face : *mesh->getFaces())
+	for (const auto& face : mesh->getFaces())
 	{
         QVector3D a = face.fn_unnorm;//face에 추가된 인스턴스이며, 정규화되지 않은 노말벡터입니다.
         float norma = (float)sqrtf(a[0]*a[0]+a[1]*a[1]+a[2]*a[2]);
         if(norma == 0)
             continue;
         if(alpha > (a[0]*n[0] + a[1]*n[1] +a[2]*n[2])/norma){
-			const MeshVertex* idx[3] ={face.mesh_vertex[0],
-                       face.mesh_vertex[1],
-                       face.mesh_vertex[2]};
+			auto idx = face.meshVertices();
             float a1 = idx[0]->position.x()*n[0]+
                     idx[0]->position.y()*n[1]+
                     idx[0]->position.z()*n[2];
@@ -250,12 +246,10 @@ float* autoorientation::lithograph(Mesh* mesh, float n[], float amin, int CA){
 }
 float autoorientation::get_touching_line(Mesh* mesh,float a[], const MeshFace& face,float touching_height){
     std::vector<const MeshVertex*> touch_list;
-	const MeshVertex* idx[3]={ face.mesh_vertex[0],
-                face.mesh_vertex[1],
-				face.mesh_vertex[2]};
+	auto idx = face.meshVertices();
     for(int j=0;j<3;j++){
         if(a[j]<touching_height){
-            touch_list.push_back(idx[j]);
+            touch_list.push_back(&*idx[j]);
         }
     }
 	std::vector<const MeshVertex*> combs;
@@ -294,7 +288,7 @@ std::vector<Orient*> autoorientation::area_cumulation(Mesh* mesh,float n[],bool 
     std::map<QString,float> orient;
     //리턴되는 값은 단순 random은 아니며, 가장 가중치가 높은 순서대로 best_n개를 뽑아냅니다.
 	size_t i = 0;
-	for (const auto& face : *mesh->getFaces())
+	for (const auto& face : mesh->getFaces())
 	{
         QVector3D an = face.fn_unnorm;
         float A = sqrtf(an.x()*an.x()+an.y()*an.y()+an.z()*an.z());
@@ -318,7 +312,7 @@ std::vector<Orient*> autoorientation::area_cumulation(Mesh* mesh,float n[],bool 
         }
 		//?!
         if(i%3000==0){
-            qmlManager->setProgress((float)i*0.15/mesh->getFaces()->size());
+            qmlManager->setProgress((float)i*0.15/mesh->getFaces().size());
             qmlManager->setProgressText("orientation.....");
         }
 		++i;
@@ -385,7 +379,7 @@ std::vector<Orient*> autoorientation::egde_plus_vertex(Mesh* mesh, int best_n){
     //orientation을 추가로 더할 때 씁니다. best_n 갯수만큼 return 하긴 하지만,
     //호출한 Tweak() 에서 val>2인 orientation만 원본 orientation에 추가하므로,
     //실제로 추가되는 값은 그보다 작을 수 있습니다.
-    int vcount = mesh->getFaces()->size()*3;
+    int vcount = mesh->getFaces().size()*3;
     //원문에서는 face 안에 vertexindex가 있다고 생각하지 않고,
     //vertexlist를 계속 나열한 채로 저장하였으므로, 비슷하게 구현하기 위해서 *3을 해줍니다.
     //그냥 다른 함수처럼 faces[i].mesh_vertex[0] 1, 2 이런식으로 구한 결과와 같습니다.
@@ -396,7 +390,7 @@ std::vector<Orient*> autoorientation::egde_plus_vertex(Mesh* mesh, int best_n){
     std::map<QString,float> lst;
     //area_cummulation처럼 map을 만들고, value 기준 상위 best_n개 만 뽑아냅니다.
     //단, map을 만드는 요소를 mesh 내에서 random하게 추가로 생성합니다.
-	auto faceItr = mesh->getFaces()->cbegin();
+	auto faceItr = mesh->getFaces().cbegin();
     for(int i=0;i<vcount*it;i++){
         float* randomNormal = calc_random_normal(mesh,i%vcount, *faceItr);
         //mesh 속 삼각형 중에서 랜덤 하게 하나를 골라 Normal을 전달받습니다.
@@ -483,21 +477,23 @@ float* autoorientation::calc_random_normal(Mesh* mesh, int i,  const MeshFace& f
     //    v=face.mesh_vertex[2]->position;
     //    w=face.mesh_vertex[0]->position;
     //}
+	auto currFace = mesh->getFaces()[j];
+	auto meshVertices = currFace.meshVertices();
 	if (i % 3 == 0) {
-		v = (*mesh->getRenderOrderFaces())[j]->mesh_vertex[0]->position;
-		w = (*mesh->getRenderOrderFaces())[j]->mesh_vertex[1]->position;
+		v = meshVertices[0]->position;
+		w = meshVertices[1]->position;
 	}
 	else if (i % 3 == 1) {
-		v = (*mesh->getRenderOrderFaces())[j]->mesh_vertex[1]->position;
-		w = (*mesh->getRenderOrderFaces())[j]->mesh_vertex[2]->position;
-	}	    								 				 
-	else {  								 				 
-		v = (*mesh->getRenderOrderFaces())[j]->mesh_vertex[2]->position;
-		w = (*mesh->getRenderOrderFaces())[j]->mesh_vertex[0]->position;
+		v = meshVertices[1]->position;
+		w = meshVertices[2]->position;
+	}	
+	else { 
+		v = meshVertices[2]->position;
+		w = meshVertices[0]->position;
 	}
 
-    int randomIndex=qrand() % mesh->getFaces()->size();
-	QVector3D r_v = (*mesh->getRenderOrderFaces())[randomIndex / 3]->mesh_vertex[randomIndex % 3]->position;
+    int randomIndex=qrand() % mesh->getFaces().size();
+	QVector3D r_v = mesh->getFaces()[randomIndex / 3].meshVertices()[randomIndex % 3]->position;
 
     //QVector3D r_v=mesh->vertices[mesh->faces[randomIndex/3].mesh_vertex[randomIndex%3]].position;
 
