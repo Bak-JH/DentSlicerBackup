@@ -222,7 +222,7 @@ public:
 
 	}
 
-	size_type size()
+	size_type size() const 
 	{
 		return _container.size();
 	}

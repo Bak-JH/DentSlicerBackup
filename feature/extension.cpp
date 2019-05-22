@@ -1,13 +1,11 @@
 #include "extension.h"
 
-void extendMesh(Mesh* mesh,const MeshFace* mf, double distance){
-    if (mf == nullptr)
-        return;
+void extendMesh(Mesh* mesh, FaceConstItr mf, double distance){
     QVector3D normal = mf->fn;
     qDebug() << normal;
-
-    std::vector<const MeshFace*> extension_faces;
-    detectExtensionFaces(mesh, normal, mf, mf, &extension_faces,nullptr);
+	auto mfVertices = mf->meshVertices();
+    std::vector<FaceConstItr> extension_faces;
+    detectExtensionFaces(mesh, normal, mf, mf, extension_faces,nullptr);
 
     // delete extension_faces
     /*for (MeshFace* mf : extension_faces){
@@ -23,27 +21,27 @@ void extendMesh(Mesh* mesh,const MeshFace* mf, double distance){
     }*/
 
     qDebug() << "detected extension faces" << extension_faces.size();
-    for (const MeshFace* emf : extension_faces){
-        qDebug() << emf->idx;
+    for (FaceConstItr emf : extension_faces){
+        qDebug() << mesh->indexOf(emf);
+		auto emfVertices = emf->meshVertices();
+
         //mesh->addFace(emf->mesh_vertex[0]->position+normal*2,emf->mesh_vertex[1]->position+normal*2,emf->mesh_vertex[2]->position+normal*2);
-        qDebug() << "distance from selected extension_faces " << mf->mesh_vertex[0]->position.distanceToPoint(emf->mesh_vertex[0]->position);
+        qDebug() << "distance from selected extension_faces " <<mfVertices[0]->position.distanceToPoint(emfVertices[0]->position);
     }
 
     Paths3D extension_outlines = detectExtensionOutline(mesh, extension_faces);
     qDebug() << "detected extension outlines" << extension_outlines.size();
 
 
-    qDebug() << "mesh size : "<< mesh->getFaces()->size();
+    qDebug() << "mesh size : "<< mesh->getFaces().size();
     //mesh->addFace(mf->mesh_vertex[0]->position+normal*2,mf->mesh_vertex[1]->position+normal*2,mf->mesh_vertex[2]->position+normal*2);
     //mesh->connectFaces();
     extendAlongOutline(mesh, normal, extension_outlines, distance);
     qDebug() << "extended along outline";
-    qDebug() << "mesh size : "<< mesh->getFaces()->size();
+    qDebug() << "mesh size : "<< mesh->getFaces().size();
+	qDebug() << "mf index: " << mesh->indexOf(mf);
 
     coverCap(mesh, normal, extension_faces, distance);
-
-    qDebug() << "mf idx : " << mf->idx;
-
     mesh->connectFaces();
 }
 void resetColorMesh(Mesh* mesh, Qt3DRender::QBuffer * colorbuffer, std::vector<int> extendFaces){
@@ -59,12 +57,12 @@ void resetColorMesh(Mesh* mesh, Qt3DRender::QBuffer * colorbuffer, std::vector<i
         colorbuffer->updateData(extendFaces.at(i)*sizeof(float)*9+6*sizeof(float),colorVertexArray);
     }
 }
-void extendColorMesh(Mesh* mesh,const MeshFace* mf, Qt3DRender::QBuffer * colorbuffer, std::vector<int>* extendFaces){
-    std::vector<const MeshFace*> extension_faces;
+void extendColorMesh(Mesh* mesh,FaceConstItr mf, Qt3DRender::QBuffer * colorbuffer, std::vector<int>* extendFaces){
+    std::vector<FaceConstItr> extension_faces;
     //std::vector<int> extendFaces;
     extendFaces->clear();
     QVector3D normal = mf->fn;
-    detectExtensionFaces(mesh, normal, mf, mf, &extension_faces, extendFaces);
+    detectExtensionFaces(mesh, normal, mf, mf, extension_faces, extendFaces);
     QByteArray colorVertexArray;
     colorVertexArray.resize(sizeof(float)*3);
     float * reVertexArray = reinterpret_cast<float*>(colorVertexArray.data());
@@ -78,63 +76,76 @@ void extendColorMesh(Mesh* mesh,const MeshFace* mf, Qt3DRender::QBuffer * colorb
     }
 
 }
-void detectExtensionFaces(const Mesh* mesh, QVector3D normal,const MeshFace* original_mf, const  MeshFace* mf, std::vector<const MeshFace*>* result, std::vector<int>* result_idx){
-    result->push_back(mf);
+void detectExtensionFaces(const Mesh* mesh, QVector3D normal, FaceConstItr original_mf, FaceConstItr  mf, std::vector<FaceConstItr>& result, std::vector<int>* result_idx){
+    result.push_back(mf);
     if (result_idx != nullptr){
-        result_idx->push_back(mf->idx);
+        result_idx->push_back(mesh->indexOf(mf));
     }
-    for (std::vector<const MeshFace*> neighbors : mf->neighboring_faces){
-		const auto& faces(*mesh->getFaces());
-        for (const MeshFace* neighbor : neighbors){
+	auto edgeCirc = mf->edgeCirculator();
+	for (size_t i = 0; i < 3; ++i, ++edgeCirc) {
+		const auto& faces(mesh->getFaces());
+        for (auto neighbor : edgeCirc->nonOwningFaces()){
             // check if neighbor already checked
             bool cont = false;
-            for (const MeshFace* elem : (*result)){
-                if (elem->idx == neighbor->idx)
-                    cont = true;
+            for (auto elem : result){
+				if (elem == neighbor.getItr())
+				{
+					cont = true;
+					break;
+				}
             }
             if (cont)
                 continue;
             // check if neighbor close to normal
-            if ((neighbor->fn - normal).length() > 0.5 ||\
-                  neighbor->mesh_vertex[0]->position.distanceToPoint(original_mf->mesh_vertex[0]->position) > 100)
+			auto nbrMeshVertices = neighbor->meshVertices();
+			auto originalMVertices = original_mf->meshVertices();
+            if ((neighbor->fn - normal).length() > 0.5 ||
+                  nbrMeshVertices[0]->position.distanceToPoint(originalMVertices[0]->position) > 100)
                 continue;
-            qDebug() << neighbor->mesh_vertex[0]->position.distanceToPoint(original_mf->mesh_vertex[0]->position);
-            qDebug() << "looking for " << neighbor->idx;
-            detectExtensionFaces(mesh, normal, original_mf, neighbor, result, result_idx);
+            qDebug() << nbrMeshVertices[0]->position.distanceToPoint(originalMVertices[0]->position);
+            qDebug() << "looking for " << mesh->indexOf(neighbor.getItr());
+            detectExtensionFaces(mesh, normal, original_mf, neighbor.getItr(), result, result_idx);
         }
     }
 
     return;
 }
 
-Paths3D detectExtensionOutline(Mesh* mesh, std::vector<const MeshFace*> meshfaces){
+Paths3D detectExtensionOutline(Mesh* mesh, const std::vector<FaceConstItr>& meshfaces){
     Mesh temp_mesh;
-    for (const MeshFace* mf : meshfaces){
-        temp_mesh.addFace(mf->mesh_vertex[0]->position,
-                mf->mesh_vertex[1]->position,
-                mf->mesh_vertex[2]->position);
+    for (auto mf : meshfaces){
+		auto meshVertices = mf->meshVertices();
+
+        temp_mesh.addFace(
+				meshVertices[0]->position,
+                meshVertices[1]->position,
+                meshVertices[2]->position);
     }
     temp_mesh.connectFaces();
 
     Paths3D temp_edges;
 
-    for (const MeshFace& mf :*temp_mesh.getFaces()){
-        if (mf.neighboring_faces[0].size() == 0){ // edge 0 is unconnected
+    for (const MeshFace& mf : temp_mesh.getFaces()){
+		auto meshVertices = mf.meshVertices();
+		auto edgeCirc = mf.edgeCirculator();
+		if (edgeCirc->nonOwningFaces().size() == 0){ // edge 0 is unconnected
             Path3D temp_edge;
-            temp_edge.push_back(*mf.mesh_vertex[0]);
-            temp_edge.push_back(*mf.mesh_vertex[1]);
+            temp_edge.push_back(*meshVertices[0]);
+            temp_edge.push_back(*meshVertices[1]);
             temp_edges.push_back(temp_edge);
         }
-        if (mf.neighboring_faces[1].size() == 0){ // edge 1 is unconnected
+		++edgeCirc;
+        if (edgeCirc->nonOwningFaces().size() == 0){ // edge 1 is unconnected
             Path3D temp_edge;
-            temp_edge.push_back(*mf.mesh_vertex[1]);
-            temp_edge.push_back(*mf.mesh_vertex[2]);
+            temp_edge.push_back(*meshVertices[1]);
+            temp_edge.push_back(*meshVertices[2]);
             temp_edges.push_back(temp_edge);
         }
-        if (mf.neighboring_faces[2].size() == 0){ // edge 2 is unconnected
+		++edgeCirc;
+        if (edgeCirc->nonOwningFaces().size() == 0){ // edge 2 is unconnected
             Path3D temp_edge;
-            temp_edge.push_back(*mf.mesh_vertex[2]);
-            temp_edge.push_back(*mf.mesh_vertex[0]);
+            temp_edge.push_back(*meshVertices[2]);
+            temp_edge.push_back(*meshVertices[0]);
             temp_edges.push_back(temp_edge);
         }
     }
@@ -181,10 +192,12 @@ void extendAlongOutline(Mesh* mesh, QVector3D normal, Paths3D selectedPaths, dou
     }
 }
 
-void coverCap(Mesh* mesh, QVector3D normal, std::vector<const MeshFace*> extension_faces, double distance){
-    for (const MeshFace* mf : extension_faces){
-        mesh->addFace(mf->mesh_vertex[0]->position + distance*normal,
-                mf->mesh_vertex[1]->position + distance*normal,
-                mf->mesh_vertex[2]->position + distance*normal);
+void coverCap(Mesh* mesh, QVector3D normal,const std::vector<FaceConstItr>& extension_faces, double distance){
+    for (FaceConstItr mf : extension_faces){
+		auto meshVertices = mf->meshVertices();
+		mesh->addFace(
+				meshVertices[0]->position + distance*normal,
+                meshVertices[1]->position + distance*normal,
+                meshVertices[2]->position + distance*normal);
     }
 }

@@ -34,17 +34,16 @@ public:
 private:
     Paths getMeshRecArea(const Mesh& mesh);
     Paths getMeshConvexHull(const Mesh& mesh);
-    Paths spreadingCheck(const Mesh* mesh, std::map<const MeshFace*, bool>& check, const MeshFace* chking_start, bool is_chking_pos);
-	const MeshVertex* getPathHead(const Mesh* mesh, const MeshFace* mf, size_t side, bool is_chking_pos);
-    Path buildOutline(const Mesh* mesh, std::map<const MeshFace*, bool>& check, const MeshFace* chking, const MeshVertex* path_head, bool is_chking_pos);
-    bool isEdgeBound(const Mesh* mesh, const MeshFace* mf, size_t side, bool is_chking_pos);
-    bool isNbrOrientSame(const Mesh* mesh, const MeshFace* mf, size_t side);
-	size_t searchVtxInFace(const MeshFace* mf, const MeshVertex* vertex);
-	const MeshVertex* getNbrVtx(const MeshFace* mf, size_t base, size_t xth);
+    Paths spreadingCheck(const Mesh* mesh, std::map<const MeshFace *, bool>& check, const MeshFace * chking_start, bool is_chking_pos);
+    Path buildOutline(const Mesh* mesh, std::map<const MeshFace *, bool>& check, const MeshFace * chking, const MeshVertex* path_head, bool is_chking_pos);
+    bool isEdgeBound(const Mesh* mesh, const MeshFace * mf, HalfEdgeConstItr edge, bool is_chking_pos);
+    bool isNbrOrientSame(const Mesh* mesh, const MeshFace * mf, HalfEdgeConstItr edge);
+	//size_t searchVtxInFace(const MeshFace * mf, const MeshVertex* vertex);
+	const MeshVertex* getNbrVtx(const MeshFace * mf, HalfEdgeConstItr base, size_t offset);
     Path idxsToPath(const Mesh* mesh, std::vector<const MeshVertex* > path_by_idx);
     Paths project(const Mesh* mesh);
     Paths clipOutlines(std::vector<Paths> outline_sets);
-    bool checkFNZ(const MeshFace* face, bool is_chking_pos);
+    bool checkFNZ(const MeshFace& face, bool is_chking_pos);
 
 	const MeshVertex* findVertexWithIntpoint(IntPoint p, const Mesh* mesh);
 	const MeshVertex* findVertexWithIntXY(size_t x, size_t y, const Mesh* mesh);
@@ -92,8 +91,8 @@ private:
 	void testOffset();
 	void debugPaths(Paths paths);
 	void debugPath(Path path);
-	void debugFaces(const Mesh* mesh, std::vector<const MeshFace*> face_list);
-	void debugFace(const Mesh* mesh, const MeshFace* face);
+	void debugFaces(const Mesh* mesh, std::vector<const MeshFace *> face_list);
+	void debugFace(const Mesh* mesh, const MeshFace * face);
 #endif
 
 };

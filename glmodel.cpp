@@ -25,7 +25,7 @@
 #endif
 
 using namespace Utils::Math;
-
+using namespace Hix::Engine3D;
 
 const QVector3D GLModel::COLOR_DEFAULT_MESH = QVector3D(0.278f, 0.670f, 0.706f);
 const QVector3D GLModel::COLOR_INFILL = QVector3D(1.0f, 1.0f, 0.0f);
@@ -323,7 +323,7 @@ void GLModel::loadUndoState(){
     } else {
         updateLock = false;
         qDebug() << "no undo state";
-        int saveCnt = (_mesh->getFaces()->size()>100000)? 3: 10;
+        int saveCnt = (_mesh->getFaces().size()>100000)? 3: 10;
         qmlManager->openResultPopUp("Undo state doesn't exist.","","Maximum "+QVariant(saveCnt).toString().toStdString()+" states are saved for this model.");
     }
 }
@@ -489,10 +489,10 @@ void GLModel::updateModelMesh(bool shadowUpdate){
     case VIEW_MODE_LAYER:
         qDebug() << "in the glmodel view mode layer" << qmlManager->getLayerViewFlags() << " " << (qmlManager->getLayerViewFlags() & LAYER_SUPPORTERS);
         if( layerMesh != nullptr ) {
-            int faces = layerMesh->getFaces()->size()*2 +
-                    (qmlManager->getLayerViewFlags() & LAYER_INFILL != 0 ? layerInfillMesh->getFaces()->size()*2 : 0) +
-                    (qmlManager->getLayerViewFlags() & LAYER_SUPPORTERS != 0 ? supportMesh->getFaces()->size()*2 : 0) +
-                    (qmlManager->getLayerViewFlags() & LAYER_RAFT != 0 ? layerRaftMesh->getFaces()->size()*2 : 0);
+            int faces = layerMesh->getFaces().size()*2 +
+                    (qmlManager->getLayerViewFlags() & LAYER_INFILL != 0 ? layerInfillMesh->getFaces().size()*2 : 0) +
+                    (qmlManager->getLayerViewFlags() & LAYER_SUPPORTERS != 0 ? supportMesh->getFaces().size()*2 : 0) +
+                    (qmlManager->getLayerViewFlags() & LAYER_RAFT != 0 ? layerRaftMesh->getFaces().size()*2 : 0);
 			updateVertices(layerMesh);
             if( qmlManager->getLayerViewFlags() & LAYER_INFILL ) {
 				appendMesh(layerInfillMesh, QVector3D(1.0f, 1.0f, 0.0f));
@@ -504,7 +504,7 @@ void GLModel::updateModelMesh(bool shadowUpdate){
 				appendMesh(layerRaftMesh, QVector3D(0.0f, 0.0f, 0.0f));
             }
         } else {
-            int faces = _mesh->getFaces()->size()*2 + ((supportMesh!=nullptr) ? supportMesh->getFaces()->size()*2:0);
+            int faces = _mesh->getFaces().size()*2 + ((supportMesh!=nullptr) ? supportMesh->getFaces().size()*2:0);
 			updateVertices(_mesh);
             if (supportMesh != nullptr)
 				appendMesh(supportMesh);
@@ -749,13 +749,9 @@ arrangeSignalSender::arrangeSignalSender(){
 
 void GLModel::clearMem(){
     QByteArray newVertexArray(vertexBuffer.data().size(), 0);
-    QByteArray newVertexNormalArray(vertexNormalBuffer.data().size(), 0);
-    QByteArray newVertexColorArray(vertexColorBuffer.data().size(), 0);
 	QByteArray newIdxArray(indexBuffer.data().size(), 0);
 
     vertexBuffer.updateData(0, newVertexArray);
-    vertexNormalBuffer.updateData(0, newVertexNormalArray);
-    vertexColorBuffer.updateData(0, newVertexColorArray);
 	indexBuffer.updateData(0, newIdxArray);
 
 	positionAttribute.setCount(0);
@@ -787,7 +783,7 @@ void GLModel::appendMesh(Mesh* mesh, QVector3D vertexColor)
 	//if the QGeo hasn't been cleared, ie) combining two meshes, set current mesh pointer to nullptr
 	if (positionAttribute.count() != 0)
 		_currentVisibleMesh = nullptr;
-    int face_size = mesh->getFaces()->size();
+    int face_size = mesh->getFaces().size();
 
 	appendFaceIndices(face_size);
 	auto buff = indexAttribute.buffer();
@@ -831,7 +827,7 @@ void GLModel::appendMesh(Mesh* mesh, QVector3D vertexColor)
 void GLModel::updateVertices(Mesh* mesh, QVector3D vertexColor)
 {
 	std::vector<Mesh::MeshOp> operations = mesh->flushChanges();
-	bool tooManyChanges = (operations.size() / (mesh->getFaces()->size() * 3)) > 0.8f;
+	bool tooManyChanges = (operations.size() / (mesh->getFaces().size() * 3)) > 0.8f;
 	if (_currentVisibleMesh != mesh  || tooManyChanges)
 	{
 		//if the mesh being updated is not the same as the visible one, we need to redraw everything
@@ -1086,7 +1082,7 @@ const Mesh* GLModel::getMesh()
 
 void GLModel::appendVtxAttributes()
 {
-	appendVtxAttributes(0, _mesh->getFaces()->size());
+	appendVtxAttributes(0, _mesh->getFaces().size());
 }
 void GLModel::appendVtxAttributes(size_t offset, size_t count)
 {
@@ -1889,7 +1885,7 @@ void GLModel::generateSupport(){
     size_t xy_reserve = x_length * y_length;
     size_t xyz_reserve = xy_reserve * z_length;
     qDebug() << "********************xy_reserve = " << xy_reserve;
-    qDebug() << "********************faces_reserve = " << _mesh->getFaces()->size();
+    qDebug() << "********************faces_reserve = " << _mesh->getFaces().size();
     qDebug() << "********************vertices_reserve = " << _mesh->getVertices()->size();
 
     layerInfillMesh = new Mesh;
@@ -2073,7 +2069,7 @@ void GLModel::modelCut(){
             // do bisecting _mesh
 
             modelcut::cutAway(lmesh, rmesh, parentModel->_mesh, parentModel->cuttingPoints, parentModel->cutFillMode);
-            if (lmesh->getFaces()->size() == 0 || rmesh->getFaces()->size() == 0){
+            if (lmesh->getFaces().size() == 0 || rmesh->getFaces().size() == 0){
                 qDebug() << "cutting contour selected not cutting";
                 qmlManager->setProgress(1);
                 //cutModeSelected(9999);
@@ -2087,13 +2083,13 @@ void GLModel::modelCut(){
 
 void GLModel::generateRLModel(Mesh* lmesh, Mesh* rmesh){
     qDebug() << "** generateRLModel" << this;
-    if (lmesh->getFaces()->size() != 0){
+    if (lmesh->getFaces().size() != 0){
         qmlManager->createModelFile(lmesh, filename+"_l");
         qDebug() << "leftmodel created";
     }
     // 승환 70%
     qmlManager->setProgress(0.72);
-    if (rmesh->getFaces()->size() != 0){
+    if (rmesh->getFaces().size() != 0){
         qmlManager->createModelFile(rmesh, filename+"_r");
         qDebug() << "rightmodel created";
     }
@@ -2401,7 +2397,7 @@ QVector3D GLModel::spreadPoint(QVector3D endPoint,QVector3D startPoint,int facto
 
 Mesh* GLModel::toSparse(Mesh* mesh){
     int i=0;
-    int jump = (mesh->getFaces()->size()<100000) ? 1:mesh->getFaces()->size()/30000; // 30000 is chosen for 800000 mesh, 30
+    int jump = (mesh->getFaces().size()<100000) ? 1:mesh->getFaces().size()/30000; // 30000 is chosen for 800000 mesh, 30
     int factor = (jump ==1) ? 1:3*log(jump);
 
     Mesh* newMesh = new Mesh;
@@ -2650,7 +2646,7 @@ void GLModel::generateExtensionFaces(double distance){
         return;
 
     saveUndoState();
-    extendMesh(_mesh, targetMeshFace, distance);
+    extendMesh(_mesh, *targetMeshFace, distance);
     targetMeshFace = NULL;
     emit _updateModelMesh(true);
 }

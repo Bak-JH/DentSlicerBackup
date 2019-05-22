@@ -4,6 +4,7 @@
 #include <QFile>
 #include <iostream>
 
+using Mesh = Hix::Engine3D::Mesh;
 /* Custom fgets function to support Mac line-ends in Ascii STL files. OpenSCAD produces this when used on Mac */
 void* FileLoader::fgets_(char* ptr, size_t len, FILE* f)
 {
@@ -210,7 +211,7 @@ bool FileLoader::loadMeshSTL(Mesh* mesh, const char* filename)
 
         // This logic is used to handle the case where the file starts with
         // "solid" but is a binary file.
-        if (mesh->faces.size() < 1)
+        if (mesh->getFaces().size() < 1)
         {
             //mesh->clear();
             return loadMeshSTL_binary(mesh, filename);

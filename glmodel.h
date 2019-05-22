@@ -103,7 +103,7 @@ class GLModel : public QEntity
 public:
 
     // load teeth model default
-    GLModel(QObject* mainWindow=nullptr, QNode* parent=nullptr, Mesh* loadMesh=nullptr, QString fname="", bool isShadow=false, int id = 0); // main constructor for mainmesh and shadowmesh
+    GLModel(QObject* mainWindow=nullptr, QNode* parent=nullptr, Hix::Engine3D::Mesh* loadMesh=nullptr, QString fname="", bool isShadow=false, int id = 0); // main constructor for mainmesh and shadowmesh
     virtual ~GLModel();
 
     //TODO: Turn these into privates as well
@@ -187,7 +187,7 @@ public:
     void removeCuttingPoint(int idx);
     void removeCuttingPoints();
     void drawLine(QVector3D endpoint);
-	void bisectModel(Plane plane, Mesh& lmesh, Mesh& rmesh);
+	void bisectModel(Plane plane, Hix::Engine3D::Mesh& lmesh, Hix::Engine3D::Mesh& rmesh);
 
     void checkPrintingArea();
     bool EndsWith(const std::string& a, const std::string& b);
@@ -212,8 +212,8 @@ public:
     // implement lock as bool variable
     bool updateLock;
 
-    const Mesh* getMesh();
-    const Mesh* getSupport();
+    const Hix::Engine3D::Mesh* getMesh();
+    const Hix::Engine3D::Mesh* getSupport();
 	void setHitTestable(bool isEnabled);
 	bool isHitTestable();
 	void setBoundingBoxVisible(bool isEnabled);
@@ -241,7 +241,7 @@ private:
 	static const QVector3D COLOR_RAFT;
 
     //Order is important! Look at the initializer list in constructor
-	const Mesh* _currentVisibleMesh;
+	const Hix::Engine3D::Mesh* _currentVisibleMesh;
     QGeometryRenderer m_geometryRenderer;
     QGeometry m_geometry;
 	QNode* _parent;
@@ -281,14 +281,14 @@ private:
     void onTimerUpdate();
     void removeLayerViewComponents();
     void generateLayerViewMaterial();
-    static Mesh* toSparse(Mesh* mesh);
-	void addShadowModel(Mesh* mesh);
-	void updateShadowModel(Mesh* mesh);
+    static Hix::Engine3D::Mesh* toSparse(Hix::Engine3D::Mesh* mesh);
+	void addShadowModel(Hix::Engine3D::Mesh* mesh);
+	void updateShadowModel(Hix::Engine3D::Mesh* mesh);
 	void deleteShadowModel();
 	void updateShadowModelImpl(); // main constructor for mainmesh and shadowmesh
-	void updateAllVertices(Mesh* mesh, QVector3D color = COLOR_DEFAULT_MESH);
-	void updateVertices(Mesh* mesh, QVector3D color = COLOR_DEFAULT_MESH);
-	void appendMesh(Mesh* mesh, QVector3D color = COLOR_DEFAULT_MESH);
+	void updateAllVertices(Hix::Engine3D::Mesh* mesh, QVector3D color = COLOR_DEFAULT_MESH);
+	void updateVertices(Hix::Engine3D::Mesh* mesh, QVector3D color = COLOR_DEFAULT_MESH);
+	void appendMesh(Hix::Engine3D::Mesh* mesh, QVector3D color = COLOR_DEFAULT_MESH);
 
     int cutMode = 1;
     int cutFillMode = 1;
@@ -311,19 +311,19 @@ private:
     int viewMode = -1;
 
     // Core mesh structures
-    Mesh* _mesh;
+	Hix::Engine3D::Mesh* _mesh;
 
     QSphereMesh* dragMesh;
-    Mesh* supportMesh = nullptr;
-    Mesh* raftMesh = nullptr;
+	Hix::Engine3D::Mesh* supportMesh = nullptr;
+	Hix::Engine3D::Mesh* raftMesh = nullptr;
 
     // layer view
-    Mesh* layerMesh;
-    Mesh* layerSupportMesh;
-    Mesh* layerRaftMesh;
-    Mesh* layerInfillMesh;
+	Hix::Engine3D::Mesh* layerMesh;
+	Hix::Engine3D::Mesh* layerSupportMesh;
+	Hix::Engine3D::Mesh* layerRaftMesh;
+	Hix::Engine3D::Mesh* layerInfillMesh;
 
-    const MeshFace *targetMeshFace = NULL; // used for object selection (specific area, like extension or labelling)
+    FaceConstItr *targetMeshFace = nullptr; // used for object selection (specific area, like extension or labelling)
 
 	//bounding box
 	BoundingBox _boundingBox;

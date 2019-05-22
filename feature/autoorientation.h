@@ -8,7 +8,7 @@
 #include <string>
 #include <QTime>
 
-
+using namespace Hix::Engine3D;
 class rotateResult{
 public:
     float phi;
