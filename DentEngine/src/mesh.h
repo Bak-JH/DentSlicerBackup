@@ -12,6 +12,8 @@
 #include <array>
 #include <variant>
 #include "../common/TrackedIndexedList.h"
+#include "../common/IteratorWrapper.h"
+
 #define cos50 0.64278761
 #define cos100 -0.17364818
 #define cos150 -0.8660254
@@ -22,92 +24,111 @@ namespace Hix
 {
 	namespace Engine3D
 	{
-		template<class T, class A>
-		TrackedIndexedList<T, A>::const_iterator getEquivalentItr(const TrackedIndexedList<T, A>& b, const TrackedIndexedList<T, A>& a, const TrackedIndexedList<T, A>::const_iterator& aItr)
+		template<class container_type, class iter_type>
+		iter_type getEquivalentItr(const container_type b, const container_type& a, const iter_type& aItr)
 		{
 			size_t idx = aItr - a.cbegin();
 			return b.cbegin() + idx;
 		}
 
+
+
 		// plane contains at least 3 vertices contained in the plane in clockwise direction
-		typedef std::vector<QVector3D> Plane;
-		struct Vertex;
-		struct Face;
-		struct Mesh;
+
+
+
 		struct HalfEdge;
-
+		struct MeshVertex;
+		struct MeshFace;
+		class Mesh;
 		typedef typename TrackedIndexedList<HalfEdge>::const_iterator HalfEdgeConstItr;
-		typedef typename TrackedIndexedList<Vertex>::const_iterator VertexConstItr;
-		typedef typename TrackedIndexedList<Face>::const_iterator FaceConstItr;
+		typedef typename TrackedIndexedList<struct MeshVertex>::const_iterator VertexConstItr;
+		typedef typename TrackedIndexedList<struct MeshFace>::const_iterator FaceConstItr;
 		typedef typename TrackedIndexedList<HalfEdge>::iterator HalfEdgeItr;
-		typedef typename TrackedIndexedList<Vertex>::iterator VertexItr;
-		typedef typename TrackedIndexedList<Face>::iterator FaceItr;
+		typedef typename TrackedIndexedList<struct MeshVertex>::iterator VertexItr;
+		typedef typename TrackedIndexedList<struct MeshFace>::iterator FaceItr;
 
+		//value semantic, double de-referencing containers
+		typedef typename IteratorWrapper< HalfEdgeConstItr, HalfEdge> HalfEdgeConstItrW;
+		typedef typename IteratorWrapper< VertexConstItr, MeshVertex> VertexConstItrW;
+		typedef typename IteratorWrapper< FaceConstItr, MeshFace> FaceConstItrW;
 
-		
-		struct Face {
-			Face() {}
-			QVector3D fn;
-			QVector3D fn_unnorm;
-			HalfEdgeConstItr edge;
-			std::array<VertexConstItr, 3> meshVertices()const;
-			//std::array<std::vector<FaceConstItr>, 3> neighboring_faces;
-			HalfEdgeCirculator edgeCirculator()const;
-			std::array<size_t, 3> getVerticeIndices(const Mesh* owningMesh)const;
-
-		};
 		struct HalfEdge
 		{
-			
-			HalfEdgeConstItr next;
-			HalfEdgeConstItr prev;
-			VertexConstItr from;
-			VertexConstItr to;
-			FaceConstItr owningFace;
+			HalfEdge()
+			{}
+			size_t index;
+			HalfEdgeConstItrW next;
+			HalfEdgeConstItrW prev;
+			VertexConstItrW from;
+			VertexConstItrW to;
+			FaceConstItrW owningFace;
 			//TODO: guarantee no self intersection occurs and we can use this
 			//HalfEdgeConstItr twin;
-			std::vector<HalfEdgeConstItr> twins;
+			std::vector<HalfEdgeConstItrW> twins;
 
-			std::vector<FaceConstItr> nonOwningFaces()const;
+			std::vector<FaceConstItrW> nonOwningFaces()const;
 		};
-		struct Vertex {
 
-			Vertex() {}
-			Vertex(QVector3D position) : position(position) {}
-			friend inline bool operator== (const Vertex& a, const Vertex& b) {
-				return a.position == b.position;
-			}
-			friend inline bool operator!= (const Vertex& a, const Vertex& b) {
-				return a.position != b.position;
-			}
-			bool empty()const;
-			void calculateNormalFromFaces();
-			std::vector<FaceConstItr> connectedFaces()const;
-			QVector3D position;
-			QVector3D vn;
-			std::vector<HalfEdgeConstItr> leavingEdges;
-			std::vector<HalfEdgeConstItr> arrivingEdges;
-
-
-		};
 		class HalfEdgeCirculator
 		{
 		public:
-			HalfEdgeCirculator(HalfEdgeConstItr ptr);
+			HalfEdgeCirculator(HalfEdgeConstItrW itrW);
 			//you need to double *, but it's worth it for indexing capability
-			HalfEdgeConstItr toItr()const;
+			//HalfEdgeConstItrW& toItrW()const;
+			HalfEdgeConstItr& toItr()const;
+
 			const HalfEdge& operator*()const;
 			void operator++();
 			void operator--();
 			HalfEdgeCirculator operator--(int);
 			HalfEdgeCirculator operator++(int);
 			const HalfEdge* operator->() const;
-			
+
 		private:
-			HalfEdgeConstItr _hEdgeItr;
+			HalfEdgeConstItrW _hEdgeItr;
 		};
 
-		class Path3D : public std::vector<Vertex> {
+		struct MeshFace {
+			MeshFace()
+			{}
+			QVector3D fn;
+			QVector3D fn_unnorm;
+			HalfEdgeConstItrW edge = nullptr;
+			std::array<VertexConstItrW, 3> meshVertices()const;
+			//std::array<std::vector<FaceConstItr>, 3> neighboring_faces;
+			HalfEdgeCirculator edgeCirculator()const;
+			std::array<size_t, 3> getVerticeIndices(const Mesh* owningMesh)const;
+
+		};
+		struct MeshVertex {
+			MeshVertex() 
+			{}
+			MeshVertex(QVector3D position): position(position) {}
+			friend inline bool operator== (const MeshVertex& a, const MeshVertex& b) {
+				return a.position == b.position;
+			}
+			friend inline bool operator!= (const MeshVertex& a, const MeshVertex& b) {
+				return a.position != b.position;
+			}
+			bool empty()const;
+			void calculateNormalFromFaces();
+			std::vector<FaceConstItrW> connectedFaces()const;
+			QVector3D position;
+			QVector3D vn;
+			std::vector<HalfEdgeConstItrW> leavingEdges;
+			std::vector<HalfEdgeConstItrW> arrivingEdges;
+
+
+		};
+
+
+
+
+
+		typedef std::vector<QVector3D> Plane;
+
+		class Path3D : public std::vector<MeshVertex> {
 		public:
 			Path projection;
 			std::vector<Path3D> inner;
@@ -140,10 +161,10 @@ namespace Hix
 			void reverseFace(FaceConstItr faceItr);
 			void reverseFaces();
 			void addFace(QVector3D v0, QVector3D v1, QVector3D v2);
-			TrackedIndexedList<Face>::const_iterator removeFace(FaceConstItr f_it);
+			TrackedIndexedList<MeshFace>::const_iterator removeFace(FaceConstItr f_it);
 			void connectFaces();
-			TrackedIndexedList<Vertex>& getVertices();
-			TrackedIndexedList<Face>& getFaces();
+			TrackedIndexedList<MeshVertex>& getVerticesNonConst();
+			TrackedIndexedList<MeshFace>& getFacesNonConst();
 
 
 			/********************** Mesh Modify and Copy Functions***********************/
@@ -154,21 +175,21 @@ namespace Hix
 			static void addPoint(float x, float y, Path* path);
 			Paths3D intersectionPaths(Path Contour, Plane target_plane)const;
 			Path3D intersectionPath(Plane base_plane, Plane target_plane)const;
-			Path intersectionPath(Face mf, float z)const;
+			Path intersectionPath(MeshFace mf, float z)const;
 
 			/********************** Helper Functions **********************/
 			static void updateMinMax(QVector3D v, std::array<float, 6>& minMax);
 			static std::array<float, 6> calculateMinMax(QMatrix4x4 rotmatrix, const Mesh* mesh);
 
-			float getFaceZmin(Face mf)const;
-			float getFaceZmax(Face mf)const;
-			//Face idx2MF(int idx)const;
-			//Vertex idx2MV(int idx)const;
+			float getFaceZmin(MeshFace mf)const;
+			float getFaceZmax(MeshFace mf)const;
+			//MeshFace idx2MF(int idx)const;
+			//MeshVertex idx2MV(int idx)const;
 
 			/********************** Getters **********************/
 			//const getter
-			const TrackedIndexedList<Vertex>& getVertices()const;
-			const TrackedIndexedList<Face>& getFaces()const;
+			const TrackedIndexedList<MeshVertex>& getVertices()const;
+			const TrackedIndexedList<MeshFace>& getFaces()const;
 			float x_min()const;
 			float x_max()const;
 			float y_min()const;
@@ -180,20 +201,20 @@ namespace Hix
 
 			/********************** index to data **********************/
 
-			inline Face& idx2mf(size_t idx)
+			inline MeshFace& idx2mf(size_t idx)
 			{
 				return faces[idx];
 			}
-			inline Vertex& idx2vtx(size_t idx)
+			inline MeshVertex& idx2vtx(size_t idx)
 			{
 				return vertices[idx];
 			}
 
-			inline const Face& idx2mf(size_t idx)const
+			inline const MeshFace& idx2mf(size_t idx)const
 			{
 				return faces[idx];
 			}
-			inline const Vertex& idx2vtx(size_t idx)const
+			inline const MeshVertex& idx2vtx(size_t idx)const
 			{
 				return vertices[idx];
 			}
@@ -208,7 +229,7 @@ namespace Hix
 		private:
 			/********************** Helper Functions **********************/
 
-			std::vector<HalfEdgeConstItr> setTwins(HalfEdgeItr edge);
+			void setTwins(HalfEdgeItr edge);
 			VertexItr addOrRetrieveFaceVertex(QVector3D v);
 			void removeVertexHash(QVector3D pos);
 			VertexConstItr getSimilarVertex(uint32_t digest, QVector3D v);
@@ -217,9 +238,9 @@ namespace Hix
 
 			QHash<uint32_t, VertexConstItr> vertices_hash;
 
-			TrackedIndexedList<Vertex> vertices;
+			TrackedIndexedList<MeshVertex> vertices;
 			TrackedIndexedList<HalfEdge> halfEdges;
-			TrackedIndexedList<Face> faces;
+			TrackedIndexedList<MeshFace> faces;
 
 			// for undo & redo
 			Mesh* prevMesh = nullptr;
@@ -251,7 +272,7 @@ namespace Hix
 		std::vector<std::array<QVector3D, 3>> interpolate(Path3D from, Path3D to);
 
 		uint32_t intPoint2Hash(IntPoint u);
-		uint32_t Vertex2Hash(Vertex u);
+		uint32_t Vertex2Hash(MeshVertex u);
 
 	};
 };

@@ -14,14 +14,22 @@ using namespace Hix::Engine3D;
 
 //half edge circulator
 
-Hix::Engine3D::HalfEdgeCirculator::HalfEdgeCirculator(HalfEdgeConstItr itr): _hEdgeItr(itr)
+Hix::Engine3D::HalfEdgeCirculator::HalfEdgeCirculator(HalfEdgeConstItrW itr): _hEdgeItr(itr)
 {
 }
 
-HalfEdgeConstItr Hix::Engine3D::HalfEdgeCirculator::toItr() const
+//HalfEdgeConstItrW& Hix::Engine3D::HalfEdgeCirculator::toItrW() const
+//{
+//	return _hEdgeItr;
+//}
+
+HalfEdgeConstItr& Hix::Engine3D::HalfEdgeCirculator::toItr() const
 {
-	return _hEdgeItr;
+	return _hEdgeItr.getItr();
 }
+
+
+
 
 const HalfEdge& Hix::Engine3D::HalfEdgeCirculator::operator*() const
 {
@@ -58,9 +66,9 @@ const HalfEdge* Hix::Engine3D::HalfEdgeCirculator::operator->() const
 }
 
 
-std::array<VertexConstItr, 3> Hix::Engine3D::Face::meshVertices() const
+std::array<VertexConstItrW, 3> Hix::Engine3D::MeshFace::meshVertices() const
 {
-	std::array<VertexConstItr, 3> result;
+	std::array<VertexConstItrW, 3> result;
 	auto circulator = edgeCirculator();
 	for (size_t i = 0; i < 3; ++i)
 	{
@@ -71,25 +79,25 @@ std::array<VertexConstItr, 3> Hix::Engine3D::Face::meshVertices() const
 
 }
 
-HalfEdgeCirculator Hix::Engine3D::Face::edgeCirculator()const
+HalfEdgeCirculator Hix::Engine3D::MeshFace::edgeCirculator()const
 {
 	return HalfEdgeCirculator(edge);
 }
 
-std::array<size_t, 3> Hix::Engine3D::Face::getVerticeIndices(const Mesh* owningMesh)const
+std::array<size_t, 3> Hix::Engine3D::MeshFace::getVerticeIndices(const Mesh* owningMesh)const
 {
 	std::array<size_t, 3> result;
 	auto faceVs = meshVertices();
 	for (size_t i = 0; i < 3; ++i)
 	{
-		result[i] = faceVs[i] - owningMesh->getVertices().cbegin();
+		result[i] = faceVs[i].getItr() - owningMesh->getVertices().cbegin();
 	}
 	return result;
 }
 
-std::vector<FaceConstItr> Hix::Engine3D::HalfEdge::nonOwningFaces()const
+std::vector<FaceConstItrW> Hix::Engine3D::HalfEdge::nonOwningFaces()const
 {
-	std::vector<FaceConstItr> result;
+	std::vector<FaceConstItrW> result;
 	for (auto each : twins)
 	{
 		result.push_back(each->owningFace);
@@ -97,9 +105,9 @@ std::vector<FaceConstItr> Hix::Engine3D::HalfEdge::nonOwningFaces()const
 	return result;
 }
 
-std::vector<FaceConstItr> Hix::Engine3D::Vertex::connectedFaces()const
+std::vector<FaceConstItrW> Hix::Engine3D::MeshVertex::connectedFaces()const
 {
-	std::vector<FaceConstItr> result;
+	std::vector<FaceConstItrW> result;
 	for (auto each : leavingEdges)
 	{
 		result.push_back(each->owningFace);
@@ -107,7 +115,7 @@ std::vector<FaceConstItr> Hix::Engine3D::Vertex::connectedFaces()const
 	return result;
 }
 
-bool Vertex::empty()const
+bool MeshVertex::empty()const
 {
 	if (leavingEdges.empty() && arrivingEdges.empty())
 		return true;
@@ -116,7 +124,7 @@ bool Vertex::empty()const
 }
 
 
-void Hix::Engine3D::Vertex::calculateNormalFromFaces()
+void Hix::Engine3D::MeshVertex::calculateNormalFromFaces()
 {
 	vn = { 0,0,0 };
 	auto faces = connectedFaces();
@@ -384,14 +392,17 @@ void Mesh::reverseFace(FaceConstItr faceItr)
 void Mesh::reverseFaces(){
 
 	size_t count = 0;
-	for(auto constItr = faces.cbegin(); constItr != faces.cend(); ++ constItr)
-
+	for (auto hEdgeItr = halfEdges.begin(); hEdgeItr != halfEdges.end(); ++hEdgeItr)
 	{
-		if (count % 100 == 0)
-			QCoreApplication::processEvents();
-		reverseFace(constItr);
-	};
+		HalfEdge& hEdge = *hEdgeItr;
+		auto tmpEdg = hEdge.next;
+		hEdge.next = hEdge.prev;
+		hEdge.prev = tmpEdg;
 
+		auto oldFrom = hEdge.from;
+		hEdge.from = hEdge.to;
+		hEdge.to = oldFrom;
+	}
 }
 
 
@@ -406,7 +417,7 @@ void Mesh::addFace(QVector3D v0, QVector3D v1, QVector3D v2){
 	//if the face is too small and slicing option collapsed a pair of its vertices, don't add.
 	if (fVtx[0] == fVtx[1] || fVtx[0] == fVtx[2] || fVtx[1] == fVtx[2])
 		return;
-    Hix::Engine3D::Face mf;
+    Hix::Engine3D::MeshFace mf;
 	mf.fn = QVector3D::normal(fVtx[0]->position, fVtx[1]->position, fVtx[2]->position);
 	mf.fn_unnorm = QVector3D::crossProduct(fVtx[1]->position - fVtx[0]->position, fVtx[1]->position - fVtx[0]->position);
 	faces.emplace_back(mf);
@@ -420,10 +431,10 @@ void Mesh::addFace(QVector3D v0, QVector3D v1, QVector3D v2){
 }
 
 
-TrackedIndexedList<Face>::const_iterator Mesh::removeFace(FaceConstItr faceItr){
+TrackedIndexedList<MeshFace>::const_iterator Mesh::removeFace(FaceConstItr faceItr){
 	//for each half edge, remove vertex relations
 	auto edgeCirculator = faceItr->edgeCirculator();
-	DeleteGuard<Vertex, std::allocator<Vertex>> vtxDelGuard = vertices.getDeleteGuard();
+	DeleteGuard<MeshVertex, std::allocator<MeshVertex>> vtxDelGuard = vertices.getDeleteGuard();
 	DeleteGuard<HalfEdge, std::allocator<HalfEdge>> hEdgeDelGuard = halfEdges.getDeleteGuard();
 
 	for (size_t i = 0; i < 3; ++i)
@@ -431,8 +442,8 @@ TrackedIndexedList<Face>::const_iterator Mesh::removeFace(FaceConstItr faceItr){
 		auto from = edgeCirculator->from;
 		auto to = edgeCirculator->to;
 
-		auto moddableLeavingVtx = vertices.toNormItr(from);
-		auto moddableArrivingVtx = vertices.toNormItr(to);
+		auto moddableLeavingVtx = vertices.toNormItr(from.getItr());
+		auto moddableArrivingVtx = vertices.toNormItr(to.getItr());
 
 		auto& leavingVtx = *moddableLeavingVtx;
 		auto& arrivingVtx = *moddableArrivingVtx;
@@ -582,7 +593,7 @@ Paths3D Mesh::intersectionPaths(Path contour, Plane target_plane) {
     float majority2_distance = abs(minDistanceToContour(majority[1], contour));//abs(majority[1].distanceToPlane(base_plane[0],base_plane[1],base_plane[2]));
 
     // calculate intersection points
-    Vertex mv1, mv2;
+    MeshVertex mv1, mv2;
     mv1.position = minority[0] + (majority[0] - minority[0])*(minority_distance/(majority1_distance+minority_distance));
     mv2.position = minority[0] + (majority[1] - minority[0])*(minority_distance/(majority2_distance+minority_distance));
 
@@ -632,7 +643,7 @@ Path3D Mesh::intersectionPath(Plane base_plane, Plane target_plane)const
     float majority2_distance = abs(majority[1].distanceToPlane(base_plane[0],base_plane[1],base_plane[2]));
 
     // calculate intersection points
-    Vertex mv1, mv2;
+    MeshVertex mv1, mv2;
     mv1.position = minority[0] + (majority[0] - minority[0])*(minority_distance/(majority1_distance+minority_distance));
     mv2.position = minority[0] + (majority[1] - minority[0])*(minority_distance/(majority2_distance+minority_distance));
 
@@ -646,13 +657,13 @@ Path3D Mesh::intersectionPath(Plane base_plane, Plane target_plane)const
     return p;
 }
 
-Path Mesh::intersectionPath(Face mf, float z) const
+Path Mesh::intersectionPath(MeshFace mf, float z) const
 {
     Path p;
 
-    std::vector<VertexConstItr> upper;
-    std::vector<VertexConstItr> middle;
-    std::vector<VertexConstItr> lower;
+    std::vector<VertexConstItrW> upper;
+    std::vector<VertexConstItrW> middle;
+    std::vector<VertexConstItrW> lower;
 
 	auto mfVertices = mf.meshVertices();
     for (int i=0; i<3; i++){
@@ -664,8 +675,8 @@ Path Mesh::intersectionPath(Face mf, float z) const
             lower.push_back(mfVertices[i]);
     }
 
-    std::vector<VertexConstItr> majority;
-    std::vector<VertexConstItr> minority;
+    std::vector<VertexConstItrW> majority;
+    std::vector<VertexConstItrW> minority;
 
     if (upper.size() == 2 && lower.size() == 1){
         majority = upper;
@@ -747,7 +758,7 @@ uint32_t Hix::Engine3D::vertexHash(QVector3D v) // max build size = 1000mm, reso
 
 
 
-std::vector<HalfEdgeConstItr> Hix::Engine3D::Mesh::setTwins(HalfEdgeItr subjectEdge)
+void Hix::Engine3D::Mesh::setTwins(HalfEdgeItr subjectEdge)
 {
 
 	subjectEdge->twins.clear();
@@ -812,7 +823,7 @@ VertexItr Mesh::addOrRetrieveFaceVertex(QVector3D v){
 		return vertices.toNormItr(similarVtx);
 	}
 
-    Vertex mv(v);
+    MeshVertex mv(v);
     vertices.emplace_back(mv);
 	auto last = vertices.end() - 1;
 	
@@ -837,16 +848,16 @@ void Hix::Engine3D::Mesh::addHalfEdgesToFace(std::array<VertexItr, 3> faceVertic
 	for (auto itr = firstAddedItr; itr != halfEdges.end(); ++itr)
 	{
 		//add vertices in (from, to) pairs, so (0,1) (1,2) (2,0)
-		itr->from = faceVertices[faceIdx % 3];
-		itr->to = faceVertices[(faceIdx + 1) % 3];
+		itr->from = wrapIterator(VertexConstItr(faceVertices[faceIdx % 3]));
+		itr->to = wrapIterator(VertexConstItr(faceVertices[(faceIdx + 1) % 3]));
 		++faceIdx;
 
 		//add "owning" face or face that the hEdge circuit creates
-		itr->owningFace = face;
-
+		itr->owningFace = wrapIterator(face);
+		auto constItrWrapped = wrapIterator(HalfEdgeConstItr(itr));
 		//for each vertices that the half edges are "leaving" from, add the half edge reference
-		faceVertices[faceIdx % 3]->leavingEdges.push_back(HalfEdgeConstItr(itr));
-		faceVertices[(faceIdx + 1) % 3]->arrivingEdges.push_back(HalfEdgeConstItr(itr));
+		faceVertices[faceIdx % 3]->leavingEdges.push_back(constItrWrapped);
+		faceVertices[(faceIdx + 1) % 3]->arrivingEdges.push_back(constItrWrapped);
 
 		//add circular relationship for all half edges
 		nextItr = itr + 1;
@@ -860,8 +871,8 @@ void Hix::Engine3D::Mesh::addHalfEdgesToFace(std::array<VertexItr, 3> faceVertic
 		{
 			prevItr = firstAddedItr;
 		}
-		itr->next = nextItr;
-		itr->prev = prevItr;
+		itr->next = wrapIterator(nextItr);
+		itr->prev = wrapIterator(prevItr);
 		//twins are not added here.
 	}
 
@@ -914,15 +925,15 @@ void Mesh::vtxIndexChangedCallback(size_t oldIdx, size_t newIdx)
 	//update leaving edges
 	for (auto leavingEdge : vtx.leavingEdges)
 	{
-		auto modLeavingEdge = halfEdges.toNormItr(leavingEdge);
-		modLeavingEdge->from = newIndexItr;
+		auto modLeavingEdge = halfEdges.toNormItr(leavingEdge.getItr());
+		modLeavingEdge->from = wrapIterator(newIndexItr);
 		//get twin edges with opposite direction ie) arriving 
 	}
 	//update arrivingEdges
 	for (auto arrivingEdge : vtx.arrivingEdges)
 	{
-		auto modArrEdge = halfEdges.toNormItr(arrivingEdge);
-		modArrEdge->to = newIndexItr;
+		auto modArrEdge = halfEdges.toNormItr(arrivingEdge.getItr());
+		modArrEdge->to = wrapIterator(newIndexItr);
 	}
 
 	//update hash value
@@ -950,7 +961,7 @@ void Mesh::faceIndexChangedCallback(size_t oldIdx, size_t newIdx)
 	for (size_t i = 0; i < 3; ++i)
 	{
 		auto modHEdge = halfEdges.toNormItr(circ.toItr());
-		modHEdge->owningFace = newIndexItr;
+		modHEdge->owningFace = wrapIterator(newIndexItr);
 	}
 }
 
@@ -963,17 +974,17 @@ void Mesh::hEdgeIndexChangedCallback(size_t oldIdx, size_t newIdx)
 	//update face that owns this half edge only if the itr owned by the face is this one
 	if (hEdge.owningFace->edge != hEdge.next && hEdge.owningFace->edge != hEdge.prev)
 	{
-		auto modFace = faces.toNormItr(hEdge.owningFace);
-		modFace->edge = newIndexItr;
+		auto modFace = faces.toNormItr(hEdge.owningFace.getItr());
+		modFace->edge = wrapIterator(newIndexItr);
 	}
 	//update vertices that have reference to this edge
 	auto oldItr = halfEdges.cbegin() + oldIdx;
-	auto modFrom = &*vertices.toNormItr(hEdge.from);
+	auto modFrom = &*vertices.toNormItr(hEdge.from.getItr());
 	auto foundItr = std::find(modFrom->leavingEdges.begin(), modFrom->leavingEdges.end(), oldItr);
-	*foundItr = newIndexItr;
-	auto modTo = &*vertices.toNormItr(hEdge.to);
+	(*foundItr).getItr() = newIndexItr;
+	auto modTo = &*vertices.toNormItr(hEdge.to.getItr());
 	foundItr = std::find(modTo->arrivingEdges.begin(), modTo->arrivingEdges.end(), oldItr);
-	*foundItr = newIndexItr;
+	(*foundItr).getItr() = newIndexItr;
 }
 
 
@@ -994,7 +1005,7 @@ void Mesh::updateMinMax(QVector3D v, std::array<float,6>& minMax){
 }
 
 
-float Mesh::getFaceZmin(Face mf)const{
+float Mesh::getFaceZmin(MeshFace mf)const{
     float face__z_min=1000;//scfg->max_buildsize_x;
 	auto mfVertices = mf.meshVertices();
     for (int i=0; i<3; i++){
@@ -1005,7 +1016,7 @@ float Mesh::getFaceZmin(Face mf)const{
     return face__z_min;
 }
 
-float Mesh::getFaceZmax(Face mf)const{
+float Mesh::getFaceZmax(MeshFace mf)const{
     float face__z_max=-1000;//-scfg->max_buildsize_x;
 	auto mfVertices = mf.meshVertices();
 
@@ -1240,8 +1251,8 @@ void findAndDeleteHash(std::vector<uint32_t>* hashList, uint32_t hash){
     }
 }
 
-bool contourContains(Path3D contour, Vertex mv){
-    for (Vertex cmv : contour){
+bool contourContains(Path3D contour, MeshVertex mv){
+    for (MeshVertex cmv : contour){
         if (cmv == mv)
             return true;
     }
@@ -1258,13 +1269,13 @@ bool listContains(std::vector<uint32_t>* hashList, uint32_t hash){
     return false;
 }
 
-Vertex findAvailableMeshVertex(
+MeshVertex findAvailableMeshVertex(
         QHash<uint32_t, Path3D>* pathHash,
         std::vector<uint32_t>* hashList,
-        Vertex start
+        MeshVertex start
         ){
     int pj_idx = 1;
-    Vertex pj = (*pathHash)[meshVertex2Hash(start)].at(pj_idx);
+    MeshVertex pj = (*pathHash)[meshVertex2Hash(start)].at(pj_idx);
 
     /*qDebug() << "finding availableMeshVertex from : " << (*pathHash)[meshVertex2Hash(start)].size()-1;
 
@@ -1291,7 +1302,7 @@ Vertex findAvailableMeshVertex(
     return pj;
 }
 
-Vertex* findAvailableMeshVertexFromContour(QHash<uint32_t, Path3D>* pathHash, std::vector<uint32_t>* hashList, Path3D* contour){
+MeshVertex* findAvailableMeshVertexFromContour(QHash<uint32_t, Path3D>* pathHash, std::vector<uint32_t>* hashList, Path3D* contour){
     for (auto& mv : *contour){
         if ((*pathHash)[meshVertex2Hash(mv)].size()>=3){
             return &(*pathHash)[meshVertex2Hash(mv)].at(1);
@@ -1468,7 +1479,7 @@ Paths3D contourConstruct3D(Paths3D hole_edges){
 
     while (pathHash.size() > 0){
         qDebug() << "new contour start" << "chosen from "<< hashList.size();
-        Vertex start, pj_prev, pj, pj_next, last, u, v;
+        MeshVertex start, pj_prev, pj, pj_next, last, u, v;
         Path3D contour;
         start = pathHash[hashList[0]][0];
         contour.push_back(start);
@@ -1499,7 +1510,7 @@ Paths3D contourConstruct3D(Paths3D hole_edges){
             contour.push_back(pj);
             qDebug() << "inserted pj : " << pj.position;
             qDebug() << "current contour size :" << contour.size();
-            for (Vertex mv : pathHash[meshVertex2Hash(pj)]){
+            for (MeshVertex mv : pathHash[meshVertex2Hash(pj)]){
                 qDebug() << "current adding meshvertex neighbors : "<< mv.position;
             }
 
@@ -1659,26 +1670,26 @@ uint32_t intPoint2Hash(IntPoint u){
     return path_hash_u;
 }
 
-uint32_t meshVertex2Hash(Vertex u){
+uint32_t meshVertex2Hash(MeshVertex u){
     uint32_t path_hash_u = vertexHash(u.position);
     return path_hash_u;
 }
 
 
-const TrackedIndexedList<Vertex>& Mesh::getVertices()const
+const TrackedIndexedList<MeshVertex>& Mesh::getVertices()const
 {
 	return vertices;
 }
-const TrackedIndexedList<Face>& Mesh::getFaces()const
+const TrackedIndexedList<MeshFace>& Mesh::getFaces()const
 {
 	return faces;
 }
 
-TrackedIndexedList<Vertex>& Mesh::getVertices()
+TrackedIndexedList<MeshVertex>& Mesh::getVerticesNonConst()
 {
 	return vertices;
 }
-TrackedIndexedList<Face>& Mesh::getFaces()
+TrackedIndexedList<MeshFace>& Mesh::getFacesNonConst()
 {
 	return faces;
 }
