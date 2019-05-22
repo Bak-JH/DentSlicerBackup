@@ -6,6 +6,12 @@
 #include <functional>
 #include "../TrackedIndexedList.h"
 #include "../catch.hpp"
+#include <boost/container/stable_vector.hpp>
+#include <boost/variant/recursive_wrapper.hpp>
+#include <chrono>  // for high_resolution_clock
+#include "../IteratorWrapper.h"
+
+//#include "../IteratorWrapper.h"
 
 namespace TrackedIndexedListTest
 {
@@ -514,6 +520,7 @@ namespace TrackedIndexedListTest
 		SECTION("non const ref")
 		{
 			TrackedIndexedList<int> largerList{ 0,1,2,3,4,5,6,7,8,9 };
+			largerList.flushChanges();
 
 			largerList.front() = -1;
 			largerList.back() = -1;
@@ -527,18 +534,14 @@ namespace TrackedIndexedListTest
 			REQUIRE(change.index() == 1);
 			auto setOfChanges = std::get<1>(change);
 			REQUIRE(setOfChanges.size() == 4);
-			std::vector<size_t> changedIdxs{ 0, 1, 2 , 9 };
-			auto vItr = changedIdxs.begin();
-			for (auto each : setOfChanges)
-			{
-				REQUIRE(*vItr == each);
-				++vItr;
-			}
+			std::unordered_set<size_t> changedIdxs{ 0, 1, 2 , 9 };
+			REQUIRE(setOfChanges == changedIdxs);
 		}
 
 		SECTION("const ref")
 		{
 			TrackedIndexedList<int> largerList{ 0,1,2,3,4,5,6,7,8,9 };
+			largerList.flushChanges();
 			const auto& constBound = largerList;
 			constBound.front();
 			constBound.back();
@@ -630,7 +633,7 @@ namespace TrackedIndexedListTest
 			}
 			SECTION("flush then delete again")
 			{
-				TrackedIndexedList<int> answer{ 0, 9, 2, 8, 4, 5, 6};
+				TrackedIndexedList<int> answer{ 0, 9, 2, 8, 4, 5, 6 };
 				{
 					auto guard = largerList.getDeleteGuard();
 					guard.deleteLater(largerList.begin() + 1); //1
@@ -644,6 +647,203 @@ namespace TrackedIndexedListTest
 
 		}
 	}
+	//struct Face;
+	//struct HalfEdge;
+	//struct Vertex;
+	//typedef typename TrackedIndexedList<typename HalfEdge>::const_iterator HalfEdgeConstItr;
+	//typedef typename TrackedIndexedList<typename Vertex>::const_iterator VertexConstItr;
+	//typedef typename TrackedIndexedList<typename Face>::const_iterator FaceConstItr;
+	//typedef typename TrackedIndexedList<typename HalfEdge>::iterator HalfEdgeItr;
+	//typedef typename TrackedIndexedList<typename Vertex>::iterator VertexItr;
+	//typedef typename TrackedIndexedList<typename Face>::iterator FaceItr;
+
+	// plane contains at least 3 vertices contained in the plane in clockwise direction
 
 
+	//template <class T>
+	//struct Base
+	//{
+	//};
+	//struct wrapper;
+
+	//struct wrpperOuter;
+	//struct Doer
+	//{
+	//public:
+	//	Doer(size_t i) : _i(i)
+	//	{
+	//	}
+	//	//ConstIteratorWrapper<TrackedIndexedList, Doer> wrapper;
+	//	void doSomthing()
+	//	{
+	//		std::cout << "jesus fucking christ";
+	//	}
+	//	wrapperOuter t;
+
+	//	size_t _i;
+	//};
+	//struct wrapperOuter
+	//{
+	//	wrapper* tt;
+	//};
+	//struct wrapper
+	//{
+	//	std::deque<Doer>::const_iterator tt;
+	//};
+
+	//typedef ZZ Z;
+
+	//struct A
+	//{
+	//	Z* itr = nullptr;
+	//};
+	//struct B
+	//{
+	//	std::deque<A>::const_iterator* itr = nullptr;
+	//};
+	struct Floats
+	{
+		float a = 1;
+		float b;
+		float c;
+		float d;
+		float e;
+		float f;
+		float g;
+		float arr[10];
+		Floats* ptr;
+		Floats* ptr1;
+		Floats* ptr2;
+		Floats* ptr3;
+
+
+
+	};
+
+	TEST_CASE("benchmark", "[TrackedIndexedList]") {
+
+
+
+		SECTION("") {
+			auto start = std::chrono::high_resolution_clock::now();
+			std::deque<Floats> test;
+			std::deque<Floats> test2;
+			std::vector<float> as;
+			for (size_t i = 0; i < 1000000; ++i)
+			{
+				test.push_back( Floats());
+			}
+			auto addFinished = std::chrono::high_resolution_clock::now();
+			for (size_t i = 0; i < 100000; ++i)
+			{
+				if (i % 30 != 0)
+				{
+					test.pop_back();
+				}
+				else
+				{
+					test.push_back( Floats());
+				}
+			}
+			auto popAndPushEnded = std::chrono::high_resolution_clock::now();
+			for (size_t z = 0; z < 1000; ++z)
+			{
+				auto itr = test.begin();
+				for (size_t i = 0; i < 10000; ++i)
+				{
+					itr += 10;
+					itr -= 1;
+					as.push_back(itr->a);
+					//test2.push_back(f);
+				}
+				test2.clear();
+			}
+			auto traverseEnded = std::chrono::high_resolution_clock::now();
+			std::chrono::duration<double> addDur = addFinished - start;
+			std::chrono::duration<double> popPushDur = popAndPushEnded - addFinished;
+			std::chrono::duration<double> travDur = traverseEnded - popAndPushEnded;
+
+
+			std::cout << std::endl;
+			std::cout << "addition took: " << addDur.count() << std::endl;
+			std::cout << "pop push op took: " << popPushDur.count() << std::endl;
+			std::cout << "trav took: " << travDur.count() << std::endl;
+
+		}
+	}
+
+
+	class A
+	{
+	public:
+
+		size_t f()
+		{
+			return (*w)->constNum;
+		}
+		IndexedListItr::iterator<A>* w;
+		size_t constNum = 3;
+	};
+
+	class B
+	{
+	public:
+
+		size_t f()
+		{
+			return (w)->constNum;
+		}
+		IteratorWrapper<IndexedListItr::iterator<B>, B> w;
+		size_t constNum = 3;
+	};
+
+	TEST_CASE("iterator wrapper for incomplete container", "[TrackedIndexedList]") {
+
+
+
+		SECTION("test") {
+			IndexedList<A> list;
+			list.push_back(A());
+			auto a = list.back();
+			a.w = new auto(list.end()-1);
+			auto num = a.f();
+			REQUIRE(num == 3);
+		}
+		SECTION("test2") {
+			IndexedList<B> list;
+			list.push_back(B());
+			auto& b = list.back();
+			b.w = new auto(list.end() - 1);
+			auto num = b.f();
+			REQUIRE(num == 3);
+		}
+
+		SECTION("comp") {
+			TrackedIndexedList<int> list{ 1, 2, 3, 4, 5 };
+			auto normItr = list.begin() + 2;
+			auto test = list.begin() + 1;
+			auto wrappedItr = wrapIterator(list.begin() + 1);
+			REQUIRE(*wrappedItr == 2);
+			REQUIRE(*wrappedItr == *test);
+			REQUIRE(wrappedItr == test);
+			REQUIRE(wrappedItr.getItr() == test);
+
+		}
+		SECTION("copy") {
+			TrackedIndexedList<int> list{ 1, 2, 3, 4, 5 };
+			auto itr0 = list.begin();
+			auto itr1 = itr0;
+			itr0 = itr0 + 3;
+			auto wrappedItr = wrapIterator(list.begin() + 1);
+			auto test = wrappedItr;
+			auto test2(wrappedItr);
+			REQUIRE(*wrappedItr == *test);
+			REQUIRE(wrappedItr == test);
+			REQUIRE(test2 == test);
+			wrappedItr.getItr() = wrappedItr.getItr() + 5;
+			REQUIRE(wrappedItr != test);
+			REQUIRE(wrappedItr != test2);
+
+		}
+	}
 }

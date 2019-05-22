@@ -4,14 +4,16 @@
 #include <numeric>
 #include <variant>
 
+
+
 template <class T, class A = std::allocator<T>>
 class TrackedIndexedList : public IndexedList<T, A> {
 
 	typedef typename IndexedList<T, A> parent_type;
 public:
-	typedef typename std::variant<bool, std::set<size_t>> changes_type;
-	typedef typename parent_type::iterator iterator;
-	typedef typename parent_type::const_iterator const_iterator;
+	typedef typename std::variant<bool, std::unordered_set<size_t>> changes_type;
+	typedef typename IndexedListItr::iterator<T,A> iterator;
+	typedef typename IndexedListItr::const_iterator<T, A> const_iterator;
 
 	TrackedIndexedList()
 	{
@@ -54,7 +56,7 @@ public:
 		}
 		else
 		{
-			std::set<size_t> changes = std::move(_changedIndices);
+			std::unordered_set<size_t> changes = std::move(_changedIndices);
 			clearChanges();
 			return changes;
 		}
@@ -63,7 +65,7 @@ public:
 	//when you want to mark change in explicit manner
 	void markChanged(const_iterator itr)
 	{
-		markChanged(itr - cbegin());
+		markChanged(itr - parent_type::cbegin());
 	}
 	void markChanged(size_t index)
 	{
@@ -78,7 +80,7 @@ protected:
 			_changedAll = true;
 		else
 		{
-			if(!_changedAll)
+			if (!_changedAll)
 				_changedIndices.insert(index);
 		}
 	}
@@ -99,7 +101,7 @@ protected:
 	void modifiedElement(size_t index) override
 	{
 		if (!_changedAll)
-			_changedIndices.insert(index);		
+			_changedIndices.insert(index);
 	}
 private:
 	inline void clearChanges()
