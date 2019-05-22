@@ -1394,10 +1394,12 @@ Rectangle {
             font.family: mainFont.name
             onTextChanged: {
                 console.log("\n\ncontent width changed ");
+                console.log(text3DInput.font);
+                hiddenText.text = text;
                 //console.log(hiddenText.text.length);
-                //console.log(hiddenText.text);
-                //console.log(hiddenText.contentWidth);
-                labelTextChanged(text, hiddenText.contentWidth);
+                console.log(hiddenText.text);
+                console.log(hiddenText.contentWidth);
+                labelTextChanged(hiddenText.text, hiddenText.contentWidth);
 
                 //sendTextChanged(text, hiddenText.text.length)
             }

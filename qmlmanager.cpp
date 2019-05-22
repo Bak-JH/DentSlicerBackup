@@ -168,6 +168,7 @@ void QmlManager::initializeUI(QQmlApplicationEngine* e){
     QObject::connect(layflatButton,SIGNAL(runGroupFeature(int,QString, double, double, double, QVariant)),this,SLOT(runGroupFeature(int,QString, double, double, double, QVariant)));
 
     boxUpperTab = FindItemByName(engine, "boxUpperTab");
+    boxLeftTab = FindItemByName(engine, "boxLeftTab");
     QObject::connect(boxUpperTab,SIGNAL(runGroupFeature(int,QString, double, double, double, QVariant)),this,SLOT(runGroupFeature(int,QString, double, double, double, QVariant)));
 
     QObject::connect(this, SIGNAL(arrangeDone(vector<QVector3D>, vector<float>)), this, SLOT(applyArrangeResult(vector<QVector3D>, vector<float>)));
@@ -278,7 +279,8 @@ void QmlManager::deleteOneModelFile(int ID) {
             if ((*gl_it)->shadowModel->labellingTextPreview != nullptr)
                 (*gl_it)->shadowModel->labellingTextPreview->deleteLabel();
             (*gl_it)->deleteLater();
-            (*gl_it)->labellingTextPreview->deleteLabel();
+            if ((*gl_it)->labellingTextPreview != nullptr)
+                (*gl_it)->labellingTextPreview->deleteLabel();
             gl_it = glmodels.erase(gl_it);
             break;
         } else

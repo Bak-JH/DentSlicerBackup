@@ -87,6 +87,14 @@ Rectangle {
         console.log("all off done");
     }
 
+    function disableUppertab(){
+        uppertab.enabled = false
+    }
+
+    function enableUppertab(){
+        uppertab.enabled = true
+    }
+
     property real move_x_value
     property real move_y_value
     property real move_z_value
@@ -1682,7 +1690,7 @@ Rectangle {
             detail2: "Font"
             text3DInputBackground_vis: true
             image: "qrc:/Resource/label_description.png"
-            labelTextContent: "Enter text!!!!!"
+            labelTextContent: "Enter text"
             labelFontName:"Alias"
             labelContentWidth: 0
             labelIsBold: false
@@ -1703,7 +1711,7 @@ Rectangle {
             }
 
             onLabelTextChanged: {
-                //console.log("sendTextChanged @@@ @@@@ @@@@@@@@@@", text, contentWidth, popup_label.labelTextContent);
+                console.log("sendTextChanged @@@ @@@@ @@@@@@@@@@", text, contentWidth, popup_label.labelTextContent);
                 popup_label.labelTextContent = text;
                 popup_label.labelContentWidth = contentWidth;
                 sendTextChanged(text, contentWidth);

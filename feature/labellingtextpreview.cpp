@@ -31,7 +31,6 @@ LabellingTextPreview::LabellingTextPreview(Qt3DCore::QNode* parent)
     planeMesh->setDepth(10.0f);
     planeMesh->setText("");
 
-
     planeMesh = new Qt3DExtras::QExtrudedTextMesh(parent->parentNode());
     planeMesh->setDepth(1.2f);
     //planeMesh->setText("asdfasdfasdf");
@@ -49,6 +48,7 @@ LabellingTextPreview::LabellingTextPreview(Qt3DCore::QNode* parent)
     planeEntity->addComponent(this->planeTransform);
     planeEntity->addComponent(this->planeMaterial);
 
+    scaleY = 12.0f/16.0f;
     planeSelected = false;
 }
 void LabellingTextPreview::setText(QString text, int contentWidth)
@@ -57,6 +57,9 @@ void LabellingTextPreview::setText(QString text, int contentWidth)
     this->text = text;
 
     planeMesh->setText(this->text);
+
+    if (text == "Enter text" && contentWidth == 0)
+        this->contentWidth = 109;
 
    // if (textureImage) {
    //     texture->removeTextureImage(textureImage);
@@ -90,8 +93,9 @@ void LabellingTextPreview::setFontBold(bool isbold){
 
 void LabellingTextPreview::setFontSize(int fontSize)
 {
-    scaleY = fontSize*scaleY/this->fontSize;
-
+    //scaleY = fontSize*scaleY/this->fontSize;
+    qDebug() << "%%%%%%%fontsize" << fontSize;
+    scaleY = fontSize/16.0f;
     this->fontSize = fontSize;
 }
 
@@ -132,9 +136,9 @@ void LabellingTextPreview::updateTransform()
 
 
     QVector3D ref = QVector3D(0, 0, 1);
-    float meshScale = 0.04f;
+    float meshScale = 0.1f;
     float length = this->text.length();
-    float callibration = (length/2.0f * this->fontSize) * meshScale / 1.0f;
+    float callibration = (this->contentWidth/2.0f * scaleY) * meshScale * 0.545f *2.38f * 0.105f;
     //QVector3D ref = QVector3D(1,0,0);
     auto tangent = QVector3D::crossProduct(normal, ref);
     //auto tangent = ref;
@@ -142,18 +146,20 @@ void LabellingTextPreview::updateTransform()
     auto binormal = QVector3D::crossProduct(tangent, normal);
     binormal.normalize();
 
-    qDebug() << translation << " cal:"<<  callibration << this->text.length();
-    qDebug() << "@@@@"<<this<<translation + normal * 0.5f + tangent * callibration - binormal * (callibration / length* 10.0f);
+    qDebug() << translation << " cal:"<<  callibration << scaleY;
+    qDebug() << "@@@@"<<this<<translation + normal * 0.5f + tangent * callibration - binormal * (callibration / length * 12.0f);
     //planeTransform->setTranslation(translation + normal * 0.5f);
-    planeTransform->setTranslation(translation + normal * 0.5f + tangent * callibration - binormal * (callibration / length * 10.0f));
+    planeTransform->setTranslation(translation + normal * 0.5f + tangent * callibration - binormal * (callibration / this->contentWidth * 18.2f));
     //planeTransform->setRotation(QQuaternion::fromAxes(tangent, normal, binormal) * QQuaternion::fromAxisAndAngle(QVector3D(0, 1, 0), 180));
     planeTransform->setRotation(QQuaternion::fromAxes(tangent, normal, binormal) * QQuaternion::fromAxisAndAngle(QVector3D(0,1, 1), 180));
     //planeTransform->setScale3D(QVector3D(width / minimumWidth, 2.0f, ratioY) * scaleY);
-    planeTransform->setScale3D(QVector3D(callibration*0.90f, callibration /1.2f, ratioY) * scaleY * meshScale);
+    planeTransform->setScale3D(QVector3D(0.545f*2.38f, 0.545f *2.38f, ratioY) * scaleY  * meshScale);
 }
 
 void LabellingTextPreview::deleteLabel() {
     qDebug() << "@@@@ Delete" << this;
+
+    this->hideLabel();
     planeMesh->deleteLater();
 }
 
@@ -166,6 +172,8 @@ void LabellingTextPreview::updateChange(QString text, int contentWidth, QString 
     this->setFontBold(isbold);
     if (this->fontSize != fontSize)
         this->setFontSize(fontSize);
+    else
+        qDebug() << "%%%%%%%%%%%%%%HAHA" << this->fontSize << fontSize;
     if (this->translation != t)
         this->setTranslation(t);
     if (n != QVector3D(0,0,0))
@@ -175,5 +183,17 @@ void LabellingTextPreview::updateChange(QString text, int contentWidth, QString 
 }
 
 void LabellingTextPreview::hideLabel() {
+    qDebug() << "@@@@@@@@@@@@@@@@@ hidelabel @@@@@@" << this;
+    /*
+    delete planeMaterial;
+    planeMaterial = new Qt3DExtras::QPhongAlphaMaterial();
+    planeMaterial->setAmbient(QColor(0,0,0,0));
+    planeMaterial->setDiffuse(QColor(0,0,0,0));
+    planeMaterial->setSpecular(QColor(0,0,0,0));
+    planeMaterial->setAlpha(0.0f);
+    planeEntity->addComponent(this->planeMaterial);
+    */
+    planeMaterial->setAlpha(0.0f);
     planeMesh->setDepth(0.0f);
+
 }

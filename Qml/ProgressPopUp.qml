@@ -85,6 +85,8 @@ Rectangle {
         progress_popup.visible = true;
         progress_text1.text = "0% complete";
         progress_text2.text = "Working...";
+        uppertab.disableUppertab();
+        lefttab.disableLefttab();
     }
 
     function updateNumber(value){
@@ -93,6 +95,8 @@ Rectangle {
         if(value===1){
             progress_popup.visible = false;
             progress_text1.text = "0% complete";
+            uppertab.enableUppertab();
+            lefttab.enableLefttab();
             //result_orient.state="active";
             //result_text.text="Orientation Complete.";
         }

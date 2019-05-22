@@ -485,6 +485,8 @@ void GLModel::copyModelAttributeFrom(GLModel* from){
 
 void GLModel::updateModelMesh(bool shadowUpdate){
     // shadowUpdate updates shadow model of current Model
+    QMetaObject::invokeMethod(qmlManager->boxUpperTab, "disableUppertab");
+    QMetaObject::invokeMethod(qmlManager->boxLeftTab, "disableLefttab");
     qDebug() << "update Model Mesh";
     // delete allocated buffers, geometry
     delete vertexBuffer;
@@ -561,7 +563,6 @@ void GLModel::updateModelMesh(bool shadowUpdate){
     //                                                 Q_ARG(QVariant, mesh->y_max - mesh->y_min),
     //                                                 Q_ARG(QVariant, mesh->z_max - mesh->z_min));
     qmlManager->sendUpdateModelInfo();
-
     checkPrintingArea();
     //QMetaObject::invokeMethod(qmlManager->scalePopup, "updateSizeInfo", Q_ARG(QVariant, mesh->x_max-mesh->x_min), Q_ARG(QVariant, mesh->y_max-mesh->y_min), Q_ARG(QVariant, mesh->z_max-mesh->z_min));
     qDebug() << "model transform :" <<m_transform->translation() << mesh->x_max << mesh->x_min << mesh->y_max << mesh->y_min << mesh->z_max << mesh->z_min;
@@ -592,18 +593,24 @@ void GLModel::updateModelMesh(bool shadowUpdate){
         shadowModel=new GLModel(this->mainWindow, this, mesh->vertexMoved(-QVector3D(mesh_x_center,mesh_y_center,mesh_z_center)), filename, true);
         shadowModel->m_transform->setTranslation(QVector3D(mesh_x_center, mesh_y_center, 0));*/
         shadowModel->copyModelAttributeFrom(prevShadowModel);
-        if (prevShadowModel->labellingTextPreview != nullptr)
+        if (prevShadowModel->labellingTextPreview != nullptr) {
+            qDebug() << "shadowmodel label hide #@@@@@@@@@@@@@@@@@";
+            prevShadowModel->labellingTextPreview->hideLabel();
             prevShadowModel->labellingTextPreview->deleteLabel();
+            prevShadowModel->labellingTextPreview->deleteLater();
+        }
         prevShadowModel->deleteLater();
 
         // reconnect handler if current selected model is updated
-        if (qmlManager->selectedModels[0]==this)
+        if (qmlManager->selectedModels[0] == this)
             qmlManager->connectHandlers(this);
         //shadowModel->m_transform->setTranslation(translation);
         QObject::connect(shadowModel, SIGNAL(modelSelected(int)), qmlManager, SLOT(modelSelected(int)));
     }
     updateLock = false;
     qDebug() << this << "released lock";
+    QMetaObject::invokeMethod(qmlManager->boxUpperTab, "enableUppertab");
+    QMetaObject::invokeMethod(qmlManager->boxLeftTab, "enableLefttab");
 }
 
 void GLModel::slicingDone(){
@@ -1229,8 +1236,8 @@ void GLModel::handlePickerClicked(QPickEvent *pick)
     if (isMoved){
         if(components().size() > 4)
         {
-            removeComponent(dragMesh);
-            qmlManager->fixMesh();
+            /*removeComponent(dragMesh);
+            qmlManager->fixMesh();*/
             qDebug() << "dragMesh removed";
         }
         //removeComponent(dragMesh);
@@ -1991,6 +1998,8 @@ void GLModel::removeModel(){
     delete m_geometry;
     delete m_geometryRenderer;
 
+//    labellingTextPreview->hideLabel();
+//    delete labellingTextPreview;
     deleteLater();
 }
 
@@ -2192,8 +2201,8 @@ void GLModel::mgoo(Qt3DRender::QPickEvent* v)
 
         if (components().size() < 5){
             //removeComponent(dragMesh);
-            dragMesh->setRadius(biggest);
-            addComponent(dragMesh);
+            /*dragMesh->setRadius(biggest);
+            addComponent(dragMesh);*/
             //qDebug() << "COMPONENTS(A): " << components();
             //qDebug() << "dragMesh added";
         }
@@ -2491,7 +2500,7 @@ void GLModel::getFontBoldChanged(bool isbold){
 
 void GLModel::getFontSizeChanged(int fontSize)
 {
-    qDebug() << "@@@@ getSizeChanged";
+    qDebug() << "@@@@ getSizeChanged" << fontSize;
     if (labellingTextPreview && labellingTextPreview->isEnabled()){
         applyLabelInfo(labellingTextPreview->text, labellingTextPreview->contentWidth, labellingTextPreview->fontName, (labellingTextPreview->fontWeight==QFont::Bold)? true:false, fontSize);
     }
@@ -2503,8 +2512,6 @@ void GLModel::applyLabelInfo(QString text, int contentWidth, QString fontName, b
     bool selected = false;
 
     qDebug() << "applyLabelInfo +++++++++++++++++++++++++ " << text  << contentWidth << this;
-    if (text != "")
-        contentWidth = 0;
 
     if (labellingTextPreview && labellingTextPreview->isEnabled()){
         translation = labellingTextPreview->translation;
@@ -2616,12 +2623,14 @@ void GLModel::generateText3DMesh()
     if (GLModel* glmodel = qobject_cast<GLModel*>(parent())) {
         glmodel->addVertices(outVertices);
         glmodel->addNormalVertices(outNormals);
-        glmodel->labellingTextPreview->hideLabel();
+        //glmodel->labellingTextPreview->hideLabel();
         emit glmodel->_updateModelMesh(true);
     }
-    //if (this->shadowModel->labellingTextPreview != nullptr)
-      //  this->shadowModel->labellingTextPreview->hideLabel();
 
+    if (this->parentModel->labellingTextPreview != nullptr){
+        qDebug() << "@@@@@@@@ shadowmodel labelling @@@@@@@@@";
+        this->parentModel->labellingTextPreview->hideLabel();
+    }
 }
 
 // for extension

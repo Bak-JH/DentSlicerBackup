@@ -7,6 +7,7 @@ import QtQuick.Controls.Styles 1.0
 
 Rectangle {
     property alias ltso: ltso
+    objectName: "boxLeftTab"
 
     color: "#EFEFEF"
     z: 10
@@ -55,6 +56,14 @@ Rectangle {
         id:ltso
         anchors.top : line2.bottom
         anchors.left: parent.left
+    }
+
+    function disableLefttab(){
+        lefttab.enabled = false
+    }
+
+    function enableLefttab(){
+        lefttab.enabled = true
     }
 
 }
