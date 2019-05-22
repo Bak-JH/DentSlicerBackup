@@ -325,6 +325,9 @@
     <ClInclude Include="unitTest\catch.hpp">
       <Filter>Source Files</Filter>
     </ClInclude>
+    <ClInclude Include="common\IteratorWrapper.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="debug\moc_predefs.h.cbt">
@@ -884,6 +887,7 @@
     <None Include="resource\zoom_up.png">
       <Filter>Resource Files</Filter>
     </None>
+    <None Include="icon-32.ico" />
     <None Include="icon-32.ico" />
     <None Include="icon-32.ico" />
     <None Include="icon-32.ico" />

@@ -234,6 +234,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="common\indexedlist.h" />
+    <ClInclude Include="common\IteratorWrapper.h" />
     <ClInclude Include="common\Singleton.h" />
     <ClInclude Include="common\TrackedIndexedList.h" />
     <ClInclude Include="DentEngine\src\polyclipping\poly2tri\sweep\advancing_front.h" />
