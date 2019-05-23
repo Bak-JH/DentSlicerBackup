@@ -5,7 +5,7 @@ void extendMesh(Mesh* mesh, FaceConstItr mf, double distance){
     qDebug() << normal;
 	auto mfVertices = mf->meshVertices();
     std::vector<FaceConstItr> extension_faces;
-    detectExtensionFaces(mesh, normal, mf, mf, extension_faces,nullptr);
+    detectExtensionFaces(mesh, normal, mf, mf, extension_faces);
 
     // delete extension_faces
     /*for (MeshFace* mf : extension_faces){
@@ -44,43 +44,35 @@ void extendMesh(Mesh* mesh, FaceConstItr mf, double distance){
     coverCap(mesh, normal, extension_faces, distance);
     mesh->connectFaces();
 }
-void resetColorMesh(Mesh* mesh, Qt3DRender::QBuffer * colorbuffer, std::vector<int> extendFaces){
-    QByteArray colorVertexArray;
-    colorVertexArray.resize(sizeof(float)*3);
-    float * reVertexArray = reinterpret_cast<float*>(colorVertexArray.data());
-    for (int i=0;i<extendFaces.size();i++){
-        reVertexArray[0] = 0.278;
-        reVertexArray[1] = 0.670;
-        reVertexArray[2] = 0.706;
-        colorbuffer->updateData(extendFaces.at(i)*sizeof(float)*9,colorVertexArray);
-        colorbuffer->updateData(extendFaces.at(i)*sizeof(float)*9+3*sizeof(float),colorVertexArray);
-        colorbuffer->updateData(extendFaces.at(i)*sizeof(float)*9+6*sizeof(float),colorVertexArray);
-    }
+void resetColorMesh(Mesh* mesh, Qt3DRender::QBuffer * vtxBuffer, std::vector<FaceConstItr>& extendFaces){
+	for (auto& fcItr : extendFaces)
+	{
+		auto vertices = fcItr->meshVertices();
+		for (auto &constVtx : vertices)
+		{
+			auto vtx = mesh->getVerticesNonConst().toNormItr(constVtx.getItr());
+			vtx->color = COLOR_DEFAULT_MESH;
+		}
+	}
 }
-void extendColorMesh(Mesh* mesh,FaceConstItr mf, Qt3DRender::QBuffer * colorbuffer, std::vector<int>* extendFaces){
-    std::vector<FaceConstItr> extension_faces;
+void extendColorMesh(Mesh* mesh,FaceConstItr mf, Qt3DRender::QBuffer * vtxBuffer, std::vector<FaceConstItr>& extendFaces){
     //std::vector<int> extendFaces;
-    extendFaces->clear();
+    extendFaces.clear();
     QVector3D normal = mf->fn;
-    detectExtensionFaces(mesh, normal, mf, mf, extension_faces, extendFaces);
-    QByteArray colorVertexArray;
-    colorVertexArray.resize(sizeof(float)*3);
-    float * reVertexArray = reinterpret_cast<float*>(colorVertexArray.data());
-    for (int i=0;i<extendFaces->size();i++){
-        reVertexArray[0] = 0.901;
-        reVertexArray[1] = 0.843;
-        reVertexArray[2] = 0.133;
-        colorbuffer->updateData(extendFaces->at(i)*sizeof(float)*9,colorVertexArray);
-        colorbuffer->updateData(extendFaces->at(i)*sizeof(float)*9+3*sizeof(float),colorVertexArray);
-        colorbuffer->updateData(extendFaces->at(i)*sizeof(float)*9+6*sizeof(float),colorVertexArray);
-    }
+    detectExtensionFaces(mesh, normal, mf, mf, extendFaces);
+	for (auto& fcItr : extendFaces)
+	{
+		auto vertices = fcItr->meshVertices();
+		for (auto& constVtx : vertices)
+		{
+			auto vtx = mesh->getVerticesNonConst().toNormItr(constVtx.getItr());
+			vtx->color = COLOR_EXTEND_FACE;
+		}
+	}
 
 }
-void detectExtensionFaces(const Mesh* mesh, QVector3D normal, FaceConstItr original_mf, FaceConstItr  mf, std::vector<FaceConstItr>& result, std::vector<int>* result_idx){
+void detectExtensionFaces(const Mesh* mesh, QVector3D normal, FaceConstItr original_mf, FaceConstItr  mf, std::vector<FaceConstItr>& result){
     result.push_back(mf);
-    if (result_idx != nullptr){
-        result_idx->push_back(mesh->indexOf(mf));
-    }
 	auto edgeCirc = mf->edgeCirculator();
 	for (size_t i = 0; i < 3; ++i, ++edgeCirc) {
 		const auto& faces(mesh->getFaces());
@@ -104,7 +96,7 @@ void detectExtensionFaces(const Mesh* mesh, QVector3D normal, FaceConstItr origi
                 continue;
             qDebug() << nbrMeshVertices[0]->position.distanceToPoint(originalMVertices[0]->position);
             qDebug() << "looking for " << mesh->indexOf(neighbor.getItr());
-            detectExtensionFaces(mesh, normal, original_mf, neighbor.getItr(), result, result_idx);
+            detectExtensionFaces(mesh, normal, original_mf, neighbor.getItr(), result);
         }
     }
 

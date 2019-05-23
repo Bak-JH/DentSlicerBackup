@@ -26,7 +26,6 @@ const size_t RayCastController::MIN_CLICK_MOVEMENT_SQRD = 40;
 
 RayCastController::RayCastController()
 {
-	_boundingBoxLayer.setRecursive(false);
 	_modelLayer.setRecursive(false);
 
 
@@ -65,19 +64,6 @@ void RayCastController::initialize(QEntity* camera)
 //}
 
 
-void RayCastController::clearLayers()
-{
-	for (auto& layer : _rayCaster->layers())
-	{
-		_rayCaster->removeLayer(layer);
-	}
-
-	//also empties out model layer
-	for (auto& model : _boundBoxHitModels)
-	{
-		model->removeComponent(&_modelLayer);
-	}
-}
 
 bool RayCastController::isClick(QPoint releasePt)
 {
@@ -93,27 +79,78 @@ bool RayCastController::isClick(QPoint releasePt)
 
 void RayCastController::mousePressed(Qt3DInput::QMouseEvent* mouse)
 {
-	_pressedTime = std::chrono::system_clock::now();
-	_pressedPt = { mouse->x(), mouse->y() };
+//	_pressedTime = std::chrono::system_clock::now();
+//	_pressedPt = { mouse->x(), mouse->y() };
+//	//trying to tell if the click is a drag.
+//	if (!qmlManager->selectedModels.empty())
+//	{
+//		_rayCastMode = RayCastMode::Other;
+//		_rayCaster->trigger(QPoint(mouse->x(), mouse->y()));
+//	}
+	if (_rayCasterBusy)
+		return;
+	_rayCasterBusy = true;
+	_mouseEvent = MouseEventData(mouse);
+	_rayCastMode = RayCastMode::Pressed;
+	_rayCaster->trigger(QPoint(mouse->x(), mouse->y()));
 }
 
 void RayCastController::mouseReleased(Qt3DInput::QMouseEvent* mouse)
 {
-	_releasePt = { mouse->x(), mouse->y() };
-	//prevents event from being freed by invoker...for some events?!
-	if (isClick(_releasePt) && mouse->button() == Qt3DInput::QMouseEvent::Buttons::LeftButton)
-	{
-
-#ifdef LOG_RAYCAST_TIME
-		__startRayTraceTime = std::chrono::system_clock::now();
-#endif
-		_rayCaster->trigger(QPoint(mouse->x(), mouse->y()));
-	}
+	//_releasePt = { mouse->x(), mouse->y() };
+	//if (isClick(_releasePt))
+	//{
+	//	_rayCastMode = RayCastMode::Click;
+	//	_rayCaster->trigger(QPoint(mouse->x(), mouse->y()));
+	//}
+	if (_rayCasterBusy)
+		return;
+	_rayCasterBusy = true;
+	_mouseEvent = MouseEventData(mouse);
+	_rayCastMode = RayCastMode::Released;
+	_rayCaster->trigger(QPoint(mouse->x(), mouse->y()));
 }
 
 void RayCastController::mousePositionChanged(Qt3DInput::QMouseEvent* mouse)
 {
+	if (_rayCasterBusy)
+		return;
+	_rayCasterBusy = true;
+	//disable move when in certain modes;
+	if (qmlManager->orientationActive ||
+		qmlManager->rotateActive ||
+		qmlManager->saveActive)
+		return;
 
+	_mouseEvent = MouseEventData(mouse);
+
+	//only call mouseMoved to selected models that are NOT doing certain features
+	for (auto selected : qmlManager->selectedModels)
+	{
+		if (selected->scaleActive ||
+			selected->cutActive ||
+			selected->shellOffsetActive ||
+			selected->extensionActive ||
+			selected->labellingActive ||
+			selected->layflatActive ||
+			selected->layerViewActive ||
+			selected->manualSupportActive ||
+			selected->supportViewActive)
+			continue;
+
+		selected->mouseMoved(_mouseEvent);
+	}
+
+
+}
+bool RayCastController::isSelected(const GLModel* model)
+{
+	auto findItr = std::find(qmlManager->selectedModels.cbegin(), qmlManager->selectedModels.cend(), model);
+	if(findItr != qmlManager->selectedModels.cend())
+	{
+		return true;
+	}
+	return false;
 }
 
 
@@ -122,79 +159,54 @@ void RayCastController::hitsChanged(const Qt3DRender::QAbstractRayCaster::Hits& 
 	auto allHits = _rayCaster->hits();
 	if (hits.size() > 0)
 	{
-		bool hitGLModel = false;
-
-
-		for (auto& hit : hits)
+		for (auto hit : hits)
 		{
-			auto etc = hit.entity();
-			auto mesh = dynamic_cast<QMesh*>(etc->components()[0]);
-			auto renderer = dynamic_cast<QGeometryRenderer*>(mesh);
-			if(renderer)
-			{
-				auto indBufferOffset = renderer->indexBufferByteOffset();
-				auto indOffset = renderer->indexOffset();
-				auto restart = renderer->restartIndexValue();
-
-				auto geo = renderer->geometry();
-				auto attrbts = geo->attributes();
-
-				QAttribute* pos = nullptr;
-				QAttribute* norm = nullptr;
-				QAttribute* colr = nullptr;
-				QAttribute* idx = nullptr;
-
-				for (auto& each : attrbts)
-				{
-					if (each->name() == QAttribute::defaultPositionAttributeName())
-					{
-						pos = each;
-					}
-					else if (each->name() == QAttribute::defaultNormalAttributeName())
-					{
-						norm = each;
-					}
-					else if (each->name() == QAttribute::defaultColorAttributeName())
-					{
-						colr = each;
-					}
-					else if (each->attributeType() == QAttribute::AttributeType::IndexAttribute)
-					{
-						idx = each;
-					}
-
-				}
-				auto count = idx->count();
-				auto normBuffer = norm->buffer();
-				auto normArr = normBuffer->data();
-				float* reNormArr = reinterpret_cast<float*>(normArr.data());
-
-
-				auto type = idx->vertexBaseType();
-				auto idxBuffer = idx->buffer();
-				auto bufferType = idxBuffer->type();
-				auto byteOffset = idx->byteOffset();
-				auto usage = idxBuffer->usage();
-
-				auto indxArray = idxBuffer->data();
-				auto stride = idx->byteStride();
-				size_t primitiveIdx = hit.primitiveIndex();
-				
-			}
 			auto glModel = dynamic_cast<GLModel*>(hit.entity());
-			size_t primitiveIdx = hit.primitiveIndex();
-#ifdef LOG_RAYCAST_TIME
-			auto endTime = std::chrono::system_clock::now() - __startRayTraceTime;
-			auto msTime = std::chrono::duration_cast<std::chrono::milliseconds>(endTime);
-
-			qDebug() << "ray trace took: " << msTime.count() << hit.type() << hit.entity() << primitiveIdx;
-#endif
-
+			qDebug() << "ray trace glmodel" << glModel;
+			if (_rayCastMode == Pressed)
+			{
+				glModel->mousePressed(_mouseEvent, hit);
+			}
+			else
+			{
+				glModel->mouseReleased(_mouseEvent, hit);
+			}
+			//auto isAlreadySelected = isSelected(glModel);
+			//if (_rayCastMode == RayCastMode::Other)
+			//{
+			//	if (isAlreadySelected)
+			//	{
+			//		//do other stuff like drag-move
+			//	}
+			//}
+			//else
+			//{
+			//	if (isAlreadySelected)
+			//	{
+			//		//unselect
+			//	}
+			//	else
+			//	{
+			//		//select
+			//	}
+			//}
 		}
 
 	}
+	else
+	{
+		qmlManager->backgroundClicked();
+	}
 
 
+	_rayCasterBusy = false;
 
 }
 
+MouseEventData::MouseEventData(Qt3DInput::QMouseEvent* v) : position({ v->x(), v->y() }), button(v->button()), modifiers(v->modifiers())
+{
+}
+
+MouseEventData::MouseEventData()
+{
+}

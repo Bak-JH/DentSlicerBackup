@@ -1,6 +1,6 @@
 #include "stlexporter.h"
 #include "qmlmanager.h"
-
+using namespace Hix::Engine3D;
 STLexporter::STLexporter()
 {
 

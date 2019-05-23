@@ -16,7 +16,18 @@ namespace Qt3DInput
 	class QMouseHandler;
 	class QMouseEvent;
 }
-class RayCastController: public QObject, private Common::Singleton<RayCastController>
+
+//cause holding 
+struct MouseEventData
+{
+	QVector2D position;
+	Qt3DInput::QMouseEvent::Buttons button;
+	Qt3DInput::QMouseEvent::Modifiers modifiers;
+public:
+	MouseEventData(Qt3DInput::QMouseEvent*);
+	MouseEventData();
+};
+class RayCastController: public QObject
 {
 	Q_OBJECT
 public:
@@ -25,7 +36,6 @@ public:
 
 
 	//for ray casting optimization using the bounding box
-	Qt3DRender::QLayer _boundingBoxLayer;
 	Qt3DRender::QLayer _modelLayer;
 public slots:
 	void mousePressed(Qt3DInput::QMouseEvent* mouse);
@@ -35,20 +45,26 @@ public slots:
 	void hitsChanged(const Qt3DRender::QAbstractRayCaster::Hits& hits);
 
 private:
-	void clearLayers();
+	enum RayCastMode
+	{
+		//Click = 0,
+		//Other
+		Pressed = 0,
+		Released
+	};
+	bool isSelected(const GLModel* model);
 	bool isClick(QPoint releasePt);
 	Qt3DRender::QScreenRayCaster* _rayCaster = nullptr;
 	Qt3DInput::QMouseHandler* _mouseHandler = nullptr;
-
+	RayCastMode _rayCastMode;
 	//click detection
 	std::chrono::time_point<std::chrono::system_clock> _pressedTime;
 	QPoint _pressedPt;
 	QPoint _releasePt;
-
-
-	//I wonder when qt deletes the event
-	//Qt3DInput::QMouseEvent* _latestEvent;
-
+	//mouse event
+	MouseEventData _mouseEvent;
+	//change this to atomic if raytracing is done on seperate thread
+	bool _rayCasterBusy = false;
 	//for removing layer element
 	std::vector<GLModel*> _boundBoxHitModels;
 	static const std::chrono::milliseconds MAX_CLICK_DURATION;

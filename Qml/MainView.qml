@@ -104,6 +104,10 @@ Entity {
             inputSource:"file:///C:/Users/user/Downloads/Spider_ascii.stl"
         }
 
+        MeshBoundedBox{
+            objectName: "boundedBox"
+            enabled: false
+        }
 
         Entity{
             objectName: "rotateSphereEntity"

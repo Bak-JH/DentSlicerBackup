@@ -167,6 +167,9 @@
     <ClCompile Include="utils\updatechecker.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="raycastcontroller.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DentEngine\src\polyclipping\poly2tri\sweep\advancing_front.h">
@@ -893,6 +896,7 @@
     <None Include="icon-32.ico" />
     <None Include="icon-32.ico" />
     <None Include="icon-32.ico" />
+    <None Include="icon-32.ico" />
   </ItemGroup>
   <ItemGroup>
     <None Include="DLPslicer.rc">
@@ -907,5 +911,10 @@
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="DLPslicer.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <QtMoc Include="raycastcontroller.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
   </ItemGroup>
 </Project>

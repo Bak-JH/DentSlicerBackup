@@ -22,7 +22,8 @@
 #include "feature/autoarrange.h"
 #include "feature/extension.h"
 #include "feature/hollowshell.h"
-#include "boundingbox.h"
+#include "DentEngine/src/configuration.h"
+#include "raycastcontroller.h"
 
 #define MAX_BUF_LEN 2000000
 
@@ -55,7 +56,6 @@ using namespace Qt3DExtras;
 
 class GLModel;
 class OverhangPoint;
-
 class featureThread: public QThread
 {
     Q_OBJECT
@@ -111,15 +111,13 @@ public:
 	const static size_t UINT_SIZE = sizeof(uint); //needs to be large enough to accomodate all range of vertex index
 	const static size_t FACE_SIZE = IDX_SIZE * UINT_SIZE;
     // load teeth model default
-    GLModel(QObject* mainWindow=nullptr, QNode* parent=nullptr, Hix::Engine3D::Mesh* loadMesh=nullptr, QString fname="", bool isShadow=false, int id = 0); // main constructor for mainmesh and shadowmesh
+    GLModel(QObject* mainWindow=nullptr, QNode* parent=nullptr, Hix::Engine3D::Mesh* loadMesh=nullptr, QString fname="", int id = 0); // main constructor for mainmesh and shadowmesh
     virtual ~GLModel();
 
     //TODO: Turn these into privates as well
-    GLModel *parentModel = nullptr;
     GLModel *leftModel = nullptr;
     GLModel *rightModel = nullptr;
     GLModel *twinModel = nullptr; // saves cut right for left, left for right models
-    GLModel *shadowModel = nullptr;
 
 
     bool appropriately_rotated=false;
@@ -136,7 +134,7 @@ public:
     float hollowShellRadius = 0;
 
     // feature extension
-    std::vector<int> extendFaces;
+    std::vector<FaceConstItr> extendFaces;
 
     // feature offset
     double shellOffsetFactor;
@@ -152,7 +150,6 @@ public:
     Qt3DRender::QTextureLoader* layerViewPlaneTextureLoader;
     Qt3DExtras::QTextureMaterial* layerViewPlaneMaterial;
     //Qt3DExtras::QPhongAlphaMaterial *layerViewPlaneMaterial = nullptr;
-    //QObjectPicker* planeObjectPicker[2];
 
 
     Qt3DExtras::QPlaneMesh* clipPlane[2];
@@ -222,31 +219,35 @@ public:
 
     const Hix::Engine3D::Mesh* getMesh();
     const Hix::Engine3D::Mesh* getSupport();
-	void setHitTestable(bool isEnabled);
-	bool isHitTestable();
+
 	void setBoundingBoxVisible(bool isEnabled);
 	const Qt3DCore::QTransform* getTransform() const;
 	void setTranslation(const QVector3D& t);
 	void setMatrix(const QMatrix4x4& matrix);
 
-	//ray tracing bounding box
-	void addBoundBoxLayer(QLayer* layer);
-	void removeBoundBoxLayer();
+	/***************Ray casting and hit test***************/
+	void setHitTestable(bool isEnabled);
+	bool isHitTestable();
 
-	//void setBoundingBox
+	//
+	bool labellingActive = false;
+	bool extensionActive = false;
+	bool cutActive = false;
+	bool hollowShellActive = false;
+	bool shellOffsetActive = false;
+	bool layflatActive = false;
+	bool manualSupportActive = false;
+	bool layerViewActive = false;
+	bool supportViewActive = false;
+	bool scaleActive = false;
 private:
+
 	//consts
 	//for QAttributes
-	const size_t POS_SIZE = 3;
-	const size_t NRM_SIZE = 3;
-	const size_t COL_SIZE = 3;
-	const size_t VTX_SIZE = POS_SIZE + NRM_SIZE + COL_SIZE;
-	std::vector<QLayer*> _boundBoxLayers;
+
 	Qt3DCore::QTransform m_transform;
-	bool _hitEnabled = true;
-	static const QVector3D COLOR_DEFAULT_MESH;
-	static const QVector3D COLOR_INFILL;
-	static const QVector3D COLOR_RAFT;
+	bool _hitEnabled = false;
+
 
     //Order is important! Look at the initializer list in constructor
 	const Hix::Engine3D::Mesh* _currentVisibleMesh;
@@ -271,42 +272,26 @@ private:
     QVector3D lastpoint;
     QVector2D prevPoint;
     void clearMem();
-	void updateBoundingBox();
 	//update faces given indicies, if index >= indexUppderLimit, it's ignored
 	void updateFaces(const std::unordered_set<size_t>& faceIndicies, const Hix::Engine3D::Mesh& mesh);
-	void updateVertices(const std::unordered_set<size_t>& vtxIndicies, const Hix::Engine3D::Mesh& mesh, QVector3D color);
+	void updateVertices(const std::unordered_set<size_t>& vtxIndicies, const Hix::Engine3D::Mesh& mesh);
 
     void onTimerUpdate();
     void removeLayerViewComponents();
     void generateLayerViewMaterial();
-    static Hix::Engine3D::Mesh* toSparse(Hix::Engine3D::Mesh* mesh);
-	void addShadowModel(Hix::Engine3D::Mesh* mesh);
-	void updateShadowModel(Hix::Engine3D::Mesh* mesh);
-	void deleteShadowModel();
-	void updateShadowModelImpl(); // main constructor for mainmesh and shadowmesh
-	void setMesh(Hix::Engine3D::Mesh* mesh, QVector3D color = COLOR_DEFAULT_MESH);
-	void updateMesh(Hix::Engine3D::Mesh* mesh, QVector3D color = COLOR_DEFAULT_MESH);
-	void appendMesh(Hix::Engine3D::Mesh* mesh, QVector3D color = COLOR_DEFAULT_MESH);
-	void appendMeshVertex(const Hix::Engine3D::Mesh* mesh, QVector3D color,
+	void setMesh(Hix::Engine3D::Mesh* mesh);
+	void updateMesh(Hix::Engine3D::Mesh* mesh);
+	void appendMesh(Hix::Engine3D::Mesh* mesh);
+	void appendMeshVertex(const Hix::Engine3D::Mesh* mesh,
 		Hix::Engine3D::VertexConstItr begin, Hix::Engine3D::VertexConstItr end);
 	void appendMeshFace(const Hix::Engine3D::Mesh* mesh,
 		Hix::Engine3D::FaceConstItr begin, Hix::Engine3D::FaceConstItr end);
 
     int cutMode = 1;
     int cutFillMode = 1;
-    bool labellingActive = false;
-    bool extensionActive = false;
-    bool cutActive = false;
-    bool hollowShellActive = false;
-    bool shellOffsetActive = false;
-    bool layflatActive = false;
-    bool manualSupportActive = false;
-    bool layerViewActive = false;
-    bool supportViewActive = false;
-    bool scaleActive = false;
+
 
     bool isMoved = false;
-    bool isReleased = true;
 
     bool isFlatcutEdge = false;
 
@@ -315,7 +300,6 @@ private:
     // Core mesh structures
 	Hix::Engine3D::Mesh* _mesh;
 
-    QSphereMesh* dragMesh;
 	Hix::Engine3D::Mesh* supportMesh = nullptr;
 	Hix::Engine3D::Mesh* raftMesh = nullptr;
 
@@ -325,10 +309,18 @@ private:
 	Hix::Engine3D::Mesh* layerRaftMesh;
 	Hix::Engine3D::Mesh* layerInfillMesh;
 
-    FaceConstItr *targetMeshFace = nullptr; // used for object selection (specific area, like extension or labelling)
+	bool _targetSelected = false;
+    FaceConstItr targetMeshFace; // used for object selection (specific area, like extension or labelling)
 
-	//bounding box
-	BoundingBox _boundingBox;
+	/***************Ray casting and hit test***************/
+
+
+
+	void addModelLayer();
+	void removeModelLayer();
+	std::vector<QLayer*> _boundBoxLayers;
+
+
 
 signals:
 
@@ -354,10 +346,13 @@ public slots:
     void mouseExitedFreeCutSphere();
     void mouseClickedFreeCutSphere(Qt3DRender::QPickEvent*);
     void mouseClickedFreeCut(Qt3DRender::QPickEvent*);
-    void mouseClicked(Qt3DRender::QPickEvent*);
     void mouseClickedLayflat(MeshFace shadow_meshface);
-    void mgoo(Qt3DRender::QPickEvent*);
-    void pgoo(Qt3DRender::QPickEvent*);
+
+	//raycasting + mouse event
+	void mouseReleased	(MouseEventData&, Qt3DRender::QRayCasterHit&);
+    void mouseMoved		(MouseEventData&);
+    void mousePressed	(MouseEventData&, Qt3DRender::QRayCasterHit&);
+	void raycastHit();
     // Scale
     void openScale();
     void closeScale();
@@ -418,7 +413,7 @@ public slots:
     void generateManualSupport();
 
     // Model Mesh info update
-    void updateModelMesh(bool);
+    void updateModelMesh();
 
     // Generate support mesh
     void generateSupport();
