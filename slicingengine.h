@@ -11,6 +11,7 @@
 #include "DentEngine/src/configuration.h"
 #include "DentEngine/src/svgexporter.h"
 
+using namespace Hix::Engine3D;
 class SlicingEngine : public QObject
 {
     Q_OBJECT

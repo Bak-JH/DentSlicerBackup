@@ -1,7 +1,7 @@
 #ifndef HOLLOWSHELL_H
 #define HOLLOWSHELL_H
 #include "DentEngine/src/mesh.h"
-
+using namespace Hix::Engine3D;
 namespace HollowShell
 {
 	void hollowShell(Mesh* mesh,const MeshFace* mf, QVector3D center, float radius);

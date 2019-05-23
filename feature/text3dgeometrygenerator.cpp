@@ -12,7 +12,7 @@
 #include "utils/qtriangulator_p.h"
 #include "feature/text3dgeometrygenerator.h"
 #include "utils/mathutils.h"
-
+using namespace Hix::Engine3D;
 using IndexType = unsigned int;
 
 struct TriangulationData {

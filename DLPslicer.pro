@@ -11,7 +11,6 @@ RC_ICONS = icon-32.ico
 RC_FILE = DLPslicer.rc
 
 SOURCES += main.cpp \
-    boundingbox.cpp \
     meshdatacontainer.cpp \
     raycastcontroller.cpp \
     slicingengine.cpp \

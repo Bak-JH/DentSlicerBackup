@@ -49,6 +49,7 @@ public:
     QEntity* models;
     Qt3DCore::QTransform* systemTransform;
     QObject* mv;
+	Qt3DCore::QEntity* boundedBox;
     Qt3DCore::QEntity *mttab;
     QObject* undoRedoButton;
     QObject* slicingData;
@@ -149,8 +150,7 @@ public:
 
     std::map<int, GLModel> glmodels;
 
-    //TODO:const pointers, need to use list instead of std::vector because std::vector elements moves around
-    //std::list<GLModel* const> selectedModels;
+	//should be set or even better a map
 	std::vector<GLModel*> selectedModels;
     std::vector<Mesh*> copyMeshes;
     std::vector<QString> copyMeshNames;
@@ -234,6 +234,8 @@ public:
     float selected_z_max(size_t selectedNum);
     float selected_z_min(size_t selectedNum);
 
+	//ray testing
+	Qt3DRender::QLayer& modelLayer();
 private:
 
 	GLModel* getModelByID(int ID);
