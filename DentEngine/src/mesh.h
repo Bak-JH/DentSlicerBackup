@@ -1,12 +1,11 @@
-#ifndef MESH_H
-#define MESH_H
+#pragma once
 #include <vector>
 #include <Qt3DCore/qtransform.h>
 #include <QVector3D>
 #include <QHash>
-#include "configuration.h"
 #include "polyclipping/clipper/clipper.hpp"
 #include "polyclipping/poly2tri/poly2tri.h"
+#include "configuration.h"
 #include <QTransform>
 #include <QTime>
 #include <array>
@@ -18,8 +17,8 @@
 #define cos100 -0.17364818
 #define cos150 -0.8660254
 #define FZERO 0.00001f
-
 using namespace ClipperLib;
+
 namespace Hix
 {
 	namespace Engine3D
@@ -167,7 +166,31 @@ namespace Hix
 			TrackedIndexedList<MeshVertex>& getVerticesNonConst();
 			TrackedIndexedList<MeshFace>& getFacesNonConst();
 			TrackedIndexedList<HalfEdge>& getHalfEdgesNonConst();
-
+			//short hand for TrackedList::toNormItr
+			inline VertexItr toNormItr(const VertexConstItr& itr)
+			{
+				return vertices.toNormItr(itr);
+			}
+			inline FaceItr toNormItr(const FaceConstItr& itr)
+			{
+				return faces.toNormItr(itr);
+			}
+			inline HalfEdgeItr toNormItr(const HalfEdgeConstItr& itr)
+			{
+				return halfEdges.toNormItr(itr);
+			}
+			inline VertexItr toNormItr(const VertexConstItrW& itr)
+			{
+				return vertices.toNormItr(itr.getItr());
+			}
+			inline FaceItr toNormItr(const FaceConstItrW& itr)
+			{
+				return faces.toNormItr(itr.getItr());
+			}
+			inline HalfEdgeItr toNormItr(const HalfEdgeConstItrW& itr)
+			{
+				return halfEdges.toNormItr(itr.getItr());
+			}
 
 			/********************** Mesh Modify and Copy Functions***********************/
 			Mesh* vertexMoved(QVector3D direction)const;
@@ -291,6 +314,3 @@ namespace Hix
 
 	};
 };
-
-
-#endif // MESH_H

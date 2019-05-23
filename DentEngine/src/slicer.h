@@ -1,8 +1,8 @@
 #ifndef SLICER_H
 #define SLICER_H
+#include "mesh.h"
 #include "polyclipping/clipper/clipper.hpp"
 #include "configuration.h"
-#include "mesh.h"
 //#include "support.h"
 //#include "infill.h"
 #include <list>
@@ -12,7 +12,7 @@
 
 using namespace ClipperLib;
 using namespace c2t;
-
+using namespace Hix::Engine3D;
 class OverhangPoint;
 
 class Slice : public Paths{ // extends Paths (total paths)

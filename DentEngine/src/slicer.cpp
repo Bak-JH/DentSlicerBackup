@@ -10,7 +10,7 @@ Slices Slicer::slice(Mesh* mesh){
     Slices slices;
     slices.mesh = mesh;
 
-    if (mesh == nullptr || mesh->getFaces()->size() ==0){
+    if (mesh == nullptr || mesh->getFaces().size() ==0){
         return slices;
     }
 
@@ -95,7 +95,7 @@ std::vector<Paths> Slicer::meshSlice(Mesh* mesh){
     std::vector<Paths> pathLists;
 
     std::vector<const MeshFace*> A;
-    A.reserve(mesh->getFaces()->size());
+    A.reserve(mesh->getFaces().size());
 
     for (int i=0; i<planes.size(); i++){
         A.insert(A.end(), triangleLists[i].begin(), triangleLists[i].end()); // union
@@ -167,7 +167,7 @@ std::vector<std::vector<const MeshFace*>> Slicer::buildTriangleLists(Mesh* mesh,
 
     // Uniform Slicing O(n)
     if (delta>0){
-		for(const auto& mf : *mesh->getFaces())
+		for(const auto& mf : mesh->getFaces())
 		{
 			int llt_idx;
             float z_min = mesh->getFaceZmin(mf);
@@ -196,7 +196,7 @@ std::vector<float> Slicer::buildUniformPlanes(float z_min, float z_max, float de
     std::vector<float> planes;
     int idx_max = ceil((z_max-z_min)/delta);
     for (int idx=0; idx<=idx_max; idx++){
-        float plane_z = round(z_min+delta*idx,2);
+        float plane_z = std::round(z_min+delta*idx);
         qDebug() << "build Uniform Planes at height z "<< plane_z;
         //float plane_z = (idx == idx_max) ? z_min+delta*(idx-1)+delta/2:z_min + delta*idx;
         planes.push_back(plane_z);
