@@ -1825,7 +1825,7 @@ void GLModel::mouseReleased(MouseEventData& pick, Qt3DRender::QRayCasterHit& hit
 		QMetaObject::invokeMethod(qmlManager->mttab, "tabOnOff");
 	}
 #ifdef _STRICT_GLMODEL
-	if (hit.type != QRayCasterHit::HitType::TriangleHit)
+	if (hit.type() != QRayCasterHit::HitType::TriangleHit)
 		throw std::runtime_error("trying to get tri idx from non tri hit");
 #endif
 	if (hit.primitiveIndex() >= _mesh->getFaces().size())

@@ -15,8 +15,8 @@ Mesh* STLexporter::mergeSelectedModels() {
     size_t verNum = 0;
     size_t totalFaceNum = 0;
     for (GLModel* model: qmlManager->selectedModels) {
-        faceNum += model->getMesh()->getFaces()->size();
-        verNum += model->getMesh()->getVertices()->size();
+        faceNum += model->getMesh()->getFaces().size();
+        verNum += model->getMesh()->getVertices().size();
     }
 
     Mesh* mergedMesh = new Mesh();
@@ -27,15 +27,16 @@ Mesh* STLexporter::mergeSelectedModels() {
     for (GLModel* model: qmlManager->selectedModels) {
         QVector3D trans = model->m_transform.translation();
 
-        for (const auto& each : *model->getMesh()->getFaces()) {
-            QVector3D v1 = each.mesh_vertex[0]->position+trans;
-            QVector3D v2 = each.mesh_vertex[1]->position+trans;
-            QVector3D v3 = each.mesh_vertex[2]->position+trans;
+        for (const auto& each : model->getMesh()->getFaces()) {
+			auto meshVertices = each.meshVertices();
+            QVector3D v1 = meshVertices[0]->position+trans;
+            QVector3D v2 = meshVertices[1]->position+trans;
+            QVector3D v3 = meshVertices[2]->position+trans;
             mergedMesh->addFace(v1,v2,v3);
         }
 
-        faceNum += model->getMesh()->getFaces()->size();
-        verNum += model->getMesh()->getVertices()->size();
+        faceNum += model->getMesh()->getFaces().size();
+        verNum += model->getMesh()->getVertices().size();
 
         if (faceNum % 100 == 0) qmlManager->setProgress((float)(0.1 + 0.3*(faceNum/totalFaceNum)));
 
@@ -106,9 +107,9 @@ void STLexporter::exportSTL(QString outfilename){
     //qmlManager->setProgress(0.1);
     QCoreApplication::processEvents();
 
-    size_t total_cnt = mesh->getFaces()->size();
+    size_t total_cnt = mesh->getFaces().size();
     size_t cnt = 0;
-    for (const auto& mf : *mesh->getFaces()){
+    for (const auto& mf : mesh->getFaces()){
         writeFace(outfile, mesh, mf);
 
         if (cnt %100 == 0){
@@ -134,12 +135,14 @@ void STLexporter::writeFace(std::ofstream& outfile,const Mesh* mesh, MeshFace mf
 
     outfile << "facet normal "<< mf.fn.x() <<" "<< mf.fn.y()<<" "<< mf.fn.z() << "\n";
     outfile << "    outer loop\n";
-    MeshVertex mv1 = *mf.mesh_vertex[0];
-    MeshVertex mv2 = *mf.mesh_vertex[1];
-    MeshVertex mv3 = *mf.mesh_vertex[2];
-    outfile << "        vertex "<< mv1.position.x()<<" "<< mv1.position.y()<<" "<< mv1.position.z()<<"\n";
-    outfile << "        vertex "<< mv2.position.x()<<" "<< mv2.position.y()<<" "<< mv2.position.z()<<"\n";
-    outfile << "        vertex "<< mv3.position.x()<<" "<< mv3.position.y()<<" "<< mv3.position.z()<<"\n";
+	auto meshVertices = mf.meshVertices();
+
+    auto& mv1 = meshVertices[0];
+    auto& mv2 = meshVertices[1];
+    auto& mv3 = meshVertices[2];
+    outfile << "        vertex "<< mv1->position.x()<<" "<< mv1->position.y()<<" "<< mv1->position.z()<<"\n";
+    outfile << "        vertex "<< mv2->position.x()<<" "<< mv2->position.y()<<" "<< mv2->position.z()<<"\n";
+    outfile << "        vertex "<< mv3->position.x()<<" "<< mv3->position.y()<<" "<< mv3->position.z()<<"\n";
     outfile << "    endloop\n";
     outfile << "endfacet\n";
 }

@@ -1931,7 +1931,7 @@ void QmlManager::copyModel(){
     for (GLModel* model : selectedModels){
         if (model == nullptr)
             continue;
-        Mesh* copied = model->getMesh()->copyMesh();
+        Mesh* copied = new Mesh( model->getMesh());
 
         copyMeshes.push_back(copied);
         copyMeshNames.push_back(model->filename);

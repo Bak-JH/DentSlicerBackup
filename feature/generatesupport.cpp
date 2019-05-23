@@ -113,15 +113,17 @@ void GenerateSupport::pointOverhangDetect(Mesh* mesh) {
 	//auto vertexFunctor = [this, &pointOverhang](const Mesh & mesh, MeshVertex & vertex, size_t count)->bool
 	//{
 	bool local_min;
-	const auto& vertices = *mesh->getVertices();
+	const auto& vertices = mesh->getVertices();
 	for (const auto& vertex : vertices)
 	{
 		local_min = true;
 		float z = vertex.position.z();
-		for (size_t face_idx = 0; face_idx < vertex.connected_faces.size() && local_min; face_idx++) {
+		auto vtxConnectedFaces = vertex.connectedFaces();
+		for (size_t face_idx = 0; face_idx < vtxConnectedFaces.size() && local_min; face_idx++) {
+			const MeshFace* connectedFace = &*vtxConnectedFaces[face_idx];
+			auto meshVertices = connectedFace->meshVertices();
 			for (size_t i = 0; i < 3; i++) {
-				const MeshFace* connectedFace = vertex.connected_faces[face_idx];
-				if (connectedFace->mesh_vertex[i]->position.z() < z)
+				if (meshVertices[i]->position.z() < z)
 				{
 					local_min = false;
 					break;
@@ -153,10 +155,13 @@ void GenerateSupport::pointOverhangDetect(Mesh* mesh) {
 	{
         bool local_min = true;
         float z = vertex.position.z();
-        for (size_t face_idx = 0; face_idx < vertex.connected_faces.size() && local_min; face_idx++) {
+		auto vtxConnectedFaces = vertex.connectedFaces();
+
+        for (size_t face_idx = 0; face_idx < vtxConnectedFaces.size() && local_min; face_idx++) {
+			const auto connectedFace = vtxConnectedFaces[face_idx];
+			auto meshVertices = connectedFace->meshVertices();
             for (size_t i = 0; i < 3; i++) {
-				const auto connectedFace = vertex.connected_faces[face_idx];
-                if (connectedFace->mesh_vertex[i]->position.z() < z) {
+                if (meshVertices[i]->position.z() < z) {
                     local_min = false;
                     break;
                 }
@@ -199,7 +204,7 @@ void GenerateSupport::faceOverhangDetect(Mesh* mesh) {
     QVector3D printingDirection = QVector3D(0,0,1);
     QVector3D faceNormal;
 
-	const auto& faces(*mesh->getFaces());
+	const auto& faces(mesh->getFaces());
 	for (const MeshFace& face : faces)
 	{
 		faceNormal = face.fn;
@@ -212,9 +217,10 @@ void GenerateSupport::faceOverhangDetect(Mesh* mesh) {
 
     // MeshFace to OverhangPoint
     for (size_t i = 0 ; i < faceOverhang.size(); i++) {
-        QVector3D v0 = faceOverhang[i].mesh_vertex[0]->position;
-        QVector3D v1 = faceOverhang[i].mesh_vertex[1]->position;
-        QVector3D v2 = faceOverhang[i].mesh_vertex[2]->position;
+		auto meshVertices = faceOverhang[i].meshVertices();
+        QVector3D v0 = meshVertices[0]->position;
+        QVector3D v1 = meshVertices[1]->position;
+        QVector3D v2 = meshVertices[2]->position;
         faceOverhangPoint(mesh, v0, v1, v2);
     }
 }
@@ -322,7 +328,7 @@ OverhangPoint GenerateSupport::coneNmeshIntersection(Mesh *mesh, OverhangPoint c
 
     // mesh
 
-	const auto& vertices = *mesh->getVertices();
+	const auto& vertices = mesh->getVertices();
 	for (const MeshVertex& vertex : vertices){
 		if (vertex.position.z() >= coneApex.position.z()) continue;
         tmp = vertex.position - coneApex.position;

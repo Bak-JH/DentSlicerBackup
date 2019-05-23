@@ -13,8 +13,8 @@ namespace MeshRepair{
     // if 2 edges are unconnected or 1 edge is unconnected, goto fillhole
     void removeUnconnected(Mesh* mesh);
 
+	//DEPRECATED, addFace already do this
     // removes zero area triangles
-    void removeDegenerate(Mesh* mesh);
 
     // find hole edges(edges along the holes) and make contour from it
     Paths3D identifyHoles(const Mesh* mesh);

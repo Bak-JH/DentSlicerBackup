@@ -11,7 +11,6 @@ RC_ICONS = icon-32.ico
 RC_FILE = DLPslicer.rc
 
 SOURCES += main.cpp \
-    meshdatacontainer.cpp \
     raycastcontroller.cpp \
     slicingengine.cpp \
     glmodel.cpp \
@@ -90,8 +89,10 @@ win32:QMAKE_LFLAGS *= -Wl,--large-address-aware
 HEADERS += \
     boundingbox.h \
     common/Indexedlist.h \
+    common/IteratorWrapper.h \
     common/Singleton.h \
     common/TrackedIndexedList.h \
+    common/indexedlist.h \
     common/indexedlist.h \
     raycastcontroller.h \
     slicingengine.h \
