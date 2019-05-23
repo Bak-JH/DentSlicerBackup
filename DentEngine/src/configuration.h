@@ -57,12 +57,12 @@ public:
     int raft_type = 2;
 
     // raft settings
-    float raft_thickness = 3; // in mm
+    float raft_thickness = 2; // in mm
     float raft_base_radius = 5; // in mm
     float raft_offset_radius = 4; // in mm
 
     // support settings
-    float support_radius_max = 1.8f;
+    float support_radius_max = 1.5f;
     float support_radius_min = 0.3f;
     float support_base_height = 2.0;
 
