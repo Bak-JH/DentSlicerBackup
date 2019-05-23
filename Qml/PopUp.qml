@@ -1396,9 +1396,11 @@ Rectangle {
                 console.log("\n\ncontent width changed ");
                 console.log(text3DInput.font);
                 hiddenText.text = text;
+                hiddenText.font.pixelSize = font.pixelSize;
                 //console.log(hiddenText.text.length);
                 console.log(hiddenText.text);
                 console.log(hiddenText.contentWidth);
+                console.log(hiddenText.contentHeight);
                 labelTextChanged(hiddenText.text, hiddenText.contentWidth);
 
                 //sendTextChanged(text, hiddenText.text.length)

@@ -123,10 +123,11 @@ void LabellingTextPreview::updateTransform()
         qDebug() << "planeMesh nullptr @@@@@@@@@@@@";
         return;
     }
-    planeMesh->setDepth(10.0f);
+    planeMesh->setDepth(0.2f);
 
     //checking if it is shadow model is needed
     QFont font( this->fontName );
+    qDebug() << "labellingtextpreview" << this->fontSize;
     font.setPointSize( this->fontSize );
 
     font.setWeight( this->fontWeight );
@@ -136,24 +137,26 @@ void LabellingTextPreview::updateTransform()
 
 
     QVector3D ref = QVector3D(0, 0, 1);
-    float meshScale = 0.1f;
+    qDebug() << "labelling text preview fontsize : " << this->fontSize;
+    float meshScale = 0.2f/14.0f * ((float)this->fontSize); // 14.0 pixel font generated and
+    qDebug() << "meshScale" << meshScale << "content width:" << this->contentWidth;
     float length = this->text.length();
     float callibration = (this->contentWidth/2.0f * scaleY) * meshScale * 0.545f *2.38f * 0.105f;
     //QVector3D ref = QVector3D(1,0,0);
-    auto tangent = QVector3D::crossProduct(normal, ref);
+    auto tangent = QVector3D::crossProduct(normal, ref).normalized();
     //auto tangent = ref;
-    tangent.normalize();
-    auto binormal = QVector3D::crossProduct(tangent, normal);
-    binormal.normalize();
+    auto binormal = QVector3D::crossProduct(tangent, normal).normalized();
 
-    qDebug() << translation << " cal:"<<  callibration << scaleY;
+    qDebug() << translation << " cal:"<<  callibration << scaleY << binormal << this->contentWidth;
     qDebug() << "@@@@"<<this<<translation + normal * 0.5f + tangent * callibration - binormal * (callibration / length * 12.0f);
-    //planeTransform->setTranslation(translation + normal * 0.5f);
-    planeTransform->setTranslation(translation + normal * 0.5f + tangent * callibration - binormal * (callibration / this->contentWidth * 18.2f));
+    planeTransform->setTranslation(translation);
+    //planeTransform->setTranslation(translation + tangent * (this->contentWidth/150 * this->fontSize) - binormal * (6.0f/this->fontSize*meshScale));// + normal * 0.5f + tangent*this->contentWidth/64/2 - binormal);// - binormal);
+    //planeTransform->setTranslation(translation + normal * 0.5f + tangent * callibration - binormal * (callibration / this->contentWidth * 18.2f));
     //planeTransform->setRotation(QQuaternion::fromAxes(tangent, normal, binormal) * QQuaternion::fromAxisAndAngle(QVector3D(0, 1, 0), 180));
-    planeTransform->setRotation(QQuaternion::fromAxes(tangent, normal, binormal) * QQuaternion::fromAxisAndAngle(QVector3D(0,1, 1), 180));
+    planeTransform->setRotation(QQuaternion::fromAxes(tangent, normal, binormal) * QQuaternion::fromAxisAndAngle(QVector3D(0, 1, 1), 180));
     //planeTransform->setScale3D(QVector3D(width / minimumWidth, 2.0f, ratioY) * scaleY);
-    planeTransform->setScale3D(QVector3D(0.545f*2.38f, 0.545f *2.38f, ratioY) * scaleY  * meshScale);
+    //planeTransform->setScale3D(QVector3D(0.545f*2.38f, 0.545f *2.38f, ratioY) * scaleY  * meshScale);
+    planeTransform->setScale3D(QVector3D(1,1,1)*meshScale);
 }
 
 void LabellingTextPreview::deleteLabel() {

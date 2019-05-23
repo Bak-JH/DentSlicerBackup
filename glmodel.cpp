@@ -1291,8 +1291,8 @@ void GLModel::handlePickerClicked(QPickEvent *pick)
 
         QMetaObject::invokeMethod(qmlManager->labelPopup, "labelUpdate");
         if (labellingTextPreview && labellingTextPreview->isEnabled()) {
-            //qDebug() << "@@@@ @@@@ 4" << pick->localIntersection() << parentModel->targetMeshFace->fn;
-            labellingTextPreview->setTranslation(m_transform->translation()+ pick->localIntersection() + parentModel->targetMeshFace->fn);
+            qDebug() << "@@@@ @@@@ 4" << pick->localIntersection() << parentModel->targetMeshFace->fn;
+            labellingTextPreview->setTranslation(m_transform->translation() + pick->localIntersection() + parentModel->targetMeshFace->fn);
             labellingTextPreview->setNormal(parentModel->targetMeshFace->fn);
             labellingTextPreview->updateTransform();
             labellingTextPreview->planeSelected = true;
@@ -2595,6 +2595,7 @@ void GLModel::generateText3DMesh()
     transform.setRotation(quat);
     transform.setTranslation(translation);
 
+    qDebug() << "generating text 3d geometry with font size : " << labellingTextPreview->fontSize;
     generateText3DGeometry(&vertices, &verticesSize,
                            &indices, &indicesSize,
                            QFont(labellingTextPreview->fontName, labellingTextPreview->fontSize, labellingTextPreview->fontWeight, false),
