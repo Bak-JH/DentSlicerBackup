@@ -73,6 +73,7 @@ LIBS += -LC:/dev/CGAL-4.11/auxiliary/gmp/lib -llibgmp-10 -llibmpfr-4
 
 INCLUDEPATH += C:/dev/CGAL-4.11/include
 INCLUDEPATH += C:/dev/CGAL-4.11/auxiliary/gmp/include
+INCLUDEPATH += C:/boost_1_59_0
 INCLUDEPATH += C:/CGAL_build8/include
 
 

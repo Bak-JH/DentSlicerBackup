@@ -18,6 +18,7 @@
 #include <QDir>
 #include <QMatrix3x3>
 #include <feature/generatesupport.h>
+#include <feature/generateraft.h>
 
 #define ATTRIBUTE_SIZE_INCREMENT 200
 #if defined(_DEBUG) || defined(QT_DEBUG)
@@ -506,6 +507,12 @@ void GLModel::updateModelMesh(bool shadowUpdate){
         if (supportMesh != nullptr)
 		{
 			appendMesh(supportMesh);
+            qDebug() << "ADDED support mesh";
+        }
+        if (raftMesh != nullptr)
+        {
+            appendMesh(raftMesh);
+            qDebug() << "ADDED raft mesh";
         }
         break;
     case VIEW_MODE_LAYER:
@@ -523,13 +530,19 @@ void GLModel::updateModelMesh(bool shadowUpdate){
 				appendMesh(supportMesh);
             }
             if( qmlManager->getLayerViewFlags() & LAYER_RAFT) {
-				appendMesh(layerRaftMesh, QVector3D(0.0f, 0.0f, 0.0f));
+                appendMesh(raftMesh);
             }
         } else {
             int faces = _mesh->getFaces()->size()*2 + ((supportMesh!=nullptr) ? supportMesh->getFaces()->size()*2:0);
 			updateVertices(_mesh);
-            if (supportMesh != nullptr)
-				appendMesh(supportMesh);
+            if (supportMesh != nullptr){
+                appendMesh(supportMesh);
+                qDebug() << "ADDED support mesh";
+            }
+            if (raftMesh != nullptr){
+                appendMesh(raftMesh);
+                qDebug() << "ADDED raft mesh";
+            }
         }
         break;
     }
@@ -822,8 +835,7 @@ void GLModel::appendMesh(Mesh* mesh, QVector3D vertexColor)
 	_currentVisibleMesh = mesh;
 	//if the QGeo hasn't been cleared, ie) combining two meshes, set current mesh pointer to nullptr
 	if (positionAttribute.count() != 0)
-		_currentVisibleMesh = nullptr;
-	int face_size = mesh->getFaces()->size();
+        _currentVisibleMesh = nullptr;
 	int face_idx = 0;
 	for (const MeshFace& mf : *mesh->getFaces()) {
 		face_idx++;
@@ -1903,18 +1915,6 @@ void GLModel::generateSupport(){
     layerSupportMesh->vertexMove(t);
     layerRaftMesh->vertexMove(t);
 
-    // generate cylinders
-    /*for( auto iter = slicer->slices.overhang_points.begin() ; iter != slicer->slices.overhang_points.end() ; iter++ ) {
-        qDebug() << "-------" << (*iter)->position.X << (*iter)->position.Y << (*iter)->position.Z;
-        generateSupporter(layerSupportMesh, *iter);
-        generateRaft(layerRaftMesh, *iter);
-    }*/
-
-    /*for( auto iter = slicer->slices.begin() ; iter != slicer->slices.end() ; iter++ ) {
-        qDebug() << "infile" << iter->infill.size() << "outershell" << iter->outershell.size() << "support" << iter->support.size() << "z" << iter->z;
-        generateInfill(layerInfillMesh, &(*iter));
-    }*/
-
     t.setZ(scfg->raft_thickness);
     layerMesh->vertexMove(t);
     t.setZ(_mesh->z_min() + scfg->raft_thickness);
@@ -2368,7 +2368,7 @@ void GLModel::getLayerViewSliderSignal(double value) {
     if (!shadowModel || !shadowModel->layerViewActive)
         return;
 
-    float height = (_mesh->z_max() - _mesh->z_min() + scfg->raft_thickness) * value;
+    float height = (_mesh->z_max() - _mesh->z_min() + scfg->raft_thickness + scfg->support_base_height) * value;
     int layer_num = int(height/scfg->layer_height)+1;
     if (value <= 0.002f)
         layer_num = 0;
@@ -3159,15 +3159,22 @@ void GLModel::reenableMouseHandlers()
 
 }
 
-void GLModel::setSupport()
+void GLModel::setSupportAndRaft()
 {
     GenerateSupport generatesupport;
     supportMesh = generatesupport.generateSupport(_mesh);
+    GenerateRaft generateraft;
+    raftMesh = generateraft.generateRaft(_mesh, generatesupport.overhangPoints);
 }
 
 const Mesh* GLModel::getSupport()
 {
     return supportMesh;
+}
+
+const Mesh* GLModel::getRaft()
+{
+    return raftMesh;
 }
 
 void GLModel::setEnabled(bool isEnabled)
