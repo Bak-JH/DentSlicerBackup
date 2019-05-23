@@ -101,7 +101,15 @@ class GLModel : public QEntity
 {
     Q_OBJECT
 public:
+	//size of QGeometry Attribute elements
+	const static size_t POS_SIZE = 3; //x, y, z of position
+	const static size_t NRM_SIZE = 3; //x, y, z of normal
+	const static size_t COL_SIZE = 3; //r, g, b for color
+	const static size_t VTX_SIZE = (POS_SIZE + NRM_SIZE + COL_SIZE) * sizeof(float);
 
+	const static size_t IDX_SIZE = 3; //3 index to vertices
+	const static size_t UINT_SIZE = sizeof(uint); //needs to be large enough to accomodate all range of vertex index
+	const static size_t FACE_SIZE = IDX_SIZE * UINT_SIZE;
     // load teeth model default
     GLModel(QObject* mainWindow=nullptr, QNode* parent=nullptr, Hix::Engine3D::Mesh* loadMesh=nullptr, QString fname="", bool isShadow=false, int id = 0); // main constructor for mainmesh and shadowmesh
     virtual ~GLModel();
@@ -263,21 +271,11 @@ private:
     QVector3D lastpoint;
     QVector2D prevPoint;
     void clearMem();
-	void addVertex(QVector3D pos, QVector3D normal, QVector3D color);
-
-	//append all
-	void appendVtxAttributes();
-	//append only from offset to count vertices, in terms of face count
-	void appendVtxAttributes(size_t offset, size_t count);
-
-    //void appendVertices(std::vector<QVector3D> vertices);
-    //void appendNormalVertices(std::vector<QVector3D> vertices);
-    //void appendColorVertices(std::vector<QVector3D> vertices);
-	void appendFaceIndices(size_t appendedFaceCnt);
 	void updateBoundingBox();
-	void updateFace(const MeshFace* face);
-	void deleteAndShiftFaces(size_t start, size_t deleteAmount);
-    void clearVertices();
+	//update faces given indicies, if index >= indexUppderLimit, it's ignored
+	void updateFaces(const std::unordered_set<size_t>& faceIndicies, const Hix::Engine3D::Mesh& mesh);
+	void updateVertices(const std::unordered_set<size_t>& vtxIndicies, const Hix::Engine3D::Mesh& mesh, QVector3D color);
+
     void onTimerUpdate();
     void removeLayerViewComponents();
     void generateLayerViewMaterial();
@@ -286,9 +284,13 @@ private:
 	void updateShadowModel(Hix::Engine3D::Mesh* mesh);
 	void deleteShadowModel();
 	void updateShadowModelImpl(); // main constructor for mainmesh and shadowmesh
-	void updateAllVertices(Hix::Engine3D::Mesh* mesh, QVector3D color = COLOR_DEFAULT_MESH);
-	void updateVertices(Hix::Engine3D::Mesh* mesh, QVector3D color = COLOR_DEFAULT_MESH);
+	void setMesh(Hix::Engine3D::Mesh* mesh, QVector3D color = COLOR_DEFAULT_MESH);
+	void updateMesh(Hix::Engine3D::Mesh* mesh, QVector3D color = COLOR_DEFAULT_MESH);
 	void appendMesh(Hix::Engine3D::Mesh* mesh, QVector3D color = COLOR_DEFAULT_MESH);
+	void appendMeshVertex(const Hix::Engine3D::Mesh* mesh, QVector3D color,
+		Hix::Engine3D::VertexConstItr begin, Hix::Engine3D::VertexConstItr end);
+	void appendMeshFace(const Hix::Engine3D::Mesh* mesh,
+		Hix::Engine3D::FaceConstItr begin, Hix::Engine3D::FaceConstItr end);
 
     int cutMode = 1;
     int cutFillMode = 1;
