@@ -12,7 +12,7 @@ void modelcut::bisectModel(Mesh* mesh, Plane plane, Mesh* leftMesh, Mesh* rightM
         bool faceLeftToPlane = true;
 		const auto& meshVertices = mf.meshVertices();
         for (int vn=0; vn<3; vn++){
-            const VertexConstItr & mv(meshVertices[vn]);
+            const VertexConstItr & mv(meshVertices[vn].getItr());
             if (!isLeftToPlane(plane, mv->position)) // if one vertex is left to plane, append to left vertices part
                 faceLeftToPlane = false;
         }
@@ -236,7 +236,7 @@ void modelcut::cutAway(Mesh* leftMesh, Mesh* rightMesh, Mesh* mesh, std::vector<
 		const auto& meshVertices = mf.meshVertices();
 
         for (int vn=0; vn<3; vn++){
-            VertexConstItr mv = meshVertices[vn];
+            auto mv = meshVertices[vn];
 
             if (PointInPolygon(IntPoint(mv->position.x()*scfg->resolution, mv->position.y()*scfg->resolution), contour_all)){
                 faceLeftToPlane = true;

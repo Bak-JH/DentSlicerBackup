@@ -203,8 +203,9 @@ void RayCastController::hitsChanged(const Qt3DRender::QAbstractRayCaster::Hits& 
 
 }
 
-MouseEventData::MouseEventData(Qt3DInput::QMouseEvent* v) : position({ v->x(), v->y() }), button(v->button()), modifiers(v->modifiers())
+MouseEventData::MouseEventData(Qt3DInput::QMouseEvent* v) : button(v->button()), modifiers(v->modifiers())
 {
+	position = {(float)v->x(), (float)v->y() };
 }
 
 MouseEventData::MouseEventData()

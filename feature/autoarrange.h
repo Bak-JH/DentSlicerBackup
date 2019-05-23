@@ -1,5 +1,6 @@
 #ifndef ARRANGE_H
 #define ARRANGE_H
+#include "DentEngine/src/mesh.h"
 #include <vector>
 #include <algorithm>
 #include <QVector3D>
@@ -9,7 +10,6 @@
 #include <math.h>
 //#include "./glmodel.h"
 #include "DentEngine/src/configuration.h"
-#include "DentEngine/src/mesh.h"
 #include "DentEngine/src/polyclipping/clipper/clipper.hpp"
 #include "convex_hull.h"
 #if  defined(QT_DEBUG) || defined(_DEBUG)
