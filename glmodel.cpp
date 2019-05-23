@@ -501,6 +501,8 @@ void GLModel::updateModelMesh(bool shadowUpdate){
     switch( viewMode ) {
     case VIEW_MODE_OBJECT:
 		updateVertices(_mesh);
+
+        m_transform.setTranslation(QVector3D(m_transform.translation().x(),m_transform.translation().y(),-_mesh->z_min()));
         break;
     case VIEW_MODE_SUPPORT:
 		updateVertices(_mesh);
@@ -514,6 +516,9 @@ void GLModel::updateModelMesh(bool shadowUpdate){
             appendMesh(raftMesh);
             qDebug() << "ADDED raft mesh";
         }
+
+        m_transform.setTranslation(QVector3D(m_transform.translation().x(),m_transform.translation().y(),-_mesh->z_min() + scfg->raft_thickness + scfg->support_base_height));
+
         break;
     case VIEW_MODE_LAYER:
         qDebug() << "in the glmodel view mode layer" << qmlManager->getLayerViewFlags() << " " << (qmlManager->getLayerViewFlags() & LAYER_SUPPORTERS);
@@ -544,15 +549,12 @@ void GLModel::updateModelMesh(bool shadowUpdate){
                 qDebug() << "ADDED raft mesh";
             }
         }
+
+        m_transform.setTranslation(QVector3D(m_transform.translation().x(),m_transform.translation().y(),-_mesh->z_min() + scfg->raft_thickness + scfg->support_base_height));
         break;
     }
     //applyGeometry();
 
-    QVector3D tmp = m_transform.translation();
-    float zlength = _mesh->z_max() - _mesh->z_min();
-    //if (shadowModel != NULL) // since shadow model transformed twice
-
-    m_transform.setTranslation(QVector3D(tmp.x(),tmp.y(),-_mesh->z_min()));
     //QMetaObject::invokeMethod(qmlManager->boundedBox, "setPosition", Q_ARG(QVariant, m_transform.translation()+QVector3D((_mesh->x_max()+_mesh->x_min())/2,(_mesh->y_max()+_mesh->y_min())/2,(_mesh->z_max()+_mesh->z_min())/2)));
     //QMetaObject::invokeMethod(qmlManager->boundedBox, "setSize", Q_ARG(QVariant, _mesh->x_max() - _mesh->x_min()),
     //                                                 Q_ARG(QVariant, _mesh->y_max() - _mesh->y_min()),
@@ -563,42 +565,24 @@ void GLModel::updateModelMesh(bool shadowUpdate){
     qDebug() << "model transform :" <<m_transform.translation() << _mesh->x_max() << _mesh->x_min() << _mesh->y_max() << _mesh->y_min() << _mesh->z_max() << _mesh->z_min();
 
 
-    // create new object picker, shadowmodel, remove prev shadowmodel
-    //QVector3D translation = shadowModel->m_transform.translation();
-    if (shadowUpdate){
-        //QObject::disconnect(shadowModel, SIGNAL(modelSelected(int)), qmlManager, SLOT(modelSelected(int)));
-        //shadowModel->removeMouseHandlers();
-        //qmlManager->disconnectHandlers(this);
-        //GLModel* prevShadowModel = shadowModel;
-        switch( viewMode ) {
-            case VIEW_MODE_OBJECT:
-                //addShadowModel(_mesh);
-                shadowModel->updateShadowModelImpl();
-                break;
-            case VIEW_MODE_SUPPORT:
-                //addShadowModel(layerMesh);
-                shadowModel->updateShadowModelImpl();
-                shadowModel->m_transform.setTranslation(shadowModel->m_transform.translation()+QVector3D(0,0,scfg->raft_thickness));
-                break;
-            case VIEW_MODE_LAYER:
-                shadowModel->updateShadowModelImpl();
-                //addShadowModel(_mesh);
-                break;
-        }
-        /*float mesh_x_center = m_transform.translation().x()+(_mesh->x_max() +_mesh->x_min())/2;
-        float mesh_y_center = m_transform.translation().y()+(_mesh->y_max() +_mesh->y_min())/2;
-        float mesh_z_center = m_transform.translation().z()+(_mesh->z_max() +_mesh->z_min())/2;
-        addShadowModel(_mesh->vertexMoved(-QVector3D(mesh_x_center,mesh_y_center,mesh_z_center)));
-        shadowModel->m_transform.setTranslation(QVector3D(mesh_x_center, mesh_y_center, 0));*/
-        //shadowModel->copyModelAttributeFrom(prevShadowModel);
-        //prevShadowModel->deleteLater();
+//    if (shadowUpdate){
+//        switch( viewMode ) {
+//            case VIEW_MODE_OBJECT:
+//                //addShadowModel(_mesh);
+//                shadowModel->updateShadowModelImpl();
+//                break;
+//            case VIEW_MODE_SUPPORT:
+//                //addShadowModel(layerMesh);
+//                shadowModel->updateShadowModelImpl();
+//                shadowModel->m_transform.setTranslation(shadowModel->m_transform.translation()+QVector3D(0,0,scfg->raft_thickness));
+//                break;
+//            case VIEW_MODE_LAYER:
+//                shadowModel->updateShadowModelImpl();
+//                //addShadowModel(_mesh);
+//                break;
+//        }
+//    }
 
-        //// reconnect handler if current selected model is updated
-        //if (qmlManager->selectedModels[0]==this)
-        //    qmlManager->connectHandlers(this);
-        //shadowModel->m_transform.setTranslation(translation);
-        //QObject::connect(shadowModel, SIGNAL(modelSelected(int)), qmlManager, SLOT(modelSelected(int)));
-    }
     updateLock = false;
     qDebug() << this << "released lock";
     QMetaObject::invokeMethod(qmlManager->boxUpperTab, "enableUppertab");
@@ -1917,7 +1901,7 @@ void GLModel::generateSupport(){
 
     t.setZ(scfg->raft_thickness);
     layerMesh->vertexMove(t);
-    t.setZ(_mesh->z_min() + scfg->raft_thickness);
+    t.setZ(_mesh->z_min() + scfg->raft_thickness + scfg->support_base_height);
     layerInfillMesh->vertexMove(t);
     layerSupportMesh->vertexMove(t);
     layerRaftMesh->vertexMove(t);
@@ -2373,7 +2357,9 @@ void GLModel::getLayerViewSliderSignal(double value) {
     if (value <= 0.002f)
         layer_num = 0;
 
-    layerViewPlaneTextureLoader = new Qt3DRender::QTextureLoader();
+    if (layerViewPlaneTextureLoader == nullptr)
+        layerViewPlaneTextureLoader = new Qt3DRender::QTextureLoader();
+
     QDir dir(QDir::tempPath()+"_export");//(qmlManager->selectedModels[0]->filename + "_export")
     if (dir.exists()){
         QString filename = dir.path()+"/"+QString::number(layer_num)+".svg";
@@ -2385,23 +2371,25 @@ void GLModel::getLayerViewSliderSignal(double value) {
     //qDebug() << "layer view plane material texture format : " << layerViewPlaneTextureLoader->format();
 
     layerViewPlaneMaterial->setTexture(layerViewPlaneTextureLoader);
+
     float rotation_values[] = { // rotate by 90 deg
         0, 1, 0,
         -1, 0, 0,
         0, 0, 1
     };
+
     QMatrix3x3 rotation_matrix(rotation_values);
 
     layerViewPlaneMaterial->setTextureTransform(rotation_matrix);
     layerViewPlaneTransform[0]->setTranslation(QVector3D(0,0,layer_num*scfg->layer_height));
 
     // change phong material of original model
-    float h = (_mesh->z_max() - _mesh->z_min() + scfg->raft_thickness) * value + _mesh->z_min();
+    float h = (_mesh->z_max() - _mesh->z_min() + scfg->raft_thickness + scfg->support_base_height) * value + _mesh->z_min() - scfg->raft_thickness - scfg->support_base_height;
     m_layerMaterialHeight->setValue(QVariant::fromValue(h));
 
-    m_layerMaterialRaftHeight->setValue(QVariant::fromValue(qmlManager->getLayerViewFlags() & LAYER_INFILL != 0 ?
+    /*m_layerMaterialRaftHeight->setValue(QVariant::fromValue(qmlManager->getLayerViewFlags() & LAYER_INFILL != 0 ?
                 _mesh->z_min() :
-                _mesh->z_max()));
+                _mesh->z_max() + scfg->raft_thickness - scfg->support_base_height));*/
 }
 
 /** HELPER functions **/
@@ -2740,7 +2728,7 @@ void GLModel::generateManualSupport(){
     if (targetMeshFace == NULL)
         return;
     QVector3D t = m_transform.translation();
-    t.setZ(_mesh->z_min()+scfg->raft_thickness);
+    t.setZ(_mesh->z_min()+scfg->raft_thickness + scfg->support_base_height);
     QVector3D targetPosition = targetMeshFace->mesh_vertex[0]->position- t;
     /*OverhangPoint* targetOverhangPosition = new OverhangPoint(targetPosition.x()*scfg->resolution,
     generateSupporter(layerSupportMesh, targetOverhangPosition, nullptr, nullptr, layerSupportMesh->z_min());*/
@@ -2942,6 +2930,9 @@ void GLModel::removeLayerViewComponents(){
     layerViewPlaneTransform[0]->deleteLater();
     layerViewPlaneMaterial->deleteLater();
     layerViewPlaneTextureLoader->deleteLater();
+
+
+    layerViewPlaneTextureLoader = nullptr;
 }
 
 void GLModel::generateLayerViewMaterial() {
@@ -2997,6 +2988,7 @@ void GLModel::generateLayerViewMaterial() {
     gl3Technique->addRenderPass(gl3Pass);
 
     //====================== top rendering ======================//
+    /*
     // Create technique, render pass and shader
     gl3Pass = new QRenderPass();
     glShader = new QShaderProgram();
@@ -3036,7 +3028,7 @@ void GLModel::generateLayerViewMaterial() {
     gl3Pass->addRenderState(blendEquation);
 
     // Add the pass to the technique
-    gl3Technique->addRenderPass(gl3Pass);
+    gl3Technique->addRenderPass(gl3Pass);*/
 
     //====================== infill rendering ======================//
     // Create technique, render pass and shader
