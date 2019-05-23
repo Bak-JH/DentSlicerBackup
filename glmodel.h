@@ -144,11 +144,11 @@ public:
     Plane cuttingPlane;
 
     // used for layer view
-    Qt3DExtras:: QPlaneMesh* layerViewPlane[1];
-    Qt3DCore::QEntity* layerViewPlaneEntity[1];
-    Qt3DCore::QTransform *layerViewPlaneTransform[1];
-    Qt3DRender::QTextureLoader* layerViewPlaneTextureLoader;
-    Qt3DExtras::QTextureMaterial* layerViewPlaneMaterial;
+    Qt3DExtras:: QPlaneMesh* layerViewPlane[1] = {nullptr};
+    Qt3DCore::QEntity* layerViewPlaneEntity[1] = {nullptr};
+    Qt3DCore::QTransform *layerViewPlaneTransform[1] = {nullptr};
+    Qt3DRender::QTextureLoader* layerViewPlaneTextureLoader = nullptr;
+    Qt3DExtras::QTextureMaterial* layerViewPlaneMaterial = nullptr;
     //Qt3DExtras::QPhongAlphaMaterial *layerViewPlaneMaterial = nullptr;
     //QObjectPicker* planeObjectPicker[2];
 
