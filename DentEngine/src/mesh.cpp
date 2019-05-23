@@ -1684,6 +1684,10 @@ const TrackedIndexedList<MeshFace>& Mesh::getFaces()const
 {
 	return faces;
 }
+const TrackedIndexedList<HalfEdge>& Mesh::getHalfEdges()const
+{
+	return halfEdges;
+}
 
 TrackedIndexedList<MeshVertex>& Mesh::getVerticesNonConst()
 {
@@ -1693,6 +1697,11 @@ TrackedIndexedList<MeshFace>& Mesh::getFacesNonConst()
 {
 	return faces;
 }
+TrackedIndexedList<HalfEdge>& Mesh::getHalfEdgesNonConst()
+{
+	return halfEdges;
+}
+
 
 float Mesh::x_min()const
 {

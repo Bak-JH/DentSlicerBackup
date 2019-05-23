@@ -57,7 +57,6 @@ namespace Hix
 		{
 			HalfEdge()
 			{}
-			size_t index;
 			HalfEdgeConstItrW next;
 			HalfEdgeConstItrW prev;
 			VertexConstItrW from;
@@ -165,6 +164,7 @@ namespace Hix
 			void connectFaces();
 			TrackedIndexedList<MeshVertex>& getVerticesNonConst();
 			TrackedIndexedList<MeshFace>& getFacesNonConst();
+			TrackedIndexedList<HalfEdge>& getHalfEdgesNonConst();
 
 
 			/********************** Mesh Modify and Copy Functions***********************/
@@ -190,6 +190,8 @@ namespace Hix
 			//const getter
 			const TrackedIndexedList<MeshVertex>& getVertices()const;
 			const TrackedIndexedList<MeshFace>& getFaces()const;
+			const TrackedIndexedList<HalfEdge>& getHalfEdges()const;
+
 			float x_min()const;
 			float x_max()const;
 			float y_min()const;
