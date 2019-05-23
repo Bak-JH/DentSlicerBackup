@@ -80,7 +80,7 @@ Mesh* GenerateSupport::generateSupport(Mesh* shellmesh) {
 			size_t index = iter - overhangPoints.begin();
 			overhangPoints.push_back(intersection);
 			//iterator might be invalidated due to resizing
-			iter = overhangPoints.begin() + index;
+            iter = overhangPoints.begin() + index + 2;
             findNearestPoint(++idx);
             findNearestPoint(++idx);
         }

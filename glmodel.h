@@ -176,7 +176,7 @@ public:
     // changeColor
     void changecolor(int mode); //0 default, 1 selected, 2 outofarea
 
-    void setSupport();
+    void setSupportAndRaft();
 
 
     // Model Mesh move
@@ -221,6 +221,7 @@ public:
 
     const Mesh* getMesh();
     const Mesh* getSupport();
+    const Mesh* getRaft();
 	void setEnabled(bool isEnabled);
 	void enablePicking(bool isEnable);
 private:

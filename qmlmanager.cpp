@@ -2161,8 +2161,8 @@ void QmlManager::viewSupportChanged(bool checked){
             /*if( selectedModels[0]->slicer == nullptr ) {
                 qmlManager->openYesNoPopUp(false, "The model should be sliced for support view.", "", "Would you like to continue?", 16, "", ftrSupportViewMode, 0);
             }*/
-            if (selectedModels[0]->getSupport() == nullptr) {
-                qmlManager->openYesNoPopUp(false, "Support will be generated.", "", "Would you like to continue?", 16, "", ftrSupportViewMode, 0);
+            if (selectedModels[0]->getSupport() == nullptr && selectedModels[0]->getRaft() == nullptr) {
+                qmlManager->openYesNoPopUp(false, "Support and raft will be generated.", "", "Would you like to continue?", 16, "", ftrSupportViewMode, 0);
             } else {
                 QMetaObject::invokeMethod(qmlManager->boxUpperTab, "all_off");
                 setViewMode(VIEW_MODE_SUPPORT);
@@ -2243,7 +2243,7 @@ void QmlManager::setViewMode(int viewMode) {
 
         if( selectedModels[0] != nullptr ) {
             QMetaObject::invokeMethod(layerViewSlider, "setThickness", Q_ARG(QVariant, (scfg->layer_height)));
-            QMetaObject::invokeMethod(layerViewSlider, "setHeight", Q_ARG(QVariant, (selectedModels[0]->getMesh()->z_max() - selectedModels[0]->getMesh()->z_min() + scfg->raft_thickness)));
+            QMetaObject::invokeMethod(layerViewSlider, "setHeight", Q_ARG(QVariant, (selectedModels[0]->getMesh()->z_max() - selectedModels[0]->getMesh()->z_min() + scfg->raft_thickness + scfg->support_base_height)));
             this->selectedModels[0]->changeViewMode(viewMode);
         }
     }
@@ -2253,12 +2253,12 @@ void QmlManager::setViewMode(int viewMode) {
         QMetaObject::invokeMethod(leftTabViewMode, "setObjectView");
     } else if (this->viewMode == VIEW_MODE_SUPPORT){
         QMetaObject::invokeMethod(qmlManager->boundedBox, "hideBox");
-        selectedModels[0]->setSupport();
+        selectedModels[0]->setSupportAndRaft();
         emit  selectedModels[0]->_updateModelMesh(true);
     } else if (this->viewMode == VIEW_MODE_LAYER){
         qDebug() << "view mode layer called";
         QMetaObject::invokeMethod(qmlManager->boundedBox, "hideBox");
-        selectedModels[0]->setSupport();
+        selectedModels[0]->setSupportAndRaft();
         qDebug() << "generated support";
         emit selectedModels[0]->_updateModelMesh(true);
     } else {
