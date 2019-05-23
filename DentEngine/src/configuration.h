@@ -49,19 +49,6 @@ public:
     float support_density = 0.4;
     float infill_density = 0.3;
 
-    float support_base_height = 2.0;
-    float subdivision_radius = 0.85; // in mm
-    float duplication_radius = 4; // in mm
-    int cluster_size = 2000;
-
-    float overhang_detect_diff_layer_height = 0.5; // in mm
-    float default_support_radius = 900 ; // in microns
-    float branching_threshold_radius = 4000; // in microns
-    int branchable_overhang_point_cnt = 4;
-
-    float overhang_threshold = layer_height/tan_theta;
-    float overhang_poll_threshold = support_density * 100; // unit region as 1cm^2
-
     int resin_type = TEMPORARY_RESIN;
     float contraction_ratio = TEMPORARY_CONTRACTION_RATIO;
 
@@ -74,8 +61,12 @@ public:
     float raft_base_radius = 5; // in mm
     float raft_offset_radius = 4; // in mm
 
+    // support settings
+    float support_radius_max = 1.8f;
+    float support_radius_min = 0.3f;
+    float support_base_height = 2.0;
 
-    // set configuration
+    // bed configuration
     QVector3D origin;
     int resolution_x = 2560;
     int resolution_y = 1440;
