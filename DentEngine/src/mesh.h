@@ -10,8 +10,8 @@
 #include <QTime>
 #include <array>
 #include <variant>
-#include "../common/TrackedIndexedList.h"
-#include "../common/IteratorWrapper.h"
+#include "../../common/TrackedIndexedList.h"
+#include "../../common/IteratorWrapper.h"
 
 #define cos50 0.64278761
 #define cos100 -0.17364818
@@ -23,13 +23,19 @@ namespace Hix
 {
 	namespace Engine3D
 	{
-		template<class container_type, class iter_type>
-		iter_type getEquivalentItr(const container_type b, const container_type& a, const iter_type& aItr)
+		template<class container_type, class itr_wrapper_type>
+		itr_wrapper_type getEquivalentItrWrapper(const container_type& b, const container_type& a, const itr_wrapper_type& aItr)
 		{
-			size_t idx = aItr - a.cbegin();
-			return b.cbegin() + idx;
+            size_t idx = aItr.getItr() - a.cbegin();
+            return wrapIterator(b.cbegin() + idx);
 		}
 
+        template<class container_type, class itr_type>
+        itr_type getEquivalentItr(const container_type& b, const container_type& a, const itr_type& aItr)
+        {
+            size_t idx = aItr - a.cbegin();
+            return b.cbegin() + idx;
+        }
 
 
 		// plane contains at least 3 vertices contained in the plane in clockwise direction
@@ -41,16 +47,16 @@ namespace Hix
 		struct MeshFace;
 		class Mesh;
 		typedef typename TrackedIndexedList<HalfEdge>::const_iterator HalfEdgeConstItr;
-		typedef typename TrackedIndexedList<struct MeshVertex>::const_iterator VertexConstItr;
-		typedef typename TrackedIndexedList<struct MeshFace>::const_iterator FaceConstItr;
+        typedef typename TrackedIndexedList<MeshVertex>::const_iterator VertexConstItr;
+        typedef typename TrackedIndexedList<MeshFace>::const_iterator FaceConstItr;
 		typedef typename TrackedIndexedList<HalfEdge>::iterator HalfEdgeItr;
-		typedef typename TrackedIndexedList<struct MeshVertex>::iterator VertexItr;
-		typedef typename TrackedIndexedList<struct MeshFace>::iterator FaceItr;
+        typedef typename TrackedIndexedList<MeshVertex>::iterator VertexItr;
+        typedef typename TrackedIndexedList<MeshFace>::iterator FaceItr;
 
 		//value semantic, double de-referencing containers
-		typedef typename IteratorWrapper< HalfEdgeConstItr, HalfEdge> HalfEdgeConstItrW;
-		typedef typename IteratorWrapper< VertexConstItr, MeshVertex> VertexConstItrW;
-		typedef typename IteratorWrapper< FaceConstItr, MeshFace> FaceConstItrW;
+        typedef IteratorWrapper< HalfEdgeConstItr> HalfEdgeConstItrW;
+        typedef IteratorWrapper< VertexConstItr> VertexConstItrW;
+        typedef IteratorWrapper< FaceConstItr> FaceConstItrW;
 
 		struct HalfEdge
 		{

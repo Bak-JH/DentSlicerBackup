@@ -183,36 +183,36 @@ Mesh::Mesh(const Mesh& o)
 	//update iterators to point to new containers
 	for (auto& face : faces)
 	{
-		face.edge = getEquivalentItr(halfEdges, o.halfEdges, face.edge);
+		face.edge = getEquivalentItrWrapper(halfEdges, o.halfEdges, face.edge);
 	}
 	for (auto& hEdge : halfEdges)
 	{
 		//next
-		hEdge.next = getEquivalentItr(halfEdges, o.halfEdges, hEdge.next);
+		hEdge.next = getEquivalentItrWrapper(halfEdges, o.halfEdges, hEdge.next);
 
 		//prev
-		hEdge.prev = getEquivalentItr(halfEdges, o.halfEdges, hEdge.prev);
+		hEdge.prev = getEquivalentItrWrapper(halfEdges, o.halfEdges, hEdge.prev);
 		//from
-		hEdge.from = getEquivalentItr(vertices, o.vertices, hEdge.from);
+		hEdge.from = getEquivalentItrWrapper(vertices, o.vertices, hEdge.from);
 		//to
-		hEdge.to = getEquivalentItr(vertices, o.vertices, hEdge.to);
+		hEdge.to = getEquivalentItrWrapper(vertices, o.vertices, hEdge.to);
 		//owningFace
-		hEdge.owningFace = getEquivalentItr(faces, o.faces, hEdge.owningFace);
+		hEdge.owningFace = getEquivalentItrWrapper(faces, o.faces, hEdge.owningFace);
 		//twins
 		for (auto& twin : hEdge.twins)
 		{
-			twin = getEquivalentItr(halfEdges, o.halfEdges, twin);
+			twin = getEquivalentItrWrapper(halfEdges, o.halfEdges, twin);
 		}
 	}
 	for (auto& vtx : vertices)
 	{
 		for (auto& hEdge : vtx.leavingEdges)
 		{
-			hEdge = getEquivalentItr(halfEdges, o.halfEdges, hEdge);
+			hEdge = getEquivalentItrWrapper(halfEdges, o.halfEdges, hEdge);
 		}
 		for (auto& hEdge : vtx.arrivingEdges)
 		{
-			hEdge = getEquivalentItr(halfEdges, o.halfEdges, hEdge);
+			hEdge = getEquivalentItrWrapper(halfEdges, o.halfEdges, hEdge);
 		}
 	}
 	for (auto& vtx : vertices_hash)
@@ -749,14 +749,6 @@ Path Mesh::intersectionPath(MeshFace mf, float z) const
 
 /********************** Helper Functions **********************/
 
-float round(float num, int precision)
-{
-    return floorf(num * pow(10.0f,precision) + .5f)/pow(10.0f,precision);
-}
-
-bool doubleAreSame(double a, double b) {
-    return std::fabs(a - b) < std::numeric_limits<double>::epsilon();
-}
 
 uint32_t Hix::Engine3D::vertexHash(QVector3D v) // max build size = 1000mm, resolution = 1 micron
 {

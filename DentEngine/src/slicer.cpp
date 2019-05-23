@@ -3,6 +3,7 @@
 #include <QElapsedTimer>
 #include <QTextStream>
 #include "qmlmanager.h"
+#include "../../utils/mathutils.h"
 
 using namespace ClipperLib;
 
@@ -196,7 +197,7 @@ std::vector<float> Slicer::buildUniformPlanes(float z_min, float z_max, float de
     std::vector<float> planes;
     int idx_max = ceil((z_max-z_min)/delta);
     for (int idx=0; idx<=idx_max; idx++){
-        float plane_z = std::round(z_min+delta*idx);
+        float plane_z = Utils::Math::round(z_min+delta*idx, 2);
         qDebug() << "build Uniform Planes at height z "<< plane_z;
         //float plane_z = (idx == idx_max) ? z_min+delta*(idx-1)+delta/2:z_min + delta*idx;
         planes.push_back(plane_z);
