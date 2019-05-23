@@ -1,8 +1,8 @@
 #pragma once
-
+#include <memory>
 
 //don't use traits here as that may create circular dependency
-template <class iterator_type, class value_type>
+template <class iterator_type>
 class IteratorWrapper
 {
 public:
@@ -25,15 +25,19 @@ public:
 		}		return *this;
 	}
 
-	value_type& operator*() const
+    auto operator*() const
 	{
 		return **_itrPtr;
 	}
-	value_type* operator->() const
+    auto operator->() const
 	{
-		return &(**_itrPtr);
+        return _itrPtr->operator->();
 
 	}
+    auto toPtr() const
+    {
+        return _itrPtr->operator->();
+    }
 	bool operator==(const IteratorWrapper& o) const
 	{
 		return *_itrPtr == *o._itrPtr;
@@ -64,6 +68,5 @@ private:
 template <class iterator_type>
 auto wrapIterator(const iterator_type& itr)
 {
-	typedef typename iterator_type::value_type value_type;
-	return IteratorWrapper<iterator_type, value_type>(new iterator_type(itr));
+    return IteratorWrapper<iterator_type>(new iterator_type(itr));
 }
