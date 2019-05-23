@@ -20,7 +20,7 @@ void HollowShell::detectHollowShellFaces(Mesh* mesh, QVector3D normal,const Mesh
 			// check if neighbor already checked
 			bool cont = false;
 			for (const MeshFace* elem : (*result)) {
-				if (elem == &*neighbor)
+                if (elem == neighbor.toPtr())
 					cont = true;
 			}
 			if (cont)
@@ -31,7 +31,7 @@ void HollowShell::detectHollowShellFaces(Mesh* mesh, QVector3D normal,const Mesh
 				continue;
 			//qDebug() << mesh->idx2MV(neighbor->mesh_vertex[0]).position.distanceToPoint(mesh->idx2MV(original_mf->mesh_vertex[0]).position);
 			//qDebug() << "looking for " << neighbor->idx;
-			detectHollowShellFaces(mesh, normal, original_mf, &*neighbor, result);
+            detectHollowShellFaces(mesh, normal, original_mf, neighbor.toPtr(), result);
 		}
 	}
 }

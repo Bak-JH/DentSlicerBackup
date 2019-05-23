@@ -9,7 +9,7 @@
 template <class T, class A = std::allocator<T>>
 class TrackedIndexedList : public IndexedList<T, A> {
 
-	typedef typename IndexedList<T, A> parent_type;
+    typedef IndexedList<T, A> parent_type;
 public:
 	typedef typename std::variant<bool, std::unordered_set<size_t>> changes_type;
 	typedef typename IndexedListItr::iterator<T,A> iterator;
@@ -28,7 +28,7 @@ public:
 		_changedAll = true;
 	}
 
-	TrackedIndexedList(std::initializer_list<T> iniList, const parent_type::allocator_type& allocator) :parent_type(iniList, allocator)
+    TrackedIndexedList(std::initializer_list<T> iniList, const typename parent_type::allocator_type& allocator) :parent_type(iniList, allocator)
 	{
 		_changedAll = true;
 	}

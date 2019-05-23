@@ -1,5 +1,4 @@
-#ifndef MATHUTILS_H
-#define MATHUTILS_H
+#pragma once
 
 #include <QVector3D>
 #include <QMatrix4x4>
@@ -16,16 +15,10 @@ namespace Utils
 
         QMatrix4x4 quatToMat(QQuaternion q);
 
-		float round(float num, int precision)
-		{
-			return floorf(num * pow(10.0f, precision) + .5f) / pow(10.0f, precision);
-		}
+        float round(float num, int precision);
 
-		bool doubleAreSame(double a, double b) {
-			return std::fabs(a - b) < std::numeric_limits<double>::epsilon();
-		}
+        bool doubleAreSame(double a, double b);
     }
 
 }
 
-#endif // MATHUTILS_H

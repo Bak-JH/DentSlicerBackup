@@ -249,7 +249,7 @@ float autoorientation::get_touching_line(Mesh* mesh,float a[], const MeshFace& f
 	auto idx = face.meshVertices();
     for(int j=0;j<3;j++){
         if(a[j]<touching_height){
-            touch_list.push_back(&*idx[j]);
+            touch_list.push_back(idx[j].getItr().operator->());
         }
     }
 	std::vector<const MeshVertex*> combs;

@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <functional>
 #include <map>
+#include <set>
 #if  defined(QT_DEBUG) || defined(_DEBUG)
 #include <stdexcept>
 //enforce strict correctness
@@ -32,8 +33,8 @@ public:
 	typedef A allocator_type;
 	typedef typename std::allocator_traits<A> A_trait;
 	typedef typename A_trait::value_type value_type;
-	typedef typename T& reference;
-	typedef typename const T& const_reference;
+    typedef T& reference;
+    typedef const T& const_reference;
 	typedef typename A_trait::difference_type difference_type;
 	typedef typename A_trait::size_type size_type;
 	typedef typename std::deque<T, A> container_type;
@@ -99,7 +100,7 @@ public:
 	reverse_iterator rend()			   ;
 	const_reverse_iterator rend() const   ;
 	const_reverse_iterator crend() const  ;
-	IndexedListItr::iterator<T, A> toNormItr(const IndexedListItr::const_iterator<T,A>& itr);
+    IndexedListItr::iterator<T, A> toNormItr(const IndexedListItr::const_iterator<T,A>& itr);
 
 
 
@@ -317,7 +318,7 @@ public:
 		flush();
 		_listPtr = o._listPtr;
 		o._listPtr = nullptr;
-		_indices(std::move(o._indices));
+        _indices = std::move(o._indices);
 		_allowPopFront = o._allowPopFront;
 	}
 	void deleteLater(typename IndexedListItr::const_iterator<T, A> itr)
@@ -364,7 +365,7 @@ namespace IndexedListItr
 		//traits
 		typedef typename A_trait::difference_type difference_type;
 		typedef typename A_trait::value_type value_type;
-		typedef typename value_type& reference;
+        typedef value_type& reference;
 		typedef typename A_trait::pointer pointer;
 		typedef std::random_access_iterator_tag iterator_category; //or another tag
 
@@ -452,7 +453,7 @@ namespace IndexedListItr
 			auto tmp = *this;
 			return tmp += offset;
 		}
-		friend iterator operator+(size_type offset, const iterator& itr)
+        friend iterator operator+(size_type offset, const iterator& itr)
 		{
 			return itr += offset;
 
@@ -462,7 +463,7 @@ namespace IndexedListItr
 			auto tmp = *this;
 			return tmp -= offset;
 		}
-		difference_type operator-(const iterator& itr)
+        difference_type operator-(const iterator& itr)const
 		{
 			return _containerItr - itr._containerItr;
 		}
@@ -502,8 +503,8 @@ namespace IndexedListItr
 		//traits
 		typedef typename A_trait::difference_type difference_type;
 		typedef typename A_trait::value_type value_type;
-		typedef typename const value_type& reference;
-		typedef typename const A_trait::const_pointer pointer;
+        typedef const value_type& reference;
+        typedef typename A_trait::const_pointer pointer;
 		typedef std::random_access_iterator_tag iterator_category; //or another tag
 
 		const_iterator()
@@ -596,7 +597,7 @@ namespace IndexedListItr
 			auto tmp = *this;
 			return tmp -= offset;
 		}
-		difference_type operator-(const const_iterator& itr)
+        difference_type operator-(const const_iterator& itr)const
 		{
 			return _containerItr - itr._containerItr;
 		}
@@ -687,7 +688,7 @@ typename IndexedList<T, A>::const_reverse_iterator IndexedList<T, A>::crend() co
 template <class T, class A>
 IndexedListItr::iterator<T, A> IndexedList<T, A>::toNormItr(const IndexedListItr::const_iterator<T,A>& itr)
 {
-	size_t idx = itr - cbegin();
+    size_t idx = itr - cbegin();
 	return  begin() + idx;
 }
 template <class T, class A>

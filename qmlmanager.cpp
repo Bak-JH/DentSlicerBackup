@@ -225,7 +225,7 @@ void QmlManager::initializeUI(QQmlApplicationEngine* e){
 
 void QmlManager::createModelFile(Mesh* target_mesh, QString fname) {
     openProgressPopUp();
-    auto res = glmodels.try_emplace(modelIDCounter, mainWindow, models, target_mesh, fname, false, modelIDCounter);
+    auto res = glmodels.try_emplace(modelIDCounter, mainWindow, models, target_mesh, fname, modelIDCounter);
     ++modelIDCounter;
     _latest = &(res.first->second);
     qDebug() << "created new model file";
@@ -574,7 +574,7 @@ void QmlManager::cleanselectedModel(int type){
 QVector3D QmlManager::getSelectedCenter(){
     QVector3D result = QVector3D(0,0,0);
 
-    if(selectedModels[0] != nullptr){
+    if(!selectedModels.empty()){
         // set initial position
         float xmid = (selectedModels[0]->getMesh()->x_max() + selectedModels[0]->getMesh()->x_min())/2;
         float ymid = (selectedModels[0]->getMesh()->y_max() + selectedModels[0]->getMesh()->y_min())/2;
@@ -586,7 +586,7 @@ QVector3D QmlManager::getSelectedCenter(){
 QVector3D QmlManager::getSelectedSize(){
     QVector3D result = QVector3D(0,0,0);
 
-    if(selectedModels[0] != nullptr){
+    if(!selectedModels.empty()){
         result = selectedModels[0]->getTransform()->translation();
         result.setX(selectedModels[0]->getMesh()->x_max() - selectedModels[0]->getMesh()->x_min());
         result.setY(selectedModels[0]->getMesh()->y_max() - selectedModels[0]->getMesh()->y_min());
@@ -598,7 +598,7 @@ QVector3D QmlManager::getSelectedSize(){
 
 int QmlManager::getselectedModelID(){
     int result = -1;
-    if (selectedModels[0] != nullptr)
+    if (!selectedModels.empty())
         result = selectedModels[0]->ID;
 
     return result;
@@ -1073,7 +1073,7 @@ void QmlManager::modelSelected(int ID){
         }
         selectedModels.clear();
         selectedModels.push_back(nullptr);
-    } else if (selectedModels.size() == 1 && selectedModels[0] != nullptr){
+    } else if (selectedModels.size() == 1 && !selectedModels.empty()){
         //qDebug() << "resetting model" << selectedModels[0]->ID;
         selectedModels[0]->changecolor(0);
         selectedModels[0]->checkPrintingArea();
@@ -1114,7 +1114,7 @@ void QmlManager::modelSelected(int ID){
     }
     if (selectedModels[0] != target){
         // change selectedModels[0]
-        if (selectedModels[0] != nullptr)
+        if (!selectedModels.empty())
             disconnectHandlers(selectedModels[0]);
         selectedModels[0] = target;
 
@@ -1176,7 +1176,7 @@ void QmlManager::modelSelected(int ID){
         selectedModels.push_back(nullptr);
     }
 
-    QMetaObject::invokeMethod(leftTabViewMode, "setEnable", Q_ARG(QVariant, selectedModels[0] != nullptr));
+    QMetaObject::invokeMethod(leftTabViewMode, "setEnable", Q_ARG(QVariant, !selectedModels.empty()));
 
     sendUpdateModelInfo();
 }
@@ -1744,17 +1744,17 @@ void QmlManager::runGroupFeature(int ftrType, QString state, double arg1, double
         */
         qDebug() << "run groupfeature lay flat";
         if (state == "active"){
-            if (selectedModels[0] != nullptr){
+            if (!selectedModels.empty()){
                 selectedModels[0]->uncolorExtensionFaces();
                 selectedModels[0]->colorExtensionFaces();
             }
         }else if (state == "inactive"){
-            if (selectedModels[0] != nullptr){
+            if (!selectedModels.empty()){
                 selectedModels[0]->uncolorExtensionFaces();
                 selectedModels[0]->closeExtension();
             }
         }
-/*        if (selectedModels[0] != nullptr) {
+/*        if (!selectedModels.empty()) {
             selectedModels[selectedModels.size() - 1]->uncolorExtensionFaces();
             selectedModels[selectedModels.size() - 1]->closeLayflat();
         }
@@ -1786,12 +1786,12 @@ void QmlManager::runGroupFeature(int ftrType, QString state, double arg1, double
     case ftrExtend:
         qDebug() << "run groupfeature extend";
         if (state == "active"){
-            if (selectedModels[0] != nullptr){
+            if (!selectedModels.empty()){
                 selectedModels[0]->uncolorExtensionFaces();
                 selectedModels[0]->colorExtensionFaces();
             }
         }else if (state == "inactive"){
-            if (selectedModels[0] != nullptr){
+            if (!selectedModels.empty()){
                 selectedModels[0]->uncolorExtensionFaces();
                 selectedModels[0]->closeExtension();
             }
@@ -2076,7 +2076,7 @@ void QmlManager::viewSupportChanged(bool checked){
     qInfo() << "viewSupportChanged" << checked;
     qDebug() << "selected Num = " << selectedModels.size();
     if( checked ) {
-        if( selectedModels[0] != nullptr ) {
+        if( !selectedModels.empty() ) {
             /*if( selectedModels[0]->slicer == nullptr ) {
                 qmlManager->openYesNoPopUp(false, "The model should be sliced for support view.", "", "Would you like to continue?", 16, "", ftrSupportViewMode, 0);
             }*/
@@ -2094,7 +2094,7 @@ void QmlManager::viewLayerChanged(bool checked){
     qInfo() << "viewLayerChanged" << checked;
     qDebug() << "selected Num = " << selectedModels.size();
     if( checked ) {
-        if( selectedModels[0] != nullptr ) {
+        if( !selectedModels.empty() ) {
             if( selectedModels[0]->slicer == nullptr ) {
                 qmlManager->openYesNoPopUp(false, "The model should be sliced for layer view.", "", "Would you like to continue?", 16, "", ftrLayerViewMode, 0);
             } else {
@@ -2113,7 +2113,7 @@ void QmlManager::layerInfillButtonChanged(bool checked){
         layerViewFlags &= ~LAYER_INFILL;
     }
 
-    if( selectedModels[0] != nullptr ) {
+    if( !selectedModels.empty() ) {
         emit selectedModels[0]->_updateModelMesh(true);
     }
 }
@@ -2126,7 +2126,7 @@ void QmlManager::layerSupportersButtonChanged(bool checked){
         layerViewFlags &= ~LAYER_SUPPORTERS;
     }
 
-    if( selectedModels[0] != nullptr ) {
+    if( !selectedModels.empty() ) {
         qDebug() << "calling updatemodelmesh ";
         emit selectedModels[0]->_updateModelMesh(true);
     }
@@ -2142,7 +2142,7 @@ void QmlManager::layerRaftButtonChanged(bool checked){
     qInfo() << LAYER_INFILL << LAYER_SUPPORTERS << LAYER_RAFT;
     qInfo() << "layerRaftButtonChanged" << checked << layerViewFlags;
 
-    if( selectedModels[0] != nullptr ) {
+    if( !selectedModels.empty() ) {
         emit selectedModels[0]->_updateModelMesh(true);
     }
 }
@@ -2160,7 +2160,7 @@ void QmlManager::setViewMode(int viewMode) {
         layerViewPopup->setProperty("visible", this->viewMode == VIEW_MODE_LAYER);
         layerViewSlider->setProperty("visible", this->viewMode == VIEW_MODE_LAYER);
 
-        if( selectedModels[0] != nullptr ) {
+        if( !selectedModels.empty() ) {
             QMetaObject::invokeMethod(layerViewSlider, "setThickness", Q_ARG(QVariant, (scfg->layer_height)));
             QMetaObject::invokeMethod(layerViewSlider, "setHeight", Q_ARG(QVariant, (selectedModels[0]->getMesh()->z_max() - selectedModels[0]->getMesh()->z_min() + scfg->raft_thickness)));
             this->selectedModels[0]->changeViewMode(viewMode);
@@ -2173,7 +2173,6 @@ void QmlManager::setViewMode(int viewMode) {
 	}
 	else
 	{
-		selectedModels[0]->setBoundingBoxVisible(false);
 		if (this->viewMode == VIEW_MODE_SUPPORT) {
 			selectedModels[0]->setSupport();
 			emit  selectedModels[0]->_updateModelMesh(true);
@@ -2239,7 +2238,7 @@ void QmlManager::unselectPartImpl(GLModel* target)
                 break;
         }
     }
-    if( selectedModels[0] != nullptr ) {
+    if( !selectedModels.empty() ) {
         selectedModels[0]->changeViewMode(VIEW_MODE_OBJECT);
     }
 

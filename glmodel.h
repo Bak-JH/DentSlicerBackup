@@ -101,6 +101,11 @@ class GLModel : public QEntity
 {
     Q_OBJECT
 public:
+    //raycasting + mouse event
+    void mouseReleased	(MouseEventData&, Qt3DRender::QRayCasterHit&);
+    void mouseMoved		(MouseEventData&);
+    void mousePressed	(MouseEventData&, Qt3DRender::QRayCasterHit&);
+
 	//size of QGeometry Attribute elements
 	const static size_t POS_SIZE = 3; //x, y, z of position
 	const static size_t NRM_SIZE = 3; //x, y, z of normal
@@ -348,11 +353,7 @@ public slots:
     void mouseClickedFreeCut(Qt3DRender::QPickEvent*);
     void mouseClickedLayflat(MeshFace shadow_meshface);
 
-	//raycasting + mouse event
-	void mouseReleased	(MouseEventData&, Qt3DRender::QRayCasterHit&);
-    void mouseMoved		(MouseEventData&);
-    void mousePressed	(MouseEventData&, Qt3DRender::QRayCasterHit&);
-	void raycastHit();
+
     // Scale
     void openScale();
     void closeScale();

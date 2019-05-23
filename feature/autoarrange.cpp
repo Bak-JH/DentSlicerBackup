@@ -68,7 +68,7 @@ Paths autoarrange::getMeshConvexHull(const Mesh& mesh){//getting convex hull are
 }
 
 Paths autoarrange::spreadingCheck(const Mesh* mesh, std::map<const MeshFace *, bool>& check, const MeshFace * chking_start, bool is_chking_pos){
-    /**/qDebug() << "SpreadingCheck started from" << &*chking_start;
+    /**/qDebug() << "SpreadingCheck started from" << chking_start;
     Paths paths;
 	const MeshFace * chking;
     std::vector<const MeshFace *> toCheck;
@@ -102,11 +102,11 @@ Paths autoarrange::spreadingCheck(const Mesh* mesh, std::map<const MeshFace *, b
 						const MeshVertex* path_head = nullptr;
 						if (j == 0 && isEdgeBound(mesh, mf, last.getItr(), is_chking_pos)) {
 							if (!isEdgeBound(mesh, mf, second.getItr(), is_chking_pos))
-								path_head =&*mf->meshVertices()[2];
+                                path_head =mf->meshVertices()[2].operator->();
 						}
 						else
 						{
-							path_head = &*mf->meshVertices()[j];
+                            path_head = mf->meshVertices()[j].operator->();
 						}
                         Path path = buildOutline(mesh, check, chking, path_head, is_chking_pos);
                         if(path.size()==0) return {};
@@ -115,7 +115,10 @@ Paths autoarrange::spreadingCheck(const Mesh* mesh, std::map<const MeshFace *, b
                     }
                 }else{//법선 방향 조건이 만족되는 이웃만 to_check에 추가하는 것이 맞을지 검토
                     auto neighbors = mfHEdge->nonOwningFaces();
-					nextIndexToCheck.insert(nextIndexToCheck.end(), neighbors.begin(), neighbors.end());
+					for (auto nItr : neighbors)
+					{
+						nextIndexToCheck.push_back(nItr.toPtr());
+					}
                 }
 				++edgeCirc;
             }
@@ -132,7 +135,10 @@ Path autoarrange::buildOutline(const Mesh* mesh, std::map<const MeshFace *, bool
 
     if(path_head== nullptr){//혼자있는 면의 경우 오리엔테이션 확인 방법이 마련되어있지 않음
         check[chking] = true;
-		path_by_idx.insert(path_by_idx.end(), meshVertices.begin(), meshVertices.end());
+		for (auto mvItr : meshVertices)
+		{
+			path_by_idx.push_back(mvItr.toPtr());
+		}
         //**qDebug() << "buildOutline done";
         return idxsToPath(mesh, path_by_idx);
     }
@@ -151,37 +157,38 @@ Path autoarrange::buildOutline(const Mesh* mesh, std::map<const MeshFace *, bool
 		HalfEdgeConstItr tailEdge;
 		for (auto each : path_tail->arrivingEdges)
 		{
-			if (&*each->owningFace == chking)
+            if (each->owningFace.operator->() == chking)
 			{
 				tailEdge = each.getItr();
 			}
 		}
         for(int i=0; i<3; i++){
-			auto current = &*meshVertices[i];
+            auto current = meshVertices[i].operator->();
 			auto currEdge = edgeCirc.toItr();
 
             if(isEdgeBound(mesh, chking, currEdge, is_chking_pos)) outline_edge_cnt++;
 			++edgeCirc;
         }
-
+        auto tailOwningFaces = tailEdge->next->nonOwningFaces();
         if(isEdgeBound(mesh, chking, tailEdge, is_chking_pos)){
             path_by_idx.push_back(path_tail);
             check[chking] = true;
             if(outline_edge_cnt==1){
                 path_tail = getNbrVtx(chking, tailEdge, 1);
-				const MeshFace *  face = &*tailEdge->next->nonOwningFaces()[0];
+                const MeshFace *  face = tailOwningFaces[0].toPtr();
                 nxt_chk = face;
             }else{//outline_edge_cnt==2
                 path_by_idx.push_back(getNbrVtx(chking, tailEdge, 1));
                 path_tail = getNbrVtx(chking, tailEdge, 2);
-				const MeshFace * face = &*tailEdge->prev->nonOwningFaces()[0];
+                const MeshFace * face = tailOwningFaces[0].toPtr();
                 nxt_chk = face;
             }
             if(path_tail == path_head) outline_closed = true;
         }else{//if not isEdgeBound(chking, tail_idx), the face doesn't share any bound edge with current outline
             //the face may share some bound edge with other outline, so we do not mark it checked
-			const MeshFace * faceA = &*tailEdge->nonOwningFaces()[0];
-			const MeshFace * faceB = &*tailEdge->prev->nonOwningFaces()[0];
+            const MeshFace * faceA = tailOwningFaces[0].toPtr();
+            auto prevTailedgeNFaces = tailEdge->prev->nonOwningFaces();
+            const MeshFace * faceB = prevTailedgeNFaces[0].toPtr();
             if(faceA == from) nxt_chk = faceB;
             else nxt_chk = faceA;
         }
@@ -200,7 +207,7 @@ bool autoarrange::isEdgeBound(const Mesh* mesh, const MeshFace * mf, HalfEdgeCon
     //4. opposit orientation
 	auto sideNBRFaces = edge->nonOwningFaces();
     if(sideNBRFaces.size() != 1) return true;
-    const MeshFace * neighbor = &*sideNBRFaces[0];
+    const MeshFace * neighbor = sideNBRFaces[0].toPtr();
     if(!checkFNZ(*neighbor, is_chking_pos)) return true;
     if(!isNbrOrientSame(mesh, mf, edge)) return true;
     return false;
@@ -229,7 +236,7 @@ const MeshVertex* autoarrange::getNbrVtx(const MeshFace * mf, HalfEdgeConstItr b
 	{
 		++circ;
 	}
-	return &*circ->from;
+    return circ->from.toPtr();
 	
 }
 
