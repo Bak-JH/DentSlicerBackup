@@ -13,6 +13,7 @@ using namespace Utils::Math;
 using namespace Hix;
 using namespace Hix::Engine3D;
 
+
 //half edge circulator
 
 Hix::Engine3D::HalfEdgeCirculator::HalfEdgeCirculator(HalfEdgeConstItrW itr): _hEdgeItr(itr)
@@ -237,6 +238,15 @@ void Mesh::setPrevMesh( Mesh* mesh)
 	prevMesh = mesh;
 }
 
+void Mesh::setVerticesColor(QVector3D color)
+{
+	for (auto& vtx : vertices)
+	{
+		vtx.color = color;
+	}
+}
+
+
 void Mesh::vertexOffset(float factor){
     int numberofVertices = vertices.size();
     _x_min = 99999;
@@ -409,12 +419,12 @@ void Mesh::reverseFaces(){
 
 /********************** Mesh Generation Functions **********************/
 
-void Mesh::addFace(QVector3D v0, QVector3D v1, QVector3D v2){
+void Mesh::addFace(QVector3D v0, QVector3D v1, QVector3D v2, QVector3D color){
 	std::array<VertexItr, 3> fVtx;
 
-    fVtx[0] = addOrRetrieveFaceVertex(v0);
-	fVtx[1] = addOrRetrieveFaceVertex(v1);
-	fVtx[2] = addOrRetrieveFaceVertex(v2);
+    fVtx[0] = addOrRetrieveFaceVertex(v0, color);
+	fVtx[1] = addOrRetrieveFaceVertex(v1, color);
+	fVtx[2] = addOrRetrieveFaceVertex(v2, color);
 	//if the face is too small and slicing option collapsed a pair of its vertices, don't add.
 	if (fVtx[0] == fVtx[1] || fVtx[0] == fVtx[2] || fVtx[1] == fVtx[2])
 		return;
@@ -814,7 +824,7 @@ void Mesh::removeVertexHash(QVector3D pos)
 	}
 }
 
-VertexItr Mesh::addOrRetrieveFaceVertex(QVector3D v){
+VertexItr Mesh::addOrRetrieveFaceVertex(QVector3D v, QVector3D color){
     uint32_t vertex_hash = vertexHash(v);
 	//find if existing vtx can be used
 	auto similarVtx = getSimilarVertex(vertex_hash, v);
@@ -823,7 +833,7 @@ VertexItr Mesh::addOrRetrieveFaceVertex(QVector3D v){
 		return vertices.toNormItr(similarVtx);
 	}
 
-    MeshVertex mv(v);
+    MeshVertex mv(v, color);
     vertices.emplace_back(mv);
 	auto last = vertices.end() - 1;
 	
@@ -1269,43 +1279,10 @@ bool listContains(std::vector<uint32_t>* hashList, uint32_t hash){
     return false;
 }
 
-MeshVertex findAvailableMeshVertex(
-        QHash<uint32_t, Path3D>* pathHash,
-        std::vector<uint32_t>* hashList,
-        MeshVertex start
-        ){
-    int pj_idx = 1;
-    MeshVertex pj = (*pathHash)[meshVertex2Hash(start)].at(pj_idx);
-
-    /*qDebug() << "finding availableMeshVertex from : " << (*pathHash)[meshVertex2Hash(start)].size()-1;
-
-    // choose from only available vertex ( in the hash list )
-    for (Path3D::iterator p_it = (*pathHash)[meshVertex2Hash(start)].begin(); p_it != (*pathHash)[meshVertex2Hash(start)].end();){
-
-    }
-
-    while (listContains(hashList, meshVertex2Hash(pj))){
-        qDebug() << "searching available vertex " << pj.position << meshVertex2Hash(pj);
-        if (pj_idx > (*pathHash)[meshVertex2Hash(start)].size()-1){
-            qDebug() << "no new pj available";
-            pj.idx = -1;
-            return pj;
-        } else {
-            (*pathHash)[meshVertex2Hash(start)].erase((*pathHash)[meshVertex2Hash(start)].begin()+pj_idx);
-            return pj;
-        }
-        pj_idx ++;
-        pj = (*pathHash)[meshVertex2Hash(start)].at(pj_idx);
-    }*/
-
-    (*pathHash)[meshVertex2Hash(start)].erase((*pathHash)[meshVertex2Hash(start)].begin()+pj_idx);
-    return pj;
-}
-
 MeshVertex* findAvailableMeshVertexFromContour(QHash<uint32_t, Path3D>* pathHash, std::vector<uint32_t>* hashList, Path3D* contour){
     for (auto& mv : *contour){
-        if ((*pathHash)[meshVertex2Hash(mv)].size()>=3){
-            return &(*pathHash)[meshVertex2Hash(mv)].at(1);
+        if ((*pathHash)[Vertex2Hash(mv)].size()>=3){
+            return &(*pathHash)[Vertex2Hash(mv)].at(1);
         }
     }
     return nullptr;
@@ -1313,7 +1290,7 @@ MeshVertex* findAvailableMeshVertexFromContour(QHash<uint32_t, Path3D>* pathHash
 
 
 // construct closed contour using segments created from identify step
-Paths3D contourConstruct3D(Paths3D hole_edges){
+Paths3D Hix::Engine3D::contourConstruct3D(Paths3D hole_edges){
     int iter = 0;
     std::vector<Paths3D::iterator> checked_its;
     bool dirty = true; // checks if iteration erased some contour
@@ -1373,7 +1350,7 @@ Paths3D contourConstruct3D(Paths3D hole_edges){
                 }
                 // prolong hole_edge 1 if end and start matches
                 if ((hole_edge1_it->end()-1)->position.distanceToPoint(hole_edge2_it->begin()->position) < scfg->vertex_inbound_distance*0.05/scfg->resolution){
-                //if (meshVertex2Hash(*(hole_edge1_it->end()-1)) == meshVertex2Hash(*hole_edge2_it->begin())){
+                //if (Vertex2Hash(*(hole_edge1_it->end()-1)) == Vertex2Hash(*hole_edge2_it->begin())){
                     //qDebug() << "erase";
                     dirty = true;
                     hole_edge1_it->insert(hole_edge1_it->end(), hole_edge2_it->begin()+1, hole_edge2_it->end());
@@ -1381,7 +1358,7 @@ Paths3D contourConstruct3D(Paths3D hole_edges){
                     //hole_edge2_it = hole_edges.erase(hole_edge2_it);
                     //qDebug() << "erased";
                 } else if ((hole_edge1_it->end()-1)->position.distanceToPoint((hole_edge2_it->end()-1)->position) < scfg->vertex_inbound_distance*0.05/scfg->resolution){
-                //} else if (meshVertex2Hash(*(hole_edge1_it->end()-1)) == meshVertex2Hash(*(hole_edge2_it->end()-1))){
+                //} else if (Vertex2Hash(*(hole_edge1_it->end()-1)) == Vertex2Hash(*(hole_edge2_it->end()-1))){
                     //qDebug() << "erase";
                     dirty = true;
                     std::reverse(hole_edge2_it->begin(), hole_edge2_it->end());
@@ -1452,8 +1429,8 @@ Paths3D contourConstruct3D(Paths3D hole_edges){
         Path3D p = hole_edges[i];
         //insertPathHash(pathHash, p[0], p[1]); // inserts opposite too
 
-        uint32_t path_hash_u = meshVertex2Hash(p[0]);
-        uint32_t path_hash_v = meshVertex2Hash(p[1]);
+        uint32_t path_hash_u = Vertex2Hash(p[0]);
+        uint32_t path_hash_v = Vertex2Hash(p[1]);
 
         if (! pathHash.contains(path_hash_u)){
             debug_count ++;
@@ -1488,9 +1465,9 @@ Paths3D contourConstruct3D(Paths3D hole_edges){
         Path3D* dest = &(pathHash[hashList[0]]);
         qDebug() << "new contour dest size : " << dest->size();
 
-        if (pathHash[meshVertex2Hash(start)].size() <= 2){
-            pathHash.remove(meshVertex2Hash(start));
-            findAndDeleteHash(&hashList, meshVertex2Hash(start));
+        if (pathHash[Vertex2Hash(start)].size() <= 2){
+            pathHash.remove(Vertex2Hash(start));
+            findAndDeleteHash(&hashList, Vertex2Hash(start));
             continue;
         }
 
@@ -1500,9 +1477,9 @@ Paths3D contourConstruct3D(Paths3D hole_edges){
         qDebug() << "current selected pj : " << pj.position;
         qDebug() << "current selected last : " << last.position;
 
-        if (pathHash[meshVertex2Hash(start)].size() <= 2){
-            pathHash.remove(meshVertex2Hash(start));
-            findAndDeleteHash(&hashList, meshVertex2Hash(start));
+        if (pathHash[Vertex2Hash(start)].size() <= 2){
+            pathHash.remove(Vertex2Hash(start));
+            findAndDeleteHash(&hashList, Vertex2Hash(start));
         }
 
         //while (!contourContains(contour, pj)){
@@ -1510,22 +1487,22 @@ Paths3D contourConstruct3D(Paths3D hole_edges){
             contour.push_back(pj);
             qDebug() << "inserted pj : " << pj.position;
             qDebug() << "current contour size :" << contour.size();
-            for (MeshVertex mv : pathHash[meshVertex2Hash(pj)]){
+            for (MeshVertex mv : pathHash[Vertex2Hash(pj)]){
                 qDebug() << "current adding meshvertex neighbors : "<< mv.position;
             }
 
-            if (pathHash[meshVertex2Hash(pj)].size() <= 2){
-                pathHash.remove(meshVertex2Hash(pj));
-                findAndDeleteHash(&hashList, meshVertex2Hash(pj));
+            if (pathHash[Vertex2Hash(pj)].size() <= 2){
+                pathHash.remove(Vertex2Hash(pj));
+                findAndDeleteHash(&hashList, Vertex2Hash(pj));
                 break;
             }
 
             u = findAvailableMeshVertex(&pathHash, &hashList, pj);
             v = findAvailableMeshVertex(&pathHash, &hashList, pj);
 
-            if (pathHash[meshVertex2Hash(pj)].size() <= 2){
-                pathHash.remove(meshVertex2Hash(pj));
-                findAndDeleteHash(&hashList, meshVertex2Hash(pj));
+            if (pathHash[Vertex2Hash(pj)].size() <= 2){
+                pathHash.remove(Vertex2Hash(pj));
+                findAndDeleteHash(&hashList, Vertex2Hash(pj));
             }
 
             qDebug() << "current selected u : " << u.position;
@@ -1558,7 +1535,7 @@ Paths3D contourConstruct3D(Paths3D hole_edges){
             }
         }
 
-        uint32_t lastHash = meshVertex2Hash(pj);
+        uint32_t lastHash = Vertex2Hash(pj);
         for (Path3D::iterator mv_it = pathHash[lastHash].begin(); mv_it != pathHash[lastHash].end();){
             if (*mv_it == pj_prev || *mv_it == start)
                 mv_it = pathHash[lastHash].erase(mv_it);
@@ -1566,9 +1543,9 @@ Paths3D contourConstruct3D(Paths3D hole_edges){
                 mv_it ++;
         }
 
-        if (pathHash[meshVertex2Hash(pj)].size() <= 2){
-            pathHash.remove(meshVertex2Hash(pj));
-            findAndDeleteHash(&hashList, meshVertex2Hash(pj));
+        if (pathHash[Vertex2Hash(pj)].size() <= 2){
+            pathHash.remove(Vertex2Hash(pj));
+            findAndDeleteHash(&hashList, Vertex2Hash(pj));
         }
 
         contour.push_back(pj);
@@ -1578,7 +1555,7 @@ Paths3D contourConstruct3D(Paths3D hole_edges){
     return contourList;*/
 }
 
-bool intPointInPath(IntPoint ip, Path p){
+bool Hix::Engine3D::intPointInPath(IntPoint ip, Path p){
     for (IntPoint i : p){
         if ((ip.X == i.X) && (ip.Y == i.Y)){
             return true;
@@ -1587,7 +1564,7 @@ bool intPointInPath(IntPoint ip, Path p){
     return false;
 };
 
-bool pathInpath(Path3D target, Path3D in){
+bool Hix::Engine3D::pathInpath(Path3D target, Path3D in){
     for (IntPoint ip : target.projection){
         if (PointInPolygon(ip, in.projection)==0){ // if ip is not contained in in
             return false;
@@ -1596,7 +1573,7 @@ bool pathInpath(Path3D target, Path3D in){
     return true;
 }
 
-std::vector<std::array<QVector3D, 3>> interpolate(Path3D from, Path3D to){
+std::vector<std::array<QVector3D, 3>> Hix::Engine3D::interpolate(Path3D from, Path3D to){
     std::vector<std::array<QVector3D, 3>> result_faces;
     if (from.size() != to.size()){
         qDebug() << "from and to size differs";
@@ -1662,18 +1639,6 @@ std::vector<std::array<QVector3D, 3>> interpolate(Path3D from, Path3D to){
     return result_faces;
 }
 
-/************** Helper Functions *****************/
-
-uint32_t intPoint2Hash(IntPoint u){
-    QVector3D u_qv3 = QVector3D(u.X, u.Y, 0);
-    uint32_t path_hash_u = vertexHash(u_qv3);
-    return path_hash_u;
-}
-
-uint32_t meshVertex2Hash(MeshVertex u){
-    uint32_t path_hash_u = vertexHash(u.position);
-    return path_hash_u;
-}
 
 
 const TrackedIndexedList<MeshVertex>& Mesh::getVertices()const
@@ -1730,5 +1695,20 @@ float Mesh::z_max()const
 {
     return _z_max;
 
+}
+
+
+/************** Helper Functions *****************/
+
+uint32_t  Hix::Engine3D::intPoint2Hash(IntPoint u) {
+	QVector3D u_qv3 = QVector3D(u.X, u.Y, 0);
+	uint32_t path_hash_u = vertexHash(u_qv3);
+	return path_hash_u;
+}
+
+uint32_t Hix::Engine3D::Vertex2Hash(MeshVertex& u)
+{
+	uint32_t path_hash_u = vertexHash(u.position);
+	return path_hash_u;
 }
 

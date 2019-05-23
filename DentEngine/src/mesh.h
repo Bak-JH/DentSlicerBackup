@@ -103,7 +103,7 @@ namespace Hix
 		struct MeshVertex {
 			MeshVertex() 
 			{}
-			MeshVertex(QVector3D position): position(position) {}
+			MeshVertex(QVector3D position, QVector3D color): position(position), color(color) {}
 			friend inline bool operator== (const MeshVertex& a, const MeshVertex& b) {
 				return a.position == b.position;
 			}
@@ -115,6 +115,7 @@ namespace Hix
 			std::vector<FaceConstItrW> connectedFaces()const;
 			QVector3D position;
 			QVector3D vn;
+			QVector3D color;
 			std::vector<HalfEdgeConstItrW> leavingEdges;
 			std::vector<HalfEdgeConstItrW> arrivingEdges;
 
@@ -152,6 +153,7 @@ namespace Hix
 
 
 			/********************** Mesh Edit Functions***********************/
+			void setVerticesColor(QVector3D color);
 			void vertexOffset(float factor);
 			void vertexMove(QVector3D direction);
 			void centerMesh();
@@ -159,7 +161,7 @@ namespace Hix
 			void vertexScale(float scaleX, float scaleY, float scaleZ, float centerX, float centerY);
 			void reverseFace(FaceConstItr faceItr);
 			void reverseFaces();
-			void addFace(QVector3D v0, QVector3D v1, QVector3D v2);
+			void addFace(QVector3D v0, QVector3D v1, QVector3D v2, QVector3D color = COLOR_DEFAULT_MESH);
 			TrackedIndexedList<MeshFace>::const_iterator removeFace(FaceConstItr f_it);
 			void connectFaces();
 			TrackedIndexedList<MeshVertex>& getVerticesNonConst();
@@ -245,7 +247,7 @@ namespace Hix
 			/********************** Helper Functions **********************/
 
 			void setTwins(HalfEdgeItr edge);
-			VertexItr addOrRetrieveFaceVertex(QVector3D v);
+			VertexItr addOrRetrieveFaceVertex(QVector3D v, QVector3D color);
 			void removeVertexHash(QVector3D pos);
 			VertexConstItr getSimilarVertex(uint32_t digest, QVector3D v);
 			void addHalfEdgesToFace(std::array<VertexItr, 3> faceVertices, FaceConstItr face);
@@ -285,7 +287,7 @@ namespace Hix
 		std::vector<std::array<QVector3D, 3>> interpolate(Path3D from, Path3D to);
 
 		uint32_t intPoint2Hash(IntPoint u);
-		uint32_t Vertex2Hash(MeshVertex u);
+		uint32_t Vertex2Hash(MeshVertex& u);
 
 	};
 };
