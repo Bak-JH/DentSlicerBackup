@@ -7,6 +7,7 @@
 
 #include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
 #include <CGAL/Constrained_Delaunay_triangulation_2.h>
+#include <CGAL/Delaunay_triangulation_2.h>
 #include <CGAL/Delaunay_mesh_vertex_base_2.h>
 #include <CGAL/Delaunay_mesh_face_base_2.h>
 #include <CGAL/Delaunay_mesh_size_criteria_2.h>
@@ -411,6 +412,10 @@ typedef struct Custom3DPoint{
      {
          return (x == a.x && y == a.y && z == a.z);
      }
+     bool operator!=(const Custom3DPoint& a) const
+     {
+         return (x != a.x || y != a.y || z != a.z);
+     }
      bool operator<(const Custom3DPoint& a) const
      {
          if (x == a.x) {
@@ -647,6 +652,100 @@ Point_2 findHolePoint(std::vector<Point_2> polygon, std::vector<Point_2> parentP
     return Point_2(polygon[0].x()+0.00001, polygon[0].y());
 }
 
+int CCW(Custom3DPoint p1, Custom3DPoint p2, Custom3DPoint p3) {
+    long long int ccw = p1.x*p2.y+p2.x*p3.y+p3.x*p1.y - p1.y*p2.x-p2.y*p3.x-p3.y*p1.x;
+    if (ccw > 0)
+        return 1;
+    if (ccw < 0)
+        return -1;
+    return 0;
+}
+
+int point2CCW(Point_2 p1, Point_2 p2, Point_2 p3) {
+    long long int ccw = p1.x()*p2.y()+p2.x()*p3.y()+p3.x()*p1.y() - p1.y()*p2.x()-p2.y()*p3.x()-p3.y()*p1.x();
+    if (ccw > 0)
+        return 1;
+    if (ccw < 0)
+        return -1;
+    return 0;
+}
+
+int point2isIntersectedLines(Point_2 A, Point_2 B, Point_2 C, Point_2 D) {
+    return point2CCW(A,C,D) != point2CCW(B,C,D) && point2CCW(A,B,C) != point2CCW(A,B,D) && point2CCW(A,C,D) * point2CCW(B,C,D) * point2CCW(A,B,C) * point2CCW(A,B,D) != 0;
+}
+
+bool isIntersectedLines(Custom3DPoint A, Custom3DPoint B, Custom3DPoint C, Custom3DPoint D) {
+    return CCW(A,C,D) != CCW(B,C,D) && CCW(A,B,C) != CCW(A,B,D) && CCW(A,C,D) * CCW(B,C,D) * CCW(A,B,C) * CCW(A,B,D) != 0;
+}
+
+struct findMaximumContour {
+    std::vector<Point_2> contour;
+    float area;
+} maxContour;
+
+void get_largest_contour(Custom3DPoint curr, std::multimap<Custom3DPoint, Custom3DPoint> *boundaryEdges, std::set<Custom3DPoint> *checker, std::set<Custom3DPoint> *allChecker, std::vector<Custom3DPoint> *contourCandi) {
+    std::multimap<Custom3DPoint, Custom3DPoint>::iterator targetIter;
+    bool isLast = true;
+
+    allChecker->insert(curr);
+    checker->insert(curr);
+    contourCandi->push_back(curr);
+
+    for (targetIter = boundaryEdges->lower_bound(curr); targetIter != boundaryEdges->upper_bound(curr); targetIter++){
+        Custom3DPoint nextPoint = targetIter->second;
+        if (checker->find(nextPoint) == checker->end()){
+            get_largest_contour(nextPoint, boundaryEdges, checker, allChecker, contourCandi);
+            isLast = false;
+        }
+    }
+
+    if (isLast){
+        //checking self intersecting
+        bool isIntersect = false;
+        unsigned int t = contourCandi->size();
+        for (unsigned int i = 1; i < t; i++) {
+            if(isIntersectedLines((*contourCandi)[i-1], (*contourCandi)[i], (*contourCandi)[0], (*contourCandi)[t-1])) {
+                isIntersect = true;
+                break;
+            }
+        }
+        //calculate contour area if contourCandi doesn't have self intersecting
+        if (!isIntersect)
+            qDebug() << "not intersect";
+        else
+            qDebug() << "intersect";
+
+        if (!isIntersect) {
+            qDebug() << "contour Candi size: " << contourCandi->size();
+            float candiArea = 0.0;
+
+            CGAL::Delaunay_triangulation_2<Kernel> dt;
+            for (unsigned int i = 0; i < t; i++)
+                dt.insert(Point_2((*contourCandi)[i].x/1000000.0, (*contourCandi)[i].y/1000000.0));
+
+            for (CGAL::Delaunay_triangulation_2<Kernel>::Finite_faces_iterator fit = dt.finite_faces_begin(); fit != dt.finite_faces_end(); fit++) {
+                float x1,y1,x2,y2,x3,y3;
+                x1 = float(dt.triangle(fit)[0].x()); y1 = float(dt.triangle(fit)[0].y());
+                x2 = float(dt.triangle(fit)[1].x()); y2 = float(dt.triangle(fit)[1].y());
+                x3 = float(dt.triangle(fit)[2].x()); y3 = float(dt.triangle(fit)[2].y());
+                candiArea += abs(x1*y2 + x2*y3 + x3*y1 - x2*y1 - x3*y2 - x1*y3)/2.0;
+            }
+
+            qDebug() << "candi area: " << candiArea;
+            if (candiArea > maxContour.area) {
+                maxContour.contour.clear();
+                for (unsigned int i = 0; i < t; i++) {
+                    maxContour.contour.push_back(Point_2((*contourCandi)[i].x, (*contourCandi)[i].y));
+                }
+                maxContour.area = candiArea;
+            }
+        }
+    }
+
+    checker->erase(checker->find(curr));
+    contourCandi->pop_back();
+}
+
 void bisectModelByPlane(Mesh* leftMesh, Mesh* rightMesh, Mesh* mesh, Plane plane, int cutFillMode){
     std::multimap<Custom3DPoint, Custom3DPoint> boundaryEdges;
 
@@ -684,23 +783,29 @@ void bisectModelByPlane(Mesh* leftMesh, Mesh* rightMesh, Mesh* mesh, Plane plane
         if (((mv1.z > targetZ) != (mv2.z > targetZ)) && targetZ != mv1.z && targetZ != mv2.z) {
             Custom3DPoint inter = getTargetZPoint(targetZ, mv1, mv2);
 
-            meshFaceQueue.push(convert2vector(mv1, inter, mv3));
-            meshFaceQueue.push(convert2vector(inter, mv2, mv3));
-            continue;
+            if (mv1 != inter && mv2 != inter && mv3 != inter) {
+                meshFaceQueue.push(convert2vector(mv1, inter, mv3));
+                meshFaceQueue.push(convert2vector(inter, mv2, mv3));
+                continue;
+            }
         }
         if (((mv2.z > targetZ) != (mv3.z > targetZ)) && targetZ != mv2.z && targetZ != mv3.z) {
             Custom3DPoint inter = getTargetZPoint(targetZ, mv2, mv3);
 
-            meshFaceQueue.push(convert2vector(mv2, inter, mv1));
-            meshFaceQueue.push(convert2vector(inter, mv3, mv1));
-            continue;
+            if (mv1 != inter && mv2 != inter && mv3 != inter) {
+                meshFaceQueue.push(convert2vector(mv2, inter, mv1));
+                meshFaceQueue.push(convert2vector(inter, mv3, mv1));
+                continue;
+            }
         }
         if (((mv3.z > targetZ) != (mv1.z > targetZ)) && targetZ != mv3.z && targetZ != mv1.z) {
             Custom3DPoint inter = getTargetZPoint(targetZ, mv3, mv1);
 
-            meshFaceQueue.push(convert2vector(mv3, inter, mv2));
-            meshFaceQueue.push(convert2vector(inter, mv1, mv2));
-            continue;
+            if (mv1 != inter && mv2 != inter && mv3 != inter) {
+                meshFaceQueue.push(convert2vector(mv3, inter, mv2));
+                meshFaceQueue.push(convert2vector(inter, mv1, mv2));
+                continue;
+            }
         }
 
         // didn't cutted mesh
@@ -746,55 +851,41 @@ void bisectModelByPlane(Mesh* leftMesh, Mesh* rightMesh, Mesh* mesh, Plane plane
 
     if (cutFillMode == 1) {
         // get contour
-        qDebug() << "get contour";
-        std::set<Custom3DPoint> checker;
-        std::multimap<Custom3DPoint, Custom3DPoint>::iterator iter, targetIter, edgeIter;
+        qDebug() << "get contours";
+        std::multimap<Custom3DPoint, Custom3DPoint>::iterator iter;
+        std::set<Custom3DPoint> checker, allChecker;
         std::vector<std::vector<Point_2>> contours;
+        std::vector<Custom3DPoint> contourCandi;
         Custom3DPoint prevPoint, currPoint;
         for (iter = boundaryEdges.begin(); iter != boundaryEdges.end(); iter++){
-//            int edgeCounter = 0;
-//            for (edgeIter = boundaryEdges.lower_bound(iter->first); edgeIter != boundaryEdges.upper_bound(iter->first); edgeIter++){
-//                edgeCounter++;
-//            }
-//            if (edgeCounter!=2) {
-//                qDebug() << "fuck1 " << iter->first.x << " " << iter->first.y;
-//                qDebug() << "fuck2 " << iter->second.x << " " << iter->second.y;
-//            }
-
-            if (checker.find(iter->first) == checker.end()) {
-                std::vector<Point_2> contour;
-                // new contour
-                prevPoint = iter->first;
-                currPoint = iter->second;
-                contour.push_back(Point_2(prevPoint.x/padding, prevPoint.y/padding));
-                checker.insert(prevPoint);
-                while(true){
-                    prevPoint = currPoint;
-                    contour.push_back(Point_2(prevPoint.x/padding, prevPoint.y/padding));
-                    checker.insert(prevPoint);
-
-                    bool findFlag = false;
-
-                    for (targetIter = boundaryEdges.lower_bound(prevPoint); targetIter != boundaryEdges.upper_bound(prevPoint); targetIter++){
-                        currPoint = targetIter->second;
-                        if (checker.find(currPoint) == checker.end()){
-                            findFlag = true;
-                            break;
-                        }
-                    }
-
-                    if (!findFlag) {
-                        break;
-                    }
+            if (allChecker.find(iter->first) == allChecker.end()){
+                qDebug() << "find contour";
+                maxContour.area = 0.0;
+                get_largest_contour(iter->first, &boundaryEdges, &checker, &allChecker, &contourCandi);
+                if (maxContour.area > 0.5) {
+                    qDebug() << "contour size: " << maxContour.contour.size();
+                    contours.push_back(maxContour.contour);
                 }
-                qDebug() << "complete make contour";
-                qDebug() << contour.size();
-                contours.push_back(contour);
             }
         }
         qDebug() << contours.size();
 
         int contourN = contours.size();
+
+        qDebug() << "merge intersected contours";
+        for (int i = 0; i < contourN; i++) {
+            for (int j = i+1; j < contourN; j++) {
+                int t1 = contours[i].size();
+                int t2 = contours[j].size();
+                for (int i1 = t1-1, i2 = 0; i2<t1; i1=i2++) {
+                    for (int j1 = t2-1, j2 = 0; j2<t2; j1=j2++) {
+                        if (point2isIntersectedLines(contours[i][i1], contours[i][i2], contours[j][j1], contours[j][j2])) {
+                            qDebug() << i << j << i1 << i2 << j1 << j2;
+                        }
+                    }
+                }
+            }
+        }
 
         // add polygon and constraints on CDT
         CDT cdt;
@@ -918,19 +1009,6 @@ void bisectModelByPlane(Mesh* leftMesh, Mesh* rightMesh, Mesh* mesh, Plane plane
 
 void printCustomPoints(Custom3DPoint p1, Custom3DPoint p2, Custom3DPoint p3) {
     qDebug() << "(" << p1.x << ", " << p1.y << ", " << p1.z << ") " << "(" << p2.x << ", " << p2.y << ", " << p2.z << ") " << "(" << p3.x << ", " << p3.y << ", " << p3.z << ")";
-}
-
-int CCW(Custom3DPoint p1, Custom3DPoint p2, Custom3DPoint p3) {
-    long long int ccw = p1.x*p2.y+p2.x*p3.y+p3.x*p1.y - p1.y*p2.x-p2.y*p3.x-p3.y*p1.x;
-    if (ccw > 0)
-        return 1;
-    if (ccw < 0)
-        return -1;
-    return 0;
-}
-
-bool isIntersectedLines(Custom3DPoint A, Custom3DPoint B, Custom3DPoint C, Custom3DPoint D) {
-    return CCW(A,C,D) != CCW(B,C,D) && CCW(A,B,C) != CCW(A,B,D) && CCW(A,C,D) * CCW(B,C,D) * CCW(A,B,C) * CCW(A,B,D) != 0;
 }
 
 Custom3DPoint findConnectedPointOrRegister(std::multimap<long long int, std::vector<Custom3DPoint> > *connectVertex, Custom3DPoint p) {
