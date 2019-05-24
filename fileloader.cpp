@@ -3,8 +3,9 @@
 #include <QDebug>
 #include <QFile>
 #include <iostream>
+#include "DentEngine/src/mesh.h"
 
-using Mesh = Hix::Engine3D::Mesh;
+using namespace Hix::Engine3D;
 /* Custom fgets function to support Mac line-ends in Ascii STL files. OpenSCAD produces this when used on Mac */
 void* FileLoader::fgets_(char* ptr, size_t len, FILE* f)
 {

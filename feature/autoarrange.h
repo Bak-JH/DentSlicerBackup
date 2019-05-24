@@ -1,6 +1,5 @@
 #ifndef ARRANGE_H
 #define ARRANGE_H
-#include "DentEngine/src/mesh.h"
 #include <vector>
 #include <algorithm>
 #include <QVector3D>
@@ -8,6 +7,7 @@
 #include <QHash>
 #include <QDebug>
 #include <math.h>
+#include "DentEngine/src/mesh.h"
 //#include "./glmodel.h"
 #include "DentEngine/src/configuration.h"
 #include "DentEngine/src/polyclipping/clipper/clipper.hpp"
@@ -16,8 +16,10 @@
 #define _DEBUG_AUTO_ARRANGE
 #endif
 
-using namespace ClipperLib;
+
 using namespace Hix::Engine3D;
+
+using namespace ClipperLib;
 typedef std::pair<IntPoint, float> XYArrangement;
 typedef std::vector<IntPoint> Vecs;
 
@@ -36,10 +38,10 @@ private:
     Paths getMeshConvexHull(const Mesh& mesh);
     Paths spreadingCheck(const Mesh* mesh, std::map<const MeshFace *, bool>& check, const MeshFace * chking_start, bool is_chking_pos);
     Path buildOutline(const Mesh* mesh, std::map<const MeshFace *, bool>& check, const MeshFace * chking, const MeshVertex* path_head, bool is_chking_pos);
-    bool isEdgeBound(const Mesh* mesh, const MeshFace * mf, HalfEdgeConstItr edge, bool is_chking_pos);
-    bool isNbrOrientSame(const Mesh* mesh, const MeshFace * mf, HalfEdgeConstItr edge);
+    bool isEdgeBound(const Mesh* mesh, const MeshFace * mf, const HalfEdge * edge, bool is_chking_pos);
+    bool isNbrOrientSame(const Mesh* mesh, const MeshFace * mf, const HalfEdge * edge);
 	//size_t searchVtxInFace(const MeshFace * mf, const MeshVertex* vertex);
-	const MeshVertex* getNbrVtx(const MeshFace * mf, HalfEdgeConstItr base, size_t offset);
+	const MeshVertex* getNbrVtx(const MeshFace * mf, const HalfEdge * base, size_t offset);
     Path idxsToPath(const Mesh* mesh, std::vector<const MeshVertex* > path_by_idx);
     Paths project(const Mesh* mesh);
     Paths clipOutlines(std::vector<Paths> outline_sets);
