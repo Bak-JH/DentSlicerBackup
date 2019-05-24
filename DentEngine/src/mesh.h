@@ -46,17 +46,18 @@ namespace Hix
 		struct MeshVertex;
 		struct MeshFace;
 		class Mesh;
-		typedef typename TrackedIndexedList<HalfEdge>::const_iterator HalfEdgeConstItr;
-        typedef typename TrackedIndexedList<MeshVertex>::const_iterator VertexConstItr;
-        typedef typename TrackedIndexedList<MeshFace>::const_iterator FaceConstItr;
-		typedef typename TrackedIndexedList<HalfEdge>::iterator HalfEdgeItr;
-        typedef typename TrackedIndexedList<MeshVertex>::iterator VertexItr;
-        typedef typename TrackedIndexedList<MeshFace>::iterator FaceItr;
+
+		typedef typename IndexedListItr::const_iterator <HalfEdge>HalfEdgeConstItr;
+		typedef typename IndexedListItr::const_iterator <MeshVertex>VertexConstItr;
+		typedef typename IndexedListItr::const_iterator <MeshFace>FaceConstItr;
+		typedef typename IndexedListItr::iterator		<HalfEdge>HalfEdgeItr;
+		typedef typename IndexedListItr::iterator		<MeshVertex>VertexItr;
+		typedef typename IndexedListItr::iterator		<MeshFace>FaceItr;
 
 		//value semantic, double de-referencing containers
-        typedef IteratorWrapper< HalfEdgeConstItr> HalfEdgeConstItrW;
-        typedef IteratorWrapper< VertexConstItr> VertexConstItrW;
-        typedef IteratorWrapper< FaceConstItr> FaceConstItrW;
+		typedef IteratorWrapper< HalfEdgeConstItr> HalfEdgeConstItrW;
+		typedef IteratorWrapper< VertexConstItr> VertexConstItrW;
+		typedef IteratorWrapper< FaceConstItr> FaceConstItrW;
 
 		struct HalfEdge
 		{
@@ -88,6 +89,7 @@ namespace Hix
 			HalfEdgeCirculator operator--(int);
 			HalfEdgeCirculator operator++(int);
 			const HalfEdge* operator->() const;
+			const HalfEdge* toPtr() const;
 
 		private:
 			HalfEdgeConstItrW _hEdgeItr;

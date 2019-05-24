@@ -67,6 +67,11 @@ const HalfEdge* Hix::Engine3D::HalfEdgeCirculator::operator->() const
 	return _hEdgeItr.operator->();
 }
 
+const HalfEdge* Hix::Engine3D::HalfEdgeCirculator::toPtr() const
+{
+	return _hEdgeItr.operator->();
+}
+
 
 std::array<VertexConstItrW, 3> Hix::Engine3D::MeshFace::meshVertices() const
 {
@@ -421,10 +426,13 @@ void Mesh::reverseFaces(){
 
 void Mesh::addFace(QVector3D v0, QVector3D v1, QVector3D v2, QVector3D color){
 	std::array<VertexItr, 3> fVtx;
+	auto t1 = addOrRetrieveFaceVertex(v0, color);
+	auto t2 = addOrRetrieveFaceVertex(v1, color);
+	auto t3 = addOrRetrieveFaceVertex(v2, color);
 
-    fVtx[0] = addOrRetrieveFaceVertex(v0, color);
-	fVtx[1] = addOrRetrieveFaceVertex(v1, color);
-	fVtx[2] = addOrRetrieveFaceVertex(v2, color);
+ //   fVtx[0] = addOrRetrieveFaceVertex(v0, color);
+	//fVtx[1] = addOrRetrieveFaceVertex(v1, color);
+	//fVtx[2] = addOrRetrieveFaceVertex(v2, color);
 	//if the face is too small and slicing option collapsed a pair of its vertices, don't add.
 	if (fVtx[0] == fVtx[1] || fVtx[0] == fVtx[2] || fVtx[1] == fVtx[2])
 		return;
