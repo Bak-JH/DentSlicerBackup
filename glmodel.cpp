@@ -2241,8 +2241,8 @@ void GLModel::mgoo(Qt3DRender::QPickEvent* v)
 
     QVector3D xAxis3D = QVector3D(1,0,0);
     QVector3D yAxis3D =  QVector3D(0,1,0);
-    QVector2D xAxis2D = (world2Screen(lastpoint+xAxis3D) - world2Screen(lastpoint));
-    QVector2D yAxis2D = (world2Screen(lastpoint+yAxis3D) - world2Screen(lastpoint));
+    QVector2D xAxis2D = (world2Screen(xAxis3D));
+    QVector2D yAxis2D = (world2Screen(yAxis3D));
     QVector2D target = currentPoint - prevPoint;
 
     float b = (target.y()*xAxis2D.x() - target.x()*xAxis2D.y())/
