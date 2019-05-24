@@ -66,6 +66,7 @@ public:
 	IndexedList& operator=(const IndexedList& o)
 	{
 		_container = o._container;
+		return *this;
 	}
 
 	IndexedList& operator=(std::initializer_list<T> iniList) { // assign initializer_list

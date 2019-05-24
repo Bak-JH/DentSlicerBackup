@@ -2815,6 +2815,7 @@ void GLModel::setHitTestable(bool isEnable)
 
 bool GLModel::isHitTestable()
 {
+	return _hitEnabled;;
 }
 
 const Qt3DCore::QTransform* GLModel::getTransform() const

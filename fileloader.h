@@ -1,7 +1,15 @@
 #ifndef FILELOADER_H
 #define FILELOADER_H
 #include <QVector3D>
-#include "DentEngine/src/mesh.h"
+
+
+namespace Hix
+{
+	namespace Engine3D
+	{
+		class Mesh;
+	}
+}
 
 //TODO: Factory pattern
 class FileLoader
