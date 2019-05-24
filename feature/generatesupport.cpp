@@ -358,12 +358,12 @@ void GenerateSupport::generateBottomFace(Mesh* mesh, OverhangPoint center) {
 
 void GenerateSupport::generateFaces(Mesh* mesh, OverhangPoint top, OverhangPoint bottom) {
     for (size_t i = 0; i < 6; i++) {
-        mesh->addFace(top.position + QVector3D(0,0,scfg->layer_height) + top.radius * QVector3D(qCos(M_PI * (i+1) / 3), qSin(M_PI * (i+1) / 3), 0),
-                      top.position + QVector3D(0,0,scfg->layer_height) + top.radius * QVector3D(qCos(M_PI * i / 3), qSin(M_PI * i / 3), 0),
+        mesh->addFace(top.position + top.radius * QVector3D(qCos(M_PI * (i+1) / 3), qSin(M_PI * (i+1) / 3), 0),
+                      top.position + top.radius * QVector3D(qCos(M_PI * i / 3), qSin(M_PI * i / 3), 0),
                       bottom.position + bottom.radius * QVector3D(qCos(M_PI * i / 3), qSin(M_PI * i / 3), 0));
         mesh->addFace(bottom.position + bottom.radius * QVector3D(qCos(M_PI * i / 3), qSin(M_PI * i / 3), 0),
                       bottom.position + bottom.radius * QVector3D(qCos(M_PI * (i+1) / 3), qSin(M_PI * (i+1) / 3), 0),
-                      top.position + QVector3D(0,0,scfg->layer_height) + top.radius * QVector3D(qCos(M_PI * (i+1) / 3), qSin(M_PI * (i+1) / 3), 0));
+                      top.position + top.radius * QVector3D(qCos(M_PI * (i+1) / 3), qSin(M_PI * (i+1) / 3), 0));
     }
 }
 
@@ -418,7 +418,9 @@ void GenerateSupport::generateStem(Mesh* mesh, OverhangPoint top, OverhangPoint*
         top = tip;
     }
 
+
     generateFaces(mesh, top, *bottom);
+
 
     if (origin_bottom.meshInterPoint) // generate bottom tip
         generateFaces(mesh, *bottom, origin_bottom);
