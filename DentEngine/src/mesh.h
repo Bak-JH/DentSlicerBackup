@@ -11,8 +11,6 @@
 #include <array>
 #include <variant>
 #include "../../common/TrackedIndexedList.h"
-#include "../../common/IteratorWrapper.h"
-
 #define cos50 0.64278761
 #define cos100 -0.17364818
 #define cos150 -0.8660254
@@ -23,12 +21,6 @@ namespace Hix
 {
 	namespace Engine3D
 	{
-		template<class container_type, class itr_wrapper_type>
-		itr_wrapper_type getEquivalentItrWrapper(const container_type& b, const container_type& a, const itr_wrapper_type& aItr)
-		{
-            size_t idx = aItr.getItr() - a.cbegin();
-            return wrapIterator(b.cbegin() + idx);
-		}
 
         template<class container_type, class itr_type>
         itr_type getEquivalentItr(const container_type& b, const container_type& a, const itr_type& aItr)
@@ -54,34 +46,30 @@ namespace Hix
 		typedef typename IndexedListItr::iterator		<MeshVertex>VertexItr;
 		typedef typename IndexedListItr::iterator		<MeshFace>FaceItr;
 
-		//value semantic, double de-referencing containers
-		typedef IteratorWrapper< HalfEdgeConstItr> HalfEdgeConstItrW;
-		typedef IteratorWrapper< VertexConstItr> VertexConstItrW;
-		typedef IteratorWrapper< FaceConstItr> FaceConstItrW;
 
 		struct HalfEdge
 		{
 			HalfEdge()
 			{}
-			HalfEdgeConstItrW next;
-			HalfEdgeConstItrW prev;
-			VertexConstItrW from;
-			VertexConstItrW to;
-			FaceConstItrW owningFace;
+			HalfEdgeConstItr next;
+			HalfEdgeConstItr prev;
+			VertexConstItr from;
+			VertexConstItr to;
+			FaceConstItr owningFace;
 			//TODO: guarantee no self intersection occurs and we can use this
 			//HalfEdgeConstItr twin;
-			std::vector<HalfEdgeConstItrW> twins;
+			std::vector<HalfEdgeConstItr> twins;
 
-			std::vector<FaceConstItrW> nonOwningFaces()const;
+			std::vector<FaceConstItr> nonOwningFaces()const;
 		};
 
 		class HalfEdgeCirculator
 		{
 		public:
-			HalfEdgeCirculator(HalfEdgeConstItrW itrW);
+			HalfEdgeCirculator(HalfEdgeConstItr itrW);
 			//you need to double *, but it's worth it for indexing capability
-			//HalfEdgeConstItrW& toItrW()const;
-			HalfEdgeConstItr& toItr()const;
+			//HalfEdgeConstItr& toItrW()const;
+			HalfEdgeConstItr& toItr();
 
 			const HalfEdge& operator*()const;
 			void operator++();
@@ -92,7 +80,7 @@ namespace Hix
 			const HalfEdge* toPtr() const;
 
 		private:
-			HalfEdgeConstItrW _hEdgeItr;
+			HalfEdgeConstItr _hEdgeItr;
 		};
 
 		struct MeshFace {
@@ -100,8 +88,8 @@ namespace Hix
 			{}
 			QVector3D fn;
 			QVector3D fn_unnorm;
-			HalfEdgeConstItrW edge = nullptr;
-			std::array<VertexConstItrW, 3> meshVertices()const;
+			HalfEdgeConstItr edge;
+			std::array<VertexConstItr, 3> meshVertices()const;
 			//std::array<std::vector<FaceConstItr>, 3> neighboring_faces;
 			HalfEdgeCirculator edgeCirculator()const;
 			std::array<size_t, 3> getVerticeIndices(const Mesh* owningMesh)const;
@@ -119,12 +107,12 @@ namespace Hix
 			}
 			bool empty()const;
 			void calculateNormalFromFaces();
-			std::vector<FaceConstItrW> connectedFaces()const;
+			std::vector<FaceConstItr> connectedFaces()const;
 			QVector3D position;
 			QVector3D vn;
 			QVector3D color;
-			std::vector<HalfEdgeConstItrW> leavingEdges;
-			std::vector<HalfEdgeConstItrW> arrivingEdges;
+			std::vector<HalfEdgeConstItr> leavingEdges;
+			std::vector<HalfEdgeConstItr> arrivingEdges;
 
 
 		};
@@ -186,18 +174,6 @@ namespace Hix
 			inline HalfEdgeItr toNormItr(const HalfEdgeConstItr& itr)
 			{
 				return halfEdges.toNormItr(itr);
-			}
-			inline VertexItr toNormItr(const VertexConstItrW& itr)
-			{
-				return vertices.toNormItr(itr.getItr());
-			}
-			inline FaceItr toNormItr(const FaceConstItrW& itr)
-			{
-				return faces.toNormItr(itr.getItr());
-			}
-			inline HalfEdgeItr toNormItr(const HalfEdgeConstItrW& itr)
-			{
-				return halfEdges.toNormItr(itr.getItr());
 			}
 
 			/********************** Mesh Modify and Copy Functions***********************/
@@ -285,6 +261,8 @@ namespace Hix
 			void updateMinMax(QVector3D v);
 
 			QHash<uint32_t, VertexConstItr> vertices_hash;
+			std::vector< VertexConstItr> __DEBUGItr;
+			std::vector< const MeshVertex* > __DEBUGPtr;
 
 			TrackedIndexedList<MeshVertex> vertices;
 			TrackedIndexedList<HalfEdge> halfEdges;
