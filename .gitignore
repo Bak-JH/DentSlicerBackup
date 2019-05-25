@@ -1,5 +1,11 @@
 /DLPslicer.pro.user.*
 /DLPslicer.pro.user
+/release
+/debug
+/Win32
+/x64
+/packages
+/.vscode
 *.h.*
 *.cpp.*
 *.autosave

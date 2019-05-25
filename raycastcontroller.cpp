@@ -49,7 +49,7 @@ void RayCastController::initialize(QEntity* camera)
 
 void RayCastController::addLayer(Qt3DRender::QLayer* layer)
 {
-	_rayCaster->addLayer(layer);
+	//_rayCaster->addLayer(layer);
 
 }
 
@@ -165,17 +165,85 @@ void RayCastController::hitsChanged(const Qt3DRender::QAbstractRayCaster::Hits& 
 	auto allHits = _rayCaster->hits();
 	if (hits.size() > 0)
 	{
+		for (auto& hit : hits)
+		{
+			auto hitType = hit.type();
+			auto etc = hit.entity();
+			auto id = etc->id();
+			auto name = etc->objectName();
+			qDebug() << "ray cast hit something: -------!";
+			qDebug() << hitType << etc << id << name;
+
+
+			auto mesh = dynamic_cast<QMesh*>(etc->components()[0]);
+			auto renderer = dynamic_cast<QGeometryRenderer*>(mesh);
+			if (renderer)
+			{
+				auto indBufferOffset = renderer->indexBufferByteOffset();
+				auto indOffset = renderer->indexOffset();
+				auto restart = renderer->restartIndexValue();
+
+				auto geo = renderer->geometry();
+				auto attrbts = geo->attributes();
+
+				QAttribute* pos = nullptr;
+				QAttribute* norm = nullptr;
+				QAttribute* colr = nullptr;
+				QAttribute* idx = nullptr;
+
+				for (auto& each : attrbts)
+				{
+					if (each->name() == QAttribute::defaultPositionAttributeName())
+					{
+						pos = each;
+					}
+					else if (each->name() == QAttribute::defaultNormalAttributeName())
+					{
+						norm = each;
+					}
+					else if (each->name() == QAttribute::defaultColorAttributeName())
+					{
+						colr = each;
+					}
+					else if (each->attributeType() == QAttribute::AttributeType::IndexAttribute)
+					{
+						idx = each;
+					}
+
+				}
+				auto count = idx->count();
+				auto normBuffer = norm->buffer();
+				auto normArr = normBuffer->data();
+				float* reNormArr = reinterpret_cast<float*>(normArr.data());
+
+
+				auto type = idx->vertexBaseType();
+				auto idxBuffer = idx->buffer();
+				auto bufferType = idxBuffer->type();
+				auto byteOffset = idx->byteOffset();
+				auto usage = idxBuffer->usage();
+
+				auto indxArray = idxBuffer->data();
+				auto stride = idx->byteStride();
+				size_t primitiveIdx = hit.primitiveIndex();
+
+			}
+		}
 		for (auto hit : hits)
 		{
+
 			auto glModel = dynamic_cast<GLModel*>(hit.entity());
-			qDebug() << "ray trace glmodel" << glModel;
-			if (_rayCastMode == Pressed)
+			if (glModel)
 			{
-				glModel->mousePressed(_mouseEvent, hit);
-			}
-			else
-			{
-				glModel->mouseReleased(_mouseEvent, hit);
+				qDebug() << "ray trace glmodel" << glModel;
+				if (_rayCastMode == Pressed)
+				{
+					glModel->mousePressed(_mouseEvent, hit);
+				}
+				else
+				{
+					glModel->mouseReleased(_mouseEvent, hit);
+				}
 			}
 			//auto isAlreadySelected = isSelected(glModel);
 			//if (_rayCastMode == RayCastMode::Other)
