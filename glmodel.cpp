@@ -35,7 +35,6 @@ using namespace Hix::Engine3D;
 
 GLModel::GLModel(QObject* mainWindow, QNode *parent, Mesh* loadMesh, QString fname, int id)
     : QEntity(parent)
-	, _parent(parent)
     , filename(fname)
     , mainWindow(mainWindow)
     , v_cnt(0)
@@ -50,15 +49,17 @@ GLModel::GLModel(QObject* mainWindow, QNode *parent, Mesh* loadMesh, QString fna
     , ID(id)
     , m_meshMaterial(nullptr)
     , m_geometry(&m_geometryRenderer)
-    ,vertexBuffer(Qt3DRender::QBuffer::VertexBuffer, &m_geometry)
-	, indexBuffer(Qt3DRender::QBuffer::IndexBuffer)
+    , vertexBuffer(Qt3DRender::QBuffer::VertexBuffer, &m_geometry)
+	, indexBuffer(Qt3DRender::QBuffer::IndexBuffer, &m_geometry)
 {
     connect(&futureWatcher, SIGNAL(finished()), this, SLOT(slicingDone()));
-    qDebug() << "new model made _______________________________"<<this<< "parent:"<<this->_parent;
+    qDebug() << "new model made _______________________________"<<this<< "parent:"<<parent;
 
     //initialize vertex buffers etc
-    vertexBuffer.setUsage(Qt3DRender::QBuffer::DynamicDraw);
-	indexBuffer.setUsage(Qt3DRender::QBuffer::DynamicDraw);
+ //   vertexBuffer.setUsage(Qt3DRender::QBuffer::DynamicDraw);
+	//indexBuffer.setUsage(Qt3DRender::QBuffer::DynamicDraw);
+	vertexBuffer.setAccessType(Qt3DRender::QBuffer::AccessType::Write);
+	indexBuffer.setAccessType(Qt3DRender::QBuffer::AccessType::Write);
 
     positionAttribute.setAttributeType(QAttribute::VertexAttribute);
     positionAttribute.setBuffer(&vertexBuffer);
@@ -97,13 +98,20 @@ GLModel::GLModel(QObject* mainWindow, QNode *parent, Mesh* loadMesh, QString fna
 	indexAttribute.setCount(0);
 	indexAttribute.setVertexSize(1);
 
+
+
 	m_geometryRenderer.setInstanceCount(1);
 	m_geometryRenderer.setFirstVertex(0);
 	m_geometryRenderer.setFirstInstance(0);
     m_geometryRenderer.setPrimitiveType(QGeometryRenderer::Triangles);
     m_geometryRenderer.setGeometry(&m_geometry);
-    addComponent(&m_geometryRenderer);
-	addComponent(&m_transform);
+	m_geometryRenderer.setVertexCount(0);
+
+	m_geometry.addAttribute(&positionAttribute);
+	m_geometry.addAttribute(&normalAttribute);
+	m_geometry.addAttribute(&colorAttribute);
+	m_geometry.addAttribute(&indexAttribute);
+
 
     // generates shadow model for object picking
   
@@ -169,14 +177,11 @@ GLModel::GLModel(QObject* mainWindow, QNode *parent, Mesh* loadMesh, QString fna
 	cuttingPoints.reserve(50);
 	cuttingContourCylinders.reserve(50);
 
-	
-
 	//rendering works in thread pool, so there is a chance of error occuring due to empty attributes...(especially for index)
-	m_geometry.addAttribute(&positionAttribute);
-	m_geometry.addAttribute(&normalAttribute);
-	m_geometry.addAttribute(&colorAttribute);
-	m_geometry.addAttribute(&indexAttribute);
-	addComponent(&_layer);
+
+	//addComponent(&_layer);
+
+	addComponent(&m_transform);
 
 }
 
@@ -774,6 +779,7 @@ void inline attrBufferResize(QAttribute & attr, Qt3DRender::QBuffer & attrBuffer
 
 void GLModel::setMesh(Mesh* mesh)
 {
+
 	//flush datas
 	auto faceHistory = mesh->getFacesNonConst().flushChanges();
 	auto verticesHistory = mesh->getVerticesNonConst().flushChanges();
@@ -795,9 +801,12 @@ void GLModel::appendMesh(Mesh* mesh)
 	//m_geometry.addAttribute(&indexAttribute);
 	auto faces = mesh->getFaces();
 	auto vtxs = mesh->getVertices();
-
-	appendMeshVertex(mesh, vtxs.cbegin(), vtxs.cend());
+	//since renderer access data from background thread
+	removeComponent(&m_geometryRenderer);
 	appendMeshFace(mesh, faces.cbegin(), faces.cend());
+	appendMeshVertex(mesh, vtxs.cbegin(), vtxs.cend());
+	addComponent(&m_geometryRenderer);
+
 }
 
 void GLModel::appendMeshVertex(const Mesh* mesh, 
@@ -839,6 +848,7 @@ void GLModel::appendMeshVertex(const Mesh* mesh,
 	positionAttribute.setCount(oldCount + count);
 	normalAttribute.setCount(oldCount + count);
 	colorAttribute.setCount(oldCount + count);
+	//funnily enough, vertex count depends on number of face(3 per face) not actual vertices.
 }
 
 void GLModel::appendMeshFace(const Mesh* mesh, Hix::Engine3D::FaceConstItr begin, Hix::Engine3D::FaceConstItr end)
@@ -872,8 +882,8 @@ void GLModel::appendMeshFace(const Mesh* mesh, Hix::Engine3D::FaceConstItr begin
 	}
 	indexBuffer.updateData(oldSize, indexBufferData);
 	indexAttribute.setCount(oldCount + count *3);//3 indicies per face
-	//funnily enough, vertex count depends on number of face(3 per face) not actual vertices.
 	m_geometryRenderer.setVertexCount(indexAttribute.count());
+
 
 }
 
@@ -896,9 +906,10 @@ void GLModel::updateMesh(Mesh* mesh)
 	}
 	auto faceChangeSet = std::get<1>(faceHistory);
 	auto vtxChangeSet = std::get<1>(verticesHistory);
-
+	removeComponent(&m_geometryRenderer);
 	updateFaces(faceChangeSet, *mesh);
 	updateVertices(faceChangeSet, *mesh);
+	addComponent(&m_geometryRenderer);
 
 }
 
@@ -963,7 +974,6 @@ void GLModel::updateFaces(const std::unordered_set<size_t>& faceIndicies, const 
 	if (newFaceCount < oldFaceCount)
 	{
 		eraseBufferData(indexAttribute, indexBuffer, difference * FACE_SIZE, difference*3);
-		m_geometryRenderer.setVertexCount(newFaceCount * 3);
 	}
 	else if (newFaceCount > oldFaceCount)
 	{
@@ -1009,6 +1019,8 @@ void GLModel::updateVertices(const std::unordered_set<size_t>& vtxIndicies, cons
 		//set other attribute count as well
 		normalAttribute.setCount(positionAttribute.count());
 		colorAttribute.setCount(positionAttribute.count());
+		m_geometryRenderer.setVertexCount(positionAttribute.count());
+
 	}
 	else if (newVtxCount > oldVtxCount)
 	{
@@ -1819,7 +1831,7 @@ void GLModel::mouseReleased(MouseEventData& pick, Qt3DRender::QRayCasterHit& hit
 	if (qmlManager->yesno_popup->property("isFlawOpen").toBool())
 		return;
 
-	if (qmlManager->selectedModels[0] != nullptr && pick.button == Qt::MouseButton::RightButton) { // when right button clicked
+	if (!qmlManager->selectedModels.empty() && pick.button == Qt::MouseButton::RightButton) { // when right button clicked
 		if (qmlManager->selectedModels[0]->ID == ID) {
 			qDebug() << "mttab alive 1";
 			QMetaObject::invokeMethod(qmlManager->mttab, "tabOnOff");
@@ -2002,7 +2014,7 @@ void GLModel::mousePressed(MouseEventData& v, Qt3DRender::QRayCasterHit& hit){
     qDebug() << "Pressed   " << currentPoint << m_transform.translation();
     //qmlManager->lastModelSelected();
 
-    if(qmlManager->selectedModels[0] != nullptr) {
+    if(!qmlManager->selectedModels.empty()) {
         //m_objectPicker->setDragEnabled(true);
 
         lastpoint= hit.localIntersection();
@@ -2165,7 +2177,7 @@ void GLModel::openLabelling()
     labellingActive = true;
 
     qmlManager->lastModelSelected();
-    if ((qmlManager->selectedModels[0] != nullptr) && (qmlManager->selectedModels[0] != this)
+    if ((!qmlManager->selectedModels.empty()) && (qmlManager->selectedModels[0] != this)
             && (qmlManager->selectedModels[0] != this)) {
         labellingActive = false;
        /* if (labellingTextPreview) {
@@ -2445,7 +2457,7 @@ void GLModel::openLayflat(){
     layflatActive = true;
 
     qmlManager->lastModelSelected();
-    if ((qmlManager->selectedModels[0] != nullptr) && (qmlManager->selectedModels[0] != this)
+    if ((!qmlManager->selectedModels.empty()) && (qmlManager->selectedModels[0] != this)
             && (qmlManager->selectedModels[0] != this))
         layflatActive = false;
     //qDebug() << "open layflat called end  " << layflatActive;
@@ -2469,7 +2481,7 @@ void GLModel::openExtension(){
     extensionActive = true;
 
     qmlManager->lastModelSelected();
-    if ((qmlManager->selectedModels[0] != nullptr) && (qmlManager->selectedModels[0] != this)
+    if ((!qmlManager->selectedModels.empty()) && (qmlManager->selectedModels[0] != this)
             && (qmlManager->selectedModels[0] != this))
         extensionActive = false;
 

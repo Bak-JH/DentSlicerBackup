@@ -127,7 +127,6 @@ public:
 
     bool appropriately_rotated=false;
     QPhongMaterial *m_meshMaterial;
-    //QMaterial *m_meshMaterial;
     QPhongAlphaMaterial *m_meshAlphaMaterial;
     QPerVertexColorMaterial *m_meshVertexMaterial;
     QMaterial *m_layerMaterial;
@@ -259,7 +258,6 @@ private:
 	const Hix::Engine3D::Mesh* _currentVisibleMesh;
     QGeometryRenderer m_geometryRenderer;
     QGeometry m_geometry;
-	QNode* _parent;
 
 	//3 vectors per data, each for position, normal, color
     Qt3DRender::QBuffer vertexBuffer;
