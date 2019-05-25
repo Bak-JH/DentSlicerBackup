@@ -52,7 +52,6 @@ GLModel::GLModel(QObject* mainWindow, QNode *parent, Mesh* loadMesh, QString fna
     , m_geometry(&m_geometryRenderer)
     ,vertexBuffer(Qt3DRender::QBuffer::VertexBuffer, &m_geometry)
 	, indexBuffer(Qt3DRender::QBuffer::IndexBuffer)
-
 {
     connect(&futureWatcher, SIGNAL(finished()), this, SLOT(slicingDone()));
     qDebug() << "new model made _______________________________"<<this<< "parent:"<<this->_parent;
@@ -98,13 +97,12 @@ GLModel::GLModel(QObject* mainWindow, QNode *parent, Mesh* loadMesh, QString fna
 	indexAttribute.setCount(0);
 	indexAttribute.setVertexSize(1);
 
-
+	m_geometryRenderer.setInstanceCount(1);
+	m_geometryRenderer.setFirstVertex(0);
+	m_geometryRenderer.setFirstInstance(0);
     m_geometryRenderer.setPrimitiveType(QGeometryRenderer::Triangles);
     m_geometryRenderer.setGeometry(&m_geometry);
     addComponent(&m_geometryRenderer);
-    m_geometryRenderer.setInstanceCount(1);
-    m_geometryRenderer.setFirstVertex(0);
-    m_geometryRenderer.setFirstInstance(0);
 	addComponent(&m_transform);
 
     // generates shadow model for object picking
@@ -874,6 +872,9 @@ void GLModel::appendMeshFace(const Mesh* mesh, Hix::Engine3D::FaceConstItr begin
 	}
 	indexBuffer.updateData(oldSize, indexBufferData);
 	indexAttribute.setCount(oldCount + count *3);//3 indicies per face
+	//funnily enough, vertex count depends on number of face(3 per face) not actual vertices.
+	m_geometryRenderer.setVertexCount(indexAttribute.count());
+
 }
 
 
@@ -962,11 +963,13 @@ void GLModel::updateFaces(const std::unordered_set<size_t>& faceIndicies, const 
 	if (newFaceCount < oldFaceCount)
 	{
 		eraseBufferData(indexAttribute, indexBuffer, difference * FACE_SIZE, difference*3);
+		m_geometryRenderer.setVertexCount(newFaceCount * 3);
 	}
 	else if (newFaceCount > oldFaceCount)
 	{
 		appendMeshFace(&mesh, faces.cend() - difference, faces.cend());
 	}
+
 }
 
 

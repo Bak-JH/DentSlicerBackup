@@ -12,10 +12,10 @@ Entity {
     property alias meshTransform: meshTransform
 
 
-   Mesh{
+    /*Mesh{
         id: testMesh
         source: inputSource
-    }
+    }*/
 
 
 
@@ -36,8 +36,9 @@ Entity {
 
     }
 
-    //components: [ testMaterial, meshTransform ]
-    components: [ testMesh, testMaterial, meshTransform ]
+    components: [ testMaterial, meshTransform ]
+    //components: [ testMesh, testMaterial, meshTransform ]
+    //components: [ testMesh, testMaterial, meshTransform]
 
     function zoomUp(){
         meshTransform.scale3D = meshTransform.scale3D.plus(Qt.vector3d(0.01,0.01,0.01))
