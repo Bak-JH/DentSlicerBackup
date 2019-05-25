@@ -36,8 +36,12 @@ public:
 
 
 	//for ray casting optimization using the bounding box
-	Qt3DRender::QLayer _modelLayer;
+	//Qt3DRender::QLayer _modelLayer;
+	void addLayer(Qt3DRender::QLayer* layer);
+	void removeLayer(Qt3DRender::QLayer* layer);
+
 public slots:
+
 	void mousePressed(Qt3DInput::QMouseEvent* mouse);
 	void mouseReleased(Qt3DInput::QMouseEvent* mouse);
 	void mousePositionChanged(Qt3DInput::QMouseEvent* mouse);

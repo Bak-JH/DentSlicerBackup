@@ -105,6 +105,7 @@ bool FileLoader::loadMeshSTL_ascii(Mesh* mesh, const char* filename)
                 break;
             }
         }
+
     }
     fclose(f);
     mesh->connectFaces();

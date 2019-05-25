@@ -101,7 +101,7 @@ Entity {
 
         Model{
             id: meshEntity4
-            inputSource:"file:///C:/Users/user/Downloads/Spider_ascii.stl"
+            //inputSource:"file:///C:/Users/user/Downloads/Spider_ascii.stl"
         }
 
         MeshBoundedBox{

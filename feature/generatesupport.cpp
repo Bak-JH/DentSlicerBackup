@@ -120,7 +120,7 @@ void GenerateSupport::pointOverhangDetect(Mesh* mesh) {
 		float z = vertex.position.z();
 		auto vtxConnectedFaces = vertex.connectedFaces();
 		for (size_t face_idx = 0; face_idx < vtxConnectedFaces.size() && local_min; face_idx++) {
-            const MeshFace* connectedFace = vtxConnectedFaces[face_idx].toPtr();
+            const MeshFace* connectedFace = vtxConnectedFaces[face_idx].operator->();
 			auto meshVertices = connectedFace->meshVertices();
 			for (size_t i = 0; i < 3; i++) {
 				if (meshVertices[i]->position.z() < z)

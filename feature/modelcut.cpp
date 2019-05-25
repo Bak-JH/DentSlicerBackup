@@ -12,7 +12,7 @@ void modelcut::bisectModel(Mesh* mesh, Plane plane, Mesh* leftMesh, Mesh* rightM
         bool faceLeftToPlane = true;
 		const auto& meshVertices = mf.meshVertices();
         for (int vn=0; vn<3; vn++){
-            const VertexConstItr & mv(meshVertices[vn].getItr());
+            const VertexConstItr & mv(meshVertices[vn]);
             if (!isLeftToPlane(plane, mv->position)) // if one vertex is left to plane, append to left vertices part
                 faceLeftToPlane = false;
         }

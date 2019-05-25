@@ -247,7 +247,7 @@ void QmlManager::createModelFile(Mesh* target_mesh, QString fname) {
 
 	//add to raytracer
 	_latest->setHitTestable(true);
-
+	_rayCastController.addLayer(&_latest->_layer);
     // 승환 100%
     setProgress(1);
 }
@@ -729,10 +729,6 @@ float QmlManager::selected_z_min(size_t selectedNum) {
     return z_min;
 }
 
-Qt3DRender::QLayer& QmlManager::modelLayer()
-{
-	return _rayCastController._modelLayer;
-}
 
 void QmlManager::sendUpdateModelInfo(){
     qDebug() << "send update model info";
