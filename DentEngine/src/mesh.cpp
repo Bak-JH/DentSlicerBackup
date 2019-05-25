@@ -771,6 +771,22 @@ uint32_t Hix::Engine3D::vertexHash(QVector3D v) // max build size = 1000mm, reso
 
 
 
+QTime Hix::Engine3D::Mesh::getPrevTime()
+{
+	if (prevMesh)
+	{
+		return prevMesh->time;
+	}
+}
+
+QTime Hix::Engine3D::Mesh::getNextTime()
+{
+	if (nextMesh)
+	{
+		return nextMesh->time;
+	}
+}
+
 void Hix::Engine3D::Mesh::setTwins(HalfEdgeItr subjectEdge)
 {
 

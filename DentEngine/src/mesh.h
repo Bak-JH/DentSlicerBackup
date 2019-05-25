@@ -248,7 +248,9 @@ namespace Hix
 			QTime time;
 			QVector3D m_translation;
 			QMatrix4x4 m_matrix;
-
+			/***********************for undo redo search*************************/
+			QTime getPrevTime();
+			QTime getNextTime();
 
 		private:
 			/********************** Helper Functions **********************/
