@@ -50,7 +50,7 @@ void resetColorMesh(Mesh* mesh, Qt3DRender::QBuffer * vtxBuffer, std::vector<Fac
 		auto vertices = fcItr->meshVertices();
 		for (auto &constVtx : vertices)
 		{
-			auto vtx = mesh->getVerticesNonConst().toNormItr(constVtx.getItr());
+			auto vtx = mesh->getVerticesNonConst().toNormItr(constVtx);
 			vtx->color = COLOR_DEFAULT_MESH;
 		}
 	}
@@ -65,7 +65,7 @@ void extendColorMesh(Mesh* mesh,FaceConstItr mf, Qt3DRender::QBuffer * vtxBuffer
 		auto vertices = fcItr->meshVertices();
 		for (auto& constVtx : vertices)
 		{
-			auto vtx = mesh->getVerticesNonConst().toNormItr(constVtx.getItr());
+			auto vtx = mesh->getVerticesNonConst().toNormItr(constVtx);
 			vtx->color = COLOR_EXTEND_FACE;
 		}
 	}
@@ -80,7 +80,7 @@ void detectExtensionFaces(const Mesh* mesh, QVector3D normal, FaceConstItr origi
             // check if neighbor already checked
             bool cont = false;
             for (auto elem : result){
-				if (elem == neighbor.getItr())
+				if (elem == neighbor)
 				{
 					cont = true;
 					break;
@@ -95,8 +95,8 @@ void detectExtensionFaces(const Mesh* mesh, QVector3D normal, FaceConstItr origi
                   nbrMeshVertices[0]->position.distanceToPoint(originalMVertices[0]->position) > 100)
                 continue;
             qDebug() << nbrMeshVertices[0]->position.distanceToPoint(originalMVertices[0]->position);
-            qDebug() << "looking for " << mesh->indexOf(neighbor.getItr());
-            detectExtensionFaces(mesh, normal, original_mf, neighbor.getItr(), result);
+            qDebug() << "looking for " << mesh->indexOf(neighbor);
+            detectExtensionFaces(mesh, normal, original_mf, neighbor, result);
         }
     }
 

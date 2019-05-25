@@ -99,8 +99,8 @@ Paths autoarrange::spreadingCheck(const Mesh* mesh, std::map<const MeshFace *, b
                 if(isEdgeBound(mesh, mf, edgeCirc.toPtr(), is_chking_pos)){
                     if(!outline_checked){
 						const MeshVertex* path_head = nullptr;
-						if (j == 0 && isEdgeBound(mesh, mf, last.toPtr(), is_chking_pos)) {
-							if (!isEdgeBound(mesh, mf, second.toPtr(), is_chking_pos))
+						if (j == 0 && isEdgeBound(mesh, mf, last.operator->(), is_chking_pos)) {
+							if (!isEdgeBound(mesh, mf, second.operator->(), is_chking_pos))
                                 path_head =mf->meshVertices()[2].operator->();
 						}
 						else
@@ -116,7 +116,7 @@ Paths autoarrange::spreadingCheck(const Mesh* mesh, std::map<const MeshFace *, b
                     auto neighbors = edgeCirc->nonOwningFaces();
 					for (auto nItr : neighbors)
 					{
-						nextIndexToCheck.push_back(nItr.toPtr());
+						nextIndexToCheck.push_back(nItr.operator->());
 					}
                 }
 				++edgeCirc;
@@ -137,7 +137,7 @@ Path autoarrange::buildOutline(const Mesh* mesh, std::map<const MeshFace *, bool
         check[chking] = true;
 		for (auto mvItr : meshVertices)
 		{
-			path_by_idx.push_back(mvItr.toPtr());
+			path_by_idx.push_back(mvItr.operator->());
 		}
         //**qDebug() << "buildOutline done";
         return idxsToPath(mesh, path_by_idx);
@@ -159,7 +159,7 @@ Path autoarrange::buildOutline(const Mesh* mesh, std::map<const MeshFace *, bool
 		{
             if (each->owningFace.operator->() == chking)
 			{
-				tailEdge = each.getItr();
+				tailEdge = each;
 			}
 		}
         for(int i=0; i<3; i++){
@@ -175,20 +175,20 @@ Path autoarrange::buildOutline(const Mesh* mesh, std::map<const MeshFace *, bool
             check[chking] = true;
             if(outline_edge_cnt==1){
                 path_tail = getNbrVtx(chking, tailEdge.operator->(), 1);
-                const MeshFace *  face = tailOwningFaces[0].toPtr();
+                const MeshFace *  face = tailOwningFaces[0].operator->();
                 nxt_chk = face;
             }else{//outline_edge_cnt==2
                 path_by_idx.push_back(getNbrVtx(chking, tailEdge.operator->(), 1));
                 path_tail = getNbrVtx(chking, tailEdge.operator->(), 2);
-                const MeshFace * face = tailOwningFaces[0].toPtr();
+                const MeshFace * face = tailOwningFaces[0].operator->();
                 nxt_chk = face;
             }
             if(path_tail == path_head) outline_closed = true;
         }else{//if not isEdgeBound(chking, tail_idx), the face doesn't share any bound edge with current outline
             //the face may share some bound edge with other outline, so we do not mark it checked
-            const MeshFace * faceA = tailOwningFaces[0].toPtr();
+            const MeshFace * faceA = tailOwningFaces[0].operator->();
             auto prevTailedgeNFaces = tailEdge->prev->nonOwningFaces();
-            const MeshFace * faceB = prevTailedgeNFaces[0].toPtr();
+            const MeshFace * faceB = prevTailedgeNFaces[0].operator->();
             if(faceA == from) nxt_chk = faceB;
             else nxt_chk = faceA;
         }
@@ -207,7 +207,7 @@ bool autoarrange::isEdgeBound(const Mesh* mesh, const MeshFace * mf, const HalfE
     //4. opposit orientation
 	auto sideNBRFaces = edge->nonOwningFaces();
     if(sideNBRFaces.size() != 1) return true;
-    const MeshFace * neighbor = sideNBRFaces[0].toPtr();
+    const MeshFace * neighbor = sideNBRFaces[0].operator->();
     if(!checkFNZ(*neighbor, is_chking_pos)) return true;
     if(!isNbrOrientSame(mesh, mf, edge)) return true;
     return false;
@@ -219,7 +219,7 @@ bool autoarrange::isNbrOrientSame(const Mesh* mesh, const MeshFace * mf, const H
 	for (auto leavingEdge : leavingVtx->leavingEdges)
 	{
 		//if an edge traveling in same direction, vtxs, and different faces
-		if (leavingEdge.toPtr() != edge && leavingEdge->to == edge->to)
+		if (leavingEdge.operator->() != edge && leavingEdge->to == edge->to)
 			return true;
 	}
     return false;
@@ -233,9 +233,9 @@ const MeshVertex* autoarrange::getNbrVtx(const MeshFace * mf, const HalfEdge* ba
 	offset = offset % 3;
 	for (size_t i = 0; i < offset; ++i)
 	{
-		base = base->next.toPtr();
+		base = base->next.operator->();
 	}
-    return base->from.toPtr();
+    return base->from.operator->();
 	
 }
 

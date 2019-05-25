@@ -245,11 +245,12 @@ public:
 	bool layerViewActive = false;
 	bool supportViewActive = false;
 	bool scaleActive = false;
+	Qt3DRender::QLayer _layer;
+
 private:
 
 	//consts
 	//for QAttributes
-
 	Qt3DCore::QTransform m_transform;
 	bool _hitEnabled = false;
 

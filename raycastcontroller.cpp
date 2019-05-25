@@ -26,9 +26,6 @@ const size_t RayCastController::MIN_CLICK_MOVEMENT_SQRD = 40;
 
 RayCastController::RayCastController()
 {
-	_modelLayer.setRecursive(false);
-
-
 }
 
 void RayCastController::initialize(QEntity* camera)
@@ -42,13 +39,22 @@ void RayCastController::initialize(QEntity* camera)
 	_mouseHandler->setSourceDevice(new QMouseDevice());
 	_rayCaster->setFilterMode(QAbstractRayCaster::FilterMode::AcceptAnyMatchingLayers);
 
-
 	QObject::connect(_mouseHandler, SIGNAL(released(Qt3DInput::QMouseEvent *)), this, SLOT(mouseReleased(Qt3DInput::QMouseEvent *)));
 	QObject::connect(_mouseHandler, SIGNAL(pressed(Qt3DInput::QMouseEvent*)), this, SLOT(mousePressed(Qt3DInput::QMouseEvent*)));
 	QObject::connect(_mouseHandler, SIGNAL(positionChanged(Qt3DInput::QMouseEvent*)), this, SLOT(mousePositionChanged(Qt3DInput::QMouseEvent*)));
 
 	QObject::connect(_rayCaster, SIGNAL(hitsChanged(const Qt3DRender::QAbstractRayCaster::Hits&)), this, SLOT(hitsChanged(const Qt3DRender::QAbstractRayCaster::Hits&)));
 
+}
+
+void RayCastController::addLayer(Qt3DRender::QLayer* layer)
+{
+	_rayCaster->addLayer(layer);
+
+}
+
+void RayCastController::removeLayer(Qt3DRender::QLayer* layer)
+{
 }
 
 //void RayCastController::initialize(Qt3DRender::QScreenRayCaster* rayCaster, Qt3DInput::QMouseHandler* mouseHandler)
@@ -113,9 +119,9 @@ void RayCastController::mouseReleased(Qt3DInput::QMouseEvent* mouse)
 
 void RayCastController::mousePositionChanged(Qt3DInput::QMouseEvent* mouse)
 {
-	if (_rayCasterBusy)
-		return;
-	_rayCasterBusy = true;
+	//if (_rayCasterBusy)
+	//	return;
+	//_rayCasterBusy = true;
 	//disable move when in certain modes;
 	if (qmlManager->orientationActive ||
 		qmlManager->rotateActive ||

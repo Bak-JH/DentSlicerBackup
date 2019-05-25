@@ -1,6 +1,6 @@
 #pragma once
 #include <memory>
-#include <deque>
+#include <boost/container/stable_vector.hpp>
 #include <utility>
 #include <algorithm>
 #include <functional>
@@ -37,9 +37,9 @@ public:
     typedef const T& const_reference;
 	typedef typename A_trait::difference_type difference_type;
 	typedef typename A_trait::size_type size_type;
-	typedef typename std::deque<T, A> container_type;
-	typedef typename container_type::iterator container_iterator_type;
-	typedef typename container_type::const_iterator container_const_iterator_type;
+	typedef typename boost::container::stable_vector<T,A> container_type;
+	typedef typename boost::container::stable_vector_iterator<T*, false> container_iterator_type;
+	typedef typename boost::container::stable_vector_iterator<T*, true> container_const_iterator_type;
 	typedef typename std::function<void(size_t, size_t)> indexChangedCallback;
 	typedef std::reverse_iterator<IndexedListItr::iterator<T, A>> reverse_iterator; //optional
 	typedef std::reverse_iterator<IndexedListItr::const_iterator<T, A>> const_reverse_iterator; //optional
@@ -106,27 +106,10 @@ public:
 
 
 	template<class ...Args>
-	void emplace_front(Args&& ... args)
-	{
-		_container.emplace_front(std::forward< Args>(args)...);
-		addedElement(0);
-	}
-	template<class ...Args>
 	void emplace_back(Args&& ... args)
 	{
 		addedElement(size());
 		_container.emplace_back(std::forward< Args>(args)...);
-	}
-	void push_front(const T& e)
-	{
-		_container.push_front(e);
-		addedElement(0);
-	}
-	void push_front(T&& e)
-	{
-		_container.push_front(std::forward<T>(e));
-		addedElement(0);
-
 	}
 	void push_back(const T& e)
 	{
@@ -138,20 +121,15 @@ public:
 		addedElement(size());
 		_container.push_back(std::forward<T>(e));
 	}
-	void pop_front()
-	{
-		_container.pop_front();
-		removedElement(0);
-	}
 	void pop_back()
 	{
 		removedElement(size());
 		_container.pop_back();
 	}
-	IndexedListItr::iterator<T, A> swapAndErase(IndexedListItr::const_iterator<T, A> pos, bool allowPopFront = false);
+	IndexedListItr::iterator<T, A> swapAndErase(IndexedListItr::const_iterator<T, A> pos);
 	//doesn't swap if the element is at the front or back
 	IndexedListItr::iterator<T, A> swapAndErase(IndexedListItr::const_iterator<T, A> start,
-		IndexedListItr::const_iterator<T, A> end, bool allowPopFront = false);
+		IndexedListItr::const_iterator<T, A> end);
 	void clear()
 	{
 		_container.clear();
@@ -309,8 +287,7 @@ public:
 	DeleteGuard& operator=(const DeleteGuard&) = delete;
 	DeleteGuard(DeleteGuard&& o) noexcept :
 		_listPtr(o._listPtr),       // explicit move of a member of class type
-		_indices(std::move(o._indices)),
-		_allowPopFront(o._allowPopFront)// explicit move of a member of non-class type
+		_indices(std::move(o._indices))
 	{
 		o._listPtr = nullptr;
 	}
@@ -320,7 +297,6 @@ public:
 		_listPtr = o._listPtr;
 		o._listPtr = nullptr;
         _indices = std::move(o._indices);
-		_allowPopFront = o._allowPopFront;
 	}
 	void deleteLater(typename IndexedListItr::const_iterator<T, A> itr)
 	{
@@ -331,22 +307,17 @@ public:
 	{
 		if (_listPtr)
 		{
-			for(auto idx: _indices)
+			for (auto idx : _indices)
 			{
-				_listPtr->swapAndErase(_listPtr->cbegin() + idx, _allowPopFront);
+				_listPtr->swapAndErase(_listPtr->cbegin() + idx);
 			}
 			_indices.clear();
 		}
-	}
-	void allowPopFront(bool isEnabled)
-	{
-		_allowPopFront = isEnabled;
 	}
 private:
 	IndexedList<T, A>* _listPtr = nullptr;
 	//have to be decreasing order so that elements about to be deleted do not get swapped
 	std::set<size_t, std::greater<size_t>> _indices;
-	bool _allowPopFront = false;
 };
 
 
@@ -360,9 +331,8 @@ namespace IndexedListItr
 		typedef A allocator_type;
 		typedef typename std::allocator_traits<A> A_trait;
 		typedef typename A_trait::size_type size_type;
-		typedef typename std::deque<T, A> container_type;
-		typedef typename container_type::iterator container_iterator_type;
-
+		typedef typename boost::container::stable_vector<T,A> container_type;
+		typedef typename boost::container::stable_vector_iterator<T*, false> container_iterator_type;
 		//traits
 		typedef typename A_trait::difference_type difference_type;
 		typedef typename A_trait::value_type value_type;
@@ -383,6 +353,7 @@ namespace IndexedListItr
 		iterator& operator=(const iterator& o)
 		{
 			_containerItr = o._containerItr;
+			_owner = o._owner;
 			return *this;
 		}
 		bool operator==(const iterator& o) const
@@ -498,9 +469,8 @@ namespace IndexedListItr
 		typedef A allocator_type;
 		typedef typename std::allocator_traits<A> A_trait;
 		typedef typename A_trait::size_type size_type;
-		typedef typename std::deque<T, A> container_type;
-		typedef typename container_type::const_iterator container_const_iterator_type;
-
+		typedef typename boost::container::stable_vector<T,A> container_type;
+		typedef typename boost::container::stable_vector_iterator<T*, true> container_const_iterator_type;
 		//traits
 		typedef typename A_trait::difference_type difference_type;
 		typedef typename A_trait::value_type value_type;
@@ -703,7 +673,7 @@ void IndexedList<T, A>::modifiedElement(const IndexedListItr::iterator<T, A>* it
 	modifiedElement(getItrIndex(itr));
 }
 template <class T, class A>
-IndexedListItr::iterator<T,A> IndexedList<T, A>::swapAndErase(IndexedListItr::const_iterator<T,A> pos, bool allowPopFront)
+IndexedListItr::iterator<T,A> IndexedList<T, A>::swapAndErase(IndexedListItr::const_iterator<T,A> pos)
 {
 	auto nextItr = pos;
 	++nextItr;
@@ -714,7 +684,7 @@ IndexedListItr::iterator<T,A> IndexedList<T, A>::swapAndErase(IndexedListItr::co
 template <class T, class A>
 //doesn't swap if the element is at the front or back
 IndexedListItr::iterator<T, A> IndexedList<T, A>::swapAndErase(IndexedListItr::const_iterator<T, A> start,
-	IndexedListItr::const_iterator<T, A> end, bool allowPopFront)
+	IndexedListItr::const_iterator<T, A> end)
 {
 	size_t startedIndex = start - cbegin();
 	size_t count = end - start;
@@ -731,15 +701,6 @@ IndexedListItr::iterator<T, A> IndexedList<T, A>::swapAndErase(IndexedListItr::c
 			{
 				_container.pop_back();
 				removedElement(size());
-				--remaining;
-			}
-		}
-		else if (allowPopFront && currItr == begin())
-		{
-			while (remaining)
-			{
-				removedElement(0);
-				_container.pop_front();
 				--remaining;
 			}
 		}

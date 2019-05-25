@@ -234,8 +234,6 @@ public:
     float selected_z_max(size_t selectedNum);
     float selected_z_min(size_t selectedNum);
 
-	//ray testing
-	Qt3DRender::QLayer& modelLayer();
 private:
 
 	GLModel* getModelByID(int ID);
