@@ -7,6 +7,9 @@
 /packages
 /.vscode
 /.vs
+/DLPslicer.vcxproj.user
+/.qmake.stash
+/enc_temp_folder
 *.h.*
 *.cpp.*
 *.autosave
