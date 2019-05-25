@@ -56,7 +56,6 @@ private:
 		Pressed = 0,
 		Released
 	};
-	bool isSelected(const GLModel* model);
 	bool isClick(QPoint releasePt);
 	Qt3DRender::QScreenRayCaster* _rayCaster = nullptr;
 	Qt3DInput::QMouseHandler* _mouseHandler = nullptr;
@@ -68,7 +67,7 @@ private:
 	//mouse event
 	MouseEventData _mouseEvent;
 	//change this to atomic if raytracing is done on seperate thread
-	bool _rayCasterBusy = false;
+	std::atomic<bool> _rayCasterBusy = false;
 	//for removing layer element
 	std::vector<GLModel*> _boundBoxHitModels;
 	static const std::chrono::milliseconds MAX_CLICK_DURATION;

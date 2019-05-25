@@ -183,7 +183,7 @@ Rectangle {
 
     function perfectPosition(){
         var point = world2Screen(qm.getSelectedCenter())
-        var boundedSizeHalf = qm.getSelectedSize().times(0.5)
+        var boundedSizeHalf = qm.selectedModelsLengths().times(0.5)
 
         var target =[]
         var max = Qt.vector2d(0,0)

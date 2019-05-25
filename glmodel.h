@@ -173,7 +173,8 @@ public:
 
     void copyModelAttributeFrom(GLModel* from);
 
-
+	QTime getPrevTime();
+	QTime getNextTime();
 
     // changeColor
     void changecolor(int mode); //0 default, 1 selected, 2 outofarea
