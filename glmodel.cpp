@@ -178,9 +178,8 @@ GLModel::GLModel(QObject* mainWindow, QNode *parent, Mesh* loadMesh, QString fna
 	cuttingContourCylinders.reserve(50);
 
 	//rendering works in thread pool, so there is a chance of error occuring due to empty attributes...(especially for index)
-
-	//addComponent(&_layer);
-
+	_layer.setRecursive(false);
+	addComponent(&_layer);
 	addComponent(&m_transform);
 
 }
@@ -456,6 +455,16 @@ void GLModel::copyModelAttributeFrom(GLModel* from){
         labellingTextPreview->setFontSize(from->labellingTextPreview->fontSize);
         labellingTextPreview->setText(from->labellingTextPreview->text, from->labellingTextPreview->contentWidth);
     }
+}
+
+QTime GLModel::getPrevTime()
+{
+	return _mesh->getPrevTime();
+}
+
+QTime GLModel::getNextTime()
+{
+	return _mesh->getNextTime();
 }
 
 void GLModel::updateModelMesh(){
@@ -1831,13 +1840,10 @@ void GLModel::mouseReleased(MouseEventData& pick, Qt3DRender::QRayCasterHit& hit
 	if (qmlManager->yesno_popup->property("isFlawOpen").toBool())
 		return;
 
-	if (!qmlManager->selectedModels.empty() && pick.button == Qt::MouseButton::RightButton) { // when right button clicked
-		if (qmlManager->selectedModels[0]->ID == ID) {
-			qDebug() << "mttab alive 1";
-			QMetaObject::invokeMethod(qmlManager->mttab, "tabOnOff");
-			return;
-		}
-
+	if (qmlManager->isSelected(this) && pick.button == Qt::MouseButton::RightButton) { // when right button clicked
+		qDebug() << "mttab alive 1";
+		QMetaObject::invokeMethod(qmlManager->mttab, "tabOnOff");
+		return;
 	}
 
 
@@ -2014,7 +2020,7 @@ void GLModel::mousePressed(MouseEventData& v, Qt3DRender::QRayCasterHit& hit){
     qDebug() << "Pressed   " << currentPoint << m_transform.translation();
     //qmlManager->lastModelSelected();
 
-    if(!qmlManager->selectedModels.empty()) {
+    if(qmlManager->isSelected(this)) {
         //m_objectPicker->setDragEnabled(true);
 
         lastpoint= hit.localIntersection();
@@ -2177,8 +2183,7 @@ void GLModel::openLabelling()
     labellingActive = true;
 
     qmlManager->lastModelSelected();
-    if ((!qmlManager->selectedModels.empty()) && (qmlManager->selectedModels[0] != this)
-            && (qmlManager->selectedModels[0] != this)) {
+    if (!qmlManager->isSelected(this)) {
         labellingActive = false;
        /* if (labellingTextPreview) {
             qDebug() << "pinpin ^^^^^^^^^^^^^^^^^ 2";
@@ -2457,8 +2462,7 @@ void GLModel::openLayflat(){
     layflatActive = true;
 
     qmlManager->lastModelSelected();
-    if ((!qmlManager->selectedModels.empty()) && (qmlManager->selectedModels[0] != this)
-            && (qmlManager->selectedModels[0] != this))
+    if (!qmlManager->isSelected(this))
         layflatActive = false;
     //qDebug() << "open layflat called end  " << layflatActive;
 
@@ -2481,8 +2485,7 @@ void GLModel::openExtension(){
     extensionActive = true;
 
     qmlManager->lastModelSelected();
-    if ((!qmlManager->selectedModels.empty()) && (qmlManager->selectedModels[0] != this)
-            && (qmlManager->selectedModels[0] != this))
+    if (!qmlManager->isSelected(this))
         extensionActive = false;
 
 }

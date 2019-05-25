@@ -38,7 +38,6 @@ void RayCastController::initialize(QEntity* camera)
 	
 	_mouseHandler->setSourceDevice(new QMouseDevice());
 	_rayCaster->setFilterMode(QAbstractRayCaster::FilterMode::AcceptAnyMatchingLayers);
-	_rayCaster->
 	QObject::connect(_mouseHandler, SIGNAL(released(Qt3DInput::QMouseEvent *)), this, SLOT(mouseReleased(Qt3DInput::QMouseEvent *)));
 	QObject::connect(_mouseHandler, SIGNAL(pressed(Qt3DInput::QMouseEvent*)), this, SLOT(mousePressed(Qt3DInput::QMouseEvent*)));
 	QObject::connect(_mouseHandler, SIGNAL(positionChanged(Qt3DInput::QMouseEvent*)), this, SLOT(mousePositionChanged(Qt3DInput::QMouseEvent*)));
@@ -49,12 +48,13 @@ void RayCastController::initialize(QEntity* camera)
 
 void RayCastController::addLayer(Qt3DRender::QLayer* layer)
 {
-	//_rayCaster->addLayer(layer);
+	_rayCaster->addLayer(layer);
 
 }
 
 void RayCastController::removeLayer(Qt3DRender::QLayer* layer)
 {
+	_rayCaster->removeLayer(layer);
 }
 
 //void RayCastController::initialize(Qt3DRender::QScreenRayCaster* rayCaster, Qt3DInput::QMouseHandler* mouseHandler)
@@ -93,9 +93,9 @@ void RayCastController::mousePressed(Qt3DInput::QMouseEvent* mouse)
 //		_rayCastMode = RayCastMode::Other;
 //		_rayCaster->trigger(QPoint(mouse->x(), mouse->y()));
 //	}
-	if (_rayCasterBusy)
+	bool busy = false;
+	if (_rayCasterBusy.compare_exchange_strong(busy, true))
 		return;
-	_rayCasterBusy = true;
 	_mouseEvent = MouseEventData(mouse);
 	_rayCastMode = RayCastMode::Pressed;
 	_rayCaster->trigger(QPoint(mouse->x(), mouse->y()));
@@ -109,9 +109,9 @@ void RayCastController::mouseReleased(Qt3DInput::QMouseEvent* mouse)
 	//	_rayCastMode = RayCastMode::Click;
 	//	_rayCaster->trigger(QPoint(mouse->x(), mouse->y()));
 	//}
-	if (_rayCasterBusy)
+	bool busy = false;
+	if (_rayCasterBusy.compare_exchange_strong(busy, true))
 		return;
-	_rayCasterBusy = true;
 	_mouseEvent = MouseEventData(mouse);
 	_rayCastMode = RayCastMode::Released;
 	_rayCaster->trigger(QPoint(mouse->x(), mouse->y()));
@@ -123,6 +123,7 @@ void RayCastController::mousePositionChanged(Qt3DInput::QMouseEvent* mouse)
 	//	return;
 	//_rayCasterBusy = true;
 	//disable move when in certain modes;
+	return;
 	if (qmlManager->orientationActive ||
 		qmlManager->rotateActive ||
 		qmlManager->saveActive)
@@ -131,7 +132,7 @@ void RayCastController::mousePositionChanged(Qt3DInput::QMouseEvent* mouse)
 	_mouseEvent = MouseEventData(mouse);
 
 	//only call mouseMoved to selected models that are NOT doing certain features
-	for (auto selected : qmlManager->selectedModels)
+	for (auto selected : qmlManager->getSelectedModels())
 	{
 		if (selected->scaleActive ||
 			selected->cutActive ||
@@ -149,86 +150,12 @@ void RayCastController::mousePositionChanged(Qt3DInput::QMouseEvent* mouse)
 
 
 }
-bool RayCastController::isSelected(const GLModel* model)
-{
-	auto findItr = std::find(qmlManager->selectedModels.cbegin(), qmlManager->selectedModels.cend(), model);
-	if(findItr != qmlManager->selectedModels.cend())
-	{
-		return true;
-	}
-	return false;
-}
-
 
 void RayCastController::hitsChanged(const Qt3DRender::QAbstractRayCaster::Hits& hits)
 {
 	auto allHits = _rayCaster->hits();
 	if (hits.size() > 0)
 	{
-		//for (auto& hit : hits)
-		//{
-		//	auto hitType = hit.type();
-		//	auto etc = hit.entity();
-		//	auto id = etc->id();
-		//	auto name = etc->objectName();
-		//	qDebug() << "ray cast hit something: -------!";
-		//	qDebug() << hitType << etc << id << name;
-
-
-		//	auto mesh = dynamic_cast<QMesh*>(etc->components()[0]);
-		//	auto renderer = dynamic_cast<QGeometryRenderer*>(mesh);
-		//	if (renderer)
-		//	{
-		//		auto indBufferOffset = renderer->indexBufferByteOffset();
-		//		auto indOffset = renderer->indexOffset();
-		//		auto restart = renderer->restartIndexValue();
-
-		//		auto geo = renderer->geometry();
-		//		auto attrbts = geo->attributes();
-
-		//		QAttribute* pos = nullptr;
-		//		QAttribute* norm = nullptr;
-		//		QAttribute* colr = nullptr;
-		//		QAttribute* idx = nullptr;
-
-		//		for (auto& each : attrbts)
-		//		{
-		//			if (each->name() == QAttribute::defaultPositionAttributeName())
-		//			{
-		//				pos = each;
-		//			}
-		//			else if (each->name() == QAttribute::defaultNormalAttributeName())
-		//			{
-		//				norm = each;
-		//			}
-		//			else if (each->name() == QAttribute::defaultColorAttributeName())
-		//			{
-		//				colr = each;
-		//			}
-		//			else if (each->attributeType() == QAttribute::AttributeType::IndexAttribute)
-		//			{
-		//				idx = each;
-		//			}
-
-		//		}
-		//		auto count = idx->count();
-		//		auto normBuffer = norm->buffer();
-		//		auto normArr = normBuffer->data();
-		//		float* reNormArr = reinterpret_cast<float*>(normArr.data());
-
-
-		//		auto type = idx->vertexBaseType();
-		//		auto idxBuffer = idx->buffer();
-		//		auto bufferType = idxBuffer->type();
-		//		auto byteOffset = idx->byteOffset();
-		//		auto usage = idxBuffer->usage();
-
-		//		auto indxArray = idxBuffer->data();
-		//		auto stride = idx->byteStride();
-		//		size_t primitiveIdx = hit.primitiveIndex();
-
-		//	}
-		//}
 		for (auto hit : hits)
 		{
 
@@ -238,32 +165,17 @@ void RayCastController::hitsChanged(const Qt3DRender::QAbstractRayCaster::Hits& 
 				qDebug() << "ray trace glmodel" << glModel;
 				if (_rayCastMode == Pressed)
 				{
-					glModel->mousePressed(_mouseEvent, hit);
+					qDebug() << "glmodel pressed";
+
+					//glModel->mousePressed(_mouseEvent, hit);
 				}
 				else
 				{
-					glModel->mouseReleased(_mouseEvent, hit);
+					qDebug() << "glmodel relllllleased";
+
+					//glModel->mouseReleased(_mouseEvent, hit);
 				}
 			}
-			//auto isAlreadySelected = isSelected(glModel);
-			//if (_rayCastMode == RayCastMode::Other)
-			//{
-			//	if (isAlreadySelected)
-			//	{
-			//		//do other stuff like drag-move
-			//	}
-			//}
-			//else
-			//{
-			//	if (isAlreadySelected)
-			//	{
-			//		//unselect
-			//	}
-			//	else
-			//	{
-			//		//select
-			//	}
-			//}
 		}
 
 	}
@@ -271,8 +183,6 @@ void RayCastController::hitsChanged(const Qt3DRender::QAbstractRayCaster::Hits& 
 	{
 		qmlManager->backgroundClicked();
 	}
-
-
 	_rayCasterBusy = false;
 
 }

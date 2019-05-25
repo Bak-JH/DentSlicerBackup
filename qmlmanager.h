@@ -150,8 +150,6 @@ public:
 
     std::map<int, GLModel> glmodels;
 
-	//should be set or even better a map
-	std::vector<GLModel*> selectedModels;
     std::vector<Mesh*> copyMeshes;
     std::vector<QString> copyMeshNames;
 
@@ -175,7 +173,6 @@ public:
     void showMoveArrow();
     void hideRotateSphere();
     void hideMoveArrow();
-    void mouseHack();
     void initializeUI(QQmlApplicationEngine *e);
     void openModelFile_internal(QString filename);
     void openArrange();
@@ -192,14 +189,16 @@ public:
     void setProgressText(std::string inputText);
     int getLayerViewFlags();
 	void modelSelected(int);
+	const std::unordered_set<GLModel*>& getSelectedModels();
 
     GLModel* findGLModelByName(QString filename);
 	void connectShadow(GLModel* shadowModel);
     Q_INVOKABLE QString getVersion();
     Q_INVOKABLE void keyboardHandlerFocus();
+	//gets center of selection in terms of world bound
     Q_INVOKABLE QVector3D getSelectedCenter();
-    Q_INVOKABLE QVector3D getSelectedSize();
-    Q_INVOKABLE int getselectedModelID();
+	//gets lengths of volume containing all selected models
+    Q_INVOKABLE QVector3D selectedModelsLengths();
     Q_INVOKABLE int getSelectedModelsSize();
     Q_INVOKABLE float getBedXSize();
     Q_INVOKABLE float getBedYSize();
@@ -213,6 +212,9 @@ public:
     Q_INVOKABLE void setClosedHandCursor();
     Q_INVOKABLE void resetCursor();
     Q_INVOKABLE bool isSelected();
+	Q_INVOKABLE bool isSelected(int ID);
+	bool isSelected(GLModel* model);
+
     Q_INVOKABLE void selectPart(int ID);
     Q_INVOKABLE void unselectPart(int ID);
     Q_INVOKABLE void unselectAll();
@@ -227,12 +229,12 @@ public:
     Q_INVOKABLE void deleteList(int ID);
     Q_INVOKABLE void deleteSelectedModels();
 
-    float selected_x_max(size_t selectedNum);
-    float selected_x_min(size_t selectedNum);
-    float selected_y_max(size_t selectedNum);
-    float selected_y_min(size_t selectedNum);
-    float selected_z_max(size_t selectedNum);
-    float selected_z_min(size_t selectedNum);
+    float selected_x_max();
+    float selected_x_min();
+    float selected_y_max();
+    float selected_y_min();
+    float selected_z_max();
+    float selected_z_min();
 
 private:
 
@@ -242,8 +244,11 @@ private:
     int viewMode;
     int layerViewFlags;
     int modelIDCounter;
-    GLModel* _latest;
-	
+    
+	//TODO: get rid of this
+	GLModel* _lastSelected;
+	std::unordered_set<GLModel*> selectedModels;
+
 	//Ray cast
 	RayCastController _rayCastController;
 
@@ -254,10 +259,12 @@ signals:
 
 public slots:
     void sendUpdateModelInfo(int, int, QString, float);
-    void createModelFile(Mesh* target_mesh, QString filename);
+    GLModel* createModelFile(Mesh* target_mesh, QString filename);
     void openModelFile(QString filename);
     void checkModelFile(GLModel* model);
     void deleteOneModelFile(int ID);
+	void deleteOneModelFile(GLModel* model);
+
     void deleteModelFileDone();
     void deleteModelFile(int ID);
     void unDo();

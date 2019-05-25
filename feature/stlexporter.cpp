@@ -7,14 +7,19 @@ STLexporter::STLexporter()
 }
 
 Mesh* STLexporter::mergeSelectedModels() {
-    if (qmlManager->selectedModels.size() == 1 && qmlManager->selectedModels[0] == nullptr) return nullptr;
-    else if (qmlManager->selectedModels.size() == 1)
-        return qmlManager->selectedModels[0]->_mesh;
-
+	auto& selectedModels = qmlManager->getSelectedModels();
+	if (selectedModels.empty()) return nullptr;
+	else if (selectedModels.size() == 1)
+	{
+		//make copy of existing mesh
+		auto existingMesh = (*selectedModels.cbegin())->getMesh();
+		Mesh* copy = new Mesh(*existingMesh);
+		return copy;
+	}
     size_t faceNum = 0;
     size_t verNum = 0;
     size_t totalFaceNum = 0;
-    for (GLModel* model: qmlManager->selectedModels) {
+    for (GLModel* model: selectedModels) {
         faceNum += model->getMesh()->getFaces().size();
         verNum += model->getMesh()->getVertices().size();
     }
@@ -24,7 +29,7 @@ Mesh* STLexporter::mergeSelectedModels() {
     faceNum = 0;
     verNum = 0;
 
-    for (GLModel* model: qmlManager->selectedModels) {
+    for (GLModel* model: selectedModels) {
         QVector3D trans = model->m_transform.translation();
 
         for (const auto& each : model->getMesh()->getFaces()) {
@@ -94,9 +99,11 @@ void STLexporter::exportSTL(QString outfilename){
     qmlManager->setProgress(0);
     qmlManager->setProgressText("saving");
 
-    size_t num = qmlManager->selectedModels.size();
-    if (num > 1) mesh = mergeSelectedModels();
-    else mesh = qmlManager->selectedModels[0]->getMesh();
+	auto& selectedModels = qmlManager->getSelectedModels();
+	if (selectedModels.empty())
+		return;
+	if (selectedModels.size() > 1) mesh = mergeSelectedModels();
+    else mesh = (*selectedModels.cbegin())->getMesh();
 
     qDebug() << "export STL";
 
@@ -126,7 +133,7 @@ void STLexporter::exportSTL(QString outfilename){
     QCoreApplication::processEvents();
     qmlManager->openResultPopUp("","File Saved","");
 
-    if (num > 1) delete mesh;
+    if (selectedModels.size() > 1) delete mesh;
 
     return;
 }
