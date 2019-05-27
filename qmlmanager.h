@@ -164,7 +164,7 @@ public:
     bool orientationActive = false;
     bool freecutActive = false;
 
-
+	RayCastController* getRayCaster();
     QString groupFunctionState;
     int groupFunctionIndex;
     float progress = 0;

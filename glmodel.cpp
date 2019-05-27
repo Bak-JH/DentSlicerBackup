@@ -48,18 +48,32 @@ GLModel::GLModel(QObject* mainWindow, QNode *parent, Mesh* loadMesh, QString fna
     , slicer(nullptr)
     , ID(id)
     , m_meshMaterial(nullptr)
-    , m_geometry(&m_geometryRenderer)
-    , vertexBuffer(Qt3DRender::QBuffer::VertexBuffer, &m_geometry)
-	, indexBuffer(Qt3DRender::QBuffer::IndexBuffer, &m_geometry)
+	, m_geometryRenderer(this)
+    , m_geometry(this)
+    , vertexBuffer(Qt3DRender::QBuffer::VertexBuffer, this)
+	, indexBuffer(Qt3DRender::QBuffer::IndexBuffer, this)
+	, positionAttribute(this)
+	, normalAttribute(this)
+	, colorAttribute(this)
+	, indexAttribute(this)
+
+
 {
     connect(&futureWatcher, SIGNAL(finished()), this, SLOT(slicingDone()));
     qDebug() << "new model made _______________________________"<<this<< "parent:"<<parent;
+	_layer.setRecursive(true);
+	m_meshMaterial = new QPhongMaterial();
+	m_meshVertexMaterial = new QPerVertexColorMaterial();
+	addComponent(&_layer);
+	addComponent(&m_transform);
+	addComponent(m_meshMaterial);
+	//addComponent(&m_geometryRenderer);
 
     //initialize vertex buffers etc
- //   vertexBuffer.setUsage(Qt3DRender::QBuffer::DynamicDraw);
-	//indexBuffer.setUsage(Qt3DRender::QBuffer::DynamicDraw);
-	vertexBuffer.setAccessType(Qt3DRender::QBuffer::AccessType::Write);
-	indexBuffer.setAccessType(Qt3DRender::QBuffer::AccessType::Write);
+    vertexBuffer.setUsage(Qt3DRender::QBuffer::DynamicDraw);
+	indexBuffer.setUsage(Qt3DRender::QBuffer::DynamicDraw);
+	vertexBuffer.setAccessType(	Qt3DRender::QBuffer::AccessType::ReadWrite);
+	indexBuffer.setAccessType(	Qt3DRender::QBuffer::AccessType::ReadWrite);
 
     positionAttribute.setAttributeType(QAttribute::VertexAttribute);
     positionAttribute.setBuffer(&vertexBuffer);
@@ -118,8 +132,7 @@ GLModel::GLModel(QObject* mainWindow, QNode *parent, Mesh* loadMesh, QString fna
 	// Add to Part List
 	qmlManager->addPart(getFileName(fname.toStdString().c_str()), ID);
 
-	m_meshMaterial = new QPhongMaterial();
-	m_meshVertexMaterial = new QPerVertexColorMaterial();
+
 
 	generateLayerViewMaterial();
 
@@ -146,9 +159,8 @@ GLModel::GLModel(QObject* mainWindow, QNode *parent, Mesh* loadMesh, QString fna
 
 	// 승환 50%
 	qmlManager->setProgress(0.49);
-	Qt3DExtras::QDiffuseMapMaterial* diffuseMapMaterial = new Qt3DExtras::QDiffuseMapMaterial();
+	//Qt3DExtras::QDiffuseMapMaterial* diffuseMapMaterial = new Qt3DExtras::QDiffuseMapMaterial();
 
-	addComponent(m_meshMaterial);
 
 	qDebug() << "created original model";
 
@@ -177,10 +189,7 @@ GLModel::GLModel(QObject* mainWindow, QNode *parent, Mesh* loadMesh, QString fna
 	cuttingPoints.reserve(50);
 	cuttingContourCylinders.reserve(50);
 
-	//rendering works in thread pool, so there is a chance of error occuring due to empty attributes...(especially for index)
-	_layer.setRecursive(false);
-	addComponent(&_layer);
-	addComponent(&m_transform);
+
 
 }
 
@@ -749,11 +758,11 @@ arrangeSignalSender::arrangeSignalSender(){
 }
 
 void GLModel::clearMem(){
-    QByteArray newVertexArray(vertexBuffer.data().size(), 0);
-	QByteArray newIdxArray(indexBuffer.data().size(), 0);
+    QByteArray newVertexArray;
+	QByteArray newIdxArray;
 
-    vertexBuffer.updateData(0, newVertexArray);
-	indexBuffer.updateData(0, newIdxArray);
+    vertexBuffer.setData(newVertexArray);
+	indexBuffer.setData(newIdxArray);
 
 	positionAttribute.setCount(0);
 	normalAttribute.setCount(0);
@@ -793,8 +802,9 @@ void GLModel::setMesh(Mesh* mesh)
 	auto faceHistory = mesh->getFacesNonConst().flushChanges();
 	auto verticesHistory = mesh->getVerticesNonConst().flushChanges();
 	auto hEdgesHistory = mesh->getHalfEdgesNonConst().flushChanges();//not used...for now
-
+	removeComponent(&m_geometryRenderer);
 	appendMesh(mesh);
+	addComponent(&m_geometryRenderer);
 
 }
 
@@ -808,13 +818,11 @@ void GLModel::appendMesh(Mesh* mesh)
 	//indexAttribute.buffer()->setAccessType(Qt3DRender::QBuffer::AccessType::);
 	//indexAttribute.buffer()->setAccessType(Qt3DRender::QBuffer::AccessType::Read);
 	//m_geometry.addAttribute(&indexAttribute);
-	auto faces = mesh->getFaces();
-	auto vtxs = mesh->getVertices();
+	auto &faces = mesh->getFaces();
+	auto &vtxs = mesh->getVertices();
 	//since renderer access data from background thread
-	removeComponent(&m_geometryRenderer);
-	appendMeshFace(mesh, faces.cbegin(), faces.cend());
 	appendMeshVertex(mesh, vtxs.cbegin(), vtxs.cend());
-	addComponent(&m_geometryRenderer);
+	appendMeshFace(mesh, faces.cbegin(), faces.cend());
 
 }
 
@@ -828,19 +836,17 @@ void GLModel::appendMeshVertex(const Mesh* mesh,
 	size_t count = end - begin;
 	size_t appendByteSize = count * VTX_SIZE;
 	//resize attr buffer for new append
-	attrBufferResize(positionAttribute, vertexBuffer, VTX_SIZE, appendByteSize);
+	//attrBufferResize(positionAttribute, vertexBuffer, VTX_SIZE, appendByteSize);
 	//data to be appended
 	QByteArray appendData;
 	appendData.resize(appendByteSize);
 	//add data to the append data
 	QVector<QVector3D> vertices;
-	qDebug() << "mesh vertices ------!";
 
 	for (auto itr = begin; itr != end; ++itr)
 	{
 		auto& vtx = *itr;
 		vertices << vtx.position << vtx.vn << vtx.color;
-		qDebug() << vtx.position << "    "<< vtx.vn;
 
 	}
 	float* rawVertexArray = reinterpret_cast<float*>(appendData.data());
@@ -850,14 +856,13 @@ void GLModel::appendMeshVertex(const Mesh* mesh,
 		rawVertexArray[idx++] = v.y();
 		rawVertexArray[idx++] = v.z();
 	}
-	qDebug() << rawVertexArray;
 	//update data/count
-	vertexBuffer.updateData(oldSize, appendData);
+	QByteArray totalData = vertexBuffer.data() + appendData;
 
+	vertexBuffer.setData(totalData);
 	positionAttribute.setCount(oldCount + count);
 	normalAttribute.setCount(oldCount + count);
 	colorAttribute.setCount(oldCount + count);
-	//funnily enough, vertex count depends on number of face(3 per face) not actual vertices.
 }
 
 void GLModel::appendMeshFace(const Mesh* mesh, Hix::Engine3D::FaceConstItr begin, Hix::Engine3D::FaceConstItr end)
@@ -869,27 +874,25 @@ void GLModel::appendMeshFace(const Mesh* mesh, Hix::Engine3D::FaceConstItr begin
 	size_t appendByteSize = count * FACE_SIZE;
 
 	//resize attr buffer for new append
-	attrBufferResize(indexAttribute, indexBuffer, FACE_SIZE, appendByteSize);
+	//attrBufferResize(indexAttribute, indexBuffer, FACE_SIZE, appendByteSize);
 	QByteArray indexBufferData;
 	indexBufferData.resize(appendByteSize);
 	uint* rawIndexArray = reinterpret_cast<uint*>(indexBufferData.data());
 
 	size_t indexIndex = 0;
-	qDebug() << "mesh faces ------!";
 
 	for (auto itr = begin; itr != end; ++itr)
 	{
 		auto& face = *itr;
 		auto faceVertices = face.getVerticeIndices(mesh);
-		qDebug() << faceVertices[0] << " " << faceVertices[1] << " " <<  faceVertices[2];
-
 		for (auto faceVtx : faceVertices)
 		{
 			rawIndexArray[indexIndex] = faceVtx;
 			++indexIndex;
 		}
 	}
-	indexBuffer.updateData(oldSize, indexBufferData);
+	QByteArray totalData = indexBuffer.data() + indexBufferData;
+	indexBuffer.setData(totalData);
 	indexAttribute.setCount(oldCount + count *3);//3 indicies per face
 	m_geometryRenderer.setVertexCount(indexAttribute.count());
 
@@ -907,7 +910,7 @@ void GLModel::updateMesh(Mesh* mesh)
 
 	//check allChanged flag and skip to updateAll OR...
 	//if the mesh being updated is not the same as the visible one, we need to redraw everything
-	if (_currentVisibleMesh != mesh || faceHistory.index() == 0 || verticesHistory.index() == 0)
+	if (true || _currentVisibleMesh != mesh || faceHistory.index() == 0 || verticesHistory.index() == 0)
 	{
 		clearMem();
 		setMesh(mesh);
@@ -915,10 +918,8 @@ void GLModel::updateMesh(Mesh* mesh)
 	}
 	auto faceChangeSet = std::get<1>(faceHistory);
 	auto vtxChangeSet = std::get<1>(verticesHistory);
-	removeComponent(&m_geometryRenderer);
+	updateVertices(vtxChangeSet, *mesh);
 	updateFaces(faceChangeSet, *mesh);
-	updateVertices(faceChangeSet, *mesh);
-	addComponent(&m_geometryRenderer);
 
 }
 
@@ -983,11 +984,15 @@ void GLModel::updateFaces(const std::unordered_set<size_t>& faceIndicies, const 
 	if (newFaceCount < oldFaceCount)
 	{
 		eraseBufferData(indexAttribute, indexBuffer, difference * FACE_SIZE, difference*3);
+		m_geometryRenderer.setVertexCount(indexAttribute.count());
 	}
 	else if (newFaceCount > oldFaceCount)
 	{
 		appendMeshFace(&mesh, faces.cend() - difference, faces.cend());
 	}
+
+	indexAttribute.setCount(newFaceCount * 3);//3 indicies per face
+	m_geometryRenderer.setVertexCount(indexAttribute.count());
 
 }
 
@@ -1004,13 +1009,18 @@ void GLModel::updateVertices(const std::unordered_set<size_t>& vtxIndicies, cons
 	QByteArray updateArray;
 	updateArray.resize(VTX_SIZE);
 	float* rawVertexArray = reinterpret_cast<float*>(updateArray.data());
+	//debug
+	auto orig = vertexBuffer.data().toStdString();
+
+	//vertexBuffer.blockSignals(true);
+	//vertexBuffer.blockNotifications(true);
 	for (auto vtxIdx : vtxIndicies)
 	{
 		if (vtxIdx < smallerCount)
 		{
 			auto vtx = vtcs[vtxIdx];
 			QVector<QVector3D> vtxData;
-			vtxData << vtx.position << vtx.vn << vtx.color;
+			vtxData << (vtx.position + QVector3D{20, 20, 20}) << vtx.vn << vtx.color;
 			size_t idx = 0;
 			for (const QVector3D& v : vtxData) {
 				rawVertexArray[idx++] = v.x();
@@ -1021,6 +1031,13 @@ void GLModel::updateVertices(const std::unordered_set<size_t>& vtxIndicies, cons
 			vertexBuffer.updateData(offset, updateArray);
 		}
 	}
+	//vertexBuffer.blockSignals(false);
+	//vertexBuffer.blockNotifications(false);
+	//emit vertexBuffer.dataChanged(vertexBuffer.data());
+
+	auto newData = vertexBuffer.data().toStdString();
+
+	qDebug() << "update vertices called, new == old = " << (newData == orig);
 	//if new size is smaller, delete elements from back
 	if (newVtxCount < oldVtxCount)
 	{
@@ -1028,13 +1045,14 @@ void GLModel::updateVertices(const std::unordered_set<size_t>& vtxIndicies, cons
 		//set other attribute count as well
 		normalAttribute.setCount(positionAttribute.count());
 		colorAttribute.setCount(positionAttribute.count());
-		m_geometryRenderer.setVertexCount(positionAttribute.count());
-
 	}
 	else if (newVtxCount > oldVtxCount)
 	{
 		appendMeshVertex(&mesh, vtcs.cend() - difference, vtcs.cend());
 	}
+	positionAttribute.setCount(newVtxCount);
+	normalAttribute.setCount(positionAttribute.count());
+	colorAttribute.setCount(positionAttribute.count());
 }
 
 
@@ -2811,25 +2829,15 @@ const Mesh* GLModel::getSupport()
 }
 
 
-inline void addToLayer(QEntity* entity, Qt3DRender::QLayer* layer)
-{
-	entity->addComponent(layer);
-
-}
-inline void removeLayer(QEntity* entity, Qt3DRender::QLayer* layer)
-{
-	entity->removeComponent(layer);
-
-}
-
 void GLModel::addModelLayer()
 {
-	//addToLayer(this, qmlManager->modelLayer());
+	qmlManager->getRayCaster()->addLayer(&_layer);
 }
 
 void GLModel::removeModelLayer()
 {
-	//removeLayer(this, qmlManager->modelLayer());
+	qmlManager->getRayCaster()->removeLayer(&_layer);
+
 }
 
 

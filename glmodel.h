@@ -323,8 +323,6 @@ private:
 
 	void addModelLayer();
 	void removeModelLayer();
-	std::vector<QLayer*> _boundBoxLayers;
-
 
 
 signals:
