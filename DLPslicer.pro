@@ -148,6 +148,7 @@ HEADERS += \
     feature/manualsupport.h
 
 #LIBS += -lOpengl32
+INCLUDEPATH += $$(BOOST_INCLUDEDIR)
 
 DISTFILES += \
     icon-32.ico \

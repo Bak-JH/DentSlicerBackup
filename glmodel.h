@@ -287,10 +287,10 @@ private:
 	void setMesh(Hix::Engine3D::Mesh* mesh);
 	void updateMesh(Hix::Engine3D::Mesh* mesh);
 	void appendMesh(Hix::Engine3D::Mesh* mesh);
-	void appendMeshVertex(const Hix::Engine3D::Mesh* mesh,
+	size_t appendMeshVertex(const Hix::Engine3D::Mesh* mesh,
 		Hix::Engine3D::VertexConstItr begin, Hix::Engine3D::VertexConstItr end);
 	void appendMeshFace(const Hix::Engine3D::Mesh* mesh,
-		Hix::Engine3D::FaceConstItr begin, Hix::Engine3D::FaceConstItr end);
+		Hix::Engine3D::FaceConstItr begin, Hix::Engine3D::FaceConstItr end, size_t prevMaxIndex);
 
     int cutMode = 1;
     int cutFillMode = 1;
