@@ -253,7 +253,7 @@ private:
 	//for QAttributes
 	Qt3DCore::QTransform m_transform;
 	bool _hitEnabled = false;
-
+	bool _isDrag = false;
 
     //Order is important! Look at the initializer list in constructor
 	const Hix::Engine3D::Mesh* _currentVisibleMesh;

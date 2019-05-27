@@ -1147,11 +1147,12 @@ void QmlManager::unselectPart(int ID){
 
 void QmlManager::unselectAll(){
     setViewMode(VIEW_MODE_OBJECT);
-    for(GLModel* curModel : selectedModels){
-        if (curModel != nullptr){
-            unselectPart(curModel->ID);
-            QMetaObject::invokeMethod(partList, "unselectPartByModel", Q_ARG(QVariant, curModel->ID));
-        }
+	for(auto itr = selectedModels.begin(); itr != selectedModels.end();)
+	{
+		auto model = *itr;
+		++itr;
+		QMetaObject::invokeMethod(partList, "unselectPartByModel", Q_ARG(QVariant, model->ID));
+		unselectPart(model->ID);
     }
     hideMoveArrow();
     hideRotateSphere();
