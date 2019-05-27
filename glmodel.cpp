@@ -912,16 +912,18 @@ void GLModel::updateMesh(Mesh* mesh)
 
 	//check allChanged flag and skip to updateAll OR...
 	//if the mesh being updated is not the same as the visible one, we need to redraw everything
-	if (true || _currentVisibleMesh != mesh || faceHistory.index() == 0 || verticesHistory.index() == 0)
+	if (_currentVisibleMesh != mesh || faceHistory.index() == 0 || verticesHistory.index() == 0)
 	{
 		clearMem();
 		setMesh(mesh);
 		return;
 	}
+	removeComponent(&m_geometryRenderer);
 	auto faceChangeSet = std::get<1>(faceHistory);
 	auto vtxChangeSet = std::get<1>(verticesHistory);
 	updateVertices(vtxChangeSet, *mesh);
 	updateFaces(faceChangeSet, *mesh);
+	addComponent(&m_geometryRenderer);
 
 }
 
@@ -964,9 +966,8 @@ void GLModel::updateFaces(const std::unordered_set<size_t>& faceIndicies, const 
 	size_t largerCount = std::max(oldFaceCount, newFaceCount);
 	size_t difference = largerCount - smallerCount;
 	//update existing old values if they were changed
-	QByteArray updateArray;
-	updateArray.resize(FACE_SIZE);
-	uint* rawIndexArray = reinterpret_cast<uint*>(updateArray.data());
+	QByteArray copy = indexBuffer.data();
+	uint* rawIndexArray = reinterpret_cast<uint*>(copy.data());
 	for (auto faceIdx : faceIndicies)
 	{
 		if (faceIdx < smallerCount)
@@ -977,11 +978,11 @@ void GLModel::updateFaces(const std::unordered_set<size_t>& faceIndicies, const 
 			//for each indices
 			for (size_t i = 0; i < 3; ++i)
 			{
-				rawIndexArray[i] = faceVertices[i];
+				rawIndexArray[i + offset] = faceVertices[i];
 			}
-			indexBuffer.updateData(offset, updateArray);
 		}
 	}
+	indexBuffer.setData(copy);
 	//if new size is smaller, delete elements from back
 	if (newFaceCount < oldFaceCount)
 	{
@@ -990,7 +991,7 @@ void GLModel::updateFaces(const std::unordered_set<size_t>& faceIndicies, const 
 	}
 	else if (newFaceCount > oldFaceCount)
 	{
-	//	appendMeshFace(&mesh, faces.cend() - difference, faces.cend(), );
+		appendMeshFace(&mesh, faces.cend() - difference, faces.cend(), 0);
 	}
 
 	indexAttribute.setCount(newFaceCount * 3);//3 indicies per face
@@ -1011,35 +1012,37 @@ void GLModel::updateVertices(const std::unordered_set<size_t>& vtxIndicies, cons
 	QByteArray updateArray;
 	updateArray.resize(VTX_SIZE);
 	float* rawVertexArray = reinterpret_cast<float*>(updateArray.data());
-	//debug
-	auto orig = vertexBuffer.data().toStdString();
+	//this is probably not a deep copy, so dw too much about what's happening inside or the cost.
+	QByteArray copy = vertexBuffer.data();
+	float* rawCopy = reinterpret_cast<float*>(updateArray.data());
+	size_t offset;
+	size_t idx;
+	QVector<QVector3D> vtxData;
 
-	//vertexBuffer.blockSignals(true);
-	//vertexBuffer.blockNotifications(true);
 	for (auto vtxIdx : vtxIndicies)
 	{
 		if (vtxIdx < smallerCount)
 		{
+			vtxData.clear();
 			auto vtx = vtcs[vtxIdx];
-			QVector<QVector3D> vtxData;
-			vtxData << (vtx.position + QVector3D{20, 20, 20}) << vtx.vn << vtx.color;
-			size_t idx = 0;
+			vtxData << vtx.position << vtx.vn << vtx.color;
+			//for (const QVector3D& v : vtxData) {
+			//	rawVertexArray[idx++] = v.x();
+			//	rawVertexArray[idx++] = v.y();
+			//	rawVertexArray[idx++] = v.z();
+			//}
+			idx = 0;
+			offset = vtxIdx * VTX_SIZE;
 			for (const QVector3D& v : vtxData) {
-				rawVertexArray[idx++] = v.x();
-				rawVertexArray[idx++] = v.y();
-				rawVertexArray[idx++] = v.z();
+				rawCopy[offset + idx++] = v.x();
+				rawCopy[offset + idx++] = v.y();
+				rawCopy[offset + idx++] = v.z();
 			}
-			size_t offset = vtxIdx * VTX_SIZE;
-			vertexBuffer.updateData(offset, updateArray);
+
+
 		}
 	}
-	//vertexBuffer.blockSignals(false);
-	//vertexBuffer.blockNotifications(false);
-	//emit vertexBuffer.dataChanged(vertexBuffer.data());
-
-	auto newData = vertexBuffer.data().toStdString();
-
-	qDebug() << "update vertices called, new == old = " << (newData == orig);
+	vertexBuffer.setData(copy);
 	//if new size is smaller, delete elements from back
 	if (newVtxCount < oldVtxCount)
 	{
