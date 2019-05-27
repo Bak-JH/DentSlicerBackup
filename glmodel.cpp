@@ -1294,6 +1294,7 @@ void GLModel::handlePickerClicked(QPickEvent *pick)
             //qDebug() << "@@@@ @@@@ 4" << pick->localIntersection() << parentModel->targetMeshFace->fn;
             labellingTextPreview->setTranslation(m_transform->translation()+ pick->localIntersection() + parentModel->targetMeshFace->fn);
             labellingTextPreview->setNormal(parentModel->targetMeshFace->fn);
+            qDebug() << "label update fn : " << parentModel->targetMeshFace->fn;
             labellingTextPreview->updateTransform();
             labellingTextPreview->planeSelected = true;
         }
@@ -2547,6 +2548,11 @@ void GLModel::applyLabelInfo(QString text, int contentWidth, QString fontName, b
 void GLModel::generateText3DMesh()
 {
     //qDebug() << "generateText3DMesh @@@@@" << this << this->parentModel;
+    if (parentModel->updateLock)
+        return;
+    parentModel->updateLock = true;
+
+
     if (!labellingTextPreview){
         qDebug() << "no labellingTextPreview";
         QMetaObject::invokeMethod(qmlManager->labelPopup, "noModel");
@@ -2559,10 +2565,13 @@ void GLModel::generateText3DMesh()
         return;
     }
 
+    qmlManager->openProgressPopUp();
+
     labellingTextPreview->planeSelected = false;
 
     parentModel->saveUndoState();
 
+    qmlManager->setProgress(0.1);
     //qDebug() <<m_transform->translation();
     //qDebug() << labellingTextPreview->translation;
 
@@ -2583,10 +2592,20 @@ void GLModel::generateText3DMesh()
     QVector3D normal = labellingTextPreview->normal;
 
     QVector3D ref = QVector3D(0, 0, 1);
-    auto tangent = QVector3D::crossProduct(normal, ref);
-
+    QVector3D tangent;
+    if (normal == QVector3D(0,0,1) || normal == QVector3D(0,0,-1)){
+        tangent = QVector3D(1,0,0);
+    } else {
+        tangent = QVector3D::crossProduct(normal, ref);
+    }
     tangent.normalize();
-    auto binormal = QVector3D::crossProduct(tangent, normal);
+
+    QVector3D binormal;
+    if (normal == QVector3D(0,0,1) || normal == QVector3D(0,0,-1)){
+        binormal = QVector3D(0,1,0);
+    } else {
+        binormal = QVector3D::crossProduct(tangent, normal);
+    }
     binormal.normalize();
 
     QQuaternion quat = QQuaternion::fromAxes(tangent, normal, binormal) * QQuaternion::fromAxisAndAngle(QVector3D(0, 0, 1), 180)* QQuaternion::fromAxisAndAngle(QVector3D(1, 0, 0), 90);
@@ -2594,16 +2613,32 @@ void GLModel::generateText3DMesh()
     transform.setScale(scale);
     transform.setRotation(quat);
     transform.setTranslation(translation);
+    qmlManager->setProgress(0.3);
+    QFont targetFont = QFont(labellingTextPreview->fontName, labellingTextPreview->fontSize, labellingTextPreview->fontWeight, false);
+    QString targetText = labellingTextPreview->text;
+    QVector3D targetNormal = labellingTextPreview->normal;
+
+    if (labellingTextPreview){
+        qDebug() << "pinpin ^^^^^^^^^^^^^^^^^ 3";
+        labellingTextPreview->planeSelected = false;
+        labellingTextPreview->deleteLabel();
+        labellingTextPreview->deleteLater();
+        labellingTextPreview = nullptr;
+    }
+    parentModel->targetMeshFace = nullptr;
 
     generateText3DGeometry(&vertices, &verticesSize,
                            &indices, &indicesSize,
-                           QFont(labellingTextPreview->fontName, labellingTextPreview->fontSize, labellingTextPreview->fontWeight, false),
-                           labellingTextPreview->text,
+                           targetFont,
+                           targetText,
                            depth,
                            parentModel->mesh,
-                           -labellingTextPreview->normal,
+                           -targetNormal,
                            transform.matrix(),
                            normalTransform.matrix());
+
+
+    qmlManager->setProgress(0.9);
 
     std::vector<QVector3D> outVertices;
     std::vector<QVector3D> outNormals;
@@ -2623,14 +2658,13 @@ void GLModel::generateText3DMesh()
     if (GLModel* glmodel = qobject_cast<GLModel*>(parent())) {
         glmodel->addVertices(outVertices);
         glmodel->addNormalVertices(outNormals);
-        //glmodel->labellingTextPreview->hideLabel();
         emit glmodel->_updateModelMesh(true);
     }
 
-    if (this->parentModel->labellingTextPreview != nullptr){
-        qDebug() << "@@@@@@@@ shadowmodel labelling @@@@@@@@@";
-        this->parentModel->labellingTextPreview->hideLabel();
-    }
+
+    qmlManager->setProgress(1);
+
+        //this->parentModel->labellingTextPreview->hideLabel();
 }
 
 // for extension
