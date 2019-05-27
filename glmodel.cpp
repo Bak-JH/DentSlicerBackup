@@ -160,7 +160,7 @@ GLModel::GLModel(QObject* mainWindow, QNode *parent, Mesh* loadMesh, QString fna
 
 	QObject::connect(this, SIGNAL(bisectDone(Mesh*, Mesh*)), this, SLOT(generateRLModel(Mesh*, Mesh*)));
 	QObject::connect(this, SIGNAL(_generateSupport()), this, SLOT(generateSupport()));
-	QObject::connect(this, SIGNAL(_updateModelMesh(bool)), this, SLOT(updateModelMesh(bool)));
+	QObject::connect(this, SIGNAL(_updateModelMesh()), this, SLOT(updateModelMesh()));
 
 	qDebug() << "created shadow model";
 
@@ -310,7 +310,7 @@ void GLModel::loadUndoState(){
         m_transform.setRotationX(0);
         m_transform.setRotationY(0);
         m_transform.setRotationZ(0);
-        emit _updateModelMesh(true);
+        emit _updateModelMesh();
     } else {
         updateLock = false;
         qDebug() << "no undo state";
@@ -336,7 +336,7 @@ void GLModel::loadRedoState(){
         m_transform.setRotationX(0);
         m_transform.setRotationY(0);
         m_transform.setRotationZ(0);
-        emit _updateModelMesh(true);
+        emit _updateModelMesh();
     } else {
         qDebug() << "no redo status";
     }
@@ -344,7 +344,7 @@ void GLModel::loadRedoState(){
 void GLModel::repairMesh()
 {
     MeshRepair::repairMesh(_mesh);
-    emit _updateModelMesh(true);
+    emit _updateModelMesh();
 }
 void GLModel::moveModelMesh(QVector3D direction, bool update){
     _mesh->vertexMove(direction);
@@ -353,7 +353,7 @@ void GLModel::moveModelMesh(QVector3D direction, bool update){
     qDebug() << "moved vertex";
     if(update)
     {
-        emit _updateModelMesh(true);
+        emit _updateModelMesh();
     }
 }
 void GLModel::rotationDone()
@@ -365,7 +365,7 @@ void GLModel::rotationDone()
 
     _mesh->vertexMove(m_transform.translation());
     m_transform.setTranslation(QVector3D(0,0,0));
-    emit _updateModelMesh(true);
+    emit _updateModelMesh();
 }
 
 
@@ -385,14 +385,14 @@ void GLModel::rotateByNumber(QVector3D& rot_center, int X, int Y, int Z)
     m_transform.setRotationZ(0);
     _mesh->vertexMove(m_transform.translation());
     m_transform.setTranslation(QVector3D(0,0,0));
-    emit _updateModelMesh(true);
+    emit _updateModelMesh();
 }
 
 void GLModel::rotateModelMesh(QMatrix4x4 matrix, bool update){
     _mesh->vertexRotate(matrix);
     if(update)
     {
-        emit _updateModelMesh(true);
+        emit _updateModelMesh();
     }
 }
 
@@ -426,7 +426,7 @@ void GLModel::scaleModelMesh(float scaleX, float scaleY, float scaleZ){
     /*if (shadowModel != NULL)
         scaleModelMesh(scale);*/
 
-    emit _updateModelMesh(true);
+    emit _updateModelMesh();
 }
 
 
@@ -712,7 +712,7 @@ void featureThread::run(){
                 qmlManager->openProgressPopUp();
                 MeshRepair::repairMesh(m_glmodel->_mesh);
 
-                emit m_glmodel->_updateModelMesh(true);
+                emit m_glmodel->_updateModelMesh();
                 break;
             }
         case ftrCut:
@@ -1587,7 +1587,7 @@ void GLModel::generateSupport(){
 	layerInfillMesh->setVerticesColor(COLOR_INFILL);
 	layerRaftMesh->setVerticesColor(COLOR_RAFT);
 
-    emit _updateModelMesh(true);
+    emit _updateModelMesh();
 }
 
 void GLModel::removePlane(){
@@ -2361,7 +2361,7 @@ void GLModel::generateText3DMesh()
     }
 
     _mesh->connectFaces();
-	emit _updateModelMesh(true);
+	emit _updateModelMesh();
 }
 
 // for extension
@@ -2389,7 +2389,7 @@ void GLModel::generateExtensionFaces(double distance){
     saveUndoState();
     extendMesh(_mesh, targetMeshFace, distance);
 	_targetSelected = false;
-	emit _updateModelMesh(true);
+	emit _updateModelMesh();
 }
 
 void GLModel::generateLayFlat(){
@@ -2444,7 +2444,7 @@ void GLModel::generateManualSupport(){
     /*OverhangPoint* targetOverhangPosition = new OverhangPoint(targetPosition.x()*scfg->resolution,
     generateSupporter(layerSupportMesh, targetOverhangPosition, nullptr, nullptr, layerSupportMesh->z_min());*/
 	_targetSelected = false;
-	emit _updateModelMesh(true);
+	emit _updateModelMesh();
 }
 
 // for shell offset
@@ -2627,7 +2627,7 @@ void GLModel::changeViewMode(int viewMode) {
         break;
     }
 
-    emit _updateModelMesh(true);
+    emit _updateModelMesh();
 }
 
 void GLModel::removeLayerViewComponents(){

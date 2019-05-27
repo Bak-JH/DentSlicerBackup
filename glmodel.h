@@ -333,7 +333,7 @@ signals:
     void resetLayflat();
     void bisectDone(Mesh*, Mesh*); //lmesh, rmesh
     void _generateSupport();
-    void _updateModelMesh(bool);
+    void _updateModelMesh();
     void layFlatSelect();
     void layFlatUnSelect();
     void extensionSelect();
