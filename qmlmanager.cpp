@@ -307,10 +307,10 @@ void QmlManager::deleteOneModelFile(GLModel* target) {
 		disconnectHandlers(target);
 		//    target->deleteLater();
 		//    target->deleteLater();
-		glmodels.erase(target->ID);
 		deletePartListItem(target->ID);
 		//if selected, remove from selected list
 		selectedModels.erase(target);
+		glmodels.erase(target->ID);
 	}
 }
 
@@ -340,10 +340,14 @@ void QmlManager::deleteSelectedModels() {
         deleteModelFileDone();
         return;
     }
-    for (auto each : selectedModels) {
-        deleteOneModelFile(each);
-    }
+	for (auto it = selectedModels.begin(); it != selectedModels.end();)
+	{
+		auto model = *it;
+		++it;
+		deleteOneModelFile(model);
 
+
+	}
     deleteModelFileDone();
 
     return;
@@ -1219,6 +1223,11 @@ void QmlManager::hideMoveArrow(){
 
 void QmlManager::hideRotateSphere(){
     rotateSphere->setEnabled(0);
+}
+
+RayCastController* QmlManager::getRayCaster()
+{
+	return &_rayCastController;
 }
 
 void QmlManager::showRotatingSphere(){

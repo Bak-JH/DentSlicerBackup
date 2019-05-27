@@ -49,6 +49,7 @@ public slots:
 	void hitsChanged(const Qt3DRender::QAbstractRayCaster::Hits& hits);
 
 private:
+	Qt3DCore::QEntity* _camera = nullptr;
 	enum RayCastMode
 	{
 		//Click = 0,
