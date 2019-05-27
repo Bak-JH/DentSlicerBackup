@@ -1289,7 +1289,7 @@ void QmlManager::totalMoveDone(){
         curModel->setTranslation(curModel->getTransform()->translation()+curModel->getTransform()->translation());
         curModel->setTranslation(QVector3D(0,0,0));
         // need to only update shadowModel & getMesh()
-        emit curModel->_updateModelMesh(false);
+        emit curModel->_updateModelMesh();
     }
     sendUpdateModelInfo();
 }
@@ -2072,7 +2072,7 @@ void QmlManager::layerInfillButtonChanged(bool checked){
     }
 	for (auto each : selectedModels)
 	{
-		emit each->_updateModelMesh(true);
+		emit each->_updateModelMesh();
 	}
   
 }
@@ -2087,7 +2087,7 @@ void QmlManager::layerSupportersButtonChanged(bool checked){
 
 	for (auto each : selectedModels)
 	{
-		emit each->_updateModelMesh(true);
+		emit each->_updateModelMesh();
 	}
 }
 
@@ -2103,7 +2103,7 @@ void QmlManager::layerRaftButtonChanged(bool checked){
 
 	for (auto each : selectedModels)
 	{
-		emit each->_updateModelMesh(true);
+		emit each->_updateModelMesh();
 	}
 }
 
@@ -2143,7 +2143,7 @@ void QmlManager::setViewMode(int viewMode) {
 			for (auto each : selectedModels)
 			{
 				each->setSupport();
-				emit  each->_updateModelMesh(true);
+				emit  each->_updateModelMesh();
 			}
 
 		}
@@ -2151,7 +2151,7 @@ void QmlManager::setViewMode(int viewMode) {
 			for (auto each : selectedModels)
 			{
 				each->setSupport();
-				emit each->_updateModelMesh(true);
+				emit each->_updateModelMesh();
 
 
 			}
