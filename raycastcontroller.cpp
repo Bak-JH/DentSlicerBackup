@@ -85,6 +85,7 @@ bool RayCastController::isClick(QPoint releasePt)
 
 void RayCastController::mousePressed(Qt3DInput::QMouseEvent* mouse)
 {
+	mouse->setAccepted(true);
 //	_pressedTime = std::chrono::system_clock::now();
 //	_pressedPt = { mouse->x(), mouse->y() };
 //	//trying to tell if the click is a drag.
@@ -94,7 +95,7 @@ void RayCastController::mousePressed(Qt3DInput::QMouseEvent* mouse)
 //		_rayCaster->trigger(QPoint(mouse->x(), mouse->y()));
 //	}
 	bool busy = false;
-	if (_rayCasterBusy.compare_exchange_strong(busy, true))
+	if (!_rayCasterBusy.compare_exchange_strong(busy, true))
 		return;
 	_mouseEvent = MouseEventData(mouse);
 	_rayCastMode = RayCastMode::Pressed;
@@ -103,6 +104,7 @@ void RayCastController::mousePressed(Qt3DInput::QMouseEvent* mouse)
 
 void RayCastController::mouseReleased(Qt3DInput::QMouseEvent* mouse)
 {
+	mouse->setAccepted(true);
 	//_releasePt = { mouse->x(), mouse->y() };
 	//if (isClick(_releasePt))
 	//{
@@ -110,7 +112,7 @@ void RayCastController::mouseReleased(Qt3DInput::QMouseEvent* mouse)
 	//	_rayCaster->trigger(QPoint(mouse->x(), mouse->y()));
 	//}
 	bool busy = false;
-	if (_rayCasterBusy.compare_exchange_strong(busy, true))
+	if (!_rayCasterBusy.compare_exchange_strong(busy, true))
 		return;
 	_mouseEvent = MouseEventData(mouse);
 	_rayCastMode = RayCastMode::Released;
@@ -119,11 +121,11 @@ void RayCastController::mouseReleased(Qt3DInput::QMouseEvent* mouse)
 
 void RayCastController::mousePositionChanged(Qt3DInput::QMouseEvent* mouse)
 {
-	//if (_rayCasterBusy)
-	//	return;
+	if (_rayCasterBusy)
+		return;
 	//_rayCasterBusy = true;
 	//disable move when in certain modes;
-	return;
+	//return;
 	if (qmlManager->orientationActive ||
 		qmlManager->rotateActive ||
 		qmlManager->saveActive)
@@ -167,19 +169,19 @@ void RayCastController::hitsChanged(const Qt3DRender::QAbstractRayCaster::Hits& 
 				{
 					qDebug() << "glmodel pressed";
 
-					//glModel->mousePressed(_mouseEvent, hit);
+					glModel->mousePressed(_mouseEvent, hit);
 				}
 				else
 				{
 					qDebug() << "glmodel relllllleased";
 
-					//glModel->mouseReleased(_mouseEvent, hit);
+					glModel->mouseReleased(_mouseEvent, hit);
 				}
 			}
 		}
 
 	}
-	else
+	else if(_rayCastMode == Pressed)
 	{
 		qmlManager->backgroundClicked();
 	}

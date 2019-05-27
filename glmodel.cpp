@@ -1821,6 +1821,7 @@ GLModel::~GLModel(){
 
 void GLModel::mouseReleased(MouseEventData& pick, Qt3DRender::QRayCasterHit& hit)
 {
+	_isDrag = false;
 	if (qmlManager->getViewMode() == VIEW_MODE_SUPPORT) {
 		qmlManager->openYesNoPopUp(false, "", "Support will disappear.", "", 18, "", ftrSupportDisappear, 1);
 		return;
@@ -1981,6 +1982,10 @@ void GLModel::mouseMoved(MouseEventData& v)
     //    return;
     //}
 
+	if (!qmlManager->isSelected(this) || !_isDrag) {
+		//isReleased = true;
+		return;
+	}
     qmlManager->moveButton->setProperty("state", "active");
     qmlManager->setClosedHandCursor();
 
@@ -2022,7 +2027,7 @@ void GLModel::mousePressed(MouseEventData& v, Qt3DRender::QRayCasterHit& hit){
 
     if(qmlManager->isSelected(this)) {
         //m_objectPicker->setDragEnabled(true);
-
+		_isDrag = true;
         lastpoint= hit.localIntersection();
         prevPoint = (QVector2D) v.position;
         qDebug() << "Dragged";
