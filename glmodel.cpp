@@ -821,12 +821,12 @@ void GLModel::appendMesh(Mesh* mesh)
 	auto &faces = mesh->getFaces();
 	auto &vtxs = mesh->getVertices();
 	//since renderer access data from background thread
-	appendMeshVertex(mesh, vtxs.cbegin(), vtxs.cend());
-	appendMeshFace(mesh, faces.cbegin(), faces.cend());
+	size_t prevMaxIndex =  appendMeshVertex(mesh, vtxs.cbegin(), vtxs.cend());
+	appendMeshFace(mesh, faces.cbegin(), faces.cend(), prevMaxIndex);
 
 }
 
-void GLModel::appendMeshVertex(const Mesh* mesh, 
+size_t GLModel::appendMeshVertex(const Mesh* mesh,
 	Hix::Engine3D::VertexConstItr begin, Hix::Engine3D::VertexConstItr end)
 {
 	//we use position attribute, but can be either normal, color etc since they have same count
@@ -863,10 +863,12 @@ void GLModel::appendMeshVertex(const Mesh* mesh,
 	positionAttribute.setCount(oldCount + count);
 	normalAttribute.setCount(oldCount + count);
 	colorAttribute.setCount(oldCount + count);
+	return oldCount;
 }
 
-void GLModel::appendMeshFace(const Mesh* mesh, Hix::Engine3D::FaceConstItr begin, Hix::Engine3D::FaceConstItr end)
+void GLModel::appendMeshFace(const Mesh* mesh, Hix::Engine3D::FaceConstItr begin, Hix::Engine3D::FaceConstItr end, size_t prevMaxIndex)
 {	
+	//we need to get maximum index of the current rendered mesh when we are appending to non-empty mesh.
 	size_t oldCount = indexAttribute.count()/3; //see below
 	size_t oldSize = oldCount * FACE_SIZE;
 
@@ -887,13 +889,13 @@ void GLModel::appendMeshFace(const Mesh* mesh, Hix::Engine3D::FaceConstItr begin
 		auto faceVertices = face.getVerticeIndices(mesh);
 		for (auto faceVtx : faceVertices)
 		{
-			rawIndexArray[indexIndex] = faceVtx;
+			rawIndexArray[indexIndex] = faceVtx + prevMaxIndex;
 			++indexIndex;
 		}
 	}
 	QByteArray totalData = indexBuffer.data() + indexBufferData;
 	indexBuffer.setData(totalData);
-	indexAttribute.setCount(oldCount + count *3);//3 indicies per face
+	indexAttribute.setCount((oldCount + count) *3);//3 indicies per face
 	m_geometryRenderer.setVertexCount(indexAttribute.count());
 
 
@@ -988,7 +990,7 @@ void GLModel::updateFaces(const std::unordered_set<size_t>& faceIndicies, const 
 	}
 	else if (newFaceCount > oldFaceCount)
 	{
-		appendMeshFace(&mesh, faces.cend() - difference, faces.cend());
+	//	appendMeshFace(&mesh, faces.cend() - difference, faces.cend(), );
 	}
 
 	indexAttribute.setCount(newFaceCount * 3);//3 indicies per face
