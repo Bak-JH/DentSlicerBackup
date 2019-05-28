@@ -710,13 +710,13 @@ void get_largest_contour(Custom3DPoint curr, std::multimap<Custom3DPoint, Custom
             }
         }
         //calculate contour area if contourCandi doesn't have self intersecting
-        if (!isIntersect)
-            qDebug() << "not intersect";
-        else
-            qDebug() << "intersect";
+//        if (!isIntersect)
+//            qDebug() << "not intersect";
+//        else
+//            qDebug() << "intersect";
 
         if (!isIntersect) {
-            qDebug() << "contour Candi size: " << contourCandi->size();
+//            qDebug() << "contour Candi size: " << contourCandi->size();
             float candiArea = 0.0;
 
             CGAL::Delaunay_triangulation_2<Kernel> dt;
@@ -731,7 +731,7 @@ void get_largest_contour(Custom3DPoint curr, std::multimap<Custom3DPoint, Custom
                 candiArea += abs(x1*y2 + x2*y3 + x3*y1 - x2*y1 - x3*y2 - x1*y3)/2.0;
             }
 
-            qDebug() << "candi area: " << candiArea;
+//            qDebug() << "candi area: " << candiArea;
             if (candiArea > maxContour.area) {
                 maxContour.contour.clear();
                 for (unsigned int i = 0; i < t; i++) {
@@ -746,7 +746,12 @@ void get_largest_contour(Custom3DPoint curr, std::multimap<Custom3DPoint, Custom
     contourCandi->pop_back();
 }
 
+void printCustomPoints(Custom3DPoint p1, Custom3DPoint p2, Custom3DPoint p3) {
+    qDebug() << "(" << p1.x << ", " << p1.y << ", " << p1.z << ") " << "(" << p2.x << ", " << p2.y << ", " << p2.z << ") " << "(" << p3.x << ", " << p3.y << ", " << p3.z << ")";
+}
+
 void bisectModelByPlane(Mesh* leftMesh, Mesh* rightMesh, Mesh* mesh, Plane plane, int cutFillMode){
+    std::vector<std::pair<Custom3DPoint, Custom3DPoint> > boundaryEdgeCandis;
     std::multimap<Custom3DPoint, Custom3DPoint> boundaryEdges;
 
     std::queue<std::vector<Custom3DPoint> > meshFaceQueue;
@@ -835,17 +840,52 @@ void bisectModelByPlane(Mesh* leftMesh, Mesh* rightMesh, Mesh* mesh, Plane plane
              * => that edge is boundary edge
              */
             if (mv1.z == targetZ && mv2.z == targetZ) {
-                boundaryEdges.insert(std::make_pair(mv1, mv2));
-                boundaryEdges.insert(std::make_pair(mv2, mv1));
+                boundaryEdgeCandis.push_back(std::make_pair(mv1, mv2));
             }
             if (mv2.z == targetZ && mv3.z == targetZ) {
-                boundaryEdges.insert(std::make_pair(mv2, mv3));
-                boundaryEdges.insert(std::make_pair(mv3, mv2));
+                boundaryEdgeCandis.push_back(std::make_pair(mv2, mv3));
             }
             if (mv3.z == targetZ && mv1.z == targetZ) {
-                boundaryEdges.insert(std::make_pair(mv3, mv1));
-                boundaryEdges.insert(std::make_pair(mv1, mv3));
+                boundaryEdgeCandis.push_back(std::make_pair(mv3, mv1));
             }
+        }
+    }
+
+    qDebug() << "boundary edge candi: " << boundaryEdgeCandis.size();
+    //check boundary edge candidate has self intersection
+    while(true){
+        int i, j, becCnt = boundaryEdgeCandis.size();
+        for (i = 0; i < becCnt; i++){
+            for (j = i+1; j < becCnt; j++){
+                Custom3DPoint A = boundaryEdgeCandis[i].first, B = boundaryEdgeCandis[i].second, C = boundaryEdgeCandis[j].first, D = boundaryEdgeCandis[j].second;
+                if (A==C || A==D || B==C || B==D) continue;
+                if (CCW(A,C,D) != CCW(B,C,D) && CCW(A,B,C) != CCW(A,B,D)) {
+                    Custom3DPoint inter = getInter(A, B, C, D);
+                    inter.z = targetZ;
+                    boundaryEdgeCandis[i] = boundaryEdgeCandis[becCnt-1];
+                    boundaryEdgeCandis[j] = boundaryEdgeCandis[becCnt-2];
+                    boundaryEdgeCandis.pop_back(); boundaryEdgeCandis.pop_back();
+                    if (CCW(C,A,D) != 0)
+                        boundaryEdgeCandis.push_back(std::make_pair(inter, A));
+                    if (CCW(C,B,D) != 0)
+                        boundaryEdgeCandis.push_back(std::make_pair(inter, B));
+                    if (CCW(A,C,B) != 0)
+                        boundaryEdgeCandis.push_back(std::make_pair(inter, C));
+                    if (CCW(A,D,B) != 0)
+                        boundaryEdgeCandis.push_back(std::make_pair(inter, D));
+                    break;
+                }
+            }
+            if (j < becCnt)
+                break;
+        }
+        if (i>=becCnt) {
+            for (i = 0; i < becCnt; i++){
+                boundaryEdges.insert(std::make_pair(boundaryEdgeCandis[i].first, boundaryEdgeCandis[i].second));
+                boundaryEdges.insert(std::make_pair(boundaryEdgeCandis[i].second, boundaryEdgeCandis[i].first));
+            }
+            boundaryEdgeCandis.clear();
+            break;
         }
     }
 
@@ -871,21 +911,6 @@ void bisectModelByPlane(Mesh* leftMesh, Mesh* rightMesh, Mesh* mesh, Plane plane
         qDebug() << contours.size();
 
         int contourN = contours.size();
-
-        qDebug() << "merge intersected contours";
-        for (int i = 0; i < contourN; i++) {
-            for (int j = i+1; j < contourN; j++) {
-                int t1 = contours[i].size();
-                int t2 = contours[j].size();
-                for (int i1 = t1-1, i2 = 0; i2<t1; i1=i2++) {
-                    for (int j1 = t2-1, j2 = 0; j2<t2; j1=j2++) {
-                        if (point2isIntersectedLines(contours[i][i1], contours[i][i2], contours[j][j1], contours[j][j2])) {
-                            qDebug() << i << j << i1 << i2 << j1 << j2;
-                        }
-                    }
-                }
-            }
-        }
 
         // add polygon and constraints on CDT
         CDT cdt;
@@ -985,9 +1010,9 @@ void bisectModelByPlane(Mesh* leftMesh, Mesh* rightMesh, Mesh* mesh, Plane plane
         // triangular
         qDebug() << "Triangular";
         if (list_of_seeds.size() > 0)
-            CGAL::refine_Delaunay_mesh_2(cdt, list_of_seeds.begin(), list_of_seeds.end(), Criteria(0.125, 1.5), false);
+            CGAL::refine_Delaunay_mesh_2(cdt, list_of_seeds.begin(), list_of_seeds.end(), Criteria());
         else
-            CGAL::refine_Delaunay_mesh_2(cdt, Criteria(0.125, 1.5));
+            CGAL::refine_Delaunay_mesh_2(cdt, Criteria());
 
         std::vector<QVector3D> orderedQV;
         QVector3D mmv1, mmv2, mmv3;
@@ -995,9 +1020,9 @@ void bisectModelByPlane(Mesh* leftMesh, Mesh* rightMesh, Mesh* mesh, Plane plane
         qDebug() << "Add face";
         for (CDT::Finite_faces_iterator fit = cdt.finite_faces_begin(); fit != cdt.finite_faces_end(); fit++) {
             if (fit->is_in_domain()) {
-                mmv1 = QVector3D(float(cdt.triangle(fit)[0].x()), float(cdt.triangle(fit)[0].y()), targetZ/padding);
-                mmv2 = QVector3D(float(cdt.triangle(fit)[1].x()), float(cdt.triangle(fit)[1].y()), targetZ/padding);
-                mmv3 = QVector3D(float(cdt.triangle(fit)[2].x()), float(cdt.triangle(fit)[2].y()), targetZ/padding);
+                mmv1 = QVector3D(float(cdt.triangle(fit)[0].x())/padding, float(cdt.triangle(fit)[0].y())/padding, targetZ/padding);
+                mmv2 = QVector3D(float(cdt.triangle(fit)[1].x())/padding, float(cdt.triangle(fit)[1].y())/padding, targetZ/padding);
+                mmv3 = QVector3D(float(cdt.triangle(fit)[2].x())/padding, float(cdt.triangle(fit)[2].y())/padding, targetZ/padding);
 
                 orderedQV = sortByCorrectOrder(mmv1, mmv2, mmv3, QVector3D(0.0, 0.0, 0.0), QVector3D(1.0, 0.0, 0.0), QVector3D(1.0, 1.0, 0.0));
                 rightMesh->addFace(orderedQV[0], orderedQV[1], orderedQV[2]);
@@ -1005,10 +1030,6 @@ void bisectModelByPlane(Mesh* leftMesh, Mesh* rightMesh, Mesh* mesh, Plane plane
             }
         }
     }
-}
-
-void printCustomPoints(Custom3DPoint p1, Custom3DPoint p2, Custom3DPoint p3) {
-    qDebug() << "(" << p1.x << ", " << p1.y << ", " << p1.z << ") " << "(" << p2.x << ", " << p2.y << ", " << p2.z << ") " << "(" << p3.x << ", " << p3.y << ", " << p3.z << ")";
 }
 
 Custom3DPoint findConnectedPointOrRegister(std::multimap<long long int, std::vector<Custom3DPoint> > *connectVertex, Custom3DPoint p) {
