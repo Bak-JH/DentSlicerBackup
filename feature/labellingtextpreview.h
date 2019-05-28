@@ -61,6 +61,7 @@ public:
     void updateChange(QString text, int contentWidth, QString fontName,
                       bool isbold,int fontSize,const QVector3D& t, const QVector3D& n);
     void hideLabel();
+    Qt3DRender::QGeometry* getGeometry();
 
     Qt3DCore::QTransform* planeTransform = nullptr;
     QVector3D translation;

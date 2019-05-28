@@ -2575,7 +2575,7 @@ void GLModel::generateText3DMesh()
     int indicesSize;
     float depth = 0.5f;
     float scale = labellingTextPreview->ratioY * labellingTextPreview->scaleY;
-    QVector3D translation = labellingTextPreview->translation + QVector3D(0,-0.3,0);
+    QVector3D translation = labellingTextPreview->translation;// + QVector3D(0,-0.3,0);
 
 
     Qt3DCore::QTransform transform, normalTransform;
@@ -2607,6 +2607,7 @@ void GLModel::generateText3DMesh()
 
     std::vector<QVector3D> outVertices;
     std::vector<QVector3D> outNormals;
+
     for (int i = 0; i < indicesSize / 3; ++i) {
         // Insert vertices in CCW order
         outVertices.push_back(vertices[2 * indices[3*i + 2] + 0]);
@@ -2618,6 +2619,7 @@ void GLModel::generateText3DMesh()
         outNormals.push_back(vertices[2 * indices[3*i + 1] + 1]);
         outNormals.push_back(vertices[2 * indices[3*i + 0] + 1]);
     }
+
 
     parentModel->mesh->connectFaces();
     if (GLModel* glmodel = qobject_cast<GLModel*>(parent())) {
