@@ -1008,53 +1008,53 @@ void QmlManager::modelSelected(int ID){
     QMetaObject::invokeMethod(boxUpperTab, "all_off");
     QMetaObject::invokeMethod(leftTabViewMode, "setObjectView");
 	auto target = getModelByID(ID);
-	if(target)
-    if (!selectedModels.empty()){ // remove selected models if multiple selected previously
+	bool modelAlreadySelected = false;
+	bool deselectNeeded = !selectedModels.empty();
+    if (deselectNeeded){ // remove selected models if multiple selected previously
         for (auto it=selectedModels.begin(); it!=selectedModels.end(); ++it){
             // unselect Model
-            if (*it == nullptr) {
-                break;
+            if (*it == target) {
+				modelAlreadySelected = true;
             }
             (*it)->changecolor(0);
             (*it)->checkPrintingArea();
             QMetaObject::invokeMethod(partList, "unselectPartByModel", Q_ARG(QVariant, (*it)->ID));
             QMetaObject::invokeMethod(yesno_popup, "deletePartListItem", Q_ARG(QVariant, (*it)->ID));
-
-            // set slicing info box property visible true if slicing info exists
-            slicingData->setProperty("visible",false);
-
             disconnectHandlers((*it));  //check
-            QMetaObject::invokeMethod(qmlManager->mttab, "hideTab"); // off MeshTransformer Tab
-			QMetaObject::invokeMethod(boundedBox, "hideBox"); // Bounded Box
-            if (groupFunctionState == "active"){
-                switch (groupFunctionIndex){
-                //case 2:
-                //    QMetaObject::invokeMethod(savePopup, "offApplyFinishButton");
-                //    break;
-                case 5:
-                    hideRotateSphere();
-                    QMetaObject::invokeMethod(rotatePopup,"offApplyFinishButton");
-                    break;
-                case 4:
-                    hideMoveArrow();
-                    QMetaObject::invokeMethod(movePopup,"offApplyFinishButton");
-                    break;
-                case 6:
-                    QMetaObject::invokeMethod(layflatPopup,"offApplyFinishButton");
-                    break;
-                case 8:
-                    QMetaObject::invokeMethod(orientPopup,"offApplyFinishButton");
-                    break;
-                case 10:
-                    QMetaObject::invokeMethod(repairPopup,"offApplyFinishButton");
-                    break;
-                }
-            }
         }
         selectedModels.clear();
-    }
+		// set slicing info box property visible true if slicing info exists
+		slicingData->setProperty("visible", false);
+		QMetaObject::invokeMethod(qmlManager->mttab, "hideTab"); // off MeshTransformer Tab
+		QMetaObject::invokeMethod(boundedBox, "hideBox"); // Bounded Box
+		if (groupFunctionState == "active") {
+			switch (groupFunctionIndex) {
+				//case 2:
+				//    QMetaObject::invokeMethod(savePopup, "offApplyFinishButton");
+				//    break;
+			case 5:
+				hideRotateSphere();
+				QMetaObject::invokeMethod(rotatePopup, "offApplyFinishButton");
+				break;
+			case 4:
+				hideMoveArrow();
+				QMetaObject::invokeMethod(movePopup, "offApplyFinishButton");
+				break;
+			case 6:
+				QMetaObject::invokeMethod(layflatPopup, "offApplyFinishButton");
+				break;
+			case 8:
+				QMetaObject::invokeMethod(orientPopup, "offApplyFinishButton");
+				break;
+			case 10:
+				QMetaObject::invokeMethod(repairPopup, "offApplyFinishButton");
+				break;
+			}
+		}
+		
+	}
 	//if part is not selected
-	if (selectedModels.end() == selectedModels.find(target))
+	if (!modelAlreadySelected)
 	{
 		selectedModels.insert(target);
 		_lastSelected = target;
@@ -1067,20 +1067,13 @@ void QmlManager::modelSelected(int ID){
 		QMetaObject::invokeMethod(yesno_popup, "addPart", Q_ARG(QVariant, 
 			target->getFileName(target->filename.toStdString().c_str())), Q_ARG(QVariant, ID));
 		qDebug() << "changing model" << target->ID;
-
-
 		qDebug() << "[model selected] b box center"; //<< xmid << " " << ymid << " " << zmid ;
 
 		QMetaObject::invokeMethod(layerViewSlider, "setThickness", Q_ARG(QVariant, (scfg->layer_height)));
 		QMetaObject::invokeMethod(layerViewSlider, "setHeight", Q_ARG(QVariant,
 			(target->getMesh()->z_max() - target->getMesh()->z_min() + scfg->raft_thickness)));
-
 		sendUpdateModelInfo();
-
 		qDebug() << "scale value   " << target->getMesh()->x_max() - target->getMesh()->x_min();
-
-
-
 		if (groupFunctionState == "active") {
 			switch (groupFunctionIndex) {
 				//case 2:
@@ -1106,6 +1099,8 @@ void QmlManager::modelSelected(int ID){
 			}
 		}
 	}
+
+
     QMetaObject::invokeMethod(leftTabViewMode, "setEnable", Q_ARG(QVariant, !selectedModels.empty()));
     sendUpdateModelInfo();
 }
@@ -1155,7 +1150,6 @@ void QmlManager::unselectAll(){
 	{
 		auto model = *itr;
 		++itr;
-		QMetaObject::invokeMethod(partList, "unselectPartByModel", Q_ARG(QVariant, model->ID));
 		unselectPart(model->ID);
     }
     hideMoveArrow();
@@ -2208,7 +2202,7 @@ QObject* FindItemByName(QQmlApplicationEngine* engine, const QString& name)
 
 void QmlManager::unselectPartImpl(GLModel* target)
 {
-
+	QMetaObject::invokeMethod(partList, "unselectPartByModel", Q_ARG(QVariant, target->ID));
     target->changecolor(0);
     target->checkPrintingArea();
     disconnectHandlers(target);
