@@ -22,7 +22,7 @@ std::chrono::time_point<std::chrono::system_clock> __startRayTraceTime;
 #endif
 
 const std::chrono::milliseconds RayCastController::MAX_CLICK_DURATION(500);
-const size_t RayCastController::MIN_CLICK_MOVEMENT_SQRD = 40;
+const size_t RayCastController::MAX_CLICK_MOVEMENT = 20;
 
 RayCastController::RayCastController()
 {
@@ -57,75 +57,75 @@ void RayCastController::removeLayer(Qt3DRender::QLayer* layer)
 	_rayCaster->removeLayer(layer);
 }
 
-//void RayCastController::initialize(Qt3DRender::QScreenRayCaster* rayCaster, Qt3DInput::QMouseHandler* mouseHandler)
-//{
-//	_rayCaster = rayCaster;
-//	_mouseHandler = mouseHandler;
-//	//camera->addComponent(_rayCaster);
-//	//camera->addComponent(_mouseHandler);
-//	//auto dbg = camera->components();
-//	//_mouseHandler->setSourceDevice(new QMouseDevice());
-//	QObject::connect(_mouseHandler, SIGNAL(released(Qt3DInput::QMouseEvent*)), this, SLOT(mouseReleased(Qt3DInput::QMouseEvent*)));
-//	QObject::connect(_rayCaster, SIGNAL(hitsChanged(const Qt3DRender::QAbstractRayCaster::Hits&)), this, SLOT(hitsChanged(const Qt3DRender::QAbstractRayCaster::Hits&)));
-//}
 
 
 
-bool RayCastController::isClick(QPoint releasePt)
+
+bool RayCastController::isClick(QVector2D releasePt)
 {
 
-	bool isClickDist = ((releasePt.x() - _pressedPt.x()) ^ 2 + (releasePt.y() - _pressedPt.y()) ^ 2) < MIN_CLICK_MOVEMENT_SQRD;
+	bool isClickDist = releasePt.distanceToPoint(_pressedPt) < MAX_CLICK_MOVEMENT;
 	if (std::chrono::system_clock::now() - _pressedTime < MAX_CLICK_DURATION && isClickDist)
 	{
-		qDebug() << "clicked";
 		return true;
 	}
+	return false;
+}
+
+bool RayCastController::shouldRaycastPressed(Qt3DInput::QMouseEvent*me)
+{
+	if (me->button() == Qt3DInput::QMouseEvent::Buttons::LeftButton)
+		return true;
+	return false;
+}
+
+bool RayCastController::shouldRaycastReleased(Qt3DInput::QMouseEvent* me)
+{
+	if (me->button() == Qt3DInput::QMouseEvent::Buttons::LeftButton || me->button() == Qt3DInput::QMouseEvent::Buttons::RightButton)
+		return true;
 	return false;
 }
 
 void RayCastController::mousePressed(Qt3DInput::QMouseEvent* mouse)
 {
 	mouse->setAccepted(true);
-//	_pressedTime = std::chrono::system_clock::now();
-//	_pressedPt = { mouse->x(), mouse->y() };
-//	//trying to tell if the click is a drag.
-//	if (!qmlManager->selectedModels.empty())
-//	{
-//		_rayCastMode = RayCastMode::Other;
-//		_rayCaster->trigger(QPoint(mouse->x(), mouse->y()));
-//	}
-	bool busy = false;
-	if (!_rayCasterBusy.compare_exchange_strong(busy, true))
-		return;
 	_mouseEvent = MouseEventData(mouse);
-	_rayCastMode = RayCastMode::Pressed;
-	_rayCaster->trigger(QPoint(mouse->x(), mouse->y()));
+	_pressedTime = std::chrono::system_clock::now();
+	_pressedPt = _mouseEvent.position;
+	if (shouldRaycastPressed(mouse))
+	{
+		bool busy = false;
+		if (!_rayCasterBusy.compare_exchange_strong(busy, true))
+			return;
+		_rayCastMode = RayCastMode::Pressed;
+		_rayCaster->trigger(QPoint(mouse->x(), mouse->y()));
+	}
 }
 
 void RayCastController::mouseReleased(Qt3DInput::QMouseEvent* mouse)
 {
 	mouse->setAccepted(true);
-	//_releasePt = { mouse->x(), mouse->y() };
-	//if (isClick(_releasePt))
-	//{
-	//	_rayCastMode = RayCastMode::Click;
-	//	_rayCaster->trigger(QPoint(mouse->x(), mouse->y()));
-	//}
-	bool busy = false;
-	if (!_rayCasterBusy.compare_exchange_strong(busy, true))
-		return;
+
 	_mouseEvent = MouseEventData(mouse);
-	_rayCastMode = RayCastMode::Released;
-	_rayCaster->trigger(QPoint(mouse->x(), mouse->y()));
+	if (shouldRaycastReleased(mouse))
+	{
+		//only do ray cast on click for release event
+		if (isClick(_mouseEvent.position))
+		{
+			bool busy = false;
+			if (!_rayCasterBusy.compare_exchange_strong(busy, true))
+				return;
+			_rayCastMode = RayCastMode::Released;
+			_rayCaster->trigger(QPoint(mouse->x(), mouse->y()));
+		}
+
+	}
 }
 
 void RayCastController::mousePositionChanged(Qt3DInput::QMouseEvent* mouse)
 {
 	if (_rayCasterBusy)
 		return;
-	//_rayCasterBusy = true;
-	//disable move when in certain modes;
-	//return;
 	if (qmlManager->orientationActive ||
 		qmlManager->rotateActive ||
 		qmlManager->saveActive)
@@ -160,23 +160,25 @@ void RayCastController::hitsChanged(const Qt3DRender::QAbstractRayCaster::Hits& 
 	{
 		for (auto hit : hits)
 		{
-
 			auto glModel = dynamic_cast<GLModel*>(hit.entity());
 			if (glModel)
 			{
+				auto test = hit.primitiveIndex();
 				qDebug() << "ray trace glmodel" << glModel;
 				if (_rayCastMode == Pressed)
 				{
 					qDebug() << "glmodel pressed";
 
-					glModel->mousePressed(_mouseEvent, hit);
+					glModel->mousePressedRayCasted(_mouseEvent, hit);
 				}
 				else
 				{
 					qDebug() << "glmodel relllllleased";
 
-					glModel->mouseReleased(_mouseEvent, hit);
+					glModel->mouseReleasedRayCasted(_mouseEvent, hit);
 				}
+				//ignore other hits
+				break;
 			}
 		}
 

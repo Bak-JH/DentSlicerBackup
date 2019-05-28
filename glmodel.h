@@ -102,9 +102,11 @@ class GLModel : public QEntity
     Q_OBJECT
 public:
     //raycasting + mouse event
-    void mouseReleased	(MouseEventData&, Qt3DRender::QRayCasterHit&);
-    void mouseMoved		(MouseEventData&);
-    void mousePressed	(MouseEventData&, Qt3DRender::QRayCasterHit&);
+    void mouseReleased			(MouseEventData&);
+    void mouseMoved				(MouseEventData&);
+    void mousePressed			(MouseEventData&);
+	void mousePressedRayCasted	(MouseEventData&, Qt3DRender::QRayCasterHit&);
+	void mouseReleasedRayCasted	(MouseEventData&, Qt3DRender::QRayCasterHit&);
 
 	//size of QGeometry Attribute elements
 	const static size_t POS_SIZE = 3; //x, y, z of position
@@ -126,8 +128,6 @@ public:
 
 
     bool appropriately_rotated=false;
-    QPhongMaterial *m_meshMaterial;
-    QPhongAlphaMaterial *m_meshAlphaMaterial;
     QPerVertexColorMaterial *m_meshVertexMaterial;
     QMaterial *m_layerMaterial;
     QParameter *m_layerMaterialHeight;

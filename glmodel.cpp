@@ -18,7 +18,8 @@
 #include <QDir>
 #include <QMatrix3x3>
 #include <feature/generatesupport.h>
- 
+#include <Qt3DCore/qpropertyupdatedchange.h>
+
 
 const size_t POS_SIZE = 3;
 const size_t NRM_SIZE = 3;
@@ -910,48 +911,41 @@ void GLModel::updateMesh(Mesh* mesh)
 	auto verticesHistory = mesh->getVerticesNonConst().flushChanges();
 	auto hEdgesHistory = mesh->getHalfEdgesNonConst().flushChanges();//not used...for now
 
+	bool tooManyChanges = false;
+	std::unordered_set<size_t> faceChangeSet;
+	std::unordered_set<size_t> vtxChangeSet;
 	//check allChanged flag and skip to updateAll OR...
 	//if the mesh being updated is not the same as the visible one, we need to redraw everything
-	if (true || _currentVisibleMesh != mesh || faceHistory.index() == 0 || verticesHistory.index() == 0)
+	if (_currentVisibleMesh != mesh || faceHistory.index() == 0 || verticesHistory.index() == 0)
+	{
+		tooManyChanges = true;
+	}
+	else
+	{
+		faceChangeSet = std::get<1>(faceHistory);
+		vtxChangeSet = std::get<1>(verticesHistory);
+		if (faceChangeSet.size() > mesh->getFaces().size() * 0.7 || vtxChangeSet.size() > mesh->getVertices().size() * 0.7)
+		{
+			tooManyChanges = true;
+		}
+	}
+	//if there are too many individual changes...
+	tooManyChanges = true;
+	if (tooManyChanges)
 	{
 		clearMem();
 		setMesh(mesh);
 		return;
 	}
-	auto faceChangeSet = std::get<1>(faceHistory);
-	auto vtxChangeSet = std::get<1>(verticesHistory);
+
+
+	removeComponent(&m_geometryRenderer);
 	updateVertices(vtxChangeSet, *mesh);
 	updateFaces(faceChangeSet, *mesh);
+	addComponent(&m_geometryRenderer);
 
 }
 
-
-inline void appendOrResizeBuffer(const QVector3D& data, QAttribute& attr, Qt3DRender::QBuffer& buffer)
-{
-	//update geometry
-	QByteArray appendVertexArray;
-	size_t newDataSize = 3 * sizeof(float);
-	appendVertexArray.resize(newDataSize);
-	float* reVertexArray = reinterpret_cast<float*>(appendVertexArray.data());
-
-	//coordinates of left vertex
-	reVertexArray[0] = data.x();
-	reVertexArray[1] = data.y();
-	reVertexArray[2] = data.z();
-
-	uint vertexCount = attr.count();
-	//if the attribute array is too small
-	auto bufferSize = buffer.data().size();
-	if((vertexCount* 3 * sizeof(float) + newDataSize) > bufferSize)
-	{
-		auto oldData = buffer.data();
-		oldData.resize(oldData.size() + ATTRIBUTE_SIZE_INCREMENT);
-		buffer.setData(oldData);
-	}
-	buffer.updateData(vertexCount * 3 * sizeof(float), appendVertexArray);
-	attr.setCount(vertexCount + 1);
-	return;
-}
 
 
 
@@ -982,6 +976,8 @@ void GLModel::updateFaces(const std::unordered_set<size_t>& faceIndicies, const 
 			indexBuffer.updateData(offset, updateArray);
 		}
 	}
+	indexBuffer.setData(indexBuffer.data());
+
 	//if new size is smaller, delete elements from back
 	if (newFaceCount < oldFaceCount)
 	{
@@ -990,7 +986,7 @@ void GLModel::updateFaces(const std::unordered_set<size_t>& faceIndicies, const 
 	}
 	else if (newFaceCount > oldFaceCount)
 	{
-	//	appendMeshFace(&mesh, faces.cend() - difference, faces.cend(), );
+		appendMeshFace(&mesh, faces.cend() - difference, faces.cend(), 0);
 	}
 
 	indexAttribute.setCount(newFaceCount * 3);//3 indicies per face
@@ -1011,8 +1007,6 @@ void GLModel::updateVertices(const std::unordered_set<size_t>& vtxIndicies, cons
 	QByteArray updateArray;
 	updateArray.resize(VTX_SIZE);
 	float* rawVertexArray = reinterpret_cast<float*>(updateArray.data());
-	//debug
-	auto orig = vertexBuffer.data().toStdString();
 
 	//vertexBuffer.blockSignals(true);
 	//vertexBuffer.blockNotifications(true);
@@ -1022,7 +1016,7 @@ void GLModel::updateVertices(const std::unordered_set<size_t>& vtxIndicies, cons
 		{
 			auto vtx = vtcs[vtxIdx];
 			QVector<QVector3D> vtxData;
-			vtxData << (vtx.position + QVector3D{20, 20, 20}) << vtx.vn << vtx.color;
+			vtxData << vtx.position  << vtx.vn << vtx.color;
 			size_t idx = 0;
 			for (const QVector3D& v : vtxData) {
 				rawVertexArray[idx++] = v.x();
@@ -1035,11 +1029,8 @@ void GLModel::updateVertices(const std::unordered_set<size_t>& vtxIndicies, cons
 	}
 	//vertexBuffer.blockSignals(false);
 	//vertexBuffer.blockNotifications(false);
-	//emit vertexBuffer.dataChanged(vertexBuffer.data());
-
-	auto newData = vertexBuffer.data().toStdString();
-
-	qDebug() << "update vertices called, new == old = " << (newData == orig);
+	//vertexBuffer.setData(vertexBuffer.data());
+	emit vertexBuffer.dataChanged(vertexBuffer.data());
 	//if new size is smaller, delete elements from back
 	if (newVtxCount < oldVtxCount)
 	{
@@ -1839,14 +1830,67 @@ void GLModel::indentHollowShell(double radius){
 GLModel::~GLModel(){
 }
 
-void GLModel::mouseReleased(MouseEventData& pick, Qt3DRender::QRayCasterHit& hit)
+
+
+void GLModel::mouseMoved(MouseEventData& v)
+{
+	if (!qmlManager->isSelected(this) || !_isDrag) {
+		//isReleased = true;
+		return;
+	}
+    qmlManager->moveButton->setProperty("state", "active");
+    qmlManager->setClosedHandCursor();
+
+    if (!isMoved){ // called only once on dragged
+        saveUndoState();
+        qmlManager->hideMoveArrow();
+        qDebug() << "hiding move arrow";
+        isMoved = true;
+    }
+
+	QVector2D currentPoint = v.position;
+
+    QVector3D xAxis3D = QVector3D(1,0,0);
+    QVector3D yAxis3D =  QVector3D(0,1,0);
+    QVector2D xAxis2D = (world2Screen(lastpoint+xAxis3D) - world2Screen(lastpoint));
+    QVector2D yAxis2D = (world2Screen(lastpoint+yAxis3D) - world2Screen(lastpoint));
+    QVector2D target = currentPoint - prevPoint;
+
+    float b = (target.y()*xAxis2D.x() - target.x()*xAxis2D.y())/
+            (xAxis2D.x()*yAxis2D.y()-xAxis2D.y()*yAxis2D.x());
+    float a = (target.x() - b*yAxis2D.x())/xAxis2D.x();
+
+    // move ax + by amount
+    qmlManager->modelMoveF(1,a);
+    qmlManager->modelMoveF(2,b);
+
+    prevPoint = currentPoint;
+
+}
+
+void GLModel::mousePressed(MouseEventData& v){
+    qDebug() << "pgoo";
+    if(v.button == Qt3DInput::QMouseEvent::Buttons::RightButton) // pass if click with right mouse
+        return;
+	QVector2D currentPoint = v.position;
+    qDebug() << "Pressed   " << currentPoint << m_transform.translation();
+}
+void GLModel::mousePressedRayCasted(MouseEventData& e, Qt3DRender::QRayCasterHit& hit) 
+{
+	mousePressed(e);
+	_isDrag = true;
+	lastpoint = hit.localIntersection();
+	prevPoint = (QVector2D)e.position;
+	qDebug() << "Dragged";
+}
+//when ray casting is not needed, ie) right click
+void GLModel::mouseReleased(MouseEventData& pick)
 {
 	_isDrag = false;
 	if (qmlManager->getViewMode() == VIEW_MODE_SUPPORT) {
 		qmlManager->openYesNoPopUp(false, "", "Support will disappear.", "", 18, "", ftrSupportDisappear, 1);
 		return;
 	}
-	//---------------- rgoo routine init --------------------
 	qmlManager->resetCursor();
 
 	if (isMoved) {
@@ -1855,30 +1899,24 @@ void GLModel::mouseReleased(MouseEventData& pick, Qt3DRender::QRayCasterHit& hit
 		return;
 	}
 
-
-	//---------------- rgoo routine end --------------------
-
 	if (qmlManager->yesno_popup->property("isFlawOpen").toBool())
 		return;
-
-	if (qmlManager->isSelected(this) && pick.button == Qt::MouseButton::RightButton) { // when right button clicked
-		qDebug() << "mttab alive 1";
-		QMetaObject::invokeMethod(qmlManager->mttab, "tabOnOff");
-		return;
-	}
-
-
 
 	if (!cutActive && !extensionActive && !labellingActive && !layflatActive && !manualSupportActive && !isMoved)// && !layerViewActive && !supportViewActive)
 		qmlManager->modelSelected(ID);
 
 	qDebug() << "model selected emit" << pick.position << ID;
-	qDebug() << "pick button : " <<pick.button;
+	qDebug() << "pick button : " << pick.button;
 
-	if (pick.button == Qt::MouseButton::RightButton) {
+	if (qmlManager->isSelected(this) && pick.button == Qt::MouseButton::RightButton) {
 		qDebug() << "mttab alive";
 		QMetaObject::invokeMethod(qmlManager->mttab, "tabOnOff");
 	}
+}
+void GLModel::mouseReleasedRayCasted(MouseEventData& pick, Qt3DRender::QRayCasterHit& hit)
+{
+	mouseReleased(pick);
+
 #ifdef _STRICT_GLMODEL
 	if (hit.type() != QRayCasterHit::HitType::TriangleHit)
 		throw std::runtime_error("trying to get tri idx from non tri hit");
@@ -1984,74 +2022,6 @@ void GLModel::mouseReleased(MouseEventData& pick, Qt3DRender::QRayCasterHit& hit
 		generateColorAttributes();
 		colorExtensionFaces();
 	}
-}
-
-void GLModel::mouseMoved(MouseEventData& v)
-{
-
-
-
-    // if not selected by qmlmanager, return
-    //bool modelSelected = false;
-    //for (GLModel* glm : qmlManager->selectedModels){
-    //    if (glm == this){
-    //        modelSelected = true;
-    //    }
-    //}
-    //if (!modelSelected){
-    //    return;
-    //}
-
-	if (!qmlManager->isSelected(this) || !_isDrag) {
-		//isReleased = true;
-		return;
-	}
-    qmlManager->moveButton->setProperty("state", "active");
-    qmlManager->setClosedHandCursor();
-
-    if (!isMoved){ // called only once on dragged
-        saveUndoState();
-        qmlManager->hideMoveArrow();
-        qDebug() << "hiding move arrow";
-        isMoved = true;
-    }
-
-	QVector2D currentPoint = v.position;
-
-    QVector3D xAxis3D = QVector3D(1,0,0);
-    QVector3D yAxis3D =  QVector3D(0,1,0);
-    QVector2D xAxis2D = (world2Screen(lastpoint+xAxis3D) - world2Screen(lastpoint));
-    QVector2D yAxis2D = (world2Screen(lastpoint+yAxis3D) - world2Screen(lastpoint));
-    QVector2D target = currentPoint - prevPoint;
-
-    float b = (target.y()*xAxis2D.x() - target.x()*xAxis2D.y())/
-            (xAxis2D.x()*yAxis2D.y()-xAxis2D.y()*yAxis2D.x());
-    float a = (target.x() - b*yAxis2D.x())/xAxis2D.x();
-
-    // move ax + by amount
-    qmlManager->modelMoveF(1,a);
-    qmlManager->modelMoveF(2,b);
-
-    prevPoint = currentPoint;
-
-}
-
-void GLModel::mousePressed(MouseEventData& v, Qt3DRender::QRayCasterHit& hit){
-    qDebug() << "pgoo";
-    if(v.button == Qt3DInput::QMouseEvent::Buttons::RightButton) // pass if click with right mouse
-        return;
-	QVector2D currentPoint = v.position;
-
-    qDebug() << "Pressed   " << currentPoint << m_transform.translation();
-    //qmlManager->lastModelSelected();
-
-    if(qmlManager->isSelected(this)) {
-        //m_objectPicker->setDragEnabled(true);
-		_isDrag = true;
-        lastpoint= hit.localIntersection();
-        prevPoint = (QVector2D) v.position;
-        qDebug() << "Dragged";
-    }
 }
 
 void GLModel::cutModeSelected(int type){
