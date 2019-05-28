@@ -263,9 +263,6 @@ namespace Hix
 			void updateMinMax(QVector3D v);
 
 			QHash<uint32_t, VertexConstItr> vertices_hash;
-			std::vector< VertexConstItr> __DEBUGItr;
-			std::vector< const MeshVertex* > __DEBUGPtr;
-
 			TrackedIndexedList<MeshVertex> vertices;
 			TrackedIndexedList<HalfEdge> halfEdges;
 			TrackedIndexedList<MeshFace> faces;

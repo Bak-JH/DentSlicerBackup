@@ -253,6 +253,7 @@ void Mesh::setVerticesColor(QVector3D color)
 
 
 void Mesh::vertexOffset(float factor){
+	vertices.markChangedAll();
     int numberofVertices = vertices.size();
     _x_min = 99999;
     _x_max = 99999;
@@ -273,6 +274,7 @@ void Mesh::vertexOffset(float factor){
 }
 
 void Mesh::vertexMove(QVector3D direction){
+	vertices.markChangedAll();
     int numberofVertices = vertices.size();
     _x_min = 99999;
     _x_max = 99999;
@@ -313,6 +315,8 @@ void Mesh::centerMesh(){
 }
 
 void Mesh::vertexRotate(QMatrix4x4 tmpmatrix){
+	vertices.markChangedAll();
+	faces.markChangedAll();
 
     _x_min = 99999;
     _x_max = 99999;
@@ -433,12 +437,6 @@ void Mesh::addFace(QVector3D v0, QVector3D v1, QVector3D v2, QVector3D color){
 	if (fVtx[0] == fVtx[1] || fVtx[0] == fVtx[2] || fVtx[1] == fVtx[2])
 		return;
     Hix::Engine3D::MeshFace mf;
-
-
-	auto DEBUGIndex0 = fVtx[0] - vertices.begin();
-	auto DEBUGIndex1 = fVtx[1] - vertices.begin();
-	auto DEBUGIndex2 = fVtx[2] - vertices.begin();
-
 	mf.fn = QVector3D::normal(fVtx[0]->position, fVtx[1]->position, fVtx[2]->position);
 	mf.fn_unnorm = QVector3D::crossProduct(fVtx[1]->position - fVtx[0]->position, fVtx[1]->position - fVtx[0]->position);
 	faces.emplace_back(mf);
@@ -855,8 +853,6 @@ VertexItr Mesh::addOrRetrieveFaceVertex(QVector3D v, QVector3D color){
     vertices.emplace_back(mv);
 	auto last = vertices.end() - 1;
     vertices_hash.insert(vertex_hash, last);
-	__DEBUGItr.push_back(last);
-	__DEBUGPtr.push_back(last.operator->());
     updateMinMax(v);
     return last;
 }
