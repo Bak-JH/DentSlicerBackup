@@ -86,29 +86,33 @@ QString SVGexporter::exportSVG(Slices shellSlices, Slices supportSlices, Slices 
 
     int support_base_layer_cnt = round(scfg->support_base_height/scfg->layer_height);
 
-    // add base support layers
-    for (int i=0; i<support_base_layer_cnt; i++){
-        QString outfilename = outfoldername + "/" + QString::number(currentSlice_idx) + ".svg";
+    if (supportSlices.size() != 0){ // generate support base only when support is being generated
 
-        std::ofstream outfile(outfilename.toStdString().c_str(), std::ios::out);
+        // add base support layers
+        for (int i=0; i<support_base_layer_cnt; i++){
+            QString outfilename = outfoldername + "/" + QString::number(currentSlice_idx) + ".svg";
 
-        writeHeader(outfile);
+            std::ofstream outfile(outfilename.toStdString().c_str(), std::ios::out);
 
-        if (scfg->slicing_mode == "uniform")
-            writeGroupHeader(outfile, currentSlice_idx, scfg->layer_height*(currentSlice_idx+1));
-        else
-            writeGroupHeader(outfile, currentSlice_idx, scfg->layer_height*(currentSlice_idx+1));
+            writeHeader(outfile);
 
-        // write support slices
-        for (int j=0; j<supportSlices[i].outershell.size(); j++){
-            writePolygon(outfile, supportSlices[i].outershell[j]);
+            if (scfg->slicing_mode == "uniform")
+                writeGroupHeader(outfile, currentSlice_idx, scfg->layer_height*(currentSlice_idx+1));
+            else
+                writeGroupHeader(outfile, currentSlice_idx, scfg->layer_height*(currentSlice_idx+1));
+
+            // write support slices
+            for (int j=0; j<supportSlices[i].outershell.size(); j++){
+                writePolygon(outfile, supportSlices[i].outershell[j]);
+            }
+
+            writeGroupFooter(outfile);
+            writeFooter(outfile);
+
+            outfile.close();
+            currentSlice_idx += 1;
         }
 
-        writeGroupFooter(outfile);
-        writeFooter(outfile);
-
-        outfile.close();
-        currentSlice_idx += 1;
     }
 
     for (int i=0; i<shellSlices.size(); i++){
@@ -129,8 +133,9 @@ QString SVGexporter::exportSVG(Slices shellSlices, Slices supportSlices, Slices 
             parsePolyTreeAndWrite(shellSlice_polytree.Childs[j], outfile);
         }
 
+        qDebug() << "support slicessize : " << supportSlices.size() << int(supportSlices.size()) - support_base_layer_cnt << (supportSlices.size() - support_base_layer_cnt > i);
         // write support slices
-        if (supportSlices.size()-support_base_layer_cnt > i){
+        if (int(supportSlices.size())-support_base_layer_cnt > i){
 
             for (int j=0; j<supportSlices[i+support_base_layer_cnt].outershell.size(); j++){
                 writePolygon(outfile, supportSlices[i+support_base_layer_cnt].outershell[j]);
