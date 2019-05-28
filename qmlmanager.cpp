@@ -1929,16 +1929,23 @@ void QmlManager::runGroupFeature(int ftrType, QString state, double arg1, double
 
         qDebug() << "1111" << mergedShellMesh;
         qDebug() << "1111" << mergedShellMesh->x_max() << mergedShellMesh->x_min();
+
         // generate support
         GenerateSupport generatesupport;
-        //Mesh* mergedSupportMesh = nullptr;
-        Mesh* mergedSupportMesh = generatesupport.generateSupport(mergedShellMesh);
+        Mesh* mergedSupportMesh = nullptr;
+        if (scfg->support_type != 0){ // if generating support
+            //Mesh* mergedSupportMesh = nullptr;
+            mergedSupportMesh = generatesupport.generateSupport(mergedShellMesh);
+        }
 
         qDebug() << "2222";
+
         // generate raft according to support structure
         GenerateRaft generateraft;
-        Mesh* mergedRaftMesh = generateraft.generateRaft(mergedShellMesh, generatesupport.overhangPoints);
-
+        Mesh* mergedRaftMesh = nullptr;
+        if (scfg->raft_type != 0){
+            mergedRaftMesh = generateraft.generateRaft(mergedShellMesh, generatesupport.overhangPoints);
+        }
         qDebug() << "3333";
         // need to generate support, raft
 
