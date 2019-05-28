@@ -51,6 +51,14 @@ LabellingTextPreview::LabellingTextPreview(Qt3DCore::QNode* parent)
     scaleY = 12.0f/16.0f;
     planeSelected = false;
 }
+
+LabellingTextPreview::~LabellingTextPreview(){
+    planeTransform->deleteLater();
+    planeMaterial->deleteLater();
+    planeEntity->deleteLater();
+}
+
+
 void LabellingTextPreview::setText(QString text, int contentWidth)
 {
     this->contentWidth = contentWidth;
@@ -124,12 +132,26 @@ void LabellingTextPreview::updateTransform()
     QVector3D ref = QVector3D(0, 0, 1);
     float meshScale = 0.1f;
     float length = this->text.length();
-    float callibration = (this->contentWidth/2.0f * scaleY) * meshScale * 0.545f *2.38f * 0.105f;
+    float callibration = (this->contentWidth/2.0f * scaleY) * meshScale *0.1517607f; //0.155f;//0.545f *2.38f *0.117f;//* 0.105f;
     //QVector3D ref = QVector3D(1,0,0);
-    auto tangent = QVector3D::crossProduct(normal, ref);
-    //auto tangent = ref;
+    QVector3D tangent;
+    if (normal == QVector3D(0,0,-1)){
+        tangent = QVector3D(1,0,0);
+    } else if (normal == QVector3D(0,0,1)){
+        tangent = QVector3D(-1,0,0);
+    } else {
+        tangent = QVector3D::crossProduct(normal, ref);
+    }
     tangent.normalize();
-    auto binormal = QVector3D::crossProduct(tangent, normal);
+
+    QVector3D binormal;
+    if (normal == QVector3D(0,0,-1)){
+        binormal = QVector3D(0,1,0);
+    } else if (normal == QVector3D(0,0,1)){
+        binormal = QVector3D(0,1,0);
+    } else {
+        binormal = QVector3D::crossProduct(tangent, normal);
+    }
     binormal.normalize();
 
     //qDebug() << translation << " cal:"<<  callibration << scaleY;
