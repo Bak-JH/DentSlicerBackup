@@ -2123,9 +2123,9 @@ void GLModel::generateRLModel(Mesh* lmesh, Mesh* rmesh){
         rightmodel->twinModel = leftmodel;
     }
 
-    qmlManager->setProgress(0.91);
+    qmlManager->setProgress(1);
 
-    if (shadowModel->shellOffsetActive){
+    /*if (shadowModel->shellOffsetActive){
 		if (leftmodel != nullptr)
 		{
 			auto offsetLeftMesh = ShellOffset::shellOffset(leftmodel->_mesh, (float)shellOffsetFactor);
@@ -2155,7 +2155,7 @@ void GLModel::generateRLModel(Mesh* lmesh, Mesh* rmesh){
     QMetaObject::invokeMethod(qmlManager->boundedBox, "hideBox");
 
     // 승환 100%
-    qmlManager->setProgress(1);
+    qmlManager->setProgress(1);*/
 }
 
 // hollow shell part
