@@ -128,6 +128,7 @@ public:
 
 
     bool appropriately_rotated=false;
+	QPhongMaterial* m_meshMaterial;
     QPerVertexColorMaterial *m_meshVertexMaterial;
     QMaterial *m_layerMaterial;
     QParameter *m_layerMaterialHeight;
