@@ -7,12 +7,11 @@
 
 using namespace ClipperLib;
 
-Slices Slicer::slice(Mesh* mesh){
-    Slices slices;
-    slices.mesh = mesh;
+bool Slicer::slice(Mesh* mesh, Slices* slices){
+    slices->mesh = mesh;
 
     if (mesh == nullptr || mesh->getFaces().size() ==0){
-        return slices;
+        return true;
     }
 
     // mesh slicing step
@@ -32,7 +31,7 @@ Slices Slicer::slice(Mesh* mesh){
 
         // flaw exists if contour overlaps
         //meshslice.outerShellOffset(-(scfg->wall_thickness+scfg->nozzle_width)/2, jtRound);
-        slices.push_back(meshslice);
+        slices->push_back(meshslice);
         qDebug() << i << "th meshslice.outershell.size() = " << meshslice.outershell.size();
 
         for (int j=0; j<meshslice.outershell.size(); j++){
@@ -72,8 +71,8 @@ Slices Slicer::slice(Mesh* mesh){
     fflush(stdout);*/
     //cout << "raft done" <<endl;
 
-    slices.containmentTreeConstruct();
-    return slices;
+    slices->containmentTreeConstruct();
+    return true;
 }
 
 /****************** Mesh Slicing Step *******************/

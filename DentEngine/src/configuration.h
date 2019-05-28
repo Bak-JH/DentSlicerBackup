@@ -50,36 +50,29 @@ public:
     float support_density = 0.4;
     float infill_density = 0.3;
 
-    float subdivision_radius = 0.85; // in mm
-    float duplication_radius = 4; // in mm
-    int cluster_size = 2000;
-
-    float overhang_detect_diff_layer_height = 0.5; // in mm
-    float default_support_radius = 900 ; // in microns
-    float branching_threshold_radius = 4000; // in microns
-    int branchable_overhang_point_cnt = 4;
-
-    float overhang_threshold = layer_height/tan_theta;
-    float overhang_poll_threshold = support_density * 100; // unit region as 1cm^2
-
     int resin_type = TEMPORARY_RESIN;
     float contraction_ratio = TEMPORARY_CONTRACTION_RATIO;
 
-    int support_type = 2;
+    int support_type = 0;
     int infill_type = 1;
-    int raft_type = 2;
+    int raft_type = 0;
 
     // raft settings
-    float raft_thickness = 0;//3;
-    int raft_base_radius = 3000;
-    int raft_offset_radius = 1800; // in microns
+    float raft_thickness = 2; // in mm
+    float raft_base_radius = 5; // in mm
+    float raft_offset_radius = 4; // in mm
 
-    // set configuration
+    // support settings
+    float support_radius_max = 1.5f;
+    float support_radius_min = 0.3f;
+    float support_base_height = 2.0;
+
+    // bed configuration
     QVector3D origin;
-    int resolution_x = 1280;
-    int resolution_y = 800;
-    int bed_x = 131.2; // in mm
-    int bed_y = 82; // in mm
+    int resolution_x = 2560;
+    int resolution_y = 1440;
+    int bed_x = 120.96; // in mm
+    int bed_y = 68.04; // in mm
     float pixel_per_mm = float(resolution_x)/float(bed_x);
 };
 

@@ -35,6 +35,7 @@ public:
 class Slices : public std::vector<Slice>{
 public:
     Mesh* mesh;
+
     Paths overhang_regions;
     std::vector<OverhangPoint*> overhang_points;
     //    std::vector<QVector3D> overhang_points;
@@ -42,6 +43,7 @@ public:
     Path raft_points;
 
     void containmentTreeConstruct();
+
 };
 
 class Slicer : public QThread
@@ -57,7 +59,7 @@ public:
     Slices raftSlices;
 
     /****************** Entire Slicing Step *******************/
-    Slices slice(Mesh* mesh);
+    bool slice(Mesh* mesh, Slices* slices);
 
     /****************** Mesh Slicing Step *******************/
     std::vector<Paths> meshSlice(Mesh* mesh); // totally k elements
