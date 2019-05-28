@@ -98,8 +98,6 @@ void detectExtensionFaces(const Mesh* mesh, QVector3D normal,const MeshFace* ori
             if ((neighbor->fn - normal).length() > 0.5 ||\
                   neighbor->mesh_vertex[0]->position.distanceToPoint(original_mf->mesh_vertex[0]->position) > 100)
                 continue;
-            qDebug() << neighbor->mesh_vertex[0]->position.distanceToPoint(original_mf->mesh_vertex[0]->position);
-            qDebug() << "looking for " << neighbor->idx;
             detectExtensionFaces(mesh, normal, original_mf, neighbor, result, result_idx);
         }
     }

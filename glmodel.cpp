@@ -123,7 +123,7 @@ GLModel::GLModel(QObject* mainWindow, QNode *parent, Mesh* loadMesh, QString fna
 		qmlManager->addPart(getFileName(fname.toStdString().c_str()), ID);
 
 		m_meshMaterial = new QPhongMaterial();
-		m_meshVertexMaterial = new QPerVertexColorMaterial();
+        m_meshVertexMaterial = new QPerVertexColorMaterial();
 
 		generateLayerViewMaterial();
 
@@ -1325,52 +1325,17 @@ void GLModel::handlePickerClicked(QPickEvent *pick)
         //parentModel->colorExtensionFaces();
 
         QMetaObject::invokeMethod(qmlManager->labelPopup, "labelUpdate");
-
         if (labellingTextPreview && labellingTextPreview->isEnabled()) {
-            labellingTextPreview->setTranslation(pick->localIntersection() + parentModel->targetMeshFace->fn);
+            //qDebug() << "@@@@ @@@@ 4" << pick->localIntersection() << parentModel->targetMeshFace->fn;
+            labellingTextPreview->setTranslation(m_transform->translation()+ pick->localIntersection() + parentModel->targetMeshFace->fn);
             labellingTextPreview->setNormal(parentModel->targetMeshFace->fn);
+            qDebug() << "label update fn : " << parentModel->targetMeshFace->fn;
+            labellingTextPreview->updateTransform();
             labellingTextPreview->planeSelected = true;
         }
         else {
             labellingTextPreview->planeSelected = false;
         }
-/*
-        QString label_text = "";
-        QString label_font = "";
-        bool label_font_bold = false;
-        int label_size = 12;
-        int contentWidth = 64;
-        if (labellingTextPreview){
-            label_text = labellingTextPreview->text;
-            label_font = labellingTextPreview->fontName;
-            label_font_bold = (labellingTextPreview->fontWeight==QFont::Bold)? true:false;
-            label_size = labellingTextPreview->fontSize;
-            contentWidth = labellingTextPreview->contentWidth;
-            labellingTextPreview->deleteLater();
-            labellingTextPreview = nullptr;
-            qDebug() << "labelling Text existed!" << label_text << label_font << label_size;
-        }
-        else
-            qDebug()<<"no labelling text";
-        //qDebug() << "me:"<<this << "parent:"<<this->parentModel<<"shadow:"<<this->shadowModel;
-        labellingTextPreview = new LabellingTextPreview(this);
-        labellingTextPreview->setEnabled(true);
-
-        if (labellingTextPreview && labellingTextPreview->isEnabled()) {
-            labellingTextPreview->setTranslation(pick->localIntersection() + parentModel->targetMeshFace->fn);
-            labellingTextPreview->setNormal(parentModel->targetMeshFace->fn);
-            if (label_text != ""){
-                labellingTextPreview->setFontName(label_font);
-                labellingTextPreview->setFontBold(label_font_bold);
-                labellingTextPreview->setFontSize(label_size);
-                labellingTextPreview->setText(label_text, contentWidth);
-            }
-            labellingTextPreview->planeSelected = true;
-        }
-        else {
-            qDebug() << "pinpin ^^^^^^^^^^^^^^^^^ 1";
-            labellingTextPreview->planeSelected = false;
-        }*/
     }
 
 
@@ -2019,7 +1984,6 @@ void GLModel::removeCuttingPoints(){
     cuttingPoints.clear();
 }
 
-
 void GLModel::removeModelPartList(){
     //remove part list
     QList<QObject*> temp;
@@ -2181,6 +2145,7 @@ void GLModel::exgoo(){
 
 void GLModel::mgoo(Qt3DRender::QPickEvent* v)
 {
+    qDebug() << "mgoo @@@@";
     if(v->buttons()>1){
         return;
     }
@@ -2228,6 +2193,7 @@ void GLModel::mgoo(Qt3DRender::QPickEvent* v)
         float biggest = x_diff>y_diff? x_diff : y_diff;
         biggest = z_diff>biggest? z_diff : biggest;
         float scale_val = biggest > 50.0f ? 1.0f : 100.0f/biggest;
+
         m_transform.setScale(scale_val);
 
         removeComponent(dragMesh);
@@ -2462,6 +2428,7 @@ Mesh* GLModel::toSparse(Mesh* mesh){
 
 void GLModel::getTextChanged(QString text, int contentWidth)
 {
+    qDebug() << "@@@@ getTexyChanged";
     if (labellingTextPreview && labellingTextPreview->isEnabled()){
         applyLabelInfo(text, contentWidth, labellingTextPreview->fontName, (labellingTextPreview->fontWeight==QFont::Bold)? true:false, labellingTextPreview->fontSize);
     }
@@ -2488,14 +2455,18 @@ void GLModel::openLabelling()
 void GLModel::closeLabelling()
 {
     qDebug() << "close labelling ******************";
+    if (!labellingActive)
+        return;
+
     labellingActive = false;
-    /*
+
     if (labellingTextPreview){
         qDebug() << "pinpin ^^^^^^^^^^^^^^^^^ 3";
         labellingTextPreview->planeSelected = false;
+        labellingTextPreview->deleteLabel();
         labellingTextPreview->deleteLater();
         labellingTextPreview = nullptr;
-    }*/
+    }
     parentModel->targetMeshFace = nullptr;
 
 //    stateChangeLabelling();
@@ -2508,12 +2479,14 @@ void GLModel::stateChangeLabelling() {
 
 void GLModel::getFontNameChanged(QString fontName)
 {
+    qDebug() << "@@@@ getFontNameChanged";
     if (labellingTextPreview && labellingTextPreview->isEnabled()){
         applyLabelInfo(labellingTextPreview->text, labellingTextPreview->contentWidth, fontName, (labellingTextPreview->fontWeight==QFont::Bold)? true:false, labellingTextPreview->fontSize);
     }
 }
 
 void GLModel::getFontBoldChanged(bool isbold){
+    qDebug() << "@@@@ getBoldChanged";
     if (labellingTextPreview && labellingTextPreview->isEnabled()){
         applyLabelInfo(labellingTextPreview->text, labellingTextPreview->contentWidth, labellingTextPreview->fontName, isbold, labellingTextPreview->fontSize);
 
@@ -2522,6 +2495,7 @@ void GLModel::getFontBoldChanged(bool isbold){
 
 void GLModel::getFontSizeChanged(int fontSize)
 {
+    qDebug() << "@@@@ getSizeChanged" << fontSize;
     if (labellingTextPreview && labellingTextPreview->isEnabled()){
         applyLabelInfo(labellingTextPreview->text, labellingTextPreview->contentWidth, labellingTextPreview->fontName, (labellingTextPreview->fontWeight==QFont::Bold)? true:false, fontSize);
     }
@@ -2532,48 +2506,47 @@ void GLModel::applyLabelInfo(QString text, int contentWidth, QString fontName, b
     QVector3D translation;
     bool selected = false;
 
-    //qDebug() << "applyLabelInfo +++++++++++++++++++++++++ "<<text<<contentWidth<<fontName<<isBold<<fontSize << labellingTextPreview->isEnabled();
+    qDebug() << "applyLabelInfo +++++++++++++++++++++++++ " << text  << contentWidth << this;
 
     if (labellingTextPreview && labellingTextPreview->isEnabled()){
         translation = labellingTextPreview->translation;
         selected = labellingTextPreview->planeSelected;
+        labellingTextPreview->deleteLabel();
         labellingTextPreview->deleteLater();
         labellingTextPreview = nullptr;
     }
     labellingTextPreview = new LabellingTextPreview(this);
     labellingTextPreview->setEnabled(true);
 
-    labellingTextPreview->setFontName(fontName);
-    labellingTextPreview->setFontSize(fontSize);
-    labellingTextPreview->setFontBold(isBold);
-    labellingTextPreview->setText(text, contentWidth);
+    //labellingTextPreview->setFontName(fontName);
+    //labellingTextPreview->setFontSize(fontSize);
+    //labellingTextPreview->setFontBold(isBold);
+    //labellingTextPreview->setText(text, contentWidth);
     labellingTextPreview->planeSelected = selected;
 
+
     if (parentModel->targetMeshFace != nullptr) {
-        labellingTextPreview->setTranslation(translation);
-        labellingTextPreview->setNormal(parentModel->targetMeshFace->fn);
+        labellingTextPreview->updateChange(text, contentWidth, fontName, isBold, fontSize, translation, parentModel->targetMeshFace->fn);
+        //labellingTextPreview->setTranslation(translation);
+        //labellingTextPreview->setNormal(parentModel->targetMeshFace->fn);
     }
-   /*
-    if (labellingTextPreview && labellingTextPreview->isEnabled() && parentModel->targetMeshFace !=nullptr) {
-        labellingTextPreview->setTranslation(translation);
-        labellingTextPreview->setNormal(parentModel->targetMeshFace->fn);
-        if (text != ""){
-            //labellingTextPreview->setText(label_text, label_text.size());
-            labellingTextPreview->setFontName(fontName);
-            labellingTextPreview->setFontBold(isBold);
-            labellingTextPreview->setFontSize(fontSize);
-            labellingTextPreview->setText(text, contentWidth);
-        }
-        labellingTextPreview->planeSelected = selected;
+    else {
+        labellingTextPreview->updateChange(text, contentWidth, fontName, isBold, fontSize, labellingTextPreview->translation, QVector3D(0,0,0));
     }
-    */
+
+
 
 }
 
 
 void GLModel::generateText3DMesh()
 {
-    qDebug() << "generateText3DMesh +++++++++++++++++++++++++";
+    //qDebug() << "generateText3DMesh @@@@@" << this << this->parentModel;
+    if (parentModel->updateLock)
+        return;
+    parentModel->updateLock = true;
+
+
     if (!labellingTextPreview){
         qDebug() << "no labellingTextPreview";
         QMetaObject::invokeMethod(qmlManager->labelPopup, "noModel");
@@ -2586,11 +2559,14 @@ void GLModel::generateText3DMesh()
         return;
     }
 
+    qmlManager->openProgressPopUp();
+
     labellingTextPreview->planeSelected = false;
 
     parentModel->saveUndoState();
 
-    //qDebug() <<m_transform.translation();
+    qmlManager->setProgress(0.1);
+    //qDebug() <<m_transform->translation();
     //qDebug() << labellingTextPreview->translation;
 
     QVector3D* originalVertices = reinterpret_cast<QVector3D*>(vertexBuffer.data().data());
@@ -2602,17 +2578,27 @@ void GLModel::generateText3DMesh()
     int indicesSize;
     float depth = 0.5f;
     float scale = labellingTextPreview->ratioY * labellingTextPreview->scaleY;
-    QVector3D translation = m_transform.translation()+labellingTextPreview->translation + QVector3D(0,-0.3,0);
+    QVector3D translation = labellingTextPreview->translation;// + QVector3D(0,-0.3,0);
 
     Qt3DCore::QTransform transform, normalTransform;
 
     QVector3D normal = labellingTextPreview->normal;
 
     QVector3D ref = QVector3D(0, 0, 1);
-    auto tangent = QVector3D::crossProduct(normal, ref);
-
+    QVector3D tangent;
+    if (normal == QVector3D(0,0,1) || normal == QVector3D(0,0,-1)){
+        tangent = QVector3D(1,0,0);
+    } else {
+        tangent = QVector3D::crossProduct(normal, ref);
+    }
     tangent.normalize();
-    auto binormal = QVector3D::crossProduct(tangent, normal);
+
+    QVector3D binormal;
+    if (normal == QVector3D(0,0,1) || normal == QVector3D(0,0,-1)){
+        binormal = QVector3D(0,1,0);
+    } else {
+        binormal = QVector3D::crossProduct(tangent, normal);
+    }
     binormal.normalize();
 
     QQuaternion quat = QQuaternion::fromAxes(tangent, normal, binormal) * QQuaternion::fromAxisAndAngle(QVector3D(0, 0, 1), 180)* QQuaternion::fromAxisAndAngle(QVector3D(1, 0, 0), 90);
@@ -2620,19 +2606,36 @@ void GLModel::generateText3DMesh()
     transform.setScale(scale);
     transform.setRotation(quat);
     transform.setTranslation(translation);
+    qmlManager->setProgress(0.3);
+    QFont targetFont = QFont(labellingTextPreview->fontName, labellingTextPreview->fontSize, labellingTextPreview->fontWeight, false);
+    QString targetText = labellingTextPreview->text;
+    QVector3D targetNormal = labellingTextPreview->normal;
+
+    if (labellingTextPreview){
+        qDebug() << "pinpin ^^^^^^^^^^^^^^^^^ 3";
+        labellingTextPreview->planeSelected = false;
+        labellingTextPreview->deleteLabel();
+        labellingTextPreview->deleteLater();
+        labellingTextPreview = nullptr;
+    }
+    parentModel->targetMeshFace = nullptr;
 
     generateText3DGeometry(&vertices, &verticesSize,
                            &indices, &indicesSize,
-                           QFont(labellingTextPreview->fontName, labellingTextPreview->fontSize, labellingTextPreview->fontWeight, false),
-                           labellingTextPreview->text,
+                           targetFont,
+                           targetText,
                            depth,
                            parentModel->_mesh,
-                           -labellingTextPreview->normal,
+                           -targetNormal,
                            transform.matrix(),
                            normalTransform.matrix());
 
+
+    qmlManager->setProgress(0.9);
+
     std::vector<QVector3D> outVertices;
     std::vector<QVector3D> outNormals;
+
     for (int i = 0; i < indicesSize / 3; ++i) {
         // Insert vertices in CCW order
         outVertices.push_back(vertices[2 * indices[3*i + 2] + 0]);
@@ -2649,11 +2652,12 @@ void GLModel::generateText3DMesh()
     if (GLModel* glmodel = qobject_cast<GLModel*>(parent())) {
         glmodel->appendVertices(outVertices);
         glmodel->appendNormalVertices(outNormals);
-
         emit glmodel->_updateModelMesh(true);
     }
 
+    qmlManager->setProgress(1);
 
+        //this->parentModel->labellingTextPreview->hideLabel();
 }
 
 // for extension
@@ -2772,6 +2776,10 @@ void GLModel::openLayflat(){
 }
 
 void GLModel::closeLayflat(){
+
+    if (!layflatActive)
+        return;
+
     layflatActive = false;
     parentModel->uncolorExtensionFaces();
     parentModel->targetMeshFace = nullptr;
@@ -2787,6 +2795,9 @@ void GLModel::openExtension(){
 }
 
 void GLModel::closeExtension(){
+    if (!extensionActive)
+        return;
+
     extensionActive = false;
     parentModel->uncolorExtensionFaces();
     parentModel->targetMeshFace = nullptr;
@@ -2798,6 +2809,10 @@ void GLModel::openManualSupport(){
 }
 
 void GLModel::closeManualSupport(){
+
+    if (!manualSupportActive)
+        return;
+
     manualSupportActive = false;
     parentModel->uncolorExtensionFaces();
     parentModel->targetMeshFace = nullptr;
@@ -2811,6 +2826,9 @@ void GLModel::openScale(){
 }
 
 void GLModel::closeScale(){
+    if (!scaleActive)
+        return;
+
     scaleActive = false;
     qmlManager->sendUpdateModelInfo();
     qDebug() << "close scale";
@@ -2824,6 +2842,10 @@ void GLModel::openCut(){
 
 void GLModel::closeCut(){
     qDebug() << "closecut called";
+
+    if (!cutActive)
+        return;
+
     cutActive = false;
     removePlane();
     parentModel->removeCuttingPoints();
@@ -2838,6 +2860,10 @@ void GLModel::openHollowShell(){
 
 void GLModel::closeHollowShell(){
     qDebug() << "close HollowShell called";
+
+    if (!hollowShellActive)
+        return;
+
     hollowShellActive = false;
     qmlManager->hollowShellSphereEntity->setProperty("visible", false);
 }
@@ -2856,6 +2882,10 @@ void GLModel::openShellOffset(){
 
 void GLModel::closeShellOffset(){
     qDebug() << "closeShelloffset";
+
+    if (!shellOffsetActive)
+        return;
+
     shellOffsetActive = false;
     removePlane();
     parentModel->removeCuttingPoints();
@@ -2919,6 +2949,31 @@ void GLModel::changeViewMode(int viewMode) {
     }
 
     emit _updateModelMesh(true);
+}
+
+void GLModel::inactivateFeatures(){
+    /*labellingActive = false;
+    extensionActive = false;
+    cutActive = false;
+    hollowShellActive = false;
+    shellOffsetActive = false;
+    layflatActive = false;
+    manualSupportActive = false;
+    layerViewActive = false;
+    supportViewActive = false;
+    scaleActive = false;*/
+
+    closeLabelling();
+    closeExtension();
+    closeCut();
+    closeHollowShell();
+    closeShellOffset();
+    closeLayflat();
+    closeManualSupport();
+    closeScale();
+    //layerViewActive = false; //closeLayerView();
+    //supportViewActive = false; //closeSupportView();
+    //parentModel->changeViewMode(VIEW_MODE_OBJECT);
 }
 
 void GLModel::removeLayerViewComponents(){

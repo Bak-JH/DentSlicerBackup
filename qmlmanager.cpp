@@ -176,6 +176,7 @@ void QmlManager::initializeUI(QQmlApplicationEngine* e){
     boxUpperTab = FindItemByName(engine, "boxUpperTab");
     boxLeftTab = FindItemByName(engine, "boxLeftTab");
     scene3d = FindItemByName(engine, "scene3d");
+
     QObject::connect(boxUpperTab,SIGNAL(runGroupFeature(int,QString, double, double, double, QVariant)),this,SLOT(runGroupFeature(int,QString, double, double, double, QVariant)));
 
     QObject::connect(this, SIGNAL(arrangeDone(std::vector<QVector3D>, std::vector<float>)), this, SLOT(applyArrangeResult(std::vector<QVector3D>, std::vector<float>)));
@@ -280,7 +281,6 @@ GLModel* QmlManager::getModelByID(int ID)
 
 
 void QmlManager::deleteOneModelFile(int ID) {
-
 	auto target = getModelByID(ID);
 	if (target)
 	{
@@ -294,7 +294,6 @@ void QmlManager::deleteOneModelFile(int ID) {
 		glmodels.erase(ID);
 		deletePartListItem(ID);
 	}
-
 }
 
 void QmlManager::deleteModelFileDone() {
@@ -1122,6 +1121,7 @@ void QmlManager::modelSelected(int ID){
 
         QMetaObject::invokeMethod(boundedBox, "hideBox"); // Bounded Box
         if (groupFunctionState == "active"){
+            //qDebug() << "@@@@ selected @@@@" << groupFunctionIndex;
             switch (groupFunctionIndex){
             //case 2:
             //    QMetaObject::invokeMethod(savePopup, "offApplyFinishButton");
@@ -1198,6 +1198,7 @@ void QmlManager::modelSelected(int ID){
 
 
         if (groupFunctionState == "active"){
+            qDebug() << "@@@@ selected2 @@@@" << groupFunctionIndex;
             switch (groupFunctionIndex){
             //case 2:
             //    QMetaObject::invokeMethod(savePopup, "onApplyFinishButton");
@@ -1223,6 +1224,7 @@ void QmlManager::modelSelected(int ID){
         }
     } else {
         //selectedModels[0] = nullptr;
+        //qDebug() << "@@@@ clear selected Models @@@@";
         selectedModels.clear();
         selectedModels.push_back(nullptr);
     }
@@ -1263,7 +1265,6 @@ void QmlManager::unselectPart(int ID){
 		qDebug() << "resetting model" << ID;
 		unselectPartImpl(target);
 	}
-
 }
 
 void QmlManager::unselectAll(){
