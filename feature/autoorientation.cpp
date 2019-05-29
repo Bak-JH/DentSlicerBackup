@@ -408,7 +408,10 @@ std::vector<Orient*> autoorientation::egde_plus_vertex(Mesh* mesh, int best_n){
             qmlManager->setProgress((float)i*0.80/(vcount*it)+0.15);
             qmlManager->setProgressText("orientation.....");
         }
-		++faceItr;
+		if (faceItr != mesh->getFaces().cend())
+			++faceItr;
+		else
+			break;
     }
 
     qmlManager->setProgress(0.95);
