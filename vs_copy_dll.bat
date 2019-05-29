@@ -12,7 +12,6 @@ IF "%1"=="Debug" (
 ) ELSE (
 	xcopy /s/Y %CGAL_DIR%\build\lib\%1\CGAL-vc140-mt-4.14.lib %~dp0\%1
 	xcopy /s/Y %CGAL_DIR%\build\bin\%1\CGAL-vc140-mt-4.14.dll %~dp0\%1
-	xcopy /s/Y %CGAL_DIR%\build\bin\%1\CGAL-vc140-mt-4.14.pdb %~dp0\%1
 )
 
 
