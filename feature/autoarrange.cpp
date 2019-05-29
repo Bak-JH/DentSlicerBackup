@@ -7,7 +7,7 @@
 #define OFFSET 2000
 #include <qmlmanager.h>
 #include <exception>
-
+#include <unordered_map>
 autoarrange::autoarrange()
 {
 }
@@ -433,7 +433,9 @@ bool is_valid_range(int y, int x, int k){
     return 0<=y && y<=k && 0<=x && x<=k;
 }
 
-bool make_outline(int y, int x, int startY, int startX, int depth, int direction, std::vector<std::vector<bool> > *block, std::vector<std::vector<bool> > *outline, std::vector<std::pair<int, int> > *vertice, int k) {
+bool make_outline(int y, int x, int startY, int startX, int depth, int direction,
+	std::unordered_map<size_t, std::unordered_map<size_t, bool>>*block,
+	std::unordered_map<size_t, std::unordered_map<size_t, bool>>*outline, std::vector<std::pair<int, int> > *vertice, int k) {
     int dy[8] = {0, -1, -1, -1, 0, 1, 1, 1}, dx[8] = {1, 1, 0, -1, -1, -1, 0, 1};
     (*outline)[y][x] = true;
     if (depth != 0 && y == startY && x == startX) {
@@ -455,7 +457,6 @@ std::vector<LLIPoint> getPaddedProj(const Mesh *mesh, int floatPointPadding) {
     long long int INF=10000000000000;
     int k=100, padding=2;
     std::vector<std::pair<LLIPoint, LLIPoint> > edges;
-    std::vector<std::vector<bool> > block, padding_block, outline;
     std::vector<std::pair<int, int> > vertice;
     std::vector<LLIPoint> result;
 
@@ -477,16 +478,7 @@ std::vector<LLIPoint> getPaddedProj(const Mesh *mesh, int floatPointPadding) {
         }
     }
 
-    qDebug() << "initialize";
-    for (int i = 0; i <= k+5; i++){
-        std::vector<bool> temp;
-        for (int j = 0; j <= k+5; j++){
-            temp.push_back(false);
-        }
-        block.push_back(temp);
-        outline.push_back(temp);
-        padding_block.push_back(temp);
-    }
+
 
     qDebug() << "fill block";
     int edgeCnt = edges.size();
@@ -501,6 +493,9 @@ std::vector<LLIPoint> getPaddedProj(const Mesh *mesh, int floatPointPadding) {
     ttt = (maxy-miny)/33; miny-=ttt; maxy+=ttt;
     blockX = (maxx-minx)/k;
     blockY = (maxy-miny)/k;
+	//when using operator=, value is initialized to false anyway
+	std::unordered_map<size_t, std::unordered_map<size_t,bool>> block, padding_block, outline;
+
 
     qDebug() << minx << " " << maxx << " " << miny << " " << maxy;
     qDebug() << blockX << " " << blockY;
@@ -509,6 +504,13 @@ std::vector<LLIPoint> getPaddedProj(const Mesh *mesh, int floatPointPadding) {
         int endXBlock = int((edges[i].second.x - minx) / blockX);
         int startYBlock = int((edges[i].first.y - miny) / blockY);
         int endYBlock;
+		//block.clear();
+		//padding_block.clear();
+		//outline.clear();
+
+		//block.resize(std::max(startYBlock, endYBlock));
+		//padding_block.resize(std::max(startYBlock, endYBlock));
+		//outline.resize(std::max(startYBlock, endYBlock));
 //        qDebug() << "fill block error here1";
 
         while(true){
