@@ -1,6 +1,6 @@
 #pragma once
 #include <memory>
-#include <boost/container/stable_vector.hpp>
+#include <deque>
 #include <utility>
 #include <algorithm>
 #include <functional>
@@ -37,9 +37,9 @@ public:
     typedef const T& const_reference;
 	typedef typename A_trait::difference_type difference_type;
 	typedef typename A_trait::size_type size_type;
-	typedef typename boost::container::stable_vector<T,A> container_type;
-	typedef typename boost::container::stable_vector_iterator<T*, false> container_iterator_type;
-	typedef typename boost::container::stable_vector_iterator<T*, true> container_const_iterator_type;
+	typedef typename std::deque<T,A> container_type;
+	//typedef typename boost::container::stable_vector_iterator<T*, false> container_iterator_type;
+	//typedef typename boost::container::stable_vector_iterator<T*, true> container_const_iterator_type;
 	typedef typename std::function<void(size_t, size_t)> indexChangedCallback;
 	typedef std::reverse_iterator<IndexedListItr::iterator<T, A>> reverse_iterator; //optional
 	typedef std::reverse_iterator<IndexedListItr::const_iterator<T, A>> const_reverse_iterator; //optional
@@ -320,8 +320,6 @@ private:
 	std::set<size_t, std::greater<size_t>> _indices;
 };
 
-
-
 namespace IndexedListItr
 {
 
@@ -331,8 +329,6 @@ namespace IndexedListItr
 		typedef A allocator_type;
 		typedef typename std::allocator_traits<A> A_trait;
 		typedef typename A_trait::size_type size_type;
-		typedef typename boost::container::stable_vector<T,A> container_type;
-		typedef typename boost::container::stable_vector_iterator<T*, false> container_iterator_type;
 		//traits
 		typedef typename A_trait::difference_type difference_type;
 		typedef typename A_trait::value_type value_type;
@@ -342,9 +338,9 @@ namespace IndexedListItr
 
 		iterator()
 		{}
-		iterator(container_iterator_type containerItr, IndexedList<T,A>* owner) : _containerItr(containerItr), _owner(owner)
+		iterator(size_t index, IndexedList<T,A>* owner) : _index(index), _owner(owner)
 		{}
-		iterator(const iterator& o) : _containerItr(o._containerItr), _owner(o._owner)
+		iterator(const iterator& o) : _index(o._index), _owner(o._owner)
 		{
 		}
 		~iterator()
@@ -352,71 +348,70 @@ namespace IndexedListItr
 
 		iterator& operator=(const iterator& o)
 		{
-			_containerItr = o._containerItr;
+			_index = o._index;
 			_owner = o._owner;
 			return *this;
 		}
 		bool operator==(const iterator& o) const
 		{
-			return _containerItr == o._containerItr;
+			return _index == o._index;
 		}
 		bool operator!=(const iterator& o) const
 		{
-			return _containerItr != o._containerItr;
+			return !operator==(o);
 		}
 
 		//random access iterator
 		bool operator< (const iterator& o) const
 		{
-			return _containerItr < o._containerItr;
+			return _index < o._index;
 		}
 		bool operator> (const iterator& o) const
 		{
-			return _containerItr > o._containerItr;
+			return _index > o._index;
 		}
 		bool operator<=(const iterator& o) const
 		{
-			return _containerItr <= o._containerItr;
+			return _index <= o._index;
 		}
 		bool operator>=(const iterator& o) const
 		{
-			return _containerItr >= o._containerItr;
+			return _index >= o._index;
 		} //optional
 
 		//pre
 		iterator& operator++()
 		{
-			++_containerItr;
+			++_index;
 			return *this;
 		}
 		iterator& operator--()
 		{
-			--_containerItr;
+			--_index;
 			return *this;
 		}
 		//post
 		iterator operator++(int)
 		{
 			auto tmp = *this;
-			++_containerItr;
+			++_index;
 			return tmp;
 		}
 		iterator operator--(int)
 		{
 			auto tmp = *this;
-			--_containerItr;
+			--_index;
 			return tmp;
 
 		}
-
 		iterator& operator+=(size_type offset)
 		{
-			_containerItr += offset;
+			_index += offset;
 			return *this;
 		}
 		iterator& operator-=(size_type offset)
 		{
-			_containerItr -= offset;
+			_index -= offset;
 
 			return *this;
 		}
@@ -437,27 +432,27 @@ namespace IndexedListItr
 		}
         difference_type operator-(const iterator& itr)const
 		{
-			return _containerItr - itr._containerItr;
+			return _index - itr._index;
 		}
 
 		reference operator*() const
 		{
 			_owner->modifiedElement(this);
-			return *_containerItr;
+			return _owner->operator[](_index);
 		}
 		pointer operator->() const
 		{
 			_owner->modifiedElement(this);
-			return &(*_containerItr);
+			return &(_owner->operator[](_index));
 		}
 		reference operator[](size_type offset) const
 		{
 			auto offsetItr = *this + offset;
 			_owner->modifiedElement(&offsetItr);
-			return *(_containerItr + offset);
+			return _owner->operator[](_index + offset);
 		}
 	private:
-		container_iterator_type _containerItr;
+		size_t _index;
 		IndexedList<T,A>* _owner;
 
 		friend class const_iterator<T,A>;
@@ -469,8 +464,6 @@ namespace IndexedListItr
 		typedef A allocator_type;
 		typedef typename std::allocator_traits<A> A_trait;
 		typedef typename A_trait::size_type size_type;
-		typedef typename boost::container::stable_vector<T,A> container_type;
-		typedef typename boost::container::stable_vector_iterator<T*, true> container_const_iterator_type;
 		//traits
 		typedef typename A_trait::difference_type difference_type;
 		typedef typename A_trait::value_type value_type;
@@ -480,77 +473,86 @@ namespace IndexedListItr
 
 		const_iterator()
 		{}
-		const_iterator(container_const_iterator_type containerItr) : _containerItr(containerItr)
+		const_iterator(size_t index, const IndexedList<T, A>* containerPtr) : _index(index), _owner(containerPtr)
 		{}
-		const_iterator(const const_iterator& o) : _containerItr(o._containerItr)
+		const_iterator(const const_iterator& o) : _index(o._index), _owner(o._owner)
 		{}
-		const_iterator(const iterator<T,A>& o) : _containerItr(o._containerItr)
+		const_iterator(const iterator<T,A>& o) : _index(o._index), _owner(o._owner)
 		{}
 		~const_iterator()
 		{}
 
+
+
+
+
 		const_iterator& operator=(const const_iterator& o)
 		{
-			_containerItr = o._containerItr;
+			_index = o._index;
+			_owner = o._owner;
 			return *this;
-
 		}
 		bool operator==(const const_iterator& o) const
 		{
-			return _containerItr == o._containerItr;
+			return _index == o._index;
 		}
 		bool operator!=(const const_iterator& o) const
 		{
-			return _containerItr != o._containerItr;
+			return !operator==(o);
 		}
-		bool operator<(const const_iterator& o) const
+
+		//random access const_iterator
+		bool operator< (const const_iterator& o) const
 		{
-			return _containerItr < o._containerItr;
+			return _index < o._index;
 		}
-		bool operator>(const const_iterator& o) const
+		bool operator> (const const_iterator& o) const
 		{
-			return _containerItr > o._containerItr;
+			return _index > o._index;
 		}
 		bool operator<=(const const_iterator& o) const
 		{
-			return _containerItr <= o._containerItr;
+			return _index <= o._index;
 		}
 		bool operator>=(const const_iterator& o) const
 		{
-			return _containerItr >= o._containerItr;
+			return _index >= o._index;
 		} //optional
-				//pre
+
+		//pre
 		const_iterator& operator++()
 		{
-			++_containerItr;
+			++_index;
 			return *this;
 		}
 		const_iterator& operator--()
 		{
-			--_containerItr;
+			--_index;
 			return *this;
 		}
 		//post
 		const_iterator operator++(int)
 		{
 			auto tmp = *this;
-			++_containerItr;
+			++_index;
 			return tmp;
 		}
 		const_iterator operator--(int)
 		{
 			auto tmp = *this;
-			--_containerItr;
+			--_index;
 			return tmp;
+
 		}
 		const_iterator& operator+=(size_type offset)
 		{
-			_containerItr += offset;
+			_index += offset;
 			return *this;
 		}
 		const_iterator& operator-=(size_type offset)
 		{
-			_containerItr -= offset;
+			_index -= offset;
+
 			return *this;
 		}
 		const_iterator operator+(size_type offset) const
@@ -568,26 +570,27 @@ namespace IndexedListItr
 			auto tmp = *this;
 			return tmp -= offset;
 		}
-        difference_type operator-(const const_iterator& itr)const
+		difference_type operator-(const const_iterator& itr)const
 		{
-			return _containerItr - itr._containerItr;
+			return _index - itr._index;
 		}
 
 		reference operator*() const
 		{
-			return *_containerItr;
+			return _owner->operator[](_index);
 		}
 		pointer operator->() const
 		{
-			return &(*_containerItr);
-
+			return &(_owner->operator[](_index));
 		}
 		reference operator[](size_type offset) const
 		{
-			return *(_containerItr + offset);
+			return _owner->operator[](_index + offset);
 		}
 	private:
-		container_const_iterator_type _containerItr;
+		size_t _index;
+		const IndexedList<T, A>* _owner;
+
 	};
 
 }
@@ -596,64 +599,64 @@ namespace IndexedListItr
 template <class T, class A>
 IndexedListItr::iterator<T, A> IndexedList<T,A>::begin()
 {
-	return IndexedListItr::iterator<T, A>(_container.begin(), this);
+	return IndexedListItr::iterator<T, A>(0, this);
 }
 template <class T, class A>
 IndexedListItr::const_iterator<T, A> IndexedList<T, A>::begin() const
 {
-	return IndexedListItr::const_iterator<T, A>(_container.begin());
+	return IndexedListItr::const_iterator<T, A>(0, this);
 }
 template <class T, class A>
 IndexedListItr::const_iterator<T, A> IndexedList<T, A>::cbegin() const
 {
 	//auto jj = const_iterator(_container.begin());
-	return IndexedListItr::const_iterator<T, A>(_container.cbegin());
+	return IndexedListItr::const_iterator<T, A>(0, this);
 }
 template <class T, class A>
 IndexedListItr::iterator<T, A> IndexedList<T, A>::end()
 {
-	return IndexedListItr::iterator<T, A>(_container.end(), this);
+	return IndexedListItr::iterator<T, A>(_container.size(), this);
 }
 template <class T, class A>
 IndexedListItr::const_iterator<T, A> IndexedList<T, A>::end() const
 {
-	return IndexedListItr::const_iterator<T, A>(_container.cend());
+	return IndexedListItr::const_iterator<T, A>(_container.size(), this);
 }
 template <class T, class A>
 IndexedListItr::const_iterator<T, A> IndexedList<T, A>::cend() const
 {
-	return IndexedListItr::const_iterator<T, A>(_container.cend());
+	return IndexedListItr::const_iterator<T, A>(_container.size(), this);
 }
 
 template <class T, class A>
 typename IndexedList<T,A>::reverse_iterator IndexedList<T, A>::rbegin()
 {
-	IndexedList<T, A>::reverse_iterator(end());
+	IndexedList<T, A>::reverse_iterator(_container.size(), this);
 }
 template <class T, class A>
 typename IndexedList<T, A>::const_reverse_iterator IndexedList<T, A>::rbegin() const
 {
-	return IndexedList<T, A>::const_reverse_iterator(end());
+	return IndexedList<T, A>::const_reverse_iterator(_container.size(), this);
 }
 template <class T, class A>
 typename IndexedList<T, A>::const_reverse_iterator IndexedList<T, A>::crbegin() const
 {
-	return IndexedList<T, A>::const_reverse_iterator(end());
+	return IndexedList<T, A>::const_reverse_iterator(_container.size(), this);
 }
 template <class T, class A>
 typename IndexedList<T, A>::reverse_iterator IndexedList<T, A>::rend()
 {
-	return IndexedList<T, A>::reverse_iterator(begin());
+	return IndexedList<T, A>::reverse_iterator(0, this);
 }
 template <class T, class A>
 typename IndexedList<T, A>::const_reverse_iterator IndexedList<T, A>::rend() const
 {
-	return IndexedList<T, A>::const_reverse_iterator(begin());
+	return IndexedList<T, A>::const_reverse_iterator(0, this);
 }
 template <class T, class A>
 typename IndexedList<T, A>::const_reverse_iterator IndexedList<T, A>::crend() const
 {
-	return IndexedList<T, A>::const_reverse_iterator(begin());
+	return IndexedList<T, A>::const_reverse_iterator(0, this);
 }
 
 template <class T, class A>
