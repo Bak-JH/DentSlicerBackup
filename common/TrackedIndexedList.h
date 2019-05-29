@@ -72,6 +72,10 @@ public:
 		_changedIndices.insert(index);
 
 	}
+	void markChangedAll()
+	{
+		_changedAll = true;
+	}
 
 protected:
 	void addedElement(size_t index) override
