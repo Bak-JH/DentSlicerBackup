@@ -83,7 +83,6 @@ public:
     bool planeSelected;
 
 private:
-    Qt3DCore::QNode* labelParent;
     //Qt3DExtras::QPlaneMesh* planeMesh = nullptr;
     Qt3DExtras::QExtrudedTextMesh* planeMesh = nullptr;
     Qt3DCore::QEntity* planeEntity = nullptr;

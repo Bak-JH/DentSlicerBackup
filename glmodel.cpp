@@ -128,6 +128,8 @@ GLModel::GLModel(QObject* mainWindow, QNode *parent, Mesh* loadMesh, QString fna
 	m_geometry.addAttribute(&indexAttribute);
 
 
+
+
     // generates shadow model for object picking
   
 	// Add to Part List
@@ -189,8 +191,6 @@ GLModel::GLModel(QObject* mainWindow, QNode *parent, Mesh* loadMesh, QString fna
 	sphereObjectPicker.reserve(50);
 	cuttingPoints.reserve(50);
 	cuttingContourCylinders.reserve(50);
-
-
 }
 
 void GLModel::changecolor(int mode){
@@ -1936,20 +1936,16 @@ void GLModel::mouseReleasedRayCasted(MouseEventData& pick, Qt3DRender::QRayCaste
 	targetMeshFace = _mesh->getFaces().cbegin() + hit.primitiveIndex();
 
 	if (labellingActive && hit.localIntersection() != QVector3D(0, 0, 0)) {
+        if (labellingTextPreview == nullptr)
+            labellingTextPreview = new LabellingTextPreview(this);
 
-		//uncolorExtensionFaces();
-		//generateColorAttributes();
-		//colorExtensionFaces();
-		QMetaObject::invokeMethod(qmlManager->labelPopup, "labelUpdate");
 
 		if (labellingTextPreview && labellingTextPreview->isEnabled()) {
-            labellingTextPreview->setTranslation(m_transform.translation() + hit.localIntersection() + targetMeshFace->fn);
+            labellingTextPreview->setTranslation(hit.localIntersection() + targetMeshFace->fn);
 			labellingTextPreview->setNormal(targetMeshFace->fn);
-			labellingTextPreview->planeSelected = true;
-		}
-		else {
-			labellingTextPreview->planeSelected = false;
-		}
+            labellingTextPreview->planeSelected = true;
+            QMetaObject::invokeMethod(qmlManager->labelPopup, "labelUpdate");
+        }
 	}
 
 
@@ -2191,26 +2187,18 @@ void GLModel::openLabelling()
     qmlManager->lastModelSelected();
     if (!qmlManager->isSelected(this)) {
         labellingActive = false;
-       /* if (labellingTextPreview) {
-            qDebug() << "pinpin ^^^^^^^^^^^^^^^^^ 2";
-            labellingTextPreview->planeSelected = false;
-            labellingTextPreview->deleteLater();
-            labellingTextPreview = nullptr;
-        }*/
     }
 
 }
 
 void GLModel::closeLabelling()
 {
-    qDebug() << "close labelling ******************";
     if (!labellingActive)
         return;
 
     labellingActive = false;
 
     if (labellingTextPreview){
-        qDebug() << "pinpin ^^^^^^^^^^^^^^^^^ 3";
         labellingTextPreview->planeSelected = false;
         labellingTextPreview->deleteLabel();
         labellingTextPreview->deleteLater();
@@ -2267,18 +2255,17 @@ void GLModel::applyLabelInfo(QString text, int contentWidth, QString fontName, b
     labellingTextPreview = new LabellingTextPreview(this);
     labellingTextPreview->setEnabled(true);
 
-    //labellingTextPreview->setFontName(fontName);
-    //labellingTextPreview->setFontSize(fontSize);
-    //labellingTextPreview->setFontBold(isBold);
-    //labellingTextPreview->setText(text, contentWidth);
     labellingTextPreview->planeSelected = selected;
 
-    if (_targetSelected) {
+    qDebug() << "applyLabelInfo";
+    if (_targetSelected){
+        qDebug() << "applyLabelInfo : target Selected";
         labellingTextPreview->updateChange(text, contentWidth, fontName, isBold, fontSize, translation,targetMeshFace->fn);
         //labellingTextPreview->setTranslation(translation);
         //labellingTextPreview->setNormal(parentModel->targetMeshFace->fn);
     }
     else {
+        qDebug() << "applyLabelInfo : target unSelected";
         labellingTextPreview->updateChange(text, contentWidth, fontName, isBold, fontSize, labellingTextPreview->translation, QVector3D(0,0,0));
         }
 
@@ -2314,8 +2301,6 @@ void GLModel::generateText3DMesh()
     saveUndoState();
 
     qmlManager->setProgress(0.1);
-    //qDebug() <<m_transform->translation();
-    //qDebug() << labellingTextPreview->translation;
 
     QVector3D* originalVertices = reinterpret_cast<QVector3D*>(vertexBuffer.data().data());
     int originalVerticesSize = vertexBuffer.data().size() / sizeof(float) / 3;
@@ -2355,12 +2340,12 @@ void GLModel::generateText3DMesh()
     transform.setRotation(quat);
     transform.setTranslation(translation);
     qmlManager->setProgress(0.3);
+
     QFont targetFont = QFont(labellingTextPreview->fontName, labellingTextPreview->fontSize, labellingTextPreview->fontWeight, false);
     QString targetText = labellingTextPreview->text;
     QVector3D targetNormal = labellingTextPreview->normal;
 
     if (labellingTextPreview){
-        qDebug() << "pinpin ^^^^^^^^^^^^^^^^^ 3";
         labellingTextPreview->planeSelected = false;
         labellingTextPreview->deleteLabel();
         labellingTextPreview->deleteLater();
@@ -2395,10 +2380,7 @@ void GLModel::generateText3DMesh()
 
     updateModelMesh();
 
-
     qmlManager->setProgress(1);
-
-        //this->parentModel->labellingTextPreview->hideLabel();
 }
 
 // for extension
