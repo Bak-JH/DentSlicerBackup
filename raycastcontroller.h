@@ -49,6 +49,7 @@ public slots:
 	void hitsChanged(const Qt3DRender::QAbstractRayCaster::Hits& hits);
 
 private:
+	Qt3DCore::QEntity* _camera = nullptr;
 	enum RayCastMode
 	{
 		//Click = 0,
@@ -56,13 +57,16 @@ private:
 		Pressed = 0,
 		Released
 	};
-	bool isClick(QPoint releasePt);
+	bool isClick(QVector2D releasePt);
+	bool shouldRaycastReleased(Qt3DInput::QMouseEvent*);
+	bool shouldRaycastPressed(Qt3DInput::QMouseEvent*);
+
 	Qt3DRender::QScreenRayCaster* _rayCaster = nullptr;
 	Qt3DInput::QMouseHandler* _mouseHandler = nullptr;
 	RayCastMode _rayCastMode;
 	//click detection
 	std::chrono::time_point<std::chrono::system_clock> _pressedTime;
-	QPoint _pressedPt;
+	QVector2D _pressedPt;
 	QPoint _releasePt;
 	//mouse event
 	MouseEventData _mouseEvent;
@@ -71,7 +75,7 @@ private:
 	//for removing layer element
 	std::vector<GLModel*> _boundBoxHitModels;
 	static const std::chrono::milliseconds MAX_CLICK_DURATION;
-	static const size_t MIN_CLICK_MOVEMENT_SQRD;
+	static const size_t MAX_CLICK_MOVEMENT;
 signals:
 
 };

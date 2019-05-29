@@ -102,9 +102,11 @@ class GLModel : public QEntity
     Q_OBJECT
 public:
     //raycasting + mouse event
-    void mouseReleased	(MouseEventData&, Qt3DRender::QRayCasterHit&);
-    void mouseMoved		(MouseEventData&);
-    void mousePressed	(MouseEventData&, Qt3DRender::QRayCasterHit&);
+    void mouseReleased			(MouseEventData&);
+    void mouseMoved				(MouseEventData&);
+    void mousePressed			(MouseEventData&);
+	void mousePressedRayCasted	(MouseEventData&, Qt3DRender::QRayCasterHit&);
+	void mouseReleasedRayCasted	(MouseEventData&, Qt3DRender::QRayCasterHit&);
 
 	//size of QGeometry Attribute elements
 	const static size_t POS_SIZE = 3; //x, y, z of position
@@ -126,8 +128,7 @@ public:
 
 
     bool appropriately_rotated=false;
-    QPhongMaterial *m_meshMaterial;
-    QPhongAlphaMaterial *m_meshAlphaMaterial;
+	QPhongMaterial* m_meshMaterial;
     QPerVertexColorMaterial *m_meshVertexMaterial;
     QMaterial *m_layerMaterial;
     QParameter *m_layerMaterialHeight;
@@ -253,7 +254,7 @@ private:
 	//for QAttributes
 	Qt3DCore::QTransform m_transform;
 	bool _hitEnabled = false;
-
+	bool _isDrag = false;
 
     //Order is important! Look at the initializer list in constructor
 	const Hix::Engine3D::Mesh* _currentVisibleMesh;
@@ -287,10 +288,10 @@ private:
 	void setMesh(Hix::Engine3D::Mesh* mesh);
 	void updateMesh(Hix::Engine3D::Mesh* mesh);
 	void appendMesh(Hix::Engine3D::Mesh* mesh);
-	void appendMeshVertex(const Hix::Engine3D::Mesh* mesh,
+	size_t appendMeshVertex(const Hix::Engine3D::Mesh* mesh,
 		Hix::Engine3D::VertexConstItr begin, Hix::Engine3D::VertexConstItr end);
 	void appendMeshFace(const Hix::Engine3D::Mesh* mesh,
-		Hix::Engine3D::FaceConstItr begin, Hix::Engine3D::FaceConstItr end);
+		Hix::Engine3D::FaceConstItr begin, Hix::Engine3D::FaceConstItr end, size_t prevMaxIndex);
 
     int cutMode = 1;
     int cutFillMode = 1;
@@ -323,8 +324,6 @@ private:
 
 	void addModelLayer();
 	void removeModelLayer();
-	std::vector<QLayer*> _boundBoxLayers;
-
 
 
 signals:
@@ -333,7 +332,7 @@ signals:
     void resetLayflat();
     void bisectDone(Mesh*, Mesh*); //lmesh, rmesh
     void _generateSupport();
-    void _updateModelMesh(bool);
+    void _updateModelMesh();
     void layFlatSelect();
     void layFlatUnSelect();
     void extensionSelect();
