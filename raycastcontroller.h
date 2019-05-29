@@ -39,6 +39,7 @@ public:
 	//Qt3DRender::QLayer _modelLayer;
 	void addLayer(Qt3DRender::QLayer* layer);
 	void removeLayer(Qt3DRender::QLayer* layer);
+	bool isDrag()const;
 
 public slots:
 
@@ -47,7 +48,6 @@ public slots:
 	void mousePositionChanged(Qt3DInput::QMouseEvent* mouse);
 
 	void hitsChanged(const Qt3DRender::QAbstractRayCaster::Hits& hits);
-
 private:
 	Qt3DCore::QEntity* _camera = nullptr;
 	enum RayCastMode
@@ -71,6 +71,7 @@ private:
 	//mouse event
 	MouseEventData _mouseEvent;
 	//change this to atomic if raytracing is done on seperate thread
+	bool _isDrag = false;
 	std::atomic<bool> _rayCasterBusy = false;
 	//for removing layer element
 	std::vector<GLModel*> _boundBoxHitModels;

@@ -101,10 +101,9 @@ class GLModel : public QEntity
 {
     Q_OBJECT
 public:
+
     //raycasting + mouse event
-    void mouseReleased			(MouseEventData&);
     void mouseMoved				(MouseEventData&);
-    void mousePressed			(MouseEventData&);
 	void mousePressedRayCasted	(MouseEventData&, Qt3DRender::QRayCasterHit&);
 	void mouseReleasedRayCasted	(MouseEventData&, Qt3DRender::QRayCasterHit&);
 
@@ -149,11 +148,11 @@ public:
     Plane cuttingPlane;
 
     // used for layer view
-    Qt3DExtras:: QPlaneMesh* layerViewPlane[1];
-    Qt3DCore::QEntity* layerViewPlaneEntity[1];
-    Qt3DCore::QTransform *layerViewPlaneTransform[1];
-    Qt3DRender::QTextureLoader* layerViewPlaneTextureLoader;
-    Qt3DExtras::QTextureMaterial* layerViewPlaneMaterial;
+    Qt3DExtras:: QPlaneMesh* layerViewPlane[1] = {nullptr};
+    Qt3DCore::QEntity* layerViewPlaneEntity[1] = {nullptr};
+    Qt3DCore::QTransform *layerViewPlaneTransform[1] = {nullptr};
+    Qt3DRender::QTextureLoader* layerViewPlaneTextureLoader = nullptr;
+    Qt3DExtras::QTextureMaterial* layerViewPlaneMaterial = nullptr;
     //Qt3DExtras::QPhongAlphaMaterial *layerViewPlaneMaterial = nullptr;
 
 
@@ -180,7 +179,7 @@ public:
     // changeColor
     void changecolor(int mode); //0 default, 1 selected, 2 outofarea
 
-    void setSupport();
+    void setSupportAndRaft();
 
 
     // Model Mesh move
@@ -207,6 +206,7 @@ public:
     QString getFileName(const std::string& s);
     static QVector3D spreadPoint(QVector3D endpoint,QVector3D startpoint,int factor);
     void changeViewMode(int viewMode);
+    void inactivateFeatures();
 
     // support
     Slicer* slicer;
@@ -225,12 +225,12 @@ public:
 
     const Hix::Engine3D::Mesh* getMesh();
     const Hix::Engine3D::Mesh* getSupport();
-
+	const Mesh* getRaft();
 	void setBoundingBoxVisible(bool isEnabled);
 	const Qt3DCore::QTransform* getTransform() const;
 	void setTranslation(const QVector3D& t);
 	void setMatrix(const QMatrix4x4& matrix);
-
+	Qt3DRender::QLayer* getLayer();
 	/***************Ray casting and hit test***************/
 	void setHitTestable(bool isEnabled);
 	bool isHitTestable();
@@ -246,7 +246,7 @@ public:
 	bool layerViewActive = false;
 	bool supportViewActive = false;
 	bool scaleActive = false;
-	Qt3DRender::QLayer _layer;
+	bool isMoved = false;
 
 private:
 
@@ -254,7 +254,6 @@ private:
 	//for QAttributes
 	Qt3DCore::QTransform m_transform;
 	bool _hitEnabled = false;
-	bool _isDrag = false;
 
     //Order is important! Look at the initializer list in constructor
 	const Hix::Engine3D::Mesh* _currentVisibleMesh;
@@ -297,7 +296,6 @@ private:
     int cutFillMode = 1;
 
 
-    bool isMoved = false;
 
     bool isFlatcutEdge = false;
 
@@ -315,16 +313,13 @@ private:
 	Hix::Engine3D::Mesh* layerRaftMesh;
 	Hix::Engine3D::Mesh* layerInfillMesh;
 
-	bool _targetSelected = false;
-    FaceConstItr targetMeshFace; // used for object selection (specific area, like extension or labelling)
+
+
 
 	/***************Ray casting and hit test***************/
-
-
-
-	void addModelLayer();
-	void removeModelLayer();
-
+	Qt3DRender::QLayer _layer;
+	bool _targetSelected = false;
+	FaceConstItr targetMeshFace; // used for object selection (specific area, like extension or labelling)
 
 signals:
 

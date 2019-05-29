@@ -7,19 +7,36 @@ STLexporter::STLexporter()
 }
 
 Mesh* STLexporter::mergeSelectedModels() {
+    std::vector<GLModel*> targetModels;
+
 	auto& selectedModels = qmlManager->getSelectedModels();
-	if (selectedModels.empty()) return nullptr;
-	else if (selectedModels.size() == 1)
+	if (selectedModels.empty())
 	{
-		//make copy of existing mesh
-		auto existingMesh = (*selectedModels.cbegin())->getMesh();
-		Mesh* copy = new Mesh(*existingMesh);
-		return copy;
+		for (auto& pair : qmlManager->glmodels) {
+			auto glm = &pair.second;
+			targetModels.push_back(glm);
+		}
+		if (targetModels.size() == 0)
+			return nullptr;
 	}
+	else
+	{
+		if (selectedModels.size() == 1)
+		{
+			//make copy of existing mesh
+			auto existingMesh = (*selectedModels.cbegin())->getMesh();
+			return new Mesh(*existingMesh);
+		}
+		else
+		{
+			targetModels.assign(selectedModels.cbegin(), selectedModels.cend());
+		}
+	}
+
     size_t faceNum = 0;
     size_t verNum = 0;
     size_t totalFaceNum = 0;
-    for (GLModel* model: selectedModels) {
+    for (GLModel* model: targetModels) {
         faceNum += model->getMesh()->getFaces().size();
         verNum += model->getMesh()->getVertices().size();
     }
@@ -29,7 +46,7 @@ Mesh* STLexporter::mergeSelectedModels() {
     faceNum = 0;
     verNum = 0;
 
-    for (GLModel* model: selectedModels) {
+    for (GLModel* model: targetModels) {
         QVector3D trans = model->m_transform.translation();
 
         for (const auto& each : model->getMesh()->getFaces()) {
