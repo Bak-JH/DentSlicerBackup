@@ -45,6 +45,9 @@ Slicer* SlicingEngine::slice(QVariant cfg, Mesh* shellMesh, Mesh* supportMesh, M
 
     qmlManager->setProgress(0.1);
 
+    // configuration
+    scfg->origin = QVector3D((shellMesh->x_min()+shellMesh->x_max())/2, (shellMesh->y_min()+shellMesh->y_max())/2, (shellMesh->z_min()+shellMesh->z_max())/2);
+
     //Mesh* loaded_mesh = mesh;
     //qDebug() << "loadedMesh : " << loaded_mesh->faces.size();
     /*Mesh* loaded_mesh = new Mesh();
@@ -53,17 +56,25 @@ Slicer* SlicingEngine::slice(QVariant cfg, Mesh* shellMesh, Mesh* supportMesh, M
 
     // Slice
     Slicer* slicer = new Slicer();
-    Slices shellSlices = slicer->slice(shellMesh);
+    Slices shellSlices;
+    qDebug() << "shell Mesh : " << shellMesh << shellSlices.mesh;
+    slicer->slice(shellMesh, &shellSlices);
+    //Slices shellSlices = slicer->slice(shellMesh);
     qDebug() << "Shell Slicing Done\n";
     qmlManager->setProgress(0.4);
-    Slices supportSlices = slicer->slice(supportMesh);
+    Slices supportSlices;
+    slicer->slice(supportMesh, &supportSlices);
+    //Slices supportSlices = slicer->slice(supportMesh);
     qDebug() << "Support Slicing Done\n";
     qmlManager->setProgress(0.6);
-    Slices raftSlices = slicer->slice(raftMesh);
+    Slices raftSlices;
+    slicer->slice(raftMesh, &raftSlices);
+    //Slices raftSlices = slicer->slice(raftMesh);
     qDebug() << "Raft Slicing Done\n";
     qmlManager->setProgress(0.8);
     Slices contourLists = supportSlices;
     qmlManager->setProgress(0.9);
+
 
     // Export to SVG
     SVGexporter* exporter = new SVGexporter();

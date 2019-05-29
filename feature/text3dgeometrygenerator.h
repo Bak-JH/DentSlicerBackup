@@ -4,6 +4,7 @@
 #include <QVector3D>
 #include <QFont>
 #include <QString>
+#include <QPlaneMesh>
 #include "DentEngine/src/mesh.h"
 
 void generateText3DGeometry(QVector3D** vertices, int* verticesSize,

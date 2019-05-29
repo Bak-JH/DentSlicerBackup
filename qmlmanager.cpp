@@ -183,6 +183,7 @@ void QmlManager::initializeUI(QQmlApplicationEngine* e){
     boxUpperTab = FindItemByName(engine, "boxUpperTab");
     boxLeftTab = FindItemByName(engine, "boxLeftTab");
     scene3d = FindItemByName(engine, "scene3d");
+
     QObject::connect(boxUpperTab,SIGNAL(runGroupFeature(int,QString, double, double, double, QVariant)),this,SLOT(runGroupFeature(int,QString, double, double, double, QVariant)));
 
     QObject::connect(this, SIGNAL(arrangeDone(std::vector<QVector3D>, std::vector<float>)), this, SLOT(applyArrangeResult(std::vector<QVector3D>, std::vector<float>)));
@@ -247,7 +248,7 @@ GLModel* QmlManager::createModelFile(Mesh* target_mesh, QString fname) {
 
 	//add to raytracer
 	latestAdded->setHitTestable(true);
-	_rayCastController.addLayer(&latestAdded->_layer);
+	_rayCastController.addLayer(latestAdded->getLayer());
     // 승환 100%
     setProgress(1);
 	return latestAdded;
@@ -291,7 +292,6 @@ GLModel* QmlManager::getModelByID(int ID)
 
 
 void QmlManager::deleteOneModelFile(int ID) {
-
 	auto target = getModelByID(ID);
 	deleteOneModelFile(target);
 }
@@ -636,7 +636,6 @@ void QmlManager::disableObjectPickers(){
     for (auto& pair : glmodels){
 		auto glm = &pair.second;
 		glm->setHitTestable(false);
-
     }
 }
 
@@ -766,18 +765,21 @@ void QmlManager::runArrange_internal(){
     if (glmodels.size()>=2){
         std::vector<XYArrangement> arng_result_set;
         std::vector<const Mesh*> meshes_to_arrange;
+		std::vector<const Qt3DCore::QTransform*> m_transform_set;
+
         for(auto& pair : glmodels)
         {
             auto model = &pair.second;
             meshes_to_arrange.push_back(model->getMesh());
+            m_transform_set.push_back(model->getTransform());
         }
         autoarrange* ar;
-        arng_result_set = ar->arngMeshes(meshes_to_arrange);
+        arng_result_set = ar->arngMeshes(meshes_to_arrange, m_transform_set);
         std::vector<QVector3D> translations;
         std::vector<float> rotations;
         for (size_t i=0; i<arng_result_set.size(); i++){
             XYArrangement arng_result = arng_result_set[i];
-            QVector3D trans_vec = QVector3D(arng_result.first.X/scfg->resolution, arng_result.first.Y/scfg->resolution, 0);
+            QVector3D trans_vec = QVector3D(arng_result.first.X/100, arng_result.first.Y/100, 0);
             translations.push_back(trans_vec);
             rotations.push_back(arng_result.second);
         }
@@ -1028,6 +1030,7 @@ void QmlManager::modelSelected(int ID){
 		QMetaObject::invokeMethod(qmlManager->mttab, "hideTab"); // off MeshTransformer Tab
 		QMetaObject::invokeMethod(boundedBox, "hideBox"); // Bounded Box
 		if (groupFunctionState == "active") {
+            //qDebug() << "@@@@ selected @@@@" << groupFunctionIndex;
 			switch (groupFunctionIndex) {
 				//case 2:
 				//    QMetaObject::invokeMethod(savePopup, "offApplyFinishButton");
@@ -1071,10 +1074,11 @@ void QmlManager::modelSelected(int ID){
 
 		QMetaObject::invokeMethod(layerViewSlider, "setThickness", Q_ARG(QVariant, (scfg->layer_height)));
 		QMetaObject::invokeMethod(layerViewSlider, "setHeight", Q_ARG(QVariant,
-			(target->getMesh()->z_max() - target->getMesh()->z_min() + scfg->raft_thickness)));
+			(target->getMesh()->z_max() - target->getMesh()->z_min() + scfg->raft_thickness+ scfg->support_base_height)));
 		sendUpdateModelInfo();
 		qDebug() << "scale value   " << target->getMesh()->x_max() - target->getMesh()->x_min();
 		if (groupFunctionState == "active") {
+            qDebug() << "@@@@ selected2 @@@@" << groupFunctionIndex;
 			switch (groupFunctionIndex) {
 				//case 2:
 				//    QMetaObject::invokeMethod(savePopup, "onApplyFinishButton");
@@ -1141,7 +1145,6 @@ void QmlManager::unselectPart(int ID){
 		qDebug() << "resetting model" << ID;
 		unselectPartImpl(target);
 	}
-
 }
 
 void QmlManager::unselectAll(){
@@ -1219,9 +1222,9 @@ void QmlManager::hideRotateSphere(){
     rotateSphere->setEnabled(0);
 }
 
-RayCastController* QmlManager::getRayCaster()
+const RayCastController& QmlManager::getRayCaster()
 {
-	return &_rayCastController;
+	return _rayCastController;
 }
 
 void QmlManager::showRotatingSphere(){
@@ -1746,7 +1749,6 @@ void QmlManager::runGroupFeature(int ftrType, QString state, double arg1, double
             qDebug() << fileName;
         }
 
-
         STLexporter* ste = new STLexporter();
         SlicingEngine* se = new SlicingEngine();
 
@@ -1756,16 +1758,25 @@ void QmlManager::runGroupFeature(int ftrType, QString state, double arg1, double
         Mesh* mergedShellMesh = ste->mergeSelectedModels();//ste->mergeModels(qmlManager->selectedModels);
         //GLModel* mergedModel = new GLModel(mainWindow, models, mergedMesh, "temporary", false);
 
-        qDebug() << "1111";
+        qDebug() << "1111" << mergedShellMesh;
+        qDebug() << "1111" << mergedShellMesh->x_max() << mergedShellMesh->x_min();
+
         // generate support
         GenerateSupport generatesupport;
-        Mesh* mergedSupportMesh = generatesupport.generateSupport(mergedShellMesh);
+        Mesh* mergedSupportMesh = nullptr;
+        if (scfg->support_type != 0){ // if generating support
+            //Mesh* mergedSupportMesh = nullptr;
+            mergedSupportMesh = generatesupport.generateSupport(mergedShellMesh);
+        }
 
         qDebug() << "2222";
-        // generate raft
-        GenerateRaft generateraft;
-        Mesh* mergedRaftMesh = generateraft.generateRaft(mergedShellMesh);
 
+        // generate raft according to support structure
+        GenerateRaft generateraft;
+        Mesh* mergedRaftMesh = nullptr;
+        if (scfg->raft_type != 0){
+            mergedRaftMesh = generateraft.generateRaft(mergedShellMesh, generatesupport.overhangPoints);
+        }
         qDebug() << "3333";
         // need to generate support, raft
 
@@ -2033,7 +2044,7 @@ void QmlManager::viewSupportChanged(bool checked){
 			}
 		}
 		if (generateSupport) {
-			qmlManager->openYesNoPopUp(false, "Support will be generated.", "", "Would you like to continue?", 16, "", ftrSupportViewMode, 0);
+			qmlManager->openYesNoPopUp(false, "Support and raft will be generated.", "", "Would you like to continue?", 16, "", ftrSupportViewMode, 0);
 		}
 		else {
 			QMetaObject::invokeMethod(qmlManager->boxUpperTab, "all_off");
@@ -2145,7 +2156,7 @@ void QmlManager::setViewMode(int viewMode) {
 		if (this->viewMode == VIEW_MODE_SUPPORT) {
 			for (auto each : selectedModels)
 			{
-				each->setSupport();
+				each->setSupportAndRaft();
 				emit  each->_updateModelMesh();
 			}
 
@@ -2153,7 +2164,7 @@ void QmlManager::setViewMode(int viewMode) {
 		else if (this->viewMode == VIEW_MODE_LAYER) {
 			for (auto each : selectedModels)
 			{
-				each->setSupport();
+				each->setSupportAndRaft();
 				emit each->_updateModelMesh();
 
 
