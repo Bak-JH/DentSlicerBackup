@@ -189,6 +189,7 @@ void RayCastController::hitsChanged(const Qt3DRender::QAbstractRayCaster::Hits& 
 	{
 		for (auto hit : hits)
 		{
+			
 			auto glModel = dynamic_cast<GLModel*>(hit.entity());
 			if (glModel)
 			{
@@ -212,6 +213,10 @@ void RayCastController::hitsChanged(const Qt3DRender::QAbstractRayCaster::Hits& 
 				}
 				//ignore other hits
 				break;
+			}
+			else
+			{
+				return;
 			}
 		}
 

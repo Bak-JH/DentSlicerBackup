@@ -35,12 +35,8 @@ void QmlManager::initializeUI(QQmlApplicationEngine* e){
 	//initialize ray casting mouse input controller
 	QEntity* camera = dynamic_cast<QEntity*>(FindItemByName(engine, "cm"));
 	_rayCastController.initialize(camera);
-	//QEntity* camera = dynamic_cast<QEntity*>(FindItemByName(engine, "cm"));
-	//auto rc = dynamic_cast<Qt3DRender::QScreenRayCaster*>(FindItemByName(engine, "screenRayCaster"));
-	//auto mh = dynamic_cast<Qt3DInput::QMouseHandler*>(FindItemByName(engine, "mouseHandler"));
-
-	//_rayCastController.initialize(rc, mh);
-
+	_moveWidgetLayer.setRecursive(true);
+	_rotateWidgetLayer.setRecursive(true);
 
     mainWindow = FindItemByName(engine, "mainWindow");
     loginWindow = FindItemByName(engine, "loginWindow");
@@ -69,6 +65,8 @@ void QmlManager::initializeUI(QQmlApplicationEngine* e){
     rotateSphereY = (QEntity *)FindItemByName(engine, "rotateSphereTorusY");
     rotateSphereZ = (QEntity *)FindItemByName(engine, "rotateSphereTorusZ");
     rotateSphereobj = FindItemByName(engine, "rotateSphere");
+	rotateSphere->addComponent(&_rotateWidgetLayer);
+
     QObject::connect(rotateSphereobj, SIGNAL(rotateInit()),this, SLOT(modelRotateInit()));
     QObject::connect(rotateSphereobj, SIGNAL(rotateSignal(int,int)),this, SLOT(modelRotate(int,int)));
     QObject::connect(rotateSphereobj, SIGNAL(rotateDone(int)),this, SLOT(modelRotateDone(int)));
@@ -159,6 +157,7 @@ void QmlManager::initializeUI(QQmlApplicationEngine* e){
     moveArrowX = (QEntity *)FindItemByName(engine, "moveArrowX");
     moveArrowY = (QEntity *)FindItemByName(engine, "moveArrowY");
     moveArrowobj = (QEntity *)FindItemByName(engine, "moveArrow");
+	moveArrow->addComponent(&_moveWidgetLayer);
     QObject::connect(moveArrowobj, SIGNAL(moveInit()),this, SLOT(modelMoveInit()));
     QObject::connect(moveArrowobj, SIGNAL(moveSignal(int,int)),this, SLOT(modelMove(int,int)));
     QObject::connect(moveArrowobj, SIGNAL(moveDone()),this, SLOT(modelMoveDone()));
@@ -222,6 +221,10 @@ void QmlManager::initializeUI(QQmlApplicationEngine* e){
     QObject::connect(mv, SIGNAL(groupSelectionActivate(bool)), this, SLOT(groupSelectionActivate(bool)));
 
     QObject::connect(yesno_popup, SIGNAL(runGroupFeature(int, QString, double, double, double, QVariant)),this,SLOT(runGroupFeature(int,QString, double, double, double, QVariant)));
+	_rayCastController.addLayer(&_moveWidgetLayer);
+	_rayCastController.addLayer(&_rotateWidgetLayer);
+
+
 }
 
 GLModel* QmlManager::createModelFile(Mesh* target_mesh, QString fname) {

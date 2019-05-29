@@ -251,7 +251,8 @@ private:
 
 	//Ray cast
 	RayCastController _rayCastController;
-
+	Qt3DRender::QLayer _rotateWidgetLayer;
+	Qt3DRender::QLayer _moveWidgetLayer;
 signals:
     void updateModelInfo(int printing_time, int layer, QString xyz, float volume);
     void arrangeDone(std::vector<QVector3D>, std::vector<float>);
