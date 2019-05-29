@@ -859,6 +859,7 @@ bool QmlManager::multipleModelSelected(int ID){
             it = selectedModels.erase(it);
             target->changecolor(0);
             target->checkPrintingArea();
+            (*it)->inactivateFeatures();
             QMetaObject::invokeMethod(partList, "unselectPartByModel", Q_ARG(QVariant, target->ID));
             QMetaObject::invokeMethod(yesno_popup, "deletePartListItem", Q_ARG(QVariant, target->ID));
 
@@ -962,6 +963,7 @@ void QmlManager::lastModelSelected(){
         /* it is simillar to selectModel() */
         (*it)->changecolor(0);
         (*it)->checkPrintingArea();
+        (*it)->inactivateFeatures();
         QMetaObject::invokeMethod(partList, "unselectPartByModel", Q_ARG(QVariant, (*it)->ID));
         QMetaObject::invokeMethod(yesno_popup, "deletePartListItem", Q_ARG(QVariant, (*it)->ID));
 
@@ -1020,6 +1022,7 @@ void QmlManager::modelSelected(int ID){
             }
             (*it)->changecolor(0);
             (*it)->checkPrintingArea();
+            (*it)->inactivateFeatures();
             QMetaObject::invokeMethod(partList, "unselectPartByModel", Q_ARG(QVariant, (*it)->ID));
             QMetaObject::invokeMethod(yesno_popup, "deletePartListItem", Q_ARG(QVariant, (*it)->ID));
             disconnectHandlers((*it));  //check
@@ -2216,6 +2219,7 @@ void QmlManager::unselectPartImpl(GLModel* target)
 	QMetaObject::invokeMethod(partList, "unselectPartByModel", Q_ARG(QVariant, target->ID));
     target->changecolor(0);
     target->checkPrintingArea();
+    target->inactivateFeatures();
     disconnectHandlers(target);
     if (groupFunctionState == "active"){
         switch (groupFunctionIndex){

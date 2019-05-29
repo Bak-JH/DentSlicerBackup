@@ -541,9 +541,6 @@ void GLModel::updateModelMesh(){
         break;
     }
 
-    QVector3D tmp = m_transform.translation();
-    float zlength = _mesh->z_max() - _mesh->z_min();
-    m_transform.setTranslation(QVector3D(tmp.x(),tmp.y(),-_mesh->z_min()));
     qmlManager->sendUpdateModelInfo();
     checkPrintingArea();
     //QMetaObject::invokeMethod(qmlManager->scalePopup, "updateSizeInfo", Q_ARG(QVariant, _mesh->x_max()-_mesh->x_min()), Q_ARG(QVariant, _mesh->y_max()-_mesh->y_min()), Q_ARG(QVariant, _mesh->z_max()-_mesh->z_min()));
@@ -1946,7 +1943,7 @@ void GLModel::mouseReleasedRayCasted(MouseEventData& pick, Qt3DRender::QRayCaste
 		QMetaObject::invokeMethod(qmlManager->labelPopup, "labelUpdate");
 
 		if (labellingTextPreview && labellingTextPreview->isEnabled()) {
-			labellingTextPreview->setTranslation(hit.localIntersection() + targetMeshFace->fn);
+            labellingTextPreview->setTranslation(m_transform.translation() + hit.localIntersection() + targetMeshFace->fn);
 			labellingTextPreview->setNormal(targetMeshFace->fn);
 			labellingTextPreview->planeSelected = true;
 		}
