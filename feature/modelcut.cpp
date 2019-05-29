@@ -1321,7 +1321,7 @@ void cutAway(Mesh* leftMesh, Mesh* rightMesh, Mesh* mesh, std::vector<QVector3D>
             qDebug() << "start to connect seperated contour";
             int minIdx, maxIdx, originMinIdx, originMaxIdx;
             long long int minz, maxz;
-            while (seperatedContourIdxs.size() > 1) {
+            while (seperatedContourIdxs.size() > 2) {
                 qDebug() << seperatedContourIdxs.size();
                 minz = 10000000000; maxz = -10000000000;
                 for (k = 0; k < seperatedContourIdxs.size(); k++) {
