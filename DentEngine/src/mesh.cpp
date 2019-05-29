@@ -357,7 +357,7 @@ void Mesh::vertexRotate(QMatrix4x4 tmpmatrix){
 }
 
 void Mesh::vertexScale(float scaleX=1, float scaleY=1, float scaleZ=1, float centerX=0, float centerY=0){
-
+	vertices.markChangedAll();
     if(fabs(scaleX) < FZERO || fabs(scaleY) < FZERO || fabs(scaleZ) < FZERO) {
         qmlManager->openResultPopUp("","Scale cannot be 0", "");
         return;
@@ -376,7 +376,7 @@ void Mesh::vertexScale(float scaleX=1, float scaleY=1, float scaleZ=1, float cen
     float fixCenterY = centerY - (centerY*scaleY);
 
 	size_t count = 0;
-	for (auto vertex : vertices)
+	for (auto& vertex : vertices)
 	{
 		if (count % 100 == 0)
 			QCoreApplication::processEvents();
