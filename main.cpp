@@ -25,7 +25,6 @@ int main(int argc, char **argv)
 {
     QApplication app(argc, argv);
     QString version = "1.0.0";
-
     /* Language patch
     QTranslator translator ;
     translator.load(":/lang_ko.qm");

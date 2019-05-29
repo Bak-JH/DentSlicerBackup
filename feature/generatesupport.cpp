@@ -39,6 +39,7 @@ GenerateSupport::GenerateSupport()
 Mesh* GenerateSupport::generateSupport(Mesh* shellmesh) {
     Mesh* mesh = shellmesh;
     Mesh* supportMesh = new Mesh();
+    z_min = mesh->z_min() - scfg->support_base_height;
 
     overhangDetect(mesh);
 
@@ -46,7 +47,7 @@ Mesh* GenerateSupport::generateSupport(Mesh* shellmesh) {
     findNearestPoint(idx);
 
     std::vector<OverhangPoint>::iterator iter = overhangPoints.begin();
-    while (iter != overhangPoints.end() - 1 && iter != overhangPoints.end()) {
+    while (iter < overhangPoints.end() - 1) {
         OverhangPoint pt1 = *iter;
         OverhangPoint pt2 = *(iter+1);
         OverhangPoint intersection = coneNconeIntersection(mesh, pt1, pt2);
@@ -76,8 +77,10 @@ Mesh* GenerateSupport::generateSupport(Mesh* shellmesh) {
             findNearestPoint(++idx);
         } else {
             generateBranch(supportMesh, pt1, pt2, &intersection);
+			size_t index = iter - overhangPoints.begin();
             overhangPoints.push_back(intersection);
-            iter += 2;
+			//iterator might be invalidated due to resizing
+            iter = overhangPoints.begin() + index + 2;
             findNearestPoint(++idx);
             findNearestPoint(++idx);
         }
@@ -122,6 +125,7 @@ void GenerateSupport::pointOverhangDetect(Mesh* mesh) {
 		for (size_t face_idx = 0; face_idx < vtxConnectedFaces.size() && local_min; face_idx++) {
             const MeshFace* connectedFace = vtxConnectedFaces[face_idx].operator->();
 			auto meshVertices = connectedFace->meshVertices();
+
 			for (size_t i = 0; i < 3; i++) {
 				if (meshVertices[i]->position.z() < z)
 				{
@@ -130,7 +134,7 @@ void GenerateSupport::pointOverhangDetect(Mesh* mesh) {
 				}
 			}
 		}
-		if (local_min && (vertex.position.z() - mesh->z_min()) >= minZ) { //
+        if (local_min && (vertex.position.z() - z_min) >= z_min_minimal_diff) { // is local minima but not global min
 			bool close = false;
 			for (size_t idx = 0; idx < overhangPoints.size(); idx++) {
 				if (abs(overhangPoints[idx].position.z() - vertex.position.z()) <= 1 // 1->variable
@@ -149,37 +153,6 @@ void GenerateSupport::pointOverhangDetect(Mesh* mesh) {
 
 
 
-
-    //for (size_t ver_idx = 0; ver_idx < mesh->vertices.size(); ver_idx++) {
-	for (const auto& vertex : vertices)
-	{
-        bool local_min = true;
-        float z = vertex.position.z();
-		auto vtxConnectedFaces = vertex.connectedFaces();
-
-        for (size_t face_idx = 0; face_idx < vtxConnectedFaces.size() && local_min; face_idx++) {
-			const auto connectedFace = vtxConnectedFaces[face_idx];
-			auto meshVertices = connectedFace->meshVertices();
-            for (size_t i = 0; i < 3; i++) {
-                if (meshVertices[i]->position.z() < z) {
-                    local_min = false;
-                    break;
-                }
-            }
-        }
-        if (local_min && (vertex.position.z() - mesh->z_min()) >= minZ) { //
-            bool close = false;
-            for (size_t idx = 0; idx < overhangPoints.size(); idx++) {
-                if (abs(overhangPoints[idx].position.z() - vertex.position.z()) <= 1 // 1->variable
-                    && (overhangPoints[idx].position - vertex.position).length() <= 2) { // 2->variable
-                    close = true;
-                    break;
-                }
-            }
-            if (!close) pointOverhang.push_back(vertex);
-        }
-    }
-
     // MeshVertex to OverhangPoint
     for (size_t i = 0; i < pointOverhang.size(); i++) {
         QVector3D overhangPoint = pointOverhang[i].position;
@@ -191,7 +164,7 @@ void GenerateSupport::pointOverhangDetect(Mesh* mesh) {
                 break;
             }
         }
-        if ((overhangPoint.z() - mesh->z_min()) >= minZ && !close) //
+        if ((overhangPoint.z() - z_min) >= z_min_minimal_diff && !close) //
             overhangPoints.push_back(OverhangPoint(overhangPoint, true));
     }
 }
@@ -245,7 +218,7 @@ void GenerateSupport::faceOverhangPoint(Mesh* mesh, QVector3D v0, QVector3D v1, 
             break;
         }
     }
-    if ((overhangPoint.z() - mesh->z_min()) >= minZ && !close) //
+    if ((overhangPoint.z() - z_min) >= z_min_minimal_diff && !close) //
         overhangPoints.push_back(OverhangPoint(overhangPoint, true));
 }
 
@@ -290,10 +263,10 @@ void GenerateSupport::findNearestPoint(size_t index) {
 OverhangPoint GenerateSupport::coneNconeIntersection(Mesh* mesh, OverhangPoint coneApex1, OverhangPoint coneApex2) {
     float x1 = coneApex1.position.x();
     float y1 = coneApex1.position.y();
-    float z1 = coneApex1.position.z() - mesh->z_min();
+    float z1 = coneApex1.position.z() - z_min;
     float x2 = coneApex2.position.x();
     float y2 = coneApex2.position.y();
-    float z2 = coneApex2.position.z() - mesh->z_min();
+    float z2 = coneApex2.position.z() - z_min;
     double tan = qTan(critical_angle_radian);
     double xyDis = qSqrt((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2));
 
@@ -311,7 +284,7 @@ OverhangPoint GenerateSupport::coneNconeIntersection(Mesh* mesh, OverhangPoint c
         float x = (n * x1 + m * x2) / (m + n);
         float y = (n * y1 + m * y2) / (m + n);
         float z = radius / tan;
-        return QVector3D(x, y, z + mesh->z_min());
+        return QVector3D(x, y, z + z_min);
     } else {
         if (z1 <= z2) return coneApex1;
         else return coneApex2;
@@ -324,7 +297,7 @@ OverhangPoint GenerateSupport::coneNmeshIntersection(Mesh *mesh, OverhangPoint c
     bool supportInt = false;
     QVector3D tmp;
     size_t vertex;
-    float radius = radiusMin;
+    float radius = supportRadiusMin;
 
     // mesh
 
@@ -362,8 +335,8 @@ OverhangPoint GenerateSupport::coneNmeshIntersection(Mesh *mesh, OverhangPoint c
     }
 
     // bed
-    if ((coneApex.position.z() - mesh->z_min()) < (nearest - coneApex.position).length()) {
-        nearest = QVector3D(coneApex.position.x(), coneApex.position.y(), mesh->z_min());
+    if ((coneApex.position.z() - z_min) < (nearest - coneApex.position).length()) {
+        nearest = QVector3D(coneApex.position.x(), coneApex.position.y(), z_min);
         meshInt = false;
     }
 
@@ -372,8 +345,9 @@ OverhangPoint GenerateSupport::coneNmeshIntersection(Mesh *mesh, OverhangPoint c
 
 float GenerateSupport::calculateRadius(float mesh_height, float bottom_height, float branch_length) {
     // float radius = 0.2 * branch_length * (1 - pow((bottom_height / mesh_height), 5));
-    float radius = 0.2f * branch_length;
+    float radius = 0.3f * branch_length;
     if (radius > supportRadiusMax) radius = supportRadiusMax;
+    if (radius < supportRadiusMin) radius = supportRadiusMin;
     return radius;
 }
 
@@ -397,7 +371,7 @@ void GenerateSupport::generateFaces(Mesh* mesh, OverhangPoint top, OverhangPoint
 }
 
 void GenerateSupport::generateBranch(Mesh* mesh, OverhangPoint leaf1, OverhangPoint leaf2, OverhangPoint* stem) {
-    float bottomRadius = calculateRadius(mesh->z_max() - mesh->z_min(), stem->position.z() - mesh->z_min(),
+    float bottomRadius = calculateRadius(mesh->z_max() - z_min, stem->position.z() - z_min,
                          std::max((leaf1.position - stem->position).length(), (leaf2.position - stem->position).length()));
     if (bottomRadius < std::max(std::max(leaf1.radius, leaf2.radius), stem->radius))
         bottomRadius = std::max(std::max(leaf1.radius, leaf2.radius), stem->radius);
@@ -433,11 +407,11 @@ void GenerateSupport::generateStem(Mesh* mesh, OverhangPoint top, OverhangPoint*
         else *bottom = OverhangPoint(internalDiv(top, origin_bottom, 5, 1), origin_bottom.radius);
     }
 
-    float bottomRadius = calculateRadius(mesh->z_max() - mesh->z_min(), bottom->position.z() - mesh->z_min(),
+    float bottomRadius = calculateRadius(mesh->z_max() - z_min, bottom->position.z() - z_min,
                                          top.position.z() - bottom->position.z());
     if (bottomRadius < std::max(top.radius, origin_bottom.radius))
         bottomRadius = std::max(top.radius, bottom->radius);
-    if (origin_bottom.supportInterPoint && (origin_bottom.radius > radiusMin) && (bottomRadius > origin_bottom.radius))
+    if (origin_bottom.supportInterPoint && (origin_bottom.radius > supportRadiusMin) && (bottomRadius > origin_bottom.radius))
          bottomRadius = origin_bottom.radius;
     bottom->radius = bottomRadius;
 
@@ -447,10 +421,13 @@ void GenerateSupport::generateStem(Mesh* mesh, OverhangPoint top, OverhangPoint*
         top = tip;
     }
 
+
     generateFaces(mesh, top, *bottom);
+
 
     if (origin_bottom.meshInterPoint) // generate bottom tip
         generateFaces(mesh, *bottom, origin_bottom);
+
     else if (!bottom->supportInterPoint)
         generateBottomFace(mesh, *bottom);
 
@@ -458,7 +435,9 @@ void GenerateSupport::generateStem(Mesh* mesh, OverhangPoint top, OverhangPoint*
         supportPoints.push_back(*bottom);
 
     if ((top.position - bottom->position).length() >= 8)
+    {
         supportPoints.push_back(OverhangPoint((top.position + bottom->position)/2, (top.radius + bottom->radius)/2));
+}
 }
 
 QVector3D GenerateSupport::internalDiv(OverhangPoint a, OverhangPoint b, float m, float n) {

@@ -57,6 +57,11 @@ void RayCastController::removeLayer(Qt3DRender::QLayer* layer)
 	_rayCaster->removeLayer(layer);
 }
 
+bool RayCastController::isDrag()const
+{
+	return _isDrag;
+}
+
 
 
 
@@ -92,6 +97,7 @@ void RayCastController::mousePressed(Qt3DInput::QMouseEvent* mouse)
 	_mouseEvent = MouseEventData(mouse);
 	_pressedTime = std::chrono::system_clock::now();
 	_pressedPt = _mouseEvent.position;
+	_isDrag = true;
 	if (shouldRaycastPressed(mouse))
 	{
 		bool busy = false;
@@ -105,8 +111,30 @@ void RayCastController::mousePressed(Qt3DInput::QMouseEvent* mouse)
 void RayCastController::mouseReleased(Qt3DInput::QMouseEvent* mouse)
 {
 	mouse->setAccepted(true);
-
 	_mouseEvent = MouseEventData(mouse);
+	_isDrag = false;
+	qmlManager->resetCursor();
+	//common loginc that does not need ray casting
+	if (qmlManager->getViewMode() == VIEW_MODE_SUPPORT) {
+		qmlManager->openYesNoPopUp(false, "", "Support will disappear.", "", 18, "", ftrSupportDisappear, 1);
+		return;
+	}
+	bool isMoved = false;
+	for (auto selected : qmlManager->getSelectedModels())
+	{
+		if (selected->isMoved)
+		{
+			selected->isMoved = false;
+			isMoved = true;
+		}
+	}
+	if (isMoved) {
+		qmlManager->modelMoveDone();
+	}
+	if (qmlManager->yesno_popup->property("isFlawOpen").toBool())
+		return;
+
+
 	if (shouldRaycastReleased(mouse))
 	{
 		//only do ray cast on click for release event
@@ -124,33 +152,34 @@ void RayCastController::mouseReleased(Qt3DInput::QMouseEvent* mouse)
 
 void RayCastController::mousePositionChanged(Qt3DInput::QMouseEvent* mouse)
 {
-	if (_rayCasterBusy)
-		return;
-	if (qmlManager->orientationActive ||
-		qmlManager->rotateActive ||
-		qmlManager->saveActive)
-		return;
-
-	_mouseEvent = MouseEventData(mouse);
-
-	//only call mouseMoved to selected models that are NOT doing certain features
-	for (auto selected : qmlManager->getSelectedModels())
+	if (_isDrag)
 	{
-		if (selected->scaleActive ||
-			selected->cutActive ||
-			selected->shellOffsetActive ||
-			selected->extensionActive ||
-			selected->labellingActive ||
-			selected->layflatActive ||
-			selected->layerViewActive ||
-			selected->manualSupportActive ||
-			selected->supportViewActive)
-			continue;
+		if (_rayCasterBusy)
+			return;
+		if (qmlManager->orientationActive ||
+			qmlManager->rotateActive ||
+			qmlManager->saveActive)
+			return;
 
-		selected->mouseMoved(_mouseEvent);
+		_mouseEvent = MouseEventData(mouse);
+
+		//only call mouseMoved to selected models that are NOT doing certain features
+		for (auto selected : qmlManager->getSelectedModels())
+		{
+			if (selected->scaleActive ||
+				selected->cutActive ||
+				selected->shellOffsetActive ||
+				selected->extensionActive ||
+				selected->labellingActive ||
+				selected->layflatActive ||
+				selected->layerViewActive ||
+				selected->manualSupportActive ||
+				selected->supportViewActive)
+				continue;
+
+			selected->mouseMoved(_mouseEvent);
+		}
 	}
-
-
 }
 
 void RayCastController::hitsChanged(const Qt3DRender::QAbstractRayCaster::Hits& hits)
@@ -176,6 +205,10 @@ void RayCastController::hitsChanged(const Qt3DRender::QAbstractRayCaster::Hits& 
 					qDebug() << "glmodel relllllleased";
 
 					glModel->mouseReleasedRayCasted(_mouseEvent, hit);
+
+
+
+
 				}
 				//ignore other hits
 				break;

@@ -29,9 +29,9 @@ public:
     autoarrange();
 
     std::vector<XYArrangement> simpArngMeshes(std::vector<const Mesh*>& meshes);
-    std::vector<XYArrangement> arngMeshes(std::vector<const Mesh*>& meshes);
-    //void arrangeQt3D(std::vector<Qt3DCore::QTransform*> m_transform_set, std::vector<XYArrangement> arng_result_set);
-    //void arrangeGlmodels(std::vector< GLModel* > * glmodels);
+    std::vector<XYArrangement> arngMeshes(std::vector<const Mesh*>& meshes, std::vector<const Qt3DCore::QTransform*> m_transform_set);
+    //void arrangeQt3D(std::vector<const Qt3DCore::QTransform*> m_transform_set, std::vector<XYArrangement> arng_result_set);
+    //void arrangeGlmodels(vector< GLModel* > * glmodels);
 
 private:
     Paths getMeshRecArea(const Mesh& mesh);

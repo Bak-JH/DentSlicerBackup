@@ -15,7 +15,7 @@ public:
     bool topPoint = false;
     bool meshInterPoint = false;
     bool supportInterPoint = false;
-    float radius = 0.1f; // support tip radius 역할
+    float radius = scfg->support_radius_min; // support tip radius 역할
 };
 
 class GenerateSupport
@@ -29,11 +29,11 @@ public:
     double critical_angle_mesh_radian = M_PI * (critical_angle_mesh / 180.0);
     std::vector<OverhangPoint> overhangPoints;
     std::vector<OverhangPoint> supportPoints;
-    float supportRadiusMax = 1;
-    float supportTipHeight = 0.1f; //크면 에러
-    float minZ = 1;
-    float minLength = 3;
-    float radiusMin = 0.1f; // support tip radius 역할
+    float supportRadiusMax = scfg->support_radius_max; // support bottom radius 역할
+    float supportRadiusMin = scfg->support_radius_min; // support tip radius 역할
+    float z_min;
+    float z_min_minimal_diff = scfg->layer_height/2;
+    float minLength = scfg->support_base_height+1;
 
     Mesh* generateSupport(Mesh* shellMesh);
 
