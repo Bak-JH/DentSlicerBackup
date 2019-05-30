@@ -890,7 +890,7 @@ void bisectModelByPlane(Mesh* leftMesh, Mesh* rightMesh, Mesh* mesh, Plane plane
         }
     }
 
-    if (cutFillMode == 1) {
+    if (cutFillMode == 2) {
         // get contour
         qDebug() << "get contours";
         std::multimap<Custom3DPoint, Custom3DPoint>::iterator iter;
@@ -906,7 +906,7 @@ void bisectModelByPlane(Mesh* leftMesh, Mesh* rightMesh, Mesh* mesh, Plane plane
                 if (maxContour.area > 0.5) {
                     qDebug() << "contour size: " << maxContour.contour.size();
                     contours.push_back(maxContour.contour);
-    }
+                }
             }
         }
         qDebug() << contours.size();
@@ -924,14 +924,14 @@ void bisectModelByPlane(Mesh* leftMesh, Mesh* rightMesh, Mesh* mesh, Plane plane
 
             for (unsigned int j = 0; j < numPoints; j++)
                 cdt.insert_constraint(vhs[j], vhs[(j+1)%numPoints]);
-    }
+        }
 
         // I assumed that the maximum number of contours is 100.
         int directedInclusionRelationship[100][100];
         for (int contourI=0; contourI < contourN; contourI++) {
             for (int contourJ=0; contourJ < contourN; contourJ++) {
                 directedInclusionRelationship[contourI][contourJ] = 0;
-    }
+            }
         }
         // make directed adjacency matrix
         for (int contourI=0; contourI < contourN; contourI++) {
@@ -1223,7 +1223,7 @@ void cutAway(Mesh* leftMesh, Mesh* rightMesh, Mesh* mesh, std::vector<QVector3D>
         }
     }
 
-    if (cutFillMode) {
+    if (cutFillMode == 2) {
         // hole filling
         qDebug() << "boundary Edge " << boundaryEdges.size();
 
