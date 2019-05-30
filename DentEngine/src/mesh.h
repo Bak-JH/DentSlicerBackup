@@ -139,6 +139,7 @@ namespace Hix
 			Mesh(const Mesh* origin);
 			//this is
 			Mesh(const Mesh&);
+            Mesh& operator+=(const Mesh& o);
 			//copy assign
 			//Mesh& operator=(const Mesh o);
 			/********************** Undo state functions***********************/
@@ -156,7 +157,8 @@ namespace Hix
 			void vertexScale(float scaleX, float scaleY, float scaleZ, float centerX, float centerY);
 			void reverseFace(FaceConstItr faceItr);
 			void reverseFaces();
-			void addFace(QVector3D v0, QVector3D v1, QVector3D v2, QVector3D color = COLOR_DEFAULT_MESH);
+            void addFaceAndConnect(QVector3D v0, QVector3D v1, QVector3D v2, QVector3D color = COLOR_DEFAULT_MESH);
+            void addFace(QVector3D v0, QVector3D v1, QVector3D v2, QVector3D color = COLOR_DEFAULT_MESH);
 			TrackedIndexedList<MeshFace>::const_iterator removeFace(FaceConstItr f_it);
 			void connectFaces();
 			TrackedIndexedList<MeshVertex>& getVerticesNonConst();

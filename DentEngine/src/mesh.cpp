@@ -135,11 +135,11 @@ void Hix::Engine3D::MeshVertex::calculateNormalFromFaces()
 {
 	vn = { 0,0,0 };
 	auto faces = connectedFaces();
-	for (auto& face : faces)
+    for (auto& face : faces)
 	{
 		vn += face->fn;
 	}
-	vn.normalize();
+    vn.normalize();
 }
 
 
@@ -225,6 +225,15 @@ Mesh::Mesh(const Mesh& o)
 		vtx = getEquivalentItr(vertices, o.vertices, vtx);
 	}
 
+}
+Mesh& Mesh::operator+=(const Mesh& o)
+{
+    for(auto& each: o.getFaces())
+    {
+        auto vertices = each.meshVertices();
+        addFaceAndConnect(vertices[0]->position, vertices[1]->position, vertices[2]->position);
+    }
+    return *this;
 }
 //Mesh& Mesh::operator=(const Mesh o)
 //{
@@ -344,13 +353,13 @@ void Mesh::vertexRotate(QMatrix4x4 tmpmatrix){
 		meshVertices[1]->position,
 		meshVertices[2]->position);
 		face.fn_unnorm = QVector3D::crossProduct(meshVertices[1]->position - meshVertices[0]->position,
-		meshVertices[2]->position - meshVertices[0]->position);
+        meshVertices[2]->position - meshVertices[0]->position);
 	};
 
-	for (auto& vertex : vertices)
+    for (auto& vertex : vertices)
 	{
 		vertex.calculateNormalFromFaces();
-	};
+    };
 
 
 
@@ -411,6 +420,9 @@ void Mesh::reverseFace(FaceConstItr faceItr)
 
 void Mesh::reverseFaces(){
 
+    halfEdges.markChangedAll();
+    vertices.markChangedAll();
+
 	size_t count = 0;
 	for (auto hEdgeItr = halfEdges.begin(); hEdgeItr != halfEdges.end(); ++hEdgeItr)
 	{
@@ -423,11 +435,24 @@ void Mesh::reverseFaces(){
 		hEdge.from = hEdge.to;
 		hEdge.to = oldFrom;
 	}
+
+    for (auto vertexItr = vertices.begin(); vertexItr != vertices.end(); ++vertexItr){
+        vertexItr->vn = -vertexItr->vn;
+    }
 }
 
 
 /********************** Mesh Generation Functions **********************/
 
+void Mesh::addFaceAndConnect(QVector3D v0, QVector3D v1, QVector3D v2, QVector3D color){
+    addFace(v0, v1, v2, color);
+    auto& last = faces.back();
+    auto circ = last.edgeCirculator();
+    for(size_t i = 0; i < 3; ++i, ++circ)
+    {
+        setTwins(halfEdges.toNormItr(circ.toItr()));
+    }
+}
 void Mesh::addFace(QVector3D v0, QVector3D v1, QVector3D v2, QVector3D color){
 	std::array<VertexItr, 3> fVtx;
     fVtx[0] = addOrRetrieveFaceVertex(v0, color);
@@ -843,11 +868,11 @@ void Mesh::removeVertexHash(QVector3D pos)
 VertexItr Mesh::addOrRetrieveFaceVertex(QVector3D v, QVector3D color){
     uint32_t vertex_hash = vertexHash(v);
 	//find if existing vtx can be used
-	auto similarVtx = getSimilarVertex(vertex_hash, v);
+    auto similarVtx = getSimilarVertex(vertex_hash, v);
 	if (similarVtx != vertices.cend())
 	{
 		return vertices.toNormItr(similarVtx);
-	}
+    }
 
     MeshVertex mv(v, color);
     vertices.emplace_back(mv);
