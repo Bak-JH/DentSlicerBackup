@@ -197,7 +197,6 @@ public:
     void removeCuttingPoint(int idx);
     void removeCuttingPoints();
     void drawLine(QVector3D endpoint);
-	void bisectModel(Plane plane, Hix::Engine3D::Mesh& lmesh, Hix::Engine3D::Mesh& rmesh);
 
     void checkPrintingArea();
     bool EndsWith(const std::string& a, const std::string& b);
