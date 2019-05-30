@@ -494,7 +494,6 @@ void QmlManager::connectHandlers(GLModel* glmodel){
     QObject::connect(layflatPopup, SIGNAL(generateLayFlat()), glmodel, SLOT(generateLayFlat()));
     QObject::connect(glmodel,SIGNAL(layFlatSelect()),this,SLOT(layFlatSelect()));
     QObject::connect(glmodel,SIGNAL(layFlatUnSelect()),this,SLOT(layFlatUnSelect()));
-	QObject::connect(glmodel, SIGNAL(modelSelected(int)), this, SLOT(modelSelected(int)));
 
     // model cut popup codes
     QObject::connect(cutPopup,SIGNAL(modelCut()),glmodel , SLOT(modelCut()));
