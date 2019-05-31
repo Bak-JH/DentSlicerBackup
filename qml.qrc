@@ -16,7 +16,6 @@
         <file>Qml/main.qml</file>
         <file>Qml/MainView.qml</file>
         <file>Qml/MeshTransformerMove.qml</file>
-        <file>Qml/MeshTransformerRotate.qml</file>
         <file>Qml/MeshTransformerTab.qml</file>
         <file>Qml/MeshTransformerZoom.qml</file>
         <file>Qml/Model.qml</file>
@@ -41,7 +40,7 @@
         <file>Qml/LeftTabSlicingOptionElement3.qml</file>
         <file>Resource/mesh/box.stl</file>
         <file>Resource/mesh/box2.stl</file>
-		<file>Qml/MeshBoundedBox.qml</file>
+        <file>Qml/MeshBoundedBox.qml</file>
         <file>Qml/YesNoPopup.qml</file>
         <file>Qml/LayerViewPopup.qml</file>
         <file>Qml/UndoRedoButton.qml</file>

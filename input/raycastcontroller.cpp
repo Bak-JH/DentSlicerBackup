@@ -136,9 +136,11 @@ bool RayCastController::verifyClick()
 	{
 		//if the click was not verified yet ie) not yet released, it's a drag
 		//start drag
-
-		_rayCastMode = RayCastMode::Drag;
-		_rayCaster.trigger(_pressedPt);
+		if (!_pressedPt.isNull())
+		{
+			_rayCastMode = RayCastMode::Drag;
+			_rayCaster.trigger(_pressedPt);
+		}
 		return true;
 	}
 	return false;
@@ -198,10 +200,11 @@ void RayCastController::mouseReleased(Qt3DInput::QMouseEvent* mouse)
 						return;
 
 					bool busy = false;
-
-					_rayCastMode = RayCastMode::Click;
-					_rayCaster.trigger(QPoint(mouse->x(), mouse->y()));
-
+					if (!_mouseEvent.position.isNull())
+					{
+						_rayCastMode = RayCastMode::Click;
+						_rayCaster.trigger(QPoint(mouse->x(), mouse->y()));
+					}
 				}
 			}
 
@@ -218,10 +221,12 @@ void RayCastController::mousePositionChanged(Qt3DInput::QMouseEvent* mouse)
 	//do hover
 	if (_hoverEnabled && !_hoverRaycastBusy)
 	{
-		_hoverRaycastBusy = true;
 		auto hoverEvent = MouseEventData(mouse);
-		_hoverRayCaster.trigger(hoverEvent.position);
-
+		if (!hoverEvent.position.isNull())
+		{
+			_hoverRaycastBusy = true;
+			_hoverRayCaster.trigger(hoverEvent.position);
+		}
 	}
 	if (_mouseBusy)
 	{
@@ -236,7 +241,7 @@ void RayCastController::mousePositionChanged(Qt3DInput::QMouseEvent* mouse)
 			//we still need to use mouse event from pressed for initiating drag.
 			auto tmpMouse = MouseEventData(mouse);
 			//probably still trying to figure out if it's a click, so help out
-			if (intPointDistance(tmpMouse.position, _pressedPt) > MAX_CLICK_MOVEMENT)
+			if (intPointDistance(tmpMouse.position, _pressedPt) > MAX_CLICK_MOVEMENT && !tmpMouse.position.isNull())
 			{
 				//mutex against verifier, check verifier state
 				if (_verifyClickTask.valid())
