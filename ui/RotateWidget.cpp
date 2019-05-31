@@ -8,7 +8,7 @@ using namespace Qt3DRender;
 using namespace Qt3DExtras;
 
 const float RotateWidget::ROTATE_SPEED = 0.1;
-
+const float HALF_PI = M_PI / 2;
 RotateWidget::RotateWidget(const QVector3D& axis, Qt3DCore::QEntity* parent):QEntity(parent), _axis(axis),
 _parent(dynamic_cast<RotateXYZWidget*>(parent))
 {
@@ -65,12 +65,13 @@ void Hix::UI::RotateWidget::dragStarted(Hix::Input::MouseEventData& e, Qt3DRende
 }
 
 
-inline int vertexccw(int x1, int y1, int x2, int y2, int x3, int y3) {
-	return (x1 * y2 + x2 * y3 + x3 * y1) - (x1 * y3 + x2 * y1 + x3 * y2);
-}
+//inline int vertexccw(int x1, int y1, int x2, int y2, int x3, int y3) {
+//	return (x1 * y2 + x2 * y3 + x3 * y1) - (x1 * y3 + x2 * y1 + x3 * y2);
+//}
 
 double Hix::UI::RotateWidget::calculateRot()
 {
+	//find angle between (center, mouse start) and (center, current mouse)
 	auto origin = qmlManager->world2Screen(_parent->transform()->translation());
 	auto origVector = QVector2D(_mouseOrigin) - origin;
 	auto currVector = QVector2D(_mouseCurrent) - origin;
@@ -79,6 +80,17 @@ double Hix::UI::RotateWidget::calculateRot()
 	auto angle = std::atan2(determinant, dotProduct);
 	double degreeangle = angle * 180 / M_PI;
 
+	//find angle between (vector into camera) and (rotating axis)
+	auto axisWorldVector = qmlManager->systemTransform->rotation().rotatedVector(_axis);
+	auto cameraVector = qmlManager->cameraViewVector();
+
+	auto cosAngle = QVector3D::dotProduct(axisWorldVector, cameraVector)
+		/(axisWorldVector.length() + cameraVector.length()) ;
+	auto angleCameraAndAxis = std::acos(cosAngle);
+	if (angleCameraAndAxis < HALF_PI)
+	{
+		degreeangle = -1.0 * degreeangle;
+	}
 	return degreeangle;
 }
 
@@ -104,7 +116,7 @@ void Hix::UI::RotateWidget::dragEnded(Hix::Input::MouseEventData& e)
 void Hix::UI::RotateWidget::onEntered()
 {
 	//only highlight when not being manipulated
-	if (_parent->isManipulated())
+	if (!_parent->isManipulated())
 	{
 		_material.setAmbient(Qt::yellow);
 		_material.setDiffuse(Qt::yellow);
@@ -115,7 +127,7 @@ void Hix::UI::RotateWidget::onEntered()
 
 void Hix::UI::RotateWidget::onExited()
 {
-	if (_parent->isManipulated())
+	if (!_parent->isManipulated())
 	{
 		_material.setAmbient(Qt::gray);
 		_material.setDiffuse(Qt::gray);

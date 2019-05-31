@@ -43,13 +43,13 @@ void QmlManager::initializeUI(QQmlApplicationEngine* e){
     keyboardHandler = (Qt3DInput::QKeyboardHandler*)FindItemByName(engine, "keyboardHandler");
     models = (QEntity *)FindItemByName(engine, "Models");
     Lights* lights = new Lights(models);
-
     mv = dynamic_cast<QEntity*> (FindItemByName(engine, "MainView"));
     systemTransform = (Qt3DCore::QTransform *) FindItemByName(engine, "systemTransform");
     mttab = (QEntity *)FindItemByName(engine, "mttab");
     QMetaObject::invokeMethod(mv, "initCamera");
 
 	auto total = dynamic_cast<QEntity*> (FindItemByName(engine, "total"));
+	_camera = dynamic_cast<Qt3DRender::QCamera*> (FindItemByName(engine, "camera"));
 
 	_rotateWidget.setParent(total);
 	_rayCastController.addLayer(&_rotateWidget.layer);
@@ -1413,7 +1413,6 @@ void QmlManager::modelRotateWithAxis(const QVector3D& axis, double angle)
 			(selectedModel->getMesh()->z_max() + selectedModel->getMesh()->z_min()) / 2);
 		auto transform = selectedModel->getTransform();
 		QMatrix4x4 rot;
-		auto test = selectedModel->getTransform()->rotation();
 		auto rotationVec = selectedModel->getTransform()->rotation().vector() ;
 		auto origRot = QVector3D::dotProduct(rotationVec, axis); // get angle of rotation for that axis
 		if (QApplication::queryKeyboardModifiers() & Qt::ShiftModifier) {// snap mode
@@ -1440,6 +1439,14 @@ void QmlManager::modelRotateWithAxis(const QVector3D& axis, double angle)
 	}
 
 
+}
+
+QVector3D QmlManager::cameraViewVector()
+{
+	return _camera->position() - systemTransform->translation();
+	//vector from camera to root
+	//auto cameraPos = _camera->
+	//return QVector3D();
 }
 
 void QmlManager::modelRotate(int Axis, int Angle){
@@ -1610,6 +1617,7 @@ void QmlManager::save() {
 void QmlManager::cameraViewChanged()
 {
 	_rotateWidget.updatePosition();
+
 }
 
 void QmlManager::groupSelectionActivate(bool active){

@@ -21,12 +21,11 @@ std::chrono::time_point<std::chrono::system_clock> __startRayTraceTime;
 
 #endif
 
-const std::chrono::milliseconds RayCastController::MAX_CLICK_DURATION = 500ms;
-const float RayCastController::MAX_CLICK_MOVEMENT = 20;
+const std::chrono::milliseconds RayCastController::MAX_CLICK_DURATION = 200ms;
+const float RayCastController::MAX_CLICK_MOVEMENT = 5;
 
 RayCastController::RayCastController()
 {
-	_hoverRayCaster.setEnabled(false);
 }
 
 void RayCastController::initialize(QEntity* camera)
@@ -82,14 +81,14 @@ void RayCastController::setHoverEnabled(bool isEnabled)
 	if (_hoverEnabled != isEnabled)
 	{
 		_hoverEnabled = isEnabled;
-		if (_hoverEnabled)
-		{
-			_hoverRayCaster.setEnabled(true);
-		}
-		else
-		{
-			_hoverRayCaster.setEnabled(false);
-		}
+		//if (_hoverEnabled)
+		//{
+		//	_hoverRayCaster.setEnabled(true);
+		//}
+		//else
+		//{
+		//	_hoverRayCaster.setEnabled(false);
+		//}
 	}
 }
 
@@ -306,7 +305,10 @@ void RayCastController::hoverHitsChanged(const Qt3DRender::QAbstractRayCaster::H
 			{
 				if (_hovered != hovered)
 				{
-					_hovered->onExited();
+					if (_hovered)
+					{
+						_hovered->onExited();
+					}
 					_hovered = hovered;
 					_hovered->onEntered();
 				}

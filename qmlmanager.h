@@ -41,6 +41,7 @@ public:
     QString version = "0.0.1";
 
     // UI components
+	Qt3DRender::QCamera* _camera;
     QObject* mainWindow;
     QObject* loginWindow;
     QObject* loginButton;
@@ -237,7 +238,7 @@ public:
     float selected_z_max();
     float selected_z_min();
 	void modelRotateWithAxis(const QVector3D& axis, double degree);
-
+	QVector3D cameraViewVector();
 private:
 
 	GLModel* getModelByID(int ID);
@@ -260,6 +261,7 @@ signals:
 
 
 public slots:
+	
     void sendUpdateModelInfo(int, int, QString, float);
     GLModel* createModelFile(Mesh* target_mesh, QString filename);
     void openModelFile(QString filename);
