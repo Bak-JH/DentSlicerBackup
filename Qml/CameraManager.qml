@@ -21,7 +21,7 @@ Entity {
 
     property vector3d inputViewCenter : Qt.vector3d( 0, 0, 0)
     property alias camera: camera
-
+    signal cameraRotated();
 
     Camera {
         objectName: "camera"
@@ -36,7 +36,6 @@ Entity {
         upVector: defaultUp
 
         viewCenter: inputViewCenter
-
         property vector3d temp : Qt.vector3d( 0.0, 0.0, 0.0 )
 
     }
@@ -54,6 +53,9 @@ Entity {
 
     CameraController{
         camera:camera
+        onCameraChanged: {
+            cameraRotated();
+        }
     }
 
     components: [

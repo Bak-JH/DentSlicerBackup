@@ -24,7 +24,8 @@
 #include <feature/generateraft.h>
 #include <exception>
 #include "utils/utils.h"
-
+using namespace Hix::Input;
+using namespace Hix::UI;
 QmlManager::QmlManager(QObject *parent) : QObject(parent)
   ,layerViewFlags(LAYER_INFILL | LAYER_SUPPORTERS | LAYER_RAFT), modelIDCounter(0)
 {
@@ -35,8 +36,6 @@ void QmlManager::initializeUI(QQmlApplicationEngine* e){
 	//initialize ray casting mouse input controller
 	QEntity* camera = dynamic_cast<QEntity*>(FindItemByName(engine, "cm"));
 	_rayCastController.initialize(camera);
-	_moveWidgetLayer.setRecursive(true);
-	_rotateWidgetLayer.setRecursive(true);
 
     mainWindow = FindItemByName(engine, "mainWindow");
     loginWindow = FindItemByName(engine, "loginWindow");
@@ -45,11 +44,16 @@ void QmlManager::initializeUI(QQmlApplicationEngine* e){
     models = (QEntity *)FindItemByName(engine, "Models");
     Lights* lights = new Lights(models);
 
-    mv = FindItemByName(engine, "MainView");
+    mv = dynamic_cast<QEntity*> (FindItemByName(engine, "MainView"));
     systemTransform = (Qt3DCore::QTransform *) FindItemByName(engine, "systemTransform");
     mttab = (QEntity *)FindItemByName(engine, "mttab");
     QMetaObject::invokeMethod(mv, "initCamera");
 
+	auto total = dynamic_cast<QEntity*> (FindItemByName(engine, "total"));
+
+	_rotateWidget.setParent(total);
+	_rayCastController.addLayer(&_rotateWidget.layer);
+	_rayCastController.addHoverLayer(&_rotateWidget.layer);
     // model move componetns
     moveButton = FindItemByName(engine, "moveButton");
     movePopup = FindItemByName(engine, "movePopup");
@@ -60,16 +64,15 @@ void QmlManager::initializeUI(QQmlApplicationEngine* e){
 
     // model rotate components
     rotatePopup = FindItemByName(engine, "rotatePopup");
-    rotateSphere = (QEntity *)FindItemByName(engine, "rotateSphereEntity");
-    rotateSphereX = (QEntity *)FindItemByName(engine, "rotateSphereTorusX");
-    rotateSphereY = (QEntity *)FindItemByName(engine, "rotateSphereTorusY");
-    rotateSphereZ = (QEntity *)FindItemByName(engine, "rotateSphereTorusZ");
-    rotateSphereobj = FindItemByName(engine, "rotateSphere");
-	rotateSphere->addComponent(&_rotateWidgetLayer);
+    //rotateSphere = (QEntity *)FindItemByName(engine, "rotateSphereEntity");
+    //rotateSphereX = (QEntity *)FindItemByName(engine, "rotateSphereTorusX");
+    //rotateSphereY = (QEntity *)FindItemByName(engine, "rotateSphereTorusY");
+    //rotateSphereZ = (QEntity *)FindItemByName(engine, "rotateSphereTorusZ");
+    //rotateSphereobj = FindItemByName(engine, "rotateSphere");
 
-    QObject::connect(rotateSphereobj, SIGNAL(rotateInit()),this, SLOT(modelRotateInit()));
-    QObject::connect(rotateSphereobj, SIGNAL(rotateSignal(int,int)),this, SLOT(modelRotate(int,int)));
-    QObject::connect(rotateSphereobj, SIGNAL(rotateDone(int)),this, SLOT(modelRotateDone(int)));
+    //QObject::connect(rotateSphereobj, SIGNAL(rotateInit()),this, SLOT(modelRotateInit()));
+    //QObject::connect(rotateSphereobj, SIGNAL(rotateSignal(int,int)),this, SLOT(modelRotate(int,int)));
+    //QObject::connect(rotateSphereobj, SIGNAL(rotateDone(int)),this, SLOT(modelRotateDone(int)));
     hideRotateSphere();
     // model rotate popup codes
     QObject::connect(rotatePopup, SIGNAL(runFeature(int,int,int,int)),this, SLOT(modelRotateByNumber(int,int,int,int)));
@@ -157,7 +160,6 @@ void QmlManager::initializeUI(QQmlApplicationEngine* e){
     moveArrowX = (QEntity *)FindItemByName(engine, "moveArrowX");
     moveArrowY = (QEntity *)FindItemByName(engine, "moveArrowY");
     moveArrowobj = (QEntity *)FindItemByName(engine, "moveArrow");
-	moveArrow->addComponent(&_moveWidgetLayer);
     QObject::connect(moveArrowobj, SIGNAL(moveInit()),this, SLOT(modelMoveInit()));
     QObject::connect(moveArrowobj, SIGNAL(moveSignal(int,int)),this, SLOT(modelMove(int,int)));
     QObject::connect(moveArrowobj, SIGNAL(moveDone()),this, SLOT(modelMoveDone()));
@@ -221,8 +223,8 @@ void QmlManager::initializeUI(QQmlApplicationEngine* e){
     QObject::connect(mv, SIGNAL(groupSelectionActivate(bool)), this, SLOT(groupSelectionActivate(bool)));
 
     QObject::connect(yesno_popup, SIGNAL(runGroupFeature(int, QString, double, double, double, QVariant)),this,SLOT(runGroupFeature(int,QString, double, double, double, QVariant)));
-	_rayCastController.addLayer(&_moveWidgetLayer);
-	_rayCastController.addLayer(&_rotateWidgetLayer);
+
+	QObject::connect(mv, SIGNAL(cameraViewChanged()), this, SLOT(cameraViewChanged()));
 
 
 }
@@ -1222,7 +1224,16 @@ void QmlManager::hideMoveArrow(){
 }
 
 void QmlManager::hideRotateSphere(){
-    rotateSphere->setEnabled(0);
+	_rotateWidget.setVisible(false);
+	//also check move
+	if (_rotateWidget.visible())
+	{
+		_rayCastController.setHoverEnabled(false);
+
+	}
+
+
+    //rotateSphere->setEnabled(0);
 }
 
 const RayCastController& QmlManager::getRayCaster()
@@ -1230,24 +1241,12 @@ const RayCastController& QmlManager::getRayCaster()
 	return _rayCastController;
 }
 
-void QmlManager::showRotatingSphere(){
-    if (selectedModels.empty())
-        return;
-    rotateSphere->setEnabled(1);
-    rotateSphereX->setEnabled(1);
-    rotateSphereY->setEnabled(1);
-    rotateSphereZ->setEnabled(1);
-    QQmlProperty::write(rotateSphereobj,"center", getSelectedCenter());
-}
 
 void QmlManager::showRotateSphere(){
     if (selectedModels.empty())
         return;
-    rotateSphere->setEnabled(1);
-    rotateSphereX->setEnabled(1);
-    rotateSphereY->setEnabled(1);
-    rotateSphereZ->setEnabled(1);
-    QQmlProperty::write(rotateSphereobj,"center", getSelectedCenter());
+	_rotateWidget.setVisible(true);
+	_rayCastController.setHoverEnabled(true);
 }
 
 
@@ -1262,23 +1261,8 @@ void QmlManager::modelMoveDone(){
         return;
 	QMetaObject::invokeMethod(boundedBox, "hideBox"); // Bounded Box
     hideMoveArrow();
-
-    for (GLModel* curModel : selectedModels){
-		curModel->setHitTestable(true);
-        //curModel->saveUndoState();
-
-        /*QVector3D translationDiff = curModel->getTransform()->translation()-curModel->m_translation;
-
-        // move translation back to original
-        curModel->getTransform()->setTranslation(curModel->m_translation);
-        curModel->moveModelMesh(translationDiff);*/
-    }
-
     sendUpdateModelInfo();
-    //if(Axis != 3){
-        showMoveArrow();
-        //QQmlProperty::write(moveArrowobj,"center",selectedModels[0]->getTransform()->translation()+QVector3D((selectedModels[0]->getMesh()->x_max()+selectedModels[0]->getMesh()->x_min())/2,(selectedModels[0]->getMesh()->y_max()+selectedModels[0]->getMesh()->y_min())/2,(selectedModels[0]->getMesh()->z_max()+selectedModels[0]->getMesh()->z_min())/2));
-    //}
+
 
 
 }
@@ -1311,7 +1295,7 @@ void QmlManager::modelRotateInit(){
     return;
 }
 
-void QmlManager::modelRotateDone(int Axis){
+void QmlManager::modelRotateDone(){
     if (selectedModels.empty())
         return;
 
@@ -1326,7 +1310,7 @@ void QmlManager::modelRotateDone(int Axis){
     }
 
 
-    showRotatingSphere();
+    showRotateSphere();
     rotateSnapAngle = 0;
 }
 
@@ -1418,6 +1402,46 @@ void QmlManager::modelMoveF(int Axis, float Distance){
         selectedModel->checkPrintingArea();
     }
 }
+void QmlManager::modelRotateWithAxis(const QVector3D& axis, double angle)
+{
+	auto axis4D = axis.toVector4D();
+	for (auto selectedModel : selectedModels) {
+		QVector3D transl = selectedModel->getTransform()->translation();
+		//selectedModel->getTransform()->setTranslation(selectedModel->m_translation);
+		QVector3D rot_center = QVector3D((selectedModel->getMesh()->x_max() + selectedModel->getMesh()->x_min()) / 2,
+			(selectedModel->getMesh()->y_max() + selectedModel->getMesh()->y_min()) / 2,
+			(selectedModel->getMesh()->z_max() + selectedModel->getMesh()->z_min()) / 2);
+		auto transform = selectedModel->getTransform();
+		QMatrix4x4 rot;
+		auto test = selectedModel->getTransform()->rotation();
+		auto rotationVec = selectedModel->getTransform()->rotation().vector() ;
+		auto origRot = QVector3D::dotProduct(rotationVec, axis); // get angle of rotation for that axis
+		if (QApplication::queryKeyboardModifiers() & Qt::ShiftModifier) {// snap mode
+			rotateSnapAngle = (rotateSnapAngle + (int)std::round(angle) + 360) % 360;
+			if (rotateSnapAngle > 0 && rotateSnapAngle < 90) {
+				rot = Qt3DCore::QTransform::rotateAround(rot_center, rotateSnapAngle - origRot, (axis4D * transform->matrix()).toVector3D());
+			}
+			else if (rotateSnapAngle > 90 && rotateSnapAngle < 180) {
+				rot = Qt3DCore::QTransform::rotateAround(rot_center, rotateSnapAngle + 90 - origRot, (axis4D * transform->matrix()).toVector3D());
+			}
+			else if (rotateSnapAngle > 180 && rotateSnapAngle < 270) {
+				rot = Qt3DCore::QTransform::rotateAround(rot_center, rotateSnapAngle + 180 - origRot, (axis4D * transform->matrix()).toVector3D());
+			}
+			else if (rotateSnapAngle > 270 && rotateSnapAngle < 360) {
+				rot = Qt3DCore::QTransform::rotateAround(rot_center, rotateSnapAngle + 270 - origRot, (axis4D * transform->matrix()).toVector3D());
+			}
+		}
+		else
+			//                selectedModel->getTransform()->setRotationX(tmpx+Angle);
+			qDebug() << angle;
+			rot = Qt3DCore::QTransform::rotateAround(rot_center, angle, (axis4D * transform->matrix()).toVector3D());
+		selectedModel->setMatrix(selectedModel->getTransform()->matrix() * rot);
+		break;
+	}
+
+
+}
+
 void QmlManager::modelRotate(int Axis, int Angle){
     if (selectedModels.empty())
         return;
@@ -1581,6 +1605,11 @@ void QmlManager::save() {
     qmlManager->openProgressPopUp();
     QFuture<void> future = QtConcurrent::run(ste, &STLexporter::exportSTL, fileName);
     return;
+}
+
+void QmlManager::cameraViewChanged()
+{
+	_rotateWidget.updatePosition();
 }
 
 void QmlManager::groupSelectionActivate(bool active){
@@ -2243,3 +2272,11 @@ void QmlManager::unselectPartImpl(GLModel* target)
 }
 
 
+QVector2D QmlManager::world2Screen(QVector3D target) {
+	QVariant value;
+	qRegisterMetaType<QVariant>("QVariant");
+	QMetaObject::invokeMethod(mttab, "world2Screen", Qt::DirectConnection, Q_RETURN_ARG(QVariant, value),
+		Q_ARG(QVariant, target));
+	QVector2D result = qvariant_cast<QVector2D>(value);
+	return result;
+}

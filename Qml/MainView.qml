@@ -33,12 +33,16 @@ Entity {
     property alias keyboardHandler: keyboardHandler
 
     property int ftrDelete : 18
-
+    signal cameraViewChanged();
     //CoordinateMesh{} // 기준좌표 체크
 
     CameraManager{
         objectName: "cm"
         id : cm
+        onCameraRotated:
+        {
+            cameraViewChanged();
+        }
     }
 
     /*SlicingConfiguration {
@@ -109,18 +113,19 @@ Entity {
             enabled: false
         }
 
-        Entity{
-            objectName: "rotateSphereEntity"
-            MeshTransformerRotate{
-                objectName: "rotateSphere"
-            }
-        }
+//        Entity{
+//            objectName: "rotateSphereEntity"
+//            MeshTransformerRotate{
+//                objectName: "rotateSphere"
+//            }
+//        }
         Entity{
             objectName: "moveArrowEntity"
             MeshTransformerMove{
                 objectName: "moveArrow"
             }
         }
+
 
 
         CoordinateMesh{}

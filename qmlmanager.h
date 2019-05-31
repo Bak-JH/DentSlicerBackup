@@ -20,7 +20,8 @@
 #include "QFuture"
 #include "utils/httpreq.h"
 #include <QKeyboardHandler>
-#include "raycastcontroller.h"
+#include "input/raycastcontroller.h"
+#include "ui/RotateXYZWidget.h"
 
 #define VIEW_MODE_OBJECT 0
 #define VIEW_MODE_SUPPORT 1
@@ -48,7 +49,7 @@ public:
     QObject* scene3d;
     QEntity* models;
     Qt3DCore::QTransform* systemTransform;
-    QObject* mv;
+	QEntity* mv;
 	Qt3DCore::QEntity* boundedBox;
     Qt3DCore::QEntity *mttab;
     QObject* undoRedoButton;
@@ -57,11 +58,11 @@ public:
 
     // model rotate components
     QObject *rotatePopup;
-    QObject *rotateSphereobj;
-    Qt3DCore::QEntity *rotateSphere;
-    Qt3DCore::QEntity *rotateSphereX;
-    Qt3DCore::QEntity *rotateSphereY;
-    Qt3DCore::QEntity *rotateSphereZ;
+    //QObject *rotateSphereobj;
+    //Qt3DCore::QEntity *rotateSphere;
+    //Qt3DCore::QEntity *rotateSphereX;
+    //Qt3DCore::QEntity *rotateSphereY;
+    //Qt3DCore::QEntity *rotateSphereZ;
 
     // model move components
     QObject *moveButton;
@@ -154,7 +155,7 @@ public:
     std::vector<QString> copyMeshNames;
 
 
-
+	//!
     int rotateSnapAngle = 0;
     int rotateSnapStartAngle = 0;
     int rotateSnapQuotient = 0;
@@ -164,11 +165,10 @@ public:
     bool orientationActive = false;
     bool freecutActive = false;
 
-	const RayCastController& getRayCaster();
+	const Hix::Input::RayCastController& getRayCaster();
     QString groupFunctionState;
     int groupFunctionIndex;
     float progress = 0;
-    void showRotatingSphere();
     void showRotateSphere();
     void showMoveArrow();
     void hideRotateSphere();
@@ -190,6 +190,7 @@ public:
     int getLayerViewFlags();
 	void modelSelected(int);
 	const std::unordered_set<GLModel*>& getSelectedModels();
+	QVector2D world2Screen(QVector3D target);
 
     GLModel* findGLModelByName(QString filename);
 	void connectShadow(GLModel* shadowModel);
@@ -235,6 +236,7 @@ public:
     float selected_y_min();
     float selected_z_max();
     float selected_z_min();
+	void modelRotateWithAxis(const QVector3D& axis, double degree);
 
 private:
 
@@ -250,9 +252,8 @@ private:
 	std::unordered_set<GLModel*> selectedModels;
 
 	//Ray cast
-	RayCastController _rayCastController;
-	Qt3DRender::QLayer _rotateWidgetLayer;
-	Qt3DRender::QLayer _moveWidgetLayer;
+	Hix::Input::RayCastController _rayCastController;
+	Hix::UI::RotateXYZWidget _rotateWidget;
 signals:
     void updateModelInfo(int printing_time, int layer, QString xyz, float volume);
     void arrangeDone(std::vector<QVector3D>, std::vector<float>);
@@ -285,7 +286,7 @@ public slots:
     void modelMoveDone();
     void totalMoveDone();
     void modelRotateInit();
-    void modelRotateDone(int);
+    void modelRotateDone();
     void totalRotateDone();
     void resetLayflat();
     void applyArrangeResult(std::vector<QVector3D>, std::vector<float>);
@@ -305,7 +306,7 @@ public slots:
     void openSave();
     void closeSave();
     void save();
-
+	void cameraViewChanged();
     void viewObjectChanged(bool checked);
     void viewSupportChanged(bool checked);
     void viewLayerChanged(bool checked);

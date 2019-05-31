@@ -216,32 +216,53 @@ Item{
         }
 
         MouseArea{
-            acceptedButtons: Qt.MiddleButton
+
+            acceptedButtons: Qt.MiddleButton | Qt.RightButton
             anchors.fill: parent
-            property bool isDrag: false
+            property int mode: 0;// 0 = none, 1 = translate, 2 = rotate, !#!@# qt...
             property vector2d prevPosition;
             property vector2d currPosition;
+            property real rotationSpeed : 0.2;
+            propagateComposedEvents: true;
 
             onPressed: {
-                isDrag = true;
+                if(mouse.button == Qt.RightButton)
+                {
+                    mode = 2;
+                }
+                else
+                {
+                    mode = 1;
+                }
                 prevPosition = Qt.vector2d(mouseX,mouseY);
             }
             onReleased:  {
-                isDrag = false
+                mode = 0;
                 mttab.updatePosition()
+                qm.enableObjectPickers();
             }
 
             onPositionChanged: {
-                if(isDrag){//mouse wheel drag
+                if(mode != 0 && !qm.freecutActive)
+                {
                     currPosition = Qt.vector2d(mouseX,mouseY);
-                    // move screen by drag scene3d
-                    sceneRoot.cm.camera.translateWorld(Qt.vector3d((-1)*(currPosition.x - prevPosition.x)/1000,0,0),0);
-                    sceneRoot.cm.camera.translateWorld(Qt.vector3d(0,(1)*(currPosition.y - prevPosition.y)/1000,0),0);
-    //                scene3d.anchors.leftMargin = scene3d.anchors.leftMargin + (currPosition.x - prevPosition.x);
-    //                scene3d.anchors.topMargin = scene3d.anchors.topMargin + (currPosition.y - prevPosition.y);
-                    //console.log(Qt.vector3d((-1)*(currPosition.x - prevPosition.x)/1000,(1)*(currPosition.y - prevPosition.y)/1000,0));
+                    qm.disableObjectPickers();
+
+                    if(mode == 1){//mouse wheel drag
+                        sceneRoot.cm.camera.translateWorld(Qt.vector3d((-1)*(currPosition.x - prevPosition.x)/1000,0,0),0);
+                        sceneRoot.cm.camera.translateWorld(Qt.vector3d(0,(1)*(currPosition.y - prevPosition.y)/1000,0),0);
+                    }
+                    else
+                    {
+                        sceneRoot.systemTransform.rotationZ += rotationSpeed *(currPosition.x - prevPosition.x);
+                        sceneRoot.systemTransform.rotationX += rotationSpeed * (-1) *(currPosition.y - prevPosition.y);
+                    }
                     prevPosition = currPosition;
+                    sceneRoot.cameraViewChanged();
+
                 }
+
+
             }
 
             onWheel: {
@@ -284,6 +305,7 @@ Item{
 
                     mttab.updatePosition();
                 }
+                sceneRoot.cameraViewChanged();
                 qm.enableObjectPickers();
             }
         }
