@@ -14,9 +14,7 @@ class modelcut : public QObject {
     Q_OBJECT
 public:
     modelcut();
-    void bisectModel(Mesh* mesh, Plane plane, Mesh* leftMesh, Mesh* rightMesh);
-    void generatePlane(Qt3DCore::QEntity* targetEntity);
-    void addCuttingPoint(Qt3DCore::QEntity* targetEntity, QVector3D v);
+
     void removeCuttingPoints();
     //rotateResult* Tweak(Mesh* mesh, bool bi_algorithmic,int CA,bool *appropriately_rotated);
     //float approachvertex(Mesh* mesh,float n[]);

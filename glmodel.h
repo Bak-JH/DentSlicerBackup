@@ -228,7 +228,9 @@ public:
 	void setBoundingBoxVisible(bool isEnabled);
 	const Qt3DCore::QTransform* getTransform() const;
 	void setTranslation(const QVector3D& t);
-	void setMatrix(const QMatrix4x4& matrix);
+    QVector3D getTranslation();
+    void setMatrix(const QMatrix4x4& matrix);
+
 	Qt3DRender::QLayer* getLayer();
 	/***************Ray casting and hit test***************/
 	void setHitTestable(bool isEnabled);

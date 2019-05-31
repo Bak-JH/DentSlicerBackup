@@ -1313,8 +1313,6 @@ void GLModel::generatePlane(){
     cuttingPlane.push_back(v2);
     cuttingPlane.push_back(v3);
 
-    //To manipulate plane color, change the QRgb(0x~~~~~~).
-    QVector3D tmp = m_transform.translation();
     QVector3D world_origin(0,0,0);
     QVector3D original_normal(0,1,0);
     QVector3D desire_normal(QVector3D::normal(v1,v2,v3)); //size=1
@@ -1325,14 +1323,13 @@ void GLModel::generatePlane(){
         planeEntity[i] = new Qt3DCore::QEntity(this);
         //qDebug() << "generatePlane---------------------==========-=-==-" << parentModel;
         clipPlane[i]=new Qt3DExtras::QPlaneMesh(this);
-        clipPlane[i]->setHeight(100.0);
-        clipPlane[i]->setWidth(100.0);
+        clipPlane[i]->setHeight(200.0);
+        clipPlane[i]->setWidth(200.0);
 
         planeTransform[i]=new Qt3DCore::QTransform();
-        planeTransform[i]->setScale(2.0f);
         planeTransform[i]->setRotation(QQuaternion::fromAxisAndAngle(crossproduct_vector, angle+180*i));
-        float zlength = _mesh->z_max() - _mesh->z_min();
-        planeTransform[i]->setTranslation(desire_normal*(-world_origin.distanceToPlane(v1,v2,v3))+QVector3D(tmp.x(),tmp.y(),-_mesh->z_min()));
+        planeTransform[i]->setTranslation(desire_normal*(-world_origin.distanceToPlane(v1,v2,v3))
+                                          + m_transform.translation());
 
         planeObjectPicker[i] = new Qt3DRender::QObjectPicker;//planeEntity[i]);
 
@@ -1795,10 +1792,8 @@ void GLModel::mouseReleasedRayCasted(MouseEventData& pick, Qt3DRender::QRayCaste
 		qDebug() << "getting handle picker clicked signal hollow shell active";
 		qDebug() << "found parent meshface";
 		// translate hollowShellSphere to mouse position
-		QVector3D v = hit.localIntersection();
-		QVector3D tmp = m_transform.translation();
-		float zlength = _mesh->z_max() - _mesh->z_min();
-		qmlManager->hollowShellSphereTransform->setTranslation(v + QVector3D(tmp.x(), tmp.y(), -_mesh->z_min()));
+        QVector3D v = hit.localIntersection();
+        qmlManager->hollowShellSphereTransform->setTranslation(v + m_transform.translation());
 
 
 	}
@@ -1869,10 +1864,9 @@ void GLModel::getSliderSignal(double value){
         float angle = qAcos(QVector3D::dotProduct(original_normal,desire_normal))*180/M_PI+(value-1)*30;
         QVector3D crossproduct_vector(QVector3D::crossProduct(original_normal,desire_normal));
 
-        QVector3D tmp = m_transform.translation();
-
         for (int i=0;i<2;i++){
-            planeTransform[i]->setTranslation(desire_normal*(-world_origin.distanceToPlane(v1,v2,v3)) +QVector3D(tmp.x(),tmp.y(),-_mesh->z_min()));
+            planeTransform[i]->setTranslation(desire_normal*(-world_origin.distanceToPlane(v1,v2,v3))
+                                              +  m_transform.translation());
             planeEntity[i]->addComponent(planeTransform[i]);
         }
 
@@ -2713,6 +2707,10 @@ const Qt3DCore::QTransform* GLModel::getTransform() const
 void GLModel::setTranslation(const QVector3D& t)
 {
 	m_transform.setTranslation(t);
+}
+
+QVector3D GLModel::getTranslation(){
+    return m_transform.translation();
 }
 
 const Mesh* GLModel::getRaft()
