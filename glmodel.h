@@ -23,8 +23,8 @@
 #include "feature/extension.h"
 #include "feature/hollowshell.h"
 #include "DentEngine/src/configuration.h"
-#include "raycastcontroller.h"
-
+#include "input/raycastcontroller.h"
+#include "input/Draggable.h"
 #define MAX_BUF_LEN 2000000
 
 using namespace Qt3DCore;
@@ -97,15 +97,18 @@ signals:
 
 
 
-class GLModel : public QEntity
+class GLModel : public QEntity, public Hix::Input::Draggable
 {
     Q_OBJECT
 public:
 
-    //raycasting + mouse event
-    void mouseMoved				(MouseEventData&);
-	void mousePressedRayCasted	(MouseEventData&, Qt3DRender::QRayCasterHit&);
-	void mouseReleasedRayCasted	(MouseEventData&, Qt3DRender::QRayCasterHit&);
+    //probably interface this as well
+	void clicked	(Hix::Input::MouseEventData&, Qt3DRender::QRayCasterHit&);
+
+	bool isDraggable(Hix::Input::MouseEventData& v, Qt3DRender::QRayCasterHit&) override;
+	void dragStarted(Hix::Input::MouseEventData&, Qt3DRender::QRayCasterHit&) override;
+	void doDrag(Hix::Input::MouseEventData& e)override;
+	void dragEnded(Hix::Input::MouseEventData&) override;
 
 	//size of QGeometry Attribute elements
 	const static size_t POS_SIZE = 3; //x, y, z of position
@@ -202,7 +205,6 @@ public:
     void checkPrintingArea();
     bool EndsWith(const std::string& a, const std::string& b);
     bool modelSelectChangable();
-    QVector2D world2Screen(QVector3D target);
     QString getFileName(const std::string& s);
     static QVector3D spreadPoint(QVector3D endpoint,QVector3D startpoint,int factor);
     void changeViewMode(int viewMode);

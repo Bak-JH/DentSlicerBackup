@@ -18,6 +18,12 @@ namespace Utils
         float round(float num, int precision);
 
         bool doubleAreSame(double a, double b);
+
+		inline float intPointDistance(QPoint a, QPoint b)
+		{
+			return std::sqrt(std::pow(a.x() - b.x(), 2) + std::pow(a.y() - b.y(), 2));
+		}
+
     }
 
 }

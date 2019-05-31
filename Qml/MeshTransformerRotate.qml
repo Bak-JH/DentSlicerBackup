@@ -398,7 +398,7 @@ Entity {
                     }
                     pastAngle = degreeangle
                 }
-                rotateSphereTransform.scale3D = Qt.vector3d(0.01/syszoom.x,0.01/syszoom.y,0.01/syszoom.z)
+                //rotateSphereTransform.scale3D = Qt.vector3d(0.01/syszoom.x,0.01/syszoom.y,0.01/syszoom.z)
 
                 //console.log(sceneRoot.systemTransform.rotationX )
                 var theta = sceneRoot.systemTransform.rotationX/180.0*Math.PI

@@ -11,7 +11,7 @@ RC_ICONS = icon-32.ico
 RC_FILE = DLPslicer.rc
 
 SOURCES += main.cpp \
-    raycastcontroller.cpp \
+    input/raycastcontroller.cpp \
     slicingengine.cpp \
     glmodel.cpp \
     qmlmanager.cpp \
@@ -24,6 +24,10 @@ SOURCES += main.cpp \
     feature/convex_hull.cpp \
     feature/text3dgeometrygenerator.cpp \
     feature/labellingtextpreview.cpp \
+    ui/MoveWidget.cpp \
+    ui/RotateWidget.cpp \
+    ui/RotateXYZWidget.cpp \
+    ui/Widget3D.cpp \
     utils/quaternionhelper.cpp \
     utils/mathutils.cpp \
     utils/qtriangulator.cpp \
@@ -105,7 +109,8 @@ HEADERS += \
     common/TrackedIndexedList.h \
     common/indexedlist.h \
     common/indexedlist.h \
-    raycastcontroller.h \
+    input/Draggable.h \
+    input/raycastcontroller.h \
     slicingengine.h \
     glmodel.h \
     qmlmanager.h \
@@ -118,6 +123,10 @@ HEADERS += \
     feature/convex_hull.h \
     feature/labellingtextpreview.h \
     feature/text3dgeometrygenerator.h \
+    ui/MoveWidget.h \
+    ui/RotateWidget.h \
+    ui/RotateXYZWidget.h \
+    ui/Widget3D.h \
     unitTest/catch.hpp \
     unitTest/tests/IndexedListTest.h \
     unitTest/tests/TrackedIndexedListTest.h \

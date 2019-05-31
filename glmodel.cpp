@@ -33,7 +33,7 @@ const size_t VTX_SIZE = POS_SIZE + NRM_SIZE + COL_SIZE;
 
 using namespace Utils::Math;
 using namespace Hix::Engine3D;
-
+using namespace Hix::Input;
 GLModel::GLModel(QObject* mainWindow, QNode *parent, Mesh* loadMesh, QString fname, int id)
     : QEntity(parent)
     , filename(fname)
@@ -1103,11 +1103,11 @@ void GLModel::mouseClickedFreeCutSphere(Qt3DRender::QPickEvent* pick)
     QVector2D pickPosition = (QVector2D)pick->position();
 
     int minIdx = 0;
-    float min = world2Screen(cuttingPoints[0]).distanceToPoint(pickPosition);
+    float min = qmlManager->world2Screen(cuttingPoints[0]).distanceToPoint(pickPosition);
     for (int i=0; i<cuttingPoints.size(); i++){
-        if (world2Screen(cuttingPoints[i]).distanceToPoint(pickPosition) < min){
+        if (qmlManager->world2Screen(cuttingPoints[i]).distanceToPoint(pickPosition) < min){
             minIdx = i;
-            min = world2Screen(cuttingPoints[i]).distanceToPoint(pickPosition);
+            min = qmlManager->world2Screen(cuttingPoints[i]).distanceToPoint(pickPosition);
         }
     }
 
@@ -1866,58 +1866,12 @@ GLModel::~GLModel(){
 
 
 
-void GLModel::mouseMoved(MouseEventData& v)
-{
 
-	if (!isMoved) { // called only once on dragged
-		qmlManager->moveButton->setProperty("state", "active");
-		qmlManager->setClosedHandCursor();
-		saveUndoState();
-		qmlManager->hideMoveArrow();
-		qDebug() << "hiding move arrow";
-		isMoved = true;
-	}
-
-	QVector2D currentPoint = v.position;
-
-	QVector3D xAxis3D = QVector3D(1, 0, 0);
-	QVector3D yAxis3D = QVector3D(0, 1, 0);
-	QVector2D xAxis2D = (world2Screen(lastpoint + xAxis3D) - world2Screen(lastpoint));
-	QVector2D yAxis2D = (world2Screen(lastpoint + yAxis3D) - world2Screen(lastpoint));
-	QVector2D target = currentPoint - prevPoint;
-
-	float b = (target.y() * xAxis2D.x() - target.x() * xAxis2D.y()) /
-		(xAxis2D.x() * yAxis2D.y() - xAxis2D.y() * yAxis2D.x());
-	float a = (target.x() - b * yAxis2D.x()) / xAxis2D.x();
-
-	// move ax + by amount
-	qmlManager->modelMoveF(1, a);
-	qmlManager->modelMoveF(2, b);
-
-	prevPoint = currentPoint;
-	
-}
-
-void GLModel::mousePressedRayCasted(MouseEventData& e, Qt3DRender::QRayCasterHit& hit) 
-{
-	qDebug() << "pgoo";
-	if (e.button == Qt3DInput::QMouseEvent::Buttons::RightButton) // pass if click with right mouse
-		return;
-	QVector2D currentPoint = e.position;
-	qDebug() << "Pressed   " << currentPoint << m_transform.translation();
-
-	lastpoint = hit.localIntersection();
-	prevPoint = (QVector2D)e.position;
-	qDebug() << "Dragged";
-}
 //when ray casting is not needed, ie) right click
 
-void GLModel::mouseReleasedRayCasted(MouseEventData& pick, Qt3DRender::QRayCasterHit& hit)
+void GLModel::clicked(MouseEventData& pick, Qt3DRender::QRayCasterHit& hit)
 {
-	if (isMoved) {
-		isMoved = false;
-		return;
-	}
+
 	if (!cutActive && !extensionActive && !labellingActive && !layflatActive && !manualSupportActive)// && !layerViewActive && !supportViewActive)
 		qmlManager->modelSelected(ID);
 
@@ -1948,10 +1902,10 @@ void GLModel::mouseReleasedRayCasted(MouseEventData& pick, Qt3DRender::QRayCaste
 		if (labellingTextPreview && labellingTextPreview->isEnabled()) {
 			labellingTextPreview->setTranslation(hit.localIntersection() + targetMeshFace->fn);
 			labellingTextPreview->setNormal(targetMeshFace->fn);
-			labellingTextPreview->planeSelected = true;
+labellingTextPreview->planeSelected = true;
 		}
 		else {
-			labellingTextPreview->planeSelected = false;
+		labellingTextPreview->planeSelected = false;
 		}
 	}
 
@@ -2031,6 +1985,70 @@ void GLModel::mouseReleasedRayCasted(MouseEventData& pick, Qt3DRender::QRayCaste
 		generateColorAttributes();
 		colorExtensionFaces();
 	}
+}
+
+bool GLModel::isDraggable(Hix::Input::MouseEventData& e, Qt3DRender::QRayCasterHit&)
+{
+	if (e.button == Qt3DInput::QMouseEvent::Buttons::LeftButton
+		&&
+		qmlManager->isSelected(this) 
+		&&
+		!(	scaleActive ||
+			cutActive ||
+			shellOffsetActive ||
+			extensionActive ||
+			labellingActive ||
+			layflatActive ||
+			layerViewActive ||
+			manualSupportActive ||
+			supportViewActive)	
+		&&
+		!(qmlManager->orientationActive ||
+			qmlManager->rotateActive ||
+			qmlManager->saveActive))
+	{
+		return true;
+	}
+	return false;
+}
+void GLModel::dragStarted(Hix::Input::MouseEventData& e, Qt3DRender::QRayCasterHit& hit)
+{
+	lastpoint = hit.localIntersection();
+	prevPoint = (QVector2D)e.position;
+	qmlManager->moveButton->setProperty("state", "active");
+	qmlManager->setClosedHandCursor();
+	saveUndoState();
+	qmlManager->hideMoveArrow();
+	qDebug() << "hiding move arrow";
+	isMoved = true;
+}
+
+void GLModel::doDrag(Hix::Input::MouseEventData& v)
+{
+	QVector2D currentPoint = QVector2D(v.position.x(), v.position.y());
+
+	QVector3D xAxis3D = QVector3D(1, 0, 0);
+	QVector3D yAxis3D = QVector3D(0, 1, 0);
+	QVector2D xAxis2D = (qmlManager->world2Screen(lastpoint + xAxis3D) - qmlManager->world2Screen(lastpoint));
+	QVector2D yAxis2D = (qmlManager->world2Screen(lastpoint + yAxis3D) - qmlManager->world2Screen(lastpoint));
+	QVector2D target = currentPoint - prevPoint;
+
+	float b = (target.y() * xAxis2D.x() - target.x() * xAxis2D.y()) /
+		(xAxis2D.x() * yAxis2D.y() - xAxis2D.y() * yAxis2D.x());
+	float a = (target.x() - b * yAxis2D.x()) / xAxis2D.x();
+
+	// move ax + by amount
+	qmlManager->modelMoveF(1, a);
+	qmlManager->modelMoveF(2, b);
+
+	prevPoint = currentPoint;
+}
+
+void GLModel::dragEnded(Hix::Input::MouseEventData&)
+{
+	isMoved = false;
+	qmlManager->modelMoveDone();
+
 }
 
 void GLModel::cutModeSelected(int type){
@@ -2146,16 +2164,7 @@ void GLModel::getLayerViewSliderSignal(double value) {
 }
 
 /** HELPER functions **/
-QVector2D GLModel::world2Screen(QVector3D target){
-    QVariant value;
-    qRegisterMetaType<QVariant>("QVariant");
-    QMetaObject::invokeMethod(qmlManager->mttab, "world2Screen", Qt::DirectConnection, Q_RETURN_ARG(QVariant,value),
-                              Q_ARG(QVariant, target));
 
-    QVector2D result = qvariant_cast<QVector2D>(value);
-
-    return result;
-}
 bool GLModel::EndsWith(const std::string& a, const std::string& b) {
     if (b.size() > a.size()) return false;
     return std::equal(a.begin() + a.size() - b.size(), a.end(), b.begin());
