@@ -241,10 +241,11 @@ GLModel* QmlManager::createModelFile(Mesh* target_mesh, QString fname) {
     latestAdded->moveModelMesh(QVector3D(
                            (-1)*xmid,
                            (-1)*ymid,
-                           (-1)*zmid));
+                           (-1)*latestAdded->getMesh()->z_min()));
 
-    //glmodel->m_translation = glmodel->getTransform()->translation();
-    qDebug() << "moved model to right place";
+    emit latestAdded->_updateModelMesh();
+
+    qDebug() << "moved model to right place" << latestAdded->getMesh()->x_min() << latestAdded->getMesh()->y_min() << latestAdded->getMesh()->z_min() << "|" << xmid << ymid << zmid << latestAdded->getTranslation();
 
 	//add to raytracer
 	latestAdded->setHitTestable(true);
@@ -1294,7 +1295,7 @@ void QmlManager::totalMoveDone(){
         //curModel->saveUndoState();
 
         curModel->moveModelMesh(curModel->getTransform()->translation(), false);
-        curModel->setTranslation(curModel->getTransform()->translation()+curModel->getTransform()->translation());
+        //curModel->setTranslation(curModel->getTransform()->translation()+curModel->getTransform()->translation());
         curModel->setTranslation(QVector3D(0,0,0));
         // need to only update shadowModel & getMesh()
         emit curModel->_updateModelMesh();
