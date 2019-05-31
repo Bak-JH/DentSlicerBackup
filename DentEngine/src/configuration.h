@@ -73,6 +73,9 @@ public:
     int resolution_y = 1440;
     int bed_x = 120.96; // in mm
     int bed_y = 68.04; // in mm
+	size_t bed_margin_x = 1;
+	size_t bed_margin_y = 1;
+
     float pixel_per_mm = float(resolution_x)/float(bed_x);
 };
 
