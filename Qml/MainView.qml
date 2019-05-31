@@ -112,22 +112,6 @@ Entity {
             objectName: "boundedBox"
             enabled: false
         }
-
-//        Entity{
-//            objectName: "rotateSphereEntity"
-//            MeshTransformerRotate{
-//                objectName: "rotateSphere"
-//            }
-//        }
-        Entity{
-            objectName: "moveArrowEntity"
-            MeshTransformerMove{
-                objectName: "moveArrow"
-            }
-        }
-
-
-
         CoordinateMesh{}
     }
 

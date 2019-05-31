@@ -22,6 +22,7 @@
 #include <QKeyboardHandler>
 #include "input/raycastcontroller.h"
 #include "ui/RotateXYZWidget.h"
+#include "ui/MoveXYZWidget.h"
 
 #define VIEW_MODE_OBJECT 0
 #define VIEW_MODE_SUPPORT 1
@@ -59,20 +60,11 @@ public:
 
     // model rotate components
     QObject *rotatePopup;
-    //QObject *rotateSphereobj;
-    //Qt3DCore::QEntity *rotateSphere;
-    //Qt3DCore::QEntity *rotateSphereX;
-    //Qt3DCore::QEntity *rotateSphereY;
-    //Qt3DCore::QEntity *rotateSphereZ;
 
     // model move components
     QObject *moveButton;
     QObject *movePopup;
     Qt3DCore::QEntity *managerModel;
-    Qt3DCore::QEntity *moveArrow;
-    Qt3DCore::QEntity *moveArrowX;
-    Qt3DCore::QEntity *moveArrowY;
-    Qt3DCore::QEntity *moveArrowobj;
 
     // selection popup
     QObject* yesno_popup;
@@ -237,6 +229,7 @@ public:
     float selected_y_min();
     float selected_z_max();
     float selected_z_min();
+	void modelMoveWithAxis(QVector3D axis, double distance);
 	void modelRotateWithAxis(const QVector3D& axis, double degree);
 	QVector3D cameraViewVector();
 private:
@@ -255,6 +248,8 @@ private:
 	//Ray cast
 	Hix::Input::RayCastController _rayCastController;
 	Hix::UI::RotateXYZWidget _rotateWidget;
+	Hix::UI::MoveXYZWidget _moveWidget;
+
 signals:
     void updateModelInfo(int printing_time, int layer, QString xyz, float volume);
     void arrangeDone(std::vector<QVector3D>, std::vector<float>);
@@ -279,7 +274,6 @@ public slots:
     void runGroupFeature(int,QString, double, double, double, QVariant);
     bool multipleModelSelected(int ID);
     void lastModelSelected();
-    void modelRotate(int,int);
     void modelRotateByNumber(int axis, int, int, int);
     void modelMove(int,int);
     void modelMoveF(int,float);

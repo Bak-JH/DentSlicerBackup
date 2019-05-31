@@ -182,6 +182,9 @@
     <ClCompile Include="ui\Widget3D.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="ui\MoveXYZWidget.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DentEngine\src\polyclipping\poly2tri\sweep\advancing_front.h">
@@ -334,16 +337,10 @@
     <ClInclude Include="common\TrackedIndexedList.h">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="unitTest\catch.hpp">
-      <Filter>Source Files</Filter>
-    </ClInclude>
     <ClInclude Include="common\IteratorWrapper.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="common\indexedlist.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="ui\MoveWidget.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="ui\Widget3D.h">
@@ -353,6 +350,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="input\Draggable.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="unitTest\catch.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -949,6 +949,12 @@
       <Filter>Header Files</Filter>
     </QtMoc>
     <QtMoc Include="ui\RotateXYZWidget.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="ui\MoveXYZWidget.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="ui\MoveWidget.h">
       <Filter>Header Files</Filter>
     </QtMoc>
   </ItemGroup>
