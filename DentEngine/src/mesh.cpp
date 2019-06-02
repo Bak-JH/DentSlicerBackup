@@ -7,7 +7,7 @@
 
 #if defined(_DEBUG) || defined(QT_DEBUG )
 #define _STRICT_MESH
-#define _STRICT_MESH_NO_SELF_INTERSECTION
+//#define _STRICT_MESH_NO_SELF_INTERSECTION
 #endif
 using namespace Utils::Math;
 using namespace Hix;
@@ -890,7 +890,7 @@ void Hix::Engine3D::Mesh::addHalfEdgesToFace(std::array<VertexItr, 3> faceVertic
 	halfEdges.emplace_back(HalfEdge());
 
 	auto firstAddedItr = halfEdges.end() - 3;
-	size_t faceIdx;
+	size_t vtxIdx = 0;
 	
 	HalfEdgeConstItr nextItr;
 	HalfEdgeConstItr prevItr;
@@ -898,15 +898,14 @@ void Hix::Engine3D::Mesh::addHalfEdgesToFace(std::array<VertexItr, 3> faceVertic
 	for (auto itr = firstAddedItr; itr != halfEdges.end(); ++itr)
 	{
 		//add vertices in (from, to) pairs, so (0,1) (1,2) (2,0)
-		itr->from = VertexConstItr(faceVertices[faceIdx % 3]);
-		itr->to = VertexConstItr(faceVertices[(faceIdx + 1) % 3]);
-		++faceIdx;
+		itr->from = VertexConstItr(faceVertices[vtxIdx % 3]);
+		itr->to = VertexConstItr(faceVertices[(vtxIdx + 1) % 3]);
 
 		//add "owning" face or face that the hEdge circuit creates
 		itr->owningFace = face;
 		//for each vertices that the half edges are "leaving" from, add the half edge reference
-		faceVertices[faceIdx % 3]->leavingEdges.push_back(itr);
-		faceVertices[(faceIdx + 1) % 3]->arrivingEdges.push_back(itr);
+		faceVertices[vtxIdx % 3]->leavingEdges.push_back(itr);
+		faceVertices[(vtxIdx + 1) % 3]->arrivingEdges.push_back(itr);
 
 		//add circular relationship for all half edges
 		nextItr = itr + 1;
@@ -927,6 +926,8 @@ void Hix::Engine3D::Mesh::addHalfEdgesToFace(std::array<VertexItr, 3> faceVertic
 		itr->next = nextItr;
 		itr->prev = prevItr;
 		//twins are not added here.
+		++vtxIdx;
+
 	}
 	this->toNormItr(face)->edge = HalfEdgeConstItr(firstAddedItr);
 }
@@ -1037,6 +1038,21 @@ void Mesh::hEdgeIndexChangedCallback(size_t oldIdx, size_t newIdx)
 	auto modTo = &*vertices.toNormItr(hEdge.to);
 	foundItr = std::find(modTo->arrivingEdges.begin(), modTo->arrivingEdges.end(), oldItr);
 	(*foundItr) = newIndexItr;
+
+	//update twins
+	for (auto& twin : hEdge.twins)
+	{
+		auto modTwin = halfEdges.toNormItr(twin);
+
+		for (auto twinTwin = modTwin->twins.begin(); twinTwin != modTwin->twins.end(); ++twinTwin)
+		{
+			if (*twinTwin == oldItr)
+			{
+				*twinTwin = newIndexItr;
+				break;
+			}
+		}
+	}
 }
 
 
