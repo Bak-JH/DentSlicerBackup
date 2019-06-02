@@ -14,8 +14,6 @@ using namespace Qt3DExtras;
 LabellingTextPreview::LabellingTextPreview(Qt3DCore::QNode* parent)
     : Qt3DCore::QEntity(parent)
 {
-    labelParent = parent;
-    qDebug() << "new labellingTextPreview ^ ^ ^ ^ ^ ^" << parent << parent->parentNode();
     /*
     texture = new QTexture2D(parent->parentNode());
     texture->setMinificationFilter(QAbstractTexture::Filter::Linear);//Linear
@@ -24,15 +22,14 @@ LabellingTextPreview::LabellingTextPreview(Qt3DCore::QNode* parent)
     */
 
     //planeMesh = new Qt3DExtras::QPlaneMesh(parent->parentNode());
-    qDebug() << "parent:" << parent << "parent's parent:" << parent->parentNode() << "parent*3"<<parent->parentNode()->parentNode();
 
 
-    planeMesh = new Qt3DExtras::QExtrudedTextMesh(parent->parentNode());
+    planeMesh = new Qt3DExtras::QExtrudedTextMesh(parent);
     planeMesh->setDepth(10.0f);
     planeMesh->setText("");
 
 
-    planeMesh = new Qt3DExtras::QExtrudedTextMesh(parent->parentNode());
+    planeMesh = new Qt3DExtras::QExtrudedTextMesh(parent);
     planeMesh->setDepth(0.2f);
 
     planeTransform = new Qt3DCore::QTransform(this);
@@ -43,7 +40,7 @@ LabellingTextPreview::LabellingTextPreview(Qt3DCore::QNode* parent)
     planeMaterial->setSpecular(QColor(0,255,255,255));
     planeMaterial->setAlpha(0.5f);
 
-    planeEntity = new Qt3DCore::QEntity(parent->parentNode());
+    planeEntity = new Qt3DCore::QEntity(parent);
     planeEntity->addComponent(this->planeMesh);
     planeEntity->addComponent(this->planeTransform);
     planeEntity->addComponent(this->planeMaterial);
@@ -130,10 +127,7 @@ void LabellingTextPreview::updateTransform()
 
 
     QVector3D ref = QVector3D(0, 0, 1);
-    float meshScale = 0.1f;
-    float length = this->text.length();
-    float callibration = (this->contentWidth/2.0f * scaleY) * meshScale *0.1517607f; //0.155f;//0.545f *2.38f *0.117f;//* 0.105f;
-    //QVector3D ref = QVector3D(1,0,0);
+
     QVector3D tangent;
     if (normal == QVector3D(0,0,-1)){
         tangent = QVector3D(1,0,0);
@@ -154,10 +148,8 @@ void LabellingTextPreview::updateTransform()
     }
     binormal.normalize();
 
-    //qDebug() << translation << " cal:"<<  callibration << scaleY;
-    //qDebug() << "@@@@"<<this<<translation + normal * 0.5f + tangent * callibration - binormal * (callibration / length * 12.0f);
-    //planeTransform->setTranslation(translation + normal * 0.5f);
     planeTransform->setTranslation(translation - normal);
+    qDebug() << "changed translation :" << translation - normal;
     planeTransform->setRotation(QQuaternion::fromAxes(tangent, normal, binormal) * QQuaternion::fromAxisAndAngle(QVector3D(0,1, 1), 180));
     planeTransform->setScale3D(QVector3D(ratioY,ratioY, ratioY) * scaleY);
 

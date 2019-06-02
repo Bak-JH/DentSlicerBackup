@@ -235,10 +235,11 @@ GLModel* QmlManager::createModelFile(Mesh* target_mesh, QString fname) {
     latestAdded->moveModelMesh(QVector3D(
                            (-1)*xmid,
                            (-1)*ymid,
-                           (-1)*zmid));
+                           (-1)*latestAdded->getMesh()->z_min()));
 
-    //glmodel->m_translation = glmodel->getTransform()->translation();
-    qDebug() << "moved model to right place";
+    emit latestAdded->_updateModelMesh();
+
+    qDebug() << "moved model to right place" << latestAdded->getMesh()->x_min() << latestAdded->getMesh()->y_min() << latestAdded->getMesh()->z_min() << "|" << xmid << ymid << zmid << latestAdded->getTranslation();
 
 	//add to raytracer
 	latestAdded->setHitTestable(true);
@@ -488,7 +489,6 @@ void QmlManager::connectHandlers(GLModel* glmodel){
     QObject::connect(layflatPopup, SIGNAL(generateLayFlat()), glmodel, SLOT(generateLayFlat()));
     QObject::connect(glmodel,SIGNAL(layFlatSelect()),this,SLOT(layFlatSelect()));
     QObject::connect(glmodel,SIGNAL(layFlatUnSelect()),this,SLOT(layFlatUnSelect()));
-	QObject::connect(glmodel, SIGNAL(modelSelected(int)), this, SLOT(modelSelected(int)));
 
     // model cut popup codes
     QObject::connect(cutPopup,SIGNAL(modelCut()),glmodel , SLOT(modelCut()));
@@ -853,6 +853,7 @@ bool QmlManager::multipleModelSelected(int ID){
             it = selectedModels.erase(it);
             target->changecolor(0);
             target->checkPrintingArea();
+            (*it)->inactivateFeatures();
             QMetaObject::invokeMethod(partList, "unselectPartByModel", Q_ARG(QVariant, target->ID));
             QMetaObject::invokeMethod(yesno_popup, "deletePartListItem", Q_ARG(QVariant, target->ID));
 
@@ -956,6 +957,7 @@ void QmlManager::lastModelSelected(){
         /* it is simillar to selectModel() */
         (*it)->changecolor(0);
         (*it)->checkPrintingArea();
+        (*it)->inactivateFeatures();
         QMetaObject::invokeMethod(partList, "unselectPartByModel", Q_ARG(QVariant, (*it)->ID));
         QMetaObject::invokeMethod(yesno_popup, "deletePartListItem", Q_ARG(QVariant, (*it)->ID));
 
@@ -1014,6 +1016,7 @@ void QmlManager::modelSelected(int ID){
             }
             (*it)->changecolor(0);
             (*it)->checkPrintingArea();
+            (*it)->inactivateFeatures();
             QMetaObject::invokeMethod(partList, "unselectPartByModel", Q_ARG(QVariant, (*it)->ID));
             QMetaObject::invokeMethod(yesno_popup, "deletePartListItem", Q_ARG(QVariant, (*it)->ID));
             disconnectHandlers((*it));  //check
@@ -1264,7 +1267,7 @@ void QmlManager::totalMoveDone(){
         //curModel->saveUndoState();
 
         curModel->moveModelMesh(curModel->getTransform()->translation(), false);
-        curModel->setTranslation(curModel->getTransform()->translation()+curModel->getTransform()->translation());
+        //curModel->setTranslation(curModel->getTransform()->translation()+curModel->getTransform()->translation());
         curModel->setTranslation(QVector3D(0,0,0));
         // need to only update shadowModel & getMesh()
         emit curModel->_updateModelMesh();
@@ -2100,6 +2103,7 @@ void QmlManager::unselectPartImpl(GLModel* target)
 	QMetaObject::invokeMethod(partList, "unselectPartByModel", Q_ARG(QVariant, target->ID));
     target->changecolor(0);
     target->checkPrintingArea();
+    target->inactivateFeatures();
     disconnectHandlers(target);
     if (groupFunctionState == "active"){
         switch (groupFunctionIndex){

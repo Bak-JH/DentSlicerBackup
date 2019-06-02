@@ -47,7 +47,14 @@ bool Hix::UI::RotateXYZWidget::isManipulated()
 }
 void Hix::UI::RotateXYZWidget::setManipulated(bool isManipulated)
 {
-	_isManipulated = isManipulated;
+	if (_isManipulated != isManipulated)
+	{
+		_isManipulated = isManipulated;
+		for (auto& each : _widgets)
+		{
+			each.setHighlight(false);
+		}
+	}
 }
 bool Hix::UI::RotateXYZWidget::visible()
 {

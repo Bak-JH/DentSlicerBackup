@@ -1,6 +1,14 @@
 #include "autoorientation.h"
 #include <qDebug>
 #include <qmlmanager.h>
+
+
+Orient::Orient(float _val, QVector3D _label)
+{
+    val = _val;
+    label = _label;
+}
+
 autoorientation::autoorientation()
 {
 
@@ -356,22 +364,21 @@ std::vector<Orient*> autoorientation::area_cumulation(Mesh* mesh,float n[],bool 
         }
     }
     std::vector<Orient*> result;
-    for (int i=0; i<best_n+1;i++){
-        result.push_back(new Orient);
-    }
-    //Orient* result = new Orient[best_n+1];
-    result[0]->val=0;
-    result[0]->label[0]=n[0];
-    result[0]->label[1]=n[1];
-    result[0]->label[2]=n[2];
+
+    result.push_back(new Orient(0, QVector3D(n[0], n[1], n[2])));
+
     //0,0,1을 처음에 추가합니다.
+
     for(int i=1;i<best_n+1;i++){
         QStringList temp=val_n[i-1].split(',');
-        result[i]->val=val[i-1];
-        result[i]->label[0]=temp[0].toFloat();
-        result[i]->label[1]=temp[1].toFloat();
-        result[i]->label[2]=temp[2].toFloat();
+        QVector3D temp_vec = QVector3D(0,0,0);
+        if (temp.size() >= 3){
+            temp_vec = QVector3D(temp[0].toFloat(), temp[1].toFloat(), temp[2].toFloat());
+        }
+        result.push_back(new Orient (val[i-1],temp_vec));
+
     }
+
     //가장 가중치가 높은 orientation들도 추가합니다.
     return result;
 }
@@ -418,7 +425,7 @@ std::vector<Orient*> autoorientation::egde_plus_vertex(Mesh* mesh, int best_n){
     qmlManager->setProgressText("orientation.....");
     std::map<QString,float>::iterator it_map;
     std::vector<float> val(best_n);
-	std::vector<QString> val_n(best_n);
+    std::vector<QString> val_n(best_n);
     for(int i=0;i<best_n;i++){
         val[i]=0;
         val_n[i]="";
@@ -445,17 +452,16 @@ std::vector<Orient*> autoorientation::egde_plus_vertex(Mesh* mesh, int best_n){
         }
     }
     std::vector<Orient*> result;
+
     for (int i=0; i<best_n;i++){
-        result.push_back(new Orient);
+        QStringList temp=val_n[i].split(',');
+        QVector3D temp_vec = QVector3D(0,0,0);
+        if (temp.size() >= 3){
+            temp_vec = QVector3D(temp[0].toFloat(), temp[1].toFloat(), temp[2].toFloat());
+        }
+        result.push_back(new Orient(val[i], temp_vec));
     }
 
-    for(int i=0;i<best_n;i++){
-        QStringList temp=val_n[i].split(',');
-        result[i]->val=val[i];
-        result[i]->label[0]=temp[0].toFloat();
-        result[i]->label[1]=temp[1].toFloat();
-        result[i]->label[2]=temp[2].toFloat();
-    }
     //추가할 orientation best_n개를 리턴합니다.
     return result;
 
@@ -530,7 +536,7 @@ std::vector<Orient*> autoorientation::remove_duplicates(std::vector<Orient*> o,i
     int count=0;
     std::vector<Orient*> orientation;
     for (int i=0; i<initIndex;i++){
-        orientation.push_back(new Orient);
+        orientation.push_back(new Orient(0,QVector3D(0,0,0)));
     }
 
     //Orient* orientation=(Orient*)malloc(sizeof(Orient)*(initIndex));

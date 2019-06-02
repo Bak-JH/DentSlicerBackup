@@ -22,9 +22,7 @@ _parent(dynamic_cast<RotateXYZWidget*>(parent))
 	_torus.setRings(50);
 	_torus.setSlices(10);
 
-	_material.setAmbient(Qt::gray);
-	_material.setDiffuse(Qt::gray);
-	_material.setSpecular(Qt::gray);
+	setHighlight(false);
 	_material.setShininess(0);
 	//set rotation of torus according to the turning axis
 	//z turning axis,  flat on xy.
@@ -56,18 +54,13 @@ bool Hix::UI::RotateWidget::isDraggable(Hix::Input::MouseEventData& e, const Qt3
 
 void Hix::UI::RotateWidget::dragStarted(Hix::Input::MouseEventData& e, const Qt3DRender::QRayCasterHit& hit)
 {
-	onEntered();
 	_parent->setManipulated(true);
+	setHighlight(true);
 	_mouseOrigin = e.position;
 	_mousePrev = e.position;
 	qmlManager->modelRotateInit();
 	_pastAngle = calculateRot();
 }
-
-
-//inline int vertexccw(int x1, int y1, int x2, int y2, int x3, int y3) {
-//	return (x1 * y2 + x2 * y3 + x3 * y1) - (x1 * y3 + x2 * y1 + x3 * y2);
-//}
 
 double Hix::UI::RotateWidget::calculateRot()
 {
@@ -94,6 +87,18 @@ double Hix::UI::RotateWidget::calculateRot()
 	return degreeangle;
 }
 
+void Hix::UI::RotateWidget::setHighlight(bool enable)
+{
+	auto color = Qt::gray;
+	if (enable)
+	{
+		color = Qt::yellow;
+	}
+	_material.setAmbient(color);
+	_material.setDiffuse(color);
+	_material.setSpecular(color);
+}
+
 void Hix::UI::RotateWidget::doDrag(Hix::Input::MouseEventData& e)
 {
 	_mouseCurrent = e.position;
@@ -106,7 +111,7 @@ void Hix::UI::RotateWidget::doDrag(Hix::Input::MouseEventData& e)
 void Hix::UI::RotateWidget::dragEnded(Hix::Input::MouseEventData& e)
 {
 	_parent->setManipulated(false);
-	onExited();
+	setHighlight(false);
 	qmlManager->modelRotateDone();
 }
 
@@ -118,10 +123,7 @@ void Hix::UI::RotateWidget::onEntered()
 	//only highlight when not being manipulated
 	if (!_parent->isManipulated())
 	{
-		_material.setAmbient(Qt::yellow);
-		_material.setDiffuse(Qt::yellow);
-		_material.setSpecular(Qt::yellow);
-		_material.setShininess(0);
+		setHighlight(true);
 	}
 }
 
@@ -129,9 +131,7 @@ void Hix::UI::RotateWidget::onExited()
 {
 	if (!_parent->isManipulated())
 	{
-		_material.setAmbient(Qt::gray);
-		_material.setDiffuse(Qt::gray);
-		_material.setSpecular(Qt::gray);
-		_material.setShininess(0);
+		setHighlight(false);
+
 	}
 }
