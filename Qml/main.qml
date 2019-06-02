@@ -122,36 +122,39 @@ Item{
             anchors.right : parent.right
             anchors.bottom : parent.bottom
             color: "#E5E5E5"
+
+            Scene3D {
+                id: scene3d
+                objectName: "scene3d"
+
+    //            width: (window.width - lefttab.width) * 1
+    //            height: (window.height - uppertab.height) * 1
+                //height: (window.height - uppertab.height) * 1
+                anchors.top : parent.top
+                anchors.left : parent.left
+                anchors.right : parent.right
+                anchors.bottom : parent.bottom
+
+                focus: true
+                hoverEnabled: true
+                aspects: ["input", "logic"]
+                cameraAspectRatioMode: Scene3D.UserAspectRatio
+
+                function disableScene3D(){
+                    scene3d.enabled = false;
+                }
+
+                function enableScene3D(){
+                    scene3d.enabled = true;
+                }
+
+                MainView {
+                    objectName: "MainView"
+                    id: sceneRoot
+                }
+            }
         }
 
-        Scene3D {
-            id: scene3d
-            objectName: "scene3d"
-
-            width: (window.width - lefttab.width) * 1
-            height: (window.width - lefttab.width) * 1
-            //height: (window.height - uppertab.height) * 1
-            anchors.top : uppertab.bottom
-            anchors.left : lefttab.right
-
-            focus: true
-            hoverEnabled: true
-            aspects: ["input", "logic"]
-            cameraAspectRatioMode: Scene3D.AutomaticAspectRatio
-
-            function disableScene3D(){
-                scene3d.enabled = false;
-            }
-
-            function enableScene3D(){
-                scene3d.enabled = true;
-            }
-
-            MainView {
-                objectName: "MainView"
-                id: sceneRoot
-            }
-        }
 
         UpperTab{
             id : uppertab
@@ -215,6 +218,8 @@ Item{
             visible: false
         }
 
+
+
         MouseArea{
 
             acceptedButtons: Qt.MiddleButton | Qt.RightButton
@@ -255,7 +260,7 @@ Item{
                     else
                     {
                         sceneRoot.systemTransform.rotationZ += rotationSpeed *(currPosition.x - prevPosition.x);
-                        sceneRoot.systemTransform.rotationX += rotationSpeed * (-1) *(currPosition.y - prevPosition.y);
+                        sceneRoot.systemTransform.rotationX += rotationSpeed *(currPosition.y - prevPosition.y);
                     }
                     prevPosition = currPosition;
                     sceneRoot.cameraViewChanged();

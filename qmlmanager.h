@@ -23,7 +23,6 @@
 #include "input/raycastcontroller.h"
 #include "ui/RotateXYZWidget.h"
 #include "ui/MoveXYZWidget.h"
-
 #define VIEW_MODE_OBJECT 0
 #define VIEW_MODE_SUPPORT 1
 #define VIEW_MODE_LAYER 2
@@ -32,6 +31,7 @@
 #define LAYER_SUPPORTERS 0x02
 #define LAYER_RAFT 0x04
 
+class QQuickItem;
 class QmlManager : public QObject
 {
     Q_OBJECT
@@ -48,7 +48,7 @@ public:
     QObject* loginButton;
     QObject* boxUpperTab;
     QObject* boxLeftTab;
-    QObject* scene3d;
+	QQuickItem* scene3d;
     QEntity* models;
     Qt3DCore::QTransform* systemTransform;
 	QEntity* mv;
@@ -230,6 +230,7 @@ public:
     float selected_z_max();
     float selected_z_min();
 	void modelMoveWithAxis(QVector3D axis, double distance);
+	void modelMove(QVector3D displacement);
 	void modelRotateWithAxis(const QVector3D& axis, double degree);
 	QVector3D cameraViewVector();
 private:
@@ -275,8 +276,6 @@ public slots:
     bool multipleModelSelected(int ID);
     void lastModelSelected();
     void modelRotateByNumber(int axis, int, int, int);
-    void modelMove(int,int);
-    void modelMoveF(int,float);
     void modelMoveByNumber(int axis, int, int);
     void modelMoveInit();
     void modelMoveDone();

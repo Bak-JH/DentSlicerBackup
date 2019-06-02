@@ -212,7 +212,6 @@
     <ClCompile Include="ui\MoveXYZWidget.cpp" />
     <ClCompile Include="ui\RotateWidget.cpp" />
     <ClCompile Include="ui\RotateXYZWidget.cpp" />
-    <ClCompile Include="ui\Widget3D.cpp" />
     <ClCompile Include="utils\gridmesh.cpp" />
     <ClCompile Include="feature\hollowshell.cpp" />
     <ClCompile Include="utils\httpreq.cpp" />
@@ -307,7 +306,6 @@
       <IncludePath Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(CGAL_DIR)\auxiliary\gmp\include;$(CGAL_DIR)\build\include;$(CGAL_DIR)\include;$(BOOST_INCLUDEDIR);.\GeneratedFiles\$(ConfigurationName);.\GeneratedFiles;.;.\utils\winsparkle;.\..\..\..\..\QT\5.12.2\MSVC2017\include;.\..\..\..\..\QT\5.12.2\MSVC2017\include\Qt3DQuickExtras;.\..\..\..\..\QT\5.12.2\MSVC2017\include\Qt3DQuick;.\..\..\..\..\QT\5.12.2\MSVC2017\include\QtQuick;.\..\..\..\..\QT\5.12.2\MSVC2017\include\QtOpenGL;.\..\..\..\..\QT\5.12.2\MSVC2017\include\QtWidgets;.\..\..\..\..\QT\5.12.2\MSVC2017\include\Qt3DExtras;.\..\..\..\..\QT\5.12.2\MSVC2017\include\Qt3DRender;.\..\..\..\..\QT\5.12.2\MSVC2017\include\Qt3DInput;.\..\..\..\..\QT\5.12.2\MSVC2017\include\Qt3DLogic;.\..\..\..\..\QT\5.12.2\MSVC2017\include\Qt3DCore;.\..\..\..\..\QT\5.12.2\MSVC2017\include\QtGamepad;.\..\..\..\..\QT\5.12.2\MSVC2017\include\QtGui;.\..\..\..\..\QT\5.12.2\MSVC2017\include\QtANGLE;.\..\..\..\..\QT\5.12.2\MSVC2017\include\QtQml;.\..\..\..\..\QT\5.12.2\MSVC2017\include\QtNetwork;.\..\..\..\..\QT\5.12.2\MSVC2017\include\QtConcurrent;.\..\..\..\..\QT\5.12.2\MSVC2017\include\QtCore;.\release;C:\VulkanSDK\1.0.51.0\include;.\..\..\..\..\QT\5.12.2\MSVC2017\mkspecs\win32-msvc</IncludePath>
       <Define Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">_WINDOWS;UNICODE;_UNICODE;WIN32;_ENABLE_EXTENDED_ALIGNED_STORAGE;QT_DEPRECATED_WARNINGS;QT_NO_DEBUG;QT_3DQUICKEXTRAS_LIB;QT_3DQUICK_LIB;QT_QUICK_LIB;QT_OPENGL_LIB;QT_WIDGETS_LIB;QT_3DEXTRAS_LIB;QT_3DRENDER_LIB;QT_3DINPUT_LIB;QT_3DLOGIC_LIB;QT_3DCORE_LIB;QT_GAMEPAD_LIB;QT_GUI_LIB;QT_QML_LIB;QT_NETWORK_LIB;QT_CONCURRENT_LIB;QT_CORE_LIB;NDEBUG;%(PreprocessorDefinitions)</Define>
     </QtMoc>
-    <ClInclude Include="ui\Widget3D.h" />
     <ClInclude Include="unitTest\catch.hpp" />
     <ClInclude Include="utils\mathutils.h" />
     <ClInclude Include="DentEngine\src\mesh.h" />

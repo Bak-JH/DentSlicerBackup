@@ -1,10 +1,12 @@
 #include "raycastcontroller.h"
 #include "glmodel.h"
 #include "qmlmanager.h"
-#include "ui/Widget3D.h"
+
 #include "input/Draggable.h"
 #include "input/Hoverable.h"
 #include "utils/mathutils.h"
+#include <qquickitem.h>
+
 #include <chrono>
 using namespace Qt3DRender;
 using namespace Qt3DInput;
@@ -97,6 +99,16 @@ bool RayCastController::hoverEnabled()
 	return _hoverEnabled;
 }
 
+bool Hix::Input::RayCastController::mousePosInBound(const Qt3DInput::QMouseEvent* mv)
+{
+	auto sceneScreen = qmlManager->scene3d;
+	if (mv->x() > 0 && mv->x() <= sceneScreen->width() && mv->y() > 0 && mv->y() <= sceneScreen->height())
+	{
+		return true;
+	}
+	return false;
+}
+
 
 
 
@@ -140,8 +152,8 @@ bool RayCastController::verifyClick()
 		{
 			_rayCastMode = RayCastMode::Drag;
 			_rayCaster.trigger(_pressedPt);
+			return true;
 		}
-		return true;
 	}
 	return false;
 }
@@ -189,7 +201,8 @@ void RayCastController::mouseReleased(Qt3DInput::QMouseEvent* mouse)
 				//is a click, so stop verifier from working to figure out if it's a click
 				_isClickVerified.notify_all();
 				//if successfully cancelled
-				if (!_verifyClickTask.get())
+				auto test = _verifyClickTask.get();
+				if (!test)
 				{
 					//common loginc that does not need ray casting
 					if (qmlManager->getViewMode() == VIEW_MODE_SUPPORT) {
@@ -203,7 +216,7 @@ void RayCastController::mouseReleased(Qt3DInput::QMouseEvent* mouse)
 					if (!_mouseEvent.position.isNull())
 					{
 						_rayCastMode = RayCastMode::Click;
-						_rayCaster.trigger(QPoint(mouse->x(), mouse->y()));
+						_rayCaster.trigger(_mouseEvent.position);
 					}
 				}
 			}
@@ -218,78 +231,90 @@ void RayCastController::mouseReleased(Qt3DInput::QMouseEvent* mouse)
 
 void RayCastController::mousePositionChanged(Qt3DInput::QMouseEvent* mouse)
 {
-	//do hover
-	if (_hoverEnabled && !_hoverRaycastBusy)
+	if (mousePosInBound(mouse))
 	{
-		auto hoverEvent = MouseEventData(mouse);
-		if (!hoverEvent.position.isNull())
+		if (_hoverEnabled && !_hoverRaycastBusy)
 		{
-			_hoverRaycastBusy = true;
-			_hoverRayCaster.trigger(hoverEvent.position);
-		}
-	}
-	if (_mouseBusy)
-	{
-		if (_dragged)
-		{
-			_mouseEvent = MouseEventData(mouse);
-
-			_dragged->doDrag(_mouseEvent);
-		}
-		else
-		{
-			//we still need to use mouse event from pressed for initiating drag.
-			auto tmpMouse = MouseEventData(mouse);
-			//probably still trying to figure out if it's a click, so help out
-			if (intPointDistance(tmpMouse.position, _pressedPt) > MAX_CLICK_MOVEMENT && !tmpMouse.position.isNull())
+			auto hoverEvent = MouseEventData(mouse);
+			if (!hoverEvent.position.isNull())
 			{
-				//mutex against verifier, check verifier state
-				if (_verifyClickTask.valid())
-				{
-					//cancel verifier
-					_isClickVerified.notify_all();
-					//if successfully cancelled
-					if (!_verifyClickTask.get())
-					{
-						//do drag
-						_rayCastMode = RayCastMode::Drag;
-						_rayCaster.trigger(_pressedPt);
-					}
-
-				}
+				_hoverRaycastBusy = true;
+				_hoverRayCaster.trigger(hoverEvent.position);
 			}
+		}
+		if (_mouseBusy)
+		{
+			if (_dragged)
+			{
+				_mouseEvent = MouseEventData(mouse);
 
+				_dragged->doDrag(_mouseEvent);
+			}
+			else
+			{
+				//we still need to use mouse event from pressed for initiating drag.
+				auto tmpMouse = MouseEventData(mouse);
+				//probably still trying to figure out if it's a click, so help out
+				if (intPointDistance(tmpMouse.position, _pressedPt) > MAX_CLICK_MOVEMENT && !tmpMouse.position.isNull())
+				{
+					//mutex against verifier, check verifier state
+					if (_verifyClickTask.valid())
+					{
+						//cancel verifier
+						_isClickVerified.notify_all();
+						//if successfully cancelled
+						if (!_verifyClickTask.get())
+						{
+							//do drag
+							_rayCastMode = RayCastMode::Drag;
+							_rayCaster.trigger(_pressedPt);
+						}
+
+					}
+				}
+
+			}
 		}
 	}
-	
-
 }
 
 void RayCastController::hitsChanged(const Qt3DRender::QAbstractRayCaster::Hits& hits)
 {
 	if (hits.size() > 0)
 	{
-		for (auto hit : hits)
+		//get the closest..WTF qt, you are supposed to return the nearest one first!
+		auto minLengthSqrd = std::numeric_limits<float>::max();
+		const Qt3DRender::QRayCasterHit* nearestHit = nullptr;
+		for (auto& hit : hits)
+		{
+
+			if (hit.distance() < minLengthSqrd)
+			{
+				minLengthSqrd = hit.distance();
+				nearestHit = &hit;
+			}
+
+		}
+		if(nearestHit)
 		{
 			if (_rayCastMode == Drag)
 			{
-				auto draggable = dynamic_cast<Draggable*>(hit.entity());
-				if (draggable && draggable->isDraggable(_mouseEvent, hit))
+				auto draggable = dynamic_cast<Draggable*>(nearestHit->entity());
+				if (draggable && draggable->isDraggable(_mouseEvent, *nearestHit))
 				{
 					_dragged = draggable;
-					_dragged->dragStarted(_mouseEvent, hit);
+					_dragged->dragStarted(_mouseEvent, *nearestHit);
 				}
 			}
 			else
 			{
-				auto glmodel = dynamic_cast<GLModel*>(hit.entity());
+				auto glmodel = dynamic_cast<GLModel*>(nearestHit->entity());
 				if (glmodel)
 				{
-					glmodel->clicked(_mouseEvent, hit);
+					glmodel->clicked(_mouseEvent, *nearestHit);
 				}
 			}
 			//ignore other entities... there shouldn't be any
-			break;
 		}
 	}
 	else if(_rayCastMode == Click)

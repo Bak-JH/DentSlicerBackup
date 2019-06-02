@@ -49,12 +49,12 @@ Hix::UI::MoveWidget::~MoveWidget()
 {
 }
 
-bool Hix::UI::MoveWidget::isDraggable(Hix::Input::MouseEventData& e, Qt3DRender::QRayCasterHit& hit)
+bool Hix::UI::MoveWidget::isDraggable(Hix::Input::MouseEventData& e, const Qt3DRender::QRayCasterHit& hit)
 {
 	return true;
 }
 
-void Hix::UI::MoveWidget::dragStarted(Hix::Input::MouseEventData& e, Qt3DRender::QRayCasterHit& hit)
+void Hix::UI::MoveWidget::dragStarted(Hix::Input::MouseEventData& e, const Qt3DRender::QRayCasterHit& hit)
 {
 	onEntered();
 	_parent->setManipulated(true);
