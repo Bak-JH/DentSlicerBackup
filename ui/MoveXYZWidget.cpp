@@ -47,7 +47,14 @@ bool Hix::UI::MoveXYZWidget::isManipulated()
 }
 void Hix::UI::MoveXYZWidget::setManipulated(bool isManipulated)
 {
-	_isManipulated = isManipulated;
+	if (_isManipulated != isManipulated)
+	{
+		_isManipulated = isManipulated;
+		for (auto& each : _widgets)
+		{
+			each.setHighlight(false);
+		}
+	}
 }
 bool Hix::UI::MoveXYZWidget::visible()
 {

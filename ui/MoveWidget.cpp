@@ -21,10 +21,7 @@ _parent(dynamic_cast<MoveXYZWidget*>(parent))
 	_transform.setScale(0.3);
 
 	_mesh.setSource(ARROW_MESH_URL);
-
-	_material.setAmbient(Qt::gray);
-	_material.setDiffuse(Qt::gray);
-	_material.setSpecular(Qt::gray);
+	setHighlight(false);
 	_material.setShininess(0);
 	//set rotation of torus according to the turning axis
 	//z turning axis,  flat on xy.
@@ -56,8 +53,8 @@ bool Hix::UI::MoveWidget::isDraggable(Hix::Input::MouseEventData& e, const Qt3DR
 
 void Hix::UI::MoveWidget::dragStarted(Hix::Input::MouseEventData& e, const Qt3DRender::QRayCasterHit& hit)
 {
-	onEntered();
 	_parent->setManipulated(true);
+	setHighlight(true);
 	_mouseOrigin = e.position;
 	_mousePrev = e.position;
 	_mouseCurrent = e.position;
@@ -66,9 +63,18 @@ void Hix::UI::MoveWidget::dragStarted(Hix::Input::MouseEventData& e, const Qt3DR
 }
 
 
-//inline int vertexccw(int x1, int y1, int x2, int y2, int x3, int y3) {
-//	return (x1 * y2 + x2 * y3 + x3 * y1) - (x1 * y3 + x2 * y1 + x3 * y2);
-//}
+void Hix::UI::MoveWidget::setHighlight(bool enable)
+{
+	auto color = Qt::gray;
+	if (enable)
+	{
+		color = Qt::yellow;
+	}
+	_material.setAmbient(color);
+	_material.setDiffuse(color);
+	_material.setSpecular(color);
+}
+
 
 double Hix::UI::MoveWidget::calculateMove()
 {
@@ -103,7 +109,8 @@ void Hix::UI::MoveWidget::doDrag(Hix::Input::MouseEventData& e)
 void Hix::UI::MoveWidget::dragEnded(Hix::Input::MouseEventData& e)
 {
 	_parent->setManipulated(false);
-	onExited();
+	setHighlight(false);
+	qmlManager->modelMoveDone();
 }
 
 
@@ -114,9 +121,7 @@ void Hix::UI::MoveWidget::onEntered()
 	//only highlight when not being manipulated
 	if (!_parent->isManipulated())
 	{
-		_material.setAmbient(Qt::yellow);
-		_material.setDiffuse(Qt::yellow);
-		_material.setSpecular(Qt::yellow);
+		setHighlight(true);
 		_material.setShininess(0);
 	}
 }
@@ -125,9 +130,7 @@ void Hix::UI::MoveWidget::onExited()
 {
 	if (!_parent->isManipulated())
 	{
-		_material.setAmbient(Qt::gray);
-		_material.setDiffuse(Qt::gray);
-		_material.setSpecular(Qt::gray);
+		setHighlight(false);
 		_material.setShininess(0);
 	}
 }

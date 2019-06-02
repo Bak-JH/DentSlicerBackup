@@ -27,6 +27,8 @@ namespace Hix
 			void dragEnded(Hix::Input::MouseEventData&e) override;
 			void onEntered()override;
 			void onExited() override;
+			void setHighlight(bool enable);
+
 		private:
 			double calculateMove();
 			MoveXYZWidget* _parent = nullptr;

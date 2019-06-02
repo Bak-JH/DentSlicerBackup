@@ -200,7 +200,6 @@ public:
     void removeCuttingPoint(int idx);
     void removeCuttingPoints();
     void drawLine(QVector3D endpoint);
-	void bisectModel(Plane plane, Hix::Engine3D::Mesh& lmesh, Hix::Engine3D::Mesh& rmesh);
 
     void checkPrintingArea();
     bool EndsWith(const std::string& a, const std::string& b);
@@ -231,7 +230,9 @@ public:
 	void setBoundingBoxVisible(bool isEnabled);
 	const Qt3DCore::QTransform* getTransform() const;
 	void setTranslation(const QVector3D& t);
-	void setMatrix(const QMatrix4x4& matrix);
+    QVector3D getTranslation();
+    void setMatrix(const QMatrix4x4& matrix);
+
 	Qt3DRender::QLayer* getLayer();
 	/***************Ray casting and hit test***************/
 	void setHitTestable(bool isEnabled);

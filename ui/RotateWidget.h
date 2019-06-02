@@ -27,13 +27,13 @@ namespace Hix
 			void dragEnded(Hix::Input::MouseEventData&e) override;
 			void onEntered()override;
 			void onExited() override;
+			void setHighlight(bool enable);
 		private:
 			double calculateRot();
 			RotateXYZWidget* _parent = nullptr;
 			QPoint _mouseOrigin;
 			QPoint _mouseCurrent;
 			QPoint _mousePrev;
-
 			double _pastAngle;
 			Qt3DExtras::QTorusMesh _torus;
 			Qt3DCore::QTransform _transform;

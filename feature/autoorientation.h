@@ -19,6 +19,7 @@ public:
 
 class Orient {
 public:
+    Orient(float _val, QVector3D _label);
     float val;
     QVector3D label;
 };
