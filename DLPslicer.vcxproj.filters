@@ -179,9 +179,6 @@
     <ClCompile Include="ui\RotateXYZWidget.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="ui\Widget3D.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="ui\MoveXYZWidget.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -341,9 +338,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="common\indexedlist.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="ui\Widget3D.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="input\Hoverable.h">
@@ -921,6 +915,7 @@
     <None Include="icon-32.ico" />
     <None Include="icon-32.ico" />
     <None Include="packages.config" />
+    <None Include="icon-32.ico" />
     <None Include="icon-32.ico" />
     <None Include="icon-32.ico" />
     <None Include="icon-32.ico" />

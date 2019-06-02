@@ -13,7 +13,7 @@
 #include <condition_variable>
 
 #include "common/Singleton.h"
-#include "ui/Widget3D.h"
+
 
 class GLModel;
 namespace Qt3DCore
@@ -61,6 +61,7 @@ namespace Hix
 
 			void setHoverEnabled(bool isEnabled);
 			bool hoverEnabled();
+			bool mousePosInBound(const Qt3DInput::QMouseEvent* mv);
 			//returns true if successfully dragged, false otherwise
 			bool verifyClick();
 		public slots:

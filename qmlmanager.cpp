@@ -24,6 +24,7 @@
 #include <feature/generateraft.h>
 #include <exception>
 #include "utils/utils.h"
+#include <qquickitem.h>
 using namespace Hix::Input;
 using namespace Hix::UI;
 QmlManager::QmlManager(QObject *parent) : QObject(parent)
@@ -171,7 +172,7 @@ void QmlManager::initializeUI(QQmlApplicationEngine* e){
 
     boxUpperTab = FindItemByName(engine, "boxUpperTab");
     boxLeftTab = FindItemByName(engine, "boxLeftTab");
-    scene3d = FindItemByName(engine, "scene3d");
+    scene3d = dynamic_cast<QQuickItem*> (FindItemByName(engine, "scene3d"));
 
     QObject::connect(boxUpperTab,SIGNAL(runGroupFeature(int,QString, double, double, double, QVariant)),this,SLOT(runGroupFeature(int,QString, double, double, double, QVariant)));
 
@@ -1315,6 +1316,12 @@ void QmlManager::totalRotateDone(){
 }
 
 void QmlManager::modelMoveWithAxis(QVector3D axis, double distance) { // for QML Signal -> float is not working in qml signal parameter
+	auto displacement = distance * axis;
+	modelMove(displacement);
+}
+
+void QmlManager::modelMove(QVector3D displacement)
+{
 	QVector3D tmp;
 	int bedXMax = scfg->bed_x / 2 - scfg->bed_margin_x;
 	int bedXMin = -bedXMax;
@@ -1322,107 +1329,23 @@ void QmlManager::modelMoveWithAxis(QVector3D axis, double distance) { // for QML
 	int bedYMin = -bedYMax;
 
 	for (auto selectedModel : selectedModels) {
-		selectedModel->setHitTestable(false);
-
 		tmp = selectedModel->getTransform()->translation();
-		//bound check
-		//if ((tmp.x() + selectedModel->getMesh()->x_max() + 1 < scfg->bed_x / 2)
-		//	&& (tmp.x() + selectedModel->getMesh()->x_min() - 1 > -scfg->bed_x / 2)) {
-		//	if (tmp.x() + selectedModel->getMesh()->x_max() + 1 + Distance > scfg->bed_x / 2)
-		//		return;
-		//	if (tmp.x() + selectedModel->getMesh()->x_min() - 1 + Distance < -scfg->bed_x / 2)
-		//		return;
-		//}
-		tmp += distance * axis;
-/*		auto mesh = selectedModel->getMesh();
+		tmp += displacement;
+		auto mesh = selectedModel->getMesh();
 		auto xMaxBound = tmp.x() + mesh->x_max();
-		auto xMinBound = tmp.x() - mesh->x_min();
+		auto xMinBound = tmp.x() + mesh->x_min();
 		auto yMaxBound = tmp.y() + mesh->y_max();
-		auto yMinBound = tmp.y() - mesh->y_max();
-		
+		auto yMinBound = tmp.y() + mesh->y_min();
+
 		if (xMaxBound < bedXMax &&
 			xMinBound > bedXMin &&
 			yMaxBound < bedYMax &&
 			yMinBound > bedYMin)
 		{
-
-		}		*/	
-		selectedModel->setTranslation(tmp);
-
+			selectedModel->setTranslation(tmp);
+		}
 		selectedModel->checkPrintingArea();
 	}
-}
-
-void QmlManager::modelMove(int Axis, int Distance){ // for QML Signal -> float is not working in qml signal parameter
-    if (selectedModels.empty())
-        return;
-	for(auto selectedModel : selectedModels){
-        selectedModel->setHitTestable(false);
-
-        switch(Axis){
-            case 1:{  //X
-                QVector3D tmp = selectedModel->getTransform()->translation();
-
-                if ((tmp.x() + selectedModel->getMesh()->x_max() + 1 < scfg->bed_x/2)
-                        && (tmp.x() + selectedModel->getMesh()->x_min() - 1 > -scfg->bed_x/2)) {
-                    if(tmp.x() + selectedModel->getMesh()->x_max() +1 + Distance > scfg->bed_x/2 )
-                        return ;
-                    if(tmp.x() + selectedModel->getMesh()->x_min() -1 + Distance < - scfg->bed_x/2 )
-                        return ;
-                }
-                selectedModel->setTranslation(QVector3D(tmp.x()+Distance,tmp.y(),tmp.z()));
-                break;
-            }
-            case 2:{  //Y
-                QVector3D tmp = selectedModel->getTransform()->translation();
-                if ((tmp.y() + selectedModel->getMesh()->y_max() + 1 < scfg->bed_y/2)
-                        && (tmp.y() + selectedModel->getMesh()->y_min() - 1 > -scfg->bed_y/2)) {
-                    if(tmp.y() + selectedModel->getMesh()->y_max() +1 + Distance > scfg->bed_y/2 )
-                        return;
-                    if(tmp.y() + selectedModel->getMesh()->y_min() -1 + Distance < - scfg->bed_y/2 )
-                        return;
-                }
-                selectedModel->setTranslation(QVector3D(tmp.x(),tmp.y()+Distance,tmp.z()));
-                break;
-            }
-        }
-        selectedModel->checkPrintingArea();
-    }
-}
-
-void QmlManager::modelMoveF(int Axis, float Distance){
-    if (selectedModels.empty())
-        return;
-	for (auto selectedModel : selectedModels) {
-		switch(Axis){
-            case 1:{  //X
-                QVector3D tmp = selectedModel->getTransform()->translation();
-
-                if ((tmp.x() + selectedModel->getMesh()->x_max() + 1 < scfg->bed_x/2)
-                        && (tmp.x() + selectedModel->getMesh()->x_min() - 1 > -scfg->bed_x/2)) {
-                    if(tmp.x() + selectedModel->getMesh()->x_max() +1 + Distance > scfg->bed_x/2 )
-                        return;
-                    if(tmp.x() + selectedModel->getMesh()->x_min() -1 + Distance < - scfg->bed_x/2 )
-                        return;
-                }
-                selectedModel->setTranslation(QVector3D(tmp.x()+Distance, tmp.y(), tmp.z()));
-                break;
-            }
-            case 2:{  //Y
-                QVector3D tmp = selectedModel->getTransform()->translation();
-                if ((tmp.y() + selectedModel->getMesh()->y_max() + 1 < scfg->bed_y/2)
-                        && (tmp.y() + selectedModel->getMesh()->y_min() - 1 > -scfg->bed_y/2)) {
-                    if(tmp.y() + selectedModel->getMesh()->y_max() +1 + Distance > scfg->bed_y/2 )
-                        return;
-                    if(tmp.y() + selectedModel->getMesh()->y_min() -1 + Distance < - scfg->bed_y/2 )
-                        return;
-                }
-                selectedModel->setTranslation(QVector3D(tmp.x(), tmp.y()+Distance, tmp.z()));
-                break;
-            }
-        }
-        selectedModel->checkPrintingArea();
-    }
 }
 void QmlManager::modelRotateWithAxis(const QVector3D& axis, double angle)
 {

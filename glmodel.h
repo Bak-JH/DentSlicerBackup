@@ -103,10 +103,10 @@ class GLModel : public QEntity, public Hix::Input::Draggable
 public:
 
     //probably interface this as well
-	void clicked	(Hix::Input::MouseEventData&, Qt3DRender::QRayCasterHit&);
+	void clicked	(Hix::Input::MouseEventData&,const Qt3DRender::QRayCasterHit&);
 
-	bool isDraggable(Hix::Input::MouseEventData& v, Qt3DRender::QRayCasterHit&) override;
-	void dragStarted(Hix::Input::MouseEventData&, Qt3DRender::QRayCasterHit&) override;
+	bool isDraggable(Hix::Input::MouseEventData& v,const Qt3DRender::QRayCasterHit&) override;
+	void dragStarted(Hix::Input::MouseEventData&,const Qt3DRender::QRayCasterHit&) override;
 	void doDrag(Hix::Input::MouseEventData& e)override;
 	void dragEnded(Hix::Input::MouseEventData&) override;
 

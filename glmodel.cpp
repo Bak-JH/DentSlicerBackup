@@ -480,7 +480,7 @@ void GLModel::updateModelMesh(){
     // shadowUpdate updates shadow model of current Model
     QMetaObject::invokeMethod(qmlManager->boxUpperTab, "disableUppertab");
     QMetaObject::invokeMethod(qmlManager->boxLeftTab, "disableLefttab");
-    QMetaObject::invokeMethod(qmlManager->scene3d, "disableScene3D");
+    QMetaObject::invokeMethod((QObject*)qmlManager->scene3d, "disableScene3D");
     qDebug() << "update Model Mesh";
     // reinitialize with updated mesh
 
@@ -570,7 +570,7 @@ void GLModel::updateModelMesh(){
     qDebug() << this << "released lock";
     QMetaObject::invokeMethod(qmlManager->boxUpperTab, "enableUppertab");
     QMetaObject::invokeMethod(qmlManager->boxLeftTab, "enableLefttab");
-    QMetaObject::invokeMethod(qmlManager->scene3d, "enableScene3D");
+    QMetaObject::invokeMethod((QObject*)qmlManager->scene3d, "enableScene3D");
 }
 
 void GLModel::slicingDone(){
@@ -1869,7 +1869,7 @@ GLModel::~GLModel(){
 
 //when ray casting is not needed, ie) right click
 
-void GLModel::clicked(MouseEventData& pick, Qt3DRender::QRayCasterHit& hit)
+void GLModel::clicked(MouseEventData& pick, const Qt3DRender::QRayCasterHit& hit)
 {
 
 	if (!cutActive && !extensionActive && !labellingActive && !layflatActive && !manualSupportActive)// && !layerViewActive && !supportViewActive)
@@ -1987,7 +1987,7 @@ labellingTextPreview->planeSelected = true;
 	}
 }
 
-bool GLModel::isDraggable(Hix::Input::MouseEventData& e, Qt3DRender::QRayCasterHit&)
+bool GLModel::isDraggable(Hix::Input::MouseEventData& e,const Qt3DRender::QRayCasterHit&)
 {
 	if (e.button == Qt3DInput::QMouseEvent::Buttons::LeftButton
 		&&
@@ -2011,7 +2011,7 @@ bool GLModel::isDraggable(Hix::Input::MouseEventData& e, Qt3DRender::QRayCasterH
 	}
 	return false;
 }
-void GLModel::dragStarted(Hix::Input::MouseEventData& e, Qt3DRender::QRayCasterHit& hit)
+void GLModel::dragStarted(Hix::Input::MouseEventData& e, const Qt3DRender::QRayCasterHit& hit)
 {
 	lastpoint = hit.localIntersection();
 	prevPoint = (QVector2D)e.position;
@@ -2026,7 +2026,10 @@ void GLModel::dragStarted(Hix::Input::MouseEventData& e, Qt3DRender::QRayCasterH
 void GLModel::doDrag(Hix::Input::MouseEventData& v)
 {
 	QVector2D currentPoint = QVector2D(v.position.x(), v.position.y());
+	//auto pt = qmlManager->world2Screen(QVector3D(0, 0, 0));
+	//auto pt2 = qmlManager->world2Screen(lastpoint);
 
+	//qDebug()<< currentPoint << pt << pt2;
 	QVector3D xAxis3D = QVector3D(1, 0, 0);
 	QVector3D yAxis3D = QVector3D(0, 1, 0);
 	QVector2D xAxis2D = (qmlManager->world2Screen(lastpoint + xAxis3D) - qmlManager->world2Screen(lastpoint));
@@ -2038,9 +2041,7 @@ void GLModel::doDrag(Hix::Input::MouseEventData& v)
 	float a = (target.x() - b * yAxis2D.x()) / xAxis2D.x();
 
 	// move ax + by amount
-	qmlManager->modelMoveF(1, a);
-	qmlManager->modelMoveF(2, b);
-
+	qmlManager->modelMove(QVector3D(a, b, 0));
 	prevPoint = currentPoint;
 }
 

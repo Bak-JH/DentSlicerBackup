@@ -21,8 +21,8 @@ namespace Hix
 		public:
 			RotateWidget(const QVector3D& axis, Qt3DCore::QEntity* parent);
 			virtual ~RotateWidget();
-			bool isDraggable(Hix::Input::MouseEventData& e, Qt3DRender::QRayCasterHit& hit) override;
-			void dragStarted(Hix::Input::MouseEventData&e, Qt3DRender::QRayCasterHit&hit) override;
+			bool isDraggable(Hix::Input::MouseEventData& e, const Qt3DRender::QRayCasterHit& hit) override;
+			void dragStarted(Hix::Input::MouseEventData&e,const Qt3DRender::QRayCasterHit&hit) override;
 			void doDrag(Hix::Input::MouseEventData& e)override;
 			void dragEnded(Hix::Input::MouseEventData&e) override;
 			void onEntered()override;
