@@ -14,10 +14,7 @@
 #include <vector>
 #include <CGAL/Delaunay_mesher_2.h>
 #include <math.h>
-#include "meshrepair.h"
-#include "utils/mathutils.h"
 
-using namespace Utils::Math;
 typedef CGAL::Exact_predicates_inexact_constructions_kernel  Kernel;
 typedef Kernel::Point_2            Point_2;
 typedef CGAL::Delaunay_mesh_vertex_base_2<Kernel>     Vb;
@@ -26,7 +23,6 @@ typedef CGAL::Triangulation_data_structure_2<Vb, Fb>   Tds;
 typedef CGAL::Constrained_Delaunay_triangulation_2<Kernel, Tds>  CDT;
 typedef CDT::Vertex_handle          Vertex_handle;
 typedef CGAL::Delaunay_mesh_size_criteria_2<CDT>    Criteria;
-
 
 
 class BigInteger {
@@ -258,111 +254,14 @@ modelcut::modelcut(){
     numPoints = 0;
 }
 
-modelcut::FacePlaneOrientation modelcut::getFacePlaneOrientation(Plane plane, const Hix::Engine3D::MeshFace& face)
-{
-	size_t onPlane = 0;
-	size_t left = 0;
-	size_t right = 0;
-	auto meshVertices = face.meshVertices();
-	float distance;
-	for (auto& each : meshVertices)
-	{
-		distance = each->position.distanceToPlane(plane[0], plane[1], plane[2]);
-		if (distance == 0) {
-			++onPlane;
-		}
-		else if (distance < 0)
-		{
-			++left;
-		}
-		else
-		{
-			++right;
-		}
-	}
-	if (onPlane == 3)
-	{
-		return FacePlaneOrientation::OnPlane;
-	}
-	else if (left > 0 && right > 0)
-	{
-		return FacePlaneOrientation::Bisect;
-	}
-	else if (left == 0)
-	{
-		return FacePlaneOrientation::Right;
-	}
-	else
-	{
-		return FacePlaneOrientation::Left;
-
-	}
-}
-
-void modelcut::bisectFace(Plane plane, const Hix::Engine3D::MeshFace& face, Mesh* leftMesh, Mesh* rightMesh)
-{
-	auto circ = face.edgeCirculator();
-	std::vector<HalfEdgeConstItr> bisectedEdges;
-	for (size_t i = 0; i < 3; ++i, ++circ)
-	{
-		auto fromPlaneDist = circ->from->position.distanceToPlane(plane[0], plane[1], plane[2]);
-		auto toPlaneDist = circ->to->position.distanceToPlane(plane[0], plane[1], plane[2]);
-		//check signs, if they are not equal, edge is bisectd by the plane
-		if (!sameSign(fromPlaneDist, toPlaneDist))
-		{
-			bisectedEdges.push_back(circ.toItr());
-		}
-	}
-	//get bisection points
-	//std::unordered_map<HalfEdgeConstItr, QVector3D> bisectionPoint;
-
-}
-
-void modelcut::bisectModel(const Mesh* mesh, Plane plane, Mesh* leftMesh, Mesh* rightMesh) {
-	// do bisecting mesh
-	size_t belowVtxCount;
-	for (const auto& mf : mesh->getFaces())
-	{
-		auto orientation = getFacePlaneOrientation(plane, mf);
-
-		switch (orientation)
-		{
-		case FacePlaneOrientation::OnPlane:
-		{
-			//do nothing
-			break;
-		}
-		case FacePlaneOrientation::Left:
-		{
-			auto meshVertices = mf.meshVertices();
-			leftMesh->addFace(meshVertices[0]->position, meshVertices[1]->position, meshVertices[2]->position);
-			break;
-		}
-		case FacePlaneOrientation::Right:
-		{
-			auto meshVertices = mf.meshVertices();
-			rightMesh->addFace(meshVertices[0]->position, meshVertices[1]->position, meshVertices[2]->position);
-			break;
-		}
-		//do bisect
-		case FacePlaneOrientation::Bisect:
-		{
-			break;
-		}
-		}
-
-		//if the plane doesn't bisect, add to up or right mesh
-		//if (faceLeftToPlane)
-		//	leftMesh->addFace(meshVertices[0]->position, meshVertices[1]->position, meshVertices[2]->position);
-		//else
-		//	rightMesh->addFace(meshVertices[0]->position, meshVertices[1]->position, meshVertices[2]->position);
-	}
-
-	qDebug() << "done bisect";
-
-	leftMesh->connectFaces();
-	rightMesh->connectFaces();
-	qDebug() << "done connecting";
+bool modelcut::isLeftToPlane(Plane plane, QVector3D position){
+    // determine if position is left to plane or not
+    if(position.distanceToPlane(plane[0],plane[1],plane[2])==0){
+        qDebug() << "distance to plane 0";
+    }
+    if(position.distanceToPlane(plane[0],plane[1],plane[2])>0)
+        return false;
+    return true;
 }
 
 
@@ -1035,40 +934,10 @@ void bisectModelByPlane(Mesh* leftMesh, Mesh* rightMesh, Mesh* mesh, Plane plane
                 orderedQV = sortByCorrectOrder(mmv1, mmv2, mmv3, QVector3D(0.0, 0.0, 0.0), QVector3D(1.0, 0.0, 0.0), QVector3D(1.0, 1.0, 0.0));
                 rightMesh->addFace(orderedQV[0], orderedQV[1], orderedQV[2]);
                 leftMesh->addFace(orderedQV[2], orderedQV[1], orderedQV[0]);
+                    }
+                }
             }
         }
-    }
-	//rightMesh->connectFaces();
-	//leftMesh->connectFaces();
-
-	//std::vector<HalfEdgeConstItr> boundaryEdgesR = MeshRepair::identifyBoundary(rightMesh);
-	//std::vector<HalfEdgeConstItr> boundaryEdgesL = MeshRepair::identifyBoundary(leftMesh);
-	//std::vector<HalfEdgeConstItr> suspects;
-	//qDebug() << "left mesh holes:";
-	//for (auto each : boundaryEdgesL)
-	//{
-	//	qDebug() << each->from->position << each->to->position;
-	//}
-	//qDebug() << "------------------------------------";
-	//qDebug() << "------------------------------------";
-	//qDebug() << "------------------------------------";
-	//qDebug() << "------------------------------------";
-	//qDebug() << "------------------------------------";
-	//qDebug() << "------------------------------------";
-	//qDebug() << "------------------------------------";
-	//qDebug() << "------------------------------------";
-	//qDebug() << "------------------------------------";
-
-
-	//qDebug() << "right mesh holes:";
-	//for (auto each : boundaryEdgesR)
-	//{
-	//	qDebug() << each->from->position << each->to->position;
-	//}
-
-}
-
-
 
 Custom3DPoint findConnectedPointOrRegister(std::multimap<long long int, std::vector<Custom3DPoint> > *connectVertex, Custom3DPoint p) {
     long long int padding_v = 10;
