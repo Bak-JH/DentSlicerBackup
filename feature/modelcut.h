@@ -28,20 +28,8 @@ public:
     Qt3DCore::QEntity* planeEntity[2];
     Qt3DCore::QTransform *planeTransform[2];
     Qt3DExtras::QPhongAlphaMaterial *planeMaterial;
-	//whether face is on left, right, laying on the plane, and bisected by plane
-	enum FacePlaneOrientation
-	{
-		Left = 0,
-		Right,
-		OnPlane,
-		Bisect
-	};
 
-	//wbjk745 cut!
-    static FacePlaneOrientation getFacePlaneOrientation(Plane plane, const Hix::Engine3D::MeshFace& face);
-	static void bisectFace(Plane plane, const Hix::Engine3D::MeshFace& face, Mesh* leftMesh, Mesh* rightMesh);
-
-	static void bisectModel(const Mesh* mesh, Plane plane, Mesh* leftMesh, Mesh* rightMesh);
+    static bool isLeftToPlane(Plane plane, QVector3D position);
 
     static void interpolate(Mesh* mesh, Path3D contour1, Path3D contour2);
     static void cutAway(Mesh* leftMesh, Mesh* rightMesh, Mesh* mesh, std::vector<QVector3D> cuttingPoints, int cutFillMode);
