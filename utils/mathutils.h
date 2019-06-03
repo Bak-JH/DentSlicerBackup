@@ -23,6 +23,10 @@ namespace Utils
 		{
 			return std::sqrt(std::pow(a.x() - b.x(), 2) + std::pow(a.y() - b.y(), 2));
 		}
+		//doesn't work on inf
+		inline bool sameSign(float a, float b) {
+			return a * b >= 0.0f;
+		}
 
     }
 

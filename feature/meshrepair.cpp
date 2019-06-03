@@ -116,6 +116,24 @@ Paths3D MeshRepair::identifyHoles(const Mesh* mesh){
 }
 
 
+std::vector<Hix::Engine3D::HalfEdgeConstItr> MeshRepair::identifyBoundary(const Mesh* mesh)
+{
+	std::vector<HalfEdgeConstItr> boundaryEdges;
+	for (auto heItr = mesh->getHalfEdges().cbegin(); heItr != mesh->getHalfEdges().cend(); ++heItr)
+	{
+		//if a half edge do not have a twin, it's a boundary edge
+		if (heItr->twins.empty())
+		{
+			auto from = heItr->from;
+			auto to = heItr->to;
+			//qDebug() << heItr->from->position << heItr->to->position;
+			boundaryEdges.push_back(heItr);
+		}
+	}
+	return boundaryEdges;
+}
+
+
 // detects hole and remove them
 void MeshRepair::fillHoles(Mesh* mesh, const Paths3D& holes){
     for (Path3D hole : holes){
@@ -200,85 +218,85 @@ void MeshRepair::fillHoles(Mesh* mesh, const Paths3D& holes){
 
     qDebug() << "ok till here4";
 }
-
-std::vector<std::array<QVector3D, 3>> MeshRepair::fillPath(Path3D path){
-    std::vector<std::array<QVector3D, 3>> result;
-    result.reserve(path.size()*10);
-
-    if (path.size() <3)
-        return result;
-
-    Plane maximal_plane;
-    maximal_plane.push_back(path[0].position);
-    maximal_plane.push_back(path[1].position);
-    maximal_plane.push_back(path[2].position);
-
-    qDebug() << "fill path debug 1";
-    for (MeshVertex mv : path){
-        if (modelcut::isLeftToPlane(maximal_plane, mv.position)){
-            // move plane to normal direction with distance from mv
-            QVector3D plane_normal = QVector3D::normal(maximal_plane[0],maximal_plane[1],maximal_plane[2]);
-            float distance = mv.position.distanceToPlane(maximal_plane[0],maximal_plane[1],maximal_plane[2]);
-            for (int i=0; i<3; i++){
-                maximal_plane[i] += distance*plane_normal;
-            }
-        }
-    }
-    qDebug() << "fill path debug 2";
-
-    // project path to target path
-    Path3D target_path;
-    target_path.reserve(path.size());
-
-    QVector3D plane_normal = QVector3D::normal(maximal_plane[0],maximal_plane[1],maximal_plane[2]);
-
-    qDebug() << "fill path debug 3";
-    for (int i=0; i<path.size(); i++){
-        target_path.push_back(path[i]);
-
-        // project qvector3d to maximal plane
-        float distance = path[i].position.distanceToPlane(maximal_plane[0],maximal_plane[1],maximal_plane[2]);
-        target_path.end()->position += plane_normal * distance;
-    }
-    qDebug() << "fill path debug 4";
-
-    //std::vector<QVector3D> interpolated = interpolate(path, target_path);
-    //qDebug() << "interpolated size : " << interpolated.size();
-    // interpolate between path and target path
-    for (std::array<QVector3D, 3> face : interpolate(path, target_path)){
-        result.push_back(face);
-    }
-
-    qDebug() << "fill path debug 5";
-
-    // fill Hole
-    int half_path_size = path.size()/2;
-
-    // fill hole really
-    for (int i=0; i<half_path_size-1; i++){
-        std::array<QVector3D,3> temp_face;
-        temp_face[0] = path[i].position;
-        temp_face[1] = path[path.size()-i-2].position;
-        temp_face[2] = path[i+1].position;
-        result.push_back(temp_face);
-        temp_face[0] = path[i+1].position;
-        temp_face[1] = path[path.size()-i-2].position;
-        temp_face[2] = path[path.size()-i-3].position;
-        result.push_back(temp_face);
-    }
-    qDebug() << "fill path debug 6";
-
-    if (path.size()%2 != 0){
-        std::array<QVector3D,3> temp_face;
-        temp_face[0] = path[0].position;
-        temp_face[1] = path[path.size()-1].position;
-        temp_face[2] = path[path.size()-2].position;
-        result.push_back(temp_face);
-    }
-    qDebug() << "fill path debug 7";
-
-    return result;
-}
+//
+//std::vector<std::array<QVector3D, 3>> MeshRepair::fillPath(Path3D path){
+//    std::vector<std::array<QVector3D, 3>> result;
+//    result.reserve(path.size()*10);
+//
+//    if (path.size() <3)
+//        return result;
+//
+//    Plane maximal_plane;
+//    maximal_plane.push_back(path[0].position);
+//    maximal_plane.push_back(path[1].position);
+//    maximal_plane.push_back(path[2].position);
+//
+//    qDebug() << "fill path debug 1";
+//    for (MeshVertex mv : path){
+//        if (modelcut::isLeftToPlane(maximal_plane, mv.position)){
+//            // move plane to normal direction with distance from mv
+//            QVector3D plane_normal = QVector3D::normal(maximal_plane[0],maximal_plane[1],maximal_plane[2]);
+//            float distance = mv.position.distanceToPlane(maximal_plane[0],maximal_plane[1],maximal_plane[2]);
+//            for (int i=0; i<3; i++){
+//                maximal_plane[i] += distance*plane_normal;
+//            }
+//        }
+//    }
+//    qDebug() << "fill path debug 2";
+//
+//    // project path to target path
+//    Path3D target_path;
+//    target_path.reserve(path.size());
+//
+//    QVector3D plane_normal = QVector3D::normal(maximal_plane[0],maximal_plane[1],maximal_plane[2]);
+//
+//    qDebug() << "fill path debug 3";
+//    for (int i=0; i<path.size(); i++){
+//        target_path.push_back(path[i]);
+//
+//        // project qvector3d to maximal plane
+//        float distance = path[i].position.distanceToPlane(maximal_plane[0],maximal_plane[1],maximal_plane[2]);
+//        target_path.end()->position += plane_normal * distance;
+//    }
+//    qDebug() << "fill path debug 4";
+//
+//    //std::vector<QVector3D> interpolated = interpolate(path, target_path);
+//    //qDebug() << "interpolated size : " << interpolated.size();
+//    // interpolate between path and target path
+//    for (std::array<QVector3D, 3> face : interpolate(path, target_path)){
+//        result.push_back(face);
+//    }
+//
+//    qDebug() << "fill path debug 5";
+//
+//    // fill Hole
+//    int half_path_size = path.size()/2;
+//
+//    // fill hole really
+//    for (int i=0; i<half_path_size-1; i++){
+//        std::array<QVector3D,3> temp_face;
+//        temp_face[0] = path[i].position;
+//        temp_face[1] = path[path.size()-i-2].position;
+//        temp_face[2] = path[i+1].position;
+//        result.push_back(temp_face);
+//        temp_face[0] = path[i+1].position;
+//        temp_face[1] = path[path.size()-i-2].position;
+//        temp_face[2] = path[path.size()-i-3].position;
+//        result.push_back(temp_face);
+//    }
+//    qDebug() << "fill path debug 6";
+//
+//    if (path.size()%2 != 0){
+//        std::array<QVector3D,3> temp_face;
+//        temp_face[0] = path[0].position;
+//        temp_face[1] = path[path.size()-1].position;
+//        temp_face[2] = path[path.size()-2].position;
+//        result.push_back(temp_face);
+//    }
+//    qDebug() << "fill path debug 7";
+//
+//    return result;
+//}
 
 
 int MeshRepair::suggestDivisionCnt(Path3D e1,Path3D e2){
