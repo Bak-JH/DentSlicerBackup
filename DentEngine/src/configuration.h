@@ -53,9 +53,9 @@ public:
     int resin_type = TEMPORARY_RESIN;
     float contraction_ratio = TEMPORARY_CONTRACTION_RATIO;
 
-    int support_type = 0;
+    int support_type = 2;
     int infill_type = 1;
-    int raft_type = 0;
+    int raft_type = 2;
 
     // raft settings
     float raft_thickness = 2; // in mm
