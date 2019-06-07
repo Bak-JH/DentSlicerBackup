@@ -25,9 +25,9 @@ SOURCES += main.cpp \
     feature/text3dgeometrygenerator.cpp \
     feature/labellingtextpreview.cpp \
     ui/MoveWidget.cpp \
+    ui/MoveXYZWidget.cpp \
     ui/RotateWidget.cpp \
     ui/RotateXYZWidget.cpp \
-    ui/Widget3D.cpp \
     utils/quaternionhelper.cpp \
     utils/mathutils.cpp \
     utils/qtriangulator.cpp \
@@ -72,14 +72,6 @@ LIBS += -L$$_PRO_FILE_PWD_/$$LIB_DIR -lWinSparkle
 # deprecated API in order to know how to port your code away from it.
 DEFINES += QT_DEPRECATED_WARNINGS
 
-# add CGAL
-LIBS += -LC:/CGAL_build8/lib/ -llibCGAL.dll
-LIBS += -LC:/dev/CGAL-4.11/auxiliary/gmp/lib -llibgmp-10 -llibmpfr-4
-
-INCLUDEPATH += C:/dev/CGAL-4.11/include
-INCLUDEPATH += C:/dev/CGAL-4.11/auxiliary/gmp/include
-INCLUDEPATH += C:/boost_1_59_0
-INCLUDEPATH += C:/CGAL_build8/include
 
 
 
@@ -98,15 +90,28 @@ win32:QMAKE_LFLAGS *= -Wl,--dynamicbase -Wl,--nxcompat
 # enable GCC large addresss aware linker flag
 win32:QMAKE_LFLAGS *= -Wl,--large-address-aware
 
+#system variable name for boost lib directory
+#(if MINGW_COMPILED system variable is not set ie) only mingw boost/cgal is installed, will return empty variable, so still works)
+#boost path
+MINGW_COMPILED_BOOST_LIB_ENV_NAME = BOOST_LIBRARYDIR$$(MINGW_COMPILED)
+MINGW_COMPILED_BOOST_LIB = $($$MINGW_COMPILED_BOOST_LIB_ENV_NAME)
+#message($$MINGW_COMPILED_BOOST_LIB)
+MINGW_COMPILED_BOOST_INCLUDE_ENV_NAME = BOOST_INCLUDEDIR$$(MINGW_COMPILED)
+MINGW_COMPILED_BOOST_INCLUDE = $($$MINGW_COMPILED_BOOST_INCLUDE_ENV_NAME)
+#message($$MINGW_COMPILED_BOOST_INCLUDE)
+#CGAL path
+MINGW_COMPILED_CGAL_ENV_NAME = CGAL_DIR$$(MINGW_COMPILED)
+MINGW_COMPILED_CGAL = $($$MINGW_COMPILED_CGAL_ENV_NAME)
+#message($$MINGW_COMPILED_CGAL)
 
 # add CGAL
-LIBS += -LC:/CGAL_build8/lib/ -llibCGAL.dll
-LIBS += -LC:/dev/CGAL-4.11/auxiliary/gmp/lib -llibgmp-10 -llibmpfr-4
+LIBS += -L$$MINGW_COMPILED_CGAL/build/lib/ -llibCGAL.dll
+LIBS += -L$$MINGW_COMPILED_CGAL/auxiliary/gmp/lib -llibgmp-10 -llibmpfr-4
 
-INCLUDEPATH += C:/dev/CGAL-4.11/include
-INCLUDEPATH += C:/dev/CGAL-4.11/auxiliary/gmp/include
-INCLUDEPATH += C:/boost_1_59_0
-INCLUDEPATH += C:/CGAL_build8/include
+INCLUDEPATH += $$MINGW_COMPILED_CGAL/include
+INCLUDEPATH += $$MINGW_COMPILED_CGAL/auxiliary/gmp/include
+INCLUDEPATH += $$MINGW_COMPILED_CGAL/build/include
+INCLUDEPATH += $$MINGW_COMPILED_BOOST_INCLUDE
 
 #TRANSLATIONS += lang_ko.ts
 
@@ -133,9 +138,9 @@ HEADERS += \
     feature/labellingtextpreview.h \
     feature/text3dgeometrygenerator.h \
     ui/MoveWidget.h \
+    ui/MoveXYZWidget.h \
     ui/RotateWidget.h \
     ui/RotateXYZWidget.h \
-    ui/Widget3D.h \
     unitTest/catch.hpp \
     unitTest/tests/IndexedListTest.h \
     unitTest/tests/TrackedIndexedListTest.h \
@@ -177,7 +182,6 @@ HEADERS += \
     feature/manualsupport.h
 
 #LIBS += -lOpengl32
-INCLUDEPATH += $$(BOOST_INCLUDEDIR)
 
 DISTFILES += \
     icon-32.ico \
