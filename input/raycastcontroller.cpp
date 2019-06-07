@@ -1,11 +1,12 @@
 #include "raycastcontroller.h"
+#include <qquickitem.h>
+
 #include "glmodel.h"
 #include "qmlmanager.h"
 
 #include "input/Draggable.h"
 #include "input/Hoverable.h"
 #include "utils/mathutils.h"
-#include <qquickitem.h>
 
 #include <chrono>
 using namespace Qt3DRender;
