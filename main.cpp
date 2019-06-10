@@ -34,11 +34,11 @@ int main(int argc, char **argv)
     QQmlApplicationEngine engine;
     qRegisterMetaType<std::vector<QVector3D>>("std::vector<QVector3D>");
     qRegisterMetaType<std::vector<float>>("std::vector<float>");
-    qmlRegisterType<GridMesh>("DentStudio", 1, 0, "GridMesh");
+    qmlRegisterType<GridMesh>("DentSlicer", 1, 0, "GridMesh");
     //qmlRegisterType<SlicingConfiguration>("DentStudio", 1, 0, "SlicingConfiguration");
 
     /** Splash Image **/
-    QPixmap pixmap(":/Resource/splash_final.png");
+    QPixmap pixmap(":/Resource/splash_dentslicer.png");
     QPainter painter(&pixmap);
     QPen penHText(QColor("#ffffff"));
     painter.setFont(QFont("Arial",9));

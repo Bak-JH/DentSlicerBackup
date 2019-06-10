@@ -313,6 +313,14 @@ void RayCastController::hitsChanged(const Qt3DRender::QAbstractRayCaster::Hits& 
 				{
 					glmodel->clicked(_mouseEvent, *nearestHit);
 				}
+                else
+                {
+                    auto parent = dynamic_cast<GLModel*>(nearestHit->entity()->parentEntity());
+                    if(parent)
+                    {
+                        parent->clicked(_mouseEvent, *nearestHit);
+                    }
+                }
 			}
 			//ignore other entities... there shouldn't be any
 		}

@@ -494,6 +494,7 @@
     <None Include="Resource\splash.png" />
     <None Include="Resource\splash2.png" />
     <None Include="Resource\splash_final.png" />
+    <None Include="Resource\splash_dentslicer.png" />
     <None Include="resource\switch.png" />
     <None Include="resource\triangle.png" />
     <None Include="Resource\undo.png" />
@@ -550,12 +551,12 @@
     <None Include="resource\zoom_up.png" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="DLPslicer.rc" />
+    <None Include="DentSlicer.rc" />
     <None Include="icon-32.ico" />
     <None Include="icon.ico" />
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="DLPslicer.rc" />
+    <ResourceCompile Include="DentSlicer.rc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Condition="Exists('$(QtMsBuild)\qt.targets')">

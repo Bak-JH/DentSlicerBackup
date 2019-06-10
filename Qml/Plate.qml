@@ -68,7 +68,7 @@ Entity {
         id : plateLogoEntity
         Mesh{
             id: plateLogoMesh
-            source: "qrc:/Resource/mesh/plate_logo.stl"
+            source: "qrc:/Resource/mesh/dentslicer_plate_logo.stl"
         }
 
         Transform{

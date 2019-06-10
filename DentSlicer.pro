@@ -4,11 +4,11 @@ QT += qml quick opengl 3dcore 3drender 3dinput 3dextras concurrent widgets core 
 
 CONFIG += c++17 resources_big
 
-TARGET = DentStudio
+TARGET = DentSlicer
 
 
-RC_ICONS = icon-32.ico
-RC_FILE = DLPslicer.rc
+RC_ICONS = icon.ico
+RC_FILE = DentSlicer.rc
 
 SOURCES += main.cpp \
     input/raycastcontroller.cpp \
@@ -25,9 +25,9 @@ SOURCES += main.cpp \
     feature/text3dgeometrygenerator.cpp \
     feature/labellingtextpreview.cpp \
     ui/MoveWidget.cpp \
+    ui/MoveXYZWidget.cpp \
     ui/RotateWidget.cpp \
     ui/RotateXYZWidget.cpp \
-    ui/Widget3D.cpp \
     utils/quaternionhelper.cpp \
     utils/mathutils.cpp \
     utils/qtriangulator.cpp \
@@ -133,9 +133,9 @@ HEADERS += \
     feature/labellingtextpreview.h \
     feature/text3dgeometrygenerator.h \
     ui/MoveWidget.h \
+    ui/MoveXYZWidget.h \
     ui/RotateWidget.h \
     ui/RotateXYZWidget.h \
-    ui/Widget3D.h \
     unitTest/catch.hpp \
     unitTest/tests/IndexedListTest.h \
     unitTest/tests/TrackedIndexedListTest.h \
@@ -180,6 +180,5 @@ HEADERS += \
 INCLUDEPATH += $$(BOOST_INCLUDEDIR)
 
 DISTFILES += \
-    icon-32.ico \
-    DLPslicer.rc \
+    DentSlicer.rc \
     icon.ico \
