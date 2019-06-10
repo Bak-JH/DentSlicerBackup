@@ -3,6 +3,8 @@
 #include <QVector3D>
 #include <QMatrix4x4>
 #include <QQuaternion>
+#include <math.h>
+
 namespace Utils
 {
     namespace Math

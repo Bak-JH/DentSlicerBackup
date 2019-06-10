@@ -455,7 +455,8 @@ bool make_outline(int y, int x, int startY, int startX, int depth, int direction
 }
 std::vector<LLIPoint> getPaddedProj(const Mesh *mesh, int floatPointPadding) {
     long long int INF=10000000000000;
-    int k=100, padding=2;
+    int k=100, padding;
+    int bedSize = 120;
     std::vector<std::pair<LLIPoint, LLIPoint> > edges;
     std::vector<std::pair<int, int> > vertice;
     std::vector<LLIPoint> result;
@@ -489,8 +490,14 @@ std::vector<LLIPoint> getPaddedProj(const Mesh *mesh, int floatPointPadding) {
         maxx = max2(maxx, max2(edges[i].first.x, edges[i].second.x));
         maxy = max2(maxy, max2(edges[i].first.y, edges[i].second.y));
     }
-    ttt = (maxx-minx)/33; minx-=ttt; maxx+=ttt;
-    ttt = (maxy-miny)/33; miny-=ttt; maxy+=ttt;
+    ttt = (maxx-minx)/10; minx-=ttt; maxx+=ttt;
+    ttt = (maxy-miny)/10; miny-=ttt; maxy+=ttt;
+
+    int cmp = ((maxx-minx)>(maxy-miny)?(maxx-minx):(maxy-miny))/bedSize;
+    padding = 12 - cmp/5;
+    padding = padding>10?10:padding;
+    padding = padding<1?1:padding;
+
     blockX = (maxx-minx)/k;
     blockY = (maxy-miny)/k;
 	//when using operator=, value is initialized to false anyway
@@ -720,8 +727,10 @@ std::vector<XYArrangement> autoarrange::arngMeshes(std::vector<const Mesh*>& mes
     }
 
     qDebug() << "start";
+    int targetIdx = meshCnt-1;
+    translational_motions[targetIdx].x = 100*floatPointPadding;
+    translational_motions[targetIdx].y = 100*floatPointPadding;
     for (int trycnt = 0; trycnt < 30; trycnt++) {
-        int targetIdx = meshCnt-1;
         LLIPoint origin_translational_motion = translational_motions[targetIdx], best_translational_motion;
         long long int optimal_v = 100000000000000000;
         float origin_rotate = rotates[targetIdx], best_rotate;

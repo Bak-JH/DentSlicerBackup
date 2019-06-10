@@ -54,8 +54,8 @@ Mesh* ShellOffset::shellOffset(Mesh* mesh, float factor){
             QVector3D qv1 = uomfMVertices[1]->position + uomfMVertices[1]->vn * factor;
             QVector3D qv0_in = uomfMVertices[0]->position;
             QVector3D qv1_in = uomfMVertices[1]->position;
-            offsetMesh->addFaceAndConnect(qv1, qv0, qv0_in);
-            offsetMesh->addFaceAndConnect(qv1, qv0_in, qv1_in);
+            offsetMesh->addFaceAndConnect(qv0, qv1, qv0_in);
+            offsetMesh->addFaceAndConnect(qv0_in, qv1, qv1_in);
         }
 		++edgeCirc;
         neighbors = edgeCirc->nonOwningFaces();
@@ -64,8 +64,8 @@ Mesh* ShellOffset::shellOffset(Mesh* mesh, float factor){
             QVector3D qv2 = uomfMVertices[2]->position + uomfMVertices[2]->vn * factor;
             QVector3D qv1_in = uomfMVertices[1]->position;
             QVector3D qv2_in = uomfMVertices[2]->position;
-            offsetMesh->addFaceAndConnect(qv2, qv1, qv1_in);
-            offsetMesh->addFaceAndConnect(qv2, qv1_in, qv2_in);
+            offsetMesh->addFaceAndConnect(qv1, qv2, qv1_in);
+            offsetMesh->addFaceAndConnect(qv1_in, qv2, qv2_in);
         }
 		++edgeCirc;
         neighbors = edgeCirc->nonOwningFaces();
@@ -74,8 +74,8 @@ Mesh* ShellOffset::shellOffset(Mesh* mesh, float factor){
             QVector3D qv2 = uomfMVertices[2]->position + uomfMVertices[2]->vn * factor;
             QVector3D qv0_in = uomfMVertices[0]->position;
             QVector3D qv2_in = uomfMVertices[2]->position;
-            offsetMesh->addFaceAndConnect(qv0, qv2_in, qv0_in);
-            offsetMesh->addFaceAndConnect(qv0, qv2, qv2_in);
+            offsetMesh->addFaceAndConnect(qv2_in, qv0, qv0_in);
+            offsetMesh->addFaceAndConnect(qv2, qv0, qv2_in);
         }
     }
 

@@ -1119,12 +1119,14 @@ void GLModel::mouseClickedFreeCutSphere(Qt3DRender::QPickEvent* pick)
 
 void GLModel::mouseClickedFreeCut(Qt3DRender::QPickEvent* pick)
 {
-    if ((pick->position().x() < 260 && pick->position().y() < 330)|| cutMode == 1 || pick->button() != Qt3DRender::QPickEvent::Buttons::LeftButton) // cut panel and if cut mode isn't freecut
+    /*if ((pick->position().x() < 260 && pick->position().y() < 330)|| cutMode == 1 || pick->button() != Qt3DRender::QPickEvent::Buttons::LeftButton) // cut panel and if cut mode isn't freecut
         return;
 
     QVector3D v = pick->localIntersection();
     QVector3D result_v = QVector3D(v.x(), -v.z(), v.y());
     result_v = result_v*2;
+
+    qDebug()<< "moiuse clicked freecut : " << v << result_v;
 
     bool found_nearby_v = false;
 
@@ -1154,7 +1156,7 @@ void GLModel::mouseClickedFreeCut(Qt3DRender::QPickEvent* pick)
         QMetaObject::invokeMethod(qmlManager->cutPopup, "colorApplyFinishButton", Q_ARG(QVariant, 2));
     else
         QMetaObject::invokeMethod(qmlManager->cutPopup, "colorApplyFinishButton", Q_ARG(QVariant, 0));
-
+    */
 }
 
 
@@ -1672,26 +1674,7 @@ void GLModel::clicked(MouseEventData& pick, const Qt3DRender::QRayCasterHit& hit
 	if (hit.type() != QRayCasterHit::HitType::TriangleHit)
 		throw std::runtime_error("trying to get tri idx from non tri hit");
 #endif
-	if (hit.primitiveIndex() >= _mesh->getFaces().size())
-	{
-		qDebug() << "trianglePick out of bound";
-		return;
-	}
-	_targetSelected = true;
-	targetMeshFace = _mesh->getFaces().cbegin() + hit.primitiveIndex();
 
-	if (labellingActive && hit.localIntersection() != QVector3D(0, 0, 0)) {
-        if (labellingTextPreview == nullptr)
-            labellingTextPreview = new LabellingTextPreview(this);
-
-
-		if (labellingTextPreview && labellingTextPreview->isEnabled()) {
-			labellingTextPreview->setTranslation(hit.localIntersection() + targetMeshFace->fn);
-			labellingTextPreview->setNormal(targetMeshFace->fn);
-            labellingTextPreview->planeSelected = true;
-            QMetaObject::invokeMethod(qmlManager->labelPopup, "labelUpdate");
-		}
-		}
 
 
 	if (cutActive) {
@@ -1703,6 +1686,12 @@ void GLModel::clicked(MouseEventData& pick, const Qt3DRender::QRayCasterHit& hit
 			qDebug() << hit.localIntersection() << "pick" << cuttingPoints.size() << cuttingPoints.size();
 			QVector3D v = hit.localIntersection();
 			qDebug() << v.distanceToPoint(cuttingPoints[cuttingPoints.size() - 1]);
+
+            if(this != hit.entity())
+            {
+                //plane clicked
+                v = {v.x(), -v.z(), v.y()};
+            }
 
 			bool found_nearby_v = false;
 			for (int i = 0; i < cuttingPoints.size(); i++) {
@@ -1733,6 +1722,16 @@ void GLModel::clicked(MouseEventData& pick, const Qt3DRender::QRayCasterHit& hit
 			//return;
 		}
 	}
+
+    //triangle index section
+    if (hit.primitiveIndex() >= _mesh->getFaces().size())
+    {
+        qDebug() << "trianglePick out of bound";
+        return;
+    }
+    _targetSelected = true;
+    targetMeshFace = _mesh->getFaces().cbegin() + hit.primitiveIndex();
+
 
 	if (extensionActive && hit.localIntersection() != QVector3D(0, 0, 0)) {
 		uncolorExtensionFaces();
@@ -1767,6 +1766,19 @@ void GLModel::clicked(MouseEventData& pick, const Qt3DRender::QRayCasterHit& hit
 		generateColorAttributes();
 		colorExtensionFaces();
 	}
+
+    if (labellingActive && hit.localIntersection() != QVector3D(0, 0, 0)) {
+        if (labellingTextPreview == nullptr)
+            labellingTextPreview = new LabellingTextPreview(this);
+
+
+        if (labellingTextPreview && labellingTextPreview->isEnabled()) {
+            labellingTextPreview->setTranslation(hit.localIntersection() + targetMeshFace->fn);
+            labellingTextPreview->setNormal(targetMeshFace->fn);
+            labellingTextPreview->planeSelected = true;
+            QMetaObject::invokeMethod(qmlManager->labelPopup, "labelUpdate");
+        }
+    }
 }
 
 bool GLModel::isDraggable(Hix::Input::MouseEventData& e,const Qt3DRender::QRayCasterHit&)
@@ -1934,7 +1946,7 @@ void GLModel::getLayerViewSliderSignal(double value) {
     QMatrix3x3 rotation_matrix(rotation_values);
 
     layerViewPlaneMaterial->setTextureTransform(rotation_matrix);
-    layerViewPlaneTransform[0]->setTranslation(QVector3D(0,0,layer_num*scfg->layer_height));
+    layerViewPlaneTransform[0]->setTranslation(QVector3D(0,0,layer_num*scfg->layer_height - scfg->raft_thickness - scfg->support_base_height));
 
     // change phong material of original model
     float h = (_mesh->z_max() - _mesh->z_min() + scfg->raft_thickness + scfg->support_base_height) * value + _mesh->z_min() - scfg->raft_thickness - scfg->support_base_height;

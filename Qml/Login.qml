@@ -49,13 +49,13 @@ ApplicationWindow {
 
 
         Image{
-            width : 136
-            height: 86
+            width : 217
+            height: 32
             anchors.top: parent.top
             anchors.horizontalCenter: parent.horizontalCenter
-            anchors.topMargin: 60
+            anchors.topMargin: 75
 
-            source: "qrc:/Resource/login_logo.png"
+            source: "qrc:/Resource/dentslicer_login_logo.png"
         }
 
         Text{
@@ -396,7 +396,7 @@ ApplicationWindow {
 
     }
     TaskbarButton {
-            overlay.iconSource: "qrc:/icon-32.ico"
+            overlay.iconSource: "qrc:/icon.ico"
     }
 
 
