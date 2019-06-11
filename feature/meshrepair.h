@@ -19,12 +19,14 @@ namespace MeshRepair{
     // find hole edges(edges along the holes) and make contour from it
     Paths3D identifyHoles(const Mesh* mesh);
 
+	//get boundaries ie) half edges on the edge/hole of the mesh
+	std::vector<Hix::Engine3D::HalfEdgeConstItr> identifyBoundary(const Mesh* mesh);
 
     // detects hole and remove them
     void fillHoles(Mesh* mesh, const Paths3D& holes);
 
     // fill hole path with faces
-    std::vector<std::array<QVector3D, 3>> fillPath(Path3D path);
+    //std::vector<std::array<QVector3D, 3>> fillPath(Path3D path);
 
     // detects orientation defects, which induces normal std::vector errors and render errors
     void fixNormalOrientations(Mesh* mesh);

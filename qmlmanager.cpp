@@ -13,6 +13,7 @@
 //#define _STRICT_DEBUG
 
 #endif
+#include <qquickitem.h>
 
 #include "qmlmanager.h"
 #include "lights.h"
@@ -24,7 +25,6 @@
 #include <feature/generateraft.h>
 #include <exception>
 #include "utils/utils.h"
-#include <qquickitem.h>
 using namespace Hix::Input;
 using namespace Hix::UI;
 QmlManager::QmlManager(QObject *parent) : QObject(parent)
