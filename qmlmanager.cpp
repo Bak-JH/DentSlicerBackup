@@ -13,9 +13,10 @@
 //#define _STRICT_DEBUG
 
 #endif
-#include <qquickitem.h>
 
 #include "qmlmanager.h"
+#include <Qt3DCore>
+#include <qquickitem.h>
 #include "lights.h"
 #include <ctype.h>
 #include <QCoreApplication>
