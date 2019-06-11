@@ -128,5 +128,6 @@
         <file>Resource/splash_dentslicer.png</file>
         <file>icon-32.ico</file>
         <file>icon.ico</file>
+        <file>Resource/dentslicer_icon.png</file>
     </qresource>
 </RCC>

@@ -40,7 +40,7 @@ int main(int argc, char **argv)
     /** Splash Image **/
     QPixmap pixmap(":/Resource/splash_dentslicer.png");
     QPainter painter(&pixmap);
-    QPen penHText(QColor("#ffffff"));
+    QPen penHText(QColor("#777777"));
     painter.setFont(QFont("Arial",9));
     painter.setPen(penHText);
 

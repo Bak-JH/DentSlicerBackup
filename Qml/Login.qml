@@ -317,17 +317,13 @@ ApplicationWindow {
             anchors.bottom: parent.bottom
             anchors.leftMargin: 36
             anchors.bottomMargin: 36
-            color: "transparent"
-            Image {
-                anchors.fill: parent
-                source: "qrc:/Resource/login_leftbutton.png"
-            }
+            color: "#00B9C8"
             Text{
                 width: parent.width
                 height: parent.height
                 anchors.centerIn: parent
 
-                text : "LOG IN"
+                text : "LOGIN"
 
                 font.pixelSize: 20
                 font.family: mainFont.name
@@ -363,11 +359,7 @@ ApplicationWindow {
             anchors.bottom: parent.bottom
             anchors.rightMargin: 36
             anchors.bottomMargin: 36
-            color: "transparent"
-            Image {
-                anchors.fill: parent
-                source: "qrc:/Resource/login_rightbutton.png"
-            }
+            color: "#00B9C8"
             Text{
                 width: parent.width
                 height: parent.height
