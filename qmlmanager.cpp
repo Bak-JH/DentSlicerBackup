@@ -752,6 +752,8 @@ void QmlManager::openArrange(){
 }
 
 void QmlManager::runArrange(){
+
+    qmlManager->openProgressPopUp();
     QFuture<void> future = QtConcurrent::run(this, &QmlManager::runArrange_internal);
 }
 
@@ -768,6 +770,7 @@ void QmlManager::runArrange_internal(){
             meshes_to_arrange.push_back(model->getMesh());
             m_transform_set.push_back(model->getTransform());
         }
+
         autoarrange* ar;
         arng_result_set = ar->arngMeshes(meshes_to_arrange, m_transform_set);
         std::vector<QVector3D> translations;
@@ -795,6 +798,8 @@ void QmlManager::applyArrangeResult(std::vector<QVector3D> translations, std::ve
         model->rotateModelMesh(3, rotations[index]);
         ++index;
     }
+
+    qmlManager->setProgress(1);
 
     qmlManager->setProgressText("Done");
     qmlManager->openResultPopUp("","Arrangement done","");
@@ -1347,7 +1352,26 @@ void QmlManager::modelMove(QVector3D displacement)
 			yMinBound > bedYMin)
 		{
 			selectedModel->setTranslation(tmp);
-		}
+        } else if ((xMaxBound >= bedXMax && xMinBound <= bedXMin)
+                   || (yMaxBound >= bedYMax && yMinBound <= bedYMin)) { // model must be rescaled
+            qmlManager->openResultPopUp("", "Model Size is too big", "Scale down the model first");
+            return;
+        }
+
+        // reposition if x is out of bound
+        if (xMaxBound >= bedXMax){
+            selectedModel->setTranslation(selectedModel->getTranslation() + QVector3D(bedXMax-xMaxBound, 0, 0));
+        } else if (xMinBound <= bedXMin){
+            selectedModel->setTranslation(selectedModel->getTranslation() + QVector3D(bedXMin-xMinBound, 0, 0));
+        }
+
+        if (yMaxBound >= bedYMax){
+            selectedModel->setTranslation(selectedModel->getTranslation() + QVector3D(0, bedYMax-yMaxBound, 0));
+        } else if (yMinBound <= bedYMin){
+            selectedModel->setTranslation(selectedModel->getTranslation() + QVector3D(0, bedYMin-yMinBound, 0));
+        }
+
+
 		selectedModel->checkPrintingArea();
 	}
 }

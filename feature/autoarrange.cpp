@@ -709,7 +709,7 @@ std::vector<XYArrangement> autoarrange::arngMeshes(std::vector<const Mesh*>& mes
     int floatPointPadding = 100;
     /**/qDebug() << "Arrange start";
     qmlManager->setProgress(0);
-    qmlManager->setProgressText("Getting projection of meshes on work plane...");
+    qmlManager->setProgressText("Arranging models...");
 
     qDebug() << "get padded projected outlines";
     for(int idx=0; idx<meshCnt; idx++){
@@ -762,6 +762,7 @@ std::vector<XYArrangement> autoarrange::arngMeshes(std::vector<const Mesh*>& mes
         qDebug() << best_rotate;
         if (best_translational_motion.x == origin_translational_motion.x && best_translational_motion.y == origin_translational_motion.y && origin_rotate == rotates[targetIdx])
             break;
+        qmlManager->setProgress(0.4* (trycnt/30) + 0.5);
     }
 
     for(int idx=0; idx<meshCnt; idx++){

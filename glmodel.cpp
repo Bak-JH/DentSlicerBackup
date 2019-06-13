@@ -1632,7 +1632,7 @@ void GLModel::generateRLModel(Mesh* lmesh, Mesh* rmesh){
     qmlManager->deleteModelFile(ID);
 
     // do auto arrange
-    qmlManager->runArrange();
+    //qmlManager->runArrange();
 	QMetaObject::invokeMethod(qmlManager->boundedBox, "hideBox");
     // 승환 100%
     qmlManager->setProgress(1);
