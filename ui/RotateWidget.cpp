@@ -58,6 +58,7 @@ void Hix::UI::RotateWidget::dragStarted(Hix::Input::MouseEventData& e, const Qt3
 	setHighlight(true);
 	_mouseOrigin = e.position;
 	_mousePrev = e.position;
+    _mouseCurrent = e.position;
 	qmlManager->modelRotateInit();
 	_pastAngle = calculateRot();
 }
@@ -84,6 +85,7 @@ double Hix::UI::RotateWidget::calculateRot()
 	{
 		degreeangle = -1.0 * degreeangle;
 	}
+    qDebug() << "deg angle" << degreeangle;
 	return degreeangle;
 }
 

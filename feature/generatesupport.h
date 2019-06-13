@@ -35,6 +35,7 @@ public:
     float z_min_minimal_diff = scfg->layer_height/2;
     float minLength = scfg->support_base_height+1;
 
+    Mesh* generateStraightSupport(Mesh* shellmesh);
     Mesh* generateSupport(Mesh* shellMesh);
 
     void overhangDetect(Mesh* mesh);
@@ -52,6 +53,7 @@ public:
     void generateFaces(Mesh* mesh, OverhangPoint top, OverhangPoint bottom);
     void generateBranch(Mesh* mesh, OverhangPoint leaf1, OverhangPoint leaf2, OverhangPoint* stem);
     void generateNShapeBranch(Mesh* mesh, OverhangPoint* pt1, OverhangPoint* pt2, size_t diameter_mm, size_t thickness_mm);
+
     void generateStem(Mesh* mesh, OverhangPoint top, OverhangPoint* bottom);
     QVector3D internalDiv(OverhangPoint a, OverhangPoint b, float m, float n);
 };

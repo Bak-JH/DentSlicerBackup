@@ -36,12 +36,32 @@ GenerateSupport::GenerateSupport()
 
 }
 
+Mesh* GenerateSupport::generateStraightSupport(Mesh* shellmesh){
+    Mesh* mesh = shellmesh;
+    Mesh* supportMesh = new Mesh();
+
+    z_min = mesh->z_min() - scfg->support_base_height;
+
+    overhangDetect(mesh);
+    size_t idx = 0;
+    findNearestPoint(idx);
+    for (OverhangPoint op : overhangPoints){
+        OverhangPoint* new_op = new OverhangPoint(QVector3D(op.position.x(), op.position.y(), z_min));
+        generateStem(supportMesh, op, new_op);
+    }
+
+    supportMesh->connectFaces();
+    return supportMesh;
+}
+
 Mesh* GenerateSupport::generateSupport(Mesh* shellmesh) {
+
     Mesh* mesh = shellmesh;
     Mesh* supportMesh = new Mesh();
     z_min = mesh->z_min() - scfg->support_base_height;
 
     overhangDetect(mesh);
+
 
     size_t idx = 0;
     findNearestPoint(idx);
@@ -421,8 +441,13 @@ void GenerateSupport::generateStem(Mesh* mesh, OverhangPoint top, OverhangPoint*
         top = tip;
     }
 
+    if (top.topPoint){
+        OverhangPoint tempTop = OverhangPoint(top.position+QVector3D(0,0,scfg->layer_height));
+        generateFaces(mesh, tempTop, *bottom);
+    } else {
+        generateFaces(mesh, top, *bottom);
+    }
 
-    generateFaces(mesh, top, *bottom);
 
 
     if (origin_bottom.meshInterPoint) // generate bottom tip

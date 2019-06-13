@@ -84,14 +84,14 @@ void RayCastController::setHoverEnabled(bool isEnabled)
 	if (_hoverEnabled != isEnabled)
 	{
 		_hoverEnabled = isEnabled;
-		//if (_hoverEnabled)
-		//{
-		//	_hoverRayCaster.setEnabled(true);
-		//}
-		//else
-		//{
-		//	_hoverRayCaster.setEnabled(false);
-		//}
+        if (_hoverEnabled)
+        {
+            _hoverRayCaster.setEnabled(true);
+        }
+        else
+        {
+            _hoverRayCaster.setEnabled(false);
+        }
 	}
 }
 
