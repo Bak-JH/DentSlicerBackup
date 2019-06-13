@@ -25,6 +25,7 @@
 #include "DentEngine/src/configuration.h"
 #include "input/raycastcontroller.h"
 #include "input/Draggable.h"
+#include "render/ModelMaterial.h"
 #define MAX_BUF_LEN 2000000
 
 using namespace Qt3DCore;
@@ -130,7 +131,7 @@ public:
 
 
     bool appropriately_rotated=false;
-	QPhongMaterial* m_meshMaterial;
+	Hix::Render::ModelMaterial m_meshMaterial;
     QPerVertexColorMaterial *m_meshVertexMaterial;
     QMaterial *m_layerMaterial;
     QParameter *m_layerMaterialHeight;
