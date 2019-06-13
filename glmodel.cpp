@@ -48,7 +48,7 @@ GLModel::GLModel(QObject* mainWindow, QNode *parent, Mesh* loadMesh, QString fna
     , layerRaftMesh(nullptr)
     , slicer(nullptr)
     , ID(id)
-    , m_meshMaterial(nullptr)
+    , m_meshMaterial()
 	, m_geometryRenderer(this)
     , m_geometry(this)
     , vertexBuffer(Qt3DRender::QBuffer::VertexBuffer, this)
@@ -63,11 +63,11 @@ GLModel::GLModel(QObject* mainWindow, QNode *parent, Mesh* loadMesh, QString fna
     connect(&futureWatcher, SIGNAL(finished()), this, SLOT(slicingDone()));
     qDebug() << "new model made _______________________________"<<this<< "parent:"<<parent;
 	_layer.setRecursive(true);
-	m_meshMaterial = new QPhongMaterial();
+	//m_meshMaterial = new QPhongMaterial();
 	m_meshVertexMaterial = new QPerVertexColorMaterial();
 	addComponent(&_layer);
 	addComponent(&m_transform);
-	addComponent(m_meshMaterial);
+	addComponent(&m_meshMaterial);
 	//addComponent(&m_geometryRenderer);
 
     //initialize vertex buffers etc
@@ -195,42 +195,42 @@ GLModel::GLModel(QObject* mainWindow, QNode *parent, Mesh* loadMesh, QString fna
 
 void GLModel::changecolor(int mode){
     if (mode == -1) mode = colorMode;
-    switch(mode){
-    case 0: // default
-        m_meshMaterial->setAmbient(QColor(130,130,140));
-        //m_meshMaterial->setDiffuse(QColor(131,206,220));
-        m_meshMaterial->setDiffuse(QColor(97,185,192));
-        m_meshMaterial->setSpecular(QColor(150,150,150));
-        m_meshMaterial->setShininess(0.0f);
+    //switch(mode){
+    //case 0: // default
+    //    m_meshMaterial->setAmbient(QColor(130,130,140));
+    //    //m_meshMaterial->setDiffuse(QColor(131,206,220));
+    //    m_meshMaterial->setDiffuse(QColor(97,185,192));
+    //    m_meshMaterial->setSpecular(QColor(150,150,150));
+    //    m_meshMaterial->setShininess(0.0f);
 
-        /*m_meshAlphaMaterial->setAmbient(QColor(130,130,140));;
-        m_meshAlphaMaterial->setDiffuse(QColor(131,206,220));
-        m_meshAlphaMaterial->setDiffuse(QColor(97,185,192));
-        m_meshAlphaMaterial->setSpecular(QColor(0,0,0));
-        m_meshAlphaMaterial->setShininess(0.0f);*/
-        colorMode = 0;
-        break;
-    case 1:
-        m_meshMaterial->setAmbient(QColor(230,230,230));
-        //m_meshMaterial->setDiffuse(QColor(100,255,100));
-        m_meshMaterial->setDiffuse(QColor(130,208,125));
-        m_meshMaterial->setSpecular(QColor(150,150,150));
-        m_meshMaterial->setShininess(0.0f);
+    //    /*m_meshAlphaMaterial->setAmbient(QColor(130,130,140));;
+    //    m_meshAlphaMaterial->setDiffuse(QColor(131,206,220));
+    //    m_meshAlphaMaterial->setDiffuse(QColor(97,185,192));
+    //    m_meshAlphaMaterial->setSpecular(QColor(0,0,0));
+    //    m_meshAlphaMaterial->setShininess(0.0f);*/
+    //    colorMode = 0;
+    //    break;
+    //case 1:
+    //    m_meshMaterial->setAmbient(QColor(230,230,230));
+    //    //m_meshMaterial->setDiffuse(QColor(100,255,100));
+    //    m_meshMaterial->setDiffuse(QColor(130,208,125));
+    //    m_meshMaterial->setSpecular(QColor(150,150,150));
+    //    m_meshMaterial->setShininess(0.0f);
 
-        /*m_meshAlphaMaterial->setDiffuse(QColor(100,255,100));
-        m_meshAlphaMaterial->setDiffuse(QColor(130,208,125));
-        m_meshAlphaMaterial->setSpecular(QColor(0,0,0));
-        m_meshAlphaMaterial->setShininess(0.0f);*/
-        colorMode = 1;
-        break;
-    case 2:
-        m_meshMaterial->setAmbient(QColor(0,0,0));
-        //m_meshMaterial->setDiffuse(QColor(205,84,84));
-        break;
-    case 3:
-        m_meshMaterial->setAmbient(QColor(160,160,160));;
-        break;
-    }
+    //    /*m_meshAlphaMaterial->setDiffuse(QColor(100,255,100));
+    //    m_meshAlphaMaterial->setDiffuse(QColor(130,208,125));
+    //    m_meshAlphaMaterial->setSpecular(QColor(0,0,0));
+    //    m_meshAlphaMaterial->setShininess(0.0f);*/
+    //    colorMode = 1;
+    //    break;
+    //case 2:
+    //    m_meshMaterial->setAmbient(QColor(0,0,0));
+    //    //m_meshMaterial->setDiffuse(QColor(205,84,84));
+    //    break;
+    //case 3:
+    //    m_meshMaterial->setAmbient(QColor(160,160,160));;
+    //    break;
+    //}
 }
 bool GLModel::modelSelectChangable(){
     bool result = false;
@@ -2184,14 +2184,14 @@ void GLModel::generateText3DMesh()
 // for extension
 
 void GLModel::colorExtensionFaces(){
-    removeComponent(m_meshMaterial);
+    removeComponent(&m_meshMaterial);
     addComponent(m_meshVertexMaterial);
 }
 
 void GLModel:: uncolorExtensionFaces(){
     resetColorMesh(_mesh, &vertexBuffer, extendFaces);
     removeComponent(m_meshVertexMaterial);
-    addComponent(m_meshMaterial);
+    addComponent(&m_meshMaterial);
 	updateModelMesh();
 
 }
@@ -2432,7 +2432,7 @@ void GLModel::changeViewMode(int viewMode) {
         }
         layerViewActive = false;
         supportViewActive = false;
-        addComponent(m_meshMaterial);
+        addComponent(&m_meshMaterial);
         removeComponent(m_layerMaterial);
         break;
     case VIEW_MODE_SUPPORT:
@@ -2442,7 +2442,7 @@ void GLModel::changeViewMode(int viewMode) {
         }
         layerViewActive = false;
         supportViewActive = true;
-        addComponent(m_meshMaterial);
+        addComponent(&m_meshMaterial);
         removeComponent(m_layerMaterial);
 
         break;
@@ -2467,7 +2467,7 @@ void GLModel::changeViewMode(int viewMode) {
         layerViewPlaneEntity[0]->addComponent(layerViewPlaneMaterial);
         getLayerViewSliderSignal(1);
 
-        removeComponent(m_meshMaterial);
+        removeComponent(&m_meshMaterial);
         break;
     }
 
@@ -2635,7 +2635,7 @@ void GLModel::generateLayerViewMaterial() {
     gl3Pass->addRenderState(cullFace);
 
     depthTest = new QDepthTest();
-    depthTest->setDepthFunction(QDepthTest::DepthFunction::Always);
+    depthTest->setDepthFunction(QDepthTest::DepthFunction::Less);
     gl3Pass->addRenderState(depthTest);
 
     // Add the pass to the technique
@@ -2665,7 +2665,6 @@ void GLModel::generateLayerViewMaterial() {
     m_layerMaterial->addParameter(m_layerMaterialRaftHeight);
 
     m_layerMaterial->addParameter(new QParameter(QStringLiteral("ambient"), QColor(130, 130, 140)));
-    m_layerMaterial->addParameter(new QParameter(QStringLiteral("diffuse"), QColor(131, 206, 220)));
     m_layerMaterial->addParameter(new QParameter(QStringLiteral("diffuse"), QColor(97, 185, 192)));
     m_layerMaterial->addParameter(new QParameter(QStringLiteral("specular"), QColor(0, 0, 0)));
     //m_layerMaterial->addParameter(new QParameter(QStringLiteral("alpha"), 0.0f));

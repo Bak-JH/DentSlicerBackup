@@ -12,11 +12,11 @@ RC_FILE = DLPslicer.rc
 
 SOURCES += main.cpp \
     input/raycastcontroller.cpp \
+    render/ModelMaterial.cpp \
     slicingengine.cpp \
     glmodel.cpp \
     qmlmanager.cpp \
     fileloader.cpp \
-    lights.cpp \
     feature/autoorientation.cpp \
     feature/modelcut.cpp \
     feature/meshrepair.cpp \
@@ -125,11 +125,11 @@ HEADERS += \
     common/indexedlist.h \
     input/Draggable.h \
     input/raycastcontroller.h \
+    render/ModelMaterial.h \
     slicingengine.h \
     glmodel.h \
     qmlmanager.h \
     fileloader.h \
-    lights.h \
     feature/autoorientation.h \
     feature/modelcut.h \
     feature/meshrepair.h \

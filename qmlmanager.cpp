@@ -13,11 +13,8 @@
 //#define _STRICT_DEBUG
 
 #endif
-
-#include "qmlmanager.h"
 #include <Qt3DCore>
 #include <qquickitem.h>
-#include "lights.h"
 #include <ctype.h>
 #include <QCoreApplication>
 #include <QTextStream>
@@ -25,6 +22,7 @@
 #include <feature/generatesupport.h>
 #include <feature/generateraft.h>
 #include <exception>
+#include "qmlmanager.h"
 #include "utils/utils.h"
 using namespace Hix::Input;
 using namespace Hix::UI;
@@ -44,7 +42,7 @@ void QmlManager::initializeUI(QQmlApplicationEngine* e){
     loginButton = FindItemByName(engine, "loginButton");
     keyboardHandler = (Qt3DInput::QKeyboardHandler*)FindItemByName(engine, "keyboardHandler");
     models = (QEntity *)FindItemByName(engine, "Models");
-    Lights* lights = new Lights(models);
+    
     mv = dynamic_cast<QEntity*> (FindItemByName(engine, "MainView"));
     systemTransform = (Qt3DCore::QTransform *) FindItemByName(engine, "systemTransform");
     mttab = (QEntity *)FindItemByName(engine, "mttab");

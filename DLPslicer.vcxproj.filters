@@ -101,9 +101,6 @@
     <ClCompile Include="feature\labellingtextpreview.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="lights.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="utils\linemeshgeometry.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -182,6 +179,9 @@
     <ClCompile Include="ui\MoveXYZWidget.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="render\ModelMaterial.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DentEngine\src\polyclipping\poly2tri\sweep\advancing_front.h">
@@ -239,9 +239,6 @@
       <Filter>Header Files</Filter>
     </QtMoc>
     <QtMoc Include="feature\labellingtextpreview.h">
-      <Filter>Header Files</Filter>
-    </QtMoc>
-    <QtMoc Include="lights.h">
       <Filter>Header Files</Filter>
     </QtMoc>
     <QtMoc Include="utils\linemeshgeometry.h">
@@ -921,6 +918,16 @@
     <None Include="icon-32.ico" />
     <None Include="icon-32.ico" />
     <None Include="icon-32.ico" />
+    <None Include="icon-32.ico" />
+    <None Include="shaders\model_shader.frag">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="shaders\model_shader.vert">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="shaders\model_shader.geom">
+      <Filter>Resource Files</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <None Include="DLPslicer.rc">
@@ -950,6 +957,9 @@
       <Filter>Header Files</Filter>
     </QtMoc>
     <QtMoc Include="ui\MoveWidget.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="render\ModelMaterial.h">
       <Filter>Header Files</Filter>
     </QtMoc>
   </ItemGroup>
