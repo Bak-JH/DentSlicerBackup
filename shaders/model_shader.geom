@@ -23,6 +23,8 @@ uniform vec3 ambient;
 uniform vec3 diffuse;
 uniform vec3 specular;
 uniform mat4 modelView;
+
+
 //we do light calculation in per primitive fashion
 vec3 calcLight(in vec3 pLightPos, in vec3 position, in vec3 norm, in vec3 pVertColor)
 {

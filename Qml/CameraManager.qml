@@ -94,12 +94,12 @@ Entity {
 
     Entity {
         components: [
-            DirectionalLight {
-                worldDirection : Qt.vector3d(0, 0, -1).normalized()
-                //color: "#fbf9ce"
-                color: "white"
-                intensity: 0.6
-            }
+//            DirectionalLight {
+//                worldDirection : Qt.vector3d(0, 0, -1).normalized()
+//                //color: "#fbf9ce"
+//                color: "white"
+//                intensity: 0.6
+//            }
         ]
     }
 
