@@ -10,8 +10,6 @@ const QString FRAG_PATH = "qrc:/shaders/model_shader.frag";
 Hix::Render::ModelMaterial::ModelMaterial():
 	_ambientParameter(QStringLiteral("ambient"), QColor(25, 25, 25)),
 	_diffuseParameter(QStringLiteral("diffuse"), QColor(80, 80, 80)),
-	_specularParameter(QStringLiteral("specular"), QColor(0,0,0)),
-
 	_vertShader(QOpenGLShader::Vertex),
 	_fragShader(QOpenGLShader::Fragment),
 	_geomShader(QOpenGLShader::Geometry)
@@ -45,24 +43,10 @@ Hix::Render::ModelMaterial::ModelMaterial():
 	_renderTechnique.addFilterKey(&_filterKey);
 	_effect.addTechnique(&_renderTechnique);
 
-	//create lights
-	QVariantList positions = QVariantList();
-	//positions in world coord
-	positions << QVector3D(_lightDistance, _lightDistance, 0);
-	positions << QVector3D(-_lightDistance, _lightDistance, 0);
-	positions << QVector3D(_lightDistance, -_lightDistance, 0);
-	positions << QVector3D(-_lightDistance, -_lightDistance, 0);
-	_pointLightPositionsParameter.setName(QStringLiteral("pointLightPositions[0]"));
-
-
 	_effect.addParameter(&_ambientParameter);
 	_effect.addParameter(&_diffuseParameter);
-	_effect.addParameter(&_specularParameter);
-	_effect.addParameter(&_pointLightPositionsParameter);
 	setEffect(&_effect);
 
-
-	_pointLightPositionsParameter.setValue(positions);
 	//this is hard coded in to shader to make the for loop in shader a const bound loop.
 	//_pointLightCountParameter.setName(QStringLiteral("pointLightCount"));
 	//_pointLightPositionsParameter.setValue(4);
@@ -79,4 +63,15 @@ Hix::Render::ModelMaterial::ModelMaterial():
 
 Hix::Render::ModelMaterial::~ModelMaterial()
 {
+}
+
+void Hix::Render::ModelMaterial::setDiffuse(const QColor& diffuse)
+{
+	_diffuseParameter.setValue(diffuse);
+}
+
+void Hix::Render::ModelMaterial::setAmbient(const QColor& ambient)
+{
+	_ambientParameter.setValue(ambient);
+
 }

@@ -57,30 +57,18 @@ GLModel::GLModel(QObject* mainWindow, QNode *parent, Mesh* loadMesh, QString fna
 	, normalAttribute(this)
 	, colorAttribute(this)
 	, indexAttribute(this)
+	, colorMode(-1)
 
 
 {
     connect(&futureWatcher, SIGNAL(finished()), this, SLOT(slicingDone()));
     qDebug() << "new model made _______________________________"<<this<< "parent:"<<parent;
 	_layer.setRecursive(true);
-	//m_meshMaterial = new QPhongMaterial();
-	m_meshVertexMaterial = new QPerVertexColorMaterial();
 	addComponent(&_layer);
 	addComponent(&m_transform);
 
 
-	//m_meshMaterial.setAmbient(QColor(5, 5, 5));
-	//m_meshMaterial.setDiffuse(QColor(200, 200, 200));
-	//m_meshMaterial.setSpecular(QColor(100, 100, 100));
-	//m_meshMaterial.setShininess(0.0f);
-	m_meshMaterial.setAmbient(QColor(5,5,5));
-	m_meshMaterial.setDiffuse(QColor(97,185,192));
-	m_meshMaterial.setSpecular(QColor(150,150,150));
-	m_meshMaterial.setShininess(0.0f);
-
-
 	addComponent(&m_meshMaterial);
-	//addComponent(&m_geometryRenderer);
 
     //initialize vertex buffers etc
     vertexBuffer.setUsage(Qt3DRender::QBuffer::DynamicDraw);
@@ -146,12 +134,9 @@ GLModel::GLModel(QObject* mainWindow, QNode *parent, Mesh* loadMesh, QString fna
   
 	// Add to Part List
 	qmlManager->addPart(getFileName(fname.toStdString().c_str()), ID);
-
-
-
 	generateLayerViewMaterial();
+	changecolor(ModelColor::Default);
 
-	this->changecolor(0);
 	if (filename != "" && (filename.contains(".stl") || filename.contains(".STL"))\
 		&& loadMesh == nullptr) {
 		_mesh = new Mesh();
@@ -207,47 +192,25 @@ GLModel::GLModel(QObject* mainWindow, QNode *parent, Mesh* loadMesh, QString fna
 
 }
 
-void GLModel::changecolor(int mode){
-    if (mode == -1) mode = colorMode;
-    //switch(mode){
-    //case 0: // default
-    //    m_meshMaterial->setAmbient(QColor(130,130,140));
-    //    //m_meshMaterial->setDiffuse(QColor(131,206,220));
-    //    m_meshMaterial->setDiffuse(QColor(97,185,192));
-    //    m_meshMaterial->setSpecular(QColor(150,150,150));
-    //    m_meshMaterial->setShininess(0.0f);
-
-    //    /*m_meshAlphaMaterial->setAmbient(QColor(130,130,140));;
-    //    m_meshAlphaMaterial->setDiffuse(QColor(131,206,220));
-    //    m_meshAlphaMaterial->setDiffuse(QColor(97,185,192));
-    //    m_meshAlphaMaterial->setSpecular(QColor(0,0,0));
-    //    m_meshAlphaMaterial->setShininess(0.0f);*/
-    //    colorMode = 0;
-    //    break;
-    //case 1:
-    //    m_meshMaterial->setAmbient(QColor(230,230,230));
-    //    //m_meshMaterial->setDiffuse(QColor(100,255,100));
-    //    m_meshMaterial->setDiffuse(QColor(130,208,125));
-    //    m_meshMaterial->setSpecular(QColor(150,150,150));
-    //    m_meshMaterial->setShininess(0.0f);
-
-    //    /*m_meshAlphaMaterial->setDiffuse(QColor(100,255,100));
-    //    m_meshAlphaMaterial->setDiffuse(QColor(130,208,125));
-    //    m_meshAlphaMaterial->setSpecular(QColor(0,0,0));
-    //    m_meshAlphaMaterial->setShininess(0.0f);*/
-    //    colorMode = 1;
-    //    break;
-    //case 2:
-    //    m_meshMaterial->setAmbient(QColor(0,0,0));
-    //    //m_meshMaterial->setDiffuse(QColor(205,84,84));
-    //    break;
-    //case 3:
-    //    m_meshMaterial->setAmbient(QColor(160,160,160));;
-    //    break;
-    //}
-
-
-
+void GLModel::changecolor(ModelColor mode){
+	if (colorMode != mode)
+	{
+		colorMode = mode;
+		switch (mode) {
+		case ModelColor::Default: // default
+			m_meshMaterial.setAmbient(QColor(65, 65, 70));
+			m_meshMaterial.setDiffuse(QColor(97, 185, 192));
+			break;
+		case ModelColor::Selected:
+			m_meshMaterial.setAmbient(QColor(115, 115, 115));
+			m_meshMaterial.setDiffuse(QColor(130, 208, 125));
+			break;
+		case ModelColor::OutOfBound:
+			m_meshMaterial.setAmbient(QColor(0, 0, 0));
+			m_meshMaterial.setDiffuse(QColor(0, 0, 0));
+			break;
+		}
+	}
 }
 bool GLModel::modelSelectChangable(){
     bool result = false;
@@ -265,17 +228,22 @@ void GLModel::checkPrintingArea(){
     float printing_safegap = 1;
     // is it inside the printing area or not?
     QVector3D tmp = m_transform.translation();
-    if ((tmp.x() + _mesh->x_min()) < printing_safegap - printing_x/2 |
-        (tmp.x() + _mesh->x_max()) > printing_x/2 - printing_safegap|
-        (tmp.y() + _mesh->y_min()) <  printing_safegap - printing_y/2|
-        (tmp.y() + _mesh->y_max()) > printing_y/2 - printing_safegap|
+    if ((tmp.x() + _mesh->x_min()) < (printing_safegap - printing_x/2)	||
+        (tmp.x() + _mesh->x_max()) > (printing_x/2 - printing_safegap)	||
+        (tmp.y() + _mesh->y_min()) < (printing_safegap - printing_y/2)	||
+        (tmp.y() + _mesh->y_max()) > (printing_y/2 - printing_safegap)	||
         (tmp.z() + _mesh->z_max()) > printing_z){
-        this->changecolor(2);
+        changecolor(ModelColor::OutOfBound);
     } else {
-        this->changecolor(-1);
-        this->changecolor(3);
+		//if (qmlManager->isSelected(this))
+		//{
+		//	changecolor(ModelColor::Selected);
+		//}
+		//else
+		//{
+		//	changecolor(ModelColor::Default);
+		//}
     }
-//    qDebug() << tmp << _mesh->x_max() << _mesh->x_min() << _mesh->y_max() << _mesh->y_min() << _mesh->z_max();
 }
 
 void GLModel::saveUndoState(){
@@ -562,24 +530,6 @@ void GLModel::updateModelMesh(){
     checkPrintingArea();
     //QMetaObject::invokeMethod(qmlManager->scalePopup, "updateSizeInfo", Q_ARG(QVariant, _mesh->x_max()-_mesh->x_min()), Q_ARG(QVariant, _mesh->y_max()-_mesh->y_min()), Q_ARG(QVariant, _mesh->z_max()-_mesh->z_min()));
     qDebug() << "model transform :" <<m_transform.translation() << _mesh->x_max() << _mesh->x_min() << _mesh->y_max() << _mesh->y_min() << _mesh->z_max() << _mesh->z_min();
-
-
-    // create new object picker, shadowmodel, remove prev shadowmodel
-    //if (shadowUpdate){
-    //    switch( viewMode ) {
-    //        case VIEW_MODE_OBJECT:
-    //            updateShadowModelImpl();
-    //            break;
-    //        case VIEW_MODE_SUPPORT:
-    //            updateShadowModelImpl();
-    //            m_transform.setTranslation(m_transform.translation()+QVector3D(0,0,scfg->raft_thickness));
-    //            break;
-    //        case VIEW_MODE_LAYER:
-    //            updateShadowModelImpl();
-    //            //addShadowModel(_mesh);
-    //            break;
-    //    }
-    //}
     updateLock = false;
     qDebug() << this << "released lock";
     QMetaObject::invokeMethod(qmlManager->boxUpperTab, "enableUppertab");
@@ -2201,14 +2151,12 @@ void GLModel::generateText3DMesh()
 // for extension
 
 void GLModel::colorExtensionFaces(){
-    removeComponent(&m_meshMaterial);
-    addComponent(m_meshVertexMaterial);
+	updateModelMesh();
+
 }
 
 void GLModel:: uncolorExtensionFaces(){
     resetColorMesh(_mesh, &vertexBuffer, extendFaces);
-    removeComponent(m_meshVertexMaterial);
-    addComponent(&m_meshMaterial);
 	updateModelMesh();
 
 }
