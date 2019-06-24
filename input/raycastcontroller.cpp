@@ -103,7 +103,7 @@ bool RayCastController::hoverEnabled()
 bool Hix::Input::RayCastController::mousePosInBound(const Qt3DInput::QMouseEvent* mv)
 {
 	auto sceneScreen = qmlManager->scene3d;
-	if (mv->x() > 0 && mv->x() <= sceneScreen->width() && mv->y() > 0 && mv->y() <= sceneScreen->height())
+	if (mv->x() >= 0 && mv->x() < sceneScreen->width() && mv->y() > 0 && mv->y() < sceneScreen->height())
 	{
 		return true;
 	}
@@ -161,6 +161,8 @@ bool RayCastController::verifyClick()
 
 void RayCastController::mousePressed(Qt3DInput::QMouseEvent* mouse)
 {
+	qDebug() << "mousePressed";
+
 
 	if (mouse->button() == Qt3DInput::QMouseEvent::Buttons::LeftButton || mouse->button() == Qt3DInput::QMouseEvent::Buttons::RightButton)
 	{
@@ -182,6 +184,8 @@ void RayCastController::mousePressed(Qt3DInput::QMouseEvent* mouse)
 
 void RayCastController::mouseReleased(Qt3DInput::QMouseEvent* mouse)
 {
+	qDebug() << "mouseReleased";
+
 	if (mouse->button() == Qt3DInput::QMouseEvent::Buttons::LeftButton || mouse->button() == Qt3DInput::QMouseEvent::Buttons::RightButton)
 	{
 		_mouseEvent = MouseEventData(mouse);
@@ -234,6 +238,7 @@ void RayCastController::mousePositionChanged(Qt3DInput::QMouseEvent* mouse)
 {
 	if (mousePosInBound(mouse))
 	{
+		qDebug() << "in bound" << mouse->x() << mouse->y();
 		if (_hoverEnabled && !_hoverRaycastBusy)
 		{
 			auto hoverEvent = MouseEventData(mouse);
@@ -268,6 +273,8 @@ void RayCastController::mousePositionChanged(Qt3DInput::QMouseEvent* mouse)
 						{
 							//do drag
 							_rayCastMode = RayCastMode::Drag;
+							qDebug() << "in bound pressed pt" << _pressedPt;
+
 							_rayCaster.trigger(_pressedPt);
 						}
 

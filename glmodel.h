@@ -131,10 +131,9 @@ public:
 
 
     bool appropriately_rotated=false;
-	//Hix::Render::ModelMaterial m_meshMaterial;
-	Qt3DExtras::QDiffuseSpecularMaterial m_meshMaterial;
+	Hix::Render::ModelMaterial m_meshMaterial;
+	//Qt3DExtras::QDiffuseSpecularMaterial m_meshMaterial;
 
-    QPerVertexColorMaterial *m_meshVertexMaterial;
     QMaterial *m_layerMaterial;
     QParameter *m_layerMaterialHeight;
     QParameter *m_layerMaterialRaftHeight;
@@ -183,7 +182,14 @@ public:
 	QTime getNextTime();
 
     // changeColor
-    void changecolor(int mode); //0 default, 1 selected, 2 outofarea
+	enum ModelColor
+	{
+		Default = 0,
+		Selected = 1,
+		OutOfBound = 2,
+
+	};
+    void changecolor(ModelColor mode); //0 default, 1 selected, 2 outofarea
 
     void setSupportAndRaft();
 

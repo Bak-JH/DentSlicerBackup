@@ -4,38 +4,28 @@
 Lights::Lights(Qt3DCore::QEntity *rootEntity)
     : parentEntity(rootEntity)
 {
+	std::vector<QVector3D> lightPos;
+	lightPos.push_back(QVector3D(light_distance, light_distance, 0));
+	lightPos.push_back(QVector3D(light_distance, -light_distance, 0));
+	lightPos.push_back(QVector3D(-light_distance, -light_distance, 0));
+	lightPos.push_back(QVector3D(-light_distance, light_distance, 0));
 
-//Light
+	//light count here is also hardcoded into model_shader.geom!!!
+	for (size_t i = 0; i < 4; ++i)
+	{
+		auto lightEntity = new Qt3DCore::QEntity(parentEntity);
+		auto light = new Qt3DRender::QPointLight(lightEntity);
+		auto lightTransform = new Qt3DCore::QTransform(lightEntity);
+		lightTransform->setTranslation(lightPos[i]);
+		//assume color is white, intensity 1.0
+		//light->setColor("white");
+		//light->setIntensity(0.8);
+		lightEntity->addComponent(light);
+		lightEntity->addComponent(lightTransform);
 
-    for (int i=0;i<number_of_lights;i++){
-    lightEntity[i]= new Qt3DCore::QEntity(parentEntity);
-    light[i]=new Qt3DRender::QPointLight(lightEntity[i]);
-    light[i]->setColor("white");
-    light[i]->setIntensity(0.1);
-    lightTransform[i] = new Qt3DCore::QTransform(lightEntity[i]);
+	}
 
-    if (i==0)
-    lightTransform[i]->setTranslation(QVector3D(light_distance,light_distance,0));
-    else if(i==1)
-    lightTransform[i]->setTranslation(QVector3D(-light_distance,-light_distance,0));
-    else if(i==2)
-    lightTransform[i]->setTranslation(QVector3D(-light_distance,light_distance,0));
-    else
-    lightTransform[i]->setTranslation(QVector3D(light_distance,-light_distance,0));
-
-    lightEntity[i]->addComponent(light[i]);
-    lightEntity[i]->addComponent(lightTransform[i]);
-    }
 
 }
-
-Lights::~Lights(){
-    /*delete[] lightEntity;
-    delete[] light;
-    delete[] lightTransform;
-    delete[] lightEntity;*/
-}
-
-
 
 

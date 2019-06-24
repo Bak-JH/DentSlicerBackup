@@ -134,7 +134,6 @@ Item{
                 anchors.left : parent.left
                 anchors.right : parent.right
                 anchors.bottom : parent.bottom
-
                 focus: true
                 hoverEnabled: true
                 aspects: ["input", "logic"]
