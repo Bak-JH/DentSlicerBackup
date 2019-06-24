@@ -131,7 +131,9 @@ public:
 
 
     bool appropriately_rotated=false;
-	Hix::Render::ModelMaterial m_meshMaterial;
+	//Hix::Render::ModelMaterial m_meshMaterial;
+	Qt3DExtras::QDiffuseSpecularMaterial m_meshMaterial;
+
     QPerVertexColorMaterial *m_meshVertexMaterial;
     QMaterial *m_layerMaterial;
     QParameter *m_layerMaterialHeight;

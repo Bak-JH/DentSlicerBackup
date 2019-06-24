@@ -67,6 +67,18 @@ GLModel::GLModel(QObject* mainWindow, QNode *parent, Mesh* loadMesh, QString fna
 	m_meshVertexMaterial = new QPerVertexColorMaterial();
 	addComponent(&_layer);
 	addComponent(&m_transform);
+
+
+	//m_meshMaterial.setAmbient(QColor(5, 5, 5));
+	//m_meshMaterial.setDiffuse(QColor(200, 200, 200));
+	//m_meshMaterial.setSpecular(QColor(100, 100, 100));
+	//m_meshMaterial.setShininess(0.0f);
+	m_meshMaterial.setAmbient(QColor(5,5,5));
+	m_meshMaterial.setDiffuse(QColor(97,185,192));
+	m_meshMaterial.setSpecular(QColor(150,150,150));
+	m_meshMaterial.setShininess(0.0f);
+
+
 	addComponent(&m_meshMaterial);
 	//addComponent(&m_geometryRenderer);
 
@@ -191,6 +203,8 @@ GLModel::GLModel(QObject* mainWindow, QNode *parent, Mesh* loadMesh, QString fna
 	sphereObjectPicker.reserve(50);
 	cuttingPoints.reserve(50);
 	cuttingContourCylinders.reserve(50);
+
+
 }
 
 void GLModel::changecolor(int mode){
@@ -231,6 +245,9 @@ void GLModel::changecolor(int mode){
     //    m_meshMaterial->setAmbient(QColor(160,160,160));;
     //    break;
     //}
+
+
+
 }
 bool GLModel::modelSelectChangable(){
     bool result = false;

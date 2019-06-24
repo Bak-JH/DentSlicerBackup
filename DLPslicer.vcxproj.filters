@@ -182,6 +182,9 @@
     <ClCompile Include="render\ModelMaterial.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="lights.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DentEngine\src\polyclipping\poly2tri\sweep\advancing_front.h">
@@ -928,6 +931,10 @@
     <None Include="shaders\model_shader.geom">
       <Filter>Resource Files</Filter>
     </None>
+    <None Include="icon-32.ico" />
+    <None Include="shaders\light.inc.frag">
+      <Filter>Resource Files</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <None Include="DLPslicer.rc">
@@ -960,6 +967,9 @@
       <Filter>Header Files</Filter>
     </QtMoc>
     <QtMoc Include="render\ModelMaterial.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="lights.h">
       <Filter>Header Files</Filter>
     </QtMoc>
   </ItemGroup>

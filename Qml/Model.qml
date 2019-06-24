@@ -42,6 +42,19 @@ Entity {
     //components: [ testMesh, testMaterial, meshTransform ]
     //components: [ testMesh, testMaterial, meshTransform]
 
+//    PointLight
+//    {
+//        objectName: "testLight"
+//        color: Qt.vector3d(1.0,0,0)
+//        intensity: 0.6
+
+//        Transform {
+//            id: lightTransform
+//            translation: Qt.vector3d(100, 100, 0);
+//        }
+//    }
+
+
     function zoomUp(){
         meshTransform.scale3D = meshTransform.scale3D.plus(Qt.vector3d(0.01,0.01,0.01))
     }

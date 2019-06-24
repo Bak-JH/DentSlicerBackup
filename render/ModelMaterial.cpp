@@ -8,9 +8,9 @@ const QString GEOM_PATH = "qrc:/shaders/model_shader.geom";
 const QString FRAG_PATH = "qrc:/shaders/model_shader.frag";
 
 Hix::Render::ModelMaterial::ModelMaterial():
-	_ambientParameter(QStringLiteral("ambient"), QColor(50, 50, 50)),
-	_diffuseParameter(QStringLiteral("diffuse"), QColor(100, 100, 100)),
-	_specularParameter(QStringLiteral("specular"), QColor(5, 5, 5)),
+	_ambientParameter(QStringLiteral("ambient"), QColor(25, 25, 25)),
+	_diffuseParameter(QStringLiteral("diffuse"), QColor(80, 80, 80)),
+	_specularParameter(QStringLiteral("specular"), QColor(0,0,0)),
 
 	_vertShader(QOpenGLShader::Vertex),
 	_fragShader(QOpenGLShader::Fragment),
@@ -39,12 +39,11 @@ Hix::Render::ModelMaterial::ModelMaterial():
 	_renderTechnique.graphicsApiFilter()->setMajorVersion(3);
 	_renderTechnique.graphicsApiFilter()->setMinorVersion(3);
 	_renderTechnique.graphicsApiFilter()->setProfile(QGraphicsApiFilter::CoreProfile);
-
+	_filterKey.setParent(this);
 	_filterKey.setName(QStringLiteral("renderingStyle"));
 	_filterKey.setValue(QStringLiteral("forward"));
 	_renderTechnique.addFilterKey(&_filterKey);
 	_effect.addTechnique(&_renderTechnique);
-	setEffect(&_effect);
 
 	//create lights
 	QVariantList positions = QVariantList();
@@ -54,6 +53,15 @@ Hix::Render::ModelMaterial::ModelMaterial():
 	positions << QVector3D(_lightDistance, -_lightDistance, 0);
 	positions << QVector3D(-_lightDistance, -_lightDistance, 0);
 	_pointLightPositionsParameter.setName(QStringLiteral("pointLightPositions[0]"));
+
+
+	_effect.addParameter(&_ambientParameter);
+	_effect.addParameter(&_diffuseParameter);
+	_effect.addParameter(&_specularParameter);
+	_effect.addParameter(&_pointLightPositionsParameter);
+	setEffect(&_effect);
+
+
 	_pointLightPositionsParameter.setValue(positions);
 	//this is hard coded in to shader to make the for loop in shader a const bound loop.
 	//_pointLightCountParameter.setName(QStringLiteral("pointLightCount"));
@@ -64,10 +72,7 @@ Hix::Render::ModelMaterial::ModelMaterial():
 	//_pointLightColorParameter.setValue(QVector3D(1.0, 1.0, 1.0));
 
 	//add parameters
-	addParameter(&_ambientParameter);
-	addParameter(&_diffuseParameter);
-	addParameter(&_specularParameter);
-	addParameter(&_pointLightPositionsParameter);
+
 
 }
 

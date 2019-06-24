@@ -57,5 +57,6 @@
         <file>shaders/model_shader.frag</file>
         <file>shaders/model_shader.vert</file>
         <file>shaders/model_shader.geom</file>
+        <file>shaders/light.inc.frag</file>
     </qresource>
 </RCC>
