@@ -371,6 +371,15 @@ float GenerateSupport::calculateRadius(float mesh_height, float bottom_height, f
     return radius;
 }
 
+
+void GenerateSupport::generateTopFace(Mesh* mesh, OverhangPoint center) {
+    float radius = center.radius;
+    for (size_t i = 0; i < 6; i ++) {
+        mesh->addFace(center.position, center.position + radius * QVector3D(qCos(M_PI * i / 3), qSin(M_PI * i / 3), 0),
+                      center.position + radius * QVector3D(qCos(M_PI * (i+1) / 3), qSin(M_PI * (i+1) / 3), 0));
+    }
+}
+
 void GenerateSupport::generateBottomFace(Mesh* mesh, OverhangPoint center) {
     float radius = center.radius;
     for (size_t i = 0; i < 6; i ++) {
@@ -435,18 +444,20 @@ void GenerateSupport::generateStem(Mesh* mesh, OverhangPoint top, OverhangPoint*
          bottomRadius = origin_bottom.radius;
     bottom->radius = bottomRadius;
 
+
+    if (top.topPoint){
+        generateTopFace(mesh, top);
+    }
+
+
     if (top.topPoint && (top.position - bottom->position).length() >= 8) { // generate top tip // 8->variable
+        OverhangPoint tempTop = OverhangPoint(top.position+QVector3D(0,0,scfg->layer_height));
         OverhangPoint tip = OverhangPoint(internalDiv(top, *bottom, 1, 5), bottom->radius);
-        generateFaces(mesh, top, tip);
+        generateFaces(mesh, tempTop, tip);
         top = tip;
     }
 
-    if (top.topPoint){
-        OverhangPoint tempTop = OverhangPoint(top.position+QVector3D(0,0,scfg->layer_height));
-        generateFaces(mesh, tempTop, *bottom);
-    } else {
-        generateFaces(mesh, top, *bottom);
-    }
+    generateFaces(mesh, top, *bottom);
 
 
 

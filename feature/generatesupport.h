@@ -49,6 +49,7 @@ public:
     OverhangPoint coneNconeIntersection(Mesh* mesh, OverhangPoint coneApex1, OverhangPoint coneApex2);
     OverhangPoint coneNmeshIntersection(Mesh* mesh, OverhangPoint coneApex);
     float calculateRadius(float mesh_height, float bottom_height, float branch_length);
+    void generateTopFace(Mesh* mesh, OverhangPoint center);
     void generateBottomFace(Mesh* mesh, OverhangPoint center);
     void generateFaces(Mesh* mesh, OverhangPoint top, OverhangPoint bottom);
     void generateBranch(Mesh* mesh, OverhangPoint leaf1, OverhangPoint leaf2, OverhangPoint* stem);
