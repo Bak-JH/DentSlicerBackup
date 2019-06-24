@@ -15,8 +15,6 @@
         <file>Qml/Lights.qml</file>
         <file>Qml/main.qml</file>
         <file>Qml/MainView.qml</file>
-        <file>Qml/MeshTransformerMove.qml</file>
-        <file>Qml/MeshTransformerRotate.qml</file>
         <file>Qml/MeshTransformerTab.qml</file>
         <file>Qml/MeshTransformerZoom.qml</file>
         <file>Qml/Model.qml</file>
@@ -56,5 +54,7 @@
         <file>Resource/mesh/plate_logo.stl</file>
         <file>Resource/mesh/boundedBox3.stl</file>
         <file>Qml/MeshPlate.qml</file>
+        <file>Resource/dentslicer_login_logo.png</file>
+        <file>Resource/mesh/dentslicer_plate_logo.stl</file>
     </qresource>
 </RCC>

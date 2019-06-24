@@ -1,16 +1,17 @@
 .TEMPLATE = app
 
-QT += qml quick opengl 3dcore 3drender 3dinput 3dextras concurrent widgets core 3dquick 3dlogic 3dquickextras
+QT += qml quick opengl 3dcore 3drender 3dinput 3dextras concurrent widgets core 3dquick 3dlogic 3dquickextras svg
 
 CONFIG += c++17 resources_big
 
-TARGET = DentStudio
+TARGET = DentSlicer
 
 
-RC_ICONS = icon-32.ico
-RC_FILE = DLPslicer.rc
+RC_ICONS = icon.ico
+RC_FILE = DentSlicer.rc
 
 SOURCES += main.cpp \
+    input/raycastcontroller.cpp \
     slicingengine.cpp \
     glmodel.cpp \
     qmlmanager.cpp \
@@ -23,6 +24,10 @@ SOURCES += main.cpp \
     feature/convex_hull.cpp \
     feature/text3dgeometrygenerator.cpp \
     feature/labellingtextpreview.cpp \
+    ui/MoveWidget.cpp \
+    ui/MoveXYZWidget.cpp \
+    ui/RotateWidget.cpp \
+    ui/RotateXYZWidget.cpp \
     utils/quaternionhelper.cpp \
     utils/mathutils.cpp \
     utils/qtriangulator.cpp \
@@ -67,6 +72,9 @@ LIBS += -L$$_PRO_FILE_PWD_/$$LIB_DIR -lWinSparkle
 # deprecated API in order to know how to port your code away from it.
 DEFINES += QT_DEPRECATED_WARNINGS
 
+
+
+
 # You can also make your code fail to compile if you use deprecated APIs.
 # In order to do so, uncomment the following line.
 # You can also select to disable deprecated APIs only up to a certain version of Qt.
@@ -82,10 +90,41 @@ win32:QMAKE_LFLAGS *= -Wl,--dynamicbase -Wl,--nxcompat
 # enable GCC large addresss aware linker flag
 win32:QMAKE_LFLAGS *= -Wl,--large-address-aware
 
+#system variable name for boost lib directory
+#(if MINGW_COMPILED system variable is not set ie) only mingw boost/cgal is installed, will return empty variable, so still works)
+#boost path
+MINGW_COMPILED_BOOST_LIB_ENV_NAME = BOOST_LIBRARYDIR$$(MINGW_COMPILED)
+MINGW_COMPILED_BOOST_LIB = $($$MINGW_COMPILED_BOOST_LIB_ENV_NAME)
+message($$MINGW_COMPILED_BOOST_LIB)
+MINGW_COMPILED_BOOST_INCLUDE_ENV_NAME = BOOST_INCLUDEDIR$$(MINGW_COMPILED)
+MINGW_COMPILED_BOOST_INCLUDE = $($$MINGW_COMPILED_BOOST_INCLUDE_ENV_NAME)
+message($$MINGW_COMPILED_BOOST_INCLUDE)
+#CGAL path
+MINGW_COMPILED_CGAL_ENV_NAME = CGAL_DIR$$(MINGW_COMPILED)
+MINGW_COMPILED_CGAL = $($$MINGW_COMPILED_CGAL_ENV_NAME)
+message($$MINGW_COMPILED_CGAL)
+
+# add CGAL
+LIBS += -L$$MINGW_COMPILED_CGAL/build/lib/ -llibCGAL.dll
+LIBS += -L$$MINGW_COMPILED_CGAL/auxiliary/gmp/lib -llibgmp-10 -llibmpfr-4
+
+INCLUDEPATH += $$MINGW_COMPILED_CGAL/include
+INCLUDEPATH += $$MINGW_COMPILED_CGAL/auxiliary/gmp/include
+INCLUDEPATH += $$MINGW_COMPILED_CGAL/build/include
+INCLUDEPATH += $$MINGW_COMPILED_BOOST_INCLUDE
 
 #TRANSLATIONS += lang_ko.ts
 
 HEADERS += \
+    boundingbox.h \
+    common/Indexedlist.h \
+    common/IteratorWrapper.h \
+    common/Singleton.h \
+    common/TrackedIndexedList.h \
+    common/indexedlist.h \
+    common/indexedlist.h \
+    input/Draggable.h \
+    input/raycastcontroller.h \
     slicingengine.h \
     glmodel.h \
     qmlmanager.h \
@@ -98,6 +137,13 @@ HEADERS += \
     feature/convex_hull.h \
     feature/labellingtextpreview.h \
     feature/text3dgeometrygenerator.h \
+    ui/MoveWidget.h \
+    ui/MoveXYZWidget.h \
+    ui/RotateWidget.h \
+    ui/RotateXYZWidget.h \
+    unitTest/catch.hpp \
+    unitTest/tests/IndexedListTest.h \
+    unitTest/tests/TrackedIndexedListTest.h \
     utils/quaternionhelper.h \
     utils/mathutils.h \
     utils/qbezier.h \
@@ -138,6 +184,5 @@ HEADERS += \
 #LIBS += -lOpengl32
 
 DISTFILES += \
-    icon-32.ico \
-    DLPslicer.rc \
+    DentSlicer.rc \
     icon.ico \

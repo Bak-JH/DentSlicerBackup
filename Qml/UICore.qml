@@ -118,7 +118,7 @@ Item {
         console.log(target3.x,target3.y,target.z)
         var point2 = target3
         var matrix = Qt.matrix4x4(0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0);
-        matrix = sceneRoot.cm.camera.projectionMatrix.times(sceneRoot.cm.camera.viewMatrix);//
+        matrix = sceneRoot.cm.cameraLens.projectionMatrix.times(sceneRoot.cm.camera.viewMatrix);//
         point2 = matrix.times(point2)
         point2.x = (point2.x+1) * scene3d.width/2;
         point2.y = (-1 * point2.y+1) * scene3d.height/2;

@@ -34,7 +34,7 @@ import Qt3D.Render 2.11
 
 Entity {
     id: root
-
+    signal cameraRotating();
     property Camera camera
 
     property vector3d _originalUpVector
@@ -46,79 +46,8 @@ Entity {
         }
     }
 
-    MouseDevice {
-        id: mouse
-        sensitivity: 0.005
-    }
 
     /***************************************** Mouse Right Rotate *****************************************/
-    components: [
-        LogicalDevice {
-              id: logicalDevice;
-
-              actions: [
-                  Action {
-                      id: rotateAction
-                      inputs: [
-                          ActionInput {
-                              sourceDevice: mouse
-                              buttons: [ MouseEvent.RightButton ]
-                          }
-                      ]
-                  }
-              ]
-
-
-              axes: [
-                  Axis {
-                      id: rotateXAxis
-                      inputs: [
-                          AnalogAxisInput {
-                              sourceDevice: mouse
-                              axis: MouseDevice.X
-                          }
-                      ]
-                  },
-                  Axis {
-                      id: rotateYAxis
-                      inputs: [
-                          AnalogAxisInput {
-                              sourceDevice: mouse
-                              axis: MouseDevice.Y
-                          }
-
-                      ]
-                  }
-              ]
-          },
-
-        FrameAction {
-            property real rotationSpeed : 2000
-            onTriggered: {
-                if (rotateAction.active) {// mouse right rotate
-                    if (qm.freecutActive)
-                        return ;
-                    qm.disableObjectPickers();
-
-                    var proper_dt = (dt > 0.1)? 0 : dt;
-
-                    sceneRoot.systemTransform.rotationZ += rotationSpeed * rotateXAxis.value * proper_dt;
-
-                    //var target = axisAngle2Quaternion(rotationSpeed * rotateXAxis.value * dt,qq.rotatedVector(systemTransform.rotation,zdown))
-                    //cm.camera.rotateAboutViewCenter(qq.multiplyQuaternion(target,systemTransform.rotation));
-                    sceneRoot.systemTransform.rotationX += rotationSpeed * (-1) * rotateYAxis.value * proper_dt;
-                    mttab.updatePosition()
-                } else {
-                    qm.enableObjectPickers();
-                }
-            }
-
-        }
-    ]
-
-
-
-
 
     /***************************************** Mouse Wheel Move *****************************************/
     // => main.qml MouseArea

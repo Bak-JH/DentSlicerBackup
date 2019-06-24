@@ -14,9 +14,7 @@ class modelcut : public QObject {
     Q_OBJECT
 public:
     modelcut();
-    void bisectModel(Mesh* mesh, Plane plane, Mesh* leftMesh, Mesh* rightMesh);
-    void generatePlane(Qt3DCore::QEntity* targetEntity);
-    void addCuttingPoint(Qt3DCore::QEntity* targetEntity, QVector3D v);
+
     void removeCuttingPoints();
     //rotateResult* Tweak(Mesh* mesh, bool bi_algorithmic,int CA,bool *appropriately_rotated);
     //float approachvertex(Mesh* mesh,float n[]);
@@ -53,6 +51,12 @@ signals:
 public slots:
     void getSliderSignal(double value);
 };
+
+bool isLeftToPlane(Plane plane, QVector3D position);
+
+void interpolate(Mesh* mesh, Path3D contour1, Path3D contour2);
+void bisectModelByPlane(Mesh* leftMesh, Mesh* rightMesh, Mesh* mesh, Plane plane, int cutFillMode);
+void cutAway(Mesh* leftMesh, Mesh* rightMesh, Mesh* mesh, std::vector<QVector3D> cuttingPoints, int cutFillMode);
 
 
 #endif // MODELCUT_H
