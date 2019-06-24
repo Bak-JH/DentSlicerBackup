@@ -69,10 +69,21 @@ public:
 
     // bed configuration
     QVector3D origin;
+
+    /* // settings for capsule 3D Printer
     int resolution_x = 2560;
     int resolution_y = 1440;
+
     int bed_x = 120.96; // in mm
-    int bed_y = 68.04; // in mm
+    int bed_y = 68.04; // in mm*/
+
+    // settings for vittro
+    int resolution_x = 1920;
+    int resolution_y = 1080;
+
+    int bed_x = 124.8; // in mm
+    int bed_y = 70.2; // in mm
+
 	size_t bed_margin_x = 1;
 	size_t bed_margin_y = 1;
 

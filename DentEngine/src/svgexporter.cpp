@@ -163,8 +163,27 @@ QString SVGexporter::exportSVG(Slices shellSlices, Slices supportSlices, Slices 
     //fflush(stdout);
     qDebug() << "slicing done";
     //exit(0);
+
+
+
+    // do run svg 2 png
+
+    int max_slices = currentSlice_idx;
+    for (int i=0; i<max_slices; i++){
+        QString svgfilename = outfoldername + "/" + QString::number(i) + ".svg";
+        QSvgRenderer renderer(svgfilename);
+        QImage image(scfg->resolution_x, scfg->resolution_y, QImage::Format_RGB32);
+        image.fill(0x000000);
+        QPainter painter(&image);
+        renderer.render(&painter);
+        image.save(outfoldername + "/S" + QString::number(i).rightJustified(6,'0') + "_P1.png");
+
+    }
+
     return result_str;
 }
+
+
 
 
 void SVGexporter::parsePolyTreeAndWrite(PolyNode* pn, std::ofstream& outfile){

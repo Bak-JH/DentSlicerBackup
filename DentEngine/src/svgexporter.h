@@ -7,6 +7,9 @@
 #include <QDir>
 #include <QJsonObject>
 #include <QJsonDocument>
+#include <QSvgRenderer>
+#include <QImage>
+#include <QPainter>
 
 using namespace ClipperLib;
 

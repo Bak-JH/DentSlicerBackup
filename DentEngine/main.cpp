@@ -143,7 +143,7 @@ int main(int argc, char *argv[])
 #else
 
     QCoreApplication a(argc, argv);
-    QCoreApplication::setApplicationName("DentStudioEngine");
+    QCoreApplication::setApplicationName("DentSlicerEngine");
     CmdLineParser parser;
     QString errorMsg;
 
