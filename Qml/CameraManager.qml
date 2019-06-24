@@ -18,25 +18,77 @@ Entity {
     property vector3d defaultUp: Qt.vector3d(0, 1, 0)
     property vector3d defaultDown: Qt.vector3d(0,-1, 0)
     property vector3d defaultCameraPosition: Qt.vector3d(0,0,100)
-
+    property real aspectRatioScene: scene3d.height/scene3d.width * 0.5
+    property real bottomPlaneMargin: 0.2
     property vector3d inputViewCenter : Qt.vector3d( 0, 0, 0)
     property alias camera: camera
+    property alias cameraLens: cameraLens
 
+    signal cameraRotated();
 
     Camera {
+        objectName: "camera"
         id: camera
 
-        projectionType: CameraLens.OrthographicProjection
-        fieldOfView: 100
-        nearPlane : 10
-        farPlane : 1000
+        //projectionType: CameraLens.OrthographicProjection
+
+//        aspectRatio: (scene3d.width/scene3d.height)
+        //aspectRatio: 4
 
         position: defaultCameraPosition
         upVector: defaultUp
 
         viewCenter: inputViewCenter
-
         property vector3d temp : Qt.vector3d( 0.0, 0.0, 0.0 )
+        components:[
+            CameraLens{
+                id: cameraLens
+                fieldOfView: 100
+                nearPlane : 10
+                farPlane : 1000
+                projectionType: CameraLens.OrthographicProjection
+                left: -0.5
+                right: 0.5
+                top:  aspectRatioScene +bottomPlaneMargin
+                bottom: -aspectRatioScene +bottomPlaneMargin
+            },
+            RenderSettings {
+                id : rd
+                pickingSettings.pickMethod: PickingSettings.TrianglePicking
+                pickingSettings.pickResultMode: PickingSettings.NearestPick
+                pickingSettings.faceOrientationPickingMode: PickingSettings.FrontFace
+
+                activeFrameGraph: RenderSurfaceSelector {
+                    Viewport {
+                        id: mainViewport
+                        normalizedRect: Qt.rect(0, 0, 1, 1)
+
+                        ClearBuffers {
+                            buffers: ClearBuffers.ColorDepthBuffer
+                            clearColor: Qt.rgba(0.6, 0.6, 0.6, 1.0)
+                        }
+
+                        Viewport {
+                            id: mainCam
+                            normalizedRect: Qt.rect(0, 0, 1, 1)
+                            CameraSelector {
+                                camera:camera
+                                ClearBuffers {
+                                   buffers: ClearBuffers.ColorDepthBuffer
+                                   clearColor: "#E5E5E5"
+                                }
+                                SortPolicy {
+                                    sortTypes: [
+                                        SortPolicy.BackToFront
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+        ]
 
     }
 
@@ -53,74 +105,15 @@ Entity {
 
     CameraController{
         camera:camera
+        onCameraChanged: {
+            cameraRotated();
+        }
     }
 
     components: [
-        RenderSettings {
-            id : rd
-            pickingSettings.pickMethod: PickingSettings.TrianglePicking
-            pickingSettings.pickResultMode: PickingSettings.NearestPick
-
-            activeFrameGraph: RenderSurfaceSelector {
-                Viewport {
-                    id: mainViewport
-                    normalizedRect: Qt.rect(0, 0, 1, 1)
-
-                    ClearBuffers {
-                        buffers: ClearBuffers.ColorDepthBuffer
-                        clearColor: Qt.rgba(0.6, 0.6, 0.6, 1.0)
-                    }
-
-                    Viewport {
-                        id: mainCam
-                        normalizedRect: Qt.rect(0, 0, 1, 1)
-                        CameraSelector {
-                            camera:camera
-                            ClearBuffers {
-                               buffers: ClearBuffers.ColorDepthBuffer
-                               clearColor: "#E5E5E5"
-                            }
-                            SortPolicy {
-                                sortTypes: [
-                                    SortPolicy.BackToFront
-                                ]
-                            }
-                        }
-                    }
-                }
-            }
-        },
-
-        InputSettings {},
-
-        ScreenRayCaster {
-            id: screenRayCaster
-
-            onHitsChanged: printHits("ScreenRayCaster hits", hits)
-        },
-
-        MouseHandler {
-            id: mouseHandler
-            sourceDevice:  MouseDevice {}
-            onReleased: {
-                if (mouse.button ===1){ // left click
-                    screenRayCaster.trigger(Qt.point(mouse.x, mouse.y));
-                }
-            }
-        }
+        InputSettings {}
     ]
 
-    function printHits(desc, hits) {
-        console.log(desc, hits.length)
-        if (hits.length <= 1){
-            qm.backgroundClicked();
-        }
-
-        for (var i=0; i<hits.length; i++) {
-            console.log("  " + hits[i].entity.objectName + " / ", hits[i].distance,
-                        hits[i].worldIntersection.x, hits[i].worldIntersection.y, hits[i].worldIntersection.z)
-        }
-    }
 
     function initCamera(){
         sceneRoot.cm.camera.translateWorld(sceneRoot.cm.camera.viewCenter.times(-1))

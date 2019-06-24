@@ -1,11 +1,13 @@
 #include "autoarrange.h"
-#define ANGLE_UNIT 45
+#include <cstdlib>
+#include <ctime>
+#define ANGLE_UNIT 270
 #define STAGE_WIDTH 95000
 #define STAGE_HEIGHT 75000
 #define OFFSET 2000
 #include <qmlmanager.h>
 #include <exception>
-
+#include <unordered_map>
 autoarrange::autoarrange()
 {
 }
@@ -14,7 +16,7 @@ Paths autoarrange::getMeshRecArea(const Mesh& mesh){//getting rectangle area of 
     Paths outline;
     Path vertices;//all vertices in mesh
     Path vertices45rot;//45 degree check
-    for(const auto& vertex : (*mesh.getVertices())){
+    for(const auto& vertex : mesh.getVertices()){
         QVector3D v_pos = vertex.position;
         mesh.addPoint(v_pos.x(), v_pos.y(), &vertices);
         mesh.addPoint(round(v_pos.x()*cosf(M_PI/4) - v_pos.y()*sinf(M_PI/4)), round(v_pos.x()*sinf(M_PI/4) + v_pos.y()*cosf(M_PI/4)), &vertices45rot);//45 degree check
@@ -58,7 +60,7 @@ Paths autoarrange::getMeshRecArea(const Mesh& mesh){//getting rectangle area of 
 Paths autoarrange::getMeshConvexHull(const Mesh& mesh){//getting convex hull area of mesh in XY Plane
     Paths outline;
     Path vertices;//all vertices in mesh
-    for(const auto& vertex : (*mesh.getVertices())){
+    for(const auto& vertex : mesh.getVertices()){
         QVector3D v_pos = vertex.position;
         mesh.addPoint(v_pos.x(), v_pos.y(), &vertices);
     }
@@ -67,16 +69,14 @@ Paths autoarrange::getMeshConvexHull(const Mesh& mesh){//getting convex hull are
     return outline;
 }
 
-Paths autoarrange::spreadingCheck(const Mesh* mesh, std::map<const MeshFace*, bool>& check, const MeshFace* chking_start, bool is_chking_pos){
+Paths autoarrange::spreadingCheck(const Mesh* mesh, std::map<const MeshFace *, bool>& check, const MeshFace * chking_start, bool is_chking_pos){
     /**/qDebug() << "SpreadingCheck started from" << chking_start;
     Paths paths;
-	const MeshFace* chking = nullptr;
-    std::vector<const MeshFace*> toCheck;
+	const MeshFace * chking;
+    std::vector<const MeshFace *> toCheck;
 	toCheck.push_back(chking_start);
-	const auto& faces(*mesh->getFaces());
     while(toCheck.size()>0){
-        //**qDebug() << "New spreadingCheck generation (" << to_check.size() << "faces)";
-        std::vector<const MeshFace*> nextIndexToCheck;
+        std::vector<const MeshFace *> nextIndexToCheck;
         for(int i=0; i< toCheck.size(); i++){
 			chking = toCheck[i];
             /*Debug
@@ -89,22 +89,39 @@ Paths autoarrange::spreadingCheck(const Mesh* mesh, std::map<const MeshFace*, bo
             }//*/
             if(check[chking]) continue;
             check[chking] = true;
-            const MeshFace* mf = toCheck[i];
-            size_t side;
+            const MeshFace * mf = toCheck[i];
             bool outline_checked = false;
-            for(side=0; side<3; side++){
-                if(isEdgeBound(mesh, mf, side, is_chking_pos)){
+			auto edgeCirc = mf->edgeCirculator();
+			//wtf
+			auto first = mf->edge;
+			auto second = first->next;
+			auto last = first->next->next;
+            for(size_t j =0; j<3; ++j)
+			{
+                if(isEdgeBound(mesh, mf, edgeCirc.toPtr(), is_chking_pos)){
                     if(!outline_checked){
-						const MeshVertex* path_head = getPathHead(mesh, mf, side, is_chking_pos);
+						const MeshVertex* path_head = nullptr;
+						if (j == 0 && isEdgeBound(mesh, mf, last.operator->(), is_chking_pos)) {
+							if (!isEdgeBound(mesh, mf, second.operator->(), is_chking_pos))
+                                path_head =mf->meshVertices()[2].operator->();
+						}
+						else
+						{
+                            path_head = mf->meshVertices()[j].operator->();
+						}
                         Path path = buildOutline(mesh, check, chking, path_head, is_chking_pos);
                         if(path.size()==0) return {};
                         paths.push_back(path);
                         outline_checked = true;
                     }
                 }else{//법선 방향 조건이 만족되는 이웃만 to_check에 추가하는 것이 맞을지 검토
-                    std::vector<const MeshFace*> neighborsIndex = mf->neighboring_faces[side];
-					nextIndexToCheck.insert(nextIndexToCheck.end(), neighborsIndex.begin(), neighborsIndex.end());
+                    auto neighbors = edgeCirc->nonOwningFaces();
+					for (auto nItr : neighbors)
+					{
+						nextIndexToCheck.push_back(nItr.operator->());
+					}
                 }
+				++edgeCirc;
             }
         }
 		toCheck.clear();
@@ -112,28 +129,24 @@ Paths autoarrange::spreadingCheck(const Mesh* mesh, std::map<const MeshFace*, bo
     }
     return paths;
 }
-
-const MeshVertex* autoarrange::getPathHead(const Mesh* mesh, const MeshFace* mf, size_t side, bool is_chking_pos){
-    if(side==0 && isEdgeBound(mesh, mf, 2, is_chking_pos)) {
-        if(isEdgeBound(mesh, mf, 1, is_chking_pos)) return nullptr;//all side of chking face is bound, face is alone
-        else return mf->mesh_vertex[2];
-    }
-    return mf->mesh_vertex[side];
-}
-
-Path autoarrange::buildOutline(const Mesh* mesh, std::map<const MeshFace*, bool>& check, const MeshFace* chking, const MeshVertex* path_head, bool is_chking_pos){
+Path autoarrange::buildOutline(const Mesh* mesh, std::map<const MeshFace *, bool>& check, const MeshFace * chking,
+	const MeshVertex* path_head, bool is_chking_pos){
     //**qDebug() << "buildOutline from" << chking;
     std::vector<const MeshVertex* > path_by_idx;
+	auto meshVertices = chking->meshVertices();
+
     if(path_head== nullptr){//혼자있는 면의 경우 오리엔테이션 확인 방법이 마련되어있지 않음
         check[chking] = true;
-		auto& meshVertices = chking->mesh_vertex;
-		path_by_idx.insert(path_by_idx.end(), meshVertices.begin(), meshVertices.end());
+		for (auto mvItr : meshVertices)
+		{
+			path_by_idx.push_back(mvItr.operator->());
+		}
         //**qDebug() << "buildOutline done";
         return idxsToPath(mesh, path_by_idx);
     }
     bool outline_closed = false;
-	const MeshFace* from;
-	const MeshFace* nxt_chk;
+	const MeshFace * from;
+	const MeshFace * nxt_chk;
     auto path_tail = path_head;
     while(!outline_closed){
         if(check[chking]){
@@ -141,31 +154,43 @@ Path autoarrange::buildOutline(const Mesh* mesh, std::map<const MeshFace*, bool>
             return {};
         }
         //**qDebug() << "chking" << chking;
-        const MeshFace* mf = chking;
         int outline_edge_cnt = 0;
-        int tail_idx;//The index that path_tail has in the mf->mesh_vertex
+		auto edgeCirc = chking->edgeCirculator();
+		HalfEdgeConstItr tailEdge;
+		for (auto each : path_tail->arrivingEdges)
+		{
+            if (each->owningFace.operator->() == chking)
+			{
+				tailEdge = each;
+			}
+		}
         for(int i=0; i<3; i++){
-            if(mf->mesh_vertex[i]==path_tail) tail_idx = i;
-            if(isEdgeBound(mesh, mf, i, is_chking_pos)) outline_edge_cnt++;
+            auto current = meshVertices[i].operator->();
+			auto currEdge = edgeCirc.toItr();
+
+            if(isEdgeBound(mesh, chking, currEdge.operator->(), is_chking_pos)) outline_edge_cnt++;
+			++edgeCirc;
         }
-        if(isEdgeBound(mesh, mf, tail_idx, is_chking_pos)){
+        auto tailOwningFaces = tailEdge->next->nonOwningFaces();
+        if(isEdgeBound(mesh, chking, tailEdge.operator->(), is_chking_pos)){
             path_by_idx.push_back(path_tail);
             check[chking] = true;
             if(outline_edge_cnt==1){
-                path_tail = getNbrVtx(mf, tail_idx, 1);
-				const MeshFace*  face =mf->neighboring_faces[(tail_idx + 1) % 3][0];
+                path_tail = getNbrVtx(chking, tailEdge.operator->(), 1);
+                const MeshFace *  face = tailOwningFaces[0].operator->();
                 nxt_chk = face;
             }else{//outline_edge_cnt==2
-                path_by_idx.push_back(getNbrVtx(mf, tail_idx, 1));
-                path_tail = getNbrVtx(mf, tail_idx, 2);
-				const MeshFace* face = mf->neighboring_faces[(tail_idx + 2) % 3][0];
+                path_by_idx.push_back(getNbrVtx(chking, tailEdge.operator->(), 1));
+                path_tail = getNbrVtx(chking, tailEdge.operator->(), 2);
+                const MeshFace * face = tailOwningFaces[0].operator->();
                 nxt_chk = face;
             }
             if(path_tail == path_head) outline_closed = true;
-        }else{//if not isEdgeBound(mf, tail_idx), the face doesn't share any bound edge with current outline
+        }else{//if not isEdgeBound(chking, tail_idx), the face doesn't share any bound edge with current outline
             //the face may share some bound edge with other outline, so we do not mark it checked
-			const MeshFace* faceA = mf->neighboring_faces[tail_idx][0];
-			const MeshFace* faceB = mf->neighboring_faces[(tail_idx + 2) % 3][0];
+            const MeshFace * faceA = tailOwningFaces[0].operator->();
+            auto prevTailedgeNFaces = tailEdge->prev->nonOwningFaces();
+            const MeshFace * faceB = prevTailedgeNFaces[0].operator->();
             if(faceA == from) nxt_chk = faceB;
             else nxt_chk = faceA;
         }
@@ -176,38 +201,44 @@ Path autoarrange::buildOutline(const Mesh* mesh, std::map<const MeshFace*, bool>
     return idxsToPath(mesh, path_by_idx);
 }
 
-bool autoarrange::isEdgeBound(const Mesh* mesh, const MeshFace* mf, size_t side, bool is_chking_pos){
+bool autoarrange::isEdgeBound(const Mesh* mesh, const MeshFace * mf, const HalfEdge* edge, bool is_chking_pos){
     //condition of bound edge:
     //1. connected to face with opposit fn.z
     //2. not connected any face
     //3. multiple neighbor
     //4. opposit orientation
-    if(mf->neighboring_faces[side].size() != 1) return true;
-    const MeshFace* neighbor = mf->neighboring_faces[side][0];
-    if(!checkFNZ(neighbor, is_chking_pos)) return true;
-    if(!isNbrOrientSame(mesh, mf, side)) return true;
+	auto sideNBRFaces = edge->nonOwningFaces();
+    if(sideNBRFaces.size() != 1) return true;
+    const MeshFace * neighbor = sideNBRFaces[0].operator->();
+    if(!checkFNZ(*neighbor, is_chking_pos)) return true;
+    if(!isNbrOrientSame(mesh, mf, edge)) return true;
     return false;
 }
 
-bool autoarrange::isNbrOrientSame(const Mesh* mesh, const MeshFace* mf, size_t side){
-    const MeshFace* nbr = mf->neighboring_faces[side][0];
-    if(getNbrVtx(nbr, searchVtxInFace(nbr, mf->mesh_vertex[side]), 2) == getNbrVtx(mf, side, 1)) return true;
+bool autoarrange::isNbrOrientSame(const Mesh* mesh, const MeshFace * mf, const HalfEdge* edge){
+
+	auto leavingVtx = edge->from;
+	for (auto leavingEdge : leavingVtx->leavingEdges)
+	{
+		//if an edge traveling in same direction, vtxs, and different faces
+		if (leavingEdge.operator->() != edge && leavingEdge->to == edge->to)
+			return true;
+	}
     return false;
 }
 
 
-size_t autoarrange::searchVtxInFace(const MeshFace* mf, const MeshVertex* vertex){
-    for(size_t i=0; i<3; i++){
-        if(mf->mesh_vertex[i] == vertex) return i;
-    }
-	throw std::runtime_error("searchVtxInFace not found");
-}
 
-const MeshVertex* autoarrange::getNbrVtx(const MeshFace* mf, size_t base, size_t xth){//getNeighborVtx
-    if(xth>0) return mf->mesh_vertex[(base+xth+3)%3];
-	//Throw here, because later when people use the -1 return that was here, it's gonna crash anyway!
-	throw std::runtime_error("getNbrVtx not found");
 
+const MeshVertex* autoarrange::getNbrVtx(const MeshFace * mf, const HalfEdge* base, size_t offset){//getNeighborVtx
+
+	offset = offset % 3;
+	for (size_t i = 0; i < offset; ++i)
+	{
+		base = base->next.operator->();
+	}
+    return base->from.operator->();
+	
 }
 
 Path autoarrange::idxsToPath(const Mesh* mesh, std::vector<const MeshVertex* > path_by_idx){
@@ -223,9 +254,9 @@ Paths autoarrange::project(const Mesh* mesh){
     std::vector<Paths> outline_sets;
     bool is_chking_pos = false;
     bool mesh_error = false;
-	std::map<const MeshFace*, bool> face_checked;
+	std::map<const MeshFace *, bool> face_checked;
 
-	size_t faces_size = mesh->getFaces()->size();
+	size_t faces_size = mesh->getFaces().size();
 	for (int i = 0; i < 2; i++)
 	{
 		is_chking_pos = !is_chking_pos;
@@ -233,9 +264,9 @@ Paths autoarrange::project(const Mesh* mesh){
 		face_checked.clear();//한 번 확인한 것은 체크리스트에서 제거되는 자료구조 도입 필요(법선 확인이 반복시행됨)
 		/****/qDebug() << "Get outline(is_chking_pos:" << is_chking_pos << ")";
 		while (!check_done && !mesh_error) {
-			for (const auto& face : *mesh->getFaces())
+			for (const auto& face : mesh->getFaces())
 			{
-				if (checkFNZ(&face, is_chking_pos) && !face_checked[&face])
+				if (checkFNZ(face, is_chking_pos) && !face_checked[&face])
 				{
 					outline_sets.push_back(spreadingCheck(mesh, face_checked, &face, is_chking_pos));
 					if (outline_sets[outline_sets.size() - 1].size() == 0) 
@@ -275,12 +306,12 @@ Paths autoarrange::clipOutlines(std::vector<Paths> outline_sets){
     return projection;
 }
 
-bool autoarrange::checkFNZ(const MeshFace* face, bool is_chking_pos){
+bool autoarrange::checkFNZ(const MeshFace& face, bool is_chking_pos){
     if(is_chking_pos){
-        if(face->fn.z()>=0) return true;
+        if(face.fn.z()>=0) return true;
         else return false;
     }else{
-        if(face->fn.z()<=0) return true;
+        if(face.fn.z()<=0) return true;
         else return false;
     }
 }
@@ -291,13 +322,11 @@ const MeshVertex* autoarrange::findVertexWithIntpoint(IntPoint p, const Mesh* me
 }
 
 const MeshVertex* autoarrange::findVertexWithIntXY(size_t x, size_t y, const Mesh* mesh){
-
-	for(const auto& vertex : *mesh->getVertices())
+	for (auto& each : mesh->getVertices())
 	{
-        QVector3D vtx_pos = vertex.position;
-        int x_int = round(vtx_pos.x()*scfg->resolution);
-        int y_int = round(vtx_pos.y()*scfg->resolution);
-        if(x_int==x && y_int==y) return &vertex;
+        int x_int = round(each.position.x()*scfg->resolution);
+        int y_int = round(each.position.y()*scfg->resolution);
+        if(x_int==x && y_int==y) return &each;
     }
 }
 
@@ -393,19 +422,353 @@ std::vector<XYArrangement> autoarrange::simpArngMeshes(std::vector<const Mesh*>&
     return arng2D(outlines);
 }
 
-std::vector<XYArrangement> autoarrange::arngMeshes(std::vector<const Mesh*>& meshes){
-    std::vector<Paths> outlines;
+typedef struct LLIPoint {
+    long long int x, y;
+} LLIPoint;
+
+#define max2(x,y) ((x)>(y)?(x):(y))
+#define min2(x,y) ((x)<(y)?(x):(y))
+
+bool is_valid_range(int y, int x, int k){
+    return 0<=y && y<=k && 0<=x && x<=k;
+}
+
+bool make_outline(int y, int x, int startY, int startX, int depth, int direction,
+	std::unordered_map<size_t, std::unordered_map<size_t, bool>>*block,
+	std::unordered_map<size_t, std::unordered_map<size_t, bool>>*outline, std::vector<std::pair<int, int> > *vertice, int k) {
+    int dy[8] = {0, -1, -1, -1, 0, 1, 1, 1}, dx[8] = {1, 1, 0, -1, -1, -1, 0, 1};
+    (*outline)[y][x] = true;
+    if (depth != 0 && y == startY && x == startX) {
+        return true;
+    }
+    for (int kk=direction+2; kk>=direction-2; kk--){
+        if (is_valid_range(y+dy[(kk+8)%8], x+dx[(kk+8)%8], k) && (*block)[y+dy[(kk+8)%8]][x+dx[(kk+8)%8]]) {
+            if (direction != kk)
+                vertice->push_back(std::make_pair(y, x));
+            if (make_outline(y+dy[(kk+8)%8], x+dx[(kk+8)%8], startY, startX, depth+1, (kk+8)%8, block, outline, vertice, k))
+                return true;
+            if (direction != kk)
+                vertice->pop_back();
+        }
+    }
+    return false;
+}
+std::vector<LLIPoint> getPaddedProj(const Mesh *mesh, int floatPointPadding) {
+    long long int INF=10000000000000;
+    int k=100, padding;
+    int bedSize = 120;
+    std::vector<std::pair<LLIPoint, LLIPoint> > edges;
+    std::vector<std::pair<int, int> > vertice;
+    std::vector<LLIPoint> result;
+
+    qDebug() << "make edges";
+    for (auto& mf: mesh->getFaces()){
+		auto meshVertices = mf.meshVertices();
+        std::vector<LLIPoint> vs;
+        for (int i = 0; i < 3; i++) {
+            LLIPoint temp;
+            QVector3D vertex = meshVertices[i]->position;
+            temp.x = int(vertex.x() * floatPointPadding); temp.y = int(vertex.y() * floatPointPadding);
+            vs.push_back(temp);
+        }
+        for (int i = 0, j = 2; i < 3; j=i++) {
+            if (vs[i].x < vs[j].x)
+                edges.push_back(std::make_pair(vs[i], vs[j]));
+            else if (vs[i].x == vs[j].x && vs[i].y < vs[j].y)
+                edges.push_back(std::make_pair(vs[i], vs[j]));
+        }
+    }
+
+
+
+    qDebug() << "fill block";
+    int edgeCnt = edges.size();
+    long long int minx = INF, maxx = -INF, miny = INF, maxy = -INF, blockX, blockY, ttt;
+    for (int i = 0; i < edgeCnt; i++){
+        minx = min2(minx, min2(edges[i].first.x, edges[i].second.x));
+        miny = min2(miny, min2(edges[i].first.y, edges[i].second.y));
+        maxx = max2(maxx, max2(edges[i].first.x, edges[i].second.x));
+        maxy = max2(maxy, max2(edges[i].first.y, edges[i].second.y));
+    }
+    ttt = (maxx-minx)/10; minx-=ttt; maxx+=ttt;
+    ttt = (maxy-miny)/10; miny-=ttt; maxy+=ttt;
+
+    int cmp = ((maxx-minx)>(maxy-miny)?(maxx-minx):(maxy-miny))/bedSize;
+    padding = 12 - cmp/5;
+    padding = padding>10?10:padding;
+    padding = padding<1?1:padding;
+
+    blockX = (maxx-minx)/k;
+    blockY = (maxy-miny)/k;
+	//when using operator=, value is initialized to false anyway
+	std::unordered_map<size_t, std::unordered_map<size_t,bool>> block, padding_block, outline;
+
+
+    qDebug() << minx << " " << maxx << " " << miny << " " << maxy;
+    qDebug() << blockX << " " << blockY;
+    for (int i = 0; i < edgeCnt; i++) {
+        int startXBlock = int((edges[i].first.x - minx) / blockX);
+        int endXBlock = int((edges[i].second.x - minx) / blockX);
+        int startYBlock = int((edges[i].first.y - miny) / blockY);
+        int endYBlock;
+		//block.clear();
+		//padding_block.clear();
+		//outline.clear();
+
+		//block.resize(std::max(startYBlock, endYBlock));
+		//padding_block.resize(std::max(startYBlock, endYBlock));
+		//outline.resize(std::max(startYBlock, endYBlock));
+//        qDebug() << "fill block error here1";
+
+        while(true){
+            if (startXBlock == endXBlock)
+                break;
+
+//            qDebug() << "fill block error here2";
+            long long int endXcor = minx + (startXBlock+1) * blockX;
+            long long int endYcor = (edges[i].first.y + (edges[i].second.y - edges[i].first.y) * (endXcor - edges[i].first.x) / (edges[i].second.x - edges[i].first.x));
+            endYBlock = int((endYcor - miny) / blockY);
+//            qDebug() << "fill block error here3";
+            for (int j = min2(startYBlock, endYBlock); j <= max2(startYBlock, endYBlock); j++){
+                block[j][startXBlock] = true;
+            }
+
+            startXBlock ++;
+            startYBlock = endYBlock;
+        }
+//        qDebug() << "fill block error here4";
+        endYBlock = int((edges[i].second.y - miny) / blockY);
+        for (int j = min2(startYBlock, endYBlock); j <= max2(startYBlock, endYBlock); j++){
+            block[j][startXBlock] = true;
+        }
+    }
+
+    qDebug() << "make padding";
+    for (int i = 0; i <= k; i++){
+        for (int j = 0; j <= k; j++) {
+            if (block[i][j]) {
+                int iMax = min2(k, i+padding), iMin = max2(0, i-padding);
+                int jMax = min2(k, j+padding), jMin = max2(0, j-padding);
+                for (int h = jMin; h <= jMax; h++){
+                    padding_block[iMin][h] = true;
+                    padding_block[iMax][h] = true;
+                }
+                for (int h = iMin; h <= iMax; h++){
+                    padding_block[h][jMin] = true;
+                    padding_block[h][jMax] = true;
+                }
+            }
+        }
+    }
+    block = padding_block;
+
+    qDebug() << "find dfs start point";
+    int startY=k, startX=k;
+    for (int i = 0; i <= k; i++) {
+        for (int j = 0; j <= k; j++) {
+            if (block[i][j]) {
+                if (i < startY) {
+                    startY = i; startX = j;
+                } else if (i == startY && j < startX){
+                    startY = i; startX = j;
+                }
+            }
+        }
+    }
+
+    qDebug() << "get outline";
+    vertice.push_back(std::make_pair(startY, startX));
+    if (block[startY][startX+1])
+        make_outline(startY, startX, startY, startX, 0, 0, &block, &outline, &vertice, k);
+    else if (block[startY+1][startX+1])
+        make_outline(startY, startX, startY, startX, 0, 7, &block, &outline, &vertice, k);
+    else if (block[startY+1][startX])
+        make_outline(startY, startX, startY, startX, 0, 6, &block, &outline, &vertice, k);
+    else
+        startX /= 0;
+
+//    char tttttt[400];
+//    for (int i = k; i >= 0; i--){
+//        for (int j = 0; j <=k ; j++){
+//            if (outline[i][j]) {
+//                tttttt[j*2] = 'O';
+//                tttttt[j*2+1] = ' ';
+//            } else {
+//                tttttt[j*2] = ' ';
+//                tttttt[j*2+1] = ' ';
+//            }
+//        }
+//        tttttt[k*2+1] = '\0';
+//        qDebug() << tttttt;
+//    }
+
+    qDebug() << "make summarized outline";
+
+    int vn = vertice.size();
+    for (int i = 0; i < vn; i++){
+        int y1 = vertice[(i-1+vn)%vn].first-vertice[(i-2+vn)%vn].first;
+        int x1 = vertice[(i-1+vn)%vn].second-vertice[(i-2+vn)%vn].second;
+        int y2 = vertice[(i+1)%vn].first-vertice[i].first;
+        int x2 = vertice[(i+1)%vn].second-vertice[i].second;
+        int y3 = vertice[i].first-vertice[(i-1+vn)%vn].first;
+        int x3 = vertice[i].second-vertice[(i-1+vn)%vn].second;
+        int y4 = vertice[(i+2)%vn].first-vertice[(i+1)%vn].first;
+        int x4 = vertice[(i+2)%vn].second-vertice[(i+1)%vn].second;
+        if (y1 != y2 || x1 != x2 || y3 != y4 || x3 != x4 || (y1 * y1 + x1 * x1 != 1 && y3 * y3 + x3 * x3 != 1)) {
+            LLIPoint tt;
+            tt.y = miny + vertice[i].first * blockY;
+            tt.x = minx + vertice[i].second * blockX;
+            result.push_back(tt);
+        }
+    }
+
+    return result;
+}
+
+int CCW(LLIPoint p1, LLIPoint p2, LLIPoint p3) {
+    long long int ccw = p1.x*p2.y+p2.x*p3.y+p3.x*p1.y - p1.y*p2.x-p2.y*p3.x-p3.y*p1.x;
+    if (ccw > 0)
+        return 1;
+    if (ccw < 0)
+        return -1;
+    return 0;
+}
+
+bool isIntersectedLines(LLIPoint A, LLIPoint B, LLIPoint C, LLIPoint D) {
+    return (CCW(A,C,D) != CCW(B,C,D) && CCW(A,B,C) != CCW(A,B,D));
+}
+
+long long int getConvexHullSizeIfNotCollision(std::vector<std::vector<LLIPoint> > *outlines, std::vector<LLIPoint> *centers, std::vector<LLIPoint> *translational_motions, std::vector<float> *rotates) {
+    int meshCnt = outlines->size();
+
+    std::vector<std::vector<LLIPoint> > newOutLines;
+    for (int i = 0; i < meshCnt; i++){
+        std::vector<LLIPoint> newOutLine;
+        float rad_angle = -(*rotates)[i] * M_PI / 180;
+        float cosq = cos(rad_angle), sinq = sin(rad_angle);
+        int vertexCnt = (*outlines)[i].size();
+        for (int j = 0; j < vertexCnt; j++) {
+            LLIPoint newPoint;
+            newPoint.x = ((*outlines)[i][j].x - (*centers)[i].x) * cosq - ((*outlines)[i][j].y - (*centers)[i].y) * sinq + (*centers)[i].x + (*translational_motions)[i].x;
+            newPoint.y = ((*outlines)[i][j].y - (*centers)[i].y) * cosq + ((*outlines)[i][j].x - (*centers)[i].x) * sinq + (*centers)[i].y + (*translational_motions)[i].y;
+            newOutLine.push_back(newPoint);
+        }
+        newOutLines.push_back(newOutLine);
+    }
+
+    for (int i = 0; i < meshCnt - 1; i++){
+        int j = meshCnt - 1;
+        // because moved target mesh is last mesh
+        int iCnt = newOutLines[i].size();
+        int jCnt = newOutLines[j].size();
+        for (int i1=0, i2=iCnt-1; i1 < iCnt; i2=i1++){
+            for (int j1=0, j2=jCnt-1; j1 < jCnt; j2=j1++){
+                if (isIntersectedLines(newOutLines[i][i1], newOutLines[i][i2], newOutLines[j][j1], newOutLines[j][j2]))
+                    return 100000000000000000;
+            }
+        }
+    }
+    Path ppp;
+    for (int i = 0; i < meshCnt; i++){
+        int vertexCnt = newOutLines[i].size();
+        for (int j = 0; j < vertexCnt; j++) {
+            ppp.push_back(IntPoint(newOutLines[i][j].x, newOutLines[i][j].y, 0));
+        }
+    }
+    Path convex = getConvexHull(&ppp);
+    int convexVertexCnt = convex.size();
+    long long int cx=0, cy=0, area=0, temp;
+    for (int i = 0; i < convexVertexCnt; i++){
+        cx += convex[i].X;
+        cy += convex[i].Y;
+    }
+    cx /= convexVertexCnt;
+    cy /= convexVertexCnt;
+
+    for (int i =0, j = convexVertexCnt-1; i < convexVertexCnt; j = i++){
+        temp = (cx*convex[j].Y+convex[j].X*convex[i].Y+convex[i].X*cy - cy*convex[j].X-convex[j].Y*convex[i].X-convex[i].Y*cx)/2;
+        if (temp < 0)
+            area -= temp;
+        else
+            area += temp;
+    }
+
+    return area;
+}
+
+
+std::vector<XYArrangement> autoarrange::arngMeshes(std::vector<const Mesh*>& meshes, std::vector<const Qt3DCore::QTransform*> m_transform_set){
+    std::vector<std::vector<LLIPoint> > outlines;
+    std::vector<LLIPoint> centers;
+    std::vector<LLIPoint> translational_motions;
+    std::vector<float> rotates;
+    std::vector<XYArrangement> result;
+    srand((unsigned int)time(NULL));
+    int meshCnt = meshes.size();
+
+    int floatPointPadding = 100;
     /**/qDebug() << "Arrange start";
     qmlManager->setProgress(0);
-    qmlManager->setProgressText("Getting projection of meshes on work plane...");
-    for(int idx=0; idx<meshes.size(); idx++){
-        //outlines.push_back(project(& meshes[idx]));
-        //RDPSimpPaths(&outlines[idx]);
-        //offsetPath(&outlines[idx]);
-        outlines.push_back(getMeshRecArea(*meshes[idx]));
-        qmlManager->setProgress(0.5*idx/meshes.size());
+    qmlManager->setProgressText("Arranging models...");
+
+    qDebug() << "get padded projected outlines";
+    for(int idx=0; idx<meshCnt; idx++){
+        LLIPoint temp;
+        temp.x = (meshes[idx]->x_max() + meshes[idx]->x_min()) / 2 * floatPointPadding;
+        temp.y = (meshes[idx]->y_max() + meshes[idx]->y_min()) / 2 * floatPointPadding;
+        centers.push_back(temp);
+        QVector3D t1 = m_transform_set[idx]->translation();
+        temp.x = t1.x() * floatPointPadding; temp.y = t1.y() * floatPointPadding;
+        translational_motions.push_back(temp);
+        rotates.push_back(0.0);
+        outlines.push_back(getPaddedProj(meshes[idx], floatPointPadding));
+        qDebug() << "complete get padded projection" << " size: " << outlines[idx].size();
+        qmlManager->setProgress(0.5*idx/meshCnt);
     }
-    return arng2D(outlines);
+
+    qDebug() << "start";
+    int targetIdx = meshCnt-1;
+    translational_motions[targetIdx].x = 100*floatPointPadding;
+    translational_motions[targetIdx].y = 100*floatPointPadding;
+    for (int trycnt = 0; trycnt < 30; trycnt++) {
+        LLIPoint origin_translational_motion = translational_motions[targetIdx], best_translational_motion;
+        long long int optimal_v = 100000000000000000;
+        float origin_rotate = rotates[targetIdx], best_rotate;
+
+        float dx[10] = {0, -0.1, 0.1, -1, 1, -5, -10, 10, 50, -50}, dy[10] 
+			= {0, -0.1, 0.1, -1, 1, -5, -10, 10, 50, -50}, dr[11] = {0, -1, 1, -5, 5, -10, 10, -30, 30, -90, 90};
+
+        for (int xcase = 0; xcase < 10; xcase++) {
+            for (int ycase = 0; ycase < 10; ycase++) {
+                for (int rcase = 0; rcase < 11; rcase++) {
+                    translational_motions[targetIdx].x = origin_translational_motion.x + dx[xcase] * floatPointPadding;
+                    translational_motions[targetIdx].y = origin_translational_motion.y + dy[ycase] * floatPointPadding;
+                    rotates[targetIdx] = origin_rotate + dr[rcase];
+                    long long int value = getConvexHullSizeIfNotCollision(&outlines, &centers, &translational_motions, &rotates);
+                    if (value < optimal_v) {
+                        optimal_v = value;
+                        best_translational_motion = translational_motions[targetIdx];
+                        best_rotate = rotates[targetIdx];
+                    }
+                }
+            }
+        }
+        if (optimal_v != 100000000000000000) {
+            translational_motions[targetIdx] = best_translational_motion;
+            rotates[targetIdx] = best_rotate;
+        }
+        qDebug() << "best value: " << optimal_v;
+        qDebug() << best_translational_motion.x << best_translational_motion.y;
+        qDebug() << best_rotate;
+        if (best_translational_motion.x == origin_translational_motion.x && best_translational_motion.y == origin_translational_motion.y && origin_rotate == rotates[targetIdx])
+            break;
+        qmlManager->setProgress(0.4* (trycnt/30) + 0.5);
+    }
+
+    for(int idx=0; idx<meshCnt; idx++){
+        result.push_back(std::make_pair(IntPoint(translational_motions[idx].x, translational_motions[idx].y, 0), rotates[idx]));
+    }
+    return result;
 }
 
 bool compareArea(std::pair<Paths*, int>& fig1, std::pair<Paths*, int>& fig2){//used for sort
@@ -954,45 +1317,44 @@ void autoarrange::debugPath(Path path) {
 	qDebug() << "===============";
 }
 
-void autoarrange::debugFaces(const Mesh* mesh, std::vector<const MeshFace*> face_list) {
+void autoarrange::debugFaces(const Mesh* mesh, std::vector<const MeshFace *> face_list) {
 	for (size_t i = 0; i < face_list.size(); i++) {
-		debugFace(mesh, face_list[i]);
+		//debugFace(mesh, face_list[i]);
 	}
 }
-
-void autoarrange::debugFace(const Mesh* mesh, const MeshFace* face) {
-    const MeshFace* mf = face;
-	qDebug() << "face #" << face->idx;
-	for (size_t side = 0; side < 3; side++) {
-		QVector3D vtx = mf->mesh_vertex[side]->position;
-		float x_f = vtx.x();
-		float y_f = vtx.y();
-		float z_f = vtx.z();
-		int x_int = round(x_f * scfg->resolution);
-		int y_int = round(y_f * scfg->resolution);
-		int z_int = round(z_f * scfg->resolution);
-		qDebug() << "(" << x_f << "," << y_f << "," << z_f << ")";
-	}
-	qDebug() << "face normal:" << "(" << mf->fn.x() << "," << mf->fn.y() << "," << mf->fn.z() << ")";
-	for (size_t side = 0; side < 3; side++) {
-		if (mf->neighboring_faces[side].size() == 1) {
-			const MeshFace* neighbor = mf->neighboring_faces[side][0];
-			if (neighbor->fn.z() >= 0) {
-				if (isNbrOrientSame(mesh, mf, side)) qDebug() << "side" << side << ": nbr" << neighbor->idx;
-				else qDebug() << "side" << side << ": bound(ornt diff)";
-			}
-			else {
-				if (isNbrOrientSame(mesh, mf, side)) qDebug() << "side" << side << ": bound(fn.z diff)";
-				else qDebug() << "side" << side << ": bound(fn.z diff, ornt diff)";
-			}
-		}
-		else if (mf->neighboring_faces[side].size() == 0) {
-			qDebug() << "side" << side << ": bound(no neighbor)";
-		}
-		else {
-			qDebug() << "side" << side << ": bound(multi-neighbor" << mf->neighboring_faces[side].size() << ")";
-		}
-	}
-}
+//
+//void autoarrange::debugFace(const Mesh* mesh, const MeshFace * face) {
+//    const MeshFace * mf = face;
+//	for (HalfEdgeConstItr edge = 0; side < 3; side++) {
+//		QVector3D vtx = mf->meshVertices()[side]->position;
+//		float x_f = vtx.x();
+//		float y_f = vtx.y();
+//		float z_f = vtx.z();
+//		int x_int = round(x_f * scfg->resolution);
+//		int y_int = round(y_f * scfg->resolution);
+//		int z_int = round(z_f * scfg->resolution);
+//		qDebug() << "(" << x_f << "," << y_f << "," << z_f << ")";
+//	}
+//	qDebug() << "face normal:" << "(" << mf->fn.x() << "," << mf->fn.y() << "," << mf->fn.z() << ")";
+//	for (HalfEdgeConstItr edge = 0; side < 3; side++) {
+//		if (mf->neighboring_faces[side].size() == 1) {
+//			const MeshFace * neighbor = mf->neighboring_faces[side][0];
+//			if (neighbor->fn.z() >= 0) {
+//				if (isNbrOrientSame(mesh, mf, side)) qDebug() << "side" << side;
+//				else qDebug() << "side" << side << ": bound(ornt diff)";
+//			}
+//			else {
+//				if (isNbrOrientSame(mesh, mf, side)) qDebug() << "side" << side << ": bound(fn.z diff)";
+//				else qDebug() << "side" << side << ": bound(fn.z diff, ornt diff)";
+//			}
+//		}
+//		else if (mf->neighboring_faces[side].size() == 0) {
+//			qDebug() << "side" << side << ": bound(no neighbor)";
+//		}
+//		else {
+//			qDebug() << "side" << side << ": bound(multi-neighbor" << mf->neighboring_faces[side].size() << ")";
+//		}
+//	}
+//}
 
 #endif

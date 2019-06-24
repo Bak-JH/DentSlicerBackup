@@ -1,9 +1,10 @@
-#ifndef MATHUTILS_H
-#define MATHUTILS_H
+#pragma once
 
 #include <QVector3D>
 #include <QMatrix4x4>
 #include <QQuaternion>
+#include <math.h>
+
 namespace Utils
 {
     namespace Math
@@ -15,8 +16,21 @@ namespace Utils
                                    QVector3D& outIntersectionPoint);
 
         QMatrix4x4 quatToMat(QQuaternion q);
+
+        float round(float num, int precision);
+
+        bool doubleAreSame(double a, double b);
+
+		inline float intPointDistance(QPoint a, QPoint b)
+		{
+			return std::sqrt(std::pow(a.x() - b.x(), 2) + std::pow(a.y() - b.y(), 2));
+		}
+		//doesn't work on inf
+		inline bool sameSign(float a, float b) {
+			return a * b >= 0.0f;
+		}
+
     }
 
 }
 
-#endif // MATHUTILS_H

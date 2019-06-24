@@ -20,7 +20,9 @@
 #include "QFuture"
 #include "utils/httpreq.h"
 #include <QKeyboardHandler>
-
+#include "input/raycastcontroller.h"
+#include "ui/RotateXYZWidget.h"
+#include "ui/MoveXYZWidget.h"
 #define VIEW_MODE_OBJECT 0
 #define VIEW_MODE_SUPPORT 1
 #define VIEW_MODE_LAYER 2
@@ -29,6 +31,7 @@
 #define LAYER_SUPPORTERS 0x02
 #define LAYER_RAFT 0x04
 
+class QQuickItem;
 class QmlManager : public QObject
 {
     Q_OBJECT
@@ -39,16 +42,17 @@ public:
     QString version = "0.0.1";
 
     // UI components
+	Qt3DRender::QCamera* _camera;
     QObject* mainWindow;
     QObject* loginWindow;
     QObject* loginButton;
     QObject* boxUpperTab;
     QObject* boxLeftTab;
-    QObject* scene3d;
+	QQuickItem* scene3d;
     QEntity* models;
     Qt3DCore::QTransform* systemTransform;
-    QObject* mv;
-    Qt3DCore::QEntity *boundedBox;
+	QEntity* mv;
+	Qt3DCore::QEntity* boundedBox;
     Qt3DCore::QEntity *mttab;
     QObject* undoRedoButton;
     QObject* slicingData;
@@ -56,20 +60,11 @@ public:
 
     // model rotate components
     QObject *rotatePopup;
-    QObject *rotateSphereobj;
-    Qt3DCore::QEntity *rotateSphere;
-    Qt3DCore::QEntity *rotateSphereX;
-    Qt3DCore::QEntity *rotateSphereY;
-    Qt3DCore::QEntity *rotateSphereZ;
 
     // model move components
     QObject *moveButton;
     QObject *movePopup;
     Qt3DCore::QEntity *managerModel;
-    Qt3DCore::QEntity *moveArrow;
-    Qt3DCore::QEntity *moveArrowX;
-    Qt3DCore::QEntity *moveArrowY;
-    Qt3DCore::QEntity *moveArrowobj;
 
     // selection popup
     QObject* yesno_popup;
@@ -149,34 +144,28 @@ public:
 
     std::map<int, GLModel> glmodels;
 
-    //TODO:const pointers, need to use list instead of std::vector because std::vector elements moves around
-    //std::list<GLModel* const> selectedModels;
-	std::vector<GLModel*> selectedModels;
     std::vector<Mesh*> copyMeshes;
     std::vector<QString> copyMeshNames;
 
 
-
+	//!
     int rotateSnapAngle = 0;
     int rotateSnapStartAngle = 0;
     int rotateSnapQuotient = 0;
-    bool groupSelectionActive = false;
     //bool moveActive = false;
     bool saveActive = false;
     bool rotateActive = false;
     bool orientationActive = false;
     bool freecutActive = false;
 
-
+	const Hix::Input::RayCastController& getRayCaster();
     QString groupFunctionState;
     int groupFunctionIndex;
     float progress = 0;
-    void showRotatingSphere();
     void showRotateSphere();
     void showMoveArrow();
     void hideRotateSphere();
     void hideMoveArrow();
-    void mouseHack();
     void initializeUI(QQmlApplicationEngine *e);
     void openModelFile_internal(QString filename);
     void openArrange();
@@ -192,14 +181,18 @@ public:
     void setProgress(float value);
     void setProgressText(std::string inputText);
     int getLayerViewFlags();
+	void modelSelected(int);
+	const std::unordered_set<GLModel*>& getSelectedModels();
+	QVector2D world2Screen(QVector3D target);
 
     GLModel* findGLModelByName(QString filename);
 	void connectShadow(GLModel* shadowModel);
     Q_INVOKABLE QString getVersion();
     Q_INVOKABLE void keyboardHandlerFocus();
+	//gets center of selection in terms of world bound
     Q_INVOKABLE QVector3D getSelectedCenter();
-    Q_INVOKABLE QVector3D getSelectedSize();
-    Q_INVOKABLE int getselectedModelID();
+	//gets lengths of volume containing all selected models
+    Q_INVOKABLE QVector3D selectedModelsLengths();
     Q_INVOKABLE int getSelectedModelsSize();
     Q_INVOKABLE float getBedXSize();
     Q_INVOKABLE float getBedYSize();
@@ -213,6 +206,9 @@ public:
     Q_INVOKABLE void setClosedHandCursor();
     Q_INVOKABLE void resetCursor();
     Q_INVOKABLE bool isSelected();
+	Q_INVOKABLE bool isSelected(int ID);
+	bool isSelected(GLModel* model);
+
     Q_INVOKABLE void selectPart(int ID);
     Q_INVOKABLE void unselectPart(int ID);
     Q_INVOKABLE void unselectAll();
@@ -227,22 +223,33 @@ public:
     Q_INVOKABLE void deleteList(int ID);
     Q_INVOKABLE void deleteSelectedModels();
 
-    float selected_x_max(size_t selectedNum);
-    float selected_x_min(size_t selectedNum);
-    float selected_y_max(size_t selectedNum);
-    float selected_y_min(size_t selectedNum);
-    float selected_z_max(size_t selectedNum);
-    float selected_z_min(size_t selectedNum);
-    void updateBoundedBox();
-
+    float selected_x_max();
+    float selected_x_min();
+    float selected_y_max();
+    float selected_y_min();
+    float selected_z_max();
+    float selected_z_min();
+	void modelMoveWithAxis(QVector3D axis, double distance);
+	void modelMove(QVector3D displacement);
+	void modelRotateWithAxis(const QVector3D& axis, double degree);
+	QVector3D cameraViewVector();
 private:
+
 	GLModel* getModelByID(int ID);
     void unselectPartImpl(GLModel* target);
+	bool groupSelectionActive = false;
     int viewMode;
     int layerViewFlags;
     int modelIDCounter;
-    GLModel* _latest;
+    
+	//TODO: get rid of this
+	GLModel* _lastSelected;
+	std::unordered_set<GLModel*> selectedModels;
 
+	//Ray cast
+	Hix::Input::RayCastController _rayCastController;
+	Hix::UI::RotateXYZWidget _rotateWidget;
+	Hix::UI::MoveXYZWidget _moveWidget;
 
 signals:
     void updateModelInfo(int printing_time, int layer, QString xyz, float volume);
@@ -250,11 +257,14 @@ signals:
 
 
 public slots:
+	
     void sendUpdateModelInfo(int, int, QString, float);
-    void createModelFile(Mesh* target_mesh, QString filename);
+    GLModel* createModelFile(Mesh* target_mesh, QString filename);
     void openModelFile(QString filename);
     void checkModelFile(GLModel* model);
     void deleteOneModelFile(int ID);
+	void deleteOneModelFile(GLModel* model);
+
     void deleteModelFileDone();
     void deleteModelFile(int ID);
     void unDo();
@@ -265,17 +275,13 @@ public slots:
     void runGroupFeature(int,QString, double, double, double, QVariant);
     bool multipleModelSelected(int ID);
     void lastModelSelected();
-    void modelSelected(int);
-    void modelRotate(int,int);
     void modelRotateByNumber(int axis, int, int, int);
-    void modelMove(int,int);
-    void modelMoveF(int,float);
     void modelMoveByNumber(int axis, int, int);
     void modelMoveInit();
     void modelMoveDone();
     void totalMoveDone();
     void modelRotateInit();
-    void modelRotateDone(int);
+    void modelRotateDone();
     void totalRotateDone();
     void resetLayflat();
     void applyArrangeResult(std::vector<QVector3D>, std::vector<float>);
@@ -295,7 +301,7 @@ public slots:
     void openSave();
     void closeSave();
     void save();
-
+	void cameraViewChanged();
     void viewObjectChanged(bool checked);
     void viewSupportChanged(bool checked);
     void viewLayerChanged(bool checked);

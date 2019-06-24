@@ -8,7 +8,7 @@
 #include <string>
 #include <QTime>
 
-
+using namespace Hix::Engine3D;
 class rotateResult{
 public:
     float phi;
@@ -19,6 +19,7 @@ public:
 
 class Orient {
 public:
+    Orient(float _val, QVector3D _label);
     float val;
     QVector3D label;
 };

@@ -7,17 +7,19 @@
 #include <QHash>
 #include <QDebug>
 #include <math.h>
+#include "DentEngine/src/mesh.h"
 //#include "./glmodel.h"
 #include "DentEngine/src/configuration.h"
-#include "DentEngine/src/mesh.h"
 #include "DentEngine/src/polyclipping/clipper/clipper.hpp"
 #include "convex_hull.h"
 #if  defined(QT_DEBUG) || defined(_DEBUG)
 #define _DEBUG_AUTO_ARRANGE
 #endif
 
-using namespace ClipperLib;
 
+using namespace Hix::Engine3D;
+
+using namespace ClipperLib;
 typedef std::pair<IntPoint, float> XYArrangement;
 typedef std::vector<IntPoint> Vecs;
 
@@ -27,24 +29,23 @@ public:
     autoarrange();
 
     std::vector<XYArrangement> simpArngMeshes(std::vector<const Mesh*>& meshes);
-    std::vector<XYArrangement> arngMeshes(std::vector<const Mesh*>& meshes);
-    //void arrangeQt3D(std::vector<Qt3DCore::QTransform*> m_transform_set, std::vector<XYArrangement> arng_result_set);
-    //void arrangeGlmodels(std::vector< GLModel* > * glmodels);
+    std::vector<XYArrangement> arngMeshes(std::vector<const Mesh*>& meshes, std::vector<const Qt3DCore::QTransform*> m_transform_set);
+    //void arrangeQt3D(std::vector<const Qt3DCore::QTransform*> m_transform_set, std::vector<XYArrangement> arng_result_set);
+    //void arrangeGlmodels(vector< GLModel* > * glmodels);
 
 private:
     Paths getMeshRecArea(const Mesh& mesh);
     Paths getMeshConvexHull(const Mesh& mesh);
-    Paths spreadingCheck(const Mesh* mesh, std::map<const MeshFace*, bool>& check, const MeshFace* chking_start, bool is_chking_pos);
-	const MeshVertex* getPathHead(const Mesh* mesh, const MeshFace* mf, size_t side, bool is_chking_pos);
-    Path buildOutline(const Mesh* mesh, std::map<const MeshFace*, bool>& check, const MeshFace* chking, const MeshVertex* path_head, bool is_chking_pos);
-    bool isEdgeBound(const Mesh* mesh, const MeshFace* mf, size_t side, bool is_chking_pos);
-    bool isNbrOrientSame(const Mesh* mesh, const MeshFace* mf, size_t side);
-	size_t searchVtxInFace(const MeshFace* mf, const MeshVertex* vertex);
-	const MeshVertex* getNbrVtx(const MeshFace* mf, size_t base, size_t xth);
+    Paths spreadingCheck(const Mesh* mesh, std::map<const MeshFace *, bool>& check, const MeshFace * chking_start, bool is_chking_pos);
+    Path buildOutline(const Mesh* mesh, std::map<const MeshFace *, bool>& check, const MeshFace * chking, const MeshVertex* path_head, bool is_chking_pos);
+    bool isEdgeBound(const Mesh* mesh, const MeshFace * mf, const HalfEdge * edge, bool is_chking_pos);
+    bool isNbrOrientSame(const Mesh* mesh, const MeshFace * mf, const HalfEdge * edge);
+	//size_t searchVtxInFace(const MeshFace * mf, const MeshVertex* vertex);
+	const MeshVertex* getNbrVtx(const MeshFace * mf, const HalfEdge * base, size_t offset);
     Path idxsToPath(const Mesh* mesh, std::vector<const MeshVertex* > path_by_idx);
     Paths project(const Mesh* mesh);
     Paths clipOutlines(std::vector<Paths> outline_sets);
-    bool checkFNZ(const MeshFace* face, bool is_chking_pos);
+    bool checkFNZ(const MeshFace& face, bool is_chking_pos);
 
 	const MeshVertex* findVertexWithIntpoint(IntPoint p, const Mesh* mesh);
 	const MeshVertex* findVertexWithIntXY(size_t x, size_t y, const Mesh* mesh);
@@ -92,8 +93,8 @@ private:
 	void testOffset();
 	void debugPaths(Paths paths);
 	void debugPath(Path path);
-	void debugFaces(const Mesh* mesh, std::vector<const MeshFace*> face_list);
-	void debugFace(const Mesh* mesh, const MeshFace* face);
+	void debugFaces(const Mesh* mesh, std::vector<const MeshFace *> face_list);
+	void debugFace(const Mesh* mesh, const MeshFace * face);
 #endif
 
 };

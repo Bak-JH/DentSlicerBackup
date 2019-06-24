@@ -15,7 +15,7 @@ public:
     bool topPoint = false;
     bool meshInterPoint = false;
     bool supportInterPoint = false;
-    float radius = 0.1f; // support tip radius 역할
+    float radius = scfg->support_radius_min; // support tip radius 역할
 };
 
 class GenerateSupport
@@ -29,12 +29,13 @@ public:
     double critical_angle_mesh_radian = M_PI * (critical_angle_mesh / 180.0);
     std::vector<OverhangPoint> overhangPoints;
     std::vector<OverhangPoint> supportPoints;
-    float supportRadiusMax = 1;
-    float supportTipHeight = 0.1f; //크면 에러
-    float minZ = 1;
-    float minLength = 3;
-    float radiusMin = 0.1f; // support tip radius 역할
+    float supportRadiusMax = scfg->support_radius_max; // support bottom radius 역할
+    float supportRadiusMin = scfg->support_radius_min; // support tip radius 역할
+    float z_min;
+    float z_min_minimal_diff = scfg->layer_height/2;
+    float minLength = scfg->support_base_height+1;
 
+    Mesh* generateStraightSupport(Mesh* shellmesh);
     Mesh* generateSupport(Mesh* shellMesh);
 
     void overhangDetect(Mesh* mesh);
@@ -48,10 +49,12 @@ public:
     OverhangPoint coneNconeIntersection(Mesh* mesh, OverhangPoint coneApex1, OverhangPoint coneApex2);
     OverhangPoint coneNmeshIntersection(Mesh* mesh, OverhangPoint coneApex);
     float calculateRadius(float mesh_height, float bottom_height, float branch_length);
+    void generateTopFace(Mesh* mesh, OverhangPoint center);
     void generateBottomFace(Mesh* mesh, OverhangPoint center);
     void generateFaces(Mesh* mesh, OverhangPoint top, OverhangPoint bottom);
     void generateBranch(Mesh* mesh, OverhangPoint leaf1, OverhangPoint leaf2, OverhangPoint* stem);
     void generateNShapeBranch(Mesh* mesh, OverhangPoint* pt1, OverhangPoint* pt2, size_t diameter_mm, size_t thickness_mm);
+
     void generateStem(Mesh* mesh, OverhangPoint top, OverhangPoint* bottom);
     QVector3D internalDiv(OverhangPoint a, OverhangPoint b, float m, float n);
 };

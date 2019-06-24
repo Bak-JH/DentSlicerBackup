@@ -18,6 +18,13 @@
 #include <QDir>
 #include <QMatrix3x3>
 #include <feature/generatesupport.h>
+#include <Qt3DCore/qpropertyupdatedchange.h>
+#include <feature/generateraft.h>
+
+const size_t POS_SIZE = 3;
+const size_t NRM_SIZE = 3;
+const size_t COL_SIZE = 3;
+const size_t VTX_SIZE = POS_SIZE + NRM_SIZE + COL_SIZE;
 
 #define ATTRIBUTE_SIZE_INCREMENT 200
 #if defined(_DEBUG) || defined(QT_DEBUG)
@@ -25,22 +32,15 @@
 #endif
 
 using namespace Utils::Math;
-
-
-const QVector3D GLModel::COLOR_DEFAULT_MESH = QVector3D(0.278f, 0.670f, 0.706f);
-const QVector3D GLModel::COLOR_INFILL = QVector3D(1.0f, 1.0f, 0.0f);
-const QVector3D GLModel::COLOR_RAFT = QVector3D(0.0f, 0.0f, 0.0f);
-
-GLModel::GLModel(QObject* mainWindow, QNode *parent, Mesh* loadMesh, QString fname, bool isShadow, int id)
+using namespace Hix::Engine3D;
+using namespace Hix::Input;
+GLModel::GLModel(QObject* mainWindow, QNode *parent, Mesh* loadMesh, QString fname, int id)
     : QEntity(parent)
-	, _parent(parent)
     , filename(fname)
     , mainWindow(mainWindow)
     , v_cnt(0)
     , f_cnt(0)
 	, _currentVisibleMesh(nullptr)
-    , dragMesh(new Qt3DExtras::QSphereMesh())
-    , parentModel((GLModel*)(parent))
     , cutMode(1)
     , layerMesh(nullptr)
     , layerInfillMesh(nullptr)
@@ -49,171 +49,148 @@ GLModel::GLModel(QObject* mainWindow, QNode *parent, Mesh* loadMesh, QString fna
     , slicer(nullptr)
     , ID(id)
     , m_meshMaterial(nullptr)
-    , m_geometry(&m_geometryRenderer)
-    ,vertexBuffer(Qt3DRender::QBuffer::VertexBuffer, &m_geometry)
-    ,vertexNormalBuffer(Qt3DRender::QBuffer::VertexBuffer, &m_geometry)
-    ,vertexColorBuffer(Qt3DRender::QBuffer::VertexBuffer, &m_geometry)
-	,_isEnabled(true)
+	, m_geometryRenderer(this)
+    , m_geometry(this)
+    , vertexBuffer(Qt3DRender::QBuffer::VertexBuffer, this)
+	, indexBuffer(Qt3DRender::QBuffer::IndexBuffer, this)
+	, positionAttribute(this)
+	, normalAttribute(this)
+	, colorAttribute(this)
+	, indexAttribute(this)
+
 
 {
     connect(&futureWatcher, SIGNAL(finished()), this, SLOT(slicingDone()));
-    qDebug() << "new model made _______________________________"<<this<< "parent:"<<this->parentModel<<"shadow:"<<this->shadowModel;
+    qDebug() << "new model made _______________________________"<<this<< "parent:"<<parent;
+	_layer.setRecursive(true);
+	m_meshMaterial = new QPhongMaterial();
+	m_meshVertexMaterial = new QPerVertexColorMaterial();
+	addComponent(&_layer);
+	addComponent(&m_transform);
+	addComponent(m_meshMaterial);
+	//addComponent(&m_geometryRenderer);
 
     //initialize vertex buffers etc
     vertexBuffer.setUsage(Qt3DRender::QBuffer::DynamicDraw);
-    vertexBuffer.setData(vertexArray);
-    vertexNormalBuffer.setUsage(Qt3DRender::QBuffer::DynamicDraw);
-    vertexNormalBuffer.setData(vertexNormalArray);
-    vertexColorBuffer.setUsage(Qt3DRender::QBuffer::DynamicDraw);
-    vertexColorBuffer.setData(vertexColorArray);
+	indexBuffer.setUsage(Qt3DRender::QBuffer::DynamicDraw);
+	vertexBuffer.setAccessType(	Qt3DRender::QBuffer::AccessType::ReadWrite);
+	indexBuffer.setAccessType(	Qt3DRender::QBuffer::AccessType::ReadWrite);
 
     positionAttribute.setAttributeType(QAttribute::VertexAttribute);
     positionAttribute.setBuffer(&vertexBuffer);
     positionAttribute.setDataType(QAttribute::Float);
-    positionAttribute.setDataSize(3);
+    positionAttribute.setDataSize(POS_SIZE);
     positionAttribute.setByteOffset(0);
-    positionAttribute.setByteStride(3 * sizeof(float));
+    positionAttribute.setByteStride(VTX_SIZE);
     positionAttribute.setCount(0);
     positionAttribute.setName(QAttribute::defaultPositionAttributeName());
 
     normalAttribute.setAttributeType(QAttribute::VertexAttribute);
-    normalAttribute.setBuffer(&vertexNormalBuffer);
+    normalAttribute.setBuffer(&vertexBuffer);
     normalAttribute.setDataType(QAttribute::Float);
-    normalAttribute.setDataSize(3);
-    normalAttribute.setByteOffset(0);
-    normalAttribute.setByteStride(3 * sizeof(float));
+    normalAttribute.setDataSize(NRM_SIZE);
+    normalAttribute.setByteOffset(POS_SIZE * sizeof(float));
+    normalAttribute.setByteStride(VTX_SIZE);
     normalAttribute.setCount(0);
     normalAttribute.setName(QAttribute::defaultNormalAttributeName());
 
     colorAttribute.setAttributeType(QAttribute::VertexAttribute);
-    colorAttribute.setBuffer(&vertexColorBuffer);
+    colorAttribute.setBuffer(&vertexBuffer);
     colorAttribute.setDataType(QAttribute::Float);
-    colorAttribute.setDataSize(3);
-    colorAttribute.setByteOffset(0);
-    colorAttribute.setByteStride(3 * sizeof(float));
+    colorAttribute.setDataSize(COL_SIZE);
+    colorAttribute.setByteOffset((NRM_SIZE + POS_SIZE) * sizeof(float));
+    colorAttribute.setByteStride(VTX_SIZE);
     colorAttribute.setCount(0);
     colorAttribute.setName(QAttribute::defaultColorAttributeName());
 
-    m_geometry.addAttribute(&positionAttribute);
-    m_geometry.addAttribute(&normalAttribute);
-    m_geometry.addAttribute(&colorAttribute);
+	indexAttribute.setVertexBaseType(QAttribute::VertexBaseType::UnsignedInt);
+	indexAttribute.setAttributeType(QAttribute::IndexAttribute);
+	indexAttribute.setBuffer(&indexBuffer);
+	indexAttribute.setDataType(QAttribute::UnsignedInt);
+	indexAttribute.setDataSize(1);
+	indexAttribute.setByteOffset(0);
+	indexAttribute.setByteStride(0);
+	indexAttribute.setCount(0);
+	indexAttribute.setVertexSize(1);
+
+
+
+	m_geometryRenderer.setInstanceCount(1);
+	m_geometryRenderer.setFirstVertex(0);
+	m_geometryRenderer.setFirstInstance(0);
     m_geometryRenderer.setPrimitiveType(QGeometryRenderer::Triangles);
     m_geometryRenderer.setGeometry(&m_geometry);
-    addComponent(&m_geometryRenderer);
-    m_geometryRenderer.setInstanceCount(1);
-    m_geometryRenderer.setFirstVertex(0);
-    m_geometryRenderer.setFirstInstance(0);
-	addComponent(&m_transform);
+	m_geometryRenderer.setVertexCount(0);
+
+	m_geometry.addAttribute(&positionAttribute);
+	m_geometry.addAttribute(&normalAttribute);
+	m_geometry.addAttribute(&colorAttribute);
+	m_geometry.addAttribute(&indexAttribute);
+
+
+
 
     // generates shadow model for object picking
-    if (isShadow){
-		//addMouseHandlers();
-
-        updateShadowModelImpl();
-
-        QObject::connect(this, SIGNAL(_generateSupport()), this, SLOT(generateSupport()));
-        QObject::connect(this, SIGNAL(_updateModelMesh(bool)), this, SLOT(updateModelMesh(bool)));
-
-        labellingTextPreview = new LabellingTextPreview(this);
-    }
-	else
-	{
-		// Add to Part List
-		qmlManager->addPart(getFileName(fname.toStdString().c_str()), ID);
-
-		m_meshMaterial = new QPhongMaterial();
-		m_meshVertexMaterial = new QPerVertexColorMaterial();
-
-		generateLayerViewMaterial();
-
-		this->changecolor(0);
-		if (filename != "" && (filename.contains(".stl") || filename.contains(".STL"))\
-			&& loadMesh == nullptr) {
-			_mesh = new Mesh();
-			FileLoader::loadMeshSTL(_mesh, filename.toLocal8Bit().constData());
-		}
-		else if (filename != "" && (filename.contains(".obj") || filename.contains(".OBJ"))\
-			&& loadMesh == nullptr) {
-			_mesh = new Mesh();
-			FileLoader::loadMeshOBJ(_mesh, filename.toLocal8Bit().constData());
-		}
-		else {
-			_mesh = loadMesh;
-		}
-
-		// 승환 25%
-		qmlManager->setProgress(0.23);
-		clearMem();
-		updateAllVertices(_mesh);
-		//applyGeometry();
-
-		// 승환 50%
-		qmlManager->setProgress(0.49);
-		Qt3DExtras::QDiffuseMapMaterial* diffuseMapMaterial = new Qt3DExtras::QDiffuseMapMaterial();
-
-		addComponent(m_meshMaterial);
-
-		qDebug() << "created original model";
-
-		//repairMesh(_mesh);
-		addShadowModel(_mesh);
-
-		// 승환 75%
-		qmlManager->setProgress(0.73);
-
-		QObject::connect(this, SIGNAL(bisectDone(Mesh*, Mesh*)), this, SLOT(generateRLModel(Mesh*, Mesh*)));
-		QObject::connect(this, SIGNAL(_generateSupport()), this, SLOT(generateSupport()));
-		QObject::connect(this, SIGNAL(_updateModelMesh(bool)), this, SLOT(updateModelMesh(bool)));
-
-		qDebug() << "created shadow model";
-
-		ft = new featureThread(this, 0);
-		qDebug() << "adding part " << fname.toStdString().c_str();
+  
+	// Add to Part List
+	qmlManager->addPart(getFileName(fname.toStdString().c_str()), ID);
 
 
-		// reserve cutting points, contours
-		sphereEntity.reserve(50);
-		sphereMesh.reserve(50);
-		sphereMaterial.reserve(50);
-		sphereTransform.reserve(50);
-		sphereObjectPicker.reserve(50);
-		cuttingPoints.reserve(50);
-		cuttingContourCylinders.reserve(50);
 
+	generateLayerViewMaterial();
+
+	this->changecolor(0);
+	if (filename != "" && (filename.contains(".stl") || filename.contains(".STL"))\
+		&& loadMesh == nullptr) {
+		_mesh = new Mesh();
+		FileLoader::loadMeshSTL(_mesh, filename.toLocal8Bit().constData());
+	}
+	else if (filename != "" && (filename.contains(".obj") || filename.contains(".OBJ"))\
+		&& loadMesh == nullptr) {
+		_mesh = new Mesh();
+		FileLoader::loadMeshOBJ(_mesh, filename.toLocal8Bit().constData());
+	}
+	else {
+		_mesh = loadMesh;
 	}
 
-}
+	// 승환 25%
+	qmlManager->setProgress(0.23);
+	clearMem();
+	setMesh(_mesh);
+	//applyGeometry();
+
+	// 승환 50%
+	qmlManager->setProgress(0.49);
+	//Qt3DExtras::QDiffuseMapMaterial* diffuseMapMaterial = new Qt3DExtras::QDiffuseMapMaterial();
 
 
+	qDebug() << "created original model";
 
-void GLModel::addMouseHandlers(){
+	//repairMesh(_mesh);
+	//addShadowModel(_mesh);
 
-	m_objectPicker = new Qt3DRender::QObjectPicker(this);
+	// 승환 75%
+	qmlManager->setProgress(0.73);
 
-	m_objectPicker->setHoverEnabled(false); // to reduce drag load
-	m_objectPicker->setDragEnabled(false);
-	// add only m_objectPicker
-	QObject::connect(m_objectPicker, SIGNAL(released(Qt3DRender::QPickEvent*)), this, SLOT(handlePickerClicked(Qt3DRender::QPickEvent*)));
-	QObject::connect(m_objectPicker, SIGNAL(moved(Qt3DRender::QPickEvent*)), this, SLOT(mgoo(Qt3DRender::QPickEvent*)));
-	QObject::connect(m_objectPicker, SIGNAL(pressed(Qt3DRender::QPickEvent*)), this, SLOT(pgoo(Qt3DRender::QPickEvent*)));
-	QObject::connect(m_objectPicker, SIGNAL(entered()), this, SLOT(engoo()));
-	QObject::connect(m_objectPicker, SIGNAL(exited()), this, SLOT(exgoo()));
-	addComponent(m_objectPicker);
-}
+	QObject::connect(this, SIGNAL(bisectDone(Mesh*, Mesh*)), this, SLOT(generateRLModel(Mesh*, Mesh*)));
+	QObject::connect(this, SIGNAL(_generateSupport()), this, SLOT(generateSupport()));
+	QObject::connect(this, SIGNAL(_updateModelMesh()), this, SLOT(updateModelMesh()));
 
-void GLModel::removeMouseHandlers(){
-    if (m_objectPicker == nullptr)
-        return;
-    //m_objectPicker->setDragEnabled(true);
-    // add only m_objectPicker
-    QObject::disconnect(m_objectPicker, SIGNAL(released(Qt3DRender::QPickEvent*)), this, SLOT(handlePickerClicked(Qt3DRender::QPickEvent*)));
-    QObject::disconnect(m_objectPicker, SIGNAL(moved(Qt3DRender::QPickEvent*)), this, SLOT(mgoo(Qt3DRender::QPickEvent*)));
-    QObject::disconnect(m_objectPicker, SIGNAL(pressed(Qt3DRender::QPickEvent*)), this, SLOT(pgoo(Qt3DRender::QPickEvent*)));
-    QObject::disconnect(m_objectPicker, SIGNAL(entered()), this, SLOT(engoo()));
-    QObject::disconnect(m_objectPicker, SIGNAL(exited()), this, SLOT(exgoo()));
-    removeComponent(m_objectPicker);
-    delete m_objectPicker;
-	m_objectPicker = nullptr;
+	qDebug() << "created shadow model";
+
+	ft = new featureThread(this, 0);
+	qDebug() << "adding part " << fname.toStdString().c_str();
+
+
+	// reserve cutting points, contours
+	sphereEntity.reserve(50);
+	sphereMesh.reserve(50);
+	sphereMaterial.reserve(50);
+	sphereTransform.reserve(50);
+	sphereObjectPicker.reserve(50);
+	cuttingPoints.reserve(50);
+	cuttingContourCylinders.reserve(50);
 }
 
 void GLModel::changecolor(int mode){
@@ -342,11 +319,11 @@ void GLModel::loadUndoState(){
         m_transform.setRotationX(0);
         m_transform.setRotationY(0);
         m_transform.setRotationZ(0);
-        emit _updateModelMesh(true);
+        emit _updateModelMesh();
     } else {
         updateLock = false;
         qDebug() << "no undo state";
-        int saveCnt = (_mesh->getFaces()->size()>100000)? 3: 10;
+        int saveCnt = (_mesh->getFaces().size()>100000)? 3: 10;
         qmlManager->openResultPopUp("Undo state doesn't exist.","","Maximum "+QVariant(saveCnt).toString().toStdString()+" states are saved for this model.");
     }
 }
@@ -368,7 +345,7 @@ void GLModel::loadRedoState(){
         m_transform.setRotationX(0);
         m_transform.setRotationY(0);
         m_transform.setRotationZ(0);
-        emit _updateModelMesh(true);
+        emit _updateModelMesh();
     } else {
         qDebug() << "no redo status";
     }
@@ -376,16 +353,16 @@ void GLModel::loadRedoState(){
 void GLModel::repairMesh()
 {
     MeshRepair::repairMesh(_mesh);
-    emit _updateModelMesh(true);
+    emit _updateModelMesh();
 }
 void GLModel::moveModelMesh(QVector3D direction, bool update){
     _mesh->vertexMove(direction);
     /*if (shadowModel != NULL)
-        shadowModel->moveModelMesh(direction);*/
+        moveModelMesh(direction);*/
     qDebug() << "moved vertex";
     if(update)
     {
-        emit _updateModelMesh(true);
+        emit _updateModelMesh();
     }
 }
 void GLModel::rotationDone()
@@ -397,7 +374,7 @@ void GLModel::rotationDone()
 
     _mesh->vertexMove(m_transform.translation());
     m_transform.setTranslation(QVector3D(0,0,0));
-    emit _updateModelMesh(true);
+    emit _updateModelMesh();
 }
 
 
@@ -417,14 +394,14 @@ void GLModel::rotateByNumber(QVector3D& rot_center, int X, int Y, int Z)
     m_transform.setRotationZ(0);
     _mesh->vertexMove(m_transform.translation());
     m_transform.setTranslation(QVector3D(0,0,0));
-    emit _updateModelMesh(true);
+    emit _updateModelMesh();
 }
 
 void GLModel::rotateModelMesh(QMatrix4x4 matrix, bool update){
     _mesh->vertexRotate(matrix);
     if(update)
     {
-        emit _updateModelMesh(true);
+        emit _updateModelMesh();
     }
 }
 
@@ -456,9 +433,9 @@ void GLModel::scaleModelMesh(float scaleX, float scaleY, float scaleZ){
     float centerY = (_mesh->y_max() + _mesh->y_min())/2;
     _mesh->vertexScale(scaleX, scaleY, scaleZ, centerX, centerY);
     /*if (shadowModel != NULL)
-        shadowModel->scaleModelMesh(scale);*/
+        scaleModelMesh(scale);*/
 
-    emit _updateModelMesh(true);
+    emit _updateModelMesh();
 }
 
 
@@ -489,62 +466,81 @@ void GLModel::copyModelAttributeFrom(GLModel* from){
     }
 }
 
-void GLModel::updateModelMesh(bool shadowUpdate){
+QTime GLModel::getPrevTime()
+{
+	return _mesh->getPrevTime();
+}
+
+QTime GLModel::getNextTime()
+{
+	return _mesh->getNextTime();
+}
+
+void GLModel::updateModelMesh(){
     // shadowUpdate updates shadow model of current Model
     QMetaObject::invokeMethod(qmlManager->boxUpperTab, "disableUppertab");
     QMetaObject::invokeMethod(qmlManager->boxLeftTab, "disableLefttab");
-    QMetaObject::invokeMethod(qmlManager->scene3d, "disableScene3D");
+    QMetaObject::invokeMethod((QObject*)qmlManager->scene3d, "disableScene3D");
     qDebug() << "update Model Mesh";
     // reinitialize with updated mesh
 
     int viewMode = qmlManager->getViewMode();
     switch( viewMode ) {
     case VIEW_MODE_OBJECT:
-		updateVertices(_mesh);
+		updateMesh(_mesh);
+
+        m_transform.setTranslation(QVector3D(m_transform.translation().x(),m_transform.translation().y(),-_mesh->z_min()));
         break;
     case VIEW_MODE_SUPPORT:
-		updateVertices(_mesh);
+		updateMesh(_mesh);
         if (supportMesh != nullptr)
-		{
+        {
 			appendMesh(supportMesh);
+            qDebug() << "ADDED support mesh";
         }
+        if (raftMesh != nullptr)
+        {
+            appendMesh(raftMesh);
+            qDebug() << "ADDED raft mesh";
+        }
+
+        m_transform.setTranslation(QVector3D(m_transform.translation().x(),m_transform.translation().y(),-_mesh->z_min() + scfg->raft_thickness + scfg->support_base_height));
+
         break;
     case VIEW_MODE_LAYER:
         qDebug() << "in the glmodel view mode layer" << qmlManager->getLayerViewFlags() << " " << (qmlManager->getLayerViewFlags() & LAYER_SUPPORTERS);
         if( layerMesh != nullptr ) {
-            int faces = layerMesh->getFaces()->size()*2 +
-                    (qmlManager->getLayerViewFlags() & LAYER_INFILL != 0 ? layerInfillMesh->getFaces()->size()*2 : 0) +
-                    (qmlManager->getLayerViewFlags() & LAYER_SUPPORTERS != 0 ? supportMesh->getFaces()->size()*2 : 0) +
-                    (qmlManager->getLayerViewFlags() & LAYER_RAFT != 0 ? layerRaftMesh->getFaces()->size()*2 : 0);
-			updateVertices(layerMesh);
+            int faces = layerMesh->getFaces().size()*2 +
+                    (qmlManager->getLayerViewFlags() & LAYER_INFILL != 0 ? layerInfillMesh->getFaces().size()*2 : 0) +
+                    (qmlManager->getLayerViewFlags() & LAYER_SUPPORTERS != 0 ? supportMesh->getFaces().size()*2 : 0) +
+                    (qmlManager->getLayerViewFlags() & LAYER_RAFT != 0 ? layerRaftMesh->getFaces().size()*2 : 0);
+			updateMesh(layerMesh);
             if( qmlManager->getLayerViewFlags() & LAYER_INFILL ) {
-				appendMesh(layerInfillMesh, QVector3D(1.0f, 1.0f, 0.0f));
+				appendMesh(layerInfillMesh);
             }
             if( qmlManager->getLayerViewFlags() & LAYER_SUPPORTERS ) {
 				appendMesh(supportMesh);
             }
             if( qmlManager->getLayerViewFlags() & LAYER_RAFT) {
-				appendMesh(layerRaftMesh, QVector3D(0.0f, 0.0f, 0.0f));
+                appendMesh(raftMesh);
             }
         } else {
-            int faces = _mesh->getFaces()->size()*2 + ((supportMesh!=nullptr) ? supportMesh->getFaces()->size()*2:0);
-			updateVertices(_mesh);
-            if (supportMesh != nullptr)
+            int faces = _mesh->getFaces().size()*2 + ((supportMesh!=nullptr) ? supportMesh->getFaces().size()*2:0);
+			updateMesh(_mesh);
+            if (supportMesh != nullptr){
 				appendMesh(supportMesh);
+                qDebug() << "ADDED support mesh";
         }
+            if (raftMesh != nullptr){
+                appendMesh(raftMesh);
+                qDebug() << "ADDED raft mesh";
+            }
+        }
+
+        m_transform.setTranslation(QVector3D(m_transform.translation().x(),m_transform.translation().y(),-_mesh->z_min() + scfg->raft_thickness + scfg->support_base_height));
         break;
     }
-    //applyGeometry();
 
-    QVector3D tmp = m_transform.translation();
-    float zlength = _mesh->z_max() - _mesh->z_min();
-    //if (shadowModel != NULL) // since shadow model transformed twice
-
-    m_transform.setTranslation(QVector3D(tmp.x(),tmp.y(),-_mesh->z_min()));
-    //QMetaObject::invokeMethod(qmlManager->boundedBox, "setPosition", Q_ARG(QVariant, m_transform.translation()+QVector3D((_mesh->x_max()+_mesh->x_min())/2,(_mesh->y_max()+_mesh->y_min())/2,(_mesh->z_max()+_mesh->z_min())/2)));
-    //QMetaObject::invokeMethod(qmlManager->boundedBox, "setSize", Q_ARG(QVariant, _mesh->x_max() - _mesh->x_min()),
-    //                                                 Q_ARG(QVariant, _mesh->y_max() - _mesh->y_min()),
-    //                                                 Q_ARG(QVariant, _mesh->z_max() - _mesh->z_min()));
     qmlManager->sendUpdateModelInfo();
     checkPrintingArea();
     //QMetaObject::invokeMethod(qmlManager->scalePopup, "updateSizeInfo", Q_ARG(QVariant, _mesh->x_max()-_mesh->x_min()), Q_ARG(QVariant, _mesh->y_max()-_mesh->y_min()), Q_ARG(QVariant, _mesh->z_max()-_mesh->z_min()));
@@ -552,46 +548,26 @@ void GLModel::updateModelMesh(bool shadowUpdate){
 
 
     // create new object picker, shadowmodel, remove prev shadowmodel
-    //QVector3D translation = shadowModel->m_transform.translation();
-    if (shadowUpdate){
-        //QObject::disconnect(shadowModel, SIGNAL(modelSelected(int)), qmlManager, SLOT(modelSelected(int)));
-        //shadowModel->removeMouseHandlers();
-        //qmlManager->disconnectHandlers(this);
-        //GLModel* prevShadowModel = shadowModel;
-        switch( viewMode ) {
-            case VIEW_MODE_OBJECT:
-                //addShadowModel(_mesh);
-                shadowModel->updateShadowModelImpl();
-                break;
-            case VIEW_MODE_SUPPORT:
-                //addShadowModel(layerMesh);
-                shadowModel->updateShadowModelImpl();
-                shadowModel->m_transform.setTranslation(shadowModel->m_transform.translation()+QVector3D(0,0,scfg->raft_thickness));
-                break;
-            case VIEW_MODE_LAYER:
-                shadowModel->updateShadowModelImpl();
-                //addShadowModel(_mesh);
-                break;
-        }
-        /*float mesh_x_center = m_transform.translation().x()+(_mesh->x_max() +_mesh->x_min())/2;
-        float mesh_y_center = m_transform.translation().y()+(_mesh->y_max() +_mesh->y_min())/2;
-        float mesh_z_center = m_transform.translation().z()+(_mesh->z_max() +_mesh->z_min())/2;
-        addShadowModel(_mesh->vertexMoved(-QVector3D(mesh_x_center,mesh_y_center,mesh_z_center)));
-        shadowModel->m_transform.setTranslation(QVector3D(mesh_x_center, mesh_y_center, 0));*/
-        //shadowModel->copyModelAttributeFrom(prevShadowModel);
-        //prevShadowModel->deleteLater();
-
-        //// reconnect handler if current selected model is updated
-        //if (qmlManager->selectedModels[0]==this)
-        //    qmlManager->connectHandlers(this);
-        //shadowModel->m_transform.setTranslation(translation);
-        //QObject::connect(shadowModel, SIGNAL(modelSelected(int)), qmlManager, SLOT(modelSelected(int)));
-    }
+    //if (shadowUpdate){
+    //    switch( viewMode ) {
+    //        case VIEW_MODE_OBJECT:
+    //            updateShadowModelImpl();
+    //            break;
+    //        case VIEW_MODE_SUPPORT:
+    //            updateShadowModelImpl();
+    //            m_transform.setTranslation(m_transform.translation()+QVector3D(0,0,scfg->raft_thickness));
+    //            break;
+    //        case VIEW_MODE_LAYER:
+    //            updateShadowModelImpl();
+    //            //addShadowModel(_mesh);
+    //            break;
+    //    }
+    //}
     updateLock = false;
     qDebug() << this << "released lock";
     QMetaObject::invokeMethod(qmlManager->boxUpperTab, "enableUppertab");
     QMetaObject::invokeMethod(qmlManager->boxLeftTab, "enableLefttab");
-    QMetaObject::invokeMethod(qmlManager->scene3d, "enableScene3D");
+    QMetaObject::invokeMethod((QObject*)qmlManager->scene3d, "enableScene3D");
 }
 
 void GLModel::slicingDone(){
@@ -761,7 +737,7 @@ void featureThread::run(){
                 qmlManager->openProgressPopUp();
                 MeshRepair::repairMesh(m_glmodel->_mesh);
 
-                emit m_glmodel->_updateModelMesh(true);
+                emit m_glmodel->_updateModelMesh();
                 break;
             }
         case ftrCut:
@@ -798,288 +774,295 @@ arrangeSignalSender::arrangeSignalSender(){
 }
 
 void GLModel::clearMem(){
-    QByteArray newVertexArray(vertexBuffer.data().size(), 0);
-    QByteArray newVertexNormalArray(vertexNormalBuffer.data().size(), 0);
-    QByteArray newVertexColorArray(vertexColorBuffer.data().size(), 0);
-    vertexBuffer.updateData(0, newVertexArray);
-    vertexNormalBuffer.updateData(0, newVertexNormalArray);
-    vertexColorBuffer.updateData(0, newVertexColorArray);
+    QByteArray newVertexArray;
+	QByteArray newIdxArray;
+
+    vertexBuffer.setData(newVertexArray);
+	indexBuffer.setData(newIdxArray);
+
 	positionAttribute.setCount(0);
 	normalAttribute.setCount(0);
 	colorAttribute.setCount(0);
+	indexAttribute.setCount(0);
+
 }
 
-
-void GLModel::clearVertices(){
-    //uint vertexCount = positionAttribute->count();
-    //vertexBuffer->
-    //positionAttribute->setCount(vertexCount+vertexCount);
-    return;
-}
-
-void GLModel::updateAllVertices(Mesh* mesh, QVector3D vertexColor)
+//****************************** Mesh -> QGeometry helper inlines *******************//
+inline void eraseBufferData(QAttribute& attr, Qt3DRender::QBuffer& buffer, size_t amount, size_t count)
 {
-	mesh->flushChanges();
-	appendMesh(mesh, vertexColor);
+	QByteArray copy = buffer.data();
+	copy.remove(copy.size() - amount, amount);
+	buffer.setData(copy);
+	attr.setCount(attr.count() - count);
+	return;
+}
+void inline attrBufferResize(QAttribute & attr, Qt3DRender::QBuffer & attrBuffer, size_t dataUnitSize, size_t appendByteSize) {
+
+	size_t currentUsedSize = attr.count() * dataUnitSize;
+	size_t currentAllocSize = attrBuffer.data().size();
+	if ((currentUsedSize + appendByteSize) > currentAllocSize) {
+		size_t countPowerOf2 = 1;
+		while (countPowerOf2 < currentUsedSize + appendByteSize) {
+			countPowerOf2 <<= 1;
+		}
+		auto copy = attrBuffer.data();
+		copy.resize(countPowerOf2);
+		attrBuffer.setData(copy);
+	}
+}
+
+void GLModel::setMesh(Mesh* mesh)
+{
+
+	//flush datas
+	auto faceHistory = mesh->getFacesNonConst().flushChanges();
+	auto verticesHistory = mesh->getVerticesNonConst().flushChanges();
+	auto hEdgesHistory = mesh->getHalfEdgesNonConst().flushChanges();//not used...for now
+	removeComponent(&m_geometryRenderer);
+	appendMesh(mesh);
+	addComponent(&m_geometryRenderer);
 
 }
 
-
-void GLModel::appendMesh(Mesh* mesh, QVector3D vertexColor)
+void GLModel::appendMesh(Mesh* mesh)
 {
 	_currentVisibleMesh = mesh;
 	//if the QGeo hasn't been cleared, ie) combining two meshes, set current mesh pointer to nullptr
 	if (positionAttribute.count() != 0)
 		_currentVisibleMesh = nullptr;
-	int face_size = mesh->getFaces()->size();
-	int face_idx = 0;
-	for (const MeshFace& mf : *mesh->getFaces()) {
-		face_idx++;
-		if (face_idx % 100 == 0)
-			QCoreApplication::processEvents();
-		std::vector<QVector3D> result_vs;
-		std::vector<QVector3D> result_vns;
-		std::vector<QVector3D> result_vcs;
-		for (int fn = 0; fn <= 2; fn++) {
-			result_vcs.push_back(vertexColor);
-			result_vs.push_back(mf.mesh_vertex[fn]->position);
-			result_vns.push_back(mf.mesh_vertex[fn]->vn);
-			if (mf.mesh_vertex[fn]->vn[0] == 0 && \
-				mf.mesh_vertex[fn]->vn[1] == 0 && \
-				mf.mesh_vertex[fn]->vn[2] == 0)
-			{
-				result_vns.pop_back();
-				result_vns.push_back(QVector3D(1, 1, 1));
-			}
-		}
-		appendVertices(result_vs);
-		appendNormalVertices(result_vns);
-		appendColorVertices(result_vcs);
+
+	//indexAttribute.buffer()->setAccessType(Qt3DRender::QBuffer::AccessType::);
+	//indexAttribute.buffer()->setAccessType(Qt3DRender::QBuffer::AccessType::Read);
+	//m_geometry.addAttribute(&indexAttribute);
+	auto &faces = mesh->getFaces();
+	auto &vtxs = mesh->getVertices();
+	//since renderer access data from background thread
+	size_t prevMaxIndex =  appendMeshVertex(mesh, vtxs.cbegin(), vtxs.cend());
+	appendMeshFace(mesh, faces.cbegin(), faces.cend(), prevMaxIndex);
+
+}
+
+size_t GLModel::appendMeshVertex(const Mesh* mesh,
+	Hix::Engine3D::VertexConstItr begin, Hix::Engine3D::VertexConstItr end)
+{
+	//we use position attribute, but can be either normal, color etc since they have same count
+	size_t oldCount = positionAttribute.count();
+	size_t oldSize = oldCount * VTX_SIZE;
+	//append count
+	size_t count = end - begin;
+	size_t appendByteSize = count * VTX_SIZE;
+	//resize attr buffer for new append
+	//attrBufferResize(positionAttribute, vertexBuffer, VTX_SIZE, appendByteSize);
+	//data to be appended
+	QByteArray appendData;
+	appendData.resize(appendByteSize);
+	//add data to the append data
+	QVector<QVector3D> vertices;
+
+	for (auto itr = begin; itr != end; ++itr)
+	{
+		auto& vtx = *itr;
+		vertices << vtx.position << vtx.vn << vtx.color;
+
 	}
+	float* rawVertexArray = reinterpret_cast<float*>(appendData.data());
+	size_t idx = 0;
+	for (const QVector3D& v : vertices) {
+		rawVertexArray[idx++] = v.x();
+		rawVertexArray[idx++] = v.y();
+		rawVertexArray[idx++] = v.z();
+	}
+	//update data/count
+	QByteArray totalData = vertexBuffer.data() + appendData;
+
+	vertexBuffer.setData(totalData);
+	positionAttribute.setCount(oldCount + count);
+	normalAttribute.setCount(oldCount + count);
+	colorAttribute.setCount(oldCount + count);
+	return oldCount;
+}
+
+void GLModel::appendMeshFace(const Mesh* mesh, Hix::Engine3D::FaceConstItr begin, Hix::Engine3D::FaceConstItr end, size_t prevMaxIndex)
+{	
+	//we need to get maximum index of the current rendered mesh when we are appending to non-empty mesh.
+	size_t oldCount = indexAttribute.count()/3; //see below
+	size_t oldSize = oldCount * FACE_SIZE;
+
+	size_t count = end - begin;
+	size_t appendByteSize = count * FACE_SIZE;
+
+	//resize attr buffer for new append
+	//attrBufferResize(indexAttribute, indexBuffer, FACE_SIZE, appendByteSize);
+	QByteArray indexBufferData;
+	indexBufferData.resize(appendByteSize);
+	uint* rawIndexArray = reinterpret_cast<uint*>(indexBufferData.data());
+
+	size_t indexIndex = 0;
+
+	for (auto itr = begin; itr != end; ++itr)
+	{
+		auto& face = *itr;
+		auto faceVertices = face.getVerticeIndices(mesh);
+		for (auto faceVtx : faceVertices)
+		{
+			rawIndexArray[indexIndex] = faceVtx + prevMaxIndex;
+			++indexIndex;
+		}
+	}
+	QByteArray totalData = indexBuffer.data() + indexBufferData;
+	indexBuffer.setData(totalData);
+	indexAttribute.setCount((oldCount + count) *3);//3 indicies per face
+	m_geometryRenderer.setVertexCount(indexAttribute.count());
+
+
 }
 
 
 
-void GLModel::updateVertices(Mesh* mesh, QVector3D vertexColor)
+void GLModel::updateMesh(Mesh* mesh)
 {
-	std::vector<Mesh::MeshOp> operations = mesh->flushChanges();
-	bool tooManyChanges = (operations.size() / (mesh->getFaces()->size() * 3)) > 0.8f;
-	if (_currentVisibleMesh != mesh || tooManyChanges)
+	//flush datas
+	auto faceHistory = mesh->getFacesNonConst().flushChanges();
+	auto verticesHistory = mesh->getVerticesNonConst().flushChanges();
+	auto hEdgesHistory = mesh->getHalfEdgesNonConst().flushChanges();//not used...for now
+
+	bool tooManyChanges = false;
+	std::unordered_set<size_t> faceChangeSet;
+	std::unordered_set<size_t> vtxChangeSet;
+	//check allChanged flag and skip to updateAll OR...
+	//if the mesh being updated is not the same as the visible one, we need to redraw everything
+	if (_currentVisibleMesh != mesh || faceHistory.index() == 0 || verticesHistory.index() == 0)
 	{
-		//if the mesh being updated is not the same as the visible one, we need to redraw everything
-		//also update all if there are too many changes.
+		tooManyChanges = true;
+	}
+	else
+	{
+		faceChangeSet = std::get<1>(faceHistory);
+		vtxChangeSet = std::get<1>(verticesHistory);
+		if (faceChangeSet.size() > mesh->getFaces().size() * 0.7 || vtxChangeSet.size() > mesh->getVertices().size() * 0.7)
+		{
+			tooManyChanges = true;
+		}
+	}
+	//if there are too many individual changes...
+	tooManyChanges = true;
+	if (tooManyChanges)
+	{
 		clearMem();
-		updateAllVertices(mesh, vertexColor);
+		setMesh(mesh);
 		return;
 	}
 
-	for (auto& operation : operations)
+
+	removeComponent(&m_geometryRenderer);
+	updateVertices(vtxChangeSet, *mesh);
+	updateFaces(faceChangeSet, *mesh);
+	addComponent(&m_geometryRenderer);
+
+}
+
+
+
+
+void GLModel::updateFaces(const std::unordered_set<size_t>& faceIndicies, const Hix::Engine3D::Mesh& mesh)
+{
+	auto& faces = mesh.getFaces();
+	size_t oldFaceCount = indexAttribute.count()/3;
+	size_t newFaceCount = faces.size();
+	size_t smallerCount = std::min(oldFaceCount, newFaceCount);
+	size_t largerCount = std::max(oldFaceCount, newFaceCount);
+	size_t difference = largerCount - smallerCount;
+	//update existing old values if they were changed
+	QByteArray updateArray;
+	updateArray.resize(FACE_SIZE);
+	uint* rawIndexArray = reinterpret_cast<uint*>(updateArray.data());
+	for (auto faceIdx : faceIndicies)
 	{
-#ifdef _STRICT_GLMODEL
-		if (operation.Type != Mesh::MeshOpType::Modify && operation.Operand == Mesh::MeshOpOperand::VertexSingle)
-			throw std::runtime_error("invalid mesh operation vertex arument on non-Modify");
-#endif
-		switch (operation.Type)
+		if (faceIdx < smallerCount)
 		{
-		case Mesh::MeshOpType::Append:
-		{
-			if (operation.Operand == Mesh::MeshOpOperand::FaceSingle)
+			auto face = faces[faceIdx];
+			size_t offset = faceIdx * FACE_SIZE;
+			auto faceVertices = face.getVerticeIndices(&mesh);
+			//for each indices
+			for (size_t i = 0; i < 3; ++i)
 			{
-				auto facePtr = std::get< const MeshFace*>(operation.Data);
-				for (size_t i = 0; i < 3; ++i)
-				{
-					const auto& vtx = facePtr->mesh_vertex[i];
-					//sigh
-					addVertex(vtx->position, vtx->vn, vertexColor);
-
-				}
+				rawIndexArray[i] = faceVertices[i];
 			}
-			else
-			{
-#ifdef _STRICT_GLMODEL
-				throw std::runtime_error("range for append operation not implemented");
-#endif
-			}
-			break;
+			indexBuffer.updateData(offset, updateArray);
 		}
-		case Mesh::MeshOpType::Modify:
-		{
-			if (operation.Operand == Mesh::MeshOpOperand::FaceRange)
-			{
-				auto range = std::get< std::pair<size_t, size_t> >(operation.Data);
-				for (size_t i = range.first; i != range.second; ++i)
-				{
-					auto facePtr = (*mesh->getRenderOrderFaces())[i];
-					updateFace(facePtr);
-				}
-			}
-
-			else if (operation.Operand == Mesh::MeshOpOperand::FaceSingle)
-			{
-				auto facePtr = std::get< const MeshFace*  >(operation.Data);
-				updateFace(facePtr);
-
-			}
-			else
-			{
-				auto vtxPtr = std::get< const MeshVertex*  >(operation.Data);
-				auto faces = vtxPtr->connected_faces;
-				for (auto each : faces)
-				{
-					updateFace(each);
-				}
-			}
-			break;
-		}
-		case Mesh::MeshOpType::Delete:
-		{
-			if (operation.Operand == Mesh::MeshOpOperand::FaceSingle)
-			{
-				auto deleteIdx = std::get<size_t>(operation.Data);
-
-				deleteAndShiftFaces(deleteIdx, 1);
-			}
-			else if (operation.Operand == Mesh::MeshOpOperand::FaceRange)
-			{
-				auto deleteRange = std::get<std::pair<size_t, size_t>>(operation.Data);
-
-				deleteAndShiftFaces(deleteRange.first, deleteRange.second - deleteRange.first );
-			}
-			else
-			{
-#ifdef _STRICT_GLMODEL
-				throw std::runtime_error("range for delete operation not implemented");
-#endif
-
-			}
-			break;
-		}
-		}
-
 	}
-}
+	indexBuffer.setData(indexBuffer.data());
 
-
-inline void appendOrResizeBuffer(const QVector3D& data, QAttribute& attr, Qt3DRender::QBuffer& buffer)
-{
-	//update geometry
-	QByteArray appendVertexArray;
-	size_t newDataSize = 3 * sizeof(float);
-	appendVertexArray.resize(newDataSize);
-	float* reVertexArray = reinterpret_cast<float*>(appendVertexArray.data());
-
-	//coordinates of left vertex
-	reVertexArray[0] = data.x();
-	reVertexArray[1] = data.y();
-	reVertexArray[2] = data.z();
-
-	uint vertexCount = attr.count();
-	//if the attribute array is too small
-	auto bufferSize = buffer.data().size();
-	if((vertexCount* 3 * sizeof(float) + newDataSize) > bufferSize)
+	//if new size is smaller, delete elements from back
+	if (newFaceCount < oldFaceCount)
 	{
-		auto oldData = buffer.data();
-		oldData.resize(oldData.size() + ATTRIBUTE_SIZE_INCREMENT);
-		buffer.setData(oldData);
+		eraseBufferData(indexAttribute, indexBuffer, difference * FACE_SIZE, difference*3);
+		m_geometryRenderer.setVertexCount(indexAttribute.count());
 	}
-	buffer.updateData(vertexCount * 3 * sizeof(float), appendVertexArray);
-	attr.setCount(vertexCount + 1);
-	return;
-}
-void GLModel::addVertex(QVector3D pos, QVector3D normal, QVector3D color) 
-{
-	appendOrResizeBuffer(pos, positionAttribute, vertexBuffer);
-	appendOrResizeBuffer(normal, normalAttribute, vertexNormalBuffer);
-	appendOrResizeBuffer(color, colorAttribute, vertexColorBuffer);
-}
-
-inline void updateBuffer(const QVector3D& data, QAttribute& attr, Qt3DRender::QBuffer& buffer, size_t offset)
-{
-	//update geometry
-	QByteArray appendVertexArray;
-	size_t newDataSize = 3 * sizeof(float);
-	appendVertexArray.resize(newDataSize);
-	float* reVertexArray = reinterpret_cast<float*>(appendVertexArray.data());
-
-	//coordinates of left vertex
-	reVertexArray[0] = data.x();
-	reVertexArray[1] = data.y();
-	reVertexArray[2] = data.z();
-
-	buffer.updateData(offset, appendVertexArray);
-	return;
-}
-void GLModel::updateFace(const MeshFace* face)
-{
-	size_t startingOffset = face->idx * 3 * 3* sizeof(float);
-	size_t offset = 0;
-	for (size_t i = 0; i < 3; ++i)
+	else if (newFaceCount > oldFaceCount)
 	{
-		offset = i * sizeof(float) * 3;
-		auto vtx = face->mesh_vertex[i];
-		updateBuffer(vtx->position, positionAttribute, vertexBuffer, startingOffset + offset);
-		QVector3D normal = vtx->vn;
-		if (vtx->vn == QVector3D{0, 0, 0})
-		{
-			normal = { 1,1,1 };
-		}
-		updateBuffer(normal, normalAttribute, vertexNormalBuffer, startingOffset + offset);
-		//updateBuffer(vtx->color, colorAttribute, vertexColorBuffer,  startingOffset + offset);
+		appendMeshFace(&mesh, faces.cend() - difference, faces.cend(), 0);
 	}
+
+	indexAttribute.setCount(newFaceCount * 3);//3 indicies per face
+	m_geometryRenderer.setVertexCount(indexAttribute.count());
+
 }
 
-inline void deleteAndShiftBuffer(QAttribute& attr, Qt3DRender::QBuffer& buffer, size_t index, size_t amount)
+
+void GLModel::updateVertices(const std::unordered_set<size_t>& vtxIndicies, const Hix::Engine3D::Mesh& mesh)
 {
-	size_t eraseAmount = amount * 3 * 3 * sizeof(float);
+	auto& vtcs = mesh.getVertices();
+	size_t oldVtxCount = positionAttribute.count();
+	size_t newVtxCount = vtcs.size();
+	size_t smallerCount = std::min(oldVtxCount, newVtxCount);
+	size_t largerCount = std::max(oldVtxCount, newVtxCount);
+	size_t difference = largerCount - smallerCount;
+	//update existing old values if they were changed
+	QByteArray updateArray;
+	updateArray.resize(VTX_SIZE);
+	float* rawVertexArray = reinterpret_cast<float*>(updateArray.data());
 
-	QByteArray copy = buffer.data();
-	copy.remove(index*  3 * 3 * sizeof(float), eraseAmount);
-	buffer.setData(copy);
-	attr.setCount(attr.count() - amount);
-	return;
+	//vertexBuffer.blockSignals(true);
+	//vertexBuffer.blockNotifications(true);
+	for (auto vtxIdx : vtxIndicies)
+	{
+		if (vtxIdx < smallerCount)
+		{
+			auto vtx = vtcs[vtxIdx];
+			QVector<QVector3D> vtxData;
+			vtxData << vtx.position  << vtx.vn << vtx.color;
+			size_t idx = 0;
+			for (const QVector3D& v : vtxData) {
+				rawVertexArray[idx++] = v.x();
+				rawVertexArray[idx++] = v.y();
+				rawVertexArray[idx++] = v.z();
+			}
+			size_t offset = vtxIdx * VTX_SIZE;
+			vertexBuffer.updateData(offset, updateArray);
+		}
+	}
+	//vertexBuffer.blockSignals(false);
+	//vertexBuffer.blockNotifications(false);
+	//vertexBuffer.setData(vertexBuffer.data());
+	emit vertexBuffer.dataChanged(vertexBuffer.data());
+	//if new size is smaller, delete elements from back
+	if (newVtxCount < oldVtxCount)
+	{
+		eraseBufferData(positionAttribute, vertexBuffer, difference * VTX_SIZE, difference);
+		//set other attribute count as well
+		normalAttribute.setCount(positionAttribute.count());
+		colorAttribute.setCount(positionAttribute.count());
+	}
+	else if (newVtxCount > oldVtxCount)
+	{
+		appendMeshVertex(&mesh, vtcs.cend() - difference, vtcs.cend());
+	}
+	positionAttribute.setCount(newVtxCount);
+	normalAttribute.setCount(positionAttribute.count());
+	colorAttribute.setCount(positionAttribute.count());
 }
-void GLModel::deleteAndShiftFaces(size_t start, size_t deleteAmount)
-{
-	deleteAndShiftBuffer(positionAttribute, vertexBuffer, start, deleteAmount);
-	deleteAndShiftBuffer(normalAttribute, vertexNormalBuffer, start, deleteAmount);
-	deleteAndShiftBuffer(colorAttribute, vertexColorBuffer, start, deleteAmount);
 
-}
-void GLModel::appendVertices(std::vector<QVector3D> vertices){
-
-    int appendVertexCount = vertices.size();
-    QByteArray appendVertexArray;
-    appendVertexArray.resize(appendVertexCount*3*sizeof(float));
-    float* reVertexArray = reinterpret_cast<float*>(appendVertexArray.data());
-
-    for (int i=0; i<appendVertexCount; i++){
-        //coordinates of left vertex
-        reVertexArray[i*3+0] = vertices[i].x();
-        reVertexArray[i*3+1] = vertices[i].y();
-        reVertexArray[i*3+2] = vertices[i].z();
-    }
-
-    uint currentVertexCount = positionAttribute.count();
-    //qDebug() << "position Attribute size : " << (int)currentVertexCount;
-    int currentVertexArraySize = currentVertexCount*3*sizeof(float);
-    int appendVertexArraySize = appendVertexArray.size();
-
-    if ((currentVertexArraySize  + appendVertexArraySize) > vertexBuffer.data().size()) {
-        auto data = vertexBuffer.data();
-        int currentVertexArraySize = data.size();
-
-        int countPowerOf2 = 1;
-        while (countPowerOf2 < currentVertexArraySize + appendVertexArraySize) {
-            countPowerOf2 <<= 1;
-        }
-
-        data.resize(countPowerOf2);
-        vertexBuffer.setData(data);
-    }
-
-    vertexBuffer.updateData(currentVertexArraySize, appendVertexArray);
-    positionAttribute.setCount(currentVertexCount + appendVertexCount);
-}
 
 const Mesh* GLModel::getMesh()
 {
@@ -1087,107 +1070,27 @@ const Mesh* GLModel::getMesh()
 }
 
 
-
-void GLModel::appendNormalVertices(std::vector<QVector3D> vertices){
-    int vertex_normal_cnt = vertices.size();
-    QByteArray appendVertexArray;
-    appendVertexArray.resize(vertex_normal_cnt*3*sizeof(float));
-    float * reVertexArray = reinterpret_cast<float*>(appendVertexArray.data());
-
-    for (int i=0; i<vertex_normal_cnt; i++){
-
-        //coordinates of left vertex
-        reVertexArray[3*i+0] = vertices[i].x();
-        reVertexArray[3*i+1] = vertices[i].y();
-        reVertexArray[3*i+2] = vertices[i].z();
-    }
-
-    uint vertexNormalCount = normalAttribute.count();
-
-    int offset = vertexNormalCount*3*sizeof(float);
-    int bytesSize = appendVertexArray.size();
-
-    if ((offset + bytesSize) > vertexNormalBuffer.data().size()) {
-        auto data = vertexNormalBuffer.data();
-
-        int countPowerOf2 = 1;
-        while (countPowerOf2 < data.size() + bytesSize) {
-            countPowerOf2 <<= 1;
-        }
-
-        data.resize(countPowerOf2);
-
-        vertexNormalBuffer.setData(data);
-    }
-
-    vertexNormalBuffer.updateData(offset, appendVertexArray);
-    normalAttribute.setCount(vertexNormalCount+ vertex_normal_cnt);
-    return;
-}
-
-void GLModel::appendColorVertices(std::vector<QVector3D> vertices){
-    int vertex_color_cnt = vertices.size();
-    QByteArray appendVertexArray;
-    appendVertexArray.resize(vertex_color_cnt*3*sizeof(float));
-    float * reVertexArray = reinterpret_cast<float*>(appendVertexArray.data());
-
-//    for (int i=0; i<vertex_color_cnt; i++){
-//        //coordinates of left vertex
-//        //97 185 192
-//        //reVertexArray[3*i+0] = 0.38;
-//        //reVertexArray[3*i+1] = 0.725;
-//        //reVertexArray[3*i+2] = 0.753;
-//        reVertexArray[3*i+0] = 0.278;
-//        reVertexArray[3*i+1] = 0.670;
-//        reVertexArray[3*i+2] = 0.706;
-//    }
-
-    int i = 0;
-    for( auto iter = vertices.begin() ; iter != vertices.end() ; iter++, i++ ) {
-        reVertexArray[3*i+0] = (*iter).x();
-        reVertexArray[3*i+1] = (*iter).y();
-        reVertexArray[3*i+2] = (*iter).z();
-    }
-
-    uint vertexColorCount = colorAttribute.count();
-
-    int offset = vertexColorCount*3*sizeof(float);
-    int bytesSize = appendVertexArray.size();
-
-    if ((offset + bytesSize) > vertexColorBuffer.data().size()) {
-        auto data = vertexColorBuffer.data();
-
-        int countPowerOf2 = 1;
-        while (countPowerOf2 < data.size() + bytesSize) {
-            countPowerOf2 <<= 1;
-        }
-
-        data.resize(countPowerOf2);
-
-        vertexColorBuffer.setData(data);
-    }
-
-    vertexColorBuffer.updateData(vertexColorCount*3*sizeof(float), appendVertexArray);
-    colorAttribute.setCount(vertexColorCount + vertex_color_cnt);
-    return;
+void swapByteOrder(unsigned int& ui)
+{
+	ui = (ui >> 24) |
+		((ui << 8) & 0x00FF0000) |
+		((ui >> 8) & 0x0000FF00) |
+		(ui << 24);
 }
 
 
-
-
-
-void GLModel::handlePickerEnteredFreeCutSphere()
+void GLModel::mouseEnteredFreeCutSphere()
 {
     QCursor cursorEraser = QCursor(QPixmap(":/Resource/cursor_eraser.png"));
     QApplication::setOverrideCursor(cursorEraser);
 
 }
 
-void GLModel::handlePickerExitedFreeCutSphere()
+void GLModel::mouseExitedFreeCutSphere()
 {
     qmlManager->resetCursor();
 }
-void GLModel::handlePickerClickedFreeCutSphere(Qt3DRender::QPickEvent* pick)
+void GLModel::mouseClickedFreeCutSphere(Qt3DRender::QPickEvent* pick)
 {
     qmlManager->resetCursor();
 
@@ -1197,14 +1100,14 @@ void GLModel::handlePickerClickedFreeCutSphere(Qt3DRender::QPickEvent* pick)
     QVector2D pickPosition = (QVector2D)pick->position();
 
     int minIdx = 0;
-    float min = world2Screen(cuttingPoints[0]).distanceToPoint(pickPosition);
+    float min = qmlManager->world2Screen(cuttingPoints[0]).distanceToPoint(pickPosition);
     for (int i=0; i<cuttingPoints.size(); i++){
-
-        if (world2Screen(cuttingPoints[i]).distanceToPoint(pickPosition) < min){
+        if (qmlManager->world2Screen(cuttingPoints[i]).distanceToPoint(pickPosition) < min){
             minIdx = i;
-            min = world2Screen(cuttingPoints[i]).distanceToPoint(pickPosition);
+            min = qmlManager->world2Screen(cuttingPoints[i]).distanceToPoint(pickPosition);
         }
     }
+
     qDebug() << "min idx  " << minIdx;
     removeCuttingPoint(minIdx);
     removeCuttingContour();
@@ -1214,278 +1117,50 @@ void GLModel::handlePickerClickedFreeCutSphere(Qt3DRender::QPickEvent* pick)
     }
 }
 
-void GLModel::handlePickerClickedFreeCut(Qt3DRender::QPickEvent* pick)
+void GLModel::mouseClickedFreeCut(Qt3DRender::QPickEvent* pick)
 {
-    if ((pick->position().x() < 260 && pick->position().y() < 330)|| cutMode == 1 || pick->button() != Qt3DRender::QPickEvent::Buttons::LeftButton) // cut panel and if cut mode isn't freecut
+    /*if ((pick->position().x() < 260 && pick->position().y() < 330)|| cutMode == 1 || pick->button() != Qt3DRender::QPickEvent::Buttons::LeftButton) // cut panel and if cut mode isn't freecut
         return;
 
     QVector3D v = pick->localIntersection();
     QVector3D result_v = QVector3D(v.x(), -v.z(), v.y());
     result_v = result_v*2;
 
+    qDebug()<< "moiuse clicked freecut : " << v << result_v;
+
     bool found_nearby_v = false;
 
 
-    for (int i=0; i<parentModel->cuttingPoints.size(); i++){
-        if (result_v.distanceToPoint(parentModel->cuttingPoints[i]) <0.5f){;
-            parentModel->removeCuttingPoint(i);
+    for (int i=0; i< cuttingPoints.size(); i++){
+        if (result_v.distanceToPoint(cuttingPoints[i]) <0.5f){;
+            removeCuttingPoint(i);
             found_nearby_v = true;
             break;
         }
     }
 
     if (!found_nearby_v){
-        parentModel->addCuttingPoint(result_v);
+        addCuttingPoint(result_v);
     }
 
     // remove cutting contour and redraw cutting contour
-    parentModel->removeCuttingContour();
-    if (parentModel->cuttingPoints.size() >=2){
+    removeCuttingContour();
+    if (cuttingPoints.size() >=2){
         qDebug() << "tt";
-        parentModel->generateCuttingContour(parentModel->cuttingPoints);
-        parentModel->regenerateCuttingPoint(parentModel->cuttingPoints);
+        generateCuttingContour(cuttingPoints);
+        regenerateCuttingPoint(cuttingPoints);
     }
 
 
-    if (parentModel->cuttingPoints.size() >= 3)
+    if (cuttingPoints.size() >= 3)
         QMetaObject::invokeMethod(qmlManager->cutPopup, "colorApplyFinishButton", Q_ARG(QVariant, 2));
     else
         QMetaObject::invokeMethod(qmlManager->cutPopup, "colorApplyFinishButton", Q_ARG(QVariant, 0));
-
+    */
 }
 
-void GLModel::handlePickerClicked(QPickEvent *pick)
-{
-    qDebug() << "handle Picker clicked" << pick->buttons() << pick->button();
 
-    /*if (pick->button() == Qt::RightButton)
-        return;*/
-
-    if (!parentModel)
-        return;
-
-    if (qmlManager->getViewMode() == VIEW_MODE_SUPPORT) {
-        qmlManager->openYesNoPopUp(false, "", "Support will disappear.", "", 18, "", ftrSupportDisappear, 1);
-        return;
-    }
-
-    //---------------- rgoo routine init --------------------
-    m_objectPicker->setDragEnabled(false);
-    m_transform.setScale(1.0f);
-    qDebug() << "setting scale back to 1.0";
-    qmlManager->resetCursor();
-
-    isReleased = true;
-    qDebug() << "Released";
-
-
-    if (isMoved){
-        removeComponent(dragMesh);
-        qmlManager->fixMesh();
-        qDebug() << "dragMesh removed";
-
-		qmlManager->modelMoveDone();
-		isMoved = false;
-		return;
-	}
-
-
-    //---------------- rgoo routine end --------------------
-
-    if (qmlManager->yesno_popup->property("isFlawOpen").toBool())
-        return;
-
-    if (qmlManager->selectedModels[0] != nullptr && !(pick->button() & Qt::LeftButton)){ // when right button clicked
-        if (qmlManager->selectedModels[0]->ID == parentModel->ID){
-            qDebug() << "mttab alive 1";
-            QMetaObject::invokeMethod(qmlManager->mttab, "tabOnOff");
-            m_objectPicker->setEnabled(false);
-            return;
-        }
-
-    }
-
-
-
-    if (!cutActive && !extensionActive && !labellingActive && !layflatActive && !manualSupportActive && !isMoved)// && !layerViewActive && !supportViewActive)
-        emit modelSelected(parentModel->ID);
-
-    qDebug() << "model selected emit" << pick->position() << parentModel->ID;
-    qDebug() << "pick button : " << !(pick->button() & Qt::LeftButton) << pick->button();
-
-    if (!(pick->button() & Qt::LeftButton)){
-        qDebug() << "mttab alive";
-        QMetaObject::invokeMethod(qmlManager->mttab, "tabOnOff");
-    }
-
-    QPickTriangleEvent *trianglePick = static_cast<QPickTriangleEvent*>(pick);
-    qDebug() << "trianglePick : " << trianglePick << qmlManager->selectedModels.size() << qmlManager;
-	if (trianglePick->triangleIndex() >= _mesh->getRenderOrderFaces()->size() )
-	{
-		qDebug() << "trianglePick out of bound";
-
-		return;
-	}
-	const MeshFace* shadow_meshface = (*_mesh->getRenderOrderFaces())[trianglePick->triangleIndex()];
-	parentModel->targetMeshFace = shadow_meshface->parentFace;
-	qDebug() << "found parent meshface" << shadow_meshface->parentFace->idx;
-
-    if (labellingActive && trianglePick && trianglePick->localIntersection() != QVector3D(0,0,0)) {
-
-        //parentModel->uncolorExtensionFaces();
-        //parentModel->generateColorAttributes();
-        //parentModel->colorExtensionFaces();
-
-        QMetaObject::invokeMethod(qmlManager->labelPopup, "labelUpdate");
-
-        if (labellingTextPreview && labellingTextPreview->isEnabled()) {
-            labellingTextPreview->setTranslation(pick->localIntersection() + parentModel->targetMeshFace->fn);
-            labellingTextPreview->setNormal(parentModel->targetMeshFace->fn);
-            labellingTextPreview->planeSelected = true;
-        }
-        else {
-            labellingTextPreview->planeSelected = false;
-        }
-/*
-        QString label_text = "";
-        QString label_font = "";
-        bool label_font_bold = false;
-        int label_size = 12;
-        int contentWidth = 64;
-        if (labellingTextPreview){
-            label_text = labellingTextPreview->text;
-            label_font = labellingTextPreview->fontName;
-            label_font_bold = (labellingTextPreview->fontWeight==QFont::Bold)? true:false;
-            label_size = labellingTextPreview->fontSize;
-            contentWidth = labellingTextPreview->contentWidth;
-            labellingTextPreview->deleteLater();
-            labellingTextPreview = nullptr;
-            qDebug() << "labelling Text existed!" << label_text << label_font << label_size;
-        }
-        else
-            qDebug()<<"no labelling text";
-        //qDebug() << "me:"<<this << "parent:"<<this->parentModel<<"shadow:"<<this->shadowModel;
-        labellingTextPreview = new LabellingTextPreview(this);
-        labellingTextPreview->setEnabled(true);
-
-        if (labellingTextPreview && labellingTextPreview->isEnabled()) {
-            labellingTextPreview->setTranslation(pick->localIntersection() + parentModel->targetMeshFace->fn);
-            labellingTextPreview->setNormal(parentModel->targetMeshFace->fn);
-            if (label_text != ""){
-                labellingTextPreview->setFontName(label_font);
-                labellingTextPreview->setFontBold(label_font_bold);
-                labellingTextPreview->setFontSize(label_size);
-                labellingTextPreview->setText(label_text, contentWidth);
-            }
-            labellingTextPreview->planeSelected = true;
-        }
-        else {
-            qDebug() << "pinpin ^^^^^^^^^^^^^^^^^ 1";
-            labellingTextPreview->planeSelected = false;
-        }*/
-    }
-
-
-    if (cutActive){
-        if (cutMode == 1){
-            qDebug() << "cut mode 1";
-
-        } else if (cutMode == 2){// && parentModel->numPoints< sizeof(parentModel->sphereEntity)/4) {
-            qDebug() << pick->localIntersection()<<"pick" << cuttingPoints.size() << parentModel->cuttingPoints.size();
-            QVector3D v = pick->localIntersection();
-            qDebug() << v.distanceToPoint(parentModel->cuttingPoints[parentModel->cuttingPoints.size()-1]);
-
-            bool found_nearby_v = false;
-            for (int i=0; i<parentModel->cuttingPoints.size(); i++){
-                if (v.distanceToPoint(parentModel->cuttingPoints[i]) <0.5f){
-                    parentModel->removeCuttingPoint(i);
-                    found_nearby_v = true;
-                    break;
-                }
-            }
-
-            if (!found_nearby_v){
-                qDebug() << "Check 0 " << parentModel->cuttingPoints.size();
-                parentModel->addCuttingPoint(v+m_transform.translation());
-                qDebug() << "Check 1 " << parentModel->cuttingPoints.size();
-            }
-
-            /*if (v.distanceToPoint(parentModel->cuttingPoints[parentModel->cuttingPoints.size()-1]) < 0.5f){
-                qDebug() << "removing cutting point";
-                //parentModel->removeCuttingPoint();
-            } else {
-                parentModel->addCuttingPoint(v);
-            }*/
-
-            // remove cutting contour and redraw cutting contour
-
-            parentModel->removeCuttingContour();
-            if (parentModel->cuttingPoints.size() >= 2){
-                parentModel->generateCuttingContour(parentModel->cuttingPoints);
-                parentModel->regenerateCuttingPoint(parentModel->cuttingPoints);
-            }
-            //generatePlane();
-            //parentModel->ft->ct->addCuttingPoint(parentModel, v);
-        } else if (cutMode == 9999){
-            qDebug() << "current cut mode :" << cutMode;
-            qmlManager->setProgress(1);
-            //return;
-        }
-    }
-
-    if (extensionActive && trianglePick  && trianglePick->localIntersection() != QVector3D(0,0,0)){
-        qDebug() << "found parent meshface" << shadow_meshface->parentFace->idx;
-        parentModel->uncolorExtensionFaces();
-        emit extensionSelect();
-        parentModel->generateColorAttributes();
-        /*qDebug() << trianglePick->localIntersection() \
-                 << parentModel->parentModel->targetMeshFace->mesh_vertex[0]->position\
-                << parentModel->parentModel->targetMeshFace->mesh_vertex[1]->position\
-                << parentModel->parentModel->targetMeshFace->mesh_vertex[2]->position;
-        */
-        // << parentModel->targetMeshFace->mesh_vertex[1] << parentModel->targetMeshFace->mesh_vertex[2];
-        parentModel->colorExtensionFaces();
-    }
-
-    if (hollowShellActive){
-        qDebug() << "getting handle picker clicked signal hollow shell active";
-        qDebug() << "found parent meshface" << shadow_meshface->parentFace->idx;
-        // translate hollowShellSphere to mouse position
-        QVector3D v = pick->localIntersection();
-        QVector3D tmp = m_transform.translation();
-        float zlength = _mesh->z_max() - _mesh->z_min();
-        qmlManager->hollowShellSphereTransform->setTranslation(v + QVector3D(tmp.x(),tmp.y(),-_mesh->z_min()));
-
-        //parentModel->indentHollowShell(10);
-        // emit hollowShellSelect();
-    }
-
-    if (layflatActive && trianglePick && trianglePick->localIntersection() != QVector3D(0,0,0)){
-        /*
-        m_objectPicker->setEnabled(false);
-        this->parentModel->m_objectPicker = new Qt3DRender::QObjectPicker(this->parentModel);
-        QObject::connect(this->parentModel->m_objectPicker, SIGNAL(clicked(Qt3DRender::QPickEvent*)), this->parentModel, SLOT(handlePickerClickedLayflat(Qt3DRender::QPickEvent*)));
-        this->parentModel->addComponent(this->parentModel->m_objectPicker);
-        */
-
-        qDebug() << "target 1 " <<shadow_meshface->fn ;
-
-        parentModel->uncolorExtensionFaces();
-        emit layFlatSelect();
-        parentModel->generateColorAttributes();
-        parentModel->colorExtensionFaces();
-    }
-
-    if (manualSupportActive && trianglePick  && trianglePick->localIntersection() != QVector3D(0,0,0)){
-        qDebug() << "manual support handle picker clicked";
-        parentModel->uncolorExtensionFaces();
-        emit extensionSelect();
-        parentModel->generateColorAttributes();
-        parentModel->colorExtensionFaces();
-    }
-}
-
-void GLModel::handlePickerClickedLayflat(MeshFace shadow_meshface){
+void GLModel::mouseClickedLayflat(MeshFace shadow_meshface){
     /*
     qDebug() << "layflat picker!";
     QPickTriangleEvent *trianglePick = static_cast<QPickTriangleEvent*>(pick);
@@ -1503,217 +1178,14 @@ void GLModel::handlePickerClickedLayflat(MeshFace shadow_meshface){
     tmp.setRotationX(angleX);
     tmp.setRotationY(angleY);
     rotateModelMesh(tmp.matrix());
-    QObject::disconnect(m_objectPicker,SIGNAL(released(Qt3DRender::QPickEvent*)), this, SLOT(handlePickerClickedLayflat(Qt3DRender::QPickEvent*)));
-    delete m_objectPicker;
-    shadowModel->m_objectPicker->setEnabled(true);
+    //QObject::disconnect(m_objectPicker,SIGNAL(released(Qt3DRender::QPickEvent*)), this, SLOT(mouseClickedLayflat(Qt3DRender::QPickEvent*)));
+    //delete m_objectPicker;
+    ////m_objectPicker->setEnabled(true);
     //closeLayflat();
     emit resetLayflat();
 }
 
-// need to create new _mesh object liek Mesh* leftMesh = new Mesh();
-void GLModel::bisectModel(Plane plane, Mesh& lmesh, Mesh& rmesh){
-    // if the cutting plane is at min or max, it will not going to cut and just end
-    if (isFlatcutEdge && !shadowModel->shellOffsetActive){
-        shadowModel->removePlane();
-        removeCuttingPoints();
-        removeCuttingContour();
-        QMetaObject::invokeMethod(qmlManager->boxUpperTab, "all_off");
-        qmlManager->setProgress(1);
-        QMetaObject::invokeMethod(qmlManager->boundedBox, "hideBox");
-        return;
-    }
-
-    // do bisecting _mesh
-
-    Paths3D cuttingEdges;
-
-	for (const MeshFace& mf : *_mesh->getFaces()) {
-		bool faceLeftToPlane = false;
-        bool faceRightToPlane = false;
-        Plane target_plane;
-        for (int vn=0; vn<3; vn++){
-            const MeshVertex& mv = *mf.mesh_vertex[vn];
-            target_plane.push_back(mv.position);
-            if (modelcut::isLeftToPlane(plane, mv.position)) // if one vertex is left to plane, append to left vertices part
-                faceLeftToPlane = true;
-            else {
-                faceRightToPlane = true;
-            }
-        }
-        if (faceLeftToPlane && faceRightToPlane){ // cutting edge
-            Path3D intersection = _mesh->intersectionPath(plane, target_plane);
-            cuttingEdges.push_back(intersection);
-            std::vector<QVector3D> upper;
-            std::vector<QVector3D> lower;
-
-            for (int i=0; i<3; i++){
-                if (target_plane[i].distanceToPlane(plane[0],plane[1],plane[2]) >0)
-                    upper.push_back(target_plane[i]);
-                else
-                    lower.push_back(target_plane[i]);
-            }
-
-            QVector3D target_plane_normal = QVector3D::normal(target_plane[0], target_plane[1], target_plane[2]);
-
-            if (upper.size() == 2){
-                float dotproduct = QVector3D::dotProduct(target_plane_normal, QVector3D::normal(upper[1],upper[0],intersection[1].position));
-                bool facingNormal = dotproduct>0;//QVector3D::normal(lower[0], intersection[0].position, intersection[1].position))>0;//abs((target_plane_normal- QVector3D::normal(lower[0], intersection[0].position, intersection[1].position)).length())<1;
-                bool facingNormalAmbiguous = abs(dotproduct)<0.1;
-                if (facingNormal || facingNormalAmbiguous){
-                    rmesh.addFace(upper[1], upper[0], intersection[1].position);
-                    rmesh.addFace(intersection[1].position, intersection[0].position, upper[1]);
-                    lmesh.addFace(lower[0], intersection[0].position, intersection[1].position);
-                }
-                if (!facingNormal || facingNormalAmbiguous) {
-                    rmesh.addFace(upper[0], upper[1], intersection[1].position);
-                    rmesh.addFace(intersection[0].position, intersection[1].position, upper[1]);
-                    lmesh.addFace(intersection[0].position, lower[0], intersection[1].position);
-                }
-            } else if (lower.size() == 2){
-                float dotproduct = QVector3D::dotProduct(target_plane_normal, QVector3D::normal(lower[0], intersection[1].position, intersection[0].position));
-                bool facingNormal = dotproduct>0;
-                bool facingNormalAmbiguous = abs(dotproduct)<0.1;
-
-                if (facingNormal || facingNormalAmbiguous){
-                    lmesh.addFace(lower[0], intersection[1].position, intersection[0].position);
-                    lmesh.addFace(lower[0], lower[1], intersection[1].position);
-                    rmesh.addFace(upper[0], intersection[0].position, intersection[1].position);
-                }
-                if (!facingNormal || facingNormalAmbiguous){
-                    lmesh.addFace(intersection[1].position, lower[0], intersection[0].position);
-                    lmesh.addFace(lower[1], lower[0], intersection[1].position);
-                    rmesh.addFace(intersection[0].position, upper[0], intersection[1].position);
-                }
-            } else {
-                qDebug() << "wrong faces";
-            }
-
-
-        } else if (faceLeftToPlane){
-            lmesh.addFace(mf.mesh_vertex[0]->position, mf.mesh_vertex[1]->position, mf.mesh_vertex[2]->position);
-        } else if (faceRightToPlane){											   							   
-            rmesh.addFace(mf.mesh_vertex[0]->position, mf.mesh_vertex[1]->position, mf.mesh_vertex[2]->position);
-        }
-    }
-
-
-    if (cutFillMode == 2){ // if fill holes
-        // contour construction
-        Paths3D contours = contourConstruct3D(cuttingEdges);
-
-        QVector3D plane_normal = QVector3D::normal(plane[0], plane[1], plane[2]);
-
-        // copy paths3d to std::vector<containmentPath*>
-        for (int c=0; c<contours.size(); c++){
-        //for (Path3D contour : contours){
-            for (MeshVertex mv : contours[c]){
-                IntPoint ip;
-                ip.X = round(mv.position.x()*scfg->resolution);
-                ip.Y = round(mv.position.y()*scfg->resolution);
-                contours[c].projection.push_back(ip);
-            }
-        }
-
-        // search for containment tree construction
-        for (int target_idx=0; target_idx<contours.size(); target_idx++){
-            for (int in_idx=0; in_idx<contours.size(); in_idx++){
-            //for (Path3D in_path : contours){
-                if ((contours[in_idx].size()>3) && (contours[target_idx].size()>3)
-                        && (target_idx != in_idx) && (pathInpath(contours[target_idx], contours[in_idx]))){
-                    contours[target_idx].outer.push_back(contours[in_idx]);
-                    contours[in_idx].inner.push_back(contours[target_idx]);
-                }
-            }
-        }
-
-        qDebug() << "after cutting edges :" << contours.size();
-
-        /*// contour 2 polygon done by poly2tri
-        std::vector<p2t::Point*> ContourPoints;
-
-        for (Path3D contour : contours){
-            for (MeshVertex mv : contour){
-                //ContourPoints.push_back(new p2t::Point(mv.position.x(), mv.position.y()));
-                ContourPoints.push_back(new p2t::Point(mv.position.y(), mv.position.z()));
-            }
-        }
-        qDebug() << "putted contourPoints";
-
-        float d = plane_normal.x()*plane[0].x() +
-                plane_normal.y()*plane[0].y() +
-                plane_normal.z()*plane[0].z();
-
-        p2t::CDT cdt(ContourPoints);
-        cdt.Triangulate();
-        std::vector<p2t::Triangle*> triangles = cdt.GetTriangles();
-        qDebug() << "done triangulation";
-
-        for (p2t::Triangle* triangle : triangles){
-            leftMesh->addFace(QVector3D(triangle->GetPoint(0)->x, triangle->GetPoint(0)->y,
-                                        0),//(d - (plane_normal.x()*triangle->GetPoint(0)->x) - (plane_normal.y()*triangle->GetPoint(0)->y))/plane_normal.z()),
-                              QVector3D(triangle->GetPoint(1)->x, triangle->GetPoint(1)->y,
-                                        0),//(d - (plane_normal.x()*triangle->GetPoint(1)->x) - (plane_normal.y()*triangle->GetPoint(1)->y))/plane_normal.z()),
-                              QVector3D(triangle->GetPoint(2)->x, triangle->GetPoint(2)->y,
-                                        0));//(d - (plane_normal.x()*triangle->GetPoint(2)->x) - (plane_normal.y()*triangle->GetPoint(2)->y))/plane_normal.z()));
-            rightMesh->addFace(QVector3D(triangle->GetPoint(1)->x, triangle->GetPoint(1)->y,
-                                         0),//(d - (plane_normal.x()*triangle->GetPoint(1)->x) - (plane_normal.y()*triangle->GetPoint(1)->y))/plane_normal.z()),
-                               QVector3D(triangle->GetPoint(0)->x, triangle->GetPoint(0)->y,
-                                         0),//(d - (plane_normal.x()*triangle->GetPoint(0)->x) - (plane_normal.y()*triangle->GetPoint(0)->y))/plane_normal.z()),
-                               QVector3D(triangle->GetPoint(2)->x, triangle->GetPoint(2)->y,
-                                         0));//(d - (plane_normal.x()*triangle->GetPoint(2)->x) - (plane_normal.y()*triangle->GetPoint(2)->y))/plane_normal.z()));
-        }*/
-
-
-        for (Path3D contour : contours){
-            qDebug() << "contour size : " << contour.size();
-            if (contour.size() <= 2){
-                continue;
-            }
-
-            QVector3D centerOfMass = QVector3D(0,0,0);
-            for (MeshVertex mv : contour){
-                centerOfMass += mv.position;
-            }
-            centerOfMass /= contour.size();
-
-            // get orientation
-            bool ccw = true;
-            QVector3D current_plane_normal = QVector3D::normal(contour[1].position, centerOfMass, contour[0].position);
-            if (QVector3D::dotProduct(current_plane_normal, plane_normal)>0){
-                ccw = false;
-            }
-
-            for (int i=0; i<contour.size(); i++){
-                if (ccw){
-                    lmesh.addFace(contour[i].position, centerOfMass, contour[(i+1)%contour.size()].position);
-                    rmesh.addFace(contour[(i+1)%contour.size()].position, centerOfMass, contour[i].position);
-                } else {
-                    lmesh.addFace(contour[(i+1)%contour.size()].position, centerOfMass, contour[i].position);
-                    rmesh.addFace(contour[i].position, centerOfMass, contour[(i+1)%contour.size()].position);
-                }
-            }
-        }
-
-    }
-
-
-    qDebug() << "done bisect";
-
-    // 승환 30%
-    qmlManager->setProgress(0.22);
-    lmesh.connectFaces();
-
-    // 승환 40%
-    qmlManager->setProgress(0.41);
-    rmesh.connectFaces();
-
-    // 승환 50%
-    qmlManager->setProgress(0.56);
-    qDebug() << "done connecting";
-
-    emit bisectDone(&lmesh, &rmesh);
-}
-
+		
 void GLModel::generateClickablePlane(){
     generatePlane();
     for (int i=0;i<2;i++){
@@ -1820,7 +1292,7 @@ void GLModel::generateCuttingContour(std::vector<QVector3D> cuttingContour){
 void GLModel::generatePlane(){
     qDebug() << "generate plane called";
     removePlane();
-    if (parentModel->cuttingPoints.size()<3){
+    if (cuttingPoints.size()<3){
         qDebug()<<"Error: There is not enough vectors to render a plane.";
         return;
     }
@@ -1828,23 +1300,21 @@ void GLModel::generatePlane(){
     QVector3D v1;
     QVector3D v2;
     QVector3D v3;
-    v1=parentModel->cuttingPoints[parentModel->cuttingPoints.size()-3];
-    v2=parentModel->cuttingPoints[parentModel->cuttingPoints.size()-2];
-    v3=parentModel->cuttingPoints[parentModel->cuttingPoints.size()-1];
-    parentModel->planeMaterial = new Qt3DExtras::QPhongAlphaMaterial();
-    parentModel->planeMaterial->setAmbient(QColor(QRgb(0xF4F4F4)));
-    parentModel->planeMaterial->setDiffuse(QColor(QRgb(0xF4F4F4)));
-    parentModel->planeMaterial->setSpecular(QColor(QRgb(0xF4F4F4)));
-    parentModel->planeMaterial->setAlpha(0.5f);
+    v1=cuttingPoints[cuttingPoints.size()-3];
+    v2=cuttingPoints[cuttingPoints.size()-2];
+    v3=cuttingPoints[cuttingPoints.size()-1];
+    planeMaterial = new Qt3DExtras::QPhongAlphaMaterial();
+    planeMaterial->setAmbient(QColor(QRgb(0xF4F4F4)));
+    planeMaterial->setDiffuse(QColor(QRgb(0xF4F4F4)));
+    planeMaterial->setSpecular(QColor(QRgb(0xF4F4F4)));
+    planeMaterial->setAlpha(0.5f);
 
     // set cutting plane
-    parentModel->cuttingPlane.clear();
-    parentModel->cuttingPlane.push_back(v1);
-    parentModel->cuttingPlane.push_back(v2);
-    parentModel->cuttingPlane.push_back(v3);
+    cuttingPlane.clear();
+    cuttingPlane.push_back(v1);
+    cuttingPlane.push_back(v2);
+    cuttingPlane.push_back(v3);
 
-    //To manipulate plane color, change the QRgb(0x~~~~~~).
-    QVector3D tmp = parentModel->m_transform.translation();
     QVector3D world_origin(0,0,0);
     QVector3D original_normal(0,1,0);
     QVector3D desire_normal(QVector3D::normal(v1,v2,v3)); //size=1
@@ -1852,34 +1322,33 @@ void GLModel::generatePlane(){
     QVector3D crossproduct_vector(QVector3D::crossProduct(original_normal,desire_normal));
 
     for (int i=0;i<2;i++){
-        parentModel->planeEntity[i] = new Qt3DCore::QEntity(parentModel->parentModel);
-        //qDebug() << "generatePlane---------------------==========-=-==-" << parentModel->parentModel;
-        parentModel->clipPlane[i]=new Qt3DExtras::QPlaneMesh(this);
-        parentModel->clipPlane[i]->setHeight(100.0);
-        parentModel->clipPlane[i]->setWidth(100.0);
+        planeEntity[i] = new Qt3DCore::QEntity(this);
+        //qDebug() << "generatePlane---------------------==========-=-==-" << parentModel;
+        clipPlane[i]=new Qt3DExtras::QPlaneMesh(this);
+        clipPlane[i]->setHeight(200.0);
+        clipPlane[i]->setWidth(200.0);
 
-        parentModel->planeTransform[i]=new Qt3DCore::QTransform();
-        parentModel->planeTransform[i]->setScale(2.0f);
-        parentModel->planeTransform[i]->setRotation(QQuaternion::fromAxisAndAngle(crossproduct_vector, angle+180*i));
-        float zlength = parentModel->_mesh->z_max() - parentModel->_mesh->z_min();
-        parentModel->planeTransform[i]->setTranslation(desire_normal*(-world_origin.distanceToPlane(v1,v2,v3))+QVector3D(tmp.x(),tmp.y(),-parentModel->_mesh->z_min()));
+        planeTransform[i]=new Qt3DCore::QTransform();
+        planeTransform[i]->setRotation(QQuaternion::fromAxisAndAngle(crossproduct_vector, angle+180*i));
+        planeTransform[i]->setTranslation(desire_normal*(-world_origin.distanceToPlane(v1,v2,v3))
+                                          + m_transform.translation());
 
-        parentModel->planeObjectPicker[i] = new Qt3DRender::QObjectPicker;//parentModel->planeEntity[i]);
+        planeObjectPicker[i] = new Qt3DRender::QObjectPicker;//planeEntity[i]);
 
-        parentModel->planeObjectPicker[i]->setHoverEnabled(true);
-        parentModel->planeObjectPicker[i]->setEnabled(true);
-        //QObject::connect(parentModel->planeObjectPicker[i], SIGNAL(clicked(Qt3DRender::QPickEvent*)), this, SLOT(handlePickerClicked(Qt3DRender::QPickEvent*)));
-        QObject::connect(parentModel->planeObjectPicker[i], SIGNAL(released(Qt3DRender::QPickEvent*)), this, SLOT(handlePickerClickedFreeCut(Qt3DRender::QPickEvent*)));
+        planeObjectPicker[i]->setHoverEnabled(true);
+        planeObjectPicker[i]->setEnabled(true);
+        //QObject::connect(planeObjectPicker[i], SIGNAL(clicked(Qt3DRender::QPickEvent*)), this, SLOT(mouseClicked(Qt3DRender::QPickEvent*)));
+        QObject::connect(planeObjectPicker[i], SIGNAL(released(Qt3DRender::QPickEvent*)), this, SLOT(mouseClickedFreeCut(Qt3DRender::QPickEvent*)));
 
 
-        parentModel->planeEntity[i]->addComponent(parentModel->planeObjectPicker[i]);
+        planeEntity[i]->addComponent(planeObjectPicker[i]);
 
-        parentModel->planeEntity[i]->addComponent(parentModel->clipPlane[i]);
-        parentModel->planeEntity[i]->addComponent(parentModel->planeTransform[i]); //jj
-        parentModel->planeEntity[i]->addComponent(parentModel->planeMaterial);
+        planeEntity[i]->addComponent(clipPlane[i]);
+        planeEntity[i]->addComponent(planeTransform[i]); //jj
+        planeEntity[i]->addComponent(planeMaterial);
     }
 
-    parentModel->removeCuttingPoints();
+    removeCuttingPoints();
     //modelCut();
 }
 
@@ -1887,8 +1356,9 @@ void GLModel::generateSupport(){
 
     // copy _mesh data from original _mesh
     layerMesh = new Mesh;
-	for (const MeshFace& mf : *_mesh->getFaces()) {
-		layerMesh->addFace(mf.mesh_vertex[0]->position, mf.mesh_vertex[1]->position, mf.mesh_vertex[2]->position, &mf);
+	for (const MeshFace& mf : _mesh->getFaces()) {
+		auto meshVertices = mf.meshVertices();
+		layerMesh->addFace(meshVertices[0]->position, meshVertices[1]->position, meshVertices[2]->position);
     }
 
     float x_length = _mesh->x_max() - _mesh->x_min();
@@ -1897,8 +1367,8 @@ void GLModel::generateSupport(){
     size_t xy_reserve = x_length * y_length;
     size_t xyz_reserve = xy_reserve * z_length;
     qDebug() << "********************xy_reserve = " << xy_reserve;
-    qDebug() << "********************faces_reserve = " << _mesh->getFaces()->size();
-    qDebug() << "********************vertices_reserve = " << _mesh->getVertices()->size();
+    qDebug() << "********************faces_reserve = " << _mesh->getFaces().size();
+    qDebug() << "********************vertices_reserve = " << _mesh->getVertices().size();
 
     layerInfillMesh = new Mesh;
     layerSupportMesh = new Mesh;
@@ -1911,21 +1381,9 @@ void GLModel::generateSupport(){
     layerSupportMesh->vertexMove(t);
     layerRaftMesh->vertexMove(t);
 
-    // generate cylinders
-    /*for( auto iter = slicer->slices.overhang_points.begin() ; iter != slicer->slices.overhang_points.end() ; iter++ ) {
-        qDebug() << "-------" << (*iter)->position.X << (*iter)->position.Y << (*iter)->position.Z;
-        generateSupporter(layerSupportMesh, *iter);
-        generateRaft(layerRaftMesh, *iter);
-    }*/
-
-    /*for( auto iter = slicer->slices.begin() ; iter != slicer->slices.end() ; iter++ ) {
-        qDebug() << "infile" << iter->infill.size() << "outershell" << iter->outershell.size() << "support" << iter->support.size() << "z" << iter->z;
-        generateInfill(layerInfillMesh, &(*iter));
-    }*/
-
     t.setZ(scfg->raft_thickness);
     layerMesh->vertexMove(t);
-    t.setZ(_mesh->z_min() + scfg->raft_thickness);
+    t.setZ(_mesh->z_min() + scfg->raft_thickness + scfg->support_base_height);
     layerInfillMesh->vertexMove(t);
     layerSupportMesh->vertexMove(t);
     layerRaftMesh->vertexMove(t);
@@ -1934,35 +1392,37 @@ void GLModel::generateSupport(){
     layerSupportMesh->connectFaces();
     layerRaftMesh->connectFaces();
 
+	layerInfillMesh->setVerticesColor(COLOR_INFILL);
+	layerRaftMesh->setVerticesColor(COLOR_RAFT);
 
-    emit _updateModelMesh(true);
+    emit _updateModelMesh();
 }
 
 void GLModel::removePlane(){
     //qDebug() << "--remove plane called--" << this << parentModel;
-    if (parentModel->planeMaterial == nullptr){
+    if (planeMaterial == nullptr){
         qDebug() << "## parentModel have no planeMaterial";
         return;
     }
-    delete parentModel->planeMaterial;
-    parentModel->planeMaterial = nullptr;
+    delete planeMaterial;
+    planeMaterial = nullptr;
     for (int i=0;i<2;i++){
-        if (parentModel->clipPlane[i] != nullptr){
-            delete parentModel->clipPlane[i];
-            parentModel->clipPlane[i] = nullptr;
+        if (clipPlane[i] != nullptr){
+            delete clipPlane[i];
+            clipPlane[i] = nullptr;
         }
-        if (parentModel->planeTransform[i] != nullptr){
-            delete parentModel->planeTransform[i];
-            parentModel->planeTransform[i] = nullptr;
+        if (planeTransform[i] != nullptr){
+            delete planeTransform[i];
+            planeTransform[i] = nullptr;
         }
-        if (parentModel->planeObjectPicker[i] != nullptr){
-            //QObject::disconnect(parentModel->planeObjectPicker[i], SIGNAL(clicked(Qt3DRender::QPickEvent*)), this, SLOT(handlePickerClickedFreeCut(Qt3DRender::QPickEvent*)));
-            delete parentModel->planeObjectPicker[i];
-            parentModel->planeObjectPicker[i] = nullptr;
+        if (planeObjectPicker[i] != nullptr){
+            //QObject::disconnect(planeObjectPicker[i], SIGNAL(clicked(Qt3DRender::QPickEvent*)), this, SLOT(mouseClickedFreeCut(Qt3DRender::QPickEvent*)));
+            delete planeObjectPicker[i];
+            planeObjectPicker[i] = nullptr;
         }
-        if (parentModel->planeEntity[i] != nullptr){
-            delete parentModel->planeEntity[i];
-            parentModel->planeEntity[i] = nullptr;
+        if (planeEntity[i] != nullptr){
+            delete planeEntity[i];
+            planeEntity[i] = nullptr;
         }
     }
 
@@ -1991,14 +1451,14 @@ void GLModel::addCuttingPoint(QVector3D v){
     sphereObjectPicker[sphereObjectPicker.size()-1]->setEnabled(true);
     sphereObjectPicker[sphereObjectPicker.size()-1]->setHoverEnabled(true);
 
-    sphereEntity.push_back(new Qt3DCore::QEntity(parentModel));
+    sphereEntity.push_back(new Qt3DCore::QEntity(this));
     sphereEntity[sphereEntity.size()-1]->addComponent(sphereMesh[sphereMesh.size()-1]);
     sphereEntity[sphereEntity.size()-1]->addComponent(sphereTransform[sphereTransform.size()-1]);
     sphereEntity[sphereEntity.size()-1]->addComponent(sphereMaterial[sphereMaterial.size()-1]);
 
-    QObject::connect(sphereObjectPicker[sphereObjectPicker.size()-1], SIGNAL(entered()), this, SLOT(handlePickerEnteredFreeCutSphere()));
-    QObject::connect(sphereObjectPicker[sphereObjectPicker.size()-1], SIGNAL(exited()), this, SLOT(handlePickerExitedFreeCutSphere()));
-    QObject::connect(sphereObjectPicker[sphereObjectPicker.size()-1], SIGNAL(clicked(Qt3DRender::QPickEvent*)), this, SLOT(handlePickerClickedFreeCutSphere(Qt3DRender::QPickEvent*)));
+    QObject::connect(sphereObjectPicker[sphereObjectPicker.size()-1], SIGNAL(entered()), this, SLOT(mouseEnteredFreeCutSphere()));
+    QObject::connect(sphereObjectPicker[sphereObjectPicker.size()-1], SIGNAL(exited()), this, SLOT(mouseExitedFreeCutSphere()));
+    QObject::connect(sphereObjectPicker[sphereObjectPicker.size()-1], SIGNAL(clicked(Qt3DRender::QPickEvent*)), this, SLOT(mouseClickedFreeCutSphere(Qt3DRender::QPickEvent*)));
     sphereEntity[sphereEntity.size()-1]->addComponent(sphereObjectPicker[sphereObjectPicker.size()-1]);
 
 }
@@ -2043,7 +1503,6 @@ void GLModel::removeCuttingPoints(){
     cuttingPoints.clear();
 }
 
-
 void GLModel::removeModelPartList(){
     //remove part list
     QList<QObject*> temp;
@@ -2060,53 +1519,81 @@ void GLModel::modelCut(){
     qDebug() << "modelcut called" << cutMode;
     if(cutMode == 0)
         return ;
-    if(cutMode == 2 && parentModel->cuttingPoints.size() < 3)
+    if(cutMode == 2 && cuttingPoints.size() < 3)
         return ;
 
-    parentModel->saveUndoState();
+    saveUndoState();
     qmlManager->openProgressPopUp();
 
 	auto lmesh = new Mesh();
 	auto rmesh = new Mesh();
     if (cutMode == 1){ // flat cut
-        if (parentModel->cuttingPlane.size() != 3){
+        if (cuttingPlane.size() != 3){
             return;
         }
-        if (this->shellOffsetActive && parentModel->isFlatcutEdge == true) {
+        if (this->shellOffsetActive && isFlatcutEdge == true) {
             getSliderSignal(0.0);
         }
-        parentModel->bisectModel(parentModel->cuttingPlane, *lmesh, *rmesh);
+
+        /*
+        // create left, rightmesh
+        Mesh* leftMesh = lmesh;
+        Mesh* rightMesh = rmesh;
+        // do bisecting mesh
+        leftMesh->faces.reserve(mesh->faces.size()*3);
+        leftMesh->vertices.reserve(mesh->faces.size()*9);
+        rightMesh->faces.reserve(mesh->faces.size()*3);
+        rightMesh->vertices.reserve(mesh->faces.size()*9);*/
+
+        bisectModelByPlane(lmesh, rmesh, _mesh, cuttingPlane, cutFillMode);
+
+        emit bisectDone(lmesh, rmesh);
+
     } else if (cutMode == 2){ // free cut
-        if (parentModel->cuttingPoints.size() >= 3){
+        if (cuttingPoints.size() >= 3){
             // do bisecting _mesh
 
-            modelcut::cutAway(lmesh, rmesh, parentModel->_mesh, parentModel->cuttingPoints, parentModel->cutFillMode);
-            if (lmesh->getFaces()->size() == 0 || rmesh->getFaces()->size() == 0){
+            /*
+            // create left, rightmesh
+            Mesh* leftMesh = lmesh;
+            Mesh* rightMesh = rmesh;
+            // do bisecting mesh
+            leftMesh->faces.reserve(_mesh->getFaces().size()*10);
+            leftMesh->vertices.reserve(_mesh->getFaces().size()*30);
+            rightMesh->faces.reserve(_mesh->getFaces().size()*10);
+            rightMesh->vertices.reserve(_mesh->getFaces().size()*30);*/
+
+            cutAway(lmesh, rmesh, _mesh, cuttingPoints, cutFillMode);
+
+            if (lmesh->getFaces().size() == 0 || rmesh->getFaces().size() == 0){
+            // diridiri ######
+            //modelcut::cutAway(lmesh, rmesh,_mesh,cuttingPoints,cutFillMode);
+            //if (lmesh->getFaces()->size() == 0 || rmesh->getFaces()->size() == 0){
+
                 qDebug() << "cutting contour selected not cutting";
                 qmlManager->setProgress(1);
                 //cutModeSelected(9999);
                 cutModeSelected(2); // reset
                 return;
             }
-            emit parentModel->bisectDone(lmesh, rmesh);
+            emit bisectDone(lmesh, rmesh);
         }
     }
 }
 
 void GLModel::generateRLModel(Mesh* lmesh, Mesh* rmesh){
     qDebug() << "** generateRLModel" << this;
-    if (lmesh->getFaces()->size() != 0){
+    if (lmesh->getFaces().size() != 0){
         qmlManager->createModelFile(lmesh, filename+"_l");
         qDebug() << "leftmodel created";
     }
     // 승환 70%
     qmlManager->setProgress(0.72);
-    if (rmesh->getFaces()->size() != 0){
+    if (rmesh->getFaces().size() != 0){
         qmlManager->createModelFile(rmesh, filename+"_r");
         qDebug() << "rightmodel created";
     }
 
-    qDebug() << "finding models";
 
     // 승환 90%
     GLModel* leftmodel = qmlManager->findGLModelByName(filename+"_l");
@@ -2117,37 +1604,36 @@ void GLModel::generateRLModel(Mesh* lmesh, Mesh* rmesh){
         rightmodel->twinModel = leftmodel;
     }
 
-    qmlManager->setProgress(0.91);
+    qmlManager->setProgress(1);
 
-    if (shadowModel->shellOffsetActive){
+    if (shellOffsetActive){
 		if (leftmodel != nullptr)
 		{
 			auto offsetLeftMesh = ShellOffset::shellOffset(leftmodel->_mesh, (float)shellOffsetFactor);
+
 			qmlManager->createModelFile(offsetLeftMesh, leftmodel->filename);
+
 			qmlManager->deleteModelFile(leftmodel->ID);
+
 		}
         if (rightmodel != nullptr)
             qmlManager->deleteModelFile(rightmodel->ID);
         QMetaObject::invokeMethod(qmlManager->boxUpperTab, "all_off");
     }
 
-    qDebug() << "left right generated";
 
-    //parentModel->deleteLater();
-    shadowModel->removePlane();
+    //deleteLater();
+    removePlane();
 
     removeCuttingPoints();
     removeCuttingContour();
 
-    qDebug() << "removed cutting plane";
     // delete original model
     qmlManager->deleteModelFile(ID);
 
-    qDebug() << "deleted original model";
     // do auto arrange
-    qmlManager->runArrange();
-    QMetaObject::invokeMethod(qmlManager->boundedBox, "hideBox");
-
+    //qmlManager->runArrange();
+	QMetaObject::invokeMethod(qmlManager->boundedBox, "hideBox");
     // 승환 100%
     qmlManager->setProgress(1);
 }
@@ -2155,143 +1641,229 @@ void GLModel::generateRLModel(Mesh* lmesh, Mesh* rmesh){
 // hollow shell part
 void GLModel::indentHollowShell(double radius){
     qDebug() << "hollow shell called" << radius;
-
-    QVector3D center = (targetMeshFace->mesh_vertex[0]->position +targetMeshFace->mesh_vertex[1]->position + targetMeshFace->mesh_vertex[2]->position)/3;
-	HollowShell::hollowShell(_mesh, targetMeshFace, center, radius);
+	if (!_targetSelected)
+		return;
+	auto meshVertices = targetMeshFace->meshVertices();
+    QVector3D center = (
+		meshVertices[0]->position +
+		meshVertices[1]->position + 
+		meshVertices[2]->position)/3;
+	HollowShell::hollowShell(_mesh, &*targetMeshFace, center, radius);
 }
 
 GLModel::~GLModel(){
-    deleteShadowModel();
 }
 
-void GLModel::engoo(){
-    //m_meshMaterial->setAmbient(QColor(10,200,10));
-}
 
-void GLModel::exgoo(){
-    //m_meshMaterial->setAmbient(QColor(81,200,242));
-    qDebug() << "exgoo";
-}
 
-void GLModel::mgoo(Qt3DRender::QPickEvent* v)
+
+//when ray casting is not needed, ie) right click
+
+void GLModel::clicked(MouseEventData& pick, const Qt3DRender::QRayCasterHit& hit)
 {
-    if(v->buttons()>1){
+
+	if (!cutActive && !extensionActive && !labellingActive && !layflatActive && !manualSupportActive)// && !layerViewActive && !supportViewActive)
+		qmlManager->modelSelected(ID);
+
+	if (qmlManager->isSelected(this) && pick.button == Qt::MouseButton::RightButton) {
+		qDebug() << "mttab alive";
+		QMetaObject::invokeMethod(qmlManager->mttab, "tabOnOff");
+	}
+
+#ifdef _STRICT_GLMODEL
+	if (hit.type() != QRayCasterHit::HitType::TriangleHit)
+		throw std::runtime_error("trying to get tri idx from non tri hit");
+#endif
+
+
+
+	if (cutActive) {
+		if (cutMode == 1) {
+			qDebug() << "cut mode 1";
+
+		}
+		else if (cutMode == 2) {// && numPoints< sizeof(sphereEntity)/4) {
+			qDebug() << hit.localIntersection() << "pick" << cuttingPoints.size() << cuttingPoints.size();
+			QVector3D v = hit.localIntersection();
+			qDebug() << v.distanceToPoint(cuttingPoints[cuttingPoints.size() - 1]);
+
+            if(this != hit.entity())
+            {
+                //plane clicked
+                v = {v.x(), -v.z(), v.y()};
+            }
+
+			bool found_nearby_v = false;
+			for (int i = 0; i < cuttingPoints.size(); i++) {
+				if (v.distanceToPoint(cuttingPoints[i]) < 0.5f) {
+					removeCuttingPoint(i);
+					found_nearby_v = true;
+					break;
+				}
+			}
+
+			if (!found_nearby_v) {
+				qDebug() << "Check 0 " << cuttingPoints.size();
+				addCuttingPoint(v + m_transform.translation());
+				qDebug() << "Check 1 " << cuttingPoints.size();
+			}
+
+			removeCuttingContour();
+			if (cuttingPoints.size() >= 2) {
+				generateCuttingContour(cuttingPoints);
+				regenerateCuttingPoint(cuttingPoints);
+			}
+			//generatePlane();
+			//ft->ct->addCuttingPoint(parentModel, v);
+		}
+		else if (cutMode == 9999) {
+			qDebug() << "current cut mode :" << cutMode;
+			qmlManager->setProgress(1);
+			//return;
+		}
+	}
+
+    //triangle index section
+    if (hit.primitiveIndex() >= _mesh->getFaces().size())
+    {
+        qDebug() << "trianglePick out of bound";
         return;
     }
+    _targetSelected = true;
+    targetMeshFace = _mesh->getFaces().cbegin() + hit.primitiveIndex();
 
-    if (qmlManager->selectedModels[0] != nullptr &&
-            (qmlManager->selectedModels[0]->shadowModel->scaleActive ||
-             qmlManager->selectedModels[0]->shadowModel->cutActive ||
-             qmlManager->selectedModels[0]->shadowModel->shellOffsetActive ||
-             qmlManager->selectedModels[0]->shadowModel->extensionActive ||
-             qmlManager->selectedModels[0]->shadowModel->labellingActive ||
-             qmlManager->selectedModels[0]->shadowModel->layflatActive ||
-             qmlManager->selectedModels[0]->shadowModel->layerViewActive ||
-             qmlManager->selectedModels[0]->shadowModel->manualSupportActive ||
-             qmlManager->selectedModels[0]->shadowModel->supportViewActive ||
-             qmlManager->orientationActive ||
-             qmlManager->rotateActive ||
-             qmlManager->saveActive))
-        return;
 
-    // if not selected by qmlmanager, return
-    bool modelSelected = false;
-    for (GLModel* glm : qmlManager->selectedModels){
-        if (glm == this->parentModel){
-            modelSelected = true;
+	if (extensionActive && hit.localIntersection() != QVector3D(0, 0, 0)) {
+		uncolorExtensionFaces();
+		emit extensionSelect();
+		generateColorAttributes();
+
+		colorExtensionFaces();
+	}
+
+	if (hollowShellActive) {
+		qDebug() << "getting handle picker clicked signal hollow shell active";
+		qDebug() << "found parent meshface";
+		// translate hollowShellSphere to mouse position
+		QVector3D v = hit.localIntersection();
+        qmlManager->hollowShellSphereTransform->setTranslation(v + m_transform.translation());
+
+
+	}
+
+	if (layflatActive && hit.localIntersection() != QVector3D(0, 0, 0)) {
+
+		uncolorExtensionFaces();
+		emit layFlatSelect();
+		generateColorAttributes();
+		colorExtensionFaces();
+	}
+
+	if (manualSupportActive && hit.localIntersection() != QVector3D(0, 0, 0)) {
+		qDebug() << "manual support handle picker clicked";
+		uncolorExtensionFaces();
+		emit extensionSelect();
+		generateColorAttributes();
+		colorExtensionFaces();
+	}
+
+    if (labellingActive && hit.localIntersection() != QVector3D(0, 0, 0)) {
+        if (labellingTextPreview == nullptr)
+            labellingTextPreview = new LabellingTextPreview(this);
+
+
+        if (labellingTextPreview && labellingTextPreview->isEnabled()) {
+            labellingTextPreview->setTranslation(hit.localIntersection() + targetMeshFace->fn);
+            labellingTextPreview->setNormal(targetMeshFace->fn);
+            labellingTextPreview->planeSelected = true;
+            QMetaObject::invokeMethod(qmlManager->labelPopup, "labelUpdate");
         }
     }
-    if (!modelSelected){
-        m_objectPicker->setDragEnabled(false);
-        isReleased = true;
-        return;
-    }
-
-    qmlManager->moveButton->setProperty("state", "active");
-    qmlManager->setClosedHandCursor();
-
-    if (!isMoved){ // called only once on dragged
-        parentModel->saveUndoState();
-        qmlManager->hideMoveArrow();
-        qDebug() << "hiding move arrow";
-        // for mgoo out problem
-
-        float x_diff = parentModel->_mesh->x_max() - parentModel->_mesh->x_min();
-        float y_diff = parentModel->_mesh->y_max() - parentModel->_mesh->y_min();
-        float z_diff = parentModel->_mesh->z_max() - parentModel->_mesh->z_min();
-        float biggest = x_diff>y_diff? x_diff : y_diff;
-        biggest = z_diff>biggest? z_diff : biggest;
-        float scale_val = biggest > 50.0f ? 1.0f : 100.0f/biggest;
-        m_transform.setScale(scale_val);
-
-        removeComponent(dragMesh);
-        dragMesh->setRadius(biggest);
-        addComponent(dragMesh);
-
-        isMoved = true;
-    }
-
-    QVector2D currentPoint = (QVector2D)v->position();
-
-    QVector3D xAxis3D = QVector3D(1,0,0);
-    QVector3D yAxis3D =  QVector3D(0,1,0);
-    QVector2D xAxis2D = (world2Screen(lastpoint+xAxis3D) - world2Screen(lastpoint));
-    QVector2D yAxis2D = (world2Screen(lastpoint+yAxis3D) - world2Screen(lastpoint));
-    QVector2D target = currentPoint - prevPoint;
-
-    float b = (target.y()*xAxis2D.x() - target.x()*xAxis2D.y())/
-            (xAxis2D.x()*yAxis2D.y()-xAxis2D.y()*yAxis2D.x());
-    float a = (target.x() - b*yAxis2D.x())/xAxis2D.x();
-
-    // move ax + by amount
-    qmlManager->modelMoveF(1,a);
-    qmlManager->modelMoveF(2,b);
-
-    //qmlManager->showMoveArrow();
-    prevPoint = currentPoint;
-
 }
 
-void GLModel::pgoo(Qt3DRender::QPickEvent* v){
-    qDebug() << "pgoo";
-    if(v->buttons()>1) // pass if click with right mouse
-        return;
+bool GLModel::isDraggable(Hix::Input::MouseEventData& e,const Qt3DRender::QRayCasterHit&)
+{
+	if (e.button == Qt3DInput::QMouseEvent::Buttons::LeftButton
+		&&
+		qmlManager->isSelected(this) 
+		&&
+		!(	scaleActive ||
+			cutActive ||
+			shellOffsetActive ||
+			extensionActive ||
+			labellingActive ||
+			layflatActive ||
+			layerViewActive ||
+			manualSupportActive ||
+			supportViewActive)	
+		&&
+		!(qmlManager->orientationActive ||
+			qmlManager->rotateActive ||
+			qmlManager->saveActive))
+	{
+		return true;
+	}
+	return false;
+}
+void GLModel::dragStarted(Hix::Input::MouseEventData& e, const Qt3DRender::QRayCasterHit& hit)
+{
+	lastpoint = hit.localIntersection();
+	prevPoint = (QVector2D)e.position;
+	qmlManager->moveButton->setProperty("state", "active");
+	qmlManager->setClosedHandCursor();
+	saveUndoState();
+	qmlManager->hideMoveArrow();
+	qDebug() << "hiding move arrow";
+	isMoved = true;
+}
 
-    if (!isReleased) // to remove double click on release problem
-        return;
-    else
-        isReleased = false;
+void GLModel::doDrag(Hix::Input::MouseEventData& v)
+{
+	QVector2D currentPoint = QVector2D(v.position.x(), v.position.y());
+	//auto pt = qmlManager->world2Screen(QVector3D(0, 0, 0));
+	//auto pt2 = qmlManager->world2Screen(lastpoint);
 
-    qDebug() << "Pressed   " << v->position() << m_transform.translation();
-    //qmlManager->lastModelSelected();
+	//qDebug()<< currentPoint << pt << pt2;
+	QVector3D xAxis3D = QVector3D(1, 0, 0);
+	QVector3D yAxis3D = QVector3D(0, 1, 0);
+	QVector2D xAxis2D = (qmlManager->world2Screen(lastpoint + xAxis3D) - qmlManager->world2Screen(lastpoint));
+	QVector2D yAxis2D = (qmlManager->world2Screen(lastpoint + yAxis3D) - qmlManager->world2Screen(lastpoint));
+	QVector2D target = currentPoint - prevPoint;
 
-    if(qmlManager->selectedModels[0] != nullptr) {
-        m_objectPicker->setDragEnabled(true);
+	float b = (target.y() * xAxis2D.x() - target.x() * xAxis2D.y()) /
+		(xAxis2D.x() * yAxis2D.y() - xAxis2D.y() * yAxis2D.x());
+	float a = (target.x() - b * yAxis2D.x()) / xAxis2D.x();
 
-        lastpoint=v->localIntersection();
-        prevPoint = (QVector2D) v->position();
-        qDebug() << "Dragged";
-    }
+	// move ax + by amount
+	qmlManager->modelMove(QVector3D(a, b, 0));
+	prevPoint = currentPoint;
+}
+
+void GLModel::dragEnded(Hix::Input::MouseEventData&)
+{
+	isMoved = false;
+	qmlManager->modelMoveDone();
+
 }
 
 void GLModel::cutModeSelected(int type){
 
     qDebug() << "cut mode selected1" << type;
-    parentModel->removeCuttingPoints();
+    removeCuttingPoints();
     //removePlane();
-    parentModel->removeCuttingContour();
-    //parentModel->removePlane();
+    removeCuttingContour();
+    //removePlane();
     cutMode = type;
     if (cutMode == 1){
-        parentModel->addCuttingPoint(QVector3D(1,0,0));
-        parentModel->addCuttingPoint(QVector3D(1,1,0));
-        parentModel->addCuttingPoint(QVector3D(2,0,0));
+        addCuttingPoint(QVector3D(1,0,0));
+        addCuttingPoint(QVector3D(1,1,0));
+        addCuttingPoint(QVector3D(2,0,0));
         generatePlane();
     } else if (cutMode == 2){
         qDebug() << QCursor::pos();
-        parentModel->addCuttingPoint(QVector3D(1,0,0));
-        parentModel->addCuttingPoint(QVector3D(1,1,0));
-        parentModel->addCuttingPoint(QVector3D(2,0,0));
+        addCuttingPoint(QVector3D(1,0,0));
+        addCuttingPoint(QVector3D(1,1,0));
+        addCuttingPoint(QVector3D(2,0,0));
         generateClickablePlane(); // plane is also clickable
     } else {
 
@@ -2300,22 +1872,22 @@ void GLModel::cutModeSelected(int type){
 }
 
 void GLModel::cutFillModeSelected(int type){
-    parentModel->cutFillMode = type;
+    cutFillMode = type;
     return;
 }
 
 void GLModel::getSliderSignal(double value){
     if (cutActive||shellOffsetActive){
         if (value == 0.0 || value == 1.8){
-            parentModel->isFlatcutEdge = true;
+            isFlatcutEdge = true;
         }
         else {
-            parentModel->isFlatcutEdge = false;
+            isFlatcutEdge = false;
         }
-        float zlength = parentModel->_mesh->z_max() - parentModel->_mesh->z_min();
-        QVector3D v1(1,0, parentModel->_mesh->z_min() + value*zlength/1.8);
-        QVector3D v2(1,1, parentModel->_mesh->z_min() + value*zlength/1.8);
-        QVector3D v3(2,0, parentModel->_mesh->z_min() + value*zlength/1.8);
+        float zlength = _mesh->z_max() - _mesh->z_min();
+        QVector3D v1(1,0, _mesh->z_min() + value*zlength/1.8);
+        QVector3D v2(1,1, _mesh->z_min() + value*zlength/1.8);
+        QVector3D v3(2,0, _mesh->z_min() + value*zlength/1.8);
 
         QVector3D world_origin(0,0,0);
         QVector3D original_normal(0,1,0);
@@ -2323,16 +1895,15 @@ void GLModel::getSliderSignal(double value){
         float angle = qAcos(QVector3D::dotProduct(original_normal,desire_normal))*180/M_PI+(value-1)*30;
         QVector3D crossproduct_vector(QVector3D::crossProduct(original_normal,desire_normal));
 
-        QVector3D tmp = parentModel->m_transform.translation();
-
         for (int i=0;i<2;i++){
-            parentModel->planeTransform[i]->setTranslation(desire_normal*(-world_origin.distanceToPlane(v1,v2,v3)) +QVector3D(tmp.x(),tmp.y(),-parentModel->_mesh->z_min()));
-            parentModel->planeEntity[i]->addComponent(parentModel->planeTransform[i]);
+            planeTransform[i]->setTranslation(desire_normal*(-world_origin.distanceToPlane(v1,v2,v3))
+                                              +  m_transform.translation());
+            planeEntity[i]->addComponent(planeTransform[i]);
         }
 
-        parentModel->cuttingPlane[0] = v1;
-        parentModel->cuttingPlane[1] = v2;
-        parentModel->cuttingPlane[2] = v3;
+        cuttingPlane[0] = v1;
+        cuttingPlane[1] = v2;
+        cuttingPlane[2] = v3;
     } else if (hollowShellActive){
         // change radius of hollowShellSphere
         hollowShellRadius = value;
@@ -2343,15 +1914,17 @@ void GLModel::getSliderSignal(double value){
 }
 
 void GLModel::getLayerViewSliderSignal(double value) {
-    if (!shadowModel || !shadowModel->layerViewActive)
+    if ( !layerViewActive)
         return;
 
-    float height = (_mesh->z_max() - _mesh->z_min() + scfg->raft_thickness) * value;
+    float height = (_mesh->z_max() - _mesh->z_min() + scfg->raft_thickness + scfg->support_base_height) * value;
     int layer_num = int(height/scfg->layer_height)+1;
     if (value <= 0.002f)
         layer_num = 0;
 
+    if (layerViewPlaneTextureLoader == nullptr)
     layerViewPlaneTextureLoader = new Qt3DRender::QTextureLoader();
+
     QDir dir(QDir::tempPath()+"_export");//(qmlManager->selectedModels[0]->filename + "_export")
     if (dir.exists()){
         QString filename = dir.path()+"/"+QString::number(layer_num)+".svg";
@@ -2363,36 +1936,29 @@ void GLModel::getLayerViewSliderSignal(double value) {
     //qDebug() << "layer view plane material texture format : " << layerViewPlaneTextureLoader->format();
 
     layerViewPlaneMaterial->setTexture(layerViewPlaneTextureLoader);
+
     float rotation_values[] = { // rotate by 90 deg
         0, 1, 0,
         -1, 0, 0,
         0, 0, 1
     };
+
     QMatrix3x3 rotation_matrix(rotation_values);
 
     layerViewPlaneMaterial->setTextureTransform(rotation_matrix);
-    layerViewPlaneTransform[0]->setTranslation(QVector3D(0,0,layer_num*scfg->layer_height));
+    layerViewPlaneTransform[0]->setTranslation(QVector3D(0,0,layer_num*scfg->layer_height - scfg->raft_thickness - scfg->support_base_height));
 
     // change phong material of original model
-    float h = (_mesh->z_max() - _mesh->z_min() + scfg->raft_thickness) * value + _mesh->z_min();
+    float h = (_mesh->z_max() - _mesh->z_min() + scfg->raft_thickness + scfg->support_base_height) * value + _mesh->z_min() - scfg->raft_thickness - scfg->support_base_height;
     m_layerMaterialHeight->setValue(QVariant::fromValue(h));
 
-    m_layerMaterialRaftHeight->setValue(QVariant::fromValue(qmlManager->getLayerViewFlags() & LAYER_INFILL != 0 ?
+    /*m_layerMaterialRaftHeight->setValue(QVariant::fromValue(qmlManager->getLayerViewFlags() & LAYER_INFILL != 0 ?
                 _mesh->z_min() :
-                _mesh->z_max()));
+                _mesh->z_max() + scfg->raft_thickness - scfg->support_base_height));*/
 }
 
 /** HELPER functions **/
-QVector2D GLModel::world2Screen(QVector3D target){
-    QVariant value;
-    qRegisterMetaType<QVariant>("QVariant");
-    QMetaObject::invokeMethod(qmlManager->mttab, "world2Screen", Qt::DirectConnection, Q_RETURN_ARG(QVariant,value),
-                              Q_ARG(QVariant, target));
 
-    QVector2D result = qvariant_cast<QVector2D>(value);
-
-    return result;
-}
 bool GLModel::EndsWith(const std::string& a, const std::string& b) {
     if (b.size() > a.size()) return false;
     return std::equal(a.begin() + a.size() - b.size(), a.end(), b.begin());
@@ -2415,43 +1981,10 @@ QVector3D GLModel::spreadPoint(QVector3D endPoint,QVector3D startPoint,int facto
     return finalVector;
 }
 
-Mesh* GLModel::toSparse(Mesh* mesh){
-    int i=0;
-    int jump = (mesh->getFaces()->size()<100000) ? 1:mesh->getFaces()->size()/30000; // 30000 is chosen for 800000 mesh, 30
-    int factor = (jump ==1) ? 1:3*log(jump);
-
-    Mesh* newMesh = new Mesh;
-
-    if (jump == 1){ // if mesh face count is less than 30000
-
-        for (const MeshFace& mf : *mesh->getFaces()){
-            newMesh->addFace(mf.mesh_vertex[0]->position, mf.mesh_vertex[1]->position, mf.mesh_vertex[2]->position, &mf);
-        }
-    } else {
-
-		for (const MeshFace& mf : *mesh->getFaces()) {
-			if (i%jump==0){
-                QCoreApplication::processEvents();
-
-                QVector3D point1 =mf.mesh_vertex[0]->position;
-                QVector3D point2 =mf.mesh_vertex[1]->position;
-                QVector3D point3 =mf.mesh_vertex[2]->position;
-                QVector3D CenterOfMass = (point1+point2+point3)/3;
-                point1=GLModel::spreadPoint(point1,CenterOfMass,factor);
-                point2=GLModel::spreadPoint(point2,CenterOfMass,factor);
-                point3=GLModel::spreadPoint(point3,CenterOfMass,factor);
-                //newMesh->addFace(mf.mesh_vertex[0]->position, mf.mesh_vertex[1]->position, mf.mesh_vertex[2]->position);
-                newMesh->addFace(point1,point2,point3, &mf);
-            }
-            i+=1;
-        }
-    }
-
-    return newMesh;
-}
 
 void GLModel::getTextChanged(QString text, int contentWidth)
 {
+    qDebug() << "@@@@ getTexyChanged";
     if (labellingTextPreview && labellingTextPreview->isEnabled()){
         applyLabelInfo(text, contentWidth, labellingTextPreview->fontName, (labellingTextPreview->fontWeight==QFont::Bold)? true:false, labellingTextPreview->fontSize);
     }
@@ -2462,31 +1995,26 @@ void GLModel::openLabelling()
     labellingActive = true;
 
     qmlManager->lastModelSelected();
-    if ((qmlManager->selectedModels[0] != nullptr) && (qmlManager->selectedModels[0] != this)
-            && (qmlManager->selectedModels[0]->shadowModel != this)) {
+    if (!qmlManager->isSelected(this)) {
         labellingActive = false;
-       /* if (labellingTextPreview) {
-            qDebug() << "pinpin ^^^^^^^^^^^^^^^^^ 2";
-            labellingTextPreview->planeSelected = false;
-            labellingTextPreview->deleteLater();
-            labellingTextPreview = nullptr;
-        }*/
     }
 
 }
 
 void GLModel::closeLabelling()
 {
-    qDebug() << "close labelling ******************";
+    if (!labellingActive)
+        return;
+
     labellingActive = false;
-    /*
+
     if (labellingTextPreview){
-        qDebug() << "pinpin ^^^^^^^^^^^^^^^^^ 3";
         labellingTextPreview->planeSelected = false;
+        labellingTextPreview->deleteLabel();
         labellingTextPreview->deleteLater();
         labellingTextPreview = nullptr;
-    }*/
-    parentModel->targetMeshFace = nullptr;
+    }
+	_targetSelected = false;
 
 //    stateChangeLabelling();
 }
@@ -2498,12 +2026,14 @@ void GLModel::stateChangeLabelling() {
 
 void GLModel::getFontNameChanged(QString fontName)
 {
+    qDebug() << "@@@@ getFontNameChanged";
     if (labellingTextPreview && labellingTextPreview->isEnabled()){
         applyLabelInfo(labellingTextPreview->text, labellingTextPreview->contentWidth, fontName, (labellingTextPreview->fontWeight==QFont::Bold)? true:false, labellingTextPreview->fontSize);
     }
 }
 
 void GLModel::getFontBoldChanged(bool isbold){
+    qDebug() << "@@@@ getBoldChanged";
     if (labellingTextPreview && labellingTextPreview->isEnabled()){
         applyLabelInfo(labellingTextPreview->text, labellingTextPreview->contentWidth, labellingTextPreview->fontName, isbold, labellingTextPreview->fontSize);
 
@@ -2512,6 +2042,7 @@ void GLModel::getFontBoldChanged(bool isbold){
 
 void GLModel::getFontSizeChanged(int fontSize)
 {
+    qDebug() << "@@@@ getSizeChanged" << fontSize;
     if (labellingTextPreview && labellingTextPreview->isEnabled()){
         applyLabelInfo(labellingTextPreview->text, labellingTextPreview->contentWidth, labellingTextPreview->fontName, (labellingTextPreview->fontWeight==QFont::Bold)? true:false, fontSize);
     }
@@ -2522,48 +2053,45 @@ void GLModel::applyLabelInfo(QString text, int contentWidth, QString fontName, b
     QVector3D translation;
     bool selected = false;
 
-    //qDebug() << "applyLabelInfo +++++++++++++++++++++++++ "<<text<<contentWidth<<fontName<<isBold<<fontSize << labellingTextPreview->isEnabled();
+    qDebug() << "applyLabelInfo +++++++++++++++++++++++++ " << text  << contentWidth << this;
 
     if (labellingTextPreview && labellingTextPreview->isEnabled()){
         translation = labellingTextPreview->translation;
         selected = labellingTextPreview->planeSelected;
+        labellingTextPreview->deleteLabel();
         labellingTextPreview->deleteLater();
         labellingTextPreview = nullptr;
     }
     labellingTextPreview = new LabellingTextPreview(this);
     labellingTextPreview->setEnabled(true);
 
-    labellingTextPreview->setFontName(fontName);
-    labellingTextPreview->setFontSize(fontSize);
-    labellingTextPreview->setFontBold(isBold);
-    labellingTextPreview->setText(text, contentWidth);
     labellingTextPreview->planeSelected = selected;
 
-    if (parentModel->targetMeshFace != nullptr) {
-        labellingTextPreview->setTranslation(translation);
-        labellingTextPreview->setNormal(parentModel->targetMeshFace->fn);
+    qDebug() << "applyLabelInfo";
+    if (_targetSelected) {
+        qDebug() << "applyLabelInfo : target Selected";
+        labellingTextPreview->updateChange(text, contentWidth, fontName, isBold, fontSize, translation,targetMeshFace->fn);
+        //labellingTextPreview->setTranslation(translation);
+        //labellingTextPreview->setNormal(parentModel->targetMeshFace->fn);
     }
-   /*
-    if (labellingTextPreview && labellingTextPreview->isEnabled() && parentModel->targetMeshFace !=nullptr) {
-        labellingTextPreview->setTranslation(translation);
-        labellingTextPreview->setNormal(parentModel->targetMeshFace->fn);
-        if (text != ""){
-            //labellingTextPreview->setText(label_text, label_text.size());
-            labellingTextPreview->setFontName(fontName);
-            labellingTextPreview->setFontBold(isBold);
-            labellingTextPreview->setFontSize(fontSize);
-            labellingTextPreview->setText(text, contentWidth);
+    else {
+        qDebug() << "applyLabelInfo : target unSelected";
+        labellingTextPreview->updateChange(text, contentWidth, fontName, isBold, fontSize, labellingTextPreview->translation, QVector3D(0,0,0));
         }
-        labellingTextPreview->planeSelected = selected;
-    }
-    */
+
+
 
 }
 
 
 void GLModel::generateText3DMesh()
 {
-    qDebug() << "generateText3DMesh +++++++++++++++++++++++++";
+    //qDebug() << "generateText3DMesh @@@@@" << this << this;
+    if (updateLock)
+        return;
+    updateLock = true;
+
+
     if (!labellingTextPreview){
         qDebug() << "no labellingTextPreview";
         QMetaObject::invokeMethod(qmlManager->labelPopup, "noModel");
@@ -2576,12 +2104,13 @@ void GLModel::generateText3DMesh()
         return;
     }
 
+    qmlManager->openProgressPopUp();
+
     labellingTextPreview->planeSelected = false;
 
-    parentModel->saveUndoState();
+    saveUndoState();
 
-    //qDebug() <<m_transform.translation();
-    //qDebug() << labellingTextPreview->translation;
+    qmlManager->setProgress(0.1);
 
     QVector3D* originalVertices = reinterpret_cast<QVector3D*>(vertexBuffer.data().data());
     int originalVerticesSize = vertexBuffer.data().size() / sizeof(float) / 3;
@@ -2592,17 +2121,27 @@ void GLModel::generateText3DMesh()
     int indicesSize;
     float depth = 0.5f;
     float scale = labellingTextPreview->ratioY * labellingTextPreview->scaleY;
-    QVector3D translation = m_transform.translation()+labellingTextPreview->translation + QVector3D(0,-0.3,0);
+    QVector3D translation = labellingTextPreview->translation;// + QVector3D(0,-0.3,0);
 
     Qt3DCore::QTransform transform, normalTransform;
 
     QVector3D normal = labellingTextPreview->normal;
 
     QVector3D ref = QVector3D(0, 0, 1);
-    auto tangent = QVector3D::crossProduct(normal, ref);
-
+    QVector3D tangent;
+    if (normal == QVector3D(0,0,1) || normal == QVector3D(0,0,-1)){
+        tangent = QVector3D(1,0,0);
+    } else {
+        tangent = QVector3D::crossProduct(normal, ref);
+    }
     tangent.normalize();
-    auto binormal = QVector3D::crossProduct(tangent, normal);
+
+    QVector3D binormal;
+    if (normal == QVector3D(0,0,1) || normal == QVector3D(0,0,-1)){
+        binormal = QVector3D(0,1,0);
+    } else {
+        binormal = QVector3D::crossProduct(tangent, normal);
+    }
     binormal.normalize();
 
     QQuaternion quat = QQuaternion::fromAxes(tangent, normal, binormal) * QQuaternion::fromAxisAndAngle(QVector3D(0, 0, 1), 180)* QQuaternion::fromAxisAndAngle(QVector3D(1, 0, 0), 90);
@@ -2610,40 +2149,48 @@ void GLModel::generateText3DMesh()
     transform.setScale(scale);
     transform.setRotation(quat);
     transform.setTranslation(translation);
+    qmlManager->setProgress(0.3);
+
+    QFont targetFont = QFont(labellingTextPreview->fontName, labellingTextPreview->fontSize, labellingTextPreview->fontWeight, false);
+    QString targetText = labellingTextPreview->text;
+    QVector3D targetNormal = labellingTextPreview->normal;
+
+    if (labellingTextPreview){
+        labellingTextPreview->planeSelected = false;
+        labellingTextPreview->deleteLabel();
+        labellingTextPreview->deleteLater();
+        labellingTextPreview = nullptr;
+    }
+	_targetSelected = false;
 
     generateText3DGeometry(&vertices, &verticesSize,
                            &indices, &indicesSize,
-                           QFont(labellingTextPreview->fontName, labellingTextPreview->fontSize, labellingTextPreview->fontWeight, false),
-                           labellingTextPreview->text,
+                           targetFont,
+                           targetText,
                            depth,
-                           parentModel->_mesh,
-                           -labellingTextPreview->normal,
+                           _mesh,
+                           -targetNormal,
                            transform.matrix(),
                            normalTransform.matrix());
 
+
+    qmlManager->setProgress(0.9);
+
     std::vector<QVector3D> outVertices;
-    std::vector<QVector3D> outNormals;
     for (int i = 0; i < indicesSize / 3; ++i) {
         // Insert vertices in CCW order
         outVertices.push_back(vertices[2 * indices[3*i + 2] + 0]);
         outVertices.push_back(vertices[2 * indices[3*i + 1] + 0]);
         outVertices.push_back(vertices[2 * indices[3*i + 0] + 0]);
-        parentModel->_mesh->addFace(vertices[2 * indices[3*i + 2] + 0], vertices[2 * indices[3*i + 1] + 0], vertices[2 * indices[3*i + 0] + 0]);
-        //qDebug() << vertices[2 * indices[3*i + 2] + 0]<< vertices[2 * indices[3*i + 1] + 0]<< vertices[2 * indices[3*i + 0] + 0];
-        outNormals.push_back(vertices[2 * indices[3*i + 2] + 1]);
-        outNormals.push_back(vertices[2 * indices[3*i + 1] + 1]);
-        outNormals.push_back(vertices[2 * indices[3*i + 0] + 1]);
+        _mesh->addFace(vertices[2 * indices[3*i + 2] + 0], vertices[2 * indices[3*i + 1] + 0], vertices[2 * indices[3*i + 0] + 0]);
+
     }
 
-    parentModel->_mesh->connectFaces();
-    if (GLModel* glmodel = qobject_cast<GLModel*>(parent())) {
-        glmodel->appendVertices(outVertices);
-        glmodel->appendNormalVertices(outNormals);
+   _mesh->connectFaces();
 
-        emit glmodel->_updateModelMesh(true);
-    }
+    updateModelMesh();
 
-
+    qmlManager->setProgress(1);
 }
 
 // for extension
@@ -2654,27 +2201,30 @@ void GLModel::colorExtensionFaces(){
 }
 
 void GLModel:: uncolorExtensionFaces(){
-    resetColorMesh(_mesh, &vertexColorBuffer, extendFaces);
+    resetColorMesh(_mesh, &vertexBuffer, extendFaces);
     removeComponent(m_meshVertexMaterial);
     addComponent(m_meshMaterial);
+	updateModelMesh();
+
 }
 void GLModel::generateColorAttributes(){
-    extendColorMesh(_mesh,targetMeshFace,&vertexColorBuffer,&extendFaces);
+    extendColorMesh(_mesh,targetMeshFace,&vertexBuffer,extendFaces);
+	updateModelMesh();
 }
 void GLModel::generateExtensionFaces(double distance){
-    if (targetMeshFace == NULL)
+    if (!_targetSelected)
         return;
 
     saveUndoState();
     extendMesh(_mesh, targetMeshFace, distance);
-    targetMeshFace = NULL;
-    emit _updateModelMesh(true);
+	_targetSelected = false;
+	emit _updateModelMesh();
 }
 
 void GLModel::generateLayFlat(){
     //MeshFace shadow_meshface = *targetMeshFace;
 
-    if(targetMeshFace == NULL)
+    if(!_targetSelected)
         return;
 
     saveUndoState();
@@ -2715,15 +2265,15 @@ void GLModel::generateLayFlat(){
 
 void GLModel::generateManualSupport(){
     qDebug() << "generateManual support called";
-    if (targetMeshFace == NULL)
+    if (!_targetSelected)
         return;
     QVector3D t = m_transform.translation();
-    t.setZ(_mesh->z_min()+scfg->raft_thickness);
-    QVector3D targetPosition = targetMeshFace->mesh_vertex[0]->position- t;
+    t.setZ(_mesh->z_min()+scfg->raft_thickness + scfg->support_base_height);
+    QVector3D targetPosition = targetMeshFace->meshVertices()[0]->position- t;
     /*OverhangPoint* targetOverhangPosition = new OverhangPoint(targetPosition.x()*scfg->resolution,
     generateSupporter(layerSupportMesh, targetOverhangPosition, nullptr, nullptr, layerSupportMesh->z_min());*/
-    targetMeshFace = NULL;
-    emit _updateModelMesh(true);
+	_targetSelected = false;
+	emit _updateModelMesh();
 }
 
 // for shell offset
@@ -2733,53 +2283,59 @@ void GLModel::generateShellOffset(double factor){
     qmlManager->openProgressPopUp();
     QString original_filename = filename;
 
+    cutMode = 1;
     cutFillMode = 1;
     shellOffsetFactor = factor;
 
-    shadowModel->modelCut();
+    modelCut();
 
 }
 
 
 void GLModel::openLayflat(){
-    //qDebug() << "open layflat called" << this << this->shadowModel;
+    //qDebug() << "open layflat called" << this << this;
     layflatActive = true;
 
     qmlManager->lastModelSelected();
-    if ((qmlManager->selectedModels[0] != nullptr) && (qmlManager->selectedModels[0] != this)
-            && (qmlManager->selectedModels[0]->shadowModel != this))
+    if (!qmlManager->isSelected(this))
         layflatActive = false;
     //qDebug() << "open layflat called end  " << layflatActive;
 
     /*
     QApplication::setOverrideCursor(QCursor(Qt::UpArrowCursor));
-    shadowModel->m_objectPicker->setEnabled(false);
-    m_objectPicker = new Qt3DRender::QObjectPicker(this);
-    QObject::connect(m_objectPicker,SIGNAL(clicked(Qt3DRender::QPickEvent*)), this, SLOT(handlePickerClickedLayflat(Qt3DRender::QPickEvent*)));
-    this->addComponent(m_objectPicker);
-    this->shadowModel->layflatActive = true;
+    //m_objectPicker->setEnabled(false);
+    //m_objectPicker = new Qt3DRender::QObjectPicker(this);
+    QObject::connect(//m_objectPicker,SIGNAL(clicked(Qt3DRender::QPickEvent*)), this, SLOT(mouseClickedLayflat(Qt3DRender::QPickEvent*)));
+    this->addComponent(//m_objectPicker);
+    this->layflatActive = true;
     */
 }
 
 void GLModel::closeLayflat(){
+
+    if (!layflatActive)
+        return;
+
     layflatActive = false;
-    parentModel->uncolorExtensionFaces();
-    parentModel->targetMeshFace = nullptr;
+    uncolorExtensionFaces();
+	_targetSelected = false;
 }
 void GLModel::openExtension(){
     extensionActive = true;
 
     qmlManager->lastModelSelected();
-    if ((qmlManager->selectedModels[0] != nullptr) && (qmlManager->selectedModels[0] != this)
-            && (qmlManager->selectedModels[0]->shadowModel != this))
+    if (!qmlManager->isSelected(this))
         extensionActive = false;
 
 }
 
 void GLModel::closeExtension(){
+    if (!extensionActive)
+        return;
+
     extensionActive = false;
-    parentModel->uncolorExtensionFaces();
-    parentModel->targetMeshFace = nullptr;
+    uncolorExtensionFaces();
+	_targetSelected = false;
 }
 
 void GLModel::openManualSupport(){
@@ -2788,19 +2344,26 @@ void GLModel::openManualSupport(){
 }
 
 void GLModel::closeManualSupport(){
+
+    if (!manualSupportActive)
+        return;
+
     manualSupportActive = false;
-    parentModel->uncolorExtensionFaces();
-    parentModel->targetMeshFace = nullptr;
-    qDebug() << "close manual support";
+    uncolorExtensionFaces();
+	_targetSelected = false;
+	qDebug() << "close manual support";
 }
 
 void GLModel::openScale(){
     scaleActive = true;
     qmlManager->sendUpdateModelInfo();
-    //QMetaObject::invokeMethod(qmlManager->scalePopup, "updateSizeInfo", Q_ARG(QVariant, parentModel->_mesh->x_max()-parentModel->_mesh->x_min()), Q_ARG(QVariant, parentModel->_mesh->y_max()-parentModel->_mesh->y_min()), Q_ARG(QVariant, parentModel->_mesh->z_max()-parentModel->_mesh->z_min()));
+    //QMetaObject::invokeMethod(qmlManager->scalePopup, "updateSizeInfo", Q_ARG(QVariant, _mesh->x_max()-_mesh->x_min()), Q_ARG(QVariant, _mesh->y_max()-_mesh->y_min()), Q_ARG(QVariant, _mesh->z_max()-_mesh->z_min()));
 }
 
 void GLModel::closeScale(){
+    if (!scaleActive)
+        return;
+
     scaleActive = false;
     qmlManager->sendUpdateModelInfo();
     qDebug() << "close scale";
@@ -2814,10 +2377,14 @@ void GLModel::openCut(){
 
 void GLModel::closeCut(){
     qDebug() << "closecut called";
+
+    if (!cutActive)
+        return;
+
     cutActive = false;
     removePlane();
-    parentModel->removeCuttingPoints();
-    parentModel->removeCuttingContour();
+    removeCuttingPoints();
+    removeCuttingContour();
 }
 
 void GLModel::openHollowShell(){
@@ -2828,6 +2395,10 @@ void GLModel::openHollowShell(){
 
 void GLModel::closeHollowShell(){
     qDebug() << "close HollowShell called";
+
+    if (!hollowShellActive)
+        return;
+
     hollowShellActive = false;
     qmlManager->hollowShellSphereEntity->setProperty("visible", false);
 }
@@ -2835,21 +2406,25 @@ void GLModel::closeHollowShell(){
 void GLModel::openShellOffset(){
     qDebug() << "openShelloffset";
     shellOffsetActive = true;
-    parentModel->addCuttingPoint(QVector3D(1,0,0));
-    parentModel->addCuttingPoint(QVector3D(1,1,0));
-    parentModel->addCuttingPoint(QVector3D(2,0,0));
+    addCuttingPoint(QVector3D(1,0,0));
+    addCuttingPoint(QVector3D(1,1,0));
+    addCuttingPoint(QVector3D(2,0,0));
 
     generatePlane();
-    m_objectPicker->setHoverEnabled(false); // to reduce drag load
-    m_objectPicker->setDragEnabled(false);
+    //m_objectPicker->setHoverEnabled(false); // to reduce drag load
+    //m_objectPicker->setDragEnabled(false);
 }
 
 void GLModel::closeShellOffset(){
     qDebug() << "closeShelloffset";
+
+    if (!shellOffsetActive)
+        return;
+
     shellOffsetActive = false;
     removePlane();
-    parentModel->removeCuttingPoints();
-    parentModel->removeCuttingContour();
+    removeCuttingPoints();
+    removeCuttingContour();
 }
 
 void GLModel::changeViewMode(int viewMode) {
@@ -2863,35 +2438,35 @@ void GLModel::changeViewMode(int viewMode) {
 
     switch( viewMode ) {
     case VIEW_MODE_OBJECT:
-        if (shadowModel->layerViewActive){
+        if (layerViewActive){
             // remove layer view components
             removeLayerViewComponents();
         }
-        shadowModel->layerViewActive = false;
-        shadowModel->supportViewActive = false;
+        layerViewActive = false;
+        supportViewActive = false;
         addComponent(m_meshMaterial);
         removeComponent(m_layerMaterial);
         break;
     case VIEW_MODE_SUPPORT:
-        if (shadowModel->layerViewActive){
+        if (layerViewActive){
             // remove layer view components
             removeLayerViewComponents();
         }
-        shadowModel->layerViewActive = false;
-        shadowModel->supportViewActive = true;
+        layerViewActive = false;
+        supportViewActive = true;
         addComponent(m_meshMaterial);
         removeComponent(m_layerMaterial);
 
         break;
     case VIEW_MODE_LAYER:
-        shadowModel->layerViewActive = true;
-        shadowModel->supportViewActive = false;
+        layerViewActive = true;
+        supportViewActive = false;
         addComponent(m_layerMaterial);
 
         // generate layer view plane materials
         layerViewPlaneMaterial = new Qt3DExtras::QTextureMaterial();
         layerViewPlaneMaterial->setAlphaBlendingEnabled(false);
-        layerViewPlaneEntity[0] = new Qt3DCore::QEntity(parentModel);
+        layerViewPlaneEntity[0] = new Qt3DCore::QEntity(this);
         layerViewPlane[0]=new Qt3DExtras::QPlaneMesh(this);
         layerViewPlane[0]->setHeight(scfg->bed_x);
         layerViewPlane[0]->setWidth(scfg->bed_y);
@@ -2908,7 +2483,32 @@ void GLModel::changeViewMode(int viewMode) {
         break;
     }
 
-    emit _updateModelMesh(true);
+    emit _updateModelMesh();
+}
+
+void GLModel::inactivateFeatures(){
+    /*labellingActive = false;
+    extensionActive = false;
+    cutActive = false;
+    hollowShellActive = false;
+    shellOffsetActive = false;
+    layflatActive = false;
+    manualSupportActive = false;
+    layerViewActive = false;
+    supportViewActive = false;
+    scaleActive = false;*/
+
+    closeLabelling();
+    closeExtension();
+    closeCut();
+    closeHollowShell();
+    closeShellOffset();
+    closeLayflat();
+    closeManualSupport();
+    closeScale();
+    //layerViewActive = false; //closeLayerView();
+    //supportViewActive = false; //closeSupportView();
+    //parentModel->changeViewMode(VIEW_MODE_OBJECT);
 }
 
 void GLModel::removeLayerViewComponents(){
@@ -2920,6 +2520,9 @@ void GLModel::removeLayerViewComponents(){
     layerViewPlaneTransform[0]->deleteLater();
     layerViewPlaneMaterial->deleteLater();
     layerViewPlaneTextureLoader->deleteLater();
+
+
+    layerViewPlaneTextureLoader = nullptr;
 }
 
 void GLModel::generateLayerViewMaterial() {
@@ -2975,6 +2578,7 @@ void GLModel::generateLayerViewMaterial() {
     gl3Technique->addRenderPass(gl3Pass);
 
     //====================== top rendering ======================//
+    /*
     // Create technique, render pass and shader
     gl3Pass = new QRenderPass();
     glShader = new QShaderProgram();
@@ -3014,7 +2618,7 @@ void GLModel::generateLayerViewMaterial() {
     gl3Pass->addRenderState(blendEquation);
 
     // Add the pass to the technique
-    gl3Technique->addRenderPass(gl3Pass);
+    gl3Technique->addRenderPass(gl3Pass);*/
 
     //====================== infill rendering ======================//
     // Create technique, render pass and shader
@@ -3079,98 +2683,71 @@ void GLModel::generateLayerViewMaterial() {
     //m_layerMaterial->addParameter(new QParameter(QStringLiteral("alpha"), 0.0f));
 }
 
-void GLModel::addShadowModel(Mesh* mesh)
-{
-    if (shadowModel)
-    {
-#ifdef _STRICT_GLMODEL
-        throw std::runtime_error("Shadow model added twice ");
-#endif
-    }
-    qDebug() << "shadowmodel added";
-    //set ID of shadow model to -ID of the parent for debugging purposes
-    int shadowModelID = -2;
-    shadowModel = new GLModel(this->mainWindow, this, mesh, filename, true, shadowModelID);
-    //delete and disconnect previous shadowModel
-    qmlManager->connectShadow(shadowModel);
 
-}
-
-
-
-void GLModel::deleteShadowModel()
-{
-    if (shadowModel)
-    {
-        qDebug()<< "shadowmodel removed";
-        shadowModel->removeMouseHandlers();
-        qmlManager->disconnectShadow(this);
-        delete shadowModel;
-        shadowModel = nullptr;
-    }
-}
-
-void GLModel::updateShadowModelImpl()
-{
-	disableMouseHandlers();
-    _mesh = toSparse(parentModel->_mesh);
-	m_transform.setTranslation(QVector3D((_mesh->x_max() + _mesh->x_min()) / 2, (_mesh->y_max() + _mesh->y_min()) / 2, (_mesh->z_max() + _mesh->z_min()) / 2));
-	_mesh->centerMesh();
-	clearMem();
-	updateAllVertices(_mesh);
-	reenableMouseHandlers();
-}
-
-void GLModel::disableMouseHandlers()
-{
-	//removeComponent(m_objectPicker);
-	//m_objectPicker->setEnabled(false);
-	//m_objectPicker->setParent(nullptr);
-	removeMouseHandlers();
-}
-
-void GLModel::reenableMouseHandlers()
-{
-	//addComponent(m_objectPicker);
-	//m_objectPicker->setEnabled(true);
-	addMouseHandlers();
-
-}
-
-void GLModel::setSupport()
-{
-    GenerateSupport generatesupport;
-    supportMesh = generatesupport.generateSupport(_mesh);
-}
 
 const Mesh* GLModel::getSupport()
 {
     return supportMesh;
 }
 
-void GLModel::setEnabled(bool isEnabled)
+
+
+void GLModel::setHitTestable(bool isEnable)
 {
-	if (_isEnabled != isEnabled)
+	if (_hitEnabled != isEnable)
 	{
-		_isEnabled = isEnabled;
-		if (_isEnabled)
+		_hitEnabled = isEnable;
+		if (_hitEnabled)
 		{
-			enablePicking(true);
-			QEntity::setParent(_parent);
+			addComponent(&_layer);
 		}
 		else
 		{
-			enablePicking(false);
-			QEntity::setParent((QNode*)nullptr);
+			removeComponent(&_layer);
 		}
 	}
 }
 
-void GLModel::enablePicking(bool isEnable)
+bool GLModel::isHitTestable()
 {
-	if (shadowModel && shadowModel->m_objectPicker && shadowModel->m_objectPicker->isEnabled() != isEnable)
-	{
-		shadowModel->m_objectPicker->setEnabled(isEnable);
-	}
+	return _hitEnabled;
+
+}
+void GLModel::setSupportAndRaft()
+{
+	GenerateSupport generatesupport;
+	supportMesh = generatesupport.generateSupport(_mesh);
+	GenerateRaft generateraft;
+	raftMesh = generateraft.generateRaft(_mesh, generatesupport.overhangPoints);
+}
+
+const Qt3DCore::QTransform* GLModel::getTransform() const
+{
+	return &m_transform;
+}
+
+void GLModel::setTranslation(const QVector3D& t)
+{
+	m_transform.setTranslation(t);
+}
+
+QVector3D GLModel::getTranslation(){
+    return m_transform.translation();
+}
+
+const Mesh* GLModel::getRaft()
+{
+    return raftMesh;
+}
+
+
+void GLModel::setMatrix(const QMatrix4x4& matrix)
+{
+	m_transform.setMatrix(matrix);
+}
+
+Qt3DRender::QLayer* GLModel::getLayer()
+{
+	return &_layer;
 }
 

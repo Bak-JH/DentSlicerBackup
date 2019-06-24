@@ -12,7 +12,7 @@ import Qt3D.Render 2.0
 import Qt3D.Input 2.0
 import Qt3D.Extras 2.0
 import QtQuick 2.7
-import DentStudio 1.0
+import DentSlicer 1.0
 //import GLQML 1.0
 
 
@@ -33,10 +33,17 @@ Entity {
     property alias keyboardHandler: keyboardHandler
 
     property int ftrDelete : 18
-
+    signal cameraViewChanged();
     //CoordinateMesh{} // 기준좌표 체크
 
-    CameraManager{id : cm}
+    CameraManager{
+        objectName: "cm"
+        id : cm
+        onCameraRotated:
+        {
+            cameraViewChanged();
+        }
+    }
 
     /*SlicingConfiguration {
         id : slicingConfiguration
@@ -68,6 +75,7 @@ Entity {
         }
 
         Entity {
+			objectName: "PrintBedGrid"
             id: gridEntity
             GridMesh {
                 id: gridMesh
@@ -88,6 +96,7 @@ Entity {
         /* White plate and logo on bed */
 
         Plate {
+			objectName: "Plate"
             id: planeEntity
         }
 
@@ -96,28 +105,13 @@ Entity {
 
         Model{
             id: meshEntity4
-            //inputSource:"file:///D:/Dev/DLPSlicer/DLPslicer/resource/mesh/lowerjaw.obj"
+            //inputSource:"file:///C:/Users/user/Downloads/Spider_ascii.stl"
         }
 
         MeshBoundedBox{
             objectName: "boundedBox"
             enabled: false
         }
-
-        Entity{
-            objectName: "rotateSphereEntity"
-            MeshTransformerRotate{
-                objectName: "rotateSphere"
-            }
-        }
-        Entity{
-            objectName: "moveArrowEntity"
-            MeshTransformerMove{
-                objectName: "moveArrow"
-            }
-        }
-
-
         CoordinateMesh{}
     }
 

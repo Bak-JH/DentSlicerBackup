@@ -167,6 +167,21 @@
     <ClCompile Include="utils\updatechecker.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="ui\MoveWidget.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ui\RotateWidget.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="input\raycastcontroller.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ui\RotateXYZWidget.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ui\MoveXYZWidget.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DentEngine\src\polyclipping\poly2tri\sweep\advancing_front.h">
@@ -316,14 +331,23 @@
     <ClInclude Include="common\Singleton.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="common\indexedlist.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
     <ClInclude Include="common\TrackedIndexedList.h">
       <Filter>Source Files</Filter>
     </ClInclude>
+    <ClInclude Include="common\IteratorWrapper.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\indexedlist.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="input\Hoverable.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="input\Draggable.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="unitTest\catch.hpp">
-      <Filter>Source Files</Filter>
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -722,6 +746,9 @@
     <None Include="Resource\splash_final.png">
       <Filter>Resource Files</Filter>
     </None>
+    <None Include="Resource\splash_dentslicer.png">
+      <Filter>Resource Files</Filter>
+    </None>
     <None Include="resource\switch.png">
       <Filter>Resource Files</Filter>
     </None>
@@ -889,9 +916,17 @@
     <None Include="icon-32.ico" />
     <None Include="icon-32.ico" />
     <None Include="icon-32.ico" />
+    <None Include="icon-32.ico" />
+    <None Include="packages.config" />
+    <None Include="icon-32.ico" />
+    <None Include="icon-32.ico" />
+    <None Include="icon-32.ico" />
+    <None Include="icon-32.ico" />
+    <None Include="icon-32.ico" />
+    <None Include="icon-32.ico" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="DLPslicer.rc">
+    <None Include="DentSlicer.rc">
       <Filter>Distribution Files</Filter>
     </None>
     <None Include="icon-32.ico">
@@ -902,6 +937,23 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="DLPslicer.rc" />
+    <ResourceCompile Include="DentSlicer.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <QtMoc Include="input\raycastcontroller.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="ui\RotateWidget.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="ui\RotateXYZWidget.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="ui\MoveXYZWidget.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="ui\MoveWidget.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
   </ItemGroup>
 </Project>

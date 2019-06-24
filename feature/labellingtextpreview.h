@@ -3,7 +3,7 @@
 
 #include <QEntity>
 #include <Qt3DCore/QTransform>
-
+#include <Qt3DExtras>
 #include <QPaintedTextureImage>
 #include <QPainter>
 #include <QPlaneMesh>
@@ -21,6 +21,7 @@ class LabellingTextPreview : public Qt3DCore::QEntity
             : scale(scale), text(text), fontName(fontName), fontWeight(fontWeight)
         {
             setSize(QSize(w * scale, h * scale));
+
         }
 
     protected:
@@ -46,6 +47,7 @@ class LabellingTextPreview : public Qt3DCore::QEntity
 
 public:
     LabellingTextPreview(Qt3DCore::QNode* parent = nullptr);
+    ~LabellingTextPreview();
 
     void setText(QString text, int contentWidth);
     void setFontName(QString fontName);
@@ -55,6 +57,12 @@ public:
     void setNormal(const QVector3D& n);
 
     void updateTransform();
+    void deleteLabel();
+
+    void updateChange(QString text, int contentWidth, QString fontName,
+                      bool isbold,int fontSize,const QVector3D& t, const QVector3D& n);
+    void hideLabel();
+    Qt3DRender::QGeometry* getGeometry();
 
     Qt3DCore::QTransform* planeTransform = nullptr;
     QVector3D translation;
@@ -69,14 +77,17 @@ public:
     float minimumWidth = 64;
     float width = 64;
     float scaleY = 5.0f;
+    //float scaleY = 0.5f;
     float ratioY = 16.0f / 64;
 
     bool planeSelected;
 
 private:
-    Qt3DExtras::QPlaneMesh* planeMesh = nullptr;
+    //Qt3DExtras::QPlaneMesh* planeMesh = nullptr;
+    Qt3DExtras::QExtrudedTextMesh* planeMesh = nullptr;
     Qt3DCore::QEntity* planeEntity = nullptr;
-    Qt3DExtras::QNormalDiffuseMapAlphaMaterial* planeMaterial = nullptr;
+    //Qt3DExtras::QNormalDiffuseMapAlphaMaterial* planeMaterial = nullptr;
+    Qt3DExtras::QPhongAlphaMaterial* planeMaterial = nullptr;
 
     Qt3DRender::QAbstractTexture* texture = nullptr;
     TextureImage* textureImage = nullptr;

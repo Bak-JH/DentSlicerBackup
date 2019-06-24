@@ -1,5 +1,15 @@
-/DLPslicer.pro.user.*
-/DLPslicer.pro.user
+/DentSlicer.pro.user.*
+/DentSlicer.pro.user
+/release
+/debug
+/Win32
+/x64
+/packages
+/.vscode
+/.vs
+/DentSlicer.vcxproj.user
+/.qmake.stash
+/enc_temp_folder
 *.h.*
 *.cpp.*
 *.autosave

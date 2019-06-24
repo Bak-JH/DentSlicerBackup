@@ -1,7 +1,7 @@
 #include "manualsupport.h"
 #include "earcut.hpp"
 #include <QtMath>
-
+using namespace Hix::Engine3D;
 void generateCustomCylinder(Mesh* mesh, const QVector3D& position, const QVector3D& positionTop, const float& radiusTop, const float& radiusBottom){
     //qDebug() << "generateCustomCylinder";
     qDebug() << "v1(" << position.x() << "," << position.y() << "," << position.z() << ")";
