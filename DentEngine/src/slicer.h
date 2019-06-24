@@ -1,8 +1,8 @@
 #ifndef SLICER_H
 #define SLICER_H
+#include "mesh.h"
 #include "polyclipping/clipper/clipper.hpp"
 #include "configuration.h"
-#include "mesh.h"
 //#include "support.h"
 //#include "infill.h"
 #include <list>
@@ -12,7 +12,7 @@
 
 using namespace ClipperLib;
 using namespace c2t;
-
+using namespace Hix::Engine3D;
 class OverhangPoint;
 
 class Slice : public Paths{ // extends Paths (total paths)
@@ -35,6 +35,7 @@ public:
 class Slices : public std::vector<Slice>{
 public:
     Mesh* mesh;
+
     Paths overhang_regions;
     std::vector<OverhangPoint*> overhang_points;
     //    std::vector<QVector3D> overhang_points;
@@ -42,6 +43,7 @@ public:
     Path raft_points;
 
     void containmentTreeConstruct();
+
 };
 
 class Slicer : public QThread
@@ -57,7 +59,7 @@ public:
     Slices raftSlices;
 
     /****************** Entire Slicing Step *******************/
-    Slices slice(Mesh* mesh);
+    bool slice(Mesh* mesh, Slices* slices);
 
     /****************** Mesh Slicing Step *******************/
     std::vector<Paths> meshSlice(Mesh* mesh); // totally k elements

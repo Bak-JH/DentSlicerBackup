@@ -40,6 +40,7 @@ public:
     static constexpr int resolution = 1000;//pow(10,resolution_scale); // resolution range from 1000 to 1
     static constexpr float max_buildsize_x = 1000;//1000000/resolution;
     static constexpr float vertex_inbound_distance = 0.002;//0.03;//(float)1/resolution; // resolution in mm (0.0001 and 0.0009 are same, 1 micron)
+	static constexpr float vertex_3D_distance = 0.0034;
 
     const char* slicing_mode = "uniform"; // uniform OR adaptive
     float layer_height = 0.1; // in mm
@@ -49,18 +50,6 @@ public:
     float support_density = 0.4;
     float infill_density = 0.3;
 
-    float subdivision_radius = 0.85; // in mm
-    float duplication_radius = 4; // in mm
-    int cluster_size = 2000;
-
-    float overhang_detect_diff_layer_height = 0.5; // in mm
-    float default_support_radius = 900 ; // in microns
-    float branching_threshold_radius = 4000; // in microns
-    int branchable_overhang_point_cnt = 4;
-
-    float overhang_threshold = layer_height/tan_theta;
-    float overhang_poll_threshold = support_density * 100; // unit region as 1cm^2
-
     int resin_type = TEMPORARY_RESIN;
     float contraction_ratio = TEMPORARY_CONTRACTION_RATIO;
 
@@ -69,18 +58,42 @@ public:
     int raft_type = 2;
 
     // raft settings
-    float raft_thickness = 0;//3;
-    int raft_base_radius = 3000;
-    int raft_offset_radius = 1800; // in microns
+    float raft_thickness = 2; // in mm
+    float raft_base_radius = 5; // in mm
+    float raft_offset_radius = 4; // in mm
 
-    // set configuration
+    // support settings
+    float support_radius_max = 1.5f;
+    float support_radius_min = 0.3f;
+    float support_base_height = 2.0;
+
+    // bed configuration
     QVector3D origin;
-    int resolution_x = 1280;
-    int resolution_y = 800;
-    int bed_x = 131.2; // in mm
-    int bed_y = 82; // in mm
+
+    /* // settings for capsule 3D Printer
+    int resolution_x = 2560;
+    int resolution_y = 1440;
+
+    int bed_x = 120.96; // in mm
+    int bed_y = 68.04; // in mm*/
+
+    // settings for vittro
+    int resolution_x = 1920;
+    int resolution_y = 1080;
+
+    int bed_x = 124.8; // in mm
+    int bed_y = 70.2; // in mm
+
+	size_t bed_margin_x = 1;
+	size_t bed_margin_y = 1;
+
     float pixel_per_mm = float(resolution_x)/float(bed_x);
 };
+
+const QVector3D COLOR_DEFAULT_MESH = QVector3D(0.278f, 0.670f, 0.706f);
+const QVector3D COLOR_INFILL = QVector3D(1.0f, 1.0f, 0.0f);
+const QVector3D COLOR_RAFT = QVector3D(0.0f, 0.0f, 0.0f);
+const QVector3D COLOR_EXTEND_FACE = QVector3D(0.901f, 0.843f, 0.133f);
 
 extern SlicingConfiguration* scfg;
 

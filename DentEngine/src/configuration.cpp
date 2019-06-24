@@ -5,3 +5,4 @@
 #include <QTimer>
 
 SlicingConfiguration* scfg = new SlicingConfiguration();
+
