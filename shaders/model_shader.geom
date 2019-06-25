@@ -55,12 +55,18 @@ void main()
 	vec3 oa = gs_in[1].position-gs_in[0].position;
 	vec3 ob = gs_in[2].position-gs_in[0].position;
 	vec3 norm=normalize(cross(oa, ob));
+    vec3 darkestColor = vec3(255, 255, 255);
+    vec3 currColor;
+    for(int i=0; i<3; i++){
+        currColor = gs_in[i].color;
+        darkestColor = (length(currColor) < length(darkestColor))? currColor : darkestColor; 
+    }
 	for(int i=0; i<3; i++){
         //return vtx normal or face normal
         // gs_out.normal = norm;
         // gs_out.position = gs_in[i].position;
         gl_Position = gl_in[i].gl_Position;
-        vec3 color = calcLights( gs_in[i].position, norm, gs_in[i].color);
+        vec3 color = calcLights( gs_in[i].position, norm, darkestColor);
         VertexColor = color;
         //gs_out.color = color;
 		EmitVertex();
