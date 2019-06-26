@@ -37,7 +37,6 @@ Hix::Render::ModelMaterial::ModelMaterial():
 	_renderTechnique.graphicsApiFilter()->setMajorVersion(3);
 	_renderTechnique.graphicsApiFilter()->setMinorVersion(3);
 	_renderTechnique.graphicsApiFilter()->setProfile(QGraphicsApiFilter::CoreProfile);
-	_filterKey.setParent(this);
 	_filterKey.setName(QStringLiteral("renderingStyle"));
 	_filterKey.setValue(QStringLiteral("forward"));
 	_renderTechnique.addFilterKey(&_filterKey);
@@ -46,16 +45,6 @@ Hix::Render::ModelMaterial::ModelMaterial():
 	_effect.addParameter(&_ambientParameter);
 	_effect.addParameter(&_diffuseParameter);
 	setEffect(&_effect);
-
-	//this is hard coded in to shader to make the for loop in shader a const bound loop.
-	//_pointLightCountParameter.setName(QStringLiteral("pointLightCount"));
-	//_pointLightPositionsParameter.setValue(4);
-
-	//since it's white color, no calculation is needed, so skipped for performance
-	//_pointLightColorParameter.setName(QStringLiteral("pointLightColor"));
-	//_pointLightColorParameter.setValue(QVector3D(1.0, 1.0, 1.0));
-
-	//add parameters
 
 
 }
@@ -74,4 +63,30 @@ void Hix::Render::ModelMaterial::setAmbient(const QColor& ambient)
 {
 	_ambientParameter.setValue(ambient);
 
+}
+
+void Hix::Render::ModelMaterial::addParameter(const std::string& key)
+{
+	if (_additionalParameters.find(key) == _additionalParameters.end())
+	{
+		_additionalParameters.emplace(std::string(key), nullptr);
+	}
+}
+
+void Hix::Render::ModelMaterial::removeParameter(const std::string& key)
+{
+	auto found = _additionalParameters.find(key);
+	if (found != _additionalParameters.end())
+	{
+		_additionalParameters.erase(found);
+	}
+}
+
+void Hix::Render::ModelMaterial::setParameterValue(const std::string& key, const QVariant& value)
+{
+	auto found = _additionalParameters.find(key);
+	if (found != _additionalParameters.end())
+	{
+		found->second.setValue(value);
+	}
 }

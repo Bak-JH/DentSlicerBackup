@@ -11,10 +11,15 @@ out vec4 fragColor;
 
 flat in vec3 VertexColor;
 
-    
+void flatShade()
+{
+    fragColor = vec4(VertexColor, 1.0);
+}
+#ifndef MAIN
+#define MAIN
 void main()
 {
     // fragColor = vec4(fs_in.color, 1.0);
-    fragColor = vec4(VertexColor, 1.0);
-
+    flatShade();
 }
+#endif

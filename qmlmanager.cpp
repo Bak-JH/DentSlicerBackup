@@ -43,19 +43,7 @@ void QmlManager::initializeUI(QQmlApplicationEngine* e){
     loginButton = FindItemByName(engine, "loginButton");
     keyboardHandler = (Qt3DInput::QKeyboardHandler*)FindItemByName(engine, "keyboardHandler");
     models = (QEntity *)FindItemByName(engine, "Models");
-
-	Lights* lights = new Lights(models);
-
-	//auto lightEntitiy = new Qt3DCore::QEntity(models);
-	//auto light = new Qt3DRender::QPointLight(lightEntitiy);
-	////light->setColor(QColor(1.0,0,0));
-	//light->setColor("white");
-	//light->setIntensity(0.1);
-	//auto lightTransform = new Qt3DCore::QTransform(lightEntitiy);
-	//lightTransform->setTranslation(QVector3D(100,100, 0));
-	//lightEntitiy->addComponent(light);
-	//lightEntitiy->addComponent(lightTransform);
-
+    Lights* lights = new Lights(models);
     mv = dynamic_cast<QEntity*> (FindItemByName(engine, "MainView"));
     systemTransform = (Qt3DCore::QTransform *) FindItemByName(engine, "systemTransform");
     mttab = (QEntity *)FindItemByName(engine, "mttab");

@@ -21,15 +21,18 @@ namespace Hix
 			ModelMaterial();
 			virtual ~ModelMaterial();
 
+			//state machine
+			void setMode();
 			void setDiffuse(const QColor& diffuse);
 			void setAmbient(const QColor& ambient);
-
+			void addParameter(const std::string& key);
+			void removeParameter(const std::string& key);
+			void setParameterValue(const std::string& key, const QVariant& value);
 		private:
 
-			//parameters
-			Qt3DRender::QParameter _ambientParameter;
-			Qt3DRender::QParameter _diffuseParameter;
 
+			//custom parameters
+			std::unordered_map<std::string, Qt3DRender::QParameter> _additionalParameters;
 
 			//just to make sure the code compiles
 			QOpenGLShader _vertShader;
@@ -41,6 +44,10 @@ namespace Hix
 			Qt3DRender::QRenderPass _renderPass;
 			Qt3DRender::QShaderProgram _shaderProgram;
 			Qt3DRender::QFilterKey _filterKey;
+
+			//default parameters
+			Qt3DRender::QParameter _ambientParameter;
+			Qt3DRender::QParameter _diffuseParameter;
 	
 
 		};

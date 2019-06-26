@@ -12,6 +12,7 @@ RC_FILE = DLPslicer.rc
 
 SOURCES += main.cpp \
     input/raycastcontroller.cpp \
+    lights.cpp \
     render/ModelMaterial.cpp \
     slicingengine.cpp \
     glmodel.cpp \
@@ -125,6 +126,7 @@ HEADERS += \
     common/indexedlist.h \
     input/Draggable.h \
     input/raycastcontroller.h \
+    lights.h \
     render/ModelMaterial.h \
     slicingengine.h \
     glmodel.h \

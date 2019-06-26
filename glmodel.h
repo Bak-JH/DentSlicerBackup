@@ -132,11 +132,6 @@ public:
 
     bool appropriately_rotated=false;
 	Hix::Render::ModelMaterial m_meshMaterial;
-	//Qt3DExtras::QDiffuseSpecularMaterial m_meshMaterial;
-
-    QMaterial *m_layerMaterial;
-    QParameter *m_layerMaterialHeight;
-    QParameter *m_layerMaterialRaftHeight;
     //QVector3D m_translation;
 
     // feature hollowshell
@@ -184,10 +179,11 @@ public:
     // changeColor
 	enum ModelColor
 	{
+		None = -1,
 		Default = 0,
-		Selected = 1,
-		OutOfBound = 2,
-
+		Selected,
+		OutOfBound,
+		LayerMode
 	};
     void changecolor(ModelColor mode); //0 default, 1 selected, 2 outofarea
 
@@ -295,7 +291,6 @@ private:
 
     void onTimerUpdate();
     void removeLayerViewComponents();
-    void generateLayerViewMaterial();
 	void setMesh(Hix::Engine3D::Mesh* mesh);
 	void updateMesh(Hix::Engine3D::Mesh* mesh);
 	void appendMesh(Hix::Engine3D::Mesh* mesh);

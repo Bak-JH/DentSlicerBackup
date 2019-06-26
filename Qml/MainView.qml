@@ -114,14 +114,6 @@ Entity {
         }
         CoordinateMesh{}
 
-        PointLight {
-            color: "red"
-            intensity: 0.3
-            constantAttenuation: 1.0
-            linearAttenuation: 0.0
-            quadraticAttenuation: 0.0025
-        }
-
     }
 
 
