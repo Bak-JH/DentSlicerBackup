@@ -1,5 +1,5 @@
-/DLPslicer.pro.user.*
-/DLPslicer.pro.user
+/DentSlicer.pro.user.*
+/DentSlicer.pro.user
 /release
 /debug
 /Win32
@@ -7,7 +7,7 @@
 /packages
 /.vscode
 /.vs
-/DLPslicer.vcxproj.user
+/DentSlicer.vcxproj.user
 /.qmake.stash
 /enc_temp_folder
 *.h.*

@@ -84,14 +84,14 @@ void RayCastController::setHoverEnabled(bool isEnabled)
 	if (_hoverEnabled != isEnabled)
 	{
 		_hoverEnabled = isEnabled;
-		//if (_hoverEnabled)
-		//{
-		//	_hoverRayCaster.setEnabled(true);
-		//}
-		//else
-		//{
-		//	_hoverRayCaster.setEnabled(false);
-		//}
+        if (_hoverEnabled)
+        {
+            _hoverRayCaster.setEnabled(true);
+        }
+        else
+        {
+            _hoverRayCaster.setEnabled(false);
+        }
 	}
 }
 
@@ -321,6 +321,14 @@ void RayCastController::hitsChanged(const Qt3DRender::QAbstractRayCaster::Hits& 
 				{
 					glmodel->clicked(_mouseEvent, *nearestHit);
 				}
+                else
+                {
+                    auto parent = dynamic_cast<GLModel*>(nearestHit->entity()->parentEntity());
+                    if(parent)
+                    {
+                        parent->clicked(_mouseEvent, *nearestHit);
+                    }
+                }
 			}
 			//ignore other entities... there shouldn't be any
 		}

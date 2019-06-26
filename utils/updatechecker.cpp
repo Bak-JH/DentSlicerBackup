@@ -15,7 +15,7 @@ void UpdateChecker::initWinSparkle(){
     win_sparkle_set_appcast_url("http://18.184.77.105/appcast/appcast.xml");
     const wchar_t* version_w = L"1.1.3";
     current_version = QString::fromWCharArray(version_w);
-    win_sparkle_set_app_details(L"HiX.org", L"DentStudioSetup", version_w);
+    win_sparkle_set_app_details(L"HiX.org", L"DentSlicerSetup", version_w);
 
     // Set DSA public key used to verify update's signature.
     // This is na example how to provide it from external source (i.e. from Qt

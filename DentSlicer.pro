@@ -1,14 +1,14 @@
 .TEMPLATE = app
 
-QT += qml quick opengl 3dcore 3drender 3dinput 3dextras concurrent widgets core 3dquick 3dlogic 3dquickextras
+QT += qml quick opengl 3dcore 3drender 3dinput 3dextras concurrent widgets core 3dquick 3dlogic 3dquickextras svg
 
 CONFIG += c++17 resources_big
 
-TARGET = DentStudio
+TARGET = DentSlicer
 
 
-RC_ICONS = icon-32.ico
-RC_FILE = DLPslicer.rc
+RC_ICONS = icon.ico
+RC_FILE = DentSlicer.rc
 
 SOURCES += main.cpp \
     input/raycastcontroller.cpp \
@@ -96,14 +96,14 @@ win32:QMAKE_LFLAGS *= -Wl,--large-address-aware
 #boost path
 MINGW_COMPILED_BOOST_LIB_ENV_NAME = BOOST_LIBRARYDIR$$(MINGW_COMPILED)
 MINGW_COMPILED_BOOST_LIB = $($$MINGW_COMPILED_BOOST_LIB_ENV_NAME)
-#message($$MINGW_COMPILED_BOOST_LIB)
+message($$MINGW_COMPILED_BOOST_LIB)
 MINGW_COMPILED_BOOST_INCLUDE_ENV_NAME = BOOST_INCLUDEDIR$$(MINGW_COMPILED)
 MINGW_COMPILED_BOOST_INCLUDE = $($$MINGW_COMPILED_BOOST_INCLUDE_ENV_NAME)
-#message($$MINGW_COMPILED_BOOST_INCLUDE)
+message($$MINGW_COMPILED_BOOST_INCLUDE)
 #CGAL path
 MINGW_COMPILED_CGAL_ENV_NAME = CGAL_DIR$$(MINGW_COMPILED)
 MINGW_COMPILED_CGAL = $($$MINGW_COMPILED_CGAL_ENV_NAME)
-#message($$MINGW_COMPILED_CGAL)
+message($$MINGW_COMPILED_CGAL)
 
 # add CGAL
 LIBS += -L$$MINGW_COMPILED_CGAL/build/lib/ -llibCGAL.dll
@@ -186,6 +186,5 @@ HEADERS += \
 #LIBS += -lOpengl32
 
 DISTFILES += \
-    icon-32.ico \
-    DLPslicer.rc \
+    DentSlicer.rc \
     icon.ico \

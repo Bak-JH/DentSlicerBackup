@@ -725,6 +725,9 @@
     <None Include="Resource\splash_final.png">
       <Filter>Resource Files</Filter>
     </None>
+    <None Include="Resource\splash_dentslicer.png">
+      <Filter>Resource Files</Filter>
+    </None>
     <None Include="resource\switch.png">
       <Filter>Resource Files</Filter>
     </None>
@@ -915,9 +918,10 @@
       <Filter>Resource Files</Filter>
     </None>
     <None Include="icon-32.ico" />
+    <None Include="icon-32.ico" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="DLPslicer.rc">
+    <None Include="DentSlicer.rc">
       <Filter>Distribution Files</Filter>
     </None>
     <None Include="icon-32.ico">
@@ -928,7 +932,7 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="DLPslicer.rc" />
+    <ResourceCompile Include="DentSlicer.rc" />
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="input\raycastcontroller.h">

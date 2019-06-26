@@ -117,6 +117,80 @@ Mesh* ShellOffset::shellOffset(Mesh* mesh, float factor){
  //       }
  //   }
 
+    std::vector<MeshFace> unconnectedOffsetMeshFaces;
+
+    offsetMesh->connectFaces();
+    for (const auto& mf: offsetMesh->getFaces()){
+        auto edgeCirc = mf.edgeCirculator();
+        for (size_t i = 0; i < 3; ++i, ++edgeCirc) {
+            if (edgeCirc->nonOwningFaces().size() == 0)
+            {
+                unconnectedOffsetMeshFaces.push_back(mf);
+                break;
+            }
+        }
+    }
+
+    qDebug() << "done copy and finding";
+    // 승환 20%
+    qmlManager->setProgress(0.17);
+
+    // offset vertices into normal direction and reverse faces
+    offsetMesh->vertexOffset(-factor);
+    offsetMesh->reverseFaces();
+
+    qDebug() << "done offsetting, reversing";
+    // 승환 40%
+    qmlManager->setProgress(0.42);
+
+    (*offsetMesh) += (*mesh);
+
+    qDebug() << "done copy2";
+    // 승환 60%
+    qmlManager->setProgress(0.54);
+
+    // identify holes to connect
+    for (int i=0; i<unconnectedOffsetMeshFaces.size(); i++){
+        if (cnt%100 ==0)
+            QCoreApplication::processEvents();
+        cnt++;
+
+        MeshFace uomf = unconnectedOffsetMeshFaces[i];
+
+		auto uomfMVertices = uomf.meshVertices();
+        auto edgeCirc = uomf.edgeCirculator();
+        auto neighbors = edgeCirc->nonOwningFaces();
+        if (neighbors.size() == 0){ // edge 0 is unconnected
+            QVector3D qv0 = uomfMVertices[0]->position + uomfMVertices[0]->vn * factor;
+            QVector3D qv1 = uomfMVertices[1]->position + uomfMVertices[1]->vn * factor;
+            QVector3D qv0_in = uomfMVertices[0]->position;
+            QVector3D qv1_in = uomfMVertices[1]->position;
+            offsetMesh->addFaceAndConnect(qv0, qv1, qv0_in);
+            offsetMesh->addFaceAndConnect(qv0_in, qv1, qv1_in);
+        }
+		++edgeCirc;
+        neighbors = edgeCirc->nonOwningFaces();
+        if (neighbors.size() == 0){ // edge 1 is unconnected
+            QVector3D qv1 = uomfMVertices[1]->position + uomfMVertices[1]->vn * factor;
+            QVector3D qv2 = uomfMVertices[2]->position + uomfMVertices[2]->vn * factor;
+            QVector3D qv1_in = uomfMVertices[1]->position;
+            QVector3D qv2_in = uomfMVertices[2]->position;
+            offsetMesh->addFaceAndConnect(qv1, qv2, qv1_in);
+            offsetMesh->addFaceAndConnect(qv1_in, qv2, qv2_in);
+        }
+		++edgeCirc;
+        neighbors = edgeCirc->nonOwningFaces();
+        if (neighbors.size() == 0){ // edge 2 is unconnected
+            QVector3D qv0 = uomfMVertices[0]->position + uomfMVertices[0]->vn * factor;
+            QVector3D qv2 = uomfMVertices[2]->position + uomfMVertices[2]->vn * factor;
+            QVector3D qv0_in = uomfMVertices[0]->position;
+            QVector3D qv2_in = uomfMVertices[2]->position;
+            offsetMesh->addFaceAndConnect(qv2_in, qv0, qv0_in);
+            offsetMesh->addFaceAndConnect(qv2, qv0, qv2_in);
+        }
+    }
+
+    qDebug() << "done creating hole fills";
 
     // connect built Mesh
     //offsetMesh->connectFaces();
