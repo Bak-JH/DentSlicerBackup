@@ -352,7 +352,6 @@
     <None Include="Qml\LeftTabSlicingOptionElement2.qml" />
     <None Include="Qml\LeftTabSlicingOptionElement3.qml" />
     <None Include="Qml\LeftTabViewMode.qml" />
-    <None Include="Qml\Lights.qml" />
     <None Include="Qml\Login.qml" />
     <None Include="Qml\MainView.qml" />
     <None Include="Qml\MeshPlate.qml" />
@@ -413,12 +412,6 @@
     <None Include="Resource\popup_image\image_orient.png" />
     <None Include="Resource\label_description.png" />
     <None Include="lang_ko.qm" />
-    <None Include="shaders\layerview_bottom.frag" />
-    <None Include="shaders\layerview_bottom.vert" />
-    <None Include="shaders\layerview_infill.frag" />
-    <None Include="shaders\layerview_infill.vert" />
-    <None Include="shaders\layerview_top.frag" />
-    <None Include="shaders\layerview_top.vert" />
     <None Include="Resource\login_leftbutton.png" />
     <None Include="Resource\login_logo.png" />
     <None Include="Resource\login_rightbutton.png" />
