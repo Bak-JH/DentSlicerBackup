@@ -7,7 +7,7 @@ import QtQuick.Controls.Styles 1.4
 import QtQuick.Dialogs 1.2
 Item{
     ApplicationWindow {
-        title: qsTr("DentStudio")
+        title: qsTr("DentSlicer")
         id : window
         width: 1280
         height: 768

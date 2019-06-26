@@ -44,13 +44,15 @@
         <file>Qml/UndoRedoButton.qml</file>
         <file>Qml/LayerViewSlider.qml</file>
         <file>Qml/SettingPopup.qml</file>
-        <file>Resource/mesh/plate_logo.stl</file>
-        <file>Resource/mesh/boundedBox3.stl</file>
-        <file>Qml/MeshPlate.qml</file>
         <file>shaders/model_shader.frag</file>
         <file>shaders/model_shader.vert</file>
-        <file>shaders/model_shader.geom</file>
+		<file>shaders/model_shader.geom</file>
         <file>shaders/light.inc.frag</file>
         <file>shaders/layerview_shader.frag</file>
-    </qresource>
+		<file>Resource/mesh/plate_logo.stl</file>
+        <file>Resource/mesh/boundedBox3.stl</file>
+        <file>Qml/MeshPlate.qml</file>
+		<file>Resource/dentslicer_login_logo.png</file>
+        <file>Resource/mesh/dentslicer_plate_logo.stl</file>
+</qresource>
 </RCC>

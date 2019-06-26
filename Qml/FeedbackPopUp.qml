@@ -48,7 +48,7 @@ Item {
             anchors.top: logo.bottom
             anchors.topMargin: 50
 
-            text : "Thank you for using " + "<font color=\"#0DA3B2\">DentStudio Beta</font>"
+            text : "Thank you for using " + "<font color=\"#0DA3B2\">DentSlicer Beta</font>"
 
             font.pixelSize: 20
             font.family: mainFont.name
@@ -79,7 +79,7 @@ Item {
             anchors.top: text2.bottom
             anchors.topMargin: 8
 
-            text : "and suggestion for " + "<font color=\"#0DA3B2\">DentStudio</font>"
+            text : "and suggestion for " + "<font color=\"#0DA3B2\">DentSlicer</font>"
 
             font.pixelSize: 16
             font.family: mainFont.name
