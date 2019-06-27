@@ -1,6 +1,5 @@
 #ifndef QMLMANAGER_H
 #define QMLMANAGER_H
-
 #include <QObject>
 #include <QDebug>
 #include <QString>
