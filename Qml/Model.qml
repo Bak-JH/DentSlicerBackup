@@ -11,16 +11,6 @@ Entity {
     //property alias testMesh: testMesh
     property alias meshTransform: meshTransform
 
-
-//    Mesh{
-//        id: testMesh
-//        //source: inputSource
-//        //source:"file:///C:/Users/user/Downloads/Spider_ascii.stl"
-
-//    }
-
-
-
     Transform {
         id: meshTransform
         property quaternion objectRotation : fromAxisAndAngle(Qt.vector3d(0,0, 1), 60)
@@ -31,16 +21,9 @@ Entity {
         translation: Qt.vector3d(0,0,0);
     }
 
-//    PhongMaterial {
-//        id: testMaterial
-//        property int counter : 0
-//        ambient: Qt.rgba(255/255,200/255,242/255,1.0)
-
-//    }
 
     components: [meshTransform]
-    //components: [ testMesh, testMaterial, meshTransform ]
-    //components: [ testMesh, testMaterial, meshTransform]
+
 
     function zoomUp(){
         meshTransform.scale3D = meshTransform.scale3D.plus(Qt.vector3d(0.01,0.01,0.01))

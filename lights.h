@@ -17,13 +17,7 @@ class Lights: public QObject
 
 public:
     explicit Lights(Qt3DCore::QEntity *rootEntity);
-    ~Lights();
-
 private:
     Qt3DCore::QEntity *parentEntity;
-    Qt3DCore::QEntity *lightEntity[4];
-    Qt3DRender::QPointLight *light[4];
-    Qt3DCore::QTransform *lightTransform[4];
     int light_distance = 100;
-    int number_of_lights = 4;
 };
