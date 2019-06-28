@@ -34,6 +34,7 @@ using namespace Qt3DExtras;
 
 
 /* feature thread */
+#define ftrEmpty -1 //TODO: remove this swtich craziness.
 #define ftrOpen 1
 #define ftrSave 2
 #define ftrExport 3
@@ -54,6 +55,7 @@ using namespace Qt3DExtras;
 #define ftrDelete 18
 #define ftrTempExport 19
 #define ftrSupportDisappear 20
+
 
 class GLModel;
 class OverhangPoint;

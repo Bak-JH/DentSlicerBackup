@@ -11,6 +11,7 @@ RC_ICONS = icon.ico
 RC_FILE = DentSlicer.rc
 
 SOURCES += main.cpp \
+    common/TaskManager.cpp \
     input/raycastcontroller.cpp \
     lights.cpp \
     render/ModelMaterial.cpp \
@@ -121,9 +122,47 @@ HEADERS += \
     common/Indexedlist.h \
     common/IteratorWrapper.h \
     common/Singleton.h \
+    common/TaskManager.h \
     common/TrackedIndexedList.h \
     common/indexedlist.h \
     common/indexedlist.h \
+    common/indexedlist.h \
+    common/indexedlist.h \
+    common/moodycamel/atomicops.h \
+    common/moodycamel/readerwriterqueue.h \
+    common/taskflow/core/executor.hpp \
+    common/taskflow/core/flow_builder.hpp \
+    common/taskflow/core/graph.hpp \
+    common/taskflow/core/notifier.hpp \
+    common/taskflow/core/observer.hpp \
+    common/taskflow/core/spmc_queue.hpp \
+    common/taskflow/core/task.hpp \
+    common/taskflow/core/taskflow.hpp \
+    common/taskflow/core/topology.hpp \
+    common/taskflow/error/error.hpp \
+    common/taskflow/predef/architecture.hpp \
+    common/taskflow/predef/architecture/arm.hpp \
+    common/taskflow/predef/architecture/mips.hpp \
+    common/taskflow/predef/architecture/ppc.hpp \
+    common/taskflow/predef/architecture/x86.hpp \
+    common/taskflow/predef/compiler.hpp \
+    common/taskflow/predef/compiler/clang.hpp \
+    common/taskflow/predef/compiler/comp_detected.hpp \
+    common/taskflow/predef/compiler/gcc.hpp \
+    common/taskflow/predef/compiler/msvc.hpp \
+    common/taskflow/predef/os.hpp \
+    common/taskflow/predef/os/ios.hpp \
+    common/taskflow/predef/os/macos.hpp \
+    common/taskflow/predef/os/os_detected.hpp \
+    common/taskflow/predef/stringify.hpp \
+    common/taskflow/predef/version_number.hpp \
+    common/taskflow/taskflow.hpp \
+    common/taskflow/utility/backoff.hpp \
+    common/taskflow/utility/generic_allocator.hpp \
+    common/taskflow/utility/object_pool.hpp \
+    common/taskflow/utility/passive_vector.hpp \
+    common/taskflow/utility/singular_allocator.hpp \
+    common/taskflow/utility/traits.hpp \
     input/Draggable.h \
     input/raycastcontroller.h \
     lights.h \

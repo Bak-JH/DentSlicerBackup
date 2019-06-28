@@ -25,6 +25,7 @@
 #include "qmlmanager.h"
 #include "utils/utils.h"
 #include "lights.h"
+
 using namespace Hix::Input;
 using namespace Hix::UI;
 QmlManager::QmlManager(QObject *parent) : QObject(parent)
@@ -1416,6 +1417,12 @@ QVector3D QmlManager::cameraViewVector()
 	return _camera->position() - systemTransform->translation();
 }
 
+TaskManager& QmlManager::taskManager()
+{
+	return _taskManager;
+}
+
+
 
 void QmlManager::modelMoveByNumber(int axis, int X, int Y){
     if (selectedModels.empty())
@@ -1495,6 +1502,62 @@ void QmlManager::groupSelectionActivate(bool active){
     } else {
         groupSelectionActive = false;
     }
+}
+
+void QmlManager::exportSelected(bool isTemporary)
+{
+	auto exportConfig = boxUpperTab->property("options");
+	// save to temporary folder
+	qDebug() << "file export called";
+	QString fileName;
+
+	// look for data if it is temporary
+	QVariantMap config = exportConfig.toMap();
+	if (!isTemporary) { // export view
+		qDebug() << "export to file";
+		fileName = QFileDialog::getSaveFileName(nullptr, tr("Export sliced file"), "");
+		//ste->exportSTL(m_glmodel->getMesh(), fileName);
+		if (fileName == "")
+			return;
+	}
+	else { // support view & layerview
+		qDebug() << "export to temp file";
+		fileName = QDir::tempPath();
+		qDebug() << fileName;
+	}
+
+	STLexporter* ste = new STLexporter();
+	SlicingEngine* se = new SlicingEngine();
+
+	qmlManager->openProgressPopUp();
+
+	// merge selected models
+	Mesh* mergedShellMesh = ste->mergeSelectedModels();//ste->mergeModels(qmlManager->selectedModels);
+	//GLModel* mergedModel = new GLModel(mainWindow, models, mergedMesh, "temporary", false);
+
+	qDebug() << "1111" << mergedShellMesh;
+	qDebug() << "1111" << mergedShellMesh->x_max() << mergedShellMesh->x_min();
+
+	// generate support
+	GenerateSupport generatesupport;
+	Mesh* mergedSupportMesh = nullptr;
+	if (scfg->support_type != 0) { // if generating support
+		//Mesh* mergedSupportMesh = nullptr;
+		mergedSupportMesh = generatesupport.generateSupport(mergedShellMesh);
+	}
+
+	qDebug() << "2222";
+
+	// generate raft according to support structure
+	GenerateRaft generateraft;
+	Mesh* mergedRaftMesh = nullptr;
+	if (scfg->raft_type != 0) {
+		mergedRaftMesh = generateraft.generateRaft(mergedShellMesh, generatesupport.overhangPoints);
+	}
+	qDebug() << "3333";
+	// need to generate support, raft
+
+	se->slice(exportConfig, mergedShellMesh, mergedSupportMesh, mergedRaftMesh, fileName);
 }
 
 void QmlManager::runGroupFeature(int ftrType, QString state, double arg1, double arg2, double arg3, QVariant data){
@@ -1630,71 +1693,8 @@ void QmlManager::runGroupFeature(int ftrType, QString state, double arg1, double
         }
         break;
     case ftrExport:
-        // save to temporary folder
-        qDebug() << "file export called";
-        QString fileName;
-
-        // look for data if it is temporary
-        QVariantMap config = data.toMap();
-        bool isTemporary = false;
-        for (QVariantMap::const_iterator iter = config.begin(); iter != config.end(); ++iter){
-            if (!strcmp(iter.key().toStdString().c_str(), "temporary")){
-                qDebug() << "iter value : " << iter.value().toString();
-                if (iter.value().toString() == "true"){
-                    isTemporary = true;
-                }
-            }
-        }
-
-        if (! isTemporary){ // export view
-            qDebug() << "export to file";
-            fileName = QFileDialog::getSaveFileName(nullptr, tr("Export sliced file"), "");
-            //ste->exportSTL(m_glmodel->getMesh(), fileName);
-            if(fileName == "")
-                return;
-        } else { // support view & layerview
-            qDebug() << "export to temp file";
-            fileName =  QDir::tempPath();
-            qDebug() << fileName;
-        }
-
-        STLexporter* ste = new STLexporter();
-        SlicingEngine* se = new SlicingEngine();
-
-        qmlManager->openProgressPopUp();
-
-        // merge selected models
-        Mesh* mergedShellMesh = ste->mergeSelectedModels();//ste->mergeModels(qmlManager->selectedModels);
-        //GLModel* mergedModel = new GLModel(mainWindow, models, mergedMesh, "temporary", false);
-
-        qDebug() << "1111" << mergedShellMesh;
-        qDebug() << "1111" << mergedShellMesh->x_max() << mergedShellMesh->x_min();
-
-        // generate support
-        GenerateSupport generatesupport;
-        Mesh* mergedSupportMesh = nullptr;
-        if (scfg->support_type != 0){ // if generating support
-            //Mesh* mergedSupportMesh = nullptr;
-            mergedSupportMesh = generatesupport.generateSupport(mergedShellMesh);
-        }
-
-        qDebug() << "2222";
-
-        // generate raft according to support structure
-        GenerateRaft generateraft;
-        Mesh* mergedRaftMesh = nullptr;
-        if (scfg->raft_type != 0){
-            mergedRaftMesh = generateraft.generateRaft(mergedShellMesh, generatesupport.overhangPoints);
-        }
-        qDebug() << "3333";
-        // need to generate support, raft
-
-        //se->slice(data, mergedMesh, fileName);
-        QFuture<Slicer*> future = QtConcurrent::run(se, &SlicingEngine::slice, data, mergedShellMesh, mergedSupportMesh, mergedRaftMesh, fileName);
-        //deleteOneModelFile(mergedModel->ID);
-
-        //m_glmodel->futureWatcher.setFuture(future);
-        break;
+		exportSelected(false);
+		break;
     }
 }
 
@@ -2040,54 +2040,96 @@ void QmlManager::setViewMode(int viewMode) {
         else if (viewMode == 2) viewLayerButton->setProperty("checked", true);
 
         this->viewMode = viewMode;
-        layerViewPopup->setProperty("visible", this->viewMode == VIEW_MODE_LAYER);
-        layerViewSlider->setProperty("visible", this->viewMode == VIEW_MODE_LAYER);
-		
-        if( !selectedModels.empty() ) {
+
+		bool sliceNeeded = false;
+		switch (viewMode) {
+		case VIEW_MODE_OBJECT:
+			QMetaObject::invokeMethod(yesno_popup, "closePopUp");
+			QMetaObject::invokeMethod(leftTabViewMode, "setObjectView");
+			break;
+		case VIEW_MODE_SUPPORT:
+			for (auto each : selectedModels)
+			{
+				each->setSupportAndRaft();
+			}
+			break;
+		case VIEW_MODE_LAYER:
+			for (auto each : selectedModels)
+			{
+				each->setSupportAndRaft();
+			}
+			for (auto each : selectedModels)
+			{
+				//generate slice if there is none
+				if (each->slicer == nullptr)
+				{
+					sliceNeeded = true;
+					break;
+				}
+			}
+			layerViewPopup->setProperty("visible", this->viewMode == VIEW_MODE_LAYER);
+			layerViewSlider->setProperty("visible", this->viewMode == VIEW_MODE_LAYER);
 			auto selectedSize = selectedModelsLengths();
-            QMetaObject::invokeMethod(layerViewSlider, "setThickness", Q_ARG(QVariant, (scfg->layer_height)));
-			QMetaObject::invokeMethod(layerViewSlider, "setHeight",
-				Q_ARG(QVariant, (selectedSize.z() + scfg->raft_thickness)));
-			for (auto each : selectedModels)
-			{
-				each->changeViewMode(viewMode);
-			}
-        }
+			QMetaObject::invokeMethod(layerViewSlider, "setThickness", Q_ARG(QVariant, (scfg->layer_height)));
+			QMetaObject::invokeMethod(layerViewSlider, "setHeight", Q_ARG(QVariant, (selectedSize.z() + scfg->raft_thickness)));
+			break;
+		}
+
+		//set view mode for each model from background thread
+		//transwarp::parallel executor{ 1 };
+		//executor.execute();
+		//if (sliceNeeded)
+		//{
+		//	auto exportSelectedTask = transwarp::make_task(transwarp::root, [this]() {
+		//		exportSelected(true);
+		//		});
+		//	auto setViewModeTask = transwarp::make_task(transwarp::wait, [this, viewMode]() {
+		//		setModelViewMode(viewMode);
+		//		}, exportSelectedTask);
+		//	setViewModeTask->schedule_all(executor);
+		//}
+		//else
+		//{
+		//	auto setViewModeTask = transwarp::make_task(transwarp::root, [this, viewMode]() {
+		//		setModelViewMode(viewMode);
+		//		});
+		//	setViewModeTask->schedule(executor);
+		//	for (int i = 0; i < 5000000; ++i)
+		//	{
+		//		qDebug() << "boooooring";
+		//	}
+
+		//}
+		tf::Taskflow* taskflow = new tf::Taskflow();
+
+		if (sliceNeeded)
+		{
+			auto exportSelectedTask = taskflow->emplace( [this]() {
+				exportSelected(true);
+				});
+			auto setViewModeTask = taskflow->emplace([this, viewMode]() {
+				setModelViewMode(viewMode);
+				});
+			exportSelectedTask.precede(setViewModeTask);
+		}
+		else
+		{
+			auto setViewModeTask = taskflow->emplace([this, viewMode]() {
+				setModelViewMode(viewMode);
+				});
+
+		}
+		_taskManager.enqueTask(taskflow);
     }
-
-    if( this->viewMode == VIEW_MODE_OBJECT ) {
-        QMetaObject::invokeMethod(yesno_popup, "closePopUp");
-        QMetaObject::invokeMethod(leftTabViewMode, "setObjectView");
-	}
-	else
-	{
-
-		if (this->viewMode == VIEW_MODE_SUPPORT) {
-			for (auto each : selectedModels)
-			{
-				each->setSupportAndRaft();
-				emit  each->_updateModelMesh();
-			}
-
-		}
-		else if (this->viewMode == VIEW_MODE_LAYER) {
-			for (auto each : selectedModels)
-			{
-				each->setSupportAndRaft();
-				emit each->_updateModelMesh();
-
-
-			}
-			qDebug() << "view mode layer called";
-			qDebug() << "generated support";
-		}
-		else {
-			qDebug() << "view mode layer called";
-		}
-	}
-
 }
-
+void QmlManager::setModelViewMode(int mode)
+{
+	qDebug() << "setModelViewMode called";
+	for (auto each : selectedModels)
+	{
+		each->changeViewMode(viewMode);
+	}
+}
 int QmlManager::getViewMode() {
     return viewMode;
 }

@@ -335,15 +335,15 @@ void GLModel::loadRedoState(){
         m_transform.setRotationX(0);
         m_transform.setRotationY(0);
         m_transform.setRotationZ(0);
-        emit _updateModelMesh();
-    } else {
+		emit _updateModelMesh();
+	} else {
         qDebug() << "no redo status";
     }
 }
 void GLModel::repairMesh()
 {
     MeshRepair::repairMesh(_mesh);
-    emit _updateModelMesh();
+	emit _updateModelMesh();
 }
 void GLModel::moveModelMesh(QVector3D direction, bool update){
     _mesh->vertexMove(direction);
@@ -352,7 +352,7 @@ void GLModel::moveModelMesh(QVector3D direction, bool update){
     qDebug() << "moved vertex";
     if(update)
     {
-        emit _updateModelMesh();
+        updateModelMesh();
     }
 }
 void GLModel::rotationDone()
@@ -364,7 +364,7 @@ void GLModel::rotationDone()
 
     _mesh->vertexMove(m_transform.translation());
     m_transform.setTranslation(QVector3D(0,0,0));
-    emit _updateModelMesh();
+    updateModelMesh();
 }
 
 
@@ -384,14 +384,14 @@ void GLModel::rotateByNumber(QVector3D& rot_center, int X, int Y, int Z)
     m_transform.setRotationZ(0);
     _mesh->vertexMove(m_transform.translation());
     m_transform.setTranslation(QVector3D(0,0,0));
-    emit _updateModelMesh();
+    updateModelMesh();
 }
 
 void GLModel::rotateModelMesh(QMatrix4x4 matrix, bool update){
     _mesh->vertexRotate(matrix);
     if(update)
     {
-        emit _updateModelMesh();
+        updateModelMesh();
     }
 }
 
@@ -425,7 +425,7 @@ void GLModel::scaleModelMesh(float scaleX, float scaleY, float scaleZ){
     /*if (shadowModel != NULL)
         scaleModelMesh(scale);*/
 
-    emit _updateModelMesh();
+    updateModelMesh();
 }
 
 
@@ -1336,11 +1336,6 @@ void GLModel::generateSupport(){
     float x_length = _mesh->x_max() - _mesh->x_min();
     float y_length = _mesh->y_max() - _mesh->y_min();
     float z_length = _mesh->z_max() - _mesh->z_min();
-    size_t xy_reserve = x_length * y_length;
-    size_t xyz_reserve = xy_reserve * z_length;
-    qDebug() << "********************xy_reserve = " << xy_reserve;
-    qDebug() << "********************faces_reserve = " << _mesh->getFaces().size();
-    qDebug() << "********************vertices_reserve = " << _mesh->getVertices().size();
 
     layerInfillMesh = new Mesh;
     layerSupportMesh = new Mesh;
@@ -1367,7 +1362,7 @@ void GLModel::generateSupport(){
 	layerInfillMesh->setVerticesColor(COLOR_INFILL);
 	layerRaftMesh->setVerticesColor(COLOR_RAFT);
 
-    emit _updateModelMesh();
+    updateModelMesh();
 }
 
 void GLModel::removePlane(){
@@ -2186,7 +2181,7 @@ void GLModel::generateExtensionFaces(double distance){
     saveUndoState();
     extendMesh(_mesh, targetMeshFace, distance);
 	_targetSelected = false;
-	emit _updateModelMesh();
+	updateModelMesh();
 }
 
 void GLModel::generateLayFlat(){
@@ -2241,7 +2236,7 @@ void GLModel::generateManualSupport(){
     /*OverhangPoint* targetOverhangPosition = new OverhangPoint(targetPosition.x()*scfg->resolution,
     generateSupporter(layerSupportMesh, targetOverhangPosition, nullptr, nullptr, layerSupportMesh->z_min());*/
 	_targetSelected = false;
-	emit _updateModelMesh();
+	updateModelMesh();
 }
 
 // for shell offset
