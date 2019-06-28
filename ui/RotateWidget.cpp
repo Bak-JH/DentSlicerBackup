@@ -114,7 +114,7 @@ void Hix::UI::RotateWidget::dragEnded(Hix::Input::MouseEventData& e)
 {
 	_parent->setManipulated(false);
 	setHighlight(false);
-	qmlManager->modelRotateDone();
+    qmlManager->totalRotateDone();
 }
 
 

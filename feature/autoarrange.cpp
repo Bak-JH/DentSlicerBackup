@@ -677,23 +677,13 @@ long long int getConvexHullSizeIfNotCollision(std::vector<std::vector<LLIPoint> 
     }
     Path convex = getConvexHull(&ppp);
     int convexVertexCnt = convex.size();
-    long long int cx=0, cy=0, area=0, temp;
-    for (int i = 0; i < convexVertexCnt; i++){
-        cx += convex[i].X;
-        cy += convex[i].Y;
-    }
-    cx /= convexVertexCnt;
-    cy /= convexVertexCnt;
+    long long int contourLength=0, temp;
 
     for (int i =0, j = convexVertexCnt-1; i < convexVertexCnt; j = i++){
-        temp = (cx*convex[j].Y+convex[j].X*convex[i].Y+convex[i].X*cy - cy*convex[j].X-convex[j].Y*convex[i].X-convex[i].Y*cx)/2;
-        if (temp < 0)
-            area -= temp;
-        else
-            area += temp;
+        contourLength += sqrt((convex[j].Y - convex[i].Y) * (convex[j].Y - convex[i].Y) + (convex[j].X - convex[i].X) * (convex[j].X - convex[i].X));
     }
 
-    return area;
+    return contourLength;
 }
 
 
@@ -710,6 +700,13 @@ std::vector<XYArrangement> autoarrange::arngMeshes(std::vector<const Mesh*>& mes
     /**/qDebug() << "Arrange start";
     qmlManager->setProgress(0);
     qmlManager->setProgressText("Arranging models...");
+
+    int temp_idx= 0;
+    for (const Qt3DCore::QTransform* transform : m_transform_set){
+
+        qDebug() << "arngMesh model transform :" << temp_idx  << transform->translation() << transform->rotation();
+        temp_idx ++;
+    }
 
     qDebug() << "get padded projected outlines";
     for(int idx=0; idx<meshCnt; idx++){
@@ -728,18 +725,21 @@ std::vector<XYArrangement> autoarrange::arngMeshes(std::vector<const Mesh*>& mes
 
     qDebug() << "start";
     int targetIdx = meshCnt-1;
-    translational_motions[targetIdx].x = 100*floatPointPadding;
-    translational_motions[targetIdx].y = 100*floatPointPadding;
+    if (getConvexHullSizeIfNotCollision(&outlines, &centers, &translational_motions, &rotates) == 100000000000000000){
+        translational_motions[targetIdx].x = 70*floatPointPadding;
+        translational_motions[targetIdx].y = 70*floatPointPadding;
+    }
     for (int trycnt = 0; trycnt < 30; trycnt++) {
         LLIPoint origin_translational_motion = translational_motions[targetIdx], best_translational_motion;
         long long int optimal_v = 100000000000000000;
         float origin_rotate = rotates[targetIdx], best_rotate;
 
-        float dx[10] = {0, -0.1, 0.1, -1, 1, -5, -10, 10, 50, -50}, dy[10] 
-			= {0, -0.1, 0.1, -1, 1, -5, -10, 10, 50, -50}, dr[11] = {0, -1, 1, -5, 5, -10, 10, -30, 30, -90, 90};
+        float dx[14] = {0, -0.01, 0.01, -0.03, 0.03, -0.1, 0.1, -0.3, 0.3, 1, 1, 3, -3, -10};
+        float dy[14] = {0, -0.01, 0.01, -0.03, 0.03, -0.1, 0.1, -0.3, 0.3, 1, 1, 3, -3, -10};
+        float dr[11] = {0, -1, 1, -3, 3, -10, 10, -30, 30, -90, 90};
 
-        for (int xcase = 0; xcase < 10; xcase++) {
-            for (int ycase = 0; ycase < 10; ycase++) {
+        for (int xcase = 0; xcase < 14; xcase++) {
+            for (int ycase = 0; ycase < 14; ycase++) {
                 for (int rcase = 0; rcase < 11; rcase++) {
                     translational_motions[targetIdx].x = origin_translational_motion.x + dx[xcase] * floatPointPadding;
                     translational_motions[targetIdx].y = origin_translational_motion.y + dy[ycase] * floatPointPadding;
@@ -768,6 +768,9 @@ std::vector<XYArrangement> autoarrange::arngMeshes(std::vector<const Mesh*>& mes
     for(int idx=0; idx<meshCnt; idx++){
         result.push_back(std::make_pair(IntPoint(translational_motions[idx].x, translational_motions[idx].y, 0), rotates[idx]));
     }
+    /*result[1].first.X = 1000;
+    result[1].first.Y = 0;
+    result[1].second = 90.0;*/
     return result;
 }
 

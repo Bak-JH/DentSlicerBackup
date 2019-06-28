@@ -759,6 +759,12 @@ void QmlManager::runArrange(){
 
 void QmlManager::runArrange_internal(){
     qDebug() << "run arrange glmodels size : " <<glmodels.size();
+
+    for(auto& pair : glmodels)
+    {
+        auto model = &pair.second;
+        qDebug() << "before " <<model->getTranslation();
+    }
     if (glmodels.size()>=2){
         std::vector<XYArrangement> arng_result_set;
         std::vector<const Mesh*> meshes_to_arrange;
@@ -794,8 +800,9 @@ void QmlManager::applyArrangeResult(std::vector<QVector3D> translations, std::ve
     for(auto& pair : glmodels)
     {
         auto model = &pair.second;
-        model->setTranslation(translations[index]);
-        model->rotateModelMesh(3, rotations[index]);
+        model->moveModelMesh_direct(translations[index], true);
+        model->rotateModelMesh_direct(3, rotations[index]);
+        //model->setTranslation(translations[index]);
         ++index;
     }
 
