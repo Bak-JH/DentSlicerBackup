@@ -1,5 +1,7 @@
 #ifndef QMLMANAGER_H
 #define QMLMANAGER_H
+
+
 #include <QObject>
 #include <QDebug>
 #include <QString>
@@ -22,6 +24,8 @@
 #include "input/raycastcontroller.h"
 #include "ui/RotateXYZWidget.h"
 #include "ui/MoveXYZWidget.h"
+#include "common/TaskManager.h"
+
 #define VIEW_MODE_OBJECT 0
 #define VIEW_MODE_SUPPORT 1
 #define VIEW_MODE_LAYER 2
@@ -232,10 +236,15 @@ public:
 	void modelMove(QVector3D displacement);
 	void modelRotateWithAxis(const QVector3D& axis, double degree);
 	QVector3D cameraViewVector();
+	TaskManager& taskManager();
 private:
-
+	TaskManager _taskManager;
+	void setModelViewMode(int mode);
 	GLModel* getModelByID(int ID);
     void unselectPartImpl(GLModel* target);
+	//do not mix UI work with background thread
+	//std::future<Slicer*> exportSelected(bool isTemp);
+	void  exportSelected(bool isTemp);
 	bool groupSelectionActive = false;
     int viewMode;
     int layerViewFlags;
