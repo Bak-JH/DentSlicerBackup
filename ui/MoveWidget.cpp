@@ -110,7 +110,7 @@ void Hix::UI::MoveWidget::dragEnded(Hix::Input::MouseEventData& e)
 {
 	_parent->setManipulated(false);
 	setHighlight(false);
-	qmlManager->modelMoveDone();
+    qmlManager->totalMoveDone();
 }
 
 

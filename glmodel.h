@@ -187,11 +187,14 @@ public:
 
     // Model Mesh move
     void repairMesh();
+    void moveModelMesh_direct(QVector3D direction, bool update = true);
     void moveModelMesh(QVector3D direction, bool update = true);
     // Model Mesh rotate
     void rotationDone();
     void rotateByNumber(QVector3D& rot_center, int X, int Y, int Z);
+    void rotateModelMesh_direct(int Axis, float Angle, bool update = true);
     void rotateModelMesh(int Axis, float Angle, bool update = true);
+    void rotateModelMesh_direct(QMatrix4x4 matrix, bool update = true);
     void rotateModelMesh(QMatrix4x4 matrix, bool update = true);
     // Model Mesh scale
     void scaleModelMesh(float scaleX, float scaleY, float scaleZ);

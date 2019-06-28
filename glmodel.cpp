@@ -355,6 +355,16 @@ void GLModel::repairMesh()
     MeshRepair::repairMesh(_mesh);
     emit _updateModelMesh();
 }
+
+void GLModel::moveModelMesh_direct(QVector3D direction, bool update){
+
+    _mesh->vertexMove(direction);
+    /*if (shadowModel != NULL)
+        moveModelMesh(direction);*/
+    qDebug() << "moved vertex";
+    updateModelMesh();
+}
+
 void GLModel::moveModelMesh(QVector3D direction, bool update){
     _mesh->vertexMove(direction);
     /*if (shadowModel != NULL)
@@ -397,6 +407,12 @@ void GLModel::rotateByNumber(QVector3D& rot_center, int X, int Y, int Z)
     emit _updateModelMesh();
 }
 
+void GLModel::rotateModelMesh_direct(QMatrix4x4 matrix, bool update){
+
+    _mesh->vertexRotate(matrix);
+    updateModelMesh();
+}
+
 void GLModel::rotateModelMesh(QMatrix4x4 matrix, bool update){
     _mesh->vertexRotate(matrix);
     if(update)
@@ -405,6 +421,24 @@ void GLModel::rotateModelMesh(QMatrix4x4 matrix, bool update){
     }
 }
 
+void GLModel::rotateModelMesh_direct(int Axis, float Angle, bool update){
+    Qt3DCore::QTransform tmp;
+    switch(Axis){
+    case 1:{
+        tmp.setRotationX(Angle);
+        break;
+    }
+    case 2:{
+        tmp.setRotationY(Angle);
+        break;
+    }
+    case 3:{
+        tmp.setRotationZ(Angle);
+        break;
+    }
+    }
+    rotateModelMesh_direct(tmp.matrix(),update);
+}
 
 void GLModel::rotateModelMesh(int Axis, float Angle, bool update){
     Qt3DCore::QTransform tmp;
@@ -530,7 +564,7 @@ void GLModel::updateModelMesh(){
             if (supportMesh != nullptr){
 				appendMesh(supportMesh);
                 qDebug() << "ADDED support mesh";
-        }
+            }
             if (raftMesh != nullptr){
                 appendMesh(raftMesh);
                 qDebug() << "ADDED raft mesh";
@@ -1842,7 +1876,7 @@ void GLModel::doDrag(Hix::Input::MouseEventData& v)
 void GLModel::dragEnded(Hix::Input::MouseEventData&)
 {
 	isMoved = false;
-	qmlManager->modelMoveDone();
+    qmlManager->totalMoveDone();
 
 }
 
