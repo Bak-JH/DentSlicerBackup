@@ -16,12 +16,13 @@ in EyeSpaceVertex {
 //     vec3 color;
 // } gs_out;
 flat out vec3 VertexColor;
+smooth out vec3 ModelPosition;
 
 //light calculation
 //uniform int pointLightCount; this is hard coded into 4 instead, due to static loop constraint on some devices
 uniform vec3 ambient;
 uniform vec3 diffuse;
-uniform mat4 modelView;
+uniform mat4 inverseModelMatrix;
 
 //legokangpalla minimalistic flat shading:
 // 1. don't do specular calculation, as flat shading causes specular to highlight entire face
@@ -68,6 +69,7 @@ void main()
         gl_Position = gl_in[i].gl_Position;
         vec3 color = calcLights( gs_in[i].position, norm, darkestColor);
         VertexColor = color;
+        ModelPosition =  vec3( inverseModelMatrix * vec4( gs_in[i].position, 1.0 ) );
         //gs_out.color = color;
 		EmitVertex();
 	}

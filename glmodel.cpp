@@ -31,9 +31,12 @@ const size_t VTX_SIZE = POS_SIZE + NRM_SIZE + COL_SIZE;
 #define _STRICT_GLMODEL
 #endif
 
+
+
 using namespace Utils::Math;
 using namespace Hix::Engine3D;
 using namespace Hix::Input;
+using namespace Hix::Render;
 GLModel::GLModel(QObject* mainWindow, QNode *parent, Mesh* loadMesh, QString fname, int id)
     : QEntity(parent)
     , filename(fname)
@@ -57,7 +60,6 @@ GLModel::GLModel(QObject* mainWindow, QNode *parent, Mesh* loadMesh, QString fna
 	, normalAttribute(this)
 	, colorAttribute(this)
 	, indexAttribute(this)
-	, colorMode(-1)
 
 
 {
@@ -134,7 +136,7 @@ GLModel::GLModel(QObject* mainWindow, QNode *parent, Mesh* loadMesh, QString fna
   
 	// Add to Part List
 	qmlManager->addPart(getFileName(fname.toStdString().c_str()), ID);
-	changecolor(ModelColor::Default);
+	changeColor(ModelColor::Default);
 
 	if (filename != "" && (filename.contains(".stl") || filename.contains(".STL"))\
 		&& loadMesh == nullptr) {
@@ -191,31 +193,8 @@ GLModel::GLModel(QObject* mainWindow, QNode *parent, Mesh* loadMesh, QString fna
 
 }
 
-void GLModel::changecolor(ModelColor mode){
-	if (colorMode != mode)
-	{
-		colorMode = mode;
-		switch (mode) {
-		case ModelColor::Default: // default
-			m_meshMaterial.setAmbient(QColor(65, 65, 70));
-			m_meshMaterial.setDiffuse(QColor(97, 185, 192));
-			break;
-		case ModelColor::Selected:
-			m_meshMaterial.setAmbient(QColor(115, 115, 115));
-			m_meshMaterial.setDiffuse(QColor(130, 208, 125));
-			break;
-		case ModelColor::OutOfBound:
-			m_meshMaterial.setAmbient(QColor(0, 0, 0));
-			m_meshMaterial.setDiffuse(QColor(0, 0, 0));
-			break;
-		case ModelColor::LayerMode:
-			m_meshMaterial.setAmbient(QColor(115, 115, 115));
-			m_meshMaterial.setDiffuse(QColor(130, 208, 125));
-			break;
-		default:
-			break;
-		}
-	}
+void GLModel::changeColor(ModelColor mode){
+	m_meshMaterial.changeColor(mode);
 }
 bool GLModel::modelSelectChangable(){
     bool result = false;
@@ -226,29 +205,20 @@ bool GLModel::modelSelectChangable(){
     return result;
 }
 
-void GLModel::checkPrintingArea(){
-    float printing_x = scfg->bed_x;
-    float printing_y = scfg->bed_y;
-    float printing_z = 120;
-    float printing_safegap = 1;
-    // is it inside the printing area or not?
-    QVector3D tmp = m_transform.translation();
-    if ((tmp.x() + _mesh->x_min()) < (printing_safegap - printing_x/2)	||
-        (tmp.x() + _mesh->x_max()) > (printing_x/2 - printing_safegap)	||
-        (tmp.y() + _mesh->y_min()) < (printing_safegap - printing_y/2)	||
-        (tmp.y() + _mesh->y_max()) > (printing_y/2 - printing_safegap)	||
-        (tmp.z() + _mesh->z_max()) > printing_z){
-        changecolor(ModelColor::OutOfBound);
-    } else {
-		//if (qmlManager->isSelected(this))
-		//{
-		//	changecolor(ModelColor::Selected);
-		//}
-		//else
-		//{
-		//	changecolor(ModelColor::Default);
-		//}
-    }
+void GLModel::checkPrintingArea() {
+	float printing_x = scfg->bed_x;
+	float printing_y = scfg->bed_y;
+	float printing_z = 120;
+	float printing_safegap = 1;
+	// is it inside the printing area or not?
+	QVector3D tmp = m_transform.translation();
+	if ((tmp.x() + _mesh->x_min()) < (printing_safegap - printing_x / 2) ||
+		(tmp.x() + _mesh->x_max()) > (printing_x / 2 - printing_safegap) ||
+		(tmp.y() + _mesh->y_min()) < (printing_safegap - printing_y / 2) ||
+		(tmp.y() + _mesh->y_max()) > (printing_y / 2 - printing_safegap) ||
+		(tmp.z() + _mesh->z_max()) > printing_z) {
+		changeColor(ModelColor::OutOfBound);
+	}
 }
 
 void GLModel::saveUndoState(){
@@ -1903,21 +1873,29 @@ void GLModel::getLayerViewSliderSignal(double value) {
     //qDebug() << "layer view plane material texture format : " << layerViewPlaneTextureLoader->format();
 
     layerViewPlaneMaterial->setTexture(layerViewPlaneTextureLoader);
-
-    float rotation_values[] = { // rotate by 90 deg
-        0, 1, 0,
-        -1, 0, 0,
-        0, 0, 1
-    };
+	float rotation_values[] = { // rotate by -90 deg
+	0, -1, 0,
+	1, 0, 0,
+	0, 0, 1
+	};
+	//flip Ys,
+	float flip_values[] = {
+		1, 0, 0,
+		0, -1, 0,
+		0, 0, 1
+	};
 
     QMatrix3x3 rotation_matrix(rotation_values);
+	QMatrix3x3 flip_matrix(flip_values);
+	QMatrix3x3 matrixTransform = flip_matrix * rotation_matrix;
 
-    layerViewPlaneMaterial->setTextureTransform(rotation_matrix);
-    layerViewPlaneTransform[0]->setTranslation(QVector3D(0,0,layer_num*scfg->layer_height - scfg->raft_thickness - scfg->support_base_height));
+    layerViewPlaneMaterial->setTextureTransform(matrixTransform);
+    layerViewPlaneTransform->setTranslation(QVector3D(0,0,layer_num*scfg->layer_height - scfg->raft_thickness - scfg->support_base_height));
 
     // change phong material of original model
     float h = (_mesh->z_max() - _mesh->z_min() + scfg->raft_thickness + scfg->support_base_height) * value + _mesh->z_min() - scfg->raft_thickness - scfg->support_base_height;
-    /*m_layerMaterialRaftHeight->setValue(QVariant::fromValue(qmlManager->getLayerViewFlags() & LAYER_INFILL != 0 ?
+	m_meshMaterial.setParameterValue("height", QVariant::fromValue(h));
+	/*m_layerMaterialRaftHeight->setValue(QVariant::fromValue(qmlManager->getLayerViewFlags() & LAYER_INFILL != 0 ?
                 _mesh->z_min() :
                 _mesh->z_max() + scfg->raft_thickness - scfg->support_base_height));*/
 }
@@ -2409,12 +2387,11 @@ void GLModel::changeViewMode(int viewMode) {
         supportViewActive = false;
 		if (qmlManager->isSelected(this))
 		{
-			changecolor(ModelColor::Selected);
+			changeColor(ModelColor::Selected);
 		}
 		else
 		{
-			changecolor(ModelColor::Default);
-
+			changeColor(ModelColor::Default);
 		}
         break;
     case VIEW_MODE_SUPPORT:
@@ -2426,11 +2403,11 @@ void GLModel::changeViewMode(int viewMode) {
         supportViewActive = true;
 		if (qmlManager->isSelected(this))
 		{
-			changecolor(ModelColor::Selected);
+			changeColor(ModelColor::Selected);
 		}
 		else
 		{
-			changecolor(ModelColor::Default);
+			changeColor(ModelColor::Default);
 
 		}
 
@@ -2438,21 +2415,22 @@ void GLModel::changeViewMode(int viewMode) {
     case VIEW_MODE_LAYER:
         layerViewActive = true;
         supportViewActive = false;
-		changecolor(ModelColor::LayerMode);
+		changeColor(ModelColor::LayerMode);
         // generate layer view plane materials
         layerViewPlaneMaterial = new Qt3DExtras::QTextureMaterial();
         layerViewPlaneMaterial->setAlphaBlendingEnabled(false);
-        layerViewPlaneEntity[0] = new Qt3DCore::QEntity(this);
-        layerViewPlane[0]=new Qt3DExtras::QPlaneMesh(this);
-        layerViewPlane[0]->setHeight(scfg->bed_x);
-        layerViewPlane[0]->setWidth(scfg->bed_y);
-        layerViewPlaneTransform[0]=new Qt3DCore::QTransform();
-        layerViewPlaneTransform[0]->setRotationZ(-90.0f);
-        layerViewPlaneTransform[0]->setRotationY(90.0f);
-        layerViewPlaneTransform[0]->setScale(1.0f);
-        layerViewPlaneEntity[0]->addComponent(layerViewPlane[0]);
-        layerViewPlaneEntity[0]->addComponent(layerViewPlaneTransform[0]); //jj
-        layerViewPlaneEntity[0]->addComponent(layerViewPlaneMaterial);
+        layerViewPlaneEntity = new Qt3DCore::QEntity(this);
+        layerViewPlane=new Qt3DExtras::QPlaneMesh(this);
+        layerViewPlane->setHeight(scfg->bed_x);
+        layerViewPlane->setWidth(scfg->bed_y);
+        layerViewPlaneTransform=new Qt3DCore::QTransform();
+		//layerViewPlaneTransform->setRotationX(90);
+		layerViewPlaneTransform->setRotationY(-90);
+		layerViewPlaneTransform->setRotationZ(-90);
+
+        layerViewPlaneEntity->addComponent(layerViewPlane);
+        layerViewPlaneEntity->addComponent(layerViewPlaneTransform); //jj
+        layerViewPlaneEntity->addComponent(layerViewPlaneMaterial);
         getLayerViewSliderSignal(1);
         break;
     }
@@ -2486,12 +2464,12 @@ void GLModel::inactivateFeatures(){
 }
 
 void GLModel::removeLayerViewComponents(){
-    layerViewPlaneEntity[0]->removeComponent(layerViewPlane[0]);
-    layerViewPlaneEntity[0]->removeComponent(layerViewPlaneTransform[0]); //jj
-    layerViewPlaneEntity[0]->removeComponent(layerViewPlaneMaterial);
-    layerViewPlaneEntity[0]->deleteLater();
-    layerViewPlane[0]->deleteLater();
-    layerViewPlaneTransform[0]->deleteLater();
+    layerViewPlaneEntity->removeComponent(layerViewPlane);
+    layerViewPlaneEntity->removeComponent(layerViewPlaneTransform); //jj
+    layerViewPlaneEntity->removeComponent(layerViewPlaneMaterial);
+    layerViewPlaneEntity->deleteLater();
+    layerViewPlane->deleteLater();
+    layerViewPlaneTransform->deleteLater();
     layerViewPlaneMaterial->deleteLater();
     layerViewPlaneTextureLoader->deleteLater();
     layerViewPlaneTextureLoader = nullptr;

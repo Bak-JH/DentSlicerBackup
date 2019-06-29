@@ -471,6 +471,7 @@
     <None Include="Resource\mesh\plate.stl" />
     <None Include="Resource\mesh\plate_logo.stl" />
     <None Include="Resource\mesh\plate_plane.stl" />
+    <None Include="shaders\layerview_shader.frag" />
     <None Include="shaders\light.inc.frag" />
     <None Include="shaders\model_shader.frag" />
     <None Include="shaders\model_shader.geom" />

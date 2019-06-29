@@ -1,15 +1,9 @@
 #version 330 core
 
-
+uniform float height;
 out vec4 fragColor;
-
-// in FinalVertex {
-//     vec3 position;
-//     vec3 normal;
-//     vec3 color;
-// } fs_in;
-
 flat in vec3 VertexColor;
+smooth in vec3 ModelPosition;
 
 void flatShade()
 {
@@ -19,7 +13,13 @@ void flatShade()
 #define MAIN
 void main()
 {
-    // fragColor = vec4(fs_in.color, 1.0);
-    flatShade();
+    if(ModelPosition.z < height)
+    {
+        flatShade();
+    }
+    else
+    {
+        discard;
+    }
 }
 #endif

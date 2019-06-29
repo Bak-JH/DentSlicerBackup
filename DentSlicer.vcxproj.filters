@@ -1032,6 +1032,10 @@
     <None Include="icon-32.ico" />
     <None Include="icon-32.ico" />
     <None Include="icon-32.ico" />
+    <None Include="icon-32.ico" />
+    <None Include="shaders\layerview_shader.frag">
+      <Filter>Resource Files</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <None Include="DentSlicer.rc">

@@ -44,6 +44,9 @@ _parent(dynamic_cast<MoveXYZWidget*>(parent))
 
 Hix::UI::MoveWidget::~MoveWidget()
 {
+	removeComponent(&_mesh);
+	removeComponent(&_material);
+	removeComponent(&_transform);
 }
 
 bool Hix::UI::MoveWidget::isDraggable(Hix::Input::MouseEventData& e, const Qt3DRender::QRayCasterHit& hit)
