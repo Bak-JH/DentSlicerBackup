@@ -45,6 +45,9 @@ _parent(dynamic_cast<RotateXYZWidget*>(parent))
 
 Hix::UI::RotateWidget::~RotateWidget()
 {
+	removeComponent(&_torus);
+	removeComponent(&_material);
+	removeComponent(&_transform);
 }
 
 bool Hix::UI::RotateWidget::isDraggable(Hix::Input::MouseEventData& e, const Qt3DRender::QRayCasterHit& hit)

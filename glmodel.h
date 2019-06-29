@@ -150,9 +150,9 @@ public:
     Plane cuttingPlane;
 
     // used for layer view
-    Qt3DExtras:: QPlaneMesh* layerViewPlane[1] = {nullptr};
-    Qt3DCore::QEntity* layerViewPlaneEntity[1] = {nullptr};
-    Qt3DCore::QTransform *layerViewPlaneTransform[1] = {nullptr};
+    Qt3DExtras:: QPlaneMesh* layerViewPlane = nullptr;
+    Qt3DCore::QEntity* layerViewPlaneEntity = nullptr;
+    Qt3DCore::QTransform *layerViewPlaneTransform = nullptr;
     Qt3DRender::QTextureLoader* layerViewPlaneTextureLoader = nullptr;
     Qt3DExtras::QTextureMaterial* layerViewPlaneMaterial = nullptr;
     //Qt3DExtras::QPhongAlphaMaterial *layerViewPlaneMaterial = nullptr;
@@ -178,16 +178,8 @@ public:
 	QTime getPrevTime();
 	QTime getNextTime();
 
-    // changeColor
-	enum ModelColor
-	{
-		None = -1,
-		Default = 0,
-		Selected,
-		OutOfBound,
-		LayerMode
-	};
-    void changecolor(ModelColor mode); //0 default, 1 selected, 2 outofarea
+
+    void changeColor(Hix::Render::ModelColor mode); //0 default, 1 selected, 2 outofarea
 
     void setSupportAndRaft();
 
@@ -280,7 +272,6 @@ private:
     QAttribute colorAttribute;
     QAttribute indexAttribute;
 
-    int colorMode;
     int v_cnt;
     int f_cnt;
     QNode* m_parent;

@@ -14,6 +14,15 @@ namespace Hix
 {
 	namespace Render
 	{
+		// changeColor
+		enum ModelColor
+		{
+			None = -1,
+			Default = 0,
+			Selected,
+			OutOfBound,
+			LayerMode
+		};
 		class ModelMaterial : public Qt3DRender::QMaterial
 		{
 			Q_OBJECT
@@ -28,8 +37,10 @@ namespace Hix
 			void addParameter(const std::string& key);
 			void removeParameter(const std::string& key);
 			void setParameterValue(const std::string& key, const QVariant& value);
+			void changeColor(ModelColor mode);
 		private:
 
+			ModelColor colorMode = ModelColor::None;
 
 			//custom parameters
 			std::unordered_map<std::string, Qt3DRender::QParameter> _additionalParameters;
