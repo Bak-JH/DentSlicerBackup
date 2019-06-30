@@ -74,22 +74,22 @@ public:
     int resolution_x = 2560;
     int resolution_y = 1440;
 
-    int bed_x = 120.96; // in mm
-    int bed_y = 68.04; // in mm*/
+    float bed_x = 120.96; // in mm
+    float bed_y = 68.04; // in mm*/
 
-    /*// settings for vittro
+    // settings for vittro plus
     int resolution_x = 1920;
     int resolution_y = 1080;
 
-    int bed_x = 124.8; // in mm
-    int bed_y = 70.2; // in mm*/
+    float bed_x = 124.8; // in mm
+    float bed_y = 70.2; // in mm
 
-    // settings for vittro
+    /*// settings for vittro
     int resolution_x = 1280;
     int resolution_y = 800;
 
-    int bed_x = 138; // in mm
-    int bed_y = 90; // in mm
+    float bed_x = 138; // in mm
+    float bed_y = 90; // in mm*/
 
 	size_t bed_margin_x = 1;
 	size_t bed_margin_y = 1;

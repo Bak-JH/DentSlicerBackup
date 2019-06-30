@@ -28,6 +28,11 @@ public:
     void writeGroupFooter(std::ofstream& outfile);
     void writeHeader(std::ofstream& outfile);
     void writeFooter(std::ofstream& outfile);
+
+
+
+    // write printer configs
+    void writeVittroOptions(QString outfoldername, int max_slices);
 };
 
 #endif // SVGEXPORTER_H
