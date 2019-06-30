@@ -293,10 +293,10 @@ void modelcut::interpolate(Mesh* mesh, Path3D contour1, Path3D contour2){
         // add face to mesh
         if (prev_min_distance_mv_idx == min_distance_mv_idx){
             // add Face from bigger to smaller (smaller 1 bigger 2)
-            mesh->addFace(bigger[ct1_idx].position, bigger[(ct1_idx+1)%bigger.size()].position, smaller[min_distance_mv_idx].position);
+            mesh->addFaceAndConnect(bigger[ct1_idx].position, bigger[(ct1_idx+1)%bigger.size()].position, smaller[min_distance_mv_idx].position);
         } else {
             // add face from smaller to bigger (bigger 1 smaller 2)
-            mesh->addFace(smaller[prev_min_distance_mv_idx].position,  bigger[ct1_idx].position, smaller[min_distance_mv_idx].position);
+            mesh->addFaceAndConnect(smaller[prev_min_distance_mv_idx].position,  bigger[ct1_idx].position, smaller[min_distance_mv_idx].position);
         }
         prev_min_distance_mv_idx = min_distance_mv_idx;
     }
@@ -736,9 +736,9 @@ void bisectModelByPlane(Mesh* leftMesh, Mesh* rightMesh, Mesh* mesh, Plane plane
         QVector3D addingMesh2 = QVector3D(mv2.x/padding, mv2.y/padding, mv2.z/padding);
         QVector3D addingMesh3 = QVector3D(mv3.x/padding, mv3.y/padding, mv3.z/padding);
         if (innerOutter > 0)
-            rightMesh->addFace(addingMesh1,addingMesh2,addingMesh3);
+            rightMesh->addFaceAndConnect(addingMesh1,addingMesh2,addingMesh3);
         else {
-            leftMesh->addFace(addingMesh1,addingMesh2,addingMesh3);
+            leftMesh->addFaceAndConnect(addingMesh1,addingMesh2,addingMesh3);
 
             /*
              * 1. z == targetZ
@@ -932,8 +932,8 @@ void bisectModelByPlane(Mesh* leftMesh, Mesh* rightMesh, Mesh* mesh, Plane plane
                 mmv3 = QVector3D(float(cdt.triangle(fit)[2].x())/padding, float(cdt.triangle(fit)[2].y())/padding, targetZ/padding);
 
                 orderedQV = sortByCorrectOrder(mmv1, mmv2, mmv3, QVector3D(0.0, 0.0, 0.0), QVector3D(1.0, 0.0, 0.0), QVector3D(1.0, 1.0, 0.0));
-                rightMesh->addFace(orderedQV[0], orderedQV[1], orderedQV[2]);
-                leftMesh->addFace(orderedQV[2], orderedQV[1], orderedQV[0]);
+                rightMesh->addFaceAndConnect(orderedQV[0], orderedQV[1], orderedQV[2]);
+                leftMesh->addFaceAndConnect(orderedQV[2], orderedQV[1], orderedQV[0]);
                     }
                 }
             }
@@ -1100,9 +1100,9 @@ void cutAway(Mesh* leftMesh, Mesh* rightMesh, Mesh* mesh, std::vector<QVector3D>
             QVector3D addingMesh2 = QVector3D(correctOrder[1].x/padding, correctOrder[1].y/padding, correctOrder[1].z/padding);
             QVector3D addingMesh3 = QVector3D(correctOrder[2].x/padding, correctOrder[2].y/padding, correctOrder[2].z/padding);
             if (innerOutter > 0)
-                rightMesh->addFace(addingMesh1,addingMesh2,addingMesh3);
+                rightMesh->addFaceAndConnect(addingMesh1,addingMesh2,addingMesh3);
             else {
-                leftMesh->addFace(addingMesh1,addingMesh2,addingMesh3);
+                leftMesh->addFaceAndConnect(addingMesh1,addingMesh2,addingMesh3);
 
                 /*
                  * 1. slide by cutting line -> intersection point (in Mesh Cutted Checker)
@@ -1328,10 +1328,10 @@ void cutAway(Mesh* leftMesh, Mesh* rightMesh, Mesh* mesh, std::vector<QVector3D>
                         point2 = findConnectedPointOrRegister(&connectVertex, point2);
                         point3 = findConnectedPointOrRegister(&connectVertex, point3);
 
-                        rightMesh->addFace(QVector3D(point1.x/padding, point1.y/padding, point1.z/padding), QVector3D(point2.x/padding, point2.y/padding, point2.z/padding), QVector3D(point3.x/padding, point3.y/padding, point3.z/padding));
-                        rightMesh->addFace(QVector3D(point3.x/padding, point3.y/padding, point3.z/padding), QVector3D(point2.x/padding, point2.y/padding, point2.z/padding), QVector3D(point1.x/padding, point1.y/padding, point1.z/padding));
-                        leftMesh->addFace(QVector3D(point1.x/padding, point1.y/padding, point1.z/padding), QVector3D(point2.x/padding, point2.y/padding, point2.z/padding), QVector3D(point3.x/padding, point3.y/padding, point3.z/padding));
-                        leftMesh->addFace(QVector3D(point3.x/padding, point3.y/padding, point3.z/padding), QVector3D(point2.x/padding, point2.y/padding, point2.z/padding), QVector3D(point1.x/padding, point1.y/padding, point1.z/padding));
+                        rightMesh->addFaceAndConnect(QVector3D(point1.x/padding, point1.y/padding, point1.z/padding), QVector3D(point2.x/padding, point2.y/padding, point2.z/padding), QVector3D(point3.x/padding, point3.y/padding, point3.z/padding));
+                        rightMesh->addFaceAndConnect(QVector3D(point3.x/padding, point3.y/padding, point3.z/padding), QVector3D(point2.x/padding, point2.y/padding, point2.z/padding), QVector3D(point1.x/padding, point1.y/padding, point1.z/padding));
+                        leftMesh->addFaceAndConnect(QVector3D(point1.x/padding, point1.y/padding, point1.z/padding), QVector3D(point2.x/padding, point2.y/padding, point2.z/padding), QVector3D(point3.x/padding, point3.y/padding, point3.z/padding));
+                        leftMesh->addFaceAndConnect(QVector3D(point3.x/padding, point3.y/padding, point3.z/padding), QVector3D(point2.x/padding, point2.y/padding, point2.z/padding), QVector3D(point1.x/padding, point1.y/padding, point1.z/padding));
                     }
                 }
             }
@@ -1454,10 +1454,10 @@ void cutAway(Mesh* leftMesh, Mesh* rightMesh, Mesh* mesh, std::vector<QVector3D>
                         point2 = findConnectedPointOrRegister(&connectVertex, point2);
                         point3 = findConnectedPointOrRegister(&connectVertex, point3);
 
-                        rightMesh->addFace(QVector3D(point1.x/padding, point1.y/padding, point1.z/padding), QVector3D(point2.x/padding, point2.y/padding, point2.z/padding), QVector3D(point3.x/padding, point3.y/padding, point3.z/padding));
-                        rightMesh->addFace(QVector3D(point3.x/padding, point3.y/padding, point3.z/padding), QVector3D(point2.x/padding, point2.y/padding, point2.z/padding), QVector3D(point1.x/padding, point1.y/padding, point1.z/padding));
-                        leftMesh->addFace(QVector3D(point1.x/padding, point1.y/padding, point1.z/padding), QVector3D(point2.x/padding, point2.y/padding, point2.z/padding), QVector3D(point3.x/padding, point3.y/padding, point3.z/padding));
-                        leftMesh->addFace(QVector3D(point3.x/padding, point3.y/padding, point3.z/padding), QVector3D(point2.x/padding, point2.y/padding, point2.z/padding), QVector3D(point1.x/padding, point1.y/padding, point1.z/padding));
+                        rightMesh->addFaceAndConnect(QVector3D(point1.x/padding, point1.y/padding, point1.z/padding), QVector3D(point2.x/padding, point2.y/padding, point2.z/padding), QVector3D(point3.x/padding, point3.y/padding, point3.z/padding));
+                        rightMesh->addFaceAndConnect(QVector3D(point3.x/padding, point3.y/padding, point3.z/padding), QVector3D(point2.x/padding, point2.y/padding, point2.z/padding), QVector3D(point1.x/padding, point1.y/padding, point1.z/padding));
+                        leftMesh->addFaceAndConnect(QVector3D(point1.x/padding, point1.y/padding, point1.z/padding), QVector3D(point2.x/padding, point2.y/padding, point2.z/padding), QVector3D(point3.x/padding, point3.y/padding, point3.z/padding));
+                        leftMesh->addFaceAndConnect(QVector3D(point3.x/padding, point3.y/padding, point3.z/padding), QVector3D(point2.x/padding, point2.y/padding, point2.z/padding), QVector3D(point1.x/padding, point1.y/padding, point1.z/padding));
                     }
                 }
                 qDebug() << "add face complete";
