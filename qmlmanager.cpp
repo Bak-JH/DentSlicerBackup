@@ -2044,6 +2044,7 @@ void QmlManager::setViewMode(int viewMode) {
     qDebug() << "current mode" << this->viewMode;
 
     if( this->viewMode != viewMode ) {
+		QMetaObject::invokeMethod(boxUpperTab, "all_off");
         //if (viewMode == 0) viewObjectButton->setProperty("checked", true);
         if (viewMode == 1) viewSupportButton->setProperty("checked", true);
         else if (viewMode == 2) viewLayerButton->setProperty("checked", true);
@@ -2052,6 +2053,7 @@ void QmlManager::setViewMode(int viewMode) {
 		layerViewPopup->setProperty("visible", this->viewMode == VIEW_MODE_LAYER);
 		layerViewSlider->setProperty("visible", this->viewMode == VIEW_MODE_LAYER);
 		bool sliceNeeded = false;
+
 		switch (viewMode) {
 		case VIEW_MODE_OBJECT:
 			QMetaObject::invokeMethod(yesno_popup, "closePopUp");
@@ -2066,6 +2068,7 @@ void QmlManager::setViewMode(int viewMode) {
 		case VIEW_MODE_LAYER:
 			for (auto each : selectedModels)
 			{
+
 				each->setSupportAndRaft();
 			}
 			for (auto each : selectedModels)
@@ -2135,6 +2138,8 @@ void QmlManager::setModelViewMode(int mode)
 	for (auto each : selectedModels)
 	{
 		each->changeViewMode(viewMode);
+		each->updateModelMesh();
+
 	}
 }
 int QmlManager::getViewMode() {
