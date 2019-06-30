@@ -1283,7 +1283,7 @@ void QmlManager::totalMoveDone(){
         //curModel->setTranslation(curModel->getTransform()->translation()+curModel->getTransform()->translation());
         curModel->setTranslation(QVector3D(0,0,0));
         // need to only update shadowModel & getMesh()
-        emit curModel->_updateModelMesh();
+        curModel->updateModelMesh();
     }
     sendUpdateModelInfo();
 }
@@ -2112,15 +2112,17 @@ void QmlManager::setViewMode(int viewMode) {
 
 		if (sliceNeeded)
 		{
-			tf::Taskflow* taskflow = new tf::Taskflow();
+//			tf::Taskflow* taskflow = new tf::Taskflow();
 
-			auto exportSelectedTask = taskflow->emplace( [this, viewMode]() {
-				exportSelected(true);
-				postToObject(std::bind(&QmlManager::setModelViewMode, this, viewMode), this);
-				});
-			_taskManager.enqueTask(taskflow);
+//			auto exportSelectedTask = taskflow->emplace( [this, viewMode]() {
+//				exportSelected(true);
+//				postToObject(std::bind(&QmlManager::setModelViewMode, this, viewMode), this);
+//				});
+//			_taskManager.enqueTask(taskflow);
 
-		}
+            exportSelected(true);
+            setModelViewMode(viewMode);
+        }
 		else
 		{
 			setModelViewMode(viewMode);
