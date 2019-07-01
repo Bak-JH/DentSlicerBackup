@@ -10,16 +10,12 @@ const QUrl FRAG_LAYERVIEW_URL = QUrl("qrc:/shaders/layerview_shader.frag");
 
 Hix::Render::ModelMaterial::ModelMaterial():
 	_ambientParameter(QStringLiteral("ambient"), QColor(25, 25, 25)),
-	_diffuseParameter(QStringLiteral("diffuse"), QColor(80, 80, 80)),
-	_vertShader(QOpenGLShader::Vertex),
-	_fragShader(QOpenGLShader::Fragment),
-	_geomShader(QOpenGLShader::Geometry)
+	_diffuseParameter(QStringLiteral("diffuse"), QColor(80, 80, 80))
 {
 
 	//GLSL in this context can use following uniforms
 	//Above declared parameters
 	//QT defined uniforms, see QShaderProgram documentation
-
 
 	_shaderProgram.setVertexShaderCode(QShaderProgram::loadSource(VERT_URL));
 	_shaderProgram.setGeometryShaderCode(QShaderProgram::loadSource(GEOM_URL));
@@ -45,6 +41,8 @@ Hix::Render::ModelMaterial::ModelMaterial():
 
 	_effect.addParameter(&_ambientParameter);
 	_effect.addParameter(&_diffuseParameter);
+	_effect.addParameter(&_colorTableParameter);
+
 	setEffect(&_effect);
 
 
