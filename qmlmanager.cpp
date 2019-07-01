@@ -2115,17 +2115,14 @@ void QmlManager::setViewMode(int viewMode) {
 
 		if (sliceNeeded)
 		{
-//			tf::Taskflow* taskflow = new tf::Taskflow();
+			tf::Taskflow* taskflow = new tf::Taskflow();
 
-//			auto exportSelectedTask = taskflow->emplace( [this, viewMode]() {
-//				exportSelected(true);
-//				postToObject(std::bind(&QmlManager::setModelViewMode, this, viewMode), this);
-//				});
-//			_taskManager.enqueTask(taskflow);
-
-            exportSelected(true);
-            setModelViewMode(viewMode);
-        }
+			auto exportSelectedTask = taskflow->emplace( [this, viewMode]() {
+				exportSelected(true);
+				postToObject(std::bind(&QmlManager::setModelViewMode, this, viewMode), this);
+				});
+			_taskManager.enqueTask(taskflow);
+       }
 		else
 		{
 			setModelViewMode(viewMode);
