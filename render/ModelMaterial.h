@@ -44,12 +44,6 @@ namespace Hix
 
 			//custom parameters
 			std::unordered_map<std::string, Qt3DRender::QParameter> _additionalParameters;
-
-			//just to make sure the code compiles
-			QOpenGLShader _vertShader;
-			QOpenGLShader _fragShader;
-			QOpenGLShader _geomShader;
-
 			Qt3DRender::QEffect _effect;
 			Qt3DRender::QTechnique _renderTechnique;
 			Qt3DRender::QRenderPass _renderPass;
@@ -59,7 +53,7 @@ namespace Hix
 			//default parameters
 			Qt3DRender::QParameter _ambientParameter;
 			Qt3DRender::QParameter _diffuseParameter;
-	
+			Qt3DRender::QParameter _colorTableParameter;
 
 		};
 	}
