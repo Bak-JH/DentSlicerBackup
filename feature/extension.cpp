@@ -1,11 +1,12 @@
 #include "extension.h"
 
-void extendMesh(Mesh* mesh, FaceConstItr mf, double distance){
+using namespace Hix::Features::Extension;
+void Hix::Features::Extension::extendMesh(Mesh* mesh, FaceConstItr mf, double distance){
     QVector3D normal = mf->fn;
     qDebug() << normal;
 	auto mfVertices = mf->meshVertices();
     std::vector<FaceConstItr> extension_faces;
-    detectExtensionFaces(mesh, normal, mf, mf, extension_faces);
+    mesh->findNearSimilarFaces(normal, mf, mf, extension_faces);
 
     // delete extension_faces
     /*for (MeshFace* mf : extension_faces){
@@ -44,66 +45,9 @@ void extendMesh(Mesh* mesh, FaceConstItr mf, double distance){
     coverCap(mesh, normal, extension_faces, distance);
     mesh->connectFaces();
 }
-void resetColorMesh(Mesh* mesh, Qt3DRender::QBuffer * vtxBuffer, std::vector<FaceConstItr>& extendFaces){
-	for (auto& fcItr : extendFaces)
-	{
-		auto vertices = fcItr->meshVertices();
-		for (auto &constVtx : vertices)
-		{
-			auto vtx = mesh->getVerticesNonConst().toNormItr(constVtx);
-			vtx->color = COLOR_DEFAULT_MESH;
-		}
-	}
-}
-void extendColorMesh(Mesh* mesh,FaceConstItr mf, Qt3DRender::QBuffer * vtxBuffer, std::vector<FaceConstItr>& extendFaces){
-    //std::vector<int> extendFaces;
-    extendFaces.clear();
-    QVector3D normal = mf->fn;
-    detectExtensionFaces(mesh, normal, mf, mf, extendFaces);
-	for (auto& fcItr : extendFaces)
-	{
-		auto vertices = fcItr->meshVertices();
-		for (auto& constVtx : vertices)
-		{
-			auto vtx = mesh->getVerticesNonConst().toNormItr(constVtx);
-			vtx->color = COLOR_EXTEND_FACE;
-		}
-	}
 
-}
-void detectExtensionFaces(const Mesh* mesh, QVector3D normal, FaceConstItr original_mf, FaceConstItr  mf, std::vector<FaceConstItr>& result){
-    result.push_back(mf);
-	auto edgeCirc = mf->edgeCirculator();
-	for (size_t i = 0; i < 3; ++i, ++edgeCirc) {
-		const auto& faces(mesh->getFaces());
-        for (auto neighbor : edgeCirc->nonOwningFaces()){
-            // check if neighbor already checked
-            bool cont = false;
-            for (auto elem : result){
-				if (elem == neighbor)
-				{
-					cont = true;
-					break;
-				}
-            }
-            if (cont)
-                continue;
-            // check if neighbor close to normal
-			auto nbrMeshVertices = neighbor->meshVertices();
-			auto originalMVertices = original_mf->meshVertices();
-            if ((neighbor->fn - normal).length() > 0.5 ||
-                  nbrMeshVertices[0]->position.distanceToPoint(originalMVertices[0]->position) > 100)
-                continue;
-            qDebug() << nbrMeshVertices[0]->position.distanceToPoint(originalMVertices[0]->position);
-            qDebug() << "looking for " << mesh->indexOf(neighbor);
-            detectExtensionFaces(mesh, normal, original_mf, neighbor, result);
-        }
-    }
 
-    return;
-}
-
-Paths3D detectExtensionOutline(Mesh* mesh, const std::vector<FaceConstItr>& meshfaces){
+Paths3D Hix::Features::Extension::detectExtensionOutline(Mesh* mesh, const std::vector<FaceConstItr>& meshfaces){
     Mesh temp_mesh;
     for (auto mf : meshfaces){
 		auto meshVertices = mf->meshVertices();
@@ -146,7 +90,7 @@ Paths3D detectExtensionOutline(Mesh* mesh, const std::vector<FaceConstItr>& mesh
     return temp_edges;
 }
 
-void extendAlongOutline(Mesh* mesh, QVector3D normal, Paths3D selectedPaths, double distance){
+void Hix::Features::Extension::extendAlongOutline(Mesh* mesh, QVector3D normal, Paths3D selectedPaths, double distance){
     // drill along selected faces
 
     while (distance>0){
@@ -184,7 +128,7 @@ void extendAlongOutline(Mesh* mesh, QVector3D normal, Paths3D selectedPaths, dou
     }
 }
 
-void coverCap(Mesh* mesh, QVector3D normal,const std::vector<FaceConstItr>& extension_faces, double distance){
+void Hix::Features::Extension::coverCap(Mesh* mesh, QVector3D normal,const std::vector<FaceConstItr>& extension_faces, double distance){
     for (FaceConstItr mf : extension_faces){
 		auto meshVertices = mf->meshVertices();
 		mesh->addFace(

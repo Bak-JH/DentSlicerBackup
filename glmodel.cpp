@@ -21,6 +21,7 @@
 #include <Qt3DCore/qpropertyupdatedchange.h>
 #include <feature/generateraft.h>
 
+
 const size_t POS_SIZE = 3;
 const size_t NRM_SIZE = 3;
 const size_t COL_SIZE = 3;
@@ -116,7 +117,6 @@ GLModel::GLModel(QObject* mainWindow, QNode *parent, Mesh* loadMesh, QString fna
 	indexAttribute.setVertexSize(1);
 
 
-
 	m_geometryRenderer.setInstanceCount(1);
 	m_geometryRenderer.setFirstVertex(0);
 	m_geometryRenderer.setFirstInstance(0);
@@ -129,15 +129,12 @@ GLModel::GLModel(QObject* mainWindow, QNode *parent, Mesh* loadMesh, QString fna
 	m_geometry.addAttribute(&colorAttribute);
 	m_geometry.addAttribute(&indexAttribute);
 
+    // set shader mode and color
+	m_meshMaterial.changeMode(Hix::Render::ShaderMode::SingleColor);
+	m_meshMaterial.setColor(Hix::Render::Colors::Default);
 
-
-
-    // generates shadow model for object picking
-  
 	// Add to Part List
 	qmlManager->addPart(getFileName(fname.toStdString().c_str()), ID);
-	changeColor(ModelColor::Default);
-
 	if (filename != "" && (filename.contains(".stl") || filename.contains(".STL"))\
 		&& loadMesh == nullptr) {
 		_mesh = new Mesh();
@@ -193,8 +190,8 @@ GLModel::GLModel(QObject* mainWindow, QNode *parent, Mesh* loadMesh, QString fna
 
 }
 
-void GLModel::changeColor(ModelColor mode){
-	m_meshMaterial.changeColor(mode);
+void GLModel::changeColor(const QVector3D& color){
+	m_meshMaterial.setColor(color);
 }
 bool GLModel::modelSelectChangable(){
     bool result = false;
@@ -217,7 +214,7 @@ void GLModel::checkPrintingArea() {
 		(tmp.y() + _mesh->y_min()) < (printing_safegap - printing_y / 2) ||
 		(tmp.y() + _mesh->y_max()) > (printing_y / 2 - printing_safegap) ||
 		(tmp.z() + _mesh->z_max()) > printing_z) {
-		changeColor(ModelColor::OutOfBound);
+		changeColor(Hix::Render::Colors::OutOfBound);
 	}
 }
 
@@ -752,7 +749,7 @@ arrangeSignalSender::arrangeSignalSender(){
 void GLModel::clearMem(){
     QByteArray newVertexArray;
 	QByteArray newIdxArray;
-
+	_primitiveColorCodes.clear();
     vertexBuffer.setData(newVertexArray);
 	indexBuffer.setData(newIdxArray);
 
@@ -838,7 +835,7 @@ size_t GLModel::appendMeshVertex(const Mesh* mesh,
 	for (auto itr = begin; itr != end; ++itr)
 	{
 		auto& vtx = *itr;
-		vertices << vtx.position << vtx.vn << vtx.color;
+		vertices << vtx.position << vtx.vn;
 
 	}
 	float* rawVertexArray = reinterpret_cast<float*>(appendData.data());
@@ -889,8 +886,13 @@ void GLModel::appendMeshFace(const Mesh* mesh, Hix::Engine3D::FaceConstItr begin
 	indexBuffer.setData(totalData);
 	indexAttribute.setCount((oldCount + count) *3);//3 indicies per face
 	m_geometryRenderer.setVertexCount(indexAttribute.count());
-
-
+	if (m_meshMaterial.shaderMode() == !ShaderMode::SingleColor)
+	{
+		for (auto itr = begin; itr != end; ++itr)
+		{
+			_primitiveColorCodes << getPrimitiveColorCode(mesh, itr);
+		}
+	}
 }
 
 
@@ -965,6 +967,10 @@ void GLModel::updateFaces(const std::unordered_set<size_t>& faceIndicies, const 
 				rawIndexArray[i] = faceVertices[i];
 			}
 			indexBuffer.updateData(offset, updateArray);
+			if (m_meshMaterial.shaderMode() == !ShaderMode::SingleColor)
+			{
+				_primitiveColorCodes[faceIdx] = getPrimitiveColorCode(&mesh, faceIdx);
+			}
 		}
 	}
 	indexBuffer.setData(indexBuffer.data());
@@ -973,6 +979,7 @@ void GLModel::updateFaces(const std::unordered_set<size_t>& faceIndicies, const 
 	if (newFaceCount < oldFaceCount)
 	{
 		eraseBufferData(indexAttribute, indexBuffer, difference * FACE_SIZE, difference*3);
+		_primitiveColorCodes.erase(_primitiveColorCodes.end() - difference, _primitiveColorCodes.end());
 		m_geometryRenderer.setVertexCount(indexAttribute.count());
 	}
 	else if (newFaceCount > oldFaceCount)
@@ -1007,7 +1014,7 @@ void GLModel::updateVertices(const std::unordered_set<size_t>& vtxIndicies, cons
 		{
 			auto vtx = vtcs[vtxIdx];
 			QVector<QVector3D> vtxData;
-			vtxData << vtx.position  << vtx.vn << vtx.color;
+			vtxData << vtx.position  << vtx.vn;
 			size_t idx = 0;
 			for (const QVector3D& v : vtxData) {
 				rawVertexArray[idx++] = v.x();
@@ -1142,7 +1149,7 @@ void GLModel::mouseClickedLayflat(MeshFace shadow_meshface){
     QPickTriangleEvent *trianglePick = static_cast<QPickTriangleEvent*>(pick);
     MeshFace shadow_meshface = _mesh->faces[trianglePick->triangleIndex()];
     */
-    uncolorExtensionFaces();
+    unselectMeshFaces();
     QVector3D tmp_fn = shadow_meshface.fn;
     Qt3DCore::QTransform tmp;
     float x= tmp_fn.x();
@@ -1362,10 +1369,6 @@ void GLModel::generateSupport(){
     layerInfillMesh->connectFaces();
     layerSupportMesh->connectFaces();
     layerRaftMesh->connectFaces();
-
-	layerInfillMesh->setVerticesColor(COLOR_INFILL);
-	layerRaftMesh->setVerticesColor(COLOR_RAFT);
-
     updateModelMesh();
 }
 
@@ -1705,11 +1708,9 @@ void GLModel::clicked(MouseEventData& pick, const Qt3DRender::QRayCasterHit& hit
 
 
 	if (extensionActive && hit.localIntersection() != QVector3D(0, 0, 0)) {
-		uncolorExtensionFaces();
+		unselectMeshFaces();
 		emit extensionSelect();
-		generateColorAttributes();
-
-		colorExtensionFaces();
+		selectMeshFaces();
 	}
 
 	if (hollowShellActive) {
@@ -1724,18 +1725,16 @@ void GLModel::clicked(MouseEventData& pick, const Qt3DRender::QRayCasterHit& hit
 
 	if (layflatActive && hit.localIntersection() != QVector3D(0, 0, 0)) {
 
-		uncolorExtensionFaces();
+		unselectMeshFaces();
 		emit layFlatSelect();
-		generateColorAttributes();
-		colorExtensionFaces();
+		selectMeshFaces();
 	}
 
 	if (manualSupportActive && hit.localIntersection() != QVector3D(0, 0, 0)) {
 		qDebug() << "manual support handle picker clicked";
-		uncolorExtensionFaces();
+		unselectMeshFaces();
 		emit extensionSelect();
-		generateColorAttributes();
-		colorExtensionFaces();
+		selectMeshFaces();
 	}
 
     if (labellingActive && hit.localIntersection() != QVector3D(0, 0, 0)) {
@@ -2172,18 +2171,24 @@ void GLModel::generateText3DMesh()
 
 // for extension
 
-void GLModel::colorExtensionFaces(){
+void GLModel:: unselectMeshFaces(){
+	for (auto& fcItr : selectedFaces)
+	{
+		auto modItr = _mesh->getFacesNonConst().toNormItr(fcItr);
+	}
+	selectedFaces.clear();
 	updateModelMesh();
 
 }
+void GLModel::selectMeshFaces(){
+	selectedFaces.clear();
+	QVector3D normal = targetMeshFace->fn;
+	_mesh->findNearSimilarFaces(normal, targetMeshFace, targetMeshFace, selectedFaces);
 
-void GLModel:: uncolorExtensionFaces(){
-    resetColorMesh(_mesh, &vertexBuffer, extendFaces);
-	updateModelMesh();
-
-}
-void GLModel::generateColorAttributes(){
-    extendColorMesh(_mesh,targetMeshFace,&vertexBuffer,extendFaces);
+	for (auto& fcItr : selectedFaces)
+	{
+		auto modItr = _mesh->getFacesNonConst().toNormItr(fcItr);
+	}
 	updateModelMesh();
 }
 void GLModel::generateExtensionFaces(double distance){
@@ -2191,7 +2196,7 @@ void GLModel::generateExtensionFaces(double distance){
         return;
 
     saveUndoState();
-    extendMesh(_mesh, targetMeshFace, distance);
+    Hix::Features::Extension::extendMesh(_mesh, targetMeshFace, distance);
 	_targetSelected = false;
 	updateModelMesh();
 }
@@ -2232,7 +2237,7 @@ void GLModel::generateLayFlat(){
     tmp2.setRotationZ(0);
     rotateModelMesh(tmp1.matrix() * tmp2.matrix());
     //qDebug() << "lay flat 1      ";
-    uncolorExtensionFaces();
+    unselectMeshFaces();
     //closeLayflat();
     emit resetLayflat();
 }
@@ -2292,7 +2297,7 @@ void GLModel::closeLayflat(){
         return;
 
     layflatActive = false;
-    uncolorExtensionFaces();
+    unselectMeshFaces();
 	_targetSelected = false;
 }
 void GLModel::openExtension(){
@@ -2309,7 +2314,7 @@ void GLModel::closeExtension(){
         return;
 
     extensionActive = false;
-    uncolorExtensionFaces();
+    unselectMeshFaces();
 	_targetSelected = false;
 }
 
@@ -2324,7 +2329,7 @@ void GLModel::closeManualSupport(){
         return;
 
     manualSupportActive = false;
-    uncolorExtensionFaces();
+    unselectMeshFaces();
 	_targetSelected = false;
 	qDebug() << "close manual support";
 }
@@ -2419,14 +2424,7 @@ void GLModel::changeViewMode(int viewMode) {
         }
         layerViewActive = false;
         supportViewActive = false;
-		if (qmlManager->isSelected(this))
-		{
-			changeColor(ModelColor::Selected);
-		}
-		else
-		{
-			changeColor(ModelColor::Default);
-		}
+		
         break;
     case VIEW_MODE_SUPPORT:
         if (layerViewActive){
@@ -2435,21 +2433,12 @@ void GLModel::changeViewMode(int viewMode) {
         }
         layerViewActive = false;
         supportViewActive = true;
-		if (qmlManager->isSelected(this))
-		{
-			changeColor(ModelColor::Selected);
-		}
-		else
-		{
-			changeColor(ModelColor::Default);
 
-		}
 
         break;
     case VIEW_MODE_LAYER:
         layerViewActive = true;
         supportViewActive = false;
-		changeColor(ModelColor::LayerMode);
         // generate layer view plane materials
         layerViewPlaneMaterial = new Qt3DExtras::QTextureMaterial();
         layerViewPlaneMaterial->setAlphaBlendingEnabled(false);
@@ -2468,9 +2457,53 @@ void GLModel::changeViewMode(int viewMode) {
         getLayerViewSliderSignal(1);
         break;
     }
+	updateShader(viewMode);
 
     emit _updateModelMesh();
 }
+
+
+void GLModel::updateShader(int viewMode)
+{
+
+	switch (viewMode) {
+	case VIEW_MODE_OBJECT:
+		if (extensionActive)
+		{
+			m_meshMaterial.changeMode(Hix::Render::ShaderMode::PerPrimitiveColor);
+		}
+		else
+		{
+			m_meshMaterial.changeMode(Hix::Render::ShaderMode::SingleColor);
+			if (qmlManager->isSelected(this))
+			{
+				m_meshMaterial.setColor(Hix::Render::Colors::Selected);
+			}
+			else
+			{
+				m_meshMaterial.setColor(Hix::Render::Colors::Default);
+			}
+		}
+
+		break;
+	case VIEW_MODE_SUPPORT:
+		m_meshMaterial.changeMode(Hix::Render::ShaderMode::SingleColor);
+		if (qmlManager->isSelected(this))
+		{
+			m_meshMaterial.setColor(Hix::Render::Colors::Selected);
+		}
+		else
+		{
+			m_meshMaterial.setColor(Hix::Render::Colors::Default);
+		}
+		break;
+	case VIEW_MODE_LAYER:
+		m_meshMaterial.changeMode(Hix::Render::ShaderMode::LayerMode);
+		break;
+	}
+
+}
+
 
 void GLModel::inactivateFeatures(){
     /*labellingActive = false;
@@ -2509,6 +2542,45 @@ void GLModel::removeLayerViewComponents(){
     layerViewPlaneTextureLoader = nullptr;
 }
 
+unsigned int GLModel::getPrimitiveColorCode(const Hix::Engine3D::Mesh* mesh, size_t faceIdx)
+{
+	auto faceItr = mesh->getFaces().cbegin() + faceIdx;
+	return getPrimitiveColorCode(mesh, faceItr);
+}
+
+unsigned int GLModel::getPrimitiveColorCode(const Hix::Engine3D::Mesh* mesh, FaceConstItr itr)
+{
+	if (faceHighlightActive())
+	{
+		//color selected stuff yellow, everything non-yellow
+		
+		if (std::find(selectedFaces.begin(), selectedFaces.end(), itr) != selectedFaces.end())
+		{
+			return Hix::Render::MeshColorCodes::SelectedFace;
+		}
+		else
+		{
+			return Hix::Render::MeshColorCodes::Selected;
+		}
+
+	}
+	else if (layerViewActive)
+	{
+		if (mesh == _mesh)
+		{
+			return Hix::Render::MeshColorCodes::Selected;
+		}
+		else if (mesh == supportMesh)
+		{
+			return Hix::Render::MeshColorCodes::Support;
+		}
+		else if (mesh == raftMesh)
+		{
+			return Hix::Render::MeshColorCodes::Raft;
+		}
+	}
+}
+
 const Mesh* GLModel::getSupport()
 {
     return supportMesh;
@@ -2536,6 +2608,10 @@ bool GLModel::isHitTestable()
 {
 	return _hitEnabled;
 
+}
+bool GLModel::faceHighlightActive() const
+{
+	return extensionActive || layflatActive || manualSupportActive;
 }
 void GLModel::setSupportAndRaft()
 {

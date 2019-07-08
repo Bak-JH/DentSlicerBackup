@@ -866,7 +866,7 @@ bool QmlManager::multipleModelSelected(int ID){
             // do unselect model
 
             it = selectedModels.erase(it);
-            target->changeColor(ModelColor::Default);
+            target->changeColor(Hix::Render::Colors::Default);
             target->checkPrintingArea();
             (*it)->inactivateFeatures();
             QMetaObject::invokeMethod(partList, "unselectPartByModel", Q_ARG(QVariant, target->ID));
@@ -915,7 +915,7 @@ bool QmlManager::multipleModelSelected(int ID){
 	selectedModels.insert(target);
 	_lastSelected = target;
     connectHandlers(target);
-    target->changeColor(ModelColor::Selected);
+    target->changeColor(Hix::Render::Colors::Selected);
     qDebug() << "multipleModelSelected invoke";
     QMetaObject::invokeMethod(partList, "selectPartByModel", Q_ARG(QVariant, target->ID));
     QMetaObject::invokeMethod(yesno_popup, "addPart", Q_ARG(QVariant, target->getFileName(target->filename.toStdString().c_str())), Q_ARG(QVariant, target->ID));
@@ -969,7 +969,7 @@ void QmlManager::lastModelSelected(){
     /* remove all elements from the list */
     for (auto it = selectedModels.begin() ; it != selectedModels.end() ; ++it) {
         /* it is simillar to selectModel() */
-        (*it)->changeColor(ModelColor::Default);
+        (*it)->changeColor(Hix::Render::Colors::Default);
         (*it)->checkPrintingArea();
         (*it)->inactivateFeatures();
         QMetaObject::invokeMethod(partList, "unselectPartByModel", Q_ARG(QVariant, (*it)->ID));
@@ -1028,7 +1028,7 @@ void QmlManager::modelSelected(int ID){
             if (*it == target) {
 				modelAlreadySelected = true;
             }
-            (*it)->changeColor(ModelColor::Default);
+            (*it)->changeColor(Hix::Render::Colors::Default);
             (*it)->checkPrintingArea();
             (*it)->inactivateFeatures();
             QMetaObject::invokeMethod(partList, "unselectPartByModel", Q_ARG(QVariant, (*it)->ID));
@@ -1074,7 +1074,7 @@ void QmlManager::modelSelected(int ID){
 		_lastSelected = target;
 		connectHandlers(target);
 
-		target->changeColor(ModelColor::Selected);
+		target->changeColor(Hix::Render::Colors::Selected);
 		qDebug() << "modelSelected invoke";
 		QMetaObject::invokeMethod(partList, "selectPartByModel", Q_ARG(QVariant, target->ID));
 		QMetaObject::invokeMethod(yesno_popup, "addPart", Q_ARG(QVariant, 
@@ -1636,18 +1636,17 @@ void QmlManager::runGroupFeature(int ftrType, QString state, double arg1, double
         qDebug() << "run groupfeature lay flat";
         if (state == "active"){
 			for (auto selectedModel : selectedModels) {
-				selectedModel->uncolorExtensionFaces();
-				selectedModel->colorExtensionFaces();
+				selectedModel->unselectMeshFaces();
 			}
         }else if (state == "inactive"){
 			for (auto selectedModel : selectedModels) {
-				selectedModel->uncolorExtensionFaces();
+				selectedModel->unselectMeshFaces();
 				selectedModel->closeExtension();
 			}
 
         }
 /*        if (!selectedModels.empty()) {
-            selectedModels[selectedModels.size() - 1]->uncolorExtensionFaces();
+            selectedModels[selectedModels.size() - 1]->unselectMeshFaces();
             selectedModels[selectedModels.size() - 1]->closeLayflat();
         }
 */
@@ -1679,12 +1678,11 @@ void QmlManager::runGroupFeature(int ftrType, QString state, double arg1, double
         qDebug() << "run groupfeature extend";
         if (state == "active"){
 			for (auto selectedModel : selectedModels) {
-				selectedModel->uncolorExtensionFaces();
-				selectedModel->colorExtensionFaces();
+				selectedModel->unselectMeshFaces();
 			}
         }else if (state == "inactive"){
 			for (auto selectedModel : selectedModels) {
-				selectedModel->uncolorExtensionFaces();
+				selectedModel->unselectMeshFaces();
 				selectedModel->closeExtension();
 			}
         }
@@ -2174,7 +2172,7 @@ QObject* FindItemByName(QQmlApplicationEngine* engine, const QString& name)
 void QmlManager::unselectPartImpl(GLModel* target)
 {
 	QMetaObject::invokeMethod(partList, "unselectPartByModel", Q_ARG(QVariant, target->ID));
-    target->changeColor(ModelColor::Default);
+    target->changeColor(Hix::Render::Colors::Default);
     target->checkPrintingArea();
     target->inactivateFeatures();
     disconnectHandlers(target);

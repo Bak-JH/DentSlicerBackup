@@ -10,17 +10,18 @@
 #include <Qt3DRender/qrenderpass.h>
 #include <Qt3DRender/qgraphicsapifilter.h>
 #include <QOpenGLShader>
+#include "Color.h"
+
 namespace Hix
 {
 	namespace Render
 	{
 		// changeColor
-		enum ModelColor
+		enum ShaderMode
 		{
 			None = -1,
-			Default = 0,
-			Selected,
-			OutOfBound,
+			SingleColor = 0,
+			PerPrimitiveColor,
 			LayerMode
 		};
 		class ModelMaterial : public Qt3DRender::QMaterial
@@ -31,16 +32,20 @@ namespace Hix
 			virtual ~ModelMaterial();
 
 			//state machine
-			void setMode();
 			void setDiffuse(const QColor& diffuse);
 			void setAmbient(const QColor& ambient);
 			void addParameter(const std::string& key);
 			void removeParameter(const std::string& key);
 			void setParameterValue(const std::string& key, const QVariant& value);
-			void changeColor(ModelColor mode);
+			void changeMode(ShaderMode mode);
+			ShaderMode shaderMode()const;
+			//color for single color mode
+			void setColor(QVector3D color);
+			//for per primitive coloring
+			void setColorCodes(QVariantList& colorCodes);
 		private:
 
-			ModelColor colorMode = ModelColor::None;
+			ShaderMode _mode = ShaderMode::None;
 
 			//custom parameters
 			std::unordered_map<std::string, Qt3DRender::QParameter> _additionalParameters;
@@ -53,7 +58,11 @@ namespace Hix
 			//default parameters
 			Qt3DRender::QParameter _ambientParameter;
 			Qt3DRender::QParameter _diffuseParameter;
+			Qt3DRender::QParameter _perPrimitiveColorParameter;
 			Qt3DRender::QParameter _colorTableParameter;
+			Qt3DRender::QParameter _singleColorParameter;
+			//per primtivie parameters, stored as QVariantList on CPU, uniform on GPU geomatry shader
+			QVariantList _faceTypePerPrimitive;
 
 		};
 	}
