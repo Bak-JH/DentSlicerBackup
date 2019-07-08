@@ -906,21 +906,21 @@ void GLModel::updateMesh(Mesh* mesh)
 			tooManyChanges = true;
 		}
 	}
-	//if there are too many individual changes...
+	//partial buffer update doesn't seem to work now...
 	tooManyChanges = true;
 	if (tooManyChanges)
 	{
+		//if there are too many individual changes just reset the buffer
 		clearMem();
 		setMesh(mesh);
-		return;
 	}
-
-
-	removeComponent(&m_geometryRenderer);
-	updateVertices(vtxChangeSet, *mesh);
-	updateFaces(faceChangeSet, *mesh);
-	addComponent(&m_geometryRenderer);
-
+	else
+	{
+		removeComponent(&m_geometryRenderer);
+		updateVertices(vtxChangeSet, *mesh);
+		updateFaces(faceChangeSet, *mesh);
+		addComponent(&m_geometryRenderer);
+	}
 }
 
 
