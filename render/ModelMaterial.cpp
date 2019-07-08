@@ -15,15 +15,19 @@ using namespace Hix::Render;
 //default
 const QUrl VERT_URL = QUrl("qrc:/shaders/default.vert");
 
-//single color
+//flat frag shader
+const QUrl FLAT_FRAG_URL = QUrl("qrc:/shaders/flat.frag");
+
+//single color geom shader
 const QUrl SINGLE_COLOR_GEOM_URL= QUrl("qrc:/shaders/singleColor.geom");
 
-//per primitive
-const QUrl PER_PRIMITIVE_FRAG_URL = QUrl("qrc:/shaders/perPrimitive.frag");
+//per primitive geom shader
 const QUrl PER_PRIMITIVE_GEOM_URL = QUrl("qrc:/shaders/perPrimitive.geom");
 
 //layerview
 const QUrl LAYERVIEW_FRAG_URL = QUrl("qrc:/shaders/layerview.frag");
+const QUrl LAYERVIEW_GEOM_URL = QUrl("qrc:/shaders/layerview.geom");
+
 
 Hix::Render::ModelMaterial::ModelMaterial():
 	_ambientParameter(QStringLiteral("ambient"), QColor(25, 25, 25)),
@@ -80,8 +84,11 @@ Hix::Render::ModelMaterial::ModelMaterial():
 
 	_effect.addParameter(&_ambientParameter);
 	_effect.addParameter(&_diffuseParameter);
-	_effect.addParameter(&_colorTableParameter);
-	_effect.addParameter(&_singleColorParameter);
+
+	//coloring faces
+	//_effect.addParameter(&_colorTableParameter);
+	//_effect.addParameter(&_perPrimitiveColorParameter);
+	//_effect.addParameter(&_singleColorParameter);
 
 	setEffect(&_effect);
 	setAmbient(QColor(65, 65, 65));
@@ -152,15 +159,15 @@ void  Hix::Render::ModelMaterial::changeMode(ShaderMode mode) {
 		}
 		switch (mode) {
 		case ShaderMode::SingleColor: // default
-			_shaderProgram.setGeometryShaderCode(QShaderProgram::loadSource(SINGLE_COLOR_GEOM_URL));
-			_shaderProgram.setFragmentShaderCode(QShaderProgram::loadSource(PER_PRIMITIVE_FRAG_URL));
+			//_shaderProgram.setGeometryShaderCode(QShaderProgram::loadSource(SINGLE_COLOR_GEOM_URL));
+			_shaderProgram.setFragmentShaderCode(QShaderProgram::loadSource(FLAT_FRAG_URL));
 			break;
 		case ShaderMode::PerPrimitiveColor:
 			_shaderProgram.setGeometryShaderCode(QShaderProgram::loadSource(PER_PRIMITIVE_GEOM_URL));
-			_shaderProgram.setFragmentShaderCode(QShaderProgram::loadSource(PER_PRIMITIVE_FRAG_URL));
+			_shaderProgram.setFragmentShaderCode(QShaderProgram::loadSource(FLAT_FRAG_URL));
 			break;
 		case ShaderMode::LayerMode:
-			_shaderProgram.setGeometryShaderCode(QShaderProgram::loadSource(PER_PRIMITIVE_GEOM_URL));
+			_shaderProgram.setGeometryShaderCode(QShaderProgram::loadSource(LAYERVIEW_GEOM_URL));
 			_shaderProgram.setFragmentShaderCode(QShaderProgram::loadSource(LAYERVIEW_FRAG_URL));
 			addParameter("height");
 			break;
@@ -184,7 +191,7 @@ void Hix::Render::ModelMaterial::setColor(QVector3D color)
 		throw std::runtime_error("Attempted to set entire mesh material color when per primitive color is used");
 	}
 #endif
-	_colorTableParameter.setValue(color);
+	_singleColorParameter.setValue(color);
 }
 
 void Hix::Render::ModelMaterial::setColorCodes(QVariantList& colorCodes)

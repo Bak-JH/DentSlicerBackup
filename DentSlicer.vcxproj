@@ -473,11 +473,13 @@
     <None Include="Resource\mesh\plate_logo.stl" />
     <None Include="Resource\mesh\plate_plane.stl" />
     <None Include="shaders\default.vert" />
+    <None Include="shaders\flat.frag" />
     <None Include="shaders\layerview.frag" />
+    <None Include="shaders\layerview.geom" />
     <None Include="shaders\light.inc.frag" />
-    <None Include="shaders\perPrimitive.frag" />
     <None Include="shaders\perPrimitive.geom" />
     <None Include="shaders\singleColor.geom" />
+    <None Include="shaders\singleColorImpl.geom" />
     <QtRcc Include="qml.qrc">
       <InitFuncName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">qml</InitFuncName>
       <InitFuncName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">qml</InitFuncName>
