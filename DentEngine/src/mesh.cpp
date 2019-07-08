@@ -252,13 +252,7 @@ void Mesh::setPrevMesh( Mesh* mesh)
 	prevMesh = mesh;
 }
 
-void Mesh::setVerticesColor(QVector3D color)
-{
-	for (auto& vtx : vertices)
-	{
-		vtx.color = color;
-	}
-}
+
 
 
 void Mesh::vertexOffset(float factor){
@@ -444,8 +438,8 @@ void Mesh::reverseFaces(){
 
 /********************** Mesh Generation Functions **********************/
 
-void Mesh::addFaceAndConnect(QVector3D v0, QVector3D v1, QVector3D v2, QVector3D color){
-    addFace(v0, v1, v2, color);
+void Mesh::addFaceAndConnect(QVector3D v0, QVector3D v1, QVector3D v2){
+    addFace(v0, v1, v2);
     auto& last = faces.back();
     auto circ = last.edgeCirculator();
     for(size_t i = 0; i < 3; ++i, ++circ)
@@ -453,11 +447,11 @@ void Mesh::addFaceAndConnect(QVector3D v0, QVector3D v1, QVector3D v2, QVector3D
         setTwins(halfEdges.toNormItr(circ.toItr()));
     }
 }
-void Mesh::addFace(QVector3D v0, QVector3D v1, QVector3D v2, QVector3D color){
+void Mesh::addFace(QVector3D v0, QVector3D v1, QVector3D v2){
 	std::array<VertexItr, 3> fVtx;
-    fVtx[0] = addOrRetrieveFaceVertex(v0, color);
-	fVtx[1] = addOrRetrieveFaceVertex(v1, color);
-	fVtx[2] = addOrRetrieveFaceVertex(v2, color);
+    fVtx[0] = addOrRetrieveFaceVertex(v0);
+	fVtx[1] = addOrRetrieveFaceVertex(v1);
+	fVtx[2] = addOrRetrieveFaceVertex(v2);
 	//if the face is too small and slicing option collapsed a pair of its vertices, don't add.
 	if (fVtx[0] == fVtx[1] || fVtx[0] == fVtx[2] || fVtx[1] == fVtx[2])
 		return;
@@ -865,7 +859,7 @@ void Mesh::removeVertexHash(QVector3D pos)
 	}
 }
 
-VertexItr Mesh::addOrRetrieveFaceVertex(QVector3D v, QVector3D color){
+VertexItr Mesh::addOrRetrieveFaceVertex(QVector3D v){
     uint32_t vertex_hash = vertexHash(v);
 	//find if existing vtx can be used
     auto similarVtx = getSimilarVertex(vertex_hash, v);
@@ -874,7 +868,7 @@ VertexItr Mesh::addOrRetrieveFaceVertex(QVector3D v, QVector3D color){
 		return vertices.toNormItr(similarVtx);
     }
 
-    MeshVertex mv(v, color);
+    MeshVertex mv(v);
     vertices.emplace_back(mv);
 	auto last = vertices.end() - 1;
     vertices_hash.insert(vertex_hash, last);
@@ -1104,6 +1098,40 @@ Mesh* Mesh::getNext()const
 {
     return nextMesh;
 }
+
+void Mesh::findNearSimilarFaces(QVector3D normal, FaceConstItr original_mf, FaceConstItr  mf, std::vector<FaceConstItr>& result, float maxRadius, float maxNormalDiff)const
+{
+	result.push_back(mf);
+	auto edgeCirc = mf->edgeCirculator();
+	for (size_t i = 0; i < 3; ++i, ++edgeCirc) {
+		const auto& faces = getFaces();
+		for (auto neighbor : edgeCirc->nonOwningFaces()) {
+			// check if neighbor already checked
+			bool cont = false;
+			for (auto elem : result) {
+				if (elem == neighbor)
+				{
+					cont = true;
+					break;
+				}
+			}
+			if (cont)
+				continue;
+			// check if neighbor close to normal
+			auto nbrMeshVertices = neighbor->meshVertices();
+			auto originalMVertices = original_mf->meshVertices();
+			if ((neighbor->fn - normal).length() > maxNormalDiff ||
+				nbrMeshVertices[0]->position.distanceToPoint(originalMVertices[0]->position) > maxRadius)
+				continue;
+			qDebug() << nbrMeshVertices[0]->position.distanceToPoint(originalMVertices[0]->position);
+			qDebug() << "looking for " << indexOf(neighbor);
+			findNearSimilarFaces( normal, original_mf, neighbor, result, maxRadius, maxNormalDiff);
+		}
+	}
+
+	return;
+}
+
 
 
 

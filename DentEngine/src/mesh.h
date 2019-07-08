@@ -83,6 +83,7 @@ namespace Hix
 			HalfEdgeConstItr _hEdgeItr;
 		};
 
+
 		struct MeshFace {
 			MeshFace()
 			{}
@@ -94,11 +95,12 @@ namespace Hix
 			HalfEdgeCirculator edgeCirculator()const;
 			std::array<size_t, 3> getVerticeIndices(const Mesh* owningMesh)const;
 
+
 		};
 		struct MeshVertex {
 			MeshVertex() 
 			{}
-			MeshVertex(QVector3D position, QVector3D color): position(position), color(color) {}
+			MeshVertex(QVector3D position) {}
 			friend inline bool operator== (const MeshVertex& a, const MeshVertex& b) {
 				return a.position == b.position;
 			}
@@ -110,7 +112,6 @@ namespace Hix
 			std::vector<FaceConstItr> connectedFaces()const;
 			QVector3D position;
 			QVector3D vn;
-			QVector3D color;
 			std::vector<HalfEdgeConstItr> leavingEdges;
 			std::vector<HalfEdgeConstItr> arrivingEdges;
 
@@ -149,7 +150,6 @@ namespace Hix
 
 
 			/********************** Mesh Edit Functions***********************/
-			void setVerticesColor(QVector3D color);
 			void vertexOffset(float factor);
 			void vertexMove(QVector3D direction);
 			void centerMesh();
@@ -157,8 +157,8 @@ namespace Hix
 			void vertexScale(float scaleX, float scaleY, float scaleZ, float centerX, float centerY);
 			void reverseFace(FaceConstItr faceItr);
 			void reverseFaces();
-            void addFaceAndConnect(QVector3D v0, QVector3D v1, QVector3D v2, QVector3D color = COLOR_DEFAULT_MESH);
-            void addFace(QVector3D v0, QVector3D v1, QVector3D v2, QVector3D color = COLOR_DEFAULT_MESH);
+            void addFaceAndConnect(QVector3D v0, QVector3D v1, QVector3D v2);
+            void addFace(QVector3D v0, QVector3D v1, QVector3D v2);
 			TrackedIndexedList<MeshFace>::const_iterator removeFace(FaceConstItr f_it);
 			void connectFaces();
 			TrackedIndexedList<MeshVertex>& getVerticesNonConst();
@@ -211,6 +211,9 @@ namespace Hix
 			float z_max()const;
 			Mesh* getPrev()const;
 			Mesh* getNext()const;
+			void findNearSimilarFaces(QVector3D normal, FaceConstItr original_mf, FaceConstItr  mf, std::vector<FaceConstItr>& result,  float maxRadius = 100, float maxNormalDiff = 0.5)const;
+
+
 
 			/********************** index to data **********************/
 
@@ -258,7 +261,7 @@ namespace Hix
 			/********************** Helper Functions **********************/
 
 			void setTwins(HalfEdgeItr edge);
-			VertexItr addOrRetrieveFaceVertex(QVector3D v, QVector3D color);
+			VertexItr addOrRetrieveFaceVertex(QVector3D v);
 			void removeVertexHash(QVector3D pos);
 			VertexConstItr getSimilarVertex(uint32_t digest, QVector3D v);
 			void addHalfEdgesToFace(std::array<VertexItr, 3> faceVertices, FaceConstItr face);
