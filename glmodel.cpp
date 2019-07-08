@@ -22,10 +22,7 @@
 #include <feature/generateraft.h>
 
 
-const size_t POS_SIZE = 3;
-const size_t NRM_SIZE = 3;
-const size_t COL_SIZE = 3;
-const size_t VTX_SIZE = POS_SIZE + NRM_SIZE + COL_SIZE;
+
 
 #define ATTRIBUTE_SIZE_INCREMENT 200
 #if defined(_DEBUG) || defined(QT_DEBUG)
@@ -59,7 +56,6 @@ GLModel::GLModel(QObject* mainWindow, QNode *parent, Mesh* loadMesh, QString fna
 	, indexBuffer(Qt3DRender::QBuffer::IndexBuffer, this)
 	, positionAttribute(this)
 	, normalAttribute(this)
-	, colorAttribute(this)
 	, indexAttribute(this)
 
 
@@ -97,15 +93,6 @@ GLModel::GLModel(QObject* mainWindow, QNode *parent, Mesh* loadMesh, QString fna
     normalAttribute.setCount(0);
     normalAttribute.setName(QAttribute::defaultNormalAttributeName());
 
-    colorAttribute.setAttributeType(QAttribute::VertexAttribute);
-    colorAttribute.setBuffer(&vertexBuffer);
-    colorAttribute.setDataType(QAttribute::Float);
-    colorAttribute.setDataSize(COL_SIZE);
-    colorAttribute.setByteOffset((NRM_SIZE + POS_SIZE) * sizeof(float));
-    colorAttribute.setByteStride(VTX_SIZE);
-    colorAttribute.setCount(0);
-    colorAttribute.setName(QAttribute::defaultColorAttributeName());
-
 	indexAttribute.setVertexBaseType(QAttribute::VertexBaseType::UnsignedInt);
 	indexAttribute.setAttributeType(QAttribute::IndexAttribute);
 	indexAttribute.setBuffer(&indexBuffer);
@@ -126,7 +113,6 @@ GLModel::GLModel(QObject* mainWindow, QNode *parent, Mesh* loadMesh, QString fna
 
 	m_geometry.addAttribute(&positionAttribute);
 	m_geometry.addAttribute(&normalAttribute);
-	m_geometry.addAttribute(&colorAttribute);
 	m_geometry.addAttribute(&indexAttribute);
 
     // set shader mode and color
@@ -755,7 +741,6 @@ void GLModel::clearMem(){
 
 	positionAttribute.setCount(0);
 	normalAttribute.setCount(0);
-	colorAttribute.setCount(0);
 	indexAttribute.setCount(0);
 
 }
@@ -851,7 +836,6 @@ size_t GLModel::appendMeshVertex(const Mesh* mesh,
 	vertexBuffer.setData(totalData);
 	positionAttribute.setCount(oldCount + count);
 	normalAttribute.setCount(oldCount + count);
-	colorAttribute.setCount(oldCount + count);
 	return oldCount;
 }
 
@@ -1035,7 +1019,6 @@ void GLModel::updateVertices(const std::unordered_set<size_t>& vtxIndicies, cons
 		eraseBufferData(positionAttribute, vertexBuffer, difference * VTX_SIZE, difference);
 		//set other attribute count as well
 		normalAttribute.setCount(positionAttribute.count());
-		colorAttribute.setCount(positionAttribute.count());
 	}
 	else if (newVtxCount > oldVtxCount)
 	{
@@ -1043,7 +1026,6 @@ void GLModel::updateVertices(const std::unordered_set<size_t>& vtxIndicies, cons
 	}
 	positionAttribute.setCount(newVtxCount);
 	normalAttribute.setCount(positionAttribute.count());
-	colorAttribute.setCount(positionAttribute.count());
 }
 
 
