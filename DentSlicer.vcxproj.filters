@@ -460,6 +460,9 @@
     <ClInclude Include="common\TaskManager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="render\Color.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="debug\moc_predefs.h.cbt">
@@ -1015,15 +1018,6 @@
     <None Include="icon-32.ico" />
     <None Include="icon-32.ico" />
     <None Include="icon-32.ico" />
-    <None Include="shaders\model_shader.frag">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="shaders\model_shader.vert">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="shaders\model_shader.geom">
-      <Filter>Resource Files</Filter>
-    </None>
     <None Include="icon-32.ico" />
     <None Include="shaders\light.inc.frag">
       <Filter>Resource Files</Filter>
@@ -1033,7 +1027,20 @@
     <None Include="icon-32.ico" />
     <None Include="icon-32.ico" />
     <None Include="icon-32.ico" />
-    <None Include="shaders\layerview_shader.frag">
+    <None Include="icon-32.ico" />
+    <None Include="shaders\default.vert">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="shaders\layerview.frag">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="shaders\perPrimitive.frag">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="shaders\perPrimitive.geom">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="shaders\singleColor.geom">
       <Filter>Resource Files</Filter>
     </None>
   </ItemGroup>

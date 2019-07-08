@@ -166,6 +166,7 @@ HEADERS += \
     input/Draggable.h \
     input/raycastcontroller.h \
     lights.h \
+    render/Color.h \
     render/ModelMaterial.h \
     slicingengine.h \
     glmodel.h \

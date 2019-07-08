@@ -104,7 +104,12 @@ class GLModel : public QEntity, public Hix::Input::Draggable
 {
     Q_OBJECT
 public:
-
+	enum MeshType
+	{
+		ModelMesh = 0,
+		Support,
+		Raft
+	};
     //probably interface this as well
 	void clicked	(Hix::Input::MouseEventData&,const Qt3DRender::QRayCasterHit&);
 
@@ -140,7 +145,7 @@ public:
     float hollowShellRadius = 0;
 
     // feature extension
-    std::vector<FaceConstItr> extendFaces;
+    std::vector<FaceConstItr> selectedFaces;
 
     // feature offset
     double shellOffsetFactor;
@@ -179,7 +184,7 @@ public:
 	QTime getNextTime();
 
 
-    void changeColor(Hix::Render::ModelColor mode); //0 default, 1 selected, 2 outofarea
+    void changeColor(const QVector3D& color);
 
     void setSupportAndRaft();
 
@@ -209,6 +214,7 @@ public:
     QString getFileName(const std::string& s);
     static QVector3D spreadPoint(QVector3D endpoint,QVector3D startpoint,int factor);
     void changeViewMode(int viewMode);
+	void updateShader(int viewMode);
     void inactivateFeatures();
 
     // support
@@ -253,6 +259,7 @@ public:
 	bool scaleActive = false;
 	bool isMoved = false;
 
+	bool faceHighlightActive()const;
 private:
 
 	//consts
@@ -274,7 +281,7 @@ private:
     QAttribute normalAttribute;
     QAttribute colorAttribute;
     QAttribute indexAttribute;
-
+	QVariantList _primitiveColorCodes;
     int v_cnt;
     int f_cnt;
     QNode* m_parent;
@@ -287,6 +294,9 @@ private:
 
     void onTimerUpdate();
     void removeLayerViewComponents();
+	unsigned int getPrimitiveColorCode(const Hix::Engine3D::Mesh* mesh, size_t faceIdx);
+	unsigned int getPrimitiveColorCode(const Hix::Engine3D::Mesh* mesh, FaceConstItr faceItr);
+
 	void setMesh(Hix::Engine3D::Mesh* mesh);
 	void updateMesh(Hix::Engine3D::Mesh* mesh);
 	void appendMesh(Hix::Engine3D::Mesh* mesh);
@@ -395,9 +405,8 @@ public slots:
     // Extension
     void openExtension();
     void closeExtension();
-    void colorExtensionFaces();
-    void uncolorExtensionFaces();
-    void generateColorAttributes();
+    void unselectMeshFaces();
+    void selectMeshFaces();
     void generateExtensionFaces(double distance);
 
     // ShellOffset

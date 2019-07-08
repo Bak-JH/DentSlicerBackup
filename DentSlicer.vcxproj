@@ -319,6 +319,7 @@
     <QtMoc Include="ui\MoveXYZWidget.h" />
     <QtMoc Include="render\ModelMaterial.h" />
     <QtMoc Include="lights.h" />
+    <ClInclude Include="render\Color.h" />
     <ClInclude Include="unitTest\catch.hpp" />
     <ClInclude Include="utils\mathutils.h" />
     <ClInclude Include="DentEngine\src\mesh.h" />
@@ -471,11 +472,12 @@
     <None Include="Resource\mesh\plate.stl" />
     <None Include="Resource\mesh\plate_logo.stl" />
     <None Include="Resource\mesh\plate_plane.stl" />
-    <None Include="shaders\layerview_shader.frag" />
+    <None Include="shaders\default.vert" />
+    <None Include="shaders\layerview.frag" />
     <None Include="shaders\light.inc.frag" />
-    <None Include="shaders\model_shader.frag" />
-    <None Include="shaders\model_shader.geom" />
-    <None Include="shaders\model_shader.vert" />
+    <None Include="shaders\perPrimitive.frag" />
+    <None Include="shaders\perPrimitive.geom" />
+    <None Include="shaders\singleColor.geom" />
     <QtRcc Include="qml.qrc">
       <InitFuncName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">qml</InitFuncName>
       <InitFuncName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">qml</InitFuncName>
