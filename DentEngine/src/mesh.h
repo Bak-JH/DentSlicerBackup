@@ -100,7 +100,7 @@ namespace Hix
 		struct MeshVertex {
 			MeshVertex() 
 			{}
-			MeshVertex(QVector3D position) {}
+			MeshVertex(QVector3D pPosition):position(pPosition) {}
 			friend inline bool operator== (const MeshVertex& a, const MeshVertex& b) {
 				return a.position == b.position;
 			}
