@@ -54,6 +54,7 @@ GLModel::GLModel(QObject* mainWindow, QNode *parent, Mesh* loadMesh, QString fna
     , m_geometry(this)
     , vertexBuffer(Qt3DRender::QBuffer::VertexBuffer, this)
 	, indexBuffer(Qt3DRender::QBuffer::IndexBuffer, this)
+	, primitiveColorBuffer(Qt3DRender::QBuffer::ShaderStorageBuffer, this)
 	, positionAttribute(this)
 	, normalAttribute(this)
 	, indexAttribute(this)
@@ -72,8 +73,11 @@ GLModel::GLModel(QObject* mainWindow, QNode *parent, Mesh* loadMesh, QString fna
     //initialize vertex buffers etc
     vertexBuffer.setUsage(Qt3DRender::QBuffer::DynamicDraw);
 	indexBuffer.setUsage(Qt3DRender::QBuffer::DynamicDraw);
+	primitiveColorBuffer.setUsage(Qt3DRender::QBuffer::DynamicDraw);
 	vertexBuffer.setAccessType(	Qt3DRender::QBuffer::AccessType::ReadWrite);
 	indexBuffer.setAccessType(	Qt3DRender::QBuffer::AccessType::ReadWrite);
+	primitiveColorBuffer.setAccessType(Qt3DRender::QBuffer::AccessType::ReadWrite);
+
 
     positionAttribute.setAttributeType(QAttribute::VertexAttribute);
     positionAttribute.setBuffer(&vertexBuffer);
@@ -138,6 +142,7 @@ GLModel::GLModel(QObject* mainWindow, QNode *parent, Mesh* loadMesh, QString fna
 	// 승환 25%
 	qmlManager->setProgress(0.23);
 	clearMem();
+	//m_meshMaterial.setPerPrimitiveColorSSBO(primitiveColorBuffer);
 	setMesh(_mesh);
 	//applyGeometry();
 
@@ -462,6 +467,7 @@ void GLModel::updateModelMesh(){
     // reinitialize with updated mesh
 
     int viewMode = qmlManager->getViewMode();
+	updateShader(viewMode);
     switch( viewMode ) {
     case VIEW_MODE_OBJECT:
 		updateMesh(_mesh);
@@ -735,9 +741,11 @@ arrangeSignalSender::arrangeSignalSender(){
 void GLModel::clearMem(){
     QByteArray newVertexArray;
 	QByteArray newIdxArray;
-	_primitiveColorCodes.clear();
+	QByteArray newPrimitiveColorArray;
+
     vertexBuffer.setData(newVertexArray);
 	indexBuffer.setData(newIdxArray);
+	primitiveColorBuffer.setData(newIdxArray);
 
 	positionAttribute.setCount(0);
 	normalAttribute.setCount(0);
@@ -778,6 +786,10 @@ void GLModel::setMesh(Mesh* mesh)
 	auto hEdgesHistory = mesh->getHalfEdgesNonConst().flushChanges();//not used...for now
 	removeComponent(&m_geometryRenderer);
 	appendMesh(mesh);
+	if (m_meshMaterial.shaderMode() == !ShaderMode::SingleColor)
+	{
+		//m_meshMaterial.setColorCodes(_primitiveColorCodes);
+	}
 	addComponent(&m_geometryRenderer);
 
 }
@@ -874,7 +886,7 @@ void GLModel::appendMeshFace(const Mesh* mesh, Hix::Engine3D::FaceConstItr begin
 	{
 		for (auto itr = begin; itr != end; ++itr)
 		{
-			_primitiveColorCodes << getPrimitiveColorCode(mesh, itr);
+			//_primitiveColorCodes << getPrimitiveColorCode(mesh, itr);
 		}
 	}
 }
@@ -919,6 +931,10 @@ void GLModel::updateMesh(Mesh* mesh)
 		removeComponent(&m_geometryRenderer);
 		updateVertices(vtxChangeSet, *mesh);
 		updateFaces(faceChangeSet, *mesh);
+		if (m_meshMaterial.shaderMode() == !ShaderMode::SingleColor)
+		{
+			//m_meshMaterial.setColorCodes(_primitiveColorCodes);
+		}
 		addComponent(&m_geometryRenderer);
 	}
 }
@@ -953,7 +969,7 @@ void GLModel::updateFaces(const std::unordered_set<size_t>& faceIndicies, const 
 			indexBuffer.updateData(offset, updateArray);
 			if (m_meshMaterial.shaderMode() == !ShaderMode::SingleColor)
 			{
-				_primitiveColorCodes[faceIdx] = getPrimitiveColorCode(&mesh, faceIdx);
+				//_primitiveColorCodes[faceIdx] = getPrimitiveColorCode(&mesh, faceIdx);
 			}
 		}
 	}
@@ -963,7 +979,7 @@ void GLModel::updateFaces(const std::unordered_set<size_t>& faceIndicies, const 
 	if (newFaceCount < oldFaceCount)
 	{
 		eraseBufferData(indexAttribute, indexBuffer, difference * FACE_SIZE, difference*3);
-		_primitiveColorCodes.erase(_primitiveColorCodes.end() - difference, _primitiveColorCodes.end());
+		//_primitiveColorCodes.erase(_primitiveColorCodes.end() - difference, _primitiveColorCodes.end());
 		m_geometryRenderer.setVertexCount(indexAttribute.count());
 	}
 	else if (newFaceCount > oldFaceCount)
@@ -2439,7 +2455,6 @@ void GLModel::changeViewMode(int viewMode) {
         getLayerViewSliderSignal(1);
         break;
     }
-	updateShader(viewMode);
 
     emit _updateModelMesh();
 }
@@ -2450,7 +2465,7 @@ void GLModel::updateShader(int viewMode)
 
 	switch (viewMode) {
 	case VIEW_MODE_OBJECT:
-		if (extensionActive)
+		if (faceHighlightActive())
 		{
 			m_meshMaterial.changeMode(Hix::Render::ShaderMode::PerPrimitiveColor);
 		}

@@ -275,11 +275,12 @@ private:
     Qt3DRender::QBuffer vertexBuffer;
 	//defines mesh faces by 3 indices to the vertexArray
     Qt3DRender::QBuffer indexBuffer;
-
+	//separates SSBO buffer for Per-primitive colors
+	Qt3DRender::QBuffer primitiveColorBuffer;
     QAttribute positionAttribute;
     QAttribute normalAttribute;
     QAttribute indexAttribute;
-	QVariantList _primitiveColorCodes;
+	//QVariantList _primitiveColorCodes;
     int v_cnt;
     int f_cnt;
     QNode* m_parent;

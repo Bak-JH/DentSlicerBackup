@@ -1,75 +1,43 @@
-#version 330 core
-
-layout( triangles ) in;
-layout( triangle_strip, max_vertices = 3 ) out;
-
-in EyeSpaceVertex {
-    vec3 position;
-    vec3 normal;
-} gs_in[];
-
-//normal value can be either vertex normal or face normal depending on smoothing option
-// out FinalVertex {
-//     vec3 position;
-//     vec3 normal;
-//     vec3 color;
-// } gs_out;
-flat out vec3 VertexColor;
-smooth out vec3 ModelPosition;
-
-//light calculation
-//uniform int pointLightCount; this is hard coded into 4 instead, due to static loop constraint on some devices
-uniform vec3 ambient;
-uniform vec3 diffuse;
-uniform mat4 inverseModelMatrix;
-
-//legokangpalla minimalistic flat shading:
-// 1. don't do specular calculation, as flat shading causes specular to highlight entire face
-// 2. do the light calculation for all light sources once and re-use the result.
-// 3. Use only point lights and assume color is 1 with intensity of 1(more complext light is useless for simple flat shading in CAD)
-// 4. Light count is hard coded so that the compiler can unroll it(HOPEFULLY!)
-
+#version 430 core
+#pragma include flat.geom
 //per primitive color code
-uniform unsigned int perPrimitiveColorCode[];
+// layout (std430, binding = 0) buffer perPrimitiveColorCode
+// {
+//     uint colorCodes[];
+// } pcc_in;
+// uniform uint perPrimitiveColorCode[200];
 //color look up table
-uniform vec3 colorTable[];
-
-#pragma include light.inc.frag
-
-//run once per primitive
-vec3 calcLights(in vec3 position, in vec3 norm, in vec3 pVertColor)
+uniform vec3 colorTable[5];
+layout (std430, binding = 1) buffer input
 {
-    vec3 diffTotal = vec3(0,0,0);
-    vec3 s;
-    float dotSN;
-    vec3 diff;
-    for(int i = 0; i < 4; ++i)
-    {
-        s = normalize(  lights[i].position - position );
-        //for now, light color is white, so don't bother multiplying by 1.0
-        dotSN = max( dot( s, norm ), 0.0 );
-        diff = diffuse * dotSN;
-        diffTotal += diff;
-    }
-
-    return (ambient + diffTotal) * pVertColor;
-}
+    uint ddd[];
+};
 
 void main()
 {
-	// calculate flat normal
-	vec3 oa = gs_in[1].position-gs_in[0].position;
-	vec3 ob = gs_in[2].position-gs_in[0].position;
-	vec3 norm=normalize(cross(oa, ob));
-    unsigned int currentColorCode = perPrimitiveColorCode[gl_PrimitiveID];
-    vec3 currColor = colorTable[currentColorCode];
-	for(int i=0; i<3; i++){
-        //return vtx normal or face normal
-        gl_Position = gl_in[i].gl_Position;
-        vec3 color = calcLights( gs_in[i].position, norm, currColor);
-        VertexColor = color;
-        ModelPosition =  vec3( inverseModelMatrix * vec4( gs_in[i].position, 1.0 ) );
-		EmitVertex();
-	}
-    EndPrimitive();
+    if(ddd[0] == 2u)
+    {
+        // calculate flat normal
+        vec3 norm = calcNorm();
+        // uint currentColorCode = perPrimitiveColorCode[gl_PrimitiveID];
+        // uint currentColorCode = perPrimitiveColorCode[1];
+
+        // uint currentColorCode =  pcc_in.colorCodes[0];
+        // int currentColorCode = 0;
+
+
+        // uint currentColorCode = 0u;
+
+        //vec3 currColor = vec3(0.5, 0.5, 0.5);
+        vec3 currColor = colorTable[0];
+        for(int i=0; i<3; i++){
+            //return vtx normal or face normal
+            gl_Position = gl_in[i].gl_Position;
+            vec3 color = calcLights( gs_in[i].position, norm, currColor);
+            VertexColor = color;
+            EmitVertex();
+        }
+        EndPrimitive();
+    }
+
 }

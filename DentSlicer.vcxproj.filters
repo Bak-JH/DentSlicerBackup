@@ -1047,7 +1047,8 @@
     <None Include="shaders\singleColor.geom">
       <Filter>Resource Files</Filter>
     </None>
-    <None Include="shaders\singleColorImpl.geom">
+    <None Include="icon-32.ico" />
+    <None Include="shaders\flat.geom">
       <Filter>Resource Files</Filter>
     </None>
   </ItemGroup>

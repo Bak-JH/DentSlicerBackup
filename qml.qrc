@@ -56,6 +56,6 @@
         <file>shaders/light.inc.frag</file>
         <file>shaders/perPrimitive.geom</file>
         <file>shaders/singleColor.geom</file>
-        <file>shaders/singleColorImpl.geom</file>
+        <file>shaders/flat.geom</file>
     </qresource>
 </RCC>
