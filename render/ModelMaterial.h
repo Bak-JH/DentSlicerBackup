@@ -10,6 +10,8 @@
 #include <Qt3DRender/qrenderpass.h>
 #include <Qt3DRender/qgraphicsapifilter.h>
 #include <QOpenGLShader>
+#include <QBuffer>
+
 #include "Color.h"
 
 namespace Hix
@@ -31,11 +33,11 @@ namespace Hix
 			ModelMaterial();
 			virtual ~ModelMaterial();
 
-			//state machine
+			void setPerPrimitiveColorSSBO(Qt3DRender::QBuffer& buffer);
 			void setDiffuse(const QColor& diffuse);
 			void setAmbient(const QColor& ambient);
-			void addParameter(const std::string& key);
-			void removeParameter(const std::string& key);
+			void addParameterWithKey(const std::string& key);
+			void removeParameterWithKey(const std::string& key);
 			void setParameterValue(const std::string& key, const QVariant& value);
 			void changeMode(ShaderMode mode);
 			ShaderMode shaderMode()const;
