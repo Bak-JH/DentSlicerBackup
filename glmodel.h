@@ -25,6 +25,7 @@
 #include "DentEngine/src/configuration.h"
 #include "input/raycastcontroller.h"
 #include "input/Draggable.h"
+#include "render/ModelMaterial.h"
 #define MAX_BUF_LEN 2000000
 
 using namespace Qt3DCore;
@@ -130,11 +131,7 @@ public:
 
 
     bool appropriately_rotated=false;
-	QPhongMaterial* m_meshMaterial;
-    QPerVertexColorMaterial *m_meshVertexMaterial;
-    QMaterial *m_layerMaterial;
-    QParameter *m_layerMaterialHeight;
-    QParameter *m_layerMaterialRaftHeight;
+	Hix::Render::ModelMaterial m_meshMaterial;
     //QVector3D m_translation;
 
     // feature hollowshell
@@ -180,7 +177,15 @@ public:
 	QTime getNextTime();
 
     // changeColor
-    void changecolor(int mode); //0 default, 1 selected, 2 outofarea
+	enum ModelColor
+	{
+		None = -1,
+		Default = 0,
+		Selected,
+		OutOfBound,
+		LayerMode
+	};
+    void changecolor(ModelColor mode); //0 default, 1 selected, 2 outofarea
 
     void setSupportAndRaft();
 
@@ -286,7 +291,6 @@ private:
 
     void onTimerUpdate();
     void removeLayerViewComponents();
-    void generateLayerViewMaterial();
 	void setMesh(Hix::Engine3D::Mesh* mesh);
 	void updateMesh(Hix::Engine3D::Mesh* mesh);
 	void appendMesh(Hix::Engine3D::Mesh* mesh);
