@@ -13,11 +13,8 @@
 //#define _STRICT_DEBUG
 
 #endif
-
-#include "qmlmanager.h"
 #include <Qt3DCore>
 #include <qquickitem.h>
-#include "lights.h"
 #include <ctype.h>
 #include <QCoreApplication>
 #include <QTextStream>
@@ -25,7 +22,9 @@
 #include <feature/generatesupport.h>
 #include <feature/generateraft.h>
 #include <exception>
+#include "qmlmanager.h"
 #include "utils/utils.h"
+#include "lights.h"
 using namespace Hix::Input;
 using namespace Hix::UI;
 QmlManager::QmlManager(QObject *parent) : QObject(parent)
@@ -857,7 +856,7 @@ bool QmlManager::multipleModelSelected(int ID){
             // do unselect model
 
             it = selectedModels.erase(it);
-            target->changecolor(0);
+            target->changecolor(GLModel::ModelColor::Default);
             target->checkPrintingArea();
             (*it)->inactivateFeatures();
             QMetaObject::invokeMethod(partList, "unselectPartByModel", Q_ARG(QVariant, target->ID));
@@ -906,8 +905,7 @@ bool QmlManager::multipleModelSelected(int ID){
 	selectedModels.insert(target);
 	_lastSelected = target;
     connectHandlers(target);
-    target->changecolor(3);
-    target->changecolor(1);
+    target->changecolor(GLModel::ModelColor::Selected);
     qDebug() << "multipleModelSelected invoke";
     QMetaObject::invokeMethod(partList, "selectPartByModel", Q_ARG(QVariant, target->ID));
     QMetaObject::invokeMethod(yesno_popup, "addPart", Q_ARG(QVariant, target->getFileName(target->filename.toStdString().c_str())), Q_ARG(QVariant, target->ID));
@@ -961,7 +959,7 @@ void QmlManager::lastModelSelected(){
     /* remove all elements from the list */
     for (auto it = selectedModels.begin() ; it != selectedModels.end() ; ++it) {
         /* it is simillar to selectModel() */
-        (*it)->changecolor(0);
+        (*it)->changecolor(GLModel::ModelColor::Default);
         (*it)->checkPrintingArea();
         (*it)->inactivateFeatures();
         QMetaObject::invokeMethod(partList, "unselectPartByModel", Q_ARG(QVariant, (*it)->ID));
@@ -1020,7 +1018,7 @@ void QmlManager::modelSelected(int ID){
             if (*it == target) {
 				modelAlreadySelected = true;
             }
-            (*it)->changecolor(0);
+            (*it)->changecolor(GLModel::ModelColor::Default);
             (*it)->checkPrintingArea();
             (*it)->inactivateFeatures();
             QMetaObject::invokeMethod(partList, "unselectPartByModel", Q_ARG(QVariant, (*it)->ID));
@@ -1066,8 +1064,7 @@ void QmlManager::modelSelected(int ID){
 		_lastSelected = target;
 		connectHandlers(target);
 
-		target->changecolor(3);
-		target->changecolor(1);
+		target->changecolor(GLModel::ModelColor::Selected);
 		qDebug() << "modelSelected invoke";
 		QMetaObject::invokeMethod(partList, "selectPartByModel", Q_ARG(QVariant, target->ID));
 		QMetaObject::invokeMethod(yesno_popup, "addPart", Q_ARG(QVariant, 
@@ -2126,7 +2123,7 @@ QObject* FindItemByName(QQmlApplicationEngine* engine, const QString& name)
 void QmlManager::unselectPartImpl(GLModel* target)
 {
 	QMetaObject::invokeMethod(partList, "unselectPartByModel", Q_ARG(QVariant, target->ID));
-    target->changecolor(0);
+    target->changecolor(GLModel::ModelColor::Default);
     target->checkPrintingArea();
     target->inactivateFeatures();
     disconnectHandlers(target);
