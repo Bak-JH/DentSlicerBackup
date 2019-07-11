@@ -919,6 +919,7 @@
     </None>
     <None Include="icon-32.ico" />
     <None Include="icon-32.ico" />
+    <None Include="icon-32.ico" />
   </ItemGroup>
   <ItemGroup>
     <None Include="DentSlicer.rc">
