@@ -80,8 +80,11 @@ int main(int argc, char **argv)
     qmlManager->initializeUI(&engine);
     splash->close();
 
-    qmlManager->mainWindow->setProperty("visible",true);
-    //qmlManager->loginWindow->setProperty("visible",true);
+#if  defined(QT_DEBUG) || defined(_DEBUG)
+	qmlManager->mainWindow->setProperty("visible", true);
+#else
+	qmlManager->loginWindow->setProperty("visible", true);
+#endif
 
     QSurfaceFormat format;
     format.setMajorVersion(3);
