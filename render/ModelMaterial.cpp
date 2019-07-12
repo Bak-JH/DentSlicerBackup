@@ -51,7 +51,7 @@ Hix::Render::ModelMaterial::ModelMaterial():
 	_renderPass.addRenderState(depthTest);
 	_renderTechnique.addRenderPass(&_renderPass);
 	_renderTechnique.graphicsApiFilter()->setApi(QGraphicsApiFilter::OpenGL);
-	_renderTechnique.graphicsApiFilter()->setMajorVersion(3);
+	_renderTechnique.graphicsApiFilter()->setMajorVersion(4);
 	_renderTechnique.graphicsApiFilter()->setMinorVersion(3);
 	_renderTechnique.graphicsApiFilter()->setProfile(QGraphicsApiFilter::CoreProfile);
 	_filterKey.setName(QStringLiteral("renderingStyle"));
@@ -75,19 +75,6 @@ Hix::Render::ModelMaterial::ModelMaterial():
 	colors << Hix::Render::Colors::SelectedFace;
 	colors << Hix::Render::Colors::Support;
 	colors << Hix::Render::Colors::Raft;
-	QVariantList TTT = QVariantList();
-	uint testInt = 1u;
-	TTT << testInt;
-	TTT << testInt;
-	TTT << testInt;
-	TTT << testInt;
-	TTT << testInt;
-	TTT << testInt;
-
-	QVariant v(1);
-
-
-
 
 	//, primitiveColorBuffer(Qt3DRender::QBuffer::ShaderStorageBuffer, this)
 
@@ -100,7 +87,7 @@ Hix::Render::ModelMaterial::ModelMaterial():
 	size_t idx = 0;
 	for (uint i = 0; i < 4; ++i)
 	{
-		rawUintArray[i] = 2u;
+		rawUintArray[i] = 1u;
 	}
 	buff->setData(testData);
 	//_perPrimitiveColorParameter.setValue(QVariant::fromValue(buffer.id()));
@@ -108,18 +95,14 @@ Hix::Render::ModelMaterial::ModelMaterial():
 	//_effect.addParameter(&_perPrimitiveColorParameter);
 	//addParameter(new Qt3DRender::QParameter("perPrimitiveColorCode", QVariant::fromValue(buffer.data()), this));
 
-	auto param = new QParameter(this);
-	param->setName(QStringLiteral("input"));
-	param->setValue(QVariant::fromValue(buff->id()));
-
-	_renderPass.addParameter(param);
+	_perPrimitiveColorParameter.setName(QStringLiteral("input"));
+	_perPrimitiveColorParameter.setValue(QVariant::fromValue(buff->id()));
+	_renderPass.addParameter(&_perPrimitiveColorParameter);
 
 
 
 
 
-	//_perPrimitiveColorParameter.setName(QStringLiteral("perPrimitiveColorCode[0]"));
-	//_perPrimitiveColorParameter.setValue(TTT);
 	_colorTableParameter.setName(QStringLiteral("colorTable[0]"));
 	_colorTableParameter.setValue(colors);
 	_singleColorParameter.setName(QStringLiteral("singleColor"));

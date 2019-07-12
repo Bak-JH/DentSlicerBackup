@@ -15,29 +15,28 @@ layout (std430, binding = 1) buffer input
 
 void main()
 {
-    if(ddd[0] == 2u)
-    {
-        // calculate flat normal
-        vec3 norm = calcNorm();
-        // uint currentColorCode = perPrimitiveColorCode[gl_PrimitiveID];
-        // uint currentColorCode = perPrimitiveColorCode[1];
 
-        // uint currentColorCode =  pcc_in.colorCodes[0];
-        // int currentColorCode = 0;
+    // calculate flat normal
+    vec3 norm = calcNorm();
+    // uint currentColorCode = perPrimitiveColorCode[gl_PrimitiveID];
+    // uint currentColorCode = perPrimitiveColorCode[1];
+
+    // uint currentColorCode =  pcc_in.colorCodes[0];
+    // int currentColorCode = 0;
 
 
-        // uint currentColorCode = 0u;
+    uint currentColorCode = ddd[0];
 
-        //vec3 currColor = vec3(0.5, 0.5, 0.5);
-        vec3 currColor = colorTable[0];
-        for(int i=0; i<3; i++){
-            //return vtx normal or face normal
-            gl_Position = gl_in[i].gl_Position;
-            vec3 color = calcLights( gs_in[i].position, norm, currColor);
-            VertexColor = color;
-            EmitVertex();
-        }
-        EndPrimitive();
+    //vec3 currColor = vec3(0.5, 0.5, 0.5);
+    vec3 currColor = colorTable[currentColorCode];
+    for(int i=0; i<3; i++){
+        //return vtx normal or face normal
+        gl_Position = gl_in[i].gl_Position;
+        vec3 color = calcLights( gs_in[i].position, norm, currColor);
+        VertexColor = color;
+        EmitVertex();
     }
+    EndPrimitive();
+    
 
 }
