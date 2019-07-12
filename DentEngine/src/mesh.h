@@ -256,8 +256,12 @@ namespace Hix
 
 		private:
 			/********************** Helper Functions **********************/
-
+            //set twin relationship for this edge as well as matching twin edge
+            ///@post: assume this edge is newly added
 			void setTwins(HalfEdgeItr edge);
+            //set twin relationship for this edge only
+            void setTwinOneSided(HalfEdgeItr edge);
+
 			VertexItr addOrRetrieveFaceVertex(QVector3D v, QVector3D color);
 			void removeVertexHash(QVector3D pos);
 			VertexConstItr getSimilarVertex(uint32_t digest, QVector3D v);
