@@ -20,8 +20,6 @@ namespace SVGexporter
 {
 
     QString exportSVG(Slices& shellSlices, Slices& supportSlices, Slices& raftSlices, QString outfoldername);
-
-
 };
 
 #endif // SVGEXPORTER_H
