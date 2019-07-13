@@ -349,6 +349,9 @@
     <ClInclude Include="unitTest\catch.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="DentEngine\src\polyclipping\QDebugPolyclipping.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="debug\moc_predefs.h.cbt">
@@ -917,6 +920,7 @@
     <None Include="shaders\light.inc.frag">
       <Filter>Resource Files</Filter>
     </None>
+    <None Include="icon-32.ico" />
     <None Include="icon-32.ico" />
     <None Include="icon-32.ico" />
   </ItemGroup>
