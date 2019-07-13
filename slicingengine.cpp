@@ -77,8 +77,7 @@ Slicer* SlicingEngine::slice(QVariant cfg, Mesh* shellMesh, Mesh* supportMesh, M
 
 
     // Export to SVG
-    SVGexporter* exporter = new SVGexporter();
-    QString export_info = exporter->exportSVG(shellSlices, supportSlices, raftSlices, filename+"_export");
+    QString export_info = SVGexporter::exportSVG(shellSlices, supportSlices, raftSlices, filename+"_export");
 
     // 승환 100%
     qmlManager->setProgress(1);

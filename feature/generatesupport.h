@@ -17,7 +17,13 @@ public:
     bool supportInterPoint = false;
     float radius = scfg->support_radius_min; // support tip radius 역할
 };
-
+namespace Hix
+{
+	namespace Debug
+	{
+		QDebug operator<< (QDebug d, const OverhangPoint& obj);
+	}
+}
 class GenerateSupport
 {
 public:
@@ -35,6 +41,8 @@ public:
     float z_min_minimal_diff = scfg->layer_height/2;
     float minLength = scfg->support_base_height+1;
 
+	//set minimum position for support so that it overlaps little bit(layer thickness)
+	float getSupportZMin(const Mesh* mesh)const;
     Mesh* generateStraightSupport(Mesh* shellmesh);
     Mesh* generateSupport(Mesh* shellMesh);
 

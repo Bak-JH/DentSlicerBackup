@@ -117,6 +117,7 @@ INCLUDEPATH += $$MINGW_COMPILED_BOOST_INCLUDE
 #TRANSLATIONS += lang_ko.ts
 
 HEADERS += \
+    DentEngine/src/polyclipping/QDebugPolyclipping.h \
     boundingbox.h \
     common/Indexedlist.h \
     common/IteratorWrapper.h \
