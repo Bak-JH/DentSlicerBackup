@@ -15,7 +15,6 @@
 #define cos100 -0.17364818
 #define cos150 -0.8660254
 #define FZERO 0.00001f
-using namespace ClipperLib;
 
 namespace Hix
 {
@@ -125,7 +124,7 @@ namespace Hix
 
 		class Path3D : public std::vector<MeshVertex> {
 		public:
-			Path projection;
+			ClipperLib::Path projection;
 			std::vector<Path3D> inner;
 			std::vector<Path3D> outer;
 		};
@@ -183,10 +182,10 @@ namespace Hix
 
 
 			/********************** Path Generation Functions **********************/
-			static void addPoint(float x, float y, Path* path);
-			Paths3D intersectionPaths(Path Contour, Plane target_plane)const;
+			static void addPoint(float x, float y, ClipperLib::Path* path);
+			Paths3D intersectionPaths(ClipperLib::Path Contour, Plane target_plane)const;
 			Path3D intersectionPath(Plane base_plane, Plane target_plane)const;
-			Path intersectionPath(MeshFace mf, float z)const;
+			ClipperLib::Path intersectionPath(MeshFace mf, float z)const;
 
 			/********************** Helper Functions **********************/
 			static void updateMinMax(QVector3D v, std::array<float, 6>& minMax);
@@ -285,18 +284,18 @@ namespace Hix
 
 		uint32_t vertexHash(QVector3D v);
 
-		QHash<uint32_t, Path>::iterator findSmallestPathHash(QHash<uint32_t, Path> pathHash);
+		QHash<uint32_t, ClipperLib::Path>::iterator findSmallestPathHash(QHash<uint32_t, ClipperLib::Path> pathHash);
 
 		// construct closed contour using segments created from identify step
-		Paths contourConstruct(Paths);
+		ClipperLib::Paths contourConstruct(ClipperLib::Paths);
 		Paths3D contourConstruct3D(Paths3D hole_edges);
 
-		bool intPointInPath(IntPoint ip, Path p);
+		bool intPointInPath(ClipperLib::IntPoint ip, ClipperLib::Path p);
 		bool pathInpath(Path3D target, Path3D in);
 
 		std::vector<std::array<QVector3D, 3>> interpolate(Path3D from, Path3D to);
 
-		uint32_t intPoint2Hash(IntPoint u);
+		uint32_t intPoint2Hash(ClipperLib::IntPoint u);
 		uint32_t Vertex2Hash(MeshVertex& u);
 
 	};

@@ -1,10 +1,52 @@
 #include "svgexporter.h"
+#include "slicer.h"
+#include "polyclipping/clipper/clipper.hpp"
+using namespace ClipperLib;
 
 int origin_x;
 int origin_y;
 int origin_z;
 
-QString SVGexporter::exportSVG(Slices shellSlices, Slices supportSlices, Slices raftSlices, QString outfoldername){
+#if defined(_DEBUG) || defined(QT_DEBUG)
+#define _DEBUG_SVG
+#endif
+
+
+#ifdef _DEBUG_SVG
+using namespace Hix::Debug;
+void logSlices(const Slices& slices)
+{
+	qDebug() << slices;
+
+}
+#endif
+namespace SVGexporterPrivate
+{
+	void parsePolyTreeAndWrite(ClipperLib::PolyNode* pn, std::ofstream& outfile);
+	void writePolygon(std::ofstream& outfile, ClipperLib::Path& contour);
+	void writePolygon(std::ofstream& outfile, ClipperLib::PolyNode* contour);
+	void writeGroupHeader(std::ofstream& outfile, int layer_idx, float z);
+	void writeGroupFooter(std::ofstream& outfile);
+	void writeHeader(std::ofstream& outfile);
+	void writeFooter(std::ofstream& outfile);
+}
+
+
+QString SVGexporter::exportSVG(Slices& shellSlices, Slices& supportSlices, Slices& raftSlices, QString outfoldername){
+	using namespace SVGexporterPrivate;
+
+#ifdef _DEBUG_SVG
+	qDebug() << "logging slices";
+	qDebug() << "shellSlices entireClass : ";
+	logSlices(shellSlices);
+	qDebug() << "supportSlices entireClass : ";
+	logSlices(supportSlices);
+	qDebug() << "raftSlices entireClass : ";
+	logSlices(raftSlices);
+#endif
+
+
+
     qDebug() << "export svg at "<< outfoldername;
     qDebug() << "shellSlices : " << shellSlices.size() << "supportSlices : " << supportSlices.size();
     QDir dir(outfoldername);
@@ -186,7 +228,7 @@ QString SVGexporter::exportSVG(Slices shellSlices, Slices supportSlices, Slices 
 
 
 
-void SVGexporter::parsePolyTreeAndWrite(PolyNode* pn, std::ofstream& outfile){
+void SVGexporterPrivate::parsePolyTreeAndWrite(PolyNode* pn, std::ofstream& outfile){
     writePolygon(outfile, pn);
     for (int i=0; i<pn->ChildCount(); i++){
         PolyNode* new_pn = pn->Childs[i];
@@ -201,7 +243,7 @@ void SVGexporter::parsePolyTreeAndWrite(PolyNode* pn, std::ofstream& outfile){
 
 }
 
-void SVGexporter::writePolygon(std::ofstream& outfile, PolyNode* contour){
+void SVGexporterPrivate::writePolygon(std::ofstream& outfile, PolyNode* contour){
     outfile << "      <polygon contour:type=\"contour\" points=\"";
     for (IntPoint point: contour->Contour){
         outfile << std::fixed << (float)(point.X)*scfg->pixel_per_mm/(scfg->resolution*scfg->contraction_ratio) + (scfg->resolution_x/2)<< "," << std::fixed << scfg->resolution_y/2 - (float)(point.Y)*scfg->pixel_per_mm/(scfg->resolution*scfg->contraction_ratio) << " "; // doesn't need 100 actually
@@ -216,7 +258,7 @@ void SVGexporter::writePolygon(std::ofstream& outfile, PolyNode* contour){
     }
 }
 
-void SVGexporter::writePolygon(std::ofstream& outfile, Path contour){
+void SVGexporterPrivate::writePolygon(std::ofstream& outfile, ClipperLib::Path& contour){
     outfile << "      <polygon contour:type=\"contour\" points=\"";
     for (IntPoint point: contour){
         outfile << std::fixed << (float)(point.X)*scfg->pixel_per_mm/(scfg->resolution*scfg->contraction_ratio) + (scfg->resolution_x/2) << "," << std::fixed << scfg->resolution_y/2 - (float)(point.Y)*scfg->pixel_per_mm/(scfg->resolution*scfg->contraction_ratio)<< " "; // doesn't need 100 actually
@@ -227,19 +269,19 @@ void SVGexporter::writePolygon(std::ofstream& outfile, Path contour){
     outfile << "\" style=\"fill: white\" />\n";
 }
 
-void SVGexporter:: writeGroupHeader(std::ofstream& outfile, int layer_idx, float z){
+void SVGexporterPrivate:: writeGroupHeader(std::ofstream& outfile, int layer_idx, float z){
     outfile << "    <g id=\"layer" << layer_idx << "\" contour:z=\""<< std::fixed << z << "\">\n";
 }
 
-void SVGexporter:: writeGroupFooter(std::ofstream& outfile){
+void SVGexporterPrivate:: writeGroupFooter(std::ofstream& outfile){
     outfile << "    </g>\n";
 }
 
-void SVGexporter::writeHeader(std::ofstream& outfile){
+void SVGexporterPrivate::writeHeader(std::ofstream& outfile){
     outfile << "<svg width='" << scfg->resolution_x << "' height='" << scfg->resolution_y << "' xmlns='http://www.w3.org/2000/svg' xmlns:contour='http://hix.co.kr' style='background-color: black;'>\n";
 }
 
-void SVGexporter::writeFooter(std::ofstream& outfile){
+void SVGexporterPrivate::writeFooter(std::ofstream& outfile){
     outfile << "</svg>";
 }
 
