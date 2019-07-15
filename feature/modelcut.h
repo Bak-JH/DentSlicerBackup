@@ -10,6 +10,7 @@
 #include <Qt3DInput>
 #include <QEntity>
 
+
 class modelcut : public QObject {
     Q_OBJECT
 public:
@@ -29,10 +30,10 @@ public:
     Qt3DCore::QTransform *planeTransform[2];
     Qt3DExtras::QPhongAlphaMaterial *planeMaterial;
 
-    static bool isLeftToPlane(Plane plane, QVector3D position);
+    static bool isLeftToPlane(Hix::Engine3D::Plane plane, QVector3D position);
 
-    static void interpolate(Mesh* mesh, Path3D contour1, Path3D contour2);
-    static void cutAway(Mesh* leftMesh, Mesh* rightMesh, Mesh* mesh, std::vector<QVector3D> cuttingPoints, int cutFillMode);
+    static void interpolate(Hix::Engine3D::Mesh* mesh, Hix::Engine3D::Path3D contour1, Hix::Engine3D::Path3D contour2);
+    static void cutAway(Hix::Engine3D::Mesh* leftMesh, Hix::Engine3D::Mesh* rightMesh, Hix::Engine3D::Mesh* mesh, std::vector<QVector3D> cuttingPoints, int cutFillMode);
 
 	Path _convexHull;
     int numPoints;
@@ -52,11 +53,11 @@ public slots:
     void getSliderSignal(double value);
 };
 
-bool isLeftToPlane(Plane plane, QVector3D position);
+bool isLeftToPlane(Hix::Engine3D::Plane plane, QVector3D position);
 
-void interpolate(Mesh* mesh, Path3D contour1, Path3D contour2);
-void bisectModelByPlane(Mesh* leftMesh, Mesh* rightMesh, Mesh* mesh, Plane plane, int cutFillMode);
-void cutAway(Mesh* leftMesh, Mesh* rightMesh, Mesh* mesh, std::vector<QVector3D> cuttingPoints, int cutFillMode);
+void interpolate(Hix::Engine3D::Mesh* mesh, Hix::Engine3D::Path3D contour1, Hix::Engine3D::Path3D contour2);
+void bisectModelByPlane(Hix::Engine3D::Mesh* leftMesh, Hix::Engine3D::Mesh* rightMesh, Hix::Engine3D::Mesh* mesh, Hix::Engine3D::Plane plane, int cutFillMode);
+void cutAway(Hix::Engine3D::Mesh* leftMesh, Hix::Engine3D::Mesh* rightMesh, Hix::Engine3D::Mesh* mesh, std::vector<QVector3D> cuttingPoints, int cutFillMode);
 
 
 #endif // MODELCUT_H
