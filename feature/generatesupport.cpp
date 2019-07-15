@@ -47,7 +47,7 @@ GenerateSupport::GenerateSupport()
 
 float GenerateSupport::getSupportZMin(const Mesh* mesh)const
 {
-	return mesh->z_min() - scfg->support_base_height - scfg->layer_height;
+	return mesh->z_min() - scfg->support_base_height;
 }
 
 Mesh* GenerateSupport::generateStraightSupport(Mesh* shellmesh){
