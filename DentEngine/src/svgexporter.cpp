@@ -50,7 +50,7 @@ QString SVGexporter::exportSVG(Slices& shellSlices, Slices& supportSlices, Slice
 
 
     qDebug() << "export svg at "<< outfoldername;
-    qDebug() << "shellSlices : " << shellSlices.size() << "supportSlices : " << supportSlices.size();
+    qDebug() << "shellSlices : " << shellSlices.size() << "supportSlices : " << supportSlices.size() << "graftSlices : " << raftSlices.size();
     QDir dir(outfoldername);
     if (!dir.exists()) {
         dir.mkpath(".");
@@ -177,7 +177,6 @@ QString SVGexporter::exportSVG(Slices& shellSlices, Slices& supportSlices, Slice
             parsePolyTreeAndWrite(shellSlice_polytree.Childs[j], outfile);
         }
 
-        qDebug() << "support slicessize : " << supportSlices.size() << int(supportSlices.size()) - support_base_layer_cnt << (supportSlices.size() - support_base_layer_cnt > i);
         // write support slices
         if (int(supportSlices.size())-support_base_layer_cnt > i){
 
