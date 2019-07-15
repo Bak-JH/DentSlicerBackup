@@ -55,6 +55,14 @@ void QmlManager::initializeUI(QQmlApplicationEngine* e){
 	_rotateWidget.setParent(total);
 	_rayCastController.addLayer(&_rotateWidget.layer);
 	_rayCastController.addHoverLayer(&_rotateWidget.layer);
+	hideRotateSphere();
+
+	//move widget
+	_moveWidget.setParent(total);
+	_rayCastController.addLayer(&_moveWidget.layer);
+	_rayCastController.addHoverLayer(&_moveWidget.layer);
+	hideMoveArrow();
+
     // model move componetns
     moveButton = FindItemByName(engine, "moveButton");
     movePopup = FindItemByName(engine, "movePopup");
@@ -65,7 +73,6 @@ void QmlManager::initializeUI(QQmlApplicationEngine* e){
 
     // model rotate components
     rotatePopup = FindItemByName(engine, "rotatePopup");
-    hideRotateSphere();
     // model rotate popup codes
     QObject::connect(rotatePopup, SIGNAL(runFeature(int,int,int,int)),this, SLOT(modelRotateByNumber(int,int,int,int)));
     QObject::connect(rotatePopup, SIGNAL(openRotate()), this, SLOT(openRotate()));
@@ -148,11 +155,6 @@ void QmlManager::initializeUI(QQmlApplicationEngine* e){
     //exportButton = FindItemByName(engine, "exportBtn");
     exportOKButton = FindItemByName(engine, "exportOKBtn");
 
-	//move widget
-	_moveWidget.setParent(total);
-	_rayCastController.addLayer(&_moveWidget.layer);
-	_rayCastController.addHoverLayer(&_moveWidget.layer);
-    hideMoveArrow();
 
     QObject *moveButton = FindItemByName(engine, "moveButton");
     QObject::connect(mttab,SIGNAL(runGroupFeature(int,QString, double, double, double,QVariant)),this,SLOT(runGroupFeature(int,QString, double, double, double, QVariant)));
