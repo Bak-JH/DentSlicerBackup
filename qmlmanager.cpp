@@ -1667,9 +1667,6 @@ void QmlManager::runGroupFeature(int ftrType, QString state, double arg1, double
         Mesh* mergedShellMesh = ste->mergeSelectedModels();//ste->mergeModels(qmlManager->selectedModels);
         //GLModel* mergedModel = new GLModel(mainWindow, models, mergedMesh, "temporary", false);
 
-        qDebug() << "1111" << mergedShellMesh;
-        qDebug() << "1111" << mergedShellMesh->x_max() << mergedShellMesh->x_min();
-
         // generate support
         GenerateSupport generatesupport;
         Mesh* mergedSupportMesh = nullptr;
@@ -1678,15 +1675,12 @@ void QmlManager::runGroupFeature(int ftrType, QString state, double arg1, double
             mergedSupportMesh = generatesupport.generateSupport(mergedShellMesh);
         }
 
-        qDebug() << "2222";
-
         // generate raft according to support structure
         GenerateRaft generateraft;
         Mesh* mergedRaftMesh = nullptr;
         if (scfg->raft_type != 0){
             mergedRaftMesh = generateraft.generateRaft(mergedShellMesh, generatesupport.overhangPoints);
         }
-        qDebug() << "3333";
         // need to generate support, raft
 
         //se->slice(data, mergedMesh, fileName);
