@@ -1,17 +1,13 @@
 #ifndef SLICER_H
 #define SLICER_H
 #include "mesh.h"
-#include "polyclipping/clipper/clipper.hpp"
 #include "configuration.h"
 //#include "support.h"
 //#include "infill.h"
 #include <list>
 #include <QThread>
 #include <QDebug>
-#include "polyclipping/clip2tri/clip2tri.h"
-
 using namespace ClipperLib;
-using namespace c2t;
 using namespace Hix::Engine3D;
 class OverhangPoint;
 
@@ -45,6 +41,14 @@ public:
     void containmentTreeConstruct();
 
 };
+namespace Hix
+{
+	namespace Debug
+	{
+		QDebug operator<< (QDebug d, const Slice& obj);
+		QDebug operator<< (QDebug d, const Slices& obj);
+	}
+}
 
 class Slicer : public QThread
 {

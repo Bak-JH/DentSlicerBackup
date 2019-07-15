@@ -12,6 +12,7 @@
 using namespace Utils::Math;
 using namespace Hix;
 using namespace Hix::Engine3D;
+using namespace ClipperLib;
 
 
 //half edge circulator
@@ -575,7 +576,7 @@ Mesh* Mesh::saveUndoState(const Qt3DCore::QTransform& transform)
 /********************** Path Generation Functions **********************/
 
 // converts float point to int in microns
-void Mesh::addPoint(float x, float y, Path *path)
+void Mesh::addPoint(float x, float y, ClipperLib::Path *path)
 {
     IntPoint ip;
     ip.X = round(x*scfg->resolution);
@@ -584,10 +585,10 @@ void Mesh::addPoint(float x, float y, Path *path)
     path->push_back(ip);
 }
 
-float minDistanceToContour(QVector3D from, Path contour){
+float minDistanceToContour(QVector3D from, ClipperLib::Path contour){
     float min_distance = 0;
     for (int i=0; i<contour.size()-1; i++){
-        Path temp_path;
+		ClipperLib::Path temp_path;
         temp_path.push_back(contour[i]);
         temp_path.push_back(contour[i+1]);
         QVector3D int2qv3 = QVector3D(((float)contour[i].X)/scfg->resolution, ((float)contour[i].Y)/scfg->resolution, from.z());

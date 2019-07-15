@@ -4,9 +4,41 @@
 #include <QTextStream>
 #include "qmlmanager.h"
 #include "../../utils/mathutils.h"
+#include "polyclipping/QDebugPolyclipping.h"
 
 using namespace ClipperLib;
+using namespace Hix::Debug;
+QDebug Hix::Debug::operator<< (QDebug d, const Slice& obj) {
+	d << "z: " << obj.z;
+	d << "polytree: " << obj.polytree;
+	d << "overhang_region: " << obj.overhang_region;
+	d << "critical_overhang_region: " << obj.critical_overhang_region;
 
+	d << "outershell: " << obj.outershell;
+	d << "infill: " << obj.infill;
+	d << "support: " << obj.support;
+	d << "Area: " << obj.Area;
+
+
+	d << "slices: ";
+	for (const auto& each : obj)
+	{
+		d << each;
+	}
+	return d;
+}
+QDebug Hix::Debug::operator<< (QDebug d, const Slices& obj) {
+	d << "mesh: " << obj.mesh;
+	d << "raft_points: " << obj.raft_points;
+	d << "overhang_regions: " << obj.overhang_regions;
+	d << "overhang_points: " << obj.overhang_points;
+	d << "slices: ";
+	for (const auto& each : obj)
+	{
+		d << each;
+	}
+	return d;
+}
 bool Slicer::slice(Mesh* mesh, Slices* slices){
     slices->mesh = mesh;
 
