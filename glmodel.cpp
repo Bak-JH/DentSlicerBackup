@@ -1784,8 +1784,6 @@ void GLModel::dragStarted(Hix::Input::MouseEventData& e, const Qt3DRender::QRayC
 	qmlManager->moveButton->setProperty("state", "active");
 	qmlManager->setClosedHandCursor();
 	saveUndoState();
-	qmlManager->hideMoveArrow();
-	qDebug() << "hiding move arrow";
 	isMoved = true;
 }
 

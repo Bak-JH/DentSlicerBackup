@@ -19,22 +19,23 @@ namespace Hix
 {
 	namespace UI
 	{
+		enum WidgetMode
+		{
+			None = 0,
+			Move,
+			Rotate
+		};
 		class Widget3DManager
 		{
 		public:
-			enum WidgetMode
-			{
-				None = 0,
-				Move,
-				Rotate
-			};
-			Widget3DManager(Qt3DCore::QEntity* qParent, Input::RayCastController* controller);
+			void initialize(Qt3DCore::QEntity* qParent, Input::RayCastController* controller);
 			void setWidgetMode(WidgetMode mode);
+			void updatePosition();
 		private:
-			WidgetMode _currMode;
+			WidgetMode _currMode = WidgetMode::None;
 			RotateXYZWidget _rotateWidget;
 			MoveXYZWidget _moveWidget;
-
+			Input::RayCastController* _controller;
 		};
 	}
 }

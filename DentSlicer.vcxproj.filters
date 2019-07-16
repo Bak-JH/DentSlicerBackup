@@ -185,6 +185,9 @@
     <ClCompile Include="lights.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="ui\Widget3DManager.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DentEngine\src\polyclipping\poly2tri\sweep\advancing_front.h">
@@ -351,6 +354,9 @@
     </ClInclude>
     <ClInclude Include="DentEngine\src\polyclipping\QDebugPolyclipping.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ui\Widget3DManager.h">
+      <Filter>Generated Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -920,6 +926,7 @@
     <None Include="shaders\light.inc.frag">
       <Filter>Resource Files</Filter>
     </None>
+    <None Include="icon-32.ico" />
     <None Include="icon-32.ico" />
     <None Include="icon-32.ico" />
     <None Include="icon-32.ico" />

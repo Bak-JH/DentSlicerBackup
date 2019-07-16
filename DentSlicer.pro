@@ -29,6 +29,7 @@ SOURCES += main.cpp \
     ui/MoveXYZWidget.cpp \
     ui/RotateWidget.cpp \
     ui/RotateXYZWidget.cpp \
+    ui/Widget3DManager.cpp \
     utils/quaternionhelper.cpp \
     utils/mathutils.cpp \
     utils/qtriangulator.cpp \
@@ -144,6 +145,7 @@ HEADERS += \
     ui/MoveXYZWidget.h \
     ui/RotateWidget.h \
     ui/RotateXYZWidget.h \
+    ui/Widget3DManager.h \
     unitTest/catch.hpp \
     unitTest/tests/IndexedListTest.h \
     unitTest/tests/TrackedIndexedListTest.h \
