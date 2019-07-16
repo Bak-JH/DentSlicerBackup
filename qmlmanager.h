@@ -20,8 +20,7 @@
 #include "utils/httpreq.h"
 #include <QKeyboardHandler>
 #include "input/raycastcontroller.h"
-#include "ui/RotateXYZWidget.h"
-#include "ui/MoveXYZWidget.h"
+#include "ui/Widget3DManager.h"
 #define VIEW_MODE_OBJECT 0
 #define VIEW_MODE_SUPPORT 1
 #define VIEW_MODE_LAYER 2
@@ -161,10 +160,6 @@ public:
     QString groupFunctionState;
     int groupFunctionIndex;
     float progress = 0;
-    void showRotateSphere();
-    void showMoveArrow();
-    void hideRotateSphere();
-    void hideMoveArrow();
     void initializeUI(QQmlApplicationEngine *e);
     void openModelFile_internal(QString filename);
     void openArrange();
@@ -247,8 +242,7 @@ private:
 
 	//Ray cast
 	Hix::Input::RayCastController _rayCastController;
-	Hix::UI::RotateXYZWidget _rotateWidget;
-	Hix::UI::MoveXYZWidget _moveWidget;
+	Hix::UI::Widget3DManager _widgetManager;
 
 signals:
     void updateModelInfo(int printing_time, int layer, QString xyz, float volume);

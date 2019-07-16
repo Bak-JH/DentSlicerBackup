@@ -84,14 +84,6 @@ void RayCastController::setHoverEnabled(bool isEnabled)
 	if (_hoverEnabled != isEnabled)
 	{
 		_hoverEnabled = isEnabled;
-        if (_hoverEnabled)
-        {
-            _hoverRayCaster.setEnabled(true);
-        }
-        else
-        {
-            _hoverRayCaster.setEnabled(false);
-        }
 	}
 }
 
@@ -161,7 +153,7 @@ void RayCastController::mousePressed(Qt3DInput::QMouseEvent* mouse)
 {
 	if (mouse->button() == Qt3DInput::QMouseEvent::Buttons::LeftButton || mouse->button() == Qt3DInput::QMouseEvent::Buttons::RightButton)
 	{
-		if (!_mouseBusy)
+		if (!_mouseBusy && mousePosInBound(mouse))
 		{
 
 			//no need for mutex, mouse events occur in main thread
@@ -211,7 +203,7 @@ void RayCastController::mouseReleased(Qt3DInput::QMouseEvent* mouse)
 						return;
 
 					bool busy = false;
-					if (!_mouseEvent.position.isNull())
+					if (!_mouseEvent.position.isNull() && mousePosInBound(mouse))
 					{
 						_rayCastMode = RayCastMode::Click;
 						_rayCaster.trigger(_mouseEvent.position);
@@ -238,6 +230,7 @@ void RayCastController::mousePositionChanged(Qt3DInput::QMouseEvent* mouse)
 			{
 				_hoverRaycastBusy = true;
 				_hoverRayCaster.trigger(hoverEvent.position);
+
 			}
 		}
 		if (_mouseBusy)
