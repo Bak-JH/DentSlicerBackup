@@ -6,18 +6,22 @@ GenerateRaft::GenerateRaft()
 
 }
 
+float getRaftTopZ(const Mesh* mesh)
+{
+	return mesh->z_min() - scfg->support_base_height; //adds another layer as a margin
+}
+
 Mesh* GenerateRaft::generateRaft(Mesh* shellmesh, std::vector<OverhangPoint> overhangPoints) {
 
     Mesh* raftMesh = new Mesh();
 
     for (OverhangPoint op : overhangPoints){
         qDebug() << "overhangposition" << op.position;
-        op.position.setZ(shellmesh->z_min()-scfg->support_base_height);
+        op.position.setZ(getRaftTopZ(shellmesh));
         generateKCylinder(raftMesh, op, scfg->raft_thickness);
     }
 
     raftMesh->connectFaces();
-
     qDebug() << "generateRaft Done";
     return raftMesh;
 }

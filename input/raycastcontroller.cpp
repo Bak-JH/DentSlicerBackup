@@ -140,8 +140,6 @@ bool Hix::Input::RayCastController::mousePosInBound(const Qt3DInput::QMouseEvent
 //}
 bool RayCastController::verifyClick()
 {
-	qDebug() << "verifyClick";
-
 	//lock that is to be relinquished
 	std::unique_lock<std::mutex> lk(_clickVerifyMtx);
 	//TODO: spurious wake ups are causing to to failed to timeout often....
@@ -161,9 +159,6 @@ bool RayCastController::verifyClick()
 
 void RayCastController::mousePressed(Qt3DInput::QMouseEvent* mouse)
 {
-	qDebug() << "mousePressed";
-
-
 	if (mouse->button() == Qt3DInput::QMouseEvent::Buttons::LeftButton || mouse->button() == Qt3DInput::QMouseEvent::Buttons::RightButton)
 	{
 		if (!_mouseBusy)
@@ -184,8 +179,6 @@ void RayCastController::mousePressed(Qt3DInput::QMouseEvent* mouse)
 
 void RayCastController::mouseReleased(Qt3DInput::QMouseEvent* mouse)
 {
-	qDebug() << "mouseReleased";
-
 	if (mouse->button() == Qt3DInput::QMouseEvent::Buttons::LeftButton || mouse->button() == Qt3DInput::QMouseEvent::Buttons::RightButton)
 	{
 		_mouseEvent = MouseEventData(mouse);
@@ -238,7 +231,6 @@ void RayCastController::mousePositionChanged(Qt3DInput::QMouseEvent* mouse)
 {
 	if (mousePosInBound(mouse))
 	{
-		qDebug() << "in bound" << mouse->x() << mouse->y();
 		if (_hoverEnabled && !_hoverRaycastBusy)
 		{
 			auto hoverEvent = MouseEventData(mouse);
@@ -273,8 +265,6 @@ void RayCastController::mousePositionChanged(Qt3DInput::QMouseEvent* mouse)
 						{
 							//do drag
 							_rayCastMode = RayCastMode::Drag;
-							qDebug() << "in bound pressed pt" << _pressedPt;
-
 							_rayCaster.trigger(_pressedPt);
 						}
 
