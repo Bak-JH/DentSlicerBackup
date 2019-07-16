@@ -8,6 +8,9 @@
 #include <qmlmanager.h>
 #include <exception>
 #include <unordered_map>
+#include "DentEngine/src/mesh.h"
+using namespace ClipperLib;
+using namespace Hix::Engine3D;
 autoarrange::autoarrange()
 {
 }

@@ -4,6 +4,15 @@
 #include "DentEngine/src/configuration.h"
 #include <QtMath>
 
+QDebug Hix::Debug::operator<< (QDebug d, const OverhangPoint& obj)
+ {
+	d << "position: " << obj.position;
+	d << "topPoint: " << obj.topPoint;
+	d << "meshInterPoint: " << obj.meshInterPoint;
+	d << "supportInterPoint: " << obj.supportInterPoint;
+	d << "radius: " << obj.radius;
+	return d;
+}
 OverhangPoint::OverhangPoint()
 {
     position = QVector3D(99999, 99999, 99999);
@@ -36,11 +45,16 @@ GenerateSupport::GenerateSupport()
 
 }
 
+float GenerateSupport::getSupportZMin(const Mesh* mesh)const
+{
+	return mesh->z_min() - scfg->support_base_height;
+}
+
 Mesh* GenerateSupport::generateStraightSupport(Mesh* shellmesh){
     Mesh* mesh = shellmesh;
     Mesh* supportMesh = new Mesh();
 
-    z_min = mesh->z_min() - scfg->support_base_height;
+    z_min = getSupportZMin(mesh);
 
     overhangDetect(mesh);
     size_t idx = 0;
@@ -58,7 +72,7 @@ Mesh* GenerateSupport::generateSupport(Mesh* shellmesh) {
 
     Mesh* mesh = shellmesh;
     Mesh* supportMesh = new Mesh();
-    z_min = mesh->z_min() - scfg->support_base_height;
+	z_min = getSupportZMin(mesh);
 
     overhangDetect(mesh);
 
