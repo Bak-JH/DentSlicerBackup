@@ -171,7 +171,6 @@ void RayCastController::mousePressed(Qt3DInput::QMouseEvent* mouse)
 
 void RayCastController::mouseReleased(Qt3DInput::QMouseEvent* mouse)
 {
-
 	if (mouse->button() == Qt3DInput::QMouseEvent::Buttons::LeftButton || mouse->button() == Qt3DInput::QMouseEvent::Buttons::RightButton)
 	{
 		_mouseEvent = MouseEventData(mouse);

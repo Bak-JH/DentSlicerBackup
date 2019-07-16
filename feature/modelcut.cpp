@@ -24,6 +24,7 @@ typedef CGAL::Constrained_Delaunay_triangulation_2<Kernel, Tds>  CDT;
 typedef CDT::Vertex_handle          Vertex_handle;
 typedef CGAL::Delaunay_mesh_size_criteria_2<CDT>    Criteria;
 
+using namespace Hix::Engine3D;
 
 class BigInteger {
 

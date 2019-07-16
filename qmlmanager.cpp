@@ -1513,61 +1513,6 @@ void QmlManager::groupSelectionActivate(bool active){
     }
 }
 
-void QmlManager::exportSelected(bool isTemporary)
-{
-	auto exportConfig = boxUpperTab->property("options");
-	// save to temporary folder
-	qDebug() << "file export called";
-	QString fileName;
-
-	// look for data if it is temporary
-	QVariantMap config = exportConfig.toMap();
-	if (!isTemporary) { // export view
-		qDebug() << "export to file";
-		fileName = QFileDialog::getSaveFileName(nullptr, tr("Export sliced file"), "");
-		//ste->exportSTL(m_glmodel->getMesh(), fileName);
-		if (fileName == "")
-			return;
-	}
-	else { // support view & layerview
-		qDebug() << "export to temp file";
-		fileName = QDir::tempPath();
-		qDebug() << fileName;
-	}
-
-	STLexporter* ste = new STLexporter();
-	SlicingEngine* se = new SlicingEngine();
-
-	qmlManager->openProgressPopUp();
-
-	// merge selected models
-	Mesh* mergedShellMesh = ste->mergeSelectedModels();//ste->mergeModels(qmlManager->selectedModels);
-	//GLModel* mergedModel = new GLModel(mainWindow, models, mergedMesh, "temporary", false);
-
-	qDebug() << "1111" << mergedShellMesh;
-	qDebug() << "1111" << mergedShellMesh->x_max() << mergedShellMesh->x_min();
-
-	// generate support
-	GenerateSupport generatesupport;
-	Mesh* mergedSupportMesh = nullptr;
-	if (scfg->support_type != 0) { // if generating support
-		//Mesh* mergedSupportMesh = nullptr;
-		mergedSupportMesh = generatesupport.generateSupport(mergedShellMesh);
-	}
-
-	qDebug() << "2222";
-
-	// generate raft according to support structure
-	GenerateRaft generateraft;
-	Mesh* mergedRaftMesh = nullptr;
-	if (scfg->raft_type != 0) {
-		mergedRaftMesh = generateraft.generateRaft(mergedShellMesh, generatesupport.overhangPoints);
-	}
-	qDebug() << "3333";
-	// need to generate support, raft
-
-	se->slice(exportConfig, mergedShellMesh, mergedSupportMesh, mergedRaftMesh, fileName);
-}
 
 void QmlManager::runGroupFeature(int ftrType, QString state, double arg1, double arg2, double arg3, QVariant data){
     groupFunctionIndex = ftrType;
@@ -1700,6 +1645,8 @@ void QmlManager::runGroupFeature(int ftrType, QString state, double arg1, double
         }
         break;
     case ftrExport:
+        // save to temporary folder
+        qDebug() << "file export called";
 		exportSelected(false);
 		break;
     }
@@ -2126,6 +2073,58 @@ void QmlManager::setViewMode(int viewMode) {
 			setModelViewMode(viewMode);
 		}
     }
+}
+
+
+void  QmlManager::exportSelected(bool isTemp)
+{
+	auto exportConfig = boxUpperTab->property("options");
+
+	QString fileName;
+
+	if (!isTemp) { // export view
+		qDebug() << "export to file";
+		fileName = QFileDialog::getSaveFileName(nullptr, tr("Export sliced file"), "");
+		//ste->exportSTL(m_glmodel->getMesh(), fileName);
+		if (fileName == "")
+			return;
+	}
+	else { // support view & layerview
+		qDebug() << "export to temp file";
+		fileName = QDir::tempPath();
+		qDebug() << fileName;
+	}
+
+	STLexporter* ste = new STLexporter();
+	SlicingEngine* se = new SlicingEngine();
+
+	qmlManager->openProgressPopUp();
+
+	// merge selected models
+	Mesh* mergedShellMesh = ste->mergeSelectedModels();//ste->mergeModels(qmlManager->selectedModels);
+	//GLModel* mergedModel = new GLModel(mainWindow, models, mergedMesh, "temporary", false);
+
+	// generate support
+	GenerateSupport generatesupport;
+	Mesh* mergedSupportMesh = nullptr;
+	if (scfg->support_type != 0) { // if generating support
+		//Mesh* mergedSupportMesh = nullptr;
+		mergedSupportMesh = generatesupport.generateSupport(mergedShellMesh);
+	}
+
+	// generate raft according to support structure
+	GenerateRaft generateraft;
+	Mesh* mergedRaftMesh = nullptr;
+	if (scfg->raft_type != 0) {
+		mergedRaftMesh = generateraft.generateRaft(mergedShellMesh, generatesupport.overhangPoints);
+	}
+	// need to generate support, raft
+
+	//se->slice(data, mergedMesh, fileName);
+	se->slice(exportConfig, mergedShellMesh, mergedSupportMesh, mergedRaftMesh, fileName);
+	//deleteOneModelFile(mergedModel->ID);
+
+	//m_glmodel->futureWatcher.setFuture(future);
 }
 void QmlManager::setModelViewMode(int mode)
 {
