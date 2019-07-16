@@ -28,7 +28,6 @@ const QUrl PER_PRIMITIVE_GEOM_URL = QUrl("qrc:/shaders/perPrimitive.geom");
 const QUrl LAYERVIEW_FRAG_URL = QUrl("qrc:/shaders/layerview.frag");
 const QUrl LAYERVIEW_GEOM_URL = QUrl("qrc:/shaders/layerview.geom");
 
-
 Hix::Render::ModelMaterial::ModelMaterial():
 	_ambientParameter(QStringLiteral("ambient"), QColor(50, 50, 50)),
 	_diffuseParameter(QStringLiteral("diffuse"), QColor(140, 140, 120))
@@ -60,51 +59,8 @@ Hix::Render::ModelMaterial::ModelMaterial():
 	_effect.addTechnique(&_renderTechnique);
 	//establish color look up table
 
-	QVariantList colors = QVariantList();
-	//positions in world coord
-	//enum MeshColor
-	//{
-	//	Default = 0,
-	//	Selected = 1,
-	//	SelectedFace = 2,
-	//	Support = 3,
-	//	Raft = 4
-	//};
-	colors << Hix::Render::Colors::Default;
-	colors << Hix::Render::Colors::Selected;
-	colors << Hix::Render::Colors::SelectedFace;
-	colors << Hix::Render::Colors::Support;
-	colors << Hix::Render::Colors::Raft;
-
-	//, primitiveColorBuffer(Qt3DRender::QBuffer::ShaderStorageBuffer, this)
-
-	Qt3DRender::QBuffer* buff = new Qt3DRender::QBuffer(this);
-	buff->setType(Qt3DRender::QBuffer::BufferType::ShaderStorageBuffer);
-
-	QByteArray testData;
-	testData.resize(4 * sizeof(uint));
-	uint* rawUintArray = reinterpret_cast<uint*>(testData.data());
-	size_t idx = 0;
-	for (uint i = 0; i < 4; ++i)
-	{
-		rawUintArray[i] = 1u;
-	}
-	buff->setData(testData);
-	//_perPrimitiveColorParameter.setValue(QVariant::fromValue(buffer.id()));
-	//_perPrimitiveColorParameter.setName("perPrimitiveColorCode");
-	//_effect.addParameter(&_perPrimitiveColorParameter);
-	//addParameter(new Qt3DRender::QParameter("perPrimitiveColorCode", QVariant::fromValue(buffer.data()), this));
-
-	_perPrimitiveColorParameter.setName(QStringLiteral("input"));
-	_perPrimitiveColorParameter.setValue(QVariant::fromValue(buff->id()));
-	_renderPass.addParameter(&_perPrimitiveColorParameter);
 
 
-
-
-
-	_colorTableParameter.setName(QStringLiteral("colorTable[0]"));
-	_colorTableParameter.setValue(colors);
 	_singleColorParameter.setName(QStringLiteral("singleColor"));
 	_singleColorParameter.setValue(QVector3D(0,0,0));
 
@@ -112,8 +68,6 @@ Hix::Render::ModelMaterial::ModelMaterial():
 	_effect.addParameter(&_diffuseParameter);
 
 	//coloring faces
-	_effect.addParameter(&_colorTableParameter);
-	//_effect.addParameter(&_perPrimitiveColorParameter);
 	_effect.addParameter(&_singleColorParameter);
 
 
@@ -229,6 +183,7 @@ ShaderMode Hix::Render::ModelMaterial::shaderMode() const
 	return _mode;
 }
 
+bool test = true;
 void Hix::Render::ModelMaterial::setColor(QVector3D color)
 {
 #ifdef _MODEL_MATERIAL_STRICT
@@ -237,17 +192,6 @@ void Hix::Render::ModelMaterial::setColor(QVector3D color)
 		throw std::runtime_error("Attempted to set entire mesh material color when per primitive color is used");
 	}
 #endif
+
 	_singleColorParameter.setValue(color);
-}
-
-void Hix::Render::ModelMaterial::setColorCodes(QVariantList& colorCodes)
-{
-
-#ifdef _MODEL_MATERIAL_STRICT
-	if (_mode == ShaderMode::SingleColor)
-	{
-		throw std::runtime_error("Attempted to set per primitive color when singular color is used for entire material");
-	}
-#endif
-	//_perPrimitiveColorParameter.setValue(colorCodes);
 }

@@ -14,6 +14,8 @@
 
 #include "Color.h"
 
+
+class GLModel;
 namespace Hix
 {
 	namespace Render
@@ -43,12 +45,8 @@ namespace Hix
 			ShaderMode shaderMode()const;
 			//color for single color mode
 			void setColor(QVector3D color);
-			//for per primitive coloring
-			void setColorCodes(QVariantList& colorCodes);
 		private:
-
 			ShaderMode _mode = ShaderMode::None;
-
 			//custom parameters
 			std::unordered_map<std::string, Qt3DRender::QParameter> _additionalParameters;
 			Qt3DRender::QEffect _effect;
@@ -60,11 +58,8 @@ namespace Hix
 			//default parameters
 			Qt3DRender::QParameter _ambientParameter;
 			Qt3DRender::QParameter _diffuseParameter;
-			Qt3DRender::QParameter _perPrimitiveColorParameter;
-			Qt3DRender::QParameter _colorTableParameter;
 			Qt3DRender::QParameter _singleColorParameter;
 			//per primtivie parameters, stored as QVariantList on CPU, uniform on GPU geomatry shader
-			QVariantList _faceTypePerPrimitive;
 
 		};
 	}
