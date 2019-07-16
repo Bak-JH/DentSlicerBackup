@@ -96,12 +96,6 @@ public:
 
     float pixel_per_mm = float(resolution_x)/float(bed_x);
 };
-
-const QVector3D COLOR_DEFAULT_MESH = QVector3D(0.278f, 0.670f, 0.706f);
-const QVector3D COLOR_INFILL = QVector3D(1.0f, 1.0f, 0.0f);
-const QVector3D COLOR_RAFT = QVector3D(0.0f, 0.0f, 0.0f);
-const QVector3D COLOR_EXTEND_FACE = QVector3D(0.901f, 0.843f, 0.133f);
-
 extern SlicingConfiguration* scfg;
 
 #endif // CONFIGURATION_H
