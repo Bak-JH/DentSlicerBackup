@@ -38,17 +38,17 @@ public:
     // configurations
     static constexpr int resolution_scale = 3;
     static constexpr int resolution = 1000;//pow(10,resolution_scale); // resolution range from 1000 to 1
-    static constexpr float max_buildsize_x = 1000;//1000000/resolution;
-    static constexpr float vertex_inbound_distance = 0.002;//0.03;//(float)1/resolution; // resolution in mm (0.0001 and 0.0009 are same, 1 micron)
-	static constexpr float vertex_3D_distance = 0.0034;
+    static constexpr float max_buildsize_x = 1000.0f;//1000000/resolution;
+    static constexpr float vertex_inbound_distance = 0.002f;//0.03;//(float)1/resolution; // resolution in mm (0.0001 and 0.0009 are same, 1 micron)
+	static constexpr float vertex_3D_distance = 0.0034f;
 
     const char* slicing_mode = "uniform"; // uniform OR adaptive
-    float layer_height = 0.1; // in mm
-    float nozzle_width = 0; // in mm (diameter) , for printers with nozzles
-    float wall_thickness = 2; // in mm
-    float fill_thickness = 1; // in mm
-    float support_density = 0.4;
-    float infill_density = 0.3;
+    float layer_height = 0.1f; // in mm
+    float nozzle_width = 0.0f; // in mm (diameter) , for printers with nozzles
+    float wall_thickness = 2.0f; // in mm
+    float fill_thickness = 1.0f; // in mm
+    float support_density = 0.4f;
+    float infill_density = 0.3f;
 
     int resin_type = TEMPORARY_RESIN;
     float contraction_ratio = TEMPORARY_CONTRACTION_RATIO;
@@ -58,14 +58,14 @@ public:
     int raft_type = 2;
 
     // raft settings
-    float raft_thickness = 2; // in mm
-    float raft_base_radius = 5; // in mm
-    float raft_offset_radius = 4; // in mm
+    float raft_thickness = 2.0f; // in mm
+    float raft_base_radius = 5.0f; // in mm
+    float raft_offset_radius = 4.0f; // in mm
 
     // support settings
     float support_radius_max = 1.5f;
     float support_radius_min = 0.3f;
-    float support_base_height = 2.0;
+    float support_base_height = 2.0f;
 
     // bed configuration
     QVector3D origin;
@@ -74,22 +74,22 @@ public:
     int resolution_x = 2560;
     int resolution_y = 1440;
 
-    int bed_x = 120.96; // in mm
-    int bed_y = 68.04; // in mm*/
+    float bed_x = 120.96; // in mm
+    float bed_y = 68.04; // in mm*/
 
-    /*// settings for vittro
+    // settings for vittro plus
     int resolution_x = 1920;
     int resolution_y = 1080;
 
-    int bed_x = 124.8; // in mm
-    int bed_y = 70.2; // in mm*/
+    float bed_x = 124.8f; // in mm
+    float bed_y = 70.2f; // in mm
 
-    // settings for vittro
+    /*// settings for vittro
     int resolution_x = 1280;
     int resolution_y = 800;
 
-    int bed_x = 138; // in mm
-    int bed_y = 90; // in mm
+    float bed_x = 138; // in mm
+    float bed_y = 90; // in mm*/
 
 	size_t bed_margin_x = 1;
 	size_t bed_margin_y = 1;

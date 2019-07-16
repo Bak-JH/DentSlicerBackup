@@ -4,9 +4,41 @@
 #include <QTextStream>
 #include "qmlmanager.h"
 #include "../../utils/mathutils.h"
+#include "polyclipping/QDebugPolyclipping.h"
 
 using namespace ClipperLib;
+using namespace Hix::Debug;
+QDebug Hix::Debug::operator<< (QDebug d, const Slice& obj) {
+	d << "z: " << obj.z;
+	d << "polytree: " << obj.polytree;
+	d << "overhang_region: " << obj.overhang_region;
+	d << "critical_overhang_region: " << obj.critical_overhang_region;
 
+	d << "outershell: " << obj.outershell;
+	d << "infill: " << obj.infill;
+	d << "support: " << obj.support;
+	d << "Area: " << obj.Area;
+
+
+	d << "slices: ";
+	for (const auto& each : obj)
+	{
+		d << each;
+	}
+	return d;
+}
+QDebug Hix::Debug::operator<< (QDebug d, const Slices& obj) {
+	d << "mesh: " << obj.mesh;
+	d << "raft_points: " << obj.raft_points;
+	d << "overhang_regions: " << obj.overhang_regions;
+	d << "overhang_points: " << obj.overhang_points;
+	d << "slices: ";
+	for (const auto& each : obj)
+	{
+		d << each;
+	}
+	return d;
+}
 bool Slicer::slice(Mesh* mesh, Slices* slices){
     slices->mesh = mesh;
 
@@ -85,10 +117,11 @@ std::vector<Paths> Slicer::meshSlice(Mesh* mesh){
 
     if (! strcmp(scfg->slicing_mode, "uniform")) {
         planes = buildUniformPlanes(mesh->z_min(), mesh->z_max(), delta);
-    } else if (scfg->slicing_mode == "adaptive") {
-        // adaptive slice
-        planes = buildAdaptivePlanes(mesh->z_min(), mesh->z_max());
-    }
+    } 
+	//else if (scfg->slicing_mode == "adaptive") {
+ //       // adaptive slice
+ //       planes = buildAdaptivePlanes(mesh->z_min(), mesh->z_max());
+ //   }
 
     // build triangle list per layer height
     std::vector<std::vector<const MeshFace*>> triangleLists = buildTriangleLists(mesh, planes, delta);
@@ -193,14 +226,19 @@ std::vector<std::vector<const MeshFace*>> Slicer::buildTriangleLists(Mesh* mesh,
 
 
 std::vector<float> Slicer::buildUniformPlanes(float z_min, float z_max, float delta){
+	float halfDelta = delta / 2.0f;
     std::vector<float> planes;
+
     int idx_max = ceil((z_max-z_min)/delta);
-    for (int idx=0; idx<=idx_max; idx++){
-        float plane_z = Utils::Math::round(z_min+delta*idx, 2);
-        qDebug() << "build Uniform Planes at height z "<< plane_z;
-        //float plane_z = (idx == idx_max) ? z_min+delta*(idx-1)+delta/2:z_min + delta*idx;
-        planes.push_back(plane_z);
-    }
+	int idx = 0;
+	float plane_z = Utils::Math::round(z_min + halfDelta, 3);
+	while (plane_z < z_max)
+	{
+		qDebug() << "build Uniform Planes at height z " << plane_z;
+		planes.push_back(plane_z);
+		++idx;
+		plane_z = Utils::Math::round(z_min + delta * idx + halfDelta, 3);
+	} 
     return planes;
 }
 

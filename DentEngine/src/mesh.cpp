@@ -12,6 +12,7 @@
 using namespace Utils::Math;
 using namespace Hix;
 using namespace Hix::Engine3D;
+using namespace ClipperLib;
 
 
 //half edge circulator
@@ -519,7 +520,7 @@ void Mesh::connectFaces(){
 
 	for (auto itr = halfEdges.begin(); itr != halfEdges.end(); ++itr)
 	{
-		setTwins(itr);
+        setTwinOneSided(itr);
 		if (count % 100 == 0) {
 			QCoreApplication::processEvents();
 		}
@@ -569,7 +570,7 @@ Mesh* Mesh::saveUndoState(const Qt3DCore::QTransform& transform)
 /********************** Path Generation Functions **********************/
 
 // converts float point to int in microns
-void Mesh::addPoint(float x, float y, Path *path)
+void Mesh::addPoint(float x, float y, ClipperLib::Path *path)
 {
     IntPoint ip;
     ip.X = round(x*scfg->resolution);
@@ -578,10 +579,10 @@ void Mesh::addPoint(float x, float y, Path *path)
     path->push_back(ip);
 }
 
-float minDistanceToContour(QVector3D from, Path contour){
+float minDistanceToContour(QVector3D from, ClipperLib::Path contour){
     float min_distance = 0;
     for (int i=0; i<contour.size()-1; i++){
-        Path temp_path;
+		ClipperLib::Path temp_path;
         temp_path.push_back(contour[i]);
         temp_path.push_back(contour[i+1]);
         QVector3D int2qv3 = QVector3D(((float)contour[i].X)/scfg->resolution, ((float)contour[i].Y)/scfg->resolution, from.z());
@@ -804,6 +805,36 @@ QTime Hix::Engine3D::Mesh::getNextTime()
 	}
 }
 
+
+void Hix::Engine3D::Mesh::setTwinOneSided(HalfEdgeItr subjectEdge)
+{
+
+    subjectEdge->twins.clear();
+    //TODO: there really should be only one twin, going in opposite direction
+    auto from = subjectEdge->from;
+    auto to = subjectEdge->to;
+    for (auto& halfEdge : from->leavingEdges)
+    {
+        //if the leavingEdge is not the subject and traveling in same from -> same to
+        if (halfEdge != subjectEdge && halfEdge->to == to)
+        {
+            subjectEdge->twins.push_back(halfEdge);
+        }
+    }
+    for (auto& halfEdge : to->leavingEdges)
+    {
+        //if the leavingEdge is not the subject and traveling in opposite direction
+        if (halfEdge != subjectEdge && halfEdge->to == from)
+        {
+            subjectEdge->twins.push_back(halfEdge);
+        }
+    }
+#ifdef _STRICT_MESH_NO_SELF_INTERSECTION
+    if (subjectEdge->twins.size() > 1)
+        throw std::runtime_error("Mesh is self intersecting");
+#endif
+
+}
 void Hix::Engine3D::Mesh::setTwins(HalfEdgeItr subjectEdge)
 {
 
@@ -817,6 +848,8 @@ void Hix::Engine3D::Mesh::setTwins(HalfEdgeItr subjectEdge)
 		if (halfEdge != subjectEdge && halfEdge->to == to)
 		{
 			subjectEdge->twins.push_back(halfEdge);
+            auto moddableEdge = halfEdges.toNormItr(halfEdge);
+            moddableEdge->twins.push_back(subjectEdge);
 		}
 	}
 	for (auto& halfEdge : to->leavingEdges)
@@ -825,6 +858,8 @@ void Hix::Engine3D::Mesh::setTwins(HalfEdgeItr subjectEdge)
 		if (halfEdge != subjectEdge && halfEdge->to == from)
 		{
 			subjectEdge->twins.push_back(halfEdge);
+            auto moddableEdge = halfEdges.toNormItr(halfEdge);
+            moddableEdge->twins.push_back(subjectEdge);
 		}
 	}
 #ifdef _STRICT_MESH_NO_SELF_INTERSECTION
