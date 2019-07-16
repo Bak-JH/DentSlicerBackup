@@ -17,6 +17,7 @@ Rectangle {
 
 
     // feature type number
+    property int ftrEmpty : -1
     property int ftrOpen : 1
     property int ftrSave : 2
     property int ftrExport : 3

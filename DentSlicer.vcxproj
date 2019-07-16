@@ -193,6 +193,7 @@
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="common\TaskManager.cpp" />
     <ClCompile Include="DentEngine\src\polyclipping\poly2tri\sweep\advancing_front.cpp" />
     <ClCompile Include="feature\autoarrange.cpp" />
     <ClCompile Include="feature\autoorientation.cpp" />
@@ -243,7 +244,43 @@
   <ItemGroup>
     <ClInclude Include="common\indexedlist.h" />
     <ClInclude Include="common\IteratorWrapper.h" />
+    <ClInclude Include="common\moodycamel\atomicops.h" />
+    <ClInclude Include="common\moodycamel\readerwriterqueue.h" />
     <ClInclude Include="common\Singleton.h" />
+    <ClInclude Include="common\taskflow\core\executor.hpp" />
+    <ClInclude Include="common\taskflow\core\flow_builder.hpp" />
+    <ClInclude Include="common\taskflow\core\graph.hpp" />
+    <ClInclude Include="common\taskflow\core\notifier.hpp" />
+    <ClInclude Include="common\taskflow\core\observer.hpp" />
+    <ClInclude Include="common\taskflow\core\spmc_queue.hpp" />
+    <ClInclude Include="common\taskflow\core\task.hpp" />
+    <ClInclude Include="common\taskflow\core\taskflow.hpp" />
+    <ClInclude Include="common\taskflow\core\topology.hpp" />
+    <ClInclude Include="common\taskflow\error\error.hpp" />
+    <ClInclude Include="common\taskflow\predef\architecture.hpp" />
+    <ClInclude Include="common\taskflow\predef\architecture\arm.hpp" />
+    <ClInclude Include="common\taskflow\predef\architecture\mips.hpp" />
+    <ClInclude Include="common\taskflow\predef\architecture\ppc.hpp" />
+    <ClInclude Include="common\taskflow\predef\architecture\x86.hpp" />
+    <ClInclude Include="common\taskflow\predef\compiler.hpp" />
+    <ClInclude Include="common\taskflow\predef\compiler\clang.hpp" />
+    <ClInclude Include="common\taskflow\predef\compiler\comp_detected.hpp" />
+    <ClInclude Include="common\taskflow\predef\compiler\gcc.hpp" />
+    <ClInclude Include="common\taskflow\predef\compiler\msvc.hpp" />
+    <ClInclude Include="common\taskflow\predef\os.hpp" />
+    <ClInclude Include="common\taskflow\predef\os\ios.hpp" />
+    <ClInclude Include="common\taskflow\predef\os\macos.hpp" />
+    <ClInclude Include="common\taskflow\predef\os\os_detected.hpp" />
+    <ClInclude Include="common\taskflow\predef\stringify.hpp" />
+    <ClInclude Include="common\taskflow\predef\version_number.hpp" />
+    <ClInclude Include="common\taskflow\taskflow.hpp" />
+    <ClInclude Include="common\taskflow\utility\backoff.hpp" />
+    <ClInclude Include="common\taskflow\utility\generic_allocator.hpp" />
+    <ClInclude Include="common\taskflow\utility\object_pool.hpp" />
+    <ClInclude Include="common\taskflow\utility\passive_vector.hpp" />
+    <ClInclude Include="common\taskflow\utility\singular_allocator.hpp" />
+    <ClInclude Include="common\taskflow\utility\traits.hpp" />
+    <ClInclude Include="common\TaskManager.h" />
     <ClInclude Include="common\TrackedIndexedList.h" />
     <ClInclude Include="DentEngine\src\polyclipping\poly2tri\sweep\advancing_front.h" />
     <QtMoc Include="feature\autoarrange.h">
@@ -283,6 +320,7 @@
     <QtMoc Include="ui\MoveXYZWidget.h" />
     <QtMoc Include="render\ModelMaterial.h" />
     <QtMoc Include="lights.h" />
+    <ClInclude Include="render\Color.h" />
     <ClInclude Include="unitTest\catch.hpp" />
     <ClInclude Include="utils\mathutils.h" />
     <ClInclude Include="DentEngine\src\mesh.h" />
@@ -435,10 +473,14 @@
     <None Include="Resource\mesh\plate.stl" />
     <None Include="Resource\mesh\plate_logo.stl" />
     <None Include="Resource\mesh\plate_plane.stl" />
+    <None Include="shaders\default.vert" />
+    <None Include="shaders\flat.frag" />
+    <None Include="shaders\flat.geom" />
+    <None Include="shaders\layerview.frag" />
+    <None Include="shaders\layerview.geom" />
     <None Include="shaders\light.inc.frag" />
-    <None Include="shaders\model_shader.frag" />
-    <None Include="shaders\model_shader.geom" />
-    <None Include="shaders\model_shader.vert" />
+    <None Include="shaders\perPrimitive.geom" />
+    <None Include="shaders\singleColor.geom" />
     <QtRcc Include="qml.qrc">
       <InitFuncName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">qml</InitFuncName>
       <InitFuncName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">qml</InitFuncName>

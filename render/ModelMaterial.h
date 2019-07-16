@@ -10,10 +10,24 @@
 #include <Qt3DRender/qrenderpass.h>
 #include <Qt3DRender/qgraphicsapifilter.h>
 #include <QOpenGLShader>
+#include <QBuffer>
+
+#include "Color.h"
+
+
+class GLModel;
 namespace Hix
 {
 	namespace Render
 	{
+		// changeColor
+		enum ShaderMode
+		{
+			None = -1,
+			SingleColor = 0,
+			PerPrimitiveColor,
+			LayerMode
+		};
 		class ModelMaterial : public Qt3DRender::QMaterial
 		{
 			Q_OBJECT
@@ -21,24 +35,20 @@ namespace Hix
 			ModelMaterial();
 			virtual ~ModelMaterial();
 
-			//state machine
-			void setMode();
+			void setPerPrimitiveColorSSBO(Qt3DRender::QBuffer& buffer);
 			void setDiffuse(const QColor& diffuse);
 			void setAmbient(const QColor& ambient);
-			void addParameter(const std::string& key);
-			void removeParameter(const std::string& key);
+			void addParameterWithKey(const std::string& key);
+			void removeParameterWithKey(const std::string& key);
 			void setParameterValue(const std::string& key, const QVariant& value);
+			void changeMode(ShaderMode mode);
+			ShaderMode shaderMode()const;
+			//color for single color mode
+			void setColor(QVector3D color);
 		private:
-
-
+			ShaderMode _mode = ShaderMode::None;
 			//custom parameters
 			std::unordered_map<std::string, Qt3DRender::QParameter> _additionalParameters;
-
-			//just to make sure the code compiles
-			QOpenGLShader _vertShader;
-			QOpenGLShader _fragShader;
-			QOpenGLShader _geomShader;
-
 			Qt3DRender::QEffect _effect;
 			Qt3DRender::QTechnique _renderTechnique;
 			Qt3DRender::QRenderPass _renderPass;
@@ -48,7 +58,8 @@ namespace Hix
 			//default parameters
 			Qt3DRender::QParameter _ambientParameter;
 			Qt3DRender::QParameter _diffuseParameter;
-	
+			Qt3DRender::QParameter _singleColorParameter;
+			//per primtivie parameters, stored as QVariantList on CPU, uniform on GPU geomatry shader
 
 		};
 	}
