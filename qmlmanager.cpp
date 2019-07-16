@@ -25,8 +25,11 @@
 #include "qmlmanager.h"
 #include "utils/utils.h"
 #include "lights.h"
+
 using namespace Hix::Input;
 using namespace Hix::UI;
+using namespace Hix::Render;
+
 QmlManager::QmlManager(QObject *parent) : QObject(parent)
   ,layerViewFlags(LAYER_INFILL | LAYER_SUPPORTERS | LAYER_RAFT), modelIDCounter(0)
 {
@@ -758,6 +761,12 @@ void QmlManager::runArrange(){
 
 void QmlManager::runArrange_internal(){
     qDebug() << "run arrange glmodels size : " <<glmodels.size();
+
+    for(auto& pair : glmodels)
+    {
+        auto model = &pair.second;
+        qDebug() << "before " <<model->getTranslation();
+    }
     if (glmodels.size()>=2){
         std::vector<XYArrangement> arng_result_set;
         std::vector<const Mesh*> meshes_to_arrange;
@@ -793,8 +802,9 @@ void QmlManager::applyArrangeResult(std::vector<QVector3D> translations, std::ve
     for(auto& pair : glmodels)
     {
         auto model = &pair.second;
-        model->setTranslation(translations[index]);
-        model->rotateModelMesh(3, rotations[index]);
+        model->moveModelMesh_direct(translations[index], true);
+        model->rotateModelMesh_direct(3, rotations[index]);
+        //model->setTranslation(translations[index]);
         ++index;
     }
 
@@ -856,7 +866,7 @@ bool QmlManager::multipleModelSelected(int ID){
             // do unselect model
 
             it = selectedModels.erase(it);
-            target->changecolor(GLModel::ModelColor::Default);
+            target->changeColor(Hix::Render::Colors::Default);
             target->checkPrintingArea();
             (*it)->inactivateFeatures();
             QMetaObject::invokeMethod(partList, "unselectPartByModel", Q_ARG(QVariant, target->ID));
@@ -905,7 +915,7 @@ bool QmlManager::multipleModelSelected(int ID){
 	selectedModels.insert(target);
 	_lastSelected = target;
     connectHandlers(target);
-    target->changecolor(GLModel::ModelColor::Selected);
+    target->changeColor(Hix::Render::Colors::Selected);
     qDebug() << "multipleModelSelected invoke";
     QMetaObject::invokeMethod(partList, "selectPartByModel", Q_ARG(QVariant, target->ID));
     QMetaObject::invokeMethod(yesno_popup, "addPart", Q_ARG(QVariant, target->getFileName(target->filename.toStdString().c_str())), Q_ARG(QVariant, target->ID));
@@ -959,7 +969,7 @@ void QmlManager::lastModelSelected(){
     /* remove all elements from the list */
     for (auto it = selectedModels.begin() ; it != selectedModels.end() ; ++it) {
         /* it is simillar to selectModel() */
-        (*it)->changecolor(GLModel::ModelColor::Default);
+        (*it)->changeColor(Hix::Render::Colors::Default);
         (*it)->checkPrintingArea();
         (*it)->inactivateFeatures();
         QMetaObject::invokeMethod(partList, "unselectPartByModel", Q_ARG(QVariant, (*it)->ID));
@@ -1018,7 +1028,7 @@ void QmlManager::modelSelected(int ID){
             if (*it == target) {
 				modelAlreadySelected = true;
             }
-            (*it)->changecolor(GLModel::ModelColor::Default);
+            (*it)->changeColor(Hix::Render::Colors::Default);
             (*it)->checkPrintingArea();
             (*it)->inactivateFeatures();
             QMetaObject::invokeMethod(partList, "unselectPartByModel", Q_ARG(QVariant, (*it)->ID));
@@ -1064,7 +1074,7 @@ void QmlManager::modelSelected(int ID){
 		_lastSelected = target;
 		connectHandlers(target);
 
-		target->changecolor(GLModel::ModelColor::Selected);
+		target->changeColor(Hix::Render::Colors::Selected);
 		qDebug() << "modelSelected invoke";
 		QMetaObject::invokeMethod(partList, "selectPartByModel", Q_ARG(QVariant, target->ID));
 		QMetaObject::invokeMethod(yesno_popup, "addPart", Q_ARG(QVariant, 
@@ -1273,7 +1283,7 @@ void QmlManager::totalMoveDone(){
         //curModel->setTranslation(curModel->getTransform()->translation()+curModel->getTransform()->translation());
         curModel->setTranslation(QVector3D(0,0,0));
         // need to only update shadowModel & getMesh()
-        emit curModel->_updateModelMesh();
+        curModel->updateModelMesh();
     }
     sendUpdateModelInfo();
 }
@@ -1416,6 +1426,12 @@ QVector3D QmlManager::cameraViewVector()
 	return _camera->position() - systemTransform->translation();
 }
 
+TaskManager& QmlManager::taskManager()
+{
+	return _taskManager;
+}
+
+
 
 void QmlManager::modelMoveByNumber(int axis, int X, int Y){
     if (selectedModels.empty())
@@ -1497,6 +1513,7 @@ void QmlManager::groupSelectionActivate(bool active){
     }
 }
 
+
 void QmlManager::runGroupFeature(int ftrType, QString state, double arg1, double arg2, double arg3, QVariant data){
     groupFunctionIndex = ftrType;
     groupFunctionState = state;
@@ -1564,18 +1581,17 @@ void QmlManager::runGroupFeature(int ftrType, QString state, double arg1, double
         qDebug() << "run groupfeature lay flat";
         if (state == "active"){
 			for (auto selectedModel : selectedModels) {
-				selectedModel->uncolorExtensionFaces();
-				selectedModel->colorExtensionFaces();
+				selectedModel->unselectMeshFaces();
 			}
         }else if (state == "inactive"){
 			for (auto selectedModel : selectedModels) {
-				selectedModel->uncolorExtensionFaces();
+				selectedModel->unselectMeshFaces();
 				selectedModel->closeExtension();
 			}
 
         }
 /*        if (!selectedModels.empty()) {
-            selectedModels[selectedModels.size() - 1]->uncolorExtensionFaces();
+            selectedModels[selectedModels.size() - 1]->unselectMeshFaces();
             selectedModels[selectedModels.size() - 1]->closeLayflat();
         }
 */
@@ -1607,12 +1623,11 @@ void QmlManager::runGroupFeature(int ftrType, QString state, double arg1, double
         qDebug() << "run groupfeature extend";
         if (state == "active"){
 			for (auto selectedModel : selectedModels) {
-				selectedModel->uncolorExtensionFaces();
-				selectedModel->colorExtensionFaces();
+				selectedModel->unselectMeshFaces();
 			}
         }else if (state == "inactive"){
 			for (auto selectedModel : selectedModels) {
-				selectedModel->uncolorExtensionFaces();
+				selectedModel->unselectMeshFaces();
 				selectedModel->closeExtension();
 			}
         }
@@ -1632,63 +1647,8 @@ void QmlManager::runGroupFeature(int ftrType, QString state, double arg1, double
     case ftrExport:
         // save to temporary folder
         qDebug() << "file export called";
-        QString fileName;
-
-        // look for data if it is temporary
-        QVariantMap config = data.toMap();
-        bool isTemporary = false;
-        for (QVariantMap::const_iterator iter = config.begin(); iter != config.end(); ++iter){
-            if (!strcmp(iter.key().toStdString().c_str(), "temporary")){
-                qDebug() << "iter value : " << iter.value().toString();
-                if (iter.value().toString() == "true"){
-                    isTemporary = true;
-                }
-            }
-        }
-
-        if (! isTemporary){ // export view
-            qDebug() << "export to file";
-            fileName = QFileDialog::getSaveFileName(nullptr, tr("Export sliced file"), "");
-            //ste->exportSTL(m_glmodel->getMesh(), fileName);
-            if(fileName == "")
-                return;
-        } else { // support view & layerview
-            qDebug() << "export to temp file";
-            fileName =  QDir::tempPath();
-            qDebug() << fileName;
-        }
-
-        STLexporter* ste = new STLexporter();
-        SlicingEngine* se = new SlicingEngine();
-
-        qmlManager->openProgressPopUp();
-
-        // merge selected models
-        Mesh* mergedShellMesh = ste->mergeSelectedModels();//ste->mergeModels(qmlManager->selectedModels);
-        //GLModel* mergedModel = new GLModel(mainWindow, models, mergedMesh, "temporary", false);
-
-        // generate support
-        GenerateSupport generatesupport;
-        Mesh* mergedSupportMesh = nullptr;
-        if (scfg->support_type != 0){ // if generating support
-            //Mesh* mergedSupportMesh = nullptr;
-            mergedSupportMesh = generatesupport.generateSupport(mergedShellMesh);
-        }
-
-        // generate raft according to support structure
-        GenerateRaft generateraft;
-        Mesh* mergedRaftMesh = nullptr;
-        if (scfg->raft_type != 0){
-            mergedRaftMesh = generateraft.generateRaft(mergedShellMesh, generatesupport.overhangPoints);
-        }
-        // need to generate support, raft
-
-        //se->slice(data, mergedMesh, fileName);
-        QFuture<Slicer*> future = QtConcurrent::run(se, &SlicingEngine::slice, data, mergedShellMesh, mergedSupportMesh, mergedRaftMesh, fileName);
-        //deleteOneModelFile(mergedModel->ID);
-
-        //m_glmodel->futureWatcher.setFuture(future);
-        break;
+		exportSelected(false);
+		break;
     }
 }
 
@@ -2029,59 +1989,153 @@ void QmlManager::setViewMode(int viewMode) {
     qDebug() << "current mode" << this->viewMode;
 
     if( this->viewMode != viewMode ) {
+		QMetaObject::invokeMethod(boxUpperTab, "all_off");
         //if (viewMode == 0) viewObjectButton->setProperty("checked", true);
         if (viewMode == 1) viewSupportButton->setProperty("checked", true);
         else if (viewMode == 2) viewLayerButton->setProperty("checked", true);
 
         this->viewMode = viewMode;
-        layerViewPopup->setProperty("visible", this->viewMode == VIEW_MODE_LAYER);
-        layerViewSlider->setProperty("visible", this->viewMode == VIEW_MODE_LAYER);
-		
-        if( !selectedModels.empty() ) {
+		layerViewPopup->setProperty("visible", this->viewMode == VIEW_MODE_LAYER);
+		layerViewSlider->setProperty("visible", this->viewMode == VIEW_MODE_LAYER);
+		bool sliceNeeded = false;
+
+		switch (viewMode) {
+		case VIEW_MODE_OBJECT:
+			QMetaObject::invokeMethod(yesno_popup, "closePopUp");
+			QMetaObject::invokeMethod(leftTabViewMode, "setObjectView");
+			break;
+		case VIEW_MODE_SUPPORT:
+			for (auto each : selectedModels)
+			{
+				each->setSupportAndRaft();
+			}
+			break;
+		case VIEW_MODE_LAYER:
+			for (auto each : selectedModels)
+			{
+
+				each->setSupportAndRaft();
+			}
+			for (auto each : selectedModels)
+			{
+				//generate slice if there is none
+				if (each->slicer == nullptr)
+				{
+					sliceNeeded = true;
+					break;
+				}
+			}
+
 			auto selectedSize = selectedModelsLengths();
-            QMetaObject::invokeMethod(layerViewSlider, "setThickness", Q_ARG(QVariant, (scfg->layer_height)));
-			QMetaObject::invokeMethod(layerViewSlider, "setHeight",
-				Q_ARG(QVariant, (selectedSize.z() + scfg->raft_thickness)));
-			for (auto each : selectedModels)
-			{
-				each->changeViewMode(viewMode);
-			}
-        }
+			QMetaObject::invokeMethod(layerViewSlider, "setThickness", Q_ARG(QVariant, (scfg->layer_height)));
+			QMetaObject::invokeMethod(layerViewSlider, "setHeight", Q_ARG(QVariant, (selectedSize.z() + scfg->raft_thickness)));
+			break;
+		}
+
+		//set view mode for each model from background thread
+		//transwarp::parallel executor{ 1 };
+		//executor.execute();
+		//if (sliceNeeded)
+		//{
+		//	auto exportSelectedTask = transwarp::make_task(transwarp::root, [this]() {
+		//		exportSelected(true);
+		//		});
+		//	auto setViewModeTask = transwarp::make_task(transwarp::wait, [this, viewMode]() {
+		//		setModelViewMode(viewMode);
+		//		}, exportSelectedTask);
+		//	setViewModeTask->schedule_all(executor);
+		//}
+		//else
+		//{
+		//	auto setViewModeTask = transwarp::make_task(transwarp::root, [this, viewMode]() {
+		//		setModelViewMode(viewMode);
+		//		});
+		//	setViewModeTask->schedule(executor);
+		//	for (int i = 0; i < 5000000; ++i)
+		//	{
+		//		qDebug() << "boooooring";
+		//	}
+
+		//}
+
+		if (sliceNeeded)
+		{
+			tf::Taskflow* taskflow = new tf::Taskflow();
+
+			auto exportSelectedTask = taskflow->emplace( [this, viewMode]() {
+				exportSelected(true);
+				postToObject(std::bind(&QmlManager::setModelViewMode, this, viewMode), this);
+				});
+			_taskManager.enqueTask(taskflow);
+       }
+		else
+		{
+			setModelViewMode(viewMode);
+		}
     }
-
-    if( this->viewMode == VIEW_MODE_OBJECT ) {
-        QMetaObject::invokeMethod(yesno_popup, "closePopUp");
-        QMetaObject::invokeMethod(leftTabViewMode, "setObjectView");
-	}
-	else
-	{
-
-		if (this->viewMode == VIEW_MODE_SUPPORT) {
-			for (auto each : selectedModels)
-			{
-				each->setSupportAndRaft();
-				emit  each->_updateModelMesh();
-			}
-
-		}
-		else if (this->viewMode == VIEW_MODE_LAYER) {
-			for (auto each : selectedModels)
-			{
-				each->setSupportAndRaft();
-				emit each->_updateModelMesh();
-
-
-			}
-			qDebug() << "view mode layer called";
-			qDebug() << "generated support";
-		}
-		else {
-			qDebug() << "view mode layer called";
-		}
-	}
-
 }
 
+
+void  QmlManager::exportSelected(bool isTemp)
+{
+	auto exportConfig = boxUpperTab->property("options");
+
+	QString fileName;
+
+	if (!isTemp) { // export view
+		qDebug() << "export to file";
+		fileName = QFileDialog::getSaveFileName(nullptr, tr("Export sliced file"), "");
+		//ste->exportSTL(m_glmodel->getMesh(), fileName);
+		if (fileName == "")
+			return;
+	}
+	else { // support view & layerview
+		qDebug() << "export to temp file";
+		fileName = QDir::tempPath();
+		qDebug() << fileName;
+	}
+
+	STLexporter* ste = new STLexporter();
+	SlicingEngine* se = new SlicingEngine();
+
+	qmlManager->openProgressPopUp();
+
+	// merge selected models
+	Mesh* mergedShellMesh = ste->mergeSelectedModels();//ste->mergeModels(qmlManager->selectedModels);
+	//GLModel* mergedModel = new GLModel(mainWindow, models, mergedMesh, "temporary", false);
+
+	// generate support
+	GenerateSupport generatesupport;
+	Mesh* mergedSupportMesh = nullptr;
+	if (scfg->support_type != 0) { // if generating support
+		//Mesh* mergedSupportMesh = nullptr;
+		mergedSupportMesh = generatesupport.generateSupport(mergedShellMesh);
+	}
+
+	// generate raft according to support structure
+	GenerateRaft generateraft;
+	Mesh* mergedRaftMesh = nullptr;
+	if (scfg->raft_type != 0) {
+		mergedRaftMesh = generateraft.generateRaft(mergedShellMesh, generatesupport.overhangPoints);
+	}
+	// need to generate support, raft
+
+	//se->slice(data, mergedMesh, fileName);
+	se->slice(exportConfig, mergedShellMesh, mergedSupportMesh, mergedRaftMesh, fileName);
+	//deleteOneModelFile(mergedModel->ID);
+
+	//m_glmodel->futureWatcher.setFuture(future);
+}
+void QmlManager::setModelViewMode(int mode)
+{
+	qDebug() << "setModelViewMode called";
+	for (auto each : selectedModels)
+	{
+		each->changeViewMode(viewMode);
+		each->updateModelMesh();
+
+	}
+}
 int QmlManager::getViewMode() {
     return viewMode;
 }
@@ -2117,7 +2171,7 @@ QObject* FindItemByName(QQmlApplicationEngine* engine, const QString& name)
 void QmlManager::unselectPartImpl(GLModel* target)
 {
 	QMetaObject::invokeMethod(partList, "unselectPartByModel", Q_ARG(QVariant, target->ID));
-    target->changecolor(GLModel::ModelColor::Default);
+    target->changeColor(Hix::Render::Colors::Default);
     target->checkPrintingArea();
     target->inactivateFeatures();
     disconnectHandlers(target);
