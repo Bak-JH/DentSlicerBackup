@@ -126,7 +126,7 @@
       <InputFile>%(FullPath)</InputFile>
     </QtRcc>
     <PostBuildEvent>
-      <Command>call "$(SolutionDir)vs_copy_dll.bat" $(configuration)</Command>
+      <Command>call "$(SolutionDir)vs_copy_dll.bat" $(configuration) $(configuration) $(SolutionDir)</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -189,7 +189,7 @@
       <IncludePath>$(CGAL_DIR)\auxiliary\gmp\include;$(CGAL_DIR)\build\include;$(CGAL_DIR)\include;$(BOOST_INCLUDEDIR);.\GeneratedFiles\$(ConfigurationName);.\GeneratedFiles;.;utils\winsparkle;..\..\..\..\QT\5.12.2\MSVC2017\include;..\..\..\..\QT\5.12.2\MSVC2017\include\Qt3DQuickExtras;..\..\..\..\QT\5.12.2\MSVC2017\include\Qt3DQuick;..\..\..\..\QT\5.12.2\MSVC2017\include\QtQuick;..\..\..\..\QT\5.12.2\MSVC2017\include\QtOpenGL;..\..\..\..\QT\5.12.2\MSVC2017\include\QtWidgets;..\..\..\..\QT\5.12.2\MSVC2017\include\Qt3DExtras;..\..\..\..\QT\5.12.2\MSVC2017\include\Qt3DRender;..\..\..\..\QT\5.12.2\MSVC2017\include\Qt3DInput;..\..\..\..\QT\5.12.2\MSVC2017\include\Qt3DLogic;..\..\..\..\QT\5.12.2\MSVC2017\include\Qt3DCore;..\..\..\..\QT\5.12.2\MSVC2017\include\QtGamepad;..\..\..\..\QT\5.12.2\MSVC2017\include\QtGui;..\..\..\..\QT\5.12.2\MSVC2017\include\QtANGLE;..\..\..\..\QT\5.12.2\MSVC2017\include\QtQml;..\..\..\..\QT\5.12.2\MSVC2017\include\QtNetwork;..\..\..\..\QT\5.12.2\MSVC2017\include\QtConcurrent;..\..\..\..\QT\5.12.2\MSVC2017\include\QtCore;debug;C:\VulkanSDK\1.0.51.0\include;..\..\..\..\QT\5.12.2\MSVC2017\mkspecs\win32-msvc;$(QTDIR)\include\QtSvg;%(AdditionalIncludeDirectories)</IncludePath>
     </QtMoc>
     <PostBuildEvent>
-      <Command>call "$(SolutionDir)vs_copy_dll.bat" $(configuration)</Command>
+      <Command>call "$(SolutionDir)vs_copy_dll.bat" $(configuration) $(configuration) $(SolutionDir)</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
