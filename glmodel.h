@@ -121,9 +121,10 @@ public:
 	//size of QGeometry Attribute elements
 	const static size_t POS_SIZE = 3; //x, y, z of position
 	const static size_t NRM_SIZE = 3; //x, y, z of normal
-	const static size_t VTX_SIZE = (POS_SIZE + NRM_SIZE) * sizeof(float);
+	const static size_t COL_SIZE = 3; //x, y, z of normal
+	const static size_t VTX_SIZE = (POS_SIZE + NRM_SIZE + COL_SIZE) * sizeof(float);
 
-	const static size_t IDX_SIZE = 3; //3 index to vertices
+	const static size_t IDX_SIZE = 3; //3 indices to vertices
 	const static size_t UINT_SIZE = sizeof(uint); //needs to be large enough to accomodate all range of vertex index
 	const static size_t FACE_SIZE = IDX_SIZE * UINT_SIZE;
     // load teeth model default
@@ -143,7 +144,7 @@ public:
     // feature hollowshell
     float hollowShellRadius = 0;
 
-    // feature extension
+    // face selection enabled
     std::vector<FaceConstItr> selectedFaces;
 
     // feature offset
@@ -258,6 +259,7 @@ public:
 	bool scaleActive = false;
 	bool isMoved = false;
 
+	bool perPrimitiveColorActive()const;
 	bool faceHighlightActive()const;
 private:
 
@@ -276,10 +278,14 @@ private:
 	//defines mesh faces by 3 indices to the vertexArray
     Qt3DRender::QBuffer indexBuffer;
 	//separates SSBO buffer for Per-primitive colors
-	Qt3DRender::QBuffer primitiveColorBuffer;
+	//Qt3DRender::QBuffer primitiveColorBuffer;
     QAttribute positionAttribute;
     QAttribute normalAttribute;
+	QAttribute colorAttribute;
+
     QAttribute indexAttribute;
+	//enum Hix::Render::MeshColorCodes is 32bits long due to the way c++ handles enums, so we force 8bit uint here.
+	std::vector<uint8_t> perPrimitiveColors;
 	//QVariantList _primitiveColorCodes;
     int v_cnt;
     int f_cnt;
@@ -293,16 +299,22 @@ private:
 
     void onTimerUpdate();
     void removeLayerViewComponents();
-	unsigned int getPrimitiveColorCode(const Hix::Engine3D::Mesh* mesh, size_t faceIdx);
-	unsigned int getPrimitiveColorCode(const Hix::Engine3D::Mesh* mesh, FaceConstItr faceItr);
+	//unsigned int getPrimitiveColorCode(const Hix::Engine3D::Mesh* mesh, size_t faceIdx);
+	QVector3D getPrimitiveColorCode(const Hix::Engine3D::Mesh* mesh, FaceConstItr faceItr);
 
 	void setMesh(Hix::Engine3D::Mesh* mesh);
 	void updateMesh(Hix::Engine3D::Mesh* mesh);
 	void appendMesh(Hix::Engine3D::Mesh* mesh);
-	size_t appendMeshVertex(const Hix::Engine3D::Mesh* mesh,
-		Hix::Engine3D::VertexConstItr begin, Hix::Engine3D::VertexConstItr end);
-	void appendMeshFace(const Hix::Engine3D::Mesh* mesh,
-		Hix::Engine3D::FaceConstItr begin, Hix::Engine3D::FaceConstItr end, size_t prevMaxIndex);
+	void appendMeshVertex(const Hix::Engine3D::Mesh* mesh,
+		Hix::Engine3D::FaceConstItr begin, Hix::Engine3D::FaceConstItr end);
+
+	void appendMeshVertexSingleColor(const Hix::Engine3D::Mesh* mesh,
+		Hix::Engine3D::FaceConstItr begin, Hix::Engine3D::FaceConstItr end);
+	void appendMeshVertexPerPrimitive(const Hix::Engine3D::Mesh* mesh,
+		Hix::Engine3D::FaceConstItr begin, Hix::Engine3D::FaceConstItr end);
+
+	void appendIndexArray(const Hix::Engine3D::Mesh* mesh,
+		Hix::Engine3D::FaceConstItr begin, Hix::Engine3D::FaceConstItr end);
 
     int cutMode = 1;
     int cutFillMode = 1;

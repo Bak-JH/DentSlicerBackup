@@ -2,10 +2,6 @@
 
 uniform vec3 singleColor;
 #pragma include flat.geom
-layout (std430, binding = 0) buffer input
-{
-    uint ddd[];
-};
 void main()
 {
     // calculate flat normal
@@ -17,5 +13,4 @@ void main()
         EmitVertex();
     }
     EndPrimitive();
-    
 }

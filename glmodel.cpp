@@ -54,9 +54,9 @@ GLModel::GLModel(QObject* mainWindow, QNode *parent, Mesh* loadMesh, QString fna
     , m_geometry(this)
     , vertexBuffer(Qt3DRender::QBuffer::VertexBuffer, this)
 	, indexBuffer(Qt3DRender::QBuffer::IndexBuffer, this)
-	, primitiveColorBuffer(Qt3DRender::QBuffer::ShaderStorageBuffer, this)
 	, positionAttribute(this)
 	, normalAttribute(this)
+	, colorAttribute(this)
 	, indexAttribute(this)
 
 
@@ -73,10 +73,8 @@ GLModel::GLModel(QObject* mainWindow, QNode *parent, Mesh* loadMesh, QString fna
     //initialize vertex buffers etc
     vertexBuffer.setUsage(Qt3DRender::QBuffer::DynamicDraw);
 	indexBuffer.setUsage(Qt3DRender::QBuffer::DynamicDraw);
-	primitiveColorBuffer.setUsage(Qt3DRender::QBuffer::DynamicDraw);
 	vertexBuffer.setAccessType(	Qt3DRender::QBuffer::AccessType::ReadWrite);
 	indexBuffer.setAccessType(	Qt3DRender::QBuffer::AccessType::ReadWrite);
-	primitiveColorBuffer.setAccessType(Qt3DRender::QBuffer::AccessType::ReadWrite);
 
 
     positionAttribute.setAttributeType(QAttribute::VertexAttribute);
@@ -96,6 +94,16 @@ GLModel::GLModel(QObject* mainWindow, QNode *parent, Mesh* loadMesh, QString fna
     normalAttribute.setByteStride(VTX_SIZE);
     normalAttribute.setCount(0);
     normalAttribute.setName(QAttribute::defaultNormalAttributeName());
+
+	colorAttribute.setAttributeType(QAttribute::VertexAttribute);
+	colorAttribute.setBuffer(&vertexBuffer);
+	colorAttribute.setDataType(QAttribute::Float);
+	colorAttribute.setDataSize(COL_SIZE);
+	colorAttribute.setByteOffset((POS_SIZE + NRM_SIZE) * sizeof(float));
+	colorAttribute.setByteStride(VTX_SIZE);
+	colorAttribute.setCount(0);
+	colorAttribute.setName(QAttribute::defaultColorAttributeName());
+
 
 	indexAttribute.setVertexBaseType(QAttribute::VertexBaseType::UnsignedInt);
 	indexAttribute.setAttributeType(QAttribute::IndexAttribute);
@@ -117,6 +125,8 @@ GLModel::GLModel(QObject* mainWindow, QNode *parent, Mesh* loadMesh, QString fna
 
 	m_geometry.addAttribute(&positionAttribute);
 	m_geometry.addAttribute(&normalAttribute);
+	m_geometry.addAttribute(&colorAttribute);
+
 	m_geometry.addAttribute(&indexAttribute);
 
     // set shader mode and color
@@ -459,13 +469,10 @@ QTime GLModel::getNextTime()
 }
 
 void GLModel::updateModelMesh(){
-    // shadowUpdate updates shadow model of current Model
     QMetaObject::invokeMethod(qmlManager->boxUpperTab, "disableUppertab");
     QMetaObject::invokeMethod(qmlManager->boxLeftTab, "disableLefttab");
     QMetaObject::invokeMethod((QObject*)qmlManager->scene3d, "disableScene3D");
     qDebug() << "update Model Mesh";
-    // reinitialize with updated mesh
-
     int viewMode = qmlManager->getViewMode();
 	updateShader(viewMode);
     switch( viewMode ) {
@@ -745,10 +752,10 @@ void GLModel::clearMem(){
 
     vertexBuffer.setData(newVertexArray);
 	indexBuffer.setData(newIdxArray);
-	primitiveColorBuffer.setData(newIdxArray);
 
 	positionAttribute.setCount(0);
 	normalAttribute.setCount(0);
+	colorAttribute.setCount(0);
 	indexAttribute.setCount(0);
 
 }
@@ -786,10 +793,6 @@ void GLModel::setMesh(Mesh* mesh)
 	auto hEdgesHistory = mesh->getHalfEdgesNonConst().flushChanges();//not used...for now
 	removeComponent(&m_geometryRenderer);
 	appendMesh(mesh);
-	if (m_meshMaterial.shaderMode() == !ShaderMode::SingleColor)
-	{
-		//m_meshMaterial.setColorCodes(_primitiveColorCodes);
-	}
 	addComponent(&m_geometryRenderer);
 
 }
@@ -807,34 +810,52 @@ void GLModel::appendMesh(Mesh* mesh)
 	auto &faces = mesh->getFaces();
 	auto &vtxs = mesh->getVertices();
 	//since renderer access data from background thread
-	size_t prevMaxIndex =  appendMeshVertex(mesh, vtxs.cbegin(), vtxs.cend());
-	appendMeshFace(mesh, faces.cbegin(), faces.cend(), prevMaxIndex);
+	appendMeshVertex(mesh, faces.cbegin(), faces.cend());
+	appendIndexArray(mesh, faces.cbegin(), faces.cend());
 
 }
 
-size_t GLModel::appendMeshVertex(const Mesh* mesh,
-	Hix::Engine3D::VertexConstItr begin, Hix::Engine3D::VertexConstItr end)
+void GLModel::appendMeshVertex(const Mesh* mesh,
+	Hix::Engine3D::FaceConstItr begin, Hix::Engine3D::FaceConstItr end)
 {
-	//we use position attribute, but can be either normal, color etc since they have same count
-	size_t oldCount = positionAttribute.count();
-	size_t oldSize = oldCount * VTX_SIZE;
-	//append count
-	size_t count = end - begin;
-	size_t appendByteSize = count * VTX_SIZE;
-	//resize attr buffer for new append
-	//attrBufferResize(positionAttribute, vertexBuffer, VTX_SIZE, appendByteSize);
+
+	if (perPrimitiveColorActive())
+	{
+		appendMeshVertexPerPrimitive(mesh, begin, end);
+	}
+	else
+	{
+		appendMeshVertexSingleColor(mesh, begin, end);
+	}
+
+}
+
+void GLModel::appendMeshVertexSingleColor(const Mesh* mesh,
+	Hix::Engine3D::FaceConstItr begin, Hix::Engine3D::FaceConstItr end)
+{
+
+	size_t oldFaceCount = indexAttribute.count() / 3;
+	size_t appendFaceCount = end - begin;
+	size_t appendFaceVerticesByteSize = appendFaceCount * IDX_SIZE * VTX_SIZE;
+	//size_t appendVtxCount = appendFaceCount * IDX_SIZE;
+
 	//data to be appended
 	QByteArray appendData;
-	appendData.resize(appendByteSize);
+	appendData.resize(appendFaceVerticesByteSize);
 	//add data to the append data
 	QVector<QVector3D> vertices;
-
+	QVector3D empty(0.0f, 0.0f, 0.0f);
 	for (auto itr = begin; itr != end; ++itr)
 	{
-		auto& vtx = *itr;
-		vertices << vtx.position << vtx.vn;
-
+		auto faceVertices = itr->meshVertices();
+		for (auto& vtxItr : faceVertices)
+		{
+			vertices << vtxItr->position << vtxItr->vn;
+			//do color
+			vertices << empty;
+		}
 	}
+
 	float* rawVertexArray = reinterpret_cast<float*>(appendData.data());
 	size_t idx = 0;
 	for (const QVector3D& v : vertices) {
@@ -846,49 +867,85 @@ size_t GLModel::appendMeshVertex(const Mesh* mesh,
 	QByteArray totalData = vertexBuffer.data() + appendData;
 
 	vertexBuffer.setData(totalData);
-	positionAttribute.setCount(oldCount + count);
-	normalAttribute.setCount(oldCount + count);
-	return oldCount;
+	size_t currCount = (oldFaceCount + appendFaceCount) * 3;
+	positionAttribute.setCount(currCount);
+	normalAttribute.setCount(currCount);
+	colorAttribute.setCount(currCount);
+
 }
 
-void GLModel::appendMeshFace(const Mesh* mesh, Hix::Engine3D::FaceConstItr begin, Hix::Engine3D::FaceConstItr end, size_t prevMaxIndex)
-{	
-	//we need to get maximum index of the current rendered mesh when we are appending to non-empty mesh.
-	size_t oldCount = indexAttribute.count()/3; //see below
-	size_t oldSize = oldCount * FACE_SIZE;
+void GLModel::appendMeshVertexPerPrimitive(const Mesh* mesh,
+	Hix::Engine3D::FaceConstItr begin, Hix::Engine3D::FaceConstItr end)
+{
 
-	size_t count = end - begin;
-	size_t appendByteSize = count * FACE_SIZE;
+	size_t oldFaceCount = indexAttribute.count() / 3;
+	size_t appendFaceCount = end - begin;
+	size_t appendFaceVerticesByteSize = appendFaceCount * IDX_SIZE * VTX_SIZE;
+	//size_t appendVtxCount = appendFaceCount * IDX_SIZE;
 
-	//resize attr buffer for new append
-	//attrBufferResize(indexAttribute, indexBuffer, FACE_SIZE, appendByteSize);
-	QByteArray indexBufferData;
-	indexBufferData.resize(appendByteSize);
-	uint* rawIndexArray = reinterpret_cast<uint*>(indexBufferData.data());
+	//data to be appended
+	QByteArray appendData;
+	appendData.resize(appendFaceVerticesByteSize);
+	//add data to the append data
+	QVector<QVector3D> vertices;
 
-	size_t indexIndex = 0;
 
 	for (auto itr = begin; itr != end; ++itr)
 	{
-		auto& face = *itr;
-		auto faceVertices = face.getVerticeIndices(mesh);
-		for (auto faceVtx : faceVertices)
+		auto faceVertices = itr->meshVertices();
+		for (auto& vtxItr : faceVertices)
 		{
-			rawIndexArray[indexIndex] = faceVtx + prevMaxIndex;
-			++indexIndex;
+			vertices << vtxItr->position << vtxItr->vn;
+			//do color
+			vertices << getPrimitiveColorCode(mesh, itr);
 		}
 	}
+	
+
+	
+
+	float* rawVertexArray = reinterpret_cast<float*>(appendData.data());
+	size_t idx = 0;
+	for (const QVector3D& v : vertices) {
+		rawVertexArray[idx++] = v.x();
+		rawVertexArray[idx++] = v.y();
+		rawVertexArray[idx++] = v.z();
+	}
+	//update data/count
+	QByteArray totalData = vertexBuffer.data() + appendData;
+
+	vertexBuffer.setData(totalData);
+	size_t currCount = (oldFaceCount + appendFaceCount) * 3;
+	positionAttribute.setCount(currCount);
+	normalAttribute.setCount(currCount);
+	colorAttribute.setCount(currCount);
+
+}
+
+void GLModel::appendIndexArray(const Mesh* mesh, Hix::Engine3D::FaceConstItr begin, Hix::Engine3D::FaceConstItr end)
+{	
+	//we need to get maximum index of the current rendered mesh when we are appending to non-empty mesh.
+	size_t startingVtxIndex = indexAttribute.count();
+	size_t oldFaceCount = startingVtxIndex /3;
+
+	size_t appendFaceCount = end - begin;
+	size_t appendFaceByteSize = appendFaceCount * FACE_SIZE;
+	size_t appendVtxCount = appendFaceCount * IDX_SIZE;
+	//resize attr buffer for new append
+	//attrBufferResize(indexAttribute, indexBuffer, FACE_SIZE, appendByteSize);
+	QByteArray indexBufferData;
+	indexBufferData.resize(appendFaceByteSize);
+	uint* rawIndexArray = reinterpret_cast<uint*>(indexBufferData.data());
+	for (size_t i = 0; i < appendVtxCount; ++i)
+	{
+		rawIndexArray[i] = i + startingVtxIndex;
+	}
+
 	QByteArray totalData = indexBuffer.data() + indexBufferData;
 	indexBuffer.setData(totalData);
-	indexAttribute.setCount((oldCount + count) *3);//3 indicies per face
+	indexAttribute.setCount((oldFaceCount + appendFaceCount) *3);//3 indicies per face
 	m_geometryRenderer.setVertexCount(indexAttribute.count());
-	if (m_meshMaterial.shaderMode() == !ShaderMode::SingleColor)
-	{
-		for (auto itr = begin; itr != end; ++itr)
-		{
-			//_primitiveColorCodes << getPrimitiveColorCode(mesh, itr);
-		}
-	}
+
 }
 
 
@@ -944,104 +1001,104 @@ void GLModel::updateMesh(Mesh* mesh)
 
 void GLModel::updateFaces(const std::unordered_set<size_t>& faceIndicies, const Hix::Engine3D::Mesh& mesh)
 {
-	auto& faces = mesh.getFaces();
-	size_t oldFaceCount = indexAttribute.count()/3;
-	size_t newFaceCount = faces.size();
-	size_t smallerCount = std::min(oldFaceCount, newFaceCount);
-	size_t largerCount = std::max(oldFaceCount, newFaceCount);
-	size_t difference = largerCount - smallerCount;
-	//update existing old values if they were changed
-	QByteArray updateArray;
-	updateArray.resize(FACE_SIZE);
-	uint* rawIndexArray = reinterpret_cast<uint*>(updateArray.data());
-	for (auto faceIdx : faceIndicies)
-	{
-		if (faceIdx < smallerCount)
-		{
-			auto face = faces[faceIdx];
-			size_t offset = faceIdx * FACE_SIZE;
-			auto faceVertices = face.getVerticeIndices(&mesh);
-			//for each indices
-			for (size_t i = 0; i < 3; ++i)
-			{
-				rawIndexArray[i] = faceVertices[i];
-			}
-			indexBuffer.updateData(offset, updateArray);
-			if (m_meshMaterial.shaderMode() == !ShaderMode::SingleColor)
-			{
-				//_primitiveColorCodes[faceIdx] = getPrimitiveColorCode(&mesh, faceIdx);
-			}
-		}
-	}
-	indexBuffer.setData(indexBuffer.data());
+	//auto& faces = mesh.getFaces();
+	//size_t oldFaceCount = indexAttribute.count()/3;
+	//size_t newFaceCount = faces.size();
+	//size_t smallerCount = std::min(oldFaceCount, newFaceCount);
+	//size_t largerCount = std::max(oldFaceCount, newFaceCount);
+	//size_t difference = largerCount - smallerCount;
+	////update existing old values if they were changed
+	//QByteArray updateArray;
+	//updateArray.resize(FACE_SIZE);
+	//uint* rawIndexArray = reinterpret_cast<uint*>(updateArray.data());
+	//for (auto faceIdx : faceIndicies)
+	//{
+	//	if (faceIdx < smallerCount)
+	//	{
+	//		auto face = faces[faceIdx];
+	//		size_t offset = faceIdx * FACE_SIZE;
+	//		auto faceVertices = face.getVerticeIndices(&mesh);
+	//		//for each indices
+	//		for (size_t i = 0; i < 3; ++i)
+	//		{
+	//			rawIndexArray[i] = faceVertices[i];
+	//		}
+	//		indexBuffer.updateData(offset, updateArray);
+	//		if (m_meshMaterial.shaderMode() == !ShaderMode::SingleColor)
+	//		{
+	//			//_primitiveColorCodes[faceIdx] = getPrimitiveColorCode(&mesh, faceIdx);
+	//		}
+	//	}
+	//}
+	//indexBuffer.setData(indexBuffer.data());
 
-	//if new size is smaller, delete elements from back
-	if (newFaceCount < oldFaceCount)
-	{
-		eraseBufferData(indexAttribute, indexBuffer, difference * FACE_SIZE, difference*3);
-		//_primitiveColorCodes.erase(_primitiveColorCodes.end() - difference, _primitiveColorCodes.end());
-		m_geometryRenderer.setVertexCount(indexAttribute.count());
-	}
-	else if (newFaceCount > oldFaceCount)
-	{
-		appendMeshFace(&mesh, faces.cend() - difference, faces.cend(), 0);
-	}
+	////if new size is smaller, delete elements from back
+	//if (newFaceCount < oldFaceCount)
+	//{
+	//	eraseBufferData(indexAttribute, indexBuffer, difference * FACE_SIZE, difference*3);
+	//	//_primitiveColorCodes.erase(_primitiveColorCodes.end() - difference, _primitiveColorCodes.end());
+	//	m_geometryRenderer.setVertexCount(indexAttribute.count());
+	//}
+	//else if (newFaceCount > oldFaceCount)
+	//{
+	//	appendMeshFace(&mesh, faces.cend() - difference, faces.cend(), 0);
+	//}
 
-	indexAttribute.setCount(newFaceCount * 3);//3 indicies per face
-	m_geometryRenderer.setVertexCount(indexAttribute.count());
+	//indexAttribute.setCount(newFaceCount * 3);//3 indicies per face
+	//m_geometryRenderer.setVertexCount(indexAttribute.count());
 
 }
 
 
 void GLModel::updateVertices(const std::unordered_set<size_t>& vtxIndicies, const Hix::Engine3D::Mesh& mesh)
 {
-	auto& vtcs = mesh.getVertices();
-	size_t oldVtxCount = positionAttribute.count();
-	size_t newVtxCount = vtcs.size();
-	size_t smallerCount = std::min(oldVtxCount, newVtxCount);
-	size_t largerCount = std::max(oldVtxCount, newVtxCount);
-	size_t difference = largerCount - smallerCount;
-	//update existing old values if they were changed
-	QByteArray updateArray;
-	updateArray.resize(VTX_SIZE);
-	float* rawVertexArray = reinterpret_cast<float*>(updateArray.data());
+	//auto& vtcs = mesh.getVertices();
+	//size_t oldVtxCount = positionAttribute.count();
+	//size_t newVtxCount = vtcs.size();
+	//size_t smallerCount = std::min(oldVtxCount, newVtxCount);
+	//size_t largerCount = std::max(oldVtxCount, newVtxCount);
+	//size_t difference = largerCount - smallerCount;
+	////update existing old values if they were changed
+	//QByteArray updateArray;
+	//updateArray.resize(VTX_SIZE);
+	//float* rawVertexArray = reinterpret_cast<float*>(updateArray.data());
 
-	//vertexBuffer.blockSignals(true);
-	//vertexBuffer.blockNotifications(true);
-	for (auto vtxIdx : vtxIndicies)
-	{
-		if (vtxIdx < smallerCount)
-		{
-			auto vtx = vtcs[vtxIdx];
-			QVector<QVector3D> vtxData;
-			vtxData << vtx.position  << vtx.vn;
-			size_t idx = 0;
-			for (const QVector3D& v : vtxData) {
-				rawVertexArray[idx++] = v.x();
-				rawVertexArray[idx++] = v.y();
-				rawVertexArray[idx++] = v.z();
-			}
-			size_t offset = vtxIdx * VTX_SIZE;
-			vertexBuffer.updateData(offset, updateArray);
-		}
-	}
-	//vertexBuffer.blockSignals(false);
-	//vertexBuffer.blockNotifications(false);
-	//vertexBuffer.setData(vertexBuffer.data());
-	emit vertexBuffer.dataChanged(vertexBuffer.data());
-	//if new size is smaller, delete elements from back
-	if (newVtxCount < oldVtxCount)
-	{
-		eraseBufferData(positionAttribute, vertexBuffer, difference * VTX_SIZE, difference);
-		//set other attribute count as well
-		normalAttribute.setCount(positionAttribute.count());
-	}
-	else if (newVtxCount > oldVtxCount)
-	{
-		appendMeshVertex(&mesh, vtcs.cend() - difference, vtcs.cend());
-	}
-	positionAttribute.setCount(newVtxCount);
-	normalAttribute.setCount(positionAttribute.count());
+	////vertexBuffer.blockSignals(true);
+	////vertexBuffer.blockNotifications(true);
+	//for (auto vtxIdx : vtxIndicies)
+	//{
+	//	if (vtxIdx < smallerCount)
+	//	{
+	//		auto vtx = vtcs[vtxIdx];
+	//		QVector<QVector3D> vtxData;
+	//		vtxData << vtx.position  << vtx.vn;
+	//		size_t idx = 0;
+	//		for (const QVector3D& v : vtxData) {
+	//			rawVertexArray[idx++] = v.x();
+	//			rawVertexArray[idx++] = v.y();
+	//			rawVertexArray[idx++] = v.z();
+	//		}
+	//		size_t offset = vtxIdx * VTX_SIZE;
+	//		vertexBuffer.updateData(offset, updateArray);
+	//	}
+	//}
+	////vertexBuffer.blockSignals(false);
+	////vertexBuffer.blockNotifications(false);
+	////vertexBuffer.setData(vertexBuffer.data());
+	//emit vertexBuffer.dataChanged(vertexBuffer.data());
+	////if new size is smaller, delete elements from back
+	//if (newVtxCount < oldVtxCount)
+	//{
+	//	eraseBufferData(positionAttribute, vertexBuffer, difference * VTX_SIZE, difference);
+	//	//set other attribute count as well
+	//	normalAttribute.setCount(positionAttribute.count());
+	//}
+	//else if (newVtxCount > oldVtxCount)
+	//{
+	//	appendMeshVertex(&mesh, vtcs.cend() - difference, vtcs.cend());
+	//}
+	//positionAttribute.setCount(newVtxCount);
+	//normalAttribute.setCount(positionAttribute.count());
 }
 
 
@@ -2170,9 +2227,10 @@ void GLModel::generateText3DMesh()
 // for extension
 
 void GLModel:: unselectMeshFaces(){
+	//we need to mark these vertices as modified so they get re-rendered with new colors
 	for (auto& fcItr : selectedFaces)
 	{
-		auto modItr = _mesh->getFacesNonConst().toNormItr(fcItr);
+		_mesh->getFacesNonConst().markChanged(fcItr);
 	}
 	selectedFaces.clear();
 	updateModelMesh();
@@ -2182,10 +2240,10 @@ void GLModel::selectMeshFaces(){
 	selectedFaces.clear();
 	QVector3D normal = targetMeshFace->fn;
 	_mesh->findNearSimilarFaces(normal, targetMeshFace, targetMeshFace, selectedFaces);
-
+	//we need to mark these vertices as modified so they get re-rendered with new colors
 	for (auto& fcItr : selectedFaces)
 	{
-		auto modItr = _mesh->getFacesNonConst().toNormItr(fcItr);
+		_mesh->getFacesNonConst().markChanged(fcItr);
 	}
 	updateModelMesh();
 }
@@ -2539,13 +2597,7 @@ void GLModel::removeLayerViewComponents(){
     layerViewPlaneTextureLoader = nullptr;
 }
 
-unsigned int GLModel::getPrimitiveColorCode(const Hix::Engine3D::Mesh* mesh, size_t faceIdx)
-{
-	auto faceItr = mesh->getFaces().cbegin() + faceIdx;
-	return getPrimitiveColorCode(mesh, faceItr);
-}
-
-unsigned int GLModel::getPrimitiveColorCode(const Hix::Engine3D::Mesh* mesh, FaceConstItr itr)
+QVector3D GLModel::getPrimitiveColorCode(const Hix::Engine3D::Mesh* mesh, FaceConstItr itr)
 {
 	if (faceHighlightActive())
 	{
@@ -2553,11 +2605,11 @@ unsigned int GLModel::getPrimitiveColorCode(const Hix::Engine3D::Mesh* mesh, Fac
 		
 		if (std::find(selectedFaces.begin(), selectedFaces.end(), itr) != selectedFaces.end())
 		{
-			return Hix::Render::MeshColorCodes::SelectedFace;
+			return Hix::Render::Colors::SelectedFace;
 		}
 		else
 		{
-			return Hix::Render::MeshColorCodes::Selected;
+			return Hix::Render::Colors::Selected;
 		}
 
 	}
@@ -2565,15 +2617,15 @@ unsigned int GLModel::getPrimitiveColorCode(const Hix::Engine3D::Mesh* mesh, Fac
 	{
 		if (mesh == _mesh)
 		{
-			return Hix::Render::MeshColorCodes::Selected;
+			return Hix::Render::Colors::Selected;
 		}
 		else if (mesh == supportMesh)
 		{
-			return Hix::Render::MeshColorCodes::Support;
+			return Hix::Render::Colors::Support;
 		}
 		else if (mesh == raftMesh)
 		{
-			return Hix::Render::MeshColorCodes::Raft;
+			return Hix::Render::Colors::Raft;
 		}
 	}
 }
@@ -2605,6 +2657,11 @@ bool GLModel::isHitTestable()
 {
 	return _hitEnabled;
 
+}
+
+bool GLModel::perPrimitiveColorActive() const
+{
+	return faceHighlightActive() || layerViewActive;
 }
 bool GLModel::faceHighlightActive() const
 {
