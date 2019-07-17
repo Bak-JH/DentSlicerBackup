@@ -181,6 +181,8 @@ void RayCastController::mouseReleased(Qt3DInput::QMouseEvent* mouse)
 		//if drag, stop dragging
 		if (_dragged)
 		{
+			qDebug() << "drag ended";
+
 			_dragged->dragEnded(_mouseEvent);
 			_dragged = nullptr;
 		}
@@ -293,6 +295,7 @@ void RayCastController::hitsChanged(const Qt3DRender::QAbstractRayCaster::Hits& 
 				auto draggable = dynamic_cast<Draggable*>(nearestHit->entity());
 				if (draggable && draggable->isDraggable(_mouseEvent, *nearestHit))
 				{
+					qDebug() << "drag started" << draggable;
 					_dragged = draggable;
 					_dragged->dragStarted(_mouseEvent, *nearestHit);
 				}

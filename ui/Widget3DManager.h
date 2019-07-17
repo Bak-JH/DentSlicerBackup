@@ -1,6 +1,7 @@
 #pragma once
 #include "RotateXYZWidget.h"
 #include "MoveXYZWidget.h"
+#include "Widget3D.h"
 //manages rotate/move widgets
 class QmlManager;
 namespace Hix
@@ -33,8 +34,8 @@ namespace Hix
 			void updatePosition();
 		private:
 			WidgetMode _currMode = WidgetMode::None;
-			RotateXYZWidget _rotateWidget;
-			MoveXYZWidget _moveWidget;
+			Widget3D _rotateWidget;
+			Widget3D _moveWidget;
 			Input::RayCastController* _controller;
 		};
 	}
