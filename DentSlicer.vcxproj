@@ -212,9 +212,7 @@
     <ClCompile Include="lights.cpp" />
     <ClCompile Include="render\ModelMaterial.cpp" />
     <ClCompile Include="ui\MoveWidget.cpp" />
-    <ClCompile Include="ui\MoveXYZWidget.cpp" />
     <ClCompile Include="ui\RotateWidget.cpp" />
-    <ClCompile Include="ui\RotateXYZWidget.cpp" />
     <ClCompile Include="ui\Widget3D.cpp" />
     <ClCompile Include="ui\Widget3DManager.cpp" />
     <ClCompile Include="utils\gridmesh.cpp" />
@@ -319,8 +317,6 @@
     <ClInclude Include="input\Hoverable.h" />
     <QtMoc Include="ui\MoveWidget.h" />
     <QtMoc Include="ui\RotateWidget.h" />
-    <QtMoc Include="ui\RotateXYZWidget.h" />
-    <QtMoc Include="ui\MoveXYZWidget.h" />
     <QtMoc Include="render\ModelMaterial.h" />
     <QtMoc Include="lights.h" />
     <QtMoc Include="ui\Widget3D.h">
