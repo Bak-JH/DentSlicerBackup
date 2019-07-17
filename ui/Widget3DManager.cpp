@@ -2,18 +2,29 @@
 #include "../qmlmanager.h"
 #include "../input/raycastcontroller.h"
 #include <Qt3DCore>
+#include "RotateWidget.h"
+#include "MoveWidget.h"
+
 using namespace Hix;
 using namespace Hix::UI;
 
 void Widget3DManager::initialize(Qt3DCore::QEntity* qParent, Input::RayCastController* controller)
 {
+	//add each individual widgets
+	_rotateWidget.addWidget(std::make_unique<RotateWidget>(QVector3D(1, 0, 0), &_rotateWidget));
+	_rotateWidget.addWidget(std::make_unique<RotateWidget>(QVector3D(0, 1, 0), &_rotateWidget));
+	_rotateWidget.addWidget(std::make_unique<RotateWidget>(QVector3D(0, 0, 1), &_rotateWidget));
+
+	_moveWidget.addWidget(std::make_unique<MoveWidget>(QVector3D(1, 0, 0), &_moveWidget));
+	_moveWidget.addWidget(std::make_unique<MoveWidget>(QVector3D(0, 1, 0), &_moveWidget));
+
 	_controller = controller;
+
 	_rotateWidget.setParent(qParent);
 	controller->addLayer(&_rotateWidget.layer);
 	controller->addHoverLayer(&_rotateWidget.layer);
 	_rotateWidget.setVisible(false);
 
-	//move widget
 	_moveWidget.setParent(qParent);
 	controller->addLayer(&_moveWidget.layer);
 	controller->addHoverLayer(&_moveWidget.layer);

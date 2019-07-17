@@ -87,8 +87,8 @@ int main(int argc, char **argv)
 #endif
 
     QSurfaceFormat format;
-    format.setMajorVersion(3);
-    format.setMinorVersion(1);
+    format.setMajorVersion(4);
+    format.setMinorVersion(3);
     format.setProfile(QSurfaceFormat::CoreProfile);
 
     QOpenGLContext gl_ctx;

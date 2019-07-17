@@ -13,12 +13,11 @@ Rectangle {
     color: "#E5E5E5"
     border.width: 1
     border.color:"#CCCCCC"
-
+    signal popupCallback
     property string high_text: high_text
     property string mid_text: mid_text
     property string low_text: low_text
     property int popup_type: popup_type
-
     property bool isFlawOpen: false
 
     Rectangle{//shadow
@@ -160,41 +159,10 @@ Rectangle {
                             qm.setViewMode(1);
                             break;
                         case uppertab.ftrExport:
-                        // case uppertab.ftrSupportViewMode:
+                            yesnoPopUp.runGroupFeature(uppertab.ftrExport, "", 0, 0, 0, null);
+                            break;
                         case uppertab.ftrLayerViewMode:
-                            function collectConfigurations(){
-                                var options = uppertab.options;
-                                var configurations = {};
-
-                                // do collecting things
-                                // configurations[key] = value;
-                                console.log("collectConfigurations")
-                                configurations["resolution"] = options[0];
-                                configurations["layer_height"] = options[1];
-                                configurations["resin_type"] = options[2];
-                                configurations["support_type"] = options[3];
-                                configurations["infill_type"] = options[4];
-                                configurations["raft_type"] = options[5];
-                                return configurations;
-                            }
-                            var cfg = collectConfigurations();
-
-                            if (popup_type == uppertab.ftrExport){
-                                cfg["temporary"] = "false";
-                                yesnoPopUp.runGroupFeature(uppertab.ftrExport, "", 0, 0, 0, cfg);
-                                //yesnoPopUp.runFeature(uppertab.ftrExport, cfg);
-                            } /* else if( popup_type == uppertab.ftrSupportViewMode ) {
-                                cfg["temporary"] = "true";
-                                qm.setViewMode(1);
-                                yesnoPopUp.runGroupFeature(uppertab.ftrExport, "", 0, 0, 0, cfg);
-                                //yesnoPopUp.runFeature(uppertab.ftrExport, cfg);
-                            } */ else if( popup_type == uppertab.ftrLayerViewMode ){
-                                cfg["temporary"] = "true";
-                                qm.setViewMode(2);
-                                yesnoPopUp.runGroupFeature(uppertab.ftrExport, "", 0, 0, 0, cfg);
-                                //yesnoPopUp.runFeature(uppertab.ftrExport, cfg);
-                            }
-
+                            qm.setViewMode(2);
                             break;
                         case uppertab.ftrSave:
                             qm.save();
@@ -214,6 +182,9 @@ Rectangle {
                         case uppertab.ftrDelete:
                             qm.deleteSelectedModels();
                             console.log("delete called by YesNoPopup");
+                            break;
+                        case uppertab.ftrEmpty:
+                            popupCallback();
                             break;
                         default:
                             break; 

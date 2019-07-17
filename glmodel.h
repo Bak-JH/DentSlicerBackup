@@ -34,6 +34,7 @@ using namespace Qt3DExtras;
 
 
 /* feature thread */
+#define ftrEmpty -1 //TODO: remove this swtich craziness.
 #define ftrOpen 1
 #define ftrSave 2
 #define ftrExport 3
@@ -54,6 +55,7 @@ using namespace Qt3DExtras;
 #define ftrDelete 18
 #define ftrTempExport 19
 #define ftrSupportDisappear 20
+
 
 class GLModel;
 class OverhangPoint;
@@ -102,7 +104,12 @@ class GLModel : public QEntity, public Hix::Input::Draggable
 {
     Q_OBJECT
 public:
-
+	enum MeshType
+	{
+		ModelMesh = 0,
+		Support,
+		Raft
+	};
     //probably interface this as well
 	void clicked	(Hix::Input::MouseEventData&,const Qt3DRender::QRayCasterHit&);
 
@@ -114,10 +121,10 @@ public:
 	//size of QGeometry Attribute elements
 	const static size_t POS_SIZE = 3; //x, y, z of position
 	const static size_t NRM_SIZE = 3; //x, y, z of normal
-	const static size_t COL_SIZE = 3; //r, g, b for color
+	const static size_t COL_SIZE = 3; //x, y, z of normal
 	const static size_t VTX_SIZE = (POS_SIZE + NRM_SIZE + COL_SIZE) * sizeof(float);
 
-	const static size_t IDX_SIZE = 3; //3 index to vertices
+	const static size_t IDX_SIZE = 3; //3 indices to vertices
 	const static size_t UINT_SIZE = sizeof(uint); //needs to be large enough to accomodate all range of vertex index
 	const static size_t FACE_SIZE = IDX_SIZE * UINT_SIZE;
     // load teeth model default
@@ -137,8 +144,8 @@ public:
     // feature hollowshell
     float hollowShellRadius = 0;
 
-    // feature extension
-    std::vector<FaceConstItr> extendFaces;
+    // face selection enabled
+    std::vector<FaceConstItr> selectedFaces;
 
     // feature offset
     double shellOffsetFactor;
@@ -148,9 +155,9 @@ public:
     Plane cuttingPlane;
 
     // used for layer view
-    Qt3DExtras:: QPlaneMesh* layerViewPlane[1] = {nullptr};
-    Qt3DCore::QEntity* layerViewPlaneEntity[1] = {nullptr};
-    Qt3DCore::QTransform *layerViewPlaneTransform[1] = {nullptr};
+    Qt3DExtras:: QPlaneMesh* layerViewPlane = nullptr;
+    Qt3DCore::QEntity* layerViewPlaneEntity = nullptr;
+    Qt3DCore::QTransform *layerViewPlaneTransform = nullptr;
     Qt3DRender::QTextureLoader* layerViewPlaneTextureLoader = nullptr;
     Qt3DExtras::QTextureMaterial* layerViewPlaneMaterial = nullptr;
     //Qt3DExtras::QPhongAlphaMaterial *layerViewPlaneMaterial = nullptr;
@@ -176,27 +183,22 @@ public:
 	QTime getPrevTime();
 	QTime getNextTime();
 
-    // changeColor
-	enum ModelColor
-	{
-		None = -1,
-		Default = 0,
-		Selected,
-		OutOfBound,
-		LayerMode
-	};
-    void changecolor(ModelColor mode); //0 default, 1 selected, 2 outofarea
+
+    void changeColor(const QVector3D& color);
 
     void setSupportAndRaft();
 
 
     // Model Mesh move
     void repairMesh();
+    void moveModelMesh_direct(QVector3D direction, bool update = true);
     void moveModelMesh(QVector3D direction, bool update = true);
     // Model Mesh rotate
     void rotationDone();
     void rotateByNumber(QVector3D& rot_center, int X, int Y, int Z);
+    void rotateModelMesh_direct(int Axis, float Angle, bool update = true);
     void rotateModelMesh(int Axis, float Angle, bool update = true);
+    void rotateModelMesh_direct(QMatrix4x4 matrix, bool update = true);
     void rotateModelMesh(QMatrix4x4 matrix, bool update = true);
     // Model Mesh scale
     void scaleModelMesh(float scaleX, float scaleY, float scaleZ);
@@ -212,6 +214,7 @@ public:
     QString getFileName(const std::string& s);
     static QVector3D spreadPoint(QVector3D endpoint,QVector3D startpoint,int factor);
     void changeViewMode(int viewMode);
+	void updateShader(int viewMode);
     void inactivateFeatures();
 
     // support
@@ -256,6 +259,8 @@ public:
 	bool scaleActive = false;
 	bool isMoved = false;
 
+	bool perPrimitiveColorActive()const;
+	bool faceHighlightActive()const;
 private:
 
 	//consts
@@ -272,13 +277,16 @@ private:
     Qt3DRender::QBuffer vertexBuffer;
 	//defines mesh faces by 3 indices to the vertexArray
     Qt3DRender::QBuffer indexBuffer;
-
+	//separates SSBO buffer for Per-primitive colors
+	//Qt3DRender::QBuffer primitiveColorBuffer;
     QAttribute positionAttribute;
     QAttribute normalAttribute;
-    QAttribute colorAttribute;
-    QAttribute indexAttribute;
+	QAttribute colorAttribute;
 
-    int colorMode;
+    QAttribute indexAttribute;
+	//enum Hix::Render::MeshColorCodes is 32bits long due to the way c++ handles enums, so we force 8bit uint here.
+	std::vector<uint8_t> perPrimitiveColors;
+	//QVariantList _primitiveColorCodes;
     int v_cnt;
     int f_cnt;
     QNode* m_parent;
@@ -291,13 +299,22 @@ private:
 
     void onTimerUpdate();
     void removeLayerViewComponents();
+	//unsigned int getPrimitiveColorCode(const Hix::Engine3D::Mesh* mesh, size_t faceIdx);
+	QVector3D getPrimitiveColorCode(const Hix::Engine3D::Mesh* mesh, FaceConstItr faceItr);
+
 	void setMesh(Hix::Engine3D::Mesh* mesh);
 	void updateMesh(Hix::Engine3D::Mesh* mesh);
 	void appendMesh(Hix::Engine3D::Mesh* mesh);
-	size_t appendMeshVertex(const Hix::Engine3D::Mesh* mesh,
-		Hix::Engine3D::VertexConstItr begin, Hix::Engine3D::VertexConstItr end);
-	void appendMeshFace(const Hix::Engine3D::Mesh* mesh,
-		Hix::Engine3D::FaceConstItr begin, Hix::Engine3D::FaceConstItr end, size_t prevMaxIndex);
+	void appendMeshVertex(const Hix::Engine3D::Mesh* mesh,
+		Hix::Engine3D::FaceConstItr begin, Hix::Engine3D::FaceConstItr end);
+
+	void appendMeshVertexSingleColor(const Hix::Engine3D::Mesh* mesh,
+		Hix::Engine3D::FaceConstItr begin, Hix::Engine3D::FaceConstItr end);
+	void appendMeshVertexPerPrimitive(const Hix::Engine3D::Mesh* mesh,
+		Hix::Engine3D::FaceConstItr begin, Hix::Engine3D::FaceConstItr end);
+
+	void appendIndexArray(const Hix::Engine3D::Mesh* mesh,
+		Hix::Engine3D::FaceConstItr begin, Hix::Engine3D::FaceConstItr end);
 
     int cutMode = 1;
     int cutFillMode = 1;
@@ -399,9 +416,8 @@ public slots:
     // Extension
     void openExtension();
     void closeExtension();
-    void colorExtensionFaces();
-    void uncolorExtensionFaces();
-    void generateColorAttributes();
+    void unselectMeshFaces();
+    void selectMeshFaces();
     void generateExtensionFaces(double distance);
 
     // ShellOffset

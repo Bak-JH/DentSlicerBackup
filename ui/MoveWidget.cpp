@@ -1,7 +1,7 @@
 #include "MoveWidget.h"
 #include "../qmlmanager.h"
 #include "../input/raycastcontroller.h"
-#include "MoveXYZWidget.h"
+#include "Widget3D.h"
 using namespace Hix::UI;
 using namespace Qt3DCore;
 using namespace Qt3DRender;
@@ -12,9 +12,8 @@ using namespace Qt3DExtras;
 const QUrl MoveWidget::ARROW_MESH_URL(QStringLiteral("qrc:/Resource/mesh/arrow.stl"));
 const double TRANSLATE_MULT = 1;
 MoveWidget::MoveWidget(const QVector3D& axis, Qt3DCore::QEntity* parent):QEntity(parent), _axis(axis),
-_parent(dynamic_cast<MoveXYZWidget*>(parent))
+_parent(dynamic_cast<Widget3D*>(parent))
 {
-
 	addComponent(&_mesh);
 	addComponent(&_material);
 	addComponent(&_transform);
@@ -39,16 +38,20 @@ _parent(dynamic_cast<MoveXYZWidget*>(parent))
 		_transform.setRotationY(90);
 	}
 	setEnabled(true);
+	addComponent(&_parent->layer);
 
 }
 
 Hix::UI::MoveWidget::~MoveWidget()
 {
+	removeComponent(&_mesh);
+	removeComponent(&_material);
+	removeComponent(&_transform);
 }
 
 bool Hix::UI::MoveWidget::isDraggable(Hix::Input::MouseEventData& e, const Qt3DRender::QRayCasterHit& hit)
 {
-	return true;
+	return _parent->visible();
 }
 
 void Hix::UI::MoveWidget::dragStarted(Hix::Input::MouseEventData& e, const Qt3DRender::QRayCasterHit& hit)
@@ -110,7 +113,7 @@ void Hix::UI::MoveWidget::dragEnded(Hix::Input::MouseEventData& e)
 {
 	_parent->setManipulated(false);
 	setHighlight(false);
-	qmlManager->modelMoveDone();
+    qmlManager->totalMoveDone();
 }
 
 

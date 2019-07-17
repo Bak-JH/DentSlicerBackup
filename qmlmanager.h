@@ -1,5 +1,7 @@
 #ifndef QMLMANAGER_H
 #define QMLMANAGER_H
+
+
 #include <QObject>
 #include <QDebug>
 #include <QString>
@@ -21,6 +23,8 @@
 #include <QKeyboardHandler>
 #include "input/raycastcontroller.h"
 #include "ui/Widget3DManager.h"
+#include "common/TaskManager.h"
+
 #define VIEW_MODE_OBJECT 0
 #define VIEW_MODE_SUPPORT 1
 #define VIEW_MODE_LAYER 2
@@ -34,6 +38,18 @@ class QmlManager : public QObject
 {
     Q_OBJECT
 public:
+
+	template <typename F>
+	static void postToObject(F&& fun, QObject* obj = qApp) {
+		QMetaObject::invokeMethod(obj, std::forward<F>(fun));
+	}
+
+	template <typename F>
+	static void postToThread(F&& fun, QThread* thread = qApp->thread()) {
+		auto* obj = QAbstractEventDispatcher::instance(thread);
+		Q_ASSERT(obj);
+		QMetaObject::invokeMethod(obj, std::forward<F>(fun));
+	}
     explicit QmlManager(QObject *parent = nullptr);
     QQmlApplicationEngine* engine;
 
@@ -227,10 +243,15 @@ public:
 	void modelMove(QVector3D displacement);
 	void modelRotateWithAxis(const QVector3D& axis, double degree);
 	QVector3D cameraViewVector();
+	TaskManager& taskManager();
 private:
-
+	TaskManager _taskManager;
+	void setModelViewMode(int mode);
 	GLModel* getModelByID(int ID);
     void unselectPartImpl(GLModel* target);
+	//do not mix UI work with background thread
+	//std::future<Slicer*> exportSelected(bool isTemp);
+	void  exportSelected(bool isTemp);
 	bool groupSelectionActive = false;
     int viewMode;
     int layerViewFlags;
