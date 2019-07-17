@@ -28,7 +28,6 @@ SOURCES += main.cpp \
     feature/labellingtextpreview.cpp \
     ui/MoveWidget.cpp \
     ui/RotateWidget.cpp \
-    ui/RotateXYZWidget.cpp \
     ui/Widget3D.cpp \
     ui/Widget3DManager.cpp \
     utils/quaternionhelper.cpp \

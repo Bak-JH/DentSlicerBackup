@@ -1,6 +1,4 @@
 #pragma once
-#include "RotateXYZWidget.h"
-#include "MoveXYZWidget.h"
 #include "Widget3D.h"
 //manages rotate/move widgets
 class QmlManager;
