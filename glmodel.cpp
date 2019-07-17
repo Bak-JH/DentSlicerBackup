@@ -1837,8 +1837,6 @@ void GLModel::dragStarted(Hix::Input::MouseEventData& e, const Qt3DRender::QRayC
 	qmlManager->moveButton->setProperty("state", "active");
 	qmlManager->setClosedHandCursor();
 	saveUndoState();
-	qmlManager->hideMoveArrow();
-	qDebug() << "hiding move arrow";
 	isMoved = true;
 }
 
@@ -2530,27 +2528,10 @@ void GLModel::updateShader(int viewMode)
 		else
 		{
 			m_meshMaterial.changeMode(Hix::Render::ShaderMode::SingleColor);
-			if (qmlManager->isSelected(this))
-			{
-				m_meshMaterial.setColor(Hix::Render::Colors::Selected);
-			}
-			else
-			{
-				m_meshMaterial.setColor(Hix::Render::Colors::Default);
-			}
 		}
-
 		break;
 	case VIEW_MODE_SUPPORT:
 		m_meshMaterial.changeMode(Hix::Render::ShaderMode::SingleColor);
-		if (qmlManager->isSelected(this))
-		{
-			m_meshMaterial.setColor(Hix::Render::Colors::Selected);
-		}
-		else
-		{
-			m_meshMaterial.setColor(Hix::Render::Colors::Default);
-		}
 		break;
 	case VIEW_MODE_LAYER:
 		m_meshMaterial.changeMode(Hix::Render::ShaderMode::LayerMode);

@@ -55,9 +55,7 @@ void QmlManager::initializeUI(QQmlApplicationEngine* e){
 	auto total = dynamic_cast<QEntity*> (FindItemByName(engine, "total"));
 	_camera = dynamic_cast<Qt3DRender::QCamera*> (FindItemByName(engine, "camera"));
 
-	_rotateWidget.setParent(total);
-	_rayCastController.addLayer(&_rotateWidget.layer);
-	_rayCastController.addHoverLayer(&_rotateWidget.layer);
+	_widgetManager.initialize(total, &_rayCastController);
     // model move componetns
     moveButton = FindItemByName(engine, "moveButton");
     movePopup = FindItemByName(engine, "movePopup");
@@ -68,7 +66,6 @@ void QmlManager::initializeUI(QQmlApplicationEngine* e){
 
     // model rotate components
     rotatePopup = FindItemByName(engine, "rotatePopup");
-    hideRotateSphere();
     // model rotate popup codes
     QObject::connect(rotatePopup, SIGNAL(runFeature(int,int,int,int)),this, SLOT(modelRotateByNumber(int,int,int,int)));
     QObject::connect(rotatePopup, SIGNAL(openRotate()), this, SLOT(openRotate()));
@@ -151,11 +148,6 @@ void QmlManager::initializeUI(QQmlApplicationEngine* e){
     //exportButton = FindItemByName(engine, "exportBtn");
     exportOKButton = FindItemByName(engine, "exportOKBtn");
 
-	//move widget
-	_moveWidget.setParent(total);
-	_rayCastController.addLayer(&_moveWidget.layer);
-	_rayCastController.addHoverLayer(&_moveWidget.layer);
-    hideMoveArrow();
 
     QObject *moveButton = FindItemByName(engine, "moveButton");
     QObject::connect(mttab,SIGNAL(runGroupFeature(int,QString, double, double, double,QVariant)),this,SLOT(runGroupFeature(int,QString, double, double, double, QVariant)));
@@ -318,8 +310,7 @@ void QmlManager::deleteModelFileDone() {
 	updateModelInfo(0, 0, "0.0 X 0.0 X 0.0 mm", 0);
 
     // UI
-    hideMoveArrow();
-    hideRotateSphere();
+	_widgetManager.setWidgetMode(WidgetMode::None);
     QMetaObject::invokeMethod(qmlManager->mttab, "hideTab");
     QMetaObject::invokeMethod(boxUpperTab, "all_off");
     QMetaObject::invokeMethod(leftTabViewMode, "setObjectView");
@@ -884,13 +875,13 @@ bool QmlManager::multipleModelSelected(int ID){
                 //case 2:
                 //    QMetaObject::invokeMethod(savePopup, "offApplyFinishButton");
                 //    break;
-                case 5:
-                    hideRotateSphere();
+				case ftrMove:
+					_widgetManager.setWidgetMode(WidgetMode::None);
+					QMetaObject::invokeMethod(movePopup, "offApplyFinishButton");
+					break;
+                case ftrRotate:
+					_widgetManager.setWidgetMode(WidgetMode::None);
                     QMetaObject::invokeMethod(rotatePopup,"offApplyFinishButton");
-                    break;
-                case 4:
-                    hideMoveArrow();
-                    QMetaObject::invokeMethod(movePopup,"offApplyFinishButton");
                     break;
                 case 6:
                     QMetaObject::invokeMethod(layflatPopup,"offApplyFinishButton");
@@ -929,12 +920,12 @@ bool QmlManager::multipleModelSelected(int ID){
         //    break;
         case 5:
             QMetaObject::invokeMethod(rotatePopup,"onApplyFinishButton");
-            showRotateSphere();
-            break;
+			_widgetManager.setWidgetMode(WidgetMode::Rotate);
+			break;
         case 4:
             QMetaObject::invokeMethod(movePopup,"onApplyFinishButton");
-            showMoveArrow();
-            break;
+			_widgetManager.setWidgetMode(WidgetMode::Move);
+			break;
         case 6:
             QMetaObject::invokeMethod(layflatPopup,"onApplyFinishButton");
             break;
@@ -985,13 +976,13 @@ void QmlManager::lastModelSelected(){
             //case 2:
             //    QMetaObject::invokeMethod(savePopup, "offApplyFinishButton");
             //    break;
-            case 4:
-                hideMoveArrow();
-                QMetaObject::invokeMethod(movePopup, "offApplyFinishButton");
+            case ftrMove:
+				_widgetManager.setWidgetMode(WidgetMode::None);
+				QMetaObject::invokeMethod(movePopup, "offApplyFinishButton");
                 break;
-            case 5:
-                hideRotateSphere();
-                QMetaObject::invokeMethod(rotatePopup, "offApplyFinishButton");
+            case ftrRotate:
+				_widgetManager.setWidgetMode(WidgetMode::None);
+				QMetaObject::invokeMethod(rotatePopup, "offApplyFinishButton");
                 break;
             case 6:
                 QMetaObject::invokeMethod(layflatPopup, "offApplyFinishButton");
@@ -1047,11 +1038,11 @@ void QmlManager::modelSelected(int ID){
 				//    QMetaObject::invokeMethod(savePopup, "offApplyFinishButton");
 				//    break;
 			case 5:
-				hideRotateSphere();
+				_widgetManager.setWidgetMode(WidgetMode::None);
 				QMetaObject::invokeMethod(rotatePopup, "offApplyFinishButton");
 				break;
 			case 4:
-				hideMoveArrow();
+				_widgetManager.setWidgetMode(WidgetMode::None);
 				QMetaObject::invokeMethod(movePopup, "offApplyFinishButton");
 				break;
 			case 6:
@@ -1095,11 +1086,11 @@ void QmlManager::modelSelected(int ID){
 				//    break;
 			case 5:
 				QMetaObject::invokeMethod(rotatePopup, "onApplyFinishButton");
-				showRotateSphere();
+				_widgetManager.setWidgetMode(WidgetMode::Rotate);
 				break;
 			case 4:
 				QMetaObject::invokeMethod(movePopup, "onApplyFinishButton");
-				showMoveArrow();
+				_widgetManager.setWidgetMode(WidgetMode::Move);
 				break;
 			case 6:
 				QMetaObject::invokeMethod(layflatPopup, "onApplyFinishButton");
@@ -1165,8 +1156,7 @@ void QmlManager::unselectAll(){
 		++itr;
 		unselectPart(model->ID);
     }
-    hideMoveArrow();
-    hideRotateSphere();
+	_widgetManager.setWidgetMode(WidgetMode::None);
     QMetaObject::invokeMethod(qmlManager->mttab, "hideTab");
     QMetaObject::invokeMethod(boxUpperTab, "all_off");
 	QMetaObject::invokeMethod(boundedBox, "hideBox");
@@ -1213,42 +1203,11 @@ void QmlManager::doDeletebyID(int ID){
     deleteModelFile(ID);
 }
 
-void QmlManager::showMoveArrow(){
-    if (selectedModels.empty())
-        return;
-
-	_moveWidget.setVisible(true);
-	_rayCastController.setHoverEnabled(true);
-}
-
-void QmlManager::hideMoveArrow(){
-	_moveWidget.setVisible(false);
-	if (!_rotateWidget.visible() && !_moveWidget.visible())
-	{
-		_rayCastController.setHoverEnabled(false);
-	}
-}
-
-void QmlManager::hideRotateSphere(){
-	_rotateWidget.setVisible(false);
-	if (!_rotateWidget.visible() && !_moveWidget.visible())
-	{
-		_rayCastController.setHoverEnabled(false);
-	}
-}
-
 const RayCastController& QmlManager::getRayCaster()
 {
 	return _rayCastController;
 }
 
-
-void QmlManager::showRotateSphere(){
-    if (selectedModels.empty())
-        return;
-	_rotateWidget.setVisible(true);
-	_rayCastController.setHoverEnabled(true);
-}
 
 
 void QmlManager::modelMoveInit(){
@@ -1261,8 +1220,8 @@ void QmlManager::modelMoveDone(){
     if (selectedModels.empty())
         return;
 	QMetaObject::invokeMethod(boundedBox, "hideBox"); // Bounded Box
-    hideMoveArrow();
-    sendUpdateModelInfo();
+	_widgetManager.setWidgetMode(WidgetMode::None);
+	sendUpdateModelInfo();
 
 
 
@@ -1311,8 +1270,8 @@ void QmlManager::modelRotateDone(){
     }
 
 
-    showRotateSphere();
-    rotateSnapAngle = 0;
+	_widgetManager.setWidgetMode(WidgetMode::Rotate);
+	rotateSnapAngle = 0;
 }
 
 void QmlManager::totalRotateDone(){
@@ -1499,10 +1458,7 @@ void QmlManager::save() {
 
 void QmlManager::cameraViewChanged()
 {
-	_rotateWidget.updatePosition();
-	_moveWidget.updatePosition();
-
-
+	_widgetManager.updatePosition();
 }
 
 void QmlManager::groupSelectionActivate(bool active){
@@ -1539,11 +1495,11 @@ void QmlManager::runGroupFeature(int ftrType, QString state, double arg1, double
     case ftrRotate: //rotate
     {
         if (state == "inactive"){
-            hideRotateSphere();
+			_widgetManager.setWidgetMode(WidgetMode::None);
 
         }else if(state == "active"){
-            showRotateSphere();
-            if (selectedModels.empty()){
+			_widgetManager.setWidgetMode(WidgetMode::Rotate);
+			if (selectedModels.empty()){
                 QMetaObject::invokeMethod(rotatePopup,"offApplyFinishButton");
             }else{
                 QMetaObject::invokeMethod(rotatePopup,"onApplyFinishButton");
@@ -1555,10 +1511,10 @@ void QmlManager::runGroupFeature(int ftrType, QString state, double arg1, double
     case ftrMove:  //move
     {
         if (state == "inactive"){
-			hideMoveArrow();
-        }else if(state == "active"){
-            showMoveArrow();
-            if (selectedModels.empty()){
+			_widgetManager.setWidgetMode(WidgetMode::None);
+		}else if(state == "active"){
+			_widgetManager.setWidgetMode(WidgetMode::Move);
+			if (selectedModels.empty()){
                 QMetaObject::invokeMethod(movePopup,"offApplyFinishButton");
             }else{
                 QMetaObject::invokeMethod(movePopup,"onApplyFinishButton");
@@ -2178,11 +2134,9 @@ void QmlManager::unselectPartImpl(GLModel* target)
     if (groupFunctionState == "active"){
         switch (groupFunctionIndex){
             case 5:
-                hideRotateSphere();
-                break;
             case 4:
-                hideMoveArrow();
-                break;
+				_widgetManager.setWidgetMode(WidgetMode::None);
+				break;
         }
     }
 	for (auto each : selectedModels)
