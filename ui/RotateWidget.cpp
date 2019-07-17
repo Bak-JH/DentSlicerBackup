@@ -1,7 +1,7 @@
 #include "RotateWidget.h"
 #include "../qmlmanager.h"
 #include "../input/raycastcontroller.h"
-#include "RotateXYZWidget.h"
+#include "Widget3D.h"
 using namespace Hix::UI;
 using namespace Qt3DCore;
 using namespace Qt3DRender;
@@ -10,7 +10,7 @@ using namespace Qt3DExtras;
 const float RotateWidget::ROTATE_SPEED = 0.1;
 const float HALF_PI = M_PI / 2;
 RotateWidget::RotateWidget(const QVector3D& axis, Qt3DCore::QEntity* parent):QEntity(parent), _axis(axis),
-_parent(dynamic_cast<RotateXYZWidget*>(parent))
+_parent(dynamic_cast<Widget3D*>(parent))
 {
 
 	addComponent(&_torus);
@@ -40,6 +40,7 @@ _parent(dynamic_cast<RotateXYZWidget*>(parent))
 		_transform.setRotationY(90);
 	}
 	setEnabled(true);
+	addComponent(&_parent->layer);
 
 }
 
@@ -52,7 +53,7 @@ Hix::UI::RotateWidget::~RotateWidget()
 
 bool Hix::UI::RotateWidget::isDraggable(Hix::Input::MouseEventData& e, const Qt3DRender::QRayCasterHit& hit)
 {
-	return true;
+	return _parent->visible();
 }
 
 void Hix::UI::RotateWidget::dragStarted(Hix::Input::MouseEventData& e, const Qt3DRender::QRayCasterHit& hit)

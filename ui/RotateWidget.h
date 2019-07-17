@@ -9,13 +9,14 @@
 #include <qtorusmesh.h>
 #include "../input/Draggable.h"
 #include "../input/Hoverable.h"
+#include "../input/Highlightable.h"
 
 namespace Hix
 {
 	namespace UI
 	{
-		class RotateXYZWidget;
-		class RotateWidget :public Qt3DCore::QEntity, public Hix::Input::Draggable, public Hix::Input::Hoverable
+		class Widget3D;
+		class RotateWidget :public Qt3DCore::QEntity, public Hix::Input::Draggable, public Hix::Input::Hoverable, public Hix::Input::Highlightable
 		{
 			Q_OBJECT
 		public:
@@ -27,10 +28,10 @@ namespace Hix
 			void dragEnded(Hix::Input::MouseEventData&e) override;
 			void onEntered()override;
 			void onExited() override;
-			void setHighlight(bool enable);
+			void setHighlight(bool enable) override;
 		private:
 			double calculateRot();
-			RotateXYZWidget* _parent = nullptr;
+			Widget3D* _parent = nullptr;
 			QPoint _mouseOrigin;
 			QPoint _mouseCurrent;
 			QPoint _mousePrev;

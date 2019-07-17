@@ -153,7 +153,7 @@ void RayCastController::mousePressed(Qt3DInput::QMouseEvent* mouse)
 {
 	if (mouse->button() == Qt3DInput::QMouseEvent::Buttons::LeftButton || mouse->button() == Qt3DInput::QMouseEvent::Buttons::RightButton)
 	{
-		if (!_mouseBusy)
+		if (!_mouseBusy && mousePosInBound(mouse))
 		{
 
 			//no need for mutex, mouse events occur in main thread
@@ -181,6 +181,8 @@ void RayCastController::mouseReleased(Qt3DInput::QMouseEvent* mouse)
 		//if drag, stop dragging
 		if (_dragged)
 		{
+			qDebug() << "drag ended";
+
 			_dragged->dragEnded(_mouseEvent);
 			_dragged = nullptr;
 		}
@@ -203,7 +205,7 @@ void RayCastController::mouseReleased(Qt3DInput::QMouseEvent* mouse)
 						return;
 
 					bool busy = false;
-					if (!_mouseEvent.position.isNull())
+					if (!_mouseEvent.position.isNull() && mousePosInBound(mouse))
 					{
 						_rayCastMode = RayCastMode::Click;
 						_rayCaster.trigger(_mouseEvent.position);
@@ -230,6 +232,7 @@ void RayCastController::mousePositionChanged(Qt3DInput::QMouseEvent* mouse)
 			{
 				_hoverRaycastBusy = true;
 				_hoverRayCaster.trigger(hoverEvent.position);
+
 			}
 		}
 		if (_mouseBusy)
@@ -292,6 +295,7 @@ void RayCastController::hitsChanged(const Qt3DRender::QAbstractRayCaster::Hits& 
 				auto draggable = dynamic_cast<Draggable*>(nearestHit->entity());
 				if (draggable && draggable->isDraggable(_mouseEvent, *nearestHit))
 				{
+					qDebug() << "drag started" << draggable;
 					_dragged = draggable;
 					_dragged->dragStarted(_mouseEvent, *nearestHit);
 				}

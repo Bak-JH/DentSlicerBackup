@@ -27,9 +27,9 @@ SOURCES += main.cpp \
     feature/text3dgeometrygenerator.cpp \
     feature/labellingtextpreview.cpp \
     ui/MoveWidget.cpp \
-    ui/MoveXYZWidget.cpp \
     ui/RotateWidget.cpp \
-    ui/RotateXYZWidget.cpp \
+    ui/Widget3D.cpp \
+    ui/Widget3DManager.cpp \
     utils/quaternionhelper.cpp \
     utils/mathutils.cpp \
     utils/qtriangulator.cpp \
@@ -181,9 +181,9 @@ HEADERS += \
     feature/labellingtextpreview.h \
     feature/text3dgeometrygenerator.h \
     ui/MoveWidget.h \
-    ui/MoveXYZWidget.h \
     ui/RotateWidget.h \
-    ui/RotateXYZWidget.h \
+    ui/Widget3D.h \
+    ui/Widget3DManager.h \
     unitTest/catch.hpp \
     unitTest/tests/IndexedListTest.h \
     unitTest/tests/TrackedIndexedListTest.h \
