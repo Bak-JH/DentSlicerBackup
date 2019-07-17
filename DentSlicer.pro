@@ -181,9 +181,7 @@ HEADERS += \
     feature/labellingtextpreview.h \
     feature/text3dgeometrygenerator.h \
     ui/MoveWidget.h \
-    ui/MoveXYZWidget.h \
     ui/RotateWidget.h \
-    ui/RotateXYZWidget.h \
     ui/Widget3D.h \
     ui/Widget3DManager.h \
     unitTest/catch.hpp \
