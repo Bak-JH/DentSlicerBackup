@@ -29,8 +29,8 @@ const QUrl LAYERVIEW_FRAG_URL = QUrl("qrc:/shaders/layerview.frag");
 const QUrl LAYERVIEW_GEOM_URL = QUrl("qrc:/shaders/layerview.geom");
 
 Hix::Render::ModelMaterial::ModelMaterial():
-	_ambientParameter(QStringLiteral("ambient"), QColor(50, 50, 50)),
-	_diffuseParameter(QStringLiteral("diffuse"), QColor(140, 140, 120))
+	_ambientParameter(QStringLiteral("ambient"), QColor(70, 70, 70)),
+	_diffuseParameter(QStringLiteral("diffuse"), QColor(140, 140, 140))
 {
 
 	//GLSL in this context can use following uniforms
