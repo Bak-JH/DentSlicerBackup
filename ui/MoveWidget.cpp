@@ -58,6 +58,7 @@ void Hix::UI::MoveWidget::dragStarted(Hix::Input::MouseEventData& e, const Qt3DR
 {
 	_parent->setManipulated(true);
 	setHighlight(true);
+	_transform.setScale3D(QVector3D(0.3f, 0.3f, 1.0f));
 	_mouseOrigin = e.position;
 	_mousePrev = e.position;
 	_mouseCurrent = e.position;
@@ -102,7 +103,6 @@ void Hix::UI::MoveWidget::doDrag(Hix::Input::MouseEventData& e)
 	qDebug() << diff;
 	_pastProj = currProj;
 	qmlManager->modelMoveWithAxis(_axis, diff * TRANSLATE_MULT);
-
 	//auto curAngle = calculateRot();
 	//auto dif = curAngle - _pastAngle;
 	//_pastAngle = curAngle;
@@ -111,6 +111,8 @@ void Hix::UI::MoveWidget::doDrag(Hix::Input::MouseEventData& e)
 
 void Hix::UI::MoveWidget::dragEnded(Hix::Input::MouseEventData& e)
 {
+	_transform.setScale3D(QVector3D(0.3f, 0.3f, 0.3f));
+	_parent->updatePosition();
 	_parent->setManipulated(false);
 	setHighlight(false);
     qmlManager->totalMoveDone();

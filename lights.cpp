@@ -5,10 +5,10 @@ Lights::Lights(Qt3DCore::QEntity *rootEntity)
     : parentEntity(rootEntity)
 {
 	std::vector<QVector3D> lightPos;
-	lightPos.push_back(QVector3D(light_distance, light_distance, 0));
-	lightPos.push_back(QVector3D(light_distance, -light_distance, 0));
-	lightPos.push_back(QVector3D(-light_distance, -light_distance, 0));
-	lightPos.push_back(QVector3D(-light_distance, light_distance, 0));
+	lightPos.push_back(QVector3D(light_distance, light_distance, light_distance));
+	lightPos.push_back(QVector3D(light_distance, -light_distance, light_distance));
+	lightPos.push_back(QVector3D(-light_distance, -light_distance, -light_distance));
+	lightPos.push_back(QVector3D(-light_distance, light_distance, -light_distance));
 
 	//light count here is also hardcoded into model_shader.geom!!!
 	for (size_t i = 0; i < 4; ++i)
