@@ -575,8 +575,8 @@ Mesh* Mesh::saveUndoState(const Qt3DCore::QTransform& transform)
 void Mesh::addPoint(float x, float y, ClipperLib::Path *path)
 {
     IntPoint ip;
-    ip.X = round(x*scfg->resolution);
-    ip.Y = round(y*scfg->resolution);
+    ip.X = round(x*ClipperLib::INT_PT_RESOLUTION);
+    ip.Y = round(y*ClipperLib::INT_PT_RESOLUTION);
     //qDebug() << "addPoint called with x " << x << " y " << y << " rounding " << ip.X;
     path->push_back(ip);
 }
@@ -587,9 +587,9 @@ float minDistanceToContour(QVector3D from, ClipperLib::Path contour){
 		ClipperLib::Path temp_path;
         temp_path.push_back(contour[i]);
         temp_path.push_back(contour[i+1]);
-        QVector3D int2qv3 = QVector3D(((float)contour[i].X)/scfg->resolution, ((float)contour[i].Y)/scfg->resolution, from.z());
+        QVector3D int2qv3 = QVector3D(((float)contour[i].X)/ClipperLib::INT_PT_RESOLUTION, ((float)contour[i].Y)/ClipperLib::INT_PT_RESOLUTION, from.z());
         IntPoint directionInt = contour[i+1] - contour[i];
-        QVector3D direction = QVector3D(directionInt.X/scfg->resolution, directionInt.Y/scfg->resolution, 0);
+        QVector3D direction = QVector3D(directionInt.X/ClipperLib::INT_PT_RESOLUTION, directionInt.Y/ClipperLib::INT_PT_RESOLUTION, 0);
         float cur_distance = from.distanceToLine(int2qv3, direction);
         if (abs(min_distance) > cur_distance){
             min_distance = cur_distance;
@@ -782,10 +782,10 @@ Path Mesh::intersectionPath(MeshFace mf, float z) const
 
 uint32_t Hix::Engine3D::vertexHash(QVector3D v) // max build size = 1000mm, resolution = 1 micron
 {
-    //qDebug() << "vertexHash" << v.x() << v.x()/SlicingConfiguration::vertex_inbound_distance;
-    return (uint32_t(((v.x()+SlicingConfiguration::vertex_inbound_distance/2) / SlicingConfiguration::vertex_inbound_distance)) ^\
-            (uint32_t(((v.y()+SlicingConfiguration::vertex_inbound_distance/2) / SlicingConfiguration::vertex_inbound_distance)) << 10) ^\
-            (uint32_t(((v.z()+SlicingConfiguration::vertex_inbound_distance/2) / SlicingConfiguration::vertex_inbound_distance)) << 20));
+    //qDebug() << "vertexHash" << v.x() << v.x()/Mesh::VTX_INBOUND_DIST;
+    return (uint32_t(((v.x()+Mesh::VTX_INBOUND_DIST/2) / Mesh::VTX_INBOUND_DIST)) ^\
+            (uint32_t(((v.y()+Mesh::VTX_INBOUND_DIST/2) / Mesh::VTX_INBOUND_DIST)) << 10) ^\
+            (uint32_t(((v.z()+Mesh::VTX_INBOUND_DIST/2) / Mesh::VTX_INBOUND_DIST)) << 20));
 }
 
 
@@ -876,7 +876,7 @@ VertexConstItr Mesh::getSimilarVertex(uint32_t digest, QVector3D v)
 	for (unsigned int idx = 0; idx < hashed_points.size(); idx++)
 	{
 		const auto vtx = hashed_points.at(idx);
-		if (vtx->position.distanceToPoint(v) <= SlicingConfiguration::vertex_3D_distance)
+		if (vtx->position.distanceToPoint(v) <= Mesh::VTX_3D_DIST)
 		{
 			return  hashed_points[idx];
 		}
@@ -1472,7 +1472,7 @@ Paths3D Hix::Engine3D::contourConstruct3D(Paths3D hole_edges){
                     continue;
                 }
                 // prolong hole_edge 1 if end and start matches
-                if ((hole_edge1_it->end()-1)->position.distanceToPoint(hole_edge2_it->begin()->position) < scfg->vertex_inbound_distance*0.05/scfg->resolution){
+                if ((hole_edge1_it->end()-1)->position.distanceToPoint(hole_edge2_it->begin()->position) < Mesh::VTX_INBOUND_DIST *0.05/ClipperLib::INT_PT_RESOLUTION){
                 //if (Vertex2Hash(*(hole_edge1_it->end()-1)) == Vertex2Hash(*hole_edge2_it->begin())){
                     //qDebug() << "erase";
                     dirty = true;
@@ -1480,7 +1480,7 @@ Paths3D Hix::Engine3D::contourConstruct3D(Paths3D hole_edges){
                     checked_its.push_back(hole_edge2_it);
                     //hole_edge2_it = hole_edges.erase(hole_edge2_it);
                     //qDebug() << "erased";
-                } else if ((hole_edge1_it->end()-1)->position.distanceToPoint((hole_edge2_it->end()-1)->position) < scfg->vertex_inbound_distance*0.05/scfg->resolution){
+                } else if ((hole_edge1_it->end()-1)->position.distanceToPoint((hole_edge2_it->end()-1)->position) < Mesh::VTX_INBOUND_DIST *0.05/ClipperLib::INT_PT_RESOLUTION){
                 //} else if (Vertex2Hash(*(hole_edge1_it->end()-1)) == Vertex2Hash(*(hole_edge2_it->end()-1))){
                     //qDebug() << "erase";
                     dirty = true;

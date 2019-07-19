@@ -34,9 +34,8 @@
 
 
 
-class SlicingConfiguration
+struct SlicingConfiguration
 {
-public:
 	enum class SupportType
 	{
 		None = 0,
@@ -55,14 +54,13 @@ public:
 		None = 0,
 		General
 	};
-    // configurations
-    static constexpr int resolution_scale = 3;
-    static constexpr int resolution = 1000;//pow(10,resolution_scale); // resolution range from 1000 to 1
-    static constexpr float max_buildsize_x = 1000.0f;//1000000/resolution;
-    static constexpr float vertex_inbound_distance = 0.002f;//0.03;//(float)1/resolution; // resolution in mm (0.0001 and 0.0009 are same, 1 micron)
-	static constexpr float vertex_3D_distance = 0.0034f;
 
-    const char* slicing_mode = "uniform"; // uniform OR adaptive
+	enum class SlicingMode
+	{
+		Uniform = 0,
+		Adaptive
+	};
+    // configurations
     float layer_height = 0.1f; // in mm
     float nozzle_width = 0.0f; // in mm (diameter) , for printers with nozzles
     float wall_thickness = 2.0f; // in mm
@@ -73,6 +71,7 @@ public:
     int resin_type = TEMPORARY_RESIN;
     float contraction_ratio = TEMPORARY_CONTRACTION_RATIO;
 
+	const SlicingMode slicing_mode = SlicingMode::Uniform; // uniform OR adaptive
 	SupportType support_type = SupportType::General;
 	InFillType infill_type = InFillType::Full;
 	RaftType raft_type = RaftType::General;
@@ -90,26 +89,12 @@ public:
     // bed configuration
     QVector3D origin;
 
-    /* // settings for capsule 3D Printer
-    int resolution_x = 2560;
-    int resolution_y = 1440;
-
-    float bed_x = 120.96; // in mm
-    float bed_y = 68.04; // in mm*/
-
     // settings for vittro plus
     int resolution_x = 1920;
     int resolution_y = 1080;
 
     float bed_x = 124.8f; // in mm
     float bed_y = 70.2f; // in mm
-
-    /*// settings for vittro
-    int resolution_x = 1280;
-    int resolution_y = 800;
-
-    float bed_x = 138; // in mm
-    float bed_y = 90; // in mm*/
 
 	size_t bed_margin_x = 1;
 	size_t bed_margin_y = 1;

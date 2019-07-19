@@ -5,10 +5,6 @@
 
 using namespace ClipperLib;
 
-int origin_x;
-int origin_y;
-int origin_z;
-
 #if defined(_DEBUG) || defined(QT_DEBUG)
 #define _DEBUG_SVG
 #endif
@@ -83,10 +79,6 @@ QString SVGexporter::exportSVG(Slices& shellSlices, Slices& supportSlices, Slice
     infofile.close();
     //qDebug() << jsonBytes;
 
-    origin_x = scfg->origin.x()*scfg->resolution;
-    origin_y = scfg->origin.y()*scfg->resolution;
-    origin_z = scfg->origin.z()*scfg->resolution;
-
     int64_t area = 0;
     int currentSlice_idx = 0;
 
@@ -96,7 +88,7 @@ QString SVGexporter::exportSVG(Slices& shellSlices, Slices& supportSlices, Slice
         std::ofstream outfile(outfilename.toStdString().c_str(), std::ios::out);
 
         writeHeader(outfile);
-        if (scfg->slicing_mode == "uniform")
+        if (scfg->slicing_mode == SlicingConfiguration::SlicingMode::Uniform)
             writeGroupHeader(outfile, currentSlice_idx, scfg->layer_height*(currentSlice_idx+1));
         else
             writeGroupHeader(outfile, currentSlice_idx, scfg->layer_height*(currentSlice_idx+1));
@@ -121,7 +113,7 @@ QString SVGexporter::exportSVG(Slices& shellSlices, Slices& supportSlices, Slice
             QString outfilename = outfoldername + "/" + QString::number(currentSlice_idx) + ".svg";
             std::ofstream outfile(outfilename.toStdString().c_str(), std::ios::out);
             writeHeader(outfile);
-            if (scfg->slicing_mode == "uniform")
+            if (scfg->slicing_mode == SlicingConfiguration::SlicingMode::Uniform)
                 writeGroupHeader(outfile, currentSlice_idx, scfg->layer_height*(currentSlice_idx+1));
             else
                 writeGroupHeader(outfile, currentSlice_idx, scfg->layer_height*(currentSlice_idx+1));
@@ -146,7 +138,7 @@ QString SVGexporter::exportSVG(Slices& shellSlices, Slices& supportSlices, Slice
         QString outfilename = outfoldername + "/" + QString::number(currentSlice_idx) + ".svg";
         std::ofstream outfile(outfilename.toStdString().c_str(), std::ios::out);
         writeHeader(outfile);
-        if (scfg->slicing_mode == "uniform")
+        if (scfg->slicing_mode == SlicingConfiguration::SlicingMode::Uniform)
             writeGroupHeader(outfile, currentSlice_idx, scfg->layer_height*(currentSlice_idx+1));
         else
             writeGroupHeader(outfile, currentSlice_idx, scfg->layer_height*(currentSlice_idx+1));
@@ -302,10 +294,10 @@ void SVGexporterPrivate::parsePolyTreeAndWrite(PolyNode* pn, std::ofstream& outf
 void SVGexporterPrivate::writePolygon(std::ofstream& outfile, PolyNode* contour){
     outfile << "      <polygon contour:type=\"contour\" points=\"";
     for (IntPoint point: contour->Contour){
-        outfile << std::fixed << (float)(point.X)*scfg->pixel_per_mm/(scfg->resolution*scfg->contraction_ratio) + (scfg->resolution_x/2)<< "," << std::fixed << scfg->resolution_y/2 - (float)(point.Y)*scfg->pixel_per_mm/(scfg->resolution*scfg->contraction_ratio) << " "; // doesn't need 100 actually
+        outfile << std::fixed << (float)(point.X)*scfg->pixel_per_mm/(ClipperLib::INT_PT_RESOLUTION*scfg->contraction_ratio) + (scfg->resolution_x/2)<< "," << std::fixed << scfg->resolution_y/2 - (float)(point.Y)*scfg->pixel_per_mm/(ClipperLib::INT_PT_RESOLUTION*scfg->contraction_ratio) << " "; // doesn't need 100 actually
 
         // just fit to origin
-        //outfile << std::fixed << (float)point.X/scfg->resolution - scfg->origin.x() << "," << std::fixed << (float)point.Y/scfg->resolution - scfg->origin.y() << " ";
+        //outfile << std::fixed << (float)point.X/ClipperLib::INT_PT_RESOLUTION - scfg->origin.x() << "," << std::fixed << (float)point.Y/ClipperLib::INT_PT_RESOLUTION - scfg->origin.y() << " ";
     }
     if (! contour->IsHole()){
         outfile << "\" style=\"fill: white\" />\n";
@@ -317,10 +309,10 @@ void SVGexporterPrivate::writePolygon(std::ofstream& outfile, PolyNode* contour)
 void SVGexporterPrivate::writePolygon(std::ofstream& outfile, ClipperLib::Path& contour){
     outfile << "      <polygon contour:type=\"contour\" points=\"";
     for (IntPoint point: contour){
-        outfile << std::fixed << (float)(point.X)*scfg->pixel_per_mm/(scfg->resolution*scfg->contraction_ratio) + (scfg->resolution_x/2) << "," << std::fixed << scfg->resolution_y/2 - (float)(point.Y)*scfg->pixel_per_mm/(scfg->resolution*scfg->contraction_ratio)<< " "; // doesn't need 100 actually
+        outfile << std::fixed << (float)(point.X)*scfg->pixel_per_mm/(ClipperLib::INT_PT_RESOLUTION*scfg->contraction_ratio) + (scfg->resolution_x/2) << "," << std::fixed << scfg->resolution_y/2 - (float)(point.Y)*scfg->pixel_per_mm/(ClipperLib::INT_PT_RESOLUTION*scfg->contraction_ratio)<< " "; // doesn't need 100 actually
 
         // just fit to origin
-        //outfile << std::fixed << (float)point.X/scfg->resolution - scfg->origin.x() << "," << std::fixed << (float)point.Y/scfg->resolution - scfg->origin.y() << " ";
+        //outfile << std::fixed << (float)point.X/ClipperLib::INT_PT_RESOLUTION - scfg->origin.x() << "," << std::fixed << (float)point.Y/ClipperLib::INT_PT_RESOLUTION - scfg->origin.y() << " ";
     }
     outfile << "\" style=\"fill: white\" />\n";
 }
