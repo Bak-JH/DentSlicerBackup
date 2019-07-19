@@ -20,6 +20,7 @@
 #include <feature/generatesupport.h>
 #include <Qt3DCore/qpropertyupdatedchange.h>
 #include <feature/generateraft.h>
+#include "DentEngine/src/configuration.h"
 
 
 
@@ -625,6 +626,7 @@ void featureThread::run(){
                 m_glmodel->updateLock = true;
                 // look for data if it is temporary
                 QVariantMap config = data.toMap();
+				scfg->set(config);
                 bool isTemporary = false;
                 for (QVariantMap::const_iterator iter = config.begin(); iter != config.end(); ++iter){
                     if (!strcmp(iter.key().toStdString().c_str(), "temporary")){
@@ -651,7 +653,7 @@ void featureThread::run(){
                 // slice file
                 qmlManager->openProgressPopUp();
                 QFuture<Slicer*> future = QtConcurrent::run(
-					se, &SlicingEngine::slice, data, m_glmodel->_mesh, m_glmodel->supportMesh, 
+					se, &SlicingEngine::slice, m_glmodel->_mesh, m_glmodel->supportMesh, 
 					m_glmodel->raftMesh, fileName + "/" + m_glmodel->filename.split("/").last() );
                 m_glmodel->futureWatcher.setFuture(future);
                 m_glmodel->updateLock = false;

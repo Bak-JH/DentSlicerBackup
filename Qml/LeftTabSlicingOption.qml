@@ -135,7 +135,7 @@ Rectangle {
                 LeftTabSlicingOptionElement{
                     id:option_support
                     columnName: ""
-                    columnContents: ["k-branch","general"]
+                    columnContents: ["k-branch","general", "none"]
                 }
                 LeftTabSlicingOptionElement2{
                     columnName: ""

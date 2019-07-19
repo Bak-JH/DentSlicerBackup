@@ -24,7 +24,8 @@
 #include <exception>
 #include "qmlmanager.h"
 #include "utils/utils.h"
-#include "lights.h"
+#include "render/lights.h"
+#include "DentEngine/src/configuration.h"
 
 using namespace Hix::Input;
 using namespace Hix::UI;
@@ -2034,8 +2035,9 @@ void QmlManager::setViewMode(int viewMode) {
 
 void  QmlManager::exportSelected(bool isTemp)
 {
-	auto exportConfig = boxUpperTab->property("options");
-
+	auto options = boxUpperTab->property("options");
+	auto exportConfig = options.toMap();
+	scfg->set(exportConfig);
 	QString fileName;
 
 	if (!isTemp) { // export view
@@ -2063,7 +2065,7 @@ void  QmlManager::exportSelected(bool isTemp)
 	// generate support
 	GenerateSupport generatesupport;
 	Mesh* mergedSupportMesh = nullptr;
-	if (scfg->support_type != 0) { // if generating support
+	if (scfg->support_type != SlicingConfiguration::SupportType::None) { // if generating support
 		//Mesh* mergedSupportMesh = nullptr;
 		mergedSupportMesh = generatesupport.generateSupport(mergedShellMesh);
 	}
@@ -2071,13 +2073,13 @@ void  QmlManager::exportSelected(bool isTemp)
 	// generate raft according to support structure
 	GenerateRaft generateraft;
 	Mesh* mergedRaftMesh = nullptr;
-	if (scfg->raft_type != 0) {
+	if (scfg->raft_type != SlicingConfiguration::RaftType::None) {
 		mergedRaftMesh = generateraft.generateRaft(mergedShellMesh, generatesupport.overhangPoints);
 	}
 	// need to generate support, raft
 
 	//se->slice(data, mergedMesh, fileName);
-	se->slice(exportConfig, mergedShellMesh, mergedSupportMesh, mergedRaftMesh, fileName);
+	se->slice(mergedShellMesh, mergedSupportMesh, mergedRaftMesh, fileName);
 	//deleteOneModelFile(mergedModel->ID);
 
 	//m_glmodel->futureWatcher.setFuture(future);
