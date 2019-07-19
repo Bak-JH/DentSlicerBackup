@@ -13,8 +13,9 @@ RC_FILE = DentSlicer.rc
 SOURCES += main.cpp \
     common/TaskManager.cpp \
     input/raycastcontroller.cpp \
-    lights.cpp \
     render/ModelMaterial.cpp \
+    render/lights.cpp \
+    slice/slicingengine.cpp \
     slicingengine.cpp \
     glmodel.cpp \
     qmlmanager.cpp \
@@ -166,9 +167,10 @@ HEADERS += \
     common/taskflow/utility/traits.hpp \
     input/Draggable.h \
     input/raycastcontroller.h \
-    lights.h \
     render/Color.h \
     render/ModelMaterial.h \
+    render/lights.h \
+    slice/slicingengine.h \
     slicingengine.h \
     glmodel.h \
     qmlmanager.h \
