@@ -70,6 +70,8 @@ public:
     Qt3DCore::QEntity *mttab;
     QObject* undoRedoButton;
     QObject* slicingData;
+	QObject* ltso;
+
     Qt3DInput::QKeyboardHandler* keyboardHandler;
 
     // model rotate components

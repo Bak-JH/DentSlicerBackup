@@ -4,17 +4,35 @@ import QtQuick.Controls 1.2
 import QtQuick.Layouts 1.3
 
 Rectangle {
-    property alias option_resolution: option_resolution
-    property alias option_layer_height: option_layer_height
-    property alias option_bed_number: option_bed_number
-    property alias option_resin_type: option_resin_type
-    property alias option_raft: option_raft
-    property alias option_support: option_support
-    property alias option_support_density: option_support_density
+//    property alias option_resolution: option_resolution
+//    property alias option_layer_height: option_layer_height
+//    property alias option_bed_number: option_bed_number
+//    property alias option_resin_type: option_resin_type
+//    property alias option_raft: option_raft
+//    property alias option_support: option_support
+//    property alias option_support_density: option_support_density
 
-    property alias option_infill: option_infill
-    property alias option_infill_density: option_infill_density
+//    property alias option_infill: option_infill
+//    property alias option_infill_density: option_infill_density
 
+    property var optionElements: []
+    function addOptionElement(optionName, contents, defaultValIdx)
+    {
+        var opComp = Qt.createComponent("LeftTabSlicingOptionElement.qml");
+        var newOption =
+                opComp.createObject(optionColLayout,
+                {"columnName" : optionName, "columnContents" : contents, "currentIndex" : defaultValIdx});
+        optionElements.push(newOption);
+    }
+    function getOptions()
+    {
+        var options = {};
+        optionElements.forEach(function(currOption)
+        {
+            options[currOption.columnName] =  currOption.currentText;
+        });
+        return options;
+    }
 
     width : 264
     height : 180
@@ -86,83 +104,84 @@ Rectangle {
             anchors.topMargin: 16
 
             ColumnLayout {
+                id: optionColLayout
                 spacing: 2
-                LeftTabSlicingOptionElement{
-                    id:option_resolution
-                    columnName: "Resolution"
-                    columnContents: ["1920*1080", "1280*800", "1024*768"]
-                }
+//                LeftTabSlicingOptionElement{
+//                    id:option_resolution
+//                    columnName: "Resolution"
+//                    columnContents: ["1920*1080", "1280*800", "1024*768"]
+//                }
 
-                Item{width:parent.width;height:2}//spacer
+//                Item{width:parent.width;height:2}//spacer
 
-                LeftTabSlicingOptionElement{
-                    id:option_layer_height
-                    columnName: "Layer height"
-                    columnContents: ["0.1","0.2","0.05"]
-                }
+//                LeftTabSlicingOptionElement{
+//                    id:option_layer_height
+//                    columnName: "Layer height"
+//                    columnContents: ["0.1","0.2","0.05"]
+//                }
 
-                Item{width:parent.width;height:2}//spacer
+//                Item{width:parent.width;height:2}//spacer
 
-                LeftTabSlicingOptionElement{
-                    id:option_bed_number
-                    columnName: "Bed number"
-                    columnContents: ["1","2","3"]
-                }
+//                LeftTabSlicingOptionElement{
+//                    id:option_bed_number
+//                    columnName: "Bed number"
+//                    columnContents: ["1","2","3"]
+//                }
 
-                Item{width:parent.width;height:2}//spacer
+//                Item{width:parent.width;height:2}//spacer
 
-                LeftTabSlicingOptionElement{
-                    id:option_resin_type
-                    columnName: "Resin Type"
-                    columnContents: ["Temporary","Clear","Castable"]
-                }
+//                LeftTabSlicingOptionElement{
+//                    id:option_resin_type
+//                    columnName: "Resin Type"
+//                    columnContents: ["Temporary","Clear","Castable"]
+//                }
 
-                Item{width:parent.width;height:2}//spacer
+//                Item{width:parent.width;height:2}//spacer
 
-                LeftTabSlicingOptionElement{
-                    id:option_raft
-                    columnName: "Raft"
-                    columnContents: ["general","none"]
+//                LeftTabSlicingOptionElement{
+//                    id:option_raft
+//                    columnName: "Raft"
+//                    columnContents: ["general","none"]
 
-                    Item{width:parent.width;height:2}//spacer
+//                    Item{width:parent.width;height:2}//spacer
 
-                }
-                LeftTabSlicingOptionElement2{
-                    columnName: "Support"
-                    columnText: "Type"
-                }
+//                }
+//                LeftTabSlicingOptionElement2{
+//                    columnName: "Support"
+//                    columnText: "Type"
+//                }
 
-                LeftTabSlicingOptionElement{
-                    id:option_support
-                    columnName: ""
-                    columnContents: ["k-branch","general", "none"]
-                }
-                LeftTabSlicingOptionElement2{
-                    columnName: ""
-                    columnText: "Density"
-                }
-                LeftTabSlicingOptionElement3{
-                    id:option_support_density
-                }
+//                LeftTabSlicingOptionElement{
+//                    id:option_support
+//                    columnName: ""
+//                    columnContents: ["k-branch","general", "none"]
+//                }
+//                LeftTabSlicingOptionElement2{
+//                    columnName: ""
+//                    columnText: "Density"
+//                }
+//                LeftTabSlicingOptionElement3{
+//                    id:option_support_density
+//                }
 
-                Item{width:parent.width;height:2}//spacer
+//                Item{width:parent.width;height:2}//spacer
 
-                LeftTabSlicingOptionElement2{
-                    columnName: "Infill"
-                    columnText: "Type"
-                }
-                LeftTabSlicingOptionElement{
-                    id:option_infill
-                    columnName: ""
-                    columnContents: ["general","full","none"]
-                }
-                LeftTabSlicingOptionElement2{
-                    columnName: ""
-                    columnText: "Density"
-                }
-                LeftTabSlicingOptionElement3{
-                    id:option_infill_density
-                }
+//                LeftTabSlicingOptionElement2{
+//                    columnName: "Infill"
+//                    columnText: "Type"
+//                }
+//                LeftTabSlicingOptionElement{
+//                    id:option_infill
+//                    columnName: ""
+//                    columnContents: ["general","full","none"]
+//                }
+//                LeftTabSlicingOptionElement2{
+//                    columnName: ""
+//                    columnText: "Density"
+//                }
+//                LeftTabSlicingOptionElement3{
+//                    id:option_infill_density
+//                }
 
             }
         }

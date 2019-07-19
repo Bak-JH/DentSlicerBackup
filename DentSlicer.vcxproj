@@ -292,6 +292,7 @@
     <ClInclude Include="DentEngine\src\polyclipping\clipper\clipper.hpp" />
     <ClInclude Include="DentEngine\src\cmdlineparser.h" />
     <ClInclude Include="DentEngine\src\configuration.h" />
+    <ClInclude Include="DentEngine\src\polyclipping\polyclipping.h" />
     <ClInclude Include="DentEngine\src\polyclipping\QDebugPolyclipping.h" />
     <ClInclude Include="feature\convex_hull.h" />
     <ClInclude Include="feature\earcut.hpp" />

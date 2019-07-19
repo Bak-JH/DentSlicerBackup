@@ -13,7 +13,6 @@ Rectangle {
     color: "#42BFCC"
     property int buttonWidth : 88
     property int buttonHeight : 98
-    property var options: []
 
 
     // feature type number
@@ -267,8 +266,6 @@ Rectangle {
                 anchors.fill: parent
                 onClicked:{
                     all_off();
-                    lefttabExport.visible = true;
-
                     // yesno popup을 거쳐 확인하고 슬라이스
                     yesnoPopUp.openYesNoPopUp(false, "Exporting process may take time.", "", "Would you like to continue?", 16, "", ftrExport, 0);
                 }

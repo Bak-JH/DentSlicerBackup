@@ -329,8 +329,8 @@ const MeshVertex* autoarrange::findVertexWithIntpoint(IntPoint p, const Mesh* me
 const MeshVertex* autoarrange::findVertexWithIntXY(size_t x, size_t y, const Mesh* mesh){
 	for (auto& each : mesh->getVertices())
 	{
-        int x_int = round(each.position.x()*scfg->resolution);
-        int y_int = round(each.position.y()*scfg->resolution);
+        int x_int = round(each.position.x()*ClipperLib::INT_PT_RESOLUTION);
+        int y_int = round(each.position.y()*ClipperLib::INT_PT_RESOLUTION);
         if(x_int==x && y_int==y) return &each;
     }
 }
@@ -1173,7 +1173,7 @@ IntPoint autoarrange::getFirstNFPPoint(const IntPoint& first_sub_vec, const IntP
 //}
 //
 //void autoarrange::arrangeSingleQt3D(Qt3DCore::QTransform* m_transform, XYArrangement arng_result){
-//    QVector3D trans_vec = QVector3D(arng_result.first.X/scfg->resolution, arng_result.first.Y/scfg->resolution, m_transform->translation().z());
+//    QVector3D trans_vec = QVector3D(arng_result.first.X/ClipperLib::INT_PT_RESOLUTION, arng_result.first.Y/ClipperLib::INT_PT_RESOLUTION, m_transform->translation().z());
 //    m_transform->setTranslation(trans_vec);
 //    m_transform->setRotationZ(arng_result.second);
 //}
@@ -1338,9 +1338,9 @@ void autoarrange::debugFaces(const Mesh* mesh, std::vector<const MeshFace *> fac
 //		float x_f = vtx.x();
 //		float y_f = vtx.y();
 //		float z_f = vtx.z();
-//		int x_int = round(x_f * scfg->resolution);
-//		int y_int = round(y_f * scfg->resolution);
-//		int z_int = round(z_f * scfg->resolution);
+//		int x_int = round(x_f * ClipperLib::INT_PT_RESOLUTION);
+//		int y_int = round(y_f * ClipperLib::INT_PT_RESOLUTION);
+//		int z_int = round(z_f * ClipperLib::INT_PT_RESOLUTION);
 //		qDebug() << "(" << x_f << "," << y_f << "," << z_f << ")";
 //	}
 //	qDebug() << "face normal:" << "(" << mf->fn.x() << "," << mf->fn.y() << "," << mf->fn.z() << ")";

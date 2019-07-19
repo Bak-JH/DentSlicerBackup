@@ -13,7 +13,7 @@ Item {
     property var columnContents :[]
 
     property alias currentText: combo.currentText
-
+    property alias currentIndex: combo.currentIndex
     Text{
         id:text
         width: 116
