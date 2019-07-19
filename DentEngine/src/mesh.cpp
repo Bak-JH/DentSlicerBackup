@@ -3,6 +3,8 @@
 #include <QDebug>
 #include <QCoreApplication>
 #include "utils/mathutils.h"
+#include "configuration.h"
+
 #include <list>
 
 #if defined(_DEBUG) || defined(QT_DEBUG )

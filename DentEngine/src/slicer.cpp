@@ -5,6 +5,7 @@
 #include "qmlmanager.h"
 #include "../../utils/mathutils.h"
 #include "polyclipping/QDebugPolyclipping.h"
+#include "configuration.h"
 
 using namespace ClipperLib;
 using namespace Hix::Debug;
@@ -18,13 +19,6 @@ QDebug Hix::Debug::operator<< (QDebug d, const Slice& obj) {
 	d << "infill: " << obj.infill;
 	d << "support: " << obj.support;
 	d << "Area: " << obj.Area;
-
-
-	d << "slices: ";
-	for (const auto& each : obj)
-	{
-		d << each;
-	}
 	return d;
 }
 QDebug Hix::Debug::operator<< (QDebug d, const Slices& obj) {

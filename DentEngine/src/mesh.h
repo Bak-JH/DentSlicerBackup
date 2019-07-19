@@ -5,7 +5,6 @@
 #include <QHash>
 #include "polyclipping/clipper/clipper.hpp"
 #include "polyclipping/poly2tri/poly2tri.h"
-#include "configuration.h"
 #include <QTransform>
 #include <QTime>
 #include <array>

@@ -32,9 +32,29 @@
 #include <QVector3D>
 #include <QVariant>
 
-class SlicingConfiguration : public QVariantMap
+
+
+class SlicingConfiguration
 {
 public:
+	enum class SupportType
+	{
+		None = 0,
+		KBranch,
+		General
+	};
+	enum class InFillType
+	{
+		None = 0,
+		Full,
+		General
+	};
+
+	enum class RaftType
+	{
+		None = 0,
+		General
+	};
     // configurations
     static constexpr int resolution_scale = 3;
     static constexpr int resolution = 1000;//pow(10,resolution_scale); // resolution range from 1000 to 1
@@ -53,9 +73,9 @@ public:
     int resin_type = TEMPORARY_RESIN;
     float contraction_ratio = TEMPORARY_CONTRACTION_RATIO;
 
-    int support_type = 2;
-    int infill_type = 1;
-    int raft_type = 2;
+	SupportType support_type = SupportType::General;
+	InFillType infill_type = InFillType::Full;
+	RaftType raft_type = RaftType::General;
 
     // raft settings
     float raft_thickness = 2.0f; // in mm
@@ -95,6 +115,8 @@ public:
 	size_t bed_margin_y = 1;
 
     float pixel_per_mm = float(resolution_x)/float(bed_x);
+
+	void set(const QVariantMap& map);
 };
 extern SlicingConfiguration* scfg;
 
