@@ -92,6 +92,29 @@ void QmlManager::initializeUI(QQmlApplicationEngine* e){
     slicingData = FindItemByName(engine, "slicingData");
 
 
+	ltso = FindItemByName(engine, "ltso");
+	QStringList values = QStringList() << "aaa" << "bb" << "cccc";
+	QString opName = "testOp";
+	QMetaObject::invokeMethod(ltso, "addOptionElement",
+		Q_ARG(QVariant, opName),
+		Q_ARG(QVariant, values),
+		Q_ARG(QVariant, 0)
+	);
+
+	QStringList values2 = QStringList() << "aaa2" << "bb2" << "cccc2";
+	QString opName2 = "testOp2";
+	QMetaObject::invokeMethod(ltso, "addOptionElement",
+		Q_ARG(QVariant, opName2),
+		Q_ARG(QVariant, values2),
+		Q_ARG(QVariant, 1)
+	);
+
+	QVariant result;
+	QMetaObject::invokeMethod(ltso, "getOptions",
+		Q_RETURN_ARG(QVariant, result)
+	);
+	auto map = result.toMap();
+
     // selection popup
     yesno_popup = FindItemByName(engine, "yesno_popup");
     result_popup = FindItemByName(engine, "result_popup");

@@ -2306,7 +2306,7 @@ void GLModel::generateManualSupport(){
     QVector3D t = m_transform.translation();
     t.setZ(_mesh->z_min()+scfg->raft_thickness + scfg->support_base_height);
     QVector3D targetPosition = targetMeshFace->meshVertices()[0]->position- t;
-    /*OverhangPoint* targetOverhangPosition = new OverhangPoint(targetPosition.x()*scfg->resolution,
+    /*OverhangPoint* targetOverhangPosition = new OverhangPoint(targetPosition.x()*ClipperLib::INT_PT_RESOLUTION,
     generateSupporter(layerSupportMesh, targetOverhangPosition, nullptr, nullptr, layerSupportMesh->z_min());*/
 	_targetSelected = false;
 	updateModelMesh();
