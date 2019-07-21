@@ -53,8 +53,8 @@ public:
     void pointOverhangDetect(Mesh* mesh, Mesh* support_mesh);
     void faceOverhangDetect(Mesh* mesh, Mesh* support_mesh);
     void faceOverhangPoint(Mesh *mesh, Mesh* support_mesh, QVector3D v0, QVector3D v1, QVector3D v2);
-
     void generateTip(Mesh* mesh, Mesh* support_mesh, QVector3D point);
+
     void findNearestPoint(size_t index);
     OverhangPoint coneNconeIntersection(OverhangPoint coneApex1, OverhangPoint coneApex2);
     OverhangPoint coneNmeshIntersection(Mesh* mesh, OverhangPoint coneApex);

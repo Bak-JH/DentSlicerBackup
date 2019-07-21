@@ -241,18 +241,23 @@ void GenerateSupport::faceOverhangPoint(Mesh* mesh, Mesh *support_mesh, QVector3
 }
 
 void GenerateSupport::generateTip(Mesh* mesh, Mesh *support_mesh, QVector3D point) {
-    OverhangPoint overhangPoint = OverhangPoint(point, true, false, false);
+    OverhangPoint overhangPoint = OverhangPoint(point, true, false, false, supportRadiusMin);
     overhangPoints.push_back(overhangPoint);
     generateTopFace(support_mesh, overhangPoint);
 
     OverhangPoint meshInt = coneNmeshIntersection(mesh, overhangPoint);
     if (!meshInt.topPoint && !meshInt.supportInterPoint && !meshInt.meshInterPoint)
         meshInt.radius = (supportRadiusMax + supportRadiusMin) / 2;
+
+    if ((meshInt.topPoint || meshInt.supportInterPoint || meshInt.meshInterPoint)
+        && (point - meshInt.position).length() < minLength)
+        return;
+
     if ((point - meshInt.position).length() < tip_len) {
         generateFaces(support_mesh, overhangPoint, meshInt);
         generateBottomFace(support_mesh, meshInt);
     } else {
-        OverhangPoint supportPoint = OverhangPoint(overhangPoint.position - QVector3D(0,0,tip_len), false, true, false);
+        OverhangPoint supportPoint = OverhangPoint(overhangPoint.position - QVector3D(0,0,tip_len), false, true, false, supportRadiusMin + 0.1f);
         generateFaces(support_mesh, overhangPoint, supportPoint);
         overhangPoints.push_back(supportPoint);
     }
@@ -427,17 +432,17 @@ void GenerateSupport::generateStem(Mesh* mesh, OverhangPoint top, OverhangPoint*
             && (top.position - bottom->position).length() < minLength) return;
 
     OverhangPoint origin_bottom = *bottom;
-    if (bottom->meshInterPoint) {
-        if ((top.position - bottom->position).length() <= 5)
+    if (origin_bottom.meshInterPoint) {
+        if ((top.position - origin_bottom.position).length() <= 5)
             *bottom = OverhangPoint(internalDiv(top, origin_bottom, 1, 1), false, true, false, origin_bottom.radius);
-        else if ((top.position - bottom->position).length() <= 10)
+        else if ((top.position - origin_bottom.position).length() <= 10)
             *bottom = OverhangPoint(internalDiv(top, origin_bottom, 3, 1), false, true, false, origin_bottom.radius);
         else *bottom = OverhangPoint(internalDiv(top, origin_bottom, 5, 1), false, true, false, origin_bottom.radius);
     }
 
     float bottomRadius = calculateRadius(/*mesh->z_max() - z_min, bottom->position.z() - z_min,*/
                                          top.position.z() - bottom->position.z());
-    if (bottomRadius < std::max(top.radius, origin_bottom.radius))
+    if (bottomRadius < std::max(top.radius, bottom->radius))
         bottomRadius = std::max(top.radius, bottom->radius);
     if (origin_bottom.supportInterPoint && (origin_bottom.radius > supportRadiusMin) && (bottomRadius > origin_bottom.radius))
          bottomRadius = origin_bottom.radius;
@@ -462,9 +467,7 @@ void GenerateSupport::generateStem(Mesh* mesh, OverhangPoint top, OverhangPoint*
         supportPoints.push_back(*bottom);
 
     if ((top.position - bottom->position).length() >= 8)
-    {
         supportPoints.push_back(OverhangPoint((top.position + bottom->position)/2, false, true, false, (top.radius + bottom->radius)/2));
-    }
 }
 
 QVector3D GenerateSupport::internalDiv(OverhangPoint a, OverhangPoint b, float m, float n) {
