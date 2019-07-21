@@ -39,8 +39,8 @@ public:
     float z_min;
     float z_min_minimal_diff = scfg->layer_height/2;
     float minLength = scfg->support_base_height+1;
-    float near_dis = 3;
-    float near_z = 1;
+    float near_dis = 8 * scfg->support_density;
+    float near_z = near_dis / 2.0f;
     float area_subdiv = 10;
     float tip_len = 3;
 

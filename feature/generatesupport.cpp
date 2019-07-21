@@ -241,7 +241,7 @@ void GenerateSupport::faceOverhangPoint(Mesh* mesh, Mesh *support_mesh, QVector3
 }
 
 void GenerateSupport::generateTip(Mesh* mesh, Mesh *support_mesh, QVector3D point) {
-    OverhangPoint overhangPoint = OverhangPoint(point, true, false, false, supportRadiusMin);
+    OverhangPoint overhangPoint = OverhangPoint(point, true, false, false);
     overhangPoints.push_back(overhangPoint);
     generateTopFace(support_mesh, overhangPoint);
 
