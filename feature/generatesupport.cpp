@@ -413,8 +413,6 @@ void GenerateSupport::generateBranch(Mesh* mesh, OverhangPoint leaf1, OverhangPo
     if (bottomRadius < std::max(std::max(leaf1.radius, leaf2.radius), stem->radius))
         bottomRadius = std::max(std::max(leaf1.radius, leaf2.radius), stem->radius);
 
-    // generate top tip
-
     stem->radius = bottomRadius;
     generateFaces(mesh, leaf1, *stem);
     generateFaces(mesh, leaf2, *stem);
@@ -432,13 +430,8 @@ void GenerateSupport::generateStem(Mesh* mesh, OverhangPoint top, OverhangPoint*
             && (top.position - bottom->position).length() < minLength) return;
 
     OverhangPoint origin_bottom = *bottom;
-    if (origin_bottom.meshInterPoint) {
-        if ((top.position - origin_bottom.position).length() <= 5)
-            *bottom = OverhangPoint(internalDiv(top, origin_bottom, 1, 1), false, true, false, origin_bottom.radius);
-        else if ((top.position - origin_bottom.position).length() <= 10)
-            *bottom = OverhangPoint(internalDiv(top, origin_bottom, 3, 1), false, true, false, origin_bottom.radius);
-        else *bottom = OverhangPoint(internalDiv(top, origin_bottom, 5, 1), false, true, false, origin_bottom.radius);
-    }
+    if (origin_bottom.meshInterPoint)
+        *bottom = OverhangPoint(lowerZInternalDiv(top, origin_bottom, bottom_tip_height), false, true, false, origin_bottom.radius);
 
     float bottomRadius = calculateRadius(/*mesh->z_max() - z_min, bottom->position.z() - z_min,*/
                                          top.position.z() - bottom->position.z());
@@ -472,4 +465,10 @@ void GenerateSupport::generateStem(Mesh* mesh, OverhangPoint top, OverhangPoint*
 
 QVector3D GenerateSupport::internalDiv(OverhangPoint a, OverhangPoint b, float m, float n) {
     return (m * b.position + n * a.position) / (m + n);
+}
+
+QVector3D GenerateSupport::lowerZInternalDiv(OverhangPoint upper, OverhangPoint lower, float z) {
+    float z_diff = upper.position.z() - lower.position.z();
+    if (z_diff <= z) return internalDiv(upper, lower, 1, 1);
+    return internalDiv(upper, lower, z_diff - z, z);
 }

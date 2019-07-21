@@ -43,6 +43,7 @@ public:
     float near_z = near_dis / 2.0f;
     float area_subdiv = 10;
     float tip_len = 3;
+    float bottom_tip_height = 2;
 
 	//set minimum position for support so that it overlaps little bit(layer thickness)
 	float getSupportZMin(const Mesh* mesh)const;
@@ -66,6 +67,7 @@ public:
 
     void generateStem(Mesh* mesh, OverhangPoint top, OverhangPoint* bottom);
     QVector3D internalDiv(OverhangPoint a, OverhangPoint b, float m, float n);
+    QVector3D lowerZInternalDiv(OverhangPoint upper, OverhangPoint lower, float z);
 };
 
 #endif // GENERATESUPPORT_H
