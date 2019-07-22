@@ -8,7 +8,6 @@
 #include <QDebug>
 #include <math.h>
 //#include "./glmodel.h"
-#include "DentEngine/src/configuration.h"
 #include "DentEngine/src/polyclipping/clipper/clipper.hpp"
 #include "convex_hull.h"
 #if  defined(QT_DEBUG) || defined(_DEBUG)

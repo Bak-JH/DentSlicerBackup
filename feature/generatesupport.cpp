@@ -1,8 +1,8 @@
 /* Clever Support: Efficient Support Structure Generation for Digital Fabrication (J. Vanek & J. A. G. Galicia & B. Benes) */
 
 #include "generateSupport.h"
-#include "DentEngine/src/configuration.h"
 #include <QtMath>
+#include "DentEngine/src/configuration.h"
 
 QDebug Hix::Debug::operator<< (QDebug d, const OverhangPoint& obj)
  {
@@ -13,7 +13,7 @@ QDebug Hix::Debug::operator<< (QDebug d, const OverhangPoint& obj)
 	d << "radius: " << obj.radius;
 	return d;
 }
-OverhangPoint::OverhangPoint()
+OverhangPoint::OverhangPoint(): radius(scfg->support_radius_min)
 {
     position = QVector3D(99999, 99999, 99999);
 }
@@ -40,7 +40,11 @@ OverhangPoint::OverhangPoint(QVector3D point, float r) {
     radius = r;
 }
 
-GenerateSupport::GenerateSupport()
+GenerateSupport::GenerateSupport():
+	supportRadiusMax(scfg->support_radius_max),
+	supportRadiusMin(scfg->support_radius_min),
+	z_min_minimal_diff(scfg->layer_height / 2),
+	minLength(scfg->support_base_height + 1)
 {
 
 }
