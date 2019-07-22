@@ -91,7 +91,7 @@ void SlicingOptBackend::createSlicingOptControls()
 	addOptionDialog(QString("Raft type"), RaftTypeStr, 1);
 	addOptionDialog(QString("Support type"), SupportTypeStr, 2);
 	addOptionDialog(QString("Infill type"), InfillTypeStr, 1);
-	addOptionDialog(QString("Slicing mode"), SlicingModeStr, 1);
+	addOptionDialog(QString("Slicing mode"), SlicingModeStr, 0);
 	QObject::connect(_qmlManager->ltso, SIGNAL(optionChanged(QString, int)), this, SLOT(onOptionChanged(QString, int)));
 
 }
