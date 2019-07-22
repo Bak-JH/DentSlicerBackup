@@ -37,14 +37,13 @@ public:
     float supportRadiusMax; // support bottom radius 역할
     float supportRadiusMin; // support tip radius 역할
     float z_min;
-    float z_min_minimal_diff = scfg->layer_height/2;
-    float minLength = scfg->support_base_height+1;
-    float near_dis = 8 * scfg->support_density;
-    float near_z = near_dis / 2.0f;
     float area_subdiv = 10;
     float tip_len = 3;
     float bottom_tip_height = 2;
-
+	float z_min_minimal_diff;
+	float minLength;
+	float near_dis;
+	float near_z;
 	//set minimum position for support so that it overlaps little bit(layer thickness)
 	float getSupportZMin(const Mesh* mesh)const;
     Mesh* generateStraightSupport(Mesh* shellmesh);

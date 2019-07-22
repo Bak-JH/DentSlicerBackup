@@ -45,9 +45,10 @@ GenerateSupport::GenerateSupport():
 	supportRadiusMax(scfg->support_radius_max),
 	supportRadiusMin(scfg->support_radius_min),
 	z_min_minimal_diff(scfg->layer_height / 2),
-	minLength(scfg->support_base_height + 1)
+	minLength(scfg->support_base_height + 1),
+	near_dis(8 * scfg->support_density),
+	near_z(near_dis / 2.0f)
 {
-
 }
 
 float GenerateSupport::getSupportZMin(const Mesh* mesh)const
