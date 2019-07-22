@@ -62,8 +62,9 @@ struct SlicingConfiguration
 
 	enum class ResinType : uint8_t
 	{
-		Uniform = 0,
-		Adaptive = 1
+		Temporary = 0,
+		Clear = 1,
+		Castable = 2
 	};
     // configurations
     float layer_height = 0.1f; // in mm
@@ -73,10 +74,10 @@ struct SlicingConfiguration
     float support_density = 0.4f;
     float infill_density = 0.3f;
 
-    int resin_type = TEMPORARY_RESIN;
     float contraction_ratio = TEMPORARY_CONTRACTION_RATIO;
 
-	const SlicingMode slicing_mode = SlicingMode::Uniform; // uniform OR adaptive
+	SlicingMode slicing_mode = SlicingMode::Uniform; // uniform OR adaptive
+	ResinType resin_type = ResinType::Temporary;
 	SupportType support_type = SupportType::General;
 	InFillType infill_type = InFillType::Full;
 	RaftType raft_type = RaftType::General;
@@ -95,8 +96,8 @@ struct SlicingConfiguration
     QVector3D origin;
 
     // settings for vittro plus
-    int resolution_x = 1920;
-    int resolution_y = 1080;
+    int resolution_x = 2560;
+    int resolution_y = 1440;
 
     float bed_x = 124.8f; // in mm
     float bed_y = 70.2f; // in mm
@@ -106,7 +107,6 @@ struct SlicingConfiguration
 
     float pixel_per_mm = float(resolution_x)/float(bed_x);
 
-	void set(const QVariantMap& map);
 };
 extern SlicingConfiguration* scfg;
 

@@ -71,7 +71,7 @@ QString SVGexporter::exportSVG(Slices& shellSlices, Slices& supportSlices, Slice
     jsonObject["z_hop_height"] = 15;
     jsonObject["move_up_feedrate"] = 350;
     jsonObject["move_down_feedrate"] = 500;
-    jsonObject["resin_type"] = scfg->resin_type;
+    jsonObject["resin_type"] = (uint8_t)scfg->resin_type;
     jsonObject["contraction_ratio"] = scfg->contraction_ratio;
     QJsonDocument jsonDocument(jsonObject);
     QByteArray jsonBytes = jsonDocument.toJson();
