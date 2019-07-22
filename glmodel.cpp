@@ -20,6 +20,7 @@
 #include <feature/generatesupport.h>
 #include <Qt3DCore/qpropertyupdatedchange.h>
 #include <feature/generateraft.h>
+#include "DentEngine/src/configuration.h"
 
 
 
@@ -651,7 +652,7 @@ void featureThread::run(){
                 // slice file
                 qmlManager->openProgressPopUp();
                 QFuture<Slicer*> future = QtConcurrent::run(
-					se, &SlicingEngine::slice, data, m_glmodel->_mesh, m_glmodel->supportMesh, 
+					se, &SlicingEngine::slice, m_glmodel->_mesh, m_glmodel->supportMesh, 
 					m_glmodel->raftMesh, fileName + "/" + m_glmodel->filename.split("/").last() );
                 m_glmodel->futureWatcher.setFuture(future);
                 m_glmodel->updateLock = false;
@@ -2304,7 +2305,7 @@ void GLModel::generateManualSupport(){
     QVector3D t = m_transform.translation();
     t.setZ(_mesh->z_min()+scfg->raft_thickness + scfg->support_base_height);
     QVector3D targetPosition = targetMeshFace->meshVertices()[0]->position- t;
-    /*OverhangPoint* targetOverhangPosition = new OverhangPoint(targetPosition.x()*scfg->resolution,
+    /*OverhangPoint* targetOverhangPosition = new OverhangPoint(targetPosition.x()*ClipperLib::INT_PT_RESOLUTION,
     generateSupporter(layerSupportMesh, targetOverhangPosition, nullptr, nullptr, layerSupportMesh->z_min());*/
 	_targetSelected = false;
 	updateModelMesh();

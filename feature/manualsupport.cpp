@@ -54,7 +54,7 @@ void generateCylinder(Mesh* mesh, const QVector3D& position, const QVector3D& po
     std::vector<std::vector<std::array<float, 2>>> polygon;
     std::vector<std::array<float, 2>> points;
     for( auto point : path ) {
-        points.push_back({(float)point.X / scfg->resolution, (float)point.Y / scfg->resolution});
+        points.push_back({(float)point.X / ClipperLib::INT_PT_RESOLUTION, (float)point.Y / ClipperLib::INT_PT_RESOLUTION});
     }
     polygon.push_back(points);
     // Run tessellation
@@ -80,16 +80,16 @@ void generateCylinder(Mesh* mesh, const QVector3D& position, const QVector3D& po
 }*/
 
 /*void generateRaft(Mesh* mesh, OverhangPoint *point) {
-    float bottom = (float)-3.0;//(point->position.Z - (int)point->height * 1000) / scfg->resolution;
-    float radius = (float)scfg->raft_offset_radius / (float)scfg->resolution;
-    QVector3D positionBottom = QVector3D((float)point->position.X / scfg->resolution,
-            (float)point->position.Y / scfg->resolution,
+    float bottom = (float)-3.0;//(point->position.Z - (int)point->height * 1000) / ClipperLib::INT_PT_RESOLUTION;
+    float radius = (float)scfg->raft_offset_radius / (float)ClipperLib::INT_PT_RESOLUTION;
+    QVector3D positionBottom = QVector3D((float)point->position.X / ClipperLib::INT_PT_RESOLUTION,
+            (float)point->position.Y / ClipperLib::INT_PT_RESOLUTION,
             bottom);
-    QVector3D positionMiddle = QVector3D((float)point->position.X / scfg->resolution,
-                                         (float)point->position.Y / scfg->resolution,
+    QVector3D positionMiddle = QVector3D((float)point->position.X / ClipperLib::INT_PT_RESOLUTION,
+                                         (float)point->position.Y / ClipperLib::INT_PT_RESOLUTION,
                                          bottom/2);
-    QVector3D positionTop = QVector3D((float)point->position.X / scfg->resolution,
-            (float)point->position.Y / scfg->resolution,
+    QVector3D positionTop = QVector3D((float)point->position.X / ClipperLib::INT_PT_RESOLUTION,
+            (float)point->position.Y / ClipperLib::INT_PT_RESOLUTION,
             0);
     generateCustomCylinder(mesh, positionBottom, positionMiddle, radius, radius*2);
     generateCustomCylinder(mesh, positionMiddle, positionTop, radius*2, radius);

@@ -14,7 +14,7 @@
 #include <memory>
 #include "DentEngine/src/mesh.h"
 #include "fileloader.h"
-#include "slicingengine.h"
+#include "slice/slicingengine.h"
 #include "feature/modelcut.h"
 #include "feature/labellingtextpreview.h"
 #include "feature/autoorientation.h"
@@ -22,7 +22,6 @@
 #include "feature/autoarrange.h"
 #include "feature/extension.h"
 #include "feature/hollowshell.h"
-#include "DentEngine/src/configuration.h"
 #include "input/raycastcontroller.h"
 #include "input/Draggable.h"
 #include "render/ModelMaterial.h"

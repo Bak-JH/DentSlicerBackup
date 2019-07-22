@@ -54,6 +54,7 @@ Rectangle {
     }
     LeftTabSlicingOption{
         id:ltso
+        objectName: "ltso"
         anchors.top : line2.bottom
         anchors.left: parent.left
     }

@@ -143,9 +143,6 @@
     <ClCompile Include="DentEngine\src\slicer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="slicingengine.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="feature\stlexporter.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -176,9 +173,6 @@
     <ClCompile Include="render\ModelMaterial.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="lights.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="ui\Widget3DManager.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>
@@ -186,6 +180,15 @@
       <Filter>Generated Files</Filter>
     </ClCompile>
     <ClCompile Include="ui\Widget3D.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="render\lights.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="slice\slicingengine.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="slice\SlicingOptBackend.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -301,9 +304,6 @@
     <ClInclude Include="DentEngine\src\slicer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <QtMoc Include="slicingengine.h">
-      <Filter>Header Files</Filter>
-    </QtMoc>
     <ClInclude Include="feature\stlexporter.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -470,6 +470,12 @@
       <Filter>Generated Files</Filter>
     </ClInclude>
     <ClInclude Include="input\Highlightable.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="DentEngine\src\polyclipping\polyclipping.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\RamosEnum.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -1043,6 +1049,9 @@
     <None Include="shaders\perPrimitive.geom" />
     <None Include="shaders\singleColor.geom" />
     <None Include="icon-32.ico" />
+    <None Include="icon-32.ico" />
+    <None Include="icon-32.ico" />
+    <None Include="icon-32.ico" />
   </ItemGroup>
   <ItemGroup>
     <None Include="DentSlicer.rc">
@@ -1071,10 +1080,16 @@
     <QtMoc Include="render\ModelMaterial.h">
       <Filter>Header Files</Filter>
     </QtMoc>
-    <QtMoc Include="lights.h">
+    <QtMoc Include="ui\Widget3D.h">
+      <Filter>Generated Files</Filter>
+    </QtMoc>
+    <QtMoc Include="render\lights.h">
       <Filter>Header Files</Filter>
     </QtMoc>
-    <QtMoc Include="ui\Widget3D.h">
+    <QtMoc Include="slice\slicingengine.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="slice\SlicingOptBackend.h">
       <Filter>Generated Files</Filter>
     </QtMoc>
   </ItemGroup>

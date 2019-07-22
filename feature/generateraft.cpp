@@ -1,5 +1,6 @@
 #include "generateraft.h"
 #include "generatesupport.h"
+#include "DentEngine/src/configuration.h"
 
 GenerateRaft::GenerateRaft()
 {
