@@ -5,7 +5,7 @@
 #include <QQmlEngine>
 #include <QQmlContext>
 #include "utils/quaternionhelper.h"
-#include "slicingengine.h"
+#include "slice/slicingengine.h"
 #include "DentEngine/src/configuration.h"
 #include "glmodel.h"
 #include "qmlmanager.h"

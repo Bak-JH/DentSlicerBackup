@@ -8,7 +8,6 @@
 #include "feature/stlexporter.h"
 #include "fileloader.h"
 #include "DentEngine/src/slicer.h"
-#include "DentEngine/src/configuration.h"
 #include "DentEngine/src/svgexporter.h"
 
 using namespace Hix::Engine3D;
@@ -18,7 +17,7 @@ class SlicingEngine : public QObject
 
 public:
     SlicingEngine();
-    Q_INVOKABLE Slicer* slice (QVariant cfg, Mesh* shellMesh=nullptr, Mesh* supportMesh=nullptr, Mesh* raftMesh=nullptr, QString filename = "");
+    Q_INVOKABLE Slicer* slice (Mesh* shellMesh=nullptr, Mesh* supportMesh=nullptr, Mesh* raftMesh=nullptr, QString filename = "");
 
 public slots:
     void slicingStarted();

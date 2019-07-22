@@ -2,6 +2,7 @@
 #include <QDir>
 #include "qmlmanager.h"
 #include "glmodel.h"
+#include "DentEngine/src/configuration.h"
 
 SlicingEngine::SlicingEngine()
 {
@@ -9,38 +10,9 @@ SlicingEngine::SlicingEngine()
 
 QProcess *slicing_process;
 
-Slicer* SlicingEngine::slice(QVariant cfg, Mesh* shellMesh, Mesh* supportMesh, Mesh* raftMesh, QString filename){
-    qDebug() << "slice" << cfg << shellMesh << filename;
-    QVariantMap config = cfg.toMap();
-    for(QVariantMap::const_iterator iter = config.begin(); iter != config.end(); ++iter) {
-        qDebug() << iter.key() << iter.value().toString();
-        if (!strcmp(iter.key().toStdString().c_str(), "support_type")){
-            (*scfg)[iter.key().toStdString().c_str()] = 2;//iter.value().toString();
-        } else if (!strcmp(iter.key().toStdString().c_str(), "infill_type")){
-            (*scfg)[iter.key().toStdString().c_str()] = 1;//iter.value().toString();
-        } else if (!strcmp(iter.key().toStdString().c_str(), "raft_type")){
-            (*scfg)[iter.key().toStdString().c_str()] = 2;//iter.value().toString();
-        } else if (!strcmp(iter.key().toStdString().c_str(), "layer_height")){
-            scfg->layer_height = iter.value().toFloat();
-            //(*scfg)[iter.key().toStdString().c_str()] = 2;//iter.value().toString();
-        } else if (!strcmp(iter.key().toStdString().c_str(), "resolution")){
-            //(*scfg)[iter.key().toStdString().c_str()] = 2;//iter.value().toString();
-        } else if (!strcmp(iter.key().toStdString().c_str(), "resin_type")){
-            if (iter.value().toString() == "Temporary"){
-                scfg->resin_type = TEMPORARY_RESIN;
-                scfg->contraction_ratio = TEMPORARY_CONTRACTION_RATIO;
-            } else if (iter.value().toString() == "Clear"){
-                scfg->resin_type = CLEAR_RESIN;
-                scfg->contraction_ratio = CLEAR_CONTRACTION_RATIO;
-            } else {
-                scfg->resin_type = CASTABLE_RESIN;
-                scfg->contraction_ratio = CASTABLE_CONTRACTION_RATIO;
-            }
-            (*scfg)[iter.key().toStdString().c_str()] = iter.value().toString();
-        } else {
+Slicer* SlicingEngine::slice( Mesh* shellMesh, Mesh* supportMesh, Mesh* raftMesh, QString filename){
+    qDebug() << "slice" << shellMesh << filename;
 
-        }
-    }
     qDebug() << "done parsing arguments";
 
     qmlManager->setProgress(0.1);
@@ -52,20 +24,21 @@ Slicer* SlicingEngine::slice(QVariant cfg, Mesh* shellMesh, Mesh* supportMesh, M
     Slices shellSlices;
     qDebug() << "shell Mesh : " << shellMesh << shellSlices.mesh;
     slicer->slice(shellMesh, &shellSlices);
-    //Slices shellSlices = slicer->slice(shellMesh);
     qDebug() << "Shell Slicing Done\n";
     qmlManager->setProgress(0.4);
     Slices supportSlices;
-    slicer->slice(supportMesh, &supportSlices);
-    //Slices supportSlices = slicer->slice(supportMesh);
-    qDebug() << "Support Slicing Done\n";
+	if (scfg->support_type != SlicingConfiguration::SupportType::None)
+	{
+		slicer->slice(supportMesh, &supportSlices);
+		qDebug() << "Support Slicing Done\n";
+	}
     qmlManager->setProgress(0.6);
     Slices raftSlices;
-    slicer->slice(raftMesh, &raftSlices);
-    //Slices raftSlices = slicer->slice(raftMesh);
-    qDebug() << "Raft Slicing Done\n";
-    qmlManager->setProgress(0.8);
-    Slices contourLists = supportSlices;
+	if (scfg->raft_type != SlicingConfiguration::RaftType::None)
+	{
+		slicer->slice(raftMesh, &raftSlices);
+		qDebug() << "Raft Slicing Done\n";
+	}
     qmlManager->setProgress(0.9);
 
 

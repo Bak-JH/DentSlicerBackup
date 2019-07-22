@@ -53,33 +53,37 @@ Rectangle {
             ColumnLayout {
                 spacing: 26
                 LeftTabExportElement{
-                    columnName: "Resolution"
-                    columnContent : lefttab.ltso.option_resolution.currentText
+                    columnName: "TEST"
+                    columnContent : "TTTTTTEST"
                 }
-                LeftTabExportElement{
-                    columnName: "Layer Height"
-                    columnContent : lefttab.ltso.option_layer_height.currentText
-                }
-                LeftTabExportElement{
-                    columnName: "Bed Number"
-                    columnContent : lefttab.ltso.option_bed_number.currentText
-                }
-                LeftTabExportElement{
-                    columnName: "Resin Type"
-                    columnContent : lefttab.ltso.option_resin_type.currentText
-                }
-                LeftTabExportElement{
-                    columnName: "Raft"
-                    columnContent : lefttab.ltso.option_raft.currentText
-                }
-                LeftTabExportElement{
-                    columnName: "Support"
-                    columnContent : lefttab.ltso.option_support.currentText + " / " + lefttab.ltso.option_support_density.density
-                }
-                LeftTabExportElement{
-                    columnName: "Infill"
-                    columnContent : lefttab.ltso.option_infill.currentText + " / " + lefttab.ltso.option_infill_density.density
-                }
+//                LeftTabExportElement{
+//                    columnName: "Resolution"
+//                    columnContent : lefttab.ltso.option_resolution.currentText
+//                }
+//                LeftTabExportElement{
+//                    columnName: "Layer Height"
+//                    columnContent : lefttab.ltso.option_layer_height.currentText
+//                }
+//                LeftTabExportElement{
+//                    columnName: "Bed Number"
+//                    columnContent : lefttab.ltso.option_bed_number.currentText
+//                }
+//                LeftTabExportElement{
+//                    columnName: "Resin Type"
+//                    columnContent : lefttab.ltso.option_resin_type.currentText
+//                }
+//                LeftTabExportElement{
+//                    columnName: "Raft"
+//                    columnContent : lefttab.ltso.option_raft.currentText
+//                }
+//                LeftTabExportElement{
+//                    columnName: "Support"
+//                    columnContent : lefttab.ltso.option_support.currentText + " / " + lefttab.ltso.option_support_density.density
+//                }
+//                LeftTabExportElement{
+//                    columnName: "Infill"
+//                    columnContent : lefttab.ltso.option_infill.currentText + " / " + lefttab.ltso.option_infill_density.density
+//                }
             }
         }
     }
