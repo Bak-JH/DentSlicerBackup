@@ -33,32 +33,37 @@
 #include <QVariant>
 
 
-
 struct SlicingConfiguration
 {
-	enum class SupportType
+	enum class SupportType: uint8_t
 	{
 		None = 0,
-		KBranch,
-		General
+		KBranch= 1,
+		General = 2
 	};
-	enum class InFillType
+	enum class InFillType : uint8_t
 	{
 		None = 0,
-		Full,
-		General
-	};
-
-	enum class RaftType
-	{
-		None = 0,
-		General
+		Full = 1,
+		General = 2
 	};
 
-	enum class SlicingMode
+	enum class RaftType : uint8_t
+	{
+		None = 0,
+		General = 1
+	};
+
+	enum class SlicingMode : uint8_t
 	{
 		Uniform = 0,
-		Adaptive
+		Adaptive = 1
+	};
+
+	enum class ResinType : uint8_t
+	{
+		Uniform = 0,
+		Adaptive = 1
 	};
     // configurations
     float layer_height = 0.1f; // in mm
