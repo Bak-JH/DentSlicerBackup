@@ -3,6 +3,6 @@
 
 #include <QQmlContext>
 #include <QTimer>
-
+#include <Qt3DCore>
 SlicingConfiguration* scfg = new SlicingConfiguration();
 

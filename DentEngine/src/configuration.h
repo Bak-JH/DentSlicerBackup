@@ -32,17 +32,41 @@
 #include <QVector3D>
 #include <QVariant>
 
-class SlicingConfiguration : public QVariantMap
-{
-public:
-    // configurations
-    static constexpr int resolution_scale = 3;
-    static constexpr int resolution = 1000;//pow(10,resolution_scale); // resolution range from 1000 to 1
-    static constexpr float max_buildsize_x = 1000.0f;//1000000/resolution;
-    static constexpr float vertex_inbound_distance = 0.002f;//0.03;//(float)1/resolution; // resolution in mm (0.0001 and 0.0009 are same, 1 micron)
-	static constexpr float vertex_3D_distance = 0.0034f;
 
-    const char* slicing_mode = "uniform"; // uniform OR adaptive
+struct SlicingConfiguration
+{
+	enum class SupportType: uint8_t
+	{
+		None = 0,
+		KBranch= 1,
+		General = 2
+	};
+	enum class InFillType : uint8_t
+	{
+		None = 0,
+		Full = 1,
+		General = 2
+	};
+
+	enum class RaftType : uint8_t
+	{
+		None = 0,
+		General = 1
+	};
+
+	enum class SlicingMode : uint8_t
+	{
+		Uniform = 0,
+		Adaptive = 1
+	};
+
+	enum class ResinType : uint8_t
+	{
+		Temporary = 0,
+		Clear = 1,
+		Castable = 2
+	};
+    // configurations
     float layer_height = 0.1f; // in mm
     float nozzle_width = 0.0f; // in mm (diameter) , for printers with nozzles
     float wall_thickness = 2.0f; // in mm
@@ -50,12 +74,13 @@ public:
     float support_density = 0.4f;
     float infill_density = 0.3f;
 
-    int resin_type = TEMPORARY_RESIN;
     float contraction_ratio = TEMPORARY_CONTRACTION_RATIO;
 
-    int support_type = 2;
-    int infill_type = 1;
-    int raft_type = 2;
+	SlicingMode slicing_mode = SlicingMode::Uniform; // uniform OR adaptive
+	ResinType resin_type = ResinType::Temporary;
+	SupportType support_type = SupportType::General;
+	InFillType infill_type = InFillType::Full;
+	RaftType raft_type = RaftType::General;
 
     // raft settings
     float raft_thickness = 2.0f; // in mm
@@ -70,31 +95,18 @@ public:
     // bed configuration
     QVector3D origin;
 
-    /* // settings for capsule 3D Printer
+    // settings for vittro plus
     int resolution_x = 2560;
     int resolution_y = 1440;
 
-    float bed_x = 120.96; // in mm
-    float bed_y = 68.04; // in mm*/
-
-    // settings for vittro plus
-    int resolution_x = 1920;
-    int resolution_y = 1080;
-
     float bed_x = 124.8f; // in mm
     float bed_y = 70.2f; // in mm
-
-    /*// settings for vittro
-    int resolution_x = 1280;
-    int resolution_y = 800;
-
-    float bed_x = 138; // in mm
-    float bed_y = 90; // in mm*/
 
 	size_t bed_margin_x = 1;
 	size_t bed_margin_y = 1;
 
     float pixel_per_mm = float(resolution_x)/float(bed_x);
+
 };
 extern SlicingConfiguration* scfg;
 

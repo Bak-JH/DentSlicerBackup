@@ -1,7 +1,6 @@
 #ifndef SLICER_H
 #define SLICER_H
 #include "mesh.h"
-#include "configuration.h"
 //#include "support.h"
 //#include "infill.h"
 #include <list>
@@ -11,7 +10,7 @@ using namespace ClipperLib;
 using namespace Hix::Engine3D;
 class OverhangPoint;
 
-class Slice : public Paths{ // extends Paths (total paths)
+class Slice{ // extends Paths (total paths)
 public:
     float z;
     PolyTree polytree; // containment relationship per slice

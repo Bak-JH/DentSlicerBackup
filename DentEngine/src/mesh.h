@@ -3,9 +3,7 @@
 #include <Qt3DCore/qtransform.h>
 #include <QVector3D>
 #include <QHash>
-#include "polyclipping/clipper/clipper.hpp"
-#include "polyclipping/poly2tri/poly2tri.h"
-#include "configuration.h"
+#include "polyclipping/polyclipping.h"
 #include <QTransform>
 #include <QTime>
 #include <array>
@@ -134,6 +132,9 @@ namespace Hix
 
 		class Mesh {
 		public:
+			static constexpr float VTX_INBOUND_DIST = 0.002f;//0.03;//(float)1/resolution; // resolution in mm (0.0001 and 0.0009 are same, 1 micron)
+			static constexpr float VTX_3D_DIST = 0.0034f;
+
 			Mesh();
 			//THIS IS NOT A COPY CONSTRUCTOR!
 			Mesh(const Mesh* origin);

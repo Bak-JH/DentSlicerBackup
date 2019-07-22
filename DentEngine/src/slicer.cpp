@@ -5,6 +5,7 @@
 #include "qmlmanager.h"
 #include "../../utils/mathutils.h"
 #include "polyclipping/QDebugPolyclipping.h"
+#include "configuration.h"
 
 using namespace ClipperLib;
 using namespace Hix::Debug;
@@ -18,13 +19,6 @@ QDebug Hix::Debug::operator<< (QDebug d, const Slice& obj) {
 	d << "infill: " << obj.infill;
 	d << "support: " << obj.support;
 	d << "Area: " << obj.Area;
-
-
-	d << "slices: ";
-	for (const auto& each : obj)
-	{
-		d << each;
-	}
 	return d;
 }
 QDebug Hix::Debug::operator<< (QDebug d, const Slices& obj) {
@@ -115,7 +109,7 @@ std::vector<Paths> Slicer::meshSlice(Mesh* mesh){
 
     std::vector<float> planes;
 
-    if (! strcmp(scfg->slicing_mode, "uniform")) {
+    if (scfg->slicing_mode == SlicingConfiguration::SlicingMode::Uniform) {
         planes = buildUniformPlanes(mesh->z_min(), mesh->z_max(), delta);
     } 
 	//else if (scfg->slicing_mode == "adaptive") {
@@ -316,7 +310,7 @@ void Slices::containmentTreeConstruct(){
             std::vector<c2t::Point> pointPath;
             pointPath.reserve(p.size());
             for (IntPoint ip : p){
-                pointPath.push_back(c2t::Point((float)ip.X/scfg->resolution,(float)ip.Y/scfg->resolution));
+                pointPath.push_back(c2t::Point((float)ip.X/ClipperLib::INT_PT_RESOLUTION,(float)ip.Y/ClipperLib::INT_PT_RESOLUTION));
             }
             pointPaths.push_back(pointPath);
         }
