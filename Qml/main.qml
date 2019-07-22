@@ -158,16 +158,6 @@ Item{
             id : uppertab
             width : parent.width
             height: 100
-
-            function getCurrentText(){}
-            options: [
-                 lefttab.ltso.option_resolution.currentText ,
-                 lefttab.ltso.option_layer_height.currentText,
-                 lefttab.ltso.option_resin_type.currentText,
-                 lefttab.ltso.option_support.currentText,
-                 lefttab.ltso.option_infill.currentText,
-                 lefttab.ltso.option_raft.currentText]
-
             anchors.top: parent.top
             anchors.left: parent.left
 
@@ -189,7 +179,7 @@ Item{
             height : parent.height - uppertab.height
 
             anchors.top: uppertab.bottom
-            anchors.left: parent.left
+            anchors.left: lefttab.right
             visible: false
         }
 

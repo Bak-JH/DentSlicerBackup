@@ -24,6 +24,7 @@
 #include "input/raycastcontroller.h"
 #include "ui/Widget3DManager.h"
 #include "common/TaskManager.h"
+#include "slice/SlicingOptBackend.h"
 
 #define VIEW_MODE_OBJECT 0
 #define VIEW_MODE_SUPPORT 1
@@ -70,6 +71,8 @@ public:
     Qt3DCore::QEntity *mttab;
     QObject* undoRedoButton;
     QObject* slicingData;
+	QObject* ltso;
+
     Qt3DInput::QKeyboardHandler* keyboardHandler;
 
     // model rotate components
@@ -261,6 +264,7 @@ private:
 	GLModel* _lastSelected;
 	std::unordered_set<GLModel*> selectedModels;
 
+	SlicingOptBackend _optBackend;
 	//Ray cast
 	Hix::Input::RayCastController _rayCastController;
 	Hix::UI::Widget3DManager _widgetManager;

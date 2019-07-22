@@ -24,13 +24,14 @@
 #include <exception>
 #include "qmlmanager.h"
 #include "utils/utils.h"
-#include "lights.h"
+#include "render/lights.h"
+#include "DentEngine/src/configuration.h"
 
 using namespace Hix::Input;
 using namespace Hix::UI;
 using namespace Hix::Render;
 
-QmlManager::QmlManager(QObject *parent) : QObject(parent)
+QmlManager::QmlManager(QObject *parent) : QObject(parent), _optBackend(this, scfg)
   ,layerViewFlags(LAYER_INFILL | LAYER_SUPPORTERS | LAYER_RAFT), modelIDCounter(0)
 {
 }
@@ -90,6 +91,9 @@ void QmlManager::initializeUI(QQmlApplicationEngine* e){
     undoRedoButton = FindItemByName(engine, "undoRedoButton");
     slicingData = FindItemByName(engine, "slicingData");
 
+
+	ltso = FindItemByName(engine, "ltso");
+	_optBackend.createSlicingOptControls();
 
     // selection popup
     yesno_popup = FindItemByName(engine, "yesno_popup");
@@ -2034,8 +2038,6 @@ void QmlManager::setViewMode(int viewMode) {
 
 void  QmlManager::exportSelected(bool isTemp)
 {
-	auto exportConfig = boxUpperTab->property("options");
-
 	QString fileName;
 
 	if (!isTemp) { // export view
@@ -2063,7 +2065,7 @@ void  QmlManager::exportSelected(bool isTemp)
 	// generate support
 	GenerateSupport generatesupport;
 	Mesh* mergedSupportMesh = nullptr;
-	if (scfg->support_type != 0) { // if generating support
+	if (scfg->support_type != SlicingConfiguration::SupportType::None) { // if generating support
 		//Mesh* mergedSupportMesh = nullptr;
 		mergedSupportMesh = generatesupport.generateSupport(mergedShellMesh);
 	}
@@ -2071,13 +2073,13 @@ void  QmlManager::exportSelected(bool isTemp)
 	// generate raft according to support structure
 	GenerateRaft generateraft;
 	Mesh* mergedRaftMesh = nullptr;
-	if (scfg->raft_type != 0) {
+	if (scfg->raft_type != SlicingConfiguration::RaftType::None) {
 		mergedRaftMesh = generateraft.generateRaft(mergedShellMesh, generatesupport.overhangPoints);
 	}
 	// need to generate support, raft
 
 	//se->slice(data, mergedMesh, fileName);
-	se->slice(exportConfig, mergedShellMesh, mergedSupportMesh, mergedRaftMesh, fileName);
+	se->slice(mergedShellMesh, mergedSupportMesh, mergedRaftMesh, fileName);
 	//deleteOneModelFile(mergedModel->ID);
 
 	//m_glmodel->futureWatcher.setFuture(future);

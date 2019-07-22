@@ -14,7 +14,7 @@ public:
     bool topPoint = false;
     bool supportInterPoint = false;
     bool meshInterPoint = false;
-    float radius = scfg->support_radius_min; // support tip radius 역할
+	float radius;
 };
 namespace Hix
 {
@@ -34,8 +34,8 @@ public:
     double critical_angle_mesh_radian = M_PI * (critical_angle_mesh / 180.0);
     std::vector<OverhangPoint> overhangPoints;
     std::vector<OverhangPoint> supportPoints;
-    float supportRadiusMax = scfg->support_radius_max; // support bottom radius 역할
-    float supportRadiusMin = scfg->support_radius_min; // support tip radius 역할
+    float supportRadiusMax; // support bottom radius 역할
+    float supportRadiusMin; // support tip radius 역할
     float z_min;
     float z_min_minimal_diff = scfg->layer_height/2;
     float minLength = scfg->support_base_height+1;
