@@ -15,8 +15,8 @@ SOURCES += main.cpp \
     input/raycastcontroller.cpp \
     render/ModelMaterial.cpp \
     render/lights.cpp \
+    slice/SlicingOptBackend.cpp \
     slice/slicingengine.cpp \
-    slicingengine.cpp \
     glmodel.cpp \
     qmlmanager.cpp \
     fileloader.cpp \
@@ -170,6 +170,7 @@ HEADERS += \
     render/Color.h \
     render/ModelMaterial.h \
     render/lights.h \
+    slice/SlicingOptBackend.h \
     slice/slicingengine.h \
     slicingengine.h \
     glmodel.h \

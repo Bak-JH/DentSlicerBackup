@@ -42,6 +42,13 @@ constexpr std::array<std::string_view, 3> BedNumberStr{
 
 };
 
+constexpr std::array<std::string_view, 3> ResinTypeStr{
+	"Temporary",
+	"Clear",
+	"Castable"
+};
+
+
 void resStringToInt(std::string_view str, int& x, int& y)
 {
 	std::string strCopy(str);
@@ -55,6 +62,7 @@ void resStringToInt(std::string_view str, int& x, int& y)
 
 SlicingOptBackend::SlicingOptBackend(QmlManager* qmlManager, SlicingConfiguration* config): _qmlManager(qmlManager), _config(config)
 {
+
 }
 
 
@@ -79,92 +87,59 @@ void SlicingOptBackend::createSlicingOptControls()
 	addOptionDialog(QString("Resolution"), ResolutionStr, 0);
 	addOptionDialog(QString("Layer height"), LayerHeightStr, 0);
 	addOptionDialog(QString("Bed number"), BedNumberStr, 0);
-	addOptionDialog(QString("Resolution"), ResolutionStr, 0);
-	addOptionDialog(QString("Resolution"), ResolutionStr, 0);
-	addOptionDialog(QString("Resolution"), ResolutionStr, 0);
-	addOptionDialog(QString("Resolution"), ResolutionStr, 0);
-	addOptionDialog(QString("Resolution"), ResolutionStr, 0);
-
-
-	//                LeftTabSlicingOptionElement{
-//                    id:option_resolution
-//                    columnName: "Resolution"
-//                    columnContents: ["1920*1080", "1280*800", "1024*768"]
-//                }
-
-//                Item{width:parent.width;height:2}//spacer
-
-//                LeftTabSlicingOptionElement{
-//                    id:option_layer_height
-//                    columnName: "Layer height"
-//                    columnContents: ["0.1","0.2","0.05"]
-//                }
-
-//                Item{width:parent.width;height:2}//spacer
-
-//                LeftTabSlicingOptionElement{
-//                    id:option_bed_number
-//                    columnName: "Bed number"
-//                    columnContents: ["1","2","3"]
-//                }
-
-//                Item{width:parent.width;height:2}//spacer
-
-//                LeftTabSlicingOptionElement{
-//                    id:option_resin_type
-//                    columnName: "Resin Type"
-//                    columnContents: ["Temporary","Clear","Castable"]
-//                }
-
-//                Item{width:parent.width;height:2}//spacer
-
-//                LeftTabSlicingOptionElement{
-//                    id:option_raft
-//                    columnName: "Raft"
-//                    columnContents: ["general","none"]
-
-//                    Item{width:parent.width;height:2}//spacer
-
-//                }
-//                LeftTabSlicingOptionElement2{
-//                    columnName: "Support"
-//                    columnText: "Type"
-//                }
-
-//                LeftTabSlicingOptionElement{
-//                    id:option_support
-//                    columnName: ""
-//                    columnContents: ["k-branch","general", "none"]
-//                }
-//                LeftTabSlicingOptionElement2{
-//                    columnName: ""
-//                    columnText: "Density"
-//                }
-//                LeftTabSlicingOptionElement3{
-//                    id:option_support_density
-//                }
-
-//                Item{width:parent.width;height:2}//spacer
-
-//                LeftTabSlicingOptionElement2{
-//                    columnName: "Infill"
-//                    columnText: "Type"
-//                }
-//                LeftTabSlicingOptionElement{
-//                    id:option_infill
-//                    columnName: ""
-//                    columnContents: ["general","full","none"]
-//                }
-//                LeftTabSlicingOptionElement2{
-//                    columnName: ""
-//                    columnText: "Density"
-//                }
-//                LeftTabSlicingOptionElement3{
-//                    id:option_infill_density
-//                }
+	addOptionDialog(QString("Resin type"), ResinTypeStr, 0);
+	addOptionDialog(QString("Raft type"), RaftTypeStr, 1);
+	addOptionDialog(QString("Support type"), SupportTypeStr, 2);
+	addOptionDialog(QString("Infill type"), InfillTypeStr, 1);
+	addOptionDialog(QString("Slicing mode"), SlicingModeStr, 1);
+	QObject::connect(_qmlManager->ltso, SIGNAL(optionChanged(QString, int)), this, SLOT(onOptionChanged(QString, int)));
 
 }
 
 void SlicingOptBackend::updateConfig()
 {
+}
+
+
+void SlicingOptBackend::onOptionChanged(QString opName, int newIndex)
+{
+	if (opName == "Resolution")
+	{
+		int x, y;
+		resStringToInt(ResolutionStr[newIndex], x, y);
+		_config->resolution_x = x;
+		_config->resolution_y = y;
+	}
+	else if (opName == "Layer height")
+	{
+		_config->layer_height = std::stof(std::string(LayerHeightStr[newIndex]));
+	}
+	else if (opName == "Bed number")
+	{
+		//?
+	}
+	else if (opName == "Resin type")
+	{
+		_config->resin_type = (SlicingConfiguration::ResinType)newIndex;
+	}
+	else if (opName == "Raft type")
+	{
+		_config->raft_type = (SlicingConfiguration::RaftType)newIndex;
+	}
+	else if (opName == "Support type")
+	{
+		_config->support_type = (SlicingConfiguration::SupportType)newIndex;
+
+	}
+	else if (opName == "Infill type")
+	{
+		_config->infill_type = (SlicingConfiguration::InFillType)newIndex;
+
+	}
+	else if (opName == "Slicing mode")
+	{
+		_config->slicing_mode = (SlicingConfiguration::SlicingMode)newIndex;
+
+	}
+
 }
