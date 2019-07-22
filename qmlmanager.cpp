@@ -2038,9 +2038,6 @@ void QmlManager::setViewMode(int viewMode) {
 
 void  QmlManager::exportSelected(bool isTemp)
 {
-	auto options = boxUpperTab->property("options");
-	auto exportConfig = options.toMap();
-	scfg->set(exportConfig);
 	QString fileName;
 
 	if (!isTemp) { // export view

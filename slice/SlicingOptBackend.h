@@ -11,6 +11,8 @@ public:
 	SlicingOptBackend(QmlManager* qmlManager, SlicingConfiguration* config);
 	void createSlicingOptControls();
 	void updateConfig();
+public slots:
+	void onOptionChanged(QString, int);
 private:
 	QmlManager* _qmlManager;
 	SlicingConfiguration* _config;

@@ -626,7 +626,6 @@ void featureThread::run(){
                 m_glmodel->updateLock = true;
                 // look for data if it is temporary
                 QVariantMap config = data.toMap();
-				scfg->set(config);
                 bool isTemporary = false;
                 for (QVariantMap::const_iterator iter = config.begin(); iter != config.end(); ++iter){
                     if (!strcmp(iter.key().toStdString().c_str(), "temporary")){
