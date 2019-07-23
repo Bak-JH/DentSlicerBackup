@@ -14,31 +14,26 @@ QDebug Hix::Debug::operator<< (QDebug d, const OverhangPoint& obj)
 	return d;
 }
 
-OverhangPoint::OverhangPoint(): radius(scfg->support_radius_min)
+OverhangPoint::OverhangPoint() : radius(scfg->support_radius_min)
 {
-    position = QVector3D(99999, 99999, 99999);
+	position = QVector3D(99999, 99999, 99999);
 }
 
-OverhangPoint::OverhangPoint(QVector3D point)
+OverhangPoint::OverhangPoint(QVector3D point) : OverhangPoint()
 {
-    position = point;
+	position = point;
 }
 
-OverhangPoint::OverhangPoint(QVector3D point, bool top, bool supportInt, bool meshInt)
+OverhangPoint::OverhangPoint(QVector3D point, bool top, bool supportInt, bool meshInt) : OverhangPoint(point)
 {
-    position = point;
-    topPoint = top;
-    supportInterPoint = supportInt;
-    meshInterPoint = meshInt;
+	topPoint = top;
+	supportInterPoint = supportInt;
+	meshInterPoint = meshInt;
 }
 
-OverhangPoint::OverhangPoint(QVector3D point, bool top, bool supportInt, bool meshInt, float r)
+OverhangPoint::OverhangPoint(QVector3D point, bool top, bool supportInt, bool meshInt, float r) :OverhangPoint(point, top, supportInt, meshInt)
 {
-    position = point;
-    topPoint = top;
-    supportInterPoint = supportInt;
-    meshInterPoint = meshInt;
-    radius = r;
+	radius = r;
 }
 
 GenerateSupport::GenerateSupport():

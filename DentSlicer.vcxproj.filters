@@ -1053,6 +1053,8 @@
     <None Include="icon-32.ico" />
     <None Include="icon-32.ico" />
     <None Include="icon-32.ico" />
+    <None Include="icon-32.ico" />
+    <None Include="Qml\LeftTabSlicingOptionElementTextbox.qml" />
   </ItemGroup>
   <ItemGroup>
     <None Include="DentSlicer.rc">

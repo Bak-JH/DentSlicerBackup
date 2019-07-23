@@ -36,8 +36,8 @@ public:
 namespace autoorientation
 {
 
-    rotateResult* Tweak(Mesh* mesh, bool bi_algorithmic,int CA,bool *appropriately_rotated);
-    float approachvertex(Mesh* mesh,float n[]);
+    rotateResult* Tweak(const Mesh* mesh, bool bi_algorithmic,int CA,bool *appropriately_rotated);
+    float approachvertex(const Mesh* mesh,float n[]);
 
 
 };

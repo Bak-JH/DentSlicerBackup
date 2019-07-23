@@ -49,6 +49,34 @@ constexpr std::array<std::string_view, 3> ResinTypeStr{
 };
 
 
+constexpr std::array<std::string_view, 11> SupportRadiusMin{
+	"0.5",
+	"0.3",
+	"0.2",
+	"0.1",
+	"0.08",
+	"0.06",
+	"0.05",
+	"0.04",
+	"0.03",
+	"0.02",
+	"0.01"
+};
+
+constexpr std::array<std::string_view, 11> SupportRadiusMax{
+	"2.0",
+	"1.5",
+	"1.2",
+	"1.0",
+	"0.8",
+	"0.6",
+	"0.5",
+	"0.4",
+	"0.3",
+	"0.2",
+	"0.1"
+};
+
 void resStringToInt(std::string_view str, int& x, int& y)
 {
 	std::string strCopy(str);
@@ -92,6 +120,9 @@ void SlicingOptBackend::createSlicingOptControls()
 	addOptionDialog(QString("Support type"), SupportTypeStr, 2);
 	addOptionDialog(QString("Infill type"), InfillTypeStr, 1);
 	addOptionDialog(QString("Slicing mode"), SlicingModeStr, 0);
+	addOptionDialog(QString("Support minimum radius"), SupportRadiusMin, 2);
+	addOptionDialog(QString("Support maximum radius"), SupportRadiusMax, 3);
+
 	QObject::connect(_qmlManager->ltso, SIGNAL(optionChanged(QString, int)), this, SLOT(onOptionChanged(QString, int)));
 
 }
@@ -139,6 +170,16 @@ void SlicingOptBackend::onOptionChanged(QString opName, int newIndex)
 	else if (opName == "Slicing mode")
 	{
 		_config->slicing_mode = (SlicingConfiguration::SlicingMode)newIndex;
+
+	}
+	else if (opName == "Support minimum radius")
+	{
+		_config->support_radius_min = std::stof(std::string(SupportRadiusMin[newIndex]));
+
+	}
+	else if (opName == "Support maximum radius")
+	{
+		_config->support_radius_max = std::stof(std::string(SupportRadiusMax[newIndex]));
 
 	}
 

@@ -403,6 +403,7 @@
     <None Include="Qml\LeftTabSlicingOptionElement.qml" />
     <None Include="Qml\LeftTabSlicingOptionElement2.qml" />
     <None Include="Qml\LeftTabSlicingOptionElement3.qml" />
+    <None Include="Qml\LeftTabSlicingOptionElementTextbox.qml" />
     <None Include="Qml\LeftTabViewMode.qml" />
     <None Include="Qml\Login.qml" />
     <None Include="Qml\MainView.qml" />

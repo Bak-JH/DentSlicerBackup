@@ -1557,18 +1557,16 @@ void QmlManager::runGroupFeature(int ftrType, QString state, double arg1, double
 				if (selectedModel->updateLock)
 					return;
 				selectedModel->updateLock = true;
-
 				selectedModel->saveUndoState();
 				qmlManager->openProgressPopUp();
 				qDebug() << "tweak start";
-				autoorientation::Tweak(selectedModel->_mesh, true, 45, &selectedModel->appropriately_rotated);
+				rotateResult* rotateres = autoorientation::Tweak(selectedModel->getMesh(), true, 45, &selectedModel->appropriately_rotated);
 				qDebug() << "got rotate result";
 				if (rotateres == NULL)
 					break;
 				else
 					selectedModel->rotateModelMesh(rotateres->R);
 			}
-
         }
         break;
     }
