@@ -363,6 +363,10 @@ void QmlManager::disconnectHandlers(GLModel* glmodel){
     // need to connect for every popup
     // model rotate popup codes
 
+	//	// auto orientation popup codes
+	//QObject::disconnect(orientPopup, SIGNAL(runFeature(int)), glmodel->ft, SLOT(setTypeAndStart(int)));
+	//// auto Repair popup codes
+	//QObject::disconnect(repairPopup, SIGNAL(runFeature(int)), glmodel->ft, SLOT(setTypeAndStart(int)));
 
 
     // model layflat popup codes
@@ -372,8 +376,6 @@ void QmlManager::disconnectHandlers(GLModel* glmodel){
 	// hollow shell popup codes
 	//QObject::disconnect(hollowShellPopup, SIGNAL(hollowShell(double)), glmodel, SLOT(indentHollowShell(double)));
 
-	// auto orientation popup codes
-	QObject::disconnect(orientPopup, SIGNAL(runFeature(int)), glmodel->ft, SLOT(setTypeAndStart(int)));
 
 	// scale popup codes
 	//QObject::disconnect(scalePopup, SIGNAL(runFeature(int,double,double,double)), glmodel->ft, SLOT(setTypeAndRun(int, double, double, double)));
@@ -392,8 +394,6 @@ void QmlManager::disconnectHandlers(GLModel* glmodel){
 	// manual support popup codes
 	QObject::disconnect(manualSupportPopup, SIGNAL(generateManualSupport()), glmodel, SLOT(generateManualSupport()));
 
-	// auto Repair popup codes
-	QObject::disconnect(repairPopup, SIGNAL(runFeature(int)), glmodel->ft, SLOT(setTypeAndStart(int)));
 	
 	// model layflat popup codes
 	QObject::disconnect(layflatPopup, SIGNAL(openLayflat()), glmodel, SLOT(openLayflat()));
@@ -482,6 +482,12 @@ void QmlManager::connectHandlers(GLModel* glmodel){
     QObject::connect(mv, SIGNAL(unDo()), glmodel, SLOT(loadUndoState()));
     QObject::connect(mv, SIGNAL(reDo()), glmodel, SLOT(loadRedoState()));*/
 
+	//// auto Repair popup codes
+	//QObject::connect(repairPopup, SIGNAL(runFeature(int)), glmodel->ft, SLOT(setTypeAndStart(int)));
+	//// auto orientation popup codes
+	//QObject::connect(orientPopup, SIGNAL(runFeature(int)), glmodel->ft, SLOT(setTypeAndStart(int)));
+
+
     QObject::connect(layflatPopup, SIGNAL(openLayflat()), glmodel, SLOT(openLayflat()));
     QObject::connect(layflatPopup, SIGNAL(closeLayflat()), glmodel, SLOT(closeLayflat()));
     QObject::connect(layflatPopup, SIGNAL(generateLayFlat()), glmodel, SLOT(generateLayFlat()));
@@ -503,9 +509,7 @@ void QmlManager::connectHandlers(GLModel* glmodel){
     QObject::connect(hollowShellPopup, SIGNAL(resultSliderValueChanged(double)), glmodel, SLOT(getSliderSignal(double)));
     */
 
-    // auto orientation popup codes
-    QObject::connect(orientPopup, SIGNAL(runFeature(int)), glmodel->ft, SLOT(setTypeAndStart(int)));
-
+ 
     // scale popup codes
     //QObject::connect(scalePopup, SIGNAL(runFeature(int,double,double,double)), glmodel->ft, SLOT(setTypeAndRun(int, double, double, double)));
     QObject::connect(scalePopup, SIGNAL(openScale()), glmodel, SLOT(openScale()));
@@ -541,8 +545,7 @@ void QmlManager::connectHandlers(GLModel* glmodel){
     QObject::connect(manualSupportPopup, SIGNAL(closeManualSupport()), glmodel, SLOT(closeManualSupport()));
     QObject::connect(manualSupportPopup, SIGNAL(generateManualSupport()), glmodel, SLOT(generateManualSupport()));
 
-    // auto Repair popup codes
-    QObject::connect(repairPopup, SIGNAL(runFeature(int)), glmodel->ft, SLOT(setTypeAndStart(int)));
+
 
     // auto arrange popup codes
     //unused, signal from qml goes right into QmlManager.runArrange
@@ -1249,6 +1252,7 @@ void QmlManager::totalMoveDone(){
         curModel->updateModelMesh();
     }
     sendUpdateModelInfo();
+	_widgetManager.updatePosition();
 }
 
 void QmlManager::modelRotateInit(){
@@ -1503,12 +1507,6 @@ void QmlManager::runGroupFeature(int ftrType, QString state, double arg1, double
 
         }else if(state == "active"){
 			_widgetManager.setWidgetMode(WidgetMode::Rotate);
-			if (selectedModels.empty()){
-                QMetaObject::invokeMethod(rotatePopup,"offApplyFinishButton");
-            }else{
-                QMetaObject::invokeMethod(rotatePopup,"onApplyFinishButton");
-            }
-
         }
         break;
     }
@@ -1518,11 +1516,6 @@ void QmlManager::runGroupFeature(int ftrType, QString state, double arg1, double
 			_widgetManager.setWidgetMode(WidgetMode::None);
 		}else if(state == "active"){
 			_widgetManager.setWidgetMode(WidgetMode::Move);
-			if (selectedModels.empty()){
-                QMetaObject::invokeMethod(movePopup,"offApplyFinishButton");
-            }else{
-                QMetaObject::invokeMethod(movePopup,"onApplyFinishButton");
-            }
         }
         break;
     }
@@ -1560,22 +1553,34 @@ void QmlManager::runGroupFeature(int ftrType, QString state, double arg1, double
     case ftrOrient:  //orient
     {
         if (state == "active"){
-            if (selectedModels.empty()){
-                QMetaObject::invokeMethod(orientPopup,"offApplyFinishButton");
-            }else{
-                QMetaObject::invokeMethod(orientPopup,"onApplyFinishButton");
-            }
+			for (auto selectedModel : selectedModels) {
+				if (selectedModel->updateLock)
+					return;
+				selectedModel->updateLock = true;
+
+				selectedModel->saveUndoState();
+				qmlManager->openProgressPopUp();
+				qDebug() << "tweak start";
+				autoorientation::Tweak(selectedModel->_mesh, true, 45, &selectedModel->appropriately_rotated);
+				qDebug() << "got rotate result";
+				if (rotateres == NULL)
+					break;
+				else
+					selectedModel->rotateModelMesh(rotateres->R);
+			}
+
         }
         break;
     }
     case ftrRepair:  //repair
     {
         if (state == "active"){
-            if (selectedModels.empty()){
-                QMetaObject::invokeMethod(repairPopup,"offApplyFinishButton");
-            }else{
-                QMetaObject::invokeMethod(repairPopup,"onApplyFinishButton");
-            }
+
+			for (auto selectedModel : selectedModels) {
+				selectedModel->saveUndoState();
+				selectedModel->repairMesh();
+
+			}
         }
         break;
     }
@@ -1596,9 +1601,12 @@ void QmlManager::runGroupFeature(int ftrType, QString state, double arg1, double
     case ftrScale:
         qDebug() << "run feature scale" << selectedModels.size();
         if (state == "active"){
-            for (GLModel* model : selectedModels){
-                model->ft->setTypeAndRun(ftrType, arg1, arg2, arg3);
-            }
+			float scaleX = arg1;
+			float scaleY = arg2;
+			float scaleZ = arg3;
+			for (auto selectedModel : selectedModels) {
+				selectedModel->scaleModelMesh(scaleX, scaleY, scaleZ);
+			}
             sendUpdateModelInfo();
         } else {
 
@@ -1607,7 +1615,8 @@ void QmlManager::runGroupFeature(int ftrType, QString state, double arg1, double
     case ftrExport:
         // save to temporary folder
         qDebug() << "file export called";
-		exportSelected(false);
+		auto exportTaskFlow = exportSelectedAsync(getExportPath());
+		_taskManager.enqueTask(exportTaskFlow);
 		break;
     }
 }
@@ -2020,13 +2029,10 @@ void QmlManager::setViewMode(int viewMode) {
 
 		if (sliceNeeded)
 		{
-			tf::Taskflow* taskflow = new tf::Taskflow();
-
-			auto exportSelectedTask = taskflow->emplace( [this, viewMode]() {
-				exportSelected(true);
-				postToObject(std::bind(&QmlManager::setModelViewMode, this, viewMode), this);
-				});
-			_taskManager.enqueTask(taskflow);
+			auto exportTaskFlow = exportSelectedAsync(QDir::tempPath());
+			auto f = std::bind(&QmlManager::setModelViewMode, this, viewMode);
+			_taskManager.enqueTask(exportTaskFlow);
+			_taskManager.enqueUITask(f);
        }
 		else
 		{
@@ -2034,55 +2040,44 @@ void QmlManager::setViewMode(int viewMode) {
 		}
     }
 }
-
-
-void  QmlManager::exportSelected(bool isTemp)
+QString QmlManager::getExportPath()
 {
 	QString fileName;
+	fileName = QFileDialog::getSaveFileName(nullptr, tr("Export sliced file"), "");
+	return fileName;
+}
+tf::Taskflow* QmlManager::exportSelectedAsync(QString exportPath)
+{
+	tf::Taskflow* taskflow = new tf::Taskflow();
+	auto exportSelectedTask = taskflow->emplace([this, exportPath](tf::Subflow& subflow) {
+		STLexporter* ste = new STLexporter();
+		SlicingEngine* se = new SlicingEngine();
 
-	if (!isTemp) { // export view
-		qDebug() << "export to file";
-		fileName = QFileDialog::getSaveFileName(nullptr, tr("Export sliced file"), "");
-		//ste->exportSTL(m_glmodel->getMesh(), fileName);
-		if (fileName == "")
-			return;
-	}
-	else { // support view & layerview
-		qDebug() << "export to temp file";
-		fileName = QDir::tempPath();
-		qDebug() << fileName;
-	}
+		qmlManager->openProgressPopUp();
 
-	STLexporter* ste = new STLexporter();
-	SlicingEngine* se = new SlicingEngine();
+		// merge selected models
+		Mesh* mergedShellMesh = ste->mergeSelectedModels();//ste->mergeModels(qmlManager->selectedModels);
+		//GLModel* mergedModel = new GLModel(mainWindow, models, mergedMesh, "temporary", false);
 
-	qmlManager->openProgressPopUp();
+		// generate support
+		GenerateSupport generatesupport;
+		Mesh* mergedSupportMesh = nullptr;
+		if (scfg->support_type != SlicingConfiguration::SupportType::None) { // if generating support
+			//Mesh* mergedSupportMesh = nullptr;
+			mergedSupportMesh = generatesupport.generateSupport(mergedShellMesh);
+		}
 
-	// merge selected models
-	Mesh* mergedShellMesh = ste->mergeSelectedModels();//ste->mergeModels(qmlManager->selectedModels);
-	//GLModel* mergedModel = new GLModel(mainWindow, models, mergedMesh, "temporary", false);
+		// generate raft according to support structure
+		GenerateRaft generateraft;
+		Mesh* mergedRaftMesh = nullptr;
+		if (scfg->raft_type != SlicingConfiguration::RaftType::None) {
+			mergedRaftMesh = generateraft.generateRaft(mergedShellMesh, generatesupport.overhangPoints);
+		}
+		// need to generate support, raft
+		se->slice(subflow, mergedShellMesh, mergedSupportMesh, mergedRaftMesh, exportPath);
+	});
+	return taskflow;
 
-	// generate support
-	GenerateSupport generatesupport;
-	Mesh* mergedSupportMesh = nullptr;
-	if (scfg->support_type != SlicingConfiguration::SupportType::None) { // if generating support
-		//Mesh* mergedSupportMesh = nullptr;
-		mergedSupportMesh = generatesupport.generateSupport(mergedShellMesh);
-	}
-
-	// generate raft according to support structure
-	GenerateRaft generateraft;
-	Mesh* mergedRaftMesh = nullptr;
-	if (scfg->raft_type != SlicingConfiguration::RaftType::None) {
-		mergedRaftMesh = generateraft.generateRaft(mergedShellMesh, generatesupport.overhangPoints);
-	}
-	// need to generate support, raft
-
-	//se->slice(data, mergedMesh, fileName);
-	se->slice(mergedShellMesh, mergedSupportMesh, mergedRaftMesh, fileName);
-	//deleteOneModelFile(mergedModel->ID);
-
-	//m_glmodel->futureWatcher.setFuture(future);
 }
 void QmlManager::setModelViewMode(int mode)
 {

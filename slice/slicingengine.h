@@ -9,6 +9,10 @@
 #include "fileloader.h"
 #include "DentEngine/src/slicer.h"
 #include "DentEngine/src/svgexporter.h"
+namespace tf
+{
+	class Subflow;
+}
 
 using namespace Hix::Engine3D;
 class SlicingEngine : public QObject
@@ -17,7 +21,7 @@ class SlicingEngine : public QObject
 
 public:
     SlicingEngine();
-    Q_INVOKABLE Slicer* slice (Mesh* shellMesh=nullptr, Mesh* supportMesh=nullptr, Mesh* raftMesh=nullptr, QString filename = "");
+    Slicer* slice (tf::Subflow& subflow, Mesh* shellMesh=nullptr, Mesh* supportMesh=nullptr, Mesh* raftMesh=nullptr, QString filename = "");
 
 public slots:
     void slicingStarted();

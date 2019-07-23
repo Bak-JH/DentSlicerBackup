@@ -58,35 +58,6 @@ using namespace Qt3DExtras;
 
 class GLModel;
 class OverhangPoint;
-class featureThread: public QThread
-{
-    Q_OBJECT
-public:
-    featureThread(GLModel* glmodel, int type);
-    GLModel* m_glmodel;
-    int progress;
-    int optype; // defines typeofoperation
-    QVariant data;
-    double arg1;
-    double arg2;
-    double arg3;
-    autoorientation* ot;
-    modelcut* ct;
-    autoarrange* ar;
-    STLexporter* ste;
-    SlicingEngine* se;
-
-signals:
-    void loadPopup(QVariant value);
-
-public slots:
-    void setTypeAndRun(int type);
-    void setTypeAndRun(int type, double arg1, double arg2, double arg3);
-    void setTypeAndRun(int type, QVariant data);
-    void setTypeAndStart(int type);
-private:
-    void run() Q_DECL_OVERRIDE;
-};
 
 class arrangeSignalSender: public QObject
 {
@@ -219,7 +190,6 @@ public:
     // support
     Slicer* slicer;
 
-    featureThread* ft;
     //arrangeSignalSender* arsignal; //unused, signal from qml goes right into QmlManager.runArrange
     QFutureWatcher<Slicer*> futureWatcher; // future watcher for feature thread results returned
 
