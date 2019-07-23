@@ -57,5 +57,6 @@
         <file>shaders/perPrimitive.geom</file>
         <file>shaders/singleColor.geom</file>
         <file>shaders/flat.geom</file>
+        <file>Qml/LeftTabSlicingOptionElementTextbox.qml</file>
     </qresource>
 </RCC>

@@ -6,11 +6,11 @@
 namespace autoorientationPrivate
 {
 	float target_function(float touching, float overhang, float line);
-	float* lithograph(Mesh* mesh, float n[], float amin, int CA);
-	float get_touching_line(Mesh* mesh, float a[], const MeshFace& face, float touching_height);
-	std::vector<Orient*> area_cumulation(Mesh* mesh, float n[], bool bi_algorithmic);
-	std::vector<Orient*> egde_plus_vertex(Mesh* mesh, int bsvest_n);
-	float* calc_random_normal(Mesh* mesh, int i, const MeshFace& face);
+	float* lithograph(const Mesh* mesh, float n[], float amin, int CA);
+	float get_touching_line(const Mesh* mesh, float a[], const MeshFace& face, float touching_height);
+	std::vector<Orient*> area_cumulation(const Mesh* mesh, float n[], bool bi_algorithmic);
+	std::vector<Orient*> egde_plus_vertex(const Mesh* mesh, int bsvest_n);
+	float* calc_random_normal(const Mesh* mesh, int i, const MeshFace& face);
 	std::vector<Orient*> remove_duplicates(std::vector<Orient*> o, int* orientCnt);
 	rotateResult* euler(Liste bestside);
 }
@@ -28,7 +28,7 @@ The critical angle CA is a variable that can be set by the operator as
      temperature, printing speed, etc.
 */
 
-rotateResult* autoorientation::Tweak(Mesh* mesh, bool bi_algorithmic,int CA,bool *appropriately_rotated){
+rotateResult* autoorientation::Tweak(const Mesh* mesh, bool bi_algorithmic,int CA,bool *appropriately_rotated){
     qmlManager->setProgress(0);
     qmlManager->setProgressText("startttttt");
 
@@ -176,7 +176,7 @@ float autoorientationPrivate::target_function(float touching,float overhang,floa
     float F = (overhang/ABSLIMIT) + (overhang / (touching+touching_line));
     return F;
 }
-float autoorientation::approachvertex(Mesh* mesh,float n[]){
+float autoorientation::approachvertex(const Mesh* mesh,float n[]){
     bool minFlag=true;
     //qt에서 최댓값이 얼마인지 몰라 flag로 만들었습니다.
 
@@ -210,7 +210,7 @@ float autoorientation::approachvertex(Mesh* mesh,float n[]){
 
     return amin;
 }
-float* autoorientationPrivate::lithograph(Mesh* mesh, float n[], float amin, int CA){
+float* autoorientationPrivate::lithograph(const Mesh* mesh, float n[], float amin, int CA){
     //overhang,bottom,line을 구합니다.
     float Overhang=1;
     float alpha= - cos((90-CA)*M_PI/180);  //CA는 0~90도입니다 기본은 45도.
@@ -261,7 +261,7 @@ float* autoorientationPrivate::lithograph(Mesh* mesh, float n[], float amin, int
     temp[2]=LineL;
     return temp;
 }
-float autoorientationPrivate::get_touching_line(Mesh* mesh,float a[], const MeshFace& face,float touching_height){
+float autoorientationPrivate::get_touching_line(const Mesh* mesh,float a[], const MeshFace& face,float touching_height){
     std::vector<const MeshVertex*> touch_list;
 	auto idx = face.meshVertices();
     for(int j=0;j<3;j++){
@@ -294,7 +294,7 @@ float autoorientationPrivate::get_touching_line(Mesh* mesh,float a[], const Mesh
     }
     return length;
 }
-std::vector<Orient*> autoorientationPrivate::area_cumulation(Mesh* mesh,float n[],bool bi_algorithmic){
+std::vector<Orient*> autoorientationPrivate::area_cumulation(const Mesh* mesh,float n[],bool bi_algorithmic){
     //bi_algorithmic이 false:6개 true:8개의 orientataion*을 만들어 리턴합니다.
     int best_n;
     if(bi_algorithmic)
@@ -391,7 +391,7 @@ std::vector<Orient*> autoorientationPrivate::area_cumulation(Mesh* mesh,float n[
     //가장 가중치가 높은 orientation들도 추가합니다.
     return result;
 }
-std::vector<Orient*> autoorientationPrivate::egde_plus_vertex(Mesh* mesh, int best_n){
+std::vector<Orient*> autoorientationPrivate::egde_plus_vertex(const Mesh* mesh, int best_n){
     //orientation을 추가로 더할 때 씁니다. best_n 갯수만큼 return 하긴 하지만,
     //호출한 Tweak() 에서 val>2인 orientation만 원본 orientation에 추가하므로,
     //실제로 추가되는 값은 그보다 작을 수 있습니다.
@@ -475,7 +475,7 @@ std::vector<Orient*> autoorientationPrivate::egde_plus_vertex(Mesh* mesh, int be
     return result;
 
 }
-float* autoorientationPrivate::calc_random_normal(Mesh* mesh, int i,  const MeshFace& face){
+float* autoorientationPrivate::calc_random_normal(const Mesh* mesh, int i,  const MeshFace& face){
     //mesh 내의 random한 normal을 리턴합니다.
     QTime time = QTime::currentTime();
     qsrand((uint)time.msec());
