@@ -88,8 +88,8 @@ struct SlicingConfiguration
     float raft_offset_radius = 4.0f; // in mm
 
     // support settings
-    float support_radius_max = 1.5f;
-    float support_radius_min = 0.3f;
+    float support_radius_max = 1.0f;
+    float support_radius_min = 0.2f;
     float support_base_height = 2.0f;
 
     // bed configuration
