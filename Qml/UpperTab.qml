@@ -748,17 +748,11 @@ Rectangle {
                 else
                     closeMove();
             }
-
-            signal runFeature(int type, int X, int Y);
+			signal runFeature(int type, int X, int Y);
             onApplyClicked: {
                 console.log("move")
                 runFeature(ftrMove,popup_move.numberbox1_number,popup_move.numberbox2_number);
             }
-            signal runGroupFeature(int type, string state, double arg1, double arg2, double arg3, var config);
-            onFinishClicked:{
-                runGroupFeature(ftrMove, state, 0, 0, 0, null);
-            }
-
             function onApplyFinishButton(){
                 popup_move.colorApplyFinishButton(0)
             }

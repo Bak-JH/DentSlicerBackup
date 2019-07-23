@@ -10,7 +10,7 @@ SlicingEngine::SlicingEngine()
 
 QProcess *slicing_process;
 
-Slicer* SlicingEngine::slice( Mesh* shellMesh, Mesh* supportMesh, Mesh* raftMesh, QString filename){
+Slicer* SlicingEngine::slice(tf::Subflow& subflow, Mesh* shellMesh, Mesh* supportMesh, Mesh* raftMesh, QString filename){
     qDebug() << "slice" << shellMesh << filename;
 
     qDebug() << "done parsing arguments";

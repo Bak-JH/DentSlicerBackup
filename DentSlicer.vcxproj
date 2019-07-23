@@ -287,8 +287,7 @@
     <ClInclude Include="DentEngine\src\polyclipping\poly2tri\sweep\advancing_front.h" />
     <QtMoc Include="feature\autoarrange.h">
     </QtMoc>
-    <QtMoc Include="feature\autoorientation.h">
-    </QtMoc>
+    <ClInclude Include="feature\autoorientation.h" />
     <ClInclude Include="DentEngine\src\polyclipping\poly2tri\sweep\cdt.h" />
     <ClInclude Include="DentEngine\src\polyclipping\clip2tri\clip2tri.h" />
     <ClInclude Include="DentEngine\src\polyclipping\clipper\clipper.hpp" />
