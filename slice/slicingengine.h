@@ -26,7 +26,7 @@ namespace SlicingEngine
 		QString size;
 		float volume;
 	};
-	Result sliceModel (tf::Subflow& subflow, Mesh* shellMesh=nullptr, Mesh* supportMesh=nullptr, Mesh* raftMesh=nullptr, QString filename = "");
+	Result sliceModel (bool isTemp, tf::Subflow& subflow, Mesh* shellMesh=nullptr, Mesh* supportMesh=nullptr, Mesh* raftMesh=nullptr, QString filename = "");
 };
 
 //extern QmlManager qm;

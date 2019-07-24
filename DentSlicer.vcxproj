@@ -204,6 +204,7 @@
     <ClCompile Include="DentEngine\src\configuration.cpp" />
     <ClCompile Include="feature\convex_hull.cpp" />
     <ClCompile Include="feature\extension.cpp" />
+    <ClCompile Include="feature\overhangDetectPostSlice.cpp" />
     <ClCompile Include="fileloader.cpp" />
     <ClCompile Include="feature\generateraft.cpp" />
     <ClCompile Include="feature\generatesupport.cpp" />
@@ -298,6 +299,7 @@
     <ClInclude Include="feature\convex_hull.h" />
     <ClInclude Include="feature\earcut.hpp" />
     <ClInclude Include="feature\extension.h" />
+    <ClInclude Include="feature\overhangDetectPostSlice.h" />
     <ClInclude Include="fileloader.h" />
     <ClInclude Include="feature\generateraft.h" />
     <ClInclude Include="feature\generatesupport.h" />

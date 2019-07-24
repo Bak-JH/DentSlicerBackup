@@ -256,7 +256,7 @@ private:
 	//std::future<Slicer*> exportSelected(bool isTemp);
 	QString getExportPath();
 	//do not make non-async version of this as taskflow allows to spawn  internal dynamic tasks for better throughoutput.
-	tf::Taskflow* exportSelectedAsync(QString exportPath);
+	tf::Taskflow* exportSelectedAsync(QString exportPath, bool isTemp);
 	bool groupSelectionActive = false;
     int viewMode;
     int layerViewFlags;
