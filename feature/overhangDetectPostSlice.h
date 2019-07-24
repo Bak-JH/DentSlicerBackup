@@ -20,10 +20,7 @@ namespace Hix
 	{
 		namespace PostSlice
 		{
-			class Volume
-			{
 
-			};
 			std::vector<QVector3D> OverhangDetectPostSlice(const Engine3D::Mesh& shellMesh);
 		}
 
