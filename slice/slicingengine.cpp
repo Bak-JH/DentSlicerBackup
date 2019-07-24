@@ -5,15 +5,13 @@
 #include "DentEngine/src/configuration.h"
 
 
-SlicingEngine::Result SlicingEngine::sliceModel(tf::Subflow& subflow, Mesh* shellMesh, Mesh* supportMesh, Mesh* raftMesh, QString filename){
+SlicingEngine::Result SlicingEngine::sliceModel(bool isTemp, tf::Subflow& subflow, Mesh* shellMesh, Mesh* supportMesh, Mesh* raftMesh, QString filename){
     qDebug() << "slice" << shellMesh << filename;
 
     qDebug() << "done parsing arguments";
 
     qmlManager->setProgress(0.1);
 
-    // configuration
-    scfg->origin = QVector3D((shellMesh->x_min()+shellMesh->x_max())/2, (shellMesh->y_min()+shellMesh->y_max())/2, (shellMesh->z_min()+shellMesh->z_max())/2);
     // Slice
     Slices shellSlices;
     qDebug() << "shell Mesh : " << shellMesh << shellSlices.mesh;
@@ -37,7 +35,7 @@ SlicingEngine::Result SlicingEngine::sliceModel(tf::Subflow& subflow, Mesh* shel
 
 
     // Export to SVG
-    QString export_info = SVGexporter::exportSVG(shellSlices, supportSlices, raftSlices, filename+"_export");
+    QString export_info = SVGexporter::exportSVG(shellSlices, supportSlices, raftSlices, filename+"_export", isTemp);
 
     // 승환 100%
     qmlManager->setProgress(1);

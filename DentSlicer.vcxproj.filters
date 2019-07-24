@@ -191,6 +191,9 @@
     <ClCompile Include="slice\SlicingOptBackend.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>
+    <ClCompile Include="feature\overhangDetectPostSlice.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DentEngine\src\polyclipping\poly2tri\sweep\advancing_front.h">
@@ -480,6 +483,9 @@
     </ClInclude>
     <ClInclude Include="slice\slicingengine.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="feature\overhangDetectPostSlice.h">
+      <Filter>Generated Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

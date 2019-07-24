@@ -81,6 +81,11 @@ constexpr std::array<std::string_view, 2> PrinterVendorType{
 	"3D'Light"
 };
 
+constexpr std::array<std::string_view, 2> SliceInvertStr{
+	"Invert X-axis",
+	"No inversion"
+};
+
 
 void resStringToInt(std::string_view str, int& x, int& y)
 {
@@ -128,6 +133,7 @@ void SlicingOptBackend::createSlicingOptControls()
 	addOptionDialog(QString("Support minimum radius"), SupportRadiusMin, 2);
 	addOptionDialog(QString("Support maximum radius"), SupportRadiusMax, 3);
 	addOptionDialog(QString("Printer vendor"), PrinterVendorType, 0);
+	addOptionDialog(QString("Slice image inversion"), SliceInvertStr, 0);
 
 	QObject::connect(_qmlManager->ltso, SIGNAL(optionChanged(QString, int)), this, SLOT(onOptionChanged(QString, int)));
 
@@ -190,6 +196,10 @@ void SlicingOptBackend::onOptionChanged(QString opName, int newIndex)
 	else if (opName == "Printer vendor")
 	{
 		_config->printer_vendor_type = (SlicingConfiguration::PrinterVendor)newIndex;
-
 	}
+	else if (opName == "Slice image inversion")
+	{
+		_config->slice_invert = (SlicingConfiguration::Invert)newIndex;
+	}
+
 }

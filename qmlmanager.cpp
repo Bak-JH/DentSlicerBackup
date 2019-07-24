@@ -1613,7 +1613,7 @@ void QmlManager::runGroupFeature(int ftrType, QString state, double arg1, double
     case ftrExport:
         // save to temporary folder
         qDebug() << "file export called";
-		auto exportTaskFlow = exportSelectedAsync(getExportPath());
+		auto exportTaskFlow = exportSelectedAsync(getExportPath(), false);
 		_taskManager.enqueTask(exportTaskFlow);
 		break;
     }
@@ -1977,7 +1977,7 @@ void QmlManager::setViewMode(int viewMode) {
 		}
 		if (sliceNeeded)
 		{
-			auto exportTaskFlow = exportSelectedAsync(QDir::tempPath());
+			auto exportTaskFlow = exportSelectedAsync(QDir::tempPath(), true);
 			auto f = std::bind(&QmlManager::setModelViewMode, this, viewMode);
 			_taskManager.enqueTask(exportTaskFlow);
 			_taskManager.enqueUITask(f);
@@ -1994,12 +1994,12 @@ QString QmlManager::getExportPath()
 	fileName = QFileDialog::getSaveFileName(nullptr, tr("Export sliced file"), "");
 	return fileName;
 }
-tf::Taskflow* QmlManager::exportSelectedAsync(QString exportPath)
+tf::Taskflow* QmlManager::exportSelectedAsync(QString exportPath, bool isTemp)
 {
 	if (exportPath.isEmpty())
 		return nullptr;
 	tf::Taskflow* taskflow = new tf::Taskflow();
-	auto exportSelectedTask = taskflow->emplace([this, exportPath](tf::Subflow& subflow) {
+	auto exportSelectedTask = taskflow->emplace([this, exportPath, isTemp](tf::Subflow& subflow) {
 
 
 		STLexporter* ste = new STLexporter();
@@ -2025,7 +2025,7 @@ tf::Taskflow* QmlManager::exportSelectedAsync(QString exportPath)
 			mergedRaftMesh = generateraft.generateRaft(mergedShellMesh, generatesupport.overhangPoints);
 		}
 		// need to generate support, raft
-		auto result = SlicingEngine::sliceModel(subflow, mergedShellMesh, mergedSupportMesh, mergedRaftMesh, exportPath);
+		auto result = SlicingEngine::sliceModel(isTemp, subflow, mergedShellMesh, mergedSupportMesh, mergedRaftMesh, exportPath);
 
 		QMetaObject::invokeMethod(layerViewSlider, "setThickness", Q_ARG(QVariant, (scfg->layer_height)));
 		QMetaObject::invokeMethod(layerViewSlider, "setLayerCount", Q_ARG(QVariant, (result.layerCount -1))); //0 based index
