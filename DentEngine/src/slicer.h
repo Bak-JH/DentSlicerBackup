@@ -49,42 +49,10 @@ namespace Hix
 	}
 }
 
-class Slicer : public QThread
+namespace Slicer
 {
-public:
-    Slicer() {};
-    //Slices slices;
-    QString slicingInfo;
-
-    Slices totalSlices;
-    Slices shellSlices;
-    Slices supportSlices;
-    Slices raftSlices;
-
     /****************** Entire Slicing Step *******************/
     bool slice(Mesh* mesh, Slices* slices);
-
-    /****************** Mesh Slicing Step *******************/
-    std::vector<Paths> meshSlice(Mesh* mesh); // totally k elements
-
-
-    /****************** Contour Construction Step *******************/
-
-
-
-    /****************** Helper Functions For Mesh Slicing Step *******************/
-	std::vector<std::vector<const MeshFace*>> buildTriangleLists(Mesh* mesh, std::vector<float> planes, float delta);
-    std::vector<float> buildUniformPlanes(float z_min, float z_max, float delta);
-    std::vector<float> buildAdaptivePlanes(float z_min, float z_max);
-
-
-    /****************** Helper Functions For Contour Construction Step *******************/
-    void insertPathHash(QHash<uint32_t, Path>& pathHash, IntPoint u, IntPoint v);
-
-
-
-    /****************** Deprecated functions *******************/
-    void containmentTreeConstruct();
 };
 
 

@@ -57,26 +57,6 @@ QString SVGexporter::exportSVG(Slices& shellSlices, Slices& supportSlices, Slice
         dir.mkpath(".");
     }
 
-    QString infofilename = outfoldername + "/" + "info.json";
-    QFile infofile(infofilename);
-    infofile.open(QFile::WriteOnly);
-
-    //std::ofstream infofile(infofilename.toStdString().c_str(), std::ios::out);
-    QJsonObject jsonObject;
-    jsonObject["layer_height"] = round(scfg->layer_height*100)/100;
-    jsonObject["total_layer"] = int(shellSlices.size() + round(scfg->support_base_height/scfg->layer_height) + raftSlices.size());
-    jsonObject["bed_curing_time"] = 15000; // depends on scfg->resin_type
-    jsonObject["curing_time"] = 2100; // depends on scfg->resin_type
-    jsonObject["mirror_rot_time"] = 2000;
-    jsonObject["z_hop_height"] = 15;
-    jsonObject["move_up_feedrate"] = 350;
-    jsonObject["move_down_feedrate"] = 500;
-    jsonObject["resin_type"] = (uint8_t)scfg->resin_type;
-    jsonObject["contraction_ratio"] = scfg->contraction_ratio;
-    QJsonDocument jsonDocument(jsonObject);
-    QByteArray jsonBytes = jsonDocument.toJson();
-    infofile.write(jsonBytes);
-    infofile.close();
     //qDebug() << jsonBytes;
 
     int64_t area = 0;
@@ -161,7 +141,7 @@ QString SVGexporter::exportSVG(Slices& shellSlices, Slices& supportSlices, Slice
     }
 
     //printf("slicing done\n");
-    int layer = shellSlices.size();
+    int layer = currentSlice_idx;
     int printing_time = layer*15/60;
 
     float x = shellSlices.mesh->x_max()-shellSlices.mesh->x_min();
@@ -173,8 +153,36 @@ QString SVGexporter::exportSVG(Slices& shellSlices, Slices& supportSlices, Slice
     result_str.sprintf("info:%d:%d:%.1f:%.1f:%.1f:%.1f\n",printing_time,layer,x,y,z,volume);
     //fflush(stdout);
     qDebug() << "slicing done";
+
+
+	QString infofilename = outfoldername + "/" + "info.json";
+	QFile infofile(infofilename);
+	infofile.open(QFile::WriteOnly);
+
+	//std::ofstream infofile(infofilename.toStdString().c_str(), std::ios::out);
+	QJsonObject jsonObject;
+	jsonObject["layer_height"] = round(scfg->layer_height * 100) / 100;
+	jsonObject["total_layer"] = currentSlice_idx;
+	jsonObject["bed_curing_time"] = 15000; // depends on scfg->resin_type
+	jsonObject["curing_time"] = 2100; // depends on scfg->resin_type
+	jsonObject["mirror_rot_time"] = 2000;
+	jsonObject["z_hop_height"] = 15;
+	jsonObject["move_up_feedrate"] = 350;
+	jsonObject["move_down_feedrate"] = 500;
+	jsonObject["resin_type"] = (uint8_t)scfg->resin_type;
+	jsonObject["contraction_ratio"] = scfg->contraction_ratio;
+	QJsonDocument jsonDocument(jsonObject);
+	QByteArray jsonBytes = jsonDocument.toJson();
+	infofile.write(jsonBytes);
+	infofile.close();
+
+
+
     //exit(0);
-    writeVittroOptions(outfoldername, currentSlice_idx);
+	if (scfg->printer_vendor_type == SlicingConfiguration::PrinterVendor::ThreeDLight)
+	{
+		writeVittroOptions(outfoldername, currentSlice_idx);
+	}
 
 
     return result_str;
