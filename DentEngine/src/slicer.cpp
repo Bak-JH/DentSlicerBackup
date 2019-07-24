@@ -41,9 +41,9 @@ namespace Slicer
 	namespace Private
 	{
 		/****************** Mesh Slicing Step *******************/
-		std::vector<Paths> meshSlice(Mesh* mesh); // totally k elements
+		std::vector<Paths> meshSlice(const Mesh* mesh); // totally k elements
 		/****************** Helper Functions For Mesh Slicing Step *******************/
-		std::vector<std::vector<const MeshFace*>> buildTriangleLists(Mesh* mesh, std::vector<float> planes, float delta);
+		std::vector<std::vector<const MeshFace*>> buildTriangleLists(const Mesh* mesh, std::vector<float> planes, float delta);
 		std::vector<float> buildUniformPlanes(float z_min, float z_max, float delta);
 		std::vector<float> buildAdaptivePlanes(float z_min, float z_max);
 		/****************** Helper Functions For Contour Construction Step *******************/
@@ -52,7 +52,7 @@ namespace Slicer
 }
 using namespace Slicer::Private;
 
-bool Slicer::slice(Mesh* mesh, Slices* slices){
+bool Slicer::slice(const Mesh* mesh, Slices* slices){
     slices->mesh = mesh;
 
     if (mesh == nullptr || mesh->getFaces().size() ==0){
@@ -123,7 +123,7 @@ bool Slicer::slice(Mesh* mesh, Slices* slices){
 /****************** Mesh Slicing Step *******************/
 
 // slices mesh into segments
-std::vector<Paths> Slicer::Private::meshSlice(Mesh* mesh){
+std::vector<Paths> Slicer::Private::meshSlice(const Mesh* mesh){
     float delta = scfg->layer_height;
 
     std::vector<float> planes;
@@ -200,7 +200,7 @@ void Slice::outerShellOffset(float delta, JoinType join_type){
 /****************** Helper Functions For Mesh Slicing Step *******************/
 
 // builds std::vector of std::vector of triangle idxs sorted by z_min
-std::vector<std::vector<const MeshFace*>> Slicer::Private::buildTriangleLists(Mesh* mesh, std::vector<float> planes, float delta){
+std::vector<std::vector<const MeshFace*>> Slicer::Private::buildTriangleLists(const Mesh* mesh, std::vector<float> planes, float delta){
 
     // Create List of list
     std::vector<std::vector<const MeshFace*>> list_list_triangle;

@@ -29,7 +29,7 @@ public:
 
 class Slices : public std::vector<Slice>{
 public:
-    Mesh* mesh;
+    const Mesh* mesh;
 
     Paths overhang_regions;
     std::vector<OverhangPoint*> overhang_points;
@@ -52,7 +52,7 @@ namespace Hix
 namespace Slicer
 {
     /****************** Entire Slicing Step *******************/
-    bool slice(Mesh* mesh, Slices* slices);
+    bool slice(const Mesh* mesh, Slices* slices);
 };
 
 
