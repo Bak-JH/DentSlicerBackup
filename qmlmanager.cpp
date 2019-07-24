@@ -459,7 +459,7 @@ void QmlManager::disconnectHandlers(GLModel* glmodel){
 
 
 
-    QObject::disconnect(layerViewSlider, SIGNAL(sliderValueChanged(double)), glmodel, SLOT(getLayerViewSliderSignal(double)));
+    QObject::disconnect(layerViewSlider, SIGNAL(sliderValueChanged(int)), glmodel, SLOT(getLayerViewSliderSignal(int)));
 }
 
 void QmlManager::connectHandlers(GLModel* glmodel){
@@ -560,7 +560,7 @@ void QmlManager::connectHandlers(GLModel* glmodel){
     //QObject::connect(exportButton, SIGNAL(runFeature(int, QVariant)), glmodel->ft, SLOT(setTypeAndRun(int, QVariant)));
 
 
-    QObject::connect(layerViewSlider, SIGNAL(sliderValueChanged(double)), glmodel, SLOT(getLayerViewSliderSignal(double)));
+    QObject::connect(layerViewSlider, SIGNAL(sliderValueChanged(int)), glmodel, SLOT(getLayerViewSliderSignal(int)));
 }
 void QmlManager::cleanselectedModel(int type){
     //selectedModels[0] = nullptr;
@@ -1868,7 +1868,7 @@ void QmlManager::viewSupportChanged(bool checked){
 		bool generateSupport = false;
 		for (auto selectedModel : selectedModels)
 		{
-			if (selectedModel->getSupport() == nullptr) {
+			if (!selectedModel->raftSupportGenerated()) {
 				generateSupport = true;
 				break;
 			}
@@ -1888,22 +1888,9 @@ void QmlManager::viewLayerChanged(bool checked){
     qInfo() << "viewLayerChanged" << checked;
     qDebug() << "selected Num = " << selectedModels.size();
     if( checked ) {
+		//since slice generated depends on current selection AND state of each selected meshes, just slice new one each time for now.
+		qmlManager->openYesNoPopUp(false, "The model should be sliced for layer view.", "", "Would you like to continue?", 16, "", ftrLayerViewMode, 0);
 
-		bool generateSlice = false;
-		for (auto selectedModel : selectedModels)
-		{
-			if (selectedModel->slicer == nullptr) {
-				generateSlice = true;
-				break;
-			}
-		}
-		if (generateSlice) {
-			qmlManager->openYesNoPopUp(false, "The model should be sliced for layer view.", "", "Would you like to continue?", 16, "", ftrLayerViewMode, 0);
-		}
-		else {
-			QMetaObject::invokeMethod(qmlManager->boxUpperTab, "all_off");
-			setViewMode(VIEW_MODE_LAYER);
-		}
     }
 }
 
@@ -1983,55 +1970,18 @@ void QmlManager::setViewMode(int viewMode) {
 
 				each->setSupportAndRaft();
 			}
-			for (auto each : selectedModels)
-			{
-				//generate slice if there is none
-				if (each->slicer == nullptr)
-				{
-					sliceNeeded = true;
-					break;
-				}
-			}
-
 			auto selectedSize = selectedModelsLengths();
-			QMetaObject::invokeMethod(layerViewSlider, "setThickness", Q_ARG(QVariant, (scfg->layer_height)));
-			QMetaObject::invokeMethod(layerViewSlider, "setHeight", Q_ARG(QVariant, (selectedSize.z() + scfg->raft_thickness)));
+
+			sliceNeeded = true;
 			break;
 		}
-
-		//set view mode for each model from background thread
-		//transwarp::parallel executor{ 1 };
-		//executor.execute();
-		//if (sliceNeeded)
-		//{
-		//	auto exportSelectedTask = transwarp::make_task(transwarp::root, [this]() {
-		//		exportSelected(true);
-		//		});
-		//	auto setViewModeTask = transwarp::make_task(transwarp::wait, [this, viewMode]() {
-		//		setModelViewMode(viewMode);
-		//		}, exportSelectedTask);
-		//	setViewModeTask->schedule_all(executor);
-		//}
-		//else
-		//{
-		//	auto setViewModeTask = transwarp::make_task(transwarp::root, [this, viewMode]() {
-		//		setModelViewMode(viewMode);
-		//		});
-		//	setViewModeTask->schedule(executor);
-		//	for (int i = 0; i < 5000000; ++i)
-		//	{
-		//		qDebug() << "boooooring";
-		//	}
-
-		//}
-
 		if (sliceNeeded)
 		{
 			auto exportTaskFlow = exportSelectedAsync(QDir::tempPath());
 			auto f = std::bind(&QmlManager::setModelViewMode, this, viewMode);
 			_taskManager.enqueTask(exportTaskFlow);
 			_taskManager.enqueUITask(f);
-       }
+		}
 		else
 		{
 			setModelViewMode(viewMode);
@@ -2046,10 +1996,13 @@ QString QmlManager::getExportPath()
 }
 tf::Taskflow* QmlManager::exportSelectedAsync(QString exportPath)
 {
+	if (exportPath.isEmpty())
+		return nullptr;
 	tf::Taskflow* taskflow = new tf::Taskflow();
 	auto exportSelectedTask = taskflow->emplace([this, exportPath](tf::Subflow& subflow) {
+
+
 		STLexporter* ste = new STLexporter();
-		SlicingEngine* se = new SlicingEngine();
 
 		qmlManager->openProgressPopUp();
 
@@ -2072,7 +2025,10 @@ tf::Taskflow* QmlManager::exportSelectedAsync(QString exportPath)
 			mergedRaftMesh = generateraft.generateRaft(mergedShellMesh, generatesupport.overhangPoints);
 		}
 		// need to generate support, raft
-		se->slice(subflow, mergedShellMesh, mergedSupportMesh, mergedRaftMesh, exportPath);
+		auto result = SlicingEngine::sliceModel(subflow, mergedShellMesh, mergedSupportMesh, mergedRaftMesh, exportPath);
+
+		QMetaObject::invokeMethod(layerViewSlider, "setThickness", Q_ARG(QVariant, (scfg->layer_height)));
+		QMetaObject::invokeMethod(layerViewSlider, "setLayerCount", Q_ARG(QVariant, (result.layerCount -1))); //0 based index
 	});
 	return taskflow;
 

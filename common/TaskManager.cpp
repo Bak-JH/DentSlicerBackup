@@ -18,7 +18,10 @@ void TaskManager::run()
 
 void TaskManager::enqueTask(tf::Taskflow* task)
 {
-	_queue.enqueue(task);
+	if (task != nullptr)
+	{
+		_queue.enqueue(task);
+	}
 }
 
 void TaskManager::enqueUITask(std::function<void()> f)
