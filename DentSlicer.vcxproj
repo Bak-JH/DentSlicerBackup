@@ -354,8 +354,7 @@
     <ClInclude Include="DentEngine\src\polyclipping\poly2tri\common\shapes.h" />
     <ClInclude Include="feature\shelloffset.h" />
     <ClInclude Include="DentEngine\src\slicer.h" />
-    <QtMoc Include="slice\slicingengine.h">
-    </QtMoc>
+    <ClInclude Include="slice\slicingengine.h" />
     <ClInclude Include="feature\stlexporter.h" />
     <ClInclude Include="DentEngine\src\svgexporter.h" />
     <ClInclude Include="DentEngine\src\polyclipping\poly2tri\sweep\sweep.h" />

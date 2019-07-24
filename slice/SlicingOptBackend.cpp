@@ -76,6 +76,11 @@ constexpr std::array<std::string_view, 11> SupportRadiusMax{
 	"0.2",
 	"0.1"
 };
+constexpr std::array<std::string_view, 2> PrinterVendorType{
+	"Hix",
+	"3D'Light"
+};
+
 
 void resStringToInt(std::string_view str, int& x, int& y)
 {
@@ -122,6 +127,7 @@ void SlicingOptBackend::createSlicingOptControls()
 	addOptionDialog(QString("Slicing mode"), SlicingModeStr, 0);
 	addOptionDialog(QString("Support minimum radius"), SupportRadiusMin, 2);
 	addOptionDialog(QString("Support maximum radius"), SupportRadiusMax, 3);
+	addOptionDialog(QString("Printer vendor"), PrinterVendorType, 0);
 
 	QObject::connect(_qmlManager->ltso, SIGNAL(optionChanged(QString, int)), this, SLOT(onOptionChanged(QString, int)));
 
@@ -180,7 +186,10 @@ void SlicingOptBackend::onOptionChanged(QString opName, int newIndex)
 	else if (opName == "Support maximum radius")
 	{
 		_config->support_radius_max = std::stof(std::string(SupportRadiusMax[newIndex]));
+	}
+	else if (opName == "Printer vendor")
+	{
+		_config->printer_vendor_type = (SlicingConfiguration::PrinterVendor)newIndex;
 
 	}
-
 }

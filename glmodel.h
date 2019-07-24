@@ -187,16 +187,10 @@ public:
 	void updateShader(int viewMode);
     void inactivateFeatures();
 
-    // support
-    Slicer* slicer;
-
-    //arrangeSignalSender* arsignal; //unused, signal from qml goes right into QmlManager.runArrange
-    QFutureWatcher<Slicer*> futureWatcher; // future watcher for feature thread results returned
 
     const int ID; //for use in Part List
     QString filename;
     QObject* mainWindow;
-    QString slicingInfo;
 
     // implement lock as bool variable
     bool updateLock;
@@ -230,8 +224,9 @@ public:
 
 	bool perPrimitiveColorActive()const;
 	bool faceHighlightActive()const;
+	bool raftSupportGenerated()const;
 private:
-
+	bool _raftSupportGenerated = false;
 	//consts
 	//for QAttributes
 	Qt3DCore::QTransform m_transform;
@@ -361,7 +356,7 @@ public slots:
     void cutModeSelected(int type);
     void cutFillModeSelected(int type);
     void getSliderSignal(double value);
-    void getLayerViewSliderSignal(double value);
+    void getLayerViewSliderSignal(int value);
 	void generateRLModel(Mesh* lmesh, Mesh* rmesh);
     void openCut();
     void closeCut();
@@ -404,7 +399,6 @@ public slots:
 
     // Generate support mesh
     void generateSupport();
-    void slicingDone();
 
     //TODO: get rid of this
     friend class featureThread;

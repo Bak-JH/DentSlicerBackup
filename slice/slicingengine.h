@@ -14,23 +14,19 @@ namespace tf
 	class Subflow;
 }
 
+
+
 using namespace Hix::Engine3D;
-class SlicingEngine : public QObject
+namespace SlicingEngine
 {
-    Q_OBJECT
-
-public:
-    SlicingEngine();
-    Slicer* slice (tf::Subflow& subflow, Mesh* shellMesh=nullptr, Mesh* supportMesh=nullptr, Mesh* raftMesh=nullptr, QString filename = "");
-
-public slots:
-    void slicingStarted();
-    void slicingOutput();
-    void slicingFinished(int, QProcess::ExitStatus);
-    void slicingError(QProcess::ProcessError);
-
-signals:
-    void updateModelInfo(int printing_time, int layer, QString xyz, float volume);
+	struct Result
+	{
+		int time;
+		int layerCount;
+		QString size;
+		float volume;
+	};
+	Result sliceModel (tf::Subflow& subflow, Mesh* shellMesh=nullptr, Mesh* supportMesh=nullptr, Mesh* raftMesh=nullptr, QString filename = "");
 };
 
 //extern QmlManager qm;
