@@ -41,11 +41,11 @@ Hix::Render::ModelMaterial::ModelMaterial():
 	changeMode(ShaderMode::SingleColor);
 	_renderPass.setShaderProgram(&_shaderProgram);
 
-	auto cullFace = new QCullFace(&_renderPass);
+	auto cullFace = new QCullFace();
 	cullFace->setMode(QCullFace::CullingMode::Back);
 	_renderPass.addRenderState(cullFace);
 
-	auto depthTest = new QDepthTest(&_renderPass);
+	auto depthTest = new QDepthTest();
 	depthTest->setDepthFunction(QDepthTest::DepthFunction::Less);
 	_renderPass.addRenderState(depthTest);
 	_renderTechnique.addRenderPass(&_renderPass);
@@ -79,31 +79,21 @@ Hix::Render::ModelMaterial::ModelMaterial():
 
 Hix::Render::ModelMaterial::~ModelMaterial()
 {
+	//qt sucks...
+	_shaderProgram.setParent((QNode*)nullptr);
+	_renderPass.setParent((QNode*)nullptr);
+	_renderTechnique.setParent((QNode*)nullptr);
+	_filterKey.setParent((QNode*)nullptr);
+	_effect.removeParameter(&_ambientParameter);
+	_effect.removeParameter(&_diffuseParameter);
+	_effect.removeParameter(&_singleColorParameter);
+	_effect.removeTechnique(&_renderTechnique);
+
 	for (auto& each : _additionalParameters)
 	{
 		auto ptr = &each.second;
 		_effect.removeParameter(ptr);
 	}
-}
-
-void Hix::Render::ModelMaterial::setPerPrimitiveColorSSBO(Qt3DRender::QBuffer& buffer)
-{
-	QByteArray testData;
-	testData.resize(4 * sizeof(uint));
-	uint* rawUintArray = reinterpret_cast<uint*>(testData.data());
-	size_t idx = 0;
-	for (uint i = 0; i < 4; ++i)
-	{
-		rawUintArray[i] = 2;
-	}
-	buffer.setData(testData);
-	//_perPrimitiveColorParameter.setValue(QVariant::fromValue(buffer.id()));
-	//_perPrimitiveColorParameter.setName("perPrimitiveColorCode");
-	//_effect.addParameter(&_perPrimitiveColorParameter);
-	addParameter(new Qt3DRender::QParameter("perPrimitiveColorCode", QVariant::fromValue(buffer.data()), this));
-
-
-
 }
 
 void Hix::Render::ModelMaterial::setDiffuse(const QColor& diffuse)
