@@ -6,7 +6,10 @@
 #include "../../utils/mathutils.h"
 #include "polyclipping/QDebugPolyclipping.h"
 #include "configuration.h"
-
+#if defined(_DEBUG) || defined(QT_DEBUG )
+#define _STRICT_SLICER
+//#define _STRICT_MESH_NO_SELF_INTERSECTION
+#endif
 using namespace ClipperLib;
 using namespace Hix::Debug;
 QDebug Hix::Debug::operator<< (QDebug d, const Slice& obj) {
@@ -132,40 +135,28 @@ std::vector<Paths> Slicer::Private::meshSlice(const Mesh* mesh){
         planes = buildUniformPlanes(mesh->z_min(), mesh->z_max(), delta);
     } 
 	//else if (scfg->slicing_mode == "adaptive") {
- //       // adaptive slice
- //       planes = buildAdaptivePlanes(mesh->z_min(), mesh->z_max());
- //   }
+	 //       // adaptive slice
+	 //       planes = buildAdaptivePlanes(mesh->z_min(), mesh->z_max());
+	 //   }
 
     // build triangle list per layer height
     std::vector<std::vector<const MeshFace*>> triangleLists = buildTriangleLists(mesh, planes, delta);
     std::vector<Paths> pathLists;
 
-    std::vector<const MeshFace*> A;
-    A.reserve(mesh->getFaces().size());
-
     for (int i=0; i<planes.size(); i++){
-        A.insert(A.end(), triangleLists[i].begin(), triangleLists[i].end()); // union
         Paths paths;
-
-        for (int t_idx=0; t_idx<A.size(); t_idx++){
-            const MeshFace& cur_mf = *A[t_idx];
-            if (mesh->getFaceZmax(cur_mf) < planes[i]){
-                A.erase(A.begin()+t_idx);
-                t_idx --;
-            }
-            else{
-                // compute intersection including on same line 2 points or 1 point
-                Path intersection = mesh->intersectionPath(cur_mf, planes[i]);
-                if (intersection.size()>0){
-                    paths.push_back(intersection);
-                }
-                else
-                    continue;
-            }
-        }
-        pathLists.push_back(paths);
+		auto& facesAtPlane = triangleLists.at(i);
+		float currPlane = planes[i];
+		for (auto face : facesAtPlane)
+		{
+			// compute intersection including on same line 2 points or 1 point
+			Path intersection = mesh->intersectionPath(*face, currPlane);
+			if (intersection.size() > 0) {
+				paths.push_back(intersection);
+			}
+		}
+		pathLists.push_back(paths);
     }
-
     return pathLists;
 }
 
@@ -204,7 +195,7 @@ std::vector<std::vector<const MeshFace*>> Slicer::Private::buildTriangleLists(co
 
     // Create List of list
     std::vector<std::vector<const MeshFace*>> list_list_triangle;
-    for (int l_idx=0; l_idx < planes.size()+1; l_idx ++){
+    for (int l_idx=0; l_idx < planes.size(); l_idx ++){
         list_list_triangle.push_back(std::vector< const MeshFace*>());
     }
 
@@ -212,25 +203,24 @@ std::vector<std::vector<const MeshFace*>> Slicer::Private::buildTriangleLists(co
     if (delta>0){
 		for(const auto& mf : mesh->getFaces())
 		{
-			int llt_idx;
             float z_min = mesh->getFaceZmin(mf);
-            if (z_min < planes[0])
-                llt_idx = 0;
-            else if (z_min > planes[planes.size()-1])
-                llt_idx = planes.size()-1;
-            else
-                llt_idx = (int)((z_min - planes[0])/delta) +1;
-
-
-            list_list_triangle[llt_idx].push_back(&mf);
+			float z_max = mesh->getFaceZmax(mf);
+			int minIdx = (int)((z_min - planes[0]) / delta) + 1;
+			int maxIdx = (int)((z_max - planes[0]) / delta);
+			minIdx = std::max(0, minIdx);
+			maxIdx = std::min((int)planes.size() - 1, maxIdx);
+			for (int i = minIdx; i <= maxIdx; ++i)
+			{
+				list_list_triangle[i].push_back(&mf);
+			}
         }
     }
-
     // General Case
     else {
-
+#ifdef _STRICT_SLICER
+		throw std::runtime_error("zero delta when building triangle list for slicing");
+#endif
     }
-
     return list_list_triangle;
 }
 

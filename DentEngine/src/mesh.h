@@ -186,7 +186,7 @@ namespace Hix
 			static void addPoint(float x, float y, ClipperLib::Path* path);
 			Paths3D intersectionPaths(ClipperLib::Path Contour, Plane target_plane)const;
 			Path3D intersectionPath(Plane base_plane, Plane target_plane)const;
-			ClipperLib::Path intersectionPath(MeshFace mf, float z)const;
+			ClipperLib::Path intersectionPath(const MeshFace& mf, float z)const;
 
 			/********************** Helper Functions **********************/
 			static void updateMinMax(QVector3D v, std::array<float, 6>& minMax);

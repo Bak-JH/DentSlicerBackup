@@ -698,7 +698,7 @@ Path3D Mesh::intersectionPath(Plane base_plane, Plane target_plane)const
     return p;
 }
 
-Path Mesh::intersectionPath(MeshFace mf, float z) const
+Path Mesh::intersectionPath(const MeshFace& mf, float z) const
 {
     Path p;
 
@@ -710,7 +710,7 @@ Path Mesh::intersectionPath(MeshFace mf, float z) const
     for (int i=0; i<3; i++){
         if (mfVertices[i]->position.z() > z){
             upper.push_back(mfVertices[i]);
-        } else if (Utils::Math::doubleAreSame(mfVertices[i]->position.z(),z)){
+        } else if (Utils::Math::floatAreSame(mfVertices[i]->position.z(),z)){
             middle.push_back(mfVertices[i]);
         } else
             lower.push_back(mfVertices[i]);
@@ -727,12 +727,9 @@ Path Mesh::intersectionPath(MeshFace mf, float z) const
         minority = upper;
     } else{
         if (lower.size() == 2 && middle.size() == 1){
-            //qDebug() << "intersection error 1 in z line";
             return p;
         } else if (upper.size() == 1 && lower.size() == 1 && middle.size() == 1){
-            //qDebug() << "intersection error 1 in z line";
             addPoint(middle[0]->position.x(), middle[0]->position.y(), &p);
-
             //add intermediate position
             float x_0, y_0;
             x_0 = ((upper[0]->position.z()-z)*lower[0]->position.x() + (z-lower[0]->position.z())*upper[0]->position.x())/(upper[0]->position.z()-lower[0]->position.z());
@@ -742,19 +739,12 @@ Path Mesh::intersectionPath(MeshFace mf, float z) const
 
             return p;
         } else if (middle.size() == 2){
-            //qDebug() << "intersection error 2 in z line";
             addPoint(middle[0]->position.x(), middle[0]->position.y(), &p);
             addPoint(middle[1]->position.x(), middle[1]->position.y(), &p);
             return p;
         } else if (middle.size() == 3){
-            //qDebug() << "intersection error all in one";
             return p;
         }
-
-        /*if (doubleAreSame(getFaceZmin(mf),z))
-        //if (getFaceZmin(mf) != z)
-            qDebug() << "intersection error at layer "<< getFaceZmax(mf) << getFaceZmin(mf) << z<< upper.size() << lower.size();
-        */
         return p;
     }
 
@@ -1105,9 +1095,9 @@ void Mesh::updateMinMax(QVector3D v, std::array<float,6>& minMax){
 
 
 float Mesh::getFaceZmin(MeshFace mf)const{
-    float face__z_min=1000;//scfg->max_buildsize_x;
+    float face__z_min=std::numeric_limits<float>::max();
 	auto mfVertices = mf.meshVertices();
-    for (int i=0; i<3; i++){
+    for (int i=0; i< mfVertices.size(); i++){
         float temp__z_min = mfVertices[i]->position.z();
         if (temp__z_min<face__z_min)
             face__z_min = temp__z_min;
@@ -1116,10 +1106,9 @@ float Mesh::getFaceZmin(MeshFace mf)const{
 }
 
 float Mesh::getFaceZmax(MeshFace mf)const{
-    float face__z_max=-1000;//-scfg->max_buildsize_x;
+    float face__z_max= std::numeric_limits<float>::min();
 	auto mfVertices = mf.meshVertices();
-
-    for (int i=0; i<3; i++){
+    for (int i=0; i< mfVertices.size(); i++){
         float temp__z_max = mfVertices[i]->position.z();
         if (temp__z_max>face__z_max)
             face__z_max = temp__z_max;
