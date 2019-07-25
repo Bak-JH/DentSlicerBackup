@@ -18,8 +18,8 @@ namespace Utils
         QMatrix4x4 quatToMat(QQuaternion q);
 
         float round(float num, int precision);
-
-        bool doubleAreSame(double a, double b);
+		bool doubleAreSame(double a, double b);
+		bool floatAreSame(float a, float b);
 
 		inline float intPointDistance(QPoint a, QPoint b)
 		{

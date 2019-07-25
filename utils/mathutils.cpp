@@ -76,6 +76,10 @@ namespace Utils
             return fabs(a - b) < std::numeric_limits<double>::epsilon();
         }
 
+		bool floatAreSame(float a, float b) {
+			return fabs(a - b) < std::numeric_limits<float>::epsilon();
+		}
+
 
 
 

@@ -151,7 +151,6 @@ GLModel::GLModel(QObject* mainWindow, QNode *parent, Mesh* loadMesh, QString fna
 	// 승환 25%
 	qmlManager->setProgress(0.23);
 	clearMem();
-	//m_meshMaterial.setPerPrimitiveColorSSBO(primitiveColorBuffer);
 	setMesh(_mesh);
 	//applyGeometry();
 

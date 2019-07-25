@@ -6,7 +6,6 @@
 struct Volume
 {
 	std::vector<const Slice*> slices; //slice that makes up this volume
-	std::vector<const >
 };
 struct OverhangWithSlice
 {
