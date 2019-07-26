@@ -19,12 +19,12 @@ OverhangPoint::OverhangPoint(): radius(scfg->support_radius_min)
     position = QVector3D(99999, 99999, 99999);
 }
 
-OverhangPoint::OverhangPoint(QVector3D point)
+OverhangPoint::OverhangPoint(QVector3D point): radius(scfg->support_radius_min)
 {
     position = point;
 }
 
-OverhangPoint::OverhangPoint(QVector3D point, bool top, bool supportInt, bool meshInt)
+OverhangPoint::OverhangPoint(QVector3D point, bool top, bool supportInt, bool meshInt): radius(scfg->support_radius_min)
 {
     position = point;
     topPoint = top;
@@ -32,7 +32,7 @@ OverhangPoint::OverhangPoint(QVector3D point, bool top, bool supportInt, bool me
     meshInterPoint = meshInt;
 }
 
-OverhangPoint::OverhangPoint(QVector3D point, bool top, bool supportInt, bool meshInt, float r)
+OverhangPoint::OverhangPoint(QVector3D point, bool top, bool supportInt, bool meshInt, float r): radius(scfg->support_radius_min)
 {
     position = point;
     topPoint = top;
