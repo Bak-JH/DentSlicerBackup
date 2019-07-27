@@ -182,18 +182,14 @@ namespace Hix
 			Mesh* vertexMoved(QVector3D direction)const;
 
 
-			/********************** Path Generation Functions **********************/
-			static void addPoint(float x, float y, ClipperLib::Path* path);
-			Paths3D intersectionPaths(ClipperLib::Path Contour, Plane target_plane)const;
-			Path3D intersectionPath(Plane base_plane, Plane target_plane)const;
-			ClipperLib::Path intersectionPath(const MeshFace& mf, float z)const;
+
 
 			/********************** Helper Functions **********************/
 			static void updateMinMax(QVector3D v, std::array<float, 6>& minMax);
 			static std::array<float, 6> calculateMinMax(QMatrix4x4 rotmatrix, const Mesh* mesh);
 
-			float getFaceZmin(MeshFace mf)const;
-			float getFaceZmax(MeshFace mf)const;
+			float getFaceZmin(const MeshFace& mf)const;
+			float getFaceZmax(const MeshFace& mf)const;
 			//MeshFace idx2MF(int idx)const;
 			//MeshVertex idx2MV(int idx)const;
 

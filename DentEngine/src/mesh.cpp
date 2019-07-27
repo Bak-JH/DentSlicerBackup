@@ -569,203 +569,6 @@ Mesh* Mesh::saveUndoState(const Qt3DCore::QTransform& transform)
 
 
 
-/********************** Path Generation Functions **********************/
-
-// converts float point to int in microns
-void Mesh::addPoint(float x, float y, ClipperLib::Path *path)
-{
-    IntPoint ip;
-    ip.X = round(x*ClipperLib::INT_PT_RESOLUTION);
-    ip.Y = round(y*ClipperLib::INT_PT_RESOLUTION);
-    //qDebug() << "addPoint called with x " << x << " y " << y << " rounding " << ip.X;
-    path->push_back(ip);
-}
-
-float minDistanceToContour(QVector3D from, ClipperLib::Path contour){
-    float min_distance = 0;
-    for (int i=0; i<contour.size()-1; i++){
-		ClipperLib::Path temp_path;
-        temp_path.push_back(contour[i]);
-        temp_path.push_back(contour[i+1]);
-        QVector3D int2qv3 = QVector3D(((float)contour[i].X)/ClipperLib::INT_PT_RESOLUTION, ((float)contour[i].Y)/ClipperLib::INT_PT_RESOLUTION, from.z());
-        IntPoint directionInt = contour[i+1] - contour[i];
-        QVector3D direction = QVector3D(directionInt.X/ClipperLib::INT_PT_RESOLUTION, directionInt.Y/ClipperLib::INT_PT_RESOLUTION, 0);
-        float cur_distance = from.distanceToLine(int2qv3, direction);
-        if (abs(min_distance) > cur_distance){
-            min_distance = cur_distance;
-        }
-    }
-    return min_distance;
-}
-
-/*
-Paths3D Mesh::intersectionPaths(Path contour, Plane target_plane) {
-    Path3D p;
-
-    std::vector<QVector3D> upper;
-    std::vector<QVector3D> lower;
-    for (int i=0; i<3; i++){
-        if (PointInPolygon(IntPoint(target_plane[i].x(),target_plane[i].y()), contour)){
-            upper.push_back(target_plane[i]);
-        } else {
-            lower.push_back(target_plane[i]);
-        }
-    }
-
-    std::vector<QVector3D> majority;
-    std::vector<QVector3D> minority;
-
-    bool flip = false;
-    if (upper.size() == 2){
-        majority = upper;
-        minority = lower;
-    } else if (lower.size() == 2){
-        flip = true;
-        majority = lower;
-        minority = upper;
-    } else {
-        qDebug() << "wrong faces";
-        // size is 0
-        return p;
-    }
-
-    float minority_distance = abs(minDistanceToContour(minority[0], contour)); //abs(minority[0].distanceToPlane(base_plane[0],base_plane[1],base_plane[2]));
-    float majority1_distance = abs(minDistanceToContour(majority[0], contour));//abs(majority[0].distanceToPlane(base_plane[0],base_plane[1],base_plane[2]));
-    float majority2_distance = abs(minDistanceToContour(majority[1], contour));//abs(majority[1].distanceToPlane(base_plane[0],base_plane[1],base_plane[2]));
-
-    // calculate intersection points
-    MeshVertex mv1, mv2;
-    mv1.position = minority[0] + (majority[0] - minority[0])*(minority_distance/(majority1_distance+minority_distance));
-    mv2.position = minority[0] + (majority[1] - minority[0])*(minority_distance/(majority2_distance+minority_distance));
-
-    if (flip){
-        p.push_back(mv1);
-        p.push_back(mv2);
-    } else {
-        p.push_back(mv2);
-        p.push_back(mv1);
-    }
-    return p;
-}*/
-
-Path3D Mesh::intersectionPath(Plane base_plane, Plane target_plane)const
-{
-    Path3D p;
-
-    std::vector<QVector3D> upper;
-    std::vector<QVector3D> lower;
-    for (int i=0; i<3; i++){
-        if (target_plane[i].distanceToPlane(base_plane[0],base_plane[1],base_plane[2]) >0){
-            upper.push_back(target_plane[i]);
-        } else {
-            lower.push_back(target_plane[i]);
-        }
-    }
-
-    std::vector<QVector3D> majority;
-    std::vector<QVector3D> minority;
-
-    bool flip = false;
-    if (upper.size() == 2){
-        majority = upper;
-        minority = lower;
-    } else if (lower.size() == 2){
-        flip = true;
-        majority = lower;
-        minority = upper;
-    } else {
-        qDebug() << "wrong faces";
-        // size is 0
-        return p;
-    }
-
-    float minority_distance = abs(minority[0].distanceToPlane(base_plane[0],base_plane[1],base_plane[2]));
-    float majority1_distance = abs(majority[0].distanceToPlane(base_plane[0],base_plane[1],base_plane[2]));
-    float majority2_distance = abs(majority[1].distanceToPlane(base_plane[0],base_plane[1],base_plane[2]));
-
-    // calculate intersection points
-    MeshVertex mv1, mv2;
-    mv1.position = minority[0] + (majority[0] - minority[0])*(minority_distance/(majority1_distance+minority_distance));
-    mv2.position = minority[0] + (majority[1] - minority[0])*(minority_distance/(majority2_distance+minority_distance));
-
-    if (flip){
-        p.push_back(mv1);
-        p.push_back(mv2);
-    } else {
-        p.push_back(mv2);
-        p.push_back(mv1);
-    }
-    return p;
-}
-
-Path Mesh::intersectionPath(const MeshFace& mf, float z) const
-{
-    Path p;
-
-    std::vector<VertexConstItr> upper;
-    std::vector<VertexConstItr> middle;
-    std::vector<VertexConstItr> lower;
-
-	auto mfVertices = mf.meshVertices();
-    for (int i=0; i<3; i++){
-        if (mfVertices[i]->position.z() > z){
-            upper.push_back(mfVertices[i]);
-        } else if (Utils::Math::floatAreSame(mfVertices[i]->position.z(),z)){
-            middle.push_back(mfVertices[i]);
-        } else
-            lower.push_back(mfVertices[i]);
-    }
-
-    std::vector<VertexConstItr> majority;
-    std::vector<VertexConstItr> minority;
-
-    if (upper.size() == 2 && lower.size() == 1){
-        majority = upper;
-        minority = lower;
-    } else if (lower.size() == 2 && upper.size() == 1){
-        majority = lower;
-        minority = upper;
-    } else{
-        if (lower.size() == 2 && middle.size() == 1){
-            return p;
-        } else if (upper.size() == 1 && lower.size() == 1 && middle.size() == 1){
-            addPoint(middle[0]->position.x(), middle[0]->position.y(), &p);
-            //add intermediate position
-            float x_0, y_0;
-            x_0 = ((upper[0]->position.z()-z)*lower[0]->position.x() + (z-lower[0]->position.z())*upper[0]->position.x())/(upper[0]->position.z()-lower[0]->position.z());
-            y_0 = ((upper[0]->position.z()-z)*lower[0]->position.y() + (z-lower[0]->position.z())*upper[0]->position.y())/(upper[0]->position.z()-lower[0]->position.z());
-
-            addPoint(x_0,y_0,&p);
-
-            return p;
-        } else if (middle.size() == 2){
-            addPoint(middle[0]->position.x(), middle[0]->position.y(), &p);
-            addPoint(middle[1]->position.x(), middle[1]->position.y(), &p);
-            return p;
-        } else if (middle.size() == 3){
-            return p;
-        }
-        return p;
-    }
-
-    float x_0, y_0, x_1, y_1;
-    x_0 = (minority[0]->position.x() - majority[0]->position.x()) \
-            * ((z-majority[0]->position.z())/(minority[0]->position.z()-majority[0]->position.z())) \
-            + majority[0]->position.x();
-    y_0 = (minority[0]->position.y() - majority[0]->position.y()) \
-            * ((z-majority[0]->position.z())/(minority[0]->position.z()-majority[0]->position.z())) \
-            + majority[0]->position.y();
-    x_1 = (minority[0]->position.x() - majority[1]->position.x()) \
-            * ((z-majority[1]->position.z())/(minority[0]->position.z()-majority[1]->position.z())) \
-            + majority[1]->position.x();
-    y_1 = (minority[0]->position.y() - majority[1]->position.y()) \
-            * ((z-majority[1]->position.z())/(minority[0]->position.z()-majority[1]->position.z())) \
-            + majority[1]->position.y();
-
-    addPoint(x_0,y_0, &p);
-    addPoint(x_1,y_1, &p);
-    return p;
-}
 
 /********************** Helper Functions **********************/
 
@@ -1094,7 +897,7 @@ void Mesh::updateMinMax(QVector3D v, std::array<float,6>& minMax){
 }
 
 
-float Mesh::getFaceZmin(MeshFace mf)const{
+float Mesh::getFaceZmin(const MeshFace& mf)const{
     float face__z_min=std::numeric_limits<float>::max();
 	auto mfVertices = mf.meshVertices();
     for (int i=0; i< mfVertices.size(); i++){
@@ -1105,7 +908,7 @@ float Mesh::getFaceZmin(MeshFace mf)const{
     return face__z_min;
 }
 
-float Mesh::getFaceZmax(MeshFace mf)const{
+float Mesh::getFaceZmax(const MeshFace& mf)const{
     float face__z_max= std::numeric_limits<float>::min();
 	auto mfVertices = mf.meshVertices();
     for (int i=0; i< mfVertices.size(); i++){

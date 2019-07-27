@@ -46,15 +46,255 @@ namespace Slicer
 		/****************** Mesh Slicing Step *******************/
 		std::vector<Paths> meshSlice(const Mesh* mesh); // totally k elements
 		/****************** Helper Functions For Mesh Slicing Step *******************/
-		std::vector<std::vector<const MeshFace*>> buildTriangleLists(const Mesh* mesh, std::vector<float> planes, float delta);
+		std::vector<std::vector<FaceConstItr>> buildTriangleLists(const Mesh* mesh, std::vector<float> planes, float delta);
 		std::vector<float> buildUniformPlanes(float z_min, float z_max, float delta);
 		std::vector<float> buildAdaptivePlanes(float z_min, float z_max);
 		/****************** Helper Functions For Contour Construction Step *******************/
 		void insertPathHash(QHash<uint32_t, Path>& pathHash, IntPoint u, IntPoint v);
+		/********************** Path Generation Functions **********************/
+		IntPoint toInt2DPt(QVector3D pt);
+		Paths3D intersectionPaths(ClipperLib::Path Contour, Plane target_plane);
+		Path3D intersectionPath(Plane base_plane, Plane target_plane);
+		ContourSegment intersectionPath(FaceConstItr& mf, float z);
 	}
 }
 using namespace Slicer::Private;
 
+
+
+
+
+/********************** Path Generation Functions **********************/
+
+// converts float point to int in microns
+void  Slicer::addPoint(float x, float y, ClipperLib::Path* path)
+{
+	IntPoint ip;
+	ip.X = round(x * ClipperLib::INT_PT_RESOLUTION);
+	ip.Y = round(y * ClipperLib::INT_PT_RESOLUTION);
+	//qDebug() << "addPoint called with x " << x << " y " << y << " rounding " << ip.X;
+	path->push_back(ip);
+}
+
+
+IntPoint  Slicer::Private::toInt2DPt(QVector3D pt)
+{
+	IntPoint ip;
+	ip.X = round(pt.x() * ClipperLib::INT_PT_RESOLUTION);
+	ip.Y = round(pt.y() * ClipperLib::INT_PT_RESOLUTION);
+	return ip;
+}
+
+
+float minDistanceToContour(QVector3D from, ClipperLib::Path contour) {
+	float min_distance = 0;
+	for (int i = 0; i < contour.size() - 1; i++) {
+		ClipperLib::Path temp_path;
+		temp_path.push_back(contour[i]);
+		temp_path.push_back(contour[i + 1]);
+		QVector3D int2qv3 = QVector3D(((float)contour[i].X) / ClipperLib::INT_PT_RESOLUTION, ((float)contour[i].Y) / ClipperLib::INT_PT_RESOLUTION, from.z());
+		IntPoint directionInt = contour[i + 1] - contour[i];
+		QVector3D direction = QVector3D(directionInt.X / ClipperLib::INT_PT_RESOLUTION, directionInt.Y / ClipperLib::INT_PT_RESOLUTION, 0);
+		float cur_distance = from.distanceToLine(int2qv3, direction);
+		if (abs(min_distance) > cur_distance) {
+			min_distance = cur_distance;
+		}
+	}
+	return min_distance;
+}
+
+
+inline void rotateCCW90(QVector3D& vec)
+{
+	//(-y,x)
+	auto tmp = vec.x();
+	vec.setX(-1.0f * vec.y());
+	vec.setY(tmp);
+}
+
+ContourSegment::ContourSegment(VertexConstItr& vtxA, VertexConstItr& vtxB, FaceConstItr& face)
+{
+	IntPoint a = toInt2DPt(vtxA->position);
+	IntPoint b = toInt2DPt(vtxB->position);
+	//QVector3D origNormal = vtxA->vn + vtxB->vn;
+	//origNormal.normalize();
+
+	auto origFn = face->fn;
+	auto mvs = face->meshVertices();
+	auto DE = mvs[0]->position - mvs[1]->position;
+	auto EF = mvs[1]->position - mvs[2]->position;
+	auto calcFn = QVector3D::crossProduct(DE, EF);
+	auto calcFn2 = QVector3D::crossProduct(EF, DE);
+	auto AB = vtxB->position - vtxA->position;
+	auto BA = vtxA->position - vtxB->position;
+	auto vA = vtxA->position;
+	auto vB = vtxB->position;
+
+
+	QVector3D faceNormal = face->fn;
+	faceNormal.setZ(0.0f);
+	faceNormal.normalize();
+
+	QVector3D ABNormal = vtxB->position - vtxA->position;
+	rotateCCW90(ABNormal);
+	ABNormal.setZ(0.0f);
+	ABNormal.normalize();
+
+	QVector3D BANormal = vtxA->position - vtxB->position;
+	rotateCCW90(BANormal);
+	BANormal.setZ(0.0f);
+	BANormal.normalize();
+
+}
+
+ContourSegment::ContourSegment(VertexConstItr& vtxA0, VertexConstItr& vtxA1, VertexConstItr& vtxB, float z, FaceConstItr& face)
+{
+}
+
+ContourSegment::ContourSegment(VertexConstItr& vtxA0, VertexConstItr& vtxA1, VertexConstItr& vtxB0, VertexConstItr& vtxB1, float z, FaceConstItr& face)
+{
+}
+
+
+
+Path3D  Slicer::Private::intersectionPath(Plane base_plane, Plane target_plane)
+{
+	Path3D p;
+
+	std::vector<QVector3D> upper;
+	std::vector<QVector3D> lower;
+	for (int i = 0; i < 3; i++) {
+		if (target_plane[i].distanceToPlane(base_plane[0], base_plane[1], base_plane[2]) > 0) {
+			upper.push_back(target_plane[i]);
+		}
+		else {
+			lower.push_back(target_plane[i]);
+		}
+	}
+
+	std::vector<QVector3D> majority;
+	std::vector<QVector3D> minority;
+
+	bool flip = false;
+	if (upper.size() == 2) {
+		majority = upper;
+		minority = lower;
+	}
+	else if (lower.size() == 2) {
+		flip = true;
+		majority = lower;
+		minority = upper;
+	}
+	else {
+		qDebug() << "wrong faces";
+		// size is 0
+		return p;
+	}
+
+	float minority_distance = abs(minority[0].distanceToPlane(base_plane[0], base_plane[1], base_plane[2]));
+	float majority1_distance = abs(majority[0].distanceToPlane(base_plane[0], base_plane[1], base_plane[2]));
+	float majority2_distance = abs(majority[1].distanceToPlane(base_plane[0], base_plane[1], base_plane[2]));
+
+	// calculate intersection points
+	MeshVertex mv1, mv2;
+	mv1.position = minority[0] + (majority[0] - minority[0]) * (minority_distance / (majority1_distance + minority_distance));
+	mv2.position = minority[0] + (majority[1] - minority[0]) * (minority_distance / (majority2_distance + minority_distance));
+
+	if (flip) {
+		p.push_back(mv1);
+		p.push_back(mv2);
+	}
+	else {
+		p.push_back(mv2);
+		p.push_back(mv1);
+	}
+	return p;
+}
+
+
+
+ContourSegment  Slicer::Private::intersectionPath(FaceConstItr& mf, float z)
+{
+	std::vector<VertexConstItr> upper;
+	std::vector<VertexConstItr> middle;
+	std::vector<VertexConstItr> lower;
+
+	auto mfVertices = mf->meshVertices();
+	for (int i = 0; i < 3; i++) {
+		if (mfVertices[i]->position.z() > z) {
+			upper.push_back(mfVertices[i]);
+		}
+		else if (mfVertices[i]->position.z() == z) {
+			middle.push_back(mfVertices[i]);
+		}
+		else
+			lower.push_back(mfVertices[i]);
+	}
+	if (middle.size() == 2)
+	{
+		ContourSegment seg(middle[0], middle[1], mf);
+		return seg;
+	}
+	return ContourSegment(mfVertices[0], mfVertices[1], mf);
+	//std::vector<VertexConstItr> majority;
+	//std::vector<VertexConstItr> minority;
+
+	////two edges intersect
+	//if (middle.size() == 0)
+	//{
+	//	if (upper.size() == 2 && lower.size() == 1) {
+	//		majority = upper;
+	//		minority = lower;
+	//	}
+	//	else {
+	//		majority = lower;
+	//		minority = upper;
+	//	}
+	//}
+	//else {
+	//	if (lower.size() != upper.size() && middle.size() == 1) {
+	//		return p;
+	//	}
+	//	else if (upper.size() == 1 && lower.size() == 1 && middle.size() == 1) {
+	//		addPoint(middle[0]->position.x(), middle[0]->position.y(), &p);
+	//		//add intermediate position
+	//		float x_0, y_0;
+	//		x_0 = ((upper[0]->position.z() - z) * lower[0]->position.x() + (z - lower[0]->position.z()) * upper[0]->position.x()) / (upper[0]->position.z() - lower[0]->position.z());
+	//		y_0 = ((upper[0]->position.z() - z) * lower[0]->position.y() + (z - lower[0]->position.z()) * upper[0]->position.y()) / (upper[0]->position.z() - lower[0]->position.z());
+
+	//		addPoint(x_0, y_0, &p);
+
+	//		return p;
+	//	}
+	//	else if (middle.size() == 2) {
+	//		addPoint(middle[0]->position.x(), middle[0]->position.y(), &p);
+	//		addPoint(middle[1]->position.x(), middle[1]->position.y(), &p);
+	//		return p;
+	//	}
+	//	else if (middle.size() == 3) {
+	//		return p;
+	//	}
+	//	return p;
+	//}
+
+	//float x_0, y_0, x_1, y_1;
+	//x_0 = (minority[0]->position.x() - majority[0]->position.x())
+	//	* ((z - majority[0]->position.z()) / (minority[0]->position.z() - majority[0]->position.z()))
+	//	+ majority[0]->position.x();
+	//y_0 = (minority[0]->position.y() - majority[0]->position.y())
+	//	* ((z - majority[0]->position.z()) / (minority[0]->position.z() - majority[0]->position.z()))
+	//	+ majority[0]->position.y();
+	//x_1 = (minority[0]->position.x() - majority[1]->position.x())
+	//	* ((z - majority[1]->position.z()) / (minority[0]->position.z() - majority[1]->position.z()))
+	//	+ majority[1]->position.x();
+	//y_1 = (minority[0]->position.y() - majority[1]->position.y())
+	//	* ((z - majority[1]->position.z()) / (minority[0]->position.z() - majority[1]->position.z()))
+	//	+ majority[1]->position.y();
+
+	//addPoint(x_0, y_0, &p);
+	//addPoint(x_1, y_1, &p);
+	//return p;
+}
 bool Slicer::slice(const Mesh* mesh, Slices* slices){
     slices->mesh = mesh;
 
@@ -140,7 +380,7 @@ std::vector<Paths> Slicer::Private::meshSlice(const Mesh* mesh){
 	 //   }
 
     // build triangle list per layer height
-    std::vector<std::vector<const MeshFace*>> triangleLists = buildTriangleLists(mesh, planes, delta);
+    std::vector<std::vector<FaceConstItr>> triangleLists = buildTriangleLists(mesh, planes, delta);
     std::vector<Paths> pathLists;
 
     for (int i=0; i<planes.size(); i++){
@@ -150,10 +390,12 @@ std::vector<Paths> Slicer::Private::meshSlice(const Mesh* mesh){
 		for (auto face : facesAtPlane)
 		{
 			// compute intersection including on same line 2 points or 1 point
-			Path intersection = mesh->intersectionPath(*face, currPlane);
-			if (intersection.size() > 0) {
-				paths.push_back(intersection);
-			}
+			intersectionPath(face, currPlane);
+
+			//Path intersection =
+			//if (intersection.size() > 0) {
+			//	paths.push_back(intersection);
+			//}
 		}
 		pathLists.push_back(paths);
     }
@@ -191,27 +433,30 @@ void Slice::outerShellOffset(float delta, JoinType join_type){
 /****************** Helper Functions For Mesh Slicing Step *******************/
 
 // builds std::vector of std::vector of triangle idxs sorted by z_min
-std::vector<std::vector<const MeshFace*>> Slicer::Private::buildTriangleLists(const Mesh* mesh, std::vector<float> planes, float delta){
+std::vector<std::vector<FaceConstItr>> Slicer::Private::buildTriangleLists(const Mesh* mesh, std::vector<float> planes, float delta){
 
     // Create List of list
-    std::vector<std::vector<const MeshFace*>> list_list_triangle;
+    std::vector<std::vector<FaceConstItr>> list_list_triangle;
     for (int l_idx=0; l_idx < planes.size(); l_idx ++){
-        list_list_triangle.push_back(std::vector< const MeshFace*>());
+        list_list_triangle.push_back(std::vector<FaceConstItr>());
     }
 
     // Uniform Slicing O(n)
     if (delta>0){
-		for(const auto& mf : mesh->getFaces())
+		auto& faces = mesh->getFaces();
+		for(auto mf = faces.cbegin(); mf != faces.cend(); ++mf)
 		{
-            float z_min = mesh->getFaceZmin(mf);
-			float z_max = mesh->getFaceZmax(mf);
+            float z_min = mesh->getFaceZmin(*mf);
+			float z_max = mesh->getFaceZmax(*mf);
 			int minIdx = (int)((z_min - planes[0]) / delta) + 1;
 			int maxIdx = (int)((z_max - planes[0]) / delta);
 			minIdx = std::max(0, minIdx);
 			maxIdx = std::min((int)planes.size() - 1, maxIdx);
+			if (z_min == z_max)
+				continue;
 			for (int i = minIdx; i <= maxIdx; ++i)
 			{
-				list_list_triangle[i].push_back(&mf);
+				list_list_triangle[i].push_back(mf);
 			}
         }
     }
@@ -323,5 +568,4 @@ void Slices::containmentTreeConstruct(){
         qDebug() << "in slice " << idx << ", constructing polytree with " << slice->outershell.size() << " to " << pointPaths.size() << " point pathes" << " total tree : " << slice->polytree.Total();
     }*/
 }
-
 
