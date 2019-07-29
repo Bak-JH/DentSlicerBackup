@@ -13,9 +13,16 @@ class OverhangPoint;
 
 struct ContourSegment
 {
+	ContourSegment();
+	//constructor helper;
+	void init(const QVector3D& a, const QVector3D& b, FaceConstItr& face);
+	//two points
 	ContourSegment(VertexConstItr& vtxA, VertexConstItr& vtxB, FaceConstItr& face );
+	//one point(B) and an edge(A0->A1)
 	ContourSegment(VertexConstItr& vtxA0, VertexConstItr& vtxA1, VertexConstItr& vtxB, float z, FaceConstItr& face);
+	//two edges
 	ContourSegment(VertexConstItr& vtxA0, VertexConstItr& vtxA1, VertexConstItr& vtxB0, VertexConstItr& vtxB1, float z, FaceConstItr& face);
+	bool isValid();
 	
 	//ordering is important.
 	//follows Righ hand thumb finger rule, if the in, goint to->from normal vector is pointed left side, CW 
@@ -24,13 +31,43 @@ struct ContourSegment
 	DoublePoint normal;
 };
 
-struct Contour
+class Contour
 {
+public:
+	Contour(const ContourSegment* start);
 	bool isClosed();
+	IntPoint getDestination();
+	void addNext(const ContourSegment* seg);
 	void calculateDirection();
+	bool isOutward();
+private:
+	void checkBound(const IntPoint& pt);
+	//bounds
+	cInt _xMax = std::numeric_limits<cInt>::lowest();
+	cInt _xMin = std::numeric_limits<cInt>::max();
+	cInt _yMax = std::numeric_limits<cInt>::lowest();
+	cInt _yMin = std::numeric_limits<cInt>::max();
+	
 	std::deque<ContourSegment> segments;
-	bool isOutward = false;
+	bool _isOutward = false;
 };
+
+
+namespace std
+{
+	template<>
+	struct hash<IntPoint>
+	{
+		//2D only!
+		std::size_t operator()(const IntPoint& pt)const
+		{
+			int16_t smallX = (int16_t)(pt.X);
+			int16_t smallY = (int16_t)(pt.Y);
+			size_t digest = smallX | smallY << 16;
+			return digest;
+		}
+	};
+}
 
 class Slice{ // extends Paths (total paths)
 public:
@@ -69,6 +106,12 @@ namespace Hix
 		QDebug operator<< (QDebug d, const Slice& obj);
 		QDebug operator<< (QDebug d, const Slices& obj);
 	}
+}
+
+namespace ContourGen
+{
+	std::vector<Contour> contourConstruct(const std::vector<ContourSegment>& segments);
+
 }
 
 namespace Slicer

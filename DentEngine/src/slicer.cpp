@@ -2,6 +2,7 @@
 #include <QHash>
 #include <QElapsedTimer>
 #include <QTextStream>
+#include <unordered_map>
 #include "qmlmanager.h"
 #include "../../utils/mathutils.h"
 #include "polyclipping/QDebugPolyclipping.h"
@@ -44,7 +45,7 @@ namespace Slicer
 	namespace Private
 	{
 		/****************** Mesh Slicing Step *******************/
-		std::vector<Paths> meshSlice(const Mesh* mesh); // totally k elements
+		std::vector<std::vector<ContourSegment>> meshSlice(const Mesh* mesh); // totally k elements
 		/****************** Helper Functions For Mesh Slicing Step *******************/
 		std::vector<std::vector<FaceConstItr>> buildTriangleLists(const Mesh* mesh, std::vector<float> planes, float delta);
 		std::vector<float> buildUniformPlanes(float z_min, float z_max, float delta);
@@ -56,12 +57,24 @@ namespace Slicer
 		Paths3D intersectionPaths(ClipperLib::Path Contour, Plane target_plane);
 		Path3D intersectionPath(Plane base_plane, Plane target_plane);
 		ContourSegment intersectionPath(FaceConstItr& mf, float z);
+		QVector3D midPoint(VertexConstItr& vtxA0, VertexConstItr& vtxA1, float z);
 	}
 }
 using namespace Slicer::Private;
 
 
 
+QVector3D Slicer::Private::midPoint(VertexConstItr& vtxA0, VertexConstItr& vtxA1, float z)
+{
+	float x, y, zRatio;
+	zRatio = ((z - vtxA0->position.z()) / (vtxA1->position.z() - vtxA0->position.z()));
+	x = (vtxA1->position.x() - vtxA0->position.x()) * zRatio
+		+ vtxA0->position.x();
+	y = (vtxA1->position.y() - vtxA0->position.y()) * zRatio
+		+ vtxA0->position.y();
+	QVector3D A(x, y, z);
+	return A;
+}
 
 
 /********************** Path Generation Functions **********************/
@@ -112,49 +125,328 @@ inline void rotateCCW90(QVector3D& vec)
 	vec.setY(tmp);
 }
 
-ContourSegment::ContourSegment(VertexConstItr& vtxA, VertexConstItr& vtxB, FaceConstItr& face)
+ContourSegment::ContourSegment()
 {
-	IntPoint a = toInt2DPt(vtxA->position);
-	IntPoint b = toInt2DPt(vtxB->position);
-	//QVector3D origNormal = vtxA->vn + vtxB->vn;
-	//origNormal.normalize();
-
-	auto origFn = face->fn;
-	auto mvs = face->meshVertices();
-	auto DE = mvs[0]->position - mvs[1]->position;
-	auto EF = mvs[1]->position - mvs[2]->position;
-	auto calcFn = QVector3D::crossProduct(DE, EF);
-	auto calcFn2 = QVector3D::crossProduct(EF, DE);
-	auto AB = vtxB->position - vtxA->position;
-	auto BA = vtxA->position - vtxB->position;
-	auto vA = vtxA->position;
-	auto vB = vtxB->position;
+}
 
 
+
+void ContourSegment::init(const QVector3D& a, const QVector3D& b, FaceConstItr& face)
+{
+	auto AInt = toInt2DPt(a);
+	auto BInt = toInt2DPt(b);
+	//points are too close, ie dist < min_resolution
+	if (AInt == BInt)
+		return;
+
+	//determine direction
 	QVector3D faceNormal = face->fn;
 	faceNormal.setZ(0.0f);
 	faceNormal.normalize();
 
-	QVector3D ABNormal = vtxB->position - vtxA->position;
+	QVector3D ABNormal = b - a;
 	rotateCCW90(ABNormal);
 	ABNormal.setZ(0.0f);
 	ABNormal.normalize();
 
-	QVector3D BANormal = vtxA->position - vtxB->position;
+	QVector3D BANormal = a - b;
 	rotateCCW90(BANormal);
 	BANormal.setZ(0.0f);
 	BANormal.normalize();
 
+	//face normal projected over z-plane should still be normal for AB/BA vector.
+	//Now determine which vector direction is correct by comparing CCW90 or CW90 normals to projected Face normal
+	auto ABDiff = (ABNormal - faceNormal).lengthSquared();
+	auto BADiff = (BANormal - faceNormal).lengthSquared();
+
+
+#ifdef _STRICT_SLICER
+	//since projected face normal is still a normal for the AB/BA vector
+	//ABNormal == faceNormal or BANormal == faceNormal
+	//hence minimum of those two diffs should be very close to be zero
+	auto smallestDiff = std::min(ABDiff, BADiff);
+
+	if (smallestDiff > 0.01f)
+	{
+		throw std::runtime_error("Slicing: contour segment normal do not match the original face normal");
+	}
+#endif
+	//if normal is actually other way around
+	if (ABDiff < BADiff)
+	{
+		//AB is correct direction
+		to = AInt;
+		from = BInt;
+		normal = DoublePoint(ABNormal.x(), ABNormal.y());
+	}
+	else
+	{
+		//BA is correct direction
+				//AB is correct direction
+		to = BInt;
+		from = AInt;
+		normal = DoublePoint(BANormal.x(), BANormal.y());
+	}
 }
+
+
+ContourSegment::ContourSegment(VertexConstItr& vtxA, VertexConstItr& vtxB, FaceConstItr& face)
+{
+	init(vtxA->position, vtxB->position, face);
+}
+
+
 
 ContourSegment::ContourSegment(VertexConstItr& vtxA0, VertexConstItr& vtxA1, VertexConstItr& vtxB, float z, FaceConstItr& face)
 {
+
+	QVector3D A = midPoint(vtxA0, vtxA1, z);
+	init(A, vtxB->position, face);
+
+
 }
 
 ContourSegment::ContourSegment(VertexConstItr& vtxA0, VertexConstItr& vtxA1, VertexConstItr& vtxB0, VertexConstItr& vtxB1, float z, FaceConstItr& face)
 {
+	QVector3D A = midPoint(vtxA0, vtxA1, z);
+	QVector3D B = midPoint(vtxB0, vtxB1, z);
+	init(A, B, face);
+
 }
 
+bool ContourSegment::isValid()
+{
+	return to != from;
+}
+
+
+
+// construct closed contour using segments created from meshSlice step
+std::vector<Contour> ContourGen::contourConstruct(const std::vector<ContourSegment>& segments) {
+	
+	std::vector<Contour> contours;
+	//use hash for god sake!
+	//key = ContourSegment.from, value = pointer to segment
+	std::unordered_map<IntPoint, const ContourSegment*> availableSegs;
+	for (auto& each : segments)
+	{
+		availableSegs[each.from] = &each;
+	}
+	while (!availableSegs.empty())
+	{
+		auto startSeg = availableSegs.begin()->second;
+		Contour currContour(startSeg);
+		availableSegs.erase(availableSegs.begin());
+		while (!currContour.isClosed())
+		{
+			auto itr = availableSegs.find(currContour.getDestination());
+#ifdef _STRICT_SLICER
+			if (itr == availableSegs.end())
+			{
+				throw std::runtime_error("Slicing:unclosed contour found while slicing");
+			}
+#endif
+			currContour.addNext(itr->second);
+			availableSegs.erase(itr);
+		}
+		contours.push_back(currContour);
+	}
+	return contours;
+
+
+
+	//Paths contourList;
+
+	//QHash<uint32_t, Path> pathHash;
+
+	//if (pathList.size() == 0)
+	//	return contourList;
+
+	//int pathCnt = 0;
+	//for (int i = 0; i < pathList.size(); i++) {
+	//	pathCnt += pathList[i].size();
+	//}
+	//qDebug() << pathCnt;
+	//pathHash.reserve(pathCnt * 10);
+
+	//int debug_count = 0;
+
+	//// pathHash Construction
+	//for (int i = 0; i < pathList.size(); i++) {
+	//	Path p = pathList[i];
+	//	//insertPathHash(pathHash, p[0], p[1]); // inserts opposite too
+
+	//	if (p[0] == p[1])
+	//		continue;
+
+	//	uint32_t path_hash_u = intPoint2Hash(p[0]);
+	//	uint32_t path_hash_v = intPoint2Hash(p[1]);
+
+	//	if (!pathHash.contains(path_hash_u)) {
+	//		debug_count++;
+	//		pathHash[path_hash_u].push_back(p[0]);
+	//	}
+	//	if (!pathHash.contains(path_hash_v)) {
+	//		debug_count++;
+	//		pathHash[path_hash_v].push_back(p[1]);
+	//	}
+	//	pathHash[path_hash_u].push_back(p[1]);
+	//	pathHash[path_hash_v].push_back(p[0]);
+	//}
+
+	//// remove duplicate IntPoint Loop xyzzw (5) / zww (3)
+	//QHashIterator<uint32_t, Path> i(pathHash);
+	//while (i.hasNext()) {
+	//	i.next();
+	//	if (i.value().size() == 3 && i.value()[1] == i.value()[2]) {
+	//		qDebug() << "same one found ";
+	//		for (IntPoint ip : i.value()) {
+	//			qDebug() << "ip value : " << ip.X << ip.Y;
+	//		}
+	//		std::vector<IntPoint>* dest = &(pathHash[intPoint2Hash(i.value()[1])]);
+	//		std::vector<IntPoint>::iterator dest_it = dest->begin();
+	//		while (dest_it != dest->end()) {
+	//			if ((*dest_it) == i.value()[0])
+	//				dest_it = dest->erase(dest_it);
+	//			else
+	//				++dest_it;
+	//		}
+
+	//		if (dest->size() == 1) {
+	//			pathHash.remove(intPoint2Hash(*(dest->begin())));
+	//		}
+	//		pathHash.remove(intPoint2Hash(i.value()[0]));
+	//	}
+	//}
+
+	//// Build Polygons
+	//while (pathHash.size() > 0) {
+	//	Path contour;
+	//	IntPoint start, pj_prev, pj, pj_next, last;
+
+	//	QHash<uint32_t, Path>::iterator smallestPathHash = pathHash.begin();//findSmallestPathHash(pathHash);
+	//	if (smallestPathHash.value().size() == 0) {
+	//		pathHash.erase(smallestPathHash);
+	//		break;
+	//	}
+	//	pj_prev = smallestPathHash.value()[0];
+	//	start = pj_prev;
+	//	contour.push_back(pj_prev);
+	//	std::vector<IntPoint>* dest = &(smallestPathHash.value());
+
+	//	if (dest->size() == 0) {
+	//		qDebug() << "dest->size() == 0";
+	//		pathHash.remove(intPoint2Hash(pj_prev));
+	//		continue;
+	//	}
+	//	else if (dest->size() == 1) {
+	//		qDebug() << "dest->size() == 1";
+	//		pathHash.remove(intPoint2Hash(pj_prev));
+	//		continue;
+	//	}
+	//	else if (dest->size() == 2) {
+	//		qDebug() << "dest->size() == 2";
+	//		pj = (*dest)[1];
+	//		last = (*dest)[0]; // pj_prev itself
+	//		pathHash.remove(intPoint2Hash(pj_prev));
+	//	}
+	//	else {
+	//		pj = (*dest)[1];
+	//		last = (*dest)[2];
+
+	//		dest->erase(dest->begin() + 1);
+	//		dest->erase(dest->begin() + 1);
+	//		if (dest->size() == 1) {
+	//			pathHash.remove(intPoint2Hash(pj_prev));
+	//			//pj_next = last;
+	//			//contour.push_back(pj);
+	//		}
+	//	}
+	//	while (pj_next != last) {
+	//		contour.push_back(pj);
+	//		dest = &(pathHash[intPoint2Hash(pj)]);
+
+	//		if (dest->size() == 0) {
+	//			qDebug() << "dest->size() == 0 from loop";
+	//			pathHash.remove(intPoint2Hash(pj));
+	//			break;
+	//		}
+	//		else if (dest->size() == 1) {
+	//			qDebug() << "dest->size() == 1 from loop";
+	//			pathHash.remove(intPoint2Hash(pj));
+	//			break;
+	//		}
+	//		else if (dest->size() == 2) {
+	//			qDebug() << "dest->size() == 2 from loop";
+	//			start = (*dest)[0]; // itself
+	//			/*uint32_t endHash = intPoint2Hash((*dest)[1]);
+	//			if (pathHash.contains(endHash))
+	//				pathHash.remove(endHash);*/ // maybe needless
+
+	//			pathHash.remove(intPoint2Hash(pj));
+	//			pj_next = last;
+	//			pj = pj_next;
+	//			pj_prev = contour[0];
+	//			last = start;
+	//			reverse(contour.begin(), contour.end());
+	//			continue;
+	//		}
+
+	//		// find pj_prev and choose another pj_next and remove pj_prev, pj_next from H[pj]
+	//		for (int d = 1; d < dest->size(); d++) {
+	//			if ((*dest)[d] == pj_prev) {
+	//				dest->erase(dest->begin() + d);
+	//				break;
+	//			}
+	//		}
+
+	//		pj_next = (*dest)[1];
+	//		dest->erase(dest->begin() + 1);
+	//		if (dest->size() == 1)
+	//			pathHash.remove(intPoint2Hash(pj));
+
+
+	//		pj_prev = pj;
+	//		pj = pj_next;
+	//	}
+
+	//	contour.push_back(last);
+	//	contour.push_back(start);
+
+	//	// collect last vertex's connectedness
+	//	uint32_t last_hash = intPoint2Hash(last);
+	//	if (pathHash.contains(last_hash)) {
+	//		dest = &(pathHash[last_hash]);
+	//		for (int d = 1; d < dest->size(); d++) {
+	//			if ((*dest)[d] == pj_prev) {
+	//				dest->erase(dest->begin() + d);
+	//				break;
+	//			}
+	//		}
+	//		for (int d = 1; d < dest->size(); d++) {
+	//			if ((*dest)[d] == start) {
+	//				dest->erase(dest->begin() + d);
+	//				break;
+	//			}
+	//		}
+	//		if (dest->size() == 1)
+	//			pathHash.remove(last_hash);
+	//	}
+
+	//	// remove 2-vertices-contours
+	//	if (contour.size() == 2)
+	//		continue;
+
+	//	/*if (Orientation(contour)){
+	//		ReversePath(contour);
+	//	}*/
+
+	//	contourList.push_back(contour);
+	//}
+
+
+	//return contourList;
+}
 
 
 Path3D  Slicer::Private::intersectionPath(Plane base_plane, Plane target_plane)
@@ -230,70 +522,39 @@ ContourSegment  Slicer::Private::intersectionPath(FaceConstItr& mf, float z)
 		else
 			lower.push_back(mfVertices[i]);
 	}
-	if (middle.size() == 2)
+	std::vector<VertexConstItr> majority;
+	std::vector<VertexConstItr> minority;
+
+	//two edges intersect
+	if (middle.size() == 0)
 	{
-		ContourSegment seg(middle[0], middle[1], mf);
-		return seg;
+		if (upper.size() == 2 && lower.size() == 1) {
+			majority = upper;
+			minority = lower;
+		}
+		else {
+			majority = lower;
+			minority = upper;
+		}
+		return ContourSegment(majority[0], minority[0], majority[1], minority[0], z, mf);
 	}
-	return ContourSegment(mfVertices[0], mfVertices[1], mf);
-	//std::vector<VertexConstItr> majority;
-	//std::vector<VertexConstItr> minority;
-
-	////two edges intersect
-	//if (middle.size() == 0)
-	//{
-	//	if (upper.size() == 2 && lower.size() == 1) {
-	//		majority = upper;
-	//		minority = lower;
-	//	}
-	//	else {
-	//		majority = lower;
-	//		minority = upper;
-	//	}
-	//}
-	//else {
-	//	if (lower.size() != upper.size() && middle.size() == 1) {
-	//		return p;
-	//	}
-	//	else if (upper.size() == 1 && lower.size() == 1 && middle.size() == 1) {
-	//		addPoint(middle[0]->position.x(), middle[0]->position.y(), &p);
-	//		//add intermediate position
-	//		float x_0, y_0;
-	//		x_0 = ((upper[0]->position.z() - z) * lower[0]->position.x() + (z - lower[0]->position.z()) * upper[0]->position.x()) / (upper[0]->position.z() - lower[0]->position.z());
-	//		y_0 = ((upper[0]->position.z() - z) * lower[0]->position.y() + (z - lower[0]->position.z()) * upper[0]->position.y()) / (upper[0]->position.z() - lower[0]->position.z());
-
-	//		addPoint(x_0, y_0, &p);
-
-	//		return p;
-	//	}
-	//	else if (middle.size() == 2) {
-	//		addPoint(middle[0]->position.x(), middle[0]->position.y(), &p);
-	//		addPoint(middle[1]->position.x(), middle[1]->position.y(), &p);
-	//		return p;
-	//	}
-	//	else if (middle.size() == 3) {
-	//		return p;
-	//	}
-	//	return p;
-	//}
-
-	//float x_0, y_0, x_1, y_1;
-	//x_0 = (minority[0]->position.x() - majority[0]->position.x())
-	//	* ((z - majority[0]->position.z()) / (minority[0]->position.z() - majority[0]->position.z()))
-	//	+ majority[0]->position.x();
-	//y_0 = (minority[0]->position.y() - majority[0]->position.y())
-	//	* ((z - majority[0]->position.z()) / (minority[0]->position.z() - majority[0]->position.z()))
-	//	+ majority[0]->position.y();
-	//x_1 = (minority[0]->position.x() - majority[1]->position.x())
-	//	* ((z - majority[1]->position.z()) / (minority[0]->position.z() - majority[1]->position.z()))
-	//	+ majority[1]->position.x();
-	//y_1 = (minority[0]->position.y() - majority[1]->position.y())
-	//	* ((z - majority[1]->position.z()) / (minority[0]->position.z() - majority[1]->position.z()))
-	//	+ majority[1]->position.y();
-
-	//addPoint(x_0, y_0, &p);
-	//addPoint(x_1, y_1, &p);
-	//return p;
+	else {
+		//when only a single tip touches with no intersecting edges
+		if (lower.size() != upper.size() && middle.size() == 1) {
+			return ContourSegment();
+		}
+		//1 edge interesecting, 1 vertice on the plane
+		else if (upper.size() == 1 && lower.size() == 1 && middle.size() == 1) {
+			return 	ContourSegment(upper[0], lower[0], middle[0], z, mf);
+		}
+		else if (middle.size() == 2) {
+			return 	ContourSegment(middle[0], middle[1], mf);
+		}
+		//face == plane
+		else if (middle.size() == 3) {
+			return  ContourSegment();
+		}
+	}
 }
 bool Slicer::slice(const Mesh* mesh, Slices* slices){
     slices->mesh = mesh;
@@ -303,28 +564,29 @@ bool Slicer::slice(const Mesh* mesh, Slices* slices){
     }
 
     // mesh slicing step
-    std::vector<Paths> meshslices = meshSlice(mesh);
+    std::vector<std::vector<ContourSegment>> meshslices = meshSlice(mesh);
 
 
     printf("meshslice done\n");
     fflush(stdout);
 
     // contour construction step per layer
+	std::vector<std::vector<Contour>> slicesCCCCC;
     for (int i=0; i< meshslices.size(); i++){
-        //qDebug() << "constructing contour" << i+1 << "/" << meshslices.size() << "offset" << -(scfg->wall_thickness+scfg->nozzle_width)/2;
-        Slice meshslice;
-        meshslice.outershell = contourConstruct(meshslices[i]);
-        int prev_size = meshslice.outershell.size();
-        meshslice.z = scfg->layer_height*i;
+		auto slice = ContourGen::contourConstruct(meshslices[i]);
+		slicesCCCCC.push_back(slice);
+        //Slice meshslice;
+        //meshslice.outershell = contourConstruct(meshslices[i]);
+        //int prev_size = meshslice.outershell.size();
+        //meshslice.z = scfg->layer_height*i;
 
-        // flaw exists if contour overlaps
-        //meshslice.outerShellOffset(-(scfg->wall_thickness+scfg->nozzle_width)/2, jtRound);
-        slices->push_back(meshslice);
-        qDebug() << i << "th meshslice.outershell.size() = " << meshslice.outershell.size();
+        //// flaw exists if contour overlaps
+        //slices->push_back(meshslice);
+        //qDebug() << i << "th meshslice.outershell.size() = " << meshslice.outershell.size();
 
-        for (int j=0; j<meshslice.outershell.size(); j++){
-            qDebug() << meshslice.outershell[j].size();
-        }
+        //for (int j=0; j<meshslice.outershell.size(); j++){
+        //    qDebug() << meshslice.outershell[j].size();
+        //}
     }
     //printf("meshslice done\n");
 
@@ -366,9 +628,9 @@ bool Slicer::slice(const Mesh* mesh, Slices* slices){
 /****************** Mesh Slicing Step *******************/
 
 // slices mesh into segments
-std::vector<Paths> Slicer::Private::meshSlice(const Mesh* mesh){
+std::vector<std::vector<ContourSegment>> Slicer::Private::meshSlice(const Mesh* mesh){
     float delta = scfg->layer_height;
-
+	std::vector<std::vector<ContourSegment>> segmentsPerPlane;
     std::vector<float> planes;
 
     if (scfg->slicing_mode == SlicingConfiguration::SlicingMode::Uniform) {
@@ -381,25 +643,27 @@ std::vector<Paths> Slicer::Private::meshSlice(const Mesh* mesh){
 
     // build triangle list per layer height
     std::vector<std::vector<FaceConstItr>> triangleLists = buildTriangleLists(mesh, planes, delta);
-    std::vector<Paths> pathLists;
 
     for (int i=0; i<planes.size(); i++){
-        Paths paths;
+        std::vector<ContourSegment> planeSegments;
 		auto& facesAtPlane = triangleLists.at(i);
 		float currPlane = planes[i];
 		for (auto face : facesAtPlane)
 		{
 			// compute intersection including on same line 2 points or 1 point
-			intersectionPath(face, currPlane);
-
+			ContourSegment seg = intersectionPath(face, currPlane);
+			if (seg.isValid())
+			{
+				planeSegments.push_back(seg);
+			}
 			//Path intersection =
 			//if (intersection.size() > 0) {
 			//	paths.push_back(intersection);
 			//}
 		}
-		pathLists.push_back(paths);
+		segmentsPerPlane.push_back(planeSegments);
     }
-    return pathLists;
+    return segmentsPerPlane;
 }
 
 
@@ -569,3 +833,56 @@ void Slices::containmentTreeConstruct(){
     }*/
 }
 
+Contour::Contour(const ContourSegment* start)
+{
+	segments.push_back(*start);
+	checkBound(start->from);
+	checkBound(start->to);
+
+}
+
+bool Contour::isClosed()
+{
+	if (segments.size() > 1)
+	{
+		return segments.front().from == segments.back().to;
+	}
+	return false;
+}
+
+//can throw when empty
+IntPoint Contour::getDestination()
+{
+	return segments.back().to;
+}
+
+void Contour::addNext(const ContourSegment* seg)
+{
+#ifdef _STRICT_SLICER
+	if (getDestination() != seg->from)
+		throw std::runtime_error("mismatching segment added to contour");
+#endif
+	segments.push_back(*seg);
+	checkBound(seg->to);
+}
+
+void Contour::checkBound(const IntPoint& pt)
+{
+	if (_xMax < pt.X)
+	{
+		_xMax = pt.X;
+	}
+	if (_xMin > pt.X)
+	{
+		_xMin = pt.X;
+	}
+
+	if (_yMax < pt.Y)
+	{
+		_yMax = pt.Y;
+	}
+	if (_yMin > pt.Y)
+	{
+		_yMin = pt.Y;
+	}
+}

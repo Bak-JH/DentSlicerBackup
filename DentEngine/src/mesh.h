@@ -291,7 +291,6 @@ namespace Hix
 		QHash<uint32_t, ClipperLib::Path>::iterator findSmallestPathHash(QHash<uint32_t, ClipperLib::Path> pathHash);
 
 		// construct closed contour using segments created from identify step
-		ClipperLib::Paths contourConstruct(ClipperLib::Paths);
 		Paths3D contourConstruct3D(Paths3D hole_edges);
 
 		bool intPointInPath(ClipperLib::IntPoint ip, ClipperLib::Path p);
