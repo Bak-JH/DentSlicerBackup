@@ -191,15 +191,15 @@
     <ClCompile Include="slice\SlicingOptBackend.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>
+    <ClCompile Include="feature\overhangDetectPostSlice.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DentEngine\src\polyclipping\poly2tri\sweep\advancing_front.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <QtMoc Include="feature\autoarrange.h">
-      <Filter>Header Files</Filter>
-    </QtMoc>
-    <QtMoc Include="feature\autoorientation.h">
       <Filter>Header Files</Filter>
     </QtMoc>
     <ClInclude Include="DentEngine\src\polyclipping\poly2tri\sweep\cdt.h">
@@ -476,6 +476,15 @@
       <Filter>Generated Files</Filter>
     </ClInclude>
     <ClInclude Include="common\RamosEnum.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="feature\autoorientation.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="slice\slicingengine.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="feature\overhangDetectPostSlice.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -1052,6 +1061,10 @@
     <None Include="icon-32.ico" />
     <None Include="icon-32.ico" />
     <None Include="icon-32.ico" />
+    <None Include="icon-32.ico" />
+    <None Include="icon-32.ico" />
+    <None Include="Qml\LeftTabSlicingOptionElementTextbox.qml" />
+    <None Include="icon-32.ico" />
   </ItemGroup>
   <ItemGroup>
     <None Include="DentSlicer.rc">
@@ -1084,9 +1097,6 @@
       <Filter>Generated Files</Filter>
     </QtMoc>
     <QtMoc Include="render\lights.h">
-      <Filter>Header Files</Filter>
-    </QtMoc>
-    <QtMoc Include="slice\slicingengine.h">
       <Filter>Header Files</Filter>
     </QtMoc>
     <QtMoc Include="slice\SlicingOptBackend.h">

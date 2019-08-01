@@ -6,8 +6,9 @@ Slider {
     id:slider
     objectName: "layerViewSlider"
     property string name:"slider"
-    property real modelHeight: modelHeight
-    property double layerThickness: 0
+    //property real modelHeight: modelHeight
+    property int layerCount: layerCount
+	property double layerThickness: 0
 
     maximumValue: 10
     minimumValue: -1
@@ -59,12 +60,14 @@ Slider {
         }
 
         var t = value / 9;
-        sliderValueChanged(t);
-        txtValue.text = Math.round(t * modelHeight/layerThickness).toString();
+		var currIndex =  Math.round(t * layerCount);
+        txtValue.text = currIndex.toString();
+		sliderValueChanged(currIndex);
+
         // 0 ~ 9 -> 25 ~ 255
         rectValue.y = 255 - value * 230 / 9;
     }
-    signal sliderValueChanged(double value);
+    signal sliderValueChanged(int value);
 
     Text{
         id : txtMin
@@ -142,11 +145,14 @@ Slider {
         layerThickness = t;
     }
 
-    function setHeight(v) {
-        modelHeight = v;
-        txtMax.text = Math.round(modelHeight/layerThickness);
-
+    function setLayerCount(v) {
+        layerCount = v;
+        txtMax.text = layerCount;
         slider.value = 9;
     }
+	function getMaxLayer()
+	{
+		return layerCount;
+	}
 }
 

@@ -58,35 +58,6 @@ using namespace Qt3DExtras;
 
 class GLModel;
 class OverhangPoint;
-class featureThread: public QThread
-{
-    Q_OBJECT
-public:
-    featureThread(GLModel* glmodel, int type);
-    GLModel* m_glmodel;
-    int progress;
-    int optype; // defines typeofoperation
-    QVariant data;
-    double arg1;
-    double arg2;
-    double arg3;
-    autoorientation* ot;
-    modelcut* ct;
-    autoarrange* ar;
-    STLexporter* ste;
-    SlicingEngine* se;
-
-signals:
-    void loadPopup(QVariant value);
-
-public slots:
-    void setTypeAndRun(int type);
-    void setTypeAndRun(int type, double arg1, double arg2, double arg3);
-    void setTypeAndRun(int type, QVariant data);
-    void setTypeAndStart(int type);
-private:
-    void run() Q_DECL_OVERRIDE;
-};
 
 class arrangeSignalSender: public QObject
 {
@@ -216,17 +187,10 @@ public:
 	void updateShader(int viewMode);
     void inactivateFeatures();
 
-    // support
-    Slicer* slicer;
-
-    featureThread* ft;
-    //arrangeSignalSender* arsignal; //unused, signal from qml goes right into QmlManager.runArrange
-    QFutureWatcher<Slicer*> futureWatcher; // future watcher for feature thread results returned
 
     const int ID; //for use in Part List
     QString filename;
     QObject* mainWindow;
-    QString slicingInfo;
 
     // implement lock as bool variable
     bool updateLock;
@@ -260,8 +224,9 @@ public:
 
 	bool perPrimitiveColorActive()const;
 	bool faceHighlightActive()const;
+	bool raftSupportGenerated()const;
 private:
-
+	bool _raftSupportGenerated = false;
 	//consts
 	//for QAttributes
 	Qt3DCore::QTransform m_transform;
@@ -391,7 +356,7 @@ public slots:
     void cutModeSelected(int type);
     void cutFillModeSelected(int type);
     void getSliderSignal(double value);
-    void getLayerViewSliderSignal(double value);
+    void getLayerViewSliderSignal(int value);
 	void generateRLModel(Mesh* lmesh, Mesh* rmesh);
     void openCut();
     void closeCut();
@@ -434,7 +399,6 @@ public slots:
 
     // Generate support mesh
     void generateSupport();
-    void slicingDone();
 
     //TODO: get rid of this
     friend class featureThread;
