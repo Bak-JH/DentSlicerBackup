@@ -112,7 +112,6 @@ void Hix::UI::MoveWidget::doDrag(Hix::Input::MouseEventData& e)
 void Hix::UI::MoveWidget::dragEnded(Hix::Input::MouseEventData& e)
 {
 	_transform.setScale3D(QVector3D(0.3f, 0.3f, 0.3f));
-	_parent->updatePosition();
 	_parent->setManipulated(false);
 	setHighlight(false);
     qmlManager->totalMoveDone();
