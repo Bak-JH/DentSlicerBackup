@@ -217,6 +217,8 @@
     <ClCompile Include="ui\RotateWidget.cpp" />
     <ClCompile Include="ui\Widget3D.cpp" />
     <ClCompile Include="ui\Widget3DManager.cpp" />
+    <ClCompile Include="unitTest\RandomGen.cpp" />
+    <ClCompile Include="unitTest\RunTests.cpp" />
     <ClCompile Include="utils\gridmesh.cpp" />
     <ClCompile Include="feature\hollowshell.cpp" />
     <ClCompile Include="utils\httpreq.cpp" />
@@ -337,6 +339,12 @@
     <ClInclude Include="ui\Widget3DManager.h" />
     <ClInclude Include="render\Color.h" />
     <ClInclude Include="unitTest\catch.hpp" />
+    <ClInclude Include="unitTest\RandomGen.h" />
+    <ClInclude Include="unitTest\tests\Float3DVectorHash.h" />
+    <ClInclude Include="unitTest\tests\IndexedListTest.h" />
+    <ClInclude Include="unitTest\RunTests.h" />
+    <ClInclude Include="unitTest\tests\SlicerTest.h" />
+    <ClInclude Include="unitTest\tests\TrackedIndexedListTest.h" />
     <ClInclude Include="utils\mathutils.h" />
     <ClInclude Include="DentEngine\src\mesh.h" />
     <ClInclude Include="feature\meshrepair.h" />

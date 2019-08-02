@@ -26,6 +26,7 @@
 #include "utils/utils.h"
 #include "render/lights.h"
 #include "DentEngine/src/configuration.h"
+#include "feature/stlexporter.h"
 
 using namespace Hix::Input;
 using namespace Hix::UI;

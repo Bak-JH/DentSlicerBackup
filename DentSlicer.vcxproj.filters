@@ -194,6 +194,12 @@
     <ClCompile Include="feature\overhangDetectPostSlice.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>
+    <ClCompile Include="unitTest\RunTests.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="unitTest\RandomGen.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DentEngine\src\polyclipping\poly2tri\sweep\advancing_front.h">
@@ -485,6 +491,24 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="feature\overhangDetectPostSlice.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="unitTest\tests\Float3DVectorHash.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="unitTest\tests\IndexedListTest.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="unitTest\tests\SlicerTest.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="unitTest\tests\TrackedIndexedListTest.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="unitTest\RunTests.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="unitTest\RandomGen.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -1064,6 +1088,8 @@
     <None Include="icon-32.ico" />
     <None Include="icon-32.ico" />
     <None Include="Qml\LeftTabSlicingOptionElementTextbox.qml" />
+    <None Include="icon-32.ico" />
+    <None Include="icon-32.ico" />
     <None Include="icon-32.ico" />
   </ItemGroup>
   <ItemGroup>
