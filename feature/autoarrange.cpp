@@ -10,7 +10,7 @@
 #include <unordered_map>
 #include "DentEngine/src/mesh.h"
 #include "DentEngine/src/configuration.h"
-
+#include "DentEngine/src/slicer.h"
 using namespace ClipperLib;
 using namespace Hix::Engine3D;
 autoarrange::autoarrange()

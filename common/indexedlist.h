@@ -454,8 +454,9 @@ namespace IndexedListItr
 	private:
 		size_t _index;
 		IndexedList<T,A>* _owner;
-
 		friend class const_iterator<T,A>;
+		friend struct std::hash<IndexedListItr::iterator<T, A>>;
+
 	};
 
 	template <class T, class A = std::allocator<T>>
@@ -590,10 +591,12 @@ namespace IndexedListItr
 	private:
 		size_t _index;
 		const IndexedList<T, A>* _owner;
-
+		friend struct std::hash<IndexedListItr::const_iterator<T, A>>;
 	};
 
 }
+
+
 
 //IndexedList iterator methods
 template <class T, class A>
@@ -725,4 +728,27 @@ IndexedListItr::iterator<T, A> IndexedList<T, A>::swapAndErase(IndexedListItr::c
 	return begin() + startedIndex;
 }
 
+
+namespace std
+{
+	template<class T, class A>
+	struct hash<IndexedListItr::iterator<T, A>>
+	{
+		//2D only!
+		std::size_t operator()(const IndexedListItr::iterator<T, A>& itr)const
+		{
+			return itr._index;
+		}
+	};
+
+	template<class T, class A>
+	struct hash<IndexedListItr::const_iterator<T, A>>
+	{
+		//2D only!
+		std::size_t operator()(const IndexedListItr::const_iterator<T, A>& itr)const
+		{
+			return itr._index;
+		}
+	};
+}
 
