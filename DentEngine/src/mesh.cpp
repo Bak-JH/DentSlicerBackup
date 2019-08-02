@@ -6,7 +6,7 @@
 #include "configuration.h"
 
 #include <list>
-
+#include <set>
 #if defined(_DEBUG) || defined(QT_DEBUG )
 #define _STRICT_MESH
 //#define _STRICT_MESH_NO_SELF_INTERSECTION
@@ -441,23 +441,27 @@ void Mesh::reverseFaces(){
 
 /********************** Mesh Generation Functions **********************/
 
-void Mesh::addFaceAndConnect(QVector3D v0, QVector3D v1, QVector3D v2){
-    addFace(v0, v1, v2);
-    auto& last = faces.back();
-    auto circ = last.edgeCirculator();
-    for(size_t i = 0; i < 3; ++i, ++circ)
-    {
-        setTwins(halfEdges.toNormItr(circ.toItr()));
-    }
+bool Mesh::addFaceAndConnect(QVector3D v0, QVector3D v1, QVector3D v2){
+	if (addFace(v0, v1, v2))
+	{
+		auto& last = faces.back();
+		auto circ = last.edgeCirculator();
+		for (size_t i = 0; i < 3; ++i, ++circ)
+		{
+			setTwins(halfEdges.toNormItr(circ.toItr()));
+		}
+		return true;
+	}
+	return false;
 }
-void Mesh::addFace(QVector3D v0, QVector3D v1, QVector3D v2){
+bool Mesh::addFace(QVector3D v0, QVector3D v1, QVector3D v2){
 	std::array<VertexItr, 3> fVtx;
     fVtx[0] = addOrRetrieveFaceVertex(v0);
 	fVtx[1] = addOrRetrieveFaceVertex(v1);
 	fVtx[2] = addOrRetrieveFaceVertex(v2);
 	//if the face is too small and slicing option collapsed a pair of its vertices, don't add.
 	if (fVtx[0] == fVtx[1] || fVtx[0] == fVtx[2] || fVtx[1] == fVtx[2])
-		return;
+		return false;
     Hix::Engine3D::MeshFace mf;
 	mf.fn = QVector3D::normal(fVtx[0]->position, fVtx[1]->position, fVtx[2]->position);
 	mf.fn_unnorm = QVector3D::crossProduct(fVtx[1]->position - fVtx[0]->position, fVtx[1]->position - fVtx[0]->position);
@@ -469,6 +473,7 @@ void Mesh::addFace(QVector3D v0, QVector3D v1, QVector3D v2){
 	fVtx[0]->calculateNormalFromFaces();
 	fVtx[1]->calculateNormalFromFaces();
 	fVtx[2]->calculateNormalFromFaces();
+	return true;
 }
 
 
@@ -571,6 +576,73 @@ Mesh* Mesh::saveUndoState(const Qt3DCore::QTransform& transform)
 
 
 /********************** Helper Functions **********************/
+
+//check if a,b are from same manifold
+bool Hix::Engine3D::isCommonManifoldFace(const FaceConstItr& a, const FaceConstItr& b, std::unordered_set<FaceConstItr> pool)
+{
+
+	std::queue<FaceConstItr> frontier;
+	frontier.push(a);
+	while (!frontier.empty() && !pool.empty())
+	{
+		auto curr = frontier.front();
+		frontier.pop();
+		pool.erase(curr);
+		if (curr == b)
+			return true;
+		else
+		{
+			auto edgeCirc = curr->edgeCirculator();
+			for (size_t i = 0; i < 3; ++i)
+			{
+				auto nFaces = edgeCirc->nonOwningFaces();
+				for (auto nFace : nFaces)
+				{
+					if (pool.find(nFace) != pool.end())
+					{
+						frontier.push(nFace);
+					}
+				}
+			}
+		}
+	}
+	return false;
+}
+
+//out of candidates, find face that is on commmon manifold as a. candidates is a subset of pool....
+bool Hix::Engine3D::findCommonManifoldFace(
+	FaceConstItr& result, const FaceConstItr& a, std::unordered_set<FaceConstItr>& candidates, std::unordered_set<FaceConstItr> pool)
+{
+	std::queue<FaceConstItr> frontier;
+	frontier.push(a);
+	while (!frontier.empty() && !pool.empty())
+	{
+		auto curr = frontier.front();
+		frontier.pop();
+		pool.erase(curr);
+		if (candidates.find(curr) != candidates.end())
+		{
+			result = curr;
+			return true;
+		}
+		else
+		{
+			auto edgeCirc = curr->edgeCirculator();
+			for (size_t i = 0; i < 3; ++i)
+			{
+				auto nFaces = edgeCirc->nonOwningFaces();
+				for (auto nFace : nFaces)
+				{
+					if (pool.find(nFace) != pool.end())
+					{
+						frontier.push(nFace);
+					}
+				}
+			}
+		}
+	}
+	return false;
+}
 
 
 uint32_t Hix::Engine3D::vertexHash(QVector3D v) // max build size = 1000mm, resolution = 1 micron
@@ -896,10 +968,22 @@ void Mesh::updateMinMax(QVector3D v, std::array<float,6>& minMax){
         minMax[5] = v.z();
 }
 
+//ascending/increasing order
+std::array<float, 3> MeshFace::sortZ()const
+{
+	std::array<float, 3> orderedZ;
+	auto mfVertices = meshVertices();
+	for (int i = 0; i < mfVertices.size(); i++) {
+		orderedZ[i] = mfVertices[i]->position.z();
+	}
+	std::sort(orderedZ.begin(), orderedZ.end());
+	return orderedZ;
+}
 
-float Mesh::getFaceZmin(const MeshFace& mf)const{
+
+float MeshFace::getFaceZmin()const{
     float face__z_min=std::numeric_limits<float>::max();
-	auto mfVertices = mf.meshVertices();
+	auto mfVertices = meshVertices();
     for (int i=0; i< mfVertices.size(); i++){
         float temp__z_min = mfVertices[i]->position.z();
         if (temp__z_min<face__z_min)
@@ -908,9 +992,9 @@ float Mesh::getFaceZmin(const MeshFace& mf)const{
     return face__z_min;
 }
 
-float Mesh::getFaceZmax(const MeshFace& mf)const{
+float MeshFace::getFaceZmax()const{
     float face__z_max= std::numeric_limits<float>::lowest();
-	auto mfVertices = mf.meshVertices();
+	auto mfVertices = meshVertices();
     for (int i=0; i< mfVertices.size(); i++){
         float temp__z_max = mfVertices[i]->position.z();
         if (temp__z_max>face__z_max)
@@ -918,6 +1002,40 @@ float Mesh::getFaceZmax(const MeshFace& mf)const{
     }
     return face__z_max;
 }
+
+bool MeshFace::getEdgeWithVertices(HalfEdgeConstItr& result, const VertexConstItr& a, const VertexConstItr& b)const
+{
+	auto edgeCirc = edgeCirculator();
+	for (size_t i = 0; i < 3; ++i)
+	{
+		auto edge = edgeCirc.toItr();
+		if ((edge->to == a && edge->from == b) || (edge->to == b && edge->from == a))
+		{
+			result = edge;
+			return true;
+		}
+		++edgeCirc;
+	}
+	return false;
+}
+
+bool MeshFace::isNeighborOf(const FaceConstItr& nFace)const
+{
+	auto edgeCirc = edgeCirculator();
+	for (size_t i = 0; i < 3; ++i)
+	{
+		auto nFaces = edgeCirc->nonOwningFaces();
+		for (auto& each : nFaces)
+		{
+			if (each == nFace)
+			{
+				return true;
+			}
+		}
+	}
+	return false;
+}
+
 
 Mesh* Mesh::getPrev()const
 {

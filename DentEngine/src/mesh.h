@@ -91,7 +91,11 @@ namespace Hix
 			//std::array<std::vector<FaceConstItr>, 3> neighboring_faces;
 			HalfEdgeCirculator edgeCirculator()const;
 			std::array<size_t, 3> getVerticeIndices(const Mesh* owningMesh)const;
-
+			std::array<float, 3> sortZ()const;
+			float getFaceZmin()const;
+			float getFaceZmax()const;
+			bool getEdgeWithVertices(HalfEdgeConstItr& result,const VertexConstItr& a, const VertexConstItr& b)const;
+			bool isNeighborOf(const FaceConstItr& nFace)const;
 
 		};
 		struct MeshVertex {
@@ -116,7 +120,8 @@ namespace Hix
 		};
 
 
-
+		bool isCommonManifoldFace(const FaceConstItr& a, const FaceConstItr& b, std::unordered_set<FaceConstItr> pool);
+		bool findCommonManifoldFace(FaceConstItr& result, const FaceConstItr& a, std::unordered_set<FaceConstItr>& candidates, std::unordered_set<FaceConstItr> pool);
 
 
 		typedef std::vector<QVector3D> Plane;
@@ -157,8 +162,8 @@ namespace Hix
 			void vertexScale(float scaleX, float scaleY, float scaleZ, float centerX, float centerY);
 			void reverseFace(FaceConstItr faceItr);
 			void reverseFaces();
-            void addFaceAndConnect(QVector3D v0, QVector3D v1, QVector3D v2);
-            void addFace(QVector3D v0, QVector3D v1, QVector3D v2);
+            bool addFaceAndConnect(QVector3D v0, QVector3D v1, QVector3D v2);
+            bool addFace(QVector3D v0, QVector3D v1, QVector3D v2);
 			TrackedIndexedList<MeshFace>::const_iterator removeFace(FaceConstItr f_it);
 			void connectFaces();
 			TrackedIndexedList<MeshVertex>& getVerticesNonConst();
@@ -188,8 +193,7 @@ namespace Hix
 			static void updateMinMax(QVector3D v, std::array<float, 6>& minMax);
 			static std::array<float, 6> calculateMinMax(QMatrix4x4 rotmatrix, const Mesh* mesh);
 
-			float getFaceZmin(const MeshFace& mf)const;
-			float getFaceZmax(const MeshFace& mf)const;
+
 			//MeshFace idx2MF(int idx)const;
 			//MeshVertex idx2MV(int idx)const;
 
@@ -232,15 +236,15 @@ namespace Hix
 			}
 			/********************** opposite **********************/
 
-			inline size_t indexOf(HalfEdgeConstItr& itr)const
+			inline size_t indexOf(const HalfEdgeConstItr& itr)const
 			{
 				return itr - halfEdges.cbegin();
 			}
-			inline size_t indexOf(VertexConstItr& itr)const
+			inline size_t indexOf(const VertexConstItr& itr)const
 			{
 				return itr - vertices.cbegin();
 			}
-			inline size_t indexOf(FaceConstItr& itr)const
+			inline size_t indexOf(const FaceConstItr& itr)const
 			{
 				return itr - faces.cbegin();
 			}
