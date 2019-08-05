@@ -66,6 +66,16 @@ struct SlicingConfiguration
 		Clear = 1,
 		Castable = 2
 	};
+	enum class PrinterVendor : uint8_t
+	{
+		Hix = 0,
+		ThreeDLight = 1
+	};
+	enum class Invert : uint8_t
+	{
+		InvertXAxis = 0,
+		NoInversion
+	};
     // configurations
     float layer_height = 0.1f; // in mm
     float nozzle_width = 0.0f; // in mm (diameter) , for printers with nozzles
@@ -76,6 +86,8 @@ struct SlicingConfiguration
 
     float contraction_ratio = TEMPORARY_CONTRACTION_RATIO;
 
+	Invert slice_invert = Invert::InvertXAxis;
+	PrinterVendor printer_vendor_type = PrinterVendor::Hix;
 	SlicingMode slicing_mode = SlicingMode::Uniform; // uniform OR adaptive
 	ResinType resin_type = ResinType::Temporary;
 	SupportType support_type = SupportType::General;
@@ -88,8 +100,8 @@ struct SlicingConfiguration
     float raft_offset_radius = 4.0f; // in mm
 
     // support settings
-    float support_radius_max = 1.5f;
-    float support_radius_min = 0.3f;
+    float support_radius_max = 1.0f;
+    float support_radius_min = 0.2f;
     float support_base_height = 2.0f;
 
     // bed configuration

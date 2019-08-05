@@ -33,7 +33,26 @@ QDebug Hix::Debug::operator<< (QDebug d, const Slices& obj) {
 	}
 	return d;
 }
-bool Slicer::slice(Mesh* mesh, Slices* slices){
+
+
+
+namespace Slicer
+{
+	namespace Private
+	{
+		/****************** Mesh Slicing Step *******************/
+		std::vector<Paths> meshSlice(const Mesh* mesh); // totally k elements
+		/****************** Helper Functions For Mesh Slicing Step *******************/
+		std::vector<std::vector<const MeshFace*>> buildTriangleLists(const Mesh* mesh, std::vector<float> planes, float delta);
+		std::vector<float> buildUniformPlanes(float z_min, float z_max, float delta);
+		std::vector<float> buildAdaptivePlanes(float z_min, float z_max);
+		/****************** Helper Functions For Contour Construction Step *******************/
+		void insertPathHash(QHash<uint32_t, Path>& pathHash, IntPoint u, IntPoint v);
+	}
+}
+using namespace Slicer::Private;
+
+bool Slicer::slice(const Mesh* mesh, Slices* slices){
     slices->mesh = mesh;
 
     if (mesh == nullptr || mesh->getFaces().size() ==0){
@@ -104,7 +123,7 @@ bool Slicer::slice(Mesh* mesh, Slices* slices){
 /****************** Mesh Slicing Step *******************/
 
 // slices mesh into segments
-std::vector<Paths> Slicer::meshSlice(Mesh* mesh){
+std::vector<Paths> Slicer::Private::meshSlice(const Mesh* mesh){
     float delta = scfg->layer_height;
 
     std::vector<float> planes;
@@ -150,9 +169,6 @@ std::vector<Paths> Slicer::meshSlice(Mesh* mesh){
     return pathLists;
 }
 
-/****************** Contour Construction Step *******************/
-
-
 
 
 /****************** Helper Functions For Offsetting Step *******************/
@@ -184,7 +200,7 @@ void Slice::outerShellOffset(float delta, JoinType join_type){
 /****************** Helper Functions For Mesh Slicing Step *******************/
 
 // builds std::vector of std::vector of triangle idxs sorted by z_min
-std::vector<std::vector<const MeshFace*>> Slicer::buildTriangleLists(Mesh* mesh, std::vector<float> planes, float delta){
+std::vector<std::vector<const MeshFace*>> Slicer::Private::buildTriangleLists(const Mesh* mesh, std::vector<float> planes, float delta){
 
     // Create List of list
     std::vector<std::vector<const MeshFace*>> list_list_triangle;
@@ -219,7 +235,7 @@ std::vector<std::vector<const MeshFace*>> Slicer::buildTriangleLists(Mesh* mesh,
 }
 
 
-std::vector<float> Slicer::buildUniformPlanes(float z_min, float z_max, float delta){
+std::vector<float> Slicer::Private::buildUniformPlanes(float z_min, float z_max, float delta){
 	float halfDelta = delta / 2.0f;
     std::vector<float> planes;
 
@@ -236,7 +252,7 @@ std::vector<float> Slicer::buildUniformPlanes(float z_min, float z_max, float de
     return planes;
 }
 
-std::vector<float> Slicer::buildAdaptivePlanes(float z_min, float z_max){
+std::vector<float> Slicer::Private::buildAdaptivePlanes(float z_min, float z_max){
     std::vector<float> planes;
     return planes;
 }
@@ -244,7 +260,7 @@ std::vector<float> Slicer::buildAdaptivePlanes(float z_min, float z_max){
 
 /****************** Helper Functions For Contour Construction Step *******************/
 
-void Slicer::insertPathHash(QHash<uint32_t, Path>& pathHash, IntPoint u, IntPoint v){
+void Slicer::Private::insertPathHash(QHash<uint32_t, Path>& pathHash, IntPoint u, IntPoint v){
     QVector3D u_qv3 = QVector3D(u.X, u.Y, 0);
     QVector3D v_qv3 = QVector3D(v.X, v.Y, 0);
 
@@ -292,10 +308,6 @@ void Slices::containmentTreeConstruct(){
         clpr.Clear();
         clpr.AddPaths(slice->outershell, ptSubject, true);
         clpr.Execute(ctUnion, slice->polytree);
-
-        for (PolyNode* pn : slice->polytree.Childs){
-            qDebug() << pn->IsHole() << pn->Parent << pn->Parent->Parent;
-        }
     }
 
     // std::vector<std::vector<IntPoint>> to std::vector<std::vector<Point>>

@@ -1,6 +1,6 @@
 #ifndef SVGEXPORTER_H
 #define SVGEXPORTER_H
-#include <fstream>
+#include <sstream>
 #include <QDir>
 #include <QJsonObject>
 #include <QJsonDocument>
@@ -18,7 +18,7 @@ class Slices;
 namespace SVGexporter
 {
 
-    QString exportSVG(Slices& shellSlices, Slices& supportSlices, Slices& raftSlices, QString outfoldername);
+    QString exportSVG(Slices& shellSlices, Slices& supportSlices, Slices& raftSlices, QString outfoldername, bool isTemp);
 };
 
 #endif // SVGEXPORTER_H
