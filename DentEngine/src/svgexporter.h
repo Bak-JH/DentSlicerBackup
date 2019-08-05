@@ -1,6 +1,6 @@
 #ifndef SVGEXPORTER_H
 #define SVGEXPORTER_H
-#include <fstream>
+#include <sstream>
 #include <QDir>
 #include <QJsonObject>
 #include <QJsonDocument>
