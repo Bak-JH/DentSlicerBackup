@@ -20,7 +20,7 @@ void logSlices(const Slices& slices)
 #endif
 namespace SVGexporterPrivate
 {
-    void parsePolyTreeAndWrite(ClipperLib::PolyNode* pn, bool isTemp);
+    void parsePolyTreeAndWrite(ClipperLib::PolyNode* pn, bool isTemp, std::stringstream& content);
     void writePolygon(ClipperLib::Path& contour, bool isTemp, std::stringstream& content);
     void writePolygon(ClipperLib::PolyNode* contour, bool isTemp, std::stringstream& content);
     void writeGroupHeader(int layer_idx, float z, std::stringstream& content);
@@ -137,7 +137,7 @@ QString SVGexporter::exportSVG(Slices& shellSlices, Slices& supportSlices, Slice
 
         PolyTree shellSlice_polytree = shellSlices[i].polytree;
         for (int j=0; j<shellSlice_polytree.ChildCount(); j++){
-            parsePolyTreeAndWrite(shellSlice_polytree.Childs[j], isTemp);
+            parsePolyTreeAndWrite(shellSlice_polytree.Childs[j], isTemp, contentStream);
         }
 
         if (int(supportSlices.size())-support_base_layer_cnt > i){
@@ -195,7 +195,6 @@ QString SVGexporter::exportSVG(Slices& shellSlices, Slices& supportSlices, Slice
     //exit(0);
     if (!isTemp && scfg->printer_vendor_type == SlicingConfiguration::PrinterVendor::ThreeDLight)
     {
-
         writeVittroOptions(outfoldername, currentSlice_idx);
     }
 
@@ -298,12 +297,11 @@ Grid Base Plate Type = None").arg(QString::number((int)(scfg->layer_height*1000)
 
 
 
-void SVGexporterPrivate::parsePolyTreeAndWrite(PolyNode* pn, bool isTemp){
-    std::stringstream contentStream;
-    writePolygon(pn, isTemp, contentStream);
+void SVGexporterPrivate::parsePolyTreeAndWrite(PolyNode* pn, bool isTemp, std::stringstream& content){
+    writePolygon(pn, isTemp, content);
     for (int i=0; i<pn->ChildCount(); i++){
         PolyNode* new_pn = pn->Childs[i];
-        parsePolyTreeAndWrite(new_pn, isTemp);
+        parsePolyTreeAndWrite(new_pn, isTemp, content);
     }
 
     /*while (pn != NULL){
