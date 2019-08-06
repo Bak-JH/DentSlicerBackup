@@ -10,6 +10,34 @@ using namespace ClipperLib;
 using namespace Hix::Engine3D;
 class OverhangPoint;
 
+
+namespace std
+{
+	template<>
+	struct hash<IntPoint>
+	{
+		//2D only!
+		std::size_t operator()(const IntPoint& pt)const
+		{
+			int16_t smallX = (int16_t)(pt.X);
+			int16_t smallY = (int16_t)(pt.Y);
+			size_t digest = smallX | smallY << 16;
+			return digest;
+		}
+	};
+	template<>
+	struct hash<std::pair<VertexConstItr, VertexConstItr>>
+	{
+		//2D only!
+		std::size_t operator()(const std::pair<VertexConstItr, VertexConstItr>& pair)const
+		{
+			//we don't care about symmertricity as the vertice pair should be sorted anyway ie) no symmetry
+			return std::hash<VertexConstItr>()(pair.first) ^ std::hash<VertexConstItr>()(pair.second);
+		}
+	};
+}
+
+
 class Slice { // extends Paths (total paths)
 public:
 	float z;
@@ -76,10 +104,12 @@ struct ContourSegment
 	ContourSegment();
 	//constructor helper;
 	bool isValid();
+	bool calcNormalAndFlip();
+	float dist();
 	//
 	//ordering is important.
 	//follows Righ hand thumb finger rule, if the in, goint to->from normal vector is pointed left side, CW 
-	//bool tooShort = false;
+	bool unknownDirection = false;
 	FaceConstItr face;
 	QVector2D from;
 	QVector2D to;
@@ -103,7 +133,7 @@ private:
 	//cInt _yMax = std::numeric_limits<cInt>::lowest();
 	//cInt _yMin = std::numeric_limits<cInt>::max();
 		//bool _isOutward = false;
-
+	bool _directionDetermined = false;
 	std::deque<ContourSegment> segments;
 };
 
@@ -119,34 +149,19 @@ private:
 
 	//two points
 
-
+	ContourSegment calculateStartingSegment(FaceConstItr& mf, std::variant<VertexConstItr, HalfEdgeConstItr>& hint);
 	ContourSegment doNextSeg(VertexConstItr from, FaceConstItr prevFace, std::variant<VertexConstItr, HalfEdgeConstItr>& to);
 	ContourSegment doNextSeg(HalfEdgeConstItr from, QVector2D fromPt, std::variant<VertexConstItr, HalfEdgeConstItr>& to);
+	QVector2D midPoint2D(VertexConstItr vtxA0, VertexConstItr vtxA1);
 
 	const Mesh* _mesh;
 	float _plane;
+	std::unordered_map<std::pair<VertexConstItr, VertexConstItr>, QVector2D> _midPtLUT;
 	std::unordered_set<FaceConstItr>& _intersectList;
 	std::unordered_set<FaceConstItr> _exploredList;
 	std::unordered_set<FaceConstItr> _tooShortList;
 
 };
-
-namespace std
-{
-	template<>
-	struct hash<IntPoint>
-	{
-		//2D only!
-		std::size_t operator()(const IntPoint& pt)const
-		{
-			int16_t smallX = (int16_t)(pt.X);
-			int16_t smallY = (int16_t)(pt.Y);
-			size_t digest = smallX | smallY << 16;
-			return digest;
-		}
-	};
-}
-
 
 
 
