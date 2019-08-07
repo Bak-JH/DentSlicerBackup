@@ -58,13 +58,6 @@ public:
 class Slices : public std::vector<Slice> {
 public:
 	const Mesh* mesh;
-
-	Paths overhang_regions;
-	std::vector<OverhangPoint*> overhang_points;
-	//    std::vector<QVector3D> overhang_points;
-	//std::vector<IntPoint> intersectionPoints;
-	Path raft_points;
-
 	void containmentTreeConstruct();
 
 };
@@ -103,9 +96,10 @@ struct ContourSegment
 {
 	ContourSegment();
 	//constructor helper;
-	bool isValid();
+	bool isValid()const;
 	bool calcNormalAndFlip();
-	float dist();
+	float dist()const;
+	void flip();
 	//
 	//ordering is important.
 	//follows Righ hand thumb finger rule, if the in, goint to->from normal vector is pointed left side, CW 
@@ -123,8 +117,12 @@ public:
 	bool isClosed();
 	//IntPoint getDestination();
 	void addNext(const ContourSegment& seg);
+	void addPrev(const ContourSegment& seg);
+
 	//void calculateDirection();
 	//bool isOutward();
+	std::deque<ContourSegment> segments;
+
 private:
 	//void checkBound(const IntPoint& pt);
 	////bounds
@@ -134,7 +132,6 @@ private:
 	//cInt _yMin = std::numeric_limits<cInt>::max();
 		//bool _isOutward = false;
 	bool _directionDetermined = false;
-	std::deque<ContourSegment> segments;
 };
 
 //one per plane
@@ -149,13 +146,15 @@ private:
 
 	//two points
 
-	ContourSegment calculateStartingSegment(FaceConstItr& mf, std::variant<VertexConstItr, HalfEdgeConstItr>& hint);
-	ContourSegment doNextSeg(VertexConstItr from, FaceConstItr prevFace, std::variant<VertexConstItr, HalfEdgeConstItr>& to);
-	ContourSegment doNextSeg(HalfEdgeConstItr from, QVector2D fromPt, std::variant<VertexConstItr, HalfEdgeConstItr>& to);
+	ContourSegment calculateStartingSegment(FaceConstItr& mf, std::variant<VertexConstItr,
+		HalfEdgeConstItr>& toHint, std::variant<VertexConstItr, HalfEdgeConstItr>& fromHint);
+	ContourSegment doNextSeg(VertexConstItr from, const ContourSegment& prevSeg, std::variant<VertexConstItr, HalfEdgeConstItr>& to);
+	ContourSegment doNextSeg(HalfEdgeConstItr from,const ContourSegment& prevSeg, std::variant<VertexConstItr, HalfEdgeConstItr>& to);
 	QVector2D midPoint2D(VertexConstItr vtxA0, VertexConstItr vtxA1);
 
 	const Mesh* _mesh;
 	float _plane;
+	bool _reverse = false;
 	std::unordered_map<std::pair<VertexConstItr, VertexConstItr>, QVector2D> _midPtLUT;
 	std::unordered_set<FaceConstItr>& _intersectList;
 	std::unordered_set<FaceConstItr> _exploredList;

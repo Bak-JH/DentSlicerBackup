@@ -26,9 +26,6 @@ QDebug Hix::Debug::operator<< (QDebug d, const Slice& obj) {
 }
 QDebug Hix::Debug::operator<< (QDebug d, const Slices& obj) {
 	d << "mesh: " << obj.mesh;
-	d << "raft_points: " << obj.raft_points;
-	d << "overhang_regions: " << obj.overhang_regions;
-	d << "overhang_points: " << obj.overhang_points;
 	d << "slices: ";
 	for (const auto& each : obj)
 	{
@@ -54,7 +51,6 @@ namespace Slicer
 		Paths3D intersectionPaths(ClipperLib::Path Contour, Plane target_plane);
 		Path3D intersectionPath(Plane base_plane, Plane target_plane);
 		std::vector<Contour> calculateContour(const Mesh* mesh, std::vector<FaceConstItr>& intersectingFaces, float z);
-		QVector2D midPoint2D(VertexConstItr& vtxA0, VertexConstItr& vtxA1, float z);
 	}
 }
 using namespace Slicer::Private;
@@ -164,12 +160,12 @@ ContourSegment::ContourSegment()
 
 
 
-bool ContourSegment::isValid()
+bool ContourSegment::isValid()const
 {
 	return to != from;
 }
 
-float ContourSegment::dist()
+float ContourSegment::dist()const
 {
 	return to.distanceToPoint(from);
 }
@@ -271,16 +267,16 @@ std::vector<std::vector<Contour>> Slicer::Private::meshSlice(const Mesh* mesh){
     std::vector<float> planes;
 
 
-	std::vector<HalfEdgeConstItr> badEdgesItr;
-	std::vector<const HalfEdge*> badEPtrs;
-	for (auto cItr = mesh->getHalfEdges().cbegin(); cItr != mesh->getHalfEdges().cend(); ++cItr)
-	{
-		if (cItr->twins.size() == 0)
-		{
-			badEdgesItr.push_back(cItr);
-			badEPtrs.push_back(cItr.operator->());
-		}
-	}
+	//std::vector<HalfEdgeConstItr> badEdgesItr;
+	//std::vector<const HalfEdge*> badEPtrs;
+	//for (auto cItr = mesh->getHalfEdges().cbegin(); cItr != mesh->getHalfEdges().cend(); ++cItr)
+	//{
+	//	if (cItr->twins.size() == 0)
+	//	{
+	//		badEdgesItr.push_back(cItr);
+	//		badEPtrs.push_back(cItr.operator->());
+	//	}
+	//}
 
     if (scfg->slicing_mode == SlicingConfiguration::SlicingMode::Uniform) {
         planes = buildUniformPlanes(mesh->z_min(), mesh->z_max(), delta);
@@ -411,8 +407,8 @@ void Slicer::Private::insertPathHash(QHash<uint32_t, Path>& pathHash, IntPoint u
     QVector3D u_qv3 = QVector3D(u.X, u.Y, 0);
     QVector3D v_qv3 = QVector3D(v.X, v.Y, 0);
 
-    uint32_t path_hash_u = vertexHash(u_qv3);
-    uint32_t path_hash_v = vertexHash(v_qv3);
+    uint32_t path_hash_u = std::hash<QVector3D>()(u_qv3);
+    uint32_t path_hash_v = std::hash<QVector3D>()(v_qv3);
 
     if (! pathHash.contains(path_hash_u)){
         //pathHash[path_hash_u].push_back(u);
@@ -528,6 +524,17 @@ void Contour::addNext(const ContourSegment& seg)
 	segments.push_back(seg);
 	//checkBound(seg->to);
 }
+void Contour::addPrev(const ContourSegment& seg)
+{
+#ifdef _STRICT_SLICER
+	//if (getDestination() != seg->from)
+	//	throw std::runtime_error("mismatching segment added to contour");
+#endif
+	segments.push_front(seg);
+	//checkBound(seg->to);
+}
+
+
 //
 //void Contour::checkBound(const IntPoint& pt)
 //{
@@ -686,6 +693,12 @@ bool ContourSegment::calcNormalAndFlip()
 		return true;
 	}
 }
+void ContourSegment::flip()
+{
+	auto tmp = to;
+	to = from;
+	from = tmp;
+}
 
 
 ContourBuilder::ContourBuilder(const Mesh* mesh, std::unordered_set<FaceConstItr>& intersectingFaces, float z)
@@ -717,7 +730,8 @@ std::variant<VertexConstItr, HalfEdgeConstItr> toHEdgeOrVtxHint(
 	}
 }
 
-ContourSegment  ContourBuilder::calculateStartingSegment(FaceConstItr& mf, std::variant<VertexConstItr, HalfEdgeConstItr>& hint)
+ContourSegment  ContourBuilder::calculateStartingSegment(FaceConstItr& mf,
+	std::variant<VertexConstItr, HalfEdgeConstItr>& outHintTo, std::variant<VertexConstItr, HalfEdgeConstItr>& outHintFrom)
 {
 	ContourSegment segment;
 	segment.face = mf;
@@ -782,9 +796,13 @@ ContourSegment  ContourBuilder::calculateStartingSegment(FaceConstItr& mf, std::
 	bool isFlipped = segment.calcNormalAndFlip();
 	if (isFlipped)
 	{
+		auto tmp = toHint;
 		toHint = fromHint;
+		fromHint = tmp;
 	}
-	hint = toHEdgeOrVtxHint(mf, toHint);
+	outHintTo = toHEdgeOrVtxHint(mf, toHint);
+	outHintFrom = toHEdgeOrVtxHint(mf, fromHint);
+
 	return segment;
 }
 
@@ -792,6 +810,8 @@ std::vector<Contour> ContourBuilder::buildContours()
 {
 	auto faces = _mesh->getFaces();
 	std::vector<Contour> contours;
+	std::vector<Contour> incompleteContours;
+
 	//when calculating intersect normals 
 	//std::unordered_map<FaceConstItr, ContourSegment> tooShortFaces;
 	std::vector<FaceConstItr> startCandidates(_intersectList.begin(), _intersectList.end());
@@ -810,10 +830,10 @@ std::vector<Contour> ContourBuilder::buildContours()
 				if (!_intersectList.empty())
 				{
 					float sum;
-					std::variant<VertexConstItr, HalfEdgeConstItr> hint;
+					std::variant<VertexConstItr, HalfEdgeConstItr> hint0, hint1;
 					for (auto each : _intersectList)
 					{
-						auto seg = calculateStartingSegment(each, hint);
+						auto seg = calculateStartingSegment(each, hint0, hint1);
 						sum += seg.dist();
 					}
 					if (sum > 0.001)
@@ -827,56 +847,95 @@ std::vector<Contour> ContourBuilder::buildContours()
 		}
 
 		Contour currContour;
+		//no dead-end or hole yet, so don't reverse
 		//add first segment
-		ContourSegment currSeg;
+		ContourSegment currSeg, prevSeg;
 		//hint for next seg
 		std::variant<VertexConstItr, HalfEdgeConstItr> hint;
+		std::variant<VertexConstItr, HalfEdgeConstItr> toHint;
+		std::variant<VertexConstItr, HalfEdgeConstItr> fromHint;
 
-		currSeg = calculateStartingSegment(*startingFace, hint);
+		currSeg = calculateStartingSegment(*startingFace, toHint, fromHint);
 		if (currSeg.unknownDirection)
 		{
 			++startingFace;
 			continue;
 		}
+		//forward direction initially
+		hint = toHint;
+		_reverse = false;
 		_intersectList.erase(*startingFace);
-		currContour.addNext(currSeg);
-		auto prevSeg = currSeg;
-		while (!currContour.isClosed())
+		do
 		{
+			if (currSeg.isValid())
+			{
+				if (_reverse)
+				{
+					currContour.addPrev(currSeg);
+				}
+				else
+				{
+					currContour.addNext(currSeg);
+				}
+				prevSeg = currSeg;
+			}
+			else
+			{
+				if (_reverse)
+				{
+					//dead end found on both end, leave the contour incomplete.
+					incompleteContours.push_back(currContour);
+					break;
+				}
+				else
+				{
+					//dead end found on the tail end, so reverse direction
+					_reverse = true;
+					hint = fromHint;
+					prevSeg = currContour.segments.front();
+
+				}
+			}
 			if (hint.index() == 0)
 			{
 				//vertex
-				currSeg = doNextSeg(std::get<0>(hint), prevSeg.face, hint);
+				currSeg = doNextSeg(std::get<0>(hint), prevSeg, hint);
 			}
 			else
 			{
 				//edge
-				currSeg = doNextSeg(std::get<1>(hint), prevSeg.to, hint);
+				currSeg = doNextSeg(std::get<1>(hint), prevSeg, hint);
 			}
-			currContour.addNext(currSeg);
-			prevSeg = currSeg;
-
 		}
-		contours.push_back(currContour);
+		while (!currContour.isClosed());
+		//if a complete contour is found, no dead ends
+		if (!_reverse)
+		{
+			contours.push_back(currContour);
+		}
 
-
-//#ifdef _STRICT_SLICER
-//		if (startingFace == startCandidates.end() - 1 && _intersectList.size() > 0)
-//		{
-//			//elements remain but we've ran out of valid segments to start from
-//			if (_intersectList.size() != tooShortFaces.size())
-//			{
-//				throw std::runtime_error("valid segs remain but ran out of starting segs");
-//			}
-//		}
-//#endif
 	}
+
+	//link un-closed contours together if possible to minimize un-closed contour counts
+	if (!incompleteContours.empty())
+	{
+		for (auto& each : incompleteContours)
+		{
+			auto beginFace = each.segments.front().face;
+			auto lastFace = each.segments.back().face;
+			qDebug() << "incomplete contour found:";
+			qDebug() << "starting face: \n" << beginFace;
+			qDebug() << "last face:  \n" << lastFace;
+		}
+	}
+
+	//repair remaining un-closed contorus
 	return contours;
 }
 
 
 //at this point we know which face interesects, and which don't
-ContourSegment ContourBuilder::doNextSeg(VertexConstItr from, FaceConstItr prevFace, std::variant<VertexConstItr, HalfEdgeConstItr>& to)
+ContourSegment ContourBuilder::doNextSeg(VertexConstItr from, const ContourSegment& prevSeg, std::variant<VertexConstItr, HalfEdgeConstItr>& to)
 {
 	ContourSegment newSeg;
 	newSeg.from = QVector2D(from->position.x(), from->position.y());
@@ -895,11 +954,13 @@ ContourSegment ContourBuilder::doNextSeg(VertexConstItr from, FaceConstItr prevF
 	}
 	if (candidates.size() > 1)
 	{
-		bool intersectFound = Hix::Engine3D::findCommonManifoldFace(curr, prevFace, candidates, pool);
-#ifdef _STRICT_SLICER
+		bool intersectFound = Hix::Engine3D::findCommonManifoldFace(curr, prevSeg.face, candidates, pool);
 		if (!intersectFound)
-			throw std::runtime_error("no proper intersecting face found from contour builder");
-#endif
+		{
+			qDebug() << "no proper intersecting face found from contour builder";
+			return ContourSegment();
+
+		}
 	}
 	else
 	{
@@ -951,30 +1012,41 @@ ContourSegment ContourBuilder::doNextSeg(VertexConstItr from, FaceConstItr prevF
 		to = mid;
 
 	}
+	if (_reverse)
+		newSeg.flip();
 	return newSeg;
 }
 
 
-ContourSegment ContourBuilder::doNextSeg(HalfEdgeConstItr from, QVector2D fromPt, std::variant<VertexConstItr, HalfEdgeConstItr>& to)
+ContourSegment ContourBuilder::doNextSeg(HalfEdgeConstItr from, const ContourSegment& prevSeg, std::variant<VertexConstItr, HalfEdgeConstItr>& to)
 {
 	ContourSegment newSeg;
 	FaceConstItr curr;
-	newSeg.from = fromPt;
-
-	auto twinFaces = from->nonOwningFaces();
-	curr = twinFaces[0];
-	newSeg.face = curr;
-
-#ifdef _STRICT_SLICER
-	if(twinFaces.size() == 0)
-		throw std::runtime_error("incomplete contour during slicing");
-	if (twinFaces.size() > 1)
-		throw std::runtime_error("two-manifold guarantee broken for slicing mesh");
-	if (_intersectList.find(curr) == _intersectList.end())
+	if (_reverse)
 	{
-		throw std::runtime_error("possible self intersecting mesh");
+		newSeg.from = prevSeg.from;
 	}
-#endif
+	else
+	{
+		newSeg.from = prevSeg.to;
+	}
+	auto neighborFaces = from->neighborFaces();
+	bool nextFound = false;
+	for (auto twin : neighborFaces)
+	{
+		if (_intersectList.find(twin) != _intersectList.end())
+		{
+			curr = twin;
+			nextFound = true;
+			break;
+		}
+	}
+	if (!nextFound)
+	{
+		qDebug() << "incomplete contour during slicing";
+		return ContourSegment();
+	}
+	newSeg.face = curr;
 	//set current intersecting face as explored
 	_intersectList.erase(curr);
 	VertexConstItr fromEdgeUpper;
@@ -1033,5 +1105,7 @@ ContourSegment ContourBuilder::doNextSeg(HalfEdgeConstItr from, QVector2D fromPt
 		newSeg.to = QVector2D(mid->position.x(), mid->position.y());
 		to = mid;
 	}
+	if (_reverse)
+		newSeg.flip();
 	return newSeg;
 }

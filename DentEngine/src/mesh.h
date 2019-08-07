@@ -18,6 +18,32 @@ namespace Hix
 {
 	namespace Engine3D
 	{
+		constexpr float VTX_INBOUND_DIST = 0.002f;//0.03;//(float)1/resolution; // resolution in mm (0.0001 and 0.0009 are same, 1 micron)
+		constexpr float VTX_3D_DIST = 0.0034f;
+	}
+}
+
+namespace std
+{
+	template<>
+	struct hash<QVector3D>
+	{
+		//2D only!
+		size_t operator()(const QVector3D& v)const
+		{
+			using namespace Hix::Engine3D;
+			return	(size_t(((v.x() + VTX_INBOUND_DIST / 2) / VTX_INBOUND_DIST)) ^
+					(size_t(((v.y() + VTX_INBOUND_DIST / 2) / VTX_INBOUND_DIST)) << 10) ^
+					(size_t(((v.z() + VTX_INBOUND_DIST / 2) / VTX_INBOUND_DIST)) << 20));
+
+		}
+	};
+}
+
+namespace Hix
+{
+	namespace Engine3D
+	{
 
         template<class container_type, class itr_type>
         itr_type getEquivalentItr(const container_type& b, const container_type& a, const itr_type& aItr)
@@ -55,9 +81,10 @@ namespace Hix
 			FaceConstItr owningFace;
 			//TODO: guarantee no self intersection occurs and we can use this
 			//HalfEdgeConstItr twin;
-			std::vector<HalfEdgeConstItr> twins;
-
+			std::unordered_set<HalfEdgeConstItr> twins()const;
 			std::vector<FaceConstItr> nonOwningFaces()const;
+			//similar to non-owning, but half edges are on opposite direction ie) faces facing the same orientation
+			std::vector<FaceConstItr> neighborFaces()const;
 		};
 
 		class HalfEdgeCirculator
@@ -135,10 +162,12 @@ namespace Hix
 
 		typedef std::vector<Path3D> Paths3D;
 
+
+
+
 		class Mesh {
 		public:
-			static constexpr float VTX_INBOUND_DIST = 0.002f;//0.03;//(float)1/resolution; // resolution in mm (0.0001 and 0.0009 are same, 1 micron)
-			static constexpr float VTX_3D_DIST = 0.0034f;
+
 
 			Mesh();
 			//THIS IS NOT A COPY CONSTRUCTOR!
@@ -162,10 +191,8 @@ namespace Hix
 			void vertexScale(float scaleX, float scaleY, float scaleZ, float centerX, float centerY);
 			void reverseFace(FaceConstItr faceItr);
 			void reverseFaces();
-            bool addFaceAndConnect(QVector3D v0, QVector3D v1, QVector3D v2);
             bool addFace(QVector3D v0, QVector3D v1, QVector3D v2);
 			TrackedIndexedList<MeshFace>::const_iterator removeFace(FaceConstItr f_it);
-			void connectFaces();
 			TrackedIndexedList<MeshVertex>& getVerticesNonConst();
 			TrackedIndexedList<MeshFace>& getFacesNonConst();
 			TrackedIndexedList<HalfEdge>& getHalfEdgesNonConst();
@@ -260,18 +287,13 @@ namespace Hix
 		private:
 			/********************** Helper Functions **********************/
             //set twin relationship for this edge as well as matching twin edge
-            ///@post: assume this edge is newly added
-			void setTwins(HalfEdgeItr edge);
-            //set twin relationship for this edge only
-            void setTwinOneSided(HalfEdgeItr edge);
 
 			VertexItr addOrRetrieveFaceVertex(QVector3D v);
 			void removeVertexHash(QVector3D pos);
-			VertexConstItr getSimilarVertex(uint32_t digest, QVector3D v);
 			void addHalfEdgesToFace(std::array<VertexItr, 3> faceVertices, FaceConstItr face);
 			void updateMinMax(QVector3D v);
 
-			QHash<uint32_t, VertexConstItr> vertices_hash;
+			std::unordered_map<QVector3D, VertexConstItr> _verticesHash;
 			TrackedIndexedList<MeshVertex> vertices;
 			TrackedIndexedList<HalfEdge> halfEdges;
 			TrackedIndexedList<MeshFace> faces;
@@ -289,9 +311,6 @@ namespace Hix
 
 		};
 
-
-		uint32_t vertexHash(QVector3D v);
-
 		QHash<uint32_t, ClipperLib::Path>::iterator findSmallestPathHash(QHash<uint32_t, ClipperLib::Path> pathHash);
 
 		// construct closed contour using segments created from identify step
@@ -306,4 +325,15 @@ namespace Hix
 		uint32_t Vertex2Hash(MeshVertex& u);
 
 	};
+
+	namespace Debug
+	{
+		using namespace Hix::Engine3D;
+
+		QDebug operator<< (QDebug d, const VertexConstItr& obj);
+		QDebug operator<< (QDebug d, const HalfEdgeConstItr& obj);
+		QDebug operator<< (QDebug d, const FaceConstItr& obj);
+	}
+
 };
+

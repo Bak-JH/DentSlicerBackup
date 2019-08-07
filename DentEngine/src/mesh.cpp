@@ -14,8 +14,61 @@
 using namespace Utils::Math;
 using namespace Hix;
 using namespace Hix::Engine3D;
+using namespace Hix::Debug;
 using namespace ClipperLib;
 
+
+QDebug Hix::Debug::operator<< (QDebug d, const VertexConstItr& obj) {
+	d << "VertexConstItr index: " << obj.index() << "\n";
+	d << "  pos:" << obj->position << "\n";
+	d << "  vn:" << obj->vn << "\n";
+
+	d << "  leaving edges indices:" << "\n";
+	for (auto each : obj->leavingEdges)
+	{
+		d << "    " << each.index() << "\n";
+	}
+	d << "  arriving edges indices:" << "\n";
+	for (auto each : obj->arrivingEdges)
+	{
+		d << "    " << each.index() << "\n";
+	}
+	return d;
+}
+
+QDebug Hix::Debug::operator<< (QDebug d, const HalfEdgeConstItr& obj) {
+	d << "HalfEdgeConstItr index " << obj.index() <<"\n";
+	d << "  owning face index:" << obj->owningFace.index() << "\n";
+	d << "  twins indicies:" << "\n";
+	auto twins = obj->twins();
+	for (auto each : twins)
+	{
+		d << "    " << each.index() << "\n";
+	}
+	d << "  from vtx: " << "\n";
+	d << obj->from << "\n";
+	d << "  to vtx" << "\n";
+	d << obj->to << "\n";
+	return d;
+}
+
+QDebug Hix::Debug::operator<< (QDebug d, const FaceConstItr& obj) {
+	d << "FaceConstItr index: " << obj.index() << "\n";
+	d << "  fn: " << obj->fn << "\n";
+	d << "  orderedZ: " << obj->fn << "\n";
+	auto orderedZ = obj->sortZ();
+	for (auto each : orderedZ)
+	{
+		d << "    " << each << "\n";
+	}
+	d << "  face hEdges:" << "\n";
+	auto hEdgeCirc = obj->edgeCirculator();
+	for (size_t i = 0; i < 3; ++i)
+	{
+		d << hEdgeCirc.toItr() << "\n";
+	}
+	return d;
+	}
 
 //half edge circulator
 
@@ -105,12 +158,45 @@ std::array<size_t, 3> Hix::Engine3D::MeshFace::getVerticeIndices(const Mesh* own
 	return result;
 }
 
+std::unordered_set<HalfEdgeConstItr> Hix::Engine3D::HalfEdge::twins()const
+{
+	std::unordered_set<HalfEdgeConstItr> twinEdges;
+	for (auto sameDirEdge : from->leavingEdges)
+	{
+		if (sameDirEdge->to == to && sameDirEdge.operator->() != this)
+		{
+			twinEdges.insert(sameDirEdge);
+		}
+	}
+	for (auto oppDirEdge : to->leavingEdges)
+	{
+		if (oppDirEdge->to == from)
+		{
+			twinEdges.insert(oppDirEdge);
+		}
+	}
+	return twinEdges;
+}
+
 std::vector<FaceConstItr> Hix::Engine3D::HalfEdge::nonOwningFaces()const
 {
 	std::vector<FaceConstItr> result;
-	for (auto each : twins)
+	auto twinsEdges = twins();
+	for (auto each : twinsEdges)
 	{
 		result.push_back(each->owningFace);
+	}
+	return result;
+}
+std::vector<FaceConstItr> Hix::Engine3D::HalfEdge::neighborFaces()const
+{
+	std::vector<FaceConstItr> result;
+	for (auto oppDirEdge : to->leavingEdges)
+	{
+		if (oppDirEdge->to == from)
+		{
+			result.push_back(oppDirEdge->owningFace);
+		}
 	}
 	return result;
 }
@@ -162,7 +248,7 @@ Mesh::Mesh( const Mesh* origin): Mesh()
 }
 Mesh::Mesh(const Mesh& o)
 {
-	vertices_hash = o.vertices_hash;
+	_verticesHash = o._verticesHash;
 
 	vertices = o.vertices;
 	halfEdges = o.halfEdges;
@@ -206,11 +292,6 @@ Mesh::Mesh(const Mesh& o)
 		hEdge.to = getEquivalentItr(vertices, o.vertices, hEdge.to);
 		//owningFace
 		hEdge.owningFace = getEquivalentItr(faces, o.faces, hEdge.owningFace);
-		//twins
-		for (auto& twin : hEdge.twins)
-		{
-			twin = getEquivalentItr(halfEdges, o.halfEdges, twin);
-		}
 	}
 	for (auto& vtx : vertices)
 	{
@@ -223,9 +304,9 @@ Mesh::Mesh(const Mesh& o)
 			hEdge = getEquivalentItr(halfEdges, o.halfEdges, hEdge);
 		}
 	}
-	for (auto& vtx : vertices_hash)
+	for (auto& hashItr : _verticesHash)
 	{
-		vtx = getEquivalentItr(vertices, o.vertices, vtx);
+		hashItr.second = getEquivalentItr(vertices, o.vertices, hashItr.second);
 	}
 
 }
@@ -234,7 +315,7 @@ Mesh& Mesh::operator+=(const Mesh& o)
     for(auto& each: o.getFaces())
     {
         auto vertices = each.meshVertices();
-        addFaceAndConnect(vertices[0]->position, vertices[1]->position, vertices[2]->position);
+        addFace(vertices[0]->position, vertices[1]->position, vertices[2]->position);
     }
     return *this;
 }
@@ -441,19 +522,6 @@ void Mesh::reverseFaces(){
 
 /********************** Mesh Generation Functions **********************/
 
-bool Mesh::addFaceAndConnect(QVector3D v0, QVector3D v1, QVector3D v2){
-	if (addFace(v0, v1, v2))
-	{
-		auto& last = faces.back();
-		auto circ = last.edgeCirculator();
-		for (size_t i = 0; i < 3; ++i, ++circ)
-		{
-			setTwins(halfEdges.toNormItr(circ.toItr()));
-		}
-		return true;
-	}
-	return false;
-}
 bool Mesh::addFace(QVector3D v0, QVector3D v1, QVector3D v2){
 	std::array<VertexItr, 3> fVtx;
     fVtx[0] = addOrRetrieveFaceVertex(v0);
@@ -521,21 +589,6 @@ TrackedIndexedList<MeshFace>::const_iterator Mesh::removeFace(FaceConstItr faceI
 	return faces.swapAndErase(faceItr);
 }
 
-//TODO: use changed history on face or vertex to only update faces which were added
-void Mesh::connectFaces(){
-	size_t count = 0;
-
-	for (auto itr = halfEdges.begin(); itr != halfEdges.end(); ++itr)
-	{
-        setTwinOneSided(itr);
-		if (count % 100 == 0) {
-			QCoreApplication::processEvents();
-		}
-
-		++count;
-	}
-}
-
 
 Mesh* Mesh::saveUndoState(const Qt3DCore::QTransform& transform)
 {
@@ -595,7 +648,7 @@ bool Hix::Engine3D::isCommonManifoldFace(const FaceConstItr& a, const FaceConstI
 			auto edgeCirc = curr->edgeCirculator();
 			for (size_t i = 0; i < 3; ++i)
 			{
-				auto nFaces = edgeCirc->nonOwningFaces();
+				auto nFaces = edgeCirc->neighborFaces();
 				for (auto nFace : nFaces)
 				{
 					if (pool.find(nFace) != pool.end())
@@ -630,7 +683,7 @@ bool Hix::Engine3D::findCommonManifoldFace(
 			auto edgeCirc = curr->edgeCirculator();
 			for (size_t i = 0; i < 3; ++i)
 			{
-				auto nFaces = edgeCirc->nonOwningFaces();
+				auto nFaces = edgeCirc->neighborFaces();
 				for (auto nFace : nFaces)
 				{
 					if (pool.find(nFace) != pool.end())
@@ -643,17 +696,6 @@ bool Hix::Engine3D::findCommonManifoldFace(
 	}
 	return false;
 }
-
-
-uint32_t Hix::Engine3D::vertexHash(QVector3D v) // max build size = 1000mm, resolution = 1 micron
-{
-    //qDebug() << "vertexHash" << v.x() << v.x()/Mesh::VTX_INBOUND_DIST;
-    return (uint32_t(((v.x()+Mesh::VTX_INBOUND_DIST/2) / Mesh::VTX_INBOUND_DIST)) ^\
-            (uint32_t(((v.y()+Mesh::VTX_INBOUND_DIST/2) / Mesh::VTX_INBOUND_DIST)) << 10) ^\
-            (uint32_t(((v.z()+Mesh::VTX_INBOUND_DIST/2) / Mesh::VTX_INBOUND_DIST)) << 20));
-}
-
-
 
 
 QTime Hix::Engine3D::Mesh::getPrevTime()
@@ -673,109 +715,29 @@ QTime Hix::Engine3D::Mesh::getNextTime()
 }
 
 
-void Hix::Engine3D::Mesh::setTwinOneSided(HalfEdgeItr subjectEdge)
-{
-
-    subjectEdge->twins.clear();
-    //TODO: there really should be only one twin, going in opposite direction
-    auto from = subjectEdge->from;
-    auto to = subjectEdge->to;
-    for (auto& halfEdge : from->leavingEdges)
-    {
-        //if the leavingEdge is not the subject and traveling in same from -> same to
-        if (halfEdge != subjectEdge && halfEdge->to == to)
-        {
-            subjectEdge->twins.push_back(halfEdge);
-        }
-    }
-    for (auto& halfEdge : to->leavingEdges)
-    {
-        //if the leavingEdge is not the subject and traveling in opposite direction
-        if (halfEdge != subjectEdge && halfEdge->to == from)
-        {
-            subjectEdge->twins.push_back(halfEdge);
-        }
-    }
-#ifdef _STRICT_MESH_NO_SELF_INTERSECTION
-    if (subjectEdge->twins.size() > 1)
-        throw std::runtime_error("Mesh is self intersecting");
-#endif
-
-}
-void Hix::Engine3D::Mesh::setTwins(HalfEdgeItr subjectEdge)
-{
-
-	subjectEdge->twins.clear();
-	//TODO: there really should be only one twin, going in opposite direction
-	auto from = subjectEdge->from;
-	auto to = subjectEdge->to;
-	for (auto& halfEdge : from->leavingEdges)
-	{
-		//if the leavingEdge is not the subject and traveling in same from -> same to
-		if (halfEdge != subjectEdge && halfEdge->to == to)
-		{
-			subjectEdge->twins.push_back(halfEdge);
-            auto moddableEdge = halfEdges.toNormItr(halfEdge);
-            moddableEdge->twins.push_back(subjectEdge);
-		}
-	}
-	for (auto& halfEdge : to->leavingEdges)
-	{
-		//if the leavingEdge is not the subject and traveling in opposite direction
-		if (halfEdge != subjectEdge && halfEdge->to == from)
-		{
-			subjectEdge->twins.push_back(halfEdge);
-            auto moddableEdge = halfEdges.toNormItr(halfEdge);
-            moddableEdge->twins.push_back(subjectEdge);
-		}
-	}
-#ifdef _STRICT_MESH_NO_SELF_INTERSECTION
-	if (subjectEdge->twins.size() > 1)
-		throw std::runtime_error("Mesh is self intersecting");
-#endif
-
-}
-VertexConstItr Mesh::getSimilarVertex(uint32_t digest, QVector3D v)
-{
-	QList<VertexConstItr> hashed_points = vertices_hash.values(digest);
-	for (unsigned int idx = 0; idx < hashed_points.size(); idx++)
-	{
-		const auto vtx = hashed_points.at(idx);
-		if (vtx->position.distanceToPoint(v) <= Mesh::VTX_3D_DIST)
-		{
-			return  hashed_points[idx];
-		}
-	}
-	return vertices.cend();
-}
-
 void Mesh::removeVertexHash(QVector3D pos)
 {
-	auto digest = vertexHash(pos);
-	auto hashItr = vertices_hash.find(digest);
-	while (hashItr != vertices_hash.end() && hashItr.key() == digest) {
-		if (hashItr.value()->position == pos) {
-			vertices_hash.erase(hashItr);
-			break;
-		}
+	auto toBeRemoved = _verticesHash.find(pos);
+	if (toBeRemoved != _verticesHash.end())
+	{
+		_verticesHash.erase(toBeRemoved);
 	}
 }
 
 VertexItr Mesh::addOrRetrieveFaceVertex(QVector3D v){
-    uint32_t vertex_hash = vertexHash(v);
 	//find if existing vtx can be used
-    auto similarVtx = getSimilarVertex(vertex_hash, v);
-	if (similarVtx != vertices.cend())
-	{
-		return vertices.toNormItr(similarVtx);
-    }
+	auto existingVtx = _verticesHash.find(v);
 
+	if (existingVtx != _verticesHash.end())
+	{
+		return vertices.toNormItr(existingVtx->second);
+    }
     MeshVertex mv(v);
     vertices.emplace_back(mv);
-	auto last = vertices.end() - 1;
-    vertices_hash.insert(vertex_hash, last);
+	auto last = vertices.cend() - 1;
+	_verticesHash[v] = last;
     updateMinMax(v);
-    return last;
+    return  vertices.toNormItr(last);
 }
 
 void Hix::Engine3D::Mesh::addHalfEdgesToFace(std::array<VertexItr, 3> faceVertices, FaceConstItr face)
@@ -821,7 +783,6 @@ void Hix::Engine3D::Mesh::addHalfEdgesToFace(std::array<VertexItr, 3> faceVertic
 		}
 		itr->next = nextItr;
 		itr->prev = prevItr;
-		//twins are not added here.
 		++vtxIdx;
 
 	}
@@ -887,12 +848,11 @@ void Mesh::vtxIndexChangedCallback(size_t oldIdx, size_t newIdx)
 
 	//update hash value
 	auto oldItr = vertices.cbegin() + oldIdx;
-	auto digest = vertexHash(vtx.position);
-	auto hashItr = vertices_hash.find(digest);
-	while (hashItr != vertices_hash.end() && hashItr.key() == digest) {
-		if (*hashItr == oldItr)
+	auto hashItr = _verticesHash.find(vtx.position);
+	while (hashItr != _verticesHash.end()) {
+		if (hashItr->second == oldItr)
 		{
-			*hashItr = newIndexItr;
+			_verticesHash[vtx.position] = newIndexItr;
 			break;
 		}
 		++hashItr;
@@ -934,21 +894,6 @@ void Mesh::hEdgeIndexChangedCallback(size_t oldIdx, size_t newIdx)
 	auto modTo = &*vertices.toNormItr(hEdge.to);
 	foundItr = std::find(modTo->arrivingEdges.begin(), modTo->arrivingEdges.end(), oldItr);
 	(*foundItr) = newIndexItr;
-
-	//update twins
-	for (auto& twin : hEdge.twins)
-	{
-		auto modTwin = halfEdges.toNormItr(twin);
-
-		for (auto twinTwin = modTwin->twins.begin(); twinTwin != modTwin->twins.end(); ++twinTwin)
-		{
-			if (*twinTwin == oldItr)
-			{
-				*twinTwin = newIndexItr;
-				break;
-			}
-		}
-	}
 }
 
 
@@ -1024,7 +969,7 @@ bool MeshFace::isNeighborOf(const FaceConstItr& nFace)const
 	auto edgeCirc = edgeCirculator();
 	for (size_t i = 0; i < 3; ++i)
 	{
-		auto nFaces = edgeCirc->nonOwningFaces();
+		auto nFaces = edgeCirc->neighborFaces();
 		for (auto& each : nFaces)
 		{
 			if (each == nFace)
@@ -1052,7 +997,7 @@ void Mesh::findNearSimilarFaces(QVector3D normal, FaceConstItr original_mf, Face
 	auto edgeCirc = mf->edgeCirculator();
 	for (size_t i = 0; i < 3; ++i, ++edgeCirc) {
 		const auto& faces = getFaces();
-		for (auto neighbor : edgeCirc->nonOwningFaces()) {
+		for (auto neighbor : edgeCirc->neighborFaces()) {
 			// check if neighbor already checked
 			bool cont = false;
 			for (auto elem : result) {
@@ -1071,7 +1016,7 @@ void Mesh::findNearSimilarFaces(QVector3D normal, FaceConstItr original_mf, Face
 				nbrMeshVertices[0]->position.distanceToPoint(originalMVertices[0]->position) > maxRadius)
 				continue;
 			qDebug() << nbrMeshVertices[0]->position.distanceToPoint(originalMVertices[0]->position);
-			qDebug() << "looking for " << indexOf(neighbor);
+			qDebug() << "looking for " << neighbor;
 			findNearSimilarFaces( normal, original_mf, neighbor, result, maxRadius, maxNormalDiff);
 		}
 	}
@@ -1193,7 +1138,7 @@ Paths3D Hix::Engine3D::contourConstruct3D(Paths3D hole_edges){
                     continue;
                 }
                 // prolong hole_edge 1 if end and start matches
-                if ((hole_edge1_it->end()-1)->position.distanceToPoint(hole_edge2_it->begin()->position) < Mesh::VTX_INBOUND_DIST *0.05/ClipperLib::INT_PT_RESOLUTION){
+                if ((hole_edge1_it->end()-1)->position.distanceToPoint(hole_edge2_it->begin()->position) < VTX_INBOUND_DIST *0.05/ClipperLib::INT_PT_RESOLUTION){
                 //if (Vertex2Hash(*(hole_edge1_it->end()-1)) == Vertex2Hash(*hole_edge2_it->begin())){
                     //qDebug() << "erase";
                     dirty = true;
@@ -1201,7 +1146,7 @@ Paths3D Hix::Engine3D::contourConstruct3D(Paths3D hole_edges){
                     checked_its.push_back(hole_edge2_it);
                     //hole_edge2_it = hole_edges.erase(hole_edge2_it);
                     //qDebug() << "erased";
-                } else if ((hole_edge1_it->end()-1)->position.distanceToPoint((hole_edge2_it->end()-1)->position) < Mesh::VTX_INBOUND_DIST *0.05/ClipperLib::INT_PT_RESOLUTION){
+                } else if ((hole_edge1_it->end()-1)->position.distanceToPoint((hole_edge2_it->end()-1)->position) < VTX_INBOUND_DIST *0.05/ClipperLib::INT_PT_RESOLUTION){
                 //} else if (Vertex2Hash(*(hole_edge1_it->end()-1)) == Vertex2Hash(*(hole_edge2_it->end()-1))){
                     //qDebug() << "erase";
                     dirty = true;
@@ -1546,13 +1491,13 @@ float Mesh::z_max()const
 
 uint32_t  Hix::Engine3D::intPoint2Hash(IntPoint u) {
 	QVector3D u_qv3 = QVector3D(u.X, u.Y, 0);
-	uint32_t path_hash_u = vertexHash(u_qv3);
+	uint32_t path_hash_u = std::hash<QVector3D>()(u_qv3);
 	return path_hash_u;
 }
 
 uint32_t Hix::Engine3D::Vertex2Hash(MeshVertex& u)
 {
-	uint32_t path_hash_u = vertexHash(u.position);
+	uint32_t path_hash_u = std::hash<QVector3D>()(u.position);
 	return path_hash_u;
 }
 
