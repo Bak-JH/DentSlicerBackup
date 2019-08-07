@@ -21,7 +21,7 @@ namespace SlicerTest
 		float z0 = rand.getFloat(min_z, max_z);
 		float z1 = rand.getFloat(min_z, max_z);
 		float z2 = rand.getFloat(min_z, max_z);
-		result = mesh->addFaceAndConnect(
+		result = mesh->addFace(
 			QVector3D(rand.getFloat(), rand.getFloat(), z0),
 			QVector3D(rand.getFloat(), rand.getFloat(), z1),
 			QVector3D(rand.getFloat(), rand.getFloat(), z2));

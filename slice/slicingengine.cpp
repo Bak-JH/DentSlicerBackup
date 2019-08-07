@@ -41,7 +41,8 @@ SlicingEngine::Result SlicingEngine::sliceModel(bool isTemp, tf::Subflow& subflo
 
 
     // Export to SVG
-    QString export_info = SVGexporter::exportSVG(shellSlices, supportSlices, raftSlices, filename+"_export", isTemp);
+    //QString export_info = SVGexporter::exportSVG(shellSlices, supportSlices, raftSlices, filename+"_export", isTemp);
+	QString export_info = SVGexporter::exportSVG(shellSlices, shellSlices, shellSlices, filename + "_export", isTemp);
 
     // 승환 100%
     qmlManager->setProgress(1);

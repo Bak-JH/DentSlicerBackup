@@ -6,8 +6,6 @@
 #include <functional>
 #include ../../common/TrackedIndexedList.h"
 #include "../catch.hpp"
-#include <boost/container/stable_vector.hpp>
-#include <boost/variant/recursive_wrapper.hpp>
 #include <chrono>  // for high_resolution_clock
 #include ../../common/IteratorWrapper.h"
 
