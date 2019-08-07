@@ -1242,9 +1242,6 @@ void GLModel::generateSupport(){
     layerSupportMesh->vertexMove(t);
     layerRaftMesh->vertexMove(t);
 
-    layerInfillMesh->connectFaces();
-    layerSupportMesh->connectFaces();
-    layerRaftMesh->connectFaces();
     updateModelMesh();
 }
 
@@ -2035,8 +2032,6 @@ void GLModel::generateText3DMesh()
         _mesh->addFace(vertices[2 * indices[3*i + 2] + 0], vertices[2 * indices[3*i + 1] + 0], vertices[2 * indices[3*i + 0] + 0]);
 
     }
-
-   _mesh->connectFaces();
 
     updateModelMesh();
 

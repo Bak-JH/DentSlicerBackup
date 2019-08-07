@@ -38,8 +38,6 @@ public:
 	typedef typename A_trait::difference_type difference_type;
 	typedef typename A_trait::size_type size_type;
 	typedef typename std::deque<T,A> container_type;
-	//typedef typename boost::container::stable_vector_iterator<T*, false> container_iterator_type;
-	//typedef typename boost::container::stable_vector_iterator<T*, true> container_const_iterator_type;
 	typedef typename std::function<void(size_t, size_t)> indexChangedCallback;
 	typedef std::reverse_iterator<IndexedListItr::iterator<T, A>> reverse_iterator; //optional
 	typedef std::reverse_iterator<IndexedListItr::const_iterator<T, A>> const_reverse_iterator; //optional
@@ -346,6 +344,12 @@ namespace IndexedListItr
 		~iterator()
 		{}
 
+		size_t index()const
+		{
+			return _index;
+		}
+
+
 		iterator& operator=(const iterator& o)
 		{
 			_index = o._index;
@@ -483,7 +487,10 @@ namespace IndexedListItr
 		~const_iterator()
 		{}
 
-
+		size_t index()const
+		{
+			return _index;
+		}
 
 
 
