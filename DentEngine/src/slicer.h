@@ -42,8 +42,6 @@ class Slice { // extends Paths (total paths)
 public:
 	float z;
 	PolyTree polytree; // containment relationship per slice
-	Paths overhang_region;
-	Paths critical_overhang_region;
 
 	Paths outershell;
 	Paths infill;
@@ -115,13 +113,15 @@ class Contour
 public:
 	//Contour(const ContourSegment* start);
 	bool isClosed();
+	void forceClose();
 	//IntPoint getDestination();
 	void addNext(const ContourSegment& seg);
 	void addPrev(const ContourSegment& seg);
-
+	float dist()const;
 	//void calculateDirection();
 	//bool isOutward();
 	std::deque<ContourSegment> segments;
+	Path toPath()const;//tmp
 
 private:
 	//void checkBound(const IntPoint& pt);
@@ -139,7 +139,7 @@ class ContourBuilder
 {
 public:
 	ContourBuilder(const Mesh* mesh, std::unordered_set<FaceConstItr>& intersectingFaces, float z);
-	std::vector<Contour> buildContours();
+	std::vector<Contour> buildContours(std::vector<Contour>& incompleteContours);
 
 private:
 	//could use bool, just incase we need to resolve non-2-maifold

@@ -15,8 +15,6 @@ using namespace Hix::Debug;
 QDebug Hix::Debug::operator<< (QDebug d, const Slice& obj) {
 	d << "z: " << obj.z;
 	d << "polytree: " << obj.polytree;
-	d << "overhang_region: " << obj.overhang_region;
-	d << "critical_overhang_region: " << obj.critical_overhang_region;
 
 	d << "outershell: " << obj.outershell;
 	d << "infill: " << obj.infill;
@@ -47,7 +45,7 @@ namespace Slicer
 		/****************** Helper Functions For Contour Construction Step *******************/
 		void insertPathHash(QHash<uint32_t, Path>& pathHash, IntPoint u, IntPoint v);
 		/********************** Path Generation Functions **********************/
-		IntPoint toInt2DPt(QVector3D pt);
+		IntPoint toInt2DPt(const QVector2D& pt);
 		Paths3D intersectionPaths(ClipperLib::Path Contour, Plane target_plane);
 		Path3D intersectionPath(Plane base_plane, Plane target_plane);
 		std::vector<Contour> calculateContour(const Mesh* mesh, std::vector<FaceConstItr>& intersectingFaces, float z);
@@ -110,7 +108,7 @@ void  Slicer::addPoint(float x, float y, ClipperLib::Path* path)
 }
 
 
-IntPoint  Slicer::Private::toInt2DPt(QVector3D pt)
+IntPoint  Slicer::Private::toInt2DPt(const QVector2D& pt)
 {
 	IntPoint ip;
 	ip.X = round(pt.x() * ClipperLib::INT_PT_RESOLUTION);
@@ -140,19 +138,19 @@ float minDistanceToContour(QVector3D from, ClipperLib::Path contour) {
 }
 
 
-inline void rotateCCW90(QVector3D& vec)
+inline void rotateCW90(QVector3D& vec)
 {
 	//(-y,x)
 	auto tmp = vec.x();
-	vec.setX(-1.0f * vec.y());
-	vec.setY(tmp);
+	vec.setX( vec.y());
+	vec.setY(-1.0f * tmp);
 }
-inline void rotateCCW90(QVector2D& vec)
+inline void rotateCW90(QVector2D& vec)
 {
 	//(-y,x)
 	auto tmp = vec.x();
-	vec.setX(-1.0f * vec.y());
-	vec.setY(tmp);
+	vec.setX(vec.y());
+	vec.setY(-1.0f * tmp);
 }
 ContourSegment::ContourSegment()
 {
@@ -238,22 +236,34 @@ bool Slicer::slice(const Mesh* mesh, Slices* slices){
     if (mesh == nullptr || mesh->getFaces().size() ==0){
         return true;
     }
-
+	std::vector<std::vector<Contour>> meshslices;
 	try
 	{
 		// mesh slicing step
-		std::vector<std::vector<Contour>> meshslices = meshSlice(mesh);
-
-
-		printf("meshslice done\n");
-		fflush(stdout);
-
-		slices->containmentTreeConstruct();
+		meshslices = meshSlice(mesh);
 	}
 	catch (std::runtime_error& e)
 	{
 		qDebug() << e.what();
 	}
+	for (int i = 0; i < meshslices.size(); i++) {
+		Slice meshslice;
+		for (auto& contour : meshslices[i])
+		{
+			meshslice.outershell.push_back(contour.toPath());
+
+		}
+		meshslice.z = scfg->layer_height * i;
+		slices->push_back(meshslice);
+
+		// flaw exists if contour overlaps
+		//meshslice.outerShellOffset(-(scfg->wall_thickness+scfg->nozzle_width)/2, jtRound);
+
+	}
+
+
+
+	slices->containmentTreeConstruct();
 
     return true;
 }
@@ -265,18 +275,6 @@ std::vector<std::vector<Contour>> Slicer::Private::meshSlice(const Mesh* mesh){
     float delta = scfg->layer_height;
 	std::vector<std::vector<Contour>> contoursPerPlane;
     std::vector<float> planes;
-
-
-	//std::vector<HalfEdgeConstItr> badEdgesItr;
-	//std::vector<const HalfEdge*> badEPtrs;
-	//for (auto cItr = mesh->getHalfEdges().cbegin(); cItr != mesh->getHalfEdges().cend(); ++cItr)
-	//{
-	//	if (cItr->twins.size() == 0)
-	//	{
-	//		badEdgesItr.push_back(cItr);
-	//		badEPtrs.push_back(cItr.operator->());
-	//	}
-	//}
 
     if (scfg->slicing_mode == SlicingConfiguration::SlicingMode::Uniform) {
         planes = buildUniformPlanes(mesh->z_min(), mesh->z_max(), delta);
@@ -291,8 +289,17 @@ std::vector<std::vector<Contour>> Slicer::Private::meshSlice(const Mesh* mesh){
 
     for (int i=0; i<planes.size(); i++){
 		ContourBuilder contourBuilder(mesh, planeFaces[i], planes[i]);
-		std::vector<Contour> contours = contourBuilder.buildContours();
+		std::vector<Contour> incompleteContours;
+		std::vector<Contour> contours = contourBuilder.buildContours(incompleteContours);
 		contoursPerPlane.push_back(contours);
+
+		////force close contours
+		//for (auto& each : incompleteContours)
+		//{
+		//	each.forceClose();
+		//}
+		//contoursPerPlane.push_back(incompleteContours);
+
 
     }
     return contoursPerPlane;
@@ -509,6 +516,19 @@ bool Contour::isClosed()
 	return false;
 }
 
+
+void Contour::forceClose()
+{
+#ifdef _STRICT_SLICER
+	if (isClosed())
+	{
+		throw std::runtime_error("force close on already closed contour");
+	}
+#endif
+	ContourSegment closer;
+	closer.from = segments.back().to;
+	closer.to = segments.front().from;
+}
 ////can throw when empty
 //IntPoint Contour::getDestination()
 //{
@@ -532,6 +552,31 @@ void Contour::addPrev(const ContourSegment& seg)
 #endif
 	segments.push_front(seg);
 	//checkBound(seg->to);
+}
+
+float Contour::dist()const
+{
+	float totalDist = 0;
+	for (auto& each : segments)
+	{
+		totalDist += each.dist();
+	}
+	return totalDist;
+}
+
+Path Contour::toPath()const
+{
+	Path path;
+	if (!segments.empty())
+	{
+		path.push_back(toInt2DPt(segments.front().from));
+		for (auto& each : segments)
+		{
+			path.push_back(toInt2DPt(each.to));
+		}
+	}
+
+	return path;
 }
 
 
@@ -652,11 +697,11 @@ bool ContourSegment::calcNormalAndFlip()
 	faceNormal.normalize();
 
 	QVector2D ABNormal = to - from;
-	rotateCCW90(ABNormal);
+	rotateCW90(ABNormal);
 	ABNormal.normalize();
 
 	QVector2D BANormal = from - to;
-	rotateCCW90(BANormal);
+	rotateCW90(BANormal);
 	BANormal.normalize();
 
 	//face normal projected over z-plane should still be normal for AB/BA vector.
@@ -676,7 +721,6 @@ bool ContourSegment::calcNormalAndFlip()
 		return false;
 	}
 
-	//if normal is actually other way around
 	if (ABDiff < BADiff)
 	{
 		//AB is correct direction
@@ -806,11 +850,10 @@ ContourSegment  ContourBuilder::calculateStartingSegment(FaceConstItr& mf,
 	return segment;
 }
 
-std::vector<Contour> ContourBuilder::buildContours()
+std::vector<Contour> ContourBuilder::buildContours(std::vector<Contour>& incompleteContours)
 {
 	auto faces = _mesh->getFaces();
 	std::vector<Contour> contours;
-	std::vector<Contour> incompleteContours;
 
 	//when calculating intersect normals 
 	//std::unordered_map<FaceConstItr, ContourSegment> tooShortFaces;
