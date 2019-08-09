@@ -334,7 +334,7 @@ namespace IndexedListItr
 		typedef typename A_trait::pointer pointer;
 		typedef std::random_access_iterator_tag iterator_category; //or another tag
 
-		iterator()
+		iterator():_owner(nullptr)
 		{}
 		iterator(size_t index, IndexedList<T,A>* owner) : _index(index), _owner(owner)
 		{}
@@ -366,6 +366,10 @@ namespace IndexedListItr
 		}
 
 		//random access iterator
+		bool initialized()const
+		{
+			return _owner != nullptr;
+		}
 		bool operator< (const iterator& o) const
 		{
 			return _index < o._index;
@@ -476,7 +480,7 @@ namespace IndexedListItr
         typedef typename A_trait::const_pointer pointer;
 		typedef std::random_access_iterator_tag iterator_category; //or another tag
 
-		const_iterator()
+		const_iterator():_owner(nullptr)
 		{}
 		const_iterator(size_t index, const IndexedList<T, A>* containerPtr) : _index(index), _owner(containerPtr)
 		{}
@@ -499,6 +503,10 @@ namespace IndexedListItr
 			_index = o._index;
 			_owner = o._owner;
 			return *this;
+		}
+		bool initialized()const
+		{
+			return _owner != nullptr;
 		}
 		bool operator==(const const_iterator& o) const
 		{
