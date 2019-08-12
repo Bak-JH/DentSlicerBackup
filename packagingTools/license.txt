@@ -1,3 +1,0 @@
-This Software License is made by HiX, to the Customer as an essential element of the services to be rendered by HiX as defined in the system specification and any associated documents and agreement. System shall mean the deliverable product as defined in these documents.
-
-Customer and HiX agree that this Software License is deemed to be part of, and subject to, the terms of the Agreement applicable to both parties.

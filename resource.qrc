@@ -1,0 +1,46 @@
+<RCC>
+    <qresource prefix="/">
+        <file>Resource/ic-support.png</file>
+        <file>Resource/ic-support-select.png</file>
+        <file>Resource/ic-shelloffset.png</file>
+        <file>Resource/ic-shelloffset-select.png</file>
+        <file>Resource/ic-scale.png</file>
+        <file>Resource/ic-scale-select.png</file>
+        <file>Resource/ic-save.png</file>
+        <file>Resource/ic-save-select.png</file>
+        <file>Resource/ic-rotate.png</file>
+        <file>Resource/ic-rotate-select.png</file>
+        <file>Resource/ic-orient.png</file>
+        <file>Resource/ic-orient-select.png</file>
+        <file>Resource/ic-open.png</file>
+        <file>Resource/ic-open-select.png</file>
+        <file>Resource/ic-move.png</file>
+        <file>Resource/ic-move-select.png</file>
+        <file>Resource/ic-layflat.png</file>
+        <file>Resource/ic-layflat-select.png</file>
+        <file>Resource/ic-label.png</file>
+        <file>Resource/ic-label-select.png</file>
+        <file>Resource/ic-extend.png</file>
+        <file>Resource/ic-extend-select.png</file>
+        <file>Resource/ic-export.png</file>
+        <file>Resource/ic-export-select.png</file>
+        <file>Resource/ic-cut.png</file>
+        <file>Resource/ic-cut-select.png</file>
+        <file>Resource/ic-autorepair.png</file>
+        <file>Resource/ic-autorepair-select.png</file>
+        <file>Resource/ic-arrange.png</file>
+        <file>Resource/ic-arrange-select.png</file>
+        <file>Resource/refresh.png</file>
+        <file>Resource/view-triangle.png</file>
+        <file>Resource/lefttab-triangle.png</file>
+        <file>Resource/btn-undo.png</file>
+        <file>Resource/btn-redo.png</file>
+        <file>Resource/ic-slicing-4.png</file>
+        <file>Resource/ic-slicing-3.png</file>
+        <file>Resource/ic-slicing-2.png</file>
+        <file>Resource/ic-slicing-1.png</file>
+        <file>Resource/ic-delete.png</file>
+        <file>Resource/tab-slicingoption.png</file>
+        <file>Resource/tab-viewmode.png</file>
+    </qresource>
+</RCC>
