@@ -6,7 +6,8 @@
 #include <Qt3DRender>
 #include <Qt3DExtras>
 #include <Qt3DInput>
-#include <qtorusmesh.h>
+#include <QTorusMesh>
+
 #include "../input/Draggable.h"
 #include "../input/Hoverable.h"
 #include "../input/Highlightable.h"

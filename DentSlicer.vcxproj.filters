@@ -194,6 +194,9 @@
     <ClCompile Include="feature\overhangDetectPostSlice.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>
+    <ClCompile Include="ui\CubeWidget.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DentEngine\src\polyclipping\poly2tri\sweep\advancing_front.h">
@@ -1100,6 +1103,9 @@
       <Filter>Header Files</Filter>
     </QtMoc>
     <QtMoc Include="slice\SlicingOptBackend.h">
+      <Filter>Generated Files</Filter>
+    </QtMoc>
+    <QtMoc Include="ui\CubeWidget.h">
       <Filter>Generated Files</Filter>
     </QtMoc>
   </ItemGroup>

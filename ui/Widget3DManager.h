@@ -1,6 +1,8 @@
 #pragma once
 #include "Widget3D.h"
-//manages rotate/move widgets
+#include "input/raycastcontroller.h"
+
+//manages rotate/move/cube widgets
 class QmlManager;
 namespace Hix
 {
@@ -28,12 +30,14 @@ namespace Hix
 		{
 		public:
 			void initialize(Qt3DCore::QEntity* qParent, Input::RayCastController* controller);
+            void addCubeWidget(GLModel* parent, std::vector<QVector3D> overhangPoints);
 			void setWidgetMode(WidgetMode mode);
 			void updatePosition();
 		private:
 			WidgetMode _currMode = WidgetMode::None;
 			Widget3D _rotateWidget;
 			Widget3D _moveWidget;
+			Widget3D _cubeWidget;
 			Input::RayCastController* _controller;
 		};
 	}

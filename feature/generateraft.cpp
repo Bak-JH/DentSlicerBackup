@@ -17,7 +17,6 @@ Mesh* GenerateRaft::generateRaft(Mesh* shellmesh, std::vector<OverhangPoint> ove
     Mesh* raftMesh = new Mesh();
 
     for (OverhangPoint op : overhangPoints){
-        qDebug() << "overhangposition" << op.position;
         op.position.setZ(getRaftTopZ(shellmesh));
         generateKCylinder(raftMesh, op, scfg->raft_thickness);
     }

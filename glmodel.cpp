@@ -483,6 +483,7 @@ void GLModel::updateModelMesh(){
         if (supportMesh != nullptr)
         {
 			appendMesh(supportMesh);
+            qmlManager->addCubeWidget(this);
             qDebug() << "ADDED support mesh";
         }
         if (raftMesh != nullptr)
