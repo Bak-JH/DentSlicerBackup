@@ -82,9 +82,15 @@ namespace Hix
 			//TODO: guarantee no self intersection occurs and we can use this
 			//HalfEdgeConstItr twin;
 			std::unordered_set<HalfEdgeConstItr> twins()const;
+			//twins in same direction
+			std::unordered_set<HalfEdgeConstItr> nonTwins()const;
+			//twins + nonTwins
+			std::unordered_set<HalfEdgeConstItr> allFromSameEdge()const;
 			std::vector<FaceConstItr> nonOwningFaces()const;
 			//similar to non-owning, but half edges are on opposite direction ie) faces facing the same orientation
-			std::vector<FaceConstItr> neighborFaces()const;
+			std::unordered_set<FaceConstItr> Hix::Engine3D::HalfEdge::twinFaces()const;
+			bool isTwin(const HalfEdgeConstItr& other)const;
+
 		};
 
 		class HalfEdgeCirculator
@@ -238,7 +244,8 @@ namespace Hix
 			float z_max()const;
 			Mesh* getPrev()const;
 			Mesh* getNext()const;
-			void findNearSimilarFaces(QVector3D normal, FaceConstItr original_mf, FaceConstItr  mf, std::vector<FaceConstItr>& result,  float maxRadius = 100, float maxNormalDiff = 0.5)const;
+			void findNearSimilarFaces(QVector3D normal,FaceConstItr mf,
+				std::unordered_set<FaceConstItr>& result,  float maxRadius = 50, float maxNormalDiff = 0.4)const;
 
 
 

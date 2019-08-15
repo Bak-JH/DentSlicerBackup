@@ -19,9 +19,20 @@ namespace std
 		//2D only!
 		std::size_t operator()(const IntPoint& pt)const
 		{
-			int16_t smallX = (int16_t)(pt.X);
-			int16_t smallY = (int16_t)(pt.Y);
-			size_t digest = smallX | smallY << 16;
+			size_t digest = pt.X | pt.Y << 48;
+			return digest;
+		}
+	};
+
+	template<>
+	struct hash<QVector2D>
+	{
+		//2D only!
+		std::size_t operator()(const QVector2D& pt)const
+		{
+			size_t x = (size_t)(pt.x());
+			size_t y = (size_t)(pt.y());
+			size_t digest = x | y << 16;
 			return digest;
 		}
 	};
@@ -42,6 +53,7 @@ class Slice { // extends Paths (total paths)
 public:
 	float z;
 	PolyTree polytree; // containment relationship per slice
+	PolyTree overhang;
 
 	Paths outershell;
 	Paths infill;
@@ -50,6 +62,9 @@ public:
 	int Area;
 
 	void outerShellOffset(float delta, JoinType join_type);
+	void getOverhang(const Slice* prevSlice, PolyTree& result)const;
+	void getOverhangMN(const Slice* prevSlice, std::unordered_set<const PolyNode*>& result)const;
+
 };
 
 
@@ -92,16 +107,21 @@ namespace Slicer
 
 struct ContourSegment
 {
+	enum FlipResult : uint8_t
+	{
+		NotFlipped = 0,
+		Flipped = 1,
+		UnknownDirection = 2
+	};
 	ContourSegment();
 	//constructor helper;
 	bool isValid()const;
-	bool calcNormalAndFlip();
+	FlipResult calcNormalAndFlip();
 	float dist()const;
 	void flip();
 	//
 	//ordering is important.
 	//follows Righ hand thumb finger rule, if the in, goint to->from normal vector is pointed left side, CW 
-	bool unknownDirection = false;
 	FaceConstItr face;
 	QVector2D from;
 	QVector2D to;
@@ -112,12 +132,16 @@ class Contour
 {
 public:
 	//Contour(const ContourSegment* start);
-	bool isClosed();
-	void forceClose();
+	bool isClosed()const;
+	//attempts to close the unclosed contour, if the gap is too large, give up.
+	bool tryClose();
 	//IntPoint getDestination();
 	void addNext(const ContourSegment& seg);
 	void addPrev(const ContourSegment& seg);
 	float dist()const;
+	QVector2D from()const;
+	QVector2D to()const;
+	void append(const Contour& appended);
 	//void calculateDirection();
 	//bool isOutward();
 	std::deque<ContourSegment> segments;
@@ -134,23 +158,31 @@ private:
 	bool _directionDetermined = false;
 };
 
+//wrapper for contour
+class IncompleteContour
+{
+private:
+	std::deque<const Contour*> _contours;
+};
+
 //one per plane
 class ContourBuilder
 {
 public:
 	ContourBuilder(const Mesh* mesh, std::unordered_set<FaceConstItr>& intersectingFaces, float z);
-	std::vector<Contour> buildContours(std::vector<Contour>& incompleteContours);
+	std::vector<Contour> buildContours();
 
 private:
 	//could use bool, just incase we need to resolve non-2-maifold
 
 	//two points
 
-	ContourSegment calculateStartingSegment(FaceConstItr& mf, std::variant<VertexConstItr,
+	ContourSegment calculateStartingSegment(const FaceConstItr& mf, std::variant<VertexConstItr,
 		HalfEdgeConstItr>& toHint, std::variant<VertexConstItr, HalfEdgeConstItr>& fromHint);
 	ContourSegment doNextSeg(VertexConstItr from, const ContourSegment& prevSeg, std::variant<VertexConstItr, HalfEdgeConstItr>& to);
 	ContourSegment doNextSeg(HalfEdgeConstItr from,const ContourSegment& prevSeg, std::variant<VertexConstItr, HalfEdgeConstItr>& to);
 	QVector2D midPoint2D(VertexConstItr vtxA0, VertexConstItr vtxA1);
+	std::unordered_set<Contour*> joinOrCloseIncompleteContours();
 
 	const Mesh* _mesh;
 	float _plane;
@@ -158,7 +190,7 @@ private:
 	std::unordered_map<std::pair<VertexConstItr, VertexConstItr>, QVector2D> _midPtLUT;
 	std::unordered_set<FaceConstItr>& _intersectList;
 	std::unordered_set<FaceConstItr> _exploredList;
-	std::unordered_set<FaceConstItr> _tooShortList;
+	std::vector<Contour> _incompleteContours;
 
 };
 

@@ -20,9 +20,9 @@ void logSlices(const Slices& slices)
 #endif
 namespace SVGexporterPrivate
 {
-	void parsePolyTreeAndWrite(ClipperLib::PolyNode* pn, std::ofstream& outfile, bool isTemp);
+	void parsePolyTreeAndWrite(const ClipperLib::PolyNode* pn, std::ofstream& outfile, bool isTemp);
 	void writePolygon(std::ofstream& outfile, ClipperLib::Path& contour, bool isTemp);
-	void writePolygon(std::ofstream& outfile, ClipperLib::PolyNode* contour, bool isTemp);
+	void writePolygon(std::ofstream& outfile, const ClipperLib::PolyNode* contour, bool isTemp);
 	void writeGroupHeader(std::ofstream& outfile, int layer_idx, float z);
 	void writeGroupFooter(std::ofstream& outfile);
 	void writeHeader(std::ofstream& outfile);
@@ -122,7 +122,16 @@ QString SVGexporter::exportSVG(Slices& shellSlices, Slices& supportSlices, Slice
             writeGroupHeader(outfile, currentSlice_idx, scfg->layer_height*(currentSlice_idx+1));
         else
             writeGroupHeader(outfile, currentSlice_idx, scfg->layer_height*(currentSlice_idx+1));
-
+		//int prevIdx = i - 1;
+		//if (prevIdx >= 0)
+		//{
+		//	auto& prevSlice = shellSlices[prevIdx];
+		//	PolyTree overhang;
+		//	shellSlices[i].getOverhang(&prevSlice, overhang);
+		//	for (int j=0; j< overhang.ChildCount(); j++){
+		//		parsePolyTreeAndWrite(overhang.Childs[j], outfile, isTemp);
+		//	}
+		//}
         PolyTree shellSlice_polytree = shellSlices[i].polytree;
         for (int j=0; j<shellSlice_polytree.ChildCount(); j++){
             parsePolyTreeAndWrite(shellSlice_polytree.Childs[j], outfile, isTemp);
@@ -283,7 +292,7 @@ Grid Base Plate Type = None").arg(QString::number((int)(scfg->layer_height*1000)
 
 
 
-void SVGexporterPrivate::parsePolyTreeAndWrite(PolyNode* pn, std::ofstream& outfile, bool isTemp){
+void SVGexporterPrivate::parsePolyTreeAndWrite(const PolyNode* pn, std::ofstream& outfile, bool isTemp){
 
     writePolygon(outfile, pn, isTemp);
     for (int i=0; i<pn->ChildCount(); i++){
@@ -299,7 +308,7 @@ void SVGexporterPrivate::parsePolyTreeAndWrite(PolyNode* pn, std::ofstream& outf
 
 }
 
-void SVGexporterPrivate::writePolygon(std::ofstream& outfile, PolyNode* contour, bool isTemp){
+void SVGexporterPrivate::writePolygon(std::ofstream& outfile, const PolyNode* contour, bool isTemp){
     outfile << "      <polygon contour:type=\"contour\" points=\"";
     for (IntPoint point: contour->Contour){
 		if (!isTemp && scfg->slice_invert == SlicingConfiguration::Invert::InvertXAxis)

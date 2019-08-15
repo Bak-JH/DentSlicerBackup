@@ -289,8 +289,7 @@ std::vector<std::vector<Contour>> Slicer::Private::meshSlice(const Mesh* mesh){
 
     for (int i=0; i<planes.size(); i++){
 		ContourBuilder contourBuilder(mesh, planeFaces[i], planes[i]);
-		std::vector<Contour> incompleteContours;
-		std::vector<Contour> contours = contourBuilder.buildContours(incompleteContours);
+		std::vector<Contour> contours = contourBuilder.buildContours();
 		contoursPerPlane.push_back(contours);
 
 		////force close contours
@@ -330,6 +329,27 @@ void Slice::outerShellOffset(float delta, JoinType join_type){
     co.AddPaths(outershell, join_type, etClosedPolygon);
     co.Execute(outershell, delta);
     return;
+}
+
+void Slice::getOverhang(const Slice* prevSlice, PolyTree& result)const
+{
+	if (prevSlice != nullptr)
+	{
+		Clipper clpr;
+		clpr.AddPaths(outershell, ptSubject, true);
+		clpr.AddPaths(prevSlice->outershell, ptClip, true);
+		clpr.Execute(ctDifference, result, pftNonZero, pftNonZero);
+	}
+}
+
+void Slice::getOverhangMN(const Slice* prevSlice, std::unordered_set<const PolyNode*>& result)const
+{
+	//auto prvSliceNode = dynamic_cast<PolyNode*>(prevSlice->outershell);
+	//if (prevSlice != nullptr)
+	//{
+
+
+	//}
 }
 
 
@@ -457,7 +477,7 @@ void Slices::containmentTreeConstruct(){
         Slice* slice = &((*this)[idx]);
         clpr.Clear();
         clpr.AddPaths(slice->outershell, ptSubject, true);
-        clpr.Execute(ctUnion, slice->polytree);
+        clpr.Execute(ctUnion, slice->polytree, pftNonZero, pftNonZero);
     }
 
     // std::vector<std::vector<IntPoint>> to std::vector<std::vector<Point>>
@@ -492,7 +512,7 @@ void Slices::containmentTreeConstruct(){
 //
 //}
 //
-bool Contour::isClosed()
+bool Contour::isClosed()const
 {
 	if (segments.size() > 1)
 	{
@@ -517,7 +537,7 @@ bool Contour::isClosed()
 }
 
 
-void Contour::forceClose()
+bool Contour::tryClose()
 {
 #ifdef _STRICT_SLICER
 	if (isClosed())
@@ -525,9 +545,23 @@ void Contour::forceClose()
 		throw std::runtime_error("force close on already closed contour");
 	}
 #endif
-	ContourSegment closer;
-	closer.from = segments.back().to;
-	closer.to = segments.front().from;
+	float totalDist = dist();
+	float gap = segments.front().from.distanceToPoint(segments.back().to);
+	if (gap < std::numeric_limits<float>::epsilon() || gap < totalDist / 5)
+	{
+		ContourSegment closer;
+		closer.from = segments.back().to;
+		closer.to = segments.front().from;
+		addNext(closer);
+#ifdef _STRICT_SLICER
+		if (!isClosed())
+		{
+			throw std::runtime_error("force close failed");
+		}
+#endif
+		return true;
+	}
+	return false;
 }
 ////can throw when empty
 //IntPoint Contour::getDestination()
@@ -564,6 +598,15 @@ float Contour::dist()const
 	return totalDist;
 }
 
+QVector2D Contour::from()const
+{
+	return segments.front().from;
+}
+QVector2D Contour::to()const
+{
+	return segments.back().to;
+}
+
 Path Contour::toPath()const
 {
 	Path path;
@@ -577,7 +620,21 @@ Path Contour::toPath()const
 	}
 
 	return path;
+}	
+void Contour::append(const Contour& appended)
+{
+#ifdef _STRICT_SLICER
+	if (to() != appended.from())
+	{
+		throw std::runtime_error("trying to append two disjoint contours");
+	}
+#endif
+	for (auto each : appended.segments)
+	{
+		addNext(each);
+	}
 }
+
 
 
 //
@@ -688,7 +745,7 @@ Path Contour::toPath()const
 //
 //}
 //
-bool ContourSegment::calcNormalAndFlip()
+ContourSegment::FlipResult ContourSegment::calcNormalAndFlip()
 {
 
 	//determine direction
@@ -717,15 +774,14 @@ bool ContourSegment::calcNormalAndFlip()
 
 	if (smallestDiff > 0.01f)
 	{
-		unknownDirection = true;
-		return false;
+		return FlipResult::UnknownDirection;
 	}
 
 	if (ABDiff < BADiff)
 	{
 		//AB is correct direction
 		normal = ABNormal;
-		return false;
+		return FlipResult::NotFlipped;
 	}
 	else
 	{
@@ -734,7 +790,7 @@ bool ContourSegment::calcNormalAndFlip()
 		to = from;
 		from = tmp;
 		normal = BANormal;
-		return true;
+		return FlipResult::Flipped;
 	}
 }
 void ContourSegment::flip()
@@ -774,7 +830,7 @@ std::variant<VertexConstItr, HalfEdgeConstItr> toHEdgeOrVtxHint(
 	}
 }
 
-ContourSegment  ContourBuilder::calculateStartingSegment(FaceConstItr& mf,
+ContourSegment  ContourBuilder::calculateStartingSegment(const FaceConstItr& mf,
 	std::variant<VertexConstItr, HalfEdgeConstItr>& outHintTo, std::variant<VertexConstItr, HalfEdgeConstItr>& outHintFrom)
 {
 	ContourSegment segment;
@@ -837,12 +893,16 @@ ContourSegment  ContourBuilder::calculateStartingSegment(FaceConstItr& mf,
 		//face == plane
 	}
 	//hint needs to be in correct direction
-	bool isFlipped = segment.calcNormalAndFlip();
-	if (isFlipped)
+	auto flipResult = segment.calcNormalAndFlip();
+	if (flipResult == ContourSegment::FlipResult::Flipped)
 	{
 		auto tmp = toHint;
 		toHint = fromHint;
 		fromHint = tmp;
+	}
+	else if (flipResult == ContourSegment::FlipResult::UnknownDirection)
+	{
+		return ContourSegment();
 	}
 	outHintTo = toHEdgeOrVtxHint(mf, toHint);
 	outHintFrom = toHEdgeOrVtxHint(mf, fromHint);
@@ -850,7 +910,7 @@ ContourSegment  ContourBuilder::calculateStartingSegment(FaceConstItr& mf,
 	return segment;
 }
 
-std::vector<Contour> ContourBuilder::buildContours(std::vector<Contour>& incompleteContours)
+std::vector<Contour> ContourBuilder::buildContours()
 {
 	auto faces = _mesh->getFaces();
 	std::vector<Contour> contours;
@@ -858,36 +918,12 @@ std::vector<Contour> ContourBuilder::buildContours(std::vector<Contour>& incompl
 	//when calculating intersect normals 
 	//std::unordered_map<FaceConstItr, ContourSegment> tooShortFaces;
 	std::vector<FaceConstItr> startCandidates(_intersectList.begin(), _intersectList.end());
+	_exploredList.clear();
+	_incompleteContours.clear();
 	auto startingFace = startCandidates.begin();
 
-	while (!_intersectList.empty())
+	while (_exploredList.size() != _intersectList.size())
 	{
-		while (_intersectList.find(*startingFace) == _intersectList.end())
-		{
-			++startingFace;
-			if (startingFace == startCandidates.end())
-			{
-				//valid starting candidates ran out.
-						//only very tiny segs remain....
-#ifdef _STRICT_SLICER
-				if (!_intersectList.empty())
-				{
-					float sum;
-					std::variant<VertexConstItr, HalfEdgeConstItr> hint0, hint1;
-					for (auto each : _intersectList)
-					{
-						auto seg = calculateStartingSegment(each, hint0, hint1);
-						sum += seg.dist();
-					}
-					if (sum > 0.001)
-					{
-						throw std::runtime_error("tiny segments should not be ignored.");
-					}
-				}
-#endif
-				return contours;
-			}
-		}
 
 		Contour currContour;
 		//no dead-end or hole yet, so don't reverse
@@ -897,9 +933,18 @@ std::vector<Contour> ContourBuilder::buildContours(std::vector<Contour>& incompl
 		std::variant<VertexConstItr, HalfEdgeConstItr> hint;
 		std::variant<VertexConstItr, HalfEdgeConstItr> toHint;
 		std::variant<VertexConstItr, HalfEdgeConstItr> fromHint;
+		std::unordered_set<FaceConstItr> ___debugExplored;
+		std::vector<FaceConstItr> __debugOrder0;
+		std::vector<FaceConstItr> __debugOrder1;
 
+		while (_exploredList.find(*startingFace) != _exploredList.end() && startingFace != startCandidates.end())
+		{
+			++startingFace;
+		}
+		if (startingFace == startCandidates.end())
+			break;
 		currSeg = calculateStartingSegment(*startingFace, toHint, fromHint);
-		if (currSeg.unknownDirection)
+		if (!currSeg.isValid())
 		{
 			++startingFace;
 			continue;
@@ -907,7 +952,7 @@ std::vector<Contour> ContourBuilder::buildContours(std::vector<Contour>& incompl
 		//forward direction initially
 		hint = toHint;
 		_reverse = false;
-		_intersectList.erase(*startingFace);
+		_exploredList.insert(*startingFace);
 		do
 		{
 			if (currSeg.isValid())
@@ -915,19 +960,29 @@ std::vector<Contour> ContourBuilder::buildContours(std::vector<Contour>& incompl
 				if (_reverse)
 				{
 					currContour.addPrev(currSeg);
+					__debugOrder1.push_back(currSeg.face);
 				}
 				else
 				{
 					currContour.addNext(currSeg);
+					__debugOrder0.push_back(currSeg.face);
 				}
 				prevSeg = currSeg;
+				if (___debugExplored.find(prevSeg.face) == ___debugExplored.end())
+				{
+					___debugExplored.insert(prevSeg.face);
+				}
+				else
+				{
+					qDebug() << "shit";
+				}
 			}
 			else
 			{
 				if (_reverse)
 				{
 					//dead end found on both end, leave the contour incomplete.
-					incompleteContours.push_back(currContour);
+					_incompleteContours.push_back(currContour);
 					break;
 				}
 				else
@@ -960,20 +1015,125 @@ std::vector<Contour> ContourBuilder::buildContours(std::vector<Contour>& incompl
 	}
 
 	//link un-closed contours together if possible to minimize un-closed contour counts
-	if (!incompleteContours.empty())
+	if (!_incompleteContours.empty())
 	{
-		for (auto& each : incompleteContours)
+
+		auto closedContours = joinOrCloseIncompleteContours();
+		for (auto each : closedContours)
 		{
-			auto beginFace = each.segments.front().face;
-			auto lastFace = each.segments.back().face;
-			qDebug() << "incomplete contour found:";
-			qDebug() << "starting face: \n" << beginFace;
-			qDebug() << "last face:  \n" << lastFace;
+			contours.push_back(*each);
 		}
+
 	}
 
 	//repair remaining un-closed contorus
 	return contours;
+}
+
+bool DFSIncompleteContour(std::unordered_set<Contour*>& unusedContours, Contour* start,
+	const std::unordered_multimap<QVector2D, Contour*>& map)
+{
+	std::unordered_map<Contour*, Contour*> traverseMap;
+	std::unordered_set<Contour*> explored;
+	bool success = false;
+	std::vector<Contour*> s;
+	s.push_back(start);
+	Contour* current;
+	while (!s.empty())
+	{
+		current = s.back();
+		s.pop_back();
+		if (explored.find(current) == explored.end())
+		{
+			explored.insert(current);
+			if (current->to() == start->from())
+			{
+				success = true;
+				break;
+			}
+			else
+			{
+				auto childrenRange =  map.equal_range(current->to());
+				for (auto it = childrenRange.first; it != childrenRange.second; ++it) {
+					traverseMap[it->second] = current;
+					s.push_back(it->second);
+				}
+			}
+		}
+	}
+
+	if (success)
+	{
+		std::vector<Contour*> rPath;
+		rPath.push_back(current);
+		auto parent = traverseMap.find(current);
+		//backtrace DFS to get the stitched contour -now closed.
+		do
+		{
+			rPath.push_back(parent->second);
+			parent = traverseMap.find(parent->second);
+
+
+		} while (parent != traverseMap.end());
+		//remove start contour form rPath
+		rPath.pop_back();
+
+		//append paths
+		for (auto rItr = rPath.crbegin(); rItr != rPath.crend(); ++rItr)
+		{
+			start->append(**rItr);
+			unusedContours.erase(*rItr);
+		}
+#ifdef _STRICT_SLICER
+		if (!start->isClosed())
+		{
+			throw std::runtime_error("DFSIncompleteContour suceeded but resulted in open contour");
+		}
+#endif // DEBUG
+	}
+	return success;
+
+
+}
+
+std::unordered_set<Contour*> ContourBuilder::joinOrCloseIncompleteContours()
+{
+	std::unordered_set<Contour*> remainingContours;
+	std::unordered_set<Contour*> unjoinableContours;
+	std::unordered_set<Contour*> closedContours;
+
+	std::unordered_multimap<QVector2D, Contour*> map;
+	for (auto& each : _incompleteContours)
+	{
+		remainingContours.insert(&each);
+		closedContours.insert(&each);
+		map.insert(std::make_pair(each.from(), &each));
+	}
+	while (!remainingContours.empty())
+	{
+		auto current = *remainingContours.begin();
+		remainingContours.erase(current);
+		bool stitchSuccess = DFSIncompleteContour(remainingContours, current, map);
+		if (!stitchSuccess)
+		{
+			unjoinableContours.insert(current);
+		}
+	}
+	//attempt to close unjoinable contours
+	size_t i = 0;
+	for (auto& each : unjoinableContours)
+	{
+		if (!each->tryClose())
+		{
+			++i;
+			closedContours.erase(each);
+		}
+	}
+	if (i != 0)
+	{
+		qDebug() << "unfixable contours";
+	}
+	return closedContours;
 }
 
 
@@ -995,24 +1155,28 @@ ContourSegment ContourBuilder::doNextSeg(VertexConstItr from, const ContourSegme
 			candidates.insert(each);
 		}
 	}
-	if (candidates.size() > 1)
+	if (candidates.size() == 1)
+	{
+		curr = *candidates.begin();
+	}
+	else if (candidates.size() > 1)
 	{
 		bool intersectFound = Hix::Engine3D::findCommonManifoldFace(curr, prevSeg.face, candidates, pool);
 		if (!intersectFound)
 		{
 			qDebug() << "no proper intersecting face found from contour builder";
 			return ContourSegment();
-
 		}
 	}
 	else
 	{
-		curr = *candidates.begin();
+		qDebug() << "hole found";
+		return ContourSegment();
 	}
 
 
 	//set current intersecting face as explored
-	_intersectList.erase(curr);
+	_exploredList.insert(curr);
 	newSeg.face = curr;
 
 	VertexConstItr upper;
@@ -1073,25 +1237,20 @@ ContourSegment ContourBuilder::doNextSeg(HalfEdgeConstItr from, const ContourSeg
 	{
 		newSeg.from = prevSeg.to;
 	}
-	auto neighborFaces = from->neighborFaces();
-	bool nextFound = false;
-	for (auto twin : neighborFaces)
+	auto twinFaces = from->twinFaces();
+	auto nonTwins = from->nonTwins();
+	if (twinFaces.size() == 1 && nonTwins.size() == 0)
 	{
-		if (_intersectList.find(twin) != _intersectList.end())
-		{
-			curr = twin;
-			nextFound = true;
-			break;
-		}
+		curr = *twinFaces.begin();
 	}
-	if (!nextFound)
+	else
 	{
 		qDebug() << "incomplete contour during slicing";
 		return ContourSegment();
 	}
 	newSeg.face = curr;
 	//set current intersecting face as explored
-	_intersectList.erase(curr);
+	_exploredList.insert(curr);
 	VertexConstItr fromEdgeUpper;
 	VertexConstItr fromEdgeLower;
 	if (from->from->position.z() < from->to->position.z())

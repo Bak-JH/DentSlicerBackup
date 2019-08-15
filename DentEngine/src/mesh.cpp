@@ -161,13 +161,6 @@ std::array<size_t, 3> Hix::Engine3D::MeshFace::getVerticeIndices(const Mesh* own
 std::unordered_set<HalfEdgeConstItr> Hix::Engine3D::HalfEdge::twins()const
 {
 	std::unordered_set<HalfEdgeConstItr> twinEdges;
-	for (auto sameDirEdge : from->leavingEdges)
-	{
-		if (sameDirEdge->to == to && sameDirEdge.operator->() != this)
-		{
-			twinEdges.insert(sameDirEdge);
-		}
-	}
 	for (auto oppDirEdge : to->leavingEdges)
 	{
 		if (oppDirEdge->to == from)
@@ -178,27 +171,55 @@ std::unordered_set<HalfEdgeConstItr> Hix::Engine3D::HalfEdge::twins()const
 	return twinEdges;
 }
 
+
+//twins in same direction
+std::unordered_set<HalfEdgeConstItr> Hix::Engine3D::HalfEdge::nonTwins()const
+{
+	std::unordered_set<HalfEdgeConstItr> nonTwins;
+	for (auto sameDirEdge : from->leavingEdges)
+	{
+		if (sameDirEdge->to == to && sameDirEdge.operator->() != this)
+		{
+			nonTwins.insert(sameDirEdge);
+		}
+	}
+	return nonTwins;
+}
+//twins + nonTwins
+std::unordered_set<HalfEdgeConstItr> Hix::Engine3D::HalfEdge::allFromSameEdge()const
+{
+	auto allEdges = twins();
+	auto tmp = nonTwins();
+	allEdges.insert(tmp.begin(), tmp.end());
+	return allEdges;
+}
+
+bool Hix::Engine3D::HalfEdge::isTwin(const HalfEdgeConstItr& other)const
+{
+	auto twns = twins();
+	return twns.find(other) != twns.end();
+}
+
+
 std::vector<FaceConstItr> Hix::Engine3D::HalfEdge::nonOwningFaces()const
 {
 	std::vector<FaceConstItr> result;
-	auto twinsEdges = twins();
-	for (auto each : twinsEdges)
+	auto otherEdges = allFromSameEdge();
+	for (auto each : otherEdges)
 	{
 		result.push_back(each->owningFace);
 	}
 	return result;
 }
-std::vector<FaceConstItr> Hix::Engine3D::HalfEdge::neighborFaces()const
+std::unordered_set<FaceConstItr> Hix::Engine3D::HalfEdge::twinFaces()const
 {
-	std::vector<FaceConstItr> result;
-	for (auto oppDirEdge : to->leavingEdges)
+	std::unordered_set<FaceConstItr> twnFaces;
+	auto twns = twins();
+	for (auto& each : twns)
 	{
-		if (oppDirEdge->to == from)
-		{
-			result.push_back(oppDirEdge->owningFace);
-		}
+		twnFaces.insert(each->owningFace);
 	}
-	return result;
+	return twnFaces;
 }
 
 std::vector<FaceConstItr> Hix::Engine3D::MeshVertex::connectedFaces()const
@@ -648,7 +669,7 @@ bool Hix::Engine3D::isCommonManifoldFace(const FaceConstItr& a, const FaceConstI
 			auto edgeCirc = curr->edgeCirculator();
 			for (size_t i = 0; i < 3; ++i)
 			{
-				auto nFaces = edgeCirc->neighborFaces();
+				auto nFaces = edgeCirc->twinFaces();
 				for (auto nFace : nFaces)
 				{
 					if (pool.find(nFace) != pool.end())
@@ -683,7 +704,7 @@ bool Hix::Engine3D::findCommonManifoldFace(
 			auto edgeCirc = curr->edgeCirculator();
 			for (size_t i = 0; i < 3; ++i)
 			{
-				auto nFaces = edgeCirc->neighborFaces();
+				auto nFaces = edgeCirc->twinFaces();
 				for (auto nFace : nFaces)
 				{
 					if (pool.find(nFace) != pool.end())
@@ -691,6 +712,7 @@ bool Hix::Engine3D::findCommonManifoldFace(
 						frontier.push(nFace);
 					}
 				}
+				
 			}
 		}
 	}
@@ -964,15 +986,15 @@ bool MeshFace::getEdgeWithVertices(HalfEdgeConstItr& result, const VertexConstIt
 	return false;
 }
 
-bool MeshFace::isNeighborOf(const FaceConstItr& nFace)const
+bool MeshFace::isNeighborOf(const FaceConstItr& other)const
 {
 	auto edgeCirc = edgeCirculator();
 	for (size_t i = 0; i < 3; ++i)
 	{
-		auto nFaces = edgeCirc->neighborFaces();
+		auto nFaces = edgeCirc->twinFaces();
 		for (auto& each : nFaces)
 		{
-			if (each == nFace)
+			if (each == other)
 			{
 				return true;
 			}
@@ -991,36 +1013,33 @@ Mesh* Mesh::getNext()const
     return nextMesh;
 }
 
-void Mesh::findNearSimilarFaces(QVector3D normal, FaceConstItr original_mf, FaceConstItr  mf, std::vector<FaceConstItr>& result, float maxRadius, float maxNormalDiff)const
+void Mesh::findNearSimilarFaces(QVector3D normal, FaceConstItr  mf,
+	std::unordered_set<FaceConstItr>& result, float maxRadius, float maxNormalDiff)const
 {
-	result.push_back(mf);
-	auto edgeCirc = mf->edgeCirculator();
-	for (size_t i = 0; i < 3; ++i, ++edgeCirc) {
-		const auto& faces = getFaces();
-		for (auto neighbor : edgeCirc->neighborFaces()) {
-			// check if neighbor already checked
-			bool cont = false;
-			for (auto elem : result) {
-				if (elem == neighbor)
+	std::unordered_set<FaceConstItr> explored;
+	std::queue<FaceConstItr>q;
+	q.push(mf);
+	result.insert(mf);
+	explored.insert(mf);
+	while (!q.empty())
+	{
+		auto curr = q.front();
+		q.pop();
+		explored.insert(curr);
+		result.insert(curr);
+		auto edgeCirc = curr->edgeCirculator();
+		for (size_t i = 0; i < 3; ++i, ++edgeCirc) {
+			auto nFaces = edgeCirc->twinFaces();
+			for (auto nFace : nFaces)
+			{
+				if (explored.find(nFace) == explored.end() && (nFace->fn - normal).length() < maxNormalDiff)
 				{
-					cont = true;
-					break;
+					q.push(nFace);
 				}
 			}
-			if (cont)
-				continue;
-			// check if neighbor close to normal
-			auto nbrMeshVertices = neighbor->meshVertices();
-			auto originalMVertices = original_mf->meshVertices();
-			if ((neighbor->fn - normal).length() > maxNormalDiff ||
-				nbrMeshVertices[0]->position.distanceToPoint(originalMVertices[0]->position) > maxRadius)
-				continue;
-			qDebug() << nbrMeshVertices[0]->position.distanceToPoint(originalMVertices[0]->position);
-			qDebug() << "looking for " << neighbor;
-			findNearSimilarFaces( normal, original_mf, neighbor, result, maxRadius, maxNormalDiff);
+		
 		}
 	}
-
 	return;
 }
 
