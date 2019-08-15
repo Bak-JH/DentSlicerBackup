@@ -2053,7 +2053,7 @@ void GLModel:: unselectMeshFaces(){
 void GLModel::selectMeshFaces(){
 	selectedFaces.clear();
 	QVector3D normal = targetMeshFace->fn;
-	_mesh->findNearSimilarFaces(normal, targetMeshFace, targetMeshFace, selectedFaces);
+	_mesh->findNearSimilarFaces(normal, targetMeshFace, selectedFaces);
 	//we need to mark these vertices as modified so they get re-rendered with new colors
 	for (auto& fcItr : selectedFaces)
 	{

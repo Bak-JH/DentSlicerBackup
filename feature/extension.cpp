@@ -6,8 +6,8 @@ void Hix::Features::Extension::extendMesh(Mesh* mesh, FaceConstItr mf, double di
     QVector3D normal = mf->fn;
     qDebug() << normal;
 	auto mfVertices = mf->meshVertices();
-    std::vector<FaceConstItr> extension_faces;
-    mesh->findNearSimilarFaces(normal, mf, mf, extension_faces);
+    std::unordered_set<FaceConstItr> extension_faces;
+    mesh->findNearSimilarFaces(normal, mf, extension_faces);
 
     // delete extension_faces
     /*for (MeshFace* mf : extension_faces){
@@ -47,7 +47,7 @@ void Hix::Features::Extension::extendMesh(Mesh* mesh, FaceConstItr mf, double di
 }
 
 
-Paths3D Hix::Features::Extension::detectExtensionOutline(Mesh* mesh, const std::vector<FaceConstItr>& meshfaces){
+Paths3D Hix::Features::Extension::detectExtensionOutline(Mesh* mesh, const std::unordered_set<FaceConstItr>& meshfaces){
     Mesh temp_mesh;
     for (auto mf : meshfaces){
 		auto meshVertices = mf->meshVertices();
@@ -127,7 +127,7 @@ void Hix::Features::Extension::extendAlongOutline(Mesh* mesh, QVector3D normal, 
     }
 }
 
-void Hix::Features::Extension::coverCap(Mesh* mesh, QVector3D normal,const std::vector<FaceConstItr>& extension_faces, double distance){
+void Hix::Features::Extension::coverCap(Mesh* mesh, QVector3D normal,const std::unordered_set<FaceConstItr>& extension_faces, double distance){
     for (FaceConstItr mf : extension_faces){
 		auto meshVertices = mf->meshVertices();
 		mesh->addFace(
