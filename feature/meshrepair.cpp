@@ -122,7 +122,8 @@ std::vector<Hix::Engine3D::HalfEdgeConstItr> MeshRepair::identifyBoundary(const 
 	for (auto heItr = mesh->getHalfEdges().cbegin(); heItr != mesh->getHalfEdges().cend(); ++heItr)
 	{
 		//if a half edge do not have a twin, it's a boundary edge
-		if (heItr->neighborFaces().empty())
+		auto twnFaces = heItr->twinFaces();
+		for (auto twnFace : twnFaces)
 		{
 			auto from = heItr->from;
 			auto to = heItr->to;
