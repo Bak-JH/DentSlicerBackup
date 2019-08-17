@@ -910,6 +910,69 @@ ContourSegment  ContourBuilder::calculateStartingSegment(const FaceConstItr& mf,
 	return segment;
 }
 
+
+void ContourBuilder::buildSegment(const FaceConstItr& mf)
+{
+	ContourSegment segment;
+	segment.face = mf;
+	std::vector<VertexConstItr> upper;
+	std::vector<VertexConstItr> middle;
+	std::vector<VertexConstItr> lower;
+
+	auto mfVertices = mf->meshVertices();
+	for (int i = 0; i < 3; i++) {
+		if (mfVertices[i]->position.z() > _plane) {
+			upper.push_back(mfVertices[i]);
+		}
+		else if (mfVertices[i]->position.z() == _plane) {
+			middle.push_back(mfVertices[i]);
+		}
+		else
+			lower.push_back(mfVertices[i]);
+	}
+	std::vector<VertexConstItr> majority;
+	std::vector<VertexConstItr> minority;
+	//two edges intersect
+	if (middle.size() == 0)
+	{
+		if (upper.size() == 2 && lower.size() == 1) {
+			majority = upper;
+			minority = lower;
+		}
+		else {
+			majority = lower;
+			minority = upper;
+		}
+		auto a = midPoint2D(majority[0], minority[0]);
+		auto b = midPoint2D(majority[1], minority[0]);
+		segment.from = a;
+		segment.to = b;
+
+	}
+	else {
+		//1 edge interesecting, 1 vertice on the plane
+		if (upper.size() == 1 && lower.size() == 1 && middle.size() == 1) {
+			auto a = midPoint2D(upper[0], lower[0]);
+			segment.from = a;
+			segment.to = QVector2D(middle[0]->position.x(), middle[0]->position.y());
+		}
+		else if (middle.size() == 2) {
+			segment.from = QVector2D(middle[0]->position.x(), middle[0]->position.y());
+			segment.to = QVector2D(middle[1]->position.x(), middle[1]->position.y());
+
+		}
+		//face == plane
+	}
+	//hint needs to be in correct direction
+	auto flipResult = segment.calcNormalAndFlip();
+	_fromHash
+	if (flipResult == ContourSegment::FlipResult::UnknownDirection)
+	{
+	}
+
+	return segment;
+}
+
 std::vector<Contour> ContourBuilder::buildContours()
 {
 	auto faces = _mesh->getFaces();
@@ -933,9 +996,7 @@ std::vector<Contour> ContourBuilder::buildContours()
 		std::variant<VertexConstItr, HalfEdgeConstItr> hint;
 		std::variant<VertexConstItr, HalfEdgeConstItr> toHint;
 		std::variant<VertexConstItr, HalfEdgeConstItr> fromHint;
-		std::unordered_set<FaceConstItr> ___debugExplored;
-		std::vector<FaceConstItr> __debugOrder0;
-		std::vector<FaceConstItr> __debugOrder1;
+
 
 		while (_exploredList.find(*startingFace) != _exploredList.end() && startingFace != startCandidates.end())
 		{
@@ -960,22 +1021,12 @@ std::vector<Contour> ContourBuilder::buildContours()
 				if (_reverse)
 				{
 					currContour.addPrev(currSeg);
-					__debugOrder1.push_back(currSeg.face);
 				}
 				else
 				{
 					currContour.addNext(currSeg);
-					__debugOrder0.push_back(currSeg.face);
 				}
 				prevSeg = currSeg;
-				if (___debugExplored.find(prevSeg.face) == ___debugExplored.end())
-				{
-					___debugExplored.insert(prevSeg.face);
-				}
-				else
-				{
-					qDebug() << "shit";
-				}
 			}
 			else
 			{
@@ -994,16 +1045,10 @@ std::vector<Contour> ContourBuilder::buildContours()
 
 				}
 			}
-			if (hint.index() == 0)
-			{
-				//vertex
-				currSeg = doNextSeg(std::get<0>(hint), prevSeg, hint);
-			}
-			else
-			{
-				//edge
-				currSeg = doNextSeg(std::get<1>(hint), prevSeg, hint);
-			}
+
+			currSeg = doNextSeg(hint, prevSeg);
+
+
 		}
 		while (!currContour.isClosed());
 		//if a complete contour is found, no dead ends
@@ -1138,7 +1183,7 @@ std::unordered_set<Contour*> ContourBuilder::joinOrCloseIncompleteContours()
 
 
 //at this point we know which face interesects, and which don't
-ContourSegment ContourBuilder::doNextSeg(VertexConstItr from, const ContourSegment& prevSeg, std::variant<VertexConstItr, HalfEdgeConstItr>& to)
+ContourSegment ContourBuilder::doNextSeg(const std::variant<VertexConstItr, HalfEdgeConstItr>& from, const ContourSegment& prevSeg, std::variant<VertexConstItr, HalfEdgeConstItr>& to)
 {
 	ContourSegment newSeg;
 	newSeg.from = QVector2D(from->position.x(), from->position.y());
@@ -1210,7 +1255,8 @@ ContourSegment ContourBuilder::doNextSeg(VertexConstItr from, const ContourSegme
 		}
 		else
 		{
-			throw std::runtime_error("edge not found");
+			qDebug() << "edge not found";
+			return ContourSegment();
 		}
 	}
 	else
@@ -1299,7 +1345,8 @@ ContourSegment ContourBuilder::doNextSeg(HalfEdgeConstItr from, const ContourSeg
 		}
 		else
 		{
-			throw std::runtime_error("edge not found");
+			qDebug() << "edge not found";
+			return ContourSegment();
 		}
 	}
 	else
