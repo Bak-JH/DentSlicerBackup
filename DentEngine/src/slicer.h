@@ -177,26 +177,24 @@ private:
 
 	//two points
 
-	ContourSegment calculateStartingSegment(const FaceConstItr& mf, std::variant<VertexConstItr,
-		HalfEdgeConstItr>& toHint, std::variant<VertexConstItr, HalfEdgeConstItr>& fromHint);
-
+	bool isArea(const Contour& contour);
 	void buildSegment(const FaceConstItr& mf);
-
-
-	ContourSegment doNextSeg(const std::variant<VertexConstItr, HalfEdgeConstItr>& from, 
-		const ContourSegment& prevSeg, std::variant<VertexConstItr, HalfEdgeConstItr>& to);
-	//ContourSegment doNextSeg(HalfEdgeConstItr from,const ContourSegment& prevSeg, std::variant<VertexConstItr, HalfEdgeConstItr>& to);
+	bool buildContour(Contour& current, bool reverse);
 	QVector2D midPoint2D(VertexConstItr vtxA0, VertexConstItr vtxA1);
 	std::unordered_set<Contour*> joinOrCloseIncompleteContours();
 
 	const Mesh* _mesh;
 	float _plane;
-	bool _reverse = false;
 	std::unordered_map<std::pair<VertexConstItr, VertexConstItr>, QVector2D> _midPtLUT;
-	std::unordered_set<FaceConstItr>& _intersectList;
+	const std::unordered_set<FaceConstItr>& _intersectList;
 	std::unordered_map<FaceConstItr, ContourSegment> _segments;
+
 	std::unordered_multimap<QVector2D, ContourSegment*> _fromHash;
 	std::unordered_multimap<QVector2D, ContourSegment*> _toHash;
+	std::unordered_multimap<QVector2D, ContourSegment*> _unknownHash;
+	std::unordered_set<ContourSegment*> _unknownSegs;
+
+	std::unordered_set<FaceConstItr> _unexplored;
 	std::vector<Contour> _incompleteContours;
 
 };
