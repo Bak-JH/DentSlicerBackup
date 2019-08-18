@@ -148,8 +148,7 @@ public:
 	Path toPath()const;//tmp
 
 private:
-	//void checkBound(const IntPoint& pt);
-	////bounds
+ 	////bounds
 	//cInt _xMax = std::numeric_limits<cInt>::lowest();
 	//cInt _xMin = std::numeric_limits<cInt>::max();
 	//cInt _yMax = std::numeric_limits<cInt>::lowest();

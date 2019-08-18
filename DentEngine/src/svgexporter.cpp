@@ -132,7 +132,7 @@ QString SVGexporter::exportSVG(Slices& shellSlices, Slices& supportSlices, Slice
 		//		parsePolyTreeAndWrite(overhang.Childs[j], outfile, isTemp);
 		//	}
 		//}
-        PolyTree shellSlice_polytree = shellSlices[i].polytree;
+        PolyTree& shellSlice_polytree = shellSlices[i].polytree;
         for (int j=0; j<shellSlice_polytree.ChildCount(); j++){
             parsePolyTreeAndWrite(shellSlice_polytree.Childs[j], outfile, isTemp);
         }
