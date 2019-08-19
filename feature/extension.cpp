@@ -1,12 +1,13 @@
 #include "extension.h"
 
 using namespace Hix::Features::Extension;
+using namespace Hix::Debug;
 void Hix::Features::Extension::extendMesh(Mesh* mesh, FaceConstItr mf, double distance){
     QVector3D normal = mf->fn;
     qDebug() << normal;
 	auto mfVertices = mf->meshVertices();
-    std::vector<FaceConstItr> extension_faces;
-    mesh->findNearSimilarFaces(normal, mf, mf, extension_faces);
+    std::unordered_set<FaceConstItr> extension_faces;
+    mesh->findNearSimilarFaces(normal, mf, extension_faces);
 
     // delete extension_faces
     /*for (MeshFace* mf : extension_faces){
@@ -23,7 +24,7 @@ void Hix::Features::Extension::extendMesh(Mesh* mesh, FaceConstItr mf, double di
 
     qDebug() << "detected extension faces" << extension_faces.size();
     for (FaceConstItr emf : extension_faces){
-        qDebug() << mesh->indexOf(emf);
+        qDebug() << emf;
 		auto emfVertices = emf->meshVertices();
 
         //mesh->addFace(emf->mesh_vertex[0]->position+normal*2,emf->mesh_vertex[1]->position+normal*2,emf->mesh_vertex[2]->position+normal*2);
@@ -40,14 +41,13 @@ void Hix::Features::Extension::extendMesh(Mesh* mesh, FaceConstItr mf, double di
     extendAlongOutline(mesh, normal, extension_outlines, distance);
     qDebug() << "extended along outline";
     qDebug() << "mesh size : "<< mesh->getFaces().size();
-	qDebug() << "mf index: " << mesh->indexOf(mf);
+	qDebug() << "mf index: " << mf;
 
     coverCap(mesh, normal, extension_faces, distance);
-    mesh->connectFaces();
 }
 
 
-Paths3D Hix::Features::Extension::detectExtensionOutline(Mesh* mesh, const std::vector<FaceConstItr>& meshfaces){
+Paths3D Hix::Features::Extension::detectExtensionOutline(Mesh* mesh, const std::unordered_set<FaceConstItr>& meshfaces){
     Mesh temp_mesh;
     for (auto mf : meshfaces){
 		auto meshVertices = mf->meshVertices();
@@ -57,7 +57,6 @@ Paths3D Hix::Features::Extension::detectExtensionOutline(Mesh* mesh, const std::
                 meshVertices[1]->position,
                 meshVertices[2]->position);
     }
-    temp_mesh.connectFaces();
 
     Paths3D temp_edges;
 
@@ -128,7 +127,7 @@ void Hix::Features::Extension::extendAlongOutline(Mesh* mesh, QVector3D normal, 
     }
 }
 
-void Hix::Features::Extension::coverCap(Mesh* mesh, QVector3D normal,const std::vector<FaceConstItr>& extension_faces, double distance){
+void Hix::Features::Extension::coverCap(Mesh* mesh, QVector3D normal,const std::unordered_set<FaceConstItr>& extension_faces, double distance){
     for (FaceConstItr mf : extension_faces){
 		auto meshVertices = mf->meshVertices();
 		mesh->addFace(

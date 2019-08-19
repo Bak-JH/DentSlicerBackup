@@ -115,7 +115,7 @@ public:
     float hollowShellRadius = 0;
 
     // face selection enabled
-    std::vector<FaceConstItr> selectedFaces;
+    std::unordered_set<FaceConstItr> selectedFaces;
 
     // feature offset
     double shellOffsetFactor;

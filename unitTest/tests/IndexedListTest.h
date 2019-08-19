@@ -4,7 +4,7 @@
 #include <string>
 #include <queue>
 #include <functional>
-#include "../IndexedList.h"
+#include "../../common/IndexedList.h"
 #include "../catch.hpp"
 
 namespace IndexedListTest

@@ -38,8 +38,6 @@ public:
 	typedef typename A_trait::difference_type difference_type;
 	typedef typename A_trait::size_type size_type;
 	typedef typename std::deque<T,A> container_type;
-	//typedef typename boost::container::stable_vector_iterator<T*, false> container_iterator_type;
-	//typedef typename boost::container::stable_vector_iterator<T*, true> container_const_iterator_type;
 	typedef typename std::function<void(size_t, size_t)> indexChangedCallback;
 	typedef std::reverse_iterator<IndexedListItr::iterator<T, A>> reverse_iterator; //optional
 	typedef std::reverse_iterator<IndexedListItr::const_iterator<T, A>> const_reverse_iterator; //optional
@@ -336,7 +334,7 @@ namespace IndexedListItr
 		typedef typename A_trait::pointer pointer;
 		typedef std::random_access_iterator_tag iterator_category; //or another tag
 
-		iterator()
+		iterator():_owner(nullptr)
 		{}
 		iterator(size_t index, IndexedList<T,A>* owner) : _index(index), _owner(owner)
 		{}
@@ -345,6 +343,12 @@ namespace IndexedListItr
 		}
 		~iterator()
 		{}
+
+		size_t index()const
+		{
+			return _index;
+		}
+
 
 		iterator& operator=(const iterator& o)
 		{
@@ -362,6 +366,10 @@ namespace IndexedListItr
 		}
 
 		//random access iterator
+		bool initialized()const
+		{
+			return _owner != nullptr;
+		}
 		bool operator< (const iterator& o) const
 		{
 			return _index < o._index;
@@ -454,8 +462,9 @@ namespace IndexedListItr
 	private:
 		size_t _index;
 		IndexedList<T,A>* _owner;
-
 		friend class const_iterator<T,A>;
+		friend struct std::hash<IndexedListItr::iterator<T, A>>;
+
 	};
 
 	template <class T, class A = std::allocator<T>>
@@ -471,7 +480,7 @@ namespace IndexedListItr
         typedef typename A_trait::const_pointer pointer;
 		typedef std::random_access_iterator_tag iterator_category; //or another tag
 
-		const_iterator()
+		const_iterator():_owner(nullptr)
 		{}
 		const_iterator(size_t index, const IndexedList<T, A>* containerPtr) : _index(index), _owner(containerPtr)
 		{}
@@ -482,7 +491,10 @@ namespace IndexedListItr
 		~const_iterator()
 		{}
 
-
+		size_t index()const
+		{
+			return _index;
+		}
 
 
 
@@ -491,6 +503,10 @@ namespace IndexedListItr
 			_index = o._index;
 			_owner = o._owner;
 			return *this;
+		}
+		bool initialized()const
+		{
+			return _owner != nullptr;
 		}
 		bool operator==(const const_iterator& o) const
 		{
@@ -590,10 +606,12 @@ namespace IndexedListItr
 	private:
 		size_t _index;
 		const IndexedList<T, A>* _owner;
-
+		friend struct std::hash<IndexedListItr::const_iterator<T, A>>;
 	};
 
 }
+
+
 
 //IndexedList iterator methods
 template <class T, class A>
@@ -725,4 +743,27 @@ IndexedListItr::iterator<T, A> IndexedList<T, A>::swapAndErase(IndexedListItr::c
 	return begin() + startedIndex;
 }
 
+
+namespace std
+{
+	template<class T, class A>
+	struct hash<IndexedListItr::iterator<T, A>>
+	{
+		//2D only!
+		std::size_t operator()(const IndexedListItr::iterator<T, A>& itr)const
+		{
+			return itr._index;
+		}
+	};
+
+	template<class T, class A>
+	struct hash<IndexedListItr::const_iterator<T, A>>
+	{
+		//2D only!
+		std::size_t operator()(const IndexedListItr::const_iterator<T, A>& itr)const
+		{
+			return itr._index;
+		}
+	};
+}
 

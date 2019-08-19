@@ -4,12 +4,10 @@
 #include <string>
 #include <queue>
 #include <functional>
-#include "../TrackedIndexedList.h"
+#include ../../common/TrackedIndexedList.h"
 #include "../catch.hpp"
-#include <boost/container/stable_vector.hpp>
-#include <boost/variant/recursive_wrapper.hpp>
 #include <chrono>  // for high_resolution_clock
-#include "../IteratorWrapper.h"
+#include ../../common/IteratorWrapper.h"
 
 //#include "../IteratorWrapper.h"
 

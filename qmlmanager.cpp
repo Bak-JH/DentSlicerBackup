@@ -26,6 +26,7 @@
 #include "utils/utils.h"
 #include "render/lights.h"
 #include "DentEngine/src/configuration.h"
+#include "feature/stlexporter.h"
 
 using namespace Hix::Input;
 using namespace Hix::UI;
@@ -2084,6 +2085,12 @@ QObject* FindItemByName(QQmlApplicationEngine* engine, const QString& name)
 void QmlManager::unselectPartImpl(GLModel* target)
 {
 	QMetaObject::invokeMethod(partList, "unselectPartByModel", Q_ARG(QVariant, target->ID));
+
+	for (auto each : selectedModels)
+	{
+		each->changeViewMode(VIEW_MODE_OBJECT);
+	}
+	selectedModels.erase(target);
     target->changeColor(Hix::Render::Colors::Default);
     target->checkPrintingArea();
     target->inactivateFeatures();
@@ -2096,12 +2103,7 @@ void QmlManager::unselectPartImpl(GLModel* target)
 				break;
         }
     }
-	for (auto each : selectedModels)
-	{
-		each->changeViewMode(VIEW_MODE_OBJECT);
-	}
-	selectedModels.erase(target);
-    if (selectedModels.size() == 0)
+
     //selectedModels.clear();
     QMetaObject::invokeMethod(leftTabViewMode, "setEnable", Q_ARG(QVariant, false));
     //QMetaObject::invokeMethod(boundedBox, "hideBox"); // Bounded Box

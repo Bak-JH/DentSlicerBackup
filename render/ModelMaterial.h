@@ -35,7 +35,6 @@ namespace Hix
 			ModelMaterial();
 			virtual ~ModelMaterial();
 
-			void setPerPrimitiveColorSSBO(Qt3DRender::QBuffer& buffer);
 			void setDiffuse(const QColor& diffuse);
 			void setAmbient(const QColor& ambient);
 			void addParameterWithKey(const std::string& key);
@@ -49,16 +48,22 @@ namespace Hix
 			ShaderMode _mode = ShaderMode::None;
 			//custom parameters
 			std::unordered_map<std::string, Qt3DRender::QParameter> _additionalParameters;
+
 			Qt3DRender::QEffect _effect;
-			Qt3DRender::QTechnique _renderTechnique;
-			Qt3DRender::QRenderPass _renderPass;
-			Qt3DRender::QShaderProgram _shaderProgram;
-			Qt3DRender::QFilterKey _filterKey;
 
 			//default parameters
 			Qt3DRender::QParameter _ambientParameter;
 			Qt3DRender::QParameter _diffuseParameter;
 			Qt3DRender::QParameter _singleColorParameter;
+
+			Qt3DRender::QFilterKey _filterKey;
+			Qt3DRender::QRenderPass _renderPass;
+			Qt3DRender::QShaderProgram _shaderProgram;
+			Qt3DRender::QTechnique _renderTechnique;
+
+	
+
+
 			//per primtivie parameters, stored as QVariantList on CPU, uniform on GPU geomatry shader
 
 		};

@@ -105,7 +105,6 @@ Mesh* STLexporter::mergeSelectedModels() {
                            (-1)*ymid,
                            (-1)*zmid));
 
-    mergedMesh->connectFaces();
 
     return mergedMesh;
 }
