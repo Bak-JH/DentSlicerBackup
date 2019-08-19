@@ -7,7 +7,6 @@
 #include <Qt3DRender>
 #include <Qt3DExtras>
 #include <Qt3DInput>
-#include "MoveWidget.h"
 #include <array>
 #include <memory>
 namespace Hix
