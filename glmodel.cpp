@@ -151,7 +151,6 @@ GLModel::GLModel(QObject* mainWindow, QNode *parent, Mesh* loadMesh, QString fna
 	// 승환 25%
 	qmlManager->setProgress(0.23);
 	clearMem();
-	//m_meshMaterial.setPerPrimitiveColorSSBO(primitiveColorBuffer);
 	setMesh(_mesh);
 	//applyGeometry();
 
@@ -1243,9 +1242,6 @@ void GLModel::generateSupport(){
     layerSupportMesh->vertexMove(t);
     layerRaftMesh->vertexMove(t);
 
-    layerInfillMesh->connectFaces();
-    layerSupportMesh->connectFaces();
-    layerRaftMesh->connectFaces();
     updateModelMesh();
 }
 
@@ -2037,8 +2033,6 @@ void GLModel::generateText3DMesh()
 
     }
 
-   _mesh->connectFaces();
-
     updateModelMesh();
 
     qmlManager->setProgress(1);
@@ -2059,7 +2053,7 @@ void GLModel:: unselectMeshFaces(){
 void GLModel::selectMeshFaces(){
 	selectedFaces.clear();
 	QVector3D normal = targetMeshFace->fn;
-	_mesh->findNearSimilarFaces(normal, targetMeshFace, targetMeshFace, selectedFaces);
+	_mesh->findNearSimilarFaces(normal, targetMeshFace, selectedFaces);
 	//we need to mark these vertices as modified so they get re-rendered with new colors
 	for (auto& fcItr : selectedFaces)
 	{

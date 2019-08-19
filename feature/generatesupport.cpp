@@ -64,8 +64,6 @@ Mesh* GenerateSupport::generateStraightSupport(Mesh* shellmesh){
         OverhangPoint* new_op = new OverhangPoint(QVector3D(op.position.x(), op.position.y(), z_min));
         generateStem(supportMesh, op, new_op);
     }
-
-    supportMesh->connectFaces();
     return supportMesh;
 }
 
@@ -139,9 +137,6 @@ Mesh* GenerateSupport::generateSupport(Mesh* shellmesh) {
         generateStem(supportMesh, *iter, &meshIntersection);
         iter++;
     }
-
-    supportMesh->connectFaces();
-
     qDebug() << "generateSupport Done";
     return supportMesh;
 }

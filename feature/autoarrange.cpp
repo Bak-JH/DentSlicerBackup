@@ -10,7 +10,7 @@
 #include <unordered_map>
 #include "DentEngine/src/mesh.h"
 #include "DentEngine/src/configuration.h"
-
+#include "DentEngine/src/slicer.h"
 using namespace ClipperLib;
 using namespace Hix::Engine3D;
 autoarrange::autoarrange()
@@ -23,8 +23,8 @@ Paths autoarrange::getMeshRecArea(const Mesh& mesh){//getting rectangle area of 
     Path vertices45rot;//45 degree check
     for(const auto& vertex : mesh.getVertices()){
         QVector3D v_pos = vertex.position;
-        mesh.addPoint(v_pos.x(), v_pos.y(), &vertices);
-        mesh.addPoint(round(v_pos.x()*cosf(M_PI/4) - v_pos.y()*sinf(M_PI/4)), round(v_pos.x()*sinf(M_PI/4) + v_pos.y()*cosf(M_PI/4)), &vertices45rot);//45 degree check
+		ClipperLib::addPoint(v_pos.x(), v_pos.y(), &vertices);
+		ClipperLib::addPoint(round(v_pos.x()*cosf(M_PI/4) - v_pos.y()*sinf(M_PI/4)), round(v_pos.x()*sinf(M_PI/4) + v_pos.y()*cosf(M_PI/4)), &vertices45rot);//45 degree check
     }
     int max_x = getMaxX(vertices) + OFFSET;
     int max_y = getMaxY(vertices) + OFFSET;
@@ -67,7 +67,7 @@ Paths autoarrange::getMeshConvexHull(const Mesh& mesh){//getting convex hull are
     Path vertices;//all vertices in mesh
     for(const auto& vertex : mesh.getVertices()){
         QVector3D v_pos = vertex.position;
-        mesh.addPoint(v_pos.x(), v_pos.y(), &vertices);
+		ClipperLib::addPoint(v_pos.x(), v_pos.y(), &vertices);
     }
     outline.push_back(getConvexHull(&vertices));
     /**/qDebug() << "got MeshConvexHull";
@@ -250,7 +250,7 @@ Path autoarrange::idxsToPath(const Mesh* mesh, std::vector<const MeshVertex* > p
     Path path;
     for(const MeshVertex* vtx : path_by_idx){
         QVector3D vertex = vtx->position;
-        mesh->Mesh::addPoint(vertex.x(), vertex.y(), &path);
+		ClipperLib::addPoint(vertex.x(), vertex.y(), &path);
     }
     return path;
 }

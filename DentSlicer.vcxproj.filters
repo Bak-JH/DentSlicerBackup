@@ -191,7 +191,22 @@
     <ClCompile Include="slice\SlicingOptBackend.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>
-    <ClCompile Include="feature\overhangDetectPostSlice.cpp">
+    <ClCompile Include="unitTest\RunTests.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="unitTest\RandomGen.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="DentEngine\src\ContourBuilder.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="DentEngine\src\polyclipping\polyclipping.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="DentEngine\src\Planes.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="feature\overhangDetect.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -484,7 +499,31 @@
     <ClInclude Include="slice\slicingengine.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="feature\overhangDetectPostSlice.h">
+    <ClInclude Include="unitTest\tests\Float3DVectorHash.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="unitTest\tests\IndexedListTest.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="unitTest\tests\SlicerTest.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="unitTest\tests\TrackedIndexedListTest.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="unitTest\RunTests.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="unitTest\RandomGen.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="DentEngine\src\ContourBuilder.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="DentEngine\src\Planes.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="feature\overhangDetect.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -1064,6 +1103,9 @@
     <None Include="icon-32.ico" />
     <None Include="icon-32.ico" />
     <None Include="Qml\LeftTabSlicingOptionElementTextbox.qml" />
+    <None Include="icon-32.ico" />
+    <None Include="icon-32.ico" />
+    <None Include="icon-32.ico" />
     <None Include="icon-32.ico" />
   </ItemGroup>
   <ItemGroup>
