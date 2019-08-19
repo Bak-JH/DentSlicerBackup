@@ -11,13 +11,13 @@ using namespace ClipperLib;
 
 namespace SVGexporterPrivate
 {
-	void parsePolyTreeAndWrite(const ClipperLib::PolyNode* pn, std::ofstream& outfile, bool isTemp);
-	void writePolygon(std::ofstream& outfile, ClipperLib::Path& contour, bool isTemp);
-	void writePolygon(std::ofstream& outfile, const ClipperLib::PolyNode* contour, bool isTemp);
-	void writeGroupHeader(std::ofstream& outfile, int layer_idx, float z);
-	void writeGroupFooter(std::ofstream& outfile);
-	void writeHeader(std::ofstream& outfile);
-	void writeFooter(std::ofstream& outfile);
+    void parsePolyTreeAndWrite(const ClipperLib::PolyNode* pn, bool isTemp, std::stringstream& content);
+    void writePolygon(ClipperLib::Path& contour, bool isTemp, std::stringstream& content);
+    void writePolygon(const ClipperLib::PolyNode* contour, bool isTemp, std::stringstream& content);
+    void writeGroupHeader(int layer_idx, float z, std::stringstream& content);
+    void writeGroupFooter(std::stringstream& content);
+    void writeHeader(std::stringstream& content);
+    void writeFooter(std::stringstream& content);
 	void writeVittroOptions(QString outfoldername, int max_slices);
 
 }
@@ -43,20 +43,24 @@ QString SVGexporter::exportSVG(Slices& shellSlices, Slices& supportSlices, Slice
     for (int i=0; i<raftSlices.size(); i++){
         QString outfilename = outfoldername + "/" + QString::number(currentSlice_idx) + ".svg";
 
-        std::ofstream outfile(outfilename.toStdString().c_str(), std::ios::out);
+        QFile outfile(outfilename);
+        std::stringstream contentStream;
+        outfile.open(QFile::WriteOnly);
 
-        writeHeader(outfile);
+        writeHeader(contentStream);
         if (scfg->slicing_mode == SlicingConfiguration::SlicingMode::Uniform)
-            writeGroupHeader(outfile, currentSlice_idx, scfg->layer_height*(currentSlice_idx+1));
+            writeGroupHeader(currentSlice_idx, scfg->layer_height*(currentSlice_idx+1), contentStream);
         else
-            writeGroupHeader(outfile, currentSlice_idx, scfg->layer_height*(currentSlice_idx+1));
+            writeGroupHeader(currentSlice_idx, scfg->layer_height*(currentSlice_idx+1), contentStream);
 
         for (int j=0; j<raftSlices[i].outershell.size(); j++){
-            writePolygon(outfile, raftSlices[i].outershell[j], isTemp);
+            writePolygon(raftSlices[i].outershell[j], isTemp, contentStream);
         }
 
-        writeGroupFooter(outfile);
-        writeFooter(outfile);
+        writeGroupFooter(contentStream);
+        writeFooter(contentStream);
+        outfile.write(QByteArray::fromStdString(contentStream.str()));
+
         outfile.close();
         currentSlice_idx += 1;
     }
@@ -69,19 +73,24 @@ QString SVGexporter::exportSVG(Slices& shellSlices, Slices& supportSlices, Slice
 
         for (int i=0; i<support_base_layer_cnt; i++){
             QString outfilename = outfoldername + "/" + QString::number(currentSlice_idx) + ".svg";
-            std::ofstream outfile(outfilename.toStdString().c_str(), std::ios::out);
-            writeHeader(outfile);
+            QFile outfile(outfilename);
+            std::stringstream contentStream;
+            outfile.open(QFile::WriteOnly);
+
+            writeHeader(contentStream);
             if (scfg->slicing_mode == SlicingConfiguration::SlicingMode::Uniform)
-                writeGroupHeader(outfile, currentSlice_idx, scfg->layer_height*(currentSlice_idx+1));
+                writeGroupHeader(currentSlice_idx, scfg->layer_height*(currentSlice_idx+1), contentStream);
             else
-                writeGroupHeader(outfile, currentSlice_idx, scfg->layer_height*(currentSlice_idx+1));
+                writeGroupHeader(currentSlice_idx, scfg->layer_height*(currentSlice_idx+1), contentStream);
 
             for (int j=0; j<supportSlices[i].outershell.size(); j++){
-                writePolygon(outfile, supportSlices[i].outershell[j], isTemp);
+                writePolygon(supportSlices[i].outershell[j], isTemp, contentStream);
             }
 
-            writeGroupFooter(outfile);
-            writeFooter(outfile);
+            writeGroupFooter(contentStream);
+            writeFooter(contentStream);
+            outfile.write(QByteArray::fromStdString(contentStream.str()));
+
             outfile.close();
             currentSlice_idx += 1;
         }
@@ -94,12 +103,15 @@ QString SVGexporter::exportSVG(Slices& shellSlices, Slices& supportSlices, Slice
 
     for (int i=0; i<shellSlices.size(); i++){
         QString outfilename = outfoldername + "/" + QString::number(currentSlice_idx) + ".svg";
-        std::ofstream outfile(outfilename.toStdString().c_str(), std::ios::out);
-        writeHeader(outfile);
+        QFile outfile(outfilename);
+        std::stringstream contentStream;
+        outfile.open(QFile::WriteOnly);
+
+        writeHeader(contentStream);
         if (scfg->slicing_mode == SlicingConfiguration::SlicingMode::Uniform)
-            writeGroupHeader(outfile, currentSlice_idx, scfg->layer_height*(currentSlice_idx+1));
+            writeGroupHeader(currentSlice_idx, scfg->layer_height*(currentSlice_idx+1), contentStream);
         else
-            writeGroupHeader(outfile, currentSlice_idx, scfg->layer_height*(currentSlice_idx+1));
+            writeGroupHeader(currentSlice_idx, scfg->layer_height*(currentSlice_idx+1), contentStream);
 		//int prevIdx = i - 1;
 		//if (prevIdx >= 0)
 		//{
@@ -112,17 +124,19 @@ QString SVGexporter::exportSVG(Slices& shellSlices, Slices& supportSlices, Slice
 		//}
         PolyTree& shellSlice_polytree = shellSlices[i].polytree;
         for (int j=0; j<shellSlice_polytree.ChildCount(); j++){
-            parsePolyTreeAndWrite(shellSlice_polytree.Childs[j], outfile, isTemp);
+            parsePolyTreeAndWrite(shellSlice_polytree.Childs[j], isTemp, contentStream);
         }
 
         if (int(supportSlices.size())-support_base_layer_cnt > i){
 
             for (int j=0; j<supportSlices[i+support_base_layer_cnt].outershell.size(); j++){
-                writePolygon(outfile, supportSlices[i+support_base_layer_cnt].outershell[j], isTemp);
+                writePolygon(supportSlices[i+support_base_layer_cnt].outershell[j], isTemp, contentStream);
             }
         }
-        writeGroupFooter(outfile);
-        writeFooter(outfile);
+        writeGroupFooter(contentStream);
+        writeFooter(contentStream);
+        outfile.write(QByteArray::fromStdString(contentStream.str()));
+
         outfile.close();
         currentSlice_idx += 1;
     }
@@ -270,12 +284,11 @@ Grid Base Plate Type = None").arg(QString::number((int)(scfg->layer_height*1000)
 
 
 
-void SVGexporterPrivate::parsePolyTreeAndWrite(const PolyNode* pn, std::ofstream& outfile, bool isTemp){
-
-    writePolygon(outfile, pn, isTemp);
+void SVGexporterPrivate::parsePolyTreeAndWrite(const PolyNode* pn, bool isTemp, std::stringstream& content){
+    writePolygon(pn, isTemp, content);
     for (int i=0; i<pn->ChildCount(); i++){
         PolyNode* new_pn = pn->Childs[i];
-        parsePolyTreeAndWrite(new_pn, outfile, isTemp);
+        parsePolyTreeAndWrite(new_pn, isTemp, content);
     }
 
     /*while (pn != NULL){
@@ -286,53 +299,53 @@ void SVGexporterPrivate::parsePolyTreeAndWrite(const PolyNode* pn, std::ofstream
 
 }
 
-void SVGexporterPrivate::writePolygon(std::ofstream& outfile, const PolyNode* contour, bool isTemp){
-    outfile << "      <polygon contour:type=\"contour\" points=\"";
+void SVGexporterPrivate::writePolygon(const PolyNode* contour, bool isTemp, std::stringstream& content){
+    content << "      <polygon contour:type=\"contour\" points=\"";
     for (IntPoint point: contour->Contour){
 		if (!isTemp && scfg->slice_invert == SlicingConfiguration::Invert::InvertXAxis)
 		{
 			point.X = -1 * point.X;
 		}
-        outfile << std::fixed << (float)(point.X)*scfg->pixel_per_mm/(ClipperLib::INT_PT_RESOLUTION*scfg->contraction_ratio) + (scfg->resolution_x/2)<< "," << std::fixed << scfg->resolution_y/2 - (float)(point.Y)*scfg->pixel_per_mm/(ClipperLib::INT_PT_RESOLUTION*scfg->contraction_ratio) << " "; // doesn't need 100 actually
+        content << std::fixed << (float)(point.X)*scfg->pixel_per_mm/(ClipperLib::INT_PT_RESOLUTION*scfg->contraction_ratio) + (scfg->resolution_x/2)<< "," << std::fixed << scfg->resolution_y/2 - (float)(point.Y)*scfg->pixel_per_mm/(ClipperLib::INT_PT_RESOLUTION*scfg->contraction_ratio) << " "; // doesn't need 100 actually
 
         // just fit to origin
         //outfile << std::fixed << (float)point.X/ClipperLib::INT_PT_RESOLUTION - scfg->origin.x() << "," << std::fixed << (float)point.Y/ClipperLib::INT_PT_RESOLUTION - scfg->origin.y() << " ";
     }
     if (! contour->IsHole()){
-        outfile << "\" style=\"fill: white\" />\n";
+        content << "\" style=\"fill: white\" />\n";
     } else {
-        outfile << "\" style=\"fill: black\" />\n";
+        content << "\" style=\"fill: black\" />\n";
     }
 }
 
-void SVGexporterPrivate::writePolygon(std::ofstream& outfile, ClipperLib::Path& contour, bool isTemp){
-    outfile << "      <polygon contour:type=\"contour\" points=\"";
+void SVGexporterPrivate::writePolygon(ClipperLib::Path& contour, bool isTemp, std::stringstream& content){
+    content << "      <polygon contour:type=\"contour\" points=\"";
     for (IntPoint point: contour){
 		if (!isTemp && scfg->slice_invert == SlicingConfiguration::Invert::InvertXAxis)
 		{
 			point.X = -1 * point.X;
 		}
-        outfile << std::fixed << (float)(point.X)*scfg->pixel_per_mm/(ClipperLib::INT_PT_RESOLUTION*scfg->contraction_ratio) + (scfg->resolution_x/2) << "," << std::fixed << scfg->resolution_y/2 - (float)(point.Y)*scfg->pixel_per_mm/(ClipperLib::INT_PT_RESOLUTION*scfg->contraction_ratio)<< " "; // doesn't need 100 actually
+        content << std::fixed << (float)(point.X)*scfg->pixel_per_mm/(ClipperLib::INT_PT_RESOLUTION*scfg->contraction_ratio) + (scfg->resolution_x/2) << "," << std::fixed << scfg->resolution_y/2 - (float)(point.Y)*scfg->pixel_per_mm/(ClipperLib::INT_PT_RESOLUTION*scfg->contraction_ratio)<< " "; // doesn't need 100 actually
 
         // just fit to origin
         //outfile << std::fixed << (float)point.X/ClipperLib::INT_PT_RESOLUTION - scfg->origin.x() << "," << std::fixed << (float)point.Y/ClipperLib::INT_PT_RESOLUTION - scfg->origin.y() << " ";
     }
-    outfile << "\" style=\"fill: white\" />\n";
+    content << "\" style=\"fill: white\" />\n";
 }
 
-void SVGexporterPrivate:: writeGroupHeader(std::ofstream& outfile, int layer_idx, float z){
-    outfile << "    <g id=\"layer" << layer_idx << "\" contour:z=\""<< std::fixed << z << "\">\n";
+void SVGexporterPrivate:: writeGroupHeader(int layer_idx, float z, std::stringstream& content){
+    content << "    <g id=\"layer" << layer_idx << "\" contour:z=\""<< std::fixed << z << "\">\n";
 }
 
-void SVGexporterPrivate:: writeGroupFooter(std::ofstream& outfile){
-    outfile << "    </g>\n";
+void SVGexporterPrivate:: writeGroupFooter(std::stringstream& content){
+    content << "    </g>\n";
 }
 
-void SVGexporterPrivate::writeHeader(std::ofstream& outfile){
-    outfile << "<svg width='" << scfg->resolution_x << "' height='" << scfg->resolution_y << "' xmlns='http://www.w3.org/2000/svg' xmlns:contour='http://hix.co.kr' style='background-color: black;'>\n";
+void SVGexporterPrivate::writeHeader(std::stringstream& content){
+    content << "<svg width='" << scfg->resolution_x << "' height='" << scfg->resolution_y << "' xmlns='http://www.w3.org/2000/svg' xmlns:contour='http://hix.co.kr' style='background-color: black;'>\n";
 }
 
-void SVGexporterPrivate::writeFooter(std::ofstream& outfile){
-    outfile << "</svg>";
+void SVGexporterPrivate::writeFooter(std::stringstream& content){
+    content << "</svg>";
 }
 
