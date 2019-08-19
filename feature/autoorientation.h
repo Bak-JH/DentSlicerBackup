@@ -1,6 +1,5 @@
 #ifndef AUTOORIENTATION_H
 #define AUTOORIENTATION_H
-#include "DentEngine/src/mesh.h"
 #include "QMatrix4x4"
 #include <math.h>
 #include <algorithm>
@@ -8,7 +7,13 @@
 #include <string>
 #include <QTime>
 
-using namespace Hix::Engine3D;
+namespace Hix
+{
+	namespace Engine3D
+	{
+		class Mesh;
+	}
+}
 class rotateResult{
 public:
     float phi;
@@ -36,8 +41,8 @@ public:
 namespace autoorientation
 {
 
-    rotateResult* Tweak(const Mesh* mesh, bool bi_algorithmic,int CA,bool *appropriately_rotated);
-    float approachvertex(const Mesh* mesh,float n[]);
+    rotateResult* Tweak(const Hix::Engine3D::Mesh* mesh, bool bi_algorithmic,int CA,bool *appropriately_rotated);
+    float approachvertex(const Hix::Engine3D::Mesh* mesh,float n[]);
 
 
 };

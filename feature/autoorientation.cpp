@@ -1,7 +1,9 @@
 #include "autoorientation.h"
+#include "DentEngine/src/mesh.h"
 #include <qDebug>
 #include <qmlmanager.h>
 
+using namespace Hix::Engine3D;
 
 namespace autoorientationPrivate
 {

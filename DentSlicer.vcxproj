@@ -194,7 +194,10 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="common\TaskManager.cpp" />
+    <ClCompile Include="DentEngine\src\ContourBuilder.cpp" />
+    <ClCompile Include="DentEngine\src\Planes.cpp" />
     <ClCompile Include="DentEngine\src\polyclipping\poly2tri\sweep\advancing_front.cpp" />
+    <ClCompile Include="DentEngine\src\polyclipping\polyclipping.cpp" />
     <ClCompile Include="feature\autoarrange.cpp" />
     <ClCompile Include="feature\autoorientation.cpp" />
     <ClCompile Include="DentEngine\src\polyclipping\poly2tri\sweep\cdt.cpp" />
@@ -204,7 +207,7 @@
     <ClCompile Include="DentEngine\src\configuration.cpp" />
     <ClCompile Include="feature\convex_hull.cpp" />
     <ClCompile Include="feature\extension.cpp" />
-    <ClCompile Include="feature\overhangDetectPostSlice.cpp" />
+    <ClCompile Include="feature\overhangDetect.cpp" />
     <ClCompile Include="fileloader.cpp" />
     <ClCompile Include="feature\generateraft.cpp" />
     <ClCompile Include="feature\generatesupport.cpp" />
@@ -218,6 +221,8 @@
     <ClCompile Include="ui\RotateWidget.cpp" />
     <ClCompile Include="ui\Widget3D.cpp" />
     <ClCompile Include="ui\Widget3DManager.cpp" />
+    <ClCompile Include="unitTest\RandomGen.cpp" />
+    <ClCompile Include="unitTest\RunTests.cpp" />
     <ClCompile Include="utils\gridmesh.cpp" />
     <ClCompile Include="feature\hollowshell.cpp" />
     <ClCompile Include="utils\httpreq.cpp" />
@@ -286,6 +291,8 @@
     <ClInclude Include="common\taskflow\utility\traits.hpp" />
     <ClInclude Include="common\TaskManager.h" />
     <ClInclude Include="common\TrackedIndexedList.h" />
+    <ClInclude Include="DentEngine\src\ContourBuilder.h" />
+    <ClInclude Include="DentEngine\src\Planes.h" />
     <ClInclude Include="DentEngine\src\polyclipping\poly2tri\sweep\advancing_front.h" />
     <QtMoc Include="feature\autoarrange.h">
     </QtMoc>
@@ -300,7 +307,7 @@
     <ClInclude Include="feature\convex_hull.h" />
     <ClInclude Include="feature\earcut.hpp" />
     <ClInclude Include="feature\extension.h" />
-    <ClInclude Include="feature\overhangDetectPostSlice.h" />
+    <ClInclude Include="feature\overhangDetect.h" />
     <ClInclude Include="fileloader.h" />
     <ClInclude Include="feature\generateraft.h" />
     <ClInclude Include="feature\generatesupport.h" />
@@ -342,6 +349,12 @@
     <ClInclude Include="ui\Widget3DManager.h" />
     <ClInclude Include="render\Color.h" />
     <ClInclude Include="unitTest\catch.hpp" />
+    <ClInclude Include="unitTest\RandomGen.h" />
+    <ClInclude Include="unitTest\tests\Float3DVectorHash.h" />
+    <ClInclude Include="unitTest\tests\IndexedListTest.h" />
+    <ClInclude Include="unitTest\RunTests.h" />
+    <ClInclude Include="unitTest\tests\SlicerTest.h" />
+    <ClInclude Include="unitTest\tests\TrackedIndexedListTest.h" />
     <ClInclude Include="utils\mathutils.h" />
     <ClInclude Include="DentEngine\src\mesh.h" />
     <ClInclude Include="feature\meshrepair.h" />

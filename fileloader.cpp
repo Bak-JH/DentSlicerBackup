@@ -108,7 +108,6 @@ bool FileLoader::loadMeshSTL_ascii(Mesh* mesh, const char* filename)
 
     }
     fclose(f);
-    mesh->connectFaces();
 
     return true;
 }
@@ -164,7 +163,6 @@ bool FileLoader::loadMeshSTL_binary(Mesh* mesh, const char* filename){
         mesh->addFace(v0, v1, v2);
     }
     fclose(f);
-    mesh->connectFaces();
 
     return true;
 }
@@ -339,7 +337,6 @@ bool FileLoader::loadMeshOBJ(Mesh* mesh, const char* filename){
     }
     qDebug() << "test 3";
     fclose(file);
-    mesh->connectFaces();
 
     return true;
 }
