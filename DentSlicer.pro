@@ -11,7 +11,11 @@ RC_ICONS = icon.ico
 RC_FILE = DentSlicer.rc
 
 SOURCES += main.cpp \
+    DentEngine/src/ContourBuilder.cpp \
+    DentEngine/src/Planes.cpp \
+    DentEngine/src/polyclipping/polyclipping.cpp \
     common/TaskManager.cpp \
+    feature/overhangDetect.cpp \
     input/raycastcontroller.cpp \
     render/ModelMaterial.cpp \
     render/lights.cpp \
@@ -119,6 +123,8 @@ INCLUDEPATH += $$MINGW_COMPILED_BOOST_INCLUDE
 #TRANSLATIONS += lang_ko.ts
 
 HEADERS += \
+    DentEngine/src/ContourBuilder.h \
+    DentEngine/src/Planes.h \
     DentEngine/src/polyclipping/QDebugPolyclipping.h \
     boundingbox.h \
     common/Indexedlist.h \
@@ -165,6 +171,7 @@ HEADERS += \
     common/taskflow/utility/passive_vector.hpp \
     common/taskflow/utility/singular_allocator.hpp \
     common/taskflow/utility/traits.hpp \
+    feature/overhangDetect.h \
     input/Draggable.h \
     input/raycastcontroller.h \
     render/Color.h \
