@@ -88,7 +88,7 @@ namespace Hix
 			std::unordered_set<HalfEdgeConstItr> allFromSameEdge()const;
 			std::vector<FaceConstItr> nonOwningFaces()const;
 			//similar to non-owning, but half edges are on opposite direction ie) faces facing the same orientation
-			std::unordered_set<FaceConstItr> Hix::Engine3D::HalfEdge::twinFaces()const;
+            std::unordered_set<FaceConstItr> twinFaces()const;
 			bool isTwin(const HalfEdgeConstItr& other)const;
 
 		};

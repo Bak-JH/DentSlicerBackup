@@ -13,11 +13,18 @@
 //	struct IntPoint;
 //
 //}
-class Slices;
+namespace Hix
+{
+	namespace Slicer
+	{
+		class Slices;
+
+	}
+}
 
 namespace SVGexporter
 {
-
+	using namespace Hix::Slicer;
     QString exportSVG(Slices& shellSlices, Slices& supportSlices, Slices& raftSlices, QString outfoldername, bool isTemp);
 };
 

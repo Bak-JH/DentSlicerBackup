@@ -9,15 +9,6 @@ using namespace ClipperLib;
 #define _DEBUG_SVG
 #endif
 
-
-#ifdef _DEBUG_SVG
-using namespace Hix::Debug;
-void logSlices(const Slices& slices)
-{
-	qDebug() << slices;
-
-}
-#endif
 namespace SVGexporterPrivate
 {
 	void parsePolyTreeAndWrite(const ClipperLib::PolyNode* pn, std::ofstream& outfile, bool isTemp);
@@ -34,19 +25,6 @@ namespace SVGexporterPrivate
 
 QString SVGexporter::exportSVG(Slices& shellSlices, Slices& supportSlices, Slices& raftSlices, QString outfoldername, bool isTemp){
 	using namespace SVGexporterPrivate;
-
-#ifdef _DEBUG_SVG
-	qDebug() << "logging slices";
-	qDebug() << "shellSlices entireClass : ";
-	logSlices(shellSlices);
-	qDebug() << "supportSlices entireClass : ";
-	logSlices(supportSlices);
-	qDebug() << "raftSlices entireClass : ";
-	logSlices(raftSlices);
-#endif
-
-
-
     qDebug() << "export svg at "<< outfoldername;
     qDebug() << "shellSlices : " << shellSlices.size() << "supportSlices : " << supportSlices.size() << "graftSlices : " << raftSlices.size();
     QDir dir(outfoldername);
