@@ -186,7 +186,7 @@ private:
 class PolyTree: public PolyNode
 { 
 public:
-    ~PolyTree(){}// Clear(); };
+    ~PolyTree(){ Clear(); };
     PolyNode* GetFirst() const;
     void Clear();
     int Total() const;
