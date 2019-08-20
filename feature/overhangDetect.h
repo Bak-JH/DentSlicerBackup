@@ -10,16 +10,17 @@ namespace Hix
 	namespace Slicer
 	{
 		class Planes;
+		class Slices;
 	}
 	namespace OverhangDetect
 	{
 		struct Overhangs
 		{
 			//point overhangs and faces that depnds on them
-			std::unordered_map<VertexConstItr, std::unordered_set<FaceConstItr>> pointOverhangs;
+			std::unordered_set<VertexConstItr> pointOverhangs;
 			std::unordered_multimap<FaceConstItr, QVector3D> faceOverhangs;
 		};
-		Overhangs detectOverhangs(const Slicer::Planes* planes, const Mesh* shellMesh);
+		std::unordered_set<VertexConstItr> detectOverhangsPostSlice(const Slicer::Planes* planes, const Mesh* shellMesh, const Slicer::Slices* slices);
 	}
 
 }

@@ -34,7 +34,7 @@ SlicingEngine::Result SlicingEngine::sliceModel(bool isTemp, tf::Subflow& subflo
     qmlManager->setProgress(0.4);
 
 	//support
-	OverhangDetect::Overhangs overhangs = OverhangDetect::detectOverhangs(&planes, shellMesh);
+	auto ptOverhangs = OverhangDetect::detectOverhangsPostSlice(&planes, shellMesh, &shellSlices);
 
  // 
 	//Slices supportSlices;
