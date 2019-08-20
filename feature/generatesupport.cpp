@@ -141,6 +141,12 @@ Mesh* GenerateSupport::generateSupport(Mesh* shellmesh) {
     return supportMesh;
 }
 
+std::vector<QVector3D> GenerateSupport::getOverhangDetect(const Mesh* mesh)
+{
+	overhangDetect(const_cast<Mesh*>(mesh), new Mesh());
+	return overhangPositions;
+}
+
 void GenerateSupport::overhangDetect(Mesh* mesh, Mesh *support_mesh) {
 
     pointOverhangDetect(mesh, support_mesh);
@@ -183,6 +189,7 @@ void GenerateSupport::pointOverhangDetect(Mesh* mesh, Mesh* support_mesh) {
 				}
 			}
             if (!close) {
+				overhangPositions.push_back(vertex.position);
                 generateTip(mesh, support_mesh, vertex.position);
             }
 		}
@@ -232,8 +239,11 @@ void GenerateSupport::faceOverhangPoint(Mesh* mesh, Mesh *support_mesh, QVector3
             break;
         }
     }
-    if ((overhangPoint.z() - z_min) >= z_min_minimal_diff && !close)
-        generateTip(mesh, support_mesh, overhangPoint);
+	if ((overhangPoint.z() - z_min) >= z_min_minimal_diff && !close)
+	{
+		generateTip(mesh, support_mesh, overhangPoint);
+		overhangPositions.push_back(overhangPoint);
+	}
 }
 
 void GenerateSupport::generateTip(Mesh* mesh, Mesh *support_mesh, QVector3D point) {

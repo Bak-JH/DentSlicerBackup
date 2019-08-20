@@ -121,9 +121,6 @@ void Hix::UI::RotateWidget::dragEnded(Hix::Input::MouseEventData& e)
     qmlManager->totalRotateDone();
 }
 
-
-
-
 void Hix::UI::RotateWidget::onEntered()
 {
 	//only highlight when not being manipulated

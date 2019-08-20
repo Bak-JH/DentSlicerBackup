@@ -32,6 +32,7 @@ public:
     double critical_angle_radian = M_PI * (critical_angle / 180.0);
     double critical_angle_mesh = 30; // critical angle for cone&mesh intersection
     double critical_angle_mesh_radian = M_PI * (critical_angle_mesh / 180.0);
+	std::vector<QVector3D> overhangPositions;
     std::vector<OverhangPoint> overhangPoints;
     std::vector<OverhangPoint> supportPoints;
     float supportRadiusMax; // support bottom radius 역할
@@ -49,6 +50,7 @@ public:
     Mesh* generateStraightSupport(Mesh* shellmesh);
     Mesh* generateSupport(Mesh* shellMesh);
 
+    std::vector<QVector3D> getOverhangDetect(const Mesh* mesh);
     void overhangDetect(Mesh* mesh, Mesh* support_mesh);
     void pointOverhangDetect(Mesh* mesh, Mesh* support_mesh);
     void faceOverhangDetect(Mesh* mesh, Mesh* support_mesh);

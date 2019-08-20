@@ -1187,6 +1187,10 @@ bool QmlManager::isSelected(GLModel* model)
 	return selectedModels.end() != selectedModels.find(model);
 }
 
+void QmlManager::addCubeWidget(GLModel* model)
+{
+}
+
 void QmlManager::modelVisible(int ID, bool isVisible){
 	auto target = getModelByID(ID);
 	if (target)
