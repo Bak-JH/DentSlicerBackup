@@ -32,6 +32,7 @@ namespace Hix
 		public:
 			void initialize(Qt3DCore::QEntity* qParent, Input::RayCastController* controller);
             void addCubeWidget(Qt3DCore::QEntity* parent, Hix::Engine3D::VertexConstItr overhangPoint, GLModel* model);
+			void addCubeWidget(Qt3DCore::QEntity* parent, QVector3D point, GLModel* model);
 			void setWidgetMode(WidgetMode mode);
 			void updatePosition();
 		private:
