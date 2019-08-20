@@ -10,6 +10,8 @@
 #include "input/Hoverable.h"
 #include "input/Highlightable.h"
 
+#include "glmodel.h"
+
 namespace Hix
 {
 	namespace UI
@@ -20,7 +22,7 @@ namespace Hix
 			Q_OBJECT
 
 		public:
-			CubeWidget(QEntity* parent, QVector3D overhangPoint);
+			CubeWidget(QEntity* parent, QVector3D overhangPoint, GLModel* model);
 			virtual ~CubeWidget();
 
             bool isDraggable(Hix::Input::MouseEventData& e, const Qt3DRender::QRayCasterHit& hit) override;
@@ -32,6 +34,7 @@ namespace Hix
             void setHighlight(bool enable) override;
 
 		private:
+			GLModel* _model;
             Widget3D* _parent = nullptr;
 			Qt3DExtras::QCuboidMesh _mesh;
 			Qt3DCore::QTransform _transform;

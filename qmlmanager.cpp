@@ -1189,8 +1189,6 @@ bool QmlManager::isSelected(GLModel* model)
 
 void QmlManager::addCubeWidget(GLModel* model)
 {
-    GenerateSupport generateSupport;
-	_widgetManager.addCubeWidget(model, generateSupport.getOverhangDetect(model->getMesh()));
 }
 
 void QmlManager::modelVisible(int ID, bool isVisible){
