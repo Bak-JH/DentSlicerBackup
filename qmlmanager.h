@@ -22,6 +22,7 @@
 #include "utils/httpreq.h"
 #include <QKeyboardHandler>
 #include "input/raycastcontroller.h"
+#include "feature/overhangDetect.h"
 #include "ui/Widget3DManager.h"
 #include "common/TaskManager.h"
 #include "slice/SlicingOptBackend.h"
