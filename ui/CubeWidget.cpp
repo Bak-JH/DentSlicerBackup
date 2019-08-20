@@ -19,7 +19,7 @@ Hix::UI::CubeWidget::CubeWidget(QEntity* parent, QVector3D overhangPoint, GLMode
 	setHighlight(false);
 	_material.setShininess(0);
 
-	_transform.setTranslation(overhangPoint + model->getTranslation);
+	_transform.setTranslation(overhangPoint + model->getTranslation());
 
 	setEnabled(true);
 	addComponent(&_parent->layer);
