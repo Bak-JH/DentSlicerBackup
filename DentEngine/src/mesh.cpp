@@ -232,6 +232,20 @@ std::vector<FaceConstItr> Hix::Engine3D::MeshVertex::connectedFaces()const
 	return result;
 }
 
+std::unordered_set<VertexConstItr> Hix::Engine3D::MeshVertex::connectedVertices() const
+{
+	std::unordered_set<VertexConstItr> connected;
+	for (auto& each : leavingEdges)
+	{
+		connected.insert(each->to);
+	}
+	for (auto& each : arrivingEdges)
+	{
+		connected.insert(each->from);
+	}
+	return connected;
+}
+
 bool MeshVertex::empty()const
 {
 	if (leavingEdges.empty() && arrivingEdges.empty())

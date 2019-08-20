@@ -141,6 +141,7 @@ namespace Hix
 			friend inline bool operator!= (const MeshVertex& a, const MeshVertex& b) {
 				return a.position != b.position;
 			}
+			std::unordered_set<VertexConstItr> connectedVertices()const;
 			bool empty()const;
 			void calculateNormalFromFaces();
 			std::vector<FaceConstItr> connectedFaces()const;
@@ -148,6 +149,7 @@ namespace Hix
 			QVector3D vn;
 			std::vector<HalfEdgeConstItr> leavingEdges;
 			std::vector<HalfEdgeConstItr> arrivingEdges;
+
 
 
 		};

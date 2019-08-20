@@ -112,16 +112,6 @@ QString SVGexporter::exportSVG(Slices& shellSlices, Slices& supportSlices, Slice
             writeGroupHeader(currentSlice_idx, scfg->layer_height*(currentSlice_idx+1), contentStream);
         else
             writeGroupHeader(currentSlice_idx, scfg->layer_height*(currentSlice_idx+1), contentStream);
-		//int prevIdx = i - 1;
-		//if (prevIdx >= 0)
-		//{
-		//	auto& prevSlice = shellSlices[prevIdx];
-		//	PolyTree overhang;
-		//	shellSlices[i].getOverhang(&prevSlice, overhang);
-		//	for (int j=0; j< overhang.ChildCount(); j++){
-		//		parsePolyTreeAndWrite(overhang.Childs[j], outfile, isTemp);
-		//	}
-		//}
         PolyTree& shellSlice_polytree = shellSlices[i].polytree;
         for (int j=0; j<shellSlice_polytree.ChildCount(); j++){
             parsePolyTreeAndWrite(shellSlice_polytree.Childs[j], isTemp, contentStream);

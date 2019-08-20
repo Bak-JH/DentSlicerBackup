@@ -10,4 +10,5 @@ namespace ClipperLib
 	// converts float point to int in microns
 	void  addPoint(float x, float y, ClipperLib::Path* path);
 	IntPoint  toInt2DPt(const QVector2D& pt);
+	bool ptInPolytree(const QVector2D& pt, const ClipperLib::PolyTree& tree, ClipperLib::PolyNode*& owningNode);
 }
