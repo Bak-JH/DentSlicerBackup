@@ -4,7 +4,7 @@
 #include "input/raycastcontroller.h"
 #include "Widget3D.h"
 
-Hix::UI::CubeWidget::CubeWidget(QEntity* parent, QVector3D overhangPoint) : QEntity(parent), _parent(dynamic_cast<Widget3D*>(parent))
+Hix::UI::CubeWidget::CubeWidget(QEntity* parent, QVector3D overhangPoint, GLModel* model) : QEntity(parent), _parent(dynamic_cast<Widget3D*>(parent))
 {
 	addComponent(&_mesh);
 	addComponent(&_material);
@@ -19,7 +19,7 @@ Hix::UI::CubeWidget::CubeWidget(QEntity* parent, QVector3D overhangPoint) : QEnt
 	setHighlight(false);
 	_material.setShininess(0);
 
-	_transform.setTranslation(overhangPoint);
+	_transform.setTranslation(overhangPoint + model->getTranslation);
 
 	setEnabled(true);
 	addComponent(&_parent->layer);

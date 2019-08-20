@@ -31,15 +31,12 @@ void Widget3DManager::initialize(Qt3DCore::QEntity* qParent, Input::RayCastContr
 
 }
 
-void Widget3DManager::addCubeWidget(GLModel* parent, std::vector<QVector3D> overhangPoints)
+void Widget3DManager::addCubeWidget(QEntity* parent, VertexConstItr overhangPoint, GLModel* model)
 {
-	for (auto point : overhangPoints)
-    {
-		_cubeWidget.addWidget(std::make_unique<CubeWidget>(&_cubeWidget, point));
-		_cubeWidget.setParent(parent);
-		_controller->addLayer(&_cubeWidget.layer);
-		_controller->addHoverLayer(&_cubeWidget.layer);
-    }
+	_cubeWidget.addWidget(std::make_unique<CubeWidget>(&_cubeWidget, overhangPoint->position, model));
+	_cubeWidget.setParent(parent);
+	_controller->addLayer(&_cubeWidget.layer);
+	_controller->addHoverLayer(&_cubeWidget.layer);
 }
 
 void Hix::UI::Widget3DManager::setWidgetMode(WidgetMode mode)

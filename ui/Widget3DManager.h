@@ -1,6 +1,7 @@
 #pragma once
 #include "Widget3D.h"
 #include "input/raycastcontroller.h"
+#include "DentEngine/src/mesh.h"
 
 //manages rotate/move/cube widgets
 class QmlManager;
@@ -30,7 +31,7 @@ namespace Hix
 		{
 		public:
 			void initialize(Qt3DCore::QEntity* qParent, Input::RayCastController* controller);
-            void addCubeWidget(GLModel* parent, std::vector<QVector3D> overhangPoints);
+            void addCubeWidget(Qt3DCore::QEntity* parent, Hix::Engine3D::VertexConstItr overhangPoint, GLModel* model);
 			void setWidgetMode(WidgetMode mode);
 			void updatePosition();
 		private:
