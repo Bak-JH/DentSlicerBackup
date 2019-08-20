@@ -33,6 +33,7 @@ SOURCES += main.cpp \
     feature/labellingtextpreview.cpp \
     ui/MoveWidget.cpp \
     ui/RotateWidget.cpp \
+    ui/CubeWidget.cpp \
     ui/Widget3D.cpp \
     ui/Widget3DManager.cpp \
     utils/quaternionhelper.cpp \
@@ -192,6 +193,7 @@ HEADERS += \
     feature/text3dgeometrygenerator.h \
     ui/MoveWidget.h \
     ui/RotateWidget.h \
+    ui/CubeWidget.h \
     ui/Widget3D.h \
     ui/Widget3DManager.h \
     unitTest/catch.hpp \

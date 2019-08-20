@@ -22,6 +22,7 @@
 #include "utils/httpreq.h"
 #include <QKeyboardHandler>
 #include "input/raycastcontroller.h"
+#include "feature/overhangDetect.h"
 #include "ui/Widget3DManager.h"
 #include "common/TaskManager.h"
 #include "slice/SlicingOptBackend.h"
@@ -221,6 +222,7 @@ public:
     Q_INVOKABLE bool isSelected();
 	Q_INVOKABLE bool isSelected(int ID);
 	bool isSelected(GLModel* model);
+    void addCubeWidget(GLModel* model);
 
     Q_INVOKABLE void selectPart(int ID);
     Q_INVOKABLE void unselectPart(int ID);

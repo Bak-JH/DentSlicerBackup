@@ -1,9 +1,8 @@
 #include "Widget3DManager.h"
-#include "../qmlmanager.h"
-#include "../input/raycastcontroller.h"
-#include <Qt3DCore>
+#include "qmlmanager.h"
 #include "RotateWidget.h"
 #include "MoveWidget.h"
+#include "CubeWidget.h"
 
 using namespace Hix;
 using namespace Hix::UI;
@@ -32,6 +31,13 @@ void Widget3DManager::initialize(Qt3DCore::QEntity* qParent, Input::RayCastContr
 
 }
 
+void Widget3DManager::addCubeWidget(QEntity* parent, VertexConstItr overhangPoint, GLModel* model)
+{
+	_cubeWidget.addWidget(std::make_unique<CubeWidget>(&_cubeWidget, overhangPoint->position, model));
+	_cubeWidget.setParent(parent);
+	_controller->addLayer(&_cubeWidget.layer);
+	_controller->addHoverLayer(&_cubeWidget.layer);
+}
 
 void Hix::UI::Widget3DManager::setWidgetMode(WidgetMode mode)
 {
