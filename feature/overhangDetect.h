@@ -14,13 +14,9 @@ namespace Hix
 	}
 	namespace OverhangDetect
 	{
-		struct Overhangs
-		{
-			//point overhangs and faces that depnds on them
-			std::unordered_set<VertexConstItr> pointOverhangs;
-			std::unordered_multimap<FaceConstItr, QVector3D> faceOverhangs;
-		};
-		std::unordered_set<VertexConstItr> detectOverhangsPostSlice(const Slicer::Planes* planes, const Mesh* shellMesh, const Slicer::Slices* slices);
+		typedef std::pair<QVector3D, FaceConstItr> FaceOverhang;
+		typedef std::vector<std::variant<VertexConstItr, FaceOverhang>>  Overhangs;
+		Overhangs detectOverhang(const Mesh* shellMesh);
 	}
 
 }
