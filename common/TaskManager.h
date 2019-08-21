@@ -3,6 +3,7 @@
 #include <array>
 #include <memory>
 #include <thread>
+#include <functional>
 #include "taskflow/taskflow.hpp"
 #include "moodycamel/readerwriterqueue.h"
 
@@ -13,6 +14,7 @@ public:
 	TaskManager();
 	void run();
 	void enqueTask(tf::Taskflow* task);
+	void enqueUITask(std::function<void()> f);
 	~TaskManager();
 private:
 	tf::Executor _executor;

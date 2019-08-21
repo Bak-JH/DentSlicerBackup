@@ -1,6 +1,6 @@
 #include "TaskManager.h"
 #include <stdexcept>
-
+#include <qmlmanager.h>
 TaskManager::TaskManager(): _taskThread(&TaskManager::run, this)
 {
 }
@@ -18,7 +18,19 @@ void TaskManager::run()
 
 void TaskManager::enqueTask(tf::Taskflow* task)
 {
-	_queue.enqueue(task);
+	if (task != nullptr)
+	{
+		_queue.enqueue(task);
+	}
+}
+
+void TaskManager::enqueUITask(std::function<void()> f)
+{
+	auto tf = new tf::Taskflow();
+	tf->emplace([f]() {
+		QmlManager::postToObject(f, qmlManager);
+	});
+	enqueTask(tf);
 }
 
 TaskManager::~TaskManager()

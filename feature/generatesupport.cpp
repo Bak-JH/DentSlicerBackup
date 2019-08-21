@@ -14,31 +14,26 @@ QDebug Hix::Debug::operator<< (QDebug d, const OverhangPoint& obj)
 	return d;
 }
 
-OverhangPoint::OverhangPoint(): radius(scfg->support_radius_min)
+OverhangPoint::OverhangPoint() : radius(scfg->support_radius_min)
 {
-    position = QVector3D(99999, 99999, 99999);
+	position = QVector3D(99999, 99999, 99999);
 }
 
-OverhangPoint::OverhangPoint(QVector3D point): radius(scfg->support_radius_min)
+OverhangPoint::OverhangPoint(QVector3D point) : OverhangPoint()
 {
-    position = point;
+	position = point;
 }
 
-OverhangPoint::OverhangPoint(QVector3D point, bool top, bool supportInt, bool meshInt): radius(scfg->support_radius_min)
+OverhangPoint::OverhangPoint(QVector3D point, bool top, bool supportInt, bool meshInt) : OverhangPoint(point)
 {
-    position = point;
-    topPoint = top;
-    supportInterPoint = supportInt;
-    meshInterPoint = meshInt;
+	topPoint = top;
+	supportInterPoint = supportInt;
+	meshInterPoint = meshInt;
 }
 
-OverhangPoint::OverhangPoint(QVector3D point, bool top, bool supportInt, bool meshInt, float r): radius(scfg->support_radius_min)
+OverhangPoint::OverhangPoint(QVector3D point, bool top, bool supportInt, bool meshInt, float r) :OverhangPoint(point, top, supportInt, meshInt)
 {
-    position = point;
-    topPoint = top;
-    supportInterPoint = supportInt;
-    meshInterPoint = meshInt;
-    radius = r;
+	radius = r;
 }
 
 GenerateSupport::GenerateSupport():
@@ -69,8 +64,6 @@ Mesh* GenerateSupport::generateStraightSupport(Mesh* shellmesh){
         OverhangPoint* new_op = new OverhangPoint(QVector3D(op.position.x(), op.position.y(), z_min));
         generateStem(supportMesh, op, new_op);
     }
-
-    supportMesh->connectFaces();
     return supportMesh;
 }
 
@@ -289,9 +282,6 @@ Mesh* GenerateSupport::generateSupport(Mesh* shellmesh) {
         generateStem(supportMesh, *iter, &meshIntersection);
         iter++;
     }
-
-    supportMesh->connectFaces();
-
     qDebug() << "generateSupport Done";
     return supportMesh;
 }

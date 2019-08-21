@@ -48,7 +48,6 @@ GLModel::GLModel(QObject* mainWindow, QNode *parent, Mesh* loadMesh, QString fna
     , layerInfillMesh(nullptr)
     , layerSupportMesh(nullptr)
     , layerRaftMesh(nullptr)
-    , slicer(nullptr)
     , ID(id)
     , m_meshMaterial()
 	, m_geometryRenderer(this)
@@ -62,7 +61,6 @@ GLModel::GLModel(QObject* mainWindow, QNode *parent, Mesh* loadMesh, QString fna
 
 
 {
-    connect(&futureWatcher, SIGNAL(finished()), this, SLOT(slicingDone()));
     qDebug() << "new model made _______________________________"<<this<< "parent:"<<parent;
 	_layer.setRecursive(true);
 	addComponent(&_layer);
@@ -153,7 +151,6 @@ GLModel::GLModel(QObject* mainWindow, QNode *parent, Mesh* loadMesh, QString fna
 	// 승환 25%
 	qmlManager->setProgress(0.23);
 	clearMem();
-	//m_meshMaterial.setPerPrimitiveColorSSBO(primitiveColorBuffer);
 	setMesh(_mesh);
 	//applyGeometry();
 
@@ -176,7 +173,6 @@ GLModel::GLModel(QObject* mainWindow, QNode *parent, Mesh* loadMesh, QString fna
 
 	qDebug() << "created shadow model";
 
-	ft = new featureThread(this, 0);
 	qDebug() << "adding part " << fname.toStdString().c_str();
 
 
@@ -230,7 +226,6 @@ void GLModel::saveUndoState_internal(){
     qDebug () << "save prev mesh";
 
     // reset slicing view since model has been updated
-    slicer = nullptr;
 	auto temp_prev_mesh =  _mesh->saveUndoState(m_transform);
 
 
@@ -543,204 +538,9 @@ void GLModel::updateModelMesh(){
     QMetaObject::invokeMethod((QObject*)qmlManager->scene3d, "enableScene3D");
 }
 
-void GLModel::slicingDone(){
-    QString result = futureWatcher.result()->slicingInfo;
-    slicingInfo = result;
-    qmlManager->slicingData->setProperty("visible", true);
 
-    slicer = futureWatcher.result();
-    emit _generateSupport();
-}
 
-featureThread::featureThread(GLModel* glmodel, int type){
-    qDebug() << "feature thread created" << type;
-    m_glmodel = glmodel;
-    optype = type;
 
-    // enable features
-    ot = new autoorientation();
-    ct = new modelcut();
-    ar = new autoarrange();
-    ste = new STLexporter();
-    se = new SlicingEngine();
-
-    QObject::connect(se, SIGNAL(updateModelInfo(int,int,QString,float)), qmlManager, SLOT(sendUpdateModelInfo(int,int,QString,float)));
-
-}
-
-void featureThread::setTypeAndRun(int type){
-    optype = type;
-    run();
-}
-
-void featureThread::setTypeAndRun(int type, double value1=1, double value2=1, double value3=1){
-    optype = type;
-    arg1 = value1;
-    arg2 = value2;
-    arg3 = value3;
-    qDebug() << "settypeandrun 4";
-    run();
-}
-
-void featureThread::setTypeAndRun(int type, QVariant map){
-    optype = type;
-    data = map;
-    run();
-}
-
-void featureThread::setTypeAndStart(int type){
-    optype = type;
-    start();
-}
-
-void featureThread::run(){
-    qDebug() << "run()";
-    switch (optype){
-        case ftrOpen:
-            {
-                break;
-            }
-        case ftrSave:
-            {
-                break;
-                /*qDebug() << "file save called";
-                if (qmlManager->selectedModels.size() == 1 && qmlManager->selectedModels[0] == nullptr) {
-                    qDebug() << "need popup";
-                    return;
-                }
-                QString fileName = QFileDialog::getSaveFileName(nullptr, tr("Save to STL file"), "", tr("3D Model file (*.stl)"));
-                if(fileName == "")
-                    return;
-                qmlManager->openProgressPopUp();
-                QFuture<void> future = QtConcurrent::run(ste, &STLexporter::exportSTL, m_glmodel->_mesh,fileName);
-                break;
-                */
-            }
-        case ftrExport: // support view & layer view & export // on export, temporary variable = true;
-            {
-
-                if (m_glmodel->updateLock){
-                    qDebug() << "still updating";
-                    return;
-                }
-                m_glmodel->updateLock = true;
-                // look for data if it is temporary
-                QVariantMap config = data.toMap();
-                bool isTemporary = false;
-                for (QVariantMap::const_iterator iter = config.begin(); iter != config.end(); ++iter){
-                    if (!strcmp(iter.key().toStdString().c_str(), "temporary")){
-                        qDebug() << "iter value : " << iter.value().toString();
-                        if (iter.value().toString() == "true"){
-                            isTemporary = true;
-                        }
-                    }
-                }
-
-                QString fileName;
-                if (! isTemporary){ // export view
-                    qDebug() << "export to file";
-                    fileName = QFileDialog::getSaveFileName(nullptr, tr("Export sliced file"), "");
-                    //ste->exportSTL(m_glmodel->_mesh, fileName);
-                    if(fileName == "")
-                        return;
-                } else { // support view & layerview
-                    qDebug() << "export to temp file";
-                    fileName =  QDir::tempPath();
-                    qDebug() << fileName;
-                }
-
-                // slice file
-                qmlManager->openProgressPopUp();
-                QFuture<Slicer*> future = QtConcurrent::run(
-					se, &SlicingEngine::slice, m_glmodel->_mesh, m_glmodel->supportMesh, 
-					m_glmodel->raftMesh, fileName + "/" + m_glmodel->filename.split("/").last() );
-                m_glmodel->futureWatcher.setFuture(future);
-                m_glmodel->updateLock = false;
-                break;
-            }
-        case ftrMove:
-            {
-                break;
-            }
-        case ftrRotate:
-            {
-                break;
-            }
-        case ftrLayFlat:
-            {
-                break;
-            }
-        case ftrArrange:
-            {
-                //emit (m_glmodel->arsignal)->runArrange();
-                //unused, signal from qml goes right into QmlManager.runArrange
-                break;
-            }
-        case ftrOrient:
-            {
-                qDebug() << "ftr orientation run";
-                //while (m_glmodel->updateLock); // if it is not locked
-                if (m_glmodel->updateLock)
-                    return;
-                m_glmodel->updateLock = true;
-
-                m_glmodel->saveUndoState();
-                qmlManager->openProgressPopUp();
-                qDebug() << "tweak start";
-                rotateResult* rotateres= ot->Tweak(m_glmodel->_mesh,true,45,&m_glmodel->appropriately_rotated);
-                qDebug() << "got rotate result";
-                if (rotateres == NULL)
-                    break;
-                else
-                    m_glmodel->rotateModelMesh(rotateres->R);
-                break;
-            }
-        case ftrScale:
-            {
-                m_glmodel->saveUndoState();
-                float scaleX = arg1;
-                float scaleY = arg2;
-                float scaleZ = arg3;
-                m_glmodel->scaleModelMesh(scaleX, scaleY, scaleZ);
-                break;
-            }
-        case ftrRepair:
-            {
-                m_glmodel->saveUndoState();
-                qmlManager->openProgressPopUp();
-                MeshRepair::repairMesh(m_glmodel->_mesh);
-
-                emit m_glmodel->_updateModelMesh();
-                break;
-            }
-        case ftrCut:
-            {
-                m_glmodel->modelCut();
-                break;
-            }
-        case ftrShellOffset:
-            {
-                //m_glmodel->saveUndoState();
-                auto offsetMesh = ShellOffset::shellOffset(m_glmodel->_mesh, -0.5);
-                qmlManager->deleteModelFile(m_glmodel->ID);
-                qmlManager->createModelFile(offsetMesh, m_glmodel->filename);
-                break;
-            }
-        case ftrExtend:
-            {
-
-                break;
-            }
-        case ftrManualSupport:
-            {
-                break;
-            }
-        case ftrLabel:
-            {
-                break;
-            }
-    }
-}
 
 arrangeSignalSender::arrangeSignalSender(){
 
@@ -957,27 +757,47 @@ void GLModel::updateMesh(Mesh* mesh)
 	auto faceHistory = mesh->getFacesNonConst().flushChanges();
 	auto verticesHistory = mesh->getVerticesNonConst().flushChanges();
 	auto hEdgesHistory = mesh->getHalfEdgesNonConst().flushChanges();//not used...for now
-
 	bool tooManyChanges = false;
 	std::unordered_set<size_t> faceChangeSet;
 	std::unordered_set<size_t> vtxChangeSet;
+	std::unordered_set<size_t> hEdgesHistorySet;
+
 	//check allChanged flag and skip to updateAll OR...
 	//if the mesh being updated is not the same as the visible one, we need to redraw everything
-	if (_currentVisibleMesh != mesh || faceHistory.index() == 0 || verticesHistory.index() == 0)
+	if (_currentVisibleMesh != mesh || faceHistory.index() == 0 || verticesHistory.index() == 0 || hEdgesHistory.index() == 0)
 	{
 		tooManyChanges = true;
 	}
-	else
+	//skip if mesh being rendered is same and unmodified
+	else if (faceHistory.index() == 1 && verticesHistory.index() == 1 && hEdgesHistory.index() == 1)
 	{
 		faceChangeSet = std::get<1>(faceHistory);
 		vtxChangeSet = std::get<1>(verticesHistory);
-		if (faceChangeSet.size() > mesh->getFaces().size() * 0.7 || vtxChangeSet.size() > mesh->getVertices().size() * 0.7)
+		hEdgesHistorySet = std::get<1>(hEdgesHistory);
+		if (faceChangeSet.size() + vtxChangeSet.size() + hEdgesHistorySet.size() == 0)
+		{
+			return;
+		}
+	}
+	if(!tooManyChanges)
+	{
+		if (faceHistory.index() == 1 && (std::get<1>(faceHistory).size() > mesh->getFaces().size() * 0.7))
+		{
+			tooManyChanges = true;
+		}
+		else if (verticesHistory.index() == 1 && (std::get<1>(verticesHistory).size() > mesh->getVertices().size() * 0.7))
+		{
+			tooManyChanges = true;
+		}
+		else if (hEdgesHistory.index() == 1 && (std::get<1>(hEdgesHistory).size() > mesh->getHalfEdges().size() * 0.7))
 		{
 			tooManyChanges = true;
 		}
 	}
 	//partial buffer update doesn't seem to work now...
 	tooManyChanges = true;
+	//if the main mesh is modified, raft and support needs to be regenerated
+	_raftSupportGenerated = false;
 	if (tooManyChanges)
 	{
 		//if there are too many individual changes just reset the buffer
@@ -1422,9 +1242,6 @@ void GLModel::generateSupport(){
     layerSupportMesh->vertexMove(t);
     layerRaftMesh->vertexMove(t);
 
-    layerInfillMesh->connectFaces();
-    layerSupportMesh->connectFaces();
-    layerRaftMesh->connectFaces();
     updateModelMesh();
 }
 
@@ -1937,21 +1754,21 @@ void GLModel::getSliderSignal(double value){
     }
 }
 
-void GLModel::getLayerViewSliderSignal(double value) {
+void GLModel::getLayerViewSliderSignal(int value) {
     if ( !layerViewActive)
         return;
 
-    float height = (_mesh->z_max() - _mesh->z_min() + scfg->raft_thickness + scfg->support_base_height) * value;
-    int layer_num = int(height/scfg->layer_height)+1;
-    if (value <= 0.002f)
-        layer_num = 0;
+    //float height = (_mesh->z_max() - _mesh->z_min() + scfg->raft_thickness + scfg->support_base_height) * value;
+    //int layer_num = int(height/scfg->layer_height)+1;
+    //if (value <= 0.002f)
+    //    layer_num = 0;
 
     if (layerViewPlaneTextureLoader == nullptr)
     layerViewPlaneTextureLoader = new Qt3DRender::QTextureLoader();
 
     QDir dir(QDir::tempPath()+"_export");//(qmlManager->selectedModels[0]->filename + "_export")
     if (dir.exists()){
-        QString filename = dir.path()+"/"+QString::number(layer_num)+".svg";
+        QString filename = dir.path()+"/"+QString::number(value)+".svg";
         qDebug() << filename;
         layerViewPlaneTextureLoader->setSource(QUrl::fromLocalFile(filename));//"C:\\Users\\User\\Desktop\\sliced\\11111_export\\100.svg"));
     }
@@ -1977,10 +1794,10 @@ void GLModel::getLayerViewSliderSignal(double value) {
 	QMatrix3x3 matrixTransform = flip_matrix * rotation_matrix;
 
     layerViewPlaneMaterial->setTextureTransform(matrixTransform);
-    layerViewPlaneTransform->setTranslation(QVector3D(0,0,layer_num*scfg->layer_height - scfg->raft_thickness - scfg->support_base_height));
+    layerViewPlaneTransform->setTranslation(QVector3D(0,0, value *scfg->layer_height - scfg->raft_thickness - scfg->support_base_height));
 
     // change phong material of original model
-    float h = (_mesh->z_max() - _mesh->z_min() + scfg->raft_thickness + scfg->support_base_height) * value + _mesh->z_min() - scfg->raft_thickness - scfg->support_base_height;
+    float h = scfg->layer_height* value + _mesh->z_min() - scfg->raft_thickness - scfg->support_base_height;
 	m_meshMaterial.setParameterValue("height", QVariant::fromValue(h));
 	/*m_layerMaterialRaftHeight->setValue(QVariant::fromValue(qmlManager->getLayerViewFlags() & LAYER_INFILL != 0 ?
                 _mesh->z_min() :
@@ -2216,8 +2033,6 @@ void GLModel::generateText3DMesh()
 
     }
 
-   _mesh->connectFaces();
-
     updateModelMesh();
 
     qmlManager->setProgress(1);
@@ -2238,7 +2053,7 @@ void GLModel:: unselectMeshFaces(){
 void GLModel::selectMeshFaces(){
 	selectedFaces.clear();
 	QVector3D normal = targetMeshFace->fn;
-	_mesh->findNearSimilarFaces(normal, targetMeshFace, targetMeshFace, selectedFaces);
+	_mesh->findNearSimilarFaces(normal, targetMeshFace, selectedFaces);
 	//we need to mark these vertices as modified so they get re-rendered with new colors
 	for (auto& fcItr : selectedFaces)
 	{
@@ -2509,7 +2324,9 @@ void GLModel::changeViewMode(int viewMode) {
         layerViewPlaneEntity->addComponent(layerViewPlane);
         layerViewPlaneEntity->addComponent(layerViewPlaneTransform); //jj
         layerViewPlaneEntity->addComponent(layerViewPlaneMaterial);
-        getLayerViewSliderSignal(1);
+		QVariant maxLayerCount;
+		QMetaObject::invokeMethod(qmlManager->layerViewSlider, "getMaxLayer", Qt::DirectConnection, Q_RETURN_ARG(QVariant, maxLayerCount));
+        getLayerViewSliderSignal(maxLayerCount.toInt());
         break;
     }
 
@@ -2649,12 +2466,18 @@ bool GLModel::faceHighlightActive() const
 {
 	return extensionActive || layflatActive || manualSupportActive;
 }
+bool GLModel::raftSupportGenerated() const
+{
+	return _raftSupportGenerated;
+}
 void GLModel::setSupportAndRaft()
 {
 	GenerateSupport generatesupport;
 	supportMesh = generatesupport.generateSupport(_mesh);
 	GenerateRaft generateraft;
 	raftMesh = generateraft.generateRaft(_mesh, generatesupport.overhangPoints);
+	_raftSupportGenerated = true;
+
 }
 
 const Qt3DCore::QTransform* GLModel::getTransform() const

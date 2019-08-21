@@ -9,29 +9,29 @@ STLexporter::STLexporter()
 Mesh* STLexporter::mergeSelectedModels() {
     std::vector<GLModel*> targetModels;
 
-	auto& selectedModels = qmlManager->getSelectedModels();
-	if (selectedModels.empty())
-	{
-		for (auto& pair : qmlManager->glmodels) {
-			auto glm = &pair.second;
-			targetModels.push_back(glm);
-		}
-		if (targetModels.size() == 0)
-			return nullptr;
-	}
-	else
-	{
-		if (selectedModels.size() == 1)
-		{
-			//make copy of existing mesh
-			auto existingMesh = (*selectedModels.cbegin())->getMesh();
-			return new Mesh(*existingMesh);
-		}
-		else
-		{
-			targetModels.assign(selectedModels.cbegin(), selectedModels.cend());
-		}
-	}
+    auto& selectedModels = qmlManager->getSelectedModels();
+    if (selectedModels.empty())
+    {
+        for (auto& pair : qmlManager->glmodels) {
+            auto glm = &pair.second;
+            targetModels.push_back(glm);
+        }
+        if (targetModels.size() == 0)
+            return nullptr;
+    }
+    else
+    {
+        if (selectedModels.size() == 1)
+        {
+            //make copy of existing mesh
+            auto existingMesh = (*selectedModels.cbegin())->getMesh();
+            return new Mesh(*existingMesh);
+        }
+        else
+        {
+            targetModels.assign(selectedModels.cbegin(), selectedModels.cend());
+        }
+    }
 
     size_t faceNum = 0;
     size_t verNum = 0;
@@ -50,7 +50,7 @@ Mesh* STLexporter::mergeSelectedModels() {
         QVector3D trans = model->m_transform.translation();
 
         for (const auto& each : model->getMesh()->getFaces()) {
-			auto meshVertices = each.meshVertices();
+            auto meshVertices = each.meshVertices();
             QVector3D v1 = meshVertices[0]->position+trans;
             QVector3D v2 = meshVertices[1]->position+trans;
             QVector3D v3 = meshVertices[2]->position+trans;
@@ -105,7 +105,6 @@ Mesh* STLexporter::mergeSelectedModels() {
                            (-1)*ymid,
                            (-1)*zmid));
 
-    mergedMesh->connectFaces();
 
     return mergedMesh;
 }
@@ -116,17 +115,19 @@ void STLexporter::exportSTL(QString outfilename){
     qmlManager->setProgress(0);
     qmlManager->setProgressText("saving");
 
-	auto& selectedModels = qmlManager->getSelectedModels();
-	if (selectedModels.empty())
-		return;
-	if (selectedModels.size() > 1) mesh = mergeSelectedModels();
+    auto& selectedModels = qmlManager->getSelectedModels();
+    if (selectedModels.empty())
+        return;
+    if (selectedModels.size() > 1) mesh = mergeSelectedModels();
     else mesh = (*selectedModels.cbegin())->getMesh();
 
     qDebug() << "export STL";
 
-    std::ofstream outfile(outfilename.toStdString().c_str(), std::ios::out);
+    QFile outfile(outfilename);
+    std::stringstream contentStream;
+    outfile.open(QFile::WriteOnly);
 
-    writeHeader(outfile);
+    writeHeader(contentStream);
     qmlManager->setProgress(0.5);
     //qmlManager->setProgress(0.1);
     QCoreApplication::processEvents();
@@ -134,7 +135,7 @@ void STLexporter::exportSTL(QString outfilename){
     size_t total_cnt = mesh->getFaces().size();
     size_t cnt = 0;
     for (const auto& mf : mesh->getFaces()){
-        writeFace(outfile, mesh, mf);
+        writeFace(mesh, mf, contentStream);
 
         if (cnt %100 == 0){
             QCoreApplication::processEvents();
@@ -143,7 +144,8 @@ void STLexporter::exportSTL(QString outfilename){
         cnt++;
     }
 
-    writeFooter(outfile);
+    writeFooter(contentStream);
+    outfile.write(QByteArray::fromStdString(contentStream.str()));
 
     outfile.close();
     qmlManager->setProgress(1);
@@ -155,26 +157,26 @@ void STLexporter::exportSTL(QString outfilename){
     return;
 }
 
-void STLexporter::writeFace(std::ofstream& outfile,const Mesh* mesh, MeshFace mf){
+void STLexporter::writeFace(const Mesh* mesh, MeshFace mf, std::stringstream& content){
 
-    outfile << "facet normal "<< mf.fn.x() <<" "<< mf.fn.y()<<" "<< mf.fn.z() << "\n";
-    outfile << "    outer loop\n";
-	auto meshVertices = mf.meshVertices();
+    content << "facet normal "<< mf.fn.x() <<" "<< mf.fn.y()<<" "<< mf.fn.z() << "\n";
+    content << "    outer loop\n";
+    auto meshVertices = mf.meshVertices();
 
     auto& mv1 = meshVertices[0];
     auto& mv2 = meshVertices[1];
     auto& mv3 = meshVertices[2];
-    outfile << "        vertex "<< mv1->position.x()<<" "<< mv1->position.y()<<" "<< mv1->position.z()<<"\n";
-    outfile << "        vertex "<< mv2->position.x()<<" "<< mv2->position.y()<<" "<< mv2->position.z()<<"\n";
-    outfile << "        vertex "<< mv3->position.x()<<" "<< mv3->position.y()<<" "<< mv3->position.z()<<"\n";
-    outfile << "    endloop\n";
-    outfile << "endfacet\n";
+    content << "        vertex "<< mv1->position.x()<<" "<< mv1->position.y()<<" "<< mv1->position.z()<<"\n";
+    content << "        vertex "<< mv2->position.x()<<" "<< mv2->position.y()<<" "<< mv2->position.z()<<"\n";
+    content << "        vertex "<< mv3->position.x()<<" "<< mv3->position.y()<<" "<< mv3->position.z()<<"\n";
+    content << "    endloop\n";
+    content << "endfacet\n";
 }
 
-void STLexporter::writeHeader(std::ofstream& outfile){
-    outfile << "solid diridiri\n";
+void STLexporter::writeHeader(std::stringstream& content){
+    content << "solid diridiri\n";
 }
 
-void STLexporter::writeFooter(std::ofstream& outfile){
-    outfile << "endsolid diridiri";
+void STLexporter::writeFooter(std::stringstream& content){
+    content << "endsolid diridiri";
 }

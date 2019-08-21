@@ -1,25 +1,36 @@
 #include "autoorientation.h"
+#include "DentEngine/src/mesh.h"
 #include <qDebug>
 #include <qmlmanager.h>
 
+using namespace Hix::Engine3D;
 
+namespace autoorientationPrivate
+{
+	float target_function(float touching, float overhang, float line);
+	float* lithograph(const Mesh* mesh, float n[], float amin, int CA);
+	float get_touching_line(const Mesh* mesh, float a[], const MeshFace& face, float touching_height);
+	std::vector<Orient*> area_cumulation(const Mesh* mesh, float n[], bool bi_algorithmic);
+	std::vector<Orient*> egde_plus_vertex(const Mesh* mesh, int bsvest_n);
+	float* calc_random_normal(const Mesh* mesh, int i, const MeshFace& face);
+	std::vector<Orient*> remove_duplicates(std::vector<Orient*> o, int* orientCnt);
+	rotateResult* euler(Liste bestside);
+}
+
+using namespace autoorientationPrivate;
 Orient::Orient(float _val, QVector3D _label)
 {
     val = _val;
     label = _label;
 }
 
-autoorientation::autoorientation()
-{
-
-}
 /*
 The critical angle CA is a variable that can be set by the operator as
     it may depend on multiple factors such as material used, printing
      temperature, printing speed, etc.
 */
 
-rotateResult* autoorientation::Tweak(Mesh* mesh, bool bi_algorithmic,int CA,bool *appropriately_rotated){
+rotateResult* autoorientation::Tweak(const Mesh* mesh, bool bi_algorithmic,int CA,bool *appropriately_rotated){
     qmlManager->setProgress(0);
     qmlManager->setProgressText("startttttt");
 
@@ -159,7 +170,7 @@ rotateResult* autoorientation::Tweak(Mesh* mesh, bool bi_algorithmic,int CA,bool
     qmlManager->openResultPopUp("","Orientation Done","");
     return result;
 }
-float autoorientation::target_function(float touching,float overhang,float line){
+float autoorientationPrivate::target_function(float touching,float overhang,float line){
     float ABSLIMIT=100;
     float RELLIMIT=1;
     float LINE_FAKTOR = 0.5; //원문 그대로 적었습니다. FACTOR가 아닐까 생각듭니다.
@@ -167,7 +178,7 @@ float autoorientation::target_function(float touching,float overhang,float line)
     float F = (overhang/ABSLIMIT) + (overhang / (touching+touching_line));
     return F;
 }
-float autoorientation::approachvertex(Mesh* mesh,float n[]){
+float autoorientation::approachvertex(const Mesh* mesh,float n[]){
     bool minFlag=true;
     //qt에서 최댓값이 얼마인지 몰라 flag로 만들었습니다.
 
@@ -201,7 +212,7 @@ float autoorientation::approachvertex(Mesh* mesh,float n[]){
 
     return amin;
 }
-float* autoorientation::lithograph(Mesh* mesh, float n[], float amin, int CA){
+float* autoorientationPrivate::lithograph(const Mesh* mesh, float n[], float amin, int CA){
     //overhang,bottom,line을 구합니다.
     float Overhang=1;
     float alpha= - cos((90-CA)*M_PI/180);  //CA는 0~90도입니다 기본은 45도.
@@ -252,7 +263,7 @@ float* autoorientation::lithograph(Mesh* mesh, float n[], float amin, int CA){
     temp[2]=LineL;
     return temp;
 }
-float autoorientation::get_touching_line(Mesh* mesh,float a[], const MeshFace& face,float touching_height){
+float autoorientationPrivate::get_touching_line(const Mesh* mesh,float a[], const MeshFace& face,float touching_height){
     std::vector<const MeshVertex*> touch_list;
 	auto idx = face.meshVertices();
     for(int j=0;j<3;j++){
@@ -285,7 +296,7 @@ float autoorientation::get_touching_line(Mesh* mesh,float a[], const MeshFace& f
     }
     return length;
 }
-std::vector<Orient*> autoorientation::area_cumulation(Mesh* mesh,float n[],bool bi_algorithmic){
+std::vector<Orient*> autoorientationPrivate::area_cumulation(const Mesh* mesh,float n[],bool bi_algorithmic){
     //bi_algorithmic이 false:6개 true:8개의 orientataion*을 만들어 리턴합니다.
     int best_n;
     if(bi_algorithmic)
@@ -382,7 +393,7 @@ std::vector<Orient*> autoorientation::area_cumulation(Mesh* mesh,float n[],bool 
     //가장 가중치가 높은 orientation들도 추가합니다.
     return result;
 }
-std::vector<Orient*> autoorientation::egde_plus_vertex(Mesh* mesh, int best_n){
+std::vector<Orient*> autoorientationPrivate::egde_plus_vertex(const Mesh* mesh, int best_n){
     //orientation을 추가로 더할 때 씁니다. best_n 갯수만큼 return 하긴 하지만,
     //호출한 Tweak() 에서 val>2인 orientation만 원본 orientation에 추가하므로,
     //실제로 추가되는 값은 그보다 작을 수 있습니다.
@@ -466,7 +477,7 @@ std::vector<Orient*> autoorientation::egde_plus_vertex(Mesh* mesh, int best_n){
     return result;
 
 }
-float* autoorientation::calc_random_normal(Mesh* mesh, int i,  const MeshFace& face){
+float* autoorientationPrivate::calc_random_normal(const Mesh* mesh, int i,  const MeshFace& face){
     //mesh 내의 random한 normal을 리턴합니다.
     QTime time = QTime::currentTime();
     qsrand((uint)time.msec());
@@ -530,7 +541,7 @@ float* autoorientation::calc_random_normal(Mesh* mesh, int i,  const MeshFace& f
         return NULL;
     }
 }
-std::vector<Orient*> autoorientation::remove_duplicates(std::vector<Orient*> o,int *orientCnt){
+std::vector<Orient*> autoorientationPrivate::remove_duplicates(std::vector<Orient*> o,int *orientCnt){
     //중복을 제거합니다.
     int initIndex=*orientCnt+8;
     int count=0;
@@ -565,7 +576,7 @@ std::vector<Orient*> autoorientation::remove_duplicates(std::vector<Orient*> o,i
     *orientCnt=count-8;
     return orientation;
 }
-rotateResult* autoorientation::euler(Liste bestside){
+rotateResult* autoorientationPrivate::euler(Liste bestside){
     //bestside의 orientation, bottom,overhang,line 으로 unprintability를 계산합니다.
     QVector3D v;
     float phi;
