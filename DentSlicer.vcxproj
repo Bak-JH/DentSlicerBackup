@@ -96,7 +96,7 @@
       <LinkIncremental>false</LinkIncremental>
       <OutputFile>$(OutDir)\DentStudio.exe</OutputFile>
       <RandomizedBaseAddress>true</RandomizedBaseAddress>
-      <SubSystem>Console</SubSystem>
+      <SubSystem>Windows</SubSystem>
       <SuppressStartupBanner>true</SuppressStartupBanner>
     </Link>
     <Midl>

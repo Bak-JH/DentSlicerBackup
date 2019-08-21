@@ -222,7 +222,8 @@ public:
     Q_INVOKABLE bool isSelected();
 	Q_INVOKABLE bool isSelected(int ID);
 	bool isSelected(GLModel* model);
-    void addCubeWidget(GLModel* model);
+    void showCubeWidgets(GLModel* model);
+	void addSupport(GLModel* model, QVector3D position);
 
     Q_INVOKABLE void selectPart(int ID);
     Q_INVOKABLE void unselectPart(int ID);

@@ -1187,8 +1187,13 @@ bool QmlManager::isSelected(GLModel* model)
 	return selectedModels.end() != selectedModels.find(model);
 }
 
-void QmlManager::addCubeWidget(GLModel* model)
+void QmlManager::showCubeWidgets(GLModel* model)
 {
+}
+
+void QmlManager::addSupport(GLModel* model, QVector3D position)
+{
+	
 }
 
 void QmlManager::modelVisible(int ID, bool isVisible){

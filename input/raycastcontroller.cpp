@@ -197,10 +197,10 @@ void RayCastController::mouseReleased(Qt3DInput::QMouseEvent* mouse)
 				if (!test)
 				{
 					//common loginc that does not need ray casting
-					if (qmlManager->getViewMode() == VIEW_MODE_SUPPORT) {
+					/*if (qmlManager->getViewMode() == VIEW_MODE_SUPPORT) {
 						qmlManager->openYesNoPopUp(false, "", "Support will disappear.", "", 18, "", ftrSupportDisappear, 1);
 						return;
-					}
+					}*/
 					if (qmlManager->yesno_popup->property("isFlawOpen").toBool())
 						return;
 
@@ -305,7 +305,10 @@ void RayCastController::hitsChanged(const Qt3DRender::QAbstractRayCaster::Hits& 
 				auto glmodel = dynamic_cast<GLModel*>(nearestHit->entity());
 				if (glmodel)
 				{
-					glmodel->clicked(_mouseEvent, *nearestHit);
+					if (qmlManager->getViewMode() == VIEW_MODE_SUPPORT)
+						qmlManager->addSupport(glmodel, nearestHit->localIntersection());
+					else 
+						glmodel->clicked(_mouseEvent, *nearestHit);
 				}
                 else
                 {
