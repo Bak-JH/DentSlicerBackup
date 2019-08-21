@@ -189,29 +189,6 @@ ContourBuilder::ContourBuilder(const Mesh* mesh, std::unordered_set<FaceConstItr
 }
 
 
-std::variant<VertexConstItr, HalfEdgeConstItr> toHEdgeOrVtxHint(
-	const FaceConstItr& mf, const std::variant<VertexConstItr, std::pair<VertexConstItr, VertexConstItr>>& edgeOrVtx)
-{
-	if (edgeOrVtx.index() == 0)
-	{
-		return std::get<0>(edgeOrVtx);
-	}
-	else
-	{
-		auto vtxPair = std::get<1>(edgeOrVtx);
-		//hint is edge
-		HalfEdgeConstItr nextEdge;
-		if (mf->getEdgeWithVertices(nextEdge, vtxPair.first, vtxPair.second))
-		{
-			return nextEdge;
-		}
-		else
-		{
-			throw std::runtime_error("edge not found");
-		}
-	}
-}
-
 void ContourBuilder::buildSegment(const FaceConstItr& mf)
 {
 	ContourSegment segment;
@@ -307,7 +284,6 @@ std::vector<Contour> ContourBuilder::buildContours()
 
 	while (!_unexplored.empty())
 	{
-
 		Contour currContour;
 		//add first segment, pop it from unexplored
 		ContourSegment& firstSeg = _segments[*_unexplored.begin()];
@@ -344,7 +320,6 @@ std::vector<Contour> ContourBuilder::buildContours()
 	//link un-closed contours together if possible to minimize un-closed contour counts
 	if (!_incompleteContours.empty())
 	{
-
 		auto closedContours = joinOrCloseIncompleteContours();
 		for (auto each : closedContours)
 		{
