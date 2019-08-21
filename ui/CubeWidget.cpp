@@ -32,6 +32,11 @@ Hix::UI::CubeWidget::~CubeWidget()
     removeComponent(&_transform);
 }
 
+void Hix::UI::CubeWidget::onClicked(Hix::Input::MouseEventData& e, const Qt3DRender::QRayCasterHit& hit)
+{
+	
+}
+
 bool Hix::UI::CubeWidget::isDraggable(Hix::Input::MouseEventData& e, const Qt3DRender::QRayCasterHit& hit)
 {
     return _parent->visible();

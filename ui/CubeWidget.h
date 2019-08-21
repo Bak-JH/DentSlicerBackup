@@ -9,6 +9,7 @@
 #include "input/Draggable.h"
 #include "input/Hoverable.h"
 #include "input/Highlightable.h"
+#include "input/raycastcontroller.h"
 
 #include "glmodel.h"
 
@@ -25,6 +26,9 @@ namespace Hix
 			CubeWidget(QEntity* parent, QVector3D overhangPoint, GLModel* model);
 			virtual ~CubeWidget();
 
+
+			void onClicked(Hix::Input::MouseEventData& e, const Qt3DRender::QRayCasterHit& hit);
+			/* these are not used in now. */
             bool isDraggable(Hix::Input::MouseEventData& e, const Qt3DRender::QRayCasterHit& hit) override;
             void dragStarted(Hix::Input::MouseEventData& e, const Qt3DRender::QRayCasterHit& hit) override;
             void doDrag(Hix::Input::MouseEventData& e)override;
@@ -40,6 +44,7 @@ namespace Hix
 			Qt3DCore::QTransform _transform;
 			Qt3DExtras::QPhongMaterial _material;
 
+			/* these are not used in now. */
 			QPoint _mouseOrigin;
 			QPoint _mouseCurrent;
 			QPoint _mousePrev;
