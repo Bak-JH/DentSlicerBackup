@@ -802,8 +802,8 @@ void QmlManager::applyArrangeResult(std::vector<QVector3D> translations, std::ve
     for(auto& pair : glmodels)
     {
         auto model = &pair.second;
-        model->moveModelMesh_direct(translations[index], true);
-        model->rotateModelMesh_direct(3, rotations[index]);
+        model->moveModelMesh(translations[index], true);
+        model->rotateModelMesh(3, rotations[index], true);
         //model->setTranslation(translations[index]);
         ++index;
     }
