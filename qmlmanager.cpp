@@ -31,6 +31,7 @@
 using namespace Hix::Input;
 using namespace Hix::UI;
 using namespace Hix::Render;
+using namespace Hix::Tasking;
 
 QmlManager::QmlManager(QObject *parent) : QObject(parent), _optBackend(this, scfg)
   ,layerViewFlags(LAYER_INFILL | LAYER_SUPPORTERS | LAYER_RAFT), modelIDCounter(0)
@@ -1228,9 +1229,7 @@ const RayCastController& QmlManager::getRayCaster()
 
 
 void QmlManager::modelMoveInit(){
-    for (GLModel* curModel: selectedModels){
-        curModel->saveUndoState();
-    }
+
 }
 
 void QmlManager::modelMoveDone(){
@@ -1266,10 +1265,6 @@ void QmlManager::totalMoveDone(){
 }
 
 void QmlManager::modelRotateInit(){
-    qDebug() << "model rotate init";
-    for (GLModel* curModel : selectedModels){
-        curModel->saveUndoState();
-    }
     return;
 }
 
@@ -1567,7 +1562,6 @@ void QmlManager::runGroupFeature(int ftrType, QString state, double arg1, double
 				if (selectedModel->updateLock)
 					return;
 				selectedModel->updateLock = true;
-				selectedModel->saveUndoState();
 				qmlManager->openProgressPopUp();
 				qDebug() << "tweak start";
 				rotateResult* rotateres = autoorientation::Tweak(selectedModel->getMesh(), true, 45, &selectedModel->appropriately_rotated);
@@ -1585,7 +1579,6 @@ void QmlManager::runGroupFeature(int ftrType, QString state, double arg1, double
         if (state == "active"){
 
 			for (auto selectedModel : selectedModels) {
-				selectedModel->saveUndoState();
 				selectedModel->repairMesh();
 
 			}
@@ -1630,96 +1623,11 @@ void QmlManager::runGroupFeature(int ftrType, QString state, double arg1, double
 }
 
 void QmlManager::unDo(){
-	if (!glmodels.empty())
-	{
-		if (selectedModels.empty()) {
-			// do global undo
-			GLModel* recentModel = nullptr;
-			// find global recent model
-			for (auto& pair : glmodels) {
-				auto glmodel = &pair.second;
-				if (glmodel->getMesh()->getPrev() == nullptr || glmodel->getMesh()->getPrev()->time.isNull())
-					continue;
-				else if (recentModel == nullptr)
-					recentModel = glmodel;
-				else if (glmodel->getMesh()->getPrev()->time >= recentModel->getMesh()->getPrev()->time) {
-					recentModel = glmodel;
-				}
-			}
 
-			// undo recentModel
-			if (recentModel != nullptr)
-				recentModel->loadUndoState();
-		}
-		else{
-			// undo the most recently changed model from selected models...
-			GLModel* recentModel = nullptr;
-			QTime recentTime(0, 0);
-			for (auto each : selectedModels)
-			{
-				auto eachUndoTime = each->getPrevTime();
-				if (!eachUndoTime.isNull() && eachUndoTime > recentTime)
-				{
-					recentModel = each;
-					recentTime = eachUndoTime;
-				}
-			}
-			if (recentModel)
-			{
-				recentModel->loadUndoState();
-
-			}
-		}
-	}
-
-    sendUpdateModelInfo();
-    return;
 }
 
 void QmlManager::reDo(){
-	if (!glmodels.empty())
-	{
-		if (selectedModels.empty()) {
-			// do global redo
-			GLModel* recentModel = nullptr;
-			// find global recent model
-			for (auto& pair : glmodels) {
-				auto glmodel = &pair.second;
-				if (glmodel->getMesh()->getNext() == nullptr || glmodel->getMesh()->getNext()->time.isNull())
-					continue;
-				else if (recentModel == nullptr)
-					recentModel = glmodel;
-				else if (glmodel->getMesh()->getNext()->time >= recentModel->getMesh()->getNext()->time) {
-					recentModel = glmodel;
-				}
-			}
-			// undo recentModel
-			if (recentModel != nullptr)
-				recentModel->loadRedoState();
-		}
-		else {
-			// undo the most recently changed model from selected models...
-			GLModel* recentModel = nullptr;
-			QTime recentTime(0, 0);
-			for (auto each : selectedModels)
-			{
-				auto eachRedoTime = each->getNextTime();
-				if (!eachRedoTime.isNull() && eachRedoTime > recentTime)
-				{
-					recentModel = each;
-					recentTime = eachRedoTime;
-				}
-			}
-			if (recentModel)
-			{
-				recentModel->loadRedoState();
 
-			}
-		}
-	}
-
-    sendUpdateModelInfo();
-    return;
 }
 
 void QmlManager::copyModel(){
@@ -1730,7 +1638,7 @@ void QmlManager::copyModel(){
     for (GLModel* model : selectedModels){
         if (model == nullptr)
             continue;
-        Mesh* copied = new Mesh( model->getMesh());
+        Mesh* copied = new Mesh( *model->getMesh());
 
         copyMeshes.push_back(copied);
         copyMeshNames.push_back(model->filename);
@@ -2004,12 +1912,12 @@ QString QmlManager::getExportPath()
 	fileName = QFileDialog::getSaveFileName(nullptr, tr("Export sliced file"), "");
 	return fileName;
 }
-tf::Taskflow* QmlManager::exportSelectedAsync(QString exportPath, bool isTemp)
+Hix::Tasking::GenericTask* QmlManager::exportSelectedAsync(QString exportPath, bool isTemp)
 {
 	if (exportPath.isEmpty())
 		return nullptr;
-	tf::Taskflow* taskflow = new tf::Taskflow();
-	auto exportSelectedTask = taskflow->emplace([this, exportPath, isTemp](tf::Subflow& subflow) {
+	auto task = new GenericTask();
+	task->getFlow().emplace([this, exportPath, isTemp](tf::Subflow& subflow) {
 
 
 		STLexporter* ste = new STLexporter();
@@ -2040,7 +1948,7 @@ tf::Taskflow* QmlManager::exportSelectedAsync(QString exportPath, bool isTemp)
 		QMetaObject::invokeMethod(layerViewSlider, "setThickness", Q_ARG(QVariant, (scfg->layer_height)));
 		QMetaObject::invokeMethod(layerViewSlider, "setLayerCount", Q_ARG(QVariant, (result.layerCount -1))); //0 based index
 	});
-	return taskflow;
+	return task;
 
 }
 void QmlManager::setModelViewMode(int mode)

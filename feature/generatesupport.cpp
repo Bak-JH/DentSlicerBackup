@@ -14,6 +14,18 @@ QDebug Hix::Debug::operator<< (QDebug d, const OverhangPoint& obj)
 	return d;
 }
 
+
+
+
+Hix::SupportGeneration::VerticalSupportTask::VerticalSupportTask(const GLModel* model)
+{
+}
+
+Hix::SupportGeneration::VerticalSupportTask::~VerticalSupportTask()
+{
+}
+
+
 OverhangPoint::OverhangPoint() : radius(scfg->support_radius_min)
 {
 	position = QVector3D(99999, 99999, 99999);

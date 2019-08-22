@@ -4,21 +4,27 @@
 #include <memory>
 #include <thread>
 #include <functional>
-#include "taskflow/taskflow.hpp"
+#include "Task.h"
 #include "moodycamel/readerwriterqueue.h"
 
 
-class TaskManager
+namespace Hix
 {
-public:
-	TaskManager();
-	void run();
-	void enqueTask(tf::Taskflow* task);
-	void enqueUITask(std::function<void()> f);
-	~TaskManager();
-private:
-	tf::Executor _executor;
-	moodycamel::BlockingReaderWriterQueue<tf::Taskflow*> _queue;
-	bool _end = false;
-	std::thread _taskThread;
-};
+	namespace Tasking
+	{
+		class TaskManager
+		{
+		public:
+			TaskManager();
+			void run();
+			void enqueTask(Hix::Tasking::Task* task);
+			void enqueUITask(std::function<void()> f);
+			~TaskManager();
+		private:
+			tf::Executor _executor;
+			moodycamel::BlockingReaderWriterQueue<Hix::Tasking::Task*> _queue;
+			bool _end = false;
+			std::thread _taskThread;
+		};
+	}
+}

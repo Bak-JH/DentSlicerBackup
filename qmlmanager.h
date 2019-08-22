@@ -249,9 +249,9 @@ public:
 	void modelMove(QVector3D displacement);
 	void modelRotateWithAxis(const QVector3D& axis, double degree);
 	QVector3D cameraViewVector();
-	TaskManager& taskManager();
+	Hix::Tasking::TaskManager& taskManager();
 private:
-	TaskManager _taskManager;
+	Hix::Tasking::TaskManager _taskManager;
 	void setModelViewMode(int mode);
 	GLModel* getModelByID(int ID);
     void unselectPartImpl(GLModel* target);
@@ -259,7 +259,7 @@ private:
 	//std::future<Slicer*> exportSelected(bool isTemp);
 	QString getExportPath();
 	//do not make non-async version of this as taskflow allows to spawn  internal dynamic tasks for better throughoutput.
-	tf::Taskflow* exportSelectedAsync(QString exportPath, bool isTemp);
+	Hix::Tasking::GenericTask* exportSelectedAsync(QString exportPath, bool isTemp);
 	bool groupSelectionActive = false;
     int viewMode;
     int layerViewFlags;

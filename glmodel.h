@@ -150,9 +150,6 @@ public:
 
     void copyModelAttributeFrom(GLModel* from);
 
-	QTime getPrevTime();
-	QTime getNextTime();
-
 
     void changeColor(const QVector3D& color);
 
@@ -261,7 +258,6 @@ private:
 	void updateFaces(const std::unordered_set<size_t>& faceIndicies, const Hix::Engine3D::Mesh& mesh);
 	void updateVertices(const std::unordered_set<size_t>& vtxIndicies, const Hix::Engine3D::Mesh& mesh);
 
-    void onTimerUpdate();
     void removeLayerViewComponents();
 	//unsigned int getPrimitiveColorCode(const Hix::Engine3D::Mesh* mesh, size_t faceIdx);
 	QVector3D getPrimitiveColorCode(const Hix::Engine3D::Mesh* mesh, FaceConstItr faceItr);
@@ -322,11 +318,6 @@ signals:
     void extensionUnSelect();
 
 public slots:
-    // Model Undo & Redo
-    void saveUndoState();
-    void saveUndoState_internal();
-    void loadUndoState();
-    void loadRedoState();
 
     // object picker parts
     void mouseEnteredFreeCutSphere();

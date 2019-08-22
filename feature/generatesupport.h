@@ -1,7 +1,7 @@
 #ifndef GENERATESUPPORT_H
 #define GENERATESUPPORT_H
 #include "glmodel.h"
-
+#include "../common/Task.h"
 class OverhangPoint
 {
 public:
@@ -21,6 +21,18 @@ namespace Hix
 	namespace Debug
 	{
 		QDebug operator<< (QDebug d, const OverhangPoint& obj);
+	}
+	namespace SupportGeneration
+	{
+		class VerticalSupportTask: public Hix::Tasking::GenericTask
+		{
+		public:
+			VerticalSupportTask(const GLModel* model);
+			virtual ~VerticalSupportTask();
+
+		private:
+			const GLModel* _model = nullptr;
+		};
 	}
 }
 class GenerateSupport
