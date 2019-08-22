@@ -21,7 +21,7 @@
 #include <Qt3DCore/qpropertyupdatedchange.h>
 #include <feature/generateraft.h>
 #include "DentEngine/src/configuration.h"
-
+#include "feature/Extrude.h"
 
 
 
@@ -133,20 +133,63 @@ GLModel::GLModel(QObject* mainWindow, QNode *parent, Mesh* loadMesh, QString fna
 	m_meshMaterial.setColor(Hix::Render::Colors::Default);
 
 	// Add to Part List
-	qmlManager->addPart(getFileName(fname.toStdString().c_str()), ID);
-	if (filename != "" && (filename.contains(".stl") || filename.contains(".STL"))\
-		&& loadMesh == nullptr) {
-		_mesh = new Mesh();
-		FileLoader::loadMeshSTL(_mesh, filename.toLocal8Bit().constData());
-	}
-	else if (filename != "" && (filename.contains(".obj") || filename.contains(".OBJ"))\
-		&& loadMesh == nullptr) {
-		_mesh = new Mesh();
-		FileLoader::loadMeshOBJ(_mesh, filename.toLocal8Bit().constData());
-	}
-	else {
-		_mesh = loadMesh;
-	}
+	//qmlManager->addPart(getFileName(fname.toStdString().c_str()), ID);
+	//if (filename != "" && (filename.contains(".stl") || filename.contains(".STL"))\
+	//	&& loadMesh == nullptr) {
+	//	_mesh = new Mesh();
+	//	FileLoader::loadMeshSTL(_mesh, filename.toLocal8Bit().constData());
+	//}
+	//else if (filename != "" && (filename.contains(".obj") || filename.contains(".OBJ"))\
+	//	&& loadMesh == nullptr) {
+	//	_mesh = new Mesh();
+	//	FileLoader::loadMeshOBJ(_mesh, filename.toLocal8Bit().constData());
+	//}
+	//else {
+	//	_mesh = loadMesh;
+	//}
+	_mesh = new Mesh();
+
+	std::vector<QVector3D> contour;
+	std::vector<QVector3D> path;
+	std::vector<float> scales;
+
+	//contour.push_back(QVector3D(-2, 2, 0));
+	//contour.push_back(QVector3D(-2, -2, 0));
+	//contour.push_back(QVector3D(2, -2, 0));
+	//contour.push_back(QVector3D(2, 2, 0));
+
+	auto a = QVector3D(-2, 2, 0);
+	QVector3D normal(0, 0, 1);
+	auto rot = QQuaternion::fromAxisAndAngle(normal, 60);
+	contour.push_back(a);
+	a = rot.rotatedVector(a);
+	contour.push_back(a);
+	a = rot.rotatedVector(a);
+	contour.push_back(a);
+	a = rot.rotatedVector(a);
+	contour.push_back(a);
+	a = rot.rotatedVector(a);
+	contour.push_back(a);
+	a = rot.rotatedVector(a);
+	contour.push_back(a);
+
+	path.push_back(QVector3D(3, 3, 3));
+	path.push_back(QVector3D(3, 3, 8));
+	path.push_back(QVector3D(3, 3, 10));
+	path.push_back(QVector3D(5, 5, 15));
+	path.push_back(QVector3D(8, 8, 20));
+	scales.push_back(1.0f);
+	scales.push_back(2.0f);
+	scales.push_back(1.0f);
+	scales.push_back(0.5f);
+	scales.push_back(0.3f);
+
+	//path.push_back(QVector3D(-2, 2, 0));
+	//path.push_back(QVector3D(-2, -2, 0));
+	Hix::Features::Extrusion::extrudeAlongPath(_mesh, normal, contour, path, &scales);
+	_mesh->addFace(contour[0], contour[1], contour[2]);
+	_mesh->addFace(contour[2], contour[3], contour[0]);
+
 
 	// 승환 25%
 	qmlManager->setProgress(0.23);
@@ -216,94 +259,7 @@ void GLModel::checkPrintingArea() {
 	}
 }
 
-void GLModel::saveUndoState(){
-    saveUndoState_internal();
-    //QFuture<void> future = QtConcurrent::run(this, &saveUndoState_internal);
-}
 
-void GLModel::saveUndoState_internal(){
-    // need to change to memcpy or something
-    qDebug () << "save prev mesh";
-
-    // reset slicing view since model has been updated
-	auto temp_prev_mesh =  _mesh->saveUndoState(m_transform);
-
-
-    // for model cut, shell offset
-	if (leftModel)
-	{
-		leftModel->_mesh->setPrevMesh(temp_prev_mesh);
-	}
-	if (rightModel)
-	{
-		rightModel->_mesh->setPrevMesh(temp_prev_mesh);
-	}
-}
-
-void GLModel::loadUndoState(){
-    //while (updateLock); // if it is not locked
-    if (updateLock)
-        return;
-    updateLock = true;
-    qDebug() << this << "achieved lock";
-
-    QMetaObject::invokeMethod(qmlManager->boxUpperTab, "all_off");
-
-    if (_mesh->getPrev() != nullptr){
-        qDebug() << "load undo state";
-        if (twinModel != NULL && _mesh->getPrev() == twinModel->_mesh->getPrev()){ // same parent, cut generated
-            qmlManager->deleteModelFile(twinModel->ID);
-        }
-        if (_mesh->time.isNull() || _mesh->m_translation == QVector3D(0,0,0) || _mesh->m_matrix.isIdentity()){ // most recent job
-            _mesh->time = QTime::currentTime();
-            _mesh->m_translation = m_transform.translation();
-            _mesh->m_matrix = m_transform.matrix();
-        }
-
-        _mesh = _mesh->getPrev();
-
-        // move model _mesh and rotate model _mesh
-        /*_mesh->vertexMove(_mesh->m_translation);
-        _mesh->vertexRotate(_mesh->m_matrix);*/
-        if (!_mesh->m_matrix.isIdentity()){
-            _mesh->vertexRotate(_mesh->m_matrix.inverted());
-            _mesh->m_matrix = QMatrix4x4();
-        }
-        m_transform.setTranslation(_mesh->m_translation);
-        m_transform.setRotationX(0);
-        m_transform.setRotationY(0);
-        m_transform.setRotationZ(0);
-        emit _updateModelMesh();
-    } else {
-        updateLock = false;
-        qDebug() << "no undo state";
-        int saveCnt = (_mesh->getFaces().size()>100000)? 3: 10;
-        qmlManager->openResultPopUp("Undo state doesn't exist.","","Maximum "+QVariant(saveCnt).toString().toStdString()+" states are saved for this model.");
-    }
-}
-
-void GLModel::loadRedoState(){
-    if (_mesh->getNext() != nullptr){
-        qDebug() << "load Redo State";
-        _mesh = _mesh->getNext();
-        // move model _mesh and rotate model _mesh
-        /*_mesh->vertexMove(_mesh->m_translation);
-        _mesh->vertexRotate(_mesh->m_matrix);*/
-        if (!_mesh->m_matrix.isIdentity()){
-            _mesh->vertexRotate(_mesh->m_matrix.inverted());
-            _mesh->m_matrix = QMatrix4x4();
-        }
-
-
-        m_transform.setTranslation(_mesh->m_translation);
-        m_transform.setRotationX(0);
-        m_transform.setRotationY(0);
-        m_transform.setRotationZ(0);
-		emit _updateModelMesh();
-	} else {
-        qDebug() << "no redo status";
-    }
-}
 void GLModel::repairMesh()
 {
     MeshRepair::repairMesh(_mesh);
@@ -454,16 +410,6 @@ void GLModel::copyModelAttributeFrom(GLModel* from){
     }
 }
 
-QTime GLModel::getPrevTime()
-{
-	return _mesh->getPrevTime();
-}
-
-QTime GLModel::getNextTime()
-{
-	return _mesh->getNextTime();
-}
-
 void GLModel::updateModelMesh(){
     QMetaObject::invokeMethod(qmlManager->boxUpperTab, "disableUppertab");
     QMetaObject::invokeMethod(qmlManager->boxLeftTab, "disableLefttab");
@@ -542,10 +488,6 @@ void GLModel::updateModelMesh(){
 
 
 
-
-arrangeSignalSender::arrangeSignalSender(){
-
-}
 
 void GLModel::clearMem(){
     QByteArray newVertexArray;
@@ -1170,10 +1112,9 @@ void GLModel::generatePlane(){
     planeMaterial->setAlpha(0.5f);
 
     // set cutting plane
-    cuttingPlane.clear();
-    cuttingPlane.push_back(v1);
-    cuttingPlane.push_back(v2);
-    cuttingPlane.push_back(v3);
+    cuttingPlane[0] = v1;
+    cuttingPlane[1] = v2;
+    cuttingPlane[2] = v3;
 
     QVector3D world_origin(0,0,0);
     QVector3D original_normal(0,1,0);
@@ -1370,7 +1311,6 @@ void GLModel::modelCut(){
     if(cutMode == 2 && cuttingPoints.size() < 3)
         return ;
 
-    saveUndoState();
     qmlManager->openProgressPopUp();
 
 	auto lmesh = new Mesh();
@@ -1383,15 +1323,6 @@ void GLModel::modelCut(){
             getSliderSignal(0.0);
         }
 
-        /*
-        // create left, rightmesh
-        Mesh* leftMesh = lmesh;
-        Mesh* rightMesh = rmesh;
-        // do bisecting mesh
-        leftMesh->faces.reserve(mesh->faces.size()*3);
-        leftMesh->vertices.reserve(mesh->faces.size()*9);
-        rightMesh->faces.reserve(mesh->faces.size()*3);
-        rightMesh->vertices.reserve(mesh->faces.size()*9);*/
 
         bisectModelByPlane(lmesh, rmesh, _mesh, cuttingPlane, cutFillMode);
 
@@ -1399,28 +1330,13 @@ void GLModel::modelCut(){
 
     } else if (cutMode == 2){ // free cut
         if (cuttingPoints.size() >= 3){
-            // do bisecting _mesh
-
-            /*
-            // create left, rightmesh
-            Mesh* leftMesh = lmesh;
-            Mesh* rightMesh = rmesh;
-            // do bisecting mesh
-            leftMesh->faces.reserve(_mesh->getFaces().size()*10);
-            leftMesh->vertices.reserve(_mesh->getFaces().size()*30);
-            rightMesh->faces.reserve(_mesh->getFaces().size()*10);
-            rightMesh->vertices.reserve(_mesh->getFaces().size()*30);*/
 
             cutAway(lmesh, rmesh, _mesh, cuttingPoints, cutFillMode);
 
             if (lmesh->getFaces().size() == 0 || rmesh->getFaces().size() == 0){
-            // diridiri ######
-            //modelcut::cutAway(lmesh, rmesh,_mesh,cuttingPoints,cutFillMode);
-            //if (lmesh->getFaces()->size() == 0 || rmesh->getFaces()->size() == 0){
 
                 qDebug() << "cutting contour selected not cutting";
                 qmlManager->setProgress(1);
-                //cutModeSelected(9999);
                 cutModeSelected(2); // reset
                 return;
             }
@@ -1655,7 +1571,6 @@ void GLModel::dragStarted(Hix::Input::MouseEventData& e, const Qt3DRender::QRayC
 	prevPoint = (QVector2D)e.position;
 	qmlManager->moveButton->setProperty("state", "active");
 	qmlManager->setClosedHandCursor();
-	saveUndoState();
 	isMoved = true;
 }
 
@@ -1956,7 +1871,6 @@ void GLModel::generateText3DMesh()
 
     labellingTextPreview->planeSelected = false;
 
-    saveUndoState();
 
     qmlManager->setProgress(0.1);
 
@@ -2065,8 +1979,6 @@ void GLModel::selectMeshFaces(){
 void GLModel::generateExtensionFaces(double distance){
     if (!_targetSelected)
         return;
-
-    saveUndoState();
     Hix::Features::Extension::extendMesh(_mesh, targetMeshFace, distance);
 	_targetSelected = false;
 	updateModelMesh();
@@ -2077,8 +1989,6 @@ void GLModel::generateLayFlat(){
 
     if(!_targetSelected)
         return;
-
-    saveUndoState();
 
     QVector3D tmp_fn = targetMeshFace->fn;
     qDebug() << "target 2 " << tmp_fn;

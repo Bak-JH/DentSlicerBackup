@@ -159,7 +159,7 @@
       <IgnoreImportLibrary>true</IgnoreImportLibrary>
       <OutputFile>$(OutDir)\DentStudio.exe</OutputFile>
       <RandomizedBaseAddress>true</RandomizedBaseAddress>
-      <SubSystem>Console</SubSystem>
+      <SubSystem>Windows</SubSystem>
       <SuppressStartupBanner>true</SuppressStartupBanner>
     </Link>
     <Midl>
@@ -193,6 +193,7 @@
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="common\Task.cpp" />
     <ClCompile Include="common\TaskManager.cpp" />
     <ClCompile Include="DentEngine\src\ContourBuilder.cpp" />
     <ClCompile Include="DentEngine\src\Planes.cpp" />
@@ -207,6 +208,7 @@
     <ClCompile Include="DentEngine\src\configuration.cpp" />
     <ClCompile Include="feature\convex_hull.cpp" />
     <ClCompile Include="feature\extension.cpp" />
+    <ClCompile Include="feature\Extrude.cpp" />
     <ClCompile Include="feature\overhangDetect.cpp" />
     <ClCompile Include="fileloader.cpp" />
     <ClCompile Include="feature\generateraft.cpp" />
@@ -256,6 +258,7 @@
     <ClInclude Include="common\moodycamel\readerwriterqueue.h" />
     <ClInclude Include="common\RamosEnum.h" />
     <ClInclude Include="common\Singleton.h" />
+    <ClInclude Include="common\Task.h" />
     <ClInclude Include="common\taskflow\core\executor.hpp" />
     <ClInclude Include="common\taskflow\core\flow_builder.hpp" />
     <ClInclude Include="common\taskflow\core\graph.hpp" />
@@ -307,6 +310,7 @@
     <ClInclude Include="feature\convex_hull.h" />
     <ClInclude Include="feature\earcut.hpp" />
     <ClInclude Include="feature\extension.h" />
+    <ClInclude Include="feature\Extrude.h" />
     <ClInclude Include="feature\overhangDetect.h" />
     <ClInclude Include="fileloader.h" />
     <ClInclude Include="feature\generateraft.h" />
