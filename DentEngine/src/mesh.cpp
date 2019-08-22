@@ -129,6 +129,8 @@ const HalfEdge* Hix::Engine3D::HalfEdgeCirculator::toPtr() const
 }
 
 
+
+
 std::array<VertexConstItr, 3> Hix::Engine3D::MeshFace::meshVertices() const
 {
 	std::array<VertexConstItr, 3> result;
@@ -276,11 +278,7 @@ Mesh::Mesh()
 	halfEdges.addIndexChangedCallback(std::bind(&Mesh::hEdgeIndexChangedCallback, this, std::placeholders::_1, std::placeholders::_2));
 
 }
-Mesh::Mesh( const Mesh* origin): Mesh()
-{
-	prevMesh = origin->prevMesh;
-	nextMesh = origin->nextMesh;
-}
+
 Mesh::Mesh(const Mesh& o)
 {
 	_verticesHash = o._verticesHash;
@@ -289,20 +287,12 @@ Mesh::Mesh(const Mesh& o)
 	halfEdges = o.halfEdges;
 	faces = o.faces;
 
-	prevMesh = o.prevMesh;
-	nextMesh = o.nextMesh;
-
-
 	_x_min = o._x_min;
 	_x_max = o._x_max;
 	_y_min = o._y_min;
 	_y_max = o._y_max;
 	_z_min = o._z_min;
 	_z_max = o._z_max;
-
-	time = o.time;
-	m_translation = o.m_translation;
-	m_matrix = o.m_matrix;
 
 
 	vertices.addIndexChangedCallback(std::bind(&Mesh::vtxIndexChangedCallback, this, std::placeholders::_1, std::placeholders::_2));
@@ -359,18 +349,6 @@ Mesh& Mesh::operator+=(const Mesh& o)
 //}
 
 /********************** Mesh Edit Functions***********************/
-
-
-void Mesh::setNextMesh( Mesh* mesh)
-{
-	nextMesh = mesh;
-}
-
-void Mesh::setPrevMesh( Mesh* mesh)
-{
-	prevMesh = mesh;
-}
-
 
 
 
@@ -465,8 +443,6 @@ void Mesh::vertexRotate(QMatrix4x4 tmpmatrix){
 		face.fn = QVector3D::normal(meshVertices[0]->position,
 		meshVertices[1]->position,
 		meshVertices[2]->position);
-		face.fn_unnorm = QVector3D::crossProduct(meshVertices[1]->position - meshVertices[0]->position,
-        meshVertices[2]->position - meshVertices[0]->position);
 	};
 
     for (auto& vertex : vertices)
@@ -567,7 +543,6 @@ bool Mesh::addFace(QVector3D v0, QVector3D v1, QVector3D v2){
 		return false;
     Hix::Engine3D::MeshFace mf;
 	mf.fn = QVector3D::normal(fVtx[0]->position, fVtx[1]->position, fVtx[2]->position);
-	mf.fn_unnorm = QVector3D::crossProduct(fVtx[1]->position - fVtx[0]->position, fVtx[1]->position - fVtx[0]->position);
 	faces.emplace_back(mf);
 	auto faceItr = faces.cend() - 1;
 
@@ -623,42 +598,6 @@ TrackedIndexedList<MeshFace>::const_iterator Mesh::removeFace(FaceConstItr faceI
 	}
 	return faces.swapAndErase(faceItr);
 }
-
-
-Mesh* Mesh::saveUndoState(const Qt3DCore::QTransform& transform)
-{
-
-	// need to remove redo State since it contains
-	nextMesh = nullptr;
-
-	// copy current Mesh as temporary prev_mesh
-	Mesh* temp_prev_mesh = new Mesh(*this);
-
-	if (prevMesh != nullptr)
-		prevMesh->nextMesh = temp_prev_mesh;
-	temp_prev_mesh->nextMesh = this;
-	temp_prev_mesh->time = QTime::currentTime();
-	temp_prev_mesh->m_translation = transform.translation();
-	temp_prev_mesh->m_matrix = transform.matrix();
-
-	const Mesh * deleteTargetMesh = this;
-
-	int saveCnt = (this->faces.size() > 100000) ? 3 : 10;
-
-	for (int i = 0; i < saveCnt; i++) { // maximal undo count is 10
-		if (deleteTargetMesh != nullptr)
-			deleteTargetMesh = deleteTargetMesh->prevMesh;
-	}
-	if (deleteTargetMesh != nullptr) {
-		deleteTargetMesh->nextMesh->prevMesh = nullptr;
-		delete deleteTargetMesh;
-	}
-
-	this->prevMesh = temp_prev_mesh;
-	return temp_prev_mesh;
-
-}
-
 
 
 
@@ -733,22 +672,6 @@ bool Hix::Engine3D::findCommonManifoldFace(
 	return false;
 }
 
-
-QTime Hix::Engine3D::Mesh::getPrevTime()
-{
-	if (prevMesh)
-	{
-		return prevMesh->time;
-	}
-}
-
-QTime Hix::Engine3D::Mesh::getNextTime()
-{
-	if (nextMesh)
-	{
-		return nextMesh->time;
-	}
-}
 
 
 void Mesh::removeVertexHash(QVector3D pos)
@@ -1015,16 +938,6 @@ bool MeshFace::isNeighborOf(const FaceConstItr& other)const
 		}
 	}
 	return false;
-}
-
-
-Mesh* Mesh::getPrev()const
-{
-    return prevMesh;
-}
-Mesh* Mesh::getNext()const
-{
-    return nextMesh;
 }
 
 void Mesh::findNearSimilarFaces(QVector3D normal, FaceConstItr  mf,
