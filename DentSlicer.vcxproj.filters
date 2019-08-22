@@ -221,6 +221,12 @@
     <ClCompile Include="feature\Extrude.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>
+    <ClCompile Include="render\SceneEntity.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="render\SceneEntityWithMaterial.h.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DentEngine\src\polyclipping\poly2tri\sweep\advancing_front.h">
@@ -1126,6 +1132,7 @@
     <None Include="icon-32.ico" />
     <None Include="icon-32.ico" />
     <None Include="icon-32.ico" />
+    <None Include="icon-32.ico" />
   </ItemGroup>
   <ItemGroup>
     <None Include="DentSlicer.rc">
@@ -1164,6 +1171,12 @@
       <Filter>Generated Files</Filter>
     </QtMoc>
     <QtMoc Include="ui\CubeWidget.h">
+      <Filter>Generated Files</Filter>
+    </QtMoc>
+    <QtMoc Include="render\SceneEntity.h">
+      <Filter>Generated Files</Filter>
+    </QtMoc>
+    <QtMoc Include="render\SceneEntityWithMaterial.h">
       <Filter>Generated Files</Filter>
     </QtMoc>
   </ItemGroup>
