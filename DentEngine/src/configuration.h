@@ -38,8 +38,9 @@ struct SlicingConfiguration
 	enum class SupportType: uint8_t
 	{
 		None = 0,
-		KBranch= 1,
-		General = 2
+		Vertical = 1
+		//KBranch= 2
+
 	};
 	enum class InFillType : uint8_t
 	{
@@ -90,7 +91,7 @@ struct SlicingConfiguration
 	PrinterVendor printer_vendor_type = PrinterVendor::Hix;
 	SlicingMode slicing_mode = SlicingMode::Uniform; // uniform OR adaptive
 	ResinType resin_type = ResinType::Temporary;
-	SupportType support_type = SupportType::General;
+	SupportType support_type = SupportType::Vertical;
 	InFillType infill_type = InFillType::Full;
 	RaftType raft_type = RaftType::General;
 
