@@ -28,7 +28,6 @@
 #include "slice/SlicingOptBackend.h"
 
 #define VIEW_MODE_OBJECT 0
-#define VIEW_MODE_SUPPORT 1
 #define VIEW_MODE_LAYER 2
 
 #define LAYER_INFILL 0x01
@@ -151,7 +150,6 @@ public:
     // view mode buttons
     QObject* leftTabViewMode;
     QObject* viewObjectButton;
-    QObject* viewSupportButton;
     QObject* viewLayerButton;
 
     QObject* layerViewPopup;
@@ -326,7 +324,6 @@ public slots:
     void save();
 	void cameraViewChanged();
     void viewObjectChanged(bool checked);
-    void viewSupportChanged(bool checked);
     void viewLayerChanged(bool checked);
 
     void layerInfillButtonChanged(bool chacked);

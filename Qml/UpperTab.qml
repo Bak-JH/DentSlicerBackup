@@ -32,7 +32,6 @@ Rectangle {
     property int ftrExtend : 13
     property int ftrManualSupport : 14
     property int ftrLabel : 15
-    property int ftrSupportViewMode : 16
     property int ftrLayerViewMode : 17
     property int ftrDelete : 18
     property int ftrSupportDisappear : 20

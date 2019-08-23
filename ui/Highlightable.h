@@ -6,7 +6,7 @@
 
 namespace Hix
 {
-	namespace Input
+	namespace UI
 	{
 		class Highlightable
 		{

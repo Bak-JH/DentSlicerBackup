@@ -224,7 +224,16 @@
     <ClCompile Include="render\SceneEntity.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>
-    <ClCompile Include="render\SceneEntityWithMaterial.h.cpp">
+    <ClCompile Include="render\SceneEntityWithMaterial.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="support\VerticalSupportModel.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="support\SupportRaftManager.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="support\SupportModel.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -502,9 +511,6 @@
     <ClInclude Include="render\Color.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
-    <ClInclude Include="input\Highlightable.h">
-      <Filter>Generated Files</Filter>
-    </ClInclude>
     <ClInclude Include="DentEngine\src\polyclipping\polyclipping.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
@@ -548,6 +554,21 @@
       <Filter>Generated Files</Filter>
     </ClInclude>
     <ClInclude Include="feature\Extrude.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="support\SupportRaftManager.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="input\Clickable.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="support\VerticalSupportModel.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="support\SupportModel.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ui\Highlightable.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -1127,6 +1148,7 @@
     <None Include="icon-32.ico" />
     <None Include="icon-32.ico" />
     <None Include="Qml\LeftTabSlicingOptionElementTextbox.qml" />
+    <None Include="icon-32.ico" />
     <None Include="icon-32.ico" />
     <None Include="icon-32.ico" />
     <None Include="icon-32.ico" />
