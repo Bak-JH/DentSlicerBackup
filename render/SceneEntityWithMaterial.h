@@ -28,7 +28,7 @@ namespace Hix
 			void updateVertices(const std::unordered_set<size_t>& vtxIndicies, const Hix::Engine3D::Mesh& mesh);
 
 			//unsigned int getPrimitiveColorCode(const Hix::Engine3D::Mesh* mesh, size_t faceIdx);
-			QVector3D getPrimitiveColorCode(const Hix::Engine3D::Mesh* mesh, FaceConstItr faceItr);
+			virtual QVector3D getPrimitiveColorCode(const Hix::Engine3D::Mesh* mesh, FaceConstItr faceItr) = 0;
 
 			void setMesh(Hix::Engine3D::Mesh* mesh);
 			void updateMesh(Hix::Engine3D::Mesh* mesh);
@@ -46,12 +46,6 @@ namespace Hix
 
 			Hix::Render::ModelMaterial _meshMaterial;
 
-		signals:
-
-			void _updateModelMesh();
-
-		public slots:
-			void updateModelMesh()override;
 		};
 	}
 }

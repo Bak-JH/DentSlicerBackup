@@ -20,19 +20,15 @@ Rectangle {
 
     function setViewMode(mode){
         viewObjectButton.checked = false;
-        viewSupportButton.checked = false;
         viewLayerButton.checked = false;
         if (mode === 0)
             viewObjectButton.checked = true;
-        else if (mode === 1)
-            viewSupportButton.checked = true;
         else if (mode === 2)
             viewLayerButton.checked = true;
     }
 
     function setEnable(enable) {
         viewObjectButton.checked = true;
-        viewSupportButton.enabled = enable;
         viewLayerButton.enabled = enable;
 
         qm.setViewMode(0);
@@ -151,60 +147,6 @@ Rectangle {
                     }
                 }
                 RadioButton {
-                    id: viewSupportButton
-                    objectName: "viewSupportButton"
-                    text: "Support View"
-                    exclusiveGroup: viewModeGroup
-                    enabled: false
-
-                    style: RadioButtonStyle {
-                        indicator: Rectangle {
-                            implicitWidth: 16
-                            implicitHeight: 16
-                            radius: 9
-                            border.color: control.activeFocus ? "darkblue" : "gray"
-                            border.width: 0
-                            Rectangle {
-                                anchors.fill: parent
-                                visible: control.checked
-                                color: "#505A5E"
-                                radius: 9
-                                anchors.margins: 4
-                            }
-                        }
-                        label: Text {
-                            id: txtSupport
-                            text: "Support View"
-                            anchors.left : parent.left
-                            anchors.leftMargin: 10
-                            color: control.enabled ? "#000000" : "#888888"
-
-                            font.family: mainFont.name
-                            font.pixelSize: 14
-                        }
-                    }
-
-                    signal onChanged(bool checked);
-
-                    //onCheckedChanged: {
-                    onClicked: {
-                        console.log("Support View Selected")
-                        onChanged(checked);
-                        if (qm.getViewMode() === 0) {
-                            viewObjectButton.checked = true
-                        } else if (qm.getViewMode() === 2) {
-                            viewLayerButton.checked = true
-                        }
-                    }
-
-                    onHoveredChanged: {
-                        if(hovered)
-                            qm.setHandCursor();
-                        else
-                            qm.resetCursor();
-                    }
-                }
-                RadioButton {
                     //text: "Layer View"
                     id: viewLayerButton
                     objectName: "viewLayerButton"
@@ -246,7 +188,6 @@ Rectangle {
                         if (qm.getViewMode() === 0) {
                             viewObjectButton.checked = true
                         } else if (qm.getViewMode() === 1) {
-                            viewSupportButton.checked = true
                         }
                     }
 

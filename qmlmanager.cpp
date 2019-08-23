@@ -184,8 +184,6 @@ void QmlManager::initializeUI(QQmlApplicationEngine* e){
     layerViewSlider = FindItemByName(engine, "layerViewSlider");
     viewObjectButton = FindItemByName(engine, "viewObjectButton");
     QObject::connect(viewObjectButton, SIGNAL(onChanged(bool)), this, SLOT(viewObjectChanged(bool)));
-    viewSupportButton = FindItemByName(engine, "viewSupportButton");
-    QObject::connect(viewSupportButton, SIGNAL(onChanged(bool)), this, SLOT(viewSupportChanged(bool)));
     viewLayerButton = FindItemByName(engine, "viewLayerButton");
     QObject::connect(viewLayerButton, SIGNAL(onChanged(bool)), this, SLOT(viewLayerChanged(bool)));
     setViewMode(VIEW_MODE_OBJECT);
@@ -721,7 +719,7 @@ float QmlManager::selected_z_min() {
 
 void QmlManager::sendUpdateModelInfo(){
     qDebug() << "send update model info";
-    if (selectedModels.size() == 0 || this->viewMode == VIEW_MODE_LAYER || this->viewMode == VIEW_MODE_SUPPORT){
+    if (selectedModels.size() == 0 || this->viewMode == VIEW_MODE_LAYER){
         qDebug() << "sendUpdateModelInfo() - no selected model";
 
         slicingData->setProperty("visible", false);
@@ -833,9 +831,7 @@ GLModel* QmlManager::findGLModelByName(QString filename){
 
 void QmlManager::backgroundClicked(){
     qDebug() << "background clicked";
-    if (viewMode == VIEW_MODE_SUPPORT)
-        openYesNoPopUp(false, "", "Support will disappear.", "", 18, "", ftrSupportDisappear, 1);
-    else unselectAll();
+    unselectAll();
 }
 
 bool QmlManager::multipleModelSelected(int ID){
@@ -1383,11 +1379,13 @@ void QmlManager::modelRotateWithAxis(const QVector3D& axis, double angle)
 			}
 		}
 		else
-			//                selectedModel->getTransform()->setRotationX(tmpx+Angle);
+		{
 			qDebug() << angle;
 			rot = Qt3DCore::QTransform::rotateAround(rot_center, angle, (axis4D * transform->matrix()).toVector3D());
+		}
 		selectedModel->setMatrix(selectedModel->getTransform()->matrix() * rot);
-		break;
+		selectedModel->checkPrintingArea();
+
 	}
 
 
@@ -1442,6 +1440,7 @@ void QmlManager::modelRotateByNumber(int axis,  int X, int Y, int Z){
                                                   (selectedModel->getMesh()->z_max()+selectedModel->getMesh()->z_min())/2);
 
         selectedModel->rotateByNumber(rot_center, X, Y, Z);
+		selectedModel->checkPrintingArea();
     }
     //showRotateSphere();
 }
@@ -1779,28 +1778,6 @@ void QmlManager::viewObjectChanged(bool checked){
     }
 }
 
-void QmlManager::viewSupportChanged(bool checked){
-    qInfo() << "viewSupportChanged" << checked;
-    qDebug() << "selected Num = " << selectedModels.size();
-    if( checked ) {
-		bool generateSupport = false;
-		for (auto selectedModel : selectedModels)
-		{
-			if (!selectedModel->raftSupportGenerated()) {
-				generateSupport = true;
-				break;
-			}
-		}
-		if (generateSupport) {
-			qmlManager->openYesNoPopUp(false, "Support and raft will be generated.", "", "Would you like to continue?", 16, "", ftrSupportViewMode, 0);
-		}
-		else {
-			QMetaObject::invokeMethod(qmlManager->boxUpperTab, "all_off");
-			setViewMode(VIEW_MODE_SUPPORT);
-		}
-
-    }
-}
 
 void QmlManager::viewLayerChanged(bool checked){
     qInfo() << "viewLayerChanged" << checked;
@@ -1863,8 +1840,7 @@ void QmlManager::setViewMode(int viewMode) {
     if( this->viewMode != viewMode ) {
 		QMetaObject::invokeMethod(boxUpperTab, "all_off");
         //if (viewMode == 0) viewObjectButton->setProperty("checked", true);
-        if (viewMode == 1) viewSupportButton->setProperty("checked", true);
-        else if (viewMode == 2) viewLayerButton->setProperty("checked", true);
+        if (viewMode == 2) viewLayerButton->setProperty("checked", true);
 
         this->viewMode = viewMode;
 		layerViewPopup->setProperty("visible", this->viewMode == VIEW_MODE_LAYER);
@@ -1876,20 +1852,8 @@ void QmlManager::setViewMode(int viewMode) {
 			QMetaObject::invokeMethod(yesno_popup, "closePopUp");
 			QMetaObject::invokeMethod(leftTabViewMode, "setObjectView");
 			break;
-		case VIEW_MODE_SUPPORT:
-			for (auto each : selectedModels)
-			{
-				each->setSupportAndRaft();
-			}
-			break;
+
 		case VIEW_MODE_LAYER:
-			for (auto each : selectedModels)
-			{
-
-				each->setSupportAndRaft();
-			}
-			auto selectedSize = selectedModelsLengths();
-
 			sliceNeeded = true;
 			break;
 		}

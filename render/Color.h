@@ -21,9 +21,6 @@ namespace Hix
 
 		namespace Colors
 		{
-			
-
-
 			const QVector3D Default = QVector3D(0.278f, 0.670f, 0.706f);
 			const QVector3D Selected = QVector3D(0.510f, 0.816f, 0.490f);
 			const QVector3D SelectedFace = QVector3D(0.901f, 0.843f, 0.133f);
@@ -31,6 +28,9 @@ namespace Hix
 			const QVector3D Support = QVector3D(0.259f,0.749f,0.8f);
 			const QVector3D Raft = QVector3D(0.431f,0.929f,0.196f);
 			const QVector3D OutOfBound = QVector3D(0.1, 0.1f, 0.1f);
+
+			const QVector3D SupportHighlighted = QVector3D(0.3108f, 0.8988f, 0.96f);
+
 
 		}
 	}

@@ -8,8 +8,6 @@
 #include <Qt3DExtras>
 #include <Qt3DInput>
 #include <QBuffer>
-#include <QObjectPicker>
-#include <QCursor>
 #include <memory>
 #include "DentEngine/src/mesh.h"
 #include "render/ModelMaterial.h"
@@ -52,13 +50,6 @@ namespace Hix
 			bool isHitTestable();
 		
 
-			// Model Mesh move, rotate, scale
-			void moveModelMesh(QVector3D direction, bool update = true);
-			void rotationDone();
-			void rotateByNumber(QVector3D& rot_center, int X, int Y, int Z);
-			void rotateModelMesh(int Axis, float Angle, bool update = true);
-			void rotateModelMesh(QMatrix4x4 matrix, bool update = true);
-			void scaleModelMesh(float scaleX, float scaleY, float scaleZ);
 
 		protected:
 
@@ -95,14 +86,6 @@ namespace Hix
 			FaceConstItr targetMeshFace; // used for object selection (specific area, like extension or labelling)
 			Qt3DRender::QLayer _layer;
 
-
-		signals:
-
-			void _updateModelMesh();
-
-		public slots:
-			// Model Mesh info update
-			virtual void updateModelMesh() = 0;
 		};
 	}
 }

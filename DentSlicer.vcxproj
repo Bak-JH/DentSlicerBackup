@@ -218,8 +218,11 @@
     <ClCompile Include="render\lights.cpp" />
     <ClCompile Include="render\ModelMaterial.cpp" />
     <ClCompile Include="render\SceneEntity.cpp" />
-    <ClCompile Include="render\SceneEntityWithMaterial.h.cpp" />
+    <ClCompile Include="render\SceneEntityWithMaterial.cpp" />
     <ClCompile Include="slice\SlicingOptBackend.cpp" />
+    <ClCompile Include="support\SupportModel.cpp" />
+    <ClCompile Include="support\SupportRaftManager.cpp" />
+    <ClCompile Include="support\VerticalSupportModel.cpp" />
     <ClCompile Include="ui\CubeWidget.cpp" />
     <ClCompile Include="ui\MoveWidget.cpp" />
     <ClCompile Include="ui\RotateWidget.cpp" />
@@ -330,8 +333,9 @@
     </QtMoc>
     <ClInclude Include="feature\manualsupport.h" />
     <QtMoc Include="input\raycastcontroller.h" />
+    <ClInclude Include="input\Clickable.h" />
     <ClInclude Include="input\Draggable.h" />
-    <ClInclude Include="input\Highlightable.h" />
+    <ClInclude Include="ui\Highlightable.h" />
     <ClInclude Include="input\Hoverable.h" />
     <QtMoc Include="ui\MoveWidget.h" />
     <QtMoc Include="ui\RotateWidget.h" />
@@ -360,6 +364,15 @@
       <IncludePath Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(CGAL_DIR)\auxiliary\gmp\include;$(CGAL_DIR)\build\include;$(CGAL_DIR)\include;$(BOOST_INCLUDEDIR);.\GeneratedFiles\$(ConfigurationName);.\GeneratedFiles;.;.\utils\winsparkle;$(QT_MSVC2017_32)\include;$(QT_MSVC2017_32)\include\Qt3DQuickExtras;$(QT_MSVC2017_32)\include\Qt3DQuick;$(QT_MSVC2017_32)\include\QtQuick;$(QT_MSVC2017_32)\include\QtOpenGL;$(QT_MSVC2017_32)\include\QtWidgets;$(QT_MSVC2017_32)\include\Qt3DExtras;$(QT_MSVC2017_32)\include\Qt3DRender;$(QT_MSVC2017_32)\include\Qt3DInput;$(QT_MSVC2017_32)\include\Qt3DLogic;$(QT_MSVC2017_32)\include\Qt3DCore;$(QT_MSVC2017_32)\include\QtGamepad;$(QT_MSVC2017_32)\include\QtGui;$(QT_MSVC2017_32)\include\QtANGLE;$(QT_MSVC2017_32)\include\QtQml;$(QT_MSVC2017_32)\include\QtNetwork;$(QT_MSVC2017_32)\include\QtConcurrent;$(QT_MSVC2017_32)\include\QtCore;.\debug;C:\VulkanSDK\1.0.51.0\include;$(QT_MSVC2017_32)\mkspecs\win32-msvc;$(QT_MSVC2017_32)\include\QtSvg</IncludePath>
       <IncludePath Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(CGAL_DIR)\auxiliary\gmp\include;$(CGAL_DIR)\build\include;$(CGAL_DIR)\include;$(BOOST_INCLUDEDIR);.\GeneratedFiles\$(ConfigurationName);.\GeneratedFiles;.;.\utils\winsparkle;$(QT_MSVC2017_32)\include;$(QT_MSVC2017_32)\include\Qt3DQuickExtras;$(QT_MSVC2017_32)\include\Qt3DQuick;$(QT_MSVC2017_32)\include\QtQuick;$(QT_MSVC2017_32)\include\QtOpenGL;$(QT_MSVC2017_32)\include\QtWidgets;$(QT_MSVC2017_32)\include\Qt3DExtras;$(QT_MSVC2017_32)\include\Qt3DRender;$(QT_MSVC2017_32)\include\Qt3DInput;$(QT_MSVC2017_32)\include\Qt3DLogic;$(QT_MSVC2017_32)\include\Qt3DCore;$(QT_MSVC2017_32)\include\QtGamepad;$(QT_MSVC2017_32)\include\QtGui;$(QT_MSVC2017_32)\include\QtANGLE;$(QT_MSVC2017_32)\include\QtQml;$(QT_MSVC2017_32)\include\QtNetwork;$(QT_MSVC2017_32)\include\QtConcurrent;$(QT_MSVC2017_32)\include\QtCore;.\release;C:\VulkanSDK\1.0.51.0\include;$(QT_MSVC2017_32)\mkspecs\win32-msvc;$(QT_MSVC2017_32)\include\QtSvg</IncludePath>
     </QtMoc>
+    <ClInclude Include="support\SupportModel.h" />
+    <ClInclude Include="support\VerticalSupportModel.h">
+      <IncludePath Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(CGAL_DIR)\auxiliary\gmp\include;$(CGAL_DIR)\build\include;$(CGAL_DIR)\include;$(BOOST_INCLUDEDIR);.\GeneratedFiles\$(ConfigurationName);.\GeneratedFiles;.;.\utils\winsparkle;$(QT_MSVC2017_32)\include;$(QT_MSVC2017_32)\include\Qt3DQuickExtras;$(QT_MSVC2017_32)\include\Qt3DQuick;$(QT_MSVC2017_32)\include\QtQuick;$(QT_MSVC2017_32)\include\QtOpenGL;$(QT_MSVC2017_32)\include\QtWidgets;$(QT_MSVC2017_32)\include\Qt3DExtras;$(QT_MSVC2017_32)\include\Qt3DRender;$(QT_MSVC2017_32)\include\Qt3DInput;$(QT_MSVC2017_32)\include\Qt3DLogic;$(QT_MSVC2017_32)\include\Qt3DCore;$(QT_MSVC2017_32)\include\QtGamepad;$(QT_MSVC2017_32)\include\QtGui;$(QT_MSVC2017_32)\include\QtANGLE;$(QT_MSVC2017_32)\include\QtQml;$(QT_MSVC2017_32)\include\QtNetwork;$(QT_MSVC2017_32)\include\QtConcurrent;$(QT_MSVC2017_32)\include\QtCore;.\debug;C:\VulkanSDK\1.0.51.0\include;$(QT_MSVC2017_32)\mkspecs\win32-msvc;$(QT_MSVC2017_32)\include\QtSvg</IncludePath>
+      <IncludePath Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(CGAL_DIR)\auxiliary\gmp\include;$(CGAL_DIR)\build\include;$(CGAL_DIR)\include;$(BOOST_INCLUDEDIR);.\GeneratedFiles\$(ConfigurationName);.\GeneratedFiles;.;.\utils\winsparkle;$(QT_MSVC2017_32)\include;$(QT_MSVC2017_32)\include\Qt3DQuickExtras;$(QT_MSVC2017_32)\include\Qt3DQuick;$(QT_MSVC2017_32)\include\QtQuick;$(QT_MSVC2017_32)\include\QtOpenGL;$(QT_MSVC2017_32)\include\QtWidgets;$(QT_MSVC2017_32)\include\Qt3DExtras;$(QT_MSVC2017_32)\include\Qt3DRender;$(QT_MSVC2017_32)\include\Qt3DInput;$(QT_MSVC2017_32)\include\Qt3DLogic;$(QT_MSVC2017_32)\include\Qt3DCore;$(QT_MSVC2017_32)\include\QtGamepad;$(QT_MSVC2017_32)\include\QtGui;$(QT_MSVC2017_32)\include\QtANGLE;$(QT_MSVC2017_32)\include\QtQml;$(QT_MSVC2017_32)\include\QtNetwork;$(QT_MSVC2017_32)\include\QtConcurrent;$(QT_MSVC2017_32)\include\QtCore;.\release;C:\VulkanSDK\1.0.51.0\include;$(QT_MSVC2017_32)\mkspecs\win32-msvc;$(QT_MSVC2017_32)\include\QtSvg</IncludePath>
+    </ClInclude>
+    <ClInclude Include="support\SupportRaftManager.h">
+      <IncludePath Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(CGAL_DIR)\auxiliary\gmp\include;$(CGAL_DIR)\build\include;$(CGAL_DIR)\include;$(BOOST_INCLUDEDIR);.\GeneratedFiles\$(ConfigurationName);.\GeneratedFiles;.;.\utils\winsparkle;$(QT_MSVC2017_32)\include;$(QT_MSVC2017_32)\include\Qt3DQuickExtras;$(QT_MSVC2017_32)\include\Qt3DQuick;$(QT_MSVC2017_32)\include\QtQuick;$(QT_MSVC2017_32)\include\QtOpenGL;$(QT_MSVC2017_32)\include\QtWidgets;$(QT_MSVC2017_32)\include\Qt3DExtras;$(QT_MSVC2017_32)\include\Qt3DRender;$(QT_MSVC2017_32)\include\Qt3DInput;$(QT_MSVC2017_32)\include\Qt3DLogic;$(QT_MSVC2017_32)\include\Qt3DCore;$(QT_MSVC2017_32)\include\QtGamepad;$(QT_MSVC2017_32)\include\QtGui;$(QT_MSVC2017_32)\include\QtANGLE;$(QT_MSVC2017_32)\include\QtQml;$(QT_MSVC2017_32)\include\QtNetwork;$(QT_MSVC2017_32)\include\QtConcurrent;$(QT_MSVC2017_32)\include\QtCore;.\debug;C:\VulkanSDK\1.0.51.0\include;$(QT_MSVC2017_32)\mkspecs\win32-msvc;$(QT_MSVC2017_32)\include\QtSvg</IncludePath>
+      <IncludePath Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(CGAL_DIR)\auxiliary\gmp\include;$(CGAL_DIR)\build\include;$(CGAL_DIR)\include;$(BOOST_INCLUDEDIR);.\GeneratedFiles\$(ConfigurationName);.\GeneratedFiles;.;.\utils\winsparkle;$(QT_MSVC2017_32)\include;$(QT_MSVC2017_32)\include\Qt3DQuickExtras;$(QT_MSVC2017_32)\include\Qt3DQuick;$(QT_MSVC2017_32)\include\QtQuick;$(QT_MSVC2017_32)\include\QtOpenGL;$(QT_MSVC2017_32)\include\QtWidgets;$(QT_MSVC2017_32)\include\Qt3DExtras;$(QT_MSVC2017_32)\include\Qt3DRender;$(QT_MSVC2017_32)\include\Qt3DInput;$(QT_MSVC2017_32)\include\Qt3DLogic;$(QT_MSVC2017_32)\include\Qt3DCore;$(QT_MSVC2017_32)\include\QtGamepad;$(QT_MSVC2017_32)\include\QtGui;$(QT_MSVC2017_32)\include\QtANGLE;$(QT_MSVC2017_32)\include\QtQml;$(QT_MSVC2017_32)\include\QtNetwork;$(QT_MSVC2017_32)\include\QtConcurrent;$(QT_MSVC2017_32)\include\QtCore;.\release;C:\VulkanSDK\1.0.51.0\include;$(QT_MSVC2017_32)\mkspecs\win32-msvc;$(QT_MSVC2017_32)\include\QtSvg</IncludePath>
+    </ClInclude>
     <ClInclude Include="ui\Widget3DManager.h" />
     <ClInclude Include="render\Color.h" />
     <ClInclude Include="unitTest\catch.hpp" />

@@ -38,13 +38,10 @@ using namespace Hix::Input;
 using namespace Hix::Render;
 GLModel::GLModel(QObject* mainWindow, QEntity*parent, Mesh* loadMesh, QString fname, int id)
     : SceneEntityWithMaterial(parent)
+	, _supportRaftManager(this)
     , filename(fname)
     , mainWindow(mainWindow)
     , cutMode(1)
-    , layerMesh(nullptr)
-    , layerInfillMesh(nullptr)
-    , layerSupportMesh(nullptr)
-    , layerRaftMesh(nullptr)
     , ID(id)
 {
     qDebug() << "new model made _______________________________"<<this<< "parent:"<<parent;
@@ -89,7 +86,6 @@ GLModel::GLModel(QObject* mainWindow, QEntity*parent, Mesh* loadMesh, QString fn
 	qmlManager->setProgress(0.73);
 
 	QObject::connect(this, SIGNAL(bisectDone(Mesh*, Mesh*)), this, SLOT(generateRLModel(Mesh*, Mesh*)));
-	QObject::connect(this, SIGNAL(_generateSupport()), this, SLOT(generateSupport()));
 
 	qDebug() << "created shadow model";
 
@@ -105,8 +101,95 @@ GLModel::GLModel(QObject* mainWindow, QEntity*parent, Mesh* loadMesh, QString fn
 	cuttingPoints.reserve(50);
 	cuttingContourCylinders.reserve(50);
 
+	QObject::connect(this, SIGNAL(_updateModelMesh()), this, SLOT(updateModelMesh()));
 
 }
+
+
+
+void GLModel::moveModelMesh(QVector3D direction, bool update) {
+	_mesh->vertexMove(direction);
+	qDebug() << "moved vertex";
+	if (update)
+	{
+		updateModelMesh();
+	}
+}
+
+void GLModel::rotationDone()
+{
+	_mesh->vertexRotate(quatToMat(m_transform.rotation()).inverted());
+	m_transform.setRotationX(0);
+	m_transform.setRotationY(0);
+	m_transform.setRotationZ(0);
+
+	_mesh->vertexMove(m_transform.translation());
+	m_transform.setTranslation(QVector3D(0, 0, 0));
+	updateModelMesh();
+}
+
+
+
+void GLModel::rotateByNumber(QVector3D& rot_center, int X, int Y, int Z)
+{
+	QMatrix4x4 rot;
+	rot = m_transform.rotateAround(rot_center, X, (QVector3D(1, 0, 0).toVector4D() * m_transform.matrix()).toVector3D());
+	m_transform.setMatrix(m_transform.matrix() * rot);
+	rot = m_transform.rotateAround(rot_center, Y, (QVector3D(0, 1, 0).toVector4D() * m_transform.matrix()).toVector3D());
+	m_transform.setMatrix(m_transform.matrix() * rot);
+	rot = m_transform.rotateAround(rot_center, Z, (QVector3D(0, 0, 1).toVector4D() * m_transform.matrix()).toVector3D());
+	m_transform.setMatrix(m_transform.matrix() * rot);
+
+	_mesh->vertexRotate(quatToMat(m_transform.rotation()).inverted());
+	m_transform.setRotationX(0);
+	m_transform.setRotationY(0);
+	m_transform.setRotationZ(0);
+	_mesh->vertexMove(m_transform.translation());
+	m_transform.setTranslation(QVector3D(0, 0, 0));
+	updateModelMesh();
+}
+
+void GLModel::rotateModelMesh(QMatrix4x4 matrix, bool update) {
+	_mesh->vertexRotate(matrix);
+	if (update)
+	{
+		updateModelMesh();
+	}
+}
+
+
+void GLModel::rotateModelMesh(int Axis, float Angle, bool update) {
+	Qt3DCore::QTransform tmp;
+	switch (Axis) {
+	case 1: {
+		tmp.setRotationX(Angle);
+		break;
+	}
+	case 2: {
+		tmp.setRotationY(Angle);
+		break;
+	}
+	case 3: {
+		tmp.setRotationZ(Angle);
+		break;
+	}
+	}
+	rotateModelMesh(tmp.matrix(), update);
+}
+
+
+
+void GLModel::scaleModelMesh(float scaleX, float scaleY, float scaleZ) {
+	/* To fix center of the model */
+	float centerX = (_mesh->x_max() + _mesh->x_min()) / 2;
+	float centerY = (_mesh->y_max() + _mesh->y_min()) / 2;
+	_mesh->vertexScale(scaleX, scaleY, scaleZ, centerX, centerY);
+	updateModelMesh();
+}
+
+
+
+
 
 void GLModel::changeColor(const QVector3D& color){
 	_meshMaterial.setColor(color);
@@ -176,51 +259,8 @@ void GLModel::updateModelMesh(){
     QMetaObject::invokeMethod(qmlManager->boxLeftTab, "disableLefttab");
     QMetaObject::invokeMethod((QObject*)qmlManager->scene3d, "disableScene3D");
     qDebug() << "update Model Mesh";
-    int viewMode = qmlManager->getViewMode();
-	updateShader(viewMode);
-    switch( viewMode ) {
-    case VIEW_MODE_OBJECT:
-		updateMesh(_mesh);
-        m_transform.setTranslation(QVector3D(m_transform.translation().x(),m_transform.translation().y(),-_mesh->z_min()));
-        break;
-    case VIEW_MODE_LAYER:
-        qDebug() << "in the glmodel view mode layer" << qmlManager->getLayerViewFlags() << " " << (qmlManager->getLayerViewFlags() & LAYER_SUPPORTERS);
-        if( layerMesh != nullptr ) {
-            int faces = layerMesh->getFaces().size()*2 +
-                    (qmlManager->getLayerViewFlags() & LAYER_INFILL != 0 ? layerInfillMesh->getFaces().size()*2 : 0) +
-                    (qmlManager->getLayerViewFlags() & LAYER_SUPPORTERS != 0 ? supportMesh->getFaces().size()*2 : 0) +
-                    (qmlManager->getLayerViewFlags() & LAYER_RAFT != 0 ? layerRaftMesh->getFaces().size()*2 : 0);
-			updateMesh(layerMesh);
-            if( qmlManager->getLayerViewFlags() & LAYER_INFILL ) {
-				appendMesh(layerInfillMesh);
-            }
-            if( qmlManager->getLayerViewFlags() & LAYER_SUPPORTERS ) {
-				appendMesh(supportMesh);
-            }
-            if( qmlManager->getLayerViewFlags() & LAYER_RAFT) {
-                appendMesh(raftMesh);
-            }
-        } else {
-            int faces = _mesh->getFaces().size()*2 + ((supportMesh!=nullptr) ? supportMesh->getFaces().size()*2:0);
-			updateMesh(_mesh);
-            if (supportMesh != nullptr){
-				appendMesh(supportMesh);
-                qDebug() << "ADDED support mesh";
-            }
-            if (raftMesh != nullptr){
-                appendMesh(raftMesh);
-                qDebug() << "ADDED raft mesh";
-            }
-        }
-
-        m_transform.setTranslation(QVector3D(m_transform.translation().x(),m_transform.translation().y(),-_mesh->z_min() + scfg->raft_thickness + scfg->support_base_height));
-        break;
-    }
-
+	updateMesh(_mesh);
     qmlManager->sendUpdateModelInfo();
-    checkPrintingArea();
-    //QMetaObject::invokeMethod(qmlManager->scalePopup, "updateSizeInfo", Q_ARG(QVariant, _mesh->x_max()-_mesh->x_min()), Q_ARG(QVariant, _mesh->y_max()-_mesh->y_min()), Q_ARG(QVariant, _mesh->z_max()-_mesh->z_min()));
-    qDebug() << "model transform :" <<m_transform.translation() << _mesh->x_max() << _mesh->x_min() << _mesh->y_max() << _mesh->y_min() << _mesh->z_max() << _mesh->z_min();
     updateLock = false;
     qDebug() << this << "released lock";
     QMetaObject::invokeMethod(qmlManager->boxUpperTab, "enableUppertab");
@@ -501,40 +541,6 @@ void GLModel::generatePlane(){
 
     removeCuttingPoints();
     //modelCut();
-}
-
-void GLModel::generateSupport(){
-
-    // copy _mesh data from original _mesh
-    layerMesh = new Mesh;
-	for (const MeshFace& mf : _mesh->getFaces()) {
-		auto meshVertices = mf.meshVertices();
-		layerMesh->addFace(meshVertices[0]->position, meshVertices[1]->position, meshVertices[2]->position);
-    }
-
-    float x_length = _mesh->x_max() - _mesh->x_min();
-    float y_length = _mesh->y_max() - _mesh->y_min();
-    float z_length = _mesh->z_max() - _mesh->z_min();
-
-    layerInfillMesh = new Mesh;
-    layerSupportMesh = new Mesh;
-    layerRaftMesh = new Mesh;
-
-    QVector3D t = m_transform.translation();
-
-    t.setZ(_mesh->z_min() * -1.0f);
-    layerInfillMesh->vertexMove(t);
-    layerSupportMesh->vertexMove(t);
-    layerRaftMesh->vertexMove(t);
-
-    t.setZ(scfg->raft_thickness);
-    layerMesh->vertexMove(t);
-    t.setZ(_mesh->z_min() + scfg->raft_thickness + scfg->support_base_height);
-    layerInfillMesh->vertexMove(t);
-    layerSupportMesh->vertexMove(t);
-    layerRaftMesh->vertexMove(t);
-
-    updateModelMesh();
 }
 
 void GLModel::removePlane(){
@@ -1557,16 +1563,6 @@ void GLModel::changeViewMode(int viewMode) {
         supportViewActive = false;
 		
         break;
-    case VIEW_MODE_SUPPORT:
-        if (layerViewActive){
-            // remove layer view components
-            removeLayerViewComponents();
-        }
-        layerViewActive = false;
-        supportViewActive = true;
-
-
-        break;
     case VIEW_MODE_LAYER:
         layerViewActive = true;
         supportViewActive = false;
@@ -1590,6 +1586,9 @@ void GLModel::changeViewMode(int viewMode) {
         getLayerViewSliderSignal(maxLayerCount.toInt());
         break;
     }
+	updateShader(viewMode);
+	adjustZHeight(viewMode);
+
 
     emit _updateModelMesh();
 }
@@ -1609,14 +1608,33 @@ void GLModel::updateShader(int viewMode)
 			_meshMaterial.changeMode(Hix::Render::ShaderMode::SingleColor);
 		}
 		break;
-	case VIEW_MODE_SUPPORT:
-		_meshMaterial.changeMode(Hix::Render::ShaderMode::SingleColor);
-		break;
 	case VIEW_MODE_LAYER:
 		_meshMaterial.changeMode(Hix::Render::ShaderMode::LayerMode);
 		break;
 	}
 
+
+
+
+}
+
+void GLModel::adjustZHeight(int viewMode)
+{
+	switch (viewMode) {
+	case VIEW_MODE_OBJECT:
+		updateMesh(_mesh);
+		m_transform.setTranslation(QVector3D(
+			m_transform.translation().x(),
+			m_transform.translation().y(),
+			-_mesh->z_min()));
+		break;
+	case VIEW_MODE_LAYER:
+		m_transform.setTranslation(QVector3D(
+			m_transform.translation().x(),
+			m_transform.translation().y(),
+			-1.0f * _supportRaftManager.supportRaftBottom()));
+		break;
+	}
 }
 
 
@@ -1659,11 +1677,6 @@ void GLModel::removeLayerViewComponents(){
 
 
 
-const Mesh* GLModel::getSupport()
-{
-    return supportMesh;
-}
-
 bool GLModel::perPrimitiveColorActive() const
 {
 	return faceHighlightActive() || layerViewActive;
@@ -1674,14 +1687,33 @@ bool GLModel::faceHighlightActive() const
 }
 bool GLModel::raftSupportGenerated() const
 {
-	return _raftSupportGenerated;
+	return _supportRaftManager.raftActive() || _supportRaftManager.supportActive();
+}
+QVector3D GLModel::getPrimitiveColorCode(const Hix::Engine3D::Mesh* mesh, FaceConstItr itr)
+{
+#ifdef _STRICT_GLMODEL
+	if (!faceHighlightActive())
+	{
+		qDebug() << "getPrimitiveColorCode when faceHighlightActive";
+		throw std::runtime_error("getPrimitiveColorCode when faceHighlightActive");
+	}
+#endif
+		//color selected stuff yellow, everything non-yellow
+
+	if (std::find(selectedFaces.begin(), selectedFaces.end(), itr) != selectedFaces.end())
+	{
+		return Hix::Render::Colors::SelectedFace;
+	}
+	else
+	{
+		return Hix::Render::Colors::Selected;
+	}
+
+
+
 }
 void GLModel::setSupportAndRaft()
 {
-	GenerateSupport generatesupport;
-	supportMesh = generatesupport.generateSupport(_mesh);
-	GenerateRaft generateraft;
-	raftMesh = generateraft.generateRaft(_mesh, generatesupport.overhangPoints);
-	_raftSupportGenerated = true;
+	_supportRaftManager.generateSuppAndRaft(scfg->support_type, scfg->raft_type);
 
 }

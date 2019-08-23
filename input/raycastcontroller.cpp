@@ -6,6 +6,8 @@
 
 #include "input/Draggable.h"
 #include "input/Hoverable.h"
+#include "input/Clickable.h"
+
 #include "utils/mathutils.h"
 
 #include <chrono>
@@ -302,17 +304,17 @@ void RayCastController::hitsChanged(const Qt3DRender::QAbstractRayCaster::Hits& 
 			}
 			else
 			{
-				auto glmodel = dynamic_cast<GLModel*>(nearestHit->entity());
-				if (glmodel)
+				auto clickable = dynamic_cast<Clickable*>(nearestHit->entity());
+				if (clickable)
 				{
-					if (qmlManager->getViewMode() == VIEW_MODE_SUPPORT)
-						qmlManager->addSupport(glmodel, nearestHit->localIntersection());
-					else 
-						glmodel->clicked(_mouseEvent, *nearestHit);
+					//if (qmlManager->getViewMode() == VIEW_MODE_SUPPORT)
+					//	qmlManager->addSupport(glmodel, nearestHit->localIntersection());
+					//else 
+					clickable->clicked(_mouseEvent, *nearestHit);
 				}
                 else
                 {
-                    auto parent = dynamic_cast<GLModel*>(nearestHit->entity()->parentEntity());
+                    auto parent = dynamic_cast<Clickable*>(nearestHit->entity()->parentEntity());
                     if(parent)
                     {
                         parent->clicked(_mouseEvent, *nearestHit);

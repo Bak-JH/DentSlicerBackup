@@ -13,6 +13,9 @@
 #include "feature/hollowshell.h"
 #include "input/raycastcontroller.h"
 #include "input/Draggable.h"
+#include "input/Clickable.h"
+#include "support/SupportRaftManager.h"
+
 #include "render/ModelMaterial.h"
 #define MAX_BUF_LEN 2000000
 
@@ -49,13 +52,12 @@ class GLModel;
 class OverhangPoint;
 
 
-class GLModel : public Hix::Render::SceneEntityWithMaterial, public Hix::Input::Draggable
+class GLModel : public Hix::Render::SceneEntityWithMaterial, public Hix::Input::Draggable, public Hix::Input::Clickable
 {
     Q_OBJECT
 public:
     //probably interface this as well
-	void clicked	(Hix::Input::MouseEventData&,const Qt3DRender::QRayCasterHit&);
-
+	void clicked	(Hix::Input::MouseEventData&,const Qt3DRender::QRayCasterHit&) override;
 	bool isDraggable(Hix::Input::MouseEventData& v,const Qt3DRender::QRayCasterHit&) override;
 	void dragStarted(Hix::Input::MouseEventData&,const Qt3DRender::QRayCasterHit&) override;
 	void doDrag(Hix::Input::MouseEventData& e)override;
@@ -144,8 +146,6 @@ public:
     // implement lock as bool variable
     bool updateLock;
 
-    const Hix::Engine3D::Mesh* getSupport();
-	const Mesh* getRaft();
 	void setBoundingBoxVisible(bool isEnabled);
 
 	
@@ -164,10 +164,25 @@ public:
 	bool perPrimitiveColorActive()const;
 	bool faceHighlightActive()const;
 	bool raftSupportGenerated()const;
+
+
+
+	//TODO: remove these
+	// Model Mesh move, rotate, scale
+	void moveModelMesh(QVector3D direction, bool update = true);
+	void rotationDone();
+	void rotateByNumber(QVector3D& rot_center, int X, int Y, int Z);
+	void rotateModelMesh(int Axis, float Angle, bool update = true);
+	void rotateModelMesh(QMatrix4x4 matrix, bool update = true);
+	void scaleModelMesh(float scaleX, float scaleY, float scaleZ);
+
+
 private:
+	void adjustZHeight(int viewMode);
+	QVector3D getPrimitiveColorCode(const Hix::Engine3D::Mesh* mesh, FaceConstItr faceItr)override;
 
     //Order is important! Look at the initializer list in constructor
-
+	Hix::Support::SupportRaftManager _supportRaftManager;
     QVector3D lastpoint;
     QVector2D prevPoint;
 
@@ -179,32 +194,18 @@ private:
     bool isFlatcutEdge = false;
     int viewMode = -1;
 
-
-	Hix::Engine3D::Mesh* supportMesh = nullptr;
-	Hix::Engine3D::Mesh* raftMesh = nullptr;
-
-	Hix::Engine3D::Mesh* layerMesh;
-	Hix::Engine3D::Mesh* layerSupportMesh;
-	Hix::Engine3D::Mesh* layerRaftMesh;
-	Hix::Engine3D::Mesh* layerInfillMesh;
-
-
-
-
-
-
 signals:
-
+	void _updateModelMesh();
     void modelSelected(int);
     void resetLayflat();
     void bisectDone(Mesh*, Mesh*); //lmesh, rmesh
-    void _generateSupport();
     void layFlatSelect();
     void layFlatUnSelect();
     void extensionSelect();
     void extensionUnSelect();
 
 public slots:
+	void updateModelMesh();
 
     // object picker parts
     void mouseEnteredFreeCutSphere();
@@ -273,10 +274,7 @@ public slots:
     void generateManualSupport();
 
     // Model Mesh info update
-    void updateModelMesh() override;
 
-    // Generate support mesh
-    void generateSupport();
 
     //TODO: get rid of this
     friend class featureThread;
