@@ -309,6 +309,7 @@ public slots:
     void cleanselectedModel(int);
     void extensionSelect();
     void extensionUnSelect();
+
     void layFlatSelect();
     void layFlatUnSelect();
     void manualSupportSelect();
@@ -325,6 +326,9 @@ public slots:
 	void cameraViewChanged();
     void viewObjectChanged(bool checked);
     void viewLayerChanged(bool checked);
+	void generateManualSupport();
+	void generateAutoSupport();
+
 
     void layerInfillButtonChanged(bool chacked);
     void layerSupportersButtonChanged(bool chacked);
