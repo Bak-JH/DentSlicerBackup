@@ -131,7 +131,6 @@ public:
 
     void checkPrintingArea();
     bool EndsWith(const std::string& a, const std::string& b);
-    bool modelSelectChangable();
     QString getFileName(const std::string& s);
     static QVector3D spreadPoint(QVector3D endpoint,QVector3D startpoint,int factor);
     void changeViewMode(int viewMode);
@@ -155,14 +154,15 @@ public:
 	bool hollowShellActive = false;
 	bool shellOffsetActive = false;
 	bool layflatActive = false;
-	bool manualSupportActive = false;
 	bool layerViewActive = false;
-	bool supportViewActive = false;
 	bool scaleActive = false;
+
+
+
 	bool isMoved = false;
 
 	bool perPrimitiveColorActive()const;
-	bool faceHighlightActive()const;
+	bool faceSelectionActive()const;
 	bool raftSupportGenerated()const;
 
 
@@ -200,6 +200,9 @@ signals:
     void resetLayflat();
     void bisectDone(Mesh*, Mesh*); //lmesh, rmesh
     void layFlatSelect();
+	void manualSupportSelect();
+	void manualSupportUnSelect();
+
     void layFlatUnSelect();
     void extensionSelect();
     void extensionUnSelect();
@@ -267,11 +270,6 @@ public slots:
     void openShellOffset();
     void closeShellOffset();
     void generateShellOffset(double factor);
-
-    // Manual Support
-    void openManualSupport();
-    void closeManualSupport();
-    void generateManualSupport();
 
     // Model Mesh info update
 
