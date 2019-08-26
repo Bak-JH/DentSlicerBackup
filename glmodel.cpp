@@ -194,14 +194,7 @@ void GLModel::scaleModelMesh(float scaleX, float scaleY, float scaleZ) {
 void GLModel::changeColor(const QVector3D& color){
 	_meshMaterial.setColor(color);
 }
-bool GLModel::modelSelectChangable(){
-    bool result = false;
-    qDebug() << cutActive << extensionActive << labellingActive << layflatActive << isMoved;
-    if (!cutActive && !extensionActive && !labellingActive && !layflatActive && !manualSupportActive && !isMoved)
-        result = true;
 
-    return result;
-}
 
 void GLModel::checkPrintingArea() {
 	float printing_x = scfg->bed_x;
@@ -237,9 +230,7 @@ void GLModel::copyModelAttributeFrom(GLModel* from){
     hollowShellActive = from->hollowShellActive;
     shellOffsetActive = from->shellOffsetActive;
     layflatActive = from->layflatActive;
-    manualSupportActive = from->manualSupportActive;
     layerViewActive = from->layerViewActive;
-    supportViewActive = from->supportViewActive;
     scaleActive = from->scaleActive;
 
     // labelling info
@@ -782,7 +773,7 @@ GLModel::~GLModel(){
 void GLModel::clicked(MouseEventData& pick, const Qt3DRender::QRayCasterHit& hit)
 {
 
-	if (!cutActive && !extensionActive && !labellingActive && !layflatActive && !manualSupportActive)// && !layerViewActive && !supportViewActive)
+	if (!cutActive && !extensionActive && !labellingActive && !layflatActive && _supportRaftManager.supportEditMode() != Hix::Support::SupportEditMode::None)// && !layerViewActive && !supportViewActive)
 		qmlManager->modelSelected(ID);
 
 	if (qmlManager->isSelected(this) && pick.button == Qt::MouseButton::RightButton) {
@@ -876,10 +867,9 @@ void GLModel::clicked(MouseEventData& pick, const Qt3DRender::QRayCasterHit& hit
 		selectMeshFaces();
 	}
 
-	if (manualSupportActive && hit.localIntersection() != QVector3D(0, 0, 0)) {
-		qDebug() << "manual support handle picker clicked";
+	if (_supportRaftManager.supportEditMode() != Hix::Support::SupportEditMode::None && hit.localIntersection() != QVector3D(0, 0, 0)) {
 		unselectMeshFaces();
-		emit extensionSelect();
+		emit manualSupportSelect();
 		selectMeshFaces();
 	}
 
@@ -909,9 +899,7 @@ bool GLModel::isDraggable(Hix::Input::MouseEventData& e,const Qt3DRender::QRayCa
 			extensionActive ||
 			labellingActive ||
 			layflatActive ||
-			layerViewActive ||
-			manualSupportActive ||
-			supportViewActive)	
+			layerViewActive)	
 		&&
 		!(qmlManager->orientationActive ||
 			qmlManager->rotateActive ||
@@ -1380,19 +1368,6 @@ void GLModel::generateLayFlat(){
 }
 
 
-void GLModel::generateManualSupport(){
-    qDebug() << "generateManual support called";
-    if (!_targetSelected)
-        return;
-    QVector3D t = m_transform.translation();
-    t.setZ(_mesh->z_min()+scfg->raft_thickness + scfg->support_base_height);
-    QVector3D targetPosition = targetMeshFace->meshVertices()[0]->position- t;
-    /*OverhangPoint* targetOverhangPosition = new OverhangPoint(targetPosition.x()*ClipperLib::INT_PT_RESOLUTION,
-    generateSupporter(layerSupportMesh, targetOverhangPosition, nullptr, nullptr, layerSupportMesh->z_min());*/
-	_targetSelected = false;
-	updateModelMesh();
-}
-
 // for shell offset
 void GLModel::generateShellOffset(double factor){
     //saveUndoState();
@@ -1439,6 +1414,7 @@ void GLModel::closeLayflat(){
 }
 void GLModel::openExtension(){
     extensionActive = true;
+	_meshMaterial.changeMode(Hix::Render::ShaderMode::PerPrimitiveColor);
 
     qmlManager->lastModelSelected();
     if (!qmlManager->isSelected(this))
@@ -1447,6 +1423,7 @@ void GLModel::openExtension(){
 }
 
 void GLModel::closeExtension(){
+	_meshMaterial.changeMode(Hix::Render::ShaderMode::SingleColor);
     if (!extensionActive)
         return;
 
@@ -1455,21 +1432,6 @@ void GLModel::closeExtension(){
 	_targetSelected = false;
 }
 
-void GLModel::openManualSupport(){
-    manualSupportActive = true;
-    qDebug() << "open manual support";
-}
-
-void GLModel::closeManualSupport(){
-
-    if (!manualSupportActive)
-        return;
-
-    manualSupportActive = false;
-    unselectMeshFaces();
-	_targetSelected = false;
-	qDebug() << "close manual support";
-}
 
 void GLModel::openScale(){
     scaleActive = true;
@@ -1560,12 +1522,10 @@ void GLModel::changeViewMode(int viewMode) {
             removeLayerViewComponents();
         }
         layerViewActive = false;
-        supportViewActive = false;
 		
         break;
     case VIEW_MODE_LAYER:
         layerViewActive = true;
-        supportViewActive = false;
         // generate layer view plane materials
         layerViewPlaneMaterial = new Qt3DExtras::QTextureMaterial();
         layerViewPlaneMaterial->setAlphaBlendingEnabled(false);
@@ -1599,7 +1559,7 @@ void GLModel::updateShader(int viewMode)
 
 	switch (viewMode) {
 	case VIEW_MODE_OBJECT:
-		if (faceHighlightActive())
+		if (faceSelectionActive())
 		{
 			_meshMaterial.changeMode(Hix::Render::ShaderMode::PerPrimitiveColor);
 		}
@@ -1656,7 +1616,6 @@ void GLModel::inactivateFeatures(){
     closeHollowShell();
     closeShellOffset();
     closeLayflat();
-    closeManualSupport();
     closeScale();
     //layerViewActive = false; //closeLayerView();
     //supportViewActive = false; //closeSupportView();
@@ -1679,11 +1638,11 @@ void GLModel::removeLayerViewComponents(){
 
 bool GLModel::perPrimitiveColorActive() const
 {
-	return faceHighlightActive() || layerViewActive;
+	return faceSelectionActive() || layerViewActive;
 }
-bool GLModel::faceHighlightActive() const
+bool GLModel::faceSelectionActive() const
 {
-	return extensionActive || layflatActive || manualSupportActive;
+	return extensionActive || layflatActive || _supportRaftManager.supportEditMode() != Hix::Support::SupportEditMode::None;
 }
 bool GLModel::raftSupportGenerated() const
 {
@@ -1692,15 +1651,15 @@ bool GLModel::raftSupportGenerated() const
 QVector3D GLModel::getPrimitiveColorCode(const Hix::Engine3D::Mesh* mesh, FaceConstItr itr)
 {
 #ifdef _STRICT_GLMODEL
-	if (!faceHighlightActive())
+	if (!faceSelectionActive())
 	{
-		qDebug() << "getPrimitiveColorCode when faceHighlightActive";
-		throw std::runtime_error("getPrimitiveColorCode when faceHighlightActive");
+		qDebug() << "getPrimitiveColorCode when faceSelectionActive";
+		throw std::runtime_error("getPrimitiveColorCode when faceSelectionActive");
 	}
 #endif
 		//color selected stuff yellow, everything non-yellow
 
-	if (std::find(selectedFaces.begin(), selectedFaces.end(), itr) != selectedFaces.end())
+	if (selectedFaces.find(itr) != selectedFaces.end())
 	{
 		return Hix::Render::Colors::SelectedFace;
 	}

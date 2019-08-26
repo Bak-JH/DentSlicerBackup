@@ -1642,6 +1642,7 @@ Rectangle {
 
             signal openManualSupport();
             signal closeManualSupport();
+			signal generateAutoSupport();
             signal generateManualSupport();
 
             function onApplyFinishButton(){
