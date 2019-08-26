@@ -393,6 +393,9 @@ void QmlManager::disconnectHandlers(GLModel* glmodel){
 
 	// manual support popup codes
 	QObject::disconnect(manualSupportPopup, SIGNAL(generateManualSupport()), glmodel, SLOT(generateManualSupport()));
+	QObject::disconnect(manualSupportPopup, SIGNAL(generateAutoSupport()), this, SLOT(generateAutoSupport()));
+
+	
 
 	
 	// model layflat popup codes
@@ -433,6 +436,11 @@ void QmlManager::disconnectHandlers(GLModel* glmodel){
 	QObject::disconnect(extensionPopup, SIGNAL(closeExtension()), glmodel, SLOT(closeExtension()));
 	QObject::disconnect(glmodel, SIGNAL(extensionSelect()), this, SLOT(extensionSelect()));
 	QObject::disconnect(glmodel, SIGNAL(extensionUnSelect()), this, SLOT(extensionUnSelect()));
+
+	//manual supprt popup codes
+	QObject::disconnect(glmodel, SIGNAL(manualSupportSelect()), this, SLOT(manualSupportSelect()));
+	QObject::disconnect(glmodel, SIGNAL(manualSupportUnselect()), this, SLOT(manualSupportUnselect()));
+
 
 	// shelloffset popup codes
 	QObject::disconnect(shelloffsetPopup, SIGNAL(openShellOffset()), glmodel, SLOT(openShellOffset()));
@@ -534,6 +542,12 @@ void QmlManager::connectHandlers(GLModel* glmodel){
     QObject::connect(glmodel,SIGNAL(extensionSelect()),this,SLOT(extensionSelect()));
     QObject::connect(glmodel,SIGNAL(extensionUnSelect()),this,SLOT(extensionUnSelect()));
 
+	//manual supprt popup codes
+	QObject::connect(glmodel, SIGNAL(manualSupportSelect()), this, SLOT(manualSupportSelect()));
+	QObject::connect(glmodel, SIGNAL(manualSupportUnselect()), this, SLOT(manualSupportUnselect()));
+
+
+
     // shelloffset popup codes
     QObject::connect(shelloffsetPopup, SIGNAL(openShellOffset()), glmodel, SLOT(openShellOffset()));
     QObject::connect(shelloffsetPopup, SIGNAL(closeShellOffset()), glmodel, SLOT(closeShellOffset()));
@@ -544,6 +558,7 @@ void QmlManager::connectHandlers(GLModel* glmodel){
     QObject::connect(manualSupportPopup, SIGNAL(openManualSupport()), glmodel, SLOT(openManualSupport()));
     QObject::connect(manualSupportPopup, SIGNAL(closeManualSupport()), glmodel, SLOT(closeManualSupport()));
     QObject::connect(manualSupportPopup, SIGNAL(generateManualSupport()), glmodel, SLOT(generateManualSupport()));
+	QObject::connect(manualSupportPopup, SIGNAL(generateAutoSupport()), glmodel, SLOT(generateAutoSupport()));
 
 
 
@@ -1993,4 +2008,17 @@ QVector2D QmlManager::world2Screen(QVector3D target) {
 		Q_ARG(QVariant, target));
 	QVector2D result = qvariant_cast<QVector2D>(value);
 	return result;
+}
+
+void QmlManager::generateManualSupport()
+{
+}
+
+void QmlManager::generateAutoSupport()
+{
+	for (auto selectedModel : selectedModels)
+	{
+		selectedModel->setSupportAndRaft();
+
+	}
 }
