@@ -55,7 +55,7 @@ Section "MainSection" SEC01
   SetOverwrite try
   SetOutPath "$INSTDIR"
 
-File /r "C:\Users\user\Documents\DSPackaging\*.*"
+File /r "setup\*.*"
 SectionEnd
 
 Section -AdditionalIcons
