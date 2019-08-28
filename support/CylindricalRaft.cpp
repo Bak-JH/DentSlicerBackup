@@ -46,7 +46,7 @@ void Hix::Support::CylindricalRaft::generateMeshForContour(const ClipperLib::Pat
 	path.reserve(RAFT_JOINT_CNT);
 
 	//cylinder is of uniform shape, except it narrows a bit in the middle-z
-	float scale = scfg->raft_offset_radius() / scfg->raft_base_radius();
+	constexpr float scale = 0.9f;
 
 	scales.emplace_back(1.0f);
 	scales.emplace_back(scale);

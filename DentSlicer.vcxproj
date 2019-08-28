@@ -211,8 +211,6 @@
     <ClCompile Include="feature\Extrude.cpp" />
     <ClCompile Include="feature\overhangDetect.cpp" />
     <ClCompile Include="fileloader.cpp" />
-    <ClCompile Include="feature\generateraft.cpp" />
-    <ClCompile Include="feature\generatesupport.cpp" />
     <ClCompile Include="glmodel.cpp" />
     <ClCompile Include="input\raycastcontroller.cpp" />
     <ClCompile Include="render\lights.cpp" />
@@ -239,7 +237,6 @@
     <ClCompile Include="feature\labellingtextpreview.cpp" />
     <ClCompile Include="utils\linemeshgeometry.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="feature\manualsupport.cpp" />
     <ClCompile Include="utils\mathutils.cpp" />
     <ClCompile Include="DentEngine\src\mesh.cpp" />
     <ClCompile Include="feature\meshrepair.cpp" />
@@ -321,8 +318,6 @@
     <ClInclude Include="feature\Extrude.h" />
     <ClInclude Include="feature\overhangDetect.h" />
     <ClInclude Include="fileloader.h" />
-    <ClInclude Include="feature\generateraft.h" />
-    <ClInclude Include="feature\generatesupport.h" />
     <QtMoc Include="glmodel.h">
     </QtMoc>
     <QtMoc Include="utils\gridmesh.h">
@@ -334,7 +329,6 @@
     </QtMoc>
     <QtMoc Include="utils\linemeshgeometry.h">
     </QtMoc>
-    <ClInclude Include="feature\manualsupport.h" />
     <QtMoc Include="input\raycastcontroller.h" />
     <ClInclude Include="input\Clickable.h" />
     <ClInclude Include="input\Draggable.h" />

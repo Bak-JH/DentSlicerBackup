@@ -19,8 +19,6 @@
 #include <QCoreApplication>
 #include <QTextStream>
 #include <QFileDialog>
-#include <feature/generatesupport.h>
-#include <feature/generateraft.h>
 #include <exception>
 #include "qmlmanager.h"
 #include "utils/utils.h"
