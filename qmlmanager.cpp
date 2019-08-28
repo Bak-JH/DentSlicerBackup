@@ -1904,26 +1904,27 @@ Hix::Tasking::GenericTask* QmlManager::exportSelectedAsync(QString exportPath, b
 
 		qmlManager->openProgressPopUp();
 
-		// merge selected models
-		Mesh* mergedShellMesh = ste->mergeSelectedModels();//ste->mergeModels(qmlManager->selectedModels);
-		//GLModel* mergedModel = new GLModel(mainWindow, models, mergedMesh, "temporary", false);
 
-		// generate support
-		GenerateSupport generatesupport;
-		Mesh* mergedSupportMesh = nullptr;
-		if (scfg->support_type != SlicingConfiguration::SupportType::None) { // if generating support
-			//Mesh* mergedSupportMesh = nullptr;
-			mergedSupportMesh = generatesupport.generateSupport(mergedShellMesh);
-		}
-
-		// generate raft according to support structure
-		GenerateRaft generateraft;
-		Mesh* mergedRaftMesh = nullptr;
-		if (scfg->raft_type != SlicingConfiguration::RaftType::None) {
-			mergedRaftMesh = generateraft.generateRaft(mergedShellMesh, generatesupport.overhangPoints);
-		}
+		
 		// need to generate support, raft
-		auto result = SlicingEngine::sliceModel(isTemp, subflow, mergedShellMesh, mergedSupportMesh, mergedRaftMesh, exportPath);
+		std::vector<const GLModel*> constSelectedModels;
+		constSelectedModels.reserve(selectedModels.size());
+		//TODO: make this...neater
+		float zMin = std::numeric_limits<float>::max();
+		for (auto each : selectedModels)
+		{
+			constSelectedModels.emplace_back(each);
+			if (each->raftSupportGenerated())
+			{
+				auto bot = each->supportRaftManager().raftBottom();
+				if (zMin > bot)
+					zMin = bot;
+			}
+		}
+		auto noSuppMin = selected_z_min();
+		if (zMin > noSuppMin)
+			zMin = noSuppMin;
+		auto result = SlicingEngine::sliceModels(isTemp, subflow, selected_z_max(), zMin, constSelectedModels, exportPath);
 
 		QMetaObject::invokeMethod(layerViewSlider, "setThickness", Q_ARG(QVariant, (scfg->layer_height)));
 		QMetaObject::invokeMethod(layerViewSlider, "setLayerCount", Q_ARG(QVariant, (result.layerCount -1))); //0 based index

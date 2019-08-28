@@ -56,6 +56,21 @@ void Hix::Support::SupportRaftManager::generateSuppAndRaft(SlicingConfiguration:
 
 }
 
+const std::vector<const Mesh*> Hix::Support::SupportRaftManager::getRaftSupportMeshes()const
+{
+	std::vector<const Mesh*> ptrs;
+	ptrs.reserve(_supports.size() + 1);
+	for (auto& each : _supports)
+	{
+		ptrs.emplace_back(each.first->getMesh());
+	}
+	if (_raft)
+	{
+		ptrs.emplace_back(_raft->getMesh());
+	}
+	return ptrs;
+}
+
 void Hix::Support::SupportRaftManager::addSupport(const std::variant<VertexConstItr, FaceOverhang>& supportSpec)
 {
 	if (!_supportExist)

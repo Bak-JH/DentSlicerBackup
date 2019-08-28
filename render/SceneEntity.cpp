@@ -125,7 +125,7 @@ void SceneEntity::clearMem() {
 }
 
 
-const Mesh* SceneEntity::getMesh()
+const Mesh* SceneEntity::getMesh()const
 {
 	return _mesh;
 }
