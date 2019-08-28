@@ -164,6 +164,7 @@ public:
 	bool faceSelectionActive()const;
 	bool raftSupportGenerated()const;
 	Hix::Support::SupportRaftManager& supportRaftManager();
+	const Hix::Support::SupportRaftManager& supportRaftManager()const;
 
 
 

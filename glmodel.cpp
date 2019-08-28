@@ -1633,6 +1633,11 @@ Hix::Support::SupportRaftManager& GLModel::supportRaftManager()
 {
 	return _supportRaftManager;
 }
+
+const Hix::Support::SupportRaftManager& GLModel::supportRaftManager()const
+{
+	return _supportRaftManager;
+}
 QVector3D GLModel::getPrimitiveColorCode(const Hix::Engine3D::Mesh* mesh, FaceConstItr itr)
 {
 #ifdef _STRICT_GLMODEL

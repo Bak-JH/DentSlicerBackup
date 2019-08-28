@@ -194,6 +194,7 @@ public:
     void setProgressText(std::string inputText);
     int getLayerViewFlags();
 	void modelSelected(int);
+	//remove this
 	const std::unordered_set<GLModel*>& getSelectedModels();
 	QVector2D world2Screen(QVector3D target);
 

@@ -44,7 +44,7 @@ namespace Hix
 			void generateRaft();
 			void clear();
 			GLModel* getModel();
-
+			const std::vector<const Mesh*> getRaftSupportMeshes()const;
 			//void attachToModel(RaftModel* support);
 
 		private:
