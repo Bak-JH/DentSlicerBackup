@@ -219,7 +219,10 @@
     <ClCompile Include="render\ModelMaterial.cpp" />
     <ClCompile Include="render\SceneEntity.cpp" />
     <ClCompile Include="render\SceneEntityWithMaterial.cpp" />
+    <ClCompile Include="feature\Shapes2D.cpp" />
     <ClCompile Include="slice\SlicingOptBackend.cpp" />
+    <ClCompile Include="support\CylindricalRaft.cpp" />
+    <ClCompile Include="support\RaftModel.cpp" />
     <ClCompile Include="support\SupportModel.cpp" />
     <ClCompile Include="support\SupportRaftManager.cpp" />
     <ClCompile Include="support\VerticalSupportModel.cpp" />
@@ -335,6 +338,9 @@
     <QtMoc Include="input\raycastcontroller.h" />
     <ClInclude Include="input\Clickable.h" />
     <ClInclude Include="input\Draggable.h" />
+    <ClInclude Include="feature\Shapes2D.h" />
+    <ClInclude Include="support\CylindricalRaft.h" />
+    <ClInclude Include="support\RaftModel.h" />
     <ClInclude Include="ui\Highlightable.h" />
     <ClInclude Include="input\Hoverable.h" />
     <QtMoc Include="ui\MoveWidget.h" />

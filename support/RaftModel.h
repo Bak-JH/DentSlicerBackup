@@ -1,7 +1,7 @@
 #pragma once
 
 #include "render/SceneEntityWithMaterial.h"
-#include "input/Highlightable.h"
+#include "ui/Highlightable.h"
 #include "input/Clickable.h"
 #include "input/Hoverable.h"
 #include "feature/overhangDetect.h"
@@ -17,13 +17,14 @@ namespace Hix
 	using namespace OverhangDetect;
 	namespace Support
 	{
-		class VerticalSupportModel : public Hix::Render::SceneEntityWithMaterial, public Hix::Input::Clickable
+		class SupportRaftManager;
+		class RaftModel : public Hix::Render::SceneEntityWithMaterial
 		{
 		public:
-			void clicked(Hix::Input::MouseEventData&, const Qt3DRender::QRayCasterHit&)override;
-			VerticalSupportModel(GLModel* owner, std::variant<VertexConstItr, FaceOverhang> overhang);
-			virtual ~VerticalSupportModel();
-
+			RaftModel(SupportRaftManager* manager);
+			virtual ~RaftModel();
+		protected:
+			SupportRaftManager* _manager;
 		};
 	}
 }

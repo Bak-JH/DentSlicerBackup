@@ -118,7 +118,6 @@ public:
 
     void changeColor(const QVector3D& color);
 
-    void setSupportAndRaft();
 
 
     void repairMesh();
@@ -164,6 +163,7 @@ public:
 	bool perPrimitiveColorActive()const;
 	bool faceSelectionActive()const;
 	bool raftSupportGenerated()const;
+	Hix::Support::SupportRaftManager& supportRaftManager();
 
 
 
@@ -178,7 +178,6 @@ public:
 
 
 private:
-	void adjustZHeight(int viewMode);
 	QVector3D getPrimitiveColorCode(const Hix::Engine3D::Mesh* mesh, FaceConstItr faceItr)override;
 
     //Order is important! Look at the initializer list in constructor

@@ -12,7 +12,7 @@
 #include <QMatrix3x3>
 #include <Qt3DCore/qpropertyupdatedchange.h>
 #include "utils/utils.h"
-
+#include "qmlmanager.h"
 
 
 #define ATTRIBUTE_SIZE_INCREMENT 200
@@ -35,7 +35,7 @@ SceneEntity::SceneEntity(QEntity* parent)
 
 
 {
-	_layer.setRecursive(true);
+	_layer.setRecursive(false);
 	addComponent(&_layer);
 	addComponent(&m_transform);
 
@@ -143,11 +143,11 @@ void SceneEntity::setHitTestable(bool isEnable)
 		_hitEnabled = isEnable;
 		if (_hitEnabled)
 		{
-			addComponent(&_layer);
+			qmlManager->getRayCaster().addInputLayer(&_layer);
 		}
 		else
 		{
-			removeComponent(&_layer);
+			qmlManager->getRayCaster().removeInputLayer(&_layer);
 		}
 	}
 }
@@ -178,9 +178,3 @@ void SceneEntity::setMatrix(const QMatrix4x4& matrix)
 {
 	m_transform.setMatrix(matrix);
 }
-
-Qt3DRender::QLayer* SceneEntity::getLayer()
-{
-	return &_layer;
-}
-

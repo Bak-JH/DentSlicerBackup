@@ -236,6 +236,15 @@
     <ClCompile Include="support\SupportModel.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>
+    <ClCompile Include="support\RaftModel.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="support\CylindricalRaft.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="feature\Shapes2D.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DentEngine\src\polyclipping\poly2tri\sweep\advancing_front.h">
@@ -569,6 +578,15 @@
       <Filter>Generated Files</Filter>
     </ClInclude>
     <ClInclude Include="ui\Highlightable.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="support\RaftModel.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="support\CylindricalRaft.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="feature\Shapes2D.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
   </ItemGroup>
