@@ -103,11 +103,15 @@ Path Contour::toPath()const
 	Path path;
 	if (!segments.empty())
 	{
-		path.push_back(toInt2DPt(segments.front().from));
+		std::vector<QVector2D> qPath;
+		qPath.reserve(segments.size() + 1);
+
+		qPath.emplace_back(segments.front().from);
 		for (auto& each : segments)
 		{
-			path.push_back(toInt2DPt(each.to));
+			qPath.emplace_back(each.to);
 		}
+		path = ClipperLib::toCLPath(qPath);
 	}
 
 	return path;

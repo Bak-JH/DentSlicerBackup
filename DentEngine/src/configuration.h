@@ -39,8 +39,6 @@ struct SlicingConfiguration
 	{
 		None = 0,
 		Vertical = 1
-		//KBranch= 2
-
 	};
 	enum class InFillType : uint8_t
 	{
@@ -97,8 +95,8 @@ struct SlicingConfiguration
 
     // raft settings
     float raft_thickness = 2.0f; // in mm
-    float raft_base_radius = 5.0f; // in mm
-    float raft_offset_radius = 4.0f; // in mm
+	float raft_base_radius()const;
+	float raft_offset_radius()const;
 
     // support settings
     float support_radius_max = 1.0f;
