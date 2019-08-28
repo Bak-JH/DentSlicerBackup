@@ -23,7 +23,6 @@ QDebug Hix::Debug::operator<< (QDebug d, const Slice& obj) {
 	return d;
 }
 QDebug Hix::Debug::operator<< (QDebug d, const Slices& obj) {
-	d << "mesh: " << obj.mesh;
 	d << "slices: ";
 	for (const auto& each : obj)
 	{
@@ -180,29 +179,25 @@ Path3D  Slicer::Private::intersectionPath(Plane base_plane, Plane target_plane)
 
 
 
-bool Hix::Slicer::slice(const Mesh* mesh, const Planes* planes, Slices* slices){
-    slices->mesh = mesh;
-
-    if (mesh == nullptr || mesh->getFaces().size() ==0){
-        return true;
+void Hix::Slicer::slice(const Mesh* mesh, const Planes* planes, Slices* slices){
+    if (mesh->getFaces().size() ==0){
+        return;
     }
 	auto zPlanes = planes->getPlanesVector();
-	auto intersectingFaces = planes->getTrigList();
+	auto intersectingFaces = planes->buildTriangleLists(mesh);
 	for (int i = 0; i < zPlanes.size(); i++) {
 		ContourBuilder contourBuilder(mesh, intersectingFaces[i], zPlanes[i]);
 		std::vector<Contour> contours = contourBuilder.buildContours();
 		if (!contours.empty())
 		{
-			auto& currSlice = slices->emplace_back();
-			currSlice.z = zPlanes[i];
+			auto& currSlice = (*slices)[i];
 			for (auto& each : contours)
 			{
 				currSlice.outershell.push_back(each.toPath());
 			}
 		}
 	}
-	slices->containmentTreeConstruct();
-    return true;
+    return;
 }
 
 /****************** Mesh Slicing Step *******************/
@@ -237,6 +232,10 @@ void Slicer::Private::insertPathHash(QHash<uint32_t, Path>& pathHash, IntPoint u
     return;
 }
 
+
+Hix::Slicer::Slices::Slices(size_t size): std::vector<Slice>(size)
+{
+}
 
 /****************** Deprecated functions *******************/
 void Slices::containmentTreeConstruct(){

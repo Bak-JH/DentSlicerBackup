@@ -13,5 +13,5 @@ float SlicingConfiguration::raft_base_radius() const
 
 float SlicingConfiguration::raft_offset_radius() const
 {
-	return raft_base_radius() - 1.0f;
+	return raft_base_radius()/20.0f;
 }

@@ -23,10 +23,10 @@ namespace SVGexporterPrivate
 }
 
 
-QString SVGexporter::exportSVG(Slices& shellSlices, Slices& supportSlices, Slices& raftSlices, QString outfoldername, bool isTemp){
+void SVGexporter::exportSVG(Slices& shellSlices,QString outfoldername, bool isTemp){
 	using namespace SVGexporterPrivate;
     qDebug() << "export svg at "<< outfoldername;
-    qDebug() << "shellSlices : " << shellSlices.size() << "supportSlices : " << supportSlices.size() << "graftSlices : " << raftSlices.size();
+	qDebug() << "shellSlices : " << shellSlices.size();
     QDir dir(outfoldername);
     if (!dir.exists()) {
         dir.mkpath(".");
@@ -36,71 +36,7 @@ QString SVGexporter::exportSVG(Slices& shellSlices, Slices& supportSlices, Slice
     }
 
     //qDebug() << jsonBytes;
-
-    int64_t area = 0;
     int currentSlice_idx = 0;
-
-    for (int i=0; i<raftSlices.size(); i++){
-        QString outfilename = outfoldername + "/" + QString::number(currentSlice_idx) + ".svg";
-
-        QFile outfile(outfilename);
-        std::stringstream contentStream;
-        outfile.open(QFile::WriteOnly);
-
-        writeHeader(contentStream);
-        if (scfg->slicing_mode == SlicingConfiguration::SlicingMode::Uniform)
-            writeGroupHeader(currentSlice_idx, scfg->layer_height*(currentSlice_idx+1), contentStream);
-        else
-            writeGroupHeader(currentSlice_idx, scfg->layer_height*(currentSlice_idx+1), contentStream);
-
-        for (int j=0; j<raftSlices[i].outershell.size(); j++){
-            writePolygon(raftSlices[i].outershell[j], isTemp, contentStream);
-        }
-
-        writeGroupFooter(contentStream);
-        writeFooter(contentStream);
-        outfile.write(QByteArray::fromStdString(contentStream.str()));
-
-        outfile.close();
-        currentSlice_idx += 1;
-    }
-
-    qDebug() << "Raft Slices : " << currentSlice_idx;
-
-    int support_base_layer_cnt = round(scfg->support_base_height/scfg->layer_height);
-
-    if (supportSlices.size() != 0){ // generate support base only when support is being generated
-
-        for (int i=0; i<support_base_layer_cnt; i++){
-            QString outfilename = outfoldername + "/" + QString::number(currentSlice_idx) + ".svg";
-            QFile outfile(outfilename);
-            std::stringstream contentStream;
-            outfile.open(QFile::WriteOnly);
-
-            writeHeader(contentStream);
-            if (scfg->slicing_mode == SlicingConfiguration::SlicingMode::Uniform)
-                writeGroupHeader(currentSlice_idx, scfg->layer_height*(currentSlice_idx+1), contentStream);
-            else
-                writeGroupHeader(currentSlice_idx, scfg->layer_height*(currentSlice_idx+1), contentStream);
-
-            for (int j=0; j<supportSlices[i].outershell.size(); j++){
-                writePolygon(supportSlices[i].outershell[j], isTemp, contentStream);
-            }
-
-            writeGroupFooter(contentStream);
-            writeFooter(contentStream);
-            outfile.write(QByteArray::fromStdString(contentStream.str()));
-
-            outfile.close();
-            currentSlice_idx += 1;
-        }
-
-    }
-	else
-	{
-		support_base_layer_cnt = 0;
-	}
-
     for (int i=0; i<shellSlices.size(); i++){
         QString outfilename = outfoldername + "/" + QString::number(currentSlice_idx) + ".svg";
         QFile outfile(outfilename);
@@ -117,12 +53,6 @@ QString SVGexporter::exportSVG(Slices& shellSlices, Slices& supportSlices, Slice
             parsePolyTreeAndWrite(shellSlice_polytree.Childs[j], isTemp, contentStream);
         }
 
-        if (int(supportSlices.size())-support_base_layer_cnt > i){
-
-            for (int j=0; j<supportSlices[i+support_base_layer_cnt].outershell.size(); j++){
-                writePolygon(supportSlices[i+support_base_layer_cnt].outershell[j], isTemp, contentStream);
-            }
-        }
         writeGroupFooter(contentStream);
         writeFooter(contentStream);
         outfile.write(QByteArray::fromStdString(contentStream.str()));
@@ -130,18 +60,8 @@ QString SVGexporter::exportSVG(Slices& shellSlices, Slices& supportSlices, Slice
         outfile.close();
         currentSlice_idx += 1;
     }
-
     //printf("slicing done\n");
-    int layer = currentSlice_idx;
-    int printing_time = layer*15/60;
-
-    float x = shellSlices.mesh->x_max()-shellSlices.mesh->x_min();
-    float y = shellSlices.mesh->y_max()-shellSlices.mesh->y_min();
-    float z = shellSlices.mesh->z_max()-shellSlices.mesh->z_min();
-
-    float volume = ((float)(area/pow(scfg->pixel_per_mm/scfg->contraction_ratio,2))/1000000)*scfg->layer_height;
-    QString result_str;
-    result_str.sprintf("info:%d:%d:%.1f:%.1f:%.1f:%.1f\n",printing_time,layer,x,y,z,volume);
+   
     //fflush(stdout);
     qDebug() << "slicing done";
 
@@ -176,7 +96,6 @@ QString SVGexporter::exportSVG(Slices& shellSlices, Slices& supportSlices, Slice
 	}
 
 
-    return result_str;
 }
 
 

@@ -32,13 +32,13 @@ namespace Hix
 
 		class Slices : public std::vector<Slice> {
 		public:
-			const Mesh* mesh;
+			Slices(size_t size);
 			void containmentTreeConstruct();
 
 		};
 
 		/****************** Entire Slicing Step *******************/
-		bool slice(const Mesh* mesh, const Planes* planes, Slices* slices);
+		void slice(const Mesh* mesh, const Planes* planes, Slices* slices);
 	};
 }
 

@@ -1,15 +1,14 @@
 #include "Planes.h"
 
 using namespace Hix::Engine3D;
-Hix::Slicer::UniformPlanes::UniformPlanes(const Hix::Engine3D::Mesh* mesh, float delta): _mesh(mesh), _delta(delta)
+Hix::Slicer::UniformPlanes::UniformPlanes(float zMin, float zMax, float delta):_delta(delta)
 {
-	size_t idx_max = ceil((_mesh->z_max() - _mesh->z_min()) / delta);
+	size_t idx_max = ceil((zMax - zMin) / delta);
 	_planes.reserve(idx_max);
 	for (int i = 0; i < idx_max; ++i)
 	{
-		float plane_z = _mesh->z_min() + delta * i;
+		float plane_z = zMin + delta * i;
 		_planes.push_back(plane_z);
-		qDebug() << "build Uniform Planes at height z " << plane_z;
 	}
 }
 
@@ -17,6 +16,11 @@ size_t Hix::Slicer::UniformPlanes::minIntersectIdx(float z) const
 {
 	int minIdx = (int)((z - _planes[0]) / _delta) + 1;
 	minIdx = std::max(0, minIdx);
+
+	//float error check
+	if (_planes[minIdx] < z)
+		++minIdx;
+
 	return minIdx;
 }
 
@@ -24,6 +28,9 @@ size_t Hix::Slicer::UniformPlanes::maxIntersectIdx(float z) const
 {
 	int maxIdx = (int)((z - _planes[0]) / _delta);
 	maxIdx = std::min((int)_planes.size() - 1, maxIdx);
+	//float error check
+	if (_planes[maxIdx] > z)
+		--maxIdx;
 	return maxIdx;
 }
 
@@ -32,15 +39,14 @@ const std::vector<float>& Hix::Slicer::UniformPlanes::getPlanesVector() const
 	return _planes;
 }
 
-void Hix::Slicer::UniformPlanes::buildTriangleLists()
+std::vector<std::unordered_set<Hix::Engine3D::FaceConstItr>> Hix::Slicer::UniformPlanes::buildTriangleLists(const Hix::Engine3D::Mesh* mesh)const
 {
-	size_t faceCnt = _mesh->getFaces().size();
+	size_t faceCnt = mesh->getFaces().size();
 	// Create List of list
-	_triangleList = std::vector<std::unordered_set<FaceConstItr>>(_planes.size());
-
+	std::vector<std::unordered_set<FaceConstItr>> result(_planes.size());
 	// Uniform Slicing O(n)
 	if (_delta > 0) {
-		auto& faces = _mesh->getFaces();
+		auto& faces = mesh->getFaces();
 		for (auto mf = faces.cbegin(); mf != faces.cend(); ++mf)
 		{
 			auto sortedZ = mf->sortZ();
@@ -64,14 +70,10 @@ void Hix::Slicer::UniformPlanes::buildTriangleLists()
 			}
 			for (int i = minIdx; i <= maxIdx; ++i)
 			{
-				_triangleList[i].insert(mf);
+				result[i].insert(mf);
 			}
 		}
 	}
-}
-
-const std::vector<std::unordered_set<Hix::Engine3D::FaceConstItr>>& Hix::Slicer::UniformPlanes::getTrigList() const
-{
-	return _triangleList;
+	return result;
 }
 

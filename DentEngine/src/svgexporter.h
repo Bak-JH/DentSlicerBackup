@@ -25,7 +25,7 @@ namespace Hix
 namespace SVGexporter
 {
 	using namespace Hix::Slicer;
-    QString exportSVG(Slices& shellSlices, Slices& supportSlices, Slices& raftSlices, QString outfoldername, bool isTemp);
+    void exportSVG(Slices& shellSlices, QString outfoldername, bool isTemp);
 };
 
 #endif // SVGEXPORTER_H
