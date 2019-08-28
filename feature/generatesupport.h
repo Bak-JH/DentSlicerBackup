@@ -48,6 +48,9 @@ public:
 	float getSupportZMin(const Mesh* mesh)const;
     Mesh* generateStraightSupport(Mesh* shellmesh);
     Mesh* generateSupport(Mesh* shellMesh);
+    void generatePrevSupport(Mesh* supportMesh, int case_num,
+                             OverhangPoint* pt1, OverhangPoint* pt2,
+                             OverhangPoint* inter, OverhangPoint* meshInter1, OverhangPoint* meshInter2);
 
     void overhangDetect(Mesh* mesh, Mesh* support_mesh);
     void pointOverhangDetect(Mesh* mesh, Mesh* support_mesh);

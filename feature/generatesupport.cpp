@@ -88,20 +88,27 @@ Mesh* GenerateSupport::generateSupport(Mesh* shellmesh) {
     OverhangPoint prev_meshInter2;
 
     std::vector<OverhangPoint>::iterator iter = overhangPoints.begin();
-    while (iter < overhangPoints.end() - 1) {
+    while (iter < overhangPoints.end()) {
 
         int case_num = 0;
         float cost = 0;
 
         OverhangPoint pt1 = *iter;
-        if (pt1.topPoint) {
+
+        OverhangPoint meshIntersection1 = coneNmeshIntersection(mesh, pt1);
+        if (iter == overhangPoints.end() - 1) {
+            case_num = 8;
+            iter++;
+        }
+
+        if (case_num != 8 && pt1.topPoint) {
             case_num = 6;
             iter++;
             findNearestPoint(++idx);
         }
 
         OverhangPoint pt2;
-        if (case_num != 6) {
+        if (case_num != 8 && case_num != 6) {
             pt2 = *(iter+1);
             if (pt2.topPoint) {
                 case_num = 7;
@@ -113,12 +120,10 @@ Mesh* GenerateSupport::generateSupport(Mesh* shellmesh) {
         }
 
         OverhangPoint intersection;
-        OverhangPoint meshIntersection1;
         OverhangPoint meshIntersection2;
 
-        if (case_num != 6 && case_num != 7) {
+        if (case_num < 6) {
             intersection = coneNconeIntersection(pt1, pt2);
-            meshIntersection1 = coneNmeshIntersection(mesh, pt1);
             meshIntersection2 = coneNmeshIntersection(mesh, pt2);
 
             if ((pt1.position - meshIntersection1.position).length() < (pt1.position - intersection.position).length()
@@ -151,139 +156,88 @@ Mesh* GenerateSupport::generateSupport(Mesh* shellmesh) {
                 cost = ((pt1.position - intersection.position).length()
                         + (pt2.position - intersection.position).length())/2.0f;
                 int index = iter - overhangPoints.begin();
-                overhangPoints.push_back(intersection);
                 //iterator might be invalidated due to resizing
                 iter = overhangPoints.begin() + index + 2;
                 findNearestPoint(++idx);
                 findNearestPoint(++idx);
             }
-        }
 
-        if (case_num == 6 || case_num == 7
-            || (prev_cost <= cost && (case_num != 5 || prev_case_num == 5))) { // 순서대로
+            if (prev_cost > cost || (case_num == 5 && prev_case_num != 5)) {
+                int tmp_case_num = prev_case_num;
+                float tmp_cost = prev_cost;
+                OverhangPoint tmp_pt1 = prev_pt1;
+                OverhangPoint tmp_pt2 = prev_pt2;
+                OverhangPoint tmp_inter = prev_inter;
+                OverhangPoint tmp_meshInter1 = prev_meshInter1;
+                OverhangPoint tmp_meshInter2 = prev_meshInter2;
 
-            int tmp_case_num = prev_case_num;
-            float tmp_cost = prev_cost;
-            OverhangPoint tmp_pt1 = prev_pt1;
-            OverhangPoint tmp_pt2 = prev_pt2;
-            OverhangPoint tmp_inter = prev_inter;
-            OverhangPoint tmp_meshInter1 = prev_meshInter1;
-            OverhangPoint tmp_meshInter2 = prev_meshInter2;
+                prev_case_num = case_num;
+                prev_cost = cost;
+                prev_pt1 = pt1;
+                prev_pt2 = pt2;
+                prev_inter = intersection;
+                prev_meshInter1 = meshIntersection1;
+                prev_meshInter2 = meshIntersection2;
 
-            prev_case_num = case_num;
-            prev_cost = cost;
-            prev_pt1 = pt1;
-            prev_pt2 = pt2;
-            prev_inter = intersection;
-            prev_meshInter1 = meshIntersection1;
-            prev_meshInter2 = meshIntersection2;
-
-            case_num = tmp_case_num;
-            cost = tmp_cost;
-            pt1 = tmp_pt1;
-            pt2 = tmp_pt2;
-            intersection = tmp_inter;
-            meshIntersection1 = tmp_meshInter1;
-            meshIntersection2 = tmp_meshInter2;
-        } else {
-            /*
-            if (prev_pt2.position == pt1.position && iter > overhangPoints.begin() + 1) {
-                *(iter-1) = pt2;
-                *iter = prev_pt1;
-                *(iter+1) = prev_pt2;
-            } else if (iter > overhangPoints.begin() + 2) {
-                *(iter-2) = pt1;
-                *(iter-1) = pt2;
-                *iter = prev_pt1;
-                *(iter+1) = prev_pt2;
+                case_num = tmp_case_num;
+                cost = tmp_cost;
+                pt1 = tmp_pt1;
+                pt2 = tmp_pt2;
+                intersection = tmp_inter;
+                meshIntersection1 = tmp_meshInter1;
+                meshIntersection2 = tmp_meshInter2;
             }
-            */
-        }
-
-        switch (case_num) {
-        case 1: {
-            generateStem(supportMesh, pt1, &meshIntersection1); // connect with mesh or bed
-            break;
-        }
-        case 2: {
-            generateStem(supportMesh, pt2, &meshIntersection2); // connect with mesh or bed
-            break;
-        }
-        case 3: {
-            generateStem(supportMesh, pt2, &pt1);
-            break;
-        }
-        case 4: {
-            generateStem(supportMesh, pt1, &pt2);
-            break;
-        }
-        case 5: {
-            generateBranch(supportMesh, pt1, pt2, &intersection);
-            break;
-        }
-        default: {
 
         }
-        }
 
+        generatePrevSupport(supportMesh, prev_case_num, &prev_pt1, &prev_pt2, &prev_inter, &prev_meshInter1, &prev_meshInter2);
+
+        prev_case_num = case_num;
+        prev_cost = cost;
+        prev_pt1 = pt1;
+        prev_pt2 = pt2;
+        prev_inter = intersection;
+        prev_meshInter1 = meshIntersection1;
+        prev_meshInter2 = meshIntersection2;
 
     }
-    while (iter < overhangPoints.end()) {
-        /*
-        switch (prev_case_num) {
-        case 1: {
-            generateStem(supportMesh, prev_pt1, &prev_meshInter1); // connect with mesh or bed
-            iter++;
-            break;
-        }
-        case 2: {
-            generateStem(supportMesh, prev_pt2, &prev_meshInter2); // connect with mesh or bed
-            *iter = prev_pt2;
-            *(iter+1) = prev_pt1;
-            iter++;
-            break;
-        }
-        case 3: {
-            generateStem(supportMesh, prev_pt2, &prev_pt1);
-            *iter = prev_pt2;
-            *(iter+1) = prev_pt1;
-            iter++;
-            break;
-        }
-        case 4: {
-            generateStem(supportMesh, prev_pt1, &prev_pt2);
-            iter++;
-            break;
-        }
-        case 5: {
-            generateBranch(supportMesh, prev_pt1, prev_pt2, &prev_inter);
-            int index = iter - overhangPoints.begin();
-            overhangPoints.push_back(prev_inter);
-            //iterator might be invalidated due to resizing
-            iter = overhangPoints.begin() + index + 2;
-            break;
-        }
-        case 7: {
-            *iter = prev_pt2;
-            *(iter+1) = prev_pt1;
-            [[fallthrough]];
-        }
-        case 6: {
-            iter++;
-            break;
-        }
-        default: {
 
-        }
-        }
-        */
+    generatePrevSupport(supportMesh, prev_case_num, &prev_pt1, &prev_pt2, &prev_inter, &prev_meshInter1, &prev_meshInter2);
 
-        OverhangPoint meshIntersection = coneNmeshIntersection(mesh, *iter);
-        generateStem(supportMesh, *iter, &meshIntersection);
-        iter++;
-    }
     qDebug() << "generateSupport Done";
     return supportMesh;
+}
+
+void GenerateSupport::generatePrevSupport(Mesh* supportMesh, int case_num,
+                                          OverhangPoint* pt1, OverhangPoint* pt2,
+                                          OverhangPoint* inter, OverhangPoint* meshInter1, OverhangPoint* meshInter2) {
+    switch (case_num) {
+    case 1:
+    case 8: {
+        generateStem(supportMesh, *pt1, meshInter1); // connect with mesh or bed
+        break;
+    }
+    case 2: {
+        generateStem(supportMesh, *pt2, meshInter2); // connect with mesh or bed
+        break;
+    }
+    case 3: {
+        generateStem(supportMesh, *pt2, pt1);
+        break;
+    }
+    case 4: {
+        generateStem(supportMesh, *pt1, pt2);
+        break;
+    }
+    case 5: {
+        generateBranch(supportMesh, *pt1, *pt2, inter);
+        overhangPoints.push_back(*inter);
+        break;
+    }
+    default: {
+
+    }
+    }
 }
 
 void GenerateSupport::overhangDetect(Mesh* mesh, Mesh *support_mesh) {
@@ -410,7 +364,8 @@ void GenerateSupport::findNearestPoint(size_t index) {
     QVector3D pt = overhangPoints[index].position;
     size_t nearest = index + 1;
     for (size_t i = index + 2; i < overhangPoints.size(); i++) {
-        if ((overhangPoints[i].position - pt).length() < (overhangPoints[nearest].position - pt).length()) {
+        if ((overhangPoints[i].position - pt).length() < (overhangPoints[nearest].position - pt).length()
+                && !overhangPoints[i].topPoint) {
             nearest = i;
         }
     }
