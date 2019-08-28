@@ -17,9 +17,7 @@
 #include <iostream>
 #include <QDir>
 #include <QMatrix3x3>
-#include <feature/generatesupport.h>
 #include <Qt3DCore/qpropertyupdatedchange.h>
-#include <feature/generateraft.h>
 #include "DentEngine/src/configuration.h"
 #include "feature/Extrude.h"
 

@@ -5,7 +5,7 @@
 
 
 constexpr  float SUPPORT_CONE_LENGTH =  1.0f;
-constexpr  float SUPPORT_OVERLAP_LENGTH = SUPPORT_CONE_LENGTH/5;
+constexpr  float SUPPORT_OVERLAP_LENGTH = SUPPORT_CONE_LENGTH/2;
 constexpr  size_t VERT_SUPPORT_JOINT_CNT = 4;// extended tip, end cone(narrow end), start cone(wider end), base(support start)
 
 

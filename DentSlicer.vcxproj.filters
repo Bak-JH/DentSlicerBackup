@@ -80,12 +80,6 @@
     <ClCompile Include="fileloader.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="feature\generateraft.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="feature\generatesupport.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="glmodel.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -105,9 +99,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="main.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="feature\manualsupport.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="utils\mathutils.cpp">
@@ -280,12 +271,6 @@
     <ClInclude Include="fileloader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="feature\generateraft.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="feature\generatesupport.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <QtMoc Include="glmodel.h">
       <Filter>Header Files</Filter>
     </QtMoc>
@@ -304,9 +289,6 @@
     <QtMoc Include="utils\linemeshgeometry.h">
       <Filter>Header Files</Filter>
     </QtMoc>
-    <ClInclude Include="feature\manualsupport.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="utils\mathutils.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -1166,6 +1148,7 @@
     <None Include="icon-32.ico" />
     <None Include="icon-32.ico" />
     <None Include="Qml\LeftTabSlicingOptionElementTextbox.qml" />
+    <None Include="icon-32.ico" />
     <None Include="icon-32.ico" />
     <None Include="icon-32.ico" />
     <None Include="icon-32.ico" />
