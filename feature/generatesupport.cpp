@@ -245,7 +245,7 @@ void GenerateSupport::overhangDetect(Mesh* mesh, Mesh *support_mesh) {
     pointOverhangDetect(mesh, support_mesh);
     faceOverhangDetect(mesh, support_mesh);
 
-    // sortOverhangPoints(); // 다른 알고리즘?
+    findHighestPoint();
 }
 
 /* Point overhang
@@ -356,6 +356,15 @@ void GenerateSupport::generateTip(Mesh* mesh, Mesh *support_mesh, QVector3D poin
         generateFaces(support_mesh, overhangPoint, supportPoint);
         overhangPoints.push_back(supportPoint);
     }
+}
+
+void GenerateSupport::findHighestPoint() {
+    size_t highest = 0;
+    for (size_t i = 1; i < overhangPoints.size(); i++) {
+        if (overhangPoints[i].position.z() > overhangPoints[highest].position.z())
+            highest = i;
+    }
+    std::swap(overhangPoints[0], overhangPoints[highest]);
 }
 
 void GenerateSupport::findNearestPoint(size_t index) {

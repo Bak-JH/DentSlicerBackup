@@ -44,6 +44,7 @@ public:
 	float minLength;
 	float near_dis;
 	float near_z;
+
 	//set minimum position for support so that it overlaps little bit(layer thickness)
 	float getSupportZMin(const Mesh* mesh)const;
     Mesh* generateStraightSupport(Mesh* shellmesh);
@@ -57,6 +58,7 @@ public:
     void faceOverhangDetect(Mesh* mesh, Mesh* support_mesh);
     void faceOverhangPoint(Mesh *mesh, Mesh* support_mesh, QVector3D v0, QVector3D v1, QVector3D v2);
     void generateTip(Mesh* mesh, Mesh* support_mesh, QVector3D point);
+    void findHighestPoint();
 
     void findNearestPoint(size_t index);
     OverhangPoint coneNconeIntersection(OverhangPoint coneApex1, OverhangPoint coneApex2);
