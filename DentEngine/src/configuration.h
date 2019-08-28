@@ -96,7 +96,6 @@ struct SlicingConfiguration
     // raft settings
     float raft_thickness = 2.0f; // in mm
 	float raft_base_radius()const;
-	float raft_offset_radius()const;
 
     // support settings
     float support_radius_max = 1.0f;
