@@ -47,27 +47,27 @@ void GenerateRaft::generateCap(Mesh* mesh, OverhangPoint top, OverhangPoint bott
 }
 
 void GenerateRaft::generateCylinder(Mesh* mesh, OverhangPoint op, float height){
-    op.radius = scfg->raft_base_radius;
+    op.radius = scfg->raft_base_radius();
 
     OverhangPoint bottom_op;
     bottom_op.position = op.position - QVector3D(0,0,height);
-    bottom_op.radius = scfg->raft_base_radius;
+    bottom_op.radius = scfg->raft_base_radius();
 
     generateFaces(mesh, op, bottom_op);
 }
 
 void GenerateRaft::generateKCylinder(Mesh* mesh, OverhangPoint op, float height){
-    op.radius = scfg->raft_base_radius;
+    op.radius = scfg->raft_base_radius();
 
     OverhangPoint middle_op;
     middle_op.position = op.position - QVector3D(0,0,height/2);
-    middle_op.radius = scfg->raft_offset_radius;
+    middle_op.radius = scfg->raft_offset_radius();
 
     generateFaces(mesh, op, middle_op);
 
     OverhangPoint bottom_op;
     bottom_op.position = op.position - QVector3D(0,0,height);
-    bottom_op.radius = scfg->raft_base_radius;
+    bottom_op.radius = scfg->raft_base_radius();
 
     generateFaces(mesh, middle_op, bottom_op);
 

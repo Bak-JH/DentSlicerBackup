@@ -1,40 +1,15 @@
 #include "Extrude.h"
+#include "Shapes2D.h"
+using namespace Hix::Shapes2D;
 using namespace Hix::Features::Extrusion;
 namespace ExtrudePrivate
 {
-	void moveContour(std::vector<QVector3D>& targetContour, QVector3D moveVector);
-	void rotateContour(std::vector<QVector3D>& targetContour, QQuaternion rotation);
-	void scaleContour(std::vector<QVector3D>& targetContour, float scale);
-
 	void generateCylinderWall(const QVector3D & a0, const QVector3D & a1,
 		const QVector3D & b0, const QVector3D & b1, std::vector<std::array<QVector3D, 3>>& output);
 	void generateCylinderWalls(const std::vector<QVector3D> & from, const std::vector<QVector3D> & to,
 		std::vector<std::array<QVector3D, 3>> & output);
 }
 
-void ExtrudePrivate::moveContour(std::vector<QVector3D>& targetContour, QVector3D moveVector)
-{
-	for (auto& each : targetContour)
-	{
-		each += moveVector;
-	}
-}
-
-void ExtrudePrivate::rotateContour(std::vector<QVector3D>& targetContour, QQuaternion rotation)
-{
-	for (auto& each : targetContour)
-	{
-		each = rotation.rotatedVector(each);
-	}
-}
-
-void ExtrudePrivate::scaleContour(std::vector<QVector3D>& targetContour, float scale)
-{
-	for (auto& each : targetContour)
-	{
-		each *= scale;
-	}
-}
 
 //for cylinder in Z-axis, assume a contour is bottom. b is on the correct direction.
 void ExtrudePrivate::generateCylinderWall(

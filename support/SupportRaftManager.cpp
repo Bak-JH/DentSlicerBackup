@@ -1,6 +1,7 @@
 #include "SupportRaftManager.h"
 #include "../feature/overhangDetect.h"
 #include "VerticalSupportModel.h"
+#include "CylindricalRaft.h"
 #include "glmodel.h"
 
 using namespace Hix::Support;
@@ -19,10 +20,27 @@ float Hix::Support::SupportRaftManager::supportRaftMinLength() const
 
 }
 
-float Hix::Support::SupportRaftManager::supportRaftBottom() const
+float Hix::Support::SupportRaftManager::raftBottom() const
 {
 	return _owner->getMesh()->z_min() - supportRaftMinLength();
 }
+float Hix::Support::SupportRaftManager::supportBottom() const
+{
+	constexpr float FACTOR = 5.0f;
+	auto raftBot = raftBottom();
+	if (_raftType == SlicingConfiguration::RaftType::None)
+	{
+		return raftBot;
+	}
+	else
+	{
+		//to prevent z-fighting between raft and support bottoms
+		return raftBot + scfg->raft_thickness/ FACTOR;
+	}
+}
+
+
+
 
 void Hix::Support::SupportRaftManager::generateSuppAndRaft(SlicingConfiguration::SupportType supType, SlicingConfiguration::RaftType raftType)
 {
@@ -31,29 +49,11 @@ void Hix::Support::SupportRaftManager::generateSuppAndRaft(SlicingConfiguration:
 
 	_supportType = supType;
 	_raftType = raftType;
-	switch (_supportType)
-	{
-	case SlicingConfiguration::SupportType::None:
-		break;
-	case SlicingConfiguration::SupportType::Vertical:
-	{
-		auto overhangs = Hix::OverhangDetect::detectOverhang(_owner->getMesh());
-		for (auto& each : overhangs)
-		{
-			if (each.index() == 0)
-			{
-				_vertexSupports[std::get<0>(each)] = std::make_unique<VerticalSupportModel>(this, each);
-			}
-			else
-			{
-				_faceSupports[std::get<1>(each).first] = std::make_unique<VerticalSupportModel>(this, each);
-			}
-		}
-	}
-		break;
-	default:
-		break;
-	}
+	_overhangs = Hix::OverhangDetect::detectOverhang(_owner->getMesh());
+	generateSupport();
+	generateRaft();
+
+
 }
 
 void Hix::Support::SupportRaftManager::addSupport(const std::variant<VertexConstItr, FaceOverhang>& supportSpec)
@@ -66,14 +66,12 @@ void Hix::Support::SupportRaftManager::addSupport(const std::variant<VertexConst
 		break;
 	case SlicingConfiguration::SupportType::Vertical:
 	{
-		if (supportSpec.index() == 0)
-		{
-			_vertexSupports[std::get<0>(supportSpec)] = std::make_unique<VerticalSupportModel>(this, supportSpec);
-		}
-		else
-		{
-			_faceSupports[std::get<1>(supportSpec).first] = std::make_unique<VerticalSupportModel>(this, supportSpec);
-		}
+		_overhangs.insert(supportSpec);
+		auto newModel = new VerticalSupportModel(this, supportSpec);
+		_supports[newModel] = std::unique_ptr<VerticalSupportModel>(newModel);
+		//since addition only happens in edit mode
+		newModel->setHitTestable(true);
+		_pendingSupports[newModel] = EditType::Added;
 	}
 	break;
 	default:
@@ -81,22 +79,94 @@ void Hix::Support::SupportRaftManager::addSupport(const std::variant<VertexConst
 	}
 }
 
-void Hix::Support::SupportRaftManager::removeSupport(const std::variant<VertexConstItr, FaceOverhang>& supportSpec)
+void Hix::Support::SupportRaftManager::removeSupport(SupportModel* e)
 {
-	if (supportSpec.index() == 0)
+	e->setEnabled(false);
+	e->setHitTestable(false);
+	_pendingSupports[e] = EditType::Removed;
+}
+
+void Hix::Support::SupportRaftManager::applyEdits()
+{
+	//remove all pending removes
+	for (auto& each : _pendingSupports)
 	{
-		_vertexSupports.erase(std::get<0>(supportSpec));
-	}
-	else
-	{
-		_faceSupports.erase(std::get<1>(supportSpec).first);
+		if (each.second == EditType::Removed)
+		{
+			_supports.erase(each.first);
+			_overhangs.erase(each.first->overhang());
+		}
 	}
 }
 
+void Hix::Support::SupportRaftManager::cancelEdits()
+{
+	//remove all pending adds
+	for (auto& each : _pendingSupports)
+	{
+		if (each.second == EditType::Added)
+		{
+			_supports.erase(each.first);
+			_overhangs.erase(each.first->overhang());
+
+		}
+		else
+		{
+			//enable hidden pending removes
+			each.first->setEnabled(true);
+			each.first->setHitTestable(true);
+
+		}
+	}
+}
+
+void Hix::Support::SupportRaftManager::generateSupport()
+{
+	switch (_supportType)
+	{
+	case SlicingConfiguration::SupportType::None:
+		break;
+	case SlicingConfiguration::SupportType::Vertical:
+	{
+		for (auto& each : _overhangs)
+		{
+			auto newModel = new VerticalSupportModel(this, each);
+			_supports[newModel] = std::unique_ptr<VerticalSupportModel>(newModel);
+		}
+	}
+	break;
+	default:
+		break;
+	}
+
+}
+
+void Hix::Support::SupportRaftManager::generateRaft()
+{
+	switch (_raftType)
+	{
+	case SlicingConfiguration::RaftType::None:
+		break;
+	case SlicingConfiguration::RaftType::General:
+		_raft = std::make_unique<CylindricalRaft>(this, _overhangs);
+		break;
+	default:
+		break;
+	}
+}
+
+
+
 void Hix::Support::SupportRaftManager::clear()
 {
-	_vertexSupports.clear();
-	_faceSupports.clear();
+	_supports.clear();
+	_pendingSupports.clear();
+	_raft.reset();
+}
+
+GLModel* Hix::Support::SupportRaftManager::getModel()
+{
+	return _owner;
 }
 
 
@@ -114,12 +184,32 @@ bool Hix::Support::SupportRaftManager::raftActive() const
 
 
 
-Hix::Support::SupportEditMode Hix::Support::SupportRaftManager::supportEditMode() const
+Hix::Support::EditMode Hix::Support::SupportRaftManager::supportEditMode() const
 {
 	return _supportEditMode;
 }
 
-void Hix::Support::SupportRaftManager::setSupportEditMode(Hix::Support::SupportEditMode mode)
+void Hix::Support::SupportRaftManager::setSupportEditMode(Hix::Support::EditMode mode)
 {
-	_supportEditMode = mode;
+	if (_supportEditMode != mode)
+	{
+		_supportEditMode = mode;
+		if (_supportEditMode == EditMode::Manual)
+		{
+			//enable supports ray cast
+			for (auto& each : _supports)
+			{
+				each.first->setHitTestable(true);
+			}
+		}
+		else
+		{
+			//disable supports ray cast
+			for (auto& each : _supports)
+			{
+				each.first->setHitTestable(false);
+			}
+		}
+	}
+
 }
