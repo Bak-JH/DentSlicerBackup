@@ -37,7 +37,7 @@ namespace Hix
 			SceneEntity(QEntity* parent = nullptr); // main constructor for mainmesh and shadowmesh
 			virtual ~SceneEntity();
 
-			const Hix::Engine3D::Mesh* getMesh();
+			const Hix::Engine3D::Mesh* getMesh()const;
 			const Qt3DCore::QTransform* getTransform() const;
 			void setTranslation(const QVector3D& t);
 			QVector3D getTranslation();

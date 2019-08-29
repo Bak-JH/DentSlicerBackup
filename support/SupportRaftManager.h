@@ -8,14 +8,19 @@ namespace Hix
 {
 	namespace Support
 	{
-		enum class SupportEditMode : uint8_t
+		enum class EditMode : uint8_t
 		{
 			None = 0,
-			Delete = 1,
-			Add = 2
+			Manual = 1
+		};
+		enum class EditType : uint8_t
+		{
+			Added = 0,
+			Removed = 1
 		};
 		using namespace Engine3D;
 		class SupportModel;
+		class RaftModel;
 		class SupportRaftManager
 		{
 		public:
@@ -23,28 +28,36 @@ namespace Hix
 			~SupportRaftManager();
 			bool supportActive()const;
 			bool raftActive()const;
-			SupportEditMode supportEditMode()const;
-			void  setSupportEditMode(SupportEditMode mode);
+			EditMode supportEditMode()const;
+			void  setSupportEditMode(EditMode mode);
 			float supportRaftMinLength()const;
 			//coordinate for bottom of support and raft
-			float supportRaftBottom()const;
+			float raftBottom()const;
+			float supportBottom()const;
 
 			void generateSuppAndRaft(SlicingConfiguration::SupportType supType, SlicingConfiguration::RaftType raftType);
 			void addSupport(const std::variant<VertexConstItr, FaceOverhang>& supportSpec);
-			void removeSupport(const std::variant<VertexConstItr, FaceOverhang>& supportSpec);
+			void removeSupport(SupportModel* e);
+			void applyEdits();
+			void cancelEdits();
+			void generateSupport();
+			void generateRaft();
 			void clear();
-
+			GLModel* getModel();
+			const std::vector<const Mesh*> getRaftSupportMeshes()const;
 			//void attachToModel(RaftModel* support);
 
 		private:
 			GLModel* _owner;
 			bool _supportExist = false;
 			bool _raftExist = false;
-			SupportEditMode _supportEditMode;
+			std::unordered_map<SupportModel*, EditType> _pendingSupports;
+			EditMode _supportEditMode = EditMode::None;
 			SlicingConfiguration::SupportType _supportType;
 			SlicingConfiguration::RaftType _raftType;
-			std::unordered_map<QVector3D, std::unique_ptr<SupportModel>> _faceSupports;
-			std::unordered_map<VertexConstItr, std::unique_ptr<SupportModel>> _vertexSupports;
+			std::unordered_map<SupportModel*, std::unique_ptr<SupportModel>> _supports;
+			std::unique_ptr<RaftModel> _raft;
+			Hix::OverhangDetect::Overhangs _overhangs;
 		};
 
 	}

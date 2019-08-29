@@ -54,16 +54,15 @@ namespace Hix
 
 			//for ray casting optimization using the bounding box
 			//Qt3DRender::QLayer _modelLayer;
-			void addLayer(Qt3DRender::QLayer* layer);
-			void removeLayer(Qt3DRender::QLayer* layer);
+			void addInputLayer(Qt3DRender::QLayer* layer);
+			void removeInputLayer(Qt3DRender::QLayer* layer);
 			void addHoverLayer(Qt3DRender::QLayer* layer);
 			void removeHoverLayer(Qt3DRender::QLayer* layer);
 
 			void setHoverEnabled(bool isEnabled);
-			bool hoverEnabled();
+			bool hoverEnabled()const;
 			bool mousePosInBound(const Qt3DInput::QMouseEvent* mv);
 			//returns true if successfully dragged, false otherwise
-			bool verifyClick();
 		public slots:
 			void mousePressed(Qt3DInput::QMouseEvent* mouse);
 			void mouseReleased(Qt3DInput::QMouseEvent* mouse);
@@ -73,6 +72,7 @@ namespace Hix
 			void hoverHitsChanged(const Qt3DRender::QAbstractRayCaster::Hits& hits);
 
 		private:
+			bool verifyClick();
 			Qt3DCore::QEntity* _camera = nullptr;
 			enum RayCastMode
 			{
