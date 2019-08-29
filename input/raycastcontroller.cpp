@@ -59,13 +59,13 @@ void RayCastController::initialize(QEntity* camera)
 		this, SLOT(hoverHitsChanged(const Qt3DRender::QAbstractRayCaster::Hits&)));
 }
 
-void RayCastController::addLayer(Qt3DRender::QLayer* layer)
+void RayCastController::addInputLayer(Qt3DRender::QLayer* layer)
 {
 	_rayCaster.addLayer(layer);
 
 }
 
-void RayCastController::removeLayer(Qt3DRender::QLayer* layer)
+void RayCastController::removeInputLayer(Qt3DRender::QLayer* layer)
 {
 	_rayCaster.removeLayer(layer);
 }
@@ -89,7 +89,7 @@ void RayCastController::setHoverEnabled(bool isEnabled)
 	}
 }
 
-bool RayCastController::hoverEnabled()
+bool RayCastController::hoverEnabled()const
 {
 	return _hoverEnabled;
 }
@@ -198,11 +198,6 @@ void RayCastController::mouseReleased(Qt3DInput::QMouseEvent* mouse)
 				auto test = _verifyClickTask.get();
 				if (!test)
 				{
-					//common loginc that does not need ray casting
-					/*if (qmlManager->getViewMode() == VIEW_MODE_SUPPORT) {
-						qmlManager->openYesNoPopUp(false, "", "Support will disappear.", "", 18, "", ftrSupportDisappear, 1);
-						return;
-					}*/
 					if (qmlManager->yesno_popup->property("isFlawOpen").toBool())
 						return;
 

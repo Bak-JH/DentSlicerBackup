@@ -187,7 +187,6 @@ Rectangle {
                         onChanged(checked);
                         if (qm.getViewMode() === 0) {
                             viewObjectButton.checked = true
-                        } else if (qm.getViewMode() === 1) {
                         }
                     }
 

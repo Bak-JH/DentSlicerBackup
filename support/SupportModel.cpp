@@ -1,7 +1,7 @@
 ﻿#include "SupportModel.h"
 #include "SupportRaftManager.h"	
 #include "../render/Color.h"
-
+#include "glmodel.h"
 
 using namespace Hix::Engine3D;
 using namespace Hix::Support;
@@ -9,7 +9,7 @@ using namespace Hix::Support;
 
 
 Hix::Support::SupportModel::SupportModel(SupportRaftManager* manager, std::variant<VertexConstItr, FaceOverhang> overhang):
-	_manager(manager), _overhang(overhang)
+	Hix::Render::SceneEntityWithMaterial(manager->getModel()), _manager(manager), _overhang(overhang)
 {
 	setHighlight(false);
 }
@@ -20,15 +20,16 @@ Hix::Support::SupportModel::~SupportModel()
 
 void Hix::Support::SupportModel::clicked(Hix::Input::MouseEventData&, const Qt3DRender::QRayCasterHit&)
 {
-	switch (_manager->supportEditMode())
+	if (isEnabled())
 	{
-	case SupportEditMode::Delete:
-		_manager->removeSupport(_overhang);
-		break;
-	case SupportEditMode::Add:
-		break;
-	default:
-		break;
+		switch (_manager->supportEditMode())
+		{
+		case EditMode::Manual:
+			_manager->removeSupport(this);
+			break;
+		default:
+			break;
+		}
 	}
 }
 
@@ -42,6 +43,11 @@ void SupportModel::setHighlight(bool enable)
 		color = Hix::Render::Colors::SupportHighlighted;
 	}
 	_meshMaterial.setColor(color);
+}
+
+const std::variant<VertexConstItr, Hix::OverhangDetect::FaceOverhang>& Hix::Support::SupportModel::overhang()
+{
+	return _overhang;
 }
 
 

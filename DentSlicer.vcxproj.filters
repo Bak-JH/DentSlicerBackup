@@ -80,12 +80,6 @@
     <ClCompile Include="fileloader.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="feature\generateraft.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="feature\generatesupport.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="glmodel.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -105,9 +99,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="main.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="feature\manualsupport.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="utils\mathutils.cpp">
@@ -236,6 +227,15 @@
     <ClCompile Include="support\SupportModel.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>
+    <ClCompile Include="support\RaftModel.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="support\CylindricalRaft.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="feature\Shapes2D.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DentEngine\src\polyclipping\poly2tri\sweep\advancing_front.h">
@@ -271,12 +271,6 @@
     <ClInclude Include="fileloader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="feature\generateraft.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="feature\generatesupport.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <QtMoc Include="glmodel.h">
       <Filter>Header Files</Filter>
     </QtMoc>
@@ -295,9 +289,6 @@
     <QtMoc Include="utils\linemeshgeometry.h">
       <Filter>Header Files</Filter>
     </QtMoc>
-    <ClInclude Include="feature\manualsupport.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="utils\mathutils.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -569,6 +560,15 @@
       <Filter>Generated Files</Filter>
     </ClInclude>
     <ClInclude Include="ui\Highlightable.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="support\RaftModel.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="support\CylindricalRaft.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="feature\Shapes2D.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -1148,6 +1148,7 @@
     <None Include="icon-32.ico" />
     <None Include="icon-32.ico" />
     <None Include="Qml\LeftTabSlicingOptionElementTextbox.qml" />
+    <None Include="icon-32.ico" />
     <None Include="icon-32.ico" />
     <None Include="icon-32.ico" />
     <None Include="icon-32.ico" />

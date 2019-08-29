@@ -19,8 +19,6 @@
 #include <QCoreApplication>
 #include <QTextStream>
 #include <QFileDialog>
-#include <feature/generatesupport.h>
-#include <feature/generateraft.h>
 #include <exception>
 #include "qmlmanager.h"
 #include "utils/utils.h"
@@ -139,6 +137,16 @@ void QmlManager::initializeUI(QQmlApplicationEngine* e){
     // manual support components
     manualSupportPopup = FindItemByName(engine, "manualSupportPopup");
 
+	// manual support popup codes
+	QObject::connect(manualSupportPopup, SIGNAL(clearSupports()), this, SLOT(clearSupports()));
+	QObject::connect(manualSupportPopup, SIGNAL(generateAutoSupport()), this, SLOT(generateAutoSupport()));
+	QObject::connect(manualSupportPopup, SIGNAL(supportEditEnabled(bool)), this, SLOT(supportEditEnabled(bool)));
+	QObject::connect(manualSupportPopup, SIGNAL(supportApplyEdit()), this, SLOT(supportApplyEdit()));
+	QObject::connect(manualSupportPopup, SIGNAL(supportCancelEdit()), this, SLOT(supportCancelEdit()));
+	QObject::connect(manualSupportPopup, SIGNAL(regenerateRaft()), this, SLOT(regenerateRaft()));
+
+
+	
     // repair components
     repairPopup = FindItemByName(engine, "repairPopup");
 
@@ -215,6 +223,8 @@ void QmlManager::initializeUI(QQmlApplicationEngine* e){
 	QObject::connect(mv, SIGNAL(cameraViewChanged()), this, SLOT(cameraViewChanged()));
 
 
+
+
 }
 
 GLModel* QmlManager::createModelFile(Mesh* target_mesh, QString fname) {
@@ -242,7 +252,6 @@ GLModel* QmlManager::createModelFile(Mesh* target_mesh, QString fname) {
 
 	//add to raytracer
 	latestAdded->setHitTestable(true);
-	_rayCastController.addLayer(latestAdded->getLayer());
     // 승환 100%
     setProgress(1);
 	return latestAdded;
@@ -391,9 +400,6 @@ void QmlManager::disconnectHandlers(GLModel* glmodel){
 	// shelloffset popup codes
 	QObject::disconnect(shelloffsetPopup, SIGNAL(shellOffset(double)), glmodel, SLOT(generateShellOffset(double)));
 
-	// manual support popup codes
-	QObject::disconnect(manualSupportPopup, SIGNAL(generateManualSupport()), glmodel, SLOT(generateManualSupport()));
-	QObject::disconnect(manualSupportPopup, SIGNAL(generateAutoSupport()), this, SLOT(generateAutoSupport()));
 
 	
 
@@ -447,9 +453,6 @@ void QmlManager::disconnectHandlers(GLModel* glmodel){
 	QObject::disconnect(shelloffsetPopup, SIGNAL(closeShellOffset()), glmodel, SLOT(closeShellOffset()));
 	QObject::disconnect(shelloffsetPopup, SIGNAL(resultSliderValueChanged(double)), glmodel, SLOT(getSliderSignal(double)));
 
-	// manual support popup codes
-	QObject::disconnect(manualSupportPopup, SIGNAL(openManualSupport()), glmodel, SLOT(openManualSupport()));
-	QObject::disconnect(manualSupportPopup, SIGNAL(closeManualSupport()), glmodel, SLOT(closeManualSupport()));
 	
 
 
@@ -553,13 +556,6 @@ void QmlManager::connectHandlers(GLModel* glmodel){
     QObject::connect(shelloffsetPopup, SIGNAL(closeShellOffset()), glmodel, SLOT(closeShellOffset()));
     QObject::connect(shelloffsetPopup, SIGNAL(shellOffset(double)), glmodel, SLOT(generateShellOffset(double)));
     QObject::connect(shelloffsetPopup, SIGNAL(resultSliderValueChanged(double)), glmodel, SLOT(getSliderSignal(double)));
-
-    // manual support popup codes
-    QObject::connect(manualSupportPopup, SIGNAL(openManualSupport()), glmodel, SLOT(openManualSupport()));
-    QObject::connect(manualSupportPopup, SIGNAL(closeManualSupport()), glmodel, SLOT(closeManualSupport()));
-    QObject::connect(manualSupportPopup, SIGNAL(generateManualSupport()), glmodel, SLOT(generateManualSupport()));
-	QObject::connect(manualSupportPopup, SIGNAL(generateAutoSupport()), glmodel, SLOT(generateAutoSupport()));
-
 
 
     // auto arrange popup codes
@@ -846,7 +842,10 @@ GLModel* QmlManager::findGLModelByName(QString filename){
 
 void QmlManager::backgroundClicked(){
     qDebug() << "background clicked";
-    unselectAll();
+	if (deselectAllowed())
+	{
+		unselectAll();
+	}
 }
 
 bool QmlManager::multipleModelSelected(int ID){
@@ -1232,7 +1231,7 @@ void QmlManager::doDeletebyID(int ID){
     deleteModelFile(ID);
 }
 
-const RayCastController& QmlManager::getRayCaster()
+RayCastController& QmlManager::getRayCaster()
 {
 	return _rayCastController;
 }
@@ -1903,26 +1902,27 @@ Hix::Tasking::GenericTask* QmlManager::exportSelectedAsync(QString exportPath, b
 
 		qmlManager->openProgressPopUp();
 
-		// merge selected models
-		Mesh* mergedShellMesh = ste->mergeSelectedModels();//ste->mergeModels(qmlManager->selectedModels);
-		//GLModel* mergedModel = new GLModel(mainWindow, models, mergedMesh, "temporary", false);
 
-		// generate support
-		GenerateSupport generatesupport;
-		Mesh* mergedSupportMesh = nullptr;
-		if (scfg->support_type != SlicingConfiguration::SupportType::None) { // if generating support
-			//Mesh* mergedSupportMesh = nullptr;
-			mergedSupportMesh = generatesupport.generateSupport(mergedShellMesh);
-		}
-
-		// generate raft according to support structure
-		GenerateRaft generateraft;
-		Mesh* mergedRaftMesh = nullptr;
-		if (scfg->raft_type != SlicingConfiguration::RaftType::None) {
-			mergedRaftMesh = generateraft.generateRaft(mergedShellMesh, generatesupport.overhangPoints);
-		}
+		
 		// need to generate support, raft
-		auto result = SlicingEngine::sliceModel(isTemp, subflow, mergedShellMesh, mergedSupportMesh, mergedRaftMesh, exportPath);
+		std::vector<const GLModel*> constSelectedModels;
+		constSelectedModels.reserve(selectedModels.size());
+		//TODO: make this...neater
+		float zMin = std::numeric_limits<float>::max();
+		for (auto each : selectedModels)
+		{
+			constSelectedModels.emplace_back(each);
+			if (each->raftSupportGenerated())
+			{
+				auto bot = each->supportRaftManager().raftBottom();
+				if (zMin > bot)
+					zMin = bot;
+			}
+		}
+		auto noSuppMin = selected_z_min();
+		if (zMin > noSuppMin)
+			zMin = noSuppMin;
+		auto result = SlicingEngine::sliceModels(isTemp, subflow, selected_z_max(), zMin, constSelectedModels, exportPath);
 
 		QMetaObject::invokeMethod(layerViewSlider, "setThickness", Q_ARG(QVariant, (scfg->layer_height)));
 		QMetaObject::invokeMethod(layerViewSlider, "setLayerCount", Q_ARG(QVariant, (result.layerCount -1))); //0 based index
@@ -2010,15 +2010,86 @@ QVector2D QmlManager::world2Screen(QVector3D target) {
 	return result;
 }
 
-void QmlManager::generateManualSupport()
-{
-}
 
 void QmlManager::generateAutoSupport()
 {
+
 	for (auto selectedModel : selectedModels)
 	{
-		selectedModel->setSupportAndRaft();
+		selectedModel->supportRaftManager().generateSuppAndRaft(scfg->support_type, scfg->raft_type);
+		selectedModel->updateModelMesh();
+		if (scfg->support_type != SlicingConfiguration::SupportType::None)
+		{
+			auto translation = selectedModel->getTranslation();
+			translation.setZ(-1.0f * selectedModel->supportRaftManager().raftBottom());
+			selectedModel->setTranslation(translation);
+		}
+	}
+}
 
+
+void QmlManager::supportEditEnabled(bool enabled)
+{
+	if (enabled)
+	{
+		for (auto selectedModel : selectedModels)
+		{
+			selectedModel->supportRaftManager().setSupportEditMode(Hix::Support::EditMode::Manual);
+		}
+		_currentActiveFeature = ftrManualSupport;
+		qmlManager->openResultPopUp("Click a model surface to add support.", "", "Click an existing support to remove it.");
+
+	}
+	else
+	{
+		for (auto selectedModel : selectedModels)
+		{
+			selectedModel->supportRaftManager().setSupportEditMode(Hix::Support::EditMode::None);
+		}
+		_currentActiveFeature = 0;
+
+	}
+
+}
+void QmlManager::clearSupports()
+{
+	for (auto selectedModel : selectedModels)
+	{
+		selectedModel->supportRaftManager().clear();
+		auto translation = selectedModel->getTranslation();
+		translation.setZ(-1.0f * selectedModel->getMesh()->z_min());
+		selectedModel->setTranslation(translation);
+	}
+}
+
+
+void QmlManager::supportApplyEdit()
+{
+	for (auto selectedModel : selectedModels)
+	{
+		selectedModel->supportRaftManager().applyEdits();
+	}
+}
+
+
+void QmlManager::supportCancelEdit()
+{
+	for (auto selectedModel : selectedModels)
+	{
+		selectedModel->supportRaftManager().cancelEdits();
+
+	}
+}
+
+bool QmlManager::deselectAllowed()
+{
+	return _currentActiveFeature != ftrManualSupport;
+}
+
+void QmlManager::regenerateRaft()
+{
+	for (auto selectedModel : selectedModels)
+	{
+		selectedModel->supportRaftManager().generateRaft();
 	}
 }

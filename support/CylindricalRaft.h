@@ -1,28 +1,34 @@
 #pragma once
 
-#include "render/SceneEntityWithMaterial.h"
-#include "input/Highlightable.h"
-#include "input/Clickable.h"
-#include "input/Hoverable.h"
-#include "feature/overhangDetect.h"
+#include "RaftModel.h"
+
 using namespace Qt3DCore;
 using namespace Qt3DRender;
 using namespace Qt3DExtras;
 
 
-class GLModel;
 namespace Hix
 {
 	using namespace Engine3D;
 	using namespace OverhangDetect;
 	namespace Support
 	{
-		class VerticalSupportModel : public Hix::Render::SceneEntityWithMaterial, public Hix::Input::Clickable
+		//heaxgon centered at 0,0,0, rotated around positive z-axis CW
+		std::vector<QVector3D> generateHexagon(float radius);
+		class CylindricalRaft : public Hix::Support::RaftModel
 		{
 		public:
-			void clicked(Hix::Input::MouseEventData&, const Qt3DRender::QRayCasterHit&)override;
-			VerticalSupportModel(GLModel* owner, std::variant<VertexConstItr, FaceOverhang> overhang);
-			virtual ~VerticalSupportModel();
+			CylindricalRaft(SupportRaftManager* manager, const Hix::OverhangDetect::Overhangs& overhangs);
+			virtual ~CylindricalRaft();
+
+		protected:
+			QVector3D getPrimitiveColorCode(const Hix::Engine3D::Mesh* mesh, FaceConstItr faceItr)override;
+		private:
+			void generateMesh(const std::vector<QVector3D>& overhangs);
+			void generateMeshForContour(const ClipperLib::Path& contour);
+			void generateCap(const std::vector<QVector3D>& contour, bool isReverse);
+
+
 
 		};
 	}

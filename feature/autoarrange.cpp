@@ -677,7 +677,7 @@ long long int getConvexHullSizeIfNotCollision(std::vector<std::vector<LLIPoint> 
     for (int i = 0; i < meshCnt; i++){
         int vertexCnt = newOutLines[i].size();
         for (int j = 0; j < vertexCnt; j++) {
-            ppp.push_back(IntPoint(newOutLines[i][j].x, newOutLines[i][j].y, 0));
+            ppp.push_back(IntPoint(newOutLines[i][j].x, newOutLines[i][j].y));
         }
     }
     Path convex = getConvexHull(&ppp);
@@ -771,7 +771,7 @@ std::vector<XYArrangement> autoarrange::arngMeshes(std::vector<const Mesh*>& mes
     }
 
     for(int idx=0; idx<meshCnt; idx++){
-        result.push_back(std::make_pair(IntPoint(translational_motions[idx].x, translational_motions[idx].y, 0), rotates[idx]));
+        result.push_back(std::make_pair(IntPoint(translational_motions[idx].x, translational_motions[idx].y), rotates[idx]));
     }
     /*result[1].first.X = 1000;
     result[1].first.Y = 0;

@@ -174,7 +174,7 @@ public:
     bool orientationActive = false;
     bool freecutActive = false;
 
-	const Hix::Input::RayCastController& getRayCaster();
+	Hix::Input::RayCastController& getRayCaster();
     QString groupFunctionState;
     int groupFunctionIndex;
     float progress = 0;
@@ -194,6 +194,7 @@ public:
     void setProgressText(std::string inputText);
     int getLayerViewFlags();
 	void modelSelected(int);
+	//remove this
 	const std::unordered_set<GLModel*>& getSelectedModels();
 	QVector2D world2Screen(QVector3D target);
 
@@ -251,6 +252,7 @@ public:
 private:
 	Hix::Tasking::TaskManager _taskManager;
 	void setModelViewMode(int mode);
+	bool deselectAllowed();
 	GLModel* getModelByID(int ID);
     void unselectPartImpl(GLModel* target);
 	//do not mix UI work with background thread
@@ -262,7 +264,7 @@ private:
     int viewMode;
     int layerViewFlags;
     int modelIDCounter;
-    
+	int _currentActiveFeature;
 	//TODO: get rid of this
 	GLModel* _lastSelected;
 	std::unordered_set<GLModel*> selectedModels;
@@ -324,11 +326,15 @@ public slots:
     void closeSave();
     void save();
 	void cameraViewChanged();
-    void viewObjectChanged(bool checked);
+    void viewObjectChanged(bool checksed);
     void viewLayerChanged(bool checked);
-	void generateManualSupport();
-	void generateAutoSupport();
 
+	void clearSupports();
+	void supportEditEnabled(bool enabled);
+	void supportCancelEdit();
+	void supportApplyEdit();
+	void generateAutoSupport();
+	void regenerateRaft();
 
     void layerInfillButtonChanged(bool chacked);
     void layerSupportersButtonChanged(bool chacked);

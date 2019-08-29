@@ -538,8 +538,6 @@ Rectangle {
             onButtonClicked:{
                 if(!qm.isSelected() && (state == "active"))
                     window.resultPopUp.openResultPopUp("","You must select at least one model.","")
-                if(!(qm.getViewMode()===1) && (state == "active"))
-                    window.resultPopUp.openResultPopUp("","You must change to Support View Mode.","");
                 //window.resultPopUp.openResultPopUp("This function is currently unavailable.","","Please check back later.")
             }
 
@@ -1318,8 +1316,8 @@ Rectangle {
             detailline2_vis: false
             imageHeight: 40
             okbutton_vis: false
-            applybutton_vis: false
-            applyfinishbutton_vis: true
+            applybutton_vis: true
+            applyfinishbutton_vis: false
             descriptionimage_vis: false
             numbox_detail2_vis: true
             numberbox_detail2_y: 170
@@ -1451,18 +1449,25 @@ Rectangle {
             state: fourth_tab_button_support.state=="active" ? "active" : "inactive"
         }*/
         PopUp {
+			property bool editActive : false
+
             objectName:"manualSupportPopup"
             id:popup_manualSupport
             funcname: "Support"
-            height: 320
-            imageHeight: 34
+            height: 420
+            imageHeight: 76
+            applybutton_vis: true
+            applyfinishbutton_vis: false
+            descriptionimage_vis: true
+            detailline1_vis: true
+            detailline2_vis: true
+            okbutton_vis: false
+
             detail1: "Automatic Generation"
             state: { //fourth_tab_button_extend.state=="active" ? "active" : "inactive"
-                if (fourth_tab_button_support.state == "active" && qm.isSelected() && qm.getViewMode() === 1){
-                    openManualSupport();
+                if (fourth_tab_button_support.state == "active" && qm.isSelected()){
                     return "active";
                 } else {
-                    closeManualSupport();
                     return "inactive";
                 }
             }
@@ -1502,9 +1507,9 @@ Rectangle {
                         }
                     }
                     onClicked: {
-                        support_autoButton.state = "clicked"
-                        support_addButton.state = "unclicked"
-                        support_removeButton.state = "unclicked"
+                        popup_manualSupport.generateAutoSupport();
+                        support_editButton.visible = true;
+
                     }
                 }
                 states: [
@@ -1520,63 +1525,6 @@ Rectangle {
                     }
                 ]
             }
-
-            detail2: "Manual Generation"
-            Rectangle {
-                id: support_addButton
-                color: parent.color
-                width: 178
-                height: 32
-                radius: 2
-                border.color: "#cccccc"
-                anchors.horizontalCenter: parent.horizontalCenter
-                anchors.top: parent.top
-                anchors.topMargin: 173
-                Text {
-                    id: addText
-                    text: "Add supports"
-                    anchors.horizontalCenter: parent.horizontalCenter
-                    anchors.verticalCenter: parent.verticalCenter
-                    font.family: mainFont.name
-                    font.pixelSize: 9
-                }
-                MouseArea {
-                    anchors.fill: parent
-                    hoverEnabled: true
-                    onEntered: {
-                        parent.color = "#f9f9f9"
-                        addText.color = "#888888"
-                    }
-                    onExited: {
-                        if (support_addButton.state == "clicked") {
-                            parent.color = "#f9f9f9"
-                            addText.color = "#888888"
-                        }
-                        else {
-                            parent.color = "#e5e5e5"
-                            addText.color = "black"
-                        }
-                    }
-                    onClicked: {
-                        support_addButton.state = "clicked"
-                        support_autoButton.state = "unclicked"
-                        support_removeButton.state = "unclicked"
-                    }
-                }
-                states: [
-                    State {
-                        name: "clicked"
-                        PropertyChanges { target: support_addButton; color: "#f9f9f9" }
-                        PropertyChanges { target: addText; color: "#888888" }
-                    },
-                    State {
-                        name: "unclicked"
-                        PropertyChanges { target: support_addButton; color: "#e5e5e5" }
-                        PropertyChanges { target: addText; color: "black" }
-                    }
-                ]
-            }
-
             Rectangle {
                 id: support_removeButton
                 color: parent.color
@@ -1585,11 +1533,11 @@ Rectangle {
                 radius: 2
                 border.color: "#cccccc"
                 anchors.horizontalCenter: parent.horizontalCenter
-                anchors.top: support_addButton.bottom
+                anchors.top: support_autoButton.bottom
                 anchors.topMargin: 20
                 Text {
                     id: removeText
-                    text: "Remove supports"
+                    text: "Clear supports"
                     anchors.horizontalCenter: parent.horizontalCenter
                     anchors.verticalCenter: parent.verticalCenter
                     font.family: mainFont.name
@@ -1613,9 +1561,15 @@ Rectangle {
                         }
                     }
                     onClicked:  {
-                        support_removeButton.state = "clicked"
-                        support_addButton.state = "unclicked"
-                        support_autoButton.state = "unclicked"
+                        popup_manualSupport.clearSupports();
+                        support_editButton.visible = false;
+                        support_cancelEditButton.visible = false;
+                        support_raftRegenButton.visible = false;
+                        popup_manualSupport.supportEditEnabled(false);
+                        addText.text = "Edit supports"
+
+
+
                     }
                 }
                 states: [
@@ -1633,17 +1587,220 @@ Rectangle {
 
                 ]
             }
-            descriptionimage_vis: true
-            detailline1_vis: true
-            detailline2_vis: true
-            okbutton_vis: false
-            applybutton_vis: true
-            applyfinishbutton_vis: false
 
-            signal openManualSupport();
-            signal closeManualSupport();
+            detail2: "Manual Generation"
+
+            Rectangle {
+
+                id: support_editButton
+                visible: false
+                color: parent.color
+                width: 178
+                height: 32
+                radius: 2
+                border.color: "#cccccc"
+                anchors.horizontalCenter: parent.horizontalCenter
+                anchors.top: support_removeButton.bottom
+                anchors.topMargin: 50
+                Text {
+                    id: addText
+                    text: "Edit supports"
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    anchors.verticalCenter: parent.verticalCenter
+                    font.family: mainFont.name
+                    font.pixelSize: 9
+                }
+                MouseArea {
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    onEntered: {
+                        parent.color = "#f9f9f9"
+                        addText.color = "#888888"
+                    }
+                    onExited: {
+                        if (support_cancelEditButton.state == "clicked") {
+                            parent.color = "#f9f9f9"
+                            addText.color = "#888888"
+                        }
+                        else {
+                            parent.color = "#e5e5e5"
+                            addText.color = "black"
+                        }
+                    }
+                    onClicked: {
+						if(popup_manualSupport.editActive)
+						{
+                            popup_manualSupport.supportEditEnabled(false);
+                            popup_manualSupport.supportApplyEdit();
+                            popup_manualSupport.editActive = false;
+                            support_cancelEditButton.visible = false;
+                            support_raftRegenButton.visible = false;
+                            addText.text = "Edit supports"
+                            popup_manualSupport.onApplyFinishButton();
+
+
+						}
+						else
+						{
+                            popup_manualSupport.editActive = true;
+                            popup_manualSupport.supportEditEnabled(true);
+                            support_cancelEditButton.visible = true;
+                            support_raftRegenButton.visible = true;
+                            addText.text = "Done"
+                            popup_manualSupport.offApplyFinishButton();
+
+
+						}
+
+                    }
+                }
+                states: [
+                    State {
+                        name: "clicked"
+                        PropertyChanges { target: support_editButton; color: "#f9f9f9" }
+                        PropertyChanges { target: addText; color: "#888888" }
+                    },
+                    State {
+                        name: "unclicked"
+                        PropertyChanges { target: support_editButton; color: "#e5e5e5" }
+                        PropertyChanges { target: addText; color: "black" }
+                    }
+                ]
+            }
+            
+			Rectangle {
+                visible: false
+                id: support_cancelEditButton
+                color: parent.color
+                width: 178
+                height: 32
+                radius: 2
+                border.color: "#cccccc"
+                anchors.horizontalCenter: parent.horizontalCenter
+                anchors.top: support_editButton.bottom
+                anchors.topMargin: 20
+                Text {
+                    id: cancelText
+                    text: "Cancel"
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    anchors.verticalCenter: parent.verticalCenter
+                    font.family: mainFont.name
+                    font.pixelSize: 9
+                }
+                MouseArea {
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    onEntered: {
+                        parent.color = "#f9f9f9"
+                        cancelText.color = "#888888"
+                    }
+                    onExited: {
+                        if (support_cancelEditButton.state == "clicked") {
+                            parent.color = "#f9f9f9"
+                            cancelText.color = "#888888"
+                        }
+                        else {
+                            parent.color = "#e5e5e5"
+                            cancelText.color = "black"
+                        }
+                    }
+                    onClicked: {
+						if(popup_manualSupport.editActive)
+                        {
+                            popup_manualSupport.supportCancelEdit();
+                            popup_manualSupport.editActive = false;
+                            addText.text = "Edit supports"
+                            support_cancelEditButton.visible = false;
+                            support_raftRegenButton.visible = false;
+                            popup_manualSupport.supportEditEnabled(false);
+
+                        }
+
+                    }
+                }
+                states: [
+                    State {
+                        name: "clicked"
+                        PropertyChanges { target: support_cancelEditButton; color: "#f9f9f9" }
+                        PropertyChanges { target: cancelText; color: "#888888" }
+                    },
+                    State {
+                        name: "unclicked"
+                        PropertyChanges { target: support_cancelEditButton; color: "#e5e5e5" }
+                        PropertyChanges { target: cancelText; color: "black" }
+                    }
+                ]
+            }
+            Rectangle {
+                visible: false
+                id: support_raftRegenButton
+                color: parent.color
+                width: 178
+                height: 32
+                radius: 2
+                border.color: "#cccccc"
+                anchors.horizontalCenter: parent.horizontalCenter
+                anchors.top: support_cancelEditButton.bottom
+                anchors.topMargin: 20
+                Text {
+                    id: supRegenText
+                    text: "Regenerate raft"
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    anchors.verticalCenter: parent.verticalCenter
+                    font.family: mainFont.name
+                    font.pixelSize: 9
+                }
+                MouseArea {
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    onEntered: {
+                        parent.color = "#f9f9f9"
+                        supRegenText.color = "#888888"
+                    }
+                    onExited: {
+                        if (support_raftRegenButton.state == "clicked") {
+                            parent.color = "#f9f9f9"
+                            supRegenText.color = "#888888"
+                        }
+                        else {
+                            parent.color = "#e5e5e5"
+                            supRegenText.color = "black"
+                        }
+                    }
+                    onClicked: {
+						if(popup_manualSupport.editActive)
+                        {
+                            popup_manualSupport.regenerateRaft();
+                        }
+
+                    }
+                }
+                states: [
+                    State {
+                        name: "clicked"
+                        PropertyChanges { target: support_cancelEditButton; color: "#f9f9f9" }
+                        PropertyChanges { target: cancelText; color: "#888888" }
+                    },
+                    State {
+                        name: "unclicked"
+                        PropertyChanges { target: support_cancelEditButton; color: "#e5e5e5" }
+                        PropertyChanges { target: cancelText; color: "black" }
+                    }
+                ]
+            }
+
+
+
+
+
+
+
 			signal generateAutoSupport();
-            signal generateManualSupport();
+            signal supportEditEnabled(bool enabled);
+            signal supportCancelEdit();
+            signal supportApplyEdit();
+            signal clearSupports();
+            signal regenerateRaft();
 
             function onApplyFinishButton(){
                 popup_manualSupport.colorApplyFinishButton(0)
@@ -1651,10 +1808,20 @@ Rectangle {
             function offApplyFinishButton(){
                 popup_manualSupport.colorApplyFinishButton(0);
             }
-            onApplyClicked: {
-                console.log("manual Support");
-                generateManualSupport();
+            
+            onApplyClicked:{
+                if(popup_manualSupport.editActive)
+                {
+                    popup_manualSupport.supportApplyEdit();
+                    popup_manualSupport.supportEditEnabled(false);
+                    popup_manualSupport.editActive = false;
+                    addText.text = "Edit supports"
+                    support_cancelEditButton.visible = false;
+
+                }
+                all_off();
             }
+
         }
 
         //15. PopUp - Label

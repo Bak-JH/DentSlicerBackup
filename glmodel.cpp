@@ -17,9 +17,7 @@
 #include <iostream>
 #include <QDir>
 #include <QMatrix3x3>
-#include <feature/generatesupport.h>
 #include <Qt3DCore/qpropertyupdatedchange.h>
-#include <feature/generateraft.h>
 #include "DentEngine/src/configuration.h"
 #include "feature/Extrude.h"
 
@@ -773,7 +771,7 @@ GLModel::~GLModel(){
 void GLModel::clicked(MouseEventData& pick, const Qt3DRender::QRayCasterHit& hit)
 {
 
-	if (!cutActive && !extensionActive && !labellingActive && !layflatActive && _supportRaftManager.supportEditMode() != Hix::Support::SupportEditMode::None)// && !layerViewActive && !supportViewActive)
+	if (!cutActive && !extensionActive && !labellingActive && !layflatActive && _supportRaftManager.supportEditMode() == Hix::Support::EditMode::None)// && !layerViewActive && !supportViewActive)
 		qmlManager->modelSelected(ID);
 
 	if (qmlManager->isSelected(this) && pick.button == Qt::MouseButton::RightButton) {
@@ -867,10 +865,11 @@ void GLModel::clicked(MouseEventData& pick, const Qt3DRender::QRayCasterHit& hit
 		selectMeshFaces();
 	}
 
-	if (_supportRaftManager.supportEditMode() != Hix::Support::SupportEditMode::None && hit.localIntersection() != QVector3D(0, 0, 0)) {
-		unselectMeshFaces();
-		emit manualSupportSelect();
-		selectMeshFaces();
+	if (_supportRaftManager.supportEditMode() == Hix::Support::EditMode::Manual && hit.localIntersection() != QVector3D(0, 0, 0)) {
+		Hix::OverhangDetect::FaceOverhang newOverhang;
+		newOverhang.first = hit.localIntersection();
+		newOverhang.second = targetMeshFace;
+		_supportRaftManager.addSupport(newOverhang);
 	}
 
     if (labellingActive && hit.localIntersection() != QVector3D(0, 0, 0)) {
@@ -1547,7 +1546,6 @@ void GLModel::changeViewMode(int viewMode) {
         break;
     }
 	updateShader(viewMode);
-	adjustZHeight(viewMode);
 
 
     emit _updateModelMesh();
@@ -1576,25 +1574,6 @@ void GLModel::updateShader(int viewMode)
 
 
 
-}
-
-void GLModel::adjustZHeight(int viewMode)
-{
-	switch (viewMode) {
-	case VIEW_MODE_OBJECT:
-		updateMesh(_mesh);
-		m_transform.setTranslation(QVector3D(
-			m_transform.translation().x(),
-			m_transform.translation().y(),
-			-_mesh->z_min()));
-		break;
-	case VIEW_MODE_LAYER:
-		m_transform.setTranslation(QVector3D(
-			m_transform.translation().x(),
-			m_transform.translation().y(),
-			-1.0f * _supportRaftManager.supportRaftBottom()));
-		break;
-	}
 }
 
 
@@ -1642,11 +1621,20 @@ bool GLModel::perPrimitiveColorActive() const
 }
 bool GLModel::faceSelectionActive() const
 {
-	return extensionActive || layflatActive || _supportRaftManager.supportEditMode() != Hix::Support::SupportEditMode::None;
+	return extensionActive || layflatActive || _supportRaftManager.supportEditMode() != Hix::Support::EditMode::None;
 }
 bool GLModel::raftSupportGenerated() const
 {
 	return _supportRaftManager.raftActive() || _supportRaftManager.supportActive();
+}
+Hix::Support::SupportRaftManager& GLModel::supportRaftManager()
+{
+	return _supportRaftManager;
+}
+
+const Hix::Support::SupportRaftManager& GLModel::supportRaftManager()const
+{
+	return _supportRaftManager;
 }
 QVector3D GLModel::getPrimitiveColorCode(const Hix::Engine3D::Mesh* mesh, FaceConstItr itr)
 {
@@ -1669,10 +1657,5 @@ QVector3D GLModel::getPrimitiveColorCode(const Hix::Engine3D::Mesh* mesh, FaceCo
 	}
 
 
-
-}
-void GLModel::setSupportAndRaft()
-{
-	_supportRaftManager.generateSuppAndRaft(scfg->support_type, scfg->raft_type);
 
 }
