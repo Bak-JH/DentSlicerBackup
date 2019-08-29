@@ -8,5 +8,5 @@ SlicingConfiguration* scfg = new SlicingConfiguration();
 
 float SlicingConfiguration::raft_base_radius() const
 {
-	return support_radius_max* 9.0f;
+	return support_radius_max* 10.0f;
 }

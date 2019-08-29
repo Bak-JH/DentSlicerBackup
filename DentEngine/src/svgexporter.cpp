@@ -41,6 +41,10 @@ void SVGexporter::exportSVG(Slices& shellSlices,QString outfoldername, bool isTe
         QString outfilename = outfoldername + "/" + QString::number(currentSlice_idx) + ".svg";
         QFile outfile(outfilename);
         std::stringstream contentStream;
+		PolyTree& shellSlice_polytree = shellSlices[i].polytree;
+
+		if (shellSlice_polytree.ChildCount() == 0) continue;
+
         outfile.open(QFile::WriteOnly);
 
         writeHeader(contentStream);
@@ -48,12 +52,12 @@ void SVGexporter::exportSVG(Slices& shellSlices,QString outfoldername, bool isTe
             writeGroupHeader(currentSlice_idx, scfg->layer_height*(currentSlice_idx+1), contentStream);
         else
             writeGroupHeader(currentSlice_idx, scfg->layer_height*(currentSlice_idx+1), contentStream);
-        PolyTree& shellSlice_polytree = shellSlices[i].polytree;
+        
         for (int j=0; j<shellSlice_polytree.ChildCount(); j++){
             parsePolyTreeAndWrite(shellSlice_polytree.Childs[j], isTemp, contentStream);
         }
 
-        writeGroupFooter(contentStream);
+		writeGroupFooter(contentStream);
         writeFooter(contentStream);
         outfile.write(QByteArray::fromStdString(contentStream.str()));
 
