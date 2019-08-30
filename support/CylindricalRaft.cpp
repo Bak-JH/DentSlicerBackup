@@ -14,10 +14,9 @@ using namespace Hix::OverhangDetect;
 
 
 
-Hix::Support::CylindricalRaft::CylindricalRaft(SupportRaftManager* manager, const Hix::OverhangDetect::Overhangs& overhangs): RaftModel(manager)
+Hix::Support::CylindricalRaft::CylindricalRaft(SupportRaftManager* manager, const std::vector<QVector3D> basePt): RaftModel(manager)
 {
-	auto overhangCoords = Hix::OverhangDetect::toCoords(overhangs);
-	generateMesh(overhangCoords);
+	generateMesh(basePt);
 	setMesh(_mesh);
 
 }

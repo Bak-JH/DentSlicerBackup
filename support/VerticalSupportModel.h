@@ -20,14 +20,13 @@ namespace Hix
 		public:
 			VerticalSupportModel(SupportRaftManager* manager, std::variant<VertexConstItr, FaceOverhang> overhang);
 			virtual ~VerticalSupportModel();
+			QVector3D getBasePt()override;
 
 		protected:
 			QVector3D getPrimitiveColorCode(const Hix::Engine3D::Mesh* mesh, FaceConstItr faceItr)override;
 		private:
 			void generateMesh();
-			
-
-
+			std::vector<QVector3D>  generateSupportPath(const std::variant<VertexConstItr, FaceOverhang>& overhang, float bottom);
 		};
 	}
 }

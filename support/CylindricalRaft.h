@@ -18,7 +18,7 @@ namespace Hix
 		class CylindricalRaft : public Hix::Support::RaftModel
 		{
 		public:
-			CylindricalRaft(SupportRaftManager* manager, const Hix::OverhangDetect::Overhangs& overhangs);
+			CylindricalRaft(SupportRaftManager* manager, std::vector<QVector3D>);
 			virtual ~CylindricalRaft();
 
 		protected:
