@@ -1414,7 +1414,7 @@ void GLModel::closeLayflat(){
 void GLModel::openExtension(){
     extensionActive = true;
 	_meshMaterial.changeMode(Hix::Render::ShaderMode::PerPrimitiveColor);
-
+	updateMesh(_mesh,true);
     qmlManager->lastModelSelected();
     if (!qmlManager->isSelected(this))
         extensionActive = false;
@@ -1422,7 +1422,6 @@ void GLModel::openExtension(){
 }
 
 void GLModel::closeExtension(){
-	_meshMaterial.changeMode(Hix::Render::ShaderMode::SingleColor);
     if (!extensionActive)
         return;
 

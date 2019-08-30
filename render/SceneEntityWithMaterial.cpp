@@ -215,32 +215,35 @@ void SceneEntityWithMaterial::appendIndexArray(const Mesh* mesh, Hix::Engine3D::
 
 
 
-void SceneEntityWithMaterial::updateMesh(Mesh* mesh)
+void SceneEntityWithMaterial::updateMesh(Mesh* mesh, bool force)
 {
 	//flush datas
 	auto faceHistory = mesh->getFacesNonConst().flushChanges();
 	auto verticesHistory = mesh->getVerticesNonConst().flushChanges();
 	auto hEdgesHistory = mesh->getHalfEdgesNonConst().flushChanges();//not used...for now
-	bool tooManyChanges = false;
+	bool tooManyChanges = force;
 	std::unordered_set<size_t> faceChangeSet;
 	std::unordered_set<size_t> vtxChangeSet;
 	std::unordered_set<size_t> hEdgesHistorySet;
 
 	//check allChanged flag and skip to updateAll OR...
 	//if the mesh being updated is not the same as the visible one, we need to redraw everything
-	if (faceHistory.index() == 0 || verticesHistory.index() == 0 || hEdgesHistory.index() == 0)
+	if (!tooManyChanges)
 	{
-		tooManyChanges = true;
-	}
-	//skip if mesh being rendered is same and unmodified
-	else if (faceHistory.index() == 1 && verticesHistory.index() == 1 && hEdgesHistory.index() == 1)
-	{
-		faceChangeSet = std::get<1>(faceHistory);
-		vtxChangeSet = std::get<1>(verticesHistory);
-		hEdgesHistorySet = std::get<1>(hEdgesHistory);
-		if (faceChangeSet.size() + vtxChangeSet.size() + hEdgesHistorySet.size() == 0)
+		if (faceHistory.index() == 0 || verticesHistory.index() == 0 || hEdgesHistory.index() == 0)
 		{
-			return;
+			tooManyChanges = true;
+		}
+		//skip if mesh being rendered is same and unmodified
+		else if (faceHistory.index() == 1 && verticesHistory.index() == 1 && hEdgesHistory.index() == 1)
+		{
+			faceChangeSet = std::get<1>(faceHistory);
+			vtxChangeSet = std::get<1>(verticesHistory);
+			hEdgesHistorySet = std::get<1>(hEdgesHistory);
+			if (faceChangeSet.size() + vtxChangeSet.size() + hEdgesHistorySet.size() == 0)
+			{
+				return;
+			}
 		}
 	}
 	if (!tooManyChanges)
