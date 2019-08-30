@@ -163,7 +163,9 @@ void Hix::Support::SupportRaftManager::generateRaft()
 	case SlicingConfiguration::RaftType::None:
 		break;
 	case SlicingConfiguration::RaftType::General:
-		_raft = std::make_unique<CylindricalRaft>(this, _overhangs);
+		for (auto& each : _supports)
+			_basePts.emplace_back(each.first->getBasePt());
+		_raft = std::make_unique<CylindricalRaft>(this, _basePts);
 		break;
 	default:
 		break;

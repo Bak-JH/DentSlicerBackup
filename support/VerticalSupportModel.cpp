@@ -30,7 +30,12 @@ VerticalSupportModel::~VerticalSupportModel()
 
 }
 
-std::vector<QVector3D>  generateSupportPath(const std::variant<VertexConstItr, FaceOverhang>& overhang, float bottom)
+QVector3D Hix::Support::VerticalSupportModel::getBasePt()
+{
+	return _basePt;
+}
+
+std::vector<QVector3D> Hix::Support::VerticalSupportModel::generateSupportPath(const std::variant<VertexConstItr, FaceOverhang>& overhang, float bottom)
 {	 
 	std::vector<QVector3D> path;
 	
@@ -53,7 +58,7 @@ std::vector<QVector3D>  generateSupportPath(const std::variant<VertexConstItr, F
 		tipNormal = faceOverhang.second->fn;
 	}
 	//tip normal needs to be facing downard, ie) cone needs to be pointing upward,
-	constexpr float normalizedVectorZMax = -0.28735f; //normalized vector 1, 0, 0.3
+	constexpr float normalizedVectorZMax = -0.44721f; //normalized vector 1, 0, 0.5
 	tipNormal.normalize();
 	tipNormal.setZ(std::min(tipNormal.z(), normalizedVectorZMax));
 
@@ -75,7 +80,7 @@ std::vector<QVector3D>  generateSupportPath(const std::variant<VertexConstItr, F
 	path.emplace_back(coneWidePart);
 	path.emplace_back(coneNarrow);
 	path.emplace_back(extendedTip);
-
+	_basePt = supportStart;
 	return path;
 }	 
 	 

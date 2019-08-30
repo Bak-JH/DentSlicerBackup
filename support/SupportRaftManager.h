@@ -58,6 +58,7 @@ namespace Hix
 			std::unordered_map<SupportModel*, std::unique_ptr<SupportModel>> _supports;
 			std::unique_ptr<RaftModel> _raft;
 			Hix::OverhangDetect::Overhangs _overhangs;
+			std::vector<QVector3D> _basePts;
 		};
 
 	}

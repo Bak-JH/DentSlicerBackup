@@ -25,13 +25,14 @@ namespace Hix
 			void onEntered()override;
 			void onExited() override;
 			void setHighlight(bool enable) override;
+			virtual QVector3D getBasePt() = 0;
 			const std::variant<VertexConstItr, FaceOverhang>& overhang();
 			SupportModel(SupportRaftManager* manager, std::variant<VertexConstItr, FaceOverhang> overhang);
 			virtual ~SupportModel();
 		protected:
 			SupportRaftManager* _manager;
 			std::variant<VertexConstItr, FaceOverhang> _overhang;
-
+			QVector3D _basePt;
 		};
 	}
 }
