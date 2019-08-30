@@ -943,25 +943,31 @@ bool MeshFace::isNeighborOf(const FaceConstItr& other)const
 void Mesh::findNearSimilarFaces(QVector3D normal, FaceConstItr  mf,
 	std::unordered_set<FaceConstItr>& result, float maxRadius, float maxNormalDiff)const
 {
-	std::unordered_set<FaceConstItr> explored;
-	std::queue<FaceConstItr>q;
-	q.push(mf);
+	std::deque<FaceConstItr>q;
+	q.emplace_back(mf);
 	result.insert(mf);
-	explored.insert(mf);
+	size_t cnt_0 = 0;
+	size_t cnt_1 = 0;
+
 	while (!q.empty())
 	{
+		++cnt_0;
 		auto curr = q.front();
-		q.pop();
-		explored.insert(curr);
+		q.pop_front();
 		result.insert(curr);
 		auto edgeCirc = curr->edgeCirculator();
 		for (size_t i = 0; i < 3; ++i, ++edgeCirc) {
 			auto nFaces = edgeCirc->twinFaces();
 			for (auto nFace : nFaces)
 			{
-				if (explored.find(nFace) == explored.end() && (nFace->fn - normal).length() < maxNormalDiff)
+				++cnt_1;
+				if(cnt_0 < 2000)
+				//if (mf->edge->from->position.distanceToPoint(nFace->edge->from->position) < maxRadius)
 				{
-					q.push(nFace);
+					if (result.find(nFace) == result.end() && (nFace->fn - normal).length() < maxNormalDiff)
+					{
+						q.emplace_back(nFace);
+					}
 				}
 			}
 		
