@@ -2,9 +2,6 @@
 #include <QtMath>
 /****************** Helper Functions For Overhang Detection Step *******************/
 
-float pointDistance3D(IntPoint A, IntPoint B){
-    return sqrt(pow(A.X-B.X, 2)+pow(A.Y-B.Y,2)+pow(A.Z-B.Z,2));
-}
 
 float pointDistance(IntPoint A, IntPoint B){
     return sqrt(pow(A.X-B.X, 2)+pow(A.Y-B.Y,2));

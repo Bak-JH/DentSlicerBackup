@@ -118,7 +118,6 @@ namespace Hix
 			MeshFace()
 			{}
 			QVector3D fn;
-			QVector3D fn_unnorm;
 			HalfEdgeConstItr edge;
 			std::array<VertexConstItr, 3> meshVertices()const;
 			//std::array<std::vector<FaceConstItr>, 3> neighboring_faces;
@@ -141,6 +140,7 @@ namespace Hix
 			friend inline bool operator!= (const MeshVertex& a, const MeshVertex& b) {
 				return a.position != b.position;
 			}
+			std::unordered_set<VertexConstItr> connectedVertices()const;
 			bool empty()const;
 			void calculateNormalFromFaces();
 			std::vector<FaceConstItr> connectedFaces()const;
@@ -150,6 +150,7 @@ namespace Hix
 			std::vector<HalfEdgeConstItr> arrivingEdges;
 
 
+
 		};
 
 
@@ -157,7 +158,7 @@ namespace Hix
 		bool findCommonManifoldFace(FaceConstItr& result, const FaceConstItr& a, std::unordered_set<FaceConstItr>& candidates, std::unordered_set<FaceConstItr> pool);
 
 
-		typedef std::vector<QVector3D> Plane;
+		typedef std::array<QVector3D,3> Plane;
 
 		class Path3D : public std::vector<MeshVertex> {
 		public:
@@ -175,19 +176,16 @@ namespace Hix
 		public:
 
 
+
+
 			Mesh();
-			//THIS IS NOT A COPY CONSTRUCTOR!
-			Mesh(const Mesh* origin);
-			//this is
-			Mesh(const Mesh&);
+			Mesh(const Mesh& o);
+			Mesh& operator=(Mesh other);
+
             Mesh& operator+=(const Mesh& o);
 			//copy assign
 			//Mesh& operator=(const Mesh o);
 			/********************** Undo state functions***********************/
-			void setNextMesh(Mesh* mesh);
-			void setPrevMesh(Mesh* mesh);
-			Mesh* saveUndoState(const Qt3DCore::QTransform& transform);
-
 
 			/********************** Mesh Edit Functions***********************/
 			void vertexOffset(float factor);
@@ -242,10 +240,8 @@ namespace Hix
 			float y_max()const;
 			float z_min()const;
 			float z_max()const;
-			Mesh* getPrev()const;
-			Mesh* getNext()const;
 			void findNearSimilarFaces(QVector3D normal,FaceConstItr mf,
-				std::unordered_set<FaceConstItr>& result,  float maxRadius = 50, float maxNormalDiff = 0.4)const;
+				std::unordered_set<FaceConstItr>& result,  float maxRadius = 50, float maxNormalDiff = 0.35f)const;
 
 
 
@@ -284,13 +280,6 @@ namespace Hix
 			}
 			/********************** Stuff that can be public **********************/
 
-			QTime time;
-			QVector3D m_translation;
-			QMatrix4x4 m_matrix;
-			/***********************for undo redo search*************************/
-			QTime getPrevTime();
-			QTime getNextTime();
-
 		private:
 			/********************** Helper Functions **********************/
             //set twin relationship for this edge as well as matching twin edge
@@ -300,20 +289,16 @@ namespace Hix
 			void addHalfEdgesToFace(std::array<VertexItr, 3> faceVertices, FaceConstItr face);
 			void updateMinMax(QVector3D v);
 
-			std::unordered_map<QVector3D, VertexConstItr> _verticesHash;
-			TrackedIndexedList<MeshVertex> vertices;
-			TrackedIndexedList<HalfEdge> halfEdges;
-			TrackedIndexedList<MeshFace> faces;
-
-			// for undo & redo
-			Mesh* prevMesh = nullptr;
-			Mesh* nextMesh = nullptr;
-
 			//index changed event callback
 			void vtxIndexChangedCallback(size_t oldIdx, size_t newIdx);
 			void faceIndexChangedCallback(size_t oldIdx, size_t newIdx);
 			void hEdgeIndexChangedCallback(size_t oldIdx, size_t newIdx);
 
+
+			std::unordered_map<QVector3D, VertexConstItr> _verticesHash;
+			TrackedIndexedList<MeshVertex> vertices;
+			TrackedIndexedList<HalfEdge> halfEdges;
+			TrackedIndexedList<MeshFace> faces;
 			float _x_min = 99999, _x_max = 99999, _y_min = 99999, _y_max = 99999, _z_min = 99999, _z_max = 99999;
 
 		};

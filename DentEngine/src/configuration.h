@@ -38,8 +38,7 @@ struct SlicingConfiguration
 	enum class SupportType: uint8_t
 	{
 		None = 0,
-		KBranch= 1,
-		General = 2
+		Vertical = 1
 	};
 	enum class InFillType : uint8_t
 	{
@@ -90,14 +89,13 @@ struct SlicingConfiguration
 	PrinterVendor printer_vendor_type = PrinterVendor::Hix;
 	SlicingMode slicing_mode = SlicingMode::Uniform; // uniform OR adaptive
 	ResinType resin_type = ResinType::Temporary;
-	SupportType support_type = SupportType::General;
+	SupportType support_type = SupportType::Vertical;
 	InFillType infill_type = InFillType::Full;
 	RaftType raft_type = RaftType::General;
 
     // raft settings
     float raft_thickness = 2.0f; // in mm
-    float raft_base_radius = 5.0f; // in mm
-    float raft_offset_radius = 4.0f; // in mm
+	float raft_base_radius()const;
 
     // support settings
     float support_radius_max = 1.0f;

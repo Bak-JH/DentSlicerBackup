@@ -31,7 +31,7 @@ namespace Hix
 
 		QDebug operator<< (QDebug d, const IntPoint& obj) {
 
-			d << "IntPoint: " << obj.X << obj.Y << obj.Z;
+			d << "IntPoint: " << obj.X << obj.Y;
 			return d;
 		}
 

@@ -23,7 +23,6 @@ QDebug Hix::Debug::operator<< (QDebug d, const Slice& obj) {
 	return d;
 }
 QDebug Hix::Debug::operator<< (QDebug d, const Slices& obj) {
-	d << "mesh: " << obj.mesh;
 	d << "slices: ";
 	for (const auto& each : obj)
 	{
@@ -38,9 +37,6 @@ namespace Slicer
 {
 	namespace Private
 	{
-
-		/****************** Mesh Slicing Step *******************/
-		std::vector<std::vector<Contour>> meshSlice(const Mesh* mesh, const Planes* planes); // totally k elements
 
 		/****************** Helper Functions For Contour Construction Step *******************/
 		void insertPathHash(QHash<uint32_t, Path>& pathHash, IntPoint u, IntPoint v);
@@ -183,52 +179,28 @@ Path3D  Slicer::Private::intersectionPath(Plane base_plane, Plane target_plane)
 
 
 
-bool Hix::Slicer::slice(const Mesh* mesh, const Planes* planes, Slices* slices){
-    slices->mesh = mesh;
-
-    if (mesh == nullptr || mesh->getFaces().size() ==0){
-        return true;
+void Hix::Slicer::slice(const Mesh* mesh, const Planes* planes, Slices* slices){
+    if (mesh->getFaces().size() ==0){
+        return;
     }
-	std::vector<std::vector<Contour>> meshslices;
-	meshslices = meshSlice(mesh, planes);
-
-	for (int i = 0; i < meshslices.size(); i++) {
-		Slice meshslice;
-		for (auto& contour : meshslices[i])
+	auto zPlanes = planes->getPlanesVector();
+	auto intersectingFaces = planes->buildTriangleLists(mesh);
+	for (int i = 0; i < zPlanes.size(); i++) {
+		ContourBuilder contourBuilder(mesh, intersectingFaces[i], zPlanes[i]);
+		std::vector<Contour> contours = contourBuilder.buildContours();
+		if (!contours.empty())
 		{
-			meshslice.outershell.push_back(contour.toPath());
-
+			auto& currSlice = (*slices)[i];
+			for (auto& each : contours)
+			{
+				currSlice.outershell.push_back(each.toPath());
+			}
 		}
-		meshslice.z = scfg->layer_height * i;
-		slices->push_back(meshslice);
 	}
-
-
-
-	slices->containmentTreeConstruct();
-
-    return true;
+    return;
 }
 
 /****************** Mesh Slicing Step *******************/
-
-// slices mesh into segments
-std::vector<std::vector<Contour>> Slicer::Private::meshSlice(const Mesh* mesh, const Planes* planes){
-
-	std::vector<std::vector<Contour>> contoursPerPlane;
-
-	auto zPlanes = planes->getPlanesVector();
-	auto intersectingFaces = planes->getTrigList();
-
-    for (int i=0; i< zPlanes.size(); i++){
-		ContourBuilder contourBuilder(mesh, intersectingFaces[i], zPlanes[i]);
-		std::vector<Contour> contours = contourBuilder.buildContours();
-		contoursPerPlane.push_back(contours);
-
-    }
-    return contoursPerPlane;
-}
-
 
 
 
@@ -261,11 +233,13 @@ void Slicer::Private::insertPathHash(QHash<uint32_t, Path>& pathHash, IntPoint u
 }
 
 
-/****************** Deprecated functions *******************/
+Hix::Slicer::Slices::Slices(size_t size): std::vector<Slice>(size)
+{
+}
 
+/****************** Deprecated functions *******************/
 void Slices::containmentTreeConstruct(){
     Clipper clpr;
-
     for (int idx=0; idx<this->size(); idx++){ // divide into parallel threads
         Slice* slice = &((*this)[idx]);
         clpr.Clear();

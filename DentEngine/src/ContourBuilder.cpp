@@ -103,11 +103,15 @@ Path Contour::toPath()const
 	Path path;
 	if (!segments.empty())
 	{
-		path.push_back(toInt2DPt(segments.front().from));
+		std::vector<QVector2D> qPath;
+		qPath.reserve(segments.size() + 1);
+
+		qPath.emplace_back(segments.front().from);
 		for (auto& each : segments)
 		{
-			path.push_back(toInt2DPt(each.to));
+			qPath.emplace_back(each.to);
 		}
+		path = ClipperLib::toCLPath(qPath);
 	}
 
 	return path;
@@ -189,29 +193,6 @@ ContourBuilder::ContourBuilder(const Mesh* mesh, std::unordered_set<FaceConstItr
 }
 
 
-std::variant<VertexConstItr, HalfEdgeConstItr> toHEdgeOrVtxHint(
-	const FaceConstItr& mf, const std::variant<VertexConstItr, std::pair<VertexConstItr, VertexConstItr>>& edgeOrVtx)
-{
-	if (edgeOrVtx.index() == 0)
-	{
-		return std::get<0>(edgeOrVtx);
-	}
-	else
-	{
-		auto vtxPair = std::get<1>(edgeOrVtx);
-		//hint is edge
-		HalfEdgeConstItr nextEdge;
-		if (mf->getEdgeWithVertices(nextEdge, vtxPair.first, vtxPair.second))
-		{
-			return nextEdge;
-		}
-		else
-		{
-			throw std::runtime_error("edge not found");
-		}
-	}
-}
-
 void ContourBuilder::buildSegment(const FaceConstItr& mf)
 {
 	ContourSegment segment;
@@ -219,7 +200,6 @@ void ContourBuilder::buildSegment(const FaceConstItr& mf)
 	std::vector<VertexConstItr> upper;
 	std::vector<VertexConstItr> middle;
 	std::vector<VertexConstItr> lower;
-
 	auto mfVertices = mf->meshVertices();
 	for (int i = 0; i < 3; i++) {
 		if (mfVertices[i]->position.z() > _plane) {
@@ -307,7 +287,6 @@ std::vector<Contour> ContourBuilder::buildContours()
 
 	while (!_unexplored.empty())
 	{
-
 		Contour currContour;
 		//add first segment, pop it from unexplored
 		ContourSegment& firstSeg = _segments[*_unexplored.begin()];
@@ -344,7 +323,6 @@ std::vector<Contour> ContourBuilder::buildContours()
 	//link un-closed contours together if possible to minimize un-closed contour counts
 	if (!_incompleteContours.empty())
 	{
-
 		auto closedContours = joinOrCloseIncompleteContours();
 		for (auto each : closedContours)
 		{
