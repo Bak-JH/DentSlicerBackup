@@ -58,14 +58,15 @@ std::vector<QVector3D> Hix::Support::VerticalSupportModel::generateSupportPath(c
 		tipNormal = faceOverhang.second->fn;
 	}
 	//tip normal needs to be facing downard, ie) cone needs to be pointing upward,
-	constexpr float normalizedVectorZMax = -0.44721f; //normalized vector 1, 0, 0.5
+	constexpr float normalizedVectorZMax = -1.0f; //tan 45
+	QVector2D xy(tipNormal.x(), tipNormal.y());
+	auto zMax = normalizedVectorZMax * xy.length();
+	tipNormal.setZ(std::min(zMax, tipNormal.z()));
 	tipNormal.normalize();
-	tipNormal.setZ(std::min(tipNormal.z(), normalizedVectorZMax));
 
 	//because of float error, it's safer to overlap support and mesh a little bit, so extend endtip into mesh a bit
 	QVector3D extendedTip = coneNarrow;
 	QVector3D intoMesh = -1.0f * tipNormal;
-	intoMesh.normalize();
 	intoMesh *= SUPPORT_OVERLAP_LENGTH;
 	extendedTip += intoMesh;
 
