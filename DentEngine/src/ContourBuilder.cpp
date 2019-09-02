@@ -200,7 +200,6 @@ void ContourBuilder::buildSegment(const FaceConstItr& mf)
 	std::vector<VertexConstItr> upper;
 	std::vector<VertexConstItr> middle;
 	std::vector<VertexConstItr> lower;
-	auto debug = mf->sortZ();
 	auto mfVertices = mf->meshVertices();
 	for (int i = 0; i < 3; i++) {
 		if (mfVertices[i]->position.z() > _plane) {
