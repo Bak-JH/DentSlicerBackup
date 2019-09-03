@@ -1278,24 +1278,6 @@ void QmlManager::modelRotateInit(){
     return;
 }
 
-void QmlManager::modelRotateDone(){
-    if (selectedModels.empty())
-        return;
-
-//    QMetaObject::invokeMethod(boundedBox, "hideBox"); // Bounded Box
-
-    std::array<float,6> minmax;
-	for (auto selectedModel : selectedModels) {
-        minmax = Mesh::calculateMinMax(Utils::Math::quatToMat(selectedModel->getTransform()->rotation()).inverted(), selectedModel->getMesh());
-        selectedModel->setTranslation(QVector3D(selectedModel->getTransform()->translation().x(),
-                                                                 selectedModel->getTransform()->translation().y(),
-                                                                 - minmax[4]));
-    }
-
-
-	_widgetManager.setWidgetMode(WidgetMode::Rotate);
-	rotateSnapAngle = 0;
-}
 
 void QmlManager::totalRotateDone(){
     qDebug() << "total rotate done" << selectedModels.size();
@@ -1307,6 +1289,7 @@ void QmlManager::totalRotateDone(){
 			continue;
 		}
 		each->rotationDone();
+
 	}
 
 
@@ -1499,7 +1482,10 @@ void QmlManager::groupSelectionActivate(bool active){
 void QmlManager::runGroupFeature(int ftrType, QString state, double arg1, double arg2, double arg3, QVariant data){
     groupFunctionIndex = ftrType;
     groupFunctionState = state;
-
+	if (state == "active")
+	{
+		clearSupports();
+	}
     qDebug()<< "runGroupFeature | type:"<<ftrType<<"| state:" <<state << selectedModels.size();
     switch(ftrType){
     /*
@@ -1538,34 +1524,7 @@ void QmlManager::runGroupFeature(int ftrType, QString state, double arg1, double
         break;
     }
     case ftrLayFlat:
-    {   /*
-        if (state == "active"){
-            if (selectedModels.empty()){
-                QMetaObject::invokeMethod(layflatPopup,"offApplyFinishButton");
-            }else{
-                QMetaObject::invokeMethod(layflatPopup,"onApplyFinishButton");
-            }
-        }else if (state == "inactive"){
-            QApplication::restoreOverrideCursor();
-        }
-        */
-        qDebug() << "run groupfeature lay flat";
-        if (state == "active"){
-			for (auto selectedModel : selectedModels) {
-				selectedModel->unselectMeshFaces();
-			}
-        }else if (state == "inactive"){
-			for (auto selectedModel : selectedModels) {
-				selectedModel->unselectMeshFaces();
-				selectedModel->closeExtension();
-			}
-
-        }
-/*        if (!selectedModels.empty()) {
-            selectedModels[selectedModels.size() - 1]->unselectMeshFaces();
-            selectedModels[selectedModels.size() - 1]->closeLayflat();
-        }
-*/
+	{
         break;
     }
     case ftrOrient:  //orient
@@ -1599,18 +1558,6 @@ void QmlManager::runGroupFeature(int ftrType, QString state, double arg1, double
         break;
     }
     case ftrExtend:
-        qDebug() << "run groupfeature extend";
-        if (state == "active"){
-			for (auto selectedModel : selectedModels) {
-				selectedModel->unselectMeshFaces();
-			}
-        }else if (state == "inactive"){
-			for (auto selectedModel : selectedModels) {
-				selectedModel->unselectMeshFaces();
-				selectedModel->closeExtension();
-			}
-        }
-        qDebug() << "groupfeature done";
         break;
     case ftrScale:
         qDebug() << "run feature scale" << selectedModels.size();
@@ -2056,9 +2003,7 @@ void QmlManager::clearSupports()
 	for (auto selectedModel : selectedModels)
 	{
 		selectedModel->supportRaftManager().clear();
-		auto translation = selectedModel->getTranslation();
-		translation.setZ(-1.0f * selectedModel->getMesh()->z_min());
-		selectedModel->setTranslation(translation);
+		selectedModel->setZToBed();
 	}
 }
 

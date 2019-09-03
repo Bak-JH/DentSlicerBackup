@@ -122,7 +122,7 @@ void GLModel::rotationDone()
 	m_transform.setRotationZ(0);
 
 	_mesh->vertexMove(m_transform.translation());
-	m_transform.setTranslation(QVector3D(0, 0, 0));
+	setZToBed();
 	updateModelMesh();
 }
 
@@ -183,6 +183,14 @@ void GLModel::scaleModelMesh(float scaleX, float scaleY, float scaleZ) {
 	float centerY = (_mesh->y_max() + _mesh->y_min()) / 2;
 	_mesh->vertexScale(scaleX, scaleY, scaleZ, centerX, centerY);
 	updateModelMesh();
+}
+
+void GLModel::setZToBed()
+{
+	auto translation = getTranslation();
+	translation.setZ(-1.0f * getMesh()->z_min());
+	setTranslation(translation);
+
 }
 
 
@@ -363,6 +371,7 @@ void GLModel::mouseClickedLayflat(MeshFace shadow_meshface){
     //delete m_objectPicker;
     ////m_objectPicker->setEnabled(true);
     //closeLayflat();
+
     emit resetLayflat();
 }
 
@@ -910,6 +919,8 @@ bool GLModel::isDraggable(Hix::Input::MouseEventData& e,const Qt3DRender::QRayCa
 }
 void GLModel::dragStarted(Hix::Input::MouseEventData& e, const Qt3DRender::QRayCasterHit& hit)
 {
+	_supportRaftManager.clear();
+	setZToBed();
 	lastpoint = hit.localIntersection();
 	prevPoint = (QVector2D)e.position;
 	qmlManager->moveButton->setProperty("state", "active");
@@ -1299,32 +1310,20 @@ void GLModel::generateText3DMesh()
 // for extension
 
 void GLModel:: unselectMeshFaces(){
-	//we need to mark these vertices as modified so they get re-rendered with new colors
-	for (auto& fcItr : selectedFaces)
-	{
-		_mesh->getFacesNonConst().markChanged(fcItr);
-	}
 	selectedFaces.clear();
-	updateModelMesh();
-
 }
 void GLModel::selectMeshFaces(){
 	selectedFaces.clear();
 	QVector3D normal = targetMeshFace->fn;
 	_mesh->findNearSimilarFaces(normal, targetMeshFace, selectedFaces);
-	//we need to mark these vertices as modified so they get re-rendered with new colors
-	for (auto& fcItr : selectedFaces)
-	{
-		_mesh->getFacesNonConst().markChanged(fcItr);
-	}
-	updateModelMesh();
+	updateMesh(_mesh, true);
 }
 void GLModel::generateExtensionFaces(double distance){
     if (!_targetSelected)
         return;
     Hix::Features::Extension::extendMesh(_mesh, targetMeshFace, distance);
 	_targetSelected = false;
-	updateModelMesh();
+	updateMesh(_mesh, true);
 }
 
 void GLModel::generateLayFlat(){
@@ -1360,6 +1359,7 @@ void GLModel::generateLayFlat(){
     tmp2.setRotationY(angleY);
     tmp2.setRotationZ(0);
     rotateModelMesh(tmp1.matrix() * tmp2.matrix());
+	setZToBed();
     //qDebug() << "lay flat 1      ";
     unselectMeshFaces();
     //closeLayflat();
@@ -1384,37 +1384,26 @@ void GLModel::generateShellOffset(double factor){
 
 
 void GLModel::openLayflat(){
-    //qDebug() << "open layflat called" << this << this;
     layflatActive = true;
-
+	_meshMaterial.changeMode(Hix::Render::ShaderMode::PerPrimitiveColor);
+	updateMesh(_mesh, true);
     qmlManager->lastModelSelected();
     if (!qmlManager->isSelected(this))
         layflatActive = false;
-    //qDebug() << "open layflat called end  " << layflatActive;
-
-    /*
-    QApplication::setOverrideCursor(QCursor(Qt::UpArrowCursor));
-    //m_objectPicker->setEnabled(false);
-    //m_objectPicker = new Qt3DRender::QObjectPicker(this);
-    QObject::connect(//m_objectPicker,SIGNAL(clicked(Qt3DRender::QPickEvent*)), this, SLOT(mouseClickedLayflat(Qt3DRender::QPickEvent*)));
-    this->addComponent(//m_objectPicker);
-    this->layflatActive = true;
-    */
 }
-
 void GLModel::closeLayflat(){
-
     if (!layflatActive)
         return;
-
     layflatActive = false;
+	_meshMaterial.changeMode(Hix::Render::ShaderMode::SingleColor);
+	updateMesh(_mesh, true);
     unselectMeshFaces();
 	_targetSelected = false;
 }
 void GLModel::openExtension(){
     extensionActive = true;
 	_meshMaterial.changeMode(Hix::Render::ShaderMode::PerPrimitiveColor);
-	updateMesh(_mesh,true);
+	updateMesh(_mesh, true);
     qmlManager->lastModelSelected();
     if (!qmlManager->isSelected(this))
         extensionActive = false;
@@ -1424,7 +1413,8 @@ void GLModel::openExtension(){
 void GLModel::closeExtension(){
     if (!extensionActive)
         return;
-
+	_meshMaterial.changeMode(Hix::Render::ShaderMode::SingleColor);
+	updateMesh(_mesh, true);
     extensionActive = false;
     unselectMeshFaces();
 	_targetSelected = false;

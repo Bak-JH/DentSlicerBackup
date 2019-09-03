@@ -78,7 +78,6 @@ public:
 
     // feature hollowshell
     float hollowShellRadius = 0;
-
     // face selection enabled
     std::unordered_set<FaceConstItr> selectedFaces;
 
@@ -176,7 +175,7 @@ public:
 	void rotateModelMesh(int Axis, float Angle, bool update = true);
 	void rotateModelMesh(QMatrix4x4 matrix, bool update = true);
 	void scaleModelMesh(float scaleX, float scaleY, float scaleZ);
-
+	void setZToBed();
 
 private:
 	QVector3D getPrimitiveColorCode(const Hix::Engine3D::Mesh* mesh, FaceConstItr faceItr)override;

@@ -304,7 +304,6 @@ public slots:
     void modelMoveDone();
     void totalMoveDone();
     void modelRotateInit();
-    void modelRotateDone();
     void totalRotateDone();
     void resetLayflat();
     void applyArrangeResult(std::vector<QVector3D>, std::vector<float>);
