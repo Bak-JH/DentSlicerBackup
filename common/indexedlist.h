@@ -46,6 +46,12 @@ public:
 	{
 
 	}
+	IndexedList(IndexedList&& other):
+		_container(std::move(other._container)), _indexChangedCallbacks(std::move(other._indexChangedCallbacks)),
+		_indexChangedCallbackToken(other._indexChangedCallbackToken)
+	{
+	}
+
 	IndexedList(const IndexedList& o) :_container(o._container)
 	{
 	}
@@ -60,6 +66,14 @@ public:
 
 	virtual ~IndexedList()
 	{}
+
+	IndexedList& operator=(IndexedList&& o)
+	{
+		_container = std::move(o._container);
+		_indexChangedCallbacks = std::move(o._indexChangedCallbacks);
+		_indexChangedCallbackToken = o._indexChangedCallbackToken;
+		return *this;
+	}
 
 	IndexedList& operator=(const IndexedList& o)
 	{
@@ -217,6 +231,11 @@ public:
 	{
 		return _container.get_allocator();
 
+	}
+	void clearIndexChangedCallbacks()
+	{
+		_indexChangedCallbacks.clear();
+		_indexChangedCallbackToken = 0;
 	}
 	size_t addIndexChangedCallback(indexChangedCallback callback)
 	{

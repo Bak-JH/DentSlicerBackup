@@ -1,22 +1,25 @@
 #include "TaskManager.h"
 #include <stdexcept>
 #include <qmlmanager.h>
+using namespace Hix::Tasking;
+
+
 TaskManager::TaskManager(): _taskThread(&TaskManager::run, this)
 {
 }
 
 void TaskManager::run()
 {
-	tf::Taskflow* currentTask = nullptr;
+	Task* currentTask = nullptr;
 	while (!_end)
 	{
 		_queue.wait_dequeue(currentTask);
-		_executor.run(*currentTask).wait();
+		_executor.run(currentTask->getFlow()).wait();
 		delete currentTask;
 	}
 }
 
-void TaskManager::enqueTask(tf::Taskflow* task)
+void TaskManager::enqueTask(Task* task)
 {
 	if (task != nullptr)
 	{
@@ -26,18 +29,14 @@ void TaskManager::enqueTask(tf::Taskflow* task)
 
 void TaskManager::enqueUITask(std::function<void()> f)
 {
-	auto tf = new tf::Taskflow();
-	tf->emplace([f]() {
-		QmlManager::postToObject(f, qmlManager);
-	});
-	enqueTask(tf);
+	auto uiTask = new UITask(f);
+	enqueTask(uiTask);
 }
 
 TaskManager::~TaskManager()
 {
 	_end = true;
-	tf::Taskflow* lastTaskflow= new tf::Taskflow();
-	auto task = lastTaskflow->emplace([]() {});
+	auto lastTaskflow= new GenericTask();
 	enqueTask(lastTaskflow);
 	_taskThread.join();
 }

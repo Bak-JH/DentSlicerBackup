@@ -7,12 +7,11 @@
 #include <Qt3DRender>
 #include <Qt3DExtras>
 #include <Qt3DInput>
-#include "MoveWidget.h"
 #include <array>
 #include <memory>
 namespace Hix
 {
-	namespace Input
+	namespace UI
 	{
 		class Highlightable;
 	}
@@ -24,7 +23,7 @@ namespace Hix
 		public:
 			Widget3D();
 			virtual ~Widget3D();
-			void addWidget(std::unique_ptr<Hix::Input::Highlightable> widget);
+			void addWidget(std::unique_ptr<Hix::UI::Highlightable> widget);
 			void setVisible(bool show);
 			bool visible();
 			Qt3DRender::QLayer layer;
@@ -34,7 +33,7 @@ namespace Hix
 			bool isManipulated();
 			void setManipulated(bool isManipulated);
 		private:
-			std::vector<std::unique_ptr<Hix::Input::Highlightable>> _widgets;
+			std::vector<std::unique_ptr<Hix::UI::Highlightable>> _widgets;
 			bool _visible = true;
 			QVector3D _center;
 			Qt3DCore::QTransform _transform;

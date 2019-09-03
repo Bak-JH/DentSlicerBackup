@@ -22,12 +22,12 @@
 #include "utils/httpreq.h"
 #include <QKeyboardHandler>
 #include "input/raycastcontroller.h"
+#include "feature/overhangDetect.h"
 #include "ui/Widget3DManager.h"
 #include "common/TaskManager.h"
 #include "slice/SlicingOptBackend.h"
 
 #define VIEW_MODE_OBJECT 0
-#define VIEW_MODE_SUPPORT 1
 #define VIEW_MODE_LAYER 2
 
 #define LAYER_INFILL 0x01
@@ -150,7 +150,6 @@ public:
     // view mode buttons
     QObject* leftTabViewMode;
     QObject* viewObjectButton;
-    QObject* viewSupportButton;
     QObject* viewLayerButton;
 
     QObject* layerViewPopup;
@@ -175,7 +174,7 @@ public:
     bool orientationActive = false;
     bool freecutActive = false;
 
-	const Hix::Input::RayCastController& getRayCaster();
+	Hix::Input::RayCastController& getRayCaster();
     QString groupFunctionState;
     int groupFunctionIndex;
     float progress = 0;
@@ -195,6 +194,7 @@ public:
     void setProgressText(std::string inputText);
     int getLayerViewFlags();
 	void modelSelected(int);
+	//remove this
 	const std::unordered_set<GLModel*>& getSelectedModels();
 	QVector2D world2Screen(QVector3D target);
 
@@ -221,6 +221,8 @@ public:
     Q_INVOKABLE bool isSelected();
 	Q_INVOKABLE bool isSelected(int ID);
 	bool isSelected(GLModel* model);
+    void showCubeWidgets(GLModel* model);
+	void addSupport(GLModel* model, QVector3D position);
 
     Q_INVOKABLE void selectPart(int ID);
     Q_INVOKABLE void unselectPart(int ID);
@@ -246,22 +248,23 @@ public:
 	void modelMove(QVector3D displacement);
 	void modelRotateWithAxis(const QVector3D& axis, double degree);
 	QVector3D cameraViewVector();
-	TaskManager& taskManager();
+	Hix::Tasking::TaskManager& taskManager();
 private:
-	TaskManager _taskManager;
+	Hix::Tasking::TaskManager _taskManager;
 	void setModelViewMode(int mode);
+	bool deselectAllowed();
 	GLModel* getModelByID(int ID);
     void unselectPartImpl(GLModel* target);
 	//do not mix UI work with background thread
 	//std::future<Slicer*> exportSelected(bool isTemp);
 	QString getExportPath();
 	//do not make non-async version of this as taskflow allows to spawn  internal dynamic tasks for better throughoutput.
-	tf::Taskflow* exportSelectedAsync(QString exportPath, bool isTemp);
+	Hix::Tasking::GenericTask* exportSelectedAsync(QString exportPath, bool isTemp);
 	bool groupSelectionActive = false;
     int viewMode;
     int layerViewFlags;
     int modelIDCounter;
-    
+	int _currentActiveFeature;
 	//TODO: get rid of this
 	GLModel* _lastSelected;
 	std::unordered_set<GLModel*> selectedModels;
@@ -301,13 +304,13 @@ public slots:
     void modelMoveDone();
     void totalMoveDone();
     void modelRotateInit();
-    void modelRotateDone();
     void totalRotateDone();
     void resetLayflat();
     void applyArrangeResult(std::vector<QVector3D>, std::vector<float>);
     void cleanselectedModel(int);
     void extensionSelect();
     void extensionUnSelect();
+
     void layFlatSelect();
     void layFlatUnSelect();
     void manualSupportSelect();
@@ -322,9 +325,15 @@ public slots:
     void closeSave();
     void save();
 	void cameraViewChanged();
-    void viewObjectChanged(bool checked);
-    void viewSupportChanged(bool checked);
+    void viewObjectChanged(bool checksed);
     void viewLayerChanged(bool checked);
+
+	void clearSupports();
+	void supportEditEnabled(bool enabled);
+	void supportCancelEdit();
+	void supportApplyEdit();
+	void generateAutoSupport();
+	void regenerateRaft();
 
     void layerInfillButtonChanged(bool chacked);
     void layerSupportersButtonChanged(bool chacked);

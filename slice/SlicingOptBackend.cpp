@@ -5,11 +5,10 @@
 
 //constexpr for mapping enum to string and vise versa
 //TODO: c++20 static reflection when it becomes available
-constexpr std::array<std::string_view, 3> SupportTypeStr{
+constexpr std::array<std::string_view, 2> SupportTypeStr{
 	"None"		,
-	"K-Branch"	,
-	"General"	
-};
+	"Vertical"	
+};	
 constexpr std::array<std::string_view, 3> InfillTypeStr{
 	"None"		,
 	"Full"	,
@@ -127,7 +126,7 @@ void SlicingOptBackend::createSlicingOptControls()
 	addOptionDialog(QString("Bed number"), BedNumberStr, 0);
 	addOptionDialog(QString("Resin type"), ResinTypeStr, 0);
 	addOptionDialog(QString("Raft type"), RaftTypeStr, 1);
-	addOptionDialog(QString("Support type"), SupportTypeStr, 2);
+	addOptionDialog(QString("Support type"), SupportTypeStr, 1);
 	addOptionDialog(QString("Infill type"), InfillTypeStr, 1);
 	addOptionDialog(QString("Slicing mode"), SlicingModeStr, 0);
 	addOptionDialog(QString("Support minimum radius"), SupportRadiusMin, 2);

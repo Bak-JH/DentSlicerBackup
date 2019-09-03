@@ -80,12 +80,6 @@
     <ClCompile Include="fileloader.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="feature\generateraft.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="feature\generatesupport.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="glmodel.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -105,9 +99,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="main.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="feature\manualsupport.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="utils\mathutils.cpp">
@@ -209,6 +200,42 @@
     <ClCompile Include="feature\overhangDetect.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>
+    <ClCompile Include="ui\CubeWidget.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ui\CubeWidget.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="common\Task.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="feature\Extrude.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="render\SceneEntity.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="render\SceneEntityWithMaterial.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="support\VerticalSupportModel.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="support\SupportRaftManager.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="support\SupportModel.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="support\RaftModel.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="support\CylindricalRaft.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="feature\Shapes2D.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DentEngine\src\polyclipping\poly2tri\sweep\advancing_front.h">
@@ -244,12 +271,6 @@
     <ClInclude Include="fileloader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="feature\generateraft.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="feature\generatesupport.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <QtMoc Include="glmodel.h">
       <Filter>Header Files</Filter>
     </QtMoc>
@@ -268,9 +289,6 @@
     <QtMoc Include="utils\linemeshgeometry.h">
       <Filter>Header Files</Filter>
     </QtMoc>
-    <ClInclude Include="feature\manualsupport.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="utils\mathutils.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -484,9 +502,6 @@
     <ClInclude Include="render\Color.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
-    <ClInclude Include="input\Highlightable.h">
-      <Filter>Generated Files</Filter>
-    </ClInclude>
     <ClInclude Include="DentEngine\src\polyclipping\polyclipping.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
@@ -524,6 +539,36 @@
       <Filter>Generated Files</Filter>
     </ClInclude>
     <ClInclude Include="feature\overhangDetect.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\Task.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="feature\Extrude.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="support\SupportRaftManager.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="input\Clickable.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="support\VerticalSupportModel.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="support\SupportModel.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ui\Highlightable.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="support\RaftModel.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="support\CylindricalRaft.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="feature\Shapes2D.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -1107,6 +1152,10 @@
     <None Include="icon-32.ico" />
     <None Include="icon-32.ico" />
     <None Include="icon-32.ico" />
+    <None Include="icon-32.ico" />
+    <None Include="icon-32.ico" />
+    <None Include="icon-32.ico" />
+    <None Include="icon-32.ico" />
   </ItemGroup>
   <ItemGroup>
     <None Include="DentSlicer.rc">
@@ -1142,6 +1191,15 @@
       <Filter>Header Files</Filter>
     </QtMoc>
     <QtMoc Include="slice\SlicingOptBackend.h">
+      <Filter>Generated Files</Filter>
+    </QtMoc>
+    <QtMoc Include="ui\CubeWidget.h">
+      <Filter>Generated Files</Filter>
+    </QtMoc>
+    <QtMoc Include="render\SceneEntity.h">
+      <Filter>Generated Files</Filter>
+    </QtMoc>
+    <QtMoc Include="render\SceneEntityWithMaterial.h">
       <Filter>Generated Files</Filter>
     </QtMoc>
   </ItemGroup>

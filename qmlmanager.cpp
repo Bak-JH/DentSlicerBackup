@@ -19,8 +19,6 @@
 #include <QCoreApplication>
 #include <QTextStream>
 #include <QFileDialog>
-#include <feature/generatesupport.h>
-#include <feature/generateraft.h>
 #include <exception>
 #include "qmlmanager.h"
 #include "utils/utils.h"
@@ -31,6 +29,7 @@
 using namespace Hix::Input;
 using namespace Hix::UI;
 using namespace Hix::Render;
+using namespace Hix::Tasking;
 
 QmlManager::QmlManager(QObject *parent) : QObject(parent), _optBackend(this, scfg)
   ,layerViewFlags(LAYER_INFILL | LAYER_SUPPORTERS | LAYER_RAFT), modelIDCounter(0)
@@ -138,6 +137,16 @@ void QmlManager::initializeUI(QQmlApplicationEngine* e){
     // manual support components
     manualSupportPopup = FindItemByName(engine, "manualSupportPopup");
 
+	// manual support popup codes
+	QObject::connect(manualSupportPopup, SIGNAL(clearSupports()), this, SLOT(clearSupports()));
+	QObject::connect(manualSupportPopup, SIGNAL(generateAutoSupport()), this, SLOT(generateAutoSupport()));
+	QObject::connect(manualSupportPopup, SIGNAL(supportEditEnabled(bool)), this, SLOT(supportEditEnabled(bool)));
+	QObject::connect(manualSupportPopup, SIGNAL(supportApplyEdit()), this, SLOT(supportApplyEdit()));
+	QObject::connect(manualSupportPopup, SIGNAL(supportCancelEdit()), this, SLOT(supportCancelEdit()));
+	QObject::connect(manualSupportPopup, SIGNAL(regenerateRaft()), this, SLOT(regenerateRaft()));
+
+
+	
     // repair components
     repairPopup = FindItemByName(engine, "repairPopup");
 
@@ -183,8 +192,6 @@ void QmlManager::initializeUI(QQmlApplicationEngine* e){
     layerViewSlider = FindItemByName(engine, "layerViewSlider");
     viewObjectButton = FindItemByName(engine, "viewObjectButton");
     QObject::connect(viewObjectButton, SIGNAL(onChanged(bool)), this, SLOT(viewObjectChanged(bool)));
-    viewSupportButton = FindItemByName(engine, "viewSupportButton");
-    QObject::connect(viewSupportButton, SIGNAL(onChanged(bool)), this, SLOT(viewSupportChanged(bool)));
     viewLayerButton = FindItemByName(engine, "viewLayerButton");
     QObject::connect(viewLayerButton, SIGNAL(onChanged(bool)), this, SLOT(viewLayerChanged(bool)));
     setViewMode(VIEW_MODE_OBJECT);
@@ -216,6 +223,8 @@ void QmlManager::initializeUI(QQmlApplicationEngine* e){
 	QObject::connect(mv, SIGNAL(cameraViewChanged()), this, SLOT(cameraViewChanged()));
 
 
+
+
 }
 
 GLModel* QmlManager::createModelFile(Mesh* target_mesh, QString fname) {
@@ -243,7 +252,6 @@ GLModel* QmlManager::createModelFile(Mesh* target_mesh, QString fname) {
 
 	//add to raytracer
 	latestAdded->setHitTestable(true);
-	_rayCastController.addLayer(latestAdded->getLayer());
     // 승환 100%
     setProgress(1);
 	return latestAdded;
@@ -392,8 +400,8 @@ void QmlManager::disconnectHandlers(GLModel* glmodel){
 	// shelloffset popup codes
 	QObject::disconnect(shelloffsetPopup, SIGNAL(shellOffset(double)), glmodel, SLOT(generateShellOffset(double)));
 
-	// manual support popup codes
-	QObject::disconnect(manualSupportPopup, SIGNAL(generateManualSupport()), glmodel, SLOT(generateManualSupport()));
+
+	
 
 	
 	// model layflat popup codes
@@ -435,14 +443,16 @@ void QmlManager::disconnectHandlers(GLModel* glmodel){
 	QObject::disconnect(glmodel, SIGNAL(extensionSelect()), this, SLOT(extensionSelect()));
 	QObject::disconnect(glmodel, SIGNAL(extensionUnSelect()), this, SLOT(extensionUnSelect()));
 
+	//manual supprt popup codes
+	QObject::disconnect(glmodel, SIGNAL(manualSupportSelect()), this, SLOT(manualSupportSelect()));
+	QObject::disconnect(glmodel, SIGNAL(manualSupportUnselect()), this, SLOT(manualSupportUnselect()));
+
+
 	// shelloffset popup codes
 	QObject::disconnect(shelloffsetPopup, SIGNAL(openShellOffset()), glmodel, SLOT(openShellOffset()));
 	QObject::disconnect(shelloffsetPopup, SIGNAL(closeShellOffset()), glmodel, SLOT(closeShellOffset()));
 	QObject::disconnect(shelloffsetPopup, SIGNAL(resultSliderValueChanged(double)), glmodel, SLOT(getSliderSignal(double)));
 
-	// manual support popup codes
-	QObject::disconnect(manualSupportPopup, SIGNAL(openManualSupport()), glmodel, SLOT(openManualSupport()));
-	QObject::disconnect(manualSupportPopup, SIGNAL(closeManualSupport()), glmodel, SLOT(closeManualSupport()));
 	
 
 
@@ -535,17 +545,17 @@ void QmlManager::connectHandlers(GLModel* glmodel){
     QObject::connect(glmodel,SIGNAL(extensionSelect()),this,SLOT(extensionSelect()));
     QObject::connect(glmodel,SIGNAL(extensionUnSelect()),this,SLOT(extensionUnSelect()));
 
+	//manual supprt popup codes
+	QObject::connect(glmodel, SIGNAL(manualSupportSelect()), this, SLOT(manualSupportSelect()));
+	QObject::connect(glmodel, SIGNAL(manualSupportUnselect()), this, SLOT(manualSupportUnselect()));
+
+
+
     // shelloffset popup codes
     QObject::connect(shelloffsetPopup, SIGNAL(openShellOffset()), glmodel, SLOT(openShellOffset()));
     QObject::connect(shelloffsetPopup, SIGNAL(closeShellOffset()), glmodel, SLOT(closeShellOffset()));
     QObject::connect(shelloffsetPopup, SIGNAL(shellOffset(double)), glmodel, SLOT(generateShellOffset(double)));
     QObject::connect(shelloffsetPopup, SIGNAL(resultSliderValueChanged(double)), glmodel, SLOT(getSliderSignal(double)));
-
-    // manual support popup codes
-    QObject::connect(manualSupportPopup, SIGNAL(openManualSupport()), glmodel, SLOT(openManualSupport()));
-    QObject::connect(manualSupportPopup, SIGNAL(closeManualSupport()), glmodel, SLOT(closeManualSupport()));
-    QObject::connect(manualSupportPopup, SIGNAL(generateManualSupport()), glmodel, SLOT(generateManualSupport()));
-
 
 
     // auto arrange popup codes
@@ -720,7 +730,7 @@ float QmlManager::selected_z_min() {
 
 void QmlManager::sendUpdateModelInfo(){
     qDebug() << "send update model info";
-    if (selectedModels.size() == 0 || this->viewMode == VIEW_MODE_LAYER || this->viewMode == VIEW_MODE_SUPPORT){
+    if (selectedModels.size() == 0 || this->viewMode == VIEW_MODE_LAYER){
         qDebug() << "sendUpdateModelInfo() - no selected model";
 
         slicingData->setProperty("visible", false);
@@ -801,8 +811,8 @@ void QmlManager::applyArrangeResult(std::vector<QVector3D> translations, std::ve
     for(auto& pair : glmodels)
     {
         auto model = &pair.second;
-        model->moveModelMesh_direct(translations[index], true);
-        model->rotateModelMesh_direct(3, rotations[index]);
+        model->moveModelMesh(translations[index], true);
+        model->rotateModelMesh(3, rotations[index], true);
         //model->setTranslation(translations[index]);
         ++index;
     }
@@ -832,9 +842,10 @@ GLModel* QmlManager::findGLModelByName(QString filename){
 
 void QmlManager::backgroundClicked(){
     qDebug() << "background clicked";
-    if (viewMode == VIEW_MODE_SUPPORT)
-        openYesNoPopUp(false, "", "Support will disappear.", "", 18, "", ftrSupportDisappear, 1);
-    else unselectAll();
+	if (deselectAllowed())
+	{
+		unselectAll();
+	}
 }
 
 bool QmlManager::multipleModelSelected(int ID){
@@ -1187,6 +1198,15 @@ bool QmlManager::isSelected(GLModel* model)
 	return selectedModels.end() != selectedModels.find(model);
 }
 
+void QmlManager::showCubeWidgets(GLModel* model)
+{
+}
+
+void QmlManager::addSupport(GLModel* model, QVector3D position)
+{
+	
+}
+
 void QmlManager::modelVisible(int ID, bool isVisible){
 	auto target = getModelByID(ID);
 	if (target)
@@ -1211,7 +1231,7 @@ void QmlManager::doDeletebyID(int ID){
     deleteModelFile(ID);
 }
 
-const RayCastController& QmlManager::getRayCaster()
+RayCastController& QmlManager::getRayCaster()
 {
 	return _rayCastController;
 }
@@ -1219,9 +1239,7 @@ const RayCastController& QmlManager::getRayCaster()
 
 
 void QmlManager::modelMoveInit(){
-    for (GLModel* curModel: selectedModels){
-        curModel->saveUndoState();
-    }
+
 }
 
 void QmlManager::modelMoveDone(){
@@ -1257,31 +1275,9 @@ void QmlManager::totalMoveDone(){
 }
 
 void QmlManager::modelRotateInit(){
-    qDebug() << "model rotate init";
-    for (GLModel* curModel : selectedModels){
-        curModel->saveUndoState();
-    }
     return;
 }
 
-void QmlManager::modelRotateDone(){
-    if (selectedModels.empty())
-        return;
-
-//    QMetaObject::invokeMethod(boundedBox, "hideBox"); // Bounded Box
-
-    std::array<float,6> minmax;
-	for (auto selectedModel : selectedModels) {
-        minmax = Mesh::calculateMinMax(Utils::Math::quatToMat(selectedModel->getTransform()->rotation()).inverted(), selectedModel->getMesh());
-        selectedModel->setTranslation(QVector3D(selectedModel->getTransform()->translation().x(),
-                                                                 selectedModel->getTransform()->translation().y(),
-                                                                 - minmax[4]));
-    }
-
-
-	_widgetManager.setWidgetMode(WidgetMode::Rotate);
-	rotateSnapAngle = 0;
-}
 
 void QmlManager::totalRotateDone(){
     qDebug() << "total rotate done" << selectedModels.size();
@@ -1293,6 +1289,7 @@ void QmlManager::totalRotateDone(){
 			continue;
 		}
 		each->rotationDone();
+
 	}
 
 
@@ -1379,11 +1376,13 @@ void QmlManager::modelRotateWithAxis(const QVector3D& axis, double angle)
 			}
 		}
 		else
-			//                selectedModel->getTransform()->setRotationX(tmpx+Angle);
+		{
 			qDebug() << angle;
 			rot = Qt3DCore::QTransform::rotateAround(rot_center, angle, (axis4D * transform->matrix()).toVector3D());
+		}
 		selectedModel->setMatrix(selectedModel->getTransform()->matrix() * rot);
-		break;
+		selectedModel->checkPrintingArea();
+
 	}
 
 
@@ -1438,6 +1437,7 @@ void QmlManager::modelRotateByNumber(int axis,  int X, int Y, int Z){
                                                   (selectedModel->getMesh()->z_max()+selectedModel->getMesh()->z_min())/2);
 
         selectedModel->rotateByNumber(rot_center, X, Y, Z);
+		selectedModel->checkPrintingArea();
     }
     //showRotateSphere();
 }
@@ -1482,7 +1482,10 @@ void QmlManager::groupSelectionActivate(bool active){
 void QmlManager::runGroupFeature(int ftrType, QString state, double arg1, double arg2, double arg3, QVariant data){
     groupFunctionIndex = ftrType;
     groupFunctionState = state;
-
+	if (state == "active")
+	{
+		clearSupports();
+	}
     qDebug()<< "runGroupFeature | type:"<<ftrType<<"| state:" <<state << selectedModels.size();
     switch(ftrType){
     /*
@@ -1521,34 +1524,7 @@ void QmlManager::runGroupFeature(int ftrType, QString state, double arg1, double
         break;
     }
     case ftrLayFlat:
-    {   /*
-        if (state == "active"){
-            if (selectedModels.empty()){
-                QMetaObject::invokeMethod(layflatPopup,"offApplyFinishButton");
-            }else{
-                QMetaObject::invokeMethod(layflatPopup,"onApplyFinishButton");
-            }
-        }else if (state == "inactive"){
-            QApplication::restoreOverrideCursor();
-        }
-        */
-        qDebug() << "run groupfeature lay flat";
-        if (state == "active"){
-			for (auto selectedModel : selectedModels) {
-				selectedModel->unselectMeshFaces();
-			}
-        }else if (state == "inactive"){
-			for (auto selectedModel : selectedModels) {
-				selectedModel->unselectMeshFaces();
-				selectedModel->closeExtension();
-			}
-
-        }
-/*        if (!selectedModels.empty()) {
-            selectedModels[selectedModels.size() - 1]->unselectMeshFaces();
-            selectedModels[selectedModels.size() - 1]->closeLayflat();
-        }
-*/
+	{
         break;
     }
     case ftrOrient:  //orient
@@ -1558,7 +1534,6 @@ void QmlManager::runGroupFeature(int ftrType, QString state, double arg1, double
 				if (selectedModel->updateLock)
 					return;
 				selectedModel->updateLock = true;
-				selectedModel->saveUndoState();
 				qmlManager->openProgressPopUp();
 				qDebug() << "tweak start";
 				rotateResult* rotateres = autoorientation::Tweak(selectedModel->getMesh(), true, 45, &selectedModel->appropriately_rotated);
@@ -1576,7 +1551,6 @@ void QmlManager::runGroupFeature(int ftrType, QString state, double arg1, double
         if (state == "active"){
 
 			for (auto selectedModel : selectedModels) {
-				selectedModel->saveUndoState();
 				selectedModel->repairMesh();
 
 			}
@@ -1584,18 +1558,6 @@ void QmlManager::runGroupFeature(int ftrType, QString state, double arg1, double
         break;
     }
     case ftrExtend:
-        qDebug() << "run groupfeature extend";
-        if (state == "active"){
-			for (auto selectedModel : selectedModels) {
-				selectedModel->unselectMeshFaces();
-			}
-        }else if (state == "inactive"){
-			for (auto selectedModel : selectedModels) {
-				selectedModel->unselectMeshFaces();
-				selectedModel->closeExtension();
-			}
-        }
-        qDebug() << "groupfeature done";
         break;
     case ftrScale:
         qDebug() << "run feature scale" << selectedModels.size();
@@ -1621,96 +1583,11 @@ void QmlManager::runGroupFeature(int ftrType, QString state, double arg1, double
 }
 
 void QmlManager::unDo(){
-	if (!glmodels.empty())
-	{
-		if (selectedModels.empty()) {
-			// do global undo
-			GLModel* recentModel = nullptr;
-			// find global recent model
-			for (auto& pair : glmodels) {
-				auto glmodel = &pair.second;
-				if (glmodel->getMesh()->getPrev() == nullptr || glmodel->getMesh()->getPrev()->time.isNull())
-					continue;
-				else if (recentModel == nullptr)
-					recentModel = glmodel;
-				else if (glmodel->getMesh()->getPrev()->time >= recentModel->getMesh()->getPrev()->time) {
-					recentModel = glmodel;
-				}
-			}
 
-			// undo recentModel
-			if (recentModel != nullptr)
-				recentModel->loadUndoState();
-		}
-		else{
-			// undo the most recently changed model from selected models...
-			GLModel* recentModel = nullptr;
-			QTime recentTime(0, 0);
-			for (auto each : selectedModels)
-			{
-				auto eachUndoTime = each->getPrevTime();
-				if (!eachUndoTime.isNull() && eachUndoTime > recentTime)
-				{
-					recentModel = each;
-					recentTime = eachUndoTime;
-				}
-			}
-			if (recentModel)
-			{
-				recentModel->loadUndoState();
-
-			}
-		}
-	}
-
-    sendUpdateModelInfo();
-    return;
 }
 
 void QmlManager::reDo(){
-	if (!glmodels.empty())
-	{
-		if (selectedModels.empty()) {
-			// do global redo
-			GLModel* recentModel = nullptr;
-			// find global recent model
-			for (auto& pair : glmodels) {
-				auto glmodel = &pair.second;
-				if (glmodel->getMesh()->getNext() == nullptr || glmodel->getMesh()->getNext()->time.isNull())
-					continue;
-				else if (recentModel == nullptr)
-					recentModel = glmodel;
-				else if (glmodel->getMesh()->getNext()->time >= recentModel->getMesh()->getNext()->time) {
-					recentModel = glmodel;
-				}
-			}
-			// undo recentModel
-			if (recentModel != nullptr)
-				recentModel->loadRedoState();
-		}
-		else {
-			// undo the most recently changed model from selected models...
-			GLModel* recentModel = nullptr;
-			QTime recentTime(0, 0);
-			for (auto each : selectedModels)
-			{
-				auto eachRedoTime = each->getNextTime();
-				if (!eachRedoTime.isNull() && eachRedoTime > recentTime)
-				{
-					recentModel = each;
-					recentTime = eachRedoTime;
-				}
-			}
-			if (recentModel)
-			{
-				recentModel->loadRedoState();
 
-			}
-		}
-	}
-
-    sendUpdateModelInfo();
-    return;
 }
 
 void QmlManager::copyModel(){
@@ -1721,7 +1598,7 @@ void QmlManager::copyModel(){
     for (GLModel* model : selectedModels){
         if (model == nullptr)
             continue;
-        Mesh* copied = new Mesh( model->getMesh());
+        Mesh* copied = new Mesh( *model->getMesh());
 
         copyMeshes.push_back(copied);
         copyMeshNames.push_back(model->filename);
@@ -1862,28 +1739,6 @@ void QmlManager::viewObjectChanged(bool checked){
     }
 }
 
-void QmlManager::viewSupportChanged(bool checked){
-    qInfo() << "viewSupportChanged" << checked;
-    qDebug() << "selected Num = " << selectedModels.size();
-    if( checked ) {
-		bool generateSupport = false;
-		for (auto selectedModel : selectedModels)
-		{
-			if (!selectedModel->raftSupportGenerated()) {
-				generateSupport = true;
-				break;
-			}
-		}
-		if (generateSupport) {
-			qmlManager->openYesNoPopUp(false, "Support and raft will be generated.", "", "Would you like to continue?", 16, "", ftrSupportViewMode, 0);
-		}
-		else {
-			QMetaObject::invokeMethod(qmlManager->boxUpperTab, "all_off");
-			setViewMode(VIEW_MODE_SUPPORT);
-		}
-
-    }
-}
 
 void QmlManager::viewLayerChanged(bool checked){
     qInfo() << "viewLayerChanged" << checked;
@@ -1946,8 +1801,7 @@ void QmlManager::setViewMode(int viewMode) {
     if( this->viewMode != viewMode ) {
 		QMetaObject::invokeMethod(boxUpperTab, "all_off");
         //if (viewMode == 0) viewObjectButton->setProperty("checked", true);
-        if (viewMode == 1) viewSupportButton->setProperty("checked", true);
-        else if (viewMode == 2) viewLayerButton->setProperty("checked", true);
+        if (viewMode == 2) viewLayerButton->setProperty("checked", true);
 
         this->viewMode = viewMode;
 		layerViewPopup->setProperty("visible", this->viewMode == VIEW_MODE_LAYER);
@@ -1959,20 +1813,8 @@ void QmlManager::setViewMode(int viewMode) {
 			QMetaObject::invokeMethod(yesno_popup, "closePopUp");
 			QMetaObject::invokeMethod(leftTabViewMode, "setObjectView");
 			break;
-		case VIEW_MODE_SUPPORT:
-			for (auto each : selectedModels)
-			{
-				each->setSupportAndRaft();
-			}
-			break;
+
 		case VIEW_MODE_LAYER:
-			for (auto each : selectedModels)
-			{
-
-				each->setSupportAndRaft();
-			}
-			auto selectedSize = selectedModelsLengths();
-
 			sliceNeeded = true;
 			break;
 		}
@@ -1995,43 +1837,44 @@ QString QmlManager::getExportPath()
 	fileName = QFileDialog::getSaveFileName(nullptr, tr("Export sliced file"), "");
 	return fileName;
 }
-tf::Taskflow* QmlManager::exportSelectedAsync(QString exportPath, bool isTemp)
+Hix::Tasking::GenericTask* QmlManager::exportSelectedAsync(QString exportPath, bool isTemp)
 {
 	if (exportPath.isEmpty())
 		return nullptr;
-	tf::Taskflow* taskflow = new tf::Taskflow();
-	auto exportSelectedTask = taskflow->emplace([this, exportPath, isTemp](tf::Subflow& subflow) {
+	auto task = new GenericTask();
+	task->getFlow().emplace([this, exportPath, isTemp](tf::Subflow& subflow) {
 
 
 		STLexporter* ste = new STLexporter();
 
 		qmlManager->openProgressPopUp();
 
-		// merge selected models
-		Mesh* mergedShellMesh = ste->mergeSelectedModels();//ste->mergeModels(qmlManager->selectedModels);
-		//GLModel* mergedModel = new GLModel(mainWindow, models, mergedMesh, "temporary", false);
 
-		// generate support
-		GenerateSupport generatesupport;
-		Mesh* mergedSupportMesh = nullptr;
-		if (scfg->support_type != SlicingConfiguration::SupportType::None) { // if generating support
-			//Mesh* mergedSupportMesh = nullptr;
-			mergedSupportMesh = generatesupport.generateSupport(mergedShellMesh);
-		}
-
-		// generate raft according to support structure
-		GenerateRaft generateraft;
-		Mesh* mergedRaftMesh = nullptr;
-		if (scfg->raft_type != SlicingConfiguration::RaftType::None) {
-			mergedRaftMesh = generateraft.generateRaft(mergedShellMesh, generatesupport.overhangPoints);
-		}
+		
 		// need to generate support, raft
-		auto result = SlicingEngine::sliceModel(isTemp, subflow, mergedShellMesh, mergedSupportMesh, mergedRaftMesh, exportPath);
+		std::vector<const GLModel*> constSelectedModels;
+		constSelectedModels.reserve(selectedModels.size());
+		//TODO: make this...neater
+		float zMin = std::numeric_limits<float>::max();
+		for (auto each : selectedModels)
+		{
+			constSelectedModels.emplace_back(each);
+			if (each->raftSupportGenerated())
+			{
+				auto bot = each->supportRaftManager().raftBottom();
+				if (zMin > bot)
+					zMin = bot;
+			}
+		}
+		auto noSuppMin = selected_z_min();
+		if (zMin > noSuppMin)
+			zMin = noSuppMin;
+		auto result = SlicingEngine::sliceModels(isTemp, subflow, selected_z_max(), zMin, constSelectedModels, exportPath);
 
 		QMetaObject::invokeMethod(layerViewSlider, "setThickness", Q_ARG(QVariant, (scfg->layer_height)));
 		QMetaObject::invokeMethod(layerViewSlider, "setLayerCount", Q_ARG(QVariant, (result.layerCount -1))); //0 based index
 	});
-	return taskflow;
+	return task;
 
 }
 void QmlManager::setModelViewMode(int mode)
@@ -2112,4 +1955,86 @@ QVector2D QmlManager::world2Screen(QVector3D target) {
 		Q_ARG(QVariant, target));
 	QVector2D result = qvariant_cast<QVector2D>(value);
 	return result;
+}
+
+
+void QmlManager::generateAutoSupport()
+{
+
+	for (auto selectedModel : selectedModels)
+	{
+		selectedModel->supportRaftManager().generateSuppAndRaft(scfg->support_type, scfg->raft_type);
+		selectedModel->updateModelMesh();
+		if (scfg->support_type != SlicingConfiguration::SupportType::None)
+		{
+			auto translation = selectedModel->getTranslation();
+			translation.setZ(-1.0f * selectedModel->supportRaftManager().raftBottom());
+			selectedModel->setTranslation(translation);
+		}
+	}
+}
+
+
+void QmlManager::supportEditEnabled(bool enabled)
+{
+	if (enabled)
+	{
+		for (auto selectedModel : selectedModels)
+		{
+			selectedModel->supportRaftManager().setSupportEditMode(Hix::Support::EditMode::Manual);
+		}
+		_currentActiveFeature = ftrManualSupport;
+		qmlManager->openResultPopUp("Click a model surface to add support.", "", "Click an existing support to remove it.");
+
+	}
+	else
+	{
+		for (auto selectedModel : selectedModels)
+		{
+			selectedModel->supportRaftManager().setSupportEditMode(Hix::Support::EditMode::None);
+		}
+		_currentActiveFeature = 0;
+
+	}
+
+}
+void QmlManager::clearSupports()
+{
+	for (auto selectedModel : selectedModels)
+	{
+		selectedModel->supportRaftManager().clear();
+		selectedModel->setZToBed();
+	}
+}
+
+
+void QmlManager::supportApplyEdit()
+{
+	for (auto selectedModel : selectedModels)
+	{
+		selectedModel->supportRaftManager().applyEdits();
+	}
+}
+
+
+void QmlManager::supportCancelEdit()
+{
+	for (auto selectedModel : selectedModels)
+	{
+		selectedModel->supportRaftManager().cancelEdits();
+
+	}
+}
+
+bool QmlManager::deselectAllowed()
+{
+	return _currentActiveFeature != ftrManualSupport;
+}
+
+void QmlManager::regenerateRaft()
+{
+	for (auto selectedModel : selectedModels)
+	{
+		selectedModel->supportRaftManager().generateRaft();
+	}
 }

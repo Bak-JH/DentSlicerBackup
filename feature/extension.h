@@ -15,6 +15,7 @@ namespace Hix
 			Paths3D detectExtensionOutline(Mesh* mesh, const std::unordered_set<FaceConstItr>& meshfaces);
 			void extendAlongOutline(Mesh* mesh, QVector3D normal, Paths3D selectedPath, double distance);
 			void coverCap(Mesh* mesh, QVector3D normal, const std::unordered_set<FaceConstItr>& extension_faces, double distance);
+
 		};
 	}
 }
