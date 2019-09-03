@@ -14,27 +14,37 @@
 #include "feature/overhangDetect.h"
 using namespace Hix;
 using namespace Hix::Slicer;
-SlicingEngine::Result SlicingEngine::sliceModel(bool isTemp, tf::Subflow& subflow, Mesh* shellMesh, Mesh* supportMesh, Mesh* raftMesh, QString filename){
-    qDebug() << "slice" << shellMesh << filename;
+SlicingEngine::Result SlicingEngine::sliceModels(bool isTemp, tf::Subflow& subflow, float zMax, float zMin, std::vector<const GLModel*> models, QString filename){
 
-    qDebug() << "done parsing arguments";
 
     qmlManager->setProgress(0.1);
 
 	//generate planes
 	//if (scfg->slicing_mode == SlicingConfiguration::SlicingMode::Uniform) {
 	float delta = scfg->layer_height;
-	UniformPlanes planes(shellMesh, delta);
-	planes.buildTriangleLists();
-    // Slice
-    Slices shellSlices;
-    qDebug() << "shell Mesh : " << shellMesh << shellSlices.mesh;
-    Slicer::slice(shellMesh, &planes, &shellSlices);
-    qDebug() << "Shell Slicing Done\n";
-    qmlManager->setProgress(0.4);
+	UniformPlanes planes(zMin, zMax, delta);
+	// Slice
+	Slices shellSlices(planes.getPlanesVector().size());
+	auto zPlanes = planes.getPlanesVector();
+	for (size_t i = 0; i < zPlanes.size(); ++i)
+	{
+		shellSlices[i].z = zPlanes[i];
+	}
+	for (auto model : models)
+	{
+		Slicer::slice(model->getMesh(), &planes, &shellSlices);
+		auto raftSupports = model->supportRaftManager().getRaftSupportMeshes();
+		for (auto child : raftSupports)
+		{
+			Slicer::slice(child, &planes, &shellSlices);
 
-	//support
-	OverhangDetect::Overhangs overhangs = OverhangDetect::detectOverhangs(&planes, shellMesh);
+		}
+
+	}
+	shellSlices.containmentTreeConstruct();
+
+
+	qmlManager->setProgress(0.4);
 
  // 
 	//Slices supportSlices;
@@ -55,21 +65,21 @@ SlicingEngine::Result SlicingEngine::sliceModel(bool isTemp, tf::Subflow& subflo
 
     // Export to SVG
     //QString export_info = SVGexporter::exportSVG(shellSlices, supportSlices, raftSlices, filename+"_export", isTemp);
-	Slices emptySupp;
 
-	QString export_info = SVGexporter::exportSVG(shellSlices, emptySupp, emptySupp, filename + "_export", isTemp);
+	SVGexporter::exportSVG(shellSlices, filename + "_export", isTemp);
 
-    // 승환 100%
+
+	int layer = planes.getPlanesVector().size();
+	int time = layer * 15 / 60;
+	auto bounds = qmlManager->selectedModelsLengths();
+	int64_t area = 0;
+
+	float volume = ((float)(area / pow(scfg->pixel_per_mm / scfg->contraction_ratio, 2)) / 1000000) * scfg->layer_height;
     qmlManager->setProgress(1);
     QStringList name_word = filename.split("/");
 
-    QStringList infos = export_info.trimmed().split(":");
-    int time = infos[1].toInt();
-    int layer = infos[2].toInt();
     QString size;
-    float x = infos[3].toFloat(), y=infos[4].toFloat(), z=infos[5].toFloat(); // x = text.trimmed().split(":")
-    size.sprintf("%.1f X %.1f X %.1f mm",x,y,z);
-    float volume = infos[6].toFloat();
+    size.sprintf("%.1f X %.1f X %.1f mm", bounds.x(), bounds.y(), bounds.z());
     qmlManager->openResultPopUp("",
                                 QString(name_word[name_word.size()-1]+" slicing done.").toStdString(),
                                 "");

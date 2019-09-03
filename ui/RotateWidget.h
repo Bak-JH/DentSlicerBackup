@@ -9,14 +9,14 @@
 #include <qtorusmesh.h>
 #include "../input/Draggable.h"
 #include "../input/Hoverable.h"
-#include "../input/Highlightable.h"
+#include "Highlightable.h"
 
 namespace Hix
 {
 	namespace UI
 	{
 		class Widget3D;
-		class RotateWidget :public Qt3DCore::QEntity, public Hix::Input::Draggable, public Hix::Input::Hoverable, public Hix::Input::Highlightable
+		class RotateWidget :public Qt3DCore::QEntity, public Hix::Input::Draggable, public Hix::Input::Hoverable, public Hix::UI::Highlightable
 		{
 			Q_OBJECT
 		public:

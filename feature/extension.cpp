@@ -24,7 +24,6 @@ void Hix::Features::Extension::extendMesh(Mesh* mesh, FaceConstItr mf, double di
 
     qDebug() << "detected extension faces" << extension_faces.size();
     for (FaceConstItr emf : extension_faces){
-        qDebug() << emf;
 		auto emfVertices = emf->meshVertices();
 
         //mesh->addFace(emf->mesh_vertex[0]->position+normal*2,emf->mesh_vertex[1]->position+normal*2,emf->mesh_vertex[2]->position+normal*2);
@@ -41,8 +40,6 @@ void Hix::Features::Extension::extendMesh(Mesh* mesh, FaceConstItr mf, double di
     extendAlongOutline(mesh, normal, extension_outlines, distance);
     qDebug() << "extended along outline";
     qDebug() << "mesh size : "<< mesh->getFaces().size();
-	qDebug() << "mf index: " << mf;
-
     coverCap(mesh, normal, extension_faces, distance);
 }
 

@@ -9,7 +9,7 @@ namespace tf
 	class Subflow;
 }
 
-
+class GLModel;
 
 using namespace Hix::Engine3D;
 namespace SlicingEngine
@@ -21,7 +21,7 @@ namespace SlicingEngine
 		QString size;
 		float volume;
 	};
-	Result sliceModel (bool isTemp, tf::Subflow& subflow, Mesh* shellMesh=nullptr, Mesh* supportMesh=nullptr, Mesh* raftMesh=nullptr, QString filename = "");
+	Result sliceModels (bool isTemp, tf::Subflow& subflow,float zMax, float zMin, std::vector<const GLModel*>models, QString filename = "");
 };
 
 //extern QmlManager qm;

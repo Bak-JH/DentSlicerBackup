@@ -2,16 +2,12 @@
 #include "../qmlmanager.h"
 #include "../input/raycastcontroller.h"
 #include "Widget3D.h"
-using namespace Hix::UI;
-using namespace Qt3DCore;
-using namespace Qt3DRender;
-using namespace Qt3DExtras;
 
 //const float MoveWidget::ROTATE_SPEED = 0.1;
 //const float HALF_PI = M_PI / 2;
-const QUrl MoveWidget::ARROW_MESH_URL(QStringLiteral("qrc:/Resource/mesh/arrow.stl"));
+const QUrl Hix::UI::MoveWidget::ARROW_MESH_URL(QStringLiteral("qrc:/Resource/mesh/arrow.stl"));
 const double TRANSLATE_MULT = 1;
-MoveWidget::MoveWidget(const QVector3D& axis, Qt3DCore::QEntity* parent):QEntity(parent), _axis(axis),
+Hix::UI::MoveWidget::MoveWidget(const QVector3D& axis, Qt3DCore::QEntity* parent):QEntity(parent), _axis(axis),
 _parent(dynamic_cast<Widget3D*>(parent))
 {
 	addComponent(&_mesh);
@@ -65,7 +61,6 @@ void Hix::UI::MoveWidget::dragStarted(Hix::Input::MouseEventData& e, const Qt3DR
 	qmlManager->modelMoveInit();
 	_pastProj = calculateMove();
 }
-
 
 void Hix::UI::MoveWidget::setHighlight(bool enable)
 {

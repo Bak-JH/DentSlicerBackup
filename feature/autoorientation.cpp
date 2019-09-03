@@ -30,6 +30,13 @@ The critical angle CA is a variable that can be set by the operator as
      temperature, printing speed, etc.
 */
 
+QVector3D fn_unnorm(const MeshFace& face)
+{
+
+	auto fVtx = face.meshVertices();
+	return QVector3D::crossProduct(fVtx[1]->position - fVtx[0]->position, fVtx[1]->position - fVtx[0]->position);
+}
+
 rotateResult* autoorientation::Tweak(const Mesh* mesh, bool bi_algorithmic,int CA,bool *appropriately_rotated){
     qmlManager->setProgress(0);
     qmlManager->setProgressText("startttttt");
@@ -224,7 +231,7 @@ float* autoorientationPrivate::lithograph(const Mesh* mesh, float n[], float ami
 
 	for (const auto& face : mesh->getFaces())
 	{
-        QVector3D a = face.fn_unnorm;//face에 추가된 인스턴스이며, 정규화되지 않은 노말벡터입니다.
+        QVector3D a = fn_unnorm(face);//face에 추가된 인스턴스이며, 정규화되지 않은 노말벡터입니다.
         float norma = (float)sqrtf(a[0]*a[0]+a[1]*a[1]+a[2]*a[2]);
         if(norma == 0)
             continue;
@@ -309,7 +316,7 @@ std::vector<Orient*> autoorientationPrivate::area_cumulation(const Mesh* mesh,fl
 	size_t i = 0;
 	for (const auto& face : mesh->getFaces())
 	{
-        QVector3D an = face.fn_unnorm;
+        QVector3D an = fn_unnorm(face);
         float A = sqrtf(an.x()*an.x()+an.y()*an.y()+an.z()*an.z());
         if(A>0){
             an.setX(an.x()/A);

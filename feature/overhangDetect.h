@@ -4,22 +4,47 @@
 
 #include <vector>
 #include "DentEngine/src/mesh.h"
+
+namespace Hix
+{
+	namespace OverhangDetect
+	{ 
+		typedef std::pair<QVector3D, Hix::Engine3D::FaceConstItr> FaceOverhang;
+	}
+}
+
+namespace std
+{
+	template<>
+	struct hash<Hix::OverhangDetect::FaceOverhang>
+	{
+		//2D only!
+		std::size_t operator()(const Hix::OverhangDetect::FaceOverhang& pt)const
+		{
+			return std::hash<QVector3D>()(pt.first);
+		}
+	};
+}
+
 namespace Hix
 {
 	using namespace Engine3D;
 	namespace Slicer
 	{
 		class Planes;
-	}
-	namespace OverhangDetect
-	{
-		struct Overhangs
-		{
-			//point overhangs and faces that depnds on them
-			std::unordered_map<VertexConstItr, std::unordered_set<FaceConstItr>> pointOverhangs;
-			std::unordered_multimap<FaceConstItr, QVector3D> faceOverhangs;
-		};
-		Overhangs detectOverhangs(const Slicer::Planes* planes, const Mesh* shellMesh);
+		class Slices;
 	}
 
+
+	namespace OverhangDetect
+	{
+		typedef std::unordered_set<std::variant<VertexConstItr, FaceOverhang>>  Overhangs;
+		std::vector<QVector3D> toCoords(const Overhangs& overhangs);
+		Overhangs detectOverhang(const Mesh* shellMesh);
+	}
+
+
+
+
 }
+

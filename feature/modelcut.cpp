@@ -590,67 +590,89 @@ struct findMaximumContour {
     float area;
 } maxContour;
 
-void get_largest_contour(Custom3DPoint curr, std::multimap<Custom3DPoint, Custom3DPoint> *boundaryEdges, std::set<Custom3DPoint> *checker, std::set<Custom3DPoint> *allChecker, std::vector<Custom3DPoint> *contourCandi) {
-    std::multimap<Custom3DPoint, Custom3DPoint>::iterator targetIter;
-    bool isLast = true;
+void get_largest_contour(Custom3DPoint start, std::multimap<Custom3DPoint, Custom3DPoint> *boundaryEdges,
+	std::set<Custom3DPoint> *checker, std::set<Custom3DPoint> *allChecker, std::vector<Custom3DPoint> *contourCandi) 
+{
+   //DFS
+	std::deque<Custom3DPoint> q;
+	q.push_back(start);
+	allChecker->insert(start);
+	checker->insert(start);
+	contourCandi->push_back(start);
+	std::map<Custom3DPoint, Custom3DPoint> traverseMap;
 
-    allChecker->insert(curr);
-    checker->insert(curr);
-    contourCandi->push_back(curr);
 
-    for (targetIter = boundaryEdges->lower_bound(curr); targetIter != boundaryEdges->upper_bound(curr); targetIter++){
-        Custom3DPoint nextPoint = targetIter->second;
-        if (checker->find(nextPoint) == checker->end()){
-            get_largest_contour(nextPoint, boundaryEdges, checker, allChecker, contourCandi);
-            isLast = false;
-                }
-    }
+	while (!q.empty())
+	{
+		auto curr = q.back();
+		q.pop_back();
 
-    if (isLast){
-        //checking self intersecting
-        bool isIntersect = false;
-        unsigned int t = contourCandi->size();
-        for (unsigned int i = 1; i < t; i++) {
-            if(isIntersectedLines((*contourCandi)[i-1], (*contourCandi)[i], (*contourCandi)[0], (*contourCandi)[t-1])) {
-                isIntersect = true;
-                break;
-                    }
-                }
-        //calculate contour area if contourCandi doesn't have self intersecting
-//        if (!isIntersect)
-//            qDebug() << "not intersect";
-//        else
-//            qDebug() << "intersect";
+		size_t count = 0;
+		for (auto targetIter = boundaryEdges->lower_bound(curr); targetIter != boundaryEdges->upper_bound(curr); targetIter++)
+		{
+			Custom3DPoint nextPoint = targetIter->second;
+			if (checker->find(nextPoint) == checker->end())
+			{
+				q.push_back(nextPoint);
+				allChecker->insert(curr);
+				checker->insert(curr);
+				traverseMap[nextPoint] = curr;
 
-        if (!isIntersect) {
-//            qDebug() << "contour Candi size: " << contourCandi->size();
-            float candiArea = 0.0;
+				++count;
+			}
+		}
+		if (count == 0)
+		{
+			//checking self intersecting
+			bool isIntersect = false;
+			//build contourCandi
+			contourCandi->clear();
+			contourCandi->push_back(curr);
+			auto parent = traverseMap.find(curr);
+			if (!traverseMap.empty())
+			{
+				//backtrace DFS to get the stitched contour -now closed.
+				do
+				{
+					contourCandi->push_back(parent->second);
+					parent = traverseMap.find(parent->second);
 
-            CGAL::Delaunay_triangulation_2<Kernel> dt;
-            for (unsigned int i = 0; i < t; i++)
-                dt.insert(Point_2((*contourCandi)[i].x/1000000.0, (*contourCandi)[i].y/1000000.0));
 
-            for (CGAL::Delaunay_triangulation_2<Kernel>::Finite_faces_iterator fit = dt.finite_faces_begin(); fit != dt.finite_faces_end(); fit++) {
-                float x1,y1,x2,y2,x3,y3;
-                x1 = float(dt.triangle(fit)[0].x()); y1 = float(dt.triangle(fit)[0].y());
-                x2 = float(dt.triangle(fit)[1].x()); y2 = float(dt.triangle(fit)[1].y());
-                x3 = float(dt.triangle(fit)[2].x()); y3 = float(dt.triangle(fit)[2].y());
-                candiArea += abs(x1*y2 + x2*y3 + x3*y1 - x2*y1 - x3*y2 - x1*y3)/2.0;
-            }
+				} while (parent != traverseMap.end());
+			}
 
-//            qDebug() << "candi area: " << candiArea;
-            if (candiArea > maxContour.area) {
-                maxContour.contour.clear();
-                for (unsigned int i = 0; i < t; i++) {
-                    maxContour.contour.push_back(Point_2((*contourCandi)[i].x, (*contourCandi)[i].y));
-            }
-                maxContour.area = candiArea;
-        }
-    }
-    }
+			unsigned int t = contourCandi->size();
+			for (unsigned int i = 1; i < t; i++) {
+				if (isIntersectedLines((*contourCandi)[i - 1], (*contourCandi)[i], (*contourCandi)[0], (*contourCandi)[t - 1])) {
+					isIntersect = true;
+					break;
+				}
+			}
 
-    checker->erase(checker->find(curr));
-    contourCandi->pop_back();
+			if (!isIntersect) {
+				float candiArea = 0.0;
+
+				CGAL::Delaunay_triangulation_2<Kernel> dt;
+				for (unsigned int i = 0; i < t; i++)
+					dt.insert(Point_2((*contourCandi)[i].x / 1000000.0, (*contourCandi)[i].y / 1000000.0));
+
+				for (CGAL::Delaunay_triangulation_2<Kernel>::Finite_faces_iterator fit = dt.finite_faces_begin(); fit != dt.finite_faces_end(); fit++) {
+					float x1, y1, x2, y2, x3, y3;
+					x1 = float(dt.triangle(fit)[0].x()); y1 = float(dt.triangle(fit)[0].y());
+					x2 = float(dt.triangle(fit)[1].x()); y2 = float(dt.triangle(fit)[1].y());
+					x3 = float(dt.triangle(fit)[2].x()); y3 = float(dt.triangle(fit)[2].y());
+					candiArea += abs(x1 * y2 + x2 * y3 + x3 * y1 - x2 * y1 - x3 * y2 - x1 * y3) / 2.0;
+				}
+				if (candiArea > maxContour.area) {
+					maxContour.contour.clear();
+					for (unsigned int i = 0; i < t; i++) {
+						maxContour.contour.push_back(Point_2((*contourCandi)[i].x, (*contourCandi)[i].y));
+					}
+					maxContour.area = candiArea;
+				}
+			}
+		}
+	}
 }
 
 void printCustomPoints(Custom3DPoint p1, Custom3DPoint p2, Custom3DPoint p3) {

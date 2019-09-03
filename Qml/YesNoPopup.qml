@@ -155,9 +155,6 @@ Rectangle {
                         case uppertab.ftrSupportDisappear:
                             qm.unselectAll();
                             break;
-                        case uppertab.ftrSupportViewMode:
-                            qm.setViewMode(1);
-                            break;
                         case uppertab.ftrExport:
                             yesnoPopUp.runGroupFeature(uppertab.ftrExport, "", 0, 0, 0, null);
                             break;
@@ -237,8 +234,7 @@ Rectangle {
                 }
                 onReleased: {
 
-                    if( popup_type == uppertab.ftrSupportViewMode ||
-                        popup_type == uppertab.ftrLayerViewMode ) {
+                    if(popup_type == uppertab.ftrLayerViewMode ) {
                         qm.setViewMode(0);
                     } else if (popup_type == uppertab.ftrSave)
                         qm.closeSave();

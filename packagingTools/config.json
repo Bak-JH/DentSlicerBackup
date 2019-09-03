@@ -1,6 +1,6 @@
 {
-    "NSISTemplate": "%DS_PACKAGE_SOURCE%\\packagingTools\\template.nsi",
-    "content": "%DS_PACKAGE_INPUT%\\*.*",
+    "NSISTemplate": "template.nsi",
+    "content": "setup\\*.*",
     "version": "1.0.1",
     "outputName": "DSBuild.nsi"
 }

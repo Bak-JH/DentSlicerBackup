@@ -2,7 +2,7 @@
 #include "../qmlmanager.h"
 #include "../input/raycastcontroller.h"
 #include <math.h>
-#include "../input/Highlightable.h"
+#include "Highlightable.h"
 
 using namespace Hix::UI;
 using namespace Hix::Input;
