@@ -519,7 +519,7 @@ void GLModel::generatePlane(){
         clipPlane[i]->setWidth(200.0);
 
         planeTransform[i]=new Qt3DCore::QTransform();
-        planeTransform[i]->setRotation(QQuaternion::fromAxisAndAngle(crossproduct_vector, angle+180*(i+1)));
+        planeTransform[i]->setRotation(QQuaternion::fromAxisAndAngle(QVector3D(1,0,0), angle+180*(i+1)));
         planeTransform[i]->setTranslation(desire_normal*(-world_origin.distanceToPlane(v1,v2,v3))
                                           + m_transform.translation());
 
