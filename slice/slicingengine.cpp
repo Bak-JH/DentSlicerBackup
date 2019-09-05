@@ -30,19 +30,23 @@ SlicingEngine::Result SlicingEngine::sliceModels(bool isTemp, tf::Subflow& subfl
 	{
 		shellSlices[i].z = zPlanes[i];
 	}
-	for (auto model : models)
-	{
-		Slicer::slice(model->getMesh(), &planes, &shellSlices);
-		auto raftSupports = model->supportRaftManager().getRaftSupportMeshes();
-		for (auto child : raftSupports)
+	auto sliceTask = subflow.emplace([&models, &planes, &shellSlices](tf::Subflow& childSubFlow) {
+		for (auto model : models)
 		{
-			Slicer::slice(child, &planes, &shellSlices);
-
+			Slicer::slice(childSubFlow, model->getMesh(), &planes, &shellSlices);
+			auto raftSupports = model->supportRaftManager().getRaftSupportMeshes();
+			for (auto child : raftSupports)
+			{
+				Slicer::slice(childSubFlow, child, &planes, &shellSlices);
+			}
 		}
+	});
 
-	}
-	shellSlices.containmentTreeConstruct();
+	auto clippingTask = subflow.emplace([&shellSlices](tf::Subflow& childSubFlow) {
+		shellSlices.containmentTreeConstruct(childSubFlow);
+	});
 
+	sliceTask.precede(clippingTask);
 
 	qmlManager->setProgress(0.4);
 
