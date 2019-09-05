@@ -41,9 +41,7 @@ namespace Slicer
 		/****************** Helper Functions For Contour Construction Step *******************/
 		void insertPathHash(QHash<uint32_t, Path>& pathHash, IntPoint u, IntPoint v);
 		/********************** Path Generation Functions **********************/
-		Paths3D intersectionPaths(ClipperLib::Path Contour, Plane target_plane);
 		Path3D intersectionPath(Plane base_plane, Plane target_plane);
-		std::vector<Contour> calculateContour(const Mesh* mesh, std::vector<FaceConstItr>& intersectingFaces, float z);
 	}
 }
 using namespace Slicer::Private;
