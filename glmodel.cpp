@@ -42,6 +42,7 @@ GLModel::GLModel(QObject* mainWindow, QEntity*parent, Mesh* loadMesh, QString fn
     , cutMode(1)
     , ID(id)
 {
+	initHitTest();
     qDebug() << "new model made _______________________________"<<this<< "parent:"<<parent;
 
     // set shader mode and color
@@ -518,20 +519,11 @@ void GLModel::generatePlane(){
         clipPlane[i]->setWidth(200.0);
 
         planeTransform[i]=new Qt3DCore::QTransform();
-        planeTransform[i]->setRotation(QQuaternion::fromAxisAndAngle(crossproduct_vector, angle+180*i));
+        planeTransform[i]->setRotation(QQuaternion::fromAxisAndAngle(crossproduct_vector, angle+180*(i+1)));
         planeTransform[i]->setTranslation(desire_normal*(-world_origin.distanceToPlane(v1,v2,v3))
                                           + m_transform.translation());
 
-        planeObjectPicker[i] = new Qt3DRender::QObjectPicker;//planeEntity[i]);
-
-        planeObjectPicker[i]->setHoverEnabled(true);
-        planeObjectPicker[i]->setEnabled(true);
-        //QObject::connect(planeObjectPicker[i], SIGNAL(clicked(Qt3DRender::QPickEvent*)), this, SLOT(mouseClicked(Qt3DRender::QPickEvent*)));
-        QObject::connect(planeObjectPicker[i], SIGNAL(released(Qt3DRender::QPickEvent*)), this, SLOT(mouseClickedFreeCut(Qt3DRender::QPickEvent*)));
-
-
-        planeEntity[i]->addComponent(planeObjectPicker[i]);
-
+        planeEntity[i]->addComponent(&_layer);
         planeEntity[i]->addComponent(clipPlane[i]);
         planeEntity[i]->addComponent(planeTransform[i]); //jj
         planeEntity[i]->addComponent(planeMaterial);
@@ -557,11 +549,6 @@ void GLModel::removePlane(){
         if (planeTransform[i] != nullptr){
             delete planeTransform[i];
             planeTransform[i] = nullptr;
-        }
-        if (planeObjectPicker[i] != nullptr){
-            //QObject::disconnect(planeObjectPicker[i], SIGNAL(clicked(Qt3DRender::QPickEvent*)), this, SLOT(mouseClickedFreeCut(Qt3DRender::QPickEvent*)));
-            delete planeObjectPicker[i];
-            planeObjectPicker[i] = nullptr;
         }
         if (planeEntity[i] != nullptr){
             delete planeEntity[i];
@@ -771,11 +758,12 @@ void GLModel::indentHollowShell(double radius){
 
 GLModel::~GLModel(){
 }
+void GLModel::initHitTest()
+{
+	addComponent(&_layer);
+	_layer.setRecursive(false);
 
-
-
-
-//when ray casting is not needed, ie) right click
+}
 
 void GLModel::clicked(MouseEventData& pick, const Qt3DRender::QRayCasterHit& hit)
 {
@@ -801,10 +789,7 @@ void GLModel::clicked(MouseEventData& pick, const Qt3DRender::QRayCasterHit& hit
 
 		}
 		else if (cutMode == 2) {// && numPoints< sizeof(sphereEntity)/4) {
-			qDebug() << hit.localIntersection() << "pick" << cuttingPoints.size() << cuttingPoints.size();
 			QVector3D v = hit.localIntersection();
-			qDebug() << v.distanceToPoint(cuttingPoints[cuttingPoints.size() - 1]);
-
             if(this != hit.entity())
             {
                 //plane clicked
@@ -1006,7 +991,7 @@ void GLModel::getSliderSignal(double value){
         float angle = qAcos(QVector3D::dotProduct(original_normal,desire_normal))*180/M_PI+(value-1)*30;
         QVector3D crossproduct_vector(QVector3D::crossProduct(original_normal,desire_normal));
 
-        for (int i=0;i<2;i++){
+        for (int i=0;i<1;i++){
             planeTransform[i]->setTranslation(desire_normal*(-world_origin.distanceToPlane(v1,v2,v3))
                                               +  m_transform.translation());
             planeEntity[i]->addComponent(planeTransform[i]);

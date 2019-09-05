@@ -14,6 +14,7 @@
 #include "input/raycastcontroller.h"
 #include "input/Draggable.h"
 #include "input/Clickable.h"
+#include "input/HitTestAble.h"
 #include "support/SupportRaftManager.h"
 
 #include "render/ModelMaterial.h"
@@ -52,7 +53,7 @@ class GLModel;
 class OverhangPoint;
 
 
-class GLModel : public Hix::Render::SceneEntityWithMaterial, public Hix::Input::Draggable, public Hix::Input::Clickable
+class GLModel : public Hix::Render::SceneEntityWithMaterial, public Hix::Input::Draggable, public Hix::Input::Clickable, public Hix::Input::HitTestAble
 {
     Q_OBJECT
 public:
@@ -97,11 +98,7 @@ public:
     //Qt3DExtras::QPhongAlphaMaterial *layerViewPlaneMaterial = nullptr;
 
 
-    Qt3DExtras::QPlaneMesh* clipPlane[2];
-    Qt3DCore::QEntity* planeEntity[2];
-    Qt3DCore::QTransform *planeTransform[2];
-    Qt3DExtras::QPhongAlphaMaterial *planeMaterial = nullptr;
-    QObjectPicker* planeObjectPicker[2];
+
 
     std::vector<Qt3DExtras::QSphereMesh*> sphereMesh;
     std::vector<Qt3DCore::QEntity*> sphereEntity;
@@ -176,8 +173,16 @@ public:
 	void rotateModelMesh(QMatrix4x4 matrix, bool update = true);
 	void scaleModelMesh(float scaleX, float scaleY, float scaleZ);
 	void setZToBed();
+protected:
+	void initHitTest()override;
 
 private:
+	Qt3DExtras::QPlaneMesh* clipPlane[2];
+	Qt3DCore::QEntity* planeEntity[2];
+	Qt3DCore::QTransform* planeTransform[2];
+	Qt3DExtras::QPhongAlphaMaterial* planeMaterial = nullptr;
+	QObjectPicker* planeObjectPicker[2];
+
 	QVector3D getPrimitiveColorCode(const Hix::Engine3D::Mesh* mesh, FaceConstItr faceItr)override;
 
     //Order is important! Look at the initializer list in constructor
