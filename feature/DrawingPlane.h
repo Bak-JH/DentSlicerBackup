@@ -18,9 +18,8 @@ namespace Hix
 		public:
 			DrawingPlane(GLModel* owner);
 			void enablePlane(bool isEnable);
-			void setTransform(const Qt3DCore::QTransform& transform);
 			void enableDrawing(bool isEnable);
-			Qt3DCore::QTransform transform()const;
+			Qt3DCore::QTransform& transform();
 			void clicked(Hix::Input::MouseEventData&, const Qt3DRender::QRayCasterHit&)override;
 
 		protected:
