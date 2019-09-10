@@ -25,14 +25,13 @@
 #include "render/lights.h"
 #include "DentEngine/src/configuration.h"
 #include "feature/stlexporter.h"
-
 using namespace Hix::Input;
 using namespace Hix::UI;
 using namespace Hix::Render;
 using namespace Hix::Tasking;
 
 QmlManager::QmlManager(QObject *parent) : QObject(parent), _optBackend(this, scfg)
-  ,layerViewFlags(LAYER_INFILL | LAYER_SUPPORTERS | LAYER_RAFT), modelIDCounter(0)
+  ,layerViewFlags(LAYER_INFILL | LAYER_SUPPORTERS | LAYER_RAFT), modelIDCounter(0), _cursorEraser(QPixmap(":/Resource/cursor_eraser.png"))
 {
 }
 
@@ -658,6 +657,11 @@ void QmlManager::setHandCursor(){
 void QmlManager::setClosedHandCursor(){
     QApplication::setOverrideCursor(QCursor(Qt::ClosedHandCursor));
 }
+
+void QmlManager::setEraserCursor() {
+	QApplication::setOverrideCursor(_cursorEraser);
+}
+
 void QmlManager::resetCursor(){
     QApplication::setOverrideCursor(QCursor(Qt::ArrowCursor));
 }

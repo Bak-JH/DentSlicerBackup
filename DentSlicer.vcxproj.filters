@@ -239,10 +239,16 @@
     <ClCompile Include="feature\modelCutZAxis.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>
-    <ClCompile Include="feature\DrawingPlane.cpp">
+    <ClCompile Include="input\HitTestAble.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>
-    <ClCompile Include="input\HitTestAble.cpp">
+    <ClCompile Include="feature\freeCut\DrawingPlane.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="feature\freeCut\FreeCutPtWidget.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="render\LineMeshEntity.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -581,6 +587,12 @@
       <Filter>Generated Files</Filter>
     </ClInclude>
     <ClInclude Include="input\HitTestAble.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="feature\freeCut\FreeCutPtWidget.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="feature\freeCut\DrawingPlane.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -1170,6 +1182,7 @@
     <None Include="icon-32.ico" />
     <None Include="icon-32.ico" />
     <None Include="icon-32.ico" />
+    <None Include="icon-32.ico" />
   </ItemGroup>
   <ItemGroup>
     <None Include="DentSlicer.rc">
@@ -1216,7 +1229,7 @@
     <QtMoc Include="render\SceneEntityWithMaterial.h">
       <Filter>Generated Files</Filter>
     </QtMoc>
-    <QtMoc Include="feature\DrawingPlane.h">
+    <QtMoc Include="render\LineMeshEntity.h">
       <Filter>Generated Files</Filter>
     </QtMoc>
   </ItemGroup>
