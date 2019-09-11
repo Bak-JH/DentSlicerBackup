@@ -303,8 +303,6 @@ void QmlManager::deleteOneModelFile(GLModel* target) {
 	if (target)
 	{
 		//TODO: move these into glmodel destructor
-		target->removeCuttingPoints();
-		target->removeCuttingContour();
 		target->removePlane();
 		disconnectHandlers(target);
 		//    target->deleteLater();

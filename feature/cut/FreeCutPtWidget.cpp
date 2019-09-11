@@ -10,7 +10,7 @@ using namespace Hix::Features::Cut;
 
 FreeCutPtWidget::FreeCutPtWidget(DrawingPlane* drawingPlane, QVector3D pos):Hix::UI::CubeWidget(drawingPlane), _drawingPlane(drawingPlane)
 {
-	_transform.setScale(0.5f);
+	//_transform.setScale(0.5f);
 	_material.setAmbient(QColor(0,0,0));
 	_material.setDiffuse(QColor(0, 0, 0));
 	_material.setSpecular(QColor(0, 0, 0));
@@ -47,4 +47,15 @@ void Hix::Features::Cut::FreeCutPtWidget::updateLineTo()
 		_line.reset(new Hix::Render::LineMeshEntity(path, this));
 	}
 
+}
+
+void Hix::Features::Cut::FreeCutPtWidget::setTranslation(const QVector3D& trans)
+{
+	_transform.setTranslation(trans);
+	updateLineTo();
+}
+
+QVector3D Hix::Features::Cut::FreeCutPtWidget::translation() const
+{
+	return _transform.translation();
 }
