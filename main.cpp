@@ -113,7 +113,7 @@ int main(int argc, char** argv)
 #if  defined(QT_DEBUG) || defined(_DEBUG)
 	qmlManager->mainWindow->setProperty("visible", true);
 #else
-	qmlManager->loginWindow->setProperty("visible", true);
+	qmlManager->mainWindow->setProperty("visible", true);
 #endif
 
 	QSurfaceFormat format;
