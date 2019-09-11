@@ -20,19 +20,19 @@ namespace Hix
 			{
 			public:
 				DrawingPlane(GLModel* owner);
+				virtual ~DrawingPlane();
 				void enablePlane(bool isEnable);
 				void enableDrawing(bool isEnable);
 				Qt3DCore::QTransform& transform();
 				void clicked(Hix::Input::MouseEventData&, const Qt3DRender::QRayCasterHit&)override;
 				void removePt(FreeCutPtWidget* pt);
+				std::vector<QVector3D> contour()const;
 			protected:
 				void initHitTest()override;
 			private:
-				std::vector<QVector2D> _contour;
 				bool _drawingEnabled = false;
 				std::array<Qt3DExtras::QPlaneMesh, 2> _planeMeshes;
 				Qt3DCore::QTransform _transform;
-				Qt3DExtras::QPhongAlphaMaterial _material;
 				GLModel* _owner = nullptr;
 				std::unordered_set<std::unique_ptr<FreeCutPtWidget>> _ptWidgets;
 			};

@@ -242,13 +242,13 @@
     <ClCompile Include="input\HitTestAble.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>
-    <ClCompile Include="feature\freeCut\DrawingPlane.cpp">
-      <Filter>Generated Files</Filter>
-    </ClCompile>
-    <ClCompile Include="feature\freeCut\FreeCutPtWidget.cpp">
-      <Filter>Generated Files</Filter>
-    </ClCompile>
     <ClCompile Include="render\LineMeshEntity.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="feature\cut\DrawingPlane.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="feature\cut\FreeCutPtWidget.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -589,10 +589,10 @@
     <ClInclude Include="input\HitTestAble.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
-    <ClInclude Include="feature\freeCut\FreeCutPtWidget.h">
+    <ClInclude Include="feature\cut\DrawingPlane.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
-    <ClInclude Include="feature\freeCut\DrawingPlane.h">
+    <ClInclude Include="feature\cut\FreeCutPtWidget.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
   </ItemGroup>

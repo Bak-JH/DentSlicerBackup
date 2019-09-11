@@ -51,6 +51,16 @@ using namespace Qt3DExtras;
 
 class GLModel;
 class OverhangPoint;
+namespace Hix
+{
+	namespace Features
+	{
+		namespace Cut
+		{
+			class DrawingPlane;
+		}
+	}
+}
 
 
 class GLModel : public Hix::Render::SceneEntityWithMaterial, public Hix::Input::Draggable, public Hix::Input::Clickable, public Hix::Input::HitTestAble
@@ -85,9 +95,6 @@ public:
     // feature offset
     double shellOffsetFactor;
 
-    std::vector<QVector3D> cuttingPoints;
-    std::vector<QEntity*> cuttingContourCylinders;
-    Plane cuttingPlane;
 
     // used for layer view
     Qt3DExtras:: QPlaneMesh* layerViewPlane = nullptr;
@@ -177,11 +184,9 @@ protected:
 	void initHitTest()override;
 
 private:
-	Qt3DExtras::QPlaneMesh* clipPlane[2];
-	Qt3DCore::QEntity* planeEntity[2];
-	Qt3DCore::QTransform* planeTransform[2];
-	Qt3DExtras::QPhongAlphaMaterial* planeMaterial = nullptr;
-	QObjectPicker* planeObjectPicker[2];
+	//cutting
+	std::unique_ptr<Hix::Features::Cut::DrawingPlane> _cuttingPlane;
+
 
 	QVector3D getPrimitiveColorCode(const Hix::Engine3D::Mesh* mesh, FaceConstItr faceItr)override;
 
@@ -213,12 +218,6 @@ signals:
 
 public slots:
 	void updateModelMesh();
-
-    // object picker parts
-    void mouseEnteredFreeCutSphere();
-    void mouseExitedFreeCutSphere();
-    void mouseClickedFreeCutSphere(Qt3DRender::QPickEvent*);
-    void mouseClickedFreeCut(Qt3DRender::QPickEvent*);
     void mouseClickedLayflat(MeshFace shadow_meshface);
 
 
@@ -232,11 +231,8 @@ public slots:
     void generateLayFlat();
 
     // Model Cut
-    void removeCuttingContour();
-    void generateCuttingContour(std::vector<QVector3D> cuttingContour);
-    void regenerateCuttingPoint(std::vector<QVector3D> cuttingContour);
-    void generateClickablePlane();
-    void generatePlane();
+
+    void generatePlane(int type);
     void removePlane();
     void modelCut();
     void cutModeSelected(int type);
