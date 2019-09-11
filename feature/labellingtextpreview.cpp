@@ -104,8 +104,6 @@ void LabellingTextPreview::setTranslation(const QVector3D& t)
 void LabellingTextPreview::setNormal(const QVector3D& n)
 {
     normal = n;
-    normal.setZ(normal.z());
-    normal.normalize();
 }
 
 void LabellingTextPreview::updateTransform()
@@ -129,31 +127,31 @@ void LabellingTextPreview::updateTransform()
     QVector3D ref = QVector3D(0, 0, 1);
 
     QVector3D tangent;
-    if (normal == QVector3D(0,0,-1)){
+    if (normal.normalized() == QVector3D(0,0,-1)){
         tangent = QVector3D(1,0,0);
     } else if (normal == QVector3D(0,0,1)){
         tangent = QVector3D(-1,0,0);
     } else {
-        tangent = QVector3D::crossProduct(normal, ref);
+        tangent = QVector3D::crossProduct(normal.normalized(), ref);
     }
     tangent.normalize();
 
     QVector3D binormal;
-    if (normal == QVector3D(0,0,-1)){
+    if (normal.normalized() == QVector3D(0,0,-1)){
         binormal = QVector3D(0,1,0);
-    } else if (normal == QVector3D(0,0,1)){
+    } else if (normal.normalized() == QVector3D(0,0,1)){
         binormal = QVector3D(0,1,0);
     } else {
-        binormal = QVector3D::crossProduct(tangent, normal);
+        binormal = QVector3D::crossProduct(tangent, normal.normalized());
     }
     binormal.normalize();
 
-    planeTransform->setTranslation(translation - normal);
-    qDebug() << "changed translation :" << translation - normal;
-    planeTransform->setRotation(QQuaternion::fromAxes(tangent, normal, binormal) * QQuaternion::fromAxisAndAngle(QVector3D(0,1, 1), 180));
+    planeTransform->setTranslation(translation + normal - normal.normalized());
+    qDebug() << "changed translation :" << translation + normal - normal.normalized();
+    planeTransform->setRotation(QQuaternion::fromAxes(tangent, normal.normalized(), binormal) * QQuaternion::fromAxisAndAngle(QVector3D(0,1, 1), 180));
     planeTransform->setScale3D(QVector3D(ratioY,ratioY, ratioY) * scaleY);
 
-    translation -= 0.8*normal;
+    translation = translation + normal - (0.8*normal.normalized());
     qDebug() << "@@@@@@@@@@@@@@@ " << planeMesh->geometry()->attributes().at(0)->buffer()->data();
 }
 

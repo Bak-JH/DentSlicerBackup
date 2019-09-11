@@ -872,13 +872,14 @@ void GLModel::clicked(MouseEventData& pick, const Qt3DRender::QRayCasterHit& hit
 		_supportRaftManager.addSupport(newOverhang);
 	}
 
+	/// Labeling Feature ///
     if (labellingActive && hit.localIntersection() != QVector3D(0, 0, 0)) {
         if (labellingTextPreview == nullptr)
             labellingTextPreview = new LabellingTextPreview(this);
 
 
         if (labellingTextPreview && labellingTextPreview->isEnabled()) {
-            labellingTextPreview->setTranslation(hit.localIntersection() + targetMeshFace->fn);
+            labellingTextPreview->setTranslation(hit.localIntersection());
             labellingTextPreview->setNormal(targetMeshFace->fn);
             labellingTextPreview->planeSelected = true;
             QMetaObject::invokeMethod(qmlManager->labelPopup, "labelUpdate");
@@ -1268,6 +1269,9 @@ void GLModel::generateText3DMesh()
     }
 	_targetSelected = false;
 
+
+	Text3D text3d;
+	text3d.
     generateText3DGeometry(&vertices, &verticesSize,
                            &indices, &indicesSize,
                            targetFont,
@@ -1281,17 +1285,17 @@ void GLModel::generateText3DMesh()
 
     qmlManager->setProgress(0.9);
 
-    std::vector<QVector3D> outVertices;
-    for (int i = 0; i < indicesSize / 3; ++i) {
-        // Insert vertices in CCW order
-        outVertices.push_back(vertices[2 * indices[3*i + 2] + 0]);
-        outVertices.push_back(vertices[2 * indices[3*i + 1] + 0]);
-        outVertices.push_back(vertices[2 * indices[3*i + 0] + 0]);
-        _mesh->addFace(vertices[2 * indices[3*i + 2] + 0], vertices[2 * indices[3*i + 1] + 0], vertices[2 * indices[3*i + 0] + 0]);
+    //std::vector<QVector3D> outVertices;
+    //for (int i = 0; i < indicesSize / 3; ++i) {
+    //    // Insert vertices in CCW order
+    //    outVertices.push_back(vertices[2 * indices[3*i + 2] + 0]);
+    //    outVertices.push_back(vertices[2 * indices[3*i + 1] + 0]);
+    //    outVertices.push_back(vertices[2 * indices[3*i + 0] + 0]);
+    //    _mesh->addFace(vertices[2 * indices[3*i + 2] + 0], vertices[2 * indices[3*i + 1] + 0], vertices[2 * indices[3*i + 0] + 0]);
 
-    }
+    //}
 
-    updateModelMesh();
+    //updateModelMesh();
 
     qmlManager->setProgress(1);
 }
