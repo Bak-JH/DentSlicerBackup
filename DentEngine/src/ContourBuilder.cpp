@@ -97,25 +97,31 @@ QVector2D Contour::to()const
 {
 	return segments.back().to;
 }
-
-Path Contour::toPath()const
+Path Contour::toPath(std::vector<QVector2D>& outFloatPath)const
 {
 	Path path;
 	if (!segments.empty())
 	{
-		std::vector<QVector2D> qPath;
-		qPath.reserve(segments.size() + 1);
+		outFloatPath.reserve(segments.size() + 1);
 
-		qPath.emplace_back(segments.front().from);
+		outFloatPath.emplace_back(segments.front().from);
 		for (auto& each : segments)
 		{
-			qPath.emplace_back(each.to);
+			outFloatPath.emplace_back(each.to);
 		}
-		path = ClipperLib::toCLPath(qPath);
+		path = ClipperLib::toCLPath(outFloatPath);
 	}
 
 	return path;
 }
+
+Path Contour::toPath()const
+{
+	std::vector<QVector2D> tmp;
+	return toPath(tmp);
+
+}
+
 void Contour::append(const Contour& appended)
 {
 #ifdef _STRICT_SLICER

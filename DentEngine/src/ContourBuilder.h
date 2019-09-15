@@ -92,6 +92,7 @@ namespace Hix
 			//bool isOutward();
 			std::deque<ContourSegment> segments;
 			Path toPath()const;//tmp
+			Path toPath(std::vector<QVector2D>& outFloatPath)const;//tmp
 
 		private:
 			////bounds
