@@ -30,11 +30,13 @@ namespace Hix
 			protected:
 				void initHitTest()override;
 			private:
+				std::unordered_map<Qt3DCore::QEntity*, Qt3DCore::QTransform*> _meshTransformMap;
 				bool _drawingEnabled = false;
 				std::array<Qt3DExtras::QPlaneMesh, 2> _planeMeshes;
 				Qt3DCore::QTransform _transform;
 				GLModel* _owner = nullptr;
 				std::unordered_set<std::unique_ptr<FreeCutPtWidget>> _ptWidgets;
+				FreeCutPtWidget* _lastPt = nullptr;
 			};
 
 

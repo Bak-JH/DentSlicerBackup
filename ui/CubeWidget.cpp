@@ -12,6 +12,7 @@ Hix::UI::CubeWidget::CubeWidget(QEntity* parent) : QEntity(parent)
 	_mesh.setXExtent(0.3f);
 	_mesh.setYExtent(0.3f);
 	_material.setShininess(0);
+	initHitTest();
 	setEnabled(true);
 }
 

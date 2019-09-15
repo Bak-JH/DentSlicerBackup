@@ -8,13 +8,14 @@ using namespace Hix::Features::Cut;
 #define _STRICT_FREECUT
 #endif
 
-FreeCutPtWidget::FreeCutPtWidget(DrawingPlane* drawingPlane, QVector3D pos):Hix::UI::CubeWidget(drawingPlane), _drawingPlane(drawingPlane)
+FreeCutPtWidget::FreeCutPtWidget(DrawingPlane* drawingPlane):Hix::UI::CubeWidget(drawingPlane), _drawingPlane(drawingPlane)
 {
 	//_transform.setScale(0.5f);
 	_material.setAmbient(QColor(0,0,0));
 	_material.setDiffuse(QColor(0, 0, 0));
 	_material.setSpecular(QColor(0, 0, 0));
-	_transform.setTranslation(pos);
+	setHitTestable(true);
+	setHoverable(true);
 
 }
 FreeCutPtWidget::~FreeCutPtWidget()
@@ -42,9 +43,13 @@ void Hix::Features::Cut::FreeCutPtWidget::updateLineTo()
 	if (prev != nullptr)
 	{
 		std::vector<QVector3D> path;
-		path.emplace_back(prev->translation());
-		path.emplace_back(translation());
+		path.emplace_back(prev->translation() - translation());
+		path.emplace_back(QVector3D(0,0,0));
 		_line.reset(new Hix::Render::LineMeshEntity(path, this));
+	}
+	else
+	{
+		_line.reset();
 	}
 
 }

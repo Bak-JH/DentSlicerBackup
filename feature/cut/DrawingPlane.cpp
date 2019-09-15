@@ -11,7 +11,7 @@ DrawingPlane::DrawingPlane(GLModel* owner): Qt3DCore::QEntity(owner)
 	planeMaterial->setDiffuse(QColor(244, 244, 244, 255));
 	planeMaterial->setSpecular(QColor(244, 244, 244, 255));
 
-	for (int i = 0; i < 2; i++) {
+	for (int i = 0; i < 1; i++) {
 		auto planeEntity = new Qt3DCore::QEntity(this);
 		//qDebug() << "generatePlane---------------------==========-=-==-" << parentModel;
 		auto clipPlane = new Qt3DExtras::QPlaneMesh(this);
@@ -19,12 +19,14 @@ DrawingPlane::DrawingPlane(GLModel* owner): Qt3DCore::QEntity(owner)
 		clipPlane->setWidth(200.0);
 
 		auto planeTransform = new Qt3DCore::QTransform();
-		planeTransform->setRotation(QQuaternion::fromAxisAndAngle(QVector3D(1, 0, 0),  90 + 180 * (i + 1)));
+		planeTransform->setRotation(QQuaternion::fromAxisAndAngle(QVector3D(1, 0, 0),  90 + 180 * i));
 		planeEntity->addComponent(&_layer);
 		planeEntity->addComponent(clipPlane);
 		planeEntity->addComponent(planeTransform); //jj
 		planeEntity->addComponent(planeMaterial);
 		planeEntity->setEnabled(true);
+
+		_meshTransformMap[planeEntity] = planeTransform;
 	}
 	addComponent(&_transform);
 
@@ -70,12 +72,21 @@ Qt3DCore::QTransform& DrawingPlane::transform()
 
 void DrawingPlane::clicked(Hix::Input::MouseEventData& m, const Qt3DRender::QRayCasterHit& hit)
 {
-	qDebug() << "plane clicked";
-	qDebug() << hit.localIntersection();
+	auto hitEntity = hit.entity();
+	//since plane has its own transformation, we need to adjust the hit test coordinate accordingly.
 	QVector3D pos = hit.localIntersection();
-	//convert to DrawingPlane transform, 
+	auto entityTransform = _meshTransformMap[hitEntity];
+	pos = entityTransform->matrix() * pos;
 	pos.setZ(_transform.translation().z());
-	_ptWidgets.emplace(std::make_unique<FreeCutPtWidget>(this, pos));
+	auto emplResult = _ptWidgets.emplace(std::make_unique<FreeCutPtWidget>(this));
+	auto newLatest = emplResult.first->get();
+	newLatest->prev = _lastPt;
+	if (_lastPt)
+	{
+		_lastPt->next = newLatest;
+	}
+	_lastPt = newLatest;
+	newLatest->setTranslation(pos);
 	if (_ptWidgets.size() >= 2)
 	{
 		QMetaObject::invokeMethod(qmlManager->cutPopup, "colorApplyFinishButton", Q_ARG(QVariant, 2));
@@ -96,6 +107,12 @@ void Hix::Features::Cut::DrawingPlane::removePt(FreeCutPtWidget* pt)
 	{
 		prev->next = next;
 	}
+	//update last pt
+	if (_lastPt == pt)
+	{
+		_lastPt = pt->prev;
+	}
+	//kinda hacky, create a tmp unique_ptr for the sake of hashing/look up
 	std::unique_ptr<FreeCutPtWidget> tmp(pt);
 	_ptWidgets.erase(tmp);
 	//don't double delete

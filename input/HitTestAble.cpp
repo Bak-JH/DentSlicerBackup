@@ -18,9 +18,30 @@ void HitTestAble::setHitTestable(bool isEnable)
 	}
 }
 
+void Hix::Input::HitTestAble::setHoverable(bool isEnable)
+{
+	if (_hoverEnabled != isEnable)
+	{
+		_hoverEnabled = isEnable;
+		if (_hoverEnabled)
+		{
+			qmlManager->getRayCaster().addHoverLayer(&_layer);
+		}
+		else
+		{
+			qmlManager->getRayCaster().removeHoverLayer(&_layer);
+		}
+	}
+}
+
 bool HitTestAble::isHitTestable()
 {
 	return _hitEnabled;
+}
+
+bool Hix::Input::HitTestAble::isHoverable()
+{
+	return _hoverEnabled;
 }
 
 Qt3DRender::QLayer* Hix::Input::HitTestAble::getLayer()

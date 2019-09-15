@@ -17,7 +17,7 @@ namespace Hix
 			class FreeCutPtWidget : public Hix::UI::CubeWidget, public Hix::Input::Clickable, public Hix::Input::Hoverable
 			{
 			public:
-				FreeCutPtWidget(DrawingPlane* drawingPlane, QVector3D pos);
+				FreeCutPtWidget(DrawingPlane* drawingPlane);
 				virtual ~FreeCutPtWidget();
 				void onEntered()override;
 				void onExited() override;
