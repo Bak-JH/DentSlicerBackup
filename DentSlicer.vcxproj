@@ -215,7 +215,9 @@
     <ClCompile Include="fileloader.cpp" />
     <ClCompile Include="feature\cut\FreeCutPtWidget.cpp" />
     <ClCompile Include="glmodel.cpp" />
+    <ClCompile Include="input\Draggable.cpp" />
     <ClCompile Include="input\HitTestAble.cpp" />
+    <ClCompile Include="input\Hoverable.cpp" />
     <ClCompile Include="input\raycastcontroller.cpp" />
     <ClCompile Include="render\lights.cpp" />
     <ClCompile Include="render\LineMeshEntity.cpp" />

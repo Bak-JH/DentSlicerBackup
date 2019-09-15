@@ -308,10 +308,16 @@ void GLModel::generatePlane(int type){
 		//want cutting plane to be over model mesh
 		float zOverModel = _mesh->z_max() + 0.1f;
 		_cuttingPlane->transform().setTranslation(QVector3D(0, 0, zOverModel));
+		qmlManager->getRayCaster().setHoverEnabled(true);
 	}
 }
 
 void GLModel::removePlane(){
+	//freecut disable hovering
+	if (cutMode == 2)
+	{
+		qmlManager->getRayCaster().setHoverEnabled(false);
+	}
 	_cuttingPlane.reset();
 }
 
