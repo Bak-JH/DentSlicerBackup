@@ -199,10 +199,10 @@
     <ClCompile Include="DentEngine\src\Planes.cpp" />
     <ClCompile Include="DentEngine\src\polyclipping\poly2tri\sweep\advancing_front.cpp" />
     <ClCompile Include="DentEngine\src\polyclipping\polyclipping.cpp" />
+    <ClCompile Include="DentEngine\src\polyclipping\polytree2tri\PolytreeCDT.cpp" />
     <ClCompile Include="feature\autoarrange.cpp" />
     <ClCompile Include="feature\autoorientation.cpp" />
     <ClCompile Include="DentEngine\src\polyclipping\poly2tri\sweep\cdt.cpp" />
-    <ClCompile Include="DentEngine\src\polyclipping\clip2tri\clip2tri.cpp" />
     <ClCompile Include="DentEngine\src\polyclipping\clipper\clipper.cpp" />
     <ClCompile Include="DentEngine\src\cmdlineparser.cpp" />
     <ClCompile Include="DentEngine\src\configuration.cpp" />
@@ -311,9 +311,9 @@
     <ClInclude Include="DentEngine\src\polyclipping\poly2tri\sweep\advancing_front.h" />
     <QtMoc Include="feature\autoarrange.h">
     </QtMoc>
+    <ClInclude Include="DentEngine\src\polyclipping\polytree2tri\PolytreeCDT.h" />
     <ClInclude Include="feature\autoorientation.h" />
     <ClInclude Include="DentEngine\src\polyclipping\poly2tri\sweep\cdt.h" />
-    <ClInclude Include="DentEngine\src\polyclipping\clip2tri\clip2tri.h" />
     <ClInclude Include="DentEngine\src\polyclipping\clipper\clipper.hpp" />
     <ClInclude Include="DentEngine\src\cmdlineparser.h" />
     <ClInclude Include="DentEngine\src\configuration.h" />

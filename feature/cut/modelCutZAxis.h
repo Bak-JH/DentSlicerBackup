@@ -23,7 +23,7 @@ namespace Hix
 				void divideTriangles();
 				void generateCutContour();
 				void generateCaps();
-
+				void fillOverlap(const Hix::Slicer::ContourSegment& seg);
 
 				float _cuttingPlane;
 				const Engine3D::Mesh* _origMesh = nullptr;

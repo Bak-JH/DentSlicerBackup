@@ -59,9 +59,6 @@
     <ClCompile Include="DentEngine\src\polyclipping\poly2tri\sweep\cdt.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="DentEngine\src\polyclipping\clip2tri\clip2tri.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="DentEngine\src\polyclipping\clipper\clipper.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -257,6 +254,9 @@
     <ClCompile Include="feature\cut\modelCutZAxis.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>
+    <ClCompile Include="DentEngine\src\polyclipping\polytree2tri\PolytreeCDT.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DentEngine\src\polyclipping\poly2tri\sweep\advancing_front.h">
@@ -266,9 +266,6 @@
       <Filter>Header Files</Filter>
     </QtMoc>
     <ClInclude Include="DentEngine\src\polyclipping\poly2tri\sweep\cdt.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="DentEngine\src\polyclipping\clip2tri\clip2tri.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="DentEngine\src\polyclipping\clipper\clipper.hpp">
@@ -599,6 +596,9 @@
       <Filter>Generated Files</Filter>
     </ClInclude>
     <ClInclude Include="feature\cut\modelCutZAxis.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="DentEngine\src\polyclipping\polytree2tri\PolytreeCDT.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -1178,6 +1178,7 @@
     <None Include="icon-32.ico" />
     <None Include="icon-32.ico" />
     <None Include="Qml\LeftTabSlicingOptionElementTextbox.qml" />
+    <None Include="icon-32.ico" />
     <None Include="icon-32.ico" />
     <None Include="icon-32.ico" />
     <None Include="icon-32.ico" />
