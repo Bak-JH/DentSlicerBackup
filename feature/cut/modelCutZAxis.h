@@ -34,7 +34,8 @@ namespace Hix
 				std::unordered_set<Hix::Engine3D::FaceConstItr> _overlapFaces;
 				std::unordered_set<Hix::Engine3D::FaceConstItr> _topFaces;
 				std::vector<Hix::Slicer::Contour> _contours;
-				
+				tf::Taskflow _flow;
+
 
 			};
 		}

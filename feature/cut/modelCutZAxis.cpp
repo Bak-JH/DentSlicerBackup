@@ -4,12 +4,15 @@ using namespace Hix::Engine3D;
 using namespace Hix::Slicer;
 Hix::Features::Cut::ZAxisCutTask::ZAxisCutTask(const Engine3D::Mesh* originalMesh, float z): _origMesh(originalMesh), _cuttingPlane(z)
 {
-
+	divideTriangles();
+	generateCutContour();
+	generateCaps();
 }
 
 tf::Taskflow& Hix::Features::Cut::ZAxisCutTask::getFlow()
 {
 	// TODO: insert return statement here
+	return _flow;
 }
 
 void Hix::Features::Cut::ZAxisCutTask::divideTriangles()
@@ -64,11 +67,27 @@ void Hix::Features::Cut::ZAxisCutTask::generateCaps()
 	//clipping;
 
 	Clipper clpr;
+	clpr.PreserveCollinear(true);
 	for (size_t idx = 0; idx < _contours.size(); idx++) { // divide into parallel threads
 		clpr.AddPath(pathCont[idx], ptSubject, true);
 	}
 	ClipperLib::PolyTree polytree;
 	clpr.Execute(ctUnion, polytree, pftNonZero, pftNonZero);
+	auto curr = polytree.GetFirst();
+	size_t count = 0;
+	size_t fuck = 0;
+	while (curr != nullptr)
+	{
+		for (auto each : curr->Contour)
+		{
+			if (fIntPtMap.find(each) == fIntPtMap.end())
+			{
+				++fuck;
+			}
+			++count;
+		}
+		curr = curr->GetNext();
+	}
 
 	//copy bakjh here.
 }
