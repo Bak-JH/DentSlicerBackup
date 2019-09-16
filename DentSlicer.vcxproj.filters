@@ -236,9 +236,6 @@
     <ClCompile Include="feature\Shapes2D.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>
-    <ClCompile Include="feature\modelCutZAxis.cpp">
-      <Filter>Generated Files</Filter>
-    </ClCompile>
     <ClCompile Include="input\HitTestAble.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>
@@ -255,6 +252,9 @@
       <Filter>Generated Files</Filter>
     </ClCompile>
     <ClCompile Include="input\Draggable.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="feature\cut\modelCutZAxis.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -589,9 +589,6 @@
     <ClInclude Include="feature\Shapes2D.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
-    <ClInclude Include="feature\modelCutZAxis.h">
-      <Filter>Generated Files</Filter>
-    </ClInclude>
     <ClInclude Include="input\HitTestAble.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
@@ -599,6 +596,9 @@
       <Filter>Generated Files</Filter>
     </ClInclude>
     <ClInclude Include="feature\cut\FreeCutPtWidget.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="feature\cut\modelCutZAxis.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
   </ItemGroup>
