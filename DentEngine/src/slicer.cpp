@@ -33,20 +33,6 @@ QDebug Hix::Debug::operator<< (QDebug d, const Slices& obj) {
 
 
 
-namespace Slicer
-{
-	namespace Private
-	{
-
-		/****************** Helper Functions For Contour Construction Step *******************/
-		void insertPathHash(QHash<uint32_t, Path>& pathHash, IntPoint u, IntPoint v);
-		/********************** Path Generation Functions **********************/
-		Path3D intersectionPath(Plane base_plane, Plane target_plane);
-	}
-}
-using namespace Slicer::Private;
-
-
 
 QVector2D ContourBuilder::midPoint2D(VertexConstItr vtxA0, VertexConstItr vtxA1)
 {
@@ -119,62 +105,6 @@ float ContourSegment::dist()const
 
 
 
-Path3D  Slicer::Private::intersectionPath(Plane base_plane, Plane target_plane)
-{
-	Path3D p;
-
-	std::vector<QVector3D> upper;
-	std::vector<QVector3D> lower;
-	for (int i = 0; i < 3; i++) {
-		if (target_plane[i].distanceToPlane(base_plane[0], base_plane[1], base_plane[2]) > 0) {
-			upper.push_back(target_plane[i]);
-		}
-		else {
-			lower.push_back(target_plane[i]);
-		}
-	}
-
-	std::vector<QVector3D> majority;
-	std::vector<QVector3D> minority;
-
-	bool flip = false;
-	if (upper.size() == 2) {
-		majority = upper;
-		minority = lower;
-	}
-	else if (lower.size() == 2) {
-		flip = true;
-		majority = lower;
-		minority = upper;
-	}
-	else {
-		qDebug() << "wrong faces";
-		// size is 0
-		return p;
-	}
-
-	float minority_distance = abs(minority[0].distanceToPlane(base_plane[0], base_plane[1], base_plane[2]));
-	float majority1_distance = abs(majority[0].distanceToPlane(base_plane[0], base_plane[1], base_plane[2]));
-	float majority2_distance = abs(majority[1].distanceToPlane(base_plane[0], base_plane[1], base_plane[2]));
-
-	// calculate intersection points
-	MeshVertex mv1, mv2;
-	mv1.position = minority[0] + (majority[0] - minority[0]) * (minority_distance / (majority1_distance + minority_distance));
-	mv2.position = minority[0] + (majority[1] - minority[0]) * (minority_distance / (majority2_distance + minority_distance));
-
-	if (flip) {
-		p.push_back(mv1);
-		p.push_back(mv2);
-	}
-	else {
-		p.push_back(mv2);
-		p.push_back(mv1);
-	}
-	return p;
-}
-
-
-
 
 
 void Hix::Slicer::slice(const Mesh* mesh, const Planes* planes, Slices* slices){
@@ -201,34 +131,6 @@ void Hix::Slicer::slice(const Mesh* mesh, const Planes* planes, Slices* slices){
 /****************** Mesh Slicing Step *******************/
 
 
-
-
-/****************** Helper Functions For Contour Construction Step *******************/
-
-void Slicer::Private::insertPathHash(QHash<uint32_t, Path>& pathHash, IntPoint u, IntPoint v){
-    QVector3D u_qv3 = QVector3D(u.X, u.Y, 0);
-    QVector3D v_qv3 = QVector3D(v.X, v.Y, 0);
-
-    uint32_t path_hash_u = std::hash<QVector3D>()(u_qv3);
-    uint32_t path_hash_v = std::hash<QVector3D>()(v_qv3);
-
-    if (! pathHash.contains(path_hash_u)){
-        //pathHash[path_hash_u].push_back(u);
-        Path* temp_path = new Path;
-        temp_path->push_back(u); // first element denotes key itself
-        pathHash.insert(path_hash_u, *temp_path);
-    }
-    if (! pathHash.contains(path_hash_v)){
-        //pathHash[path_hash_u].push_back(v);
-        Path* temp_path = new Path;
-        temp_path->push_back(v); // first element denotes key itself
-        pathHash.insert(path_hash_u, *temp_path);
-    }
-    pathHash[path_hash_u].push_back(u);
-    pathHash[path_hash_v].push_back(v);
-
-    return;
-}
 
 
 Hix::Slicer::Slices::Slices(size_t size): std::vector<Slice>(size)
