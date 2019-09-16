@@ -7,6 +7,13 @@ Hix::Features::Cut::ZAxisCutTask::ZAxisCutTask(const Engine3D::Mesh* originalMes
 	divideTriangles();
 	generateCutContour();
 	generateCaps();
+	for (auto& contour : _contours)
+	{
+		for (auto& seg : contour.segments)
+		{
+			fillOverlap(seg);
+		}
+	}
 }
 
 tf::Taskflow& Hix::Features::Cut::ZAxisCutTask::getFlow()
@@ -73,6 +80,10 @@ void Hix::Features::Cut::ZAxisCutTask::generateCaps()
 	}
 	ClipperLib::PolyTree polytree;
 	clpr.Execute(ctUnion, polytree, pftNonZero, pftNonZero);
+
+	//map to float paths
+	std::unordered_map<ClipperLib::PolyNode*, 
+
 	auto curr = polytree.GetFirst();
 	size_t count = 0;
 	size_t fuck = 0;
