@@ -4,37 +4,36 @@
 #include <unordered_set>
 using namespace ClipperLib;
 
-
 // converts float point to int in microns
-void  ClipperLib::addPoint(float x, float y, ClipperLib::Path* path)
+void  Hix::Polyclipping::addPoint(float x, float y, ClipperLib::Path* path)
 {
 	IntPoint ip;
-	ip.X = round(x * ClipperLib::INT_PT_RESOLUTION);
-	ip.Y = round(y * ClipperLib::INT_PT_RESOLUTION);
+	ip.X = round(x * Hix::Polyclipping::INT_PT_RESOLUTION);
+	ip.Y = round(y * Hix::Polyclipping::INT_PT_RESOLUTION);
 	//qDebug() << "addPoint called with x " << x << " y " << y << " rounding " << ip.X;
 	path->push_back(ip);
 }
-IntPoint  ClipperLib::toInt2DPt(const QVector2D& pt)
+IntPoint  Hix::Polyclipping::toInt2DPt(const QVector2D& pt)
 {
 	IntPoint ip;
-	ip.X = round(pt.x() * ClipperLib::INT_PT_RESOLUTION);
-	ip.Y = round(pt.y() * ClipperLib::INT_PT_RESOLUTION);
+	ip.X = round(pt.x() * Hix::Polyclipping::INT_PT_RESOLUTION);
+	ip.Y = round(pt.y() * Hix::Polyclipping::INT_PT_RESOLUTION);
 	return ip;
 }
 
-IntPoint  ClipperLib::toInt2DPt(const QVector3D& pt)
+IntPoint  Hix::Polyclipping::toInt2DPt(const QVector3D& pt)
 {
 	IntPoint ip;
-	ip.X = round(pt.x() * ClipperLib::INT_PT_RESOLUTION);
-	ip.Y = round(pt.y() * ClipperLib::INT_PT_RESOLUTION);
+	ip.X = round(pt.x() * Hix::Polyclipping::INT_PT_RESOLUTION);
+	ip.Y = round(pt.y() * Hix::Polyclipping::INT_PT_RESOLUTION);
 	return ip;
 }
-QVector2D ClipperLib::toFloatPt(const IntPoint& pt)
+QVector2D Hix::Polyclipping::toFloatPt(const IntPoint& pt)
 {
-	QVector2D fp((float)pt.X/ (float)ClipperLib::INT_PT_RESOLUTION, (float)pt.Y / (float)ClipperLib::INT_PT_RESOLUTION);
+	QVector2D fp((float)pt.X/ (float)Hix::Polyclipping::INT_PT_RESOLUTION, (float)pt.Y /(float)Hix::Polyclipping::INT_PT_RESOLUTION);
 	return fp;
 }
-Path ClipperLib::toCLPath(const std::vector<QVector2D>& path)
+Path Hix::Polyclipping::toCLPath(const std::vector<QVector2D>& path)
 {
 	Path clipperPath;
 	clipperPath.reserve(path.size());
@@ -45,7 +44,7 @@ Path ClipperLib::toCLPath(const std::vector<QVector2D>& path)
 	return clipperPath;
 }
 
-Path ClipperLib::toCLPath(const std::vector<QVector3D>& path)
+ClipperLib::Path Hix::Polyclipping::toCLPath(const std::vector<QVector3D>& path)
 {
 	Path clipperPath;
 	clipperPath.reserve(path.size());
@@ -56,7 +55,7 @@ Path ClipperLib::toCLPath(const std::vector<QVector3D>& path)
 	return clipperPath;
 }
 
-bool ClipperLib::ptInPolytree(const QVector2D& pt, const ClipperLib::PolyTree& tree, ClipperLib::PolyNode*& owningNode)
+bool Hix::Polyclipping::ptInPolytree(const QVector2D& pt, const ClipperLib::PolyTree& tree, ClipperLib::PolyNode*& owningNode)
 {
 	IntPoint intPt = toInt2DPt(pt);
 	bool lastResultHole = true;
