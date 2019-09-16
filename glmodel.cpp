@@ -21,7 +21,7 @@
 #include "DentEngine/src/configuration.h"
 #include "feature/Extrude.h"
 #include "feature/cut/DrawingPlane.h"
-
+#include "feature/cut/modelCutZAxis.h"
 
 
 #define ATTRIBUTE_SIZE_INCREMENT 200
@@ -72,6 +72,10 @@ GLModel::GLModel(QObject* mainWindow, QEntity*parent, Mesh* loadMesh, QString fn
 	qmlManager->setProgress(0.23);
 	setMesh(_mesh);
 	//applyGeometry();
+	auto midPt = _mesh->z_max() + _mesh->z_min();
+	midPt = midPt / 2;
+	Hix::Features::Cut::ZAxisCutTask(_mesh, midPt);
+
 
 	// 승환 50%
 	qmlManager->setProgress(0.49);
