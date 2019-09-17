@@ -18,7 +18,7 @@ size_t Hix::Slicer::UniformPlanes::minIntersectIdx(float z) const
 	minIdx = std::max(0, minIdx);
 
 	//float error check
-	if (_planes[minIdx] < z)
+	if (minIdx < _planes.size() && _planes[minIdx] < z)
 		++minIdx;
 
 	return minIdx;
@@ -29,7 +29,7 @@ size_t Hix::Slicer::UniformPlanes::maxIntersectIdx(float z) const
 	int maxIdx = (int)((z - _planes[0]) / _delta);
 	maxIdx = std::min((int)_planes.size() - 1, maxIdx);
 	//float error check
-	if (_planes[maxIdx] > z)
+	if (maxIdx >= 0 && _planes[maxIdx] > z)
 		--maxIdx;
 	return maxIdx;
 }

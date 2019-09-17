@@ -277,15 +277,23 @@ void ContourBuilder::buildSegment(const FaceConstItr& mf)
 			segment.to = QVector2D(middle[1]->position.x(), middle[1]->position.y());
 
 		}
+
 		//face == plane
 	}
-	//hint needs to be in correct direction
-	auto flipResult = segment.calcNormalAndFlip();
 
+	ContourSegment::FlipResult flipResult;
+	if (segment.from == segment.to)
+	{
+		flipResult = ContourSegment::FlipResult::UnknownDirection;
+	}
+	else
+	{
+		//hint needs to be in correct direction
+		flipResult = segment.calcNormalAndFlip();
+	}
 	//insert to container
 	_segments[mf] = segment;
 	auto& newSeg = _segments[mf];
-
 
 	//segment is too small and direction cannot be determinied
 	if (flipResult == ContourSegment::FlipResult::UnknownDirection)

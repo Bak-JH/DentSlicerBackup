@@ -543,6 +543,7 @@ bool Mesh::addFace(QVector3D v0, QVector3D v1, QVector3D v2){
 		return false;
     Hix::Engine3D::MeshFace mf;
 	mf.fn = QVector3D::normal(fVtx[0]->position, fVtx[1]->position, fVtx[2]->position);
+
 	faces.emplace_back(mf);
 	auto faceItr = faces.cend() - 1;
 
@@ -568,6 +569,7 @@ bool Mesh::addFace(const FaceConstItr& face)
 	fVtx[2] = addOrRetrieveFaceVertex(vtxPos[2]);
 	Hix::Engine3D::MeshFace mf;
 	mf.fn = face->fn;
+
 	faces.emplace_back(mf);
 	auto faceItr = faces.cend() - 1;
 	addHalfEdgesToFace(fVtx, faceItr);
