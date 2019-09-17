@@ -18,20 +18,11 @@ class Text3D
 public:
 	Text3D() {}
 	virtual ~Text3D() {}
-	void generateText3DGeometry(QVector3D** vertices, int* verticesSize,
-		unsigned int** indices, int* indicesSize,
-		QFont font, QString text, float depth,
-		Hix::Engine3D::Mesh* mesh,
-		//const QVector3D* originalVertices,
-		//const int originalVerticesCount,
-		const QVector3D normalVector,
-		const QMatrix4x4& transform,
-		const QMatrix4x4& normalTransform);
-	std::unordered_map<PolyNode*, std::vector<p2t::Triangle*>> Text3D::triangluateBFS(PolyTree& tree);
-	std::vector<p2t::Point*> toPointVector(std::vector<QVector2D> floatPath);
+	void generateText3D(QFont font, QString text, Hix::Engine3D::Mesh* targetMesh);
+	void generateTextFace(const PolyTree& tree, Hix::Engine3D::Mesh* targetMesh);
+	std::vector<p2t::Point*> toPointVector(const std::vector<QVector2D> floatPath);
+	std::vector<p2t::Point*> toPointVector(const ClipperLib::Path intPath);
 private:
-	std::vector<PolyNode*> nodes;
-	std::unordered_map<PolyNode*, std::vector<QVector2D>> floatPathMap;
-	std::vector<QVector2D> floatPath;
+	std::unordered_map<PolyNode*, std::vector<QVector2D>> _floatPathMap;
 };
 #endif // TEXT3DGEOMETRYGENERATOR_H
