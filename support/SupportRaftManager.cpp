@@ -71,6 +71,21 @@ const std::vector<const Mesh*> Hix::Support::SupportRaftManager::getRaftSupportM
 	return ptrs;
 }
 
+std::vector<QVector3D> Hix::Support::SupportRaftManager::getSupportBasePts() const
+{
+	std::vector<QVector3D> basePts;
+	basePts.reserve(_supports.size());
+	for (auto& pair : _supports)
+	{
+		auto editStatus = _pendingSupports.find(pair.first);
+		if (editStatus == _pendingSupports.end() || editStatus->second == EditType::Added)
+		{
+			basePts.emplace_back(pair.first->getBasePt());
+		}
+	}
+	return basePts;
+}
+
 void Hix::Support::SupportRaftManager::addSupport(const std::variant<VertexConstItr, FaceOverhang>& supportSpec)
 {
 	if (!_supportExist)
@@ -137,6 +152,7 @@ void Hix::Support::SupportRaftManager::cancelEdits()
 
 void Hix::Support::SupportRaftManager::generateSupport()
 {
+
 	switch (_supportType)
 	{
 	case SlicingConfiguration::SupportType::None:
@@ -158,15 +174,17 @@ void Hix::Support::SupportRaftManager::generateSupport()
 
 void Hix::Support::SupportRaftManager::generateRaft()
 {
+
 	switch (_raftType)
 	{
 	case SlicingConfiguration::RaftType::None:
 		break;
 	case SlicingConfiguration::RaftType::General:
-		for (auto& each : _supports)
-			_basePts.emplace_back(each.first->getBasePt());
-		_raft = std::make_unique<CylindricalRaft>(this, _basePts);
+	{
+		auto basePts = getSupportBasePts();
+		_raft = std::make_unique<CylindricalRaft>(this, basePts);
 		break;
+	}
 	default:
 		break;
 	}
