@@ -17,6 +17,7 @@ namespace Hix
 		public:
 			virtual void onEntered()=0;
 			virtual void onExited() =0;
+			virtual ~Hoverable();
 		};
 	}
 }

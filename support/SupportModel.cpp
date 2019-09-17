@@ -11,11 +11,19 @@ using namespace Hix::Support;
 Hix::Support::SupportModel::SupportModel(SupportRaftManager* manager, std::variant<VertexConstItr, FaceOverhang> overhang):
 	Hix::Render::SceneEntityWithMaterial(manager->getModel()), _manager(manager), _overhang(overhang)
 {
+	initHitTest();
 	setHighlight(false);
 }
 
 Hix::Support::SupportModel::~SupportModel()
 {
+}
+
+void Hix::Support::SupportModel::initHitTest()
+{
+	addComponent(&_layer);
+	_layer.setRecursive(false);
+
 }
 
 void Hix::Support::SupportModel::clicked(Hix::Input::MouseEventData&, const Qt3DRender::QRayCasterHit&)

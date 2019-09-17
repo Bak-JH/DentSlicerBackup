@@ -14,6 +14,7 @@
 #include "input/raycastcontroller.h"
 #include "input/Draggable.h"
 #include "input/Clickable.h"
+#include "input/HitTestAble.h"
 #include "support/SupportRaftManager.h"
 
 #include "render/ModelMaterial.h"
@@ -50,9 +51,19 @@ using namespace Qt3DExtras;
 
 class GLModel;
 class OverhangPoint;
+namespace Hix
+{
+	namespace Features
+	{
+		namespace Cut
+		{
+			class DrawingPlane;
+		}
+	}
+}
 
 
-class GLModel : public Hix::Render::SceneEntityWithMaterial, public Hix::Input::Draggable, public Hix::Input::Clickable
+class GLModel : public Hix::Render::SceneEntityWithMaterial, public Hix::Input::Draggable, public Hix::Input::Clickable, public Hix::Input::HitTestAble
 {
     Q_OBJECT
 public:
@@ -84,9 +95,6 @@ public:
     // feature offset
     double shellOffsetFactor;
 
-    std::vector<QVector3D> cuttingPoints;
-    std::vector<QEntity*> cuttingContourCylinders;
-    Plane cuttingPlane;
 
     // used for layer view
     Qt3DExtras:: QPlaneMesh* layerViewPlane = nullptr;
@@ -97,11 +105,7 @@ public:
     //Qt3DExtras::QPhongAlphaMaterial *layerViewPlaneMaterial = nullptr;
 
 
-    Qt3DExtras::QPlaneMesh* clipPlane[2];
-    Qt3DCore::QEntity* planeEntity[2];
-    Qt3DCore::QTransform *planeTransform[2];
-    Qt3DExtras::QPhongAlphaMaterial *planeMaterial = nullptr;
-    QObjectPicker* planeObjectPicker[2];
+
 
     std::vector<Qt3DExtras::QSphereMesh*> sphereMesh;
     std::vector<Qt3DCore::QEntity*> sphereEntity;
@@ -176,8 +180,14 @@ public:
 	void rotateModelMesh(QMatrix4x4 matrix, bool update = true);
 	void scaleModelMesh(float scaleX, float scaleY, float scaleZ);
 	void setZToBed();
+protected:
+	void initHitTest()override;
 
 private:
+	//cutting
+	std::unique_ptr<Hix::Features::Cut::DrawingPlane> _cuttingPlane;
+
+
 	QVector3D getPrimitiveColorCode(const Hix::Engine3D::Mesh* mesh, FaceConstItr faceItr)override;
 
     //Order is important! Look at the initializer list in constructor
@@ -208,12 +218,6 @@ signals:
 
 public slots:
 	void updateModelMesh();
-
-    // object picker parts
-    void mouseEnteredFreeCutSphere();
-    void mouseExitedFreeCutSphere();
-    void mouseClickedFreeCutSphere(Qt3DRender::QPickEvent*);
-    void mouseClickedFreeCut(Qt3DRender::QPickEvent*);
     void mouseClickedLayflat(MeshFace shadow_meshface);
 
 
@@ -227,11 +231,8 @@ public slots:
     void generateLayFlat();
 
     // Model Cut
-    void removeCuttingContour();
-    void generateCuttingContour(std::vector<QVector3D> cuttingContour);
-    void regenerateCuttingPoint(std::vector<QVector3D> cuttingContour);
-    void generateClickablePlane();
-    void generatePlane();
+
+    void generatePlane(int type);
     void removePlane();
     void modelCut();
     void cutModeSelected(int type);

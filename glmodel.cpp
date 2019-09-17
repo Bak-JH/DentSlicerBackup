@@ -20,7 +20,8 @@
 #include <Qt3DCore/qpropertyupdatedchange.h>
 #include "DentEngine/src/configuration.h"
 #include "feature/Extrude.h"
-
+#include "feature/cut/DrawingPlane.h"
+#include "feature/cut/modelCutZAxis.h"
 
 
 #define ATTRIBUTE_SIZE_INCREMENT 200
@@ -34,6 +35,7 @@ using namespace Utils::Math;
 using namespace Hix::Engine3D;
 using namespace Hix::Input;
 using namespace Hix::Render;
+
 GLModel::GLModel(QObject* mainWindow, QEntity*parent, Mesh* loadMesh, QString fname, int id)
     : SceneEntityWithMaterial(parent)
 	, _supportRaftManager(this)
@@ -42,6 +44,7 @@ GLModel::GLModel(QObject* mainWindow, QEntity*parent, Mesh* loadMesh, QString fn
     , cutMode(1)
     , ID(id)
 {
+	initHitTest();
     qDebug() << "new model made _______________________________"<<this<< "parent:"<<parent;
 
     // set shader mode and color
@@ -61,15 +64,10 @@ GLModel::GLModel(QObject* mainWindow, QEntity*parent, Mesh* loadMesh, QString fn
 		delete _mesh;
 		_mesh = loadMesh;
 	}
-
-
-
-
+	//applyGeometry();
 	// 승환 25%
 	qmlManager->setProgress(0.23);
 	setMesh(_mesh);
-	//applyGeometry();
-
 	// 승환 50%
 	qmlManager->setProgress(0.49);
 	//Qt3DExtras::QDiffuseMapMaterial* diffuseMapMaterial = new Qt3DExtras::QDiffuseMapMaterial();
@@ -96,8 +94,6 @@ GLModel::GLModel(QObject* mainWindow, QEntity*parent, Mesh* loadMesh, QString fn
 	sphereMaterial.reserve(50);
 	sphereTransform.reserve(50);
 	sphereObjectPicker.reserve(50);
-	cuttingPoints.reserve(50);
-	cuttingContourCylinders.reserve(50);
 
 	QObject::connect(this, SIGNAL(_updateModelMesh()), this, SLOT(updateModelMesh()));
 
@@ -268,93 +264,9 @@ void GLModel::updateModelMesh(){
 
 
 
-void GLModel::mouseEnteredFreeCutSphere()
-{
-    QCursor cursorEraser = QCursor(QPixmap(":/Resource/cursor_eraser.png"));
-    QApplication::setOverrideCursor(cursorEraser);
-
-}
-
-void GLModel::mouseExitedFreeCutSphere()
-{
-    qmlManager->resetCursor();
-}
-void GLModel::mouseClickedFreeCutSphere(Qt3DRender::QPickEvent* pick)
-{
-    qmlManager->resetCursor();
-
-    if(cuttingPoints.size() < 1)
-        return;
-
-    QVector2D pickPosition = (QVector2D)pick->position();
-
-    int minIdx = 0;
-    float min = qmlManager->world2Screen(cuttingPoints[0]).distanceToPoint(pickPosition);
-    for (int i=0; i<cuttingPoints.size(); i++){
-        if (qmlManager->world2Screen(cuttingPoints[i]).distanceToPoint(pickPosition) < min){
-            minIdx = i;
-            min = qmlManager->world2Screen(cuttingPoints[i]).distanceToPoint(pickPosition);
-        }
-    }
-
-    qDebug() << "min idx  " << minIdx;
-    removeCuttingPoint(minIdx);
-    removeCuttingContour();
-    if (cuttingPoints.size() >=2){
-        generateCuttingContour(cuttingPoints);
-        regenerateCuttingPoint(cuttingPoints);
-    }
-}
-
-void GLModel::mouseClickedFreeCut(Qt3DRender::QPickEvent* pick)
-{
-    /*if ((pick->position().x() < 260 && pick->position().y() < 330)|| cutMode == 1 || pick->button() != Qt3DRender::QPickEvent::Buttons::LeftButton) // cut panel and if cut mode isn't freecut
-        return;
-
-    QVector3D v = pick->localIntersection();
-    QVector3D result_v = QVector3D(v.x(), -v.z(), v.y());
-    result_v = result_v*2;
-
-    qDebug()<< "moiuse clicked freecut : " << v << result_v;
-
-    bool found_nearby_v = false;
-
-
-    for (int i=0; i< cuttingPoints.size(); i++){
-        if (result_v.distanceToPoint(cuttingPoints[i]) <0.5f){;
-            removeCuttingPoint(i);
-            found_nearby_v = true;
-            break;
-        }
-    }
-
-    if (!found_nearby_v){
-        addCuttingPoint(result_v);
-    }
-
-    // remove cutting contour and redraw cutting contour
-    removeCuttingContour();
-    if (cuttingPoints.size() >=2){
-        qDebug() << "tt";
-        generateCuttingContour(cuttingPoints);
-        regenerateCuttingPoint(cuttingPoints);
-    }
-
-
-    if (cuttingPoints.size() >= 3)
-        QMetaObject::invokeMethod(qmlManager->cutPopup, "colorApplyFinishButton", Q_ARG(QVariant, 2));
-    else
-        QMetaObject::invokeMethod(qmlManager->cutPopup, "colorApplyFinishButton", Q_ARG(QVariant, 0));
-    */
-}
-
 
 void GLModel::mouseClickedLayflat(MeshFace shadow_meshface){
-    /*
-    qDebug() << "layflat picker!";
-    QPickTriangleEvent *trianglePick = static_cast<QPickTriangleEvent*>(pick);
-    MeshFace shadow_meshface = _mesh->faces[trianglePick->triangleIndex()];
-    */
+
     unselectMeshFaces();
     QVector3D tmp_fn = shadow_meshface.fn;
     Qt3DCore::QTransform tmp;
@@ -367,283 +279,41 @@ void GLModel::mouseClickedLayflat(MeshFace shadow_meshface){
     tmp.setRotationX(angleX);
     tmp.setRotationY(angleY);
     rotateModelMesh(tmp.matrix());
-    //QObject::disconnect(m_objectPicker,SIGNAL(released(Qt3DRender::QPickEvent*)), this, SLOT(mouseClickedLayflat(Qt3DRender::QPickEvent*)));
-    //delete m_objectPicker;
-    ////m_objectPicker->setEnabled(true);
-    //closeLayflat();
+
 
     emit resetLayflat();
 }
 
 		
-void GLModel::generateClickablePlane(){
-    generatePlane();
-    for (int i=0;i<2;i++){
-       qDebug() << "generated clickable plane";
-    }
-    return;
-}
-
-void GLModel::removeCuttingContour(){
-    qDebug() << "in the remove cutting contour " << cuttingContourCylinders.size();
-
-    for (int i=0; i<cuttingContourCylinders.size(); i++){
-        cuttingContourCylinders[i]->deleteLater();
-    }
-    cuttingContourCylinders.clear();
-    if (cuttingPoints.size() < 3)
-        QMetaObject::invokeMethod(qmlManager->cutPopup, "colorApplyFinishButton", Q_ARG(QVariant, 0));
-}
-void GLModel::regenerateCuttingPoint(std::vector<QVector3D> points){
-    return;
-    int temp = points.size();
-    /* This function is working with strange logic(make 3 times more point and delete ),  fix it later */
-  \
-
-    for (int i=0; i<temp; i++){
-        QVector3D temp = points[i] + QVector3D(0,0,110);
-
-        addCuttingPoint(temp);
-        //addCuttingPoint((QVector3D)sphereTransform[i]->translation());
-
-        qDebug() << "tttt    " << points[i] << (QVector3D)sphereTransform[i]->translation();
-    }
-
-    for (int i=0; i<temp; i++){
-        qDebug() << "remove";
-        removeCuttingPoint(0);
-    }
-
-}
-
-void GLModel::generateCuttingContour(std::vector<QVector3D> cuttingContour){
-    for (int cvi=0; cvi<cuttingContour.size(); cvi++){
-        qDebug() << "pos   " << cvi;
-    }
-
-    for (int cvi=0; cvi<cuttingContour.size()-1; cvi++){
-        QVector3D to = cuttingContour[cvi];
-        to = QVector3D(to.x(), to.y(), 100.0f);
-        QVector3D from = cuttingContour[(cvi+1)%cuttingContour.size()];
-        from = QVector3D(from.x(), from.y(), 100.0f);
-        double w, h, d, l, tx, ty, tz, lxz, anglex, angley;
-        w = to.x() - from.x();
-        h = to.y() - from.y();
-        d = to.z() - from.z();
-        l = sqrt(w*w + h*h + d*d);
-        lxz = sqrt(w*w + d*d);
-        tx = from.x() + w/2;
-        ty = from.y() + h/2;
-        tz = from.z() + d/2;
-        anglex = (l==0)? 90:acos(h/l)*180/3.14159265;
-        angley = (lxz==0)? 90:acos(d/lxz)*180/3.14159265;
-
-        QVector3D QVx(static_cast<float>(1), static_cast<float>(0), static_cast<float>(0));
-        QVector3D QVy(static_cast<float>(0), static_cast<float>(((w<0)?-1:1)), static_cast<float>(0));
-
-        // Cylinder shape data
-        Qt3DExtras::QCylinderMesh *cylinder = new Qt3DExtras::QCylinderMesh();
-        cylinder->setRadius(.1f);
-
-        cylinder->setLength(static_cast<float>(l));
-        cylinder->setRings(100);
-        cylinder->setSlices(20);
-
-        // CylinderMesh Transform
-        Qt3DCore::QTransform *cylinderTransform = new Qt3DCore::QTransform();
-        cylinderTransform->setScale(1.0f);
-        cylinderTransform->setRotation(Qt3DCore::QTransform::fromAxesAndAngles(QVx,static_cast<float>(anglex), QVy, static_cast<float>(angley)));
-        //cylinderTransform->setTranslation(QVector3D(static_cast<float>(tx), static_cast<float>(ty), static_cast<float>(tz)));
-        cylinderTransform->setTranslation(QVector3D(static_cast<float>(tx), static_cast<float>(ty), 100));
-
-        Qt3DExtras::QPhongMaterial *cylinderMaterial = new Qt3DExtras::QPhongMaterial();
-
-        cylinderMaterial->setAmbient(QColor(QRgb(0x0086AA)));
-        cylinderMaterial->setDiffuse(QColor(QRgb(0x0086AA)));
-        cylinderMaterial->setSpecular(QColor(QRgb(0x0086AA)));
-        /*
-        cylinderMaterial->setAmbient(QColor(QRgb(0x004F6B)));
-        cylinderMaterial->setDiffuse(QColor(QRgb(0x004F6B)));
-        cylinderMaterial->setSpecular(QColor(QRgb(0x004F6B)));
-        */
-        cylinderMaterial->setShininess(0.0f);
-        // Cylinder
-        QEntity* m_cylinderEntity = new Qt3DCore::QEntity(this);
-        m_cylinderEntity->addComponent(cylinder);
-        m_cylinderEntity->addComponent(cylinderMaterial);
-        m_cylinderEntity->addComponent(cylinderTransform);
-        cuttingContourCylinders.push_back(m_cylinderEntity);
-    }
-
-    if (cuttingPoints.size() >= 3)
-        QMetaObject::invokeMethod(qmlManager->cutPopup, "colorApplyFinishButton", Q_ARG(QVariant, 2));
-}
-
-void GLModel::generatePlane(){
-    qDebug() << "generate plane called";
-    removePlane();
-    if (cuttingPoints.size()<3){
-        qDebug()<<"Error: There is not enough vectors to render a plane.";
-        return;
-    }
-
-    QVector3D v1;
-    QVector3D v2;
-    QVector3D v3;
-    v1=cuttingPoints[cuttingPoints.size()-3];
-    v2=cuttingPoints[cuttingPoints.size()-2];
-    v3=cuttingPoints[cuttingPoints.size()-1];
-    planeMaterial = new Qt3DExtras::QPhongAlphaMaterial();
-    planeMaterial->setAmbient(QColor(QRgb(0xF4F4F4)));
-    planeMaterial->setDiffuse(QColor(QRgb(0xF4F4F4)));
-    planeMaterial->setSpecular(QColor(QRgb(0xF4F4F4)));
-    planeMaterial->setAlpha(0.5f);
-
-    // set cutting plane
-    cuttingPlane[0] = v1;
-    cuttingPlane[1] = v2;
-    cuttingPlane[2] = v3;
-
-    QVector3D world_origin(0,0,0);
-    QVector3D original_normal(0,1,0);
-    QVector3D desire_normal(QVector3D::normal(v1,v2,v3)); //size=1
-    float angle = qAcos(QVector3D::dotProduct(original_normal,desire_normal))*180/M_PI;
-    QVector3D crossproduct_vector(QVector3D::crossProduct(original_normal,desire_normal));
-
-    for (int i=0;i<2;i++){
-        planeEntity[i] = new Qt3DCore::QEntity(this);
-        //qDebug() << "generatePlane---------------------==========-=-==-" << parentModel;
-        clipPlane[i]=new Qt3DExtras::QPlaneMesh(this);
-        clipPlane[i]->setHeight(200.0);
-        clipPlane[i]->setWidth(200.0);
-
-        planeTransform[i]=new Qt3DCore::QTransform();
-        planeTransform[i]->setRotation(QQuaternion::fromAxisAndAngle(crossproduct_vector, angle+180*i));
-        planeTransform[i]->setTranslation(desire_normal*(-world_origin.distanceToPlane(v1,v2,v3))
-                                          + m_transform.translation());
-
-        planeObjectPicker[i] = new Qt3DRender::QObjectPicker;//planeEntity[i]);
-
-        planeObjectPicker[i]->setHoverEnabled(true);
-        planeObjectPicker[i]->setEnabled(true);
-        //QObject::connect(planeObjectPicker[i], SIGNAL(clicked(Qt3DRender::QPickEvent*)), this, SLOT(mouseClicked(Qt3DRender::QPickEvent*)));
-        QObject::connect(planeObjectPicker[i], SIGNAL(released(Qt3DRender::QPickEvent*)), this, SLOT(mouseClickedFreeCut(Qt3DRender::QPickEvent*)));
 
 
-        planeEntity[i]->addComponent(planeObjectPicker[i]);
+void GLModel::generatePlane(int type){
 
-        planeEntity[i]->addComponent(clipPlane[i]);
-        planeEntity[i]->addComponent(planeTransform[i]); //jj
-        planeEntity[i]->addComponent(planeMaterial);
-    }
+	//generate drawing plane
+	_cuttingPlane.reset(new Hix::Features::Cut::DrawingPlane(this)); 
+	_cuttingPlane->enablePlane(true);
+	//if flat cut
+	if (type == 1)
+	{
 
-    removeCuttingPoints();
-    //modelCut();
+	}
+	else if (type == 2)
+	{
+		_cuttingPlane->enableDrawing(true);
+		//want cutting plane to be over model mesh
+		float zOverModel = _mesh->z_max() + 0.1f;
+		_cuttingPlane->transform().setTranslation(QVector3D(0, 0, zOverModel));
+		qmlManager->getRayCaster().setHoverEnabled(true);
+	}
 }
 
 void GLModel::removePlane(){
-    //qDebug() << "--remove plane called--" << this << parentModel;
-    if (planeMaterial == nullptr){
-        qDebug() << "## parentModel have no planeMaterial";
-        return;
-    }
-    delete planeMaterial;
-    planeMaterial = nullptr;
-    for (int i=0;i<2;i++){
-        if (clipPlane[i] != nullptr){
-            delete clipPlane[i];
-            clipPlane[i] = nullptr;
-        }
-        if (planeTransform[i] != nullptr){
-            delete planeTransform[i];
-            planeTransform[i] = nullptr;
-        }
-        if (planeObjectPicker[i] != nullptr){
-            //QObject::disconnect(planeObjectPicker[i], SIGNAL(clicked(Qt3DRender::QPickEvent*)), this, SLOT(mouseClickedFreeCut(Qt3DRender::QPickEvent*)));
-            delete planeObjectPicker[i];
-            planeObjectPicker[i] = nullptr;
-        }
-        if (planeEntity[i] != nullptr){
-            delete planeEntity[i];
-            planeEntity[i] = nullptr;
-        }
-    }
-
-}
-
-void GLModel::addCuttingPoint(QVector3D v){
-    QVector3D tmp = m_transform.translation();
-    float zlength = _mesh->z_max() - _mesh->z_min();
-    cuttingPoints.push_back(v);
-
-    sphereMesh.push_back(new Qt3DExtras::QSphereMesh);
-    sphereMesh[sphereMesh.size()-1]->setRadius(0.4);
-
-    sphereTransform.push_back(new Qt3DCore::QTransform);
-    //sphereTransform[sphereTransform.size()-1]->setTranslation(v + QVector3D(tmp.x(),tmp.y(), -_mesh->z_min()));
-    //v = QVector3D(v.x(),v.y(),0);
-    sphereTransform[sphereTransform.size()-1]->setTranslation(v + QVector3D(tmp.x(),tmp.y(), 200));
-
-    sphereMaterial.push_back(new Qt3DExtras::QPhongMaterial());
-    sphereMaterial[sphereMaterial.size()-1]->setAmbient(QColor(QRgb(0x000000)));
-    sphereMaterial[sphereMaterial.size()-1]->setDiffuse(QColor(QRgb(0x000000)));
-    sphereMaterial[sphereMaterial.size()-1]->setSpecular(QColor(QRgb(0x000000)));
-    sphereMaterial[sphereMaterial.size()-1]->setShininess(0.0f);
-
-    sphereObjectPicker.push_back(new Qt3DRender::QObjectPicker);
-    sphereObjectPicker[sphereObjectPicker.size()-1]->setEnabled(true);
-    sphereObjectPicker[sphereObjectPicker.size()-1]->setHoverEnabled(true);
-
-    sphereEntity.push_back(new Qt3DCore::QEntity(this));
-    sphereEntity[sphereEntity.size()-1]->addComponent(sphereMesh[sphereMesh.size()-1]);
-    sphereEntity[sphereEntity.size()-1]->addComponent(sphereTransform[sphereTransform.size()-1]);
-    sphereEntity[sphereEntity.size()-1]->addComponent(sphereMaterial[sphereMaterial.size()-1]);
-
-    QObject::connect(sphereObjectPicker[sphereObjectPicker.size()-1], SIGNAL(entered()), this, SLOT(mouseEnteredFreeCutSphere()));
-    QObject::connect(sphereObjectPicker[sphereObjectPicker.size()-1], SIGNAL(exited()), this, SLOT(mouseExitedFreeCutSphere()));
-    QObject::connect(sphereObjectPicker[sphereObjectPicker.size()-1], SIGNAL(clicked(Qt3DRender::QPickEvent*)), this, SLOT(mouseClickedFreeCutSphere(Qt3DRender::QPickEvent*)));
-    sphereEntity[sphereEntity.size()-1]->addComponent(sphereObjectPicker[sphereObjectPicker.size()-1]);
-
-}
-
-void GLModel::removeCuttingPoint(int idx){
-    qDebug()<< "cutting points : " << cuttingPoints.size();
-
-    sphereEntity[idx]->removeComponent(sphereMesh[idx]);
-    sphereEntity[idx]->removeComponent(sphereTransform[idx]);
-    sphereEntity[idx]->removeComponent(sphereMaterial[idx]);
-    sphereEntity[idx]->removeComponent(sphereObjectPicker[idx]);
-    sphereEntity[idx]->deleteLater();
-    sphereMesh[idx]->deleteLater();
-    sphereTransform[idx]->deleteLater();
-    sphereMaterial[idx]->deleteLater();
-    sphereObjectPicker[idx]->deleteLater();
-    sphereEntity.erase(sphereEntity.begin()+idx);
-    sphereMesh.erase(sphereMesh.begin()+idx);
-    sphereTransform.erase(sphereTransform.begin()+idx);
-    sphereMaterial.erase(sphereMaterial.begin()+idx);
-    sphereObjectPicker.erase(sphereObjectPicker.begin()+idx);
-    cuttingPoints.erase(cuttingPoints.begin()+idx);
-}
-
-void GLModel::removeCuttingPoints(){
-    for (int i=0; i<sphereEntity.size(); i++){
-        sphereEntity[i]->removeComponent(sphereMesh[i]);
-        sphereEntity[i]->removeComponent(sphereTransform[i]);
-        sphereEntity[i]->removeComponent(sphereMaterial[i]);
-        sphereEntity[i]->removeComponent(sphereObjectPicker[i]);
-        sphereEntity[i]->deleteLater();
-        sphereMesh[i]->deleteLater();
-        sphereTransform[i]->deleteLater();
-        sphereMaterial[i]->deleteLater();
-        sphereObjectPicker[i]->deleteLater();
-    }
-    sphereEntity.clear();
-    sphereMesh.clear();
-    sphereTransform.clear();
-    sphereMaterial.clear();
-    sphereObjectPicker.clear();
-    cuttingPoints.clear();
+	//freecut disable hovering
+	if (cutMode == 2)
+	{
+		qmlManager->getRayCaster().setHoverEnabled(false);
+	}
+	_cuttingPlane.reset();
 }
 
 void GLModel::removeModelPartList(){
@@ -659,33 +329,26 @@ void GLModel::removeModelPartList(){
 }
 
 void GLModel::modelCut(){
-    qDebug() << "modelcut called" << cutMode;
-    if(cutMode == 0)
-        return ;
-    if(cutMode == 2 && cuttingPoints.size() < 3)
-        return ;
 
     qmlManager->openProgressPopUp();
 
-	auto lmesh = new Mesh();
-	auto rmesh = new Mesh();
+
     if (cutMode == 1){ // flat cut
-        if (cuttingPlane.size() != 3){
-            return;
-        }
+		auto lmesh = new Mesh();
+		auto rmesh = new Mesh();
         if (this->shellOffsetActive && isFlatcutEdge == true) {
             getSliderSignal(0.0);
         }
-
-
-        bisectModelByPlane(lmesh, rmesh, _mesh, cuttingPlane, cutFillMode);
-
+		bool fillCuttingSurface = cutFillMode == 2;
+		Hix::Features::Cut::ZAxisCutTask task(_mesh, lmesh, rmesh, _cuttingPlane->transform().translation().z(), fillCuttingSurface);
         emit bisectDone(lmesh, rmesh);
 
     } else if (cutMode == 2){ // free cut
-        if (cuttingPoints.size() >= 3){
-
-            cutAway(lmesh, rmesh, _mesh, cuttingPoints, cutFillMode);
+		auto cuttingContour = _cuttingPlane->contour();
+        if (cuttingContour.size() >= 2){
+			auto lmesh = new Mesh();
+			auto rmesh = new Mesh();
+            cutAway(lmesh, rmesh, _mesh, cuttingContour, cutFillMode);
 
             if (lmesh->getFaces().size() == 0 || rmesh->getFaces().size() == 0){
 
@@ -742,10 +405,6 @@ void GLModel::generateRLModel(Mesh* lmesh, Mesh* rmesh){
 
     //deleteLater();
     removePlane();
-
-    removeCuttingPoints();
-    removeCuttingContour();
-
     // delete original model
     qmlManager->deleteModelFile(ID);
 
@@ -771,11 +430,12 @@ void GLModel::indentHollowShell(double radius){
 
 GLModel::~GLModel(){
 }
+void GLModel::initHitTest()
+{
+	addComponent(&_layer);
+	_layer.setRecursive(false);
 
-
-
-
-//when ray casting is not needed, ie) right click
+}
 
 void GLModel::clicked(MouseEventData& pick, const Qt3DRender::QRayCasterHit& hit)
 {
@@ -793,53 +453,6 @@ void GLModel::clicked(MouseEventData& pick, const Qt3DRender::QRayCasterHit& hit
 		throw std::runtime_error("trying to get tri idx from non tri hit");
 #endif
 
-
-
-	if (cutActive) {
-		if (cutMode == 1) {
-			qDebug() << "cut mode 1";
-
-		}
-		else if (cutMode == 2) {// && numPoints< sizeof(sphereEntity)/4) {
-			qDebug() << hit.localIntersection() << "pick" << cuttingPoints.size() << cuttingPoints.size();
-			QVector3D v = hit.localIntersection();
-			qDebug() << v.distanceToPoint(cuttingPoints[cuttingPoints.size() - 1]);
-
-            if(this != hit.entity())
-            {
-                //plane clicked
-                v = {v.x(), -v.z(), v.y()};
-            }
-
-			bool found_nearby_v = false;
-			for (int i = 0; i < cuttingPoints.size(); i++) {
-				if (v.distanceToPoint(cuttingPoints[i]) < 0.5f) {
-					removeCuttingPoint(i);
-					found_nearby_v = true;
-					break;
-				}
-			}
-
-			if (!found_nearby_v) {
-				qDebug() << "Check 0 " << cuttingPoints.size();
-				addCuttingPoint(v + m_transform.translation());
-				qDebug() << "Check 1 " << cuttingPoints.size();
-			}
-
-			removeCuttingContour();
-			if (cuttingPoints.size() >= 2) {
-				generateCuttingContour(cuttingPoints);
-				regenerateCuttingPoint(cuttingPoints);
-			}
-			//generatePlane();
-			//ft->ct->addCuttingPoint(parentModel, v);
-		}
-		else if (cutMode == 9999) {
-			qDebug() << "current cut mode :" << cutMode;
-			qmlManager->setProgress(1);
-			//return;
-		}
-	}
 
     //triangle index section
     if (hit.primitiveIndex() >= _mesh->getFaces().size())
@@ -960,25 +573,8 @@ void GLModel::dragEnded(Hix::Input::MouseEventData&)
 void GLModel::cutModeSelected(int type){
 
     qDebug() << "cut mode selected1" << type;
-    removeCuttingPoints();
-    //removePlane();
-    removeCuttingContour();
-    //removePlane();
     cutMode = type;
-    if (cutMode == 1){
-        addCuttingPoint(QVector3D(1,0,0));
-        addCuttingPoint(QVector3D(1,1,0));
-        addCuttingPoint(QVector3D(2,0,0));
-        generatePlane();
-    } else if (cutMode == 2){
-        qDebug() << QCursor::pos();
-        addCuttingPoint(QVector3D(1,0,0));
-        addCuttingPoint(QVector3D(1,1,0));
-        addCuttingPoint(QVector3D(2,0,0));
-        generateClickablePlane(); // plane is also clickable
-    } else {
-
-    }
+	generatePlane(cutMode);
     return;
 }
 
@@ -996,25 +592,9 @@ void GLModel::getSliderSignal(double value){
             isFlatcutEdge = false;
         }
         float zlength = _mesh->z_max() - _mesh->z_min();
-        QVector3D v1(1,0, _mesh->z_min() + value*zlength/1.8);
-        QVector3D v2(1,1, _mesh->z_min() + value*zlength/1.8);
-        QVector3D v3(2,0, _mesh->z_min() + value*zlength/1.8);
+       
+		_cuttingPlane->transform().setTranslation(QVector3D(0,0, _mesh->z_min() + value*zlength/1.8));
 
-        QVector3D world_origin(0,0,0);
-        QVector3D original_normal(0,1,0);
-        QVector3D desire_normal(QVector3D::normal(v1,v2,v3)); //size=1
-        float angle = qAcos(QVector3D::dotProduct(original_normal,desire_normal))*180/M_PI+(value-1)*30;
-        QVector3D crossproduct_vector(QVector3D::crossProduct(original_normal,desire_normal));
-
-        for (int i=0;i<2;i++){
-            planeTransform[i]->setTranslation(desire_normal*(-world_origin.distanceToPlane(v1,v2,v3))
-                                              +  m_transform.translation());
-            planeEntity[i]->addComponent(planeTransform[i]);
-        }
-
-        cuttingPlane[0] = v1;
-        cuttingPlane[1] = v2;
-        cuttingPlane[2] = v3;
     } else if (hollowShellActive){
         // change radius of hollowShellSphere
         hollowShellRadius = value;
@@ -1438,8 +1018,6 @@ void GLModel::closeScale(){
 
 void GLModel::openCut(){
     cutActive = true;
-
-    cutModeSelected(0);
 }
 
 void GLModel::closeCut(){
@@ -1450,8 +1028,7 @@ void GLModel::closeCut(){
 
     cutActive = false;
     removePlane();
-    removeCuttingPoints();
-    removeCuttingContour();
+
 }
 
 void GLModel::openHollowShell(){
@@ -1473,13 +1050,8 @@ void GLModel::closeHollowShell(){
 void GLModel::openShellOffset(){
     qDebug() << "openShelloffset";
     shellOffsetActive = true;
-    addCuttingPoint(QVector3D(1,0,0));
-    addCuttingPoint(QVector3D(1,1,0));
-    addCuttingPoint(QVector3D(2,0,0));
+    generatePlane(1);
 
-    generatePlane();
-    //m_objectPicker->setHoverEnabled(false); // to reduce drag load
-    //m_objectPicker->setDragEnabled(false);
 }
 
 void GLModel::closeShellOffset(){
@@ -1490,8 +1062,6 @@ void GLModel::closeShellOffset(){
 
     shellOffsetActive = false;
     removePlane();
-    removeCuttingPoints();
-    removeCuttingContour();
 }
 
 void GLModel::changeViewMode(int viewMode) {
