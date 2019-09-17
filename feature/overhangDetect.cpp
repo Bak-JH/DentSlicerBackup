@@ -147,7 +147,6 @@ Overhangs Hix::OverhangDetect::detectOverhang(const Mesh* shellMesh)
 	XYzHasher ptHasher(2 * scfg->support_density, scfg->layer_height);
 
 	//this is needed to remove too close support points
-	std::unordered_set<FaceOverhang>sdfsdf;
 	std::unordered_map<size_t, FaceOverhang> faceHashedOverhangs;
 	std::unordered_map<size_t, std::variant<VertexConstItr, FaceOverhang>> allHashedOverhangs;
 	//get all local minimas
