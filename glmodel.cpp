@@ -64,19 +64,10 @@ GLModel::GLModel(QObject* mainWindow, QEntity*parent, Mesh* loadMesh, QString fn
 		delete _mesh;
 		_mesh = loadMesh;
 	}
-
-
-
-
+	//applyGeometry();
 	// 승환 25%
 	qmlManager->setProgress(0.23);
 	setMesh(_mesh);
-	//applyGeometry();
-	auto midPt = _mesh->z_max() + _mesh->z_min();
-	midPt = midPt / 2;
-	Hix::Features::Cut::ZAxisCutTask(_mesh, midPt);
-
-
 	// 승환 50%
 	qmlManager->setProgress(0.49);
 	//Qt3DExtras::QDiffuseMapMaterial* diffuseMapMaterial = new Qt3DExtras::QDiffuseMapMaterial();
@@ -348,7 +339,9 @@ void GLModel::modelCut(){
         if (this->shellOffsetActive && isFlatcutEdge == true) {
             getSliderSignal(0.0);
         }
-        bisectModelByPlane(lmesh, rmesh, _mesh, _cuttingPlane->transform().translation().z(), cutFillMode);
+		bool fillCuttingSurface = cutFillMode == 2;
+		Hix::Features::Cut::ZAxisCutTask task(_mesh, lmesh, rmesh, _cuttingPlane->transform().translation().z(), fillCuttingSurface);
+        //bisectModelByPlane(lmesh, rmesh, _mesh, _cuttingPlane->transform().translation().z(), );
         emit bisectDone(lmesh, rmesh);
 
     } else if (cutMode == 2){ // free cut
