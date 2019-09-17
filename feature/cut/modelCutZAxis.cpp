@@ -2,11 +2,16 @@
 using namespace Hix;
 using namespace Hix::Engine3D;
 using namespace Hix::Slicer;
-Hix::Features::Cut::ZAxisCutTask::ZAxisCutTask(const Engine3D::Mesh* originalMesh, float z): _origMesh(originalMesh), _cuttingPlane(z)
+using namespace ClipperLib;
+Hix::Features::Cut::ZAxisCutTask::ZAxisCutTask(const Mesh* originalMesh, Mesh* botMesh, Mesh* topMesh, float z, bool fillCutSurface):
+	_origMesh(originalMesh),_bottomMesh(botMesh), _topMesh(topMesh), _cuttingPlane(z), _fillCuttingSurface(fillCutSurface)
 {
 	divideTriangles();
 	generateCutContour();
-	generateCaps();
+	if (fillCutSurface)
+	{
+		generateCaps();
+	}
 	for (auto& contour : _contours)
 	{
 		for (auto& seg : contour.segments)
@@ -14,6 +19,8 @@ Hix::Features::Cut::ZAxisCutTask::ZAxisCutTask(const Engine3D::Mesh* originalMes
 			fillOverlap(seg);
 		}
 	}
+
+
 }
 
 tf::Taskflow& Hix::Features::Cut::ZAxisCutTask::getFlow()
@@ -47,6 +54,15 @@ void Hix::Features::Cut::ZAxisCutTask::divideTriangles()
 			_overlapFaces.insert(mf);
 		}
 	}
+	//add non cut faces to each halves
+	for (auto& each : _botFaces)
+	{
+		_bottomMesh->addFace(each);
+	}
+	for (auto& each : _topFaces)
+	{
+		_topMesh->addFace(each);
+	}
 }
 
 void Hix::Features::Cut::ZAxisCutTask::generateCutContour()
@@ -74,31 +90,115 @@ void Hix::Features::Cut::ZAxisCutTask::generateCaps()
 	//clipping;
 
 	Clipper clpr;
-	clpr.PreserveCollinear(true);
 	for (size_t idx = 0; idx < _contours.size(); idx++) { // divide into parallel threads
 		clpr.AddPath(pathCont[idx], ptSubject, true);
 	}
 	ClipperLib::PolyTree polytree;
 	clpr.Execute(ctUnion, polytree, pftNonZero, pftNonZero);
 
-	//map to float paths
-	std::unordered_map<ClipperLib::PolyNode*, 
+	//triangulate
+	Hix::Polyclipping::PolytreeCDT cdt(&fIntPtMap, &polytree);
+	auto triangulationResult =  cdt.triangulate();
 
-	auto curr = polytree.GetFirst();
-	size_t count = 0;
-	size_t fuck = 0;
-	while (curr != nullptr)
+	//add triangles
+	for (auto& pair : triangulationResult)
 	{
-		for (auto each : curr->Contour)
+		auto& cap = pair.second;
+		for (auto& trig : cap)
 		{
-			if (fIntPtMap.find(each) == fIntPtMap.end())
+			std::array<QVector3D, 3> vertices
 			{
-				++fuck;
-			}
-			++count;
+				QVector3D(trig[0], _cuttingPlane),
+				QVector3D(trig[1], _cuttingPlane),
+				QVector3D(trig[2], _cuttingPlane)
+
+			};
+			_bottomMesh->addFace(vertices[0], vertices[1], vertices[2]);
+			_topMesh->addFace(vertices[2], vertices[1], vertices[0]);
 		}
-		curr = curr->GetNext();
+	}
+}
+
+void Hix::Features::Cut::ZAxisCutTask::fillOverlap(const Hix::Slicer::ContourSegment& seg)
+{
+	auto face = seg.face;
+	if (!face.initialized())
+	{
+		return;
+	}
+	auto mvs = face->meshVertices();
+	std::vector<VertexConstItr> highs;
+	std::vector<VertexConstItr> lows;
+	VertexConstItr med;
+	for (size_t i = 0; i < 3; ++i)
+	{
+		auto& curr = mvs[i];
+		if (curr->position.z() < _cuttingPlane)
+		{
+			lows.emplace_back(curr);
+		}
+		else if (curr->position.z() > _cuttingPlane)
+		{
+			highs.emplace_back(curr);
+		}
+		else
+		{
+			med = curr;
+		}
+	}
+	//two cases, one where two edges cut, or only one edge is cut
+	if (med.initialized())
+	{
+		//one edge and vtx case
+		//f->t->h
+		//t->f->l
+		QVector3D from(seg.from, _cuttingPlane);
+		QVector3D to(seg.to, _cuttingPlane);
+
+		_topMesh->addFace(seg.from, seg.to, highs[0]->position);
+		_bottomMesh->addFace(seg.to, seg.from, lows[0]->position);
+	}
+	else
+	{
+		//two edges case
+		
+		Mesh* twoFacesAddedMesh, *oneFaceAddedMesh;
+		QVector3D from;
+		QVector3D to;
+		bool isPyramid = lows.size() > highs.size();
+		std::vector<VertexConstItr> majority(std::move(lows));
+		std::vector<VertexConstItr> minority(std::move(highs));
+		if (isPyramid)
+		{
+			// /_\ //
+			from = QVector3D(seg.from, _cuttingPlane);
+			to = QVector3D(seg.to, _cuttingPlane);
+			twoFacesAddedMesh = _bottomMesh;
+			oneFaceAddedMesh = _topMesh;
+		}
+		else
+		{
+			// \_/ //
+			from = QVector3D(seg.to, _cuttingPlane);
+			to = QVector3D(seg.from, _cuttingPlane);
+			majority.swap(minority);
+			twoFacesAddedMesh = _topMesh;
+			oneFaceAddedMesh = _bottomMesh;
+		}
+		//need to sort majority to winding order
+		HalfEdgeConstItr hintEdge;
+		face->getEdgeWithVertices(hintEdge,majority[0], majority[1]);
+		majority[0] = hintEdge->from;
+		majority[1] = hintEdge->to;
+
+		//face goes in this order, f-> t -> minority
+		oneFaceAddedMesh->addFace(from, to, minority[0]->position);
+		// maj[0]->t->f 
+		// maj[0]->maj[1]->t 
+		twoFacesAddedMesh->addFace(majority[0]->position, to, from);
+		twoFacesAddedMesh->addFace(majority[0]->position, majority[1]->position, to);
 	}
 
-	//copy bakjh here.
+
+
 }
