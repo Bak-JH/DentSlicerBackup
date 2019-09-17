@@ -13,7 +13,6 @@ namespace Hix
 		void moveContour(std::vector<QVector3D>& targetContour, const QVector3D& moveVector);
 		void rotateContour(std::vector<QVector3D>& targetContour,const QQuaternion& rotation);
 		void scaleContour(std::vector<QVector3D>& targetContour, float scale);
-
-
+		void scaleContourAroundCentoid(std::vector<QVector3D>& targetContour, float scale, QVector2D& centoid);
 	}
 }

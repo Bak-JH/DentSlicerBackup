@@ -34,7 +34,7 @@ void ExtrudePrivate::generateCylinderWalls(const std::vector<QVector3D> & from, 
 using namespace ExtrudePrivate;
 
 std::vector<QVector3D> Hix::Features::Extrusion::extrudeAlongPath(Engine3D::Mesh* destinationMesh, const QVector3D& normal,
-	const std::vector<QVector3D>& contour, const std::vector<QVector3D>& path, std::vector<std::vector<QVector3D>>& jointContours, const std::vector<float>* scale)
+	const std::vector<QVector3D>& contour, const std::vector<QVector3D>& path, std::vector<std::vector<QVector3D>>& jointContours, const std::vector<float>* scale, QVector2D* centoid)
 {
 
 	if (contour.size() < 3 || path.size() < 2)
@@ -75,7 +75,16 @@ std::vector<QVector3D> Hix::Features::Extrusion::extrudeAlongPath(Engine3D::Mesh
 	{
 		for (size_t i = 0; i < jointContours.size(); ++i)
 		{
-			scaleContour(jointContours[i], (*scale)[i]);
+			if (centoid)
+			{
+				scaleContourAroundCentoid(jointContours[i], (*scale)[i], *centoid);
+
+			}
+			else
+			{
+				scaleContour(jointContours[i], (*scale)[i]);
+
+			}
 		}
 	}
 	for (size_t i = 0; i < jointContours.size(); ++i)
