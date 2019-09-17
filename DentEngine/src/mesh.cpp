@@ -554,6 +554,30 @@ bool Mesh::addFace(QVector3D v0, QVector3D v1, QVector3D v2){
 	return true;
 }
 
+bool Mesh::addFace(const FaceConstItr& face)
+{
+	auto origMVs = face->meshVertices();
+	std::array<QVector3D, 3> vtxPos{
+		origMVs[0]->position,
+		origMVs[1]->position,
+		origMVs[2]->position
+	};
+	std::array<VertexItr, 3> fVtx;
+	fVtx[0] = addOrRetrieveFaceVertex(vtxPos[0]);
+	fVtx[1] = addOrRetrieveFaceVertex(vtxPos[1]);
+	fVtx[2] = addOrRetrieveFaceVertex(vtxPos[2]);
+	Hix::Engine3D::MeshFace mf;
+	mf.fn = face->fn;
+	faces.emplace_back(mf);
+	auto faceItr = faces.cend() - 1;
+	addHalfEdgesToFace(fVtx, faceItr);
+	fVtx[0]->calculateNormalFromFaces();
+	fVtx[1]->calculateNormalFromFaces();
+	fVtx[2]->calculateNormalFromFaces();
+	return true;
+}
+
+
 
 TrackedIndexedList<MeshFace>::const_iterator Mesh::removeFace(FaceConstItr faceItr){
 	//for each half edge, remove vertex relations
@@ -1089,7 +1113,7 @@ Paths3D Hix::Engine3D::contourConstruct3D(Paths3D hole_edges){
                     continue;
                 }
                 // prolong hole_edge 1 if end and start matches
-                if ((hole_edge1_it->end()-1)->position.distanceToPoint(hole_edge2_it->begin()->position) < VTX_INBOUND_DIST *0.05/ClipperLib::INT_PT_RESOLUTION){
+                if ((hole_edge1_it->end()-1)->position.distanceToPoint(hole_edge2_it->begin()->position) < VTX_INBOUND_DIST *0.05/Hix::Polyclipping::INT_PT_RESOLUTION){
                 //if (Vertex2Hash(*(hole_edge1_it->end()-1)) == Vertex2Hash(*hole_edge2_it->begin())){
                     //qDebug() << "erase";
                     dirty = true;
@@ -1097,7 +1121,7 @@ Paths3D Hix::Engine3D::contourConstruct3D(Paths3D hole_edges){
                     checked_its.push_back(hole_edge2_it);
                     //hole_edge2_it = hole_edges.erase(hole_edge2_it);
                     //qDebug() << "erased";
-                } else if ((hole_edge1_it->end()-1)->position.distanceToPoint((hole_edge2_it->end()-1)->position) < VTX_INBOUND_DIST *0.05/ClipperLib::INT_PT_RESOLUTION){
+                } else if ((hole_edge1_it->end()-1)->position.distanceToPoint((hole_edge2_it->end()-1)->position) < VTX_INBOUND_DIST *0.05/Hix::Polyclipping::INT_PT_RESOLUTION){
                 //} else if (Vertex2Hash(*(hole_edge1_it->end()-1)) == Vertex2Hash(*(hole_edge2_it->end()-1))){
                     //qDebug() << "erase";
                     dirty = true;

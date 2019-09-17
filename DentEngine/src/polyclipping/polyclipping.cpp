@@ -33,6 +33,13 @@ QVector2D Hix::Polyclipping::toFloatPt(const IntPoint& pt)
 	QVector2D fp((float)pt.X/ (float)Hix::Polyclipping::INT_PT_RESOLUTION, (float)pt.Y /(float)Hix::Polyclipping::INT_PT_RESOLUTION);
 	return fp;
 }
+
+
+p2t::Point* Hix::Polyclipping::toDoublePtHeap(const ClipperLib::IntPoint& pt)
+{
+	return new p2t::Point((float)pt.X / (float)Hix::Polyclipping::INT_PT_RESOLUTION, (float)pt.Y / (float)Hix::Polyclipping::INT_PT_RESOLUTION);
+}
+
 Path Hix::Polyclipping::toCLPath(const std::vector<QVector2D>& path)
 {
 	Path clipperPath;
@@ -90,4 +97,3 @@ bool Hix::Polyclipping::ptInPolytree(const QVector2D& pt, const ClipperLib::Poly
 	}
 	return !lastResultHole;
 }
-

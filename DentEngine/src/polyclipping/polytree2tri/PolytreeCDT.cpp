@@ -1,5 +1,6 @@
 #include "PolytreeCDT.h"
 #include <unordered_set>
+#include "../polyclipping.h"
 using namespace ClipperLib;
 using namespace Hix::Polyclipping;
 PolytreeCDT::PolytreeCDT(const ClipperLib::PolyTree* polytree): _tree(polytree)
@@ -33,7 +34,7 @@ std::unordered_map<PolyNode*, std::vector<PolytreeCDT::Triangle>> triangluateBFS
 	std::unordered_set<PolyNode*> solids;
 	std::deque<PolyNode*> q;
 	auto firstSolids = tree.Childs;
-	for (auto& each : firstSolids)
+	for (auto each : firstSolids)
 	{
 		solids.emplace(each);
 		q.emplace_back(each);
@@ -62,9 +63,10 @@ std::unordered_map<PolyNode*, std::vector<PolytreeCDT::Triangle>> triangluateBFS
 		{
 			cdt.AddHole(floatPathMap[hole]);
 		}
+		cdt.Triangulate();
 		auto p2tTrigs = cdt.GetTriangles();
 		//create vector to contain trigs
-		auto trigVector = result[eachSolid];
+		auto& trigVector = result[eachSolid];
 		trigVector.reserve(p2tTrigs.size());
 		//convert to more robust value trigs
 		for (auto& trig : p2tTrigs)
@@ -104,9 +106,42 @@ PolytreeCDT::~PolytreeCDT()
 
 void PolytreeCDT::toFloatPts()
 {
-
+	auto curr = _tree->GetFirst();
+	while (curr)
+	{
+		std::vector<p2t::Point*> floatPath;
+		floatPath.reserve(curr->Contour.size());
+		for (auto& point : curr->Contour)
+		{
+			floatPath.emplace_back(toDoublePtHeap(point));
+		}
+		_nodeFloatPtMap[curr] = floatPath;
+		curr = curr->GetNext();
+	}
 }
 
 void PolytreeCDT::toFloatPtsWithMap()
 {
+	auto curr = _tree->GetFirst();
+	while (curr)
+	{
+		std::vector<p2t::Point*> floatPath;
+		floatPath.reserve(curr->Contour.size());
+		for (auto& point : curr->Contour)
+		{
+			auto origFloatPt = _floatIntMap->find(point);
+			if (origFloatPt == _floatIntMap->end())
+			{
+				//no matching original float point detected
+				floatPath.emplace_back(toDoublePtHeap(point));
+			}
+			else
+			{
+				auto qVector = origFloatPt->second;
+				floatPath.emplace_back(new p2t::Point(qVector.x(), qVector.y()));
+			}
+		}
+		_nodeFloatPtMap[curr] = floatPath;
+		curr = curr->GetNext();
+	}
 }

@@ -219,14 +219,14 @@ void SVGexporterPrivate::writePolygon(const PolyNode* contour, bool isTemp, std:
 		{
 			point.X = -1 * point.X;
 		}
-		auto fp = ClipperLib::toFloatPt(point);
+		auto fp = Hix::Polyclipping::toFloatPt(point);
         content << std::fixed << 
 			fp.x()*scfg->pixel_per_mm/scfg->contraction_ratio
 			+ (scfg->resolution_x/2)<< "," << std::fixed << scfg->resolution_y/2
 			- fp.y()*scfg->pixel_per_mm/scfg->contraction_ratio << " "; // doesn't need 100 actually
 
         // just fit to origin
-        //outfile << std::fixed << (float)point.X/ClipperLib::INT_PT_RESOLUTION - scfg->origin.x() << "," << std::fixed << (float)point.Y/ClipperLib::INT_PT_RESOLUTION - scfg->origin.y() << " ";
+        //outfile << std::fixed << (float)point.X/Hix::Polyclipping::INT_PT_RESOLUTION - scfg->origin.x() << "," << std::fixed << (float)point.Y/Hix::Polyclipping::INT_PT_RESOLUTION - scfg->origin.y() << " ";
     }
     if (! contour->IsHole()){
         content << "\" style=\"fill: white\" />\n";
@@ -242,14 +242,14 @@ void SVGexporterPrivate::writePolygon(ClipperLib::Path& contour, bool isTemp, st
 		{
 			point.X = -1 * point.X;
 		}
-		auto fp = ClipperLib::toFloatPt(point);
+		auto fp = Hix::Polyclipping::toFloatPt(point);
         content << std::fixed << 
 			fp.x() * scfg->pixel_per_mm/scfg->contraction_ratio
 			+ (scfg->resolution_x/2) << "," << std::fixed << scfg->resolution_y/2
 			- fp.y() * scfg->pixel_per_mm / scfg->contraction_ratio << " "; // doesn't need 100 actually
 
         // just fit to origin
-        //outfile << std::fixed << (float)point.X/ClipperLib::INT_PT_RESOLUTION - scfg->origin.x() << "," << std::fixed << (float)point.Y/ClipperLib::INT_PT_RESOLUTION - scfg->origin.y() << " ";
+        //outfile << std::fixed << (float)point.X/Hix::Polyclipping::INT_PT_RESOLUTION - scfg->origin.x() << "," << std::fixed << (float)point.Y/Hix::Polyclipping::INT_PT_RESOLUTION - scfg->origin.y() << " ";
     }
     content << "\" style=\"fill: white\" />\n";
 }

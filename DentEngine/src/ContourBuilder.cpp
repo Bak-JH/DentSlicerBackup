@@ -2,8 +2,7 @@
 
 using namespace Hix::Slicer;
 using namespace Hix::Engine3D;
-
-
+using namespace ClipperLib;
 
 
 inline void rotateCW90(QVector3D& vec)
@@ -109,7 +108,7 @@ Path Contour::toPath(std::vector<QVector2D>& outFloatPath)const
 		{
 			outFloatPath.emplace_back(each.to);
 		}
-		path = ClipperLib::toCLPath(outFloatPath);
+		path = Hix::Polyclipping::toCLPath(outFloatPath);
 	}
 
 	return path;
@@ -197,6 +196,36 @@ ContourBuilder::ContourBuilder(const Mesh* mesh, std::unordered_set<FaceConstItr
 	:_mesh(mesh), _plane(z), _intersectList(intersectingFaces)
 {
 }
+
+
+QVector2D ContourBuilder::midPoint2D(VertexConstItr vtxA0, VertexConstItr vtxA1)
+{
+	QVector2D result;
+	//A0.z > A1.z
+	if (vtxA0->position.z() < vtxA1->position.z())
+	{
+		std::swap(vtxA0, vtxA1);
+	}
+	auto fullEdge = std::make_pair(vtxA0, vtxA1);
+	auto preCalc = _midPtLUT.find(fullEdge);
+	if (preCalc == _midPtLUT.end())
+	{
+		float x, y, zRatio;
+		zRatio = ((_plane - vtxA0->position.z()) / (vtxA1->position.z() - vtxA0->position.z()));
+		x = (vtxA1->position.x() - vtxA0->position.x()) * zRatio
+			+ vtxA0->position.x();
+		y = (vtxA1->position.y() - vtxA0->position.y()) * zRatio
+			+ vtxA0->position.y();
+		result = QVector2D(x, y);
+		_midPtLUT[fullEdge] = result;
+	}
+	else
+	{
+		result = preCalc->second;
+	}
+	return result;
+}
+
 
 
 void ContourBuilder::buildSegment(const FaceConstItr& mf)

@@ -34,35 +34,6 @@ QDebug Hix::Debug::operator<< (QDebug d, const Slices& obj) {
 
 
 
-QVector2D ContourBuilder::midPoint2D(VertexConstItr vtxA0, VertexConstItr vtxA1)
-{
-	QVector2D result;
-	//A0.z > A1.z
-	if (vtxA0->position.z() < vtxA1->position.z())
-	{
-		std::swap(vtxA0, vtxA1);
-	}
-	auto fullEdge = std::make_pair(vtxA0, vtxA1);
-	auto preCalc = _midPtLUT.find(fullEdge);
-	if (preCalc == _midPtLUT.end())
-	{
-		float x, y, zRatio;
-		zRatio = ((_plane - vtxA0->position.z()) / (vtxA1->position.z() - vtxA0->position.z()));
-		x = (vtxA1->position.x() - vtxA0->position.x()) * zRatio
-			+ vtxA0->position.x();
-		y = (vtxA1->position.y() - vtxA0->position.y()) * zRatio
-			+ vtxA0->position.y();
-		result = QVector2D(x, y);
-		_midPtLUT[fullEdge] = result;
-	}
-	else
-	{
-		result = preCalc->second;
-	}
-	return result;
-}
-
-
 
 
 
@@ -74,9 +45,9 @@ float minDistanceToContour(QVector3D from, ClipperLib::Path contour) {
 		ClipperLib::Path temp_path;
 		temp_path.push_back(contour[i]);
 		temp_path.push_back(contour[i + 1]);
-		QVector3D int2qv3 = QVector3D(((float)contour[i].X) / ClipperLib::INT_PT_RESOLUTION, ((float)contour[i].Y) / ClipperLib::INT_PT_RESOLUTION, from.z());
+		QVector3D int2qv3 = QVector3D(((float)contour[i].X) / Hix::Polyclipping::INT_PT_RESOLUTION, ((float)contour[i].Y) / Hix::Polyclipping::INT_PT_RESOLUTION, from.z());
 		IntPoint directionInt = contour[i + 1] - contour[i];
-		QVector3D direction = QVector3D(directionInt.X / ClipperLib::INT_PT_RESOLUTION, directionInt.Y / ClipperLib::INT_PT_RESOLUTION, 0);
+		QVector3D direction = QVector3D(directionInt.X / Hix::Polyclipping::INT_PT_RESOLUTION, directionInt.Y / Hix::Polyclipping::INT_PT_RESOLUTION, 0);
 		float cur_distance = from.distanceToLine(int2qv3, direction);
 		if (abs(min_distance) > cur_distance) {
 			min_distance = cur_distance;
