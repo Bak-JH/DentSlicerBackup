@@ -9,10 +9,7 @@ namespace Hix
 	{
 		namespace Extrusion
 		{
-			//extrude, can use starting face as end cap and remove starting faces.
-			void extrudeFaces(Engine3D::Mesh* destinationMesh, const std::unordered_set<Engine3D::FaceConstItr>& faces,
-				const std::unordered_set<Engine3D::FaceConstItr>& hintBoundaryFaces,
-				const QVector3D& direction, float length, bool removeStartingFaces, bool copyEndcap);
+
 
 
 			//extrude along a parth, returns endcap contour, given contour is on the same direction (CW, CCW) as the final end cap

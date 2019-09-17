@@ -1,4 +1,5 @@
 #include "Shapes2D.h"
+using namespace ClipperLib;
 std::vector<QVector3D> Hix::Shapes2D::generateHexagon(float radius)
 {
 	std::vector<QVector3D>hexagon;
@@ -29,7 +30,7 @@ std::vector<ClipperLib::Path> Hix::Shapes2D::combineContour(const std::vector<st
 	clPaths.reserve(contours.size());
 	for (auto& each : contours)
 	{
-		clPaths.emplace_back(ClipperLib::toCLPath(each));
+		clPaths.emplace_back(Hix::Polyclipping::toCLPath(each));
 	}
 	for (auto& each : clPaths)
 	{

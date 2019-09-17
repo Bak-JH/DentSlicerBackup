@@ -35,8 +35,6 @@ SceneEntity::SceneEntity(QEntity* parent)
 
 
 {
-	_layer.setRecursive(false);
-	addComponent(&_layer);
 	addComponent(&m_transform);
 
 
@@ -134,29 +132,6 @@ SceneEntity::~SceneEntity()
 {
 }
 
-
-
-void SceneEntity::setHitTestable(bool isEnable)
-{
-	if (_hitEnabled != isEnable)
-	{
-		_hitEnabled = isEnable;
-		if (_hitEnabled)
-		{
-			qmlManager->getRayCaster().addInputLayer(&_layer);
-		}
-		else
-		{
-			qmlManager->getRayCaster().removeInputLayer(&_layer);
-		}
-	}
-}
-
-bool SceneEntity::isHitTestable()
-{
-	return _hitEnabled;
-
-}
 
 
 const Qt3DCore::QTransform* SceneEntity::getTransform() const
