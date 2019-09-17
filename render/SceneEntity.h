@@ -43,12 +43,6 @@ namespace Hix
 			QVector3D getTranslation();
 			void setMatrix(const QMatrix4x4& matrix);
 
-			Qt3DRender::QLayer* getLayer();
-			
-			/***************Ray casting and hit test***************/
-			void setHitTestable(bool isEnabled);
-			bool isHitTestable();
-		
 
 
 		protected:
@@ -81,10 +75,8 @@ namespace Hix
 			Hix::Engine3D::Mesh* _mesh;
 
 			/***************Ray casting and hit test***************/
-			bool _hitEnabled = false;
 			bool _targetSelected = false;
 			FaceConstItr targetMeshFace; // used for object selection (specific area, like extension or labelling)
-			Qt3DRender::QLayer _layer;
 
 		};
 	}

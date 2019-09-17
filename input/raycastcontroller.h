@@ -63,6 +63,11 @@ namespace Hix
 			bool hoverEnabled()const;
 			bool mousePosInBound(const Qt3DInput::QMouseEvent* mv);
 			//returns true if successfully dragged, false otherwise
+			//to remove delete object reference
+			void hoverObjectDeleted(Hix::Input::Hoverable* justDeleted);
+			void draggableObjectDeleted(Hix::Input::Draggable* justDeleted);
+
+
 		public slots:
 			void mousePressed(Qt3DInput::QMouseEvent* mouse);
 			void mouseReleased(Qt3DInput::QMouseEvent* mouse);
