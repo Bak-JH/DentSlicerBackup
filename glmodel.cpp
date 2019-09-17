@@ -341,7 +341,6 @@ void GLModel::modelCut(){
         }
 		bool fillCuttingSurface = cutFillMode == 2;
 		Hix::Features::Cut::ZAxisCutTask task(_mesh, lmesh, rmesh, _cuttingPlane->transform().translation().z(), fillCuttingSurface);
-        //bisectModelByPlane(lmesh, rmesh, _mesh, _cuttingPlane->transform().translation().z(), );
         emit bisectDone(lmesh, rmesh);
 
     } else if (cutMode == 2){ // free cut
