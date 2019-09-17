@@ -196,6 +196,7 @@ namespace Hix
 			void reverseFace(FaceConstItr faceItr);
 			void reverseFaces();
             bool addFace(QVector3D v0, QVector3D v1, QVector3D v2);
+			bool addFace(const FaceConstItr& face);
 			TrackedIndexedList<MeshFace>::const_iterator removeFace(FaceConstItr f_it);
 			TrackedIndexedList<MeshVertex>& getVerticesNonConst();
 			TrackedIndexedList<MeshFace>& getFacesNonConst();

@@ -2,7 +2,6 @@
 
 #include "clipper/clipper.hpp"
 #include "poly2tri/poly2tri.h"
-#include "clip2tri/clip2tri.h"
 #include <QDebug>
 
 

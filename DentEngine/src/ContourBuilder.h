@@ -8,16 +8,6 @@
 
 namespace std
 {
-	template<>
-	struct hash<IntPoint>
-	{
-		//2D only!
-		std::size_t operator()(const IntPoint& pt)const
-		{
-			size_t digest = pt.X | pt.Y << 48;
-			return digest;
-		}
-	};
 
 	template<>
 	struct hash<QVector2D>
@@ -25,9 +15,9 @@ namespace std
 		//2D only!
 		std::size_t operator()(const QVector2D& pt)const
 		{
-			size_t x = (size_t)(pt.x());
-			size_t y = (size_t)(pt.y());
-			size_t digest = x | y << 16;
+			size_t x = (size_t)(pt.x() * Hix::Polyclipping::INT_PT_RESOLUTION);
+			size_t y = (size_t)(pt.y() * Hix::Polyclipping::INT_PT_RESOLUTION);
+			size_t digest = x | y << 32;
 			return digest;
 		}
 	};
@@ -91,7 +81,8 @@ namespace Hix
 			//void calculateDirection();
 			//bool isOutward();
 			std::deque<ContourSegment> segments;
-			Path toPath()const;//tmp
+			ClipperLib::Path toPath()const;//tmp
+			ClipperLib::Path toPath(std::vector<QVector2D>& outFloatPath)const;//tmp
 
 		private:
 			////bounds

@@ -2,8 +2,7 @@
 
 using namespace Hix::Slicer;
 using namespace Hix::Engine3D;
-
-
+using namespace ClipperLib;
 
 
 inline void rotateCW90(QVector3D& vec)
@@ -97,25 +96,31 @@ QVector2D Contour::to()const
 {
 	return segments.back().to;
 }
-
-Path Contour::toPath()const
+Path Contour::toPath(std::vector<QVector2D>& outFloatPath)const
 {
 	Path path;
 	if (!segments.empty())
 	{
-		std::vector<QVector2D> qPath;
-		qPath.reserve(segments.size() + 1);
+		outFloatPath.reserve(segments.size() + 1);
 
-		qPath.emplace_back(segments.front().from);
+		outFloatPath.emplace_back(segments.front().from);
 		for (auto& each : segments)
 		{
-			qPath.emplace_back(each.to);
+			outFloatPath.emplace_back(each.to);
 		}
-		path = ClipperLib::toCLPath(qPath);
+		path = Hix::Polyclipping::toCLPath(outFloatPath);
 	}
 
 	return path;
 }
+
+Path Contour::toPath()const
+{
+	std::vector<QVector2D> tmp;
+	return toPath(tmp);
+
+}
+
 void Contour::append(const Contour& appended)
 {
 #ifdef _STRICT_SLICER
@@ -193,6 +198,36 @@ ContourBuilder::ContourBuilder(const Mesh* mesh, std::unordered_set<FaceConstItr
 }
 
 
+QVector2D ContourBuilder::midPoint2D(VertexConstItr vtxA0, VertexConstItr vtxA1)
+{
+	QVector2D result;
+	//A0.z > A1.z
+	if (vtxA0->position.z() < vtxA1->position.z())
+	{
+		std::swap(vtxA0, vtxA1);
+	}
+	auto fullEdge = std::make_pair(vtxA0, vtxA1);
+	auto preCalc = _midPtLUT.find(fullEdge);
+	if (preCalc == _midPtLUT.end())
+	{
+		float x, y, zRatio;
+		zRatio = ((_plane - vtxA0->position.z()) / (vtxA1->position.z() - vtxA0->position.z()));
+		x = (vtxA1->position.x() - vtxA0->position.x()) * zRatio
+			+ vtxA0->position.x();
+		y = (vtxA1->position.y() - vtxA0->position.y()) * zRatio
+			+ vtxA0->position.y();
+		result = QVector2D(x, y);
+		_midPtLUT[fullEdge] = result;
+	}
+	else
+	{
+		result = preCalc->second;
+	}
+	return result;
+}
+
+
+
 void ContourBuilder::buildSegment(const FaceConstItr& mf)
 {
 	ContourSegment segment;
@@ -242,15 +277,23 @@ void ContourBuilder::buildSegment(const FaceConstItr& mf)
 			segment.to = QVector2D(middle[1]->position.x(), middle[1]->position.y());
 
 		}
+
 		//face == plane
 	}
-	//hint needs to be in correct direction
-	auto flipResult = segment.calcNormalAndFlip();
 
+	ContourSegment::FlipResult flipResult;
+	if (segment.from == segment.to)
+	{
+		flipResult = ContourSegment::FlipResult::UnknownDirection;
+	}
+	else
+	{
+		//hint needs to be in correct direction
+		flipResult = segment.calcNormalAndFlip();
+	}
 	//insert to container
 	_segments[mf] = segment;
 	auto& newSeg = _segments[mf];
-
 
 	//segment is too small and direction cannot be determinied
 	if (flipResult == ContourSegment::FlipResult::UnknownDirection)
