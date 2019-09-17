@@ -1193,7 +1193,7 @@ void GLModel::applyLabelInfo(QString text, int contentWidth, QString fontName, b
 
 void GLModel::generateText3DMesh()
 {
-    //qDebug() << "generateText3DMesh @@@@@" << this << this;
+    qDebug() << "generateText3DMesh @@@@@" << this << this;
     if (updateLock)
         return;
     updateLock = true;
@@ -1271,16 +1271,7 @@ void GLModel::generateText3DMesh()
 
 
 	Text3D text3d;
-	text3d.
-    generateText3DGeometry(&vertices, &verticesSize,
-                           &indices, &indicesSize,
-                           targetFont,
-                           targetText,
-                           depth,
-                           _mesh,
-                           -targetNormal,
-                           transform.matrix(),
-                           normalTransform.matrix());
+	text3d.generateText3D(targetFont,targetText, _mesh);
 
 
     qmlManager->setProgress(0.9);
@@ -1295,7 +1286,7 @@ void GLModel::generateText3DMesh()
 
     //}
 
-    //updateModelMesh();
+    updateModelMesh();
 
     qmlManager->setProgress(1);
 }
