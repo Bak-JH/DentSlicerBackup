@@ -94,7 +94,7 @@ struct SlicingConfiguration
 	RaftType raft_type = RaftType::General;
 
     // raft settings
-    float raft_thickness = 2.0f; // in mm
+    float raft_thickness = 1.0f; // in mm
 	float raft_base_radius()const;
 
     // support settings
