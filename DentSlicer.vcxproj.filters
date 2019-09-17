@@ -59,9 +59,6 @@
     <ClCompile Include="DentEngine\src\polyclipping\poly2tri\sweep\cdt.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="DentEngine\src\polyclipping\clip2tri\clip2tri.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="DentEngine\src\polyclipping\clipper\clipper.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -236,6 +233,30 @@
     <ClCompile Include="feature\Shapes2D.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>
+    <ClCompile Include="input\HitTestAble.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="render\LineMeshEntity.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="feature\cut\DrawingPlane.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="feature\cut\FreeCutPtWidget.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="input\Hoverable.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="input\Draggable.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="feature\cut\modelCutZAxis.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="DentEngine\src\polyclipping\polytree2tri\PolytreeCDT.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DentEngine\src\polyclipping\poly2tri\sweep\advancing_front.h">
@@ -245,9 +266,6 @@
       <Filter>Header Files</Filter>
     </QtMoc>
     <ClInclude Include="DentEngine\src\polyclipping\poly2tri\sweep\cdt.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="DentEngine\src\polyclipping\clip2tri\clip2tri.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="DentEngine\src\polyclipping\clipper\clipper.hpp">
@@ -260,9 +278,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="feature\convex_hull.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="feature\earcut.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="feature\extension.h">
@@ -569,6 +584,21 @@
       <Filter>Generated Files</Filter>
     </ClInclude>
     <ClInclude Include="feature\Shapes2D.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="input\HitTestAble.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="feature\cut\DrawingPlane.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="feature\cut\FreeCutPtWidget.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="feature\cut\modelCutZAxis.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="DentEngine\src\polyclipping\polytree2tri\PolytreeCDT.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -1201,6 +1231,9 @@
       <Filter>Generated Files</Filter>
     </QtMoc>
     <QtMoc Include="render\SceneEntityWithMaterial.h">
+      <Filter>Generated Files</Filter>
+    </QtMoc>
+    <QtMoc Include="render\LineMeshEntity.h">
       <Filter>Generated Files</Filter>
     </QtMoc>
   </ItemGroup>

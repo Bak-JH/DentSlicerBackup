@@ -60,7 +60,7 @@ void Hix::Support::CylindricalRaft::generateMeshForContour(const ClipperLib::Pat
 	contour.reserve(contourPath.size());
 	for (auto& each : contourPath)
 	{
-		contour.emplace_back(ClipperLib::toFloatPt(each));
+		contour.emplace_back(Hix::Polyclipping::toFloatPt(each));
 	}
 
 	//create cylinder walls

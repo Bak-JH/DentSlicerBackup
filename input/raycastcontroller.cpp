@@ -104,6 +104,22 @@ bool Hix::Input::RayCastController::mousePosInBound(const Qt3DInput::QMouseEvent
 	return false;
 }
 
+void Hix::Input::RayCastController::hoverObjectDeleted(Hix::Input::Hoverable* justDeleted)
+{
+	if (_hovered == justDeleted)
+	{
+		_hovered = nullptr;
+	}
+}
+
+void Hix::Input::RayCastController::draggableObjectDeleted(Hix::Input::Draggable* justDeleted)
+{
+	if (_dragged == justDeleted)
+	{
+		_dragged = nullptr;
+	}
+}
+
 
 
 

@@ -23,8 +23,8 @@ Paths autoarrange::getMeshRecArea(const Mesh& mesh){//getting rectangle area of 
     Path vertices45rot;//45 degree check
     for(const auto& vertex : mesh.getVertices()){
         QVector3D v_pos = vertex.position;
-		ClipperLib::addPoint(v_pos.x(), v_pos.y(), &vertices);
-		ClipperLib::addPoint(round(v_pos.x()*cosf(M_PI/4) - v_pos.y()*sinf(M_PI/4)), round(v_pos.x()*sinf(M_PI/4) + v_pos.y()*cosf(M_PI/4)), &vertices45rot);//45 degree check
+		Hix::Polyclipping::addPoint(v_pos.x(), v_pos.y(), &vertices);
+		Hix::Polyclipping::addPoint(round(v_pos.x()*cosf(M_PI/4) - v_pos.y()*sinf(M_PI/4)), round(v_pos.x()*sinf(M_PI/4) + v_pos.y()*cosf(M_PI/4)), &vertices45rot);//45 degree check
     }
     int max_x = getMaxX(vertices) + OFFSET;
     int max_y = getMaxY(vertices) + OFFSET;
@@ -67,7 +67,7 @@ Paths autoarrange::getMeshConvexHull(const Mesh& mesh){//getting convex hull are
     Path vertices;//all vertices in mesh
     for(const auto& vertex : mesh.getVertices()){
         QVector3D v_pos = vertex.position;
-		ClipperLib::addPoint(v_pos.x(), v_pos.y(), &vertices);
+		Hix::Polyclipping::addPoint(v_pos.x(), v_pos.y(), &vertices);
     }
     outline.push_back(getConvexHull(&vertices));
     /**/qDebug() << "got MeshConvexHull";
@@ -250,7 +250,7 @@ Path autoarrange::idxsToPath(const Mesh* mesh, std::vector<const MeshVertex* > p
     Path path;
     for(const MeshVertex* vtx : path_by_idx){
         QVector3D vertex = vtx->position;
-		ClipperLib::addPoint(vertex.x(), vertex.y(), &path);
+		Hix::Polyclipping::addPoint(vertex.x(), vertex.y(), &path);
     }
     return path;
 }
@@ -329,8 +329,8 @@ const MeshVertex* autoarrange::findVertexWithIntpoint(IntPoint p, const Mesh* me
 const MeshVertex* autoarrange::findVertexWithIntXY(size_t x, size_t y, const Mesh* mesh){
 	for (auto& each : mesh->getVertices())
 	{
-        int x_int = round(each.position.x()*ClipperLib::INT_PT_RESOLUTION);
-        int y_int = round(each.position.y()*ClipperLib::INT_PT_RESOLUTION);
+        int x_int = round(each.position.x()*Hix::Polyclipping::INT_PT_RESOLUTION);
+        int y_int = round(each.position.y()*Hix::Polyclipping::INT_PT_RESOLUTION);
         if(x_int==x && y_int==y) return &each;
     }
 }
@@ -1173,7 +1173,7 @@ IntPoint autoarrange::getFirstNFPPoint(const IntPoint& first_sub_vec, const IntP
 //}
 //
 //void autoarrange::arrangeSingleQt3D(Qt3DCore::QTransform* m_transform, XYArrangement arng_result){
-//    QVector3D trans_vec = QVector3D(arng_result.first.X/ClipperLib::INT_PT_RESOLUTION, arng_result.first.Y/ClipperLib::INT_PT_RESOLUTION, m_transform->translation().z());
+//    QVector3D trans_vec = QVector3D(arng_result.first.X/Hix::Polyclipping::INT_PT_RESOLUTION, arng_result.first.Y/Hix::Polyclipping::INT_PT_RESOLUTION, m_transform->translation().z());
 //    m_transform->setTranslation(trans_vec);
 //    m_transform->setRotationZ(arng_result.second);
 //}
@@ -1338,9 +1338,9 @@ void autoarrange::debugFaces(const Mesh* mesh, std::vector<const MeshFace *> fac
 //		float x_f = vtx.x();
 //		float y_f = vtx.y();
 //		float z_f = vtx.z();
-//		int x_int = round(x_f * ClipperLib::INT_PT_RESOLUTION);
-//		int y_int = round(y_f * ClipperLib::INT_PT_RESOLUTION);
-//		int z_int = round(z_f * ClipperLib::INT_PT_RESOLUTION);
+//		int x_int = round(x_f * Hix::Polyclipping::INT_PT_RESOLUTION);
+//		int y_int = round(y_f * Hix::Polyclipping::INT_PT_RESOLUTION);
+//		int z_int = round(z_f * Hix::Polyclipping::INT_PT_RESOLUTION);
 //		qDebug() << "(" << x_f << "," << y_f << "," << z_f << ")";
 //	}
 //	qDebug() << "face normal:" << "(" << mf->fn.x() << "," << mf->fn.y() << "," << mf->fn.z() << ")";

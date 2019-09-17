@@ -31,14 +31,6 @@ void Widget3DManager::initialize(Qt3DCore::QEntity* qParent, Input::RayCastContr
 
 }
 
-void Widget3DManager::addCubeWidget(QEntity* parent, VertexConstItr overhangPoint, GLModel* model)
-{
-	_cubeWidget.addWidget(std::make_unique<CubeWidget>(&_cubeWidget, overhangPoint->position, model));
-	_cubeWidget.setParent(parent);
-	_controller->addInputLayer(&_cubeWidget.layer);
-	_controller->addHoverLayer(&_cubeWidget.layer);
-}
-
 void Hix::UI::Widget3DManager::setWidgetMode(WidgetMode mode)
 {
 	if (_currMode != mode)

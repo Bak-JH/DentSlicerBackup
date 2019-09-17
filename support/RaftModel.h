@@ -2,8 +2,6 @@
 
 #include "render/SceneEntityWithMaterial.h"
 #include "ui/Highlightable.h"
-#include "input/Clickable.h"
-#include "input/Hoverable.h"
 #include "feature/overhangDetect.h"
 using namespace Qt3DCore;
 using namespace Qt3DRender;

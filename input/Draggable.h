@@ -19,7 +19,7 @@ namespace Hix
 			virtual void dragStarted(MouseEventData& e, const Qt3DRender::QRayCasterHit& hit) = 0;
 			virtual void doDrag(MouseEventData& e) = 0;
 			virtual void dragEnded(MouseEventData& e) = 0;
-			
+			virtual ~Draggable();
 		};
 	}
 }

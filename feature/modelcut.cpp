@@ -255,15 +255,7 @@ modelcut::modelcut(){
     numPoints = 0;
 }
 
-bool modelcut::isLeftToPlane(Plane plane, QVector3D position){
-    // determine if position is left to plane or not
-    if(position.distanceToPlane(plane[0],plane[1],plane[2])==0){
-        qDebug() << "distance to plane 0";
-    }
-    if(position.distanceToPlane(plane[0],plane[1],plane[2])>0)
-        return false;
-    return true;
-}
+
 
 
 // interpolate between two random closed same oriented contours
@@ -675,11 +667,13 @@ void get_largest_contour(Custom3DPoint start, std::multimap<Custom3DPoint, Custo
 	}
 }
 
+
+
 void printCustomPoints(Custom3DPoint p1, Custom3DPoint p2, Custom3DPoint p3) {
     qDebug() << "(" << p1.x << ", " << p1.y << ", " << p1.z << ") " << "(" << p2.x << ", " << p2.y << ", " << p2.z << ") " << "(" << p3.x << ", " << p3.y << ", " << p3.z << ")";
 }
 
-void bisectModelByPlane(Mesh* leftMesh, Mesh* rightMesh, Mesh* mesh, Plane plane, int cutFillMode){
+void bisectModelByPlane(Mesh* leftMesh, Mesh* rightMesh, Mesh* mesh, float planeZ, int cutFillMode){
     std::vector<std::pair<Custom3DPoint, Custom3DPoint> > boundaryEdgeCandis;
     std::multimap<Custom3DPoint, Custom3DPoint> boundaryEdges;
 
@@ -687,13 +681,8 @@ void bisectModelByPlane(Mesh* leftMesh, Mesh* rightMesh, Mesh* mesh, Plane plane
     Custom3DPoint mv1, mv2, mv3;
 
     double padding = 1000000.0;
-    long long int targetZ = int(plane[0].z() * padding);
+    long long int targetZ = int(planeZ * padding);
 
-    // each z axis coordinate values are should same
-    if (plane[0].z() != plane[1].z() || plane[0].z() != plane[2].z() || plane[1].z() != plane[2].z()) {
-        qDebug() << "z value of points of Plane are different";
-        return;
-    }
     qDebug() << "mesh faces" << mesh->getFaces().size();
 
     qDebug() << "make meshFace Queue";
@@ -1493,35 +1482,3 @@ void cutAway(Mesh* leftMesh, Mesh* rightMesh, Mesh* mesh, std::vector<QVector3D>
 //    rightMesh->connectFaces();
 //    qDebug() << "complete2!!!";
 }
-
-void modelcut::removeCuttingPoints(){
-
-    for(int i=0;i<numPoints;i++)
-    {
-        sphereEntity[i]->removeComponent(sphereMesh[i]);
-        sphereEntity[i]->removeComponent(sphereTransform[i]);
-        sphereEntity[i]->removeComponent(sphereMaterial[i]);
-    }
-    /*delete [] sphereEntity;
-    delete [] sphereMaterial;
-    delete [] sphereMesh;
-    delete [] sphereTransform;*/
-    numPoints=0;
-}
-
-void modelcut::getSliderSignal(double value){
-    QVector3D v1=cuttingPoints[cuttingPoints.size()-3];
-    QVector3D v2=cuttingPoints[cuttingPoints.size()-2];
-    QVector3D v3=cuttingPoints[cuttingPoints.size()-1];
-    QVector3D world_origin(0,0,0);
-    QVector3D original_normal(0,1,0);
-    QVector3D desire_normal(QVector3D::normal(v1,v2,v3)); //size=1
-    float angle = qAcos(QVector3D::dotProduct(original_normal,desire_normal))*180/M_PI+(value-1)*30;
-    QVector3D crossproduct_vector(QVector3D::crossProduct(original_normal,desire_normal));
-    for (int i=0;i<2;i++){
-        planeTransform[i]->setRotation(QQuaternion::fromAxisAndAngle(crossproduct_vector, angle+180*i));
-        planeTransform[i]->setTranslation(desire_normal*(-world_origin.distanceToPlane(v1,v2,v3)));
-        planeEntity[i]->addComponent(planeTransform[i]);
-    }
-}
-

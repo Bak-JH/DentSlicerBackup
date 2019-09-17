@@ -216,8 +216,10 @@ public:
     Q_INVOKABLE void disableObjectPickers();
     Q_INVOKABLE void enableObjectPickers();
     Q_INVOKABLE void setHandCursor();
+	Q_INVOKABLE void setEraserCursor();
     Q_INVOKABLE void setClosedHandCursor();
     Q_INVOKABLE void resetCursor();
+
     Q_INVOKABLE bool isSelected();
 	Q_INVOKABLE bool isSelected(int ID);
 	bool isSelected(GLModel* model);
@@ -274,6 +276,10 @@ private:
 	Hix::Input::RayCastController _rayCastController;
 	Hix::UI::Widget3DManager _widgetManager;
 
+	//cursors
+	QCursor _cursorEraser;
+
+
 signals:
     void updateModelInfo(int printing_time, int layer, QString xyz, float volume);
     void arrangeDone(std::vector<QVector3D>, std::vector<float>);
@@ -304,7 +310,6 @@ public slots:
     void modelMoveDone();
     void totalMoveDone();
     void modelRotateInit();
-    void modelRotateDone();
     void totalRotateDone();
     void resetLayflat();
     void applyArrangeResult(std::vector<QVector3D>, std::vector<float>);
