@@ -212,6 +212,18 @@ void GLModel::checkPrintingArea() {
 		(tmp.z() + _mesh->z_max()) > printing_z) {
 		changeColor(Hix::Render::Colors::OutOfBound);
 	}
+	else
+	{
+		if (qmlManager->isSelected(this))
+		{
+			changeColor(Hix::Render::Colors::Selected);
+		}
+		else
+		{
+			changeColor(Hix::Render::Colors::Default);
+		}
+
+	}
 }
 
 
