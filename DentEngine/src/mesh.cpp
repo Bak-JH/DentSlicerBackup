@@ -406,12 +406,6 @@ void Mesh::centerMesh(){
     float y_center = (_y_max+_y_min)/2;
     float z_center = (_z_max+_z_min)/2;
     vertexMove(-QVector3D(x_center, y_center, z_center));
-    _x_max = _x_max - x_center;
-    _x_min = _x_min - x_center;
-    _y_max = _y_max - y_center;
-    _y_min = _y_min - y_center;
-    _z_max = _z_max - z_center;
-    _z_min = _z_min - z_center;
 }
 
 void Mesh::vertexRotate(QMatrix4x4 tmpmatrix){

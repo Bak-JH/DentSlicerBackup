@@ -33,8 +33,9 @@
 #include <QVariant>
 
 
-struct SlicingConfiguration
+class SlicingConfiguration
 {
+public:
 	enum class SupportType: uint8_t
 	{
 		None = 0,
@@ -105,17 +106,29 @@ struct SlicingConfiguration
     // bed configuration
     QVector3D origin;
 
-    // settings for vittro plus
-    int resolution_x = 2560;
-    int resolution_y = 1440;
 
-    float bed_x = 124.8f; // in mm
-    float bed_y = 70.2f; // in mm
 
-	size_t bed_margin_x = 1;
-	size_t bed_margin_y = 1;
+	void setBedX(float val);
+	void setBedY(float val);
+	void setResolutionX(float val);
+	void setResolutionY(float val);
 
-    float pixel_per_mm = float(resolution_x)/float(bed_x);
+
+private:
+
+
+	float _pixelPerMM = float(resolution_x) / float(bed_x);
+
+	float _bedX = 124.8f; // in mm
+	float _bedY = 70.2f; // in mm
+
+	// settings for vittro plus
+	int _resolutionX = 2560;
+	int _resolutionY = 1440;
+
+	const float _bedMarginX = 1;
+	const float _bedMarginY = 1;
+
 
 };
 extern SlicingConfiguration* scfg;
