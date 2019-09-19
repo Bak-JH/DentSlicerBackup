@@ -83,7 +83,6 @@ public:
     float nozzle_width = 0.0f; // in mm (diameter) , for printers with nozzles
     float wall_thickness = 2.0f; // in mm
     float fill_thickness = 1.0f; // in mm
-    float support_density = 0.4f;
     float infill_density = 0.3f;
 
     float contraction_ratio = TEMPORARY_CONTRACTION_RATIO;
@@ -124,6 +123,7 @@ public:
 	float pixelPerMMX()const;
 	float pixelPerMMY()const;
 
+	size_t supportDensity = 50;
 
 private:
 
