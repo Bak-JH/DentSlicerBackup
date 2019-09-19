@@ -142,9 +142,18 @@ std::vector<QVector3D> Hix::OverhangDetect::toCoords(const Overhangs& overhangs)
 Overhangs Hix::OverhangDetect::detectOverhang(const Mesh* shellMesh)
 {
 	Overhangs overhangs;
+
+	//if density is 0, don't detect anything
+	if (scfg->supportDensity == 0)
+		return overhangs;
+	auto suppDensity = (float)scfg->supportDensity / 100.0f;
 	//be generous with bin size for face support
-	XYzHasher faceHasher(8 * scfg->support_density, 8 * scfg->support_density);
-	XYzHasher ptHasher(2 * scfg->support_density, scfg->layer_height);
+	constexpr float minDist = 0.8f;
+	auto ptOverhangMinDist = minDist / suppDensity;
+	auto faceOverhangMinDist = ptOverhangMinDist * 4;
+
+	XYzHasher faceHasher(faceOverhangMinDist, faceOverhangMinDist);
+	XYzHasher ptHasher(ptOverhangMinDist, ptOverhangMinDist);
 
 	//this is needed to remove too close support points
 	std::unordered_map<size_t, FaceOverhang> faceHashedOverhangs;

@@ -1198,6 +1198,7 @@
     <None Include="icon-32.ico" />
     <None Include="icon-32.ico" />
     <None Include="icon-32.ico" />
+    <None Include="Qml\LeftTabSlicingOptionElementPercentage.qml" />
   </ItemGroup>
   <ItemGroup>
     <None Include="DentSlicer.rc">
