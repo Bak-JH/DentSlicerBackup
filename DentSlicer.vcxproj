@@ -195,6 +195,7 @@
   <ItemGroup>
     <ClCompile Include="common\Task.cpp" />
     <ClCompile Include="common\TaskManager.cpp" />
+    <ClCompile Include="DentEngine\src\Bounds3D.cpp" />
     <ClCompile Include="DentEngine\src\ContourBuilder.cpp" />
     <ClCompile Include="DentEngine\src\Planes.cpp" />
     <ClCompile Include="DentEngine\src\polyclipping\poly2tri\sweep\advancing_front.cpp" />
@@ -306,6 +307,7 @@
     <ClInclude Include="common\taskflow\utility\traits.hpp" />
     <ClInclude Include="common\TaskManager.h" />
     <ClInclude Include="common\TrackedIndexedList.h" />
+    <ClInclude Include="DentEngine\src\Bounds3D.h" />
     <ClInclude Include="DentEngine\src\ContourBuilder.h" />
     <ClInclude Include="DentEngine\src\Planes.h" />
     <ClInclude Include="DentEngine\src\polyclipping\poly2tri\sweep\advancing_front.h" />

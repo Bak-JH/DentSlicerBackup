@@ -130,8 +130,8 @@ public:
     void removeCuttingPoint(int idx);
     void removeCuttingPoints();
     void drawLine(QVector3D endpoint);
-
-    void checkPrintingArea();
+	bool isPrintable()const;
+    void updatePrintable();
     bool EndsWith(const std::string& a, const std::string& b);
     QString getFileName(const std::string& s);
     static QVector3D spreadPoint(QVector3D endpoint,QVector3D startpoint,int factor);
@@ -174,10 +174,12 @@ public:
 	//TODO: remove these
 	// Model Mesh move, rotate, scale
 	void moveModelMesh(QVector3D direction, bool update = true);
+	void moveDone();
 	void rotationDone();
-	void rotateByNumber(QVector3D& rot_center, int X, int Y, int Z);
-	void rotateModelMesh(int Axis, float Angle, bool update = true);
-	void rotateModelMesh(QMatrix4x4 matrix, bool update = true);
+	void rotateAroundPt(QVector3D& rot_center, float X, float Y, float Z);
+	void rotateAroundPt(QVector3D& rot_center, const QVector3D& axis, float angle);
+
+	
 	void scaleModelMesh(float scaleX, float scaleY, float scaleZ);
 	void setZToBed();
 protected:
@@ -218,7 +220,6 @@ signals:
 
 public slots:
 	void updateModelMesh();
-    void mouseClickedLayflat(MeshFace shadow_meshface);
 
 
     // Scale
