@@ -31,7 +31,7 @@
 #include <math.h>
 #include <QVector3D>
 #include <QVariant>
-
+#include "Bounds3D.h"
 
 class SlicingConfiguration
 {
@@ -76,6 +76,8 @@ public:
 		InvertXAxis = 0,
 		NoInversion
 	};
+	SlicingConfiguration();
+
     // configurations
     float layer_height = 0.1f; // in mm
     float nozzle_width = 0.0f; // in mm (diameter) , for printers with nozzles
@@ -110,26 +112,31 @@ public:
 
 	void setBedX(float val);
 	void setBedY(float val);
+	void setBedHeight(float val);
 	void setResolutionX(float val);
 	void setResolutionY(float val);
+	float resolutionX()const;
+	float resolutionY()const;
+	float bedX()const;
+	float bedY()const;
+	float bedHeight()const;
+	const Hix::Engine3D::Bounds3D& bedBound()const;
+	float pixelPerMMX()const;
+	float pixelPerMMY()const;
 
 
 private:
 
+	float _pixelPerMMX;
+	float _pixelPerMMY;
 
-	float _pixelPerMM = float(resolution_x) / float(bed_x);
-
-	float _bedX = 124.8f; // in mm
-	float _bedY = 70.2f; // in mm
+	float _bedX; // in mm
+	float _bedY; // in mm
 
 	// settings for vittro plus
-	int _resolutionX = 2560;
-	int _resolutionY = 1440;
-
-	const float _bedMarginX = 1;
-	const float _bedMarginY = 1;
-
-
+	int _resolutionX;
+	int _resolutionY;
+	Hix::Engine3D::Bounds3D _bedBound;
 };
 extern SlicingConfiguration* scfg;
 

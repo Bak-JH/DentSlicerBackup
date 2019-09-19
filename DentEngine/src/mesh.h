@@ -8,6 +8,7 @@
 #include <QTime>
 #include <array>
 #include <variant>
+#include "Bounds3D.h"
 #include "../../common/TrackedIndexedList.h"
 #define cos50 0.64278761
 #define cos100 -0.17364818
@@ -188,6 +189,7 @@ namespace Hix
 			/********************** Undo state functions***********************/
 
 			/********************** Mesh Edit Functions***********************/
+			void vertexApplyTransformation(const Qt3DCore::QTransform& transform);
 			void vertexOffset(float factor);
 			void vertexMove(QVector3D direction);
 			void centerMesh();
@@ -222,8 +224,6 @@ namespace Hix
 
 
 			/********************** Helper Functions **********************/
-			static void updateMinMax(QVector3D v, std::array<float, 6>& minMax);
-			static std::array<float, 6> calculateMinMax(QMatrix4x4 rotmatrix, const Mesh* mesh);
 
 
 			//MeshFace idx2MF(int idx)const;
@@ -235,12 +235,13 @@ namespace Hix
 			const TrackedIndexedList<MeshFace>& getFaces()const;
 			const TrackedIndexedList<HalfEdge>& getHalfEdges()const;
 
-			float x_min()const;
-			float x_max()const;
-			float y_min()const;
-			float y_max()const;
-			float z_min()const;
-			float z_max()const;
+
+			inline float x_min()const{ return _bounds.xMin();}
+			inline float x_max()const{ return _bounds.xMax();}
+			inline float y_min()const{ return _bounds.yMin();}
+			inline float y_max()const{ return _bounds.yMax();}
+			inline float z_min()const{ return _bounds.zMin();}
+			inline float z_max()const{ return _bounds.zMax();}
 			void findNearSimilarFaces(QVector3D normal,FaceConstItr mf,
 				std::unordered_set<FaceConstItr>& result, float maxNormalDiff = 0.20f)const;
 
@@ -280,7 +281,7 @@ namespace Hix
 				return itr - faces.cbegin();
 			}
 			/********************** Stuff that can be public **********************/
-
+			const Bounds3D& bounds()const;
 		private:
 			/********************** Helper Functions **********************/
             //set twin relationship for this edge as well as matching twin edge
@@ -288,7 +289,6 @@ namespace Hix
 			VertexItr addOrRetrieveFaceVertex(QVector3D v);
 			void removeVertexHash(QVector3D pos);
 			void addHalfEdgesToFace(std::array<VertexItr, 3> faceVertices, FaceConstItr face);
-			void updateMinMax(QVector3D v);
 
 			//index changed event callback
 			void vtxIndexChangedCallback(size_t oldIdx, size_t newIdx);
@@ -300,7 +300,7 @@ namespace Hix
 			TrackedIndexedList<MeshVertex> vertices;
 			TrackedIndexedList<HalfEdge> halfEdges;
 			TrackedIndexedList<MeshFace> faces;
-			float _x_min = 99999, _x_max = 99999, _y_min = 99999, _y_max = 99999, _z_min = 99999, _z_max = 99999;
+			Bounds3D _bounds;
 
 		};
 

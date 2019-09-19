@@ -284,7 +284,7 @@ void ContourBuilder::buildSegment(const FaceConstItr& mf)
 	ContourSegment::FlipResult flipResult;
 	if (segment.from == segment.to)
 	{
-		flipResult = ContourSegment::FlipResult::UnknownDirection;
+		return;
 	}
 	else
 	{
