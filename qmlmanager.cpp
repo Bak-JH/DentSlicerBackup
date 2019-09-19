@@ -595,19 +595,11 @@ int QmlManager::getSelectedModelsSize() {
 }
 
 float QmlManager::getBedXSize(){
-    return scfg->bed_x;
+    return scfg->bedX();
 }
 
 float QmlManager::getBedYSize(){
-    return scfg->bed_y;
-}
-
-void QmlManager::setBedXSize(float x){
-    scfg->bed_x = x;
-}
-
-void QmlManager::setBedYSize(float y){
-    scfg->bed_y = y;
+    return scfg->bedY();
 }
 
 
@@ -814,8 +806,7 @@ void QmlManager::applyArrangeResult(std::vector<QVector3D> translations, std::ve
     {
         auto model = &pair.second;
         model->moveModelMesh(translations[index], true);
-        model->rotateModelMesh(3, rotations[index], true);
-        //model->setTranslation(translations[index]);
+        //model->rotateModelMesh(3, rotations[index], true);
         ++index;
     }
 
@@ -878,8 +869,10 @@ bool QmlManager::multipleModelSelected(int ID){
             // do unselect model
 
             it = selectedModels.erase(it);
-            target->changeColor(Hix::Render::Colors::Default);
-            target->checkPrintingArea();
+			if (target->isPrintable())
+			{
+				target->changeColor(Hix::Render::Colors::Default);
+			}
             (*it)->inactivateFeatures();
             QMetaObject::invokeMethod(partList, "unselectPartByModel", Q_ARG(QVariant, target->ID));
             QMetaObject::invokeMethod(yesno_popup, "deletePartListItem", Q_ARG(QVariant, target->ID));
@@ -981,8 +974,10 @@ void QmlManager::lastModelSelected(){
     /* remove all elements from the list */
     for (auto it = selectedModels.begin() ; it != selectedModels.end() ; ++it) {
         /* it is simillar to selectModel() */
-        (*it)->changeColor(Hix::Render::Colors::Default);
-        (*it)->checkPrintingArea();
+		if ((*it)->isPrintable())
+		{
+			(*it)->changeColor(Hix::Render::Colors::Default);
+		}
         (*it)->inactivateFeatures();
         QMetaObject::invokeMethod(partList, "unselectPartByModel", Q_ARG(QVariant, (*it)->ID));
         QMetaObject::invokeMethod(yesno_popup, "deletePartListItem", Q_ARG(QVariant, (*it)->ID));
@@ -1028,7 +1023,6 @@ void QmlManager::modelSelected(int ID){
         if (multipleModelSelected(ID))
             return;
     }
-
     QMetaObject::invokeMethod(boxUpperTab, "all_off");
     QMetaObject::invokeMethod(leftTabViewMode, "setObjectView");
 	auto target = getModelByID(ID);
@@ -1040,8 +1034,8 @@ void QmlManager::modelSelected(int ID){
             if (*it == target) {
 				modelAlreadySelected = true;
             }
-            (*it)->changeColor(Hix::Render::Colors::Default);
-            (*it)->checkPrintingArea();
+			if((*it)->isPrintable())
+				(*it)->changeColor(Hix::Render::Colors::Default);
             (*it)->inactivateFeatures();
             QMetaObject::invokeMethod(partList, "unselectPartByModel", Q_ARG(QVariant, (*it)->ID));
             QMetaObject::invokeMethod(yesno_popup, "deletePartListItem", Q_ARG(QVariant, (*it)->ID));
@@ -1086,7 +1080,8 @@ void QmlManager::modelSelected(int ID){
 		_lastSelected = target;
 		connectHandlers(target);
 
-		target->changeColor(Hix::Render::Colors::Selected);
+		if( target->isPrintable())
+			target->changeColor(Hix::Render::Colors::Selected);
 		qDebug() << "modelSelected invoke";
 		QMetaObject::invokeMethod(partList, "selectPartByModel", Q_ARG(QVariant, target->ID));
 		QMetaObject::invokeMethod(yesno_popup, "addPart", Q_ARG(QVariant, 
@@ -1260,17 +1255,9 @@ void QmlManager::totalMoveDone(){
         if (curModel == nullptr)
             continue;
         if (curModel->getTransform()->translation().isNull()){
-            qDebug() << "equals identity so don't save";
             continue;
         }
-
-        //curModel->saveUndoState();
-
-        curModel->moveModelMesh(curModel->getTransform()->translation(), false);
-        //curModel->setTranslation(curModel->getTransform()->translation()+curModel->getTransform()->translation());
-        curModel->setTranslation(QVector3D(0,0,0));
-        // need to only update shadowModel & getMesh()
-        curModel->updateModelMesh();
+		curModel->moveDone();
     }
     sendUpdateModelInfo();
 	_widgetManager.updatePosition();
@@ -1293,8 +1280,6 @@ void QmlManager::totalRotateDone(){
 		each->rotationDone();
 
 	}
-
-
     sendUpdateModelInfo();
 }
 
@@ -1305,48 +1290,14 @@ void QmlManager::modelMoveWithAxis(QVector3D axis, double distance) { // for QML
 
 void QmlManager::modelMove(QVector3D displacement)
 {
-	QVector3D tmp;
-	int bedXMax = scfg->bed_x / 2 - scfg->bed_margin_x;
-	int bedXMin = -bedXMax;
-	int bedYMax = scfg->bed_y / 2 - scfg->bed_margin_x;
-	int bedYMin = -bedYMax;
-
+	QVector3D bndCheckedDisp;
+	const auto& printBound = scfg->bedBound();
 	for (auto selectedModel : selectedModels) {
-		tmp = selectedModel->getTransform()->translation();
-		tmp += displacement;
 		auto mesh = selectedModel->getMesh();
-		auto xMaxBound = tmp.x() + mesh->x_max();
-		auto xMinBound = tmp.x() + mesh->x_min();
-		auto yMaxBound = tmp.y() + mesh->y_max();
-		auto yMinBound = tmp.y() + mesh->y_min();
-
-		if (xMaxBound < bedXMax &&
-			xMinBound > bedXMin &&
-			yMaxBound < bedYMax &&
-			yMinBound > bedYMin)
-		{
-			selectedModel->setTranslation(tmp);
-        } else if ((xMaxBound >= bedXMax && xMinBound <= bedXMin)
-                   || (yMaxBound >= bedYMax && yMinBound <= bedYMin)) { // model must be rescaled
-            qmlManager->openResultPopUp("", "Model Size is too big", "Scale down the model first");
-            return;
-        }
-
-        // reposition if x is out of bound
-        if (xMaxBound >= bedXMax){
-            selectedModel->setTranslation(selectedModel->getTranslation() + QVector3D(bedXMax-xMaxBound, 0, 0));
-        } else if (xMinBound <= bedXMin){
-            selectedModel->setTranslation(selectedModel->getTranslation() + QVector3D(bedXMin-xMinBound, 0, 0));
-        }
-
-        if (yMaxBound >= bedYMax){
-            selectedModel->setTranslation(selectedModel->getTranslation() + QVector3D(0, bedYMax-yMaxBound, 0));
-        } else if (yMinBound <= bedYMin){
-            selectedModel->setTranslation(selectedModel->getTranslation() + QVector3D(0, bedYMin-yMinBound, 0));
-        }
-
-
-		selectedModel->checkPrintingArea();
+		auto totalDisp = displacement + selectedModel->getTranslation();
+		bndCheckedDisp = printBound.displaceWithin(mesh->bounds(), totalDisp);
+		bndCheckedDisp.setZ(selectedModel->getTransform()->translation().z()); //TODO
+		selectedModel->setTranslation(bndCheckedDisp);
 	}
 }
 void QmlManager::modelRotateWithAxis(const QVector3D& axis, double angle)
@@ -1380,10 +1331,10 @@ void QmlManager::modelRotateWithAxis(const QVector3D& axis, double angle)
 		else
 		{
 			qDebug() << angle;
-			rot = Qt3DCore::QTransform::rotateAround(rot_center, angle, (axis4D * transform->matrix()).toVector3D());
+			rot = Qt3DCore::QTransform::rotateAround(rot_center, angle, axis);
 		}
 		selectedModel->setMatrix(selectedModel->getTransform()->matrix() * rot);
-		selectedModel->checkPrintingArea();
+		selectedModel->updatePrintable();
 
 	}
 
@@ -1414,14 +1365,14 @@ void QmlManager::modelMoveByNumber(int axis, int X, int Y){
         targetY = tmp.y() + Y;
 
         if(tmp.x() + selectedModel->getMesh()->x_max() +1 + X> 80/2 )
-            targetX = tmp.x() - (tmp.x() + selectedModel->getMesh()->x_max() - scfg->bed_x/2 + 1);
+            targetX = tmp.x() - (tmp.x() + selectedModel->getMesh()->x_max() - scfg->bedX()/2 + 1);
         if(tmp.x() + selectedModel->getMesh()->x_min() -1 + X< - 80/2 )
-            targetX = tmp.x() - (tmp.x() + selectedModel->getMesh()->x_min() + scfg->bed_x/2 - 1);
+            targetX = tmp.x() - (tmp.x() + selectedModel->getMesh()->x_min() + scfg->bedX()/2 - 1);
 
         if(tmp.y() + selectedModel->getMesh()->y_max() +1 + Y> 80/2 )
-            targetY = tmp.y() - (tmp.y() + selectedModel->getMesh()->y_max() - scfg->bed_y/2 + 1);
+            targetY = tmp.y() - (tmp.y() + selectedModel->getMesh()->y_max() - scfg->bedY()/2 + 1);
         if(tmp.y() + selectedModel->getMesh()->y_min() -1 + Y< - 80/2 )
-            targetY = tmp.y() - (tmp.y() + selectedModel->getMesh()->y_min() + scfg->bed_y/2 - 1);
+            targetY = tmp.y() - (tmp.y() + selectedModel->getMesh()->y_min() + scfg->bedY()/2 - 1);
 
         selectedModel->setTranslation(QVector3D(targetX, targetY, tmp.z()));
         //selectedModel->moveModelMesh(QVector3D(targetX,targetY,tmp.z()));
@@ -1429,7 +1380,7 @@ void QmlManager::modelMoveByNumber(int axis, int X, int Y){
 
     modelMoveDone();
 }
-void QmlManager::modelRotateByNumber(int axis,  int X, int Y, int Z){
+void QmlManager::modelRotateByNumber(int mode,  int X, int Y, int Z){
     if (selectedModels.empty())
         return;
 
@@ -1437,11 +1388,9 @@ void QmlManager::modelRotateByNumber(int axis,  int X, int Y, int Z){
 		QVector3D rot_center = QVector3D((selectedModel->getMesh()->x_max()+selectedModel->getMesh()->x_min())/2,
                                                   (selectedModel->getMesh()->y_max()+selectedModel->getMesh()->y_min())/2,
                                                   (selectedModel->getMesh()->z_max()+selectedModel->getMesh()->z_min())/2);
-
-        selectedModel->rotateByNumber(rot_center, X, Y, Z);
-		selectedModel->checkPrintingArea();
+        selectedModel->rotateAroundPt(rot_center, (float)X, (float)Y, (float)Z);
+		selectedModel->updatePrintable();
     }
-    //showRotateSphere();
 }
 void QmlManager::resetLayflat(){
     QMetaObject::invokeMethod(layflatPopup,"onApplyFinishButton");
@@ -1542,8 +1491,8 @@ void QmlManager::runGroupFeature(int ftrType, QString state, double arg1, double
 				qDebug() << "got rotate result";
 				if (rotateres == NULL)
 					break;
-				else
-					selectedModel->rotateModelMesh(rotateres->R);
+				//else
+					//selectedModel->rotateModelMesh(rotateres->R);
 			}
         }
         break;
@@ -1843,6 +1792,8 @@ Hix::Tasking::GenericTask* QmlManager::exportSelectedAsync(QString exportPath, b
 {
 	if (exportPath.isEmpty())
 		return nullptr;
+	if (selectedModels.empty())
+		return nullptr;
 	auto task = new GenericTask();
 	task->getFlow().emplace([this, exportPath, isTemp](tf::Subflow& subflow) {
 
@@ -1930,8 +1881,10 @@ void QmlManager::unselectPartImpl(GLModel* target)
 		each->changeViewMode(VIEW_MODE_OBJECT);
 	}
 	selectedModels.erase(target);
-    target->changeColor(Hix::Render::Colors::Default);
-    target->checkPrintingArea();
+	if (target->isPrintable())
+	{
+		target->changeColor(Hix::Render::Colors::Default);
+	}
     target->inactivateFeatures();
     disconnectHandlers(target);
     if (groupFunctionState == "active"){
@@ -2004,8 +1957,11 @@ void QmlManager::clearSupports()
 {
 	for (auto selectedModel : selectedModels)
 	{
-		selectedModel->supportRaftManager().clear();
-		selectedModel->setZToBed();
+		if (selectedModel->supportRaftManager().supportActive())
+		{
+			selectedModel->supportRaftManager().clear();
+			selectedModel->setZToBed();
+		}
 	}
 }
 

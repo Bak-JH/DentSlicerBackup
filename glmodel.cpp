@@ -110,21 +110,34 @@ void GLModel::moveModelMesh(QVector3D direction, bool update) {
 	}
 }
 
+
+void GLModel::moveDone()
+{
+	_mesh->vertexMove(getTransform()->translation());
+	setTranslation(QVector3D(0, 0, 0));
+	updatePrintable();
+	updateModelMesh();
+}
 void GLModel::rotationDone()
 {
+	////auto rotCenter = _mesh->bounds().centre();
+	//_mesh->vertexApplyTransformation(m_transform);
+	////reset transform by setting identity matrix;
+	//m_transform.setMatrix(QMatrix4x4());
 	_mesh->vertexRotate(quatToMat(m_transform.rotation()).inverted());
 	m_transform.setRotationX(0);
 	m_transform.setRotationY(0);
 	m_transform.setRotationZ(0);
-
-	_mesh->vertexMove(m_transform.translation());
 	setZToBed();
+	_mesh->vertexMove(m_transform.translation());
+	m_transform.setTranslation(QVector3D(0, 0, 0));
+	updatePrintable();
 	updateModelMesh();
 }
 
 
 
-void GLModel::rotateByNumber(QVector3D& rot_center, int X, int Y, int Z)
+void GLModel::rotateAroundPt(QVector3D& rot_center, float X, float Y, float Z)
 {
 	QMatrix4x4 rot;
 	rot = m_transform.rotateAround(rot_center, X, (QVector3D(1, 0, 0).toVector4D() * m_transform.matrix()).toVector3D());
@@ -138,38 +151,28 @@ void GLModel::rotateByNumber(QVector3D& rot_center, int X, int Y, int Z)
 	m_transform.setRotationX(0);
 	m_transform.setRotationY(0);
 	m_transform.setRotationZ(0);
+	setZToBed();
 	_mesh->vertexMove(m_transform.translation());
 	m_transform.setTranslation(QVector3D(0, 0, 0));
 	updateModelMesh();
 }
 
-void GLModel::rotateModelMesh(QMatrix4x4 matrix, bool update) {
-	_mesh->vertexRotate(matrix);
-	if (update)
-	{
-		updateModelMesh();
-	}
+void GLModel::rotateAroundPt(QVector3D& rot_center, const QVector3D& axis, float angle)
+{
+	QMatrix4x4 rot;
+	rot = m_transform.rotateAround(rot_center, angle, axis);
+	m_transform.setMatrix(m_transform.matrix() * rot);
+	_mesh->vertexRotate(quatToMat(m_transform.rotation()).inverted());
+	m_transform.setRotationX(0);
+	m_transform.setRotationY(0);
+	m_transform.setRotationZ(0);
+	setZToBed();
+	_mesh->vertexMove(m_transform.translation());
+	m_transform.setTranslation(QVector3D(0, 0, 0));
+	updateModelMesh();
 }
 
 
-void GLModel::rotateModelMesh(int Axis, float Angle, bool update) {
-	Qt3DCore::QTransform tmp;
-	switch (Axis) {
-	case 1: {
-		tmp.setRotationX(Angle);
-		break;
-	}
-	case 2: {
-		tmp.setRotationY(Angle);
-		break;
-	}
-	case 3: {
-		tmp.setRotationZ(Angle);
-		break;
-	}
-	}
-	rotateModelMesh(tmp.matrix(), update);
-}
 
 
 
@@ -178,6 +181,7 @@ void GLModel::scaleModelMesh(float scaleX, float scaleY, float scaleZ) {
 	float centerX = (_mesh->x_max() + _mesh->x_min()) / 2;
 	float centerY = (_mesh->y_max() + _mesh->y_min()) / 2;
 	_mesh->vertexScale(scaleX, scaleY, scaleZ, centerX, centerY);
+	updatePrintable();
 	updateModelMesh();
 }
 
@@ -197,19 +201,16 @@ void GLModel::changeColor(const QVector3D& color){
 	_meshMaterial.setColor(color);
 }
 
+bool GLModel::isPrintable()const
+{
+	const auto& bedBound = scfg->bedBound();
+	return bedBound.contains(_mesh->bounds());
+}
 
-void GLModel::checkPrintingArea() {
-	float printing_x = scfg->bed_x;
-	float printing_y = scfg->bed_y;
-	float printing_z = 120;
-	float printing_safegap = 1;
+void GLModel::updatePrintable() {
 	// is it inside the printing area or not?
-	QVector3D tmp = m_transform.translation();
-	if ((tmp.x() + _mesh->x_min()) < (printing_safegap - printing_x / 2) ||
-		(tmp.x() + _mesh->x_max()) > (printing_x / 2 - printing_safegap) ||
-		(tmp.y() + _mesh->y_min()) < (printing_safegap - printing_y / 2) ||
-		(tmp.y() + _mesh->y_max()) > (printing_y / 2 - printing_safegap) ||
-		(tmp.z() + _mesh->z_max()) > printing_z) {
+	if(!isPrintable())
+	{
 		changeColor(Hix::Render::Colors::OutOfBound);
 	}
 	else
@@ -274,31 +275,6 @@ void GLModel::updateModelMesh(){
 }
 
 
-
-
-
-void GLModel::mouseClickedLayflat(MeshFace shadow_meshface){
-
-    unselectMeshFaces();
-    QVector3D tmp_fn = shadow_meshface.fn;
-    Qt3DCore::QTransform tmp;
-    float x= tmp_fn.x();
-    float y= tmp_fn.y();
-    float z=tmp_fn.z();
-    float angleX = qAtan2(y,z)*180/M_PI;
-    if (z>0) angleX+=180;
-    float angleY = qAtan2(x,z)*180/M_PI;
-    tmp.setRotationX(angleX);
-    tmp.setRotationY(angleY);
-    rotateModelMesh(tmp.matrix());
-
-
-    emit resetLayflat();
-}
-
-		
-
-
 void GLModel::generatePlane(int type){
 
 	//generate drawing plane
@@ -306,7 +282,7 @@ void GLModel::generatePlane(int type){
 	_cuttingPlane->enablePlane(true);
 	//if flat cut
 	if (type == 1)
-	{
+	{	
 
 	}
 	else if (type == 2)
@@ -919,43 +895,18 @@ void GLModel::generateExtensionFaces(double distance){
 }
 
 void GLModel::generateLayFlat(){
-    //MeshFace shadow_meshface = *targetMeshFace;
-
     if(!_targetSelected)
         return;
-
-    QVector3D tmp_fn = targetMeshFace->fn;
-    qDebug() << "target 2 " << tmp_fn;
-
-    float x= tmp_fn.x();
-    float y= tmp_fn.y();
-    float z=tmp_fn.z();
-
-    float angleX = 0;
-    float angleY = 0;
-    qDebug() << "aqtan2" << qAtan2(z,y)*180/M_PI << "aqtan2" << qAtan2(z,x)*180/M_PI;
-    angleX = (qAtan2(z,y)*180/M_PI);
-    angleX = 90 + angleX;
-    z = (-1)*qSqrt(qPow(z,2) + qPow(y,2));
-    angleY = (qAtan2(z,x)*180/M_PI);
-    angleY = -90 - angleY;
-    //qDebug() << "angle" << angleX << angleY;
-    Qt3DCore::QTransform tmp1;
-    Qt3DCore::QTransform tmp2;
-    tmp1.setRotationX(angleX);
-    tmp1.setRotationY(0);
-    tmp1.setRotationZ(0);
-    //qDebug() << "lay flat 0      ";
-    //rotateModelMesh(tmp->matrix());
-    tmp2.setRotationX(0);
-    tmp2.setRotationY(angleY);
-    tmp2.setRotationZ(0);
-    rotateModelMesh(tmp1.matrix() * tmp2.matrix());
+	unselectMeshFaces();
+	constexpr QVector3D toBottNormal(0, 0, -1);
+	auto rotationTo = QQuaternion::rotationTo(targetMeshFace->fn, toBottNormal);
+	auto rotCenter = _mesh->bounds().centre();
+	QVector3D rotAxis;
+	float angle;
+	rotationTo.getAxisAndAngle(&rotAxis, &angle);
+	rotateAroundPt(rotCenter, rotAxis, angle);
 	setZToBed();
-    //qDebug() << "lay flat 1      ";
-    unselectMeshFaces();
-    //closeLayflat();
-    emit resetLayflat();
+	emit resetLayflat();
 }
 
 
@@ -988,6 +939,7 @@ void GLModel::closeLayflat(){
         return;
     layflatActive = false;
 	_meshMaterial.changeMode(Hix::Render::ShaderMode::SingleColor);
+	updatePrintable();
 	updateMesh(_mesh, true);
     unselectMeshFaces();
 	_targetSelected = false;
@@ -1101,8 +1053,8 @@ void GLModel::changeViewMode(int viewMode) {
         layerViewPlaneMaterial->setAlphaBlendingEnabled(false);
         layerViewPlaneEntity = new Qt3DCore::QEntity(this);
         layerViewPlane=new Qt3DExtras::QPlaneMesh(this);
-        layerViewPlane->setHeight(scfg->bed_x);
-        layerViewPlane->setWidth(scfg->bed_y);
+        layerViewPlane->setHeight(scfg->bedX());
+        layerViewPlane->setWidth(scfg->bedY());
         layerViewPlaneTransform=new Qt3DCore::QTransform();
 		//layerViewPlaneTransform->setRotationX(90);
 		layerViewPlaneTransform->setRotationY(-90);

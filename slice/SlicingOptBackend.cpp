@@ -149,8 +149,8 @@ void SlicingOptBackend::onOptionChanged(QString opName, int newIndex)
 	{
 		int x, y;
 		resStringToInt(ResolutionStr[newIndex], x, y);
-		_config->resolution_x = x;
-		_config->resolution_y = y;
+		_config->setResolutionX(x);
+		_config->setResolutionY(y);
 	}
 	else if (opName == "Layer height")
 	{

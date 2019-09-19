@@ -74,7 +74,7 @@ SlicingEngine::Result SlicingEngine::sliceModels(bool isTemp, tf::Subflow& subfl
 	auto bounds = qmlManager->selectedModelsLengths();
 	int64_t area = 0;
 
-	float volume = ((float)(area / pow(scfg->pixel_per_mm / scfg->contraction_ratio, 2)) / 1000000) * scfg->layer_height;
+	float volume = ((float)(area / pow(scfg->pixelPerMMX() / scfg->contraction_ratio, 2)) / 1000000) * scfg->layer_height;
     qmlManager->setProgress(1);
     QStringList name_word = filename.split("/");
 
