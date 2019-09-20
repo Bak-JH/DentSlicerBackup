@@ -1862,7 +1862,7 @@ Rectangle {
             signal closeLabelling()
             signal stateChangeLabelling()
             signal sendTextChanged(string text, int contentWidth);
-            signal sendLabelUpdate(string text, int contentWidth, string fontName, bool isBold, int fontSize);
+            signal sendLabelUpdate(string text, string fontName, bool isBold, int fontSize);
 
             onApplyClicked: {
                 console.log("ApplyClicked");
@@ -1889,9 +1889,10 @@ Rectangle {
             }
 
             function labelUpdate() {
-                //console.log("sendLabelUpdate @@@@@@@@@@@@@@@@@@@@@@@@@@@@%%%%%%%%%%%%");
-                sendLabelUpdate(popup_label.labelTextContent, popup_label.labelContentWidth
-                                ,popup_label.labelFontName, popup_label.labelIsBold, popup_label.labelFontSize);
+                console.log("sendLabelUpdate @@@@@@@@@@@@@@@@@@@@@@@@@@@@%%%%%%%%%%%%");
+                console.log(typeof(popup_label.transform))
+                sendLabelUpdate(popup_label.labelTextContent, popup_label.labelFontName, 
+                                popup_label.labelIsBold, popup_label.labelFontSize);
             }
 
             ComboBox {
