@@ -222,8 +222,10 @@ void SVGexporterPrivate::writePolygon(const PolyNode* contour, bool isTemp, std:
 		auto fp = Hix::Polyclipping::toFloatPt(point);
         content << std::fixed << 
 			fp.x()*scfg->pixelPerMMX()/scfg->contraction_ratio
-			+ (scfg->resolutionX()/2)<< "," << std::fixed << scfg->resolutionY()/2
-			- fp.y()*scfg->pixelPerMMX()/scfg->contraction_ratio << " "; // doesn't need 100 actually
+			+ (scfg->resolutionX()/2)
+			<< "," << std::fixed <<
+			scfg->resolutionY()/2
+			- fp.y()*scfg->pixelPerMMX()/scfg->contraction_ratio << " "; // doesn't need 100 actually// TODO fix this
 
         // just fit to origin
         //outfile << std::fixed << (float)point.X/Hix::Polyclipping::INT_PT_RESOLUTION - scfg->origin.x() << "," << std::fixed << (float)point.Y/Hix::Polyclipping::INT_PT_RESOLUTION - scfg->origin.y() << " ";
@@ -245,7 +247,9 @@ void SVGexporterPrivate::writePolygon(ClipperLib::Path& contour, bool isTemp, st
 		auto fp = Hix::Polyclipping::toFloatPt(point);
         content << std::fixed << 
 			fp.x() * scfg->pixelPerMMX()/scfg->contraction_ratio
-			+ (scfg->resolutionX()/2) << "," << std::fixed << scfg->resolutionY()/2
+			+ (scfg->resolutionX()/2) 
+			<< ","<< std::fixed <<
+			scfg->resolutionY()/2
 			- fp.y() * scfg->pixelPerMMX() / scfg->contraction_ratio << " "; // doesn't need 100 actually
 
         // just fit to origin

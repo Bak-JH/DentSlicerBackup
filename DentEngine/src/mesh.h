@@ -20,6 +20,7 @@ namespace Hix
 	namespace Engine3D
 	{
 		constexpr float VTX_INBOUND_DIST = 0.002f;//0.03;//(float)1/resolution; // resolution in mm (0.0001 and 0.0009 are same, 1 micron)
+		constexpr float VTX_INBOUND_DITTER = VTX_INBOUND_DIST / 2;
 		constexpr float VTX_3D_DIST = 0.0034f;
 	}
 }
@@ -29,7 +30,6 @@ namespace std
 	template<>
 	struct hash<QVector3D>
 	{
-		//2D only!
 		size_t operator()(const QVector3D& v)const
 		{
 			using namespace Hix::Engine3D;
@@ -189,7 +189,7 @@ namespace Hix
 			/********************** Undo state functions***********************/
 
 			/********************** Mesh Edit Functions***********************/
-			void vertexApplyTransformation(const Qt3DCore::QTransform& transform);
+			//void vertexApplyTransformation(const Qt3DCore::QTransform& transform);
 			void vertexOffset(float factor);
 			void vertexMove(QVector3D direction);
 			void centerMesh();

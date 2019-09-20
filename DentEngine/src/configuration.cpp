@@ -42,11 +42,13 @@ void SlicingConfiguration::setBedHeight(float val)
 
 void SlicingConfiguration::setResolutionX(float val)
 {
+	_resolutionX = val;
 	_pixelPerMMX = _resolutionX / _bedX;
 }
 
 void SlicingConfiguration::setResolutionY(float val)
 {
+	_resolutionY = val;
 	_pixelPerMMY = _resolutionY / _bedY;
 }
 
