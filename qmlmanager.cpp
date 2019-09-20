@@ -388,7 +388,7 @@ void QmlManager::disconnectHandlers(GLModel* glmodel){
 
 	// label popup codes
 	QObject::disconnect(labelPopup, SIGNAL(stateChangeLabelling()), glmodel, SLOT(stateChangeLabelling()));
-	QObject::disconnect(labelPopup, SIGNAL(sendLabelUpdate(QString, int, QString, bool, int)), glmodel, SLOT(applyLabelInfo(QString, int, QString, bool, int)));
+	QObject::disconnect(labelPopup, SIGNAL(sendLabelUpdate(QString, QString, bool, int)), glmodel, SLOT(applyLabelInfo(QString, QString, bool, int)));
 	//QObject::connect(labelPopup, SIGNAL(runFeature(int)),glmodel->ft, SLOT(setTypeAndStart(int)));
 	
 	// extension popup codes
@@ -528,7 +528,7 @@ void QmlManager::connectHandlers(GLModel* glmodel){
     QObject::connect(labelPopup, SIGNAL(openLabelling()),glmodel,SLOT(openLabelling()));
     QObject::connect(labelPopup, SIGNAL(closeLabelling()),glmodel,SLOT(closeLabelling()));
     QObject::connect(labelPopup, SIGNAL(stateChangeLabelling()), glmodel, SLOT(stateChangeLabelling()));
-    QObject::connect(labelPopup, SIGNAL(sendLabelUpdate(QString, int, QString, bool, int)), glmodel, SLOT(applyLabelInfo(QString, int, QString, bool, int)));
+    QObject::connect(labelPopup, SIGNAL(sendLabelUpdate(QString, QString, bool, int)), glmodel, SLOT(applyLabelInfo(QString, QString, bool, int)));
     //QObject::connect(labelPopup, SIGNAL(runFeature(int)),glmodel->ft, SLOT(setTypeAndStart(int)));
     QObject::connect(labelPopup, SIGNAL(generateText3DMesh()), glmodel, SLOT(generateText3DMesh()));
     QObject::connect(labelFontBox, SIGNAL(sendFontName(QString)),glmodel, SLOT(getFontNameChanged(QString)));

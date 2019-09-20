@@ -89,9 +89,6 @@
     <ClCompile Include="utils\httpreq.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="feature\labellingtextpreview.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="utils\linemeshgeometry.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -141,9 +138,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="DentEngine\src\polyclipping\poly2tri\sweep\sweep_context.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="feature\text3dgeometrygenerator.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="utils\updatechecker.cpp">
@@ -257,6 +251,9 @@
     <ClCompile Include="DentEngine\src\polyclipping\polytree2tri\PolytreeCDT.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>
+    <ClCompile Include="feature\text3dgenerator.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DentEngine\src\polyclipping\poly2tri\sweep\advancing_front.h">
@@ -296,9 +293,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <QtMoc Include="utils\httpreq.h">
-      <Filter>Header Files</Filter>
-    </QtMoc>
-    <QtMoc Include="feature\labellingtextpreview.h">
       <Filter>Header Files</Filter>
     </QtMoc>
     <QtMoc Include="utils\linemeshgeometry.h">
@@ -362,9 +356,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="DentEngine\src\polyclipping\poly2tri\sweep\sweep_context.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="feature\text3dgeometrygenerator.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <QtMoc Include="utils\updatechecker.h">
@@ -600,6 +591,9 @@
     </ClInclude>
     <ClInclude Include="DentEngine\src\polyclipping\polytree2tri\PolytreeCDT.h">
       <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="feature\text3dgenerator.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -1178,6 +1172,7 @@
     <None Include="icon-32.ico" />
     <None Include="icon-32.ico" />
     <None Include="Qml\LeftTabSlicingOptionElementTextbox.qml" />
+    <None Include="icon-32.ico" />
     <None Include="icon-32.ico" />
     <None Include="icon-32.ico" />
     <None Include="icon-32.ico" />
