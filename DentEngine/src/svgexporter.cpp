@@ -268,6 +268,9 @@ void SVGexporterPrivate:: writeGroupFooter(std::stringstream& content){
 
 void SVGexporterPrivate::writeHeader(std::stringstream& content){
     content << "<svg width='" << scfg->resolutionX() << "' height='" << scfg->resolutionY() << "' xmlns='http://www.w3.org/2000/svg' xmlns:contour='http://hix.co.kr' style='background-color: black;'>\n";
+	content << "<rect width='" << scfg->resolutionX() << "' height='" << scfg->resolutionY() << "' fill='black'>\n";
+	content << "</rect>\n";
+
 }
 
 void SVGexporterPrivate::writeFooter(std::stringstream& content){

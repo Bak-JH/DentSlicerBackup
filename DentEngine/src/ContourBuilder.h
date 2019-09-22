@@ -101,6 +101,8 @@ namespace Hix
 		public:
 			ContourBuilder(const Mesh* mesh, std::unordered_set<FaceConstItr>& intersectingFaces, float z);
 			std::vector<Contour> buildContours();
+			std::vector<Contour> flushIncompleteContours();
+
 
 		private:
 			//could use bool, just incase we need to resolve non-2-maifold

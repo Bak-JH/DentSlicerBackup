@@ -10,41 +10,38 @@
 #include <variant>
 #include "Bounds3D.h"
 #include "../../common/TrackedIndexedList.h"
+#include "../../common/Hasher.h"
 #define cos50 0.64278761
 #define cos100 -0.17364818
 #define cos150 -0.8660254
 #define FZERO 0.00001f
 
-namespace Hix
-{
-	namespace Engine3D
-	{
-		constexpr float VTX_INBOUND_DIST = 0.002f;//0.03;//(float)1/resolution; // resolution in mm (0.0001 and 0.0009 are same, 1 micron)
-		constexpr float VTX_INBOUND_DITTER = VTX_INBOUND_DIST / 2;
-		constexpr float VTX_3D_DIST = 0.0034f;
-	}
-}
-
 namespace std
 {
-	template<>
-	struct hash<QVector3D>
-	{
-		size_t operator()(const QVector3D& v)const
-		{
-			using namespace Hix::Engine3D;
-			return	(size_t(((v.x() + VTX_INBOUND_DIST / 2) / VTX_INBOUND_DIST)) ^
-					(size_t(((v.y() + VTX_INBOUND_DIST / 2) / VTX_INBOUND_DIST)) << 10) ^
-					(size_t(((v.z() + VTX_INBOUND_DIST / 2) / VTX_INBOUND_DIST)) << 20));
-
-		}
-	};
+	//template<>
+	//struct hash<QVector3D>
+	//{
+	//	size_t operator()(const QVector3D& v)const
+	//	{
+	//	}
+	//};
 }
 
 namespace Hix
 {
 	namespace Engine3D
 	{
+		static constexpr float VTX_INBOUND_DIST = 0.002f;//10 micron resolution
+		static constexpr float VTX_INBOUND_DITTER = VTX_INBOUND_DIST / 2;
+		static constexpr float VTX_3D_DIST = 0.0034f;
+		//hasher unique to each mesh class...
+		class MeshVtxHasher: public Hix::Common::Hasher<QVector3D>
+		{
+		public:
+			//TODO
+			//void optimizeForBound(const Bounds3D& meshBound);
+			size_t operator()(const QVector3D& hashed)const override;
+		};
 
         template<class container_type, class itr_type>
         itr_type getEquivalentItr(const container_type& b, const container_type& a, const itr_type& aItr)
@@ -197,7 +194,7 @@ namespace Hix
 			void vertexScale(float scaleX, float scaleY, float scaleZ, float centerX, float centerY);
 			void reverseFace(FaceConstItr faceItr);
 			void reverseFaces();
-            bool addFace(QVector3D v0, QVector3D v1, QVector3D v2);
+            bool addFace(const QVector3D& v0, const QVector3D& v1, const QVector3D& v2);
 			bool addFace(const FaceConstItr& face);
 			TrackedIndexedList<MeshFace>::const_iterator removeFace(FaceConstItr f_it);
 			TrackedIndexedList<MeshVertex>& getVerticesNonConst();
@@ -286,7 +283,7 @@ namespace Hix
 			/********************** Helper Functions **********************/
             //set twin relationship for this edge as well as matching twin edge
 
-			VertexItr addOrRetrieveFaceVertex(QVector3D v);
+			VertexItr addOrRetrieveFaceVertex(const QVector3D& v);
 			void removeVertexHash(QVector3D pos);
 			void addHalfEdgesToFace(std::array<VertexItr, 3> faceVertices, FaceConstItr face);
 
@@ -295,8 +292,8 @@ namespace Hix
 			void faceIndexChangedCallback(size_t oldIdx, size_t newIdx);
 			void hEdgeIndexChangedCallback(size_t oldIdx, size_t newIdx);
 
-
-			std::unordered_map<QVector3D, VertexConstItr> _verticesHash;
+			MeshVtxHasher _vtxHasher;
+			std::unordered_map<size_t, VertexConstItr> _verticesHash;
 			TrackedIndexedList<MeshVertex> vertices;
 			TrackedIndexedList<HalfEdge> halfEdges;
 			TrackedIndexedList<MeshFace> faces;
@@ -313,9 +310,6 @@ namespace Hix
 		bool pathInpath(Path3D target, Path3D in);
 
 		std::vector<std::array<QVector3D, 3>> interpolate(Path3D from, Path3D to);
-
-		uint32_t intPoint2Hash(ClipperLib::IntPoint u);
-		uint32_t Vertex2Hash(MeshVertex& u);
 
 	};
 

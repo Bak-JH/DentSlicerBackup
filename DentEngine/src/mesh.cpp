@@ -523,7 +523,7 @@ void Mesh::reverseFaces(){
 
 /********************** Mesh Generation Functions **********************/
 
-bool Mesh::addFace(QVector3D v0, QVector3D v1, QVector3D v2){
+bool Mesh::addFace(const QVector3D& v0, const QVector3D& v1, const QVector3D& v2){
 	std::array<VertexItr, 3> fVtx;
     fVtx[0] = addOrRetrieveFaceVertex(v0);
 	fVtx[1] = addOrRetrieveFaceVertex(v1);
@@ -692,7 +692,7 @@ bool Hix::Engine3D::findCommonManifoldFace(
 
 void Mesh::removeVertexHash(QVector3D pos)
 {
-	auto toBeRemoved = _verticesHash.find(pos);
+	auto toBeRemoved = _verticesHash.find(_vtxHasher(pos));
 	if (toBeRemoved != _verticesHash.end())
 	{
 		_verticesHash.erase(toBeRemoved);
@@ -704,9 +704,10 @@ const Bounds3D& Hix::Engine3D::Mesh::bounds() const
 	return _bounds;
 }
 
-VertexItr Mesh::addOrRetrieveFaceVertex(QVector3D v){
+VertexItr Mesh::addOrRetrieveFaceVertex(const QVector3D& v){
 	//find if existing vtx can be used
-	auto existingVtx = _verticesHash.find(v);
+	auto hashval = _vtxHasher(v);
+	auto existingVtx = _verticesHash.find(hashval);
 
 	if (existingVtx != _verticesHash.end())
 	{
@@ -715,7 +716,7 @@ VertexItr Mesh::addOrRetrieveFaceVertex(QVector3D v){
     MeshVertex mv(v);
     vertices.emplace_back(mv);
 	auto last = vertices.cend() - 1;
-	_verticesHash[v] = last;
+	_verticesHash[hashval] = last;
     _bounds.update(v);
     return  vertices.toNormItr(last);
 }
@@ -794,11 +795,12 @@ void Mesh::vtxIndexChangedCallback(size_t oldIdx, size_t newIdx)
 
 	//update hash value
 	auto oldItr = vertices.cbegin() + oldIdx;
-	auto hashItr = _verticesHash.find(vtx.position);
+	auto hashVal = _vtxHasher(vtx.position);
+	auto hashItr = _verticesHash.find(hashVal);
 	while (hashItr != _verticesHash.end()) {
 		if (hashItr->second == oldItr)
 		{
-			_verticesHash[vtx.position] = newIndexItr;
+			_verticesHash[hashVal] = newIndexItr;
 			break;
 		}
 		++hashItr;
@@ -982,15 +984,6 @@ bool listContains(std::vector<uint32_t>* hashList, uint32_t hash){
         h_it ++;
     }
     return false;
-}
-
-MeshVertex* findAvailableMeshVertexFromContour(QHash<uint32_t, Path3D>* pathHash, std::vector<uint32_t>* hashList, Path3D* contour){
-    for (auto& mv : *contour){
-        if ((*pathHash)[Vertex2Hash(mv)].size()>=3){
-            return &(*pathHash)[Vertex2Hash(mv)].at(1);
-        }
-    }
-    return nullptr;
 }
 
 
@@ -1374,15 +1367,27 @@ TrackedIndexedList<HalfEdge>& Mesh::getHalfEdgesNonConst()
 
 /************** Helper Functions *****************/
 
-uint32_t  Hix::Engine3D::intPoint2Hash(IntPoint u) {
-	QVector3D u_qv3 = QVector3D(u.X, u.Y, 0);
-	uint32_t path_hash_u = std::hash<QVector3D>()(u_qv3);
-	return path_hash_u;
-}
-
-uint32_t Hix::Engine3D::Vertex2Hash(MeshVertex& u)
+size_t Hix::Engine3D::MeshVtxHasher::operator()(const QVector3D& hashed) const
 {
-	uint32_t path_hash_u = std::hash<QVector3D>()(u.position);
-	return path_hash_u;
-}
+	//return	(size_t(((v.x() + VTX_INBOUND_DIST / 2) / VTX_INBOUND_DIST)) ^
+	//	(size_t(((v.y() + VTX_INBOUND_DIST / 2) / VTX_INBOUND_DIST)) << 10) ^
+	//	(size_t(((v.z() + VTX_INBOUND_DIST / 2) / VTX_INBOUND_DIST)) << 20));
 
+
+	//range of int21 = -1048576, 1048575, roughly 4m on 2micron resolution
+	//range of uint21 = 0, 2097151
+	//2^21 - 1
+	static constexpr int32_t INT21_MAX_HALF = 1048576;
+	static constexpr uint64_t UINT_21_MASK = 2097151; //0b111111...for 21 bits
+	//using uint21, so 63 bits for all
+	uint64_t digest = 0;
+	for (size_t i = 0; i < 3; ++i)
+	{
+		int32_t signedMicron = int32_t((hashed[i] + VTX_INBOUND_DITTER) / VTX_INBOUND_DIST);
+		uint64_t unsignedMicron = std::max(0, (signedMicron + INT21_MAX_HALF));
+		//discard top 11 bits so 21 bits valid, shift to correct position
+		unsignedMicron = (unsignedMicron & UINT_21_MASK) << (21 * i);
+		digest = digest | unsignedMicron;
+	}
+	return	digest;
+}
