@@ -13,6 +13,22 @@ const double critical_angle = 45;
 const double critical_angle_radian = M_PI * (critical_angle / 180.0);
 float area_subdiv = 20.0f;
 
+namespace std
+{
+	template<>
+	struct hash<QVector3D>
+	{
+		//2D only!
+		std::size_t operator()(const QVector3D& pt)const
+		{
+			constexpr static Hix::Engine3D::MeshVtxHasher hasher;
+			return hasher(pt);
+			//TODO
+
+		}
+	};
+}
+
 namespace OverhangDetectPrivate
 {
 	std::unordered_set<VertexConstItr> localMinFacingDown(const Mesh* mesh);

@@ -85,10 +85,7 @@ bool FileLoader::loadMeshSTL_ascii(Mesh* mesh, const char* filename)
 
         if (sscanf(buffer, " vertex %f %f %f", &f0, &f1, &f2) == 3)
         {
-            vertex.setX(f0);
-            vertex.setY(f1);
-            vertex.setZ(f2);
-
+			QVector3D vertex(f0, f1, f2);
             n++;
             switch(n)
             {
@@ -156,9 +153,9 @@ bool FileLoader::loadMeshSTL_binary(Mesh* mesh, const char* filename){
         }
         float *v= ((float*)buffer)+3;
 
-        QVector3D v0 = QVector3D(v[0], v[1], v[2]);
-        QVector3D v1 = QVector3D(v[3], v[4], v[5]);
-        QVector3D v2 = QVector3D(v[6], v[7], v[8]);
+        QVector3D v0(v[0], v[1], v[2]);
+        QVector3D v1(v[3], v[4], v[5]);
+        QVector3D v2(v[6], v[7], v[8]);
 
         mesh->addFace(v0, v1, v2);
     }
