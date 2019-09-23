@@ -75,8 +75,8 @@ namespace Hix
 			void addNext(const ContourSegment& seg);
 			void addPrev(const ContourSegment& seg);
 			float dist()const;
-			QVector2D from()const;
-			QVector2D to()const;
+			QVector2D& from();
+			QVector2D& to();
 			void append(const Contour& appended);
 			//void calculateDirection();
 			//bool isOutward();

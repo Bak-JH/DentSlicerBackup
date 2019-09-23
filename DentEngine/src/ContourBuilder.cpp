@@ -88,11 +88,11 @@ float Contour::dist()const
 	return totalDist;
 }
 
-QVector2D Contour::from()const
+QVector2D& Contour::from()
 {
 	return segments.front().from;
 }
-QVector2D Contour::to()const
+QVector2D& Contour::to()
 {
 	return segments.back().to;
 }
@@ -467,9 +467,16 @@ std::unordered_set<Contour*> ContourBuilder::joinOrCloseIncompleteContours()
 	std::unordered_multimap<QVector2D, Contour*> map;
 	for (auto& each : _incompleteContours)
 	{
+		IntPoint from = Hix::Polyclipping::toInt2DPt(each.from());
+		IntPoint to = Hix::Polyclipping::toInt2DPt(each.to());
+		each.from() = Hix::Polyclipping::toFloatPt(from);
+		each.to() = Hix::Polyclipping::toFloatPt(to);
+		if (from == to && each.dist() < 2)
+			continue;
 		remainingContours.insert(&each);
 		closedContours.insert(&each);
 		map.insert(std::make_pair(each.from(), &each));
+
 	}
 	while (!remainingContours.empty())
 	{
@@ -497,6 +504,9 @@ std::unordered_set<Contour*> ContourBuilder::joinOrCloseIncompleteContours()
 	}
 	return closedContours;
 }
+
+
+
 
 bool ContourBuilder::buildContour(Contour& current, bool reverse)
 {
@@ -540,3 +550,6 @@ bool ContourBuilder::buildContour(Contour& current, bool reverse)
 	}
 	return false;
 }
+
+
+

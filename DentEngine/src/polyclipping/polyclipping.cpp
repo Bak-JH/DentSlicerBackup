@@ -4,14 +4,15 @@
 #include <unordered_set>
 using namespace ClipperLib;
 
+static constexpr float INT_PT_RES_FLOAT = (float)Hix::Polyclipping::INT_PT_RESOLUTION;
+static constexpr float INT_PT_RES_DITTER_FLOAT = (float)Hix::Polyclipping::INT_PT_RESOLUTION / 2.0f;
+
 // converts float point to int in microns
 void  Hix::Polyclipping::addPoint(float x, float y, ClipperLib::Path* path)
 {
-	IntPoint ip;
-	ip.X = round(x * Hix::Polyclipping::INT_PT_RESOLUTION);
-	ip.Y = round(y * Hix::Polyclipping::INT_PT_RESOLUTION);
+
 	//qDebug() << "addPoint called with x " << x << " y " << y << " rounding " << ip.X;
-	path->push_back(ip);
+	path->push_back(toInt2DPt(QVector2D(x,y)));
 }
 IntPoint  Hix::Polyclipping::toInt2DPt(const QVector2D& pt)
 {
@@ -23,10 +24,7 @@ IntPoint  Hix::Polyclipping::toInt2DPt(const QVector2D& pt)
 
 IntPoint  Hix::Polyclipping::toInt2DPt(const QVector3D& pt)
 {
-	IntPoint ip;
-	ip.X = round(pt.x() * Hix::Polyclipping::INT_PT_RESOLUTION);
-	ip.Y = round(pt.y() * Hix::Polyclipping::INT_PT_RESOLUTION);
-	return ip;
+	return toInt2DPt(pt.toVector2D());
 }
 QVector2D Hix::Polyclipping::toFloatPt(const IntPoint& pt)
 {
