@@ -16,9 +16,8 @@ namespace Hix
 			//ie) when cylinder is complete, starting contour faces wrong way and it's normal is towards the inside of cylinder
 			//does not generate end caps though.
 			std::vector<QVector3D> extrudeAlongPath(Engine3D::Mesh* destinationMesh, const QVector3D& normal,
-				const std::vector<QVector3D>& contour, const std::vector<QVector3D>& path,
-				std::vector<std::vector<QVector3D>>& outJointContours, const std::vector<float>* scale = nullptr);
-		
+				const std::vector<QVector3D>& contour, const std::vector<QVector3D>& path, std::vector<std::vector<QVector3D>>& outJointContours, 
+				const std::vector<float>* scale = nullptr, QVector2D* centoid = nullptr);		
 		}
 
 
