@@ -48,6 +48,7 @@ namespace Hix
 			//void attachToModel(RaftModel* support);
 
 		private:
+			std::vector<QVector3D> getSupportBasePts()const;
 			GLModel* _owner;
 			bool _supportExist = false;
 			bool _raftExist = false;
@@ -58,7 +59,6 @@ namespace Hix
 			std::unordered_map<SupportModel*, std::unique_ptr<SupportModel>> _supports;
 			std::unique_ptr<RaftModel> _raft;
 			Hix::OverhangDetect::Overhangs _overhangs;
-			std::vector<QVector3D> _basePts;
 		};
 
 	}

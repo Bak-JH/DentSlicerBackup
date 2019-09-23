@@ -34,6 +34,8 @@ QVector3D Hix::Support::CylindricalRaft::getPrimitiveColorCode(const Hix::Engine
 
 void Hix::Support::CylindricalRaft::generateMeshForContour(const ClipperLib::Path& contourPath)
 {
+
+
 	//need to form a contour that contains all overhangs
 	std::vector<QVector3D> contour;
 	std::vector<QVector3D> path;
@@ -52,9 +54,9 @@ void Hix::Support::CylindricalRaft::generateMeshForContour(const ClipperLib::Pat
 	scales.emplace_back(1.0f);
 
 	//path is simple cylinder starting from 0,0,0 to 0,0,raft_height
-	path.emplace_back(QVector3D(0, 0, _manager->raftBottom() + scfg->raft_thickness));
-	path.emplace_back(QVector3D(0, 0, _manager->raftBottom() + scfg->raft_thickness / 2.0f));
 	path.emplace_back(QVector3D(0, 0, _manager->raftBottom()));
+	path.emplace_back(QVector3D(0, 0, _manager->raftBottom() + scfg->raft_thickness / 2.0f));
+	path.emplace_back(QVector3D(0, 0, _manager->raftBottom() + scfg->raft_thickness));
 
 	//convert to float point contour
 	contour.reserve(contourPath.size());
@@ -63,12 +65,25 @@ void Hix::Support::CylindricalRaft::generateMeshForContour(const ClipperLib::Pat
 		contour.emplace_back(Hix::Polyclipping::toFloatPt(each));
 	}
 
+	//TODO get rid of this ugly messs
+	float xCenter = 0;
+	float yCenter = 0;
+	for (auto& pt : contour)
+	{
+		xCenter += pt.x();
+		yCenter += pt.y();
+	}
+	xCenter /= contour.size();
+	yCenter /= contour.size();
+	QVector2D centoid(xCenter, yCenter);
+
+
 	//create cylinder walls
 	std::vector<std::vector<QVector3D>> jointContours;
-	Hix::Features::Extrusion::extrudeAlongPath(_mesh, QVector3D(0, 0, 1), contour, path, jointContours, &scales);
+	Hix::Features::Extrusion::extrudeAlongPath(_mesh, QVector3D(0, 0, 1), contour, path, jointContours, &scales, &centoid);
 	//generate caps
-	generateCap(jointContours.front(), false);
-	generateCap(jointContours.back(), true);
+	generateCap(jointContours.front(), true);
+	generateCap(jointContours.back(), false);
 
 
 }

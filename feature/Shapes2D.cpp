@@ -76,3 +76,17 @@ void Hix::Shapes2D::scaleContour(std::vector<QVector3D>& targetContour, float sc
 		each *= scale;
 	}
 }
+
+
+void Hix::Shapes2D::scaleContourAroundCentoid(std::vector<QVector3D>& targetContour, float scale, QVector2D& centoid)
+{
+	for (auto& each : targetContour)
+	{
+		each -= centoid;
+	}
+	scaleContour(targetContour, scale);
+	for (auto& each : targetContour)
+	{
+		each += centoid;
+	}
+}
