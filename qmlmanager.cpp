@@ -426,7 +426,7 @@ void QmlManager::disconnectHandlers(GLModel* glmodel){
 	QObject::disconnect(scalePopup, SIGNAL(closeScale()), glmodel, SLOT(closeScale()));
 
 	// label popup codes
-	QObject::disconnect(labelPopup, SIGNAL(sendTextChanged(QString, int)), glmodel, SLOT(getTextChanged(QString, int)));
+	QObject::disconnect(labelPopup, SIGNAL(sendTextChanged(QString)), glmodel, SLOT(getTextChanged(QString)));
 	QObject::disconnect(labelPopup, SIGNAL(openLabelling()), glmodel, SLOT(openLabelling()));
 	QObject::disconnect(labelPopup, SIGNAL(closeLabelling()), glmodel, SLOT(closeLabelling()));
 	QObject::disconnect(labelPopup, SIGNAL(generateText3DMesh()), glmodel, SLOT(generateText3DMesh()));
@@ -524,7 +524,7 @@ void QmlManager::connectHandlers(GLModel* glmodel){
     QObject::connect(scalePopup, SIGNAL(closeScale()), glmodel, SLOT(closeScale()));
 
     // label popup codes
-    QObject::connect(labelPopup, SIGNAL(sendTextChanged(QString, int)),glmodel,SLOT(getTextChanged(QString, int)));
+    QObject::connect(labelPopup, SIGNAL(sendTextChanged(QString)),glmodel,SLOT(getTextChanged(QString)));
     QObject::connect(labelPopup, SIGNAL(openLabelling()),glmodel,SLOT(openLabelling()));
     QObject::connect(labelPopup, SIGNAL(closeLabelling()),glmodel,SLOT(closeLabelling()));
     QObject::connect(labelPopup, SIGNAL(stateChangeLabelling()), glmodel, SLOT(stateChangeLabelling()));

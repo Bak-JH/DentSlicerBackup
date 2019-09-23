@@ -251,8 +251,11 @@
     <ClCompile Include="DentEngine\src\polyclipping\polytree2tri\PolytreeCDT.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>
-    <ClCompile Include="feature\text3dgenerator.cpp">
+    <ClCompile Include="feature\labelling\labelModel.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="feature\labelling\labelManager.cpp">
+      <Filter>Generated Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -592,8 +595,11 @@
     <ClInclude Include="DentEngine\src\polyclipping\polytree2tri\PolytreeCDT.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
-    <ClInclude Include="feature\text3dgenerator.h">
+    <ClInclude Include="feature\labelling\labelModel.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="feature\labelling\labelManager.h">
+      <Filter>Generated Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
