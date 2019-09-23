@@ -219,7 +219,7 @@ std::unordered_set<FaceConstItr> Hix::Engine3D::HalfEdge::twinFaces()const
 	auto twns = twins();
 	for (auto& each : twns)
 	{
-		twnFaces.insert(each->owningFace);
+		twnFaces.emplace(each->owningFace);
 	}
 	return twnFaces;
 }
@@ -229,7 +229,7 @@ std::vector<FaceConstItr> Hix::Engine3D::MeshVertex::connectedFaces()const
 	std::vector<FaceConstItr> result;
 	for (auto each : leavingEdges)
 	{
-		result.push_back(each->owningFace);
+		result.emplace_back(each->owningFace);
 	}
 	return result;
 }
@@ -918,13 +918,13 @@ void Mesh::findNearSimilarFaces(QVector3D normal, FaceConstItr  mf,
 	std::unordered_set<FaceConstItr>& result, float maxNormalDiff, size_t maxCount)const
 {
 	std::deque<FaceConstItr>q;
+	result.reserve(maxCount);
 	q.emplace_back(mf);
-	result.insert(mf);
+	result.emplace(mf);
 	while (!q.empty())
 	{
 		auto curr = q.front();
 		q.pop_front();
-		result.insert(curr);
 		if (result.size() == maxCount)
 			return;
 		auto edgeCirc = curr->edgeCirculator();
@@ -932,9 +932,11 @@ void Mesh::findNearSimilarFaces(QVector3D normal, FaceConstItr  mf,
 			auto nFaces = edgeCirc->twinFaces();
 			for (auto nFace : nFaces)
 			{
-				if (result.find(nFace) == result.end() && (nFace->fn - normal).length() < maxNormalDiff)
+				if (result.find(nFace) == result.end() && (nFace->fn - normal).lengthSquared() < maxNormalDiff)
 				{
 					q.emplace_back(nFace);
+					result.emplace(nFace);
+
 				}
 			}
 		}

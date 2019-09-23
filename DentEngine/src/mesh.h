@@ -240,7 +240,7 @@ namespace Hix
 			inline float z_min()const{ return _bounds.zMin();}
 			inline float z_max()const{ return _bounds.zMax();}
 			void findNearSimilarFaces(QVector3D normal,FaceConstItr mf,
-				std::unordered_set<FaceConstItr>& result, float maxNormalDiff = 0.20f, size_t maxCount = 100)const;
+				std::unordered_set<FaceConstItr>& result, float maxNormalDiff = 0.1f, size_t maxCount = 10000)const;
 
 
 
