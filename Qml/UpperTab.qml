@@ -1852,7 +1852,6 @@ Rectangle {
             image: "qrc:/Resource/label_description.png"
             labelTextContent: "Enter text"
             labelFontName:"Alias"
-            labelContentWidth: 0
             labelIsBold: false
             labelFontSize: 12
 
@@ -1861,7 +1860,7 @@ Rectangle {
             signal openLabelling()
             signal closeLabelling()
             signal stateChangeLabelling()
-            signal sendTextChanged(string text, int contentWidth);
+            signal sendTextChanged(string text);
             signal sendLabelUpdate(string text, string fontName, bool isBold, int fontSize);
 
             onApplyClicked: {
@@ -1871,10 +1870,9 @@ Rectangle {
             }
 
             onLabelTextChanged: {
-                console.log("sendTextChanged @@@ @@@@ @@@@@@@@@@", text, contentWidth, popup_label.labelTextContent);
+                console.log("sendTextChanged @@@ @@@@ @@@@@@@@@@", text, popup_label.labelTextContent);
                 popup_label.labelTextContent = text;
-                popup_label.labelContentWidth = contentWidth;
-                sendTextChanged(text, contentWidth);
+                sendTextChanged(text);
             }
 
             onStateChanged: {

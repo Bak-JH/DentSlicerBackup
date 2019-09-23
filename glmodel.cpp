@@ -238,7 +238,7 @@ void GLModel::copyModelAttributeFrom(GLModel* from){
     if (from->textPreview) {
         qDebug() << "copyModelAttributeFrom";
         if (!textPreview)
-            textPreview = new Hix::Labelling::Text3D(this, *(from->textPreview));
+            textPreview = new Hix::Labelling::LabelModel(this, *(from->textPreview));
     }
 }
 
@@ -496,7 +496,7 @@ void GLModel::clicked(MouseEventData& pick, const Qt3DRender::QRayCasterHit& hit
 	/// Labeling Feature ///
     if (labellingActive && hit.localIntersection() != QVector3D(0, 0, 0)) {
         if (textPreview == nullptr)
-            textPreview = new Hix::Labelling::Text3D(this);
+            textPreview = new Hix::Labelling::LabelModel(this);
 
 		if (textPreview && labellingActive) {
 			textPreview->setTranslation(hit.localIntersection());
@@ -679,8 +679,8 @@ QVector3D GLModel::spreadPoint(QVector3D endPoint,QVector3D startPoint,int facto
 void GLModel::getTextChanged(QString text)
 {
     qDebug() << "@@@@ getTexyChanged";
-    if (textPreview && labellingActive){
-        applyLabelInfo(text, textPreview->fontName, (textPreview->fontWeight==QFont::Bold)? true:false, textPreview->fontSize);
+    if (text != "" && textPreview && labellingActive){
+		textPreview->text = text;
     }
 }
 
@@ -719,24 +719,23 @@ void GLModel::getFontNameChanged(QString fontName)
 {
     qDebug() << "@@@@ getFontNameChanged";
     if (textPreview && labellingActive){
-        applyLabelInfo(textPreview->text, fontName, (textPreview->fontWeight==QFont::Bold)? true:false, textPreview->fontSize);
+		textPreview->font.setFamily(fontName);
     }
 }
 
 void GLModel::getFontBoldChanged(bool isbold){
     qDebug() << "@@@@ getBoldChanged";
     if (textPreview && labellingActive){
-        applyLabelInfo(textPreview->text, textPreview->fontName, isbold, textPreview->fontSize);
-
+		textPreview->font.setBold(isbold);
     }
 }
 
 void GLModel::getFontSizeChanged(int fontSize)
 {
     qDebug() << "@@@@ getSizeChanged" << fontSize;
-    if (textPreview && labellingActive){
-        applyLabelInfo(textPreview->text, textPreview->fontName, (textPreview->fontWeight==QFont::Bold)? true:false, fontSize);
-    }
+	if (textPreview && labellingActive){
+		textPreview->font.setPointSize(fontSize);
+	}
 }
 
 /* make a new labellingTextPreview and apply label info's */
@@ -745,7 +744,7 @@ void GLModel::applyLabelInfo(QString text, QString fontName, bool isBold, int fo
 	qDebug() << "label apply";
 
     if (textPreview && labellingActive){
-		textPreview->generateText3D(QFont(fontName, fontSize, isBold), text, _mesh, targetMeshFace->fn, 0.025f);
+		textPreview->generateLabelModel(text, _mesh, targetMeshFace->fn, 0.025f);
 		updateModelMesh();
     }
 }

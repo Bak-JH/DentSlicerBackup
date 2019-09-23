@@ -5,7 +5,7 @@
 #include "fileloader.h"
 #include "slice/slicingengine.h"
 #include "feature/modelcut.h"
-#include "feature/text3dgenerator.h"
+#include "feature/labelling/labelModel.h"
 #include "feature/autoorientation.h"
 #include "feature/meshrepair.h"
 #include "feature/autoarrange.h"
@@ -114,7 +114,7 @@ public:
     std::vector<QPhongMaterial*> sphereMaterial;
 
     void removeModelPartList();
-    Hix::Labelling::Text3D* textPreview = nullptr;
+    Hix::Labelling::LabelModel* textPreview = nullptr;
 
     void copyModelAttributeFrom(GLModel* from);
 
