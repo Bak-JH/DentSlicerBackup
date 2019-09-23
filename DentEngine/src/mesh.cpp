@@ -1369,11 +1369,6 @@ TrackedIndexedList<HalfEdge>& Mesh::getHalfEdgesNonConst()
 
 size_t Hix::Engine3D::MeshVtxHasher::operator()(const QVector3D& hashed) const
 {
-	//return	(size_t(((v.x() + VTX_INBOUND_DIST / 2) / VTX_INBOUND_DIST)) ^
-	//	(size_t(((v.y() + VTX_INBOUND_DIST / 2) / VTX_INBOUND_DIST)) << 10) ^
-	//	(size_t(((v.z() + VTX_INBOUND_DIST / 2) / VTX_INBOUND_DIST)) << 20));
-
-
 	//range of int21 = -1048576, 1048575, roughly 4m on 2micron resolution
 	//range of uint21 = 0, 2097151
 	//2^21 - 1

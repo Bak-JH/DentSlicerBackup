@@ -516,29 +516,27 @@ bool ContourBuilder::buildContour(Contour& current, bool reverse)
 		oppMap = &_toHash;
 		from = current.to();
 	}
-	ContourSegment* next = nullptr;
 	auto oppRange = oppMap->equal_range(from);
 	auto range = map->equal_range(from);
     //range is of size 1
-    //fucking GCC
-    if (range.first != range.second  && oppRange.first != oppRange.second)
+	auto nextItr = range.first;
+	bool hasAny = range.first != range.second && oppRange.first != oppRange.second;
+	bool hasOnlyOne = hasAny && (++range.first == range.second && ++oppRange.first == oppRange.second);
+    if (hasOnlyOne && _unexplored.find(nextItr->second->face) != _unexplored.end())
 	{
-        next = range.first->second;
-        if(++range.first == range.second && ++oppRange.first == oppRange.second)
+		const ContourSegment& next = *nextItr->second;
+
+        if (reverse)
         {
-            if (reverse)
-            {
-                current.addPrev(*next);
-            }
-            else
-            {
-                current.addNext(*next);
-            }
-            //mark explored
-            _unexplored.erase(next->face);
-            return true;
+            current.addPrev(next);
         }
-        return false;
+        else
+        {
+            current.addNext(next);
+        }
+        //mark explored
+        _unexplored.erase(next.face);
+        return true;
 	}
 	return false;
 }
