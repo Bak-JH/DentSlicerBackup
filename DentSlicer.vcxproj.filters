@@ -254,9 +254,6 @@
     <ClCompile Include="feature\labelling\labelModel.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="feature\labelling\labelManager.cpp">
-      <Filter>Generated Files</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DentEngine\src\polyclipping\poly2tri\sweep\advancing_front.h">
@@ -597,9 +594,6 @@
     </ClInclude>
     <ClInclude Include="feature\labelling\labelModel.h">
       <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="feature\labelling\labelManager.h">
-      <Filter>Generated Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -1178,6 +1172,7 @@
     <None Include="icon-32.ico" />
     <None Include="icon-32.ico" />
     <None Include="Qml\LeftTabSlicingOptionElementTextbox.qml" />
+    <None Include="icon-32.ico" />
     <None Include="icon-32.ico" />
     <None Include="icon-32.ico" />
     <None Include="icon-32.ico" />
