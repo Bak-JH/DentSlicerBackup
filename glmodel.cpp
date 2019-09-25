@@ -495,9 +495,11 @@ void GLModel::clicked(MouseEventData& pick, const Qt3DRender::QRayCasterHit& hit
 
 	/// Labeling Feature ///
     if (labellingActive && hit.localIntersection() != QVector3D(0, 0, 0)) {
-        if (textPreview == nullptr)
-            textPreview = new Hix::Labelling::LabelModel(this);
+		if (textPreview != nullptr)
+			textPreview->setEnabled(false);
 
+		textPreview = new Hix::Labelling::LabelModel(this);
+		
 		if (textPreview && labellingActive) {
 			textPreview->setTranslation(hit.localIntersection());
             QMetaObject::invokeMethod(qmlManager->labelPopup, "labelUpdate");
@@ -703,10 +705,10 @@ void GLModel::closeLabelling()
     labellingActive = false;
 
     if (textPreview){
-        textPreview = nullptr;
+		textPreview->setEnabled(false);
     }
 	_targetSelected = false;
-
+	textPreview = nullptr;
 //    stateChangeLabelling();
 }
 
@@ -744,7 +746,7 @@ void GLModel::applyLabelInfo(QString text, QString fontName, bool isBold, int fo
 	qDebug() << "label apply";
 
     if (textPreview && labellingActive){
-		textPreview->generateLabelModel(text, _mesh, targetMeshFace->fn, 0.025f);
+		textPreview->generateLabel(text, _mesh, targetMeshFace->fn, 0.025f);
 		updateModelMesh();
     }
 }
@@ -753,10 +755,10 @@ void GLModel::applyLabelInfo(QString text, QString fontName, bool isBold, int fo
 void GLModel::generateText3DMesh()
 {
     qDebug() << "generateText3DMesh @@@@@" << this << this;
+
     if (updateLock)
         return;
     updateLock = true;
-
 
     if (!textPreview){
         qDebug() << "no labellingTextPreview";
@@ -766,61 +768,17 @@ void GLModel::generateText3DMesh()
 
     qmlManager->openProgressPopUp();
 
-    qmlManager->setProgress(0.1);
-
-    QVector3D* originalVertices = reinterpret_cast<QVector3D*>(vertexBuffer.data().data());
-    int originalVerticesSize = vertexBuffer.data().size() / sizeof(float) / 3;
-
-    QVector3D* vertices;
-    int verticesSize;
-    unsigned int* indices;
-    int indicesSize;
-    float depth = 0.5f;
-
-    Qt3DCore::QTransform transform, normalTransform;
-
-
-    QVector3D ref = QVector3D(0, 0, 1);
-    QVector3D tangent;
-    if (textPreview->normal == QVector3D(0,0,1) || textPreview->normal == QVector3D(0,0,-1)){
-        tangent = QVector3D(1,0,0);
-    } else {
-        tangent = QVector3D::crossProduct(textPreview->normal, ref);
-    }
-    tangent.normalize();
-
-    QVector3D binormal;
-    if (textPreview->normal == QVector3D(0,0,1) || textPreview->normal == QVector3D(0,0,-1)){
-        binormal = QVector3D(0,1,0);
-    } else {
-        binormal = QVector3D::crossProduct(tangent, textPreview->normal);
-    }
-    binormal.normalize();
-
-    QQuaternion quat = QQuaternion::fromAxes(tangent, textPreview->normal, binormal) * QQuaternion::fromAxisAndAngle(QVector3D(0, 0, 1), 180)* QQuaternion::fromAxisAndAngle(QVector3D(1, 0, 0), 90);
-
-    qmlManager->setProgress(0.3);
-
-    QString targetText = textPreview->text;
-    QVector3D targetNormal = textPreview->normal;
+    qmlManager->setProgress(0.1f);
 
 	_targetSelected = false;
+	*_mesh += *textPreview->getMesh();
 
-    qmlManager->setProgress(0.9);
-
-    //std::vector<QVector3D> outVertices;
-    //for (int i = 0; i < indicesSize / 3; ++i) {
-    //    // Insert vertices in CCW order
-    //    outVertices.push_back(vertices[2 * indices[3*i + 2] + 0]);
-    //    outVertices.push_back(vertices[2 * indices[3*i + 1] + 0]);
-    //    outVertices.push_back(vertices[2 * indices[3*i + 0] + 0]);
-    //    _mesh->addFace(vertices[2 * indices[3*i + 2] + 0], vertices[2 * indices[3*i + 1] + 0], vertices[2 * indices[3*i + 0] + 0]);
-
-    //}
+    qmlManager->setProgress(0.5f);
 
     updateModelMesh();
+	textPreview = nullptr;
 
-    qmlManager->setProgress(1);
+    qmlManager->setProgress(1.0f);
 }
 
 // for extension
