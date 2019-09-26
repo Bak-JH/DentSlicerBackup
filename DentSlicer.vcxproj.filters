@@ -253,6 +253,7 @@
     </ClCompile>
     <ClCompile Include="feature\labelling\labelModel.cpp">
       <Filter>Source Files</Filter>
+		</ClCompile>
     <ClCompile Include="DentEngine\src\Bounds3D.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>
@@ -596,7 +597,8 @@
     </ClInclude>
     <ClInclude Include="feature\labelling\labelModel.h">
       <Filter>Header Files</Filter>
-    <ClInclude Include="DentEngine\src\Bounds3D.h">
+		</ClInclude>
+		<ClInclude Include="DentEngine\src\Bounds3D.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
     <ClInclude Include="common\Hasher.h">
