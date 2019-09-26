@@ -88,11 +88,11 @@ float Contour::dist()const
 	return totalDist;
 }
 
-QVector2D Contour::from()const
+QVector2D& Contour::from()
 {
 	return segments.front().from;
 }
-QVector2D Contour::to()const
+QVector2D& Contour::to()
 {
 	return segments.back().to;
 }
@@ -284,7 +284,7 @@ void ContourBuilder::buildSegment(const FaceConstItr& mf)
 	ContourSegment::FlipResult flipResult;
 	if (segment.from == segment.to)
 	{
-		flipResult = ContourSegment::FlipResult::UnknownDirection;
+		return;
 	}
 	else
 	{
@@ -372,13 +372,17 @@ std::vector<Contour> ContourBuilder::buildContours()
 			if (isArea(*each))
 			{
 				contours.push_back(*each);
+				qDebug() << "repaired contour";
 			}
 		}
 
 	}
-
 	//repair remaining un-closed contorus
 	return contours;
+}
+std::vector<Contour> Hix::Slicer::ContourBuilder::flushIncompleteContours()
+{
+	return std::move(_incompleteContours);
 }
 bool ContourBuilder::isArea(const Contour& contour)
 {
@@ -393,7 +397,8 @@ bool ContourBuilder::isArea(const Contour& contour)
 bool DFSIncompleteContour(std::unordered_set<Contour*>& unusedContours, Contour* start,
 	const std::unordered_multimap<QVector2D, Contour*>& map)
 {
-	std::unordered_map<Contour*, Contour*> traverseMap;
+	//std::unordered_map<Contour*, Contour*> traverseMap;
+	std::deque<Contour*> path;
 	std::unordered_set<Contour*> explored;
 	bool success = false;
 	std::vector<Contour*> s;
@@ -403,47 +408,41 @@ bool DFSIncompleteContour(std::unordered_set<Contour*>& unusedContours, Contour*
 	{
 		current = s.back();
 		s.pop_back();
-		if (explored.find(current) == explored.end())
+
+		explored.insert(current);
+		path.push_back(current);
+		if (current->to() == start->from())
 		{
-			explored.insert(current);
-			if (current->to() == start->from())
-			{
-				success = true;
-				break;
-			}
-			else
-			{
-				auto childrenRange = map.equal_range(current->to());
-				for (auto it = childrenRange.first; it != childrenRange.second; ++it) {
-					traverseMap[it->second] = current;
+			success = true;
+			break;
+		}
+		else
+		{
+			auto childrenRange = map.equal_range(current->to());
+			size_t added = 0;
+			for (auto it = childrenRange.first; it != childrenRange.second; ++it) {
+				if (explored.find(it->second) == explored.end())
+				{
 					s.push_back(it->second);
+					++added;
 				}
+			}
+			if (added == 0)
+			{
+				//dead end
+				explored.erase(current);
+				path.pop_back();
 			}
 		}
 	}
 
-	if (success)
+	if (success && path.size() > 1)
 	{
-		std::vector<Contour*> rPath;
-		rPath.push_back(current);
-		auto parent = traverseMap.find(current);
-		if (!traverseMap.empty())
-		{
-			//backtrace DFS to get the stitched contour -now closed.
-			do
-			{
-				rPath.push_back(parent->second);
-				parent = traverseMap.find(parent->second);
-
-
-			} while (parent != traverseMap.end());
-		}
 
 		//remove start contour form rPath
-		rPath.pop_back();
-
+		path.pop_front();
 		//append paths
-		for (auto rItr = rPath.crbegin(); rItr != rPath.crend(); ++rItr)
+		for (auto rItr = path.cbegin(); rItr != path.cend(); ++rItr)
 		{
 			start->append(**rItr);
 			unusedContours.erase(*rItr);
@@ -468,9 +467,16 @@ std::unordered_set<Contour*> ContourBuilder::joinOrCloseIncompleteContours()
 	std::unordered_multimap<QVector2D, Contour*> map;
 	for (auto& each : _incompleteContours)
 	{
+		IntPoint from = Hix::Polyclipping::toInt2DPt(each.from());
+		IntPoint to = Hix::Polyclipping::toInt2DPt(each.to());
+		each.from() = Hix::Polyclipping::toFloatPt(from);
+		each.to() = Hix::Polyclipping::toFloatPt(to);
+		if (from == to && each.dist() < 2)
+			continue;
 		remainingContours.insert(&each);
 		closedContours.insert(&each);
 		map.insert(std::make_pair(each.from(), &each));
+
 	}
 	while (!remainingContours.empty())
 	{
@@ -499,6 +505,9 @@ std::unordered_set<Contour*> ContourBuilder::joinOrCloseIncompleteContours()
 	return closedContours;
 }
 
+
+
+
 bool ContourBuilder::buildContour(Contour& current, bool reverse)
 {
 	std::unordered_multimap<QVector2D, ContourSegment*>* map;
@@ -517,29 +526,30 @@ bool ContourBuilder::buildContour(Contour& current, bool reverse)
 		oppMap = &_toHash;
 		from = current.to();
 	}
-	ContourSegment* next = nullptr;
 	auto oppRange = oppMap->equal_range(from);
 	auto range = map->equal_range(from);
     //range is of size 1
-    //fucking GCC
-    if (range.first != range.second  && oppRange.first != oppRange.second)
+	auto nextItr = range.first;
+	bool hasAny = range.first != range.second && oppRange.first != oppRange.second;
+	bool hasOnlyOne = hasAny && (++range.first == range.second && ++oppRange.first == oppRange.second);
+    if (hasOnlyOne && _unexplored.find(nextItr->second->face) != _unexplored.end())
 	{
-        next = range.first->second;
-        if(++range.first == range.second && ++oppRange.first == oppRange.second)
+		const ContourSegment& next = *nextItr->second;
+
+        if (reverse)
         {
-            if (reverse)
-            {
-                current.addPrev(*next);
-            }
-            else
-            {
-                current.addNext(*next);
-            }
-            //mark explored
-            _unexplored.erase(next->face);
-            return true;
+            current.addPrev(next);
         }
-        return false;
+        else
+        {
+            current.addNext(next);
+        }
+        //mark explored
+        _unexplored.erase(next.face);
+        return true;
 	}
 	return false;
 }
+
+
+

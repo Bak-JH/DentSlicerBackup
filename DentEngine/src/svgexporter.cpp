@@ -124,7 +124,7 @@ material consumption estimation = 29.9781\r\n").arg(QString::number((int)(scfg->
     for (int i=0; i<max_slices; i++){
         QString svgfilename = outfoldername + "/" + QString::number(i) + ".svg";
         QSvgRenderer renderer(svgfilename);
-        QImage image(scfg->resolution_x, scfg->resolution_y, QImage::Format_RGB32);
+        QImage image(scfg->resolutionX(), scfg->resolutionY(), QImage::Format_RGB32);
         image.fill(0x000000);
         QPainter painter(&image);
         renderer.render(&painter);
@@ -188,8 +188,8 @@ Edge thickness = 1\r\n\
 Distance to Part = 1\r\n\
 Max offset from Part = -1\r\n\
 Grid Base Plate Type = None").arg(QString::number((int)(scfg->layer_height*1000)),
-            QString::number(scfg->bed_x), QString::number(scfg->bed_y),
-            QString::number(scfg->resolution_x), QString::number(scfg->resolution_y),
+            QString::number(scfg->bedX()), QString::number(scfg->bedY()),
+            QString::number(scfg->resolutionX()), QString::number(scfg->resolutionY()),
             QString::number(scfg->layer_height)).toStdString().data());
     parametersfile.close();
 
@@ -221,9 +221,11 @@ void SVGexporterPrivate::writePolygon(const PolyNode* contour, bool isTemp, std:
 		}
 		auto fp = Hix::Polyclipping::toFloatPt(point);
         content << std::fixed << 
-			fp.x()*scfg->pixel_per_mm/scfg->contraction_ratio
-			+ (scfg->resolution_x/2)<< "," << std::fixed << scfg->resolution_y/2
-			- fp.y()*scfg->pixel_per_mm/scfg->contraction_ratio << " "; // doesn't need 100 actually
+			fp.x()*scfg->pixelPerMMX()/scfg->contraction_ratio
+			+ (scfg->resolutionX()/2)
+			<< "," << std::fixed <<
+			scfg->resolutionY()/2
+			- fp.y()*scfg->pixelPerMMX()/scfg->contraction_ratio << " "; // doesn't need 100 actually// TODO fix this
 
         // just fit to origin
         //outfile << std::fixed << (float)point.X/Hix::Polyclipping::INT_PT_RESOLUTION - scfg->origin.x() << "," << std::fixed << (float)point.Y/Hix::Polyclipping::INT_PT_RESOLUTION - scfg->origin.y() << " ";
@@ -244,9 +246,11 @@ void SVGexporterPrivate::writePolygon(ClipperLib::Path& contour, bool isTemp, st
 		}
 		auto fp = Hix::Polyclipping::toFloatPt(point);
         content << std::fixed << 
-			fp.x() * scfg->pixel_per_mm/scfg->contraction_ratio
-			+ (scfg->resolution_x/2) << "," << std::fixed << scfg->resolution_y/2
-			- fp.y() * scfg->pixel_per_mm / scfg->contraction_ratio << " "; // doesn't need 100 actually
+			fp.x() * scfg->pixelPerMMX()/scfg->contraction_ratio
+			+ (scfg->resolutionX()/2) 
+			<< ","<< std::fixed <<
+			scfg->resolutionY()/2
+			- fp.y() * scfg->pixelPerMMX() / scfg->contraction_ratio << " "; // doesn't need 100 actually
 
         // just fit to origin
         //outfile << std::fixed << (float)point.X/Hix::Polyclipping::INT_PT_RESOLUTION - scfg->origin.x() << "," << std::fixed << (float)point.Y/Hix::Polyclipping::INT_PT_RESOLUTION - scfg->origin.y() << " ";
@@ -263,7 +267,10 @@ void SVGexporterPrivate:: writeGroupFooter(std::stringstream& content){
 }
 
 void SVGexporterPrivate::writeHeader(std::stringstream& content){
-    content << "<svg width='" << scfg->resolution_x << "' height='" << scfg->resolution_y << "' xmlns='http://www.w3.org/2000/svg' xmlns:contour='http://hix.co.kr' style='background-color: black;'>\n";
+    content << "<svg width='" << scfg->resolutionX() << "' height='" << scfg->resolutionY() << "' xmlns='http://www.w3.org/2000/svg' xmlns:contour='http://hix.co.kr' style='background-color: black;'>\n";
+	content << "<rect width='" << scfg->resolutionX() << "' height='" << scfg->resolutionY() << "' fill='black'>\n";
+	content << "</rect>\n";
+
 }
 
 void SVGexporterPrivate::writeFooter(std::stringstream& content){

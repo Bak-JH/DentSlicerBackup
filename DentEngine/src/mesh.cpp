@@ -219,7 +219,7 @@ std::unordered_set<FaceConstItr> Hix::Engine3D::HalfEdge::twinFaces()const
 	auto twns = twins();
 	for (auto& each : twns)
 	{
-		twnFaces.insert(each->owningFace);
+		twnFaces.emplace(each->owningFace);
 	}
 	return twnFaces;
 }
@@ -229,7 +229,7 @@ std::vector<FaceConstItr> Hix::Engine3D::MeshVertex::connectedFaces()const
 	std::vector<FaceConstItr> result;
 	for (auto each : leavingEdges)
 	{
-		result.push_back(each->owningFace);
+		result.emplace_back(each->owningFace);
 	}
 	return result;
 }
@@ -287,13 +287,7 @@ Mesh::Mesh(const Mesh& o)
 	halfEdges = o.halfEdges;
 	faces = o.faces;
 
-	_x_min = o._x_min;
-	_x_max = o._x_max;
-	_y_min = o._y_min;
-	_y_max = o._y_max;
-	_z_min = o._z_min;
-	_z_max = o._z_max;
-
+	_bounds = o._bounds;
 
 	vertices.addIndexChangedCallback(std::bind(&Mesh::vtxIndexChangedCallback, this, std::placeholders::_1, std::placeholders::_2));
 	faces.addIndexChangedCallback(std::bind(&Mesh::faceIndexChangedCallback, this, std::placeholders::_1, std::placeholders::_2));
@@ -350,17 +344,40 @@ Mesh& Mesh::operator+=(const Mesh& o)
 
 /********************** Mesh Edit Functions***********************/
 
-
+//void Mesh::vertexApplyTransformation(const Qt3DCore::QTransform& transform)
+//{
+//	auto mat = transform.matrix();
+//	qDebug() << "fuuuckl" << mat;
+//	auto scale = transform.scale3D();
+//	vertices.markChangedAll();
+//	_bounds.reset();
+//	size_t count = 0;
+//	for (auto& vertex : vertices)
+//	{
+//		if (count % 100 == 0)
+//			QCoreApplication::processEvents();
+//		vertex.position = vertex.position * transform.matrix();
+//		_bounds.update(vertex.position);
+//		++count;
+//	};
+//
+//	for (auto& face : faces)
+//	{
+//		auto meshVertices = face.meshVertices();
+//		face.fn = QVector3D::normal(meshVertices[0]->position,
+//			meshVertices[1]->position,
+//			meshVertices[2]->position);
+//	};
+//
+//	for (auto& vertex : vertices)
+//	{
+//		vertex.calculateNormalFromFaces();
+//	};
+//}
 
 void Mesh::vertexOffset(float factor){
 	vertices.markChangedAll();
-    int numberofVertices = vertices.size();
-    _x_min = 99999;
-    _x_max = 99999;
-    _y_min = 99999;
-    _y_max = 99999;
-    _z_min = 99999;
-    _z_max = 99999;
+	_bounds.reset();
 	size_t count = 0;
 	for(auto& vertex: vertices)
 	{
@@ -368,20 +385,14 @@ void Mesh::vertexOffset(float factor){
 			QCoreApplication::processEvents();
 		QVector3D tmp = vertex.position - vertex.vn * factor;
 		vertex.position = tmp;
-		this->updateMinMax(vertex.position);
+		_bounds.update(vertex.position);
 		++count;
 	};
 }
 
 void Mesh::vertexMove(QVector3D direction){
 	vertices.markChangedAll();
-    int numberofVertices = vertices.size();
-    _x_min = 99999;
-    _x_max = 99999;
-    _y_min = 99999;
-    _y_max = 99999;
-    _z_min = 99999;
-    _z_max = 99999;
+	_bounds.reset();
 	size_t count = 0;
 	for (auto& vertex : vertices)
 	{
@@ -389,7 +400,7 @@ void Mesh::vertexMove(QVector3D direction){
 			QCoreApplication::processEvents();
 		QVector3D tmp = direction + vertex.position;
 		vertex.position = tmp;
-		updateMinMax(vertex.position);
+		_bounds.update(vertex.position);
 		++count;
 	};
 }
@@ -402,29 +413,16 @@ Mesh* Mesh::vertexMoved(QVector3D direction)const
 }
 
 void Mesh::centerMesh(){
-    float x_center = (_x_max+_x_min)/2;
-    float y_center = (_y_max+_y_min)/2;
-    float z_center = (_z_max+_z_min)/2;
+    float x_center = (x_max() + x_min())/2;
+    float y_center = (y_max() + y_min())/2;
+    float z_center = (z_max() + z_min())/2;
     vertexMove(-QVector3D(x_center, y_center, z_center));
-    _x_max = _x_max - x_center;
-    _x_min = _x_min - x_center;
-    _y_max = _y_max - y_center;
-    _y_min = _y_min - y_center;
-    _z_max = _z_max - z_center;
-    _z_min = _z_min - z_center;
 }
 
 void Mesh::vertexRotate(QMatrix4x4 tmpmatrix){
 	vertices.markChangedAll();
 	faces.markChangedAll();
-
-    _x_min = 99999;
-    _x_max = 99999;
-    _y_min = 99999;
-    _y_max = 99999;
-    _z_min = 99999;
-    _z_max = 99999;
-
+	_bounds.reset();
 	for (auto& vertex : vertices)
 	{
 		QVector4D tmpVertex;
@@ -434,7 +432,7 @@ void Mesh::vertexRotate(QMatrix4x4 tmpmatrix){
 		tmpVertex2.setY(QVector4D::dotProduct(tmpVertex, tmpmatrix.column(1)));
 		tmpVertex2.setZ(QVector4D::dotProduct(tmpVertex, tmpmatrix.column(2)));
 		vertex.position = tmpVertex2;
-		updateMinMax(vertex.position);
+		_bounds.update(vertex.position);
 	};
 
 	for (auto& face : faces)
@@ -456,18 +454,11 @@ void Mesh::vertexRotate(QMatrix4x4 tmpmatrix){
 
 void Mesh::vertexScale(float scaleX=1, float scaleY=1, float scaleZ=1, float centerX=0, float centerY=0){
 	vertices.markChangedAll();
+	_bounds.reset();
     if(fabs(scaleX) < FZERO || fabs(scaleY) < FZERO || fabs(scaleZ) < FZERO) {
         qmlManager->openResultPopUp("","Scale cannot be 0", "");
         return;
     }
-
-    int numberofVertices = vertices.size();
-    _x_min = 99999;
-    _x_max = 99999;
-    _y_min = 99999;
-    _y_max = 99999;
-    _z_min = 99999;
-    _z_max = 99999;
 
     /* need to fix center of the model */
     float fixCenterX = centerX - (centerX*scaleX);
@@ -483,7 +474,7 @@ void Mesh::vertexScale(float scaleX=1, float scaleY=1, float scaleZ=1, float cen
 		tmp.setY(vertex.position.y() * scaleY + fixCenterY);
 		tmp.setZ(vertex.position.z() * scaleZ);
 		vertex.position = tmp;
-		updateMinMax(vertex.position);
+		_bounds.update(vertex.position);
 		++count;
 	}
 }
@@ -511,7 +502,6 @@ void Mesh::reverseFaces(){
 
     halfEdges.markChangedAll();
     vertices.markChangedAll();
-
 	size_t count = 0;
 	for (auto hEdgeItr = halfEdges.begin(); hEdgeItr != halfEdges.end(); ++hEdgeItr)
 	{
@@ -533,7 +523,7 @@ void Mesh::reverseFaces(){
 
 /********************** Mesh Generation Functions **********************/
 
-bool Mesh::addFace(QVector3D v0, QVector3D v1, QVector3D v2){
+bool Mesh::addFace(const QVector3D& v0, const QVector3D& v1, const QVector3D& v2){
 	std::array<VertexItr, 3> fVtx;
     fVtx[0] = addOrRetrieveFaceVertex(v0);
 	fVtx[1] = addOrRetrieveFaceVertex(v1);
@@ -702,16 +692,22 @@ bool Hix::Engine3D::findCommonManifoldFace(
 
 void Mesh::removeVertexHash(QVector3D pos)
 {
-	auto toBeRemoved = _verticesHash.find(pos);
+	auto toBeRemoved = _verticesHash.find(_vtxHasher(pos));
 	if (toBeRemoved != _verticesHash.end())
 	{
 		_verticesHash.erase(toBeRemoved);
 	}
 }
 
-VertexItr Mesh::addOrRetrieveFaceVertex(QVector3D v){
+const Bounds3D& Hix::Engine3D::Mesh::bounds() const
+{
+	return _bounds;
+}
+
+VertexItr Mesh::addOrRetrieveFaceVertex(const QVector3D& v){
 	//find if existing vtx can be used
-	auto existingVtx = _verticesHash.find(v);
+	auto hashval = _vtxHasher(v);
+	auto existingVtx = _verticesHash.find(hashval);
 
 	if (existingVtx != _verticesHash.end())
 	{
@@ -720,8 +716,8 @@ VertexItr Mesh::addOrRetrieveFaceVertex(QVector3D v){
     MeshVertex mv(v);
     vertices.emplace_back(mv);
 	auto last = vertices.cend() - 1;
-	_verticesHash[v] = last;
-    updateMinMax(v);
+	_verticesHash[hashval] = last;
+    _bounds.update(v);
     return  vertices.toNormItr(last);
 }
 
@@ -776,40 +772,6 @@ void Hix::Engine3D::Mesh::addHalfEdgesToFace(std::array<VertexItr, 3> faceVertic
 
 
 
-std::array<float,6> Mesh::calculateMinMax(QMatrix4x4 rotmatrix, const Mesh* mesh) {
-	qDebug() << "calculate minmax";
-	std::array<float, 6> minmax{ 99999 };
-	size_t count = 0;
-	const auto &vertices = mesh->getVertices();
-	for (const auto& vertex : vertices)
-	{
-		QVector4D tmpVertex;
-		QVector3D tmpVertex2;
-		if (count % 100 == 0)
-			QCoreApplication::processEvents();
-		tmpVertex = vertex.position.toVector4D();
-		QVector3D v = QVector3D(QVector4D::dotProduct(tmpVertex, rotmatrix.column(0)), QVector4D::dotProduct(tmpVertex, rotmatrix.column(1)), QVector4D::dotProduct(tmpVertex, rotmatrix.column(2)));
-		updateMinMax(v, minmax);
-	}
-    return minmax;
-}
-
-void Mesh::updateMinMax(QVector3D v)
-{
-    if (v.x() > _x_max || _x_max == 99999)
-        _x_max = v.x();
-    if (v.x() < _x_min || _x_min == 99999)
-        _x_min = v.x();
-    if (v.y() > _y_max || _y_max == 99999)
-        _y_max = v.y();
-    if (v.y() < _y_min || _y_min == 99999)
-        _y_min = v.y();
-    if (v.z() > _z_max || _z_max == 99999)
-        _z_max = v.z();
-    if (v.z() < _z_min || _z_min == 99999)
-        _z_min = v.z();
-}
-
 
 void Mesh::vtxIndexChangedCallback(size_t oldIdx, size_t newIdx)
 {
@@ -833,11 +795,12 @@ void Mesh::vtxIndexChangedCallback(size_t oldIdx, size_t newIdx)
 
 	//update hash value
 	auto oldItr = vertices.cbegin() + oldIdx;
-	auto hashItr = _verticesHash.find(vtx.position);
+	auto hashVal = _vtxHasher(vtx.position);
+	auto hashItr = _verticesHash.find(hashVal);
 	while (hashItr != _verticesHash.end()) {
 		if (hashItr->second == oldItr)
 		{
-			_verticesHash[vtx.position] = newIndexItr;
+			_verticesHash[hashVal] = newIndexItr;
 			break;
 		}
 		++hashItr;
@@ -882,21 +845,6 @@ void Mesh::hEdgeIndexChangedCallback(size_t oldIdx, size_t newIdx)
 }
 
 
-void Mesh::updateMinMax(QVector3D v, std::array<float,6>& minMax){
-//array order: _x_min, _x_max...._z_min, _z_max
-    if (v.x() < minMax[0] || minMax[0] == 99999)
-        minMax[0] = v.x();
-    if (v.x() > minMax[1] || minMax[1] == 99999)
-        minMax[1] = v.x();
-    if (v.y() < minMax[2] || minMax[2] == 99999)
-        minMax[2] = v.y();
-    if (v.y() > minMax[3] || minMax[3] == 99999)
-        minMax[3] = v.y();
-    if (v.z() < minMax[4] || minMax[4] == 99999)
-        minMax[4] = v.z();
-    if (v.z() > minMax[5] || minMax[5] == 99999)
-        minMax[5] = v.z();
-}
 
 //ascending/increasing order
 std::array<float, 3> MeshFace::sortZ()const
@@ -967,33 +915,28 @@ bool MeshFace::isNeighborOf(const FaceConstItr& other)const
 }
 
 void Mesh::findNearSimilarFaces(QVector3D normal, FaceConstItr  mf,
-	std::unordered_set<FaceConstItr>& result, float maxNormalDiff)const
+	std::unordered_set<FaceConstItr>& result, float maxNormalDiff, size_t maxCount)const
 {
 	std::deque<FaceConstItr>q;
+	result.reserve(maxCount);
 	q.emplace_back(mf);
-	result.insert(mf);
-	bool boundDetected = false;
+	result.emplace(mf);
 	while (!q.empty())
 	{
 		auto curr = q.front();
 		q.pop_front();
-		result.insert(curr);
+		if (result.size() == maxCount)
+			return;
 		auto edgeCirc = curr->edgeCirculator();
 		for (size_t i = 0; i < 3; ++i, ++edgeCirc) {
 			auto nFaces = edgeCirc->twinFaces();
 			for (auto nFace : nFaces)
 			{
-				if (!boundDetected && result.find(nFace) == result.end())
+				if (result.find(nFace) == result.end() && (nFace->fn - normal).lengthSquared() < maxNormalDiff)
 				{
-					if ((nFace->fn - normal).length() < maxNormalDiff)
-					{
-						q.emplace_back(nFace);
-					}
-					else
-					{
-						boundDetected = true;
+					q.emplace_back(nFace);
+					result.emplace(nFace);
 
-					}
 				}
 			}
 		}
@@ -1043,15 +986,6 @@ bool listContains(std::vector<uint32_t>* hashList, uint32_t hash){
         h_it ++;
     }
     return false;
-}
-
-MeshVertex* findAvailableMeshVertexFromContour(QHash<uint32_t, Path3D>* pathHash, std::vector<uint32_t>* hashList, Path3D* contour){
-    for (auto& mv : *contour){
-        if ((*pathHash)[Vertex2Hash(mv)].size()>=3){
-            return &(*pathHash)[Vertex2Hash(mv)].at(1);
-        }
-    }
-    return nullptr;
 }
 
 
@@ -1433,48 +1367,24 @@ TrackedIndexedList<HalfEdge>& Mesh::getHalfEdgesNonConst()
 	return halfEdges;
 }
 
-
-float Mesh::x_min()const
-{
-    return _x_min;
-}
-float Mesh::x_max()const
-{
-    return _x_max;
-
-}
-float Mesh::y_min()const
-{
-    return _y_min;
-
-}
-float Mesh::y_max()const
-{
-    return _y_max;
-
-}
-float Mesh::z_min()const
-{
-    return _z_min;
-}
-float Mesh::z_max()const
-{
-    return _z_max;
-
-}
-
-
 /************** Helper Functions *****************/
 
-uint32_t  Hix::Engine3D::intPoint2Hash(IntPoint u) {
-	QVector3D u_qv3 = QVector3D(u.X, u.Y, 0);
-	uint32_t path_hash_u = std::hash<QVector3D>()(u_qv3);
-	return path_hash_u;
-}
-
-uint32_t Hix::Engine3D::Vertex2Hash(MeshVertex& u)
+size_t Hix::Engine3D::MeshVtxHasher::operator()(const QVector3D& hashed) const
 {
-	uint32_t path_hash_u = std::hash<QVector3D>()(u.position);
-	return path_hash_u;
+	//range of int21 = -1048576, 1048575, roughly 4m on 2micron resolution
+	//range of uint21 = 0, 2097151
+	//2^21 - 1
+	static constexpr int32_t INT21_MAX_HALF = 1048576;
+	static constexpr uint64_t UINT_21_MASK = 2097151; //0b111111...for 21 bits
+	//using uint21, so 63 bits for all
+	uint64_t digest = 0;
+	for (size_t i = 0; i < 3; ++i)
+	{
+		int32_t signedMicron = int32_t((hashed[i] + VTX_INBOUND_DITTER) / VTX_INBOUND_DIST);
+		uint64_t unsignedMicron = std::max(0, (signedMicron + INT21_MAX_HALF));
+		//discard top 11 bits so 21 bits valid, shift to correct position
+		unsignedMicron = (unsignedMicron & UINT_21_MASK) << (21 * i);
+		digest = digest | unsignedMicron;
+	}
+	return	digest;
 }
-

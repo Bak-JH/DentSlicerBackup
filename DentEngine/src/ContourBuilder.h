@@ -75,8 +75,8 @@ namespace Hix
 			void addNext(const ContourSegment& seg);
 			void addPrev(const ContourSegment& seg);
 			float dist()const;
-			QVector2D from()const;
-			QVector2D to()const;
+			QVector2D& from();
+			QVector2D& to();
 			void append(const Contour& appended);
 			//void calculateDirection();
 			//bool isOutward();
@@ -101,6 +101,8 @@ namespace Hix
 		public:
 			ContourBuilder(const Mesh* mesh, std::unordered_set<FaceConstItr>& intersectingFaces, float z);
 			std::vector<Contour> buildContours();
+			std::vector<Contour> flushIncompleteContours();
+
 
 		private:
 			//could use bool, just incase we need to resolve non-2-maifold

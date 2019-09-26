@@ -31,10 +31,11 @@
 #include <math.h>
 #include <QVector3D>
 #include <QVariant>
+#include "Bounds3D.h"
 
-
-struct SlicingConfiguration
+class SlicingConfiguration
 {
+public:
 	enum class SupportType: uint8_t
 	{
 		None = 0,
@@ -75,12 +76,13 @@ struct SlicingConfiguration
 		InvertXAxis = 0,
 		NoInversion
 	};
+	SlicingConfiguration();
+
     // configurations
     float layer_height = 0.1f; // in mm
     float nozzle_width = 0.0f; // in mm (diameter) , for printers with nozzles
     float wall_thickness = 2.0f; // in mm
     float fill_thickness = 1.0f; // in mm
-    float support_density = 0.4f;
     float infill_density = 0.3f;
 
     float contraction_ratio = TEMPORARY_CONTRACTION_RATIO;
@@ -105,18 +107,36 @@ struct SlicingConfiguration
     // bed configuration
     QVector3D origin;
 
-    // settings for vittro plus
-    int resolution_x = 2560;
-    int resolution_y = 1440;
 
-    float bed_x = 124.8f; // in mm
-    float bed_y = 70.2f; // in mm
 
-	size_t bed_margin_x = 1;
-	size_t bed_margin_y = 1;
+	void setBedX(float val);
+	void setBedY(float val);
+	void setBedHeight(float val);
+	void setResolutionX(float val);
+	void setResolutionY(float val);
+	float resolutionX()const;
+	float resolutionY()const;
+	float bedX()const;
+	float bedY()const;
+	float bedHeight()const;
+	const Hix::Engine3D::Bounds3D& bedBound()const;
+	float pixelPerMMX()const;
+	float pixelPerMMY()const;
 
-    float pixel_per_mm = float(resolution_x)/float(bed_x);
+	size_t supportDensity = 50;
 
+private:
+
+	float _pixelPerMMX;
+	float _pixelPerMMY;
+
+	float _bedX; // in mm
+	float _bedY; // in mm
+
+	// settings for vittro plus
+	int _resolutionX;
+	int _resolutionY;
+	Hix::Engine3D::Bounds3D _bedBound;
 };
 extern SlicingConfiguration* scfg;
 

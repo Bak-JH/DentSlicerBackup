@@ -24,9 +24,7 @@ namespace Hix
 			PolyTree polytree; // containment relationship per slice
 			PolyTree overhang;
 
-			Paths outershell;
-
-
+			Paths closedContours;
 		};
 
 

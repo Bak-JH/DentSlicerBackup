@@ -19,7 +19,8 @@ QDebug Hix::Debug::operator<< (QDebug d, const Slice& obj) {
 	d << "z: " << obj.z;
 	d << "polytree: " << obj.polytree;
 
-	d << "outershell: " << obj.outershell;
+	d << "closedContours: " << obj.closedContours;
+
 	return d;
 }
 QDebug Hix::Debug::operator<< (QDebug d, const Slices& obj) {
@@ -85,15 +86,12 @@ void Hix::Slicer::slice(const Mesh* mesh, const Planes* planes, Slices* slices){
 	auto zPlanes = planes->getPlanesVector();
 	auto intersectingFaces = planes->buildTriangleLists(mesh);
 	for (int i = 0; i < zPlanes.size(); i++) {
+		auto& currSlice = (*slices)[i];
 		ContourBuilder contourBuilder(mesh, intersectingFaces[i], zPlanes[i]);
-		std::vector<Contour> contours = contourBuilder.buildContours();
-		if (!contours.empty())
+		auto contours = contourBuilder.buildContours();
+		for (auto& each : contours)
 		{
-			auto& currSlice = (*slices)[i];
-			for (auto& each : contours)
-			{
-				currSlice.outershell.push_back(each.toPath());
-			}
+			currSlice.closedContours.push_back(each.toPath());
 		}
 	}
     return;
@@ -113,8 +111,8 @@ void Slices::containmentTreeConstruct(){
     Clipper clpr;
     for (int idx=0; idx<this->size(); idx++){ // divide into parallel threads
         Slice* slice = &((*this)[idx]);
-        clpr.Clear();
-        clpr.AddPaths(slice->outershell, ptSubject, true);
+			clpr.Clear();
+        clpr.AddPaths(slice->closedContours, ptSubject, true);
         clpr.Execute(ctUnion, slice->polytree, pftNonZero, pftNonZero);
     }
 }
