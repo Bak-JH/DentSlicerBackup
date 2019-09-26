@@ -253,6 +253,8 @@
     </ClCompile>
     <ClCompile Include="feature\labelling\labelModel.cpp">
       <Filter>Source Files</Filter>
+    <ClCompile Include="DentEngine\src\Bounds3D.cpp">
+      <Filter>Generated Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -594,6 +596,11 @@
     </ClInclude>
     <ClInclude Include="feature\labelling\labelModel.h">
       <Filter>Header Files</Filter>
+    <ClInclude Include="DentEngine\src\Bounds3D.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\Hasher.h">
+      <Filter>Generated Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -1182,6 +1189,11 @@
     <None Include="icon-32.ico" />
     <None Include="icon-32.ico" />
     <None Include="icon-32.ico" />
+    <None Include="icon-32.ico" />
+    <None Include="icon-32.ico" />
+    <None Include="icon-32.ico" />
+    <None Include="icon-32.ico" />
+    <None Include="Qml\LeftTabSlicingOptionElementPercentage.qml" />
     <None Include="icon-32.ico" />
   </ItemGroup>
   <ItemGroup>
