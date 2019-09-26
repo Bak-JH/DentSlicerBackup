@@ -2,6 +2,7 @@
 
 #include <array>
 #include <QObject>
+#include <qvariant.h>
 class QmlManager;
 class SlicingConfiguration;
 class SlicingOptBackend : public QObject
@@ -10,14 +11,14 @@ class SlicingOptBackend : public QObject
 public:
 	SlicingOptBackend(QmlManager* qmlManager, SlicingConfiguration* config);
 	void createSlicingOptControls();
-	void updateConfig();
 public slots:
-	void onOptionChanged(QString, int);
+	void onOptionChanged(QString, QVariant);
 private:
 	QmlManager* _qmlManager;
 	SlicingConfiguration* _config;
 	template<std::size_t arraySizeType>
-	void addOptionDialog(QString opName, std::array<std::string_view, arraySizeType> content, int defaultIdx);
+	void addOptionDialogCombo(QString opName, std::array<std::string_view, arraySizeType> content, int defaultVal);
+	void addOptionDialogPercentage(QString opName, int defaultVal);
 
 };
 

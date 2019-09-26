@@ -8,12 +8,12 @@ import QtQuick.Controls.Private 1.0
 Item {
     width: parent.width
     height: 24
-    signal usrIndexChanged(string opName, int index);
+    signal usrInputChanged(string opName, variant value);
     property string columnName
     property var columnContents :[]
 
     property alias currentText: combo.currentText
-    property alias currentIndex: combo.currentIndex
+    property alias currentValue: combo.currentIndex
     Text{
         id:text
         width: 116
@@ -36,7 +36,7 @@ Item {
         anchors.top : parent.top
         model:columnContents
         onActivated:{
-            usrIndexChanged(columnName, index);
+            usrInputChanged(columnName, index);
         }
 
         Image{

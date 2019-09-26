@@ -5,22 +5,32 @@ import QtQuick.Layouts 1.3
 
 Rectangle {
 
-    signal optionChanged(string opName, int newIndex);
+    signal optionChanged(string opName, variant newIndex);
     property var optionElements: []
-    function addOptionElement(optionName, contents, defaultValIdx)
+    function addOptionElementCombo(optionName, contents, defaultVal)
     {
         var opComp = Qt.createComponent("LeftTabSlicingOptionElement.qml");
-//        var callBack = (index) =>{
-//            optionChanged(columnName, index);
-//        };
         var newOption =
                 opComp.createObject(optionColLayout,
                 {
                     "columnName" : optionName,
                     "columnContents" : contents,
-                    "currentIndex" : defaultValIdx
+                    "currentValue" : defaultVal
                 });
-        newOption.usrIndexChanged.connect(optionChanged);
+        newOption.usrInputChanged.connect(optionChanged);
+        optionElements.push(newOption);
+    }
+
+    function addOptionElementPercentage(optionName, defaultVal)
+    {
+        var opComp = Qt.createComponent("LeftTabSlicingOptionElementPercentage.qml");
+        var newOption =
+                opComp.createObject(optionColLayout,
+                {
+                    "columnName" : optionName,
+                    "currentValue" : defaultVal
+                });
+        newOption.usrInputChanged.connect(optionChanged);
         optionElements.push(newOption);
     }
     width : 264

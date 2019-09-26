@@ -21,7 +21,10 @@ namespace std
 		//2D only!
 		std::size_t operator()(const Hix::OverhangDetect::FaceOverhang& pt)const
 		{
-			return std::hash<QVector3D>()(pt.first);
+			constexpr static Hix::Engine3D::MeshVtxHasher hasher;
+			return hasher(pt.first);
+			//TODO
+
 		}
 	};
 }
