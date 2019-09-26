@@ -88,11 +88,6 @@ void Hix::Labelling::LabelModel::generateLabel(QString text, Hix::Engine3D::Mesh
 		++i;
 	}
 	
-
-	QQuaternion test = QQuaternion::rotationTo(QVector3D(0, -1, 0), targetNormal);
-	qDebug() << "NORMAL: " << targetNormal << "QUAT: " << test;
-	_mesh->vertexRotate(Utils::Math::quatToMat(QQuaternion::rotationTo(QVector3D(0, -1, 0), targetNormal)));
-
 	// generate front & back mesh
 	for (auto node : _trigMap)
 	{
