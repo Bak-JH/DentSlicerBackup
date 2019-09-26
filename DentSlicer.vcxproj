@@ -195,6 +195,7 @@
   <ItemGroup>
     <ClCompile Include="common\Task.cpp" />
     <ClCompile Include="common\TaskManager.cpp" />
+    <ClCompile Include="DentEngine\src\Bounds3D.cpp" />
     <ClCompile Include="DentEngine\src\ContourBuilder.cpp" />
     <ClCompile Include="DentEngine\src\Planes.cpp" />
     <ClCompile Include="DentEngine\src\polyclipping\poly2tri\sweep\advancing_front.cpp" />
@@ -264,6 +265,7 @@
     <ClCompile Include="utils\updatechecker.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="common\Hasher.h" />
     <ClInclude Include="common\indexedlist.h" />
     <ClInclude Include="common\IteratorWrapper.h" />
     <ClInclude Include="common\moodycamel\atomicops.h" />
@@ -306,6 +308,7 @@
     <ClInclude Include="common\taskflow\utility\traits.hpp" />
     <ClInclude Include="common\TaskManager.h" />
     <ClInclude Include="common\TrackedIndexedList.h" />
+    <ClInclude Include="DentEngine\src\Bounds3D.h" />
     <ClInclude Include="DentEngine\src\ContourBuilder.h" />
     <ClInclude Include="DentEngine\src\Planes.h" />
     <ClInclude Include="DentEngine\src\polyclipping\poly2tri\sweep\advancing_front.h" />
@@ -451,6 +454,7 @@
     <None Include="Qml\LeftTabSlicingOptionElement.qml" />
     <None Include="Qml\LeftTabSlicingOptionElement2.qml" />
     <None Include="Qml\LeftTabSlicingOptionElement3.qml" />
+    <None Include="Qml\LeftTabSlicingOptionElementPercentage.qml" />
     <None Include="Qml\LeftTabSlicingOptionElementTextbox.qml" />
     <None Include="Qml\LeftTabViewMode.qml" />
     <None Include="Qml\Login.qml" />

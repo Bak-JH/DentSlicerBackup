@@ -34,12 +34,6 @@ constexpr std::array<std::string_view, 3> LayerHeightStr{
 	"0.1","0.2","0.05"
 };
 
-constexpr std::array<std::string_view, 3> BedNumberStr{
-	"1",
-	"2",
-	"3"
-
-};
 
 constexpr std::array<std::string_view, 3> ResinTypeStr{
 	"Temporary",
@@ -104,14 +98,14 @@ SlicingOptBackend::SlicingOptBackend(QmlManager* qmlManager, SlicingConfiguratio
 
 
 template<std::size_t arraySizeType>
-void SlicingOptBackend::addOptionDialog(QString opName, std::array<std::string_view, arraySizeType> content, int defaultIdx)
+void SlicingOptBackend::addOptionDialogCombo(QString opName, std::array<std::string_view, arraySizeType> content, int defaultIdx)
 {
 	QStringList enumStrings;
 	for (auto& each : content)
 	{
 		enumStrings.push_back(each.data());
 	}
-	QMetaObject::invokeMethod(_qmlManager->ltso, "addOptionElement",
+	QMetaObject::invokeMethod(_qmlManager->ltso, "addOptionElementCombo",
 		Q_ARG(QVariant, opName),
 		Q_ARG(QVariant, enumStrings),
 		Q_ARG(QVariant, defaultIdx)
@@ -121,84 +115,91 @@ void SlicingOptBackend::addOptionDialog(QString opName, std::array<std::string_v
 void SlicingOptBackend::createSlicingOptControls()
 {
 
-	addOptionDialog(QString("Resolution"), ResolutionStr, 0);
-	addOptionDialog(QString("Layer height"), LayerHeightStr, 0);
-	addOptionDialog(QString("Bed number"), BedNumberStr, 0);
-	addOptionDialog(QString("Resin type"), ResinTypeStr, 0);
-	addOptionDialog(QString("Raft type"), RaftTypeStr, 1);
-	addOptionDialog(QString("Support type"), SupportTypeStr, 1);
-	addOptionDialog(QString("Infill type"), InfillTypeStr, 1);
-	addOptionDialog(QString("Slicing mode"), SlicingModeStr, 0);
-	addOptionDialog(QString("Support minimum radius"), SupportRadiusMin, 2);
-	addOptionDialog(QString("Support maximum radius"), SupportRadiusMax, 3);
-	addOptionDialog(QString("Printer vendor"), PrinterVendorType, 0);
-	addOptionDialog(QString("Slice image inversion"), SliceInvertStr, 0);
-
-	QObject::connect(_qmlManager->ltso, SIGNAL(optionChanged(QString, int)), this, SLOT(onOptionChanged(QString, int)));
+	addOptionDialogCombo(QString("Resolution"), ResolutionStr, 0);
+	addOptionDialogCombo(QString("Layer height"), LayerHeightStr, 0);
+	addOptionDialogCombo(QString("Resin type"), ResinTypeStr, 0);
+	addOptionDialogCombo(QString("Raft type"), RaftTypeStr, 1);
+	addOptionDialogCombo(QString("Support type"), SupportTypeStr, 1);
+	addOptionDialogCombo(QString("Infill type"), InfillTypeStr, 1);
+	addOptionDialogCombo(QString("Slicing mode"), SlicingModeStr, 0);
+	addOptionDialogCombo(QString("Support minimum radius"), SupportRadiusMin, 2);
+	addOptionDialogCombo(QString("Support maximum radius"), SupportRadiusMax, 3);
+	addOptionDialogCombo(QString("Printer vendor"), PrinterVendorType, 0);
+	addOptionDialogCombo(QString("Slice image inversion"), SliceInvertStr, 0);
+	addOptionDialogPercentage(QString("Support density"), 50);
+	QObject::connect(_qmlManager->ltso, SIGNAL(optionChanged(QString, QVariant)), this, SLOT(onOptionChanged(QString, QVariant)));
 
 }
 
-void SlicingOptBackend::updateConfig()
+void SlicingOptBackend::addOptionDialogPercentage(QString opName, int defaultVal)
 {
+	QMetaObject::invokeMethod(_qmlManager->ltso, "addOptionElementPercentage",
+		Q_ARG(QVariant, opName),
+		Q_ARG(QVariant, defaultVal)
+	);
 }
 
 
-void SlicingOptBackend::onOptionChanged(QString opName, int newIndex)
+
+
+
+void SlicingOptBackend::onOptionChanged(QString opName, QVariant newVal)
 {
+	int toInt = newVal.toInt();
 	if (opName == "Resolution")
 	{
 		int x, y;
-		resStringToInt(ResolutionStr[newIndex], x, y);
-		_config->resolution_x = x;
-		_config->resolution_y = y;
+		resStringToInt(ResolutionStr[toInt], x, y);
+		_config->setResolutionX(x);
+		_config->setResolutionY(y);
 	}
 	else if (opName == "Layer height")
 	{
-		_config->layer_height = std::stof(std::string(LayerHeightStr[newIndex]));
-	}
-	else if (opName == "Bed number")
-	{
-		//?
+		_config->layer_height = std::stof(std::string(LayerHeightStr[toInt]));
 	}
 	else if (opName == "Resin type")
 	{
-		_config->resin_type = (SlicingConfiguration::ResinType)newIndex;
+		_config->resin_type = (SlicingConfiguration::ResinType)toInt;
 	}
 	else if (opName == "Raft type")
 	{
-		_config->raft_type = (SlicingConfiguration::RaftType)newIndex;
+		_config->raft_type = (SlicingConfiguration::RaftType)toInt;
 	}
 	else if (opName == "Support type")
 	{
-		_config->support_type = (SlicingConfiguration::SupportType)newIndex;
+		_config->support_type = (SlicingConfiguration::SupportType)toInt;
 
 	}
 	else if (opName == "Infill type")
 	{
-		_config->infill_type = (SlicingConfiguration::InFillType)newIndex;
+		_config->infill_type = (SlicingConfiguration::InFillType)toInt;
 
 	}
 	else if (opName == "Slicing mode")
 	{
-		_config->slicing_mode = (SlicingConfiguration::SlicingMode)newIndex;
+		_config->slicing_mode = (SlicingConfiguration::SlicingMode)toInt;
 
 	}
 	else if (opName == "Support minimum radius")
 	{
-		_config->support_radius_min = std::stof(std::string(SupportRadiusMin[newIndex]));
+		_config->support_radius_min = std::stof(std::string(SupportRadiusMin[toInt]));
 
 	}
 	else if (opName == "Support maximum radius")
 	{
-		_config->support_radius_max = std::stof(std::string(SupportRadiusMax[newIndex]));
+		_config->support_radius_max = std::stof(std::string(SupportRadiusMax[toInt]));
 	}
 	else if (opName == "Printer vendor")
 	{
-		_config->printer_vendor_type = (SlicingConfiguration::PrinterVendor)newIndex;
+		_config->printer_vendor_type = (SlicingConfiguration::PrinterVendor)toInt;
 	}
 	else if (opName == "Slice image inversion")
 	{
-		_config->slice_invert = (SlicingConfiguration::Invert)newIndex;
+		_config->slice_invert = (SlicingConfiguration::Invert)toInt;
+	}
+	else if (opName == "Support density")
+	{
+		_config->supportDensity = toInt;
 	}
 
 }
