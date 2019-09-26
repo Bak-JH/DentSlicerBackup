@@ -209,8 +209,6 @@ public:
     Q_INVOKABLE int getSelectedModelsSize();
     Q_INVOKABLE float getBedXSize();
     Q_INVOKABLE float getBedYSize();
-    Q_INVOKABLE void setBedXSize(float x);
-    Q_INVOKABLE void setBedYSize(float y);
     Q_INVOKABLE bool getGroupSelectionActive();
     Q_INVOKABLE void fixMesh();
     Q_INVOKABLE void disableObjectPickers();
@@ -304,7 +302,7 @@ public slots:
     void runGroupFeature(int,QString, double, double, double, QVariant);
     bool multipleModelSelected(int ID);
     void lastModelSelected();
-    void modelRotateByNumber(int axis, int, int, int);
+    void modelRotateByNumber(int mode, int, int, int);
     void modelMoveByNumber(int axis, int, int);
     void modelMoveInit();
     void modelMoveDone();

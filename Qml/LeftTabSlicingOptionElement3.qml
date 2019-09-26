@@ -81,11 +81,7 @@ Item {
                     }else{
                         text = text.charAt(0).replace(/[^1-9.]\%/g,'')+text.substring(1,text.length).replace(/[^0-9.]\%/g, '');
                     }
-                    /*
-                    if(!numberBox_text.text.toString().includes("%"))
-                        numberBox_text.text = numberBox_text.text+"%"
 
-                    */
                     if (parseFloat(text) > 100){
                         text = text.slice(0,-1)
                     }

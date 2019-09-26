@@ -44,9 +44,9 @@ float Hix::Support::SupportRaftManager::supportBottom() const
 
 void Hix::Support::SupportRaftManager::generateSuppAndRaft(SlicingConfiguration::SupportType supType, SlicingConfiguration::RaftType raftType)
 {
+	clear();
 	_supportExist = true;
 	_raftExist = true;
-
 	_supportType = supType;
 	_raftType = raftType;
 	_overhangs = Hix::OverhangDetect::detectOverhang(_owner->getMesh());
@@ -194,6 +194,8 @@ void Hix::Support::SupportRaftManager::generateRaft()
 
 void Hix::Support::SupportRaftManager::clear()
 {
+	_supportExist = false;
+	_raftExist = false;
 	_supports.clear();
 	_pendingSupports.clear();
 	_raft.reset();
