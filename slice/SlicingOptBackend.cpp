@@ -5,9 +5,10 @@
 
 //constexpr for mapping enum to string and vise versa
 //TODO: c++20 static reflection when it becomes available
-constexpr std::array<std::string_view, 2> SupportTypeStr{
+constexpr std::array<std::string_view, 3> SupportTypeStr{
 	"None"		,
-	"Vertical"	
+	"Vertical"	,
+	"Tree"
 };	
 constexpr std::array<std::string_view, 3> InfillTypeStr{
 	"None"		,

@@ -2,6 +2,7 @@
 
 #include "../DentEngine/src/configuration.h"
 #include "VerticalSupportModel.h"
+#include "TreeSupportModel.h"
 #include <memory>
 class GLModel;
 namespace Hix

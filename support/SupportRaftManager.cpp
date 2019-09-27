@@ -1,6 +1,7 @@
 #include "SupportRaftManager.h"
 #include "../feature/overhangDetect.h"
 #include "VerticalSupportModel.h"
+#include "TreeSupportGenerate.h"
 #include "CylindricalRaft.h"
 #include "glmodel.h"
 
@@ -89,6 +90,18 @@ void Hix::Support::SupportRaftManager::addSupport(const std::variant<VertexConst
 		_pendingSupports[newModel] = EditType::Added;
 	}
 	break;
+	case SlicingConfiguration::SupportType::Tree:
+	{
+		/*
+		_overhangs.insert(supportSpec);
+		auto newModel = new Hix::Support::TreeSupportModel(this, supportSpec);
+		_supports[newModel] = std::unique_ptr<TreeSupportModel>(newModel);
+		//since addition only happens in edit mode
+		newModel->setHitTestable(true);
+		_pendingSupports[newModel] = EditType::Added;
+		*/
+	}
+	break;
 	default:
 		break;
 	}
@@ -148,6 +161,11 @@ void Hix::Support::SupportRaftManager::generateSupport()
 			auto newModel = new VerticalSupportModel(this, each);
 			_supports[newModel] = std::unique_ptr<VerticalSupportModel>(newModel);
 		}
+	}
+	break;
+	case SlicingConfiguration::SupportType::Tree:
+	{
+		auto treeSupport = new TreeSupportGenerate(this, _overhangs, &_supports);
 	}
 	break;
 	default:

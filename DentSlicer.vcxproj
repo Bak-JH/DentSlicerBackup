@@ -55,14 +55,14 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup>
-	<OutDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">release\</OutDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">release\</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(Platform)\$(Configuration)\</IntDir>
     <TargetName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">DentSlicer</TargetName>
     <IgnoreImportLibrary Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</IgnoreImportLibrary>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</LinkIncremental>
     <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">debug\</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(Platform)\$(Configuration)\</IntDir>
-	<TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">DentSlicer</TargetName>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">DentSlicer</TargetName>
     <IgnoreImportLibrary Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</IgnoreImportLibrary>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -223,6 +223,8 @@
     <ClCompile Include="support\RaftModel.cpp" />
     <ClCompile Include="support\SupportModel.cpp" />
     <ClCompile Include="support\SupportRaftManager.cpp" />
+    <ClCompile Include="support\TreeSupportGenerate.cpp" />
+    <ClCompile Include="support\TreeSupportModel.cpp" />
     <ClCompile Include="support\VerticalSupportModel.cpp" />
     <ClCompile Include="ui\CubeWidget.cpp" />
     <ClCompile Include="ui\MoveWidget.cpp" />
@@ -335,6 +337,8 @@
     <ClInclude Include="feature\Shapes2D.h" />
     <ClInclude Include="support\CylindricalRaft.h" />
     <ClInclude Include="support\RaftModel.h" />
+    <ClInclude Include="support\TreeSupportGenerate.h" />
+    <ClInclude Include="support\TreeSupportModel.h" />
     <ClInclude Include="ui\Highlightable.h" />
     <ClInclude Include="input\Hoverable.h" />
     <QtMoc Include="ui\MoveWidget.h" />
