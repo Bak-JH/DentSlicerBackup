@@ -1,6 +1,5 @@
 #pragma once
 #include <vector>
-#include <Qt3DCore/qtransform.h>
 #include <QVector3D>
 #include <QHash>
 #include "polyclipping/polyclipping.h"
@@ -18,13 +17,6 @@
 
 namespace std
 {
-	//template<>
-	//struct hash<QVector3D>
-	//{
-	//	size_t operator()(const QVector3D& v)const
-	//	{
-	//	}
-	//};
 }
 
 namespace Hix
@@ -186,7 +178,6 @@ namespace Hix
 			/********************** Undo state functions***********************/
 
 			/********************** Mesh Edit Functions***********************/
-			//void vertexApplyTransformation(const Qt3DCore::QTransform& transform);
 			void vertexOffset(float factor);
 			void vertexMove(QVector3D direction);
 			void centerMesh();
@@ -194,6 +185,8 @@ namespace Hix
 			void vertexScale(float scaleX, float scaleY, float scaleZ, float centerX, float centerY);
 			void reverseFace(FaceConstItr faceItr);
 			void reverseFaces();
+			QVector3D transformedVtx(const VertexConstItr& vtx, const Qt3DCore::QTransform& transform)const;
+
             bool addFace(const QVector3D& v0, const QVector3D& v1, const QVector3D& v2);
 			bool addFace(const FaceConstItr& face);
 			TrackedIndexedList<MeshFace>::const_iterator removeFace(FaceConstItr f_it);
@@ -279,6 +272,7 @@ namespace Hix
 			}
 			/********************** Stuff that can be public **********************/
 			const Bounds3D& bounds()const;
+
 		private:
 			/********************** Helper Functions **********************/
             //set twin relationship for this edge as well as matching twin edge
@@ -298,6 +292,7 @@ namespace Hix
 			TrackedIndexedList<HalfEdge> halfEdges;
 			TrackedIndexedList<MeshFace> faces;
 			Bounds3D _bounds;
+			Qt3DCore::QTransform _transform;
 
 		};
 

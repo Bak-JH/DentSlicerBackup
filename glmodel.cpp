@@ -61,13 +61,12 @@ GLModel::GLModel(QObject* mainWindow, QEntity*parent, Mesh* loadMesh, QString fn
 		FileLoader::loadMeshOBJ(_mesh, filename.toLocal8Bit().constData());
 	}
 	else {
-		delete _mesh;
-		_mesh = loadMesh;
+		setMesh(loadMesh);
 	}
 	//applyGeometry();
 	// 승환 25%
 	qmlManager->setProgress(0.23);
-	setMesh(_mesh);
+	updateEntireMesh(_mesh);
 	// 승환 50%
 	qmlManager->setProgress(0.49);
 	//Qt3DExtras::QDiffuseMapMaterial* diffuseMapMaterial = new Qt3DExtras::QDiffuseMapMaterial();
