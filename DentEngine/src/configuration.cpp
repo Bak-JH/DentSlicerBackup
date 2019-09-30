@@ -15,6 +15,9 @@ SlicingConfiguration::SlicingConfiguration()
 
 	setResolutionX(2560);
 	setResolutionY(1440);
+
+	setScreenX(120.96f);
+	setScreenY(68.04f);
 }
 
 float SlicingConfiguration::raft_base_radius() const
@@ -43,13 +46,32 @@ void SlicingConfiguration::setBedHeight(float val)
 void SlicingConfiguration::setResolutionX(float val)
 {
 	_resolutionX = val;
-	_pixelPerMMX = _resolutionX / _bedX;
 }
 
 void SlicingConfiguration::setResolutionY(float val)
 {
 	_resolutionY = val;
-	_pixelPerMMY = _resolutionY / _bedY;
+}
+
+void SlicingConfiguration::setScreenX(float val)
+{
+	_screenX = val;
+	_pixelPerMMX = _resolutionX / _screenX;
+}
+
+void SlicingConfiguration::setScreenY(float val)
+{
+	_screenY = val;
+	_pixelPerMMY = _resolutionY / _screenY;
+}
+
+float SlicingConfiguration::screenX() const
+{
+	return _resolutionX;
+}
+float SlicingConfiguration::screenY() const
+{
+	return _resolutionY;
 }
 
 float SlicingConfiguration::resolutionX() const

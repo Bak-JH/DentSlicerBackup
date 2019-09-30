@@ -69,6 +69,13 @@ constexpr std::array<std::string_view, 11> SupportRadiusMax{
 	"0.2",
 	"0.1"
 };
+
+constexpr std::array<std::string_view, 4> ContractionRatio{
+	"1.1",
+	"1.0",
+	"0.99504",
+	"0.9909"
+};
 constexpr std::array<std::string_view, 2> PrinterVendorType{
 	"Hix",
 	"3D'Light"
@@ -122,11 +129,13 @@ void SlicingOptBackend::createSlicingOptControls()
 	addOptionDialogCombo(QString("Support type"), SupportTypeStr, 1);
 	addOptionDialogCombo(QString("Infill type"), InfillTypeStr, 1);
 	addOptionDialogCombo(QString("Slicing mode"), SlicingModeStr, 0);
-	addOptionDialogCombo(QString("Support minimum radius"), SupportRadiusMin, 2);
-	addOptionDialogCombo(QString("Support maximum radius"), SupportRadiusMax, 3);
+	addOptionDialogCombo(QString("Support min radius"), SupportRadiusMin, 2);
+	addOptionDialogCombo(QString("Support max radius"), SupportRadiusMax, 3);
 	addOptionDialogCombo(QString("Printer vendor"), PrinterVendorType, 0);
 	addOptionDialogCombo(QString("Slice image inversion"), SliceInvertStr, 0);
 	addOptionDialogPercentage(QString("Support density"), 50);
+	addOptionDialogCombo(QString("Contraction Ratio"), ContractionRatio, 1);
+
 	QObject::connect(_qmlManager->ltso, SIGNAL(optionChanged(QString, QVariant)), this, SLOT(onOptionChanged(QString, QVariant)));
 
 }
@@ -180,12 +189,12 @@ void SlicingOptBackend::onOptionChanged(QString opName, QVariant newVal)
 		_config->slicing_mode = (SlicingConfiguration::SlicingMode)toInt;
 
 	}
-	else if (opName == "Support minimum radius")
+	else if (opName == "Support min radius")
 	{
 		_config->support_radius_min = std::stof(std::string(SupportRadiusMin[toInt]));
 
 	}
-	else if (opName == "Support maximum radius")
+	else if (opName == "Support max radius")
 	{
 		_config->support_radius_max = std::stof(std::string(SupportRadiusMax[toInt]));
 	}
@@ -201,5 +210,8 @@ void SlicingOptBackend::onOptionChanged(QString opName, QVariant newVal)
 	{
 		_config->supportDensity = toInt;
 	}
-
+	else if (opName == "Contraction Ratio")
+	{
+		_config->supportDensity = toInt;
+	}
 }
