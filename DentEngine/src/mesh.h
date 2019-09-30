@@ -60,96 +60,129 @@ namespace Hix
 		struct MeshFace;
 		class Mesh;
 
-		typedef typename IndexedListItr::const_iterator <HalfEdge>HalfEdgeConstItr;
-		typedef typename IndexedListItr::const_iterator <MeshVertex>VertexConstItr;
-		typedef typename IndexedListItr::const_iterator <MeshFace>FaceConstItr;
-		typedef typename IndexedListItr::iterator		<HalfEdge>HalfEdgeItr;
-		typedef typename IndexedListItr::iterator		<MeshVertex>VertexItr;
-		typedef typename IndexedListItr::iterator		<MeshFace>FaceItr;
+		//typedef typename IndexedListItr::const_iterator <HalfEdge>HalfEdgeConstItr;
+		//typedef typename IndexedListItr::const_iterator <MeshVertex>VertexConstItr;
+		//typedef typename IndexedListItr::const_iterator <MeshFace>FaceConstItr;
+		//typedef typename IndexedListItr::iterator		<HalfEdge>HalfEdgeItr;
+		//typedef typename IndexedListItr::iterator		<MeshVertex>VertexItr;
+		//typedef typename IndexedListItr::iterator		<MeshFace>FaceItr;
 
-
-		struct HalfEdge
-		{
-			HalfEdge()
-			{}
-			HalfEdgeConstItr next;
-			HalfEdgeConstItr prev;
-			VertexConstItr from;
-			VertexConstItr to;
-			FaceConstItr owningFace;
-			//TODO: guarantee no self intersection occurs and we can use this
-			//HalfEdgeConstItr twin;
-			std::unordered_set<HalfEdgeConstItr> twins()const;
-			//twins in same direction
-			std::unordered_set<HalfEdgeConstItr> nonTwins()const;
-			//twins + nonTwins
-			std::unordered_set<HalfEdgeConstItr> allFromSameEdge()const;
-			std::vector<FaceConstItr> nonOwningFaces()const;
-			//similar to non-owning, but half edges are on opposite direction ie) faces facing the same orientation
-            std::unordered_set<FaceConstItr> twinFaces()const;
-			bool isTwin(const HalfEdgeConstItr& other)const;
-
-		};
-
-		class HalfEdgeCirculator
+		class MeshDataIterator
 		{
 		public:
-			HalfEdgeCirculator(HalfEdgeConstItr itrW);
-			//you need to double *, but it's worth it for indexing capability
-			//HalfEdgeConstItr& toItrW()const;
-			HalfEdgeConstItr& toItr();
-
-			const HalfEdge& operator*()const;
-			void operator++();
-			void operator--();
-			HalfEdgeCirculator operator--(int);
-			HalfEdgeCirculator operator++(int);
-			const HalfEdge* operator->() const;
-			const HalfEdge* toPtr() const;
-
-		private:
-			HalfEdgeConstItr _hEdgeItr;
+			MeshDataIterator();
+			MeshDataIterator(size_t idx, Mesh* owner);
+		protected:
+			Mesh* _owner;
+			size_t _index;
 		};
 
+		class VertexItr;
+		class FaceItr;
 
-		struct MeshFace {
-			MeshFace()
-			{}
-			QVector3D fn;
-			HalfEdgeConstItr edge;
-			std::array<VertexConstItr, 3> meshVertices()const;
+		class HalfEdgeItr : private MeshDataIterator
+		{
+		public:
+			HalfEdgeItr();
+			HalfEdgeItr(size_t idx, Mesh* owner);
+			HalfEdgeItr next()const;
+			HalfEdgeItr prev()const;
+			VertexItr from()const;
+			VertexItr to()const;
+			FaceItr owningFace()const;
+			//HalfEdgeConstItr twin;
+			std::unordered_set<HalfEdgeItr> twins()const;
+			//twins in same direction
+			std::unordered_set<HalfEdgeItr> nonTwins()const;
+			//twins + nonTwins
+			std::unordered_set<HalfEdgeItr> allFromSameEdge()const;
+			std::vector<FaceItr> nonOwningFaces()const;
+			//similar to non-owning, but half edges are on opposite direction ie) faces facing the same orientation
+			std::unordered_set<FaceItr> twinFaces()const;
+			bool isTwin(const HalfEdgeItr& other)const;
+
+		};
+		class VertexItr : private MeshDataIterator
+		{
+		public:
+			VertexItr();
+			VertexItr(size_t idx, Mesh* owner);
+			const QVector3D& vn()const;
+			void setVn(const QVector3D& val);
+			const QVector3D& position()const;
+			void setPosition(const QVector3D& val);
+			HalfEdgeItr edge()const;
+			std::array<VertexItr, 3> meshVertices()const;
 			//std::array<std::vector<FaceConstItr>, 3> neighboring_faces;
 			HalfEdgeCirculator edgeCirculator()const;
-			std::array<size_t, 3> getVerticeIndices(const Mesh* owningMesh)const;
+			std::array<size_t, 3> getVerticeIndices(const Mesh * owningMesh)const;
 			std::array<float, 3> sortZ()const;
 			float getFaceZmin()const;
 			float getFaceZmax()const;
-			bool getEdgeWithVertices(HalfEdgeConstItr& result,const VertexConstItr& a, const VertexConstItr& b)const;
+			bool getEdgeWithVertices(HalfEdgeConstItr& result, const VertexConstItr& a, const VertexConstItr& b)const;
 			bool isNeighborOf(const FaceConstItr& nFace)const;
 
 		};
+		class FaceItr : private MeshDataIterator
+		{
+		public:
+			FaceItr();
+			FaceItr(size_t idx, Mesh* owner);
+			const QVector3D& fn()const;
+			void setFn(const QVector3D& val);
+			std::unordered_set<HalfEdgeItr> leavingEdges()const;
+			std::unordered_set<HalfEdgeItr> arrivingEdges()const;
+		};
+
+
+
+
+		//actual memory footprint
+		struct HalfEdge
+		{
+			size_t next;
+			size_t prev;
+			size_t from;
+			size_t to;
+			size_t owningFace;
+		};
+		struct MeshFace {
+			QVector3D fn;
+			size_t edge;
+		};
 		struct MeshVertex {
-			MeshVertex() 
-			{}
-			MeshVertex(QVector3D pPosition):position(pPosition) {}
-			friend inline bool operator== (const MeshVertex& a, const MeshVertex& b) {
-				return a.position == b.position;
-			}
-			friend inline bool operator!= (const MeshVertex& a, const MeshVertex& b) {
-				return a.position != b.position;
-			}
-			std::unordered_set<VertexConstItr> connectedVertices()const;
-			bool empty()const;
-			void calculateNormalFromFaces();
-			std::vector<FaceConstItr> connectedFaces()const;
 			QVector3D position;
 			QVector3D vn;
-			std::vector<HalfEdgeConstItr> leavingEdges;
-			std::vector<HalfEdgeConstItr> arrivingEdges;
-
-
-
+			std::vector<size_t> leavingEdges;
+			std::vector<size_t> arrivingEdges;
 		};
+
+		
+
+
+
+
+		//class HalfEdgeCirculator
+		//{
+		//public:
+		//	HalfEdgeCirculator(HalfEdgeConstItr itrW);
+		//	//you need to double *, but it's worth it for indexing capability
+		//	//HalfEdgeConstItr& toItrW()const;
+		//	HalfEdgeConstItr& toItr();
+
+		//	const HalfEdge& operator*()const;
+		//	void operator++();
+		//	void operator--();
+		//	HalfEdgeCirculator operator--(int);
+		//	HalfEdgeCirculator operator++(int);
+		//	const HalfEdge* operator->() const;
+		//	const HalfEdge* toPtr() const;
+
+		//private:
+		//	HalfEdgeConstItr _hEdgeItr;
+		//};
+
+
 
 
 		bool isCommonManifoldFace(const FaceConstItr& a, const FaceConstItr& b, std::unordered_set<FaceConstItr> pool);
