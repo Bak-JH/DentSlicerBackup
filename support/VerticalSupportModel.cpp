@@ -21,13 +21,13 @@ Hix::Support::VerticalSupportModel::VerticalSupportModel(SupportRaftManager* man
 	SupportModel(manager, overhang)
 {
 	generateMesh();
-	setMesh(_mesh);
 
 }
 
 VerticalSupportModel::~VerticalSupportModel()
 {
-
+	//unlike other SceneEntities, Raft and support owns their mesh data
+	delete _mesh;
 }
 
 QVector3D Hix::Support::VerticalSupportModel::getBasePt()
@@ -128,13 +128,15 @@ void Hix::Support::VerticalSupportModel::generateMesh()
 	scales.emplace_back(coneTipRadiusScale);
 	scales.emplace_back(coneTipRadiusScale);
 
-
+	auto mesh = new Mesh();
 	std::vector<std::vector<QVector3D>> jointContours;
-	Hix::Features::Extrusion::extrudeAlongPath(_mesh, QVector3D(0,0,1), contour, path, jointContours, &scales);
+	Hix::Features::Extrusion::extrudeAlongPath(mesh, QVector3D(0,0,1), contour, path, jointContours, &scales);
 
 	//create endcaps using joint contours;
-	hexagonToTri(_mesh, jointContours.front(), path.front(), true);
-	hexagonToTri(_mesh, jointContours.back(), path.back(), false);
+	hexagonToTri(mesh, jointContours.front(), path.front(), true);
+	hexagonToTri(mesh, jointContours.back(), path.back(), false);
+	setMesh(mesh);
+
 }
 
 std::vector<QVector3D> Hix::Support::generateHexagon(float radius)

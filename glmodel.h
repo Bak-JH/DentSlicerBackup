@@ -141,7 +141,6 @@ public:
 
 
     const int ID; //for use in Part List
-    QString filename;
     QObject* mainWindow;
 
     // implement lock as bool variable
@@ -186,6 +185,8 @@ protected:
 	void initHitTest()override;
 
 private:
+	QString filename;
+
 	//cutting
 	std::unique_ptr<Hix::Features::Cut::DrawingPlane> _cuttingPlane;
 

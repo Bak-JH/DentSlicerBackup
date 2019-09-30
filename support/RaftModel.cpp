@@ -8,4 +8,5 @@ Hix::Support::RaftModel::RaftModel(SupportRaftManager* manager): Hix::Render::Sc
 
 Hix::Support::RaftModel::~RaftModel()
 {
+
 }

@@ -17,8 +17,6 @@ using namespace Hix::OverhangDetect;
 Hix::Support::CylindricalRaft::CylindricalRaft(SupportRaftManager* manager, const std::vector<QVector3D> basePt): RaftModel(manager)
 {
 	generateMesh(basePt);
-	setMesh(_mesh);
-
 }
 
 Hix::Support::CylindricalRaft::~CylindricalRaft()
@@ -32,7 +30,7 @@ QVector3D Hix::Support::CylindricalRaft::getPrimitiveColorCode(const Hix::Engine
 }
 
 
-void Hix::Support::CylindricalRaft::generateMeshForContour(const ClipperLib::Path& contourPath)
+void Hix::Support::CylindricalRaft::generateMeshForContour(Mesh* mesh, const ClipperLib::Path& contourPath)
 {
 
 
@@ -80,15 +78,15 @@ void Hix::Support::CylindricalRaft::generateMeshForContour(const ClipperLib::Pat
 
 	//create cylinder walls
 	std::vector<std::vector<QVector3D>> jointContours;
-	Hix::Features::Extrusion::extrudeAlongPath(_mesh, QVector3D(0, 0, 1), contour, path, jointContours, &scales, &centoid);
+	Hix::Features::Extrusion::extrudeAlongPath(mesh, QVector3D(0, 0, 1), contour, path, jointContours, &scales, &centoid);
 	//generate caps
-	generateCap(jointContours.front(), true);
-	generateCap(jointContours.back(), false);
+	generateCap(mesh, jointContours.front(), true);
+	generateCap(mesh, jointContours.back(), false);
 
 
 }
 
-void Hix::Support::CylindricalRaft::generateCap(const std::vector<QVector3D>& contour, bool isReverse)
+void Hix::Support::CylindricalRaft::generateCap(Mesh* mesh, const std::vector<QVector3D>& contour, bool isReverse)
 {
 	float z = contour.front().z();
 	std::vector<p2t::Point>container;
@@ -127,7 +125,7 @@ void Hix::Support::CylindricalRaft::generateCap(const std::vector<QVector3D>& co
 			pt1 = tri->GetPoint(1);
 			pt2 = tri->GetPoint(2);
 		}
-		_mesh->addFace(
+		mesh->addFace(
 			QVector3D(pt0->x, pt0->y, z),
 			QVector3D(pt1->x, pt1->y, z),
 			QVector3D(pt2->x, pt2->y, z));
@@ -137,6 +135,8 @@ void Hix::Support::CylindricalRaft::generateCap(const std::vector<QVector3D>& co
 
 void Hix::Support::CylindricalRaft::generateMesh(const std::vector<QVector3D>& overhangs)
 {
+	auto mesh = new Mesh();
+
 	//need to form a contour that contains all overhangs
 	std::vector<std::vector<QVector3D>> cylinders;
 	auto hexagon = generateHexagon(scfg->raft_base_radius());
@@ -153,9 +153,7 @@ void Hix::Support::CylindricalRaft::generateMesh(const std::vector<QVector3D>& o
 	auto contours = Hix::Shapes2D::combineContour(cylinders);
 	for (auto& contour : contours)
 	{
-		generateMeshForContour(contour);
+		generateMeshForContour(mesh, contour);
 	}
-
-	//cylinder top and bottom
-	
+	setMesh(mesh);
 }

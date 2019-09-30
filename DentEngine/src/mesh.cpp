@@ -374,7 +374,7 @@ Mesh& Mesh::operator+=(const Mesh& o)
 //		vertex.calculateNormalFromFaces();
 //	};
 //}
-
+//
 void Mesh::vertexOffset(float factor){
 	vertices.markChangedAll();
 	_bounds.reset();
@@ -522,6 +522,13 @@ void Mesh::reverseFaces(){
 
 
 /********************** Mesh Generation Functions **********************/
+
+QVector3D Hix::Engine3D::Mesh::transformedVtx(const VertexConstItr& vtx, const Qt3DCore::QTransform& transform) const
+{
+	QVector3D transformed;
+	transformed = vtx->position * transform.matrix();
+	return transformed;
+}
 
 bool Mesh::addFace(const QVector3D& v0, const QVector3D& v1, const QVector3D& v2){
 	std::array<VertexItr, 3> fVtx;
@@ -703,6 +710,7 @@ const Bounds3D& Hix::Engine3D::Mesh::bounds() const
 {
 	return _bounds;
 }
+
 
 VertexItr Mesh::addOrRetrieveFaceVertex(const QVector3D& v){
 	//find if existing vtx can be used

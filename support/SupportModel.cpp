@@ -11,12 +11,16 @@ using namespace Hix::Support;
 Hix::Support::SupportModel::SupportModel(SupportRaftManager* manager, std::variant<VertexConstItr, FaceOverhang> overhang):
 	Hix::Render::SceneEntityWithMaterial(manager->getModel()), _manager(manager), _overhang(overhang)
 {
+	_mesh = new Mesh();
 	initHitTest();
 	setHighlight(false);
 }
 
 Hix::Support::SupportModel::~SupportModel()
 {
+	if (_mesh)
+		//unlike other SceneEntities, Raft and support owns their mesh data
+		delete _mesh;
 }
 
 void Hix::Support::SupportModel::initHitTest()
