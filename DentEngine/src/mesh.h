@@ -60,27 +60,44 @@ namespace Hix
 		struct MeshFace;
 		class Mesh;
 
-		//typedef typename IndexedListItr::const_iterator <HalfEdge>HalfEdgeConstItr;
-		//typedef typename IndexedListItr::const_iterator <MeshVertex>VertexConstItr;
-		//typedef typename IndexedListItr::const_iterator <MeshFace>FaceConstItr;
-		//typedef typename IndexedListItr::iterator		<HalfEdge>HalfEdgeItr;
-		//typedef typename IndexedListItr::iterator		<MeshVertex>VertexItr;
-		//typedef typename IndexedListItr::iterator		<MeshFace>FaceItr;
+		class HalfEdgeItr;
+		class VertexItr;
+		class FaceItr;
 
+		template <typename T>
 		class MeshDataIterator
 		{
-		public:
+		protected:
 			MeshDataIterator();
 			MeshDataIterator(size_t idx, Mesh* owner);
+		public:
+			T& operator++();
+			T& operator--();
+			T operator--(int);
+			T operator++(int);
+			bool initialized()const;
+			bool operator==(const T& o) const;
+			bool operator!=(const T& o) const;
+
+			//random access const_iterator
+			bool operator< (const T& o) const;
+			bool operator> (const T& o) const;
+			bool operator<=(const T& o) const;
+			bool operator>=(const T& o) const;
+			T& operator+=(size_t offset);
+			T& operator-=(size_t offset);
+
+			T operator+(size_t offset) const;
+			friend MeshDataIterator operator+(size_t offset, const T& itr);
+			T operator-(size_t offset) const;
+			size_t operator-(const T& itr)const;
 		protected:
 			Mesh* _owner;
 			size_t _index;
 		};
 
-		class VertexItr;
-		class FaceItr;
 
-		class HalfEdgeItr : private MeshDataIterator
+		class HalfEdgeItr : public MeshDataIterator<HalfEdgeItr>
 		{
 		public:
 			HalfEdgeItr();
@@ -102,7 +119,28 @@ namespace Hix
 			bool isTwin(const HalfEdgeItr& other)const;
 
 		};
-		class VertexItr : private MeshDataIterator
+
+		class FaceItr : public MeshDataIterator<FaceItr>
+		{
+		public:
+			FaceItr();
+			FaceItr(size_t idx, Mesh* owner);
+			const QVector3D& fn()const;
+			void setFn(const QVector3D& val);
+
+			HalfEdgeItr edge()const;
+			std::array<VertexItr, 3> meshVertices()const;
+			//std::array<std::vector<FaceConstItr>, 3> neighboring_faces;
+			std::array<size_t, 3> getVerticeIndices(const Mesh * owningMesh)const;
+			std::array<float, 3> sortZ()const;
+			float getFaceZmin()const;
+			float getFaceZmax()const;
+			bool getEdgeWithVertices(HalfEdgeItr& result, const VertexItr& a, const VertexItr& b)const;
+			bool isNeighborOf(const FaceItr& nFace)const;
+
+		};
+
+		class VertexItr : public MeshDataIterator<VertexItr>
 		{
 		public:
 			VertexItr();
@@ -111,31 +149,19 @@ namespace Hix
 			void setVn(const QVector3D& val);
 			const QVector3D& position()const;
 			void setPosition(const QVector3D& val);
-			HalfEdgeItr edge()const;
-			std::array<VertexItr, 3> meshVertices()const;
-			//std::array<std::vector<FaceConstItr>, 3> neighboring_faces;
-			HalfEdgeCirculator edgeCirculator()const;
-			std::array<size_t, 3> getVerticeIndices(const Mesh * owningMesh)const;
-			std::array<float, 3> sortZ()const;
-			float getFaceZmin()const;
-			float getFaceZmax()const;
-			bool getEdgeWithVertices(HalfEdgeConstItr& result, const VertexConstItr& a, const VertexConstItr& b)const;
-			bool isNeighborOf(const FaceConstItr& nFace)const;
-
-		};
-		class FaceItr : private MeshDataIterator
-		{
-		public:
-			FaceItr();
-			FaceItr(size_t idx, Mesh* owner);
-			const QVector3D& fn()const;
-			void setFn(const QVector3D& val);
 			std::unordered_set<HalfEdgeItr> leavingEdges()const;
 			std::unordered_set<HalfEdgeItr> arrivingEdges()const;
+			std::unordered_set<VertexItr> connectedVertices()const;
+			bool empty()const;
+			void calculateNormalFromFaces();
+			std::vector<FaceItr> connectedFaces()const;
 		};
 
 
 
+		typedef const HalfEdgeItr HalfEdgeConstItr;
+		typedef const VertexItr VertexConstItr;
+		typedef const FaceItr FaceConstItr;
 
 		//actual memory footprint
 		struct HalfEdge
@@ -160,27 +186,6 @@ namespace Hix
 		
 
 
-
-
-		//class HalfEdgeCirculator
-		//{
-		//public:
-		//	HalfEdgeCirculator(HalfEdgeConstItr itrW);
-		//	//you need to double *, but it's worth it for indexing capability
-		//	//HalfEdgeConstItr& toItrW()const;
-		//	HalfEdgeConstItr& toItr();
-
-		//	const HalfEdge& operator*()const;
-		//	void operator++();
-		//	void operator--();
-		//	HalfEdgeCirculator operator--(int);
-		//	HalfEdgeCirculator operator++(int);
-		//	const HalfEdge* operator->() const;
-		//	const HalfEdge* toPtr() const;
-
-		//private:
-		//	HalfEdgeConstItr _hEdgeItr;
-		//};
 
 
 
@@ -233,20 +238,6 @@ namespace Hix
 			TrackedIndexedList<MeshVertex>& getVerticesNonConst();
 			TrackedIndexedList<MeshFace>& getFacesNonConst();
 			TrackedIndexedList<HalfEdge>& getHalfEdgesNonConst();
-			//short hand for TrackedList::toNormItr
-			inline VertexItr toNormItr(const VertexConstItr& itr)
-			{
-				return vertices.toNormItr(itr);
-			}
-			inline FaceItr toNormItr(const FaceConstItr& itr)
-			{
-				return faces.toNormItr(itr);
-			}
-			inline HalfEdgeItr toNormItr(const HalfEdgeConstItr& itr)
-			{
-				return halfEdges.toNormItr(itr);
-			}
-
 			/********************** Mesh Modify and Copy Functions***********************/
 			Mesh* vertexMoved(QVector3D direction)const;
 
