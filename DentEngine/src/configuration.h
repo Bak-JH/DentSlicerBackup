@@ -23,7 +23,7 @@
 #define CLEAR_RESIN 2
 #define CASTABLE_RESIN 3
 
-#define TEMPORARY_CONTRACTION_RATIO 1.01//1.005//0.99502//0.98814
+#define TEMPORARY_CONTRACTION_RATIO 1.00//1.005//0.99502//0.98814
 #define CLEAR_CONTRACTION_RATIO 0.99504 //0.99009
 #define CASTABLE_CONTRACTION_RATIO 0.99009
 
@@ -114,6 +114,10 @@ public:
 	void setBedHeight(float val);
 	void setResolutionX(float val);
 	void setResolutionY(float val);
+	void setScreenX(float val);
+	void setScreenY(float val);
+	float screenX()const;
+	float screenY()const;
 	float resolutionX()const;
 	float resolutionY()const;
 	float bedX()const;
@@ -129,6 +133,9 @@ private:
 
 	float _pixelPerMMX;
 	float _pixelPerMMY;
+
+	float _screenX;
+	float _screenY;
 
 	float _bedX; // in mm
 	float _bedY; // in mm
