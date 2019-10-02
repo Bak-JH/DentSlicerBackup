@@ -11,6 +11,7 @@
 #include "Bounds3D.h"
 #include "../../common/TrackedIndexedList.h"
 #include "../../common/Hasher.h"
+#include "../../common/RandomAccessIteratorBase.h"
 #define cos50 0.64278761
 #define cos100 -0.17364818
 #define cos150 -0.8660254
@@ -60,53 +61,20 @@ namespace Hix
 		struct MeshFace;
 		class Mesh;
 
-		class HalfEdgeItr;
-		class VertexItr;
-		class FaceItr;
+		class HalfEdgeConstItr;
+		class VertexConstItr;
+		class FaceConstItr;
 
-		template <typename T>
-		class MeshDataIterator
-		{
-		protected:
-			MeshDataIterator();
-			MeshDataIterator(size_t idx, Mesh* owner);
-		public:
-			T& operator++();
-			T& operator--();
-			T operator--(int);
-			T operator++(int);
-			bool initialized()const;
-			bool operator==(const T& o) const;
-			bool operator!=(const T& o) const;
-
-			//random access const_iterator
-			bool operator< (const T& o) const;
-			bool operator> (const T& o) const;
-			bool operator<=(const T& o) const;
-			bool operator>=(const T& o) const;
-			T& operator+=(size_t offset);
-			T& operator-=(size_t offset);
-
-			T operator+(size_t offset) const;
-			friend MeshDataIterator operator+(size_t offset, const T& itr);
-			T operator-(size_t offset) const;
-			size_t operator-(const T& itr)const;
-		protected:
-			Mesh* _owner;
-			size_t _index;
-		};
-
-
-		class HalfEdgeItr : public MeshDataIterator<HalfEdgeItr>
+		class HalfEdgeConstItr : public RandomAccessIteratorBase<HalfEdgeConstItr, Mesh>
 		{
 		public:
-			HalfEdgeItr();
-			HalfEdgeItr(size_t idx, Mesh* owner);
-			HalfEdgeItr next()const;
-			HalfEdgeItr prev()const;
-			VertexItr from()const;
-			VertexItr to()const;
-			FaceItr owningFace()const;
+			HalfEdgeConstItr();
+			HalfEdgeConstItr(size_t idx, Mesh* owner);
+			HalfEdgeConstItr next()const;
+			HalfEdgeConstItr prev()const;
+			VertexConstItr from()const;
+			VertexConstItr to()const;
+			FaceConstItr owningFace()const;
 			//HalfEdgeConstItr twin;
 			std::unordered_set<HalfEdgeItr> twins()const;
 			//twins in same direction
@@ -120,7 +88,7 @@ namespace Hix
 
 		};
 
-		class FaceItr : public MeshDataIterator<FaceItr>
+		class FaceConstItr : public MeshDataIterator<FaceItr>
 		{
 		public:
 			FaceItr();
@@ -140,7 +108,7 @@ namespace Hix
 
 		};
 
-		class VertexItr : public MeshDataIterator<VertexItr>
+		class VertexConstItr : public MeshDataIterator<VertexItr>
 		{
 		public:
 			VertexItr();
