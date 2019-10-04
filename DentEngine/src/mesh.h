@@ -61,97 +61,137 @@ namespace Hix
 		struct MeshFace;
 		class Mesh;
 
-		class HalfEdgeConstItr;
-		class VertexConstItr;
-		class FaceConstItr;
+		class HalfEdgeItr;
+		class VertexItr;
+		class FaceItr;
 
-		class HalfEdgeConstItr : public RandomAccessIteratorBase<HalfEdgeConstItr, Mesh>
+		class HalfEdgeItr : public RandomAccessIteratorBase<HalfEdgeItr, Mesh>
 		{
 		public:
-			HalfEdgeConstItr();
-			HalfEdgeConstItr(size_t idx, Mesh* owner);
-			HalfEdgeConstItr next()const;
-			HalfEdgeConstItr prev()const;
-			VertexConstItr from()const;
-			VertexConstItr to()const;
-			FaceConstItr owningFace()const;
+			using RandomAccessIteratorBase<HalfEdgeItr, Mesh>::RandomAccessIteratorBase<HalfEdgeItr, Mesh>;
+			HalfEdgeItr next()const;
+			HalfEdgeItr prev()const;
+			void moveNext();
+			void movePrev();
+			VertexItr from()const;
+			VertexItr to()const;
+			FaceItr owningFace()const;
+
 			//HalfEdgeConstItr twin;
 			std::unordered_set<HalfEdgeItr> twins()const;
 			//twins in same direction
 			std::unordered_set<HalfEdgeItr> nonTwins()const;
 			//twins + nonTwins
 			std::unordered_set<HalfEdgeItr> allFromSameEdge()const;
-			std::vector<FaceItr> nonOwningFaces()const;
+			std::unordered_set<FaceItr> nonOwningFaces()const;
 			//similar to non-owning, but half edges are on opposite direction ie) faces facing the same orientation
 			std::unordered_set<FaceItr> twinFaces()const;
 			bool isTwin(const HalfEdgeItr& other)const;
+		private:
+			const HalfEdge& ref()const;
 
 		};
 
-		class FaceConstItr : public MeshDataIterator<FaceItr>
+		class FaceItr : public RandomAccessIteratorBase<FaceItr, Mesh>
 		{
 		public:
-			FaceItr();
-			FaceItr(size_t idx, Mesh* owner);
+			using RandomAccessIteratorBase<FaceItr, Mesh>::RandomAccessIteratorBase<FaceItr, Mesh>;
 			const QVector3D& fn()const;
-			void setFn(const QVector3D& val);
-
 			HalfEdgeItr edge()const;
 			std::array<VertexItr, 3> meshVertices()const;
-			//std::array<std::vector<FaceConstItr>, 3> neighboring_faces;
-			std::array<size_t, 3> getVerticeIndices(const Mesh * owningMesh)const;
+			std::array<size_t, 3> getVerticeIndices()const;
 			std::array<float, 3> sortZ()const;
 			float getFaceZmin()const;
 			float getFaceZmax()const;
 			bool getEdgeWithVertices(HalfEdgeItr& result, const VertexItr& a, const VertexItr& b)const;
 			bool isNeighborOf(const FaceItr& nFace)const;
-
+		private:
+			const MeshFace& ref()const;
 		};
 
-		class VertexConstItr : public MeshDataIterator<VertexItr>
+		class VertexItr : public RandomAccessIteratorBase<VertexItr, Mesh>
 		{
 		public:
-			VertexItr();
-			VertexItr(size_t idx, Mesh* owner);
+			using RandomAccessIteratorBase<VertexItr, Mesh>::RandomAccessIteratorBase<VertexItr, Mesh>;
 			const QVector3D& vn()const;
-			void setVn(const QVector3D& val);
 			const QVector3D& position()const;
-			void setPosition(const QVector3D& val);
 			std::unordered_set<HalfEdgeItr> leavingEdges()const;
 			std::unordered_set<HalfEdgeItr> arrivingEdges()const;
 			std::unordered_set<VertexItr> connectedVertices()const;
-			bool empty()const;
-			void calculateNormalFromFaces();
+			bool disconnected()const;
 			std::vector<FaceItr> connectedFaces()const;
+		private:
+			const MeshVertex& ref()const;
 		};
 
-
-
-		typedef const HalfEdgeItr HalfEdgeConstItr;
-		typedef const VertexItr VertexConstItr;
-		typedef const FaceItr FaceConstItr;
 
 		//actual memory footprint
 		struct HalfEdge
 		{
-			size_t next;
-			size_t prev;
-			size_t from;
-			size_t to;
-			size_t owningFace;
+			uint32_t next;
+			uint32_t prev;
+			uint32_t from;
+			uint32_t to;
+			uint32_t owningFace;
 		};
 		struct MeshFace {
-			QVector3D fn;
-			size_t edge;
+			uint32_t edge;
 		};
 		struct MeshVertex {
 			QVector3D position;
-			QVector3D vn;
-			std::vector<size_t> leavingEdges;
-			std::vector<size_t> arrivingEdges;
+			std::vector<uint32_t> leavingEdges;
+			std::vector<uint32_t> arrivingEdges;
 		};
 
-		
+
+
+
+
+		class MeshIteratorFactory
+		{
+		public:
+			MeshIteratorFactory();
+			MeshIteratorFactory(Mesh* mesh);
+		protected:
+			Mesh* _mesh;
+		};
+
+		class HalfEdgeItrFactory: private MeshIteratorFactory
+		{
+		public:
+			typedef HalfEdgeItr iterator;
+			typedef HalfEdgeItr const_iterator;
+			typedef IndexedList<HalfEdge, std::allocator<HalfEdge>, HalfEdgeItrFactory> containerType;
+			using MeshIteratorFactory::MeshIteratorFactory;
+			iterator buildIterator(size_t index, const containerType* containerPtr)const;
+			const_iterator buildConstIterator(size_t index, const containerType* containerPtr)const;
+		};
+
+
+		class VertexItrFactory : private MeshIteratorFactory
+		{
+		public:
+			typedef VertexItr iterator;
+			typedef VertexItr const_iterator;
+			typedef IndexedList<MeshVertex, std::allocator<MeshVertex>, VertexItrFactory> containerType;
+			using MeshIteratorFactory::MeshIteratorFactory;
+			iterator buildIterator(size_t index, const containerType* containerPtr)const;
+			const_iterator buildConstIterator(size_t index, const containerType* containerPtr)const;
+		};
+
+
+		class FaceItrFactory: private MeshIteratorFactory
+		{
+		public:
+			typedef FaceItr iterator;
+			typedef FaceItr const_iterator;
+			typedef IndexedList<MeshFace, std::allocator<MeshFace>, FaceItrFactory> containerType;
+			using MeshIteratorFactory::MeshIteratorFactory;
+			iterator buildIterator(size_t index, const containerType* containerPtr)const;
+			const_iterator buildConstIterator(size_t index, const containerType* containerPtr)const;
+		};
+
+
 
 
 

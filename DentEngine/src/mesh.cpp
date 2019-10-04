@@ -1,10 +1,9 @@
 #include "mesh.h"
 #include "qmlmanager.h"
-#include <QDebug>
 #include <QCoreApplication>
 #include "utils/mathutils.h"
 #include "configuration.h"
-
+#include "../../common/Debug.h"
 #include <list>
 #include <set>
 #if defined(_DEBUG) || defined(QT_DEBUG )
@@ -18,10 +17,10 @@ using namespace Hix::Debug;
 using namespace ClipperLib;
 
 
-QDebug Hix::Debug::operator<< (QDebug d, const VertexConstItr& obj) {
+QDebug Hix::Debug::operator<< (QDebug d, const VertexItr& obj) {
 	d << "VertexConstItr index: " << obj.index() << "\n";
-	d << "  pos:" << obj->position << "\n";
-	d << "  vn:" << obj->vn << "\n";
+	d << "  pos:" << obj->position() << "\n";
+	d << "  vn:" << obj->vn() << "\n";
 
 	d << "  leaving edges indices:" << "\n";
 	for (auto each : obj->leavingEdges)
@@ -36,7 +35,7 @@ QDebug Hix::Debug::operator<< (QDebug d, const VertexConstItr& obj) {
 	return d;
 }
 
-QDebug Hix::Debug::operator<< (QDebug d, const HalfEdgeConstItr& obj) {
+QDebug Hix::Debug::operator<< (QDebug d, const HalfEdgeItr& obj) {
 	d << "HalfEdgeConstItr index " << obj.index() <<"\n";
 	d << "  owning face index:" << obj->owningFace.index() << "\n";
 	d << "  twins indicies:" << "\n";
@@ -52,7 +51,7 @@ QDebug Hix::Debug::operator<< (QDebug d, const HalfEdgeConstItr& obj) {
 	return d;
 }
 
-QDebug Hix::Debug::operator<< (QDebug d, const FaceConstItr& obj) {
+QDebug Hix::Debug::operator<< (QDebug d, const FaceItr& obj) {
 	d << "FaceConstItr index: " << obj.index() << "\n";
 	d << "  fn: " << obj->fn << "\n";
 	d << "  orderedZ: " << obj->fn << "\n";
@@ -68,104 +67,99 @@ QDebug Hix::Debug::operator<< (QDebug d, const FaceConstItr& obj) {
 		d << hEdgeCirc.toItr() << "\n";
 	}
 	return d;
-	}
-
-//half edge circulator
-
-Hix::Engine3D::HalfEdgeCirculator::HalfEdgeCirculator(HalfEdgeConstItr itr): _hEdgeItr(itr)
-{
 }
 
-//HalfEdgeConstItr& Hix::Engine3D::HalfEdgeCirculator::toItrW() const
-//{
-//	return _hEdgeItr;
-//}
-
-HalfEdgeConstItr& Hix::Engine3D::HalfEdgeCirculator::toItr()
+Hix::Engine3D::MeshIteratorFactory::MeshIteratorFactory()
 {
-	return _hEdgeItr;
+	DONT_USE
+}
+Hix::Engine3D::MeshIteratorFactory::MeshIteratorFactory(Mesh* mesh) : _mesh(mesh) {}
+
+
+HalfEdgeItrFactory::iterator HalfEdgeItrFactory::buildIterator(size_t index, const HalfEdgeItrFactory::containerType* containerPtr) const
+{
+	return HalfEdgeItrFactory::iterator(index, _mesh);
 }
 
-
-
-
-const HalfEdge& Hix::Engine3D::HalfEdgeCirculator::operator*() const
+HalfEdgeItrFactory::const_iterator HalfEdgeItrFactory::buildConstIterator(size_t index, const HalfEdgeItrFactory::containerType* containerPtr) const
 {
-	return *_hEdgeItr;
+	return HalfEdgeItrFactory::iterator(index, _mesh);
+}
+VertexItrFactory::iterator VertexItrFactory::buildIterator(size_t index, const VertexItrFactory::containerType* containerPtr) const
+{
+	return VertexItrFactory::iterator(index, _mesh);
 }
 
-void Hix::Engine3D::HalfEdgeCirculator::operator++()
+VertexItrFactory::const_iterator VertexItrFactory::buildConstIterator(size_t index, const VertexItrFactory::containerType* containerPtr) const
 {
-	_hEdgeItr = _hEdgeItr->next;
+	return VertexItrFactory::iterator(index, _mesh);
+}
+FaceItrFactory::iterator FaceItrFactory::buildIterator(size_t index, const FaceItrFactory::containerType* containerPtr) const
+{
+	return FaceItrFactory::iterator(index, _mesh);
 }
 
-void Hix::Engine3D::HalfEdgeCirculator::operator--()
+FaceItrFactory::const_iterator FaceItrFactory::buildConstIterator(size_t index, const FaceItrFactory::containerType* containerPtr) const
 {
-	_hEdgeItr = _hEdgeItr->prev;
+	return FaceItrFactory::iterator(index, _mesh);
 }
 
-HalfEdgeCirculator Hix::Engine3D::HalfEdgeCirculator::operator--(int)
+const HalfEdge& HalfEdgeItr::ref()const
 {
-	auto tmp = *this;
-	this->operator--();
-	return tmp;
+	return _owner->getHalfEdges()[_index];
 }
 
-HalfEdgeCirculator Hix::Engine3D::HalfEdgeCirculator::operator++(int)
+const MeshFace& FaceItr::ref() const
 {
-	auto tmp = *this;
-	this->operator++();
-	return tmp;
+	return _owner->getFaces()[_index];
+}
+const MeshVertex& VertexItr::ref() const
+{
+	return _owner->getVertices()[_index];
 }
 
-const HalfEdge* Hix::Engine3D::HalfEdgeCirculator::operator->() const
+HalfEdgeItr Hix::Engine3D::HalfEdgeItr::next() const
 {
-	return _hEdgeItr.operator->();
+	return HalfEdgeItr(ref().next, _owner);
 }
 
-const HalfEdge* Hix::Engine3D::HalfEdgeCirculator::toPtr() const
+HalfEdgeItr Hix::Engine3D::HalfEdgeItr::prev() const
 {
-	return _hEdgeItr.operator->();
+	return HalfEdgeItr(ref().prev, _owner);
 }
 
-
-
-
-std::array<VertexConstItr, 3> Hix::Engine3D::MeshFace::meshVertices() const
+void Hix::Engine3D::HalfEdgeItr::moveNext()
 {
-	std::array<VertexConstItr, 3> result;
-	auto circulator = edgeCirculator();
-	for (size_t i = 0; i < 3; ++i)
+	_index = ref().next;
+}
+
+void Hix::Engine3D::HalfEdgeItr::movePrev()
+{
+	_index = ref().prev;
+}
+
+VertexItr Hix::Engine3D::HalfEdgeItr::from() const
+{
+	return VertexItr(ref().from, _owner);
+}
+
+VertexItr Hix::Engine3D::HalfEdgeItr::to() const
+{
+	return VertexItr(ref().to, _owner);
+}
+
+FaceItr Hix::Engine3D::HalfEdgeItr::owningFace() const
+{
+	return FaceItr(ref().owningFace, _owner);
+}
+
+std::unordered_set<HalfEdgeItr> Hix::Engine3D::HalfEdgeItr::twins() const
+{
+	std::unordered_set<HalfEdgeItr> twinEdges;
+	auto fromVtx = from();
+	for (auto oppDirEdge : to().leavingEdges())
 	{
-		result[i] = circulator->from;
-		++circulator;
-	}
-	return result;
-
-}
-
-HalfEdgeCirculator Hix::Engine3D::MeshFace::edgeCirculator()const
-{
-	return HalfEdgeCirculator(edge);
-}
-
-std::array<size_t, 3> Hix::Engine3D::MeshFace::getVerticeIndices(const Mesh* owningMesh)const
-{
-	std::array<size_t, 3> result;
-	auto faceVs = meshVertices();
-	for (size_t i = 0; i < 3; ++i)
-	{
-		result[i] = faceVs[i] - owningMesh->getVertices().cbegin();
-	}
-	return result;
-}
-
-std::unordered_set<HalfEdgeConstItr> Hix::Engine3D::HalfEdge::twins()const
-{
-	std::unordered_set<HalfEdgeConstItr> twinEdges;
-	for (auto oppDirEdge : to->leavingEdges)
-	{
-		if (oppDirEdge->to == from)
+		if (oppDirEdge.to() == fromVtx)
 		{
 			twinEdges.insert(oppDirEdge);
 		}
@@ -173,22 +167,21 @@ std::unordered_set<HalfEdgeConstItr> Hix::Engine3D::HalfEdge::twins()const
 	return twinEdges;
 }
 
-
-//twins in same direction
-std::unordered_set<HalfEdgeConstItr> Hix::Engine3D::HalfEdge::nonTwins()const
+std::unordered_set<HalfEdgeItr> Hix::Engine3D::HalfEdgeItr::nonTwins() const
 {
-	std::unordered_set<HalfEdgeConstItr> nonTwins;
-	for (auto sameDirEdge : from->leavingEdges)
+	std::unordered_set<HalfEdgeItr> nonTwins;
+	auto toVtx = to();
+	for (auto sameDirEdge : from().leavingEdges())
 	{
-		if (sameDirEdge->to == to && sameDirEdge.operator->() != this)
+		if (sameDirEdge.to() == toVtx && sameDirEdge != *this)
 		{
 			nonTwins.insert(sameDirEdge);
 		}
 	}
 	return nonTwins;
 }
-//twins + nonTwins
-std::unordered_set<HalfEdgeConstItr> Hix::Engine3D::HalfEdge::allFromSameEdge()const
+
+std::unordered_set<HalfEdgeItr> Hix::Engine3D::HalfEdgeItr::allFromSameEdge() const
 {
 	auto allEdges = twins();
 	auto tmp = nonTwins();
@@ -196,77 +189,183 @@ std::unordered_set<HalfEdgeConstItr> Hix::Engine3D::HalfEdge::allFromSameEdge()c
 	return allEdges;
 }
 
-bool Hix::Engine3D::HalfEdge::isTwin(const HalfEdgeConstItr& other)const
+std::unordered_set<FaceItr> Hix::Engine3D::HalfEdgeItr::nonOwningFaces() const
+{
+	std::unordered_set<FaceItr> result;
+	auto otherEdges = allFromSameEdge();
+	for (auto each : otherEdges)
+	{
+		result.insert(each.owningFace());
+	}
+	return result;
+}
+
+std::unordered_set<FaceItr> Hix::Engine3D::HalfEdgeItr::twinFaces() const
+{
+	std::unordered_set<FaceItr> twnFaces;
+	for (auto& each : twins())
+	{
+		twnFaces.emplace(each.owningFace());
+	}
+	return twnFaces;
+}
+
+bool Hix::Engine3D::HalfEdgeItr::isTwin(const HalfEdgeItr& other) const
 {
 	auto twns = twins();
 	return twns.find(other) != twns.end();
 }
 
-
-std::vector<FaceConstItr> Hix::Engine3D::HalfEdge::nonOwningFaces()const
+const QVector3D& Hix::Engine3D::FaceItr::fn() const
 {
-	std::vector<FaceConstItr> result;
-	auto otherEdges = allFromSameEdge();
-	for (auto each : otherEdges)
-	{
-		result.push_back(each->owningFace);
-	}
-	return result;
-}
-std::unordered_set<FaceConstItr> Hix::Engine3D::HalfEdge::twinFaces()const
-{
-	std::unordered_set<FaceConstItr> twnFaces;
-	auto twns = twins();
-	for (auto& each : twns)
-	{
-		twnFaces.emplace(each->owningFace);
-	}
-	return twnFaces;
+	QVector3D fn;
+	mf.fn = QVector3D::normal(fVtx[0]->position, fVtx[1]->position, fVtx[2]->position);
+	return fn;
 }
 
-std::vector<FaceConstItr> Hix::Engine3D::MeshVertex::connectedFaces()const
+HalfEdgeItr Hix::Engine3D::FaceItr::edge() const
 {
-	std::vector<FaceConstItr> result;
-	for (auto each : leavingEdges)
+	return HalfEdgeItr(ref().edge,_owner);
+}
+
+std::array<VertexItr, 3> Hix::Engine3D::FaceItr::meshVertices() const
+{
+	std::array<VertexItr, 3> result;
+	auto circulator = edge();
+	for (size_t i = 0; i < 3; ++i)
 	{
-		result.emplace_back(each->owningFace);
+		result[i] = circulator.from();
+		circulator.moveNext();
 	}
 	return result;
 }
 
-std::unordered_set<VertexConstItr> Hix::Engine3D::MeshVertex::connectedVertices() const
+std::array<size_t, 3> Hix::Engine3D::FaceItr::getVerticeIndices() const
 {
-	std::unordered_set<VertexConstItr> connected;
-	for (auto& each : leavingEdges)
+	std::array<size_t, 3> result;
+	auto faceVs = meshVertices();
+	for (size_t i = 0; i < 3; ++i)
 	{
-		connected.insert(each->to);
+		result[i] = faceVs[i].index();
 	}
-	for (auto& each : arrivingEdges)
-	{
-		connected.insert(each->from);
-	}
-	return connected;
+	return result;
 }
 
-bool MeshVertex::empty()const
+std::array<float, 3> Hix::Engine3D::FaceItr::sortZ() const
 {
-	if (leavingEdges.empty() && arrivingEdges.empty())
-		return true;
-	else
-		false;
+	std::array<float, 3> orderedZ;
+	auto mfVertices = meshVertices();
+	for (int i = 0; i < mfVertices.size(); i++) {
+		orderedZ[i] = mfVertices[i].position().z();
+	}
+	std::sort(orderedZ.begin(), orderedZ.end());
+	return orderedZ;
+}
+
+float Hix::Engine3D::FaceItr::getFaceZmin() const
+{
+	float face__z_min = std::numeric_limits<float>::max();
+	auto mfVertices = meshVertices();
+	for (int i = 0; i < mfVertices.size(); i++) {
+		float temp__z_min = mfVertices[i].position().z();
+		if (temp__z_min < face__z_min)
+			face__z_min = temp__z_min;
+	}
+	return face__z_min;
+}
+
+float Hix::Engine3D::FaceItr::getFaceZmax() const
+{
+	float face__z_max = std::numeric_limits<float>::lowest();
+	auto mfVertices = meshVertices();
+	for (int i = 0; i < mfVertices.size(); i++) {
+		float temp__z_max = mfVertices[i].position().z();
+		if (temp__z_max > face__z_max)
+			face__z_max = temp__z_max;
+	}
+	return face__z_max;
+}
+
+bool Hix::Engine3D::FaceItr::getEdgeWithVertices(HalfEdgeItr& result, const VertexItr& a, const VertexItr& b) const
+{
+	auto hEdge = edge();
+	for (size_t i = 0; i < 3; ++i)
+	{
+		auto to = hEdge.to();
+		auto from = hEdge.from();
+		if ((to== a && from == b) || (to == b && from == a))
+		{
+			result = hEdge;
+			return true;
+		}
+		hEdge.moveNext();
+	}
+	return false;
+}
+
+bool Hix::Engine3D::FaceItr::isNeighborOf(const FaceItr& other) const
+{
+
+	auto hEdge = edge();
+	for (size_t i = 0; i < 3; ++i)
+	{
+		auto nFaces = hEdge.twinFaces();
+		for (auto& each : nFaces)
+		{
+			if (each == other)
+			{
+				return true;
+			}
+		}
+	}
+	return false;
 }
 
 
-void Hix::Engine3D::MeshVertex::calculateNormalFromFaces()
+const QVector3D& Hix::Engine3D::VertexItr::vn() const
 {
-	vn = { 0,0,0 };
+	QVector3D vn;
 	auto faces = connectedFaces();
-    for (auto& face : faces)
+	for (auto& face : faces)
 	{
-		vn += face->fn;
+		vn += face.fn();
 	}
-    vn.normalize();
+	vn.normalize();
+	return vn;
 }
+
+const QVector3D& Hix::Engine3D::VertexItr::position() const
+{
+	return 
+}
+
+std::unordered_set<HalfEdgeItr> Hix::Engine3D::VertexItr::leavingEdges() const
+{
+	return std::unordered_set<HalfEdgeItr>();
+}
+
+std::unordered_set<HalfEdgeItr> Hix::Engine3D::VertexItr::arrivingEdges() const
+{
+	return std::unordered_set<HalfEdgeItr>();
+}
+
+std::unordered_set<VertexItr> Hix::Engine3D::VertexItr::connectedVertices() const
+{
+	return std::unordered_set<VertexItr>();
+}
+
+bool Hix::Engine3D::VertexItr::disconnected() const
+{
+	return false;
+}
+
+std::vector<FaceItr> Hix::Engine3D::VertexItr::connectedFaces() const
+{
+	return std::vector<FaceItr>();
+}
+
+
+
 
 
 Mesh::Mesh()
@@ -846,74 +945,6 @@ void Mesh::hEdgeIndexChangedCallback(size_t oldIdx, size_t newIdx)
 
 
 
-//ascending/increasing order
-std::array<float, 3> MeshFace::sortZ()const
-{
-	std::array<float, 3> orderedZ;
-	auto mfVertices = meshVertices();
-	for (int i = 0; i < mfVertices.size(); i++) {
-		orderedZ[i] = mfVertices[i]->position.z();
-	}
-	std::sort(orderedZ.begin(), orderedZ.end());
-	return orderedZ;
-}
-
-
-float MeshFace::getFaceZmin()const{
-    float face__z_min=std::numeric_limits<float>::max();
-	auto mfVertices = meshVertices();
-    for (int i=0; i< mfVertices.size(); i++){
-        float temp__z_min = mfVertices[i]->position.z();
-        if (temp__z_min<face__z_min)
-            face__z_min = temp__z_min;
-    }
-    return face__z_min;
-}
-
-float MeshFace::getFaceZmax()const{
-    float face__z_max= std::numeric_limits<float>::lowest();
-	auto mfVertices = meshVertices();
-    for (int i=0; i< mfVertices.size(); i++){
-        float temp__z_max = mfVertices[i]->position.z();
-        if (temp__z_max>face__z_max)
-            face__z_max = temp__z_max;
-    }
-    return face__z_max;
-}
-
-bool MeshFace::getEdgeWithVertices(HalfEdgeConstItr& result, const VertexConstItr& a, const VertexConstItr& b)const
-{
-	auto edgeCirc = edgeCirculator();
-	for (size_t i = 0; i < 3; ++i)
-	{
-		auto edge = edgeCirc.toItr();
-		if ((edge->to == a && edge->from == b) || (edge->to == b && edge->from == a))
-		{
-			result = edge;
-			return true;
-		}
-		++edgeCirc;
-	}
-	return false;
-}
-
-bool MeshFace::isNeighborOf(const FaceConstItr& other)const
-{
-	auto edgeCirc = edgeCirculator();
-	for (size_t i = 0; i < 3; ++i)
-	{
-		auto nFaces = edgeCirc->twinFaces();
-		for (auto& each : nFaces)
-		{
-			if (each == other)
-			{
-				return true;
-			}
-		}
-	}
-	return false;
-}
-
 void Mesh::findNearSimilarFaces(QVector3D normal, FaceConstItr  mf,
 	std::unordered_set<FaceConstItr>& result, float maxNormalDiff, size_t maxCount)const
 {
@@ -1388,3 +1419,4 @@ size_t Hix::Engine3D::MeshVtxHasher::operator()(const QVector3D& hashed) const
 	}
 	return	digest;
 }
+

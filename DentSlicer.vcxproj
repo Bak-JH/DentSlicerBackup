@@ -193,6 +193,7 @@
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="common\Debug.cpp" />
     <ClCompile Include="common\Task.cpp" />
     <ClCompile Include="common\TaskManager.cpp" />
     <ClCompile Include="DentEngine\src\Bounds3D.cpp" />
@@ -265,12 +266,14 @@
     <ClCompile Include="utils\updatechecker.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="common\Debug.h" />
     <ClInclude Include="common\Hasher.h" />
     <ClInclude Include="common\indexedlist.h" />
     <ClInclude Include="common\IteratorWrapper.h" />
     <ClInclude Include="common\moodycamel\atomicops.h" />
     <ClInclude Include="common\moodycamel\readerwriterqueue.h" />
     <ClInclude Include="common\RamosEnum.h" />
+    <ClInclude Include="common\RandomAccessIteratorBase.h" />
     <ClInclude Include="common\Singleton.h" />
     <ClInclude Include="common\Task.h" />
     <ClInclude Include="common\taskflow\core\executor.hpp" />

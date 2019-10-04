@@ -610,6 +610,9 @@
     <ClInclude Include="common\Hasher.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
+    <ClInclude Include="common\RandomAccessIteratorBase.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="debug\moc_predefs.h.cbt">
@@ -1202,6 +1205,7 @@
     <None Include="icon-32.ico" />
     <None Include="icon-32.ico" />
     <None Include="Qml\LeftTabSlicingOptionElementPercentage.qml" />
+    <None Include="icon-32.ico" />
     <None Include="icon-32.ico" />
   </ItemGroup>
   <ItemGroup>
