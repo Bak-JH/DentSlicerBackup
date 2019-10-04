@@ -6,14 +6,14 @@
 
 
 
-template <class T, class A = std::allocator<T>>
-class TrackedIndexedList : public IndexedList<T, A> {
+template <class T, class A = std::allocator<T>, class ItrFac = IndexedListItr::DefaultIteratorFactory<T, A>>
+class TrackedIndexedList : public IndexedList<T, A, ItrFac> {
 
-    typedef IndexedList<T, A> parent_type;
+    typedef IndexedList<T, A, ItrFac> parent_type;
 public:
 	typedef typename std::variant<bool, std::unordered_set<size_t>> changes_type;
-	typedef typename IndexedListItr::iterator<T,A> iterator;
-	typedef typename IndexedListItr::const_iterator<T, A> const_iterator;
+	typedef typename parent_type::iterator iterator;
+	typedef typename parent_type::const_iterator const_iterator;
 
 	TrackedIndexedList()
 	{
