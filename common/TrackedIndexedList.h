@@ -1,3 +1,4 @@
+#pragma once
 #include "IndexedList.h"
 #include <vector>
 #include <unordered_set>
@@ -15,20 +16,21 @@ public:
 	typedef typename parent_type::iterator iterator;
 	typedef typename parent_type::const_iterator const_iterator;
 
-	TrackedIndexedList()
+	TrackedIndexedList(ItrFac itrFac = ItrFac()): parent_type(itrFac)
 	{
-
 	}
 	TrackedIndexedList(const TrackedIndexedList& o) :parent_type(o)
 	{
 		_changedAll = true;
 	}
-	TrackedIndexedList(std::initializer_list<T> iniList) : TrackedIndexedList(iniList, std::allocator<T>())
+	TrackedIndexedList(std::initializer_list<T> iniList, ItrFac itrFac = ItrFac()):
+		TrackedIndexedList(iniList, std::allocator<T>(), itrFac)
 	{
 		_changedAll = true;
 	}
 
-    TrackedIndexedList(std::initializer_list<T> iniList, const typename parent_type::allocator_type& allocator) :parent_type(iniList, allocator)
+    TrackedIndexedList(std::initializer_list<T> iniList, const typename parent_type::allocator_type& allocator,
+		ItrFac itrFac = ItrFac()) :parent_type(iniList, allocator, itrFac)
 	{
 		_changedAll = true;
 	}

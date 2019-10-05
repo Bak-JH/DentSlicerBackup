@@ -76,6 +76,13 @@ Hix::Engine3D::MeshIteratorFactory::MeshIteratorFactory()
 }
 Hix::Engine3D::MeshIteratorFactory::MeshIteratorFactory(Mesh* mesh) : _mesh(mesh) {}
 
+MeshDataIterator::MeshDataIterator()
+{
+}
+MeshDataIterator::MeshDataIterator(size_t idx, Mesh* owner) : RandomAccessIteratorBase<MeshDataIterator, Mesh>(idx, owner)
+{
+}
+
 
 HalfEdgeItrFactory::iterator HalfEdgeItrFactory::buildIterator(size_t index, const HalfEdgeItrFactory::containerType* containerPtr) const
 {
@@ -458,10 +465,9 @@ Mesh::Mesh(const Mesh& o)
 }
 Mesh& Mesh::operator+=(const Mesh& o)
 {
-    for(auto& each: o.getFaces())
+    for(auto curr = o.getFaces().begin(); curr != o.getFaces().end(); ++curr)
     {
-        auto vertices = each.meshVertices();
-        addFace(vertices[0]->position, vertices[1]->position, vertices[2]->position);
+        addFace(curr);
     }
     return *this;
 }

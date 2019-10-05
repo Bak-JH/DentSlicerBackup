@@ -48,19 +48,19 @@ public:
 	typedef std::reverse_iterator<iterator> reverse_iterator; //optional
 	typedef std::reverse_iterator<const_iterator> const_reverse_iterator; //optional
 
-	IndexedList(ItrFac itrFac = ItrFac()): _iteratorFactory(), _itrFactory(ItrFac())
+	IndexedList(ItrFac itrFac = ItrFac()): _itrFactory(ItrFac())
 	{
 	}
 	IndexedList(IndexedList&& other) :
 		_container(std::move(other._container)), _indexChangedCallbacks(std::move(other._indexChangedCallbacks)),
-		_indexChangedCallbackToken(other._indexChangedCallbackToken), _iteratorFactory(std::move(other._iteratorFactory))
+		_indexChangedCallbackToken(other._indexChangedCallbackToken), _itrFactory(std::move(other._itrFactory))
 	{
 	}
 	//notice how we do not copy any other members.
 	IndexedList(const IndexedList& o) :_container(o._container), _itrFactory(o._itrFactory)
 	{
 	}
-	IndexedList(std::initializer_list<T> iniList, ItrFac itrFac = ItrFac()) : IndexedList(iniList, std::allocator<T>()), _itrFactory(itrFac)
+	IndexedList(std::initializer_list<T> iniList, ItrFac itrFac = ItrFac()) : IndexedList(iniList, std::allocator<T>(), itrFac)
 	{
 	}
 
@@ -106,19 +106,20 @@ public:
 	//bool operator>=(const IndexedList&) const; //optional
 
 	//iterators
-	iterator begin();
-	const_iterator begin() const;
-	const_iterator cbegin() const;
-	iterator end();
-	const_iterator end() const;
-	const_iterator cend() const;
+	typename ItrFac::iterator begin();
+	typename ItrFac::const_iterator begin() const;
+	typename ItrFac::const_iterator cbegin() const;
+	typename ItrFac::iterator end();
+	typename ItrFac::const_iterator end() const;
+	typename ItrFac::const_iterator cend() const;
+	typename ItrFac::iterator toNormItr(const const_iterator& itr);
+
 	reverse_iterator rbegin();
 	const_reverse_iterator rbegin() const;
 	const_reverse_iterator crbegin() const;
 	reverse_iterator rend();
 	const_reverse_iterator rend() const;
 	const_reverse_iterator crend() const;
-	iterator toNormItr(const const_iterator& itr);
 
 
 
@@ -251,7 +252,7 @@ public:
 
 	DeleteGuard<T, A, ItrFac> getDeleteGuard()
 	{
-		return DeleteGuard<T, A>(this);
+		return DeleteGuard<T, A, ItrFac>(this);
 	}
 
 protected:
@@ -324,7 +325,7 @@ public:
 	template<class IteratorType>
 	void deleteLater(const IteratorType& itr)
 	{
-		_indices.insert(itr->index());
+		_indices.insert(itr.index());
 	}
 	void flush()
 	{
@@ -640,13 +641,13 @@ namespace IndexedListItr
 	public:
 		typedef IndexedListItr::iterator<T, A> iterator;
 		typedef  IndexedListItr::const_iterator<T, A> const_iterator;
-		DefaultIteratorFactory::iterator buildIterator(size_t index, const IndexedList<T, A, DefaultIteratorFactory>* containerPtr)const
+		DefaultIteratorFactory::iterator buildIterator(size_t index, IndexedList<T, A, DefaultIteratorFactory>* containerPtr)const
 		{
-			return DefaultIteratorFactory::iterator(index, containerPtr);
+			return iterator(index, containerPtr);
 		}
 		DefaultIteratorFactory::const_iterator buildConstIterator(size_t index, const IndexedList<T, A, DefaultIteratorFactory>* containerPtr)const
 		{
-			return DefaultIteratorFactory::const_iterator(index, containerPtr);
+			return const_iterator(index, containerPtr);
 		}
 	};
 
@@ -656,33 +657,33 @@ namespace IndexedListItr
 
 //IndexedList iterator methods
 template <class T, class A, class ItrFac>
-typename IndexedList<T, A, ItrFac>::iterator IndexedList<T, A, ItrFac>::begin()
+typename ItrFac::iterator IndexedList<T, A, ItrFac>::begin()
 {
 	return _itrFactory.buildIterator(0, this);
 }
 template <class T, class A, class ItrFac>
-typename IndexedList<T, A, ItrFac>::const_iterator IndexedList<T, A, ItrFac>::begin() const
+typename ItrFac::const_iterator IndexedList<T, A, ItrFac>::begin() const
 {
 	return _itrFactory.buildConstIterator(0, this);
 }
 template <class T, class A, class ItrFac>
-typename IndexedList<T, A, ItrFac>::const_iterator IndexedList<T, A, ItrFac>::cbegin() const
+typename ItrFac::const_iterator IndexedList<T, A, ItrFac>::cbegin() const
 {
 	//auto jj = const_iterator(_container.begin());
 	return _itrFactory.buildConstIterator(0, this);
 }
 template <class T, class A, class ItrFac>
-typename IndexedList<T, A, ItrFac>::iterator IndexedList<T, A, ItrFac>::end()
+typename ItrFac::iterator IndexedList<T, A, ItrFac>::end()
 {
 	return _itrFactory.buildIterator(_container.size(), this);
 }
 template <class T, class A, class ItrFac>
-typename IndexedList<T, A, ItrFac>::const_iterator IndexedList<T, A, ItrFac>::end() const
+typename ItrFac::const_iterator IndexedList<T, A, ItrFac>::end() const
 {
 	return _itrFactory.buildConstIterator(_container.size(), this);
 }
 template <class T, class A, class ItrFac>
-typename IndexedList<T, A, ItrFac>::const_iterator IndexedList<T, A, ItrFac>::cend() const
+typename ItrFac::const_iterator IndexedList<T, A, ItrFac>::cend() const
 {
 	return _itrFactory.buildConstIterator(_container.size(), this);
 }
@@ -719,24 +720,24 @@ typename IndexedList<T, A, ItrFac>::const_reverse_iterator IndexedList<T, A, Itr
 }
 
 template <class T, class A, class ItrFac>
-typename IndexedList<T, A, ItrFac>::iterator IndexedList<T, A, ItrFac>::toNormItr(const IndexedList<T, A, ItrFac>::const_iterator& itr)
+typename ItrFac::iterator IndexedList<T, A, ItrFac>::toNormItr(const typename ItrFac::const_iterator& itr)
 {
 	size_t idx = itr - cbegin();
 	return  begin() + idx;
 }
 
 template <class T, class A, class ItrFac>
-typename IndexedList<T, A, ItrFac>::difference_type IndexedList<T, A, ItrFac>::getItrIndex(const IndexedList<T, A, ItrFac>::iterator* itr)const
+typename IndexedList<T, A, ItrFac>::difference_type IndexedList<T, A, ItrFac>::getItrIndex(const typename ItrFac::iterator* itr)const
 {
-	return IndexedList<T, A, ItrFac>::const_iterator(*itr) - cbegin();
+	return ItrFac::const_iterator(*itr) - cbegin();
 }
 template <class T, class A, class ItrFac>
-void IndexedList<T, A, ItrFac>::modifiedElement(const IndexedList<T, A, ItrFac>::iterator* itr)
+void IndexedList<T, A, ItrFac>::modifiedElement(const typename ItrFac::iterator* itr)
 {
 	modifiedElement(getItrIndex(itr));
 }
 template <class T, class A, class ItrFac>
-typename IndexedList<T, A, ItrFac>::iterator IndexedList<T, A, ItrFac>::swapAndErase(typename IndexedList<T, A, ItrFac>::const_iterator pos)
+typename ItrFac::iterator IndexedList<T, A, ItrFac>::swapAndErase(typename ItrFac::const_iterator pos)
 {
 	auto nextItr = pos;
 	++nextItr;
@@ -747,8 +748,8 @@ typename IndexedList<T, A, ItrFac>::iterator IndexedList<T, A, ItrFac>::swapAndE
 
 template <class T, class A, class ItrFac>
 //doesn't swap if the element is at the front or back
-typename IndexedList<T, A, ItrFac>::iterator IndexedList<T, A, ItrFac>::swapAndErase(typename IndexedList<T, A, ItrFac>::const_iterator start,
-	typename IndexedList<T, A, ItrFac>::const_iterator end)
+typename ItrFac::iterator IndexedList<T, A, ItrFac>::swapAndErase(typename ItrFac::const_iterator start,
+	typename ItrFac::const_iterator end)
 {
 	size_t startedIndex = start - cbegin();
 	size_t count = end - start;
