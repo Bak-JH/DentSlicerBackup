@@ -19,16 +19,16 @@ using namespace ClipperLib;
 
 QDebug Hix::Debug::operator<< (QDebug d, const VertexItr& obj) {
 	d << "VertexConstItr index: " << obj.index() << "\n";
-	d << "  pos:" << obj->position() << "\n";
-	d << "  vn:" << obj->vn() << "\n";
+	d << "  pos:" << obj.position() << "\n";
+	d << "  vn:" << obj.vn() << "\n";
 
 	d << "  leaving edges indices:" << "\n";
-	for (auto each : obj->leavingEdges)
+	for (auto each : obj.leavingEdges())
 	{
 		d << "    " << each.index() << "\n";
 	}
 	d << "  arriving edges indices:" << "\n";
-	for (auto each : obj->arrivingEdges)
+	for (auto each : obj.arrivingEdges())
 	{
 		d << "    " << each.index() << "\n";
 	}
@@ -37,34 +37,35 @@ QDebug Hix::Debug::operator<< (QDebug d, const VertexItr& obj) {
 
 QDebug Hix::Debug::operator<< (QDebug d, const HalfEdgeItr& obj) {
 	d << "HalfEdgeConstItr index " << obj.index() <<"\n";
-	d << "  owning face index:" << obj->owningFace.index() << "\n";
+	d << "  owning face index:" << obj.owningFace().index() << "\n";
 	d << "  twins indicies:" << "\n";
-	auto twins = obj->twins();
+	auto twins = obj.twins();
 	for (auto each : twins)
 	{
 		d << "    " << each.index() << "\n";
 	}
 	d << "  from vtx: " << "\n";
-	d << obj->from << "\n";
+	d << obj.from << "\n";
 	d << "  to vtx" << "\n";
-	d << obj->to << "\n";
+	d << obj.to << "\n";
 	return d;
 }
 
 QDebug Hix::Debug::operator<< (QDebug d, const FaceItr& obj) {
 	d << "FaceConstItr index: " << obj.index() << "\n";
-	d << "  fn: " << obj->fn << "\n";
-	d << "  orderedZ: " << obj->fn << "\n";
-	auto orderedZ = obj->sortZ();
+	d << "  fn: " << obj.fn() << "\n";
+	d << "  orderedZ: \n";
+	auto orderedZ = obj.sortZ();
 	for (auto each : orderedZ)
 	{
 		d << "    " << each << "\n";
 	}
 	d << "  face hEdges:" << "\n";
-	auto hEdgeCirc = obj->edgeCirculator();
+	auto hEdgeCirc = obj.edge();
 	for (size_t i = 0; i < 3; ++i)
 	{
-		d << hEdgeCirc.toItr() << "\n";
+		d << hEdgeCirc << "\n";
+		hEdgeCirc.moveNext();
 	}
 	return d;
 }
@@ -218,8 +219,8 @@ bool Hix::Engine3D::HalfEdgeItr::isTwin(const HalfEdgeItr& other) const
 
 const QVector3D& Hix::Engine3D::FaceItr::fn() const
 {
-	QVector3D fn;
-	mf.fn = QVector3D::normal(fVtx[0]->position, fVtx[1]->position, fVtx[2]->position);
+	auto fVtx = meshVertices();
+	QVector3D fn = QVector3D::normal(fVtx[0].position(), fVtx[1].position(), fVtx[2].position());
 	return fn;
 }
 
@@ -336,32 +337,59 @@ const QVector3D& Hix::Engine3D::VertexItr::vn() const
 
 const QVector3D& Hix::Engine3D::VertexItr::position() const
 {
-	return 
+	return ref().position;
 }
 
 std::unordered_set<HalfEdgeItr> Hix::Engine3D::VertexItr::leavingEdges() const
 {
-	return std::unordered_set<HalfEdgeItr>();
+	std::unordered_set<HalfEdgeItr> edges;
+	for (auto edgeIdx : ref().leavingEdges)
+	{
+		edges.emplace(edgeIdx, _owner);
+	}
+	return edges;
 }
 
 std::unordered_set<HalfEdgeItr> Hix::Engine3D::VertexItr::arrivingEdges() const
 {
-	return std::unordered_set<HalfEdgeItr>();
+	std::unordered_set<HalfEdgeItr> edges;
+	for (auto edgeIdx : ref().arrivingEdges)
+	{
+		edges.emplace(edgeIdx, _owner);
+	}
+	return edges;
 }
 
 std::unordered_set<VertexItr> Hix::Engine3D::VertexItr::connectedVertices() const
 {
-	return std::unordered_set<VertexItr>();
+	std::unordered_set<VertexItr> connected;
+	for (auto& each : leavingEdges())
+	{
+		connected.insert(each.to());
+	}
+	for (auto& each : arrivingEdges())
+	{
+		connected.insert(each.from());
+	}
+	return connected;
 }
 
 bool Hix::Engine3D::VertexItr::disconnected() const
 {
-	return false;
+	if (ref().leavingEdges.empty() && ref().arrivingEdges.empty())
+		return true;
+	else
+		false;
 }
 
 std::vector<FaceItr> Hix::Engine3D::VertexItr::connectedFaces() const
 {
-	return std::vector<FaceItr>();
+	std::vector<FaceItr> result;
+	for (auto each : leavingEdges())
+	{
+		result.emplace_back(each.owningFace());
+	}
+	return result;
 }
 
 

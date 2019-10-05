@@ -77,7 +77,7 @@ namespace Hix
 			VertexItr to()const;
 			FaceItr owningFace()const;
 
-			//HalfEdgeConstItr twin;
+			//HalfEdgeItr twin;
 			std::unordered_set<HalfEdgeItr> twins()const;
 			//twins in same direction
 			std::unordered_set<HalfEdgeItr> nonTwins()const;
@@ -198,8 +198,8 @@ namespace Hix
 
 
 
-		bool isCommonManifoldFace(const FaceConstItr& a, const FaceConstItr& b, std::unordered_set<FaceConstItr> pool);
-		bool findCommonManifoldFace(FaceConstItr& result, const FaceConstItr& a, std::unordered_set<FaceConstItr>& candidates, std::unordered_set<FaceConstItr> pool);
+		bool isCommonManifoldFace(const FaceItr& a, const FaceItr& b, std::unordered_set<FaceItr> pool);
+		bool findCommonManifoldFace(FaceItr& result, const FaceItr& a, std::unordered_set<FaceItr>& candidates, std::unordered_set<FaceItr> pool);
 
 
 		typedef std::array<QVector3D,3> Plane;
@@ -238,11 +238,11 @@ namespace Hix
 			void centerMesh();
 			void vertexRotate(QMatrix4x4 tmpmatrix);
 			void vertexScale(float scaleX, float scaleY, float scaleZ, float centerX, float centerY);
-			void reverseFace(FaceConstItr faceItr);
+			void reverseFace(FaceItr faceItr);
 			void reverseFaces();
             bool addFace(const QVector3D& v0, const QVector3D& v1, const QVector3D& v2);
-			bool addFace(const FaceConstItr& face);
-			TrackedIndexedList<MeshFace>::const_iterator removeFace(FaceConstItr f_it);
+			bool addFace(const FaceItr& face);
+			TrackedIndexedList<MeshFace>::const_iterator removeFace(FaceItr f_it);
 			TrackedIndexedList<MeshVertex>& getVerticesNonConst();
 			TrackedIndexedList<MeshFace>& getFacesNonConst();
 			TrackedIndexedList<HalfEdge>& getHalfEdgesNonConst();
@@ -271,44 +271,8 @@ namespace Hix
 			inline float y_max()const{ return _bounds.yMax();}
 			inline float z_min()const{ return _bounds.zMin();}
 			inline float z_max()const{ return _bounds.zMax();}
-			void findNearSimilarFaces(QVector3D normal,FaceConstItr mf,
-				std::unordered_set<FaceConstItr>& result, float maxNormalDiff = 0.1f, size_t maxCount = 10000)const;
-
-
-
-			/********************** index to data **********************/
-
-			inline MeshFace& idx2mf(size_t idx)
-			{
-				return faces[idx];
-			}
-			inline MeshVertex& idx2vtx(size_t idx)
-			{
-				return vertices[idx];
-			}
-
-			inline const MeshFace& idx2mf(size_t idx)const
-			{
-				return faces[idx];
-			}
-			inline const MeshVertex& idx2vtx(size_t idx)const
-			{
-				return vertices[idx];
-			}
-			/********************** opposite **********************/
-
-			inline size_t indexOf(const HalfEdgeConstItr& itr)const
-			{
-				return itr - halfEdges.cbegin();
-			}
-			inline size_t indexOf(const VertexConstItr& itr)const
-			{
-				return itr - vertices.cbegin();
-			}
-			inline size_t indexOf(const FaceConstItr& itr)const
-			{
-				return itr - faces.cbegin();
-			}
+			void findNearSimilarFaces(QVector3D normal,FaceItr mf,
+				std::unordered_set<FaceItr>& result, float maxNormalDiff = 0.1f, size_t maxCount = 10000)const;
 			/********************** Stuff that can be public **********************/
 			const Bounds3D& bounds()const;
 		private:
@@ -317,7 +281,7 @@ namespace Hix
 
 			VertexItr addOrRetrieveFaceVertex(const QVector3D& v);
 			void removeVertexHash(QVector3D pos);
-			void addHalfEdgesToFace(std::array<VertexItr, 3> faceVertices, FaceConstItr face);
+			void addHalfEdgesToFace(std::array<VertexItr, 3> faceVertices, FaceItr face);
 
 			//index changed event callback
 			void vtxIndexChangedCallback(size_t oldIdx, size_t newIdx);
@@ -325,7 +289,7 @@ namespace Hix
 			void hEdgeIndexChangedCallback(size_t oldIdx, size_t newIdx);
 
 			MeshVtxHasher _vtxHasher;
-			std::unordered_map<size_t, VertexConstItr> _verticesHash;
+			std::unordered_map<size_t, VertexItr> _verticesHash;
 			TrackedIndexedList<MeshVertex> vertices;
 			TrackedIndexedList<HalfEdge> halfEdges;
 			TrackedIndexedList<MeshFace> faces;
@@ -349,9 +313,9 @@ namespace Hix
 	{
 		using namespace Hix::Engine3D;
 
-		QDebug operator<< (QDebug d, const VertexConstItr& obj);
-		QDebug operator<< (QDebug d, const HalfEdgeConstItr& obj);
-		QDebug operator<< (QDebug d, const FaceConstItr& obj);
+		QDebug operator<< (QDebug d, const VertexItr& obj);
+		QDebug operator<< (QDebug d, const HalfEdgeItr& obj);
+		QDebug operator<< (QDebug d, const FaceItr& obj);
 	}
 
 };
