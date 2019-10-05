@@ -11,7 +11,7 @@
 //enforce strict correctness
 #define _INDEXED_LIST_STRICT
 #endif
-
+#define EXPOSE_ITR_INDEX
 template<class T, class A, class ItrFac>
 class DeleteGuard;
 
@@ -48,7 +48,7 @@ public:
 	typedef std::reverse_iterator<iterator> reverse_iterator; //optional
 	typedef std::reverse_iterator<const_iterator> const_reverse_iterator; //optional
 
-	IndexedList(ItrFac itrFac = ItrFac()): _itrFactory(ItrFac())
+	IndexedList(ItrFac itrFac = ItrFac()): _itrFactory(itrFac)
 	{
 	}
 	IndexedList(IndexedList&& other) :
@@ -71,7 +71,10 @@ public:
 
 	virtual ~IndexedList()
 	{}
-
+	void setItrFactory(const ItrFac& itrFac)
+	{
+		_itrFactory = itrFac;
+	}
 	IndexedList& operator=(IndexedList&& o)
 	{
 		_container = std::move(o._container);
@@ -325,7 +328,11 @@ public:
 	template<class IteratorType>
 	void deleteLater(const IteratorType& itr)
 	{
+#ifdef EXPOSE_ITR_INDEX
 		_indices.insert(itr.index());
+#else
+		_indices.insert(itr - _listPtr->cbegin());
+#endif
 	}
 	void flush()
 	{
@@ -370,12 +377,12 @@ namespace IndexedListItr
 		}
 		~iterator()
 		{}
-
+#ifdef EXPOSE_ITR_INDEX
 		size_t index()const
 		{
 			return _index;
 		}
-
+#endif
 
 		iterator& operator=(const iterator& o)
 		{
@@ -518,11 +525,12 @@ namespace IndexedListItr
 		~const_iterator()
 		{}
 
+#ifdef EXPOSE_ITR_INDEX
 		size_t index()const
 		{
 			return _index;
 		}
-
+#endif
 
 
 		const_iterator& operator=(const const_iterator& o)
@@ -722,8 +730,13 @@ typename IndexedList<T, A, ItrFac>::const_reverse_iterator IndexedList<T, A, Itr
 template <class T, class A, class ItrFac>
 typename ItrFac::iterator IndexedList<T, A, ItrFac>::toNormItr(const typename ItrFac::const_iterator& itr)
 {
+#ifdef EXPOSE_ITR_INDEX
+	return begin() + itr.index();
+#else
 	size_t idx = itr - cbegin();
 	return  begin() + idx;
+
+#endif
 }
 
 template <class T, class A, class ItrFac>

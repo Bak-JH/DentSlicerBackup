@@ -6,9 +6,9 @@ class RandomAccessIteratorBase
 {
 
 public:
-	RandomAccessIteratorBase() :_index(0), _onwer(nullptr)
+	RandomAccessIteratorBase() :_index(0), _owner(nullptr)
 	{}
-	RandomAccessIteratorBase(size_t idx, OwnerType* owner) : _index(idx), _onwer(owner)
+	RandomAccessIteratorBase(size_t idx, OwnerType* owner) : _index(idx), _owner(owner)
 	{}
 	size_t index()const
 	{
@@ -18,7 +18,7 @@ public:
 	{
 		_index = o._index;
 		_owner = o._owner;
-		return *this;
+		return *static_cast<ItrType>(this);;
 	}
 	bool initialized()const
 	{
@@ -55,41 +55,41 @@ public:
 	ItrType& operator++()
 	{
 		++_index;
-		return *this;
+		return *static_cast<ItrType*>(this);
 	}
 	ItrType& operator--()
 	{
 		--_index;
-		return *this;
+		return *static_cast<ItrType*>(this);
 	}
 	//post
 	ItrType operator++(int)
 	{
-		auto tmp = *this;
-		++_index;
+		auto tmp = *static_cast<ItrType*>(this);
+		++tmp._index;
 		return tmp;
 	}
 	ItrType operator--(int)
 	{
-		auto tmp = *this;
-		--_index;
+		auto tmp = *static_cast<ItrType*>(this);
+		--tmp._index;
 		return tmp;
 
 	}
 	ItrType& operator+=(size_t offset)
 	{
 		_index += offset;
-		return *this;
+		return *static_cast<ItrType*>(this);
 	}
 	ItrType& operator-=(size_t offset)
 	{
 		_index -= offset;
 
-		return *this;
+		return *static_cast<ItrType*>(this);
 	}
 	ItrType operator+(size_t offset) const
 	{
-		auto tmp = *this;
+		ItrType tmp = *static_cast<const ItrType*>(this);
 		return tmp += offset;
 	}
 	friend ItrType operator+(size_t offset, const ItrType& itr)
@@ -99,7 +99,7 @@ public:
 	}
 	ItrType operator-(size_t offset) const
 	{
-		auto tmp = *this;
+		auto tmp = *static_cast<ItrType*>(this);
 		return tmp -= offset;
 	}
 	size_t operator-(const ItrType& itr)const
