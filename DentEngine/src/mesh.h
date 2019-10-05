@@ -53,9 +53,6 @@ namespace Hix
 
 
 		// plane contains at least 3 vertices contained in the plane in clockwise direction
-
-
-
 		struct HalfEdge;
 		struct MeshVertex;
 		struct MeshFace;
@@ -65,10 +62,18 @@ namespace Hix
 		class VertexItr;
 		class FaceItr;
 
-		class HalfEdgeItr : public RandomAccessIteratorBase<HalfEdgeItr, Mesh>
+
+		class MeshDataIterator : public RandomAccessIteratorBase<MeshDataIterator, Mesh>
 		{
 		public:
-			using RandomAccessIteratorBase<HalfEdgeItr, Mesh>::RandomAccessIteratorBase<HalfEdgeItr, Mesh>;
+			MeshDataIterator();
+			MeshDataIterator(size_t idx, Mesh* owner);
+		};
+
+		class HalfEdgeItr : public MeshDataIterator
+		{
+		public:
+			using MeshDataIterator::MeshDataIterator;
 			HalfEdgeItr next()const;
 			HalfEdgeItr prev()const;
 			void moveNext();
@@ -92,10 +97,10 @@ namespace Hix
 
 		};
 
-		class FaceItr : public RandomAccessIteratorBase<FaceItr, Mesh>
+		class FaceItr : public MeshDataIterator
 		{
 		public:
-			using RandomAccessIteratorBase<FaceItr, Mesh>::RandomAccessIteratorBase<FaceItr, Mesh>;
+			using MeshDataIterator::MeshDataIterator;
 			const QVector3D& fn()const;
 			HalfEdgeItr edge()const;
 			std::array<VertexItr, 3> meshVertices()const;
@@ -109,10 +114,10 @@ namespace Hix
 			const MeshFace& ref()const;
 		};
 
-		class VertexItr : public RandomAccessIteratorBase<VertexItr, Mesh>
+		class VertexItr : public MeshDataIterator
 		{
 		public:
-			using RandomAccessIteratorBase<VertexItr, Mesh>::RandomAccessIteratorBase<VertexItr, Mesh>;
+			using MeshDataIterator::MeshDataIterator;
 			const QVector3D& vn()const;
 			const QVector3D& position()const;
 			std::unordered_set<HalfEdgeItr> leavingEdges()const;
@@ -218,10 +223,6 @@ namespace Hix
 
 		class Mesh {
 		public:
-
-
-
-
 			Mesh();
 			Mesh(const Mesh& o);
 			Mesh& operator=(Mesh other);
@@ -290,9 +291,9 @@ namespace Hix
 
 			MeshVtxHasher _vtxHasher;
 			std::unordered_map<size_t, VertexItr> _verticesHash;
-			TrackedIndexedList<MeshVertex> vertices;
-			TrackedIndexedList<HalfEdge> halfEdges;
-			TrackedIndexedList<MeshFace> faces;
+			TrackedIndexedList<MeshVertex, std::allocator<MeshVertex>, VertexItrFactory> vertices;
+			TrackedIndexedList<HalfEdge, std::allocator<HalfEdge>, HalfEdgeItrFactory> halfEdges;
+			TrackedIndexedList<MeshFace, std::allocator<MeshFace>, FaceItrFactory> faces;
 			Bounds3D _bounds;
 
 		};
