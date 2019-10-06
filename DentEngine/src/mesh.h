@@ -1,7 +1,6 @@
 #pragma once
-#include <vector>
+#include "MeshIterators.h"
 #include <Qt3DCore/qtransform.h>
-#include <QVector3D>
 #include <QHash>
 #include "polyclipping/polyclipping.h"
 #include <QTransform>
@@ -44,18 +43,12 @@ namespace Hix
 
 
 		// plane contains at least 3 vertices contained in the plane in clockwise direction
-		struct HalfEdge;
-		struct MeshVertex;
-		struct MeshFace;
-		class Mesh;
 
-		class HalfEdgeConstItr;
-		class VertexConstItr;
-		class FaceConstItr;
+		template<class ItrType>
+		class HalfEdgeItrBase : public RandomAccessIteratorBase<ItrType, Mesh>
+		{
 
-		class HalfEdgeConstItr;
-		class VertexConstItr;
-		class FaceConstItr;
+		};
 
 		class HalfEdgeConstItr : public RandomAccessIteratorBase<HalfEdgeConstItr, Mesh>
 		{
@@ -138,33 +131,6 @@ namespace Hix
 			using VertexConstItr::VertexConstItr;
 			MeshVertex& ref()const;
 		};
-
-
-		//actual memory footprint
-		struct HalfEdge
-		{
-			uint32_t next;
-			uint32_t from;
-			uint32_t to;
-			uint32_t owningFace;
-		};
-		struct MeshFace {
-			uint32_t edge;
-		};
-		struct MeshVertex {
-			MeshVertex(QVector3D);
-			friend inline bool operator== (const MeshVertex& a, const MeshVertex& b) {
-				return a.position == b.position;
-			}
-			friend inline bool operator!= (const MeshVertex& a, const MeshVertex& b) {
-				return a.position != b.position;
-			}
-			QVector3D position;
-			std::unordered_set<uint32_t> leavingEdges;
-			std::unordered_set<uint32_t> arrivingEdges;
-		};
-
-
 
 
 
@@ -263,13 +229,13 @@ namespace Hix
 
 			/********************** Getters **********************/
 			//non-const getters. really should not be used
-			auto& getVerticesNonConst();
-			auto& getFacesNonConst();
-			auto& getHalfEdgesNonConst();
+			TrackedIndexedList<MeshVertex, std::allocator<MeshVertex>, VertexItrFactory>& getVertices();
+			TrackedIndexedList<MeshFace, std::allocator<MeshFace>, FaceItrFactory>& getFaces();
+			TrackedIndexedList<HalfEdge, std::allocator<HalfEdge>, HalfEdgeItrFactory>& getHalfEdges();
 			//const getter
-			const auto& getVertices()const;
-			const auto& getFaces()const;
-			const auto& getHalfEdges()const;
+			const TrackedIndexedList<MeshVertex, std::allocator<MeshVertex>, VertexItrFactory>& getVertices()const;
+			const TrackedIndexedList<MeshFace, std::allocator<MeshFace>, FaceItrFactory>& getFaces()const;
+			const TrackedIndexedList<HalfEdge, std::allocator<HalfEdge>, HalfEdgeItrFactory>& getHalfEdges()const;
 
 
 			inline float x_min()const{ return _bounds.xMin();}
