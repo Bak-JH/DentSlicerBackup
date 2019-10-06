@@ -99,7 +99,7 @@ public:
 	}
 	ItrType operator-(size_t offset) const
 	{
-		auto tmp = *static_cast<ItrType*>(this);
+		auto tmp = *static_cast<const ItrType*>(this);
 		return tmp -= offset;
 	}
 	size_t operator-(const ItrType& itr)const

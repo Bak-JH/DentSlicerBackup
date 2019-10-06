@@ -731,10 +731,14 @@ template <class T, class A, class ItrFac>
 typename ItrFac::iterator IndexedList<T, A, ItrFac>::toNormItr(const typename ItrFac::const_iterator& itr)
 {
 #ifdef EXPOSE_ITR_INDEX
-	return begin() + itr.index();
+	auto modItr = begin();
+	modItr+= itr.index();
+	return modItr;
 #else
 	size_t idx = itr - cbegin();
-	return  begin() + idx;
+	auto modItr = begin();
+	modItr += idx;
+	return modItr;
 
 #endif
 }
@@ -766,7 +770,8 @@ typename ItrFac::iterator IndexedList<T, A, ItrFac>::swapAndErase(typename ItrFa
 {
 	size_t startedIndex = start - cbegin();
 	size_t count = end - start;
-	auto currItr = begin() + startedIndex;
+	ItrFac::iterator currItr = begin();
+	currItr += startedIndex;
 	size_t index = 0;
 	size_t remaining = count;
 	// n amount of deletes, maximum n amounts of swaps
@@ -797,7 +802,9 @@ typename ItrFac::iterator IndexedList<T, A, ItrFac>::swapAndErase(typename ItrFa
 
 	}
 	//iterator can be invalidated when deleted
-	return begin() + startedIndex;
+	auto modItr = begin();
+	modItr += startedIndex;
+	return modItr;
 }
 
 

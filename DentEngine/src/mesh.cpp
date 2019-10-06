@@ -45,9 +45,9 @@ QDebug Hix::Debug::operator<< (QDebug d, const HalfEdgeConstItr& obj) {
 		d << "    " << each.index() << "\n";
 	}
 	d << "  from vtx: " << "\n";
-	d << obj.from << "\n";
+	d << obj.from()<< "\n";
 	d << "  to vtx" << "\n";
-	d << obj.to << "\n";
+	d << obj.to()<< "\n";
 	return d;
 }
 
@@ -69,6 +69,33 @@ QDebug Hix::Debug::operator<< (QDebug d, const FaceConstItr& obj) {
 	}
 	return d;
 }
+
+const auto& Mesh::getVertices()const
+{
+	return vertices;
+}
+const auto& Mesh::getFaces()const
+{
+	return faces;
+}
+const auto& Mesh::getHalfEdges()const
+{
+	return halfEdges;
+}
+
+auto& Mesh::getVerticesNonConst()
+{
+	return vertices;
+}
+auto& Mesh::getFacesNonConst()
+{
+	return faces;
+}
+auto& Mesh::getHalfEdgesNonConst()
+{
+	return halfEdges;
+}
+
 Hix::Engine3D::MeshVertex::MeshVertex(QVector3D pos) : position(pos)
 {
 }
@@ -745,7 +772,7 @@ void Hix::Engine3D::Mesh::addHalfEdgesToFace(std::array<size_t, 3> faceVertices,
 	for (auto itr = firstAddedItr; itr != halfEdges.end(); ++itr)
 	{
 		//add vertices in (from, to) pairs, so (0,1) (1,2) (2,0)
-		itr.ref().from = faceVertices[vtxIdx % 3];
+		itr.ref().from= faceVertices[vtxIdx % 3];
 		itr.ref().to = faceVertices[(vtxIdx + 1) % 3];
 
 		//add "owning" face or face that the hEdge circuit creates
@@ -780,14 +807,14 @@ void Mesh::vtxIndexChangedCallback(size_t oldIdx, size_t newIdx)
 	for (auto leavingEdge : vtx.leavingEdges)
 	{
 		auto& modLeavingEdge = halfEdges[leavingEdge];
-		modLeavingEdge.from = newIdx;
+		modLeavingEdge.from= newIdx;
 		//get twin edges with opposite direction ie) arriving 
 	}
 	//update arrivingEdges
 	for (auto arrivingEdge : vtx.arrivingEdges)
 	{
 		auto& modArrEdge = halfEdges[arrivingEdge];
-		modArrEdge.to = newIdx;
+		modArrEdge.to= newIdx;
 	}
 	auto newIndexItr = vertices.cbegin() + newIdx;
 	//update hash value
@@ -825,7 +852,7 @@ void Mesh::hEdgeIndexChangedCallback(size_t oldIdx, size_t newIdx)
 	//update face that owns this half edge only if the itr owned by the face is this one
 	if (hEdge.owningFace().edge() != hEdge.next() && hEdge.owningFace().edge() != hEdge.prev())
 	{
-		auto modFace = faces.toNormItr(hEdge.owningFace);
+		auto modFace = faces.toNormItr(hEdge.owningFace());
 		modFace.ref().edge = newIdx;
 	}
 	//update vertices that have reference to this edge
@@ -1266,31 +1293,7 @@ std::vector<std::array<QVector3D, 3>> Hix::Engine3D::interpolate(Path3D from, Pa
 
 
 
-const auto& Mesh::getVertices()const
-{
-	return vertices;
-}
-const auto& Mesh::getFaces()const
-{
-	return faces;
-}
-const auto& Mesh::getHalfEdges()const
-{
-	return halfEdges;
-}
 
-auto& Mesh::getVerticesNonConst()
-{
-	return vertices;
-}
-auto& Mesh::getFacesNonConst()
-{
-	return faces;
-}
-auto& Mesh::getHalfEdgesNonConst()
-{
-	return halfEdges;
-}
 
 /************** Helper Functions *****************/
 
