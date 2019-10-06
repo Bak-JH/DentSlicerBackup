@@ -260,6 +260,9 @@
     <ClCompile Include="DentEngine\src\Bounds3D.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>
+    <ClCompile Include="common\Debug.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DentEngine\src\polyclipping\poly2tri\sweep\advancing_front.h">
@@ -611,6 +614,12 @@
       <Filter>Generated Files</Filter>
     </ClInclude>
     <ClInclude Include="common\RandomAccessIteratorBase.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\Debug.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="DentEngine\src\MeshIterators.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -1205,6 +1214,7 @@
     <None Include="icon-32.ico" />
     <None Include="icon-32.ico" />
     <None Include="Qml\LeftTabSlicingOptionElementPercentage.qml" />
+    <None Include="icon-32.ico" />
     <None Include="icon-32.ico" />
     <None Include="icon-32.ico" />
   </ItemGroup>

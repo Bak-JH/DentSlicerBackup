@@ -10,6 +10,11 @@ public:
 	{}
 	RandomAccessIteratorBase(size_t idx, OwnerType* owner) : _index(idx), _owner(owner)
 	{}
+	RandomAccessIteratorBase(const RandomAccessIteratorBase& o) : _index(o._index), _owner(o._owner)
+	{
+	}
+	//~RandomAccessIteratorBase()
+	//{}
 	size_t index()const
 	{
 		return _index;
@@ -113,22 +118,22 @@ protected:
 	OwnerType* _owner;
 	size_t _index;
 private:
-	friend struct std::hash<RandomAccessIteratorBase>;
+	//friend struct std::hash<RandomAccessIteratorBase<ItrType, OwnerType>>;
 
 };
 
 
-
-namespace std
-{
-	template<class ItrType, class OwnerType>
-	struct hash<RandomAccessIteratorBase<ItrType, OwnerType>>
-	{
-		//2D only!
-		std::size_t operator()(const RandomAccessIteratorBase<ItrType, OwnerType>& itr)const
-		{
-			return itr._index;
-		}
-	};
-}
-
+//
+//namespace std
+//{
+//	template<class ItrType, class OwnerType>
+//	struct hash<RandomAccessIteratorBase<ItrType, OwnerType>>
+//	{
+//		//2D only!
+//		std::size_t operator()(const RandomAccessIteratorBase<ItrType, OwnerType>& itr)const
+//		{
+//			return itr._index;
+//		}
+//	};
+//}
+//

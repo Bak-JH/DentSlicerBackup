@@ -1,6 +1,7 @@
 #pragma once
 #include "../../common/RandomAccessIteratorBase.h"
 #include <vector>
+#include <array>
 #include <unordered_set>
 #include <QVector3D>
 
@@ -64,7 +65,7 @@ namespace Hix
 
 			RefType ref()const
 			{
-				return ParentType::_owner->getHalfEdges()(ParentType::_index);
+				return ParentType::_owner->getHalfEdges()[ParentType::_index];
 			}
 			RefType operator*() const
 			{
@@ -72,7 +73,7 @@ namespace Hix
 			}
 			PtrType operator->() const
 			{
-				return &(ParentType::_owner->getHalfEdges()(ParentType::_index));
+				return &(ParentType::_owner->getHalfEdges()[ParentType::_index]);
 			}
 			HEItrType next()const
 			{
@@ -82,25 +83,25 @@ namespace Hix
 			{
 				return HEItrType(next().next().index(), ParentType::_owner);
 			}
-			HEItrType moveNext()
+			void moveNext()
 			{
 				ParentType::_index = ref().next;
 			}
-			HEItrType movePrev()
+			void movePrev()
 			{
 				ParentType::_index = next().next().index();
 			}
 			typename TypeConstInfo::VertexItrType from()const
 			{
-				TypeConstInfo::VertexItrType(ref().from, ParentType::_owner);
+				return TypeConstInfo::VertexItrType(ref().from, ParentType::_owner);
 			}
 			typename TypeConstInfo::VertexItrType to()const
 			{
-				TypeConstInfo::VertexItrType(ref().to, ParentType::_owner);
+				return TypeConstInfo::VertexItrType(ref().to, ParentType::_owner);
 			}
 			typename TypeConstInfo::FaceItrType owningFace()const
 			{
-				TypeConstInfo::FaceItrType(ref().owningFace, ParentType::_owner);
+				return TypeConstInfo::FaceItrType(ref().owningFace, ParentType::_owner);
 			}
 			//HalfEdgeConstItr twin;
 			std::unordered_set<HEItrType> twins()const
@@ -175,7 +176,7 @@ namespace Hix
 			using RefType=  ValType &;
 			RefType ref()const
 			{
-				return ParentType::_owner->getVertices()(ParentType::_index);
+				return ParentType::_owner->getVertices()[ParentType::_index];
 			}
 			RefType operator*() const
 			{
@@ -183,7 +184,7 @@ namespace Hix
 			}
 			PtrType operator->() const
 			{
-				return &(ParentType::_owner->getVertices()(ParentType::_index));
+				return &(ParentType::_owner->getVertices()[ParentType::_index]);
 			}
 
 			const QVector3D& vn() const
@@ -239,12 +240,12 @@ namespace Hix
 					false;
 			}
 
-			std::vector<FaceConstItr> connectedFaces() const
+			std::unordered_set<typename TypeConstInfo::FaceItrType> connectedFaces() const
 			{
-				std::vector<FaceConstItr> result;
+				std::unordered_set<typename TypeConstInfo::FaceItrType> result;
 				for (auto each : leavingEdges())
 				{
-					result.emplace_back(each.owningFace());
+					result.emplace(each.owningFace());
 				}
 				return result;
 			}
@@ -266,7 +267,7 @@ namespace Hix
 			using RefType=  ValType &;
 			RefType ref()const
 			{
-				return ParentType::_owner->getFaces()(ParentType::_index);
+				return ParentType::_owner->getFaces()[ParentType::_index];
 			}
 			RefType operator*() const
 			{
@@ -274,7 +275,7 @@ namespace Hix
 			}
 			PtrType operator->() const
 			{
-				return &(ParentType::_owner->getFaces()(ParentType::_index));
+				return &(ParentType::_owner->getFaces()[ParentType::_index]);
 			}
 
 			const QVector3D& fn() const

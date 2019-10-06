@@ -10,7 +10,6 @@
 #include "Bounds3D.h"
 #include "../../common/TrackedIndexedList.h"
 #include "../../common/Hasher.h"
-#include "../../common/RandomAccessIteratorBase.h"
 #define cos50 0.64278761
 #define cos100 -0.17364818
 #define cos150 -0.8660254
@@ -40,100 +39,6 @@ namespace Hix
             size_t idx = aItr - a.cbegin();
             return b.cbegin() + idx;
         }
-
-
-		// plane contains at least 3 vertices contained in the plane in clockwise direction
-
-		template<class ItrType>
-		class HalfEdgeItrBase : public RandomAccessIteratorBase<ItrType, Mesh>
-		{
-
-		};
-
-		class HalfEdgeConstItr : public RandomAccessIteratorBase<HalfEdgeConstItr, Mesh>
-		{
-		public:
-			using RandomAccessIteratorBase::RandomAccessIteratorBase;
-			HalfEdgeConstItr next()const;
-			HalfEdgeConstItr prev()const;
-			void moveNext();
-			void movePrev();
-			VertexConstItr from()const;
-			VertexConstItr to()const;
-			FaceConstItr owningFace()const;
-
-			//HalfEdgeConstItr twin;
-			std::unordered_set<HalfEdgeConstItr> twins()const;
-			//twins in same direction
-			std::unordered_set<HalfEdgeConstItr> nonTwins()const;
-			//twins + nonTwins
-			std::unordered_set<HalfEdgeConstItr> allFromSameEdge()const;
-			std::unordered_set<FaceConstItr> nonOwningFaces()const;
-			//similar to non-owning, but half edges are on opposite direction ie) faces facing the same orientation
-			std::unordered_set<FaceConstItr> twinFaces()const;
-			bool isTwin(const HalfEdgeConstItr& other)const;
-		private:
-			const HalfEdge& ref()const;
-
-		};
-
-		class FaceConstItr : public RandomAccessIteratorBase<FaceConstItr, Mesh>
-		{
-		public:
-			using RandomAccessIteratorBase::RandomAccessIteratorBase;
-			const QVector3D& fn()const;
-			HalfEdgeConstItr edge()const;
-			std::array<VertexConstItr, 3> meshVertices()const;
-			std::array<size_t, 3> getVerticeIndices()const;
-			std::array<float, 3> sortZ()const;
-			float getFaceZmin()const;
-			float getFaceZmax()const;
-			bool getEdgeWithVertices(HalfEdgeConstItr& result, const VertexConstItr& a, const VertexConstItr& b)const;
-			bool isNeighborOf(const FaceConstItr& nFace)const;
-		private:
-			const MeshFace& ref()const;
-		};
-
-		class VertexConstItr : public RandomAccessIteratorBase<VertexConstItr, Mesh>
-		{
-		public:
-			using RandomAccessIteratorBase::RandomAccessIteratorBase;
-			const QVector3D& vn()const;
-			const QVector3D& position()const;
-			std::unordered_set<HalfEdgeConstItr> leavingEdges()const;
-			std::unordered_set<HalfEdgeConstItr> arrivingEdges()const;
-			std::unordered_set<VertexConstItr> connectedVertices()const;
-			bool disconnected()const;
-			std::vector<FaceConstItr> connectedFaces()const;
-		private:
-			const MeshVertex& ref()const;
-		};
-
-
-		class HalfEdgeItr : public HalfEdgeConstItr
-		{
-		public:
-			using HalfEdgeConstItr::HalfEdgeConstItr;
-			HalfEdge& ref()const;
-		};
-
-		class FaceItr : public FaceConstItr
-		{
-		public:
-			using FaceConstItr::FaceConstItr;
-			MeshFace& ref()const;
-
-		};
-
-		class VertexItr : public VertexConstItr
-		{
-		public:
-			using VertexConstItr::VertexConstItr;
-			MeshVertex& ref()const;
-		};
-
-
-
 		class MeshIteratorFactory
 		{
 		public:
