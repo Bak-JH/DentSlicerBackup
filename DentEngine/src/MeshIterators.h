@@ -171,19 +171,20 @@ namespace Hix
 		public:
 			using RandomAccessIteratorBase<VtxItrType, typename TypeConstInfo::OwnerType>::RandomAccessIteratorBase;
 			using ParentType = RandomAccessIteratorBase< VtxItrType, typename TypeConstInfo::OwnerType>;
-
 			using PtrType = ValType *;
 			using RefType=  ValType &;
-
-			RefType operator*() const
+			RefType ref()const
 			{
 				return ParentType::_owner->getVertices()(ParentType::_index);
+			}
+			RefType operator*() const
+			{
+				return ref();
 			}
 			PtrType operator->() const
 			{
 				return &(ParentType::_owner->getVertices()(ParentType::_index));
 			}
-
 
 			const QVector3D& vn() const
 			{
@@ -247,9 +248,6 @@ namespace Hix
 				}
 				return result;
 			}
-
-
-
 			const QVector3D& position() const
 			{
 				return ref().position;
@@ -264,17 +262,21 @@ namespace Hix
 		public:
 			using RandomAccessIteratorBase<FaceItrType, typename TypeConstInfo::OwnerType>::RandomAccessIteratorBase;
 			using ParentType = RandomAccessIteratorBase< FaceItrType, typename TypeConstInfo::OwnerType>;
-
 			using PtrType = ValType *;
 			using RefType=  ValType &;
-			RefType operator*() const
+			RefType ref()const
 			{
 				return ParentType::_owner->getFaces()(ParentType::_index);
+			}
+			RefType operator*() const
+			{
+				return ref();
 			}
 			PtrType operator->() const
 			{
 				return &(ParentType::_owner->getFaces()(ParentType::_index));
 			}
+
 			const QVector3D& fn() const
 			{
 				auto fVtx = meshVertices();
