@@ -70,28 +70,28 @@ QDebug Hix::Debug::operator<< (QDebug d, const FaceConstItr& obj) {
 	return d;
 }
 
-const auto& Mesh::getVertices()const
+const TrackedIndexedList<MeshVertex, std::allocator<MeshVertex>, VertexItrFactory>& Mesh::getVertices()const
 {
 	return vertices;
 }
-const auto& Mesh::getFaces()const
+const TrackedIndexedList<MeshFace, std::allocator<MeshFace>, FaceItrFactory>& Mesh::getFaces()const
 {
 	return faces;
 }
-const auto& Mesh::getHalfEdges()const
+const TrackedIndexedList<HalfEdge, std::allocator<HalfEdge>, HalfEdgeItrFactory>& Mesh::getHalfEdges()const
 {
 	return halfEdges;
 }
 
-auto& Mesh::getVerticesNonConst()
+TrackedIndexedList<MeshVertex, std::allocator<MeshVertex>, VertexItrFactory>& Mesh::getVertices()
 {
 	return vertices;
 }
-auto& Mesh::getFacesNonConst()
+TrackedIndexedList<MeshFace, std::allocator<MeshFace>, FaceItrFactory>& Mesh::getFaces()
 {
 	return faces;
 }
-auto& Mesh::getHalfEdgesNonConst()
+TrackedIndexedList<HalfEdge, std::allocator<HalfEdge>, HalfEdgeItrFactory>& Mesh::getHalfEdges()
 {
 	return halfEdges;
 }
@@ -133,35 +133,6 @@ FaceItrFactory::iterator FaceItrFactory::buildIterator(size_t index, const FaceI
 FaceItrFactory::const_iterator FaceItrFactory::buildConstIterator(size_t index, const FaceItrFactory::containerType* containerPtr) const
 {
 	return FaceItrFactory::const_iterator(index, _mesh);
-}
-
-const HalfEdge& HalfEdgeConstItr::ref()const
-{
-	return _owner->getHalfEdges()[_index];
-}
-
-const MeshFace& FaceConstItr::ref() const
-{
-	return _owner->getFaces()[_index];
-}
-const MeshVertex& VertexConstItr::ref() const
-{
-	return _owner->getVertices()[_index];
-}
-
-
-HalfEdge& HalfEdgeItr::ref()const
-{
-	return _owner->getHalfEdgesNonConst()[_index];
-}
-
-MeshFace& FaceItr::ref() const
-{
-	return _owner->getFacesNonConst()[_index];
-}
-MeshVertex& VertexItr::ref() const
-{
-	return _owner->getVerticesNonConst()[_index];
 }
 
 
@@ -380,12 +351,6 @@ const QVector3D& Hix::Engine3D::VertexConstItr::vn() const
 	vn.normalize();
 	return vn;
 }
-
-const QVector3D& Hix::Engine3D::VertexConstItr::position() const
-{
-	return ref().position;
-}
-
 std::unordered_set<HalfEdgeConstItr> Hix::Engine3D::VertexConstItr::leavingEdges() const
 {
 	std::unordered_set<HalfEdgeConstItr> edges;
@@ -436,6 +401,44 @@ std::vector<FaceConstItr> Hix::Engine3D::VertexConstItr::connectedFaces() const
 		result.emplace_back(each.owningFace());
 	}
 	return result;
+}
+
+
+
+const QVector3D& Hix::Engine3D::VertexConstItr::position() const
+{
+	return ref().position;
+}
+
+
+
+const HalfEdge& HalfEdgeConstItr::ref()const
+{
+	return _owner->getHalfEdges()[_index];
+}
+
+const MeshFace& FaceConstItr::ref() const
+{
+	return _owner->getFaces()[_index];
+}
+const MeshVertex& VertexConstItr::ref() const
+{
+	return _owner->getVertices()[_index];
+}
+
+
+HalfEdge& HalfEdgeItr::ref()const
+{
+	return _owner->getHalfEdgesNonConst()[_index];
+}
+
+MeshFace& FaceItr::ref() const
+{
+	return _owner->getFacesNonConst()[_index];
+}
+MeshVertex& VertexItr::ref() const
+{
+	return _owner->getVerticesNonConst()[_index];
 }
 
 
