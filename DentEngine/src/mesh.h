@@ -17,16 +17,7 @@
 #define cos150 -0.8660254
 #define FZERO 0.00001f
 
-namespace std
-{
-	//template<>
-	//struct hash<QVector3D>
-	//{
-	//	size_t operator()(const QVector3D& v)const
-	//	{
-	//	}
-	//};
-}
+
 
 namespace Hix
 {
@@ -336,3 +327,57 @@ namespace Hix
 
 };
 
+
+
+namespace std
+{
+	using namespace Hix::Engine3D;
+	template<>
+	struct hash<VertexConstItr>
+	{
+		size_t operator()(const VertexConstItr& v)const
+		{
+			return v.index();
+		}
+	};
+	template<>
+	struct hash<HalfEdgeConstItr>
+	{
+		size_t operator()(const HalfEdgeConstItr& v)const
+		{
+			return v.index();
+		}
+	};
+	template<>
+	struct hash<FaceConstItr>
+	{
+		size_t operator()(const FaceConstItr& v)const
+		{
+			return v.index();
+		}
+	};
+	template<>
+	struct hash<VertexItr>
+	{
+		size_t operator()(const VertexItr& v)const
+		{
+			return v.index();
+		}
+	};
+	template<>
+	struct hash<FaceItr>
+	{
+		size_t operator()(const FaceItr& v)const
+		{
+			return v.index();
+		}
+	};
+	template<>
+	struct hash<HalfEdgeItr>
+	{
+		size_t operator()(const HalfEdgeItr& v)const
+		{
+			return v.index();
+		}
+	};
+}
