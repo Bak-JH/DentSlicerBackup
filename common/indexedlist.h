@@ -116,6 +116,7 @@ public:
 	typename ItrFac::const_iterator end() const;
 	typename ItrFac::const_iterator cend() const;
 	typename ItrFac::iterator toNormItr(const const_iterator& itr);
+	typename ItrFac::const_iterator toConstItr(const iterator& itr)const;
 
 	reverse_iterator rbegin();
 	const_reverse_iterator rbegin() const;
@@ -731,17 +732,29 @@ template <class T, class A, class ItrFac>
 typename ItrFac::iterator IndexedList<T, A, ItrFac>::toNormItr(const typename ItrFac::const_iterator& itr)
 {
 #ifdef EXPOSE_ITR_INDEX
-	auto modItr = begin();
-	modItr+= itr.index();
+	auto modItr = begin() + itr.index();
 	return modItr;
 #else
 	size_t idx = itr - cbegin();
-	auto modItr = begin();
-	modItr += idx;
+	auto modItr = begin() + idx;
 	return modItr;
 
 #endif
 }
+template <class T, class A, class ItrFac>
+typename ItrFac::const_iterator IndexedList<T, A, ItrFac>::toConstItr(const typename ItrFac::iterator& itr)const
+{
+#ifdef EXPOSE_ITR_INDEX
+	auto modItr = cbegin() + itr.index();
+	return modItr;
+#else
+	size_t idx = itr - begin();
+	auto modItr = cbegin() + idx;
+	return modItr;
+
+#endif
+}
+
 
 template <class T, class A, class ItrFac>
 typename IndexedList<T, A, ItrFac>::difference_type IndexedList<T, A, ItrFac>::getItrIndex(const typename ItrFac::iterator* itr)const
@@ -770,8 +783,7 @@ typename ItrFac::iterator IndexedList<T, A, ItrFac>::swapAndErase(typename ItrFa
 {
 	size_t startedIndex = start - cbegin();
 	size_t count = end - start;
-	ItrFac::iterator currItr = begin();
-	currItr += startedIndex;
+	auto currItr = begin() + startedIndex;
 	size_t index = 0;
 	size_t remaining = count;
 	// n amount of deletes, maximum n amounts of swaps
@@ -802,9 +814,7 @@ typename ItrFac::iterator IndexedList<T, A, ItrFac>::swapAndErase(typename ItrFa
 
 	}
 	//iterator can be invalidated when deleted
-	auto modItr = begin();
-	modItr += startedIndex;
-	return modItr;
+	return begin() + startedIndex;
 }
 
 
