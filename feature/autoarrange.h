@@ -13,6 +13,7 @@
 #if  defined(QT_DEBUG) || defined(_DEBUG)
 #define _DEBUG_AUTO_ARRANGE
 #endif
+
 namespace Hix
 {
 	namespace Engine3D
