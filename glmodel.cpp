@@ -6,7 +6,6 @@
 #include <exception>
 
 #include "qmlmanager.h"
-#include "feature/text3dgeometrygenerator.h"
 #include "feature/shelloffset.h"
 //#include "feature/supportview.h"
 #include "feature/stlexporter.h"
@@ -249,14 +248,10 @@ void GLModel::copyModelAttributeFrom(GLModel* from){
     scaleActive = from->scaleActive;
 
     // labelling info
-    if (from->labellingTextPreview) {
+    if (from->textPreview) {
         qDebug() << "copyModelAttributeFrom";
-        if (!labellingTextPreview)
-            labellingTextPreview = new LabellingTextPreview(this);
-        labellingTextPreview->setFontName(from->labellingTextPreview->fontName);
-        labellingTextPreview->setFontBold((from->labellingTextPreview->fontWeight == QFont::Bold)? true:false);
-        labellingTextPreview->setFontSize(from->labellingTextPreview->fontSize);
-        labellingTextPreview->setText(from->labellingTextPreview->text, from->labellingTextPreview->contentWidth);
+        if (!textPreview)
+            textPreview = new Hix::Labelling::LabelModel(this, *(from->textPreview));
     }
 }
 
@@ -452,12 +447,14 @@ void GLModel::clicked(MouseEventData& pick, const Qt3DRender::QRayCasterHit& hit
     targetMeshFace = _mesh->getFaces().cbegin() + hit.primitiveIndex();
 
 
+	/// Extension Feature ///
 	if (extensionActive && hit.localIntersection() != QVector3D(0, 0, 0)) {
 		unselectMeshFaces();
 		emit extensionSelect();
 		selectMeshFaces();
 	}
 
+	/// Hollow Shell ///
 	if (hollowShellActive) {
 		qDebug() << "getting handle picker clicked signal hollow shell active";
 		qDebug() << "found parent meshface";
@@ -468,6 +465,7 @@ void GLModel::clicked(MouseEventData& pick, const Qt3DRender::QRayCasterHit& hit
 
 	}
 
+	/// Lay Flat ///
 	if (layflatActive && hit.localIntersection() != QVector3D(0, 0, 0)) {
 
 		unselectMeshFaces();
@@ -475,6 +473,7 @@ void GLModel::clicked(MouseEventData& pick, const Qt3DRender::QRayCasterHit& hit
 		selectMeshFaces();
 	}
 
+	/// Manual Support ///
 	if (_supportRaftManager.supportEditMode() == Hix::Support::EditMode::Manual && hit.localIntersection() != QVector3D(0, 0, 0)) {
 		Hix::OverhangDetect::FaceOverhang newOverhang;
 		newOverhang.first = hit.localIntersection();
@@ -482,15 +481,15 @@ void GLModel::clicked(MouseEventData& pick, const Qt3DRender::QRayCasterHit& hit
 		_supportRaftManager.addSupport(newOverhang);
 	}
 
+	/// Labeling Feature ///
     if (labellingActive && hit.localIntersection() != QVector3D(0, 0, 0)) {
-        if (labellingTextPreview == nullptr)
-            labellingTextPreview = new LabellingTextPreview(this);
+		if (textPreview != nullptr)
+			textPreview->setEnabled(false);
 
-
-        if (labellingTextPreview && labellingTextPreview->isEnabled()) {
-            labellingTextPreview->setTranslation(hit.localIntersection() + targetMeshFace->fn);
-            labellingTextPreview->setNormal(targetMeshFace->fn);
-            labellingTextPreview->planeSelected = true;
+		textPreview = new Hix::Labelling::LabelModel(this);
+		
+		if (textPreview && labellingActive) {
+			textPreview->setTranslation(hit.localIntersection());
             QMetaObject::invokeMethod(qmlManager->labelPopup, "labelUpdate");
         }
     }
@@ -667,11 +666,11 @@ QVector3D GLModel::spreadPoint(QVector3D endPoint,QVector3D startPoint,int facto
 }
 
 
-void GLModel::getTextChanged(QString text, int contentWidth)
+void GLModel::getTextChanged(QString text)
 {
     qDebug() << "@@@@ getTexyChanged";
-    if (labellingTextPreview && labellingTextPreview->isEnabled()){
-        applyLabelInfo(text, contentWidth, labellingTextPreview->fontName, (labellingTextPreview->fontWeight==QFont::Bold)? true:false, labellingTextPreview->fontSize);
+    if (text != "" && textPreview && labellingActive){
+		textPreview->text = text;
     }
 }
 
@@ -693,14 +692,11 @@ void GLModel::closeLabelling()
 
     labellingActive = false;
 
-    if (labellingTextPreview){
-        labellingTextPreview->planeSelected = false;
-        labellingTextPreview->deleteLabel();
-        labellingTextPreview->deleteLater();
-        labellingTextPreview = nullptr;
+    if (textPreview){
+		textPreview->setEnabled(false);
     }
 	_targetSelected = false;
-
+	textPreview = nullptr;
 //    stateChangeLabelling();
 }
 
@@ -712,167 +708,65 @@ void GLModel::stateChangeLabelling() {
 void GLModel::getFontNameChanged(QString fontName)
 {
     qDebug() << "@@@@ getFontNameChanged";
-    if (labellingTextPreview && labellingTextPreview->isEnabled()){
-        applyLabelInfo(labellingTextPreview->text, labellingTextPreview->contentWidth, fontName, (labellingTextPreview->fontWeight==QFont::Bold)? true:false, labellingTextPreview->fontSize);
+    if (textPreview && labellingActive){
+		textPreview->font.setFamily(fontName);
     }
 }
 
 void GLModel::getFontBoldChanged(bool isbold){
     qDebug() << "@@@@ getBoldChanged";
-    if (labellingTextPreview && labellingTextPreview->isEnabled()){
-        applyLabelInfo(labellingTextPreview->text, labellingTextPreview->contentWidth, labellingTextPreview->fontName, isbold, labellingTextPreview->fontSize);
-
+    if (textPreview && labellingActive){
+		textPreview->font.setBold(isbold);
     }
 }
 
 void GLModel::getFontSizeChanged(int fontSize)
 {
     qDebug() << "@@@@ getSizeChanged" << fontSize;
-    if (labellingTextPreview && labellingTextPreview->isEnabled()){
-        applyLabelInfo(labellingTextPreview->text, labellingTextPreview->contentWidth, labellingTextPreview->fontName, (labellingTextPreview->fontWeight==QFont::Bold)? true:false, fontSize);
-    }
+	if (textPreview && labellingActive){
+		textPreview->font.setPointSize(fontSize);
+	}
 }
 
 /* make a new labellingTextPreview and apply label info's */
-void GLModel::applyLabelInfo(QString text, int contentWidth, QString fontName, bool isBold, int fontSize){
-    QVector3D translation;
-    bool selected = false;
+void GLModel::applyLabelInfo(QString text, QString fontName, bool isBold, int fontSize)
+{
+	qDebug() << "label apply";
 
-    qDebug() << "applyLabelInfo +++++++++++++++++++++++++ " << text  << contentWidth << this;
-
-    if (labellingTextPreview && labellingTextPreview->isEnabled()){
-        translation = labellingTextPreview->translation;
-        selected = labellingTextPreview->planeSelected;
-        labellingTextPreview->deleteLabel();
-        labellingTextPreview->deleteLater();
-        labellingTextPreview = nullptr;
+    if (textPreview && labellingActive){
+		textPreview->generateLabel(text, _mesh, targetMeshFace->fn, 0.025f);
+		updateModelMesh();
     }
-    labellingTextPreview = new LabellingTextPreview(this);
-    labellingTextPreview->setEnabled(true);
-
-    labellingTextPreview->planeSelected = selected;
-
-    qDebug() << "applyLabelInfo";
-    if (_targetSelected) {
-        qDebug() << "applyLabelInfo : target Selected";
-        labellingTextPreview->updateChange(text, contentWidth, fontName, isBold, fontSize, translation,targetMeshFace->fn);
-        //labellingTextPreview->setTranslation(translation);
-        //labellingTextPreview->setNormal(parentModel->targetMeshFace->fn);
-    }
-    else {
-        qDebug() << "applyLabelInfo : target unSelected";
-        labellingTextPreview->updateChange(text, contentWidth, fontName, isBold, fontSize, labellingTextPreview->translation, QVector3D(0,0,0));
-        }
-
-
-
 }
 
 
 void GLModel::generateText3DMesh()
 {
-    //qDebug() << "generateText3DMesh @@@@@" << this << this;
+    qDebug() << "generateText3DMesh @@@@@" << this << this;
+
     if (updateLock)
         return;
     updateLock = true;
 
-
-    if (!labellingTextPreview){
+    if (!textPreview){
         qDebug() << "no labellingTextPreview";
-        QMetaObject::invokeMethod(qmlManager->labelPopup, "noModel");
-        return;
-    }
-
-    if (!labellingTextPreview->planeSelected) {
-        qDebug() << "no planeSelected" <<labellingTextPreview->translation;
         QMetaObject::invokeMethod(qmlManager->labelPopup, "noModel");
         return;
     }
 
     qmlManager->openProgressPopUp();
 
-    labellingTextPreview->planeSelected = false;
+    qmlManager->setProgress(0.1f);
 
-
-    qmlManager->setProgress(0.1);
-
-    QVector3D* originalVertices = reinterpret_cast<QVector3D*>(vertexBuffer.data().data());
-    int originalVerticesSize = vertexBuffer.data().size() / sizeof(float) / 3;
-
-    QVector3D* vertices;
-    int verticesSize;
-    unsigned int* indices;
-    int indicesSize;
-    float depth = 0.5f;
-    float scale = labellingTextPreview->ratioY * labellingTextPreview->scaleY;
-    QVector3D translation = labellingTextPreview->translation;// + QVector3D(0,-0.3,0);
-
-    Qt3DCore::QTransform transform, normalTransform;
-
-    QVector3D normal = labellingTextPreview->normal;
-
-    QVector3D ref = QVector3D(0, 0, 1);
-    QVector3D tangent;
-    if (normal == QVector3D(0,0,1) || normal == QVector3D(0,0,-1)){
-        tangent = QVector3D(1,0,0);
-    } else {
-        tangent = QVector3D::crossProduct(normal, ref);
-    }
-    tangent.normalize();
-
-    QVector3D binormal;
-    if (normal == QVector3D(0,0,1) || normal == QVector3D(0,0,-1)){
-        binormal = QVector3D(0,1,0);
-    } else {
-        binormal = QVector3D::crossProduct(tangent, normal);
-    }
-    binormal.normalize();
-
-    QQuaternion quat = QQuaternion::fromAxes(tangent, normal, binormal) * QQuaternion::fromAxisAndAngle(QVector3D(0, 0, 1), 180)* QQuaternion::fromAxisAndAngle(QVector3D(1, 0, 0), 90);
-
-    transform.setScale(scale);
-    transform.setRotation(quat);
-    transform.setTranslation(translation);
-    qmlManager->setProgress(0.3);
-
-    QFont targetFont = QFont(labellingTextPreview->fontName, labellingTextPreview->fontSize, labellingTextPreview->fontWeight, false);
-    QString targetText = labellingTextPreview->text;
-    QVector3D targetNormal = labellingTextPreview->normal;
-
-    if (labellingTextPreview){
-        labellingTextPreview->planeSelected = false;
-        labellingTextPreview->deleteLabel();
-        labellingTextPreview->deleteLater();
-        labellingTextPreview = nullptr;
-    }
 	_targetSelected = false;
+	*_mesh += *textPreview->getMesh();
 
-    generateText3DGeometry(&vertices, &verticesSize,
-                           &indices, &indicesSize,
-                           targetFont,
-                           targetText,
-                           depth,
-                           _mesh,
-                           -targetNormal,
-                           transform.matrix(),
-                           normalTransform.matrix());
-
-
-    qmlManager->setProgress(0.9);
-
-    std::vector<QVector3D> outVertices;
-    for (int i = 0; i < indicesSize / 3; ++i) {
-        // Insert vertices in CCW order
-        outVertices.push_back(vertices[2 * indices[3*i + 2] + 0]);
-        outVertices.push_back(vertices[2 * indices[3*i + 1] + 0]);
-        outVertices.push_back(vertices[2 * indices[3*i + 0] + 0]);
-        _mesh->addFace(vertices[2 * indices[3*i + 2] + 0], vertices[2 * indices[3*i + 1] + 0], vertices[2 * indices[3*i + 0] + 0]);
-
-    }
+    qmlManager->setProgress(0.5f);
 
     updateModelMesh();
+	textPreview = nullptr;
 
-    qmlManager->setProgress(1);
+    qmlManager->setProgress(1.0f);
 }
 
 // for extension

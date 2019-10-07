@@ -1852,7 +1852,6 @@ Rectangle {
             image: "qrc:/Resource/label_description.png"
             labelTextContent: "Enter text"
             labelFontName:"Alias"
-            labelContentWidth: 0
             labelIsBold: false
             labelFontSize: 12
 
@@ -1861,8 +1860,8 @@ Rectangle {
             signal openLabelling()
             signal closeLabelling()
             signal stateChangeLabelling()
-            signal sendTextChanged(string text, int contentWidth);
-            signal sendLabelUpdate(string text, int contentWidth, string fontName, bool isBold, int fontSize);
+            signal sendTextChanged(string text);
+            signal sendLabelUpdate(string text, string fontName, bool isBold, int fontSize);
 
             onApplyClicked: {
                 console.log("ApplyClicked");
@@ -1871,10 +1870,9 @@ Rectangle {
             }
 
             onLabelTextChanged: {
-                console.log("sendTextChanged @@@ @@@@ @@@@@@@@@@", text, contentWidth, popup_label.labelTextContent);
+                console.log("sendTextChanged @@@ @@@@ @@@@@@@@@@", text, popup_label.labelTextContent);
                 popup_label.labelTextContent = text;
-                popup_label.labelContentWidth = contentWidth;
-                sendTextChanged(text, contentWidth);
+                sendTextChanged(text);
             }
 
             onStateChanged: {
@@ -1889,9 +1887,10 @@ Rectangle {
             }
 
             function labelUpdate() {
-                //console.log("sendLabelUpdate @@@@@@@@@@@@@@@@@@@@@@@@@@@@%%%%%%%%%%%%");
-                sendLabelUpdate(popup_label.labelTextContent, popup_label.labelContentWidth
-                                ,popup_label.labelFontName, popup_label.labelIsBold, popup_label.labelFontSize);
+                console.log("sendLabelUpdate @@@@@@@@@@@@@@@@@@@@@@@@@@@@%%%%%%%%%%%%");
+                console.log(typeof(popup_label.transform))
+                sendLabelUpdate(popup_label.labelTextContent, popup_label.labelFontName, 
+                                popup_label.labelIsBold, popup_label.labelFontSize);
             }
 
             ComboBox {
