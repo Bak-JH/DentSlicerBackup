@@ -49,7 +49,7 @@ std::vector<std::unordered_set<Hix::Engine3D::FaceConstItr>> Hix::Slicer::Unifor
 		auto& faces = mesh->getFaces();
 		for (auto mf = faces.cbegin(); mf != faces.cend(); ++mf)
 		{
-			auto sortedZ = mf->sortZ();
+			auto sortedZ = mf.sortZ();
 			float z_min = sortedZ[0];
 			float z_mid = sortedZ[1];
 			float z_max = sortedZ[2];
