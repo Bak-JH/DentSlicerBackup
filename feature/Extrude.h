@@ -17,8 +17,7 @@ namespace Hix
 			//does not generate end caps though.
 			std::vector<QVector3D> extrudeAlongPath(Engine3D::Mesh* destinationMesh, const QVector3D& normal,
 				const std::vector<QVector3D>& contour, const std::vector<QVector3D>& path, std::vector<std::vector<QVector3D>>& outJointContours, 
-				const std::vector<float>* scale = nullptr, QVector2D* centoid = nullptr);
-		
+				const std::vector<float>* scale = nullptr, QVector2D* centoid = nullptr);		
 		}
 
 

@@ -243,7 +243,6 @@
     <ClCompile Include="utils\gridmesh.cpp" />
     <ClCompile Include="feature\hollowshell.cpp" />
     <ClCompile Include="utils\httpreq.cpp" />
-    <ClCompile Include="feature\labellingtextpreview.cpp" />
     <ClCompile Include="utils\linemeshgeometry.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="utils\mathutils.cpp" />
@@ -262,7 +261,7 @@
     <ClCompile Include="DentEngine\src\svgexporter.cpp" />
     <ClCompile Include="DentEngine\src\polyclipping\poly2tri\sweep\sweep.cpp" />
     <ClCompile Include="DentEngine\src\polyclipping\poly2tri\sweep\sweep_context.cpp" />
-    <ClCompile Include="feature\text3dgeometrygenerator.cpp" />
+    <ClCompile Include="feature\labelling\labelModel.cpp" />
     <ClCompile Include="utils\updatechecker.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -347,8 +346,6 @@
     <ClInclude Include="feature\hollowshell.h" />
     <QtMoc Include="utils\httpreq.h">
     </QtMoc>
-    <QtMoc Include="feature\labellingtextpreview.h">
-    </QtMoc>
     <QtMoc Include="utils\linemeshgeometry.h">
     </QtMoc>
     <QtMoc Include="input\raycastcontroller.h" />
@@ -415,7 +412,7 @@
     <ClInclude Include="DentEngine\src\svgexporter.h" />
     <ClInclude Include="DentEngine\src\polyclipping\poly2tri\sweep\sweep.h" />
     <ClInclude Include="DentEngine\src\polyclipping\poly2tri\sweep\sweep_context.h" />
-    <ClInclude Include="feature\text3dgeometrygenerator.h" />
+    <ClInclude Include="feature\labelling\labelModel.h" />
     <QtMoc Include="utils\updatechecker.h">
     </QtMoc>
     <ClInclude Include="DentEngine\src\polyclipping\poly2tri\common\utils.h" />
