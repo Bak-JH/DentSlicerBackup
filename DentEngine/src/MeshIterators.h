@@ -124,7 +124,7 @@ namespace Hix
 				auto toVtx = to();
 				for (auto sameDirEdge : from().leavingEdges())
 				{
-					if (sameDirEdge.to() == toVtx && sameDirEdge != *this)
+					if (sameDirEdge.to() == toVtx && *this != sameDirEdge)
 					{
 						nonTwins.insert(sameDirEdge);
 					}

@@ -131,7 +131,19 @@ namespace Hix
             bool addFace(const QVector3D& v0, const QVector3D& v1, const QVector3D& v2);
 			bool addFace(const FaceConstItr& face);
 			FaceConstItr removeFace(FaceConstItr f_it);
-
+			//short hand for TrackedList::toNormItr
+			inline VertexItr toNormItr(const VertexConstItr& itr)
+			{
+				return vertices.toNormItr(itr);
+			}
+			inline FaceItr toNormItr(const FaceConstItr& itr)
+			{
+				return faces.toNormItr(itr);
+			}
+			inline HalfEdgeItr toNormItr(const HalfEdgeConstItr& itr)
+			{
+				return halfEdges.toNormItr(itr);
+			}
 			/********************** Getters **********************/
 			//non-const getters. really should not be used
 			TrackedIndexedList<MeshVertex, std::allocator<MeshVertex>, VertexItrFactory>& getVertices();

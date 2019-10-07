@@ -67,13 +67,13 @@ std::unordered_set<VertexConstItr> OverhangDetectPrivate::localMinFacingDown(con
 	const auto& vertices = mesh->getVertices();
 	for (auto vtx = vertices.cbegin(); vtx != vertices.cend(); ++vtx)
 	{
-		if (vtx->vn.z() < 0.0f)
+		if (vtx.vn().z() < 0.0f)
 		{
 			bool localMin = true;
-			auto connected = vtx->connectedVertices();
+			auto connected = vtx.connectedVertices();
 			for (auto& each : connected)
 			{
-				if (each->position.z() < vtx->position.z())
+				if (each.position().z() < vtx.position().z())
 				{
 					localMin = false;
 					break;
@@ -95,8 +95,8 @@ std::unordered_map<QVector3D, FaceConstItr> OverhangDetectPrivate::faceOverhangD
 	const auto& faces = mesh->getFaces();
 	for (auto face = faces.cbegin(); face != faces.cend(); ++face)
 	{
-		if (face->fn.z() > 0) continue;
-		double cos = double(QVector3D::dotProduct(face->fn, printingDirection));
+		if (face.fn().z() > 0) continue;
+		double cos = double(QVector3D::dotProduct(face.fn(), printingDirection));
 		if (std::abs(cos) > cosVal) {
 			faceOverhangPoint(face, faceOverhangs);
 		}
@@ -107,9 +107,9 @@ std::unordered_map<QVector3D, FaceConstItr> OverhangDetectPrivate::faceOverhangD
 void OverhangDetectPrivate::faceOverhangPoint(const FaceConstItr& overhangFace, std::unordered_map<QVector3D, FaceConstItr>& output) {
 	// area subdivision (recursive case)
 
-	auto startingVertices = overhangFace->meshVertices();
+	auto startingVertices = overhangFace.meshVertices();
 	std::queue<std::array<QVector3D, 3>> q;
-	q.emplace(std::array<QVector3D, 3>{startingVertices[0]->position, startingVertices[1]->position, startingVertices[2]->position});
+	q.emplace(std::array<QVector3D, 3>{startingVertices[0].position(), startingVertices[1].position(), startingVertices[2].position()});
 	while (!q.empty())
 	{
 		auto curr = q.front();
@@ -145,7 +145,7 @@ std::vector<QVector3D> Hix::OverhangDetect::toCoords(const Overhangs& overhangs)
 	{
 		if (each.index() == 0)
 		{
-			coords.emplace_back(std::get<0>(each)->position);
+			coords.emplace_back(std::get<0>(each).position());
 		}
 		else
 		{
@@ -183,7 +183,7 @@ Overhangs Hix::OverhangDetect::detectOverhang(const Mesh* shellMesh)
 	}
 	for (auto& ptOverhang : pointOverhangs)
 	{
-		allHashedOverhangs[ptHasher(ptOverhang->position)] = ptOverhang;
+		allHashedOverhangs[ptHasher(ptOverhang.position())] = ptOverhang;
 	}
 	//rehash
 	for (auto& faceOverhang : faceHashedOverhangs)

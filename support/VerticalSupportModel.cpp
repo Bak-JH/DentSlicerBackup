@@ -48,14 +48,14 @@ std::vector<QVector3D> Hix::Support::VerticalSupportModel::generateSupportPath(c
 	if (overhang.index() == 0)
 	{
 		auto& vtx = std::get<0>(overhang);
-		coneNarrow = vtx->position;
-		tipNormal = vtx->vn;
+		coneNarrow = vtx.position();
+		tipNormal = vtx.vn();
 	}
 	else
 	{
 		auto& faceOverhang = std::get<1>(overhang);
 		coneNarrow = faceOverhang.first;
-		tipNormal = faceOverhang.second->fn;
+		tipNormal = faceOverhang.second.fn();
 	}
 	//tip normal needs to be facing downard, ie) cone needs to be pointing upward,
 	constexpr float normalizedVectorZMax = -1.0f; //tan 45
