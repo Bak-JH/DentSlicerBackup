@@ -66,9 +66,9 @@ void inline attrBufferResize(QAttribute& attr, Qt3DRender::QBuffer& attrBuffer, 
 void SceneEntityWithMaterial::setMesh(Mesh* mesh)
 {
 	//flush datas
-	auto faceHistory = mesh->getFacesNonConst().flushChanges();
-	auto verticesHistory = mesh->getVerticesNonConst().flushChanges();
-	auto hEdgesHistory = mesh->getHalfEdgesNonConst().flushChanges();//not used...for now
+	auto faceHistory = mesh->getFaces().flushChanges();
+	auto verticesHistory = mesh->getVertices().flushChanges();
+	auto hEdgesHistory = mesh->getHalfEdges().flushChanges();//not used...for now
 	removeComponent(&m_geometryRenderer);
 	auto& faces = mesh->getFaces();
 	auto& vtxs = mesh->getVertices();
@@ -112,10 +112,10 @@ void SceneEntityWithMaterial::appendMeshVertexSingleColor(const Mesh* mesh,
 	QVector3D empty(0.0f, 0.0f, 0.0f);
 	for (auto itr = begin; itr != end; ++itr)
 	{
-		auto faceVertices = itr->meshVertices();
+		auto faceVertices = itr.meshVertices();
 		for (auto& vtxItr : faceVertices)
 		{
-			vertices << vtxItr->position << vtxItr->vn;
+			vertices << vtxItr.position() << vtxItr.vn();
 			//do color
 			vertices << empty;
 		}
@@ -157,12 +157,12 @@ void SceneEntityWithMaterial::appendMeshVertexPerPrimitive(const Mesh* mesh,
 
 	for (auto itr = begin; itr != end; ++itr)
 	{
-		auto faceVertices = itr->meshVertices();
+		auto faceVertices = itr.meshVertices();
 		auto colorCode = getPrimitiveColorCode(mesh, itr);
 
 		for (auto& vtxItr : faceVertices)
 		{
-			vertices << vtxItr->position << vtxItr->vn << colorCode;
+			vertices << vtxItr.position() << vtxItr.vn() << colorCode;
 		}
 	}
 
@@ -218,9 +218,9 @@ void SceneEntityWithMaterial::appendIndexArray(const Mesh* mesh, Hix::Engine3D::
 void SceneEntityWithMaterial::updateMesh(Mesh* mesh, bool force)
 {
 	//flush datas
-	auto faceHistory = mesh->getFacesNonConst().flushChanges();
-	auto verticesHistory = mesh->getVerticesNonConst().flushChanges();
-	auto hEdgesHistory = mesh->getHalfEdgesNonConst().flushChanges();//not used...for now
+	auto faceHistory = mesh->getFaces().flushChanges();
+	auto verticesHistory = mesh->getVertices().flushChanges();
+	auto hEdgesHistory = mesh->getHalfEdges().flushChanges();//not used...for now
 	bool tooManyChanges = force;
 	std::unordered_set<size_t> faceChangeSet;
 	std::unordered_set<size_t> vtxChangeSet;

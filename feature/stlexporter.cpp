@@ -49,11 +49,13 @@ Mesh* STLexporter::mergeSelectedModels() {
     for (GLModel* model: targetModels) {
         QVector3D trans = model->m_transform.translation();
 
-        for (const auto& each : model->getMesh()->getFaces()) {
+		auto faceCend = model->getMesh()->getFaces().cend();
+		for (auto each = model->getMesh()->getFaces().cbegin(); each != faceCend; ++each)
+		{
             auto meshVertices = each.meshVertices();
-            QVector3D v1 = meshVertices[0]->position+trans;
-            QVector3D v2 = meshVertices[1]->position+trans;
-            QVector3D v3 = meshVertices[2]->position+trans;
+            QVector3D v1 = meshVertices[0].position()+trans;
+            QVector3D v2 = meshVertices[1].position()+trans;
+            QVector3D v3 = meshVertices[2].position()+trans;
             mergedMesh->addFace(v1,v2,v3);
         }
 
@@ -134,7 +136,11 @@ void STLexporter::exportSTL(QString outfilename){
 
     size_t total_cnt = mesh->getFaces().size();
     size_t cnt = 0;
-    for (const auto& mf : mesh->getFaces()){
+
+
+	auto faceCend = mesh->getFaces().cend();
+	for (auto mf = mesh->getFaces().cbegin(); mf != faceCend; ++mf)
+	{
         writeFace(mesh, mf, contentStream);
 
         if (cnt %100 == 0){
@@ -157,18 +163,18 @@ void STLexporter::exportSTL(QString outfilename){
     return;
 }
 
-void STLexporter::writeFace(const Mesh* mesh, MeshFace mf, std::stringstream& content){
+void STLexporter::writeFace(const Mesh* mesh, const Hix::Engine3D::FaceConstItr& mf, std::stringstream& content){
 
-    content << "facet normal "<< mf.fn.x() <<" "<< mf.fn.y()<<" "<< mf.fn.z() << "\n";
+    content << "facet normal "<< mf.fn().x() <<" "<< mf.fn().y()<<" "<< mf.fn().z() << "\n";
     content << "    outer loop\n";
     auto meshVertices = mf.meshVertices();
 
     auto& mv1 = meshVertices[0];
     auto& mv2 = meshVertices[1];
     auto& mv3 = meshVertices[2];
-    content << "        vertex "<< mv1->position.x()<<" "<< mv1->position.y()<<" "<< mv1->position.z()<<"\n";
-    content << "        vertex "<< mv2->position.x()<<" "<< mv2->position.y()<<" "<< mv2->position.z()<<"\n";
-    content << "        vertex "<< mv3->position.x()<<" "<< mv3->position.y()<<" "<< mv3->position.z()<<"\n";
+    content << "        vertex "<< mv1.position().x()<<" "<< mv1.position().y()<<" "<< mv1.position().z()<<"\n";
+    content << "        vertex "<< mv2.position().x()<<" "<< mv2.position().y()<<" "<< mv2.position().z()<<"\n";
+    content << "        vertex "<< mv3.position().x()<<" "<< mv3.position().y()<<" "<< mv3.position().z()<<"\n";
     content << "    endloop\n";
     content << "endfacet\n";
 }

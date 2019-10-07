@@ -403,12 +403,12 @@ void GLModel::indentHollowShell(double radius){
     qDebug() << "hollow shell called" << radius;
 	if (!_targetSelected)
 		return;
-	auto meshVertices = targetMeshFace->meshVertices();
+	auto meshVertices = targetMeshFace.meshVertices();
     QVector3D center = (
-		meshVertices[0]->position +
-		meshVertices[1]->position + 
-		meshVertices[2]->position)/3;
-	HollowShell::hollowShell(_mesh, &*targetMeshFace, center, radius);
+		meshVertices[0].position() +
+		meshVertices[1].position() + 
+		meshVertices[2].position())/3;
+	HollowShell::hollowShell(_mesh, targetMeshFace, center, radius);
 }
 
 GLModel::~GLModel(){
@@ -734,7 +734,7 @@ void GLModel::applyLabelInfo(QString text, QString fontName, bool isBold, int fo
 	qDebug() << "label apply";
 
     if (textPreview && labellingActive){
-		textPreview->generateLabel(text, _mesh, targetMeshFace->fn, 0.025f);
+		textPreview->generateLabel(text, _mesh, targetMeshFace.fn(), 0.025f);
 		updateModelMesh();
     }
 }
@@ -776,7 +776,7 @@ void GLModel:: unselectMeshFaces(){
 }
 void GLModel::selectMeshFaces(){
 	selectedFaces.clear();
-	QVector3D normal = targetMeshFace->fn;
+	QVector3D normal = targetMeshFace.fn();
 	_mesh->findNearSimilarFaces(normal, targetMeshFace, selectedFaces);
 	updateMesh(_mesh, true);
 }
@@ -793,7 +793,7 @@ void GLModel::generateLayFlat(){
         return;
 	unselectMeshFaces();
 	constexpr QVector3D toBottNormal(0, 0, -1);
-	auto rotationTo = QQuaternion::rotationTo(targetMeshFace->fn, toBottNormal);
+	auto rotationTo = QQuaternion::rotationTo(targetMeshFace.fn(), toBottNormal);
 	auto rotCenter = _mesh->bounds().centre();
 	QVector3D rotAxis;
 	float angle;

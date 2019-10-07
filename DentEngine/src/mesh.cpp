@@ -202,9 +202,9 @@ Mesh& Mesh::operator+=(const Mesh& o)
 //	for (auto& face : faces)
 //	{
 //		auto meshVertices = face.meshVertices();
-//		face.fn = QVector3D::normal(meshVertices[0]->position,
-//			meshVertices[1]->position,
-//			meshVertices[2]->position);
+//		face.fn = QVector3D::normal(meshVertices[0].position(),
+//			meshVertices[1].position(),
+//			meshVertices[2].position());
 //	};
 //
 //	for (auto& vertex : vertices)
@@ -735,7 +735,7 @@ Paths3D Hix::Engine3D::contourConstruct3D(Paths3D hole_edges){
         }
         if (!checked){
             result_edges.push_back(*hole_edge_it);
-            qDebug() << "result_edge : " << hole_edge_it->begin()->position << (hole_edge_it->end()-1)->position;
+            qDebug() << "result_edge : " << hole_edge_it->begin()->position<< (hole_edge_it->end()-1)->position;
         }
         hole_edge_it ++;
     }
