@@ -37,13 +37,14 @@ namespace Hix
 			SceneEntity(QEntity* parent = nullptr); // main constructor for mainmesh and shadowmesh
 			virtual ~SceneEntity();
 			void setMesh(Mesh* mesh);
+			void clearMesh();
 			//for now, one sceneEntity per mesh, no setter for mesh in sceneEntity
 			const Hix::Engine3D::Mesh* getMesh()const;
 			const Qt3DCore::QTransform& transform() const;
 			Qt3DCore::QTransform& transform();
-			QVector3D toParentCoord(const VertexConstItr& vtx)const;
 			QVector3D toParentCoord(const QVector3D& pos)const;
-			QVector3D toRootCoord(const VertexConstItr& vtx)const;
+			//world coordinates.
+			QVector3D toRootCoord(const QVector3D& vtx)const;
 
 			//update faces given indicies, if index >= indexUppderLimit, it's ignored
 			void updateFaces(const std::unordered_set<size_t>& faceIndicies, const Hix::Engine3D::Mesh& mesh);

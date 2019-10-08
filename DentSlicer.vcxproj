@@ -193,6 +193,7 @@
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="common\Debug.cpp" />
     <ClCompile Include="common\Task.cpp" />
     <ClCompile Include="common\TaskManager.cpp" />
     <ClCompile Include="DentEngine\src\Bounds3D.cpp" />
@@ -242,7 +243,6 @@
     <ClCompile Include="utils\gridmesh.cpp" />
     <ClCompile Include="feature\hollowshell.cpp" />
     <ClCompile Include="utils\httpreq.cpp" />
-    <ClCompile Include="feature\labellingtextpreview.cpp" />
     <ClCompile Include="utils\linemeshgeometry.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="utils\mathutils.cpp" />
@@ -261,16 +261,18 @@
     <ClCompile Include="DentEngine\src\svgexporter.cpp" />
     <ClCompile Include="DentEngine\src\polyclipping\poly2tri\sweep\sweep.cpp" />
     <ClCompile Include="DentEngine\src\polyclipping\poly2tri\sweep\sweep_context.cpp" />
-    <ClCompile Include="feature\text3dgeometrygenerator.cpp" />
+    <ClCompile Include="feature\labelling\labelModel.cpp" />
     <ClCompile Include="utils\updatechecker.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="common\Debug.h" />
     <ClInclude Include="common\Hasher.h" />
     <ClInclude Include="common\indexedlist.h" />
     <ClInclude Include="common\IteratorWrapper.h" />
     <ClInclude Include="common\moodycamel\atomicops.h" />
     <ClInclude Include="common\moodycamel\readerwriterqueue.h" />
     <ClInclude Include="common\RamosEnum.h" />
+    <ClInclude Include="common\RandomAccessIteratorBase.h" />
     <ClInclude Include="common\Singleton.h" />
     <ClInclude Include="common\Task.h" />
     <ClInclude Include="common\taskflow\core\executor.hpp" />
@@ -310,6 +312,7 @@
     <ClInclude Include="common\TrackedIndexedList.h" />
     <ClInclude Include="DentEngine\src\Bounds3D.h" />
     <ClInclude Include="DentEngine\src\ContourBuilder.h" />
+    <ClInclude Include="DentEngine\src\MeshIterators.h" />
     <ClInclude Include="DentEngine\src\Planes.h" />
     <ClInclude Include="DentEngine\src\polyclipping\poly2tri\sweep\advancing_front.h" />
     <QtMoc Include="feature\autoarrange.h">
@@ -342,8 +345,6 @@
     </QtMoc>
     <ClInclude Include="feature\hollowshell.h" />
     <QtMoc Include="utils\httpreq.h">
-    </QtMoc>
-    <QtMoc Include="feature\labellingtextpreview.h">
     </QtMoc>
     <QtMoc Include="utils\linemeshgeometry.h">
     </QtMoc>
@@ -411,7 +412,7 @@
     <ClInclude Include="DentEngine\src\svgexporter.h" />
     <ClInclude Include="DentEngine\src\polyclipping\poly2tri\sweep\sweep.h" />
     <ClInclude Include="DentEngine\src\polyclipping\poly2tri\sweep\sweep_context.h" />
-    <ClInclude Include="feature\text3dgeometrygenerator.h" />
+    <ClInclude Include="feature\labelling\labelModel.h" />
     <QtMoc Include="utils\updatechecker.h">
     </QtMoc>
     <ClInclude Include="DentEngine\src\polyclipping\poly2tri\common\utils.h" />

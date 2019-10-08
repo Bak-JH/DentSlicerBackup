@@ -82,8 +82,8 @@ void SVGexporter::exportSVG(Slices& shellSlices,QString outfoldername, bool isTe
 	jsonObject["curing_time"] = 2100; // depends on scfg->resin_type
 	jsonObject["mirror_rot_time"] = 2000;
 	jsonObject["z_hop_height"] = 15;
-	jsonObject["move_up_feedrate"] = 350;
-	jsonObject["move_down_feedrate"] = 500;
+	jsonObject["min_speed"] = 350;
+	jsonObject["max_speed"] = 500;
 	jsonObject["resin_type"] = (uint8_t)scfg->resin_type;
 	jsonObject["contraction_ratio"] = scfg->contraction_ratio;
 	QJsonDocument jsonDocument(jsonObject);
@@ -225,7 +225,7 @@ void SVGexporterPrivate::writePolygon(const PolyNode* contour, bool isTemp, std:
 			+ (scfg->resolutionX()/2)
 			<< "," << std::fixed <<
 			scfg->resolutionY()/2
-			- fp.y()*scfg->pixelPerMMX()/scfg->contraction_ratio << " "; // doesn't need 100 actually// TODO fix this
+			- fp.y()*scfg->pixelPerMMY()/scfg->contraction_ratio << " "; // doesn't need 100 actually// TODO fix this
 
         // just fit to origin
         //outfile << std::fixed << (float)point.X/Hix::Polyclipping::INT_PT_RESOLUTION - scfg->origin.x() << "," << std::fixed << (float)point.Y/Hix::Polyclipping::INT_PT_RESOLUTION - scfg->origin.y() << " ";
@@ -250,7 +250,7 @@ void SVGexporterPrivate::writePolygon(ClipperLib::Path& contour, bool isTemp, st
 			+ (scfg->resolutionX()/2) 
 			<< ","<< std::fixed <<
 			scfg->resolutionY()/2
-			- fp.y() * scfg->pixelPerMMX() / scfg->contraction_ratio << " "; // doesn't need 100 actually
+			- fp.y() * scfg->pixelPerMMY() / scfg->contraction_ratio << " "; // doesn't need 100 actually
 
         // just fit to origin
         //outfile << std::fixed << (float)point.X/Hix::Polyclipping::INT_PT_RESOLUTION - scfg->origin.x() << "," << std::fixed << (float)point.Y/Hix::Polyclipping::INT_PT_RESOLUTION - scfg->origin.y() << " ";

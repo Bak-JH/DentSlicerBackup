@@ -119,7 +119,7 @@ void SceneEntity::clearMem() {
 }
 
 
-const Mesh* SceneEntity::getMesh()const
+const  Hix::Engine3D::Mesh* SceneEntity::getMesh()const
 {
 	return _mesh;
 }
@@ -136,19 +136,15 @@ Qt3DCore::QTransform& Hix::Render::SceneEntity::transform()
 
 }
 
-QVector3D Hix::Render::SceneEntity::toParentCoord(const VertexConstItr& vtx) const
-{
-	return toParentCoord(vtx->position);
-}
 
 QVector3D Hix::Render::SceneEntity::toParentCoord(const QVector3D& pos) const
 {
 	return pos * _transform.matrix();
 }
 
-QVector3D Hix::Render::SceneEntity::toRootCoord(const VertexConstItr& vtx) const
+QVector3D Hix::Render::SceneEntity::toRootCoord(const QVector3D& origCoord) const
 {
-	auto coord = vtx->position;
+	auto coord(origCoord);
 	auto curr = this;
 	while (curr)
 	{
@@ -163,22 +159,34 @@ SceneEntity::~SceneEntity()
 	//mesh and SceneEntity lifetimes are decoupled
 }
 
-void Hix::Render::SceneEntity::setMesh(Mesh* newMesh)
+void Hix::Render::SceneEntity::setMesh(Hix::Engine3D::Mesh* newMesh)
 {
 	if (_mesh != newMesh && newMesh != nullptr)
 	{
+		if (_mesh)
+			clearMesh();
 		_mesh = newMesh;
+		_mesh->setSceneEntity(this);
 		updateEntireMesh(_mesh);
 	}
 }
 
 
-void SceneEntity::updateEntireMesh(Mesh* mesh)
+void Hix::Render::SceneEntity::clearMesh()
+{
+	_mesh->setSceneEntity(nullptr);
+	delete _mesh;
+	_mesh = nullptr;
+}
+
+
+
+void SceneEntity::updateEntireMesh(Hix::Engine3D::Mesh* mesh)
 {
 	//flush datas
-	auto faceHistory = mesh->getFacesNonConst().flushChanges();
-	auto verticesHistory = mesh->getVerticesNonConst().flushChanges();
-	auto hEdgesHistory = mesh->getHalfEdgesNonConst().flushChanges();//not used...for now
+	auto faceHistory = mesh->getFaces().flushChanges();
+	auto verticesHistory = mesh->getVertices().flushChanges();
+	auto hEdgesHistory = mesh->getHalfEdges().flushChanges();//not used...for now
 	removeComponent(&m_geometryRenderer);
 	auto& faces = mesh->getFaces();
 	auto& vtxs = mesh->getVertices();
@@ -190,12 +198,12 @@ void SceneEntity::updateEntireMesh(Mesh* mesh)
 }
 
 
-void SceneEntity::updateMesh(Mesh* mesh, bool force)
+void SceneEntity::updateMesh(Hix::Engine3D::Mesh* mesh, bool force)
 {
 	//flush datas
-	auto faceHistory = mesh->getFacesNonConst().flushChanges();
-	auto verticesHistory = mesh->getVerticesNonConst().flushChanges();
-	auto hEdgesHistory = mesh->getHalfEdgesNonConst().flushChanges();//not used...for now
+	auto faceHistory = mesh->getFaces().flushChanges();
+	auto verticesHistory = mesh->getVertices().flushChanges();
+	auto hEdgesHistory = mesh->getHalfEdges().flushChanges();//not used...for now
 	bool tooManyChanges = force;
 	std::unordered_set<size_t> faceChangeSet;
 	std::unordered_set<size_t> vtxChangeSet;
@@ -407,10 +415,10 @@ void SceneEntity::appendMeshVertex(const Mesh* mesh,
 	QVector3D empty(0.0f, 0.0f, 0.0f);
 	for (auto itr = begin; itr != end; ++itr)
 	{
-		auto faceVertices = itr->meshVertices();
+		auto faceVertices = itr.meshVertices();
 		for (auto& vtxItr : faceVertices)
 		{
-			vertices << vtxItr->position << vtxItr->vn;
+			vertices << vtxItr.localPosition() << vtxItr.vn();
 			//do color
 			vertices << empty;
 		}

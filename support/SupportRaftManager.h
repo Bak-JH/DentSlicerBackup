@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../DentEngine/src/configuration.h"
+#include "DentEngine/src/configuration.h"
 #include "VerticalSupportModel.h"
 #include <memory>
 class GLModel;
