@@ -140,7 +140,7 @@ ContourSegment::FlipResult ContourSegment::calcNormalAndFlip()
 {
 
 	//determine direction
-	QVector3D faceNormal = face.fn();
+	QVector3D faceNormal = face.worldFn();
 	faceNormal.setZ(0.0f);
 	faceNormal.normalize();
 
@@ -202,7 +202,9 @@ QVector2D ContourBuilder::midPoint2D(VertexConstItr vtxA0, VertexConstItr vtxA1)
 {
 	QVector2D result;
 	//A0.z > A1.z
-	if (vtxA0.position().z() < vtxA1.position().z())
+	auto a0pos = vtxA0.worldPosition();
+	auto a1pos = vtxA1.worldPosition();
+	if (a0pos.z() < a1pos.z())
 	{
 		std::swap(vtxA0, vtxA1);
 	}
@@ -211,11 +213,11 @@ QVector2D ContourBuilder::midPoint2D(VertexConstItr vtxA0, VertexConstItr vtxA1)
 	if (preCalc == _midPtLUT.end())
 	{
 		float x, y, zRatio;
-		zRatio = ((_plane - vtxA0.position().z()) / (vtxA1.position().z() - vtxA0.position().z()));
-		x = (vtxA1.position().x() - vtxA0.position().x()) * zRatio
-			+ vtxA0.position().x();
-		y = (vtxA1.position().y() - vtxA0.position().y()) * zRatio
-			+ vtxA0.position().y();
+		zRatio = ((_plane - a0pos.z()) / (a1pos.z() - a0pos.z()));
+		x = (a1pos.x() - a0pos.x()) * zRatio
+			+ a0pos.x();
+		y = (a1pos.y() - a0pos.y()) * zRatio
+			+ a0pos.y();
 		result = QVector2D(x, y);
 		_midPtLUT[fullEdge] = result;
 	}
@@ -237,10 +239,11 @@ void ContourBuilder::buildSegment(const FaceConstItr& mf)
 	std::vector<VertexConstItr> lower;
 	auto mfVertices = mf.meshVertices();
 	for (int i = 0; i < 3; i++) {
-		if (mfVertices[i].position().z() > _plane) {
+		auto pos = mfVertices[i].worldPosition();
+		if (pos.z() > _plane) {
 			upper.push_back(mfVertices[i]);
 		}
-		else if (mfVertices[i].position().z() == _plane) {
+		else if (pos.z() == _plane) {
 			middle.push_back(mfVertices[i]);
 		}
 		else
@@ -266,15 +269,18 @@ void ContourBuilder::buildSegment(const FaceConstItr& mf)
 
 	}
 	else {
+		auto middle0pos = middle[0].worldPosition();
+		auto middle1pos = middle[1].worldPosition();
+
 		//1 edge interesecting, 1 vertice on the plane
 		if (upper.size() == 1 && lower.size() == 1 && middle.size() == 1) {
 			auto a = midPoint2D(upper[0], lower[0]);
 			segment.from = a;
-			segment.to = QVector2D(middle[0].position().x(), middle[0].position().y());
+			segment.to = QVector2D(middle0pos);
 		}
 		else if (middle.size() == 2) {
-			segment.from = QVector2D(middle[0].position().x(), middle[0].position().y());
-			segment.to = QVector2D(middle[1].position().x(), middle[1].position().y());
+			segment.from = QVector2D(middle0pos);
+			segment.to = QVector2D(middle1pos);
 
 		}
 

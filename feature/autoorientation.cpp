@@ -34,7 +34,7 @@ QVector3D fn_unnorm(const FaceConstItr& face)
 {
 
 	auto fVtx = face.meshVertices();
-	return QVector3D::crossProduct(fVtx[1].position() - fVtx[0].position(), fVtx[1].position() - fVtx[0].position());
+	return QVector3D::crossProduct(fVtx[1].worldPosition() - fVtx[0].worldPosition(), fVtx[1].worldPosition() - fVtx[0].worldPosition());
 }
 
 rotateResult* autoorientation::Tweak(const Mesh* mesh, bool bi_algorithmic,int CA,bool *appropriately_rotated){
@@ -195,15 +195,15 @@ float autoorientation::approachvertex(const Mesh* mesh,float n[]){
 	{
 		auto idx = face.meshVertices();
 		//한 삼각형의 세 점 index를 받아옵니다.
-		float a1 = idx[0].position().x() * n[0] +
-			idx[0].position().y() * n[1] +
-			idx[0].position().z() * n[2];
-		float a2 = idx[1].position().x() * n[0] +
-			idx[1].position().y() * n[1] +
-			idx[1].position().z() * n[2];
-		float a3 = idx[2].position().x() * n[0] +
-			idx[2].position().y() * n[1] +
-			idx[2].position().z() * n[2];
+		float a1 = idx[0].worldPosition().x() * n[0] +
+			idx[0].worldPosition().y() * n[1] +
+			idx[0].worldPosition().z() * n[2];
+		float a2 = idx[1].worldPosition().x() * n[0] +
+			idx[1].worldPosition().y() * n[1] +
+			idx[1].worldPosition().z() * n[2];
+		float a3 = idx[2].worldPosition().x() * n[0] +
+			idx[2].worldPosition().y() * n[1] +
+			idx[2].worldPosition().z() * n[2];
 		//orientation의 방향과 계산을 한 뒤 최솟값을 구합니다.
 		//예상으론 oriestation방향으로 들어오는 평면과 가장 가까운 점의 거리를 구하는게 아닐까 싶습니다.
 		float an = std::min(std::min(a1, a2), a3);
@@ -238,15 +238,15 @@ float* autoorientationPrivate::lithograph(const Mesh* mesh, float n[], float ami
             continue;
         if(alpha > (a[0]*n[0] + a[1]*n[1] +a[2]*n[2])/norma){
 			auto idx = face.meshVertices();
-            float a1 = idx[0].position().x()*n[0]+
-                    idx[0].position().y()*n[1]+
-                    idx[0].position().z()*n[2];
-            float a2 = idx[1].position().x()*n[0]+
-                    idx[1].position().y()*n[1]+
-                    idx[1].position().z()*n[2];
-            float a3 = idx[2].position().x()*n[0]+
-                    idx[2].position().y()*n[1]+
-                    idx[2].position().z()*n[2];
+            float a1 = idx[0].worldPosition().x()*n[0]+
+                    idx[0].worldPosition().y()*n[1]+
+                    idx[0].worldPosition().z()*n[2];
+            float a2 = idx[1].worldPosition().x()*n[0]+
+                    idx[1].worldPosition().y()*n[1]+
+                    idx[1].worldPosition().z()*n[2];
+            float a3 = idx[2].worldPosition().x()*n[0]+
+                    idx[2].worldPosition().y()*n[1]+
+                    idx[2].worldPosition().z()*n[2];
             float an = std::min(std::min(a1,a2),a3);
             float ali=fabs(a.x()*n[0]+a.y()*n[1]+a.z()*n[2])/2;
 
@@ -298,9 +298,9 @@ float autoorientationPrivate::get_touching_line(const Mesh* mesh,float a[], cons
 		auto p1=combs.at(j);
         j++;
 		auto p2=combs.at(j);
-        length+=sqrtf(        (p2.position().x()-p1.position().x())*(p2.position().x()-p1.position().x())+
-                              (p2.position().y()-p1.position().y())*(p2.position().y()-p1.position().y())+
-                              (p2.position().z()-p1.position().z())*(p2.position().z()-p1.position().z()));
+        length+=sqrtf(        (p2.worldPosition().x()-p1.worldPosition().x())*(p2.worldPosition().x()-p1.worldPosition().x())+
+                              (p2.worldPosition().y()-p1.worldPosition().y())*(p2.worldPosition().y()-p1.worldPosition().y())+
+                              (p2.worldPosition().z()-p1.worldPosition().z())*(p2.worldPosition().z()-p1.worldPosition().z()));
     }
     return length;
 }
@@ -495,34 +495,34 @@ float* autoorientationPrivate::calc_random_normal(const Mesh* mesh, int i,  cons
 	int j = i / 3;
     //if(i%3 == 0){
 
-    //    v=face.mesh_vertex[0].position();
-    //    w=face.mesh_vertex[1].position();
+    //    v=face.mesh_vertex[0].worldPosition();
+    //    w=face.mesh_vertex[1].worldPosition();
     //}
     //else if(i%3 == 1){
-    //    v=face.mesh_vertex[1].position();
-    //    w=face.mesh_vertex[2].position();
+    //    v=face.mesh_vertex[1].worldPosition();
+    //    w=face.mesh_vertex[2].worldPosition();
     //}
     //else{
-    //    v=face.mesh_vertex[2].position();
-    //    w=face.mesh_vertex[0].position();
+    //    v=face.mesh_vertex[2].worldPosition();
+    //    w=face.mesh_vertex[0].worldPosition();
     //}
 	auto currFace = mesh->getFaces().cbegin() + j;
 	auto meshVertices = currFace.meshVertices();
 	if (i % 3 == 0) {
-		v = meshVertices[0].position();
-		w = meshVertices[1].position();
+		v = meshVertices[0].worldPosition();
+		w = meshVertices[1].worldPosition();
 	}
 	else if (i % 3 == 1) {
-		v = meshVertices[1].position();
-		w = meshVertices[2].position();
+		v = meshVertices[1].worldPosition();
+		w = meshVertices[2].worldPosition();
 	}	
 	else { 
-		v = meshVertices[2].position();
-		w = meshVertices[0].position();
+		v = meshVertices[2].worldPosition();
+		w = meshVertices[0].worldPosition();
 	}
 
     int randomIndex=qrand() % mesh->getFaces().size();
-	QVector3D r_v = (mesh->getFaces().cbegin()+( randomIndex / 3)).meshVertices()[randomIndex % 3].position();
+	QVector3D r_v = (mesh->getFaces().cbegin()+( randomIndex / 3)).meshVertices()[randomIndex % 3].worldPosition();
 
     //QVector3D r_v=mesh->vertices[mesh->faces[randomIndex/3].mesh_vertex[randomIndex%3]].position;
 

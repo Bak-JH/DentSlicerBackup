@@ -3,7 +3,7 @@
 using namespace Hix::Features::Extension;
 using namespace Hix::Debug;
 void Hix::Features::Extension::extendMesh(Mesh* mesh, FaceConstItr mf, double distance){
-    QVector3D normal = mf.fn();
+    QVector3D normal = mf.localFn();
     qDebug() << normal;
 	auto mfVertices = mf.meshVertices();
     std::unordered_set<FaceConstItr> extension_faces;
@@ -27,7 +27,7 @@ void Hix::Features::Extension::extendMesh(Mesh* mesh, FaceConstItr mf, double di
 		auto emfVertices = emf.meshVertices();
 
         //mesh->addFace(emf->mesh_vertex[0].position()+normal*2,emf->mesh_vertex[1].position()+normal*2,emf->mesh_vertex[2].position()+normal*2);
-        qDebug() << "distance from selected extension_faces " <<mfVertices[0].position().distanceToPoint(emfVertices[0].position());
+        qDebug() << "distance from selected extension_faces " <<mfVertices[0].localPosition().distanceToPoint(emfVertices[0].localPosition());
     }
 
     Paths3D extension_outlines = detectExtensionOutline(mesh, extension_faces);
@@ -50,9 +50,9 @@ Paths3D Hix::Features::Extension::detectExtensionOutline(Mesh* mesh, const std::
 		auto meshVertices = mf.meshVertices();
 
         temp_mesh.addFace(
-				meshVertices[0].position(),
-                meshVertices[1].position(),
-                meshVertices[2].position());
+				meshVertices[0].localPosition(),
+                meshVertices[1].localPosition(),
+                meshVertices[2].localPosition());
     }
 
     Paths3D temp_edges;
@@ -129,8 +129,8 @@ void Hix::Features::Extension::coverCap(Mesh* mesh, QVector3D normal,const std::
     for (FaceConstItr mf : extension_faces){
 		auto meshVertices = mf.meshVertices();
 		mesh->addFace(
-				meshVertices[0].position() + distance*normal,
-                meshVertices[1].position() + distance*normal,
-                meshVertices[2].position() + distance*normal);
+				meshVertices[0].localPosition() + distance*normal,
+                meshVertices[1].localPosition() + distance*normal,
+                meshVertices[2].localPosition() + distance*normal);
     }
 }

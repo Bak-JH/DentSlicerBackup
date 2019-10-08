@@ -133,11 +133,11 @@ void Hix::Features::Cut::ZAxisCutTask::fillOverlap(const Hix::Slicer::ContourSeg
 	for (size_t i = 0; i < 3; ++i)
 	{
 		auto& curr = mvs[i];
-		if (curr.position().z() < _cuttingPlane)
+		if (curr.worldPosition().z() < _cuttingPlane)
 		{
 			lows.emplace_back(curr);
 		}
-		else if (curr.position().z() > _cuttingPlane)
+		else if (curr.worldPosition().z() > _cuttingPlane)
 		{
 			highs.emplace_back(curr);
 		}
@@ -155,8 +155,8 @@ void Hix::Features::Cut::ZAxisCutTask::fillOverlap(const Hix::Slicer::ContourSeg
 		QVector3D from(seg.from, _cuttingPlane);
 		QVector3D to(seg.to, _cuttingPlane);
 
-		_topMesh->addFace(seg.from, seg.to, highs[0].position());
-		_bottomMesh->addFace(seg.to, seg.from, lows[0].position());
+		_topMesh->addFace(seg.from, seg.to, highs[0].localPosition());
+		_bottomMesh->addFace(seg.to, seg.from, lows[0].localPosition());
 	}
 	else
 	{
@@ -192,11 +192,11 @@ void Hix::Features::Cut::ZAxisCutTask::fillOverlap(const Hix::Slicer::ContourSeg
 		majority[1] = hintEdge.to();
 
 		//face goes in this order, f-> t -> minority
-		oneFaceAddedMesh->addFace(from, to, minority[0].position());
+		oneFaceAddedMesh->addFace(from, to, minority[0].localPosition());
 		// maj[0]->t->f 
 		// maj[0]->maj[1]->t 
-		twoFacesAddedMesh->addFace(majority[0].position(), to, from);
-		twoFacesAddedMesh->addFace(majority[0].position(), majority[1].position(), to);
+		twoFacesAddedMesh->addFace(majority[0].localPosition(), to, from);
+		twoFacesAddedMesh->addFace(majority[0].localPosition(), majority[1].localPosition(), to);
 	}
 
 
