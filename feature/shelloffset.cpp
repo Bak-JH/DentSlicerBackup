@@ -31,12 +31,12 @@ Mesh* ShellOffset::shellOffset(Mesh* mesh, float factor){
 	{
 		size_t index = outEdge - mesh->getHalfEdges().cbegin();
 		auto inEdge = offsetMesh->getHalfEdges().cbegin() + index;
-		qDebug() << outEdge.from().position() << outEdge.to().position();
-		qDebug() << inEdge.to().position() << inEdge.from().position();
+		qDebug() << outEdge.from().localPosition() << outEdge.to().localPosition();
+		qDebug() << inEdge.to().localPosition() << inEdge.from().localPosition();
 		qDebug() << "--------------------------------------------------";
 
-		holeFaces.push_back({ inEdge.to().position() , inEdge.from().position(),outEdge.from().position() });
-		holeFaces.push_back({ inEdge.from().position(), outEdge.to().position(), outEdge.from().position() });
+		holeFaces.push_back({ inEdge.to().localPosition() , inEdge.from().localPosition(),outEdge.from().localPosition() });
+		holeFaces.push_back({ inEdge.from().localPosition(), outEdge.to().localPosition(), outEdge.from().localPosition() });
 	}
 	qDebug() << "appending outer mesh";
 
@@ -87,8 +87,8 @@ Mesh* ShellOffset::shellOffset(Mesh* mesh, float factor){
  //       auto edgeCirc = uomf.edgeCirculator();
  //       auto neighbors = edgeCirc.nonOwningFaces();
  //       if (neighbors.size() == 0){ // edge 0 is unconnected
- //           QVector3D qv0 = uomfMVertices[0].position() + uomfMVertices[0].vn() * factor;
- //           QVector3D qv1 = uomfMVertices[1].position() + uomfMVertices[1].vn() * factor;
+ //           QVector3D qv0 = uomfMVertices[0].position() + uomfMVertices[0].localVn() * factor;
+ //           QVector3D qv1 = uomfMVertices[1].position() + uomfMVertices[1].localVn() * factor;
  //           QVector3D qv0_in = uomfMVertices[0].position();
  //           QVector3D qv1_in = uomfMVertices[1].position();
  //           offsetMesh->addFace(qv1, qv0, qv0_in);
@@ -97,8 +97,8 @@ Mesh* ShellOffset::shellOffset(Mesh* mesh, float factor){
 	//	++edgeCirc;
  //       neighbors = edgeCirc.nonOwningFaces();
  //       if (neighbors.size() == 0){ // edge 1 is unconnected
- //           QVector3D qv1 = uomfMVertices[1].position() + uomfMVertices[1].vn() * factor;
- //           QVector3D qv2 = uomfMVertices[2].position() + uomfMVertices[2].vn() * factor;
+ //           QVector3D qv1 = uomfMVertices[1].position() + uomfMVertices[1].localVn() * factor;
+ //           QVector3D qv2 = uomfMVertices[2].position() + uomfMVertices[2].localVn() * factor;
  //           QVector3D qv1_in = uomfMVertices[1].position();
  //           QVector3D qv2_in = uomfMVertices[2].position();
  //           offsetMesh->addFace(qv2, qv1, qv1_in);
@@ -107,8 +107,8 @@ Mesh* ShellOffset::shellOffset(Mesh* mesh, float factor){
 	//	++edgeCirc;
  //       neighbors = edgeCirc.nonOwningFaces();
  //       if (neighbors.size() == 0){ // edge 2 is unconnected
- //           QVector3D qv0 = uomfMVertices[0].position() + uomfMVertices[0].vn() * factor;
- //           QVector3D qv2 = uomfMVertices[2].position() + uomfMVertices[2].vn() * factor;
+ //           QVector3D qv0 = uomfMVertices[0].position() + uomfMVertices[0].localVn() * factor;
+ //           QVector3D qv2 = uomfMVertices[2].position() + uomfMVertices[2].localVn() * factor;
  //           QVector3D qv0_in = uomfMVertices[0].position();
  //           QVector3D qv2_in = uomfMVertices[2].position();
  //           offsetMesh->addFace(qv0, qv2_in, qv0_in);
@@ -160,30 +160,30 @@ Mesh* ShellOffset::shellOffset(Mesh* mesh, float factor){
         auto edge = uomf.edge();
         auto neighbors = edge.nonOwningFaces();
         if (neighbors.size() == 0){ // edge 0 is unconnected
-            QVector3D qv0 = uomfMVertices[0].position() + uomfMVertices[0].vn() * factor;
-            QVector3D qv1 = uomfMVertices[1].position() + uomfMVertices[1].vn() * factor;
-            QVector3D qv0_in = uomfMVertices[0].position();
-            QVector3D qv1_in = uomfMVertices[1].position();
+            QVector3D qv0 = uomfMVertices[0].localPosition() + uomfMVertices[0].localVn() * factor;
+            QVector3D qv1 = uomfMVertices[1].localPosition() + uomfMVertices[1].localVn() * factor;
+            QVector3D qv0_in = uomfMVertices[0].localPosition();
+            QVector3D qv1_in = uomfMVertices[1].localPosition();
             offsetMesh->addFace(qv0, qv1, qv0_in);
             offsetMesh->addFace(qv0_in, qv1, qv1_in);
         }
 		edge.moveNext();
         neighbors = edge.nonOwningFaces();
         if (neighbors.size() == 0){ // edge 1 is unconnected
-            QVector3D qv1 = uomfMVertices[1].position() + uomfMVertices[1].vn() * factor;
-            QVector3D qv2 = uomfMVertices[2].position() + uomfMVertices[2].vn() * factor;
-            QVector3D qv1_in = uomfMVertices[1].position();
-            QVector3D qv2_in = uomfMVertices[2].position();
+            QVector3D qv1 = uomfMVertices[1].localPosition() + uomfMVertices[1].localVn() * factor;
+            QVector3D qv2 = uomfMVertices[2].localPosition() + uomfMVertices[2].localVn() * factor;
+            QVector3D qv1_in = uomfMVertices[1].localPosition();
+            QVector3D qv2_in = uomfMVertices[2].localPosition();
             offsetMesh->addFace(qv1, qv2, qv1_in);
             offsetMesh->addFace(qv1_in, qv2, qv2_in);
         }
 		edge.moveNext();
 		neighbors = edge.nonOwningFaces();
         if (neighbors.size() == 0){ // edge 2 is unconnected
-            QVector3D qv0 = uomfMVertices[0].position() + uomfMVertices[0].vn() * factor;
-            QVector3D qv2 = uomfMVertices[2].position() + uomfMVertices[2].vn() * factor;
-            QVector3D qv0_in = uomfMVertices[0].position();
-            QVector3D qv2_in = uomfMVertices[2].position();
+            QVector3D qv0 = uomfMVertices[0].localPosition() + uomfMVertices[0].localVn() * factor;
+            QVector3D qv2 = uomfMVertices[2].localPosition() + uomfMVertices[2].localVn() * factor;
+            QVector3D qv0_in = uomfMVertices[0].localPosition();
+            QVector3D qv2_in = uomfMVertices[2].localPosition();
             offsetMesh->addFace(qv2_in, qv0, qv0_in);
             offsetMesh->addFace(qv2, qv0, qv2_in);
         }

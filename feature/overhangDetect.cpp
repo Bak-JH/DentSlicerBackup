@@ -13,6 +13,10 @@ const double critical_angle = 45;
 const double critical_angle_radian = M_PI * (critical_angle / 180.0);
 float area_subdiv = 20.0f;
 
+
+//scene graph position of each support from model is:
+//same coordinate system as model's
+
 namespace std
 {
 	template<>
@@ -29,25 +33,21 @@ namespace std
 	};
 }
 
-namespace OverhangDetectPrivate
+
+
+
+class XYzHasher
 {
-	std::unordered_set<VertexConstItr> localMinFacingDown(const Mesh* mesh);
-	std::unordered_map<QVector3D, FaceConstItr> faceOverhangDetect(const Mesh* mesh);
-	void faceOverhangPoint(const FaceConstItr& overhangFace, std::unordered_map<QVector3D, FaceConstItr>& output);
-	class XYzHasher
-	{
-	public:
-		XYzHasher(float xyMin, float zMin);
-		size_t operator()(QVector3D v);
-		const float xyMinDist;
-		const float zMinDist;
-	};
-
-}
+public:
+	XYzHasher(float xyMin, float zMin);
+	size_t operator()(QVector3D v);
+	const float xyMinDist;
+	const float zMinDist;
+};
 
 
 
-using namespace OverhangDetectPrivate;
+
 XYzHasher::XYzHasher(float xyMin, float zMin): xyMinDist(xyMin), zMinDist(zMin)
 {
 
@@ -61,19 +61,19 @@ size_t XYzHasher::operator()(QVector3D v)
 }
 
 
-std::unordered_set<VertexConstItr> OverhangDetectPrivate::localMinFacingDown(const Mesh* mesh){
+std::unordered_set<VertexConstItr> Hix::OverhangDetect::Detector::localMinFacingDown(const Mesh* mesh){
 
 	std::unordered_set<VertexConstItr> minis;
-	const auto& vertices = mesh->getVertices();
-	for (auto vtx = vertices.cbegin(); vtx != vertices.cend(); ++vtx)
+	auto vtxCend = mesh->getVertices().cend();
+	for (auto vtx = mesh->getVertices().cbegin(); vtx != vtxCend; ++vtx)
 	{
-		if (vtx.vn().z() < 0.0f)
+		if (vtx.worldVn().z() < 0.0f)
 		{
 			bool localMin = true;
 			auto connected = vtx.connectedVertices();
 			for (auto& each : connected)
 			{
-				if (each.position().z() < vtx.position().z())
+				if (each.worldPosition().z() < vtx.worldPosition().z())
 				{
 					localMin = false;
 					break;
@@ -88,15 +88,16 @@ std::unordered_set<VertexConstItr> OverhangDetectPrivate::localMinFacingDown(con
 
 
 
-std::unordered_map<QVector3D, FaceConstItr> OverhangDetectPrivate::faceOverhangDetect(const Mesh* mesh) {
+std::unordered_map<QVector3D, FaceConstItr> Hix::OverhangDetect::Detector::faceOverhangDetect(const Mesh* mesh) {
 	QVector3D printingDirection = QVector3D(0, 0, 1);
 	std::unordered_map<QVector3D, FaceConstItr> faceOverhangs;
 	auto cosVal =  std::abs(std::cos(critical_angle_radian));
 	const auto& faces = mesh->getFaces();
 	for (auto face = faces.cbegin(); face != faces.cend(); ++face)
 	{
-		if (face.fn().z() > 0) continue;
-		double cos = double(QVector3D::dotProduct(face.fn(), printingDirection));
+		auto worldFn = _worldFNCache[face];
+		if (worldFn.z() >= 0) continue;
+		double cos = double(QVector3D::dotProduct(worldFn, printingDirection));
 		if (std::abs(cos) > cosVal) {
 			faceOverhangPoint(face, faceOverhangs);
 		}
@@ -104,12 +105,14 @@ std::unordered_map<QVector3D, FaceConstItr> OverhangDetectPrivate::faceOverhangD
 	return faceOverhangs;
 }
 
-void OverhangDetectPrivate::faceOverhangPoint(const FaceConstItr& overhangFace, std::unordered_map<QVector3D, FaceConstItr>& output) {
+void Hix::OverhangDetect::Detector::faceOverhangPoint(const FaceConstItr& overhangFace,
+	std::unordered_map<QVector3D, FaceConstItr>& output) {
 	// area subdivision (recursive case)
 
 	auto startingVertices = overhangFace.meshVertices();
 	std::queue<std::array<QVector3D, 3>> q;
-	q.emplace(std::array<QVector3D, 3>{startingVertices[0].position(), startingVertices[1].position(), startingVertices[2].position()});
+	q.emplace(std::array<QVector3D, 3>
+	{startingVertices[0].localPosition(), startingVertices[1].localPosition(), startingVertices[2].localPosition()});
 	while (!q.empty())
 	{
 		auto curr = q.front();
@@ -145,7 +148,7 @@ std::vector<QVector3D> Hix::OverhangDetect::toCoords(const Overhangs& overhangs)
 	{
 		if (each.index() == 0)
 		{
-			coords.emplace_back(std::get<0>(each).position());
+			coords.emplace_back(std::get<0>(each).localPosition());
 		}
 		else
 		{
@@ -155,10 +158,15 @@ std::vector<QVector3D> Hix::OverhangDetect::toCoords(const Overhangs& overhangs)
 	return coords;
 }
 
-Overhangs Hix::OverhangDetect::detectOverhang(const Mesh* shellMesh)
+Overhangs Hix::OverhangDetect::Detector::detectOverhang(const Mesh* shellMesh)
 {
 	Overhangs overhangs;
-
+	//precalculate world fn values
+	auto faceCend = shellMesh->getFaces().cend();
+	for (auto face = shellMesh->getFaces().cbegin(); face != faceCend; ++face)
+	{
+		_worldFNCache.emplace(face, face.worldFn());
+	}
 	//if density is 0, don't detect anything
 	if (scfg->supportDensity == 0)
 		return overhangs;
@@ -183,7 +191,7 @@ Overhangs Hix::OverhangDetect::detectOverhang(const Mesh* shellMesh)
 	}
 	for (auto& ptOverhang : pointOverhangs)
 	{
-		allHashedOverhangs[ptHasher(ptOverhang.position())] = ptOverhang;
+		allHashedOverhangs[ptHasher(ptOverhang.localPosition())] = ptOverhang;
 	}
 	//rehash
 	for (auto& faceOverhang : faceHashedOverhangs)

@@ -42,9 +42,14 @@ namespace Hix
 			const Hix::Engine3D::Mesh* getMesh()const;
 			const Qt3DCore::QTransform& transform() const;
 			Qt3DCore::QTransform& transform();
-			QVector3D toParentCoord(const QVector3D& pos)const;
+			QVector3D toParentCoord(const QVector3D& childPos)const;
+			QVector3D fromParentCoord(const QVector3D& parentPos)const;
+
 			//world coordinates.
-			QVector3D toRootCoord(const QVector3D& vtx)const;
+			QVector3D toRootCoord(const QVector3D& local)const;
+			QVector3D toLocalCoord(const QVector3D& world)const;
+
+			
 
 			//update faces given indicies, if index >= indexUppderLimit, it's ignored
 			void updateFaces(const std::unordered_set<size_t>& faceIndicies, const Hix::Engine3D::Mesh& mesh);

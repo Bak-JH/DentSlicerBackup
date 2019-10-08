@@ -137,14 +137,19 @@ Qt3DCore::QTransform& Hix::Render::SceneEntity::transform()
 }
 
 
-QVector3D Hix::Render::SceneEntity::toParentCoord(const QVector3D& pos) const
+QVector3D Hix::Render::SceneEntity::toParentCoord(const QVector3D& childPos) const
 {
-	return pos * _transform.matrix();
+	return childPos * _transform.matrix().inverted();
 }
 
-QVector3D Hix::Render::SceneEntity::toRootCoord(const QVector3D& origCoord) const
+QVector3D Hix::Render::SceneEntity::fromParentCoord(const QVector3D& parentPos) const
 {
-	auto coord(origCoord);
+	return parentPos * _transform.matrix();
+}
+
+QVector3D Hix::Render::SceneEntity::toRootCoord(const QVector3D& local) const
+{
+	auto coord(local);
 	auto curr = this;
 	while (curr)
 	{
@@ -153,6 +158,20 @@ QVector3D Hix::Render::SceneEntity::toRootCoord(const QVector3D& origCoord) cons
 	}
 	return coord;
 }
+QVector3D Hix::Render::SceneEntity::toLocalCoord(const QVector3D& world) const
+{
+	auto coord(world);
+	auto curr = this;
+	//since this is multiplication, it's associative ie) order doesn't matter.
+	//order shown here is wrong though.
+	while (curr)
+	{
+		coord = curr->fromParentCoord(coord);
+		curr = dynamic_cast<SceneEntity*>(curr->parentEntity());
+	}
+	return coord;
+}
+
 
 SceneEntity::~SceneEntity() 
 {
@@ -418,7 +437,7 @@ void SceneEntity::appendMeshVertex(const Mesh* mesh,
 		auto faceVertices = itr.meshVertices();
 		for (auto& vtxItr : faceVertices)
 		{
-			vertices << vtxItr.localPosition() << vtxItr.vn();
+			vertices << vtxItr.localPosition() << vtxItr.localVn();
 			//do color
 			vertices << empty;
 		}

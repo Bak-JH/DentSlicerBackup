@@ -21,8 +21,8 @@ using namespace ClipperLib;
 
 QDebug Hix::Debug::operator<< (QDebug d, const VertexConstItr& obj) {
 	d << "VertexConstItr index: " << obj.index() << "\n";
-	d << "  pos:" << obj.position() << "\n";
-	d << "  vn:" << obj.vn() << "\n";
+	d << "  pos:" << obj.localPosition() << "\n";
+	d << "  vn:" << obj.localVn() << "\n";
 
 	d << "  leaving edges indices:" << "\n";
 	for (auto each : obj.leavingEdges())
@@ -55,7 +55,7 @@ QDebug Hix::Debug::operator<< (QDebug d, const HalfEdgeConstItr& obj) {
 
 QDebug Hix::Debug::operator<< (QDebug d, const FaceConstItr& obj) {
 	d << "FaceConstItr index: " << obj.index() << "\n";
-	d << "  fn: " << obj.fn() << "\n";
+	d << "  fn: " << obj.localFn() << "\n";
 	d << "  orderedZ: \n";
 	auto orderedZ = obj.sortZ();
 	for (auto each : orderedZ)
@@ -224,9 +224,9 @@ void Mesh::vertexOffset(float factor){
 	{
 		if (count % 100 == 0)
 			QCoreApplication::processEvents();
-		QVector3D tmp = vtxItr.position() - vtxItr.vn() * factor;
+		QVector3D tmp = vtxItr.localPosition() - vtxItr.localVn() * factor;
 		vtxItr.ref().position = tmp;
-		_bounds.update(vtxItr.position());
+		_bounds.update(vtxItr.localPosition());
 		++count;
 	};
 }
@@ -294,9 +294,9 @@ bool Mesh::addFace(const FaceConstItr& face)
 {
 	auto origMVs = face.meshVertices();
 	std::array<QVector3D, 3> vtxPos{
-		origMVs[0].position(),
-		origMVs[1].position(),
-		origMVs[2].position()
+		origMVs[0].localPosition(),
+		origMVs[1].localPosition(),
+		origMVs[2].localPosition()
 	};
 	std::array<size_t, 3> fVtx;
 	fVtx[0] = addOrRetrieveFaceVertex(vtxPos[0]);
@@ -332,12 +332,12 @@ FaceConstItr Mesh::removeFace(FaceConstItr faceItr){
 		if (moddableLeavingVtx.leavingEdges().empty())
 		{
 			vtxDelGuard.deleteLater(moddableLeavingVtx);
-			removeVertexHash(moddableLeavingVtx.position());
+			removeVertexHash(moddableLeavingVtx.localPosition());
 		}
 		if (moddableArrivingVtx.arrivingEdges().empty())
 		{
 			vtxDelGuard.deleteLater(moddableArrivingVtx);
-			removeVertexHash(moddableArrivingVtx.position());
+			removeVertexHash(moddableArrivingVtx.localPosition());
 		}
 		edge.moveNext();
 	}
@@ -444,10 +444,17 @@ void Hix::Engine3D::Mesh::setSceneEntity(const Render::SceneEntity* entity)
 	_entity = entity;
 }
 
-QVector3D Hix::Engine3D::Mesh::toWorld(const VertexConstItr& local)const;
+
+QVector3D Hix::Engine3D::Mesh::toWorld(const QVector3D& local)const
 {
 	return _entity->toRootCoord(local);
 }
+
+QVector3D Hix::Engine3D::Mesh::toLocal(const QVector3D& world)const
+{
+	return _entity->toLocalCoord(world);
+}
+
 
 size_t Mesh::addOrRetrieveFaceVertex(const QVector3D& v){
 	//find if existing vtx can be used
@@ -592,7 +599,7 @@ void Mesh::findNearSimilarFaces(QVector3D normal, FaceConstItr  mf,
 			auto nFaces = edge.twinFaces();
 			for (auto nFace : nFaces)
 			{
-				if (result.find(nFace) == result.end() && (nFace.fn() - normal).lengthSquared() < maxNormalDiff)
+				if (result.find(nFace) == result.end() && (nFace.localFn() - normal).lengthSquared() < maxNormalDiff)
 				{
 					q.emplace_back(nFace);
 					result.emplace(nFace);

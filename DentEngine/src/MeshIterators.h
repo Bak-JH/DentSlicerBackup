@@ -187,14 +187,21 @@ namespace Hix
 				return &(ParentType::_owner->getVertices()[ParentType::_index]);
 			}
 
-			const QVector3D& vn() const
+			const QVector3D& localVn() const
 			{
 				QVector3D vn;
 				auto faces = connectedFaces();
 				for (auto& face : faces)
 				{
-					vn += face.fn();
+					vn += face.localFn();
 				}
+				vn.normalize();
+				return vn;
+			}
+			const QVector3D& worldVn() const
+			{
+				auto vn = localVn();
+				vn = ParentType::_owner->toWorld(vn);
 				vn.normalize();
 				return vn;
 			}
@@ -255,7 +262,7 @@ namespace Hix
 			}
 			QVector3D worldPosition()const
 			{
-				ParentType::_owner->toWorld(ref().position);
+				return ParentType::_owner->toWorld(ref().position);
 			}
 
 
