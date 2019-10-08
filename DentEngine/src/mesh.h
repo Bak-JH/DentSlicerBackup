@@ -1,6 +1,5 @@
 #pragma once
-#include <vector>
-#include <QVector3D>
+#include "MeshIterators.h"
 #include <QHash>
 #include "polyclipping/polyclipping.h"
 #include <QTransform>
@@ -15,12 +14,14 @@
 #define cos150 -0.8660254
 #define FZERO 0.00001f
 
-namespace std
-{
-}
+
 
 namespace Hix
 {
+	namespace Render
+	{
+		class SceneEntity;
+	}
 	namespace Engine3D
 	{
 		static constexpr float VTX_INBOUND_DIST = 0.002f;//10 micron resolution
@@ -41,107 +42,55 @@ namespace Hix
             size_t idx = aItr - a.cbegin();
             return b.cbegin() + idx;
         }
-
-
-		// plane contains at least 3 vertices contained in the plane in clockwise direction
-
-
-
-		struct HalfEdge;
-		struct MeshVertex;
-		struct MeshFace;
-		class Mesh;
-
-		typedef typename IndexedListItr::const_iterator <HalfEdge>HalfEdgeConstItr;
-		typedef typename IndexedListItr::const_iterator <MeshVertex>VertexConstItr;
-		typedef typename IndexedListItr::const_iterator <MeshFace>FaceConstItr;
-		typedef typename IndexedListItr::iterator		<HalfEdge>HalfEdgeItr;
-		typedef typename IndexedListItr::iterator		<MeshVertex>VertexItr;
-		typedef typename IndexedListItr::iterator		<MeshFace>FaceItr;
-
-
-		struct HalfEdge
-		{
-			HalfEdge()
-			{}
-			HalfEdgeConstItr next;
-			HalfEdgeConstItr prev;
-			VertexConstItr from;
-			VertexConstItr to;
-			FaceConstItr owningFace;
-			//TODO: guarantee no self intersection occurs and we can use this
-			//HalfEdgeConstItr twin;
-			std::unordered_set<HalfEdgeConstItr> twins()const;
-			//twins in same direction
-			std::unordered_set<HalfEdgeConstItr> nonTwins()const;
-			//twins + nonTwins
-			std::unordered_set<HalfEdgeConstItr> allFromSameEdge()const;
-			std::vector<FaceConstItr> nonOwningFaces()const;
-			//similar to non-owning, but half edges are on opposite direction ie) faces facing the same orientation
-            std::unordered_set<FaceConstItr> twinFaces()const;
-			bool isTwin(const HalfEdgeConstItr& other)const;
-
-		};
-
-		class HalfEdgeCirculator
+		class MeshIteratorFactory
 		{
 		public:
-			HalfEdgeCirculator(HalfEdgeConstItr itrW);
-			//you need to double *, but it's worth it for indexing capability
-			//HalfEdgeConstItr& toItrW()const;
-			HalfEdgeConstItr& toItr();
+			MeshIteratorFactory();
+			MeshIteratorFactory(Mesh* mesh);
+		protected:
+			Mesh* _mesh;
+		};
 
-			const HalfEdge& operator*()const;
-			void operator++();
-			void operator--();
-			HalfEdgeCirculator operator--(int);
-			HalfEdgeCirculator operator++(int);
-			const HalfEdge* operator->() const;
-			const HalfEdge* toPtr() const;
-
-		private:
-			HalfEdgeConstItr _hEdgeItr;
+		class HalfEdgeItrFactory: private MeshIteratorFactory
+		{
+		public:
+			typedef HalfEdgeItr iterator;
+			typedef HalfEdgeConstItr const_iterator;
+			typedef IndexedList<HalfEdge, std::allocator<HalfEdge>, HalfEdgeItrFactory> containerType;
+			using MeshIteratorFactory::MeshIteratorFactory;
+			iterator buildIterator(size_t index, const containerType* containerPtr)const;
+			const_iterator buildConstIterator(size_t index, const containerType* containerPtr)const;
 		};
 
 
-		struct MeshFace {
-			MeshFace()
-			{}
-			QVector3D fn;
-			HalfEdgeConstItr edge;
-			std::array<VertexConstItr, 3> meshVertices()const;
-			//std::array<std::vector<FaceConstItr>, 3> neighboring_faces;
-			HalfEdgeCirculator edgeCirculator()const;
-			std::array<size_t, 3> getVerticeIndices(const Mesh* owningMesh)const;
-			std::array<float, 3> sortZ()const;
-			float getFaceZmin()const;
-			float getFaceZmax()const;
-			bool getEdgeWithVertices(HalfEdgeConstItr& result,const VertexConstItr& a, const VertexConstItr& b)const;
-			bool isNeighborOf(const FaceConstItr& nFace)const;
-
+		class VertexItrFactory : private MeshIteratorFactory
+		{
+		public:
+			typedef VertexItr iterator;
+			typedef VertexConstItr const_iterator;
+			typedef IndexedList<MeshVertex, std::allocator<MeshVertex>, VertexItrFactory> containerType;
+			using MeshIteratorFactory::MeshIteratorFactory;
+			iterator buildIterator(size_t index, const containerType* containerPtr)const;
+			const_iterator buildConstIterator(size_t index, const containerType* containerPtr)const;
 		};
-		struct MeshVertex {
-			MeshVertex() 
-			{}
-			MeshVertex(QVector3D pPosition):position(pPosition) {}
-			friend inline bool operator== (const MeshVertex& a, const MeshVertex& b) {
-				return a.position == b.position;
-			}
-			friend inline bool operator!= (const MeshVertex& a, const MeshVertex& b) {
-				return a.position != b.position;
-			}
-			std::unordered_set<VertexConstItr> connectedVertices()const;
-			bool empty()const;
-			void calculateNormalFromFaces();
-			std::vector<FaceConstItr> connectedFaces()const;
-			QVector3D position;
-			QVector3D vn;
-			std::vector<HalfEdgeConstItr> leavingEdges;
-			std::vector<HalfEdgeConstItr> arrivingEdges;
 
 
-
+		class FaceItrFactory: private MeshIteratorFactory
+		{
+		public:
+			typedef FaceItr iterator;
+			typedef FaceConstItr const_iterator;
+			typedef IndexedList<MeshFace, std::allocator<MeshFace>, FaceItrFactory> containerType;
+			using MeshIteratorFactory::MeshIteratorFactory;
+			iterator buildIterator(size_t index, const containerType* containerPtr)const;
+			const_iterator buildConstIterator(size_t index, const containerType* containerPtr)const;
 		};
+
+
+
+
+
+
 
 
 		bool isCommonManifoldFace(const FaceConstItr& a, const FaceConstItr& b, std::unordered_set<FaceConstItr> pool);
@@ -164,10 +113,6 @@ namespace Hix
 
 		class Mesh {
 		public:
-
-
-
-
 			Mesh();
 			Mesh(const Mesh& o);
 			Mesh& operator=(Mesh other);
@@ -189,10 +134,7 @@ namespace Hix
 
             bool addFace(const QVector3D& v0, const QVector3D& v1, const QVector3D& v2);
 			bool addFace(const FaceConstItr& face);
-			TrackedIndexedList<MeshFace>::const_iterator removeFace(FaceConstItr f_it);
-			TrackedIndexedList<MeshVertex>& getVerticesNonConst();
-			TrackedIndexedList<MeshFace>& getFacesNonConst();
-			TrackedIndexedList<HalfEdge>& getHalfEdgesNonConst();
+			FaceConstItr removeFace(FaceConstItr f_it);
 			//short hand for TrackedList::toNormItr
 			inline VertexItr toNormItr(const VertexConstItr& itr)
 			{
@@ -206,24 +148,15 @@ namespace Hix
 			{
 				return halfEdges.toNormItr(itr);
 			}
-
-			/********************** Mesh Modify and Copy Functions***********************/
-			Mesh* vertexMoved(QVector3D direction)const;
-
-
-
-
-			/********************** Helper Functions **********************/
-
-
-			//MeshFace idx2MF(int idx)const;
-			//MeshVertex idx2MV(int idx)const;
-
 			/********************** Getters **********************/
+			//non-const getters. really should not be used
+			TrackedIndexedList<MeshVertex, std::allocator<MeshVertex>, VertexItrFactory>& getVertices();
+			TrackedIndexedList<MeshFace, std::allocator<MeshFace>, FaceItrFactory>& getFaces();
+			TrackedIndexedList<HalfEdge, std::allocator<HalfEdge>, HalfEdgeItrFactory>& getHalfEdges();
 			//const getter
-			const TrackedIndexedList<MeshVertex>& getVertices()const;
-			const TrackedIndexedList<MeshFace>& getFaces()const;
-			const TrackedIndexedList<HalfEdge>& getHalfEdges()const;
+			const TrackedIndexedList<MeshVertex, std::allocator<MeshVertex>, VertexItrFactory>& getVertices()const;
+			const TrackedIndexedList<MeshFace, std::allocator<MeshFace>, FaceItrFactory>& getFaces()const;
+			const TrackedIndexedList<HalfEdge, std::allocator<HalfEdge>, HalfEdgeItrFactory>& getHalfEdges()const;
 
 
 			inline float x_min()const{ return _bounds.xMin();}
@@ -234,52 +167,19 @@ namespace Hix
 			inline float z_max()const{ return _bounds.zMax();}
 			void findNearSimilarFaces(QVector3D normal,FaceConstItr mf,
 				std::unordered_set<FaceConstItr>& result, float maxNormalDiff = 0.1f, size_t maxCount = 10000)const;
-
-
-
-			/********************** index to data **********************/
-
-			inline MeshFace& idx2mf(size_t idx)
-			{
-				return faces[idx];
-			}
-			inline MeshVertex& idx2vtx(size_t idx)
-			{
-				return vertices[idx];
-			}
-
-			inline const MeshFace& idx2mf(size_t idx)const
-			{
-				return faces[idx];
-			}
-			inline const MeshVertex& idx2vtx(size_t idx)const
-			{
-				return vertices[idx];
-			}
-			/********************** opposite **********************/
-
-			inline size_t indexOf(const HalfEdgeConstItr& itr)const
-			{
-				return itr - halfEdges.cbegin();
-			}
-			inline size_t indexOf(const VertexConstItr& itr)const
-			{
-				return itr - vertices.cbegin();
-			}
-			inline size_t indexOf(const FaceConstItr& itr)const
-			{
-				return itr - faces.cbegin();
-			}
 			/********************** Stuff that can be public **********************/
 			const Bounds3D& bounds()const;
-
+			void setSceneEntity(const Render::SceneEntity* entity);
+			QVector3D toWorld(const VertexConstItr& local)const;
 		private:
+
+			const Render::SceneEntity* _entity = nullptr;
 			/********************** Helper Functions **********************/
             //set twin relationship for this edge as well as matching twin edge
 
-			VertexItr addOrRetrieveFaceVertex(const QVector3D& v);
+			size_t addOrRetrieveFaceVertex(const QVector3D& v);
 			void removeVertexHash(QVector3D pos);
-			void addHalfEdgesToFace(std::array<VertexItr, 3> faceVertices, FaceConstItr face);
+			void addHalfEdgesToFace(std::array<size_t, 3> faceVertices, size_t faceIdx);
 
 			//index changed event callback
 			void vtxIndexChangedCallback(size_t oldIdx, size_t newIdx);
@@ -288,11 +188,11 @@ namespace Hix
 
 			MeshVtxHasher _vtxHasher;
 			std::unordered_map<size_t, VertexConstItr> _verticesHash;
-			TrackedIndexedList<MeshVertex> vertices;
-			TrackedIndexedList<HalfEdge> halfEdges;
-			TrackedIndexedList<MeshFace> faces;
+			TrackedIndexedList<MeshVertex, std::allocator<MeshVertex>, VertexItrFactory> vertices;
+			TrackedIndexedList<HalfEdge, std::allocator<HalfEdge>, HalfEdgeItrFactory> halfEdges;
+			TrackedIndexedList<MeshFace, std::allocator<MeshFace>, FaceItrFactory> faces;
 			Bounds3D _bounds;
-			Qt3DCore::QTransform _transform;
+			
 
 		};
 
@@ -319,3 +219,57 @@ namespace Hix
 
 };
 
+
+
+namespace std
+{
+	using namespace Hix::Engine3D;
+	template<>
+	struct hash<VertexConstItr>
+	{
+		size_t operator()(const VertexConstItr& v)const
+		{
+			return v.index();
+		}
+	};
+	template<>
+	struct hash<HalfEdgeConstItr>
+	{
+		size_t operator()(const HalfEdgeConstItr& v)const
+		{
+			return v.index();
+		}
+	};
+	template<>
+	struct hash<FaceConstItr>
+	{
+		size_t operator()(const FaceConstItr& v)const
+		{
+			return v.index();
+		}
+	};
+	template<>
+	struct hash<VertexItr>
+	{
+		size_t operator()(const VertexItr& v)const
+		{
+			return v.index();
+		}
+	};
+	template<>
+	struct hash<FaceItr>
+	{
+		size_t operator()(const FaceItr& v)const
+		{
+			return v.index();
+		}
+	};
+	template<>
+	struct hash<HalfEdgeItr>
+	{
+		size_t operator()(const HalfEdgeItr& v)const
+		{
+			return v.index();
+		}
+	};
+}

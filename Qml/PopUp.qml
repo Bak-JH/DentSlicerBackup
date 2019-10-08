@@ -39,7 +39,6 @@ Rectangle {
     //----------------------------------------------------------------
     // properties for label info
     property string labelTextContent:labelTextContent
-    property int labelContentWidth:labelContentWidth
     property string labelFontName:labelFontName
     property bool labelIsBold:labelIsBold
     property int labelFontSize:labelFontSize
@@ -1339,7 +1338,7 @@ Rectangle {
         }
     }
 
-    signal labelTextChanged(string text, int contentWidth)
+    signal labelTextChanged(string text)
 
     // text3d input
     Rectangle {
@@ -1398,10 +1397,7 @@ Rectangle {
                 hiddenText.text = text;
                 //console.log(hiddenText.text.length);
                 console.log(hiddenText.text);
-                console.log(hiddenText.contentWidth);
-                labelTextChanged(hiddenText.text, hiddenText.contentWidth);
-
-                //sendTextChanged(text, hiddenText.text.length)
+                labelTextChanged(hiddenText.text);
             }
 
 

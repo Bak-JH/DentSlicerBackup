@@ -1,3 +1,4 @@
+#pragma once
 #include "IndexedList.h"
 #include <vector>
 #include <unordered_set>
@@ -6,29 +7,30 @@
 
 
 
-template <class T, class A = std::allocator<T>>
-class TrackedIndexedList : public IndexedList<T, A> {
+template <class T, class A = std::allocator<T>, class ItrFac = IndexedListItr::DefaultIteratorFactory<T, A>>
+class TrackedIndexedList : public IndexedList<T, A, ItrFac> {
 
-    typedef IndexedList<T, A> parent_type;
+    typedef IndexedList<T, A, ItrFac> parent_type;
 public:
 	typedef typename std::variant<bool, std::unordered_set<size_t>> changes_type;
-	typedef typename IndexedListItr::iterator<T,A> iterator;
-	typedef typename IndexedListItr::const_iterator<T, A> const_iterator;
+	typedef typename parent_type::iterator iterator;
+	typedef typename parent_type::const_iterator const_iterator;
 
-	TrackedIndexedList()
+	TrackedIndexedList(ItrFac itrFac = ItrFac()): parent_type(itrFac)
 	{
-
 	}
 	TrackedIndexedList(const TrackedIndexedList& o) :parent_type(o)
 	{
 		_changedAll = true;
 	}
-	TrackedIndexedList(std::initializer_list<T> iniList) : TrackedIndexedList(iniList, std::allocator<T>())
+	TrackedIndexedList(std::initializer_list<T> iniList, ItrFac itrFac = ItrFac()):
+		TrackedIndexedList(iniList, std::allocator<T>(), itrFac)
 	{
 		_changedAll = true;
 	}
 
-    TrackedIndexedList(std::initializer_list<T> iniList, const typename parent_type::allocator_type& allocator) :parent_type(iniList, allocator)
+    TrackedIndexedList(std::initializer_list<T> iniList, const typename parent_type::allocator_type& allocator,
+		ItrFac itrFac = ItrFac()) :parent_type(iniList, allocator, itrFac)
 	{
 		_changedAll = true;
 	}

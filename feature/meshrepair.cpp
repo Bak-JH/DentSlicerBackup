@@ -52,12 +52,11 @@ void MeshRepair::removeUnconnected(Mesh* mesh){
 			//don't hog UI thread too long;
 			QCoreApplication::processEvents();
 		}
-        const MeshFace& mf = (*mf_it);
         int neighbor_cnt = 0;
-		auto edgeCirc = mf.edgeCirculator();
-		for (size_t i = 0; i < 3; ++i, ++edgeCirc)
+		auto edge = mf_it.edge();
+		for (size_t i = 0; i < 3; ++i, edge.moveNext())
 		{
-			neighbor_cnt += edgeCirc->nonOwningFaces().size();
+			neighbor_cnt += edge.nonOwningFaces().size();
 		}
 
         if (neighbor_cnt == 0){
@@ -78,17 +77,18 @@ Paths3D MeshRepair::identifyHoles(const Mesh* mesh){
     // used for auto repair steps
     Paths3D holes;
     int face_idx = 0;
-
-    for (const MeshFace &mf : (mesh->getFaces())){
+	auto faceCend = mesh->getFaces().cend();
+	for(auto mf = mesh->getFaces().cbegin(); mf != faceCend; ++mf)
+	{
         face_idx ++;
         if (face_idx %100 ==0)
             QCoreApplication::processEvents();
 
         //qDebug() << "neighbors " << mf.neighboring_faces[0].size() << mf.neighboring_faces[1].size() << mf.neighboring_faces[2].size();
-		auto edgeCirc = mf.edgeCirculator();
-		for (size_t i = 0; i < 3; ++i, ++edgeCirc)
+		auto edge = mf.edge();
+		for (size_t i = 0; i < 3; ++i, edge.moveNext())
 		{
-			auto neighbors = edgeCirc->nonOwningFaces();
+			auto neighbors = edge.nonOwningFaces();
 			if (neighbors.size() != 0)
 			{
 				Path3D temp_edge;
@@ -122,13 +122,11 @@ std::vector<Hix::Engine3D::HalfEdgeConstItr> MeshRepair::identifyBoundary(const 
 	for (auto heItr = mesh->getHalfEdges().cbegin(); heItr != mesh->getHalfEdges().cend(); ++heItr)
 	{
 		//if a half edge do not have a twin, it's a boundary edge
-		auto twnFaces = heItr->twinFaces();
-		for (auto twnFace : twnFaces)
+		auto twnFaces = heItr.twinFaces();
+		if (twnFaces.empty())
 		{
-			auto from = heItr->from;
-			auto to = heItr->to;
-			//qDebug() << heItr->from->position << heItr->to->position;
 			boundaryEdges.push_back(heItr);
+
 		}
 	}
 	return boundaryEdges;
@@ -256,7 +254,7 @@ void MeshRepair::fillHoles(Mesh* mesh, const Paths3D& holes){
 //
 //        // project qvector3d to maximal plane
 //        float distance = path[i].position.distanceToPlane(maximal_plane[0],maximal_plane[1],maximal_plane[2]);
-//        target_path.end()->position += plane_normal * distance;
+//        target_path.end().position() += plane_normal * distance;
 //    }
 //    qDebug() << "fill path debug 4";
 //

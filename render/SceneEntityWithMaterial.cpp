@@ -99,12 +99,12 @@ void SceneEntityWithMaterial::appendMeshVertexPerPrimitive(const Mesh* mesh,
 
 	for (auto itr = begin; itr != end; ++itr)
 	{
-		auto faceVertices = itr->meshVertices();
+		auto faceVertices = itr.meshVertices();
 		auto colorCode = getPrimitiveColorCode(mesh, itr);
 
 		for (auto& vtxItr : faceVertices)
 		{
-			vertices << vtxItr->position << vtxItr->vn << colorCode;
+			vertices << vtxItr.position() << vtxItr.vn() << colorCode;
 		}
 	}
 

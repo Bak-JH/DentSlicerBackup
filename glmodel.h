@@ -5,7 +5,7 @@
 #include "fileloader.h"
 #include "slice/slicingengine.h"
 #include "feature/modelcut.h"
-#include "feature/labellingtextpreview.h"
+#include "feature/labelling/labelModel.h"
 #include "feature/autoorientation.h"
 #include "feature/meshrepair.h"
 #include "feature/autoarrange.h"
@@ -85,7 +85,6 @@ public:
 
 
     bool appropriately_rotated=false;
-    //QVector3D m_translation;
 
     // feature hollowshell
     float hollowShellRadius = 0;
@@ -114,7 +113,7 @@ public:
     std::vector<QPhongMaterial*> sphereMaterial;
 
     void removeModelPartList();
-    LabellingTextPreview* labellingTextPreview = nullptr;
+    Hix::Labelling::LabelModel* textPreview = nullptr;
 
     void copyModelAttributeFrom(GLModel* from);
 
@@ -251,14 +250,14 @@ public slots:
     void closeHollowShell();
 
     // Labelling
-    void getTextChanged(QString text, int contentWidth);
+    void getTextChanged(QString text);
     void openLabelling();
     void closeLabelling();
     void stateChangeLabelling();
     void getFontNameChanged(QString fontName);
     void getFontBoldChanged(bool isBold);
     void getFontSizeChanged(int fontSize);
-    void applyLabelInfo(QString text, int contentWidth, QString fontName, bool isBold, int fontSize);
+    void applyLabelInfo(QString text, QString fontName, bool isBold, int fontSize);
     void generateText3DMesh();
 
     // Extension
