@@ -34,7 +34,7 @@ class autoarrange : public QObject {
 public:
     autoarrange();
 
-    std::vector<XYArrangement> arngMeshes(std::vector<const Hix::Engine3D::Mesh*>& meshes, std::vector<const Qt3DCore::QTransform*> m_transform_set);
+    std::vector<XYArrangement> arngMeshes(std::vector<const Hix::Engine3D::Mesh*>& meshes, std::vector<Qt3DCore::QTransform> m_transform_set);
   
 };
 

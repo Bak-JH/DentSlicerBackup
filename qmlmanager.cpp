@@ -236,18 +236,11 @@ GLModel* QmlManager::createModelFile(Mesh* target_mesh, QString fname) {
     qDebug() << "connected model selected signal";
 
     // set initial position
-    float xmid = (latestAdded->getMesh()->x_max() + latestAdded->getMesh()->x_min())/2;
-    float ymid = (latestAdded->getMesh()->y_max() + latestAdded->getMesh()->y_min())/2;
-    float zmid = (latestAdded->getMesh()->z_max() + latestAdded->getMesh()->z_min())/2;
 
-    latestAdded->moveModelMesh(QVector3D(
-                           (-1)*xmid,
-                           (-1)*ymid,
-                           (-1)*latestAdded->getMesh()->z_min()));
+    latestAdded->setZToBed();
 
     emit latestAdded->_updateModelMesh();
 
-    qDebug() << "moved model to right place" << latestAdded->getMesh()->x_min() << latestAdded->getMesh()->y_min() << latestAdded->getMesh()->z_min() << "|" << xmid << ymid << zmid << latestAdded->getTranslation();
 
 	//add to raytracer
 	latestAdded->setHitTestable(true);
@@ -256,7 +249,7 @@ GLModel* QmlManager::createModelFile(Mesh* target_mesh, QString fname) {
 	return latestAdded;
 }
 void QmlManager::openModelFile(QString fname){
-    auto latest = createModelFile(nullptr, fname);
+    auto latest = createModelFile(new Mesh(), fname);
 
     // check for defects
     checkModelFile(latest);
@@ -577,16 +570,10 @@ void QmlManager::cleanselectedModel(int type){
 QVector3D QmlManager::getSelectedCenter()
 {
 	//get full bound
-	float xMid = (selected_x_max() + selected_x_min())/ 2;
-	float yMid = (selected_y_max() + selected_y_min())/ 2;
-	float zMid = (selected_z_max() + selected_z_min())/ 2;
-	return { xMid, yMid, zMid };
+	return getSelectedBound().centre();
 }
 QVector3D QmlManager::selectedModelsLengths(){
-	float xLength = selected_x_max() - selected_x_min();
-	float yLength = selected_y_max() - selected_y_min();
-	float zLength = selected_z_max() - selected_z_min();
-	return { xLength, yLength, zLength};
+	return getSelectedBound().lengths();
 }
 
 
@@ -656,69 +643,16 @@ void QmlManager::resetCursor(){
     QApplication::setOverrideCursor(QCursor(Qt::ArrowCursor));
 }
 
-float QmlManager::selected_x_max() {
-	float max = std::numeric_limits<float>::lowest();
-	for (auto each : selectedModels)
-	{
-		auto currMax = each->getTransform()->translation().x() + each->getMesh()->x_max();
-		if (max < currMax)
-			max = currMax;
-    }
-    return max;
-}
-float QmlManager::selected_y_max() {
 
-	float max = std::numeric_limits<float>::lowest();
-	for (auto each : selectedModels)
+Hix::Engine3D::Bounds3D QmlManager::getSelectedBound()const
+{
+	Hix::Engine3D::Bounds3D bound;
+	for (auto& selected : selectedModels)
 	{
-		auto currMax = each->getTransform()->translation().y() + each->getMesh()->y_max();
-		if (max < currMax)
-			max = currMax;
+		bound += selected->recursiveAabb();
 	}
-	return max;
+	return bound;
 }
-float QmlManager::selected_z_max() {
-	float max = std::numeric_limits<float>::lowest();
-	for (auto each : selectedModels)
-	{
-		auto currMax = each->getTransform()->translation().z() + each->getMesh()->z_max();
-		if (max < currMax)
-			max = currMax;
-	}
-	return max;
-}
-float QmlManager::selected_x_min() {
-	float min = std::numeric_limits<float>::max();
-	for (auto each : selectedModels)
-	{
-		auto currMin = each->getTransform()->translation().x() + each->getMesh()->x_min();
-		if (min > currMin)
-			min = currMin;
-	}
-	return min;
-}
-float QmlManager::selected_y_min() {
-	float min = std::numeric_limits<float>::max();
-	for (auto each : selectedModels)
-	{
-		auto currMin = each->getTransform()->translation().y() + each->getMesh()->y_min();
-		if (min > currMin)
-			min = currMin;
-	}
-	return min;
-}
-float QmlManager::selected_z_min() {
-	float min = std::numeric_limits<float>::max();
-	for (auto each : selectedModels)
-	{
-		auto currMin = each->getTransform()->translation().z() + each->getMesh()->z_min();
-		if (min > currMin)
-			min = currMin;
-	}
-	return min;
-}
-
-
 
 
 
@@ -767,32 +701,32 @@ void QmlManager::runArrange_internal(){
 
     for(auto& pair : glmodels)
     {
-        auto model = &pair.second;
-        qDebug() << "before " <<model->getTranslation();
+        const auto* const model = &pair.second;
+        qDebug() << "before " <<model->transform().translation();
     }
     if (glmodels.size()>=2){
         std::vector<XYArrangement> arng_result_set;
         std::vector<const Mesh*> meshes_to_arrange;
-		std::vector<const Qt3DCore::QTransform*> m_transform_set;
+		std::vector<Qt3DCore::QTransform> m_transform_set;
 
-        for(auto& pair : glmodels)
-        {
-            auto model = &pair.second;
-            meshes_to_arrange.push_back(model->getMesh());
-            m_transform_set.push_back(model->getTransform());
-        }
+   //     for(auto& pair : glmodels)
+   //     {
+			//const auto* const  model = &pair.second;
+   //         meshes_to_arrange.push_back(model->getMesh());
+   //         m_transform_set.push_back(model->transform());
+   //     }
 
-        autoarrange* ar;
-        arng_result_set = ar->arngMeshes(meshes_to_arrange, m_transform_set);
-        std::vector<QVector3D> translations;
-        std::vector<float> rotations;
-        for (size_t i=0; i<arng_result_set.size(); i++){
-            XYArrangement arng_result = arng_result_set[i];
-            QVector3D trans_vec = QVector3D(arng_result.first.X/100, arng_result.first.Y/100, 0);
-            translations.push_back(trans_vec);
-            rotations.push_back(arng_result.second);
-        }
-        emit arrangeDone(translations, rotations);
+   //     autoarrange* ar;
+   //     arng_result_set = ar->arngMeshes(meshes_to_arrange, m_transform_set);
+   //     std::vector<QVector3D> translations;
+   //     std::vector<float> rotations;
+   //     for (size_t i=0; i<arng_result_set.size(); i++){
+   //         XYArrangement arng_result = arng_result_set[i];
+   //         QVector3D trans_vec = QVector3D(arng_result.first.X/100, arng_result.first.Y/100, 0);
+   //         translations.push_back(trans_vec);
+   //         rotations.push_back(arng_result.second);
+   //     }
+   //     emit arrangeDone(translations, rotations);
 
         //ar->arrangeQt3D(m_transform_set, arng_result_set);
         //ar->arrangeGlmodels(&glmodel);
@@ -805,8 +739,7 @@ void QmlManager::applyArrangeResult(std::vector<QVector3D> translations, std::ve
     for(auto& pair : glmodels)
     {
         auto model = &pair.second;
-        model->moveModelMesh(translations[index], true);
-        //model->rotateModelMesh(3, rotations[index], true);
+        model->moveModel(translations[index]);
         ++index;
     }
 
@@ -824,8 +757,8 @@ GLModel* QmlManager::findGLModelByName(QString filename){
     for(auto& pair : glmodels)
     {
         auto model = &pair.second;
-        qDebug() << "finding " << filename << model->filename;
-        if (model->filename == filename){
+        qDebug() << "finding " << filename << model->filename();
+        if (model->filename() == filename){
             return model;
         }
     }
@@ -923,7 +856,7 @@ bool QmlManager::multipleModelSelected(int ID){
     target->changeColor(Hix::Render::Colors::Selected);
     qDebug() << "multipleModelSelected invoke";
     QMetaObject::invokeMethod(partList, "selectPartByModel", Q_ARG(QVariant, target->ID));
-    QMetaObject::invokeMethod(yesno_popup, "addPart", Q_ARG(QVariant, target->getFileName(target->filename.toStdString().c_str())), Q_ARG(QVariant, target->ID));
+    QMetaObject::invokeMethod(yesno_popup, "addPart", Q_ARG(QVariant, target->getFileName(target->filename().toStdString().c_str())), Q_ARG(QVariant, target->ID));
     qDebug() << "[multi model selected] b box center"; //<< xmid << " " << ymid << " " << zmid ;
 
     sendUpdateModelInfo();
@@ -1085,7 +1018,7 @@ void QmlManager::modelSelected(int ID){
 		qDebug() << "modelSelected invoke";
 		QMetaObject::invokeMethod(partList, "selectPartByModel", Q_ARG(QVariant, target->ID));
 		QMetaObject::invokeMethod(yesno_popup, "addPart", Q_ARG(QVariant, 
-			target->getFileName(target->filename.toStdString().c_str())), Q_ARG(QVariant, ID));
+			target->getFileName(target->filename().toStdString().c_str())), Q_ARG(QVariant, ID));
 		qDebug() << "changing model" << target->ID;
 		qDebug() << "[model selected] b box center"; //<< xmid << " " << ymid << " " << zmid ;
 
@@ -1233,54 +1166,29 @@ RayCastController& QmlManager::getRayCaster()
 	return _rayCastController;
 }
 
-
-
-void QmlManager::modelMoveInit(){
-
-}
-
-void QmlManager::modelMoveDone(){
-    if (selectedModels.empty())
-        return;
-	QMetaObject::invokeMethod(boundedBox, "hideBox"); // Bounded Box
-	_widgetManager.setWidgetMode(WidgetMode::None);
-	sendUpdateModelInfo();
-
-
-
-}
-
 void QmlManager::totalMoveDone(){
-    for (GLModel* curModel : selectedModels){
-        if (curModel == nullptr)
-            continue;
-        if (curModel->getTransform()->translation().isNull()){
-            continue;
-        }
-		curModel->moveDone();
+	for (auto each : selectedModels)
+	{
+		each->moveDone();
     }
     sendUpdateModelInfo();
 	_widgetManager.updatePosition();
 }
 
-void QmlManager::modelRotateInit(){
-    return;
-}
-
-
 void QmlManager::totalRotateDone(){
-    qDebug() << "total rotate done" << selectedModels.size();
 	for (auto each : selectedModels)
 	{
-		qDebug() << each->getTransform()->rotation();
-		if (each->getTransform()->rotation().isIdentity()) {
-			qDebug() << "equals identity so don't save";
-			continue;
-		}
-		each->rotationDone();
-
+		each->rotateDone();
 	}
     sendUpdateModelInfo();
+}
+
+void QmlManager::totalScaleDone() {
+	for (auto each : selectedModels)
+	{
+		each->scaleDone();
+	}
+	sendUpdateModelInfo();
 }
 
 void QmlManager::modelMoveWithAxis(QVector3D axis, double distance) { // for QML Signal -> float is not working in qml signal parameter
@@ -1293,47 +1201,16 @@ void QmlManager::modelMove(QVector3D displacement)
 	QVector3D bndCheckedDisp;
 	const auto& printBound = scfg->bedBound();
 	for (auto selectedModel : selectedModels) {
-		auto mesh = selectedModel->getMesh();
-		auto totalDisp = displacement + selectedModel->getTranslation();
-		bndCheckedDisp = printBound.displaceWithin(mesh->bounds(), totalDisp);
-		bndCheckedDisp.setZ(selectedModel->getTransform()->translation().z()); //TODO
-		selectedModel->setTranslation(bndCheckedDisp);
+		bndCheckedDisp = printBound.displaceWithin(selectedModel->recursiveAabb(), displacement);
+		selectedModel->moveModel(bndCheckedDisp);
 	}
 }
 void QmlManager::modelRotateWithAxis(const QVector3D& axis, double angle)
 {
 	auto axis4D = axis.toVector4D();
 	for (auto selectedModel : selectedModels) {
-		QVector3D transl = selectedModel->getTransform()->translation();
-		//selectedModel->getTransform()->setTranslation(selectedModel->m_translation);
-		QVector3D rot_center = QVector3D((selectedModel->getMesh()->x_max() + selectedModel->getMesh()->x_min()) / 2,
-			(selectedModel->getMesh()->y_max() + selectedModel->getMesh()->y_min()) / 2,
-			(selectedModel->getMesh()->z_max() + selectedModel->getMesh()->z_min()) / 2);
-		auto transform = selectedModel->getTransform();
-		QMatrix4x4 rot;
-		auto rotationVec = selectedModel->getTransform()->rotation().vector() ;
-		auto origRot = QVector3D::dotProduct(rotationVec, axis); // get angle of rotation for that axis
-		if (QApplication::queryKeyboardModifiers() & Qt::ShiftModifier) {// snap mode
-			rotateSnapAngle = (rotateSnapAngle + (int)std::round(angle) + 360) % 360;
-			if (rotateSnapAngle > 0 && rotateSnapAngle < 90) {
-				rot = Qt3DCore::QTransform::rotateAround(rot_center, rotateSnapAngle - origRot, (axis4D * transform->matrix()).toVector3D());
-			}
-			else if (rotateSnapAngle > 90 && rotateSnapAngle < 180) {
-				rot = Qt3DCore::QTransform::rotateAround(rot_center, rotateSnapAngle + 90 - origRot, (axis4D * transform->matrix()).toVector3D());
-			}
-			else if (rotateSnapAngle > 180 && rotateSnapAngle < 270) {
-				rot = Qt3DCore::QTransform::rotateAround(rot_center, rotateSnapAngle + 180 - origRot, (axis4D * transform->matrix()).toVector3D());
-			}
-			else if (rotateSnapAngle > 270 && rotateSnapAngle < 360) {
-				rot = Qt3DCore::QTransform::rotateAround(rot_center, rotateSnapAngle + 270 - origRot, (axis4D * transform->matrix()).toVector3D());
-			}
-		}
-		else
-		{
-			qDebug() << angle;
-			rot = Qt3DCore::QTransform::rotateAround(rot_center, angle, axis);
-		}
-		selectedModel->setMatrix(selectedModel->getTransform()->matrix() * rot);
+		auto rotation = QQuaternion::fromAxisAndAngle(axis, angle);
+		selectedModel->rotateModel(rotation);
 		selectedModel->updatePrintable();
 
 	}
@@ -1357,39 +1234,21 @@ void QmlManager::modelMoveByNumber(int axis, int X, int Y){
     if (selectedModels.empty())
         return;
 
+	QVector3D displacement(X, Y, 0);
 	for (auto selectedModel : selectedModels) {
-		QVector3D tmp = selectedModel->getTransform()->translation();
-        int targetX, targetY;
-
-        targetX = tmp.x() + X;
-        targetY = tmp.y() + Y;
-
-        if(tmp.x() + selectedModel->getMesh()->x_max() +1 + X> 80/2 )
-            targetX = tmp.x() - (tmp.x() + selectedModel->getMesh()->x_max() - scfg->bedX()/2 + 1);
-        if(tmp.x() + selectedModel->getMesh()->x_min() -1 + X< - 80/2 )
-            targetX = tmp.x() - (tmp.x() + selectedModel->getMesh()->x_min() + scfg->bedX()/2 - 1);
-
-        if(tmp.y() + selectedModel->getMesh()->y_max() +1 + Y> 80/2 )
-            targetY = tmp.y() - (tmp.y() + selectedModel->getMesh()->y_max() - scfg->bedY()/2 + 1);
-        if(tmp.y() + selectedModel->getMesh()->y_min() -1 + Y< - 80/2 )
-            targetY = tmp.y() - (tmp.y() + selectedModel->getMesh()->y_min() + scfg->bedY()/2 - 1);
-
-        selectedModel->setTranslation(QVector3D(targetX, targetY, tmp.z()));
-        //selectedModel->moveModelMesh(QVector3D(targetX,targetY,tmp.z()));
+		selectedModel->moveModel(displacement);
+		selectedModel->moveDone();
     }
 
-    modelMoveDone();
 }
 void QmlManager::modelRotateByNumber(int mode,  int X, int Y, int Z){
     if (selectedModels.empty())
         return;
 
 	for (auto selectedModel : selectedModels) {
-		QVector3D rot_center = QVector3D((selectedModel->getMesh()->x_max()+selectedModel->getMesh()->x_min())/2,
-                                                  (selectedModel->getMesh()->y_max()+selectedModel->getMesh()->y_min())/2,
-                                                  (selectedModel->getMesh()->z_max()+selectedModel->getMesh()->z_min())/2);
-        selectedModel->rotateAroundPt(rot_center, (float)X, (float)Y, (float)Z);
-		selectedModel->updatePrintable();
+		auto rotation = QQuaternion::fromEulerAngles(X,Y,Z);
+		selectedModel->rotateModel(rotation);
+		selectedModel->rotateDone();
     }
 }
 void QmlManager::resetLayflat(){
@@ -1517,7 +1376,8 @@ void QmlManager::runGroupFeature(int ftrType, QString state, double arg1, double
 			float scaleY = arg2;
 			float scaleZ = arg3;
 			for (auto selectedModel : selectedModels) {
-				selectedModel->scaleModelMesh(scaleX, scaleY, scaleZ);
+				selectedModel->scaleModel(QVector3D(scaleX, scaleY, scaleZ));
+				selectedModel->scaleDone();
 			}
             sendUpdateModelInfo();
         } else {
@@ -1552,7 +1412,7 @@ void QmlManager::copyModel(){
         Mesh* copied = new Mesh( *model->getMesh());
 
         copyMeshes.push_back(copied);
-        copyMeshNames.push_back(model->filename);
+        copyMeshNames.push_back(model->filename());
         /*foreach (MeshFace mf, model->getMesh()->faces){
             copyMesh->addFace(model->getMesh()->idx2MV(mf.mesh_vertex[0]).position, model->getMesh()->idx2MV(mf.mesh_vertex[1]).position, model->getMesh()->idx2MV(mf.mesh_vertex[2]).position, mf.idx);
         }
@@ -1805,24 +1665,14 @@ Hix::Tasking::GenericTask* QmlManager::exportSelectedAsync(QString exportPath, b
 
 		
 		// need to generate support, raft
-		std::vector<const GLModel*> constSelectedModels;
-		constSelectedModels.reserve(selectedModels.size());
-		//TODO: make this...neater
-		float zMin = std::numeric_limits<float>::max();
-		for (auto each : selectedModels)
-		{
-			constSelectedModels.emplace_back(each);
-			if (each->raftSupportGenerated())
-			{
-				auto bot = each->supportRaftManager().raftBottom();
-				if (zMin > bot)
-					zMin = bot;
-			}
-		}
-		auto noSuppMin = selected_z_min();
-		if (zMin > noSuppMin)
-			zMin = noSuppMin;
-		auto result = SlicingEngine::sliceModels(isTemp, subflow, selected_z_max(), zMin, constSelectedModels, exportPath);
+		std::vector<const GLModel*> constSelectedModels(selectedModels.cbegin(), selectedModels.cend());
+		//constSelectedModels.reserve(selectedModels.size());
+		//for (auto each : selectedModels)
+		//{
+		//	constSelectedModels.emplace_back(each);
+		//}
+		auto selectedBound = getSelectedBound();
+		auto result = SlicingEngine::sliceModels(isTemp, subflow, selectedBound.zMax(), selectedBound.zMin(), constSelectedModels, exportPath);
 
 		QMetaObject::invokeMethod(layerViewSlider, "setThickness", Q_ARG(QVariant, (scfg->layer_height)));
 		QMetaObject::invokeMethod(layerViewSlider, "setLayerCount", Q_ARG(QVariant, (result.layerCount -1))); //0 based index
@@ -1922,9 +1772,7 @@ void QmlManager::generateAutoSupport()
 		selectedModel->updateModelMesh();
 		if (scfg->support_type != SlicingConfiguration::SupportType::None)
 		{
-			auto translation = selectedModel->getTranslation();
-			translation.setZ(-1.0f * selectedModel->supportRaftManager().raftBottom());
-			selectedModel->setTranslation(translation);
+			selectedModel->moveModel(QVector3D(0, 0, -selectedModel->supportRaftManager().raftBottom()));
 		}
 	}
 }

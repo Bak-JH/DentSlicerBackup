@@ -49,7 +49,8 @@ void Hix::Support::SupportRaftManager::generateSuppAndRaft(SlicingConfiguration:
 	_raftExist = true;
 	_supportType = supType;
 	_raftType = raftType;
-	_overhangs = Hix::OverhangDetect::detectOverhang(_owner->getMesh());
+	Hix::OverhangDetect::Detector detector;
+	_overhangs = detector.detectOverhang(_owner->getMesh());
 	generateSupport();
 	generateRaft();
 

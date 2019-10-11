@@ -38,7 +38,7 @@ using namespace Hix::Render;
 GLModel::GLModel(QObject* mainWindow, QEntity*parent, Mesh* loadMesh, QString fname, int id)
     : SceneEntityWithMaterial(parent)
 	, _supportRaftManager(this)
-    , filename(fname)
+    , _filename(fname)
     , mainWindow(mainWindow)
     , cutMode(1)
     , ID(id)
@@ -51,17 +51,14 @@ GLModel::GLModel(QObject* mainWindow, QEntity*parent, Mesh* loadMesh, QString fn
 	_meshMaterial.setColor(Hix::Render::Colors::Default);
 
 	qmlManager->addPart(getFileName(fname.toStdString().c_str()), ID);
-	if (filename != "" && (filename.contains(".stl") || filename.contains(".STL"))\
-		&& loadMesh == nullptr) {
-		FileLoader::loadMeshSTL(_mesh, filename.toLocal8Bit().constData());
+	if (_filename != "" && (_filename.contains(".stl") || _filename.contains(".STL"))) {
+		FileLoader::loadMeshSTL(loadMesh, _filename.toLocal8Bit().constData());
 	}
-	else if (filename != "" && (filename.contains(".obj") || filename.contains(".OBJ"))\
-		&& loadMesh == nullptr) {
-		FileLoader::loadMeshOBJ(_mesh, filename.toLocal8Bit().constData());
+	else if (_filename != "" && (_filename.contains(".obj") || _filename.contains(".OBJ"))) {
+		FileLoader::loadMeshOBJ(loadMesh, _filename.toLocal8Bit().constData());
 	}
-	else {
-		setMesh(loadMesh);
-	}
+	loadMesh->centerMesh();
+	setMesh(loadMesh);
 	//applyGeometry();
 	// 승환 25%
 	qmlManager->setProgress(0.23);
@@ -99,72 +96,54 @@ GLModel::GLModel(QObject* mainWindow, QEntity*parent, Mesh* loadMesh, QString fn
 
 
 
-void GLModel::moveModelMesh(QVector3D direction, bool update) {
-	_mesh->vertexMove(direction);
-	qDebug() << "moved vertex";
-	if (update)
-	{
-		updateModelMesh();
-	}
+void GLModel::moveModel(const QVector3D& displacement) {
+	auto translation = _transform.translation() + displacement;
+	_transform.setTranslation(translation);
+	_aabb.translate(displacement);
+}
+void GLModel::rotateModel(const QQuaternion& rotation) {
+	auto newRot = rotation * _transform.rotation();
+	_transform.setRotation(newRot);
 }
 
 
+void GLModel::scaleModel(const QVector3D& scales) {
+	auto newScales = _transform.scale3D() * scales; //this is NOT cross product
+	_aabb.translate(-_transform.translation());
+	_aabb.scale(QVector3D(1.0f, 1.0f, 1.0f)/_transform.scale3D());
+	_aabb.scale(newScales);
+	_aabb.translate(_transform.translation());
+	_transform.setScale3D(newScales);
+}
 void GLModel::moveDone()
 {
 	updatePrintable();
-	updateModelMesh();
 }
-void GLModel::rotationDone()
+
+
+void GLModel::rotateDone()
 {
+	updateRecursiveAabb();
 	setZToBed();
 	updatePrintable();
-	updateModelMesh();
 }
-
-
-
-void GLModel::rotateAroundPt(QVector3D& rot_center, float X, float Y, float Z)
+void GLModel::scaleDone()
 {
-	QMatrix4x4 rot;
-	rot = _transform.rotateAround(rot_center, X, (QVector3D(1, 0, 0).toVector4D() * _transform.matrix()).toVector3D());
-	_transform.setMatrix(_transform.matrix() * rot);
-	rot = _transform.rotateAround(rot_center, Y, (QVector3D(0, 1, 0).toVector4D() * _transform.matrix()).toVector3D());
-	_transform.setMatrix(_transform.matrix() * rot);
-	rot = _transform.rotateAround(rot_center, Z, (QVector3D(0, 0, 1).toVector4D() * _transform.matrix()).toVector3D());
-	_transform.setMatrix(_transform.matrix() * rot);
 
 	setZToBed();
-	updateModelMesh();
-}
-
-void GLModel::rotateAroundPt(QVector3D& rot_center, const QVector3D& axis, float angle)
-{
-	QMatrix4x4 rot;
-	rot = _transform.rotateAround(rot_center, angle, axis);
-	_transform.setMatrix(_transform.matrix() * rot);
-	setZToBed();
-	updateModelMesh();
-}
-
-
-
-
-
-void GLModel::scaleModelMesh(float scaleX, float scaleY, float scaleZ) {
-	/* To fix center of the model */
-	float centerX = (_mesh->x_max() + _mesh->x_min()) / 2;
-	float centerY = (_mesh->y_max() + _mesh->y_min()) / 2;
-	_mesh->vertexScale(scaleX, scaleY, scaleZ, centerX, centerY);
 	updatePrintable();
-	updateModelMesh();
+
 }
+
 
 void GLModel::setZToBed()
 {
-	auto translation = getTranslation();
-	translation.setZ(-1.0f * getMesh()->z_min());
-	setTranslation(translation);
+	moveModel(QVector3D(0, 0, -_aabb.zMin()));
+}
 
+QString GLModel::filename() const
+{
+	return _filename;
 }
 
 
@@ -178,7 +157,7 @@ void GLModel::changeColor(const QVector3D& color){
 bool GLModel::isPrintable()const
 {
 	const auto& bedBound = scfg->bedBound();
-	return bedBound.contains(_mesh->bounds());
+	return bedBound.contains(_aabb);
 }
 
 void GLModel::updatePrintable() {
@@ -321,22 +300,23 @@ void GLModel::modelCut(){
 }
 
 void GLModel::generateRLModel(Mesh* lmesh, Mesh* rmesh){
+	GLModel* leftmodel = nullptr;
+	GLModel* rightmodel = nullptr;
     qDebug() << "** generateRLModel" << this;
     if (lmesh->getFaces().size() != 0){
-        qmlManager->createModelFile(lmesh, filename+"_l");
+		leftmodel = qmlManager->createModelFile(lmesh, _filename+"_l");
         qDebug() << "leftmodel created";
     }
     // 승환 70%
     qmlManager->setProgress(0.72);
     if (rmesh->getFaces().size() != 0){
-        qmlManager->createModelFile(rmesh, filename+"_r");
+		rightmodel = qmlManager->createModelFile(rmesh, _filename +"_r");
         qDebug() << "rightmodel created";
     }
 
 
     // 승환 90%
-    GLModel* leftmodel = qmlManager->findGLModelByName(filename+"_l");
-    GLModel* rightmodel = qmlManager->findGLModelByName(filename+"_r");
+
     qDebug() << "found models : " << leftmodel << rightmodel;
     if (leftmodel != nullptr && rightmodel != nullptr){
         leftmodel->twinModel = rightmodel;
@@ -350,7 +330,7 @@ void GLModel::generateRLModel(Mesh* lmesh, Mesh* rmesh){
 		{
 			auto offsetLeftMesh = ShellOffset::shellOffset(leftmodel->_mesh, (float)shellOffsetFactor);
 
-			qmlManager->createModelFile(offsetLeftMesh, leftmodel->filename);
+			qmlManager->createModelFile(offsetLeftMesh, leftmodel->filename());
 
 			qmlManager->deleteModelFile(leftmodel->ID);
 
@@ -380,9 +360,9 @@ void GLModel::indentHollowShell(double radius){
 		return;
 	auto meshVertices = targetMeshFace.meshVertices();
     QVector3D center = (
-		meshVertices[0].position() +
-		meshVertices[1].position() + 
-		meshVertices[2].position())/3;
+		meshVertices[0].localPosition() +
+		meshVertices[1].localPosition() +
+		meshVertices[2].localPosition())/3;
 	HollowShell::hollowShell(_mesh, targetMeshFace, center, radius);
 }
 
@@ -435,7 +415,7 @@ void GLModel::clicked(MouseEventData& pick, const Qt3DRender::QRayCasterHit& hit
 		qDebug() << "found parent meshface";
 		// translate hollowShellSphere to mouse position
 		QVector3D v = hit.localIntersection();
-        qmlManager->hollowShellSphereTransform->setTranslation(v + m_transform.translation());
+        qmlManager->hollowShellSphereTransform->setTranslation(v + _transform.translation());
 
 
 	}
@@ -495,7 +475,6 @@ bool GLModel::isDraggable(Hix::Input::MouseEventData& e,const Qt3DRender::QRayCa
 void GLModel::dragStarted(Hix::Input::MouseEventData& e, const Qt3DRender::QRayCasterHit& hit)
 {
 	_supportRaftManager.clear();
-	setZToBed();
 	lastpoint = hit.localIntersection();
 	prevPoint = (QVector2D)e.position;
 	qmlManager->moveButton->setProperty("state", "active");
@@ -709,7 +688,7 @@ void GLModel::applyLabelInfo(QString text, QString fontName, bool isBold, int fo
 	qDebug() << "label apply";
 
     if (textPreview && labellingActive){
-		textPreview->generateLabel(text, _mesh, targetMeshFace.fn(), 0.025f);
+		textPreview->generateLabel(text, _mesh, targetMeshFace.localFn(), 0.025f);
 		updateModelMesh();
     }
     }
@@ -751,7 +730,7 @@ void GLModel:: unselectMeshFaces(){
 }
 void GLModel::selectMeshFaces(){
 	selectedFaces.clear();
-	QVector3D normal = targetMeshFace.fn();
+	QVector3D normal = targetMeshFace.localFn();
 	_mesh->findNearSimilarFaces(normal, targetMeshFace, selectedFaces);
 	updateMesh(_mesh, true);
 }
@@ -767,14 +746,10 @@ void GLModel::generateLayFlat(){
     if(!_targetSelected)
         return;
 	unselectMeshFaces();
-	constexpr QVector3D toBottNormal(0, 0, -1);
-	auto rotationTo = QQuaternion::rotationTo(targetMeshFace.fn(), toBottNormal);
-	auto rotCenter = _mesh->bounds().centre();
-	QVector3D rotAxis;
-	float angle;
-	rotationTo.getAxisAndAngle(&rotAxis, &angle);
-	rotateAroundPt(rotCenter, rotAxis, angle);
-	setZToBed();
+	constexpr QVector3D worldBot(0, 0, -1);
+	auto localBotNorml = toLocalCoord(worldBot);
+	auto rotationTo = QQuaternion::rotationTo(targetMeshFace.localFn(), localBotNorml);
+	_transform.setRotation(_transform.rotation() * rotationTo);
 	emit resetLayflat();
 }
 
@@ -784,7 +759,7 @@ void GLModel::generateShellOffset(double factor){
     //saveUndoState();
     qDebug() << "generate shell Offset";
     qmlManager->openProgressPopUp();
-    QString original_filename = filename;
+    QString original_filename = _filename;
 
     cutMode = 1;
     cutFillMode = 1;
@@ -808,7 +783,7 @@ void GLModel::closeLayflat(){
         return;
     layflatActive = false;
 	_meshMaterial.changeMode(Hix::Render::ShaderMode::SingleColor);
-	updatePrintable();
+	rotateDone();
 	updateMesh(_mesh, true);
     unselectMeshFaces();
 	_targetSelected = false;

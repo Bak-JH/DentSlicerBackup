@@ -67,6 +67,7 @@ class GLModel : public Hix::Render::SceneEntityWithMaterial, public Hix::Input::
 {
     Q_OBJECT
 public:
+
     //probably interface this as well
 	void clicked	(Hix::Input::MouseEventData&,const Qt3DRender::QRayCasterHit&) override;
 	bool isDraggable(Hix::Input::MouseEventData& v,const Qt3DRender::QRayCasterHit&) override;
@@ -171,20 +172,19 @@ public:
 
 	//TODO: remove these
 	// Model Mesh move, rotate, scale
-	void moveModelMesh(QVector3D direction, bool update = true);
+	void moveModel(const QVector3D& displacement);
+	void rotateModel(const QQuaternion& rotation);
+	void scaleModel(const QVector3D& scale);
 	void moveDone();
-	void rotationDone();
-	void rotateAroundPt(QVector3D& rot_center, float X, float Y, float Z);
-	void rotateAroundPt(QVector3D& rot_center, const QVector3D& axis, float angle);
-
-	
-	void scaleModelMesh(float scaleX, float scaleY, float scaleZ);
+	void rotateDone();
+	void scaleDone();
 	void setZToBed();
+	QString filename()const;
 protected:
 	void initHitTest()override;
 
 private:
-	QString filename;
+	QString _filename;
 
 	//cutting
 	std::unique_ptr<Hix::Features::Cut::DrawingPlane> _cuttingPlane;

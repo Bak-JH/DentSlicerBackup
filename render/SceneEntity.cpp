@@ -139,12 +139,12 @@ Qt3DCore::QTransform& Hix::Render::SceneEntity::transform()
 
 QVector3D Hix::Render::SceneEntity::toParentCoord(const QVector3D& childPos) const
 {
-	return childPos * _transform.matrix().inverted();
+	return  _transform.matrix() * childPos;
 }
 
 QVector3D Hix::Render::SceneEntity::fromParentCoord(const QVector3D& parentPos) const
 {
-	return parentPos * _transform.matrix();
+	return _transform.matrix().inverted() * parentPos;
 }
 
 QVector3D Hix::Render::SceneEntity::toRootCoord(const QVector3D& local) const
@@ -186,6 +186,7 @@ void Hix::Render::SceneEntity::setMesh(Hix::Engine3D::Mesh* newMesh)
 			clearMesh();
 		_mesh = newMesh;
 		_mesh->setSceneEntity(this);
+		updateRecursiveAabb();
 		updateEntireMesh(_mesh);
 	}
 }
@@ -460,3 +461,41 @@ void SceneEntity::appendMeshVertex(const Mesh* mesh,
 	colorAttribute.setCount(currCount);
 
 }
+
+
+
+const Hix::Engine3D::Bounds3D& SceneEntity::aabb()const
+{
+
+	return _aabb;
+}
+
+ Hix::Engine3D::Bounds3D SceneEntity::recursiveAabb()const
+{
+	auto totalAABB = _aabb;
+	for (auto child : childNodes())
+	{
+		auto childEntity = dynamic_cast<SceneEntity*>(child);
+		if (childEntity)
+		{
+			totalAABB += childEntity->recursiveAabb();
+		}
+	}
+	return totalAABB;
+}
+
+
+void SceneEntity::updateRecursiveAabb()
+{
+	//expensive operation to re-calculate bounding box, but necessary
+	_aabb = Bounds3D(*this);
+	for (auto child : childNodes())
+	{
+		auto childEntity = dynamic_cast<SceneEntity*>(child);
+		if (childEntity)
+		{
+			childEntity->updateRecursiveAabb();
+		}
+	}
+}
+

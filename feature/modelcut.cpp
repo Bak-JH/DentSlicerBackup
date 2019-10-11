@@ -693,7 +693,7 @@ void bisectModelByPlane(Mesh* leftMesh, Mesh* rightMesh, Mesh* mesh, float plane
 		meshVertices.clear();
         for (int i = 0; i < 3; i++) {
 			const auto& mvs = mf.meshVertices();
-            QVector3D vertex = mvs[i].position();
+            QVector3D vertex = mvs[i].worldPosition();
             Custom3DPoint customVertex;
             customVertex.x = int(vertex.x() * padding); customVertex.y = int(vertex.y() * padding); customVertex.z = int(vertex.z() * padding);
             meshVertices.push_back(customVertex);
@@ -1004,7 +1004,7 @@ void cutAway(Mesh* leftMesh, Mesh* rightMesh, Mesh* mesh, std::vector<QVector3D>
 		auto mvs = mf.meshVertices();
         meshVertices.clear();
         for (i = 0; i < 3; i++) {
-            QVector3D vertex = mvs[i].position();
+            QVector3D vertex = mvs[i].worldPosition();
             Custom3DPoint customVertex;
             customVertex.x = int(vertex.x() * padding); customVertex.y = int(vertex.y() * padding); customVertex.z = int(vertex.z() * padding);
             meshVertices.push_back(customVertex);
