@@ -140,10 +140,7 @@ ContourSegment::FlipResult ContourSegment::calcNormalAndFlip()
 {
 
 	//determine direction
-	QVector3D faceNormal = face.worldFn();
-	faceNormal.setZ(0.0f);
-	faceNormal.normalize();
-
+	QVector2D faceNormal(face.worldFn());
 	QVector2D ABNormal = to - from;
 	rotateCW90(ABNormal);
 	ABNormal.normalize();

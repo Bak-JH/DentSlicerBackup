@@ -124,7 +124,6 @@ namespace Hix
 
 			/********************** Mesh Edit Functions***********************/
 			void vertexOffset(float factor);
-			void vertexMove(QVector3D direction);
 			void centerMesh();
 			void vertexRotate(QMatrix4x4 tmpmatrix);
 			void vertexScale(float scaleX, float scaleY, float scaleZ, float centerX, float centerY);
@@ -173,7 +172,7 @@ namespace Hix
 			QVector3D toWorld(const QVector3D& local)const;
 			QVector3D toLocal(const QVector3D& world)const;
 		private:
-
+			void vertexMove(const QVector3D& direction);
 			const Render::SceneEntity* _entity = nullptr;
 			/********************** Helper Functions **********************/
             //set twin relationship for this edge as well as matching twin edge
@@ -192,6 +191,8 @@ namespace Hix
 			TrackedIndexedList<MeshVertex, std::allocator<MeshVertex>, VertexItrFactory> vertices;
 			TrackedIndexedList<HalfEdge, std::allocator<HalfEdge>, HalfEdgeItrFactory> halfEdges;
 			TrackedIndexedList<MeshFace, std::allocator<MeshFace>, FaceItrFactory> faces;
+
+			//axis aligned bound box, needs to be recalculated even when just transform changed.
 			Bounds3D _bounds;
 			
 

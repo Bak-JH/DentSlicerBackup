@@ -58,7 +58,6 @@ void Hix::UI::MoveWidget::dragStarted(Hix::Input::MouseEventData& e, const Qt3DR
 	_mouseOrigin = e.position;
 	_mousePrev = e.position;
 	_mouseCurrent = e.position;
-	qmlManager->modelMoveInit();
 	_pastProj = calculateMove();
 }
 

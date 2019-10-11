@@ -41,7 +41,6 @@ namespace Hix
 			//for now, one sceneEntity per mesh, no setter for mesh in sceneEntity
 			const Hix::Engine3D::Mesh* getMesh()const;
 			const Qt3DCore::QTransform& transform() const;
-			Qt3DCore::QTransform& transform();
 			QVector3D toParentCoord(const QVector3D& childPos)const;
 			QVector3D fromParentCoord(const QVector3D& parentPos)const;
 
@@ -61,8 +60,17 @@ namespace Hix
 			virtual void appendMeshVertex(const Hix::Engine3D::Mesh* mesh,
 				Hix::Engine3D::FaceConstItr begin, Hix::Engine3D::FaceConstItr end);
 
+			//get this model's axis aligned bounding box
+			const Hix::Engine3D::Bounds3D& aabb()const;
+			//get total AABB including it's children
+			Hix::Engine3D::Bounds3D recursiveAabb()const;
+			void updateRecursiveAabb();
 
 		protected:
+			//modifiable transform, cannot be accessed by other classes
+			Qt3DCore::QTransform& transform();
+			//Axis aligned bounding box
+			Hix::Engine3D::Bounds3D _aabb;
 
 			Qt3DCore::QTransform _transform;
 			void clearMem();

@@ -299,7 +299,7 @@ namespace Hix
 			const QVector3D& worldFn() const
 			{
 				auto fn = localFn();
-				fn = toWorld(fn);
+				fn = ParentType::_owner->toWorld(fn);
 				fn.normalize();
 				return fn;
 			}

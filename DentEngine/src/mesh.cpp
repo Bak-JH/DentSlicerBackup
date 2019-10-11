@@ -231,6 +231,20 @@ void Mesh::vertexOffset(float factor){
 	};
 }
 
+void Mesh::vertexMove(const QVector3D& direction) {
+	vertices.markChangedAll();
+	size_t count = 0;
+	for (auto& vertex : vertices)
+	{
+		if (count % 100 == 0)
+			QCoreApplication::processEvents();
+		QVector3D tmp = direction + vertex.position;
+		vertex.position = tmp;
+		++count;
+	};
+	_bounds.translate(direction);
+
+}
 
 void Mesh::centerMesh(){
     float x_center = (x_max() + x_min())/2;

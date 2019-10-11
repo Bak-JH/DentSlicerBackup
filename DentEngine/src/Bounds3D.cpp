@@ -1,5 +1,5 @@
 #include "Bounds3D.h"
-
+#include "../render/SceneEntity.h"
 using namespace Hix::Engine3D;
 constexpr std::array<float, 6> __iniBound = {
 	std::numeric_limits<float>::lowest(),
@@ -23,6 +23,15 @@ Bounds3D::Bounds3D():_bound(__iniBound)
 {
 }
 
+Hix::Engine3D::Bounds3D::Bounds3D(const Hix::Render::SceneEntity& bounded): Bounds3D()
+{
+	auto vtxCend = bounded.getMesh()->getVertices().cend();
+	for (auto vtx = bounded.getMesh()->getVertices().cbegin(); vtx != vtxCend; ++vtx)
+	{
+		update(vtx.worldPosition());
+	}
+}
+
 void Hix::Engine3D::Bounds3D::update(const QVector3D& v)
 {
 	if (v.x() > _bound[0]) _bound[0] = v.x();
@@ -31,6 +40,37 @@ void Hix::Engine3D::Bounds3D::update(const QVector3D& v)
 	if (v.y() < _bound[3]) _bound[3] = v.y();
 	if (v.z() > _bound[4]) _bound[4] = v.z();
 	if (v.z() < _bound[5]) _bound[5] = v.z();
+}
+
+Bounds3D& Hix::Engine3D::Bounds3D::operator+=(const Bounds3D& other)
+{
+	if (other._bound[0] > _bound[0]) _bound[0] = other._bound[0];
+	if (other._bound[1] < _bound[1]) _bound[1] = other._bound[1];
+	if (other._bound[2] > _bound[2]) _bound[2] = other._bound[2];
+	if (other._bound[3] < _bound[3]) _bound[3] = other._bound[3];
+	if (other._bound[4] > _bound[4]) _bound[4] = other._bound[4];
+	if (other._bound[5] < _bound[5]) _bound[5] = other._bound[5];
+	return *this;
+}
+
+void Hix::Engine3D::Bounds3D::translate(const QVector3D& displacement)
+{
+	_bound[0] += displacement.x();
+	_bound[1] += displacement.x();
+	_bound[2] += displacement.y();
+	_bound[3] += displacement.y();
+	_bound[4] += displacement.z();
+	_bound[5] += displacement.z();
+}
+
+void Hix::Engine3D::Bounds3D::scale(const QVector3D& scales)
+{
+	_bound[0] *= scales.x();
+	_bound[1] *= scales.x();
+	_bound[2] *= scales.y();
+	_bound[3] *= scales.y();
+	_bound[4] *= scales.z();
+	_bound[5] *= scales.z();
 }
 
 void Bounds3D::reset()
@@ -121,22 +161,42 @@ float Bounds3D::zMin() const
 
 float Hix::Engine3D::Bounds3D::centreX() const
 {
-	return 0.0f;
+	return (xMax() + xMin())/2.0f;
 }
 
 float Hix::Engine3D::Bounds3D::centreY() const
 {
-	return 0.0f;
+	return (yMax() + yMin()) / 2.0f;
 }
 
 float Hix::Engine3D::Bounds3D::centreZ() const
 {
-	return 0.0f;
+	return (zMax() + zMin()) / 2.0f;
+}
+
+float Hix::Engine3D::Bounds3D::lengthX() const
+{
+	return std::abs(xMax() - xMin());
+}
+
+float Hix::Engine3D::Bounds3D::lengthY() const
+{
+	return std::abs(yMax() - yMin());
+}
+
+float Hix::Engine3D::Bounds3D::lengthZ() const
+{
+	return std::abs(zMax() - zMin());
 }
 
 QVector3D Hix::Engine3D::Bounds3D::centre() const
 {
 	return QVector3D(centreX(), centreY(), centreZ());
+}
+
+QVector3D Hix::Engine3D::Bounds3D::lengths() const
+{
+	return QVector3D(lengthX(), lengthY(), lengthZ());
 }
 
 QVector3D Hix::Engine3D::Bounds3D::displaceWithin(const Bounds3D& child, QVector3D displacement) const

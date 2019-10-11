@@ -18,7 +18,7 @@ autoarrange::autoarrange()
 }
 
 
-std::vector<XYArrangement> autoarrange::arngMeshes(std::vector<const Mesh*>& meshes, std::vector<const Qt3DCore::QTransform*> m_transform_set){
+std::vector<XYArrangement> autoarrange::arngMeshes(std::vector<const Mesh*>& meshes, std::vector<Qt3DCore::QTransform> m_transform_set){
   
     return std::vector<XYArrangement>();
 }
