@@ -14,36 +14,39 @@
 #include "feature/overhangDetect.h"
 using namespace Hix;
 using namespace Hix::Slicer;
-SlicingEngine::Result SlicingEngine::sliceModels(bool isTemp, tf::Subflow& subflow, float zMax, float zMin, std::vector<const GLModel*> models, QString filename){
+using namespace Hix::Render;
 
+SlicingEngine::Result SlicingEngine::sliceModels(bool isTemp, tf::Subflow& subflow, float zMax, std::vector<std::reference_wrapper<const GLModel>> models, const Hix::Support::SupportRaftManager& suppRaft, QString filename){
+
+	constexpr float BOTT = 0.0f;
 
     qmlManager->setProgress(0.1);
 
 	//generate planes
 	//if (scfg->slicing_mode == SlicingConfiguration::SlicingMode::Uniform) {
 	float delta = scfg->layer_height;
-	UniformPlanes planes(zMin, zMax, delta);
-	// Slice
+	UniformPlanes planes(BOTT, zMax, delta);
 	Slices shellSlices(planes.getPlanesVector().size());
 	auto zPlanes = planes.getPlanesVector();
+	//set z elevation for each slizes
 	for (size_t i = 0; i < zPlanes.size(); ++i)
 	{
 		shellSlices[i].z = zPlanes[i];
 	}
-	for (auto model : models)
-	{
-		Slicer::slice(model->getMesh(), &planes, &shellSlices);
-		auto raftSupports = model->supportRaftManager().getRaftSupportMeshes();
-		for (auto child : raftSupports)
-		{
-			Slicer::slice(child, &planes, &shellSlices);
-
-		}
-
-	}
+	//slice models
+	//for (auto& model : models)
+	//{
+	//	Slicer::slice(dynamic_cast<const SceneEntity&>(model.get()), &planes, &shellSlices);
+	//}
+	////slice supports
+	//for (auto& support : suppRaft.supportModels())
+	//{
+	//	Slicer::slice(support, &planes, &shellSlices);
+	//}
+	//slice raft
+	Slicer::slice(suppRaft.raftModel(), &planes, &shellSlices);
+	//use clipper to combine clippings
 	shellSlices.containmentTreeConstruct();
-
-
 	qmlManager->setProgress(0.4);
 
  // 

@@ -201,7 +201,7 @@ namespace Hix
 			const QVector3D& worldVn() const
 			{
 				auto vn = localVn();
-				vn = ParentType::_owner->toWorld(vn);
+				vn = ParentType::_owner->vectorToWorld(vn);
 				vn.normalize();
 				return vn;
 			}
@@ -262,7 +262,7 @@ namespace Hix
 			}
 			QVector3D worldPosition()const
 			{
-				return ParentType::_owner->toWorld(ref().position);
+				return ParentType::_owner->ptToWorld(ref().position);
 			}
 
 
@@ -299,7 +299,7 @@ namespace Hix
 			const QVector3D& worldFn() const
 			{
 				auto fn = localFn();
-				fn = ParentType::_owner->toWorld(fn);
+				fn = ParentType::_owner->vectorToWorld(fn);
 				fn.normalize();
 				return fn;
 			}

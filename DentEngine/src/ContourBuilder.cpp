@@ -234,9 +234,11 @@ void ContourBuilder::buildSegment(const FaceConstItr& mf)
 	std::vector<VertexConstItr> upper;
 	std::vector<VertexConstItr> middle;
 	std::vector<VertexConstItr> lower;
+	std::vector<QVector3D> debugInfo;
 	auto mfVertices = mf.meshVertices();
 	for (int i = 0; i < 3; i++) {
 		auto pos = mfVertices[i].worldPosition();
+		debugInfo.push_back(pos);
 		if (pos.z() > _plane) {
 			upper.push_back(mfVertices[i]);
 		}
@@ -267,7 +269,6 @@ void ContourBuilder::buildSegment(const FaceConstItr& mf)
 	}
 	else {
 		auto middle0pos = middle[0].worldPosition();
-		auto middle1pos = middle[1].worldPosition();
 
 		//1 edge interesecting, 1 vertice on the plane
 		if (upper.size() == 1 && lower.size() == 1 && middle.size() == 1) {
@@ -276,6 +277,7 @@ void ContourBuilder::buildSegment(const FaceConstItr& mf)
 			segment.to = QVector2D(middle0pos);
 		}
 		else if (middle.size() == 2) {
+			auto middle1pos = middle[1].worldPosition();
 			segment.from = QVector2D(middle0pos);
 			segment.to = QVector2D(middle1pos);
 

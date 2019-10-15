@@ -8,8 +8,8 @@ using namespace Hix::Support;
 
 
 
-Hix::Support::SupportModel::SupportModel(SupportRaftManager* manager, std::variant<VertexConstItr, FaceOverhang> overhang):
-	Hix::Render::SceneEntityWithMaterial(manager->getModel()), _manager(manager), _overhang(overhang)
+Hix::Support::SupportModel::SupportModel(SupportRaftManager* manager):
+	Hix::Render::SceneEntityWithMaterial(&manager->rootEntity()), _manager(manager)
 {
 	_mesh = new Mesh();
 	initHitTest();
@@ -45,8 +45,6 @@ void Hix::Support::SupportModel::clicked(Hix::Input::MouseEventData&, const Qt3D
 	}
 }
 
-
-
 void SupportModel::setHighlight(bool enable)
 {
 	auto color = Hix::Render::Colors::Support;
@@ -56,15 +54,6 @@ void SupportModel::setHighlight(bool enable)
 	}
 	_meshMaterial.setColor(color);
 }
-
-const std::variant<VertexConstItr, Hix::OverhangDetect::FaceOverhang>& Hix::Support::SupportModel::overhang()
-{
-	return _overhang;
-}
-
-
-
-
 
 void SupportModel::onEntered()
 {

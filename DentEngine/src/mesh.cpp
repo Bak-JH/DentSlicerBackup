@@ -458,15 +458,40 @@ void Hix::Engine3D::Mesh::setSceneEntity(const Render::SceneEntity* entity)
 	_entity = entity;
 }
 
+const Hix::Render::SceneEntity* Hix::Engine3D::Mesh::entity() const
+{
+	return _entity;
+}
 
-QVector3D Hix::Engine3D::Mesh::toWorld(const QVector3D& local)const
+
+QVector4D Hix::Engine3D::Mesh::toWorld(const QVector4D& local)const
 {
 	return _entity->toRootCoord(local);
 }
 
-QVector3D Hix::Engine3D::Mesh::toLocal(const QVector3D& world)const
+QVector4D Hix::Engine3D::Mesh::toLocal(const QVector4D& world)const
 {
 	return _entity->toLocalCoord(world);
+}
+
+QVector3D Hix::Engine3D::Mesh::ptToWorld(const QVector3D& local) const
+{
+	return _entity->ptToRoot(local);
+}
+
+QVector3D Hix::Engine3D::Mesh::vectorToWorld(const QVector3D& local) const
+{
+	return _entity->vectorToRoot(local);
+}
+
+QVector3D Hix::Engine3D::Mesh::ptToLocal(const QVector3D& world) const
+{
+	return _entity->ptToLocal(world);
+}
+
+QVector3D Hix::Engine3D::Mesh::vectorToLocal(const QVector3D& world) const
+{
+	return _entity->vectorToLocal(world);
 }
 
 

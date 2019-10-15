@@ -137,17 +137,17 @@ Qt3DCore::QTransform& Hix::Render::SceneEntity::transform()
 }
 
 
-QVector3D Hix::Render::SceneEntity::toParentCoord(const QVector3D& childPos) const
+QVector4D Hix::Render::SceneEntity::toParentCoord(const QVector4D& childPos) const
 {
 	return  _transform.matrix() * childPos;
 }
 
-QVector3D Hix::Render::SceneEntity::fromParentCoord(const QVector3D& parentPos) const
+QVector4D Hix::Render::SceneEntity::fromParentCoord(const QVector4D& parentPos) const
 {
 	return _transform.matrix().inverted() * parentPos;
 }
 
-QVector3D Hix::Render::SceneEntity::toRootCoord(const QVector3D& local) const
+QVector4D Hix::Render::SceneEntity::toRootCoord(const QVector4D& local) const
 {
 	auto coord(local);
 	auto curr = this;
@@ -158,7 +158,7 @@ QVector3D Hix::Render::SceneEntity::toRootCoord(const QVector3D& local) const
 	}
 	return coord;
 }
-QVector3D Hix::Render::SceneEntity::toLocalCoord(const QVector3D& world) const
+QVector4D Hix::Render::SceneEntity::toLocalCoord(const QVector4D& world) const
 {
 	auto coord(world);
 	auto curr = this;
@@ -171,6 +171,27 @@ QVector3D Hix::Render::SceneEntity::toLocalCoord(const QVector3D& world) const
 	}
 	return coord;
 }
+
+QVector3D Hix::Render::SceneEntity::ptToRoot(const QVector3D& local) const
+{
+	return QVector3D(toRootCoord(QVector4D(local, 1)));
+}
+
+QVector3D Hix::Render::SceneEntity::vectorToRoot(const QVector3D& local) const
+{
+	return QVector3D(toRootCoord(QVector4D(local, 0)));
+}
+
+QVector3D Hix::Render::SceneEntity::ptToLocal(const QVector3D& world) const
+{
+	return QVector3D(toLocalCoord(QVector4D(world, 1)));
+}
+
+QVector3D Hix::Render::SceneEntity::vectorToLocal(const QVector3D& world) const
+{
+	return QVector3D(toLocalCoord(QVector4D(world, 0)));
+}
+
 
 
 SceneEntity::~SceneEntity() 

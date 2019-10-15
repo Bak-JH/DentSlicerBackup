@@ -253,11 +253,14 @@
     </ClCompile>
     <ClCompile Include="feature\labelling\labelModel.cpp">
       <Filter>Source Files</Filter>
-		</ClCompile>
+    </ClCompile>
     <ClCompile Include="DentEngine\src\Bounds3D.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>
     <ClCompile Include="common\Debug.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="support\ModelAttachedSupport.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -600,7 +603,7 @@
     </ClInclude>
     <ClInclude Include="feature\labelling\labelModel.h">
       <Filter>Header Files</Filter>
-		</ClInclude>
+    </ClInclude>
     <ClInclude Include="DentEngine\src\Bounds3D.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
@@ -614,6 +617,15 @@
       <Filter>Generated Files</Filter>
     </ClInclude>
     <ClInclude Include="DentEngine\src\MeshIterators.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\HetUniquePtr.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="support\BaseSupport.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="support\ModelAttachedSupport.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -1208,6 +1220,7 @@
     <None Include="icon-32.ico" />
     <None Include="icon-32.ico" />
     <None Include="Qml\LeftTabSlicingOptionElementPercentage.qml" />
+    <None Include="icon-32.ico" />
     <None Include="icon-32.ico" />
     <None Include="icon-32.ico" />
     <None Include="icon-32.ico" />

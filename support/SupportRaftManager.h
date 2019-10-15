@@ -2,7 +2,7 @@
 
 #include "DentEngine/src/configuration.h"
 #include "VerticalSupportModel.h"
-#include <memory>
+#include "../../common/HetUniquePtr.h"
 class GLModel;
 namespace Hix
 {
@@ -24,41 +24,47 @@ namespace Hix
 		class SupportRaftManager
 		{
 		public:
-			SupportRaftManager(GLModel* parent);
+			static float raftBottom();
+			static float supportBottom();
+			static float supportRaftMinLength();
+
+			SupportRaftManager();
+			void initialize(Qt3DCore::QEntity* parent);
 			~SupportRaftManager();
 			bool supportActive()const;
 			bool raftActive()const;
 			EditMode supportEditMode()const;
 			void  setSupportEditMode(EditMode mode);
-			float supportRaftMinLength()const;
 			//coordinate for bottom of support and raft
-			float raftBottom()const;
-			float supportBottom()const;
 
-			void generateSuppAndRaft(SlicingConfiguration::SupportType supType, SlicingConfiguration::RaftType raftType);
-			void addSupport(const std::variant<VertexConstItr, FaceOverhang>& supportSpec);
+			void autoGenSuppRaft(const GLModel& model, SlicingConfiguration::SupportType supType, SlicingConfiguration::RaftType raftType);
+			void addSupport(const OverhangDetect::Overhang& overhang);
 			void removeSupport(SupportModel* e);
 			void applyEdits();
 			void cancelEdits();
-			void generateSupport();
+			void generateSupport(const GLModel& model);
 			void generateRaft();
+			//removed due to efficiency when deleting multiple
+			size_t clear(const GLModel& model);
+			void clear(const std::unordered_set<const GLModel*>& models);
+			std::vector<std::reference_wrapper<const Hix::Render::SceneEntity>> supportModels()const;
+			const Hix::Render::SceneEntity& raftModel()const;
 			void clear();
-			GLModel* getModel();
-			const std::vector<const Mesh*> getRaftSupportMeshes()const;
-			//void attachToModel(RaftModel* support);
+			Qt3DCore::QEntity& rootEntity();
 
 		private:
+			void autoGenSuppRaftRecursive(const GLModel& model);
+
+			Qt3DCore::QEntity _root;
 			std::vector<QVector3D> getSupportBasePts()const;
-			GLModel* _owner;
 			bool _supportExist = false;
 			bool _raftExist = false;
 			std::unordered_map<SupportModel*, EditType> _pendingSupports;
 			EditMode _supportEditMode = EditMode::None;
 			SlicingConfiguration::SupportType _supportType;
 			SlicingConfiguration::RaftType _raftType;
-			std::unordered_map<SupportModel*, std::unique_ptr<SupportModel>> _supports;
+			std::unordered_set<Hix::Memory::HetUniquePtr<SupportModel>> _supports;
 			std::unique_ptr<RaftModel> _raft;
-			Hix::OverhangDetect::Overhangs _overhangs;
 		};
 
 	}

@@ -112,7 +112,7 @@ void Hix::OverhangDetect::Detector::faceOverhangPoint(const FaceConstItr& overha
 	auto startingVertices = overhangFace.meshVertices();
 	std::queue<std::array<QVector3D, 3>> q;
 	q.emplace(std::array<QVector3D, 3>
-	{startingVertices[0].localPosition(), startingVertices[1].localPosition(), startingVertices[2].localPosition()});
+	{startingVertices[0].worldPosition(), startingVertices[1].worldPosition(), startingVertices[2].worldPosition()});
 	while (!q.empty())
 	{
 		auto curr = q.front();
@@ -148,11 +148,11 @@ std::vector<QVector3D> Hix::OverhangDetect::toCoords(const Overhangs& overhangs)
 	{
 		if (each.index() == 0)
 		{
-			coords.emplace_back(std::get<0>(each).localPosition());
+			coords.emplace_back(std::get<0>(each).worldPosition());
 		}
 		else
 		{
-			coords.emplace_back(std::get<1>(each).first);
+			coords.emplace_back(std::get<1>(each).coord);
 		}
 	}
 	return coords;
@@ -181,30 +181,35 @@ Overhangs Hix::OverhangDetect::Detector::detectOverhang(const Mesh* shellMesh)
 
 	//this is needed to remove too close support points
 	std::unordered_map<size_t, FaceOverhang> faceHashedOverhangs;
-	std::unordered_map<size_t, std::variant<VertexConstItr, FaceOverhang>> allHashedOverhangs;
+	std::unordered_map<size_t, Overhang> allHashedOverhangs;
 	//get all local minimas
 	auto pointOverhangs = localMinFacingDown(shellMesh);
 	auto faceOverhangs = faceOverhangDetect(shellMesh);
 	for (auto& faceOverhang : faceOverhangs)
 	{
-		faceHashedOverhangs[faceHasher(faceOverhang.first)] = faceOverhang;
+		faceHashedOverhangs[faceHasher(faceOverhang.first)] = { faceOverhang.first, faceOverhang.second };
 	}
 	for (auto& ptOverhang : pointOverhangs)
 	{
-		allHashedOverhangs[ptHasher(ptOverhang.localPosition())] = ptOverhang;
+		allHashedOverhangs[ptHasher(ptOverhang.worldPosition())] = ptOverhang;
 	}
 	//rehash
 	for (auto& faceOverhang : faceHashedOverhangs)
 	{
-		allHashedOverhangs[ptHasher(faceOverhang.second.first)] = faceOverhang.second;
+		allHashedOverhangs[ptHasher(faceOverhang.second.coord)] = faceOverhang.second;
 	}
 	overhangs.reserve(allHashedOverhangs.size());
-	for (auto& overhang : allHashedOverhangs)
+	for (auto& hashedPt : allHashedOverhangs)
 	{
-		overhangs.insert(overhang.second);
+		overhangs.emplace(hashedPt.second);
 	}
 
 
 	return overhangs;
 
+}
+
+const Hix::Engine3D::Mesh* Hix::OverhangDetect::FaceOverhang::owner() const
+{
+	return face.owner();
 }

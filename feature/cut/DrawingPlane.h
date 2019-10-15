@@ -4,7 +4,7 @@
 #include <array>
 #include "input/Clickable.h"
 #include "input/HitTestAble.h"
-#include <memory>
+#include "../../common/HetUniquePtr.h"
 #include <unordered_set>
 class GLModel;
 
@@ -35,7 +35,7 @@ namespace Hix
 				std::array<Qt3DExtras::QPlaneMesh, 2> _planeMeshes;
 				Qt3DCore::QTransform _transform;
 				GLModel* _owner = nullptr;
-				std::unordered_set<std::unique_ptr<FreeCutPtWidget>> _ptWidgets;
+				std::unordered_set<Hix::Memory::HetUniquePtr<FreeCutPtWidget>> _ptWidgets;
 				FreeCutPtWidget* _lastPt = nullptr;
 			};
 

@@ -3,34 +3,36 @@
 using namespace Hix::Engine3D;
 Hix::Slicer::UniformPlanes::UniformPlanes(float zMin, float zMax, float delta):_delta(delta)
 {
-	size_t idx_max = ceil((zMax - zMin) / delta);
-	_planes.reserve(idx_max);
-	for (int i = 0; i < idx_max; ++i)
+	auto plane_z = zMin;
+	auto maxWithMargin = zMax + _delta;
+	size_t multiple = 0;
+	while(plane_z < maxWithMargin)
 	{
-		float plane_z = zMin + delta * i;
+		plane_z = zMin + _delta * multiple;
 		_planes.push_back(plane_z);
+		++multiple;
 	}
 }
 
 size_t Hix::Slicer::UniformPlanes::minIntersectIdx(float z) const
 {
-	int minIdx = (int)((z - _planes[0]) / _delta) + 1;
-	minIdx = std::max(0, minIdx);
-
+	int minIdx = std::ceil((z - _planes[0]) / _delta);
 	//float error check
-	if (minIdx < _planes.size() && _planes[minIdx] < z)
+	auto newFloat = _delta * minIdx + _planes[0];
+	if (newFloat < z)
 		++minIdx;
-
+	minIdx = std::min(std::max(0, minIdx), (int)_planes.size()-1);
 	return minIdx;
 }
 
 size_t Hix::Slicer::UniformPlanes::maxIntersectIdx(float z) const
 {
-	int maxIdx = (int)((z - _planes[0]) / _delta);
-	maxIdx = std::min((int)_planes.size() - 1, maxIdx);
+	int maxIdx = std::floor((z - _planes[0]) / _delta);
 	//float error check
-	if (maxIdx >= 0 && _planes[maxIdx] > z)
+	auto newFloat = _delta * maxIdx + _planes[0];
+	if (newFloat > z)
 		--maxIdx;
+	maxIdx = std::min(std::max(0, maxIdx), (int)_planes.size() - 1);
 	return maxIdx;
 }
 
@@ -53,6 +55,10 @@ std::vector<std::unordered_set<Hix::Engine3D::FaceConstItr>> Hix::Slicer::Unifor
 			float z_min = sortedZ[0];
 			float z_mid = sortedZ[1];
 			float z_max = sortedZ[2];
+			if (z_max <= _planes[0] && z_mid < _planes[0])
+				continue;
+			if (z_min >= _planes.back() && z_mid > _planes.back())
+				continue;
 			size_t minIdx = minIntersectIdx(z_min);
 			size_t maxIdx = maxIntersectIdx(z_max);
 			if (minIdx > maxIdx)

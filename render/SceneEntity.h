@@ -41,13 +41,16 @@ namespace Hix
 			//for now, one sceneEntity per mesh, no setter for mesh in sceneEntity
 			const Hix::Engine3D::Mesh* getMesh()const;
 			const Qt3DCore::QTransform& transform() const;
-			QVector3D toParentCoord(const QVector3D& childPos)const;
-			QVector3D fromParentCoord(const QVector3D& parentPos)const;
+			QVector4D toParentCoord(const QVector4D& childPos)const;
+			QVector4D fromParentCoord(const QVector4D& parentPos)const;
 
 			//world coordinates.
-			QVector3D toRootCoord(const QVector3D& local)const;
-			QVector3D toLocalCoord(const QVector3D& world)const;
-
+			QVector4D toRootCoord(const QVector4D& local)const;
+			QVector4D toLocalCoord(const QVector4D& world)const;
+			QVector3D ptToRoot(const QVector3D& local)const;
+			QVector3D vectorToRoot(const QVector3D& local)const;
+			QVector3D ptToLocal(const QVector3D& world)const;
+			QVector3D vectorToLocal(const QVector3D& world)const;
 			
 
 			//update faces given indicies, if index >= indexUppderLimit, it's ignored
