@@ -7,9 +7,21 @@
 
 namespace Hix
 {
+	using namespace Engine3D;
 	namespace OverhangDetect
 	{ 
-		typedef std::pair<QVector3D, Hix::Engine3D::FaceConstItr> FaceOverhang;
+		struct FaceOverhang
+		{
+			QVector3D coord;
+			Hix::Engine3D::FaceConstItr face;
+			const Hix::Engine3D::Mesh* owner()const;
+			bool operator==(const FaceOverhang& o) const
+			{
+				return face == o.face && coord == o.coord;
+			}
+		};
+		typedef std::variant<VertexConstItr, FaceOverhang>  Overhang;
+
 	}
 }
 
@@ -22,11 +34,12 @@ namespace std
 		std::size_t operator()(const Hix::OverhangDetect::FaceOverhang& pt)const
 		{
 			constexpr static Hix::Engine3D::MeshVtxHasher hasher;
-			return hasher(pt.first);
+			return hasher(pt.coord);
 			//TODO
 
 		}
 	};
+
 }
 
 namespace Hix
@@ -39,13 +52,13 @@ namespace Hix
 	}
 	namespace OverhangDetect
 	{
-		typedef std::unordered_set<std::variant<VertexConstItr, FaceOverhang>>  Overhangs;
+		typedef std::unordered_set<typename OverhangDetect::Overhang>  Overhangs;
 		std::vector<QVector3D> toCoords(const Overhangs& overhangs);
 
 		class Detector
 		{
 		public:
-			Overhangs detectOverhang(const Mesh* shellMesh);
+			OverhangDetect::Overhangs detectOverhang(const Mesh* shellMesh);
 		private:
 			std::unordered_set<VertexConstItr> localMinFacingDown(const Mesh* mesh);
 			std::unordered_map<QVector3D, FaceConstItr> faceOverhangDetect(const Mesh* mesh);

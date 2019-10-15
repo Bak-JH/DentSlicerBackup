@@ -15,7 +15,6 @@
 #include "input/Draggable.h"
 #include "input/Clickable.h"
 #include "input/HitTestAble.h"
-#include "support/SupportRaftManager.h"
 
 #include "render/ModelMaterial.h"
 #define MAX_BUF_LEN 2000000
@@ -164,9 +163,6 @@ public:
 
 	bool perPrimitiveColorActive()const;
 	bool faceSelectionActive()const;
-	bool raftSupportGenerated()const;
-	Hix::Support::SupportRaftManager& supportRaftManager();
-	const Hix::Support::SupportRaftManager& supportRaftManager()const;
 
 
 
@@ -193,7 +189,6 @@ private:
 	QVector3D getPrimitiveColorCode(const Hix::Engine3D::Mesh* mesh, FaceConstItr faceItr)override;
 
     //Order is important! Look at the initializer list in constructor
-	Hix::Support::SupportRaftManager _supportRaftManager;
     QVector3D lastpoint;
     QVector2D prevPoint;
 

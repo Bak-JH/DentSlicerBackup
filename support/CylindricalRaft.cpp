@@ -53,8 +53,8 @@ void Hix::Support::CylindricalRaft::generateMeshForContour(Mesh* mesh, const Cli
 
 	//path is simple cylinder starting from 0,0,0 to 0,0,raft_height
 	path.emplace_back(QVector3D(0, 0, _manager->raftBottom()));
-	path.emplace_back(QVector3D(0, 0, _manager->raftBottom() + scfg->raft_thickness / 2.0f));
-	path.emplace_back(QVector3D(0, 0, _manager->raftBottom() + scfg->raft_thickness));
+	path.emplace_back(QVector3D(0, 0, scfg->raft_thickness / 2.0f));
+	path.emplace_back(QVector3D(0, 0, scfg->raft_thickness));
 
 	//convert to float point contour
 	contour.reserve(contourPath.size());

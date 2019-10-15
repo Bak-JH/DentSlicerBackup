@@ -78,7 +78,7 @@ void DrawingPlane::clicked(Hix::Input::MouseEventData& m, const Qt3DRender::QRay
 	auto entityTransform = _meshTransformMap[hitEntity];
 	pos = entityTransform->matrix() * pos;
 	pos.setZ(_transform.translation().z());
-	auto emplResult = _ptWidgets.emplace(std::make_unique<FreeCutPtWidget>(this));
+	auto emplResult = _ptWidgets.emplace(Hix::Memory::toUnique(new FreeCutPtWidget(this)));
 	auto newLatest = emplResult.first->get();
 	newLatest->prev = _lastPt;
 	if (_lastPt)
@@ -113,10 +113,8 @@ void Hix::Features::Cut::DrawingPlane::removePt(FreeCutPtWidget* pt)
 		_lastPt = pt->prev;
 	}
 	//kinda hacky, create a tmp unique_ptr for the sake of hashing/look up
-	std::unique_ptr<FreeCutPtWidget> tmp(pt);
-	_ptWidgets.erase(tmp);
+	_ptWidgets.erase(Hix::Memory::toDummy(pt));
 	//don't double delete
-	tmp.release();
 	
 	if (_ptWidgets.size() < 2)
 	{

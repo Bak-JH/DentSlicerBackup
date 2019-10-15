@@ -169,8 +169,14 @@ namespace Hix
 			/********************** Stuff that can be public **********************/
 			const Bounds3D& bounds()const;
 			void setSceneEntity(const Render::SceneEntity* entity);
-			QVector3D toWorld(const QVector3D& local)const;
-			QVector3D toLocal(const QVector3D& world)const;
+			const Render::SceneEntity* entity()const;
+			QVector4D toWorld(const QVector4D& local)const;
+			QVector4D toLocal(const QVector4D& world)const;
+			QVector3D ptToWorld(const QVector3D& local)const;
+			QVector3D vectorToWorld(const QVector3D& local)const;
+			QVector3D ptToLocal(const QVector3D& world)const;
+			QVector3D vectorToLocal(const QVector3D& world)const;
+
 		private:
 			void vertexMove(const QVector3D& direction);
 			const Render::SceneEntity* _entity = nullptr;

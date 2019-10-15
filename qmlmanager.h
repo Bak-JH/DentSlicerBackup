@@ -26,6 +26,7 @@
 #include "ui/Widget3DManager.h"
 #include "common/TaskManager.h"
 #include "slice/SlicingOptBackend.h"
+#include "support/SupportRaftManager.h"
 
 #define VIEW_MODE_OBJECT 0
 #define VIEW_MODE_LAYER 2
@@ -244,6 +245,8 @@ public:
 	void modelRotateWithAxis(const QVector3D& axis, double degree);
 	QVector3D cameraViewVector();
 	Hix::Tasking::TaskManager& taskManager();
+	Hix::Support::SupportRaftManager& supportRaftManager();
+
 private:
 	Hix::Tasking::TaskManager _taskManager;
 	void setModelViewMode(int mode);
@@ -271,6 +274,7 @@ private:
 
 	//cursors
 	QCursor _cursorEraser;
+	Hix::Support::SupportRaftManager _supportRaftManager;
 
 
 signals:

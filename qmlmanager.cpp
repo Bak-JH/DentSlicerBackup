@@ -25,6 +25,7 @@
 #include "render/lights.h"
 #include "DentEngine/src/configuration.h"
 #include "feature/stlexporter.h"
+#include <functional>
 using namespace Hix::Input;
 using namespace Hix::UI;
 using namespace Hix::Render;
@@ -56,6 +57,8 @@ void QmlManager::initializeUI(QQmlApplicationEngine* e){
 	_camera = dynamic_cast<Qt3DRender::QCamera*> (FindItemByName(engine, "camera"));
 
 	_widgetManager.initialize(total, &_rayCastController);
+	_supportRaftManager.initialize(models);
+
     // model move componetns
     moveButton = FindItemByName(engine, "moveButton");
     movePopup = FindItemByName(engine, "movePopup");
@@ -1228,6 +1231,11 @@ TaskManager& QmlManager::taskManager()
 	return _taskManager;
 }
 
+Hix::Support::SupportRaftManager& QmlManager::supportRaftManager()
+{
+	return _supportRaftManager;
+}
+
 
 
 void QmlManager::modelMoveByNumber(int axis, int X, int Y){
@@ -1665,15 +1673,19 @@ Hix::Tasking::GenericTask* QmlManager::exportSelectedAsync(QString exportPath, b
 
 		
 		// need to generate support, raft
-		std::vector<const GLModel*> constSelectedModels(selectedModels.cbegin(), selectedModels.cend());
+		std::vector<std::reference_wrapper<const GLModel>> constSelectedModels;
+		constSelectedModels.reserve(selectedModels.size());
+		std::transform(std::begin(selectedModels), std::end(selectedModels), std::back_inserter(constSelectedModels),
+			[](GLModel* ptr)-> std::reference_wrapper<const GLModel> {
+				return std::cref(*ptr);
+			});
 		//constSelectedModels.reserve(selectedModels.size());
 		//for (auto each : selectedModels)
 		//{
 		//	constSelectedModels.emplace_back(each);
 		//}
 		auto selectedBound = getSelectedBound();
-		auto result = SlicingEngine::sliceModels(isTemp, subflow, selectedBound.zMax(), selectedBound.zMin(), constSelectedModels, exportPath);
-
+		auto result = SlicingEngine::sliceModels(isTemp, subflow, selectedBound.zMax(), constSelectedModels, _supportRaftManager, exportPath);
 		QMetaObject::invokeMethod(layerViewSlider, "setThickness", Q_ARG(QVariant, (scfg->layer_height)));
 		QMetaObject::invokeMethod(layerViewSlider, "setLayerCount", Q_ARG(QVariant, (result.layerCount -1))); //0 based index
 	});
@@ -1765,15 +1777,13 @@ QVector2D QmlManager::world2Screen(QVector3D target) {
 
 void QmlManager::generateAutoSupport()
 {
-
 	for (auto selectedModel : selectedModels)
 	{
-		selectedModel->supportRaftManager().generateSuppAndRaft(scfg->support_type, scfg->raft_type);
-		selectedModel->updateModelMesh();
 		if (scfg->support_type != SlicingConfiguration::SupportType::None)
 		{
-			selectedModel->moveModel(QVector3D(0, 0, -selectedModel->supportRaftManager().raftBottom()));
+			selectedModel->moveModel(QVector3D(0, 0, Hix::Support::SupportRaftManager::supportRaftMinLength()));
 		}
+		_supportRaftManager.autoGenSuppRaft(*selectedModel, scfg->support_type, scfg->raft_type);
 	}
 }
 
@@ -1782,54 +1792,39 @@ void QmlManager::supportEditEnabled(bool enabled)
 {
 	if (enabled)
 	{
-		for (auto selectedModel : selectedModels)
-		{
-			selectedModel->supportRaftManager().setSupportEditMode(Hix::Support::EditMode::Manual);
-		}
+		_supportRaftManager.setSupportEditMode(Hix::Support::EditMode::Manual);
 		_currentActiveFeature = ftrManualSupport;
 		qmlManager->openResultPopUp("Click a model surface to add support.", "", "Click an existing support to remove it.");
-
 	}
 	else
 	{
-		for (auto selectedModel : selectedModels)
-		{
-			selectedModel->supportRaftManager().setSupportEditMode(Hix::Support::EditMode::None);
-		}
+		_supportRaftManager.setSupportEditMode(Hix::Support::EditMode::None);
 		_currentActiveFeature = 0;
-
 	}
 
 }
 void QmlManager::clearSupports()
 {
+	std::unordered_set<const GLModel*> constSelection;
 	for (auto selectedModel : selectedModels)
 	{
-		if (selectedModel->supportRaftManager().supportActive())
-		{
-			selectedModel->supportRaftManager().clear();
-			selectedModel->setZToBed();
-		}
+		selectedModel->setZToBed();
+		constSelection.emplace(selectedModel);
 	}
+	_supportRaftManager.clear(constSelection);
+
 }
 
 
 void QmlManager::supportApplyEdit()
 {
-	for (auto selectedModel : selectedModels)
-	{
-		selectedModel->supportRaftManager().applyEdits();
-	}
+	_supportRaftManager.applyEdits();
 }
 
 
 void QmlManager::supportCancelEdit()
 {
-	for (auto selectedModel : selectedModels)
-	{
-		selectedModel->supportRaftManager().cancelEdits();
-
-	}
+	_supportRaftManager.cancelEdits();
 }
 
 bool QmlManager::deselectAllowed()
@@ -1839,8 +1834,5 @@ bool QmlManager::deselectAllowed()
 
 void QmlManager::regenerateRaft()
 {
-	for (auto selectedModel : selectedModels)
-	{
-		selectedModel->supportRaftManager().generateRaft();
-	}
+	_supportRaftManager.generateRaft();
 }

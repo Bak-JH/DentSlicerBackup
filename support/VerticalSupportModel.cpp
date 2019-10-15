@@ -2,7 +2,8 @@
 #include "SupportRaftManager.h"
 #include "../DentEngine/src/configuration.h"
 #include "../feature/Extrude.h"
-
+#include "SupportRaftManager.h"
+#include "../glmodel.h"
 
 constexpr  float SUPPORT_CONE_LENGTH =  1.0f;
 constexpr  float SUPPORT_OVERLAP_LENGTH = SUPPORT_CONE_LENGTH/2;
@@ -14,11 +15,12 @@ using namespace Hix::Input;
 using namespace Hix::Render;
 using namespace Hix::Support;
 using namespace Hix::OverhangDetect;
+using namespace Qt3DCore;
 
 
 
-Hix::Support::VerticalSupportModel::VerticalSupportModel(SupportRaftManager* manager, std::variant<VertexConstItr, FaceOverhang> overhang):
-	SupportModel(manager, overhang)
+Hix::Support::VerticalSupportModel::VerticalSupportModel(SupportRaftManager* manager, const Overhang& overhang):
+	SupportModel(manager), _overhang(overhang)
 {
 	generateMesh();
 
@@ -27,15 +29,19 @@ Hix::Support::VerticalSupportModel::VerticalSupportModel(SupportRaftManager* man
 VerticalSupportModel::~VerticalSupportModel()
 {
 	//unlike other SceneEntities, Raft and support owns their mesh data
-	delete _mesh;
 }
 
-QVector3D Hix::Support::VerticalSupportModel::getBasePt()
+const QVector3D& Hix::Support::VerticalSupportModel::getBasePt() const
 {
 	return _basePt;
 }
 
-std::vector<QVector3D> Hix::Support::VerticalSupportModel::generateSupportPath(const std::variant<VertexConstItr, FaceOverhang>& overhang, float bottom)
+const Overhang& Hix::Support::VerticalSupportModel::getOverhang() const
+{
+	return _overhang;
+}
+
+std::vector<QVector3D> Hix::Support::VerticalSupportModel::generateSupportPath(float bottom)
 {	 
 	std::vector<QVector3D> path;
 	
@@ -45,17 +51,17 @@ std::vector<QVector3D> Hix::Support::VerticalSupportModel::generateSupportPath(c
 	QVector3D coneNarrow;
 	QVector3D tipNormal;
 	//find the end tip of the support and normal at that point.
-	if (overhang.index() == 0)
+	if (_overhang.index() == 0)
 	{
-		auto& vtx = std::get<0>(overhang);
-		coneNarrow = vtx.localPosition();
-		tipNormal = vtx.localVn();
+		auto& vtx = std::get<0>(_overhang);
+		coneNarrow = vtx.worldPosition();
+		tipNormal = vtx.worldVn();
 	}
 	else
 	{
-		auto& faceOverhang = std::get<1>(overhang);
-		coneNarrow = faceOverhang.first;
-		tipNormal = faceOverhang.second.localFn();
+		auto& faceOverhang = std::get<1>(_overhang);
+		coneNarrow = faceOverhang.coord;
+		tipNormal = faceOverhang.face.worldFn();
 	}
 	//tip normal needs to be facing downard, ie) cone needs to be pointing upward,
 	constexpr float normalizedVectorZMax = -1.0f; //tan 45
@@ -76,7 +82,7 @@ std::vector<QVector3D> Hix::Support::VerticalSupportModel::generateSupportPath(c
 	//part of support that's in raft
 	QVector3D supportStart = coneWidePart;
 
-	supportStart.setZ(bottom);
+	supportStart.setZ(0);
 
 	path.emplace_back(supportStart);
 	path.emplace_back(coneWidePart);
@@ -119,7 +125,7 @@ void Hix::Support::VerticalSupportModel::generateMesh()
 	std::vector<QVector3D> path;
 	std::vector<float> scales;
 
-	path = generateSupportPath(_overhang, _manager->supportBottom());
+	path = generateSupportPath(_manager->supportBottom());
 	contour = generateHexagon(scfg->support_radius_max);
 
 	//set scales

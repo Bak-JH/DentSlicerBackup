@@ -111,6 +111,11 @@ public:
 	{
 		return _index - itr._index;
 	}
+	OwnerType* owner()const
+	{
+		return _owner;
+	}
+
 	//notice distinct lack of -> and * and other dereference/accesse methods.
 	//they should be implemented in children classes.
 

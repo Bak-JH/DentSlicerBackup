@@ -37,7 +37,6 @@ using namespace Hix::Render;
 
 GLModel::GLModel(QObject* mainWindow, QEntity*parent, Mesh* loadMesh, QString fname, int id)
     : SceneEntityWithMaterial(parent)
-	, _supportRaftManager(this)
     , _filename(fname)
     , mainWindow(mainWindow)
     , cutMode(1)
@@ -377,8 +376,9 @@ void GLModel::initHitTest()
 
 void GLModel::clicked(MouseEventData& pick, const Qt3DRender::QRayCasterHit& hit)
 {
-
-	if (!cutActive && !extensionActive && !labellingActive && !layflatActive && _supportRaftManager.supportEditMode() == Hix::Support::EditMode::None)// && !layerViewActive && !supportViewActive)
+	auto suppMode = qmlManager->supportRaftManager().supportEditMode();
+	if (!cutActive && !extensionActive && !labellingActive && !layflatActive &&
+		suppMode == Hix::Support::EditMode::None)// && !layerViewActive && !supportViewActive)
 		qmlManager->modelSelected(ID);
 
 	if (qmlManager->isSelected(this) && pick.button == Qt::MouseButton::RightButton) {
@@ -429,11 +429,11 @@ void GLModel::clicked(MouseEventData& pick, const Qt3DRender::QRayCasterHit& hit
 	}
 
 	/// Manual Support ///
-	if (_supportRaftManager.supportEditMode() == Hix::Support::EditMode::Manual && hit.localIntersection() != QVector3D(0, 0, 0)) {
+	if (suppMode == Hix::Support::EditMode::Manual && hit.localIntersection() != QVector3D(0, 0, 0)) {
 		Hix::OverhangDetect::FaceOverhang newOverhang;
-		newOverhang.first = hit.localIntersection();
-		newOverhang.second = targetMeshFace;
-		_supportRaftManager.addSupport(newOverhang);
+		newOverhang.coord = ptToRoot(hit.localIntersection());
+		newOverhang.face = targetMeshFace;
+		qmlManager->supportRaftManager().addSupport(newOverhang);
 	}
 
 	/// Labeling Feature ///
@@ -474,7 +474,12 @@ bool GLModel::isDraggable(Hix::Input::MouseEventData& e,const Qt3DRender::QRayCa
 }
 void GLModel::dragStarted(Hix::Input::MouseEventData& e, const Qt3DRender::QRayCasterHit& hit)
 {
-	_supportRaftManager.clear();
+	if (qmlManager->supportRaftManager().supportActive())
+	{
+		auto count = qmlManager->supportRaftManager().clear(*this);
+		if (count > 0)
+			setZToBed();
+	}
 	lastpoint = hit.localIntersection();
 	prevPoint = (QVector2D)e.position;
 	qmlManager->moveButton->setProperty("state", "active");
@@ -746,8 +751,8 @@ void GLModel::generateLayFlat(){
     if(!_targetSelected)
         return;
 	unselectMeshFaces();
-	constexpr QVector3D worldBot(0, 0, -1);
-	auto localBotNorml = toLocalCoord(worldBot);
+	constexpr QVector4D worldBot(0, 0, -1, 1);
+	QVector3D localBotNorml(toLocalCoord(worldBot));
 	auto rotationTo = QQuaternion::rotationTo(targetMeshFace.localFn(), localBotNorml);
 	_transform.setRotation(_transform.rotation() * rotationTo);
 	emit resetLayflat();
@@ -988,21 +993,9 @@ bool GLModel::perPrimitiveColorActive() const
 }
 bool GLModel::faceSelectionActive() const
 {
-	return extensionActive || layflatActive || _supportRaftManager.supportEditMode() != Hix::Support::EditMode::None;
-}
-bool GLModel::raftSupportGenerated() const
-{
-	return _supportRaftManager.raftActive() || _supportRaftManager.supportActive();
-}
-Hix::Support::SupportRaftManager& GLModel::supportRaftManager()
-{
-	return _supportRaftManager;
+	return extensionActive || layflatActive;
 }
 
-const Hix::Support::SupportRaftManager& GLModel::supportRaftManager()const
-{
-	return _supportRaftManager;
-}
 QVector3D GLModel::getPrimitiveColorCode(const Hix::Engine3D::Mesh* mesh, FaceConstItr itr)
 {
 #ifdef _STRICT_GLMODEL
