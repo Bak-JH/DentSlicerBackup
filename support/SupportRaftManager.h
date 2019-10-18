@@ -48,7 +48,7 @@ namespace Hix
 			size_t clear(const GLModel& model);
 			void clear(const std::unordered_set<const GLModel*>& models);
 			std::vector<std::reference_wrapper<const Hix::Render::SceneEntity>> supportModels()const;
-			const Hix::Render::SceneEntity& raftModel()const;
+			const Hix::Render::SceneEntity* raftModel()const;
 			void clear();
 			Qt3DCore::QEntity& rootEntity();
 

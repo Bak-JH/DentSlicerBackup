@@ -25,7 +25,7 @@ namespace Hix
 			QVector3D getPrimitiveColorCode(const Hix::Engine3D::Mesh* mesh, FaceConstItr faceItr)override;
 		private:
 			void generateMesh(const std::vector<QVector3D>& overhangs);
-			void generateMeshForContour(Mesh* mesh, const ClipperLib::Path& contour);
+			void generateMeshForContour(Mesh* mesh, const std::vector<QVector3D>& contour);
 			void generateCap(Mesh* mesh, const std::vector<QVector3D>& contour, bool isReverse);
 
 

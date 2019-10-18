@@ -34,37 +34,49 @@ SlicingEngine::Result SlicingEngine::sliceModels(bool isTemp, tf::Subflow& subfl
 		shellSlices[i].z = zPlanes[i];
 	}
 	//slice models
-	//for (auto& model : models)
-	//{
-	//	Slicer::slice(dynamic_cast<const SceneEntity&>(model.get()), &planes, &shellSlices);
-	//}
-	////slice supports
-	//for (auto& support : suppRaft.supportModels())
-	//{
-	//	Slicer::slice(support, &planes, &shellSlices);
-	//}
+	for (auto& model : models)
+	{
+		Slicer::slice(dynamic_cast<const SceneEntity&>(model.get()), &planes, &shellSlices);
+	}
+	//slice supports
+	for (auto& support : suppRaft.supportModels())
+	{
+		Slicer::slice(support, &planes, &shellSlices);
+	}
 	//slice raft
-	Slicer::slice(suppRaft.raftModel(), &planes, &shellSlices);
+	auto raft = suppRaft.raftModel();
+	if (raft)
+	{
+		Slicer::slice(*raft, &planes, &shellSlices);
+	}
 	//use clipper to combine clippings
 	shellSlices.containmentTreeConstruct();
 	qmlManager->setProgress(0.4);
 
- // 
-	//Slices supportSlices;
-	//if (scfg->support_type != SlicingConfiguration::SupportType::None)
-	//{
-	//	Slicer::slice(supportMesh, &supportSlices);
-	//	qDebug() << "Support Slicing Done\n";
-	//}
- //   qmlManager->setProgress(0.6);
- //   Slices raftSlices;
-	//if (scfg->raft_type != SlicingConfiguration::RaftType::None)
-	//{
-	//	Slicer::slice(raftMesh, &raftSlices);
-	//	qDebug() << "Raft Slicing Done\n";
-	//}
- //   qmlManager->setProgress(0.9);
-
+	//remove empty contours from the top and bottom
+	size_t forwardPopCnt = 0;
+	auto forwardItr = shellSlices.begin();
+	while (forwardItr->polytree.ChildCount() == 0)
+	{
+		++forwardPopCnt;
+		++forwardItr;
+	}
+	for (size_t i = 0; i < forwardPopCnt; ++i)
+	{
+		shellSlices.pop_front();
+	}
+	size_t backPopCnt = 0;
+	auto backItr = shellSlices.rbegin();
+	while (backItr->polytree.ChildCount() == 0)
+	{
+		++backPopCnt;
+		++backItr;
+	}
+	for (size_t i = 0; i < backPopCnt; ++i)
+	{
+		shellSlices.pop_back();
+	}
+	qDebug() << "removed empty slices count bott: " << forwardPopCnt << "top :" << backPopCnt;
 
     // Export to SVG
     //QString export_info = SVGexporter::exportSVG(shellSlices, supportSlices, raftSlices, filename+"_export", isTemp);

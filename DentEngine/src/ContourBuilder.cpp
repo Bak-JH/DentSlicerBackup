@@ -5,19 +5,26 @@ using namespace Hix::Engine3D;
 using namespace ClipperLib;
 
 
-inline void rotateCW90(QVector3D& vec)
-{
-	//(-y,x)
-	auto tmp = vec.x();
-	vec.setX(vec.y());
-	vec.setY(-1.0f * tmp);
-}
+//inline void rotateCW90(QVector3D& vec)
+//{
+//	//(y,-x)
+//	auto tmp = vec.x();
+//	vec.setX(vec.y());
+//	vec.setY(-tmp);
+//}
 inline void rotateCW90(QVector2D& vec)
 {
-	//(-y,x)
+	//(y,-x)
 	auto tmp = vec.x();
 	vec.setX(vec.y());
-	vec.setY(-1.0f * tmp);
+	vec.setY(-tmp);
+}
+inline void rotateCCW90(QVector2D& vec)
+{
+	//(-y,x)
+	auto tmp = vec.x();
+	vec.setX(-vec.y());
+	vec.setY(tmp);
 }
 
 bool Contour::isClosed()const
@@ -141,18 +148,18 @@ ContourSegment::FlipResult ContourSegment::calcNormalAndFlip()
 
 	//determine direction
 	QVector2D faceNormal(face.worldFn());
-	QVector2D ABNormal = to - from;
-	rotateCW90(ABNormal);
-	ABNormal.normalize();
 
-	QVector2D BANormal = from - to;
-	rotateCW90(BANormal);
-	BANormal.normalize();
+	QVector2D ABNormal(to - from);
+	ABNormal.normalize();
+	QVector2D BANormal(ABNormal);
+
+	rotateCW90(ABNormal);
+	rotateCCW90(BANormal);
 
 	//face normal projected over z-plane should still be normal for AB/BA vector.
 	//Now determine which vector direction is correct by comparing CCW90 or CW90 normals to projected Face normal
-	auto ABDiff = (ABNormal - faceNormal).lengthSquared();
-	auto BADiff = (BANormal - faceNormal).lengthSquared();
+	auto ABDiff = (ABNormal - faceNormal).length();
+	auto BADiff = (BANormal - faceNormal).length();
 
 
 	//since projected face normal is still a normal for the AB/BA vector
@@ -160,7 +167,7 @@ ContourSegment::FlipResult ContourSegment::calcNormalAndFlip()
 	//hence minimum of those two diffs should be very close to be zero
 	auto smallestDiff = std::min(ABDiff, BADiff);
 
-	if (smallestDiff > 0.01f)
+	if (std::abs(ABDiff - BADiff) < 0.1f)
 	{
 		return FlipResult::UnknownDirection;
 	}
@@ -234,11 +241,9 @@ void ContourBuilder::buildSegment(const FaceConstItr& mf)
 	std::vector<VertexConstItr> upper;
 	std::vector<VertexConstItr> middle;
 	std::vector<VertexConstItr> lower;
-	std::vector<QVector3D> debugInfo;
 	auto mfVertices = mf.meshVertices();
 	for (int i = 0; i < 3; i++) {
 		auto pos = mfVertices[i].worldPosition();
-		debugInfo.push_back(pos);
 		if (pos.z() > _plane) {
 			upper.push_back(mfVertices[i]);
 		}
@@ -328,11 +333,6 @@ std::vector<Contour> ContourBuilder::buildContours()
 		buildSegment(each);
 	}
 	//remove segments of unknown direction from stating segment candidates.
-	for (auto each : _unknownSegs)
-	{
-		_unexplored.erase(each->face);
-	}
-
 	while (!_unexplored.empty())
 	{
 		Contour currContour;

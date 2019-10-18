@@ -306,6 +306,8 @@ void QmlManager::deleteOneModelFile(GLModel* target) {
 		deletePartListItem(target->ID);
 		//if selected, remove from selected list
 		selectedModels.erase(target);
+		//clear related supports
+		_supportRaftManager.clear(target);
 		glmodels.erase(target->ID);
 	}
 }
@@ -1781,6 +1783,7 @@ void QmlManager::generateAutoSupport()
 	{
 		if (scfg->support_type != SlicingConfiguration::SupportType::None)
 		{
+			selectedModel->setZToBed();
 			selectedModel->moveModel(QVector3D(0, 0, Hix::Support::SupportRaftManager::supportRaftMinLength()));
 		}
 		_supportRaftManager.autoGenSuppRaft(*selectedModel, scfg->support_type, scfg->raft_type);
