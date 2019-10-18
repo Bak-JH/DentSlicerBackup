@@ -74,6 +74,7 @@
       $(PCL_DIR)\include\pcl-1.9;
       $(PCL_DIR)\3rdParty\Eigen\eigen3;
       $(PCL_DIR)\3rdParty\FLANN\include;
+      $(PCL_DIR)\3rdParty\FLANN\include\flann\ext;
       $(PCL_DIR)\3rdParty\Qhull\include;
       $(PCL_DIR)\3rdParty\VTK\include
       </AdditionalIncludeDirectories>
@@ -154,6 +155,7 @@
       $(PCL_DIR)\include\pcl-1.9;
       $(PCL_DIR)\3rdParty\Eigen\eigen3;
       $(PCL_DIR)\3rdParty\FLANN\include;
+      $(PCL_DIR)\3rdParty\FLANN\include\flann\ext;
       $(PCL_DIR)\3rdParty\Qhull\include;
       $(PCL_DIR)\3rdParty\VTK\include
       </AdditionalIncludeDirectories>

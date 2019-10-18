@@ -112,7 +112,7 @@ void Hix::Slicer::slice(const Hix::Render::SceneEntity& entity, const Planes* pl
 
 
 
-Hix::Slicer::Slices::Slices(size_t size): std::vector<Slice>(size)
+Hix::Slicer::Slices::Slices(size_t size): std::deque<Slice>(size)
 {
 }
 

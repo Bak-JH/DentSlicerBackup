@@ -124,7 +124,6 @@ namespace Hix
 			std::unordered_multimap<QVector2D, ContourSegment*> _fromHash;
 			std::unordered_multimap<QVector2D, ContourSegment*> _toHash;
 			std::unordered_multimap<QVector2D, ContourSegment*> _unknownHash;
-			std::unordered_set<ContourSegment*> _unknownSegs;
 
 			std::unordered_set<FaceConstItr> _unexplored;
 			std::vector<Contour> _incompleteContours;

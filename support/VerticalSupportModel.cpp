@@ -138,7 +138,9 @@ void Hix::Support::VerticalSupportModel::generateMesh()
 
 	auto mesh = new Mesh();
 	std::vector<std::vector<QVector3D>> jointContours;
-	Hix::Features::Extrusion::extrudeAlongPath(mesh, QVector3D(0,0,1), contour, path, jointContours, &scales);
+	std::function<void(std::vector<QVector3D>&, float)> uniformScaler(Hix::Shapes2D::scaleContour);
+
+	Hix::Features::Extrusion::extrudeAlongPath(mesh, QVector3D(0,0,1), contour, path, jointContours, &scales, &uniformScaler);
 
 	//create endcaps using joint contours;
 	hexagonToTri(mesh, jointContours.front(), path.front(), true);

@@ -241,6 +241,11 @@ void Hix::Support::SupportRaftManager::clear(const std::unordered_set<const GLMo
 	}
 }
 
+const Hix::Render::SceneEntity* Hix::Support::SupportRaftManager::raftModel() const
+{
+	return _raft.get();
+}
+
 std::vector<std::reference_wrapper<const Hix::Render::SceneEntity>> Hix::Support::SupportRaftManager::supportModels() const
 {
 	std::vector<std::reference_wrapper<const Hix::Render::SceneEntity>> entities;
@@ -250,11 +255,6 @@ std::vector<std::reference_wrapper<const Hix::Render::SceneEntity>> Hix::Support
 		entities.emplace_back(dynamic_cast<const Hix::Render::SceneEntity&>(*each.get()));
 	}
 	return entities;
-}
-
-const Hix::Render::SceneEntity& Hix::Support::SupportRaftManager::raftModel() const
-{
-	return dynamic_cast<const Hix::Render::SceneEntity&>(*_raft.get());
 }
 
 

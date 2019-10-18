@@ -32,7 +32,7 @@ namespace Hix
 		};
 
 
-		class Slices : public std::vector<Slice> {
+		class Slices : public std::deque<Slice> {
 		public:
 			Slices(size_t size);
 			void containmentTreeConstruct();
