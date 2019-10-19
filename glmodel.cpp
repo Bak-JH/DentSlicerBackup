@@ -61,7 +61,6 @@ GLModel::GLModel(QObject* mainWindow, QEntity*parent, Mesh* loadMesh, QString fn
 	//applyGeometry();
 	// 승환 25%
 	qmlManager->setProgress(0.23);
-	updateEntireMesh(_mesh);
 	// 승환 50%
 	qmlManager->setProgress(0.49);
 	//Qt3DExtras::QDiffuseMapMaterial* diffuseMapMaterial = new Qt3DExtras::QDiffuseMapMaterial();
