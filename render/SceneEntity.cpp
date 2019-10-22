@@ -29,7 +29,6 @@ SceneEntity::SceneEntity(QEntity* parent)
 	, vertexBuffer(Qt3DRender::QBuffer::VertexBuffer, this)
 	, indexBuffer(Qt3DRender::QBuffer::IndexBuffer, this)
 	, positionAttribute(this)
-	, normalAttribute(this)
 	, colorAttribute(this)
 	, indexAttribute(this)
 
@@ -52,20 +51,11 @@ SceneEntity::SceneEntity(QEntity* parent)
 	positionAttribute.setCount(0);
 	positionAttribute.setName(QAttribute::defaultPositionAttributeName());
 
-	normalAttribute.setAttributeType(QAttribute::VertexAttribute);
-	normalAttribute.setBuffer(&vertexBuffer);
-	normalAttribute.setDataType(QAttribute::Float);
-	normalAttribute.setDataSize(NRM_SIZE);
-	normalAttribute.setByteOffset(POS_SIZE * sizeof(float));
-	normalAttribute.setByteStride(VTX_SIZE);
-	normalAttribute.setCount(0);
-	normalAttribute.setName(QAttribute::defaultNormalAttributeName());
-
 	colorAttribute.setAttributeType(QAttribute::VertexAttribute);
 	colorAttribute.setBuffer(&vertexBuffer);
 	colorAttribute.setDataType(QAttribute::Float);
 	colorAttribute.setDataSize(COL_SIZE);
-	colorAttribute.setByteOffset((POS_SIZE + NRM_SIZE) * sizeof(float));
+	colorAttribute.setByteOffset((POS_SIZE) * sizeof(float));
 	colorAttribute.setByteStride(VTX_SIZE);
 	colorAttribute.setCount(0);
 	colorAttribute.setName(QAttribute::defaultColorAttributeName());
@@ -90,7 +80,6 @@ SceneEntity::SceneEntity(QEntity* parent)
 	m_geometryRenderer.setVertexCount(0);
 
 	m_geometry.addAttribute(&positionAttribute);
-	m_geometry.addAttribute(&normalAttribute);
 	m_geometry.addAttribute(&colorAttribute);
 
 	m_geometry.addAttribute(&indexAttribute);
@@ -112,7 +101,6 @@ void SceneEntity::clearMem() {
 	indexBuffer.setData(newIdxArray);
 
 	positionAttribute.setCount(0);
-	normalAttribute.setCount(0);
 	colorAttribute.setCount(0);
 	indexAttribute.setCount(0);
 
@@ -215,6 +203,7 @@ void Hix::Render::SceneEntity::setMesh(Hix::Engine3D::Mesh* newMesh)
 
 void Hix::Render::SceneEntity::clearMesh()
 {
+	clearMem();
 	_mesh->setSceneEntity(nullptr);
 	delete _mesh;
 	_mesh = nullptr;
@@ -225,6 +214,7 @@ void Hix::Render::SceneEntity::clearMesh()
 void SceneEntity::updateEntireMesh(Hix::Engine3D::Mesh* mesh)
 {
 	//flush datas
+	
 	auto faceHistory = mesh->getFaces().flushChanges();
 	auto verticesHistory = mesh->getVertices().flushChanges();
 	auto hEdgesHistory = mesh->getHalfEdges().flushChanges();//not used...for now
@@ -459,7 +449,7 @@ void SceneEntity::appendMeshVertex(const Mesh* mesh,
 		auto faceVertices = itr.meshVertices();
 		for (auto& vtxItr : faceVertices)
 		{
-			vertices << vtxItr.localPosition() << vtxItr.localVn();
+			vertices << vtxItr.localPosition();
 			//do color
 			vertices << empty;
 		}
@@ -478,7 +468,6 @@ void SceneEntity::appendMeshVertex(const Mesh* mesh,
 	vertexBuffer.setData(totalData);
 	size_t currCount = (oldFaceCount + appendFaceCount) * 3;
 	positionAttribute.setCount(currCount);
-	normalAttribute.setCount(currCount);
 	colorAttribute.setCount(currCount);
 
 }

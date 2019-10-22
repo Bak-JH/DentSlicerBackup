@@ -10,7 +10,6 @@ layout( triangle_strip, max_vertices = 3 ) out;
 
 in EyeSpaceVertex {
     vec3 position;
-    vec3 normal;
     vec3 color;
 } gs_in[];
 
