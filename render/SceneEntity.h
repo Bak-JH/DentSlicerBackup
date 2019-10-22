@@ -26,9 +26,8 @@ namespace Hix
 
 			//size of QGeometry Attribute elements
 			const static size_t POS_SIZE = 3; //x, y, z of position
-			const static size_t NRM_SIZE = 3; //x, y, z of normal
-			const static size_t COL_SIZE = 3; //x, y, z of normal
-			const static size_t VTX_SIZE = (POS_SIZE + NRM_SIZE + COL_SIZE) * sizeof(float);
+			const static size_t COL_SIZE = 3; //rgb color
+			const static size_t VTX_SIZE = (POS_SIZE + COL_SIZE) * sizeof(float);
 
 			const static size_t IDX_SIZE = 3; //3 indices to vertices
 			const static size_t UINT_SIZE = sizeof(uint); //needs to be large enough to accomodate all range of vertex index
@@ -90,7 +89,6 @@ namespace Hix
 			//separates SSBO buffer for Per-primitive colors
 			//Qt3DRender::QBuffer primitiveColorBuffer;
 			QAttribute positionAttribute;
-			QAttribute normalAttribute;
 			QAttribute colorAttribute;
 			QAttribute indexAttribute;
 

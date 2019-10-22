@@ -4,9 +4,9 @@
 #include <QDebug>
 #include <QCoreApplication>
 using namespace Hix::Engine3D;
-
+class GLModel;
 namespace MeshRepair{
-    void repairMesh(Mesh* mesh);
+    void modelRepair(GLModel* model);
 
     // removes unconnected vertices and faces
 

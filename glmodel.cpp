@@ -181,7 +181,7 @@ void GLModel::updatePrintable() {
 
 void GLModel::repairMesh()
 {
-    MeshRepair::repairMesh(_mesh);
+    MeshRepair::modelRepair(this);
 	emit _updateModelMesh();
 }
 

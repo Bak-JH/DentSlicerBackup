@@ -305,9 +305,9 @@ void QmlManager::deleteOneModelFile(GLModel* target) {
 		//    target->deleteLater();
 		deletePartListItem(target->ID);
 		//if selected, remove from selected list
+		_supportRaftManager.clear(*target);
 		selectedModels.erase(target);
 		//clear related supports
-		_supportRaftManager.clear(target);
 		glmodels.erase(target->ID);
 	}
 }

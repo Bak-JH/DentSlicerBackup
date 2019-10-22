@@ -104,7 +104,7 @@ void SceneEntityWithMaterial::appendMeshVertexPerPrimitive(const Mesh* mesh,
 
 		for (auto& vtxItr : faceVertices)
 		{
-			vertices << vtxItr.localPosition() << vtxItr.localVn() << colorCode;
+			vertices << vtxItr.localPosition() << colorCode;
 		}
 	}
 
@@ -121,7 +121,6 @@ void SceneEntityWithMaterial::appendMeshVertexPerPrimitive(const Mesh* mesh,
 	vertexBuffer.setData(totalData);
 	size_t currCount = (oldFaceCount + appendFaceCount) * 3;
 	positionAttribute.setCount(currCount);
-	normalAttribute.setCount(currCount);
 	colorAttribute.setCount(currCount);
 
 }
