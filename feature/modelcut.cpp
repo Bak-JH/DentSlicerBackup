@@ -687,11 +687,13 @@ void bisectModelByPlane(Mesh* leftMesh, Mesh* rightMesh, Mesh* mesh, float plane
 
     qDebug() << "make meshFace Queue";
     std::vector<Custom3DPoint> meshVertices, parentMesh;
-    for (const auto& mf: mesh->getFaces()){
-        meshVertices.clear();
+	auto faceCend = mesh->getFaces().cend();
+	for (auto mf = mesh->getFaces().cbegin(); mf != faceCend; ++mf)
+	{
+		meshVertices.clear();
         for (int i = 0; i < 3; i++) {
 			const auto& mvs = mf.meshVertices();
-            QVector3D vertex = mvs[i]->position;
+            QVector3D vertex = mvs[i].worldPosition();
             Custom3DPoint customVertex;
             customVertex.x = int(vertex.x() * padding); customVertex.y = int(vertex.y() * padding); customVertex.z = int(vertex.z() * padding);
             meshVertices.push_back(customVertex);
@@ -996,11 +998,13 @@ void cutAway(Mesh* leftMesh, Mesh* rightMesh, Mesh* mesh, std::vector<QVector3D>
 
     qDebug() << "make meshFace Queue";
     std::vector<Custom3DPoint> meshVertices, parentMesh;
-    for (const auto& mf: mesh->getFaces()){
+	auto faceCend = mesh->getFaces().cend();
+	for(auto mf = mesh->getFaces().cbegin(); mf != faceCend; ++mf)
+	{
 		auto mvs = mf.meshVertices();
         meshVertices.clear();
         for (i = 0; i < 3; i++) {
-            QVector3D vertex = mvs[i]->position;
+            QVector3D vertex = mvs[i].worldPosition();
             Custom3DPoint customVertex;
             customVertex.x = int(vertex.x() * padding); customVertex.y = int(vertex.y() * padding); customVertex.z = int(vertex.z() * padding);
             meshVertices.push_back(customVertex);

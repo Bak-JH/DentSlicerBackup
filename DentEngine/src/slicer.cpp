@@ -79,8 +79,18 @@ float ContourSegment::dist()const
 
 
 
-void Hix::Slicer::slice(const Mesh* mesh, const Planes* planes, Slices* slices){
-    if (mesh->getFaces().size() ==0){
+void Hix::Slicer::slice(const Hix::Render::SceneEntity& entity, const Planes* planes, Slices* slices){
+    
+	for (auto childNode : entity.childNodes())
+	{
+		auto sliceableModel = dynamic_cast<const Hix::Render::SceneEntity*>(childNode);
+		if (sliceableModel)
+		{
+			slice(*sliceableModel, planes, slices);
+		}
+	}
+	auto mesh = entity.getMesh();
+	if (mesh->getFaces().size() ==0){
         return;
     }
 	auto zPlanes = planes->getPlanesVector();
@@ -102,7 +112,7 @@ void Hix::Slicer::slice(const Mesh* mesh, const Planes* planes, Slices* slices){
 
 
 
-Hix::Slicer::Slices::Slices(size_t size): std::vector<Slice>(size)
+Hix::Slicer::Slices::Slices(size_t size): std::deque<Slice>(size)
 {
 }
 

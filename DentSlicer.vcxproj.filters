@@ -89,9 +89,6 @@
     <ClCompile Include="utils\httpreq.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="feature\labellingtextpreview.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="utils\linemeshgeometry.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -141,9 +138,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="DentEngine\src\polyclipping\poly2tri\sweep\sweep_context.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="feature\text3dgeometrygenerator.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="utils\updatechecker.cpp">
@@ -257,7 +251,19 @@
     <ClCompile Include="DentEngine\src\polyclipping\polytree2tri\PolytreeCDT.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>
+    <ClCompile Include="feature\labelling\labelModel.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="DentEngine\src\Bounds3D.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="common\Debug.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="support\ModelAttachedSupport.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="feature\ModelBuilder.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -299,9 +305,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <QtMoc Include="utils\httpreq.h">
-      <Filter>Header Files</Filter>
-    </QtMoc>
-    <QtMoc Include="feature\labellingtextpreview.h">
       <Filter>Header Files</Filter>
     </QtMoc>
     <QtMoc Include="utils\linemeshgeometry.h">
@@ -365,9 +368,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="DentEngine\src\polyclipping\poly2tri\sweep\sweep_context.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="feature\text3dgeometrygenerator.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <QtMoc Include="utils\updatechecker.h">
@@ -604,10 +604,34 @@
     <ClInclude Include="DentEngine\src\polyclipping\polytree2tri\PolytreeCDT.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
+    <ClInclude Include="feature\labelling\labelModel.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="DentEngine\src\Bounds3D.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
     <ClInclude Include="common\Hasher.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\RandomAccessIteratorBase.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\Debug.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="DentEngine\src\MeshIterators.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\HetUniquePtr.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="support\BaseSupport.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="support\ModelAttachedSupport.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="feature\ModelBuilder.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
   </ItemGroup>

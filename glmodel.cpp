@@ -6,7 +6,6 @@
 #include <exception>
 
 #include "qmlmanager.h"
-#include "feature/text3dgeometrygenerator.h"
 #include "feature/shelloffset.h"
 //#include "feature/supportview.h"
 #include "feature/stlexporter.h"
@@ -38,8 +37,7 @@ using namespace Hix::Render;
 
 GLModel::GLModel(QObject* mainWindow, QEntity*parent, Mesh* loadMesh, QString fname, int id)
     : SceneEntityWithMaterial(parent)
-	, _supportRaftManager(this)
-    , filename(fname)
+    , _filename(fname)
     , mainWindow(mainWindow)
     , cutMode(1)
     , ID(id)
@@ -52,22 +50,17 @@ GLModel::GLModel(QObject* mainWindow, QEntity*parent, Mesh* loadMesh, QString fn
 	_meshMaterial.setColor(Hix::Render::Colors::Default);
 
 	qmlManager->addPart(getFileName(fname.toStdString().c_str()), ID);
-	if (filename != "" && (filename.contains(".stl") || filename.contains(".STL"))\
-		&& loadMesh == nullptr) {
-		FileLoader::loadMeshSTL(_mesh, filename.toLocal8Bit().constData());
+	if (_filename != "" && (_filename.contains(".stl") || _filename.contains(".STL"))) {
+		FileLoader::loadMeshSTL(loadMesh, _filename.toLocal8Bit().constData());
 	}
-	else if (filename != "" && (filename.contains(".obj") || filename.contains(".OBJ"))\
-		&& loadMesh == nullptr) {
-		FileLoader::loadMeshOBJ(_mesh, filename.toLocal8Bit().constData());
+	else if (_filename != "" && (_filename.contains(".obj") || _filename.contains(".OBJ"))) {
+		FileLoader::loadMeshOBJ(loadMesh, _filename.toLocal8Bit().constData());
 	}
-	else {
-		delete _mesh;
-		_mesh = loadMesh;
-	}
+	loadMesh->centerMesh();
+	setMesh(loadMesh);
 	//applyGeometry();
 	// 승환 25%
 	qmlManager->setProgress(0.23);
-	setMesh(_mesh);
 	// 승환 50%
 	qmlManager->setProgress(0.49);
 	//Qt3DExtras::QDiffuseMapMaterial* diffuseMapMaterial = new Qt3DExtras::QDiffuseMapMaterial();
@@ -101,96 +94,54 @@ GLModel::GLModel(QObject* mainWindow, QEntity*parent, Mesh* loadMesh, QString fn
 
 
 
-void GLModel::moveModelMesh(QVector3D direction, bool update) {
-	_mesh->vertexMove(direction);
-	qDebug() << "moved vertex";
-	if (update)
-	{
-		updateModelMesh();
-	}
+void GLModel::moveModel(const QVector3D& displacement) {
+	auto translation = _transform.translation() + displacement;
+	_transform.setTranslation(translation);
+	_aabb.translate(displacement);
+}
+void GLModel::rotateModel(const QQuaternion& rotation) {
+	auto newRot = rotation * _transform.rotation();
+	_transform.setRotation(newRot);
 }
 
 
+void GLModel::scaleModel(const QVector3D& scales) {
+	auto newScales = _transform.scale3D() * scales; //this is NOT cross product
+	_aabb.translate(-_transform.translation());
+	_aabb.scale(QVector3D(1.0f, 1.0f, 1.0f)/_transform.scale3D());
+	_aabb.scale(newScales);
+	_aabb.translate(_transform.translation());
+	_transform.setScale3D(newScales);
+}
 void GLModel::moveDone()
 {
-	_mesh->vertexMove(getTransform()->translation());
-	setTranslation(QVector3D(0, 0, 0));
 	updatePrintable();
-	updateModelMesh();
 }
-void GLModel::rotationDone()
+
+
+void GLModel::rotateDone()
 {
-	////auto rotCenter = _mesh->bounds().centre();
-	//_mesh->vertexApplyTransformation(m_transform);
-	////reset transform by setting identity matrix;
-	//m_transform.setMatrix(QMatrix4x4());
-	_mesh->vertexRotate(quatToMat(m_transform.rotation()).inverted());
-	m_transform.setRotationX(0);
-	m_transform.setRotationY(0);
-	m_transform.setRotationZ(0);
+	updateRecursiveAabb();
 	setZToBed();
-	_mesh->vertexMove(m_transform.translation());
-	m_transform.setTranslation(QVector3D(0, 0, 0));
 	updatePrintable();
-	updateModelMesh();
 }
-
-
-
-void GLModel::rotateAroundPt(QVector3D& rot_center, float X, float Y, float Z)
+void GLModel::scaleDone()
 {
-	QMatrix4x4 rot;
-	rot = m_transform.rotateAround(rot_center, X, (QVector3D(1, 0, 0).toVector4D() * m_transform.matrix()).toVector3D());
-	m_transform.setMatrix(m_transform.matrix() * rot);
-	rot = m_transform.rotateAround(rot_center, Y, (QVector3D(0, 1, 0).toVector4D() * m_transform.matrix()).toVector3D());
-	m_transform.setMatrix(m_transform.matrix() * rot);
-	rot = m_transform.rotateAround(rot_center, Z, (QVector3D(0, 0, 1).toVector4D() * m_transform.matrix()).toVector3D());
-	m_transform.setMatrix(m_transform.matrix() * rot);
 
-	_mesh->vertexRotate(quatToMat(m_transform.rotation()).inverted());
-	m_transform.setRotationX(0);
-	m_transform.setRotationY(0);
-	m_transform.setRotationZ(0);
 	setZToBed();
-	_mesh->vertexMove(m_transform.translation());
-	m_transform.setTranslation(QVector3D(0, 0, 0));
-	updateModelMesh();
-}
-
-void GLModel::rotateAroundPt(QVector3D& rot_center, const QVector3D& axis, float angle)
-{
-	QMatrix4x4 rot;
-	rot = m_transform.rotateAround(rot_center, angle, axis);
-	m_transform.setMatrix(m_transform.matrix() * rot);
-	_mesh->vertexRotate(quatToMat(m_transform.rotation()).inverted());
-	m_transform.setRotationX(0);
-	m_transform.setRotationY(0);
-	m_transform.setRotationZ(0);
-	setZToBed();
-	_mesh->vertexMove(m_transform.translation());
-	m_transform.setTranslation(QVector3D(0, 0, 0));
-	updateModelMesh();
-}
-
-
-
-
-
-void GLModel::scaleModelMesh(float scaleX, float scaleY, float scaleZ) {
-	/* To fix center of the model */
-	float centerX = (_mesh->x_max() + _mesh->x_min()) / 2;
-	float centerY = (_mesh->y_max() + _mesh->y_min()) / 2;
-	_mesh->vertexScale(scaleX, scaleY, scaleZ, centerX, centerY);
 	updatePrintable();
-	updateModelMesh();
+
 }
+
 
 void GLModel::setZToBed()
 {
-	auto translation = getTranslation();
-	translation.setZ(-1.0f * getMesh()->z_min());
-	setTranslation(translation);
+	moveModel(QVector3D(0, 0, -_aabb.zMin()));
+}
 
+QString GLModel::filename() const
+{
+	return _filename;
 }
 
 
@@ -204,7 +155,7 @@ void GLModel::changeColor(const QVector3D& color){
 bool GLModel::isPrintable()const
 {
 	const auto& bedBound = scfg->bedBound();
-	return bedBound.contains(_mesh->bounds());
+	return bedBound.contains(_aabb);
 }
 
 void GLModel::updatePrintable() {
@@ -230,7 +181,7 @@ void GLModel::updatePrintable() {
 
 void GLModel::repairMesh()
 {
-    MeshRepair::repairMesh(_mesh);
+    MeshRepair::modelRepair(this);
 	emit _updateModelMesh();
 }
 
@@ -249,14 +200,10 @@ void GLModel::copyModelAttributeFrom(GLModel* from){
     scaleActive = from->scaleActive;
 
     // labelling info
-    if (from->labellingTextPreview) {
+    if (from->textPreview) {
         qDebug() << "copyModelAttributeFrom";
-        if (!labellingTextPreview)
-            labellingTextPreview = new LabellingTextPreview(this);
-        labellingTextPreview->setFontName(from->labellingTextPreview->fontName);
-        labellingTextPreview->setFontBold((from->labellingTextPreview->fontWeight == QFont::Bold)? true:false);
-        labellingTextPreview->setFontSize(from->labellingTextPreview->fontSize);
-        labellingTextPreview->setText(from->labellingTextPreview->text, from->labellingTextPreview->contentWidth);
+        if (!textPreview)
+            textPreview = new Hix::Labelling::LabelModel(this, *(from->textPreview));
     }
 }
 
@@ -351,22 +298,23 @@ void GLModel::modelCut(){
 }
 
 void GLModel::generateRLModel(Mesh* lmesh, Mesh* rmesh){
+	GLModel* leftmodel = nullptr;
+	GLModel* rightmodel = nullptr;
     qDebug() << "** generateRLModel" << this;
     if (lmesh->getFaces().size() != 0){
-        qmlManager->createModelFile(lmesh, filename+"_l");
+		leftmodel = qmlManager->createModelFile(lmesh, _filename+"_l");
         qDebug() << "leftmodel created";
     }
     // 승환 70%
     qmlManager->setProgress(0.72);
     if (rmesh->getFaces().size() != 0){
-        qmlManager->createModelFile(rmesh, filename+"_r");
+		rightmodel = qmlManager->createModelFile(rmesh, _filename +"_r");
         qDebug() << "rightmodel created";
     }
 
 
     // 승환 90%
-    GLModel* leftmodel = qmlManager->findGLModelByName(filename+"_l");
-    GLModel* rightmodel = qmlManager->findGLModelByName(filename+"_r");
+
     qDebug() << "found models : " << leftmodel << rightmodel;
     if (leftmodel != nullptr && rightmodel != nullptr){
         leftmodel->twinModel = rightmodel;
@@ -380,7 +328,7 @@ void GLModel::generateRLModel(Mesh* lmesh, Mesh* rmesh){
 		{
 			auto offsetLeftMesh = ShellOffset::shellOffset(leftmodel->_mesh, (float)shellOffsetFactor);
 
-			qmlManager->createModelFile(offsetLeftMesh, leftmodel->filename);
+			qmlManager->createModelFile(offsetLeftMesh, leftmodel->filename());
 
 			qmlManager->deleteModelFile(leftmodel->ID);
 
@@ -408,12 +356,12 @@ void GLModel::indentHollowShell(double radius){
     qDebug() << "hollow shell called" << radius;
 	if (!_targetSelected)
 		return;
-	auto meshVertices = targetMeshFace->meshVertices();
+	auto meshVertices = targetMeshFace.meshVertices();
     QVector3D center = (
-		meshVertices[0]->position +
-		meshVertices[1]->position + 
-		meshVertices[2]->position)/3;
-	HollowShell::hollowShell(_mesh, &*targetMeshFace, center, radius);
+		meshVertices[0].localPosition() +
+		meshVertices[1].localPosition() +
+		meshVertices[2].localPosition())/3;
+	HollowShell::hollowShell(_mesh, targetMeshFace, center, radius);
 }
 
 GLModel::~GLModel(){
@@ -427,8 +375,9 @@ void GLModel::initHitTest()
 
 void GLModel::clicked(MouseEventData& pick, const Qt3DRender::QRayCasterHit& hit)
 {
-
-	if (!cutActive && !extensionActive && !labellingActive && !layflatActive && _supportRaftManager.supportEditMode() == Hix::Support::EditMode::None)// && !layerViewActive && !supportViewActive)
+	auto suppMode = qmlManager->supportRaftManager().supportEditMode();
+	if (!cutActive && !extensionActive && !labellingActive && !layflatActive &&
+		suppMode == Hix::Support::EditMode::None)// && !layerViewActive && !supportViewActive)
 		qmlManager->modelSelected(ID);
 
 	if (qmlManager->isSelected(this) && pick.button == Qt::MouseButton::RightButton) {
@@ -452,22 +401,25 @@ void GLModel::clicked(MouseEventData& pick, const Qt3DRender::QRayCasterHit& hit
     targetMeshFace = _mesh->getFaces().cbegin() + hit.primitiveIndex();
 
 
+	/// Extension Feature ///
 	if (extensionActive && hit.localIntersection() != QVector3D(0, 0, 0)) {
 		unselectMeshFaces();
 		emit extensionSelect();
 		selectMeshFaces();
 	}
 
+	/// Hollow Shell ///
 	if (hollowShellActive) {
 		qDebug() << "getting handle picker clicked signal hollow shell active";
 		qDebug() << "found parent meshface";
 		// translate hollowShellSphere to mouse position
 		QVector3D v = hit.localIntersection();
-        qmlManager->hollowShellSphereTransform->setTranslation(v + m_transform.translation());
+        qmlManager->hollowShellSphereTransform->setTranslation(v + _transform.translation());
 
 
 	}
 
+	/// Lay Flat ///
 	if (layflatActive && hit.localIntersection() != QVector3D(0, 0, 0)) {
 
 		unselectMeshFaces();
@@ -475,22 +427,23 @@ void GLModel::clicked(MouseEventData& pick, const Qt3DRender::QRayCasterHit& hit
 		selectMeshFaces();
 	}
 
-	if (_supportRaftManager.supportEditMode() == Hix::Support::EditMode::Manual && hit.localIntersection() != QVector3D(0, 0, 0)) {
+	/// Manual Support ///
+	if (suppMode == Hix::Support::EditMode::Manual && hit.localIntersection() != QVector3D(0, 0, 0)) {
 		Hix::OverhangDetect::FaceOverhang newOverhang;
-		newOverhang.first = hit.localIntersection();
-		newOverhang.second = targetMeshFace;
-		_supportRaftManager.addSupport(newOverhang);
+		newOverhang.coord = ptToRoot(hit.localIntersection());
+		newOverhang.face = targetMeshFace;
+		qmlManager->supportRaftManager().addSupport(newOverhang);
 	}
 
+	/// Labeling Feature ///
     if (labellingActive && hit.localIntersection() != QVector3D(0, 0, 0)) {
-        if (labellingTextPreview == nullptr)
-            labellingTextPreview = new LabellingTextPreview(this);
+		if (textPreview != nullptr)
+			textPreview->setEnabled(false);
 
+		textPreview = new Hix::Labelling::LabelModel(this);
 
-        if (labellingTextPreview && labellingTextPreview->isEnabled()) {
-            labellingTextPreview->setTranslation(hit.localIntersection() + targetMeshFace->fn);
-            labellingTextPreview->setNormal(targetMeshFace->fn);
-            labellingTextPreview->planeSelected = true;
+		if (textPreview && labellingActive) {
+			textPreview->setTranslation(hit.localIntersection());
             QMetaObject::invokeMethod(qmlManager->labelPopup, "labelUpdate");
         }
     }
@@ -520,8 +473,12 @@ bool GLModel::isDraggable(Hix::Input::MouseEventData& e,const Qt3DRender::QRayCa
 }
 void GLModel::dragStarted(Hix::Input::MouseEventData& e, const Qt3DRender::QRayCasterHit& hit)
 {
-	_supportRaftManager.clear();
-	setZToBed();
+	if (qmlManager->supportRaftManager().supportActive())
+	{
+		auto count = qmlManager->supportRaftManager().clear(*this);
+		if (count > 0)
+			setZToBed();
+	}
 	lastpoint = hit.localIntersection();
 	prevPoint = (QVector2D)e.position;
 	qmlManager->moveButton->setProperty("state", "active");
@@ -667,11 +624,11 @@ QVector3D GLModel::spreadPoint(QVector3D endPoint,QVector3D startPoint,int facto
 }
 
 
-void GLModel::getTextChanged(QString text, int contentWidth)
+void GLModel::getTextChanged(QString text)
 {
     qDebug() << "@@@@ getTexyChanged";
-    if (labellingTextPreview && labellingTextPreview->isEnabled()){
-        applyLabelInfo(text, contentWidth, labellingTextPreview->fontName, (labellingTextPreview->fontWeight==QFont::Bold)? true:false, labellingTextPreview->fontSize);
+    if (text != "" && textPreview && labellingActive){
+		textPreview->text = text;
     }
 }
 
@@ -693,14 +650,11 @@ void GLModel::closeLabelling()
 
     labellingActive = false;
 
-    if (labellingTextPreview){
-        labellingTextPreview->planeSelected = false;
-        labellingTextPreview->deleteLabel();
-        labellingTextPreview->deleteLater();
-        labellingTextPreview = nullptr;
+    if (textPreview){
+		textPreview->setEnabled(false);
     }
 	_targetSelected = false;
-
+	textPreview = nullptr;
 //    stateChangeLabelling();
 }
 
@@ -712,167 +666,65 @@ void GLModel::stateChangeLabelling() {
 void GLModel::getFontNameChanged(QString fontName)
 {
     qDebug() << "@@@@ getFontNameChanged";
-    if (labellingTextPreview && labellingTextPreview->isEnabled()){
-        applyLabelInfo(labellingTextPreview->text, labellingTextPreview->contentWidth, fontName, (labellingTextPreview->fontWeight==QFont::Bold)? true:false, labellingTextPreview->fontSize);
+    if (textPreview && labellingActive){
+		textPreview->font.setFamily(fontName);
     }
 }
 
 void GLModel::getFontBoldChanged(bool isbold){
     qDebug() << "@@@@ getBoldChanged";
-    if (labellingTextPreview && labellingTextPreview->isEnabled()){
-        applyLabelInfo(labellingTextPreview->text, labellingTextPreview->contentWidth, labellingTextPreview->fontName, isbold, labellingTextPreview->fontSize);
-
+    if (textPreview && labellingActive){
+		textPreview->font.setBold(isbold);
     }
 }
 
 void GLModel::getFontSizeChanged(int fontSize)
 {
     qDebug() << "@@@@ getSizeChanged" << fontSize;
-    if (labellingTextPreview && labellingTextPreview->isEnabled()){
-        applyLabelInfo(labellingTextPreview->text, labellingTextPreview->contentWidth, labellingTextPreview->fontName, (labellingTextPreview->fontWeight==QFont::Bold)? true:false, fontSize);
+	if (textPreview && labellingActive){
+		textPreview->font.setPointSize(fontSize);
     }
 }
 
 /* make a new labellingTextPreview and apply label info's */
-void GLModel::applyLabelInfo(QString text, int contentWidth, QString fontName, bool isBold, int fontSize){
-    QVector3D translation;
-    bool selected = false;
+void GLModel::applyLabelInfo(QString text, QString fontName, bool isBold, int fontSize)
+{
+	qDebug() << "label apply";
 
-    qDebug() << "applyLabelInfo +++++++++++++++++++++++++ " << text  << contentWidth << this;
-
-    if (labellingTextPreview && labellingTextPreview->isEnabled()){
-        translation = labellingTextPreview->translation;
-        selected = labellingTextPreview->planeSelected;
-        labellingTextPreview->deleteLabel();
-        labellingTextPreview->deleteLater();
-        labellingTextPreview = nullptr;
+    if (textPreview && labellingActive){
+		textPreview->generateLabel(text, _mesh, targetMeshFace.localFn(), 0.025f);
+		updateModelMesh();
     }
-    labellingTextPreview = new LabellingTextPreview(this);
-    labellingTextPreview->setEnabled(true);
-
-    labellingTextPreview->planeSelected = selected;
-
-    qDebug() << "applyLabelInfo";
-    if (_targetSelected) {
-        qDebug() << "applyLabelInfo : target Selected";
-        labellingTextPreview->updateChange(text, contentWidth, fontName, isBold, fontSize, translation,targetMeshFace->fn);
-        //labellingTextPreview->setTranslation(translation);
-        //labellingTextPreview->setNormal(parentModel->targetMeshFace->fn);
     }
-    else {
-        qDebug() << "applyLabelInfo : target unSelected";
-        labellingTextPreview->updateChange(text, contentWidth, fontName, isBold, fontSize, labellingTextPreview->translation, QVector3D(0,0,0));
-        }
-
-
-
-}
 
 
 void GLModel::generateText3DMesh()
 {
-    //qDebug() << "generateText3DMesh @@@@@" << this << this;
+    qDebug() << "generateText3DMesh @@@@@" << this << this;
+
     if (updateLock)
         return;
     updateLock = true;
 
-
-    if (!labellingTextPreview){
+    if (!textPreview){
         qDebug() << "no labellingTextPreview";
-        QMetaObject::invokeMethod(qmlManager->labelPopup, "noModel");
-        return;
-    }
-
-    if (!labellingTextPreview->planeSelected) {
-        qDebug() << "no planeSelected" <<labellingTextPreview->translation;
         QMetaObject::invokeMethod(qmlManager->labelPopup, "noModel");
         return;
     }
 
     qmlManager->openProgressPopUp();
 
-    labellingTextPreview->planeSelected = false;
+    qmlManager->setProgress(0.1f);
 
-
-    qmlManager->setProgress(0.1);
-
-    QVector3D* originalVertices = reinterpret_cast<QVector3D*>(vertexBuffer.data().data());
-    int originalVerticesSize = vertexBuffer.data().size() / sizeof(float) / 3;
-
-    QVector3D* vertices;
-    int verticesSize;
-    unsigned int* indices;
-    int indicesSize;
-    float depth = 0.5f;
-    float scale = labellingTextPreview->ratioY * labellingTextPreview->scaleY;
-    QVector3D translation = labellingTextPreview->translation;// + QVector3D(0,-0.3,0);
-
-    Qt3DCore::QTransform transform, normalTransform;
-
-    QVector3D normal = labellingTextPreview->normal;
-
-    QVector3D ref = QVector3D(0, 0, 1);
-    QVector3D tangent;
-    if (normal == QVector3D(0,0,1) || normal == QVector3D(0,0,-1)){
-        tangent = QVector3D(1,0,0);
-    } else {
-        tangent = QVector3D::crossProduct(normal, ref);
-    }
-    tangent.normalize();
-
-    QVector3D binormal;
-    if (normal == QVector3D(0,0,1) || normal == QVector3D(0,0,-1)){
-        binormal = QVector3D(0,1,0);
-    } else {
-        binormal = QVector3D::crossProduct(tangent, normal);
-    }
-    binormal.normalize();
-
-    QQuaternion quat = QQuaternion::fromAxes(tangent, normal, binormal) * QQuaternion::fromAxisAndAngle(QVector3D(0, 0, 1), 180)* QQuaternion::fromAxisAndAngle(QVector3D(1, 0, 0), 90);
-
-    transform.setScale(scale);
-    transform.setRotation(quat);
-    transform.setTranslation(translation);
-    qmlManager->setProgress(0.3);
-
-    QFont targetFont = QFont(labellingTextPreview->fontName, labellingTextPreview->fontSize, labellingTextPreview->fontWeight, false);
-    QString targetText = labellingTextPreview->text;
-    QVector3D targetNormal = labellingTextPreview->normal;
-
-    if (labellingTextPreview){
-        labellingTextPreview->planeSelected = false;
-        labellingTextPreview->deleteLabel();
-        labellingTextPreview->deleteLater();
-        labellingTextPreview = nullptr;
-    }
 	_targetSelected = false;
+	*_mesh += *textPreview->getMesh();
 
-    generateText3DGeometry(&vertices, &verticesSize,
-                           &indices, &indicesSize,
-                           targetFont,
-                           targetText,
-                           depth,
-                           _mesh,
-                           -targetNormal,
-                           transform.matrix(),
-                           normalTransform.matrix());
-
-
-    qmlManager->setProgress(0.9);
-
-    std::vector<QVector3D> outVertices;
-    for (int i = 0; i < indicesSize / 3; ++i) {
-        // Insert vertices in CCW order
-        outVertices.push_back(vertices[2 * indices[3*i + 2] + 0]);
-        outVertices.push_back(vertices[2 * indices[3*i + 1] + 0]);
-        outVertices.push_back(vertices[2 * indices[3*i + 0] + 0]);
-        _mesh->addFace(vertices[2 * indices[3*i + 2] + 0], vertices[2 * indices[3*i + 1] + 0], vertices[2 * indices[3*i + 0] + 0]);
-
-    }
+    qmlManager->setProgress(0.5f);
 
     updateModelMesh();
+	textPreview = nullptr;
 
-    qmlManager->setProgress(1);
+    qmlManager->setProgress(1.0f);
 }
 
 // for extension
@@ -882,7 +734,7 @@ void GLModel:: unselectMeshFaces(){
 }
 void GLModel::selectMeshFaces(){
 	selectedFaces.clear();
-	QVector3D normal = targetMeshFace->fn;
+	QVector3D normal = targetMeshFace.localFn();
 	_mesh->findNearSimilarFaces(normal, targetMeshFace, selectedFaces);
 	updateMesh(_mesh, true);
 }
@@ -898,14 +750,10 @@ void GLModel::generateLayFlat(){
     if(!_targetSelected)
         return;
 	unselectMeshFaces();
-	constexpr QVector3D toBottNormal(0, 0, -1);
-	auto rotationTo = QQuaternion::rotationTo(targetMeshFace->fn, toBottNormal);
-	auto rotCenter = _mesh->bounds().centre();
-	QVector3D rotAxis;
-	float angle;
-	rotationTo.getAxisAndAngle(&rotAxis, &angle);
-	rotateAroundPt(rotCenter, rotAxis, angle);
-	setZToBed();
+	constexpr QVector4D worldBot(0, 0, -1, 1);
+	QVector3D localBotNorml(toLocalCoord(worldBot));
+	auto rotationTo = QQuaternion::rotationTo(targetMeshFace.localFn(), localBotNorml);
+	_transform.setRotation(_transform.rotation() * rotationTo);
 	emit resetLayflat();
 }
 
@@ -915,7 +763,7 @@ void GLModel::generateShellOffset(double factor){
     //saveUndoState();
     qDebug() << "generate shell Offset";
     qmlManager->openProgressPopUp();
-    QString original_filename = filename;
+    QString original_filename = _filename;
 
     cutMode = 1;
     cutFillMode = 1;
@@ -939,7 +787,7 @@ void GLModel::closeLayflat(){
         return;
     layflatActive = false;
 	_meshMaterial.changeMode(Hix::Render::ShaderMode::SingleColor);
-	updatePrintable();
+	rotateDone();
 	updateMesh(_mesh, true);
     unselectMeshFaces();
 	_targetSelected = false;
@@ -1144,21 +992,9 @@ bool GLModel::perPrimitiveColorActive() const
 }
 bool GLModel::faceSelectionActive() const
 {
-	return extensionActive || layflatActive || _supportRaftManager.supportEditMode() != Hix::Support::EditMode::None;
-}
-bool GLModel::raftSupportGenerated() const
-{
-	return _supportRaftManager.raftActive() || _supportRaftManager.supportActive();
-}
-Hix::Support::SupportRaftManager& GLModel::supportRaftManager()
-{
-	return _supportRaftManager;
+	return extensionActive || layflatActive;
 }
 
-const Hix::Support::SupportRaftManager& GLModel::supportRaftManager()const
-{
-	return _supportRaftManager;
-}
 QVector3D GLModel::getPrimitiveColorCode(const Hix::Engine3D::Mesh* mesh, FaceConstItr itr)
 {
 #ifdef _STRICT_GLMODEL

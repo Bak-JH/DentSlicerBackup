@@ -1,5 +1,5 @@
 #pragma once
-#include "mesh.h"
+#include "../../render/SceneEntity.h"
 //#include "support.h"
 //#include "infill.h"
 #include <list>
@@ -14,6 +14,10 @@ class OverhangPoint;
 
 namespace Hix
 {
+	namespace Render
+	{
+
+	}
 	namespace Slicer
 	{
 		class Planes;
@@ -28,7 +32,7 @@ namespace Hix
 		};
 
 
-		class Slices : public std::vector<Slice> {
+		class Slices : public std::deque<Slice> {
 		public:
 			Slices(size_t size);
 			void containmentTreeConstruct();
@@ -36,7 +40,7 @@ namespace Hix
 		};
 
 		/****************** Entire Slicing Step *******************/
-		void slice(const Mesh* mesh, const Planes* planes, Slices* slices);
+		void slice(const Hix::Render::SceneEntity& entitiy, const Planes* planes, Slices* slices);
 	};
 }
 
