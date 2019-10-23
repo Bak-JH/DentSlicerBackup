@@ -35,7 +35,7 @@ void Hix::Features::Cut::ZAxisCutTask::divideTriangles()
 	auto& faces = _origMesh->getFaces();
 	for (auto mf = faces.cbegin(); mf != faces.cend(); ++mf)
 	{
-		auto sortedZ = mf->sortZ();
+		auto sortedZ = mf.sortZ();
 		float z_min = sortedZ[0];
 		float z_mid = sortedZ[1];
 		float z_max = sortedZ[2];
@@ -126,18 +126,18 @@ void Hix::Features::Cut::ZAxisCutTask::fillOverlap(const Hix::Slicer::ContourSeg
 	{
 		return;
 	}
-	auto mvs = face->meshVertices();
+	auto mvs = face.meshVertices();
 	std::vector<VertexConstItr> highs;
 	std::vector<VertexConstItr> lows;
 	VertexConstItr med;
 	for (size_t i = 0; i < 3; ++i)
 	{
 		auto& curr = mvs[i];
-		if (curr->position.z() < _cuttingPlane)
+		if (curr.worldPosition().z() < _cuttingPlane)
 		{
 			lows.emplace_back(curr);
 		}
-		else if (curr->position.z() > _cuttingPlane)
+		else if (curr.worldPosition().z() > _cuttingPlane)
 		{
 			highs.emplace_back(curr);
 		}
@@ -155,8 +155,8 @@ void Hix::Features::Cut::ZAxisCutTask::fillOverlap(const Hix::Slicer::ContourSeg
 		QVector3D from(seg.from, _cuttingPlane);
 		QVector3D to(seg.to, _cuttingPlane);
 
-		_topMesh->addFace(seg.from, seg.to, highs[0]->position);
-		_bottomMesh->addFace(seg.to, seg.from, lows[0]->position);
+		_topMesh->addFace(seg.from, seg.to, highs[0].localPosition());
+		_bottomMesh->addFace(seg.to, seg.from, lows[0].localPosition());
 	}
 	else
 	{
@@ -187,16 +187,16 @@ void Hix::Features::Cut::ZAxisCutTask::fillOverlap(const Hix::Slicer::ContourSeg
 		}
 		//need to sort majority to winding order
 		HalfEdgeConstItr hintEdge;
-		face->getEdgeWithVertices(hintEdge,majority[0], majority[1]);
-		majority[0] = hintEdge->from;
-		majority[1] = hintEdge->to;
+		face.getEdgeWithVertices(hintEdge,majority[0], majority[1]);
+		majority[0] = hintEdge.from();
+		majority[1] = hintEdge.to();
 
 		//face goes in this order, f-> t -> minority
-		oneFaceAddedMesh->addFace(from, to, minority[0]->position);
+		oneFaceAddedMesh->addFace(from, to, minority[0].localPosition());
 		// maj[0]->t->f 
 		// maj[0]->maj[1]->t 
-		twoFacesAddedMesh->addFace(majority[0]->position, to, from);
-		twoFacesAddedMesh->addFace(majority[0]->position, majority[1]->position, to);
+		twoFacesAddedMesh->addFace(majority[0].localPosition(), to, from);
+		twoFacesAddedMesh->addFace(majority[0].localPosition(), majority[1].localPosition(), to);
 	}
 
 

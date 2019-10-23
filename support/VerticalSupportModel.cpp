@@ -2,7 +2,8 @@
 #include "SupportRaftManager.h"
 #include "../DentEngine/src/configuration.h"
 #include "../feature/Extrude.h"
-
+#include "SupportRaftManager.h"
+#include "../glmodel.h"
 
 constexpr  float SUPPORT_CONE_LENGTH =  1.0f;
 constexpr  float SUPPORT_OVERLAP_LENGTH = SUPPORT_CONE_LENGTH/2;
@@ -14,28 +15,33 @@ using namespace Hix::Input;
 using namespace Hix::Render;
 using namespace Hix::Support;
 using namespace Hix::OverhangDetect;
+using namespace Qt3DCore;
 
 
 
-Hix::Support::VerticalSupportModel::VerticalSupportModel(SupportRaftManager* manager, std::variant<VertexConstItr, FaceOverhang> overhang):
-	SupportModel(manager, overhang)
+Hix::Support::VerticalSupportModel::VerticalSupportModel(SupportRaftManager* manager, const Overhang& overhang):
+	SupportModel(manager), _overhang(overhang)
 {
 	generateMesh();
-	setMesh(_mesh);
 
 }
 
 VerticalSupportModel::~VerticalSupportModel()
 {
-
+	//unlike other SceneEntities, Raft and support owns their mesh data
 }
 
-QVector3D Hix::Support::VerticalSupportModel::getBasePt()
+const QVector3D& Hix::Support::VerticalSupportModel::getBasePt() const
 {
 	return _basePt;
 }
 
-std::vector<QVector3D> Hix::Support::VerticalSupportModel::generateSupportPath(const std::variant<VertexConstItr, FaceOverhang>& overhang, float bottom)
+const Overhang& Hix::Support::VerticalSupportModel::getOverhang() const
+{
+	return _overhang;
+}
+
+std::vector<QVector3D> Hix::Support::VerticalSupportModel::generateSupportPath(float bottom)
 {	 
 	std::vector<QVector3D> path;
 	
@@ -45,27 +51,28 @@ std::vector<QVector3D> Hix::Support::VerticalSupportModel::generateSupportPath(c
 	QVector3D coneNarrow;
 	QVector3D tipNormal;
 	//find the end tip of the support and normal at that point.
-	if (overhang.index() == 0)
+	if (_overhang.index() == 0)
 	{
-		auto& vtx = std::get<0>(overhang);
-		coneNarrow = vtx->position;
-		tipNormal = vtx->vn;
+		auto& vtx = std::get<0>(_overhang);
+		coneNarrow = vtx.worldPosition();
+		tipNormal = vtx.worldVn();
 	}
 	else
 	{
-		auto& faceOverhang = std::get<1>(overhang);
-		coneNarrow = faceOverhang.first;
-		tipNormal = faceOverhang.second->fn;
+		auto& faceOverhang = std::get<1>(_overhang);
+		coneNarrow = faceOverhang.coord;
+		tipNormal = faceOverhang.face.worldFn();
 	}
 	//tip normal needs to be facing downard, ie) cone needs to be pointing upward,
-	constexpr float normalizedVectorZMax = -0.44721f; //normalized vector 1, 0, 0.5
+	constexpr float normalizedVectorZMax = -1.0f; //tan 45
+	QVector2D xy(tipNormal.x(), tipNormal.y());
+	auto zMax = normalizedVectorZMax * xy.length();
+	tipNormal.setZ(std::min(zMax, tipNormal.z()));
 	tipNormal.normalize();
-	tipNormal.setZ(std::min(tipNormal.z(), normalizedVectorZMax));
 
 	//because of float error, it's safer to overlap support and mesh a little bit, so extend endtip into mesh a bit
 	QVector3D extendedTip = coneNarrow;
 	QVector3D intoMesh = -1.0f * tipNormal;
-	intoMesh.normalize();
 	intoMesh *= SUPPORT_OVERLAP_LENGTH;
 	extendedTip += intoMesh;
 
@@ -74,7 +81,8 @@ std::vector<QVector3D> Hix::Support::VerticalSupportModel::generateSupportPath(c
 	coneWidePart += tipNormal * SUPPORT_CONE_LENGTH;
 	//part of support that's in raft
 	QVector3D supportStart = coneWidePart;
-	supportStart.setZ(bottom);
+
+	supportStart.setZ(0);
 
 	path.emplace_back(supportStart);
 	path.emplace_back(coneWidePart);
@@ -117,7 +125,7 @@ void Hix::Support::VerticalSupportModel::generateMesh()
 	std::vector<QVector3D> path;
 	std::vector<float> scales;
 
-	path = generateSupportPath(_overhang, _manager->supportBottom());
+	path = generateSupportPath(_manager->supportBottom());
 	contour = generateHexagon(scfg->support_radius_max);
 
 	//set scales
@@ -128,13 +136,17 @@ void Hix::Support::VerticalSupportModel::generateMesh()
 	scales.emplace_back(coneTipRadiusScale);
 	scales.emplace_back(coneTipRadiusScale);
 
-
+	auto mesh = new Mesh();
 	std::vector<std::vector<QVector3D>> jointContours;
-	Hix::Features::Extrusion::extrudeAlongPath(_mesh, QVector3D(0,0,1), contour, path, jointContours, &scales);
+	std::function<void(std::vector<QVector3D>&, float)> uniformScaler(Hix::Shapes2D::scaleContour);
+
+	Hix::Features::Extrusion::extrudeAlongPath(mesh, QVector3D(0,0,1), contour, path, jointContours, &scales, &uniformScaler);
 
 	//create endcaps using joint contours;
-	hexagonToTri(_mesh, jointContours.front(), path.front(), true);
-	hexagonToTri(_mesh, jointContours.back(), path.back(), false);
+	hexagonToTri(mesh, jointContours.front(), path.front(), true);
+	hexagonToTri(mesh, jointContours.back(), path.back(), false);
+	setMesh(mesh);
+
 }
 
 std::vector<QVector3D> Hix::Support::generateHexagon(float radius)

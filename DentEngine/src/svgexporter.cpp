@@ -42,11 +42,7 @@ void SVGexporter::exportSVG(Slices& shellSlices,QString outfoldername, bool isTe
         QFile outfile(outfilename);
         std::stringstream contentStream;
 		PolyTree& shellSlice_polytree = shellSlices[i].polytree;
-
-		if (shellSlice_polytree.ChildCount() == 0) continue;
-
         outfile.open(QFile::WriteOnly);
-
         writeHeader(contentStream);
         if (scfg->slicing_mode == SlicingConfiguration::SlicingMode::Uniform)
             writeGroupHeader(currentSlice_idx, scfg->layer_height*(currentSlice_idx+1), contentStream);

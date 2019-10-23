@@ -5,7 +5,7 @@
 #include "fileloader.h"
 #include "slice/slicingengine.h"
 #include "feature/modelcut.h"
-#include "feature/labellingtextpreview.h"
+#include "feature/labelling/labelModel.h"
 #include "feature/autoorientation.h"
 #include "feature/meshrepair.h"
 #include "feature/autoarrange.h"
@@ -15,7 +15,6 @@
 #include "input/Draggable.h"
 #include "input/Clickable.h"
 #include "input/HitTestAble.h"
-#include "support/SupportRaftManager.h"
 
 #include "render/ModelMaterial.h"
 #define MAX_BUF_LEN 2000000
@@ -67,6 +66,7 @@ class GLModel : public Hix::Render::SceneEntityWithMaterial, public Hix::Input::
 {
     Q_OBJECT
 public:
+
     //probably interface this as well
 	void clicked	(Hix::Input::MouseEventData&,const Qt3DRender::QRayCasterHit&) override;
 	bool isDraggable(Hix::Input::MouseEventData& v,const Qt3DRender::QRayCasterHit&) override;
@@ -85,7 +85,6 @@ public:
 
 
     bool appropriately_rotated=false;
-    //QVector3D m_translation;
 
     // feature hollowshell
     float hollowShellRadius = 0;
@@ -114,7 +113,7 @@ public:
     std::vector<QPhongMaterial*> sphereMaterial;
 
     void removeModelPartList();
-    LabellingTextPreview* labellingTextPreview = nullptr;
+    Hix::Labelling::LabelModel* textPreview = nullptr;
 
     void copyModelAttributeFrom(GLModel* from);
 
@@ -141,7 +140,6 @@ public:
 
 
     const int ID; //for use in Part List
-    QString filename;
     QObject* mainWindow;
 
     // implement lock as bool variable
@@ -165,27 +163,25 @@ public:
 
 	bool perPrimitiveColorActive()const;
 	bool faceSelectionActive()const;
-	bool raftSupportGenerated()const;
-	Hix::Support::SupportRaftManager& supportRaftManager();
-	const Hix::Support::SupportRaftManager& supportRaftManager()const;
 
 
 
 	//TODO: remove these
 	// Model Mesh move, rotate, scale
-	void moveModelMesh(QVector3D direction, bool update = true);
+	void moveModel(const QVector3D& displacement);
+	void rotateModel(const QQuaternion& rotation);
+	void scaleModel(const QVector3D& scale);
 	void moveDone();
-	void rotationDone();
-	void rotateAroundPt(QVector3D& rot_center, float X, float Y, float Z);
-	void rotateAroundPt(QVector3D& rot_center, const QVector3D& axis, float angle);
-
-	
-	void scaleModelMesh(float scaleX, float scaleY, float scaleZ);
+	void rotateDone();
+	void scaleDone();
 	void setZToBed();
+	QString filename()const;
 protected:
 	void initHitTest()override;
 
 private:
+	QString _filename;
+
 	//cutting
 	std::unique_ptr<Hix::Features::Cut::DrawingPlane> _cuttingPlane;
 
@@ -193,7 +189,6 @@ private:
 	QVector3D getPrimitiveColorCode(const Hix::Engine3D::Mesh* mesh, FaceConstItr faceItr)override;
 
     //Order is important! Look at the initializer list in constructor
-	Hix::Support::SupportRaftManager _supportRaftManager;
     QVector3D lastpoint;
     QVector2D prevPoint;
 
@@ -250,14 +245,14 @@ public slots:
     void closeHollowShell();
 
     // Labelling
-    void getTextChanged(QString text, int contentWidth);
+    void getTextChanged(QString text);
     void openLabelling();
     void closeLabelling();
     void stateChangeLabelling();
     void getFontNameChanged(QString fontName);
     void getFontBoldChanged(bool isBold);
     void getFontSizeChanged(int fontSize);
-    void applyLabelInfo(QString text, int contentWidth, QString fontName, bool isBold, int fontSize);
+    void applyLabelInfo(QString text, QString fontName, bool isBold, int fontSize);
     void generateText3DMesh();
 
     // Extension
