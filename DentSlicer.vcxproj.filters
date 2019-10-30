@@ -47,16 +47,10 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="DentEngine\src\polyclipping\poly2tri\sweep\advancing_front.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="feature\autoarrange.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="feature\autoorientation.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="DentEngine\src\polyclipping\poly2tri\sweep\cdt.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="DentEngine\src\polyclipping\clipper\clipper.cpp">
@@ -119,9 +113,6 @@
     <ClCompile Include="utils\quaternionhelper.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="DentEngine\src\polyclipping\poly2tri\common\shapes.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="feature\shelloffset.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -132,12 +123,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="DentEngine\src\svgexporter.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="DentEngine\src\polyclipping\poly2tri\sweep\sweep.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="DentEngine\src\polyclipping\poly2tri\sweep\sweep_context.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="utils\updatechecker.cpp">
@@ -263,17 +248,25 @@
     <ClCompile Include="support\ModelAttachedSupport.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>
+    <ClCompile Include="feature\ModelBuilder.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="DentEngine\src\SlicerDebugInfoExport.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="DentEngine\src\SlicerDebug.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="DentEngine\src\polyclipping\poly2tri\common\shapes.cc" />
+    <ClCompile Include="DentEngine\src\polyclipping\poly2tri\sweep\advancing_front.cc" />
+    <ClCompile Include="DentEngine\src\polyclipping\poly2tri\sweep\cdt.cc" />
+    <ClCompile Include="DentEngine\src\polyclipping\poly2tri\sweep\sweep.cc" />
+    <ClCompile Include="DentEngine\src\polyclipping\poly2tri\sweep\sweep_context.cc" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="DentEngine\src\polyclipping\poly2tri\sweep\advancing_front.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <QtMoc Include="feature\autoarrange.h">
       <Filter>Header Files</Filter>
     </QtMoc>
-    <ClInclude Include="DentEngine\src\polyclipping\poly2tri\sweep\cdt.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="DentEngine\src\polyclipping\clipper\clipper.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -322,9 +315,6 @@
     <QtMoc Include="feature\modelcut.h">
       <Filter>Header Files</Filter>
     </QtMoc>
-    <ClInclude Include="DentEngine\src\polyclipping\poly2tri\poly2tri.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="utils\qbezier.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -627,6 +617,18 @@
     </ClInclude>
     <ClInclude Include="support\ModelAttachedSupport.h">
       <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="feature\ModelBuilder.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="DentEngine\src\SlicerDebugInfoExport.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="DentEngine\src\SlicerDebug.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\delaunator.hpp">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -1225,6 +1227,10 @@
     <None Include="icon-32.ico" />
     <None Include="icon-32.ico" />
     <None Include="icon-32.ico" />
+    <None Include="icon-32.ico" />
+    <None Include="icon-32.ico" />
+    <None Include="icon-32.ico" />
+    <None Include="icon-32.ico" />
   </ItemGroup>
   <ItemGroup>
     <None Include="DentSlicer.rc">
@@ -1274,5 +1280,16 @@
     <QtMoc Include="render\LineMeshEntity.h">
       <Filter>Generated Files</Filter>
     </QtMoc>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="DentEngine\src\polyclipping\poly2tri\sweep\advancing_front.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="DentEngine\src\polyclipping\poly2tri\sweep\cdt.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="DentEngine\src\polyclipping\poly2tri\poly2tri.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

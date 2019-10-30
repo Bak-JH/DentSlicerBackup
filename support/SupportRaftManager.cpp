@@ -41,13 +41,11 @@ float Hix::Support::SupportRaftManager::supportBottom()
 
 
 
-void Hix::Support::SupportRaftManager::autoGenSuppRaft(const GLModel& model, SlicingConfiguration::SupportType supType, SlicingConfiguration::RaftType raftType)
+void Hix::Support::SupportRaftManager::autoGen(const GLModel& model, SlicingConfiguration::SupportType supType)
 {
 	clear();
 	_supportExist = true;
-	_raftExist = true;
 	_supportType = supType;
-	_raftType = raftType;
 	autoGenSuppRaftRecursive(model);
 	generateRaft();
 
@@ -176,21 +174,10 @@ void Hix::Support::SupportRaftManager::generateSupport(const GLModel& model)
 
 void Hix::Support::SupportRaftManager::generateRaft()
 {
-
-	switch (_raftType)
-	{
-	case SlicingConfiguration::RaftType::None:
-		break;
-	case SlicingConfiguration::RaftType::General:
-	{
-		auto basePts = getSupportBasePts();
-		_raft = std::make_unique<CylindricalRaft>(this, basePts);
-		break;
-	}
-	default:
-		break;
-	}
+	auto basePts = getSupportBasePts();
+	_raft = std::make_unique<CylindricalRaft>(this, basePts);
 }
+
 size_t Hix::Support::SupportRaftManager::clear(const GLModel& model)
 {
 	size_t count = 0;

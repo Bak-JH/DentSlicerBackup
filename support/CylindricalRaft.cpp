@@ -50,11 +50,10 @@ void Hix::Support::CylindricalRaft::generateMeshForContour(Mesh* mesh, const std
 	path.reserve(RAFT_JOINT_CNT);
 
 	//cylinder is of uniform shape, except it narrows a bit in the middle-z
-	constexpr float scale = 1.6f;
 
-	scales.emplace_back(1.0f);
+	scales.emplace_back(0.4f);
 	//scales.emplace_back(scale);
-	scales.emplace_back(scale);
+	scales.emplace_back(1.2f);
 
 	//path is simple cylinder starting from 0,0,0 to 0,0,raft_height
 	path.emplace_back(QVector3D(0, 0, _manager->raftBottom()));
@@ -94,7 +93,23 @@ void Hix::Support::CylindricalRaft::generateCap(Mesh* mesh, const std::vector<QV
 	p2t::CDT constrainedDelTrig(ptrs);
 	constrainedDelTrig.Triangulate();
 	auto triangles = constrainedDelTrig.GetTriangles();
+	std::unordered_set<double> debugX;
+	std::unordered_set<double> debugY;
+	double minX = 999;
+	double minY = 999;
+	double maxX = -999;
+	double maxY = -999;
 
+
+	for (auto& each : container)
+	{
+		debugX.emplace(each.x);
+		debugY.emplace(each.y);
+		minX = std::min(minX, each.x);
+		minY = std::min(minY, each.y);
+		maxX = std::max(maxX, each.x);
+		maxY = std::max(maxY, each.y);
+	}
 	//as long as intial contour is not modified in the p2t library, float->double->float should be lossless
 	for (auto& tri : triangles)
 	{
@@ -104,6 +119,7 @@ void Hix::Support::CylindricalRaft::generateCap(Mesh* mesh, const std::vector<QV
 			pt2 = tri->GetPoint(0);
 			pt1 = tri->GetPoint(1);
 			pt0 = tri->GetPoint(2);
+
 		}
 		else
 		{
@@ -124,7 +140,7 @@ void Hix::Support::CylindricalRaft::generateMesh(const std::vector<QVector3D>& o
 	auto mesh = new Mesh();
 	//generate square for each overhang
 	//std::vector<std::vector<QVector3D>> cylinders;
-	auto square = Hix::Shapes2D::generateSquare(scfg->support_radius_max);
+	auto square = Hix::Shapes2D::generateSquare(scfg->support_radius_max*1.5);
 
 	std::vector<QVector3D> contourPoints;
 	contourPoints.reserve(4 * overhangs.size());

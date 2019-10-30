@@ -125,7 +125,6 @@ void SlicingOptBackend::createSlicingOptControls()
 	addOptionDialogCombo(QString("Resolution"), ResolutionStr, 0);
 	addOptionDialogCombo(QString("Layer height"), LayerHeightStr, 0);
 	addOptionDialogCombo(QString("Resin type"), ResinTypeStr, 0);
-	addOptionDialogCombo(QString("Raft type"), RaftTypeStr, 1);
 	addOptionDialogCombo(QString("Support type"), SupportTypeStr, 1);
 	addOptionDialogCombo(QString("Infill type"), InfillTypeStr, 1);
 	addOptionDialogCombo(QString("Slicing mode"), SlicingModeStr, 0);
@@ -169,10 +168,6 @@ void SlicingOptBackend::onOptionChanged(QString opName, QVariant newVal)
 	else if (opName == "Resin type")
 	{
 		_config->resin_type = (SlicingConfiguration::ResinType)toInt;
-	}
-	else if (opName == "Raft type")
-	{
-		_config->raft_type = (SlicingConfiguration::RaftType)toInt;
 	}
 	else if (opName == "Support type")
 	{

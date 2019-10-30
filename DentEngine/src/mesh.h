@@ -193,7 +193,7 @@ namespace Hix
 			void hEdgeIndexChangedCallback(size_t oldIdx, size_t newIdx);
 
 			MeshVtxHasher _vtxHasher;
-			std::unordered_map<size_t, VertexConstItr> _verticesHash;
+			std::unordered_multimap<size_t, VertexConstItr> _verticesHash;
 			TrackedIndexedList<MeshVertex, std::allocator<MeshVertex>, VertexItrFactory> vertices;
 			TrackedIndexedList<HalfEdge, std::allocator<HalfEdge>, HalfEdgeItrFactory> halfEdges;
 			TrackedIndexedList<MeshFace, std::allocator<MeshFace>, FaceItrFactory> faces;

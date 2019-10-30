@@ -1,4 +1,5 @@
 #include "Shapes2D.h"
+#include "../DentEngine/src/ContourBuilder.h"
 using namespace ClipperLib;
 std::vector<QVector3D> Hix::Shapes2D::generateHexagon(float radius)
 {
@@ -88,6 +89,7 @@ void Hix::Shapes2D::scaleContour(std::vector<QVector3D>& targetContour, float sc
 	}
 }
 
+
 void Hix::Shapes2D::scaleContourVtxNormal(std::vector<QVector3D>& targetContour, float scale)
 {
 	auto inputContour = targetContour;
@@ -117,11 +119,25 @@ bool Hix::Shapes2D::isClockwise(const std::vector<QVector3D>& contour)
 	if (contour.size() < 2)
 		return true;
 	QVector3D prevPt = contour.back();
-	int sum = 0;
+	double sum = 0;
 	for (auto& pt : contour)
 	{
 		sum += (pt.x() - prevPt.x()) * (pt.y() + prevPt.y());
 		prevPt = pt;
+	}
+	return sum >= 0;
+}
+
+bool Hix::Shapes2D::isClockwise(const Hix::Slicer::Contour& contour)
+{
+	if (contour.segments.size() < 2)
+		return true;
+	QVector3D prevPt = contour.segments.back().to;
+	double sum = 0;
+	for (auto& pt : contour.segments)
+	{
+		sum += (pt.to.x() - prevPt.x()) * (pt.to.y() + prevPt.y());
+		prevPt = pt.to;
 	}
 	return sum >= 0;
 }

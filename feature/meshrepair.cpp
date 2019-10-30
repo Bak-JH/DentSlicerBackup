@@ -189,19 +189,13 @@ void remesh(GLModel* model)
 
 	pcl::PointCloud<pcl::PointNormal> outPts;
 	std::vector<pcl::Vertices> outPoly;
-	//pcl::MarchingCubesHoppe<pcl::PointNormal> mc;
-	//mc.setIsoLevel(default_iso_level);
-	//mc.setGridResolution(default_grid_res, default_grid_res, default_grid_res);
-	//mc.setPercentageExtendGrid(default_extend_percentage);
-	//mc.setInputCloud(cloud);
-	//mc.reconstruct(outPts, outPoly);
+	pcl::MarchingCubesHoppe<pcl::PointNormal> mc;
+	mc.setIsoLevel(default_iso_level);
+	mc.setGridResolution(default_grid_res, default_grid_res, default_grid_res);
+	mc.setPercentageExtendGrid(default_extend_percentage);
+	mc.setInputCloud(cloud);
+	mc.reconstruct(outPts, outPoly);
 
-	//add back to mesh;
-	//polygon should be triangular due to the nature of marching cubes
-	//using TriangleMesh = pcl::geometry::TriangleMesh<MeshTraits<true>>;
-	//TriangleMesh triMesh;
-	//pcl::geometry::toFaceVertexMesh(triMesh, output);
-	//auto& faceData = triMesh.getFaceDataCloud();
 
 	pcl::Poisson<pcl::PointNormal> poisson;
 	poisson.setDepth(12);
@@ -276,26 +270,28 @@ Paths3D MeshRepair::identifyHoles(const Mesh* mesh){
 
     // used for auto repair steps
     Paths3D holes;
-    int face_idx = 0;
+	std::unordered_set<HalfEdgeConstItr> interesect;
 	auto faceCend = mesh->getFaces().cend();
 	for(auto mf = mesh->getFaces().cbegin(); mf != faceCend; ++mf)
 	{
-        face_idx ++;
-        if (face_idx %100 ==0)
-            QCoreApplication::processEvents();
-
-        //qDebug() << "neighbors " << mf.neighboring_faces[0].size() << mf.neighboring_faces[1].size() << mf.neighboring_faces[2].size();
 		auto edge = mf.edge();
 		for (size_t i = 0; i < 3; ++i, edge.moveNext())
 		{
 			auto neighbors = edge.nonOwningFaces();
-			if (neighbors.size() != 0)
+			if (neighbors.size() == 0)
 			{
 				Path3D temp_edge;
 				auto meshVertices = mf.meshVertices();
 				temp_edge.push_back(*meshVertices[i]);
 				temp_edge.push_back(*meshVertices[(i+1)%3]);
 				holes.push_back(temp_edge);
+			}
+			else if (neighbors.size() > 1)
+			{
+				if (neighbors.size() % 2 != 0)
+				{
+					qDebug() << "shit";
+				}
 			}
 		}
     }

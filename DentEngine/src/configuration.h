@@ -47,13 +47,6 @@ public:
 		Full = 1,
 		General = 2
 	};
-
-	enum class RaftType : uint8_t
-	{
-		None = 0,
-		General = 1
-	};
-
 	enum class SlicingMode : uint8_t
 	{
 		Uniform = 0,
@@ -93,7 +86,6 @@ public:
 	ResinType resin_type = ResinType::Temporary;
 	SupportType support_type = SupportType::Vertical;
 	InFillType infill_type = InFillType::Full;
-	RaftType raft_type = RaftType::General;
 
     // raft settings
     float raft_thickness = 1.0f; // in mm

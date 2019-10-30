@@ -27,14 +27,6 @@ void SVGexporter::exportSVG(Slices& shellSlices,QString outfoldername, bool isTe
 	using namespace SVGexporterPrivate;
     qDebug() << "export svg at "<< outfoldername;
 	qDebug() << "shellSlices : " << shellSlices.size();
-    QDir dir(outfoldername);
-    if (!dir.exists()) {
-        dir.mkpath(".");
-    } else {
-        dir.removeRecursively();
-        dir.mkpath(".");
-    }
-
     //qDebug() << jsonBytes;
     int currentSlice_idx = 0;
     for (int i=0; i<shellSlices.size(); i++){
