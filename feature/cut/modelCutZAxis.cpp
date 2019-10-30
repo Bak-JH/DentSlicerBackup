@@ -202,3 +202,73 @@ void Hix::Features::Cut::ZAxisCutTask::fillOverlap(const Hix::Slicer::ContourSeg
 
 
 }
+
+
+
+
+
+
+void GLModel::generatePlane(int type) {
+
+	//generate drawing plane
+	_cuttingPlane.reset(new Hix::Features::Cut::DrawingPlane(this));
+	_cuttingPlane->enablePlane(true);
+	//if flat cut
+	if (type == 1)
+	{
+
+	}
+	else if (type == 2)
+	{
+		_cuttingPlane->enableDrawing(true);
+		//want cutting plane to be over model mesh
+		float zOverModel = _mesh->z_max() + 0.1f;
+		_cuttingPlane->transform().setTranslation(QVector3D(0, 0, zOverModel));
+		qmlManager->getRayCaster().setHoverEnabled(true);
+	}
+}
+
+void GLModel::removePlane() {
+	//freecut disable hovering
+	if (cutMode == 2)
+	{
+		qmlManager->getRayCaster().setHoverEnabled(false);
+	}
+	_cuttingPlane.reset();
+}
+
+
+void GLModel::cutModeSelected(int type) {
+
+	qDebug() << "cut mode selected1" << type;
+	cutMode = type;
+	generatePlane(cutMode);
+	return;
+}
+
+void GLModel::cutFillModeSelected(int type) {
+	cutFillMode = type;
+	return;
+}
+
+void GLModel::getSliderSignal(double value) {
+	if (cutActive || shellOffsetActive) {
+		if (value == 0.0 || value == 1.8) {
+			isFlatcutEdge = true;
+		}
+		else {
+			isFlatcutEdge = false;
+		}
+		float zlength = _mesh->z_max() - _mesh->z_min();
+
+		_cuttingPlane->transform().setTranslation(QVector3D(0, 0, _mesh->z_min() + value * zlength / 1.8));
+
+	}
+	else if (hollowShellActive) {
+		// change radius of hollowShellSphere
+		hollowShellRadius = value;
+		qmlManager->hollowShellSphereMesh->setRadius(hollowShellRadius);
+
+		qDebug() << "getting slider signal: current radius is " << value;
+	}
+}

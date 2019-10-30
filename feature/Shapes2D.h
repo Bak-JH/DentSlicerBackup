@@ -3,6 +3,10 @@
 
 namespace Hix
 {
+	namespace Slicer
+	{
+		class Contour;
+	}
 	namespace Shapes2D
 	{
 
@@ -16,7 +20,9 @@ namespace Hix
 		void rotateContour(std::vector<QVector3D>& targetContour,const QQuaternion& rotation);
 		void scaleContour(std::vector<QVector3D>& targetContour, float scale);
 		void scaleContourVtxNormal(std::vector<QVector3D>& targetContour, float scale);
+
 		bool isClockwise(const std::vector<QVector3D>& contour);
+		bool isClockwise(const Hix::Slicer::Contour& contour);
 		void ensureOrientation(bool isClockwise, std::vector<QVector3D>& contour);
 
 		void scaleContourAroundCentoid(std::vector<QVector3D>& targetContour, float scale, QVector2D& centoid);

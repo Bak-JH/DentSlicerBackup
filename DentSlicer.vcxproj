@@ -233,12 +233,17 @@
     <ClCompile Include="DentEngine\src\Bounds3D.cpp" />
     <ClCompile Include="DentEngine\src\ContourBuilder.cpp" />
     <ClCompile Include="DentEngine\src\Planes.cpp" />
-    <ClCompile Include="DentEngine\src\polyclipping\poly2tri\sweep\advancing_front.cpp" />
+    <ClCompile Include="DentEngine\src\polyclipping\poly2tri\common\shapes.cc" />
+    <ClCompile Include="DentEngine\src\polyclipping\poly2tri\sweep\advancing_front.cc" />
+    <ClCompile Include="DentEngine\src\polyclipping\poly2tri\sweep\cdt.cc" />
+    <ClCompile Include="DentEngine\src\polyclipping\poly2tri\sweep\sweep.cc" />
+    <ClCompile Include="DentEngine\src\polyclipping\poly2tri\sweep\sweep_context.cc" />
     <ClCompile Include="DentEngine\src\polyclipping\polyclipping.cpp" />
     <ClCompile Include="DentEngine\src\polyclipping\polytree2tri\PolytreeCDT.cpp" />
+    <ClCompile Include="DentEngine\src\SlicerDebug.cpp" />
+    <ClCompile Include="DentEngine\src\SlicerDebugInfoExport.cpp" />
     <ClCompile Include="feature\autoarrange.cpp" />
     <ClCompile Include="feature\autoorientation.cpp" />
-    <ClCompile Include="DentEngine\src\polyclipping\poly2tri\sweep\cdt.cpp" />
     <ClCompile Include="DentEngine\src\polyclipping\clipper\clipper.cpp" />
     <ClCompile Include="DentEngine\src\cmdlineparser.cpp" />
     <ClCompile Include="DentEngine\src\configuration.cpp" />
@@ -289,19 +294,17 @@
     <ClCompile Include="qmlmanager.cpp" />
     <ClCompile Include="utils\qtriangulator.cpp" />
     <ClCompile Include="utils\quaternionhelper.cpp" />
-    <ClCompile Include="DentEngine\src\polyclipping\poly2tri\common\shapes.cpp" />
     <ClCompile Include="feature\shelloffset.cpp" />
     <ClCompile Include="DentEngine\src\slicer.cpp" />
     <ClCompile Include="slice\slicingengine.cpp" />
     <ClCompile Include="feature\stlexporter.cpp" />
     <ClCompile Include="DentEngine\src\svgexporter.cpp" />
-    <ClCompile Include="DentEngine\src\polyclipping\poly2tri\sweep\sweep.cpp" />
-    <ClCompile Include="DentEngine\src\polyclipping\poly2tri\sweep\sweep_context.cpp" />
     <ClCompile Include="feature\labelling\labelModel.cpp" />
     <ClCompile Include="utils\updatechecker.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="common\Debug.h" />
+    <ClInclude Include="common\delaunator.hpp" />
     <ClInclude Include="common\HetUniquePtr.h" />
     <ClInclude Include="common\Hasher.h" />
     <ClInclude Include="common\indexedlist.h" />
@@ -351,12 +354,15 @@
     <ClInclude Include="DentEngine\src\ContourBuilder.h" />
     <ClInclude Include="DentEngine\src\MeshIterators.h" />
     <ClInclude Include="DentEngine\src\Planes.h" />
-    <ClInclude Include="DentEngine\src\polyclipping\poly2tri\sweep\advancing_front.h" />
     <QtMoc Include="feature\autoarrange.h">
     </QtMoc>
-    <ClInclude Include="DentEngine\src\polyclipping\polytree2tri\PolytreeCDT.h" />
-    <ClInclude Include="feature\autoorientation.h" />
+    <ClInclude Include="DentEngine\src\polyclipping\poly2tri\poly2tri.h" />
+    <ClInclude Include="DentEngine\src\polyclipping\poly2tri\sweep\advancing_front.h" />
     <ClInclude Include="DentEngine\src\polyclipping\poly2tri\sweep\cdt.h" />
+    <ClInclude Include="DentEngine\src\polyclipping\polytree2tri\PolytreeCDT.h" />
+    <ClInclude Include="DentEngine\src\SlicerDebug.h" />
+    <ClInclude Include="DentEngine\src\SlicerDebugInfoExport.h" />
+    <ClInclude Include="feature\autoorientation.h" />
     <ClInclude Include="DentEngine\src\polyclipping\clipper\clipper.hpp" />
     <ClInclude Include="DentEngine\src\cmdlineparser.h" />
     <ClInclude Include="DentEngine\src\configuration.h" />
@@ -434,7 +440,6 @@
     <ClInclude Include="DentEngine\src\utils\metric.h" />
     <QtMoc Include="feature\modelcut.h">
     </QtMoc>
-    <ClInclude Include="DentEngine\src\polyclipping\poly2tri\poly2tri.h" />
     <ClInclude Include="utils\qbezier.h" />
     <ClInclude Include="utils\qdatabuffer_p.h" />
     <QtMoc Include="qmlmanager.h">

@@ -52,16 +52,10 @@ namespace Hix
 			ContourSegment();
 			//constructor helper;
 			bool isValid()const;
-			FlipResult calcNormalAndFlip();
 			float dist()const;
-			void flip();
-			//
-			//ordering is important.
-			//follows Righ hand thumb finger rule, if the in, goint to->from normal vector is pointed left side, CW 
 			FaceConstItr face;
 			QVector2D from;
 			QVector2D to;
-			QVector2D normal;
 		};
 
 		class Contour
@@ -78,20 +72,11 @@ namespace Hix
 			QVector2D& from();
 			QVector2D& to();
 			void append(const Contour& appended);
-			//void calculateDirection();
-			//bool isOutward();
-			std::deque<ContourSegment> segments;
+			bool isOutward()const;
 			ClipperLib::Path toPath()const;//tmp
 			ClipperLib::Path toPath(std::vector<QVector2D>& outFloatPath)const;//tmp
-
-		private:
-			////bounds
-			//cInt _xMax = std::numeric_limits<cInt>::lowest();
-			//cInt _xMin = std::numeric_limits<cInt>::max();
-			//cInt _yMax = std::numeric_limits<cInt>::lowest();
-			//cInt _yMin = std::numeric_limits<cInt>::max();
-				//bool _isOutward = false;
-			bool _directionDetermined = false;
+			ClipperLib::Path toDebugPath()const;//tmp
+			std::deque<ContourSegment> segments;
 		};
 
 
@@ -102,6 +87,7 @@ namespace Hix
 			ContourBuilder(const Mesh* mesh, std::unordered_set<FaceConstItr>& intersectingFaces, float z);
 			std::vector<Contour> buildContours();
 			std::vector<Contour> flushIncompleteContours();
+			static bool isArea(const Contour& contour);
 
 
 		private:
@@ -109,11 +95,10 @@ namespace Hix
 
 			//two points
 
-			bool isArea(const Contour& contour);
 			void buildSegment(const FaceConstItr& mf);
 			bool buildContour(Contour& current, bool reverse);
-			QVector2D midPoint2D(VertexConstItr vtxA0, VertexConstItr vtxA1);
-			std::unordered_set<Contour*> joinOrCloseIncompleteContours();
+			QVector2D planeIntersectionPt(VertexConstItr vtxA0, VertexConstItr vtxA1);
+			std::vector<Contour>  joinOrCloseIncompleteContours();
 
 			const Mesh* _mesh;
 			float _plane;
@@ -123,7 +108,6 @@ namespace Hix
 
 			std::unordered_multimap<QVector2D, ContourSegment*> _fromHash;
 			std::unordered_multimap<QVector2D, ContourSegment*> _toHash;
-			std::unordered_multimap<QVector2D, ContourSegment*> _unknownHash;
 
 			std::unordered_set<FaceConstItr> _unexplored;
 			std::vector<Contour> _incompleteContours;

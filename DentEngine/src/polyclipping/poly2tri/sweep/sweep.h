@@ -1,6 +1,6 @@
 /*
- * Poly2Tri Copyright (c) 2009-2010, Poly2Tri Contributors
- * http://code.google.com/p/poly2tri/
+ * Poly2Tri Copyright (c) 2009-2018, Poly2Tri Contributors
+ * https://github.com/jhasse/poly2tri
  *
  * All rights reserved.
  *
@@ -33,7 +33,7 @@
  * Zalik, B.(2008)'Sweep-line algorithm for constrained Delaunay triangulation',
  * International Journal of Geographical Information Science
  *
- * "FlipScan" Constrained Edge Algorithm invented by Thomas Åhl?, thahlen@gmail.com
+ * "FlipScan" Constrained Edge Algorithm invented by Thomas ?hl?n, thahlen@gmail.com
  */
 
 #ifndef SWEEP_H
@@ -142,7 +142,7 @@ private:
    * @param d - point opposite a
    * @return true if d is inside circle, false if on circle edge
    */
-  bool Incircle(Point& pa, Point& pb, Point& pc, Point& pd);
+  bool Incircle(const Point& pa, const Point& pb, const Point& pc, const Point& pd) const;
 
   /**
    * Rotates a triangle pair one vertex CW
@@ -158,7 +158,7 @@ private:
    *       n4                    n4
    * </pre>
    */
-  void RotateTrianglePair(Triangle& t, Point& p, Triangle& ot, Point& op);
+  void RotateTrianglePair(Triangle& t, Point& p, Triangle& ot, Point& op) const;
 
   /**
    * Fills holes in the Advancing Front
@@ -171,22 +171,22 @@ private:
 
   // Decision-making about when to Fill hole.
   // Contributed by ToolmakerSteve2
-  bool LargeHole_DontFill(Node* node);
-  bool AngleExceeds90Degrees(Point* origin, Point* pa, Point* pb);
-  bool AngleExceedsPlus90DegreesOrIsNegative(Point* origin, Point* pa, Point* pb);
-  double Angle(Point& origin, Point& pa, Point& pb);
+  bool LargeHole_DontFill(const Node* node) const;
+  bool AngleExceeds90Degrees(const Point* origin, const Point* pa, const Point* pb) const;
+  bool AngleExceedsPlus90DegreesOrIsNegative(const Point* origin, const Point* pa, const Point* pb) const;
+  double Angle(const Point* origin, const Point* pa, const Point* pb) const;
 
   /**
    *
    * @param node - middle node
    * @return the angle between 3 front nodes
    */
-  double HoleAngle(Node& node);
+  double HoleAngle(const Node& node) const;
 
   /**
    * The basin angle is decided against the horizontal line [1,0]
    */
-  double BasinAngle(Node& node);
+  double BasinAngle(const Node& node) const;
 
   /**
    * Fills a basin that has formed on the Advancing Front to the right

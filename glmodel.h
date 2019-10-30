@@ -124,11 +124,7 @@ public:
 
     void repairMesh();
 
-    // Model Cut
-    void addCuttingPoint(QVector3D v);
-    void removeCuttingPoint(int idx);
-    void removeCuttingPoints();
-    void drawLine(QVector3D endpoint);
+
 	bool isPrintable()const;
     void updatePrintable();
     bool EndsWith(const std::string& a, const std::string& b);
@@ -150,7 +146,6 @@ public:
 	
 	bool labellingActive = false;
 	bool extensionActive = false;
-	bool cutActive = false;
 	bool hollowShellActive = false;
 	bool shellOffsetActive = false;
 	bool layflatActive = false;
@@ -182,8 +177,6 @@ protected:
 private:
 	QString _filename;
 
-	//cutting
-	std::unique_ptr<Hix::Features::Cut::DrawingPlane> _cuttingPlane;
 
 
 	QVector3D getPrimitiveColorCode(const Hix::Engine3D::Mesh* mesh, FaceConstItr faceItr)override;
@@ -228,12 +221,7 @@ public slots:
 
     // Model Cut
 
-    void generatePlane(int type);
-    void removePlane();
-    void modelCut();
-    void cutModeSelected(int type);
-    void cutFillModeSelected(int type);
-    void getSliderSignal(double value);
+
     void getLayerViewSliderSignal(int value);
 	void generateRLModel(Mesh* lmesh, Mesh* rmesh);
     void openCut();

@@ -222,35 +222,6 @@ void GLModel::updateModelMesh(){
 }
 
 
-void GLModel::generatePlane(int type){
-
-	//generate drawing plane
-	_cuttingPlane.reset(new Hix::Features::Cut::DrawingPlane(this)); 
-	_cuttingPlane->enablePlane(true);
-	//if flat cut
-	if (type == 1)
-	{	
-
-	}
-	else if (type == 2)
-	{
-		_cuttingPlane->enableDrawing(true);
-		//want cutting plane to be over model mesh
-		float zOverModel = _mesh->z_max() + 0.1f;
-		_cuttingPlane->transform().setTranslation(QVector3D(0, 0, zOverModel));
-		qmlManager->getRayCaster().setHoverEnabled(true);
-	}
-}
-
-void GLModel::removePlane(){
-	//freecut disable hovering
-	if (cutMode == 2)
-	{
-		qmlManager->getRayCaster().setHoverEnabled(false);
-	}
-	_cuttingPlane.reset();
-}
-
 void GLModel::removeModelPartList(){
     //remove part list
     QList<QObject*> temp;
@@ -263,39 +234,7 @@ void GLModel::removeModelPartList(){
     QMetaObject::invokeMethod(yesno_popup, "deletePartListItem", Q_ARG(QVariant, ID));
 }
 
-void GLModel::modelCut(){
 
-    qmlManager->openProgressPopUp();
-
-
-    if (cutMode == 1){ // flat cut
-		auto lmesh = new Mesh();
-		auto rmesh = new Mesh();
-        if (this->shellOffsetActive && isFlatcutEdge == true) {
-            getSliderSignal(0.0);
-        }
-		bool fillCuttingSurface = cutFillMode == 2;
-		Hix::Features::Cut::ZAxisCutTask task(_mesh, lmesh, rmesh, _cuttingPlane->transform().translation().z(), fillCuttingSurface);
-        emit bisectDone(lmesh, rmesh);
-
-    } else if (cutMode == 2){ // free cut
-		auto cuttingContour = _cuttingPlane->contour();
-        if (cuttingContour.size() >= 2){
-			auto lmesh = new Mesh();
-			auto rmesh = new Mesh();
-            cutAway(lmesh, rmesh, _mesh, cuttingContour, cutFillMode);
-
-            if (lmesh->getFaces().size() == 0 || rmesh->getFaces().size() == 0){
-
-                qDebug() << "cutting contour selected not cutting";
-                qmlManager->setProgress(1);
-                cutModeSelected(2); // reset
-                return;
-            }
-            emit bisectDone(lmesh, rmesh);
-        }
-    }
-}
 
 void GLModel::generateRLModel(Mesh* lmesh, Mesh* rmesh){
 	GLModel* leftmodel = nullptr;
@@ -456,7 +395,6 @@ bool GLModel::isDraggable(Hix::Input::MouseEventData& e,const Qt3DRender::QRayCa
 		qmlManager->isSelected(this) 
 		&&
 		!(	scaleActive ||
-			cutActive ||
 			shellOffsetActive ||
 			extensionActive ||
 			labellingActive ||
@@ -515,39 +453,7 @@ void GLModel::dragEnded(Hix::Input::MouseEventData&)
 
 }
 
-void GLModel::cutModeSelected(int type){
 
-    qDebug() << "cut mode selected1" << type;
-    cutMode = type;
-	generatePlane(cutMode);
-    return;
-}
-
-void GLModel::cutFillModeSelected(int type){
-    cutFillMode = type;
-    return;
-}
-
-void GLModel::getSliderSignal(double value){
-    if (cutActive||shellOffsetActive){
-        if (value == 0.0 || value == 1.8){
-            isFlatcutEdge = true;
-        }
-        else {
-            isFlatcutEdge = false;
-        }
-        float zlength = _mesh->z_max() - _mesh->z_min();
-       
-		_cuttingPlane->transform().setTranslation(QVector3D(0,0, _mesh->z_min() + value*zlength/1.8));
-
-    } else if (hollowShellActive){
-        // change radius of hollowShellSphere
-        hollowShellRadius = value;
-        qmlManager->hollowShellSphereMesh->setRadius(hollowShellRadius);
-
-        qDebug() << "getting slider signal: current radius is " << value;
-    }
-}
 
 void GLModel::getLayerViewSliderSignal(int value) {
     if ( !layerViewActive)

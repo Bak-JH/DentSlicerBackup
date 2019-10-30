@@ -1,11 +1,11 @@
 #pragma once
 #include "../../render/SceneEntity.h"
-//#include "support.h"
-//#include "infill.h"
+#include "ContourBuilder.h"
 #include <list>
 #include <QThread>
 #include <QDebug>
 #include <QVector2D>
+
 using namespace ClipperLib;
 using namespace Hix::Engine3D;
 class OverhangPoint;
@@ -28,7 +28,9 @@ namespace Hix
 			PolyTree polytree; // containment relationship per slice
 			PolyTree overhang;
 
-			Paths closedContours;
+			std::deque<Contour> closedContours;
+			std::deque<Contour> incompleteContours;
+
 		};
 
 
