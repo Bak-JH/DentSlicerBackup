@@ -15,6 +15,7 @@ namespace Hix
 		class Draggable
 		{
 		public:
+			virtual void setDraggable(bool) = 0;
 			virtual bool isDraggable(MouseEventData& e,const Qt3DRender::QRayCasterHit& hit) = 0;
 			virtual void dragStarted(MouseEventData& e, const Qt3DRender::QRayCasterHit& hit) = 0;
 			virtual void doDrag(MouseEventData& e) = 0;

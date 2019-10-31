@@ -27,6 +27,7 @@
 #include "common/TaskManager.h"
 #include "slice/SlicingOptBackend.h"
 #include "support/SupportRaftManager.h"
+#include "feature/labelling/labelModel.h"
 
 #define VIEW_MODE_OBJECT 0
 #define VIEW_MODE_LAYER 2
@@ -183,9 +184,6 @@ public:
     void openModelFile_internal(QString filename);
     void openArrange();
     void runArrange_internal();
-    void disconnectHandlers(GLModel* glmodel);
-	void disconnectShadow(GLModel* glmodel);
-    void connectHandlers(GLModel* glmodel);
     void addPart(QString fileName, int ID);
     void deletePartListItem(int ID);
     void openProgressPopUp();
@@ -195,6 +193,12 @@ public:
     void setProgressText(std::string inputText);
     int getLayerViewFlags();
 	void modelSelected(int);
+	
+	void faceSelectionEnable();
+	void faceSelectionDisable();
+
+	void setLabelText(QString text);
+
 	//remove this
 	const std::unordered_set<GLModel*>& getSelectedModels();
 	QVector2D world2Screen(QVector3D target);
@@ -300,7 +304,6 @@ public slots:
     void groupSelectionActivate(bool);
     void runGroupFeature(int,QString, double, double, double, QVariant);
     bool multipleModelSelected(int ID);
-    void lastModelSelected();
     void modelRotateByNumber(int mode, int, int, int);
     void modelMoveByNumber(int axis, int, int);
 
