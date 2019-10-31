@@ -1856,7 +1856,7 @@ Rectangle {
             labelFontSize: 12
 
             //signal runFeature(int type);
-            signal generateText3DMesh()
+            signal generateLabelMesh()
             signal openLabelling()
             signal closeLabelling()
             signal stateChangeLabelling()
@@ -1866,7 +1866,7 @@ Rectangle {
             onApplyClicked: {
                 console.log("ApplyClicked");
                 //runFeature(ftrLabel);
-                generateText3DMesh()
+                generateLabelMesh()
             }
 
             onLabelTextChanged: {

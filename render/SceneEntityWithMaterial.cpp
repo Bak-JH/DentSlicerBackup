@@ -125,3 +125,19 @@ void SceneEntityWithMaterial::appendMeshVertexPerPrimitive(const Mesh* mesh,
 
 }
 
+void SceneEntityWithMaterial::setMaterialMode(const Hix::Render::ShaderMode mode)
+{
+	_meshMaterial.changeMode(mode);
+	callRecursive(this, &SceneEntityWithMaterial::setMaterialMode, mode);
+}
+
+void SceneEntityWithMaterial::setMaterialColor(const QVector3D color)
+{
+	_meshMaterial.setColor(color);
+	callRecursive(this, &SceneEntityWithMaterial::setMaterialColor, color);
+}
+
+void SceneEntityWithMaterial::setLayerViewHeight(const float height)
+{
+	_meshMaterial.setParameterValue("height", QVariant::fromValue(height));
+}

@@ -21,6 +21,7 @@
 #include "feature/Extrude.h"
 #include "feature/cut/DrawingPlane.h"
 #include "feature/cut/modelCutZAxis.h"
+#include "feature/labelling/labelModel.h"
 
 
 #define ATTRIBUTE_SIZE_INCREMENT 200
@@ -35,6 +36,9 @@ using namespace Hix::Engine3D;
 using namespace Hix::Input;
 using namespace Hix::Render;
 
+
+
+
 GLModel::GLModel(QObject* mainWindow, QEntity*parent, Mesh* loadMesh, QString fname, int id)
     : SceneEntityWithMaterial(parent)
     , _filename(fname)
@@ -44,20 +48,26 @@ GLModel::GLModel(QObject* mainWindow, QEntity*parent, Mesh* loadMesh, QString fn
 {
 	initHitTest();
     qDebug() << "new model made _______________________________"<<this<< "parent:"<<parent;
-
+	qDebug() << "new model made _______________________________" << fname;
     // set shader mode and color
-	_meshMaterial.changeMode(Hix::Render::ShaderMode::SingleColor);
-	_meshMaterial.setColor(Hix::Render::Colors::Default);
+	setMaterialMode(Hix::Render::ShaderMode::SingleColor);
+	setMaterialColor(Hix::Render::Colors::Default);
 
-	qmlManager->addPart(getFileName(fname.toStdString().c_str()), ID);
-	if (_filename != "" && (_filename.contains(".stl") || _filename.contains(".STL"))) {
-		FileLoader::loadMeshSTL(loadMesh, _filename.toLocal8Bit().constData());
+	if (_filename != "")
+	{
+		qmlManager->addPart(getFileName(fname.toStdString().c_str()), ID);
+		if (_filename.contains(".stl") || _filename.contains(".STL")) {
+			FileLoader::loadMeshSTL(loadMesh, _filename.toLocal8Bit().constData());
+		}
+		else if (_filename.contains(".obj") || _filename.contains(".OBJ")) {
+			FileLoader::loadMeshOBJ(loadMesh, _filename.toLocal8Bit().constData());
+		}
 	}
-	else if (_filename != "" && (_filename.contains(".obj") || _filename.contains(".OBJ"))) {
-		FileLoader::loadMeshOBJ(loadMesh, _filename.toLocal8Bit().constData());
+	if (loadMesh)
+	{
+		loadMesh->centerMesh();
+		setMesh(loadMesh);
 	}
-	loadMesh->centerMesh();
-	setMesh(loadMesh);
 	//applyGeometry();
 	// 승환 25%
 	qmlManager->setProgress(0.23);
@@ -148,8 +158,9 @@ QString GLModel::filename() const
 
 
 
-void GLModel::changeColor(const QVector3D& color){
-	_meshMaterial.setColor(color);
+void GLModel::changeColor(const QVector3D& color)
+{
+	setMaterialColor(color);
 }
 
 bool GLModel::isPrintable()const
@@ -162,17 +173,17 @@ void GLModel::updatePrintable() {
 	// is it inside the printing area or not?
 	if(!isPrintable())
 	{
-		changeColor(Hix::Render::Colors::OutOfBound);
+		setMaterialColor(Hix::Render::Colors::OutOfBound);
 	}
 	else
 	{
 		if (qmlManager->isSelected(this))
 		{
-			changeColor(Hix::Render::Colors::Selected);
+			setMaterialColor(Hix::Render::Colors::Selected);
 		}
 		else
 		{
-			changeColor(Hix::Render::Colors::Default);
+			setMaterialColor(Hix::Render::Colors::Default);
 		}
 
 	}
@@ -197,14 +208,6 @@ void GLModel::copyModelAttributeFrom(GLModel* from){
     shellOffsetActive = from->shellOffsetActive;
     layflatActive = from->layflatActive;
     layerViewActive = from->layerViewActive;
-    scaleActive = from->scaleActive;
-
-    // labelling info
-    if (from->textPreview) {
-        qDebug() << "copyModelAttributeFrom";
-        if (!textPreview)
-            textPreview = new Hix::Labelling::LabelModel(this, *(from->textPreview));
-    }
 }
 
 void GLModel::updateModelMesh(){
@@ -373,6 +376,23 @@ void GLModel::initHitTest()
 
 }
 
+void GLModel::setHitTestable(bool isEnable)
+{
+	if (_hitEnabled != isEnable)
+	{
+		_hitEnabled = isEnable;
+		if (_hitEnabled)
+		{
+			qmlManager->getRayCaster().addInputLayer(&_layer);
+		}
+		else
+		{
+			qmlManager->getRayCaster().removeInputLayer(&_layer);
+		}
+	}
+	callRecursive(this, &GLModel::setHitTestable, isEnable);
+}
+
 void GLModel::clicked(MouseEventData& pick, const Qt3DRender::QRayCasterHit& hit)
 {
 	auto suppMode = qmlManager->supportRaftManager().supportEditMode();
@@ -440,7 +460,7 @@ void GLModel::clicked(MouseEventData& pick, const Qt3DRender::QRayCasterHit& hit
 		if (textPreview != nullptr)
 			textPreview->setEnabled(false);
 
-		textPreview = new Hix::Labelling::LabelModel(this);
+		textPreview = new Hix::LabelModel(this);
 
 		if (textPreview && labellingActive) {
 			textPreview->setTranslation(hit.localIntersection());
@@ -455,8 +475,7 @@ bool GLModel::isDraggable(Hix::Input::MouseEventData& e,const Qt3DRender::QRayCa
 		&&
 		qmlManager->isSelected(this) 
 		&&
-		!(	scaleActive ||
-			cutActive ||
+			(cutActive ||
 			shellOffsetActive ||
 			extensionActive ||
 			labellingActive ||
@@ -593,7 +612,7 @@ void GLModel::getLayerViewSliderSignal(int value) {
 
     // change phong material of original model
     float h = scfg->layer_height* value + _mesh->z_min() - scfg->raft_thickness - scfg->support_base_height;
-	_meshMaterial.setParameterValue("height", QVariant::fromValue(h));
+	setLayerViewHeight(h);
 	/*m_layerMaterialRaftHeight->setValue(QVariant::fromValue(qmlManager->getLayerViewFlags() & LAYER_INFILL != 0 ?
                 _mesh->z_min() :
                 _mesh->z_max() + scfg->raft_thickness - scfg->support_base_height));*/
@@ -626,7 +645,6 @@ QVector3D GLModel::spreadPoint(QVector3D endPoint,QVector3D startPoint,int facto
 
 void GLModel::getTextChanged(QString text)
 {
-    qDebug() << "@@@@ getTexyChanged";
     if (text != "" && textPreview && labellingActive){
 		textPreview->text = text;
     }
@@ -636,7 +654,6 @@ void GLModel::openLabelling()
 {
     labellingActive = true;
 
-    qmlManager->lastModelSelected();
     if (!qmlManager->isSelected(this)) {
         labellingActive = false;
     }
@@ -687,20 +704,20 @@ void GLModel::getFontSizeChanged(int fontSize)
 }
 
 /* make a new labellingTextPreview and apply label info's */
-void GLModel::applyLabelInfo(QString text, QString fontName, bool isBold, int fontSize)
+void GLModel::updateLabelPreview(QString text, QString fontName, bool isBold, int fontSize)
 {
 	qDebug() << "label apply";
 
     if (textPreview && labellingActive){
-		textPreview->generateLabel(text, _mesh, targetMeshFace.localFn(), 0.025f);
+		textPreview->generateLabel(text, _mesh, targetMeshFace.localFn());
 		updateModelMesh();
     }
-    }
+   }
 
 
-void GLModel::generateText3DMesh()
+void GLModel::generateLabelMesh()
 {
-    qDebug() << "generateText3DMesh @@@@@" << this << this;
+    qDebug() << "generateLabelMesh @@@@@" << this << this;
 
     if (updateLock)
         return;
@@ -717,12 +734,11 @@ void GLModel::generateText3DMesh()
     qmlManager->setProgress(0.1f);
 
 	_targetSelected = false;
-	*_mesh += *textPreview->getMesh();
-
     qmlManager->setProgress(0.5f);
 
-    updateModelMesh();
+	setMaterialColor(Hix::Render::Colors::Selected);
 	textPreview = nullptr;
+    updateModelMesh();
 
     qmlManager->setProgress(1.0f);
 }
@@ -731,19 +747,21 @@ void GLModel::generateText3DMesh()
 
 void GLModel:: unselectMeshFaces(){
 	selectedFaces.clear();
+	_targetSelected = false;
+	callRecursive(this, &GLModel::unselectMeshFaces);
 }
 void GLModel::selectMeshFaces(){
 	selectedFaces.clear();
 	QVector3D normal = targetMeshFace.localFn();
 	_mesh->findNearSimilarFaces(normal, targetMeshFace, selectedFaces);
-	updateMesh(_mesh, true);
+	updateMesh(true);
 }
 void GLModel::generateExtensionFaces(double distance){
     if (!_targetSelected)
         return;
     Hix::Features::Extension::extendMesh(_mesh, targetMeshFace, distance);
 	_targetSelected = false;
-	updateMesh(_mesh, true);
+	updateMesh(true);
 }
 
 void GLModel::generateLayFlat(){
@@ -770,62 +788,6 @@ void GLModel::generateShellOffset(double factor){
     shellOffsetFactor = factor;
 
     modelCut();
-
-}
-
-
-void GLModel::openLayflat(){
-    layflatActive = true;
-	_meshMaterial.changeMode(Hix::Render::ShaderMode::PerPrimitiveColor);
-	updateMesh(_mesh, true);
-    qmlManager->lastModelSelected();
-    if (!qmlManager->isSelected(this))
-        layflatActive = false;
-}
-void GLModel::closeLayflat(){
-    if (!layflatActive)
-        return;
-    layflatActive = false;
-	_meshMaterial.changeMode(Hix::Render::ShaderMode::SingleColor);
-	rotateDone();
-	updateMesh(_mesh, true);
-    unselectMeshFaces();
-	_targetSelected = false;
-}
-void GLModel::openExtension(){
-    extensionActive = true;
-	_meshMaterial.changeMode(Hix::Render::ShaderMode::PerPrimitiveColor);
-	updateMesh(_mesh, true);
-    qmlManager->lastModelSelected();
-    if (!qmlManager->isSelected(this))
-        extensionActive = false;
-
-}
-
-void GLModel::closeExtension(){
-    if (!extensionActive)
-        return;
-	_meshMaterial.changeMode(Hix::Render::ShaderMode::SingleColor);
-	updateMesh(_mesh, true);
-    extensionActive = false;
-    unselectMeshFaces();
-	_targetSelected = false;
-}
-
-
-void GLModel::openScale(){
-    scaleActive = true;
-    qmlManager->sendUpdateModelInfo();
-    //QMetaObject::invokeMethod(qmlManager->scalePopup, "updateSizeInfo", Q_ARG(QVariant, _mesh->x_max()-_mesh->x_min()), Q_ARG(QVariant, _mesh->y_max()-_mesh->y_min()), Q_ARG(QVariant, _mesh->z_max()-_mesh->z_min()));
-}
-
-void GLModel::closeScale(){
-    if (!scaleActive)
-        return;
-
-    scaleActive = false;
-    qmlManager->sendUpdateModelInfo();
-    qDebug() << "close scale";
 }
 
 void GLModel::openCut(){
@@ -930,15 +892,15 @@ void GLModel::updateShader(int viewMode)
 	case VIEW_MODE_OBJECT:
 		if (faceSelectionActive())
 		{
-			_meshMaterial.changeMode(Hix::Render::ShaderMode::PerPrimitiveColor);
+			setMaterialMode(Hix::Render::ShaderMode::PerPrimitiveColor);
 		}
 		else
 		{
-			_meshMaterial.changeMode(Hix::Render::ShaderMode::SingleColor);
+			setMaterialMode(Hix::Render::ShaderMode::SingleColor);
 		}
 		break;
 	case VIEW_MODE_LAYER:
-		_meshMaterial.changeMode(Hix::Render::ShaderMode::LayerMode);
+		setMaterialMode(Hix::Render::ShaderMode::LayerMode);
 		break;
 	}
 
@@ -949,16 +911,7 @@ void GLModel::updateShader(int viewMode)
 
 
 void GLModel::inactivateFeatures(){
-    /*labellingActive = false;
-    extensionActive = false;
-    cutActive = false;
-    hollowShellActive = false;
-    shellOffsetActive = false;
-    layflatActive = false;
-    manualSupportActive = false;
-    layerViewActive = false;
-    supportViewActive = false;
-    scaleActive = false;*/
+
 
     closeLabelling();
     closeExtension();
@@ -966,10 +919,7 @@ void GLModel::inactivateFeatures(){
     closeHollowShell();
     closeShellOffset();
     closeLayflat();
-    closeScale();
-    //layerViewActive = false; //closeLayerView();
-    //supportViewActive = false; //closeSupportView();
-    //parentModel->changeViewMode(VIEW_MODE_OBJECT);
+
 }
 
 void GLModel::removeLayerViewComponents(){
@@ -983,7 +933,6 @@ void GLModel::removeLayerViewComponents(){
     layerViewPlaneTextureLoader->deleteLater();
     layerViewPlaneTextureLoader = nullptr;
 }
-
 
 
 bool GLModel::perPrimitiveColorActive() const

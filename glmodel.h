@@ -5,7 +5,6 @@
 #include "fileloader.h"
 #include "slice/slicingengine.h"
 #include "feature/modelcut.h"
-#include "feature/labelling/labelModel.h"
 #include "feature/autoorientation.h"
 #include "feature/meshrepair.h"
 #include "feature/autoarrange.h"
@@ -50,6 +49,12 @@ using namespace Qt3DExtras;
 
 class GLModel;
 class OverhangPoint;
+
+namespace Hix
+{
+	class LabelModel;
+}
+
 namespace Hix
 {
 	namespace Features
@@ -113,7 +118,7 @@ public:
     std::vector<QPhongMaterial*> sphereMaterial;
 
     void removeModelPartList();
-    Hix::Labelling::LabelModel* textPreview = nullptr;
+	Hix::LabelModel* textPreview = nullptr;
 
     void copyModelAttributeFrom(GLModel* from);
 
@@ -155,15 +160,14 @@ public:
 	bool shellOffsetActive = false;
 	bool layflatActive = false;
 	bool layerViewActive = false;
-	bool scaleActive = false;
 
 
 
 	bool isMoved = false;
 
+	// useless funcitons. why did you use them?
 	bool perPrimitiveColorActive()const;
 	bool faceSelectionActive()const;
-
 
 
 	//TODO: remove these
@@ -176,6 +180,9 @@ public:
 	void scaleDone();
 	void setZToBed();
 	QString filename()const;
+
+	void setHitTestable(bool isEnable);
+
 protected:
 	void initHitTest()override;
 
@@ -218,8 +225,6 @@ public slots:
 
 
     // Scale
-    void openScale();
-    void closeScale();
 
     // Lay Flat
     void openLayflat();
@@ -252,8 +257,8 @@ public slots:
     void getFontNameChanged(QString fontName);
     void getFontBoldChanged(bool isBold);
     void getFontSizeChanged(int fontSize);
-    void applyLabelInfo(QString text, QString fontName, bool isBold, int fontSize);
-    void generateText3DMesh();
+    void updateLabelPreview(QString text, QString fontName, bool isBold, int fontSize);
+    void generateLabelMesh();
 
     // Extension
     void openExtension();

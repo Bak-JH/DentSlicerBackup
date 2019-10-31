@@ -1,26 +1,28 @@
 #include "labelModel.h"
 #include "utils/mathutils.h"
+#include <QTransform>
 
-Hix::Labelling::LabelModel::LabelModel(Qt3DCore::QEntity* parent)
-	:SceneEntityWithMaterial(parent)
+Hix::LabelModel::LabelModel(Qt3DCore::QEntity* parent)
+	:GLModel(nullptr, parent)
 {
+	setMaterialColor(Hix::Render::Colors::Support);
 }
 
-Hix::Labelling::LabelModel::LabelModel(Qt3DCore::QEntity* parent, LabelModel& from)
+Hix::LabelModel::LabelModel(Qt3DCore::QEntity* parent, LabelModel& from)
 {
 	setParent(parent);
-	translation = from.translation;
-	normal = from.normal;
 	text = from.text;
 	font = from.font;
 }
 
-void Hix::Labelling::LabelModel::generateLabel(QString text, Hix::Engine3D::Mesh* targetMesh,
-												QVector3D targetNormal, float scale)
+
+
+void Hix::LabelModel::generateLabel(QString text, Hix::Engine3D::Mesh* targetMesh, QVector3D targetNormal)
 {
-	qDebug() << "Text3D::generateText3D()";
-	qDebug() << "FONT: " << font << "TEXT: " << text << "MESH: " << targetMesh;
-	qDebug() << "POS: " << translation << "NOR: " << targetNormal << "SCALE: " << scale;
+	auto labelMesh = new Mesh();
+
+	qDebug() << "LabelModel::generateLabel()";
+	qDebug() << "FONT: " << font << "TEXT: " << text << "MESH: " << targetMesh << "NORMAL: " << targetNormal;
 	QPainterPath painterPath;
 	painterPath.setFillRule(Qt::WindingFill);
 	painterPath.addText(0, 0, font, text);
@@ -31,7 +33,7 @@ void Hix::Labelling::LabelModel::generateLabel(QString text, Hix::Engine3D::Mesh
 	qDebug() << "WIDTH: " << width << "HEIGHT: " << height;
 
 	// translate float points to int point
-	QList<QPolygonF> polygons = painterPath.toSubpathPolygons(QTransform().scale(1.0f, -1.0f));
+	QList<QPolygonF> polygons = painterPath.toSubpathPolygons(::QTransform().scale(1.0f, -1.0f));
 	std::vector<Path> IntPaths;
 	for (auto polygon : polygons)
 	{
@@ -74,15 +76,10 @@ void Hix::Labelling::LabelModel::generateLabel(QString text, Hix::Engine3D::Mesh
 		std::reverse(contour.begin(), contour.end());
 
 		std::vector<QVector3D> path;
-		path.emplace_back(QVector3D(translation.x(), translation.y(), translation.z()));
-		path.emplace_back(QVector3D(translation.x(), translation.y()-0.05f, translation.z()));
+		path.emplace_back(0, 0, 0);
+		path.emplace_back(0, -2.f, 0);
 
-
-		std::vector<float> scales;
-		scales.emplace_back(scale);
-		scales.emplace_back(scale);
-		scales.emplace_back(scale);
-		extrudeAlongPath(_mesh, QVector3D(0,-1,0), contour, path, jointContours, &scales);
+		extrudeAlongPath<int>(labelMesh, QVector3D(0,-1,0), contour, path, jointContours);
 
 		contour.clear();
 		++i;
@@ -93,61 +90,26 @@ void Hix::Labelling::LabelModel::generateLabel(QString text, Hix::Engine3D::Mesh
 	{
 		for (auto trig : node.second)
 		{
-			_mesh->addFace(
-				QVector3D(translation.x() + (trig[0].x() * scale), jointContours.back().front().y(), translation.z() + (trig[0].y() * scale)),
-				QVector3D(translation.x() + (trig[1].x() * scale), jointContours.back().front().y(), translation.z() + (trig[1].y() * scale)),
-				QVector3D(translation.x() + (trig[2].x() * scale), jointContours.back().front().y(), translation.z() + (trig[2].y() * scale))
+			labelMesh->addFace(
+				QVector3D(trig[0].x(), jointContours.back().front().y(), trig[0].y()),
+				QVector3D(trig[1].x(), jointContours.back().front().y(), trig[1].y()),
+				QVector3D(trig[2].x(), jointContours.back().front().y(), trig[2].y())
 			);
 
-			_mesh->addFace(
-				QVector3D(translation.x() + (trig[2].x() * scale), jointContours.front().front().y(), translation.z() + (trig[2].y() * scale)),
-				QVector3D(translation.x() + (trig[1].x() * scale), jointContours.front().front().y(), translation.z() + (trig[1].y() * scale)),
-				QVector3D(translation.x() + (trig[0].x() * scale), jointContours.front().front().y(), translation.z() + (trig[0].y() * scale))
-			);
+			labelMesh->addFace(
+				QVector3D(trig[2].x(), jointContours.front().front().y(), trig[2].y()),
+				QVector3D(trig[1].x(), jointContours.front().front().y(), trig[1].y()),
+				QVector3D(trig[0].x(), jointContours.front().front().y(), trig[0].y()));
 		}
 	}
 
-	setMesh(_mesh);
+	transform().setRotation(QQuaternion::rotationTo(QVector3D(0,-1,0), targetNormal));
+	transform().setScale(0.05f);
+
+	setMesh(labelMesh);
 }
 
-void Hix::Labelling::LabelModel::setTranslation(QVector3D t)
+void Hix::LabelModel::setTranslation(QVector3D t)
 {
-	translation = t;
-}
-
-void Hix::Labelling::LabelModel::clicked(Hix::Input::MouseEventData&, const Qt3DRender::QRayCasterHit&)
-{
-}
-
-void Hix::Labelling::LabelModel::onEntered()
-{
-	setHighlight(true);
-}
-
-void Hix::Labelling::LabelModel::onExited()
-{
-	setHighlight(false);
-}
-
-void Hix::Labelling::LabelModel::setHighlight(bool enable)
-{
-	auto color = Hix::Render::Colors::Support;
-	if (enable)
-	{
-		color = Hix::Render::Colors::SupportHighlighted;
-	}
-	_meshMaterial.setColor(color);
-}
-
-QVector3D Hix::Labelling::LabelModel::getPrimitiveColorCode(const Hix::Engine3D::Mesh* mesh, Hix::Engine3D::FaceConstItr faceItr)
-{
-	throw std::runtime_error("Text3D::getPrimitiveColorCode not implemented");
-	return QVector3D();
-}
-
-void Hix::Labelling::LabelModel::initHitTest()
-{
-	addComponent(&_layer);
-	_layer.setRecursive(false);
-
+	transform().setTranslation(t);
 }
