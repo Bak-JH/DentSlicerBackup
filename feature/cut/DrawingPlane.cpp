@@ -4,7 +4,7 @@
 using namespace Hix::Input;
 using namespace Hix::Features::Cut;
 
-DrawingPlane::DrawingPlane(GLModel* owner): Qt3DCore::QEntity(owner)
+DrawingPlane::DrawingPlane(Qt3DCore::QEntity* owner): Qt3DCore::QEntity(owner)
 {
 	auto planeMaterial = new Qt3DExtras::QPhongAlphaMaterial(this);
 	planeMaterial->setAmbient(QColor(244,244,244,255));
