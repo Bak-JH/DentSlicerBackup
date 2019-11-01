@@ -29,43 +29,40 @@ namespace Hix
 			{
 
 			public:
-				void operator();
+			//	void operator();
 
-			private:
-				void ClassifyVertices(std::vector<Vector3<Real>> const& clipVertices, Plane3<Real> const& plane);
-				void ClassifyEdges(std::vector<Vector3<Real>>& clipVertices, std::vector<int> const& indices);
+			//private:
+			//	void ClassifyVertices(std::vector<Vector3<Real>> const& clipVertices, Plane3<Real> const& plane);
+			//	void ClassifyEdges(std::vector<Vector3<Real>>& clipVertices, std::vector<int> const& indices);
+			//	void ClassifyTriangles(std::vector<int> const& indices,
+			//		std::vector<int>& negIndices, std::vector<int>& posIndices);
+			//	void AppendTriangle(std::vector<int>& indices, int v0, int v1, int v2)
+			//	{
+			//		indices.push_back(v0);
+			//		indices.push_back(v1);
+			//		indices.push_back(v2);
+			//	}
+			//	void SplitTrianglePPM(std::vector<int>& negIndices,
+			//		std::vector<int>& posIndices, int v0, int v1, int v2);
 
-				void ClassifyTriangles(std::vector<int> const& indices,
-					std::vector<int>& negIndices, std::vector<int>& posIndices);
+			//	void SplitTriangleMMP(std::vector<int>& negIndices,
+			//		std::vector<int>& posIndices, int v0, int v1, int v2);
 
-				void AppendTriangle(std::vector<int>& indices, int v0, int v1, int v2)
-				{
-					indices.push_back(v0);
-					indices.push_back(v1);
-					indices.push_back(v2);
-				}
+			//	void SplitTrianglePMZ(std::vector<int>& negIndices,
+			//		std::vector<int>& posIndices, int v0, int v1, int v2);
 
-				void SplitTrianglePPM(std::vector<int>& negIndices,
-					std::vector<int>& posIndices, int v0, int v1, int v2);
+			//	void SplitTriangleMPZ(std::vector<int>& negIndices,
+			//		std::vector<int>& posIndices, int v0, int v1, int v2);
 
-				void SplitTriangleMMP(std::vector<int>& negIndices,
-					std::vector<int>& posIndices, int v0, int v1, int v2);
+			//	// Stores the signed distances from the vertices to the plane.
+			//	std::vector<Real> mSignedDistances;
 
-				void SplitTrianglePMZ(std::vector<int>& negIndices,
-					std::vector<int>& posIndices, int v0, int v1, int v2);
-
-				void SplitTriangleMPZ(std::vector<int>& negIndices,
-					std::vector<int>& posIndices, int v0, int v1, int v2);
-
-				// Stores the signed distances from the vertices to the plane.
-				std::vector<Real> mSignedDistances;
-
-				// Stores the edges whose vertices are on opposite sides of the
-				// plane.  The key is a pair of indices into the vertex array.
-				// The value is the point of intersection of the edge with the
-				// plane and an index into m_kVertices (the index is larger or
-				// equal to the number of vertices of incoming rkVertices).
-				std::map<EdgeKey<false>, std::pair<Vector3<Real>, int>> mEMap;
+			//	// Stores the edges whose vertices are on opposite sides of the
+			//	// plane.  The key is a pair of indices into the vertex array.
+			//	// The value is the point of intersection of the edge with the
+			//	// plane and an index into m_kVertices (the index is larger or
+			//	// equal to the number of vertices of incoming rkVertices).
+			//	std::map<EdgeKey<false>, std::pair<Vector3<Real>, int>> mEMap;
 			};
 
 		}
