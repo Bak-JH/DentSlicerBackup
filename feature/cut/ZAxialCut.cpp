@@ -1,6 +1,7 @@
 ﻿#include "ZAxialCut.h"
 #include "../../glmodel.h"
 #include "../../qmlmanager.h"
+#include "../../common/GTEngine/Include/Mathematics/GteSplitMeshByPlane.h"
 using namespace Hix;
 using namespace Hix::Engine3D;
 using namespace Hix::Slicer;
@@ -13,20 +14,26 @@ Hix::Features::Cut::ZAxialCut::ZAxialCut(GLModel* subject, float cuttingPlane, b
 {
 	_bottomMesh = new Mesh();
 	_topMesh = new Mesh();
+	// Partition the torus mesh.
+	std::vector<gte::Vector3<float>> clipVertices;
+	std::vector<int> negIndices, posIndices;
+	gte::SplitMeshByPlane<float> splitter;
+	splitter(mTorusVerticesWS, mTorusIndices, mPlane, clipVertices, negIndices, posIndices);
 
-	divideTriangles();
-	generateCutContour();
-	if (_fill)
-	{
-		generateCaps();
-	}
-	for (auto& contour : _contours)
-	{
-		for (auto& seg : contour.segments)
-		{
-			fillOverlap(seg);
-		}
-	}
+
+	//divideTriangles();
+	//generateCutContour();
+	//if (_fill)
+	//{
+	//	generateCaps();
+	//}
+	//for (auto& contour : _contours)
+	//{
+	//	for (auto& seg : contour.segments)
+	//	{
+	//		fillOverlap(seg);
+	//	}
+	//}
 	GLModel* botModel = nullptr;
 	GLModel* topModel = nullptr;
 	if (_bottomMesh->getFaces().size() != 0) {
