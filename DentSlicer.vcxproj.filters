@@ -101,9 +101,6 @@
     <ClCompile Include="DentEngine\src\utils\metric.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="feature\modelcut.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="qmlmanager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -230,9 +227,6 @@
     <ClCompile Include="input\Draggable.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>
-    <ClCompile Include="feature\cut\modelCutZAxis.cpp">
-      <Filter>Generated Files</Filter>
-    </ClCompile>
     <ClCompile Include="DentEngine\src\polyclipping\polytree2tri\PolytreeCDT.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>
@@ -262,6 +256,18 @@
     <ClCompile Include="DentEngine\src\polyclipping\poly2tri\sweep\cdt.cc" />
     <ClCompile Include="DentEngine\src\polyclipping\poly2tri\sweep\sweep.cc" />
     <ClCompile Include="DentEngine\src\polyclipping\poly2tri\sweep\sweep_context.cc" />
+    <ClCompile Include="feature\cut\polylinecut.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="feature\cut\modelcut.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="feature\cut\ZAxialCut.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="feature\Feature.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="feature\autoarrange.h">
@@ -312,9 +318,6 @@
     <ClInclude Include="DentEngine\src\utils\metric.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <QtMoc Include="feature\modelcut.h">
-      <Filter>Header Files</Filter>
-    </QtMoc>
     <ClInclude Include="utils\qbezier.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -583,9 +586,6 @@
       <Filter>Generated Files</Filter>
     </ClInclude>
     <ClInclude Include="feature\cut\FreeCutPtWidget.h">
-      <Filter>Generated Files</Filter>
-    </ClInclude>
-    <ClInclude Include="feature\cut\modelCutZAxis.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
     <ClInclude Include="DentEngine\src\polyclipping\polytree2tri\PolytreeCDT.h">
@@ -1231,6 +1231,7 @@
     <None Include="icon-32.ico" />
     <None Include="icon-32.ico" />
     <None Include="icon-32.ico" />
+    <None Include="icon-32.ico" />
   </ItemGroup>
   <ItemGroup>
     <None Include="DentSlicer.rc">
@@ -1289,6 +1290,18 @@
       <Filter>Generated Files</Filter>
     </ClInclude>
     <ClInclude Include="DentEngine\src\polyclipping\poly2tri\poly2tri.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="feature\cut\modelcut.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="feature\cut\ZAxialCut.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="feature\cut\polylinecut.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="feature\Feature.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
   </ItemGroup>

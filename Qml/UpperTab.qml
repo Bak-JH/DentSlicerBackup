@@ -1134,7 +1134,6 @@ Rectangle {
                 }
                 else {
                     slider_vis = false;
-                    closeCut();
                     return "inactive"
                 }
             }
@@ -1168,6 +1167,7 @@ Rectangle {
 
             onApplyClicked: {
                 modelCut();
+                closeCut();
                 slider_vis = false;
             }
 

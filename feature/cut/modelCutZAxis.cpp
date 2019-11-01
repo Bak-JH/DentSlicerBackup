@@ -204,6 +204,7 @@ void Hix::Features::Cut::ZAxisCutTask::fillOverlap(const Hix::Slicer::ContourSeg
 }
 
 
+removePlane();
 
 
 
@@ -270,5 +271,41 @@ void GLModel::getSliderSignal(double value) {
 		qmlManager->hollowShellSphereMesh->setRadius(hollowShellRadius);
 
 		qDebug() << "getting slider signal: current radius is " << value;
+	}
+}
+
+
+void GLModel::modelCut() {
+
+	qmlManager->openProgressPopUp();
+
+
+	if (cutMode == 1) { // flat cut
+		auto lmesh = new Mesh();
+		auto rmesh = new Mesh();
+		if (this->shellOffsetActive && isFlatcutEdge == true) {
+			getSliderSignal(0.0);
+		}
+		bool fillCuttingSurface = cutFillMode == 2;
+		Hix::Features::Cut::ZAxisCutTask task(_mesh, lmesh, rmesh, _cuttingPlane->transform().translation().z(), fillCuttingSurface);
+		emit bisectDone(lmesh, rmesh);
+
+	}
+	else if (cutMode == 2) { // free cut
+		auto cuttingContour = _cuttingPlane->contour();
+		if (cuttingContour.size() >= 2) {
+			auto lmesh = new Mesh();
+			auto rmesh = new Mesh();
+			cutAway(lmesh, rmesh, _mesh, cuttingContour, cutFillMode);
+
+			if (lmesh->getFaces().size() == 0 || rmesh->getFaces().size() == 0) {
+
+				qDebug() << "cutting contour selected not cutting";
+				qmlManager->setProgress(1);
+				cutModeSelected(2); // reset
+				return;
+			}
+			emit bisectDone(lmesh, rmesh);
+		}
 	}
 }

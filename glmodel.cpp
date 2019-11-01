@@ -35,13 +35,13 @@ using namespace Hix::Engine3D;
 using namespace Hix::Input;
 using namespace Hix::Render;
 
-GLModel::GLModel(QObject* mainWindow, QEntity*parent, Mesh* loadMesh, QString fname, int id)
+GLModel::GLModel(QEntity*parent, Mesh* loadMesh, QString fname, int id, const Qt3DCore::QTransform* transform)
     : SceneEntityWithMaterial(parent)
     , _filename(fname)
-    , mainWindow(mainWindow)
-    , cutMode(1)
     , ID(id)
 {
+	if (transform)
+		_transform.setMatrix(transform->matrix());
 	initHitTest();
     qDebug() << "new model made _______________________________"<<this<< "parent:"<<parent;
 
@@ -74,7 +74,6 @@ GLModel::GLModel(QObject* mainWindow, QEntity*parent, Mesh* loadMesh, QString fn
 	// 승환 75%
 	qmlManager->setProgress(0.73);
 
-	QObject::connect(this, SIGNAL(bisectDone(Mesh*, Mesh*)), this, SLOT(generateRLModel(Mesh*, Mesh*)));
 
 	qDebug() << "created shadow model";
 
@@ -188,11 +187,8 @@ void GLModel::repairMesh()
 
 /* copy info's from other GLModel */
 void GLModel::copyModelAttributeFrom(GLModel* from){
-    cutMode = from->cutMode;
-    cutFillMode = from->cutFillMode;
     labellingActive = from->labellingActive;
     extensionActive = from->extensionActive;
-    cutActive = from->cutActive;
     hollowShellActive = from->hollowShellActive;
     shellOffsetActive = from->shellOffsetActive;
     layflatActive = from->layflatActive;
@@ -222,74 +218,6 @@ void GLModel::updateModelMesh(){
 }
 
 
-void GLModel::removeModelPartList(){
-    //remove part list
-    QList<QObject*> temp;
-    temp.append(mainWindow);
-    QObject *partList = (QEntity *)FindItemByName(temp, "partList");
-    QObject *yesno_popup = (QEntity *)FindItemByName(temp, "yesno_popup");
-
-    qDebug() <<"remove ID   " << ID;
-    QMetaObject::invokeMethod(partList, "deletePartListItem", Q_ARG(QVariant, ID));
-    QMetaObject::invokeMethod(yesno_popup, "deletePartListItem", Q_ARG(QVariant, ID));
-}
-
-
-
-void GLModel::generateRLModel(Mesh* lmesh, Mesh* rmesh){
-	GLModel* leftmodel = nullptr;
-	GLModel* rightmodel = nullptr;
-    qDebug() << "** generateRLModel" << this;
-    if (lmesh->getFaces().size() != 0){
-		leftmodel = qmlManager->createModelFile(lmesh, _filename+"_l");
-        qDebug() << "leftmodel created";
-    }
-    // 승환 70%
-    qmlManager->setProgress(0.72);
-    if (rmesh->getFaces().size() != 0){
-		rightmodel = qmlManager->createModelFile(rmesh, _filename +"_r");
-        qDebug() << "rightmodel created";
-    }
-
-
-    // 승환 90%
-
-    qDebug() << "found models : " << leftmodel << rightmodel;
-    if (leftmodel != nullptr && rightmodel != nullptr){
-        leftmodel->twinModel = rightmodel;
-        rightmodel->twinModel = leftmodel;
-    }
-
-    qmlManager->setProgress(1);
-
-    if (shellOffsetActive){
-		if (leftmodel != nullptr)
-		{
-			auto offsetLeftMesh = ShellOffset::shellOffset(leftmodel->_mesh, (float)shellOffsetFactor);
-
-			qmlManager->createModelFile(offsetLeftMesh, leftmodel->filename());
-
-			qmlManager->deleteModelFile(leftmodel->ID);
-
-		}
-        if (rightmodel != nullptr)
-            qmlManager->deleteModelFile(rightmodel->ID);
-        QMetaObject::invokeMethod(qmlManager->boxUpperTab, "all_off");
-    }
-
-
-    //deleteLater();
-    removePlane();
-    // delete original model
-    qmlManager->deleteModelFile(ID);
-
-    // do auto arrange
-    //qmlManager->runArrange();
-	QMetaObject::invokeMethod(qmlManager->boundedBox, "hideBox");
-    // 승환 100%
-    qmlManager->setProgress(1);
-}
-
 // hollow shell part
 void GLModel::indentHollowShell(double radius){
     qDebug() << "hollow shell called" << radius;
@@ -315,7 +243,7 @@ void GLModel::initHitTest()
 void GLModel::clicked(MouseEventData& pick, const Qt3DRender::QRayCasterHit& hit)
 {
 	auto suppMode = qmlManager->supportRaftManager().supportEditMode();
-	if (!cutActive && !extensionActive && !labellingActive && !layflatActive &&
+	if (!extensionActive && !labellingActive && !layflatActive &&
 		suppMode == Hix::Support::EditMode::None)// && !layerViewActive && !supportViewActive)
 		qmlManager->modelSelected(ID);
 
@@ -671,11 +599,11 @@ void GLModel::generateShellOffset(double factor){
     qmlManager->openProgressPopUp();
     QString original_filename = _filename;
 
-    cutMode = 1;
-    cutFillMode = 1;
+    //cutMode = 1;
+    //cutFillMode = 1;
     shellOffsetFactor = factor;
 
-    modelCut();
+    //modelCut();
 
 }
 
@@ -734,20 +662,7 @@ void GLModel::closeScale(){
     qDebug() << "close scale";
 }
 
-void GLModel::openCut(){
-    cutActive = true;
-}
 
-void GLModel::closeCut(){
-    qDebug() << "closecut called";
-
-    if (!cutActive)
-        return;
-
-    cutActive = false;
-    removePlane();
-
-}
 
 void GLModel::openHollowShell(){
     qDebug() << "open HollowShell called";
@@ -768,7 +683,6 @@ void GLModel::closeHollowShell(){
 void GLModel::openShellOffset(){
     qDebug() << "openShelloffset";
     shellOffsetActive = true;
-    generatePlane(1);
 
 }
 
@@ -779,7 +693,6 @@ void GLModel::closeShellOffset(){
         return;
 
     shellOffsetActive = false;
-    removePlane();
 }
 
 void GLModel::changeViewMode(int viewMode) {
@@ -868,7 +781,6 @@ void GLModel::inactivateFeatures(){
 
     closeLabelling();
     closeExtension();
-    closeCut();
     closeHollowShell();
     closeShellOffset();
     closeLayflat();

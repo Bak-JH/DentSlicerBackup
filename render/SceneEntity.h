@@ -23,7 +23,6 @@ namespace Hix
 		{
 			Q_OBJECT
 		public:
-
 			//size of QGeometry Attribute elements
 			const static size_t POS_SIZE = 3; //x, y, z of position
 			const static size_t COL_SIZE = 3; //rgb color
@@ -69,8 +68,7 @@ namespace Hix
 			void updateRecursiveAabb();
 
 		protected:
-			//modifiable transform, cannot be accessed by other classes
-			Qt3DCore::QTransform& transform();
+
 			//Axis aligned bounding box
 			Hix::Engine3D::Bounds3D _aabb;
 
