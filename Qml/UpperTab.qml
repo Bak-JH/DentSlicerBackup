@@ -4,6 +4,7 @@ import QtQuick.Layouts 1.0
 import QtQuick.Controls 1.0
 //import QtQuick.Controls.Styles 1.0
 import QtQuick.Controls.Styles 1.4
+import FeatureEnums 1.0
 
 
 
@@ -857,9 +858,11 @@ Rectangle {
             state: { //fourth_tab_button_extend.state=="active" ? "active" : "inactive"
                 if (second_tab_button_layflat.state == "active" && qm.isSelected()){
                     openLayflat();
+					qm.setCurrentActiveFeature(Feature::LayFlat);
                     return "active";
                 } else {
                     closeLayflat();
+					qm.setCurrentActiveFeature(Feature::None);
                     return "inactive";
                 }
             }
@@ -1410,9 +1413,11 @@ Rectangle {
             state: { //fourth_tab_button_extend.state=="active" ? "active" : "inactive"
                 if (fourth_tab_button_extend.state == "active" && qm.isSelected()){
                     openExtension();
+					qm.setCurrentActiveFeature(Feature::Extend);
                     return "active";
                 } else {
                     closeExtension();
+					qm.setCurrentActiveFeature(Feature::None);
                     return "inactive";
                 }
             }
@@ -1857,8 +1862,6 @@ Rectangle {
 
             //signal runFeature(int type);
             signal generateLabelMesh()
-            signal openLabelling()
-            signal closeLabelling()
             signal stateChangeLabelling()
             signal sendTextChanged(string text);
             signal sendLabelUpdate(string text, string fontName, bool isBold, int fontSize);
@@ -2146,14 +2149,14 @@ Rectangle {
 
             state: {
                 if (fourth_tab_button_label.state=="active" && qm.isSelected()) {
-                    openLabelling()
+                    qm.setCurrentActiveFeature(Feature::Label)
                     return "active"
                 }
                 else {
 
                     //text3DInput.focus = false;
                     //sceneRoot.keyboardHandler.focus = true;
-                    closeLabelling()
+                    qm.setCurrentActiveFeature(Feature::None)
                     return "inactive"
                 }
             }

@@ -22,31 +22,6 @@ using namespace Qt3DCore;
 using namespace Qt3DRender;
 using namespace Qt3DExtras;
 
-
-/* feature thread */
-#define ftrEmpty -1 //TODO: remove this swtich craziness.
-#define ftrOpen 1
-#define ftrSave 2
-#define ftrExport 3
-#define ftrMove 4
-#define ftrRotate 5
-#define ftrLayFlat 6
-#define ftrArrange 7
-#define ftrOrient 8
-#define ftrScale 9
-#define ftrRepair 10
-#define ftrCut 11
-#define ftrShellOffset 12
-#define ftrExtend 13
-#define ftrManualSupport 14
-#define ftrLabel 15
-#define ftrSupportViewMode 16
-#define ftrLayerViewMode 17
-#define ftrDelete 18
-#define ftrTempExport 19
-#define ftrSupportDisappear 20
-
-
 class GLModel;
 class OverhangPoint;
 
@@ -152,17 +127,6 @@ public:
 
 	void setBoundingBoxVisible(bool isEnabled);
 
-	
-	bool labellingActive = false;
-	bool extensionActive = false;
-	bool cutActive = false;
-	bool hollowShellActive = false;
-	bool shellOffsetActive = false;
-	bool layflatActive = false;
-	bool layerViewActive = false;
-
-
-
 	bool isMoved = false;
 
 	// useless funcitons. why did you use them?
@@ -251,9 +215,6 @@ public slots:
 
     // Labelling
     void getTextChanged(QString text);
-    void openLabelling();
-    void closeLabelling();
-    void stateChangeLabelling();
     void getFontNameChanged(QString fontName);
     void getFontBoldChanged(bool isBold);
     void getFontSizeChanged(int fontSize);

@@ -67,6 +67,8 @@ namespace Hix
 			//get total AABB including it's children
 			Hix::Engine3D::Bounds3D recursiveAabb()const;
 			void updateRecursiveAabb();
+			bool targetSelected()const;
+			FaceConstItr targetMeshFace();
 
 		protected:
 
@@ -115,7 +117,7 @@ namespace Hix
 
 			/***************Ray casting and hit test***************/
 			bool _targetSelected = false;
-			FaceConstItr targetMeshFace; // used for object selection (specific area, like extension or labelling)
+			FaceConstItr _targetMeshFace; // used for object selection (specific area, like extension or labelling)
 
 		};
 	}

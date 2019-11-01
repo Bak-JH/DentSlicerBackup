@@ -36,6 +36,36 @@
 #define LAYER_SUPPORTERS 0x02
 #define LAYER_RAFT 0x04
 
+
+//delete later(maybe?)
+namespace Hix
+{
+	namespace Features
+	{
+		enum FeatureEnum
+		{
+			None,
+			Open,
+			Save,
+			Export,
+			Move,
+			Rotate,
+			LayFlat,
+			Arrange,
+			Orient,
+			Scale,
+			Repair,
+			Cut,
+			ShellOffset,
+			Extend,
+			ManualSupport,
+			Label,
+			LayerViewMode,
+			Delete
+		};
+	}
+}
+
 class QQuickItem;
 class QmlManager : public QObject
 {
@@ -194,10 +224,18 @@ public:
     int getLayerViewFlags();
 	void modelSelected(int);
 	
+	Q_INVOKABLE void setCurrentActiveFeature(int);
+	Hix::Features::FeatureEnum currentFeature()const;
+
 	void faceSelectionEnable();
 	void faceSelectionDisable();
 
+	void generateLayFlat();
+
 	void setLabelText(QString text);
+	void stateChangeLabelling();
+	void updateLabelPreview(QString text, QString fontName, bool isBold, int fontSize);
+	void generateLabelMesh();
 
 	//remove this
 	const std::unordered_set<GLModel*>& getSelectedModels();
@@ -252,6 +290,7 @@ public:
 	Hix::Support::SupportRaftManager& supportRaftManager();
 
 private:
+	Hix::Features::FeatureEnum _currentActiveFeature = Hix::Features::FeatureEnum::None;
 	Hix::Tasking::TaskManager _taskManager;
 	void setModelViewMode(int mode);
 	bool deselectAllowed();
@@ -266,7 +305,6 @@ private:
     int viewMode;
     int layerViewFlags;
     int modelIDCounter;
-	int _currentActiveFeature;
 	//TODO: get rid of this
 	GLModel* _lastSelected;
 	std::unordered_set<GLModel*> selectedModels;

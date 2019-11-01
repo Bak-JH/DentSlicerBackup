@@ -201,13 +201,6 @@ void GLModel::repairMesh()
 void GLModel::copyModelAttributeFrom(GLModel* from){
     cutMode = from->cutMode;
     cutFillMode = from->cutFillMode;
-    labellingActive = from->labellingActive;
-    extensionActive = from->extensionActive;
-    cutActive = from->cutActive;
-    hollowShellActive = from->hollowShellActive;
-    shellOffsetActive = from->shellOffsetActive;
-    layflatActive = from->layflatActive;
-    layerViewActive = from->layerViewActive;
 }
 
 void GLModel::updateModelMesh(){
@@ -354,19 +347,6 @@ void GLModel::generateRLModel(Mesh* lmesh, Mesh* rmesh){
     qmlManager->setProgress(1);
 }
 
-// hollow shell part
-void GLModel::indentHollowShell(double radius){
-    qDebug() << "hollow shell called" << radius;
-	if (!_targetSelected)
-		return;
-	auto meshVertices = targetMeshFace.meshVertices();
-    QVector3D center = (
-		meshVertices[0].localPosition() +
-		meshVertices[1].localPosition() +
-		meshVertices[2].localPosition())/3;
-	HollowShell::hollowShell(_mesh, targetMeshFace, center, radius);
-}
-
 GLModel::~GLModel(){
 }
 void GLModel::initHitTest()
@@ -396,7 +376,11 @@ void GLModel::setHitTestable(bool isEnable)
 void GLModel::clicked(MouseEventData& pick, const Qt3DRender::QRayCasterHit& hit)
 {
 	auto suppMode = qmlManager->supportRaftManager().supportEditMode();
-	if (!cutActive && !extensionActive && !labellingActive && !layflatActive &&
+	auto currentFeature = qmlManager->currentFeature();
+	if (currentFeature != Hix::Features::FeatureEnum::Cut && 
+		currentFeature != Hix::Features::FeatureEnum::Extend &&
+		currentFeature != Hix::Features::FeatureEnum::Label &&
+		currentFeature != Hix::Features::FeatureEnum::LayFlat &&
 		suppMode == Hix::Support::EditMode::None)// && !layerViewActive && !supportViewActive)
 		qmlManager->modelSelected(ID);
 
@@ -418,18 +402,19 @@ void GLModel::clicked(MouseEventData& pick, const Qt3DRender::QRayCasterHit& hit
         return;
     }
     _targetSelected = true;
-    targetMeshFace = _mesh->getFaces().cbegin() + hit.primitiveIndex();
+    _targetMeshFace = _mesh->getFaces().cbegin() + hit.primitiveIndex();
 
 
 	/// Extension Feature ///
-	if (extensionActive && hit.localIntersection() != QVector3D(0, 0, 0)) {
+	if (qmlManager->currentFeature() == Hix::Features::FeatureEnum::Extend &&
+		hit.localIntersection() != QVector3D(0, 0, 0)) {
 		unselectMeshFaces();
 		emit extensionSelect();
 		selectMeshFaces();
 	}
 
 	/// Hollow Shell ///
-	if (hollowShellActive) {
+	if (qmlManager->currentFeature() == Hix::Features::FeatureEnum::ShellOffset) {
 		qDebug() << "getting handle picker clicked signal hollow shell active";
 		qDebug() << "found parent meshface";
 		// translate hollowShellSphere to mouse position
@@ -440,7 +425,8 @@ void GLModel::clicked(MouseEventData& pick, const Qt3DRender::QRayCasterHit& hit
 	}
 
 	/// Lay Flat ///
-	if (layflatActive && hit.localIntersection() != QVector3D(0, 0, 0)) {
+	if (qmlManager->currentFeature() == Hix::Features::FeatureEnum::LayFlat && 
+		hit.localIntersection() != QVector3D(0, 0, 0)) {
 
 		unselectMeshFaces();
 		emit layFlatSelect();
@@ -451,18 +437,18 @@ void GLModel::clicked(MouseEventData& pick, const Qt3DRender::QRayCasterHit& hit
 	if (suppMode == Hix::Support::EditMode::Manual && hit.localIntersection() != QVector3D(0, 0, 0)) {
 		Hix::OverhangDetect::FaceOverhang newOverhang;
 		newOverhang.coord = ptToRoot(hit.localIntersection());
-		newOverhang.face = targetMeshFace;
+		newOverhang.face = _targetMeshFace;
 		qmlManager->supportRaftManager().addSupport(newOverhang);
 	}
 
 	/// Labeling Feature ///
-    if (labellingActive && hit.localIntersection() != QVector3D(0, 0, 0)) {
+    if (currentFeature != Hix::Features::FeatureEnum::Label && hit.localIntersection() != QVector3D(0, 0, 0)) {
 		if (textPreview != nullptr)
 			textPreview->setEnabled(false);
 
 		textPreview = new Hix::LabelModel(this);
 
-		if (textPreview && labellingActive) {
+		if (textPreview && currentFeature != Hix::Features::FeatureEnum::Label) {
 			textPreview->setTranslation(hit.localIntersection());
             QMetaObject::invokeMethod(qmlManager->labelPopup, "labelUpdate");
         }
@@ -534,90 +520,6 @@ void GLModel::dragEnded(Hix::Input::MouseEventData&)
 
 }
 
-void GLModel::cutModeSelected(int type){
-
-    qDebug() << "cut mode selected1" << type;
-    cutMode = type;
-	generatePlane(cutMode);
-    return;
-}
-
-void GLModel::cutFillModeSelected(int type){
-    cutFillMode = type;
-    return;
-}
-
-void GLModel::getSliderSignal(double value){
-    if (cutActive||shellOffsetActive){
-        if (value == 0.0 || value == 1.8){
-            isFlatcutEdge = true;
-        }
-        else {
-            isFlatcutEdge = false;
-        }
-        float zlength = _mesh->z_max() - _mesh->z_min();
-       
-		_cuttingPlane->transform().setTranslation(QVector3D(0,0, _mesh->z_min() + value*zlength/1.8));
-
-    } else if (hollowShellActive){
-        // change radius of hollowShellSphere
-        hollowShellRadius = value;
-        qmlManager->hollowShellSphereMesh->setRadius(hollowShellRadius);
-
-        qDebug() << "getting slider signal: current radius is " << value;
-    }
-}
-
-void GLModel::getLayerViewSliderSignal(int value) {
-    if ( !layerViewActive)
-        return;
-
-    //float height = (_mesh->z_max() - _mesh->z_min() + scfg->raft_thickness + scfg->support_base_height) * value;
-    //int layer_num = int(height/scfg->layer_height)+1;
-    //if (value <= 0.002f)
-    //    layer_num = 0;
-
-    if (layerViewPlaneTextureLoader == nullptr)
-    layerViewPlaneTextureLoader = new Qt3DRender::QTextureLoader();
-
-    QDir dir(QDir::tempPath()+"_export");//(qmlManager->selectedModels[0]->filename + "_export")
-    if (dir.exists()){
-        QString filename = dir.path()+"/"+QString::number(value)+".svg";
-        qDebug() << filename;
-        layerViewPlaneTextureLoader->setSource(QUrl::fromLocalFile(filename));//"C:\\Users\\User\\Desktop\\sliced\\11111_export\\100.svg"));
-    }
-    //qDebug() << "layer view plane material texture format : " << layerViewPlaneTextureLoader->format();
-    //layerViewPlaneTextureLoader->setFormat(QAbstractTexture::RGBA32F);
-    //qDebug() << "layer view plane material texture format : " << layerViewPlaneTextureLoader->format();
-
-    layerViewPlaneMaterial->setTexture(layerViewPlaneTextureLoader);
-	float rotation_values[] = { // rotate by -90 deg
-	0, -1, 0,
-	1, 0, 0,
-	0, 0, 1
-	};
-	//flip Ys,
-	float flip_values[] = {
-		1, 0, 0,
-		0, -1, 0,
-		0, 0, 1
-	};
-
-    QMatrix3x3 rotation_matrix(rotation_values);
-	QMatrix3x3 flip_matrix(flip_values);
-	QMatrix3x3 matrixTransform = flip_matrix * rotation_matrix;
-
-    layerViewPlaneMaterial->setTextureTransform(matrixTransform);
-    layerViewPlaneTransform->setTranslation(QVector3D(0,0, value *scfg->layer_height - scfg->raft_thickness - scfg->support_base_height));
-
-    // change phong material of original model
-    float h = scfg->layer_height* value + _mesh->z_min() - scfg->raft_thickness - scfg->support_base_height;
-	setLayerViewHeight(h);
-	/*m_layerMaterialRaftHeight->setValue(QVariant::fromValue(qmlManager->getLayerViewFlags() & LAYER_INFILL != 0 ?
-                _mesh->z_min() :
-                _mesh->z_max() + scfg->raft_thickness - scfg->support_base_height));*/
-}
-
 /** HELPER functions **/
 
 bool GLModel::EndsWith(const std::string& a, const std::string& b) {
@@ -650,36 +552,6 @@ void GLModel::getTextChanged(QString text)
     }
 }
 
-void GLModel::openLabelling()
-{
-    labellingActive = true;
-
-    if (!qmlManager->isSelected(this)) {
-        labellingActive = false;
-    }
-
-}
-
-void GLModel::closeLabelling()
-{
-    if (!labellingActive)
-        return;
-
-    labellingActive = false;
-
-    if (textPreview){
-		textPreview->setEnabled(false);
-    }
-	_targetSelected = false;
-	textPreview = nullptr;
-//    stateChangeLabelling();
-}
-
-void GLModel::stateChangeLabelling() {
-    qmlManager->keyboardHandlerFocus();
-    (qmlManager->keyboardHandler)->setFocus(true);
-}
-
 void GLModel::getFontNameChanged(QString fontName)
 {
     qDebug() << "@@@@ getFontNameChanged";
@@ -703,46 +575,6 @@ void GLModel::getFontSizeChanged(int fontSize)
     }
 }
 
-/* make a new labellingTextPreview and apply label info's */
-void GLModel::updateLabelPreview(QString text, QString fontName, bool isBold, int fontSize)
-{
-	qDebug() << "label apply";
-
-    if (textPreview && labellingActive){
-		textPreview->generateLabel(text, _mesh, targetMeshFace.localFn());
-		updateModelMesh();
-    }
-   }
-
-
-void GLModel::generateLabelMesh()
-{
-    qDebug() << "generateLabelMesh @@@@@" << this << this;
-
-    if (updateLock)
-        return;
-    updateLock = true;
-
-    if (!textPreview){
-        qDebug() << "no labellingTextPreview";
-        QMetaObject::invokeMethod(qmlManager->labelPopup, "noModel");
-        return;
-    }
-
-    qmlManager->openProgressPopUp();
-
-    qmlManager->setProgress(0.1f);
-
-	_targetSelected = false;
-    qmlManager->setProgress(0.5f);
-
-	setMaterialColor(Hix::Render::Colors::Selected);
-	textPreview = nullptr;
-    updateModelMesh();
-
-    qmlManager->setProgress(1.0f);
-}
-
 // for extension
 
 void GLModel:: unselectMeshFaces(){
@@ -752,91 +584,17 @@ void GLModel:: unselectMeshFaces(){
 }
 void GLModel::selectMeshFaces(){
 	selectedFaces.clear();
-	QVector3D normal = targetMeshFace.localFn();
-	_mesh->findNearSimilarFaces(normal, targetMeshFace, selectedFaces);
+	QVector3D normal = _targetMeshFace.localFn();
+	_mesh->findNearSimilarFaces(normal, _targetMeshFace, selectedFaces);
 	updateMesh(true);
 }
 void GLModel::generateExtensionFaces(double distance){
     if (!_targetSelected)
         return;
-    Hix::Features::Extension::extendMesh(_mesh, targetMeshFace, distance);
+    Hix::Features::Extension::extendMesh(_mesh, _targetMeshFace, distance);
 	_targetSelected = false;
 	updateMesh(true);
-}
-
-void GLModel::generateLayFlat(){
-    if(!_targetSelected)
-        return;
-	unselectMeshFaces();
-	constexpr QVector4D worldBot(0, 0, -1, 1);
-	QVector3D localBotNorml(toLocalCoord(worldBot));
-	auto rotationTo = QQuaternion::rotationTo(targetMeshFace.localFn(), localBotNorml);
-	_transform.setRotation(_transform.rotation() * rotationTo);
-	emit resetLayflat();
-}
-
-
-// for shell offset
-void GLModel::generateShellOffset(double factor){
-    //saveUndoState();
-    qDebug() << "generate shell Offset";
-    qmlManager->openProgressPopUp();
-    QString original_filename = _filename;
-
-    cutMode = 1;
-    cutFillMode = 1;
-    shellOffsetFactor = factor;
-
-    modelCut();
-}
-
-void GLModel::openCut(){
-    cutActive = true;
-}
-
-void GLModel::closeCut(){
-    qDebug() << "closecut called";
-
-    if (!cutActive)
-        return;
-
-    cutActive = false;
-    removePlane();
-
-}
-
-void GLModel::openHollowShell(){
-    qDebug() << "open HollowShell called";
-    hollowShellActive = true;
-    qmlManager->hollowShellSphereEntity->setProperty("visible", true);
-}
-
-void GLModel::closeHollowShell(){
-    qDebug() << "close HollowShell called";
-
-    if (!hollowShellActive)
-        return;
-
-    hollowShellActive = false;
-    qmlManager->hollowShellSphereEntity->setProperty("visible", false);
-}
-
-void GLModel::openShellOffset(){
-    qDebug() << "openShelloffset";
-    shellOffsetActive = true;
-    generatePlane(1);
-
-}
-
-void GLModel::closeShellOffset(){
-    qDebug() << "closeShelloffset";
-
-    if (!shellOffsetActive)
-        return;
-
-    shellOffsetActive = false;
-    removePlane();
-}
+}	
 
 void GLModel::changeViewMode(int viewMode) {
     if( this->viewMode == viewMode ) {
