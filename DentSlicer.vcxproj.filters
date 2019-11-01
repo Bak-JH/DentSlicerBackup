@@ -268,6 +268,81 @@
     <ClCompile Include="feature\Feature.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>
+    <ClCompile Include="common\GTEngine\Source\Mathematics\MSW\GteCPUQueryInstructions.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="common\GTEngine\Source\Mathematics\MSW\GteIntelSSE.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="common\GTEngine\Source\Mathematics\GteBitHacks.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="common\GTEngine\Source\Mathematics\GteBSPrecision.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="common\GTEngine\Source\Mathematics\GteEdgeKey.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="common\GTEngine\Source\Mathematics\GteETManifoldMesh.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="common\GTEngine\Source\Mathematics\GteETNonmanifoldMesh.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="common\GTEngine\Source\Mathematics\GteGenerateMeshUV.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="common\GTEngine\Source\Mathematics\GteIEEEBinary16.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="common\GTEngine\Source\Mathematics\GteTetrahedronKey.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="common\GTEngine\Source\Mathematics\GteTriangleKey.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="common\GTEngine\Source\Mathematics\GteTSManifoldMesh.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="common\GTEngine\Source\Mathematics\GteUIntegerAP32.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="common\GTEngine\Source\Mathematics\GteVEManifoldMesh.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="common\GTEngine\Source\Mathematics\GteVETManifoldMesh.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="common\GTEngine\Source\Mathematics\GteVETNonmanifoldMesh.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="common\GTEngine\Source\GTEnginePCH.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="common\GTEngine\Source\LowLevel\MSW\GteLogToMessageBox.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="common\GTEngine\Source\LowLevel\MSW\GteLogToOutputWindow.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="common\GTEngine\Source\LowLevel\GteLogger.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="common\GTEngine\Source\LowLevel\GteLogReporter.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="common\GTEngine\Source\LowLevel\GteLogToFile.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="common\GTEngine\Source\LowLevel\GteLogToStdout.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="common\GTEngine\Source\LowLevel\GteLogToStringArray.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="common\GTEngine\Source\LowLevel\GteTimer.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="feature\autoarrange.h">
@@ -1232,6 +1307,7 @@
     <None Include="icon-32.ico" />
     <None Include="icon-32.ico" />
     <None Include="icon-32.ico" />
+    <None Include="icon-32.ico" />
   </ItemGroup>
   <ItemGroup>
     <None Include="DentSlicer.rc">
@@ -1302,6 +1378,1140 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="feature\Feature.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\MSW\GteCPUQueryInstructions.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\MSW\GteIntelSSE.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteACosEstimate.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteAlignedBox.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteApprCircle2.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteApprCone3.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteApprCylinder3.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteApprEllipse2.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteApprEllipseByArcs.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteApprEllipsoid3.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteApprGaussian2.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteApprGaussian3.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteApprGreatCircle3.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteApprHeightLine2.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteApprHeightPlane3.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteApprOrthogonalLine2.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteApprOrthogonalLine3.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteApprOrthogonalPlane3.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteApprParaboloid3.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteApprPolynomial2.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteApprPolynomial3.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteApprPolynomial4.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteApprPolynomialSpecial2.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteApprPolynomialSpecial3.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteApprPolynomialSpecial4.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteApprQuadratic2.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteApprQuadratic3.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteApprQuery.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteApprSphere3.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteApprTorus3.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteArbitraryPrecision.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteArc2.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteASinEstimate.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteATanEstimate.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteAxisAngle.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteBandedMatrix.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteBasisFunction.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteBezierCurve.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteBitHacks.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteBSNumber.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteBSplineCurve.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteBSplineCurveFit.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteBSplineGeodesic.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteBSplineReduction.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteBSplineSurface.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteBSplineSurfaceFit.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteBSplineVolume.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteBSPPolygon2.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteBSPrecision.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteBSRational.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteCapsule.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteChebyshevRatio.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteCholeskyDecomposition.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteCircle3.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteCLODPolyline.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteCone.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteConformalMapGenus0.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteConstrainedDelaunay2.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteContAlignedBox.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteContCapsule3.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteContCircle2.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteContCone.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteContCylinder3.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteContEllipse2.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteContEllipse2MinCR.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteContEllipsoid3.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteContEllipsoid3MinCR.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteContLozenge3.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteContOrientedBox2.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteContOrientedBox3.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteContPointInPolygon2.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteContPointInPolyhedron3.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteContScribeCircle2.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteContScribeCircle3Sphere3.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteContSphere3.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteConvertCoordinates.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteConvexHull2.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteConvexHull3.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteConvexPolyhedron3.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteCosEstimate.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteCubicRootsQR.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteCylinder3.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteDarbouxFrame.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteDCPQuery.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteDelaunay2.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteDelaunay2Mesh.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteDelaunay3.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteDelaunay3Mesh.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteDisjointIntervals.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteDisjointRectangles.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteDistAlignedBox3OrientedBox3.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteDistAlignedBoxAlignedBox.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteDistCircle3Circle3.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteDistLine3AlignedBox3.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteDistLine3Circle3.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteDistLine3OrientedBox3.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteDistLine3Rectangle3.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteDistLine3Triangle3.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteDistLineLine.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteDistLineRay.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteDistLineSegment.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteDistOrientedBox3OrientedBox3.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteDistPoint3Circle3.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteDistPoint3ConvexPolyhedron3.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteDistPoint3Cylinder3.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteDistPoint3Frustum3.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteDistPoint3Plane3.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteDistPoint3Rectangle3.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteDistPoint3Tetrahedron3.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteDistPointAlignedBox.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteDistPointHyperellipsoid.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteDistPointLine.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteDistPointOrientedBox.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteDistPointRay.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteDistPointSegment.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteDistPointTriangle.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteDistPointTriangleExact.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteDistRay3AlignedBox3.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteDistRay3OrientedBox3.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteDistRay3Rectangle3.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteDistRay3Triangle3.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteDistRayRay.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteDistRaySegment.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteDistRectangle3AlignedBox3.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteDistRectangle3OrientedBox3.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteDistRectangle3Rectangle3.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteDistSegment3AlignedBox3.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteDistSegment3OrientedBox3.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteDistSegment3Rectangle3.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteDistSegment3Triangle3.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteDistSegmentSegment.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteDistSegmentSegmentExact.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteDistTriangle3AlignedBox3.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteDistTriangle3OrientedBox3.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteDistTriangle3Rectangle3.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteDistTriangle3Triangle3.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteEdgeKey.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteEllipse3.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteEllipsoidGeodesic.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteETManifoldMesh.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteETNonmanifoldMesh.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteEulerAngles.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteExp2Estimate.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteExpEstimate.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteFeatureKey.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteFIQuery.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteFrenetFrame.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteFrustum3.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteGaussianElimination.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteGaussNewtonMinimizer.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteGenerateMeshUV.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteGMatrix.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteGVector.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteHalfspace.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteHyperellipsoid.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteHyperplane.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteHypersphere.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIEEEBinary.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIEEEBinary16.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIndexAttribute.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntegration.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntpAkima1.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntpAkimaNonuniform1.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntpAkimaUniform1.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntpAkimaUniform2.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntpAkimaUniform3.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntpBicubic2.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntpBilinear2.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntpBSplineUniform.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntpLinearNonuniform2.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntpLinearNonuniform3.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntpQuadraticNonuniform2.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntpSphere2.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntpThinPlateSpline2.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntpThinPlateSpline3.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntpTricubic3.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntpTrilinear3.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntpVectorField2.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntrAlignedBox2AlignedBox2.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntrAlignedBox2Circle2.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntrAlignedBox2OrientedBox2.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntrAlignedBox3AlignedBox3.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntrAlignedBox3Cone3.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntrAlignedBox3Cylinder3.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntrAlignedBox3OrientedBox3.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntrAlignedBox3Sphere3.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntrArc2Arc2.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntrCapsule3Capsule3.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntrCircle2Arc2.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntrCircle2Circle2.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntrConvexPolygonHyperplane.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntrDisk2Sector2.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntrEllipse2Ellipse2.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntrEllipsoid3Ellipsoid3.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntrHalfspace2Polygon2.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntrHalfspace3Capsule3.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntrHalfspace3Cylinder3.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntrHalfspace3Ellipsoid3.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntrHalfspace3OrientedBox3.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntrHalfspace3Segment3.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntrHalfspace3Sphere3.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntrHalfspace3Triangle3.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntrIntervals.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntrLine2AlignedBox2.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntrLine2Arc2.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntrLine2Circle2.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntrLine2Line2.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntrLine2OrientedBox2.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntrLine2Ray2.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntrLine2Segment2.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntrLine2Triangle2.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntrLine3AlignedBox3.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntrLine3Capsule3.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntrLine3Cone3.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntrLine3Cylinder3.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntrLine3Ellipsoid3.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntrLine3OrientedBox3.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntrLine3Plane3.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntrLine3Sphere3.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntrLine3Triangle3.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntrOrientedBox2Circle2.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntrOrientedBox2Cone2.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntrOrientedBox2OrientedBox2.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntrOrientedBox2Sector2.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntrOrientedBox3Cone3.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntrOrientedBox3Cylinder3.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntrOrientedBox3Frustum3.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntrOrientedBox3OrientedBox3.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntrOrientedBox3Sphere3.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntrPlane3Capsule3.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntrPlane3Circle3.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntrPlane3Cylinder3.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntrPlane3Ellipsoid3.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntrPlane3OrientedBox3.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntrPlane3Plane3.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntrPlane3Sphere3.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntrPlane3Triangle3.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntrRay2AlignedBox2.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntrRay2Arc2.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntrRay2Circle2.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntrRay2OrientedBox2.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntrRay2Ray2.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntrRay2Segment2.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntrRay2Triangle2.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntrRay3AlignedBox3.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntrRay3Capsule3.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntrRay3Cone3.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntrRay3Cylinder3.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntrRay3Ellipsoid3.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntrRay3OrientedBox3.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntrRay3Plane3.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntrRay3Sphere3.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntrRay3Triangle3.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntrSegment2AlignedBox2.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntrSegment2Arc2.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntrSegment2Circle2.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntrSegment2OrientedBox2.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntrSegment2Segment2.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntrSegment2Triangle2.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntrSegment3AlignedBox3.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntrSegment3Capsule3.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntrSegment3Cone3.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntrSegment3Cylinder3.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntrSegment3Ellipsoid3.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntrSegment3OrientedBox3.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntrSegment3Plane3.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntrSegment3Sphere3.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntrSegment3Triangle3.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntrSphere3Cone3.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntrSphere3Frustum3.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntrSphere3Sphere3.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntrSphere3Triangle3.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntrTriangle2Triangle2.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntrTriangle3OrientedBox3.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteInvSqrtEstimate.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIsPlanarGraph.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteLCPSolver.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteLevenbergMarquardtMinimizer.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteLine.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteLinearSystem.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteLog2Estimate.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteLogEstimate.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteLozenge3.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteMath.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteMatrix.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteMatrix2x2.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteMatrix3x3.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteMatrix4x4.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteMesh.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteMeshCurvature.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteMinimalCycleBasis.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteMinimize1.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteMinimizeN.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteMinimumAreaBox2.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteMinimumAreaCircle2.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteMinimumVolumeBox3.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteMinimumVolumeSphere3.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteNaturalSplineCurve.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteNearestNeighborQuery.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteNURBSCircle.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteNURBSCurve.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteNURBSSphere.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteNURBSSurface.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteNURBSVolume.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteOBBTreeOfPoints.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteOdeEuler.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteOdeImplicitEuler.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteOdeMidpoint.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteOdeRungeKutta4.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteOdeSolver.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteOrientedBox.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteParametricCurve.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteParametricSurface.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GtePlanarMesh.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GtePolygon2.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GtePolyhedron3.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GtePolynomial1.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GtePolynomialCurve.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GtePrimalQuery2.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GtePrimalQuery3.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteProjection.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteQFNumber.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteQuadricSurface.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteQuarticRootsQR.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteQuaternion.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteRay.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteRectangle.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteRectangleMesh.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteRectanglePatchMesh.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteRevolutionMesh.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteRiemannianGeodesic.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteRootsBisection.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteRootsBrentsMethod.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteRootsPolynomial.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteRotation.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteSector2.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteSegment.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteSeparatePoints2.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteSeparatePoints3.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteSinEstimate.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteSingularValueDecomposition.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteSlerpEstimate.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteSplitMeshByPlane.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteSqrtEstimate.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteSymmetricEigensolver.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteSymmetricEigensolver2x2.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteSymmetricEigensolver3x3.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteTanEstimate.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteTCBSplineCurve.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteTetrahedron3.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteTetrahedronKey.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteTIQuery.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteTorus3.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteTriangle.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteTriangleKey.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteTriangulateCDT.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteTriangulateEC.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteTSManifoldMesh.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteTubeMesh.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteUIntegerALU32.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteUIntegerAP32.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteUIntegerFP32.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteUniqueVerticesTriangles.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteUnsymmetricEigenvalues.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteVector.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteVector2.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteVector3.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteVector4.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteVEManifoldMesh.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteVertexAttribute.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteVertexCollapseMesh.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteVETManifoldMesh.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteVETNonmanifoldMesh.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\GTEngine.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\GTEnginePCH.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\GTMathematics.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\GTEngineDEF.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\GTEngine\Include\GTLowLevel.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
   </ItemGroup>
