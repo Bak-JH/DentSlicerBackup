@@ -504,3 +504,12 @@ void SceneEntity::updateRecursiveAabb()
 	callRecursive(this, &SceneEntity::updateRecursiveAabb);
 }
 
+bool SceneEntity::targetSelected()const
+{
+	return _targetSelected;
+}
+
+FaceConstItr SceneEntity::targetMeshFace()
+{
+	return _targetMeshFace;
+}

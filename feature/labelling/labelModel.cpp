@@ -2,13 +2,13 @@
 #include "utils/mathutils.h"
 #include <QTransform>
 
-Hix::LabelModel::LabelModel(Qt3DCore::QEntity* parent)
+Hix::Label::LabelModel::LabelModel(Qt3DCore::QEntity* parent)
 	:GLModel(nullptr, parent)
 {
 	setMaterialColor(Hix::Render::Colors::Support);
 }
 
-Hix::LabelModel::LabelModel(Qt3DCore::QEntity* parent, LabelModel& from)
+Hix::Label::LabelModel::LabelModel(Qt3DCore::QEntity* parent, LabelModel& from)
 {
 	setParent(parent);
 	text = from.text;
@@ -17,12 +17,9 @@ Hix::LabelModel::LabelModel(Qt3DCore::QEntity* parent, LabelModel& from)
 
 
 
-void Hix::LabelModel::generateLabel(QString text, Hix::Engine3D::Mesh* targetMesh, QVector3D targetNormal)
+void Hix::Label::LabelModel::generateLabel(QString text, QVector3D targetNormal)
 {
 	auto labelMesh = new Mesh();
-
-	qDebug() << "LabelModel::generateLabel()";
-	qDebug() << "FONT: " << font << "TEXT: " << text << "MESH: " << targetMesh << "NORMAL: " << targetNormal;
 	QPainterPath painterPath;
 	painterPath.setFillRule(Qt::WindingFill);
 	painterPath.addText(0, 0, font, text);
@@ -109,7 +106,7 @@ void Hix::LabelModel::generateLabel(QString text, Hix::Engine3D::Mesh* targetMes
 	setMesh(labelMesh);
 }
 
-void Hix::LabelModel::setTranslation(QVector3D t)
+void Hix::Label::LabelModel::setTranslation(QVector3D t)
 {
 	transform().setTranslation(t);
 }

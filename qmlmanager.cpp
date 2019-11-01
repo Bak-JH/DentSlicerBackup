@@ -25,6 +25,7 @@
 #include "render/lights.h"
 #include "DentEngine/src/configuration.h"
 #include "feature/stlexporter.h"
+#include "DentEngine/src/MeshIterators.h"
 #include <functional>
 using namespace Hix::Input;
 using namespace Hix::UI;
@@ -230,25 +231,14 @@ void QmlManager::initializeUI(QQmlApplicationEngine* e){
 	QObject::connect(layflatPopup, SIGNAL(closeLayflat()), this, SLOT(faceSelectionDisable()));
 	QObject::connect(extensionPopup, SIGNAL(closeExtension()), this, SLOT(faceSelectionDisable()));
 
-	QObject::connect(layflatPopup, SIGNAL(generateLayFlat()), glmodel, SLOT(generateLayFlat()));
-	QObject::connect(glmodel, SIGNAL(layFlatSelect()), this, SLOT(layFlatSelect()));
-	QObject::connect(glmodel, SIGNAL(layFlatUnSelect()), this, SLOT(layFlatUnSelect()));
+	QObject::connect(layflatPopup, SIGNAL(generateLayFlat()), this, SLOT(generateLayFlat()));
 
-	// model cut popup codes
-	QObject::connect(cutPopup, SIGNAL(modelCut()), glmodel, SLOT(modelCut()));
-	QObject::connect(cutPopup, SIGNAL(cutModeSelected(int)), glmodel, SLOT(cutModeSelected(int)));
-	QObject::connect(cutPopup, SIGNAL(cutFillModeSelected(int)), glmodel, SLOT(cutFillModeSelected(int)));
-	QObject::connect(cutPopup, SIGNAL(openCut()), glmodel, SLOT(openCut()));
-	QObject::connect(cutPopup, SIGNAL(closeCut()), glmodel, SLOT(closeCut()));
-	QObject::connect(cutPopup, SIGNAL(resultSliderValueChanged(double)), glmodel, SLOT(getSliderSignal(double)));
 
 
 	// label popup codes
-	QObject::connect(labelPopup, SIGNAL(sendTextChanged(QString)), this, SLOT(setLabelText(QString)));
-	QObject::connect(labelPopup, SIGNAL(openLabelling()), glmodel, SLOT(openLabelling()));
-	QObject::connect(labelPopup, SIGNAL(closeLabelling()), glmodel, SLOT(closeLabelling()));
-	QObject::connect(labelPopup, SIGNAL(stateChangeLabelling()), glmodel, SLOT(stateChangeLabelling()));
-	QObject::connect(labelPopup, SIGNAL(sendLabelUpdate(QString, QString, bool, int)), glmodel, SLOT(updateLabelPreview(QString, QString, bool, int)));
+	QObject::connect(labelPopup, SIGNAL(sendLTextChanged(QString)), this, SLOT(setLabelText(QString)));
+	QObject::connect(labelPopup, SIGNAL(stateChangeLabelling()), this, SLOT(stateChangeLabelling()));
+	QObject::connect(labelPopup, SIGNAL(sendLabelUpdate(QString, QString, bool, int)), this, SLOT(updateLabelPreview(QString, QString, bool, int)));
 	//QObject::connect(labelPopup, SIGNAL(runFeature(int)),glmodel->ft, SLOT(setTypeAndStart(int)));
 	QObject::connect(labelPopup, SIGNAL(generateLabelMesh()), glmodel, SLOT(generateLabelMesh()));
 	QObject::connect(labelFontBox, SIGNAL(sendFontName(QString)), glmodel, SLOT(getFontNameChanged(QString)));
@@ -256,26 +246,7 @@ void QmlManager::initializeUI(QQmlApplicationEngine* e){
 	QObject::connect(labelFontSizeBox, SIGNAL(sendFontSize(int)), glmodel, SLOT(getFontSizeChanged(int)));
 
 	// extension popup codes
-
 	QObject::connect(extensionPopup, SIGNAL(generateExtensionFaces(double)), glmodel, SLOT(generateExtensionFaces(double)));
-	QObject::connect(glmodel, SIGNAL(extensionSelect()), this, SLOT(extensionSelect()));
-	QObject::connect(glmodel, SIGNAL(extensionUnSelect()), this, SLOT(extensionUnSelect()));
-
-	//manual supprt popup codes
-	QObject::connect(glmodel, SIGNAL(manualSupportSelect()), this, SLOT(manualSupportSelect()));
-	QObject::connect(glmodel, SIGNAL(manualSupportUnselect()), this, SLOT(manualSupportUnselect()));
-
-	// shelloffset popup codes
-	QObject::connect(shelloffsetPopup, SIGNAL(openShellOffset()), glmodel, SLOT(openShellOffset()));
-	QObject::connect(shelloffsetPopup, SIGNAL(closeShellOffset()), glmodel, SLOT(closeShellOffset()));
-	QObject::connect(shelloffsetPopup, SIGNAL(shellOffset(double)), glmodel, SLOT(generateShellOffset(double)));
-	QObject::connect(shelloffsetPopup, SIGNAL(resultSliderValueChanged(double)), glmodel, SLOT(getSliderSignal(double)));
-
-	QObject::connect(layerViewSlider, SIGNAL(sliderValueChanged(int)), glmodel, SLOT(getLayerViewSliderSignal(int)));
-
-
-
-
 
 }
 
@@ -653,25 +624,25 @@ bool QmlManager::multipleModelSelected(int ID){
             QMetaObject::invokeMethod(qmlManager->mttab, "hideTab"); // off MeshTransformer Tab
 
             if (groupFunctionState == "active"){
-                switch (groupFunctionIndex){
+                switch (_currentActiveFeature){
                 //case 2:
                 //    QMetaObject::invokeMethod(savePopup, "offApplyFinishButton");
                 //    break;
-				case ftrMove:
+				case Hix::Features::FeatureEnum::Move:
 					_widgetManager.setWidgetMode(WidgetMode::None);
 					QMetaObject::invokeMethod(movePopup, "offApplyFinishButton");
 					break;
-                case ftrRotate:
+                case Hix::Features::FeatureEnum::Rotate:
 					_widgetManager.setWidgetMode(WidgetMode::None);
                     QMetaObject::invokeMethod(rotatePopup,"offApplyFinishButton");
                     break;
-                case 6:
+                case Hix::Features::FeatureEnum::LayFlat:
                     QMetaObject::invokeMethod(layflatPopup,"offApplyFinishButton");
                     break;
-                case 8:
+                case Hix::Features::FeatureEnum::Orient:
                     QMetaObject::invokeMethod(orientPopup,"offApplyFinishButton");
                     break;
-                case 10:
+                case Hix::Features::FeatureEnum::Repair:
                     QMetaObject::invokeMethod(repairPopup,"offApplyFinishButton");
                     break;
                 }
@@ -832,11 +803,20 @@ void QmlManager::modelSelected(int ID){
     sendUpdateModelInfo();
 }
 
+void QmlManager::setCurrentActiveFeature(int tasknum)
+{
+	_currentActiveFeature = static_cast<Hix::Features::FeatureEnum>(tasknum);
+}
+
+Hix::Features::FeatureEnum QmlManager::currentFeature()const
+{
+	return _currentActiveFeature;
+}
+
 void QmlManager::faceSelectionEnable()
 {
-	for (auto selectedModel : getSelectedModels())
+	for (auto selectedModel : selectedModels)
 	{
-
 		selectedModel->setMaterialMode(Hix::Render::ShaderMode::PerPrimitiveColor);
 		selectedModel->updateMesh(true);
 	}
@@ -844,7 +824,7 @@ void QmlManager::faceSelectionEnable()
 
 void QmlManager::faceSelectionDisable()
 {
-	for (auto selectedModel : getSelectedModels())
+	for (auto selectedModel : selectedModels)
 	{
 		selectedModel->setMaterialMode(Hix::Render::ShaderMode::SingleColor);
 		selectedModel->updateMesh(true);
@@ -853,16 +833,75 @@ void QmlManager::faceSelectionDisable()
 	}
 }
 
+void QmlManager::generateLayFlat()
+{
+	for (auto selectedModel : selectedModels)
+	{
+		if (!selectedModel->targetSelected())
+			return;
+		selectedModel->unselectMeshFaces();
+		constexpr QVector4D worldBot(0, 0, -1, 1);
+		QVector3D localBotNorml(selectedModel->toLocalCoord(worldBot));
+		auto rotationTo = QQuaternion::rotationTo(selectedModel->targetMeshFace().localFn(), localBotNorml);
+		selectedModel->transform().setRotation(selectedModel->transform().rotation() * rotationTo);
+		resetLayflat();
+	}
+}
+
 void QmlManager::setLabelText(QString text)
 {
 	if (text != "")
 	{
-		for (auto selectedModel : getSelectedModels())
+		for (auto selectedModel : selectedModels)
 		{
 			if (selectedModel->textPreview)
 				selectedModel->textPreview->text = text;
 		}
 	}
+}
+
+void QmlManager::stateChangeLabelling()
+{
+	keyboardHandlerFocus();
+	keyboardHandler->setFocus(true);
+}
+
+void QmlManager::updateLabelPreview(QString text, QString fontName, bool isBold, int fontSize) 
+{
+	for (auto selectedModel : selectedModels)
+	{
+		if (selectedModel->textPreview && _currentActiveFeature == Hix::Features::FeatureEnum::Label)
+		{
+			selectedModel->textPreview->generateLabel(text, selectedModel->targetMeshFace().localFn());
+			selectedModel->updateModelMesh();
+		}
+	}
+}
+
+void QmlManager::generateLabelMesh()
+{
+	if (updateLock)
+        return;
+    updateLock = true;
+
+    if (!textPreview){
+        qDebug() << "no labellingTextPreview";
+        QMetaObject::invokeMethod(qmlManager->labelPopup, "noModel");
+        return;
+    }
+
+    qmlManager->openProgressPopUp();
+
+    qmlManager->setProgress(0.1f);
+
+	_targetSelected = false;
+    qmlManager->setProgress(0.5f);
+
+	setMaterialColor(Hix::Render::Colors::Selected);
+	textPreview = nullptr;
+    updateModelMesh();
+
+    qmlManager->setProgress(1.0f);
 }
 
 const std::unordered_set<GLModel*>& QmlManager::getSelectedModels()
@@ -872,9 +911,6 @@ const std::unordered_set<GLModel*>& QmlManager::getSelectedModels()
 
 void QmlManager::layFlatSelect(){
     QMetaObject::invokeMethod(layflatPopup,"onApplyFinishButton");
-}
-void QmlManager::layFlatUnSelect(){
-    QMetaObject::invokeMethod(layflatPopup,"offApplyFinishButton");
 }
 
 void QmlManager::extensionSelect(){
@@ -1309,6 +1345,7 @@ void QmlManager::closeSave() {
 }
 
 void QmlManager::openMove(){
+	setCurrentActiveFeature(1);
     //moveActive = true;
     return;
 }

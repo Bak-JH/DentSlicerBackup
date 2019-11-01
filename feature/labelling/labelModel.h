@@ -12,19 +12,22 @@ using namespace Hix::Engine3D;
 
 namespace Hix
 {
-	class LabelModel : public GLModel
+	namespace Label
 	{
-	public:
-		LabelModel(Qt3DCore::QEntity* parent = nullptr);
-		LabelModel(Qt3DCore::QEntity* parent, LabelModel& from);
-		virtual ~LabelModel() {}
-		void generateLabel(QString text, Hix::Engine3D::Mesh* targetMesh, QVector3D targetNormal);
-		void setTranslation(QVector3D t);
+		class LabelModel : public GLModel
+		{
+		public:
+			LabelModel(Qt3DCore::QEntity* parent = nullptr);
+			LabelModel(Qt3DCore::QEntity* parent, LabelModel& from);
+			virtual ~LabelModel() {}
+			void generateLabel(QString text, QVector3D targetNormal);
+			void setTranslation(QVector3D t);
 
-		// properties
-		QString text;
-		QFont font = QFont("Arial", 12, QFont::Normal);
-	};
+			// properties
+			QString text;
+			QFont font = QFont("Arial", 12, QFont::Normal);
+		};
+	}
 }
 
 #endif // LABELMODEL_H
