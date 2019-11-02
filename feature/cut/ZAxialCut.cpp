@@ -17,7 +17,7 @@ Hix::Features::Cut::ZAxialCut::ZAxialCut(GLModel* subject, float cuttingPlane, b
 	// Partition the torus mesh.
 	//std::vector<gte::Vector3<float>> clipVertices;
 	//std::vector<int> negIndices, posIndices;
-	//gte::SplitMeshByPlane<float> splitter;
+	gte::SplitMeshByPlane<float> splitter;
 	//splitter(mTorusVerticesWS, mTorusIndices, mPlane, clipVertices, negIndices, posIndices);
 
 

@@ -95,9 +95,6 @@
     <ClCompile Include="DentEngine\src\mesh.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="feature\meshrepair.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="DentEngine\src\utils\metric.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -343,9 +340,6 @@
     <ClCompile Include="common\GTEngine\Source\LowLevel\GteTimer.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>
-    <ClCompile Include="feature\cut\MeshPlaneBisect.cpp">
-      <Filter>Generated Files</Filter>
-    </ClCompile>
     <ClCompile Include="feature\repair\Algorithms\checkAndRepair.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>
@@ -406,6 +400,9 @@
     <ClCompile Include="feature\repair\meshrepair.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>
+    <ClCompile Include="feature\cut\MeshPlaneCut.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="feature\autoarrange.h">
@@ -448,9 +445,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="DentEngine\src\mesh.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="feature\meshrepair.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="DentEngine\src\utils\metric.h">
@@ -1360,6 +1354,7 @@
     <None Include="icon-32.ico" />
     <None Include="icon-32.ico" />
     <None Include="Qml\LeftTabSlicingOptionElementPercentage.qml" />
+    <None Include="icon-32.ico" />
     <None Include="icon-32.ico" />
     <None Include="icon-32.ico" />
     <None Include="icon-32.ico" />
@@ -2579,9 +2574,6 @@
     <ClInclude Include="common\GTEngine\Include\GTLowLevel.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
-    <ClInclude Include="feature\cut\MeshPlaneBisect.h">
-      <Filter>Generated Files</Filter>
-    </ClInclude>
     <ClInclude Include="feature\repair\Kernel\basics.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
@@ -2631,6 +2623,9 @@
       <Filter>Generated Files</Filter>
     </ClInclude>
     <ClInclude Include="feature\repair\meshrepair.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="feature\cut\MeshPlaneCut.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
   </ItemGroup>

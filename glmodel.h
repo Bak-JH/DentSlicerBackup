@@ -6,7 +6,6 @@
 #include "slice/slicingengine.h"
 #include "feature/labelling/labelModel.h"
 #include "feature/autoorientation.h"
-#include "feature/meshrepair.h"
 #include "feature/autoarrange.h"
 #include "feature/extension.h"
 #include "feature/hollowshell.h"
