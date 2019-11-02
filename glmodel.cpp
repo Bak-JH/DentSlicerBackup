@@ -173,14 +173,13 @@ void GLModel::updatePrintable() {
 		{
 			changeColor(Hix::Render::Colors::Default);
 		}
-
 	}
 }
 
 
 void GLModel::repairMesh()
 {
-    MeshRepair::modelRepair(this);
+    //MeshRepair::modelRepair(this);
 	emit _updateModelMesh();
 }
 

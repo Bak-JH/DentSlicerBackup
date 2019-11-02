@@ -3,7 +3,6 @@
 
 #include "DentEngine/src/mesh.h"
 #include "glmodel.h"
-#include "meshrepair.h"
 namespace ShellOffset
 {
     Mesh* shellOffset(Mesh* glmodel, float factor);
