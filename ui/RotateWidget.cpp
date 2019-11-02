@@ -63,7 +63,6 @@ void Hix::UI::RotateWidget::dragStarted(Hix::Input::MouseEventData& e, const Qt3
 	_mouseOrigin = e.position;
 	_mousePrev = e.position;
     _mouseCurrent = e.position;
-	qmlManager->modelRotateInit();
 	_pastAngle = calculateRot();
 }
 

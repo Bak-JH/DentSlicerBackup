@@ -318,9 +318,6 @@ void RayCastController::hitsChanged(const Qt3DRender::QAbstractRayCaster::Hits& 
 				auto clickable = dynamic_cast<Clickable*>(nearestHit->entity());
 				if (clickable)
 				{
-					//if (qmlManager->getViewMode() == VIEW_MODE_SUPPORT)
-					//	qmlManager->addSupport(glmodel, nearestHit->localIntersection());
-					//else 
 					clickable->clicked(_mouseEvent, *nearestHit);
 				}
                 else

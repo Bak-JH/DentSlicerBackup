@@ -23,12 +23,10 @@ namespace Hix
 		{
 			Q_OBJECT
 		public:
-
 			//size of QGeometry Attribute elements
 			const static size_t POS_SIZE = 3; //x, y, z of position
-			const static size_t NRM_SIZE = 3; //x, y, z of normal
-			const static size_t COL_SIZE = 3; //x, y, z of normal
-			const static size_t VTX_SIZE = (POS_SIZE + NRM_SIZE + COL_SIZE) * sizeof(float);
+			const static size_t COL_SIZE = 3; //rgb color
+			const static size_t VTX_SIZE = (POS_SIZE + COL_SIZE) * sizeof(float);
 
 			const static size_t IDX_SIZE = 3; //3 indices to vertices
 			const static size_t UINT_SIZE = sizeof(uint); //needs to be large enough to accomodate all range of vertex index
@@ -36,20 +34,46 @@ namespace Hix
 			// load teeth model default
 			SceneEntity(QEntity* parent = nullptr); // main constructor for mainmesh and shadowmesh
 			virtual ~SceneEntity();
-
+			void setMesh(Mesh* mesh);
+			void clearMesh();
+			//for now, one sceneEntity per mesh, no setter for mesh in sceneEntity
 			const Hix::Engine3D::Mesh* getMesh()const;
-			const Qt3DCore::QTransform* getTransform() const;
-			void setTranslation(const QVector3D& t);
-			QVector3D getTranslation();
-			void setMatrix(const QMatrix4x4& matrix);
+			const Qt3DCore::QTransform& transform() const;
+			QVector4D toParentCoord(const QVector4D& childPos)const;
+			QVector4D fromParentCoord(const QVector4D& parentPos)const;
 
+			//world coordinates.
+			QVector4D toRootCoord(const QVector4D& local)const;
+			QVector4D toLocalCoord(const QVector4D& world)const;
+			QVector3D ptToRoot(const QVector3D& local)const;
+			QVector3D vectorToRoot(const QVector3D& local)const;
+			QVector3D ptToLocal(const QVector3D& world)const;
+			QVector3D vectorToLocal(const QVector3D& world)const;
+			
 
+			//update faces given indicies, if index >= indexUppderLimit, it's ignored
+			void updateFaces(const std::unordered_set<size_t>& faceIndicies, const Hix::Engine3D::Mesh& mesh);
+			void updateVertices(const std::unordered_set<size_t>& vtxIndicies, const Hix::Engine3D::Mesh& mesh);
+			void updateEntireMesh(Hix::Engine3D::Mesh* mesh);
+			void updateMesh(Hix::Engine3D::Mesh* mesh, bool force = false);
+			void appendIndexArray(const Hix::Engine3D::Mesh* mesh,
+				Hix::Engine3D::FaceConstItr begin, Hix::Engine3D::FaceConstItr end);
+			virtual void appendMeshVertex(const Hix::Engine3D::Mesh* mesh,
+				Hix::Engine3D::FaceConstItr begin, Hix::Engine3D::FaceConstItr end);
+
+			//get this model's axis aligned bounding box
+			const Hix::Engine3D::Bounds3D& aabb()const;
+			//get total AABB including it's children
+			Hix::Engine3D::Bounds3D recursiveAabb()const;
+			void updateRecursiveAabb();
 
 		protected:
 
-			void clearMem();
+			//Axis aligned bounding box
+			Hix::Engine3D::Bounds3D _aabb;
 
-			Qt3DCore::QTransform m_transform;
+			Qt3DCore::QTransform _transform;
+			void clearMem();
 			
 
 			//Order is important! Look at the initializer list in constructor
@@ -63,7 +87,6 @@ namespace Hix
 			//separates SSBO buffer for Per-primitive colors
 			//Qt3DRender::QBuffer primitiveColorBuffer;
 			QAttribute positionAttribute;
-			QAttribute normalAttribute;
 			QAttribute colorAttribute;
 			QAttribute indexAttribute;
 
@@ -72,7 +95,7 @@ namespace Hix
 			QEntity* m_parent;
 
 			// Core mesh structures
-			Hix::Engine3D::Mesh* _mesh;
+			Hix::Engine3D::Mesh* _mesh = nullptr; 
 
 			/***************Ray casting and hit test***************/
 			bool _targetSelected = false;
