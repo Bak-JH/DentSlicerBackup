@@ -27,6 +27,7 @@ QmlManager* qmlManager;
 #include <QSplashScreen>
 #include "utils/updatechecker.h"
 #include "utils/gridmesh.h"
+
 using namespace Qt3DCore;
 
 #endif

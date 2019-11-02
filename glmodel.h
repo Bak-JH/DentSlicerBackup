@@ -4,10 +4,8 @@
 #include "render/SceneEntityWithMaterial.h"
 #include "fileloader.h"
 #include "slice/slicingengine.h"
-#include "feature/modelcut.h"
-#include "feature/labellingtextpreview.h"
+#include "feature/labelling/labelModel.h"
 #include "feature/autoorientation.h"
-#include "feature/meshrepair.h"
 #include "feature/autoarrange.h"
 #include "feature/extension.h"
 #include "feature/hollowshell.h"
@@ -15,7 +13,6 @@
 #include "input/Draggable.h"
 #include "input/Clickable.h"
 #include "input/HitTestAble.h"
-#include "support/SupportRaftManager.h"
 
 #include "render/ModelMaterial.h"
 #define MAX_BUF_LEN 2000000
@@ -51,22 +48,13 @@ using namespace Qt3DExtras;
 
 class GLModel;
 class OverhangPoint;
-namespace Hix
-{
-	namespace Features
-	{
-		namespace Cut
-		{
-			class DrawingPlane;
-		}
-	}
-}
 
 
 class GLModel : public Hix::Render::SceneEntityWithMaterial, public Hix::Input::Draggable, public Hix::Input::Clickable, public Hix::Input::HitTestAble
 {
     Q_OBJECT
 public:
+
     //probably interface this as well
 	void clicked	(Hix::Input::MouseEventData&,const Qt3DRender::QRayCasterHit&) override;
 	bool isDraggable(Hix::Input::MouseEventData& v,const Qt3DRender::QRayCasterHit&) override;
@@ -75,17 +63,10 @@ public:
 	void dragEnded(Hix::Input::MouseEventData&) override;
 
     // load teeth model default
-    GLModel(QObject* mainWindow=nullptr, QEntity* parent=nullptr, Hix::Engine3D::Mesh* loadMesh=nullptr, QString fname="", int id = 0); // main constructor for mainmesh and shadowmesh
+    GLModel(QEntity* parent=nullptr, Hix::Engine3D::Mesh* loadMesh=nullptr, QString fname="", int id = 0, const Qt3DCore::QTransform* transform = nullptr); // main constructor for mainmesh and shadowmesh
     virtual ~GLModel();
 
-    //TODO: Turn these into privates as well
-    GLModel *leftModel = nullptr;
-    GLModel *rightModel = nullptr;
-    GLModel *twinModel = nullptr; // saves cut right for left, left for right models
-
-
     bool appropriately_rotated=false;
-    //QVector3D m_translation;
 
     // feature hollowshell
     float hollowShellRadius = 0;
@@ -113,8 +94,7 @@ public:
     std::vector<Qt3DRender::QObjectPicker*> sphereObjectPicker;
     std::vector<QPhongMaterial*> sphereMaterial;
 
-    void removeModelPartList();
-    LabellingTextPreview* labellingTextPreview = nullptr;
+    Hix::Labelling::LabelModel* textPreview = nullptr;
 
     void copyModelAttributeFrom(GLModel* from);
 
@@ -125,11 +105,7 @@ public:
 
     void repairMesh();
 
-    // Model Cut
-    void addCuttingPoint(QVector3D v);
-    void removeCuttingPoint(int idx);
-    void removeCuttingPoints();
-    void drawLine(QVector3D endpoint);
+
 	bool isPrintable()const;
     void updatePrintable();
     bool EndsWith(const std::string& a, const std::string& b);
@@ -141,8 +117,6 @@ public:
 
 
     const int ID; //for use in Part List
-    QString filename;
-    QObject* mainWindow;
 
     // implement lock as bool variable
     bool updateLock;
@@ -152,7 +126,6 @@ public:
 	
 	bool labellingActive = false;
 	bool extensionActive = false;
-	bool cutActive = false;
 	bool hollowShellActive = false;
 	bool shellOffsetActive = false;
 	bool layflatActive = false;
@@ -165,51 +138,41 @@ public:
 
 	bool perPrimitiveColorActive()const;
 	bool faceSelectionActive()const;
-	bool raftSupportGenerated()const;
-	Hix::Support::SupportRaftManager& supportRaftManager();
-	const Hix::Support::SupportRaftManager& supportRaftManager()const;
 
 
 
 	//TODO: remove these
 	// Model Mesh move, rotate, scale
-	void moveModelMesh(QVector3D direction, bool update = true);
+	void moveModel(const QVector3D& displacement);
+	void rotateModel(const QQuaternion& rotation);
+	void scaleModel(const QVector3D& scale);
 	void moveDone();
-	void rotationDone();
-	void rotateAroundPt(QVector3D& rot_center, float X, float Y, float Z);
-	void rotateAroundPt(QVector3D& rot_center, const QVector3D& axis, float angle);
-
-	
-	void scaleModelMesh(float scaleX, float scaleY, float scaleZ);
+	void rotateDone();
+	void scaleDone();
 	void setZToBed();
+	QString filename()const;
 protected:
 	void initHitTest()override;
 
 private:
-	//cutting
-	std::unique_ptr<Hix::Features::Cut::DrawingPlane> _cuttingPlane;
+	QString _filename;
+
 
 
 	QVector3D getPrimitiveColorCode(const Hix::Engine3D::Mesh* mesh, FaceConstItr faceItr)override;
 
     //Order is important! Look at the initializer list in constructor
-	Hix::Support::SupportRaftManager _supportRaftManager;
     QVector3D lastpoint;
     QVector2D prevPoint;
 
 
 	void removeLayerViewComponents();
-
-    int cutMode = 1;
-    int cutFillMode = 1;
-    bool isFlatcutEdge = false;
     int viewMode = -1;
 
 signals:
 	void _updateModelMesh();
     void modelSelected(int);
     void resetLayflat();
-    void bisectDone(Mesh*, Mesh*); //lmesh, rmesh
     void layFlatSelect();
 	void manualSupportSelect();
 	void manualSupportUnSelect();
@@ -231,18 +194,9 @@ public slots:
     void closeLayflat();
     void generateLayFlat();
 
-    // Model Cut
 
-    void generatePlane(int type);
-    void removePlane();
-    void modelCut();
-    void cutModeSelected(int type);
-    void cutFillModeSelected(int type);
-    void getSliderSignal(double value);
+
     void getLayerViewSliderSignal(int value);
-	void generateRLModel(Mesh* lmesh, Mesh* rmesh);
-    void openCut();
-    void closeCut();
 
     // Hollow Shell
     void indentHollowShell(double radius);
@@ -250,14 +204,14 @@ public slots:
     void closeHollowShell();
 
     // Labelling
-    void getTextChanged(QString text, int contentWidth);
+    void getTextChanged(QString text);
     void openLabelling();
     void closeLabelling();
     void stateChangeLabelling();
     void getFontNameChanged(QString fontName);
     void getFontBoldChanged(bool isBold);
     void getFontSizeChanged(int fontSize);
-    void applyLabelInfo(QString text, int contentWidth, QString fontName, bool isBold, int fontSize);
+    void applyLabelInfo(QString text, QString fontName, bool isBold, int fontSize);
     void generateText3DMesh();
 
     // Extension

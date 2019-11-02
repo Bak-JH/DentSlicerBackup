@@ -26,6 +26,7 @@
 #include "ui/Widget3DManager.h"
 #include "common/TaskManager.h"
 #include "slice/SlicingOptBackend.h"
+#include "support/SupportRaftManager.h"
 
 #define VIEW_MODE_OBJECT 0
 #define VIEW_MODE_LAYER 2
@@ -34,6 +35,13 @@
 #define LAYER_SUPPORTERS 0x02
 #define LAYER_RAFT 0x04
 
+namespace Hix
+{
+	namespace Features
+	{
+		class Feature;
+	}
+}
 class QQuickItem;
 class QmlManager : public QObject
 {
@@ -65,6 +73,7 @@ public:
     QObject* boxLeftTab;
 	QQuickItem* scene3d;
     QEntity* models;
+	QEntity* total;
     Qt3DCore::QTransform* systemTransform;
 	QEntity* mv;
 	Qt3DCore::QEntity* boundedBox;
@@ -238,17 +247,14 @@ public:
     Q_INVOKABLE void deleteList(int ID);
     Q_INVOKABLE void deleteSelectedModels();
 
-    float selected_x_max();
-    float selected_x_min();
-    float selected_y_max();
-    float selected_y_min();
-    float selected_z_max();
-    float selected_z_min();
+	Hix::Engine3D::Bounds3D getSelectedBound()const;
 	void modelMoveWithAxis(QVector3D axis, double distance);
 	void modelMove(QVector3D displacement);
 	void modelRotateWithAxis(const QVector3D& axis, double degree);
 	QVector3D cameraViewVector();
 	Hix::Tasking::TaskManager& taskManager();
+	Hix::Support::SupportRaftManager& supportRaftManager();
+
 private:
 	Hix::Tasking::TaskManager _taskManager;
 	void setModelViewMode(int mode);
@@ -276,7 +282,8 @@ private:
 
 	//cursors
 	QCursor _cursorEraser;
-
+	Hix::Support::SupportRaftManager _supportRaftManager;
+	std::unique_ptr<Hix::Features::Feature> _currentFeature;
 
 signals:
     void updateModelInfo(int printing_time, int layer, QString xyz, float volume);
@@ -284,9 +291,17 @@ signals:
 
 
 public slots:
-	
+	// model cut popup codes
+	void modelCut();
+	void cutModeSelected(int);
+	void cutFillModeSelected(int);
+	void openCut();
+	void closeCut();
+	void getSliderSignal(double);
+
+
     void sendUpdateModelInfo(int, int, QString, float);
-    GLModel* createModelFile(Mesh* target_mesh, QString filename);
+    GLModel* createModelFile(Mesh* target_mesh, QString filename, const Qt3DCore::QTransform* transform = nullptr);
     void openModelFile(QString filename);
     void checkModelFile(GLModel* model);
     void deleteOneModelFile(int ID);
@@ -304,11 +319,11 @@ public slots:
     void lastModelSelected();
     void modelRotateByNumber(int mode, int, int, int);
     void modelMoveByNumber(int axis, int, int);
-    void modelMoveInit();
-    void modelMoveDone();
+
     void totalMoveDone();
-    void modelRotateInit();
     void totalRotateDone();
+	void totalScaleDone();
+
     void resetLayflat();
     void applyArrangeResult(std::vector<QVector3D>, std::vector<float>);
     void cleanselectedModel(int);

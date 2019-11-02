@@ -9,10 +9,10 @@ namespace autoorientationPrivate
 {
 	float target_function(float touching, float overhang, float line);
 	float* lithograph(const Mesh* mesh, float n[], float amin, int CA);
-	float get_touching_line(const Mesh* mesh, float a[], const MeshFace& face, float touching_height);
+	float get_touching_line(const Mesh* mesh, float a[], const FaceConstItr& face, float touching_height);
 	std::vector<Orient*> area_cumulation(const Mesh* mesh, float n[], bool bi_algorithmic);
 	std::vector<Orient*> egde_plus_vertex(const Mesh* mesh, int bsvest_n);
-	float* calc_random_normal(const Mesh* mesh, int i, const MeshFace& face);
+	float* calc_random_normal(const Mesh* mesh, int i, const FaceConstItr& face);
 	std::vector<Orient*> remove_duplicates(std::vector<Orient*> o, int* orientCnt);
 	rotateResult* euler(Liste bestside);
 }
@@ -30,11 +30,11 @@ The critical angle CA is a variable that can be set by the operator as
      temperature, printing speed, etc.
 */
 
-QVector3D fn_unnorm(const MeshFace& face)
+QVector3D fn_unnorm(const FaceConstItr& face)
 {
 
 	auto fVtx = face.meshVertices();
-	return QVector3D::crossProduct(fVtx[1]->position - fVtx[0]->position, fVtx[1]->position - fVtx[0]->position);
+	return QVector3D::crossProduct(fVtx[1].worldPosition() - fVtx[0].worldPosition(), fVtx[1].worldPosition() - fVtx[0].worldPosition());
 }
 
 rotateResult* autoorientation::Tweak(const Mesh* mesh, bool bi_algorithmic,int CA,bool *appropriately_rotated){
@@ -190,19 +190,20 @@ float autoorientation::approachvertex(const Mesh* mesh,float n[]){
     //qt에서 최댓값이 얼마인지 몰라 flag로 만들었습니다.
 
     float amin;
-	for (const auto& face : mesh->getFaces())
+	auto faceCend = mesh->getFaces().cend();
+	for (auto face = mesh->getFaces().cbegin(); face != faceCend; ++face)
 	{
 		auto idx = face.meshVertices();
 		//한 삼각형의 세 점 index를 받아옵니다.
-		float a1 = idx[0]->position.x() * n[0] +
-			idx[0]->position.y() * n[1] +
-			idx[0]->position.z() * n[2];
-		float a2 = idx[1]->position.x() * n[0] +
-			idx[1]->position.y() * n[1] +
-			idx[1]->position.z() * n[2];
-		float a3 = idx[2]->position.x() * n[0] +
-			idx[2]->position.y() * n[1] +
-			idx[2]->position.z() * n[2];
+		float a1 = idx[0].worldPosition().x() * n[0] +
+			idx[0].worldPosition().y() * n[1] +
+			idx[0].worldPosition().z() * n[2];
+		float a2 = idx[1].worldPosition().x() * n[0] +
+			idx[1].worldPosition().y() * n[1] +
+			idx[1].worldPosition().z() * n[2];
+		float a3 = idx[2].worldPosition().x() * n[0] +
+			idx[2].worldPosition().y() * n[1] +
+			idx[2].worldPosition().z() * n[2];
 		//orientation의 방향과 계산을 한 뒤 최솟값을 구합니다.
 		//예상으론 oriestation방향으로 들어오는 평면과 가장 가까운 점의 거리를 구하는게 아닐까 싶습니다.
 		float an = std::min(std::min(a1, a2), a3);
@@ -228,8 +229,8 @@ float* autoorientationPrivate::lithograph(const Mesh* mesh, float n[], float ami
     float touching_height = amin+15;
 
     float anti_n[3]={-n[0],-n[1],-n[2]};
-
-	for (const auto& face : mesh->getFaces())
+	auto faceCend = mesh->getFaces().cend();
+	for (auto face = mesh->getFaces().cbegin(); face != faceCend; ++face)
 	{
         QVector3D a = fn_unnorm(face);//face에 추가된 인스턴스이며, 정규화되지 않은 노말벡터입니다.
         float norma = (float)sqrtf(a[0]*a[0]+a[1]*a[1]+a[2]*a[2]);
@@ -237,15 +238,15 @@ float* autoorientationPrivate::lithograph(const Mesh* mesh, float n[], float ami
             continue;
         if(alpha > (a[0]*n[0] + a[1]*n[1] +a[2]*n[2])/norma){
 			auto idx = face.meshVertices();
-            float a1 = idx[0]->position.x()*n[0]+
-                    idx[0]->position.y()*n[1]+
-                    idx[0]->position.z()*n[2];
-            float a2 = idx[1]->position.x()*n[0]+
-                    idx[1]->position.y()*n[1]+
-                    idx[1]->position.z()*n[2];
-            float a3 = idx[2]->position.x()*n[0]+
-                    idx[2]->position.y()*n[1]+
-                    idx[2]->position.z()*n[2];
+            float a1 = idx[0].worldPosition().x()*n[0]+
+                    idx[0].worldPosition().y()*n[1]+
+                    idx[0].worldPosition().z()*n[2];
+            float a2 = idx[1].worldPosition().x()*n[0]+
+                    idx[1].worldPosition().y()*n[1]+
+                    idx[1].worldPosition().z()*n[2];
+            float a3 = idx[2].worldPosition().x()*n[0]+
+                    idx[2].worldPosition().y()*n[1]+
+                    idx[2].worldPosition().z()*n[2];
             float an = std::min(std::min(a1,a2),a3);
             float ali=fabs(a.x()*n[0]+a.y()*n[1]+a.z()*n[2])/2;
 
@@ -270,18 +271,18 @@ float* autoorientationPrivate::lithograph(const Mesh* mesh, float n[], float ami
     temp[2]=LineL;
     return temp;
 }
-float autoorientationPrivate::get_touching_line(const Mesh* mesh,float a[], const MeshFace& face,float touching_height){
-    std::vector<const MeshVertex*> touch_list;
+float autoorientationPrivate::get_touching_line(const Mesh* mesh,float a[], const FaceConstItr& face,float touching_height){
+    std::vector<VertexConstItr> touch_list;
 	auto idx = face.meshVertices();
     for(int j=0;j<3;j++){
         if(a[j]<touching_height){
-            touch_list.push_back(idx[j].operator->());
+            touch_list.push_back(idx[j]);
         }
     }
-	std::vector<const MeshVertex*> combs;
+	std::vector<VertexConstItr> combs;
     for(int j=0;j<touch_list.size();j++){
-        const MeshVertex* a1;
-		const MeshVertex* a2;
+        VertexConstItr a1;
+		VertexConstItr a2;
         a1=touch_list.at(j);
         for(int k=j+1;k<touch_list.size();k++){
             a2=touch_list.at(k);
@@ -294,12 +295,12 @@ float autoorientationPrivate::get_touching_line(const Mesh* mesh,float a[], cons
     }
     float length = 0;
     for(int j=0;j<combs.size();j++){
-		const MeshVertex* p1=combs.at(j);
+		auto p1=combs.at(j);
         j++;
-		const MeshVertex* p2=combs.at(j);
-        length+=sqrtf(        (p2->position.x()-p1->position.x())*(p2->position.x()-p1->position.x())+
-                              (p2->position.y()-p1->position.y())*(p2->position.y()-p1->position.y())+
-                              (p2->position.z()-p1->position.z())*(p2->position.z()-p1->position.z()));
+		auto p2=combs.at(j);
+        length+=sqrtf(        (p2.worldPosition().x()-p1.worldPosition().x())*(p2.worldPosition().x()-p1.worldPosition().x())+
+                              (p2.worldPosition().y()-p1.worldPosition().y())*(p2.worldPosition().y()-p1.worldPosition().y())+
+                              (p2.worldPosition().z()-p1.worldPosition().z())*(p2.worldPosition().z()-p1.worldPosition().z()));
     }
     return length;
 }
@@ -314,7 +315,8 @@ std::vector<Orient*> autoorientationPrivate::area_cumulation(const Mesh* mesh,fl
     std::map<QString,float> orient;
     //리턴되는 값은 단순 random은 아니며, 가장 가중치가 높은 순서대로 best_n개를 뽑아냅니다.
 	size_t i = 0;
-	for (const auto& face : mesh->getFaces())
+	auto faceCend = mesh->getFaces().cend();
+	for (auto face = mesh->getFaces().cbegin(); face != faceCend; ++face)
 	{
         QVector3D an = fn_unnorm(face);
         float A = sqrtf(an.x()*an.x()+an.y()*an.y()+an.z()*an.z());
@@ -417,7 +419,7 @@ std::vector<Orient*> autoorientationPrivate::egde_plus_vertex(const Mesh* mesh, 
     //단, map을 만드는 요소를 mesh 내에서 random하게 추가로 생성합니다.
 	auto faceItr = mesh->getFaces().cbegin();
     for(int i=0;i<vcount*it;i++){
-        float* randomNormal = calc_random_normal(mesh,i%vcount, *faceItr);
+        float* randomNormal = calc_random_normal(mesh,i%vcount, faceItr);
         //mesh 속 삼각형 중에서 랜덤 하게 하나를 골라 Normal을 전달받습니다.
         if(randomNormal==NULL){//randomNormal 크기가 0이 되는 경우를 제외합니다.
             continue;
@@ -484,7 +486,7 @@ std::vector<Orient*> autoorientationPrivate::egde_plus_vertex(const Mesh* mesh, 
     return result;
 
 }
-float* autoorientationPrivate::calc_random_normal(const Mesh* mesh, int i,  const MeshFace& face){
+float* autoorientationPrivate::calc_random_normal(const Mesh* mesh, int i,  const FaceConstItr& face){
     //mesh 내의 random한 normal을 리턴합니다.
     QTime time = QTime::currentTime();
     qsrand((uint)time.msec());
@@ -493,34 +495,34 @@ float* autoorientationPrivate::calc_random_normal(const Mesh* mesh, int i,  cons
 	int j = i / 3;
     //if(i%3 == 0){
 
-    //    v=face.mesh_vertex[0]->position;
-    //    w=face.mesh_vertex[1]->position;
+    //    v=face.mesh_vertex[0].worldPosition();
+    //    w=face.mesh_vertex[1].worldPosition();
     //}
     //else if(i%3 == 1){
-    //    v=face.mesh_vertex[1]->position;
-    //    w=face.mesh_vertex[2]->position;
+    //    v=face.mesh_vertex[1].worldPosition();
+    //    w=face.mesh_vertex[2].worldPosition();
     //}
     //else{
-    //    v=face.mesh_vertex[2]->position;
-    //    w=face.mesh_vertex[0]->position;
+    //    v=face.mesh_vertex[2].worldPosition();
+    //    w=face.mesh_vertex[0].worldPosition();
     //}
-	auto currFace = mesh->getFaces()[j];
+	auto currFace = mesh->getFaces().cbegin() + j;
 	auto meshVertices = currFace.meshVertices();
 	if (i % 3 == 0) {
-		v = meshVertices[0]->position;
-		w = meshVertices[1]->position;
+		v = meshVertices[0].worldPosition();
+		w = meshVertices[1].worldPosition();
 	}
 	else if (i % 3 == 1) {
-		v = meshVertices[1]->position;
-		w = meshVertices[2]->position;
+		v = meshVertices[1].worldPosition();
+		w = meshVertices[2].worldPosition();
 	}	
 	else { 
-		v = meshVertices[2]->position;
-		w = meshVertices[0]->position;
+		v = meshVertices[2].worldPosition();
+		w = meshVertices[0].worldPosition();
 	}
 
     int randomIndex=qrand() % mesh->getFaces().size();
-	QVector3D r_v = mesh->getFaces()[randomIndex / 3].meshVertices()[randomIndex % 3]->position;
+	QVector3D r_v = (mesh->getFaces().cbegin()+( randomIndex / 3)).meshVertices()[randomIndex % 3].worldPosition();
 
     //QVector3D r_v=mesh->vertices[mesh->faces[randomIndex/3].mesh_vertex[randomIndex%3]].position;
 

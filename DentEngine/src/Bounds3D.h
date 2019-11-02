@@ -3,6 +3,10 @@
 #include <array>
 namespace Hix
 {
+	namespace Render
+	{
+		class SceneEntity;
+	}
 	namespace Engine3D
 	{
 		//bounding box in 3D
@@ -11,10 +15,12 @@ namespace Hix
 
 		public:
 			Bounds3D();
+			Bounds3D(const Hix::Render::SceneEntity& bounded);
 			void update(const QVector3D& pt);
+			Bounds3D& operator+=(const Bounds3D& other);
+			void translate(const QVector3D& displacement);
+			void scale(const QVector3D& scales);
 			void reset();
-
-
 			void setXMax(float val);
 			void setXMin(float val);
 			void setYMax(float val);
@@ -31,7 +37,11 @@ namespace Hix
 			float centreX()const;
 			float centreY()const;
 			float centreZ()const;
+			float lengthX()const;
+			float lengthY()const;
+			float lengthZ()const;
 			QVector3D centre()const;
+			QVector3D lengths()const;
 			QVector3D displaceWithin(const Bounds3D& child, QVector3D displacement =  QVector3D())const;
 			std::array<float, 6> calculateMaxDisplacement(const Bounds3D & child)const;
 			bool contains(const Hix::Engine3D::Bounds3D& other)const;

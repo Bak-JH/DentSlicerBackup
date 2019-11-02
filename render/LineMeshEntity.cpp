@@ -16,7 +16,7 @@ LineMeshEntity::LineMeshEntity(const std::vector<QVector3D>& vertices, Qt3DCore:
 	_vertexBuffer.setUsage(Qt3DRender::QBuffer::DynamicDraw);
 	_vertexBuffer.setAccessType(Qt3DRender::QBuffer::AccessType::ReadWrite);
 	QByteArray vertexBufferData;
-	vertexBufferData.resize(vertices.size() * 3 * sizeof(float));
+	vertexBufferData.resize(_points.size() * 3 * sizeof(float));
 	float* rawVertexArray = reinterpret_cast<float*>(vertexBufferData.data());
 	int idx = 0;
 	for (const auto& v : _points) {
@@ -32,7 +32,7 @@ LineMeshEntity::LineMeshEntity(const std::vector<QVector3D>& vertices, Qt3DCore:
 	_positionAttribute.setDataType(QAttribute::Float);
 	_positionAttribute.setDataSize(3);
 	_positionAttribute.setByteOffset(0);
-	//_positionAttribute.setByteStride(VTX_SIZE);
+	_positionAttribute.setByteStride(3* sizeof(float));
 	_positionAttribute.setCount(_points.size());
 	_positionAttribute.setName(QAttribute::defaultPositionAttributeName());
 
@@ -43,9 +43,9 @@ LineMeshEntity::LineMeshEntity(const std::vector<QVector3D>& vertices, Qt3DCore:
 	_geometryRenderer.setInstanceCount(1);
 	_geometryRenderer.setFirstVertex(0);
 	_geometryRenderer.setFirstInstance(0);
-	_geometryRenderer.setPrimitiveType(QGeometryRenderer::Lines);
+	_geometryRenderer.setPrimitiveType(QGeometryRenderer::LineStrip);
 	_geometryRenderer.setGeometry(&_geometry);
-	_geometryRenderer.setVertexCount(0);
+	_geometryRenderer.setVertexCount(_points.size());
 
 	_material.setAmbient(QColor(0, 0, 0));
 	_material.setDiffuse(QColor(0, 0, 0));

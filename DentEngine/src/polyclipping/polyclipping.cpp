@@ -2,6 +2,7 @@
 #include <QVector2D>
 #include <QVector3D>
 #include <unordered_set>
+#include "../configuration.h"
 using namespace ClipperLib;
 
 static constexpr float INT_PT_RES_FLOAT = (float)Hix::Polyclipping::INT_PT_RESOLUTION;
@@ -20,6 +21,18 @@ IntPoint  Hix::Polyclipping::toInt2DPt(const QVector2D& pt)
 	ip.X = round(pt.x() * Hix::Polyclipping::INT_PT_RESOLUTION);
 	ip.Y = round(pt.y() * Hix::Polyclipping::INT_PT_RESOLUTION);
 	return ip;
+}
+
+IntPoint Hix::Polyclipping::toPixelSize(const QVector2D& pt)
+{
+	IntPoint pixelSize;
+	float invert = scfg->slice_invert == SlicingConfiguration::Invert::InvertXAxis ? -1.0f : 1.0f;
+	pixelSize.X = std::round(pt.x()* invert * scfg->pixelPerMMX() / scfg->contraction_ratio
+		+ (scfg->resolutionX() / 2));
+
+	pixelSize.Y = std::round(pt.y() * scfg->pixelPerMMY() / scfg->contraction_ratio
+		+ (scfg->resolutionY() / 2));
+	return pixelSize;
 }
 
 IntPoint  Hix::Polyclipping::toInt2DPt(const QVector3D& pt)
@@ -56,6 +69,17 @@ ClipperLib::Path Hix::Polyclipping::toCLPath(const std::vector<QVector3D>& path)
 	for (auto& each : path)
 	{
 		clipperPath.emplace_back(toInt2DPt(each));
+	}
+	return clipperPath;
+}
+
+ClipperLib::Path Hix::Polyclipping::toDebugPixelPath(const std::vector<QVector2D>& path)
+{
+	Path clipperPath;
+	clipperPath.reserve(path.size());
+	for (auto& each : path)
+	{
+		clipperPath.emplace_back(toPixelSize(each));
 	}
 	return clipperPath;
 }

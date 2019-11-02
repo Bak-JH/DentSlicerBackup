@@ -1,23 +1,33 @@
 #include "ContourBuilder.h"
-
+#include "../../feature/Shapes2D.h"
+#include "SlicerDebug.h"
+#include "SlicerDebugInfoExport.h"
+#include "configuration.h"
 using namespace Hix::Slicer;
 using namespace Hix::Engine3D;
 using namespace ClipperLib;
 
 
-inline void rotateCW90(QVector3D& vec)
-{
-	//(-y,x)
-	auto tmp = vec.x();
-	vec.setX(vec.y());
-	vec.setY(-1.0f * tmp);
-}
+//inline void rotateCW90(QVector3D& vec)
+//{
+//	//(y,-x)
+//	auto tmp = vec.x();
+//	vec.setX(vec.y());
+//	vec.setY(-tmp);
+//}
 inline void rotateCW90(QVector2D& vec)
 {
-	//(-y,x)
+	//(y,-x)
 	auto tmp = vec.x();
 	vec.setX(vec.y());
-	vec.setY(-1.0f * tmp);
+	vec.setY(-tmp);
+}
+inline void rotateCCW90(QVector2D& vec)
+{
+	//(-y,x)
+	auto tmp = vec.x();
+	vec.setX(-vec.y());
+	vec.setY(tmp);
 }
 
 bool Contour::isClosed()const
@@ -101,14 +111,31 @@ Path Contour::toPath(std::vector<QVector2D>& outFloatPath)const
 	Path path;
 	if (!segments.empty())
 	{
-		outFloatPath.reserve(segments.size() + 1);
+		outFloatPath.reserve(segments.size());
 
-		outFloatPath.emplace_back(segments.front().from);
 		for (auto& each : segments)
 		{
 			outFloatPath.emplace_back(each.to);
 		}
 		path = Hix::Polyclipping::toCLPath(outFloatPath);
+	}
+
+	return path;
+}
+
+ClipperLib::Path Hix::Slicer::Contour::toDebugPath() const
+{
+	Path path;
+	if (!segments.empty())
+	{
+		std::vector<QVector2D> ptPath;
+		ptPath.reserve(segments.size());
+
+		for (auto& each : segments)
+		{
+			ptPath.emplace_back(each.to);
+		}
+		path = Hix::Polyclipping::toDebugPixelPath(ptPath);
 	}
 
 	return path;
@@ -123,73 +150,22 @@ Path Contour::toPath()const
 
 void Contour::append(const Contour& appended)
 {
-#ifdef _STRICT_SLICER
-	if (to() != appended.from())
-	{
-		throw std::runtime_error("trying to append two disjoint contours");
-	}
-#endif
+	auto appendBeginIdx = segments.size();
 	for (auto each : appended.segments)
 	{
 		addNext(each);
 	}
+	if (appendBeginIdx > 0)
+		segments[appendBeginIdx].from = segments[appendBeginIdx - 1].to;
 }
 
 
-ContourSegment::FlipResult ContourSegment::calcNormalAndFlip()
+bool Hix::Slicer::Contour::isOutward()const
 {
-
-	//determine direction
-	QVector3D faceNormal = face->fn;
-	faceNormal.setZ(0.0f);
-	faceNormal.normalize();
-
-	QVector2D ABNormal = to - from;
-	rotateCW90(ABNormal);
-	ABNormal.normalize();
-
-	QVector2D BANormal = from - to;
-	rotateCW90(BANormal);
-	BANormal.normalize();
-
-	//face normal projected over z-plane should still be normal for AB/BA vector.
-	//Now determine which vector direction is correct by comparing CCW90 or CW90 normals to projected Face normal
-	auto ABDiff = (ABNormal - faceNormal).lengthSquared();
-	auto BADiff = (BANormal - faceNormal).lengthSquared();
-
-
-	//since projected face normal is still a normal for the AB/BA vector
-	//ABNormal == faceNormal or BANormal == faceNormal
-	//hence minimum of those two diffs should be very close to be zero
-	auto smallestDiff = std::min(ABDiff, BADiff);
-
-	if (smallestDiff > 0.01f)
-	{
-		return FlipResult::UnknownDirection;
-	}
-
-	if (ABDiff < BADiff)
-	{
-		//AB is correct direction
-		normal = ABNormal;
-		return FlipResult::NotFlipped;
-	}
-	else
-	{
-		//BA is correct direction
-		auto tmp = to;
-		to = from;
-		from = tmp;
-		normal = BANormal;
-		return FlipResult::Flipped;
-	}
+	return !Hix::Shapes2D::isClockwise(*this);
 }
-void ContourSegment::flip()
-{
-	auto tmp = to;
-	to = from;
-	from = tmp;
-}
+
+
 
 
 ContourBuilder::ContourBuilder(const Mesh* mesh, std::unordered_set<FaceConstItr>& intersectingFaces, float z)
@@ -198,11 +174,13 @@ ContourBuilder::ContourBuilder(const Mesh* mesh, std::unordered_set<FaceConstItr
 }
 
 
-QVector2D ContourBuilder::midPoint2D(VertexConstItr vtxA0, VertexConstItr vtxA1)
+QVector2D ContourBuilder::planeIntersectionPt(VertexConstItr vtxA0, VertexConstItr vtxA1)
 {
 	QVector2D result;
 	//A0.z > A1.z
-	if (vtxA0->position.z() < vtxA1->position.z())
+	auto a0pos = vtxA0.worldPosition();
+	auto a1pos = vtxA1.worldPosition();
+	if (a0pos.z() < a1pos.z())
 	{
 		std::swap(vtxA0, vtxA1);
 	}
@@ -211,11 +189,11 @@ QVector2D ContourBuilder::midPoint2D(VertexConstItr vtxA0, VertexConstItr vtxA1)
 	if (preCalc == _midPtLUT.end())
 	{
 		float x, y, zRatio;
-		zRatio = ((_plane - vtxA0->position.z()) / (vtxA1->position.z() - vtxA0->position.z()));
-		x = (vtxA1->position.x() - vtxA0->position.x()) * zRatio
-			+ vtxA0->position.x();
-		y = (vtxA1->position.y() - vtxA0->position.y()) * zRatio
-			+ vtxA0->position.y();
+		zRatio = ((_plane - a0pos.z()) / (a1pos.z() - a0pos.z()));
+		x = (a1pos.x() - a0pos.x()) * zRatio
+			+ a0pos.x();
+		y = (a1pos.y() - a0pos.y()) * zRatio
+			+ a0pos.y();
 		result = QVector2D(x, y);
 		_midPtLUT[fullEdge] = result;
 	}
@@ -235,22 +213,25 @@ void ContourBuilder::buildSegment(const FaceConstItr& mf)
 	std::vector<VertexConstItr> upper;
 	std::vector<VertexConstItr> middle;
 	std::vector<VertexConstItr> lower;
-	auto mfVertices = mf->meshVertices();
+
+
+	auto mfVertices = mf.meshVertices();
 	for (int i = 0; i < 3; i++) {
-		if (mfVertices[i]->position.z() > _plane) {
+		auto pos = mfVertices[i].worldPosition();
+		if (pos.z() > _plane) {
 			upper.push_back(mfVertices[i]);
 		}
-		else if (mfVertices[i]->position.z() == _plane) {
+		else if (pos.z() == _plane) {
 			middle.push_back(mfVertices[i]);
 		}
 		else
 			lower.push_back(mfVertices[i]);
 	}
-	std::vector<VertexConstItr> majority;
-	std::vector<VertexConstItr> minority;
 	//two edges intersect
 	if (middle.size() == 0)
 	{
+		std::vector<VertexConstItr> majority;
+		std::vector<VertexConstItr> minority;
 		if (upper.size() == 2 && lower.size() == 1) {
 			majority = upper;
 			minority = lower;
@@ -259,54 +240,66 @@ void ContourBuilder::buildSegment(const FaceConstItr& mf)
 			majority = lower;
 			minority = upper;
 		}
-		auto a = midPoint2D(majority[0], minority[0]);
-		auto b = midPoint2D(majority[1], minority[0]);
-		segment.from = a;
-		segment.to = b;
-
+		//need to sort majority to have correct orientation
+		if (!mf.isNextVtx(majority[0], majority[1]))
+		{
+			std::swap(majority[0], majority[1]);
+		}
+		//need to swap again if high pt is minority, ie) pyramid shape
+		if (upper.size() == 1)
+		{
+			std::swap(majority[0], majority[1]);
+		}
+		segment.from = planeIntersectionPt(majority[1], minority[0]);
+		segment.to = planeIntersectionPt(majority[0], minority[0]);
 	}
 	else {
+		auto middle0pos = QVector2D(middle[0].worldPosition());
 		//1 edge interesecting, 1 vertice on the plane
 		if (upper.size() == 1 && lower.size() == 1 && middle.size() == 1) {
-			auto a = midPoint2D(upper[0], lower[0]);
-			segment.from = a;
-			segment.to = QVector2D(middle[0]->position.x(), middle[0]->position.y());
+			auto edgeIntersect = planeIntersectionPt(upper[0], lower[0]);
+			//need to check orientation if its HLM or MLH, H = High, L = Low, M = Middle
+			if (mf.isNextVtx(upper[0], lower[0]))
+			{
+				segment.from = edgeIntersect;
+				segment.to = middle0pos;
+			}
+			else
+			{
+				segment.from = middle0pos;
+				segment.to = edgeIntersect;
+			}
+
 		}
 		else if (middle.size() == 2) {
-			segment.from = QVector2D(middle[0]->position.x(), middle[0]->position.y());
-			segment.to = QVector2D(middle[1]->position.x(), middle[1]->position.y());
-
+			auto middle1pos = QVector2D(middle[1].worldPosition());
+			//also needs to check orientation
+			if (!mf.isNextVtx(middle[0], middle[1]))
+			{
+				std::swap(middle0pos, middle1pos);
+			}
+			//for V shape, order is also reversed;
+			if (!lower.empty())
+			{
+				std::swap(middle0pos, middle1pos);
+			}
+			segment.from = middle0pos;
+			segment.to = middle1pos;
 		}
-
-		//face == plane
 	}
 
-	ContourSegment::FlipResult flipResult;
 	if (segment.from == segment.to)
 	{
 		return;
 	}
-	else
-	{
-		//hint needs to be in correct direction
-		flipResult = segment.calcNormalAndFlip();
-	}
+
 	//insert to container
 	_segments[mf] = segment;
 	auto& newSeg = _segments[mf];
+	_unexplored.insert(mf);
 
-	//segment is too small and direction cannot be determinied
-	if (flipResult == ContourSegment::FlipResult::UnknownDirection)
-	{
-		_unknownHash.insert(std::make_pair(newSeg.from, &newSeg));
-		_unknownHash.insert(std::make_pair(newSeg.to, &newSeg));
-	}
-	else
-	{
-		_fromHash.insert(std::make_pair(newSeg.from, &newSeg));
-		_toHash.insert(std::make_pair(newSeg.to, &newSeg));
-	}
-
+	_fromHash.insert(std::make_pair(newSeg.from, &newSeg));
+	_toHash.insert(std::make_pair(newSeg.to, &newSeg));
 
 }
 
@@ -315,28 +308,19 @@ std::vector<Contour> ContourBuilder::buildContours()
 	auto faces = _mesh->getFaces();
 	std::vector<Contour> contours;
 	_incompleteContours.clear();
-	_unexplored = _intersectList;
 
 	//create segments
 	for (const auto& each : _intersectList)
 	{
 		buildSegment(each);
 	}
-	//remove segments of unknown direction from stating segment candidates.
-	for (auto each : _unknownSegs)
-	{
-		_unexplored.erase(each->face);
-	}
-
 	while (!_unexplored.empty())
 	{
 		Contour currContour;
 		//add first segment, pop it from unexplored
 		ContourSegment& firstSeg = _segments[*_unexplored.begin()];
+		_unexplored.erase(firstSeg.face);
 		currContour.addNext(firstSeg);
-		_unexplored.erase(_unexplored.begin());
-
-
 		//add rest
 		uint8_t deadEndCnt = 0;
 		while (deadEndCnt != 2)
@@ -366,16 +350,8 @@ std::vector<Contour> ContourBuilder::buildContours()
 	//link un-closed contours together if possible to minimize un-closed contour counts
 	if (!_incompleteContours.empty())
 	{
-		auto closedContours = joinOrCloseIncompleteContours();
-		for (auto each : closedContours)
-		{
-			if (isArea(*each))
-			{
-				contours.push_back(*each);
-				qDebug() << "repaired contour";
-			}
-		}
-
+		auto repairedContours = joinOrCloseIncompleteContours();
+		std::move(repairedContours.begin(), repairedContours.end(), std::back_inserter(contours));
 	}
 	//repair remaining un-closed contorus
 	return contours;
@@ -395,14 +371,15 @@ bool ContourBuilder::isArea(const Contour& contour)
 
 
 bool DFSIncompleteContour(std::unordered_set<Contour*>& unusedContours, Contour* start,
-	const std::unordered_multimap<QVector2D, Contour*>& map)
+	const std::unordered_multimap<IntPoint, Contour*>& fromMap, const std::unordered_map<Contour*, IntPoint>& toMap, Contour& out)
 {
 	//std::unordered_map<Contour*, Contour*> traverseMap;
 	std::deque<Contour*> path;
 	std::unordered_set<Contour*> explored;
-	bool success = false;
 	std::vector<Contour*> s;
 	s.push_back(start);
+	bool combineSuccess = false;
+	IntPoint startFrom = Hix::Polyclipping::toInt2DPt(start->from());
 	Contour* current;
 	while (!s.empty())
 	{
@@ -411,14 +388,14 @@ bool DFSIncompleteContour(std::unordered_set<Contour*>& unusedContours, Contour*
 
 		explored.insert(current);
 		path.push_back(current);
-		if (current->to() == start->from())
+		if (startFrom == toMap.at(current))
 		{
-			success = true;
+			combineSuccess = true;
 			break;
 		}
 		else
 		{
-			auto childrenRange = map.equal_range(current->to());
+			auto childrenRange = fromMap.equal_range(toMap.at(current));
 			size_t added = 0;
 			for (auto it = childrenRange.first; it != childrenRange.second; ++it) {
 				if (explored.find(it->second) == explored.end())
@@ -435,73 +412,81 @@ bool DFSIncompleteContour(std::unordered_set<Contour*>& unusedContours, Contour*
 			}
 		}
 	}
-
-	if (success && path.size() > 1)
+	out = *start;
+	if (combineSuccess && path.size() > 1)
 	{
-
 		//remove start contour form rPath
 		path.pop_front();
 		//append paths
 		for (auto rItr = path.cbegin(); rItr != path.cend(); ++rItr)
 		{
-			start->append(**rItr);
+			out.append(**rItr);
 			unusedContours.erase(*rItr);
 		}
-		//usually this happens when contour is made of one very small segment
-		if (!start->isClosed())
+	}
+	//usually this happens when contour is made of one very small segment
+	if (!out.isClosed())
+	{
+		if (!out.tryClose())
 		{
 			return false;
 		}
 	}
-	return success;
-
-
+	return ContourBuilder::isArea(out);
 }
 
-std::unordered_set<Contour*> ContourBuilder::joinOrCloseIncompleteContours()
+std::vector<Contour> ContourBuilder::joinOrCloseIncompleteContours()
 {
 	std::unordered_set<Contour*> remainingContours;
 	std::unordered_set<Contour*> unjoinableContours;
-	std::unordered_set<Contour*> closedContours;
+	std::vector<Contour> closedContours;
+	closedContours.reserve(_incompleteContours.size());
+	//debug log
+	qDebug() << "incomplete contours: " << _incompleteContours.size();
 
-	std::unordered_multimap<QVector2D, Contour*> map;
+	std::unordered_multimap<IntPoint, Contour*> fromMap;
+	std::unordered_map<Contour*, IntPoint> toMap;
+
 	for (auto& each : _incompleteContours)
 	{
 		IntPoint from = Hix::Polyclipping::toInt2DPt(each.from());
 		IntPoint to = Hix::Polyclipping::toInt2DPt(each.to());
-		each.from() = Hix::Polyclipping::toFloatPt(from);
-		each.to() = Hix::Polyclipping::toFloatPt(to);
-		if (from == to && each.dist() < 2)
+		//each.from() = Hix::Polyclipping::toFloatPt(from);
+		////each.to() = Hix::Polyclipping::toFloatPt(to);
+		//if (from == to)
+		//	continue;
+		//auto fromToDist = each.from().distanceToPoint(each.to());
+		if (each.dist() < Hix::Polyclipping::FLOAT_PT_RESOLUTION)
 			continue;
 		remainingContours.insert(&each);
-		closedContours.insert(&each);
-		map.insert(std::make_pair(each.from(), &each));
-
+		fromMap.insert(std::make_pair(from, &each));
+		toMap.insert(std::make_pair(&each, to));
 	}
 	while (!remainingContours.empty())
 	{
 		auto current = *remainingContours.begin();
 		remainingContours.erase(current);
-		bool stitchSuccess = DFSIncompleteContour(remainingContours, current, map);
+		Contour result;
+		bool stitchSuccess = DFSIncompleteContour(remainingContours, current, fromMap, toMap, result);
 		if (!stitchSuccess)
 		{
 			unjoinableContours.insert(current);
 		}
-	}
-	//attempt to close unjoinable contours
-	size_t i = 0;
-	for (auto& each : unjoinableContours)
-	{
-		if (!each->tryClose())
+		else
 		{
-			++i;
-			closedContours.erase(each);
+			closedContours.emplace_back(std::move(result));
 		}
 	}
-	if (i != 0)
+	//remove repaired contours from incomplete contours
+	auto itr = _incompleteContours.begin();
+	while (itr != _incompleteContours.end())
 	{
-		qDebug() << "unfixable contours";
+		if (unjoinableContours.find(&(*itr)) != unjoinableContours.end())
+			itr = _incompleteContours.erase(itr);
+		else
+			++itr;
 	}
+	qDebug() << "repaired contours: " << closedContours.size();
 	return closedContours;
 }
 
@@ -511,27 +496,23 @@ std::unordered_set<Contour*> ContourBuilder::joinOrCloseIncompleteContours()
 bool ContourBuilder::buildContour(Contour& current, bool reverse)
 {
 	std::unordered_multimap<QVector2D, ContourSegment*>* map;
-	std::unordered_multimap<QVector2D, ContourSegment*>* oppMap;
 
 	QVector2D from;
 	if (reverse)
 	{
 		map = &_toHash;
-		oppMap = &_fromHash;
 		from = current.from();
 	}
 	else
 	{
 		map = &_fromHash;
-		oppMap = &_toHash;
 		from = current.to();
 	}
-	auto oppRange = oppMap->equal_range(from);
 	auto range = map->equal_range(from);
     //range is of size 1
 	auto nextItr = range.first;
-	bool hasAny = range.first != range.second && oppRange.first != oppRange.second;
-	bool hasOnlyOne = hasAny && (++range.first == range.second && ++oppRange.first == oppRange.second);
+	bool hasAny = range.first != range.second;
+	bool hasOnlyOne = hasAny && (++range.first == range.second);
     if (hasOnlyOne && _unexplored.find(nextItr->second->face) != _unexplored.end())
 	{
 		const ContourSegment& next = *nextItr->second;

@@ -1,8 +1,8 @@
 #pragma once
 
 #include "SupportModel.h"
-
-using namespace Qt3DCore;
+#include "ModelAttachedSupport.h"
+#include "BaseSupport.h"
 using namespace Qt3DRender;
 using namespace Qt3DExtras;
 
@@ -15,18 +15,24 @@ namespace Hix
 	{
 		//heaxgon centered at 0,0,0, rotated around positive z-axis CW
 		std::vector<QVector3D> generateHexagon(float radius);
-		class VerticalSupportModel : public Hix::Support::SupportModel
+		class VerticalSupportModel : public SupportModel, public BaseSupport, public ModelAttachedSupport
 		{
 		public:
-			VerticalSupportModel(SupportRaftManager* manager, std::variant<VertexConstItr, FaceOverhang> overhang);
+			VerticalSupportModel(SupportRaftManager* manager, const Overhang& overhang);
 			virtual ~VerticalSupportModel();
-			QVector3D getBasePt()override;
+			//BaseSupport
+			const QVector3D& getBasePt()const override;
+			//ModelAttachedSupport
+			const Overhang& getOverhang()const override;
+
 
 		protected:
 			QVector3D getPrimitiveColorCode(const Hix::Engine3D::Mesh* mesh, FaceConstItr faceItr)override;
 		private:
+			QVector3D _basePt;
+			Overhang _overhang;
 			void generateMesh();
-			std::vector<QVector3D>  generateSupportPath(const std::variant<VertexConstItr, FaceOverhang>& overhang, float bottom);
+			std::vector<QVector3D>  generateSupportPath(float bottom);
 		};
 	}
 }
