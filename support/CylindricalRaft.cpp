@@ -71,69 +71,6 @@ void Hix::Support::CylindricalRaft::generateMeshForContour(Mesh* mesh, const std
 
 }
 
-void Hix::Support::CylindricalRaft::generateCap(Mesh* mesh, const std::vector<QVector3D>& contour, bool isReverse)
-{
-	float z = contour.front().z();
-	std::vector<p2t::Point>container;
-	container.reserve(contour.size());
-	for (auto itr = contour.cbegin(); itr != contour.cend(); ++itr)
-	{
-		container.emplace_back((double)itr->x(), (double)itr->y());
-	}
-
-
-	//because people are...stupid?
-	std::vector<p2t::Point*>ptrs;
-	ptrs.reserve(container.size());
-	for (auto& each : container)
-	{
-		ptrs.emplace_back(&each);
-	}
-
-	p2t::CDT constrainedDelTrig(ptrs);
-	constrainedDelTrig.Triangulate();
-	auto triangles = constrainedDelTrig.GetTriangles();
-	std::unordered_set<double> debugX;
-	std::unordered_set<double> debugY;
-	double minX = 999;
-	double minY = 999;
-	double maxX = -999;
-	double maxY = -999;
-
-
-	for (auto& each : container)
-	{
-		debugX.emplace(each.x);
-		debugY.emplace(each.y);
-		minX = std::min(minX, each.x);
-		minY = std::min(minY, each.y);
-		maxX = std::max(maxX, each.x);
-		maxY = std::max(maxY, each.y);
-	}
-	//as long as intial contour is not modified in the p2t library, float->double->float should be lossless
-	for (auto& tri : triangles)
-	{
-		p2t::Point* pt0, *pt1, *pt2;
-		if (isReverse)
-		{
-			pt2 = tri->GetPoint(0);
-			pt1 = tri->GetPoint(1);
-			pt0 = tri->GetPoint(2);
-
-		}
-		else
-		{
-			pt0 = tri->GetPoint(0);
-			pt1 = tri->GetPoint(1);
-			pt2 = tri->GetPoint(2);
-		}
-		mesh->addFace(
-			QVector3D(pt0->x, pt0->y, z),
-			QVector3D(pt1->x, pt1->y, z),
-			QVector3D(pt2->x, pt2->y, z));
-	}
-
-}
 
 void Hix::Support::CylindricalRaft::generateMesh(const std::vector<QVector3D>& overhangs)
 {
