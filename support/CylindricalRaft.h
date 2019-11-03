@@ -26,7 +26,6 @@ namespace Hix
 		private:
 			void generateMesh(const std::vector<QVector3D>& overhangs);
 			void generateMeshForContour(Mesh* mesh, const std::vector<QVector3D>& contour);
-			void generateCap(Mesh* mesh, const std::vector<QVector3D>& contour, bool isReverse);
 
 
 

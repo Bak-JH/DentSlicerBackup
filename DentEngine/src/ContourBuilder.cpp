@@ -5,6 +5,7 @@
 #include "configuration.h"
 using namespace Hix::Slicer;
 using namespace Hix::Engine3D;
+using namespace Hix::Shapes2D;
 using namespace ClipperLib;
 
 
@@ -15,20 +16,7 @@ using namespace ClipperLib;
 //	vec.setX(vec.y());
 //	vec.setY(-tmp);
 //}
-inline void rotateCW90(QVector2D& vec)
-{
-	//(y,-x)
-	auto tmp = vec.x();
-	vec.setX(vec.y());
-	vec.setY(-tmp);
-}
-inline void rotateCCW90(QVector2D& vec)
-{
-	//(-y,x)
-	auto tmp = vec.x();
-	vec.setX(-vec.y());
-	vec.setY(tmp);
-}
+
 
 bool Contour::isClosed()const
 {

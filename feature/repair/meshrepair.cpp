@@ -70,6 +70,66 @@ std::vector<Hix::Engine3D::HalfEdgeConstItr>  Hix::Features::identifyBoundary(co
 	return boundaryEdges;
 }
 
+std::vector<Hix::Engine3D::Mesh*> Hix::Features::seperateDisconnectedMeshes(Hix::Engine3D::Mesh* mesh)
+{
+	std::vector<Hix::Engine3D::Mesh*> meshes;
+	std::deque<std::unordered_set<FaceConstItr>> connected;
+	std::unordered_set<size_t> unexplored;
+	auto meshFaces = mesh->getFaces();
+	size_t totalFaceCnt = meshFaces.size();
+	unexplored.reserve(totalFaceCnt);
+	for (size_t i = 0; i < totalFaceCnt; ++i)
+	{
+		unexplored.insert(i);
+	}
+
+	while (!unexplored.empty())
+	{
+		auto& current = connected.emplace_back();
+		auto begin = *unexplored.begin();
+		std::deque<FaceConstItr>q;
+		current.emplace(meshFaces.cbegin() + begin);
+		unexplored.erase(begin);
+		while (!q.empty())
+		{
+			auto curr = q.front();
+			q.pop_front();
+			auto edge = curr.edge();
+			for (size_t i = 0; i < 3; ++i, edge.moveNext()) {
+				auto nFaces = edge.twinFaces();
+				for (auto nFace : nFaces)
+				{
+					if (current.find(nFace) == current.end())
+					{
+						q.emplace_back(nFace);
+						current.emplace(nFace);
+						unexplored.erase(nFace.index());
+					}
+				}
+			}
+		}
+	}
+	//if there are indeed multiple meshes, allocate new meshs
+	if (connected.size() > 1)
+	{
+		meshes.reserve(connected.size());
+		for (auto& faces : connected)
+		{
+			auto newMesh = new Mesh();
+			meshes.emplace_back(newMesh);
+			for (auto& face : faces)
+			{
+				newMesh->addFace(face);
+			}
+		}
+	}
+	else
+	{
+		meshes.emplace_back(mesh);
+	}
+	return meshes;
+}
+
 
 
 

@@ -14,26 +14,19 @@ Hix::Features::Cut::ZAxialCut::ZAxialCut(GLModel* subject, float cuttingPlane, b
 {
 	_bottomMesh = new Mesh();
 	_topMesh = new Mesh();
-	// Partition the torus mesh.
-	//std::vector<gte::Vector3<float>> clipVertices;
-	//std::vector<int> negIndices, posIndices;
-	gte::SplitMeshByPlane<float> splitter;
-	//splitter(mTorusVerticesWS, mTorusIndices, mPlane, clipVertices, negIndices, posIndices);
-
-
-	//divideTriangles();
-	//generateCutContour();
-	//if (_fill)
-	//{
-	//	generateCaps();
-	//}
-	//for (auto& contour : _contours)
-	//{
-	//	for (auto& seg : contour.segments)
-	//	{
-	//		fillOverlap(seg);
-	//	}
-	//}
+	divideTriangles();
+	generateCutContour();
+	if (_fill)
+	{
+		generateCaps();
+	}
+	for (auto& contour : _contours)
+	{
+		for (auto& seg : contour.segments)
+		{
+			fillOverlap(seg);
+		}
+	}
 	GLModel* botModel = nullptr;
 	GLModel* topModel = nullptr;
 	if (_bottomMesh->getFaces().size() != 0) {
@@ -124,9 +117,9 @@ void Hix::Features::Cut::ZAxialCut::generateCaps()
 		{
 			std::array<QVector3D, 3> vertices
 			{
-				QVector3D(trig[0], _cuttingPlane),
-				QVector3D(trig[1], _cuttingPlane),
-				QVector3D(trig[2], _cuttingPlane)
+				_origMesh->ptToLocal(QVector3D(trig[0], _cuttingPlane)),
+				_origMesh->ptToLocal(QVector3D(trig[1], _cuttingPlane)),
+				_origMesh->ptToLocal(QVector3D(trig[2], _cuttingPlane))
 
 			};
 			_bottomMesh->addFace(vertices[0], vertices[1], vertices[2]);
@@ -170,7 +163,8 @@ void Hix::Features::Cut::ZAxialCut::fillOverlap(const Hix::Slicer::ContourSegmen
 		//t->f->l
 		QVector3D from(seg.from, _cuttingPlane);
 		QVector3D to(seg.to, _cuttingPlane);
-
+		from = _origMesh->ptToLocal(from);
+		to = _origMesh->ptToLocal(to);
 		_topMesh->addFace(seg.from, seg.to, highs[0].localPosition());
 		_bottomMesh->addFace(seg.to, seg.from, lows[0].localPosition());
 	}
@@ -201,6 +195,8 @@ void Hix::Features::Cut::ZAxialCut::fillOverlap(const Hix::Slicer::ContourSegmen
 			twoFacesAddedMesh = _topMesh;
 			oneFaceAddedMesh = _bottomMesh;
 		}
+		from = _origMesh->ptToLocal(from);
+		to = _origMesh->ptToLocal(to);
 		//need to sort majority to winding order
 		HalfEdgeConstItr hintEdge;
 		face.getEdgeWithVertices(hintEdge, majority[0], majority[1]);

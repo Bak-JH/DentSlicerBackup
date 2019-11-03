@@ -14,5 +14,6 @@ namespace Hix
 		Hix::Engine3D::Paths3D identifyHoles(const  Hix::Engine3D::Mesh* mesh);
 		//get boundaries ie) half edges on the edge/hole of the mesh
 		std::vector<Hix::Engine3D::HalfEdgeConstItr> identifyBoundary(const Hix::Engine3D::Mesh* mesh);
+		std::vector<Engine3D::Mesh*> seperateDisconnectedMeshes(Engine3D::Mesh* mesh);
 	}
 }

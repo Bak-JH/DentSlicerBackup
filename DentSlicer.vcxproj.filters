@@ -403,6 +403,9 @@
     <ClCompile Include="feature\cut\MeshPlaneCut.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>
+    <ClCompile Include="feature\CSG\CorkMeshFactory.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="feature\autoarrange.h">
@@ -1370,9 +1373,6 @@
     <None Include="icon-32.ico" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="DentSlicer.rc">
-      <Filter>Distribution Files</Filter>
-    </None>
     <None Include="icon-32.ico">
       <Filter>Distribution Files</Filter>
     </None>
@@ -2626,6 +2626,9 @@
       <Filter>Generated Files</Filter>
     </ClInclude>
     <ClInclude Include="feature\cut\MeshPlaneCut.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="feature\CSG\CorkMeshFactory.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
   </ItemGroup>

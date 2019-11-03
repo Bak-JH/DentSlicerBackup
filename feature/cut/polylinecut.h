@@ -19,9 +19,8 @@ namespace Hix
 			public:
 				PolylineCut(GLModel* origModel, std::vector<QVector3D> cuttingPoints, bool fill);
 			private:
-				void cutAway();
+				//void cutAway();
 
-				std::vector<QVector3D> _cuttingPoints;
 				bool _fill;
 				const Engine3D::Mesh* _origMesh;
 				Engine3D::Mesh* _leftMesh;
