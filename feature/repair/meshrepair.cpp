@@ -90,6 +90,7 @@ std::vector<Hix::Engine3D::Mesh*> Hix::Features::seperateDisconnectedMeshes(Hix:
 		std::deque<FaceConstItr>q;
 		current.emplace(meshFaces.cbegin() + begin);
 		unexplored.erase(begin);
+		q.emplace_back(*current.begin());
 		while (!q.empty())
 		{
 			auto curr = q.front();

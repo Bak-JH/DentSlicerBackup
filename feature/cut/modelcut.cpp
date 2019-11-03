@@ -68,7 +68,7 @@ void Hix::Features::ModelCut::applyCut()
 	{
 		for (auto each : _models)
 		{
-			PolylineCut impl(each, _cuttingPlane.contour(), _isFill);
+			PolylineCut impl(each, _cuttingPlane.contour());
 		}
 		break;
 	}
