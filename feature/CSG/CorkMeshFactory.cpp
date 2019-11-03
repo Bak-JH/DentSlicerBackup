@@ -22,7 +22,15 @@ CorkTriMesh Hix::Features::CSG::toCorkMesh(const Hix::Engine3D::Mesh& mesh)
 	}
 	i = 0;
 	for (auto vtxItr = vtcs.cbegin(); vtxItr != vtcsEnd; ++vtxItr, ++i) {
-		auto worldPos = vtxItr.worldPosition();
+		QVector3D worldPos;
+		if (mesh.entity() == nullptr)
+		{
+			worldPos = vtxItr.localPosition();
+		}
+		else
+		{
+			worldPos = vtxItr.worldPosition();
+		}
 		(out.vertices)[3 * i + 0] = worldPos.x();
 		(out.vertices)[3 * i + 1] = worldPos.y();
 		(out.vertices)[3 * i + 2] = worldPos.z();

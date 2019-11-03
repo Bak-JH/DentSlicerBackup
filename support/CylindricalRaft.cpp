@@ -65,8 +65,8 @@ void Hix::Support::CylindricalRaft::generateMeshForContour(Mesh* mesh, const std
 	Hix::Features::Extrusion::extrudeAlongPath(
 		mesh, QVector3D(0, 0, 1), contour, path, jointContours, &scales, &thicknessScaler);
 	//generate caps
-	generateCap(mesh, jointContours.front(), true);
-	generateCap(mesh, jointContours.back(), false);
+	Hix::Shapes2D::generateCapZPlane(mesh, jointContours.front(), true);
+	Hix::Shapes2D::generateCapZPlane(mesh, jointContours.back(), false);
 
 
 }

@@ -73,7 +73,7 @@ std::vector<QVector3D> Hix::Shapes2D::to3DShape(float zPos, const std::vector<QV
 std::vector<QVector2D> Hix::Shapes2D::PolylineToArea(float thickness, const std::vector<QVector2D>& polyline)
 {
 	std::vector<QVector2D> areaContour;
-	if (polyline.size() > 2)
+	if (polyline.size() > 1)
 	{
 		auto radius = thickness / 2.0f;
 		auto vtcsCnt = polyline.size();

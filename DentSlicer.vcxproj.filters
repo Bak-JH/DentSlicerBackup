@@ -2631,5 +2631,8 @@
     <ClInclude Include="feature\CSG\CorkMeshFactory.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
+    <ClInclude Include="feature\CSG\CSG.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

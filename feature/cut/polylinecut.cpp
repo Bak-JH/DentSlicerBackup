@@ -4,8 +4,6 @@
 #include <map>
 #include <string.h>
 #include <stdlib.h>
-#include "feature/convex_hull.h"
-#include "DentEngine/src/utils/metric.h"
 #include <QObject>
 #include <Qt3DCore>
 #include <Qt3DRender>
@@ -14,65 +12,83 @@
 #include <QEntity>
 #include "../../glmodel.h"
 #include "../../qmlmanager.h"
+#include <vector>
 
 #include "DentEngine/src/mesh.h"
-
-#include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
-#include <CGAL/Constrained_Delaunay_triangulation_2.h>
-#include <CGAL/Delaunay_triangulation_2.h>
-#include <CGAL/Delaunay_mesh_vertex_base_2.h>
-#include <CGAL/Delaunay_mesh_face_base_2.h>
-#include <CGAL/Delaunay_mesh_size_criteria_2.h>
-#include <vector>
-#include <CGAL/Delaunay_mesher_2.h>
-#include <math.h>
+#include "../repair/meshrepair.h"
 #include "polylinecut.h"
-
-typedef CGAL::Exact_predicates_inexact_constructions_kernel  Kernel;
-typedef Kernel::Point_2            Point_2;
-typedef CGAL::Delaunay_mesh_vertex_base_2<Kernel>     Vb;
-typedef CGAL::Delaunay_mesh_face_base_2<Kernel>      Fb;
-typedef CGAL::Triangulation_data_structure_2<Vb, Fb>   Tds;
-typedef CGAL::Constrained_Delaunay_triangulation_2<Kernel, Tds>  CDT;
-typedef CDT::Vertex_handle          Vertex_handle;
-typedef CGAL::Delaunay_mesh_size_criteria_2<CDT>    Criteria;
+#include "../CSG/CSG.h"
+//#include "DentEngine/src/utils/metric.h"
+//#include "feature/convex_hull.h"
+//#include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
+//#include <CGAL/Constrained_Delaunay_triangulation_2.h>
+//#include <CGAL/Delaunay_triangulation_2.h>
+//#include <CGAL/Delaunay_mesh_vertex_base_2.h>
+//#include <CGAL/Delaunay_mesh_face_base_2.h>
+//#include <CGAL/Delaunay_mesh_size_criteria_2.h>
+//#include <CGAL/Delaunay_mesher_2.h>
+//#include <math.h>
+//
+//typedef CGAL::Exact_predicates_inexact_constructions_kernel  Kernel;
+//typedef Kernel::Point_2            Point_2;
+//typedef CGAL::Delaunay_mesh_vertex_base_2<Kernel>     Vb;
+//typedef CGAL::Delaunay_mesh_face_base_2<Kernel>      Fb;
+//typedef CGAL::Triangulation_data_structure_2<Vb, Fb>   Tds;
+//typedef CGAL::Constrained_Delaunay_triangulation_2<Kernel, Tds>  CDT;
+//typedef CDT::Vertex_handle          Vertex_handle;
+//typedef CGAL::Delaunay_mesh_size_criteria_2<CDT>    Criteria;
 
 using namespace Hix::Engine3D;
 using namespace Hix::Slicer;
+using namespace Hix::Features;
+using namespace Hix::Features::CSG;
 using namespace Hix::Features::Cut;
 
 
-Hix::Features::Cut::PolylineCut::PolylineCut(GLModel * origModel, std::vector<QVector3D> _cuttingPoints, bool fill) :
-	_origMesh(origModel->getMesh()), _fill(fill)
+Hix::Features::Cut::PolylineCut::PolylineCut(GLModel * origModel, std::vector<QVector3D> _cuttingPoints) :
+	_origMesh(origModel->getMesh())
 
 {
-	_leftMesh = new Mesh();
-	_rightMesh = new Mesh();
+	//convert polyline to CSG-able 3D mesh, a thin 3D wall.
+	Mesh polylineWall;
 
 	//cutAway();
 	auto polyline = Hix::Shapes2D::to2DShape(_cuttingPoints);
-	auto contour2d = Hix::Shapes2D::PolylineToArea(1, polyline);
+	auto contour2d = Hix::Shapes2D::PolylineToArea(0.001f, polyline);
 	auto contour3d = Hix::Shapes2D::to3DShape(0.0f, contour2d);
 
 	std::vector<QVector3D> path;
 
-
 	path.reserve(2);
-	path.emplace_back(QVector3D(0, 0, 0));
-	path.emplace_back(QVector3D(0, 0, origModel->recursiveAabb().zMax()));
+	path.emplace_back(QVector3D(0, 0, -0.5));
+	path.emplace_back(QVector3D(0, 0, origModel->recursiveAabb().zMax() + 0.5));
 	std::vector<std::vector<QVector3D>> jointContours;
+	Hix::Features::Extrusion::extrudeAlongPath<float>(&polylineWall, QVector3D(0,0,1), contour3d, path, jointContours);
+	//generate caps
+	Hix::Shapes2D::generateCapZPlane(&polylineWall, jointContours.front(), true);
+	Hix::Shapes2D::generateCapZPlane(&polylineWall, jointContours.back(), false);
 
+	//convert all meshes to cork meshes
+	auto cylinderWallCork = toCorkMesh(polylineWall);
+	auto subjectCork = toCorkMesh(*origModel->getMesh());
+	CorkTriMesh output;
+	computeDifference(subjectCork, cylinderWallCork, &output);
 
-	Hix::Features::Extrusion::extrudeAlongPath<float>(_leftMesh, QVector3D(0,0,1), contour3d, path, jointContours);
+	//convert the result back to hix mesh
 
-	GLModel* leftModel = nullptr;
-	GLModel* rightModel = nullptr;
-	if (_leftMesh->getFaces().size() != 0) {
-		leftModel = qmlManager->createModelFile(_leftMesh, origModel->filename() + "_left", &origModel->transform());
+	auto result = toHixMesh(output);
+	//manual free cork memory, TODO RAII
+	freeCorkTriMesh(&cylinderWallCork);
+	freeCorkTriMesh(&subjectCork);
+	freeCorkTriMesh(&output);
+
+	//seperate disconnected meshes
+	auto seperateParts = Hix::Features::seperateDisconnectedMeshes(result);
+	for (size_t i = 0; i < seperateParts.size(); ++i)
+	{
+		auto model = qmlManager->createModelFile(seperateParts[i], origModel->filename() +"_cut" + QString::number(i), &origModel->transform());
 	}
-	if (_rightMesh->getFaces().size() != 0) {
-		rightModel = qmlManager->createModelFile(_rightMesh, origModel->filename() + "_top", &origModel->transform());
-	}
+
 	qmlManager->deleteModelFile(origModel->ID);
 }
 

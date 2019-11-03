@@ -17,14 +17,12 @@ namespace Hix
 			class PolylineCut
 			{
 			public:
-				PolylineCut(GLModel* origModel, std::vector<QVector3D> cuttingPoints, bool fill);
+				PolylineCut(GLModel* origModel, std::vector<QVector3D> cuttingPoints);
 			private:
 				//void cutAway();
 
-				bool _fill;
 				const Engine3D::Mesh* _origMesh;
-				Engine3D::Mesh* _leftMesh;
-				Engine3D::Mesh* _rightMesh;
+
 			};
 
 
