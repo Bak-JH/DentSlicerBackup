@@ -1154,7 +1154,7 @@
     <ResourceCompile Include="DentSlicer.rc" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\cork_me\win\wincork\wincorkDLL.vcxproj">
+    <ProjectReference Include="cork\win\wincork\wincorkDLL.vcxproj">
       <Project>{239d1648-b3dc-437e-830c-f2106c01b30c}</Project>
     </ProjectReference>
   </ItemGroup>
