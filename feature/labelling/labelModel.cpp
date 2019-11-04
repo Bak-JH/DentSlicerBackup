@@ -15,8 +15,6 @@ Hix::Label::LabelModel::LabelModel(Qt3DCore::QEntity* parent, LabelModel& from)
 	font = from.font;
 }
 
-
-
 void Hix::Label::LabelModel::generateLabel(QString text, QVector3D targetNormal)
 {
 	auto labelMesh = new Mesh();

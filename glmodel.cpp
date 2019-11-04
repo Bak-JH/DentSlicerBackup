@@ -38,7 +38,6 @@ using namespace Hix::Render;
 
 
 
-
 GLModel::GLModel(QObject* mainWindow, QEntity*parent, Mesh* loadMesh, QString fname, int id)
     : SceneEntityWithMaterial(parent)
     , _filename(fname)
@@ -446,7 +445,7 @@ void GLModel::clicked(MouseEventData& pick, const Qt3DRender::QRayCasterHit& hit
 		if (textPreview != nullptr)
 			textPreview->setEnabled(false);
 
-		textPreview = new Hix::LabelModel(this);
+		textPreview = new Hix::Label::LabelModel(this);
 
 		if (textPreview && currentFeature != Hix::Features::FeatureEnum::Label) {
 			textPreview->setTranslation(hit.localIntersection());
@@ -461,16 +460,16 @@ bool GLModel::isDraggable(Hix::Input::MouseEventData& e,const Qt3DRender::QRayCa
 		&&
 		qmlManager->isSelected(this) 
 		&&
-			(cutActive ||
-			shellOffsetActive ||
-			extensionActive ||
-			labellingActive ||
-			layflatActive ||
-			layerViewActive)	
+			(qmlManager->currentFeature() != Hix::Features::FeatureEnum::Cut ||
+			qmlManager->currentFeature() != Hix::Features::FeatureEnum::ShellOffset ||
+			qmlManager->currentFeature() != Hix::Features::FeatureEnum::Extend ||
+			qmlManager->currentFeature() != Hix::Features::FeatureEnum::Label ||
+			qmlManager->currentFeature() != Hix::Features::FeatureEnum::LayFlat ||
+			qmlManager->currentFeature() != Hix::Features::FeatureEnum::LayerViewMode)
 		&&
-		!(qmlManager->orientationActive ||
-			qmlManager->rotateActive ||
-			qmlManager->saveActive))
+		!(qmlManager->currentFeature() != Hix::Features::FeatureEnum::Orient ||
+			qmlManager->currentFeature() != Hix::Features::FeatureEnum::Rotate ||
+			qmlManager->currentFeature() != Hix::Features::FeatureEnum::Save))
 	{
 		return true;
 	}
@@ -607,7 +606,7 @@ void GLModel::changeViewMode(int viewMode) {
 
     switch( viewMode ) {
     case VIEW_MODE_OBJECT:
-        if (layerViewActive){
+        if (qmlManager->currentFeature() != Hix::Features::FeatureEnum::LayerViewMode){
             // remove layer view components
             removeLayerViewComponents();
         }
@@ -668,11 +667,10 @@ void GLModel::updateShader(int viewMode)
 }
 
 
-void GLModel::inactivateFeatures(){
+void GLModel::inactivateFeatures()
+{
 
 
-    closeLabelling();
-    closeExtension();
     closeCut();
     closeHollowShell();
     closeShellOffset();
@@ -695,11 +693,11 @@ void GLModel::removeLayerViewComponents(){
 
 bool GLModel::perPrimitiveColorActive() const
 {
-	return faceSelectionActive() || layerViewActive;
+	return faceSelectionActive() || qmlManager->currentFeature() != Hix::Features::FeatureEnum::LayerViewMode;
 }
 bool GLModel::faceSelectionActive() const
 {
-	return extensionActive || layflatActive;
+	return qmlManager->currentFeature() != Hix::Features::FeatureEnum::Extend || qmlManager->currentFeature() != Hix::Features::FeatureEnum::Layflat;
 }
 
 QVector3D GLModel::getPrimitiveColorCode(const Hix::Engine3D::Mesh* mesh, FaceConstItr itr)
