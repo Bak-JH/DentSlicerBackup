@@ -880,28 +880,31 @@ void QmlManager::updateLabelPreview(QString text, QString fontName, bool isBold,
 
 void QmlManager::generateLabelMesh()
 {
-	if (updateLock)
-        return;
-    updateLock = true;
+	for (auto selectedModel : selectedModels)
+	{
+		if (selectedModel->updateLock)
+			return;
+		selectedModel->updateLock = true;
 
-    if (!textPreview){
-        qDebug() << "no labellingTextPreview";
-        QMetaObject::invokeMethod(qmlManager->labelPopup, "noModel");
-        return;
-    }
+		if (!selectedModel->textPreview) {
+			qDebug() << "no labellingTextPreview";
+			QMetaObject::invokeMethod(qmlManager->labelPopup, "noModel");
+			return;
+		}
 
-    qmlManager->openProgressPopUp();
+		openProgressPopUp();
 
-    qmlManager->setProgress(0.1f);
+		setProgress(0.1f);
 
-	_targetSelected = false;
-    qmlManager->setProgress(0.5f);
+		selectedModel->_targetSelected = false;
+		setProgress(0.5f);
 
-	setMaterialColor(Hix::Render::Colors::Selected);
-	textPreview = nullptr;
-    updateModelMesh();
+		selectedModel->setMaterialColor(Hix::Render::Colors::Selected);
+		selectedModel->textPreview = nullptr;
+		selectedModel->updateModelMesh();
 
-    qmlManager->setProgress(1.0f);
+		setProgress(1.0f);
+	}
 }
 
 const std::unordered_set<GLModel*>& QmlManager::getSelectedModels()

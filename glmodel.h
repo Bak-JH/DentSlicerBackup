@@ -93,7 +93,7 @@ public:
     std::vector<QPhongMaterial*> sphereMaterial;
 
     void removeModelPartList();
-	Hix::LabelModel* textPreview = nullptr;
+	Hix::Label::LabelModel* textPreview = nullptr;
 
     void copyModelAttributeFrom(GLModel* from);
 
@@ -218,12 +218,9 @@ public slots:
     void getFontNameChanged(QString fontName);
     void getFontBoldChanged(bool isBold);
     void getFontSizeChanged(int fontSize);
-    void updateLabelPreview(QString text, QString fontName, bool isBold, int fontSize);
     void generateLabelMesh();
 
     // Extension
-    void openExtension();
-    void closeExtension();
     void unselectMeshFaces();
     void selectMeshFaces();
     void generateExtensionFaces(double distance);

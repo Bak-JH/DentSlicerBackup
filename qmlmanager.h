@@ -201,10 +201,6 @@ public:
     int rotateSnapStartAngle = 0;
     int rotateSnapQuotient = 0;
     //bool moveActive = false;
-    bool saveActive = false;
-    bool rotateActive = false;
-    bool orientationActive = false;
-    bool freecutActive = false;
 
 	Hix::Input::RayCastController& getRayCaster();
     QString groupFunctionState;
