@@ -19,6 +19,7 @@
 #include <Qt3DCore/qpropertyupdatedchange.h>
 #include "DentEngine/src/configuration.h"
 #include "feature/Extrude.h"
+#include "feature/cut/modelcut.h"
 #include "feature/cut/DrawingPlane.h"
 #include "feature/labelling/labelModel.h"
 
@@ -202,8 +203,7 @@ void GLModel::repairMesh()
 
 /* copy info's from other GLModel */
 void GLModel::copyModelAttributeFrom(GLModel* from){
-    cutMode = from->cutMode;
-    cutFillMode = from->cutFillMode;
+
 }
 
 void GLModel::updateModelMesh(){
@@ -226,12 +226,12 @@ void GLModel::indentHollowShell(double radius){
     qDebug() << "hollow shell called" << radius;
 	if (!_targetSelected)
 		return;
-	auto meshVertices = targetMeshFace.meshVertices();
+	auto meshVertices = _targetMeshFace.meshVertices();
     QVector3D center = (
 		meshVertices[0].localPosition() +
 		meshVertices[1].localPosition() +
 		meshVertices[2].localPosition())/3;
-	HollowShell::hollowShell(_mesh, targetMeshFace, center, radius);
+	HollowShell::hollowShell(_mesh, _targetMeshFace, center, radius);
 }
 
 GLModel::~GLModel(){
@@ -263,9 +263,8 @@ void GLModel::setHitTestable(bool isEnable)
 void GLModel::clicked(MouseEventData& pick, const Qt3DRender::QRayCasterHit& hit)
 {
 	auto suppMode = qmlManager->supportRaftManager().supportEditMode();
-	auto currentFeature = qmlManager->currentFeature();
-	if (currentFeature != Hix::Features::FeatureEnum::Cut && 
-		currentFeature != Hix::Features::FeatureEnum::Extend &&
+	if (qmlManager->isActive<Hix::Features::ModelCut>(qmlManager->currentFeature()) &&
+		qmlManager->isActive<Hix::Features::Extend>(qmlManager->currentFeature()) &&
 		currentFeature != Hix::Features::FeatureEnum::Label &&
 		currentFeature != Hix::Features::FeatureEnum::LayFlat &&
 		suppMode == Hix::Support::EditMode::None)// && !layerViewActive && !supportViewActive)
@@ -293,7 +292,7 @@ void GLModel::clicked(MouseEventData& pick, const Qt3DRender::QRayCasterHit& hit
 
 
 	/// Extension Feature ///
-	if (qmlManager->currentFeature() == Hix::Features::FeatureEnum::Extend &&
+	if (qmlManager->isActive<Hix::Features::Extend>(qmlManager->currentFeature()) &&
 		hit.localIntersection() != QVector3D(0, 0, 0)) {
 		unselectMeshFaces();
 		emit extensionSelect();
@@ -348,9 +347,9 @@ bool GLModel::isDraggable(Hix::Input::MouseEventData& e,const Qt3DRender::QRayCa
 		&&
 		qmlManager->isSelected(this) 
 		&&
-			(qmlManager->currentFeature() != Hix::Features::FeatureEnum::CUT ||
+			(qmlManager->isActive<Hix::Features::ModelCut*>(qmlManager->currentFeature())||
 			qmlManager->currentFeature() != Hix::Features::FeatureEnum::ShellOffset ||
-			qmlManager->currentFeature() != Hix::Features::FeatureEnum::Extend ||
+			qmlManager->isActive<Hix::Features::Extend*>(qmlManager->currentFeature()) ||
 			qmlManager->currentFeature() != Hix::Features::FeatureEnum::Label ||
 			qmlManager->currentFeature() != Hix::Features::FeatureEnum::LayFlat ||
 			qmlManager->currentFeature() != Hix::Features::FeatureEnum::LayerViewMode)
@@ -527,13 +526,6 @@ void GLModel::selectMeshFaces(){
 	_mesh->findNearSimilarFaces(normal, _targetMeshFace, selectedFaces);
 	updateMesh(true);
 }
-void GLModel::generateExtensionFaces(double distance){
-    if (!_targetSelected)
-        return;
-    Hix::Features::Extension::extendMesh(_mesh, _targetMeshFace, distance);
-	_targetSelected = false;
-	updateMesh(true);
-}	
 
 void GLModel::changeViewMode(int viewMode) {
     if( this->viewMode == viewMode ) {
@@ -611,7 +603,6 @@ void GLModel::inactivateFeatures()
 {
 
 
-    closeCut();
     closeHollowShell();
     closeShellOffset();
     closeLayflat();
@@ -637,7 +628,8 @@ bool GLModel::perPrimitiveColorActive() const
 }
 bool GLModel::faceSelectionActive() const
 {
-	return qmlManager->currentFeature() != Hix::Features::FeatureEnum::Extend || qmlManager->currentFeature() != Hix::Features::FeatureEnum::Layflat;
+	return qmlManager->isActive<Hix::Features::Extend>(qmlManager->currentFeature()) || 
+			qmlManager->currentFeature() != Hix::Features::FeatureEnum::Layflat;
 }
 
 QVector3D GLModel::getPrimitiveColorCode(const Hix::Engine3D::Mesh* mesh, FaceConstItr itr)

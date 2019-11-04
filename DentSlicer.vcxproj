@@ -851,6 +851,7 @@
     </ClInclude>
     <ClInclude Include="feature\cut\modelcut.h" />
     <ClInclude Include="feature\Feature.h" />
+    <ClInclude Include="feature\labelling\LabelManager.h" />
     <ClInclude Include="feature\ModelBuilder.h" />
     <ClInclude Include="feature\overhangDetect.h" />
     <ClInclude Include="feature\repair\Algorithms\detectIntersections.h" />

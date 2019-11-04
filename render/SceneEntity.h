@@ -38,6 +38,7 @@ namespace Hix
 			void clearMesh();
 			//for now, one sceneEntity per mesh, no setter for mesh in sceneEntity
 			const Hix::Engine3D::Mesh* getMesh()const;
+			Hix::Engine3D::Mesh* getMesh();
 			const Qt3DCore::QTransform& transform() const;
 			QVector4D toParentCoord(const QVector4D& childPos)const;
 			QVector4D fromParentCoord(const QVector4D& parentPos)const;
@@ -66,6 +67,7 @@ namespace Hix
 			//get total AABB including it's children
 			Hix::Engine3D::Bounds3D recursiveAabb()const;
 			void updateRecursiveAabb();
+			void setTargetSelected(bool isSelected);
 			bool targetSelected()const;
 			FaceConstItr targetMeshFace();
 

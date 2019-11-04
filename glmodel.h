@@ -179,7 +179,6 @@ public slots:
     // Extension
     void unselectMeshFaces();
     void selectMeshFaces();
-    void generateExtensionFaces(double distance);
 
     // ShellOffset
     void openShellOffset();
