@@ -38,8 +38,7 @@ GLModel::GLModel(QEntity*parent, Mesh* loadMesh, QString fname, int id, const Qt
     , _filename(fname)
     , ID(id)
 {
-	if (transform)
-		_transform.setMatrix(transform->matrix());
+
 	initHitTest();
     qDebug() << "new model made _______________________________"<<this<< "parent:"<<parent;
 
@@ -54,7 +53,15 @@ GLModel::GLModel(QEntity*parent, Mesh* loadMesh, QString fname, int id, const Qt
 	else if (_filename != "" && (_filename.contains(".obj") || _filename.contains(".OBJ"))) {
 		FileLoader::loadMeshOBJ(loadMesh, _filename.toLocal8Bit().constData());
 	}
-	loadMesh->centerMesh();
+
+	if (transform)
+	{
+		_transform.setMatrix(transform->matrix());
+	}
+	else
+	{
+		loadMesh->centerMesh();
+	}
 	setMesh(loadMesh);
 	//applyGeometry();
 	// 승환 25%
