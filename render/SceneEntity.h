@@ -23,7 +23,6 @@ namespace Hix
 		{
 			Q_OBJECT
 		public:
-
 			//size of QGeometry Attribute elements
 			const static size_t POS_SIZE = 3; //x, y, z of position
 			const static size_t COL_SIZE = 3; //rgb color

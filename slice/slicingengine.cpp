@@ -12,11 +12,15 @@
 #include "DentEngine/src/slicer.h"
 #include "DentEngine/src/Planes.h"
 #include "feature/overhangDetect.h"
+#include "DentEngine/src/SlicerDebug.h"
+#include "DentEngine/src/SlicerDebugInfoExport.h"
+
 using namespace Hix;
 using namespace Hix::Slicer;
 using namespace Hix::Render;
 
-SlicingEngine::Result SlicingEngine::sliceModels(bool isTemp, tf::Subflow& subflow, float zMax, std::vector<std::reference_wrapper<const GLModel>> models, const Hix::Support::SupportRaftManager& suppRaft, QString filename){
+SlicingEngine::Result SlicingEngine::sliceModels(bool isTemp, tf::Subflow& subflow, float zMax,
+	std::vector<std::reference_wrapper<const GLModel>> models, const Hix::Support::SupportRaftManager& suppRaft, QString filename){
 
 	constexpr float BOTT = 0.0f;
 
@@ -32,6 +36,24 @@ SlicingEngine::Result SlicingEngine::sliceModels(bool isTemp, tf::Subflow& subfl
 	for (size_t i = 0; i < zPlanes.size(); ++i)
 	{
 		shellSlices[i].z = zPlanes[i];
+	}
+	filename += "_export";
+	QDir dir(filename);
+	if (!dir.exists()) {
+		dir.mkpath(".");
+	}
+	else {
+		dir.removeRecursively();
+		dir.mkpath(".");
+	}
+	//debug log
+	if (Hix::Slicer::Debug::SlicerDebug::getInstance().enableDebug)
+	{
+		Hix::Slicer::Debug::SlicerDebug::getInstance().debugFilePath = filename + QString("/debug/");
+		QDir debugDir(Hix::Slicer::Debug::SlicerDebug::getInstance().debugFilePath);
+		if (!debugDir.exists()) {
+			debugDir.mkpath(".");
+		}
 	}
 	//slice models
 	for (auto& model : models)
@@ -49,6 +71,16 @@ SlicingEngine::Result SlicingEngine::sliceModels(bool isTemp, tf::Subflow& subfl
 	{
 		Slicer::slice(*raft, &planes, &shellSlices);
 	}
+	//debug svg
+	if (Hix::Slicer::Debug::SlicerDebug::getInstance().enableDebug)
+	{
+		for (size_t i = 0; i < shellSlices.size(); ++i)
+		{
+			Hix::Slicer::Debug::outDebugSVGs(shellSlices[i].closedContours, i);
+			Hix::Slicer::Debug::outDebugIncompletePathsSVGs(shellSlices[i].incompleteContours, i);
+		}
+	}
+
 	//use clipper to combine clippings
 	shellSlices.containmentTreeConstruct();
 	qmlManager->setProgress(0.4);
@@ -81,7 +113,7 @@ SlicingEngine::Result SlicingEngine::sliceModels(bool isTemp, tf::Subflow& subfl
     // Export to SVG
     //QString export_info = SVGexporter::exportSVG(shellSlices, supportSlices, raftSlices, filename+"_export", isTemp);
 
-	SVGexporter::exportSVG(shellSlices, filename + "_export", isTemp);
+	SVGexporter::exportSVG(shellSlices, filename , isTemp);
 
 
 	int layer = planes.getPlanesVector().size();

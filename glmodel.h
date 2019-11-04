@@ -4,9 +4,8 @@
 #include "render/SceneEntityWithMaterial.h"
 #include "fileloader.h"
 #include "slice/slicingengine.h"
-#include "feature/modelcut.h"
+#include "feature/labelling/labelModel.h"
 #include "feature/autoorientation.h"
-#include "feature/meshrepair.h"
 #include "feature/autoarrange.h"
 #include "feature/extension.h"
 #include "feature/hollowshell.h"
@@ -25,22 +24,6 @@ using namespace Qt3DExtras;
 class GLModel;
 class OverhangPoint;
 
-namespace Hix
-{
-	class LabelModel;
-}
-
-namespace Hix
-{
-	namespace Features
-	{
-		namespace Cut
-		{
-			class DrawingPlane;
-		}
-	}
-}
-
 
 class GLModel : public Hix::Render::SceneEntityWithMaterial, public Hix::Input::Draggable, public Hix::Input::Clickable, public Hix::Input::HitTestAble
 {
@@ -55,14 +38,8 @@ public:
 	void dragEnded(Hix::Input::MouseEventData&) override;
 
     // load teeth model default
-    GLModel(QObject* mainWindow=nullptr, QEntity* parent=nullptr, Hix::Engine3D::Mesh* loadMesh=nullptr, QString fname="", int id = 0); // main constructor for mainmesh and shadowmesh
+    GLModel(QEntity* parent=nullptr, Hix::Engine3D::Mesh* loadMesh=nullptr, QString fname="", int id = 0, const Qt3DCore::QTransform* transform = nullptr); // main constructor for mainmesh and shadowmesh
     virtual ~GLModel();
-
-    //TODO: Turn these into privates as well
-    GLModel *leftModel = nullptr;
-    GLModel *rightModel = nullptr;
-    GLModel *twinModel = nullptr; // saves cut right for left, left for right models
-
 
     bool appropriately_rotated=false;
 
@@ -104,11 +81,7 @@ public:
 
     void repairMesh();
 
-    // Model Cut
-    void addCuttingPoint(QVector3D v);
-    void removeCuttingPoint(int idx);
-    void removeCuttingPoints();
-    void drawLine(QVector3D endpoint);
+
 	bool isPrintable()const;
     void updatePrintable();
     bool EndsWith(const std::string& a, const std::string& b);
@@ -120,7 +93,6 @@ public:
 
 
     const int ID; //for use in Part List
-    QObject* mainWindow;
 
     // implement lock as bool variable
     bool updateLock;
@@ -153,8 +125,6 @@ protected:
 private:
 	QString _filename;
 
-	//cutting
-	std::unique_ptr<Hix::Features::Cut::DrawingPlane> _cuttingPlane;
 
 
 	QVector3D getPrimitiveColorCode(const Hix::Engine3D::Mesh* mesh, FaceConstItr faceItr)override;
@@ -165,17 +135,12 @@ private:
 
 
 	void removeLayerViewComponents();
-
-    int cutMode = 1;
-    int cutFillMode = 1;
-    bool isFlatcutEdge = false;
     int viewMode = -1;
 
 signals:
 	void _updateModelMesh();
     void modelSelected(int);
     void resetLayflat();
-    void bisectDone(Mesh*, Mesh*); //lmesh, rmesh
     void layFlatSelect();
 	void manualSupportSelect();
 	void manualSupportUnSelect();
@@ -195,18 +160,9 @@ public slots:
     void closeLayflat();
     void generateLayFlat();
 
-    // Model Cut
 
-    void generatePlane(int type);
-    void removePlane();
-    void modelCut();
-    void cutModeSelected(int type);
-    void cutFillModeSelected(int type);
-    void getSliderSignal(double value);
+
     void getLayerViewSliderSignal(int value);
-	void generateRLModel(Mesh* lmesh, Mesh* rmesh);
-    void openCut();
-    void closeCut();
 
     // Hollow Shell
     void indentHollowShell(double radius);

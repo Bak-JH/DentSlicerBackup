@@ -20,7 +20,6 @@
 #include "DentEngine/src/configuration.h"
 #include "feature/Extrude.h"
 #include "feature/cut/DrawingPlane.h"
-#include "feature/cut/modelCutZAxis.h"
 #include "feature/labelling/labelModel.h"
 
 
@@ -36,15 +35,12 @@ using namespace Hix::Engine3D;
 using namespace Hix::Input;
 using namespace Hix::Render;
 
-
-
-GLModel::GLModel(QObject* mainWindow, QEntity*parent, Mesh* loadMesh, QString fname, int id)
+GLModel::GLModel(QEntity*parent, Mesh* loadMesh, QString fname, int id, const Qt3DCore::QTransform* transform)
     : SceneEntityWithMaterial(parent)
     , _filename(fname)
-    , mainWindow(mainWindow)
-    , cutMode(1)
     , ID(id)
 {
+
 	initHitTest();
     qDebug() << "new model made _______________________________"<<this<< "parent:"<<parent;
 	qDebug() << "new model made _______________________________" << fname;
@@ -67,6 +63,16 @@ GLModel::GLModel(QObject* mainWindow, QEntity*parent, Mesh* loadMesh, QString fn
 		loadMesh->centerMesh();
 		setMesh(loadMesh);
 	}
+
+	if (transform)
+	{
+		_transform.setMatrix(transform->matrix());
+	}
+	else
+	{
+		loadMesh->centerMesh();
+	}
+	setMesh(loadMesh);
 	//applyGeometry();
 	// 승환 25%
 	qmlManager->setProgress(0.23);
@@ -83,7 +89,6 @@ GLModel::GLModel(QObject* mainWindow, QEntity*parent, Mesh* loadMesh, QString fn
 	// 승환 75%
 	qmlManager->setProgress(0.73);
 
-	QObject::connect(this, SIGNAL(bisectDone(Mesh*, Mesh*)), this, SLOT(generateRLModel(Mesh*, Mesh*)));
 
 	qDebug() << "created shadow model";
 
@@ -184,14 +189,13 @@ void GLModel::updatePrintable() {
 		{
 			setMaterialColor(Hix::Render::Colors::Default);
 		}
-
 	}
 }
 
 
 void GLModel::repairMesh()
 {
-    MeshRepair::modelRepair(this);
+    //MeshRepair::modelRepair(this);
 	emit _updateModelMesh();
 }
 
@@ -217,133 +221,17 @@ void GLModel::updateModelMesh(){
 }
 
 
-void GLModel::generatePlane(int type){
-
-	//generate drawing plane
-	_cuttingPlane.reset(new Hix::Features::Cut::DrawingPlane(this)); 
-	_cuttingPlane->enablePlane(true);
-	//if flat cut
-	if (type == 1)
-	{	
-
-	}
-	else if (type == 2)
-	{
-		_cuttingPlane->enableDrawing(true);
-		//want cutting plane to be over model mesh
-		float zOverModel = _mesh->z_max() + 0.1f;
-		_cuttingPlane->transform().setTranslation(QVector3D(0, 0, zOverModel));
-		qmlManager->getRayCaster().setHoverEnabled(true);
-	}
-}
-
-void GLModel::removePlane(){
-	//freecut disable hovering
-	if (cutMode == 2)
-	{
-		qmlManager->getRayCaster().setHoverEnabled(false);
-	}
-	_cuttingPlane.reset();
-}
-
-void GLModel::removeModelPartList(){
-    //remove part list
-    QList<QObject*> temp;
-    temp.append(mainWindow);
-    QObject *partList = (QEntity *)FindItemByName(temp, "partList");
-    QObject *yesno_popup = (QEntity *)FindItemByName(temp, "yesno_popup");
-
-    qDebug() <<"remove ID   " << ID;
-    QMetaObject::invokeMethod(partList, "deletePartListItem", Q_ARG(QVariant, ID));
-    QMetaObject::invokeMethod(yesno_popup, "deletePartListItem", Q_ARG(QVariant, ID));
-}
-
-void GLModel::modelCut(){
-
-    qmlManager->openProgressPopUp();
-
-
-    if (cutMode == 1){ // flat cut
-		auto lmesh = new Mesh();
-		auto rmesh = new Mesh();
-        if (this->shellOffsetActive && isFlatcutEdge == true) {
-            getSliderSignal(0.0);
-        }
-		bool fillCuttingSurface = cutFillMode == 2;
-		Hix::Features::Cut::ZAxisCutTask task(_mesh, lmesh, rmesh, _cuttingPlane->transform().translation().z(), fillCuttingSurface);
-        emit bisectDone(lmesh, rmesh);
-
-    } else if (cutMode == 2){ // free cut
-		auto cuttingContour = _cuttingPlane->contour();
-        if (cuttingContour.size() >= 2){
-			auto lmesh = new Mesh();
-			auto rmesh = new Mesh();
-            cutAway(lmesh, rmesh, _mesh, cuttingContour, cutFillMode);
-
-            if (lmesh->getFaces().size() == 0 || rmesh->getFaces().size() == 0){
-
-                qDebug() << "cutting contour selected not cutting";
-                qmlManager->setProgress(1);
-                cutModeSelected(2); // reset
-                return;
-            }
-            emit bisectDone(lmesh, rmesh);
-        }
-    }
-}
-
-void GLModel::generateRLModel(Mesh* lmesh, Mesh* rmesh){
-	GLModel* leftmodel = nullptr;
-	GLModel* rightmodel = nullptr;
-    qDebug() << "** generateRLModel" << this;
-    if (lmesh->getFaces().size() != 0){
-		leftmodel = qmlManager->createModelFile(lmesh, _filename+"_l");
-        qDebug() << "leftmodel created";
-    }
-    // 승환 70%
-    qmlManager->setProgress(0.72);
-    if (rmesh->getFaces().size() != 0){
-		rightmodel = qmlManager->createModelFile(rmesh, _filename +"_r");
-        qDebug() << "rightmodel created";
-    }
-
-
-    // 승환 90%
-
-    qDebug() << "found models : " << leftmodel << rightmodel;
-    if (leftmodel != nullptr && rightmodel != nullptr){
-        leftmodel->twinModel = rightmodel;
-        rightmodel->twinModel = leftmodel;
-    }
-
-    qmlManager->setProgress(1);
-
-    if (shellOffsetActive){
-		if (leftmodel != nullptr)
-		{
-			auto offsetLeftMesh = ShellOffset::shellOffset(leftmodel->_mesh, (float)shellOffsetFactor);
-
-			qmlManager->createModelFile(offsetLeftMesh, leftmodel->filename());
-
-			qmlManager->deleteModelFile(leftmodel->ID);
-
-		}
-        if (rightmodel != nullptr)
-            qmlManager->deleteModelFile(rightmodel->ID);
-        QMetaObject::invokeMethod(qmlManager->boxUpperTab, "all_off");
-    }
-
-
-    //deleteLater();
-    removePlane();
-    // delete original model
-    qmlManager->deleteModelFile(ID);
-
-    // do auto arrange
-    //qmlManager->runArrange();
-	QMetaObject::invokeMethod(qmlManager->boundedBox, "hideBox");
-    // 승환 100%
-    qmlManager->setProgress(1);
+// hollow shell part
+void GLModel::indentHollowShell(double radius){
+    qDebug() << "hollow shell called" << radius;
+	if (!_targetSelected)
+		return;
+	auto meshVertices = targetMeshFace.meshVertices();
+    QVector3D center = (
+		meshVertices[0].localPosition() +
+		meshVertices[1].localPosition() +
+		meshVertices[2].localPosition())/3;
+	HollowShell::hollowShell(_mesh, targetMeshFace, center, radius);
 }
 
 GLModel::~GLModel(){
@@ -460,7 +348,7 @@ bool GLModel::isDraggable(Hix::Input::MouseEventData& e,const Qt3DRender::QRayCa
 		&&
 		qmlManager->isSelected(this) 
 		&&
-			(qmlManager->currentFeature() != Hix::Features::FeatureEnum::Cut ||
+			(qmlManager->currentFeature() != Hix::Features::FeatureEnum::CUT ||
 			qmlManager->currentFeature() != Hix::Features::FeatureEnum::ShellOffset ||
 			qmlManager->currentFeature() != Hix::Features::FeatureEnum::Extend ||
 			qmlManager->currentFeature() != Hix::Features::FeatureEnum::Label ||
@@ -517,6 +405,58 @@ void GLModel::dragEnded(Hix::Input::MouseEventData&)
 	isMoved = false;
     qmlManager->totalMoveDone();
 
+}
+
+
+
+void GLModel::getLayerViewSliderSignal(int value) {
+    if ( !layerViewActive)
+        return;
+
+    //float height = (_mesh->z_max() - _mesh->z_min() + scfg->raft_thickness + scfg->support_base_height) * value;
+    //int layer_num = int(height/scfg->layer_height)+1;
+    //if (value <= 0.002f)
+    //    layer_num = 0;
+
+    if (layerViewPlaneTextureLoader == nullptr)
+    layerViewPlaneTextureLoader = new Qt3DRender::QTextureLoader();
+
+    QDir dir(QDir::tempPath()+"_export");//(qmlManager->selectedModels[0]->filename + "_export")
+    if (dir.exists()){
+        QString filename = dir.path()+"/"+QString::number(value)+".svg";
+        qDebug() << filename;
+        layerViewPlaneTextureLoader->setSource(QUrl::fromLocalFile(filename));//"C:\\Users\\User\\Desktop\\sliced\\11111_export\\100.svg"));
+    }
+    //qDebug() << "layer view plane material texture format : " << layerViewPlaneTextureLoader->format();
+    //layerViewPlaneTextureLoader->setFormat(QAbstractTexture::RGBA32F);
+    //qDebug() << "layer view plane material texture format : " << layerViewPlaneTextureLoader->format();
+
+    layerViewPlaneMaterial->setTexture(layerViewPlaneTextureLoader);
+	float rotation_values[] = { // rotate by -90 deg
+	0, -1, 0,
+	1, 0, 0,
+	0, 0, 1
+	};
+	//flip Ys,
+	float flip_values[] = {
+		1, 0, 0,
+		0, -1, 0,
+		0, 0, 1
+	};
+
+    QMatrix3x3 rotation_matrix(rotation_values);
+	QMatrix3x3 flip_matrix(flip_values);
+	QMatrix3x3 matrixTransform = flip_matrix * rotation_matrix;
+
+    layerViewPlaneMaterial->setTextureTransform(matrixTransform);
+    layerViewPlaneTransform->setTranslation(QVector3D(0,0, value *scfg->layer_height - scfg->raft_thickness - scfg->support_base_height));
+
+    // change phong material of original model
+    float h = scfg->layer_height* value + _mesh->z_min() - scfg->raft_thickness - scfg->support_base_height;
+	_meshMaterial.setParameterValue("height", QVariant::fromValue(h));
+	/*m_layerMaterialRaftHeight->setValue(QVariant::fromValue(qmlManager->getLayerViewFlags() & LAYER_INFILL != 0 ?
+                _mesh->z_min() :
+                _mesh->z_max() + scfg->raft_thickness - scfg->support_base_height));*/
 }
 
 /** HELPER functions **/

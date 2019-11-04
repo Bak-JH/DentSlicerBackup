@@ -37,7 +37,7 @@ namespace Hix
 			void  setSupportEditMode(EditMode mode);
 			//coordinate for bottom of support and raft
 
-			void autoGenSuppRaft(const GLModel& model, SlicingConfiguration::SupportType supType, SlicingConfiguration::RaftType raftType);
+			void autoGen(const GLModel& model, SlicingConfiguration::SupportType supType);
 			void addSupport(const OverhangDetect::Overhang& overhang);
 			void removeSupport(SupportModel* e);
 			void applyEdits();
@@ -62,7 +62,6 @@ namespace Hix
 			std::unordered_map<SupportModel*, EditType> _pendingSupports;
 			EditMode _supportEditMode = EditMode::None;
 			SlicingConfiguration::SupportType _supportType;
-			SlicingConfiguration::RaftType _raftType;
 			std::unordered_set<Hix::Memory::HetUniquePtr<SupportModel>> _supports;
 			std::unique_ptr<RaftModel> _raft;
 		};

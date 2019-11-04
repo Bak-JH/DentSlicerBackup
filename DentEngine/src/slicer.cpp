@@ -8,6 +8,8 @@
 #include "configuration.h"
 #include "ContourBuilder.h"
 #include "Planes.h"
+#include "SlicerDebug.h"
+#include "SlicerDebugInfoExport.h"
 #if defined(_DEBUG) || defined(QT_DEBUG )
 #define _STRICT_SLICER
 //#define _STRICT_MESH_NO_SELF_INTERSECTION
@@ -18,8 +20,6 @@ using namespace Hix::Slicer;
 QDebug Hix::Debug::operator<< (QDebug d, const Slice& obj) {
 	d << "z: " << obj.z;
 	d << "polytree: " << obj.polytree;
-
-	d << "closedContours: " << obj.closedContours;
 
 	return d;
 }
@@ -93,15 +93,21 @@ void Hix::Slicer::slice(const Hix::Render::SceneEntity& entity, const Planes* pl
 	if (mesh->getFaces().size() ==0){
         return;
     }
+
+	//MeshRepair::identifyHoles(mesh);
+
 	auto zPlanes = planes->getPlanesVector();
 	auto intersectingFaces = planes->buildTriangleLists(mesh);
 	for (int i = 0; i < zPlanes.size(); i++) {
+		qDebug() << "slicing: " << i;
 		auto& currSlice = (*slices)[i];
 		ContourBuilder contourBuilder(mesh, intersectingFaces[i], zPlanes[i]);
 		auto contours = contourBuilder.buildContours();
-		for (auto& each : contours)
+		std::move(contours.begin(), contours.end(), std::back_inserter(currSlice.closedContours));  // ##
+		if (Hix::Slicer::Debug::SlicerDebug::getInstance().enableDebug)
 		{
-			currSlice.closedContours.push_back(each.toPath());
+			auto incompleteContours = contourBuilder.flushIncompleteContours();
+			std::move(incompleteContours.begin(), incompleteContours.end(), std::back_inserter(currSlice.incompleteContours));  // ##
 		}
 	}
     return;
@@ -121,8 +127,11 @@ void Slices::containmentTreeConstruct(){
     Clipper clpr;
     for (int idx=0; idx<this->size(); idx++){ // divide into parallel threads
         Slice* slice = &((*this)[idx]);
-			clpr.Clear();
-        clpr.AddPaths(slice->closedContours, ptSubject, true);
+		clpr.Clear();
+		for (auto& each : slice->closedContours)
+		{
+			clpr.AddPath(each.toPath(), ptSubject, true);
+		}
         clpr.Execute(ctUnion, slice->polytree, pftNonZero, pftNonZero);
     }
 }

@@ -20,13 +20,15 @@ namespace Hix
 			//ie) when cylinder is complete, starting contour faces wrong way and it's normal is towards the inside of cylinder
 			//does not generate end caps though.
 			template<typename ScaleArg>
-			std::vector<QVector3D> extrudeAlongPath(Engine3D::Mesh* destinationMesh, const QVector3D& normal,
-				const std::vector<QVector3D>& contour, const std::vector<QVector3D>& path, std::vector<std::vector<QVector3D>>& jointContours,
-				const std::vector<ScaleArg>* scales = nullptr, std::function<void (std::vector<QVector3D>&,  ScaleArg)>* scaleFunctor = nullptr)
+			void extrudeAlongPath(Engine3D::Mesh* destinationMesh, const QVector3D& normal,
+				const std::vector<QVector3D>& contour, const std::vector<QVector3D>& path,
+				std::vector<std::vector<QVector3D>>& jointContours,
+				const std::vector<ScaleArg>* scales = nullptr,
+				std::function<void (std::vector<QVector3D>&,  ScaleArg)>* scaleFunctor = nullptr)
 			{
 
 				if (contour.size() < 3 || path.size() < 2 || (scales && (!scaleFunctor || scales->size() != path.size())))
-					return std::vector<QVector3D>();
+					return;
 				//joints including end cap contours
 				jointContours.clear();
 				jointContours.reserve(path.size());
@@ -85,8 +87,6 @@ namespace Hix
 					destinationMesh->addFace(trig[0], trig[1], trig[2]);
 				}
 
-				//return information for the ending cap so that user can generate it if he wants it
-				return jointContours.back();
 			}
 
 		}

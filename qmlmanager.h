@@ -36,36 +36,13 @@
 #define LAYER_SUPPORTERS 0x02
 #define LAYER_RAFT 0x04
 
-
-//delete later(maybe?)
 namespace Hix
 {
 	namespace Features
 	{
-		enum FeatureEnum
-		{
-			None,
-			Open,
-			Save,
-			Export,
-			Move,
-			Rotate,
-			LayFlat,
-			Arrange,
-			Orient,
-			Scale,
-			Repair,
-			Cut,
-			ShellOffset,
-			Extend,
-			ManualSupport,
-			Label,
-			LayerViewMode,
-			Delete
-		};
+		class Feature;
 	}
 }
-
 class QQuickItem;
 class QmlManager : public QObject
 {
@@ -97,6 +74,7 @@ public:
     QObject* boxLeftTab;
 	QQuickItem* scene3d;
     QEntity* models;
+	QEntity* total;
     Qt3DCore::QTransform* systemTransform;
 	QEntity* mv;
 	Qt3DCore::QEntity* boundedBox;
@@ -219,9 +197,6 @@ public:
     void setProgressText(std::string inputText);
     int getLayerViewFlags();
 	void modelSelected(int);
-	
-	Q_INVOKABLE void setCurrentActiveFeature(int);
-	Hix::Features::FeatureEnum currentFeature()const;
 
 	void faceSelectionEnable();
 	void faceSelectionDisable();
@@ -286,7 +261,6 @@ public:
 	Hix::Support::SupportRaftManager& supportRaftManager();
 
 private:
-	Hix::Features::FeatureEnum _currentActiveFeature = Hix::Features::FeatureEnum::None;
 	Hix::Tasking::TaskManager _taskManager;
 	void setModelViewMode(int mode);
 	bool deselectAllowed();
@@ -313,7 +287,7 @@ private:
 	//cursors
 	QCursor _cursorEraser;
 	Hix::Support::SupportRaftManager _supportRaftManager;
-
+	std::unique_ptr<Hix::Features::Feature> _currentFeature;
 
 signals:
     void updateModelInfo(int printing_time, int layer, QString xyz, float volume);
@@ -321,9 +295,17 @@ signals:
 
 
 public slots:
-	
+	// model cut popup codes
+	void modelCut();
+	void cutModeSelected(int);
+	void cutFillModeSelected(int);
+	void openCut();
+	void closeCut();
+	void getSliderSignal(double);
+
+
     void sendUpdateModelInfo(int, int, QString, float);
-    GLModel* createModelFile(Mesh* target_mesh, QString filename);
+    GLModel* createModelFile(Mesh* target_mesh, QString filename, const Qt3DCore::QTransform* transform = nullptr);
     void openModelFile(QString filename);
     void checkModelFile(GLModel* model);
     void deleteOneModelFile(int ID);
