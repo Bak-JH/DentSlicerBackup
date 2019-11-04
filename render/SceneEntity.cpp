@@ -112,6 +112,11 @@ const  Hix::Engine3D::Mesh* SceneEntity::getMesh()const
 	return _mesh;
 }
 
+Hix::Engine3D::Mesh* SceneEntity::getMesh()
+{
+	return _mesh;
+}
+
 const Qt3DCore::QTransform& Hix::Render::SceneEntity::transform() const
 {
 	return _transform;
@@ -494,6 +499,11 @@ void SceneEntity::updateRecursiveAabb()
 	//expensive operation to re-calculate bounding box, but necessary
 	_aabb = Bounds3D(*this);
 	callRecursive(this, &SceneEntity::updateRecursiveAabb);
+}
+
+void SceneEntity::setTargetSelected(bool isSelected)
+{
+	_targetSelected = isSelected;
 }
 
 bool SceneEntity::targetSelected()const

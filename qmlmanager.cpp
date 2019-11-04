@@ -246,7 +246,7 @@ void QmlManager::initializeUI(QQmlApplicationEngine* e){
 	QObject::connect(labelFontSizeBox, SIGNAL(sendFontSize(int)), glmodel, SLOT(getFontSizeChanged(int)));
 
 	// extension popup codes
-	QObject::connect(extensionPopup, SIGNAL(generateExtensionFaces(double)), glmodel, SLOT(generateExtensionFaces(double)));
+	QObject::connect(extensionPopup, SIGNAL(generateExtensionFaces(double)), this, SLOT(generateExtensionFaces(double)));
 	// model cut popup codes
 	QObject::connect(cutPopup, SIGNAL(modelCut()), this, SLOT(modelCut()));
 	QObject::connect(cutPopup, SIGNAL(cutModeSelected(int)), this, SLOT(cutModeSelected(int)));
@@ -329,7 +329,6 @@ void QmlManager::deleteOneModelFile(GLModel* target) {
 	if (target)
 	{
 		//TODO: move these into glmodel destructor
-		target->removePlane();
 		//    target->deleteLater();
 		//    target->deleteLater();
 		deletePartListItem(target->ID);
@@ -632,30 +631,6 @@ bool QmlManager::multipleModelSelected(int ID){
 
             QMetaObject::invokeMethod(qmlManager->mttab, "hideTab"); // off MeshTransformer Tab
 
-            if (groupFunctionState == "active"){
-                switch (_currentActiveFeature){
-                //case 2:
-                //    QMetaObject::invokeMethod(savePopup, "offApplyFinishButton");
-                //    break;
-				case Hix::Features::FeatureEnum::Move:
-					_widgetManager.setWidgetMode(WidgetMode::None);
-					QMetaObject::invokeMethod(movePopup, "offApplyFinishButton");
-					break;
-                case Hix::Features::FeatureEnum::Rotate:
-					_widgetManager.setWidgetMode(WidgetMode::None);
-                    QMetaObject::invokeMethod(rotatePopup,"offApplyFinishButton");
-                    break;
-                case Hix::Features::FeatureEnum::LayFlat:
-                    QMetaObject::invokeMethod(layflatPopup,"offApplyFinishButton");
-                    break;
-                case Hix::Features::FeatureEnum::Orient:
-                    QMetaObject::invokeMethod(orientPopup,"offApplyFinishButton");
-                    break;
-                case Hix::Features::FeatureEnum::Repair:
-                    QMetaObject::invokeMethod(repairPopup,"offApplyFinishButton");
-                    break;
-                }
-            }
             return true;
         }
 		else
@@ -812,6 +787,11 @@ void QmlManager::modelSelected(int ID){
     sendUpdateModelInfo();
 }
 
+Hix::Features::Feature* QmlManager::currentFeature()const
+{
+	return _currentFeature.get();
+}
+
 void QmlManager::faceSelectionEnable()
 {
 	for (auto selectedModel : selectedModels)
@@ -869,7 +849,7 @@ void QmlManager::updateLabelPreview(QString text, QString fontName, bool isBold,
 {
 	for (auto selectedModel : selectedModels)
 	{
-		if (selectedModel->textPreview && _currentActiveFeature == Hix::Features::FeatureEnum::Label)
+		if (selectedModel->textPreview && _currentFeature == Hix::Features::FeatureEnum::Label)
 		{
 			selectedModel->textPreview->generateLabel(text, selectedModel->targetMeshFace().localFn());
 			selectedModel->updateModelMesh();
@@ -895,7 +875,7 @@ void QmlManager::generateLabelMesh()
 
 		setProgress(0.1f);
 
-		selectedModel->_targetSelected = false;
+		selectedModel->setTargetSelected(false);
 		setProgress(0.5f);
 
 		selectedModel->setMaterialColor(Hix::Render::Colors::Selected);
@@ -903,6 +883,20 @@ void QmlManager::generateLabelMesh()
 		selectedModel->updateModelMesh();
 
 		setProgress(1.0f);
+	}
+}
+
+void QmlManager::generateExtensionFaces(double distance)
+{
+	for (auto selectedModel : selectedModels)
+	{
+		if (selectedModel->targetSelected())
+			return;
+
+		auto extend = dynamic_cast<Extend*>(_currentFeature.get());
+		extend->extendMesh(selectedModel->getMesh(), selectedModel->targetMeshFace(), distance);
+		selectedModel->setTargetSelected(false);
+		selectedModel->updateMesh(true);
 	}
 }
 
@@ -1335,18 +1329,15 @@ void QmlManager::setProgress(float value){
 
 void QmlManager::openSave() {
     qDebug() << "open Save";
-    saveActive = true;
     return;
 }
 
 void QmlManager::closeSave() {
     qDebug() << "close Save";
-    saveActive = false;
     return;
 }
 
 void QmlManager::openMove(){
-	setCurrentActiveFeature(1);
     //moveActive = true;
     return;
 }
@@ -1362,26 +1353,22 @@ void QmlManager::openRotate(){
     qDebug() << "open Rotate";
 	QMetaObject::invokeMethod(qmlManager->boundedBox, "hideBox");
     slicingData->setProperty("visible", false);
-    rotateActive = true;
     return;
 }
 
 void QmlManager::closeRotate(){
     qDebug() << "close Rotate";
-    rotateActive = false;
     totalRotateDone();
     return;
 }
 
 void QmlManager::openOrientation(){
     qDebug() << "open orientation";
-    orientationActive = true;
     return;
 }
 
 void QmlManager::closeOrientation(){
     qDebug() << "close orientation";
-    orientationActive = false;
     sendUpdateModelInfo();
     return;
 }

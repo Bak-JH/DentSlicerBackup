@@ -36,6 +36,32 @@
 #define LAYER_SUPPORTERS 0x02
 #define LAYER_RAFT 0x04
 
+
+/// PLZ DELETE THESE DISGUSTING THINGS ///
+/* feature thread */
+#define ftrEmpty -1 //TODO: remove this swtich craziness.
+#define ftrOpen 1
+#define ftrSave 2
+#define ftrExport 3
+#define ftrMove 4
+#define ftrRotate 5
+#define ftrLayFlat 6
+#define ftrArrange 7
+#define ftrOrient 8
+#define ftrScale 9
+#define ftrRepair 10
+#define ftrCut 11
+#define ftrShellOffset 12
+#define ftrExtend 13
+#define ftrManualSupport 14
+#define ftrLabel 15
+#define ftrSupportViewMode 16
+#define ftrLayerViewMode 17
+#define ftrDelete 18
+#define ftrTempExport 19
+#define ftrSupportDisappear 20
+
+
 namespace Hix
 {
 	namespace Features
@@ -52,6 +78,12 @@ public:
 	template <typename F>
 	static void postToObject(F&& fun, QObject* obj = qApp) {
 		QMetaObject::invokeMethod(obj, std::forward<F>(fun));
+	}
+
+	template<typename FeatureType>
+	bool isActive(const Hix::Features::Feature* curr)
+	{
+		return dynamic_cast<FeatureType*>(curr) != nullptr;
 	}
 
 	template <typename F>
@@ -197,6 +229,8 @@ public:
     void setProgressText(std::string inputText);
     int getLayerViewFlags();
 	void modelSelected(int);
+	
+	Hix::Features::Feature* currentFeature()const;
 
 	void faceSelectionEnable();
 	void faceSelectionDisable();
@@ -207,6 +241,8 @@ public:
 	void stateChangeLabelling();
 	void updateLabelPreview(QString text, QString fontName, bool isBold, int fontSize);
 	void generateLabelMesh();
+
+	void generateExtensionFaces(double distance);
 
 	//remove this
 	const std::unordered_set<GLModel*>& getSelectedModels();

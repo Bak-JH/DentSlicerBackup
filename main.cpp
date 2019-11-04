@@ -89,8 +89,6 @@ int main(int argc, char** argv)
 	qmlManager->version = version;
 	QScopedPointer<QmlManager> qm(qmlManager);
 
-	qmlRegisterType<Hix::Features::FeatureEnum>("FeatureEnums", 1, 0, "Feature");
-
 	engine.rootContext()->setContextProperty("qm", qm.data());
 	//FindItemByName(&engine, "slicing_data")->setContextProperty("qm", qmlManager);
 	engine.rootContext()->setContextProperty("qq", qq.data());
