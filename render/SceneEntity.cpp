@@ -117,14 +117,6 @@ const Qt3DCore::QTransform& Hix::Render::SceneEntity::transform() const
 	return _transform;
 }
 
-Qt3DCore::QTransform& Hix::Render::SceneEntity::transform()
-{
-
-	return _transform;
-
-}
-
-
 QVector4D Hix::Render::SceneEntity::toParentCoord(const QVector4D& childPos) const
 {
 	return  _transform.matrix() * childPos;

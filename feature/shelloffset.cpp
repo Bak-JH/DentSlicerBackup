@@ -1,13 +1,13 @@
 #include "shelloffset.h"
 #include "qmlmanager.h"
-
+#include "feature/repair/meshrepair.h"
 // offset shell with mm
 
 
 Mesh* ShellOffset::shellOffset(Mesh* mesh, float factor){
     int cnt=0;
     Mesh* offsetMesh = new Mesh(*mesh);
-	std::vector<HalfEdgeConstItr> boundaryEdges = MeshRepair::identifyBoundary(mesh);
+	std::vector<HalfEdgeConstItr> boundaryEdges = Hix::Features::identifyBoundary(mesh);
 
 
 	//we fill hole by connecting matching outer halfedge with inner halfedge to form a rectangle(two triangles)

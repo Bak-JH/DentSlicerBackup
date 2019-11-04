@@ -441,10 +441,14 @@ bool Hix::Engine3D::findCommonManifoldFace(
 
 void Mesh::removeVertexHash(QVector3D pos)
 {
-	auto toBeRemoved = _verticesHash.find(_vtxHasher(pos));
-	if (toBeRemoved != _verticesHash.end())
+	auto toBeRemoved = _verticesHash.equal_range(_vtxHasher(pos));
+	for (auto& nVtxItr = toBeRemoved.first; nVtxItr != toBeRemoved.second; ++nVtxItr)
 	{
-		_verticesHash.erase(toBeRemoved);
+		if (nVtxItr->second.localPosition() == pos)
+		{
+			_verticesHash.erase(nVtxItr);
+			break;
+		}
 	}
 }
 
@@ -498,16 +502,18 @@ QVector3D Hix::Engine3D::Mesh::vectorToLocal(const QVector3D& world) const
 size_t Mesh::addOrRetrieveFaceVertex(const QVector3D& v){
 	//find if existing vtx can be used
 	auto hashval = _vtxHasher(v);
-	auto existingVtx = _verticesHash.find(hashval);
-
-	if (existingVtx != _verticesHash.end())
+	auto binVtxs = _verticesHash.equal_range(hashval);
+	for (auto& curr = binVtxs.first; curr != binVtxs.second; ++curr)
 	{
-		return existingVtx->second.index();
-    }
+		if (curr->second.localPosition() == v)
+		{
+			return curr->second.index();
+		}
+	}
     MeshVertex mv(v);
     vertices.emplace_back(mv);
 	auto last = vertices.cend() - 1;
-	_verticesHash[hashval] = last;
+	_verticesHash.insert({ hashval, last });
     _bounds.update(v);
     return  last.index();
 }
@@ -574,14 +580,15 @@ void Mesh::vtxIndexChangedCallback(size_t oldIdx, size_t newIdx)
 	//update hash value
 	auto oldItr = vertices.cbegin() + oldIdx;
 	auto hashVal = _vtxHasher(vtx.position);
-	auto hashItr = _verticesHash.find(hashVal);
-	while (hashItr != _verticesHash.end()) {
-		if (hashItr->second == oldItr)
+	auto binVtxs = _verticesHash.equal_range(hashVal);
+	for (auto& curr = binVtxs.first; curr != binVtxs.second; ++curr)
+	{
+		if (curr->second == oldItr)
 		{
-			_verticesHash[hashVal] = newIndexItr;
+			_verticesHash.erase(curr);
+			_verticesHash.insert({ hashVal , newIndexItr});
 			break;
 		}
-		++hashItr;
 	}
 }
 

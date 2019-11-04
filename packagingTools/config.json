@@ -1,6 +1,6 @@
 {
     "NSISTemplate": "template.nsi",
     "content": "setup\\*.*",
-    "version": "1.0.5_rc5",
+    "version": "1.0.9",
     "outputName": "DSBuild.nsi"
 }

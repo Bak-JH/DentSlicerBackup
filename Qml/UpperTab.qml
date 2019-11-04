@@ -1137,7 +1137,6 @@ Rectangle {
                 }
                 else {
                     slider_vis = false;
-                    closeCut();
                     return "inactive"
                 }
             }
@@ -1171,6 +1170,7 @@ Rectangle {
 
             onApplyClicked: {
                 modelCut();
+                closeCut();
                 slider_vis = false;
             }
 
@@ -1749,7 +1749,7 @@ Rectangle {
                 anchors.topMargin: 20
                 Text {
                     id: supRegenText
-                    text: "Regenerate raft"
+                    text: "Generate raft"
                     anchors.horizontalCenter: parent.horizontalCenter
                     anchors.verticalCenter: parent.verticalCenter
                     font.family: mainFont.name

@@ -19,7 +19,7 @@ namespace Hix
 			class DrawingPlane : public Qt3DCore::QEntity, public Hix::Input::HitTestAble, public Hix::Input::Clickable
 			{
 			public:
-				DrawingPlane(GLModel* owner);
+				DrawingPlane(Qt3DCore::QEntity* owner);
 				virtual ~DrawingPlane();
 				void enablePlane(bool isEnable);
 				void enableDrawing(bool isEnable);
@@ -34,7 +34,7 @@ namespace Hix
 				bool _drawingEnabled = false;
 				std::array<Qt3DExtras::QPlaneMesh, 2> _planeMeshes;
 				Qt3DCore::QTransform _transform;
-				GLModel* _owner = nullptr;
+				Qt3DCore::QEntity* _owner = nullptr;
 				std::unordered_set<Hix::Memory::HetUniquePtr<FreeCutPtWidget>> _ptWidgets;
 				FreeCutPtWidget* _lastPt = nullptr;
 			};

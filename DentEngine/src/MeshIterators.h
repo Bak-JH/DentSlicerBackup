@@ -382,6 +382,25 @@ namespace Hix
 				return false;
 			}
 
+			bool isNextVtx(const typename TypeConstInfo::VertexItrType& prev, const typename TypeConstInfo::VertexItrType& next) const
+			{
+				auto hEdge = edge();
+				for (size_t i = 0; i < 3; ++i)
+				{
+
+					if (hEdge.from() == prev)
+					{
+						if (hEdge.to() == next)
+						{
+							return true;
+						}
+						break;
+					}
+					hEdge.moveNext();
+				}
+				return false;
+			}
+
 			bool isNeighborOf(const FaceConstItr& other) const
 			{
 

@@ -12,7 +12,6 @@
 #include <future>
 #include <condition_variable>
 
-#include "common/Singleton.h"
 
 
 class GLModel;

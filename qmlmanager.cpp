@@ -26,12 +26,13 @@
 #include "DentEngine/src/configuration.h"
 #include "feature/stlexporter.h"
 #include "DentEngine/src/MeshIterators.h"
+#include "feature/cut/modelcut.h"
 #include <functional>
 using namespace Hix::Input;
 using namespace Hix::UI;
 using namespace Hix::Render;
 using namespace Hix::Tasking;
-
+using namespace Hix::Features;
 QmlManager::QmlManager(QObject *parent) : QObject(parent), _optBackend(this, scfg)
   ,layerViewFlags(LAYER_INFILL | LAYER_SUPPORTERS | LAYER_RAFT), modelIDCounter(0), _cursorEraser(QPixmap(":/Resource/cursor_eraser.png"))
 {
@@ -54,7 +55,7 @@ void QmlManager::initializeUI(QQmlApplicationEngine* e){
     mttab = (QEntity *)FindItemByName(engine, "mttab");
     QMetaObject::invokeMethod(mv, "initCamera");
 
-	auto total = dynamic_cast<QEntity*> (FindItemByName(engine, "total"));
+	total = dynamic_cast<QEntity*> (FindItemByName(engine, "total"));
 	_camera = dynamic_cast<Qt3DRender::QCamera*> (FindItemByName(engine, "camera"));
 
 	_widgetManager.initialize(total, &_rayCastController);
@@ -197,7 +198,6 @@ void QmlManager::initializeUI(QQmlApplicationEngine* e){
     QObject::connect(viewObjectButton, SIGNAL(onChanged(bool)), this, SLOT(viewObjectChanged(bool)));
     viewLayerButton = FindItemByName(engine, "viewLayerButton");
     QObject::connect(viewLayerButton, SIGNAL(onChanged(bool)), this, SLOT(viewLayerChanged(bool)));
-    setViewMode(VIEW_MODE_OBJECT);
 
     layerInfillButton = FindItemByName(engine, "layerInfillButton");
     QObject::connect(layerInfillButton, SIGNAL(onChanged(bool)), this, SLOT(layerInfillButtonChanged(bool)));
@@ -247,12 +247,21 @@ void QmlManager::initializeUI(QQmlApplicationEngine* e){
 
 	// extension popup codes
 	QObject::connect(extensionPopup, SIGNAL(generateExtensionFaces(double)), glmodel, SLOT(generateExtensionFaces(double)));
+	// model cut popup codes
+	QObject::connect(cutPopup, SIGNAL(modelCut()), this, SLOT(modelCut()));
+	QObject::connect(cutPopup, SIGNAL(cutModeSelected(int)), this, SLOT(cutModeSelected(int)));
+	QObject::connect(cutPopup, SIGNAL(cutFillModeSelected(int)), this, SLOT(cutFillModeSelected(int)));
+	QObject::connect(cutPopup, SIGNAL(openCut()), this, SLOT(openCut()));
+	QObject::connect(cutPopup, SIGNAL(closeCut()), this, SLOT(closeCut()));
+	QObject::connect(cutPopup, SIGNAL(resultSliderValueChanged(double)), this, SLOT(getSliderSignal(double)));
 
 }
 
-GLModel* QmlManager::createModelFile(Mesh* target_mesh, QString fname) {
+
+
+GLModel* QmlManager::createModelFile(Mesh* target_mesh, QString fname, const Qt3DCore::QTransform* transform) {
     openProgressPopUp();
-    auto res = glmodels.try_emplace(modelIDCounter, mainWindow, models, target_mesh, fname, modelIDCounter);
+    auto res = glmodels.try_emplace(modelIDCounter, models, target_mesh, fname, modelIDCounter, transform);
     ++modelIDCounter;
     auto latestAdded = &(res.first->second);
     qDebug() << "created new model file";
@@ -803,16 +812,6 @@ void QmlManager::modelSelected(int ID){
     sendUpdateModelInfo();
 }
 
-void QmlManager::setCurrentActiveFeature(int tasknum)
-{
-	_currentActiveFeature = static_cast<Hix::Features::FeatureEnum>(tasknum);
-}
-
-Hix::Features::FeatureEnum QmlManager::currentFeature()const
-{
-	return _currentActiveFeature;
-}
-
 void QmlManager::faceSelectionEnable()
 {
 	for (auto selectedModel : selectedModels)
@@ -943,7 +942,6 @@ void QmlManager::unselectPart(int ID){
 }
 
 void QmlManager::unselectAll(){
-    setViewMode(VIEW_MODE_OBJECT);
 	for(auto itr = selectedModels.begin(); itr != selectedModels.end();)
 	{
 		auto model = *itr;
@@ -1626,7 +1624,7 @@ void QmlManager::generateAutoSupport()
 			selectedModel->setZToBed();
 			selectedModel->moveModel(QVector3D(0, 0, Hix::Support::SupportRaftManager::supportRaftMinLength()));
 		}
-		_supportRaftManager.autoGenSuppRaft(*selectedModel, scfg->support_type, scfg->raft_type);
+		_supportRaftManager.autoGen(*selectedModel, scfg->support_type);
 	}
 }
 
@@ -1679,3 +1677,36 @@ void QmlManager::regenerateRaft()
 {
 	_supportRaftManager.generateRaft();
 }
+
+//temp features
+
+void QmlManager::modelCut()
+{
+	auto modelCut = dynamic_cast<ModelCut*>(_currentFeature.get());
+	modelCut->applyCut();
+}
+void QmlManager::cutModeSelected(int mode)
+{
+	auto modelCut = dynamic_cast<ModelCut*>(_currentFeature.get());
+	modelCut->cutModeSelected(mode);
+}
+void QmlManager::cutFillModeSelected(int fill)
+{
+	auto modelCut = dynamic_cast<ModelCut*>(_currentFeature.get());
+	modelCut->cutFillModeSelected(fill);
+}
+void QmlManager::openCut()
+{
+	_currentFeature.reset(new ModelCut(selectedModels, getSelectedBound()));
+
+}
+void QmlManager::closeCut()
+{
+	_currentFeature.reset();
+}
+void QmlManager::getSliderSignal(double sliderPos)
+{
+	auto modelCut = dynamic_cast<ModelCut*>(_currentFeature.get());
+	modelCut->getSliderSignal(sliderPos);
+}
+
