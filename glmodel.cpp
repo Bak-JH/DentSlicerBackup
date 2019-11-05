@@ -22,6 +22,7 @@
 #include "feature/cut/modelcut.h"
 #include "feature/cut/DrawingPlane.h"
 #include "feature/label/labelling.h"
+#include "feature/layFlat.h"
 
 
 #define ATTRIBUTE_SIZE_INCREMENT 200
@@ -266,7 +267,7 @@ void GLModel::clicked(MouseEventData& pick, const Qt3DRender::QRayCasterHit& hit
 	if (qmlManager->isActive<Hix::Features::ModelCut>(qmlManager->currentFeature()) &&
 		qmlManager->isActive<Hix::Features::Extend>(qmlManager->currentFeature()) &&
 		qmlManager->isActive<Hix::Features::Labelling>(qmlManager->currentFeature()) &&
-		currentFeature != Hix::Features::FeatureEnum::LayFlat &&
+		qmlManager->isActive<Hix::Features::LayFlat>(qmlManager->currentFeature()) &&
 		suppMode == Hix::Support::EditMode::None)// && !layerViewActive && !supportViewActive)
 		qmlManager->modelSelected(ID);
 
@@ -345,7 +346,7 @@ bool GLModel::isDraggable(Hix::Input::MouseEventData& e,const Qt3DRender::QRayCa
 			qmlManager->currentFeature() != Hix::Features::FeatureEnum::ShellOffset ||
 			qmlManager->isActive<Hix::Features::Extend*>(qmlManager->currentFeature()) ||
 			qmlManager->isActive<Hix::Features::Labelling*>(qmlManager->currentFeature()) ||
-			qmlManager->currentFeature() != Hix::Features::FeatureEnum::LayFlat ||
+			qmlManager->isActive<Hix::Features::LayFlat*>(qmlManager->currentFeature()) ||
 			qmlManager->currentFeature() != Hix::Features::FeatureEnum::LayerViewMode)
 		&&
 		!(qmlManager->currentFeature() != Hix::Features::FeatureEnum::Orient ||
@@ -590,8 +591,8 @@ bool GLModel::perPrimitiveColorActive() const
 }
 bool GLModel::faceSelectionActive() const
 {
-	return qmlManager->isActive<Hix::Features::Extend>(qmlManager->currentFeature()) || 
-			qmlManager->isActive<Hix::Features::LayFlat>(qmlManager->currentFeature()
+	return qmlManager->isActive<Hix::Features::Extend>(qmlManager->currentFeature()) ||
+		qmlManager->isActive<Hix::Features::LayFlat>(qmlManager->currentFeature());
 }
 
 QVector3D GLModel::getPrimitiveColorCode(const Hix::Engine3D::Mesh* mesh, FaceConstItr itr)

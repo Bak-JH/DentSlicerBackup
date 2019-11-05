@@ -18,7 +18,7 @@ namespace Hix
 
 		private:
 			Hix::LabelModel* _previewModel;
-			std::unordered_set<GLModel*> _models;
+			std::unordered_set<GLModel*> _targetModels;
 			Hix::Engine3D::Bounds3D _modelsBound;
 		};
 	}

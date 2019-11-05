@@ -12,6 +12,8 @@
 #include <QEntity>
 #include "../../glmodel.h"
 #include "../../qmlmanager.h"
+#include "feature/Shapes2D.h"
+#include "feature/Extrude.h"
 #include <vector>
 
 #include "DentEngine/src/mesh.h"
