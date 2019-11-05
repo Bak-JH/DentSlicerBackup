@@ -169,9 +169,7 @@ public:
 
     std::map<int, GLModel> glmodels;
 
-    std::vector<Mesh*> copyMeshes;
-    std::vector<QString> copyMeshNames;
-
+    std::vector<size_t> copyMeshes;
 
 	//!
     int rotateSnapAngle = 0;
@@ -254,8 +252,10 @@ public:
 	QVector3D cameraViewVector();
 	Hix::Tasking::TaskManager& taskManager();
 	Hix::Support::SupportRaftManager& supportRaftManager();
+	GLModel* createAndListModel(Hix::Engine3D::Mesh* mesh, QString filename, const Qt3DCore::QTransform* transform);
 
 private:
+	QString filenameToModelName(const std::string& s);
 	Hix::Tasking::TaskManager _taskManager;
 	void setModelViewMode(int mode);
 	bool deselectAllowed();
@@ -301,7 +301,6 @@ public slots:
 
 
     void sendUpdateModelInfo(int, int, QString, float);
-    GLModel* createModelFile(Mesh* target_mesh, QString filename, const Qt3DCore::QTransform* transform = nullptr);
     void openModelFile(QString filename);
     void checkModelFile(GLModel* model);
     void deleteOneModelFile(int ID);

@@ -1,7 +1,65 @@
 #include "Shapes2D.h"
 #include "../DentEngine/src/ContourBuilder.h"
+#include "agCDT/CDT.h"
+
 using namespace ClipperLib;
 
+
+namespace std
+{
+
+	template<>
+	struct hash<CDT::V2d<float>>
+	{
+		//2D only!
+		std::size_t operator()(const CDT::V2d<float>& pt)const
+		{
+			size_t x = (size_t)(pt.x);
+			size_t y = (size_t)(pt.y);
+			size_t digest = x | y << 32;
+			return digest;
+		}
+	};
+}
+
+template <typename QVectorType>
+std::vector<CDT::V2d<float>> QVectorToCDTVtx(const std::vector<QVectorType>& input)
+{
+	std::vector<CDT::V2d<float>> v2d;
+	v2d.reserve(input.size());
+	for (auto& each : input)
+	{
+		v2d.emplace_back(CDT::V2d<float>::make(each.x(), each.y()));
+	}
+
+	std::unordered_set<CDT::V2d<float>> test;
+	for (auto& each : v2d)
+	{
+		test.insert(each);
+	}
+	if (test.size() != v2d.size())
+	{
+		return v2d;
+	}
+
+	return v2d;
+}
+template <typename QVectorType>
+std::vector<CDT::Edge> QVectorToCDTEdge(const std::vector<QVectorType>& input)
+{
+	std::vector<CDT::Edge> edges;
+	if (input.size() < 2)
+		return edges;
+	auto edgeCnt = input.size();
+	edges.reserve(edgeCnt);
+	--edgeCnt;
+	edges.emplace_back(0, edgeCnt);
+	for (size_t i = 0; i < edgeCnt; ++i)
+	{
+		edges.emplace_back(i, i + 1);
+	}
+	return edges;
+}
 void Hix::Shapes2D::rotateCW90(QVector2D& vec)
 {
 	//(y,-x)
@@ -122,53 +180,64 @@ std::vector<QVector2D> Hix::Shapes2D::PolylineToArea(float thickness, const std:
 	return areaContour;
 }
 
-void Hix::Shapes2D::generateCapZPlane(Hix::Engine3D::Mesh* mesh, const std::vector<QVector3D>& contour, bool isReverse)
+
+void generateCapZPlaneImpl(Hix::Engine3D::Mesh* mesh, float zPos, const std::vector<CDT::V2d<float>>& vtcs, const std::vector<CDT::Edge> edges, bool isReverse)
 {
-	float z = contour.front().z();
-	std::vector<p2t::Point>container;
-	container.reserve(contour.size());
-	for (auto itr = contour.cbegin(); itr != contour.cend(); ++itr)
-	{
-		container.emplace_back((double)itr->x(), (double)itr->y());
-	}
-
-	//because people are...stupid?
-	std::vector<p2t::Point*>ptrs;
-	ptrs.reserve(container.size());
-	for (auto& each : container)
-	{
-		ptrs.emplace_back(&each);
-	}
-
-	p2t::CDT constrainedDelTrig(ptrs);
-	constrainedDelTrig.Triangulate();
-	auto triangles = constrainedDelTrig.GetTriangles();
+	CDT::Triangulation<float> cdt = CDT::Triangulation<float>(CDT::FindingClosestPoint::BoostRTree);
+	// ... same as above
+	cdt.insertVertices(vtcs);
+	cdt.insertEdges(edges);
+	cdt.eraseOuterTriangles();
+	//TODO: is input vtcs different from output vtcs?
+	auto& vtcsOut = cdt.vertices;
+	auto& tris = cdt.triangles;
 
 	//as long as intial contour is not modified in the p2t library, float->double->float should be lossless
-	for (auto& tri : triangles)
+	for (auto& tri : tris)
 	{
-		p2t::Point* pt0, * pt1, * pt2;
+		auto& triVtcs = tri.vertices;
+		CDT::V2d<float> pt0, pt1,pt2;
 		if (isReverse)
 		{
-			pt2 = tri->GetPoint(0);
-			pt1 = tri->GetPoint(1);
-			pt0 = tri->GetPoint(2);
+			pt0 = vtcsOut[triVtcs[2]].pos;
+			pt1 = vtcsOut[triVtcs[1]].pos;
+			pt2 = vtcsOut[triVtcs[0]].pos;
 
 		}
 		else
 		{
-			pt0 = tri->GetPoint(0);
-			pt1 = tri->GetPoint(1);
-			pt2 = tri->GetPoint(2);
+			pt0 = vtcsOut[triVtcs[0]].pos;
+			pt1 = vtcsOut[triVtcs[1]].pos;
+			pt2 = vtcsOut[triVtcs[2]].pos;
 		}
+
+		vtcsOut[triVtcs[2]].pos.x;
 		mesh->addFace(
-			QVector3D(pt0->x, pt0->y, z),
-			QVector3D(pt1->x, pt1->y, z),
-			QVector3D(pt2->x, pt2->y, z));
+			QVector3D(pt0.x, pt0.y, zPos),
+			QVector3D(pt1.x, pt1.y, zPos),
+			QVector3D(pt2.x, pt2.y, zPos));
 	}
 
 }
 
+void Hix::Shapes2D::generateCapZPlane(Hix::Engine3D::Mesh* mesh, const std::vector<QVector3D>& contour, bool isReverse)
+{
+	if (contour.size() < 2)
+		return;
+	auto vtcs = QVectorToCDTVtx(contour);
+	auto edges = QVectorToCDTEdge(contour);
+	float z = contour.front().z();
+	generateCapZPlaneImpl(mesh, z, vtcs, edges, isReverse);
+}
+
+void Hix::Shapes2D::generateCapZPlane(Hix::Engine3D::Mesh* mesh, const std::vector<QVector2D>& contour, float zPos, bool isReverse)
+{
+	if (contour.size() < 2)
+		return;
+	auto vtcs = QVectorToCDTVtx(contour);
+	auto edges = QVectorToCDTEdge(contour);
+	generateCapZPlaneImpl(mesh, zPos, vtcs, edges, isReverse);
+}
 
 std::vector<ClipperLib::Path> Hix::Shapes2D::combineContour(const std::vector<std::vector<QVector3D>>& contours)
 {
@@ -250,19 +319,6 @@ void Hix::Shapes2D::scaleContourVtxNormal(std::vector<QVector3D>& targetContour,
 	}
 }
 
-bool Hix::Shapes2D::isClockwise(const std::vector<QVector3D>& contour)
-{
-	if (contour.size() < 2)
-		return true;
-	QVector3D prevPt = contour.back();
-	double sum = 0;
-	for (auto& pt : contour)
-	{
-		sum += (pt.x() - prevPt.x()) * (pt.y() + prevPt.y());
-		prevPt = pt;
-	}
-	return sum >= 0;
-}
 
 bool Hix::Shapes2D::isClockwise(const Hix::Slicer::Contour& contour)
 {
@@ -278,12 +334,7 @@ bool Hix::Shapes2D::isClockwise(const Hix::Slicer::Contour& contour)
 	return sum >= 0;
 }
 
-void Hix::Shapes2D::ensureOrientation(bool isClockwise, std::vector<QVector3D>& contour)
-{
-	if (Hix::Shapes2D::isClockwise(contour) == isClockwise)
-		return;
-	std::reverse(contour.begin(), contour.end());
-}
+
 
 
 void Hix::Shapes2D::scaleContourAroundCentoid(std::vector<QVector3D>& targetContour, float scale, QVector2D& centoid)

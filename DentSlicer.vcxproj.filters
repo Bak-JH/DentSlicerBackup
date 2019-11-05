@@ -2634,5 +2634,23 @@
     <ClInclude Include="feature\CSG\CSG.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
+    <ClInclude Include="feature\agCDT\CDT.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="feature\agCDT\CDT.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="feature\agCDT\CDTUtils.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="feature\agCDT\CDTUtils.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="feature\agCDT\PointRTree.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="feature\agCDT\predicates.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

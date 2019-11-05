@@ -808,6 +808,12 @@
     <ClInclude Include="DentEngine\src\polyclipping\polytree2tri\PolytreeCDT.h" />
     <ClInclude Include="DentEngine\src\SlicerDebug.h" />
     <ClInclude Include="DentEngine\src\SlicerDebugInfoExport.h" />
+    <ClInclude Include="feature\agCDT\CDT.h" />
+    <ClInclude Include="feature\agCDT\CDT.hpp" />
+    <ClInclude Include="feature\agCDT\CDTUtils.h" />
+    <ClInclude Include="feature\agCDT\CDTUtils.hpp" />
+    <ClInclude Include="feature\agCDT\PointRTree.h" />
+    <ClInclude Include="feature\agCDT\predicates.h" />
     <ClInclude Include="feature\autoorientation.h" />
     <ClInclude Include="DentEngine\src\polyclipping\clipper\clipper.hpp" />
     <ClInclude Include="DentEngine\src\cmdlineparser.h" />
@@ -1154,7 +1160,7 @@
     <ResourceCompile Include="DentSlicer.rc" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\cork_me\win\wincork\wincorkDLL.vcxproj">
+    <ProjectReference Include="cork\win\wincork\wincorkDLL.vcxproj">
       <Project>{239d1648-b3dc-437e-830c-f2106c01b30c}</Project>
     </ProjectReference>
   </ItemGroup>
