@@ -27,7 +27,6 @@
 #include "common/TaskManager.h"
 #include "slice/SlicingOptBackend.h"
 #include "support/SupportRaftManager.h"
-#include "feature/labelling/labelModel.h"
 
 #define VIEW_MODE_OBJECT 0
 #define VIEW_MODE_LAYER 2
@@ -237,9 +236,14 @@ public:
 
 	void generateLayFlat();
 
+	void openLabelling();
+	void closeLabelling();
 	void setLabelText(QString text);
+	void setLabelFontName(QString fontName);
+	void setLabelFontBold(bool isBold);
+	void setLabelFontSize(int fontSize);
+	void setLabelTranslation(const QVector3D translation);	
 	void stateChangeLabelling();
-	void updateLabelPreview(QString text, QString fontName, bool isBold, int fontSize);
 	void generateLabelMesh();
 
 	void generateExtensionFaces(double distance);
@@ -299,7 +303,6 @@ public:
 private:
 	Hix::Tasking::TaskManager _taskManager;
 	void setModelViewMode(int mode);
-	bool deselectAllowed();
 	GLModel* getModelByID(int ID);
     void unselectPartImpl(GLModel* target);
 	//do not mix UI work with background thread

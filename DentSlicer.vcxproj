@@ -321,6 +321,7 @@
     <ClCompile Include="feature\Extrude.cpp" />
     <ClCompile Include="feature\cut\modelcut.cpp" />
     <ClCompile Include="feature\Feature.cpp" />
+    <ClCompile Include="feature\label\Labelling.cpp" />
     <ClCompile Include="feature\ModelBuilder.cpp" />
     <ClCompile Include="feature\overhangDetect.cpp" />
     <ClCompile Include="feature\repair\Algorithms\checkAndRepair.cpp" />
@@ -387,7 +388,7 @@
     <ClCompile Include="slice\slicingengine.cpp" />
     <ClCompile Include="feature\stlexporter.cpp" />
     <ClCompile Include="DentEngine\src\svgexporter.cpp" />
-    <ClCompile Include="feature\labelling\labelModel.cpp" />
+    <ClCompile Include="feature\label\labelModel.cpp" />
     <ClCompile Include="utils\updatechecker.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -851,7 +852,7 @@
     </ClInclude>
     <ClInclude Include="feature\cut\modelcut.h" />
     <ClInclude Include="feature\Feature.h" />
-    <ClInclude Include="feature\labelling\LabelManager.h" />
+    <ClInclude Include="feature\label\Labelling.h" />
     <ClInclude Include="feature\ModelBuilder.h" />
     <ClInclude Include="feature\overhangDetect.h" />
     <ClInclude Include="feature\repair\Algorithms\detectIntersections.h" />
@@ -950,7 +951,7 @@
     <ClInclude Include="DentEngine\src\svgexporter.h" />
     <ClInclude Include="DentEngine\src\polyclipping\poly2tri\sweep\sweep.h" />
     <ClInclude Include="DentEngine\src\polyclipping\poly2tri\sweep\sweep_context.h" />
-    <ClInclude Include="feature\labelling\labelModel.h" />
+    <ClInclude Include="feature\label\labelModel.h" />
     <QtMoc Include="utils\updatechecker.h">
     </QtMoc>
     <ClInclude Include="DentEngine\src\polyclipping\poly2tri\common\utils.h" />

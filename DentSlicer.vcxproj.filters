@@ -121,8 +121,11 @@
     <ClCompile Include="slice\slicingengine.cpp" />
     <ClCompile Include="feature\stlexporter.cpp" />
     <ClCompile Include="DentEngine\src\svgexporter.cpp" />
-    <ClCompile Include="feature\labelling\labelModel.cpp" />
     <ClCompile Include="utils\updatechecker.cpp" />
+    <ClCompile Include="feature\label\Labelling.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="feature\label\labelModel.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="common\Debug.h" />
@@ -637,13 +640,13 @@
     <ClInclude Include="DentEngine\src\svgexporter.h" />
     <ClInclude Include="DentEngine\src\polyclipping\poly2tri\sweep\sweep.h" />
     <ClInclude Include="DentEngine\src\polyclipping\poly2tri\sweep\sweep_context.h" />
-    <ClInclude Include="feature\labelling\labelModel.h" />
     <ClInclude Include="DentEngine\src\polyclipping\poly2tri\common\utils.h" />
     <ClInclude Include="utils\utils.h" />
     <ClInclude Include="utils\winsparkle\winsparkle.h" />
-    <ClInclude Include="feature\labelling\LabelManager.h">
+    <ClInclude Include="feature\label\Labelling.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="feature\label\labelModel.h" />
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="debug\moc_predefs.h.cbt" />
@@ -870,6 +873,11 @@
     <Filter Include="Header Files">
       <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
       <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
+      <ParseFiles>true</ParseFiles>
+    </Filter>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
       <ParseFiles>true</ParseFiles>
     </Filter>
   </ItemGroup>

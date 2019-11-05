@@ -1861,6 +1861,9 @@ Rectangle {
             labelFontSize: 12
 
             //signal runFeature(int type);
+
+			signal openLabelling()
+            signal closeLabelling()
             signal generateLabelMesh()
             signal stateChangeLabelling()
             signal sendTextChanged(string text);
@@ -1887,13 +1890,6 @@ Rectangle {
 
             function noModel(){
                 window.resultPopUp.openResultPopUp("","You must select the location of label.","");
-            }
-
-            function labelUpdate() {
-                console.log("sendLabelUpdate @@@@@@@@@@@@@@@@@@@@@@@@@@@@%%%%%%%%%%%%");
-                console.log(typeof(popup_label.transform))
-                sendLabelUpdate(popup_label.labelTextContent, popup_label.labelFontName, 
-                                popup_label.labelIsBold, popup_label.labelFontSize);
             }
 
             ComboBox {
@@ -2149,14 +2145,14 @@ Rectangle {
 
             state: {
                 if (fourth_tab_button_label.state=="active" && qm.isSelected()) {
-                    qm.setCurrentActiveFeature(Feature::Label)
+                    openLabelling()
                     return "active"
                 }
                 else {
 
                     //text3DInput.focus = false;
                     //sceneRoot.keyboardHandler.focus = true;
-                    qm.setCurrentActiveFeature(Feature::None)
+                    closeLabelling()
                     return "inactive"
                 }
             }

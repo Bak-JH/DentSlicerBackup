@@ -4,7 +4,6 @@
 #include "render/SceneEntityWithMaterial.h"
 #include "fileloader.h"
 #include "slice/slicingengine.h"
-#include "feature/labelling/labelModel.h"
 #include "feature/autoorientation.h"
 #include "feature/autoarrange.h"
 #include "feature/extension.h"
@@ -70,8 +69,6 @@ public:
     std::vector<QPhongMaterial*> sphereMaterial;
 
     void removeModelPartList();
-	Hix::Label::LabelModel* textPreview = nullptr;
-
     void copyModelAttributeFrom(GLModel* from);
 
 
@@ -170,11 +167,6 @@ public slots:
     void closeHollowShell();
 
     // Labelling
-    void getTextChanged(QString text);
-    void getFontNameChanged(QString fontName);
-    void getFontBoldChanged(bool isBold);
-    void getFontSizeChanged(int fontSize);
-    void generateLabelMesh();
 
     // Extension
     void unselectMeshFaces();
