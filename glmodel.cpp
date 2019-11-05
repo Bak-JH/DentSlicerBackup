@@ -21,7 +21,7 @@
 #include "feature/Extrude.h"
 #include "feature/cut/modelcut.h"
 #include "feature/cut/DrawingPlane.h"
-#include "feature/labelling/labelModel.h"
+#include "feature/label/labelling.h"
 
 
 #define ATTRIBUTE_SIZE_INCREMENT 200
@@ -265,7 +265,7 @@ void GLModel::clicked(MouseEventData& pick, const Qt3DRender::QRayCasterHit& hit
 	auto suppMode = qmlManager->supportRaftManager().supportEditMode();
 	if (qmlManager->isActive<Hix::Features::ModelCut>(qmlManager->currentFeature()) &&
 		qmlManager->isActive<Hix::Features::Extend>(qmlManager->currentFeature()) &&
-		currentFeature != Hix::Features::FeatureEnum::Label &&
+		qmlManager->isActive<Hix::Features::Labelling>(qmlManager->currentFeature()) &&
 		currentFeature != Hix::Features::FeatureEnum::LayFlat &&
 		suppMode == Hix::Support::EditMode::None)// && !layerViewActive && !supportViewActive)
 		qmlManager->modelSelected(ID);
@@ -311,7 +311,7 @@ void GLModel::clicked(MouseEventData& pick, const Qt3DRender::QRayCasterHit& hit
 	}
 
 	/// Lay Flat ///
-	if (qmlManager->currentFeature() == Hix::Features::FeatureEnum::LayFlat && 
+	if (qmlManager->isActive<Hix::Features::LayFlat>(qmlManager->currentFeature()) &&
 		hit.localIntersection() != QVector3D(0, 0, 0)) {
 
 		unselectMeshFaces();
@@ -328,16 +328,10 @@ void GLModel::clicked(MouseEventData& pick, const Qt3DRender::QRayCasterHit& hit
 	}
 
 	/// Labeling Feature ///
-    if (currentFeature != Hix::Features::FeatureEnum::Label && hit.localIntersection() != QVector3D(0, 0, 0)) {
-		if (textPreview != nullptr)
-			textPreview->setEnabled(false);
-
-		textPreview = new Hix::Label::LabelModel(this);
-
-		if (textPreview && currentFeature != Hix::Features::FeatureEnum::Label) {
-			textPreview->setTranslation(hit.localIntersection());
-            QMetaObject::invokeMethod(qmlManager->labelPopup, "labelUpdate");
-        }
+    if (qmlManager->isActive<Hix::Features::Labelling>(qmlManager->currentFeature()) 
+			&& hit.localIntersection() != QVector3D(0, 0, 0)) 
+	{
+		qmlManager->setLabelTranslation(hit.localIntersection());
     }
 }
 
@@ -350,7 +344,7 @@ bool GLModel::isDraggable(Hix::Input::MouseEventData& e,const Qt3DRender::QRayCa
 			(qmlManager->isActive<Hix::Features::ModelCut*>(qmlManager->currentFeature())||
 			qmlManager->currentFeature() != Hix::Features::FeatureEnum::ShellOffset ||
 			qmlManager->isActive<Hix::Features::Extend*>(qmlManager->currentFeature()) ||
-			qmlManager->currentFeature() != Hix::Features::FeatureEnum::Label ||
+			qmlManager->isActive<Hix::Features::Labelling*>(qmlManager->currentFeature()) ||
 			qmlManager->currentFeature() != Hix::Features::FeatureEnum::LayFlat ||
 			qmlManager->currentFeature() != Hix::Features::FeatureEnum::LayerViewMode)
 		&&
@@ -476,43 +470,11 @@ QString GLModel::getFileName(const std::string& s){
    return QString::fromStdString("");
 }
 
-QVector3D GLModel::spreadPoint(QVector3D endPoint,QVector3D startPoint,int factor){
-    QVector3D standardVector = endPoint-startPoint;
-    QVector3D finalVector=endPoint+standardVector*(factor-1);
-    return finalVector;
+QVector3D GLModel::spreadPoint(QVector3D endPoint, QVector3D startPoint, int factor) {
+	QVector3D standardVector = endPoint - startPoint;
+	QVector3D finalVector = endPoint + standardVector * (factor - 1);
+	return finalVector;
 }
-
-
-void GLModel::getTextChanged(QString text)
-{
-    if (text != "" && textPreview && labellingActive){
-		textPreview->text = text;
-    }
-}
-
-void GLModel::getFontNameChanged(QString fontName)
-{
-    qDebug() << "@@@@ getFontNameChanged";
-    if (textPreview && labellingActive){
-		textPreview->font.setFamily(fontName);
-    }
-}
-
-void GLModel::getFontBoldChanged(bool isbold){
-    qDebug() << "@@@@ getBoldChanged";
-    if (textPreview && labellingActive){
-		textPreview->font.setBold(isbold);
-    }
-}
-
-void GLModel::getFontSizeChanged(int fontSize)
-{
-    qDebug() << "@@@@ getSizeChanged" << fontSize;
-	if (textPreview && labellingActive){
-		textPreview->font.setPointSize(fontSize);
-    }
-}
-
 // for extension
 
 void GLModel:: unselectMeshFaces(){
@@ -629,7 +591,7 @@ bool GLModel::perPrimitiveColorActive() const
 bool GLModel::faceSelectionActive() const
 {
 	return qmlManager->isActive<Hix::Features::Extend>(qmlManager->currentFeature()) || 
-			qmlManager->currentFeature() != Hix::Features::FeatureEnum::Layflat;
+			qmlManager->isActive<Hix::Features::LayFlat>(qmlManager->currentFeature()
 }
 
 QVector3D GLModel::getPrimitiveColorCode(const Hix::Engine3D::Mesh* mesh, FaceConstItr itr)

@@ -27,6 +27,7 @@
 #include "feature/stlexporter.h"
 #include "DentEngine/src/MeshIterators.h"
 #include "feature/cut/modelcut.h"
+#include "feature/label/Labelling.h"
 #include <functional>
 using namespace Hix::Input;
 using namespace Hix::UI;
@@ -227,7 +228,7 @@ void QmlManager::initializeUI(QQmlApplicationEngine* e){
 
 
 	QObject::connect(layflatPopup, SIGNAL(openLayflat()), this, SLOT(faceSelectionEnable()));
-	QObject::connect(extensionPopup, SIGNAL(openExtension()), this, SLOT(faceSelectionEnable()));
+	QObject::connect(extensionPopup, SIGNAL(openExtension()), this, SLOT(openExtension()));
 	QObject::connect(layflatPopup, SIGNAL(closeLayflat()), this, SLOT(faceSelectionDisable()));
 	QObject::connect(extensionPopup, SIGNAL(closeExtension()), this, SLOT(faceSelectionDisable()));
 
@@ -236,14 +237,16 @@ void QmlManager::initializeUI(QQmlApplicationEngine* e){
 
 
 	// label popup codes
+	QObject::connect(labelPopup, SIGNAL(openLabelling()), this, SLOT(openLabelling()));
+	QObject::connect(labelPopup, SIGNAL(closeLabelling()), this, SLOT(closeLabelling()));
 	QObject::connect(labelPopup, SIGNAL(sendLTextChanged(QString)), this, SLOT(setLabelText(QString)));
 	QObject::connect(labelPopup, SIGNAL(stateChangeLabelling()), this, SLOT(stateChangeLabelling()));
 	QObject::connect(labelPopup, SIGNAL(sendLabelUpdate(QString, QString, bool, int)), this, SLOT(updateLabelPreview(QString, QString, bool, int)));
 	//QObject::connect(labelPopup, SIGNAL(runFeature(int)),glmodel->ft, SLOT(setTypeAndStart(int)));
-	QObject::connect(labelPopup, SIGNAL(generateLabelMesh()), glmodel, SLOT(generateLabelMesh()));
-	QObject::connect(labelFontBox, SIGNAL(sendFontName(QString)), glmodel, SLOT(getFontNameChanged(QString)));
-	QObject::connect(labelFontBoldBox, SIGNAL(sendFontBold(bool)), glmodel, SLOT(getFontBoldChanged(bool)));
-	QObject::connect(labelFontSizeBox, SIGNAL(sendFontSize(int)), glmodel, SLOT(getFontSizeChanged(int)));
+	QObject::connect(labelPopup, SIGNAL(generateLabelMesh()), this, SLOT(generateLabelMesh()));
+	QObject::connect(labelFontBox, SIGNAL(sendFontName(QString)), this, SLOT(getFontNameChanged(QString)));
+	QObject::connect(labelFontBoldBox, SIGNAL(sendFontBold(bool)), this, SLOT(getFontBoldChanged(bool)));
+	QObject::connect(labelFontSizeBox, SIGNAL(sendFontSize(int)), this, SLOT(getFontSizeChanged(int)));
 
 	// extension popup codes
 	QObject::connect(extensionPopup, SIGNAL(generateExtensionFaces(double)), this, SLOT(generateExtensionFaces(double)));
@@ -583,7 +586,7 @@ GLModel* QmlManager::findGLModelByName(QString filename){
 
 void QmlManager::backgroundClicked(){
     qDebug() << "background clicked";
-	if (deselectAllowed())
+	if (_supportRaftManager.supportEditMode() == Hix::Support::EditMode::Manual)
 	{
 		unselectAll();
 	}
@@ -827,16 +830,38 @@ void QmlManager::generateLayFlat()
 	}
 }
 
+void QmlManager::openLabelling()
+{
+	_currentFeature.reset(new Labelling());
+}
+
+void QmlManager::closeLabelling()
+{
+	_currentFeature.reset();
+}
+
 void QmlManager::setLabelText(QString text)
 {
-	if (text != "")
-	{
-		for (auto selectedModel : selectedModels)
-		{
-			if (selectedModel->textPreview)
-				selectedModel->textPreview->text = text;
-		}
-	}
+	auto labelling = dynamic_cast<Labelling*>(_currentFeature.get());
+	labelling->setText(text);
+}
+
+void QmlManager::setLabelFontName(QString fontName)
+{
+	auto labelling = dynamic_cast<Labelling*>(_currentFeature.get());
+	labelling->setFontName(fontName);
+}
+
+void QmlManager::setLabelFontBold(bool isBold)
+{
+	auto labelling = dynamic_cast<Labelling*>(_currentFeature.get());
+	labelling->setFontBold(isBold);
+}
+
+void QmlManager::setLabelFontSize(int fontSize)
+{
+	auto labelling = dynamic_cast<Labelling*>(_currentFeature.get());
+	labelling->setFontSize(fontSize);
 }
 
 void QmlManager::stateChangeLabelling()
@@ -845,26 +870,14 @@ void QmlManager::stateChangeLabelling()
 	keyboardHandler->setFocus(true);
 }
 
-void QmlManager::updateLabelPreview(QString text, QString fontName, bool isBold, int fontSize) 
+void QmlManager::setLabelTranslation(const QVector3D translation)
 {
-	for (auto selectedModel : selectedModels)
-	{
-		if (selectedModel->textPreview && _currentFeature == Hix::Features::FeatureEnum::Label)
-		{
-			selectedModel->textPreview->generateLabel(text, selectedModel->targetMeshFace().localFn());
-			selectedModel->updateModelMesh();
-		}
-	}
+	auto labelling = dynamic_cast<Labelling*>(_currentFeature.get());
+	labelling->setTranslation(translation);
 }
 
 void QmlManager::generateLabelMesh()
 {
-	for (auto selectedModel : selectedModels)
-	{
-		if (selectedModel->updateLock)
-			return;
-		selectedModel->updateLock = true;
-
 		if (!selectedModel->textPreview) {
 			qDebug() << "no labellingTextPreview";
 			QMetaObject::invokeMethod(qmlManager->labelPopup, "noModel");
@@ -1621,13 +1634,11 @@ void QmlManager::supportEditEnabled(bool enabled)
 	if (enabled)
 	{
 		_supportRaftManager.setSupportEditMode(Hix::Support::EditMode::Manual);
-		_currentActiveFeature = ftrManualSupport;
 		qmlManager->openResultPopUp("Click a model surface to add support.", "", "Click an existing support to remove it.");
 	}
 	else
 	{
 		_supportRaftManager.setSupportEditMode(Hix::Support::EditMode::None);
-		_currentActiveFeature = 0;
 	}
 
 }
@@ -1653,11 +1664,6 @@ void QmlManager::supportApplyEdit()
 void QmlManager::supportCancelEdit()
 {
 	_supportRaftManager.cancelEdits();
-}
-
-bool QmlManager::deselectAllowed()
-{
-	return _currentActiveFeature != ftrManualSupport;
 }
 
 void QmlManager::regenerateRaft()

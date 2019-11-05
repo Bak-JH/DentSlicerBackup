@@ -2,20 +2,12 @@
 #include "utils/mathutils.h"
 #include <QTransform>
 
-Hix::Label::LabelModel::LabelModel(Qt3DCore::QEntity* parent)
-	:GLModel(nullptr, parent)
+Hix::LabelModel::LabelModel(Qt3DCore::QEntity* parent):GLModel(parent)
 {
 	setMaterialColor(Hix::Render::Colors::Support);
 }
 
-Hix::Label::LabelModel::LabelModel(Qt3DCore::QEntity* parent, LabelModel& from)
-{
-	setParent(parent);
-	text = from.text;
-	font = from.font;
-}
-
-void Hix::Label::LabelModel::generateLabel(QString text, QVector3D targetNormal)
+void Hix::LabelModel::generateLabel(QVector3D targetNormal)
 {
 	auto labelMesh = new Mesh();
 	QPainterPath painterPath;
@@ -104,7 +96,7 @@ void Hix::Label::LabelModel::generateLabel(QString text, QVector3D targetNormal)
 	setMesh(labelMesh);
 }
 
-void Hix::Label::LabelModel::setTranslation(QVector3D t)
+void Hix::LabelModel::setTranslation(QVector3D t)
 {
 	transform().setTranslation(t);
 }
