@@ -2,6 +2,7 @@
 #include "qmlmanager.h"
 
 Hix::Features::Labelling::Labelling(const std::unordered_set<GLModel*>& selectedModels)
+	:_targetModels(selectedModels)
 {
 	if (selectedModels.size() > 1)
 	{
@@ -50,5 +51,24 @@ void Hix::Features::Labelling::setFontSize(int fontSize)
 
 void Hix::Features::Labelling::generateLabelMesh()
 {
+	if (!_previewModel)
+	{
+		qDebug() << "no labellingTextPreview";
+		QMetaObject::invokeMethod(qmlManager->labelPopup, "noModel");
+		return;
+	}
+	
 
+	qmlManager->openProgressPopUp();
+	qmlManager->setProgress(0.1f);
+	
+	for (auto target : _targetModels)
+	{
+		target->setTargetSelected(false);
+		target->setMaterialColor(Hix::Render::Colors::Selected);
+		target->updateModelMesh();
+	}
+	_previewModel = nullptr;
+
+	qmlManager->setProgress(1.0f);
 }

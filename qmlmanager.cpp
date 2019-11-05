@@ -832,7 +832,7 @@ void QmlManager::generateLayFlat()
 
 void QmlManager::openLabelling()
 {
-	_currentFeature.reset(new Labelling());
+	_currentFeature.reset(new Labelling(selectedModels));
 }
 
 void QmlManager::closeLabelling()
@@ -878,25 +878,8 @@ void QmlManager::setLabelTranslation(const QVector3D translation)
 
 void QmlManager::generateLabelMesh()
 {
-		if (!selectedModel->textPreview) {
-			qDebug() << "no labellingTextPreview";
-			QMetaObject::invokeMethod(qmlManager->labelPopup, "noModel");
-			return;
-		}
-
-		openProgressPopUp();
-
-		setProgress(0.1f);
-
-		selectedModel->setTargetSelected(false);
-		setProgress(0.5f);
-
-		selectedModel->setMaterialColor(Hix::Render::Colors::Selected);
-		selectedModel->textPreview = nullptr;
-		selectedModel->updateModelMesh();
-
-		setProgress(1.0f);
-	}
+	auto labelling = dynamic_cast<Labelling*>(_currentFeature.get());
+	labelling->generateLabelMesh();
 }
 
 void QmlManager::generateExtensionFaces(double distance)

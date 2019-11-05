@@ -70,6 +70,7 @@ namespace Hix
 			void setTargetSelected(bool isSelected);
 			bool targetSelected()const;
 			FaceConstItr targetMeshFace();
+			Qt3DCore::QTransform& transform();
 
 		protected:
 
@@ -87,7 +88,6 @@ namespace Hix
 			}
 
 			//modifiable transform, cannot be accessed by other classes
-			Qt3DCore::QTransform& transform();
 			//Axis aligned bounding box
 			Hix::Engine3D::Bounds3D _aabb;
 
