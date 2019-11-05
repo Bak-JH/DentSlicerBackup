@@ -51,9 +51,9 @@ void Hix::Support::CylindricalRaft::generateMeshForContour(Mesh* mesh, const std
 
 	//cylinder is of uniform shape, except it narrows a bit in the middle-z
 
-	scales.emplace_back(0.4f);
+	scales.emplace_back(1.0f);
 	//scales.emplace_back(scale);
-	scales.emplace_back(1.2f);
+	scales.emplace_back(1.0f);
 
 	//path is simple cylinder starting from 0,0,0 to 0,0,raft_height
 	path.emplace_back(QVector3D(0, 0, _manager->raftBottom()));
@@ -77,7 +77,7 @@ void Hix::Support::CylindricalRaft::generateMesh(const std::vector<QVector3D>& o
 	auto mesh = new Mesh();
 	//generate square for each overhang
 	//std::vector<std::vector<QVector3D>> cylinders;
-	auto square = Hix::Shapes2D::generateSquare(scfg->support_radius_max*1.5);
+	auto square = Hix::Shapes2D::generateSquare(scfg->support_radius_max);
 
 	std::vector<QVector3D> contourPoints;
 	contourPoints.reserve(4 * overhangs.size());

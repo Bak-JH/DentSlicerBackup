@@ -3,6 +3,7 @@
 #include <string.h>
 #include <time.h>
 #include "TMesh/tmesh.h"
+#include "../../glmodel.h"
 
 using namespace T_MESH;
 using namespace Hix::Engine3D;
@@ -247,10 +248,60 @@ Mesh* toHixMesh(const Basic_TMesh& input)
 	return mesh;
 }
 
-std::vector<Mesh*> importAndRepairMesh(const std::string& importPath)
+std::vector<Mesh*> Hix::Features::repair(const Hix::Engine3D::Mesh& mesh)
 {
-	std::vector<Mesh*> meshes;
-	 TMesh::init(); // This is mandatory
+	std::vector<Hix::Engine3D::Mesh*> meshes;
+	TMesh::init(); // This is mandatory
+	std::vector<size_t> triInds;
+	std::vector<float> vtcs;
+	auto& faces = mesh.getFaces();
+	auto& mvs = mesh.getVertices();
+	auto faceEnd = faces.cend();
+	auto mvsEnd = mvs.cend();
+	triInds.reserve(faces.size() * 3);
+	triInds.reserve(mvs.size() * 3);
+	for (auto itr = faces.cbegin(); itr != faceEnd; ++itr)
+	{
+		auto faceVtcs = itr.meshVertices();
+		triInds.push_back(faceVtcs[0].index());
+		triInds.push_back(faceVtcs[1].index());
+		triInds.push_back(faceVtcs[2].index());
+	}
+	for (auto& vtx : mvs)
+	{
+		vtcs.push_back(vtx.position.x());
+		vtcs.push_back(vtx.position.y());
+		vtcs.push_back(vtx.position.z());
+	}
+	Basic_TMesh tin;
+	tin.loadTriangleList(vtcs.data(), triInds.data(), mvs.size(), faces.size());
+   //seperate into multiple components if there are disjoing components
+	auto components = tin.seperateComponents();
+	components.emplace_back(tin);
+	meshes.reserve(components.size());
+	//run repair
+	for (auto& comp : components)
+	{
+		// Fill holes
+		if (comp.boundaries())
+		{
+			comp.fillSmallBoundaries(0, true);
+		}
+
+		// Run geometry correction
+		if (!comp.boundaries()) TMesh::warning("Fixing degeneracies and intersections...\n");
+		if (comp.boundaries() || !comp.meshclean())
+			qDebug() << "mesh repair failed";
+		meshes.push_back(toHixMesh(comp));
+	}
+
+	return meshes;
+}
+
+std::vector<Mesh*> Hix::Features::importAndRepairMesh(const std::string& importPath)
+{
+	std::vector<Hix::Engine3D::Mesh*> meshes;
+	TMesh::init(); // This is mandatory
 	 clock_t beginning = clock();
 
 	 // Uncomment the following to prevent message reporting
@@ -296,5 +347,60 @@ std::vector<Mesh*> importAndRepairMesh(const std::string& importPath)
 
 	 printf("Elapsed time: %d ms\n", clock() - beginning);
 
- return meshes;
+	return meshes;
+}
+
+Hix::Features::MeshRepair::MeshRepair(const std::unordered_set<GLModel*>& selectedModels)
+{
+	for (auto model : selectedModels)
+	{
+		repairImpl(model, model->modelName());
+	}
+}
+
+Hix::Features::MeshRepair::~MeshRepair()
+{
+}
+
+void Hix::Features::MeshRepair::repairImpl(Hix::Render::SceneEntity* subject, const QString& modelName)
+{
+	size_t childIdx = 0;
+	for (auto childNode : subject->childNodes())
+	{
+		auto entity = dynamic_cast<Hix::Render::SceneEntity*>(childNode);
+		if (entity)
+		{
+			auto childName = modelName + "_child" + QString::number(childIdx);
+			repairImpl(subject, childName);
+			++childIdx;
+		}
+	}
+
+	//std::vector<Hix::Engine3D::Mesh*> repairedComps;
+	auto repairedComps = Hix::Features::repair(*subject->getMesh());
+	if (repairedComps.size() == 0)
+	{
+		qDebug() << "repair failed";
+		return;
+	}
+	else if (repairedComps.size() == 1)
+	{
+		//replace with repaired mesh
+		subject->clearMesh();
+		subject->setMesh(repairedComps.front());
+	}
+	else
+	{
+		//mesh was split into seperate components, they should be added as children of the original subject
+		//subject is now an "empty" node, with no mesh and just transform matrix
+		subject->clearMesh();
+		size_t childIdx = 0;
+		for (auto& comp : repairedComps)
+		{
+			auto newModel = new GLModel(subject, comp, modelName + "_child" + QString::number(childIdx));
+			++childIdx;
+		}
+
+	}
+
 }

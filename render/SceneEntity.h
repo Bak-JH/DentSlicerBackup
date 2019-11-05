@@ -35,6 +35,7 @@ namespace Hix
 			SceneEntity(QEntity* parent = nullptr); // main constructor for mainmesh and shadowmesh
 			virtual ~SceneEntity();
 			void setMesh(Mesh* mesh);
+
 			void clearMesh();
 			//for now, one sceneEntity per mesh, no setter for mesh in sceneEntity
 			const Hix::Engine3D::Mesh* getMesh()const;

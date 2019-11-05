@@ -152,6 +152,7 @@ class Basic_TMesh
 		int loadIV(const char *);		//!< Loads IV
 		int loadVRML1(const char *);		//!< Loads VRML 1.0
 		int loadOFF(const char *);		//!< Loads OFF
+		int loadTriangleList(const float* vtcs, const size_t* inds, size_t vtxCount, size_t triCount);
 		int loadEFF(const char *);		//!< Loads EFF
 		int loadPLY(const char *);		//!< Loads PLY
 		int loadVerTri(const char *);		//!< Loads VER-TRI

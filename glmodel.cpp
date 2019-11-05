@@ -35,7 +35,7 @@ using namespace Hix::Render;
 
 GLModel::GLModel(QEntity*parent, Mesh* loadMesh, QString fname, int id, const Qt3DCore::QTransform* transform)
     : SceneEntityWithMaterial(parent)
-    , _filename(fname)
+    , _name(fname)
     , ID(id)
 {
 
@@ -45,14 +45,6 @@ GLModel::GLModel(QEntity*parent, Mesh* loadMesh, QString fname, int id, const Qt
     // set shader mode and color
 	_meshMaterial.changeMode(Hix::Render::ShaderMode::SingleColor);
 	_meshMaterial.setColor(Hix::Render::Colors::Default);
-
-	qmlManager->addPart(getFileName(fname.toStdString().c_str()), ID);
-	if (_filename != "" && (_filename.contains(".stl") || _filename.contains(".STL"))) {
-		FileLoader::loadMeshSTL(loadMesh, _filename.toLocal8Bit().constData());
-	}
-	else if (_filename != "" && (_filename.contains(".obj") || _filename.contains(".OBJ"))) {
-		FileLoader::loadMeshOBJ(loadMesh, _filename.toLocal8Bit().constData());
-	}
 
 	if (transform)
 	{
@@ -143,9 +135,9 @@ void GLModel::setZToBed()
 	moveModel(QVector3D(0, 0, -_aabb.zMin()));
 }
 
-QString GLModel::filename() const
+QString GLModel::modelName() const
 {
-	return _filename;
+	return _name;
 }
 
 
@@ -444,16 +436,6 @@ bool GLModel::EndsWith(const std::string& a, const std::string& b) {
     return std::equal(a.begin() + a.size() - b.size(), a.end(), b.begin());
 }
 
-QString GLModel::getFileName(const std::string& s){
-   char sep = '/';
-
-   size_t i = s.rfind(sep, s.length());
-   if (i != std::string::npos) {
-      return QString::fromStdString(s.substr(i+1, s.length() - i));
-   }
-
-   return QString::fromStdString("");
-}
 
 QVector3D GLModel::spreadPoint(QVector3D endPoint,QVector3D startPoint,int factor){
     QVector3D standardVector = endPoint-startPoint;
@@ -601,7 +583,6 @@ void GLModel::generateShellOffset(double factor){
     //saveUndoState();
     qDebug() << "generate shell Offset";
     qmlManager->openProgressPopUp();
-    QString original_filename = _filename;
 
     //cutMode = 1;
     //cutFillMode = 1;
