@@ -12,6 +12,9 @@ start ..\vs_copy_dll.bat release setup ..\
 start copy_pcl.bat
 ECHO copy DentSlicer.exe
 xcopy /s/Y ..\release\DentSlicer.exe setup
+xcopy /s/Y ..\release\wincorkDLL.dll setup
+
+
 ECHO DSP: create NSI build script
 start DSNSISBuilder.exe config.json
 ECHO DSP: create setup.exe
