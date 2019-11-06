@@ -241,7 +241,6 @@ void QmlManager::initializeUI(QQmlApplicationEngine* e){
 	QObject::connect(labelPopup, SIGNAL(closeLabelling()), this, SLOT(closeLabelling()));
 	QObject::connect(labelPopup, SIGNAL(sendLTextChanged(QString)), this, SLOT(setLabelText(QString)));
 	QObject::connect(labelPopup, SIGNAL(stateChangeLabelling()), this, SLOT(stateChangeLabelling()));
-	QObject::connect(labelPopup, SIGNAL(sendLabelUpdate(QString, QString, bool, int)), this, SLOT(updateLabelPreview(QString, QString, bool, int)));
 	//QObject::connect(labelPopup, SIGNAL(runFeature(int)),glmodel->ft, SLOT(setTypeAndStart(int)));
 	QObject::connect(labelPopup, SIGNAL(generateLabelMesh()), this, SLOT(generateLabelMesh()));
 	QObject::connect(labelFontBox, SIGNAL(sendFontName(QString)), this, SLOT(getFontNameChanged(QString)));
@@ -260,36 +259,34 @@ void QmlManager::initializeUI(QQmlApplicationEngine* e){
 
 }
 
-
-
-GLModel* QmlManager::createModelFile(Mesh* target_mesh, QString fname, const Qt3DCore::QTransform* transform) {
-    openProgressPopUp();
-    auto res = glmodels.try_emplace(modelIDCounter, models, target_mesh, fname, modelIDCounter, transform);
+GLModel* QmlManager::createAndListModel(Hix::Engine3D::Mesh* mesh, QString fname, const Qt3DCore::QTransform* transform) {
+	auto res = glmodels.try_emplace(modelIDCounter, models, mesh, fname, modelIDCounter, transform);
     ++modelIDCounter;
     auto latestAdded = &(res.first->second);
-    qDebug() << "created new model file";
-    // model selection codes, connect handlers later when model selected
-    qDebug() << "connected model selected signal";
-
     // set initial position
-
     latestAdded->setZToBed();
-
-    emit latestAdded->_updateModelMesh();
-
-
 	//add to raytracer
 	latestAdded->setHitTestable(true);
-    // 승환 100%
-    setProgress(1);
+	qmlManager->addPart(latestAdded->modelName(), latestAdded->ID);
 	return latestAdded;
 }
 void QmlManager::openModelFile(QString fname){
-    auto latest = createModelFile(new Mesh(), fname);
+	openProgressPopUp();
 
+	auto mesh = new Mesh();
+	if (fname != "" && (fname.contains(".stl") || fname.contains(".STL"))) {
+		FileLoader::loadMeshSTL(mesh, fname.toLocal8Bit().constData());
+	}
+	else if (fname != "" && (fname.contains(".obj") || fname.contains(".OBJ"))) {
+		FileLoader::loadMeshOBJ(mesh, fname.toLocal8Bit().constData());
+	}
+	fname = filenameToModelName(fname.toStdString());
+	setProgress(0.3);
+	auto latest = createAndListModel(mesh, fname, nullptr);
+	setProgress(0.6);
     // check for defects
     checkModelFile(latest);
-
+	setProgress(1.0);
     // do auto arrange
     if (glmodels.size() >= 2)
         openArrange();
@@ -570,13 +567,13 @@ void QmlManager::applyArrangeResult(std::vector<QVector3D> translations, std::ve
     }
 }
 
-GLModel* QmlManager::findGLModelByName(QString filename){
+GLModel* QmlManager::findGLModelByName(QString modelName){
 
     for(auto& pair : glmodels)
     {
         auto model = &pair.second;
-        qDebug() << "finding " << filename << model->filename();
-        if (model->filename() == filename){
+        qDebug() << "finding " << modelName << model->modelName();
+        if (model->modelName() == modelName){
             return model;
         }
     }
@@ -626,8 +623,6 @@ bool QmlManager::multipleModelSelected(int ID){
 			}
             (*it)->inactivateFeatures();
             QMetaObject::invokeMethod(partList, "unselectPartByModel", Q_ARG(QVariant, target->ID));
-            QMetaObject::invokeMethod(yesno_popup, "deletePartListItem", Q_ARG(QVariant, target->ID));
-
             // set slicing info box property visible true if slicing info exists
             //slicingData->setProperty("visible", false);
             sendUpdateModelInfo();
@@ -648,7 +643,6 @@ bool QmlManager::multipleModelSelected(int ID){
     target->changeColor(Hix::Render::Colors::Selected);
     qDebug() << "multipleModelSelected invoke";
     QMetaObject::invokeMethod(partList, "selectPartByModel", Q_ARG(QVariant, target->ID));
-    QMetaObject::invokeMethod(yesno_popup, "addPart", Q_ARG(QVariant, target->getFileName(target->filename().toStdString().c_str())), Q_ARG(QVariant, target->ID));
     qDebug() << "[multi model selected] b box center"; //<< xmid << " " << ymid << " " << zmid ;
 
     sendUpdateModelInfo();
@@ -748,8 +742,6 @@ void QmlManager::modelSelected(int ID){
 			target->changeColor(Hix::Render::Colors::Selected);
 		qDebug() << "modelSelected invoke";
 		QMetaObject::invokeMethod(partList, "selectPartByModel", Q_ARG(QVariant, target->ID));
-		QMetaObject::invokeMethod(yesno_popup, "addPart", Q_ARG(QVariant, 
-			target->getFileName(target->filename().toStdString().c_str())), Q_ARG(QVariant, ID));
 		qDebug() << "changing model" << target->ID;
 		qDebug() << "[model selected] b box center"; //<< xmid << " " << ymid << " " << zmid ;
 
@@ -894,6 +886,18 @@ void QmlManager::generateExtensionFaces(double distance)
 		selectedModel->setTargetSelected(false);
 		selectedModel->updateMesh(true);
 	}
+}
+
+QString QmlManager::filenameToModelName(const std::string& s)
+{
+	char sep = '/';
+
+	size_t i = s.rfind(sep, s.length());
+	if (i != std::string::npos) {
+		return QString::fromStdString(s.substr(i + 1, s.length() - i));
+	}
+
+	return QString::fromStdString("");
 }
 
 const std::unordered_set<GLModel*>& QmlManager::getSelectedModels()
@@ -1241,40 +1245,21 @@ void QmlManager::reDo(){
 
 void QmlManager::copyModel(){
     copyMeshes.clear();
-    copyMeshNames.clear();
 
     qDebug() << "copying current selected Models";
     for (GLModel* model : selectedModels){
-        if (model == nullptr)
-            continue;
-        Mesh* copied = new Mesh( *model->getMesh());
-
-        copyMeshes.push_back(copied);
-        copyMeshNames.push_back(model->filename());
-        /*foreach (MeshFace mf, model->getMesh()->faces){
-            copyMesh->addFace(model->getMesh()->idx2MV(mf.mesh_vertex[0]).position, model->getMesh()->idx2MV(mf.mesh_vertex[1]).position, model->getMesh()->idx2MV(mf.mesh_vertex[2]).position, mf.idx);
-        }
-        copyMesh->connectFaces();
-        copyMeshes.push_back(copyMesh);*/
+        copyMeshes.push_back(model->ID);
     }
     return;
 }
 
 void QmlManager::pasteModel(){
-    if(copyMeshes.size() < 1) // clipboard check
-        return ;
-
-    qDebug() << "pasting current saved selected Meshes";
-    int counter = 0;
-    for (Mesh* copyMesh : copyMeshes){
-        QString temp = copyMeshNames.at(counter).split(".").first() + QString::fromStdString("_copy_") + QString::number(modelIDCounter);
-
-        createModelFile(copyMesh, temp);
-        counter++;
+    for (auto copyIdx : copyMeshes){
+		auto model = getModelByID(copyIdx);
+		QString temp = model->modelName() + "_copy";
+		createAndListModel(new Mesh(*model->getMesh()), temp, nullptr);
     }
-
     openArrange();
-
     return;
 }
 
@@ -1600,6 +1585,7 @@ QVector2D QmlManager::world2Screen(QVector3D target) {
 
 void QmlManager::generateAutoSupport()
 {
+	_supportRaftManager.clear();
 	for (auto selectedModel : selectedModels)
 	{
 		if (scfg->support_type != SlicingConfiguration::SupportType::None)

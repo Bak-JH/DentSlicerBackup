@@ -30,10 +30,10 @@ Hix::Features::Cut::ZAxialCut::ZAxialCut(GLModel* subject, float cuttingPlane, b
 	GLModel* botModel = nullptr;
 	GLModel* topModel = nullptr;
 	if (_bottomMesh->getFaces().size() != 0) {
-		botModel = qmlManager->createModelFile(_bottomMesh, subject->filename() + "_bot", &subject->transform());
+		botModel = qmlManager->createAndListModel(_bottomMesh, subject->modelName() + "_bot", &subject->transform());
 	}
 	if (_topMesh->getFaces().size() != 0) {
-		topModel = qmlManager->createModelFile(_topMesh, subject->filename() + "_top", &subject->transform());
+		topModel = qmlManager->createAndListModel(_topMesh, subject->modelName() + "_top", &subject->transform());
 	}
 	qmlManager->deleteModelFile(subject->ID);
 }

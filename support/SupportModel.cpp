@@ -18,9 +18,6 @@ Hix::Support::SupportModel::SupportModel(SupportRaftManager* manager):
 
 Hix::Support::SupportModel::~SupportModel()
 {
-	if (_mesh)
-		//unlike other SceneEntities, Raft and support owns their mesh data
-		delete _mesh;
 }
 
 void Hix::Support::SupportModel::initHitTest()

@@ -1867,7 +1867,6 @@ Rectangle {
             signal generateLabelMesh()
             signal stateChangeLabelling()
             signal sendTextChanged(string text);
-            signal sendLabelUpdate(string text, string fontName, bool isBold, int fontSize);
 
             onApplyClicked: {
                 console.log("ApplyClicked");

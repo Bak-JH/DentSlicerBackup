@@ -830,6 +830,12 @@
     <ClInclude Include="DentEngine\src\polyclipping\polytree2tri\PolytreeCDT.h" />
     <ClInclude Include="DentEngine\src\SlicerDebug.h" />
     <ClInclude Include="DentEngine\src\SlicerDebugInfoExport.h" />
+    <ClInclude Include="feature\agCDT\CDT.h" />
+    <ClInclude Include="feature\agCDT\CDT.hpp" />
+    <ClInclude Include="feature\agCDT\CDTUtils.h" />
+    <ClInclude Include="feature\agCDT\CDTUtils.hpp" />
+    <ClInclude Include="feature\agCDT\PointRTree.h" />
+    <ClInclude Include="feature\agCDT\predicates.h" />
     <ClInclude Include="feature\autoorientation.h" />
     <ClInclude Include="DentEngine\src\polyclipping\clipper\clipper.hpp" />
     <ClInclude Include="DentEngine\src\cmdlineparser.h" />

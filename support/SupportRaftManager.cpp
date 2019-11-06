@@ -43,7 +43,6 @@ float Hix::Support::SupportRaftManager::supportBottom()
 
 void Hix::Support::SupportRaftManager::autoGen(const GLModel& model, SlicingConfiguration::SupportType supType)
 {
-	clear();
 	_supportExist = true;
 	_supportType = supType;
 	autoGenSuppRaftRecursive(model);
