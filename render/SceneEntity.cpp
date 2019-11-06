@@ -181,19 +181,21 @@ QVector3D Hix::Render::SceneEntity::vectorToLocal(const QVector3D& world) const
 
 SceneEntity::~SceneEntity() 
 {
-	//mesh and SceneEntity lifetimes are decoupled
+	if (_mesh)
+		delete _mesh;
 }
 
 void Hix::Render::SceneEntity::setMesh(Hix::Engine3D::Mesh* newMesh)
 {
-	if (_mesh != newMesh && newMesh != nullptr)
+	if (_mesh != newMesh)
 	{
-		if (_mesh)
-			clearMesh();
 		_mesh = newMesh;
-		_mesh->setSceneEntity(this);
-		updateRecursiveAabb();
-		updateEntireMesh(_mesh);
+		if (_mesh)
+		{
+			_mesh->setSceneEntity(this);
+			updateRecursiveAabb();
+			updateEntireMesh(_mesh);
+		}
 	}
 }
 

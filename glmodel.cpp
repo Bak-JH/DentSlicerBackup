@@ -39,7 +39,7 @@ using namespace Hix::Render;
 
 GLModel::GLModel(QEntity*parent, Mesh* loadMesh, QString fname, int id, const Qt3DCore::QTransform* transform)
     : SceneEntityWithMaterial(parent)
-    , _filename(fname)
+    , _name(fname)
     , ID(id)
 {
 
@@ -49,22 +49,6 @@ GLModel::GLModel(QEntity*parent, Mesh* loadMesh, QString fname, int id, const Qt
     // set shader mode and color
 	setMaterialMode(Hix::Render::ShaderMode::SingleColor);
 	setMaterialColor(Hix::Render::Colors::Default);
-
-	if (_filename != "")
-	{
-		qmlManager->addPart(getFileName(fname.toStdString().c_str()), ID);
-		if (_filename.contains(".stl") || _filename.contains(".STL")) {
-			FileLoader::loadMeshSTL(loadMesh, _filename.toLocal8Bit().constData());
-		}
-		else if (_filename.contains(".obj") || _filename.contains(".OBJ")) {
-			FileLoader::loadMeshOBJ(loadMesh, _filename.toLocal8Bit().constData());
-		}
-	}
-	if (loadMesh)
-	{
-		loadMesh->centerMesh();
-		setMesh(loadMesh);
-	}
 
 	if (transform)
 	{
@@ -155,9 +139,9 @@ void GLModel::setZToBed()
 	moveModel(QVector3D(0, 0, -_aabb.zMin()));
 }
 
-QString GLModel::filename() const
+QString GLModel::modelName() const
 {
-	return _filename;
+	return _name;
 }
 
 
@@ -301,15 +285,15 @@ void GLModel::clicked(MouseEventData& pick, const Qt3DRender::QRayCasterHit& hit
 	}
 
 	/// Hollow Shell ///
-	if (qmlManager->currentFeature() == Hix::Features::FeatureEnum::ShellOffset) {
-		qDebug() << "getting handle picker clicked signal hollow shell active";
-		qDebug() << "found parent meshface";
-		// translate hollowShellSphere to mouse position
-		QVector3D v = hit.localIntersection();
-        qmlManager->hollowShellSphereTransform->setTranslation(v + _transform.translation());
+	//if (qmlManager->currentFeature() == Hix::Features::FeatureEnum::ShellOffset) {
+	//	qDebug() << "getting handle picker clicked signal hollow shell active";
+	//	qDebug() << "found parent meshface";
+	//	// translate hollowShellSphere to mouse position
+	//	QVector3D v = hit.localIntersection();
+ //       qmlManager->hollowShellSphereTransform->setTranslation(v + _transform.translation());
 
 
-	}
+	//}
 
 	/// Lay Flat ///
 	if (qmlManager->isActive<Hix::Features::LayFlat>(qmlManager->currentFeature()) &&
@@ -343,20 +327,21 @@ bool GLModel::isDraggable(Hix::Input::MouseEventData& e,const Qt3DRender::QRayCa
 		qmlManager->isSelected(this) 
 		&&
 			(qmlManager->isActive<Hix::Features::ModelCut*>(qmlManager->currentFeature())||
-			qmlManager->currentFeature() != Hix::Features::FeatureEnum::ShellOffset ||
+			//qmlManager->currentFeature() != Hix::Features::FeatureEnum::ShellOffset ||
 			qmlManager->isActive<Hix::Features::Extend*>(qmlManager->currentFeature()) ||
 			qmlManager->isActive<Hix::Features::Labelling*>(qmlManager->currentFeature()) ||
-			qmlManager->isActive<Hix::Features::LayFlat*>(qmlManager->currentFeature()) ||
-			qmlManager->currentFeature() != Hix::Features::FeatureEnum::LayerViewMode)
-		&&
+			qmlManager->isActive<Hix::Features::LayFlat*>(qmlManager->currentFeature())
+			//qmlManager->currentFeature() != Hix::Features::FeatureEnum::LayerViewMode)
+		/*&&
 		!(qmlManager->currentFeature() != Hix::Features::FeatureEnum::Orient ||
 			qmlManager->currentFeature() != Hix::Features::FeatureEnum::Rotate ||
-			qmlManager->currentFeature() != Hix::Features::FeatureEnum::Save))
+			qmlManager->currentFeature() != Hix::Features::FeatureEnum::Save)*/))
 	{
 		return true;
 	}
 	return false;
 }
+
 void GLModel::dragStarted(Hix::Input::MouseEventData& e, const Qt3DRender::QRayCasterHit& hit)
 {
 	if (qmlManager->supportRaftManager().supportActive())
@@ -404,8 +389,8 @@ void GLModel::dragEnded(Hix::Input::MouseEventData&)
 
 
 void GLModel::getLayerViewSliderSignal(int value) {
-    if ( !layerViewActive)
-        return;
+   /* if ( !layerViewActive)
+        return;*/
 
     //float height = (_mesh->z_max() - _mesh->z_min() + scfg->raft_thickness + scfg->support_base_height) * value;
     //int layer_num = int(height/scfg->layer_height)+1;
@@ -447,7 +432,7 @@ void GLModel::getLayerViewSliderSignal(int value) {
 
     // change phong material of original model
     float h = scfg->layer_height* value + _mesh->z_min() - scfg->raft_thickness - scfg->support_base_height;
-	_meshMaterial.setParameterValue("height", QVariant::fromValue(h));
+	//_meshMaterial.setParameterValue("height", QVariant::fromValue(h));
 	/*m_layerMaterialRaftHeight->setValue(QVariant::fromValue(qmlManager->getLayerViewFlags() & LAYER_INFILL != 0 ?
                 _mesh->z_min() :
                 _mesh->z_max() + scfg->raft_thickness - scfg->support_base_height));*/
@@ -460,16 +445,6 @@ bool GLModel::EndsWith(const std::string& a, const std::string& b) {
     return std::equal(a.begin() + a.size() - b.size(), a.end(), b.begin());
 }
 
-QString GLModel::getFileName(const std::string& s){
-   char sep = '/';
-
-   size_t i = s.rfind(sep, s.length());
-   if (i != std::string::npos) {
-      return QString::fromStdString(s.substr(i+1, s.length() - i));
-   }
-
-   return QString::fromStdString("");
-}
 
 QVector3D GLModel::spreadPoint(QVector3D endPoint, QVector3D startPoint, int factor) {
 	QVector3D standardVector = endPoint - startPoint;
@@ -490,6 +465,52 @@ void GLModel::selectMeshFaces(){
 	updateMesh(true);
 }
 
+// for shell offset
+void GLModel::generateShellOffset(double factor){
+    //saveUndoState();
+    qDebug() << "generate shell Offset";
+    qmlManager->openProgressPopUp();
+
+    //cutMode = 1;
+    //cutFillMode = 1;
+    shellOffsetFactor = factor;
+
+    //modelCut();
+
+}
+
+
+void GLModel::openHollowShell(){
+    qDebug() << "open HollowShell called";
+    //hollowShellActive = true;
+    qmlManager->hollowShellSphereEntity->setProperty("visible", true);
+}
+
+void GLModel::closeHollowShell(){
+    qDebug() << "close HollowShell called";
+
+    //if (!hollowShellActive)
+    //    return;
+
+    //hollowShellActive = false;
+    qmlManager->hollowShellSphereEntity->setProperty("visible", false);
+}
+
+void GLModel::openShellOffset(){
+    qDebug() << "openShelloffset";
+    //shellOffsetActive = true;
+
+}
+
+void GLModel::closeShellOffset(){
+    qDebug() << "closeShelloffset";
+
+    //if (!shellOffsetActive)
+    //    return;
+
+    //shellOffsetActive = false;
+}
+
 void GLModel::changeViewMode(int viewMode) {
     if( this->viewMode == viewMode ) {
         return;
@@ -501,15 +522,15 @@ void GLModel::changeViewMode(int viewMode) {
 
     switch( viewMode ) {
     case VIEW_MODE_OBJECT:
-        if (qmlManager->currentFeature() != Hix::Features::FeatureEnum::LayerViewMode){
-            // remove layer view components
-            removeLayerViewComponents();
-        }
-        layerViewActive = false;
+        //if (qmlManager->currentFeature() != Hix::Features::FeatureEnum::LayerViewMode){
+        //    // remove layer view components
+        //    removeLayerViewComponents();
+        //}
+        //layerViewActive = false;
 		
         break;
     case VIEW_MODE_LAYER:
-        layerViewActive = true;
+        //layerViewActive = true;
         // generate layer view plane materials
         layerViewPlaneMaterial = new Qt3DExtras::QTextureMaterial();
         layerViewPlaneMaterial->setAlphaBlendingEnabled(false);
@@ -587,7 +608,8 @@ void GLModel::removeLayerViewComponents(){
 
 bool GLModel::perPrimitiveColorActive() const
 {
-	return faceSelectionActive() || qmlManager->currentFeature() != Hix::Features::FeatureEnum::LayerViewMode;
+	return true; // TODO: delete later
+	//return faceSelectionActive() || qmlManager->currentFeature() != Hix::Features::FeatureEnum::LayerViewMode;
 }
 bool GLModel::faceSelectionActive() const
 {

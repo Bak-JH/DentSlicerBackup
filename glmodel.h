@@ -82,7 +82,6 @@ public:
 	bool isPrintable()const;
     void updatePrintable();
     bool EndsWith(const std::string& a, const std::string& b);
-    QString getFileName(const std::string& s);
     static QVector3D spreadPoint(QVector3D endpoint,QVector3D startpoint,int factor);
     void changeViewMode(int viewMode);
 	void updateShader(int viewMode);
@@ -112,15 +111,15 @@ public:
 	void rotateDone();
 	void scaleDone();
 	void setZToBed();
-	QString filename()const;
-
 	void setHitTestable(bool isEnable);
+
+	QString modelName()const;
 
 protected:
 	void initHitTest()override;
 
 private:
-	QString _filename;
+	QString _name;
 
 
 
