@@ -1,14 +1,16 @@
 #include "labelModel.h"
 #include "utils/mathutils.h"
 #include <QTransform>
+#include <QPainterPath>
 
 Hix::LabelModel::LabelModel(Qt3DCore::QEntity* parent):GLModel(parent)
 {
 	setMaterialColor(Hix::Render::Colors::Support);
 }
 
-void Hix::LabelModel::generateLabel(QVector3D targetNormal)
+void Hix::LabelModel::generateLabelMesh(const QVector3D translation, const QVector3D normal, const QString text, const QFont font)
 {
+
 	auto labelMesh = new Mesh();
 	QPainterPath painterPath;
 	painterPath.setFillRule(Qt::WindingFill);
@@ -90,13 +92,10 @@ void Hix::LabelModel::generateLabel(QVector3D targetNormal)
 		}
 	}
 
-	transform().setRotation(QQuaternion::rotationTo(QVector3D(0,-1,0), targetNormal));
+	transform().setTranslation(translation);
+	transform().setRotation(QQuaternion::rotationTo(QVector3D(0,-1,0), normal));
 	transform().setScale(0.05f);
 
 	setMesh(labelMesh);
-}
-
-void Hix::LabelModel::setTranslation(QVector3D t)
-{
-	transform().setTranslation(t);
+	_targetSelected = true;
 }

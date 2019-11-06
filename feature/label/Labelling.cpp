@@ -1,52 +1,52 @@
 #include "Labelling.h"
 #include "qmlmanager.h"
 
-Hix::Features::Labelling::Labelling(const std::unordered_set<GLModel*>& selectedModels)
-	:_targetModels(selectedModels)
+Hix::Features::Labelling::Labelling(GLModel* selectedModel)
+	:_targetModel(selectedModel)
 {
-	if (selectedModels.size() > 1)
-	{
-		qmlManager->openResultPopUp("", "multiple selecteion is not supported", "");
-		return;
-	}
-	
-	_previewModel = new Hix::LabelModel(selectedModels.begin());
+	_previewModel = new Hix::LabelModel(_targetModel);
+
 }
 
-void Hix::Features::Labelling::setTranslation(QVector3D translation)
+Hix::Features::Labelling::~Labelling()
+{
+	if(_previewModel)
+		_previewModel->deleteLater();
+}
+
+void Hix::Features::Labelling::updateLabelMesh(const QVector3D translation, const QVector3D normal)
 {
 	if (qmlManager->isActive<Labelling>(qmlManager->currentFeature()))
 	{
 		if (_previewModel)
+		{
 			_previewModel->deleteLater();
+			_previewModel = new Hix::LabelModel(_targetModel);
+		}
 
-		_previewModel->generateLabel(translation);
+		_previewModel->generateLabelMesh(translation, normal, _text, _font);
 		_previewModel->updateModelMesh();
 	}
 }
 
-void Hix::Features::Labelling::setText(QString text)
+void Hix::Features::Labelling::setText(const QString text)
 {
-	if (_previewModel)
-		_previewModel->text = text;
+	_text = text;
 }
 
-void Hix::Features::Labelling::setFontName(QString fontName)
+void Hix::Features::Labelling::setFontName(const QString fontName)
 {
-	if (_previewModel)
-		_previewModel->font.setFamily(fontName);
+	_font.setFamily(fontName);
 }
 
-void Hix::Features::Labelling::setFontBold(bool isBold)
+void Hix::Features::Labelling::setFontBold(const bool isBold)
 {
-	if (_previewModel)
-		_previewModel->font.setBold(isBold);
+	_font.setBold(isBold);
 }
 
-void Hix::Features::Labelling::setFontSize(int fontSize)
+void Hix::Features::Labelling::setFontSize(const int fontSize)
 {
-	if (_previewModel)
-		_previewModel->font.setPointSize(fontSize);
+	_font.setPointSize(fontSize);
 }
 
 void Hix::Features::Labelling::generateLabelMesh()
@@ -62,12 +62,10 @@ void Hix::Features::Labelling::generateLabelMesh()
 	qmlManager->openProgressPopUp();
 	qmlManager->setProgress(0.1f);
 	
-	for (auto target : _targetModels)
-	{
-		target->setTargetSelected(false);
-		target->setMaterialColor(Hix::Render::Colors::Selected);
-		target->updateModelMesh();
-	}
+
+	_targetModel->setTargetSelected(false);
+	_targetModel->setMaterialColor(Hix::Render::Colors::Selected);
+	_targetModel->updateModelMesh();
 	_previewModel = nullptr;
 
 	qmlManager->setProgress(1.0f);

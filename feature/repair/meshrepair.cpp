@@ -397,7 +397,7 @@ void Hix::Features::MeshRepair::repairImpl(Hix::Render::SceneEntity* subject, co
 		size_t childIdx = 0;
 		for (auto& comp : repairedComps)
 		{
-			auto newModel = new GLModel(subject, comp, modelName + "_child" + QString::number(childIdx));
+			//auto newModel = new GLModel(subject, comp, modelName + "_child" + QString::number(childIdx));
 			++childIdx;
 		}
 
