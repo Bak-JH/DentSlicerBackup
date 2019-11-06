@@ -155,6 +155,8 @@ QMatrix4x4 Hix::Render::SceneEntity::toRootMatrix() const
 		matrix = curr->transform().matrix() * matrix;
 		curr = dynamic_cast<SceneEntity*>(curr->parentEntity());
 	}
+	QVector4D test (0, 0, 0, 1);
+	auto tttt = matrix * test;
 	return matrix;
 }
 QVector4D Hix::Render::SceneEntity::toLocalCoord(const QVector4D& world) const

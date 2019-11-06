@@ -69,11 +69,7 @@ Hix::Render::ModelMaterial::ModelMaterial():
 
 	//coloring faces
 	_effect.addParameter(&_singleColorParameter);
-
-
 	setEffect(&_effect);
-
-
 }
 
 
@@ -146,6 +142,7 @@ void  Hix::Render::ModelMaterial::changeMode(ShaderMode mode) {
 		if (_mode == ShaderMode::LayerMode)
 		{
 			removeParameterWithKey("height");
+			removeParameterWithKey("fuckingStuipidWorldMatrix");
 		}
 		switch (mode) {
 		case ShaderMode::SingleColor: // default
@@ -160,6 +157,8 @@ void  Hix::Render::ModelMaterial::changeMode(ShaderMode mode) {
 			_shaderProgram.setGeometryShaderCode(QShaderProgram::loadSource(LAYERVIEW_GEOM_URL));
 			_shaderProgram.setFragmentShaderCode(QShaderProgram::loadSource(LAYERVIEW_FRAG_URL));
 			addParameterWithKey("height");
+			addParameterWithKey("fuckingStuipidWorldMatrix");
+
 			break;
 		default:
 			break;

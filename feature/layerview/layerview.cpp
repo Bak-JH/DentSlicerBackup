@@ -16,6 +16,7 @@ Hix::Features::LayerView::LayerView(const std::unordered_set<GLModel*>& selected
 	{
 		model->changeViewMode(VIEW_MODE_LAYER);
 		model->updateModelMesh();
+		model->meshMaterial().setParameterValue("fuckingStuipidWorldMatrix", QVariant::fromValue(model->toRootMatrix()));
 	}
 	qmlManager->layerViewPopup->setProperty("visible", true);
 	qmlManager->layerViewSlider->setProperty("visible", true);
@@ -28,8 +29,6 @@ Hix::Features::LayerView::LayerView(const std::unordered_set<GLModel*>& selected
 	QMetaObject::invokeMethod(qmlManager->layerViewSlider, "getMaxLayer", Qt::DirectConnection, Q_RETURN_ARG(QVariant, maxLayerCount));
 	_maxLayer = maxLayerCount.toInt();
 	crossSectionSliderSignal(_maxLayer);
-
-
 
 }
 
