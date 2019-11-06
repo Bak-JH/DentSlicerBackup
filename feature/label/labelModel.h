@@ -5,6 +5,7 @@
 #include "feature/Extrude.h"
 #include "glmodel.h"
 
+
 using namespace Hix::Features::Extrusion;
 using namespace ClipperLib;
 using namespace Hix::Polyclipping;
@@ -17,12 +18,7 @@ namespace Hix
 	public:
 		LabelModel(Qt3DCore::QEntity* parent = nullptr);
 		virtual ~LabelModel() {}
-		void generateLabel(QVector3D targetNormal);
-		void setTranslation(QVector3D t);
-
-		// properties
-		QString text;
-		QFont font = QFont("Arial", 12, QFont::Normal);
+		void generateLabelMesh(const QVector3D translation, const QVector3D normal, const QString text, const QFont font);
 	};
 }
 

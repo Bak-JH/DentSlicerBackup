@@ -517,3 +517,8 @@ FaceConstItr SceneEntity::targetMeshFace()
 {
 	return _targetMeshFace;
 }
+
+Qt3DCore::QTransform& Hix::Render::SceneEntity::transform()
+{
+	return _transform;
+}

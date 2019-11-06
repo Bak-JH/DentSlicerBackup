@@ -80,9 +80,9 @@ public:
 	}
 
 	template<typename FeatureType>
-	bool isActive(Hix::Features::Feature* curr)
+	bool isActive(const Hix::Features::Feature* curr)
 	{
-		return dynamic_cast<FeatureType*>(curr) != nullptr;
+		return dynamic_cast<const FeatureType*>(curr) != nullptr;
 	}
 
 	template <typename F>
@@ -227,24 +227,9 @@ public:
     int getLayerViewFlags();
 	void modelSelected(int);
 	
+	void updateLabelMesh(const QVector3D translation, const QVector3D normal);
+
 	Hix::Features::Feature* currentFeature()const;
-
-	void faceSelectionEnable();
-	void faceSelectionDisable();
-
-	void generateLayFlat();
-
-	void openLabelling();
-	void closeLabelling();
-	void setLabelText(QString text);
-	void setLabelFontName(QString fontName);
-	void setLabelFontBold(bool isBold);
-	void setLabelFontSize(int fontSize);
-	void setLabelTranslation(const QVector3D translation);	
-	void stateChangeLabelling();
-	void generateLabelMesh();
-
-	void generateExtensionFaces(double distance);
 
 	//remove this
 	const std::unordered_set<GLModel*>& getSelectedModels();
@@ -340,6 +325,30 @@ public slots:
 	void cutFillModeSelected(int);
 	void openCut();
 	void closeCut();
+
+	void extensionSelect();
+	void extensionUnSelect();
+	void layFlatSelect();
+	void layFlatUnSelect();
+
+
+	void openLabelling();
+	void closeLabelling();
+	void setLabelText(QString text);
+	void setLabelFontName(QString fontName);
+	void setLabelFontBold(bool isBold);
+	void setLabelFontSize(int fontSize);
+	void stateChangeLabelling();
+	void generateLabelMesh();
+
+	void openExtension();
+	void closeExtension();
+	void generateExtensionFaces(double distance);
+
+	void openLayFlat();
+	void closeLayFlat();
+	void generateLayFlat();
+
 	void getSliderSignal(double);
 
 
@@ -368,11 +377,7 @@ public slots:
     void resetLayflat();
     void applyArrangeResult(std::vector<QVector3D>, std::vector<float>);
     void cleanselectedModel(int);
-    void extensionSelect();
-    void extensionUnSelect();
-
-    void layFlatSelect();
-    void layFlatUnSelect();
+   
     void manualSupportSelect();
     void manualSupportUnselect();
     void openRotate();

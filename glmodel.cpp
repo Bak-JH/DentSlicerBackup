@@ -49,6 +49,9 @@ GLModel::GLModel(QEntity*parent, Mesh* loadMesh, QString fname, int id, const Qt
     // set shader mode and color
 	setMaterialMode(Hix::Render::ShaderMode::SingleColor);
 	setMaterialColor(Hix::Render::Colors::Default);
+	
+	if (!loadMesh)
+		return;
 
 	if (transform)
 	{
@@ -248,10 +251,10 @@ void GLModel::setHitTestable(bool isEnable)
 void GLModel::clicked(MouseEventData& pick, const Qt3DRender::QRayCasterHit& hit)
 {
 	auto suppMode = qmlManager->supportRaftManager().supportEditMode();
-	if (qmlManager->isActive<Hix::Features::ModelCut>(qmlManager->currentFeature()) &&
-		qmlManager->isActive<Hix::Features::Extend>(qmlManager->currentFeature()) &&
-		qmlManager->isActive<Hix::Features::Labelling>(qmlManager->currentFeature()) &&
-		qmlManager->isActive<Hix::Features::LayFlat>(qmlManager->currentFeature()) &&
+	if (!qmlManager->isActive<Hix::Features::ModelCut>(qmlManager->currentFeature()) &&
+		!qmlManager->isActive<Hix::Features::Extend>(qmlManager->currentFeature()) &&
+		!qmlManager->isActive<Hix::Features::Labelling>(qmlManager->currentFeature()) &&
+		!qmlManager->isActive<Hix::Features::LayFlat>(qmlManager->currentFeature()) &&
 		suppMode == Hix::Support::EditMode::None)// && !layerViewActive && !supportViewActive)
 		qmlManager->modelSelected(ID);
 
@@ -272,7 +275,6 @@ void GLModel::clicked(MouseEventData& pick, const Qt3DRender::QRayCasterHit& hit
         qDebug() << "trianglePick out of bound";
         return;
     }
-    _targetSelected = true;
     _targetMeshFace = _mesh->getFaces().cbegin() + hit.primitiveIndex();
 
 
@@ -316,7 +318,7 @@ void GLModel::clicked(MouseEventData& pick, const Qt3DRender::QRayCasterHit& hit
     if (qmlManager->isActive<Hix::Features::Labelling>(qmlManager->currentFeature()) 
 			&& hit.localIntersection() != QVector3D(0, 0, 0)) 
 	{
-		qmlManager->setLabelTranslation(hit.localIntersection());
+		qmlManager->updateLabelMesh(hit.localIntersection(), _targetMeshFace.localFn());
     }
 }
 
@@ -326,11 +328,11 @@ bool GLModel::isDraggable(Hix::Input::MouseEventData& e,const Qt3DRender::QRayCa
 		&&
 		qmlManager->isSelected(this) 
 		&&
-			(qmlManager->isActive<Hix::Features::ModelCut*>(qmlManager->currentFeature())||
+			(qmlManager->isActive<Hix::Features::ModelCut>(qmlManager->currentFeature())||
 			//qmlManager->currentFeature() != Hix::Features::FeatureEnum::ShellOffset ||
-			qmlManager->isActive<Hix::Features::Extend*>(qmlManager->currentFeature()) ||
-			qmlManager->isActive<Hix::Features::Labelling*>(qmlManager->currentFeature()) ||
-			qmlManager->isActive<Hix::Features::LayFlat*>(qmlManager->currentFeature())
+			qmlManager->isActive<Hix::Features::Extend>(qmlManager->currentFeature()) ||
+			qmlManager->isActive<Hix::Features::Labelling>(qmlManager->currentFeature()) ||
+			qmlManager->isActive<Hix::Features::LayFlat>(qmlManager->currentFeature())
 			//qmlManager->currentFeature() != Hix::Features::FeatureEnum::LayerViewMode)
 		/*&&
 		!(qmlManager->currentFeature() != Hix::Features::FeatureEnum::Orient ||
@@ -456,7 +458,6 @@ QVector3D GLModel::spreadPoint(QVector3D endPoint, QVector3D startPoint, int fac
 void GLModel:: unselectMeshFaces(){
 	selectedFaces.clear();
 	_targetSelected = false;
-	callRecursive(this, &GLModel::unselectMeshFaces);
 }
 void GLModel::selectMeshFaces(){
 	selectedFaces.clear();
@@ -589,7 +590,6 @@ void GLModel::inactivateFeatures()
 
     closeHollowShell();
     closeShellOffset();
-    closeLayflat();
 
 }
 
@@ -619,15 +619,6 @@ bool GLModel::faceSelectionActive() const
 
 QVector3D GLModel::getPrimitiveColorCode(const Hix::Engine3D::Mesh* mesh, FaceConstItr itr)
 {
-#ifdef _STRICT_GLMODEL
-	if (!faceSelectionActive())
-	{
-		qDebug() << "getPrimitiveColorCode when faceSelectionActive";
-		throw std::runtime_error("getPrimitiveColorCode when faceSelectionActive");
-	}
-#endif
-		//color selected stuff yellow, everything non-yellow
-
 	if (selectedFaces.find(itr) != selectedFaces.end())
 	{
 		return Hix::Render::Colors::SelectedFace;

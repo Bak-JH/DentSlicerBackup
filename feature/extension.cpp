@@ -1,6 +1,30 @@
 #include "extension.h"
+#include "render/ModelMaterial.h"
+#include "render/Color.h"
+#include "glmodel.h"
 
 using namespace Hix::Debug;
+
+Hix::Features::Extend::Extend(const std::unordered_set<GLModel*>& selectedModels):_models(selectedModels)
+{
+	for (auto each : _models)
+	{
+		each->setMaterialMode(Hix::Render::ShaderMode::PerPrimitiveColor);
+		each->updateMesh(true);
+	}
+}
+
+Hix::Features::Extend::~Extend()
+{
+	for (auto each : _models)
+	{
+		each->setMaterialMode(Hix::Render::ShaderMode::SingleColor);
+		each->updateMesh(true);
+		each->unselectMeshFaces();
+		each->setTargetSelected(false);
+	}
+}
+
 void Hix::Features::Extend::extendMesh(Mesh* mesh, FaceConstItr mf, double distance){
     QVector3D normal = mf.localFn();
     qDebug() << normal;

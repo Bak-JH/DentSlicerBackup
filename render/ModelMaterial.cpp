@@ -176,6 +176,8 @@ ShaderMode Hix::Render::ModelMaterial::shaderMode() const
 bool test = true;
 void Hix::Render::ModelMaterial::setColor(QVector3D color)
 {
+	qDebug() << _mode;
+
 #ifdef _MODEL_MATERIAL_STRICT
 	if (_mode != ShaderMode::SingleColor)
 	{

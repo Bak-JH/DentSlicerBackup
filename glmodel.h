@@ -152,9 +152,6 @@ public slots:
     // Scale
 
     // Lay Flat
-    void openLayflat();
-    void closeLayflat();
-    void generateLayFlat();
 
 
 

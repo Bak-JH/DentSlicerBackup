@@ -4,7 +4,6 @@ import QtQuick.Layouts 1.0
 import QtQuick.Controls 1.0
 //import QtQuick.Controls.Styles 1.0
 import QtQuick.Controls.Styles 1.4
-import FeatureEnums 1.0
 
 
 
@@ -858,11 +857,9 @@ Rectangle {
             state: { //fourth_tab_button_extend.state=="active" ? "active" : "inactive"
                 if (second_tab_button_layflat.state == "active" && qm.isSelected()){
                     openLayflat();
-					qm.setCurrentActiveFeature(Feature::LayFlat);
                     return "active";
                 } else {
                     closeLayflat();
-					qm.setCurrentActiveFeature(Feature::None);
                     return "inactive";
                 }
             }
@@ -1413,11 +1410,9 @@ Rectangle {
             state: { //fourth_tab_button_extend.state=="active" ? "active" : "inactive"
                 if (fourth_tab_button_extend.state == "active" && qm.isSelected()){
                     openExtension();
-					qm.setCurrentActiveFeature(Feature::Extend);
                     return "active";
                 } else {
                     closeExtension();
-					qm.setCurrentActiveFeature(Feature::None);
                     return "inactive";
                 }
             }

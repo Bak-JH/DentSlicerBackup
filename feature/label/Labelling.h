@@ -1,5 +1,7 @@
 #pragma once
 #include "labelModel.h"
+#include <QFont>
+#include <QString>
 
 namespace Hix
 {
@@ -8,17 +10,20 @@ namespace Hix
 		class Labelling : public Feature
 		{
 		public:
-			Labelling(const std::unordered_set<GLModel*>& selectedModels);
-			void setTranslation(QVector3D translation);
-			void setText(QString text);
-			void setFontName(QString fontName);
-			void setFontBold(bool isBold);
-			void setFontSize(int fontSize);
+			Labelling(GLModel* selectedModel);
+			virtual ~Labelling();
+			void updateLabelMesh(const QVector3D translation, const QVector3D normal);
+			void setText(const QString text);
+			void setFontName(const QString fontName);
+			void setFontBold(const bool isBold);
+			void setFontSize(const int fontSize);
 			void generateLabelMesh();
 
 		private:
-			Hix::LabelModel* _previewModel;
-			std::unordered_set<GLModel*> _targetModels;
+			QString _text = "Enter text";
+			QFont _font = QFont("Arial", 12, QFont::Normal);
+			Hix::LabelModel* _previewModel = nullptr;
+			GLModel* _targetModel;
 			Hix::Engine3D::Bounds3D _modelsBound;
 		};
 	}
