@@ -5,7 +5,8 @@ Hix::Features::LayFlat::LayFlat(const std::unordered_set<GLModel*>& selectedMode
 {
 	for (auto each : _models)
 	{
-		qDebug() << each;
+		each->setMaterialMode(Hix::Render::ShaderMode::PerPrimitiveColor);
+		each->updateMesh(true);
 	}
 }
 
@@ -13,8 +14,6 @@ void Hix::Features::LayFlat::generateLayFlat()
 {
 	for (auto each : _models)
 	{
-		if (!each->targetSelected())
-			continue;
 		each->unselectMeshFaces();
 		constexpr QVector4D worldBot(0, 0, -1, 1);
 		QVector3D localBotNorml(each->toLocalCoord(worldBot));

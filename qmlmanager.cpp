@@ -228,9 +228,9 @@ void QmlManager::initializeUI(QQmlApplicationEngine* e){
 	QObject::connect(mv, SIGNAL(cameraViewChanged()), this, SLOT(cameraViewChanged()));
 
 
-	QObject::connect(layflatPopup, SIGNAL(openLayflat()), this, SLOT(faceSelectionEnable()));
+	QObject::connect(layflatPopup, SIGNAL(openLayflat()), this, SLOT(openLayFlat()));
 	QObject::connect(extensionPopup, SIGNAL(openExtension()), this, SLOT(openExtension()));
-	QObject::connect(layflatPopup, SIGNAL(closeLayflat()), this, SLOT(faceSelectionDisable()));
+	QObject::connect(layflatPopup, SIGNAL(closeLayflat()), this, SLOT(closeLayFlat()));
 	QObject::connect(extensionPopup, SIGNAL(closeExtension()), this, SLOT(closeExtension()));
 
 	QObject::connect(layflatPopup, SIGNAL(generateLayFlat()), this, SLOT(generateLayFlat()));
@@ -820,17 +820,8 @@ void QmlManager::closeLayFlat()
 
 void QmlManager::generateLayFlat()
 {
-	for (auto selectedModel : selectedModels)
-	{
-		if (!selectedModel->targetSelected())
-			return;
-		selectedModel->unselectMeshFaces();
-		constexpr QVector4D worldBot(0, 0, -1, 1);
-		QVector3D localBotNorml(selectedModel->toLocalCoord(worldBot));
-		auto rotationTo = QQuaternion::rotationTo(selectedModel->targetMeshFace().localFn(), localBotNorml);
-		selectedModel->transform().setRotation(selectedModel->transform().rotation() * rotationTo);
-		resetLayflat();
-	}
+	auto layFlat = dynamic_cast<LayFlat*>(_currentFeature.get());
+	layFlat->generateLayFlat();
 }
 
 void QmlManager::openLabelling()
