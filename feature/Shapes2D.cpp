@@ -1,6 +1,7 @@
 #include "Shapes2D.h"
 #include "../DentEngine/src/ContourBuilder.h"
 #include "agCDT/CDT.h"
+//#include "../cork/src/isct/triangle.h"
 
 using namespace ClipperLib;
 
@@ -9,10 +10,10 @@ namespace std
 {
 
 	template<>
-	struct hash<CDT::V2d<float>>
+	struct hash<CDT::V2d<double>>
 	{
 		//2D only!
-		std::size_t operator()(const CDT::V2d<float>& pt)const
+		std::size_t operator()(const CDT::V2d<double>& pt)const
 		{
 			size_t x = (size_t)(pt.x);
 			size_t y = (size_t)(pt.y);
@@ -23,16 +24,16 @@ namespace std
 }
 
 template <typename QVectorType>
-std::vector<CDT::V2d<float>> QVectorToCDTVtx(const std::vector<QVectorType>& input)
+std::vector<CDT::V2d<double>> QVectorToCDTVtx(const std::vector<QVectorType>& input)
 {
-	std::vector<CDT::V2d<float>> v2d;
+	std::vector<CDT::V2d<double>> v2d;
 	v2d.reserve(input.size());
 	for (auto& each : input)
 	{
-		v2d.emplace_back(CDT::V2d<float>::make(each.x(), each.y()));
+		v2d.emplace_back(CDT::V2d<double>::make(each.x(), each.y()));
 	}
 
-	std::unordered_set<CDT::V2d<float>> test;
+	std::unordered_set<CDT::V2d<double>> test;
 	for (auto& each : v2d)
 	{
 		test.insert(each);
@@ -181,9 +182,9 @@ std::vector<QVector2D> Hix::Shapes2D::PolylineToArea(float thickness, const std:
 }
 
 
-void generateCapZPlaneImpl(Hix::Engine3D::Mesh* mesh, float zPos, const std::vector<CDT::V2d<float>>& vtcs, const std::vector<CDT::Edge> edges, bool isReverse)
+void generateCapZPlaneImpl(Hix::Engine3D::Mesh* mesh, float zPos, const std::vector<CDT::V2d<double>>& vtcs, const std::vector<CDT::Edge> edges, bool isReverse)
 {
-	CDT::Triangulation<float> cdt = CDT::Triangulation<float>(CDT::FindingClosestPoint::BoostRTree);
+	CDT::Triangulation<double> cdt = CDT::Triangulation<double>(CDT::FindingClosestPoint::BoostRTree);
 	// ... same as above
 	cdt.insertVertices(vtcs);
 	cdt.insertEdges(edges);
@@ -196,7 +197,7 @@ void generateCapZPlaneImpl(Hix::Engine3D::Mesh* mesh, float zPos, const std::vec
 	for (auto& tri : tris)
 	{
 		auto& triVtcs = tri.vertices;
-		CDT::V2d<float> pt0, pt1,pt2;
+		CDT::V2d<double> pt0, pt1,pt2;
 		if (isReverse)
 		{
 			pt0 = vtcsOut[triVtcs[2]].pos;

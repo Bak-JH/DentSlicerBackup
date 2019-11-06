@@ -12,7 +12,7 @@ void main()
     for(int i=0; i<3; i++){
         //return vtx normal or face normal
         gl_Position = gl_in[i].gl_Position;
-        vec3 color = calcLights( gs_in[i].position, norm, gs_in[0].color);
+        vec4 color = calcLights( gs_in[i].position, norm, gs_in[0].color);
         VertexColor = color;
         EmitVertex();
     }

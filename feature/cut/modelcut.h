@@ -18,21 +18,18 @@ namespace Hix
 			ModelCut(const std::unordered_set<GLModel*>& selectedModels, Hix::Engine3D::Bounds3D bound);
 			virtual ~ModelCut();
 			void cutModeSelected(int type);
-			void cutFillModeSelected(int type);
 			void getSliderSignal(double value);
 			void applyCut();
 				
-			// Model Cut
+			// polyline
 			void addCuttingPoint(QVector3D v);
 			void removeCuttingPoint(int idx);
 			void removeCuttingPoints();
 			void drawLine(QVector3D endpoint);
 		private:
 			//cutting
-			bool _isFill = false;
 			CutType _cutType = ZAxial;
 			const Engine3D::Mesh* _origMesh;
-			bool _fillCuttingSurface;
 			Hix::Features::Cut::DrawingPlane _cuttingPlane;
 			Hix::Engine3D::Bounds3D _modelsBound;
 			std::unordered_set<GLModel*> _models;

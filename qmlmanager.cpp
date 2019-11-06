@@ -26,6 +26,9 @@
 #include "DentEngine/src/configuration.h"
 #include "feature/stlexporter.h"
 #include "feature/cut/modelcut.h"
+#include "feature/repair/meshrepair.h"
+#include "feature/layerview/layerview.h"
+
 #include <functional>
 using namespace Hix::Input;
 using namespace Hix::UI;
@@ -233,14 +236,52 @@ void QmlManager::initializeUI(QQmlApplicationEngine* e){
 	QObject::connect(cutPopup, SIGNAL(closeCut()), this, SLOT(closeCut()));
 	QObject::connect(cutPopup, SIGNAL(resultSliderValueChanged(double)), this, SLOT(getSliderSignal(double)));
 
+	QObject::connect(repairPopup, SIGNAL(modelRepair()), this, SLOT(modelRepair()));
+
+
+
+	// shelloffset popup codes
+	QObject::connect(shelloffsetPopup, SIGNAL(openShellOffset()), this, SLOT(openShellOffset()));
+	QObject::connect(shelloffsetPopup, SIGNAL(closeShellOffset()), this, SLOT(closeShellOffset()));
+	QObject::connect(shelloffsetPopup, SIGNAL(shellOffset(double)), this, SLOT(generateShellOffset(double)));
+	QObject::connect(shelloffsetPopup, SIGNAL(resultSliderValueChanged(double)), this, SLOT(getSliderSignal(double)));
+
+	QObject::connect(layerViewSlider, SIGNAL(sliderValueChanged(int)), this, SLOT(getCrossSectionSignal(int)));
+
+
 }
+
+GLModel* QmlManager::listModel(GLModel* model)
+{
+	Qt3DCore::QTransform toRoot;
+	toRoot.setMatrix(model->toRootMatrix());
+	auto res = glmodels.try_emplace(modelIDCounter, models, model->getMeshModd(), model->modelName(), modelIDCounter, &toRoot);
+	++modelIDCounter;
+	auto latestAdded = &(res.first->second);
+	// set initial position
+	//add to raytracer
+	latestAdded->setHitTestable(true);
+	qmlManager->addPart(latestAdded->modelName(), latestAdded->ID);
+	//steal children, mixing RAII with QT is difficult
+	for (auto& childNode : model->childNodes())
+	{
+		auto childModel = dynamic_cast<GLModel*>(childNode);
+		if (childModel)
+		{
+			childModel->setParent(latestAdded);
+		}
+	}
+	model->setMesh(nullptr);
+	delete model;
+	return latestAdded;
+}
+
 
 GLModel* QmlManager::createAndListModel(Hix::Engine3D::Mesh* mesh, QString fname, const Qt3DCore::QTransform* transform) {
 	auto res = glmodels.try_emplace(modelIDCounter, models, mesh, fname, modelIDCounter, transform);
     ++modelIDCounter;
     auto latestAdded = &(res.first->second);
     // set initial position
-    latestAdded->setZToBed();
 	//add to raytracer
 	latestAdded->setHitTestable(true);
 	qmlManager->addPart(latestAdded->modelName(), latestAdded->ID);
@@ -258,10 +299,20 @@ void QmlManager::openModelFile(QString fname){
 	}
 	fname = filenameToModelName(fname.toStdString());
 	setProgress(0.3);
+	mesh->centerMesh();
 	auto latest = createAndListModel(mesh, fname, nullptr);
+	
 	setProgress(0.6);
-    // check for defects
-    checkModelFile(latest);
+
+	//repair mode
+	if (Hix::Features::isRepairNeeded(mesh))
+	{
+		qmlManager->setProgressText("Repairing mesh.");
+		std::unordered_set<GLModel*> repairModels;
+		repairModels.insert(latest);
+		_currentFeature.reset(new MeshRepair(repairModels));
+		_currentFeature.reset();
+	}
 	setProgress(1.0);
     // do auto arrange
     if (glmodels.size() >= 2)
@@ -270,14 +321,12 @@ void QmlManager::openModelFile(QString fname){
     QApplication::setOverrideCursor(QCursor(Qt::ArrowCursor));
 }
 
-void QmlManager::checkModelFile(GLModel* target){
-    ;
+void QmlManager::modelRepair()
+{
+	_currentFeature.reset(new MeshRepair(selectedModels));
+	//if cut is finished;
+	_currentFeature.reset();
 
-    //size_t holesCount = MeshRepair::identifyHoles(target->getMesh()).size();
-    //if (holesCount!= 0){
-    //    selectPart(target->ID);
-    //    qmlManager->openYesNoPopUp(false, "Model has flaws.", "", "Do you want to fix the model?", 16, "", ftrRepair, 0);
-    //}
 }
 
 GLModel* QmlManager::getModelByID(int ID)
@@ -397,9 +446,6 @@ void QmlManager::disconnectHandlers(GLModel* glmodel){
 	// extension popup codes
 	QObject::disconnect(extensionPopup, SIGNAL(generateExtensionFaces(double)), glmodel, SLOT(generateExtensionFaces(double)));
 
-	// shelloffset popup codes
-	QObject::disconnect(shelloffsetPopup, SIGNAL(shellOffset(double)), glmodel, SLOT(generateShellOffset(double)));
-
 
 	
 
@@ -441,11 +487,7 @@ void QmlManager::disconnectHandlers(GLModel* glmodel){
 
 
 	// shelloffset popup codes
-	QObject::disconnect(shelloffsetPopup, SIGNAL(openShellOffset()), glmodel, SLOT(openShellOffset()));
-	QObject::disconnect(shelloffsetPopup, SIGNAL(closeShellOffset()), glmodel, SLOT(closeShellOffset()));
-	QObject::disconnect(shelloffsetPopup, SIGNAL(resultSliderValueChanged(double)), glmodel, SLOT(getSliderSignal(double)));
 
-	
 
 
     // auto arrange popup codes
@@ -462,7 +504,6 @@ void QmlManager::disconnectHandlers(GLModel* glmodel){
 
 
 
-    QObject::disconnect(layerViewSlider, SIGNAL(sliderValueChanged(int)), glmodel, SLOT(getLayerViewSliderSignal(int)));
 }
 
 void QmlManager::connectHandlers(GLModel* glmodel){
@@ -537,12 +578,6 @@ void QmlManager::connectHandlers(GLModel* glmodel){
 
 
 
-    // shelloffset popup codes
-    QObject::connect(shelloffsetPopup, SIGNAL(openShellOffset()), glmodel, SLOT(openShellOffset()));
-    QObject::connect(shelloffsetPopup, SIGNAL(closeShellOffset()), glmodel, SLOT(closeShellOffset()));
-    QObject::connect(shelloffsetPopup, SIGNAL(shellOffset(double)), glmodel, SLOT(generateShellOffset(double)));
-    QObject::connect(shelloffsetPopup, SIGNAL(resultSliderValueChanged(double)), glmodel, SLOT(getSliderSignal(double)));
-
 
     // auto arrange popup codes
     //unused, signal from qml goes right into QmlManager.runArrange
@@ -557,7 +592,6 @@ void QmlManager::connectHandlers(GLModel* glmodel){
     //QObject::connect(exportButton, SIGNAL(runFeature(int, QVariant)), glmodel->ft, SLOT(setTypeAndRun(int, QVariant)));
 
 
-    QObject::connect(layerViewSlider, SIGNAL(sliderValueChanged(int)), glmodel, SLOT(getLayerViewSliderSignal(int)));
 }
 void QmlManager::cleanselectedModel(int type){
     //selectedModels[0] = nullptr;
@@ -601,14 +635,15 @@ void QmlManager::keyboardHandlerFocus(){
 }
 
 void QmlManager::fixMesh(){
-    if (selectedModels.empty())
-        return;
-
     openProgressPopUp();
-    for(auto glm : selectedModels)
-        glm->repairMesh();
-
+	qmlManager->setProgressText("Repairing mesh.");
+	qmlManager->setProgress(0.1);
+	_currentFeature.reset(new MeshRepair(selectedModels));
+	_currentFeature.reset();
+	qmlManager->setProgress(1.0);
 }
+
+
 
 void QmlManager::disableObjectPickers(){
     for (auto& pair : glmodels){
@@ -830,9 +865,6 @@ bool QmlManager::multipleModelSelected(int ID){
                 case 8:
                     QMetaObject::invokeMethod(orientPopup,"offApplyFinishButton");
                     break;
-                case 10:
-                    QMetaObject::invokeMethod(repairPopup,"offApplyFinishButton");
-                    break;
                 }
             }
             return true;
@@ -871,9 +903,6 @@ bool QmlManager::multipleModelSelected(int ID){
             break;
         case 8:
             QMetaObject::invokeMethod(orientPopup,"onApplyFinishButton");
-            break;
-        case 10:
-            QMetaObject::invokeMethod(repairPopup,"onApplyFinishButton");
             break;
         }
     }
@@ -1012,11 +1041,8 @@ void QmlManager::modelSelected(int ID){
 		qDebug() << "changing model" << target->ID;
 		qDebug() << "[model selected] b box center"; //<< xmid << " " << ymid << " " << zmid ;
 
-		QMetaObject::invokeMethod(layerViewSlider, "setThickness", Q_ARG(QVariant, (scfg->layer_height)));
-		QMetaObject::invokeMethod(layerViewSlider, "setHeight", Q_ARG(QVariant,
-			(target->getMesh()->z_max() - target->getMesh()->z_min() + scfg->raft_thickness+ scfg->support_base_height)));
-		sendUpdateModelInfo();
-		qDebug() << "scale value   " << target->getMesh()->x_max() - target->getMesh()->x_min();
+		//sendUpdateModelInfo();
+		//qDebug() << "scale value   " << target->getMesh()->x_max() - target->getMesh()->x_min();
 		if (groupFunctionState == "active") {
             qDebug() << "@@@@ selected2 @@@@" << groupFunctionIndex;
 			switch (groupFunctionIndex) {
@@ -1362,17 +1388,6 @@ void QmlManager::runGroupFeature(int ftrType, QString state, double arg1, double
         }
         break;
     }
-    case ftrRepair:  //repair
-    {
-        if (state == "active"){
-
-			for (auto selectedModel : selectedModels) {
-				selectedModel->repairMesh();
-
-			}
-        }
-        break;
-    }
     case ftrExtend:
         break;
     case ftrScale:
@@ -1602,8 +1617,7 @@ void QmlManager::setViewMode(int viewMode) {
         if (viewMode == 2) viewLayerButton->setProperty("checked", true);
 
         this->viewMode = viewMode;
-		layerViewPopup->setProperty("visible", this->viewMode == VIEW_MODE_LAYER);
-		layerViewSlider->setProperty("visible", this->viewMode == VIEW_MODE_LAYER);
+
 		bool sliceNeeded = false;
 
 		switch (viewMode) {
@@ -1673,11 +1687,24 @@ Hix::Tasking::GenericTask* QmlManager::exportSelectedAsync(QString exportPath, b
 }
 void QmlManager::setModelViewMode(int mode)
 {
-	qDebug() << "setModelViewMode called";
-	for (auto each : selectedModels)
+
+	switch (mode) {
+	case VIEW_MODE_OBJECT:
 	{
-		each->changeViewMode(viewMode);
-		each->updateModelMesh();
+		auto layerview = dynamic_cast<LayerView*>(_currentFeature.get());
+		if (layerview)
+		{
+			_currentFeature.reset();
+		}		
+		break;
+	}
+
+
+	case VIEW_MODE_LAYER:
+	{
+		_currentFeature.reset(new LayerView(selectedModels, getSelectedBound()));
+		break;
+	}
 
 	}
 }
@@ -1830,11 +1857,6 @@ void QmlManager::cutModeSelected(int mode)
 	auto modelCut = dynamic_cast<ModelCut*>(_currentFeature.get());
 	modelCut->cutModeSelected(mode);
 }
-void QmlManager::cutFillModeSelected(int fill)
-{
-	auto modelCut = dynamic_cast<ModelCut*>(_currentFeature.get());
-	modelCut->cutFillModeSelected(fill);
-}
 void QmlManager::openCut()
 {
 	_currentFeature.reset(new ModelCut(selectedModels, getSelectedBound()));
@@ -1847,6 +1869,55 @@ void QmlManager::closeCut()
 void QmlManager::getSliderSignal(double sliderPos)
 {
 	auto modelCut = dynamic_cast<ModelCut*>(_currentFeature.get());
-	modelCut->getSliderSignal(sliderPos);
+	if (modelCut)
+	{
+		modelCut->getSliderSignal(sliderPos);
+		return;
+	}
+	auto shellOffset = dynamic_cast<ShellOffset*>(_currentFeature.get());
+	if (shellOffset)
+	{
+		shellOffset->getSliderSignal(sliderPos);
+		return;
+	}
 }
+
+void QmlManager::getCrossSectionSignal(int val)
+{
+	auto layerview = dynamic_cast<LayerView*>(_currentFeature.get());
+	if (layerview)
+	{
+		layerview->crossSectionSliderSignal(val);
+	}
+}
+
+
+void QmlManager::openShellOffset() {
+	if (selectedModels.size() == 1)
+	{
+		_currentFeature.reset(new ShellOffset(*selectedModels.begin()));
+
+	}
+	else
+	{
+		qmlManager->openResultPopUp("A single model must be selected", "", "");
+	}
+
+}
+
+void QmlManager::closeShellOffset() {
+	_currentFeature.reset();
+}
+
+
+// for shell offset
+void QmlManager::generateShellOffset(double factor) {
+	qmlManager->openProgressPopUp();
+	qmlManager->setProgress(0.1);
+	auto shellOffset = dynamic_cast<ShellOffset*>(_currentFeature.get());
+	shellOffset->doOffset(factor);
+	qmlManager->setProgress(1.0);
+
+}
+
 

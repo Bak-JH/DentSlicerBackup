@@ -112,6 +112,12 @@ const  Hix::Engine3D::Mesh* SceneEntity::getMesh()const
 	return _mesh;
 }
 
+Hix::Engine3D::Mesh* SceneEntity::getMeshModd()
+{
+	return _mesh;
+}
+
+
 const Qt3DCore::QTransform& Hix::Render::SceneEntity::transform() const
 {
 	return _transform;
@@ -137,6 +143,19 @@ QVector4D Hix::Render::SceneEntity::toRootCoord(const QVector4D& local) const
 		curr = dynamic_cast<SceneEntity*>(curr->parentEntity());
 	}
 	return coord;
+}
+
+QMatrix4x4 Hix::Render::SceneEntity::toRootMatrix() const
+{
+	auto matrix = QMatrix4x4();
+	matrix.setToIdentity();
+	auto curr = this;
+	while (curr)
+	{
+		matrix = curr->transform().matrix() * matrix;
+		curr = dynamic_cast<SceneEntity*>(curr->parentEntity());
+	}
+	return matrix;
 }
 QVector4D Hix::Render::SceneEntity::toLocalCoord(const QVector4D& world) const
 {
@@ -189,7 +208,8 @@ void Hix::Render::SceneEntity::setMesh(Hix::Engine3D::Mesh* newMesh)
 		{
 			_mesh->setSceneEntity(this);
 			updateRecursiveAabb();
-			updateEntireMesh(_mesh);
+			addComponent(&m_geometryRenderer);
+			updateMesh(_mesh, true);
 		}
 	}
 }
@@ -201,6 +221,8 @@ void Hix::Render::SceneEntity::clearMesh()
 	_mesh->setSceneEntity(nullptr);
 	delete _mesh;
 	_mesh = nullptr;
+	removeComponent(&m_geometryRenderer);
+
 }
 
 
@@ -225,6 +247,10 @@ void SceneEntity::updateEntireMesh(Hix::Engine3D::Mesh* mesh)
 
 void SceneEntity::updateMesh(Hix::Engine3D::Mesh* mesh, bool force)
 {
+	if (mesh == nullptr)
+	{
+		return;
+	}
 	//flush datas
 	auto faceHistory = mesh->getFaces().flushChanges();
 	auto verticesHistory = mesh->getVertices().flushChanges();
@@ -437,20 +463,24 @@ void SceneEntity::appendMeshVertex(const Mesh* mesh,
 	appendData.resize(appendFaceVerticesByteSize);
 	//add data to the append data
 	QVector<QVector3D> vertices;
-	QVector3D empty(0.0f, 0.0f, 0.0f);
+	QVector4D empty(0.0f, 0.0f, 0.0f, 0.0f);
+	float* rawVertexArray = reinterpret_cast<float*>(appendData.data());
+	size_t idx = 0;
 	for (auto itr = begin; itr != end; ++itr)
 	{
 		auto faceVertices = itr.meshVertices();
 		for (auto& vtxItr : faceVertices)
 		{
-			vertices << vtxItr.localPosition();
-			//do color
-			vertices << empty;
+			auto pos = vtxItr.localPosition();
+			rawVertexArray[idx++] = pos[0];
+			rawVertexArray[idx++] = pos[1];
+			rawVertexArray[idx++] = pos[2];
+			rawVertexArray[idx++] = empty[0];
+			rawVertexArray[idx++] = empty[1];
+			rawVertexArray[idx++] = empty[2];
+			rawVertexArray[idx++] = empty[3];
 		}
 	}
-
-	float* rawVertexArray = reinterpret_cast<float*>(appendData.data());
-	size_t idx = 0;
 	for (const QVector3D& v : vertices) {
 		rawVertexArray[idx++] = v.x();
 		rawVertexArray[idx++] = v.y();

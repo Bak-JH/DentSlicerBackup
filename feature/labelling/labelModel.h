@@ -38,7 +38,7 @@ namespace Hix {
 			QString text;
 			QFont font = QFont("Arial", 12, QFont::Normal);
 		protected:
-			QVector3D getPrimitiveColorCode(const Hix::Engine3D::Mesh* mesh, FaceConstItr faceItr)override;
+			QVector4D getPrimitiveColorCode(const Hix::Engine3D::Mesh* mesh, FaceConstItr faceItr)override;
 		private:
 			void initHitTest()override;
 			

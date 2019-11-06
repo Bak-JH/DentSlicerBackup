@@ -17,23 +17,23 @@ namespace Hix
 		{
 			class ZAxialCut
 			{
+				
 			public:
-				ZAxialCut(GLModel* subject, float cuttingPlane, bool fill);
+				//should cut keep both halves
+				enum Result
+				{
+					KeepBoth,
+					KeepTop,
+					KeepBottom
+				};
+				ZAxialCut(GLModel* subject, float cuttingPlane, Result option = Result::KeepBoth);
+				void doChildrenRecursive(GLModel* subject, float cuttingPlane, Result option);
 			private:
-				void divideTriangles();
-				void generateCutContour();
-				void generateCaps();
-				void fillOverlap(const Hix::Slicer::ContourSegment& seg);
-
-				bool _fill;
+				//top, bottom pair
+				std::unordered_map<GLModel*, std::pair<GLModel*, GLModel*>> _divisionMap;
+				std::unordered_set<GLModel*> _topChildren;
+				std::unordered_set<GLModel*> _botChildren;
 				float _cuttingPlane;
-				const Engine3D::Mesh* _origMesh;
-				Engine3D::Mesh* _bottomMesh;
-				Engine3D::Mesh* _topMesh;
-				std::unordered_set<Hix::Engine3D::FaceConstItr> _botFaces;
-				std::unordered_set<Hix::Engine3D::FaceConstItr> _overlapFaces;
-				std::unordered_set<Hix::Engine3D::FaceConstItr> _topFaces;
-				std::vector<Hix::Slicer::Contour> _contours;
 			};
 		}
 	}

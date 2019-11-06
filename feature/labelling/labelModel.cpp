@@ -139,7 +139,7 @@ void Hix::Labelling::LabelModel::setHighlight(bool enable)
 	_meshMaterial.setColor(color);
 }
 
-QVector3D Hix::Labelling::LabelModel::getPrimitiveColorCode(const Hix::Engine3D::Mesh* mesh, Hix::Engine3D::FaceConstItr faceItr)
+QVector4D Hix::Labelling::LabelModel::getPrimitiveColorCode(const Hix::Engine3D::Mesh* mesh, Hix::Engine3D::FaceConstItr faceItr)
 {
 	throw std::runtime_error("Text3D::getPrimitiveColorCode not implemented");
 	return QVector3D();

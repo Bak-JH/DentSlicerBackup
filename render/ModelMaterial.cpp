@@ -62,7 +62,7 @@ Hix::Render::ModelMaterial::ModelMaterial():
 
 
 	_singleColorParameter.setName(QStringLiteral("singleColor"));
-	_singleColorParameter.setValue(QVector3D(0,0,0));
+	_singleColorParameter.setValue(QVector4D(0,0,0,0));
 
 	_effect.addParameter(&_ambientParameter);
 	_effect.addParameter(&_diffuseParameter);
@@ -174,7 +174,7 @@ ShaderMode Hix::Render::ModelMaterial::shaderMode() const
 }
 
 bool test = true;
-void Hix::Render::ModelMaterial::setColor(QVector3D color)
+void Hix::Render::ModelMaterial::setColor(QVector4D color)
 {
 #ifdef _MODEL_MATERIAL_STRICT
 	if (_mode != ShaderMode::SingleColor)

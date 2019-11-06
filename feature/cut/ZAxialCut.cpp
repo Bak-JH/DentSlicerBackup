@@ -7,19 +7,214 @@ using namespace Hix::Engine3D;
 using namespace Hix::Slicer;
 using namespace ClipperLib;
 
-
-
-Hix::Features::Cut::ZAxialCut::ZAxialCut(GLModel* subject, float cuttingPlane, bool fill):
-	_cuttingPlane(cuttingPlane), _fill(fill), _origMesh(subject->getMesh())
+namespace Hix
 {
+
+	namespace Features
+	{
+		namespace Cut
+		{
+			class ZAxialCutImp
+			{
+
+			public:
+				ZAxialCutImp(GLModel* subject, float cuttingPlane, Mesh*& topMesh, Mesh*& botMesh, ZAxialCut::Result option);
+			private:
+				void divideTriangles();
+				void generateCutContour();
+				void generateCaps();
+				void fillOverlap(const Hix::Slicer::ContourSegment& seg);
+				float _cuttingPlane;
+				const Engine3D::Mesh* _origMesh;
+				Engine3D::Mesh* _bottomMesh;
+				Engine3D::Mesh* _topMesh;
+				std::unordered_set<Hix::Engine3D::FaceConstItr> _botFaces;
+				std::unordered_set<Hix::Engine3D::FaceConstItr> _overlapFaces;
+				std::unordered_set<Hix::Engine3D::FaceConstItr> _topFaces;
+				std::vector<Hix::Slicer::Contour> _contours;
+				ZAxialCut::Result _option;
+			};
+		}
+	}
+}
+
+
+Hix::Features::Cut::ZAxialCut::ZAxialCut(GLModel* subject, float cuttingPlane, Result option) :
+	_cuttingPlane(cuttingPlane)
+{
+	//do listed part first
+
+	Mesh* listedTopMesh = nullptr;
+	Mesh* listedBotMesh = nullptr;
+
+	ZAxialCutImp(subject, cuttingPlane, listedTopMesh, listedBotMesh, option);
+	bool deleteOriginal = false;
+	GLModel* botModel = nullptr;
+	GLModel* topModel = nullptr;
+	if (listedBotMesh == nullptr && listedTopMesh == nullptr)
+	{
+	}
+	else if (listedBotMesh == nullptr)
+	{
+		topModel = subject;
+	}
+	else if (listedTopMesh == nullptr)
+	{
+		botModel = subject;
+	}
+	else
+	{
+		botModel = qmlManager->createAndListModel(listedBotMesh, subject->modelName() + "_bot", &subject->transform());
+		topModel = qmlManager->createAndListModel(listedTopMesh, subject->modelName() + "_top", &subject->transform());
+		deleteOriginal = true;
+	}
+	_divisionMap.insert(std::make_pair(subject, std::make_pair(topModel, botModel)));
+	//do it for each unlisted children
+	doChildrenRecursive(subject, cuttingPlane, option);
+	//if parent exists, add to that parent, if no parent exists, promot to listed model
+	std::deque<GLModel*> promoteToListed;
+	for (auto child : _topChildren)
+	{
+		auto origParent = dynamic_cast<GLModel*>(child->parentEntity());
+		auto parentTB = _divisionMap[origParent];
+		if (parentTB.first != nullptr)
+		{
+			child->setParent(parentTB.first);
+			auto parent = child->parentEntity();
+			auto parent2 = child->parentEntity();
+		}
+		else
+		{
+			promoteToListed.push_back(child);
+		}
+	}
+	for (auto child : _botChildren)
+	{
+		auto origParent = dynamic_cast<GLModel*>(child->parentEntity());
+		auto parentTB = _divisionMap[origParent];
+		if (parentTB.second != nullptr)
+		{
+			child->setParent(parentTB.second);
+			auto parent = child->parentEntity();
+			auto parent2 = child->parentEntity();
+		}
+		else
+		{
+			promoteToListed.push_back(child);
+		}
+	}
+	for (auto each : promoteToListed)
+	{
+		qmlManager->listModel(each);
+	}
+	if (botModel)
+	{
+		botModel->updateRecursiveAabb();
+	}
+	if (topModel)
+	{
+		topModel->updateRecursiveAabb();
+		//if (option == Result::KeepTop)
+		//	topModel->setZToBed();
+	}
+	//delete split models
+	_divisionMap.erase(subject);
+	for (auto& split : _divisionMap)
+	{
+		size_t spltCnt = 0;
+		//top
+		if (split.second.first != nullptr && split.second.first != split.first)
+		{
+			++spltCnt;
+		}
+		//bot
+		if (split.second.second != nullptr && split.second.second != split.first)
+		{
+			++spltCnt;
+		}
+		if (spltCnt != 0)
+		{
+			//if split occured, the original model needs to be deleted
+			delete split.first;
+		}
+	}
+
+
+	if(deleteOriginal)
+		qmlManager->deleteModelFile(subject->ID);
+}
+
+void Hix::Features::Cut::ZAxialCut::doChildrenRecursive(GLModel* subject, float cuttingPlane, Result option)
+{
+	for (auto childNode : subject->childNodes())
+	{
+		auto model = dynamic_cast<GLModel*>(childNode);
+		if (model)
+		{
+			GLModel* botModel = nullptr;
+			GLModel* topModel = nullptr;
+			Mesh* childTopMesh = nullptr;
+			Mesh* childBotMesh = nullptr;
+			ZAxialCutImp(model, cuttingPlane, childTopMesh, childBotMesh, option);
+			if (childBotMesh == nullptr)
+			{
+				topModel = subject;
+				_topChildren.insert(topModel);
+			}
+			else if (childTopMesh == nullptr)
+			{
+				botModel = subject;
+				_botChildren.insert(botModel);
+			}
+			else
+			{
+				//need to set node hierarchy later
+				topModel = new GLModel(model->parentEntity(), childTopMesh, model->modelName() + "_top", 0, &model->transform());
+				botModel = new GLModel(model->parentEntity(), childBotMesh, model->modelName() + "_bot", 0, &model->transform());
+				_topChildren.insert(topModel);
+				_botChildren.insert(botModel);
+
+			}
+			_divisionMap.insert(std::make_pair(model, std::make_pair(botModel, topModel)));
+			doChildrenRecursive(model, cuttingPlane, option);
+		}
+	}
+}
+
+Hix::Features::Cut::ZAxialCutImp::ZAxialCutImp(GLModel* subject, float cuttingPlane, Mesh*& topMesh, Mesh*& botMesh, ZAxialCut::Result option) :
+	_cuttingPlane(cuttingPlane), _origMesh(subject->getMesh()), _option((option))
+{
+	//empty model
 	_bottomMesh = new Mesh();
 	_topMesh = new Mesh();
 	divideTriangles();
-	generateCutContour();
-	if (_fill)
+	//early exit, no cut needed
+	if (_origMesh->getFaces().size() == 0)
 	{
-		generateCaps();
+		//empty node, add empty halves to both sides
+		botMesh = _bottomMesh;
+		topMesh = _topMesh;
+		subject->clearMesh();
+		return;
 	}
+	else if (_bottomMesh->getFaces().size() == _origMesh->getFaces().size() && _option != ZAxialCut::Result::KeepTop)
+	{
+		delete _topMesh;
+		delete _bottomMesh;
+		topMesh = nullptr;
+		botMesh = subject->getMeshModd();
+		return;
+	}
+	else if (_topMesh->getFaces().size() == _origMesh->getFaces().size() && _option != ZAxialCut::Result::KeepBottom)
+	{
+		delete _topMesh;
+		delete _bottomMesh;
+		topMesh = subject->getMeshModd();
+		botMesh = nullptr;
+		return;
+	}
+	generateCutContour();
+	generateCaps();
 	for (auto& contour : _contours)
 	{
 		for (auto& seg : contour.segments)
@@ -27,18 +222,26 @@ Hix::Features::Cut::ZAxialCut::ZAxialCut(GLModel* subject, float cuttingPlane, b
 			fillOverlap(seg);
 		}
 	}
-	GLModel* botModel = nullptr;
-	GLModel* topModel = nullptr;
-	if (_bottomMesh->getFaces().size() != 0) {
-		botModel = qmlManager->createAndListModel(_bottomMesh, subject->modelName() + "_bot", &subject->transform());
+
+	if (_option == ZAxialCut::Result::KeepTop)
+	{
+		delete _bottomMesh;
+		_bottomMesh = nullptr;
 	}
-	if (_topMesh->getFaces().size() != 0) {
-		topModel = qmlManager->createAndListModel(_topMesh, subject->modelName() + "_top", &subject->transform());
+	else if (_option == ZAxialCut::Result::KeepBottom)
+	{
+		delete _topMesh;
+		_topMesh = nullptr;
 	}
-	qmlManager->deleteModelFile(subject->ID);
+
+	botMesh = _bottomMesh;
+	topMesh = _topMesh;
+
+	subject->clearMesh();
 }
 
-void Hix::Features::Cut::ZAxialCut::divideTriangles()
+
+void Hix::Features::Cut::ZAxialCutImp::divideTriangles()
 {
 	// Uniform Slicing O(n)
 	auto& faces = _origMesh->getFaces();
@@ -74,13 +277,13 @@ void Hix::Features::Cut::ZAxialCut::divideTriangles()
 	}
 }
 
-void Hix::Features::Cut::ZAxialCut::generateCutContour()
+void Hix::Features::Cut::ZAxialCutImp::generateCutContour()
 {
 	ContourBuilder contourBuilder(_origMesh, _overlapFaces, _cuttingPlane);
 	_contours = contourBuilder.buildContours();
 }
 
-void Hix::Features::Cut::ZAxialCut::generateCaps()
+void Hix::Features::Cut::ZAxialCutImp::generateCaps()
 {
 	//need to map float contours with int path contours to nullify float error
 	std::unordered_map<IntPoint, QVector2D> fIntPtMap;
@@ -128,7 +331,7 @@ void Hix::Features::Cut::ZAxialCut::generateCaps()
 	}
 }
 
-void Hix::Features::Cut::ZAxialCut::fillOverlap(const Hix::Slicer::ContourSegment& seg)
+void Hix::Features::Cut::ZAxialCutImp::fillOverlap(const Hix::Slicer::ContourSegment& seg)
 {
 	auto face = seg.face;
 	if (!face.initialized())
@@ -214,5 +417,7 @@ void Hix::Features::Cut::ZAxialCut::fillOverlap(const Hix::Slicer::ContourSegmen
 
 
 }
+
+
 
 
