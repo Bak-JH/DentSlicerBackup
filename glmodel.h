@@ -64,7 +64,7 @@ public:
 
     // load teeth model default
     GLModel(QEntity* parent=nullptr, Hix::Engine3D::Mesh* loadMesh=nullptr, QString fname="", int id = 0, const Qt3DCore::QTransform* transform = nullptr); // main constructor for mainmesh and shadowmesh
-    virtual ~GLModel();
+	virtual ~GLModel();
 
     bool appropriately_rotated=false;
 
@@ -75,17 +75,6 @@ public:
 
     // feature offset
     double shellOffsetFactor;
-
-
-    // used for layer view
-    Qt3DExtras:: QPlaneMesh* layerViewPlane = nullptr;
-    Qt3DCore::QEntity* layerViewPlaneEntity = nullptr;
-    Qt3DCore::QTransform *layerViewPlaneTransform = nullptr;
-    Qt3DRender::QTextureLoader* layerViewPlaneTextureLoader = nullptr;
-    Qt3DExtras::QTextureMaterial* layerViewPlaneMaterial = nullptr;
-    //Qt3DExtras::QPhongAlphaMaterial *layerViewPlaneMaterial = nullptr;
-
-
 
 
     std::vector<Qt3DExtras::QSphereMesh*> sphereMesh;
@@ -99,11 +88,9 @@ public:
     void copyModelAttributeFrom(GLModel* from);
 
 
-    void changeColor(const QVector3D& color);
+    void changeColor(const QVector4D& color);
 
 
-
-    void repairMesh();
 
 
 	bool isPrintable()const;
@@ -126,9 +113,7 @@ public:
 	bool labellingActive = false;
 	bool extensionActive = false;
 	bool hollowShellActive = false;
-	bool shellOffsetActive = false;
 	bool layflatActive = false;
-	bool layerViewActive = false;
 	bool scaleActive = false;
 
 
@@ -158,14 +143,13 @@ private:
 
 
 
-	QVector3D getPrimitiveColorCode(const Hix::Engine3D::Mesh* mesh, FaceConstItr faceItr)override;
+	QVector4D getPrimitiveColorCode(const Hix::Engine3D::Mesh* mesh, FaceConstItr faceItr)override;
 
     //Order is important! Look at the initializer list in constructor
     QVector3D lastpoint;
     QVector2D prevPoint;
 
 
-	void removeLayerViewComponents();
     int viewMode = -1;
 
 signals:
@@ -195,8 +179,6 @@ public slots:
 
 
 
-    void getLayerViewSliderSignal(int value);
-
     // Hollow Shell
     void indentHollowShell(double radius);
     void openHollowShell();
@@ -221,9 +203,7 @@ public slots:
     void generateExtensionFaces(double distance);
 
     // ShellOffset
-    void openShellOffset();
-    void closeShellOffset();
-    void generateShellOffset(double factor);
+
 
     // Model Mesh info update
 

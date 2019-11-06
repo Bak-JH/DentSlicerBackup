@@ -62,26 +62,31 @@ Entity {
                     Viewport {
                         id: mainViewport
                         normalizedRect: Qt.rect(0, 0, 1, 1)
+                        CameraSelector {
+                            camera:camera
+                            ClearBuffers {
+                                buffers: ClearBuffers.ColorDepthBuffer
+                                clearColor: "#E5E5E5"
+                            }
 
-                        ClearBuffers {
-                            buffers: ClearBuffers.ColorDepthBuffer
-                            clearColor: Qt.rgba(0.6, 0.6, 0.6, 1.0)
-                        }
 
-                        Viewport {
-                            id: mainCam
-                            normalizedRect: Qt.rect(0, 0, 1, 1)
-                            CameraSelector {
-                                camera:camera
-                                ClearBuffers {
-                                   buffers: ClearBuffers.ColorDepthBuffer
-                                   clearColor: "#E5E5E5"
-                                }
-                                SortPolicy {
-                                    sortTypes: [
-                                        SortPolicy.BackToFront
-                                    ]
-                                }
+                            // RenderStateSet {
+                            //     renderStates: [
+                            //         CullFace { mode : CullFace.Back },       
+                            //         DepthTest { depthFunction: DepthTest.Less },         
+                            //         NoDepthMask { },         
+                            //         BlendEquationArguments {         
+                            //             sourceRgb: BlendEquationArguments.Alpha        
+                            //             destinationRgb: BlendEquationArguments.Alpha       
+                            //             },
+                            //         BlendEquation {blendFunction: BlendEquation.Add}
+                            //     ]
+                            // }
+
+                            SortPolicy {
+                                sortTypes: [
+                                    SortPolicy.BackToFront
+                                ]
                             }
                         }
                     }

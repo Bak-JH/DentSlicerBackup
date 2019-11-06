@@ -406,6 +406,12 @@
     <ClCompile Include="feature\CSG\CorkMeshFactory.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>
+    <ClCompile Include="feature\layerview\CrossSectionPlane.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="feature\layerview\layerview.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="feature\autoarrange.h">
@@ -717,9 +723,6 @@
     <ClInclude Include="input\HitTestAble.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
-    <ClInclude Include="feature\cut\DrawingPlane.h">
-      <Filter>Generated Files</Filter>
-    </ClInclude>
     <ClInclude Include="feature\cut\FreeCutPtWidget.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
@@ -765,6 +768,12 @@
     <ClInclude Include="common\delaunator.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <QtMoc Include="feature\cut\DrawingPlane.h">
+      <Filter>Generated Files</Filter>
+    </QtMoc>
+    <QtMoc Include="feature\layerview\CrossSectionPlane.h">
+      <Filter>Generated Files</Filter>
+    </QtMoc>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="debug\moc_predefs.h.cbt">
@@ -2650,6 +2659,9 @@
       <Filter>Generated Files</Filter>
     </ClInclude>
     <ClInclude Include="feature\agCDT\predicates.h">
+      <Filter>Generated Files</Filter>
+    </ClInclude>
+    <ClInclude Include="feature\layerview\layerview.h">
       <Filter>Generated Files</Filter>
     </ClInclude>
   </ItemGroup>
