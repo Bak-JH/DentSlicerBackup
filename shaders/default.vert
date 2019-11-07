@@ -2,17 +2,16 @@
 
 //from QAttribute names
 in vec3 vertexPosition;
-in vec3 vertexColor;
+in vec4 vertexColor;
 
 out EyeSpaceVertex {
     vec3 position;
-    vec3 color;
+    vec4 color;
 } vs_out;
 
 uniform mat4 modelMatrix;
 uniform mat3 modelNormalMatrix;
 uniform mat4 mvp;
-uniform mat4 ModelViewMatrix;
 
 void main()
 {

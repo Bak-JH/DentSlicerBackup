@@ -110,6 +110,7 @@ public:
 
 	//iterators
 	typename ItrFac::iterator begin();
+	typename ItrFac::iterator itrAt(size_t idx);
 	typename ItrFac::const_iterator begin() const;
 	typename ItrFac::const_iterator cbegin() const;
 	typename ItrFac::iterator end();
@@ -150,8 +151,9 @@ public:
 	}
 	iterator swapAndErase(const_iterator pos);
 	//doesn't swap if the element is at the front or back
-	iterator swapAndErase(const_iterator start,
-		const_iterator end);
+	iterator swapAndErase(const_iterator start, const_iterator end);
+	void swapAndErase(std::unordered_set<size_t>& deleteIdcs);
+
 	void clear()
 	{
 		_container.clear();
@@ -339,17 +341,14 @@ public:
 	{
 		if (_listPtr)
 		{
-			for (auto idx : _indices)
-			{
-				_listPtr->swapAndErase(_listPtr->cbegin() + idx);
-			}
+			_listPtr->swapAndErase(_indices);
 			_indices.clear();
 		}
 	}
 private:
 	IndexedList<T, A, ItrFac>* _listPtr = nullptr;
 	//have to be decreasing order so that elements about to be deleted do not get swapped
-	std::set<size_t, std::greater<size_t>> _indices;
+	std::unordered_set<size_t> _indices;
 };
 
 //default iterator
@@ -670,6 +669,13 @@ typename ItrFac::iterator IndexedList<T, A, ItrFac>::begin()
 {
 	return _itrFactory.buildIterator(0, this);
 }
+
+template <class T, class A, class ItrFac>
+typename ItrFac::iterator IndexedList<T, A, ItrFac>::itrAt(size_t idx)
+{
+	return _itrFactory.buildIterator(idx, this);
+}
+
 template <class T, class A, class ItrFac>
 typename ItrFac::const_iterator IndexedList<T, A, ItrFac>::begin() const
 {
@@ -815,6 +821,35 @@ typename ItrFac::iterator IndexedList<T, A, ItrFac>::swapAndErase(typename ItrFa
 	}
 	//iterator can be invalidated when deleted
 	return begin() + startedIndex;
+}
+
+template <class T, class A, class ItrFac>
+//doesn't swap if the element is at the front or back
+void IndexedList<T, A, ItrFac>::swapAndErase(std::unordered_set<size_t>& deleteIdcs)
+{
+	auto deleteCnt = deleteIdcs.size();
+	for (int i = size() -1; i >= 0; --i )
+	{
+		if (deleteIdcs.empty())
+			break;
+		auto rItr = itrAt(i);
+		if (deleteIdcs.find(i) != deleteIdcs.cend())
+		{
+			deleteIdcs.erase(i);
+		}
+		else
+		{
+			auto randomDel = *deleteIdcs.begin();
+			deleteIdcs.erase(deleteIdcs.begin());
+			std::swap(_container[randomDel], *rItr);
+			indexChanged(i, randomDel);
+			modifiedElement(randomDel);
+		}
+
+	}
+	for (size_t i = 0; i < deleteCnt; ++i)
+		_container.pop_back();
+
 }
 
 

@@ -341,43 +341,39 @@ bool Mesh::addFace(const FaceConstItr& face)
 
 
 
-FaceConstItr Mesh::removeFace(FaceConstItr faceItr){
-	//for each half edge, remove vertex relations
-	auto edge = faceItr.edge();
+void Mesh::removeFaces(const std::unordered_set<FaceConstItr>& faceItrs){
+
 	auto vtxDelGuard = vertices.getDeleteGuard();
 	auto hEdgeDelGuard = halfEdges.getDeleteGuard();
-
-	for (size_t i = 0; i < 3; ++i)
+	auto faceDelGuard = faces.getDeleteGuard();
+	std::unordered_set<VertexItr> maybeEmptyVtcs;
+	for (auto& faceConstItr : faceItrs)
 	{
-		auto from = edge.from();
-		auto to = edge.to();
-
-		auto moddableLeavingVtx = vertices.toNormItr(from);
-		auto moddableArrivingVtx = vertices.toNormItr(to);
-
-		moddableLeavingVtx.ref().leavingEdges.erase(edge.index());
-		moddableArrivingVtx.ref().arrivingEdges.erase(edge.index());
-
-		//if the vertex is empty ie) there are no half edges connectint to it, delete the vertex
-		if (moddableLeavingVtx.leavingEdges().empty())
+		auto faceItr = faces.toNormItr(faceConstItr);
+		faceDelGuard.deleteLater(faceItr);
+		//for each half edge, remove vertex relations
+		auto edge = faceItr.edge();
+		for (size_t i = 0; i < 3; ++i)
 		{
-			vtxDelGuard.deleteLater(moddableLeavingVtx);
-			removeVertexHash(moddableLeavingVtx.localPosition());
+			auto from = edge.from();
+			auto to = edge.to();
+			from.ref().leavingEdges.erase(edge.index());
+			to.ref().arrivingEdges.erase(edge.index());
+			maybeEmptyVtcs.insert(from);
+			hEdgeDelGuard.deleteLater(edge);
+			edge.moveNext();
 		}
-		if (moddableArrivingVtx.arrivingEdges().empty())
-		{
-			vtxDelGuard.deleteLater(moddableArrivingVtx);
-			removeVertexHash(moddableArrivingVtx.localPosition());
-		}
-		edge.moveNext();
 	}
-	//remove all half edges belonging to the mesh
-	for (size_t i = 0; i < 3; ++i)
+	//remove disconnected vertices
+	for (auto& vtxItr : maybeEmptyVtcs)
 	{
-		hEdgeDelGuard.deleteLater(edge);
-		edge.moveNext();
+		if (vtxItr->arrivingEdges.empty() && vtxItr->leavingEdges.empty())
+		{
+			removeVertexHash(vtxItr.localPosition());
+			vtxDelGuard.deleteLater(vtxItr);
+		}
 	}
-	return faces.toConstItr(faces.swapAndErase(faceItr));
+
 }
 
 
@@ -625,12 +621,11 @@ void Mesh::faceIndexChangedCallback(size_t oldIdx, size_t newIdx)
 void Mesh::hEdgeIndexChangedCallback(size_t oldIdx, size_t newIdx)
 {
 	//halfEdge whose index has been changed
-	HalfEdgeConstItr hEdge(newIdx,this);
+	HalfEdgeItr hEdge(newIdx,this);
 	//update face that owns this half edge only if the itr owned by the face is this one
-	if (hEdge.owningFace().edge() != hEdge.next() && hEdge.owningFace().edge() != hEdge.prev())
+	if (hEdge.owningFace()->edge == oldIdx)
 	{
-		auto modFace = faces.toNormItr(hEdge.owningFace());
-		modFace.ref().edge = newIdx;
+		hEdge.owningFace()->edge = newIdx;
 	}
 	//update vertices that have reference to this edge
 	auto& from = vertices[hEdge.from().index()];
@@ -639,13 +634,14 @@ void Mesh::hEdgeIndexChangedCallback(size_t oldIdx, size_t newIdx)
 	from.leavingEdges.insert(newIdx);
 	to.arrivingEdges.erase(oldIdx);
 	to.arrivingEdges.insert(newIdx);
+	hEdge.prev()->next = newIdx;
 }
 
 
 
-void Mesh::findNearSimilarFaces(QVector3D normal, FaceConstItr  mf,
-	std::unordered_set<FaceConstItr>& result, float maxNormalDiff, size_t maxCount)const
+std::unordered_set<FaceConstItr> Mesh::findNearSimilarFaces(QVector3D normal, FaceConstItr  mf, float maxNormalDiff, size_t maxCount)const
 {
+	std::unordered_set<FaceConstItr> result;
 	std::deque<FaceConstItr>q;
 	result.reserve(maxCount);
 	q.emplace_back(mf);
@@ -655,7 +651,7 @@ void Mesh::findNearSimilarFaces(QVector3D normal, FaceConstItr  mf,
 		auto curr = q.front();
 		q.pop_front();
 		if (result.size() == maxCount)
-			return;
+			return result;
 		auto edge = curr.edge();
 		for (size_t i = 0; i < 3; ++i, edge.moveNext()) {
 			auto nFaces = edge.twinFaces();
@@ -670,7 +666,7 @@ void Mesh::findNearSimilarFaces(QVector3D normal, FaceConstItr  mf,
 			}
 		}
 	}
-	return;
+	return result;
 }
 
 

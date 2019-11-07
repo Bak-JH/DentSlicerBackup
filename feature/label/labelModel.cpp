@@ -91,10 +91,9 @@ void Hix::LabelModel::generateLabelMesh(const QVector3D translation, const QVect
 		}
 	}
 
-	transform().setTranslation(translation);
-	transform().setRotation(QQuaternion::rotationTo(QVector3D(0,-1,0), normal));
 	transform().setScale(0.05f);
+	transform().setRotation(QQuaternion::rotationTo(QVector3D(0, -1, 0), normal));
+	transform().setTranslation(translation);
 
 	setMesh(labelMesh);
-	_targetSelected = true;
 }

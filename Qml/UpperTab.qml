@@ -1465,8 +1465,10 @@ Rectangle {
             detail1: "Automatic Generation"
             state: { //fourth_tab_button_extend.state=="active" ? "active" : "inactive"
                 if (fourth_tab_button_support.state == "active" && qm.isSelected()){
+                    openSupport();
                     return "active";
                 } else {
+                    closeSupport();
                     return "inactive";
                 }
             }
@@ -1563,7 +1565,6 @@ Rectangle {
                         popup_manualSupport.clearSupports();
                         support_editButton.visible = false;
                         support_cancelEditButton.visible = false;
-                        support_raftRegenButton.visible = false;
                         popup_manualSupport.supportEditEnabled(false);
                         addText.text = "Edit supports"
 
@@ -1633,7 +1634,6 @@ Rectangle {
                             popup_manualSupport.supportApplyEdit();
                             popup_manualSupport.editActive = false;
                             support_cancelEditButton.visible = false;
-                            support_raftRegenButton.visible = false;
                             addText.text = "Edit supports"
                             popup_manualSupport.onApplyFinishButton();
 
@@ -1644,7 +1644,6 @@ Rectangle {
                             popup_manualSupport.editActive = true;
                             popup_manualSupport.supportEditEnabled(true);
                             support_cancelEditButton.visible = true;
-                            support_raftRegenButton.visible = true;
                             addText.text = "Done"
                             popup_manualSupport.offApplyFinishButton();
 
@@ -1710,7 +1709,6 @@ Rectangle {
                             popup_manualSupport.editActive = false;
                             addText.text = "Edit supports"
                             support_cancelEditButton.visible = false;
-                            support_raftRegenButton.visible = false;
                             popup_manualSupport.supportEditEnabled(false);
 
                         }
@@ -1731,7 +1729,7 @@ Rectangle {
                 ]
             }
             Rectangle {
-                visible: false
+                visible: true
                 id: support_raftRegenButton
                 color: parent.color
                 width: 178
@@ -1767,11 +1765,7 @@ Rectangle {
                         }
                     }
                     onClicked: {
-						if(popup_manualSupport.editActive)
-                        {
-                            popup_manualSupport.regenerateRaft();
-                        }
-
+                        popup_manualSupport.regenerateRaft();
                     }
                 }
                 states: [
@@ -1788,12 +1782,8 @@ Rectangle {
                 ]
             }
 
-
-
-
-
-
-
+            signal openSupport();
+            signal closeSupport();
 			signal generateAutoSupport();
             signal supportEditEnabled(bool enabled);
             signal supportCancelEdit();
