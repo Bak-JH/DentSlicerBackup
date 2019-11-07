@@ -2,16 +2,18 @@
 #include "labelModel.h"
 #include <QFont>
 #include <QString>
-
+#include "../interfaces/SelectFaceFeature.h"
 namespace Hix
 {
 	namespace Features
 	{
-		class Labelling : public Feature
+		class Labelling : public SelectFaceFeature
 		{
 		public:
 			Labelling(GLModel* selectedModel);
 			virtual ~Labelling();
+			void faceSelected(GLModel* selected, const Hix::Engine3D::FaceConstItr& selectedFace, const Hix::Input::MouseEventData& mouse, const Qt3DRender::QRayCasterHit& hit)override;
+
 			void updateLabelMesh(const QVector3D translation, const QVector3D normal);
 			void setText(const QString text);
 			void setFontName(const QString fontName);

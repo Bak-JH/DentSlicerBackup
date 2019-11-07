@@ -122,6 +122,33 @@ const Qt3DCore::QTransform& Hix::Render::SceneEntity::transform() const
 	return _transform;
 }
 
+QMatrix4x4 Hix::Render::SceneEntity::toRootMatrix() const
+{
+	auto matrix = QMatrix4x4();
+	matrix.setToIdentity();
+	auto curr = this;
+	while (curr)
+	{
+		matrix = curr->transform().matrix() * matrix;
+		curr = dynamic_cast<SceneEntity*>(curr->parentEntity());
+	}
+	return matrix;
+}
+
+QMatrix4x4 Hix::Render::SceneEntity::toLocalMatrix() const
+{
+	auto matrix = QMatrix4x4();
+	matrix.setToIdentity();
+	auto curr = this;
+	while (curr)
+	{
+		matrix = curr->transform().matrix().inverted() * matrix;
+		curr = dynamic_cast<SceneEntity*>(curr->parentEntity());
+	}
+	return matrix;
+}
+
+
 QVector4D Hix::Render::SceneEntity::toParentCoord(const QVector4D& childPos) const
 {
 	return  _transform.matrix() * childPos;
@@ -144,26 +171,10 @@ QVector4D Hix::Render::SceneEntity::toRootCoord(const QVector4D& local) const
 	return coord;
 }
 
-QMatrix4x4 Hix::Render::SceneEntity::toRootMatrix() const
-{
-	auto matrix = QMatrix4x4();
-	matrix.setToIdentity();
-	auto curr = this;
-	while (curr)
-	{
-		matrix = curr->transform().matrix() * matrix;
-		curr = dynamic_cast<SceneEntity*>(curr->parentEntity());
-	}
-	QVector4D test (0, 0, 0, 1);
-	auto tttt = matrix * test;
-	return matrix;
-}
 QVector4D Hix::Render::SceneEntity::toLocalCoord(const QVector4D& world) const
 {
 	auto coord(world);
 	auto curr = this;
-	//since this is multiplication, it's associative ie) order doesn't matter.
-	//order shown here is wrong though.
 	while (curr)
 	{
 		coord = curr->fromParentCoord(coord);
@@ -529,20 +540,6 @@ void SceneEntity::updateRecursiveAabb()
 	callRecursive(this, &SceneEntity::updateRecursiveAabb);
 }
 
-void SceneEntity::setTargetSelected(bool isSelected)
-{
-	_targetSelected = isSelected;
-}
-
-bool SceneEntity::targetSelected()const
-{
-	return _targetSelected;
-}
-
-FaceConstItr SceneEntity::targetMeshFace()
-{
-	return _targetMeshFace;
-}
 
 Qt3DCore::QTransform& Hix::Render::SceneEntity::transform()
 {

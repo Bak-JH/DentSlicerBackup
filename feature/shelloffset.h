@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Feature.h"
+#include "interfaces/Feature.h"
 #include "glmodel.h"
 #include "cut/DrawingPlane.h"
 

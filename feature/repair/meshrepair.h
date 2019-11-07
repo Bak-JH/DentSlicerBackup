@@ -2,7 +2,7 @@
 #include <vector>
 #include <string>
 #include "../../DentEngine/src/Mesh.h"
-#include "../Feature.h"
+#include "../interfaces/Feature.h"
 class GLModel;
 namespace Hix
 {

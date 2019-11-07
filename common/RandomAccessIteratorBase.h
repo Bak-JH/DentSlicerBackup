@@ -1,11 +1,12 @@
 #pragma once
-
+#include <iterator>
 
 template <typename ItrType, typename OwnerType>
 class RandomAccessIteratorBase
 {
 
 public:
+
 	RandomAccessIteratorBase() :_index(0), _owner(nullptr)
 	{}
 	RandomAccessIteratorBase(size_t idx, OwnerType* owner) : _index(idx), _owner(owner)

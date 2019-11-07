@@ -5,65 +5,32 @@
 
 using namespace Hix::Debug;
 
-Hix::Features::Extend::Extend(const std::unordered_set<GLModel*>& selectedModels):_models(selectedModels)
+Hix::Features::Extend::Extend(const std::unordered_set<GLModel*>& selectedModels):Feature(selectedModels)
 {
-	for (auto each : _models)
-	{
-		each->setMaterialMode(Hix::Render::ShaderMode::PerPrimitiveColor);
-		each->updateMesh(true);
-	}
 }
 
 Hix::Features::Extend::~Extend()
 {
-	for (auto each : _models)
-	{
-		each->setMaterialMode(Hix::Render::ShaderMode::SingleColor);
-		each->updateMesh(true);
-		each->unselectMeshFaces();
-		each->setTargetSelected(false);
-	}
 }
 
-void Hix::Features::Extend::extendMesh(Mesh* mesh, FaceConstItr mf, double distance){
-    QVector3D normal = mf.localFn();
-    qDebug() << normal;
-	auto mfVertices = mf.meshVertices();
-    std::unordered_set<FaceConstItr> extension_faces;
-    mesh->findNearSimilarFaces(normal, mf, extension_faces);
+void Hix::Features::Extend::faceSelected(GLModel* selected, const Hix::Engine3D::FaceConstItr& selectedFace, const Hix::Input::MouseEventData& mouse, const Qt3DRender::QRayCasterHit& hit)
+{
+	_model = selected;
+	_normal = selectedFace.localFn();
+	_extensionFaces = selected->getMesh()->findNearSimilarFaces(_normal, selectedFace);
+	PPShaderFeature::colorFaces(selected, _extensionFaces);
+}
 
-    // delete extension_faces
-    /*for (MeshFace* mf : extension_faces){
-        for (std::vector<MeshFace>::iterator f_it=mesh->faces.begin(); f_it!=mesh->faces.end();){
-            if (f_it->idx == mf->idx){
-                //f_it = mesh->faces.erase(f_it);
-                mesh->removeFace(mf);
-            } else {
-                f_it++;
-            }
-        }
-        //mesh->removeFace(mf);
-    }*/
+void Hix::Features::Extend::extendMesh(double distance){
 
-    qDebug() << "detected extension faces" << extension_faces.size();
-    for (FaceConstItr emf : extension_faces){
-		auto emfVertices = emf.meshVertices();
-
-        //mesh->addFace(emf->mesh_vertex[0].position()+normal*2,emf->mesh_vertex[1].position()+normal*2,emf->mesh_vertex[2].position()+normal*2);
-        qDebug() << "distance from selected extension_faces " <<mfVertices[0].localPosition().distanceToPoint(emfVertices[0].localPosition());
-    }
-
-    Paths3D extension_outlines = detectExtensionOutline(mesh, extension_faces);
-    qDebug() << "detected extension outlines" << extension_outlines.size();
-
-
-    qDebug() << "mesh size : "<< mesh->getFaces().size();
-    //mesh->addFace(mf->mesh_vertex[0].position()+normal*2,mf->mesh_vertex[1].position()+normal*2,mf->mesh_vertex[2].position()+normal*2);
-    //mesh->connectFaces();
-    extendAlongOutline(mesh, normal, extension_outlines, distance);
-    qDebug() << "extended along outline";
-    qDebug() << "mesh size : "<< mesh->getFaces().size();
-    coverCap(mesh, normal, extension_faces, distance);
+	if (_model)
+	{
+		Paths3D extension_outlines = detectExtensionOutline(_model->getMeshModd(), _extensionFaces);
+		extendAlongOutline(_model->getMeshModd(), _normal, extension_outlines, distance);
+		coverCap(_model->getMeshModd(), _normal, _extensionFaces, distance);
+		_model->getMeshModd()->removeFaces(_extensionFaces);
+		_model->updateMesh();
+	}
 }
 
 

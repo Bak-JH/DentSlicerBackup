@@ -57,23 +57,13 @@ public:
     std::vector<Qt3DRender::QObjectPicker*> sphereObjectPicker;
     std::vector<QPhongMaterial*> sphereMaterial;
 
-    void removeModelPartList();
-    void copyModelAttributeFrom(GLModel* from);
-
-
     void changeColor(const QVector4D& color);
-
-
-
-
 	bool isPrintable()const;
     void updatePrintable();
     bool EndsWith(const std::string& a, const std::string& b);
     static QVector3D spreadPoint(QVector3D endpoint,QVector3D startpoint,int factor);
     void changeViewMode(int viewMode);
 	void updateShader(int viewMode);
-    void inactivateFeatures();
-
 
     const int ID; //for use in Part List
 
@@ -81,9 +71,6 @@ public:
     bool updateLock;
 
 	void setBoundingBoxVisible(bool isEnabled);
-
-	bool isMoved = false;
-
 	// useless funcitons. why did you use them?
 	bool perPrimitiveColorActive()const;
 	bool faceSelectionActive()const;
@@ -101,8 +88,7 @@ public:
 	void setHitTestable(bool isEnable);
 
 	QString modelName()const;
-
-
+	GLModel* getRootModel();
 
 protected:
 	void initHitTest()override;
@@ -125,40 +111,12 @@ signals:
 	void _updateModelMesh();
     void modelSelected(int);
     void resetLayflat();
-    void layFlatSelect();
-	void manualSupportSelect();
-	void manualSupportUnSelect();
-
-    void layFlatUnSelect();
-    void extensionSelect();
-    void extensionUnSelect();
 
 public slots:
 	void updateModelMesh();
 
-
-    // Scale
-
-    // Lay Flat
-
-
-
-    // Hollow Shell
-    void indentHollowShell(double radius);
-    void openHollowShell();
-    void closeHollowShell();
-
-    // Labelling
-
     // Extension
     void unselectMeshFaces();
-    void selectMeshFaces();
-
-    // ShellOffset
-
-
-    // Model Mesh info update
-
 
     //TODO: get rid of this
     friend class featureThread;

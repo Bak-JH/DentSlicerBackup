@@ -47,13 +47,13 @@ namespace Hix
 
 			//world coordinates.
 			QMatrix4x4 toRootMatrix() const;
+			QMatrix4x4 toLocalMatrix() const;
 			QVector4D toRootCoord(const QVector4D& local)const;
 			QVector4D toLocalCoord(const QVector4D& world)const;
 			QVector3D ptToRoot(const QVector3D& local)const;
 			QVector3D vectorToRoot(const QVector3D& local)const;
 			QVector3D ptToLocal(const QVector3D& world)const;
 			QVector3D vectorToLocal(const QVector3D& world)const;
-			
 
 			//update faces given indicies, if index >= indexUppderLimit, it's ignored
 			void updateFaces(const std::unordered_set<size_t>& faceIndicies, const Hix::Engine3D::Mesh& mesh);
@@ -70,9 +70,6 @@ namespace Hix
 			//get total AABB including it's children
 			Hix::Engine3D::Bounds3D recursiveAabb()const;
 			void updateRecursiveAabb();
-			void setTargetSelected(bool isSelected);
-			bool targetSelected()const;
-			FaceConstItr targetMeshFace();
 			Qt3DCore::QTransform& transform();
 
 		protected:
@@ -120,8 +117,6 @@ namespace Hix
 			Hix::Engine3D::Mesh* _mesh = nullptr; 
 
 			/***************Ray casting and hit test***************/
-			bool _targetSelected = false;
-			FaceConstItr _targetMeshFace; // used for object selection (specific area, like extension or labelling)
 
 		};
 	}

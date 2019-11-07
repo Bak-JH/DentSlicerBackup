@@ -31,6 +31,7 @@
 #include "feature/layFlat.h"
 #include "feature/repair/meshrepair.h"
 #include "feature/layerview/layerview.h"
+#include "feature/SupportFeature.h"
 
 #include <functional>
 using namespace Hix::Input;
@@ -39,7 +40,7 @@ using namespace Hix::Render;
 using namespace Hix::Tasking;
 using namespace Hix::Features;
 QmlManager::QmlManager(QObject *parent) : QObject(parent), _optBackend(this, scfg)
-  ,layerViewFlags(LAYER_INFILL | LAYER_SUPPORTERS | LAYER_RAFT), modelIDCounter(0), _cursorEraser(QPixmap(":/Resource/cursor_eraser.png"))
+  ,layerViewFlags(LAYER_INFILL | LAYER_SUPPORTERS | LAYER_RAFT), modelIDCounter(-1), _cursorEraser(QPixmap(":/Resource/cursor_eraser.png"))
 {
 }
 
@@ -153,7 +154,8 @@ void QmlManager::initializeUI(QQmlApplicationEngine* e){
 	QObject::connect(manualSupportPopup, SIGNAL(supportApplyEdit()), this, SLOT(supportApplyEdit()));
 	QObject::connect(manualSupportPopup, SIGNAL(supportCancelEdit()), this, SLOT(supportCancelEdit()));
 	QObject::connect(manualSupportPopup, SIGNAL(regenerateRaft()), this, SLOT(regenerateRaft()));
-
+	QObject::connect(manualSupportPopup, SIGNAL(openSupport()), this, SLOT(openSupport()));
+	QObject::connect(manualSupportPopup, SIGNAL(closeSupport()), this, SLOT(closeSupport()));
 
 	
     // repair components
@@ -281,7 +283,7 @@ GLModel* QmlManager::listModel(GLModel* model)
 	Qt3DCore::QTransform toRoot;
 	toRoot.setMatrix(model->toRootMatrix());
 	auto res = glmodels.try_emplace(modelIDCounter, models, model->getMeshModd(), model->modelName(), modelIDCounter, &toRoot);
-	++modelIDCounter;
+	--modelIDCounter;
 	auto latestAdded = &(res.first->second);
 	// set initial position
 	//add to raytracer
@@ -304,7 +306,7 @@ GLModel* QmlManager::listModel(GLModel* model)
 
 GLModel* QmlManager::createAndListModel(Hix::Engine3D::Mesh* mesh, QString fname, const Qt3DCore::QTransform* transform) {
 	auto res = glmodels.try_emplace(modelIDCounter, models, mesh, fname, modelIDCounter, transform);
-    ++modelIDCounter;
+    --modelIDCounter;
     auto latestAdded = &(res.first->second);
     // set initial position
 	//add to raytracer
@@ -326,7 +328,7 @@ void QmlManager::openModelFile(QString fname){
 	setProgress(0.3);
 	mesh->centerMesh();
 	auto latest = createAndListModel(mesh, fname, nullptr);
-	
+	latest->setZToBed();
 	setProgress(0.6);
 
 	//repair mode
@@ -634,7 +636,7 @@ GLModel* QmlManager::findGLModelByName(QString modelName){
 
 void QmlManager::backgroundClicked(){
     qDebug() << "background clicked";
-	if (_supportRaftManager.supportEditMode() == Hix::Support::EditMode::Manual)
+	if (!isFeatureActive())
 	{
 		unselectAll();
 	}
@@ -672,7 +674,6 @@ bool QmlManager::multipleModelSelected(int ID){
 			{
 				target->changeColor(Hix::Render::Colors::Default);
 			}
-            (*it)->inactivateFeatures();
             QMetaObject::invokeMethod(partList, "unselectPartByModel", Q_ARG(QVariant, target->ID));
             // set slicing info box property visible true if slicing info exists
             //slicingData->setProperty("visible", false);
@@ -765,7 +766,6 @@ void QmlManager::modelSelected(int ID){
             }
 			if((*it)->isPrintable())
 				(*it)->changeColor(Hix::Render::Colors::Default);
-            (*it)->inactivateFeatures();
             QMetaObject::invokeMethod(partList, "unselectPartByModel", Q_ARG(QVariant, (*it)->ID));
             QMetaObject::invokeMethod(yesno_popup, "deletePartListItem", Q_ARG(QVariant, (*it)->ID));
         }
@@ -897,8 +897,7 @@ void QmlManager::openLabelling()
 		return;
 	}
 
-	for(auto each : selectedModels)
-		_currentFeature.reset(new Labelling(each));
+	_currentFeature.reset(new Labelling(_lastSelected));
 }
 
 void QmlManager::closeLabelling()
@@ -936,21 +935,20 @@ void QmlManager::stateChangeLabelling()
 	keyboardHandler->setFocus(true);
 }
 
-void QmlManager::updateLabelMesh(const QVector3D translation, const QVector3D normal)
-{
-	auto labelling = dynamic_cast<Labelling*>(_currentFeature.get());
-	labelling->updateLabelMesh(translation, normal);
-}
-
-void QmlManager::addToSelected(GLModel* model)
-{
-	selectedModels.insert(model);
-}
-
 void QmlManager::generateLabelMesh()
 {
 	auto labelling = dynamic_cast<Labelling*>(_currentFeature.get());
 	labelling->generateLabelMesh();
+	
+	// added label model to selectedModels
+	for (auto each : _lastSelected->childNodes())
+	{
+		auto model = dynamic_cast<GLModel*>(each);
+		if (model)
+		{
+			selectedModels.insert(model);
+		}
+	}
 }
 
 void QmlManager::openExtension()
@@ -965,16 +963,8 @@ void QmlManager::closeExtension()
 
 void QmlManager::generateExtensionFaces(double distance)
 {
-	for (auto selectedModel : selectedModels)
-	{
-		if (selectedModel->targetSelected())
-			return;
-
-		auto extend = dynamic_cast<Extend*>(_currentFeature.get());
-		extend->extendMesh(selectedModel->getMeshModd(), selectedModel->targetMeshFace(), distance);
-		selectedModel->setTargetSelected(false);
-		selectedModel->updateMesh(true);
-	}
+	auto extend = dynamic_cast<Extend*>(_currentFeature.get());
+	extend->extendMesh(distance);
 }
 
 QString QmlManager::filenameToModelName(const std::string& s)
@@ -1650,7 +1640,6 @@ void QmlManager::unselectPartImpl(GLModel* target)
 	{
 		target->changeColor(Hix::Render::Colors::Default);
 	}
-    target->inactivateFeatures();
     if (groupFunctionState == "active"){
         switch (groupFunctionIndex){
             case 5:
@@ -1676,6 +1665,17 @@ QVector2D QmlManager::world2Screen(QVector3D target) {
 	return result;
 }
 
+
+void QmlManager::openSupport()
+{
+	//just empty placeholder to give modality to Support.
+	_currentFeature.reset(new SupportFeature());
+
+}
+void QmlManager::closeSupport()
+{
+	_currentFeature.reset();
+}
 
 void QmlManager::generateAutoSupport()
 {
@@ -1809,4 +1809,7 @@ void QmlManager::generateShellOffset(double factor) {
 
 }
 
-
+bool QmlManager::isFeatureActive()
+{
+	return _currentFeature.get() != nullptr;
+}
