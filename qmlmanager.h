@@ -199,7 +199,7 @@ public:
     QObject* layerRaftButton;
     QObject* layerViewSlider;
 
-    std::map<int, GLModel> glmodels;
+    std::unordered_map<int, GLModel> glmodels;
 
     std::vector<size_t> copyMeshes;
 
@@ -283,6 +283,7 @@ public:
 	Hix::Tasking::TaskManager& taskManager();
 	Hix::Support::SupportRaftManager& supportRaftManager();
 	GLModel* createAndListModel(Hix::Engine3D::Mesh* mesh, QString filename, const Qt3DCore::QTransform* transform);
+	GLModel* listModel(GLModel* model);
 
 private:
 	QString filenameToModelName(const std::string& s);
@@ -322,7 +323,6 @@ public slots:
 	// model cut popup codes
 	void modelCut();
 	void cutModeSelected(int);
-	void cutFillModeSelected(int);
 	void openCut();
 	void closeCut();
 
@@ -350,11 +350,11 @@ public slots:
 	void generateLayFlat();
 
 	void getSliderSignal(double);
-
+	void getCrossSectionSignal(int);
+	void modelRepair();
 
     void sendUpdateModelInfo(int, int, QString, float);
     void openModelFile(QString filename);
-    void checkModelFile(GLModel* model);
     void deleteOneModelFile(int ID);
 	void deleteOneModelFile(GLModel* model);
 
@@ -403,6 +403,10 @@ public slots:
     void layerInfillButtonChanged(bool chacked);
     void layerSupportersButtonChanged(bool chacked);
     void layerRaftButtonChanged(bool chacked);
+
+	void openShellOffset();
+	void closeShellOffset();
+	void generateShellOffset(double factor);
 };
 
 

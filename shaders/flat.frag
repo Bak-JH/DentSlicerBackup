@@ -1,6 +1,6 @@
 #version 430 core
 out vec4 fragColor;
-flat in vec3 VertexColor;
+flat in vec4 VertexColor;
 
 
 // in EyeSpaceVertex {
@@ -11,5 +11,5 @@ flat in vec3 VertexColor;
 void main()
 {
     //fragColor = vec4(0.5, 0.0, 0.0 , 1.0);
-    fragColor = vec4(VertexColor, 1.0);
+    fragColor = VertexColor;
 }

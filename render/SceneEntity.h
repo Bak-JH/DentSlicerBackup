@@ -25,7 +25,7 @@ namespace Hix
 		public:
 			//size of QGeometry Attribute elements
 			const static size_t POS_SIZE = 3; //x, y, z of position
-			const static size_t COL_SIZE = 3; //rgb color
+			const static size_t COL_SIZE = 4; //rgb color
 			const static size_t VTX_SIZE = (POS_SIZE + COL_SIZE) * sizeof(float);
 
 			const static size_t IDX_SIZE = 3; //3 indices to vertices
@@ -39,12 +39,14 @@ namespace Hix
 			void clearMesh();
 			//for now, one sceneEntity per mesh, no setter for mesh in sceneEntity
 			const Hix::Engine3D::Mesh* getMesh()const;
-			Hix::Engine3D::Mesh* getMesh();
+			Hix::Engine3D::Mesh* getMeshModd();
+
 			const Qt3DCore::QTransform& transform() const;
 			QVector4D toParentCoord(const QVector4D& childPos)const;
 			QVector4D fromParentCoord(const QVector4D& parentPos)const;
 
 			//world coordinates.
+			QMatrix4x4 toRootMatrix() const;
 			QVector4D toRootCoord(const QVector4D& local)const;
 			QVector4D toLocalCoord(const QVector4D& world)const;
 			QVector3D ptToRoot(const QVector3D& local)const;

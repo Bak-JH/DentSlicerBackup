@@ -49,19 +49,17 @@ GLModel::GLModel(QEntity*parent, Mesh* loadMesh, QString fname, int id, const Qt
     // set shader mode and color
 	setMaterialMode(Hix::Render::ShaderMode::SingleColor);
 	setMaterialColor(Hix::Render::Colors::Default);
-	
-	if (!loadMesh)
-		return;
 
+	setMesh(loadMesh);
+	
 	if (transform)
 	{
 		_transform.setMatrix(transform->matrix());
 	}
 	else
 	{
-		loadMesh->centerMesh();
+		setZToBed();
 	}
-	setMesh(loadMesh);
 	//applyGeometry();
 	// 승환 25%
 	qmlManager->setProgress(0.23);
@@ -72,12 +70,8 @@ GLModel::GLModel(QEntity*parent, Mesh* loadMesh, QString fname, int id, const Qt
 
 	qDebug() << "created original model";
 
-	//repairMesh(_mesh);
-	//addShadowModel(_mesh);
-
 	// 승환 75%
 	qmlManager->setProgress(0.73);
-
 
 	qDebug() << "created shadow model";
 
@@ -94,8 +88,6 @@ GLModel::GLModel(QEntity*parent, Mesh* loadMesh, QString fname, int id, const Qt
 	QObject::connect(this, SIGNAL(_updateModelMesh()), this, SLOT(updateModelMesh()));
 
 }
-
-
 
 void GLModel::moveModel(const QVector3D& displacement) {
 	auto translation = _transform.translation() + displacement;
@@ -139,7 +131,7 @@ void GLModel::scaleDone()
 
 void GLModel::setZToBed()
 {
-	moveModel(QVector3D(0, 0, -_aabb.zMin()));
+	moveModel(QVector3D(0, 0, - recursiveAabb().zMin()));
 }
 
 QString GLModel::modelName() const
@@ -151,7 +143,7 @@ QString GLModel::modelName() const
 
 
 
-void GLModel::changeColor(const QVector3D& color)
+void GLModel::changeColor(const QVector4D& color)
 {
 	setMaterialColor(color);
 }
@@ -182,16 +174,10 @@ void GLModel::updatePrintable() {
 }
 
 
-void GLModel::repairMesh()
-{
-    //MeshRepair::modelRepair(this);
-	emit _updateModelMesh();
-}
 
 
 /* copy info's from other GLModel */
 void GLModel::copyModelAttributeFrom(GLModel* from){
-
 }
 
 void GLModel::updateModelMesh(){
@@ -238,6 +224,7 @@ void GLModel::setHitTestable(bool isEnable)
 		_hitEnabled = isEnable;
 		if (_hitEnabled)
 		{
+			
 			qmlManager->getRayCaster().addInputLayer(&_layer);
 		}
 		else
@@ -390,56 +377,6 @@ void GLModel::dragEnded(Hix::Input::MouseEventData&)
 
 
 
-void GLModel::getLayerViewSliderSignal(int value) {
-   /* if ( !layerViewActive)
-        return;*/
-
-    //float height = (_mesh->z_max() - _mesh->z_min() + scfg->raft_thickness + scfg->support_base_height) * value;
-    //int layer_num = int(height/scfg->layer_height)+1;
-    //if (value <= 0.002f)
-    //    layer_num = 0;
-
-    if (layerViewPlaneTextureLoader == nullptr)
-    layerViewPlaneTextureLoader = new Qt3DRender::QTextureLoader();
-
-    QDir dir(QDir::tempPath()+"_export");//(qmlManager->selectedModels[0]->filename + "_export")
-    if (dir.exists()){
-        QString filename = dir.path()+"/"+QString::number(value)+".svg";
-        qDebug() << filename;
-        layerViewPlaneTextureLoader->setSource(QUrl::fromLocalFile(filename));//"C:\\Users\\User\\Desktop\\sliced\\11111_export\\100.svg"));
-    }
-    //qDebug() << "layer view plane material texture format : " << layerViewPlaneTextureLoader->format();
-    //layerViewPlaneTextureLoader->setFormat(QAbstractTexture::RGBA32F);
-    //qDebug() << "layer view plane material texture format : " << layerViewPlaneTextureLoader->format();
-
-    layerViewPlaneMaterial->setTexture(layerViewPlaneTextureLoader);
-	float rotation_values[] = { // rotate by -90 deg
-	0, -1, 0,
-	1, 0, 0,
-	0, 0, 1
-	};
-	//flip Ys,
-	float flip_values[] = {
-		1, 0, 0,
-		0, -1, 0,
-		0, 0, 1
-	};
-
-    QMatrix3x3 rotation_matrix(rotation_values);
-	QMatrix3x3 flip_matrix(flip_values);
-	QMatrix3x3 matrixTransform = flip_matrix * rotation_matrix;
-
-    layerViewPlaneMaterial->setTextureTransform(matrixTransform);
-    layerViewPlaneTransform->setTranslation(QVector3D(0,0, value *scfg->layer_height - scfg->raft_thickness - scfg->support_base_height));
-
-    // change phong material of original model
-    float h = scfg->layer_height* value + _mesh->z_min() - scfg->raft_thickness - scfg->support_base_height;
-	//_meshMaterial.setParameterValue("height", QVariant::fromValue(h));
-	/*m_layerMaterialRaftHeight->setValue(QVariant::fromValue(qmlManager->getLayerViewFlags() & LAYER_INFILL != 0 ?
-                _mesh->z_min() :
-                _mesh->z_max() + scfg->raft_thickness - scfg->support_base_height));*/
-}
-
 /** HELPER functions **/
 
 bool GLModel::EndsWith(const std::string& a, const std::string& b) {
@@ -466,20 +403,6 @@ void GLModel::selectMeshFaces(){
 	updateMesh(true);
 }
 
-// for shell offset
-void GLModel::generateShellOffset(double factor){
-    //saveUndoState();
-    qDebug() << "generate shell Offset";
-    qmlManager->openProgressPopUp();
-
-    //cutMode = 1;
-    //cutFillMode = 1;
-    shellOffsetFactor = factor;
-
-    //modelCut();
-
-}
-
 
 void GLModel::openHollowShell(){
     qDebug() << "open HollowShell called";
@@ -497,20 +420,6 @@ void GLModel::closeHollowShell(){
     qmlManager->hollowShellSphereEntity->setProperty("visible", false);
 }
 
-void GLModel::openShellOffset(){
-    qDebug() << "openShelloffset";
-    //shellOffsetActive = true;
-
-}
-
-void GLModel::closeShellOffset(){
-    qDebug() << "closeShelloffset";
-
-    //if (!shellOffsetActive)
-    //    return;
-
-    //shellOffsetActive = false;
-}
 
 void GLModel::changeViewMode(int viewMode) {
     if( this->viewMode == viewMode ) {
@@ -523,33 +432,8 @@ void GLModel::changeViewMode(int viewMode) {
 
     switch( viewMode ) {
     case VIEW_MODE_OBJECT:
-        //if (qmlManager->currentFeature() != Hix::Features::FeatureEnum::LayerViewMode){
-        //    // remove layer view components
-        //    removeLayerViewComponents();
-        //}
-        //layerViewActive = false;
-		
         break;
     case VIEW_MODE_LAYER:
-        //layerViewActive = true;
-        // generate layer view plane materials
-        layerViewPlaneMaterial = new Qt3DExtras::QTextureMaterial();
-        layerViewPlaneMaterial->setAlphaBlendingEnabled(false);
-        layerViewPlaneEntity = new Qt3DCore::QEntity(this);
-        layerViewPlane=new Qt3DExtras::QPlaneMesh(this);
-        layerViewPlane->setHeight(scfg->bedX());
-        layerViewPlane->setWidth(scfg->bedY());
-        layerViewPlaneTransform=new Qt3DCore::QTransform();
-		//layerViewPlaneTransform->setRotationX(90);
-		layerViewPlaneTransform->setRotationY(-90);
-		layerViewPlaneTransform->setRotationZ(-90);
-
-        layerViewPlaneEntity->addComponent(layerViewPlane);
-        layerViewPlaneEntity->addComponent(layerViewPlaneTransform); //jj
-        layerViewPlaneEntity->addComponent(layerViewPlaneMaterial);
-		QVariant maxLayerCount;
-		QMetaObject::invokeMethod(qmlManager->layerViewSlider, "getMaxLayer", Qt::DirectConnection, Q_RETURN_ARG(QVariant, maxLayerCount));
-        getLayerViewSliderSignal(maxLayerCount.toInt());
         break;
     }
 	updateShader(viewMode);
@@ -589,27 +473,18 @@ void GLModel::inactivateFeatures()
 
 
     closeHollowShell();
-    closeShellOffset();
-
-}
-
-void GLModel::removeLayerViewComponents(){
-    layerViewPlaneEntity->removeComponent(layerViewPlane);
-    layerViewPlaneEntity->removeComponent(layerViewPlaneTransform); //jj
-    layerViewPlaneEntity->removeComponent(layerViewPlaneMaterial);
-    layerViewPlaneEntity->deleteLater();
-    layerViewPlane->deleteLater();
-    layerViewPlaneTransform->deleteLater();
-    layerViewPlaneMaterial->deleteLater();
-    layerViewPlaneTextureLoader->deleteLater();
-    layerViewPlaneTextureLoader = nullptr;
+    //closeShellOffset();
+    // closeLayflat();
+    // closeScale();
+    //layerViewActive = false; //closeLayerView();
+    //supportViewActive = false; //closeSupportView();
+    //parentModel->changeViewMode(VIEW_MODE_OBJECT);
 }
 
 
 bool GLModel::perPrimitiveColorActive() const
 {
-	return true; // TODO: delete later
-	//return faceSelectionActive() || qmlManager->currentFeature() != Hix::Features::FeatureEnum::LayerViewMode;
+	return faceSelectionActive();
 }
 bool GLModel::faceSelectionActive() const
 {
@@ -617,7 +492,7 @@ bool GLModel::faceSelectionActive() const
 		qmlManager->isActive<Hix::Features::LayFlat>(qmlManager->currentFeature());
 }
 
-QVector3D GLModel::getPrimitiveColorCode(const Hix::Engine3D::Mesh* mesh, FaceConstItr itr)
+QVector4D GLModel::getPrimitiveColorCode(const Hix::Engine3D::Mesh* mesh, FaceConstItr itr)
 {
 	if (selectedFaces.find(itr) != selectedFaces.end())
 	{

@@ -18,6 +18,7 @@ namespace Hix
 			class FreeCutPtWidget;
 			class DrawingPlane : public Qt3DCore::QEntity, public Hix::Input::HitTestAble, public Hix::Input::Clickable
 			{
+				Q_OBJECT
 			public:
 				DrawingPlane(Qt3DCore::QEntity* owner);
 				virtual ~DrawingPlane();
