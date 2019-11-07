@@ -228,7 +228,6 @@ public:
 	void modelSelected(int);
 	
 	void updateLabelMesh(const QVector3D translation, const QVector3D normal);
-	void addToSelected(GLModel* model);
 
 	Hix::Features::Feature* currentFeature()const;
 
