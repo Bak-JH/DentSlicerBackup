@@ -45,21 +45,19 @@ void Hix::Support::SupportRaftManager::autoGen(const GLModel& model, SlicingConf
 {
 	_supportExist = true;
 	_supportType = supType;
-	autoGenSuppRaftRecursive(model);
-	generateRaft();
-
+	autoGenRecurv(model);
 }
 
 
 
-void Hix::Support::SupportRaftManager::autoGenSuppRaftRecursive(const GLModel& model)
+void Hix::Support::SupportRaftManager::autoGenRecurv(const GLModel& model)
 {
 	for (auto childNode : model.childNodes())
 	{
 		auto mainModel = dynamic_cast<GLModel*>(childNode);
 		if (mainModel)
 		{
-			autoGenSuppRaftRecursive(*mainModel);
+			autoGenRecurv(*mainModel);
 		}
 	}
 	generateSupport(model);

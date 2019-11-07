@@ -1,5 +1,5 @@
 #pragma once
-#include "../Feature.h"
+#include "../interfaces/Feature.h"
 #include "../../DentEngine/src/Bounds3D.h"
 #include "CrossSectionPlane.h"
 namespace Hix

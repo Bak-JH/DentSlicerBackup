@@ -23,7 +23,7 @@
 #include "feature/cut/DrawingPlane.h"
 #include "feature/label/labelling.h"
 #include "feature/layFlat.h"
-
+#include "feature/interfaces/SelectFaceFeature.h"
 
 #define ATTRIBUTE_SIZE_INCREMENT 200
 #if defined(_DEBUG) || defined(QT_DEBUG)
@@ -56,24 +56,9 @@ GLModel::GLModel(QEntity*parent, Mesh* loadMesh, QString fname, int id, const Qt
 	{
 		_transform.setMatrix(transform->matrix());
 	}
-	//applyGeometry();
-	// 승환 25%
-	qmlManager->setProgress(0.23);
-	// 승환 50%
-	qmlManager->setProgress(0.49);
-	//Qt3DExtras::QDiffuseMapMaterial* diffuseMapMaterial = new Qt3DExtras::QDiffuseMapMaterial();
-
-
-	qDebug() << "created original model";
 
 	// 승환 75%
 	qmlManager->setProgress(0.73);
-
-	qDebug() << "created shadow model";
-
-	qDebug() << "adding part " << fname.toStdString().c_str();
-
-
 	// reserve cutting points, contours
 	sphereEntity.reserve(50);
 	sphereMesh.reserve(50);
@@ -180,41 +165,6 @@ void GLModel::updatePrintable() {
 	}
 }
 
-
-
-
-/* copy info's from other GLModel */
-void GLModel::copyModelAttributeFrom(GLModel* from){
-}
-
-void GLModel::updateModelMesh(){
-    QMetaObject::invokeMethod(qmlManager->boxUpperTab, "disableUppertab");
-    QMetaObject::invokeMethod(qmlManager->boxLeftTab, "disableLefttab");
-    QMetaObject::invokeMethod((QObject*)qmlManager->scene3d, "disableScene3D");
-    qDebug() << "update Model Mesh";
-	updateMesh(_mesh);
-    qmlManager->sendUpdateModelInfo();
-    updateLock = false;
-    qDebug() << this << "released lock";
-    QMetaObject::invokeMethod(qmlManager->boxUpperTab, "enableUppertab");
-    QMetaObject::invokeMethod(qmlManager->boxLeftTab, "enableLefttab");
-    QMetaObject::invokeMethod((QObject*)qmlManager->scene3d, "enableScene3D");
-}
-
-
-// hollow shell part
-void GLModel::indentHollowShell(double radius){
-    qDebug() << "hollow shell called" << radius;
-	if (!_targetSelected)
-		return;
-	auto meshVertices = _targetMeshFace.meshVertices();
-    QVector3D center = (
-		meshVertices[0].localPosition() +
-		meshVertices[1].localPosition() +
-		meshVertices[2].localPosition())/3;
-	HollowShell::hollowShell(_mesh, _targetMeshFace, center, radius);
-}
-
 GLModel::~GLModel(){
 }
 void GLModel::initHitTest()
@@ -245,98 +195,52 @@ void GLModel::setHitTestable(bool isEnable)
 void GLModel::clicked(MouseEventData& pick, const Qt3DRender::QRayCasterHit& hit)
 {
 	auto listed = getRootModel();
-	auto suppMode = qmlManager->supportRaftManager().supportEditMode();
-	if (!qmlManager->isActive<Hix::Features::ModelCut>(qmlManager->currentFeature()) &&
-		!qmlManager->isActive<Hix::Features::Extend>(qmlManager->currentFeature()) &&
-		!qmlManager->isActive<Hix::Features::Labelling>(qmlManager->currentFeature()) &&
-		!qmlManager->isActive<Hix::Features::LayFlat>(qmlManager->currentFeature()) &&
-		suppMode == Hix::Support::EditMode::None)// && !layerViewActive && !supportViewActive)
-		qmlManager->modelSelected(listed->ID);
-
-	if (qmlManager->isSelected(listed) && pick.button == Qt::MouseButton::RightButton) {
-		qDebug() << "mttab alive";
-		QMetaObject::invokeMethod(qmlManager->mttab, "tabOnOff");
+	if (!qmlManager->isFeatureActive())
+	{
+		if (pick.button == Qt::MouseButton::LeftButton)
+		{
+			qmlManager->modelSelected(listed->ID);
+		}
+		else if (pick.button == Qt::MouseButton::RightButton && qmlManager->isSelected(listed))
+		{
+			qDebug() << "mttab alive";
+			QMetaObject::invokeMethod(qmlManager->mttab, "tabOnOff");
+		}
+		return;
 	}
-
-#ifdef _STRICT_GLMODEL
-	if (hit.type() != QRayCasterHit::HitType::TriangleHit)
-		throw std::runtime_error("trying to get tri idx from non tri hit");
-#endif
-
 
     //triangle index section
-    if (hit.primitiveIndex() >= _mesh->getFaces().size())
+    if (hit.primitiveIndex() >= _mesh->getFaces().size() || hit.localIntersection() == QVector3D(0, 0, 0) || !qmlManager->isSelected(listed))
     {
-        qDebug() << "trianglePick out of bound";
-        return;
     }
-    _targetMeshFace = _mesh->getFaces().cbegin() + hit.primitiveIndex();
-
-
-	/// Extension Feature ///
-	if (qmlManager->isActive<Hix::Features::Extend>(qmlManager->currentFeature()) &&
-		hit.localIntersection() != QVector3D(0, 0, 0)) {
-		listed->unselectMeshFaces();
-		emit extensionSelect();
-		selectMeshFaces();
-		listed->updateMesh(true);
-		qDebug() << getRootModel()->ID;
-	}
-
-	/// Hollow Shell ///
-	//if (qmlManager->currentFeature() == Hix::Features::FeatureEnum::ShellOffset) {
-	//	qDebug() << "getting handle picker clicked signal hollow shell active";
-	//	qDebug() << "found parent meshface";
-	//	// translate hollowShellSphere to mouse position
-	//	QVector3D v = hit.localIntersection();
- //       qmlManager->hollowShellSphereTransform->setTranslation(v + _transform.translation());
-
-
-	//}
-
-	/// Lay Flat ///
-	if (qmlManager->isActive<Hix::Features::LayFlat>(qmlManager->currentFeature()) &&
-		hit.localIntersection() != QVector3D(0, 0, 0)) {
-
-		listed->unselectMeshFaces();
-		emit layFlatSelect();
-		selectMeshFaces();
-		listed->updateMesh(true);
-
-	}
-
-	/// Manual Support ///
-	if (suppMode == Hix::Support::EditMode::Manual && hit.localIntersection() != QVector3D(0, 0, 0)) {
-		Hix::OverhangDetect::FaceOverhang newOverhang;
-		newOverhang.coord = ptToRoot(hit.localIntersection());
-		newOverhang.face = _targetMeshFace;
-		qmlManager->supportRaftManager().addSupport(newOverhang);
-	}
-
-	/// Labeling Feature ///
-    if (qmlManager->isActive<Hix::Features::Labelling>(qmlManager->currentFeature()) 
-			&& hit.localIntersection() != QVector3D(0, 0, 0)) 
+	else
 	{
-		qmlManager->updateLabelMesh(hit.localIntersection(), _targetMeshFace.localFn());
-    }
+		auto selectFaceFeature = dynamic_cast<Hix::Features::SelectFaceFeature*>(qmlManager->currentFeature());
+		if (selectFaceFeature)
+		{
+			auto selectedFace = _mesh->getFaces().cbegin() + hit.primitiveIndex();
+			selectFaceFeature->faceSelected(this, selectedFace, pick, hit);
+		}
+	}
 }
+void GLModel::updateModelMesh() {
+	QMetaObject::invokeMethod(qmlManager->boxUpperTab, "disableUppertab");
+	QMetaObject::invokeMethod(qmlManager->boxLeftTab, "disableLefttab");
+	QMetaObject::invokeMethod((QObject*)qmlManager->scene3d, "disableScene3D");
+	qDebug() << "update Model Mesh";
+	updateMesh(_mesh);
+	qmlManager->sendUpdateModelInfo();
+	updateLock = false;
+	qDebug() << this << "released lock";
+	QMetaObject::invokeMethod(qmlManager->boxUpperTab, "enableUppertab");
+	QMetaObject::invokeMethod(qmlManager->boxLeftTab, "enableLefttab");
+	QMetaObject::invokeMethod((QObject*)qmlManager->scene3d, "enableScene3D");
+}
+
 
 bool GLModel::isDraggable(Hix::Input::MouseEventData& e,const Qt3DRender::QRayCasterHit&)
 {
-	if (e.button == Qt3DInput::QMouseEvent::Buttons::LeftButton
-		&&
-		qmlManager->isSelected(this) 
-		&&
-			(qmlManager->isActive<Hix::Features::ModelCut>(qmlManager->currentFeature())||
-			//qmlManager->currentFeature() != Hix::Features::FeatureEnum::ShellOffset ||
-			qmlManager->isActive<Hix::Features::Extend>(qmlManager->currentFeature()) ||
-			qmlManager->isActive<Hix::Features::Labelling>(qmlManager->currentFeature()) ||
-			qmlManager->isActive<Hix::Features::LayFlat>(qmlManager->currentFeature())
-			//qmlManager->currentFeature() != Hix::Features::FeatureEnum::LayerViewMode)
-		/*&&
-		!(qmlManager->currentFeature() != Hix::Features::FeatureEnum::Orient ||
-			qmlManager->currentFeature() != Hix::Features::FeatureEnum::Rotate ||
-			qmlManager->currentFeature() != Hix::Features::FeatureEnum::Save)*/))
+	if (e.button == Qt3DInput::QMouseEvent::Buttons::LeftButton && qmlManager->isSelected(this) && !qmlManager->isFeatureActive())
 	{
 		return true;
 	}
@@ -355,7 +259,6 @@ void GLModel::dragStarted(Hix::Input::MouseEventData& e, const Qt3DRender::QRayC
 	prevPoint = (QVector2D)e.position;
 	qmlManager->moveButton->setProperty("state", "active");
 	qmlManager->setClosedHandCursor();
-	isMoved = true;
 }
 
 void GLModel::doDrag(Hix::Input::MouseEventData& v)
@@ -382,11 +285,8 @@ void GLModel::doDrag(Hix::Input::MouseEventData& v)
 
 void GLModel::dragEnded(Hix::Input::MouseEventData&)
 {
-	isMoved = false;
     qmlManager->totalMoveDone();
-
 }
-
 
 
 /** HELPER functions **/
@@ -406,32 +306,8 @@ QVector3D GLModel::spreadPoint(QVector3D endPoint, QVector3D startPoint, int fac
 
 void GLModel:: unselectMeshFaces(){
 	selectedFaces.clear();
-	_targetSelected = false;
 	callRecursive(this, &GLModel::unselectMeshFaces);
 }
-void GLModel::selectMeshFaces(){
-	selectedFaces.clear();
-	QVector3D normal = _targetMeshFace.localFn();
-	_mesh->findNearSimilarFaces(normal, _targetMeshFace, selectedFaces);
-}
-
-
-void GLModel::openHollowShell(){
-    qDebug() << "open HollowShell called";
-    //hollowShellActive = true;
-    qmlManager->hollowShellSphereEntity->setProperty("visible", true);
-}
-
-void GLModel::closeHollowShell(){
-    qDebug() << "close HollowShell called";
-
-    //if (!hollowShellActive)
-    //    return;
-
-    //hollowShellActive = false;
-    qmlManager->hollowShellSphereEntity->setProperty("visible", false);
-}
-
 
 void GLModel::changeViewMode(int viewMode) {
     if( this->viewMode == viewMode ) {
@@ -479,29 +355,14 @@ void GLModel::updateShader(int viewMode)
 
 }
 
-
-void GLModel::inactivateFeatures()
-{
-
-
-    closeHollowShell();
-    //closeShellOffset();
-    // closeLayflat();
-    // closeScale();
-    //layerViewActive = false; //closeLayerView();
-    //supportViewActive = false; //closeSupportView();
-    //parentModel->changeViewMode(VIEW_MODE_OBJECT);
-}
-
-
 bool GLModel::perPrimitiveColorActive() const
 {
 	return faceSelectionActive();
 }
 bool GLModel::faceSelectionActive() const
 {
-	return qmlManager->isActive<Hix::Features::Extend>(qmlManager->currentFeature()) ||
-		qmlManager->isActive<Hix::Features::LayFlat>(qmlManager->currentFeature());
+	return qmlManager->isActive<Hix::Features::Extend>() ||
+		qmlManager->isActive<Hix::Features::LayFlat>();
 }
 
 QVector4D GLModel::getPrimitiveColorCode(const Hix::Engine3D::Mesh* mesh, FaceConstItr itr)
@@ -514,7 +375,5 @@ QVector4D GLModel::getPrimitiveColorCode(const Hix::Engine3D::Mesh* mesh, FaceCo
 	{
 		return Hix::Render::Colors::Selected;
 	}
-
-
 
 }

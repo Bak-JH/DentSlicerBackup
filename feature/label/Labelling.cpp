@@ -8,15 +8,23 @@ Hix::Features::Labelling::Labelling(GLModel* selectedModel)
 
 }
 
+
+
 Hix::Features::Labelling::~Labelling()
 {
 	if(_previewModel)
 		_previewModel->deleteLater();
 }
 
+void Hix::Features::Labelling::faceSelected(GLModel* selected, const Hix::Engine3D::FaceConstItr& selectedFace, const Hix::Input::MouseEventData& mouse, const Qt3DRender::QRayCasterHit& hit)
+{
+	updateLabelMesh(hit.localIntersection(), selectedFace.localFn());
+
+}
+
 void Hix::Features::Labelling::updateLabelMesh(const QVector3D translation, const QVector3D normal)
 {
-	if (qmlManager->isActive<Labelling>(qmlManager->currentFeature()))
+	if (qmlManager->isActive<Labelling>())
 	{
 		if (_previewModel)
 		{
@@ -64,7 +72,7 @@ void Hix::Features::Labelling::generateLabelMesh()
 	qmlManager->setProgress(0.1f);
 	
 
-	_targetModel->setTargetSelected(false);
+	//_targetModel->setTargetSelected(false);
 	_targetModel->setMaterialColor(Hix::Render::Colors::Selected);
 	_targetModel->updateModelMesh();
 	_previewModel = nullptr;

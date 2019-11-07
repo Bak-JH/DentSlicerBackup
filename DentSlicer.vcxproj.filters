@@ -54,7 +54,6 @@
     <ClCompile Include="feature\extension.cpp" />
     <ClCompile Include="feature\Extrude.cpp" />
     <ClCompile Include="feature\cut\modelcut.cpp" />
-    <ClCompile Include="feature\Feature.cpp" />
     <ClCompile Include="feature\label\Labelling.cpp" />
     <ClCompile Include="feature\layFlat.cpp" />
     <ClCompile Include="feature\layerview\CrossSectionPlane.cpp" />
@@ -127,6 +126,16 @@
     <ClCompile Include="DentEngine\src\svgexporter.cpp" />
     <ClCompile Include="utils\updatechecker.cpp" />
     <ClCompile Include="feature\label\labelModel.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="feature\SupportFeature.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="feature\interfaces\Feature.cpp" />
+    <ClCompile Include="feature\interfaces\PPShaderFeature.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="feature\interfaces\SelectFaceFeature.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -587,7 +596,6 @@
     <ClInclude Include="feature\Extrude.h" />
     <ClInclude Include="feature\cut\FreeCutPtWidget.h" />
     <ClInclude Include="feature\cut\modelcut.h" />
-    <ClInclude Include="feature\Feature.h" />
     <ClInclude Include="feature\label\Labelling.h" />
     <ClInclude Include="feature\layFlat.h" />
     <ClInclude Include="feature\layerview\layerview.h" />
@@ -635,7 +643,6 @@
     <ClInclude Include="unitTest\tests\SlicerTest.h" />
     <ClInclude Include="unitTest\tests\TrackedIndexedListTest.h" />
     <ClInclude Include="utils\mathutils.h" />
-    <ClInclude Include="DentEngine\src\mesh.h" />
     <ClInclude Include="DentEngine\src\utils\metric.h" />
     <ClInclude Include="feature\cut\polylinecut.h" />
     <ClInclude Include="utils\qbezier.h" />
@@ -655,6 +662,19 @@
     <ClInclude Include="utils\utils.h" />
     <ClInclude Include="utils\winsparkle\winsparkle.h" />
     <ClInclude Include="feature\label\labelModel.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="feature\SupportFeature.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="feature\interfaces\Feature.h" />
+    <ClInclude Include="feature\interfaces\PPShaderFeature.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="feature\interfaces\SelectFaceFeature.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="DentEngine\src\mesh.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
