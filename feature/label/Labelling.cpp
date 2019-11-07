@@ -20,9 +20,10 @@ void Hix::Features::Labelling::updateLabelMesh(const QVector3D translation, cons
 	{
 		if (_previewModel)
 		{
-			_previewModel->deleteLater();
-			_previewModel = new Hix::LabelModel(_targetModel);
+			delete _previewModel;
 		}
+		_previewModel = new Hix::LabelModel(_targetModel);
+
 
 		_previewModel->generateLabelMesh(translation, normal, _text, _font);
 		_previewModel->updateModelMesh();
@@ -66,7 +67,6 @@ void Hix::Features::Labelling::generateLabelMesh()
 	_targetModel->setTargetSelected(false);
 	_targetModel->setMaterialColor(Hix::Render::Colors::Selected);
 	_targetModel->updateModelMesh();
-	qmlManager->addToSelected(_previewModel);
 	_previewModel = nullptr;
 
 	qmlManager->setProgress(1.0f);

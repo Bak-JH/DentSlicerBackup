@@ -16,11 +16,10 @@ namespace Hix
 		public:
 			Extend(const std::unordered_set<GLModel*>& selectedModels);
 			virtual ~Extend();
-			void extendMesh(Mesh* mesh, FaceConstItr mf, double distance);
+			void extendMesh(Mesh* mesh, const QVector3D& normal, const std::unordered_set<FaceConstItr>& mf, double distance);
 			Paths3D detectExtensionOutline(Mesh* mesh, const std::unordered_set<FaceConstItr>& meshfaces);
 			void extendAlongOutline(Mesh* mesh, QVector3D normal, Paths3D selectedPath, double distance);
 			void coverCap(Mesh* mesh, QVector3D normal, const std::unordered_set<FaceConstItr>& extension_faces, double distance);
-
 		private:
 			std::unordered_set<GLModel*> _models;
 		};
