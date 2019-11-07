@@ -1,6 +1,37 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
+    <ClCompile Include="common\Debug.cpp" />
+    <ClCompile Include="common\GTEngine\Source\GTEnginePCH.cpp" />
+    <ClCompile Include="common\GTEngine\Source\LowLevel\GteLogger.cpp" />
+    <ClCompile Include="common\GTEngine\Source\LowLevel\GteLogReporter.cpp" />
+    <ClCompile Include="common\GTEngine\Source\LowLevel\GteLogToFile.cpp" />
+    <ClCompile Include="common\GTEngine\Source\LowLevel\GteLogToStdout.cpp" />
+    <ClCompile Include="common\GTEngine\Source\LowLevel\GteLogToStringArray.cpp" />
+    <ClCompile Include="common\GTEngine\Source\LowLevel\GteTimer.cpp" />
+    <ClCompile Include="common\GTEngine\Source\LowLevel\MSW\GteLogToMessageBox.cpp" />
+    <ClCompile Include="common\GTEngine\Source\LowLevel\MSW\GteLogToOutputWindow.cpp" />
+    <ClCompile Include="common\GTEngine\Source\Mathematics\GteBitHacks.cpp" />
+    <ClCompile Include="common\GTEngine\Source\Mathematics\GteBSPrecision.cpp" />
+    <ClCompile Include="common\GTEngine\Source\Mathematics\GteEdgeKey.cpp" />
+    <ClCompile Include="common\GTEngine\Source\Mathematics\GteETManifoldMesh.cpp" />
+    <ClCompile Include="common\GTEngine\Source\Mathematics\GteETNonmanifoldMesh.cpp" />
+    <ClCompile Include="common\GTEngine\Source\Mathematics\GteGenerateMeshUV.cpp" />
+    <ClCompile Include="common\GTEngine\Source\Mathematics\GteIEEEBinary16.cpp" />
+    <ClCompile Include="common\GTEngine\Source\Mathematics\GteTetrahedronKey.cpp" />
+    <ClCompile Include="common\GTEngine\Source\Mathematics\GteTriangleKey.cpp" />
+    <ClCompile Include="common\GTEngine\Source\Mathematics\GteTSManifoldMesh.cpp" />
+    <ClCompile Include="common\GTEngine\Source\Mathematics\GteUIntegerAP32.cpp" />
+    <ClCompile Include="common\GTEngine\Source\Mathematics\GteVEManifoldMesh.cpp" />
+    <ClCompile Include="common\GTEngine\Source\Mathematics\GteVETManifoldMesh.cpp" />
+    <ClCompile Include="common\GTEngine\Source\Mathematics\GteVETNonmanifoldMesh.cpp" />
+    <ClCompile Include="common\GTEngine\Source\Mathematics\MSW\GteCPUQueryInstructions.cpp" />
+    <ClCompile Include="common\GTEngine\Source\Mathematics\MSW\GteIntelSSE.cpp" />
+    <ClCompile Include="common\Task.cpp" />
+    <ClCompile Include="common\TaskManager.cpp" />
+    <ClCompile Include="DentEngine\src\Bounds3D.cpp" />
+    <ClCompile Include="DentEngine\src\ContourBuilder.cpp" />
+    <ClCompile Include="DentEngine\src\Planes.cpp" />
     <Filter Include="Generated Files">
       <UniqueIdentifier>{71ED8ED8-ACB9-4CE9-BBE1-E00B30144E11}</UniqueIdentifier>
       <Extensions>cpp;c;cxx;moc;h;def;odl;idl;res;</Extensions>
@@ -253,6 +284,620 @@
     <ClCompile Include="DentEngine\src\polyclipping\poly2tri\sweep\cdt.cc" />
     <ClCompile Include="DentEngine\src\polyclipping\poly2tri\sweep\sweep.cc" />
     <ClCompile Include="DentEngine\src\polyclipping\poly2tri\sweep\sweep_context.cc" />
+    <ClCompile Include="DentEngine\src\polyclipping\polyclipping.cpp" />
+    <ClCompile Include="DentEngine\src\polyclipping\polytree2tri\PolytreeCDT.cpp" />
+    <ClCompile Include="DentEngine\src\SlicerDebug.cpp" />
+    <ClCompile Include="DentEngine\src\SlicerDebugInfoExport.cpp" />
+    <ClCompile Include="feature\autoarrange.cpp" />
+    <ClCompile Include="feature\autoorientation.cpp" />
+    <ClCompile Include="DentEngine\src\polyclipping\clipper\clipper.cpp" />
+    <ClCompile Include="DentEngine\src\cmdlineparser.cpp" />
+    <ClCompile Include="DentEngine\src\configuration.cpp" />
+    <ClCompile Include="feature\convex_hull.cpp" />
+    <ClCompile Include="feature\CSG\CorkMeshFactory.cpp" />
+    <ClCompile Include="feature\cut\DrawingPlane.cpp" />
+    <ClCompile Include="feature\cut\MeshPlaneCut.cpp" />
+    <ClCompile Include="feature\cut\ZAxialCut.cpp" />
+    <ClCompile Include="feature\extension.cpp" />
+    <ClCompile Include="feature\Extrude.cpp" />
+    <ClCompile Include="feature\cut\modelcut.cpp" />
+    <ClCompile Include="feature\Feature.cpp" />
+    <ClCompile Include="feature\ModelBuilder.cpp" />
+    <ClCompile Include="feature\overhangDetect.cpp" />
+    <ClCompile Include="feature\repair\Algorithms\checkAndRepair.cpp" />
+    <ClCompile Include="feature\repair\Algorithms\detectIntersections.cpp" />
+    <ClCompile Include="feature\repair\Algorithms\holeFilling.cpp" />
+    <ClCompile Include="feature\repair\Algorithms\marchIntersections.cpp" />
+    <ClCompile Include="feature\repair\Algorithms\subdivision.cpp" />
+    <ClCompile Include="feature\repair\Kernel\coordinates.cpp" />
+    <ClCompile Include="feature\repair\Kernel\graph.cpp" />
+    <ClCompile Include="feature\repair\Kernel\heap.cpp" />
+    <ClCompile Include="feature\repair\Kernel\jqsort.cpp" />
+    <ClCompile Include="feature\repair\Kernel\list.cpp" />
+    <ClCompile Include="feature\repair\Kernel\matrix.cpp" />
+    <ClCompile Include="feature\repair\Kernel\orientation.c" />
+    <ClCompile Include="feature\repair\Kernel\point.cpp" />
+    <ClCompile Include="feature\repair\Kernel\tmesh.cpp" />
+    <ClCompile Include="feature\repair\meshrepair.cpp" />
+    <ClCompile Include="feature\repair\TMesh\edge.cpp" />
+    <ClCompile Include="feature\repair\TMesh\io.cpp" />
+    <ClCompile Include="feature\repair\TMesh\tin.cpp" />
+    <ClCompile Include="feature\repair\TMesh\triangle.cpp" />
+    <ClCompile Include="feature\repair\TMesh\vertex.cpp" />
+    <ClCompile Include="fileloader.cpp" />
+    <ClCompile Include="feature\cut\FreeCutPtWidget.cpp" />
+    <ClCompile Include="glmodel.cpp" />
+    <ClCompile Include="input\Draggable.cpp" />
+    <ClCompile Include="input\HitTestAble.cpp" />
+    <ClCompile Include="input\Hoverable.cpp" />
+    <ClCompile Include="input\raycastcontroller.cpp" />
+    <ClCompile Include="render\lights.cpp" />
+    <ClCompile Include="render\LineMeshEntity.cpp" />
+    <ClCompile Include="render\ModelMaterial.cpp" />
+    <ClCompile Include="render\SceneEntity.cpp" />
+    <ClCompile Include="render\SceneEntityWithMaterial.cpp" />
+    <ClCompile Include="feature\Shapes2D.cpp" />
+    <ClCompile Include="slice\SlicingOptBackend.cpp" />
+    <ClCompile Include="support\CylindricalRaft.cpp" />
+    <ClCompile Include="support\ModelAttachedSupport.cpp" />
+    <ClCompile Include="support\RaftModel.cpp" />
+    <ClCompile Include="support\SupportModel.cpp" />
+    <ClCompile Include="support\SupportRaftManager.cpp" />
+    <ClCompile Include="support\VerticalSupportModel.cpp" />
+    <ClCompile Include="ui\CubeWidget.cpp" />
+    <ClCompile Include="ui\MoveWidget.cpp" />
+    <ClCompile Include="ui\RotateWidget.cpp" />
+    <ClCompile Include="ui\Widget3D.cpp" />
+    <ClCompile Include="ui\Widget3DManager.cpp" />
+    <ClCompile Include="unitTest\RandomGen.cpp" />
+    <ClCompile Include="unitTest\RunTests.cpp" />
+    <ClCompile Include="utils\gridmesh.cpp" />
+    <ClCompile Include="feature\hollowshell.cpp" />
+    <ClCompile Include="utils\httpreq.cpp" />
+    <ClCompile Include="utils\linemeshgeometry.cpp" />
+    <ClCompile Include="main.cpp" />
+    <ClCompile Include="utils\mathutils.cpp" />
+    <ClCompile Include="DentEngine\src\mesh.cpp" />
+    <ClCompile Include="DentEngine\src\utils\metric.cpp" />
+    <ClCompile Include="feature\cut\polylinecut.cpp" />
+    <ClCompile Include="qmlmanager.cpp" />
+    <ClCompile Include="utils\qtriangulator.cpp" />
+    <ClCompile Include="utils\quaternionhelper.cpp" />
+    <ClCompile Include="feature\shelloffset.cpp" />
+    <ClCompile Include="DentEngine\src\slicer.cpp" />
+    <ClCompile Include="slice\slicingengine.cpp" />
+    <ClCompile Include="feature\stlexporter.cpp" />
+    <ClCompile Include="DentEngine\src\svgexporter.cpp" />
+    <ClCompile Include="utils\updatechecker.cpp" />
+    <ClCompile Include="feature\label\Labelling.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="feature\label\labelModel.cpp" />
+    <ClCompile Include="feature\layFlat.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="common\Debug.h" />
+    <ClInclude Include="common\delaunator.hpp" />
+    <ClInclude Include="common\GTEngine\Include\GTEngine.h" />
+    <ClInclude Include="common\GTEngine\Include\GTEngineDEF.h" />
+    <ClInclude Include="common\GTEngine\Include\GTEnginePCH.h" />
+    <ClInclude Include="common\GTEngine\Include\GTLowLevel.h" />
+    <ClInclude Include="common\GTEngine\Include\GTMathematics.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteACosEstimate.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteAlignedBox.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteApprCircle2.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteApprCone3.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteApprCylinder3.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteApprEllipse2.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteApprEllipseByArcs.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteApprEllipsoid3.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteApprGaussian2.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteApprGaussian3.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteApprGreatCircle3.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteApprHeightLine2.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteApprHeightPlane3.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteApprOrthogonalLine2.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteApprOrthogonalLine3.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteApprOrthogonalPlane3.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteApprParaboloid3.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteApprPolynomial2.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteApprPolynomial3.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteApprPolynomial4.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteApprPolynomialSpecial2.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteApprPolynomialSpecial3.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteApprPolynomialSpecial4.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteApprQuadratic2.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteApprQuadratic3.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteApprQuery.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteApprSphere3.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteApprTorus3.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteArbitraryPrecision.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteArc2.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteASinEstimate.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteATanEstimate.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteAxisAngle.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteBandedMatrix.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteBasisFunction.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteBezierCurve.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteBitHacks.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteBSNumber.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteBSplineCurve.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteBSplineCurveFit.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteBSplineGeodesic.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteBSplineReduction.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteBSplineSurface.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteBSplineSurfaceFit.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteBSplineVolume.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteBSPPolygon2.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteBSPrecision.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteBSRational.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteCapsule.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteChebyshevRatio.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteCholeskyDecomposition.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteCircle3.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteCLODPolyline.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteCone.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteConformalMapGenus0.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteConstrainedDelaunay2.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteContAlignedBox.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteContCapsule3.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteContCircle2.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteContCone.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteContCylinder3.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteContEllipse2.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteContEllipse2MinCR.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteContEllipsoid3.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteContEllipsoid3MinCR.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteContLozenge3.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteContOrientedBox2.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteContOrientedBox3.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteContPointInPolygon2.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteContPointInPolyhedron3.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteContScribeCircle2.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteContScribeCircle3Sphere3.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteContSphere3.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteConvertCoordinates.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteConvexHull2.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteConvexHull3.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteConvexPolyhedron3.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteCosEstimate.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteCubicRootsQR.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteCylinder3.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteDarbouxFrame.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteDCPQuery.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteDelaunay2.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteDelaunay2Mesh.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteDelaunay3.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteDelaunay3Mesh.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteDisjointIntervals.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteDisjointRectangles.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteDistAlignedBox3OrientedBox3.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteDistAlignedBoxAlignedBox.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteDistCircle3Circle3.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteDistLine3AlignedBox3.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteDistLine3Circle3.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteDistLine3OrientedBox3.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteDistLine3Rectangle3.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteDistLine3Triangle3.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteDistLineLine.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteDistLineRay.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteDistLineSegment.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteDistOrientedBox3OrientedBox3.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteDistPoint3Circle3.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteDistPoint3ConvexPolyhedron3.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteDistPoint3Cylinder3.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteDistPoint3Frustum3.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteDistPoint3Plane3.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteDistPoint3Rectangle3.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteDistPoint3Tetrahedron3.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteDistPointAlignedBox.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteDistPointHyperellipsoid.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteDistPointLine.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteDistPointOrientedBox.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteDistPointRay.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteDistPointSegment.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteDistPointTriangle.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteDistPointTriangleExact.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteDistRay3AlignedBox3.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteDistRay3OrientedBox3.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteDistRay3Rectangle3.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteDistRay3Triangle3.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteDistRayRay.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteDistRaySegment.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteDistRectangle3AlignedBox3.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteDistRectangle3OrientedBox3.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteDistRectangle3Rectangle3.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteDistSegment3AlignedBox3.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteDistSegment3OrientedBox3.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteDistSegment3Rectangle3.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteDistSegment3Triangle3.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteDistSegmentSegment.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteDistSegmentSegmentExact.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteDistTriangle3AlignedBox3.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteDistTriangle3OrientedBox3.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteDistTriangle3Rectangle3.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteDistTriangle3Triangle3.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteEdgeKey.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteEllipse3.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteEllipsoidGeodesic.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteETManifoldMesh.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteETNonmanifoldMesh.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteEulerAngles.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteExp2Estimate.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteExpEstimate.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteFeatureKey.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteFIQuery.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteFrenetFrame.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteFrustum3.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteGaussianElimination.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteGaussNewtonMinimizer.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteGenerateMeshUV.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteGMatrix.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteGVector.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteHalfspace.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteHyperellipsoid.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteHyperplane.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteHypersphere.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIEEEBinary.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIEEEBinary16.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIndexAttribute.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntegration.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntpAkima1.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntpAkimaNonuniform1.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntpAkimaUniform1.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntpAkimaUniform2.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntpAkimaUniform3.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntpBicubic2.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntpBilinear2.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntpBSplineUniform.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntpLinearNonuniform2.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntpLinearNonuniform3.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntpQuadraticNonuniform2.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntpSphere2.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntpThinPlateSpline2.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntpThinPlateSpline3.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntpTricubic3.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntpTrilinear3.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntpVectorField2.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntrAlignedBox2AlignedBox2.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntrAlignedBox2Circle2.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntrAlignedBox2OrientedBox2.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntrAlignedBox3AlignedBox3.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntrAlignedBox3Cone3.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntrAlignedBox3Cylinder3.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntrAlignedBox3OrientedBox3.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntrAlignedBox3Sphere3.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntrArc2Arc2.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntrCapsule3Capsule3.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntrCircle2Arc2.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntrCircle2Circle2.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntrConvexPolygonHyperplane.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntrDisk2Sector2.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntrEllipse2Ellipse2.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntrEllipsoid3Ellipsoid3.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntrHalfspace2Polygon2.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntrHalfspace3Capsule3.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntrHalfspace3Cylinder3.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntrHalfspace3Ellipsoid3.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntrHalfspace3OrientedBox3.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntrHalfspace3Segment3.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntrHalfspace3Sphere3.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntrHalfspace3Triangle3.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntrIntervals.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntrLine2AlignedBox2.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntrLine2Arc2.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntrLine2Circle2.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntrLine2Line2.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntrLine2OrientedBox2.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntrLine2Ray2.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntrLine2Segment2.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntrLine2Triangle2.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntrLine3AlignedBox3.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntrLine3Capsule3.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntrLine3Cone3.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntrLine3Cylinder3.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntrLine3Ellipsoid3.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntrLine3OrientedBox3.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntrLine3Plane3.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntrLine3Sphere3.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntrLine3Triangle3.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntrOrientedBox2Circle2.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntrOrientedBox2Cone2.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntrOrientedBox2OrientedBox2.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntrOrientedBox2Sector2.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntrOrientedBox3Cone3.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntrOrientedBox3Cylinder3.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntrOrientedBox3Frustum3.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntrOrientedBox3OrientedBox3.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntrOrientedBox3Sphere3.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntrPlane3Capsule3.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntrPlane3Circle3.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntrPlane3Cylinder3.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntrPlane3Ellipsoid3.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntrPlane3OrientedBox3.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntrPlane3Plane3.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntrPlane3Sphere3.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntrPlane3Triangle3.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntrRay2AlignedBox2.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntrRay2Arc2.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntrRay2Circle2.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntrRay2OrientedBox2.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntrRay2Ray2.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntrRay2Segment2.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntrRay2Triangle2.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntrRay3AlignedBox3.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntrRay3Capsule3.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntrRay3Cone3.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntrRay3Cylinder3.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntrRay3Ellipsoid3.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntrRay3OrientedBox3.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntrRay3Plane3.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntrRay3Sphere3.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntrRay3Triangle3.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntrSegment2AlignedBox2.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntrSegment2Arc2.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntrSegment2Circle2.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntrSegment2OrientedBox2.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntrSegment2Segment2.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntrSegment2Triangle2.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntrSegment3AlignedBox3.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntrSegment3Capsule3.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntrSegment3Cone3.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntrSegment3Cylinder3.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntrSegment3Ellipsoid3.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntrSegment3OrientedBox3.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntrSegment3Plane3.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntrSegment3Sphere3.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntrSegment3Triangle3.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntrSphere3Cone3.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntrSphere3Frustum3.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntrSphere3Sphere3.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntrSphere3Triangle3.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntrTriangle2Triangle2.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIntrTriangle3OrientedBox3.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteInvSqrtEstimate.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteIsPlanarGraph.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteLCPSolver.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteLevenbergMarquardtMinimizer.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteLine.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteLinearSystem.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteLog2Estimate.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteLogEstimate.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteLozenge3.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteMath.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteMatrix.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteMatrix2x2.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteMatrix3x3.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteMatrix4x4.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteMesh.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteMeshCurvature.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteMinimalCycleBasis.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteMinimize1.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteMinimizeN.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteMinimumAreaBox2.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteMinimumAreaCircle2.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteMinimumVolumeBox3.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteMinimumVolumeSphere3.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteNaturalSplineCurve.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteNearestNeighborQuery.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteNURBSCircle.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteNURBSCurve.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteNURBSSphere.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteNURBSSurface.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteNURBSVolume.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteOBBTreeOfPoints.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteOdeEuler.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteOdeImplicitEuler.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteOdeMidpoint.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteOdeRungeKutta4.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteOdeSolver.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteOrientedBox.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteParametricCurve.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteParametricSurface.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GtePlanarMesh.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GtePolygon2.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GtePolyhedron3.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GtePolynomial1.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GtePolynomialCurve.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GtePrimalQuery2.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GtePrimalQuery3.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteProjection.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteQFNumber.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteQuadricSurface.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteQuarticRootsQR.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteQuaternion.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteRay.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteRectangle.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteRectangleMesh.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteRectanglePatchMesh.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteRevolutionMesh.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteRiemannianGeodesic.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteRootsBisection.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteRootsBrentsMethod.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteRootsPolynomial.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteRotation.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteSector2.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteSegment.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteSeparatePoints2.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteSeparatePoints3.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteSinEstimate.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteSingularValueDecomposition.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteSlerpEstimate.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteSplitMeshByPlane.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteSqrtEstimate.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteSymmetricEigensolver.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteSymmetricEigensolver2x2.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteSymmetricEigensolver3x3.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteTanEstimate.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteTCBSplineCurve.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteTetrahedron3.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteTetrahedronKey.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteTIQuery.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteTorus3.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteTriangle.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteTriangleKey.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteTriangulateCDT.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteTriangulateEC.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteTSManifoldMesh.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteTubeMesh.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteUIntegerALU32.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteUIntegerAP32.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteUIntegerFP32.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteUniqueVerticesTriangles.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteUnsymmetricEigenvalues.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteVector.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteVector2.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteVector3.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteVector4.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteVEManifoldMesh.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteVertexAttribute.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteVertexCollapseMesh.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteVETManifoldMesh.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\GteVETNonmanifoldMesh.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\MSW\GteCPUQueryInstructions.h" />
+    <ClInclude Include="common\GTEngine\Include\Mathematics\MSW\GteIntelSSE.h" />
+    <ClInclude Include="common\HetUniquePtr.h" />
+    <ClInclude Include="common\Hasher.h" />
+    <ClInclude Include="common\indexedlist.h" />
+    <ClInclude Include="common\IteratorWrapper.h" />
+    <ClInclude Include="common\moodycamel\atomicops.h" />
+    <ClInclude Include="common\moodycamel\readerwriterqueue.h" />
+    <ClInclude Include="common\RamosEnum.h" />
+    <ClInclude Include="common\RandomAccessIteratorBase.h" />
+    <ClInclude Include="common\Singleton.h" />
+    <ClInclude Include="common\Task.h" />
+    <ClInclude Include="common\taskflow\core\executor.hpp" />
+    <ClInclude Include="common\taskflow\core\flow_builder.hpp" />
+    <ClInclude Include="common\taskflow\core\graph.hpp" />
+    <ClInclude Include="common\taskflow\core\notifier.hpp" />
+    <ClInclude Include="common\taskflow\core\observer.hpp" />
+    <ClInclude Include="common\taskflow\core\spmc_queue.hpp" />
+    <ClInclude Include="common\taskflow\core\task.hpp" />
+    <ClInclude Include="common\taskflow\core\taskflow.hpp" />
+    <ClInclude Include="common\taskflow\core\topology.hpp" />
+    <ClInclude Include="common\taskflow\error\error.hpp" />
+    <ClInclude Include="common\taskflow\predef\architecture.hpp" />
+    <ClInclude Include="common\taskflow\predef\architecture\arm.hpp" />
+    <ClInclude Include="common\taskflow\predef\architecture\mips.hpp" />
+    <ClInclude Include="common\taskflow\predef\architecture\ppc.hpp" />
+    <ClInclude Include="common\taskflow\predef\architecture\x86.hpp" />
+    <ClInclude Include="common\taskflow\predef\compiler.hpp" />
+    <ClInclude Include="common\taskflow\predef\compiler\clang.hpp" />
+    <ClInclude Include="common\taskflow\predef\compiler\comp_detected.hpp" />
+    <ClInclude Include="common\taskflow\predef\compiler\gcc.hpp" />
+    <ClInclude Include="common\taskflow\predef\compiler\msvc.hpp" />
+    <ClInclude Include="common\taskflow\predef\os.hpp" />
+    <ClInclude Include="common\taskflow\predef\os\ios.hpp" />
+    <ClInclude Include="common\taskflow\predef\os\macos.hpp" />
+    <ClInclude Include="common\taskflow\predef\os\os_detected.hpp" />
+    <ClInclude Include="common\taskflow\predef\stringify.hpp" />
+    <ClInclude Include="common\taskflow\predef\version_number.hpp" />
+    <ClInclude Include="common\taskflow\taskflow.hpp" />
+    <ClInclude Include="common\taskflow\utility\backoff.hpp" />
+    <ClInclude Include="common\taskflow\utility\generic_allocator.hpp" />
+    <ClInclude Include="common\taskflow\utility\object_pool.hpp" />
+    <ClInclude Include="common\taskflow\utility\passive_vector.hpp" />
+    <ClInclude Include="common\taskflow\utility\singular_allocator.hpp" />
+    <ClInclude Include="common\taskflow\utility\traits.hpp" />
+    <ClInclude Include="common\TaskManager.h" />
+    <ClInclude Include="common\TrackedIndexedList.h" />
+    <ClInclude Include="DentEngine\src\Bounds3D.h" />
+    <ClInclude Include="DentEngine\src\ContourBuilder.h" />
+    <ClInclude Include="DentEngine\src\MeshIterators.h" />
+    <ClInclude Include="DentEngine\src\Planes.h" />
+    <ClInclude Include="DentEngine\src\polyclipping\poly2tri\poly2tri.h" />
+    <ClInclude Include="DentEngine\src\polyclipping\poly2tri\sweep\advancing_front.h" />
+    <ClInclude Include="DentEngine\src\polyclipping\poly2tri\sweep\cdt.h" />
+    <ClInclude Include="DentEngine\src\polyclipping\polytree2tri\PolytreeCDT.h" />
+    <ClInclude Include="DentEngine\src\SlicerDebug.h" />
+    <ClInclude Include="DentEngine\src\SlicerDebugInfoExport.h" />
+    <ClInclude Include="feature\autoorientation.h" />
+    <ClInclude Include="DentEngine\src\polyclipping\clipper\clipper.hpp" />
+    <ClInclude Include="DentEngine\src\cmdlineparser.h" />
+    <ClInclude Include="DentEngine\src\configuration.h" />
+    <ClInclude Include="DentEngine\src\polyclipping\polyclipping.h" />
+    <ClInclude Include="DentEngine\src\polyclipping\QDebugPolyclipping.h" />
+    <ClInclude Include="feature\convex_hull.h" />
+    <ClInclude Include="feature\CSG\CorkMeshFactory.h" />
+    <ClInclude Include="feature\CSG\CSG.h" />
+    <ClInclude Include="feature\cut\DrawingPlane.h" />
+    <ClInclude Include="feature\cut\MeshPlaneCut.h" />
+    <ClInclude Include="feature\cut\ZAxialCut.h" />
+    <ClInclude Include="feature\extension.h" />
+    <ClInclude Include="feature\Extrude.h" />
+    <ClInclude Include="feature\cut\FreeCutPtWidget.h" />
+    <ClInclude Include="feature\cut\modelcut.h" />
+    <ClInclude Include="feature\Feature.h" />
+    <ClInclude Include="feature\ModelBuilder.h" />
+    <ClInclude Include="feature\overhangDetect.h" />
+    <ClInclude Include="feature\repair\Algorithms\detectIntersections.h" />
+    <ClInclude Include="feature\repair\Algorithms\marchIntersections.h" />
+    <ClInclude Include="feature\repair\Kernel\basics.h" />
+    <ClInclude Include="feature\repair\Kernel\coordinates.h" />
+    <ClInclude Include="feature\repair\Kernel\graph.h" />
+    <ClInclude Include="feature\repair\Kernel\heap.h" />
+    <ClInclude Include="feature\repair\Kernel\jqsort.h" />
+    <ClInclude Include="feature\repair\Kernel\list.h" />
+    <ClInclude Include="feature\repair\Kernel\matrix.h" />
+    <ClInclude Include="feature\repair\Kernel\point.h" />
+    <ClInclude Include="feature\repair\Kernel\tmesh_kernel.h" />
+    <ClInclude Include="feature\repair\meshrepair.h" />
+    <ClInclude Include="feature\repair\TMesh\edge.h" />
+    <ClInclude Include="feature\repair\TMesh\tin.h" />
+    <ClInclude Include="feature\repair\TMesh\tmesh.h" />
+    <ClInclude Include="feature\repair\TMesh\triangle.h" />
+    <ClInclude Include="feature\repair\TMesh\vertex.h" />
+    <ClInclude Include="fileloader.h" />
+    <ClInclude Include="feature\hollowshell.h" />
+    <ClInclude Include="input\Clickable.h" />
+    <ClInclude Include="input\Draggable.h" />
+    <ClInclude Include="feature\Shapes2D.h" />
+    <ClInclude Include="input\HitTestAble.h" />
+    <ClInclude Include="support\BaseSupport.h" />
+    <ClInclude Include="support\CylindricalRaft.h" />
+    <ClInclude Include="support\ModelAttachedSupport.h" />
+    <ClInclude Include="support\RaftModel.h" />
+    <ClInclude Include="ui\Highlightable.h" />
+    <ClInclude Include="input\Hoverable.h" />
+    <ClInclude Include="support\SupportModel.h" />
+    <ClInclude Include="support\VerticalSupportModel.h" />
+    <ClInclude Include="support\SupportRaftManager.h" />
+    <ClInclude Include="ui\Widget3DManager.h" />
+    <ClInclude Include="render\Color.h" />
+    <ClInclude Include="unitTest\catch.hpp" />
+    <ClInclude Include="unitTest\RandomGen.h" />
+    <ClInclude Include="unitTest\tests\Float3DVectorHash.h" />
+    <ClInclude Include="unitTest\tests\IndexedListTest.h" />
+    <ClInclude Include="unitTest\RunTests.h" />
+    <ClInclude Include="unitTest\tests\SlicerTest.h" />
+    <ClInclude Include="unitTest\tests\TrackedIndexedListTest.h" />
+    <ClInclude Include="utils\mathutils.h" />
+    <ClInclude Include="DentEngine\src\mesh.h" />
+    <ClInclude Include="DentEngine\src\utils\metric.h" />
+    <ClInclude Include="feature\cut\polylinecut.h" />
+    <ClInclude Include="utils\qbezier.h" />
+    <ClInclude Include="utils\qdatabuffer_p.h" />
+    <ClInclude Include="utils\qrbtree.h" />
+    <ClInclude Include="utils\qtriangulator_p.h" />
+    <ClInclude Include="utils\qvectorpath_p.h" />
+    <ClInclude Include="DentEngine\src\polyclipping\poly2tri\common\shapes.h" />
+    <ClInclude Include="feature\shelloffset.h" />
+    <ClInclude Include="DentEngine\src\slicer.h" />
+    <ClInclude Include="slice\slicingengine.h" />
+    <ClInclude Include="feature\stlexporter.h" />
+    <ClInclude Include="DentEngine\src\svgexporter.h" />
+    <ClInclude Include="DentEngine\src\polyclipping\poly2tri\sweep\sweep.h" />
+    <ClInclude Include="DentEngine\src\polyclipping\poly2tri\sweep\sweep_context.h" />
+    <ClInclude Include="DentEngine\src\polyclipping\poly2tri\common\utils.h" />
+    <ClInclude Include="utils\utils.h" />
+    <ClInclude Include="utils\winsparkle\winsparkle.h" />
+    <ClInclude Include="feature\label\Labelling.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="feature\label\labelModel.h" />
+    <ClInclude Include="feature\layFlat.h">
     <ClCompile Include="feature\cut\polylinecut.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -776,623 +1421,237 @@
     </QtMoc>
   </ItemGroup>
   <ItemGroup>
-    <CustomBuild Include="debug\moc_predefs.h.cbt">
-      <Filter>Generated Files</Filter>
-    </CustomBuild>
-    <CustomBuild Include="release\moc_predefs.h.cbt">
-      <Filter>Generated Files</Filter>
-    </CustomBuild>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Qml\CameraController.qml">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="Qml\CameraManager.qml">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="Qml\CoordinateMesh.qml">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="Qml\FeedbackPopUp.qml">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="Qml\FileDialogLoad.qml">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="Qml\LayerViewPopup.qml">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="Qml\LayerViewSlider.qml">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="Qml\LeftTab.qml">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="Qml\LeftTabExport.qml">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="Qml\LeftTabExportElement.qml">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="Qml\LeftTabPartList.qml">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="Qml\LeftTabPartListElement.qml">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="Qml\LeftTabSlicingOption.qml">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="Qml\LeftTabSlicingOptionElement.qml">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="Qml\LeftTabSlicingOptionElement2.qml">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="Qml\LeftTabSlicingOptionElement3.qml">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="Qml\LeftTabViewMode.qml">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="Qml\Login.qml">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="Qml\MainView.qml">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="Qml\MeshPlate.qml">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="Qml\MeshTransformerMove.qml">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="Qml\MeshTransformerRotate.qml">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="Qml\MeshTransformerTab.qml">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="Qml\MeshTransformerZoom.qml">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="Qml\Model.qml">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="Resource\font\NotoSans-Regular.ttf">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="Resource\font\NotoSans-SemiCondensed.ttf">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="Resource\font\NotoSans-SemiCondensedMedium.ttf">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="Qml\Planeslider.qml">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="Qml\Plate.qml">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="Qml\PopUp.qml">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="Qml\ProgressPopUp.qml">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="Qml\ResultPopup.qml">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="Qml\SCroll.qml">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="Qml\SettingPopup.qml">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="Qml\SlicingData.qml">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="Qml\SlicingDataElement.qml">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="Qml\UICore.qml">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="Qml\UndoRedoButton.qml">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="Qml\UpperButton.qml">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="Qml\UpperTab.qml">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="Qml\ViewButton.qml">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="Qml\ViewChange.qml">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="Qml\YesNoPopup.qml">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="Resource\mesh\arrow.stl">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="resource\bar.png">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="Resource\mesh\boundedBox.stl">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="Resource\mesh\boundedBox2.stl">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="Resource\mesh\boundedBox3.stl">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="Resource\mesh\box.stl">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="Resource\mesh\box05mm.stl">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="Resource\mesh\box1mm.stl">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="Resource\mesh\box2.stl">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="resource\combo_arrow.png">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="resource\cursor.png">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="Resource\cursor_eraser.png">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="resource\cut_act.png">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="resource\cut_curved.png">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="resource\cut_flat.png">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="resource\downTriangle.png">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="Resource\popup_image\down_button.png">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="Resource\popup_image\down_button_hover.png">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="Resource\pem\dsa_pub.pem">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="Resource\flat_cut.png">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="Resource\flat_cut_select.png">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="Resource\free_cut.png">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="Resource\free_cut_select.png">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="Resource\mesh\grid.obj">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="grid.png">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="grid2.png">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="icon-32.ico">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="Resource\popup_image\image_arrange.png">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="Resource\popup_image\image_autorepair.png">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="Resource\popup_image\image_layflat.png">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="Resource\popup_image\image_orient.png">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="Resource\label_description.png">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="lang_ko.qm">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="Resource\login_leftbutton.png">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="Resource\login_logo.png">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="Resource\login_rightbutton.png">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="Qml\main.qml">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="resource\model_delete.png">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="resource\model_delete_select.png">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="resource\model_move.png">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="resource\model_move_select.png">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="resource\model_rotate.png">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="resource\model_rotate_select.png">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="resource\model_scale.png">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="resource\model_scale_select.png">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="resource\move_arrow.png">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="resource\move_circle.png">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="Resource\part_delete.png">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="resource\part_off.png">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="resource\part_on.png">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="Resource\part_select.png">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="resource\pen.png">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="Resource\mesh\plate.stl">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="Resource\mesh\plate_logo.stl">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="Resource\mesh\plate_plane.stl">
-      <Filter>Resource Files</Filter>
-    </None>
-    <QtRcc Include="qml.qrc">
-      <Filter>Resource Files</Filter>
-    </QtRcc>
-    <None Include="Resource\redo.png">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="Resource\redo_icon.png">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="Resource\redo_icon_select.png">
-      <Filter>Resource Files</Filter>
-    </None>
-    <QtRcc Include="resources.qrc">
-      <Filter>Resource Files</Filter>
-    </QtRcc>
-    <None Include="resource\rotate_back.png">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="resource\rotate_x.png">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="resource\rotate_x2.png">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="resource\rotate_y.png">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="resource\rotate_y2.png">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="resource\rotate_z.png">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="Resource\popup_image\scale_lock.png">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="Resource\popup_image\scale_unlock.png">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="Resource\popup_image\shelloffset_switch.png">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="Resource\popup_image\shelloffset_switch_hover.png">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="resource\slicing_clock.png">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="resource\slicing_layer.png">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="resource\slicing_refresh.png">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="resource\slicing_size.png">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="resource\slicing_volume.png">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="Resource\splash.png">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="Resource\splash2.png">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="Resource\splash_final.png">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="Resource\splash_dentslicer.png">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="resource\switch.png">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="resource\triangle.png">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="Resource\undo.png">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="Resource\undo_icon.png">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="Resource\undo_icon_select.png">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="resource\upTriangle.png">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="Resource\popup_image\up_button.png">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="Resource\popup_image\up_button_hover.png">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="Resource\upper2_arrange.png">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="Resource\upper2_autorepair.png">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="Resource\upper2_cut.png">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="Resource\upper2_export.png">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="Resource\upper2_extend.png">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="Resource\upper2_feedback.png">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="Resource\upper2_label.png">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="Resource\upper2_layflat.png">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="Resource\upper2_move.png">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="Resource\upper2_open.png">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="Resource\upper2_orient.png">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="Resource\upper2_rotate.png">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="Resource\upper2_save.png">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="Resource\upper2_scale.png">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="Resource\upper2_setting.png">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="Resource\upper2_shelloffset.png">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="Resource\upper2_support.png">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="resource\upper_arrange.png">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="resource\upper_autorepair.png">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="resource\upper_cut.png">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="resource\upper_export.png">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="Resource\upper_extend.png">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="Resource\upper_feedback.png">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="resource\upper_label.png">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="resource\upper_layflat.png">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="resource\upper_move.png">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="resource\upper_open.png">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="resource\upper_orientation.png">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="resource\upper_rotate.png">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="resource\upper_save.png">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="resource\upper_scale.png">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="Resource\upper_setting.png">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="resource\upper_shelloffset.png">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="resource\upper_support.png">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="resource\view.png">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="resource\view_back.png">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="resource\view_background.png">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="resource\view_bottom.png">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="resource\view_center.png">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="resource\view_front.png">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="resource\view_left.png">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="resource\view_right.png">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="resource\view_up.png">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="resource\zoom.png">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="resource\zoom_down.png">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="resource\zoom_up.png">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="icon-32.ico" />
-    <None Include="icon-32.ico" />
-    <None Include="icon-32.ico" />
-    <None Include="icon-32.ico" />
-    <None Include="icon-32.ico" />
-    <None Include="icon-32.ico" />
-    <None Include="packages.config" />
-    <None Include="icon-32.ico" />
-    <None Include="icon-32.ico" />
-    <None Include="icon-32.ico" />
-    <None Include="icon-32.ico" />
-    <None Include="icon-32.ico" />
-    <None Include="icon-32.ico" />
-    <None Include="icon-32.ico" />
-    <None Include="icon-32.ico" />
-    <None Include="shaders\light.inc.frag">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="icon-32.ico" />
-    <None Include="icon-32.ico" />
-    <None Include="icon-32.ico" />
-    <None Include="icon-32.ico" />
-    <None Include="shaders\default.vert" />
-    <None Include="shaders\flat.frag" />
-    <None Include="shaders\flat.geom" />
-    <None Include="shaders\layerview.frag" />
-    <None Include="shaders\layerview.geom" />
-    <None Include="shaders\perPrimitive.geom" />
-    <None Include="shaders\singleColor.geom" />
-    <None Include="icon-32.ico" />
-    <None Include="icon-32.ico" />
-    <None Include="icon-32.ico" />
-    <None Include="icon-32.ico" />
-    <None Include="icon-32.ico" />
-    <None Include="icon-32.ico" />
-    <None Include="Qml\LeftTabSlicingOptionElementTextbox.qml" />
-    <None Include="icon-32.ico" />
-    <None Include="icon-32.ico" />
-    <None Include="icon-32.ico" />
-    <None Include="icon-32.ico" />
-    <None Include="icon-32.ico" />
-    <None Include="icon-32.ico" />
-    <None Include="icon-32.ico" />
-    <None Include="icon-32.ico" />
-    <None Include="icon-32.ico" />
-    <None Include="icon-32.ico" />
-    <None Include="icon-32.ico" />
-    <None Include="icon-32.ico" />
-    <None Include="icon-32.ico" />
-    <None Include="icon-32.ico" />
-    <None Include="Qml\LeftTabSlicingOptionElementPercentage.qml" />
-    <None Include="icon-32.ico" />
-    <None Include="icon-32.ico" />
-    <None Include="icon-32.ico" />
-    <None Include="icon-32.ico" />
-    <None Include="icon-32.ico" />
-    <None Include="icon-32.ico" />
-    <None Include="icon-32.ico" />
-    <None Include="icon-32.ico" />
-    <None Include="icon-32.ico" />
-    <None Include="icon-32.ico" />
-    <None Include="icon-32.ico" />
-    <None Include="icon-32.ico" />
-    <None Include="icon-32.ico" />
-    <None Include="icon-32.ico" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="icon-32.ico">
-      <Filter>Distribution Files</Filter>
-    </None>
-    <None Include="icon.ico">
-      <Filter>Distribution Files</Filter>
-    </None>
+    <CustomBuild Include="debug\moc_predefs.h.cbt" />
+    <CustomBuild Include="release\moc_predefs.h.cbt" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="DentSlicer.rc" />
   </ItemGroup>
   <ItemGroup>
+    <QtMoc Include="feature\autoarrange.h" />
+    <QtMoc Include="glmodel.h" />
+    <QtMoc Include="utils\gridmesh.h" />
+    <QtMoc Include="utils\httpreq.h" />
+    <QtMoc Include="utils\linemeshgeometry.h" />
+    <QtMoc Include="input\raycastcontroller.h" />
+    <QtMoc Include="render\LineMeshEntity.h" />
+    <QtMoc Include="ui\MoveWidget.h" />
+    <QtMoc Include="ui\RotateWidget.h" />
+    <QtMoc Include="render\ModelMaterial.h" />
+    <QtMoc Include="render\lights.h" />
+    <QtMoc Include="ui\Widget3D.h" />
+    <QtMoc Include="slice\SlicingOptBackend.h" />
+    <QtMoc Include="ui\CubeWidget.h" />
+    <QtMoc Include="render\SceneEntity.h" />
+    <QtMoc Include="render\SceneEntityWithMaterial.h" />
+    <QtMoc Include="qmlmanager.h" />
+    <QtMoc Include="utils\quaternionhelper.h" />
+    <QtMoc Include="utils\updatechecker.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <QtRcc Include="qml.qrc" />
+    <QtRcc Include="resources.qrc" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+    <None Include="Qml\CameraController.qml" />
+    <None Include="Qml\CameraManager.qml" />
+    <None Include="Qml\CoordinateMesh.qml" />
+    <None Include="Qml\FeedbackPopUp.qml" />
+    <None Include="Qml\FileDialogLoad.qml" />
+    <None Include="Qml\LayerViewPopup.qml" />
+    <None Include="Qml\LayerViewSlider.qml" />
+    <None Include="Qml\LeftTab.qml" />
+    <None Include="Qml\LeftTabExport.qml" />
+    <None Include="Qml\LeftTabExportElement.qml" />
+    <None Include="Qml\LeftTabPartList.qml" />
+    <None Include="Qml\LeftTabPartListElement.qml" />
+    <None Include="Qml\LeftTabSlicingOption.qml" />
+    <None Include="Qml\LeftTabSlicingOptionElement.qml" />
+    <None Include="Qml\LeftTabSlicingOptionElement2.qml" />
+    <None Include="Qml\LeftTabSlicingOptionElement3.qml" />
+    <None Include="Qml\LeftTabSlicingOptionElementPercentage.qml" />
+    <None Include="Qml\LeftTabSlicingOptionElementTextbox.qml" />
+    <None Include="Qml\LeftTabViewMode.qml" />
+    <None Include="Qml\Login.qml" />
+    <None Include="Qml\MainView.qml" />
+    <None Include="Qml\MeshPlate.qml" />
+    <None Include="Qml\MeshTransformerMove.qml" />
+    <None Include="Qml\MeshTransformerRotate.qml" />
+    <None Include="Qml\MeshTransformerTab.qml" />
+    <None Include="Qml\MeshTransformerZoom.qml" />
+    <None Include="Qml\Model.qml" />
+    <None Include="Resource\font\NotoSans-Regular.ttf" />
+    <None Include="Resource\font\NotoSans-SemiCondensed.ttf" />
+    <None Include="Resource\font\NotoSans-SemiCondensedMedium.ttf" />
+    <None Include="Qml\Planeslider.qml" />
+    <None Include="Qml\Plate.qml" />
+    <None Include="Qml\PopUp.qml" />
+    <None Include="Qml\ProgressPopUp.qml" />
+    <None Include="Qml\ResultPopup.qml" />
+    <None Include="Qml\SCroll.qml" />
+    <None Include="Qml\SettingPopup.qml" />
+    <None Include="Qml\SlicingData.qml" />
+    <None Include="Qml\SlicingDataElement.qml" />
+    <None Include="Qml\UICore.qml" />
+    <None Include="Qml\UndoRedoButton.qml" />
+    <None Include="Qml\UpperButton.qml" />
+    <None Include="Qml\UpperTab.qml" />
+    <None Include="Qml\ViewButton.qml" />
+    <None Include="Qml\ViewChange.qml" />
+    <None Include="Qml\YesNoPopup.qml" />
+    <None Include="Resource\mesh\arrow.stl" />
+    <None Include="resource\bar.png" />
+    <None Include="Resource\mesh\boundedBox.stl" />
+    <None Include="Resource\mesh\boundedBox2.stl" />
+    <None Include="Resource\mesh\boundedBox3.stl" />
+    <None Include="Resource\mesh\box.stl" />
+    <None Include="Resource\mesh\box05mm.stl" />
+    <None Include="Resource\mesh\box1mm.stl" />
+    <None Include="Resource\mesh\box2.stl" />
+    <None Include="resource\combo_arrow.png" />
+    <None Include="resource\cursor.png" />
+    <None Include="Resource\cursor_eraser.png" />
+    <None Include="resource\cut_act.png" />
+    <None Include="resource\cut_curved.png" />
+    <None Include="resource\cut_flat.png" />
+    <None Include="resource\downTriangle.png" />
+    <None Include="Resource\popup_image\down_button.png" />
+    <None Include="Resource\popup_image\down_button_hover.png" />
+    <None Include="Resource\pem\dsa_pub.pem" />
+    <None Include="Resource\flat_cut.png" />
+    <None Include="Resource\flat_cut_select.png" />
+    <None Include="Resource\free_cut.png" />
+    <None Include="Resource\free_cut_select.png" />
+    <None Include="Resource\mesh\grid.obj" />
+    <None Include="grid.png" />
+    <None Include="grid2.png" />
+    <None Include="icon-32.ico" />
+    <None Include="Resource\popup_image\image_arrange.png" />
+    <None Include="Resource\popup_image\image_autorepair.png" />
+    <None Include="Resource\popup_image\image_layflat.png" />
+    <None Include="Resource\popup_image\image_orient.png" />
+    <None Include="Resource\label_description.png" />
+    <None Include="lang_ko.qm" />
+    <None Include="Resource\login_leftbutton.png" />
+    <None Include="Resource\login_logo.png" />
+    <None Include="Resource\login_rightbutton.png" />
+    <None Include="Qml\main.qml" />
+    <None Include="resource\model_delete.png" />
+    <None Include="resource\model_delete_select.png" />
+    <None Include="resource\model_move.png" />
+    <None Include="resource\model_move_select.png" />
+    <None Include="resource\model_rotate.png" />
+    <None Include="resource\model_rotate_select.png" />
+    <None Include="resource\model_scale.png" />
+    <None Include="resource\model_scale_select.png" />
+    <None Include="resource\move_arrow.png" />
+    <None Include="resource\move_circle.png" />
+    <None Include="Resource\part_delete.png" />
+    <None Include="resource\part_off.png" />
+    <None Include="resource\part_on.png" />
+    <None Include="Resource\part_select.png" />
+    <None Include="resource\pen.png" />
+    <None Include="Resource\mesh\plate.stl" />
+    <None Include="Resource\mesh\plate_logo.stl" />
+    <None Include="Resource\mesh\plate_plane.stl" />
+    <None Include="shaders\default.vert" />
+    <None Include="shaders\flat.frag" />
+    <None Include="shaders\flat.geom" />
+    <None Include="shaders\layerview.frag" />
+    <None Include="shaders\layerview.geom" />
+    <None Include="shaders\light.inc.frag" />
+    <None Include="shaders\perPrimitive.geom" />
+    <None Include="shaders\singleColor.geom" />
+    <None Include="Resource\redo.png" />
+    <None Include="Resource\redo_icon.png" />
+    <None Include="Resource\redo_icon_select.png" />
+    <None Include="resource\rotate_back.png" />
+    <None Include="resource\rotate_x.png" />
+    <None Include="resource\rotate_x2.png" />
+    <None Include="resource\rotate_y.png" />
+    <None Include="resource\rotate_y2.png" />
+    <None Include="resource\rotate_z.png" />
+    <None Include="Resource\popup_image\scale_lock.png" />
+    <None Include="Resource\popup_image\scale_unlock.png" />
+    <None Include="Resource\popup_image\shelloffset_switch.png" />
+    <None Include="Resource\popup_image\shelloffset_switch_hover.png" />
+    <None Include="resource\slicing_clock.png" />
+    <None Include="resource\slicing_layer.png" />
+    <None Include="resource\slicing_refresh.png" />
+    <None Include="resource\slicing_size.png" />
+    <None Include="resource\slicing_volume.png" />
+    <None Include="Resource\splash.png" />
+    <None Include="Resource\splash2.png" />
+    <None Include="Resource\splash_final.png" />
+    <None Include="Resource\splash_dentslicer.png" />
+    <None Include="resource\switch.png" />
+    <None Include="resource\triangle.png" />
+    <None Include="Resource\undo.png" />
+    <None Include="Resource\undo_icon.png" />
+    <None Include="Resource\undo_icon_select.png" />
+    <None Include="resource\upTriangle.png" />
+    <None Include="Resource\popup_image\up_button.png" />
+    <None Include="Resource\popup_image\up_button_hover.png" />
+    <None Include="Resource\upper2_arrange.png" />
+    <None Include="Resource\upper2_autorepair.png" />
+    <None Include="Resource\upper2_cut.png" />
+    <None Include="Resource\upper2_export.png" />
+    <None Include="Resource\upper2_extend.png" />
+    <None Include="Resource\upper2_feedback.png" />
+    <None Include="Resource\upper2_label.png" />
+    <None Include="Resource\upper2_layflat.png" />
+    <None Include="Resource\upper2_move.png" />
+    <None Include="Resource\upper2_open.png" />
+    <None Include="Resource\upper2_orient.png" />
+    <None Include="Resource\upper2_rotate.png" />
+    <None Include="Resource\upper2_save.png" />
+    <None Include="Resource\upper2_scale.png" />
+    <None Include="Resource\upper2_setting.png" />
+    <None Include="Resource\upper2_shelloffset.png" />
+    <None Include="Resource\upper2_support.png" />
+    <None Include="resource\upper_arrange.png" />
+    <None Include="resource\upper_autorepair.png" />
+    <None Include="resource\upper_cut.png" />
+    <None Include="resource\upper_export.png" />
+    <None Include="Resource\upper_extend.png" />
+    <None Include="Resource\upper_feedback.png" />
+    <None Include="resource\upper_label.png" />
+    <None Include="resource\upper_layflat.png" />
+    <None Include="resource\upper_move.png" />
+    <None Include="resource\upper_open.png" />
+    <None Include="resource\upper_orientation.png" />
+    <None Include="resource\upper_rotate.png" />
+    <None Include="resource\upper_save.png" />
+    <None Include="resource\upper_scale.png" />
+    <None Include="Resource\upper_setting.png" />
+    <None Include="resource\upper_shelloffset.png" />
+    <None Include="resource\upper_support.png" />
+    <None Include="resource\view.png" />
+    <None Include="resource\view_back.png" />
+    <None Include="resource\view_background.png" />
+    <None Include="resource\view_bottom.png" />
+    <None Include="resource\view_center.png" />
+    <None Include="resource\view_front.png" />
+    <None Include="resource\view_left.png" />
+    <None Include="resource\view_right.png" />
+    <None Include="resource\view_up.png" />
+    <None Include="resource\zoom.png" />
+    <None Include="resource\zoom_down.png" />
+    <None Include="resource\zoom_up.png" />
+    <None Include="icon.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
+      <ParseFiles>true</ParseFiles>
+    </Filter>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+      <ParseFiles>true</ParseFiles>
+    </Filter>
     <QtMoc Include="input\raycastcontroller.h">
       <Filter>Header Files</Filter>
     </QtMoc>

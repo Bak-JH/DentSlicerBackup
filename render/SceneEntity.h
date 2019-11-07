@@ -59,7 +59,7 @@ namespace Hix
 			void updateFaces(const std::unordered_set<size_t>& faceIndicies, const Hix::Engine3D::Mesh& mesh);
 			void updateVertices(const std::unordered_set<size_t>& vtxIndicies, const Hix::Engine3D::Mesh& mesh);
 			void updateEntireMesh(Hix::Engine3D::Mesh* mesh);
-			void updateMesh(Hix::Engine3D::Mesh* mesh, bool force = false);
+			void updateMesh(bool force = false);
 			void appendIndexArray(const Hix::Engine3D::Mesh* mesh,
 				Hix::Engine3D::FaceConstItr begin, Hix::Engine3D::FaceConstItr end);
 			virtual void appendMeshVertex(const Hix::Engine3D::Mesh* mesh,
@@ -70,9 +70,27 @@ namespace Hix
 			//get total AABB including it's children
 			Hix::Engine3D::Bounds3D recursiveAabb()const;
 			void updateRecursiveAabb();
+			void setTargetSelected(bool isSelected);
+			bool targetSelected()const;
+			FaceConstItr targetMeshFace();
+			Qt3DCore::QTransform& transform();
 
 		protected:
 
+			template<typename OwnerPtr, typename Fn, typename ...Args>
+			void callRecursive(OwnerPtr owner, Fn functionPtr, Args... arguments)
+			{
+				for (auto child : owner->childNodes())
+				{
+					auto childEntity = dynamic_cast<OwnerPtr>(child);
+					if (childEntity)
+					{
+						(childEntity->*functionPtr)(arguments...);
+					}
+				}
+			}
+
+			//modifiable transform, cannot be accessed by other classes
 			//Axis aligned bounding box
 			Hix::Engine3D::Bounds3D _aabb;
 
@@ -103,7 +121,7 @@ namespace Hix
 
 			/***************Ray casting and hit test***************/
 			bool _targetSelected = false;
-			FaceConstItr targetMeshFace; // used for object selection (specific area, like extension or labelling)
+			FaceConstItr _targetMeshFace; // used for object selection (specific area, like extension or labelling)
 
 		};
 	}

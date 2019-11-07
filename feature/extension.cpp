@@ -1,8 +1,31 @@
 #include "extension.h"
+#include "render/ModelMaterial.h"
+#include "render/Color.h"
+#include "glmodel.h"
 
-using namespace Hix::Features::Extension;
 using namespace Hix::Debug;
-void Hix::Features::Extension::extendMesh(Mesh* mesh, FaceConstItr mf, double distance){
+
+Hix::Features::Extend::Extend(const std::unordered_set<GLModel*>& selectedModels):_models(selectedModels)
+{
+	for (auto each : _models)
+	{
+		each->setMaterialMode(Hix::Render::ShaderMode::PerPrimitiveColor);
+		each->updateMesh(true);
+	}
+}
+
+Hix::Features::Extend::~Extend()
+{
+	for (auto each : _models)
+	{
+		each->setMaterialMode(Hix::Render::ShaderMode::SingleColor);
+		each->updateMesh(true);
+		each->unselectMeshFaces();
+		each->setTargetSelected(false);
+	}
+}
+
+void Hix::Features::Extend::extendMesh(Mesh* mesh, FaceConstItr mf, double distance){
     QVector3D normal = mf.localFn();
     qDebug() << normal;
 	auto mfVertices = mf.meshVertices();
@@ -44,7 +67,7 @@ void Hix::Features::Extension::extendMesh(Mesh* mesh, FaceConstItr mf, double di
 }
 
 
-Paths3D Hix::Features::Extension::detectExtensionOutline(Mesh* mesh, const std::unordered_set<FaceConstItr>& meshfaces){
+Paths3D Hix::Features::Extend::detectExtensionOutline(Mesh* mesh, const std::unordered_set<FaceConstItr>& meshfaces){
     Mesh temp_mesh;
     for (auto mf : meshfaces){
 		auto meshVertices = mf.meshVertices();
@@ -87,7 +110,7 @@ Paths3D Hix::Features::Extension::detectExtensionOutline(Mesh* mesh, const std::
     return temp_edges;
 }
 
-void Hix::Features::Extension::extendAlongOutline(Mesh* mesh, QVector3D normal, Paths3D selectedPaths, double distance){
+void Hix::Features::Extend::extendAlongOutline(Mesh* mesh, QVector3D normal, Paths3D selectedPaths, double distance){
     // drill along selected faces
 
     while (distance>0){
@@ -125,7 +148,7 @@ void Hix::Features::Extension::extendAlongOutline(Mesh* mesh, QVector3D normal, 
     }
 }
 
-void Hix::Features::Extension::coverCap(Mesh* mesh, QVector3D normal,const std::unordered_set<FaceConstItr>& extension_faces, double distance){
+void Hix::Features::Extend::coverCap(Mesh* mesh, QVector3D normal,const std::unordered_set<FaceConstItr>& extension_faces, double distance){
     for (FaceConstItr mf : extension_faces){
 		auto meshVertices = mf.meshVertices();
 		mesh->addFace(

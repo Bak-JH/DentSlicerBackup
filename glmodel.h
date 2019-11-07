@@ -4,7 +4,6 @@
 #include "render/SceneEntityWithMaterial.h"
 #include "fileloader.h"
 #include "slice/slicingengine.h"
-#include "feature/labelling/labelModel.h"
 #include "feature/autoorientation.h"
 #include "feature/autoarrange.h"
 #include "feature/extension.h"
@@ -20,31 +19,6 @@
 using namespace Qt3DCore;
 using namespace Qt3DRender;
 using namespace Qt3DExtras;
-
-
-/* feature thread */
-#define ftrEmpty -1 //TODO: remove this swtich craziness.
-#define ftrOpen 1
-#define ftrSave 2
-#define ftrExport 3
-#define ftrMove 4
-#define ftrRotate 5
-#define ftrLayFlat 6
-#define ftrArrange 7
-#define ftrOrient 8
-#define ftrScale 9
-#define ftrRepair 10
-#define ftrCut 11
-#define ftrShellOffset 12
-#define ftrExtend 13
-#define ftrManualSupport 14
-#define ftrLabel 15
-#define ftrSupportViewMode 16
-#define ftrLayerViewMode 17
-#define ftrDelete 18
-#define ftrTempExport 19
-#define ftrSupportDisappear 20
-
 
 class GLModel;
 class OverhangPoint;
@@ -83,8 +57,7 @@ public:
     std::vector<Qt3DRender::QObjectPicker*> sphereObjectPicker;
     std::vector<QPhongMaterial*> sphereMaterial;
 
-    Hix::Labelling::LabelModel* textPreview = nullptr;
-
+    void removeModelPartList();
     void copyModelAttributeFrom(GLModel* from);
 
 
@@ -109,20 +82,11 @@ public:
 
 	void setBoundingBoxVisible(bool isEnabled);
 
-	
-	bool labellingActive = false;
-	bool extensionActive = false;
-	bool hollowShellActive = false;
-	bool layflatActive = false;
-	bool scaleActive = false;
-
-
-
 	bool isMoved = false;
 
+	// useless funcitons. why did you use them?
 	bool perPrimitiveColorActive()const;
 	bool faceSelectionActive()const;
-
 
 
 	//TODO: remove these
@@ -134,7 +98,12 @@ public:
 	void rotateDone();
 	void scaleDone();
 	void setZToBed();
+	void setHitTestable(bool isEnable);
+
 	QString modelName()const;
+
+
+
 protected:
 	void initHitTest()override;
 
@@ -169,13 +138,8 @@ public slots:
 
 
     // Scale
-    void openScale();
-    void closeScale();
 
     // Lay Flat
-    void openLayflat();
-    void closeLayflat();
-    void generateLayFlat();
 
 
 
@@ -185,22 +149,10 @@ public slots:
     void closeHollowShell();
 
     // Labelling
-    void getTextChanged(QString text);
-    void openLabelling();
-    void closeLabelling();
-    void stateChangeLabelling();
-    void getFontNameChanged(QString fontName);
-    void getFontBoldChanged(bool isBold);
-    void getFontSizeChanged(int fontSize);
-    void applyLabelInfo(QString text, QString fontName, bool isBold, int fontSize);
-    void generateText3DMesh();
 
     // Extension
-    void openExtension();
-    void closeExtension();
     void unselectMeshFaces();
     void selectMeshFaces();
-    void generateExtensionFaces(double distance);
 
     // ShellOffset
 

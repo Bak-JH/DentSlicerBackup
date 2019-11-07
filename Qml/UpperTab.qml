@@ -1855,17 +1855,17 @@ Rectangle {
             labelFontSize: 12
 
             //signal runFeature(int type);
-            signal generateText3DMesh()
-            signal openLabelling()
+
+			signal openLabelling()
             signal closeLabelling()
+            signal generateLabelMesh()
             signal stateChangeLabelling()
             signal sendTextChanged(string text);
-            signal sendLabelUpdate(string text, string fontName, bool isBold, int fontSize);
 
             onApplyClicked: {
                 console.log("ApplyClicked");
                 //runFeature(ftrLabel);
-                generateText3DMesh()
+                generateLabelMesh()
             }
 
             onLabelTextChanged: {
@@ -1883,13 +1883,6 @@ Rectangle {
 
             function noModel(){
                 window.resultPopUp.openResultPopUp("","You must select the location of label.","");
-            }
-
-            function labelUpdate() {
-                console.log("sendLabelUpdate @@@@@@@@@@@@@@@@@@@@@@@@@@@@%%%%%%%%%%%%");
-                console.log(typeof(popup_label.transform))
-                sendLabelUpdate(popup_label.labelTextContent, popup_label.labelFontName, 
-                                popup_label.labelIsBold, popup_label.labelFontSize);
             }
 
             ComboBox {

@@ -49,7 +49,7 @@ void SupportModel::setHighlight(bool enable)
 	{
 		color = Hix::Render::Colors::SupportHighlighted;
 	}
-	_meshMaterial.setColor(color);
+	setMaterialColor(color);
 }
 
 void SupportModel::onEntered()
