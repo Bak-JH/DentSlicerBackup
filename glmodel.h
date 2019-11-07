@@ -102,7 +102,7 @@ public:
 
 	QString modelName()const;
 
-
+	GLModel* getRootModel();
 
 protected:
 	void initHitTest()override;
