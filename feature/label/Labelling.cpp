@@ -66,6 +66,7 @@ void Hix::Features::Labelling::generateLabelMesh()
 	_targetModel->setTargetSelected(false);
 	_targetModel->setMaterialColor(Hix::Render::Colors::Selected);
 	_targetModel->updateModelMesh();
+	qmlManager->addToSelected(_previewModel);
 	_previewModel = nullptr;
 
 	qmlManager->setProgress(1.0f);
