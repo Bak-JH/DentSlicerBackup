@@ -312,6 +312,7 @@
     <ClCompile Include="feature\convex_hull.cpp" />
     <ClCompile Include="feature\CSG\CorkMeshFactory.cpp" />
     <ClCompile Include="feature\cut\DrawingPlane.cpp" />
+    <ClCompile Include="feature\cut\MeshPlaneBisect.cpp" />
     <ClCompile Include="feature\cut\MeshPlaneCut.cpp" />
     <ClCompile Include="feature\cut\ZAxialCut.cpp" />
     <ClCompile Include="feature\extension.cpp" />

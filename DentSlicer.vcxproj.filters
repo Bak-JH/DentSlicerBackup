@@ -50,7 +50,6 @@
     <ClCompile Include="feature\CSG\CorkMeshFactory.cpp" />
     <ClCompile Include="feature\cut\DrawingPlane.cpp" />
     <ClCompile Include="feature\cut\MeshPlaneCut.cpp" />
-    <ClCompile Include="feature\cut\ZAxialCut.cpp" />
     <ClCompile Include="feature\extension.cpp" />
     <ClCompile Include="feature\Extrude.cpp" />
     <ClCompile Include="feature\cut\modelcut.cpp" />
@@ -136,6 +135,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="feature\interfaces\SelectFaceFeature.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="feature\cut\MeshPlaneBisect.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="feature\cut\ZAxialCut.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

@@ -39,7 +39,7 @@ namespace Hix
 }
 
 
-Hix::Features::Cut::ZAxialCut::ZAxialCut(GLModel* subject, float cuttingPlane, Result option) :
+Hix::Features::Cut::ZAxialCut::ZAxialCut(GLModel* subject, float cuttingPlane, Hix::Features::Cut::ZAxialCut::Result option) :
 	_cuttingPlane(cuttingPlane)
 {
 	//do listed part first
@@ -57,10 +57,13 @@ Hix::Features::Cut::ZAxialCut::ZAxialCut(GLModel* subject, float cuttingPlane, R
 	else if (listedBotMesh == nullptr)
 	{
 		topModel = subject;
+		topModel->setMesh(listedTopMesh);
 	}
 	else if (listedTopMesh == nullptr)
 	{
 		botModel = subject;
+		botModel->setMesh(listedBotMesh);
+
 	}
 	else
 	{
@@ -241,8 +244,9 @@ Hix::Features::Cut::ZAxialCutImp::ZAxialCutImp(GLModel* subject, float cuttingPl
 
 	botMesh = _bottomMesh;
 	topMesh = _topMesh;
-
 	subject->clearMesh();
+
+
 }
 
 
