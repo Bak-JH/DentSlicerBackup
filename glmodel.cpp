@@ -50,10 +50,6 @@ GLModel::GLModel(QEntity*parent, Mesh* loadMesh, QString fname, int id, const Qt
 	{
 		_transform.setMatrix(transform->matrix());
 	}
-	else
-	{
-		setZToBed();
-	}
 	//applyGeometry();
 	// 승환 25%
 	qmlManager->setProgress(0.23);

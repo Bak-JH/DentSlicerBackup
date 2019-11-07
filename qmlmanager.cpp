@@ -301,7 +301,7 @@ void QmlManager::openModelFile(QString fname){
 	setProgress(0.3);
 	mesh->centerMesh();
 	auto latest = createAndListModel(mesh, fname, nullptr);
-	
+	latest->setZToBed();
 	setProgress(0.6);
 
 	//repair mode
