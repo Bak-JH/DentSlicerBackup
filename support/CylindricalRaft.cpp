@@ -29,10 +29,10 @@ Hix::Support::CylindricalRaft::~CylindricalRaft()
 {
 }
 
-QVector3D Hix::Support::CylindricalRaft::getPrimitiveColorCode(const Hix::Engine3D::Mesh* mesh, FaceConstItr faceItr)
+QVector4D Hix::Support::CylindricalRaft::getPrimitiveColorCode(const Hix::Engine3D::Mesh* mesh, FaceConstItr faceItr)
 {
 	throw std::runtime_error("Hix::Support::CylindricalRaft::getPrimitiveColorCode not implemented");
-	return QVector3D();
+	return QVector4D();
 }
 
 
@@ -51,7 +51,7 @@ void Hix::Support::CylindricalRaft::generateMeshForContour(Mesh* mesh, const std
 
 	//cylinder is of uniform shape, except it narrows a bit in the middle-z
 
-	scales.emplace_back(0.4f);
+	scales.emplace_back(0.6f);
 	//scales.emplace_back(scale);
 	scales.emplace_back(1.2f);
 
@@ -65,82 +65,19 @@ void Hix::Support::CylindricalRaft::generateMeshForContour(Mesh* mesh, const std
 	Hix::Features::Extrusion::extrudeAlongPath(
 		mesh, QVector3D(0, 0, 1), contour, path, jointContours, &scales, &thicknessScaler);
 	//generate caps
-	generateCap(mesh, jointContours.front(), true);
-	generateCap(mesh, jointContours.back(), false);
+	Hix::Shapes2D::generateCapZPlane(mesh, jointContours.front(), true);
+	Hix::Shapes2D::generateCapZPlane(mesh, jointContours.back(), false);
 
 
 }
 
-void Hix::Support::CylindricalRaft::generateCap(Mesh* mesh, const std::vector<QVector3D>& contour, bool isReverse)
-{
-	float z = contour.front().z();
-	std::vector<p2t::Point>container;
-	container.reserve(contour.size());
-	for (auto itr = contour.cbegin(); itr != contour.cend(); ++itr)
-	{
-		container.emplace_back((double)itr->x(), (double)itr->y());
-	}
-
-
-	//because people are...stupid?
-	std::vector<p2t::Point*>ptrs;
-	ptrs.reserve(container.size());
-	for (auto& each : container)
-	{
-		ptrs.emplace_back(&each);
-	}
-
-	p2t::CDT constrainedDelTrig(ptrs);
-	constrainedDelTrig.Triangulate();
-	auto triangles = constrainedDelTrig.GetTriangles();
-	std::unordered_set<double> debugX;
-	std::unordered_set<double> debugY;
-	double minX = 999;
-	double minY = 999;
-	double maxX = -999;
-	double maxY = -999;
-
-
-	for (auto& each : container)
-	{
-		debugX.emplace(each.x);
-		debugY.emplace(each.y);
-		minX = std::min(minX, each.x);
-		minY = std::min(minY, each.y);
-		maxX = std::max(maxX, each.x);
-		maxY = std::max(maxY, each.y);
-	}
-	//as long as intial contour is not modified in the p2t library, float->double->float should be lossless
-	for (auto& tri : triangles)
-	{
-		p2t::Point* pt0, *pt1, *pt2;
-		if (isReverse)
-		{
-			pt2 = tri->GetPoint(0);
-			pt1 = tri->GetPoint(1);
-			pt0 = tri->GetPoint(2);
-
-		}
-		else
-		{
-			pt0 = tri->GetPoint(0);
-			pt1 = tri->GetPoint(1);
-			pt2 = tri->GetPoint(2);
-		}
-		mesh->addFace(
-			QVector3D(pt0->x, pt0->y, z),
-			QVector3D(pt1->x, pt1->y, z),
-			QVector3D(pt2->x, pt2->y, z));
-	}
-
-}
 
 void Hix::Support::CylindricalRaft::generateMesh(const std::vector<QVector3D>& overhangs)
 {
 	auto mesh = new Mesh();
 	//generate square for each overhang
 	//std::vector<std::vector<QVector3D>> cylinders;
-	auto square = Hix::Shapes2D::generateSquare(scfg->support_radius_max*1.5);
+	auto square = Hix::Shapes2D::generateSquare(scfg->support_radius_max *1.8);
 
 	std::vector<QVector3D> contourPoints;
 	contourPoints.reserve(4 * overhangs.size());

@@ -10,11 +10,11 @@ layout( triangle_strip, max_vertices = 3 ) out;
 
 in EyeSpaceVertex {
     vec3 position;
-    vec3 color;
+    vec4 color;
 } gs_in[];
 
 //since flat shader, all fragments are colored with same color
-flat out vec3 VertexColor;
+flat out vec4 VertexColor;
 uniform vec3 ambient;
 uniform vec3 diffuse;
 
@@ -22,7 +22,7 @@ uniform vec3 diffuse;
 #pragma include light.inc.frag
 
 //run once per primitive
-vec3 calcLights(in vec3 position, in vec3 norm, in vec3 primitiveColor)
+vec4 calcLights(in vec3 position, in vec3 norm, in vec4 primitiveColor)
 {
     vec3 diffTotal = vec3(0,0,0);
     vec3 s;
@@ -37,7 +37,7 @@ vec3 calcLights(in vec3 position, in vec3 norm, in vec3 primitiveColor)
         diffTotal += diff;
     }
 
-    return (ambient + diffTotal) * primitiveColor;
+    return vec4((ambient + diffTotal), 1.0) * primitiveColor;
 }
 vec3 calcNorm()
 {

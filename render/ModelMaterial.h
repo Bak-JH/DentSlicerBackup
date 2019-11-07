@@ -43,7 +43,7 @@ namespace Hix
 			void changeMode(ShaderMode mode);
 			ShaderMode shaderMode()const;
 			//color for single color mode
-			void setColor(QVector3D color);
+			void setColor(QVector4D color);
 		private:
 			ShaderMode _mode = ShaderMode::None;
 			//custom parameters

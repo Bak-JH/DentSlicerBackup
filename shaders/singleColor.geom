@@ -1,6 +1,6 @@
 #version 430 core
 
-uniform vec3 singleColor;
+uniform vec4 singleColor;
 #pragma include flat.geom
 void main()
 {
@@ -8,7 +8,7 @@ void main()
     vec3 norm = calcNorm();
     for(int i=0; i<3; i++){
         gl_Position = gl_in[i].gl_Position;
-        vec3 color = calcLights( gs_in[i].position, norm, singleColor);
+        vec4 color = calcLights( gs_in[i].position, norm, singleColor);
         VertexColor = color;
         EmitVertex();
     }

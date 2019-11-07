@@ -39,6 +39,11 @@ SceneEntityWithMaterial::~SceneEntityWithMaterial()
 {
 }
 
+Hix::Render::ModelMaterial& Hix::Render::SceneEntityWithMaterial::meshMaterial()
+{
+	return _meshMaterial;
+}
+
 inline void eraseBufferData(QAttribute& attr, Qt3DRender::QBuffer& buffer, size_t amount, size_t count)
 {
 	QByteArray copy = buffer.data();
@@ -94,8 +99,8 @@ void SceneEntityWithMaterial::appendMeshVertexPerPrimitive(const Mesh* mesh,
 	QByteArray appendData;
 	appendData.resize(appendFaceVerticesByteSize);
 	//add data to the append data
-	QVector<QVector3D> vertices;
-
+	float* rawVertexArray = reinterpret_cast<float*>(appendData.data());
+	size_t idx = 0;
 
 	for (auto itr = begin; itr != end; ++itr)
 	{
@@ -104,16 +109,15 @@ void SceneEntityWithMaterial::appendMeshVertexPerPrimitive(const Mesh* mesh,
 
 		for (auto& vtxItr : faceVertices)
 		{
-			vertices << vtxItr.localPosition() << colorCode;
+			auto pos = vtxItr.localPosition();
+			rawVertexArray[idx++] = pos[0];
+			rawVertexArray[idx++] = pos[1];
+			rawVertexArray[idx++] = pos[2];
+			rawVertexArray[idx++] = colorCode[0];
+			rawVertexArray[idx++] = colorCode[1];
+			rawVertexArray[idx++] = colorCode[2];
+			rawVertexArray[idx++] = colorCode[3];
 		}
-	}
-
-	float* rawVertexArray = reinterpret_cast<float*>(appendData.data());
-	size_t idx = 0;
-	for (const QVector3D& v : vertices) {
-		rawVertexArray[idx++] = v.x();
-		rawVertexArray[idx++] = v.y();
-		rawVertexArray[idx++] = v.z();
 	}
 	//update data/count
 	QByteArray totalData = vertexBuffer.data() + appendData;
@@ -125,3 +129,19 @@ void SceneEntityWithMaterial::appendMeshVertexPerPrimitive(const Mesh* mesh,
 
 }
 
+void SceneEntityWithMaterial::setMaterialMode(const Hix::Render::ShaderMode mode)
+{
+	_meshMaterial.changeMode(mode);
+	callRecursive(this, &SceneEntityWithMaterial::setMaterialMode, mode);
+}
+
+void SceneEntityWithMaterial::setMaterialColor(const QVector4D color)
+{
+	_meshMaterial.setColor(color);
+	callRecursive(this, &SceneEntityWithMaterial::setMaterialColor, color);
+}
+
+void SceneEntityWithMaterial::setLayerViewHeight(const float height)
+{
+	_meshMaterial.setParameterValue("height", QVariant::fromValue(height));
+}

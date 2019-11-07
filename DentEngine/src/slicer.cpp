@@ -10,7 +10,6 @@
 #include "Planes.h"
 #include "SlicerDebug.h"
 #include "SlicerDebugInfoExport.h"
-#include "../../feature/meshrepair.h"
 #if defined(_DEBUG) || defined(QT_DEBUG )
 #define _STRICT_SLICER
 //#define _STRICT_MESH_NO_SELF_INTERSECTION

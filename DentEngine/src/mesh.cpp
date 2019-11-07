@@ -104,7 +104,6 @@ Hix::Engine3D::MeshVertex::MeshVertex(QVector3D pos) : position(pos)
 
 Hix::Engine3D::MeshIteratorFactory::MeshIteratorFactory()
 {
-	DONT_USE
 }
 Hix::Engine3D::MeshIteratorFactory::MeshIteratorFactory(Mesh* mesh) : _mesh(mesh) {}
 
@@ -256,21 +255,29 @@ void Mesh::centerMesh(){
 
 
 
-void Mesh::reverseFace(FaceConstItr faceItr)
+void Mesh::reverseFace(FaceItr faceItr)
 {
-	auto hEdge = halfEdges.toNormItr(faceItr.edge());
+	auto hEdge = faceItr.edge();
+	std::array<HalfEdgeItr, 3> halfEItrs;
+	std::array<uint32_t, 3> prevArray;
+
 	for (size_t i = 0; i < 3; ++i)
 	{
-		auto fromVtx = hEdge.from();
-		auto toVtx =  hEdge.to();
-		auto currIndex = hEdge.index();
-		fromVtx.ref().leavingEdges.erase(currIndex);
-		fromVtx.ref().arrivingEdges.insert(currIndex);
-		toVtx.ref().leavingEdges.insert(currIndex);
-		toVtx.ref().arrivingEdges.erase(currIndex);
-		hEdge.ref().next = hEdge.prev().index();
-		std::swap(hEdge.ref().from, hEdge.ref().to);
+		halfEItrs[i] = hEdge;
+		prevArray[(i+2)%3] = hEdge->next;
 		hEdge.moveNext();
+	}
+	for (size_t i = 0; i < 3; ++i)
+	{
+		auto fromVtx = halfEItrs[i].from();
+		auto toVtx = halfEItrs[i].to();
+		auto currIndex = halfEItrs[i].index();
+		fromVtx->leavingEdges.erase(currIndex);
+		fromVtx->arrivingEdges.insert(currIndex);
+		toVtx->leavingEdges.insert(currIndex);
+		toVtx->arrivingEdges.erase(currIndex);
+		halfEItrs[i]->next = prevArray[i];
+		std::swap(halfEItrs[i]->from, halfEItrs[i]->to);
 	}
 }
 
@@ -280,8 +287,8 @@ void Mesh::reverseFaces(){
     halfEdges.markChangedAll();
     vertices.markChangedAll();
 	size_t count = 0;
-	auto end = faces.cend();
-	for (auto currFace = faces.cbegin(); currFace != end; ++currFace)
+	auto end = faces.end();
+	for (auto currFace = faces.begin(); currFace != end; ++currFace)
 	{
 		reverseFace(currFace);
 	}
@@ -289,6 +296,15 @@ void Mesh::reverseFaces(){
 
 
 /********************** Mesh Generation Functions **********************/
+
+void Hix::Engine3D::Mesh::clear()
+{
+	_verticesHash.clear();
+	vertices.clear();
+	halfEdges.clear();
+	faces.clear();
+	_bounds = Bounds3D();
+}
 
 bool Mesh::addFace(const QVector3D& v0, const QVector3D& v1, const QVector3D& v2){
 	std::array<size_t, 3> fVtx;

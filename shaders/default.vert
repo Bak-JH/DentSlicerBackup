@@ -12,6 +12,7 @@ out EyeSpaceVertex {
 uniform mat4 modelMatrix;
 uniform mat3 modelNormalMatrix;
 uniform mat4 mvp;
+uniform mat4 ModelViewMatrix;
 
 void main()
 {

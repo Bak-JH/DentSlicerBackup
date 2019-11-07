@@ -906,12 +906,14 @@ std::deque<Basic_TMesh> Basic_TMesh::seperateComponents()
 
 	//make seperate meshes
 	FOREACHNODE(components, n)
+	{
 		component = (List*)n->data;
 		if (component != biggest)
-		{ 
+		{
 			auto t = (Triangle*)(component->head()->data);
 			otherMeshes.emplace_back(t, false);
 		}
+	}
 
 
 	nt = 0;
