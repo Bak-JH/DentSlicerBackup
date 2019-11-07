@@ -31,6 +31,7 @@
 #include "feature/layFlat.h"
 #include "feature/repair/meshrepair.h"
 #include "feature/layerview/layerview.h"
+#include "feature/SupportFeature.h"
 
 #include <functional>
 using namespace Hix::Input;
@@ -153,7 +154,8 @@ void QmlManager::initializeUI(QQmlApplicationEngine* e){
 	QObject::connect(manualSupportPopup, SIGNAL(supportApplyEdit()), this, SLOT(supportApplyEdit()));
 	QObject::connect(manualSupportPopup, SIGNAL(supportCancelEdit()), this, SLOT(supportCancelEdit()));
 	QObject::connect(manualSupportPopup, SIGNAL(regenerateRaft()), this, SLOT(regenerateRaft()));
-
+	QObject::connect(manualSupportPopup, SIGNAL(openSupport()), this, SLOT(openSupport()));
+	QObject::connect(manualSupportPopup, SIGNAL(closeSupport()), this, SLOT(closeSupport()));
 
 	
     // repair components
@@ -634,7 +636,7 @@ GLModel* QmlManager::findGLModelByName(QString modelName){
 
 void QmlManager::backgroundClicked(){
     qDebug() << "background clicked";
-	if (_supportRaftManager.supportEditMode() == Hix::Support::EditMode::Manual)
+	if (!isFeatureActive())
 	{
 		unselectAll();
 	}
@@ -672,7 +674,6 @@ bool QmlManager::multipleModelSelected(int ID){
 			{
 				target->changeColor(Hix::Render::Colors::Default);
 			}
-            (*it)->inactivateFeatures();
             QMetaObject::invokeMethod(partList, "unselectPartByModel", Q_ARG(QVariant, target->ID));
             // set slicing info box property visible true if slicing info exists
             //slicingData->setProperty("visible", false);
@@ -765,7 +766,6 @@ void QmlManager::modelSelected(int ID){
             }
 			if((*it)->isPrintable())
 				(*it)->changeColor(Hix::Render::Colors::Default);
-            (*it)->inactivateFeatures();
             QMetaObject::invokeMethod(partList, "unselectPartByModel", Q_ARG(QVariant, (*it)->ID));
             QMetaObject::invokeMethod(yesno_popup, "deletePartListItem", Q_ARG(QVariant, (*it)->ID));
         }
@@ -935,12 +935,6 @@ void QmlManager::stateChangeLabelling()
 	keyboardHandler->setFocus(true);
 }
 
-void QmlManager::updateLabelMesh(const QVector3D translation, const QVector3D normal)
-{
-	auto labelling = dynamic_cast<Labelling*>(_currentFeature.get());
-	labelling->updateLabelMesh(translation, normal);
-}
-
 void QmlManager::generateLabelMesh()
 {
 	auto labelling = dynamic_cast<Labelling*>(_currentFeature.get());
@@ -969,17 +963,8 @@ void QmlManager::closeExtension()
 
 void QmlManager::generateExtensionFaces(double distance)
 {
-	for (auto selectedModel : selectedModels)
-	{
-		if (selectedModel->targetSelected())
-			return;
-
-		auto extend = dynamic_cast<Extend*>(_currentFeature.get());
-		extend->extendMesh(selectedModel->getMeshModd(),selectedModel->targetMeshFace().localFn(),
-			selectedModel->selectedFaces, distance);
-		selectedModel->setTargetSelected(false);
-		selectedModel->updateMesh(true);
-	}
+	auto extend = dynamic_cast<Extend*>(_currentFeature.get());
+	extend->extendMesh(distance);
 }
 
 QString QmlManager::filenameToModelName(const std::string& s)
@@ -1655,7 +1640,6 @@ void QmlManager::unselectPartImpl(GLModel* target)
 	{
 		target->changeColor(Hix::Render::Colors::Default);
 	}
-    target->inactivateFeatures();
     if (groupFunctionState == "active"){
         switch (groupFunctionIndex){
             case 5:
@@ -1681,6 +1665,17 @@ QVector2D QmlManager::world2Screen(QVector3D target) {
 	return result;
 }
 
+
+void QmlManager::openSupport()
+{
+	//just empty placeholder to give modality to Support.
+	_currentFeature.reset(new SupportFeature());
+
+}
+void QmlManager::closeSupport()
+{
+	_currentFeature.reset();
+}
 
 void QmlManager::generateAutoSupport()
 {
@@ -1814,4 +1809,7 @@ void QmlManager::generateShellOffset(double factor) {
 
 }
 
-
+bool QmlManager::isFeatureActive()
+{
+	return _currentFeature.get() != nullptr;
+}

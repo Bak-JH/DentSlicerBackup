@@ -80,11 +80,11 @@ public:
 	}
 
 	template<typename FeatureType>
-	bool isActive(const Hix::Features::Feature* curr)
+	bool isActive()
 	{
-		return dynamic_cast<const FeatureType*>(curr) != nullptr;
+		return dynamic_cast<const FeatureType*>(_currentFeature.get()) != nullptr;
 	}
-
+	bool isFeatureActive();
 	template <typename F>
 	static void postToThread(F&& fun, QThread* thread = qApp->thread()) {
 		auto* obj = QAbstractEventDispatcher::instance(thread);
@@ -227,8 +227,6 @@ public:
     int getLayerViewFlags();
 	void modelSelected(int);
 	
-	void updateLabelMesh(const QVector3D translation, const QVector3D normal);
-
 	Hix::Features::Feature* currentFeature()const;
 
 	//remove this
@@ -393,6 +391,8 @@ public slots:
     void viewObjectChanged(bool checksed);
     void viewLayerChanged(bool checked);
 
+	void openSupport();
+	void closeSupport();
 	void clearSupports();
 	void supportEditEnabled(bool enabled);
 	void supportCancelEdit();

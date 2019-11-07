@@ -52,7 +52,7 @@ namespace Hix
 			void setZLength(float length);
 
 		private:
-			std::array<float, 6> _bound;
+			std::array<float, 6> _bound{0,0,0,0,0,0};
 
 		};
 

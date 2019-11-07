@@ -53,7 +53,7 @@ namespace Hix
 			Qt3DCore::QEntity& rootEntity();
 
 		private:
-			void autoGenSuppRaftRecursive(const GLModel& model);
+			void autoGenRecurv(const GLModel& model);
 
 			Qt3DCore::QEntity _root;
 			std::vector<QVector3D> getSupportBasePts()const;

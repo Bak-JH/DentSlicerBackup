@@ -133,7 +133,7 @@ namespace Hix
 			void clear();
             bool addFace(const QVector3D& v0, const QVector3D& v1, const QVector3D& v2);
 			bool addFace(const FaceConstItr& face);
-			FaceConstItr removeFace(FaceConstItr f_it);
+			void removeFaces(const std::unordered_set<FaceConstItr>& f_it);
 			//short hand for TrackedList::toNormItr
 			inline VertexItr toNormItr(const VertexConstItr& itr)
 			{
@@ -164,8 +164,8 @@ namespace Hix
 			inline float y_max()const{ return _bounds.yMax();}
 			inline float z_min()const{ return _bounds.zMin();}
 			inline float z_max()const{ return _bounds.zMax();}
-			void findNearSimilarFaces(QVector3D normal,FaceConstItr mf,
-				std::unordered_set<FaceConstItr>& result, float maxNormalDiff = 0.1f, size_t maxCount = 10000)const;
+			std::unordered_set<FaceConstItr> findNearSimilarFaces(QVector3D normal,FaceConstItr mf, float maxNormalDiff = 0.1f, size_t maxCount = 10000)const;
+
 			/********************** Stuff that can be public **********************/
 			const Bounds3D& bounds()const;
 			void setSceneEntity(const Render::SceneEntity* entity);
