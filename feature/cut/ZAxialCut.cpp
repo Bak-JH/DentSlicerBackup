@@ -64,8 +64,8 @@ Hix::Features::Cut::ZAxialCut::ZAxialCut(GLModel* subject, float cuttingPlane, R
 	}
 	else
 	{
-		botModel = qmlManager->createAndListModel(listedBotMesh, subject->modelName() + "_bot", &subject->transform());
-		topModel = qmlManager->createAndListModel(listedTopMesh, subject->modelName() + "_top", &subject->transform());
+		botModel = qmlManager->createAndListModel(listedBotMesh, subject->modelName() + "_bot", nullptr);
+		topModel = qmlManager->createAndListModel(listedTopMesh, subject->modelName() + "_top", nullptr);
 		deleteOriginal = true;
 	}
 	_divisionMap.insert(std::make_pair(subject, std::make_pair(topModel, botModel)));
@@ -103,19 +103,24 @@ Hix::Features::Cut::ZAxialCut::ZAxialCut(GLModel* subject, float cuttingPlane, R
 			promoteToListed.push_back(child);
 		}
 	}
+	std::vector<GLModel*> listed;
+	listed.reserve(promoteToListed.size() + 2);
 	for (auto each : promoteToListed)
 	{
-		qmlManager->listModel(each);
+		listed.push_back(qmlManager->listModel(each));
 	}
 	if (botModel)
 	{
-		botModel->updateRecursiveAabb();
+		listed.push_back(botModel);
 	}
 	if (topModel)
 	{
-		topModel->updateRecursiveAabb();
-		//if (option == Result::KeepTop)
-		//	topModel->setZToBed();
+		listed.push_back(topModel);
+	}
+	//need to set listed parts to the bed
+	for (auto& each : listed)
+	{
+		each->setZToBed();
 	}
 	//delete split models
 	_divisionMap.erase(subject);
