@@ -102,6 +102,8 @@ public:
 
 	QString modelName()const;
 
+
+
 protected:
 	void initHitTest()override;
 

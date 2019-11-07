@@ -942,6 +942,11 @@ void QmlManager::updateLabelMesh(const QVector3D translation, const QVector3D no
 	labelling->updateLabelMesh(translation, normal);
 }
 
+void QmlManager::addToSelected(GLModel* model)
+{
+	selectedModels.insert(model);
+}
+
 void QmlManager::generateLabelMesh()
 {
 	auto labelling = dynamic_cast<Labelling*>(_currentFeature.get());
