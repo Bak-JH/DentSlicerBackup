@@ -1070,6 +1070,7 @@ Rectangle {
 
         //10. PopUp - Auto Repair
         PopUp {
+            signal modelRepair();
             id: popup_autorepair
             objectName: "repairPopup"
             funcname: "Auto Repair"
@@ -1087,14 +1088,17 @@ Rectangle {
             //state: third_tab_button_autorepair.state=="active" ? "active" : "inactive"
             state: {
                 if (third_tab_button_autorepair.state=="active" && qm.isSelected())
-                    return "active"
+                {
+                    onApplyFinishButton(); 
+                    return "active";
+
+                }
                 else
                     return "inactive"
             }
-            signal runFeature(int type);
             onApplyClicked: {
                 console.log("auto repair");
-                runFeature(ftrRepair);
+                modelRepair();
             }
             function onApplyFinishButton(){
                 console.log("r-on")
@@ -1113,7 +1117,6 @@ Rectangle {
             funcname: "Cut"
             height: 300
             detail1: "Cutting Surface"
-            detail2: "After treatment"
             detailline1_vis: false
             detailline2_vis: false
             okbutton_vis:false
@@ -1122,8 +1125,8 @@ Rectangle {
             descriptionimage_vis: false
             leftselectimage_vis: true
             rightselectimage_vis: true
-            radiobutton1_vis: true
-            radiobutton2_vis: true
+            radiobutton1_vis: false
+            radiobutton2_vis: false
             slider_vis: false
             imageHeight: 70
             state: {
@@ -1159,10 +1162,6 @@ Rectangle {
 
             onPlaneSliderValueChanged: {
                 resultSliderValueChanged(value);
-            }
-
-            onRadioClicked: {
-                cutFillModeSelected(value);
             }
 
             onApplyClicked: {

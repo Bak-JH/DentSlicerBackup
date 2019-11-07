@@ -27,7 +27,7 @@ namespace Hix
 
 
 		protected:
-			QVector3D getPrimitiveColorCode(const Hix::Engine3D::Mesh* mesh, FaceConstItr faceItr)override;
+			QVector4D getPrimitiveColorCode(const Hix::Engine3D::Mesh* mesh, FaceConstItr faceItr)override;
 		private:
 			QVector3D _basePt;
 			Overhang _overhang;

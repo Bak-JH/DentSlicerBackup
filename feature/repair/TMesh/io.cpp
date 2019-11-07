@@ -469,7 +469,6 @@ int Basic_TMesh::loadOFF(const char *fname)
 
 int Basic_TMesh::loadTriangleList(const float* vtcs, const size_t* inds, size_t vtxCount, size_t triCount)
 {
-	FILE* fp;
 	Node* n;
 	char s[256], * line;
 	float x, y, z;
@@ -493,7 +492,7 @@ int Basic_TMesh::loadTriangleList(const float* vtcs, const size_t* inds, size_t 
 		auto i1 = inds[i + 1];
 		auto i2 = inds[i + 2];
 
-		if (i0 == i1 || i1 == i2 || i2 == i0)
+		if (!(i0 == i1 || i1 == i2 || i2 == i0))
 		{
 			CreateIndexedTriangle(var, i0, i1, i2);
 		}

@@ -1,13 +1,28 @@
-#ifndef SHELLOFFSET_H
-#define SHELLOFFSET_H
+#pragma once
 
-#include "DentEngine/src/mesh.h"
+#include "Feature.h"
 #include "glmodel.h"
-namespace ShellOffset
-{
-    Mesh* shellOffset(Mesh* glmodel, float factor);
-    void connectHoles(Mesh* target_mesh, Paths3D from_holes, Paths3D to_holes);
+#include "cut/DrawingPlane.h"
 
+namespace Hix
+{
+	namespace Features
+	{
+		class ShellOffset : public Hix::Features::Feature
+		{
+		public:
+			ShellOffset(GLModel* glmodel);
+			virtual ~ShellOffset();
+			void getSliderSignal(double value);
+			void doOffset(float offset);
+		private:
+			GLModel* _subject = nullptr;
+			float _zPlane = 0;
+			void doOffsetImpl(GLModel* glModel, float offset, float zPlane);
+			Hix::Engine3D::Bounds3D _modelBound;
+			Hix::Features::Cut::DrawingPlane _cuttingPlane;
+
+		};
+	}
 };
 
-#endif // SHELLOFFSET_H

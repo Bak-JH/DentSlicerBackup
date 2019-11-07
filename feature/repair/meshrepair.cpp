@@ -4,7 +4,7 @@
 #include <time.h>
 #include "TMesh/tmesh.h"
 #include "../../glmodel.h"
-
+#include "../../qmlmanager.h"
 using namespace T_MESH;
 using namespace Hix::Engine3D;
 using namespace Hix::Features;
@@ -52,6 +52,17 @@ Paths3D  Hix::Features::identifyHoles(const Mesh* mesh) {
 	}*/
 	qDebug() << "mesh hole count :" << holes.size();
 	return holes;
+}
+
+bool Hix::Features::isRepairNeeded(const Hix::Engine3D::Mesh* mesh)
+{
+	auto edgeEnd = mesh->getHalfEdges().cend();
+	for (auto edgeItr = mesh->getHalfEdges().cbegin(); edgeItr != edgeEnd; ++edgeItr)
+	{
+		if (edgeItr.twins().size() != 1)
+			return true;
+	}
+	return false;
 }
 
 
@@ -248,9 +259,23 @@ Mesh* toHixMesh(const Basic_TMesh& input)
 	return mesh;
 }
 
-std::vector<Mesh*> Hix::Features::repair(const Hix::Engine3D::Mesh& mesh)
+
+
+void toHixMesh(const Basic_TMesh& input, Hix::Engine3D::Mesh& mesh)
 {
-	std::vector<Hix::Engine3D::Mesh*> meshes;
+	Node* n;
+	Triangle* t;
+	mesh.clear();
+	FOREACHTRIANGLEOFMESH(input, t, n)
+	{
+		mesh.addFace(
+			QVector3D(t->v1()->x, t->v1()->y, t->v1()->z),
+			QVector3D(t->v2()->x, t->v2()->y, t->v2()->z),
+			QVector3D(t->v3()->x, t->v3()->y, t->v3()->z));
+	}
+}
+void Hix::Features::repair(Hix::Engine3D::Mesh& mesh)
+{
 	TMesh::init(); // This is mandatory
 	std::vector<size_t> triInds;
 	std::vector<float> vtcs;
@@ -276,26 +301,24 @@ std::vector<Mesh*> Hix::Features::repair(const Hix::Engine3D::Mesh& mesh)
 	Basic_TMesh tin;
 	tin.loadTriangleList(vtcs.data(), triInds.data(), mvs.size(), faces.size());
    //seperate into multiple components if there are disjoing components
-	auto components = tin.seperateComponents();
-	components.emplace_back(tin);
-	meshes.reserve(components.size());
-	//run repair
-	for (auto& comp : components)
-	{
-		// Fill holes
-		if (comp.boundaries())
-		{
-			comp.fillSmallBoundaries(0, true);
-		}
+	tin.removeSmallestComponents();
+	
 
-		// Run geometry correction
-		if (!comp.boundaries()) TMesh::warning("Fixing degeneracies and intersections...\n");
-		if (comp.boundaries() || !comp.meshclean())
-			qDebug() << "mesh repair failed";
-		meshes.push_back(toHixMesh(comp));
+
+
+	// Fill holes
+	if (tin.boundaries())
+	{
+		tin.fillSmallBoundaries(0, true);
 	}
 
-	return meshes;
+	// Run geometry correction
+	if (!tin.boundaries()) TMesh::warning("Fixing degeneracies and intersections...\n");
+	if (tin.boundaries() || !tin.meshclean())
+		qDebug() << "mesh repair failed";
+	
+	toHixMesh(tin, mesh);
+
 }
 
 std::vector<Mesh*> Hix::Features::importAndRepairMesh(const std::string& importPath)
@@ -362,12 +385,12 @@ Hix::Features::MeshRepair::~MeshRepair()
 {
 }
 
-void Hix::Features::MeshRepair::repairImpl(Hix::Render::SceneEntity* subject, const QString& modelName)
+void Hix::Features::MeshRepair::repairImpl(GLModel* subject, const QString& modelName)
 {
 	size_t childIdx = 0;
 	for (auto childNode : subject->childNodes())
 	{
-		auto entity = dynamic_cast<Hix::Render::SceneEntity*>(childNode);
+		auto entity = dynamic_cast<GLModel*>(childNode);
 		if (entity)
 		{
 			auto childName = modelName + "_child" + QString::number(childIdx);
@@ -377,30 +400,61 @@ void Hix::Features::MeshRepair::repairImpl(Hix::Render::SceneEntity* subject, co
 	}
 
 	//std::vector<Hix::Engine3D::Mesh*> repairedComps;
-	auto repairedComps = Hix::Features::repair(*subject->getMesh());
-	if (repairedComps.size() == 0)
+
+	auto seperated = Hix::Features::seperateDisconnectedMeshes(subject->getMeshModd());
+	//remove smallest components
+	double avgSize = 0;
+	for (auto sepComp : seperated)
+	{
+		avgSize += sepComp->getFaces().size();
+	}
+	avgSize /= seperated.size();
+	avgSize *= 0.20;
+
+	for (auto itr = seperated.begin(); itr != seperated.end();)
+	{
+		if ((double)(*itr)->getFaces().size() > (double)avgSize)
+		{
+			++itr;
+		}
+		else
+		{
+			delete (*itr);
+			itr = seperated.erase(itr);
+		}
+	}
+	for (auto sepComp : seperated)
+	{
+		Hix::Features::repair(*sepComp);
+	}
+
+
+	if (seperated.size() == 0)
 	{
 		qDebug() << "repair failed";
 		return;
 	}
-	else if (repairedComps.size() == 1)
+	else if (seperated.size() == 1)
 	{
-		//replace with repaired mesh
-		subject->clearMesh();
-		subject->setMesh(repairedComps.front());
+		//do nothing, see seperateDisconnectedMeshes
+		
 	}
 	else
 	{
 		//mesh was split into seperate components, they should be added as children of the original subject
 		//subject is now an "empty" node, with no mesh and just transform matrix
 		subject->clearMesh();
+		subject->setMesh(new Mesh());
 		size_t childIdx = 0;
-		for (auto& comp : repairedComps)
+		auto emptyTransform = Qt3DCore::QTransform();
+		for (auto& comp : seperated)
 		{
-			//auto newModel = new GLModel(subject, comp, modelName + "_child" + QString::number(childIdx));
+			//qmlManager->createAndListModel(comp, modelName + "_child" + QString::number(childIdx), &subject->transform());
+			auto newModel = new GLModel(subject, comp, modelName + "_child" + QString::number(childIdx), 0, &emptyTransform);
 			++childIdx;
 		}
 
 	}
+	subject->setZToBed();
 
 }
