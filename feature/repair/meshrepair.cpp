@@ -3,7 +3,8 @@
 #include <string.h>
 #include <time.h>
 #include "TMesh/tmesh.h"
-
+#include "../../glmodel.h"
+#include "../../qmlmanager.h"
 using namespace T_MESH;
 using namespace Hix::Engine3D;
 using namespace Hix::Features;
@@ -53,6 +54,17 @@ Paths3D  Hix::Features::identifyHoles(const Mesh* mesh) {
 	return holes;
 }
 
+bool Hix::Features::isRepairNeeded(const Hix::Engine3D::Mesh* mesh)
+{
+	auto edgeEnd = mesh->getHalfEdges().cend();
+	for (auto edgeItr = mesh->getHalfEdges().cbegin(); edgeItr != edgeEnd; ++edgeItr)
+	{
+		if (edgeItr.twins().size() != 1)
+			return true;
+	}
+	return false;
+}
+
 
 std::vector<Hix::Engine3D::HalfEdgeConstItr>  Hix::Features::identifyBoundary(const Hix::Engine3D::Mesh* mesh)
 {
@@ -68,6 +80,67 @@ std::vector<Hix::Engine3D::HalfEdgeConstItr>  Hix::Features::identifyBoundary(co
 		}
 	}
 	return boundaryEdges;
+}
+
+std::vector<Hix::Engine3D::Mesh*> Hix::Features::seperateDisconnectedMeshes(Hix::Engine3D::Mesh* mesh)
+{
+	std::vector<Hix::Engine3D::Mesh*> meshes;
+	std::deque<std::unordered_set<FaceConstItr>> connected;
+	std::unordered_set<size_t> unexplored;
+	auto meshFaces = mesh->getFaces();
+	size_t totalFaceCnt = meshFaces.size();
+	unexplored.reserve(totalFaceCnt);
+	for (size_t i = 0; i < totalFaceCnt; ++i)
+	{
+		unexplored.insert(i);
+	}
+
+	while (!unexplored.empty())
+	{
+		auto& current = connected.emplace_back();
+		auto begin = *unexplored.begin();
+		std::deque<FaceConstItr>q;
+		current.emplace(meshFaces.cbegin() + begin);
+		unexplored.erase(begin);
+		q.emplace_back(*current.begin());
+		while (!q.empty())
+		{
+			auto curr = q.front();
+			q.pop_front();
+			auto edge = curr.edge();
+			for (size_t i = 0; i < 3; ++i, edge.moveNext()) {
+				auto nFaces = edge.twinFaces();
+				for (auto nFace : nFaces)
+				{
+					if (current.find(nFace) == current.end())
+					{
+						q.emplace_back(nFace);
+						current.emplace(nFace);
+						unexplored.erase(nFace.index());
+					}
+				}
+			}
+		}
+	}
+	//if there are indeed multiple meshes, allocate new meshs
+	if (connected.size() > 1)
+	{
+		meshes.reserve(connected.size());
+		for (auto& faces : connected)
+		{
+			auto newMesh = new Mesh();
+			meshes.emplace_back(newMesh);
+			for (auto& face : faces)
+			{
+				newMesh->addFace(face);
+			}
+		}
+	}
+	else
+	{
+		meshes.emplace_back(mesh);
+	}
+	return meshes;
 }
 
 
@@ -186,10 +259,72 @@ Mesh* toHixMesh(const Basic_TMesh& input)
 	return mesh;
 }
 
-std::vector<Mesh*> importAndRepairMesh(const std::string& importPath)
+
+
+void toHixMesh(const Basic_TMesh& input, Hix::Engine3D::Mesh& mesh)
 {
-	std::vector<Mesh*> meshes;
-	 TMesh::init(); // This is mandatory
+	Node* n;
+	Triangle* t;
+	mesh.clear();
+	FOREACHTRIANGLEOFMESH(input, t, n)
+	{
+		mesh.addFace(
+			QVector3D(t->v1()->x, t->v1()->y, t->v1()->z),
+			QVector3D(t->v2()->x, t->v2()->y, t->v2()->z),
+			QVector3D(t->v3()->x, t->v3()->y, t->v3()->z));
+	}
+}
+void Hix::Features::repair(Hix::Engine3D::Mesh& mesh)
+{
+	TMesh::init(); // This is mandatory
+	std::vector<size_t> triInds;
+	std::vector<float> vtcs;
+	auto& faces = mesh.getFaces();
+	auto& mvs = mesh.getVertices();
+	auto faceEnd = faces.cend();
+	auto mvsEnd = mvs.cend();
+	triInds.reserve(faces.size() * 3);
+	triInds.reserve(mvs.size() * 3);
+	for (auto itr = faces.cbegin(); itr != faceEnd; ++itr)
+	{
+		auto faceVtcs = itr.meshVertices();
+		triInds.push_back(faceVtcs[0].index());
+		triInds.push_back(faceVtcs[1].index());
+		triInds.push_back(faceVtcs[2].index());
+	}
+	for (auto& vtx : mvs)
+	{
+		vtcs.push_back(vtx.position.x());
+		vtcs.push_back(vtx.position.y());
+		vtcs.push_back(vtx.position.z());
+	}
+	Basic_TMesh tin;
+	tin.loadTriangleList(vtcs.data(), triInds.data(), mvs.size(), faces.size());
+   //seperate into multiple components if there are disjoing components
+	tin.removeSmallestComponents();
+	
+
+
+
+	// Fill holes
+	if (tin.boundaries())
+	{
+		tin.fillSmallBoundaries(0, true);
+	}
+
+	// Run geometry correction
+	if (!tin.boundaries()) TMesh::warning("Fixing degeneracies and intersections...\n");
+	if (tin.boundaries() || !tin.meshclean())
+		qDebug() << "mesh repair failed";
+	
+	toHixMesh(tin, mesh);
+
+}
+
+std::vector<Mesh*> Hix::Features::importAndRepairMesh(const std::string& importPath)
+{
+	std::vector<Hix::Engine3D::Mesh*> meshes;
+	TMesh::init(); // This is mandatory
 	 clock_t beginning = clock();
 
 	 // Uncomment the following to prevent message reporting
@@ -235,5 +370,91 @@ std::vector<Mesh*> importAndRepairMesh(const std::string& importPath)
 
 	 printf("Elapsed time: %d ms\n", clock() - beginning);
 
- return meshes;
+	return meshes;
+}
+
+Hix::Features::MeshRepair::MeshRepair(const std::unordered_set<GLModel*>& selectedModels)
+{
+	for (auto model : selectedModels)
+	{
+		repairImpl(model, model->modelName());
+	}
+}
+
+Hix::Features::MeshRepair::~MeshRepair()
+{
+}
+
+void Hix::Features::MeshRepair::repairImpl(GLModel* subject, const QString& modelName)
+{
+	size_t childIdx = 0;
+	for (auto childNode : subject->childNodes())
+	{
+		auto entity = dynamic_cast<GLModel*>(childNode);
+		if (entity)
+		{
+			auto childName = modelName + "_child" + QString::number(childIdx);
+			repairImpl(subject, childName);
+			++childIdx;
+		}
+	}
+
+	//std::vector<Hix::Engine3D::Mesh*> repairedComps;
+
+	auto seperated = Hix::Features::seperateDisconnectedMeshes(subject->getMeshModd());
+	//remove smallest components
+	double avgSize = 0;
+	for (auto sepComp : seperated)
+	{
+		avgSize += sepComp->getFaces().size();
+	}
+	avgSize /= seperated.size();
+	avgSize *= 0.20;
+
+	for (auto itr = seperated.begin(); itr != seperated.end();)
+	{
+		if ((double)(*itr)->getFaces().size() > (double)avgSize)
+		{
+			++itr;
+		}
+		else
+		{
+			delete (*itr);
+			itr = seperated.erase(itr);
+		}
+	}
+	for (auto sepComp : seperated)
+	{
+		Hix::Features::repair(*sepComp);
+	}
+
+
+	if (seperated.size() == 0)
+	{
+		qDebug() << "repair failed";
+		return;
+	}
+	else if (seperated.size() == 1)
+	{
+		//do nothing, see seperateDisconnectedMeshes
+		
+	}
+	else
+	{
+		//mesh was split into seperate components, they should be added as children of the original subject
+		//subject is now an "empty" node, with no mesh and just transform matrix
+		subject->clearMesh();
+		subject->setMesh(new Mesh());
+		size_t childIdx = 0;
+		auto emptyTransform = Qt3DCore::QTransform();
+		for (auto& comp : seperated)
+		{
+			//qmlManager->createAndListModel(comp, modelName + "_child" + QString::number(childIdx), &subject->transform());
+			auto newModel = new GLModel(subject, comp, modelName + "_child" + QString::number(childIdx), 0, &emptyTransform);
+			++childIdx;
+		}
+
+	}
+	subject->setZToBed();
+
 }

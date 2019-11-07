@@ -41,10 +41,7 @@ void ModelCut::cutModeSelected(int type) {
 	return;
 }
 
-void ModelCut::cutFillModeSelected(int type) {
-	_isFill = type;
-	return;
-}
+
 
 void ModelCut::getSliderSignal(double value) {
 	float zlength = _modelsBound.lengthZ();
@@ -59,7 +56,7 @@ void Hix::Features::ModelCut::applyCut()
 	{
 		for (auto each : _models)
 		{
-			ZAxialCut impl(each, _cuttingPlane.transform().translation().z(), _isFill);
+			ZAxialCut impl(each, _cuttingPlane.transform().translation().z());
 
 		}
 		break;
@@ -68,7 +65,7 @@ void Hix::Features::ModelCut::applyCut()
 	{
 		for (auto each : _models)
 		{
-			PolylineCut impl(each, _cuttingPlane.contour(), _isFill);
+			PolylineCut impl(each, _cuttingPlane.contour());
 		}
 		break;
 	}

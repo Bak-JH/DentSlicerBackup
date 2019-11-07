@@ -25,7 +25,13 @@
 #include "render/lights.h"
 #include "DentEngine/src/configuration.h"
 #include "feature/stlexporter.h"
+#include "DentEngine/src/MeshIterators.h"
 #include "feature/cut/modelcut.h"
+#include "feature/label/Labelling.h"
+#include "feature/layFlat.h"
+#include "feature/repair/meshrepair.h"
+#include "feature/layerview/layerview.h"
+
 #include <functional>
 using namespace Hix::Input;
 using namespace Hix::UI;
@@ -225,6 +231,28 @@ void QmlManager::initializeUI(QQmlApplicationEngine* e){
 	QObject::connect(mv, SIGNAL(cameraViewChanged()), this, SLOT(cameraViewChanged()));
 
 
+	QObject::connect(layflatPopup, SIGNAL(openLayflat()), this, SLOT(openLayFlat()));
+	QObject::connect(extensionPopup, SIGNAL(openExtension()), this, SLOT(openExtension()));
+	QObject::connect(layflatPopup, SIGNAL(closeLayflat()), this, SLOT(closeLayFlat()));
+	QObject::connect(extensionPopup, SIGNAL(closeExtension()), this, SLOT(closeExtension()));
+
+	QObject::connect(layflatPopup, SIGNAL(generateLayFlat()), this, SLOT(generateLayFlat()));
+
+
+
+	// label popup codes
+	QObject::connect(labelPopup, SIGNAL(openLabelling()), this, SLOT(openLabelling()));
+	QObject::connect(labelPopup, SIGNAL(closeLabelling()), this, SLOT(closeLabelling()));
+	QObject::connect(labelPopup, SIGNAL(sendTextChanged(QString)), this, SLOT(setLabelText(QString)));
+	QObject::connect(labelPopup, SIGNAL(stateChangeLabelling()), this, SLOT(stateChangeLabelling()));
+	//QObject::connect(labelPopup, SIGNAL(runFeature(int)),glmodel->ft, SLOT(setTypeAndStart(int)));
+	QObject::connect(labelPopup, SIGNAL(generateLabelMesh()), this, SLOT(generateLabelMesh()));
+	QObject::connect(labelFontBox, SIGNAL(sendFontName(QString)), this, SLOT(setLabelFontName(QString)));
+	QObject::connect(labelFontBoldBox, SIGNAL(sendFontBold(bool)), this, SLOT(setLabelFontBold(bool)));
+	QObject::connect(labelFontSizeBox, SIGNAL(sendFontSize(int)), this, SLOT(setLabelFontSize(int)));
+
+	// extension popup codes
+	QObject::connect(extensionPopup, SIGNAL(generateExtensionFaces(double)), this, SLOT(generateExtensionFaces(double)));
 	// model cut popup codes
 	QObject::connect(cutPopup, SIGNAL(modelCut()), this, SLOT(modelCut()));
 	QObject::connect(cutPopup, SIGNAL(cutModeSelected(int)), this, SLOT(cutModeSelected(int)));
@@ -233,38 +261,84 @@ void QmlManager::initializeUI(QQmlApplicationEngine* e){
 	QObject::connect(cutPopup, SIGNAL(closeCut()), this, SLOT(closeCut()));
 	QObject::connect(cutPopup, SIGNAL(resultSliderValueChanged(double)), this, SLOT(getSliderSignal(double)));
 
+	QObject::connect(repairPopup, SIGNAL(modelRepair()), this, SLOT(modelRepair()));
+
+
+
+	// shelloffset popup codes
+	QObject::connect(shelloffsetPopup, SIGNAL(openShellOffset()), this, SLOT(openShellOffset()));
+	QObject::connect(shelloffsetPopup, SIGNAL(closeShellOffset()), this, SLOT(closeShellOffset()));
+	QObject::connect(shelloffsetPopup, SIGNAL(shellOffset(double)), this, SLOT(generateShellOffset(double)));
+	QObject::connect(shelloffsetPopup, SIGNAL(resultSliderValueChanged(double)), this, SLOT(getSliderSignal(double)));
+
+	QObject::connect(layerViewSlider, SIGNAL(sliderValueChanged(int)), this, SLOT(getCrossSectionSignal(int)));
+
+
+}
+
+GLModel* QmlManager::listModel(GLModel* model)
+{
+	Qt3DCore::QTransform toRoot;
+	toRoot.setMatrix(model->toRootMatrix());
+	auto res = glmodels.try_emplace(modelIDCounter, models, model->getMeshModd(), model->modelName(), modelIDCounter, &toRoot);
+	++modelIDCounter;
+	auto latestAdded = &(res.first->second);
+	// set initial position
+	//add to raytracer
+	latestAdded->setHitTestable(true);
+	qmlManager->addPart(latestAdded->modelName(), latestAdded->ID);
+	//steal children, mixing RAII with QT is difficult
+	for (auto& childNode : model->childNodes())
+	{
+		auto childModel = dynamic_cast<GLModel*>(childNode);
+		if (childModel)
+		{
+			childModel->setParent(latestAdded);
+		}
+	}
+	model->setMesh(nullptr);
+	delete model;
+	return latestAdded;
 }
 
 
-
-GLModel* QmlManager::createModelFile(Mesh* target_mesh, QString fname, const Qt3DCore::QTransform* transform) {
-    openProgressPopUp();
-    auto res = glmodels.try_emplace(modelIDCounter, models, target_mesh, fname, modelIDCounter, transform);
+GLModel* QmlManager::createAndListModel(Hix::Engine3D::Mesh* mesh, QString fname, const Qt3DCore::QTransform* transform) {
+	auto res = glmodels.try_emplace(modelIDCounter, models, mesh, fname, modelIDCounter, transform);
     ++modelIDCounter;
     auto latestAdded = &(res.first->second);
-    qDebug() << "created new model file";
-    // model selection codes, connect handlers later when model selected
-    qDebug() << "connected model selected signal";
-
     // set initial position
-
-    latestAdded->setZToBed();
-
-    emit latestAdded->_updateModelMesh();
-
-
 	//add to raytracer
 	latestAdded->setHitTestable(true);
-    // 승환 100%
-    setProgress(1);
+	qmlManager->addPart(latestAdded->modelName(), latestAdded->ID);
 	return latestAdded;
 }
 void QmlManager::openModelFile(QString fname){
-    auto latest = createModelFile(new Mesh(), fname);
+	openProgressPopUp();
 
-    // check for defects
-    checkModelFile(latest);
+	auto mesh = new Mesh();
+	if (fname != "" && (fname.contains(".stl") || fname.contains(".STL"))) {
+		FileLoader::loadMeshSTL(mesh, fname.toLocal8Bit().constData());
+	}
+	else if (fname != "" && (fname.contains(".obj") || fname.contains(".OBJ"))) {
+		FileLoader::loadMeshOBJ(mesh, fname.toLocal8Bit().constData());
+	}
+	fname = filenameToModelName(fname.toStdString());
+	setProgress(0.3);
+	mesh->centerMesh();
+	auto latest = createAndListModel(mesh, fname, nullptr);
+	
+	setProgress(0.6);
 
+	//repair mode
+	if (Hix::Features::isRepairNeeded(mesh))
+	{
+		qmlManager->setProgressText("Repairing mesh.");
+		std::unordered_set<GLModel*> repairModels;
+		repairModels.insert(latest);
+		_currentFeature.reset(new MeshRepair(repairModels));
+		_currentFeature.reset();
+	}
+	setProgress(1.0);
     // do auto arrange
     if (glmodels.size() >= 2)
         openArrange();
@@ -272,14 +346,12 @@ void QmlManager::openModelFile(QString fname){
     QApplication::setOverrideCursor(QCursor(Qt::ArrowCursor));
 }
 
-void QmlManager::checkModelFile(GLModel* target){
-    ;
+void QmlManager::modelRepair()
+{
+	_currentFeature.reset(new MeshRepair(selectedModels));
+	//if cut is finished;
+	_currentFeature.reset();
 
-    //size_t holesCount = MeshRepair::identifyHoles(target->getMesh()).size();
-    //if (holesCount!= 0){
-    //    selectPart(target->ID);
-    //    qmlManager->openYesNoPopUp(false, "Model has flaws.", "", "Do you want to fix the model?", 16, "", ftrRepair, 0);
-    //}
 }
 
 GLModel* QmlManager::getModelByID(int ID)
@@ -307,7 +379,6 @@ void QmlManager::deleteOneModelFile(GLModel* target) {
 	if (target)
 	{
 		//TODO: move these into glmodel destructor
-		disconnectHandlers(target);
 		//    target->deleteLater();
 		//    target->deleteLater();
 		deletePartListItem(target->ID);
@@ -357,210 +428,6 @@ void QmlManager::deleteSelectedModels() {
     return;
 }
 
-void QmlManager::disconnectHandlers(GLModel* glmodel){
-    qDebug() << "disconnectHandlers(GLModel* glmodel)";
-
-    //QObject::disconnect(glmodel->ft, SIGNAL(setProgress(QVariant)),progress_popup, SLOT(updateNumber(QVariant)));
-    //QObject::disconnect(glmodel->ft, SIGNAL(loadPopup(QVariant)),orientPopup, SLOT(show_popup(QVariant)));
-
-    //QObject::disconnect(yesno_popup, SIGNAL(runGroupFeature(int, QString, double, double, double, QVariant)),this,SLOT(runGroupFeature(int,QString, double, double, double, QVariant))); //glmodel->ft, SLOT(setTypeAndRun(int, QVariant)));
-    //QObject::disconnect(yesno_popup, SIGNAL(runFeature(int, QVariant)), glmodel->ft, SLOT(setTypeAndRun(int, QVariant)));
-
-    /*QObject::disconnect(undoRedoButton, SIGNAL(unDo()), glmodel, SLOT(loadUndoState()));
-    QObject::disconnect(undoRedoButton, SIGNAL(reDo()), glmodel, SLOT(loadRedoState()));
-    QObject::disconnect(mv, SIGNAL(unDo()), glmodel, SLOT(loadUndoState()));
-    QObject::disconnect(mv, SIGNAL(reDo()), glmodel, SLOT(loadRedoState()));*/
-
-    // need to connect for every popup
-    // model rotate popup codes
-
-	//	// auto orientation popup codes
-	//QObject::disconnect(orientPopup, SIGNAL(runFeature(int)), glmodel->ft, SLOT(setTypeAndStart(int)));
-	//// auto Repair popup codes
-	//QObject::disconnect(repairPopup, SIGNAL(runFeature(int)), glmodel->ft, SLOT(setTypeAndStart(int)));
-
-
-    // model layflat popup codes
-	QObject::disconnect(layflatPopup, SIGNAL(generateLayFlat()), glmodel, SLOT(generateLayFlat()));
-	//QObject::disconnect(layflatPopup, SIGNAL(openLayflat()), glmodel, SLOT(openLayflat()));
-
-	// hollow shell popup codes
-	//QObject::disconnect(hollowShellPopup, SIGNAL(hollowShell(double)), glmodel, SLOT(indentHollowShell(double)));
-
-
-	// scale popup codes
-	//QObject::disconnect(scalePopup, SIGNAL(runFeature(int,double,double,double)), glmodel->ft, SLOT(setTypeAndRun(int, double, double, double)));
-
-	// label popup codes
-	QObject::disconnect(labelPopup, SIGNAL(stateChangeLabelling()), glmodel, SLOT(stateChangeLabelling()));
-	QObject::disconnect(labelPopup, SIGNAL(sendLabelUpdate(QString, QString, bool, int)), glmodel, SLOT(applyLabelInfo(QString, QString, bool, int)));
-	//QObject::connect(labelPopup, SIGNAL(runFeature(int)),glmodel->ft, SLOT(setTypeAndStart(int)));
-	
-	// extension popup codes
-	QObject::disconnect(extensionPopup, SIGNAL(generateExtensionFaces(double)), glmodel, SLOT(generateExtensionFaces(double)));
-
-	// shelloffset popup codes
-	QObject::disconnect(shelloffsetPopup, SIGNAL(shellOffset(double)), glmodel, SLOT(generateShellOffset(double)));
-
-
-	
-
-	
-	// model layflat popup codes
-	QObject::disconnect(layflatPopup, SIGNAL(openLayflat()), glmodel, SLOT(openLayflat()));
-	QObject::disconnect(layflatPopup, SIGNAL(closeLayflat()), glmodel, SLOT(closeLayflat()));
-	QObject::disconnect(glmodel, SIGNAL(layFlatSelect()), this, SLOT(layFlatSelect()));
-	QObject::disconnect(glmodel, SIGNAL(layFlatUnSelect()), this, SLOT(layFlatUnSelect()));
-
-	//// hollow shell popup codes
-	//QObject::disconnect(hollowShellPopup, SIGNAL(hollowShell(double)), glmodel, SLOT(hollowShell(double)));
-	//QObject::disconnect(hollowShellPopup, SIGNAL(openHollowShell()), glmodel, SLOT(openHollowShell()));
-	//QObject::disconnect(hollowShellPopup, SIGNAL(resultSliderValueChanged(double)), glmodel, SLOT(getSliderSignal(double)));
-
-
-	// scale popup codes
-	QObject::disconnect(scalePopup, SIGNAL(openScale()), glmodel, SLOT(openScale()));
-	QObject::disconnect(scalePopup, SIGNAL(closeScale()), glmodel, SLOT(closeScale()));
-
-	// label popup codes
-	QObject::disconnect(labelPopup, SIGNAL(sendTextChanged(QString)), glmodel, SLOT(getTextChanged(QString)));
-	QObject::disconnect(labelPopup, SIGNAL(openLabelling()), glmodel, SLOT(openLabelling()));
-	QObject::disconnect(labelPopup, SIGNAL(closeLabelling()), glmodel, SLOT(closeLabelling()));
-	QObject::disconnect(labelPopup, SIGNAL(generateText3DMesh()), glmodel, SLOT(generateText3DMesh()));
-	QObject::disconnect(labelFontBox, SIGNAL(sendFontName(QString)), glmodel, SLOT(getFontNameChanged(QString)));
-	QObject::disconnect(labelFontBoldBox, SIGNAL(sendFontBold(bool)), glmodel, SLOT(getFontBoldChanged(bool)));
-	QObject::disconnect(labelFontSizeBox, SIGNAL(sendFontSize(int)), glmodel, SLOT(getFontSizeChanged(int)));
-
-	// extension popup codes
-	QObject::disconnect(extensionPopup, SIGNAL(openExtension()), glmodel, SLOT(openExtension()));
-	QObject::disconnect(extensionPopup, SIGNAL(closeExtension()), glmodel, SLOT(closeExtension()));
-	QObject::disconnect(glmodel, SIGNAL(extensionSelect()), this, SLOT(extensionSelect()));
-	QObject::disconnect(glmodel, SIGNAL(extensionUnSelect()), this, SLOT(extensionUnSelect()));
-
-	//manual supprt popup codes
-	QObject::disconnect(glmodel, SIGNAL(manualSupportSelect()), this, SLOT(manualSupportSelect()));
-	QObject::disconnect(glmodel, SIGNAL(manualSupportUnselect()), this, SLOT(manualSupportUnselect()));
-
-
-	// shelloffset popup codes
-	QObject::disconnect(shelloffsetPopup, SIGNAL(openShellOffset()), glmodel, SLOT(openShellOffset()));
-	QObject::disconnect(shelloffsetPopup, SIGNAL(closeShellOffset()), glmodel, SLOT(closeShellOffset()));
-	QObject::disconnect(shelloffsetPopup, SIGNAL(resultSliderValueChanged(double)), glmodel, SLOT(getSliderSignal(double)));
-
-	
-
-
-    // auto arrange popup codes
-    //unused, signal from qml goes right into QmlManager.runArrange
-    //QObject::disconnect(arrangePopup, SIGNAL(runFeature(int)), glmodel->ft, SLOT(setTypeAndStart(int)));
-    //QObject::disconnect(glmodel->arsignal, SIGNAL(runArrange()), this, SLOT(runArrange()));
-
-    // save button codes
-    //QObject::disconnect(saveButton, SIGNAL(runFeature(int)), glmodel->ft, SLOT(setTypeAndRun(int)));
-
-    // export button codes
-    //QObject::disconnect(exportOKButton, SIGNAL(runGroupFeature(int, QString, double, double, double, QVariant)),this,SLOT(runGroupFeature(int,QString, double, double, double, QVariant))); //glmodel->ft, SLOT(setTypeAndRun(int, QVariant)));
-    //QObject::disconnect(exportButton, SIGNAL(runFeature(int, QVariant)), glmodel->ft, SLOT(setTypeAndRun(int, QVariant)));
-
-
-
-    QObject::disconnect(layerViewSlider, SIGNAL(sliderValueChanged(int)), glmodel, SLOT(getLayerViewSliderSignal(int)));
-}
-
-void QmlManager::connectHandlers(GLModel* glmodel){
-
-    //QObject::connect(glmodel->ft, SIGNAL(setProgress(QVariant)),progress_text, SLOT(update_loading(QVariant)));
-    //QObject::connect(glmodel->ft, SIGNAL(setProgress(QVariant)),progress_popup, SLOT(updateNumber(QVariant)));
-    //QObject::connect(glmodel->ft, SIGNAL(loadPopup(QVariant)),orientPopup, SLOT(show_popup(QVariant)));
-
-    // need to connect for every popup
-    // model layflat popup codes
-    /*
-    QObject::connect(layflatPopup, SIGNAL(openLayflat()), glmodel, SLOT(openLayflat()));
-    QObject::connect(glmodel, SIGNAL(resetLayflat()), this, SLOT(resetLayflat()));
-    */
-
-    //QObject::connect(yesno_popup, SIGNAL(runFeature(int, QVariant)), glmodel->ft, SLOT(setTypeAndRun(int, QVariant)));
-
-    /*QObject::connect(undoRedoButton, SIGNAL(unDo()), glmodel, SLOT(loadUndoState()));
-    QObject::connect(undoRedoButton, SIGNAL(reDo()), glmodel, SLOT(loadRedoState()));
-    QObject::connect(mv, SIGNAL(unDo()), glmodel, SLOT(loadUndoState()));
-    QObject::connect(mv, SIGNAL(reDo()), glmodel, SLOT(loadRedoState()));*/
-
-	//// auto Repair popup codes
-	//QObject::connect(repairPopup, SIGNAL(runFeature(int)), glmodel->ft, SLOT(setTypeAndStart(int)));
-	//// auto orientation popup codes
-	//QObject::connect(orientPopup, SIGNAL(runFeature(int)), glmodel->ft, SLOT(setTypeAndStart(int)));
-
-
-    QObject::connect(layflatPopup, SIGNAL(openLayflat()), glmodel, SLOT(openLayflat()));
-    QObject::connect(layflatPopup, SIGNAL(closeLayflat()), glmodel, SLOT(closeLayflat()));
-    QObject::connect(layflatPopup, SIGNAL(generateLayFlat()), glmodel, SLOT(generateLayFlat()));
-    QObject::connect(glmodel,SIGNAL(layFlatSelect()),this,SLOT(layFlatSelect()));
-    QObject::connect(glmodel,SIGNAL(layFlatUnSelect()),this,SLOT(layFlatUnSelect()));
-
-
-
-    /*// hollow shell popup codes
-    QObject::connect(hollowShellPopup, SIGNAL(openHollowShell()), glmodel, SLOT(openHollowShell()));
-    QObject::connect(hollowShellPopup, SIGNAL(closeHollowShell()), glmodel, SLOT(closeHollowShell()));
-    QObject::connect(hollowShellPopup, SIGNAL(hollowShell(double)), glmodel, SLOT(indentHollowShell(double)));
-    QObject::connect(hollowShellPopup, SIGNAL(resultSliderValueChanged(double)), glmodel, SLOT(getSliderSignal(double)));
-    */
-
- 
-    // scale popup codes
-    //QObject::connect(scalePopup, SIGNAL(runFeature(int,double,double,double)), glmodel->ft, SLOT(setTypeAndRun(int, double, double, double)));
-    QObject::connect(scalePopup, SIGNAL(openScale()), glmodel, SLOT(openScale()));
-    QObject::connect(scalePopup, SIGNAL(closeScale()), glmodel, SLOT(closeScale()));
-
-    // label popup codes
-    QObject::connect(labelPopup, SIGNAL(sendTextChanged(QString)),glmodel,SLOT(getTextChanged(QString)));
-    QObject::connect(labelPopup, SIGNAL(openLabelling()),glmodel,SLOT(openLabelling()));
-    QObject::connect(labelPopup, SIGNAL(closeLabelling()),glmodel,SLOT(closeLabelling()));
-    QObject::connect(labelPopup, SIGNAL(stateChangeLabelling()), glmodel, SLOT(stateChangeLabelling()));
-    QObject::connect(labelPopup, SIGNAL(sendLabelUpdate(QString, QString, bool, int)), glmodel, SLOT(applyLabelInfo(QString, QString, bool, int)));
-    //QObject::connect(labelPopup, SIGNAL(runFeature(int)),glmodel->ft, SLOT(setTypeAndStart(int)));
-    QObject::connect(labelPopup, SIGNAL(generateText3DMesh()), glmodel, SLOT(generateText3DMesh()));
-    QObject::connect(labelFontBox, SIGNAL(sendFontName(QString)),glmodel, SLOT(getFontNameChanged(QString)));
-    QObject::connect(labelFontBoldBox, SIGNAL(sendFontBold(bool)),glmodel, SLOT(getFontBoldChanged(bool)));
-    QObject::connect(labelFontSizeBox, SIGNAL(sendFontSize(int)),glmodel, SLOT(getFontSizeChanged(int)));
-
-    // extension popup codes
-    QObject::connect(extensionPopup, SIGNAL(openExtension()), glmodel, SLOT(openExtension()));
-    QObject::connect(extensionPopup, SIGNAL(closeExtension()), glmodel, SLOT(closeExtension()));
-    QObject::connect(extensionPopup, SIGNAL(generateExtensionFaces(double)), glmodel, SLOT(generateExtensionFaces(double)));
-    QObject::connect(glmodel,SIGNAL(extensionSelect()),this,SLOT(extensionSelect()));
-    QObject::connect(glmodel,SIGNAL(extensionUnSelect()),this,SLOT(extensionUnSelect()));
-
-	//manual supprt popup codes
-	QObject::connect(glmodel, SIGNAL(manualSupportSelect()), this, SLOT(manualSupportSelect()));
-	QObject::connect(glmodel, SIGNAL(manualSupportUnselect()), this, SLOT(manualSupportUnselect()));
-
-
-
-    // shelloffset popup codes
-    QObject::connect(shelloffsetPopup, SIGNAL(openShellOffset()), glmodel, SLOT(openShellOffset()));
-    QObject::connect(shelloffsetPopup, SIGNAL(closeShellOffset()), glmodel, SLOT(closeShellOffset()));
-    QObject::connect(shelloffsetPopup, SIGNAL(shellOffset(double)), glmodel, SLOT(generateShellOffset(double)));
-    QObject::connect(shelloffsetPopup, SIGNAL(resultSliderValueChanged(double)), glmodel, SLOT(getSliderSignal(double)));
-
-
-    // auto arrange popup codes
-    //unused, signal from qml goes right into QmlManager.runArrange
-    //QObject::connect(arrangePopup, SIGNAL(runFeature(int)), glmodel->ft, SLOT(setTypeAndStart(int)));
-    //QObject::connect(glmodel->arsignal, SIGNAL(runArrange()), this, SLOT(runArrange()));
-
-    // save button codes
-    //QObject::connect(saveButton, SIGNAL(runFeature(int)), glmodel->ft, SLOT(setTypeAndRun(int)));
-
-    // export button codes
-    //QObject::connect(exportOKButton, SIGNAL(runGroupFeature(int, QString, double, double, double, QVariant)),this,SLOT(runGroupFeature(int,QString, double, double, double, QVariant)));
-    //QObject::connect(exportButton, SIGNAL(runFeature(int, QVariant)), glmodel->ft, SLOT(setTypeAndRun(int, QVariant)));
-
-
-    QObject::connect(layerViewSlider, SIGNAL(sliderValueChanged(int)), glmodel, SLOT(getLayerViewSliderSignal(int)));
-}
 void QmlManager::cleanselectedModel(int type){
     //selectedModels[0] = nullptr;
 }
@@ -603,14 +470,15 @@ void QmlManager::keyboardHandlerFocus(){
 }
 
 void QmlManager::fixMesh(){
-    if (selectedModels.empty())
-        return;
-
     openProgressPopUp();
-    for(auto glm : selectedModels)
-        glm->repairMesh();
-
+	qmlManager->setProgressText("Repairing mesh.");
+	qmlManager->setProgress(0.1);
+	_currentFeature.reset(new MeshRepair(selectedModels));
+	_currentFeature.reset();
+	qmlManager->setProgress(1.0);
 }
+
+
 
 void QmlManager::disableObjectPickers(){
     for (auto& pair : glmodels){
@@ -750,13 +618,13 @@ void QmlManager::applyArrangeResult(std::vector<QVector3D> translations, std::ve
     }
 }
 
-GLModel* QmlManager::findGLModelByName(QString filename){
+GLModel* QmlManager::findGLModelByName(QString modelName){
 
     for(auto& pair : glmodels)
     {
         auto model = &pair.second;
-        qDebug() << "finding " << filename << model->filename();
-        if (model->filename() == filename){
+        qDebug() << "finding " << modelName << model->modelName();
+        if (model->modelName() == modelName){
             return model;
         }
     }
@@ -766,7 +634,7 @@ GLModel* QmlManager::findGLModelByName(QString filename){
 
 void QmlManager::backgroundClicked(){
     qDebug() << "background clicked";
-	if (deselectAllowed())
+	if (_supportRaftManager.supportEditMode() == Hix::Support::EditMode::Manual)
 	{
 		unselectAll();
 	}
@@ -806,13 +674,10 @@ bool QmlManager::multipleModelSelected(int ID){
 			}
             (*it)->inactivateFeatures();
             QMetaObject::invokeMethod(partList, "unselectPartByModel", Q_ARG(QVariant, target->ID));
-            QMetaObject::invokeMethod(yesno_popup, "deletePartListItem", Q_ARG(QVariant, target->ID));
-
             // set slicing info box property visible true if slicing info exists
             //slicingData->setProperty("visible", false);
             sendUpdateModelInfo();
 
-            disconnectHandlers(target);  //check
             QMetaObject::invokeMethod(qmlManager->mttab, "hideTab"); // off MeshTransformer Tab
 
             if (groupFunctionState == "active"){
@@ -834,9 +699,6 @@ bool QmlManager::multipleModelSelected(int ID){
                 case 8:
                     QMetaObject::invokeMethod(orientPopup,"offApplyFinishButton");
                     break;
-                case 10:
-                    QMetaObject::invokeMethod(repairPopup,"offApplyFinishButton");
-                    break;
                 }
             }
             return true;
@@ -850,11 +712,9 @@ bool QmlManager::multipleModelSelected(int ID){
 
 	selectedModels.insert(target);
 	_lastSelected = target;
-    connectHandlers(target);
     target->changeColor(Hix::Render::Colors::Selected);
     qDebug() << "multipleModelSelected invoke";
     QMetaObject::invokeMethod(partList, "selectPartByModel", Q_ARG(QVariant, target->ID));
-    QMetaObject::invokeMethod(yesno_popup, "addPart", Q_ARG(QVariant, target->getFileName(target->filename().toStdString().c_str())), Q_ARG(QVariant, target->ID));
     qDebug() << "[multi model selected] b box center"; //<< xmid << " " << ymid << " " << zmid ;
 
     sendUpdateModelInfo();
@@ -877,9 +737,6 @@ bool QmlManager::multipleModelSelected(int ID){
         case 8:
             QMetaObject::invokeMethod(orientPopup,"onApplyFinishButton");
             break;
-        case 10:
-            QMetaObject::invokeMethod(repairPopup,"onApplyFinishButton");
-            break;
         }
     }
 
@@ -888,65 +745,6 @@ bool QmlManager::multipleModelSelected(int ID){
     return true;
 }
 
-void QmlManager::lastModelSelected(){
-    //qDebug() << "selectLastModel() ++++++++++++++++++++++++++++++++" << selectedModels.size();
-
-    /* leaves only last model clicked */
-    int size = selectedModels.size();
-
-    /* if selected Models has only one element or none */
-    if (size < 2)
-        return;
-
-    selectedModels.erase(_lastSelected);
-
-    qDebug() << "leave:" << _lastSelected;
-
-    /* remove all elements from the list */
-    for (auto it = selectedModels.begin() ; it != selectedModels.end() ; ++it) {
-        /* it is simillar to selectModel() */
-		if ((*it)->isPrintable())
-		{
-			(*it)->changeColor(Hix::Render::Colors::Default);
-		}
-        (*it)->inactivateFeatures();
-        QMetaObject::invokeMethod(partList, "unselectPartByModel", Q_ARG(QVariant, (*it)->ID));
-        QMetaObject::invokeMethod(yesno_popup, "deletePartListItem", Q_ARG(QVariant, (*it)->ID));
-
-        slicingData->setProperty("visible", false);
-
-        disconnectHandlers((*it));
-        QMetaObject::invokeMethod(qmlManager->mttab, "hideTab");
-		QMetaObject::invokeMethod(boundedBox, "hideBox"); // Bounded Box
-        if(groupFunctionState == "active") {
-            switch (groupFunctionIndex) {
-            //case 2:
-            //    QMetaObject::invokeMethod(savePopup, "offApplyFinishButton");
-            //    break;
-            case ftrMove:
-				_widgetManager.setWidgetMode(WidgetMode::None);
-				QMetaObject::invokeMethod(movePopup, "offApplyFinishButton");
-                break;
-            case ftrRotate:
-				_widgetManager.setWidgetMode(WidgetMode::None);
-				QMetaObject::invokeMethod(rotatePopup, "offApplyFinishButton");
-                break;
-            case 6:
-                QMetaObject::invokeMethod(layflatPopup, "offApplyFinishButton");
-                break;
-            case 8:
-                QMetaObject::invokeMethod(orientPopup, "offApplyFinishButton");
-                break;
-            case 10:
-                QMetaObject::invokeMethod(repairPopup, "offApplyFinishButton");
-                break;
-            }
-        }
-    }
-    selectedModels.clear();
-    selectedModels.insert(_lastSelected);
-    sendUpdateModelInfo();
-}
 
 void QmlManager::modelSelected(int ID){
     qDebug() << "modelSelected()";
@@ -970,7 +768,6 @@ void QmlManager::modelSelected(int ID){
             (*it)->inactivateFeatures();
             QMetaObject::invokeMethod(partList, "unselectPartByModel", Q_ARG(QVariant, (*it)->ID));
             QMetaObject::invokeMethod(yesno_popup, "deletePartListItem", Q_ARG(QVariant, (*it)->ID));
-            disconnectHandlers((*it));  //check
         }
         selectedModels.clear();
 		// set slicing info box property visible true if slicing info exists
@@ -1009,22 +806,16 @@ void QmlManager::modelSelected(int ID){
 	{
 		selectedModels.insert(target);
 		_lastSelected = target;
-		connectHandlers(target);
 
 		if( target->isPrintable())
 			target->changeColor(Hix::Render::Colors::Selected);
 		qDebug() << "modelSelected invoke";
 		QMetaObject::invokeMethod(partList, "selectPartByModel", Q_ARG(QVariant, target->ID));
-		QMetaObject::invokeMethod(yesno_popup, "addPart", Q_ARG(QVariant, 
-			target->getFileName(target->filename().toStdString().c_str())), Q_ARG(QVariant, ID));
 		qDebug() << "changing model" << target->ID;
 		qDebug() << "[model selected] b box center"; //<< xmid << " " << ymid << " " << zmid ;
 
-		QMetaObject::invokeMethod(layerViewSlider, "setThickness", Q_ARG(QVariant, (scfg->layer_height)));
-		QMetaObject::invokeMethod(layerViewSlider, "setHeight", Q_ARG(QVariant,
-			(target->getMesh()->z_max() - target->getMesh()->z_min() + scfg->raft_thickness+ scfg->support_base_height)));
-		sendUpdateModelInfo();
-		qDebug() << "scale value   " << target->getMesh()->x_max() - target->getMesh()->x_min();
+		//sendUpdateModelInfo();
+		//qDebug() << "scale value   " << target->getMesh()->x_max() - target->getMesh()->x_min();
 		if (groupFunctionState == "active") {
             qDebug() << "@@@@ selected2 @@@@" << groupFunctionIndex;
 			switch (groupFunctionIndex) {
@@ -1057,6 +848,147 @@ void QmlManager::modelSelected(int ID){
     sendUpdateModelInfo();
 }
 
+Hix::Features::Feature* QmlManager::currentFeature()const
+{
+	return _currentFeature.get();
+}
+
+//void QmlManager::faceSelectionEnable()
+//{
+//	for (auto selectedModel : selectedModels)
+//	{
+//		selectedModel->setMaterialMode(Hix::Render::ShaderMode::PerPrimitiveColor);
+//		selectedModel->updateMesh(true);
+//	}
+//}
+//
+//void QmlManager::faceSelectionDisable()
+//{
+//	for (auto selectedModel : selectedModels)
+//	{
+//		selectedModel->setMaterialMode(Hix::Render::ShaderMode::SingleColor);
+//		selectedModel->updateMesh(true);
+//		selectedModel->rotateDone();
+//		selectedModel->unselectMeshFaces();
+//	}
+//}
+
+void QmlManager::openLayFlat()
+{
+	_currentFeature.reset(new LayFlat(selectedModels));
+}
+
+void QmlManager::closeLayFlat()
+{
+	_currentFeature.reset();
+}
+
+void QmlManager::generateLayFlat()
+{
+	auto layFlat = dynamic_cast<LayFlat*>(_currentFeature.get());
+	layFlat->generateLayFlat();
+}
+
+void QmlManager::openLabelling()
+{
+	if (selectedModels.size() > 1)
+	{
+		openResultPopUp("", "multiple selecteion is not supported", "");
+		return;
+	}
+
+	for(auto each : selectedModels)
+		_currentFeature.reset(new Labelling(each));
+}
+
+void QmlManager::closeLabelling()
+{
+	_currentFeature.reset();
+}
+
+void QmlManager::setLabelText(QString text)
+{
+	auto labelling = dynamic_cast<Labelling*>(_currentFeature.get());
+	labelling->setText(text);
+}
+
+void QmlManager::setLabelFontName(QString fontName)
+{
+	auto labelling = dynamic_cast<Labelling*>(_currentFeature.get());
+	labelling->setFontName(fontName);
+}
+
+void QmlManager::setLabelFontBold(bool isBold)
+{
+	auto labelling = dynamic_cast<Labelling*>(_currentFeature.get());
+	labelling->setFontBold(isBold);
+}
+
+void QmlManager::setLabelFontSize(int fontSize)
+{
+	auto labelling = dynamic_cast<Labelling*>(_currentFeature.get());
+	labelling->setFontSize(fontSize);
+}
+
+void QmlManager::stateChangeLabelling()
+{
+	keyboardHandlerFocus();
+	keyboardHandler->setFocus(true);
+}
+
+void QmlManager::updateLabelMesh(const QVector3D translation, const QVector3D normal)
+{
+	auto labelling = dynamic_cast<Labelling*>(_currentFeature.get());
+	labelling->updateLabelMesh(translation, normal);
+}
+
+void QmlManager::addToSelected(GLModel* model)
+{
+	selectedModels.insert(model);
+}
+
+void QmlManager::generateLabelMesh()
+{
+	auto labelling = dynamic_cast<Labelling*>(_currentFeature.get());
+	labelling->generateLabelMesh();
+}
+
+void QmlManager::openExtension()
+{
+	_currentFeature.reset(new Extend(selectedModels));
+}
+
+void QmlManager::closeExtension()
+{
+	_currentFeature.reset();
+}
+
+void QmlManager::generateExtensionFaces(double distance)
+{
+	for (auto selectedModel : selectedModels)
+	{
+		if (selectedModel->targetSelected())
+			return;
+
+		auto extend = dynamic_cast<Extend*>(_currentFeature.get());
+		extend->extendMesh(selectedModel->getMeshModd(), selectedModel->targetMeshFace(), distance);
+		selectedModel->setTargetSelected(false);
+		selectedModel->updateMesh(true);
+	}
+}
+
+QString QmlManager::filenameToModelName(const std::string& s)
+{
+	char sep = '/';
+
+	size_t i = s.rfind(sep, s.length());
+	if (i != std::string::npos) {
+		return QString::fromStdString(s.substr(i + 1, s.length() - i));
+	}
+
+	return QString::fromStdString("");
+}
+
 const std::unordered_set<GLModel*>& QmlManager::getSelectedModels()
 {
 	return selectedModels;
@@ -1065,8 +997,9 @@ const std::unordered_set<GLModel*>& QmlManager::getSelectedModels()
 void QmlManager::layFlatSelect(){
     QMetaObject::invokeMethod(layflatPopup,"onApplyFinishButton");
 }
-void QmlManager::layFlatUnSelect(){
-    QMetaObject::invokeMethod(layflatPopup,"offApplyFinishButton");
+
+void QmlManager::layFlatUnSelect() {
+	QMetaObject::invokeMethod(layflatPopup, "offApplyFinishButton");
 }
 
 void QmlManager::extensionSelect(){
@@ -1358,17 +1291,6 @@ void QmlManager::runGroupFeature(int ftrType, QString state, double arg1, double
         }
         break;
     }
-    case ftrRepair:  //repair
-    {
-        if (state == "active"){
-
-			for (auto selectedModel : selectedModels) {
-				selectedModel->repairMesh();
-
-			}
-        }
-        break;
-    }
     case ftrExtend:
         break;
     case ftrScale:
@@ -1405,40 +1327,21 @@ void QmlManager::reDo(){
 
 void QmlManager::copyModel(){
     copyMeshes.clear();
-    copyMeshNames.clear();
 
     qDebug() << "copying current selected Models";
     for (GLModel* model : selectedModels){
-        if (model == nullptr)
-            continue;
-        Mesh* copied = new Mesh( *model->getMesh());
-
-        copyMeshes.push_back(copied);
-        copyMeshNames.push_back(model->filename());
-        /*foreach (MeshFace mf, model->getMesh()->faces){
-            copyMesh->addFace(model->getMesh()->idx2MV(mf.mesh_vertex[0]).position, model->getMesh()->idx2MV(mf.mesh_vertex[1]).position, model->getMesh()->idx2MV(mf.mesh_vertex[2]).position, mf.idx);
-        }
-        copyMesh->connectFaces();
-        copyMeshes.push_back(copyMesh);*/
+        copyMeshes.push_back(model->ID);
     }
     return;
 }
 
 void QmlManager::pasteModel(){
-    if(copyMeshes.size() < 1) // clipboard check
-        return ;
-
-    qDebug() << "pasting current saved selected Meshes";
-    int counter = 0;
-    for (Mesh* copyMesh : copyMeshes){
-        QString temp = copyMeshNames.at(counter).split(".").first() + QString::fromStdString("_copy_") + QString::number(modelIDCounter);
-
-        createModelFile(copyMesh, temp);
-        counter++;
+    for (auto copyIdx : copyMeshes){
+		auto model = getModelByID(copyIdx);
+		QString temp = model->modelName() + "_copy";
+		createAndListModel(new Mesh(*model->getMesh()), temp, nullptr);
     }
-
     openArrange();
-
     return;
 }
 
@@ -1489,13 +1392,11 @@ void QmlManager::setProgress(float value){
 
 void QmlManager::openSave() {
     qDebug() << "open Save";
-    saveActive = true;
     return;
 }
 
 void QmlManager::closeSave() {
     qDebug() << "close Save";
-    saveActive = false;
     return;
 }
 
@@ -1515,26 +1416,22 @@ void QmlManager::openRotate(){
     qDebug() << "open Rotate";
 	QMetaObject::invokeMethod(qmlManager->boundedBox, "hideBox");
     slicingData->setProperty("visible", false);
-    rotateActive = true;
     return;
 }
 
 void QmlManager::closeRotate(){
     qDebug() << "close Rotate";
-    rotateActive = false;
     totalRotateDone();
     return;
 }
 
 void QmlManager::openOrientation(){
     qDebug() << "open orientation";
-    orientationActive = true;
     return;
 }
 
 void QmlManager::closeOrientation(){
     qDebug() << "close orientation";
-    orientationActive = false;
     sendUpdateModelInfo();
     return;
 }
@@ -1617,8 +1514,7 @@ void QmlManager::setViewMode(int viewMode) {
         if (viewMode == 2) viewLayerButton->setProperty("checked", true);
 
         this->viewMode = viewMode;
-		layerViewPopup->setProperty("visible", this->viewMode == VIEW_MODE_LAYER);
-		layerViewSlider->setProperty("visible", this->viewMode == VIEW_MODE_LAYER);
+
 		bool sliceNeeded = false;
 
 		switch (viewMode) {
@@ -1688,11 +1584,24 @@ Hix::Tasking::GenericTask* QmlManager::exportSelectedAsync(QString exportPath, b
 }
 void QmlManager::setModelViewMode(int mode)
 {
-	qDebug() << "setModelViewMode called";
-	for (auto each : selectedModels)
+
+	switch (mode) {
+	case VIEW_MODE_OBJECT:
 	{
-		each->changeViewMode(viewMode);
-		each->updateModelMesh();
+		auto layerview = dynamic_cast<LayerView*>(_currentFeature.get());
+		if (layerview)
+		{
+			_currentFeature.reset();
+		}		
+		break;
+	}
+
+
+	case VIEW_MODE_LAYER:
+	{
+		_currentFeature.reset(new LayerView(selectedModels, getSelectedBound()));
+		break;
+	}
 
 	}
 }
@@ -1742,7 +1651,6 @@ void QmlManager::unselectPartImpl(GLModel* target)
 		target->changeColor(Hix::Render::Colors::Default);
 	}
     target->inactivateFeatures();
-    disconnectHandlers(target);
     if (groupFunctionState == "active"){
         switch (groupFunctionIndex){
             case 5:
@@ -1771,6 +1679,7 @@ QVector2D QmlManager::world2Screen(QVector3D target) {
 
 void QmlManager::generateAutoSupport()
 {
+	_supportRaftManager.clear();
 	for (auto selectedModel : selectedModels)
 	{
 		if (scfg->support_type != SlicingConfiguration::SupportType::None)
@@ -1788,13 +1697,11 @@ void QmlManager::supportEditEnabled(bool enabled)
 	if (enabled)
 	{
 		_supportRaftManager.setSupportEditMode(Hix::Support::EditMode::Manual);
-		_currentActiveFeature = ftrManualSupport;
 		qmlManager->openResultPopUp("Click a model surface to add support.", "", "Click an existing support to remove it.");
 	}
 	else
 	{
 		_supportRaftManager.setSupportEditMode(Hix::Support::EditMode::None);
-		_currentActiveFeature = 0;
 	}
 
 }
@@ -1822,11 +1729,6 @@ void QmlManager::supportCancelEdit()
 	_supportRaftManager.cancelEdits();
 }
 
-bool QmlManager::deselectAllowed()
-{
-	return _currentActiveFeature != ftrManualSupport;
-}
-
 void QmlManager::regenerateRaft()
 {
 	_supportRaftManager.generateRaft();
@@ -1844,11 +1746,6 @@ void QmlManager::cutModeSelected(int mode)
 	auto modelCut = dynamic_cast<ModelCut*>(_currentFeature.get());
 	modelCut->cutModeSelected(mode);
 }
-void QmlManager::cutFillModeSelected(int fill)
-{
-	auto modelCut = dynamic_cast<ModelCut*>(_currentFeature.get());
-	modelCut->cutFillModeSelected(fill);
-}
 void QmlManager::openCut()
 {
 	_currentFeature.reset(new ModelCut(selectedModels, getSelectedBound()));
@@ -1861,6 +1758,55 @@ void QmlManager::closeCut()
 void QmlManager::getSliderSignal(double sliderPos)
 {
 	auto modelCut = dynamic_cast<ModelCut*>(_currentFeature.get());
-	modelCut->getSliderSignal(sliderPos);
+	if (modelCut)
+	{
+		modelCut->getSliderSignal(sliderPos);
+		return;
+	}
+	auto shellOffset = dynamic_cast<ShellOffset*>(_currentFeature.get());
+	if (shellOffset)
+	{
+		shellOffset->getSliderSignal(sliderPos);
+		return;
+	}
 }
+
+void QmlManager::getCrossSectionSignal(int val)
+{
+	auto layerview = dynamic_cast<LayerView*>(_currentFeature.get());
+	if (layerview)
+	{
+		layerview->crossSectionSliderSignal(val);
+	}
+}
+
+
+void QmlManager::openShellOffset() {
+	if (selectedModels.size() == 1)
+	{
+		_currentFeature.reset(new ShellOffset(*selectedModels.begin()));
+
+	}
+	else
+	{
+		qmlManager->openResultPopUp("A single model must be selected", "", "");
+	}
+
+}
+
+void QmlManager::closeShellOffset() {
+	_currentFeature.reset();
+}
+
+
+// for shell offset
+void QmlManager::generateShellOffset(double factor) {
+	qmlManager->openProgressPopUp();
+	qmlManager->setProgress(0.1);
+	auto shellOffset = dynamic_cast<ShellOffset*>(_currentFeature.get());
+	shellOffset->doOffset(factor);
+	qmlManager->setProgress(1.0);
+
+}
+
 

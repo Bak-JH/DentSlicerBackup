@@ -4,7 +4,6 @@
 #include "render/SceneEntityWithMaterial.h"
 #include "fileloader.h"
 #include "slice/slicingengine.h"
-#include "feature/labelling/labelModel.h"
 #include "feature/autoorientation.h"
 #include "feature/autoarrange.h"
 #include "feature/extension.h"
@@ -20,31 +19,6 @@
 using namespace Qt3DCore;
 using namespace Qt3DRender;
 using namespace Qt3DExtras;
-
-
-/* feature thread */
-#define ftrEmpty -1 //TODO: remove this swtich craziness.
-#define ftrOpen 1
-#define ftrSave 2
-#define ftrExport 3
-#define ftrMove 4
-#define ftrRotate 5
-#define ftrLayFlat 6
-#define ftrArrange 7
-#define ftrOrient 8
-#define ftrScale 9
-#define ftrRepair 10
-#define ftrCut 11
-#define ftrShellOffset 12
-#define ftrExtend 13
-#define ftrManualSupport 14
-#define ftrLabel 15
-#define ftrSupportViewMode 16
-#define ftrLayerViewMode 17
-#define ftrDelete 18
-#define ftrTempExport 19
-#define ftrSupportDisappear 20
-
 
 class GLModel;
 class OverhangPoint;
@@ -64,7 +38,7 @@ public:
 
     // load teeth model default
     GLModel(QEntity* parent=nullptr, Hix::Engine3D::Mesh* loadMesh=nullptr, QString fname="", int id = 0, const Qt3DCore::QTransform* transform = nullptr); // main constructor for mainmesh and shadowmesh
-    virtual ~GLModel();
+	virtual ~GLModel();
 
     bool appropriately_rotated=false;
 
@@ -77,39 +51,24 @@ public:
     double shellOffsetFactor;
 
 
-    // used for layer view
-    Qt3DExtras:: QPlaneMesh* layerViewPlane = nullptr;
-    Qt3DCore::QEntity* layerViewPlaneEntity = nullptr;
-    Qt3DCore::QTransform *layerViewPlaneTransform = nullptr;
-    Qt3DRender::QTextureLoader* layerViewPlaneTextureLoader = nullptr;
-    Qt3DExtras::QTextureMaterial* layerViewPlaneMaterial = nullptr;
-    //Qt3DExtras::QPhongAlphaMaterial *layerViewPlaneMaterial = nullptr;
-
-
-
-
     std::vector<Qt3DExtras::QSphereMesh*> sphereMesh;
     std::vector<Qt3DCore::QEntity*> sphereEntity;
     std::vector<Qt3DCore::QTransform*> sphereTransform;
     std::vector<Qt3DRender::QObjectPicker*> sphereObjectPicker;
     std::vector<QPhongMaterial*> sphereMaterial;
 
-    Hix::Labelling::LabelModel* textPreview = nullptr;
-
+    void removeModelPartList();
     void copyModelAttributeFrom(GLModel* from);
 
 
-    void changeColor(const QVector3D& color);
+    void changeColor(const QVector4D& color);
 
 
-
-    void repairMesh();
 
 
 	bool isPrintable()const;
     void updatePrintable();
     bool EndsWith(const std::string& a, const std::string& b);
-    QString getFileName(const std::string& s);
     static QVector3D spreadPoint(QVector3D endpoint,QVector3D startpoint,int factor);
     void changeViewMode(int viewMode);
 	void updateShader(int viewMode);
@@ -123,22 +82,11 @@ public:
 
 	void setBoundingBoxVisible(bool isEnabled);
 
-	
-	bool labellingActive = false;
-	bool extensionActive = false;
-	bool hollowShellActive = false;
-	bool shellOffsetActive = false;
-	bool layflatActive = false;
-	bool layerViewActive = false;
-	bool scaleActive = false;
-
-
-
 	bool isMoved = false;
 
+	// useless funcitons. why did you use them?
 	bool perPrimitiveColorActive()const;
 	bool faceSelectionActive()const;
-
 
 
 	//TODO: remove these
@@ -150,23 +98,27 @@ public:
 	void rotateDone();
 	void scaleDone();
 	void setZToBed();
-	QString filename()const;
+	void setHitTestable(bool isEnable);
+
+	QString modelName()const;
+
+
+
 protected:
 	void initHitTest()override;
 
 private:
-	QString _filename;
+	QString _name;
 
 
 
-	QVector3D getPrimitiveColorCode(const Hix::Engine3D::Mesh* mesh, FaceConstItr faceItr)override;
+	QVector4D getPrimitiveColorCode(const Hix::Engine3D::Mesh* mesh, FaceConstItr faceItr)override;
 
     //Order is important! Look at the initializer list in constructor
     QVector3D lastpoint;
     QVector2D prevPoint;
 
 
-	void removeLayerViewComponents();
     int viewMode = -1;
 
 signals:
@@ -186,17 +138,10 @@ public slots:
 
 
     // Scale
-    void openScale();
-    void closeScale();
 
     // Lay Flat
-    void openLayflat();
-    void closeLayflat();
-    void generateLayFlat();
 
 
-
-    void getLayerViewSliderSignal(int value);
 
     // Hollow Shell
     void indentHollowShell(double radius);
@@ -204,27 +149,13 @@ public slots:
     void closeHollowShell();
 
     // Labelling
-    void getTextChanged(QString text);
-    void openLabelling();
-    void closeLabelling();
-    void stateChangeLabelling();
-    void getFontNameChanged(QString fontName);
-    void getFontBoldChanged(bool isBold);
-    void getFontSizeChanged(int fontSize);
-    void applyLabelInfo(QString text, QString fontName, bool isBold, int fontSize);
-    void generateText3DMesh();
 
     // Extension
-    void openExtension();
-    void closeExtension();
     void unselectMeshFaces();
     void selectMeshFaces();
-    void generateExtensionFaces(double distance);
 
     // ShellOffset
-    void openShellOffset();
-    void closeShellOffset();
-    void generateShellOffset(double factor);
+
 
     // Model Mesh info update
 

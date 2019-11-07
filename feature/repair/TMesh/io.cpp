@@ -463,6 +463,50 @@ int Basic_TMesh::loadOFF(const char *fname)
  return 0;
 }
 
+
+
+////////////////////// Loads OFF format ///////////////////////////
+
+int Basic_TMesh::loadTriangleList(const float* vtcs, const size_t* inds, size_t vtxCount, size_t triCount)
+{
+	Node* n;
+	char s[256], * line;
+	float x, y, z;
+	int  nt, ne, triangulate = 0;
+	Vertex* v;
+	size_t i = 0;
+
+	size_t floatCount = vtxCount * 3;
+	for (i = 0; i < floatCount; i += 3)
+	{
+		V.appendTail(newVertex(vtcs[i], vtcs[i + 1], vtcs[i + 2]));
+	}
+
+	ExtVertex** var = (ExtVertex * *)malloc(sizeof(ExtVertex*) * vtxCount);
+	i = 0; FOREACHVERTEX(v, n) var[i++] = new ExtVertex(v);
+
+	size_t triIndexCnt = triCount * 3;
+	for (i = 0; i < triIndexCnt; i += 3)
+	{
+		auto i0 = inds[i];
+		auto i1 = inds[i + 1];
+		auto i2 = inds[i + 2];
+
+		if (!(i0 == i1 || i1 == i2 || i2 == i0))
+		{
+			CreateIndexedTriangle(var, i0, i1, i2);
+		}
+	}
+
+	for (i = 0; i < vtxCount; i++) delete(var[i]);
+	free(var);
+	fixConnectivity();
+	d_boundaries = d_handles = d_shells = 1;
+	TMesh::setFilename("tmp");
+	return 0;
+}
+
+
 ////////////////////// Loads EFF format ///////////////////////////
 
 int Basic_TMesh::loadEFF(const char *fname)

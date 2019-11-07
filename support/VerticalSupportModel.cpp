@@ -114,9 +114,9 @@ void hexagonToTri(Mesh* supportMesh, const std::vector<QVector3D>& endCapOutline
 }	 
 
 
-QVector3D Hix::Support::VerticalSupportModel::getPrimitiveColorCode(const Hix::Engine3D::Mesh* mesh, FaceConstItr faceItr)
+QVector4D Hix::Support::VerticalSupportModel::getPrimitiveColorCode(const Hix::Engine3D::Mesh* mesh, FaceConstItr faceItr)
 {
-	return QVector3D();
+	return QVector4D();
 }
 
 void Hix::Support::VerticalSupportModel::generateMesh()

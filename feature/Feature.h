@@ -4,6 +4,8 @@ namespace Hix
 {
 	namespace Features
 	{
+
+
 		class Feature
 		{
 		public:

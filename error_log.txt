@@ -1,0 +1,7 @@
+Begining error logging at 
+Mon Nov  4 18:34:32 2019
+error at C:\Users\legok\source\repos\DentStudio\cork\src\cork.cpp, line #120: empty mesh input to Cork routine.
+Begining error logging at 
+Mon Nov  4 18:36:09 2019
+error at C:\Users\legok\source\repos\DentStudio\cork\src\cork.cpp, line #120: empty mesh input to Cork routine.
+error at C:\Users\legok\source\repos\DentStudio\cork\src\cork.cpp, line #120: empty mesh input to Cork routine.

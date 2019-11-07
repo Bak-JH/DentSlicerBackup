@@ -35,6 +35,32 @@
 #define LAYER_SUPPORTERS 0x02
 #define LAYER_RAFT 0x04
 
+
+/// PLZ DELETE THESE DISGUSTING THINGS ///
+/* feature thread */
+#define ftrEmpty -1 //TODO: remove this swtich craziness.
+#define ftrOpen 1
+#define ftrSave 2
+#define ftrExport 3
+#define ftrMove 4
+#define ftrRotate 5
+#define ftrLayFlat 6
+#define ftrArrange 7
+#define ftrOrient 8
+#define ftrScale 9
+#define ftrRepair 10
+#define ftrCut 11
+#define ftrShellOffset 12
+#define ftrExtend 13
+#define ftrManualSupport 14
+#define ftrLabel 15
+#define ftrSupportViewMode 16
+#define ftrLayerViewMode 17
+#define ftrDelete 18
+#define ftrTempExport 19
+#define ftrSupportDisappear 20
+
+
 namespace Hix
 {
 	namespace Features
@@ -51,6 +77,12 @@ public:
 	template <typename F>
 	static void postToObject(F&& fun, QObject* obj = qApp) {
 		QMetaObject::invokeMethod(obj, std::forward<F>(fun));
+	}
+
+	template<typename FeatureType>
+	bool isActive(const Hix::Features::Feature* curr)
+	{
+		return dynamic_cast<const FeatureType*>(curr) != nullptr;
 	}
 
 	template <typename F>
@@ -167,21 +199,15 @@ public:
     QObject* layerRaftButton;
     QObject* layerViewSlider;
 
-    std::map<int, GLModel> glmodels;
+    std::unordered_map<int, GLModel> glmodels;
 
-    std::vector<Mesh*> copyMeshes;
-    std::vector<QString> copyMeshNames;
-
+    std::vector<size_t> copyMeshes;
 
 	//!
     int rotateSnapAngle = 0;
     int rotateSnapStartAngle = 0;
     int rotateSnapQuotient = 0;
     //bool moveActive = false;
-    bool saveActive = false;
-    bool rotateActive = false;
-    bool orientationActive = false;
-    bool freecutActive = false;
 
 	Hix::Input::RayCastController& getRayCaster();
     QString groupFunctionState;
@@ -191,9 +217,6 @@ public:
     void openModelFile_internal(QString filename);
     void openArrange();
     void runArrange_internal();
-    void disconnectHandlers(GLModel* glmodel);
-	void disconnectShadow(GLModel* glmodel);
-    void connectHandlers(GLModel* glmodel);
     void addPart(QString fileName, int ID);
     void deletePartListItem(int ID);
     void openProgressPopUp();
@@ -203,6 +226,12 @@ public:
     void setProgressText(std::string inputText);
     int getLayerViewFlags();
 	void modelSelected(int);
+	
+	void updateLabelMesh(const QVector3D translation, const QVector3D normal);
+	void addToSelected(GLModel* model);
+
+	Hix::Features::Feature* currentFeature()const;
+
 	//remove this
 	const std::unordered_set<GLModel*>& getSelectedModels();
 	QVector2D world2Screen(QVector3D target);
@@ -254,11 +283,13 @@ public:
 	QVector3D cameraViewVector();
 	Hix::Tasking::TaskManager& taskManager();
 	Hix::Support::SupportRaftManager& supportRaftManager();
+	GLModel* createAndListModel(Hix::Engine3D::Mesh* mesh, QString filename, const Qt3DCore::QTransform* transform);
+	GLModel* listModel(GLModel* model);
 
 private:
+	QString filenameToModelName(const std::string& s);
 	Hix::Tasking::TaskManager _taskManager;
 	void setModelViewMode(int mode);
-	bool deselectAllowed();
 	GLModel* getModelByID(int ID);
     void unselectPartImpl(GLModel* target);
 	//do not mix UI work with background thread
@@ -270,7 +301,6 @@ private:
     int viewMode;
     int layerViewFlags;
     int modelIDCounter;
-	int _currentActiveFeature;
 	//TODO: get rid of this
 	GLModel* _lastSelected;
 	std::unordered_set<GLModel*> selectedModels;
@@ -294,16 +324,38 @@ public slots:
 	// model cut popup codes
 	void modelCut();
 	void cutModeSelected(int);
-	void cutFillModeSelected(int);
 	void openCut();
 	void closeCut();
-	void getSliderSignal(double);
 
+	void extensionSelect();
+	void extensionUnSelect();
+	void layFlatSelect();
+	void layFlatUnSelect();
+
+
+	void openLabelling();
+	void closeLabelling();
+	void setLabelText(QString text);
+	void setLabelFontName(QString fontName);
+	void setLabelFontBold(bool isBold);
+	void setLabelFontSize(int fontSize);
+	void stateChangeLabelling();
+	void generateLabelMesh();
+
+	void openExtension();
+	void closeExtension();
+	void generateExtensionFaces(double distance);
+
+	void openLayFlat();
+	void closeLayFlat();
+	void generateLayFlat();
+
+	void getSliderSignal(double);
+	void getCrossSectionSignal(int);
+	void modelRepair();
 
     void sendUpdateModelInfo(int, int, QString, float);
-    GLModel* createModelFile(Mesh* target_mesh, QString filename, const Qt3DCore::QTransform* transform = nullptr);
     void openModelFile(QString filename);
-    void checkModelFile(GLModel* model);
     void deleteOneModelFile(int ID);
 	void deleteOneModelFile(GLModel* model);
 
@@ -316,7 +368,6 @@ public slots:
     void groupSelectionActivate(bool);
     void runGroupFeature(int,QString, double, double, double, QVariant);
     bool multipleModelSelected(int ID);
-    void lastModelSelected();
     void modelRotateByNumber(int mode, int, int, int);
     void modelMoveByNumber(int axis, int, int);
 
@@ -327,11 +378,7 @@ public slots:
     void resetLayflat();
     void applyArrangeResult(std::vector<QVector3D>, std::vector<float>);
     void cleanselectedModel(int);
-    void extensionSelect();
-    void extensionUnSelect();
-
-    void layFlatSelect();
-    void layFlatUnSelect();
+   
     void manualSupportSelect();
     void manualSupportUnselect();
     void openRotate();
@@ -357,6 +404,10 @@ public slots:
     void layerInfillButtonChanged(bool chacked);
     void layerSupportersButtonChanged(bool chacked);
     void layerRaftButtonChanged(bool chacked);
+
+	void openShellOffset();
+	void closeShellOffset();
+	void generateShellOffset(double factor);
 };
 
 
