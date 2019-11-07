@@ -117,7 +117,6 @@ Hix::Engine3D::Mesh* SceneEntity::getMeshModd()
 	return _mesh;
 }
 
-
 const Qt3DCore::QTransform& Hix::Render::SceneEntity::transform() const
 {
 	return _transform;
@@ -211,7 +210,7 @@ void Hix::Render::SceneEntity::setMesh(Hix::Engine3D::Mesh* newMesh)
 			_mesh->setSceneEntity(this);
 			updateRecursiveAabb();
 			addComponent(&m_geometryRenderer);
-			updateMesh(_mesh, true);
+			updateMesh(true);
 		}
 	}
 }
@@ -247,16 +246,16 @@ void SceneEntity::updateEntireMesh(Hix::Engine3D::Mesh* mesh)
 }
 
 
-void SceneEntity::updateMesh(Hix::Engine3D::Mesh* mesh, bool force)
+void SceneEntity::updateMesh(bool force)
 {
-	if (mesh == nullptr)
+	if (_mesh == nullptr)
 	{
 		return;
 	}
 	//flush datas
-	auto faceHistory = mesh->getFaces().flushChanges();
-	auto verticesHistory = mesh->getVertices().flushChanges();
-	auto hEdgesHistory = mesh->getHalfEdges().flushChanges();//not used...for now
+	auto faceHistory = _mesh->getFaces().flushChanges();
+	auto verticesHistory = _mesh->getVertices().flushChanges();
+	auto hEdgesHistory = _mesh->getHalfEdges().flushChanges();//not used...for now
 	bool tooManyChanges = force;
 	std::unordered_set<size_t> faceChangeSet;
 	std::unordered_set<size_t> vtxChangeSet;
@@ -284,15 +283,15 @@ void SceneEntity::updateMesh(Hix::Engine3D::Mesh* mesh, bool force)
 	}
 	if (!tooManyChanges)
 	{
-		if (faceHistory.index() == 1 && (std::get<1>(faceHistory).size() > mesh->getFaces().size() * 0.7))
+		if (faceHistory.index() == 1 && (std::get<1>(faceHistory).size() > _mesh->getFaces().size() * 0.7))
 		{
 			tooManyChanges = true;
 		}
-		else if (verticesHistory.index() == 1 && (std::get<1>(verticesHistory).size() > mesh->getVertices().size() * 0.7))
+		else if (verticesHistory.index() == 1 && (std::get<1>(verticesHistory).size() > _mesh->getVertices().size() * 0.7))
 		{
 			tooManyChanges = true;
 		}
-		else if (hEdgesHistory.index() == 1 && (std::get<1>(hEdgesHistory).size() > mesh->getHalfEdges().size() * 0.7))
+		else if (hEdgesHistory.index() == 1 && (std::get<1>(hEdgesHistory).size() > _mesh->getHalfEdges().size() * 0.7))
 		{
 			tooManyChanges = true;
 		}
@@ -303,19 +302,21 @@ void SceneEntity::updateMesh(Hix::Engine3D::Mesh* mesh, bool force)
 	{
 		//if there are too many individual changes just reset the buffer
 		clearMem();
-		updateEntireMesh(mesh);
+		updateEntireMesh(_mesh);
 	}
 	else
 	{
 		removeComponent(&m_geometryRenderer);
-		updateVertices(vtxChangeSet, *mesh);
-		updateFaces(faceChangeSet, *mesh);
+		updateVertices(vtxChangeSet, *_mesh);
+		updateFaces(faceChangeSet, *_mesh);
 		//if (_meshMaterial.shaderMode() == !ShaderMode::SingleColor)
 		//{
 		//	//m_meshMaterial.setColorCodes(_primitiveColorCodes);
 		//}
 		addComponent(&m_geometryRenderer);
 	}
+
+	callRecursive(this, &SceneEntity::updateMesh, force);
 }
 
 
@@ -525,13 +526,25 @@ void SceneEntity::updateRecursiveAabb()
 {
 	//expensive operation to re-calculate bounding box, but necessary
 	_aabb = Bounds3D(*this);
-	for (auto child : childNodes())
-	{
-		auto childEntity = dynamic_cast<SceneEntity*>(child);
-		if (childEntity)
-		{
-			childEntity->updateRecursiveAabb();
-		}
-	}
+	callRecursive(this, &SceneEntity::updateRecursiveAabb);
 }
 
+void SceneEntity::setTargetSelected(bool isSelected)
+{
+	_targetSelected = isSelected;
+}
+
+bool SceneEntity::targetSelected()const
+{
+	return _targetSelected;
+}
+
+FaceConstItr SceneEntity::targetMeshFace()
+{
+	return _targetMeshFace;
+}
+
+Qt3DCore::QTransform& Hix::Render::SceneEntity::transform()
+{
+	return _transform;
+}
