@@ -25,44 +25,10 @@ Hix::Features::Extend::~Extend()
 	}
 }
 
-void Hix::Features::Extend::extendMesh(Mesh* mesh, FaceConstItr mf, double distance){
-    QVector3D normal = mf.localFn();
-    qDebug() << normal;
-	auto mfVertices = mf.meshVertices();
-    std::unordered_set<FaceConstItr> extension_faces;
-    mesh->findNearSimilarFaces(normal, mf, extension_faces);
-
-    // delete extension_faces
-    /*for (MeshFace* mf : extension_faces){
-        for (std::vector<MeshFace>::iterator f_it=mesh->faces.begin(); f_it!=mesh->faces.end();){
-            if (f_it->idx == mf->idx){
-                //f_it = mesh->faces.erase(f_it);
-                mesh->removeFace(mf);
-            } else {
-                f_it++;
-            }
-        }
-        //mesh->removeFace(mf);
-    }*/
-
-    qDebug() << "detected extension faces" << extension_faces.size();
-    for (FaceConstItr emf : extension_faces){
-		auto emfVertices = emf.meshVertices();
-
-        //mesh->addFace(emf->mesh_vertex[0].position()+normal*2,emf->mesh_vertex[1].position()+normal*2,emf->mesh_vertex[2].position()+normal*2);
-        qDebug() << "distance from selected extension_faces " <<mfVertices[0].localPosition().distanceToPoint(emfVertices[0].localPosition());
-    }
+void Hix::Features::Extend::extendMesh(Mesh* mesh, const QVector3D& normal, const std::unordered_set<FaceConstItr>& extension_faces, double distance){
 
     Paths3D extension_outlines = detectExtensionOutline(mesh, extension_faces);
-    qDebug() << "detected extension outlines" << extension_outlines.size();
-
-
-    qDebug() << "mesh size : "<< mesh->getFaces().size();
-    //mesh->addFace(mf->mesh_vertex[0].position()+normal*2,mf->mesh_vertex[1].position()+normal*2,mf->mesh_vertex[2].position()+normal*2);
-    //mesh->connectFaces();
     extendAlongOutline(mesh, normal, extension_outlines, distance);
-    qDebug() << "extended along outline";
-    qDebug() << "mesh size : "<< mesh->getFaces().size();
     coverCap(mesh, normal, extension_faces, distance);
 }
 

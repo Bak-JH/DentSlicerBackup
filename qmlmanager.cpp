@@ -39,7 +39,7 @@ using namespace Hix::Render;
 using namespace Hix::Tasking;
 using namespace Hix::Features;
 QmlManager::QmlManager(QObject *parent) : QObject(parent), _optBackend(this, scfg)
-  ,layerViewFlags(LAYER_INFILL | LAYER_SUPPORTERS | LAYER_RAFT), modelIDCounter(0), _cursorEraser(QPixmap(":/Resource/cursor_eraser.png"))
+  ,layerViewFlags(LAYER_INFILL | LAYER_SUPPORTERS | LAYER_RAFT), modelIDCounter(-1), _cursorEraser(QPixmap(":/Resource/cursor_eraser.png"))
 {
 }
 
@@ -281,7 +281,7 @@ GLModel* QmlManager::listModel(GLModel* model)
 	Qt3DCore::QTransform toRoot;
 	toRoot.setMatrix(model->toRootMatrix());
 	auto res = glmodels.try_emplace(modelIDCounter, models, model->getMeshModd(), model->modelName(), modelIDCounter, &toRoot);
-	++modelIDCounter;
+	--modelIDCounter;
 	auto latestAdded = &(res.first->second);
 	// set initial position
 	//add to raytracer
@@ -304,7 +304,7 @@ GLModel* QmlManager::listModel(GLModel* model)
 
 GLModel* QmlManager::createAndListModel(Hix::Engine3D::Mesh* mesh, QString fname, const Qt3DCore::QTransform* transform) {
 	auto res = glmodels.try_emplace(modelIDCounter, models, mesh, fname, modelIDCounter, transform);
-    ++modelIDCounter;
+    --modelIDCounter;
     auto latestAdded = &(res.first->second);
     // set initial position
 	//add to raytracer
@@ -897,8 +897,7 @@ void QmlManager::openLabelling()
 		return;
 	}
 
-	for(auto each : selectedModels)
-		_currentFeature.reset(new Labelling(each));
+	_currentFeature.reset(new Labelling(_lastSelected));
 }
 
 void QmlManager::closeLabelling()
@@ -942,15 +941,20 @@ void QmlManager::updateLabelMesh(const QVector3D translation, const QVector3D no
 	labelling->updateLabelMesh(translation, normal);
 }
 
-void QmlManager::addToSelected(GLModel* model)
-{
-	selectedModels.insert(model);
-}
-
 void QmlManager::generateLabelMesh()
 {
 	auto labelling = dynamic_cast<Labelling*>(_currentFeature.get());
 	labelling->generateLabelMesh();
+	
+	// added label model to selectedModels
+	for (auto each : _lastSelected->childNodes())
+	{
+		auto model = dynamic_cast<GLModel*>(each);
+		if (model)
+		{
+			selectedModels.insert(model);
+		}
+	}
 }
 
 void QmlManager::openExtension()
@@ -971,7 +975,8 @@ void QmlManager::generateExtensionFaces(double distance)
 			return;
 
 		auto extend = dynamic_cast<Extend*>(_currentFeature.get());
-		extend->extendMesh(selectedModel->getMeshModd(), selectedModel->targetMeshFace(), distance);
+		extend->extendMesh(selectedModel->getMeshModd(),selectedModel->targetMeshFace().localFn(),
+			selectedModel->selectedFaces, distance);
 		selectedModel->setTargetSelected(false);
 		selectedModel->updateMesh(true);
 	}

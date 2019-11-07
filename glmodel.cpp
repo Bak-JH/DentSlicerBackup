@@ -45,7 +45,7 @@ GLModel::GLModel(QEntity*parent, Mesh* loadMesh, QString fname, int id, const Qt
 
 	initHitTest();
     qDebug() << "new model made _______________________________"<<this<< "parent:"<<parent;
-	qDebug() << "new model made _______________________________" << fname;
+	qDebug() << "new model made _______________________________" << ID;
     // set shader mode and color
 	setMaterialMode(Hix::Render::ShaderMode::SingleColor);
 	setMaterialColor(Hix::Render::Colors::Default);
@@ -139,7 +139,18 @@ QString GLModel::modelName() const
 	return _name;
 }
 
+GLModel* GLModel::getRootModel()
+{
+	auto current = this;
+	GLModel* back = current;
+	while (current)
+	{
+		back = current;
+		current = dynamic_cast<GLModel*>(current->parent());
+	}
+	return back;
 
+}
 
 
 
@@ -237,15 +248,16 @@ void GLModel::setHitTestable(bool isEnable)
 
 void GLModel::clicked(MouseEventData& pick, const Qt3DRender::QRayCasterHit& hit)
 {
+	auto listed = getRootModel();
 	auto suppMode = qmlManager->supportRaftManager().supportEditMode();
 	if (!qmlManager->isActive<Hix::Features::ModelCut>(qmlManager->currentFeature()) &&
 		!qmlManager->isActive<Hix::Features::Extend>(qmlManager->currentFeature()) &&
 		!qmlManager->isActive<Hix::Features::Labelling>(qmlManager->currentFeature()) &&
 		!qmlManager->isActive<Hix::Features::LayFlat>(qmlManager->currentFeature()) &&
 		suppMode == Hix::Support::EditMode::None)// && !layerViewActive && !supportViewActive)
-		qmlManager->modelSelected(ID);
+		qmlManager->modelSelected(listed->ID);
 
-	if (qmlManager->isSelected(this) && pick.button == Qt::MouseButton::RightButton) {
+	if (qmlManager->isSelected(listed) && pick.button == Qt::MouseButton::RightButton) {
 		qDebug() << "mttab alive";
 		QMetaObject::invokeMethod(qmlManager->mttab, "tabOnOff");
 	}
@@ -268,9 +280,11 @@ void GLModel::clicked(MouseEventData& pick, const Qt3DRender::QRayCasterHit& hit
 	/// Extension Feature ///
 	if (qmlManager->isActive<Hix::Features::Extend>(qmlManager->currentFeature()) &&
 		hit.localIntersection() != QVector3D(0, 0, 0)) {
-		unselectMeshFaces();
+		listed->unselectMeshFaces();
 		emit extensionSelect();
 		selectMeshFaces();
+		listed->updateMesh(true);
+		qDebug() << getRootModel()->ID;
 	}
 
 	/// Hollow Shell ///
@@ -288,9 +302,11 @@ void GLModel::clicked(MouseEventData& pick, const Qt3DRender::QRayCasterHit& hit
 	if (qmlManager->isActive<Hix::Features::LayFlat>(qmlManager->currentFeature()) &&
 		hit.localIntersection() != QVector3D(0, 0, 0)) {
 
-		unselectMeshFaces();
+		listed->unselectMeshFaces();
 		emit layFlatSelect();
 		selectMeshFaces();
+		listed->updateMesh(true);
+
 	}
 
 	/// Manual Support ///
@@ -395,12 +411,12 @@ QVector3D GLModel::spreadPoint(QVector3D endPoint, QVector3D startPoint, int fac
 void GLModel:: unselectMeshFaces(){
 	selectedFaces.clear();
 	_targetSelected = false;
+	callRecursive(this, &GLModel::unselectMeshFaces);
 }
 void GLModel::selectMeshFaces(){
 	selectedFaces.clear();
 	QVector3D normal = _targetMeshFace.localFn();
 	_mesh->findNearSimilarFaces(normal, _targetMeshFace, selectedFaces);
-	updateMesh(true);
 }
 
 
