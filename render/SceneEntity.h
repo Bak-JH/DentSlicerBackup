@@ -67,6 +67,7 @@ namespace Hix
 
 			//get this model's axis aligned bounding box
 			const Hix::Engine3D::Bounds3D& aabb()const;
+			Hix::Engine3D::Bounds3D& aabb();
 			//get total AABB including it's children
 			Hix::Engine3D::Bounds3D recursiveAabb()const;
 			void updateRecursiveAabb();
