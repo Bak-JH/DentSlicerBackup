@@ -82,6 +82,9 @@ public:
 	void moveModel(const QVector3D& displacement);
 	void rotateModel(const QQuaternion& rotation);
 	void scaleModel(const QVector3D& scale);
+	void updateAABBMove(const QVector3D& translate);
+	void updateAABBScale(const QVector3D& scale);
+
 	void moveDone();
 	void rotateDone();
 	void scaleDone();
