@@ -456,5 +456,5 @@ void Hix::Features::MeshRepair::repairImpl(GLModel* subject, const QString& mode
 
 	}
 	subject->setZToBed();
-
+	subject->updateRecursiveAabb();
 }
