@@ -167,6 +167,23 @@ void GLModel::updatePrintable() {
 
 GLModel::~GLModel(){
 }
+
+ void GLModel::getChildrenModels(std::unordered_set<GLModel*>& results)
+{
+	 
+	for (auto child : childNodes())
+	{
+		auto model = dynamic_cast<GLModel*>(child);
+		if (model)
+		{
+			results.insert(model);
+		}
+	}
+	callRecursive(this, &GLModel::getChildrenModels, results);
+
+}
+
+
 void GLModel::initHitTest()
 {
 	addComponent(&_layer);
@@ -240,7 +257,8 @@ void GLModel::updateModelMesh() {
 
 bool GLModel::isDraggable(Hix::Input::MouseEventData& e,const Qt3DRender::QRayCasterHit&)
 {
-	if (e.button == Qt3DInput::QMouseEvent::Buttons::LeftButton && qmlManager->isSelected(this) && !qmlManager->isFeatureActive())
+	auto listed = getRootModel();
+	if (e.button == Qt3DInput::QMouseEvent::Buttons::LeftButton && qmlManager->isSelected(listed) && !qmlManager->isFeatureActive())
 	{
 		return true;
 	}
@@ -249,11 +267,15 @@ bool GLModel::isDraggable(Hix::Input::MouseEventData& e,const Qt3DRender::QRayCa
 
 void GLModel::dragStarted(Hix::Input::MouseEventData& e, const Qt3DRender::QRayCasterHit& hit)
 {
+	auto listed = getRootModel();
 	if (qmlManager->supportRaftManager().supportActive())
 	{
-		auto count = qmlManager->supportRaftManager().clear(*this);
-		if (count > 0)
-			setZToBed();
+		size_t prevCount = qmlManager->supportRaftManager().supportCount();
+		qmlManager->supportRaftManager().clear(*listed);
+		if (qmlManager->supportRaftManager().supportCount() != prevCount)
+		{
+			listed->setZToBed();
+		}
 	}
 	lastpoint = hit.localIntersection();
 	prevPoint = (QVector2D)e.position;
