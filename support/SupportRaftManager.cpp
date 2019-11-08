@@ -175,33 +175,21 @@ void Hix::Support::SupportRaftManager::generateRaft()
 	_raft = std::make_unique<CylindricalRaft>(this, basePts);
 }
 
-size_t Hix::Support::SupportRaftManager::clear(const GLModel& model)
+void  Hix::Support::SupportRaftManager::clear(GLModel& model)
 {
-	size_t count = 0;
-	for (auto curr = _supports.begin(); curr != _supports.end();)
+	std::unordered_set<GLModel*> models;
+	std::unordered_set<const GLModel*> constModels;
+
+	model.getChildrenModels(models);
+	for (auto each : models)
 	{
-		auto attachedSupport = dynamic_cast<ModelAttachedSupport*>(curr->get());
-		if (attachedSupport)
-		{
-			if (&model == &attachedSupport->getAttachedModel())
-			{
-				curr = _supports.erase(curr);
-				++count;
-			}
-			else
-			{
-				++curr;
-			}
-		}
+		constModels.insert(each);
 	}
-	if (_supports.size() == 0)
-	{
-		clear();
-	}
-	return count;
+	constModels.insert(&model);
+	clearImpl(constModels);
 }
 
-void Hix::Support::SupportRaftManager::clear(const std::unordered_set<const GLModel*>& models)
+void Hix::Support::SupportRaftManager::clearImpl(const std::unordered_set<const GLModel*>& models)
 {
 	for (auto curr = _supports.begin(); curr != _supports.end();)
 	{
@@ -254,6 +242,11 @@ void Hix::Support::SupportRaftManager::clear()
 Qt3DCore::QEntity& Hix::Support::SupportRaftManager::rootEntity()
 {
 	return _root;
+}
+
+size_t Hix::Support::SupportRaftManager::supportCount() const
+{
+	return _supports.size();
 }
 
 

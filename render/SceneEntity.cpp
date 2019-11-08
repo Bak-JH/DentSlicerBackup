@@ -518,6 +518,14 @@ const Hix::Engine3D::Bounds3D& SceneEntity::aabb()const
 	return _aabb;
 }
 
+Hix::Engine3D::Bounds3D& SceneEntity::aabb()
+{
+
+	return _aabb;
+}
+
+
+
  Hix::Engine3D::Bounds3D SceneEntity::recursiveAabb()const
 {
 	auto totalAABB = _aabb;

@@ -1707,13 +1707,11 @@ void QmlManager::supportEditEnabled(bool enabled)
 }
 void QmlManager::clearSupports()
 {
-	std::unordered_set<const GLModel*> constSelection;
 	for (auto selectedModel : selectedModels)
 	{
 		selectedModel->setZToBed();
-		constSelection.emplace(selectedModel);
+		_supportRaftManager.clear(*selectedModel);
 	}
-	_supportRaftManager.clear(constSelection);
 
 }
 

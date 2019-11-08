@@ -45,15 +45,16 @@ namespace Hix
 			void generateSupport(const GLModel& model);
 			void generateRaft();
 			//removed due to efficiency when deleting multiple
-			size_t clear(const GLModel& model);
-			void clear(const std::unordered_set<const GLModel*>& models);
 			std::vector<std::reference_wrapper<const Hix::Render::SceneEntity>> supportModels()const;
 			const Hix::Render::SceneEntity* raftModel()const;
 			void clear();
-			Qt3DCore::QEntity& rootEntity();
+			void clear(GLModel& model);
 
+			Qt3DCore::QEntity& rootEntity();
+			size_t supportCount()const;
 		private:
 			void autoGenRecurv(const GLModel& model);
+			void clearImpl(const std::unordered_set<const GLModel*>& models);
 
 			Qt3DCore::QEntity _root;
 			std::vector<QVector3D> getSupportBasePts()const;

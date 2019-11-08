@@ -27,9 +27,10 @@ void Hix::Features::Extend::extendMesh(double distance){
 	{
 		Paths3D extension_outlines = detectExtensionOutline(_model->getMeshModd(), _extensionFaces);
 		extendAlongOutline(_model->getMeshModd(), _normal, extension_outlines, distance);
-		coverCap(_model->getMeshModd(), _normal, _extensionFaces, distance);
+		coverCap(_model, _normal, _extensionFaces, distance);
 		_model->getMeshModd()->removeFaces(_extensionFaces);
 		_model->updateMesh();
+		_model->setZToBed();
 	}
 }
 
@@ -115,12 +116,20 @@ void Hix::Features::Extend::extendAlongOutline(Mesh* mesh, QVector3D normal, Pat
     }
 }
 
-void Hix::Features::Extend::coverCap(Mesh* mesh, QVector3D normal,const std::unordered_set<FaceConstItr>& extension_faces, double distance){
-    for (FaceConstItr mf : extension_faces){
+void Hix::Features::Extend::coverCap(GLModel* model, QVector3D normal,const std::unordered_set<FaceConstItr>& extension_faces, double distance){
+	auto* mesh = model->getMeshModd();
+	auto& aabb = model->aabb();
+	for (FaceConstItr mf : extension_faces){
 		auto meshVertices = mf.meshVertices();
 		mesh->addFace(
 				meshVertices[0].localPosition() + distance*normal,
                 meshVertices[1].localPosition() + distance*normal,
                 meshVertices[2].localPosition() + distance*normal);
+		auto added = mesh->getFaces().cend() -1;
+		auto addedVtcs = added.meshVertices();
+		aabb.update(addedVtcs[0].worldPosition());
+		aabb.update(addedVtcs[1].worldPosition());
+		aabb.update(addedVtcs[2].worldPosition());
+
     }
 }
