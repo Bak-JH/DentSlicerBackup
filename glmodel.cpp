@@ -73,7 +73,7 @@ GLModel::GLModel(QEntity*parent, Mesh* loadMesh, QString fname, int id, const Qt
 void GLModel::moveModel(const QVector3D& displacement) {
 	auto translation = _transform.translation() + displacement;
 	_transform.setTranslation(translation);
-	_aabb.translate(displacement);
+	updateAABBMove(displacement);
 }
 void GLModel::rotateModel(const QQuaternion& rotation) {
 	auto newRot = rotation * _transform.rotation();
@@ -83,12 +83,30 @@ void GLModel::rotateModel(const QQuaternion& rotation) {
 
 void GLModel::scaleModel(const QVector3D& scales) {
 	auto newScales = _transform.scale3D() * scales; //this is NOT cross product
-	_aabb.translate(-_transform.translation());
-	_aabb.scale(QVector3D(1.0f, 1.0f, 1.0f)/_transform.scale3D());
-	_aabb.scale(newScales);
-	_aabb.translate(_transform.translation());
 	_transform.setScale3D(newScales);
+	updateAABBScale(scales);
+
 }
+
+
+void GLModel::updateAABBMove(const QVector3D& displacement)
+{
+	auto translation = _transform.translation() + displacement;
+	_aabb.translate(displacement);
+	callRecursive(this, &GLModel::updateAABBMove, displacement);
+}
+void GLModel::updateAABBScale(const QVector3D& scale)
+{
+	updateRecursiveAabb();
+	//auto newScales = _transform.scale3D() * scale; //this is NOT cross product
+	//_aabb.translate(-_transform.translation());
+	//_aabb.scale(QVector3D(1.0f, 1.0f, 1.0f) / _transform.scale3D());
+	//_aabb.scale(newScales);
+	//_aabb.translate(_transform.translation());
+	//callRecursive(this, &GLModel::updateAABBScale, scale);
+}
+
+
 void GLModel::moveDone()
 {
 	updatePrintable();
@@ -112,7 +130,8 @@ void GLModel::scaleDone()
 
 void GLModel::setZToBed()
 {
-	moveModel(QVector3D(0, 0, - recursiveAabb().zMin()));
+	auto listedModel = getRootModel();
+	listedModel->moveModel(QVector3D(0, 0, -listedModel->recursiveAabb().zMin()));
 }
 
 QString GLModel::modelName() const
@@ -244,11 +263,9 @@ void GLModel::updateModelMesh() {
 	QMetaObject::invokeMethod(qmlManager->boxUpperTab, "disableUppertab");
 	QMetaObject::invokeMethod(qmlManager->boxLeftTab, "disableLefttab");
 	QMetaObject::invokeMethod((QObject*)qmlManager->scene3d, "disableScene3D");
-	qDebug() << "update Model Mesh";
 	updateMesh(_mesh);
 	qmlManager->sendUpdateModelInfo();
 	updateLock = false;
-	qDebug() << this << "released lock";
 	QMetaObject::invokeMethod(qmlManager->boxUpperTab, "enableUppertab");
 	QMetaObject::invokeMethod(qmlManager->boxLeftTab, "enableLefttab");
 	QMetaObject::invokeMethod((QObject*)qmlManager->scene3d, "enableScene3D");
