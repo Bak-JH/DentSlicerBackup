@@ -9,8 +9,7 @@ Hix::Features::Labelling::Labelling()
 
 Hix::Features::Labelling::~Labelling()
 {
-	if (_previewModel)
-		delete _previewModel;
+	delete _previewModel;
 }
 
 void Hix::Features::Labelling::faceSelected(GLModel* selected, const Hix::Engine3D::FaceConstItr& selectedFace, const Hix::Input::MouseEventData& mouse, const Qt3DRender::QRayCasterHit& hit)
@@ -26,7 +25,10 @@ void Hix::Features::Labelling::updateLabelMesh(const QVector3D translation, cons
 	{
 		if (_previewModel)
 		{
-			delete _previewModel;
+			_previewModel->transform().setTranslation(translation);
+			_previewModel->transform().setRotation(QQuaternion::rotationTo(QVector3D(0, -1, 0), normal));
+			_previewModel->updateModelMesh();
+			return;
 		}
 		_previewModel = new Hix::LabelModel(_targetModel);
 
