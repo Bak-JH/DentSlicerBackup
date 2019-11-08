@@ -9,8 +9,8 @@ Hix::Features::Labelling::Labelling()
 
 Hix::Features::Labelling::~Labelling()
 {
-	if(_previewModel)
-		_previewModel->deleteLater();
+	if (_previewModel)
+		delete _previewModel;
 }
 
 void Hix::Features::Labelling::faceSelected(GLModel* selected, const Hix::Engine3D::FaceConstItr& selectedFace, const Hix::Input::MouseEventData& mouse, const Qt3DRender::QRayCasterHit& hit)
