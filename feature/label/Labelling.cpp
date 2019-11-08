@@ -1,11 +1,8 @@
 #include "Labelling.h"
 #include "qmlmanager.h"
 
-Hix::Features::Labelling::Labelling(GLModel* selectedModel)
-	:_targetModel(selectedModel)
+Hix::Features::Labelling::Labelling()
 {
-	_previewModel = new Hix::LabelModel(_targetModel);
-
 }
 
 
@@ -18,6 +15,7 @@ Hix::Features::Labelling::~Labelling()
 
 void Hix::Features::Labelling::faceSelected(GLModel* selected, const Hix::Engine3D::FaceConstItr& selectedFace, const Hix::Input::MouseEventData& mouse, const Qt3DRender::QRayCasterHit& hit)
 {
+	_targetModel = selected;
 	updateLabelMesh(hit.localIntersection(), selectedFace.localFn());
 
 }
