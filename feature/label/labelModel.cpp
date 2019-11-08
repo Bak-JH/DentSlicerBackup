@@ -64,8 +64,8 @@ void Hix::LabelModel::generateLabelMesh(const QVector3D translation, const QVect
 		std::reverse(contour.begin(), contour.end());
 
 		std::vector<QVector3D> path;
-		path.emplace_back(0, 0, 0);
-		path.emplace_back(0, -2.f, 0);
+		path.emplace_back(0, 10.f, 0);
+		path.emplace_back(0, -2, 0);
 
 		extrudeAlongPath<int>(labelMesh, QVector3D(0,-1,0), contour, path, jointContours);
 
