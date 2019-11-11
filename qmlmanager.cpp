@@ -46,6 +46,7 @@ QmlManager::QmlManager(QObject *parent) : QObject(parent), _optBackend(this, scf
 
 void QmlManager::initializeUI(QQmlApplicationEngine* e){
     engine = e;
+
 	//initialize ray casting mouse input controller
 	QEntity* camera = dynamic_cast<QEntity*>(FindItemByName(engine, "cm"));
 	_rayCastController.initialize(camera);
