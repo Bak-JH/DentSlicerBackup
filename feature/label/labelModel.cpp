@@ -10,6 +10,7 @@ Hix::LabelModel::LabelModel(Qt3DCore::QEntity* parent):GLModel(parent)
 
 void Hix::LabelModel::generateLabelMesh(const QVector3D translation, const QVector3D normal, const QString text, const QFont font)
 {
+	qDebug() << text << " - " << font;
 	auto labelMesh = new Mesh();
 	QPainterPath painterPath;
 	painterPath.setFillRule(Qt::WindingFill);

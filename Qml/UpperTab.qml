@@ -2132,10 +2132,13 @@ Rectangle {
                     return "active"
                 }
                 else {
-
-                    //text3DInput.focus = false;
                     //sceneRoot.keyboardHandler.focus = true;
+					labelFontBox.currentIndex = 0
+					labelFontSizeBox.currentIndex = 0
+					labelFontBoldBox.checked = false
+
                     closeLabelling()
+					//text3DInput.focus = false;
                     return "inactive"
                 }
             }
