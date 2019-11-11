@@ -143,6 +143,9 @@
     <ClCompile Include="feature\cut\ZAxialCut.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Qml\Popup.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="common\Debug.h" />
@@ -712,6 +715,9 @@
     <QtMoc Include="qmlmanager.h" />
     <QtMoc Include="utils\quaternionhelper.h" />
     <QtMoc Include="utils\updatechecker.h" />
+    <QtMoc Include="Qml\Popup.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
   </ItemGroup>
   <ItemGroup>
     <QtRcc Include="qml.qrc" />
