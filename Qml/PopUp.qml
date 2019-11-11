@@ -1359,7 +1359,6 @@ Rectangle {
         //anchors.leftMargin: 25
         //anchors.rightMargin: 25
         anchors.bottomMargin: 55
-
         Text {
             id: hiddenText
             anchors.fill: text3DInput
