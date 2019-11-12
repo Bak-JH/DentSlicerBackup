@@ -70,11 +70,12 @@ GLModel::GLModel(QEntity*parent, Mesh* loadMesh, QString fname, int id, const Qt
 
 }
 
-void GLModel::moveModel(const QVector3D& displacement) {
-	auto translation = _transform.translation() + displacement;
+void GLModel::moveModel(const QVector3D& movement) {
+	auto translation = _transform.translation() + movement;
 	_transform.setTranslation(translation);
-	updateAABBMove(displacement);
+	updateAABBMove(movement);
 }
+
 void GLModel::rotateModel(const QQuaternion& rotation) {
 	auto newRot = rotation * _transform.rotation();
 	_transform.setRotation(newRot);

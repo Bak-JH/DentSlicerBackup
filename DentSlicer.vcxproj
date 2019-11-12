@@ -304,7 +304,13 @@
     <ClCompile Include="DentEngine\src\polyclipping\polytree2tri\PolytreeCDT.cpp" />
     <ClCompile Include="DentEngine\src\SlicerDebug.cpp" />
     <ClCompile Include="DentEngine\src\SlicerDebugInfoExport.cpp" />
-    <ClCompile Include="feature\autoarrange.cpp" />
+    <ClCompile Include="feature\arrange\autoarrange.cpp" />
+    <ClCompile Include="feature\arrange\GuillotineBinPack.cpp" />
+    <ClCompile Include="feature\arrange\MaxRectsBinPack.cpp" />
+    <ClCompile Include="feature\arrange\Rect.cpp" />
+    <ClCompile Include="feature\arrange\ShelfBinPack.cpp" />
+    <ClCompile Include="feature\arrange\ShelfNextFitBinPack.cpp" />
+    <ClCompile Include="feature\arrange\SkylineBinPack.cpp" />
     <ClCompile Include="feature\autoorientation.cpp" />
     <ClCompile Include="DentEngine\src\polyclipping\clipper\clipper.cpp" />
     <ClCompile Include="DentEngine\src\cmdlineparser.cpp" />
@@ -826,8 +832,6 @@
     <ClInclude Include="DentEngine\src\mesh.h" />
     <ClInclude Include="DentEngine\src\MeshIterators.h" />
     <ClInclude Include="DentEngine\src\Planes.h" />
-    <QtMoc Include="feature\autoarrange.h">
-    </QtMoc>
     <ClInclude Include="DentEngine\src\polyclipping\poly2tri\poly2tri.h" />
     <ClInclude Include="DentEngine\src\polyclipping\poly2tri\sweep\advancing_front.h" />
     <ClInclude Include="DentEngine\src\polyclipping\poly2tri\sweep\cdt.h" />
@@ -840,6 +844,13 @@
     <ClInclude Include="feature\agCDT\CDTUtils.hpp" />
     <ClInclude Include="feature\agCDT\PointRTree.h" />
     <ClInclude Include="feature\agCDT\predicates.h" />
+    <ClInclude Include="feature\arrange\autoarrange.h" />
+    <ClInclude Include="feature\arrange\GuillotineBinPack.h" />
+    <ClInclude Include="feature\arrange\MaxRectsBinPack.h" />
+    <ClInclude Include="feature\arrange\Rect.h" />
+    <ClInclude Include="feature\arrange\ShelfBinPack.h" />
+    <ClInclude Include="feature\arrange\ShelfNextFitBinPack.h" />
+    <ClInclude Include="feature\arrange\SkylineBinPack.h" />
     <ClInclude Include="feature\autoorientation.h" />
     <ClInclude Include="DentEngine\src\polyclipping\clipper\clipper.hpp" />
     <ClInclude Include="DentEngine\src\cmdlineparser.h" />
