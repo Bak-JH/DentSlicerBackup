@@ -845,17 +845,12 @@ void QmlManager::generateLayFlat()
 
 void QmlManager::openLabelling()
 {
-	//if (selectedModels.size() > 1)
-	//{
-	//	openResultPopUp("", "multiple selecteion is not supported", "");
-	//	return;
-	//}
-
 	_currentFeature.reset(new Labelling());
 }
 
 void QmlManager::closeLabelling()
 {
+	stateChangeLabelling();
 	_currentFeature.reset();
 }
 
