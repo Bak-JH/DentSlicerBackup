@@ -23,15 +23,10 @@ void Hix::Features::Labelling::updateLabelMesh(const QVector3D translation, cons
 {
 	if (qmlManager->isActive<Labelling>())
 	{
-		if (_previewModel)
+		if (!_previewModel)
 		{
-			_previewModel->transform().setTranslation(translation);
-			_previewModel->transform().setRotation(QQuaternion::rotationTo(QVector3D(0, -1, 0), normal));
-			_previewModel->updateModelMesh();
-			return;
+			_previewModel = new Hix::LabelModel(_targetModel);
 		}
-		_previewModel = new Hix::LabelModel(_targetModel);
-
 
 		_previewModel->generateLabelMesh(translation, normal, _text, _font);
 		_previewModel->updateModelMesh();
