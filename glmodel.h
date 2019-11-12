@@ -5,7 +5,6 @@
 #include "fileloader.h"
 #include "slice/slicingengine.h"
 #include "feature/autoorientation.h"
-#include "feature/autoarrange.h"
 #include "feature/extension.h"
 #include "feature/hollowshell.h"
 #include "input/raycastcontroller.h"
@@ -79,7 +78,7 @@ public:
 
 	//TODO: remove these
 	// Model Mesh move, rotate, scale
-	void moveModel(const QVector3D& displacement);
+	void moveModel(const QVector3D& movement);
 	void rotateModel(const QQuaternion& rotation);
 	void scaleModel(const QVector3D& scale);
 	void updateAABBMove(const QVector3D& translate);

@@ -14,7 +14,6 @@
 #include <QPointF>
 #include <QCursor>
 #include <QQmlProperty>
-#include "feature/autoarrange.h"
 #include "feature/shelloffset.h"
 #include "glmodel.h"
 #include "QtConcurrent/QtConcurrentRun"
@@ -216,7 +215,6 @@ public:
     void initializeUI(QQmlApplicationEngine *e);
     void openModelFile_internal(QString filename);
     void openArrange();
-    void runArrange_internal();
     void addPart(QString fileName, int ID);
     void deletePartListItem(int ID);
     void openProgressPopUp();
@@ -373,7 +371,6 @@ public slots:
 	void totalScaleDone();
 
     void resetLayflat();
-    void applyArrangeResult(std::vector<QVector3D>, std::vector<float>);
     void cleanselectedModel(int);
    
     void manualSupportSelect();
