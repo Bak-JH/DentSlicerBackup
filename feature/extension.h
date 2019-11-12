@@ -1,7 +1,6 @@
 #ifndef EXTENSION_H
 #define EXTENSION_H
 #include "DentEngine/src/mesh.h"
-#include "autoarrange.h"
 #include <Qt3DRender>
 #include "interfaces/SelectFaceFeature.h"
 #include "interfaces/PPShaderFeature.h"

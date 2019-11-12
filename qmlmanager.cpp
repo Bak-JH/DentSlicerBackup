@@ -32,6 +32,7 @@
 #include "feature/repair/meshrepair.h"
 #include "feature/layerview/layerview.h"
 #include "feature/SupportFeature.h"
+#include "feature/arrange/autoarrange.h"
 
 #include <functional>
 using namespace Hix::Input;
@@ -560,65 +561,18 @@ void QmlManager::openArrange(){
 
 void QmlManager::runArrange(){
 
+	std::unordered_set<GLModel*> listedModels;
+	for (auto& each : glmodels)
+	{
+		listedModels.insert(&each.second);
+	}
     qmlManager->openProgressPopUp();
-    QFuture<void> future = QtConcurrent::run(this, &QmlManager::runArrange_internal);
+	Autoarrange arrange(listedModels);
+	qmlManager->setProgress(1);
+
 }
 
-void QmlManager::runArrange_internal(){
-    qDebug() << "run arrange glmodels size : " <<glmodels.size();
 
-    for(auto& pair : glmodels)
-    {
-        const auto* const model = &pair.second;
-        qDebug() << "before " <<model->transform().translation();
-    }
-    if (glmodels.size()>=2){
-        std::vector<XYArrangement> arng_result_set;
-        std::vector<const Mesh*> meshes_to_arrange;
-		std::vector<Qt3DCore::QTransform> m_transform_set;
-
-   //     for(auto& pair : glmodels)
-   //     {
-			//const auto* const  model = &pair.second;
-   //         meshes_to_arrange.push_back(model->getMesh());
-   //         m_transform_set.push_back(model->transform());
-   //     }
-
-   //     autoarrange* ar;
-   //     arng_result_set = ar->arngMeshes(meshes_to_arrange, m_transform_set);
-   //     std::vector<QVector3D> translations;
-   //     std::vector<float> rotations;
-   //     for (size_t i=0; i<arng_result_set.size(); i++){
-   //         XYArrangement arng_result = arng_result_set[i];
-   //         QVector3D trans_vec = QVector3D(arng_result.first.X/100, arng_result.first.Y/100, 0);
-   //         translations.push_back(trans_vec);
-   //         rotations.push_back(arng_result.second);
-   //     }
-   //     emit arrangeDone(translations, rotations);
-
-        //ar->arrangeQt3D(m_transform_set, arng_result_set);
-        //ar->arrangeGlmodels(&glmodel);
-    }
-}
-
-void QmlManager::applyArrangeResult(std::vector<QVector3D> translations, std::vector<float> rotations){
-    qDebug() << "apply arrange result ";
-    size_t index = 0;
-    for(auto& pair : glmodels)
-    {
-        auto model = &pair.second;
-        model->moveModel(translations[index]);
-        ++index;
-    }
-
-    qmlManager->setProgress(1);
-
-    qmlManager->setProgressText("Done");
-    qmlManager->openResultPopUp("","Arrangement done","");
-    if(selectedModels.size() > 0){
-        sendUpdateModelInfo();
-    }
-}
 
 GLModel* QmlManager::findGLModelByName(QString modelName){
 
