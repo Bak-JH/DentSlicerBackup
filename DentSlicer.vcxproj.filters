@@ -911,6 +911,7 @@
     <None Include="resource\zoom_down.png" />
     <None Include="resource\zoom_up.png" />
     <None Include="icon.ico" />
+    <None Include="Qml\SamplePopup.qml" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Source Files">
