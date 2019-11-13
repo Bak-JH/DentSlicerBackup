@@ -4,6 +4,9 @@ import QtQuick.Scene3D 2.0
 import QtQuick.Window 2.2
 import QtQuick.Controls.Styles 1.4
 import QtQuick.Dialogs 1.2
+
+import hix.qml 1.0
+
 Item{
     ApplicationWindow {
         title: qsTr("DentSlicer")
@@ -206,7 +209,13 @@ Item{
             visible: false
         }
 
-
+		SamplePopup
+		{
+			anchors.top: uppertab.bottom
+			anchors.left: lefttab.right
+			anchors.leftMargin: 15
+			anchors.topMargin: 20
+		}
 
         MouseArea{
 
@@ -373,6 +382,7 @@ Item{
             }
         }
         */
+
         PopUp {
             id: result_orient
             objectName: "result_orient"

@@ -1,17 +1,39 @@
 #pragma once
-#include <5.12.3/QtQuick/private/qquickrectangle_p.h>
-#include <QtQuick/5.12.3/QtQuick/private/qquickmousearea_p.h>
-#include <QtQuick/5.12.3/QtQuick/private/qquickevents_p_p.h>
-#include <Qt3DQuickExtras/Qt3DQuickWindow>
+#include <QtQuick/private/qquickrectangle_p.h>
+#include <QtQuick/private/qquickmousearea_p.h>
+#include <QtQuick/private/qquickevents_p_p.h>
+#include <QtQuick/private/qquicktext_p.h>
 
-class TestRect : public QQuickRectangle
+namespace Hix
 {
-	Q_OBJECT
-public:
-	TestRect();
-public slots:
-	void onClick();
-private:
-	QQuickMouseArea* mouseArea;
-	Qt3DExtras::Quick::Qt3DQuickWindow* window;
-};
+	namespace QML
+	{
+		class XButton : public QQuickRectangle
+		{
+			Q_OBJECT
+		public:
+			XButton(QQuickItem* parent = nullptr);
+
+		public slots:
+			void onClick();
+
+		private:
+			QQuickMouseArea* _mouseArea;
+		};
+
+		class PopupShell : public QQuickRectangle
+		{
+			Q_OBJECT
+			Q_PROPERTY(QString title MEMBER _title NOTIFY titleChanged)
+
+		public:
+			PopupShell(QQuickItem* parent = nullptr);
+
+		public slots:
+			void titleChanged();
+
+		protected:
+			QString _title = "Test";
+		};
+	}
+}

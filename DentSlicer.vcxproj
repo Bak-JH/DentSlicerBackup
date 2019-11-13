@@ -989,6 +989,7 @@
     <None Include="Qml\MeshTransformerTab.qml" />
     <None Include="Qml\MeshTransformerZoom.qml" />
     <None Include="Qml\Model.qml" />
+    <None Include="Qml\SamplePopup.qml" />
     <None Include="Resource\font\NotoSans-Regular.ttf" />
     <None Include="Resource\font\NotoSans-SemiCondensed.ttf" />
     <None Include="Resource\font\NotoSans-SemiCondensedMedium.ttf" />
