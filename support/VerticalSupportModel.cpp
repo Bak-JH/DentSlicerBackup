@@ -71,8 +71,9 @@ std::vector<QVector3D> Hix::Support::VerticalSupportModel::generateSupportPath(f
 	tipNormal.normalize();
 
 	//because of float error, it's safer to overlap support and mesh a little bit, so extend endtip into mesh a bit
+	constexpr float intoMeshLength = -0.120f; //120 micron
 	QVector3D extendedTip = coneNarrow;
-	QVector3D intoMesh = -1.0f * tipNormal;
+	QVector3D intoMesh = intoMeshLength * tipNormal;
 	intoMesh *= SUPPORT_OVERLAP_LENGTH;
 	extendedTip += intoMesh;
 

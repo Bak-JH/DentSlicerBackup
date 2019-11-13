@@ -14,6 +14,17 @@ void Hix::Support::SupportRaftManager::initialize(Qt3DCore::QEntity* parent)
 {
 	_root.setParent(parent);
 	_root.setEnabled(true);
+
+
+	parent->addComponent(&_rayCaster);
+
+
+	_rayCaster.setFilterMode(QAbstractRayCaster::FilterMode::AcceptAnyMatchingLayers);
+	_rayCaster.setRunMode(QAbstractRayCaster::RunMode::SingleShot);
+
+
+	QObject::connect(&_rayCaster, &Qt3DRender::QAbstractRayCaster::hitsChanged,this, &SupportRaftManager::hitsChanged);
+
 }
 Hix::Support::SupportRaftManager::~SupportRaftManager()
 {
@@ -45,26 +56,9 @@ void Hix::Support::SupportRaftManager::autoGen(const GLModel& model, SlicingConf
 {
 	_supportExist = true;
 	_supportType = supType;
-	autoGenRecurv(model);
+	auto overhangs = detectOverhang(model);
+	generateSupport(overhangs);
 }
-
-
-
-void Hix::Support::SupportRaftManager::autoGenRecurv(const GLModel& model)
-{
-	for (auto childNode : model.childNodes())
-	{
-		auto mainModel = dynamic_cast<GLModel*>(childNode);
-		if (mainModel)
-		{
-			autoGenRecurv(*mainModel);
-		}
-	}
-	generateSupport(model);
-
-
-}
-
 
 
 std::vector<QVector3D> Hix::Support::SupportRaftManager::getSupportBasePts() const
@@ -146,10 +140,8 @@ void Hix::Support::SupportRaftManager::cancelEdits()
 	}
 }
 
-void Hix::Support::SupportRaftManager::generateSupport(const GLModel& model)
+void Hix::Support::SupportRaftManager::generateSupport(const Hix::OverhangDetect::Overhangs& overhangs)
 {
-	Hix::OverhangDetect::Detector detector;
-	auto overhangs = detector.detectOverhang(model.getMesh());
 	switch (_supportType)
 	{
 	case SlicingConfiguration::SupportType::None:
@@ -175,18 +167,49 @@ void Hix::Support::SupportRaftManager::generateRaft()
 	_raft = std::make_unique<CylindricalRaft>(this, basePts);
 }
 
-void  Hix::Support::SupportRaftManager::clear(GLModel& model)
+Hix::OverhangDetect::Overhangs Hix::Support::SupportRaftManager::detectOverhang(const GLModel& listed)
 {
-	std::unordered_set<GLModel*> models;
-	std::unordered_set<const GLModel*> constModels;
+	std::unordered_set<const GLModel*> models;
+	listed.getChildrenModels(models);
+	Hix::OverhangDetect::Overhangs overhangs;
+	models.insert(&listed);
+	QVector3D straightDown(0, 0, -1);
+
+	for (auto model : models)
+	{
+		_rayCaster.addLayer(model->getLayer());
+	}
+
+
+
+	for (auto model : models)
+	{
+		Hix::OverhangDetect::Detector detector;
+		auto eachOverhangs =   detector.detectOverhang(model->getMesh());
+		overhangs.insert(eachOverhangs.begin(), eachOverhangs.end());
+		for (auto& each : overhangs)
+		{
+			auto starting = Hix::OverhangDetect::toCoord(each);
+			_rayCaster.trigger(starting, straightDown, starting.z());
+		}
+		//use raycast to enrish overhang data
+	}
+	for (auto model : models)
+	{
+		_rayCaster.removeLayer(model->getLayer());
+	}
+
+
+	return overhangs;
+}
+
+void  Hix::Support::SupportRaftManager::clear(const GLModel& model)
+{
+	std::unordered_set<const GLModel*> models;
 
 	model.getChildrenModels(models);
-	for (auto each : models)
-	{
-		constModels.insert(each);
-	}
-	constModels.insert(&model);
-	clearImpl(constModels);
+	models.insert(&model);
+	clearImpl(models);
 }
 
 void Hix::Support::SupportRaftManager::clearImpl(const std::unordered_set<const GLModel*>& models)
@@ -247,6 +270,10 @@ Qt3DCore::QEntity& Hix::Support::SupportRaftManager::rootEntity()
 size_t Hix::Support::SupportRaftManager::supportCount() const
 {
 	return _supports.size();
+}
+
+void Hix::Support::SupportRaftManager::hitsChanged(const Qt3DRender::QAbstractRayCaster::Hits& hits)
+{
 }
 
 
