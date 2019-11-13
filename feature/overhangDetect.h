@@ -53,6 +53,7 @@ namespace Hix
 	namespace OverhangDetect
 	{
 		typedef std::unordered_set<typename OverhangDetect::Overhang>  Overhangs;
+		QVector3D toCoord(const Overhang& overhangs);
 		std::vector<QVector3D> toCoords(const Overhangs& overhangs);
 
 		class Detector

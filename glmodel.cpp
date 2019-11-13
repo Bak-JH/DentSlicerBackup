@@ -188,7 +188,7 @@ void GLModel::updatePrintable() {
 GLModel::~GLModel(){
 }
 
- void GLModel::getChildrenModels(std::unordered_set<GLModel*>& results)
+ void GLModel::getChildrenModels(std::unordered_set<const GLModel*>& results)const
 {
 	 
 	for (auto child : childNodes())
@@ -202,7 +202,6 @@ GLModel::~GLModel(){
 	callRecursive(this, &GLModel::getChildrenModels, results);
 
 }
-
 
 void GLModel::initHitTest()
 {

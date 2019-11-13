@@ -140,20 +140,26 @@ void Hix::OverhangDetect::Detector::faceOverhangPoint(const FaceConstItr& overha
 }
 
 
+QVector3D Hix::OverhangDetect::toCoord(const Overhang& ovhang)
+{
+	if (ovhang.index() == 0)
+	{
+		return std::get<0>(ovhang).worldPosition();
+	}
+	else
+	{
+		return std::get<1>(ovhang).coord;
+	}
+}
+
 std::vector<QVector3D> Hix::OverhangDetect::toCoords(const Overhangs& overhangs)
 {
 	std::vector<QVector3D> coords;
 	coords.reserve(overhangs.size());
 	for (auto& each : overhangs)
 	{
-		if (each.index() == 0)
-		{
-			coords.emplace_back(std::get<0>(each).worldPosition());
-		}
-		else
-		{
-			coords.emplace_back(std::get<1>(each).coord);
-		}
+		coords.emplace_back(toCoord(each));
+
 	}
 	return coords;
 }
@@ -203,7 +209,7 @@ Overhangs Hix::OverhangDetect::Detector::detectOverhang(const Mesh* shellMesh)
 	{
 		overhangs.emplace(hashedPt.second);
 	}
-
+	//raycast
 
 	return overhangs;
 
