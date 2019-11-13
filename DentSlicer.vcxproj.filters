@@ -614,7 +614,6 @@
     <ClInclude Include="feature\repair\Kernel\basics.h" />
     <ClInclude Include="feature\repair\Kernel\coordinates.h" />
     <ClInclude Include="feature\repair\Kernel\graph.h" />
-    <ClInclude Include="feature\repair\Kernel\heap.h" />
     <ClInclude Include="feature\repair\Kernel\jqsort.h" />
     <ClInclude Include="feature\repair\Kernel\list.h" />
     <ClInclude Include="feature\repair\Kernel\matrix.h" />
