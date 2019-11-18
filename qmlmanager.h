@@ -199,7 +199,7 @@ public:
     QObject* layerRaftButton;
     QObject* layerViewSlider;
 
-    std::unordered_map<int, GLModel> glmodels;
+    std::vector<std::unique_ptr<GLModel>> glmodels;
 
     std::vector<size_t> copyMeshes;
 
@@ -311,6 +311,7 @@ private:
 	QCursor _cursorEraser;
 	Hix::Support::SupportRaftManager _supportRaftManager;
 	std::unique_ptr<Hix::Features::Feature> _currentFeature;
+	std::deque<std::unique_ptr<Hix::Features::Feature>> _featureHistory;
 
 signals:
     void updateModelInfo(int printing_time, int layer, QString xyz, float volume);
@@ -418,4 +419,4 @@ QObject* FindItemByName(QQmlApplicationEngine* engine, const QString& name);
 
 extern QmlManager *qmlManager;
 
-#endif // QMLMANAGER_H
+#endif //QMLMANAGER_H

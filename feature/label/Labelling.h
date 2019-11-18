@@ -21,6 +21,8 @@ namespace Hix
 			void setFontSize(const int fontSize);
 			void generateLabelMesh();
 
+			void undo() override {} // TODO: undo
+
 		private:
 			QString _text = "Enter text";
 			QFont _font = QFont("Arial", 12, QFont::Normal);

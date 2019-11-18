@@ -26,6 +26,8 @@ namespace Hix
 			void removeCuttingPoint(int idx);
 			void removeCuttingPoints();
 			void drawLine(QVector3D endpoint);
+
+			void undo() override;
 		private:
 			//cutting
 			CutType _cutType = ZAxial;
@@ -34,6 +36,7 @@ namespace Hix
 			Hix::Engine3D::Bounds3D _modelsBound;
 			std::unordered_set<GLModel*> _models;
 
+			std::deque<GLModel*> _modelHistory;
 		};
 	}
 }

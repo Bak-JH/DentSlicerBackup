@@ -17,6 +17,7 @@ namespace Hix
 		public:
 			MeshRepair(const std::unordered_set<GLModel*>& selectedModels);
 			virtual ~MeshRepair();
+			void undo() override {} // do nothing
 		private:
 			void repairImpl(GLModel* subject, const QString& modelName);
 

@@ -209,14 +209,6 @@ Item{
             visible: false
         }
 
-		SamplePopup
-		{
-			anchors.top: uppertab.bottom
-			anchors.left: lefttab.right
-			anchors.leftMargin: 15
-			anchors.topMargin: 20
-		}
-
         MouseArea{
 
             acceptedButtons: Qt.MiddleButton | Qt.RightButton

@@ -12,13 +12,14 @@ namespace Hix
 	namespace Features
 	{
 		using namespace Hix::Engine3D;
-		class Extend: public SelectFaceFeature, public PPShaderFeature //pee pee hee hee
+		class Extend: public SelectFaceFeature, public PPShaderFeature//pee pee hee hee
 		{
 		public:
 			Extend(const std::unordered_set<GLModel*>& selectedModels);
 			virtual ~Extend();
 			void faceSelected(GLModel* selected, const Hix::Engine3D::FaceConstItr& selectedFace, const Hix::Input::MouseEventData& mouse, const Qt3DRender::QRayCasterHit& hit)override;
 			void extendMesh(double distance);
+			void undo() override;
 
 		private:
 			Paths3D detectExtensionOutline(Mesh* mesh, const std::unordered_set<FaceConstItr>& meshfaces);
@@ -28,6 +29,7 @@ namespace Hix
 			GLModel* _model = nullptr;
 			QVector3D _normal;
 			std::unordered_set<FaceConstItr> _extensionFaces;
+			std::deque<Mesh*> _prevMeshes;
 		};
 	}
 }

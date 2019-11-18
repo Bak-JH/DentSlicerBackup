@@ -11,6 +11,7 @@ namespace Hix
 			SupportFeature();
 			void faceSelected(GLModel* selected, const Hix::Engine3D::FaceConstItr& selectedFace, const Hix::Input::MouseEventData& mouse, const Qt3DRender::QRayCasterHit& hit)override;
 			virtual ~SupportFeature();
+			void undo() override {} //TODO: undo
 		};
 
 	}

@@ -13,7 +13,7 @@ Mesh* STLexporter::mergeSelectedModels() {
     if (selectedModels.empty())
     {
         for (auto& pair : qmlManager->glmodels) {
-            auto glm = &pair.second;
+			auto glm = pair.get();
             targetModels.push_back(glm);
         }
         if (targetModels.size() == 0)

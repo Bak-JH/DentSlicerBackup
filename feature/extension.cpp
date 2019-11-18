@@ -21,19 +21,32 @@ void Hix::Features::Extend::faceSelected(GLModel* selected, const Hix::Engine3D:
 	PPShaderFeature::colorFaces(selected, _extensionFaces);
 }
 
-void Hix::Features::Extend::extendMesh(double distance){
-
+void Hix::Features::Extend::extendMesh(double distance)
+{
 	if (_model)
 	{
+		_prevMeshes.push_back(new Mesh(*_model->getMeshModd()));
+		_model->unselectMeshFaces();
 		Paths3D extension_outlines = detectExtensionOutline(_model->getMeshModd(), _extensionFaces);
 		extendAlongOutline(_model->getMeshModd(), _normal, extension_outlines, distance);
 		coverCap(_model, _normal, _extensionFaces, distance);
 		_model->getMeshModd()->removeFaces(_extensionFaces);
 		_model->updateMesh();
+		_extensionFaces.clear();
 		_model->setZToBed();
 	}
 }
 
+void Hix::Features::Extend::undo()
+{
+	qDebug() << _extensionFaces.size();
+	_model->setMesh(_prevMeshes.back());
+	_model->unselectMeshFaces();
+	_model->updateMesh();
+	_model->setZToBed();
+	_prevMeshes.pop_back();
+	qDebug() << _extensionFaces.size();
+}
 
 Paths3D Hix::Features::Extend::detectExtensionOutline(Mesh* mesh, const std::unordered_set<FaceConstItr>& meshfaces){
     Mesh temp_mesh;
