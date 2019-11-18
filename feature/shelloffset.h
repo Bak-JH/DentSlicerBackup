@@ -15,6 +15,7 @@ namespace Hix
 			virtual ~ShellOffset();
 			void getSliderSignal(double value);
 			void doOffset(float offset);
+			void undo() override {} //TODO:undo
 		private:
 			GLModel* _subject = nullptr;
 			float _zPlane = 0;

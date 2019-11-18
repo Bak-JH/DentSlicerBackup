@@ -33,6 +33,7 @@
 #include "feature/layerview/layerview.h"
 #include "feature/SupportFeature.h"
 #include "Qml/Popup.h"
+#include "feature/extension.h"
 
 #include <functional>
 using namespace Hix::Input;
@@ -286,9 +287,10 @@ GLModel* QmlManager::listModel(GLModel* model)
 {
 	Qt3DCore::QTransform toRoot;
 	toRoot.setMatrix(model->toRootMatrix());
-	auto res = glmodels.try_emplace(modelIDCounter, models, model->getMeshModd(), model->modelName(), modelIDCounter, &toRoot);
+	auto res = new GLModel(models, model->getMeshModd(), model->modelName(), modelIDCounter, &toRoot);
+	glmodels.push_back(std::make_unique<GLModel>(res));
 	--modelIDCounter;
-	auto latestAdded = &(res.first->second);
+	auto latestAdded = res;
 	// set initial position
 	//add to raytracer
 	latestAdded->setHitTestable(true);
@@ -309,9 +311,10 @@ GLModel* QmlManager::listModel(GLModel* model)
 
 
 GLModel* QmlManager::createAndListModel(Hix::Engine3D::Mesh* mesh, QString fname, const Qt3DCore::QTransform* transform) {
-	auto res = glmodels.try_emplace(modelIDCounter, models, mesh, fname, modelIDCounter, transform);
+	auto res = new GLModel(models, mesh, fname, modelIDCounter, transform);
+	glmodels.push_back(std::make_unique<GLModel>(res));
     --modelIDCounter;
-    auto latestAdded = &(res.first->second);
+	auto latestAdded = res;
     // set initial position
 	//add to raytracer
 	latestAdded->setHitTestable(true);
@@ -362,16 +365,17 @@ void QmlManager::modelRepair()
 
 GLModel* QmlManager::getModelByID(int ID)
 {
-	auto modelItr = glmodels.find(ID);
-	if (modelItr == glmodels.end())
+	for (auto& modelItr : glmodels)
 	{
+		if (modelItr.get()->id() == ID)
+			return modelItr.get();
+	}
+
 #ifdef _STRICT_DEBUG
 		throw std::exception("getModelByID failed");
 #endif
 		qDebug() << "glmodels.find failed" <<ID;
-		return nullptr;
-	}
-	return &modelItr->second;
+	return nullptr;
 }
 
 
@@ -392,7 +396,6 @@ void QmlManager::deleteOneModelFile(GLModel* target) {
 		_supportRaftManager.clear(*target);
 		selectedModels.erase(target);
 		//clear related supports
-		glmodels.erase(target->ID);
 	}
 }
 
@@ -488,14 +491,14 @@ void QmlManager::fixMesh(){
 
 void QmlManager::disableObjectPickers(){
     for (auto& pair : glmodels){
-		auto glm = &pair.second;
+		auto glm = pair.get();
 		glm->setHitTestable(false);
     }
 }
 
 void QmlManager::enableObjectPickers(){
 	for (auto& pair : glmodels) {
-		auto glm = &pair.second;
+		auto glm = pair.get();
 		glm->setHitTestable(true);
     }
 }
@@ -573,7 +576,7 @@ void QmlManager::runArrange_internal(){
 
     for(auto& pair : glmodels)
     {
-        const auto* const model = &pair.second;
+		const auto* const model = pair.get();
         qDebug() << "before " <<model->transform().translation();
     }
     if (glmodels.size()>=2){
@@ -610,7 +613,7 @@ void QmlManager::applyArrangeResult(std::vector<QVector3D> translations, std::ve
     size_t index = 0;
     for(auto& pair : glmodels)
     {
-        auto model = &pair.second;
+		auto model = pair.get();
         model->moveModel(translations[index]);
         ++index;
     }
@@ -628,7 +631,7 @@ GLModel* QmlManager::findGLModelByName(QString modelName){
 
     for(auto& pair : glmodels)
     {
-        auto model = &pair.second;
+		auto model = pair.get();
         qDebug() << "finding " << modelName << model->modelName();
         if (model->modelName() == modelName){
             return model;
@@ -953,6 +956,7 @@ void QmlManager::closeExtension()
 void QmlManager::generateExtensionFaces(double distance)
 {
 	auto extend = dynamic_cast<Extend*>(_currentFeature.get());
+	_featureHistory.push_back(std::move(_currentFeature));
 	extend->extendMesh(distance);
 }
 
@@ -1297,7 +1301,11 @@ void QmlManager::runGroupFeature(int ftrType, QString state, double arg1, double
 }
 
 void QmlManager::unDo(){
-
+	if (_featureHistory.empty())
+		return;
+	auto prevFeture = _featureHistory.back().get();
+	prevFeture->undo();
+	_featureHistory.pop_back();
 }
 
 void QmlManager::reDo(){
@@ -1726,6 +1734,7 @@ void QmlManager::regenerateRaft()
 void QmlManager::modelCut()
 {
 	auto modelCut = dynamic_cast<ModelCut*>(_currentFeature.get());
+	_featureHistory.push_back(std::move(_currentFeature));
 	modelCut->applyCut();
 }
 void QmlManager::cutModeSelected(int mode)

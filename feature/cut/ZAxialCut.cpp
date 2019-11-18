@@ -147,7 +147,6 @@ Hix::Features::Cut::ZAxialCut::ZAxialCut(GLModel* subject, float cuttingPlane, H
 		}
 	}
 
-
 	if(deleteOriginal)
 		qmlManager->deleteModelFile(subject->ID);
 }
