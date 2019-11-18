@@ -45,15 +45,15 @@ constexpr std::array<std::string_view, 3> ResinTypeStr{
 constexpr std::array<std::string_view, 11> SupportRadiusMin{
 	"0.5",
 	"0.3",
+	"0.28",
+	"0.25",
 	"0.2",
 	"0.1",
 	"0.08",
 	"0.06",
 	"0.05",
 	"0.04",
-	"0.03",
 	"0.02",
-	"0.01"
 };
 
 constexpr std::array<std::string_view, 11> SupportRadiusMax{
@@ -128,7 +128,7 @@ void SlicingOptBackend::createSlicingOptControls()
 	addOptionDialogCombo(QString("Support type"), SupportTypeStr, 1);
 	addOptionDialogCombo(QString("Infill type"), InfillTypeStr, 1);
 	addOptionDialogCombo(QString("Slicing mode"), SlicingModeStr, 0);
-	addOptionDialogCombo(QString("Support min radius"), SupportRadiusMin, 2);
+	addOptionDialogCombo(QString("Support min radius"), SupportRadiusMin, 3);
 	addOptionDialogCombo(QString("Support max radius"), SupportRadiusMax, 3);
 	addOptionDialogCombo(QString("Printer vendor"), PrinterVendorType, 0);
 	addOptionDialogCombo(QString("Slice image inversion"), SliceInvertStr, 0);

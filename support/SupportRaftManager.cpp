@@ -4,6 +4,9 @@
 #include "CylindricalRaft.h"
 #include "glmodel.h"
 #include <functional>
+#include "../Mesh/BVH.h"
+#include "../Mesh/MTRayCaster.h"
+#include "../common/Debug.h"
 using namespace Hix::Support;
 using namespace Hix::Memory;
 
@@ -14,17 +17,6 @@ void Hix::Support::SupportRaftManager::initialize(Qt3DCore::QEntity* parent)
 {
 	_root.setParent(parent);
 	_root.setEnabled(true);
-
-
-	parent->addComponent(&_rayCaster);
-
-
-	_rayCaster.setFilterMode(QAbstractRayCaster::FilterMode::AcceptAnyMatchingLayers);
-	_rayCaster.setRunMode(QAbstractRayCaster::RunMode::SingleShot);
-
-
-	QObject::connect(&_rayCaster, &Qt3DRender::QAbstractRayCaster::hitsChanged,this, &SupportRaftManager::hitsChanged);
-
 }
 Hix::Support::SupportRaftManager::~SupportRaftManager()
 {
@@ -71,7 +63,7 @@ std::vector<QVector3D> Hix::Support::SupportRaftManager::getSupportBasePts() con
 		if (editStatus == _pendingSupports.end() || editStatus->second == EditType::Added)
 		{
 			auto baseSupport = dynamic_cast<BaseSupport*>(each.get());
-			if (baseSupport)
+			if (baseSupport && baseSupport->hasBasePt())
 			{
 				basePts.emplace_back(baseSupport->getBasePt());
 			}
@@ -142,6 +134,7 @@ void Hix::Support::SupportRaftManager::cancelEdits()
 
 void Hix::Support::SupportRaftManager::generateSupport(const Hix::OverhangDetect::Overhangs& overhangs)
 {
+
 	switch (_supportType)
 	{
 	case SlicingConfiguration::SupportType::None:
@@ -175,31 +168,17 @@ Hix::OverhangDetect::Overhangs Hix::Support::SupportRaftManager::detectOverhang(
 	models.insert(&listed);
 	QVector3D straightDown(0, 0, -1);
 
-	for (auto model : models)
-	{
-		_rayCaster.addLayer(model->getLayer());
-	}
-
 
 
 	for (auto model : models)
 	{
 		Hix::OverhangDetect::Detector detector;
 		auto eachOverhangs =   detector.detectOverhang(model->getMesh());
-		overhangs.insert(eachOverhangs.begin(), eachOverhangs.end());
-		for (auto& each : overhangs)
-		{
-			auto starting = Hix::OverhangDetect::toCoord(each);
-			_rayCaster.trigger(starting, straightDown, starting.z());
-		}
-		//use raycast to enrish overhang data
-	}
-	for (auto model : models)
-	{
-		_rayCaster.removeLayer(model->getLayer());
-	}
+		overhangs.insert(overhangs.end(), eachOverhangs.begin(), eachOverhangs.end());
 
-
+	}
+	//raycaster for support generation
+	prepareRaycaster(listed);
 	return overhangs;
 }
 
@@ -234,6 +213,12 @@ void Hix::Support::SupportRaftManager::clearImpl(const std::unordered_set<const 
 	{
 		clear();
 	}
+}
+
+void Hix::Support::SupportRaftManager::prepareRaycaster(const GLModel& model)
+{
+	_rayCaster.reset( new MTRayCaster());
+	_rayCaster->addAccelerator(new Hix::Engine3D::BVH(model));
 }
 
 const Hix::Render::SceneEntity* Hix::Support::SupportRaftManager::raftModel() const
@@ -272,9 +257,11 @@ size_t Hix::Support::SupportRaftManager::supportCount() const
 	return _supports.size();
 }
 
-void Hix::Support::SupportRaftManager::hitsChanged(const Qt3DRender::QAbstractRayCaster::Hits& hits)
+RayCaster& Hix::Support::SupportRaftManager::supportRaycaster()
 {
+	return *_rayCaster.get();
 }
+
 
 
 

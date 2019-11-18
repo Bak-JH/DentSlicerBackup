@@ -12,6 +12,7 @@ namespace Hix
 			Q_OBJECT
 		public:
 			LineMeshEntity(const std::vector<QVector3D>& vertices, Qt3DCore::QEntity* parent);
+			LineMeshEntity(const std::vector<QVector3D>& vertices, Qt3DCore::QEntity* parent, const QVector4D& color);
 			int vertexCount();
 		private:
 			std::vector<QVector3D> _points;
