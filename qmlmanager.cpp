@@ -11,7 +11,7 @@
 //for absolute correctness
 #ifdef _DEBUG
 //#define _STRICT_DEBUG
-
+#include "common/debugging/DebugRenderObject.h"
 #endif
 #include <Qt3DCore>
 #include <qquickitem.h>
@@ -67,6 +67,9 @@ void QmlManager::initializeUI(QQmlApplicationEngine* e){
 
 	_widgetManager.initialize(total, &_rayCastController);
 	_supportRaftManager.initialize(models);
+#ifdef _DEBUG
+	Hix::Debug::DebugRenderObject::getInstance().initialize(models);
+#endif
 
     // model move componetns
     moveButton = FindItemByName(engine, "moveButton");

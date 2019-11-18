@@ -10,9 +10,7 @@ void Hix::Features::SupportFeature::faceSelected(GLModel* selected, const Hix::E
 {
 	auto suppMode = qmlManager->supportRaftManager().supportEditMode();
 	if (suppMode == Hix::Support::EditMode::Manual) {
-		Hix::OverhangDetect::FaceOverhang newOverhang;
-		newOverhang.coord = selected->ptToRoot(hit.localIntersection());
-		newOverhang.face = selectedFace;
+		Hix::OverhangDetect::Overhang newOverhang(selectedFace, selected->ptToRoot(hit.localIntersection()));
 		qmlManager->supportRaftManager().addSupport(newOverhang);
 	}
 }
