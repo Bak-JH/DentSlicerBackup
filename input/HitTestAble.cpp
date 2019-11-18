@@ -44,7 +44,7 @@ bool Hix::Input::HitTestAble::isHoverable()
 	return _hoverEnabled;
 }
 
-Qt3DRender::QLayer* Hix::Input::HitTestAble::getLayer()
+Qt3DRender::QLayer* Hix::Input::HitTestAble::getLayer()const
 {
 	return &_layer;
 }

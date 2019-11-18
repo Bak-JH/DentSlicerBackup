@@ -13,14 +13,14 @@ namespace Hix
 			virtual void setHoverable(bool isEnable);
 			virtual bool isHitTestable();
 			virtual bool isHoverable();
-			Qt3DRender::QLayer* getLayer();
+			Qt3DRender::QLayer* getLayer()const;
 
 		protected:
 			virtual void initHitTest() = 0;
 			bool _hitEnabled = false;
 			bool _hoverEnabled = false;
 
-			Qt3DRender::QLayer _layer;
+			mutable Qt3DRender::QLayer _layer; //because QT is shit.
 
 		};
 

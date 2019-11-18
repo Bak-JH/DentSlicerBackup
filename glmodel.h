@@ -39,7 +39,8 @@ public:
     GLModel(QEntity* parent=nullptr, Hix::Engine3D::Mesh* loadMesh=nullptr, QString fname="", int id = 0, const Qt3DCore::QTransform* transform = nullptr); // main constructor for mainmesh and shadowmesh
 	virtual ~GLModel();
 
-	void getChildrenModels(std::unordered_set<GLModel*>& results);
+	void getChildrenModels(std::unordered_set<const GLModel*>& results)const;
+
 	bool appropriately_rotated=false;
 
     // feature hollowshell

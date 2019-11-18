@@ -3,6 +3,9 @@
 #include "DentEngine/src/configuration.h"
 #include "VerticalSupportModel.h"
 #include "../../common/HetUniquePtr.h"
+
+#include <QAbstractRayCaster>
+#include <qraycaster.h>
 class GLModel;
 namespace Hix
 {
@@ -21,7 +24,7 @@ namespace Hix
 		using namespace Engine3D;
 		class SupportModel;
 		class RaftModel;
-		class SupportRaftManager
+		class SupportRaftManager : public QObject
 		{
 		public:
 			static float raftBottom();
@@ -42,20 +45,23 @@ namespace Hix
 			void removeSupport(SupportModel* e);
 			void applyEdits();
 			void cancelEdits();
-			void generateSupport(const GLModel& model);
+			void generateSupport(const Hix::OverhangDetect::Overhangs& overhangs);
 			void generateRaft();
+			OverhangDetect::Overhangs detectOverhang(const GLModel& model);
 			//removed due to efficiency when deleting multiple
 			std::vector<std::reference_wrapper<const Hix::Render::SceneEntity>> supportModels()const;
 			const Hix::Render::SceneEntity* raftModel()const;
 			void clear();
-			void clear(GLModel& model);
+			void clear(const GLModel& model);
 
 			Qt3DCore::QEntity& rootEntity();
 			size_t supportCount()const;
-		private:
-			void autoGenRecurv(const GLModel& model);
-			void clearImpl(const std::unordered_set<const GLModel*>& models);
+			//void checkOverhangCollision(GLModel* model, )
+			RayCaster& supportRaycaster();
 
+		private:
+			void clearImpl(const std::unordered_set<const GLModel*>& models);
+			void prepareRaycaster(const GLModel& model);
 			Qt3DCore::QEntity _root;
 			std::vector<QVector3D> getSupportBasePts()const;
 			bool _supportExist = false;
@@ -65,6 +71,7 @@ namespace Hix
 			SlicingConfiguration::SupportType _supportType;
 			std::unordered_set<Hix::Memory::HetUniquePtr<SupportModel>> _supports;
 			std::unique_ptr<RaftModel> _raft;
+			std::unique_ptr<RayCaster> _rayCaster;
 		};
 
 	}
