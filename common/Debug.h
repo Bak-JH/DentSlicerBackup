@@ -10,6 +10,7 @@
 
 
 #ifdef _DEBUG
+#include "debugging/DebugRenderObject.h"
 
 #define DONT_USE Hix::Debug::throwDontUse();
 namespace Hix

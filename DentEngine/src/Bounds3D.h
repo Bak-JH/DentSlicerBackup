@@ -42,6 +42,7 @@ namespace Hix
 			float lengthZ()const;
 			QVector3D centre()const;
 			QVector3D lengths()const;
+			const std::array<float, 6>& bound()const;
 			QVector3D displaceWithin(const Bounds3D& child, QVector3D displacement =  QVector3D())const;
 			std::array<float, 6> calculateMaxDisplacement(const Bounds3D & child)const;
 			bool contains(const Hix::Engine3D::Bounds3D& other)const;
@@ -52,7 +53,7 @@ namespace Hix
 			void setZLength(float length);
 
 		private:
-			std::array<float, 6> _bound{0,0,0,0,0,0};
+			std::array<float, 6> _bound;
 
 		};
 

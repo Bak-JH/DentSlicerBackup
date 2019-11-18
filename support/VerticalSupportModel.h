@@ -21,6 +21,7 @@ namespace Hix
 			VerticalSupportModel(SupportRaftManager* manager, const Overhang& overhang);
 			virtual ~VerticalSupportModel();
 			//BaseSupport
+			bool hasBasePt()const override;
 			const QVector3D& getBasePt()const override;
 			//ModelAttachedSupport
 			const Overhang& getOverhang()const override;
@@ -31,8 +32,9 @@ namespace Hix
 		private:
 			QVector3D _basePt;
 			Overhang _overhang;
+			bool _hasBasePt = false;
 			void generateMesh();
-			std::vector<QVector3D>  generateSupportPath(float bottom);
+			std::vector<QVector3D>  generateSupportPath(float bottom, std::vector<float>& scales);
 		};
 	}
 }

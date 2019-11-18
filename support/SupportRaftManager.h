@@ -57,11 +57,11 @@ namespace Hix
 			Qt3DCore::QEntity& rootEntity();
 			size_t supportCount()const;
 			//void checkOverhangCollision(GLModel* model, )
+			RayCaster& supportRaycaster();
 
-			void hitsChanged(const Qt3DRender::QAbstractRayCaster::Hits& hits);
 		private:
 			void clearImpl(const std::unordered_set<const GLModel*>& models);
-
+			void prepareRaycaster(const GLModel& model);
 			Qt3DCore::QEntity _root;
 			std::vector<QVector3D> getSupportBasePts()const;
 			bool _supportExist = false;
@@ -71,7 +71,7 @@ namespace Hix
 			SlicingConfiguration::SupportType _supportType;
 			std::unordered_set<Hix::Memory::HetUniquePtr<SupportModel>> _supports;
 			std::unique_ptr<RaftModel> _raft;
-			Qt3DRender::QRayCaster _rayCaster;
+			std::unique_ptr<RayCaster> _rayCaster;
 		};
 
 	}

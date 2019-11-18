@@ -56,6 +56,13 @@ LineMeshEntity::LineMeshEntity(const std::vector<QVector3D>& vertices, Qt3DCore:
 	addComponent(&_geometryRenderer);
 }
 
+Hix::Render::LineMeshEntity::LineMeshEntity(const std::vector<QVector3D>& vertices, Qt3DCore::QEntity* parent, const QVector4D& color): LineMeshEntity(vertices, parent)
+{
+	_material.setAmbient(QColor(color.x(), color.y(), color.z()));
+	_material.setDiffuse(QColor(color.x(), color.y(), color.z()));
+	_material.setSpecular(QColor(color.x(), color.y(), color.z()));
+}
+
 int LineMeshEntity::vertexCount()
 {
 	return _points.size();
