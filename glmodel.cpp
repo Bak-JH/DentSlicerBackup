@@ -49,23 +49,15 @@ GLModel::GLModel(QEntity*parent, Mesh* loadMesh, QString fname, int id, const Qt
     // set shader mode and color
 	setMaterialMode(Hix::Render::ShaderMode::SingleColor);
 	setMaterialColor(Hix::Render::Colors::Default);
-
-	setMesh(loadMesh);
-	
+	//this order is important since transform affect AABB calculation during setMesh
 	if (transform)
 	{
 		_transform.setMatrix(transform->matrix());
 	}
+	setMesh(loadMesh);
 
 	// 승환 75%
 	qmlManager->setProgress(0.73);
-	// reserve cutting points, contours
-	sphereEntity.reserve(50);
-	sphereMesh.reserve(50);
-	sphereMaterial.reserve(50);
-	sphereTransform.reserve(50);
-	sphereObjectPicker.reserve(50);
-
 	QObject::connect(this, SIGNAL(_updateModelMesh()), this, SLOT(updateModelMesh()));
 
 }
