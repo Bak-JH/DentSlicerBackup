@@ -72,4 +72,5 @@ void Hix::Features::ModelCut::applyCut()
 	default:
 		break;
 	}
+	qmlManager->unselectAll();
 }

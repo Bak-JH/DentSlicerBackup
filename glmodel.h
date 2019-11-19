@@ -51,13 +51,6 @@ public:
     // feature offset
     double shellOffsetFactor;
 
-
-    std::vector<Qt3DExtras::QSphereMesh*> sphereMesh;
-    std::vector<Qt3DCore::QEntity*> sphereEntity;
-    std::vector<Qt3DCore::QTransform*> sphereTransform;
-    std::vector<Qt3DRender::QObjectPicker*> sphereObjectPicker;
-    std::vector<QPhongMaterial*> sphereMaterial;
-
     void changeColor(const QVector4D& color);
 	bool isPrintable()const;
     void updatePrintable();
