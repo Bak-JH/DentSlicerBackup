@@ -2,6 +2,7 @@
 #include "utils/mathutils.h"
 #include <QTransform>
 #include <QPainterPath>
+#include "../../common/Debug.h"
 
 Hix::LabelModel::LabelModel(Qt3DCore::QEntity* parent):GLModel(parent)
 {
@@ -92,9 +93,9 @@ void Hix::LabelModel::generateLabelMesh(const QVector3D translation, const QVect
 		}
 	}
 
-	transform().setScale(0.05f);
-	transform().setRotation(QQuaternion::rotationTo(QVector3D(0, -1, 0), normal));
-	transform().setTranslation(translation);
+	_transform.setScale(0.05f);
+	_transform.setRotation(QQuaternion::rotationTo(QVector3D(0, -1, 0), normal));
+	_transform.setTranslation(translation);
 
 	setMesh(labelMesh);
 }

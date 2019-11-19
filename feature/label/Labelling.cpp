@@ -27,9 +27,7 @@ void Hix::Features::Labelling::updateLabelMesh(const QVector3D translation, cons
 		{
 			_previewModel = new Hix::LabelModel(_targetModel);
 		}
-
 		_previewModel->generateLabelMesh(translation, normal, _text, _font);
-		_previewModel->updateModelMesh();
 	}
 }
 
@@ -61,16 +59,8 @@ void Hix::Features::Labelling::generateLabelMesh()
 		QMetaObject::invokeMethod(qmlManager->labelPopup, "noModel");
 		return;
 	}
-	
-
-	qmlManager->openProgressPopUp();
-	qmlManager->setProgress(0.1f);
-	
-
-	//_targetModel->setTargetSelected(false);
 	_targetModel->setMaterialColor(Hix::Render::Colors::Selected);
 	_targetModel->updateModelMesh();
 	_previewModel = nullptr;
 
-	qmlManager->setProgress(1.0f);
 }

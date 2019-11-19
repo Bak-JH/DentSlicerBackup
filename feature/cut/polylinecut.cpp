@@ -108,6 +108,7 @@ void Hix::Features::Cut::PolylineCut::cutCSG(const QString& subjectName, Hix::Re
 	for (size_t i = 0; i < seperateParts.size(); ++i)
 	{
 		auto model = qmlManager->createAndListModel(seperateParts[i], subjectName + "_cut" + QString::number(i), nullptr);
+		model->setZToBed();
 	}
 	subject->setMesh(nullptr);
 	auto model = dynamic_cast<GLModel*>(subject);
