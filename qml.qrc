@@ -57,6 +57,10 @@
         <file>shaders/singleColor.geom</file>
         <file>shaders/flat.geom</file>
         <file>Qml/LeftTabSlicingOptionElementPercentage.qml</file>
-        <file>Qml/SamplePopup.qml</file>
+        <file>Qml/BastardyMenu.qml</file>
+        <file>Qml/MenuButton.qml</file>
+        <file>Qml/LeftPopup.qml</file>
+        <file>Qml/RoundedButton.qml</file>
+        <file>Qml/CtrInputBox.qml</file>
     </qresource>
 </RCC>

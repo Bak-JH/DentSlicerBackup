@@ -143,7 +143,10 @@
     <ClCompile Include="feature\cut\ZAxialCut.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Qml\Popup.cpp">
+    <ClCompile Include="Qml\MenuButton.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Qml\LeftPopup.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -714,7 +717,10 @@
     <QtMoc Include="qmlmanager.h" />
     <QtMoc Include="utils\quaternionhelper.h" />
     <QtMoc Include="utils\updatechecker.h" />
-    <QtMoc Include="Qml\Popup.h">
+    <QtMoc Include="Qml\MenuButton.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="Qml\LeftPopup.h">
       <Filter>Header Files</Filter>
     </QtMoc>
   </ItemGroup>
@@ -910,7 +916,12 @@
     <None Include="resource\zoom_down.png" />
     <None Include="resource\zoom_up.png" />
     <None Include="icon.ico" />
-    <None Include="Qml\SamplePopup.qml" />
+    <None Include="Qml\BastardyMenu.qml" />
+    <None Include="Qml\MenuButton.qml" />
+    <None Include="Qml\LeftPopup.qml" />
+    <None Include="Qml\InputBox.qml" />
+    <None Include="Qml\RoundedButton.qml" />
+    <None Include="Qml\CtrInputBox.qml" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Source Files">
@@ -923,5 +934,24 @@
       <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
       <ParseFiles>true</ParseFiles>
     </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="Resource\vs_icon.png" />
+    <Image Include="Resource\menu_move.png" />
+    <Image Include="Resource\menu_open.png" />
+    <Image Include="Resource\menu_rotate.png" />
+    <Image Include="Resource\menu_orient.png" />
+    <Image Include="Resource\menu_arrange.png" />
+    <Image Include="Resource\menu_autorepair.png" />
+    <Image Include="Resource\menu_cut.png" />
+    <Image Include="Resource\menu_export.png" />
+    <Image Include="Resource\menu_extend.png" />
+    <Image Include="Resource\menu_label.png" />
+    <Image Include="Resource\menu_layflat.png" />
+    <Image Include="Resource\menu_save.png" />
+    <Image Include="Resource\menu_shelloffset.png" />
+    <Image Include="Resource\menu_scale.png" />
+    <Image Include="Resource\menu_support.png" />
+    <Image Include="Resource\closebutton.png" />
   </ItemGroup>
 </Project>

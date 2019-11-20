@@ -129,5 +129,22 @@
         <file>icon-32.ico</file>
         <file>icon.ico</file>
         <file>Resource/dentslicer_icon.png</file>
+        <file>Resource/vs_icon.png</file>
+        <file>Resource/menu_move.png</file>
+        <file>Resource/menu_open.png</file>
+        <file>Resource/menu_rotate.png</file>
+        <file>Resource/menu_arrange.png</file>
+        <file>Resource/menu_autorepair.png</file>
+        <file>Resource/menu_cut.png</file>
+        <file>Resource/menu_export.png</file>
+        <file>Resource/menu_extend.png</file>
+        <file>Resource/menu_label.png</file>
+        <file>Resource/menu_layflat.png</file>
+        <file>Resource/menu_orient.png</file>
+        <file>Resource/menu_save.png</file>
+        <file>Resource/menu_scale.png</file>
+        <file>Resource/menu_shelloffset.png</file>
+        <file>Resource/menu_support.png</file>
+        <file>Resource/closebutton.png</file>
     </qresource>
 </RCC>

@@ -209,14 +209,22 @@ Item{
             visible: false
         }
 
-		SamplePopup
-		{
+		BastardyMenu {
+			id: bastardymenu
 			anchors.top: uppertab.bottom
 			anchors.left: lefttab.right
 			anchors.leftMargin: 15
 			anchors.topMargin: 20
 		}
 
+		LeftPopup {
+			id: leftpopup
+			anchors.top: bastardymenu.bottom
+			anchors.left: lefttab.right
+			anchors.leftMargin: 15
+			anchors.topMargin: 120
+		}
+		
         MouseArea{
 
             acceptedButtons: Qt.MiddleButton | Qt.RightButton
