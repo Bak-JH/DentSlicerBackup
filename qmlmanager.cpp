@@ -32,7 +32,8 @@
 #include "feature/repair/meshrepair.h"
 #include "feature/layerview/layerview.h"
 #include "feature/SupportFeature.h"
-#include "Qml/Popup.h"
+#include "Qml/MenuButton.h"
+#include "Qml/LeftPopup.h"
 
 #include <functional>
 using namespace Hix::Input;
@@ -43,8 +44,11 @@ using namespace Hix::Features;
 QmlManager::QmlManager(QObject *parent) : QObject(parent), _optBackend(this, scfg)
   ,layerViewFlags(LAYER_INFILL | LAYER_SUPPORTERS | LAYER_RAFT), modelIDCounter(-1), _cursorEraser(QPixmap(":/Resource/cursor_eraser.png"))
 {
-	qmlRegisterType<Hix::QML::XButton>("hix.qml", 1, 0, "XButton");
-	qmlRegisterType<Hix::QML::PopupShell>("hix.qml", 1, 0, "PopupShell");
+	qmlRegisterType<Hix::QML::MenuBtnShell>("hix.qml", 1, 0, "MenuBtnShell");
+	qmlRegisterType<Hix::QML::CloseButton>("hix.qml", 1, 0, "CloseButton");
+	qmlRegisterType<Hix::QML::RoundButton>("hix.qml", 1, 0, "RoundButton");
+	qmlRegisterType<Hix::QML::LeftPopupShell>("hix.qml", 1, 0, "LeftPopupShell");
+	qmlRegisterType<Hix::QML::InputBox>("hix.qml", 1, 0, "InputBox");
 }
 
 void QmlManager::initializeUI(QQmlApplicationEngine* e){

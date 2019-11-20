@@ -8,32 +8,23 @@ namespace Hix
 {
 	namespace QML
 	{
-		class XButton : public QQuickRectangle
+		class MenuBtnShell : public QQuickRectangle
 		{
 			Q_OBJECT
+			Q_PROPERTY(QString fname MEMBER _fname)
+			//Q_PROPERTY(QImage fimg MEMBER _fimg)
 		public:
-			XButton(QQuickItem* parent = nullptr);
+			MenuBtnShell(QQuickItem* parent = nullptr);
 
 		public slots:
 			void onClick();
-
+		
 		private:
 			QQuickMouseArea* _mouseArea;
-		};
-
-		class PopupShell : public QQuickRectangle
-		{
-			Q_OBJECT
-			Q_PROPERTY(QString title MEMBER _title NOTIFY titleChanged)
-
-		public:
-			PopupShell(QQuickItem* parent = nullptr);
-
-		public slots:
-			void titleChanged();
 
 		protected:
-			QString _title = "Test";
+			QString _fname = "name";
+			//QImage _fimg = QImage("qrc:/Resource/vs_icon.png");
 		};
 	}
 }
