@@ -32,7 +32,7 @@ public:
 	}
 	bool operator==(const ItrType& o) const
 	{
-		return _index == o._index;
+		return _index == o._index && _owner == o._owner;
 	}
 	bool operator!=(const ItrType& o) const
 	{

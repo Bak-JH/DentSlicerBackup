@@ -41,7 +41,7 @@ using namespace Hix::Render;
 using namespace Hix::Tasking;
 using namespace Hix::Features;
 QmlManager::QmlManager(QObject *parent) : QObject(parent), _optBackend(this, scfg)
-  ,layerViewFlags(LAYER_INFILL | LAYER_SUPPORTERS | LAYER_RAFT), modelIDCounter(-1), _cursorEraser(QPixmap(":/Resource/cursor_eraser.png"))
+  ,layerViewFlags(LAYER_INFILL | LAYER_SUPPORTERS | LAYER_RAFT), modelIDCounter(-1), _cursorEraser(QPixmap(":/Resource/cursor_eraser.png")), _currentFeature(nullptr)
 {
 }
 
