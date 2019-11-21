@@ -184,6 +184,9 @@
     <ClCompile Include="common\debugging\DebugRenderObject.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="ui\Widget.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="common\Debug.h" />
@@ -765,6 +768,11 @@
     <ClInclude Include="common\debugging\DebugRenderObject.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="ui\Widget.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ui\RotateWidget.h" />
+    <ClInclude Include="ui\MoveWidget.h" />
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="debug\moc_predefs.h.cbt" />
@@ -782,8 +790,6 @@
     <QtMoc Include="utils\linemeshgeometry.h" />
     <QtMoc Include="input\raycastcontroller.h" />
     <QtMoc Include="render\LineMeshEntity.h" />
-    <QtMoc Include="ui\MoveWidget.h" />
-    <QtMoc Include="ui\RotateWidget.h" />
     <QtMoc Include="render\ModelMaterial.h" />
     <QtMoc Include="render\lights.h" />
     <QtMoc Include="ui\Widget3D.h" />

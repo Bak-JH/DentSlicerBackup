@@ -9,8 +9,7 @@ using namespace Qt3DExtras;
 
 const float RotateWidget::ROTATE_SPEED = 0.1;
 const float HALF_PI = M_PI / 2;
-RotateWidget::RotateWidget(const QVector3D& axis, Qt3DCore::QEntity* parent):QEntity(parent), _axis(axis),
-_parent(dynamic_cast<Widget3D*>(parent))
+RotateWidget::RotateWidget(const QVector3D& axis, Qt3DCore::QEntity* parent) :Widget(axis, parent)
 {
 
 	addComponent(&_torus);
@@ -39,8 +38,6 @@ _parent(dynamic_cast<Widget3D*>(parent))
 	{
 		_transform.setRotationY(90);
 	}
-	setEnabled(true);
-	addComponent(&_parent->layer);
 
 }
 
@@ -103,6 +100,7 @@ void Hix::UI::RotateWidget::setHighlight(bool enable)
 	_material.setDiffuse(color);
 	_material.setSpecular(color);
 }
+
 
 void Hix::UI::RotateWidget::doDrag(Hix::Input::MouseEventData& e)
 {
