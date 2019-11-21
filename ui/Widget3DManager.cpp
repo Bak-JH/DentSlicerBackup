@@ -20,13 +20,9 @@ void Widget3DManager::initialize(Qt3DCore::QEntity* qParent, Input::RayCastContr
 	_controller = controller;
 
 	_rotateWidget.setParent(qParent);
-	controller->addInputLayer(&_rotateWidget.layer);
-	controller->addHoverLayer(&_rotateWidget.layer);
 	_rotateWidget.setVisible(false);
 
 	_moveWidget.setParent(qParent);
-	controller->addInputLayer(&_moveWidget.layer);
-	controller->addHoverLayer(&_moveWidget.layer);
 	_moveWidget.setVisible(false);
 
 }

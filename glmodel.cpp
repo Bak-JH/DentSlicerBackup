@@ -247,6 +247,7 @@ void GLModel::clicked(MouseEventData& pick, const Qt3DRender::QRayCasterHit& hit
 		if (selectFaceFeature)
 		{
 			auto selectedFace = _mesh->getFaces().cbegin() + hit.primitiveIndex();
+			auto fn = selectedFace.worldFn();
 			selectFaceFeature->faceSelected(this, selectedFace, pick, hit);
 		}
 	}
