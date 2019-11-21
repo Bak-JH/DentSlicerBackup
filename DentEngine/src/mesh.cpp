@@ -156,7 +156,6 @@ Mesh::Mesh(const Mesh& o)
 	vertices = o.vertices;
 	halfEdges = o.halfEdges;
 	faces = o.faces;
-	_bounds = o._bounds;
 	//datas themselves do not contain dependency to mesh object
 	//but we use custom iterators to embed dependency to mesh object in order to tranverse to other datas
 	//ie) face -> edge and so on...
@@ -216,7 +215,6 @@ Mesh& Mesh::operator+=(const Mesh& o)
 
 void Mesh::vertexOffset(float factor){
 	vertices.markChangedAll();
-	_bounds.reset();
 	size_t count = 0;
 	auto end = vertices.end();
 	for(auto vtxItr = vertices.begin(); vtxItr != end; ++vtxItr)
@@ -225,7 +223,6 @@ void Mesh::vertexOffset(float factor){
 			QCoreApplication::processEvents();
 		QVector3D tmp = vtxItr.localPosition() - vtxItr.localVn() * factor;
 		vtxItr.ref().position = tmp;
-		_bounds.update(vtxItr.localPosition());
 		++count;
 	};
 }
@@ -241,15 +238,13 @@ void Mesh::vertexMove(const QVector3D& direction) {
 		vertex.position = tmp;
 		++count;
 	};
-	_bounds.translate(direction);
 
 }
 
 void Mesh::centerMesh(){
-    float x_center = (x_max() + x_min())/2;
-    float y_center = (y_max() + y_min())/2;
-    float z_center = (z_max() + z_min())/2;
-    vertexMove(-QVector3D(x_center, y_center, z_center));
+	Bounds3D bound;
+	bound.localBoundUpdate(*this);
+    vertexMove(-bound.centre());
 }
 
 
@@ -303,7 +298,6 @@ void Hix::Engine3D::Mesh::clear()
 	vertices.clear();
 	halfEdges.clear();
 	faces.clear();
-	_bounds = Bounds3D();
 }
 
 bool Mesh::addFace(const QVector3D& v0, const QVector3D& v1, const QVector3D& v2){
@@ -464,10 +458,6 @@ void Mesh::removeVertexHash(QVector3D pos)
 	}
 }
 
-const Bounds3D& Hix::Engine3D::Mesh::bounds() const
-{
-	return _bounds;
-}
 
 void Hix::Engine3D::Mesh::setSceneEntity(const Render::SceneEntity* entity)
 {
@@ -526,7 +516,6 @@ size_t Mesh::addOrRetrieveFaceVertex(const QVector3D& v){
     vertices.emplace_back(mv);
 	auto last = vertices.cend() - 1;
 	_verticesHash.insert({ hashval, last });
-    _bounds.update(v);
     return  last.index();
 }
 

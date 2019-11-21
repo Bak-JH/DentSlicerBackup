@@ -9,6 +9,7 @@ namespace Hix
 	}
 	namespace Engine3D
 	{
+		class Mesh;
 		//bounding box in 3D
 		class Bounds3D
 		{
@@ -17,6 +18,7 @@ namespace Hix
 			Bounds3D();
 			Bounds3D(const Hix::Render::SceneEntity& bounded);
 			void update(const QVector3D& pt);
+			void localBoundUpdate(const Hix::Engine3D::Mesh& mesh);
 			Bounds3D& operator+=(const Bounds3D& other);
 			void translate(const QVector3D& displacement);
 			void scale(const QVector3D& scales);

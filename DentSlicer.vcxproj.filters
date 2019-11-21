@@ -184,6 +184,9 @@
     <ClCompile Include="common\debugging\DebugRenderObject.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="feature\TwoManifoldBuilder.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="common\Debug.h" />
@@ -763,6 +766,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="common\debugging\DebugRenderObject.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="feature\TwoManifoldBuilder.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -157,13 +157,6 @@ namespace Hix
 			const TrackedIndexedList<MeshFace, std::allocator<MeshFace>, FaceItrFactory>& getFaces()const;
 			const TrackedIndexedList<HalfEdge, std::allocator<HalfEdge>, HalfEdgeItrFactory>& getHalfEdges()const;
 
-
-			inline float x_min()const{ return _bounds.xMin();}
-			inline float x_max()const{ return _bounds.xMax();}
-			inline float y_min()const{ return _bounds.yMin();}
-			inline float y_max()const{ return _bounds.yMax();}
-			inline float z_min()const{ return _bounds.zMin();}
-			inline float z_max()const{ return _bounds.zMax();}
 			std::unordered_set<FaceConstItr> findNearSimilarFaces(QVector3D normal,FaceConstItr mf, float maxNormalDiff = 0.1f, size_t maxCount = 10000)const;
 
 			/********************** Stuff that can be public **********************/
@@ -196,11 +189,7 @@ namespace Hix
 			std::unordered_multimap<size_t, VertexConstItr> _verticesHash;
 			TrackedIndexedList<MeshVertex, std::allocator<MeshVertex>, VertexItrFactory> vertices;
 			TrackedIndexedList<HalfEdge, std::allocator<HalfEdge>, HalfEdgeItrFactory> halfEdges;
-			TrackedIndexedList<MeshFace, std::allocator<MeshFace>, FaceItrFactory> faces;
-
-			//axis aligned bound box, needs to be recalculated even when just transform changed.
-			Bounds3D _bounds;
-			
+			TrackedIndexedList<MeshFace, std::allocator<MeshFace>, FaceItrFactory> faces;			
 
 		};
 
