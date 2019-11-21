@@ -239,6 +239,5 @@ void Hix::Engine3D::BVH::initModel(const GLModel& model)
 	{
 		_wPosCache[vtxItr] = vtxItr.worldPosition();
 	}
-	auto faceEnd = model.getMesh()->getFaces().cend();
 }
 
