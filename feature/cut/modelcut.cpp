@@ -56,9 +56,9 @@ void Hix::Features::ModelCut::applyCut()
 	{
 		for (auto each : _models)
 		{
-			_modelHistory.push_back(std::move(each));
+			_modelHistory.push_back(each);
 			ZAxialCut impl(each, _cuttingPlane.transform().translation().z());
-
+			
 		}
 		break;
 	}
@@ -83,7 +83,8 @@ void ModelCut::undo()
 		//qmlManager->listModel(_modelHistory.back());
 		for (auto each : _models)
 		{
-			qDebug() << each->id();
+			qmlManager->listModel(each);
+			qDebug() << each->ID;
 		}
 	}
 }

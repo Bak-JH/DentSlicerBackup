@@ -5,47 +5,66 @@
 
 using namespace Hix::Debug;
 
-Hix::Features::Extend::Extend(const std::unordered_set<GLModel*>& selectedModels):Feature(selectedModels)
+Hix::Features::ExtendMode::ExtendMode(const std::unordered_set<GLModel*>& selectedModels) 
+	:PPShaderFeature(selectedModels)
 {
+}
+
+Hix::Features::ExtendMode::~ExtendMode()
+{
+}
+
+void Hix::Features::ExtendMode::faceSelected(GLModel* selected, const Hix::Engine3D::FaceConstItr& selectedFace, const Hix::Input::MouseEventData& mouse, const Qt3DRender::QRayCasterHit& hit)
+{
+	auto& arg = _args[selected];
+	arg.normal = selectedFace.localFn();
+	auto& latest = arg.extensionFaces = selected->getMesh()->findNearSimilarFaces(arg.normal, selectedFace);
+	PPShaderFeature::colorFaces(selected, latest);
+}
+
+std::unique_ptr<Hix::Features::FeatureContainer> Hix::Features::ExtendMode::applyExtend(double distance)
+{
+	std::unique_ptr<Hix::Features::FeatureContainer> container = std::make_unique<FeatureContainer>();
+	for (auto& each : _args)
+	{
+		auto& arg = each.second;
+		container->addFeature(new Extend(each.first, arg.normal, arg.extensionFaces, distance));
+	}
+
+	return nullptr;
+}
+
+
+
+Hix::Features::Extend::Extend(GLModel* selectedModel, const QVector3D& selectedFaceNormal,
+								const std::unordered_set<FaceConstItr>& targetFaces, double distance)
+	: _model(selectedModel), _normal(selectedFaceNormal), _extensionFaces(targetFaces)
+{
+
+
+	_prevMesh = new Mesh(*selectedModel->getMeshModd());
+	selectedModel->unselectMeshFaces();
+	Paths3D extension_outlines = detectExtensionOutline(selectedModel->getMeshModd(), _extensionFaces);
+	extendAlongOutline(selectedModel->getMeshModd(), _normal, extension_outlines, distance);
+	coverCap(selectedModel, _normal, _extensionFaces, distance);
+	selectedModel->getMeshModd()->removeFaces(_extensionFaces);
+	selectedModel->updateMesh();
+	selectedModel->setZToBed();
+	_extensionFaces.clear();
+		
+
 }
 
 Hix::Features::Extend::~Extend()
 {
 }
 
-void Hix::Features::Extend::faceSelected(GLModel* selected, const Hix::Engine3D::FaceConstItr& selectedFace, const Hix::Input::MouseEventData& mouse, const Qt3DRender::QRayCasterHit& hit)
-{
-	_model = selected;
-	_normal = selectedFace.localFn();
-	_extensionFaces = selected->getMesh()->findNearSimilarFaces(_normal, selectedFace);
-	PPShaderFeature::colorFaces(selected, _extensionFaces);
-}
-
-void Hix::Features::Extend::extendMesh(double distance)
-{
-	if (_model)
-	{
-		_prevMeshes.push_back(new Mesh(*_model->getMeshModd()));
-		_model->unselectMeshFaces();
-		Paths3D extension_outlines = detectExtensionOutline(_model->getMeshModd(), _extensionFaces);
-		extendAlongOutline(_model->getMeshModd(), _normal, extension_outlines, distance);
-		coverCap(_model, _normal, _extensionFaces, distance);
-		_model->getMeshModd()->removeFaces(_extensionFaces);
-		_model->updateMesh();
-		_extensionFaces.clear();
-		_model->setZToBed();
-	}
-}
-
 void Hix::Features::Extend::undo()
 {
-	qDebug() << _extensionFaces.size();
-	_model->setMesh(_prevMeshes.back());
+	_model->setMesh(_prevMesh);
 	_model->unselectMeshFaces();
 	_model->updateMesh();
 	_model->setZToBed();
-	_prevMeshes.pop_back();
-	qDebug() << _extensionFaces.size();
 }
 
 Paths3D Hix::Features::Extend::detectExtensionOutline(Mesh* mesh, const std::unordered_set<FaceConstItr>& meshfaces){

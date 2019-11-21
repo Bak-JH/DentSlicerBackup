@@ -134,9 +134,6 @@
     <ClCompile Include="feature\interfaces\PPShaderFeature.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="feature\interfaces\SelectFaceFeature.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="feature\cut\MeshPlaneBisect.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -144,6 +141,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Qml\Popup.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="feature\interfaces\Mode.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="feature\interfaces\SelectFaceMode.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -678,10 +681,13 @@
     <ClInclude Include="feature\interfaces\PPShaderFeature.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="feature\interfaces\SelectFaceFeature.h">
+    <ClInclude Include="DentEngine\src\mesh.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="DentEngine\src\mesh.h">
+    <ClInclude Include="feature\interfaces\Mode.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="feature\interfaces\SelectFaceMode.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

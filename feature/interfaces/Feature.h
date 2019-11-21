@@ -1,5 +1,7 @@
 #pragma once
 #include <unordered_set>
+#include <memory>
+#include <deque>
 class GLModel;
 namespace Hix
 {
@@ -11,12 +13,22 @@ namespace Hix
 		{
 		public:
 			Feature();
-			Feature(const std::unordered_set<GLModel*>& subjects);
 			virtual ~Feature();
 			virtual void undo() = 0;
-		protected:
-			std::unordered_set<GLModel*> _subjects;
 
+
+		};
+
+
+		class FeatureContainer: public Feature
+		{
+		public:
+			FeatureContainer();
+			void addFeature(Feature* feature);
+			virtual ~FeatureContainer();
+			void undo()override;
+		private:
+			std::deque<std::unique_ptr<Feature>> _container;
 		};
 	}
 }

@@ -2,7 +2,8 @@
 #include "../../glmodel.h"
 #include "../../qmlmanager.h"
 
-Hix::Features::PPShaderFeature::PPShaderFeature()
+Hix::Features::PPShaderFeature::PPShaderFeature(const std::unordered_set<GLModel*>& selectedModels)
+	:_subjects(selectedModels), Mode()
 {
 	for (auto each : _subjects)
 	{

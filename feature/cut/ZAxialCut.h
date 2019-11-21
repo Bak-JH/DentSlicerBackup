@@ -2,6 +2,7 @@
 #include <unordered_set>
 #include "../../DentEngine/src/ContourBuilder.h"
 #include "../../common/Task.h"
+#include "feature/interfaces/Feature.h"
 
 class GLModel;
 namespace Hix
@@ -15,7 +16,7 @@ namespace Hix
 	{
 		namespace Cut
 		{
-			class ZAxialCut
+			class ZAxialCut : public Feature
 			{
 				
 			public:
@@ -28,6 +29,7 @@ namespace Hix
 				};
 				ZAxialCut(GLModel* subject, float cuttingPlane, Result option = Result::KeepBoth);
 				void doChildrenRecursive(GLModel* subject, float cuttingPlane, Result option);
+				void undo() override;
 			private:
 				//top, bottom pair
 				std::unordered_map<GLModel*, std::pair<GLModel*, GLModel*>> _divisionMap;

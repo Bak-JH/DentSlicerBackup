@@ -83,8 +83,6 @@ Hix::Features::Cut::ZAxialCut::ZAxialCut(GLModel* subject, float cuttingPlane, H
 		if (parentTB.first != nullptr)
 		{
 			child->setParent(parentTB.first);
-			auto parent = child->parentEntity();
-			auto parent2 = child->parentEntity();
 		}
 		else
 		{
@@ -98,8 +96,6 @@ Hix::Features::Cut::ZAxialCut::ZAxialCut(GLModel* subject, float cuttingPlane, H
 		if (parentTB.second != nullptr)
 		{
 			child->setParent(parentTB.second);
-			auto parent = child->parentEntity();
-			auto parent2 = child->parentEntity();
 		}
 		else
 		{
@@ -143,12 +139,14 @@ Hix::Features::Cut::ZAxialCut::ZAxialCut(GLModel* subject, float cuttingPlane, H
 		if (spltCnt != 0)
 		{
 			//if split occured, the original model needs to be deleted
-			delete split.first;
+			//delete split.first;
 		}
 	}
 
 	if(deleteOriginal)
 		qmlManager->deleteModelFile(subject->ID);
+
+	qDebug() << qmlManager->glmodels.size();
 }
 
 void Hix::Features::Cut::ZAxialCut::doChildrenRecursive(GLModel* subject, float cuttingPlane, Result option)
@@ -188,6 +186,16 @@ void Hix::Features::Cut::ZAxialCut::doChildrenRecursive(GLModel* subject, float 
 	}
 }
 
+void Hix::Features::Cut::ZAxialCut::undo()
+{
+	for (auto each : _divisionMap)
+	{
+		qDebug() << "org: " << each.first->ID;
+		qDebug() << "c1: " << each.second.first;
+		qDebug() << "c2: " << each.second.second;
+	}
+}
+
 Hix::Features::Cut::ZAxialCutImp::ZAxialCutImp(GLModel* subject, float cuttingPlane, Mesh*& topMesh, Mesh*& botMesh, ZAxialCut::Result option) :
 	_cuttingPlane(cuttingPlane), _origMesh(subject->getMesh()), _option((option))
 {
@@ -201,7 +209,7 @@ Hix::Features::Cut::ZAxialCutImp::ZAxialCutImp(GLModel* subject, float cuttingPl
 		//empty node, add empty halves to both sides
 		botMesh = _bottomMesh;
 		topMesh = _topMesh;
-		subject->clearMesh();
+		//subject->clearMesh();
 		return;
 	}
 	else if (_bottomMesh->getFaces().size() == _origMesh->getFaces().size() && _option != ZAxialCut::Result::KeepTop)
@@ -243,7 +251,7 @@ Hix::Features::Cut::ZAxialCutImp::ZAxialCutImp(GLModel* subject, float cuttingPl
 
 	botMesh = _bottomMesh;
 	topMesh = _topMesh;
-	subject->clearMesh();
+	//subject->clearMesh();
 
 
 }
