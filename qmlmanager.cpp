@@ -33,7 +33,7 @@
 #include "feature/layerview/layerview.h"
 #include "feature/SupportFeature.h"
 #include "feature/arrange/autoarrange.h"
-
+#include "feature/TwoManifoldBuilder.h"
 #include <functional>
 using namespace Hix::Input;
 using namespace Hix::UI;
@@ -336,14 +336,16 @@ void QmlManager::openModelFile(QString fname){
 	setProgress(0.6);
 
 	//repair mode
-	if (Hix::Features::isRepairNeeded(mesh))
-	{
-		qmlManager->setProgressText("Repairing mesh.");
-		std::unordered_set<GLModel*> repairModels;
-		repairModels.insert(latest);
-		_currentFeature.reset(new MeshRepair(repairModels));
-		_currentFeature.reset();
-	}
+	//if (Hix::Features::isRepairNeeded(mesh))
+	//{
+	//	qmlManager->setProgressText("Repairing mesh.");
+	//	std::unordered_set<GLModel*> repairModels;
+	//	repairModels.insert(latest);
+	//	_currentFeature.reset(new MeshRepair(repairModels));
+	//	_currentFeature.reset();
+	//}
+	TwoManifoldBuilder modelBuilder(*mesh);
+
 	setProgress(1.0);
     // do auto arrange
     if (glmodels.size() >= 2)
