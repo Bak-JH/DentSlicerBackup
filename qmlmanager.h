@@ -81,7 +81,11 @@ public:
 	template<typename FeatureType>
 	bool isActive()
 	{
-		return dynamic_cast<const FeatureType*>(_currentFeature.get()) != nullptr;
+		if (_currentFeature.get() != nullptr)
+		{
+			return dynamic_cast<const FeatureType*>(_currentFeature.get()) != nullptr;
+		}
+		return false;
 	}
 	bool isFeatureActive();
 	template <typename F>

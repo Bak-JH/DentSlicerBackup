@@ -7,8 +7,7 @@
 //const float HALF_PI = M_PI / 2;
 const QUrl Hix::UI::MoveWidget::ARROW_MESH_URL(QStringLiteral("qrc:/Resource/mesh/arrow.stl"));
 const double TRANSLATE_MULT = 1;
-Hix::UI::MoveWidget::MoveWidget(const QVector3D& axis, Qt3DCore::QEntity* parent):QEntity(parent), _axis(axis),
-_parent(dynamic_cast<Widget3D*>(parent))
+Hix::UI::MoveWidget::MoveWidget(const QVector3D& axis, Qt3DCore::QEntity* parent):Widget(axis, parent)
 {
 	addComponent(&_mesh);
 	addComponent(&_material);
@@ -33,8 +32,6 @@ _parent(dynamic_cast<Widget3D*>(parent))
 	{
 		_transform.setRotationY(90);
 	}
-	setEnabled(true);
-	addComponent(&_parent->layer);
 
 }
 
