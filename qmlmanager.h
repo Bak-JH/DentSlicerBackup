@@ -82,7 +82,7 @@ public:
 	template<typename FeatureType>
 	bool isActive()
 	{
-		return dynamic_cast<const FeatureType*>(_currentFeature.get()) != nullptr;
+		return dynamic_cast<const FeatureType*>(_currentMode.get()) != nullptr;
 	}
 	bool isFeatureActive();
 	template <typename F>
@@ -227,7 +227,7 @@ public:
     int getLayerViewFlags();
 	void modelSelected(int);
 	
-	Hix::Features::Feature* currentFeature()const;
+	Hix::Features::Mode* currentMode()const;
 
 	//remove this
 	const std::unordered_set<GLModel*>& getSelectedModels();
@@ -310,7 +310,7 @@ private:
 	//cursors
 	QCursor _cursorEraser;
 	Hix::Support::SupportRaftManager _supportRaftManager;
-	std::unique_ptr<Hix::Features::Feature> _currentFeature;
+	std::unique_ptr<Hix::Features::Mode> _currentMode;
 	std::deque<std::unique_ptr<Hix::Features::Feature>> _featureHistory;
 
 signals:

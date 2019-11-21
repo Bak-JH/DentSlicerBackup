@@ -12,12 +12,12 @@ Hix::Features::Labelling::~Labelling()
 	delete _previewModel;
 }
 
-void Hix::Features::Labelling::faceSelected(GLModel* selected, const Hix::Engine3D::FaceConstItr& selectedFace, const Hix::Input::MouseEventData& mouse, const Qt3DRender::QRayCasterHit& hit)
-{
-	_targetModel = selected;
-	updateLabelMesh(hit.localIntersection(), selectedFace.localFn());
-
-}
+//void Hix::Features::Labelling::faceSelected(GLModel* selected, const Hix::Engine3D::FaceConstItr& selectedFace, const Hix::Input::MouseEventData& mouse, const Qt3DRender::QRayCasterHit& hit)
+//{
+//	_targetModel = selected;
+//	updateLabelMesh(hit.localIntersection(), selectedFace.localFn());
+//
+//}
 
 void Hix::Features::Labelling::updateLabelMesh(const QVector3D translation, const QVector3D normal)
 {

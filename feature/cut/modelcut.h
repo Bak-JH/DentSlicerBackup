@@ -7,7 +7,7 @@ namespace Hix
 {
 	namespace Features
 	{
-		class ModelCut: public Hix::Features::Feature
+		class ModelCut : public Feature
 		{
 		public:
 			enum CutType
@@ -20,6 +20,7 @@ namespace Hix
 			void cutModeSelected(int type);
 			void getSliderSignal(double value);
 			void applyCut();
+			void undo() override;
 				
 			// polyline
 			void addCuttingPoint(QVector3D v);
@@ -27,7 +28,6 @@ namespace Hix
 			void removeCuttingPoints();
 			void drawLine(QVector3D endpoint);
 
-			void undo() override;
 		private:
 			//cutting
 			CutType _cutType = ZAxial;

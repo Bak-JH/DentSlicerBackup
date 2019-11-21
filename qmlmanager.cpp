@@ -285,42 +285,39 @@ void QmlManager::initializeUI(QQmlApplicationEngine* e){
 
 GLModel* QmlManager::listModel(GLModel* model)
 {
-	Qt3DCore::QTransform toRoot;
-	toRoot.setMatrix(model->toRootMatrix());
-	auto res = new GLModel(models, model->getMeshModd(), model->modelName(), modelIDCounter, &toRoot);
-	glmodels.push_back(std::make_unique<GLModel>(res));
-	--modelIDCounter;
-	auto latestAdded = res;
+	auto latestAdded = getModelByID(model->ID);
+
+	if (latestAdded == nullptr)
+	{
+		Qt3DCore::QTransform toRoot;
+		toRoot.setMatrix(model->toRootMatrix());
+		glmodels.push_back(std::make_unique<GLModel>(models, model->getMeshModd(), model->modelName(), modelIDCounter, &toRoot));
+		--modelIDCounter;
+		latestAdded = glmodels.back().get();
+	}
 	// set initial position
 	//add to raytracer
+	latestAdded->setParent(models);
+	latestAdded->setEnabled(true);
 	latestAdded->setHitTestable(true);
 	qmlManager->addPart(latestAdded->modelName(), latestAdded->ID);
-	//steal children, mixing RAII with QT is difficult
-	for (auto& childNode : model->childNodes())
-	{
-		auto childModel = dynamic_cast<GLModel*>(childNode);
-		if (childModel)
-		{
-			childModel->setParent(latestAdded);
-		}
-	}
-	model->setMesh(nullptr);
-	delete model;
 	return latestAdded;
 }
 
 
 GLModel* QmlManager::createAndListModel(Hix::Engine3D::Mesh* mesh, QString fname, const Qt3DCore::QTransform* transform) {
-	auto res = new GLModel(models, mesh, fname, modelIDCounter, transform);
-	glmodels.push_back(std::make_unique<GLModel>(res));
+	//auto res = new GLModel(models, mesh, fname, modelIDCounter, transform);
+	glmodels.push_back(std::make_unique<GLModel>(models, mesh, fname, modelIDCounter, transform));
     --modelIDCounter;
-	auto latestAdded = res;
+	auto latestAdded = glmodels.back().get();
     // set initial position
 	//add to raytracer
 	latestAdded->setHitTestable(true);
+	qDebug() << "model name: " << latestAdded->modelName();
 	qmlManager->addPart(latestAdded->modelName(), latestAdded->ID);
 	return latestAdded;
 }
+
 void QmlManager::openModelFile(QString fname){
 	openProgressPopUp();
 
@@ -344,8 +341,8 @@ void QmlManager::openModelFile(QString fname){
 		qmlManager->setProgressText("Repairing mesh.");
 		std::unordered_set<GLModel*> repairModels;
 		repairModels.insert(latest);
-		_currentFeature.reset(new MeshRepair(repairModels));
-		_currentFeature.reset();
+		//_currentFeature.reset(new MeshRepair(repairModels));
+		_currentMode.reset();
 	}
 	setProgress(1.0);
     // do auto arrange
@@ -357,9 +354,9 @@ void QmlManager::openModelFile(QString fname){
 
 void QmlManager::modelRepair()
 {
-	_currentFeature.reset(new MeshRepair(selectedModels));
+	//_currentFeature.reset(new MeshRepair(selectedModels));
 	//if cut is finished;
-	_currentFeature.reset();
+	_currentMode.reset();
 
 }
 
@@ -367,14 +364,10 @@ GLModel* QmlManager::getModelByID(int ID)
 {
 	for (auto& modelItr : glmodels)
 	{
-		if (modelItr.get()->id() == ID)
+		if (modelItr.get()->ID == ID)
 			return modelItr.get();
 	}
 
-#ifdef _STRICT_DEBUG
-		throw std::exception("getModelByID failed");
-#endif
-		qDebug() << "glmodels.find failed" <<ID;
 	return nullptr;
 }
 
@@ -395,6 +388,8 @@ void QmlManager::deleteOneModelFile(GLModel* target) {
 		//if selected, remove from selected list
 		_supportRaftManager.clear(*target);
 		selectedModels.erase(target);
+		target->QNode::setParent((QNode*)nullptr);
+		target->setEnabled(false);
 		//clear related supports
 	}
 }
@@ -482,8 +477,8 @@ void QmlManager::fixMesh(){
     openProgressPopUp();
 	qmlManager->setProgressText("Repairing mesh.");
 	qmlManager->setProgress(0.1);
-	_currentFeature.reset(new MeshRepair(selectedModels));
-	_currentFeature.reset();
+	//_currentFeature.reset(new MeshRepair(selectedModels));
+	_currentMode.reset();
 	qmlManager->setProgress(1.0);
 }
 
@@ -492,6 +487,7 @@ void QmlManager::fixMesh(){
 void QmlManager::disableObjectPickers(){
     for (auto& pair : glmodels){
 		auto glm = pair.get();
+		//qDebug() << glm->ID;
 		glm->setHitTestable(false);
     }
 }
@@ -855,9 +851,9 @@ void QmlManager::modelSelected(int ID){
     sendUpdateModelInfo();
 }
 
-Hix::Features::Feature* QmlManager::currentFeature()const
+Hix::Features::Mode* QmlManager::currentMode()const
 {
-	return _currentFeature.get();
+	return _currentMode.get();
 }
 
 //void QmlManager::faceSelectionEnable()
@@ -882,53 +878,53 @@ Hix::Features::Feature* QmlManager::currentFeature()const
 
 void QmlManager::openLayFlat()
 {
-	_currentFeature.reset(new LayFlat(selectedModels));
+	_currentMode.reset(new LayFlatMode(selectedModels));
 }
 
 void QmlManager::closeLayFlat()
 {
-	_currentFeature.reset();
+	_currentMode.reset();
 }
 
 void QmlManager::generateLayFlat()
 {
-	auto layFlat = dynamic_cast<LayFlat*>(_currentFeature.get());
-	layFlat->generateLayFlat();
+	//auto layFlat = dynamic_cast<LayFlat*>(_currentFeature.get());
+	//layFlat->generateLayFlat();
 }
 
 void QmlManager::openLabelling()
 {
-	_currentFeature.reset(new Labelling());
+	//_currentFeature.reset(new Labelling());
 }
 
 void QmlManager::closeLabelling()
 {
 	stateChangeLabelling();
-	_currentFeature.reset();
+	_currentMode.reset();
 }
 
 void QmlManager::setLabelText(QString text)
 {
-	auto labelling = dynamic_cast<Labelling*>(_currentFeature.get());
-	labelling->setText(text);
+	//auto labelling = dynamic_cast<Labelling*>(_currentFeature.get());
+	//labelling->setText(text);
 }
 
 void QmlManager::setLabelFontName(QString fontName)
 {
-	auto labelling = dynamic_cast<Labelling*>(_currentFeature.get());
-	labelling->setFontName(fontName);
+	//auto labelling = dynamic_cast<Labelling*>(_currentFeature.get());
+	//labelling->setFontName(fontName);
 }
 
 void QmlManager::setLabelFontBold(bool isBold)
 {
-	auto labelling = dynamic_cast<Labelling*>(_currentFeature.get());
-	labelling->setFontBold(isBold);
+	//auto labelling = dynamic_cast<Labelling*>(_currentFeature.get());
+	//labelling->setFontBold(isBold);
 }
 
 void QmlManager::setLabelFontSize(int fontSize)
 {
-	auto labelling = dynamic_cast<Labelling*>(_currentFeature.get());
-	labelling->setFontSize(fontSize);
+	//auto labelling = dynamic_cast<Labelling*>(_currentFeature.get());
+	//labelling->setFontSize(fontSize);
 }
 
 void QmlManager::stateChangeLabelling()
@@ -939,25 +935,24 @@ void QmlManager::stateChangeLabelling()
 
 void QmlManager::generateLabelMesh()
 {
-	auto labelling = dynamic_cast<Labelling*>(_currentFeature.get());
-	labelling->generateLabelMesh();
+	//auto labelling = dynamic_cast<Labelling*>(_currentFeature.get());
+	//labelling->generateLabelMesh();
 }
 
 void QmlManager::openExtension()
 {
-	_currentFeature.reset(new Extend(selectedModels));
+	_currentMode.reset(new ExtendMode(selectedModels));
 }
 
 void QmlManager::closeExtension()
 {
-	_currentFeature.reset();
+	_currentMode.reset();
 }
 
 void QmlManager::generateExtensionFaces(double distance)
 {
-	auto extend = dynamic_cast<Extend*>(_currentFeature.get());
-	_featureHistory.push_back(std::move(_currentFeature));
-	extend->extendMesh(distance);
+	auto extend = dynamic_cast<ExtendMode*>(_currentMode.get());
+	_featureHistory.push_back(extend->applyExtend(distance));
 }
 
 QString QmlManager::filenameToModelName(const std::string& s)
@@ -1575,18 +1570,18 @@ void QmlManager::setModelViewMode(int mode)
 	switch (mode) {
 	case VIEW_MODE_OBJECT:
 	{
-		auto layerview = dynamic_cast<LayerView*>(_currentFeature.get());
-		if (layerview)
-		{
-			_currentFeature.reset();
-		}		
-		break;
+		//auto layerview = dynamic_cast<LayerView*>(_currentFeature.get());
+		//if (layerview)
+		//{
+		//	_currentMode.reset();
+		//}		
+		//break;
 	}
 
 
 	case VIEW_MODE_LAYER:
 	{
-		_currentFeature.reset(new LayerView(selectedModels, getSelectedBound()));
+		//_currentFeature.reset(new LayerView(selectedModels, getSelectedBound()));
 		break;
 	}
 
@@ -1666,12 +1661,12 @@ QVector2D QmlManager::world2Screen(QVector3D target) {
 void QmlManager::openSupport()
 {
 	//just empty placeholder to give modality to Support.
-	_currentFeature.reset(new SupportFeature());
+	//_currentFeature.reset(new SupportFeature());
 
 }
 void QmlManager::closeSupport()
 {
-	_currentFeature.reset();
+	_currentMode.reset();
 }
 
 void QmlManager::generateAutoSupport()
@@ -1733,54 +1728,54 @@ void QmlManager::regenerateRaft()
 
 void QmlManager::modelCut()
 {
-	auto modelCut = dynamic_cast<ModelCut*>(_currentFeature.get());
-	_featureHistory.push_back(std::move(_currentFeature));
-	modelCut->applyCut();
+	//auto modelCut = dynamic_cast<ModelCut*>(_currentFeature.get());
+	//_featureHistory.push_back(std::move(_currentFeature));
+	//modelCut->applyCut();
 }
 void QmlManager::cutModeSelected(int mode)
 {
-	auto modelCut = dynamic_cast<ModelCut*>(_currentFeature.get());
-	modelCut->cutModeSelected(mode);
+	//auto modelCut = dynamic_cast<ModelCut*>(_currentFeature.get());
+	//modelCut->cutModeSelected(mode);
 }
 void QmlManager::openCut()
 {
-	_currentFeature.reset(new ModelCut(selectedModels, getSelectedBound()));
+	//_currentFeature.reset(new ModelCut(selectedModels, getSelectedBound()));
 
 }
 void QmlManager::closeCut()
 {
-	_currentFeature.reset();
+	_currentMode.reset();
 }
 void QmlManager::getSliderSignal(double sliderPos)
 {
-	auto modelCut = dynamic_cast<ModelCut*>(_currentFeature.get());
-	if (modelCut)
-	{
-		modelCut->getSliderSignal(sliderPos);
-		return;
-	}
-	auto shellOffset = dynamic_cast<ShellOffset*>(_currentFeature.get());
-	if (shellOffset)
-	{
-		shellOffset->getSliderSignal(sliderPos);
-		return;
-	}
+	//auto modelCut = dynamic_cast<ModelCut*>(_currentFeature.get());
+	//if (modelCut)
+	//{
+	//	modelCut->getSliderSignal(sliderPos);
+	//	return;
+	//}
+	//auto shellOffset = dynamic_cast<ShellOffset*>(_currentFeature.get());
+	//if (shellOffset)
+	//{
+	//	shellOffset->getSliderSignal(sliderPos);
+	//	return;
+	//}
 }
 
 void QmlManager::getCrossSectionSignal(int val)
 {
-	auto layerview = dynamic_cast<LayerView*>(_currentFeature.get());
-	if (layerview)
-	{
-		layerview->crossSectionSliderSignal(val);
-	}
+	//auto layerview = dynamic_cast<LayerView*>(_currentFeature.get());
+	//if (layerview)
+	//{
+	//	layerview->crossSectionSliderSignal(val);
+	//}
 }
 
 
 void QmlManager::openShellOffset() {
 	if (selectedModels.size() == 1)
 	{
-		_currentFeature.reset(new ShellOffset(*selectedModels.begin()));
+		//_currentFeature.reset(new ShellOffset(*selectedModels.begin()));
 
 	}
 	else
@@ -1791,7 +1786,7 @@ void QmlManager::openShellOffset() {
 }
 
 void QmlManager::closeShellOffset() {
-	_currentFeature.reset();
+	_currentMode.reset();
 }
 
 
@@ -1799,13 +1794,13 @@ void QmlManager::closeShellOffset() {
 void QmlManager::generateShellOffset(double factor) {
 	qmlManager->openProgressPopUp();
 	qmlManager->setProgress(0.1);
-	auto shellOffset = dynamic_cast<ShellOffset*>(_currentFeature.get());
-	shellOffset->doOffset(factor);
+	//auto shellOffset = dynamic_cast<ShellOffset*>(_currentFeature.get());
+	//shellOffset->doOffset(factor);
 	qmlManager->setProgress(1.0);
 
 }
 
 bool QmlManager::isFeatureActive()
 {
-	return _currentFeature.get() != nullptr;
+	return _currentMode.get() != nullptr;
 }
