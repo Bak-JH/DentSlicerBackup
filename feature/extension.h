@@ -13,25 +13,13 @@ namespace Hix
 	namespace Features
 	{
 		using namespace Engine3D;
-		class Extend;
+
 		struct ExtendArg
 		{
 			QVector3D normal;
 			std::unordered_set<FaceConstItr> extensionFaces;
 		};
-		class ExtendMode : public SelectFaceMode, public PPShaderFeature, public Mode
-		{
-		public:
-			ExtendMode(const std::unordered_set<GLModel*>& selectedModels);
-			virtual ~ExtendMode();
-			void faceSelected(GLModel* selected, const Hix::Engine3D::FaceConstItr& selectedFace, const Hix::Input::MouseEventData& mouse, const Qt3DRender::QRayCasterHit& hit)override;
-			std::unique_ptr<FeatureContainer> applyExtend(double distance);
 
-		private:
-			GLModel* _model = nullptr;
-			QVector3D _normal;
-			std::unordered_map<GLModel*, ExtendArg> _args;
-		};
 
 		class Extend: public Feature //pee pee hee hee
 		{
@@ -50,6 +38,22 @@ namespace Hix
 			QVector3D _normal;
 			std::unordered_set<FaceConstItr> _extensionFaces;
 			Mesh* _prevMesh;
+		};
+
+
+
+		class ExtendMode : public SelectFaceMode, public PPShaderFeature, public Mode
+		{
+		public:
+			ExtendMode(const std::unordered_set<GLModel*> & selectedModels);
+			virtual ~ExtendMode();
+			void faceSelected(GLModel* selected, const Hix::Engine3D::FaceConstItr& selectedFace, const Hix::Input::MouseEventData& mouse, const Qt3DRender::QRayCasterHit& hit)override;
+			std::unique_ptr<FeatureContainer> applyExtend(double distance);
+
+		private:
+			GLModel* _model = nullptr;
+			QVector3D _normal;
+			std::unordered_map<GLModel*, ExtendArg> _args;
 		};
 	}
 }

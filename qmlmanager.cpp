@@ -888,8 +888,9 @@ void QmlManager::closeLayFlat()
 
 void QmlManager::generateLayFlat()
 {
-	//auto layFlat = dynamic_cast<LayFlat*>(_currentFeature.get());
-	//layFlat->generateLayFlat();
+	auto layflat = dynamic_cast<LayFlatMode*>(_currentMode.get())->applyLayFlat();
+	if (layflat != nullptr)
+		_featureHistory.push_back(std::move(layflat));
 }
 
 void QmlManager::openLabelling()
@@ -951,8 +952,9 @@ void QmlManager::closeExtension()
 
 void QmlManager::generateExtensionFaces(double distance)
 {
-	auto extend = dynamic_cast<ExtendMode*>(_currentMode.get());
-	_featureHistory.push_back(extend->applyExtend(distance));
+	auto extend = dynamic_cast<ExtendMode*>(_currentMode.get())->applyExtend(distance);
+	if(extend != nullptr)
+		_featureHistory.push_back(std::move(extend));
 }
 
 QString QmlManager::filenameToModelName(const std::string& s)
@@ -1298,8 +1300,9 @@ void QmlManager::runGroupFeature(int ftrType, QString state, double arg1, double
 void QmlManager::unDo(){
 	if (_featureHistory.empty())
 		return;
-	auto prevFeture = _featureHistory.back().get();
-	prevFeture->undo();
+	auto prevFeature = _featureHistory.back().get();
+	if(prevFeature)
+		prevFeature->undo();
 	_featureHistory.pop_back();
 }
 
