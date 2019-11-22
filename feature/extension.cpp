@@ -24,15 +24,20 @@ void Hix::Features::ExtendMode::faceSelected(GLModel* selected, const Hix::Engin
 
 std::unique_ptr<Hix::Features::FeatureContainer> Hix::Features::ExtendMode::applyExtend(double distance)
 {
+	if (_args.empty())
+		return nullptr;
 	std::unique_ptr<Hix::Features::FeatureContainer> container = std::make_unique<FeatureContainer>();
 	for (auto& each : _args)
 	{
 		auto& arg = each.second;
 		container->addFeature(new Extend(each.first, arg.normal, arg.extensionFaces, distance));
 	}
+	_args.clear();
 
-	return nullptr;
+	return container;
 }
+
+
 
 
 

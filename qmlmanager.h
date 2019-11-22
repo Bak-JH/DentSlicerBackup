@@ -311,7 +311,7 @@ private:
 	QCursor _cursorEraser;
 	Hix::Support::SupportRaftManager _supportRaftManager;
 	std::unique_ptr<Hix::Features::Mode> _currentMode;
-	std::deque<std::unique_ptr<Hix::Features::Feature>> _featureHistory;
+	std::deque<std::unique_ptr<Hix::Features::FeatureContainer>> _featureHistory;
 
 signals:
     void updateModelInfo(int printing_time, int layer, QString xyz, float volume);

@@ -3,26 +3,6 @@
 using namespace Hix::Features;
 
 
-
-
-//void Hix::Features::LayFlat::faceSelected(GLModel* selected, const Hix::Engine3D::FaceConstItr& selectedFace, const Hix::Input::MouseEventData& mouse, const Qt3DRender::QRayCasterHit& hit)
-//{
-//	auto listed = selected->getRootModel();
-//	auto neighbors = selected->getMesh()->findNearSimilarFaces(selectedFace.localFn(), selectedFace);
-//	PPShaderFeature::colorFaces(selected, neighbors);
-//	auto loooocal = selectedFace.localFn();
-//	auto worldFn = selectedFace.worldFn();
-//	_selectedNormal = listed->vectorToLocal(worldFn);
-//	_isReady = true;
-//
-//
-//
-//}
-
-Hix::Features::LayFlat::~LayFlat()
-{
-}
-
 Hix::Features::LayFlatMode::LayFlatMode(const std::unordered_set<GLModel*>& selectedModels)
 	: PPShaderFeature(selectedModels)
 {
@@ -34,25 +14,61 @@ Hix::Features::LayFlatMode::~LayFlatMode()
 
 void Hix::Features::LayFlatMode::faceSelected(GLModel* selected, const Hix::Engine3D::FaceConstItr& selectedFace, const Hix::Input::MouseEventData& mouse, const Qt3DRender::QRayCasterHit& hit)
 {
+	auto listed = selected->getRootModel();
+	auto neighbors = selected->getMesh()->findNearSimilarFaces(selectedFace.localFn(), selectedFace);
+	PPShaderFeature::colorFaces(selected, neighbors);
+	_args[selected] = listed->vectorToLocal(selectedFace.worldFn());
+	isReady = true;
 }
 
-std::unique_ptr<LayFlat> Hix::Features::LayFlatMode::applyLayFlat()
+std::unique_ptr<Hix::Features::FeatureContainer> Hix::Features::LayFlatMode::applyLayFlat()
 {
-	return std::unique_ptr<LayFlat>();
+	if (_args.empty())
+		return nullptr;
+
+	std::unique_ptr<Hix::Features::FeatureContainer> container = std::make_unique<FeatureContainer>();
+	for (auto& each : _args)
+		container->addFeature(new LayFlat(each.first, each.second, isReady));
+
+	_args.clear();
+
+	return container;
 }
 
-Hix::Features::LayFlat::LayFlat(const std::unordered_set<GLModel*>& selectedModels, QVector3D normal, bool isReady)
+
+
+
+
+Hix::Features::LayFlat::LayFlat(GLModel* selectedModel, QVector3D normal, bool isReady) : _model(selectedModel)
 {
-	//if (!isReady)
-	//	return;
-	//for (auto each : _subjects)
-	//{
-	//	constexpr QVector3D worldBot(0, 0, -1);
-	//	QVector3D localBotNorml = each->vectorToLocal(worldBot);
-	//	auto rot = QQuaternion::rotationTo(normal, localBotNorml);
-	//	each->transform().setRotation(each->transform().rotation() * rot);
-	//	each->updateRecursiveAabb();
-	//	each->setZToBed();
-	//	qmlManager->resetLayflat();
-	//}
+	if (!isReady)
+		return;
+
+	_prevRotation = new QQuaternion(selectedModel->transform().rotation());
+
+	constexpr QVector3D worldBot(0, 0, -1);
+	QVector3D localBotNorml = selectedModel->vectorToLocal(worldBot);
+	auto rot = QQuaternion::rotationTo(normal, localBotNorml);
+
+	selectedModel->unselectMeshFaces();
+	selectedModel->updateMesh(true);
+
+	selectedModel->transform().setRotation(selectedModel->transform().rotation() * rot);
+	selectedModel->updateRecursiveAabb();
+	selectedModel->setZToBed();
+	qmlManager->resetLayflat();
+}
+
+void Hix::Features::LayFlat::undo()
+{
+	qDebug() << _model->transform().rotation();
+	qDebug() << *_prevRotation;
+	_model->transform().setRotation(*_prevRotation);
+	_model->updateMesh();
+	_model->updateRecursiveAabb();
+	_model->setZToBed();
+}
+
+Hix::Features::LayFlat::~LayFlat()
+{
 }
