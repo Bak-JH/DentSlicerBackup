@@ -364,7 +364,17 @@ namespace Hix
 				}
 				return face__z_max;
 			}
-
+			bool isWrongOrientation()
+			{
+				auto hEdge = edge();
+				for (size_t i = 0; i < 3; ++i)
+				{
+					if (!hEdge.nonTwins().empty())
+						return true;
+					hEdge.moveNext();
+				}
+				return false;
+			}
 			bool getEdgeWithVertices(typename TypeConstInfo::HalfEdgeItrType& result, const typename TypeConstInfo::VertexItrType& a, const typename TypeConstInfo::VertexItrType& b) const
 			{
 				auto hEdge = edge();

@@ -344,7 +344,24 @@ void QmlManager::openModelFile(QString fname){
 	//	_currentFeature.reset(new MeshRepair(repairModels));
 	//	_currentFeature.reset();
 	//}
+	size_t diffFace = mesh->getFaces().size();
 	TwoManifoldBuilder modelBuilder(*mesh);
+
+	latest->setMaterialMode(Hix::Render::ShaderMode::PerPrimitiveColor);
+	for (auto itr = mesh->getFaces().cbegin() + diffFace; itr != mesh->getFaces().cend(); ++itr)
+	{
+		latest->selectedFaces.insert(itr);
+	}
+	latest->updateMesh(true);
+
+
+
+
+
+
+
+
+
 
 	setProgress(1.0);
     // do auto arrange

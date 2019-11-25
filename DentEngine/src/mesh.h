@@ -125,11 +125,8 @@ namespace Hix
 			/********************** Mesh Edit Functions***********************/
 			void vertexOffset(float factor);
 			void centerMesh();
-			void vertexRotate(QMatrix4x4 tmpmatrix);
-			void vertexScale(float scaleX, float scaleY, float scaleZ, float centerX, float centerY);
 			void reverseFace(FaceItr faceItr);
 			void reverseFaces();
-			QVector3D transformedVtx(const VertexConstItr& vtx, const Qt3DCore::QTransform& transform)const;
 			void clear();
             bool addFace(const QVector3D& v0, const QVector3D& v1, const QVector3D& v2);
 			bool addFace(const FaceConstItr& face);
@@ -170,7 +167,9 @@ namespace Hix
 			QVector3D ptToLocal(const QVector3D& world)const;
 			QVector3D vectorToLocal(const QVector3D& world)const;
 
+			VertexConstItr getVtxAtLocalPos(const QVector3D& pos)const;
 		private:
+			void rehashVtcs();
 			void vertexMove(const QVector3D& direction);
 			const Render::SceneEntity* _entity = nullptr;
 			/********************** Helper Functions **********************/

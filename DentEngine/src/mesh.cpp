@@ -225,6 +225,18 @@ void Mesh::vertexOffset(float factor){
 		vtxItr.ref().position = tmp;
 		++count;
 	};
+	rehashVtcs();
+}
+
+void Hix::Engine3D::Mesh::rehashVtcs()
+{
+	_verticesHash.clear();
+	auto vEnd = vertices.cend();
+	for (auto itr = vertices.cbegin(); itr != vEnd; ++itr)
+	{
+		auto hashval = _vtxHasher(itr.localPosition());
+		_verticesHash.insert({ hashval, itr });
+	}
 }
 
 void Mesh::vertexMove(const QVector3D& direction) {
@@ -238,6 +250,7 @@ void Mesh::vertexMove(const QVector3D& direction) {
 		vertex.position = tmp;
 		++count;
 	};
+	rehashVtcs();
 
 }
 
@@ -498,6 +511,20 @@ QVector3D Hix::Engine3D::Mesh::ptToLocal(const QVector3D& world) const
 QVector3D Hix::Engine3D::Mesh::vectorToLocal(const QVector3D& world) const
 {
 	return _entity->vectorToLocal(world);
+}
+
+VertexConstItr Hix::Engine3D::Mesh::getVtxAtLocalPos(const QVector3D& pos) const
+{
+	auto hashval = _vtxHasher(pos);
+	auto binVtxs = _verticesHash.equal_range(hashval);
+	for (auto& curr = binVtxs.first; curr != binVtxs.second; ++curr)
+	{
+		if (curr->second.localPosition() == pos)
+		{
+			return curr->second;
+		}
+	}
+	return VertexConstItr();
 }
 
 
