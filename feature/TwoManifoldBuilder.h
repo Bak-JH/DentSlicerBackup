@@ -14,7 +14,7 @@ namespace Hix
 		public:
 			TwoManifoldBuilder(Hix::Engine3D::Mesh& model);
 		private:
-			const Hix::Engine3D::Mesh& _model;
+			Hix::Engine3D::Mesh& _model;
 			std::unordered_map<Hix::Engine3D::FaceConstItr, QVector3D> _fnCache;
 		};
 	}
