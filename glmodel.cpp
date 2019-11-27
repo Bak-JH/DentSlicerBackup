@@ -49,32 +49,25 @@ GLModel::GLModel(QEntity*parent, Mesh* loadMesh, QString fname, int id, const Qt
     // set shader mode and color
 	setMaterialMode(Hix::Render::ShaderMode::SingleColor);
 	setMaterialColor(Hix::Render::Colors::Default);
-
-	setMesh(loadMesh);
-	
+	//this order is important since transform affect AABB calculation during setMesh
 	if (transform)
 	{
 		_transform.setMatrix(transform->matrix());
 	}
+	setMesh(loadMesh);
 
 	// 승환 75%
 	qmlManager->setProgress(0.73);
-	// reserve cutting points, contours
-	sphereEntity.reserve(50);
-	sphereMesh.reserve(50);
-	sphereMaterial.reserve(50);
-	sphereTransform.reserve(50);
-	sphereObjectPicker.reserve(50);
-
 	QObject::connect(this, SIGNAL(_updateModelMesh()), this, SLOT(updateModelMesh()));
 
 }
 
-void GLModel::moveModel(const QVector3D& displacement) {
-	auto translation = _transform.translation() + displacement;
+void GLModel::moveModel(const QVector3D& movement) {
+	auto translation = _transform.translation() + movement;
 	_transform.setTranslation(translation);
-	updateAABBMove(displacement);
+	updateAABBMove(movement);
 }
+
 void GLModel::rotateModel(const QQuaternion& rotation) {
 	auto newRot = rotation * _transform.rotation();
 	_transform.setRotation(newRot);
@@ -187,7 +180,7 @@ void GLModel::updatePrintable() {
 GLModel::~GLModel(){
 }
 
- void GLModel::getChildrenModels(std::unordered_set<GLModel*>& results)
+ void GLModel::getChildrenModels(std::unordered_set<const GLModel*>& results)const
 {
 	 
 	for (auto child : childNodes())
@@ -201,7 +194,6 @@ GLModel::~GLModel(){
 	callRecursive(this, &GLModel::getChildrenModels, results);
 
 }
-
 
 void GLModel::initHitTest()
 {
@@ -255,6 +247,7 @@ void GLModel::clicked(MouseEventData& pick, const Qt3DRender::QRayCasterHit& hit
 		if (selectFaceFeature)
 		{
 			auto selectedFace = _mesh->getFaces().cbegin() + hit.primitiveIndex();
+			auto fn = selectedFace.worldFn();
 			selectFaceFeature->faceSelected(this, selectedFace, pick, hit);
 		}
 	}
@@ -285,15 +278,15 @@ bool GLModel::isDraggable(Hix::Input::MouseEventData& e,const Qt3DRender::QRayCa
 void GLModel::dragStarted(Hix::Input::MouseEventData& e, const Qt3DRender::QRayCasterHit& hit)
 {
 	auto listed = getRootModel();
-	if (qmlManager->supportRaftManager().supportActive())
-	{
-		size_t prevCount = qmlManager->supportRaftManager().supportCount();
-		qmlManager->supportRaftManager().clear(*listed);
-		if (qmlManager->supportRaftManager().supportCount() != prevCount)
-		{
-			listed->setZToBed();
-		}
-	}
+	//if (qmlManager->supportRaftManager().supportActive())
+	//{
+	//	size_t prevCount = qmlManager->supportRaftManager().supportCount();
+	//	qmlManager->supportRaftManager().clear(*listed);
+	//	if (qmlManager->supportRaftManager().supportCount() != prevCount)
+	//	{
+	//		listed->setZToBed();
+	//	}
+	//}
 	lastpoint = hit.localIntersection();
 	prevPoint = (QVector2D)e.position;
 	qmlManager->moveButton->setProperty("state", "active");

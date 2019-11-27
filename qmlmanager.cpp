@@ -11,7 +11,7 @@
 //for absolute correctness
 #ifdef _DEBUG
 //#define _STRICT_DEBUG
-
+#include "common/debugging/DebugRenderObject.h"
 #endif
 #include <Qt3DCore>
 #include <qquickitem.h>
@@ -34,6 +34,7 @@
 #include "feature/SupportFeature.h"
 #include "Qml/Popup.h"
 #include "feature/extension.h"
+#include "feature/arrange/autoarrange.h"
 
 #include <functional>
 using namespace Hix::Input;
@@ -42,7 +43,8 @@ using namespace Hix::Render;
 using namespace Hix::Tasking;
 using namespace Hix::Features;
 QmlManager::QmlManager(QObject *parent) : QObject(parent), _optBackend(this, scfg)
-  ,layerViewFlags(LAYER_INFILL | LAYER_SUPPORTERS | LAYER_RAFT), modelIDCounter(-1), _cursorEraser(QPixmap(":/Resource/cursor_eraser.png"))
+	,layerViewFlags(LAYER_INFILL | LAYER_SUPPORTERS | LAYER_RAFT), modelIDCounter(-1)
+	, _cursorEraser(QPixmap(":/Resource/cursor_eraser.png")), _currentMode(nullptr)
 {
 	qmlRegisterType<Hix::QML::XButton>("hix.qml", 1, 0, "XButton");
 	qmlRegisterType<Hix::QML::PopupShell>("hix.qml", 1, 0, "PopupShell");
@@ -71,6 +73,9 @@ void QmlManager::initializeUI(QQmlApplicationEngine* e){
 
 	_widgetManager.initialize(total, &_rayCastController);
 	_supportRaftManager.initialize(models);
+#ifdef _DEBUG
+	Hix::Debug::DebugRenderObject::getInstance().initialize(models);
+#endif
 
     // model move componetns
     moveButton = FindItemByName(engine, "moveButton");
@@ -563,65 +568,18 @@ void QmlManager::openArrange(){
 
 void QmlManager::runArrange(){
 
+	std::unordered_set<GLModel*> listedModels;
+	for (auto& each : glmodels)
+	{
+		listedModels.insert(each.get());
+	}
     qmlManager->openProgressPopUp();
-    QFuture<void> future = QtConcurrent::run(this, &QmlManager::runArrange_internal);
+	Autoarrange arrange(listedModels);
+	qmlManager->setProgress(1);
+
 }
 
-void QmlManager::runArrange_internal(){
-    qDebug() << "run arrange glmodels size : " <<glmodels.size();
 
-    for(auto& pair : glmodels)
-    {
-		const auto* const model = pair.get();
-        qDebug() << "before " <<model->transform().translation();
-    }
-    if (glmodels.size()>=2){
-        std::vector<XYArrangement> arng_result_set;
-        std::vector<const Mesh*> meshes_to_arrange;
-		std::vector<Qt3DCore::QTransform> m_transform_set;
-
-   //     for(auto& pair : glmodels)
-   //     {
-			//const auto* const  model = &pair.second;
-   //         meshes_to_arrange.push_back(model->getMesh());
-   //         m_transform_set.push_back(model->transform());
-   //     }
-
-   //     autoarrange* ar;
-   //     arng_result_set = ar->arngMeshes(meshes_to_arrange, m_transform_set);
-   //     std::vector<QVector3D> translations;
-   //     std::vector<float> rotations;
-   //     for (size_t i=0; i<arng_result_set.size(); i++){
-   //         XYArrangement arng_result = arng_result_set[i];
-   //         QVector3D trans_vec = QVector3D(arng_result.first.X/100, arng_result.first.Y/100, 0);
-   //         translations.push_back(trans_vec);
-   //         rotations.push_back(arng_result.second);
-   //     }
-   //     emit arrangeDone(translations, rotations);
-
-        //ar->arrangeQt3D(m_transform_set, arng_result_set);
-        //ar->arrangeGlmodels(&glmodel);
-    }
-}
-
-void QmlManager::applyArrangeResult(std::vector<QVector3D> translations, std::vector<float> rotations){
-    qDebug() << "apply arrange result ";
-    size_t index = 0;
-    for(auto& pair : glmodels)
-    {
-		auto model = pair.get();
-        model->moveModel(translations[index]);
-        ++index;
-    }
-
-    qmlManager->setProgress(1);
-
-    qmlManager->setProgressText("Done");
-    qmlManager->openResultPopUp("","Arrangement done","");
-    if(selectedModels.size() > 0){
-        sendUpdateModelInfo();
-    }
-}
 
 GLModel* QmlManager::findGLModelByName(QString modelName){
 
@@ -1040,11 +998,6 @@ bool QmlManager::isSelected(GLModel* model)
 
 void QmlManager::showCubeWidgets(GLModel* model)
 {
-}
-
-void QmlManager::addSupport(GLModel* model, QVector3D position)
-{
-	
 }
 
 void QmlManager::modelVisible(int ID, bool isVisible){
@@ -1664,8 +1617,7 @@ QVector2D QmlManager::world2Screen(QVector3D target) {
 void QmlManager::openSupport()
 {
 	//just empty placeholder to give modality to Support.
-	//_currentFeature.reset(new SupportFeature());
-
+	_currentMode.reset(new SupportMode(selectedModels, models));
 }
 void QmlManager::closeSupport()
 {
@@ -1674,15 +1626,10 @@ void QmlManager::closeSupport()
 
 void QmlManager::generateAutoSupport()
 {
-	_supportRaftManager.clear();
-	for (auto selectedModel : selectedModels)
+	auto autoGenSupport = dynamic_cast<SupportMode*>(_currentMode.get());
+	if (autoGenSupport != nullptr)
 	{
-		if (scfg->support_type != SlicingConfiguration::SupportType::None)
-		{
-			selectedModel->setZToBed();
-			selectedModel->moveModel(QVector3D(0, 0, Hix::Support::SupportRaftManager::supportRaftMinLength()));
-		}
-		_supportRaftManager.autoGen(*selectedModel, scfg->support_type);
+		autoGenSupport->generateAutoSupport();
 	}
 }
 
@@ -1713,13 +1660,11 @@ void QmlManager::clearSupports()
 
 void QmlManager::supportApplyEdit()
 {
-	_supportRaftManager.applyEdits();
 }
 
 
 void QmlManager::supportCancelEdit()
 {
-	_supportRaftManager.cancelEdits();
 }
 
 void QmlManager::regenerateRaft()
@@ -1806,4 +1751,9 @@ void QmlManager::generateShellOffset(double factor) {
 bool QmlManager::isFeatureActive()
 {
 	return _currentMode.get() != nullptr;
+}
+
+void QmlManager::addToHistory(Hix::Features::Feature* feature)
+{
+	_featureHistory.emplace_back(std::unique_ptr<Hix::Features::Feature>(feature));
 }

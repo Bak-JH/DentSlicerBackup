@@ -1,5 +1,7 @@
 ﻿#include "SupportModel.h"
 #include "SupportRaftManager.h"	
+#include "feature/SupportFeature.h"
+#include "qmlmanager.h"
 #include "../render/Color.h"
 #include "glmodel.h"
 
@@ -34,7 +36,7 @@ void Hix::Support::SupportModel::clicked(Hix::Input::MouseEventData&, const Qt3D
 		switch (_manager->supportEditMode())
 		{
 		case EditMode::Manual:
-			_manager->removeSupport(this);
+			qmlManager->addToHistory(new Features::RemoveSupport(this));
 			break;
 		default:
 			break;

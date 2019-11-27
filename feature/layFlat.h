@@ -2,19 +2,13 @@
 #include <unordered_set>
 #include "interfaces/SelectFaceMode.h"
 #include "interfaces/PPShaderFeature.h"
+#include "DentEngine/src/Bounds3D.h"
 class GLModel;
 
 namespace Hix
 {
 	namespace Features
 	{
-		//struct LayFlatArg
-		//{
-		//	QVector3D normal;
-		//	Hix::Bounds3D* aabb;
-		//};
-
-
 		class LayFlat: public Feature//public SelectFaceFeature, public PPShaderFeature
 		{
 		public:
@@ -25,11 +19,12 @@ namespace Hix
 		private:
 			GLModel* _model;
 			QQuaternion* _prevRotation;
+			Hix::Engine3D::Bounds3D* _prevAabb;
 		};
 
 
 
-		class LayFlatMode : public SelectFaceMode, public PPShaderFeature, public Mode
+		class LayFlatMode : public SelectFaceMode, public PPShaderFeature
 		{
 		public:
 			LayFlatMode(const std::unordered_set<GLModel*>& selectedModels);

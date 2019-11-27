@@ -1564,7 +1564,6 @@ Rectangle {
                     onClicked:  {
                         popup_manualSupport.clearSupports();
                         support_editButton.visible = false;
-                        support_cancelEditButton.visible = false;
                         popup_manualSupport.supportEditEnabled(false);
                         addText.text = "Edit supports"
 
@@ -1618,22 +1617,12 @@ Rectangle {
                         addText.color = "#888888"
                     }
                     onExited: {
-                        if (support_cancelEditButton.state == "clicked") {
-                            parent.color = "#f9f9f9"
-                            addText.color = "#888888"
-                        }
-                        else {
-                            parent.color = "#e5e5e5"
-                            addText.color = "black"
-                        }
                     }
                     onClicked: {
 						if(popup_manualSupport.editActive)
 						{
                             popup_manualSupport.supportEditEnabled(false);
-                            popup_manualSupport.supportApplyEdit();
                             popup_manualSupport.editActive = false;
-                            support_cancelEditButton.visible = false;
                             addText.text = "Edit supports"
                             popup_manualSupport.onApplyFinishButton();
 
@@ -1643,7 +1632,6 @@ Rectangle {
 						{
                             popup_manualSupport.editActive = true;
                             popup_manualSupport.supportEditEnabled(true);
-                            support_cancelEditButton.visible = true;
                             addText.text = "Done"
                             popup_manualSupport.offApplyFinishButton();
 
@@ -1666,68 +1654,6 @@ Rectangle {
                 ]
             }
             
-			Rectangle {
-                visible: false
-                id: support_cancelEditButton
-                color: parent.color
-                width: 178
-                height: 32
-                radius: 2
-                border.color: "#cccccc"
-                anchors.horizontalCenter: parent.horizontalCenter
-                anchors.top: support_editButton.bottom
-                anchors.topMargin: 20
-                Text {
-                    id: cancelText
-                    text: "Cancel"
-                    anchors.horizontalCenter: parent.horizontalCenter
-                    anchors.verticalCenter: parent.verticalCenter
-                    font.family: mainFont.name
-                    font.pixelSize: 9
-                }
-                MouseArea {
-                    anchors.fill: parent
-                    hoverEnabled: true
-                    onEntered: {
-                        parent.color = "#f9f9f9"
-                        cancelText.color = "#888888"
-                    }
-                    onExited: {
-                        if (support_cancelEditButton.state == "clicked") {
-                            parent.color = "#f9f9f9"
-                            cancelText.color = "#888888"
-                        }
-                        else {
-                            parent.color = "#e5e5e5"
-                            cancelText.color = "black"
-                        }
-                    }
-                    onClicked: {
-						if(popup_manualSupport.editActive)
-                        {
-                            popup_manualSupport.supportCancelEdit();
-                            popup_manualSupport.editActive = false;
-                            addText.text = "Edit supports"
-                            support_cancelEditButton.visible = false;
-                            popup_manualSupport.supportEditEnabled(false);
-
-                        }
-
-                    }
-                }
-                states: [
-                    State {
-                        name: "clicked"
-                        PropertyChanges { target: support_cancelEditButton; color: "#f9f9f9" }
-                        PropertyChanges { target: cancelText; color: "#888888" }
-                    },
-                    State {
-                        name: "unclicked"
-                        PropertyChanges { target: support_cancelEditButton; color: "#e5e5e5" }
-                        PropertyChanges { target: cancelText; color: "black" }
-                    }
-                ]
-            }
             Rectangle {
                 visible: true
                 id: support_raftRegenButton
@@ -1737,7 +1663,7 @@ Rectangle {
                 radius: 2
                 border.color: "#cccccc"
                 anchors.horizontalCenter: parent.horizontalCenter
-                anchors.top: support_cancelEditButton.bottom
+                anchors.top: support_editButton.bottom
                 anchors.topMargin: 20
                 Text {
                     id: supRegenText
@@ -1771,12 +1697,12 @@ Rectangle {
                 states: [
                     State {
                         name: "clicked"
-                        PropertyChanges { target: support_cancelEditButton; color: "#f9f9f9" }
+                        PropertyChanges { target: support_raftRegenButton; color: "#f9f9f9" }
                         PropertyChanges { target: cancelText; color: "#888888" }
                     },
                     State {
                         name: "unclicked"
-                        PropertyChanges { target: support_cancelEditButton; color: "#e5e5e5" }
+                        PropertyChanges { target: support_raftRegenButton; color: "#e5e5e5" }
                         PropertyChanges { target: cancelText; color: "black" }
                     }
                 ]
@@ -1786,8 +1712,6 @@ Rectangle {
             signal closeSupport();
 			signal generateAutoSupport();
             signal supportEditEnabled(bool enabled);
-            signal supportCancelEdit();
-            signal supportApplyEdit();
             signal clearSupports();
             signal regenerateRaft();
 
@@ -1801,11 +1725,9 @@ Rectangle {
             onApplyClicked:{
                 if(popup_manualSupport.editActive)
                 {
-                    popup_manualSupport.supportApplyEdit();
                     popup_manualSupport.supportEditEnabled(false);
                     popup_manualSupport.editActive = false;
                     addText.text = "Edit supports"
-                    support_cancelEditButton.visible = false;
 
                 }
                 all_off();
