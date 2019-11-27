@@ -14,7 +14,6 @@
 #include <QPointF>
 #include <QCursor>
 #include <QQmlProperty>
-#include "feature/autoarrange.h"
 #include "feature/shelloffset.h"
 #include "glmodel.h"
 #include "QtConcurrent/QtConcurrentRun"
@@ -82,7 +81,11 @@ public:
 	template<typename FeatureType>
 	bool isActive()
 	{
-		return dynamic_cast<const FeatureType*>(_currentMode.get()) != nullptr;
+		if (_currentMode.get() != nullptr)
+		{
+			return dynamic_cast<const FeatureType*>(_currentMode.get()) != nullptr;
+		}
+		return false;
 	}
 	bool isFeatureActive();
 	template <typename F>
@@ -216,7 +219,6 @@ public:
     void initializeUI(QQmlApplicationEngine *e);
     void openModelFile_internal(QString filename);
     void openArrange();
-    void runArrange_internal();
     void addPart(QString fileName, int ID);
     void deletePartListItem(int ID);
     void openProgressPopUp();
@@ -257,7 +259,7 @@ public:
 	Q_INVOKABLE bool isSelected(int ID);
 	bool isSelected(GLModel* model);
     void showCubeWidgets(GLModel* model);
-	void addSupport(GLModel* model, QVector3D position);
+	void addSupport(std::unique_ptr<Hix::Features::FeatureContainer> container);
 
     Q_INVOKABLE void selectPart(int ID);
     Q_INVOKABLE void unselectPart(int ID);
@@ -282,7 +284,7 @@ public:
 	Hix::Support::SupportRaftManager& supportRaftManager();
 	GLModel* createAndListModel(Hix::Engine3D::Mesh* mesh, QString filename, const Qt3DCore::QTransform* transform);
 	GLModel* listModel(GLModel* model);
-
+	void addToHistory(Hix::Features::Feature* feature);
 private:
 	QString filenameToModelName(const std::string& s);
 	Hix::Tasking::TaskManager _taskManager;
@@ -311,7 +313,7 @@ private:
 	QCursor _cursorEraser;
 	Hix::Support::SupportRaftManager _supportRaftManager;
 	std::unique_ptr<Hix::Features::Mode> _currentMode;
-	std::deque<std::unique_ptr<Hix::Features::FeatureContainer>> _featureHistory;
+	std::deque<std::unique_ptr<Hix::Features::Feature>> _featureHistory;
 
 signals:
     void updateModelInfo(int printing_time, int layer, QString xyz, float volume);
@@ -374,7 +376,6 @@ public slots:
 	void totalScaleDone();
 
     void resetLayflat();
-    void applyArrangeResult(std::vector<QVector3D>, std::vector<float>);
     void cleanselectedModel(int);
    
     void manualSupportSelect();

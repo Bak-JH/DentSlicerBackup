@@ -93,7 +93,7 @@ public:
 
     // support settings
     float support_radius_max = 1.0f;
-    float support_radius_min = 0.2f;
+    float support_radius_min = 0.25f;
     float support_base_height = 2.0f;
 
     // bed configuration

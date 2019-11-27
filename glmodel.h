@@ -5,7 +5,6 @@
 #include "fileloader.h"
 #include "slice/slicingengine.h"
 #include "feature/autoorientation.h"
-#include "feature/autoarrange.h"
 #include "feature/extension.h"
 #include "feature/hollowshell.h"
 #include "input/raycastcontroller.h"
@@ -40,7 +39,8 @@ public:
     GLModel(QEntity* parent=nullptr, Hix::Engine3D::Mesh* loadMesh=nullptr, QString fname="", int id = 0, const Qt3DCore::QTransform* transform = nullptr); // main constructor for mainmesh and shadowmesh
 	virtual ~GLModel();
 
-	void getChildrenModels(std::unordered_set<GLModel*>& results);
+	void getChildrenModels(std::unordered_set<const GLModel*>& results)const;
+
 	bool appropriately_rotated=false;
 
     // feature hollowshell
@@ -50,13 +50,6 @@ public:
 
     // feature offset
     double shellOffsetFactor;
-
-
-    std::vector<Qt3DExtras::QSphereMesh*> sphereMesh;
-    std::vector<Qt3DCore::QEntity*> sphereEntity;
-    std::vector<Qt3DCore::QTransform*> sphereTransform;
-    std::vector<Qt3DRender::QObjectPicker*> sphereObjectPicker;
-    std::vector<QPhongMaterial*> sphereMaterial;
 
     void changeColor(const QVector4D& color);
 	bool isPrintable()const;
@@ -79,7 +72,7 @@ public:
 
 	//TODO: remove these
 	// Model Mesh move, rotate, scale
-	void moveModel(const QVector3D& displacement);
+	void moveModel(const QVector3D& movement);
 	void rotateModel(const QQuaternion& rotation);
 	void scaleModel(const QVector3D& scale);
 	void updateAABBMove(const QVector3D& translate);

@@ -17,7 +17,8 @@ void Hix::Features::LayFlatMode::faceSelected(GLModel* selected, const Hix::Engi
 	auto listed = selected->getRootModel();
 	auto neighbors = selected->getMesh()->findNearSimilarFaces(selectedFace.localFn(), selectedFace);
 	PPShaderFeature::colorFaces(selected, neighbors);
-	_args[selected] = listed->vectorToLocal(selectedFace.worldFn());
+	auto worldFn = selectedFace.worldFn();
+	_args[selected] = listed->vectorToLocal(worldFn);
 	isReady = true;
 }
 
@@ -28,7 +29,9 @@ std::unique_ptr<Hix::Features::FeatureContainer> Hix::Features::LayFlatMode::app
 
 	std::unique_ptr<Hix::Features::FeatureContainer> container = std::make_unique<FeatureContainer>();
 	for (auto& each : _args)
+	{
 		container->addFeature(new LayFlat(each.first, each.second, isReady));
+	}
 
 	_args.clear();
 
@@ -45,6 +48,7 @@ Hix::Features::LayFlat::LayFlat(GLModel* selectedModel, QVector3D normal, bool i
 		return;
 
 	_prevRotation = new QQuaternion(selectedModel->transform().rotation());
+	_prevAabb = new Bounds3D(selectedModel->aabb());
 
 	constexpr QVector3D worldBot(0, 0, -1);
 	QVector3D localBotNorml = selectedModel->vectorToLocal(worldBot);
@@ -61,11 +65,9 @@ Hix::Features::LayFlat::LayFlat(GLModel* selectedModel, QVector3D normal, bool i
 
 void Hix::Features::LayFlat::undo()
 {
-	qDebug() << _model->transform().rotation();
-	qDebug() << *_prevRotation;
 	_model->transform().setRotation(*_prevRotation);
+	_model->aabb() = *_prevAabb;
 	_model->updateMesh();
-	_model->updateRecursiveAabb();
 	_model->setZToBed();
 }
 

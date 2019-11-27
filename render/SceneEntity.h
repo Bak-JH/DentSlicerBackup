@@ -87,7 +87,18 @@ namespace Hix
 					}
 				}
 			}
-
+			template<typename OwnerPtr, typename Fn, typename ...Args>
+			void callRecursive(OwnerPtr owner, Fn functionPtr, Args... arguments)const
+			{
+				for (auto child : owner->childNodes())
+				{
+					auto childEntity = dynamic_cast<OwnerPtr>(child);
+					if (childEntity)
+					{
+						(childEntity->*functionPtr)(arguments...);
+					}
+				}
+			}
 			//modifiable transform, cannot be accessed by other classes
 			//Axis aligned bounding box
 			Hix::Engine3D::Bounds3D _aabb;

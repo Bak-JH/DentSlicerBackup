@@ -67,8 +67,8 @@ Hix::Features::Cut::ZAxialCut::ZAxialCut(GLModel* subject, float cuttingPlane, H
 	}
 	else
 	{
-		botModel = qmlManager->createAndListModel(listedBotMesh, subject->modelName() + "_bot", nullptr);
-		topModel = qmlManager->createAndListModel(listedTopMesh, subject->modelName() + "_top", nullptr);
+		botModel = qmlManager->createAndListModel(listedBotMesh, subject->modelName() + "_bot", &subject->transform());
+		topModel = qmlManager->createAndListModel(listedTopMesh, subject->modelName() + "_top", &subject->transform());
 		deleteOriginal = true;
 	}
 	_divisionMap.insert(std::make_pair(subject, std::make_pair(topModel, botModel)));
@@ -142,7 +142,6 @@ Hix::Features::Cut::ZAxialCut::ZAxialCut(GLModel* subject, float cuttingPlane, H
 			//delete split.first;
 		}
 	}
-
 	if(deleteOriginal)
 		qmlManager->deleteModelFile(subject->ID);
 
@@ -163,12 +162,12 @@ void Hix::Features::Cut::ZAxialCut::doChildrenRecursive(GLModel* subject, float 
 			ZAxialCutImp(model, cuttingPlane, childTopMesh, childBotMesh, option);
 			if (childBotMesh == nullptr)
 			{
-				topModel = subject;
+				topModel = model;
 				_topChildren.insert(topModel);
 			}
 			else if (childTopMesh == nullptr)
 			{
-				botModel = subject;
+				botModel = model;
 				_botChildren.insert(botModel);
 			}
 			else

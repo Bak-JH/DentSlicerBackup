@@ -1,24 +1,15 @@
 #pragma once
-
-#include <QObject>
-#include <QApplication>
-#include <Qt3DCore>
-#include <Qt3DRender>
-#include <Qt3DExtras>
-#include <Qt3DInput>
+#include "Widget.h"
 #include <qtorusmesh.h>
-#include "../input/Draggable.h"
-#include "../input/Hoverable.h"
-#include "Highlightable.h"
+
 
 namespace Hix
 {
 	namespace UI
 	{
 		class Widget3D;
-		class RotateWidget :public Qt3DCore::QEntity, public Hix::Input::Draggable, public Hix::Input::Hoverable, public Hix::UI::Highlightable
+		class RotateWidget :public Hix::UI::Widget
 		{
-			Q_OBJECT
 		public:
 			RotateWidget(const QVector3D& axis, Qt3DCore::QEntity* parent);
 			virtual ~RotateWidget();
@@ -29,9 +20,9 @@ namespace Hix
 			void onEntered()override;
 			void onExited() override;
 			void setHighlight(bool enable) override;
+
 		private:
 			double calculateRot();
-			Widget3D* _parent = nullptr;
 			QPoint _mouseOrigin;
 			QPoint _mouseCurrent;
 			QPoint _mousePrev;
@@ -40,7 +31,8 @@ namespace Hix
 			Qt3DCore::QTransform _transform;
 			Qt3DExtras::QPhongMaterial _material;
 			//rotation axis
-			QVector3D _axis;
+
+
 			static const float ROTATE_SPEED;
 
 		};

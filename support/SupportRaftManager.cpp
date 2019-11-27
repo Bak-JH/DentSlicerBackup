@@ -4,6 +4,9 @@
 #include "CylindricalRaft.h"
 #include "glmodel.h"
 #include <functional>
+#include "../Mesh/BVH.h"
+#include "../Mesh/MTRayCaster.h"
+#include "../common/Debug.h"
 using namespace Hix::Support;
 using namespace Hix::Memory;
 
@@ -43,28 +46,10 @@ float Hix::Support::SupportRaftManager::supportBottom()
 
 void Hix::Support::SupportRaftManager::autoGen(const GLModel& model, SlicingConfiguration::SupportType supType)
 {
-	_supportExist = true;
 	_supportType = supType;
-	autoGenRecurv(model);
+	auto overhangs = detectOverhang(model);
+	generateSupport(overhangs);
 }
-
-
-
-void Hix::Support::SupportRaftManager::autoGenRecurv(const GLModel& model)
-{
-	for (auto childNode : model.childNodes())
-	{
-		auto mainModel = dynamic_cast<GLModel*>(childNode);
-		if (mainModel)
-		{
-			autoGenRecurv(*mainModel);
-		}
-	}
-	generateSupport(model);
-
-
-}
-
 
 
 std::vector<QVector3D> Hix::Support::SupportRaftManager::getSupportBasePts() const
@@ -73,26 +58,21 @@ std::vector<QVector3D> Hix::Support::SupportRaftManager::getSupportBasePts() con
 	basePts.reserve(_supports.size());
 	for (auto& each : _supports)
 	{
-		auto editStatus = _pendingSupports.find(each.get());
-		if (editStatus == _pendingSupports.end() || editStatus->second == EditType::Added)
+		auto baseSupport = dynamic_cast<BaseSupport*>(each.get());
+		if (baseSupport && baseSupport->hasBasePt())
 		{
-			auto baseSupport = dynamic_cast<BaseSupport*>(each.get());
-			if (baseSupport)
-			{
-				basePts.emplace_back(baseSupport->getBasePt());
-			}
+			basePts.emplace_back(baseSupport->getBasePt());
 		}
 	}
 	return basePts;
 }
 
-void Hix::Support::SupportRaftManager::addSupport(const OverhangDetect::Overhang& overhang)
+SupportModel* Hix::Support::SupportRaftManager::addSupport(const OverhangDetect::Overhang& overhang)
 {
-	if (!_supportExist)
-		return;
 	switch (_supportType)
 	{
 	case SlicingConfiguration::SupportType::None:
+		return nullptr;
 		break;
 	case SlicingConfiguration::SupportType::Vertical:
 	{
@@ -100,10 +80,11 @@ void Hix::Support::SupportRaftManager::addSupport(const OverhangDetect::Overhang
 		_supports.emplace(toUnique(dynamic_cast<SupportModel*>(newModel)));
 		//since addition only happens in edit mode
 		newModel->setHitTestable(true);
-		_pendingSupports[newModel] = EditType::Added;
+		return newModel;
 	}
 	break;
 	default:
+		return nullptr;
 		break;
 	}
 }
@@ -112,44 +93,12 @@ void Hix::Support::SupportRaftManager::removeSupport(SupportModel* e)
 {
 	e->setEnabled(false);
 	e->setHitTestable(false);
-	_pendingSupports[e] = EditType::Removed;
+	_supports.erase(toDummy(e));
 }
 
-void Hix::Support::SupportRaftManager::applyEdits()
+void Hix::Support::SupportRaftManager::generateSupport(const Hix::OverhangDetect::Overhangs& overhangs)
 {
-	//remove all pending removes
-	for (auto& each : _pendingSupports)
-	{
-		if (each.second == EditType::Removed)
-		{
-			_supports.erase(toDummy(each.first));
-		}
-	}
-}
 
-void Hix::Support::SupportRaftManager::cancelEdits()
-{
-	//remove all pending adds
-	for (auto& each : _pendingSupports)
-	{
-		if (each.second == EditType::Added)
-		{
-			_supports.erase(toDummy(each.first));
-		}
-		else
-		{
-			//enable hidden pending removes
-			each.first->setEnabled(true);
-			each.first->setHitTestable(true);
-
-		}
-	}
-}
-
-void Hix::Support::SupportRaftManager::generateSupport(const GLModel& model)
-{
-	Hix::OverhangDetect::Detector detector;
-	auto overhangs = detector.detectOverhang(model.getMesh());
 	switch (_supportType)
 	{
 	case SlicingConfiguration::SupportType::None:
@@ -175,18 +124,35 @@ void Hix::Support::SupportRaftManager::generateRaft()
 	_raft = std::make_unique<CylindricalRaft>(this, basePts);
 }
 
-void  Hix::Support::SupportRaftManager::clear(GLModel& model)
+Hix::OverhangDetect::Overhangs Hix::Support::SupportRaftManager::detectOverhang(const GLModel& listed)
 {
-	std::unordered_set<GLModel*> models;
-	std::unordered_set<const GLModel*> constModels;
+	std::unordered_set<const GLModel*> models;
+	listed.getChildrenModels(models);
+	Hix::OverhangDetect::Overhangs overhangs;
+	models.insert(&listed);
+	QVector3D straightDown(0, 0, -1);
+
+
+
+	for (auto model : models)
+	{
+		Hix::OverhangDetect::Detector detector;
+		auto eachOverhangs =   detector.detectOverhang(model->getMesh());
+		overhangs.insert(overhangs.end(), eachOverhangs.begin(), eachOverhangs.end());
+
+	}
+	//raycaster for support generation
+	prepareRaycaster(listed);
+	return overhangs;
+}
+
+void  Hix::Support::SupportRaftManager::clear(const GLModel& model)
+{
+	std::unordered_set<const GLModel*> models;
 
 	model.getChildrenModels(models);
-	for (auto each : models)
-	{
-		constModels.insert(each);
-	}
-	constModels.insert(&model);
-	clearImpl(constModels);
+	models.insert(&model);
+	clearImpl(models);
 }
 
 void Hix::Support::SupportRaftManager::clearImpl(const std::unordered_set<const GLModel*>& models)
@@ -213,6 +179,12 @@ void Hix::Support::SupportRaftManager::clearImpl(const std::unordered_set<const 
 	}
 }
 
+void Hix::Support::SupportRaftManager::prepareRaycaster(const GLModel& model)
+{
+	_rayCaster.reset( new MTRayCaster());
+	_rayCaster->addAccelerator(new Hix::Engine3D::BVH(model));
+}
+
 const Hix::Render::SceneEntity* Hix::Support::SupportRaftManager::raftModel() const
 {
 	return _raft.get();
@@ -229,13 +201,16 @@ std::vector<std::reference_wrapper<const Hix::Render::SceneEntity>> Hix::Support
 	return entities;
 }
 
+std::unordered_set<Hix::Memory::HetUniquePtr<SupportModel>>& Hix::Support::SupportRaftManager::supports()
+{
+	return _supports;
+}
+
 
 void Hix::Support::SupportRaftManager::clear()
 {
-	_supportExist = false;
 	_raftExist = false;
 	_supports.clear();
-	_pendingSupports.clear();
 	_raft.reset();
 }
 
@@ -249,11 +224,17 @@ size_t Hix::Support::SupportRaftManager::supportCount() const
 	return _supports.size();
 }
 
+RayCaster& Hix::Support::SupportRaftManager::supportRaycaster()
+{
+	return *_rayCaster.get();
+}
+
+
 
 
 bool Hix::Support::SupportRaftManager::supportActive() const
 {
-	return _supportExist;
+	return true;
 }
 
 bool Hix::Support::SupportRaftManager::raftActive() const

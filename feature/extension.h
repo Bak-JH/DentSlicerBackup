@@ -1,7 +1,6 @@
 #ifndef EXTENSION_H
 #define EXTENSION_H
 #include "DentEngine/src/mesh.h"
-#include "autoarrange.h"
 #include <Qt3DRender>
 #include "interfaces/SelectFaceMode.h"
 #include "interfaces/PPShaderFeature.h"
@@ -42,7 +41,7 @@ namespace Hix
 
 
 
-		class ExtendMode : public SelectFaceMode, public PPShaderFeature, public Mode
+		class ExtendMode: public SelectFaceMode, public PPShaderFeature
 		{
 		public:
 			ExtendMode(const std::unordered_set<GLModel*> & selectedModels);
