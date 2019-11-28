@@ -284,12 +284,12 @@ public:
 	Hix::Support::SupportRaftManager& supportRaftManager();
 	GLModel* createAndListModel(Hix::Engine3D::Mesh* mesh, QString filename, const Qt3DCore::QTransform* transform);
 	GLModel* listModel(GLModel* model);
+	GLModel* getModelByID(int ID);
 
 private:
 	QString filenameToModelName(const std::string& s);
 	Hix::Tasking::TaskManager _taskManager;
 	void setModelViewMode(int mode);
-	GLModel* getModelByID(int ID);
     void unselectPartImpl(GLModel* target);
 	//do not mix UI work with background thread
 	//std::future<Slicer*> exportSelected(bool isTemp);

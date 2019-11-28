@@ -190,6 +190,9 @@
     <ClCompile Include="feature\TwoManifoldBuilder.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="feature\PoissonRemesh.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="common\Debug.h" />
@@ -777,6 +780,9 @@
     <ClInclude Include="ui\RotateWidget.h" />
     <ClInclude Include="ui\MoveWidget.h" />
     <ClInclude Include="feature\TwoManifoldBuilder.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="feature\PoissonRemesh.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

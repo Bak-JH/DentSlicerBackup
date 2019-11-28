@@ -346,13 +346,12 @@ bool Mesh::addFace(const FaceConstItr& face)
 	return true;
 }
 
-
-
-void Mesh::removeFaces(const std::unordered_set<FaceConstItr>& faceItrs){
-
-	auto vtxDelGuard = vertices.getDeleteGuard();
-	auto hEdgeDelGuard = halfEdges.getDeleteGuard();
-	auto faceDelGuard = faces.getDeleteGuard();
+MeshDeleteGuard Hix::Engine3D::Mesh::removeFacesWithoutShifting(const std::unordered_set<FaceConstItr>& faceItrs)
+{
+	MeshDeleteGuard delguardContainer{ vertices.getDeleteGuard(), halfEdges.getDeleteGuard(), faces.getDeleteGuard() };
+	auto& vtxDelGuard = delguardContainer.vtxDeleteGuard;
+	auto& hEdgeDelGuard = delguardContainer.hEdgeDeleteGuard;
+	auto& faceDelGuard = delguardContainer.faceDeleteGuard;
 	std::unordered_set<VertexItr> maybeEmptyVtcs;
 	for (auto& faceConstItr : faceItrs)
 	{
@@ -380,7 +379,13 @@ void Mesh::removeFaces(const std::unordered_set<FaceConstItr>& faceItrs){
 			vtxDelGuard.deleteLater(vtxItr);
 		}
 	}
+	return delguardContainer;
+}
 
+
+
+void Mesh::removeFaces(const std::unordered_set<FaceConstItr>& faceItrs){
+	auto delguard = removeFacesWithoutShifting(faceItrs);
 }
 
 
@@ -1106,3 +1111,25 @@ size_t Hix::Engine3D::MeshVtxHasher::operator()(const QVector3D& hashed) const
 	return	digest;
 }
 
+void Hix::Engine3D::MeshDeleteGuard::flush()
+{
+	vtxDeleteGuard.flush();
+	hEdgeDeleteGuard.flush();
+	faceDeleteGuard.flush();
+}
+
+MeshDeleteGuard& Hix::Engine3D::MeshDeleteGuard::operator+=(MeshDeleteGuard&& other)
+{
+#ifdef _DEBUG
+	if (vtxDeleteGuard.container() != other.vtxDeleteGuard.container() ||
+		hEdgeDeleteGuard.container() != other.hEdgeDeleteGuard.container() ||
+		faceDeleteGuard.container() != other.faceDeleteGuard.container())
+	{
+		throw std::runtime_error("MeshDeleteGuard appending delete guards of different containers");
+	}
+#endif
+	vtxDeleteGuard += std::move(other.vtxDeleteGuard);
+	hEdgeDeleteGuard += std::move(other.hEdgeDeleteGuard);
+	faceDeleteGuard += std::move(other.faceDeleteGuard);
+	return *this;
+}

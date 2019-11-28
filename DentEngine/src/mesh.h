@@ -108,7 +108,18 @@ namespace Hix
 
 		typedef std::vector<Path3D> Paths3D;
 
+		struct MeshDeleteGuard
+		{
+			TrackedIndexedList<MeshVertex, std::allocator<MeshVertex>, VertexItrFactory>::DeleteGuardType vtxDeleteGuard;
+			TrackedIndexedList<HalfEdge, std::allocator<HalfEdge>, HalfEdgeItrFactory>::DeleteGuardType hEdgeDeleteGuard;
+			TrackedIndexedList<MeshFace, std::allocator<MeshFace>, FaceItrFactory>::DeleteGuardType faceDeleteGuard;
+			MeshDeleteGuard& operator=(MeshDeleteGuard&& o) = default;
+			MeshDeleteGuard(MeshDeleteGuard&& o) = default;
+			void flush();
+			MeshDeleteGuard& operator+=(MeshDeleteGuard&& other);
 
+
+		};
 
 
 		class Mesh {
@@ -130,7 +141,8 @@ namespace Hix
 			void clear();
             bool addFace(const QVector3D& v0, const QVector3D& v1, const QVector3D& v2);
 			bool addFace(const FaceConstItr& face);
-			void removeFaces(const std::unordered_set<FaceConstItr>& f_it);
+			MeshDeleteGuard removeFacesWithoutShifting(const std::unordered_set<FaceConstItr>& faceItrs);
+			void removeFaces(const std::unordered_set<FaceConstItr>& faceItrs);
 			//short hand for TrackedList::toNormItr
 			inline VertexItr toNormItr(const VertexConstItr& itr)
 			{

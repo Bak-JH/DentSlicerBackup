@@ -335,6 +335,13 @@ void QmlManager::openModelFile(QString fname){
 	latest->setZToBed();
 	setProgress(0.6);
 
+
+	size_t diffFace = mesh->getFaces().size();
+	TwoManifoldBuilder modelBuilder(*mesh);
+	//auto builtModel = modelBuilder.execute();
+	//latest->clearMesh();
+	//latest->setMesh(builtModel);
+
 	//repair mode
 	//if (Hix::Features::isRepairNeeded(mesh))
 	//{
@@ -344,23 +351,7 @@ void QmlManager::openModelFile(QString fname){
 	//	_currentFeature.reset(new MeshRepair(repairModels));
 	//	_currentFeature.reset();
 	//}
-	size_t diffFace = mesh->getFaces().size();
-	TwoManifoldBuilder modelBuilder(*mesh);
-
-	latest->setMaterialMode(Hix::Render::ShaderMode::PerPrimitiveColor);
-	for (auto itr = mesh->getFaces().cbegin() + diffFace; itr != mesh->getFaces().cend(); ++itr)
-	{
-		latest->selectedFaces.insert(itr);
-	}
-	latest->updateMesh(true);
-
-
-
-
-
-
-
-
+	Hix::Debug::DebugRenderObject::getInstance().colorDebugFaces();
 
 
 	setProgress(1.0);
