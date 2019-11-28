@@ -107,16 +107,23 @@ namespace Hix
 			std::unordered_set<HEItrType> twins()const
 			{
 				std::unordered_set<HEItrType> twinEdges;
-				auto fromVtx = from();
+				auto fromVtx = ref().from;
 				for (auto oppDirEdge : to().leavingEdges())
 				{
-					if (oppDirEdge.to() == fromVtx)
+					if (oppDirEdge->to == fromVtx)
 					{
 						twinEdges.insert(oppDirEdge);
 					}
 				}
 				return twinEdges;
 			}
+			bool isBoundary()const
+			{
+				if (twins().size() == 0)
+					return true;
+				return false;
+			}
+
 			//twins in same direction
 			std::unordered_set<HEItrType> nonTwins()const
 			{
@@ -238,6 +245,62 @@ namespace Hix
 				}
 				return connected;
 			}
+			std::unordered_set< typename TypeConstInfo::HalfEdgeItrType> leavingBoundary()const
+			{
+				std::unordered_set< typename TypeConstInfo::HalfEdgeItrType> leavingBoundary;
+				auto leavings = leavingEdges();
+				auto arriving = arrivingEdges();
+				std::unordered_set<size_t> arrivingFromVtcs;
+				for (auto& each : arriving)
+				{
+					arrivingFromVtcs.insert(each->from);
+				}
+				
+				for (auto& each : leavings)
+				{
+					if (arrivingFromVtcs.find(each->to) == arrivingFromVtcs.end())
+					{
+						leavingBoundary.insert(each);
+					}
+				}
+				return leavingBoundary;
+			}
+			//std::unordered_set< typename TypeConstInfo::HalfEdgeItrType> arrivingBoundary()const
+			//{
+			//	std::unordered_set< typename TypeConstInfo::HalfEdgeItrType> leavingBoundary;
+			//	auto leavings = leavingEdges();
+			//	auto arriving = arrivingEdges();
+			//	std::unordered_set<size_t> arrivingFromVtcs;
+			//	for (auto& each : arriving)
+			//	{
+			//		arrivingFromVtcs.insert(each->from);
+			//	}
+
+			//	for (auto& each : leavings)
+			//	{
+			//		if (arrivingFromVtcs.find(each->to) == arrivingFromVtcs.end())
+			//		{
+			//			leavingBoundary.insert(each);
+			//		}
+			//	}
+			//	return leavingBoundary;
+			//}
+
+
+			bool isConnected(const typename TypeConstInfo::VertexItrType& other)const
+			{
+				for (auto& each : leavingEdges())
+				{
+					if (each.to() == other)
+						return true;
+				}
+				for (auto& each : arrivingEdges())
+				{
+					if (each.from() == other)
+						return true;
+				}
+				return false;
+			}
 
 			bool disconnected() const
 			{
@@ -318,7 +381,17 @@ namespace Hix
 				}
 				return result;
 			}
-
+			bool hasVertex(const typename TypeConstInfo::VertexItrType& vertex) const
+			{
+				auto circulator = edge();
+				for (size_t i = 0; i < 3; ++i)
+				{
+					if (circulator.from() == vertex)
+						return true;
+					circulator.moveNext();
+				}
+				return false;
+			}
 			std::array<size_t, 3> getVerticeIndices() const
 			{
 				std::array<size_t, 3> result;
@@ -411,7 +484,7 @@ namespace Hix
 				return false;
 			}
 
-			bool isNeighborOf(const FaceConstItr& other) const
+			bool isNeighborOf(const typename TypeConstInfo::FaceItrType& other) const
 			{
 
 				auto hEdge = edge();
@@ -427,6 +500,86 @@ namespace Hix
 					}
 				}
 				return false;
+			}
+			std::unordered_set<FaceItrType> neighborFaces()const
+			{
+				std::unordered_set<FaceItrType> faces;
+				auto hEdge = edge();
+				for (size_t i = 0; i < 3; ++i)
+				{
+					auto nFaces = hEdge.twinFaces();
+					faces.merge(std::move(nFaces));
+					hEdge.moveNext();
+				}
+				return faces;
+			}
+
+			std::unordered_set<FaceItrType> findAllConnected()const
+			{
+				std::unordered_set<FaceItrType> explored;
+				std::deque< FaceItrType>frontier;
+				frontier.push_back(*static_cast<const FaceItrType*>(this));
+				explored.insert(*static_cast<const FaceItrType*>(this));
+				while (!frontier.empty())
+				{
+					auto curr = frontier.front();
+					frontier.pop_front();
+					auto neigborFaces = curr.neighborFaces();
+
+					for (auto& each : neigborFaces)
+					{
+						if (explored.find(each) == explored.cend())
+						{
+							frontier.push_back(each);
+							explored.insert(each);
+						}
+					}
+				}
+				return explored;
+			}
+
+			//for degenerative situation when two faces are connected only from a single shared vertex
+			bool isButterfly(const typename TypeConstInfo::FaceItrType& other, const typename TypeConstInfo::VertexItrType& common)const
+			{
+				qDebug() << "isButterfly";
+
+				std::unordered_set<FaceItrType> explored;
+				std::deque< FaceItrType>frontier;
+				frontier.push_back(*static_cast<const FaceItrType*>(this));
+				explored.insert(*static_cast<const FaceItrType*>(this));
+				while (!frontier.empty())
+				{
+					auto curr = frontier.front();
+					frontier.pop_front();
+					auto neigborFaces = curr.neighborFaces();
+					qDebug() << "	neighbor faces" << neigborFaces.size();
+
+					for (auto& each : neigborFaces)
+					{
+						if (each.hasVertex(common))
+						{
+							qDebug() << "		checking faces: " << other.index() << each.index() ;
+
+							//early check
+							if (each == other)
+							{
+								qDebug() << "		phew false ";
+
+								return false;
+							}
+							else
+							{
+								if (explored.find(each) == explored.cend())
+								{
+									qDebug() << "		inserting: " << each.index();
+									frontier.push_back(each);
+									explored.insert(each);
+								}
+							}
+						}
+					}
+				}
+				return true;
 			}
 
 		};
