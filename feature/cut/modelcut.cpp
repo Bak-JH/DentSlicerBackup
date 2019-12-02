@@ -75,17 +75,3 @@ void Hix::Features::ModelCut::applyCut()
 	}
 	qmlManager->unselectAll();
 }
-
-void ModelCut::undo()
-{
-	switch (_cutType)
-	{
-	case Hix::Features::ModelCut::ZAxial:
-		//qmlManager->listModel(_modelHistory.back());
-		for (auto each : _models)
-		{
-			qmlManager->listModel(each);
-			qDebug() << each->ID;
-		}
-	}
-}

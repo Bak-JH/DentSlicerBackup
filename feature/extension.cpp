@@ -26,6 +26,7 @@ std::unique_ptr<Hix::Features::FeatureContainer> Hix::Features::ExtendMode::appl
 {
 	if (_args.empty())
 		return nullptr;
+
 	std::unique_ptr<Hix::Features::FeatureContainer> container = std::make_unique<FeatureContainer>();
 	for (auto& each : _args)
 	{
@@ -41,20 +42,20 @@ std::unique_ptr<Hix::Features::FeatureContainer> Hix::Features::ExtendMode::appl
 
 
 
-Hix::Features::Extend::Extend(GLModel* selectedModel, const QVector3D& selectedFaceNormal,
+Hix::Features::Extend::Extend(GLModel* targetModel, const QVector3D& targetFaceNormal,
 								const std::unordered_set<FaceConstItr>& targetFaces, double distance)
-	: _model(selectedModel), _normal(selectedFaceNormal), _extensionFaces(targetFaces)
+	: _model(targetModel), _normal(targetFaceNormal), _extensionFaces(targetFaces)
 {
 
 
-	_prevMesh = new Mesh(*selectedModel->getMeshModd());
-	selectedModel->unselectMeshFaces();
-	Paths3D extension_outlines = detectExtensionOutline(selectedModel->getMeshModd(), _extensionFaces);
-	extendAlongOutline(selectedModel->getMeshModd(), _normal, extension_outlines, distance);
-	coverCap(selectedModel, _normal, _extensionFaces, distance);
-	selectedModel->getMeshModd()->removeFaces(_extensionFaces);
-	selectedModel->updateMesh();
-	selectedModel->setZToBed();
+	_prevMesh = new Mesh(*_model->getMeshModd());
+	_model->unselectMeshFaces();
+	Paths3D extension_outlines = detectExtensionOutline(_model->getMeshModd(), _extensionFaces);
+	extendAlongOutline(_model->getMeshModd(), _normal, extension_outlines, distance);
+	coverCap(_model, _normal, _extensionFaces, distance);
+	_model->getMeshModd()->removeFaces(_extensionFaces);
+	_model->updateMesh();
+	_model->setZToBed();
 	_extensionFaces.clear();
 		
 

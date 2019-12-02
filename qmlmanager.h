@@ -385,6 +385,11 @@ public slots:
     void closeRotate();
     void openMove();
     void closeMove();
+
+	void openScale();
+	void closeScale();
+	void applyScale(double, double, double);
+
     void openOrientation();
     void closeOrientation();
     void openSave();

@@ -34,6 +34,7 @@
 #include "feature/SupportFeature.h"
 #include "Qml/Popup.h"
 #include "feature/extension.h"
+#include "feature/scale.h"
 #include "feature/arrange/autoarrange.h"
 
 #include <functional>
@@ -94,6 +95,11 @@ void QmlManager::initializeUI(QQmlApplicationEngine* e){
     //rotateSphere->setEnabled(0);
     QObject *rotateButton = FindItemByName(engine, "rotateButton");
 
+	scalePopup = FindItemByName(engine, "scalePopup");
+	QObject::connect(scalePopup, SIGNAL(openScale()), this, SLOT(openScale()));
+	QObject::connect(scalePopup, SIGNAL(closeScale()), this, SLOT(closeScale()));
+	QObject::connect(scalePopup, SIGNAL(applyScale(double, double, double)), this, SLOT(applyScale(double, double, double)));
+
 
     // create hollowShellSphere and make it invisible
     hollowShellSphereEntity = new Qt3DCore::QEntity(models);
@@ -144,12 +150,13 @@ void QmlManager::initializeUI(QQmlApplicationEngine* e){
     QObject::connect(orientPopup, SIGNAL(openOrientation()), this, SLOT(openOrientation()));
     QObject::connect(orientPopup, SIGNAL(closeOrientation()), this, SLOT(closeOrientation()));
 
-    // scale components
-    scalePopup = FindItemByName(engine, "scalePopup");
-
     // extension components
     extensionButton = FindItemByName(engine,"extendButton");
     extensionPopup = FindItemByName(engine, "extensionPopup");
+	QObject::connect(extensionButton, SIGNAL(runGroupFeature(int, QString, double, double, double, QVariant)), this, SLOT(runGroupFeature(int, QString, double, double, double, QVariant)));
+	QObject::connect(extensionPopup, SIGNAL(openExtension()), this, SLOT(openExtension()));
+	QObject::connect(extensionPopup, SIGNAL(closeExtension()), this, SLOT(closeExtension()));
+	QObject::connect(extensionPopup, SIGNAL(generateExtensionFaces(double)), this, SLOT(generateExtensionFaces(double)));
 
     // shell offset components
     shelloffsetPopup = FindItemByName(engine, "shelloffsetPopup");
@@ -193,9 +200,7 @@ void QmlManager::initializeUI(QQmlApplicationEngine* e){
     repairButton = FindItemByName(engine,"repairButton");
     QObject::connect(repairButton,SIGNAL(runGroupFeature(int,QString, double, double, double, QVariant)),this,SLOT(runGroupFeature(int,QString, double, double, double, QVariant)));
 
-    QObject::connect(extensionButton,SIGNAL(runGroupFeature(int,QString, double, double, double, QVariant)),this,SLOT(runGroupFeature(int,QString, double, double, double, QVariant)));
 
-    QObject::connect(scalePopup, SIGNAL(runGroupFeature(int,QString,double, double, double, QVariant)), this, SLOT(runGroupFeature(int,QString, double, double, double, QVariant)));
 
     layflatButton = FindItemByName(engine,"layflatButton");
     QObject::connect(layflatButton,SIGNAL(runGroupFeature(int,QString, double, double, double, QVariant)),this,SLOT(runGroupFeature(int,QString, double, double, double, QVariant)));
@@ -244,9 +249,7 @@ void QmlManager::initializeUI(QQmlApplicationEngine* e){
 
 
 	QObject::connect(layflatPopup, SIGNAL(openLayflat()), this, SLOT(openLayFlat()));
-	QObject::connect(extensionPopup, SIGNAL(openExtension()), this, SLOT(openExtension()));
 	QObject::connect(layflatPopup, SIGNAL(closeLayflat()), this, SLOT(closeLayFlat()));
-	QObject::connect(extensionPopup, SIGNAL(closeExtension()), this, SLOT(closeExtension()));
 
 	QObject::connect(layflatPopup, SIGNAL(generateLayFlat()), this, SLOT(generateLayFlat()));
 
@@ -263,8 +266,6 @@ void QmlManager::initializeUI(QQmlApplicationEngine* e){
 	QObject::connect(labelFontBoldBox, SIGNAL(sendFontBold(bool)), this, SLOT(setLabelFontBold(bool)));
 	QObject::connect(labelFontSizeBox, SIGNAL(sendFontSize(int)), this, SLOT(setLabelFontSize(int)));
 
-	// extension popup codes
-	QObject::connect(extensionPopup, SIGNAL(generateExtensionFaces(double)), this, SLOT(generateExtensionFaces(double)));
 	// model cut popup codes
 	QObject::connect(cutPopup, SIGNAL(modelCut()), this, SLOT(modelCut()));
 	QObject::connect(cutPopup, SIGNAL(cutModeSelected(int)), this, SLOT(cutModeSelected(int)));
@@ -1227,19 +1228,6 @@ void QmlManager::runGroupFeature(int ftrType, QString state, double arg1, double
     case ftrExtend:
         break;
     case ftrScale:
-        qDebug() << "run feature scale" << selectedModels.size();
-        if (state == "active"){
-			float scaleX = arg1;
-			float scaleY = arg2;
-			float scaleZ = arg3;
-			for (auto selectedModel : selectedModels) {
-				selectedModel->scaleModel(QVector3D(scaleX, scaleY, scaleZ));
-				selectedModel->scaleDone();
-			}
-            sendUpdateModelInfo();
-        } else {
-
-        }
         break;
     case ftrExport:
         // save to temporary folder
@@ -1361,6 +1349,27 @@ void QmlManager::closeRotate(){
     qDebug() << "close Rotate";
     totalRotateDone();
     return;
+}
+
+void QmlManager::openScale() 
+{
+	_currentMode.reset(new ScaleMode(selectedModels));
+}
+
+void QmlManager::closeScale() 
+{
+	_currentMode.reset();
+}
+
+void QmlManager::applyScale(double arg1, double arg2, double arg3)
+{
+	float scaleX = arg1;
+	float scaleY = arg2;
+	float scaleZ = arg3;
+
+	auto scale = dynamic_cast<ScaleMode*>(_currentMode.get())->applyScale(QVector3D(scaleX, scaleY, scaleZ));
+	if (scale != nullptr)
+		_featureHistory.push_back(std::move(scale));
 }
 
 void QmlManager::openOrientation(){
