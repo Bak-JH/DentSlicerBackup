@@ -103,6 +103,11 @@ namespace Hix
 			{
 				return TypeConstInfo::FaceItrType(ref().owningFace, ParentType::_owner);
 			}
+			float localLength()const
+			{
+				float length = from().localPosition().distanceToPoint(to().localPosition());
+				return length;
+			}
 			//HalfEdgeConstItr twin;
 			std::unordered_set<HEItrType> twins()const
 			{

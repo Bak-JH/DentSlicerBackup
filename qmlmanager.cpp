@@ -278,8 +278,6 @@ void QmlManager::initializeUI(QQmlApplicationEngine* e){
 	QObject::connect(shelloffsetPopup, SIGNAL(resultSliderValueChanged(double)), this, SLOT(getSliderSignal(double)));
 
 	QObject::connect(layerViewSlider, SIGNAL(sliderValueChanged(int)), this, SLOT(getCrossSectionSignal(int)));
-
-
 }
 
 GLModel* QmlManager::listModel(GLModel* model)
@@ -332,12 +330,15 @@ void QmlManager::openModelFile(QString fname){
 	setProgress(0.3);
 	mesh->centerMesh();
 	auto latest = createAndListModel(mesh, fname, nullptr);
-	latest->setZToBed();
+	//latest->setZToBed();
 	setProgress(0.6);
 
 
-	size_t diffFace = mesh->getFaces().size();
 	TwoManifoldBuilder modelBuilder(*mesh);
+	latest->setZToBed();
+
+	//latest->updateMesh(true);
+
 	//auto builtModel = modelBuilder.execute();
 	//latest->clearMesh();
 	//latest->setMesh(builtModel);
@@ -352,7 +353,6 @@ void QmlManager::openModelFile(QString fname){
 	//	_currentFeature.reset();
 	//}
 	Hix::Debug::DebugRenderObject::getInstance().colorDebugFaces();
-
 
 	setProgress(1.0);
     // do auto arrange
