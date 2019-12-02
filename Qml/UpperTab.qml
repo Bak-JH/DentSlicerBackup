@@ -974,8 +974,8 @@ Rectangle {
 
             signal openScale();
             signal closeScale();
+			signal applyScale(double arg1, double arg2, double arg3);
             //signal runFeature(int type, double scaleX, double scaleY, double scaleZ);
-            signal runGroupFeature(int type, string state, double arg1, double arg2, double arg3, var config);
 
             state: {
                 if (third_tab_button_scale.state=="active" && qm.isSelected()){
@@ -1011,29 +1011,30 @@ Rectangle {
                 console.log("scale called x y z" + numberbox1_number + numberbox2_number + numberbox3_number);
                 console.log("scale called" + numbox_value_detail2);
                 if (numbox_value_detail2 != 100) // scale by scale value
-                    runGroupFeature(ftrScale, state, numbox_value_detail2/100, numbox_value_detail2/100, numbox_value_detail2/100, null);
+                    applyScale(numbox_value_detail2/100, 
+							   numbox_value_detail2/100,
+							   numbox_value_detail2/100);
                     //runFeature(ftrScale, numbox_value_detail2/100, numbox_value_detail2/100, numbox_value_detail2/100);
                 else if (scale_lock.source == "qrc:/Resource/popup_image/scale_lock.png"){ // scale by definite mm with locked
                     console.log("scale is locked");
                     if(numberbox1_number != numberbox1_number_origin) {
-                        runGroupFeature(ftrScale, state,
-                                        numberbox1_number/numberbox1_number_origin,
-                                        numberbox1_number/numberbox1_number_origin,
-                                        numberbox1_number/numberbox1_number_origin, null);
+                        applyScale(numberbox1_number/numberbox1_number_origin,
+                                   numberbox1_number/numberbox1_number_origin,
+                                   numberbox1_number/numberbox1_number_origin);
                     } else if (numberbox2_number != numberbox2_number_origin) {
-                        runGroupFeature(ftrScale, state,
-                                        numberbox2_number/numberbox2_number_origin,
-                                        numberbox2_number/numberbox2_number_origin,
-                                        numberbox2_number/numberbox2_number_origin, null);
+                        applyScale(numberbox2_number/numberbox2_number_origin,
+                                   numberbox2_number/numberbox2_number_origin,
+                                   numberbox2_number/numberbox2_number_origin);
                     } else {
-                        runGroupFeature(ftrScale, state,
-                                        numberbox3_number/numberbox3_number_origin,
-                                        numberbox3_number/numberbox3_number_origin,
-                                        numberbox3_number/numberbox3_number_origin, null);
+                        applyScale(numberbox3_number/numberbox3_number_origin,
+                                   numberbox3_number/numberbox3_number_origin,
+                                   numberbox3_number/numberbox3_number_origin);
                     }
                 }
                 else // scale by definite mm with unlocked
-                    runGroupFeature(ftrScale, state, numberbox1_number/numberbox1_number_origin, numberbox2_number/numberbox2_number_origin, numberbox3_number/numberbox3_number_origin, null);
+                    applyScale(numberbox1_number/numberbox1_number_origin,
+							   numberbox2_number/numberbox2_number_origin, 
+							   numberbox3_number/numberbox3_number_origin);
                     //runFeature(ftrScale, numberbox1_number/numberbox1_number_origin, numberbox2_number/numberbox2_number_origin, numberbox3_number/numberbox3_number_origin);
                 // update scale info
             }

@@ -20,7 +20,7 @@ namespace Hix
 			void cutModeSelected(int type);
 			void getSliderSignal(double value);
 			void applyCut();
-			void undo() override;
+			void undo() override {}
 				
 			// polyline
 			void addCuttingPoint(QVector3D v);

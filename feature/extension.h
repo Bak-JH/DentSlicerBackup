@@ -23,7 +23,7 @@ namespace Hix
 		class Extend: public Feature //pee pee hee hee
 		{
 		public:
-			Extend(GLModel* selectedModel, const QVector3D& selectedFaceNormal,
+			Extend(GLModel* targetModel, const QVector3D& targetFaceNormal,
 					const std::unordered_set<FaceConstItr>& targetFaces, double distance);
 			virtual ~Extend();
 			void undo() override;
