@@ -285,6 +285,7 @@ public:
 	GLModel* createAndListModel(Hix::Engine3D::Mesh* mesh, QString filename, const Qt3DCore::QTransform* transform);
 	GLModel* listModel(GLModel* model);
 	void addToHistory(Hix::Features::Feature* feature);
+	Hix::Features::Mode* getCurrentMode();
 private:
 	QString filenameToModelName(const std::string& s);
 	Hix::Tasking::TaskManager _taskManager;

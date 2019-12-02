@@ -1626,11 +1626,9 @@ void QmlManager::closeSupport()
 
 void QmlManager::generateAutoSupport()
 {
-	auto autoGenSupport = dynamic_cast<SupportMode*>(_currentMode.get());
+	auto autoGenSupport = dynamic_cast<SupportMode*>(_currentMode.get())->generateAutoSupport();
 	if (autoGenSupport != nullptr)
-	{
-		autoGenSupport->generateAutoSupport();
-	}
+		_featureHistory.push_back(std::move(autoGenSupport));
 }
 
 
@@ -1649,12 +1647,9 @@ void QmlManager::supportEditEnabled(bool enabled)
 }
 void QmlManager::clearSupports()
 {
-	for (auto selectedModel : selectedModels)
-	{
-		selectedModel->setZToBed();
-		_supportRaftManager.clear(*selectedModel);
-	}
-
+	auto clearSupport = dynamic_cast<SupportMode*>(_currentMode.get())->clearSupport();
+	if (clearSupport != nullptr)
+		_featureHistory.push_back(std::move(clearSupport));
 }
 
 
@@ -1756,4 +1751,9 @@ bool QmlManager::isFeatureActive()
 void QmlManager::addToHistory(Hix::Features::Feature* feature)
 {
 	_featureHistory.emplace_back(std::unique_ptr<Hix::Features::Feature>(feature));
+}
+
+Hix::Features::Mode* QmlManager::getCurrentMode()
+{
+	return _currentMode.get();
 }

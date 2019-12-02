@@ -13,6 +13,7 @@ namespace Hix
 		{
 		public:
 			AddSupport(const Hix::Engine3D::FaceConstItr face, QVector3D point);
+			AddSupport(const OverhangDetect::Overhang& overhang);
 			virtual ~AddSupport();
 			void undo() override;
 
@@ -24,21 +25,12 @@ namespace Hix
 		{
 		public:
 			RemoveSupport(SupportModel* target);
+			RemoveSupport(std::unique_ptr<SupportModel>&& target);
 			virtual ~RemoveSupport();
 			void undo() override;
 
 		private:
-			SupportModel* _removedModel;
-		};
-		class SupportFeature: public Feature
-		{
-		public:
-			SupportFeature(std::unordered_set<GLModel*>& selectedModel);
-			virtual ~SupportFeature();
-			void undo() override; //TODO: undo
-
-		private:
-			std::unordered_set<Hix::Memory::HetUniquePtr<SupportModel>> _prevSupports;
+			std::unique_ptr<SupportModel> _removedModel;
 		};
 
 		class SupportMode: public SelectFaceMode
@@ -47,7 +39,9 @@ namespace Hix
 			SupportMode(const std::unordered_set<GLModel*>& selectedModels, QEntity* parent);
 			virtual ~SupportMode();
 			void faceSelected(GLModel* selected, const Hix::Engine3D::FaceConstItr& selectedFace, const Hix::Input::MouseEventData& mouse, const Qt3DRender::QRayCasterHit& hit)override;
-			void generateAutoSupport();
+			std::unique_ptr<Hix::Features::FeatureContainer> generateAutoSupport();
+			std::unique_ptr<Hix::Features::FeatureContainer> clearSupport();
+			void removeSupport(SupportModel* target);
 
 		private:
 			std::unordered_set<GLModel*> _targetModels;
