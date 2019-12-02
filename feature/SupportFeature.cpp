@@ -2,28 +2,21 @@
 #include "../../input/raycastcontroller.h"
 #include "render/Color.h"
 #include "../../qmlmanager.h"
-Hix::Features::SupportFeature::SupportFeature(std::unordered_set<GLModel*>& selectedModels)
-{
 
-	_prevSupports = std::unordered_set<Hix::Memory::HetUniquePtr<SupportModel>>(std::move(qmlManager->supportRaftManager().supports()));
-	qmlManager->supportRaftManager().supports().clear();
-	for (auto selectedModel : selectedModels)
-	{
-		if (scfg->support_type != SlicingConfiguration::SupportType::None)
-		{
-			selectedModel->setZToBed();
-			selectedModel->moveModel(QVector3D(0, 0, Hix::Support::SupportRaftManager::supportRaftMinLength()));
-		}
-		qmlManager->supportRaftManager().autoGen(*selectedModel, scfg->support_type);
-	}
-
-}
-
+/////////////////////
+///  Add Support  ///
+/////////////////////
 Hix::Features::AddSupport::AddSupport(const Hix::Engine3D::FaceConstItr face, QVector3D point)
 {
 	qDebug() << "AddSupport";
 	Hix::OverhangDetect::Overhang newOverhang(face, point);
 	_addedModel = qmlManager->supportRaftManager().addSupport(newOverhang);
+	_addedModel->setHitTestable(true);
+}
+
+Hix::Features::AddSupport::AddSupport(const OverhangDetect::Overhang& overhang)
+{
+	_addedModel = qmlManager->supportRaftManager().addSupport(overhang);
 }
 
 Hix::Features::AddSupport::~AddSupport()
@@ -36,23 +29,38 @@ void Hix::Features::AddSupport::undo()
 	qmlManager->supportRaftManager().removeSupport(_addedModel);
 }
 
-Hix::Features::SupportFeature::~SupportFeature()
+
+
+////////////////////////
+///  Remove Support  ///
+////////////////////////
+Hix::Features::RemoveSupport::RemoveSupport(SupportModel* target)
+{
+	_removedModel = std::move(qmlManager->supportRaftManager().removeSupport(target));
+}
+
+Hix::Features::RemoveSupport::RemoveSupport(std::unique_ptr<SupportModel>&& target)
+{
+	_removedModel = std::move(qmlManager->supportRaftManager().removeSupport(target.release()));
+}
+
+Hix::Features::RemoveSupport::~RemoveSupport()
 {
 }
 
-void Hix::Features::SupportFeature::undo()
+void Hix::Features::RemoveSupport::undo()
 {
-	qDebug() << "SupportFeature undo called";
-	/*for (auto& each : _prevSupports)
-	{
-		qmlManager->supportRaftManager().supports().emplace(std::move(each.get()));
-	}*/
+	_removedModel.get()->setEnabled(true);
+	_removedModel.get()->setHitTestable(true);
+	qmlManager->supportRaftManager().supports().insert(std::make_pair(_removedModel.get(), std::move(_removedModel)));
+	qDebug() << "RemoveSupport undo called";
 }
 
 
 
-
-
+////////////////////
+/// Support Mode ///
+////////////////////
 Hix::Features::SupportMode::SupportMode(const std::unordered_set<GLModel*>& selectedModels, QEntity* parent)
 	: _targetModels(selectedModels)
 {
@@ -72,22 +80,63 @@ void Hix::Features::SupportMode::faceSelected(GLModel* selected, const Hix::Engi
 	}
 }
 
-void Hix::Features::SupportMode::generateAutoSupport()
+std::unique_ptr<Hix::Features::FeatureContainer> Hix::Features::SupportMode::generateAutoSupport()
 {
-	qmlManager->addToHistory(new SupportFeature(_targetModels));
+	qmlManager->supportRaftManager().setSupportType(scfg->support_type);
+	std::unique_ptr<Hix::Features::FeatureContainer> container = std::make_unique<FeatureContainer>();
+	
+	for (auto selectedModel : _targetModels)
+	{
+		if (scfg->support_type != SlicingConfiguration::SupportType::None)
+		{
+			selectedModel->setZToBed();
+			selectedModel->moveModel(QVector3D(0, 0, Hix::Support::SupportRaftManager::supportRaftMinLength()));
+		}
+		auto overhangs = qmlManager->supportRaftManager().detectOverhang(*selectedModel);
+		for (auto overhang : overhangs)
+		{
+			container->addFeature(new AddSupport(overhang));
+		}
+	}
+
+	return container;
 }
 
-Hix::Features::RemoveSupport::RemoveSupport(SupportModel* target)
+std::unique_ptr<Hix::Features::FeatureContainer> Hix::Features::SupportMode::clearSupport()
 {
-	qmlManager->supportRaftManager().removeSupport(target);
+	std::unique_ptr<Hix::Features::FeatureContainer> container = std::make_unique<FeatureContainer>();
+	std::unordered_set<const GLModel*> models;
+
+	for (auto model : _targetModels)
+	{
+		model->getChildrenModels(models);
+		models.insert(model);
+	}
+	
+	auto& supps = qmlManager->supportRaftManager().supports();
+	for (auto curr = supps.begin(); curr != supps.end();)
+	{
+		auto deleted = curr;
+		++curr;
+		auto attachedSupport = dynamic_cast<ModelAttachedSupport*>(deleted->first);
+		if (attachedSupport)
+		{
+			auto ptr = &attachedSupport->getAttachedModel();
+			if (models.find(ptr) != models.end())
+				container->addFeature(new RemoveSupport(std::move(deleted->second)));
+		}
+	}
+
+	for (auto model : _targetModels)
+		model->setZToBed();
+
+	if (qmlManager->supportRaftManager().supports().size() == 0)
+		qmlManager->supportRaftManager().clear();
+
+	return container;
 }
 
-Hix::Features::RemoveSupport::~RemoveSupport()
+void Hix::Features::SupportMode::removeSupport(SupportModel* target)
 {
-}
-
-void Hix::Features::RemoveSupport::undo()
-{
-	_removedModel->setHitTestable(true);
-	qmlManager->supportRaftManager().supports().emplace(Memory::toUnique(_removedModel));
+	qmlManager->addToHistory(new RemoveSupport(target));
 }

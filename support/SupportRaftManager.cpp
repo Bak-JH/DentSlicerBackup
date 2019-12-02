@@ -7,6 +7,8 @@
 #include "../Mesh/BVH.h"
 #include "../Mesh/MTRayCaster.h"
 #include "../common/Debug.h"
+#include "qmlmanager.h"
+#include "feature/SupportFeature.h"
 using namespace Hix::Support;
 using namespace Hix::Memory;
 
@@ -44,13 +46,10 @@ float Hix::Support::SupportRaftManager::supportBottom()
 
 
 
-void Hix::Support::SupportRaftManager::autoGen(const GLModel& model, SlicingConfiguration::SupportType supType)
+void Hix::Support::SupportRaftManager::setSupportType(SlicingConfiguration::SupportType supType)
 {
 	_supportType = supType;
-	auto overhangs = detectOverhang(model);
-	generateSupport(overhangs);
 }
-
 
 std::vector<QVector3D> Hix::Support::SupportRaftManager::getSupportBasePts() const
 {
@@ -58,7 +57,7 @@ std::vector<QVector3D> Hix::Support::SupportRaftManager::getSupportBasePts() con
 	basePts.reserve(_supports.size());
 	for (auto& each : _supports)
 	{
-		auto baseSupport = dynamic_cast<BaseSupport*>(each.get());
+		auto baseSupport = dynamic_cast<BaseSupport*>(each.first);
 		if (baseSupport && baseSupport->hasBasePt())
 		{
 			basePts.emplace_back(baseSupport->getBasePt());
@@ -76,10 +75,9 @@ SupportModel* Hix::Support::SupportRaftManager::addSupport(const OverhangDetect:
 		break;
 	case SlicingConfiguration::SupportType::Vertical:
 	{
-		auto newModel = new VerticalSupportModel(this, overhang);
-		_supports.emplace(toUnique(dynamic_cast<SupportModel*>(newModel)));
+		auto newModel = dynamic_cast<SupportModel*>(new VerticalSupportModel(this, overhang));
+		_supports.insert(std::make_pair(newModel, std::unique_ptr<SupportModel>(newModel)));
 		//since addition only happens in edit mode
-		newModel->setHitTestable(true);
 		return newModel;
 	}
 	break;
@@ -89,33 +87,13 @@ SupportModel* Hix::Support::SupportRaftManager::addSupport(const OverhangDetect:
 	}
 }
 
-void Hix::Support::SupportRaftManager::removeSupport(SupportModel* e)
+std::unique_ptr<SupportModel> Hix::Support::SupportRaftManager::removeSupport(SupportModel* e)
 {
 	e->setEnabled(false);
 	e->setHitTestable(false);
-	_supports.erase(toDummy(e));
-}
-
-void Hix::Support::SupportRaftManager::generateSupport(const Hix::OverhangDetect::Overhangs& overhangs)
-{
-
-	switch (_supportType)
-	{
-	case SlicingConfiguration::SupportType::None:
-		break;
-	case SlicingConfiguration::SupportType::Vertical:
-	{
-		for (auto& each : overhangs)
-		{
-			auto newModel = new VerticalSupportModel(this, each);
-			_supports.emplace(toUnique(dynamic_cast<SupportModel*>(newModel)));
-		}
-	}
-	break;
-	default:
-		break;
-	}
-
+	auto result = std::move(_supports.find(e)->second);
+	_supports.erase(e);
+	return result;
 }
 
 void Hix::Support::SupportRaftManager::generateRaft()
@@ -159,7 +137,7 @@ void Hix::Support::SupportRaftManager::clearImpl(const std::unordered_set<const 
 {
 	for (auto curr = _supports.begin(); curr != _supports.end();)
 	{
-		auto attachedSupport = dynamic_cast<ModelAttachedSupport*>(curr->get());
+		auto attachedSupport = dynamic_cast<ModelAttachedSupport*>(curr->second.get());
 		if (attachedSupport)
 		{
 			auto ptr = &attachedSupport->getAttachedModel();
@@ -196,12 +174,12 @@ std::vector<std::reference_wrapper<const Hix::Render::SceneEntity>> Hix::Support
 	entities.reserve(_supports.size());
 	for (auto& each : _supports)
 	{
-		entities.emplace_back(dynamic_cast<const Hix::Render::SceneEntity&>(*each.get()));
+		entities.emplace_back(dynamic_cast<const Hix::Render::SceneEntity&>(*each.first));
 	}
 	return entities;
 }
 
-std::unordered_set<Hix::Memory::HetUniquePtr<SupportModel>>& Hix::Support::SupportRaftManager::supports()
+std::unordered_map<SupportModel*, std::unique_ptr<SupportModel>>& Hix::Support::SupportRaftManager::supports()
 {
 	return _supports;
 }
@@ -259,7 +237,7 @@ void Hix::Support::SupportRaftManager::setSupportEditMode(Hix::Support::EditMode
 			//enable supports ray cast
 			for (auto& each : _supports)
 			{
-				each->setHitTestable(true);
+				each.first->setHitTestable(true);
 			}
 		}
 		else
@@ -267,7 +245,7 @@ void Hix::Support::SupportRaftManager::setSupportEditMode(Hix::Support::EditMode
 			//disable supports ray cast
 			for (auto& each : _supports)
 			{
-				each->setHitTestable(false);
+				each.first->setHitTestable(true);
 			}
 		}
 	}

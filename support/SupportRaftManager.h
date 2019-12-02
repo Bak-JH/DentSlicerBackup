@@ -2,7 +2,6 @@
 
 #include "DentEngine/src/configuration.h"
 #include "VerticalSupportModel.h"
-#include "../../common/HetUniquePtr.h"
 
 #include <QAbstractRayCaster>
 #include <qraycaster.h>
@@ -36,16 +35,15 @@ namespace Hix
 			void  setSupportEditMode(EditMode mode);
 			//coordinate for bottom of support and raft
 
-			void autoGen(const GLModel& model, SlicingConfiguration::SupportType supType);
+			void setSupportType(SlicingConfiguration::SupportType supType);
 			SupportModel* addSupport(const OverhangDetect::Overhang& overhang);
-			void removeSupport(SupportModel* e);
+			std::unique_ptr<SupportModel> removeSupport(SupportModel* e);
 
-			void generateSupport(const Hix::OverhangDetect::Overhangs& overhangs);
 			void generateRaft();
 			OverhangDetect::Overhangs detectOverhang(const GLModel& model);
 			//removed due to efficiency when deleting multiple
 			std::vector<std::reference_wrapper<const Hix::Render::SceneEntity>> supportModels()const;
-			std::unordered_set<Hix::Memory::HetUniquePtr<SupportModel>>& supports();
+			std::unordered_map<SupportModel*, std::unique_ptr<SupportModel>>& supports();
 			const Hix::Render::SceneEntity* raftModel()const;
 			void clear();
 			void clear(const GLModel& model);
@@ -64,7 +62,7 @@ namespace Hix
 			bool _raftExist = false;
 			EditMode _supportEditMode = EditMode::None;
 			SlicingConfiguration::SupportType _supportType;
-			std::unordered_set<Hix::Memory::HetUniquePtr<SupportModel>> _supports;
+			std::unordered_map<SupportModel*, std::unique_ptr<SupportModel>> _supports;
 			std::unique_ptr<RaftModel> _raft;
 			std::unique_ptr<RayCaster> _rayCaster;
 		};
