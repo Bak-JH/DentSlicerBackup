@@ -20,6 +20,7 @@ namespace Hix
 		public:
 			void initialize(Qt3DCore::QEntity* root);
 			void addLine(const std::vector<QVector3D>& vertices, const QVector4D& color = Hix::Render::Colors::OutOfBound);
+			void addPaths(const std::vector< std::vector<QVector3D>>& paths, const QVector4D& color = Hix::Render::Colors::OutOfBound);
 			void outlineFace(const Hix::Engine3D::FaceConstItr& face, const QVector4D& color = Hix::Render::Colors::OutOfBound);
 			void registerDebugColorFaces(GLModel* owner, const std::unordered_set<FaceConstItr>& faces);
 			void colorDebugFaces();

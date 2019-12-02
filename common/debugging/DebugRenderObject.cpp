@@ -14,6 +14,12 @@ void Hix::Debug::DebugRenderObject::addLine(const std::vector<QVector3D>& vertic
 	_lines.emplace_back(vertices, _root, color);
 }
 
+void Hix::Debug::DebugRenderObject::addPaths(const std::vector<std::vector<QVector3D>>& paths, const QVector4D& color)
+{
+	_lines.emplace_back(paths, _root, color);
+
+}
+
 void Hix::Debug::DebugRenderObject::outlineFace(const Hix::Engine3D::FaceConstItr& face, const QVector4D& color)
 {
 	std::vector<QVector3D> points;

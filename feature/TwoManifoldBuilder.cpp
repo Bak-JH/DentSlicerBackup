@@ -3,6 +3,7 @@
 #include "PoissonRemesh.h"
 #include "../common/Debug.h"
 #include "../qmlmanager.h"
+#include <cmath>
 //Few assumptions
 //1. Assume filling plane is XY plane.
 //2. Assume Model have a boundary edges that is roughly parallel to this plane
@@ -443,14 +444,305 @@ void edgeRemoveConcavity(Hix::Engine3D::Mesh& mesh, std::deque<HalfEdgeConstItr>
 			//break;
 		} while (removeCnt != 0);
 	}
-	mesh.removeFaces(toBeDeleted);
-	std::unordered_set<FaceConstItr> boundaryFaces;
-	for (auto& each : boundary)
-	{
-		boundaryFaces.insert(each.owningFace());
-	}
+	//mesh.removeFaces(toBeDeleted);
+	//std::unordered_set<FaceConstItr> boundaryFaces;
+	//for (auto& each : boundary)
+	//{
+	//	boundaryFaces.insert(each.owningFace());
+	//}
 	auto model = qmlManager->getModelByID(dynamic_cast<const GLModel*>(mesh.entity())->ID);
-	Hix::Debug::DebugRenderObject::getInstance().registerDebugColorFaces(model, boundaryFaces);
+	Hix::Debug::DebugRenderObject::getInstance().registerDebugColorFaces(model, toBeDeleted);
+
+
+}
+
+void edgeRemoveConcavity2(Hix::Engine3D::Mesh& mesh, std::deque<HalfEdgeConstItr>& boundary, bool isBottEmpty)
+{
+	std::unordered_set<FaceConstItr> toBeDeleted;
+	if (boundary.size() < 2)
+		return;
+	//if bott is empty, CCW,  CW otherwise
+	size_t totalRemovedCnt = 0;
+	size_t removeCnt;
+	std::vector < std::vector<QVector3D>> debugLines;
+
+	if (isBottEmpty)
+	{
+		do
+		{
+			removeCnt = 0;
+			auto e0 = boundary.begin();
+			auto e1 = e0 + 1;
+			while (e1 != boundary.end())
+			{
+				auto vtx0(e0->from());
+				auto vtx1(e0->to());
+				auto vtx2(e1->to());
+				auto pos0 = vtx0.localPosition();
+				auto pos1 = vtx1.localPosition();
+				auto pos2 = vtx2.localPosition();
+
+
+				////e0to -> e0from, e1from -> e1to
+				////auto e0Dir = e0->to().localPosition() - e0->from().localPosition();
+				////auto e1Dir = e1->to().localPosition() - e1->from().localPosition();
+				//auto e0Dir = e0->from().localPosition() - e0->to().localPosition();
+				//auto e0Dir2 = e0->to().localPosition() - e0->from().localPosition();
+
+				//auto e1Dir = e1->to().localPosition() - e1->from().localPosition();
+
+
+				//auto dotProduct2 = QVector3D::dotProduct(e0Dir2, e1Dir);
+				//auto dotProduct = QVector3D::dotProduct(e0Dir, e1Dir);
+				//auto angle = acos(dotProduct / (e0Dir.length() * e1Dir.length()));
+				//auto degreeAngle = angle * (180 / M_PI);
+				//qDebug() << "angle between: " << degreeAngle << dotProduct;
+
+				auto fn0 = e0->owningFace().localFn();
+				auto fn1 = e1->owningFace().localFn();
+				auto fnAvg = fn0 + fn1;
+				fnAvg.normalize();
+
+				auto fnNew = QVector3D::normal(pos0, pos1, pos2);
+				auto approachZeroWhenConcave = fnAvg - fnNew;
+				constexpr float NORMAL_THRESHOLD = 1;
+
+				//if (dotProduct2 > 0 && degreeAngle < 120)
+				if(fnNew.length() > NORMAL_THRESHOLD)
+				{
+					
+					//++removeCnt;
+					//auto twins = e1->next().twins();
+					//if (twins.size() > 1)
+					//	qDebug() << "non manifold scan, more than 1 twin";
+					//auto eNext = *twins.begin();
+					//toBeDeleted.insert(face0);
+					//e0 = boundary.erase(e0, e1 + 1);
+					//e0 = boundary.insert(e0, eNext);
+					//e1 = e0 + 1;
+					std::vector<QVector3D> debugLine;
+					debugLine.emplace_back(e0->from().localPosition());
+					debugLine.emplace_back(e1->to().localPosition());
+					debugLines.emplace_back(std::move(debugLine));
+
+				}
+
+				++e0;
+				++e1;
+
+
+
+			}
+			auto isBoundaryCorrect = checkBoundary(boundary);
+			totalRemovedCnt += removeCnt;
+			break;
+		} while (removeCnt != 0);
+	}
+
+	Hix::Debug::DebugRenderObject::getInstance().addPaths(debugLines);
+
+	//mesh.removeFaces(toBeDeleted);
+	//std::unordered_set<FaceConstItr> boundaryFaces;
+	//for (auto& each : boundary)
+	//{
+	//	boundaryFaces.insert(each.owningFace());
+	//}
+	//auto model = qmlManager->getModelByID(dynamic_cast<const GLModel*>(mesh.entity())->ID);
+	//Hix::Debug::DebugRenderObject::getInstance().registerDebugColorFaces(model, toBeDeleted);
+
+
+}
+
+void printXYPlane(Hix::Engine3D::Mesh& mesh, std::deque<HalfEdgeConstItr>& boundary, bool isBottEmpty)
+{
+	std::unordered_set<FaceConstItr> toBeDeleted;
+	if (boundary.size() < 2)
+		return;
+	//if bott is empty, CCW,  CW otherwise
+	size_t totalRemovedCnt = 0;
+	size_t removeCnt;
+	std::vector < std::vector<QVector3D>> debugLines;
+
+	if (isBottEmpty)
+	{
+		do
+		{
+			removeCnt = 0;
+			auto e0 = boundary.begin();
+			auto e1 = e0 + 1;
+			while (e1 != boundary.end())
+			{
+				auto vtx0(e0->from());
+				auto vtx1(e0->to());
+				auto vtx2(e1->to());
+				auto pos0 = vtx0.localPosition();
+				auto pos1 = vtx1.localPosition();
+				auto pos2 = vtx2.localPosition();
+				std::vector<QVector2D> tri
+				{
+					QVector2D(pos0),
+					QVector2D(pos1),
+					QVector2D(pos2)
+				};
+				//QVector2D xy0(pos0);
+				//QVector2D xy1(pos1);
+				//QVector2D xy2(pos2);
+				//debugLine.emplace_back(xy0);
+				//debugLine.emplace_back(xy1);
+				//debugLine.emplace_back(xy2);
+				bool isUpFacing = Hix::Shapes2D::isClockwise(tri);
+				if (isUpFacing)
+				{
+					std::vector<QVector3D> debugLine;
+					debugLine.emplace_back(e0->from().localPosition());
+					debugLine.emplace_back(e1->to().localPosition());
+					debugLines.emplace_back(std::move(debugLine));
+
+				}
+				++e0;
+				++e1;
+
+
+
+			}
+			auto isBoundaryCorrect = checkBoundary(boundary);
+			totalRemovedCnt += removeCnt;
+			break;
+		} while (removeCnt != 0);
+	}
+
+	Hix::Debug::DebugRenderObject::getInstance().addPaths(debugLines);
+
+	//mesh.removeFaces(toBeDeleted);
+	//std::unordered_set<FaceConstItr> boundaryFaces;
+	//for (auto& each : boundary)
+	//{
+	//	boundaryFaces.insert(each.owningFace());
+	//}
+	//auto model = qmlManager->getModelByID(dynamic_cast<const GLModel*>(mesh.entity())->ID);
+	//Hix::Debug::DebugRenderObject::getInstance().registerDebugColorFaces(model, toBeDeleted);
+
+
+}
+
+
+
+void cuntourConcaveFill2(Hix::Engine3D::Mesh& mesh, std::deque<HalfEdgeConstItr>& boundary, bool isBottEmpty)
+{
+	std::unordered_set<FaceConstItr> toBeDeleted;
+	if (boundary.size() < 2)
+		return;
+	//if bott is empty, CCW,  CW otherwise
+	size_t totalRemovedCnt = 0;
+	size_t removeCnt;
+	std::vector < std::vector<QVector3D>> debugLines;
+	//float maxLength = 0;
+	//for(auto& edge : boundary)
+	//{
+	//	auto length = edge.localLength();
+	//	if (length > maxLength)
+	//		maxLength = length;
+	//}
+	//float edgeThreshold = maxLength * 5;
+	if (isBottEmpty)
+	{
+		do
+		{
+			removeCnt = 0;
+			auto e0 = boundary.begin();
+			auto e1 = e0 + 1;
+			while (e1 != boundary.end())
+			{
+				auto vtx0(e0->from());
+				auto vtx1(e0->to());
+				auto vtx2(e1->to());
+				auto pos0 = vtx0.localPosition();
+				auto pos1 = vtx1.localPosition();
+				auto pos2 = vtx2.localPosition();
+				std::vector<QVector2D> tri
+				{
+					QVector2D(pos0),
+					QVector2D(pos1),
+					QVector2D(pos2)
+				};
+				bool faceAdded = false;
+				bool isUpFacing = Hix::Shapes2D::isClockwise(tri);
+				if (isUpFacing)
+				{
+					//auto edgeLength = pos0.distanceToPoint(pos2);
+					////e0to -> e0from, e1from -> e1to
+					auto e0Dir = e0->to().localPosition() - e0->from().localPosition();
+					auto e1Dir = e1->from().localPosition() - e1->to().localPosition();
+					//auto e0Dir = e0->from().localPosition() - e0->to().localPosition();
+					//auto e0Dir2 = e0->to().localPosition() - e0->from().localPosition();
+
+					//auto e1Dir = e1->to().localPosition() - e1->from().localPosition();
+
+
+					//auto dotProduct2 = QVector3D::dotProduct(e0Dir2, e1Dir);
+					auto dotProduct = QVector3D::dotProduct(e0Dir, e1Dir);
+					auto angle = acos(dotProduct / (e0Dir.length() * e1Dir.length()));
+					auto degreeAngle = angle * (180 / M_PI);
+
+
+
+				
+
+					//if (edgeLength < edgeThreshold)
+					if (degreeAngle < 120)
+					{
+						mesh.addFace(pos2, pos1, pos0);
+						auto latestFace = mesh.getFaces().cend() - 1;
+						//if (latestFace.isWrongOrientation())
+						//{
+						//	qDebug() << "wrong orientation face added" << area(xz0, xz1, xz2);
+						//}
+						//else
+						//{
+						//	qDebug() << "		working" << area(xz0, xz1, xz2);
+
+						//}
+						HalfEdgeConstItr itr;
+						bool isworking = latestFace.getEdgeWithVertices(itr, e0->from(), e1->to());
+						//update boundary
+						e0 = boundary.erase(e0, e1 + 1);
+						e0 = boundary.insert(e0, itr);
+						e1 = e0 + 1;
+						//++e0;
+						//if (e0 == boundary.end())
+						//	break;
+						//else
+						//	e1 = e0 + 1;
+						faceAdded = true;
+						++removeCnt;
+					}
+					//std::vector<QVector3D> debugLine;
+					//debugLine.emplace_back(e0->from().localPosition());
+					//debugLine.emplace_back(e1->to().localPosition());
+					//debugLines.emplace_back(std::move(debugLine));
+
+				}
+				if (!faceAdded)
+				{
+					++e0;
+					++e1;
+				}
+			}
+			auto isBoundaryCorrect = checkBoundary(boundary);
+			totalRemovedCnt += removeCnt;
+		} while (removeCnt != 0);
+	}
+
+	Hix::Debug::DebugRenderObject::getInstance().addPaths(debugLines);
+
+	//mesh.removeFaces(toBeDeleted);
+	//std::unordered_set<FaceConstItr> boundaryFaces;
+	//for (auto& each : boundary)
+	//{
+	//	boundaryFaces.insert(each.owningFace());
+	//}
+	//auto model = qmlManager->getModelByID(dynamic_cast<const GLModel*>(mesh.entity())->ID);
+	//Hix::Debug::DebugRenderObject::getInstance().registerDebugColorFaces(model, toBeDeleted);
 
 
 }
@@ -696,6 +988,19 @@ void edgeRemoveDownFacing(Hix::Engine3D::Mesh& mesh, std::deque<HalfEdgeConstItr
 	}
 	auto delguard2 = mesh.removeFacesWithoutShifting(isolatedFaces);
 	delguard += std::move( delguard2);
+	//reform boundary after shifting faces
+	//we use a boundary vertex as hint as vertices shouldn't be shifted(ones with faces connected)
+	auto hintVtx = largestItr->begin()->to();
+	delguard.flush();
+	auto startingEdge = *hintVtx.leavingBoundary().begin();
+	boundary.clear();
+	boundary = getBoundary(startingEdge);
+
+
+
+
+
+
 
 	////auto boundaries = formBoundaryPaths(exploredEdges);
 	////auto test = toBeDeleted;
@@ -720,6 +1025,64 @@ void edgeRemoveDownFacing(Hix::Engine3D::Mesh& mesh, std::deque<HalfEdgeConstItr
 
 }
 
+void zCylinder(Hix::Engine3D::Mesh& model, std::deque<HalfEdgeConstItr>& boundary, bool isBottEmpty, float zVal)
+{
+	std::vector<QVector3D> bottomPath;
+	bottomPath.reserve(boundary.size() + 1);
+	for (auto& each : boundary)
+	{
+		auto pos = each.from().localPosition();
+		bottomPath.emplace_back(QVector3D(pos.x(), pos.y(), zVal));
+	}
+	auto last = boundary.front().from().localPosition();
+	bottomPath.emplace_back(QVector3D(last.x(), last.y(), zVal));
+
+	//create actual cylinder
+	auto dItr = bottomPath.cbegin();
+	for (auto bItr = boundary.cbegin(); bItr != boundary.cend(); ++bItr, ++dItr)
+	{
+		auto& b0 = *dItr;
+		auto& b1 = *(dItr + 1);
+		auto t0 = bItr->from().localPosition();
+		auto t1 = bItr->to().localPosition();
+
+		//topTriFace
+		model.addFace(t1, t0, b1);
+		//bot face
+		model.addFace(t0, b0, b1);
+
+	}
+	
+
+}
+
+void buildBott(Hix::Engine3D::Mesh& mesh, const  std::deque<HalfEdgeConstItr>& boundary, bool isBottEmpty, float zVal)
+{
+	std::vector<std::vector<QVector3D>> shapes;
+	auto& latest = shapes.emplace_back();
+	for (auto& each : boundary)
+	{
+		auto pos = each.from().localPosition();
+		latest.emplace_back(QVector3D(pos.x(), pos.y(), 0));
+
+	}
+	auto paths =  Hix::Shapes2D::combineContour(shapes);
+	auto& outer = *paths.begin();
+	std::vector<QVector2D> contour;
+
+	for (auto& each : outer)
+	{
+		auto flPt = Hix::Polyclipping::toFloatPt(each);
+		contour.emplace_back(QVector2D(flPt));
+	}
+
+
+	Hix::Shapes2D::generateCapZPlane(&mesh, contour, zVal, isBottEmpty);
+
+}
+
+
+
 
 
 
@@ -735,6 +1098,15 @@ Hix::Features::TwoManifoldBuilder::TwoManifoldBuilder(Hix::Engine3D::Mesh& model
 	//	_fnCache.insert(std::make_pair(itr, itr.localFn()));
 	//}
 
+
+
+	auto boundary = getLongestBoundary(_model);
+	auto isBottEmpty = !isClockwise(boundary);
+	edgeRemoveDownFacing(_model, boundary, isBottEmpty);
+	cuntourConcaveFill2(_model, boundary, isBottEmpty);
+
+
+
 	auto vtxEnd = _model.getVertices().cend();
 	float zMin = std::numeric_limits<float>::max();
 	float zMax = std::numeric_limits<float>::lowest();
@@ -746,13 +1118,22 @@ Hix::Features::TwoManifoldBuilder::TwoManifoldBuilder(Hix::Engine3D::Mesh& model
 		if (posZ > zMax)
 			zMax = posZ;
 	}
+	constexpr float Z_OFFSET = 2.0f;
+	float zValue;
+	if (isBottEmpty)
+	{
+		zValue = zMin - Z_OFFSET;
+	}
+	else
+	{
+		zValue = zMax + Z_OFFSET;
+	}
+	
+	zCylinder(_model, boundary, isBottEmpty, zValue);
+	buildBott(_model, boundary, isBottEmpty, zValue);
 
-	auto boundary = getLongestBoundary(_model);
-	auto test = getBoundary(*boundary.begin());
-	auto isBoundaryCorrect = checkBoundary(boundary);
-	auto isBottEmpty = !isClockwise(boundary);
 	//edgeRemoveConcavity(_model, boundary, isBottEmpty);
-	edgeRemoveDownFacing(_model, boundary, isBottEmpty);
+	//edgeRemoveConcavity2(_model, boundary, isBottEmpty);
 	////edgeSmoothing(_model, boundary, isBottEmpty);
 	//edgeRemoveDownFacing(_model, boundary, isBottEmpty);
 	////for(auto& )
