@@ -113,9 +113,11 @@ namespace Hix
 			TrackedIndexedList<MeshVertex, std::allocator<MeshVertex>, VertexItrFactory>::DeleteGuardType vtxDeleteGuard;
 			TrackedIndexedList<HalfEdge, std::allocator<HalfEdge>, HalfEdgeItrFactory>::DeleteGuardType hEdgeDeleteGuard;
 			TrackedIndexedList<MeshFace, std::allocator<MeshFace>, FaceItrFactory>::DeleteGuardType faceDeleteGuard;
+			MeshDeleteGuard(Mesh* mesh);
 			MeshDeleteGuard& operator=(MeshDeleteGuard&& o) = default;
 			MeshDeleteGuard(MeshDeleteGuard&& o) = default;
 			void flush();
+			void release();
 			MeshDeleteGuard& operator+=(MeshDeleteGuard&& other);
 
 

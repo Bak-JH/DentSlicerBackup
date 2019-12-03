@@ -4,34 +4,8 @@
 using namespace Hix::Input;
 using namespace Hix::Features::Cut;
 
-DrawingPlane::DrawingPlane(Qt3DCore::QEntity* owner): Qt3DCore::QEntity(owner)
+DrawingPlane::DrawingPlane(Qt3DCore::QEntity* owner): Hix::Render::PlaneMeshEntity(owner)
 {
-	auto planeMaterial = new Qt3DExtras::QPhongAlphaMaterial(this);
-	planeMaterial->setAmbient(QColor(244,244,244,255));
-	planeMaterial->setDiffuse(QColor(244, 244, 244, 255));
-	planeMaterial->setSpecular(QColor(244, 244, 244, 255));
-
-	for (int i = 0; i < 1; i++) {
-		auto planeEntity = new Qt3DCore::QEntity(this);
-		//qDebug() << "generatePlane---------------------==========-=-==-" << parentModel;
-		auto clipPlane = new Qt3DExtras::QPlaneMesh(this);
-		clipPlane->setHeight(200.0);
-		clipPlane->setWidth(200.0);
-
-		auto planeTransform = new Qt3DCore::QTransform();
-		planeTransform->setRotation(QQuaternion::fromAxisAndAngle(QVector3D(1, 0, 0),  90 + 180 * i));
-		planeEntity->addComponent(&_layer);
-		planeEntity->addComponent(clipPlane);
-		planeEntity->addComponent(planeTransform); //jj
-		planeEntity->addComponent(planeMaterial);
-		planeEntity->setEnabled(true);
-
-		_meshTransformMap[planeEntity] = planeTransform;
-	}
-	addComponent(&_transform);
-
-
-
 	initHitTest();
 	setEnabled(false);
 	setHitTestable(false);
@@ -65,10 +39,6 @@ void DrawingPlane::enableDrawing(bool isEnable)
 
 }
 
-Qt3DCore::QTransform& DrawingPlane::transform()
-{
-	return _transform;
-}
 
 void DrawingPlane::clicked(Hix::Input::MouseEventData& m, const Qt3DRender::QRayCasterHit& hit)
 {
@@ -149,7 +119,10 @@ std::vector<QVector3D> Hix::Features::Cut::DrawingPlane::contour() const
 
 void DrawingPlane::initHitTest()
 {
-	addComponent(&_layer);
+	for (auto& p : _meshTransformMap)
+	{
+		p.first->addComponent(&_layer);
+	}
 	_layer.setRecursive(false);
 
 }

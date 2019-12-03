@@ -193,6 +193,9 @@
     <ClCompile Include="feature\PoissonRemesh.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="render\PlaneMeshEntity.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="common\Debug.h" />
@@ -785,6 +788,7 @@
     <ClInclude Include="feature\PoissonRemesh.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="feature\cut\DrawingPlane.h" />
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="debug\moc_predefs.h.cbt" />
@@ -794,7 +798,6 @@
     <ResourceCompile Include="DentSlicer.rc" />
   </ItemGroup>
   <ItemGroup>
-    <QtMoc Include="feature\cut\DrawingPlane.h" />
     <QtMoc Include="feature\layerview\CrossSectionPlane.h" />
     <QtMoc Include="glmodel.h" />
     <QtMoc Include="utils\gridmesh.h" />
@@ -812,6 +815,9 @@
     <QtMoc Include="qmlmanager.h" />
     <QtMoc Include="utils\quaternionhelper.h" />
     <QtMoc Include="utils\updatechecker.h" />
+    <QtMoc Include="render\PlaneMeshEntity.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
   </ItemGroup>
   <ItemGroup>
     <QtRcc Include="qml.qrc" />

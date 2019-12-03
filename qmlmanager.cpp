@@ -278,6 +278,15 @@ void QmlManager::initializeUI(QQmlApplicationEngine* e){
 	QObject::connect(shelloffsetPopup, SIGNAL(resultSliderValueChanged(double)), this, SLOT(getSliderSignal(double)));
 
 	QObject::connect(layerViewSlider, SIGNAL(sliderValueChanged(int)), this, SLOT(getCrossSectionSignal(int)));
+
+	//auto planeTest = new Hix::Render::PlaneMeshEntity(total);
+	//QVector3D point(0, 0, 0);
+	//QVector3D direction(0,0,-1);
+
+	//QVector3D test(0, 0, 3);
+	//auto dist = test.distanceToPlane(point, direction);
+	//Hix::Render::PDPlane pdPlane{ point, direction };
+	//planeTest->setPointNormal(pdPlane);
 }
 
 GLModel* QmlManager::listModel(GLModel* model)
@@ -335,9 +344,10 @@ void QmlManager::openModelFile(QString fname){
 
 
 	TwoManifoldBuilder modelBuilder(*mesh);
-	latest->setZToBed();
+	latest->updateMesh(true);
+	//latest->setZToBed();
+	//Hix::Debug::DebugRenderObject::getInstance().colorDebugFaces();
 
-	//latest->updateMesh(true);
 
 	//auto builtModel = modelBuilder.execute();
 	//latest->clearMesh();
@@ -352,7 +362,6 @@ void QmlManager::openModelFile(QString fname){
 	//	_currentFeature.reset(new MeshRepair(repairModels));
 	//	_currentFeature.reset();
 	//}
-	Hix::Debug::DebugRenderObject::getInstance().colorDebugFaces();
 
 	setProgress(1.0);
     // do auto arrange
