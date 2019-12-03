@@ -348,7 +348,7 @@ bool Mesh::addFace(const FaceConstItr& face)
 
 MeshDeleteGuard Hix::Engine3D::Mesh::removeFacesWithoutShifting(const std::unordered_set<FaceConstItr>& faceItrs)
 {
-	MeshDeleteGuard delguardContainer{ vertices.getDeleteGuard(), halfEdges.getDeleteGuard(), faces.getDeleteGuard() };
+	MeshDeleteGuard delguardContainer(this);
 	auto& vtxDelGuard = delguardContainer.vtxDeleteGuard;
 	auto& hEdgeDelGuard = delguardContainer.hEdgeDeleteGuard;
 	auto& faceDelGuard = delguardContainer.faceDeleteGuard;
@@ -375,6 +375,7 @@ MeshDeleteGuard Hix::Engine3D::Mesh::removeFacesWithoutShifting(const std::unord
 	{
 		if (vtxItr->arrivingEdges.empty() && vtxItr->leavingEdges.empty())
 		{
+			qDebug() << "vertex removed at: " << vtxItr.localPosition();
 			removeVertexHash(vtxItr.localPosition());
 			vtxDelGuard.deleteLater(vtxItr);
 		}
@@ -662,6 +663,7 @@ void Mesh::hEdgeIndexChangedCallback(size_t oldIdx, size_t newIdx)
 
 std::unordered_set<FaceConstItr> Mesh::findNearSimilarFaces(QVector3D normal, FaceConstItr  mf, float maxNormalDiff, size_t maxCount)const
 {
+
 	std::unordered_set<FaceConstItr> result;
 	std::deque<FaceConstItr>q;
 	result.reserve(maxCount);
@@ -1109,6 +1111,11 @@ size_t Hix::Engine3D::MeshVtxHasher::operator()(const QVector3D& hashed) const
 		digest = digest | unsignedMicron;
 	}
 	return	digest;
+}
+
+Hix::Engine3D::MeshDeleteGuard::MeshDeleteGuard(Mesh* mesh): 
+	vtxDeleteGuard(mesh->getVertices().getDeleteGuard()), hEdgeDeleteGuard(mesh->getHalfEdges().getDeleteGuard()), faceDeleteGuard(mesh->getFaces().getDeleteGuard())
+{
 }
 
 void Hix::Engine3D::MeshDeleteGuard::flush()

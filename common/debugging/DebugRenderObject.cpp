@@ -53,8 +53,16 @@ void Hix::Debug::DebugRenderObject::colorDebugFaces()
 
 void Hix::Debug::DebugRenderObject::clear()
 {
+	_planes.clear();
 	_lines.clear();
 	_debugFaceMap.clear();
+}
+
+Hix::Render::PlaneMeshEntity& Hix::Debug::DebugRenderObject::displayPlane(const Hix::Render::PDPlane& pdplane)
+{
+	auto& plane = _planes.emplace_back(_root);
+	plane.setPointNormal(pdplane);
+	return plane;
 }
 
 

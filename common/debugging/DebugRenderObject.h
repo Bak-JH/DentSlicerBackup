@@ -3,8 +3,10 @@
 #include <deque>
 #include "../Singleton.h"
 #include "../../render/LineMeshEntity.h"
+#include "../../render/PlaneMeshEntity.h"
 #include "../../render/Color.h"
 #include "../../DentEngine/src/mesh.h"
+
 namespace Qt3DCore
 {
 	class QEntity;
@@ -25,9 +27,11 @@ namespace Hix
 			void registerDebugColorFaces(GLModel* owner, const std::unordered_set<FaceConstItr>& faces);
 			void colorDebugFaces();
 			void clear();
+			Hix::Render::PlaneMeshEntity& displayPlane(const Hix::Render::PDPlane& pdplane);
 		private:
 			std::unordered_map<GLModel*, std::unordered_set<FaceConstItr>> _debugFaceMap;
 			std::deque<Hix::Render::LineMeshEntity> _lines;
+			std::deque<Hix::Render::PlaneMeshEntity>_planes;
 			Qt3DCore::QEntity* _root = nullptr;
 		};
 	}
