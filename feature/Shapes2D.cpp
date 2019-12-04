@@ -240,15 +240,27 @@ void Hix::Shapes2D::generateCapZPlane(Hix::Engine3D::Mesh* mesh, const std::vect
 	generateCapZPlaneImpl(mesh, zPos, vtcs, edges, isReverse);
 }
 
-std::vector<ClipperLib::Path> Hix::Shapes2D::combineContour(const std::vector<std::vector<QVector3D>>& contours)
+std::vector<std::vector<QVector3D>> Hix::Shapes2D::combineContour(const std::vector<std::vector<QVector3D>>& contours)
 {
-	std::vector<ClipperLib::Path> result;
+	std::vector<std::vector<QVector3D>> result;
 	ClipperLib::Clipper clipper;
 	std::vector<Path> clPaths;
+	std::unordered_map<ClipperLib::IntPoint, QVector3D> intToFloatMap;
 	clPaths.reserve(contours.size());
 	for (auto& each : contours)
 	{
 		clPaths.emplace_back(Hix::Polyclipping::toCLPath(each));
+	}
+	//map int point to float
+	for (size_t i = 0; i < clPaths.size(); ++i)
+	{
+		auto& path = clPaths[i];
+		auto& fPath = contours[i];
+
+		for (size_t j = 0; j < path.size(); ++j)
+		{
+			intToFloatMap[path[j]] = fPath[j];
+		}
 	}
 	for (auto& each : clPaths)
 	{
@@ -262,8 +274,22 @@ std::vector<ClipperLib::Path> Hix::Shapes2D::combineContour(const std::vector<st
 	{
 		for (auto& child : tree.Childs)
 		{
-			result.emplace_back(child->Contour);
+			std::vector<QVector3D> currPath;
+			for (auto& pt : child->Contour)
+			{
+				try
+				{
+					auto& floatPt = intToFloatMap.at(pt);
+					currPath.emplace_back(floatPt);
+				}
+				catch (...)
+				{
+					auto flPt = Hix::Polyclipping::toFloatPt(pt);
+					currPath.emplace_back(flPt);
+				}
 
+			}
+			result.emplace_back(std::move(currPath));
 		}
 	}
 	return result;

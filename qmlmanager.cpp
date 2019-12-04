@@ -33,7 +33,7 @@
 #include "feature/layerview/layerview.h"
 #include "feature/SupportFeature.h"
 #include "feature/arrange/autoarrange.h"
-
+#include "feature/TwoManifoldBuilder.h"
 #include <functional>
 using namespace Hix::Input;
 using namespace Hix::UI;
@@ -279,7 +279,14 @@ void QmlManager::initializeUI(QQmlApplicationEngine* e){
 
 	QObject::connect(layerViewSlider, SIGNAL(sliderValueChanged(int)), this, SLOT(getCrossSectionSignal(int)));
 
+	//auto planeTest = new Hix::Render::PlaneMeshEntity(total);
+	//QVector3D point(0, 0, 0);
+	//QVector3D direction(0,0,-1);
 
+	//QVector3D test(0, 0, 3);
+	//auto dist = test.distanceToPlane(point, direction);
+	//Hix::Render::PDPlane pdPlane{ point, direction };
+	//planeTest->setPointNormal(pdPlane);
 }
 
 GLModel* QmlManager::listModel(GLModel* model)
@@ -318,7 +325,7 @@ GLModel* QmlManager::createAndListModel(Hix::Engine3D::Mesh* mesh, QString fname
 	qmlManager->addPart(latestAdded->modelName(), latestAdded->ID);
 	return latestAdded;
 }
-void QmlManager::openModelFile(QString fname){
+void QmlManager::openModelFile(QString fname) {
 	openProgressPopUp();
 
 	auto mesh = new Mesh();
@@ -334,6 +341,41 @@ void QmlManager::openModelFile(QString fname){
 	auto latest = createAndListModel(mesh, fname, nullptr);
 	latest->setZToBed();
 	setProgress(0.6);
+	//repair mode
+	if (Hix::Features::isRepairNeeded(mesh))
+	{
+		qmlManager->setProgressText("Repairing mesh.");
+		std::unordered_set<GLModel*> repairModels;
+		repairModels.insert(latest);
+		_currentFeature.reset(new MeshRepair(repairModels));
+		_currentFeature.reset();
+	}
+	setProgress(1.0);
+	// do auto arrange
+	if (glmodels.size() >= 2)
+		openArrange();
+	//runArrange();
+	QApplication::setOverrideCursor(QCursor(Qt::ArrowCursor));
+}
+
+void QmlManager::openAndBuildModel(QString fname) {
+	openProgressPopUp();
+
+	auto mesh = new Mesh();
+	if (fname != "" && (fname.contains(".stl") || fname.contains(".STL"))) {
+		FileLoader::loadMeshSTL(mesh, fname.toLocal8Bit().constData());
+	}
+	else if (fname != "" && (fname.contains(".obj") || fname.contains(".OBJ"))) {
+		FileLoader::loadMeshOBJ(mesh, fname.toLocal8Bit().constData());
+	}
+	fname = filenameToModelName(fname.toStdString());
+	setProgress(0.1);
+	mesh->centerMesh();
+	auto latest = createAndListModel(mesh, fname, nullptr);
+	setProgress(0.2);
+
+	TwoManifoldBuilder modelBuilder(*mesh);
+	setProgress(0.4);
 
 	//repair mode
 	if (Hix::Features::isRepairNeeded(mesh))
@@ -345,12 +387,15 @@ void QmlManager::openModelFile(QString fname){
 		_currentFeature.reset();
 	}
 	setProgress(1.0);
-    // do auto arrange
-    if (glmodels.size() >= 2)
-        openArrange();
-    //runArrange();
-    QApplication::setOverrideCursor(QCursor(Qt::ArrowCursor));
+	// do auto arrange
+	if (glmodels.size() >= 2)
+		openArrange();
+	//runArrange();
+	QApplication::setOverrideCursor(QCursor(Qt::ArrowCursor));
 }
+
+
+
 
 void QmlManager::modelRepair()
 {

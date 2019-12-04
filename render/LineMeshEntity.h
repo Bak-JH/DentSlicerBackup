@@ -13,9 +13,10 @@ namespace Hix
 		public:
 			LineMeshEntity(const std::vector<QVector3D>& vertices, Qt3DCore::QEntity* parent);
 			LineMeshEntity(const std::vector<QVector3D>& vertices, Qt3DCore::QEntity* parent, const QVector4D& color);
-			int vertexCount();
+
+			LineMeshEntity(const std::vector<std::vector<QVector3D>>& vertices, Qt3DCore::QEntity* parent);
+			LineMeshEntity(const std::vector<std::vector<QVector3D>>& vertices, Qt3DCore::QEntity* parent, const QVector4D& color);
 		private:
-			std::vector<QVector3D> _points;
 			Qt3DCore::QTransform _transform;
 			Qt3DExtras::QPhongMaterial _material;
 
