@@ -345,7 +345,7 @@ void QmlManager::openModelFile(QString fname){
 
 	TwoManifoldBuilder modelBuilder(*mesh);
 	latest->updateMesh(true);
-	//latest->setZToBed();
+	latest->setZToBed();
 	//Hix::Debug::DebugRenderObject::getInstance().colorDebugFaces();
 
 

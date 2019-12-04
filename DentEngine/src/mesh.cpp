@@ -215,19 +215,23 @@ Mesh& Mesh::operator+=(const Mesh& o)
 
 void Mesh::vertexOffset(float factor){
 	vertices.markChangedAll();
-	size_t count = 0;
 	auto end = vertices.end();
 	for(auto vtxItr = vertices.begin(); vtxItr != end; ++vtxItr)
 	{
-		if (count % 100 == 0)
-			QCoreApplication::processEvents();
 		QVector3D tmp = vtxItr.localPosition() - vtxItr.localVn() * factor;
 		vtxItr.ref().position = tmp;
-		++count;
 	};
 	rehashVtcs();
 }
 
+void Mesh::vertexRotate(const QQuaternion& rot) {
+	for (auto& vertex : vertices)
+	{
+		vertex.position = rot.rotatedVector(vertex.position);
+	};
+	rehashVtcs();
+
+}
 void Hix::Engine3D::Mesh::rehashVtcs()
 {
 	_verticesHash.clear();
@@ -241,14 +245,10 @@ void Hix::Engine3D::Mesh::rehashVtcs()
 
 void Mesh::vertexMove(const QVector3D& direction) {
 	vertices.markChangedAll();
-	size_t count = 0;
 	for (auto& vertex : vertices)
 	{
-		if (count % 100 == 0)
-			QCoreApplication::processEvents();
 		QVector3D tmp = direction + vertex.position;
 		vertex.position = tmp;
-		++count;
 	};
 	rehashVtcs();
 

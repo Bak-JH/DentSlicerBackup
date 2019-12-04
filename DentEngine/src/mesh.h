@@ -137,6 +137,8 @@ namespace Hix
 
 			/********************** Mesh Edit Functions***********************/
 			void vertexOffset(float factor);
+			void vertexRotate(const QQuaternion& rot);
+
 			void centerMesh();
 			void reverseFace(FaceItr faceItr);
 			void reverseFaces();
