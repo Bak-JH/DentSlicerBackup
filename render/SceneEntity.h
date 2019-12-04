@@ -54,6 +54,7 @@ namespace Hix
 			QVector3D vectorToRoot(const QVector3D& local)const;
 			QVector3D ptToLocal(const QVector3D& world)const;
 			QVector3D vectorToLocal(const QVector3D& world)const;
+			SceneEntity* parentSceneEntity()const;
 
 			//update faces given indicies, if index >= indexUppderLimit, it's ignored
 			void updateFaces(const std::unordered_set<size_t>& faceIndicies, const Hix::Engine3D::Mesh& mesh);
@@ -122,8 +123,6 @@ namespace Hix
 			QAttribute indexAttribute;
 
 
-			//QVariantList _primitiveColorCodes;
-			QEntity* m_parent;
 
 			// Core mesh structures
 			Hix::Engine3D::Mesh* _mesh = nullptr; 
