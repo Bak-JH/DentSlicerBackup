@@ -8,14 +8,14 @@ FileDialog {
     nameFilters: ["3D files(*.stl *.obj)"]
 	property var isModelBuilder: false
     onAccepted: {
-        var filepath = filedialogload.fileUrl.toString().replace(/^(file:\/{3})/,"");
-        console.log("opening" + filepath);
 		if(isModelBuilder)
 		{
+			var filepath = fileDialogMB.fileUrl.toString().replace(/^(file:\/{3})/,"");
 			qm.openAndBuildModel(filepath);
 		}
 		else
 		{
+		    var filepath = filedialogload.fileUrl.toString().replace(/^(file:\/{3})/,"");
 			qm.openModelFile(filepath);
 		}
     }

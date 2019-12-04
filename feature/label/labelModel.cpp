@@ -93,9 +93,15 @@ void Hix::LabelModel::generateLabelMesh(const QVector3D translation, const QVect
 		}
 	}
 
-	_transform.setScale(0.05f);
-	_transform.setRotation(QQuaternion::rotationTo(QVector3D(0, -1, 0), normal));
+	auto rotation = QQuaternion::rotationTo(QVector3D(0, -1, 0), normal);
+	Qt3DCore::QTransform worldTrans;
+	worldTrans.setRotation(rotation);
+	auto toLocalMat = parentSceneEntity()->toLocalMatrix();
+	auto finalMat = toLocalMat * worldTrans.matrix();
+	Qt3DCore::QTransform finalTrans;
+	finalTrans.setMatrix(finalMat);
+	_transform.setRotation(finalTrans.rotation());
 	_transform.setTranslation(translation);
-
+	_transform.setScale(0.05f);
 	setMesh(labelMesh);
 }
