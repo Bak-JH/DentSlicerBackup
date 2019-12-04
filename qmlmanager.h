@@ -355,6 +355,7 @@ public slots:
 
     void sendUpdateModelInfo(int, int, QString, float);
     void openModelFile(QString filename);
+	void openAndBuildModel(QString filename);
     void deleteOneModelFile(int ID);
 	void deleteOneModelFile(GLModel* model);
 

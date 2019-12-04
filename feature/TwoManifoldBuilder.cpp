@@ -1,6 +1,5 @@
 #include "TwoManifoldBuilder.h"
 #include "Shapes2D.h"
-#include "PoissonRemesh.h"
 #include "../common/Debug.h"
 #include "../qmlmanager.h"
 #include <cmath>
@@ -75,7 +74,6 @@ std::deque<std::deque<HalfEdgeConstItr>> formBoundaryPaths(std::unordered_set<Ha
 			auto nexts = to.leavingBoundary();
 			if (nexts.size() == 0)
 			{
-				qDebug("shit, deadend");
 				success = false;
 				break;
 			}
@@ -84,18 +82,13 @@ std::deque<std::deque<HalfEdgeConstItr>> formBoundaryPaths(std::unordered_set<Ha
 				//suspect butterfly degeneracy
 				auto currentFace = curr.owningFace();
 				auto nf = currentFace.neighborFaces();
-				qDebug() << "currentFace: " << currentFace.index() << "nf size:" << nf.size();
 
 				success = false;
 
 				for (auto& nextEdge : nexts)
 				{
-					qDebug()<< "doing butterfly on: " << nextEdge.index() << nextEdge.owningFace().index();
-
 					if (nextEdge.owningFace() == currentFace || !currentFace.isButterfly(nextEdge.owningFace(), to))
 					{
-						qDebug() << "yay butterfly handled is singleTriangle: " << (nextEdge.owningFace() == currentFace);
-
 						success = true;
 						curr = nextEdge;
 						break;
@@ -105,14 +98,10 @@ std::deque<std::deque<HalfEdgeConstItr>> formBoundaryPaths(std::unordered_set<Ha
 			}
 			else
 			{
-				//default case
-				qDebug() << "default";
-
 				curr = *nexts.begin();
 			}
 			if (!success || boundaryEdges.find(curr) == boundaryEdges.end())
 			{
-				qDebug("shit, boundary doesn't exist");
 				success = false;
 				break;
 			}
@@ -156,8 +145,6 @@ std::deque<HalfEdgeConstItr>  getBoundary(const HalfEdgeConstItr& start)
 	{
 		auto to = curr.to();
 		auto nexts = to.leavingBoundary();
-		if (nexts.size() != 1)
-			qDebug("shit, boundaries multiple");
 		curr = *nexts.begin();
 		boundary.emplace_back(curr);
 	}
@@ -206,7 +193,6 @@ bool checkBoundary(std::deque<HalfEdgeConstItr>& boundary)
 	}
 	if (set.size() != boundary.size())
 	{
-		qDebug("boundary has duplicate edges");
 		return false;
 	}
 	auto prevTo = boundary.back().to();
@@ -214,7 +200,6 @@ bool checkBoundary(std::deque<HalfEdgeConstItr>& boundary)
 	{
 		if (prevTo != itr->from())
 		{
-			qDebug() << prevTo.index() << itr->from().index() << prevTo.localPosition() << itr->from().localPosition();
 			return false;
 		}
 		prevTo = itr->to();
@@ -736,13 +721,10 @@ void buildBott(Hix::Engine3D::Mesh& mesh, const  std::deque<HalfEdgeConstItr>& b
 	auto paths =  Hix::Shapes2D::combineContour(shapes);
 	auto& outer = *paths.begin();
 	std::vector<QVector2D> contour;
-
 	for (auto& each : outer)
 	{
-		auto flPt = Hix::Polyclipping::toFloatPt(each);
-		contour.emplace_back(QVector2D(flPt));
+		contour.emplace_back(QVector2D(each));
 	}
-
 	Hix::Shapes2D::generateCapZPlane(&mesh, contour, zVal, isBottEmpty);
 
 }
@@ -754,13 +736,6 @@ void buildBott(Hix::Engine3D::Mesh& mesh, const  std::deque<HalfEdgeConstItr>& b
 
 Hix::Features::TwoManifoldBuilder::TwoManifoldBuilder(Hix::Engine3D::Mesh& model):_model(model)
 {
-
-	//auto avg = faceNormalAvg(_model);
-	//Hix::Render::PDPlane plane;
-	//plane.normal = avg;
-	//plane.point = QVector3D(0, 0, 0);
-	//Hix::Debug::DebugRenderObject::getInstance().displayPlane(plane);
-	//return;
 	auto boundary = getLongestBoundary(_model);
 	auto isBottEmpty = !isClockwise(boundary);
 	bool boundaryCorrect = false;
@@ -786,7 +761,6 @@ Hix::Features::TwoManifoldBuilder::TwoManifoldBuilder(Hix::Engine3D::Mesh& model
 	}
 	auto rotator = QQuaternion::rotationTo(bestFitPlane.normal, zDirection);
 	model.vertexRotate(rotator);
-	//edgeRemoveWrongZ(_model, boundary, isBottEmpty);
 	cuntourConcaveFill(_model, boundary, isBottEmpty);
 	auto vtxEnd = _model.getVertices().cend();
 	float zMin = std::numeric_limits<float>::max();
@@ -799,7 +773,7 @@ Hix::Features::TwoManifoldBuilder::TwoManifoldBuilder(Hix::Engine3D::Mesh& model
 		if (posZ > zMax)
 			zMax = posZ;
 	}
-	constexpr float Z_OFFSET = 1.0f;
+	constexpr float Z_OFFSET = 2.0f;
 	float zValue;
 	if (isBottEmpty)
 	{
@@ -814,10 +788,4 @@ Hix::Features::TwoManifoldBuilder::TwoManifoldBuilder(Hix::Engine3D::Mesh& model
 	deleteGuard.flush();
 
 
-}
-
-Hix::Engine3D::Mesh* Hix::Features::TwoManifoldBuilder::execute()
-{
-	Hix::Features::PoissonRemesh remesher;
-	return remesher.remesh(_model);
 }

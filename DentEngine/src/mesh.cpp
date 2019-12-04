@@ -375,7 +375,6 @@ MeshDeleteGuard Hix::Engine3D::Mesh::removeFacesWithoutShifting(const std::unord
 	{
 		if (vtxItr->arrivingEdges.empty() && vtxItr->leavingEdges.empty())
 		{
-			qDebug() << "vertex removed at: " << vtxItr.localPosition();
 			removeVertexHash(vtxItr.localPosition());
 			vtxDelGuard.deleteLater(vtxItr);
 		}
