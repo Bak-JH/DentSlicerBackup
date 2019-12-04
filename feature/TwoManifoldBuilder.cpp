@@ -235,65 +235,61 @@ void cuntourConcaveFill(Hix::Engine3D::Mesh& mesh, std::deque<HalfEdgeConstItr>&
 	//if bott is empty, CCW,  CW otherwise
 	size_t totalRemovedCnt = 0;
 	size_t removeCnt;
-
-	if (isBottEmpty)
+	do
 	{
-		do
+		removeCnt = 0;
+		auto e0 = boundary.begin();
+		auto e1 = e0 + 1;
+		while (e1 != boundary.end())
 		{
-			removeCnt = 0;
-			auto e0 = boundary.begin();
-			auto e1 = e0 + 1;
-			while (e1 != boundary.end())
+			auto vtx0(e0->from());
+			auto vtx1(e0->to());
+			auto vtx2(e1->to());
+			auto pos0 = vtx0.localPosition();
+			auto pos1 = vtx1.localPosition();
+			auto pos2 = vtx2.localPosition();
+			std::vector<QVector2D> tri
 			{
-				auto vtx0(e0->from());
-				auto vtx1(e0->to());
-				auto vtx2(e1->to());
-				auto pos0 = vtx0.localPosition();
-				auto pos1 = vtx1.localPosition();
-				auto pos2 = vtx2.localPosition();
-				std::vector<QVector2D> tri
+				QVector2D(pos0),
+				QVector2D(pos1),
+				QVector2D(pos2)
+			};
+			bool faceAdded = false;
+			bool isUpFacing = Hix::Shapes2D::isClockwise(tri);
+			if (isUpFacing == isBottEmpty)
+			{
+				auto e0Dir = e0->to().localPosition() - e0->from().localPosition();
+				auto e1Dir = e1->from().localPosition() - e1->to().localPosition();
+
+				auto dotProduct = QVector3D::dotProduct(e0Dir, e1Dir);
+				auto angle = acos(dotProduct / (e0Dir.length() * e1Dir.length()));
+				auto degreeAngle = angle * (180 / M_PI);
+
+				if (degreeAngle < 120)
 				{
-					QVector2D(pos0),
-					QVector2D(pos1),
-					QVector2D(pos2)
-				};
-				bool faceAdded = false;
-				bool isUpFacing = Hix::Shapes2D::isClockwise(tri);
-				if (isUpFacing)
-				{
-					auto e0Dir = e0->to().localPosition() - e0->from().localPosition();
-					auto e1Dir = e1->from().localPosition() - e1->to().localPosition();
+					mesh.addFace(pos2, pos1, pos0);
+					auto latestFace = mesh.getFaces().cend() - 1;
 
-					auto dotProduct = QVector3D::dotProduct(e0Dir, e1Dir);
-					auto angle = acos(dotProduct / (e0Dir.length() * e1Dir.length()));
-					auto degreeAngle = angle * (180 / M_PI);
-
-					if (degreeAngle < 120)
-					{
-						mesh.addFace(pos2, pos1, pos0);
-						auto latestFace = mesh.getFaces().cend() - 1;
-
-						HalfEdgeConstItr itr;
-						bool isworking = latestFace.getEdgeWithVertices(itr, e0->from(), e1->to());
-						//update boundary
-						e0 = boundary.erase(e0, e1 + 1);
-						e0 = boundary.insert(e0, itr);
-						e1 = e0 + 1;
-						faceAdded = true;
-						++removeCnt;
-					}
-
+					HalfEdgeConstItr itr;
+					bool isworking = latestFace.getEdgeWithVertices(itr, e0->from(), e1->to());
+					//update boundary
+					e0 = boundary.erase(e0, e1 + 1);
+					e0 = boundary.insert(e0, itr);
+					e1 = e0 + 1;
+					faceAdded = true;
+					++removeCnt;
 				}
-				if (!faceAdded)
-				{
-					++e0;
-					++e1;
-				}
+
 			}
-			auto isBoundaryCorrect = checkBoundary(boundary);
-			totalRemovedCnt += removeCnt;
-		} while (removeCnt != 0);
-	}
+			if (!faceAdded)
+			{
+				++e0;
+				++e1;
+			}
+		}
+		totalRemovedCnt += removeCnt;
+	} while (removeCnt != 0);
+
 }
 
 bool isDownard(const FaceConstItr& face)
@@ -657,7 +653,11 @@ MeshDeleteGuard edgeRemoveOutlier(Hix::Engine3D::Mesh& mesh, std::deque<HalfEdge
 		if (itr->size() > largestItr->size())
 			largestItr = itr;
 	}
-
+	std::unordered_set<FaceConstItr> dontDeleteFaces;
+	for (auto& e : *largestItr)
+	{
+		dontDeleteFaces.insert(e.owningFace());
+	}
 	//delete disconnected faces
 	std::unordered_set<FaceConstItr> isolatedFaces;
 	for (auto itr = boundaries.begin(); itr != boundaries.end(); ++itr)
@@ -666,7 +666,19 @@ MeshDeleteGuard edgeRemoveOutlier(Hix::Engine3D::Mesh& mesh, std::deque<HalfEdge
 		{
 			auto firstEdge = itr->front();
 			auto connected = firstEdge.owningFace().findAllConnected();
-			isolatedFaces.merge(std::move(connected));
+			bool canDelete = true;
+			for (auto& f : dontDeleteFaces)
+			{
+				if (connected.find(f) != connected.end())
+				{
+					canDelete = false;
+					break;
+				}
+			}
+			if (canDelete)
+			{
+				isolatedFaces.merge(std::move(connected));
+			}
 		}
 	}
 	auto delguard2 = mesh.removeFacesWithoutShifting(isolatedFaces);
@@ -753,28 +765,41 @@ Hix::Features::TwoManifoldBuilder::TwoManifoldBuilder(Hix::Engine3D::Mesh& model
 	auto isBottEmpty = !isClockwise(boundary);
 	bool boundaryCorrect = false;
 	Hix::Engine3D::MeshDeleteGuard deleteGuard(&_model);
+	Hix::Render::PDPlane bestFitPlane;
 	for (size_t i = 0; i < 2; ++i)
 	{
-		auto bestFitPlane = bestFittingPlane(boundary);
+		bestFitPlane = bestFittingPlane(boundary);
 		reorientatePlane(bestFitPlane, isBottEmpty);
-		Hix::Debug::DebugRenderObject::getInstance().displayPlane(bestFitPlane);
 		auto delFaces = edgeRemoveOutlier(_model, boundary, bestFitPlane);
 		deleteGuard += std::move(delFaces);
 	}
+	bestFitPlane = bestFittingPlane(boundary);
+	QVector3D zDirection;
+	if (isBottEmpty)
+	{
+		zDirection = QVector3D(0, 0, 1);
+	}
+	else
+	{
+		zDirection = QVector3D(0, 0, 1);
+
+	}
+	auto rotator = QQuaternion::rotationTo(bestFitPlane.normal, zDirection);
+	model.vertexRotate(rotator);
 	//edgeRemoveWrongZ(_model, boundary, isBottEmpty);
-	//cuntourConcaveFill(_model, boundary, isBottEmpty);
+	cuntourConcaveFill(_model, boundary, isBottEmpty);
 	auto vtxEnd = _model.getVertices().cend();
 	float zMin = std::numeric_limits<float>::max();
 	float zMax = std::numeric_limits<float>::lowest();
-	for (auto itr = _model.getVertices().cbegin(); itr != vtxEnd; ++itr)
+	for (auto& e: boundary)
 	{
-		auto posZ = itr.localPosition().z();
+		auto posZ = e.from().localPosition().z();
 		if (posZ < zMin)
 			zMin = posZ;
 		if (posZ > zMax)
 			zMax = posZ;
 	}
-	constexpr float Z_OFFSET = 0.2f;
+	constexpr float Z_OFFSET = 1.0f;
 	float zValue;
 	if (isBottEmpty)
 	{
