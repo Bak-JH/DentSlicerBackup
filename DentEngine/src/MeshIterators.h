@@ -546,8 +546,6 @@ namespace Hix
 			//for degenerative situation when two faces are connected only from a single shared vertex
 			bool isButterfly(const typename TypeConstInfo::FaceItrType& other, const typename TypeConstInfo::VertexItrType& common)const
 			{
-				qDebug() << "isButterfly";
-
 				std::unordered_set<FaceItrType> explored;
 				std::deque< FaceItrType>frontier;
 				frontier.push_back(*static_cast<const FaceItrType*>(this));
@@ -557,26 +555,21 @@ namespace Hix
 					auto curr = frontier.front();
 					frontier.pop_front();
 					auto neigborFaces = curr.neighborFaces();
-					qDebug() << "	neighbor faces" << neigborFaces.size();
 
 					for (auto& each : neigborFaces)
 					{
 						if (each.hasVertex(common))
 						{
-							qDebug() << "		checking faces: " << other.index() << each.index() ;
 
 							//early check
 							if (each == other)
 							{
-								qDebug() << "		phew false ";
-
 								return false;
 							}
 							else
 							{
 								if (explored.find(each) == explored.cend())
 								{
-									qDebug() << "		inserting: " << each.index();
 									frontier.push_back(each);
 									explored.insert(each);
 								}

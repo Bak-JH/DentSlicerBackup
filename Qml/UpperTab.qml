@@ -426,20 +426,13 @@ Rectangle {
             anchors.left: third_tab_button_scale.right
             iconSource1: "qrc:/resource/upper_autorepair.png"
             iconSource2: "qrc:/Resource/upper2_autorepair.png"
-            iconText: qsTr("Auto Repair")
-            /*
-            Connections {
-                target: box_uppertab
-                box: third_tab_button_autorepair.iconText
-            }
-            visible: if(box_uppertab.box != iconText) return false;
-            */
-            signal runGroupFeature(int type, string state, double arg1, double arg2, double arg3, var config);
-            onButtonClicked:{
-                if(!qm.isSelected() && (state == "active"))
-                    window.resultPopUp.openResultPopUp("","You must select at least one model.","")
-                else
-                    runGroupFeature(ftrRepair, state, 0, 0, 0, null);
+            iconText: qsTr("Model Builder")
+			 MouseArea{
+                anchors.fill: parent
+                onClicked:{
+                    all_off()
+					fileDialogMB.open();
+                }
             }
         }
 

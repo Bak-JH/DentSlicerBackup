@@ -325,7 +325,7 @@ GLModel* QmlManager::createAndListModel(Hix::Engine3D::Mesh* mesh, QString fname
 	qmlManager->addPart(latestAdded->modelName(), latestAdded->ID);
 	return latestAdded;
 }
-void QmlManager::openModelFile(QString fname){
+void QmlManager::openModelFile(QString fname) {
 	openProgressPopUp();
 
 	auto mesh = new Mesh();
@@ -339,37 +339,63 @@ void QmlManager::openModelFile(QString fname){
 	setProgress(0.3);
 	mesh->centerMesh();
 	auto latest = createAndListModel(mesh, fname, nullptr);
-	//latest->setZToBed();
+	latest->setZToBed();
 	setProgress(0.6);
+	//repair mode
+	if (Hix::Features::isRepairNeeded(mesh))
+	{
+		qmlManager->setProgressText("Repairing mesh.");
+		std::unordered_set<GLModel*> repairModels;
+		repairModels.insert(latest);
+		_currentFeature.reset(new MeshRepair(repairModels));
+		_currentFeature.reset();
+	}
+	setProgress(1.0);
+	// do auto arrange
+	if (glmodels.size() >= 2)
+		openArrange();
+	//runArrange();
+	QApplication::setOverrideCursor(QCursor(Qt::ArrowCursor));
+}
 
+void QmlManager::openAndBuildModel(QString fname) {
+	openProgressPopUp();
+
+	auto mesh = new Mesh();
+	if (fname != "" && (fname.contains(".stl") || fname.contains(".STL"))) {
+		FileLoader::loadMeshSTL(mesh, fname.toLocal8Bit().constData());
+	}
+	else if (fname != "" && (fname.contains(".obj") || fname.contains(".OBJ"))) {
+		FileLoader::loadMeshOBJ(mesh, fname.toLocal8Bit().constData());
+	}
+	fname = filenameToModelName(fname.toStdString());
+	setProgress(0.1);
+	mesh->centerMesh();
+	auto latest = createAndListModel(mesh, fname, nullptr);
+	setProgress(0.2);
 
 	TwoManifoldBuilder modelBuilder(*mesh);
-	latest->updateMesh(true);
-	latest->setZToBed();
-	//Hix::Debug::DebugRenderObject::getInstance().colorDebugFaces();
-
-
-	//auto builtModel = modelBuilder.execute();
-	//latest->clearMesh();
-	//latest->setMesh(builtModel);
+	setProgress(0.4);
 
 	//repair mode
-	//if (Hix::Features::isRepairNeeded(mesh))
-	//{
-	//	qmlManager->setProgressText("Repairing mesh.");
-	//	std::unordered_set<GLModel*> repairModels;
-	//	repairModels.insert(latest);
-	//	_currentFeature.reset(new MeshRepair(repairModels));
-	//	_currentFeature.reset();
-	//}
-
+	if (Hix::Features::isRepairNeeded(mesh))
+	{
+		qmlManager->setProgressText("Repairing mesh.");
+		std::unordered_set<GLModel*> repairModels;
+		repairModels.insert(latest);
+		_currentFeature.reset(new MeshRepair(repairModels));
+		_currentFeature.reset();
+	}
 	setProgress(1.0);
-    // do auto arrange
-    if (glmodels.size() >= 2)
-        openArrange();
-    //runArrange();
-    QApplication::setOverrideCursor(QCursor(Qt::ArrowCursor));
+	// do auto arrange
+	if (glmodels.size() >= 2)
+		openArrange();
+	//runArrange();
+	QApplication::setOverrideCursor(QCursor(Qt::ArrowCursor));
 }
+
+
+
 
 void QmlManager::modelRepair()
 {
