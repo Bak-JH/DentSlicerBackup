@@ -5,6 +5,7 @@
 #include "../../render/LineMeshEntity.h"
 #include "../../render/PlaneMeshEntity.h"
 #include "../../render/Color.h"
+#include "../../feature/Plane3D.h"
 #include "../../DentEngine/src/mesh.h"
 
 namespace Qt3DCore
@@ -27,7 +28,7 @@ namespace Hix
 			void registerDebugColorFaces(GLModel* owner, const std::unordered_set<FaceConstItr>& faces);
 			void colorDebugFaces();
 			void clear();
-			Hix::Render::PlaneMeshEntity& displayPlane(const Hix::Render::PDPlane& pdplane);
+			Hix::Render::PlaneMeshEntity& displayPlane(const Hix::Plane3D::PDPlane& pdplane);
 		private:
 			std::unordered_map<GLModel*, std::unordered_set<FaceConstItr>> _debugFaceMap;
 			std::deque<Hix::Render::LineMeshEntity> _lines;
