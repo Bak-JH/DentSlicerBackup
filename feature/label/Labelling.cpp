@@ -1,5 +1,95 @@
 #include "Labelling.h"
 #include "qmlmanager.h"
+#include "../Shapes2D.h"
+#include "../Extrude.h"
+using namespace Hix::Engine3D;
+using namespace Hix::Polyclipping;
+using namespace Hix::Shapes2D;
+using namespace Hix::Features::Extrusion;
+using namespace ClipperLib;
+
+//Mesh* generateLabelMesh(const QVector3D translation, const QVector3D normal, const QString text, const QFont font)
+
+GLModel* Hix::Features::Labelling::generatePreviewModel()
+{
+
+	auto labelMesh = new Mesh();
+	QPainterPath painterPath;
+	painterPath.setFillRule(Qt::WindingFill);
+	painterPath.addText(0, 0, _font, _text);
+
+	auto width = painterPath.boundingRect().width();
+	auto height = painterPath.boundingRect().height();
+	// translate float points to int point
+	QList<QPolygonF> polygons = painterPath.toSubpathPolygons(::QTransform().scale(1.0f, -1.0f));
+	std::vector<Path> IntPaths;
+	std::vector<std::vector<QVector3D>> fPath;
+
+	for (auto polygon : polygons)
+	{
+		Path IntPath;
+		for (auto point : polygon)
+		{
+			point.setX(point.x() - (width / 2));
+			point.setY(point.y() - (height / 2));
+			IntPath.push_back(toInt2DPt(QVector3D(point)));
+		}
+		IntPaths.emplace_back(IntPath);
+	}
+
+	// add paths into clipper
+	Clipper clpr;
+	clpr.AddPaths(IntPaths, ptSubject, true);
+	// generate polytree
+	PolyTree polytree;
+	clpr.Execute(ctUnion, polytree, pftNonZero, pftNonZero);
+
+	// triangulate
+	PolytreeCDT polycdt(&polytree);
+	std::unordered_map<PolyNode*, std::vector<PolytreeCDT::Triangle>> _trigMap;
+	_trigMap = polycdt.triangulate();
+
+	// generate cyliner wall
+	std::vector<std::vector<QVector3D>> jointContours;
+	std::vector<QVector3D> path;
+	path.emplace_back(0, 0, -10);
+	path.emplace_back(0, 0, 5);
+	for (auto& intPath : IntPaths)
+	{
+		std::vector<QVector3D> contour;
+		contour.reserve(intPath.size());
+		for (auto& point : intPath)
+		{
+			contour.emplace_back(QVector3D(toFloatPt(point).x(), toFloatPt(point).y(), 0));
+		}
+		std::reverse(contour.begin(), contour.end());
+
+		extrudeAlongPath<int>(labelMesh, QVector3D(0, 0, 1), contour, path, jointContours);
+
+		contour.clear();
+	}
+
+	//generate front & back mesh
+	for (auto node : _trigMap)
+	{
+		for (auto trig : node.second)
+		{
+			labelMesh->addFace(
+				QVector3D(trig[0].x(), trig[0].y(), path.back().z()),
+				QVector3D(trig[1].x(), trig[1].y(), path.back().z()),
+				QVector3D(trig[2].x(), trig[2].y(), path.back().z())
+			);
+
+			labelMesh->addFace(
+				QVector3D(trig[2].x(), trig[2].y(), path.front().z()),
+				QVector3D(trig[1].x(), trig[1].y(), path.front().z()),
+				QVector3D(trig[0].x(), trig[0].y(), path.front().z()));
+		}
+	}
+
+	return new GLModel(_targetModel, labelMesh, "label", 0);
+
+}
 
 Hix::Features::Labelling::Labelling()
 {
@@ -9,46 +99,91 @@ Hix::Features::Labelling::Labelling()
 
 Hix::Features::Labelling::~Labelling()
 {
-	delete _previewModel;
 }
 
 void Hix::Features::Labelling::faceSelected(GLModel* selected, const Hix::Engine3D::FaceConstItr& selectedFace, const Hix::Input::MouseEventData& mouse, const Qt3DRender::QRayCasterHit& hit)
 {
 	_targetModel = selected;
-	updateLabelMesh(hit.localIntersection(), selectedFace.worldFn());
+	updateLabelMesh(hit.localIntersection(), selectedFace);
 
 }
-
-void Hix::Features::Labelling::updateLabelMesh(const QVector3D translation, const QVector3D normal)
+//void xyPlanePath(const QVector3D& worldStart, const Hix::Engine3D::FaceConstItr& face, float width)
+//{
+//	auto radius = width / 2;
+//	auto worldZ = worldStart.z();
+//	auto nFaces = face.neighborFaces();
+//	std::unordered_set<FaceConstItr> explored;
+//	explored.insert(face);
+//	std::deque<FaceConstItr> qL;
+//	std::deque<FaceConstItr> qR;
+//	for (auto& nf : nFaces)
+//	{
+//		auto sortedZ = nf.sortZ();
+//		if (sortedZ[2] >= worldZ && sortedZ[0] <= worldZ)
+//		{
+//			//q
+//		}
+//	}
+//}
+void Hix::Features::Labelling::updateLabelMesh(const QVector3D& localIntersection, const Hix::Engine3D::FaceConstItr& face)
 {
-	if (qmlManager->isActive<Labelling>())
+	//setMaterialColor(Hix::Render::Colors::Support);
+	if (_isDirty)
 	{
-		if (!_previewModel)
-		{
-			_previewModel = new Hix::LabelModel(_targetModel);
-		}
-		_previewModel->generateLabelMesh(translation, normal, _text, _font);
+		_previewModel.reset(generatePreviewModel());
+	}
+	//auto worldIntersection = _targetModel->ptToRoot(localIntersection);
+	auto worldZ = _targetModel->ptToRoot(localIntersection).z();
+	auto width = _previewModel->aabb().lengthX();
+	auto height = _previewModel->aabb().lengthY();
+	//float zHeight = acos()
+	//move model
+	auto rotation = QQuaternion::fromDirection(face.worldFn(), QVector3D(0, 0, 1));
+	Qt3DCore::QTransform worldTrans;
+	worldTrans.setRotation(rotation);
+	auto toLocalMat = _targetModel->toLocalMatrix();
+	auto finalMat = toLocalMat * worldTrans.matrix();
+	Qt3DCore::QTransform finalTrans;
+	finalTrans.setMatrix(finalMat);
+	Qt3DCore::QTransform newTransform;
+	newTransform.setRotation(finalTrans.rotation());
+	newTransform.setTranslation(localIntersection);
+	newTransform.setScale(0.05f);
+	_previewModel->transform().setMatrix(newTransform.matrix());
+}
+
+void Hix::Features::Labelling::setText(const QString& text)
+{
+	if (_text != text)
+	{
+		_text = text;
+		_isDirty = true;
 	}
 }
 
-void Hix::Features::Labelling::setText(const QString text)
-{
-	_text = text;
-}
-
-void Hix::Features::Labelling::setFontName(const QString fontName)
+void Hix::Features::Labelling::setFontName(const QString& fontName)
 {
 	_font.setFamily(fontName);
+	_isDirty = true;
+
 }
 
-void Hix::Features::Labelling::setFontBold(const bool isBold)
+void Hix::Features::Labelling::setFontBold(bool isBold)
 {
-	_font.setBold(isBold);
+	if (_font.bold() != isBold)
+	{
+		_font.setBold(isBold);
+		_isDirty = true;
+	}
 }
 
-void Hix::Features::Labelling::setFontSize(const int fontSize)
+void Hix::Features::Labelling::setFontSize(int fontSize)
 {
-	_font.setPointSize(fontSize);
+	if (_font.pointSize()!= fontSize)
+	{
+		_font.setPointSize(fontSize);
+		_isDirty = true;
+	}
 }
 
 void Hix::Features::Labelling::generateLabelMesh()
@@ -61,6 +196,6 @@ void Hix::Features::Labelling::generateLabelMesh()
 	}
 	_targetModel->setMaterialColor(Hix::Render::Colors::Selected);
 	_targetModel->updateModelMesh();
-	_previewModel = nullptr;
+	_previewModel.release();
 
 }

@@ -58,7 +58,7 @@ void Hix::Debug::DebugRenderObject::clear()
 	_debugFaceMap.clear();
 }
 
-Hix::Render::PlaneMeshEntity& Hix::Debug::DebugRenderObject::displayPlane(const Hix::Render::PDPlane& pdplane)
+Hix::Render::PlaneMeshEntity& Hix::Debug::DebugRenderObject::displayPlane(const Hix::Plane3D::PDPlane& pdplane)
 {
 	auto& plane = _planes.emplace_back(_root);
 	plane.setPointNormal(pdplane);
