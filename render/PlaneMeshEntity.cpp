@@ -37,7 +37,7 @@ Qt3DCore::QTransform& PlaneMeshEntity::transform()
 	return _transform;
 }
 
-void Hix::Render::PlaneMeshEntity::setPointNormal(const PDPlane& plane)
+void Hix::Render::PlaneMeshEntity::setPointNormal(const Hix::Plane3D::PDPlane& plane)
 {
 	_transform.setTranslation(plane.point);
 	_transform.setRotation(QQuaternion::fromDirection(plane.normal,QVector3D(0,0,1)));

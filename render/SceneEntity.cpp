@@ -210,6 +210,11 @@ QVector3D Hix::Render::SceneEntity::vectorToLocal(const QVector3D& world) const
 	return QVector3D(toLocalCoord(QVector4D(world, 0)));
 }
 
+SceneEntity* Hix::Render::SceneEntity::parentSceneEntity() const
+{
+	return  dynamic_cast<SceneEntity*>(parentEntity());
+}
+
 
 
 SceneEntity::~SceneEntity() 
