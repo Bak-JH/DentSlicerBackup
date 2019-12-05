@@ -123,9 +123,6 @@
     <ClCompile Include="feature\stlexporter.cpp" />
     <ClCompile Include="DentEngine\src\svgexporter.cpp" />
     <ClCompile Include="utils\updatechecker.cpp" />
-    <ClCompile Include="feature\label\labelModel.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="feature\SupportFeature.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -194,6 +191,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="render\PlaneMeshEntity.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="feature\Plane3D.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -719,9 +719,6 @@
     <ClInclude Include="DentEngine\src\polyclipping\poly2tri\common\utils.h" />
     <ClInclude Include="utils\utils.h" />
     <ClInclude Include="utils\winsparkle\winsparkle.h" />
-    <ClInclude Include="feature\label\labelModel.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="feature\SupportFeature.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -789,6 +786,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="feature\cut\DrawingPlane.h" />
+    <ClInclude Include="feature\Plane3D.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="debug\moc_predefs.h.cbt" />

@@ -299,70 +299,8 @@ bool isUpward(const FaceConstItr& face)
 }
 
 
-Hix::Render::PDPlane bestFittingPlane(const std::vector<QVector3D>& points)
-{
-	Hix::Render::PDPlane plane;
-	if (points.size() < 3 ){
-		return plane; // At least three points required
-	}
 
-	QVector3D sum;
-	for (auto& p : points)
-	{
-		sum += p;
-	}
-
-	auto centroid = sum * (1.0 / points.size());
-	float xx = 0, xy = 0, xz = 0, yy = 0, yz = 0, zz = 0;
-	// Calc full 3x3 covariance matrix, excluding symmetries:
-	for (auto& p : points)
-	{
-		auto r = p - centroid;
-		xx += r.x() * r.x();
-		xy += r.x() * r.y();
-		xz += r.x() * r.z();
-		yy += r.y() * r.y();
-		yz += r.y() * r.z();
-		zz += r.z() * r.z();
-	}
-	auto det_x = yy * zz - yz * yz;
-	auto det_y = xx * zz - xz * xz;
-	auto det_z = xx * yy - xy * xy;
-
-	auto det_max = std::max({ det_x, det_y, det_z });
-	if (det_max <= 0.0) {
-		return plane; // The points don't span a plane
-	}
-
-	// Pick path with best conditioning:
-	QVector3D dir;
-	if( det_max == det_x){
-		dir = QVector3D(
-			det_x,
-			xz * yz - xy * zz,
-			xy * yz - xz * yy
-			);
-	}
-	else if (det_max == det_y){
-		dir = QVector3D(
-			xz * yz - xy * zz,
-			det_y,
-			xy * xz - yz * xx
-			);
-	}
-	else {
-		dir = QVector3D(
-			xy * yz - xz * yy,
-			xy * xz - yz * xx,
-			det_z
-			);
-	};
-	plane.normal = dir.normalized();
-	plane.point = centroid;
-	return plane;
-}
-
-void reorientatePlane(Hix::Render::PDPlane& plane, bool isBottEmpty)
+void reorientatePlane(Hix::Plane3D::PDPlane& plane, bool isBottEmpty)
 {
 	if (isBottEmpty)
 	{
@@ -380,7 +318,7 @@ void reorientatePlane(Hix::Render::PDPlane& plane, bool isBottEmpty)
 
 	}
 }
-Hix::Render::PDPlane bestFittingPlane(const std::deque<HalfEdgeConstItr>& edges)
+Hix::Plane3D::PDPlane bestFittingPlane(const std::deque<HalfEdgeConstItr>& edges)
 {
 	std::vector<QVector3D> points;
 	points.reserve(edges.size());
@@ -388,7 +326,7 @@ Hix::Render::PDPlane bestFittingPlane(const std::deque<HalfEdgeConstItr>& edges)
 		[](const HalfEdgeConstItr& e)->QVector3D {
 			return e.to().localPosition();
 		});
-	return bestFittingPlane(points);
+	return Hix::Plane3D::bestFittingPlane(points);
 }
 
 void edgeRemoveWrongZ(Hix::Engine3D::Mesh& mesh, std::deque<HalfEdgeConstItr>& boundary, bool isBottEmpty)
@@ -517,7 +455,7 @@ void edgeRemoveWrongZ(Hix::Engine3D::Mesh& mesh, std::deque<HalfEdgeConstItr>& b
 
 }
 
-inline bool isBelowPlane(const Hix::Render::PDPlane& plane, const FaceConstItr& itr, std::unordered_map<VertexConstItr, bool>& cache)
+inline bool isBelowPlane(const Hix::Plane3D::PDPlane& plane, const FaceConstItr& itr, std::unordered_map<VertexConstItr, bool>& cache)
 {
 	auto mvs = itr.meshVertices();
 	for (auto& v : mvs)
@@ -542,7 +480,7 @@ inline bool isBelowPlane(const Hix::Render::PDPlane& plane, const FaceConstItr& 
 	return false;
 }
 
-MeshDeleteGuard edgeRemoveOutlier(Hix::Engine3D::Mesh& mesh, std::deque<HalfEdgeConstItr>& boundary, const Hix::Render::PDPlane& plane)
+MeshDeleteGuard edgeRemoveOutlier(Hix::Engine3D::Mesh& mesh, std::deque<HalfEdgeConstItr>& boundary, const Hix::Plane3D::PDPlane& plane)
 {
 	if (boundary.size() < 2)
 		return MeshDeleteGuard(&mesh);
@@ -740,7 +678,7 @@ Hix::Features::TwoManifoldBuilder::TwoManifoldBuilder(Hix::Engine3D::Mesh& model
 	auto isBottEmpty = !isClockwise(boundary);
 	bool boundaryCorrect = false;
 	Hix::Engine3D::MeshDeleteGuard deleteGuard(&_model);
-	Hix::Render::PDPlane bestFitPlane;
+	Hix::Plane3D::PDPlane bestFitPlane;
 	for (size_t i = 0; i < 2; ++i)
 	{
 		bestFitPlane = bestFittingPlane(boundary);
