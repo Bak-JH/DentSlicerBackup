@@ -22,12 +22,12 @@ void Hix::Features::LayFlatMode::faceSelected(GLModel* selected, const Hix::Engi
 	isReady = true;
 }
 
-std::unique_ptr<Hix::Features::FeatureContainer> Hix::Features::LayFlatMode::applyLayFlat()
+Hix::Features::FeatureContainer* Hix::Features::LayFlatMode::applyLayFlat()
 {
 	if (_args.empty())
 		return nullptr;
 
-	std::unique_ptr<Hix::Features::FeatureContainer> container = std::make_unique<FeatureContainer>();
+	Hix::Features::FeatureContainer* container = new FeatureContainer();
 	for (auto& each : _args)
 	{
 		container->addFeature(new LayFlat(each.first, each.second, isReady));

@@ -24,6 +24,7 @@
 #include "feature/label/labelling.h"
 #include "feature/layFlat.h"
 #include "feature/interfaces/SelectFaceMode.h"
+#include "feature/move.h"
 
 #define ATTRIBUTE_SIZE_INCREMENT 200
 #if defined(_DEBUG) || defined(QT_DEBUG)
@@ -277,6 +278,7 @@ bool GLModel::isDraggable(Hix::Input::MouseEventData& e,const Qt3DRender::QRayCa
 
 void GLModel::dragStarted(Hix::Input::MouseEventData& e, const Qt3DRender::QRayCasterHit& hit)
 {
+	//dynamic_cast<Hix::Features::MoveMode*>(qmlManager->getCurrentMode())->featureStarted();
 	auto listed = getRootModel();
 	//if (qmlManager->supportRaftManager().supportActive())
 	//{
@@ -289,7 +291,7 @@ void GLModel::dragStarted(Hix::Input::MouseEventData& e, const Qt3DRender::QRayC
 	//}
 	lastpoint = hit.localIntersection();
 	prevPoint = (QVector2D)e.position;
-	qmlManager->moveButton->setProperty("state", "active");
+	//qmlManager->moveButton->setProperty("state", "active");
 	qmlManager->setClosedHandCursor();
 }
 
@@ -317,7 +319,8 @@ void GLModel::doDrag(Hix::Input::MouseEventData& v)
 
 void GLModel::dragEnded(Hix::Input::MouseEventData&)
 {
-    qmlManager->totalMoveDone();
+	//dynamic_cast<Hix::Features::MoveMode*>(qmlManager->getCurrentMode())->featureEnded();
+    //qmlManager->totalMoveDone();
 }
 
 

@@ -1,4 +1,4 @@
-#include "Scale.h"
+#include "scale.h"
 
 Hix::Features::ScaleMode::ScaleMode(const std::unordered_set<GLModel*>& selectedModels)
 	: _targetModels(selectedModels)
@@ -9,9 +9,9 @@ Hix::Features::ScaleMode::~ScaleMode()
 {
 }
 
-std::unique_ptr<Hix::Features::FeatureContainer> Hix::Features::ScaleMode::applyScale(QVector3D scale)
+Hix::Features::FeatureContainer* Hix::Features::ScaleMode::applyScale(QVector3D scale)
 {
-	std::unique_ptr<Hix::Features::FeatureContainer> container = std::make_unique<FeatureContainer>();
+	Hix::Features::FeatureContainer* container = new FeatureContainer();
 	for (auto& target : _targetModels)
 		container->addFeature(new Scale(target, scale));
 

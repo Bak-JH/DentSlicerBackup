@@ -47,7 +47,7 @@ namespace Hix
 			ExtendMode(const std::unordered_set<GLModel*> & selectedModels);
 			virtual ~ExtendMode();
 			void faceSelected(GLModel* selected, const Hix::Engine3D::FaceConstItr& selectedFace, const Hix::Input::MouseEventData& mouse, const Qt3DRender::QRayCasterHit& hit)override;
-			std::unique_ptr<FeatureContainer> applyExtend(double distance);
+			FeatureContainer* applyExtend(double distance);
 
 		private:
 			GLModel* _model = nullptr;

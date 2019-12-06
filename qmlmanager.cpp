@@ -36,6 +36,11 @@
 #include "feature/extension.h"
 #include "feature/scale.h"
 #include "feature/arrange/autoarrange.h"
+#include "feature/interfaces/WidgetMode.h"
+#include "feature/rotate.h"
+#include "feature/move.h"
+#include "feature/deleteModel.h"
+#include "feature/addModel.h"
 
 #include <functional>
 using namespace Hix::Input;
@@ -72,7 +77,6 @@ void QmlManager::initializeUI(QQmlApplicationEngine* e){
 	total = dynamic_cast<QEntity*> (FindItemByName(engine, "total"));
 	_camera = dynamic_cast<Qt3DRender::QCamera*> (FindItemByName(engine, "camera"));
 
-	_widgetManager.initialize(total, &_rayCastController);
 	_supportRaftManager.initialize(models);
 #ifdef _DEBUG
 	Hix::Debug::DebugRenderObject::getInstance().initialize(models);
@@ -289,39 +293,23 @@ void QmlManager::initializeUI(QQmlApplicationEngine* e){
 
 }
 
-GLModel* QmlManager::listModel(GLModel* model)
+Hix::Features::Feature* QmlManager::listModel(GLModel* model)
 {
-	auto latestAdded = getModelByID(model->ID);
-
-	if (latestAdded == nullptr)
-	{
-		Qt3DCore::QTransform toRoot;
-		toRoot.setMatrix(model->toRootMatrix());
-		glmodels.push_back(std::make_unique<GLModel>(models, model->getMeshModd(), model->modelName(), modelIDCounter, &toRoot));
-		--modelIDCounter;
-		latestAdded = glmodels.back().get();
-	}
-	// set initial position
-	//add to raytracer
-	latestAdded->setParent(models);
-	latestAdded->setEnabled(true);
-	latestAdded->setHitTestable(true);
-	qmlManager->addPart(latestAdded->modelName(), latestAdded->ID);
-	return latestAdded;
+	auto addModel = new Hix::Features::AddModel(models, model, modelIDCounter);
+	_featureHistoryManager.addFeature(addModel);
+	glmodels[model] = std::move(addModel->getAddedModelUnique());
+	--modelIDCounter;
+	return addModel;
 }
 
 
-GLModel* QmlManager::createAndListModel(Hix::Engine3D::Mesh* mesh, QString fname, const Qt3DCore::QTransform* transform) {
-	//auto res = new GLModel(models, mesh, fname, modelIDCounter, transform);
-	glmodels.push_back(std::make_unique<GLModel>(models, mesh, fname, modelIDCounter, transform));
-    --modelIDCounter;
-	auto latestAdded = glmodels.back().get();
-    // set initial position
-	//add to raytracer
-	latestAdded->setHitTestable(true);
-	qDebug() << "model name: " << latestAdded->modelName();
-	qmlManager->addPart(latestAdded->modelName(), latestAdded->ID);
-	return latestAdded;
+Hix::Features::Feature* QmlManager::createAndListModel(Hix::Engine3D::Mesh* mesh, QString fname, const Qt3DCore::QTransform* transform) {
+	auto addModel = new Hix::Features::AddModel(models, mesh, fname, modelIDCounter, transform);
+	_featureHistoryManager.addFeature(addModel);
+	--modelIDCounter;
+	glmodels[addModel->getAddedModel()] =  std::move(addModel->getAddedModelUnique());
+	qDebug() << addModel->getAddedModel();
+	return addModel;
 }
 
 void QmlManager::openModelFile(QString fname){
@@ -337,7 +325,7 @@ void QmlManager::openModelFile(QString fname){
 	fname = filenameToModelName(fname.toStdString());
 	setProgress(0.3);
 	mesh->centerMesh();
-	auto latest = createAndListModel(mesh, fname, nullptr);
+	auto latest = dynamic_cast<Hix::Features::AddModel*>(createAndListModel(mesh, fname, nullptr))->getAddedModel();
 	latest->setZToBed();
 	setProgress(0.6);
 
@@ -370,21 +358,14 @@ GLModel* QmlManager::getModelByID(int ID)
 {
 	for (auto& modelItr : glmodels)
 	{
-		if (modelItr.get()->ID == ID)
-			return modelItr.get();
+		if (modelItr.first->ID == ID)
+			return modelItr.first;
 	}
 
 	return nullptr;
 }
 
-
-void QmlManager::deleteOneModelFile(int ID) {
-	auto target = getModelByID(ID);
-	deleteOneModelFile(target);
-}
-
-
-void QmlManager::deleteOneModelFile(GLModel* target) {
+void QmlManager::removeSelected(GLModel* target) {
 	if (target)
 	{
 		//TODO: move these into glmodel destructor
@@ -394,9 +375,8 @@ void QmlManager::deleteOneModelFile(GLModel* target) {
 		//if selected, remove from selected list
 		_supportRaftManager.clear(*target);
 		selectedModels.erase(target);
-		target->QNode::setParent((QNode*)nullptr);
-		target->setEnabled(false);
-		//clear related supports
+		//glmodels.erase(target);
+		qDebug() << glmodels.size();
 	}
 }
 
@@ -406,33 +386,36 @@ void QmlManager::deleteModelFileDone() {
 	updateModelInfo(0, 0, "0.0 X 0.0 X 0.0 mm", 0);
 
     // UI
-	_widgetManager.setWidgetMode(WidgetMode::None);
     QMetaObject::invokeMethod(qmlManager->mttab, "hideTab");
     QMetaObject::invokeMethod(boxUpperTab, "all_off");
     QMetaObject::invokeMethod(leftTabViewMode, "setObjectView");
 }
 
-void QmlManager::deleteModelFile(int ID){
+void QmlManager::deleteModelFile(GLModel* model){
     qDebug() << "deletemodelfile" << glmodels.size();
-    deleteOneModelFile(ID);
+	_featureHistoryManager.addFeature(new DeleteModel(model));
     deleteModelFileDone();
 }
 
 void QmlManager::deleteSelectedModels() {
     qDebug() << "deleteSelectedModels()";
 
+
     if (selectedModels.size() == 0) {
         deleteModelFileDone();
         return;
     }
+	Hix::Features::FeatureContainer* container = new Hix::Features::FeatureContainer();
 	for (auto it = selectedModels.begin(); it != selectedModels.end();)
 	{
 		auto model = *it;
 		++it;
-		deleteOneModelFile(model);
+		container->addFeature(new DeleteModel(model));
 
 
 	}
+
+	_featureHistoryManager.addFeature(container);
     deleteModelFileDone();
 
     return;
@@ -492,7 +475,7 @@ void QmlManager::fixMesh(){
 
 void QmlManager::disableObjectPickers(){
     for (auto& pair : glmodels){
-		auto glm = pair.get();
+		auto glm = pair.first;
 		//qDebug() << glm->ID;
 		glm->setHitTestable(false);
     }
@@ -500,7 +483,7 @@ void QmlManager::disableObjectPickers(){
 
 void QmlManager::enableObjectPickers(){
 	for (auto& pair : glmodels) {
-		auto glm = pair.get();
+		auto glm = pair.first;
 		glm->setHitTestable(true);
     }
 }
@@ -572,7 +555,7 @@ void QmlManager::runArrange(){
 	std::unordered_set<GLModel*> listedModels;
 	for (auto& each : glmodels)
 	{
-		listedModels.insert(each.get());
+		listedModels.insert(each.first);
 	}
     qmlManager->openProgressPopUp();
 	Autoarrange arrange(listedModels);
@@ -586,7 +569,7 @@ GLModel* QmlManager::findGLModelByName(QString modelName){
 
     for(auto& pair : glmodels)
     {
-		auto model = pair.get();
+		auto model = pair.second.get();
         qDebug() << "finding " << modelName << model->modelName();
         if (model->modelName() == modelName){
             return model;
@@ -649,11 +632,9 @@ bool QmlManager::multipleModelSelected(int ID){
                 //    QMetaObject::invokeMethod(savePopup, "offApplyFinishButton");
                 //    break;
 				case ftrMove:
-					_widgetManager.setWidgetMode(WidgetMode::None);
 					QMetaObject::invokeMethod(movePopup, "offApplyFinishButton");
 					break;
                 case ftrRotate:
-					_widgetManager.setWidgetMode(WidgetMode::None);
                     QMetaObject::invokeMethod(rotatePopup,"offApplyFinishButton");
                     break;
                 case 6:
@@ -688,11 +669,9 @@ bool QmlManager::multipleModelSelected(int ID){
         //    break;
         case 5:
             QMetaObject::invokeMethod(rotatePopup,"onApplyFinishButton");
-			_widgetManager.setWidgetMode(WidgetMode::Rotate);
 			break;
         case 4:
             QMetaObject::invokeMethod(movePopup,"onApplyFinishButton");
-			_widgetManager.setWidgetMode(WidgetMode::Move);
 			break;
         case 6:
             QMetaObject::invokeMethod(layflatPopup,"onApplyFinishButton");
@@ -743,11 +722,9 @@ void QmlManager::modelSelected(int ID){
 				//    QMetaObject::invokeMethod(savePopup, "offApplyFinishButton");
 				//    break;
 			case 5:
-				_widgetManager.setWidgetMode(WidgetMode::None);
 				QMetaObject::invokeMethod(rotatePopup, "offApplyFinishButton");
 				break;
 			case 4:
-				_widgetManager.setWidgetMode(WidgetMode::None);
 				QMetaObject::invokeMethod(movePopup, "offApplyFinishButton");
 				break;
 			case 6:
@@ -786,11 +763,9 @@ void QmlManager::modelSelected(int ID){
 				//    break;
 			case 5:
 				QMetaObject::invokeMethod(rotatePopup, "onApplyFinishButton");
-				_widgetManager.setWidgetMode(WidgetMode::Rotate);
 				break;
 			case 4:
 				QMetaObject::invokeMethod(movePopup, "onApplyFinishButton");
-				_widgetManager.setWidgetMode(WidgetMode::Move);
 				break;
 			case 6:
 				QMetaObject::invokeMethod(layflatPopup, "onApplyFinishButton");
@@ -849,7 +824,7 @@ void QmlManager::generateLayFlat()
 {
 	auto layflat = dynamic_cast<LayFlatMode*>(_currentMode.get())->applyLayFlat();
 	if (layflat != nullptr)
-		_featureHistory.push_back(std::move(layflat));
+		_featureHistoryManager.addFeature(layflat);
 }
 
 void QmlManager::openLabelling()
@@ -913,7 +888,7 @@ void QmlManager::generateExtensionFaces(double distance)
 {
 	auto extend = dynamic_cast<ExtendMode*>(_currentMode.get())->applyExtend(distance);
 	if(extend != nullptr)
-		_featureHistory.push_back(std::move(extend));
+		_featureHistoryManager.addFeature(extend);
 }
 
 QString QmlManager::filenameToModelName(const std::string& s)
@@ -974,7 +949,6 @@ void QmlManager::unselectAll(){
 		++itr;
 		unselectPart(model->ID);
     }
-	_widgetManager.setWidgetMode(WidgetMode::None);
     QMetaObject::invokeMethod(qmlManager->mttab, "hideTab");
     QMetaObject::invokeMethod(boxUpperTab, "all_off");
 	QMetaObject::invokeMethod(boundedBox, "hideBox");
@@ -1012,39 +986,22 @@ void QmlManager::modelVisible(int ID, bool isVisible){
 void QmlManager::doDelete(){
     if(selectedModels.empty())
         return;
+
+	Hix::Features::FeatureContainer* container = new Hix::Features::FeatureContainer();
 	for (auto it = selectedModels.begin(); it != selectedModels.end();)
 	{
 		auto model = *it;
 		it = selectedModels.erase(it);
-		deleteOneModelFile(model);
+		container->addFeature(new DeleteModel(model));
 	}
-	deleteModelFileDone();
-}
 
-void QmlManager::doDeletebyID(int ID){
-    deleteModelFile(ID);
+	_featureHistoryManager.addFeature(container);
+	deleteModelFileDone();
 }
 
 RayCastController& QmlManager::getRayCaster()
 {
 	return _rayCastController;
-}
-
-void QmlManager::totalMoveDone(){
-	for (auto each : selectedModels)
-	{
-		each->moveDone();
-    }
-    sendUpdateModelInfo();
-	_widgetManager.updatePosition();
-}
-
-void QmlManager::totalRotateDone(){
-	for (auto each : selectedModels)
-	{
-		each->rotateDone();
-	}
-    sendUpdateModelInfo();
 }
 
 void QmlManager::totalScaleDone() {
@@ -1146,7 +1103,9 @@ void QmlManager::save() {
 
 void QmlManager::cameraViewChanged()
 {
-	_widgetManager.updatePosition();
+	auto widget = dynamic_cast<Hix::Features::WidgetMode*>(_currentMode.get());
+	if(widget)
+		widget->updatePosition();
 }
 
 void QmlManager::groupSelectionActivate(bool active){
@@ -1163,7 +1122,7 @@ void QmlManager::runGroupFeature(int ftrType, QString state, double arg1, double
     groupFunctionState = state;
 	if (state == "active")
 	{
-		clearSupports();
+		Hix::Features::clearSupport(selectedModels);
 	}
     qDebug()<< "runGroupFeature | type:"<<ftrType<<"| state:" <<state << selectedModels.size();
     switch(ftrType){
@@ -1184,24 +1143,11 @@ void QmlManager::runGroupFeature(int ftrType, QString state, double arg1, double
     }
     */
     case ftrRotate: //rotate
-    {
-        if (state == "inactive"){
-			_widgetManager.setWidgetMode(WidgetMode::None);
-
-        }else if(state == "active"){
-			_widgetManager.setWidgetMode(WidgetMode::Rotate);
-        }
         break;
-    }
+ 
     case ftrMove:  //move
-    {
-        if (state == "inactive"){
-			_widgetManager.setWidgetMode(WidgetMode::None);
-		}else if(state == "active"){
-			_widgetManager.setWidgetMode(WidgetMode::Move);
-        }
         break;
-    }
+
     case ftrLayFlat:
 	{
         break;
@@ -1239,12 +1185,7 @@ void QmlManager::runGroupFeature(int ftrType, QString state, double arg1, double
 }
 
 void QmlManager::unDo(){
-	if (_featureHistory.empty())
-		return;
-	auto prevFeature = _featureHistory.back().get();
-	if(prevFeature)
-		prevFeature->undo();
-	_featureHistory.pop_back();
+	_featureHistoryManager.undo();
 }
 
 void QmlManager::reDo(){
@@ -1328,18 +1269,22 @@ void QmlManager::closeSave() {
 
 void QmlManager::openMove(){
     //moveActive = true;
+	_currentMode.reset(new MoveMode(selectedModels, &_rayCastController));
     return;
 }
 
 void QmlManager::closeMove(){
     qDebug() << "close move";
-    totalMoveDone();
+	_currentMode.reset();
     return;
 }
 
 
 void QmlManager::openRotate(){
     qDebug() << "open Rotate";
+
+	_currentMode.reset(new RotateMode(selectedModels, &_rayCastController));
+
 	QMetaObject::invokeMethod(qmlManager->boundedBox, "hideBox");
     slicingData->setProperty("visible", false);
     return;
@@ -1347,7 +1292,8 @@ void QmlManager::openRotate(){
 
 void QmlManager::closeRotate(){
     qDebug() << "close Rotate";
-    totalRotateDone();
+	_currentMode.reset();
+
     return;
 }
 
@@ -1369,7 +1315,7 @@ void QmlManager::applyScale(double arg1, double arg2, double arg3)
 
 	auto scale = dynamic_cast<ScaleMode*>(_currentMode.get())->applyScale(QVector3D(scaleX, scaleY, scaleZ));
 	if (scale != nullptr)
-		_featureHistory.push_back(std::move(scale));
+		_featureHistoryManager.addFeature(scale);
 }
 
 void QmlManager::openOrientation(){
@@ -1601,7 +1547,6 @@ void QmlManager::unselectPartImpl(GLModel* target)
         switch (groupFunctionIndex){
             case 5:
             case 4:
-				_widgetManager.setWidgetMode(WidgetMode::None);
 				break;
         }
     }
@@ -1637,7 +1582,7 @@ void QmlManager::generateAutoSupport()
 {
 	auto autoGenSupport = dynamic_cast<SupportMode*>(_currentMode.get())->generateAutoSupport();
 	if (autoGenSupport != nullptr)
-		_featureHistory.push_back(std::move(autoGenSupport));
+		_featureHistoryManager.addFeature(autoGenSupport);
 }
 
 
@@ -1658,7 +1603,7 @@ void QmlManager::clearSupports()
 {
 	auto clearSupport = dynamic_cast<SupportMode*>(_currentMode.get())->clearSupport();
 	if (clearSupport != nullptr)
-		_featureHistory.push_back(std::move(clearSupport));
+		_featureHistoryManager.addFeature(clearSupport);
 }
 
 
@@ -1680,18 +1625,18 @@ void QmlManager::regenerateRaft()
 
 void QmlManager::modelCut()
 {
-	//auto modelCut = dynamic_cast<ModelCut*>(_currentFeature.get());
-	//_featureHistory.push_back(std::move(_currentFeature));
-	//modelCut->applyCut();
+	auto modelCut = dynamic_cast<ModelCut*>(_currentMode.get());
+	//_featureHistoryManager.addFeature();
+	modelCut->applyCut();
 }
 void QmlManager::cutModeSelected(int mode)
 {
-	//auto modelCut = dynamic_cast<ModelCut*>(_currentFeature.get());
-	//modelCut->cutModeSelected(mode);
+	auto modelCut = dynamic_cast<ModelCut*>(_currentMode.get());
+		modelCut->cutModeSelected(mode);
 }
 void QmlManager::openCut()
 {
-	//_currentFeature.reset(new ModelCut(selectedModels, getSelectedBound()));
+	_currentMode.reset(new ModelCut(selectedModels, getSelectedBound()));
 
 }
 void QmlManager::closeCut()
@@ -1757,12 +1702,12 @@ bool QmlManager::isFeatureActive()
 	return _currentMode.get() != nullptr;
 }
 
-void QmlManager::addToHistory(Hix::Features::Feature* feature)
-{
-	_featureHistory.emplace_back(std::unique_ptr<Hix::Features::Feature>(feature));
-}
-
 Hix::Features::Mode* QmlManager::getCurrentMode()
 {
 	return _currentMode.get();
+}
+
+Hix::Features::FeatureHisroyManager& QmlManager::featureHistoryManager()
+{
+	return _featureHistoryManager;
 }

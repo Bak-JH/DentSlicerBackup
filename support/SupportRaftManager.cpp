@@ -75,9 +75,13 @@ SupportModel* Hix::Support::SupportRaftManager::addSupport(const OverhangDetect:
 		break;
 	case SlicingConfiguration::SupportType::Vertical:
 	{
+		qDebug() << _supports.size();
+
 		auto newModel = dynamic_cast<SupportModel*>(new VerticalSupportModel(this, overhang));
 		_supports.insert(std::make_pair(newModel, std::unique_ptr<SupportModel>(newModel)));
 		//since addition only happens in edit mode
+		qDebug() << _supports.size();
+
 		return newModel;
 	}
 	break;
@@ -87,6 +91,13 @@ SupportModel* Hix::Support::SupportRaftManager::addSupport(const OverhangDetect:
 	}
 }
 
+void Hix::Support::SupportRaftManager::addSupport(std::unique_ptr<SupportModel> target)
+{
+	qDebug() << _supports.size();
+	_supports.insert(std::make_pair(target.get(),std::move(target)));
+	qDebug() << _supports.size();
+}
+
 std::unique_ptr<SupportModel> Hix::Support::SupportRaftManager::removeSupport(SupportModel* e)
 {
 	e->setEnabled(false);
@@ -94,6 +105,11 @@ std::unique_ptr<SupportModel> Hix::Support::SupportRaftManager::removeSupport(Su
 	auto result = std::move(_supports.find(e)->second);
 	_supports.erase(e);
 	return result;
+}
+
+bool Hix::Support::SupportRaftManager::supportsEmpty()
+{
+	return _supports.empty();
 }
 
 void Hix::Support::SupportRaftManager::generateRaft()
@@ -179,11 +195,31 @@ std::vector<std::reference_wrapper<const Hix::Render::SceneEntity>> Hix::Support
 	return entities;
 }
 
-std::unordered_map<SupportModel*, std::unique_ptr<SupportModel>>& Hix::Support::SupportRaftManager::supports()
+std::vector<SupportModel*> Hix::Support::SupportRaftManager::modelAttachedSupports(const std::unordered_set<GLModel*>& models)const
 {
-	return _supports;
-}
+	std::vector<SupportModel*> supps;
+	std::unordered_set<const GLModel*> childs;
 
+	for (auto model : models)
+	{
+		model->getChildrenModels(childs);
+		childs.insert(model);
+	}
+	for (auto curr = _supports.cbegin(); curr != _supports.cend(); ++curr)
+	{
+		auto attachedSupport = dynamic_cast<ModelAttachedSupport*>(curr->first);
+		if (attachedSupport)
+		{
+			auto ptr = &attachedSupport->getAttachedModel();
+			if (childs.find(ptr) != childs.end())
+			{
+				supps.push_back(curr->first);
+			}
+		}
+	}
+	return supps;
+
+}
 
 void Hix::Support::SupportRaftManager::clear()
 {

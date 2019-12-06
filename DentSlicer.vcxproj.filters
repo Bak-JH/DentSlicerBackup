@@ -126,7 +126,6 @@
     <ClCompile Include="ui\RotateWidget.cpp" />
     <ClCompile Include="ui\Widget.cpp" />
     <ClCompile Include="ui\Widget3D.cpp" />
-    <ClCompile Include="ui\Widget3DManager.cpp" />
     <ClCompile Include="unitTest\RandomGen.cpp" />
     <ClCompile Include="unitTest\RunTests.cpp" />
     <ClCompile Include="utils\gridmesh.cpp" />
@@ -148,6 +147,24 @@
     <ClCompile Include="DentEngine\src\svgexporter.cpp" />
     <ClCompile Include="utils\updatechecker.cpp" />
     <ClCompile Include="feature\scale.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="feature\rotate.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="feature\FeatureHistoryManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="feature\interfaces\WidgetMode.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="feature\move.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="feature\deleteModel.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="feature\addModel.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -667,7 +684,6 @@
     <ClInclude Include="support\VerticalSupportModel.h" />
     <ClInclude Include="support\SupportRaftManager.h" />
     <ClInclude Include="ui\Widget.h" />
-    <ClInclude Include="ui\Widget3DManager.h" />
     <ClInclude Include="render\Color.h" />
     <ClInclude Include="unitTest\catch.hpp" />
     <ClInclude Include="unitTest\RandomGen.h" />
@@ -699,6 +715,24 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="feature\scale.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="feature\rotate.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="feature\FeatureHistoryManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="feature\interfaces\WidgetMode.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="feature\move.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="feature\deleteModel.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="feature\addModel.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
