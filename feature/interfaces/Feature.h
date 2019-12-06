@@ -27,6 +27,7 @@ namespace Hix
 			void addFeature(Feature* feature);
 			virtual ~FeatureContainer();
 			void undo()override;
+			const bool empty();
 		private:
 			std::deque<std::unique_ptr<Feature>> _container;
 		};

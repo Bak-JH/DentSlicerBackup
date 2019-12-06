@@ -2,6 +2,7 @@
 #include "../../qmlmanager.h"
 #include "ZAxialCut.h"
 #include "polylinecut.h"
+#include "feature/interfaces/Feature.h"
 using namespace Hix;
 using namespace Hix::Features;
 using namespace Hix::Features::Cut;
@@ -50,6 +51,7 @@ void ModelCut::getSliderSignal(double value) {
 
 void Hix::Features::ModelCut::applyCut()
 {
+	Hix::Features::FeatureContainer* container = new Hix::Features::FeatureContainer();
 	switch (_cutType)
 	{
 	case Hix::Features::ModelCut::ZAxial:
@@ -66,6 +68,7 @@ void Hix::Features::ModelCut::applyCut()
 		for (auto each : _models)
 		{
 			PolylineCut impl(each, _cuttingPlane.contour());
+			container->addFeature(impl.getContainer());
 		}
 		break;
 	}
@@ -73,4 +76,5 @@ void Hix::Features::ModelCut::applyCut()
 		break;
 	}
 	qmlManager->unselectAll();
+	qmlManager->featureHistoryManager().addFeature(container);
 }

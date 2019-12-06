@@ -14,9 +14,9 @@ Hix::Features::AddModel::AddModel(Qt3DCore::QEntity* parent, GLModel* model, int
 	Qt3DCore::QTransform toRoot;
 	toRoot.setMatrix(model->toRootMatrix());
 	_addedModel = new GLModel(parent, model->getMeshModd(), model->modelName(), id, &toRoot);
-	_addedModel->setParent(parent);
 	_addedModel->setEnabled(true);
 	_addedModel->setHitTestable(true);
+	_addedModel->setParent(parent);
 	qmlManager->addPart(_addedModel->modelName(), _addedModel->ID);
 }
 
@@ -27,13 +27,13 @@ Hix::Features::AddModel::~AddModel()
 void Hix::Features::AddModel::undo()
 {
 	qmlManager->deletePartListItem(_addedModel->ID);
-	qmlManager->modelSelected(_addedModel->ID);
+	qmlManager->unselectPart(_addedModel);
 	//if selected, remove from selected list
 	qmlManager->supportRaftManager().clear(*_addedModel);
 
 	_addedModel->QNode::setParent((QNode*)nullptr);
 	_addedModel->setEnabled(false);
-	qmlManager->removeSelected(_addedModel);
+	qmlManager->removeFromGLModels(_addedModel);
 }
 
 GLModel* Hix::Features::AddModel::getAddedModel()

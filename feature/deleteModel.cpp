@@ -2,17 +2,18 @@
 #include "glmodel.h"
 #include "qmlmanager.h"
 
-Hix::Features::DeleteModel::DeleteModel(GLModel* target) : _deletedModel(target)
+Hix::Features::DeleteModel::DeleteModel(GLModel* target)
 {
-	qmlManager->modelSelected(target->ID);
+	qmlManager->unselectPart(target);
 	qmlManager->deletePartListItem(target->ID);
-	//if selected, remove from selected list
 	qmlManager->supportRaftManager().clear(*target);
 
+	_deletedModel = qmlManager->removeFromGLModels(target);
+	qDebug() << _deletedModel->ID;
+
+	_deletedModel->setHitTestable(false);
 	_deletedModel->setEnabled(false);
 	_deletedModel->QNode::setParent((QNode*)nullptr);
-
-	qmlManager->removeSelected(target);
 }
 
 Hix::Features::DeleteModel::~DeleteModel()
@@ -22,8 +23,10 @@ Hix::Features::DeleteModel::~DeleteModel()
 void Hix::Features::DeleteModel::undo()
 {
 	qmlManager->addPart(_deletedModel->modelName(), _deletedModel->ID);
-	_deletedModel->QNode::setParent(qmlManager->models);
 	_deletedModel->setEnabled(true);
+	_deletedModel->setHitTestable(true);
+	_deletedModel->QNode::setParent(qmlManager->models);
+	qmlManager->addToGLModels(_deletedModel);
 }
 
 GLModel* Hix::Features::DeleteModel::getDeletedModel()

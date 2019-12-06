@@ -296,7 +296,6 @@ void QmlManager::initializeUI(QQmlApplicationEngine* e){
 Hix::Features::Feature* QmlManager::listModel(GLModel* model)
 {
 	auto addModel = new Hix::Features::AddModel(models, model, modelIDCounter);
-	_featureHistoryManager.addFeature(addModel);
 	glmodels[model] = std::move(addModel->getAddedModelUnique());
 	--modelIDCounter;
 	return addModel;
@@ -305,7 +304,6 @@ Hix::Features::Feature* QmlManager::listModel(GLModel* model)
 
 Hix::Features::Feature* QmlManager::createAndListModel(Hix::Engine3D::Mesh* mesh, QString fname, const Qt3DCore::QTransform* transform) {
 	auto addModel = new Hix::Features::AddModel(models, mesh, fname, modelIDCounter, transform);
-	_featureHistoryManager.addFeature(addModel);
 	--modelIDCounter;
 	glmodels[addModel->getAddedModel()] =  std::move(addModel->getAddedModelUnique());
 	qDebug() << addModel->getAddedModel();
@@ -325,7 +323,11 @@ void QmlManager::openModelFile(QString fname){
 	fname = filenameToModelName(fname.toStdString());
 	setProgress(0.3);
 	mesh->centerMesh();
-	auto latest = dynamic_cast<Hix::Features::AddModel*>(createAndListModel(mesh, fname, nullptr))->getAddedModel();
+
+	auto addModel = createAndListModel(mesh, fname, nullptr);
+	_featureHistoryManager.addFeature(addModel);
+
+	auto latest = dynamic_cast<Hix::Features::AddModel*>(addModel)->getAddedModel();
 	latest->setZToBed();
 	setProgress(0.6);
 
@@ -365,20 +367,28 @@ GLModel* QmlManager::getModelByID(int ID)
 	return nullptr;
 }
 
-void QmlManager::removeSelected(GLModel* target) {
+GLModel* QmlManager::removeFromGLModels(GLModel* target) {
 	if (target)
 	{
-		//TODO: move these into glmodel destructor
-		//    target->deleteLater();
-		//    target->deleteLater();
-		deletePartListItem(target->ID);
-		//if selected, remove from selected list
-		_supportRaftManager.clear(*target);
 		selectedModels.erase(target);
-		//glmodels.erase(target);
-		qDebug() << glmodels.size();
+		auto copy = glmodels.at(target).release();
+		glmodels.erase(target);
+		
+		return copy;
+	}
+
+	return nullptr;
+}
+
+
+void QmlManager::addToGLModels(GLModel* target)
+{
+	if (target)
+	{
+		glmodels[target] = std::move(std::unique_ptr<GLModel>(target));
 	}
 }
+
 
 void QmlManager::deleteModelFileDone() {
     QMetaObject::invokeMethod(leftTabViewMode, "setEnable", Q_ARG(QVariant, false));
@@ -409,13 +419,11 @@ void QmlManager::deleteSelectedModels() {
 	for (auto it = selectedModels.begin(); it != selectedModels.end();)
 	{
 		auto model = *it;
-		++it;
+		it = selectedModels.erase(it);
 		container->addFeature(new DeleteModel(model));
-
-
 	}
-
-	_featureHistoryManager.addFeature(container);
+	if(!container->empty())
+		_featureHistoryManager.addFeature(container);
     deleteModelFileDone();
 
     return;
@@ -938,7 +946,7 @@ void QmlManager::unselectPart(int ID){
 	if (target)
 	{
 		qDebug() << "resetting model" << ID;
-		unselectPartImpl(target);
+		unselectPart(target);
 	}
 }
 
@@ -1206,7 +1214,7 @@ void QmlManager::pasteModel(){
     for (auto copyIdx : copyMeshes){
 		auto model = getModelByID(copyIdx);
 		QString temp = model->modelName() + "_copy";
-		createAndListModel(new Mesh(*model->getMesh()), temp, nullptr);
+		_featureHistoryManager.addFeature(createAndListModel(new Mesh(*model->getMesh()), temp, nullptr));
     }
     openArrange();
     return;
@@ -1530,7 +1538,7 @@ QObject* FindItemByName(QQmlApplicationEngine* engine, const QString& name)
     return FindItemByName(engine->rootObjects(), name);
 }
 
-void QmlManager::unselectPartImpl(GLModel* target)
+void QmlManager::unselectPart(GLModel* target)
 {
 	QMetaObject::invokeMethod(partList, "unselectPartByModel", Q_ARG(QVariant, target->ID));
 
@@ -1626,7 +1634,6 @@ void QmlManager::regenerateRaft()
 void QmlManager::modelCut()
 {
 	auto modelCut = dynamic_cast<ModelCut*>(_currentMode.get());
-	//_featureHistoryManager.addFeature();
 	modelCut->applyCut();
 }
 void QmlManager::cutModeSelected(int mode)
