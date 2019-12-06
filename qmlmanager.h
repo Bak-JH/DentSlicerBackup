@@ -287,12 +287,13 @@ public:
 	Hix::Features::Feature* listModel(GLModel* model);
 	Hix::Features::Mode* getCurrentMode();
 	void setCurrentMode(Hix::Features::Mode* mode);
+	void unselectPart(GLModel* target);
+
 private:
 	QString filenameToModelName(const std::string& s);
 	Hix::Tasking::TaskManager _taskManager;
 	void setModelViewMode(int mode);
 	GLModel* getModelByID(int ID);
-    void unselectPartImpl(GLModel* target);
 	//do not mix UI work with background thread
 	//std::future<Slicer*> exportSelected(bool isTemp);
 	QString getExportPath();
@@ -357,7 +358,8 @@ public slots:
 
     void sendUpdateModelInfo(int, int, QString, float);
     void openModelFile(QString filename);
-	void removeSelected(GLModel* selected);
+	GLModel* removeFromGLModels(GLModel* target);
+	void addToGLModels(GLModel* target);
 
     void deleteModelFileDone();
     void deleteModelFile(GLModel* target);

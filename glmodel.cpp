@@ -143,7 +143,6 @@ GLModel* GLModel::getRootModel()
 		current = dynamic_cast<GLModel*>(current->parent());
 	}
 	return back;
-
 }
 
 

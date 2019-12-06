@@ -32,3 +32,8 @@ void Hix::Features::FeatureContainer::undo()
 		each->undo();
 	}
 }
+
+const bool Hix::Features::FeatureContainer::empty()
+{
+	return _container.empty();
+}

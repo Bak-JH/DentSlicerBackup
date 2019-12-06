@@ -49,7 +49,7 @@ using namespace Hix::Features::CSG;
 using namespace Hix::Features::Cut;
 
 
-Hix::Features::Cut::PolylineCut::PolylineCut(GLModel * origModel, std::vector<QVector3D> _cuttingPoints)
+Hix::Features::Cut::PolylineCut::PolylineCut(GLModel * origModel, std::vector<QVector3D> _cuttingPoints) : _container(new FeatureContainer())
 {
 	//convert polyline to CSG-able 3D mesh, a thin 3D wall.
 	Mesh polylineWall;
@@ -64,6 +64,11 @@ Hix::Features::Cut::PolylineCut::PolylineCut(GLModel * origModel, std::vector<QV
 
 void Hix::Features::Cut::PolylineCut::undo()
 {
+}
+
+FeatureContainer* Hix::Features::Cut::PolylineCut::getContainer()
+{
+	return _container;
 }
 
 void Hix::Features::Cut::PolylineCut::generateCuttingWalls(const std::vector<QVector3D>& polyline, const Hix::Engine3D::Bounds3D& cutBound, Hix::Engine3D::Mesh& out)
@@ -108,7 +113,6 @@ void Hix::Features::Cut::PolylineCut::cutCSG(const QString& subjectName, Hix::Re
 	freeCorkTriMesh(&subjectCork);
 	freeCorkTriMesh(&output);
 
-	Hix::Features::FeatureContainer* container = new Hix::Features::FeatureContainer();
 	//seperate disconnected meshes
 	auto seperateParts = Hix::Features::seperateDisconnectedMeshes(result);
 	for (size_t i = 0; i < seperateParts.size(); ++i)
@@ -116,20 +120,19 @@ void Hix::Features::Cut::PolylineCut::cutCSG(const QString& subjectName, Hix::Re
 		auto addModel = dynamic_cast<Hix::Features::AddModel*>(qmlManager->createAndListModel(seperateParts[i], subjectName + "_cut" + QString::number(i), nullptr));
 		addModel->getAddedModel()->setZToBed();
 		_prevDivideMap[dynamic_cast<GLModel*>(subject)].insert(addModel->getAddedModel());
-		container->addFeature(addModel);
+		_container->addFeature(addModel);
 	}
-	subject->setMesh(nullptr);
+	//subject->setMesh(nullptr);
 	auto model = dynamic_cast<GLModel*>(subject);
 	if (model)
 	{
 		auto deleteModel = dynamic_cast<Hix::Features::DeleteModel*>(new DeleteModel(model));
 		_prevDivideMap[dynamic_cast<GLModel*>(model)].insert(deleteModel->getDeletedModel());
-		container->addFeature(deleteModel);
+		_container->addFeature(deleteModel);
 	}
 	else
 	{
 		delete subject;
 	}
-	qmlManager->featureHistoryManager().addFeature(container);
 }
 
