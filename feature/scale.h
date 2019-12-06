@@ -13,7 +13,7 @@ namespace Hix
 			ScaleMode(const std::unordered_set<GLModel*>& selectedModels);
 			virtual ~ScaleMode();
 
-			std::unique_ptr<FeatureContainer> applyScale(QVector3D scale);
+			FeatureContainer* applyScale(QVector3D scale);
 		private:
 			std::unordered_set<GLModel*> _targetModels;
 		};

@@ -22,10 +22,11 @@
 #include <QKeyboardHandler>
 #include "input/raycastcontroller.h"
 #include "feature/overhangDetect.h"
-#include "ui/Widget3DManager.h"
 #include "common/TaskManager.h"
 #include "slice/SlicingOptBackend.h"
 #include "support/SupportRaftManager.h"
+#include "feature/FeatureHistoryManager.h"
+#include "feature/interfaces/Feature.h"
 
 #define VIEW_MODE_OBJECT 0
 #define VIEW_MODE_LAYER 2
@@ -202,7 +203,7 @@ public:
     QObject* layerRaftButton;
     QObject* layerViewSlider;
 
-    std::vector<std::unique_ptr<GLModel>> glmodels;
+    std::unordered_map<GLModel*, std::unique_ptr<GLModel>> glmodels;
 
     std::vector<size_t> copyMeshes;
 
@@ -266,7 +267,6 @@ public:
     Q_INVOKABLE void unselectAll();
     Q_INVOKABLE void modelVisible(int ID, bool isVisible);
     Q_INVOKABLE void doDelete();
-    Q_INVOKABLE void doDeletebyID(int ID);
     Q_INVOKABLE void runArrange();
     Q_INVOKABLE void setViewMode(int viewMode);
     Q_INVOKABLE int getViewMode();
@@ -282,10 +282,11 @@ public:
 	QVector3D cameraViewVector();
 	Hix::Tasking::TaskManager& taskManager();
 	Hix::Support::SupportRaftManager& supportRaftManager();
-	GLModel* createAndListModel(Hix::Engine3D::Mesh* mesh, QString filename, const Qt3DCore::QTransform* transform);
-	GLModel* listModel(GLModel* model);
-	void addToHistory(Hix::Features::Feature* feature);
+	Hix::Features::FeatureHisroyManager& featureHistoryManager();
+	Hix::Features::Feature* createAndListModel(Hix::Engine3D::Mesh* mesh, QString filename, const Qt3DCore::QTransform* transform);
+	Hix::Features::Feature* listModel(GLModel* model);
 	Hix::Features::Mode* getCurrentMode();
+	void setCurrentMode(Hix::Features::Mode* mode);
 private:
 	QString filenameToModelName(const std::string& s);
 	Hix::Tasking::TaskManager _taskManager;
@@ -308,13 +309,12 @@ private:
 	SlicingOptBackend _optBackend;
 	//Ray cast
 	Hix::Input::RayCastController _rayCastController;
-	Hix::UI::Widget3DManager _widgetManager;
 
 	//cursors
 	QCursor _cursorEraser;
 	Hix::Support::SupportRaftManager _supportRaftManager;
 	std::unique_ptr<Hix::Features::Mode> _currentMode;
-	std::deque<std::unique_ptr<Hix::Features::Feature>> _featureHistory;
+	Hix::Features::FeatureHisroyManager _featureHistoryManager;
 
 signals:
     void updateModelInfo(int printing_time, int layer, QString xyz, float volume);
@@ -357,11 +357,10 @@ public slots:
 
     void sendUpdateModelInfo(int, int, QString, float);
     void openModelFile(QString filename);
-    void deleteOneModelFile(int ID);
-	void deleteOneModelFile(GLModel* model);
+	void removeSelected(GLModel* selected);
 
     void deleteModelFileDone();
-    void deleteModelFile(int ID);
+    void deleteModelFile(GLModel* target);
     void unDo();
     void reDo();
     void copyModel();
@@ -372,8 +371,6 @@ public slots:
     void modelRotateByNumber(int mode, int, int, int);
     void modelMoveByNumber(int axis, int, int);
 
-    void totalMoveDone();
-    void totalRotateDone();
 	void totalScaleDone();
 
     void resetLayflat();

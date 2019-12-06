@@ -22,12 +22,12 @@ void Hix::Features::ExtendMode::faceSelected(GLModel* selected, const Hix::Engin
 	PPShaderFeature::colorFaces(selected, latest);
 }
 
-std::unique_ptr<Hix::Features::FeatureContainer> Hix::Features::ExtendMode::applyExtend(double distance)
+Hix::Features::FeatureContainer* Hix::Features::ExtendMode::applyExtend(double distance)
 {
 	if (_args.empty())
 		return nullptr;
 
-	std::unique_ptr<Hix::Features::FeatureContainer> container = std::make_unique<FeatureContainer>();
+	Hix::Features::FeatureContainer* container = new FeatureContainer();
 	for (auto& each : _args)
 	{
 		auto& arg = each.second;

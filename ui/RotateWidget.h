@@ -36,7 +36,6 @@ namespace Hix
 			static const float ROTATE_SPEED;
 
 		};
-
 	}
 }
 

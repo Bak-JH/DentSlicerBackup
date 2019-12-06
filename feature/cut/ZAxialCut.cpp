@@ -2,6 +2,8 @@
 #include "../../glmodel.h"
 #include "../../qmlmanager.h"
 #include "../../common/GTEngine/Include/Mathematics/GteSplitMeshByPlane.h"
+#include "feature/addModel.h"
+#include "feature/deleteModel.h"
 using namespace Hix;
 using namespace Hix::Engine3D;
 using namespace Hix::Slicer;
@@ -67,8 +69,8 @@ Hix::Features::Cut::ZAxialCut::ZAxialCut(GLModel* subject, float cuttingPlane, H
 	}
 	else
 	{
-		botModel = qmlManager->createAndListModel(listedBotMesh, subject->modelName() + "_bot", &subject->transform());
-		topModel = qmlManager->createAndListModel(listedTopMesh, subject->modelName() + "_top", &subject->transform());
+		botModel = dynamic_cast<Hix::Features::AddModel*>(qmlManager->createAndListModel(listedBotMesh, subject->modelName() + "_bot", &subject->transform()))->getAddedModel();
+		topModel = dynamic_cast<Hix::Features::AddModel*>(qmlManager->createAndListModel(listedTopMesh, subject->modelName() + "_top", &subject->transform()))->getAddedModel();
 		deleteOriginal = true;
 	}
 	_divisionMap.insert(std::make_pair(subject, std::make_pair(topModel, botModel)));
@@ -106,7 +108,7 @@ Hix::Features::Cut::ZAxialCut::ZAxialCut(GLModel* subject, float cuttingPlane, H
 	listed.reserve(promoteToListed.size() + 2);
 	for (auto each : promoteToListed)
 	{
-		listed.push_back(qmlManager->listModel(each));
+		listed.push_back(dynamic_cast<Hix::Features::AddModel*>(qmlManager->listModel(each))->getAddedModel());
 	}
 	if (botModel)
 	{
@@ -143,7 +145,7 @@ Hix::Features::Cut::ZAxialCut::ZAxialCut(GLModel* subject, float cuttingPlane, H
 		}
 	}
 	if(deleteOriginal)
-		qmlManager->deleteModelFile(subject->ID);
+		//qmlManager->deleteModelFile(subject->ID);
 
 	qDebug() << qmlManager->glmodels.size();
 }

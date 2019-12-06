@@ -37,13 +37,16 @@ namespace Hix
 
 			void setSupportType(SlicingConfiguration::SupportType supType);
 			SupportModel* addSupport(const OverhangDetect::Overhang& overhang);
+			void addSupport(std::unique_ptr<SupportModel> target);
 			std::unique_ptr<SupportModel> removeSupport(SupportModel* e);
+
+			bool supportsEmpty();
 
 			void generateRaft();
 			OverhangDetect::Overhangs detectOverhang(const GLModel& model);
 			//removed due to efficiency when deleting multiple
 			std::vector<std::reference_wrapper<const Hix::Render::SceneEntity>> supportModels()const;
-			std::unordered_map<SupportModel*, std::unique_ptr<SupportModel>>& supports();
+			std::vector<SupportModel*> modelAttachedSupports(const std::unordered_set<GLModel*>& models)const;
 			const Hix::Render::SceneEntity* raftModel()const;
 			void clear();
 			void clear(const GLModel& model);

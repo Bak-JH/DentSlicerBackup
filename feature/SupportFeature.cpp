@@ -39,11 +39,6 @@ Hix::Features::RemoveSupport::RemoveSupport(SupportModel* target)
 	_removedModel = std::move(qmlManager->supportRaftManager().removeSupport(target));
 }
 
-Hix::Features::RemoveSupport::RemoveSupport(std::unique_ptr<SupportModel>&& target)
-{
-	_removedModel = std::move(qmlManager->supportRaftManager().removeSupport(target.release()));
-}
-
 Hix::Features::RemoveSupport::~RemoveSupport()
 {
 }
@@ -52,7 +47,7 @@ void Hix::Features::RemoveSupport::undo()
 {
 	_removedModel.get()->setEnabled(true);
 	_removedModel.get()->setHitTestable(true);
-	qmlManager->supportRaftManager().supports().insert(std::make_pair(_removedModel.get(), std::move(_removedModel)));
+	qmlManager->supportRaftManager().addSupport(std::move(_removedModel));
 	qDebug() << "RemoveSupport undo called";
 }
 
@@ -76,15 +71,15 @@ void Hix::Features::SupportMode::faceSelected(GLModel* selected, const Hix::Engi
 {
 	auto suppMode = qmlManager->supportRaftManager().supportEditMode();
 	if (suppMode == Hix::Support::EditMode::Manual) {
-		qmlManager->addToHistory(new AddSupport(selectedFace, selected->ptToRoot(hit.localIntersection())));
+		qmlManager->featureHistoryManager().addFeature(new AddSupport(selectedFace, selected->ptToRoot(hit.localIntersection())));
 	}
 }
 
-std::unique_ptr<Hix::Features::FeatureContainer> Hix::Features::SupportMode::generateAutoSupport()
+Hix::Features::FeatureContainer* Hix::Features::SupportMode::generateAutoSupport()
 {
 	qmlManager->supportRaftManager().setSupportType(scfg->support_type);
-	std::unique_ptr<Hix::Features::FeatureContainer> container = std::make_unique<FeatureContainer>();
-	
+	Hix::Features::FeatureContainer* container = new FeatureContainer();
+
 	for (auto selectedModel : _targetModels)
 	{
 		if (scfg->support_type != SlicingConfiguration::SupportType::None)
@@ -102,35 +97,18 @@ std::unique_ptr<Hix::Features::FeatureContainer> Hix::Features::SupportMode::gen
 	return container;
 }
 
-std::unique_ptr<Hix::Features::FeatureContainer> Hix::Features::SupportMode::clearSupport()
+Hix::Features::FeatureContainer* Hix::Features::SupportMode::clearSupport()
 {
-	std::unique_ptr<Hix::Features::FeatureContainer> container = std::make_unique<FeatureContainer>();
+	Hix::Features::FeatureContainer* container = new FeatureContainer();
 	std::unordered_set<const GLModel*> models;
 
-	for (auto model : _targetModels)
-	{
-		model->getChildrenModels(models);
-		models.insert(model);
-	}
-	
-	auto& supps = qmlManager->supportRaftManager().supports();
-	for (auto curr = supps.begin(); curr != supps.end();)
-	{
-		auto deleted = curr;
-		++curr;
-		auto attachedSupport = dynamic_cast<ModelAttachedSupport*>(deleted->first);
-		if (attachedSupport)
-		{
-			auto ptr = &attachedSupport->getAttachedModel();
-			if (models.find(ptr) != models.end())
-				container->addFeature(new RemoveSupport(std::move(deleted->second)));
-		}
-	}
+	for(auto each : qmlManager->supportRaftManager().modelAttachedSupports(_targetModels))
+		container->addFeature(new RemoveSupport(each));
 
 	for (auto model : _targetModels)
 		model->setZToBed();
 
-	if (qmlManager->supportRaftManager().supports().size() == 0)
+	if (qmlManager->supportRaftManager().supportsEmpty())
 		qmlManager->supportRaftManager().clear();
 
 	return container;
@@ -138,5 +116,22 @@ std::unique_ptr<Hix::Features::FeatureContainer> Hix::Features::SupportMode::cle
 
 void Hix::Features::SupportMode::removeSupport(SupportModel* target)
 {
-	qmlManager->addToHistory(new RemoveSupport(target));
+	qmlManager->featureHistoryManager().addFeature(new RemoveSupport(target));
+}
+
+std::unique_ptr<Hix::Features::FeatureContainer> Hix::Features::clearSupport(std::unordered_set<GLModel*>& models)
+{
+	auto container = std::unique_ptr<Hix::Features::FeatureContainer>();
+	for (auto each : qmlManager->supportRaftManager().modelAttachedSupports(models))
+	{
+		container->addFeature(new RemoveSupport(each));
+	}
+
+	for (auto model : models)
+		model->setZToBed();
+
+	if (qmlManager->supportRaftManager().supportsEmpty())
+		qmlManager->supportRaftManager().clear();
+
+	return container;
 }

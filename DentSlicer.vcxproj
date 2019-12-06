@@ -263,6 +263,7 @@
     <ClCompile Include="DentEngine\src\polyclipping\polytree2tri\PolytreeCDT.cpp" />
     <ClCompile Include="DentEngine\src\SlicerDebug.cpp" />
     <ClCompile Include="DentEngine\src\SlicerDebugInfoExport.cpp" />
+    <ClCompile Include="feature\addModel.cpp" />
     <ClCompile Include="feature\arrange\autoarrange.cpp" />
     <ClCompile Include="feature\arrange\GuillotineBinPack.cpp" />
     <ClCompile Include="feature\arrange\MaxRectsBinPack.cpp" />
@@ -280,18 +281,22 @@
     <ClCompile Include="feature\cut\MeshPlaneBisect.cpp" />
     <ClCompile Include="feature\cut\MeshPlaneCut.cpp" />
     <ClCompile Include="feature\cut\ZAxialCut.cpp" />
+    <ClCompile Include="feature\deleteModel.cpp" />
     <ClCompile Include="feature\extension.cpp" />
     <ClCompile Include="feature\Extrude.cpp" />
     <ClCompile Include="feature\cut\modelcut.cpp" />
+    <ClCompile Include="feature\FeatureHistoryManager.cpp" />
     <ClCompile Include="feature\interfaces\Feature.cpp" />
     <ClCompile Include="feature\interfaces\Mode.cpp" />
     <ClCompile Include="feature\interfaces\SelectFaceMode.cpp" />
+    <ClCompile Include="feature\interfaces\WidgetMode.cpp" />
     <ClCompile Include="feature\label\Labelling.cpp" />
     <ClCompile Include="feature\label\labelModel.cpp" />
     <ClCompile Include="feature\layFlat.cpp" />
     <ClCompile Include="feature\layerview\CrossSectionPlane.cpp" />
     <ClCompile Include="feature\layerview\layerview.cpp" />
     <ClCompile Include="feature\ModelBuilder.cpp" />
+    <ClCompile Include="feature\move.cpp" />
     <ClCompile Include="feature\overhangDetect.cpp" />
     <ClCompile Include="feature\interfaces\PPShaderFeature.cpp" />
     <ClCompile Include="feature\repair\Algorithms\checkAndRepair.cpp" />
@@ -314,6 +319,7 @@
     <ClCompile Include="feature\repair\TMesh\tin.cpp" />
     <ClCompile Include="feature\repair\TMesh\triangle.cpp" />
     <ClCompile Include="feature\repair\TMesh\vertex.cpp" />
+    <ClCompile Include="feature\rotate.cpp" />
     <ClCompile Include="feature\SupportFeature.cpp" />
     <ClCompile Include="fileloader.cpp" />
     <ClCompile Include="feature\cut\FreeCutPtWidget.cpp" />
@@ -348,7 +354,6 @@
     <ClCompile Include="feature\scale.cpp" />
     <ClCompile Include="ui\Widget.cpp" />
     <ClCompile Include="ui\Widget3D.cpp" />
-    <ClCompile Include="ui\Widget3DManager.cpp" />
     <ClCompile Include="unitTest\RandomGen.cpp" />
     <ClCompile Include="unitTest\RunTests.cpp" />
     <ClCompile Include="utils\gridmesh.cpp" />
@@ -808,6 +813,7 @@
     <ClInclude Include="DentEngine\src\polyclipping\polytree2tri\PolytreeCDT.h" />
     <ClInclude Include="DentEngine\src\SlicerDebug.h" />
     <ClInclude Include="DentEngine\src\SlicerDebugInfoExport.h" />
+    <ClInclude Include="feature\addModel.h" />
     <ClInclude Include="feature\agCDT\CDT.h" />
     <ClInclude Include="feature\agCDT\CDT.hpp" />
     <ClInclude Include="feature\agCDT\CDTUtils.h" />
@@ -836,6 +842,7 @@
     </QtMoc>
     <ClInclude Include="feature\cut\MeshPlaneCut.h" />
     <ClInclude Include="feature\cut\ZAxialCut.h" />
+    <ClInclude Include="feature\deleteModel.h" />
     <ClInclude Include="feature\extension.h" />
     <ClInclude Include="feature\Extrude.h" />
     <ClInclude Include="feature\cut\FreeCutPtWidget.h">
@@ -843,8 +850,10 @@
       <IncludePath Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(BOOST_INCLUDEDIR);.\GeneratedFiles\$(ConfigurationName);.\GeneratedFiles;.;.\utils\winsparkle;$(QT_MSVC2017_64)\include;$(QT_MSVC2017_64)\include\Qt3DQuickExtras;$(QT_MSVC2017_64)\include\Qt3DQuick;$(QT_MSVC2017_64)\include\QtQuick;$(QT_MSVC2017_64)\include\QtOpenGL;$(QT_MSVC2017_64)\include\QtWidgets;$(QT_MSVC2017_64)\include\Qt3DExtras;$(QT_MSVC2017_64)\include\Qt3DRender;$(QT_MSVC2017_64)\include\Qt3DInput;$(QT_MSVC2017_64)\include\Qt3DLogic;$(QT_MSVC2017_64)\include\Qt3DCore;$(QT_MSVC2017_64)\include\QtGamepad;$(QT_MSVC2017_64)\include\QtGui;$(QT_MSVC2017_64)\include\QtANGLE;$(QT_MSVC2017_64)\include\QtQml;$(QT_MSVC2017_64)\include\QtNetwork;$(QT_MSVC2017_64)\include\QtConcurrent;$(QT_MSVC2017_64)\include\QtCore;.\release;$(QT_MSVC2017_64)\mkspecs\win32-msvc;$(QT_MSVC2017_64)\include\QtSvg</IncludePath>
     </ClInclude>
     <ClInclude Include="feature\cut\modelcut.h" />
+    <ClInclude Include="feature\FeatureHistoryManager.h" />
     <ClInclude Include="feature\interfaces\Feature.h" />
     <ClInclude Include="feature\interfaces\SelectFaceMode.h" />
+    <ClInclude Include="feature\interfaces\WidgetMode.h" />
     <ClInclude Include="feature\label\Labelling.h" />
     <ClInclude Include="feature\label\labelModel.h" />
     <ClInclude Include="feature\layFlat.h" />
@@ -855,6 +864,7 @@
     <ClInclude Include="feature\layerview\layerview.h" />
     <ClInclude Include="feature\interfaces\Mode.h" />
     <ClInclude Include="feature\ModelBuilder.h" />
+    <ClInclude Include="feature\move.h" />
     <ClInclude Include="feature\overhangDetect.h" />
     <ClInclude Include="feature\interfaces\PPShaderFeature.h" />
     <ClInclude Include="feature\repair\Algorithms\detectIntersections.h" />
@@ -873,6 +883,7 @@
     <ClInclude Include="feature\repair\TMesh\tmesh.h" />
     <ClInclude Include="feature\repair\TMesh\triangle.h" />
     <ClInclude Include="feature\repair\TMesh\vertex.h" />
+    <ClInclude Include="feature\rotate.h" />
     <ClInclude Include="feature\SupportFeature.h" />
     <ClInclude Include="fileloader.h" />
     <QtMoc Include="glmodel.h">
@@ -932,7 +943,6 @@
     </ClInclude>
     <ClInclude Include="feature\scale.h" />
     <ClInclude Include="ui\Widget.h" />
-    <ClInclude Include="ui\Widget3DManager.h" />
     <ClInclude Include="render\Color.h" />
     <ClInclude Include="unitTest\catch.hpp" />
     <ClInclude Include="unitTest\RandomGen.h" />

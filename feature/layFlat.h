@@ -30,7 +30,7 @@ namespace Hix
 			LayFlatMode(const std::unordered_set<GLModel*>& selectedModels);
 			virtual ~LayFlatMode();
 			void faceSelected(GLModel* selected, const Hix::Engine3D::FaceConstItr& selectedFace, const Hix::Input::MouseEventData& mouse, const Qt3DRender::QRayCasterHit& hit)override;
-			std::unique_ptr<Hix::Features::FeatureContainer> applyLayFlat();
+			FeatureContainer* applyLayFlat();
 
 		private:
 			GLModel* _model = nullptr;
