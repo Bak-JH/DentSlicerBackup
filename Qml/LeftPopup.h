@@ -1,10 +1,12 @@
-#pragma once
+  #pragma once
 #include <QtQuick/private/qquickrectangle_p.h>
 #include <QtQuick/private/qquickmousearea_p.h>
 #include <QtQuick/private/qquickevents_p_p.h>
 #include <QtQuick/private/qquicktext_p.h>
 #include <QtQuickTemplates2/private/qquickspinbox_p.h>
+#include <QtQuickTemplates2/private/qquickcombobox_p.h>
 #include <QSpinBox>
+//#include <QComboBox>
 #include <QWidget>
 
 
@@ -43,7 +45,7 @@ namespace Hix
 
 		protected:
 			QString _title = "Name";
-			QString _popupHeight = "284";
+			QString _popupHeight = "360"; //"284";
 		};
 
 
@@ -61,25 +63,94 @@ namespace Hix
 			void propNameChanged();
 
 		protected:
-			QString _propName = "property";
+			QString _propName = "Property";
 		};
 
-
-		class RoundButton : public QQuickRectangle
+		class DropdownBox : public QQuickRectangle
 		{
 			Q_OBJECT
-			Q_PROPERTY(QString btntext MEMBER _btntext)
+			Q_PROPERTY(QString dropName MEMBER _dropName NOTIFY dropNameChanged)
+			Q_PROPERTY(QQuickComboBox* dropRect MEMBER _dropRect)
+			Q_PROPERTY(QStringList dropList MEMBER _dropList)
 
 		public:
-			RoundButton(QQuickItem* parent = nullptr);
+			DropdownBox(QQuickItem* parent = nullptr);
+			QQuickComboBox* _dropRect;
 
 		public slots:
-			void textChanged();
+			void dropNameChanged();
+
+		protected:
+		
+			QString _dropName = "Dropdown";
+			QStringList _dropList = { "Banana", "Apple", "Coconut", "Almond" };
+		};
+
+		class FreeCutButton : public QQuickRectangle
+		{
+			Q_OBJECT
+			Q_PROPERTY(QColor btncolor MEMBER _btncolor NOTIFY btnColorChanged)
+
+		public:
+			FreeCutButton(QQuickItem* parent = nullptr);
+
+		signals:
+			void btnColorChanged(const QColor& changedColor);
+
+		public slots:
 			void onClick();
 
 		private:
 			QQuickMouseArea* _mouseArea;
+			QColor _btncolor;
+		};
+
+		class FlatCutButton : public QQuickRectangle
+		{
+			Q_OBJECT
+
+		public:
+			FlatCutButton(QQuickItem* parent = nullptr);
+
+		public slots:
+			void onClick();
+
+		private:
+			QQuickMouseArea* _mouseArea;
+
+		};
+
+		class LabelTextBox : public QQuickRectangle
+		{
+			Q_OBJECT
+
+		};
+
+		class RoundButton : public QQuickRectangle
+		{
+			Q_OBJECT
+			Q_PROPERTY(QString btntext MEMBER _btntext NOTIFY btntextChanged)
+			Q_PROPERTY(QColor btncolor MEMBER _btncolor NOTIFY btnColorChanged)
+			//Q_PROPERTY(QString btnwidth MEMBER _btnwidth NOTIFTY btnwidthChanged)
+
+		public:
+			RoundButton(QQuickItem* parent = nullptr);
+
+		signals:
+			void btnColorChanged(const QColor& changedColor);
+
+		public slots:
+			void btntextChanged();
+			//void btnwidthChanged();
+			void onClick();
+			void onEntered();
+			void onExited();
+
+		private:
+			QQuickMouseArea* _mouseArea;
 			QString _btntext = "Apply";
+			QColor _btncolor;
+			//QString _btnwidth = "224";
 		};
 	}
 }

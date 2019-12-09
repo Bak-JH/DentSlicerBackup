@@ -1,4 +1,4 @@
-import QtQuick 2.4
+import QtQuick 2.6
 import QtQuick.Controls 1.4
 import QtQuick.Scene3D 2.0
 import QtQuick.Window 2.2
@@ -29,6 +29,10 @@ Item{
 
         property alias mainFont : mainFont
 
+		property alias openRegular: openRegular
+		property alias openSemiBold: openSemiBold
+		property alias openBold: openBold
+
         /*
         onActiveFocusItemChanged: {
             console.log("does window has chain", activeFocusOnTab);
@@ -47,6 +51,19 @@ Item{
             id : mediumFont
             source: "qrc:/Resource/font/NotoSans-SemiCondensedMedium.ttf"
         }
+
+		FontLoader {
+			id: openRegular
+            source: "qrc:/Resource/font/OpenSans-Regular.ttf"
+		}
+		FontLoader {
+			id: openSemiBold
+            source: "qrc:/Resource/font/OpenSans-SemiBold.ttf"
+		}
+		FontLoader {
+			id: openBold
+            source: "qrc:/Resource/font/OpenSans-Bold.ttf"
+		}
 
 //        LeftTabPartListElement {
 //            id: statechanger
@@ -217,14 +234,86 @@ Item{
 			anchors.topMargin: 20
 		}
 
+		PartList{
+			id: partlist
+			anchors.top: uppertab.bottom
+            anchors.left: parent.left
+			z: 10
+		}
+
 		LeftPopup {
 			id: leftpopup
-			anchors.top: bastardymenu.bottom
+			anchors.top: uppertab.bottom
 			anchors.left: lefttab.right
 			anchors.leftMargin: 15
 			anchors.topMargin: 120
 		}
+
+		Toast {
+			id: toast
+			anchors.top: uppertab.bottom
+			anchors.topMargin: 600
+			anchors.left: lefttab.right
+			anchors.leftMargin: 15
+		}
+
+		UndoRedo {
+			id: undoredo
+			anchors.top: uppertab.bottom
+			anchors.topMargin: 720
+			anchors.left: lefttab.right
+			anchors.leftMargin: 15
+		}
+
+		SlideBar {
+			id: slidebar
+			anchors.top: uppertab.bottom
+			anchors.topMargin: 160
+			anchors.left: lefttab.right
+			anchors.leftMargin: 600
+		}
+
+		Cam {
+			id: cam
+			anchors.top: uppertab.bottom
+			anchors.topMargin: 160
+			anchors.left: slidebar.right
+			anchors.leftMargin: 300
+		}
+		/*
+		CanvasTest {
+			id: canvastest
+			anchors.top: uppertab.bottom
+			anchors.topMargin: 160
+			anchors.left: lefttab.right
+			anchors.leftMargin: 180
+		}
+		*/
+		ViewMode {
+			id: viewmode
+			anchors.top: uppertab.bottom
+			anchors.left: lefttab.right
+			anchors.leftMargin: 15
+			anchors.topMargin: 500
+		}
+
+		PrintInfo {
+			id: printinfo
+			anchors.top: slidebar.top
+			anchors.topMargin: 100
+			anchors.left: slidebar.right
+			anchors.leftMargin: 100
+		}
 		
+		/*
+		ModalWindow {
+			id: modalwindow
+			anchors.top: uppertab.bottom
+			anchors.topMargin: 160
+			anchors.left: lefttab.right
+			anchors.leftMargin: 320
+		}
+		*/
         MouseArea{
 
             acceptedButtons: Qt.MiddleButton | Qt.RightButton

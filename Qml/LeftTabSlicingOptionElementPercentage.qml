@@ -21,7 +21,8 @@ Item {
         font.pixelSize: 14
         anchors.leftMargin:14
         text: columnName
-        font.family: mainFont.name
+        font.family: 
+		.name
         verticalAlignment: Text.AlignBottom
         color : "black"
     }

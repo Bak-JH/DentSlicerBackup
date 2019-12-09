@@ -23,7 +23,7 @@ namespace Hix
 			QQuickMouseArea* _mouseArea;
 
 		protected:
-			QString _fname = "name";
+			QString _fname = "Open";
 			//QImage _fimg = QImage("qrc:/Resource/vs_icon.png");
 		};
 	}
