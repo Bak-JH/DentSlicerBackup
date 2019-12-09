@@ -533,7 +533,6 @@ void edgeRemoveWrongZ(Hix::Engine3D::Mesh& mesh, std::deque<HalfEdgeConstItr>& b
 	//reform boundary after shifting faces
 	//we use a boundary vertex as hint as vertices shouldn't be shifted(ones with faces connected)
 	auto hintVtxPos = largestItr->begin()->to().localPosition();
-	qDebug() << "new boundary hint at: " << hintVtxPos;
 	delguard.flush();
 	auto hintVtx = mesh.getVtxAtLocalPos(hintVtxPos);
 	auto startingEdge = *hintVtx.leavingBoundary().begin();
@@ -638,12 +637,6 @@ MeshDeleteGuard edgeRemoveOutlier(Hix::Engine3D::Mesh& mesh, std::deque<HalfEdge
 		totalRemovedCnt += removeCnt;
 		//break;
 	} while (removeCnt != 0);
-	//auto delguard = mesh.removeFacesWithoutShifting(toBeDeleted);
-	//boundary = getBoundary(*exploredEdges.begin());
-	//return delguard;
-	//auto model = qmlManager->getModelByID(dynamic_cast<const GLModel*>(mesh.entity())->ID);
-	//Hix::Debug::DebugRenderObject::getInstance().registerDebugColorFaces(model, toBeDeleted);
-
 	auto delguard = mesh.removeFacesWithoutShifting(toBeDeleted);
 	//use explored faces to form new boundaries, there maybe multiple boundaries due to parts of meshes becoming disconnected
 	std::unordered_set<HalfEdgeConstItr> boundaryEdges;
@@ -767,18 +760,7 @@ Hix::Features::TwoManifoldBuilder::TwoManifoldBuilder(Hix::Engine3D::Mesh& model
 	auto boundary = getLongestBoundary(_model);
 	auto isBottEmpty = !isClockwise(boundary);
 	auto entireFitPlane = bestFittingPlaneEntireModel(_model, boundary, isBottEmpty);
-	Hix::Debug::DebugRenderObject::getInstance().displayPlane(entireFitPlane);
-	return;
-
-	Hix::Engine3D::MeshDeleteGuard deleteGuard(&_model);
-	Hix::Plane3D::PDPlane bestFitPlane;
-	for (size_t i = 0; i < 1; ++i)
-	{
-		bestFitPlane = bestFittingPlaneRemoveUpperOutlier(boundary, isBottEmpty);
-		auto delFaces = edgeRemoveOutlier(_model, boundary, bestFitPlane);
-		deleteGuard += std::move(delFaces);
-	}
-	bestFitPlane = bestFittingPlane(boundary, isBottEmpty);
+	auto delFaces = edgeRemoveOutlier(_model, boundary, entireFitPlane);
 	QVector3D zDirection;
 	if (isBottEmpty)
 	{
@@ -789,7 +771,7 @@ Hix::Features::TwoManifoldBuilder::TwoManifoldBuilder(Hix::Engine3D::Mesh& model
 		zDirection = QVector3D(0, 0, -1);
 
 	}
-	auto rotator = QQuaternion::rotationTo(bestFitPlane.normal, zDirection);
+	auto rotator = QQuaternion::rotationTo(entireFitPlane.normal, zDirection);
 	model.vertexRotate(rotator);
 	cuntourConcaveFill(_model, boundary, isBottEmpty);
 	auto vtxEnd = _model.getVertices().cend();
@@ -815,7 +797,7 @@ Hix::Features::TwoManifoldBuilder::TwoManifoldBuilder(Hix::Engine3D::Mesh& model
 	}
 	zCylinder(_model, boundary, isBottEmpty, zValue);
 	buildBott(_model, boundary, isBottEmpty, zValue);
-	deleteGuard.flush();
+	delFaces.flush();
 
 
 }

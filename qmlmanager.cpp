@@ -372,20 +372,18 @@ void QmlManager::openAndBuildModel(QString fname) {
 	setProgress(0.1);
 	auto latest = createAndListModel(mesh, fname, nullptr);
 	setProgress(0.2);
-
 	TwoManifoldBuilder modelBuilder(*mesh);
-	latest->updateMesh(true);
-	//mesh->centerMesh();
+	mesh->centerMesh();
 	setProgress(0.4);
 	//repair mode
-	//if (Hix::Features::isRepairNeeded(mesh))
-	//{
-	//	qmlManager->setProgressText("Repairing mesh.");
-	//	std::unordered_set<GLModel*> repairModels;
-	//	repairModels.insert(latest);
-	//	_currentFeature.reset(new MeshRepair(repairModels));
-	//	_currentFeature.reset();
-	//}
+	if (Hix::Features::isRepairNeeded(mesh))
+	{
+		qmlManager->setProgressText("Repairing mesh.");
+		std::unordered_set<GLModel*> repairModels;
+		repairModels.insert(latest);
+		_currentFeature.reset(new MeshRepair(repairModels));
+		_currentFeature.reset();
+	}
 	setProgress(1.0);
 	// do auto arrange
 	if (glmodels.size() >= 2)
