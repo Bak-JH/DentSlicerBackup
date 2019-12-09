@@ -268,7 +268,7 @@ void GLModel::updateModelMesh() {
 bool GLModel::isDraggable(Hix::Input::MouseEventData& e,const Qt3DRender::QRayCasterHit&)
 {
 	auto listed = getRootModel();
-	if (e.button == Qt3DInput::QMouseEvent::Buttons::LeftButton && qmlManager->isSelected(listed) && !qmlManager->isFeatureActive())
+	if (e.button == Qt3DInput::QMouseEvent::Buttons::LeftButton && qmlManager->isSelected(listed) && (!qmlManager->isFeatureActive() || qmlManager->isActive<Hix::Features::MoveMode>()))
 	{
 		return true;
 	}
@@ -277,7 +277,10 @@ bool GLModel::isDraggable(Hix::Input::MouseEventData& e,const Qt3DRender::QRayCa
 
 void GLModel::dragStarted(Hix::Input::MouseEventData& e, const Qt3DRender::QRayCasterHit& hit)
 {
-	//dynamic_cast<Hix::Features::MoveMode*>(qmlManager->getCurrentMode())->featureStarted();
+	if(!qmlManager->isActive<Hix::Features::MoveMode>())
+		qmlManager->moveButton->setProperty("state", "active");
+
+	dynamic_cast<Hix::Features::MoveMode*>(qmlManager->getCurrentMode())->featureStarted();
 	auto listed = getRootModel();
 	//if (qmlManager->supportRaftManager().supportActive())
 	//{
@@ -290,7 +293,6 @@ void GLModel::dragStarted(Hix::Input::MouseEventData& e, const Qt3DRender::QRayC
 	//}
 	lastpoint = hit.localIntersection();
 	prevPoint = (QVector2D)e.position;
-	//qmlManager->moveButton->setProperty("state", "active");
 	qmlManager->setClosedHandCursor();
 }
 
@@ -318,7 +320,7 @@ void GLModel::doDrag(Hix::Input::MouseEventData& v)
 
 void GLModel::dragEnded(Hix::Input::MouseEventData&)
 {
-	//dynamic_cast<Hix::Features::MoveMode*>(qmlManager->getCurrentMode())->featureEnded();
+	dynamic_cast<Hix::Features::MoveMode*>(qmlManager->getCurrentMode())->featureEnded();
     //qmlManager->totalMoveDone();
 }
 

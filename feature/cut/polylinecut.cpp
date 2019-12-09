@@ -64,11 +64,7 @@ Hix::Features::Cut::PolylineCut::PolylineCut(GLModel * origModel, std::vector<QV
 
 void Hix::Features::Cut::PolylineCut::undo()
 {
-}
-
-FeatureContainer* Hix::Features::Cut::PolylineCut::getContainer()
-{
-	return _container;
+	_container->undo();
 }
 
 void Hix::Features::Cut::PolylineCut::generateCuttingWalls(const std::vector<QVector3D>& polyline, const Hix::Engine3D::Bounds3D& cutBound, Hix::Engine3D::Mesh& out)

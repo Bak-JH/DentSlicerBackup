@@ -33,6 +33,14 @@ void Hix::Features::FeatureContainer::undo()
 	}
 }
 
+void Hix::Features::FeatureContainer::redo()
+{
+	for (auto& each : _container)
+	{
+		each->redo();
+	}
+}
+
 const bool Hix::Features::FeatureContainer::empty()
 {
 	return _container.empty();
