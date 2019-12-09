@@ -318,7 +318,30 @@ void reorientatePlane(Hix::Plane3D::PDPlane& plane, bool isBottEmpty)
 
 	}
 }
-Hix::Plane3D::PDPlane bestFittingPlane(const std::deque<HalfEdgeConstItr>& edges)
+Hix::Plane3D::PDPlane bestFittingPlaneEntireModel(const Mesh& mesh, const std::deque<HalfEdgeConstItr>& edges, bool isBottEmpty)
+{
+	std::vector<QVector3D> points;
+	auto& vtcs = mesh.getVertices();
+
+	points.reserve(vtcs.size());
+	std::transform(vtcs.cbegin(), vtcs.cend(), std::back_inserter(points),
+		[](const MeshVertex& v)->QVector3D {
+			return v.position;
+		});
+	auto bestFit = Hix::Plane3D::bestFittingPlane(points);
+	reorientatePlane(bestFit, isBottEmpty);
+	float distanceToPlane = 0;
+	for (auto& he : edges)
+	{
+		distanceToPlane += he.from().localPosition().distanceToPlane(bestFit.point, bestFit.normal);
+	}
+	distanceToPlane /= edges.size();
+	bestFit.point += bestFit.normal * distanceToPlane;
+	return bestFit;
+}
+
+
+Hix::Plane3D::PDPlane bestFittingPlane(const std::deque<HalfEdgeConstItr>& edges, bool isBottEmpty)
 {
 	std::vector<QVector3D> points;
 	points.reserve(edges.size());
@@ -326,7 +349,74 @@ Hix::Plane3D::PDPlane bestFittingPlane(const std::deque<HalfEdgeConstItr>& edges
 		[](const HalfEdgeConstItr& e)->QVector3D {
 			return e.to().localPosition();
 		});
-	return Hix::Plane3D::bestFittingPlane(points);
+	auto bestFit = Hix::Plane3D::bestFittingPlane(points);
+	reorientatePlane(bestFit, isBottEmpty);
+	return bestFit;
+}
+
+Hix::Plane3D::PDPlane bestFittingPlaneRemoveUpperOutlier(const std::deque<HalfEdgeConstItr>& edges, bool isBottEmpty)
+{
+	std::vector<QVector3D> points;
+	points.reserve(edges.size());
+	std::transform(edges.cbegin(), edges.cend(), std::back_inserter(points),
+		[](const HalfEdgeConstItr& e)->QVector3D {
+			return e.to().localPosition();
+		});
+	auto initialBestFit = Hix::Plane3D::bestFittingPlane(points);
+	reorientatePlane(initialBestFit, isBottEmpty);
+	//need to refind to remove outliers, especially upper outliers to prevent decimation of lower gum areas
+
+	float underDistanceAvg = 0;
+	std::vector<std::pair<QVector3D*, float>> upperPts;
+	std::vector<QVector3D*> botPts;
+	upperPts.reserve(points.size());
+	botPts.reserve(points.size());
+
+	std::function<bool(float)> isUnder;
+	if (isBottEmpty)
+	{
+		isUnder = [](float dist) {return dist > 0; };
+	}
+	else
+	{
+		isUnder = [](float dist) {return dist < 0; };
+	}
+	for (auto& p : points)
+	{
+		auto dist = p.distanceToPlane(initialBestFit.point, initialBestFit.normal);
+		if (isUnder(dist))
+		{
+			underDistanceAvg += dist;
+			botPts.emplace_back(&p);
+		}
+		else
+		{
+			upperPts.emplace_back(std::make_pair(&p, dist));
+		}
+	}
+	underDistanceAvg /= botPts.size();
+	//float threshold = std::abs(underDistanceAvg) * 1.75;
+	constexpr float multiplier = 0.8f;
+	float threshold = std::abs(underDistanceAvg) * multiplier;
+	size_t delCnt = 0;
+
+	for (auto& p : upperPts)
+	{
+		if (std::abs(p.second) < threshold)
+		{
+			botPts.emplace_back(p.first);
+		}
+	}
+	std::vector<QVector3D> filteredPts;
+	filteredPts.reserve(botPts.size());
+	for (auto& p : botPts)
+	{
+		filteredPts.emplace_back(*p);
+	}
+	auto bestFit = Hix::Plane3D::bestFittingPlane(filteredPts);
+	reorientatePlane(bestFit, isBottEmpty);
+
+	return bestFit;
 }
 
 void edgeRemoveWrongZ(Hix::Engine3D::Mesh& mesh, std::deque<HalfEdgeConstItr>& boundary, bool isBottEmpty)
@@ -676,17 +766,19 @@ Hix::Features::TwoManifoldBuilder::TwoManifoldBuilder(Hix::Engine3D::Mesh& model
 {
 	auto boundary = getLongestBoundary(_model);
 	auto isBottEmpty = !isClockwise(boundary);
-	bool boundaryCorrect = false;
+	auto entireFitPlane = bestFittingPlaneEntireModel(_model, boundary, isBottEmpty);
+	Hix::Debug::DebugRenderObject::getInstance().displayPlane(entireFitPlane);
+	return;
+
 	Hix::Engine3D::MeshDeleteGuard deleteGuard(&_model);
 	Hix::Plane3D::PDPlane bestFitPlane;
-	for (size_t i = 0; i < 2; ++i)
+	for (size_t i = 0; i < 1; ++i)
 	{
-		bestFitPlane = bestFittingPlane(boundary);
-		reorientatePlane(bestFitPlane, isBottEmpty);
+		bestFitPlane = bestFittingPlaneRemoveUpperOutlier(boundary, isBottEmpty);
 		auto delFaces = edgeRemoveOutlier(_model, boundary, bestFitPlane);
 		deleteGuard += std::move(delFaces);
 	}
-	bestFitPlane = bestFittingPlane(boundary);
+	bestFitPlane = bestFittingPlane(boundary, isBottEmpty);
 	QVector3D zDirection;
 	if (isBottEmpty)
 	{
@@ -694,7 +786,7 @@ Hix::Features::TwoManifoldBuilder::TwoManifoldBuilder(Hix::Engine3D::Mesh& model
 	}
 	else
 	{
-		zDirection = QVector3D(0, 0, 1);
+		zDirection = QVector3D(0, 0, -1);
 
 	}
 	auto rotator = QQuaternion::rotationTo(bestFitPlane.normal, zDirection);
