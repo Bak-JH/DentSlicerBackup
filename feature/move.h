@@ -14,7 +14,7 @@ namespace Hix
 			Move(GLModel* target);
 			virtual ~Move();
 			void undo()override;
-			void redo()override {} //TODO: redo
+			void redo()override;
 
 		private:
 			GLModel* _target;

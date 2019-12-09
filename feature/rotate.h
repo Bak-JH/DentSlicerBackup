@@ -14,7 +14,7 @@ namespace Hix
 			Rotate(GLModel* target);
 			virtual ~Rotate();
 			void undo()override;
-			void redo()override {} //TODO: redo
+			void redo()override;
 
 		private:
 			GLModel* _target;

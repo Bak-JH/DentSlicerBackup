@@ -46,7 +46,18 @@ Hix::Features::Move::~Move()
 
 void Hix::Features::Move::undo()
 {
+	auto currMatrix = _target->transform().matrix();
 	_target->transform().setMatrix(_prevMatrix);
 	_target->aabb() = _prevAabb;
 	qmlManager->cameraViewChanged();
+	_prevMatrix = currMatrix;
+}
+
+void Hix::Features::Move::redo()
+{
+	auto currMatrix = _target->transform().matrix();
+	_target->transform().setMatrix(_prevMatrix);
+	_target->aabb() = _prevAabb;
+	qmlManager->cameraViewChanged();
+	_prevMatrix = currMatrix;
 }
