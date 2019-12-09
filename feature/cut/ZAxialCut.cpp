@@ -42,7 +42,7 @@ namespace Hix
 
 
 Hix::Features::Cut::ZAxialCut::ZAxialCut(GLModel* subject, float cuttingPlane, Hix::Features::Cut::ZAxialCut::Result option) :
-	_cuttingPlane(cuttingPlane)
+	_cuttingPlane(cuttingPlane), _container(new Hix::Features::FeatureContainer())
 {
 	//do listed part first
 
@@ -69,8 +69,14 @@ Hix::Features::Cut::ZAxialCut::ZAxialCut(GLModel* subject, float cuttingPlane, H
 	}
 	else
 	{
-		botModel = dynamic_cast<Hix::Features::AddModel*>(qmlManager->createAndListModel(listedBotMesh, subject->modelName() + "_bot", &subject->transform()))->getAddedModel();
-		topModel = dynamic_cast<Hix::Features::AddModel*>(qmlManager->createAndListModel(listedTopMesh, subject->modelName() + "_top", &subject->transform()))->getAddedModel();
+		auto addBot = qmlManager->createAndListModel(listedBotMesh, subject->modelName() + "_bot", &subject->transform());
+		auto addTop = qmlManager->createAndListModel(listedTopMesh, subject->modelName() + "_top", &subject->transform());
+		
+		_container->addFeature(addBot);
+		_container->addFeature(addTop);
+		
+		botModel = dynamic_cast<Hix::Features::AddModel*>(addBot)->getAddedModel();
+		topModel = dynamic_cast<Hix::Features::AddModel*>(addTop)->getAddedModel();
 		deleteOriginal = true;
 	}
 	_divisionMap.insert(std::make_pair(subject, std::make_pair(topModel, botModel)));
@@ -144,7 +150,8 @@ Hix::Features::Cut::ZAxialCut::ZAxialCut(GLModel* subject, float cuttingPlane, H
 			//delete split.first;
 		}
 	}
-	if(deleteOriginal)
+	if (deleteOriginal)
+		_container->addFeature(new DeleteModel(subject));
 		//qmlManager->deleteModelFile(subject->ID);
 
 	qDebug() << qmlManager->glmodels.size();
@@ -189,12 +196,7 @@ void Hix::Features::Cut::ZAxialCut::doChildrenRecursive(GLModel* subject, float 
 
 void Hix::Features::Cut::ZAxialCut::undo()
 {
-	for (auto each : _divisionMap)
-	{
-		qDebug() << "org: " << each.first->ID;
-		qDebug() << "c1: " << each.second.first;
-		qDebug() << "c2: " << each.second.second;
-	}
+	_container->undo();
 }
 
 Hix::Features::Cut::ZAxialCutImp::ZAxialCutImp(GLModel* subject, float cuttingPlane, Mesh*& topMesh, Mesh*& botMesh, ZAxialCut::Result option) :

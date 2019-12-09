@@ -1197,7 +1197,7 @@ void QmlManager::unDo(){
 }
 
 void QmlManager::reDo(){
-
+	_featureHistoryManager.redo();
 }
 
 void QmlManager::copyModel(){
@@ -1652,18 +1652,19 @@ void QmlManager::closeCut()
 }
 void QmlManager::getSliderSignal(double sliderPos)
 {
-	//auto modelCut = dynamic_cast<ModelCut*>(_currentFeature.get());
-	//if (modelCut)
-	//{
-	//	modelCut->getSliderSignal(sliderPos);
-	//	return;
-	//}
-	//auto shellOffset = dynamic_cast<ShellOffset*>(_currentFeature.get());
-	//if (shellOffset)
-	//{
-	//	shellOffset->getSliderSignal(sliderPos);
-	//	return;
-	//}
+	auto modelCut = dynamic_cast<ModelCut*>(_currentMode.get());
+	if (modelCut)
+	{
+		modelCut->getSliderSignal(sliderPos);
+		return;
+	}
+
+	auto shellOffset = dynamic_cast<ShellOffset*>(_currentMode.get());
+	if (shellOffset)
+	{
+		shellOffset->getSliderSignal(sliderPos);
+		return;
+	}
 }
 
 void QmlManager::getCrossSectionSignal(int val)

@@ -14,6 +14,7 @@ namespace Hix
 			Move(GLModel* target);
 			virtual ~Move();
 			void undo()override;
+			void redo()override {} //TODO: redo
 
 		private:
 			GLModel* _target;
@@ -29,7 +30,7 @@ namespace Hix
 			void featureStarted()override;
 			void featureEnded()override;
 		private:
-			Hix::Features::FeatureContainer* _moveContainer;
+			Hix::Features::FeatureContainer* _moveContainer = nullptr;
 		};
 	}
 }

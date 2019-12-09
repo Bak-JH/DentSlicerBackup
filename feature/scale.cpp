@@ -34,7 +34,19 @@ Hix::Features::Scale::~Scale()
 void Hix::Features::Scale::undo()
 {
 	qDebug() << "scale: " << _prevScale;
+	auto tmp = _model->transform().scale3D();
 	_model->scaleModel(_prevScale);
 	_model->scaleDone();
 	qmlManager->sendUpdateModelInfo();
+	_prevScale = tmp;
+}
+
+void Hix::Features::Scale::redo()
+{
+	qDebug() << "scale: " << _prevScale;
+	auto tmp = _model->transform().scale3D() / _prevScale;
+	_model->scaleModel(_prevScale);
+	_model->scaleDone();
+	qmlManager->sendUpdateModelInfo();
+	_prevScale = tmp;
 }

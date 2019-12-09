@@ -1,4 +1,5 @@
 #include "FeatureHistoryManager.h"
+#include <QDebug>
 
 void Hix::Features::FeatureHisroyManager::addFeature(Hix::Features::Feature* feature)
 {
@@ -6,15 +7,28 @@ void Hix::Features::FeatureHisroyManager::addFeature(Hix::Features::Feature* fea
 		return;
 
 	_history.emplace_back(std::unique_ptr<Feature>(feature));
+	_historyItr = _history.end()-1;
 }
 
 void Hix::Features::FeatureHisroyManager::undo()
 {
-	if (_history.empty())
+	if (_historyItr == _history.begin())
 		return;
 
-	auto prevFeature = _history.back().release();
+	auto prevFeature = _historyItr->get();
 	if (prevFeature)
 		prevFeature->undo();
-	_history.pop_back();
+
+	--_historyItr;
+}
+
+void Hix::Features::FeatureHisroyManager::redo()
+{
+	if (_historyItr+1 == _history.end())
+		return;
+
+	++_historyItr;
+	auto prevFeature = _historyItr->get();
+	if (prevFeature)
+		prevFeature->redo();
 }

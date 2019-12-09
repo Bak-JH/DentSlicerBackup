@@ -15,7 +15,8 @@ namespace Hix
 			AddSupport(const Hix::Engine3D::FaceConstItr face, QVector3D point);
 			AddSupport(const OverhangDetect::Overhang& overhang);
 			virtual ~AddSupport();
-			void undo() override;
+			void undo()override;
+			void redo()override {} //TODO: redo
 
 		private:
 			SupportModel* _addedModel;
@@ -26,7 +27,8 @@ namespace Hix
 		public:
 			RemoveSupport(SupportModel* target);
 			virtual ~RemoveSupport();
-			void undo() override;
+			void undo()override;
+			void redo()override {} //TODO: redo
 
 		private:
 			std::unique_ptr<SupportModel> _removedModel;

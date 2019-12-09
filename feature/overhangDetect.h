@@ -21,6 +21,7 @@ namespace Hix
 			const Hix::Engine3D::Mesh* owner()const;
 			const QVector3D& normal()const;
 			void undo()override {}
+			void redo()override {}
 			//void setRaycastResult(const RayHits& hit);
 			//const RayHits& rayHit()const;
 		private:

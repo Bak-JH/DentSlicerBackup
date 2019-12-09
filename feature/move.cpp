@@ -2,7 +2,8 @@
 #include "ui/MoveWidget.h"
 #include "qmlmanager.h"
 
-Hix::Features::MoveMode::MoveMode(const std::unordered_set<GLModel*>& targetModels, Input::RayCastController* controller)
+Hix::Features::MoveMode::MoveMode
+(const std::unordered_set<GLModel*>& targetModels, Input::RayCastController* controller)
 	: WidgetMode(targetModels, controller)
 {
 	_widget.addWidget(std::make_unique<Hix::UI::MoveWidget>(QVector3D(1, 0, 0), &_widget));

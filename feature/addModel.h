@@ -14,6 +14,7 @@ namespace Hix
 			AddModel(Qt3DCore::QEntity* parent, GLModel* model, int id);
 			virtual ~AddModel();
 			void undo()override;
+			void redo()override {} //TODO: redo
 			GLModel* getAddedModel();
 			std::unique_ptr<GLModel> getAddedModelUnique();
 
