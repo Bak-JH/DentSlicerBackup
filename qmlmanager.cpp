@@ -34,6 +34,13 @@
 #include "feature/SupportFeature.h"
 #include "Qml/MenuButton.h"
 #include "Qml/LeftPopup.h"
+#include "Qml/Toast.h"
+#include "Qml/SlideBar.h"
+#include "Qml/ModalWindow.h"
+#include "Qml/Cam.h"
+#include "Qml/ViewMode.h"
+#include "Qml/PartList.h"
+#include "Qml/PrintInfo.h"
 
 #include <functional>
 using namespace Hix::Input;
@@ -49,6 +56,27 @@ QmlManager::QmlManager(QObject *parent) : QObject(parent), _optBackend(this, scf
 	qmlRegisterType<Hix::QML::RoundButton>("hix.qml", 1, 0, "RoundButton");
 	qmlRegisterType<Hix::QML::LeftPopupShell>("hix.qml", 1, 0, "LeftPopupShell");
 	qmlRegisterType<Hix::QML::InputBox>("hix.qml", 1, 0, "InputBox");
+	qmlRegisterType<Hix::QML::DropdownBox>("hix.qml", 1, 0, "DropdownBox");
+	qmlRegisterType<Hix::QML::FreeCutButton>("hix.qml", 1, 0, "FreeCutButton");
+	qmlRegisterType<Hix::QML::FlatCutButton>("hix.qml", 1, 0, "FlatCutButton");
+	qmlRegisterType<Hix::QML::ToastShell>("hix.qml", 1, 0, "ToastShell");
+	qmlRegisterType<Hix::QML::ToastCloseButton>("hix.qml", 1, 0, "ToastCloseButton");
+	qmlRegisterType<Hix::QML::SlideBarShell>("hix.qml", 1, 0, "SlideBarShell");
+	qmlRegisterType<Hix::QML::LabelTextBox>("hix.qml", 1, 0, "LabelTextBox");
+	qmlRegisterType<Hix::QML::ModalShell>("hix.qml", 1, 0, "ModalShell");
+	qmlRegisterType<Hix::QML::ModalCloseButton>("hix.qml", 1, 0, "ModalCloseButton");
+	qmlRegisterType<Hix::QML::ModalRoundButton>("hix.qml", 1, 0, "ModalRoundButton");
+	qmlRegisterType<Hix::QML::CamPopupShell>("hix.qml", 1, 0, "CamPopupShell");
+	qmlRegisterType<Hix::QML::CamButtonShell>("hix.qml", 1, 0, "CamButtonShell");
+	qmlRegisterType<Hix::QML::CamBoxIcon>("hix.qml", 1, 0, "CamBoxIcon");
+	qmlRegisterType<Hix::QML::ViewModeShell>("hix.qml", 1, 0, "ViewModeShell");
+	qmlRegisterType<Hix::QML::ViewModePopup>("hix.qml", 1, 0, "ViewModePopup");
+	qmlRegisterType<Hix::QML::ObjectViewButton>("hix.qml", 1, 0, "ObjectViewButton");
+	qmlRegisterType<Hix::QML::LayerViewButton>("hix.qml", 1, 0, "LayerViewButton");
+	qmlRegisterType<Hix::QML::PartListContent>("hix.qml", 1, 0, "PartListContent");
+	qmlRegisterType<Hix::QML::PartDeleteButton>("hix.qml", 1, 0, "PartDeleteButton");
+	qmlRegisterType<Hix::QML::PrintInfoText>("hix.qml", 1, 0, "PrintInfoText");
+
 }
 
 void QmlManager::initializeUI(QQmlApplicationEngine* e){
