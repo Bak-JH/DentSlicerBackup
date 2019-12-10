@@ -8,7 +8,6 @@
 /////////////////////
 Hix::Features::AddSupport::AddSupport(const Hix::Engine3D::FaceConstItr face, QVector3D point)
 {
-	qDebug() << "AddSupport";
 	Hix::OverhangDetect::Overhang newOverhang(face, point);
 	_addedModel = qmlManager->supportRaftManager().addSupport(newOverhang);
 	_addedModel->setHitTestable(true);
@@ -25,8 +24,14 @@ Hix::Features::AddSupport::~AddSupport()
 
 void Hix::Features::AddSupport::undo()
 {
-	qDebug() << "AddSupport undo called";
-	qmlManager->supportRaftManager().removeSupport(_addedModel);
+	_removedModel = qmlManager->supportRaftManager().removeSupport(_addedModel).release();
+}
+
+void Hix::Features::AddSupport::redo()
+{
+	_removedModel->setEnabled(true);
+	_removedModel->setHitTestable(true);
+	_addedModel = qmlManager->supportRaftManager().addSupport(std::unique_ptr<SupportModel>(_removedModel));
 }
 
 
@@ -36,7 +41,7 @@ void Hix::Features::AddSupport::undo()
 ////////////////////////
 Hix::Features::RemoveSupport::RemoveSupport(SupportModel* target)
 {
-	_removedModel = std::move(qmlManager->supportRaftManager().removeSupport(target));
+	_removedModel = qmlManager->supportRaftManager().removeSupport(target).release();
 }
 
 Hix::Features::RemoveSupport::~RemoveSupport()
@@ -45,10 +50,14 @@ Hix::Features::RemoveSupport::~RemoveSupport()
 
 void Hix::Features::RemoveSupport::undo()
 {
-	_removedModel.get()->setEnabled(true);
-	_removedModel.get()->setHitTestable(true);
-	qmlManager->supportRaftManager().addSupport(std::move(_removedModel));
-	qDebug() << "RemoveSupport undo called";
+	_removedModel->setEnabled(true);
+	_removedModel->setHitTestable(true);
+	_addedModel = qmlManager->supportRaftManager().addSupport(std::unique_ptr<SupportModel>(_removedModel));
+}
+
+void Hix::Features::RemoveSupport::redo()
+{
+	_removedModel = qmlManager->supportRaftManager().removeSupport(_addedModel).release();
 }
 
 

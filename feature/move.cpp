@@ -24,20 +24,23 @@ void Hix::Features::MoveMode::featureStarted()
 
 void Hix::Features::MoveMode::featureEnded()
 {
+	qmlManager->featureHistoryManager().addFeature(_moveContainer);
+
 	for (auto& each : _targetModels)
-	{
-		qmlManager->featureHistoryManager().addFeature(_moveContainer);
 		each->moveDone();
-		qmlManager->sendUpdateModelInfo();
-	}
+	
+	qmlManager->sendUpdateModelInfo();
 	_widget.updatePosition();
 }
 
-Hix::Features::Move::Move(GLModel* target) : _target(target)
+
+
+
+
+Hix::Features::Move::Move(GLModel* target) : _model(target)
 {
 	_prevMatrix = target->transform().matrix();
 	_prevAabb = target->aabb();
-	qDebug() << _prevMatrix;
 }
 
 Hix::Features::Move::~Move()
@@ -46,18 +49,21 @@ Hix::Features::Move::~Move()
 
 void Hix::Features::Move::undo()
 {
-	auto currMatrix = _target->transform().matrix();
-	_target->transform().setMatrix(_prevMatrix);
-	_target->aabb() = _prevAabb;
+	_nextMatrix = _model->transform().matrix();
+	_nextAabb = _model->aabb();
+
+	_model->transform().setMatrix(_prevMatrix);
+	_model->aabb() = _prevAabb;
 	qmlManager->cameraViewChanged();
-	_prevMatrix = currMatrix;
+	_model->updatePrintable();
+	_model->updateMesh();
 }
 
 void Hix::Features::Move::redo()
 {
-	auto currMatrix = _target->transform().matrix();
-	_target->transform().setMatrix(_prevMatrix);
-	_target->aabb() = _prevAabb;
+	_model->transform().setMatrix(_nextMatrix);
+	_model->aabb() = _nextAabb;
 	qmlManager->cameraViewChanged();
-	_prevMatrix = currMatrix;
+	_model->updatePrintable();
+	_model->updateMesh();
 }

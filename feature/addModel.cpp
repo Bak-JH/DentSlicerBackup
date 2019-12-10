@@ -36,6 +36,11 @@ void Hix::Features::AddModel::undo()
 	qmlManager->removeFromGLModels(_addedModel);
 }
 
+void Hix::Features::AddModel::redo()
+{
+
+} 
+
 GLModel* Hix::Features::AddModel::getAddedModel()
 {
 	return _addedModel;

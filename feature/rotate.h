@@ -17,9 +17,11 @@ namespace Hix
 			void redo()override;
 
 		private:
-			GLModel* _target;
+			GLModel* _model;
 			QMatrix4x4 _prevMatrix;
 			Engine3D::Bounds3D _prevAabb;
+			QMatrix4x4 _nextMatrix;
+			Engine3D::Bounds3D _nextAabb;
 		};
 
 		class RotateMode : public WidgetMode

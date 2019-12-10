@@ -27,7 +27,7 @@ namespace Hix
 					const std::unordered_set<FaceConstItr>& targetFaces, double distance);
 			virtual ~Extend();
 			void undo()override;
-			void redo()override {} //TODO: redo
+			void redo()override;
 
 		private:
 			Paths3D detectExtensionOutline(Mesh* mesh, const std::unordered_set<FaceConstItr>& meshfaces);
@@ -38,6 +38,7 @@ namespace Hix
 			QVector3D _normal;
 			std::unordered_set<FaceConstItr> _extensionFaces;
 			Mesh* _prevMesh;
+			Mesh* _nextMesh;
 		};
 
 

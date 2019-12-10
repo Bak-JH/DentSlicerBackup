@@ -14,13 +14,13 @@ namespace Hix
 		public:
 			LayFlat(GLModel* selectedModel, QVector3D normal, bool isReady);
 			void undo()override;
-			void redo()override {} //TODO: redo
+			void redo()override;
 			virtual ~LayFlat();
 
 		private:
 			GLModel* _model;
-			QQuaternion* _prevRotation;
-			Hix::Engine3D::Bounds3D* _prevAabb;
+			QMatrix4x4 _prevMatrix;
+			Hix::Engine3D::Bounds3D _prevAabb;
 		};
 
 
