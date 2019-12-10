@@ -7,6 +7,22 @@ namespace Hix
 {
 	namespace Features
 	{
+		class Scale : public Feature
+		{
+		public:
+			Scale(GLModel* targetModel, QVector3D& scale);
+			virtual ~Scale();
+			void undo()override;
+			void redo()override;
+
+		private:
+			GLModel* _model;
+			QMatrix4x4 _prevMatrix;
+			Engine3D::Bounds3D _prevAabb;
+			QMatrix4x4 _nextMatrix;
+			Engine3D::Bounds3D _nextAabb;
+		};
+
 		class ScaleMode : public Mode
 		{
 		public:
@@ -18,17 +34,5 @@ namespace Hix
 			std::unordered_set<GLModel*> _targetModels;
 		};
 
-		class Scale : public Feature
-		{
-		public:
-			Scale(GLModel* targetModel, QVector3D& scale);
-			virtual ~Scale();
-			void undo()override;
-			void redo()override;
-
-		private:
-			GLModel* _model;
-			QVector3D _prevScale;
-		};
 	}
 }

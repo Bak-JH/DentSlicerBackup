@@ -37,7 +37,7 @@ namespace Hix
 
 			void setSupportType(SlicingConfiguration::SupportType supType);
 			SupportModel* addSupport(const OverhangDetect::Overhang& overhang);
-			void addSupport(std::unique_ptr<SupportModel> target);
+			SupportModel* addSupport(std::unique_ptr<SupportModel> target);
 			std::unique_ptr<SupportModel> removeSupport(SupportModel* e);
 
 			bool supportsEmpty();

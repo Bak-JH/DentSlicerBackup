@@ -53,12 +53,13 @@ Hix::Features::Extend::Extend(GLModel* targetModel, const QVector3D& targetFaceN
 	Paths3D extension_outlines = detectExtensionOutline(_model->getMeshModd(), _extensionFaces);
 	extendAlongOutline(_model->getMeshModd(), _normal, extension_outlines, distance);
 	coverCap(_model, _normal, _extensionFaces, distance);
+
 	_model->getMeshModd()->removeFaces(_extensionFaces);
+	_model->unselectMeshFaces();
 	_model->updateMesh();
+
 	_model->setZToBed();
 	_extensionFaces.clear();
-		
-
 }
 
 Hix::Features::Extend::~Extend()
@@ -67,7 +68,17 @@ Hix::Features::Extend::~Extend()
 
 void Hix::Features::Extend::undo()
 {
+	_nextMesh = _model->getMeshModd();
+
 	_model->setMesh(_prevMesh);
+	_model->unselectMeshFaces();
+	_model->updateMesh();
+	_model->setZToBed();
+}
+
+void Hix::Features::Extend::redo()
+{
+	_model->setMesh(_nextMesh);
 	_model->unselectMeshFaces();
 	_model->updateMesh();
 	_model->setZToBed();

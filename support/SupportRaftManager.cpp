@@ -91,11 +91,11 @@ SupportModel* Hix::Support::SupportRaftManager::addSupport(const OverhangDetect:
 	}
 }
 
-void Hix::Support::SupportRaftManager::addSupport(std::unique_ptr<SupportModel> target)
+SupportModel* Hix::Support::SupportRaftManager::addSupport(std::unique_ptr<SupportModel> target)
 {
-	qDebug() << _supports.size();
-	_supports.insert(std::make_pair(target.get(),std::move(target)));
-	qDebug() << _supports.size();
+	auto temp = target.get();
+	_supports.insert(std::make_pair(temp,std::move(target)));
+	return temp;
 }
 
 std::unique_ptr<SupportModel> Hix::Support::SupportRaftManager::removeSupport(SupportModel* e)

@@ -1,34 +1,36 @@
 #include "FeatureHistoryManager.h"
 #include <QDebug>
 
+Hix::Features::FeatureHisroyManager::FeatureHisroyManager()
+{
+	_itr = _history.end();
+}
+
 void Hix::Features::FeatureHisroyManager::addFeature(Hix::Features::Feature* feature)
 {
-	if (feature == nullptr)
-		return;
-
+	if (_history.end() != _itr)
+	{
+		_history.erase(_itr, _history.end());
+	}
 	_history.emplace_back(std::unique_ptr<Feature>(feature));
-	_historyItr = _history.end()-1;
+	_itr = _history.end();
+
 }
 
 void Hix::Features::FeatureHisroyManager::undo()
 {
-	if (_historyItr == _history.begin())
+	if (_itr == _history.begin())
 		return;
-
-	auto prevFeature = _historyItr->get();
-	if (prevFeature)
-		prevFeature->undo();
-
-	--_historyItr;
+	--_itr;
+	auto prevFeature = _itr->get();
+	prevFeature->undo();
 }
 
 void Hix::Features::FeatureHisroyManager::redo()
 {
-	if (_historyItr+1 == _history.end())
+	if (_itr == _history.end())
 		return;
-
-	++_historyItr;
-	auto prevFeature = _historyItr->get();
-	if (prevFeature)
-		prevFeature->redo();
+	auto prevFeature = _itr->get();
+	prevFeature->redo();
+	++_itr;
 }

@@ -26,16 +26,16 @@ void Hix::Features::RotateMode::featureStarted()
 
 void Hix::Features::RotateMode::featureEnded()
 {
+	qmlManager->featureHistoryManager().addFeature(_rotateContainer);
 	for (auto& each : _targetModels)
 	{
-		qmlManager->featureHistoryManager().addFeature(_rotateContainer);
 		each->rotateDone();
 		qmlManager->sendUpdateModelInfo();
 	}
 	_widget.updatePosition();
 }
 
-Hix::Features::Rotate::Rotate(GLModel* target) : _target(target)
+Hix::Features::Rotate::Rotate(GLModel* target) : _model(target)
 {
 	_prevMatrix = target->transform().matrix();
 	_prevAabb = target->aabb();
@@ -48,18 +48,21 @@ Hix::Features::Rotate::~Rotate()
 
 void Hix::Features::Rotate::undo()
 {
-	auto currMatrix = _target->transform().matrix();
-	_target->transform().setMatrix(_prevMatrix);
-	_target->aabb() = _prevAabb;
+	_nextMatrix = _model->transform().matrix();
+	_nextAabb = _model->aabb();
+
+	_model->transform().setMatrix(_prevMatrix);
+	_model->aabb() = _prevAabb;
 	qmlManager->cameraViewChanged();
-	_prevMatrix = currMatrix;
+	_model->updatePrintable();
+	_model->updateMesh();
 }
 
 void Hix::Features::Rotate::redo()
 {
-	auto currMatrix = _target->transform().matrix();
-	_target->transform().setMatrix(_prevMatrix);
-	_target->aabb() = _prevAabb;
+	_model->transform().setMatrix(_nextMatrix);
+	_model->aabb() = _nextAabb;
 	qmlManager->cameraViewChanged();
-	_prevMatrix = currMatrix;
+	_model->updatePrintable();
+	_model->updateMesh();
 }

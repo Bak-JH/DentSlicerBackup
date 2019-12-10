@@ -47,8 +47,8 @@ Hix::Features::LayFlat::LayFlat(GLModel* selectedModel, QVector3D normal, bool i
 	if (!isReady)
 		return;
 
-	_prevRotation = new QQuaternion(selectedModel->transform().rotation());
-	_prevAabb = new Bounds3D(selectedModel->aabb());
+	_prevMatrix = selectedModel->transform().matrix();
+	_prevAabb = selectedModel->aabb();
 
 	constexpr QVector3D worldBot(0, 0, -1);
 	QVector3D localBotNorml = selectedModel->vectorToLocal(worldBot);
@@ -65,10 +65,34 @@ Hix::Features::LayFlat::LayFlat(GLModel* selectedModel, QVector3D normal, bool i
 
 void Hix::Features::LayFlat::undo()
 {
-	_model->transform().setRotation(*_prevRotation);
-	_model->aabb() = *_prevAabb;
-	_model->updateMesh();
+	auto currMatrix = _model->transform().matrix();
+	auto currAabb = _model->aabb();
+
+	_model->transform().setMatrix(_prevMatrix);
+	_model->aabb() = _prevAabb;
+	qmlManager->cameraViewChanged();
 	_model->setZToBed();
+	_model->unselectMeshFaces();
+	_model->updatePrintable();
+
+	_prevMatrix = currMatrix;
+	_prevAabb = currAabb;
+}
+
+void Hix::Features::LayFlat::redo()
+{
+	auto currMatrix = _model->transform().matrix();
+	auto currAabb = _model->aabb();
+
+	_model->transform().setMatrix(_prevMatrix);
+	_model->aabb() = _prevAabb;
+	qmlManager->cameraViewChanged();
+	_model->setZToBed();
+	_model->unselectMeshFaces();
+	_model->updatePrintable();
+
+	_prevMatrix = currMatrix;
+	_prevAabb = currAabb;
 }
 
 Hix::Features::LayFlat::~LayFlat()

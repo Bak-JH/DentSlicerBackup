@@ -16,9 +16,10 @@ namespace Hix
 			AddSupport(const OverhangDetect::Overhang& overhang);
 			virtual ~AddSupport();
 			void undo()override;
-			void redo()override {} //TODO: redo
+			void redo()override;
 
 		private:
+			SupportModel* _removedModel;
 			SupportModel* _addedModel;
 		};
 
@@ -28,10 +29,11 @@ namespace Hix
 			RemoveSupport(SupportModel* target);
 			virtual ~RemoveSupport();
 			void undo()override;
-			void redo()override {} //TODO: redo
+			void redo()override;
 
 		private:
-			std::unique_ptr<SupportModel> _removedModel;
+			SupportModel* _removedModel;
+			SupportModel* _addedModel;
 		};
 
 		std::unique_ptr<Hix::Features::FeatureContainer> clearSupport(std::unordered_set<GLModel*>& models);

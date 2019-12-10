@@ -18,10 +18,15 @@ Hix::Features::FeatureContainer* Hix::Features::ScaleMode::applyScale(QVector3D 
 	return container;
 }
 
+
+
+
+
 Hix::Features::Scale::Scale(GLModel* targetModel, QVector3D& scale)
 	: _model(targetModel)
 {
-	_prevScale = targetModel->transform().scale3D() / scale;
+	_prevMatrix = targetModel->transform().matrix();
+	_prevAabb = targetModel->aabb();
 	targetModel->scaleModel(scale);
 	targetModel->scaleDone();
 	qmlManager->sendUpdateModelInfo();
@@ -33,20 +38,21 @@ Hix::Features::Scale::~Scale()
 
 void Hix::Features::Scale::undo()
 {
-	qDebug() << "scale: " << _prevScale;
-	auto tmp = _model->transform().scale3D();
-	_model->scaleModel(_prevScale);
-	_model->scaleDone();
+	_nextMatrix = _model->transform().matrix();
+	_nextAabb = _model->aabb();
+
+	_model->transform().setMatrix(_prevMatrix);
+	_model->aabb() = _prevAabb;
 	qmlManager->sendUpdateModelInfo();
-	_prevScale = tmp;
+	_model->updatePrintable();
+	_model->updateMesh();
 }
 
 void Hix::Features::Scale::redo()
 {
-	qDebug() << "scale: " << _prevScale;
-	auto tmp = _model->transform().scale3D() / _prevScale;
-	_model->scaleModel(_prevScale);
-	_model->scaleDone();
+	_model->transform().setMatrix(_nextMatrix);
+	_model->aabb() = _nextAabb;
 	qmlManager->sendUpdateModelInfo();
-	_prevScale = tmp;
+	_model->updatePrintable();
+	_model->updateMesh();
 }
