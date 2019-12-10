@@ -74,7 +74,7 @@ void QmlManager::initializeUI(QQmlApplicationEngine* e){
     // model move componetns
     moveButton = FindItemByName(engine, "moveButton");
     movePopup = FindItemByName(engine, "movePopup");
-    QObject::connect(movePopup, SIGNAL(runFeature(int,int,int)),this, SLOT(modelMoveByNumber(int,int,int)));
+    QObject::connect(movePopup, SIGNAL(runFeature(int, qreal, qreal)),this, SLOT(modelMoveByNumber(int, qreal, qreal)));
     QObject::connect(movePopup, SIGNAL(closeMove()), this, SLOT(closeMove()));
     QObject::connect(movePopup, SIGNAL(openMove()), this, SLOT(openMove()));
 	boundedBox = (QEntity*)FindItemByName(engine, "boundedBox");
@@ -82,7 +82,7 @@ void QmlManager::initializeUI(QQmlApplicationEngine* e){
     // model rotate components
     rotatePopup = FindItemByName(engine, "rotatePopup");
     // model rotate popup codes
-    QObject::connect(rotatePopup, SIGNAL(runFeature(int,int,int,int)),this, SLOT(modelRotateByNumber(int,int,int,int)));
+    QObject::connect(rotatePopup, SIGNAL(runFeature(int, qreal, qreal, qreal)),this, SLOT(modelRotateByNumber(int, qreal, qreal, qreal)));
     QObject::connect(rotatePopup, SIGNAL(openRotate()), this, SLOT(openRotate()));
     QObject::connect(rotatePopup, SIGNAL(closeRotate()), this, SLOT(closeRotate()));
     //rotateSphere->setEnabled(0);
@@ -1140,7 +1140,7 @@ Hix::Support::SupportRaftManager& QmlManager::supportRaftManager()
 
 
 
-void QmlManager::modelMoveByNumber(int axis, int X, int Y){
+void QmlManager::modelMoveByNumber(int axis, qreal X, qreal Y){
     if (selectedModels.empty())
         return;
 
@@ -1151,7 +1151,7 @@ void QmlManager::modelMoveByNumber(int axis, int X, int Y){
     }
 
 }
-void QmlManager::modelRotateByNumber(int mode,  int X, int Y, int Z){
+void QmlManager::modelRotateByNumber(int mode, qreal X, qreal Y, qreal Z){
     if (selectedModels.empty())
         return;
 
@@ -1659,6 +1659,8 @@ void QmlManager::openSupport()
 }
 void QmlManager::closeSupport()
 {
+	_supportRaftManager.applyEdits();
+	supportEditEnabled(false);
 	_currentFeature.reset();
 }
 

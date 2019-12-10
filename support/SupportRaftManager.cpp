@@ -111,6 +111,7 @@ void Hix::Support::SupportRaftManager::applyEdits()
 			_supports.erase(toDummy(each.first));
 		}
 	}
+	_pendingSupports.clear();
 }
 
 void Hix::Support::SupportRaftManager::cancelEdits()
@@ -130,6 +131,7 @@ void Hix::Support::SupportRaftManager::cancelEdits()
 
 		}
 	}
+	_pendingSupports.clear();
 }
 
 void Hix::Support::SupportRaftManager::generateSupport(const Hix::OverhangDetect::Overhangs& overhangs)
