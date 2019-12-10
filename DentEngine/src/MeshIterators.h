@@ -54,24 +54,25 @@ namespace Hix
 		};
 
 		//actual base for edge, vtx, face iterators, specialized later for constness.
-		template <typename HEItrType, typename ValType, typename TypeConstInfo>
+		template <typename HEItrType, typename T, typename TypeConstInfo>
 		class HalfEdgeItrBase : public RandomAccessIteratorBase< HEItrType, typename TypeConstInfo::OwnerType>
 		{
 		public:
 			using RandomAccessIteratorBase<HEItrType, typename TypeConstInfo::OwnerType>::RandomAccessIteratorBase;
 			using ParentType = RandomAccessIteratorBase< HEItrType, typename TypeConstInfo::OwnerType>;
-			using PtrType = ValType *;
-			using RefType=  ValType &;
+			using value_type = T;
+			using pointer = value_type*;
+			using reference = value_type&;
 
-			RefType ref()const
+			reference ref()const
 			{
 				return ParentType::_owner->getHalfEdges()[ParentType::_index];
 			}
-			RefType operator*() const
+			reference operator*() const
 			{
 				return ref();
 			}
-			PtrType operator->() const
+			pointer operator->() const
 			{
 				return &(ParentType::_owner->getHalfEdges()[ParentType::_index]);
 			}
@@ -178,23 +179,24 @@ namespace Hix
 			}
 		};
 
-		template <typename VtxItrType, typename ValType, typename TypeConstInfo>
+		template <typename VtxItrType, typename T, typename TypeConstInfo>
 		class VertexItrBase : public RandomAccessIteratorBase< VtxItrType, typename TypeConstInfo::OwnerType>
 		{
 		public:
 			using RandomAccessIteratorBase<VtxItrType, typename TypeConstInfo::OwnerType>::RandomAccessIteratorBase;
 			using ParentType = RandomAccessIteratorBase< VtxItrType, typename TypeConstInfo::OwnerType>;
-			using PtrType = ValType *;
-			using RefType=  ValType &;
-			RefType ref()const
+			using value_type = T;
+			using pointer = value_type*;
+			using reference = value_type&;
+			reference ref()const
 			{
 				return ParentType::_owner->getVertices()[ParentType::_index];
 			}
-			RefType operator*() const
+			reference operator*() const
 			{
 				return ref();
 			}
-			PtrType operator->() const
+			pointer operator->() const
 			{
 				return &(ParentType::_owner->getVertices()[ParentType::_index]);
 			}
@@ -337,23 +339,24 @@ namespace Hix
 
 		};
 
-		template <typename FaceItrType, typename ValType, typename TypeConstInfo>
+		template <typename FaceItrType, typename T, typename TypeConstInfo>
 		class FaceItrBase : public RandomAccessIteratorBase< FaceItrType, typename TypeConstInfo::OwnerType>
 		{
 		public:
 			using RandomAccessIteratorBase<FaceItrType, typename TypeConstInfo::OwnerType>::RandomAccessIteratorBase;
 			using ParentType = RandomAccessIteratorBase< FaceItrType, typename TypeConstInfo::OwnerType>;
-			using PtrType = ValType *;
-			using RefType=  ValType &;
-			RefType ref()const
+			using value_type = T;
+			using pointer = value_type*;
+			using reference = value_type&;
+			reference ref()const
 			{
 				return ParentType::_owner->getFaces()[ParentType::_index];
 			}
-			RefType operator*() const
+			reference operator*() const
 			{
 				return ref();
 			}
-			PtrType operator->() const
+			pointer operator->() const
 			{
 				return &(ParentType::_owner->getFaces()[ParentType::_index]);
 			}

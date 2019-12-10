@@ -370,13 +370,11 @@ void QmlManager::openAndBuildModel(QString fname) {
 	}
 	fname = filenameToModelName(fname.toStdString());
 	setProgress(0.1);
-	mesh->centerMesh();
 	auto latest = createAndListModel(mesh, fname, nullptr);
 	setProgress(0.2);
-
 	TwoManifoldBuilder modelBuilder(*mesh);
+	mesh->centerMesh();
 	setProgress(0.4);
-
 	//repair mode
 	if (Hix::Features::isRepairNeeded(mesh))
 	{
