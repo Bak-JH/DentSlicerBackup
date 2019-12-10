@@ -738,7 +738,7 @@ Rectangle {
                 else
                     closeMove();
             }
-			signal runFeature(int type, int X, int Y);
+			signal runFeature(int type, real X, real Y);
             onApplyClicked: {
                 console.log("move")
                 runFeature(ftrMove,popup_move.numberbox1_number,popup_move.numberbox2_number);
@@ -774,7 +774,7 @@ Rectangle {
             //numbox_default: 0
             numbox_updown_scale: 5
             number_unit: "°"
-            signal runFeature(int type, int X, int Y, int Z);
+            signal runFeature(int type, real X, real Y, real Z);
             onApplyClicked: {
                 console.log("rotate")
                 runFeature(ftrRotate,popup_rotate.numberbox1_number,popup_rotate.numberbox2_number,popup_rotate.numberbox3_number);
