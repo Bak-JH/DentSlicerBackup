@@ -21,6 +21,7 @@ namespace Hix
 
 		private:
 			GLModel* _addedModel;
+			GLModel* _deletedModel;
 		};
 	}
 }

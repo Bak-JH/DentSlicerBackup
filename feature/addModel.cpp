@@ -26,6 +26,7 @@ Hix::Features::AddModel::~AddModel()
 
 void Hix::Features::AddModel::undo()
 {
+	_deletedModel = _addedModel;
 	qmlManager->deletePartListItem(_addedModel->ID);
 	qmlManager->unselectPart(_addedModel);
 	//if selected, remove from selected list
@@ -38,8 +39,12 @@ void Hix::Features::AddModel::undo()
 
 void Hix::Features::AddModel::redo()
 {
-
-} 
+	_deletedModel->setEnabled(true);
+	_deletedModel->setHitTestable(true);
+	_deletedModel->setParent(qmlManager->models);
+	qmlManager->addPart(_deletedModel->modelName(), _deletedModel->ID);
+	qmlManager->addToGLModels(_deletedModel);
+}
 
 GLModel* Hix::Features::AddModel::getAddedModel()
 {
