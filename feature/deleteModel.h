@@ -11,11 +11,12 @@ namespace Hix
 			DeleteModel(GLModel* target);
 			virtual ~DeleteModel();
 			void undo()override;
-			void redo()override {} //TODO: redo
+			void redo()override;
 			GLModel* getDeletedModel();
 
 		private:
 			GLModel* _deletedModel;
+			GLModel* _addedModel;
 		};
 	}
 }
