@@ -1,5 +1,5 @@
 import QtQuick 2.6
-import hix.qml 1.0
+import hix.qml 1.0 as Hix
 import QtQuick.Controls 2.1
 import QtQuick.Controls.Styles 1.4
 import QtGraphicalEffects 1.12
@@ -9,14 +9,14 @@ Item {
 	property var buttonsWidth: 320
 	property var buttonSpace: 32
 
-	ModalShell {
+	Hix.ModalShell {
 		id: modalshell
 		width: 420
 		height: 240
 		radius: 8
 		color: "#ffffff"
 
-		ModalCloseButton {
+		Hix.CloseButton {
 			width: 16
 			height: 16
 			color: transparent
@@ -47,18 +47,47 @@ Item {
 			anchors.bottom: parent.bottom
 			anchors.bottomMargin: parent.height * 0.2
 
-			RoundedButton {
+			Hix.RoundButton {
 				id: leftbtn
 				width: (buttonsWidth - buttonSpace) / 2
-				color: themeColor
+				height: 32
+				radius: height / 2
+				color: "#00b9c8"	//themecolor
 				anchors.left: parent.left
+
+				Text {
+					anchors.horizontalCenter: parent.horizontalCenter
+					anchors.verticalCenter: parent.verticalCenter
+					color: "#FFFFFF"
+					font.pointSize: 10
+					text: "Apply"
+					font.family: openSemiBold.name
+				}
+				onClicked: { console.log("clicked"); }
+				onEntered: { color = "#21959e" }
+				onExited: { color = "#00b9c8" }
 			}
-			RoundedButton {
+
+			Hix.RoundButton {
 				id: rightbtn
 				width: buttonsWidth - leftbtn.width - buttonSpace
-				color: themeColor
+				height: 32
+				radius: height / 2
+				color: "#00b9c8"	//themecolor
 				anchors.left: leftbtn.right
 				anchors.leftMargin: buttonSpace
+
+				Text {
+					anchors.horizontalCenter: parent.horizontalCenter
+					anchors.verticalCenter: parent.verticalCenter
+					color: "#FFFFFF"
+					font.pointSize: 10
+					text: "Apply"
+					font.family: openSemiBold.name
+				}
+				onClicked: { console.log("clicked"); }
+				onEntered: { color = "#21959e" }
+				onExited: { color = "#00b9c8" }
 			}
 		}
 	}

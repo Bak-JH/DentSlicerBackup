@@ -1,5 +1,5 @@
 import QtQuick 2.6
-import hix.qml 1.0
+import hix.qml 1.0 as Hix
 import QtQuick.Controls 2.1
 import QtQuick.Controls.Styles 1.4
 import QtGraphicalEffects 1.12
@@ -10,7 +10,7 @@ Item {
 		if (viewmodepopup.visible == false) { viewmodepopup.visible = true; }
 		else { viewmodepopup.visible = false; }
 	}
-	ViewModeShell {
+	Hix.ViewModeShell {
 		id: viewmodeshell
 		width: 256
 		height: 50
@@ -46,7 +46,7 @@ Item {
 			onClicked: { viewPopupToggle(); }
 		}
 	}
-	ViewModePopup {
+	Rectangle {
 		id: viewmodepopup
 		width: 184
 		height: 88
@@ -99,7 +99,8 @@ Item {
 				ctx.fill();
 			}
 
-			ObjectViewButton {
+
+			Hix.RoundButton {
 				id: objectviewbutton
 				width: 160
 				height: 36
@@ -109,23 +110,22 @@ Item {
 				anchors.rightMargin: (parent.width - width - 16) / 2
 				Text {
 					id: objecttext
-					text: qsTr("Object View")
-					font.family: openRegular.name
-					font.pointSize: 10
 					anchors.horizontalCenter: parent.horizontalCenter
 					anchors.verticalCenter: parent.verticalCenter
+					font.pointSize: 10
+					text: qsTr("Object View")
+					font.family: openRegular.name
 				}
-				MouseArea {
-					anchors.fill: parent
-					onClicked: {
-						objecttext.color = "#1db2c4"
-						objecttext.font.family = openSemiBold.name
-						layertext.color = "#000000"
-						layertext.font.family = openRegular.name
-					}
+				onClicked: {
+					console.log("clicked")
+					objecttext.color = "#1db2c4"
+					objecttext.font.family = openSemiBold.name
+					layertext.color = "#000000"
+					layertext.font.family = openRegular.name
 				}
 			}
-			LayerViewButton {
+
+			Hix.RoundButton {
 				id: layerviewbutton
 				width: 160
 				height: 36
@@ -134,22 +134,21 @@ Item {
 				anchors.rightMargin: (parent.width - width - 16) / 2
 				Text {
 					id: layertext
-					text: qsTr("Layer View")
-					font.family: openRegular.name
-					font.pointSize: 10
 					anchors.horizontalCenter: parent.horizontalCenter
 					anchors.verticalCenter: parent.verticalCenter
+					font.pointSize: 10
+					text: qsTr("Layer View")
+					font.family: openRegular.name
 				}
-				MouseArea {
-					anchors.fill: parent
-					onClicked: {
-						layertext.color = "#1db2c4"
-						layertext.font.family = openSemiBold.name
-						objecttext.color = "#000000"
-						objecttext.font.family = openRegular.name
-					}
+				onClicked: {
+					console.log("clicked")
+					layertext.color = "#1db2c4"
+					layertext.font.family = openSemiBold.name
+					objecttext.color = "#000000"
+					objecttext.font.family = openRegular.name
 				}
 			}
+
 		}
 		DropShadow {
 			anchors.fill: canvas

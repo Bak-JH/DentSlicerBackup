@@ -1,30 +1,65 @@
 import QtQuick 2.6
 import hix.qml 1.0
-
 import QtGraphicalEffects 1.12
 import QtQuick.Controls 2.1
 
 
+LeftPopup {
+	property var sidePadding: 16
+	property var topPadding: 64
+	property var spaceBtwCtr: 48
+	property var themeColor: "#00b9c8"
+	
+	featureName: qsTr("Move")
+	leftPopupHeight: 284
+	width: 256
+
+	CtrInputBox {
+		id: moveX
+		inputText: "X Offset(mm)"
+		width: parent.width - sidePadding * 2
+		anchors.left: parent.left
+		anchors.leftMargin: sidePadding
+		anchors.top: parent.top
+		anchors.topMargin: topPadding
+	}
+
+	CtrInputBox {
+		id: moveY
+		inputText: "Y Offset(mm)"
+		width: parent.width - sidePadding * 2
+		anchors.left: parent.left
+		anchors.leftMargin: sidePadding
+		anchors.top: moveX.bottom
+		anchors.topMargin: spaceBtwCtr
+	}
+
+	CtrInputBox {
+		id: moveZ
+		inputText: "Z Offset(mm)"
+		width: parent.width - sidePadding * 2
+		anchors.left: parent.left
+		anchors.leftMargin: sidePadding
+		anchors.top: moveY.bottom
+		anchors.topMargin: spaceBtwCtr
+	}
+}
+/*
 Item {
 	property var myPadding: 16
 	property var themeColor: "#00b9c8"
 
-	property var featureName
-	property var leftPopupHeight
-
 	LeftPopupShell {
 		id: leftpopupshell
 		width: 256
-		implicitWidth: width
-		height: leftPopupHeight
+		height: 284
 		//height: popupHeight
 		color: "#F6FEFF"
 		radius: 8
 
 		Text {
 			id: popuptitle
-			text: featureName
-			//text: parent.title
+			text: qsTr("Move")
 			font.pointSize: 11
 			font.family: openRegular.name
 			font.weight: Font.Bold
@@ -48,59 +83,36 @@ Item {
 				anchors.right: parent.right
 			}
 		}
-		/*
-		Text {
-			id: popupbody
-			text: parent.body
-			font.pointSize: 10
-			font.family: openRegular.name
-			anchors.top: parent.top
-			anchors.left: parent.left
-			anchors.topMargin: 40
-			anchors.leftMargin: myPadding
-		}
-		
+
 		CtrInputBox {
+			id: moveX
+			inputText: "X Offset"
 			width: parent.width - myPadding * 2
 			anchors.left: parent.left
 			anchors.leftMargin: myPadding
 			anchors.top: popuptitle.bottom
+			anchors.topMargin: 32
+		}
+
+		CtrInputBox {
+			id: moveY
+			inputText: "Y Offset"
+			width: parent.width - myPadding * 2
+			anchors.left: parent.left
+			anchors.leftMargin: myPadding
+			anchors.top: moveX.bottom
 			anchors.topMargin: 48
 		}
-		
-		CtrDropdownBox {
+
+		CtrInputBox {
+			id: moveZ
+			inputText: "Z Offset"
 			width: parent.width - myPadding * 2
 			anchors.left: parent.left
 			anchors.leftMargin: myPadding
-			anchors.top: parent.top
-			anchors.topMargin: 120
+			anchors.top: moveY.bottom
+			anchors.topMargin: 48
 		}
-
-		CtrCutSwitch {
-			width: parent.width - myPadding * 2
-			anchors.left: parent.left
-			anchors.leftMargin: myPadding
-			anchors.top: parent.top
-			anchors.topMargin: 144
-		}
-
-		CtrLabelTextBox {
-			width: parent.width - myPadding * 2
-			anchors.left: parent.left
-			anchors.leftMargin: myPadding
-			anchors.top: parent.top
-			anchors.topMargin: 260
-		}
-
-		CtrScaleXYZ {
-			width: parent.width - myPadding * 2
-			anchors.left: parent.left
-			anchors.leftMargin: myPadding
-			anchors.top: parent.top
-			anchors.topMargin: 300
-		}
-		*/
-
 
 		RoundedButton {
 			anchors.bottom: parent.bottom
@@ -117,3 +129,4 @@ Item {
 		source: leftpopupshell
 	}
 }
+*/

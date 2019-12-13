@@ -1,11 +1,16 @@
 import QtQuick 2.6
-import hix.qml 1.0
+import hix.qml 1.0 as Hix
 import QtQuick.Controls 2.1 //1.4
 import QtQuick.Controls.Styles 1.4
 import QtGraphicalEffects 1.12
 
 Item {
 	property var myPadding: 16
+
+	function showHideToggle() {
+		if(showhideimg.source == "qrc:/Resource/part_show_1.png") showhide.source = "qrc:/Resource/part_hide_1.png"
+		else showhideimg.source = "qrc:/Resource/part_show_1.png"
+	}
 
 	Rectangle {
 		id: partlistshell
@@ -43,19 +48,38 @@ Item {
 				width: 224; height: 28
 				Column {
 					anchors.verticalCenter: parent.verticalCenter
-					Text { 
-						text: name
-						font.family: openRegular.name
+					Hix.RoundButton{
+						width: 224; height: 28
+						color: "lightblue"
+						Text { 
+							text: name
+							font.family: openRegular.name
+							anchors.verticalCenter: parent.verticalCenter
+						}
 					}
-					
 				}
-				Image {
-					source: "qrc:/Resource/part_show.png"
+				Hix.RoundButton{
+					id: showhide
+					width: 16
+					height: width
 					anchors.right: parent.right
-					anchors.rightMargin: width /2
+					anchors.rightMargin: 6
 					anchors.verticalCenter: parent.verticalCenter
-					width: sourceSize.width / 1.5
-					height: sourceSize.height / 1.5
+					Image {
+						id: showhideimg
+						source: "qrc:/Resource/part_show_1.png"
+						anchors.verticalCenter: parent.verticalCenter
+						//anchors.right: parent.right
+						//anchors.rightMargin: width /2
+						//anchors.verticalCenter: parent.verticalCenter
+						//width: sourceSize.width / 1.5
+						//height: sourceSize.height / 1.5
+					}
+					onClicked: {
+						console.log("showhide clicked")
+						if(showhideimg.source == "qrc:/Resource/part_show_1.png") showhideimg.source = "qrc:/Resource/part_hide_1.png"
+						else showhideimg.source = "qrc:/Resource/part_show_1.png"
+					}
 				}
 			}
 		}
@@ -68,7 +92,7 @@ Item {
 		}
 
 		Rectangle {
-			width: 240;
+			width: 256 - 16;
 			height: 212;
 			//anchors.horizontalCenter: parent.horizontalCenter
 			anchors.right: parent.right
@@ -88,7 +112,6 @@ Item {
 					id: control
 					//width: 12
 					policy: ScrollBar.AlwaysOn
-
 					contentItem: Rectangle {
 						implicitWidth: 8
 						//implicitHeight: 100
@@ -100,9 +123,9 @@ Item {
 			}
 		}
 
-		PartDeleteButton {
+		Hix.RoundButton {
 			width: 14
-			color: "yellow"
+			height: width
 			anchors.right: parent.right
 			anchors.rightMargin: myPadding
 			anchors.bottom: parent.bottom
@@ -110,9 +133,10 @@ Item {
 			Image {
 				anchors.right: parent.right
 				anchors.bottom: parent.bottom
-				source: "qrc:/Resource/part_remove.png"
-				sourceSize.width: width/1.5
+				source: "qrc:/Resource/part_delete_1.png"
+				//sourceSize.width: width
 			}
+			onClicked: { console.log("delete clicked") }
 		}
 
 	}

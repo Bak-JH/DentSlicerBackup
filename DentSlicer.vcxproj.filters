@@ -143,9 +143,6 @@
     <ClCompile Include="feature\cut\ZAxialCut.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Qml\MenuButton.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Qml\LeftPopup.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -156,9 +153,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Qml\ModalWindow.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Qml\Cam.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Qml\ViewMode.cpp">
@@ -738,9 +732,6 @@
     <QtMoc Include="qmlmanager.h" />
     <QtMoc Include="utils\quaternionhelper.h" />
     <QtMoc Include="utils\updatechecker.h" />
-    <QtMoc Include="Qml\MenuButton.h">
-      <Filter>Header Files</Filter>
-    </QtMoc>
     <QtMoc Include="Qml\LeftPopup.h">
       <Filter>Header Files</Filter>
     </QtMoc>
@@ -751,9 +742,6 @@
       <Filter>Header Files</Filter>
     </QtMoc>
     <QtMoc Include="Qml\ModalWindow.h">
-      <Filter>Header Files</Filter>
-    </QtMoc>
-    <QtMoc Include="Qml\Cam.h">
       <Filter>Header Files</Filter>
     </QtMoc>
     <QtMoc Include="Qml\ViewMode.h">
@@ -978,6 +966,13 @@
     <None Include="Qml\PartList.qml" />
     <None Include="Qml\PartListContentBox.qml" />
     <None Include="Qml\PrintInfo.qml" />
+    <None Include="Qml\LeftPopupMove.qml" />
+    <None Include="Qml\LeftPopupRotate.qml" />
+    <None Include="Qml\LeftPopupScale.qml" />
+    <None Include="Qml\LeftPopupArrange.qml" />
+    <None Include="Qml\LeftPopupExtend.qml" />
+    <None Include="Qml\LeftPopupLayFlat.qml" />
+    <None Include="Qml\LeftPopupOrient.qml" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Source Files">
@@ -1052,6 +1047,11 @@
     <Image Include="Resource\menu_shelloffset_select_1.png" />
     <Image Include="Resource\menu_support_select_1.png" />
     <Image Include="Resource\menu_scale_select_1.png" />
+    <Image Include="Resource\part_delete_1.png" />
+    <Image Include="Resource\part_hide_1.png" />
+    <Image Include="Resource\part_hide_select_1.png" />
+    <Image Include="Resource\part_show_1.png" />
+    <Image Include="Resource\part_show_select_1.png" />
   </ItemGroup>
   <ItemGroup>
     <Font Include="Resource\font\OpenSans-Bold.ttf" />

@@ -1,5 +1,5 @@
 import QtQuick 2.6
-import hix.qml 1.0
+import hix.qml 1.0 as Hix
 import QtQuick.Controls 2.1
 import QtQuick.Controls.Styles 1.4
 import QtGraphicalEffects 1.12
@@ -11,7 +11,7 @@ Item{
 		else { campopupshell.visible = false; }
 	}
 
-	CamButtonShell {
+	Hix.RoundButton {
 		id: cambuttonshell
 		width: 90
 		height: width
@@ -43,14 +43,10 @@ Item{
 			anchors.bottomMargin: parent.height * 0.1
 			height: width * 0.6
 		}
-
-		MouseArea {
-			anchors.fill: parent
-			hoverEnabled: true
-			onEntered: { cambuttonshell.color = camHoverColor; camicon.source = "qrc:/Resource/cam_hover.png" }
-			onExited: { cambuttonshell.color = "#ffffff"; camicon.source = "qrc:/Resource/cam.png" }
-			onClicked: { camToggle(); }
-		}
+		onClicked: { camToggle(); }
+		onEntered: { cambuttonshell.color = camHoverColor; camicon.source = "qrc:/Resource/cam_hover.png" }
+		onExited: { cambuttonshell.color = "#ffffff"; camicon.source = "qrc:/Resource/cam.png" }
+		
 	}
 	
 	DropShadow {
@@ -61,7 +57,7 @@ Item{
 		source: cambuttonshell
 	}
 
-	CamPopupShell {
+	Rectangle {
 		id:campopupshell
 		visible: false
 		anchors.top: cambuttonshell.bottom
@@ -95,23 +91,15 @@ Item{
 				var s = 20;		//triangle part height
 				//var h1 = h - s - 24;
 				var w1 = 22;
-			
-
-				//ctx.shadowBlur = 9;
-				//ctx.shadowColor = "#30000000";
 
 				ctx.beginPath();
 				ctx.fillStyle = "#ffffff";
 				ctx.moveTo(startX, startY-windowRadius);
 				ctx.arc(startX, startY, windowRadius, Math.PI * 1.5, Math.PI * 2, false);
-				//ctx.moveTo(startX+windowRadius, startY);
 				ctx.lineTo(startX+windowRadius, startY+h);
 				ctx.arc(startX, startY+h, windowRadius, 0, Math.PI * 0.5, false);
 				ctx.lineTo(startX-w, startY+h+windowRadius);
 				ctx.arc(startX-w, startY+h, windowRadius, Math.PI * 0.5, Math.PI, false);
-				//ctx.lineTo(startX-w-windowRadius, startY+h-h1);
-				//ctx.lineTo(startX-w-windowRadius-16, startY+h-h1-s/2);
-				//ctx.lineTo(startX-w-windowRadius, startY+h-h1-s);
 				ctx.lineTo(startX-w-windowRadius, startY);
 				ctx.arc(startX-w, startY, windowRadius, Math.PI, Math.PI * 1.5, false);
 				ctx.lineTo(startX-w1-s, startY-windowRadius);
@@ -201,17 +189,7 @@ Item{
 					}
 				}
 			}
-			/*
-			CamBoxIcon {
-				width: 58
-				height: width
-				radius: 6
-				color: "#eeeeee"
-				Image {
-					source: "qrc:/Resource/triangle_down.png"
-				}
-			}
-			*/
+
 		}
 		
 	

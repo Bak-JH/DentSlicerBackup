@@ -1,5 +1,5 @@
 import QtQuick 2.6
-import hix.qml 1.0
+import hix.qml 1.0 as Hix
 import QtQuick.Controls 2.1
 import QtQuick.Controls.Styles 1.4
 import QtGraphicalEffects 1.12
@@ -10,7 +10,7 @@ Item {
 		width :440
 		height: 72
 		radius: height / 2
-		Rectangle {
+		Hix.RoundButton {
 			id: refresh
 			width: parent.height - 16
 			height: width
@@ -19,8 +19,10 @@ Item {
 			anchors.left: parent.left
 			anchors.leftMargin: 8
 			anchors.verticalCenter: parent.verticalCenter
+			onEntered: { color = "#00b9c8" }	//themeColor
+			onExited: { color = "#19d6e0" }
 		}
-		PrintInfoText {
+		Hix.PrintInfoText {
 			width: 240
 			height: parent.height * 0.6
 			anchors.left: refresh.right

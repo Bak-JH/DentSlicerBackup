@@ -1,5 +1,5 @@
 import QtQuick 2.6
-import hix.qml 1.0
+import hix.qml 1.0 as Hix
 import QtQuick.Controls 2.1
 import QtQuick.Controls.Styles 1.4
 import QtGraphicalEffects 1.12
@@ -8,7 +8,7 @@ Item {
 	property var btnSize: 60
 	width: 180
 
-	Rectangle {
+	Hix.RoundButton {
 		id: undo
 		color: "#ffffff"
 		width: btnSize
@@ -20,8 +20,10 @@ Item {
 			anchors.verticalCenter: parent.verticalCenter
 			anchors.horizontalCenter: parent.horizontalCenter
 		}
+		onEntered: { color = "#eeeeee" }
+		onExited: { color = "#ffffff" }
 	}
-	Rectangle {
+	Hix. RoundButton {
 		id: redo
 		color: "#ffffff"
 		width: btnSize
@@ -34,6 +36,8 @@ Item {
 			anchors.verticalCenter: parent.verticalCenter
 			anchors.horizontalCenter: parent.horizontalCenter
 		}
+		onEntered: { color = "#eeeeee" }
+		onExited: { color = "#ffffff" }
 	}
 	DropShadow {
 		anchors.fill: undo

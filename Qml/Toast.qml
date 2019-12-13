@@ -1,12 +1,12 @@
 import QtQuick 2.6
-import hix.qml 1.0
+import hix.qml 1.0 as Hix
 import QtQuick.Controls 2.1
 import QtQuick.Controls.Styles 1.4
 import QtGraphicalEffects 1.12
 
 Item {
 	property var themeColor: "#00b9c8"
-	ToastShell {
+	Hix.ToastShell {
 		id: toastshell
 		width: 500
 		height: 60
@@ -35,7 +35,7 @@ Item {
 			anchors.leftMargin: circle.width / 4
 			font.family: openRegular.name
 		}
-		CloseButton {
+		Hix.CloseButton {
 			width: 16
 			height: 16
 			anchors.verticalCenter: parent.verticalCenter
