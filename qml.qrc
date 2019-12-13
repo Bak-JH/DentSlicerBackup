@@ -78,5 +78,12 @@
         <file>Qml/PartList.qml</file>
         <file>Qml/PartListContentBox.qml</file>
         <file>Qml/PrintInfo.qml</file>
+        <file>Qml/LeftPopupMove.qml</file>
+        <file>Qml/LeftPopupRotate.qml</file>
+        <file>Qml/LeftPopupScale.qml</file>
+        <file>Qml/LeftPopupArrange.qml</file>
+        <file>Qml/LeftPopupExtend.qml</file>
+        <file>Qml/LeftPopupLayFlat.qml</file>
+        <file>Qml/LeftPopupOrient.qml</file>
     </qresource>
 </RCC>

@@ -240,7 +240,7 @@ Item{
             anchors.left: parent.left
 			z: 10
 		}
-
+		/*
 		LeftPopup {
 			id: leftpopup
 			anchors.top: uppertab.bottom
@@ -248,7 +248,38 @@ Item{
 			anchors.leftMargin: 15
 			anchors.topMargin: 120
 		}
+		*/
 
+		LeftPopupMove {
+			id: leftpopupmove
+			anchors.top: uppertab.bottom
+			anchors.left: lefttab.right
+			anchors.leftMargin: 15
+			anchors.topMargin: 120
+		}
+		LeftPopupScale {
+			id: leftpopupscale
+			anchors.top: uppertab.bottom
+			anchors.left: leftpopupmove.right
+			anchors.leftMargin: 15
+			anchors.topMargin: 120
+		}
+		LeftPopupRotate {
+			id: leftpopuprotate
+			anchors.top: uppertab.bottom
+			anchors.left: leftpopupscale.right
+			anchors.leftMargin: 15
+			anchors.topMargin: 120
+		}
+		LeftPopupOrient
+		{
+			id: leftpopuporient
+			anchors.top: uppertab.bottom
+			anchors.left: lefttab.right
+			anchors.leftMargin: 15
+			anchors.topMargin: 400
+		}
+		/*
 		Toast {
 			id: toast
 			anchors.top: uppertab.bottom
@@ -256,7 +287,7 @@ Item{
 			anchors.left: lefttab.right
 			anchors.leftMargin: 15
 		}
-
+		*/
 		UndoRedo {
 			id: undoredo
 			anchors.top: uppertab.bottom
@@ -264,7 +295,7 @@ Item{
 			anchors.left: lefttab.right
 			anchors.leftMargin: 15
 		}
-
+		/*
 		SlideBar {
 			id: slidebar
 			anchors.top: uppertab.bottom
@@ -272,6 +303,7 @@ Item{
 			anchors.left: lefttab.right
 			anchors.leftMargin: 600
 		}
+		*/
 
 		Cam {
 			id: cam
@@ -294,13 +326,13 @@ Item{
 			anchors.top: uppertab.bottom
 			anchors.left: lefttab.right
 			anchors.leftMargin: 15
-			anchors.topMargin: 500
+			anchors.topMargin: 700
 		}
 
 		PrintInfo {
 			id: printinfo
 			anchors.top: slidebar.top
-			anchors.topMargin: 100
+			anchors.topMargin: 500
 			anchors.left: slidebar.right
 			anchors.leftMargin: 100
 		}
@@ -314,8 +346,8 @@ Item{
 			anchors.leftMargin: 320
 		}
 		*/
+		
         MouseArea{
-
             acceptedButtons: Qt.MiddleButton | Qt.RightButton
             anchors.fill: parent
             property int mode: 0;// 0 = none, 1 = translate, 2 = rotate, !#!@# qt...

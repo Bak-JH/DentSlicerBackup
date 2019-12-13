@@ -26,18 +26,6 @@ namespace Hix
 		protected:
 			QString _toastmsg = "Support generation completed";
 		};
-		class ToastCloseButton : public QQuickRectangle
-		{
-			Q_OBJECT
-
-		public:
-			ToastCloseButton(QQuickItem* parent = nullptr);
 		
-		public slots:
-			void onClick();
-
-		private:
-			QQuickMouseArea* _mouseArea;
-		};
 	}
 }

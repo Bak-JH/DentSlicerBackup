@@ -13,7 +13,7 @@
 namespace Hix
 {
 	namespace QML
-	{
+	{	
 		
 		class CloseButton : public QQuickRectangle
 		{
@@ -34,6 +34,7 @@ namespace Hix
 		{
 			Q_OBJECT
 			Q_PROPERTY(QString title MEMBER _title NOTIFY titleChanged)
+			Q_PROPERTY(QString body MEMBER _body NOTIFY bodyChanged)
 			Q_PROPERTY(QString popupHeight MEMBER _popupHeight NOTIFY popupHeightChanged)
 
 		public:
@@ -41,11 +42,13 @@ namespace Hix
 
 		public slots:
 			void titleChanged();
+			void bodyChanged();
 			void popupHeightChanged();
 
 		protected:
 			QString _title = "Name";
-			QString _popupHeight = "360"; //"284";
+			QString _body = "Click the surface to face it down";
+			QString _popupHeight = "560"; //"284";
 		};
 
 
@@ -86,7 +89,57 @@ namespace Hix
 			QStringList _dropList = { "Banana", "Apple", "Coconut", "Almond" };
 		};
 
-		class FreeCutButton : public QQuickRectangle
+
+		class RoundButton : public QQuickRectangle
+		{
+			Q_OBJECT
+			Q_PROPERTY(QString fName MEMBER _fName NOTIFY fNameChanged)
+
+		public:
+			RoundButton(QQuickItem* parent = nullptr);
+
+		signals:
+			void clicked();
+			void entered();
+			void exited();
+
+		public slots:
+			void onClick();
+			void onEntered();
+			void onExited();
+			void fNameChanged();
+			//void onEnable();
+			//void onDisable();
+
+		protected:
+			QString _fName = "Move";
+			QQuickMouseArea* _mouseArea;
+		};
+		//class TextButton : public RoundButton
+		//{
+		//	Q_OBJECT
+
+		//		Q_PROPERTY(QString btntext MEMBER _btntext NOTIFY btntextChanged)
+		//		Q_PROPERTY(QColor btncolor MEMBER _btncolor NOTIFY btnColorChanged)
+
+		//public:
+		//	TextButton(QQuickItem* parent = nullptr);
+
+		//signals:
+		//	void btnColorChanged(const QColor& changedColor);
+		//public slots:
+		//	void onClick();
+		//	void onEntered();
+		//	void onExited();
+		//	void btntextChanged();
+
+		//private:
+		//	QString _btntext = "Apply";
+		//	QColor _btncolor;
+		//};
+
+		/*
+		class FreeCutButton : public RoundButton
 		{
 			Q_OBJECT
 			Q_PROPERTY(QColor btncolor MEMBER _btncolor NOTIFY btnColorChanged)
@@ -96,16 +149,20 @@ namespace Hix
 
 		signals:
 			void btnColorChanged(const QColor& changedColor);
+			void clicked();
+			void entered();
+			void exited();
 
 		public slots:
 			void onClick();
+			void onEntered();
+			void onExited();
 
 		private:
-			QQuickMouseArea* _mouseArea;
 			QColor _btncolor;
 		};
 
-		class FlatCutButton : public QQuickRectangle
+		class FlatCutButton : public RoundButton
 		{
 			Q_OBJECT
 
@@ -114,11 +171,8 @@ namespace Hix
 
 		public slots:
 			void onClick();
-
-		private:
-			QQuickMouseArea* _mouseArea;
-
 		};
+		*/
 
 		class LabelTextBox : public QQuickRectangle
 		{
@@ -126,31 +180,6 @@ namespace Hix
 
 		};
 
-		class RoundButton : public QQuickRectangle
-		{
-			Q_OBJECT
-			Q_PROPERTY(QString btntext MEMBER _btntext NOTIFY btntextChanged)
-			Q_PROPERTY(QColor btncolor MEMBER _btncolor NOTIFY btnColorChanged)
-			//Q_PROPERTY(QString btnwidth MEMBER _btnwidth NOTIFTY btnwidthChanged)
 
-		public:
-			RoundButton(QQuickItem* parent = nullptr);
-
-		signals:
-			void btnColorChanged(const QColor& changedColor);
-
-		public slots:
-			void btntextChanged();
-			//void btnwidthChanged();
-			void onClick();
-			void onEntered();
-			void onExited();
-
-		private:
-			QQuickMouseArea* _mouseArea;
-			QString _btntext = "Apply";
-			QColor _btncolor;
-			//QString _btnwidth = "224";
-		};
 	}
 }

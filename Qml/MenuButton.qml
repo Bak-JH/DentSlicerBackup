@@ -1,7 +1,8 @@
 import QtQuick 2.6
-import hix.qml 1.0
+import hix.qml 1.0 as Hix
 
-MenuBtnShell {
+//MenuBtnShell {
+Hix.RoundButton {
 	property string iconBasic
 	property string nameColor: "#9d9d9d"
 
@@ -10,8 +11,6 @@ MenuBtnShell {
 	//color: hovered ? "#eeeeee" : "#ffffff"
 	
 	Image {
-		//width: 50
-		//height: 50
 		sourceSize.width: width
 		anchors.top: parent.top;
 		anchors.topMargin: (parent.height - height) * 0.5 - parent.height * 0.08
@@ -23,11 +22,15 @@ MenuBtnShell {
 		anchors.horizontalCenter: parent.horizontalCenter
 		anchors.bottom: parent.bottom
 		anchors.bottomMargin: 10
-		text: parent.fname
+		text: parent.fName
 		color: nameColor
 		font.pointSize: 10
 		font.family: openRegular.name
 	}
+	
+}
+
+
 	/*
 	states: [
         State {
@@ -39,7 +42,6 @@ MenuBtnShell {
             PropertyChanges {target: menubuttonshell; color: "#00ff00"}
         }
     ]
-	
 	
 	MouseArea {
 		anchors.fill: parent
@@ -70,5 +72,3 @@ MenuBtnShell {
 		}
 	}
 	*/
-	
-}

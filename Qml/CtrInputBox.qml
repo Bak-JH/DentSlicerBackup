@@ -5,25 +5,32 @@ import QtQuick.Controls.Styles 1.4
 import QtGraphicalEffects 1.12
 
 InputBox {
+	//width: 224
+	//height: 26
+
+	property string inputText
+
 	Text {
-		text: parent.propName
+		//text: parent.propName
+		text: inputText
 		font.family: openRegular.name
 		anchors.left: parent.left
-		anchors.top: parent.top
-		anchors.topMargin: height / 2
+		//anchors.top: parent.top
+		//anchors.topMargin: height / 2
 		color: "#666666"
-		//anchors.verticalCenter: parent.verticalCenter
+		anchors.verticalCenter: parent.verticalCenter
 		//verticalAlignment: Text.AlignVCenter
 	}
 
 	SpinBox {
 		id: control
-		font.family: openSemiBold.name
+		font.family: openRegular.name
 		value: 0
 		width: parent.width * 0.5
 		height: 26
 		anchors.right: parent.right
 		anchors.rightMargin: parent.width * 0.1
+		anchors.verticalCenter: parent.verticalCenter
 		editable: true
 		from: parent.inputRect.from
 		to: parent.inputRect.to
@@ -79,7 +86,6 @@ InputBox {
 
 			implicitWidth: parent.width * 0.1
 			implicitHeight: implicitWidth * 0.9
-			//implicitHeight: parent.height / 2
 
 			Image {
 				anchors.fill: parent

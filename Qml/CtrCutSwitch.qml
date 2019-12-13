@@ -1,35 +1,23 @@
 import QtQuick 2.4
-import hix.qml 1.0
+import hix.qml 1.0 as Hix
 import QtQuick.Controls 2.1
 import QtQuick.Controls.Styles 1.4
 import QtGraphicalEffects 1.12
 
 Rectangle {
-	//property bool isFlatCutOn: false;
-	//property bool isFreeCutOn: false;
 	property int cutRadius: 8;
 
 	function hitFlatCut() {
-		if (flatbtn.state == "flatOff") {
-			flatbtn.state = "flatOn";
-			freebtn.state = "freeOff";
-		}
-		else {
-			flatbtn.state = "flatOn"
-		}
+		if (flatbtn.state == "flatOff") { flatbtn.state = "flatOn"; freebtn.state = "freeOff"; }
+		else { flatbtn.state = "flatOn" }
 	}
 
 	function hitFreeCut() {
-		if (freebtn.state == "freeOff") {
-			freebtn.state = "freeOn";
-			flatbtn.state = "flatOff";
-		}
-		else {
-			freebtn.state = "freeOn"
-		}
+		if (freebtn.state == "freeOff") { freebtn.state = "freeOn"; flatbtn.state = "flatOff"; }
+		else { freebtn.state = "freeOn" }
 	}
 
-	Rectangle {
+	Hix.RoundButton {
 		id: flatbtn
 		width: 104
 		height: 96
@@ -60,11 +48,7 @@ Rectangle {
 			anchors.horizontalCenter: parent.horizontalCenter
 		}
 
-		MouseArea {
-			hoverEnabled: true
-			anchors.fill: parent
-			onClicked: hitFlatCut()
-		}
+		onClicked: { hitFlatCut() }
 
 		states: [
 			State {
@@ -86,7 +70,8 @@ Rectangle {
 		]
 	}
 
-	FreeCutButton {
+	//FreeCutButton {
+	Hix.RoundButton {
 		id: freebtn
 		width: 104
 		height: 96
@@ -120,18 +105,13 @@ Rectangle {
 			anchors.horizontalCenter: parent.horizontalCenter
 		}
 
+		onClicked: { hitFreeCut() }
+		/*
 		onBtnColorChanged : {
 			color = changedColor
-			//parent.color = parent.btncolor
-		}
-
-		/*
-		MouseArea {
-			hoverEnabled: true
-			anchors.fill: parent
-			onClicked: hitFreeCut()
 		}
 		*/
+
 
 		states: [
 			State {

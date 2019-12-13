@@ -12,15 +12,12 @@ Item {
 	property var menusStr: ["open", "move", "rotate", "scale", "cut", "shelloffset", "extend", "label", "layflat", "orient", "arrange", "support", "autorepair", "save", "extract"]
 
 	function menuClick(id) {												// get every MenuButton inactive but selected one
-		console.log("hi");
-		console.log(menusStr[0]);
 		for( var i = 0; i < menus.length; i++ ) {
 			menus[i].nameColor = "#9d9d9d"
 			menus[i].iconBasic = "qrc:/Resource/menu_"+menusStr[i]+".png"
 		}
 		id.nameColor = activeNameColor										//change selected button's text color
 	}
-
 	
 	Rectangle {
 		width: 1365
@@ -314,7 +311,7 @@ Item {
 			MouseArea {
 				anchors.fill: parent
 				hoverEnabled: true
-				onClicked: { menuClick(save); parent.color = defaultColor; parent.nameColor = activeNameColor; parent.iconBasic="qrc:/Resource/menu_extract_select_1.png" }
+				onClicked: { menuClick(extract); parent.color = defaultColor; parent.nameColor = activeNameColor; parent.iconBasic="qrc:/Resource/menu_extract_select_1.png" }
 				onEntered: {
 					if (parent.nameColor == activeNameColor) {}	// hover on already selected button
 					else parent.color = hoverColor	// hover on unselected button

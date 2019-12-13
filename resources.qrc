@@ -193,5 +193,10 @@
         <file>Resource/menu_scale_select_1.png</file>
         <file>Resource/menu_shelloffset_select_1.png</file>
         <file>Resource/menu_support_select_1.png</file>
+        <file>Resource/part_delete_1.png</file>
+        <file>Resource/part_hide_1.png</file>
+        <file>Resource/part_hide_select_1.png</file>
+        <file>Resource/part_show_1.png</file>
+        <file>Resource/part_show_select_1.png</file>
     </qresource>
 </RCC>

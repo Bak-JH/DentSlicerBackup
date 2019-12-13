@@ -17,13 +17,6 @@ namespace Hix
 		public:
 			SlideBarShell(QQuickItem* parent = nullptr);
 			QQuickSlider* _slideRect;
-
-		//public slots:
-
-		//private:
-			//QQuickMouseArea* _mouseArea;
-
-		//protected:
 		};
 	}
 }
