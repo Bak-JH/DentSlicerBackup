@@ -6,7 +6,7 @@
 using namespace Hix::Debug;
 
 Hix::Features::ExtendMode::ExtendMode(const std::unordered_set<GLModel*>& selectedModels) 
-	:PPShaderFeature(selectedModels)
+	:PPShaderMode(selectedModels)
 {
 }
 
@@ -19,7 +19,7 @@ void Hix::Features::ExtendMode::faceSelected(GLModel* selected, const Hix::Engin
 	auto& arg = _args[selected];
 	arg.normal = selectedFace.localFn();
 	auto& latest = arg.extensionFaces = selected->getMesh()->findNearSimilarFaces(arg.normal, selectedFace);
-	PPShaderFeature::colorFaces(selected, latest);
+	PPShaderMode::colorFaces(selected, latest);
 }
 
 Hix::Features::FeatureContainer* Hix::Features::ExtendMode::applyExtend(double distance)

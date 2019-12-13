@@ -58,7 +58,6 @@
     <ClCompile Include="feature\cut\DrawingPlane.cpp" />
     <ClCompile Include="feature\cut\MeshPlaneBisect.cpp" />
     <ClCompile Include="feature\cut\MeshPlaneCut.cpp" />
-    <ClCompile Include="feature\cut\ZAxialCut.cpp" />
     <ClCompile Include="feature\extension.cpp" />
     <ClCompile Include="feature\Extrude.cpp" />
     <ClCompile Include="feature\cut\modelcut.cpp" />
@@ -72,7 +71,6 @@
     <ClCompile Include="feature\layerview\layerview.cpp" />
     <ClCompile Include="feature\ModelBuilder.cpp" />
     <ClCompile Include="feature\overhangDetect.cpp" />
-    <ClCompile Include="feature\interfaces\PPShaderFeature.cpp" />
     <ClCompile Include="feature\repair\Algorithms\checkAndRepair.cpp" />
     <ClCompile Include="feature\repair\Algorithms\detectIntersections.cpp" />
     <ClCompile Include="feature\repair\Algorithms\holeFilling.cpp" />
@@ -101,7 +99,6 @@
     <ClCompile Include="input\HitTestAble.cpp" />
     <ClCompile Include="input\Hoverable.cpp" />
     <ClCompile Include="input\raycastcontroller.cpp" />
-    <ClCompile Include="Qml\Popup.cpp" />
     <ClCompile Include="Mesh\BVH.cpp" />
     <ClCompile Include="Mesh\HixBVH.cpp" />
     <ClCompile Include="Mesh\MeshCache.cpp" />
@@ -136,7 +133,6 @@
     <ClCompile Include="utils\mathutils.cpp" />
     <ClCompile Include="DentEngine\src\mesh.cpp" />
     <ClCompile Include="DentEngine\src\utils\metric.cpp" />
-    <ClCompile Include="feature\cut\polylinecut.cpp" />
     <ClCompile Include="qmlmanager.cpp" />
     <ClCompile Include="utils\qtriangulator.cpp" />
     <ClCompile Include="utils\quaternionhelper.cpp" />
@@ -165,6 +161,18 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="feature\addModel.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="feature\interfaces\PPShaderMode.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="feature\cut\ZAxialCut.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="feature\cut\polylinecut.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Qml\Popup.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -642,7 +650,6 @@
     <ClInclude Include="feature\interfaces\Mode.h" />
     <ClInclude Include="feature\ModelBuilder.h" />
     <ClInclude Include="feature\overhangDetect.h" />
-    <ClInclude Include="feature\interfaces\PPShaderFeature.h" />
     <ClInclude Include="feature\repair\Algorithms\detectIntersections.h" />
     <ClInclude Include="feature\repair\Algorithms\marchIntersections.h" />
     <ClInclude Include="feature\repair\Kernel\basics.h" />
@@ -680,7 +687,6 @@
     <ClInclude Include="input\Hoverable.h" />
     <ClInclude Include="ui\MoveWidget.h" />
     <ClInclude Include="ui\RotateWidget.h" />
-    <ClInclude Include="support\SupportModel.h" />
     <ClInclude Include="support\VerticalSupportModel.h" />
     <ClInclude Include="support\SupportRaftManager.h" />
     <ClInclude Include="ui\Widget.h" />
@@ -735,6 +741,9 @@
     <ClInclude Include="feature\addModel.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="feature\interfaces\PPShaderMode.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="debug\moc_predefs.h.cbt" />
@@ -752,7 +761,6 @@
     <QtMoc Include="utils\linemeshgeometry.h" />
     <QtMoc Include="input\raycastcontroller.h" />
     <QtMoc Include="render\LineMeshEntity.h" />
-    <QtMoc Include="Qml\Popup.h" />
     <QtMoc Include="render\ModelMaterial.h" />
     <QtMoc Include="render\lights.h" />
     <QtMoc Include="ui\Widget3D.h" />
@@ -763,6 +771,9 @@
     <QtMoc Include="qmlmanager.h" />
     <QtMoc Include="utils\quaternionhelper.h" />
     <QtMoc Include="utils\updatechecker.h" />
+    <QtMoc Include="Qml\Popup.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
   </ItemGroup>
   <ItemGroup>
     <QtRcc Include="qml.qrc" />
@@ -957,6 +968,7 @@
     <None Include="resource\zoom_down.png" />
     <None Include="resource\zoom_up.png" />
     <None Include="icon.ico" />
+    <None Include="Qml\Plane.qml" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Header Files">

@@ -28,15 +28,14 @@ namespace Hix
 					KeepBottom
 				};
 				ZAxialCut(GLModel* subject, float cuttingPlane, Result option = Result::KeepBoth);
+
 				void doChildrenRecursive(GLModel* subject, float cuttingPlane, Result option);
 				void undo()override;
-				void redo()override {} //TODO: redo
+				void redo()override;
 			private:
 				//top, bottom pair
 				Hix::Features::FeatureContainer* _container;
-				std::unordered_map<GLModel*, std::pair<GLModel*, GLModel*>> _divisionMap;
-				std::unordered_set<GLModel*> _topChildren;
-				std::unordered_set<GLModel*> _botChildren;
+				int top_no, bot_no;
 				float _cuttingPlane;
 			};
 		}

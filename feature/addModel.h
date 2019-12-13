@@ -12,7 +12,6 @@ namespace Hix
 		{
 		public:
 			AddModel(Qt3DCore::QEntity* parent, Hix::Engine3D::Mesh* mesh, QString fname, int id, const Qt3DCore::QTransform* transform);
-			AddModel(Qt3DCore::QEntity* parent, GLModel* model, int id);
 			virtual ~AddModel();
 			void undo()override;
 			void redo()override;
