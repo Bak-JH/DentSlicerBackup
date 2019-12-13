@@ -37,6 +37,7 @@
 #include "feature/scale.h"
 #include "feature/arrange/autoarrange.h"
 #include "feature/interfaces/WidgetMode.h"
+#include "feature/interfaces/PPShaderMode.h"
 #include "feature/rotate.h"
 #include "feature/move.h"
 #include "feature/deleteModel.h"
@@ -293,19 +294,10 @@ void QmlManager::initializeUI(QQmlApplicationEngine* e){
 
 }
 
-Hix::Features::Feature* QmlManager::listModel(GLModel* model)
-{
-	auto addModel = new Hix::Features::AddModel(models, model, modelIDCounter);
-	glmodels[model] = std::move(addModel->getAddedModelUnique());
-	--modelIDCounter;
-	return addModel;
-}
-
-
 Hix::Features::Feature* QmlManager::createAndListModel(Hix::Engine3D::Mesh* mesh, QString fname, const Qt3DCore::QTransform* transform) {
 	auto addModel = new Hix::Features::AddModel(models, mesh, fname, modelIDCounter, transform);
 	--modelIDCounter;
-	glmodels[addModel->getAddedModel()] =  std::move(addModel->getAddedModelUnique());
+	addToGLModels(addModel->getAddedModel());
 	qDebug() << addModel->getAddedModel();
 	return addModel;
 }
@@ -337,8 +329,7 @@ void QmlManager::openModelFile(QString fname){
 		qmlManager->setProgressText("Repairing mesh.");
 		std::unordered_set<GLModel*> repairModels;
 		repairModels.insert(latest);
-		//_currentFeature.reset(new MeshRepair(repairModels));
-		_currentMode.reset();
+		MeshRepair sfsdfs(repairModels);
 	}
 	setProgress(1.0);
     // do auto arrange
@@ -589,7 +580,7 @@ GLModel* QmlManager::findGLModelByName(QString modelName){
 
 void QmlManager::backgroundClicked(){
     qDebug() << "background clicked";
-	if (!isFeatureActive())
+	if (!isShaderModeActive())
 	{
 		unselectAll();
 	}
@@ -1708,6 +1699,11 @@ void QmlManager::generateShellOffset(double factor) {
 bool QmlManager::isFeatureActive()
 {
 	return _currentMode.get() != nullptr;
+}
+
+bool QmlManager::isShaderModeActive()
+{
+	return dynamic_cast<Hix::Features::PPShaderMode*>(_currentMode.get()) != nullptr;
 }
 
 Hix::Features::Mode* QmlManager::getCurrentMode()

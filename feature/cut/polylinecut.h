@@ -26,7 +26,7 @@ namespace Hix
 			public:
 				PolylineCut(GLModel* origModel, std::vector<QVector3D> cuttingPoints);
 				void undo()override;
-				void redo()override {} //TODO: redo
+				void redo()override;
 			private:
 				void generateCuttingWalls(const std::vector<QVector3D>& polyline, const Hix::Engine3D::Bounds3D& cutBound, Hix::Engine3D::Mesh& out);
 				void cutCSG(const QString& subjectName, Hix::Render::SceneEntity* subject, const CorkTriMesh& subtract);

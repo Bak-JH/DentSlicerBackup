@@ -1,8 +1,8 @@
-#include "PPShaderFeature.h"
+#include "PPShaderMode.h"
 #include "../../glmodel.h"
 #include "../../qmlmanager.h"
 
-Hix::Features::PPShaderFeature::PPShaderFeature(const std::unordered_set<GLModel*>& selectedModels)
+Hix::Features::PPShaderMode::PPShaderMode(const std::unordered_set<GLModel*>& selectedModels)
 	:_subjects(selectedModels), Mode()
 {
 	for (auto each : _subjects)
@@ -13,7 +13,7 @@ Hix::Features::PPShaderFeature::PPShaderFeature(const std::unordered_set<GLModel
 	}
 }
 
-void Hix::Features::PPShaderFeature::colorFaces(GLModel* model, const std::unordered_set<Hix::Engine3D::FaceConstItr>& faces)
+void Hix::Features::PPShaderMode::colorFaces(GLModel* model, const std::unordered_set<Hix::Engine3D::FaceConstItr>& faces)
 {
 	auto listed = model->getRootModel();
 	listed->unselectMeshFaces();
@@ -21,7 +21,7 @@ void Hix::Features::PPShaderFeature::colorFaces(GLModel* model, const std::unord
 	listed->updateMesh(true);
 }
 
-Hix::Features::PPShaderFeature::~PPShaderFeature()
+Hix::Features::PPShaderMode::~PPShaderMode()
 {
 	for (auto each : _subjects)
 	{

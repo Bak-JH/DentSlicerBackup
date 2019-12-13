@@ -1,7 +1,7 @@
 #pragma once
 #include <unordered_set>
 #include "interfaces/SelectFaceMode.h"
-#include "interfaces/PPShaderFeature.h"
+#include "interfaces/PPShaderMode.h"
 #include "DentEngine/src/Bounds3D.h"
 class GLModel;
 
@@ -9,7 +9,7 @@ namespace Hix
 {
 	namespace Features
 	{
-		class LayFlat: public Feature//public SelectFaceFeature, public PPShaderFeature
+		class LayFlat: public Feature//public SelectFaceFeature, public PPShaderMode
 		{
 		public:
 			LayFlat(GLModel* selectedModel, QVector3D normal, bool isReady);
@@ -25,7 +25,7 @@ namespace Hix
 
 
 
-		class LayFlatMode : public SelectFaceMode, public PPShaderFeature
+		class LayFlatMode : public SelectFaceMode, public PPShaderMode
 		{
 		public:
 			LayFlatMode(const std::unordered_set<GLModel*>& selectedModels);

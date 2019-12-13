@@ -89,6 +89,7 @@ public:
 		return false;
 	}
 	bool isFeatureActive();
+	bool isShaderModeActive();
 	template <typename F>
 	static void postToThread(F&& fun, QThread* thread = qApp->thread()) {
 		auto* obj = QAbstractEventDispatcher::instance(thread);
@@ -284,7 +285,6 @@ public:
 	Hix::Support::SupportRaftManager& supportRaftManager();
 	Hix::Features::FeatureHisroyManager& featureHistoryManager();
 	Hix::Features::Feature* createAndListModel(Hix::Engine3D::Mesh* mesh, QString filename, const Qt3DCore::QTransform* transform);
-	Hix::Features::Feature* listModel(GLModel* model);
 	Hix::Features::Mode* getCurrentMode();
 	void setCurrentMode(Hix::Features::Mode* mode);
 	void unselectPart(GLModel* target);

@@ -67,6 +67,11 @@ void Hix::Features::Cut::PolylineCut::undo()
 	_container->undo();
 }
 
+void Hix::Features::Cut::PolylineCut::redo()
+{
+	_container->redo();
+}
+
 void Hix::Features::Cut::PolylineCut::generateCuttingWalls(const std::vector<QVector3D>& polyline, const Hix::Engine3D::Bounds3D& cutBound, Hix::Engine3D::Mesh& out)
 {
 	//to 2d polygon

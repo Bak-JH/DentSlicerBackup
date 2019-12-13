@@ -4,7 +4,7 @@ using namespace Hix::Features;
 
 
 Hix::Features::LayFlatMode::LayFlatMode(const std::unordered_set<GLModel*>& selectedModels)
-	: PPShaderFeature(selectedModels)
+	: PPShaderMode(selectedModels)
 {
 }
 
@@ -16,7 +16,7 @@ void Hix::Features::LayFlatMode::faceSelected(GLModel* selected, const Hix::Engi
 {
 	auto listed = selected->getRootModel();
 	auto neighbors = selected->getMesh()->findNearSimilarFaces(selectedFace.localFn(), selectedFace);
-	PPShaderFeature::colorFaces(selected, neighbors);
+	PPShaderMode::colorFaces(selected, neighbors);
 	auto worldFn = selectedFace.worldFn();
 	_args[selected] = listed->vectorToLocal(worldFn);
 	isReady = true;

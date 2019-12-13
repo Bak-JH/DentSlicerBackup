@@ -7,12 +7,12 @@ namespace Hix
 {
 	namespace Features
 	{
-		class PPShaderFeature: virtual public Mode
+		class PPShaderMode : virtual public Mode
 		{
 		public:
-			PPShaderFeature(const std::unordered_set<GLModel*>& selectedModels);
+			PPShaderMode(const std::unordered_set<GLModel*>& selectedModels);
 			void colorFaces(GLModel* model, const std::unordered_set <Hix::Engine3D::FaceConstItr > & faces);
-			virtual ~PPShaderFeature();
+			virtual ~PPShaderMode();
 		protected:
 			std::unordered_set<GLModel*> _subjects;
 		};

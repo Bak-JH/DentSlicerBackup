@@ -4,20 +4,11 @@
 
 Hix::Features::AddModel::AddModel(Qt3DCore::QEntity* parent, Hix::Engine3D::Mesh* mesh, QString fname, int id, const Qt3DCore::QTransform* transform)
 {
+	qDebug() << "add " << id;
 	_addedModel = new GLModel(parent, mesh, fname, id, transform);
 	_addedModel->setHitTestable(true);
 	qmlManager->addPart(fname, id);
-}
-
-Hix::Features::AddModel::AddModel(Qt3DCore::QEntity* parent, GLModel* model, int id)
-{
-	Qt3DCore::QTransform toRoot;
-	toRoot.setMatrix(model->toRootMatrix());
-	_addedModel = new GLModel(parent, model->getMeshModd(), model->modelName(), id, &toRoot);
-	_addedModel->setEnabled(true);
-	_addedModel->setHitTestable(true);
-	_addedModel->setParent(parent);
-	qmlManager->addPart(_addedModel->modelName(), _addedModel->ID);
+	_addedModel->setZToBed();
 }
 
 Hix::Features::AddModel::~AddModel()

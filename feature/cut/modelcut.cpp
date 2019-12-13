@@ -24,12 +24,13 @@ Hix::Features::ModelCut::~ModelCut()
 }
 
 void ModelCut::cutModeSelected(int type) {
-	//if flat cut
+	//if flat cut		
+
 	if (type == 1)
 	{
 		_cutType = ZAxial;
-		_cuttingPlane.enablePlane(true);
 		_cuttingPlane.transform().setTranslation(QVector3D(0, 0, 4.04637));
+		_cuttingPlane.enablePlane(true);
 	}
 	else if (type == 2)
 	{
@@ -38,6 +39,7 @@ void ModelCut::cutModeSelected(int type) {
 		//want cutting plane to be over model mesh
 		float zOverModel = _modelsBound.zMax() + 0.1f;
 		_cuttingPlane.transform().setTranslation(QVector3D(0, 0, zOverModel));
+		_cuttingPlane.enablePlane(true);
 		qmlManager->getRayCaster().setHoverEnabled(true);
 	}
 	return;
@@ -53,7 +55,6 @@ void ModelCut::getSliderSignal(double value) {
 
 void Hix::Features::ModelCut::applyCut()
 {
-	Hix::Features::FeatureContainer* container = new Hix::Features::FeatureContainer();
 	switch (_cutType)
 	{
 	case Hix::Features::ModelCut::ZAxial:
@@ -78,5 +79,4 @@ void Hix::Features::ModelCut::applyCut()
 		break;
 	}
 	qmlManager->unselectAll();
-	qmlManager->featureHistoryManager().addFeature(container);
 }
