@@ -21,15 +21,9 @@ namespace Hix
 				
 			public:
 				//should cut keep both halves
-				enum Result
-				{
-					KeepBoth,
-					KeepTop,
-					KeepBottom
-				};
-				ZAxialCut(GLModel* subject, float cuttingPlane, Result option = Result::KeepBoth);
+				ZAxialCut(GLModel* subject, float cuttingPlane);
 
-				void doChildrenRecursive(GLModel* subject, float cuttingPlane, Result option);
+				void doChildrenRecursive(GLModel* subject, float cuttingPlane);
 				void undo()override;
 				void redo()override;
 				std::unordered_set<GLModel*>& upperModels();
