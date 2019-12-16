@@ -1730,11 +1730,11 @@ void QmlManager::closeShellOffset() {
 
 // for shell offset
 void QmlManager::generateShellOffset(double factor) {
-	qmlManager->openProgressPopUp();
-	qmlManager->setProgress(0.1);
+	openProgressPopUp();
+	setProgress(0.1);
 	auto shellOffset = dynamic_cast<ShellOffsetMode*>(_currentMode.get());
-	shellOffset->doOffset(factor);
-	qmlManager->setProgress(1.0);
+	_featureHistoryManager.addFeature(shellOffset->doOffset(factor));
+	setProgress(1.0);
 
 }
 

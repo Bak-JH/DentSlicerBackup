@@ -3,6 +3,7 @@
 #include "feature/repair/meshrepair.h"
 #include "DentEngine/src/mesh.h"
 #include "cut/ZAxialCut.h"
+#include "deleteModel.h"
 // offset shell with mm
 
 using namespace Hix::Engine3D;
@@ -36,6 +37,7 @@ Hix::Features::Feature* Hix::Features::ShellOffsetMode::doOffset(float offset)
 
 Hix::Features::ShellOffset::ShellOffset(GLModel* target, float offset, float zPlane) : _prevMesh(target->getMeshModd())
 {
+	_container = new FeatureContainer();
 	Mesh offsetMesh(*target->getMeshModd());
 
 	qDebug() << "copy, offset, reverse, add";
@@ -52,9 +54,24 @@ Hix::Features::ShellOffset::ShellOffset(GLModel* target, float offset, float zPl
 	qmlManager->setProgress(0.70);
 	// 승환 100%
 	qmlManager->setProgress(1);
-	cut = new ZAxialCut(target, zPlane, ZAxialCut::Result::KeepTop);
+	auto cut = new ZAxialCut(target, zPlane);
+
+	for (auto& each : cut->lowerModels())
+		_container->addFeature(new DeleteModel(each));
+
+	_container->addFeature(cut);
 }
 
 Hix::Features::ShellOffset::~ShellOffset()
 {
+}
+
+void Hix::Features::ShellOffset::undo()
+{
+	_container->undo();
+}
+
+void Hix::Features::ShellOffset::redo()
+{
+	_container->redo();
 }

@@ -35,9 +35,9 @@ void Hix::Features::FeatureContainer::undo()
 
 void Hix::Features::FeatureContainer::redo()
 {
-	for (auto& each : _container)
+	for (auto each = _container.rbegin(); each != _container.rend(); ++each)
 	{
-		each->redo();
+		each->get()->redo();
 	}
 }
 
