@@ -8,21 +8,32 @@ namespace Hix
 {
 	namespace Features
 	{
-		class ShellOffset : public Hix::Features::Feature
+		class ShellOffsetMode : public Hix::Features::Mode
 		{
 		public:
-			ShellOffset(GLModel* glmodel);
-			virtual ~ShellOffset();
+			ShellOffsetMode(GLModel* glmodel);
+			virtual ~ShellOffsetMode();
 			void getSliderSignal(double value);
-			void doOffset(float offset);
-			void undo() override {} //TODO:undo
+			Hix::Features::Feature* doOffset(float offset);
 		private:
 			GLModel* _subject = nullptr;
 			float _zPlane = 0;
-			void doOffsetImpl(GLModel* glModel, float offset, float zPlane);
 			Hix::Engine3D::Bounds3D _modelBound;
 			Hix::Features::Cut::DrawingPlane _cuttingPlane;
 
+		};
+
+		class ShellOffset : public Hix::Features::Feature
+		{
+		public:
+			ShellOffset(GLModel* target, float offset, float zPlane);
+			virtual ~ShellOffset();
+			void undo()override {}
+			void redo()override {}
+
+		private:
+			Mesh* _prevMesh;
+			Feature* cut;
 		};
 	}
 };

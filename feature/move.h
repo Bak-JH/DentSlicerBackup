@@ -11,6 +11,7 @@ namespace Hix
 		class Move : public Feature
 		{
 		public:
+			Move(GLModel* target, const QVector3D& to);
 			Move(GLModel* target);
 			virtual ~Move();
 			void undo()override;
@@ -31,6 +32,7 @@ namespace Hix
 			virtual ~MoveMode();
 			void featureStarted()override;
 			void featureEnded()override;
+			FeatureContainer* applyMove(const QVector3D& to);
 		private:
 			Hix::Features::FeatureContainer* _moveContainer = nullptr;
 		};

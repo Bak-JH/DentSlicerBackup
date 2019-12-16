@@ -12,6 +12,7 @@ namespace Hix
 		{
 		public:
 			Rotate(GLModel* target);
+			Rotate(GLModel* target, const QQuaternion& rot);
 			virtual ~Rotate();
 			void undo()override;
 			void redo()override;
@@ -31,6 +32,7 @@ namespace Hix
 			virtual ~RotateMode();
 			void featureStarted()override;
 			void featureEnded()override;
+			Hix::Features::FeatureContainer* applyRotate(const QQuaternion& rot);
 
 		private:
 			Hix::Features::FeatureContainer* _rotateContainer;

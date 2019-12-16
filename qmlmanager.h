@@ -370,8 +370,8 @@ public slots:
     void groupSelectionActivate(bool);
     void runGroupFeature(int,QString, double, double, double, QVariant);
     bool multipleModelSelected(int ID);
-    void modelRotateByNumber(int mode, int, int, int);
-    void modelMoveByNumber(int axis, int, int);
+    void applyRotation(int mode, int, int, int);
+    void applyMove(int axis, int, int);
 
 	void totalScaleDone();
 

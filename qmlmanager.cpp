@@ -86,7 +86,7 @@ void QmlManager::initializeUI(QQmlApplicationEngine* e){
     // model move componetns
     moveButton = FindItemByName(engine, "moveButton");
     movePopup = FindItemByName(engine, "movePopup");
-    QObject::connect(movePopup, SIGNAL(runFeature(int,int,int)),this, SLOT(modelMoveByNumber(int,int,int)));
+    QObject::connect(movePopup, SIGNAL(applyMove(int,int,int)),this, SLOT(applyMove(int,int,int)));
     QObject::connect(movePopup, SIGNAL(closeMove()), this, SLOT(closeMove()));
     QObject::connect(movePopup, SIGNAL(openMove()), this, SLOT(openMove()));
 	boundedBox = (QEntity*)FindItemByName(engine, "boundedBox");
@@ -94,7 +94,7 @@ void QmlManager::initializeUI(QQmlApplicationEngine* e){
     // model rotate components
     rotatePopup = FindItemByName(engine, "rotatePopup");
     // model rotate popup codes
-    QObject::connect(rotatePopup, SIGNAL(runFeature(int,int,int,int)),this, SLOT(modelRotateByNumber(int,int,int,int)));
+    QObject::connect(rotatePopup, SIGNAL(applyRotation(int,int,int,int)),this, SLOT(applyRotation(int,int,int,int)));
     QObject::connect(rotatePopup, SIGNAL(openRotate()), this, SLOT(openRotate()));
     QObject::connect(rotatePopup, SIGNAL(closeRotate()), this, SLOT(closeRotate()));
     //rotateSphere->setEnabled(0);
@@ -1055,25 +1055,26 @@ Hix::Support::SupportRaftManager& QmlManager::supportRaftManager()
 
 
 
-void QmlManager::modelMoveByNumber(int axis, int X, int Y){
+void QmlManager::applyMove(int axis, int X, int Y){
     if (selectedModels.empty())
         return;
 
 	QVector3D displacement(X, Y, 0);
-	for (auto selectedModel : selectedModels) {
-		selectedModel->moveModel(displacement);
-		selectedModel->moveDone();
-    }
+
+	auto move = dynamic_cast<Hix::Features::MoveMode*>(_currentMode.get())->applyMove(displacement);
+	if (move != nullptr)
+		_featureHistoryManager.addFeature(move);
 
 }
-void QmlManager::modelRotateByNumber(int mode,  int X, int Y, int Z){
+void QmlManager::applyRotation(int mode,  int X, int Y, int Z){
     if (selectedModels.empty())
         return;
 
 	for (auto selectedModel : selectedModels) {
 		auto rotation = QQuaternion::fromEulerAngles(X,Y,Z);
-		selectedModel->rotateModel(rotation);
-		selectedModel->rotateDone();
+		auto rotate = dynamic_cast<Hix::Features::RotateMode*>(_currentMode.get())->applyRotate(rotation);
+		if (rotate != nullptr)
+			_featureHistoryManager.addFeature(rotate);
     }
 }
 void QmlManager::resetLayflat(){
@@ -1650,7 +1651,7 @@ void QmlManager::getSliderSignal(double sliderPos)
 		return;
 	}
 
-	auto shellOffset = dynamic_cast<ShellOffset*>(_currentMode.get());
+	auto shellOffset = dynamic_cast<ShellOffsetMode*>(_currentMode.get());
 	if (shellOffset)
 	{
 		shellOffset->getSliderSignal(sliderPos);
@@ -1671,7 +1672,7 @@ void QmlManager::getCrossSectionSignal(int val)
 void QmlManager::openShellOffset() {
 	if (selectedModels.size() == 1)
 	{
-		//_currentFeature.reset(new ShellOffset(*selectedModels.begin()));
+		_currentMode.reset(new ShellOffsetMode(*selectedModels.begin()));
 
 	}
 	else
@@ -1690,8 +1691,8 @@ void QmlManager::closeShellOffset() {
 void QmlManager::generateShellOffset(double factor) {
 	qmlManager->openProgressPopUp();
 	qmlManager->setProgress(0.1);
-	//auto shellOffset = dynamic_cast<ShellOffset*>(_currentFeature.get());
-	//shellOffset->doOffset(factor);
+	auto shellOffset = dynamic_cast<ShellOffsetMode*>(_currentMode.get());
+	shellOffset->doOffset(factor);
 	qmlManager->setProgress(1.0);
 
 }
