@@ -5,8 +5,6 @@ import QtQuick.Window 2.2
 import QtQuick.Controls.Styles 1.4
 import QtQuick.Dialogs 1.2
 
-import hix.qml 1.0
-
 Item{
     ApplicationWindow {
         title: qsTr("DentSlicer")
@@ -206,6 +204,11 @@ Item{
 
         FileDialogLoad{
             id: filedialogload
+            visible: false
+        }
+		FileDialogLoad{
+            id: fileDialogMB
+			isModelBuilder: true
             visible: false
         }
 

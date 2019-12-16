@@ -73,7 +73,7 @@ void Hix::Features::LayFlat::undo()
 	qmlManager->cameraViewChanged();
 	_model->setZToBed();
 	_model->unselectMeshFaces();
-	_model->updatePrintable();
+	_model->updateMesh(true);
 
 	_prevMatrix = currMatrix;
 	_prevAabb = currAabb;
@@ -89,7 +89,7 @@ void Hix::Features::LayFlat::redo()
 	qmlManager->cameraViewChanged();
 	_model->setZToBed();
 	_model->unselectMeshFaces();
-	_model->updatePrintable();
+	_model->updateMesh(true);
 
 	_prevMatrix = currMatrix;
 	_prevAabb = currAabb;

@@ -5,6 +5,7 @@
 #include "TMesh/tmesh.h"
 #include "../../glmodel.h"
 #include "../../qmlmanager.h"
+#include"../../common/Debug.h"
 using namespace T_MESH;
 using namespace Hix::Engine3D;
 using namespace Hix::Features;
@@ -65,22 +66,20 @@ bool Hix::Features::isRepairNeeded(const Hix::Engine3D::Mesh* mesh)
 	return false;
 }
 
-
-std::vector<Hix::Engine3D::HalfEdgeConstItr>  Hix::Features::identifyBoundary(const Hix::Engine3D::Mesh* mesh)
+std::vector<Hix::Engine3D::HalfEdgeConstItr>  Hix::Features::getBoundaryEdges(const Hix::Engine3D::Mesh* mesh)
 {
 	std::vector<HalfEdgeConstItr> boundaryEdges;
 	for (auto heItr = mesh->getHalfEdges().cbegin(); heItr != mesh->getHalfEdges().cend(); ++heItr)
 	{
-		//if a half edge do not have a twin, it's a boundary edge
-		auto twnFaces = heItr.twinFaces();
-		if (twnFaces.empty())
+		if (heItr.twins().size() != 1)
 		{
-			boundaryEdges.push_back(heItr);
-
+			boundaryEdges.emplace_back(heItr);
 		}
 	}
 	return boundaryEdges;
 }
+
+
 
 std::vector<Hix::Engine3D::Mesh*> Hix::Features::seperateDisconnectedMeshes(Hix::Engine3D::Mesh* mesh)
 {
@@ -437,7 +436,8 @@ void Hix::Features::MeshRepair::repairImpl(GLModel* subject, const QString& mode
 	else if (seperated.size() == 1)
 	{
 		//do nothing, see seperateDisconnectedMeshes
-		
+		subject->updateMesh(true);
+
 	}
 	else
 	{
@@ -455,6 +455,6 @@ void Hix::Features::MeshRepair::repairImpl(GLModel* subject, const QString& mode
 		}
 
 	}
-	subject->setZToBed();
 	subject->updateRecursiveAabb();
+	subject->setZToBed();
 }
