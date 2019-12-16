@@ -32,7 +32,6 @@
 #include "feature/repair/meshrepair.h"
 #include "feature/layerview/layerview.h"
 #include "feature/SupportFeature.h"
-#include "Qml/Popup.h"
 #include "feature/extension.h"
 #include "feature/scale.h"
 #include "feature/arrange/autoarrange.h"
@@ -43,6 +42,7 @@
 #include "feature/deleteModel.h"
 #include "feature/addModel.h"
 
+#include "feature/TwoManifoldBuilder.h"
 #include <functional>
 using namespace Hix::Input;
 using namespace Hix::UI;
@@ -53,8 +53,6 @@ QmlManager::QmlManager(QObject *parent) : QObject(parent), _optBackend(this, scf
 	,layerViewFlags(LAYER_INFILL | LAYER_SUPPORTERS | LAYER_RAFT), modelIDCounter(-1)
 	, _cursorEraser(QPixmap(":/Resource/cursor_eraser.png")), _currentMode(nullptr)
 {
-	qmlRegisterType<Hix::QML::XButton>("hix.qml", 1, 0, "XButton");
-	qmlRegisterType<Hix::QML::PopupShell>("hix.qml", 1, 0, "PopupShell");
 }
 
 void QmlManager::initializeUI(QQmlApplicationEngine* e){
@@ -86,7 +84,7 @@ void QmlManager::initializeUI(QQmlApplicationEngine* e){
     // model move componetns
     moveButton = FindItemByName(engine, "moveButton");
     movePopup = FindItemByName(engine, "movePopup");
-    QObject::connect(movePopup, SIGNAL(applyMove(int,int,int)),this, SLOT(applyMove(int,int,int)));
+    QObject::connect(movePopup, SIGNAL(applyMove(int, qreal, qreal)),this, SLOT(applyMove(int, qreal, qreal)));
     QObject::connect(movePopup, SIGNAL(closeMove()), this, SLOT(closeMove()));
     QObject::connect(movePopup, SIGNAL(openMove()), this, SLOT(openMove()));
 	boundedBox = (QEntity*)FindItemByName(engine, "boundedBox");
@@ -94,7 +92,7 @@ void QmlManager::initializeUI(QQmlApplicationEngine* e){
     // model rotate components
     rotatePopup = FindItemByName(engine, "rotatePopup");
     // model rotate popup codes
-    QObject::connect(rotatePopup, SIGNAL(applyRotation(int,int,int,int)),this, SLOT(applyRotation(int,int,int,int)));
+    QObject::connect(rotatePopup, SIGNAL(applyRotation(int, qreal, qreal, qreal)),this, SLOT(applyRotation(int, qreal, qreal, qreal)));
     QObject::connect(rotatePopup, SIGNAL(openRotate()), this, SLOT(openRotate()));
     QObject::connect(rotatePopup, SIGNAL(closeRotate()), this, SLOT(closeRotate()));
     //rotateSphere->setEnabled(0);
@@ -291,7 +289,14 @@ void QmlManager::initializeUI(QQmlApplicationEngine* e){
 
 	QObject::connect(layerViewSlider, SIGNAL(sliderValueChanged(int)), this, SLOT(getCrossSectionSignal(int)));
 
+	//auto planeTest = new Hix::Render::PlaneMeshEntity(total);
+	//QVector3D point(0, 0, 0);
+	//QVector3D direction(0,0,-1);
 
+	//QVector3D test(0, 0, 3);
+	//auto dist = test.distanceToPlane(point, direction);
+	//Hix::Render::PDPlane pdPlane{ point, direction };
+	//planeTest->setPointNormal(pdPlane);
 }
 
 Hix::Features::Feature* QmlManager::createAndListModel(Hix::Engine3D::Mesh* mesh, QString fname, const Qt3DCore::QTransform* transform) {
@@ -322,7 +327,39 @@ void QmlManager::openModelFile(QString fname){
 	auto latest = dynamic_cast<Hix::Features::AddModel*>(addModel)->getAddedModel();
 	latest->setZToBed();
 	setProgress(0.6);
+	//repair mode
+	if (Hix::Features::isRepairNeeded(mesh))
+	{
+		qmlManager->setProgressText("Repairing mesh.");
+		std::unordered_set<GLModel*> repairModels;
+		repairModels.insert(latest);
+		new MeshRepair(repairModels);
+	}
+	setProgress(1.0);
+	// do auto arrange
+	if (glmodels.size() >= 2)
+		openArrange();
+	//runArrange();
+	QApplication::setOverrideCursor(QCursor(Qt::ArrowCursor));
+}
 
+void QmlManager::openAndBuildModel(QString fname) {
+	openProgressPopUp();
+
+	auto mesh = new Mesh();
+	if (fname != "" && (fname.contains(".stl") || fname.contains(".STL"))) {
+		FileLoader::loadMeshSTL(mesh, fname.toLocal8Bit().constData());
+	}
+	else if (fname != "" && (fname.contains(".obj") || fname.contains(".OBJ"))) {
+		FileLoader::loadMeshOBJ(mesh, fname.toLocal8Bit().constData());
+	}
+	fname = filenameToModelName(fname.toStdString());
+	setProgress(0.1);
+	auto latest = dynamic_cast<Hix::Features::AddModel*>(createAndListModel(mesh, fname, nullptr))->getAddedModel();
+	setProgress(0.2);
+	TwoManifoldBuilder modelBuilder(*mesh);
+	mesh->centerMesh();
+	setProgress(0.4);
 	//repair mode
 	if (Hix::Features::isRepairNeeded(mesh))
 	{
@@ -332,12 +369,15 @@ void QmlManager::openModelFile(QString fname){
 		MeshRepair sfsdfs(repairModels);
 	}
 	setProgress(1.0);
-    // do auto arrange
-    if (glmodels.size() >= 2)
-        openArrange();
-    //runArrange();
-    QApplication::setOverrideCursor(QCursor(Qt::ArrowCursor));
+	// do auto arrange
+	if (glmodels.size() >= 2)
+		openArrange();
+	//runArrange();
+	QApplication::setOverrideCursor(QCursor(Qt::ArrowCursor));
 }
+
+
+
 
 void QmlManager::modelRepair()
 {
@@ -828,7 +868,7 @@ void QmlManager::generateLayFlat()
 
 void QmlManager::openLabelling()
 {
-	//_currentFeature.reset(new Labelling());
+	_currentMode.reset(new Labelling());
 }
 
 void QmlManager::closeLabelling()
@@ -1055,7 +1095,7 @@ Hix::Support::SupportRaftManager& QmlManager::supportRaftManager()
 
 
 
-void QmlManager::applyMove(int axis, int X, int Y){
+void QmlManager::applyMove(int axis, qreal X, qreal Y){
     if (selectedModels.empty())
         return;
 
@@ -1066,7 +1106,7 @@ void QmlManager::applyMove(int axis, int X, int Y){
 		_featureHistoryManager.addFeature(move);
 
 }
-void QmlManager::applyRotation(int mode,  int X, int Y, int Z){
+void QmlManager::applyRotation(int mode, qreal X, qreal Y, qreal Z){
     if (selectedModels.empty())
         return;
 
@@ -1575,6 +1615,7 @@ void QmlManager::openSupport()
 }
 void QmlManager::closeSupport()
 {
+	supportEditEnabled(false);
 	_currentMode.reset();
 }
 

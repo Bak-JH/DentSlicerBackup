@@ -21,7 +21,7 @@ namespace Hix
 
 		std::vector<QVector2D> PolylineToArea(float thickness, const std::vector<QVector2D>& polyline);
 
-		std::vector<ClipperLib::Path> combineContour(const std::vector<std::vector<QVector3D>>& contours);
+		std::vector<std::vector<QVector3D>> combineContour(const std::vector<std::vector<QVector3D>>& contours);
 
 		
 		void generateCapZPlane(Hix::Engine3D::Mesh* mesh, const std::vector<QVector2D>& contour, float zPos, bool isReverse);

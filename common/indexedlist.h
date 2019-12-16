@@ -44,7 +44,7 @@ public:
 	//iterators
 	typedef typename ItrFac::iterator iterator;
 	typedef typename ItrFac::const_iterator const_iterator;
-
+	typedef DeleteGuard<T, A, ItrFac> DeleteGuardType;
 	typedef std::reverse_iterator<iterator> reverse_iterator; //optional
 	typedef std::reverse_iterator<const_iterator> const_reverse_iterator; //optional
 
@@ -344,6 +344,17 @@ public:
 			_listPtr->swapAndErase(_indices);
 			_indices.clear();
 		}
+	}
+	DeleteGuard& operator+=(DeleteGuard&& other)
+	{
+		_indices.merge(std::move(other._indices));
+		other._indices.clear();
+		other._listPtr = nullptr;
+		return *this;
+	}
+	const IndexedList<T, A, ItrFac>* container()const
+	{
+		return _listPtr;
 	}
 private:
 	IndexedList<T, A, ItrFac>* _listPtr = nullptr;

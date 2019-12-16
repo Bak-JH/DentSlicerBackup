@@ -32,11 +32,17 @@ namespace Hix
 				void doChildrenRecursive(GLModel* subject, float cuttingPlane, Result option);
 				void undo()override;
 				void redo()override;
+				std::unordered_set<GLModel*>& upperModels();
+				std::unordered_set<GLModel*>& lowerModels();
+
 			private:
 				//top, bottom pair
 				Hix::Features::FeatureContainer* _container;
 				int top_no, bot_no;
 				float _cuttingPlane;
+				std::unordered_set<GLModel*> _upperModels;
+				std::unordered_set<GLModel*> _lowerModels;
+
 			};
 		}
 	}

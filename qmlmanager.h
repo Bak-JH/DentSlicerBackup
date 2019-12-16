@@ -294,6 +294,7 @@ private:
 	Hix::Tasking::TaskManager _taskManager;
 	void setModelViewMode(int mode);
 	GLModel* getModelByID(int ID);
+    void unselectPartImpl(GLModel* target);
 	//do not mix UI work with background thread
 	//std::future<Slicer*> exportSelected(bool isTemp);
 	QString getExportPath();
@@ -360,6 +361,7 @@ public slots:
     void openModelFile(QString filename);
 	GLModel* removeFromGLModels(GLModel* target);
 	void addToGLModels(GLModel* target);
+	void openAndBuildModel(QString filename);
 
     void deleteModelFileDone();
     void deleteModelFile(GLModel* target);
@@ -370,8 +372,8 @@ public slots:
     void groupSelectionActivate(bool);
     void runGroupFeature(int,QString, double, double, double, QVariant);
     bool multipleModelSelected(int ID);
-    void applyRotation(int mode, int, int, int);
-    void applyMove(int axis, int, int);
+    void applyRotation(int mode, qreal, qreal, qreal);
+    void applyMove(int axis, qreal, qreal);
 
 	void totalScaleDone();
 
