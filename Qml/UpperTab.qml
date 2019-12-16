@@ -745,10 +745,10 @@ Rectangle {
                 else
                     closeMove();
             }
-			signal runFeature(int type, int X, int Y);
+			signal applyMove(int type, int X, int Y);
             onApplyClicked: {
                 console.log("move")
-                runFeature(ftrMove,popup_move.numberbox1_number,popup_move.numberbox2_number);
+                applyMove(ftrMove,popup_move.numberbox1_number,popup_move.numberbox2_number);
             }
             function onApplyFinishButton(){
                 popup_move.colorApplyFinishButton(0)
@@ -781,10 +781,10 @@ Rectangle {
             //numbox_default: 0
             numbox_updown_scale: 5
             number_unit: "°"
-            signal runFeature(int type, int X, int Y, int Z);
+            signal applyRotation(int type, int X, int Y, int Z);
             onApplyClicked: {
                 console.log("rotate")
-                runFeature(ftrRotate,popup_rotate.numberbox1_number,popup_rotate.numberbox2_number,popup_rotate.numberbox3_number);
+                applyRotation(ftrRotate,popup_rotate.numberbox1_number,popup_rotate.numberbox2_number,popup_rotate.numberbox3_number);
             }
             signal runGroupFeature(int type, string state, double arg1, double arg2, double arg3, var config);
             signal closeRotate();
@@ -1022,7 +1022,7 @@ Rectangle {
                                    numberbox1_number/numberbox1_number_origin,
                                    numberbox1_number/numberbox1_number_origin);
                     } else if (numberbox2_number != numberbox2_number_origin) {
-                        applyScale(numberbox2_number/numberbox2_number_origin,
+                         (numberbox2_number/numberbox2_number_origin,
                                    numberbox2_number/numberbox2_number_origin,
                                    numberbox2_number/numberbox2_number_origin);
                     } else {

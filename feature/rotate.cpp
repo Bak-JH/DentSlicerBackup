@@ -35,10 +35,28 @@ void Hix::Features::RotateMode::featureEnded()
 	_widget.updatePosition();
 }
 
+Hix::Features::FeatureContainer* Hix::Features::RotateMode::applyRotate(const QQuaternion& rot)
+{
+	Hix::Features::FeatureContainer* container = new FeatureContainer();
+	for (auto& target : _targetModels)
+		container->addFeature(new Rotate(target, rot));
+	return container;
+}
+
 Hix::Features::Rotate::Rotate(GLModel* target) : _model(target)
 {
 	_prevMatrix = target->transform().matrix();
 	_prevAabb = target->aabb();
+}
+
+Hix::Features::Rotate::Rotate(GLModel* target, const QQuaternion& rot) : _model(target)
+{
+	_prevMatrix = target->transform().matrix();
+	_prevAabb = target->aabb();
+	target->rotateModel(rot);
+
+	if (qmlManager->isActive<Hix::Features::WidgetMode>())
+		qmlManager->cameraViewChanged();
 }
 
 Hix::Features::Rotate::~Rotate()

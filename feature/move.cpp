@@ -33,9 +33,27 @@ void Hix::Features::MoveMode::featureEnded()
 	_widget.updatePosition();
 }
 
+Hix::Features::FeatureContainer* Hix::Features::MoveMode::applyMove(const QVector3D& to)
+{
+	Hix::Features::FeatureContainer* container = new FeatureContainer();
+	for (auto& target : _targetModels)
+		container->addFeature(new Move(target, to));
+	return container;
+}
 
 
 
+
+
+Hix::Features::Move::Move(GLModel* target, const QVector3D& to) : _model(target)
+{
+	_prevMatrix = target->transform().matrix();
+	_prevAabb = target->aabb();
+	target->moveModel(to);
+
+	if(qmlManager->isActive<Hix::Features::WidgetMode>())
+		qmlManager->cameraViewChanged();
+}
 
 Hix::Features::Move::Move(GLModel* target) : _model(target)
 {

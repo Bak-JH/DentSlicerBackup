@@ -2,6 +2,7 @@
 #include "../../input/raycastcontroller.h"
 #include "render/Color.h"
 #include "../../qmlmanager.h"
+#include "feature/move.h"
 
 /////////////////////
 ///  Add Support  ///
@@ -93,8 +94,7 @@ Hix::Features::FeatureContainer* Hix::Features::SupportMode::generateAutoSupport
 	{
 		if (scfg->support_type != SlicingConfiguration::SupportType::None)
 		{
-			selectedModel->setZToBed();
-			selectedModel->moveModel(QVector3D(0, 0, Hix::Support::SupportRaftManager::supportRaftMinLength()));
+			container->addFeature(new Move(selectedModel, QVector3D(0, 0, Hix::Support::SupportRaftManager::supportRaftMinLength())));
 		}
 		auto overhangs = qmlManager->supportRaftManager().detectOverhang(*selectedModel);
 		for (auto overhang : overhangs)
@@ -115,7 +115,7 @@ Hix::Features::FeatureContainer* Hix::Features::SupportMode::clearSupport()
 		container->addFeature(new RemoveSupport(each));
 
 	for (auto model : _targetModels)
-		model->setZToBed();
+		container->addFeature(new Move(model, QVector3D(0, 0, -Hix::Support::SupportRaftManager::supportRaftMinLength())));
 
 	if (qmlManager->supportRaftManager().supportsEmpty())
 		qmlManager->supportRaftManager().clear();
