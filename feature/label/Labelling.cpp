@@ -88,7 +88,6 @@ GLModel* Hix::Features::LabellingMode::generatePreviewModel()
 	}
 
 	return new GLModel(_targetModel, labelMesh, "label", 0);
-
 }
 
 Hix::Features::LabellingMode::LabellingMode()
@@ -150,6 +149,7 @@ void Hix::Features::LabellingMode::updateLabelMesh(const QVector3D& localInterse
 	newTransform.setTranslation(localIntersection);
 	newTransform.setScale(0.05f);
 	_previewModel->transform().setMatrix(newTransform.matrix());
+	_previewModel->updateAABBScale(newTransform.scale3D());
 }
 
 void Hix::Features::LabellingMode::setText(const QString& text)

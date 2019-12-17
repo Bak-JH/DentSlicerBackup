@@ -1,7 +1,6 @@
 #include "deleteModel.h"
 #include "glmodel.h"
 #include "qmlmanager.h"
-#include "common/debugging/DebugRenderObject.h"
 
 Hix::Features::DeleteModel::DeleteModel(GLModel* target)
 {
@@ -27,7 +26,6 @@ void Hix::Features::DeleteModel::undo()
 	{
 		qmlManager->addPart(_deletedModel.first->modelName(), _deletedModel.first->ID);
 		qmlManager->addToGLModels(_deletedModel.first);
-		Hix::Debug::DebugRenderObject::getInstance().showGLModelAabb(_deletedModel.first);
 	}
 }
 

@@ -304,7 +304,6 @@ Hix::Features::Feature* QmlManager::createAndListModel(Hix::Engine3D::Mesh* mesh
 	--modelIDCounter;
 	addToGLModels(addModel->getAddedModel());
 	qDebug() << addModel->getAddedModel();
-	Hix::Debug::DebugRenderObject::getInstance().showGLModelAabb(addModel->getAddedModel());
 	return addModel;
 }
 
