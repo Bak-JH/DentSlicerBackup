@@ -89,7 +89,6 @@ public:
 		return false;
 	}
 	bool isFeatureActive();
-	bool isShaderModeActive();
 	template <typename F>
 	static void postToThread(F&& fun, QThread* thread = qApp->thread()) {
 		auto* obj = QAbstractEventDispatcher::instance(thread);

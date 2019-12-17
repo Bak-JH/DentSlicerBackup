@@ -44,7 +44,6 @@ void Hix::Features::Scale::undo()
 	_model->transform().setMatrix(_prevMatrix);
 	_model->aabb() = _prevAabb;
 	qmlManager->sendUpdateModelInfo();
-	_model->updatePrintable();
 	_model->updateMesh();
 }
 
@@ -53,6 +52,5 @@ void Hix::Features::Scale::redo()
 	_model->transform().setMatrix(_nextMatrix);
 	_model->aabb() = _nextAabb;
 	qmlManager->sendUpdateModelInfo();
-	_model->updatePrintable();
 	_model->updateMesh();
 }

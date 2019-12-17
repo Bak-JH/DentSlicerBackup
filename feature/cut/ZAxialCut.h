@@ -20,7 +20,6 @@ namespace Hix
 			{
 				
 			public:
-				//should cut keep both halves
 				ZAxialCut(GLModel* subject, float cuttingPlane);
 
 				void doChildrenRecursive(GLModel* subject, float cuttingPlane);

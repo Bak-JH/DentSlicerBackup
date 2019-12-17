@@ -41,8 +41,9 @@ namespace Hix
 
 
 Hix::Features::Cut::ZAxialCut::ZAxialCut(GLModel* subject, float cuttingPlane) :
-	_cuttingPlane(cuttingPlane), _container(new Hix::Features::FeatureContainer()), top_no(1), bot_no(1)
+	_cuttingPlane(cuttingPlane), top_no(1), bot_no(1)
 {
+	_container = new Hix::Features::FeatureContainer();
 	qDebug() << "zmax: " << subject->recursiveAabb().zMax() << "plane : " << cuttingPlane << "zmin: " << subject->recursiveAabb().zMin();
 	if (cuttingPlane >= subject->recursiveAabb().zMax() || cuttingPlane <= subject->recursiveAabb().zMin())
 	{
@@ -58,18 +59,22 @@ Hix::Features::Cut::ZAxialCut::ZAxialCut(GLModel* subject, float cuttingPlane) :
 
 void Hix::Features::Cut::ZAxialCut::doChildrenRecursive(GLModel* subject, float cuttingPlane)
 {
-	GLModel* botModel = nullptr;
-	GLModel* topModel = nullptr;
 	Mesh* childTopMesh = nullptr;
 	Mesh* childBotMesh = nullptr;
 	ZAxialCutImp(subject, cuttingPlane, childTopMesh, childBotMesh);
-	if (childBotMesh == nullptr || childBotMesh->getFaces().empty())
+	if(subject->getMesh()->getFaces().empty())
+	{ }
+	else if (childBotMesh == nullptr || childBotMesh->getFaces().empty())
 	{
-		topModel = subject;
+		auto addTopModel = dynamic_cast<AddModel*>(qmlManager->createAndListModel(subject->getMeshModd(), subject->modelName() + "_top", &subject->transform()));
+		_container->addFeature(addTopModel);
+		_upperModels.insert(subject);
 	}
 	else if (childTopMesh == nullptr || childTopMesh->getFaces().empty())
 	{
-		botModel = subject;
+		auto addBotModel = dynamic_cast<AddModel*>(qmlManager->createAndListModel(subject->getMeshModd(), subject->modelName() + "_bot", &subject->transform()));
+		_container->addFeature(addBotModel);
+		_upperModels.insert(subject);
 	}
 	else
 	{

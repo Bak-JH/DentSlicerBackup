@@ -51,6 +51,37 @@ void Hix::Debug::DebugRenderObject::colorDebugFaces()
 	}
 }
 
+void Hix::Debug::DebugRenderObject::showGLModelAabb(GLModel* target)
+{
+	auto minX = target->recursiveAabb().xMin();
+	auto minY = target->recursiveAabb().yMin();
+	auto minZ = target->recursiveAabb().zMin();
+	auto maxX = target->recursiveAabb().xMax();
+	auto maxY = target->recursiveAabb().yMax();
+	auto maxZ = target->recursiveAabb().zMax();
+
+	std::vector<std::vector<QVector3D>> paths;
+
+	paths.push_back({ QVector3D(minX, minY, minZ), QVector3D(maxX, minY, minZ) });
+	paths.push_back({ QVector3D(minX, minY, minZ), QVector3D(minX, maxY, minZ) });
+	paths.push_back({ QVector3D(minX, minY, minZ), QVector3D(minX, minY, maxZ) });
+
+	paths.push_back({ QVector3D(maxX, maxY, maxZ), QVector3D(maxX, minY, maxZ) });
+	paths.push_back({ QVector3D(maxX, maxY, maxZ), QVector3D(minX, maxY, maxZ) });
+	paths.push_back({ QVector3D(maxX, maxY, maxZ), QVector3D(maxX, maxY, minZ) });
+
+	paths.push_back({ QVector3D(minX, minY, maxZ), QVector3D(maxX, minY, maxZ) });
+	paths.push_back({ QVector3D(minX, minY, maxZ), QVector3D(minX, maxY, maxZ) });
+
+	paths.push_back({ QVector3D(minX, maxY, minZ), QVector3D(minX, maxY, maxZ) });
+	paths.push_back({ QVector3D(minX, maxY, minZ), QVector3D(maxX, maxY, minZ) });
+
+	paths.push_back({ QVector3D(maxX, minY, minZ), QVector3D(maxX, maxY, minZ) });
+	paths.push_back({ QVector3D(maxX, minY, minZ), QVector3D(maxX, minY, maxZ) });
+
+	addPaths(paths);
+}
+
 void Hix::Debug::DebugRenderObject::clear()
 {
 	_planes.clear();

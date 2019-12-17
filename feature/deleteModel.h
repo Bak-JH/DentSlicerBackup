@@ -1,5 +1,6 @@
 #pragma once
 #include "feature/interfaces/Feature.h"
+#include <QObject>
 
 namespace Hix
 {
@@ -15,8 +16,8 @@ namespace Hix
 			GLModel* getDeletedModel();
 
 		private:
-			GLModel* _deletedModel;
-			GLModel* _addedModel;
+			std::pair<GLModel*, QObject*> _deletedModel;
+			std::pair<GLModel*, QObject*> _addedModel;
 		};
 	}
 }

@@ -223,7 +223,7 @@ void GLModel::setHitTestable(bool isEnable)
 void GLModel::clicked(MouseEventData& pick, const Qt3DRender::QRayCasterHit& hit)
 {
 	auto listed = getRootModel();
-	if (!qmlManager->isFeatureActive())
+	if (!qmlManager->isFeatureActive() || qmlManager->isActive<Hix::Features::WidgetMode>())
 	{
 		if (pick.button == Qt::MouseButton::LeftButton)
 		{

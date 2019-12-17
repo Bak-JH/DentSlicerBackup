@@ -1,6 +1,7 @@
 #include "deleteModel.h"
 #include "glmodel.h"
 #include "qmlmanager.h"
+#include "common/debugging/DebugRenderObject.h"
 
 Hix::Features::DeleteModel::DeleteModel(GLModel* target)
 {
@@ -8,12 +9,9 @@ Hix::Features::DeleteModel::DeleteModel(GLModel* target)
 	qmlManager->deletePartListItem(target->ID);
 	qmlManager->supportRaftManager().clear(*target);
 
-	_deletedModel = qmlManager->removeFromGLModels(target);
-	qDebug() << _deletedModel->ID;
+	_deletedModel = std::make_pair(qmlManager->removeFromGLModels(target), target->QNode::parent());
 
-	_deletedModel->setHitTestable(false);
-	_deletedModel->setEnabled(false);
-	_deletedModel->QNode::setParent((QNode*)nullptr);
+	target->QNode::setParent((QNode*)nullptr);
 }
 
 Hix::Features::DeleteModel::~DeleteModel()
@@ -23,27 +21,29 @@ Hix::Features::DeleteModel::~DeleteModel()
 void Hix::Features::DeleteModel::undo()
 {
 	_addedModel = _deletedModel;
-	qmlManager->addPart(_deletedModel->modelName(), _deletedModel->ID);
-	_deletedModel->setEnabled(true);
-	_deletedModel->setHitTestable(true);
-	_deletedModel->QNode::setParent(qmlManager->models);
-	qmlManager->addToGLModels(_deletedModel);
+	_deletedModel.first->QNode::setParent((QNode*)_deletedModel.second);
+
+	if (!dynamic_cast<GLModel*>(_deletedModel.second))
+	{
+		qmlManager->addPart(_deletedModel.first->modelName(), _deletedModel.first->ID);
+		qmlManager->addToGLModels(_deletedModel.first);
+		Hix::Debug::DebugRenderObject::getInstance().showGLModelAabb(_deletedModel.first);
+	}
 }
 
 void Hix::Features::DeleteModel::redo()
 {
-	qmlManager->unselectPart(_addedModel);
-	qmlManager->deletePartListItem(_addedModel->ID);
-	qmlManager->supportRaftManager().clear(*_addedModel);
+	qmlManager->unselectPart(_addedModel.first);
+	qmlManager->deletePartListItem(_addedModel.first->ID);
+	qmlManager->supportRaftManager().clear(*_addedModel.first);
 
-	_deletedModel = qmlManager->removeFromGLModels(_addedModel);
+	_deletedModel.first = qmlManager->removeFromGLModels(_addedModel.first);
 
-	_deletedModel->setHitTestable(false);
-	_deletedModel->setEnabled(false);
-	_deletedModel->QNode::setParent((QNode*)nullptr);
+	_addedModel.first->QNode::setParent((QNode*)nullptr);
+
 }
 
 GLModel* Hix::Features::DeleteModel::getDeletedModel()
 {
-	return _deletedModel;
+	return _deletedModel.first;
 }
