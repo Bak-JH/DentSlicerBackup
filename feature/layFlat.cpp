@@ -18,7 +18,7 @@ void Hix::Features::LayFlatMode::faceSelected(GLModel* selected, const Hix::Engi
 	auto neighbors = selected->getMesh()->findNearSimilarFaces(selectedFace.localFn(), selectedFace);
 	PPShaderMode::colorFaces(selected, neighbors);
 	auto worldFn = selectedFace.worldFn();
-	_args[selected] = listed->vectorToLocal(worldFn);
+	_args[listed] = listed->vectorToLocal(worldFn);
 	isReady = true;
 }
 

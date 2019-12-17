@@ -304,6 +304,7 @@ Hix::Features::Feature* QmlManager::createAndListModel(Hix::Engine3D::Mesh* mesh
 	--modelIDCounter;
 	addToGLModels(addModel->getAddedModel());
 	qDebug() << addModel->getAddedModel();
+	Hix::Debug::DebugRenderObject::getInstance().showGLModelAabb(addModel->getAddedModel());
 	return addModel;
 }
 
@@ -398,17 +399,18 @@ GLModel* QmlManager::getModelByID(int ID)
 	return nullptr;
 }
 
-GLModel* QmlManager::removeFromGLModels(GLModel* target) {
-	if (target)
+GLModel* QmlManager::removeFromGLModels(GLModel* target) 
+{
+	selectedModels.erase(target);
+	if (!dynamic_cast<GLModel*>(target->parent()))
 	{
-		selectedModels.erase(target);
 		auto copy = glmodels.at(target).release();
 		glmodels.erase(target);
-		
 		return copy;
 	}
-
-	return nullptr;
+	
+	return target;
+	
 }
 
 
@@ -620,7 +622,7 @@ GLModel* QmlManager::findGLModelByName(QString modelName){
 
 void QmlManager::backgroundClicked(){
     qDebug() << "background clicked";
-	if (!isShaderModeActive())
+	if (!isActive<PPShaderMode>())
 	{
 		unselectAll();
 	}
@@ -868,7 +870,7 @@ void QmlManager::generateLayFlat()
 
 void QmlManager::openLabelling()
 {
-	_currentMode.reset(new Labelling());
+	_currentMode.reset(new LabellingMode());
 }
 
 void QmlManager::closeLabelling()
@@ -909,8 +911,8 @@ void QmlManager::stateChangeLabelling()
 
 void QmlManager::generateLabelMesh()
 {
-	//auto labelling = dynamic_cast<Labelling*>(_currentFeature.get());
-	//labelling->generateLabelMesh();
+	auto labelling = dynamic_cast<LabellingMode*>(_currentMode.get());
+	labelling->applyLabelMesh();
 }
 
 void QmlManager::openExtension()
@@ -1743,10 +1745,6 @@ bool QmlManager::isFeatureActive()
 	return _currentMode.get() != nullptr;
 }
 
-bool QmlManager::isShaderModeActive()
-{
-	return dynamic_cast<Hix::Features::PPShaderMode*>(_currentMode.get()) != nullptr;
-}
 
 Hix::Features::Mode* QmlManager::getCurrentMode()
 {

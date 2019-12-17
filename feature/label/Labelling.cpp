@@ -10,7 +10,7 @@ using namespace ClipperLib;
 
 //Mesh* generateLabelMesh(const QVector3D translation, const QVector3D normal, const QString text, const QFont font)
 
-GLModel* Hix::Features::Labelling::generatePreviewModel()
+GLModel* Hix::Features::LabellingMode::generatePreviewModel()
 {
 
 	auto labelMesh = new Mesh();
@@ -91,17 +91,17 @@ GLModel* Hix::Features::Labelling::generatePreviewModel()
 
 }
 
-Hix::Features::Labelling::Labelling()
+Hix::Features::LabellingMode::LabellingMode()
 {
 }
 
 
 
-Hix::Features::Labelling::~Labelling()
+Hix::Features::LabellingMode::~LabellingMode()
 {
 }
 
-void Hix::Features::Labelling::faceSelected(GLModel* selected, const Hix::Engine3D::FaceConstItr& selectedFace, const Hix::Input::MouseEventData& mouse, const Qt3DRender::QRayCasterHit& hit)
+void Hix::Features::LabellingMode::faceSelected(GLModel* selected, const Hix::Engine3D::FaceConstItr& selectedFace, const Hix::Input::MouseEventData& mouse, const Qt3DRender::QRayCasterHit& hit)
 {
 	_targetModel = selected;
 	updateLabelMesh(hit.localIntersection(), selectedFace);
@@ -125,7 +125,7 @@ void Hix::Features::Labelling::faceSelected(GLModel* selected, const Hix::Engine
 //		}
 //	}
 //}
-void Hix::Features::Labelling::updateLabelMesh(const QVector3D& localIntersection, const Hix::Engine3D::FaceConstItr& face)
+void Hix::Features::LabellingMode::updateLabelMesh(const QVector3D& localIntersection, const Hix::Engine3D::FaceConstItr& face)
 {
 	//setMaterialColor(Hix::Render::Colors::Support);
 	if (_isDirty)
@@ -152,7 +152,7 @@ void Hix::Features::Labelling::updateLabelMesh(const QVector3D& localIntersectio
 	_previewModel->transform().setMatrix(newTransform.matrix());
 }
 
-void Hix::Features::Labelling::setText(const QString& text)
+void Hix::Features::LabellingMode::setText(const QString& text)
 {
 	if (_text != text)
 	{
@@ -161,14 +161,14 @@ void Hix::Features::Labelling::setText(const QString& text)
 	}
 }
 
-void Hix::Features::Labelling::setFontName(const QString& fontName)
+void Hix::Features::LabellingMode::setFontName(const QString& fontName)
 {
 	_font.setFamily(fontName);
 	_isDirty = true;
 
 }
 
-void Hix::Features::Labelling::setFontBold(bool isBold)
+void Hix::Features::LabellingMode::setFontBold(bool isBold)
 {
 	if (_font.bold() != isBold)
 	{
@@ -177,7 +177,7 @@ void Hix::Features::Labelling::setFontBold(bool isBold)
 	}
 }
 
-void Hix::Features::Labelling::setFontSize(int fontSize)
+void Hix::Features::LabellingMode::setFontSize(int fontSize)
 {
 	if (_font.pointSize()!= fontSize)
 	{
@@ -186,7 +186,7 @@ void Hix::Features::Labelling::setFontSize(int fontSize)
 	}
 }
 
-void Hix::Features::Labelling::generateLabelMesh()
+void Hix::Features::LabellingMode::applyLabelMesh()
 {
 	if (!_previewModel)
 	{
@@ -197,5 +197,4 @@ void Hix::Features::Labelling::generateLabelMesh()
 	_targetModel->setMaterialColor(Hix::Render::Colors::Selected);
 	_targetModel->updateModelMesh();
 	_previewModel.release();
-
 }

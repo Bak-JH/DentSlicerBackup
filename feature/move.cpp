@@ -73,7 +73,6 @@ void Hix::Features::Move::undo()
 	_model->transform().setMatrix(_prevMatrix);
 	_model->aabb() = _prevAabb;
 	qmlManager->cameraViewChanged();
-	_model->updatePrintable();
 	_model->updateMesh();
 }
 
@@ -82,6 +81,5 @@ void Hix::Features::Move::redo()
 	_model->transform().setMatrix(_nextMatrix);
 	_model->aabb() = _nextAabb;
 	qmlManager->cameraViewChanged();
-	_model->updatePrintable();
 	_model->updateMesh();
 }
