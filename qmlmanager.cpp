@@ -441,18 +441,15 @@ void QmlManager::deleteModelFile(GLModel* model){
 
 void QmlManager::deleteSelectedModels() {
     qDebug() << "deleteSelectedModels()";
-
-
     if (selectedModels.size() == 0) {
         deleteModelFileDone();
         return;
     }
-	Hix::Features::FeatureContainer* container = new Hix::Features::FeatureContainer();
-	for (auto it = selectedModels.begin(); it != selectedModels.end();)
+	auto copySelectedModels = selectedModels;
+	Hix::Features::FeatureContainerFlushSupport* container = new Hix::Features::FeatureContainerFlushSupport();
+	for (auto it = copySelectedModels.begin(); it != copySelectedModels.end(); ++it)
 	{
-		auto model = *it;
-		it = selectedModels.erase(it);
-		container->addFeature(new DeleteModel(model));
+		container->addFeature(new DeleteModel(*it));
 	}
 	if(!container->empty())
 		_featureHistoryManager.addFeature(container);
@@ -1586,8 +1583,6 @@ void QmlManager::unselectPart(GLModel* target)
     //QMetaObject::invokeMethod(boundedBox, "hideBox"); // Bounded Box
     sendUpdateModelInfo();
 }
-
-
 QVector2D QmlManager::world2Screen(QVector3D target) {
 	QVariant value;
 	qRegisterMetaType<QVariant>("QVariant");
@@ -1601,7 +1596,7 @@ QVector2D QmlManager::world2Screen(QVector3D target) {
 void QmlManager::openSupport()
 {
 	//just empty placeholder to give modality to Support.
-	_currentMode.reset(new SupportMode(selectedModels, models));
+	_currentMode.reset(new SupportMode(selectedModels));
 }
 void QmlManager::closeSupport()
 {

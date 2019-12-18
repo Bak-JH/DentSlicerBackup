@@ -76,12 +76,12 @@ void Hix::Features::ExtendMode::faceSelected(GLModel* selected, const Hix::Engin
 	PPShaderMode::colorFaces(selected, latest);
 }
 
-Hix::Features::FeatureContainer* Hix::Features::ExtendMode::applyExtend(double distance)
+Hix::Features::FeatureContainerFlushSupport* Hix::Features::ExtendMode::applyExtend(double distance)
 {
 	if (_args.empty())
 		return nullptr;
 
-	Hix::Features::FeatureContainer* container = new FeatureContainer();
+	Hix::Features::FeatureContainerFlushSupport* container = new FeatureContainerFlushSupport();
 	for (auto& each : _args)
 	{
 		auto& arg = each.second;
@@ -98,7 +98,7 @@ Hix::Features::FeatureContainer* Hix::Features::ExtendMode::applyExtend(double d
 
 Hix::Features::Extend::Extend(GLModel* targetModel, const QVector3D& targetFaceNormal,
 								const std::unordered_set<FaceConstItr>& targetFaces, double distance)
-	: _model(targetModel), _normal(targetFaceNormal), _extensionFaces(targetFaces), FlushSupport()
+	: _model(targetModel), _normal(targetFaceNormal), _extensionFaces(targetFaces)
 {
 
 

@@ -8,7 +8,7 @@ namespace Hix
 {
 	namespace Features
 	{
-		class Move : public FlushSupport
+		class Move : public Feature
 		{
 		public:
 			Move(GLModel* target, const QVector3D& to);
@@ -32,9 +32,9 @@ namespace Hix
 			virtual ~MoveMode();
 			void featureStarted()override;
 			void featureEnded()override;
-			FeatureContainer* applyMove(const QVector3D& to);
+			FeatureContainerFlushSupport* applyMove(const QVector3D& to);
 		private:
-			Hix::Features::FeatureContainer* _moveContainer = nullptr;
+			Hix::Features::FeatureContainerFlushSupport* _moveContainer = nullptr;
 		};
 	}
 }

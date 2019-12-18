@@ -1,12 +1,14 @@
 #pragma once
 #include "feature/interfaces/Feature.h"
+#include "feature/interfaces/FlushSupport.h"
+
 #include <QObject>
 
 namespace Hix
 {
 	namespace Features
 	{
-		class DeleteModel : public Feature
+		class DeleteModel : public Feature, public FlushSupport
 		{
 		public:
 			DeleteModel(GLModel* target);

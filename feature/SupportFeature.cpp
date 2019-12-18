@@ -126,7 +126,7 @@ void Hix::Features::RemoveRaft::redo()
 ////////////////////
 /// Support Mode ///
 ////////////////////
-Hix::Features::SupportMode::SupportMode(const std::unordered_set<GLModel*>& selectedModels, QEntity* parent)
+Hix::Features::SupportMode::SupportMode(const std::unordered_set<GLModel*>& selectedModels)
 	: _targetModels(selectedModels)
 {
 }
@@ -171,13 +171,10 @@ Hix::Features::FeatureContainer* Hix::Features::SupportMode::generateAutoSupport
 
 Hix::Features::FeatureContainer* Hix::Features::SupportMode::clearSupport()
 {
-	if (qmlManager->supportRaftManager().supportsEmpty())
-		return nullptr;
-
 	Hix::Features::FeatureContainer* container = new FeatureContainer();
 	std::unordered_set<const GLModel*> models;
-
-	container->addFeature(new RemoveRaft());
+	if(qmlManager->supportRaftManager().raftActive())
+		container->addFeature(new RemoveRaft());
 
 	for(auto each : qmlManager->supportRaftManager().modelAttachedSupports(_targetModels))
 		container->addFeature(new RemoveSupport(each));

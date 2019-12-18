@@ -8,7 +8,7 @@ namespace Hix
 {
 	namespace Features
 	{
-		class Rotate : public FlushSupport
+		class Rotate : public Feature
 		{
 		public:
 			Rotate(GLModel* target);
@@ -32,10 +32,10 @@ namespace Hix
 			virtual ~RotateMode();
 			void featureStarted()override;
 			void featureEnded()override;
-			Hix::Features::FeatureContainer* applyRotate(const QQuaternion& rot);
+			Hix::Features::FeatureContainerFlushSupport* applyRotate(const QQuaternion& rot);
 
 		private:
-			Hix::Features::FeatureContainer* _rotateContainer;
+			Hix::Features::FeatureContainerFlushSupport* _rotateContainer;
 		};
 
 		

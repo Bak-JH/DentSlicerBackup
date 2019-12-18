@@ -7,7 +7,7 @@ namespace Hix
 {
 	namespace Features
 	{
-		class Scale : public FlushSupport
+		class Scale : public Feature
 		{
 		public:
 			Scale(GLModel* targetModel, QVector3D& scale);
@@ -29,7 +29,7 @@ namespace Hix
 			ScaleMode(const std::unordered_set<GLModel*>& selectedModels);
 			virtual ~ScaleMode();
 
-			FeatureContainer* applyScale(QVector3D scale);
+			FeatureContainerFlushSupport* applyScale(QVector3D scale);
 		private:
 			std::unordered_set<GLModel*> _targetModels;
 		};

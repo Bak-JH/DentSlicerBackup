@@ -3,6 +3,7 @@
 #include <QFont>
 #include <QString>
 #include "../interfaces/SelectFaceMode.h"
+#include "../interfaces/FlushSupport.h"
 namespace Hix
 {
 	namespace Features
@@ -33,7 +34,7 @@ namespace Hix
 			QVector3D _scale;
 		};
 
-		class Labelling : public Feature
+		class Labelling : public Feature, public FlushSupport
 		{
 		public:
 			Labelling(GLModel* parentModel, GLModel* previewModel);

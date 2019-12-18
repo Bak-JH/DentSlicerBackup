@@ -21,7 +21,7 @@ namespace Hix
 		};
 
 
-		class Extend: public FlushSupport //pee pee hee hee
+		class Extend: public Feature //pee pee hee hee
 		{
 		public:
 			Extend(GLModel* targetModel, const QVector3D& targetFaceNormal,
@@ -48,7 +48,7 @@ namespace Hix
 			ExtendMode(const std::unordered_set<GLModel*> & selectedModels);
 			virtual ~ExtendMode();
 			void faceSelected(GLModel* selected, const Hix::Engine3D::FaceConstItr& selectedFace, const Hix::Input::MouseEventData& mouse, const Qt3DRender::QRayCasterHit& hit)override;
-			FeatureContainer* applyExtend(double distance);
+			FeatureContainerFlushSupport* applyExtend(double distance);
 
 		private:
 			GLModel* _model = nullptr;

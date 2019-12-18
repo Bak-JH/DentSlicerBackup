@@ -20,7 +20,7 @@ namespace Hix
 		};
 
 
-		class FeatureContainer: public Feature
+		class FeatureContainer: virtual public Feature
 		{
 		public:
 			FeatureContainer();
@@ -29,8 +29,9 @@ namespace Hix
 			void undo()override;
 			void redo()override;
 			const bool empty();
-		private:
+		protected:
 			std::deque<std::unique_ptr<Feature>> _container;
 		};
+
 	}
 }
