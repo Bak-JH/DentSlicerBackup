@@ -73,41 +73,10 @@ Entity {
             specular: Qt.rgba(100/255, 100/255, 100/255, 1 )
             shininess: 0
         }
-
-        Entity {
-			objectName: "PrintBedGrid"
-            id: gridEntity
-            GridMesh {
-                id: gridMesh
-                meshResolution: Qt.size(Math.floor(qm.getBedXSize()/5),
-                                        Math.floor(qm.getBedYSize()/5))
-            }
-
-            Transform {
-                id: gridMeshTransform
-                translation : Qt.vector3d(-qm.getBedXSize()/2, -qm.getBedYSize()/2, 0)
-                scale3D: Qt.vector3d(qm.getBedXSize(),
-                                     qm.getBedYSize(),
-                                     1)
-            }
-            components:[gridMesh, gridMeshTransform, meshMaterial]
-        }
-
-        /* White plate and logo on bed */
-
-        Plate {
-			objectName: "Plate"
-            id: planeEntity
-        }
-
-
-        /* Model */
-
-        Model{
+		Model{
             id: meshEntity4
             //inputSource:"file:///C:/Users/user/Downloads/Spider_ascii.stl"
         }
-
         CoordinateMesh{}
 
     }

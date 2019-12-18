@@ -2,7 +2,7 @@
 #include "SlicerDebug.h"
 #include "configuration.h"
 #include <QSvgGenerator>
-
+#include "../../qmlmanager.h"
 void drawContour(const Hix::Slicer::Contour& contour, QPainter& painter, QString contourName)
 {
 	auto intPath = contour.toDebugPath();
@@ -24,10 +24,10 @@ void Hix::Slicer::Debug::outDebugSVGs(const std::deque<Hix::Slicer::Contour>& co
 	
 	//svg file name
 	QString newPath = SlicerDebug::getInstance().debugFilePath + QString::number(z) + QString(".svg");
-
+	auto& pSet = qmlManager->settings().printerSetting();
 	QSvgGenerator generator;
 	generator.setFileName(newPath);
-	QSize size(scfg->resolutionX() + 200, scfg->resolutionY() + 200);
+	QSize size(pSet.sliceImageResolutionX + 200, pSet.sliceImageResolutionY + 200);
 	generator.setSize(size);
 	generator.setViewBox(QRect(0, 0, size.width(), size.height()));
 	QPainter painter;
@@ -66,10 +66,11 @@ void Hix::Slicer::Debug::outDebugIncompletePathsSVGs(const std::deque<Hix::Slice
 
 	//svg file name
 	QString newPath = SlicerDebug::getInstance().debugFilePath +"Incomplete_"+ QString::number(z) + QString(".svg");
+	auto& pSet = qmlManager->settings().printerSetting();
 
 	QSvgGenerator generator;
 	generator.setFileName(newPath);
-	QSize size(scfg->resolutionX() + 200, scfg->resolutionY() + 200);
+	QSize size(pSet.sliceImageResolutionX + 200, pSet.sliceImageResolutionY + 200);
 	generator.setSize(size);
 	generator.setViewBox(QRect(0, 0, size.width(), size.height()));
 	QPainter painter;

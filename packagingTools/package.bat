@@ -9,6 +9,7 @@ mkdir setup
 %QT_MSVC2017_64%\bin\windeployqt.exe --dir setup --compiler-runtime --release --qmldir ..\Qml ..\release\DentSlicer.exe
 ECHO running vs_copy_dll for copying dependent libraries
 start ..\vs_copy_dll.bat release setup ..\
+start ..\vs_copy_resources.bat release setup ..\
 start copy_pcl.bat
 ECHO copy DentSlicer.exe
 xcopy /s/Y ..\release\DentSlicer.exe setup
