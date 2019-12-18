@@ -4,6 +4,7 @@ import QtQuick.Layouts 1.0
 import QtQuick.Controls 1.0
 //import QtQuick.Controls.Styles 1.0
 import QtQuick.Controls.Styles 1.4
+import QtQuick.Dialogs 1.0
 
 
 
@@ -562,6 +563,20 @@ Rectangle {
         }
     }
 
+	
+	FileDialog {
+		id: settingFileDialog
+		title: "Please choose a settings file"
+		folder: shortcuts.home
+		nameFilters: ["Setting files(*.json)"]
+		visible: false
+		onAccepted: {
+			var filepath = settingFileDialog.fileUrl.toString().replace(/^(file:\/{3})/,"");
+			qm.settingFileChanged(filepath);
+		}
+		onRejected: {
+		}
+	}
     Item{
         id : fifthtab
         width : buttonWidth *1
@@ -573,7 +588,6 @@ Rectangle {
 
         //color: "transparent"
 
-
         UpperButton{
             id : fifth_tab_button_setting
             objectName : "Setting"
@@ -582,11 +596,23 @@ Rectangle {
             iconSource2: "qrc:/Resource/upper2_setting.png"
             iconText: qsTr("Setting")
 
-            onButtonClicked:{
-                if(state == "active")
-                    settingPopup.visible = true
-                else
-                    settingPopup.visible = false
+            // onButtonClicked:{
+            //     if(state == "active")
+			// 	{
+			// 	    //settingPopup.visible = true
+            //         settingFileDialog.open();
+			// 	}
+            //     else
+			// 	{
+            //         //settingPopup.visible = false
+			// 	}
+            // }
+			    MouseArea{
+                anchors.fill: parent
+                onClicked:{
+                    all_off()
+                    settingFileDialog.open();
+                }
             }
         }
 

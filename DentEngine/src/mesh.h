@@ -6,7 +6,6 @@
 #include <QTime>
 #include <array>
 #include <variant>
-#include "Bounds3D.h"
 #include "../../common/TrackedIndexedList.h"
 #include "../../common/Hasher.h"
 #define cos50 0.64278761
@@ -123,7 +122,6 @@ namespace Hix
 
 		};
 
-
 		class Mesh {
 		public:
 			Mesh();
@@ -172,8 +170,6 @@ namespace Hix
 
 			std::unordered_set<FaceConstItr> findNearSimilarFaces(QVector3D normal,FaceConstItr mf, float maxNormalDiff = 0.1f, size_t maxCount = 10000)const;
 
-			/********************** Stuff that can be public **********************/
-			const Bounds3D& bounds()const;
 			void setSceneEntity(const Render::SceneEntity* entity);
 			const Render::SceneEntity* entity()const;
 			QVector4D toWorld(const QVector4D& local)const;
@@ -184,6 +180,11 @@ namespace Hix
 			QVector3D vectorToLocal(const QVector3D& world)const;
 
 			VertexConstItr getVtxAtLocalPos(const QVector3D& pos)const;
+			std::unordered_map<FaceConstItr, QVector3D> cacheWorldFN()const;
+			std::unordered_map<VertexConstItr, QVector3D> cacheWorldPos()const;
+			std::unordered_map<VertexConstItr, QVector3D> cacheWorldVN()const;
+
+
 		private:
 			void rehashVtcs();
 			void vertexMove(const QVector3D& direction);

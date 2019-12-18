@@ -1,5 +1,4 @@
-#ifndef SVGEXPORTER_H
-#define SVGEXPORTER_H
+#pragma once
 #include <sstream>
 #include <QDir>
 #include <QJsonObject>
@@ -7,12 +6,8 @@
 #include <QSvgRenderer>
 #include <QImage>
 #include <QPainter>
-//namespace ClipperLib
-//{
-//	typedef PolyNode;
-//	struct IntPoint;
-//
-//}
+#include "polyclipping/polyclipping.h"
+
 namespace Hix
 {
 	namespace Slicer
@@ -22,10 +17,27 @@ namespace Hix
 	}
 }
 
-namespace SVGexporter
+class SVGexporter
 {
-	using namespace Hix::Slicer;
-    void exportSVG(Slices& shellSlices, QString outfoldername, bool isTemp);
+public:
+    void exportSVG(Hix::Slicer::Slices& shellSlices, QString outfoldername, bool isTemp);
+
+private:
+	void parsePolyTreeAndWrite(const ClipperLib::PolyNode* pn, bool isTemp, std::stringstream& content);
+	void writePolygon(const ClipperLib::PolyNode * contour, bool isTemp, std::stringstream & content);
+	void writePolygon(ClipperLib::Path & contour, bool isTemp, std::stringstream & content);
+	void writeGroupHeader(int layer_idx, float z, std::stringstream & content);
+	void writeGroupFooter(std::stringstream & content);
+	void writeHeader(std::stringstream & content);
+	void writeFooter(std::stringstream& content);
+
+	float _ppmmX;
+	float _ppmmY;
+
+	QVector2D _offsetXY;
+
+	float _resX;
+	float _resY;
+
 };
 
-#endif // SVGEXPORTER_H
