@@ -28,7 +28,8 @@
 #include "feature/FeatureHistoryManager.h"
 #include "feature/interfaces/Feature.h"
 #include "ui/GridBed.h"
-#include "Settings/AppSetting.h"#define VIEW_MODE_OBJECT 0
+#include "Settings/AppSetting.h"
+#define VIEW_MODE_OBJECT 0
 #define VIEW_MODE_LAYER 2
 
 #define LAYER_INFILL 0x01
