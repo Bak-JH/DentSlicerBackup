@@ -863,8 +863,7 @@ void QmlManager::closeLayFlat()
 void QmlManager::generateLayFlat()
 {
 	auto layflat = dynamic_cast<LayFlatMode*>(_currentMode.get())->applyLayFlat();
-	if (layflat != nullptr)
-		_featureHistoryManager.addFeature(layflat);
+	_featureHistoryManager.addFeature(layflat);
 }
 
 void QmlManager::openLabelling()
@@ -880,26 +879,22 @@ void QmlManager::closeLabelling()
 
 void QmlManager::setLabelText(QString text)
 {
-	//auto labelling = dynamic_cast<Labelling*>(_currentFeature.get());
-	//labelling->setText(text);
+	dynamic_cast<LabellingMode*>(_currentMode.get())->setText(text);
 }
 
 void QmlManager::setLabelFontName(QString fontName)
 {
-	//auto labelling = dynamic_cast<Labelling*>(_currentFeature.get());
-	//labelling->setFontName(fontName);
+	dynamic_cast<LabellingMode*>(_currentMode.get())->setFontName(fontName);
 }
 
 void QmlManager::setLabelFontBold(bool isBold)
 {
-	//auto labelling = dynamic_cast<Labelling*>(_currentFeature.get());
-	//labelling->setFontBold(isBold);
+	dynamic_cast<LabellingMode*>(_currentMode.get())->setFontBold(isBold);
 }
 
 void QmlManager::setLabelFontSize(int fontSize)
 {
-	//auto labelling = dynamic_cast<Labelling*>(_currentFeature.get());
-	//labelling->setFontSize(fontSize);
+	dynamic_cast<LabellingMode*>(_currentMode.get())->setFontSize(fontSize);
 }
 
 void QmlManager::stateChangeLabelling()
@@ -910,8 +905,9 @@ void QmlManager::stateChangeLabelling()
 
 void QmlManager::generateLabelMesh()
 {
-	auto labelling = dynamic_cast<LabellingMode*>(_currentMode.get());
-	labelling->applyLabelMesh();
+	auto labelling = dynamic_cast<LabellingMode*>(_currentMode.get())->applyLabelMesh();
+	if(labelling != nullptr)
+		_featureHistoryManager.addFeature(labelling);
 }
 
 void QmlManager::openExtension()
@@ -1103,8 +1099,7 @@ void QmlManager::applyMove(int axis, qreal X, qreal Y){
 	QVector3D displacement(X, Y, 0);
 
 	auto move = dynamic_cast<Hix::Features::MoveMode*>(_currentMode.get())->applyMove(displacement);
-	if (move != nullptr)
-		_featureHistoryManager.addFeature(move);
+	_featureHistoryManager.addFeature(move);
 
 }
 void QmlManager::applyRotation(int mode, qreal X, qreal Y, qreal Z){
@@ -1114,8 +1109,7 @@ void QmlManager::applyRotation(int mode, qreal X, qreal Y, qreal Z){
 	for (auto selectedModel : selectedModels) {
 		auto rotation = QQuaternion::fromEulerAngles(X,Y,Z);
 		auto rotate = dynamic_cast<Hix::Features::RotateMode*>(_currentMode.get())->applyRotate(rotation);
-		if (rotate != nullptr)
-			_featureHistoryManager.addFeature(rotate);
+		_featureHistoryManager.addFeature(rotate);
     }
 }
 void QmlManager::resetLayflat(){
@@ -1355,8 +1349,7 @@ void QmlManager::applyScale(double arg1, double arg2, double arg3)
 	float scaleZ = arg3;
 
 	auto scale = dynamic_cast<ScaleMode*>(_currentMode.get())->applyScale(QVector3D(scaleX, scaleY, scaleZ));
-	if (scale != nullptr)
-		_featureHistoryManager.addFeature(scale);
+	_featureHistoryManager.addFeature(scale);
 }
 
 void QmlManager::openOrientation(){
@@ -1623,8 +1616,7 @@ void QmlManager::closeSupport()
 void QmlManager::generateAutoSupport()
 {
 	auto autoGenSupport = dynamic_cast<SupportMode*>(_currentMode.get())->generateAutoSupport();
-	if (autoGenSupport != nullptr)
-		_featureHistoryManager.addFeature(autoGenSupport);
+	_featureHistoryManager.addFeature(autoGenSupport);
 }
 
 
@@ -1644,8 +1636,7 @@ void QmlManager::supportEditEnabled(bool enabled)
 void QmlManager::clearSupports()
 {
 	auto clearSupport = dynamic_cast<SupportMode*>(_currentMode.get())->clearSupport();
-	if (clearSupport != nullptr)
-		_featureHistoryManager.addFeature(clearSupport);
+	_featureHistoryManager.addFeature(clearSupport);
 }
 
 
