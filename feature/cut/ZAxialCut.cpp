@@ -43,7 +43,6 @@ namespace Hix
 Hix::Features::Cut::ZAxialCut::ZAxialCut(GLModel* subject, float cuttingPlane) :
 	_cuttingPlane(cuttingPlane), top_no(1), bot_no(1)
 {
-	_container = new Hix::Features::FeatureContainer();
 	qDebug() << "zmax: " << subject->recursiveAabb().zMax() << "plane : " << cuttingPlane << "zmin: " << subject->recursiveAabb().zMin();
 	if (cuttingPlane >= subject->recursiveAabb().zMax() || cuttingPlane <= subject->recursiveAabb().zMin())
 	{
@@ -51,7 +50,7 @@ Hix::Features::Cut::ZAxialCut::ZAxialCut(GLModel* subject, float cuttingPlane) :
 	}//do listed part first
 
 	doChildrenRecursive(subject, cuttingPlane);
-	_container->addFeature(new DeleteModel(subject));
+	addFeature(new DeleteModel(subject));
 	//qmlManager->deleteModelFile(subject->ID);
 
 	qDebug() << qmlManager->glmodels.size();
@@ -67,13 +66,13 @@ void Hix::Features::Cut::ZAxialCut::doChildrenRecursive(GLModel* subject, float 
 	else if (childBotMesh == nullptr || childBotMesh->getFaces().empty())
 	{
 		auto addTopModel = dynamic_cast<AddModel*>(qmlManager->createAndListModel(subject->getMeshModd(), subject->modelName() + "_top", &subject->transform()));
-		_container->addFeature(addTopModel);
+		addFeature(addTopModel);
 		_upperModels.insert(subject);
 	}
 	else if (childTopMesh == nullptr || childTopMesh->getFaces().empty())
 	{
 		auto addBotModel = dynamic_cast<AddModel*>(qmlManager->createAndListModel(subject->getMeshModd(), subject->modelName() + "_bot", &subject->transform()));
-		_container->addFeature(addBotModel);
+		addFeature(addBotModel);
 		_upperModels.insert(subject);
 	}
 	else
@@ -84,8 +83,8 @@ void Hix::Features::Cut::ZAxialCut::doChildrenRecursive(GLModel* subject, float 
 		_upperModels.insert(addTopModel->getAddedModel());
 		_lowerModels.insert(addBotModel->getAddedModel());
 		
-		_container->addFeature(addTopModel);
-		_container->addFeature(addBotModel);
+		addFeature(addTopModel);
+		addFeature(addBotModel);
 	}
 	for (auto childNode : subject->childNodes())
 	{
@@ -95,16 +94,6 @@ void Hix::Features::Cut::ZAxialCut::doChildrenRecursive(GLModel* subject, float 
 			doChildrenRecursive(model, cuttingPlane);
 		}
 	}
-}
-
-void Hix::Features::Cut::ZAxialCut::undo()
-{
-	_container->undo();
-}
-
-void Hix::Features::Cut::ZAxialCut::redo()
-{
-	_container->redo();
 }
 
 std::unordered_set<GLModel*>& Hix::Features::Cut::ZAxialCut::upperModels()

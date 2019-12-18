@@ -9,9 +9,9 @@ Hix::Features::ScaleMode::~ScaleMode()
 {
 }
 
-Hix::Features::FeatureContainer* Hix::Features::ScaleMode::applyScale(QVector3D scale)
+Hix::Features::FeatureContainerFlushSupport* Hix::Features::ScaleMode::applyScale(QVector3D scale)
 {
-	Hix::Features::FeatureContainer* container = new FeatureContainer();
+	Hix::Features::FeatureContainerFlushSupport* container = new FeatureContainerFlushSupport();
 	for (auto& target : _targetModels)
 		container->addFeature(new Scale(target, scale));
 
@@ -23,7 +23,7 @@ Hix::Features::FeatureContainer* Hix::Features::ScaleMode::applyScale(QVector3D 
 
 
 Hix::Features::Scale::Scale(GLModel* targetModel, QVector3D& scale)
-	: _model(targetModel), FlushSupport()
+	: _model(targetModel)
 {
 	_prevMatrix = targetModel->transform().matrix();
 	_prevAabb = targetModel->aabb();

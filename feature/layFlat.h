@@ -10,7 +10,7 @@ namespace Hix
 {
 	namespace Features
 	{
-		class LayFlat: public FlushSupport//public SelectFaceFeature, public PPShaderMode
+		class LayFlat: public Feature
 		{
 		public:
 			LayFlat(GLModel* selectedModel, QVector3D normal, bool isReady);
@@ -32,7 +32,7 @@ namespace Hix
 			LayFlatMode(const std::unordered_set<GLModel*>& selectedModels);
 			virtual ~LayFlatMode();
 			void faceSelected(GLModel* selected, const Hix::Engine3D::FaceConstItr& selectedFace, const Hix::Input::MouseEventData& mouse, const Qt3DRender::QRayCasterHit& hit)override;
-			FeatureContainer* applyLayFlat();
+			FeatureContainerFlushSupport* applyLayFlat();
 
 		private:
 			GLModel* _model = nullptr;

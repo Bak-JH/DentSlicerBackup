@@ -5,12 +5,16 @@ namespace Hix
 {
 	namespace Features
 	{
-		class FlushSupport : public Feature
+		class FlushSupport
 		{
 		public:
 			FlushSupport();
+			//FlushSupport(GLModel* model);
+
 			virtual ~FlushSupport();
 		};
+		class FeatureContainerFlushSupport : public FeatureContainer, public FlushSupport
+		{};
 	}
 }
 

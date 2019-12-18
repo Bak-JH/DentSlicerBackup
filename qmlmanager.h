@@ -293,7 +293,6 @@ private:
 	Hix::Tasking::TaskManager _taskManager;
 	void setModelViewMode(int mode);
 	GLModel* getModelByID(int ID);
-    void unselectPartImpl(GLModel* target);
 	//do not mix UI work with background thread
 	//std::future<Slicer*> exportSelected(bool isTemp);
 	QString getExportPath();

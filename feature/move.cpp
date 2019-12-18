@@ -17,7 +17,7 @@ Hix::Features::MoveMode::~MoveMode()
 
 void Hix::Features::MoveMode::featureStarted()
 {
-	_moveContainer = new FeatureContainer();
+	_moveContainer = new FeatureContainerFlushSupport();
 	for (auto& target : _targetModels)
 		_moveContainer->addFeature(new Move(target));
 }
@@ -34,9 +34,9 @@ void Hix::Features::MoveMode::featureEnded()
 	_widget.updatePosition();
 }
 
-Hix::Features::FeatureContainer* Hix::Features::MoveMode::applyMove(const QVector3D& to)
+Hix::Features::FeatureContainerFlushSupport* Hix::Features::MoveMode::applyMove(const QVector3D& to)
 {
-	Hix::Features::FeatureContainer* container = new FeatureContainer();
+	Hix::Features::FeatureContainerFlushSupport* container = new FeatureContainerFlushSupport();
 	for (auto& target : _targetModels)
 		container->addFeature(new Move(target, to));
 	return container;
@@ -46,7 +46,7 @@ Hix::Features::FeatureContainer* Hix::Features::MoveMode::applyMove(const QVecto
 
 
 
-Hix::Features::Move::Move(GLModel* target, const QVector3D& to) : _model(target), FlushSupport()
+Hix::Features::Move::Move(GLModel* target, const QVector3D& to) : _model(target)
 {
 	_prevMatrix = target->transform().matrix();
 	_prevAabb = target->aabb();
@@ -56,7 +56,7 @@ Hix::Features::Move::Move(GLModel* target, const QVector3D& to) : _model(target)
 		qmlManager->cameraViewChanged();
 }
 
-Hix::Features::Move::Move(GLModel* target) : _model(target), FlushSupport()
+Hix::Features::Move::Move(GLModel* target) : _model(target)
 {
 	_prevMatrix = target->transform().matrix();
 	_prevAabb = target->aabb();

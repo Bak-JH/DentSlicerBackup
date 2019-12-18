@@ -21,17 +21,14 @@ namespace Hix
 	{
 		namespace Cut
 		{
-			class PolylineCut : public FlushSupport
+			class PolylineCut : public FeatureContainerFlushSupport
 			{
 			public:
 				PolylineCut(GLModel* origModel, std::vector<QVector3D> cuttingPoints);
-				void undo()override;
-				void redo()override;
 			private:
 				void generateCuttingWalls(const std::vector<QVector3D>& polyline, const Hix::Engine3D::Bounds3D& cutBound, Hix::Engine3D::Mesh& out);
 				void cutCSG(const QString& subjectName, Hix::Render::SceneEntity* subject, const CorkTriMesh& subtract);
 				std::unordered_map<GLModel*, std::unordered_set<GLModel*>> _prevDivideMap;
-				FeatureContainer* _container;
 			};
 
 

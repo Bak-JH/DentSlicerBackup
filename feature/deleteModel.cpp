@@ -6,8 +6,6 @@ Hix::Features::DeleteModel::DeleteModel(GLModel* target)
 {
 	qmlManager->unselectPart(target);
 	qmlManager->deletePartListItem(target->ID);
-	qmlManager->supportRaftManager().clear(*target);
-
 	_deletedModel = std::make_pair(qmlManager->removeFromGLModels(target), target->QNode::parent());
 
 	target->QNode::setParent((QNode*)nullptr);

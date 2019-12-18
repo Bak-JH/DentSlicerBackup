@@ -18,7 +18,7 @@ Hix::Features::RotateMode::~RotateMode()
 
 void Hix::Features::RotateMode::featureStarted()
 {
-	_rotateContainer = new FeatureContainer();
+	_rotateContainer = new FeatureContainerFlushSupport();
 	for (auto& target : _targetModels)
 		_rotateContainer->addFeature(new Rotate(target));
 
@@ -36,21 +36,21 @@ void Hix::Features::RotateMode::featureEnded()
 	_widget.updatePosition();
 }
 
-Hix::Features::FeatureContainer* Hix::Features::RotateMode::applyRotate(const QQuaternion& rot)
+Hix::Features::FeatureContainerFlushSupport* Hix::Features::RotateMode::applyRotate(const QQuaternion& rot)
 {
-	Hix::Features::FeatureContainer* container = new FeatureContainer();
+	Hix::Features::FeatureContainerFlushSupport* container = new FeatureContainerFlushSupport();
 	for (auto& target : _targetModels)
 		container->addFeature(new Rotate(target, rot));
 	return container;
 }
 
-Hix::Features::Rotate::Rotate(GLModel* target) : _model(target), FlushSupport()
+Hix::Features::Rotate::Rotate(GLModel* target) : _model(target)
 {
 	_prevMatrix = target->transform().matrix();
 	_prevAabb = target->aabb();
 }
 
-Hix::Features::Rotate::Rotate(GLModel* target, const QQuaternion& rot) : _model(target), FlushSupport()
+Hix::Features::Rotate::Rotate(GLModel* target, const QQuaternion& rot) : _model(target)
 {
 	_prevMatrix = target->transform().matrix();
 	_prevAabb = target->aabb();

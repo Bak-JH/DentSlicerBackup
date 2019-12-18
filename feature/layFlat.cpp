@@ -4,7 +4,7 @@ using namespace Hix::Features;
 
 
 Hix::Features::LayFlatMode::LayFlatMode(const std::unordered_set<GLModel*>& selectedModels)
-	: PPShaderMode(selectedModels), FlushSupport()
+	: PPShaderMode(selectedModels)
 {
 }
 
@@ -22,17 +22,16 @@ void Hix::Features::LayFlatMode::faceSelected(GLModel* selected, const Hix::Engi
 	isReady = true;
 }
 
-Hix::Features::FeatureContainer* Hix::Features::LayFlatMode::applyLayFlat()
+Hix::Features::FeatureContainerFlushSupport* Hix::Features::LayFlatMode::applyLayFlat()
 {
 	if (_args.empty())
 		return nullptr;
 
-	Hix::Features::FeatureContainer* container = new FeatureContainer();
+	Hix::Features::FeatureContainerFlushSupport* container = new FeatureContainerFlushSupport();
 	for (auto& each : _args)
 	{
 		container->addFeature(new LayFlat(each.first, each.second, isReady));
 	}
-
 	_args.clear();
 
 	return container;

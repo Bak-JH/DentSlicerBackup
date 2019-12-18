@@ -53,24 +53,12 @@ Hix::Features::Cut::PolylineCut::PolylineCut(GLModel * origModel, std::vector<QV
 {
 	//convert polyline to CSG-able 3D mesh, a thin 3D wall.
 	Mesh polylineWall;
-	_container = new FeatureContainer();
-
 	generateCuttingWalls(_cuttingPoints, origModel->recursiveAabb(), polylineWall);
 	//convert all meshes to cork meshes
 	auto cylinderWallCork = toCorkMesh(polylineWall);
 	cutCSG(origModel->modelName(), origModel, cylinderWallCork);
 	freeCorkTriMesh(&cylinderWallCork);
 
-}
-
-void Hix::Features::Cut::PolylineCut::undo()
-{
-	_container->undo();
-}
-
-void Hix::Features::Cut::PolylineCut::redo()
-{
-	_container->redo();
 }
 
 void Hix::Features::Cut::PolylineCut::generateCuttingWalls(const std::vector<QVector3D>& polyline, const Hix::Engine3D::Bounds3D& cutBound, Hix::Engine3D::Mesh& out)
@@ -125,7 +113,7 @@ void Hix::Features::Cut::PolylineCut::cutCSG(const QString& subjectName, Hix::Re
 		auto addModel = dynamic_cast<Hix::Features::AddModel*>(qmlManager->createAndListModel(seperateParts[i], subjectName + "_cut" + QString::number(i), nullptr));
 		addModel->getAddedModel()->setZToBed();
 		_prevDivideMap[dynamic_cast<GLModel*>(subject)].insert(addModel->getAddedModel());
-		_container->addFeature(addModel);
+		addFeature(addModel);
 	}
 	//subject->setMesh(nullptr);
 	auto model = dynamic_cast<GLModel*>(subject);
@@ -133,7 +121,7 @@ void Hix::Features::Cut::PolylineCut::cutCSG(const QString& subjectName, Hix::Re
 	{
 		auto deleteModel = dynamic_cast<Hix::Features::DeleteModel*>(new DeleteModel(model));
 		_prevDivideMap[dynamic_cast<GLModel*>(model)].insert(deleteModel->getDeletedModel());
-		_container->addFeature(deleteModel);
+		addFeature(deleteModel);
 	}
 	else
 	{
