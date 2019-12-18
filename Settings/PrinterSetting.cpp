@@ -48,7 +48,6 @@ void Hix::Settings::PrinterSetting::parseJSONImpl(const rapidjson::Document& doc
 		parse(doc, "bedRadius", bedRadius);
 		bedBound.setXLength(bedRadius * 2);
 		bedBound.setYLength(bedRadius * 2);
-		bedBound.translate(QVector3D(bedOffsetX, bedOffsetY, 0));
 	}
 	else
 	{
@@ -56,7 +55,6 @@ void Hix::Settings::PrinterSetting::parseJSONImpl(const rapidjson::Document& doc
 		parse(doc, "bedY", bedY);
 		bedBound.setXLength(bedX);
 		bedBound.setYLength(bedY);
-		bedBound.translate(QVector3D(bedOffsetX, bedOffsetY, 0));
 	}
 
 }

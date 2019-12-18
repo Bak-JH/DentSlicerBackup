@@ -43,7 +43,7 @@ namespace Hix
 				if (genVal.Is<std::string>())
 				{
 					str = genVal.Get<std::string>();
-					//std::transform(str.begin(), str.end(), str.begin(), std::tolower);
+					std::transform(str.begin(), str.end(), str.begin(), [](unsigned char c) { return std::tolower(c); });
 					auto enumResult = map.find(str);
 					if (enumResult != map.cend())
 					{
@@ -59,7 +59,7 @@ namespace Hix
 				if (genVal.Is<std::string>())
 				{
 					str = genVal.Get<std::string>();
-					//std::transform(str.begin(), str.end(), str.begin(), std::tolower);
+					std::transform(str.begin(), str.end(), str.begin(), [](unsigned char c) { return std::tolower(c); });
 					auto enumResult = map.find(str);
 					if (enumResult != map.cend())
 					{

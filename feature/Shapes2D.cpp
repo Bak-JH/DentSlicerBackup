@@ -126,9 +126,10 @@ std::vector<std::vector<QVector3D>> Hix::Shapes2D::gridRect(float xLength, float
 {
 	float xRad = xLength / 2.0f;
 	float yRad = yLength / 2.0f;
-	size_t xLineCnt = ((size_t)(xRad / offset)) * 2;
-	size_t yLineCnt = ((size_t)(yRad / offset)) * 2;
-	size_t lineCnt = xLineCnt + yLineCnt + 2;
+	//cnt for positive axis
+	size_t xLineCnt = ((size_t)(xRad / offset));
+	size_t yLineCnt = ((size_t)(yRad / offset));
+	size_t lineCnt = xLineCnt*2 + yLineCnt*2 + 2;
 	std::vector<std::vector<QVector3D>> grid;
 	grid.reserve(lineCnt);
 	//x axis, y axis

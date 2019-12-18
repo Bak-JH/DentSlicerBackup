@@ -255,7 +255,7 @@ public:
 	Q_INVOKABLE void setEraserCursor();
     Q_INVOKABLE void setClosedHandCursor();
     Q_INVOKABLE void resetCursor();
-	Q_INVOKABLE void settingFileDialog(QString path);
+	Q_INVOKABLE void settingFileChanged(QString path);
 
     Q_INVOKABLE bool isSelected();
 	Q_INVOKABLE bool isSelected(int ID);

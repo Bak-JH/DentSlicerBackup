@@ -21,7 +21,7 @@ void SVGexporter::exportSVG(Slices& shellSlices,QString outfoldername, bool isTe
 	_ppmmY = printerSetting.pixelPerMMY();
 	_resX = printerSetting.sliceImageResolutionX;
 	_resY = printerSetting.sliceImageResolutionY;
-
+	_offsetXY = QVector2D(printerSetting.bedOffsetX, printerSetting.bedOffsetY);
     qDebug() << "export svg at "<< outfoldername;
 	qDebug() << "shellSlices : " << shellSlices.size();
     //qDebug() << jsonBytes;
@@ -203,7 +203,7 @@ void SVGexporter::writePolygon(const PolyNode* contour, bool isTemp, std::string
 		{
 			point.X = -1 * point.X;
 		}
-		auto fp = Hix::Polyclipping::toFloatPt(point);
+		auto fp = Hix::Polyclipping::toFloatPt(point) + _offsetXY;
         content << std::fixed << 
 			fp.x()*_ppmmX/scfg->contraction_ratio
 			+ (_resX/2)
@@ -228,7 +228,7 @@ void SVGexporter::writePolygon(ClipperLib::Path& contour, bool isTemp, std::stri
 		{
 			point.X = -1 * point.X;
 		}
-		auto fp = Hix::Polyclipping::toFloatPt(point);
+		auto fp = Hix::Polyclipping::toFloatPt(point) + _offsetXY;
         content << std::fixed << 
 			fp.x() * _ppmmX/scfg->contraction_ratio
 			+ (_resX/2) 

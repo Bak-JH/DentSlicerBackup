@@ -280,7 +280,7 @@ void QmlManager::initializeUI(QQmlApplicationEngine* e){
 
 	QObject::connect(layerViewSlider, SIGNAL(sliderValueChanged(int)), this, SLOT(getCrossSectionSignal(int)));
 	//init settings
-	_bed.drawBed(total);
+	_bed.drawBed();
 }
 
 GLModel* QmlManager::listModel(GLModel* model)
@@ -1800,8 +1800,8 @@ const Hix::Settings::AppSetting& QmlManager::settings() const
 
 
 
-void QmlManager::settingFileDialog(QString path)
+void QmlManager::settingFileChanged(QString path)
 {
 	_setting.setPrinterPath(path.toStdString());
-	_bed.drawBed(total);
+	_bed.drawBed();
 }

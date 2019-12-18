@@ -33,6 +33,9 @@ private:
 
 	float _ppmmX;
 	float _ppmmY;
+
+	QVector2D _offsetXY;
+
 	float _resX;
 	float _resY;
 
