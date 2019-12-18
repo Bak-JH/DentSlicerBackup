@@ -150,6 +150,8 @@ void Hix::Features::LabellingMode::updateLabelMesh(const QVector3D& localInterse
 	newTransform.setScale(0.05f);
 	_previewModel->transform().setMatrix(newTransform.matrix());
 	_previewModel->updateAABBScale(newTransform.scale3D());
+	_matrix = newTransform.matrix();
+	_scale = newTransform.scale3D();
 }
 
 void Hix::Features::LabellingMode::setText(const QString& text)
@@ -158,6 +160,9 @@ void Hix::Features::LabellingMode::setText(const QString& text)
 	{
 		_text = text;
 		_isDirty = true;
+		_previewModel.reset(generatePreviewModel());
+		_previewModel->transform().setMatrix(_matrix);
+		_previewModel->updateAABBScale(_scale);
 	}
 }
 
@@ -165,7 +170,9 @@ void Hix::Features::LabellingMode::setFontName(const QString& fontName)
 {
 	_font.setFamily(fontName);
 	_isDirty = true;
-
+	_previewModel.reset(generatePreviewModel());
+	_previewModel->transform().setMatrix(_matrix);
+	_previewModel->updateAABBScale(_scale);
 }
 
 void Hix::Features::LabellingMode::setFontBold(bool isBold)
@@ -173,7 +180,10 @@ void Hix::Features::LabellingMode::setFontBold(bool isBold)
 	if (_font.bold() != isBold)
 	{
 		_font.setBold(isBold);
-		_isDirty = true;
+		_isDirty = true;	
+		_previewModel.reset(generatePreviewModel());
+		_previewModel->transform().setMatrix(_matrix);
+		_previewModel->updateAABBScale(_scale);
 	}
 }
 
@@ -183,18 +193,45 @@ void Hix::Features::LabellingMode::setFontSize(int fontSize)
 	{
 		_font.setPointSize(fontSize);
 		_isDirty = true;
+		_previewModel.reset(generatePreviewModel());
+		_previewModel->transform().setMatrix(_matrix);
+		_previewModel->updateAABBScale(_scale);
 	}
 }
 
-void Hix::Features::LabellingMode::applyLabelMesh()
+Hix::Features::Feature* Hix::Features::LabellingMode::applyLabelMesh()
 {
 	if (!_previewModel)
 	{
 		qDebug() << "no labellingTextPreview";
 		QMetaObject::invokeMethod(qmlManager->labelPopup, "noModel");
-		return;
+		return nullptr;
 	}
+
+	return new Labelling(_targetModel, _previewModel.release());
+}
+
+
+
+Hix::Features::Labelling::Labelling(GLModel* parentModel, GLModel* previewModel)
+	: _targetModel(parentModel), _label(previewModel)
+{
 	_targetModel->setMaterialColor(Hix::Render::Colors::Selected);
 	_targetModel->updateModelMesh();
-	_previewModel.release();
+}
+
+Hix::Features::Labelling::~Labelling()
+{
+}
+
+void Hix::Features::Labelling::undo()
+{
+	_label->QNode::setParent((QNode*)nullptr);
+}
+
+void Hix::Features::Labelling::redo()
+{
+	if (!qmlManager->isSelected(_targetModel))
+		_label->setMaterialColor(Hix::Render::Colors::Default);
+	_label->QNode::setParent(_targetModel);
 }

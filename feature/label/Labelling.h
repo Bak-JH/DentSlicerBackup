@@ -18,9 +18,7 @@ namespace Hix
 			void setFontName(const QString& fontName);
 			void setFontBold(bool isBold);
 			void setFontSize(int fontSize);
-			void applyLabelMesh();
-
-			//void undo() override {} // TODO: undo
+			Hix::Features::Feature* applyLabelMesh();
 
 		private:
 			QString _text = "Enter text";
@@ -30,15 +28,22 @@ namespace Hix
 			Hix::Engine3D::Bounds3D _modelsBound;
 			GLModel* generatePreviewModel();
 			bool _isDirty = true;
-
+			
+			QMatrix4x4 _matrix;
+			QVector3D _scale;
 		};
 
 		class Labelling : public Feature
 		{
 		public:
-			Labelling();
+			Labelling(GLModel* parentModel, GLModel* previewModel);
 			virtual ~Labelling();
+			void undo()override;
+			void redo()override;
 
+		private:
+			GLModel* _label;
+			GLModel* _targetModel;
 		};
 	}
 }

@@ -24,14 +24,11 @@ void Hix::Features::AddModel::undo()
 	qmlManager->supportRaftManager().clear(*_addedModel);
 
 	_addedModel->QNode::setParent((QNode*)nullptr);
-	_addedModel->setEnabled(false);
 	qmlManager->removeFromGLModels(_addedModel);
 }
 
 void Hix::Features::AddModel::redo()
 {
-	_deletedModel->setEnabled(true);
-	_deletedModel->setHitTestable(true);
 	_deletedModel->setParent(qmlManager->models);
 	qmlManager->addPart(_deletedModel->modelName(), _deletedModel->ID);
 	qmlManager->addToGLModels(_deletedModel);
