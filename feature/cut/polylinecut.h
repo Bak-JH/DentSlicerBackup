@@ -1,7 +1,7 @@
 #ifndef MODELCUT_H
 #define MODELCUT_H
 #include <QVector3D>
-#include "feature/interfaces/Feature.h"
+#include "feature/interfaces/FlushSupport.h"
 
 class GLModel;
 class CorkTriMesh;
@@ -21,7 +21,7 @@ namespace Hix
 	{
 		namespace Cut
 		{
-			class PolylineCut : public Feature
+			class PolylineCut : public FlushSupport
 			{
 			public:
 				PolylineCut(GLModel* origModel, std::vector<QVector3D> cuttingPoints);

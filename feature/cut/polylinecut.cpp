@@ -49,10 +49,11 @@ using namespace Hix::Features::CSG;
 using namespace Hix::Features::Cut;
 
 
-Hix::Features::Cut::PolylineCut::PolylineCut(GLModel * origModel, std::vector<QVector3D> _cuttingPoints) : _container(new FeatureContainer())
+Hix::Features::Cut::PolylineCut::PolylineCut(GLModel * origModel, std::vector<QVector3D> _cuttingPoints)
 {
 	//convert polyline to CSG-able 3D mesh, a thin 3D wall.
 	Mesh polylineWall;
+	_container = new FeatureContainer();
 
 	generateCuttingWalls(_cuttingPoints, origModel->recursiveAabb(), polylineWall);
 	//convert all meshes to cork meshes

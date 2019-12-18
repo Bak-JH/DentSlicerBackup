@@ -8,13 +8,32 @@ Hix::Features::FeatureHisroyManager::FeatureHisroyManager()
 
 void Hix::Features::FeatureHisroyManager::addFeature(Hix::Features::Feature* feature)
 {
+	if (feature == nullptr)
+	{
+		return;
+	}
+
+	if (dynamic_cast<FeatureContainer*>(feature))
+	{
+		if (dynamic_cast<FeatureContainer*>(feature)->empty())
+		{
+			return;
+		}
+	}
+
 	if (_history.end() != _itr)
 	{
 		_history.erase(_itr, _history.end());
 	}
+	   
+	// max size
+	if (_history.size() > 2)
+	{
+		_history.pop_front();
+	}
+
 	_history.emplace_back(std::unique_ptr<Feature>(feature));
 	_itr = _history.end();
-
 }
 
 void Hix::Features::FeatureHisroyManager::undo()

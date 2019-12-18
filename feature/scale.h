@@ -1,13 +1,13 @@
 #pragma once
 #include "qmlmanager.h"
 #include "feature/interfaces/Mode.h"
-#include "feature/interfaces/Feature.h"
+#include "feature/interfaces/FlushSupport.h"
 
 namespace Hix
 {
 	namespace Features
 	{
-		class Scale : public Feature
+		class Scale : public FlushSupport
 		{
 		public:
 			Scale(GLModel* targetModel, QVector3D& scale);

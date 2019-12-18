@@ -23,7 +23,7 @@ Hix::Features::FeatureContainer* Hix::Features::ScaleMode::applyScale(QVector3D 
 
 
 Hix::Features::Scale::Scale(GLModel* targetModel, QVector3D& scale)
-	: _model(targetModel)
+	: _model(targetModel), FlushSupport()
 {
 	_prevMatrix = targetModel->transform().matrix();
 	_prevAabb = targetModel->aabb();

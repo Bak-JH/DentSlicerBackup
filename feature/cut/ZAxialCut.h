@@ -1,8 +1,8 @@
 #pragma once
 #include <unordered_set>
 #include "../../DentEngine/src/ContourBuilder.h"
+#include "feature/interfaces/FlushSupport.h"
 #include "../../common/Task.h"
-#include "feature/interfaces/Feature.h"
 
 class GLModel;
 namespace Hix
@@ -16,7 +16,7 @@ namespace Hix
 	{
 		namespace Cut
 		{
-			class ZAxialCut : public Feature
+			class ZAxialCut : public FlushSupport
 			{
 				
 			public:

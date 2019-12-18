@@ -3,13 +3,14 @@
 #include "interfaces/SelectFaceMode.h"
 #include "interfaces/PPShaderMode.h"
 #include "DentEngine/src/Bounds3D.h"
+#include "interfaces/FlushSupport.h"
 class GLModel;
 
 namespace Hix
 {
 	namespace Features
 	{
-		class LayFlat: public Feature//public SelectFaceFeature, public PPShaderMode
+		class LayFlat: public FlushSupport//public SelectFaceFeature, public PPShaderMode
 		{
 		public:
 			LayFlat(GLModel* selectedModel, QVector3D normal, bool isReady);
