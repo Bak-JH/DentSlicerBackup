@@ -113,7 +113,8 @@ SlicingEngine::Result SlicingEngine::sliceModels(bool isTemp, tf::Subflow& subfl
     // Export to SVG
     //QString export_info = SVGexporter::exportSVG(shellSlices, supportSlices, raftSlices, filename+"_export", isTemp);
 
-	SVGexporter::exportSVG(shellSlices, filename , isTemp);
+	SVGexporter exp;
+	exp.exportSVG(shellSlices, filename, isTemp);
 
 
 	int layer = planes.getPlanesVector().size();
@@ -121,7 +122,7 @@ SlicingEngine::Result SlicingEngine::sliceModels(bool isTemp, tf::Subflow& subfl
 	auto bounds = qmlManager->selectedModelsLengths();
 	int64_t area = 0;
 
-	float volume = ((float)(area / pow(scfg->pixelPerMMX() / scfg->contraction_ratio, 2)) / 1000000) * scfg->layer_height;
+	float volume = ((float)(area / pow(qmlManager->settings().printerSetting().pixelPerMMX()/ scfg->contraction_ratio, 2)) / 1000000) * scfg->layer_height;
     qmlManager->setProgress(1);
     QStringList name_word = filename.split("/");
 

@@ -260,6 +260,35 @@ namespace Hix
 				return (got_intersection);
 			}
 
+			inline void
+				getAll(std::list<BoundedObject*>& intersected_objects) const
+			{
+				if (!root_)
+					return ;
+
+				// Start the intersection process at the root
+				std::list<Node*> working_list;
+				working_list.push_back(root_);
+
+				while (!working_list.empty())
+				{
+					Node* node = working_list.front();
+					working_list.pop_front();
+					// We have to check the children of the intersected 'node'
+					if (node->hasChildren())
+					{
+						working_list.push_back(node->getLeftChild());
+						working_list.push_back(node->getRightChild());
+					}
+					else // 'node' is a leaf -> save it's object in the output list
+					{
+						intersected_objects.push_back(node->getObject());
+					}
+				}
+
+				return;
+			}
+
 		protected:
 			Node* root_;
 			std::vector<BoundedObject*>* sorted_objects_;

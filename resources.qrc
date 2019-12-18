@@ -92,8 +92,6 @@
         <file>Resource/splash.png</file>
         <file>Resource/upper_extend.png</file>
         <file>Resource/splash2.png</file>
-        <file>Resource/mesh/plate.stl</file>
-        <file>Resource/mesh/plate_plane.stl</file>
         <file>Resource/mesh/arrow.stl</file>
         <file>Resource/font/NotoSans-Regular.ttf</file>
         <file>Resource/font/NotoSans-SemiCondensed.ttf</file>
@@ -129,5 +127,6 @@
         <file>icon-32.ico</file>
         <file>icon.ico</file>
         <file>Resource/dentslicer_icon.png</file>
+        <file>Resource/mesh/plate_logo.stl</file>
     </qresource>
 </RCC>

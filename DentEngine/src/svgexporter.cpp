@@ -1,30 +1,27 @@
 #include "svgexporter.h"
 #include "slicer.h"
-#include "polyclipping/polyclipping.h"
 #include "configuration.h"
-
-using namespace ClipperLib;
-
+#include "../../qmlmanager.h"
+using namespace Hix::Slicer;
 #if defined(_DEBUG) || defined(QT_DEBUG)
 #define _DEBUG_SVG
 #endif
 
 namespace SVGexporterPrivate
 {
-    void parsePolyTreeAndWrite(const ClipperLib::PolyNode* pn, bool isTemp, std::stringstream& content);
-    void writePolygon(ClipperLib::Path& contour, bool isTemp, std::stringstream& content);
-    void writePolygon(const ClipperLib::PolyNode* contour, bool isTemp, std::stringstream& content);
-    void writeGroupHeader(int layer_idx, float z, std::stringstream& content);
-    void writeGroupFooter(std::stringstream& content);
-    void writeHeader(std::stringstream& content);
-    void writeFooter(std::stringstream& content);
 	void writeVittroOptions(QString outfoldername, int max_slices);
 
 }
 
 
 void SVGexporter::exportSVG(Slices& shellSlices,QString outfoldername, bool isTemp){
-	using namespace SVGexporterPrivate;
+	auto& printerSetting = qmlManager->settings().printerSetting();
+
+	_ppmmX = printerSetting.pixelPerMMX();
+	_ppmmY = printerSetting.pixelPerMMY();
+	_resX = printerSetting.sliceImageResolutionX;
+	_resY = printerSetting.sliceImageResolutionY;
+	_offsetXY = QVector2D(printerSetting.bedOffsetX, printerSetting.bedOffsetY);
     qDebug() << "export svg at "<< outfoldername;
 	qDebug() << "shellSlices : " << shellSlices.size();
     //qDebug() << jsonBytes;
@@ -80,11 +77,10 @@ void SVGexporter::exportSVG(Slices& shellSlices,QString outfoldername, bool isTe
 	infofile.close();
 
 
-
     //exit(0);
-	if (!isTemp && scfg->printer_vendor_type == SlicingConfiguration::PrinterVendor::ThreeDLight)
+	if (!isTemp && printerSetting.infoFileType == Hix::Settings::PrinterSetting::InfoFileType::ThreeDelight)
 	{
-		writeVittroOptions(outfoldername, currentSlice_idx);
+		SVGexporterPrivate::writeVittroOptions(outfoldername, currentSlice_idx);
 	}
 
 
@@ -108,11 +104,11 @@ material consumption estimation = 29.9781\r\n").arg(QString::number((int)(scfg->
 
 
     // do run svg 2 png
-
-    for (int i=0; i<max_slices; i++){
+	auto& printerSetting = qmlManager->settings().printerSetting();
+	for (int i=0; i<max_slices; i++){
         QString svgfilename = outfoldername + "/" + QString::number(i) + ".svg";
         QSvgRenderer renderer(svgfilename);
-        QImage image(scfg->resolutionX(), scfg->resolutionY(), QImage::Format_RGB32);
+        QImage image(printerSetting.sliceImageResolutionX, printerSetting.sliceImageResolutionY, QImage::Format_RGB32);
         image.fill(0x000000);
         QPainter painter(&image);
         renderer.render(&painter);
@@ -176,8 +172,8 @@ Edge thickness = 1\r\n\
 Distance to Part = 1\r\n\
 Max offset from Part = -1\r\n\
 Grid Base Plate Type = None").arg(QString::number((int)(scfg->layer_height*1000)),
-            QString::number(scfg->bedX()), QString::number(scfg->bedY()),
-            QString::number(scfg->resolutionX()), QString::number(scfg->resolutionY()),
+            QString::number(printerSetting.bedX), QString::number(printerSetting.bedY),
+            QString::number(printerSetting.sliceImageResolutionX), QString::number(printerSetting.sliceImageResolutionY),
             QString::number(scfg->layer_height)).toStdString().data());
     parametersfile.close();
 
@@ -185,7 +181,7 @@ Grid Base Plate Type = None").arg(QString::number((int)(scfg->layer_height*1000)
 
 
 
-void SVGexporterPrivate::parsePolyTreeAndWrite(const PolyNode* pn, bool isTemp, std::stringstream& content){
+void SVGexporter::parsePolyTreeAndWrite(const PolyNode* pn, bool isTemp, std::stringstream& content){
     writePolygon(pn, isTemp, content);
     for (int i=0; i<pn->ChildCount(); i++){
         PolyNode* new_pn = pn->Childs[i];
@@ -200,20 +196,20 @@ void SVGexporterPrivate::parsePolyTreeAndWrite(const PolyNode* pn, bool isTemp, 
 
 }
 
-void SVGexporterPrivate::writePolygon(const PolyNode* contour, bool isTemp, std::stringstream& content){
+void SVGexporter::writePolygon(const PolyNode* contour, bool isTemp, std::stringstream& content){
     content << "      <polygon contour:type=\"contour\" points=\"";
     for (IntPoint point: contour->Contour){
 		if (!isTemp && scfg->slice_invert == SlicingConfiguration::Invert::InvertXAxis)
 		{
 			point.X = -1 * point.X;
 		}
-		auto fp = Hix::Polyclipping::toFloatPt(point);
+		auto fp = Hix::Polyclipping::toFloatPt(point) + _offsetXY;
         content << std::fixed << 
-			fp.x()*scfg->pixelPerMMX()/scfg->contraction_ratio
-			+ (scfg->resolutionX()/2)
+			fp.x()*_ppmmX/scfg->contraction_ratio
+			+ (_resX/2)
 			<< "," << std::fixed <<
-			scfg->resolutionY()/2
-			- fp.y()*scfg->pixelPerMMY()/scfg->contraction_ratio << " "; // doesn't need 100 actually// TODO fix this
+			_resY/2
+			- fp.y()*_ppmmY/scfg->contraction_ratio << " "; // doesn't need 100 actually// TODO fix this
 
         // just fit to origin
         //outfile << std::fixed << (float)point.X/Hix::Polyclipping::INT_PT_RESOLUTION - scfg->origin.x() << "," << std::fixed << (float)point.Y/Hix::Polyclipping::INT_PT_RESOLUTION - scfg->origin.y() << " ";
@@ -225,20 +221,20 @@ void SVGexporterPrivate::writePolygon(const PolyNode* contour, bool isTemp, std:
     }
 }
 
-void SVGexporterPrivate::writePolygon(ClipperLib::Path& contour, bool isTemp, std::stringstream& content){
+void SVGexporter::writePolygon(ClipperLib::Path& contour, bool isTemp, std::stringstream& content){
     content << "      <polygon contour:type=\"contour\" points=\"";
     for (IntPoint point: contour){
 		if (!isTemp && scfg->slice_invert == SlicingConfiguration::Invert::InvertXAxis)
 		{
 			point.X = -1 * point.X;
 		}
-		auto fp = Hix::Polyclipping::toFloatPt(point);
+		auto fp = Hix::Polyclipping::toFloatPt(point) + _offsetXY;
         content << std::fixed << 
-			fp.x() * scfg->pixelPerMMX()/scfg->contraction_ratio
-			+ (scfg->resolutionX()/2) 
+			fp.x() * _ppmmX/scfg->contraction_ratio
+			+ (_resX/2) 
 			<< ","<< std::fixed <<
-			scfg->resolutionY()/2
-			- fp.y() * scfg->pixelPerMMY() / scfg->contraction_ratio << " "; // doesn't need 100 actually
+			_resY/2
+			- fp.y() * _ppmmY / scfg->contraction_ratio << " "; // doesn't need 100 actually
 
         // just fit to origin
         //outfile << std::fixed << (float)point.X/Hix::Polyclipping::INT_PT_RESOLUTION - scfg->origin.x() << "," << std::fixed << (float)point.Y/Hix::Polyclipping::INT_PT_RESOLUTION - scfg->origin.y() << " ";
@@ -246,22 +242,22 @@ void SVGexporterPrivate::writePolygon(ClipperLib::Path& contour, bool isTemp, st
     content << "\" style=\"fill: white\" />\n";
 }
 
-void SVGexporterPrivate:: writeGroupHeader(int layer_idx, float z, std::stringstream& content){
+void SVGexporter:: writeGroupHeader(int layer_idx, float z, std::stringstream& content){
     content << "    <g id=\"layer" << layer_idx << "\" contour:z=\""<< std::fixed << z << "\">\n";
 }
 
-void SVGexporterPrivate:: writeGroupFooter(std::stringstream& content){
+void SVGexporter:: writeGroupFooter(std::stringstream& content){
     content << "    </g>\n";
 }
 
-void SVGexporterPrivate::writeHeader(std::stringstream& content){
-    content << "<svg width='" << scfg->resolutionX() << "' height='" << scfg->resolutionY() << "' xmlns='http://www.w3.org/2000/svg' xmlns:contour='http://hix.co.kr' style='background-color: black;'>\n";
-	content << "<rect width='" << scfg->resolutionX() << "' height='" << scfg->resolutionY() << "' fill='black'>\n";
+void SVGexporter::writeHeader(std::stringstream& content){
+    content << "<svg width='" << _resX << "' height='" << _resY << "' xmlns='http://www.w3.org/2000/svg' xmlns:contour='http://hix.co.kr' style='background-color: black;'>\n";
+	content << "<rect width='" << _resX << "' height='" << _resY << "' fill='black'>\n";
 	content << "</rect>\n";
 
 }
 
-void SVGexporterPrivate::writeFooter(std::stringstream& content){
+void SVGexporter::writeFooter(std::stringstream& content){
     content << "</svg>";
 }
 

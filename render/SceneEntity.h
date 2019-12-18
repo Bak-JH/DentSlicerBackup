@@ -11,6 +11,7 @@
 #include <memory>
 #include "DentEngine/src/mesh.h"
 #include "render/ModelMaterial.h"
+#include "DentEngine/src/Bounds3D.h"
 namespace Hix
 {
 	namespace Render

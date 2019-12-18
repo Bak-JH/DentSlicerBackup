@@ -27,8 +27,8 @@
 #include "support/SupportRaftManager.h"
 #include "feature/FeatureHistoryManager.h"
 #include "feature/interfaces/Feature.h"
-
-#define VIEW_MODE_OBJECT 0
+#include "ui/GridBed.h"
+#include "Settings/AppSetting.h"#define VIEW_MODE_OBJECT 0
 #define VIEW_MODE_LAYER 2
 
 #define LAYER_INFILL 0x01
@@ -255,6 +255,7 @@ public:
 	Q_INVOKABLE void setEraserCursor();
     Q_INVOKABLE void setClosedHandCursor();
     Q_INVOKABLE void resetCursor();
+	Q_INVOKABLE void settingFileChanged(QString path);
 
     Q_INVOKABLE bool isSelected();
 	Q_INVOKABLE bool isSelected(int ID);
@@ -287,7 +288,7 @@ public:
 	Hix::Features::Mode* getCurrentMode();
 	void setCurrentMode(Hix::Features::Mode* mode);
 	void unselectPart(GLModel* target);
-
+	const Hix::Settings::AppSetting& settings()const;
 private:
 	QString filenameToModelName(const std::string& s);
 	Hix::Tasking::TaskManager _taskManager;
@@ -315,7 +316,8 @@ private:
 	Hix::Support::SupportRaftManager _supportRaftManager;
 	std::unique_ptr<Hix::Features::Mode> _currentMode;
 	Hix::Features::FeatureHisroyManager _featureHistoryManager;
-
+	Hix::Settings::AppSetting _setting;
+	Hix::UI::GridBed _bed;
 signals:
     void updateModelInfo(int printing_time, int layer, QString xyz, float volume);
     void arrangeDone(std::vector<QVector3D>, std::vector<float>);
@@ -327,7 +329,6 @@ public slots:
 	void cutModeSelected(int);
 	void openCut();
 	void closeCut();
-
 	void extensionSelect();
 	void extensionUnSelect();
 	void layFlatSelect();

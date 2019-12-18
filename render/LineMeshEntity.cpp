@@ -55,11 +55,11 @@ LineMeshEntity::LineMeshEntity(const std::vector<QVector3D>& vertices, Qt3DCore:
 	addComponent(&_geometryRenderer);
 }
 
-Hix::Render::LineMeshEntity::LineMeshEntity(const std::vector<QVector3D>& vertices, Qt3DCore::QEntity* parent, const QVector4D& color): LineMeshEntity(vertices, parent)
+Hix::Render::LineMeshEntity::LineMeshEntity(const std::vector<QVector3D>& vertices, Qt3DCore::QEntity* parent, const QColor& color): LineMeshEntity(vertices, parent)
 {
-	_material.setAmbient(QColor(color.x(), color.y(), color.z()));
-	_material.setDiffuse(QColor(color.x(), color.y(), color.z()));
-	_material.setSpecular(QColor(color.x(), color.y(), color.z()));
+	_material.setAmbient(color);
+	_material.setDiffuse(color);
+	_material.setSpecular(color);
 }
 
 
@@ -135,9 +135,9 @@ LineMeshEntity::LineMeshEntity(const std::vector<std::vector<QVector3D>>& vertic
 	addComponent(&_geometryRenderer);
 }
 
-Hix::Render::LineMeshEntity::LineMeshEntity(const std::vector<std::vector<QVector3D>>& vertices, Qt3DCore::QEntity* parent, const QVector4D& color) : LineMeshEntity(vertices, parent)
+Hix::Render::LineMeshEntity::LineMeshEntity(const std::vector<std::vector<QVector3D>>& vertices, Qt3DCore::QEntity* parent, const QColor& color) : LineMeshEntity(vertices, parent)
 {
-	_material.setAmbient(QColor(color.x(), color.y(), color.z()));
-	_material.setDiffuse(QColor(color.x(), color.y(), color.z()));
-	_material.setSpecular(QColor(color.x(), color.y(), color.z()));
+	_material.setAmbient(color);
+	_material.setDiffuse(color);
+	_material.setSpecular(color);
 }

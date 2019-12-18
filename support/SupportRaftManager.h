@@ -3,8 +3,6 @@
 #include "DentEngine/src/configuration.h"
 #include "VerticalSupportModel.h"
 
-#include <QAbstractRayCaster>
-#include <qraycaster.h>
 class GLModel;
 namespace Hix
 {

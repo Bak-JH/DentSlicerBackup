@@ -43,6 +43,7 @@
 #include "feature/addModel.h"
 
 #include "feature/TwoManifoldBuilder.h"
+#include "render/CircleMeshEntity.h"
 #include <functional>
 using namespace Hix::Input;
 using namespace Hix::UI;
@@ -288,15 +289,8 @@ void QmlManager::initializeUI(QQmlApplicationEngine* e){
 	QObject::connect(shelloffsetPopup, SIGNAL(resultSliderValueChanged(double)), this, SLOT(getSliderSignal(double)));
 
 	QObject::connect(layerViewSlider, SIGNAL(sliderValueChanged(int)), this, SLOT(getCrossSectionSignal(int)));
-
-	//auto planeTest = new Hix::Render::PlaneMeshEntity(total);
-	//QVector3D point(0, 0, 0);
-	//QVector3D direction(0,0,-1);
-
-	//QVector3D test(0, 0, 3);
-	//auto dist = test.distanceToPlane(point, direction);
-	//Hix::Render::PDPlane pdPlane{ point, direction };
-	//planeTest->setPointNormal(pdPlane);
+	//init settings
+	_bed.drawBed();
 }
 
 Hix::Features::Feature* QmlManager::createAndListModel(Hix::Engine3D::Mesh* mesh, QString fname, const Qt3DCore::QTransform* transform) {
@@ -477,11 +471,11 @@ int QmlManager::getSelectedModelsSize() {
 }
 
 float QmlManager::getBedXSize(){
-    return scfg->bedX();
+    return _setting.printerSetting().bedX;
 }
 
 float QmlManager::getBedYSize(){
-    return scfg->bedY();
+	return _setting.printerSetting().bedY;
 }
 
 
@@ -1053,7 +1047,7 @@ void QmlManager::modelMoveWithAxis(QVector3D axis, double distance) { // for QML
 void QmlManager::modelMove(QVector3D displacement)
 {
 	QVector3D bndCheckedDisp;
-	const auto& printBound = scfg->bedBound();
+	const auto& printBound = _setting.printerSetting().bedBound;
 	for (auto selectedModel : selectedModels) {
 		bndCheckedDisp = printBound.displaceWithin(selectedModel->recursiveAabb(), displacement);
 		selectedModel->moveModel(bndCheckedDisp);
@@ -1745,4 +1739,17 @@ Hix::Features::Mode* QmlManager::getCurrentMode()
 Hix::Features::FeatureHisroyManager& QmlManager::featureHistoryManager()
 {
 	return _featureHistoryManager;
+}
+
+const Hix::Settings::AppSetting& QmlManager::settings() const
+{
+	return _setting;
+}
+
+
+
+void QmlManager::settingFileChanged(QString path)
+{
+	_setting.setPrinterPath(path.toStdString());
+	_bed.drawBed();
 }
