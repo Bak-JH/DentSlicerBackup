@@ -596,16 +596,23 @@ Rectangle {
             iconSource2: "qrc:/Resource/upper2_setting.png"
             iconText: qsTr("Setting")
 
-            onButtonClicked:{
-                if(state == "active")
-				{
-				    settingPopup.visible = true
+            // onButtonClicked:{
+            //     if(state == "active")
+			// 	{
+			// 	    //settingPopup.visible = true
+            //         settingFileDialog.open();
+			// 	}
+            //     else
+			// 	{
+            //         //settingPopup.visible = false
+			// 	}
+            // }
+			    MouseArea{
+                anchors.fill: parent
+                onClicked:{
+                    all_off()
                     settingFileDialog.open();
-				}
-                else
-				{
-                    settingPopup.visible = false
-				}
+                }
             }
         }
 

@@ -12,14 +12,21 @@ namespace Hix
 	{
 
 		template<typename ItrType>
-		void setZ(float z, ItrType itr, ItrType end)
+		void move3D(QVector3D offset, ItrType itr, ItrType end)
 		{
 			for (; itr != end; ++itr)
 			{
-				itr->setZ(z);
+				(*itr) += offset;
 			}
 		}
-
+		template<typename ItrType>
+		void setZ(float offset, ItrType itr, ItrType end)
+		{
+			for (; itr != end; ++itr)
+			{
+				itr->setZ(offset);
+			}
+		}
 		std::vector<std::vector<QVector3D>> gridCircle(float radius, float offset);
 		std::vector<std::vector<QVector3D>> gridRect(float xLength, float yLength, float offset);
 
