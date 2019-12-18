@@ -7,6 +7,8 @@
 #include <list>
 #include <set>
 #include "../../render/SceneEntity.h"
+#include "Bounds3D.h"
+
 #if defined(_DEBUG) || defined(QT_DEBUG )
 #define _STRICT_MESH
 //#define _STRICT_MESH_NO_SELF_INTERSECTION
@@ -530,6 +532,42 @@ VertexConstItr Hix::Engine3D::Mesh::getVtxAtLocalPos(const QVector3D& pos) const
 		}
 	}
 	return VertexConstItr();
+}
+
+std::unordered_map<FaceConstItr, QVector3D> Hix::Engine3D::Mesh::cacheWorldFN() const
+{
+	std::unordered_map<FaceConstItr, QVector3D> result;
+	result.reserve(faces.size());
+	auto cend = faces.cend();
+	for (auto itr = faces.cbegin(); itr != cend; ++itr)
+	{
+		result.emplace(std::make_pair(itr, itr.worldFn()));
+	}
+	return result;
+}
+
+std::unordered_map<VertexConstItr, QVector3D> Hix::Engine3D::Mesh::cacheWorldPos() const
+{
+	std::unordered_map<VertexConstItr, QVector3D> result;
+	result.reserve(vertices.size());
+	auto cend = vertices.cend();
+	for (auto itr = vertices.cbegin(); itr != cend; ++itr)
+	{
+		result.emplace(std::make_pair(itr, itr.worldPosition()));
+	}
+	return result;
+}
+
+std::unordered_map<VertexConstItr, QVector3D> Hix::Engine3D::Mesh::cacheWorldVN() const
+{
+	std::unordered_map<VertexConstItr, QVector3D> result;
+	result.reserve(vertices.size());
+	auto cend = vertices.cend();
+	for (auto itr = vertices.cbegin(); itr != cend; ++itr)
+	{
+		result.emplace(std::make_pair(itr, itr.worldVn()));
+	}
+	return result;
 }
 
 

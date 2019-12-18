@@ -2,29 +2,29 @@
 #include "../../qmlmanager.h"
 using namespace Hix::Render;
 
-PlaneMeshEntity::PlaneMeshEntity(Qt3DCore::QEntity* owner): Qt3DCore::QEntity(owner)
+PlaneMeshEntity::PlaneMeshEntity(Qt3DCore::QEntity* owner):PlaneMeshEntity(owner, 200, 200, QColor(244, 244, 244, 255))
+{
+}
+
+Hix::Render::PlaneMeshEntity::PlaneMeshEntity(Qt3DCore::QEntity* owner, float width, float height, const QColor& color) : Qt3DCore::QEntity(owner)
 {
 	auto planeMaterial = new Qt3DExtras::QPhongAlphaMaterial(this);
-	planeMaterial->setAmbient(QColor(244,244,244,255));
-	planeMaterial->setDiffuse(QColor(244, 244, 244, 255));
-	planeMaterial->setSpecular(QColor(244, 244, 244, 255));
+	planeMaterial->setAmbient(color);
+	planeMaterial->setDiffuse(color);
+	planeMaterial->setSpecular(color);
+	auto planeEntity = new Qt3DCore::QEntity(this);
+	//qDebug() << "generatePlane---------------------==========-=-==-" << parentModel;
+	auto clipPlane = new Qt3DExtras::QPlaneMesh(this);
+	clipPlane->setHeight(height);
+	clipPlane->setWidth(width);
+	auto planeTransform = new Qt3DCore::QTransform();
+	planeTransform->setRotation(QQuaternion::fromAxisAndAngle(QVector3D(1, 0, 0), 90));
+	planeEntity->addComponent(clipPlane);
+	planeEntity->addComponent(planeTransform); //jj
+	planeEntity->addComponent(planeMaterial);
+	planeEntity->setEnabled(true);
 
-	for (int i = 0; i < 1; i++) {
-		auto planeEntity = new Qt3DCore::QEntity(this);
-		//qDebug() << "generatePlane---------------------==========-=-==-" << parentModel;
-		auto clipPlane = new Qt3DExtras::QPlaneMesh(this);
-		clipPlane->setHeight(200.0);
-		clipPlane->setWidth(200.0);
-
-		auto planeTransform = new Qt3DCore::QTransform();
-		planeTransform->setRotation(QQuaternion::fromAxisAndAngle(QVector3D(1, 0, 0),  90 + 180 * i));
-		planeEntity->addComponent(clipPlane);
-		planeEntity->addComponent(planeTransform); //jj
-		planeEntity->addComponent(planeMaterial);
-		planeEntity->setEnabled(true);
-
-		_meshTransformMap[planeEntity] = planeTransform;
-	}
+	_meshTransformMap[planeEntity] = planeTransform;
 	addComponent(&_transform);
 }
 

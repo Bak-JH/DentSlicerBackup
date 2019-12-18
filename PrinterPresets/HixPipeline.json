@@ -1,0 +1,16 @@
+{
+    "presetName": "Hix Pipeline",
+    "infoFileType": "Hix",
+    "sliceImageType": "svg",
+    "sliceImageResolutionX": 1920,
+    "sliceImageResolutionY": 1080,
+    "screenX": 120.96,
+    "screenY": 68.04,
+    "bedShape": "Rectangle",
+    "bedX": 123.8,
+    "bedY": 69.2,
+    "bedOffsetX": 0.0,
+    "bedOffsetY": 0.0,
+    "bedHeight": 120.0
+
+}
