@@ -98,7 +98,7 @@ Hix::Features::FeatureContainer* Hix::Features::ExtendMode::applyExtend(double d
 
 Hix::Features::Extend::Extend(GLModel* targetModel, const QVector3D& targetFaceNormal,
 								const std::unordered_set<FaceConstItr>& targetFaces, double distance)
-	: _model(targetModel), _normal(targetFaceNormal), _extensionFaces(targetFaces)
+	: _model(targetModel), _normal(targetFaceNormal), _extensionFaces(targetFaces), FlushSupport()
 {
 
 

@@ -4,7 +4,7 @@ using namespace Hix::Features;
 
 
 Hix::Features::LayFlatMode::LayFlatMode(const std::unordered_set<GLModel*>& selectedModels)
-	: PPShaderMode(selectedModels)
+	: PPShaderMode(selectedModels), FlushSupport()
 {
 }
 

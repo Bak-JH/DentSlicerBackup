@@ -288,6 +288,7 @@
     <ClCompile Include="feature\cut\modelcut.cpp" />
     <ClCompile Include="feature\FeatureHistoryManager.cpp" />
     <ClCompile Include="feature\interfaces\Feature.cpp" />
+    <ClCompile Include="feature\interfaces\FlushSupport.cpp" />
     <ClCompile Include="feature\interfaces\Mode.cpp" />
     <ClCompile Include="feature\interfaces\PPShaderMode.cpp" />
     <ClCompile Include="feature\interfaces\SelectFaceMode.cpp" />
@@ -854,6 +855,7 @@
     <ClInclude Include="feature\cut\modelcut.h" />
     <ClInclude Include="feature\FeatureHistoryManager.h" />
     <ClInclude Include="feature\interfaces\Feature.h" />
+    <ClInclude Include="feature\interfaces\FlushSupport.h" />
     <ClInclude Include="feature\interfaces\PPShaderMode.h" />
     <ClInclude Include="feature\interfaces\SelectFaceMode.h" />
     <ClInclude Include="feature\interfaces\WidgetMode.h" />

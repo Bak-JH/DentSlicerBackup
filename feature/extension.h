@@ -5,6 +5,7 @@
 #include "interfaces/SelectFaceMode.h"
 #include "interfaces/PPShaderMode.h"
 #include "interfaces/Mode.h"
+#include "feature/interfaces/FlushSupport.h"
 
 class GLModel;
 namespace Hix
@@ -20,7 +21,7 @@ namespace Hix
 		};
 
 
-		class Extend: public Feature //pee pee hee hee
+		class Extend: public FlushSupport //pee pee hee hee
 		{
 		public:
 			Extend(GLModel* targetModel, const QVector3D& targetFaceNormal,

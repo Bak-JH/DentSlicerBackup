@@ -26,18 +26,18 @@ Hix::Features::FeatureContainer::~FeatureContainer()
 
 void Hix::Features::FeatureContainer::undo()
 {
-	qDebug() << _container.size();
-	for (auto& each : _container)
+
+	for (auto each = _container.rbegin(); each != _container.rend(); ++each)
 	{
-		each->undo();
+		each->get()->undo();
 	}
 }
 
 void Hix::Features::FeatureContainer::redo()
 {
-	for (auto each = _container.rbegin(); each != _container.rend(); ++each)
+	for (auto& each : _container)
 	{
-		each->get()->redo();
+		each->redo();
 	}
 }
 

@@ -75,12 +75,9 @@ SupportModel* Hix::Support::SupportRaftManager::addSupport(const OverhangDetect:
 		break;
 	case SlicingConfiguration::SupportType::Vertical:
 	{
-		qDebug() << _supports.size();
-
 		auto newModel = dynamic_cast<SupportModel*>(new VerticalSupportModel(this, overhang));
 		_supports.insert(std::make_pair(newModel, std::unique_ptr<SupportModel>(newModel)));
 		//since addition only happens in edit mode
-		qDebug() << _supports.size();
 
 		return newModel;
 	}
@@ -112,10 +109,25 @@ bool Hix::Support::SupportRaftManager::supportsEmpty()
 	return _supports.empty();
 }
 
-void Hix::Support::SupportRaftManager::generateRaft()
+RaftModel* Hix::Support::SupportRaftManager::generateRaft()
 {
 	auto basePts = getSupportBasePts();
 	_raft = std::make_unique<CylindricalRaft>(this, basePts);
+	return _raft.get();
+} 
+
+RaftModel* Hix::Support::SupportRaftManager::addRaft(RaftModel* raft)
+{
+	_raft.reset(raft);
+	return _raft.get();
+}
+
+RaftModel* Hix::Support::SupportRaftManager::removeRaft()
+{
+	auto copy = _raft.release();
+	copy->setParent((QNode*)nullptr);
+	_raft.reset();
+	return copy;
 }
 
 Hix::OverhangDetect::Overhangs Hix::Support::SupportRaftManager::detectOverhang(const GLModel& listed)
@@ -167,10 +179,6 @@ void Hix::Support::SupportRaftManager::clearImpl(const std::unordered_set<const 
 			}
 		}
 	}
-	if (_supports.size() == 0)
-	{
-		clear();
-	}
 }
 
 void Hix::Support::SupportRaftManager::prepareRaycaster(const GLModel& model)
@@ -221,13 +229,6 @@ std::vector<SupportModel*> Hix::Support::SupportRaftManager::modelAttachedSuppor
 
 }
 
-void Hix::Support::SupportRaftManager::clear()
-{
-	_raftExist = false;
-	_supports.clear();
-	_raft.reset();
-}
-
 Qt3DCore::QEntity& Hix::Support::SupportRaftManager::rootEntity()
 {
 	return _root;
@@ -253,7 +254,7 @@ bool Hix::Support::SupportRaftManager::supportActive() const
 
 bool Hix::Support::SupportRaftManager::raftActive() const
 {
-	return _raftExist;
+	return _raft.get() != nullptr;
 }
 
 

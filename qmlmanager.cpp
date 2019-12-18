@@ -1155,10 +1155,6 @@ void QmlManager::groupSelectionActivate(bool active){
 void QmlManager::runGroupFeature(int ftrType, QString state, double arg1, double arg2, double arg3, QVariant data){
     groupFunctionIndex = ftrType;
     groupFunctionState = state;
-	if (state == "active")
-	{
-		Hix::Features::clearSupport(selectedModels);
-	}
     qDebug()<< "runGroupFeature | type:"<<ftrType<<"| state:" <<state << selectedModels.size();
     switch(ftrType){
     /*
@@ -1616,7 +1612,8 @@ void QmlManager::closeSupport()
 void QmlManager::generateAutoSupport()
 {
 	auto autoGenSupport = dynamic_cast<SupportMode*>(_currentMode.get())->generateAutoSupport();
-	_featureHistoryManager.addFeature(autoGenSupport);
+	if (autoGenSupport != nullptr)
+		_featureHistoryManager.addFeature(autoGenSupport);
 }
 
 
@@ -1636,7 +1633,8 @@ void QmlManager::supportEditEnabled(bool enabled)
 void QmlManager::clearSupports()
 {
 	auto clearSupport = dynamic_cast<SupportMode*>(_currentMode.get())->clearSupport();
-	_featureHistoryManager.addFeature(clearSupport);
+	if(clearSupport != nullptr)
+		_featureHistoryManager.addFeature(clearSupport);
 }
 
 
@@ -1651,7 +1649,15 @@ void QmlManager::supportCancelEdit()
 
 void QmlManager::regenerateRaft()
 {
-	_supportRaftManager.generateRaft();
+	Hix::Features::FeatureContainer* container = new FeatureContainer();
+	if (_supportRaftManager.raftActive())
+	{
+		//delete
+		container->addFeature(dynamic_cast<SupportMode*>(_currentMode.get())->removeRaft());
+	}
+	//add
+	container->addFeature(dynamic_cast<SupportMode*>(_currentMode.get())->generateRaft());
+		_featureHistoryManager.addFeature(container);
 }
 
 //temp features

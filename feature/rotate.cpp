@@ -26,7 +26,8 @@ void Hix::Features::RotateMode::featureStarted()
 
 void Hix::Features::RotateMode::featureEnded()
 {
-	qmlManager->featureHistoryManager().addFeature(_rotateContainer);
+	if (!_rotateContainer->empty())
+		qmlManager->featureHistoryManager().addFeature(_rotateContainer);
 	for (auto& each : _targetModels)
 	{
 		each->rotateDone();
@@ -43,13 +44,13 @@ Hix::Features::FeatureContainer* Hix::Features::RotateMode::applyRotate(const QQ
 	return container;
 }
 
-Hix::Features::Rotate::Rotate(GLModel* target) : _model(target)
+Hix::Features::Rotate::Rotate(GLModel* target) : _model(target), FlushSupport()
 {
 	_prevMatrix = target->transform().matrix();
 	_prevAabb = target->aabb();
 }
 
-Hix::Features::Rotate::Rotate(GLModel* target, const QQuaternion& rot) : _model(target)
+Hix::Features::Rotate::Rotate(GLModel* target, const QQuaternion& rot) : _model(target), FlushSupport()
 {
 	_prevMatrix = target->transform().matrix();
 	_prevAabb = target->aabb();

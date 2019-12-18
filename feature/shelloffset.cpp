@@ -55,11 +55,11 @@ Hix::Features::ShellOffset::ShellOffset(GLModel* target, float offset, float zPl
 	// 승환 100%
 	qmlManager->setProgress(1);
 	auto cut = new ZAxialCut(target, zPlane);
+	_container->addFeature(cut);
 
 	for (auto& each : cut->lowerModels())
 		_container->addFeature(new DeleteModel(each));
 
-	_container->addFeature(cut);
 }
 
 Hix::Features::ShellOffset::~ShellOffset()

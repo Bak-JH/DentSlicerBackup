@@ -1,5 +1,5 @@
 #pragma once
-#include "feature/interfaces/Feature.h"
+#include "feature/interfaces/FlushSupport.h"
 #include "feature/interfaces/WidgetMode.h"
 #include "ui/Widget3D.h"
 #include "DentEngine/src/Bounds3D.h"
@@ -8,7 +8,7 @@ namespace Hix
 {
 	namespace Features
 	{
-		class Rotate : public Feature
+		class Rotate : public FlushSupport
 		{
 		public:
 			Rotate(GLModel* target);

@@ -24,7 +24,8 @@ void Hix::Features::MoveMode::featureStarted()
 
 void Hix::Features::MoveMode::featureEnded()
 {
-	qmlManager->featureHistoryManager().addFeature(_moveContainer);
+	if(!_moveContainer->empty())
+		qmlManager->featureHistoryManager().addFeature(_moveContainer);
 
 	for (auto& each : _targetModels)
 		each->moveDone();
@@ -45,7 +46,7 @@ Hix::Features::FeatureContainer* Hix::Features::MoveMode::applyMove(const QVecto
 
 
 
-Hix::Features::Move::Move(GLModel* target, const QVector3D& to) : _model(target)
+Hix::Features::Move::Move(GLModel* target, const QVector3D& to) : _model(target), FlushSupport()
 {
 	_prevMatrix = target->transform().matrix();
 	_prevAabb = target->aabb();
@@ -55,7 +56,7 @@ Hix::Features::Move::Move(GLModel* target, const QVector3D& to) : _model(target)
 		qmlManager->cameraViewChanged();
 }
 
-Hix::Features::Move::Move(GLModel* target) : _model(target)
+Hix::Features::Move::Move(GLModel* target) : _model(target), FlushSupport()
 {
 	_prevMatrix = target->transform().matrix();
 	_prevAabb = target->aabb();
