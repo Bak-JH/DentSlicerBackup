@@ -26,7 +26,8 @@
 #include "common/TaskManager.h"
 #include "slice/SlicingOptBackend.h"
 #include "support/SupportRaftManager.h"
-
+#include "ui/GridBed.h"
+#include "Settings/AppSetting.h"
 #define VIEW_MODE_OBJECT 0
 #define VIEW_MODE_LAYER 2
 
@@ -254,6 +255,7 @@ public:
 	Q_INVOKABLE void setEraserCursor();
     Q_INVOKABLE void setClosedHandCursor();
     Q_INVOKABLE void resetCursor();
+	Q_INVOKABLE void settingFileChanged(QString path);
 
     Q_INVOKABLE bool isSelected();
 	Q_INVOKABLE bool isSelected(int ID);
@@ -285,7 +287,7 @@ public:
 	GLModel* createAndListModel(Hix::Engine3D::Mesh* mesh, QString filename, const Qt3DCore::QTransform* transform);
 	GLModel* listModel(GLModel* model);
 	GLModel* getModelByID(int ID);
-
+	const Hix::Settings::AppSetting& settings()const;
 private:
 	QString filenameToModelName(const std::string& s);
 	Hix::Tasking::TaskManager _taskManager;
@@ -313,7 +315,8 @@ private:
 	QCursor _cursorEraser;
 	Hix::Support::SupportRaftManager _supportRaftManager;
 	std::unique_ptr<Hix::Features::Feature> _currentFeature;
-
+	Hix::Settings::AppSetting _setting;
+	Hix::UI::GridBed _bed;
 signals:
     void updateModelInfo(int printing_time, int layer, QString xyz, float volume);
     void arrangeDone(std::vector<QVector3D>, std::vector<float>);
@@ -325,7 +328,6 @@ public slots:
 	void cutModeSelected(int);
 	void openCut();
 	void closeCut();
-
 	void extensionSelect();
 	void extensionUnSelect();
 	void layFlatSelect();

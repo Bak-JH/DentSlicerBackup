@@ -17,6 +17,14 @@ namespace Hix
 		public:
 			Bounds3D();
 			Bounds3D(const Hix::Render::SceneEntity& bounded);
+			template<typename ItrType>
+			Bounds3D(ItrType itr, ItrType end) : Bounds3D()
+			{
+				for (; itr != end; ++itr)
+				{
+					update(*itr);
+				}
+			}
 			void update(const QVector3D& pt);
 			void localBoundUpdate(const Hix::Engine3D::Mesh& mesh);
 			Bounds3D& operator+=(const Bounds3D& other);
