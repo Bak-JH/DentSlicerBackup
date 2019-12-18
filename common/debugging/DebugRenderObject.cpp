@@ -9,18 +9,18 @@ void Hix::Debug::DebugRenderObject::initialize(QEntity* root)
 	_root = root;
 }
 
-void Hix::Debug::DebugRenderObject::addLine(const std::vector<QVector3D>& vertices, const QVector4D& color)
+void Hix::Debug::DebugRenderObject::addLine(const std::vector<QVector3D>& vertices, const QColor& color)
 {
 	_lines.emplace_back(vertices, _root, color);
 }
 
-void Hix::Debug::DebugRenderObject::addPaths(const std::vector<std::vector<QVector3D>>& paths, const QVector4D& color)
+void Hix::Debug::DebugRenderObject::addPaths(const std::vector<std::vector<QVector3D>>& paths, const QColor& color)
 {
 	_lines.emplace_back(paths, _root, color);
 
 }
 
-void Hix::Debug::DebugRenderObject::outlineFace(const Hix::Engine3D::FaceConstItr& face, const QVector4D& color)
+void Hix::Debug::DebugRenderObject::outlineFace(const Hix::Engine3D::FaceConstItr& face, const QColor& color)
 {
 	std::vector<QVector3D> points;
 	auto mvs = face.meshVertices();

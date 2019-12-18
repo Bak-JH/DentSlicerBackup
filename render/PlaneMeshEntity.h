@@ -18,12 +18,13 @@ namespace Hix
 			Q_OBJECT
 		public:
 			PlaneMeshEntity(Qt3DCore::QEntity* owner);
+			PlaneMeshEntity(Qt3DCore::QEntity* owner, float width, float height, const QColor& color);
+
 			virtual ~PlaneMeshEntity();
 			Qt3DCore::QTransform& transform();
 			void setPointNormal(const Hix::Plane3D::PDPlane& plane);
 		protected:
 			std::unordered_map<Qt3DCore::QEntity*, Qt3DCore::QTransform*> _meshTransformMap;
-			std::array<Qt3DExtras::QPlaneMesh, 2> _planeMeshes;
 			Qt3DCore::QTransform _transform;
 			Qt3DCore::QEntity* _owner = nullptr;
 

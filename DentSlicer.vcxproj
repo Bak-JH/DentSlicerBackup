@@ -177,7 +177,7 @@
       <InputFile>%(FullPath)</InputFile>
     </QtRcc>
     <PostBuildEvent>
-      <Command>call "$(SolutionDir)vs_copy_dll.bat" $(configuration) $(configuration) $(SolutionDir)</Command>
+      <Command>call "$(SolutionDir)vs_post_build.bat" $(configuration) $(configuration) $(SolutionDir)</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -260,7 +260,7 @@
       </IncludePath>
     </QtMoc>
     <PostBuildEvent>
-      <Command>call "$(SolutionDir)vs_copy_dll.bat" $(configuration) $(configuration) $(SolutionDir)</Command>
+      <Command>call "$(SolutionDir)vs_post_build.bat" $(configuration) $(configuration) $(SolutionDir)</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -293,6 +293,8 @@
     <ClCompile Include="common\GTEngine\Source\Mathematics\MSW\GteIntelSSE.cpp" />
     <ClCompile Include="common\Task.cpp" />
     <ClCompile Include="common\TaskManager.cpp" />
+    <ClCompile Include="common\Tree\BVHBuilder.cpp" />
+    <ClCompile Include="common\Tree\TreeBuilder.cpp" />
     <ClCompile Include="DentEngine\src\Bounds3D.cpp" />
     <ClCompile Include="DentEngine\src\ContourBuilder.cpp" />
     <ClCompile Include="DentEngine\src\Planes.cpp" />
@@ -365,12 +367,14 @@
     <ClCompile Include="input\HitTestAble.cpp" />
     <ClCompile Include="input\Hoverable.cpp" />
     <ClCompile Include="input\raycastcontroller.cpp" />
+    <ClCompile Include="common\Tree\LineTree.cpp" />
     <ClCompile Include="Mesh\BVH.cpp" />
     <ClCompile Include="Mesh\HixBVH.cpp" />
     <ClCompile Include="Mesh\MeshCache.cpp" />
     <ClCompile Include="Mesh\MTRayCaster.cpp" />
     <ClCompile Include="Mesh\RayAccelerator.cpp" />
     <ClCompile Include="Mesh\RayCaster.cpp" />
+    <ClCompile Include="render\CircleMeshEntity.cpp" />
     <ClCompile Include="render\lights.cpp" />
     <ClCompile Include="render\LineMeshEntity.cpp" />
     <ClCompile Include="render\ModelMaterial.cpp" />
@@ -378,6 +382,9 @@
     <ClCompile Include="render\SceneEntity.cpp" />
     <ClCompile Include="render\SceneEntityWithMaterial.cpp" />
     <ClCompile Include="feature\Shapes2D.cpp" />
+    <ClCompile Include="Settings\AppSetting.cpp" />
+    <ClCompile Include="Settings\JSONParsedSetting.cpp" />
+    <ClCompile Include="Settings\PrinterSetting.cpp" />
     <ClCompile Include="slice\SlicingOptBackend.cpp" />
     <ClCompile Include="support\CylindricalRaft.cpp" />
     <ClCompile Include="support\ModelAttachedSupport.cpp" />
@@ -386,6 +393,7 @@
     <ClCompile Include="support\SupportRaftManager.cpp" />
     <ClCompile Include="support\VerticalSupportModel.cpp" />
     <ClCompile Include="ui\CubeWidget.cpp" />
+    <ClCompile Include="ui\GridBed.cpp" />
     <ClCompile Include="ui\MoveWidget.cpp" />
     <ClCompile Include="ui\RotateWidget.cpp" />
     <ClCompile Include="ui\Widget.cpp" />
@@ -800,8 +808,48 @@
     <ClInclude Include="common\IteratorWrapper.h" />
     <ClInclude Include="common\moodycamel\atomicops.h" />
     <ClInclude Include="common\moodycamel\readerwriterqueue.h" />
+    <ClInclude Include="common\Tree\BVHBuilder.h" />
+    <ClInclude Include="common\Tree\NTree.h" />
+    <ClInclude Include="common\Tree\NTreeDeque.h" />
     <ClInclude Include="common\RamosEnum.h" />
     <ClInclude Include="common\RandomAccessIteratorBase.h" />
+    <ClInclude Include="common\rapidjson\allocators.h" />
+    <ClInclude Include="common\rapidjson\cursorstreamwrapper.h" />
+    <ClInclude Include="common\rapidjson\document.h" />
+    <ClInclude Include="common\rapidjson\encodedstream.h" />
+    <ClInclude Include="common\rapidjson\encodings.h" />
+    <ClInclude Include="common\rapidjson\error\en.h" />
+    <ClInclude Include="common\rapidjson\error\error.h" />
+    <ClInclude Include="common\rapidjson\filereadstream.h" />
+    <ClInclude Include="common\rapidjson\filewritestream.h" />
+    <ClInclude Include="common\rapidjson\fwd.h" />
+    <ClInclude Include="common\rapidjson\internal\biginteger.h" />
+    <ClInclude Include="common\rapidjson\internal\clzll.h" />
+    <ClInclude Include="common\rapidjson\internal\diyfp.h" />
+    <ClInclude Include="common\rapidjson\internal\dtoa.h" />
+    <ClInclude Include="common\rapidjson\internal\ieee754.h" />
+    <ClInclude Include="common\rapidjson\internal\itoa.h" />
+    <ClInclude Include="common\rapidjson\internal\meta.h" />
+    <ClInclude Include="common\rapidjson\internal\pow10.h" />
+    <ClInclude Include="common\rapidjson\internal\regex.h" />
+    <ClInclude Include="common\rapidjson\internal\stack.h" />
+    <ClInclude Include="common\rapidjson\internal\strfunc.h" />
+    <ClInclude Include="common\rapidjson\internal\strtod.h" />
+    <ClInclude Include="common\rapidjson\internal\swap.h" />
+    <ClInclude Include="common\rapidjson\istreamwrapper.h" />
+    <ClInclude Include="common\rapidjson\memorybuffer.h" />
+    <ClInclude Include="common\rapidjson\memorystream.h" />
+    <ClInclude Include="common\rapidjson\msinttypes\inttypes.h" />
+    <ClInclude Include="common\rapidjson\msinttypes\stdint.h" />
+    <ClInclude Include="common\rapidjson\ostreamwrapper.h" />
+    <ClInclude Include="common\rapidjson\pointer.h" />
+    <ClInclude Include="common\rapidjson\prettywriter.h" />
+    <ClInclude Include="common\rapidjson\rapidjson.h" />
+    <ClInclude Include="common\rapidjson\reader.h" />
+    <ClInclude Include="common\rapidjson\schema.h" />
+    <ClInclude Include="common\rapidjson\stream.h" />
+    <ClInclude Include="common\rapidjson\stringbuffer.h" />
+    <ClInclude Include="common\rapidjson\writer.h" />
     <ClInclude Include="common\Singleton.h" />
     <ClInclude Include="common\Task.h" />
     <ClInclude Include="common\taskflow\core\executor.hpp" />
@@ -839,6 +887,7 @@
     <ClInclude Include="common\taskflow\utility\traits.hpp" />
     <ClInclude Include="common\TaskManager.h" />
     <ClInclude Include="common\TrackedIndexedList.h" />
+    <ClInclude Include="common\Tree\TreeBuilder.h" />
     <ClInclude Include="DentEngine\src\Bounds3D.h" />
     <ClInclude Include="DentEngine\src\ContourBuilder.h" />
     <ClInclude Include="DentEngine\src\mesh.h" />
@@ -939,6 +988,7 @@
       <IncludePath Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(CGAL_DIR)\auxiliary\gmp\include;$(CGAL_DIR)\build\include;$(CGAL_DIR)\include;$(BOOST_INCLUDEDIR);.\GeneratedFiles\$(ConfigurationName);.\GeneratedFiles;.;.\utils\winsparkle;$(QT_MSVC2017_64)\include;$(QT_MSVC2017_64)\include\Qt3DQuickExtras;$(QT_MSVC2017_64)\include\Qt3DQuick;$(QT_MSVC2017_64)\include\QtQuick;$(QT_MSVC2017_64)\include\QtOpenGL;$(QT_MSVC2017_64)\include\QtWidgets;$(QT_MSVC2017_64)\include\Qt3DExtras;$(QT_MSVC2017_64)\include\Qt3DRender;$(QT_MSVC2017_64)\include\Qt3DInput;$(QT_MSVC2017_64)\include\Qt3DLogic;$(QT_MSVC2017_64)\include\Qt3DCore;$(QT_MSVC2017_64)\include\QtGamepad;$(QT_MSVC2017_64)\include\QtGui;$(QT_MSVC2017_64)\include\QtANGLE;$(QT_MSVC2017_64)\include\QtQml;$(QT_MSVC2017_64)\include\QtNetwork;$(QT_MSVC2017_64)\include\QtConcurrent;$(QT_MSVC2017_64)\include\QtCore;.\debug;$(QT_MSVC2017_64)\mkspecs\win32-msvc;$(QT_MSVC2017_64)\include\QtSvg</IncludePath>
       <IncludePath Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(CGAL_DIR)\auxiliary\gmp\include;$(CGAL_DIR)\build\include;$(CGAL_DIR)\include;$(BOOST_INCLUDEDIR);.\GeneratedFiles\$(ConfigurationName);.\GeneratedFiles;.;.\utils\winsparkle;$(QT_MSVC2017_64)\include;$(QT_MSVC2017_64)\include\Qt3DQuickExtras;$(QT_MSVC2017_64)\include\Qt3DQuick;$(QT_MSVC2017_64)\include\QtQuick;$(QT_MSVC2017_64)\include\QtOpenGL;$(QT_MSVC2017_64)\include\QtWidgets;$(QT_MSVC2017_64)\include\Qt3DExtras;$(QT_MSVC2017_64)\include\Qt3DRender;$(QT_MSVC2017_64)\include\Qt3DInput;$(QT_MSVC2017_64)\include\Qt3DLogic;$(QT_MSVC2017_64)\include\Qt3DCore;$(QT_MSVC2017_64)\include\QtGamepad;$(QT_MSVC2017_64)\include\QtGui;$(QT_MSVC2017_64)\include\QtANGLE;$(QT_MSVC2017_64)\include\QtQml;$(QT_MSVC2017_64)\include\QtNetwork;$(QT_MSVC2017_64)\include\QtConcurrent;$(QT_MSVC2017_64)\include\QtCore;.\release;$(QT_MSVC2017_64)\mkspecs\win32-msvc;$(QT_MSVC2017_64)\include\QtSvg</IncludePath>
     </QtMoc>
+    <ClInclude Include="common\Tree\LineTree.h" />
     <ClInclude Include="Mesh\BVH.h" />
     <ClInclude Include="Mesh\HixBVH.h" />
     <ClInclude Include="Mesh\MeshCache.h" />
@@ -950,10 +1000,19 @@
       <IncludePath Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.\common\GTEngine\Include;$(CGAL_DIR)\auxiliary\gmp\include;$(CGAL_DIR)\build\include;$(CGAL_DIR)\include;$(BOOST_INCLUDEDIR);.\GeneratedFiles\$(ConfigurationName);.\GeneratedFiles;.;.\utils\winsparkle;$(QT_MSVC2017_64)\include;$(QT_MSVC2017_64)\include\Qt3DQuickExtras;$(QT_MSVC2017_64)\include\Qt3DQuick;$(QT_MSVC2017_64)\include\QtQuick;$(QT_MSVC2017_64)\include\QtOpenGL;$(QT_MSVC2017_64)\include\QtWidgets;$(QT_MSVC2017_64)\include\Qt3DExtras;$(QT_MSVC2017_64)\include\Qt3DRender;$(QT_MSVC2017_64)\include\Qt3DInput;$(QT_MSVC2017_64)\include\Qt3DLogic;$(QT_MSVC2017_64)\include\Qt3DCore;$(QT_MSVC2017_64)\include\QtGamepad;$(QT_MSVC2017_64)\include\QtGui;$(QT_MSVC2017_64)\include\QtANGLE;$(QT_MSVC2017_64)\include\QtQml;$(QT_MSVC2017_64)\include\QtNetwork;$(QT_MSVC2017_64)\include\QtConcurrent;$(QT_MSVC2017_64)\include\QtCore;.\release;$(QT_MSVC2017_64)\mkspecs\win32-msvc;$(QT_MSVC2017_64)\include\QtSvg;$(INHERIT);$(OPENNI2_DIR)\Include;$(PCL_DIR)\3rdParty\VTK\include\vtk-8.1;$(PCL_DIR)\include\pcl-1.9;$(PCL_DIR)\3rdParty\Eigen\eigen3;$(PCL_DIR)\3rdParty\FLANN\include;$(PCL_DIR)\3rdParty\FLANN\include\flann\ext;$(PCL_DIR)\3rdParty\Qhull\include;$(PCL_DIR)\3rdParty\VTK\include
       %(AdditionalIncludeDirectories)</IncludePath>
     </QtMoc>
+    <ClInclude Include="render\CircleMeshEntity.h">
+      <IncludePath Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">.\common\GTEngine\Include;$(CGAL_DIR)\auxiliary\gmp\include;$(CGAL_DIR)\build\include;$(CGAL_DIR)\include;$(BOOST_INCLUDEDIR);.\GeneratedFiles\$(ConfigurationName);.\GeneratedFiles;.;.\utils\winsparkle;$(QT_MSVC2017_64)\include;$(QT_MSVC2017_64)\include\Qt3DQuickExtras;$(QT_MSVC2017_64)\include\Qt3DQuick;$(QT_MSVC2017_64)\include\QtQuick;$(QT_MSVC2017_64)\include\QtOpenGL;$(QT_MSVC2017_64)\include\QtWidgets;$(QT_MSVC2017_64)\include\Qt3DExtras;$(QT_MSVC2017_64)\include\Qt3DRender;$(QT_MSVC2017_64)\include\Qt3DInput;$(QT_MSVC2017_64)\include\Qt3DLogic;$(QT_MSVC2017_64)\include\Qt3DCore;$(QT_MSVC2017_64)\include\QtGamepad;$(QT_MSVC2017_64)\include\QtGui;$(QT_MSVC2017_64)\include\QtANGLE;$(QT_MSVC2017_64)\include\QtQml;$(QT_MSVC2017_64)\include\QtNetwork;$(QT_MSVC2017_64)\include\QtConcurrent;$(QT_MSVC2017_64)\include\QtCore;.\debug;$(QT_MSVC2017_64)\mkspecs\win32-msvc;$(QT_MSVC2017_64)\include\QtSvg;$(INHERIT);$(OPENNI2_DIR)\Include;$(PCL_DIR)\3rdParty\VTK\include\vtk-8.1;$(PCL_DIR)\include\pcl-1.9;$(PCL_DIR)\3rdParty\Eigen\eigen3;$(PCL_DIR)\3rdParty\FLANN\include;$(PCL_DIR)\3rdParty\FLANN\include\flann\ext;$(PCL_DIR)\3rdParty\Qhull\include;$(PCL_DIR)\3rdParty\VTK\include</IncludePath>
+      <IncludePath Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.\common\GTEngine\Include;$(CGAL_DIR)\auxiliary\gmp\include;$(CGAL_DIR)\build\include;$(CGAL_DIR)\include;$(BOOST_INCLUDEDIR);.\GeneratedFiles\$(ConfigurationName);.\GeneratedFiles;.;.\utils\winsparkle;$(QT_MSVC2017_64)\include;$(QT_MSVC2017_64)\include\Qt3DQuickExtras;$(QT_MSVC2017_64)\include\Qt3DQuick;$(QT_MSVC2017_64)\include\QtQuick;$(QT_MSVC2017_64)\include\QtOpenGL;$(QT_MSVC2017_64)\include\QtWidgets;$(QT_MSVC2017_64)\include\Qt3DExtras;$(QT_MSVC2017_64)\include\Qt3DRender;$(QT_MSVC2017_64)\include\Qt3DInput;$(QT_MSVC2017_64)\include\Qt3DLogic;$(QT_MSVC2017_64)\include\Qt3DCore;$(QT_MSVC2017_64)\include\QtGamepad;$(QT_MSVC2017_64)\include\QtGui;$(QT_MSVC2017_64)\include\QtANGLE;$(QT_MSVC2017_64)\include\QtQml;$(QT_MSVC2017_64)\include\QtNetwork;$(QT_MSVC2017_64)\include\QtConcurrent;$(QT_MSVC2017_64)\include\QtCore;.\release;$(QT_MSVC2017_64)\mkspecs\win32-msvc;$(QT_MSVC2017_64)\include\QtSvg;$(INHERIT);$(OPENNI2_DIR)\Include;$(PCL_DIR)\3rdParty\VTK\include\vtk-8.1;$(PCL_DIR)\include\pcl-1.9;$(PCL_DIR)\3rdParty\Eigen\eigen3;$(PCL_DIR)\3rdParty\FLANN\include;$(PCL_DIR)\3rdParty\FLANN\include\flann\ext;$(PCL_DIR)\3rdParty\Qhull\include;$(PCL_DIR)\3rdParty\VTK\include
+      %(AdditionalIncludeDirectories)</IncludePath>
+    </ClInclude>
+    <ClInclude Include="Settings\AppSetting.h" />
+    <ClInclude Include="Settings\JSONParsedSetting.h" />
+    <ClInclude Include="Settings\PrinterSetting.h" />
     <ClInclude Include="support\BaseSupport.h" />
     <ClInclude Include="support\CylindricalRaft.h" />
     <ClInclude Include="support\ModelAttachedSupport.h" />
     <ClInclude Include="support\RaftModel.h" />
+    <ClInclude Include="ui\GridBed.h" />
     <ClInclude Include="ui\Highlightable.h" />
     <ClInclude Include="input\Hoverable.h" />
     <ClInclude Include="ui\MoveWidget.h" />
@@ -979,6 +1038,7 @@
     <ClInclude Include="render\Color.h" />
     <ClInclude Include="unitTest\catch.hpp" />
     <ClInclude Include="unitTest\RandomGen.h" />
+    <ClInclude Include="unitTest\tests\BVHTest.h" />
     <ClInclude Include="unitTest\tests\Float3DVectorHash.h" />
     <ClInclude Include="unitTest\tests\IndexedListTest.h" />
     <ClInclude Include="unitTest\RunTests.h" />
@@ -1134,6 +1194,10 @@
     <None Include="Resource\mesh\plate.stl" />
     <None Include="Resource\mesh\plate_logo.stl" />
     <None Include="Resource\mesh\plate_plane.stl" />
+    <CopyFileToFolders Include="settings.json">
+      <DeploymentContent>true</DeploymentContent>
+      <FileType>Document</FileType>
+    </CopyFileToFolders>
     <None Include="shaders\default.vert" />
     <None Include="shaders\flat.frag" />
     <None Include="shaders\flat.geom" />

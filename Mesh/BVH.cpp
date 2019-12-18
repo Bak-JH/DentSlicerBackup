@@ -1,5 +1,7 @@
 #include "BVH.h"
 #include "../glmodel.h"
+#include "../../DentEngine/src/Bounds3D.h"
+#include "../common/Tree/BVHBuilder.h"
 using namespace Hix;
 using namespace Hix::Engine3D;
 typedef Hix::Temp::BVH<FaceConstItr> BVHImpl;
@@ -213,7 +215,6 @@ bool Hix::Engine3D::BVH::rayIntersectsAABB(const QVector3D& dirFrac, const QVect
 	return true;
 }
 
-
 Hix::Engine3D::BVH::BVH(const GLModel& model):_model(model)
 {
 	//cache world vertex positions and triangle bounding boxes
@@ -228,6 +229,7 @@ Hix::Engine3D::BVH::BVH(const GLModel& model):_model(model)
 	_boundedObjects = boundFactory.getBounds(allModels);
 	//do not call parent::build, without Node factory patten, defaults to pcl::...Node class
 	build(_boundedObjects);
+
 }
 
 

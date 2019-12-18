@@ -4,8 +4,7 @@
 #include <unordered_map>
 #include <unordered_set>
 #include "../../DentEngine/src/polyclipping/polyclipping.h"
-#include "../../DentEngine/src/configuration.h"
-
+#include "../../qmlmanager.h"
 
 constexpr float MARGIN = 20;
 namespace std
@@ -56,7 +55,7 @@ Hix::Features::Autoarrange::Autoarrange(const std::unordered_set<GLModel*>& sele
 		modelRectMap.insert(std::make_pair(rect, model));
 	}
 	rbp::SkylineBinPack skylinePacker;
-	skylinePacker.Init(scfg->bedX() * Hix::Polyclipping::INT_PT_RESOLUTION, scfg->bedY() * Hix::Polyclipping::INT_PT_RESOLUTION, false);
+	skylinePacker.Init(qmlManager->settings().printerSetting().bedX * Hix::Polyclipping::INT_PT_RESOLUTION, qmlManager->settings().printerSetting().bedY* Hix::Polyclipping::INT_PT_RESOLUTION, false);
 	skylinePacker.Insert(rectsInput, packedOutput, rbp::SkylineBinPack::LevelBottomLeft);
 	//calculate max occupied rect so that we can re-center
 	int xMax = 0;

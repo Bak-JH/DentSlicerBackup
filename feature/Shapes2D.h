@@ -10,9 +10,23 @@ namespace Hix
 	}
 	namespace Shapes2D
 	{
+
+		template<typename ItrType>
+		void setZ(float z, ItrType itr, ItrType end)
+		{
+			for (; itr != end; ++itr)
+			{
+				itr->setZ(z);
+			}
+		}
+
+		std::vector<std::vector<QVector3D>> gridCircle(float radius, float offset);
+		std::vector<std::vector<QVector3D>> gridRect(float xLength, float yLength, float offset);
+
 		void rotateCW90(QVector2D& vec);
 		void rotateCCW90(QVector2D& vec);
 
+		std::vector<QVector3D> generateCircle(float radius, size_t segCount);
 		std::vector<QVector3D> generateHexagon(float radius);
 		std::vector<QVector3D> generateSquare(float radius);
 		

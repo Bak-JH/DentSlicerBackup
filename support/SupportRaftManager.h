@@ -4,8 +4,6 @@
 #include "VerticalSupportModel.h"
 #include "../../common/HetUniquePtr.h"
 
-#include <QAbstractRayCaster>
-#include <qraycaster.h>
 class GLModel;
 namespace Hix
 {
