@@ -33,11 +33,11 @@ namespace Hix
 		private:
 			void coverCap(GLModel* model, QVector3D normal, const std::unordered_set<FaceConstItr>& extension_faces, double distance);
 
-			GLModel* _model;
+			std::unique_ptr<GLModel> _model;
 			QVector3D _normal;
 			std::unordered_set<FaceConstItr> _extensionFaces;
-			Mesh* _prevMesh;
-			Mesh* _nextMesh;
+			std::unique_ptr<Mesh> _prevMesh;
+			std::unique_ptr<Mesh> _nextMesh;
 		};
 
 
@@ -51,7 +51,7 @@ namespace Hix
 			FeatureContainerFlushSupport* applyExtend(double distance);
 
 		private:
-			GLModel* _model = nullptr;
+			std::unique_ptr<GLModel> _model;
 			QVector3D _normal;
 			std::unordered_map<GLModel*, ExtendArg> _args;
 		};

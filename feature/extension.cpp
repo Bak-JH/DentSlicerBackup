@@ -100,9 +100,9 @@ Hix::Features::Extend::Extend(GLModel* targetModel, const QVector3D& targetFaceN
 								const std::unordered_set<FaceConstItr>& targetFaces, double distance)
 	: _model(targetModel), _normal(targetFaceNormal), _extensionFaces(targetFaces)
 {
+	_nextMesh = std::unique_ptr<Mesh>(_model->getMeshModd());
 
-
-	_prevMesh = new Mesh(*_model->getMeshModd());
+	_prevMesh = std::make_unique<Mesh>(*_model->getMeshModd());
 	_model->unselectMeshFaces();
 	std::deque<HalfEdgeConstItr> path;
 	try
@@ -114,7 +114,7 @@ Hix::Features::Extend::Extend(GLModel* targetModel, const QVector3D& targetFaceN
 		return;
 	}
 	extendAlongOutline(_model->getMeshModd(), _normal, distance, path);
-	coverCap(_model, _normal, _extensionFaces, distance);
+	coverCap(_model.get(), _normal, _extensionFaces, distance);
 
 	_model->getMeshModd()->removeFaces(_extensionFaces);
 	_model->unselectMeshFaces();
@@ -126,13 +126,15 @@ Hix::Features::Extend::Extend(GLModel* targetModel, const QVector3D& targetFaceN
 
 Hix::Features::Extend::~Extend()
 {
+	_model.release();
+	_prevMesh.release();
+	_nextMesh.release();
 }
 
 void Hix::Features::Extend::undo()
 {
-	_nextMesh = _model->getMeshModd();
 
-	_model->setMesh(_prevMesh);
+	_model->setMesh(_prevMesh.get());
 	_model->unselectMeshFaces();
 	_model->updateMesh();
 	_model->setZToBed();
@@ -140,7 +142,7 @@ void Hix::Features::Extend::undo()
 
 void Hix::Features::Extend::redo()
 {
-	_model->setMesh(_nextMesh);
+	_model->setMesh(_nextMesh.get());
 	_model->unselectMeshFaces();
 	_model->updateMesh();
 	_model->setZToBed();
