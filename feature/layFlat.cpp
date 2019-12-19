@@ -96,4 +96,5 @@ void Hix::Features::LayFlat::redo()
 
 Hix::Features::LayFlat::~LayFlat()
 {
+	_model.release();
 }
