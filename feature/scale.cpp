@@ -34,6 +34,7 @@ Hix::Features::Scale::Scale(GLModel* targetModel, QVector3D& scale)
 
 Hix::Features::Scale::~Scale()
 {
+	_model.release();
 }
 
 void Hix::Features::Scale::undo()
