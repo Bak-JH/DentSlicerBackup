@@ -19,8 +19,8 @@ namespace Hix
 			std::unique_ptr<GLModel> getAddedModelUnique();
 
 		private:
-			GLModel* _addedModel;
-			GLModel* _deletedModel;
+			std::unique_ptr<GLModel> _addedModel;
+			std::unique_ptr<GLModel> _deletedModel;
 		};
 	}
 }
