@@ -9,8 +9,13 @@
 #include <Qt3DInput>
 #include <array>
 #include <memory>
+
 namespace Hix
 {
+	namespace Features
+	{
+		class WidgetMode;
+	}
 	namespace UI
 	{
 		class Widget;
@@ -21,7 +26,7 @@ namespace Hix
 		{
 			Q_OBJECT
 		public:
-			Widget3D();
+			Widget3D(Hix::Features::WidgetMode* mode);
 			virtual ~Widget3D();
 			void addWidget(std::unique_ptr<Hix::UI::Widget> widget);
 			void setVisible(bool show);
@@ -31,9 +36,14 @@ namespace Hix
 			Qt3DCore::QTransform* transform();
 			bool isManipulated();
 			void setManipulated(bool isManipulated);
+			Hix::Features::WidgetMode* mode();
+
+		protected:
+			Hix::Features::WidgetMode* _mode;
+
 		private:
 			std::vector<std::unique_ptr<Hix::UI::Widget>> _widgets;
-			bool _visible = true;
+			bool _visible = false;
 			QVector3D _center;
 			Qt3DCore::QTransform _transform;
 			bool _isManipulated = false;

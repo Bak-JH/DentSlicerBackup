@@ -2,6 +2,7 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <ClCompile Include="common\Debug.cpp" />
+    <ClCompile Include="common\debugging\DebugRenderObject.cpp" />
     <ClCompile Include="common\GTEngine\Source\GTEnginePCH.cpp" />
     <ClCompile Include="common\GTEngine\Source\LowLevel\GteLogger.cpp" />
     <ClCompile Include="common\GTEngine\Source\LowLevel\GteLogReporter.cpp" />
@@ -41,6 +42,14 @@
     <ClCompile Include="DentEngine\src\polyclipping\polytree2tri\PolytreeCDT.cpp" />
     <ClCompile Include="DentEngine\src\SlicerDebug.cpp" />
     <ClCompile Include="DentEngine\src\SlicerDebugInfoExport.cpp" />
+    <ClCompile Include="feature\addModel.cpp" />
+    <ClCompile Include="feature\arrange\autoarrange.cpp" />
+    <ClCompile Include="feature\arrange\GuillotineBinPack.cpp" />
+    <ClCompile Include="feature\arrange\MaxRectsBinPack.cpp" />
+    <ClCompile Include="feature\arrange\Rect.cpp" />
+    <ClCompile Include="feature\arrange\ShelfBinPack.cpp" />
+    <ClCompile Include="feature\arrange\ShelfNextFitBinPack.cpp" />
+    <ClCompile Include="feature\arrange\SkylineBinPack.cpp" />
     <ClCompile Include="feature\autoorientation.cpp" />
     <ClCompile Include="DentEngine\src\polyclipping\clipper\clipper.cpp" />
     <ClCompile Include="DentEngine\src\cmdlineparser.cpp" />
@@ -48,16 +57,28 @@
     <ClCompile Include="feature\convex_hull.cpp" />
     <ClCompile Include="feature\CSG\CorkMeshFactory.cpp" />
     <ClCompile Include="feature\cut\DrawingPlane.cpp" />
+    <ClCompile Include="feature\cut\MeshPlaneBisect.cpp" />
     <ClCompile Include="feature\cut\MeshPlaneCut.cpp" />
+    <ClCompile Include="feature\cut\polylinecut.cpp" />
+    <ClCompile Include="feature\cut\ZAxialCut.cpp" />
+    <ClCompile Include="feature\deleteModel.cpp" />
     <ClCompile Include="feature\extension.cpp" />
     <ClCompile Include="feature\Extrude.cpp" />
     <ClCompile Include="feature\cut\modelcut.cpp" />
+    <ClCompile Include="feature\FeatureHistoryManager.cpp" />
+    <ClCompile Include="feature\interfaces\Mode.cpp" />
+    <ClCompile Include="feature\interfaces\PPShaderMode.cpp" />
+    <ClCompile Include="feature\interfaces\SelectFaceMode.cpp" />
+    <ClCompile Include="feature\interfaces\WidgetMode.cpp" />
     <ClCompile Include="feature\label\Labelling.cpp" />
     <ClCompile Include="feature\layFlat.cpp" />
     <ClCompile Include="feature\layerview\CrossSectionPlane.cpp" />
     <ClCompile Include="feature\layerview\layerview.cpp" />
     <ClCompile Include="feature\ModelBuilder.cpp" />
+    <ClCompile Include="feature\move.cpp" />
     <ClCompile Include="feature\overhangDetect.cpp" />
+    <ClCompile Include="feature\Plane3D.cpp" />
+    <ClCompile Include="feature\PoissonRemesh.cpp" />
     <ClCompile Include="feature\repair\Algorithms\checkAndRepair.cpp" />
     <ClCompile Include="feature\repair\Algorithms\detectIntersections.cpp" />
     <ClCompile Include="feature\repair\Algorithms\holeFilling.cpp" />
@@ -78,6 +99,9 @@
     <ClCompile Include="feature\repair\TMesh\tin.cpp" />
     <ClCompile Include="feature\repair\TMesh\triangle.cpp" />
     <ClCompile Include="feature\repair\TMesh\vertex.cpp" />
+    <ClCompile Include="feature\rotate.cpp" />
+    <ClCompile Include="feature\SupportFeature.cpp" />
+    <ClCompile Include="feature\TwoManifoldBuilder.cpp" />
     <ClCompile Include="fileloader.cpp" />
     <ClCompile Include="feature\cut\FreeCutPtWidget.cpp" />
     <ClCompile Include="glmodel.cpp" />
@@ -85,9 +109,16 @@
     <ClCompile Include="input\HitTestAble.cpp" />
     <ClCompile Include="input\Hoverable.cpp" />
     <ClCompile Include="input\raycastcontroller.cpp" />
+    <ClCompile Include="Mesh\BVH.cpp" />
+    <ClCompile Include="Mesh\HixBVH.cpp" />
+    <ClCompile Include="Mesh\MeshCache.cpp" />
+    <ClCompile Include="Mesh\MTRayCaster.cpp" />
+    <ClCompile Include="Mesh\RayAccelerator.cpp" />
+    <ClCompile Include="Mesh\RayCaster.cpp" />
     <ClCompile Include="render\lights.cpp" />
     <ClCompile Include="render\LineMeshEntity.cpp" />
     <ClCompile Include="render\ModelMaterial.cpp" />
+    <ClCompile Include="render\PlaneMeshEntity.cpp" />
     <ClCompile Include="render\SceneEntity.cpp" />
     <ClCompile Include="render\SceneEntityWithMaterial.cpp" />
     <ClCompile Include="feature\Shapes2D.cpp" />
@@ -101,8 +132,9 @@
     <ClCompile Include="ui\CubeWidget.cpp" />
     <ClCompile Include="ui\MoveWidget.cpp" />
     <ClCompile Include="ui\RotateWidget.cpp" />
+    <ClCompile Include="feature\scale.cpp" />
+    <ClCompile Include="ui\Widget.cpp" />
     <ClCompile Include="ui\Widget3D.cpp" />
-    <ClCompile Include="ui\Widget3DManager.cpp" />
     <ClCompile Include="unitTest\RandomGen.cpp" />
     <ClCompile Include="unitTest\RunTests.cpp" />
     <ClCompile Include="utils\gridmesh.cpp" />
@@ -113,7 +145,6 @@
     <ClCompile Include="utils\mathutils.cpp" />
     <ClCompile Include="DentEngine\src\mesh.cpp" />
     <ClCompile Include="DentEngine\src\utils\metric.cpp" />
-    <ClCompile Include="feature\cut\polylinecut.cpp" />
     <ClCompile Include="qmlmanager.cpp" />
     <ClCompile Include="utils\qtriangulator.cpp" />
     <ClCompile Include="utils\quaternionhelper.cpp" />
@@ -123,77 +154,10 @@
     <ClCompile Include="feature\stlexporter.cpp" />
     <ClCompile Include="DentEngine\src\svgexporter.cpp" />
     <ClCompile Include="utils\updatechecker.cpp" />
-    <ClCompile Include="feature\SupportFeature.cpp">
+    <ClCompile Include="feature\interfaces\Feature.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="feature\interfaces\Feature.cpp" />
-    <ClCompile Include="feature\interfaces\PPShaderFeature.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="feature\interfaces\SelectFaceFeature.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="feature\cut\MeshPlaneBisect.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="feature\cut\ZAxialCut.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="feature\arrange\GuillotineBinPack.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="feature\arrange\MaxRectsBinPack.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="feature\arrange\Rect.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="feature\arrange\ShelfBinPack.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="feature\arrange\ShelfNextFitBinPack.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="feature\arrange\SkylineBinPack.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="feature\arrange\autoarrange.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Mesh\BVH.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Mesh\RayAccelerator.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Mesh\RayCaster.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Mesh\MTRayCaster.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Mesh\HixBVH.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Mesh\MeshCache.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="common\debugging\DebugRenderObject.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="ui\Widget.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="feature\TwoManifoldBuilder.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="feature\PoissonRemesh.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="render\PlaneMeshEntity.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="feature\Plane3D.cpp">
+    <ClCompile Include="feature\interfaces\FlushSupport.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Settings\AppSetting.cpp">
@@ -223,6 +187,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="common\Debug.h" />
+    <ClInclude Include="common\debugging\DebugRenderObject.h" />
     <ClInclude Include="common\delaunator.hpp" />
     <ClInclude Include="common\GTEngine\Include\GTEngine.h" />
     <ClInclude Include="common\GTEngine\Include\GTEngineDEF.h" />
@@ -602,8 +567,8 @@
     <ClInclude Include="common\GTEngine\Include\Mathematics\GteVETNonmanifoldMesh.h" />
     <ClInclude Include="common\GTEngine\Include\Mathematics\MSW\GteCPUQueryInstructions.h" />
     <ClInclude Include="common\GTEngine\Include\Mathematics\MSW\GteIntelSSE.h" />
-    <ClInclude Include="common\HetUniquePtr.h" />
     <ClInclude Include="common\Hasher.h" />
+    <ClInclude Include="common\HetUniquePtr.h" />
     <ClInclude Include="common\indexedlist.h" />
     <ClInclude Include="common\IteratorWrapper.h" />
     <ClInclude Include="common\moodycamel\atomicops.h" />
@@ -649,6 +614,7 @@
     <ClInclude Include="common\TrackedIndexedList.h" />
     <ClInclude Include="DentEngine\src\Bounds3D.h" />
     <ClInclude Include="DentEngine\src\ContourBuilder.h" />
+    <ClInclude Include="DentEngine\src\mesh.h" />
     <ClInclude Include="DentEngine\src\MeshIterators.h" />
     <ClInclude Include="DentEngine\src\Planes.h" />
     <ClInclude Include="DentEngine\src\polyclipping\poly2tri\poly2tri.h" />
@@ -657,12 +623,20 @@
     <ClInclude Include="DentEngine\src\polyclipping\polytree2tri\PolytreeCDT.h" />
     <ClInclude Include="DentEngine\src\SlicerDebug.h" />
     <ClInclude Include="DentEngine\src\SlicerDebugInfoExport.h" />
+    <ClInclude Include="feature\addModel.h" />
     <ClInclude Include="feature\agCDT\CDT.h" />
     <ClInclude Include="feature\agCDT\CDT.hpp" />
     <ClInclude Include="feature\agCDT\CDTUtils.h" />
     <ClInclude Include="feature\agCDT\CDTUtils.hpp" />
     <ClInclude Include="feature\agCDT\PointRTree.h" />
     <ClInclude Include="feature\agCDT\predicates.h" />
+    <ClInclude Include="feature\arrange\autoarrange.h" />
+    <ClInclude Include="feature\arrange\GuillotineBinPack.h" />
+    <ClInclude Include="feature\arrange\MaxRectsBinPack.h" />
+    <ClInclude Include="feature\arrange\Rect.h" />
+    <ClInclude Include="feature\arrange\ShelfBinPack.h" />
+    <ClInclude Include="feature\arrange\ShelfNextFitBinPack.h" />
+    <ClInclude Include="feature\arrange\SkylineBinPack.h" />
     <ClInclude Include="feature\autoorientation.h" />
     <ClInclude Include="DentEngine\src\polyclipping\clipper\clipper.hpp" />
     <ClInclude Include="DentEngine\src\cmdlineparser.h" />
@@ -672,23 +646,33 @@
     <ClInclude Include="feature\convex_hull.h" />
     <ClInclude Include="feature\CSG\CorkMeshFactory.h" />
     <ClInclude Include="feature\CSG\CSG.h" />
+    <ClInclude Include="feature\cut\DrawingPlane.h" />
     <ClInclude Include="feature\cut\MeshPlaneCut.h" />
     <ClInclude Include="feature\cut\ZAxialCut.h" />
+    <ClInclude Include="feature\deleteModel.h" />
     <ClInclude Include="feature\extension.h" />
     <ClInclude Include="feature\Extrude.h" />
     <ClInclude Include="feature\cut\FreeCutPtWidget.h" />
     <ClInclude Include="feature\cut\modelcut.h" />
+    <ClInclude Include="feature\FeatureHistoryManager.h" />
+    <ClInclude Include="feature\interfaces\Feature.h" />
+    <ClInclude Include="feature\interfaces\PPShaderMode.h" />
+    <ClInclude Include="feature\interfaces\SelectFaceMode.h" />
+    <ClInclude Include="feature\interfaces\WidgetMode.h" />
     <ClInclude Include="feature\label\Labelling.h" />
     <ClInclude Include="feature\layFlat.h" />
     <ClInclude Include="feature\layerview\layerview.h" />
+    <ClInclude Include="feature\interfaces\Mode.h" />
     <ClInclude Include="feature\ModelBuilder.h" />
+    <ClInclude Include="feature\move.h" />
     <ClInclude Include="feature\overhangDetect.h" />
+    <ClInclude Include="feature\Plane3D.h" />
+    <ClInclude Include="feature\PoissonRemesh.h" />
     <ClInclude Include="feature\repair\Algorithms\detectIntersections.h" />
     <ClInclude Include="feature\repair\Algorithms\marchIntersections.h" />
     <ClInclude Include="feature\repair\Kernel\basics.h" />
     <ClInclude Include="feature\repair\Kernel\coordinates.h" />
     <ClInclude Include="feature\repair\Kernel\graph.h" />
-    <ClInclude Include="feature\repair\Kernel\heap.h" />
     <ClInclude Include="feature\repair\Kernel\jqsort.h" />
     <ClInclude Include="feature\repair\Kernel\list.h" />
     <ClInclude Include="feature\repair\Kernel\matrix.h" />
@@ -700,22 +684,33 @@
     <ClInclude Include="feature\repair\TMesh\tmesh.h" />
     <ClInclude Include="feature\repair\TMesh\triangle.h" />
     <ClInclude Include="feature\repair\TMesh\vertex.h" />
+    <ClInclude Include="feature\rotate.h" />
+    <ClInclude Include="feature\SupportFeature.h" />
+    <ClInclude Include="feature\TwoManifoldBuilder.h" />
     <ClInclude Include="fileloader.h" />
     <ClInclude Include="feature\hollowshell.h" />
     <ClInclude Include="input\Clickable.h" />
     <ClInclude Include="input\Draggable.h" />
     <ClInclude Include="feature\Shapes2D.h" />
     <ClInclude Include="input\HitTestAble.h" />
+    <ClInclude Include="Mesh\BVH.h" />
+    <ClInclude Include="Mesh\HixBVH.h" />
+    <ClInclude Include="Mesh\MeshCache.h" />
+    <ClInclude Include="Mesh\MTRayCaster.h" />
+    <ClInclude Include="Mesh\RayAccelerator.h" />
+    <ClInclude Include="Mesh\RayCaster.h" />
     <ClInclude Include="support\BaseSupport.h" />
     <ClInclude Include="support\CylindricalRaft.h" />
     <ClInclude Include="support\ModelAttachedSupport.h" />
     <ClInclude Include="support\RaftModel.h" />
     <ClInclude Include="ui\Highlightable.h" />
     <ClInclude Include="input\Hoverable.h" />
-    <ClInclude Include="support\SupportModel.h" />
+    <ClInclude Include="ui\MoveWidget.h" />
+    <ClInclude Include="ui\RotateWidget.h" />
     <ClInclude Include="support\VerticalSupportModel.h" />
     <ClInclude Include="support\SupportRaftManager.h" />
-    <ClInclude Include="ui\Widget3DManager.h" />
+    <ClInclude Include="feature\scale.h" />
+    <ClInclude Include="ui\Widget.h" />
     <ClInclude Include="render\Color.h" />
     <ClInclude Include="unitTest\catch.hpp" />
     <ClInclude Include="unitTest\RandomGen.h" />
@@ -743,74 +738,7 @@
     <ClInclude Include="DentEngine\src\polyclipping\poly2tri\common\utils.h" />
     <ClInclude Include="utils\utils.h" />
     <ClInclude Include="utils\winsparkle\winsparkle.h" />
-    <ClInclude Include="feature\SupportFeature.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="feature\interfaces\Feature.h" />
-    <ClInclude Include="feature\interfaces\PPShaderFeature.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="feature\interfaces\SelectFaceFeature.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="DentEngine\src\mesh.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="feature\arrange\GuillotineBinPack.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="feature\arrange\MaxRectsBinPack.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="feature\arrange\Rect.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="feature\arrange\ShelfBinPack.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="feature\arrange\ShelfNextFitBinPack.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="feature\arrange\SkylineBinPack.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="feature\arrange\autoarrange.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Mesh\BVH.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Mesh\RayAccelerator.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Mesh\RayCaster.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Mesh\MTRayCaster.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Mesh\HixBVH.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Mesh\MeshCache.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="common\debugging\DebugRenderObject.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="ui\Widget.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="ui\RotateWidget.h" />
-    <ClInclude Include="ui\MoveWidget.h" />
-    <ClInclude Include="feature\TwoManifoldBuilder.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="feature\PoissonRemesh.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="feature\cut\DrawingPlane.h" />
-    <ClInclude Include="feature\Plane3D.h">
+    <ClInclude Include="feature\interfaces\FlushSupport.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="common\rapidjson\error\en.h">
@@ -973,6 +901,7 @@
     <QtMoc Include="utils\linemeshgeometry.h" />
     <QtMoc Include="input\raycastcontroller.h" />
     <QtMoc Include="render\LineMeshEntity.h" />
+    <QtMoc Include="render\PlaneMeshEntity.h" />
     <QtMoc Include="render\ModelMaterial.h" />
     <QtMoc Include="render\lights.h" />
     <QtMoc Include="ui\Widget3D.h" />
@@ -983,9 +912,6 @@
     <QtMoc Include="qmlmanager.h" />
     <QtMoc Include="utils\quaternionhelper.h" />
     <QtMoc Include="utils\updatechecker.h" />
-    <QtMoc Include="render\PlaneMeshEntity.h">
-      <Filter>Header Files</Filter>
-    </QtMoc>
   </ItemGroup>
   <ItemGroup>
     <QtRcc Include="qml.qrc" />
@@ -1020,6 +946,8 @@
     <None Include="Qml\MeshTransformerTab.qml" />
     <None Include="Qml\MeshTransformerZoom.qml" />
     <None Include="Qml\Model.qml" />
+    <None Include="Qml\Plane.qml" />
+    <None Include="Qml\SamplePopup.qml" />
     <None Include="Resource\font\NotoSans-Regular.ttf" />
     <None Include="Resource\font\NotoSans-SemiCondensed.ttf" />
     <None Include="Resource\font\NotoSans-SemiCondensedMedium.ttf" />
@@ -1181,14 +1109,14 @@
     <None Include="icon.ico" />
   </ItemGroup>
   <ItemGroup>
-    <Filter Include="Source Files">
-      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
-      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
-      <ParseFiles>true</ParseFiles>
-    </Filter>
     <Filter Include="Header Files">
       <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
       <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
+      <ParseFiles>true</ParseFiles>
+    </Filter>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
       <ParseFiles>true</ParseFiles>
     </Filter>
   </ItemGroup>

@@ -128,5 +128,6 @@
         <file>icon.ico</file>
         <file>Resource/dentslicer_icon.png</file>
         <file>Resource/mesh/plate_logo.stl</file>
+        <file>Resource/dentslicer_login_logo.png</file>
     </qresource>
 </RCC>

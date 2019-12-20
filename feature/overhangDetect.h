@@ -5,12 +5,13 @@
 #include <vector>
 #include "DentEngine/src/mesh.h"
 #include "../Mesh/RayCaster.h"
+#include "feature/interfaces/Feature.h"
 namespace Hix
 {
 	using namespace Engine3D;
 	namespace OverhangDetect
 	{ 
-		class Overhang
+		class Overhang : public Features::Feature
 		{
 		public:
 			Overhang(const FaceConstItr& face, const QVector3D& coord);
@@ -19,6 +20,8 @@ namespace Hix
 			bool operator==(const Overhang& o) const;
 			const Hix::Engine3D::Mesh* owner()const;
 			const QVector3D& normal()const;
+			void undo()override {}
+			void redo()override {}
 			//void setRaycastResult(const RayHits& hit);
 			//const RayHits& rayHit()const;
 		private:

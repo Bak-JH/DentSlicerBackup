@@ -1,6 +1,7 @@
 #pragma once
 #include <unordered_set>
 #include "../../DentEngine/src/ContourBuilder.h"
+#include "feature/interfaces/FlushSupport.h"
 #include "../../common/Task.h"
 
 class GLModel;
@@ -15,25 +16,23 @@ namespace Hix
 	{
 		namespace Cut
 		{
-			class ZAxialCut
+			class ZAxialCut :public Hix::Features::FeatureContainerFlushSupport
 			{
 				
 			public:
-				//should cut keep both halves
-				enum Result
-				{
-					KeepBoth,
-					KeepTop,
-					KeepBottom
-				};
-				ZAxialCut(GLModel* subject, float cuttingPlane, Result option = Result::KeepBoth);
-				void doChildrenRecursive(GLModel* subject, float cuttingPlane, Result option);
+				ZAxialCut(GLModel* subject, float cuttingPlane);
+
+				void doChildrenRecursive(GLModel* subject, float cuttingPlane);
+				std::unordered_set<GLModel*>& upperModels();
+				std::unordered_set<GLModel*>& lowerModels();
+
 			private:
 				//top, bottom pair
-				std::unordered_map<GLModel*, std::pair<GLModel*, GLModel*>> _divisionMap;
-				std::unordered_set<GLModel*> _topChildren;
-				std::unordered_set<GLModel*> _botChildren;
+				int top_no, bot_no;
 				float _cuttingPlane;
+				std::unordered_set<GLModel*> _upperModels;
+				std::unordered_set<GLModel*> _lowerModels;
+
 			};
 		}
 	}

@@ -7,6 +7,7 @@
 #include "../../render/Color.h"
 #include "../../feature/Plane3D.h"
 #include "../../DentEngine/src/mesh.h"
+//#include "glmodel.h"
 
 namespace Qt3DCore
 {
@@ -27,6 +28,7 @@ namespace Hix
 			void outlineFace(const Hix::Engine3D::FaceConstItr& face, const QColor& color = QColor(0, 0, 0, 255));
 			void registerDebugColorFaces(GLModel* owner, const std::unordered_set<FaceConstItr>& faces);
 			void colorDebugFaces();
+			void showGLModelAabb(GLModel* target);
 			void clear();
 			Hix::Render::PlaneMeshEntity& displayPlane(const Hix::Plane3D::PDPlane& pdplane);
 		private:

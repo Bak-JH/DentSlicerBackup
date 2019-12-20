@@ -2,6 +2,7 @@
 #include "../../qmlmanager.h"
 #include "ZAxialCut.h"
 #include "polylinecut.h"
+#include "feature/interfaces/Feature.h"
 using namespace Hix;
 using namespace Hix::Features;
 using namespace Hix::Features::Cut;
@@ -15,7 +16,6 @@ Hix::Features::ModelCut::ModelCut(const std::unordered_set<GLModel*>& selectedMo
 	_models(selectedModels), _cuttingPlane(qmlManager->total), _modelsBound(bound)
 {
 	qmlManager->getRayCaster().setHoverEnabled(true);
-	_cuttingPlane.enablePlane(true);
 }
 
 Hix::Features::ModelCut::~ModelCut()
@@ -24,10 +24,13 @@ Hix::Features::ModelCut::~ModelCut()
 }
 
 void ModelCut::cutModeSelected(int type) {
-	//if flat cut
+	//if flat cut		
+
 	if (type == 1)
 	{
 		_cutType = ZAxial;
+		_cuttingPlane.transform().setTranslation(QVector3D(0, 0, 4.04637));
+		_cuttingPlane.enablePlane(true);
 	}
 	else if (type == 2)
 	{
@@ -36,6 +39,7 @@ void ModelCut::cutModeSelected(int type) {
 		//want cutting plane to be over model mesh
 		float zOverModel = _modelsBound.zMax() + 0.1f;
 		_cuttingPlane.transform().setTranslation(QVector3D(0, 0, zOverModel));
+		_cuttingPlane.enablePlane(true);
 		qmlManager->getRayCaster().setHoverEnabled(true);
 	}
 	return;
@@ -45,6 +49,7 @@ void ModelCut::cutModeSelected(int type) {
 
 void ModelCut::getSliderSignal(double value) {
 	float zlength = _modelsBound.lengthZ();
+	qDebug() << _modelsBound.zMin() + value * zlength / 1.8;
 	_cuttingPlane.transform().setTranslation(QVector3D(0, 0, _modelsBound.zMin() + value * zlength / 1.8));
 }
 
@@ -56,8 +61,8 @@ void Hix::Features::ModelCut::applyCut()
 	{
 		for (auto each : _models)
 		{
-			ZAxialCut impl(each, _cuttingPlane.transform().translation().z());
-
+			qmlManager->featureHistoryManager().
+				addFeature(new ZAxialCut(each, _cuttingPlane.transform().translation().z()));
 		}
 		break;
 	}
@@ -65,7 +70,8 @@ void Hix::Features::ModelCut::applyCut()
 	{
 		for (auto each : _models)
 		{
-			PolylineCut impl(each, _cuttingPlane.contour());
+			qmlManager->featureHistoryManager().
+				addFeature(new PolylineCut(each, _cuttingPlane.contour()));
 		}
 		break;
 	}

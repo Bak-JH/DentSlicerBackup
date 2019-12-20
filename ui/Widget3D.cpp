@@ -6,7 +6,7 @@
 
 using namespace Hix::UI;
 using namespace Hix::Input;
-Widget3D::Widget3D()
+Widget3D::Widget3D(Hix::Features::WidgetMode* mode) : _mode(mode)
 {
 	addComponent(&_transform);
 }
@@ -67,6 +67,12 @@ void Hix::UI::Widget3D::setManipulated(bool isManipulated)
 		}
 	}
 }
+
+Hix::Features::WidgetMode* Hix::UI::Widget3D::mode()
+{
+	return _mode;
+}
+
 bool Hix::UI::Widget3D::visible()
 {
 	return _visible;

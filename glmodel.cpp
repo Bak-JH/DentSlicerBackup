@@ -23,7 +23,8 @@
 #include "feature/cut/DrawingPlane.h"
 #include "feature/label/labelling.h"
 #include "feature/layFlat.h"
-#include "feature/interfaces/SelectFaceFeature.h"
+#include "feature/interfaces/SelectFaceMode.h"
+#include "feature/move.h"
 
 #define ATTRIBUTE_SIZE_INCREMENT 200
 #if defined(_DEBUG) || defined(QT_DEBUG)
@@ -142,7 +143,6 @@ GLModel* GLModel::getRootModel()
 		current = dynamic_cast<GLModel*>(current->parent());
 	}
 	return back;
-
 }
 
 
@@ -223,7 +223,7 @@ void GLModel::setHitTestable(bool isEnable)
 void GLModel::clicked(MouseEventData& pick, const Qt3DRender::QRayCasterHit& hit)
 {
 	auto listed = getRootModel();
-	if (!qmlManager->isFeatureActive())
+	if (!qmlManager->isFeatureActive() || qmlManager->isActive<Hix::Features::WidgetMode>())
 	{
 		if (pick.button == Qt::MouseButton::LeftButton)
 		{
@@ -243,7 +243,7 @@ void GLModel::clicked(MouseEventData& pick, const Qt3DRender::QRayCasterHit& hit
     }
 	else
 	{
-		auto selectFaceFeature = dynamic_cast<Hix::Features::SelectFaceFeature*>(qmlManager->currentFeature());
+		auto selectFaceFeature = dynamic_cast<Hix::Features::SelectFaceMode*>(qmlManager->currentMode());
 		if (selectFaceFeature)
 		{
 			auto selectedFace = _mesh->getFaces().cbegin() + hit.primitiveIndex();
@@ -268,7 +268,7 @@ void GLModel::updateModelMesh() {
 bool GLModel::isDraggable(Hix::Input::MouseEventData& e,const Qt3DRender::QRayCasterHit&)
 {
 	auto listed = getRootModel();
-	if (e.button == Qt3DInput::QMouseEvent::Buttons::LeftButton && qmlManager->isSelected(listed) && !qmlManager->isFeatureActive())
+	if (e.button == Qt3DInput::QMouseEvent::Buttons::LeftButton && qmlManager->isSelected(listed) && (!qmlManager->isFeatureActive() || qmlManager->isActive<Hix::Features::MoveMode>()))
 	{
 		return true;
 	}
@@ -277,19 +277,22 @@ bool GLModel::isDraggable(Hix::Input::MouseEventData& e,const Qt3DRender::QRayCa
 
 void GLModel::dragStarted(Hix::Input::MouseEventData& e, const Qt3DRender::QRayCasterHit& hit)
 {
+	if(!qmlManager->isActive<Hix::Features::MoveMode>())
+		qmlManager->moveButton->setProperty("state", "active");
+
+	dynamic_cast<Hix::Features::MoveMode*>(qmlManager->getCurrentMode())->featureStarted();
 	auto listed = getRootModel();
-	if (qmlManager->supportRaftManager().supportActive())
-	{
-		size_t prevCount = qmlManager->supportRaftManager().supportCount();
-		qmlManager->supportRaftManager().clear(*listed);
-		if (qmlManager->supportRaftManager().supportCount() != prevCount)
-		{
-			listed->setZToBed();
-		}
-	}
+	//if (qmlManager->supportRaftManager().supportActive())
+	//{
+	//	size_t prevCount = qmlManager->supportRaftManager().supportCount();
+	//	qmlManager->supportRaftManager().clear(*listed);
+	//	if (qmlManager->supportRaftManager().supportCount() != prevCount)
+	//	{
+	//		listed->setZToBed();
+	//	}
+	//}
 	lastpoint = hit.localIntersection();
 	prevPoint = (QVector2D)e.position;
-	qmlManager->moveButton->setProperty("state", "active");
 	qmlManager->setClosedHandCursor();
 }
 
@@ -317,7 +320,8 @@ void GLModel::doDrag(Hix::Input::MouseEventData& v)
 
 void GLModel::dragEnded(Hix::Input::MouseEventData&)
 {
-    qmlManager->totalMoveDone();
+	dynamic_cast<Hix::Features::MoveMode*>(qmlManager->getCurrentMode())->featureEnded();
+    //qmlManager->totalMoveDone();
 }
 
 
@@ -393,7 +397,7 @@ bool GLModel::perPrimitiveColorActive() const
 }
 bool GLModel::faceSelectionActive() const
 {
-	return qmlManager->isActive<Hix::Features::Extend>() ||
+	return qmlManager->isActive<Hix::Features::ExtendMode>() ||
 		qmlManager->isActive<Hix::Features::LayFlat>();
 }
 

@@ -2,6 +2,7 @@
 #include "../qmlmanager.h"
 #include "../input/raycastcontroller.h"
 #include "Widget3D.h"
+#include "feature/rotate.h"
 using namespace Hix::UI;
 using namespace Qt3DCore;
 using namespace Qt3DRender;
@@ -55,6 +56,7 @@ bool Hix::UI::RotateWidget::isDraggable(Hix::Input::MouseEventData& e, const Qt3
 
 void Hix::UI::RotateWidget::dragStarted(Hix::Input::MouseEventData& e, const Qt3DRender::QRayCasterHit& hit)
 {
+	dynamic_cast<Features::RotateMode*>(_parent->mode())->featureStarted();
 	_parent->setManipulated(true);
 	setHighlight(true);
 	_mouseOrigin = e.position;
@@ -113,9 +115,10 @@ void Hix::UI::RotateWidget::doDrag(Hix::Input::MouseEventData& e)
 
 void Hix::UI::RotateWidget::dragEnded(Hix::Input::MouseEventData& e)
 {
+	dynamic_cast<Features::RotateMode*>(_parent->mode())->featureEnded();
 	_parent->setManipulated(false);
 	setHighlight(false);
-    qmlManager->totalRotateDone();
+    //qmlManager->totalRotateDone();
 }
 
 void Hix::UI::RotateWidget::onEntered()

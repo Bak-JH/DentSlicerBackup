@@ -1,13 +1,13 @@
 #pragma once
-#include "../interfaces/Feature.h"
-#include "../../DentEngine/src/ContourBuilder.h"
-#include "../../DentEngine/src/Bounds3D.h"
+#include "feature/interfaces/Mode.h"
+#include "DentEngine/src/ContourBuilder.h"
+#include "DentEngine/src/Bounds3D.h"
 #include "DrawingPlane.h"
 namespace Hix
 {
 	namespace Features
 	{
-		class ModelCut: public Hix::Features::Feature
+		class ModelCut : public Mode
 		{
 		public:
 			enum CutType
@@ -26,6 +26,7 @@ namespace Hix
 			void removeCuttingPoint(int idx);
 			void removeCuttingPoints();
 			void drawLine(QVector3D endpoint);
+
 		private:
 			//cutting
 			CutType _cutType = ZAxial;
@@ -33,7 +34,6 @@ namespace Hix
 			Hix::Features::Cut::DrawingPlane _cuttingPlane;
 			Hix::Engine3D::Bounds3D _modelsBound;
 			std::unordered_set<GLModel*> _models;
-
 		};
 	}
 }

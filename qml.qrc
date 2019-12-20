@@ -55,5 +55,6 @@
         <file>shaders/singleColor.geom</file>
         <file>shaders/flat.geom</file>
         <file>Qml/LeftTabSlicingOptionElementPercentage.qml</file>
+        <file>Qml/SamplePopup.qml</file>
     </qresource>
 </RCC>

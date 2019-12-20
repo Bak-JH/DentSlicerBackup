@@ -9,7 +9,7 @@ namespace Hix
 	namespace Features
 	{
 
-		class TwoManifoldBuilder : public Hix::Features::Feature
+		class TwoManifoldBuilder //: public Hix::Features::Feature
 		{
 		public:
 			TwoManifoldBuilder(Hix::Engine3D::Mesh& model);
