@@ -3,6 +3,7 @@
 #pragma once
 #include "feature/interfaces/Feature.h"
 #include "DentEngine/src/mesh.h"
+#include "glmodel.h"
 
 namespace Hix
 {
@@ -16,11 +17,10 @@ namespace Hix
 			void undo()override;
 			void redo()override;
 			GLModel* getAddedModel();
-			std::unique_ptr<GLModel> getAddedModelUnique();
 
 		private:
-			std::unique_ptr<GLModel> _addedModel;
-			std::unique_ptr<GLModel> _deletedModel;
+			GLModel* _addedModel;
+			GLModel* _deletedModel;
 		};
 	}
 }
