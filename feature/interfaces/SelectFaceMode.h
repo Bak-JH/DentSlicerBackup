@@ -1,5 +1,5 @@
 #pragma once
-#include"Feature.h"
+#include"Mode.h"
 #include "../../DentEngine/src/mesh.h"
 class GLModel;
 
@@ -15,12 +15,12 @@ namespace Hix
 	}
 	namespace Features
 	{
-		class SelectFaceFeature : virtual public Hix::Features::Feature
+		class SelectFaceMode : virtual public Hix::Features::Mode
 		{
 		public:
 			virtual void faceSelected(GLModel* selected, const Hix::Engine3D::FaceConstItr& selectedFace, const Hix::Input::MouseEventData& mouse, const Qt3DRender::QRayCasterHit& hit) =0;
-			SelectFaceFeature();
-			virtual ~SelectFaceFeature();
+			SelectFaceMode();
+			virtual ~SelectFaceMode();
 		protected:
 		};
 

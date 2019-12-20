@@ -4,6 +4,7 @@ import QtQuick.Scene3D 2.0
 import QtQuick.Window 2.2
 import QtQuick.Controls.Styles 1.4
 import QtQuick.Dialogs 1.2
+
 Item{
     ApplicationWindow {
         title: qsTr("DentSlicer")
@@ -211,8 +212,6 @@ Item{
             visible: false
         }
 
-
-
         MouseArea{
 
             acceptedButtons: Qt.MiddleButton | Qt.RightButton
@@ -378,6 +377,7 @@ Item{
             }
         }
         */
+
         PopUp {
             id: result_orient
             objectName: "result_orient"

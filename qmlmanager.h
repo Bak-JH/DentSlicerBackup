@@ -22,10 +22,11 @@
 #include <QKeyboardHandler>
 #include "input/raycastcontroller.h"
 #include "feature/overhangDetect.h"
-#include "ui/Widget3DManager.h"
 #include "common/TaskManager.h"
 #include "slice/SlicingOptBackend.h"
 #include "support/SupportRaftManager.h"
+#include "feature/FeatureHistoryManager.h"
+#include "feature/interfaces/Feature.h"
 #include "ui/GridBed.h"
 #include "Settings/AppSetting.h"
 #define VIEW_MODE_OBJECT 0
@@ -82,9 +83,9 @@ public:
 	template<typename FeatureType>
 	bool isActive()
 	{
-		if (_currentFeature.get() != nullptr)
+		if (_currentMode.get() != nullptr)
 		{
-			return dynamic_cast<const FeatureType*>(_currentFeature.get()) != nullptr;
+			return dynamic_cast<const FeatureType*>(_currentMode.get()) != nullptr;
 		}
 		return false;
 	}
@@ -203,7 +204,7 @@ public:
     QObject* layerRaftButton;
     QObject* layerViewSlider;
 
-    std::unordered_map<int, GLModel> glmodels;
+    std::unordered_map<GLModel*, std::unique_ptr<GLModel>> glmodels;
 
     std::vector<size_t> copyMeshes;
 
@@ -230,7 +231,7 @@ public:
     int getLayerViewFlags();
 	void modelSelected(int);
 	
-	Hix::Features::Feature* currentFeature()const;
+	Hix::Features::Mode* currentMode()const;
 
 	//remove this
 	const std::unordered_set<GLModel*>& getSelectedModels();
@@ -261,14 +262,13 @@ public:
 	Q_INVOKABLE bool isSelected(int ID);
 	bool isSelected(GLModel* model);
     void showCubeWidgets(GLModel* model);
-	void addSupport(GLModel* model, QVector3D position);
+	void addSupport(std::unique_ptr<Hix::Features::FeatureContainer> container);
 
     Q_INVOKABLE void selectPart(int ID);
     Q_INVOKABLE void unselectPart(int ID);
     Q_INVOKABLE void unselectAll();
     Q_INVOKABLE void modelVisible(int ID, bool isVisible);
     Q_INVOKABLE void doDelete();
-    Q_INVOKABLE void doDeletebyID(int ID);
     Q_INVOKABLE void runArrange();
     Q_INVOKABLE void setViewMode(int viewMode);
     Q_INVOKABLE int getViewMode();
@@ -284,15 +284,17 @@ public:
 	QVector3D cameraViewVector();
 	Hix::Tasking::TaskManager& taskManager();
 	Hix::Support::SupportRaftManager& supportRaftManager();
-	GLModel* createAndListModel(Hix::Engine3D::Mesh* mesh, QString filename, const Qt3DCore::QTransform* transform);
-	GLModel* listModel(GLModel* model);
-	GLModel* getModelByID(int ID);
+	Hix::Features::FeatureHisroyManager& featureHistoryManager();
+	Hix::Features::Feature* createAndListModel(Hix::Engine3D::Mesh* mesh, QString filename, const Qt3DCore::QTransform* transform);
+	Hix::Features::Mode* getCurrentMode();
+	void setCurrentMode(Hix::Features::Mode* mode);
+	void unselectPart(GLModel* target);
 	const Hix::Settings::AppSetting& settings()const;
 private:
 	QString filenameToModelName(const std::string& s);
 	Hix::Tasking::TaskManager _taskManager;
 	void setModelViewMode(int mode);
-    void unselectPartImpl(GLModel* target);
+	GLModel* getModelByID(int ID);
 	//do not mix UI work with background thread
 	//std::future<Slicer*> exportSelected(bool isTemp);
 	QString getExportPath();
@@ -309,12 +311,12 @@ private:
 	SlicingOptBackend _optBackend;
 	//Ray cast
 	Hix::Input::RayCastController _rayCastController;
-	Hix::UI::Widget3DManager _widgetManager;
 
 	//cursors
 	QCursor _cursorEraser;
 	Hix::Support::SupportRaftManager _supportRaftManager;
-	std::unique_ptr<Hix::Features::Feature> _currentFeature;
+	std::unique_ptr<Hix::Features::Mode> _currentMode;
+	Hix::Features::FeatureHisroyManager _featureHistoryManager;
 	Hix::Settings::AppSetting _setting;
 	Hix::UI::GridBed _bed;
 signals:
@@ -357,12 +359,12 @@ public slots:
 
     void sendUpdateModelInfo(int, int, QString, float);
     void openModelFile(QString filename);
+	GLModel* removeFromGLModels(GLModel* target);
+	void addToGLModels(GLModel* target);
 	void openAndBuildModel(QString filename);
-    void deleteOneModelFile(int ID);
-	void deleteOneModelFile(GLModel* model);
 
     void deleteModelFileDone();
-    void deleteModelFile(int ID);
+    void deleteModelFile(GLModel* target);
     void unDo();
     void reDo();
     void copyModel();
@@ -370,11 +372,9 @@ public slots:
     void groupSelectionActivate(bool);
     void runGroupFeature(int,QString, double, double, double, QVariant);
     bool multipleModelSelected(int ID);
-    void modelRotateByNumber(int mode, qreal, qreal, qreal);
-    void modelMoveByNumber(int axis, qreal, qreal);
+    void applyRotation(int mode, qreal, qreal, qreal);
+    void applyMove(int axis, qreal, qreal);
 
-    void totalMoveDone();
-    void totalRotateDone();
 	void totalScaleDone();
 
     void resetLayflat();
@@ -386,6 +386,11 @@ public slots:
     void closeRotate();
     void openMove();
     void closeMove();
+
+	void openScale();
+	void closeScale();
+	void applyScale(double, double, double);
+
     void openOrientation();
     void closeOrientation();
     void openSave();
@@ -422,4 +427,4 @@ QObject* FindItemByName(QQmlApplicationEngine* engine, const QString& name);
 
 extern QmlManager *qmlManager;
 
-#endif // QMLMANAGER_H
+#endif //QMLMANAGER_H

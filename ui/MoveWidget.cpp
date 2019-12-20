@@ -2,6 +2,7 @@
 #include "../qmlmanager.h"
 #include "../input/raycastcontroller.h"
 #include "Widget3D.h"
+#include "feature/move.h"
 
 //const float MoveWidget::ROTATE_SPEED = 0.1;
 //const float HALF_PI = M_PI / 2;
@@ -49,6 +50,7 @@ bool Hix::UI::MoveWidget::isDraggable(Hix::Input::MouseEventData& e, const Qt3DR
 
 void Hix::UI::MoveWidget::dragStarted(Hix::Input::MouseEventData& e, const Qt3DRender::QRayCasterHit& hit)
 {
+	dynamic_cast<Features::MoveMode*>(_parent->mode())->featureStarted();
 	_parent->setManipulated(true);
 	setHighlight(true);
 	_transform.setScale3D(QVector3D(0.3f, 0.3f, 1.0f));
@@ -102,10 +104,11 @@ void Hix::UI::MoveWidget::doDrag(Hix::Input::MouseEventData& e)
 
 void Hix::UI::MoveWidget::dragEnded(Hix::Input::MouseEventData& e)
 {
+	dynamic_cast<Features::MoveMode*>(_parent->mode())->featureEnded();
 	_transform.setScale3D(QVector3D(0.3f, 0.3f, 0.3f));
 	_parent->setManipulated(false);
 	setHighlight(false);
-    qmlManager->totalMoveDone();
+    //qmlManager->totalMoveDone();
 }
 
 
