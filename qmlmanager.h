@@ -285,7 +285,6 @@ public:
 	Hix::Tasking::TaskManager& taskManager();
 	Hix::Support::SupportRaftManager& supportRaftManager();
 	Hix::Features::FeatureHisroyManager& featureHistoryManager();
-	Hix::Features::Feature* createAndListModel(Hix::Engine3D::Mesh* mesh, QString filename, const Qt3DCore::QTransform* transform);
 	Hix::Features::Mode* getCurrentMode();
 	void setCurrentMode(Hix::Features::Mode* mode);
 	void unselectPart(GLModel* target);
@@ -303,7 +302,6 @@ private:
 	bool groupSelectionActive = false;
     int viewMode;
     int layerViewFlags;
-    int modelIDCounter;
 	//TODO: get rid of this
 	GLModel* _lastSelected;
 	std::unordered_set<GLModel*> selectedModels;
@@ -359,8 +357,12 @@ public slots:
 
     void sendUpdateModelInfo(int, int, QString, float);
     void openModelFile(QString filename);
-	GLModel* removeFromGLModels(GLModel* target);
+	std::unique_ptr<GLModel> removeFromGLModels(GLModel* target);
+	GLModel* releaseFromGLModels(GLModel* target);
+
 	void addToGLModels(GLModel* target);
+	void addToGLModels(std::unique_ptr<GLModel>&& target);
+
 	void openAndBuildModel(QString filename);
 
     void deleteModelFileDone();
