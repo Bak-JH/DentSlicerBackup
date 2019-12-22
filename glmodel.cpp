@@ -231,7 +231,7 @@ void GLModel::clicked(MouseEventData& pick, const Qt3DRender::QRayCasterHit& hit
 	{
 		if (pick.button == Qt::MouseButton::LeftButton)
 		{
-			qmlManager->modelSelected(listed->ID);
+			qmlManager->modelSelected(listed->ID());
 		}
 		else if (pick.button == Qt::MouseButton::RightButton && qmlManager->isSelected(listed))
 		{

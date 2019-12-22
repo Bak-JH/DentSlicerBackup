@@ -22,25 +22,6 @@
 #include "../repair/meshrepair.h"
 #include "polylinecut.h"
 #include "../CSG/CSG.h"
-//#include "DentEngine/src/utils/metric.h"
-//#include "feature/convex_hull.h"
-//#include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
-//#include <CGAL/Constrained_Delaunay_triangulation_2.h>
-//#include <CGAL/Delaunay_triangulation_2.h>
-//#include <CGAL/Delaunay_mesh_vertex_base_2.h>
-//#include <CGAL/Delaunay_mesh_face_base_2.h>
-//#include <CGAL/Delaunay_mesh_size_criteria_2.h>
-//#include <CGAL/Delaunay_mesher_2.h>
-//#include <math.h>
-//
-//typedef CGAL::Exact_predicates_inexact_constructions_kernel  Kernel;
-//typedef Kernel::Point_2            Point_2;
-//typedef CGAL::Delaunay_mesh_vertex_base_2<Kernel>     Vb;
-//typedef CGAL::Delaunay_mesh_face_base_2<Kernel>      Fb;
-//typedef CGAL::Triangulation_data_structure_2<Vb, Fb>   Tds;
-//typedef CGAL::Constrained_Delaunay_triangulation_2<Kernel, Tds>  CDT;
-//typedef CDT::Vertex_handle          Vertex_handle;
-//typedef CGAL::Delaunay_mesh_size_criteria_2<CDT>    Criteria;
 
 using namespace Hix::Engine3D;
 using namespace Hix::Slicer;
@@ -110,7 +91,7 @@ void Hix::Features::Cut::PolylineCut::cutCSG(const QString& subjectName, Hix::Re
 	{
 		if (seperateParts[i]->getFaces().empty())
 			continue;
-		auto addModel = dynamic_cast<Hix::Features::AddModel*>(qmlManager->createAndListModel(seperateParts[i], subjectName + "_cut" + QString::number(i), nullptr));
+		auto addModel = new Hix::Features::ListModel(seperateParts[i], subjectName + "_cut" + QString::number(i), nullptr);
 		addModel->getAddedModel()->setZToBed();
 		_prevDivideMap[dynamic_cast<GLModel*>(subject)].insert(addModel->getAddedModel());
 		addFeature(addModel);
@@ -119,7 +100,7 @@ void Hix::Features::Cut::PolylineCut::cutCSG(const QString& subjectName, Hix::Re
 	auto model = dynamic_cast<GLModel*>(subject);
 	if (model)
 	{
-		auto deleteModel = dynamic_cast<Hix::Features::DeleteModel*>(new DeleteModel(model));
+		auto deleteModel = new DeleteModel(model);
 		_prevDivideMap[dynamic_cast<GLModel*>(model)].insert(deleteModel->getDeletedModel());
 		addFeature(deleteModel);
 	}

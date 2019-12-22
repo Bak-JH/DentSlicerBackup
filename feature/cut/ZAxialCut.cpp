@@ -51,7 +51,7 @@ Hix::Features::Cut::ZAxialCut::ZAxialCut(GLModel* subject, float cuttingPlane) :
 
 	doChildrenRecursive(subject, cuttingPlane);
 	addFeature(new DeleteModel(subject));
-	//qmlManager->deleteModelFile(subject->ID);
+	//qmlManager->deleteModelFile(subject->ID());
 
 	qDebug() << qmlManager->glmodels.size();
 }
@@ -65,20 +65,20 @@ void Hix::Features::Cut::ZAxialCut::doChildrenRecursive(GLModel* subject, float 
 	{ }
 	else if (childBotMesh == nullptr || childBotMesh->getFaces().empty())
 	{
-		auto addTopModel = dynamic_cast<AddModel*>(qmlManager->createAndListModel(subject->getMeshModd(), subject->modelName() + "_top", &subject->transform()));
+		auto addTopModel = new ListModel(subject->getMeshModd(), subject->modelName() + "_top", &subject->transform());
 		addFeature(addTopModel);
 		_upperModels.insert(subject);
 	}
 	else if (childTopMesh == nullptr || childTopMesh->getFaces().empty())
 	{
-		auto addBotModel = dynamic_cast<AddModel*>(qmlManager->createAndListModel(subject->getMeshModd(), subject->modelName() + "_bot", &subject->transform()));
+		auto addBotModel = new ListModel(subject->getMeshModd(), subject->modelName() + "_bot", &subject->transform());
 		addFeature(addBotModel);
 		_upperModels.insert(subject);
 	}
 	else
 	{
-		auto addTopModel = dynamic_cast<AddModel*>(qmlManager->createAndListModel(childTopMesh, subject->modelName() + "_top", &subject->transform()));
-		auto addBotModel = dynamic_cast<AddModel*>(qmlManager->createAndListModel(childBotMesh, subject->modelName() + "_bot", &subject->transform()));
+		auto addTopModel = new ListModel(childTopMesh, subject->modelName() + "_top", &subject->transform());
+		auto addBotModel = new ListModel(childBotMesh, subject->modelName() + "_bot", &subject->transform());
 		
 		_upperModels.insert(addTopModel->getAddedModel());
 		_lowerModels.insert(addBotModel->getAddedModel());
