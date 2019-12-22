@@ -51,7 +51,7 @@ using namespace Hix::Render;
 using namespace Hix::Tasking;
 using namespace Hix::Features;
 QmlManager::QmlManager(QObject *parent) : QObject(parent), _optBackend(this, scfg)
-	,layerViewFlags(LAYER_INFILL | LAYER_SUPPORTERS | LAYER_RAFT), modelIDCounter(-1)
+	,layerViewFlags(LAYER_INFILL | LAYER_SUPPORTERS | LAYER_RAFT)
 	, _cursorEraser(QPixmap(":/Resource/cursor_eraser.png")), _currentMode(nullptr)
 {
 }
@@ -293,14 +293,6 @@ void QmlManager::initializeUI(QQmlApplicationEngine* e){
 	_bed.drawBed();
 }
 
-Hix::Features::Feature* QmlManager::createAndListModel(Hix::Engine3D::Mesh* mesh, QString fname, const Qt3DCore::QTransform* transform) {
-	auto addModel = new Hix::Features::AddModel(models, mesh, fname, modelIDCounter, transform);
-	--modelIDCounter;
-	addToGLModels(addModel->getAddedModel());
-	qDebug() << addModel->getAddedModel();
-	return addModel;
-}
-
 void QmlManager::openModelFile(QString fname){
 	openProgressPopUp();
 
@@ -315,10 +307,10 @@ void QmlManager::openModelFile(QString fname){
 	setProgress(0.3);
 	mesh->centerMesh();
 
-	auto addModel = createAndListModel(mesh, fname, nullptr);
+	auto addModel = new ListModel(mesh, fname, nullptr);
 	_featureHistoryManager.addFeature(addModel);
 
-	auto latest = dynamic_cast<Hix::Features::AddModel*>(addModel)->getAddedModel();
+	auto latest = addModel->getAddedModel();
 	latest->setZToBed();
 	setProgress(0.6);
 	//repair mode
@@ -349,7 +341,10 @@ void QmlManager::openAndBuildModel(QString fname) {
 	}
 	fname = filenameToModelName(fname.toStdString());
 	setProgress(0.1);
-	auto latest = dynamic_cast<Hix::Features::AddModel*>(createAndListModel(mesh, fname, nullptr))->getAddedModel();
+	auto addModel = new ListModel(mesh, fname, nullptr);
+	_featureHistoryManager.addFeature(addModel);
+	auto latest = addModel->getAddedModel();
+
 	setProgress(0.2);
 	TwoManifoldBuilder modelBuilder(*mesh);
 	mesh->centerMesh();
@@ -385,25 +380,26 @@ GLModel* QmlManager::getModelByID(int ID)
 {
 	for (auto& modelItr : glmodels)
 	{
-		if (modelItr.first->ID == ID)
+		if (modelItr.first->ID() == ID)
 			return modelItr.first;
 	}
 
 	return nullptr;
 }
 
-GLModel* QmlManager::removeFromGLModels(GLModel* target) 
+std::unique_ptr<GLModel> QmlManager::removeFromGLModels(GLModel* target) 
 {
 	selectedModels.erase(target);
-	if (!dynamic_cast<GLModel*>(target->parent()))
-	{
-		auto copy = glmodels.at(target).release();
-		glmodels.erase(target);
-		return copy;
-	}
-	
-	return target;
-	
+	auto node = glmodels.extract(target);
+	return std::unique_ptr<GLModel>(std::move(node.mapped()));
+
+}
+
+GLModel* QmlManager::releaseFromGLModels(GLModel* target)
+{
+	selectedModels.erase(target);
+	auto node = glmodels.extract(target);
+	return node.mapped().release();
 }
 
 
@@ -412,6 +408,14 @@ void QmlManager::addToGLModels(GLModel* target)
 	if (target)
 	{
 		glmodels[target] = std::move(std::unique_ptr<GLModel>(target));
+	}
+}
+
+void QmlManager::addToGLModels(std::unique_ptr<GLModel>&& target)
+{
+	if (target)
+	{
+		glmodels[target.get()] = std::move(target);
 	}
 }
 
@@ -471,11 +475,11 @@ int QmlManager::getSelectedModelsSize() {
 }
 
 float QmlManager::getBedXSize(){
-    return _setting.printerSetting().bedX;
+    return _setting.printerSetting.bedX;
 }
 
 float QmlManager::getBedYSize(){
-	return _setting.printerSetting().bedY;
+	return _setting.printerSetting.bedY;
 }
 
 
@@ -642,7 +646,7 @@ bool QmlManager::multipleModelSelected(int ID){
     // if target is already in selectedModels
 	for (auto it = selectedModels.begin(); it != selectedModels.end();) {
         /* when selectedModels is an empty std::vector */
-        if ((*it)->ID == ID){
+        if ((*it)->ID() == ID){
             // do unselect model
 
             it = selectedModels.erase(it);
@@ -650,7 +654,7 @@ bool QmlManager::multipleModelSelected(int ID){
 			{
 				target->changeColor(Hix::Render::Colors::Default);
 			}
-            QMetaObject::invokeMethod(partList, "unselectPartByModel", Q_ARG(QVariant, target->ID));
+            QMetaObject::invokeMethod(partList, "unselectPartByModel", Q_ARG(QVariant, target->ID()));
             // set slicing info box property visible true if slicing info exists
             //slicingData->setProperty("visible", false);
             sendUpdateModelInfo();
@@ -689,7 +693,7 @@ bool QmlManager::multipleModelSelected(int ID){
 	_lastSelected = target;
     target->changeColor(Hix::Render::Colors::Selected);
     qDebug() << "multipleModelSelected invoke";
-    QMetaObject::invokeMethod(partList, "selectPartByModel", Q_ARG(QVariant, target->ID));
+    QMetaObject::invokeMethod(partList, "selectPartByModel", Q_ARG(QVariant, target->ID()));
     qDebug() << "[multi model selected] b box center"; //<< xmid << " " << ymid << " " << zmid ;
 
     sendUpdateModelInfo();
@@ -738,8 +742,8 @@ void QmlManager::modelSelected(int ID){
             }
 			if((*it)->isPrintable())
 				(*it)->changeColor(Hix::Render::Colors::Default);
-            QMetaObject::invokeMethod(partList, "unselectPartByModel", Q_ARG(QVariant, (*it)->ID));
-            QMetaObject::invokeMethod(yesno_popup, "deletePartListItem", Q_ARG(QVariant, (*it)->ID));
+            QMetaObject::invokeMethod(partList, "unselectPartByModel", Q_ARG(QVariant, (*it)->ID()));
+            QMetaObject::invokeMethod(yesno_popup, "deletePartListItem", Q_ARG(QVariant, (*it)->ID()));
         }
         selectedModels.clear();
 		// set slicing info box property visible true if slicing info exists
@@ -780,8 +784,8 @@ void QmlManager::modelSelected(int ID){
 		if( target->isPrintable())
 			target->changeColor(Hix::Render::Colors::Selected);
 		qDebug() << "modelSelected invoke";
-		QMetaObject::invokeMethod(partList, "selectPartByModel", Q_ARG(QVariant, target->ID));
-		qDebug() << "changing model" << target->ID;
+		QMetaObject::invokeMethod(partList, "selectPartByModel", Q_ARG(QVariant, target->ID()));
+		qDebug() << "changing model" << target->ID();
 		qDebug() << "[model selected] b box center"; //<< xmid << " " << ymid << " " << zmid ;
 
 		//sendUpdateModelInfo();
@@ -974,7 +978,7 @@ void QmlManager::unselectAll(){
 	{
 		auto model = *itr;
 		++itr;
-		unselectPart(model->ID);
+		unselectPart(model->ID());
     }
     QMetaObject::invokeMethod(qmlManager->mttab, "hideTab");
     QMetaObject::invokeMethod(boxUpperTab, "all_off");
@@ -1047,7 +1051,7 @@ void QmlManager::modelMoveWithAxis(QVector3D axis, double distance) { // for QML
 void QmlManager::modelMove(QVector3D displacement)
 {
 	QVector3D bndCheckedDisp;
-	const auto& printBound = _setting.printerSetting().bedBound;
+	const auto& printBound = _setting.printerSetting.bedBound;
 	for (auto selectedModel : selectedModels) {
 		bndCheckedDisp = printBound.displaceWithin(selectedModel->recursiveAabb(), displacement);
 		selectedModel->moveModel(bndCheckedDisp);
@@ -1219,7 +1223,7 @@ void QmlManager::copyModel(){
 
     qDebug() << "copying current selected Models";
     for (GLModel* model : selectedModels){
-        copyMeshes.push_back(model->ID);
+        copyMeshes.push_back(model->ID());
     }
     return;
 }
@@ -1228,7 +1232,7 @@ void QmlManager::pasteModel(){
     for (auto copyIdx : copyMeshes){
 		auto model = getModelByID(copyIdx);
 		QString temp = model->modelName() + "_copy";
-		_featureHistoryManager.addFeature(createAndListModel(new Mesh(*model->getMesh()), temp, nullptr));
+		_featureHistoryManager.addFeature( new ListModel(new Mesh(*model->getMesh()), temp, nullptr));
     }
     openArrange();
     return;
@@ -1553,7 +1557,7 @@ QObject* FindItemByName(QQmlApplicationEngine* engine, const QString& name)
 
 void QmlManager::unselectPart(GLModel* target)
 {
-	QMetaObject::invokeMethod(partList, "unselectPartByModel", Q_ARG(QVariant, target->ID));
+	QMetaObject::invokeMethod(partList, "unselectPartByModel", Q_ARG(QVariant, target->ID()));
 
 	for (auto each : selectedModels)
 	{

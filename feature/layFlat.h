@@ -19,7 +19,7 @@ namespace Hix
 			virtual ~LayFlat();
 
 		private:
-			std::unique_ptr<GLModel> _model;
+			GLModel* _model;
 			QMatrix4x4 _prevMatrix;
 			Hix::Engine3D::Bounds3D _prevAabb;
 		};
@@ -35,7 +35,6 @@ namespace Hix
 			FeatureContainerFlushSupport* applyLayFlat();
 
 		private:
-			std::unique_ptr<GLModel> _model;
 			bool isReady = false;
 			std::unordered_map<GLModel*, QVector3D> _args;
 		};

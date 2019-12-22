@@ -64,7 +64,8 @@ Hix::Features::Move::Move(GLModel* target) : _model(target)
 
 Hix::Features::Move::~Move()
 {
-	_model.release();
+	_model = nullptr;
+	delete _model;
 }
 
 void Hix::Features::Move::undo()
