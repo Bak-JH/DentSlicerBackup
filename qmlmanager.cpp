@@ -51,7 +51,7 @@ using namespace Hix::Render;
 using namespace Hix::Tasking;
 using namespace Hix::Features;
 QmlManager::QmlManager(QObject *parent) : QObject(parent), _optBackend(this, scfg)
-	,layerViewFlags(LAYER_INFILL | LAYER_SUPPORTERS | LAYER_RAFT), modelIDCounter(-1)
+	,layerViewFlags(LAYER_INFILL | LAYER_SUPPORTERS | LAYER_RAFT)
 	, _cursorEraser(QPixmap(":/Resource/cursor_eraser.png")), _currentMode(nullptr)
 {
 }
@@ -293,14 +293,6 @@ void QmlManager::initializeUI(QQmlApplicationEngine* e){
 	_bed.drawBed();
 }
 
-Hix::Features::Feature* QmlManager::createAndListModel(Hix::Engine3D::Mesh* mesh, QString fname, const Qt3DCore::QTransform* transform) {
-	auto addModel = new Hix::Features::AddModel(models, mesh, fname, modelIDCounter, transform);
-	--modelIDCounter;
-	addToGLModels(addModel->getAddedModel());
-	qDebug() << addModel->getAddedModel();
-	return addModel;
-}
-
 void QmlManager::openModelFile(QString fname){
 	openProgressPopUp();
 
@@ -315,10 +307,10 @@ void QmlManager::openModelFile(QString fname){
 	setProgress(0.3);
 	mesh->centerMesh();
 
-	auto addModel = createAndListModel(mesh, fname, nullptr);
+	auto addModel = new ListModel(mesh, fname, nullptr);
 	_featureHistoryManager.addFeature(addModel);
 
-	auto latest = dynamic_cast<Hix::Features::AddModel*>(addModel)->getAddedModel();
+	auto latest = addModel->getAddedModel();
 	latest->setZToBed();
 	setProgress(0.6);
 	//repair mode
@@ -349,7 +341,10 @@ void QmlManager::openAndBuildModel(QString fname) {
 	}
 	fname = filenameToModelName(fname.toStdString());
 	setProgress(0.1);
-	auto latest = dynamic_cast<Hix::Features::AddModel*>(createAndListModel(mesh, fname, nullptr))->getAddedModel();
+	auto addModel = new ListModel(mesh, fname, nullptr);
+	_featureHistoryManager.addFeature(addModel);
+	auto latest = addModel->getAddedModel();
+
 	setProgress(0.2);
 	TwoManifoldBuilder modelBuilder(*mesh);
 	mesh->centerMesh();
@@ -385,25 +380,26 @@ GLModel* QmlManager::getModelByID(int ID)
 {
 	for (auto& modelItr : glmodels)
 	{
-		if (modelItr.first->ID == ID)
+		if (modelItr.first->ID() == ID)
 			return modelItr.first;
 	}
 
 	return nullptr;
 }
 
-GLModel* QmlManager::removeFromGLModels(GLModel* target) 
+std::unique_ptr<GLModel> QmlManager::removeFromGLModels(GLModel* target) 
 {
 	selectedModels.erase(target);
-	if (!dynamic_cast<GLModel*>(target->parent()))
-	{
-		auto copy = glmodels.at(target).release();
-		glmodels.erase(target);
-		return copy;
-	}
-	
-	return target;
-	
+	auto node = glmodels.extract(target);
+	return std::unique_ptr<GLModel>(std::move(node.mapped()));
+
+}
+
+GLModel* QmlManager::releaseFromGLModels(GLModel* target)
+{
+	selectedModels.erase(target);
+	auto node = glmodels.extract(target);
+	return node.mapped().release();
 }
 
 
@@ -412,6 +408,14 @@ void QmlManager::addToGLModels(GLModel* target)
 	if (target)
 	{
 		glmodels[target] = std::move(std::unique_ptr<GLModel>(target));
+	}
+}
+
+void QmlManager::addToGLModels(std::unique_ptr<GLModel>&& target)
+{
+	if (target)
+	{
+		glmodels[target.get()] = std::move(target);
 	}
 }
 
@@ -1228,7 +1232,7 @@ void QmlManager::pasteModel(){
     for (auto copyIdx : copyMeshes){
 		auto model = getModelByID(copyIdx);
 		QString temp = model->modelName() + "_copy";
-		_featureHistoryManager.addFeature(createAndListModel(new Mesh(*model->getMesh()), temp, nullptr));
+		_featureHistoryManager.addFeature( new ListModel(new Mesh(*model->getMesh()), temp, nullptr));
     }
     openArrange();
     return;
