@@ -152,7 +152,7 @@ void GLModel::changeColor(const QVector4D& color)
 
 bool GLModel::isPrintable()const
 {
-	const auto& bedBound = qmlManager->settings().printerSetting().bedBound;
+	const auto& bedBound = qmlManager->settings().printerSetting.bedBound;
 	return bedBound.contains(_aabb);
 }
 

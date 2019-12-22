@@ -475,11 +475,11 @@ int QmlManager::getSelectedModelsSize() {
 }
 
 float QmlManager::getBedXSize(){
-    return _setting.printerSetting().bedX;
+    return _setting.printerSetting.bedX;
 }
 
 float QmlManager::getBedYSize(){
-	return _setting.printerSetting().bedY;
+	return _setting.printerSetting.bedY;
 }
 
 
@@ -1051,7 +1051,7 @@ void QmlManager::modelMoveWithAxis(QVector3D axis, double distance) { // for QML
 void QmlManager::modelMove(QVector3D displacement)
 {
 	QVector3D bndCheckedDisp;
-	const auto& printBound = _setting.printerSetting().bedBound;
+	const auto& printBound = _setting.printerSetting.bedBound;
 	for (auto selectedModel : selectedModels) {
 		bndCheckedDisp = printBound.displaceWithin(selectedModel->recursiveAabb(), displacement);
 		selectedModel->moveModel(bndCheckedDisp);
