@@ -35,7 +35,7 @@ void Hix::UI::GridBed::drawBed()
 {
 	auto parent = qmlManager->total;
 	_logo->setParent(parent);
-	auto& printerSettings = qmlManager->settings().printerSetting();
+	auto& printerSettings = qmlManager->settings().printerSetting;
 	switch (printerSettings.bedShape)
 	{
 	case Hix::Settings::PrinterSetting::BedShape::Circle:

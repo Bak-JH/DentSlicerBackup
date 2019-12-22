@@ -74,7 +74,7 @@ namespace Hix
 		{
 		public:
 			void parseJSON(const std::filesystem::path& jsonPath);
-			void refresh();
+			virtual void refresh();
 		protected:
 			virtual void initialize() = 0;
 			virtual void parseJSONImpl(const rapidjson::Document& doc) = 0;

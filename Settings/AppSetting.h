@@ -4,16 +4,20 @@ namespace Hix
 {
 	namespace Settings
 	{
-		class AppSetting
+		class AppSetting:public JSONParsedSetting
 		{
 		public:
 			AppSetting();
-			void refresh();
+			~AppSetting();
+			void refresh() override;
 			void setPrinterPath(const std::string& path);
-			const PrinterSetting& printerSetting()const;
-		private:
-			std::filesystem::path _printerFile;
-			PrinterSetting _printerSetting;
+			bool enableErrorReport;
+			std::string printerPresetPath;
+			PrinterSetting printerSetting;
+		protected:
+			void initialize()override;
+			void parseJSONImpl(const rapidjson::Document& doc)override;
+
 
 		};
 	}
