@@ -1,9 +1,10 @@
 #pragma once
 #include "feature/interfaces/Feature.h"
 #include "feature/interfaces/FlushSupport.h"
-
 #include <QObject>
-
+#include <Qt3DCore>
+#include <variant>
+#include <memory>
 namespace Hix
 {
 	namespace Features
@@ -18,8 +19,12 @@ namespace Hix
 			GLModel* getDeletedModel();
 
 		private:
-			std::pair<GLModel*, QObject*> _deletedModel;
-			std::pair<GLModel*, QObject*> _addedModel;
+			struct RedoInfo
+			{
+				std::unique_ptr<GLModel> redoModel;
+				Qt3DCore::QNode* parent;
+			};
+			std::variant<GLModel*, RedoInfo> _model;
 		};
 	}
 }

@@ -38,15 +38,13 @@ using namespace Hix::Engine3D;
 using namespace Hix::Input;
 using namespace Hix::Render;
 
-GLModel::GLModel(QEntity*parent, Mesh* loadMesh, QString fname, int id, const Qt3DCore::QTransform* transform)
+GLModel::GLModel(QEntity*parent, Mesh* loadMesh, QString fname, const Qt3DCore::QTransform* transform)
     : SceneEntityWithMaterial(parent)
     , _name(fname)
-    , ID(id)
 {
 
 	initHitTest();
     qDebug() << "new model made _______________________________"<<this<< "parent:"<<parent;
-	qDebug() << "new model made _______________________________" << ID;
     // set shader mode and color
 	setMaterialMode(Hix::Render::ShaderMode::SingleColor);
 	setMaterialColor(Hix::Render::Colors::Default);
@@ -154,7 +152,7 @@ void GLModel::changeColor(const QVector4D& color)
 
 bool GLModel::isPrintable()const
 {
-	const auto& bedBound = qmlManager->settings().printerSetting().bedBound;
+	const auto& bedBound = qmlManager->settings().printerSetting.bedBound;
 	return bedBound.contains(_aabb);
 }
 
@@ -220,6 +218,12 @@ void GLModel::setHitTestable(bool isEnable)
 	callRecursive(this, &GLModel::setHitTestable, isEnable);
 }
 
+int GLModel::ID() const
+{
+	int64_t longPtr = (int64_t)this;
+	return longPtr;
+}
+
 void GLModel::clicked(MouseEventData& pick, const Qt3DRender::QRayCasterHit& hit)
 {
 	auto listed = getRootModel();
@@ -227,7 +231,7 @@ void GLModel::clicked(MouseEventData& pick, const Qt3DRender::QRayCasterHit& hit
 	{
 		if (pick.button == Qt::MouseButton::LeftButton)
 		{
-			qmlManager->modelSelected(listed->ID);
+			qmlManager->modelSelected(listed->ID());
 		}
 		else if (pick.button == Qt::MouseButton::RightButton && qmlManager->isSelected(listed))
 		{

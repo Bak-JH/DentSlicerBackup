@@ -26,7 +26,7 @@ IntPoint  Hix::Polyclipping::toInt2DPt(const QVector2D& pt)
 
 IntPoint Hix::Polyclipping::toPixelSize(const QVector2D& pt)
 {
-	auto& pSet = qmlManager->settings().printerSetting();
+	auto& pSet = qmlManager->settings().printerSetting;
 	IntPoint pixelSize;
 	float invert = scfg->slice_invert == SlicingConfiguration::Invert::InvertXAxis ? -1.0f : 1.0f;
 	pixelSize.X = std::round(pt.x()* invert * pSet.pixelPerMMX() / scfg->contraction_ratio

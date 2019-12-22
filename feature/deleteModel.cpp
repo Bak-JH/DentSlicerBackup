@@ -4,11 +4,8 @@
 
 Hix::Features::DeleteModel::DeleteModel(GLModel* target)
 {
-	qmlManager->unselectPart(target);
-	qmlManager->deletePartListItem(target->ID);
-	_deletedModel = std::make_pair(qmlManager->removeFromGLModels(target), target->QNode::parent());
-
-	target->QNode::setParent((QNode*)nullptr);
+	_model = target;
+	redo();
 }
 
 Hix::Features::DeleteModel::~DeleteModel()
@@ -17,29 +14,43 @@ Hix::Features::DeleteModel::~DeleteModel()
 
 void Hix::Features::DeleteModel::undo()
 {
-	_addedModel = _deletedModel;
-	_deletedModel.first->QNode::setParent((QNode*)_deletedModel.second);
-
-	if (!dynamic_cast<GLModel*>(_deletedModel.second))
+	auto& info = std::get<RedoInfo>(_model);
+	auto& model = info.redoModel;
+	auto raw = model.release();
+	_model = raw;
+	model->setParent(info.parent);
+	if (info.parent == qmlManager->models)
 	{
-		qmlManager->addPart(_deletedModel.first->modelName(), _deletedModel.first->ID);
-		qmlManager->addToGLModels(_deletedModel.first);
+		qmlManager->addPart(raw->modelName(), raw->ID());
+		qmlManager->addToGLModels(raw);
 	}
 }
 
 void Hix::Features::DeleteModel::redo()
 {
-	qmlManager->unselectPart(_addedModel.first);
-	qmlManager->deletePartListItem(_addedModel.first->ID);
-	qmlManager->supportRaftManager().clear(*_addedModel.first);
-
-	_deletedModel.first = qmlManager->removeFromGLModels(_addedModel.first);
-
-	_addedModel.first->QNode::setParent((QNode*)nullptr);
-
+	auto raw = std::get<GLModel*>(_model);
+	auto parent = raw->parentNode();
+	raw->QNode::setParent((QNode*)nullptr);
+	if (parent == qmlManager->models)
+	{
+		qmlManager->unselectPart(raw);
+		qmlManager->deletePartListItem(raw->ID());
+		qmlManager->releaseFromGLModels(raw);
+	}
+	_model = RedoInfo{ std::unique_ptr<GLModel>(raw), parent };
 }
 
 GLModel* Hix::Features::DeleteModel::getDeletedModel()
 {
-	return _deletedModel.first;
+	auto idx = _model.index();
+	if (idx == 0)
+	{
+		auto& ptr = std::get<0>(_model);
+		return ptr;
+	}
+	else
+	{
+		auto& info = std::get<1>(_model);
+		return info.redoModel.get();
+	}
 }

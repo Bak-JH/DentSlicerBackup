@@ -62,7 +62,8 @@ Hix::Features::Rotate::Rotate(GLModel* target, const QQuaternion& rot) : _model(
 
 Hix::Features::Rotate::~Rotate()
 {
-	_model.release();
+	_model = nullptr;
+	delete _model;
 }
 
 void Hix::Features::Rotate::undo()

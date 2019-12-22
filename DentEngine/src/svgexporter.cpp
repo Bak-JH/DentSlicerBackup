@@ -15,7 +15,7 @@ namespace SVGexporterPrivate
 
 
 void SVGexporter::exportSVG(Slices& shellSlices,QString outfoldername, bool isTemp){
-	auto& printerSetting = qmlManager->settings().printerSetting();
+	auto& printerSetting = qmlManager->settings().printerSetting;
 
 	_ppmmX = printerSetting.pixelPerMMX();
 	_ppmmY = printerSetting.pixelPerMMY();
@@ -104,7 +104,7 @@ material consumption estimation = 29.9781\r\n").arg(QString::number((int)(scfg->
 
 
     // do run svg 2 png
-	auto& printerSetting = qmlManager->settings().printerSetting();
+	auto& printerSetting = qmlManager->settings().printerSetting;
 	for (int i=0; i<max_slices; i++){
         QString svgfilename = outfoldername + "/" + QString::number(i) + ".svg";
         QSvgRenderer renderer(svgfilename);

@@ -1,25 +1,61 @@
 #include "AppSetting.h"
+#include <fstream>
+#include "../common/rapidjson/stringbuffer.h"
+#include "../common/rapidjson/writer.h"
+#include "../common/rapidjson/ostreamwrapper.h"
+
+
 using namespace Hix::Settings;
+using namespace Hix::Settings::JSON;
+typedef rapidjson::GenericStringBuffer<rapidjson::UTF8<>, rapidjson::MemoryPoolAllocator<>> StringBuffer;
+
 Hix::Settings::AppSetting::AppSetting()
 {
-	_printerFile = std::filesystem::current_path();
-	_printerFile.append("PrinterPresets/HixCapsule.json");
-	refresh();
+	auto appSettingsPath = std::filesystem::current_path();
+	appSettingsPath.append("settings.json");
+	parseJSON(appSettingsPath);
+}
+
+Hix::Settings::AppSetting::~AppSetting()
+{
 }
 
 void Hix::Settings::AppSetting::refresh()
 {
-
-	_printerSetting.parseJSON(_printerFile);
+	JSONParsedSetting::refresh();
+	auto printerPath = std::filesystem::current_path();
+	printerPath.append(printerPresetPath);
+	printerSetting.parseJSON(printerPath);
 }
 
 void Hix::Settings::AppSetting::setPrinterPath(const std::string& path)
 {
-	_printerFile = path;
+	//temp
+
+	printerPresetPath = path;
+	char cbuf[1024]; rapidjson::MemoryPoolAllocator<> allocator(cbuf, sizeof cbuf);
+	rapidjson::Document doc(&allocator, 256);
+	doc.SetObject();
+	doc.AddMember("printerPresetPath", printerPresetPath, allocator);
+	doc.AddMember("enableErrorReport", enableErrorReport, allocator);
+
+	std::ofstream of(_jsonPath, std::ios_base::trunc);
+	rapidjson::OStreamWrapper osw{ of };
+	rapidjson::Writer<rapidjson::OStreamWrapper> writer{ osw };
+	doc.Accept(writer);
 	refresh();
 }
 
-const PrinterSetting& Hix::Settings::AppSetting::printerSetting()const
+
+void Hix::Settings::AppSetting::initialize()
 {
-	return _printerSetting;
+	printerPresetPath = "PrinterPresets/HixCapsule.json";
+	enableErrorReport = true;
+}
+
+void Hix::Settings::AppSetting::parseJSONImpl(const rapidjson::Document& doc)
+{
+	tryParse(doc, "printerPresetPath", printerPresetPath);
+	tryParse(doc, "enableErrorReport", enableErrorReport);
+
 }

@@ -1,26 +1,39 @@
 
 #pragma once
-#pragma once
+#include <Qt3DCore>
 #include "feature/interfaces/Feature.h"
 #include "DentEngine/src/mesh.h"
-
+#include "glmodel.h"
 namespace Hix
 {
 	namespace Features
 	{
+
+		//two seperate features since we know at caller where the model is added to(root or other model)
 		class AddModel : public Feature
 		{
 		public:
-			AddModel(Qt3DCore::QEntity* parent, Hix::Engine3D::Mesh* mesh, QString fname, int id, const Qt3DCore::QTransform* transform);
+			AddModel(Qt3DCore::QEntity* parent, Hix::Engine3D::Mesh* mesh, QString fname, const Qt3DCore::QTransform* transform);
 			virtual ~AddModel();
 			void undo()override;
 			void redo()override;
 			GLModel* getAddedModel();
-			std::unique_ptr<GLModel> getAddedModelUnique();
+		protected:
+			struct UndoInfo
+			{
+				std::unique_ptr<GLModel> undoModel;
+				Qt3DCore::QNode* parent;
+			};
+			std::variant<GLModel*, UndoInfo> _model;
+		};
 
-		private:
-			std::unique_ptr<GLModel> _addedModel;
-			std::unique_ptr<GLModel> _deletedModel;
+		class ListModel : public AddModel
+		{
+		public:
+			ListModel(Hix::Engine3D::Mesh* mesh, QString fname, const Qt3DCore::QTransform* transform);
+			virtual ~ListModel();
+			void undo()override;
+			void redo()override;
 		};
 	}
 }
