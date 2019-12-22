@@ -288,6 +288,8 @@ public:
 	Hix::Features::Mode* getCurrentMode();
 	void setCurrentMode(Hix::Features::Mode* mode);
 	void unselectPart(GLModel* target);
+	void addToGLModels(GLModel* target);
+	void addToGLModels(std::unique_ptr<GLModel>&& target);
 	const Hix::Settings::AppSetting& settings()const;
 private:
 	QString filenameToModelName(const std::string& s);
@@ -360,8 +362,7 @@ public slots:
 	std::unique_ptr<GLModel> removeFromGLModels(GLModel* target);
 	GLModel* releaseFromGLModels(GLModel* target);
 
-	void addToGLModels(GLModel* target);
-	void addToGLModels(std::unique_ptr<GLModel>&& target);
+
 
 	void openAndBuildModel(QString filename);
 

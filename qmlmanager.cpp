@@ -646,7 +646,7 @@ bool QmlManager::multipleModelSelected(int ID){
     // if target is already in selectedModels
 	for (auto it = selectedModels.begin(); it != selectedModels.end();) {
         /* when selectedModels is an empty std::vector */
-        if ((*it)->ID == ID){
+        if ((*it)->ID() == ID){
             // do unselect model
 
             it = selectedModels.erase(it);
@@ -654,7 +654,7 @@ bool QmlManager::multipleModelSelected(int ID){
 			{
 				target->changeColor(Hix::Render::Colors::Default);
 			}
-            QMetaObject::invokeMethod(partList, "unselectPartByModel", Q_ARG(QVariant, target->ID));
+            QMetaObject::invokeMethod(partList, "unselectPartByModel", Q_ARG(QVariant, target->ID()));
             // set slicing info box property visible true if slicing info exists
             //slicingData->setProperty("visible", false);
             sendUpdateModelInfo();
@@ -693,7 +693,7 @@ bool QmlManager::multipleModelSelected(int ID){
 	_lastSelected = target;
     target->changeColor(Hix::Render::Colors::Selected);
     qDebug() << "multipleModelSelected invoke";
-    QMetaObject::invokeMethod(partList, "selectPartByModel", Q_ARG(QVariant, target->ID));
+    QMetaObject::invokeMethod(partList, "selectPartByModel", Q_ARG(QVariant, target->ID()));
     qDebug() << "[multi model selected] b box center"; //<< xmid << " " << ymid << " " << zmid ;
 
     sendUpdateModelInfo();
@@ -742,8 +742,8 @@ void QmlManager::modelSelected(int ID){
             }
 			if((*it)->isPrintable())
 				(*it)->changeColor(Hix::Render::Colors::Default);
-            QMetaObject::invokeMethod(partList, "unselectPartByModel", Q_ARG(QVariant, (*it)->ID));
-            QMetaObject::invokeMethod(yesno_popup, "deletePartListItem", Q_ARG(QVariant, (*it)->ID));
+            QMetaObject::invokeMethod(partList, "unselectPartByModel", Q_ARG(QVariant, (*it)->ID()));
+            QMetaObject::invokeMethod(yesno_popup, "deletePartListItem", Q_ARG(QVariant, (*it)->ID()));
         }
         selectedModels.clear();
 		// set slicing info box property visible true if slicing info exists
@@ -784,8 +784,8 @@ void QmlManager::modelSelected(int ID){
 		if( target->isPrintable())
 			target->changeColor(Hix::Render::Colors::Selected);
 		qDebug() << "modelSelected invoke";
-		QMetaObject::invokeMethod(partList, "selectPartByModel", Q_ARG(QVariant, target->ID));
-		qDebug() << "changing model" << target->ID;
+		QMetaObject::invokeMethod(partList, "selectPartByModel", Q_ARG(QVariant, target->ID()));
+		qDebug() << "changing model" << target->ID();
 		qDebug() << "[model selected] b box center"; //<< xmid << " " << ymid << " " << zmid ;
 
 		//sendUpdateModelInfo();
@@ -978,7 +978,7 @@ void QmlManager::unselectAll(){
 	{
 		auto model = *itr;
 		++itr;
-		unselectPart(model->ID);
+		unselectPart(model->ID());
     }
     QMetaObject::invokeMethod(qmlManager->mttab, "hideTab");
     QMetaObject::invokeMethod(boxUpperTab, "all_off");
@@ -1223,7 +1223,7 @@ void QmlManager::copyModel(){
 
     qDebug() << "copying current selected Models";
     for (GLModel* model : selectedModels){
-        copyMeshes.push_back(model->ID);
+        copyMeshes.push_back(model->ID());
     }
     return;
 }
@@ -1557,7 +1557,7 @@ QObject* FindItemByName(QQmlApplicationEngine* engine, const QString& name)
 
 void QmlManager::unselectPart(GLModel* target)
 {
-	QMetaObject::invokeMethod(partList, "unselectPartByModel", Q_ARG(QVariant, target->ID));
+	QMetaObject::invokeMethod(partList, "unselectPartByModel", Q_ARG(QVariant, target->ID()));
 
 	for (auto each : selectedModels)
 	{

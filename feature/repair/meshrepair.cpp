@@ -450,7 +450,7 @@ void Hix::Features::MeshRepair::repairImpl(GLModel* subject, const QString& mode
 		for (auto& comp : seperated)
 		{
 			//qmlManager->createAndListModel(comp, modelName + "_child" + QString::number(childIdx), &subject->transform());
-			auto newModel = new GLModel(subject, comp, modelName + "_child" + QString::number(childIdx), 0, &emptyTransform);
+			auto newModel = new GLModel(subject, comp, modelName + "_child" + QString::number(childIdx), &emptyTransform);
 			++childIdx;
 		}
 

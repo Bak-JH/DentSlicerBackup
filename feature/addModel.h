@@ -9,7 +9,7 @@ namespace Hix
 	namespace Features
 	{
 
-
+		//two seperate features since we know at caller where the model is added to(root or other model)
 		class AddModel : public Feature
 		{
 		public:
@@ -29,6 +29,7 @@ namespace Hix
 
 		class ListModel : public AddModel
 		{
+		public:
 			ListModel(Hix::Engine3D::Mesh* mesh, QString fname, const Qt3DCore::QTransform* transform);
 			virtual ~ListModel();
 			void undo()override;
