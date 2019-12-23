@@ -24,12 +24,12 @@ Hix::Features::AddSupport::~AddSupport()
 {
 }
 
-void Hix::Features::AddSupport::undo()
+void Hix::Features::AddSupport::undoImpl()
 {
 	_removedModel = qmlManager->supportRaftManager().removeSupport(_addedModel).release();
 }
 
-void Hix::Features::AddSupport::redo()
+void Hix::Features::AddSupport::redoImpl()
 {
 	_removedModel->setEnabled(true);
 	_removedModel->setHitTestable(true);
@@ -50,14 +50,14 @@ Hix::Features::RemoveSupport::~RemoveSupport()
 {
 }
 
-void Hix::Features::RemoveSupport::undo()
+void Hix::Features::RemoveSupport::undoImpl()
 {
 	_removedModel->setEnabled(true);
 	_removedModel->setHitTestable(true);
 	_addedModel = qmlManager->supportRaftManager().addSupport(std::unique_ptr<SupportModel>(_removedModel));
 }
 
-void Hix::Features::RemoveSupport::redo()
+void Hix::Features::RemoveSupport::redoImpl()
 {
 	_removedModel = qmlManager->supportRaftManager().removeSupport(_addedModel).release();
 }
@@ -78,14 +78,14 @@ Hix::Features::AddRaft::~AddRaft()
 	//delete _deletedRaft;
 }
 
-void Hix::Features::AddRaft::undo()
+void Hix::Features::AddRaft::undoImpl()
 {
 	_deletedRaft = _addedRaft;
 	_addedRaft->setParent((QNode*)nullptr);
 	_deletedRaft = qmlManager->supportRaftManager().removeRaft();
 }
 
-void Hix::Features::AddRaft::redo()
+void Hix::Features::AddRaft::redoImpl()
 {
 	_deletedRaft->setParent(qmlManager->total);
 	qmlManager->supportRaftManager().addRaft(_deletedRaft);
@@ -108,14 +108,14 @@ Hix::Features::RemoveRaft::~RemoveRaft()
 }
 
 
-void Hix::Features::RemoveRaft::undo()
+void Hix::Features::RemoveRaft::undoImpl()
 {
 	_addedRaft = _deletedRaft;
 	_deletedRaft->setParent(qmlManager->total);
 	qmlManager->supportRaftManager().addRaft(_deletedRaft);
 }
 
-void Hix::Features::RemoveRaft::redo()
+void Hix::Features::RemoveRaft::redoImpl()
 {
 	_deletedRaft = qmlManager->supportRaftManager().removeRaft();
 	_addedRaft->setParent((QNode*)nullptr);

@@ -15,8 +15,8 @@ namespace Hix
 		public:
 			AddModel(Qt3DCore::QEntity* parent, Hix::Engine3D::Mesh* mesh, QString fname, const Qt3DCore::QTransform* transform);
 			virtual ~AddModel();
-			void undo()override;
-			void redo()override;
+			void undoImpl()override;
+			void redoImpl()override;
 			GLModel* getAddedModel();
 		protected:
 			struct UndoInfo
@@ -32,8 +32,8 @@ namespace Hix
 		public:
 			ListModel(Hix::Engine3D::Mesh* mesh, QString fname, const Qt3DCore::QTransform* transform);
 			virtual ~ListModel();
-			void undo()override;
-			void redo()override;
+			void undoImpl()override;
+			void redoImpl()override;
 		};
 	}
 }

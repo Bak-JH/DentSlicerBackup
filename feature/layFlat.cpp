@@ -62,7 +62,7 @@ Hix::Features::LayFlat::LayFlat(GLModel* selectedModel, QVector3D normal, bool i
 	qmlManager->resetLayflat();
 }
 
-void Hix::Features::LayFlat::undo()
+void Hix::Features::LayFlat::undoImpl()
 {
 	auto currMatrix = _model->transform().matrix();
 	auto currAabb = _model->aabb();
@@ -78,7 +78,7 @@ void Hix::Features::LayFlat::undo()
 	_prevAabb = currAabb;
 }
 
-void Hix::Features::LayFlat::redo()
+void Hix::Features::LayFlat::redoImpl()
 {
 	auto currMatrix = _model->transform().matrix();
 	auto currAabb = _model->aabb();

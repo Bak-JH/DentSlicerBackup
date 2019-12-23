@@ -14,8 +14,8 @@ namespace Hix
 		{
 		public:
 			LayFlat(GLModel* selectedModel, QVector3D normal, bool isReady);
-			void undo()override;
-			void redo()override;
+			void undoImpl()override;
+			void redoImpl()override;
 			virtual ~LayFlat();
 
 		private:

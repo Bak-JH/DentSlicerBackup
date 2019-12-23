@@ -1,4 +1,5 @@
 #include "Feature.h"
+#include "qmlmanager.h"
 #include <QDebug>
 using namespace Hix::Features;
 
@@ -9,6 +10,18 @@ Hix::Features::Feature::Feature()
 
 Hix::Features::Feature::~Feature()
 {
+}
+
+void Hix::Features::Feature::undo()
+{
+	qmlManager->unselectAll();
+	undoImpl();
+}
+
+void Hix::Features::Feature::redo()
+{
+	qmlManager->unselectAll();
+	redoImpl();
 }
 
 Hix::Features::FeatureContainer::FeatureContainer()
@@ -24,7 +37,7 @@ Hix::Features::FeatureContainer::~FeatureContainer()
 {
 }
 
-void Hix::Features::FeatureContainer::undo()
+void Hix::Features::FeatureContainer::undoImpl()
 {
 
 	for (auto each = _container.rbegin(); each != _container.rend(); ++each)
@@ -33,7 +46,7 @@ void Hix::Features::FeatureContainer::undo()
 	}
 }
 
-void Hix::Features::FeatureContainer::redo()
+void Hix::Features::FeatureContainer::redoImpl()
 {
 	for (auto& each : _container)
 	{

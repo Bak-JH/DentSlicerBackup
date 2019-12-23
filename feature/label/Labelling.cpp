@@ -224,12 +224,12 @@ Hix::Features::Labelling::~Labelling()
 {
 }
 
-void Hix::Features::Labelling::undo()
+void Hix::Features::Labelling::undoImpl()
 {
 	_label->QNode::setParent((QNode*)nullptr);
 }
 
-void Hix::Features::Labelling::redo()
+void Hix::Features::Labelling::redoImpl()
 {
 	if (!qmlManager->isSelected(_targetModel))
 		_label->setMaterialColor(Hix::Render::Colors::Default);

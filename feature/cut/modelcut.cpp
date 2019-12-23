@@ -21,6 +21,7 @@ Hix::Features::ModelCut::ModelCut(const std::unordered_set<GLModel*>& selectedMo
 Hix::Features::ModelCut::~ModelCut()
 {
 	qmlManager->getRayCaster().setHoverEnabled(false);
+	_cuttingPlane.enablePlane(false);
 }
 
 void ModelCut::cutModeSelected(int type) {
@@ -29,7 +30,10 @@ void ModelCut::cutModeSelected(int type) {
 	if (type == 1)
 	{
 		_cutType = ZAxial;
-		_cuttingPlane.transform().setTranslation(QVector3D(0, 0, 4.04637));
+		_cuttingPlane.enableDrawing(false);
+		_cuttingPlane.clearPt();
+		//qmlManager->getRayCaster().setHoverEnabled(false);
+		_cuttingPlane.transform().setTranslation(QVector3D(0, 0, _modelsBound.zMin() + 1 * _modelsBound.lengthZ() / 1.8));
 		_cuttingPlane.enablePlane(true);
 	}
 	else if (type == 2)
@@ -49,7 +53,7 @@ void ModelCut::cutModeSelected(int type) {
 
 void ModelCut::getSliderSignal(double value) {
 	float zlength = _modelsBound.lengthZ();
-	qDebug() << _modelsBound.zMin() + value * zlength / 1.8;
+	qDebug() << value;
 	_cuttingPlane.transform().setTranslation(QVector3D(0, 0, _modelsBound.zMin() + value * zlength / 1.8));
 }
 
