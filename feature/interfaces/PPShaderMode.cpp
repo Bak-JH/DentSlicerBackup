@@ -28,6 +28,6 @@ Hix::Features::PPShaderMode::~PPShaderMode()
 		each->unselectMeshFaces();
 		each->setMaterialMode(Hix::Render::ShaderMode::SingleColor);
 		each->updatePrintable();
-		//each->updateMesh(true);
+		each->updateMesh(true);
 	}
 }
