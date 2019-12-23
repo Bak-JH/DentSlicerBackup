@@ -349,6 +349,7 @@
     <ClCompile Include="render\SceneEntityWithMaterial.cpp" />
     <ClCompile Include="feature\Shapes2D.cpp" />
     <ClCompile Include="Settings\AppSetting.cpp" />
+    <ClCompile Include="Settings\DeployInfo.cpp" />
     <ClCompile Include="Settings\JSONParsedSetting.cpp" />
     <ClCompile Include="Settings\PrinterSetting.cpp" />
     <ClCompile Include="slice\SlicingOptBackend.cpp" />
@@ -977,6 +978,7 @@
       %(AdditionalIncludeDirectories)</IncludePath>
     </ClInclude>
     <ClInclude Include="Settings\AppSetting.h" />
+    <ClInclude Include="Settings\DeployInfo.h" />
     <ClInclude Include="Settings\JSONParsedSetting.h" />
     <ClInclude Include="Settings\PrinterSetting.h" />
     <ClInclude Include="support\BaseSupport.h" />
