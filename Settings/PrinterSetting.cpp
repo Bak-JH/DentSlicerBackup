@@ -10,6 +10,10 @@ const std::unordered_map<std::string, PrinterSetting::BedShape> __bedShapeMap
 	{ {"circle", PrinterSetting::BedShape::Circle},{"rectangle", PrinterSetting::BedShape::Rect} };
 
 
+Hix::Settings::PrinterSetting::PrinterSetting(): _allocator(&_buffer, _buffer.size())
+{
+}
+
 float Hix::Settings::PrinterSetting::pixelPerMMX() const
 {
 	return sliceImageResolutionX / screenX;;
@@ -57,4 +61,5 @@ void Hix::Settings::PrinterSetting::parseJSONImpl(const rapidjson::Document& doc
 		bedBound.setYLength(bedY);
 	}
 
+	printerConstants = tryParseObj(doc, "printerConstants", _allocator);
 }

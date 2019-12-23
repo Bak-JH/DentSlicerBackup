@@ -1,7 +1,7 @@
 #include "AppSetting.h"
 #include <fstream>
 #include "../common/rapidjson/stringbuffer.h"
-#include "../common/rapidjson/writer.h"
+#include "../common/rapidjson/PrettyWriter.h"
 #include "../common/rapidjson/ostreamwrapper.h"
 
 
@@ -42,7 +42,7 @@ void Hix::Settings::AppSetting::setPrinterPath(const std::string& path)
 
 	std::ofstream of(_jsonPath, std::ios_base::trunc);
 	rapidjson::OStreamWrapper osw{ of };
-	rapidjson::Writer<rapidjson::OStreamWrapper> writer{ osw };
+	rapidjson::PrettyWriter<rapidjson::OStreamWrapper> writer{ osw };
 	doc.Accept(writer);
 	refresh();
 }
