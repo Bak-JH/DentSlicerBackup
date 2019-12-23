@@ -1,4 +1,4 @@
 {
-    "printerPreset": "HixCapsule.json",
+    "printerPresetPath": "PrinterPresets/HixCapsule.json",
     "enableErrorReport": true
 }
