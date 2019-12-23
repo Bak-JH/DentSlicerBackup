@@ -26,6 +26,7 @@ namespace Hix
 				void enableDrawing(bool isEnable);
 				void clicked(Hix::Input::MouseEventData&, const Qt3DRender::QRayCasterHit&)override;
 				void removePt(FreeCutPtWidget* pt);
+				void clearPt();
 				std::vector<QVector3D> contour()const;
 			protected:
 				void initHitTest()override;

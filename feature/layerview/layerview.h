@@ -22,4 +22,4 @@ namespace Hix
 			int _maxLayer;
 		};
 	}
-}`
+}
