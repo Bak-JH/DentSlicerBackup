@@ -11,7 +11,7 @@ typedef rapidjson::GenericStringBuffer<rapidjson::UTF8<>, rapidjson::MemoryPoolA
 
 Hix::Settings::AppSetting::AppSetting()
 {
-	auto appSettingsPath = std::filesystem::current_path();
+	auto appSettingsPath = deployInfo.settingsDir;
 	appSettingsPath.append("settings.json");
 	parseJSON(appSettingsPath);
 }
