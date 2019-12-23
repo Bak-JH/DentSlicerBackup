@@ -12,8 +12,8 @@ namespace Hix
 		public:
 			Scale(GLModel* targetModel, QVector3D& scale);
 			virtual ~Scale();
-			void undo()override;
-			void redo()override;
+			void undoImpl()override;
+			void redoImpl()override;
 
 		private:
 			GLModel* _model;

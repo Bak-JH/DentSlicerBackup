@@ -38,7 +38,7 @@ Hix::Features::Scale::~Scale()
 	delete _model;
 }
 
-void Hix::Features::Scale::undo()
+void Hix::Features::Scale::undoImpl()
 {
 	_nextMatrix = _model->transform().matrix();
 	_nextAabb = _model->aabb();
@@ -49,7 +49,7 @@ void Hix::Features::Scale::undo()
 	_model->updateMesh();
 }
 
-void Hix::Features::Scale::redo()
+void Hix::Features::Scale::redoImpl()
 {
 	_model->transform().setMatrix(_nextMatrix);
 	_model->aabb() = _nextAabb;

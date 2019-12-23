@@ -14,8 +14,8 @@ namespace Hix
 		public:
 			DeleteModel(GLModel* target);
 			virtual ~DeleteModel();
-			void undo()override;
-			void redo()override;
+			void undoImpl()override;
+			void redoImpl()override;
 			GLModel* getDeletedModel();
 
 		private:

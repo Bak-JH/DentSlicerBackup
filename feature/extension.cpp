@@ -136,7 +136,7 @@ Hix::Features::Extend::~Extend()
 	delete _nextMesh;
 }
 
-void Hix::Features::Extend::undo()
+void Hix::Features::Extend::undoImpl()
 {
 	_model->setMesh(_prevMesh);
 	_model->unselectMeshFaces();
@@ -144,7 +144,7 @@ void Hix::Features::Extend::undo()
 	_model->setZToBed();
 }
 
-void Hix::Features::Extend::redo()
+void Hix::Features::Extend::redoImpl()
 {
 	_model->setMesh(_nextMesh);
 	_model->unselectMeshFaces();
