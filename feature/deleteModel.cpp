@@ -12,7 +12,7 @@ Hix::Features::DeleteModel::~DeleteModel()
 {
 }
 
-void Hix::Features::DeleteModel::undo()
+void Hix::Features::DeleteModel::undoImpl()
 {
 	auto& info = std::get<RedoInfo>(_model);
 	auto& model = info.redoModel;
@@ -26,7 +26,7 @@ void Hix::Features::DeleteModel::undo()
 	}
 }
 
-void Hix::Features::DeleteModel::redo()
+void Hix::Features::DeleteModel::redoImpl()
 {
 	auto raw = std::get<GLModel*>(_model);
 	auto parent = raw->parentNode();

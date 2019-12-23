@@ -39,8 +39,8 @@ namespace Hix
 		public:
 			Labelling(GLModel* parentModel, GLModel* previewModel);
 			virtual ~Labelling();
-			void undo()override;
-			void redo()override;
+			void undoImpl()override;
+			void redoImpl()override;
 
 		private:
 			GLModel* _label;

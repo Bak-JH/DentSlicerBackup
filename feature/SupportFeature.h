@@ -15,8 +15,8 @@ namespace Hix
 			AddSupport(const Hix::Engine3D::FaceConstItr face, QVector3D point);
 			AddSupport(const OverhangDetect::Overhang& overhang);
 			virtual ~AddSupport();
-			void undo()override;
-			void redo()override;
+			void undoImpl()override;
+			void redoImpl()override;
 
 		private:
 			SupportModel* _removedModel;
@@ -28,8 +28,8 @@ namespace Hix
 		public:
 			RemoveSupport(SupportModel* target);
 			virtual ~RemoveSupport();
-			void undo()override;
-			void redo()override;
+			void undoImpl()override;
+			void redoImpl()override;
 
 		private:
 			SupportModel* _removedModel;
@@ -41,8 +41,8 @@ namespace Hix
 		public: 
 			AddRaft();
 			virtual ~AddRaft();
-			void undo()override;
-			void redo()override;
+			void undoImpl()override;
+			void redoImpl()override;
 
 		private:
 			RaftModel* _addedRaft;
@@ -54,8 +54,8 @@ namespace Hix
 		public: 
 			RemoveRaft();
 			virtual ~RemoveRaft();
-			void undo()override;
-			void redo()override;
+			void undoImpl()override;
+			void redoImpl()override;
 
 		private:
 			RaftModel* _addedRaft;

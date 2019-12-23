@@ -66,12 +66,12 @@ Hix::Features::ShellOffset::~ShellOffset()
 {
 }
 
-void Hix::Features::ShellOffset::undo()
+void Hix::Features::ShellOffset::undoImpl()
 {
 	_container->undo();
 }
 
-void Hix::Features::ShellOffset::redo()
+void Hix::Features::ShellOffset::redoImpl()
 {
 	_container->redo();
 }

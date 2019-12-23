@@ -27,8 +27,8 @@ namespace Hix
 			Extend(GLModel* targetModel, const QVector3D& targetFaceNormal,
 					const std::unordered_set<FaceConstItr>& targetFaces, double distance);
 			virtual ~Extend();
-			void undo()override;
-			void redo()override;
+			void undoImpl()override;
+			void redoImpl()override;
 
 		private:
 			void coverCap(GLModel* model, QVector3D normal, const std::unordered_set<FaceConstItr>& extension_faces, double distance);
