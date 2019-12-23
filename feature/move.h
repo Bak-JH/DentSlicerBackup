@@ -14,8 +14,8 @@ namespace Hix
 			Move(GLModel* target, const QVector3D& to);
 			Move(GLModel* target);
 			virtual ~Move();
-			void undo()override;
-			void redo()override;
+			void undoImpl()override;
+			void redoImpl()override;
 
 		private:
 			GLModel* _model;

@@ -14,8 +14,10 @@ namespace Hix
 		public:
 			Feature();
 			virtual ~Feature();
-			virtual void undo() = 0;
-			virtual void redo() = 0;
+			void undo();
+			void redo();
+			virtual void undoImpl() = 0;
+			virtual void redoImpl() = 0;
 
 		};
 
@@ -26,8 +28,8 @@ namespace Hix
 			FeatureContainer();
 			void addFeature(Feature* feature);
 			virtual ~FeatureContainer();
-			void undo()override;
-			void redo()override;
+			void undoImpl()override;
+			void redoImpl()override;
 			const bool empty();
 		protected:
 			std::deque<std::unique_ptr<Feature>> _container;

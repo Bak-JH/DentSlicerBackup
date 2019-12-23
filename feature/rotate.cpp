@@ -66,7 +66,7 @@ Hix::Features::Rotate::~Rotate()
 	delete _model;
 }
 
-void Hix::Features::Rotate::undo()
+void Hix::Features::Rotate::undoImpl()
 {
 	_nextMatrix = _model->transform().matrix();
 	_nextAabb = _model->aabb();
@@ -77,7 +77,7 @@ void Hix::Features::Rotate::undo()
 	_model->updateMesh();
 }
 
-void Hix::Features::Rotate::redo()
+void Hix::Features::Rotate::redoImpl()
 {
 	_model->transform().setMatrix(_nextMatrix);
 	_model->aabb() = _nextAabb;

@@ -28,8 +28,8 @@ namespace Hix
 		public:
 			ShellOffset(GLModel* target, float offset, float zPlane);
 			virtual ~ShellOffset();
-			void undo()override;
-			void redo()override;
+			void undoImpl()override;
+			void redoImpl()override;
 
 		private:
 			Mesh* _prevMesh;

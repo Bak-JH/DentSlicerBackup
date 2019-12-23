@@ -13,7 +13,7 @@ Hix::Features::ShellOffsetMode::ShellOffsetMode(GLModel* glmodel) : _subject(glm
 {
 	_modelBound = _subject->recursiveAabb();
 	_cuttingPlane.enablePlane(true);
-
+	_cuttingPlane.transform().setTranslation(QVector3D(0, 0, _modelBound.zMin() + 1 * _modelBound.lengthZ() / 1.8));
 }
 
 Hix::Features::ShellOffsetMode::~ShellOffsetMode()
@@ -66,12 +66,12 @@ Hix::Features::ShellOffset::~ShellOffset()
 {
 }
 
-void Hix::Features::ShellOffset::undo()
+void Hix::Features::ShellOffset::undoImpl()
 {
 	_container->undo();
 }
 
-void Hix::Features::ShellOffset::redo()
+void Hix::Features::ShellOffset::redoImpl()
 {
 	_container->redo();
 }

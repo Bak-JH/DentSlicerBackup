@@ -12,7 +12,8 @@ namespace Hix
 			LayerView(const std::unordered_set<GLModel*>& selectedModels, Hix::Engine3D::Bounds3D bound);
 			virtual ~LayerView();
 			void crossSectionSliderSignal(int value);
-			void undo() override {} //do nothing
+			void undoImpl() override {} //do nothing
+			void redoImpl() override {} //do nothing
 		private:
 			//cutting
 			Hix::Features::CrossSectionPlane _crossSectionPlane;
