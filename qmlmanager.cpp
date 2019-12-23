@@ -980,6 +980,7 @@ void QmlManager::unselectAll(){
 		++itr;
 		unselectPart(model->ID());
     }
+	_currentMode.reset();
     QMetaObject::invokeMethod(qmlManager->mttab, "hideTab");
     QMetaObject::invokeMethod(boxUpperTab, "all_off");
 	QMetaObject::invokeMethod(boundedBox, "hideBox");

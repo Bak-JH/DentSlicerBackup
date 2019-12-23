@@ -93,6 +93,11 @@ void Hix::Features::Cut::DrawingPlane::removePt(FreeCutPtWidget* pt)
 
 }
 
+void Hix::Features::Cut::DrawingPlane::clearPt()
+{
+	_ptWidgets.clear();
+}
+
 std::vector<QVector3D> Hix::Features::Cut::DrawingPlane::contour() const
 {
 	std::vector<QVector3D> path;
