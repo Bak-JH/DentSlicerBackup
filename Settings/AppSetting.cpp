@@ -23,6 +23,7 @@ Hix::Settings::AppSetting::~AppSetting()
 void Hix::Settings::AppSetting::refresh()
 {
 	JSONParsedSetting::refresh();
+	deployInfo.refresh();
 	auto printerPath = std::filesystem::current_path();
 	printerPath.append(printerPresetPath);
 	printerSetting.parseJSON(printerPath);

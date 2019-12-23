@@ -183,6 +183,9 @@
     <ClCompile Include="common\Tree\BVHBuilder.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Settings\DeployInfo.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="common\Debug.h" />
@@ -881,6 +884,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="unitTest\tests\BVHTest.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Settings\DeployInfo.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
