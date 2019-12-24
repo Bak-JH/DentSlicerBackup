@@ -10,7 +10,7 @@ namespace Hix
 		struct ExplicitDeleter {
 			explicit ExplicitDeleter(bool doDelete = true) : _delete(doDelete) {}
 			void operator()(T* p) const {
-				if (_delete) delete p;
+ 				if (_delete) delete p;
 			}
 			bool _delete;
 		};

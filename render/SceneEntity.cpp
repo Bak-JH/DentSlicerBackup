@@ -173,14 +173,21 @@ QVector4D Hix::Render::SceneEntity::toRootCoord(const QVector4D& local) const
 
 QVector4D Hix::Render::SceneEntity::toLocalCoord(const QVector4D& world) const
 {
-	auto coord(world);
 	auto curr = this;
+	std::vector<const SceneEntity*> entities;
 	while (curr)
 	{
-		coord = curr->fromParentCoord(coord);
+		entities.push_back(curr);
 		curr = dynamic_cast<SceneEntity*>(curr->parentEntity());
 	}
+	auto coord(world);
+	for (auto rItr = entities.rbegin(); rItr != entities.rend(); ++rItr)
+	{
+		coord = (*rItr)->fromParentCoord(coord);
+	}
 	return coord;
+
+
 }
 
 QVector3D Hix::Render::SceneEntity::ptToRoot(const QVector3D& local) const
@@ -201,6 +208,11 @@ QVector3D Hix::Render::SceneEntity::ptToLocal(const QVector3D& world) const
 QVector3D Hix::Render::SceneEntity::vectorToLocal(const QVector3D& world) const
 {
 	return QVector3D(toLocalCoord(QVector4D(world, 0)));
+}
+
+SceneEntity* Hix::Render::SceneEntity::parentSceneEntity() const
+{
+	return  dynamic_cast<SceneEntity*>(parentEntity());
 }
 
 

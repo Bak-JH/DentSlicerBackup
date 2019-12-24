@@ -59,17 +59,13 @@ public:
 		Clear = 1,
 		Castable = 2
 	};
-	enum class PrinterVendor : uint8_t
-	{
-		Hix = 0,
-		ThreeDLight = 1
-	};
 	enum class Invert : uint8_t
 	{
 		InvertXAxis = 0,
 		NoInversion
 	};
 	SlicingConfiguration();
+	float raft_base_radius()const;
 
     // configurations
     float layer_height = 0.1f; // in mm
@@ -81,7 +77,6 @@ public:
     float contraction_ratio = TEMPORARY_CONTRACTION_RATIO;
 
 	Invert slice_invert = Invert::InvertXAxis;
-	PrinterVendor printer_vendor_type = PrinterVendor::Hix;
 	SlicingMode slicing_mode = SlicingMode::Uniform; // uniform OR adaptive
 	ResinType resin_type = ResinType::Temporary;
 	SupportType support_type = SupportType::Vertical;
@@ -89,53 +84,15 @@ public:
 
     // raft settings
     float raft_thickness = 1.0f; // in mm
-	float raft_base_radius()const;
 
     // support settings
     float support_radius_max = 1.0f;
-    float support_radius_min = 0.2f;
+    float support_radius_min = 0.25f;
     float support_base_height = 2.0f;
-
-    // bed configuration
-    QVector3D origin;
-
-
-
-	void setBedX(float val);
-	void setBedY(float val);
-	void setBedHeight(float val);
-	void setResolutionX(float val);
-	void setResolutionY(float val);
-	void setScreenX(float val);
-	void setScreenY(float val);
-	float screenX()const;
-	float screenY()const;
-	float resolutionX()const;
-	float resolutionY()const;
-	float bedX()const;
-	float bedY()const;
-	float bedHeight()const;
-	const Hix::Engine3D::Bounds3D& bedBound()const;
-	float pixelPerMMX()const;
-	float pixelPerMMY()const;
-
 	size_t supportDensity = 50;
 
 private:
 
-	float _pixelPerMMX;
-	float _pixelPerMMY;
-
-	float _screenX;
-	float _screenY;
-
-	float _bedX; // in mm
-	float _bedY; // in mm
-
-	// settings for vittro plus
-	int _resolutionX;
-	int _resolutionY;
-	Hix::Engine3D::Bounds3D _bedBound;
 };
 extern SlicingConfiguration* scfg;
 

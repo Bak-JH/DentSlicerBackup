@@ -11,6 +11,7 @@
 #include <memory>
 #include "DentEngine/src/mesh.h"
 #include "render/ModelMaterial.h"
+#include "DentEngine/src/Bounds3D.h"
 namespace Hix
 {
 	namespace Render
@@ -54,6 +55,7 @@ namespace Hix
 			QVector3D vectorToRoot(const QVector3D& local)const;
 			QVector3D ptToLocal(const QVector3D& world)const;
 			QVector3D vectorToLocal(const QVector3D& world)const;
+			SceneEntity* parentSceneEntity()const;
 
 			//update faces given indicies, if index >= indexUppderLimit, it's ignored
 			void updateFaces(const std::unordered_set<size_t>& faceIndicies, const Hix::Engine3D::Mesh& mesh);
@@ -87,7 +89,18 @@ namespace Hix
 					}
 				}
 			}
-
+			template<typename OwnerPtr, typename Fn, typename ...Args>
+			void callRecursive(OwnerPtr owner, Fn functionPtr, Args... arguments)const
+			{
+				for (auto child : owner->childNodes())
+				{
+					auto childEntity = dynamic_cast<OwnerPtr>(child);
+					if (childEntity)
+					{
+						(childEntity->*functionPtr)(arguments...);
+					}
+				}
+			}
 			//modifiable transform, cannot be accessed by other classes
 			//Axis aligned bounding box
 			Hix::Engine3D::Bounds3D _aabb;
@@ -111,8 +124,6 @@ namespace Hix
 			QAttribute indexAttribute;
 
 
-			//QVariantList _primitiveColorCodes;
-			QEntity* m_parent;
 
 			// Core mesh structures
 			Hix::Engine3D::Mesh* _mesh = nullptr; 

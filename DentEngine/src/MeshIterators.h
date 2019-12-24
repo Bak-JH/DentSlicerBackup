@@ -54,24 +54,25 @@ namespace Hix
 		};
 
 		//actual base for edge, vtx, face iterators, specialized later for constness.
-		template <typename HEItrType, typename ValType, typename TypeConstInfo>
+		template <typename HEItrType, typename T, typename TypeConstInfo>
 		class HalfEdgeItrBase : public RandomAccessIteratorBase< HEItrType, typename TypeConstInfo::OwnerType>
 		{
 		public:
 			using RandomAccessIteratorBase<HEItrType, typename TypeConstInfo::OwnerType>::RandomAccessIteratorBase;
 			using ParentType = RandomAccessIteratorBase< HEItrType, typename TypeConstInfo::OwnerType>;
-			using PtrType = ValType *;
-			using RefType=  ValType &;
+			using value_type = T;
+			using pointer = value_type*;
+			using reference = value_type&;
 
-			RefType ref()const
+			reference ref()const
 			{
 				return ParentType::_owner->getHalfEdges()[ParentType::_index];
 			}
-			RefType operator*() const
+			reference operator*() const
 			{
 				return ref();
 			}
-			PtrType operator->() const
+			pointer operator->() const
 			{
 				return &(ParentType::_owner->getHalfEdges()[ParentType::_index]);
 			}
@@ -103,20 +104,32 @@ namespace Hix
 			{
 				return TypeConstInfo::FaceItrType(ref().owningFace, ParentType::_owner);
 			}
+			float localLength()const
+			{
+				float length = from().localPosition().distanceToPoint(to().localPosition());
+				return length;
+			}
 			//HalfEdgeConstItr twin;
 			std::unordered_set<HEItrType> twins()const
 			{
 				std::unordered_set<HEItrType> twinEdges;
-				auto fromVtx = from();
+				auto fromVtx = ref().from;
 				for (auto oppDirEdge : to().leavingEdges())
 				{
-					if (oppDirEdge.to() == fromVtx)
+					if (oppDirEdge->to == fromVtx)
 					{
 						twinEdges.insert(oppDirEdge);
 					}
 				}
 				return twinEdges;
 			}
+			bool isBoundary()const
+			{
+				if (twins().size() == 0)
+					return true;
+				return false;
+			}
+
 			//twins in same direction
 			std::unordered_set<HEItrType> nonTwins()const
 			{
@@ -166,23 +179,24 @@ namespace Hix
 			}
 		};
 
-		template <typename VtxItrType, typename ValType, typename TypeConstInfo>
+		template <typename VtxItrType, typename T, typename TypeConstInfo>
 		class VertexItrBase : public RandomAccessIteratorBase< VtxItrType, typename TypeConstInfo::OwnerType>
 		{
 		public:
 			using RandomAccessIteratorBase<VtxItrType, typename TypeConstInfo::OwnerType>::RandomAccessIteratorBase;
 			using ParentType = RandomAccessIteratorBase< VtxItrType, typename TypeConstInfo::OwnerType>;
-			using PtrType = ValType *;
-			using RefType=  ValType &;
-			RefType ref()const
+			using value_type = T;
+			using pointer = value_type*;
+			using reference = value_type&;
+			reference ref()const
 			{
 				return ParentType::_owner->getVertices()[ParentType::_index];
 			}
-			RefType operator*() const
+			reference operator*() const
 			{
 				return ref();
 			}
-			PtrType operator->() const
+			pointer operator->() const
 			{
 				return &(ParentType::_owner->getVertices()[ParentType::_index]);
 			}
@@ -238,6 +252,62 @@ namespace Hix
 				}
 				return connected;
 			}
+			std::unordered_set< typename TypeConstInfo::HalfEdgeItrType> leavingBoundary()const
+			{
+				std::unordered_set< typename TypeConstInfo::HalfEdgeItrType> leavingBoundary;
+				auto leavings = leavingEdges();
+				auto arriving = arrivingEdges();
+				std::unordered_set<size_t> arrivingFromVtcs;
+				for (auto& each : arriving)
+				{
+					arrivingFromVtcs.insert(each->from);
+				}
+				
+				for (auto& each : leavings)
+				{
+					if (arrivingFromVtcs.find(each->to) == arrivingFromVtcs.end())
+					{
+						leavingBoundary.insert(each);
+					}
+				}
+				return leavingBoundary;
+			}
+			//std::unordered_set< typename TypeConstInfo::HalfEdgeItrType> arrivingBoundary()const
+			//{
+			//	std::unordered_set< typename TypeConstInfo::HalfEdgeItrType> leavingBoundary;
+			//	auto leavings = leavingEdges();
+			//	auto arriving = arrivingEdges();
+			//	std::unordered_set<size_t> arrivingFromVtcs;
+			//	for (auto& each : arriving)
+			//	{
+			//		arrivingFromVtcs.insert(each->from);
+			//	}
+
+			//	for (auto& each : leavings)
+			//	{
+			//		if (arrivingFromVtcs.find(each->to) == arrivingFromVtcs.end())
+			//		{
+			//			leavingBoundary.insert(each);
+			//		}
+			//	}
+			//	return leavingBoundary;
+			//}
+
+
+			bool isConnected(const typename TypeConstInfo::VertexItrType& other)const
+			{
+				for (auto& each : leavingEdges())
+				{
+					if (each.to() == other)
+						return true;
+				}
+				for (auto& each : arrivingEdges())
+				{
+					if (each.from() == other)
+						return true;
+				}
+				return false;
+			}
 
 			bool disconnected() const
 			{
@@ -269,23 +339,24 @@ namespace Hix
 
 		};
 
-		template <typename FaceItrType, typename ValType, typename TypeConstInfo>
+		template <typename FaceItrType, typename T, typename TypeConstInfo>
 		class FaceItrBase : public RandomAccessIteratorBase< FaceItrType, typename TypeConstInfo::OwnerType>
 		{
 		public:
 			using RandomAccessIteratorBase<FaceItrType, typename TypeConstInfo::OwnerType>::RandomAccessIteratorBase;
 			using ParentType = RandomAccessIteratorBase< FaceItrType, typename TypeConstInfo::OwnerType>;
-			using PtrType = ValType *;
-			using RefType=  ValType &;
-			RefType ref()const
+			using value_type = T;
+			using pointer = value_type*;
+			using reference = value_type&;
+			reference ref()const
 			{
 				return ParentType::_owner->getFaces()[ParentType::_index];
 			}
-			RefType operator*() const
+			reference operator*() const
 			{
 				return ref();
 			}
-			PtrType operator->() const
+			pointer operator->() const
 			{
 				return &(ParentType::_owner->getFaces()[ParentType::_index]);
 			}
@@ -318,7 +389,17 @@ namespace Hix
 				}
 				return result;
 			}
-
+			bool hasVertex(const typename TypeConstInfo::VertexItrType& vertex) const
+			{
+				auto circulator = edge();
+				for (size_t i = 0; i < 3; ++i)
+				{
+					if (circulator.from() == vertex)
+						return true;
+					circulator.moveNext();
+				}
+				return false;
+			}
 			std::array<size_t, 3> getVerticeIndices() const
 			{
 				std::array<size_t, 3> result;
@@ -364,7 +445,17 @@ namespace Hix
 				}
 				return face__z_max;
 			}
-
+			bool isWrongOrientation()
+			{
+				auto hEdge = edge();
+				for (size_t i = 0; i < 3; ++i)
+				{
+					if (!hEdge.nonTwins().empty())
+						return true;
+					hEdge.moveNext();
+				}
+				return false;
+			}
 			bool getEdgeWithVertices(typename TypeConstInfo::HalfEdgeItrType& result, const typename TypeConstInfo::VertexItrType& a, const typename TypeConstInfo::VertexItrType& b) const
 			{
 				auto hEdge = edge();
@@ -401,7 +492,7 @@ namespace Hix
 				return false;
 			}
 
-			bool isNeighborOf(const FaceConstItr& other) const
+			bool isNeighborOf(const typename TypeConstInfo::FaceItrType& other) const
 			{
 
 				auto hEdge = edge();
@@ -417,6 +508,79 @@ namespace Hix
 					}
 				}
 				return false;
+			}
+			std::unordered_set<FaceItrType> neighborFaces()const
+			{
+				std::unordered_set<FaceItrType> faces;
+				auto hEdge = edge();
+				for (size_t i = 0; i < 3; ++i)
+				{
+					auto nFaces = hEdge.twinFaces();
+					faces.merge(std::move(nFaces));
+					hEdge.moveNext();
+				}
+				return faces;
+			}
+
+			std::unordered_set<FaceItrType> findAllConnected()const
+			{
+				std::unordered_set<FaceItrType> explored;
+				std::deque< FaceItrType>frontier;
+				frontier.push_back(*static_cast<const FaceItrType*>(this));
+				explored.insert(*static_cast<const FaceItrType*>(this));
+				while (!frontier.empty())
+				{
+					auto curr = frontier.front();
+					frontier.pop_front();
+					auto neigborFaces = curr.neighborFaces();
+
+					for (auto& each : neigborFaces)
+					{
+						if (explored.find(each) == explored.cend())
+						{
+							frontier.push_back(each);
+							explored.insert(each);
+						}
+					}
+				}
+				return explored;
+			}
+
+			//for degenerative situation when two faces are connected only from a single shared vertex
+			bool isButterfly(const typename TypeConstInfo::FaceItrType& other, const typename TypeConstInfo::VertexItrType& common)const
+			{
+				std::unordered_set<FaceItrType> explored;
+				std::deque< FaceItrType>frontier;
+				frontier.push_back(*static_cast<const FaceItrType*>(this));
+				explored.insert(*static_cast<const FaceItrType*>(this));
+				while (!frontier.empty())
+				{
+					auto curr = frontier.front();
+					frontier.pop_front();
+					auto neigborFaces = curr.neighborFaces();
+
+					for (auto& each : neigborFaces)
+					{
+						if (each.hasVertex(common))
+						{
+
+							//early check
+							if (each == other)
+							{
+								return false;
+							}
+							else
+							{
+								if (explored.find(each) == explored.cend())
+								{
+									frontier.push_back(each);
+									explored.insert(each);
+								}
+							}
+						}
+					}
+				}
+				return true;
 			}
 
 		};

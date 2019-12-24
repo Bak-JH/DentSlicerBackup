@@ -24,12 +24,6 @@ constexpr std::array<std::string_view, 2> SlicingModeStr{
 	"Adaptive"
 };
 
-constexpr std::array<std::string_view, 4> ResolutionStr{
-	"2560*1440",
-	"1920*1080",
-	"1280*800",
-	"1024*768"
-};
 constexpr std::array<std::string_view, 3> LayerHeightStr{
 	"0.1","0.2","0.05"
 };
@@ -45,15 +39,15 @@ constexpr std::array<std::string_view, 3> ResinTypeStr{
 constexpr std::array<std::string_view, 11> SupportRadiusMin{
 	"0.5",
 	"0.3",
+	"0.28",
+	"0.25",
 	"0.2",
 	"0.1",
 	"0.08",
 	"0.06",
 	"0.05",
 	"0.04",
-	"0.03",
 	"0.02",
-	"0.01"
 };
 
 constexpr std::array<std::string_view, 11> SupportRadiusMax{
@@ -76,10 +70,7 @@ constexpr std::array<std::string_view, 4> ContractionRatio{
 	"0.99504",
 	"0.9909"
 };
-constexpr std::array<std::string_view, 2> PrinterVendorType{
-	"Hix",
-	"3D'Light"
-};
+
 
 constexpr std::array<std::string_view, 2> SliceInvertStr{
 	"Invert X-axis",
@@ -122,15 +113,13 @@ void SlicingOptBackend::addOptionDialogCombo(QString opName, std::array<std::str
 void SlicingOptBackend::createSlicingOptControls()
 {
 
-	addOptionDialogCombo(QString("Resolution"), ResolutionStr, 0);
 	addOptionDialogCombo(QString("Layer height"), LayerHeightStr, 0);
 	addOptionDialogCombo(QString("Resin type"), ResinTypeStr, 0);
 	addOptionDialogCombo(QString("Support type"), SupportTypeStr, 1);
 	addOptionDialogCombo(QString("Infill type"), InfillTypeStr, 1);
 	addOptionDialogCombo(QString("Slicing mode"), SlicingModeStr, 0);
-	addOptionDialogCombo(QString("Support min radius"), SupportRadiusMin, 2);
+	addOptionDialogCombo(QString("Support min radius"), SupportRadiusMin, 3);
 	addOptionDialogCombo(QString("Support max radius"), SupportRadiusMax, 3);
-	addOptionDialogCombo(QString("Printer vendor"), PrinterVendorType, 0);
 	addOptionDialogCombo(QString("Slice image inversion"), SliceInvertStr, 0);
 	addOptionDialogPercentage(QString("Support density"), 50);
 	addOptionDialogCombo(QString("Contraction Ratio"), ContractionRatio, 1);
@@ -154,14 +143,7 @@ void SlicingOptBackend::addOptionDialogPercentage(QString opName, int defaultVal
 void SlicingOptBackend::onOptionChanged(QString opName, QVariant newVal)
 {
 	int toInt = newVal.toInt();
-	if (opName == "Resolution")
-	{
-		int x, y;
-		resStringToInt(ResolutionStr[toInt], x, y);
-		_config->setResolutionX(x);
-		_config->setResolutionY(y);
-	}
-	else if (opName == "Layer height")
+	if (opName == "Layer height")
 	{
 		_config->layer_height = std::stof(std::string(LayerHeightStr[toInt]));
 	}
@@ -192,10 +174,6 @@ void SlicingOptBackend::onOptionChanged(QString opName, QVariant newVal)
 	else if (opName == "Support max radius")
 	{
 		_config->support_radius_max = std::stof(std::string(SupportRadiusMax[toInt]));
-	}
-	else if (opName == "Printer vendor")
-	{
-		_config->printer_vendor_type = (SlicingConfiguration::PrinterVendor)toInt;
 	}
 	else if (opName == "Slice image inversion")
 	{

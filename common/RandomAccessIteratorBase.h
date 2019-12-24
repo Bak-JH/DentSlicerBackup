@@ -6,7 +6,12 @@ class RandomAccessIteratorBase
 {
 
 public:
-
+	using iterator_category = std::random_access_iterator_tag;
+	using difference_type = size_t;
+	//declare ref,value,ptr type on the inheriting class
+	//using pointer = void;
+	//using reference = void;
+	//using value_type = void;
 	RandomAccessIteratorBase() :_index(0), _owner(nullptr)
 	{}
 	RandomAccessIteratorBase(size_t idx, OwnerType* owner) : _index(idx), _owner(owner)
@@ -32,7 +37,7 @@ public:
 	}
 	bool operator==(const ItrType& o) const
 	{
-		return _index == o._index;
+		return _index == o._index && _owner == o._owner;
 	}
 	bool operator!=(const ItrType& o) const
 	{
@@ -82,33 +87,33 @@ public:
 		return tmp;
 
 	}
-	ItrType& operator+=(size_t offset)
+	ItrType& operator+=(difference_type offset)
 	{
 		_index += offset;
 		return *static_cast<ItrType*>(this);
 	}
-	ItrType& operator-=(size_t offset)
+	ItrType& operator-=(difference_type offset)
 	{
 		_index -= offset;
 
 		return *static_cast<ItrType*>(this);
 	}
-	ItrType operator+(size_t offset) const
+	ItrType operator+(difference_type offset) const
 	{
 		ItrType tmp = *static_cast<const ItrType*>(this);
 		return tmp += offset;
 	}
-	friend ItrType operator+(size_t offset, const ItrType& itr)
+	friend ItrType operator+(difference_type offset, const ItrType& itr)
 	{
 		return itr += offset;
 
 	}
-	ItrType operator-(size_t offset) const
+	ItrType operator-(difference_type offset) const
 	{
 		auto tmp = *static_cast<const ItrType*>(this);
 		return tmp -= offset;
 	}
-	size_t operator-(const ItrType& itr)const
+	difference_type operator-(const ItrType& itr)const
 	{
 		return _index - itr._index;
 	}
@@ -122,7 +127,7 @@ public:
 
 protected:
 	OwnerType* _owner;
-	size_t _index;
+	difference_type _index;
 private:
 	//friend struct std::hash<RandomAccessIteratorBase<ItrType, OwnerType>>;
 

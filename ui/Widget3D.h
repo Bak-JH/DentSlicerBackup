@@ -9,11 +9,16 @@
 #include <Qt3DInput>
 #include <array>
 #include <memory>
+
 namespace Hix
 {
+	namespace Features
+	{
+		class WidgetMode;
+	}
 	namespace UI
 	{
-		class Highlightable;
+		class Widget;
 	}
 	namespace UI
 	{
@@ -21,20 +26,24 @@ namespace Hix
 		{
 			Q_OBJECT
 		public:
-			Widget3D();
+			Widget3D(Hix::Features::WidgetMode* mode);
 			virtual ~Widget3D();
-			void addWidget(std::unique_ptr<Hix::UI::Highlightable> widget);
+			void addWidget(std::unique_ptr<Hix::UI::Widget> widget);
 			void setVisible(bool show);
 			bool visible();
-			Qt3DRender::QLayer layer;
 			//need to place the widget between camera and the center
 			void updatePosition();
 			Qt3DCore::QTransform* transform();
 			bool isManipulated();
 			void setManipulated(bool isManipulated);
+			Hix::Features::WidgetMode* mode();
+
+		protected:
+			Hix::Features::WidgetMode* _mode;
+
 		private:
-			std::vector<std::unique_ptr<Hix::UI::Highlightable>> _widgets;
-			bool _visible = true;
+			std::vector<std::unique_ptr<Hix::UI::Widget>> _widgets;
+			bool _visible = false;
 			QVector3D _center;
 			Qt3DCore::QTransform _transform;
 			bool _isManipulated = false;

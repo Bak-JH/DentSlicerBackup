@@ -129,6 +129,8 @@
         <file>icon-32.ico</file>
         <file>icon.ico</file>
         <file>Resource/dentslicer_icon.png</file>
+        <file>Resource/mesh/plate_logo.stl</file>
+        <file>Resource/dentslicer_login_logo.png</file>
         <file>Resource/vs_icon.png</file>
         <file>Resource/closebutton.png</file>
         <file>Resource/triangle_down.png</file>

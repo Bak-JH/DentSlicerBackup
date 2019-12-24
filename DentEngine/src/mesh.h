@@ -6,7 +6,6 @@
 #include <QTime>
 #include <array>
 #include <variant>
-#include "Bounds3D.h"
 #include "../../common/TrackedIndexedList.h"
 #include "../../common/Hasher.h"
 #define cos50 0.64278761
@@ -108,8 +107,20 @@ namespace Hix
 
 		typedef std::vector<Path3D> Paths3D;
 
+		struct MeshDeleteGuard
+		{
+			TrackedIndexedList<MeshVertex, std::allocator<MeshVertex>, VertexItrFactory>::DeleteGuardType vtxDeleteGuard;
+			TrackedIndexedList<HalfEdge, std::allocator<HalfEdge>, HalfEdgeItrFactory>::DeleteGuardType hEdgeDeleteGuard;
+			TrackedIndexedList<MeshFace, std::allocator<MeshFace>, FaceItrFactory>::DeleteGuardType faceDeleteGuard;
+			MeshDeleteGuard(Mesh* mesh);
+			MeshDeleteGuard& operator=(MeshDeleteGuard&& o) = default;
+			MeshDeleteGuard(MeshDeleteGuard&& o) = default;
+			void flush();
+			void release();
+			MeshDeleteGuard& operator+=(MeshDeleteGuard&& other);
 
 
+		};
 
 		class Mesh {
 		public:
@@ -124,16 +135,16 @@ namespace Hix
 
 			/********************** Mesh Edit Functions***********************/
 			void vertexOffset(float factor);
+			void vertexRotate(const QQuaternion& rot);
+
 			void centerMesh();
-			void vertexRotate(QMatrix4x4 tmpmatrix);
-			void vertexScale(float scaleX, float scaleY, float scaleZ, float centerX, float centerY);
 			void reverseFace(FaceItr faceItr);
 			void reverseFaces();
-			QVector3D transformedVtx(const VertexConstItr& vtx, const Qt3DCore::QTransform& transform)const;
 			void clear();
             bool addFace(const QVector3D& v0, const QVector3D& v1, const QVector3D& v2);
 			bool addFace(const FaceConstItr& face);
-			void removeFaces(const std::unordered_set<FaceConstItr>& f_it);
+			MeshDeleteGuard removeFacesWithoutShifting(const std::unordered_set<FaceConstItr>& faceItrs);
+			void removeFaces(const std::unordered_set<FaceConstItr>& faceItrs);
 			//short hand for TrackedList::toNormItr
 			inline VertexItr toNormItr(const VertexConstItr& itr)
 			{
@@ -157,17 +168,8 @@ namespace Hix
 			const TrackedIndexedList<MeshFace, std::allocator<MeshFace>, FaceItrFactory>& getFaces()const;
 			const TrackedIndexedList<HalfEdge, std::allocator<HalfEdge>, HalfEdgeItrFactory>& getHalfEdges()const;
 
-
-			inline float x_min()const{ return _bounds.xMin();}
-			inline float x_max()const{ return _bounds.xMax();}
-			inline float y_min()const{ return _bounds.yMin();}
-			inline float y_max()const{ return _bounds.yMax();}
-			inline float z_min()const{ return _bounds.zMin();}
-			inline float z_max()const{ return _bounds.zMax();}
 			std::unordered_set<FaceConstItr> findNearSimilarFaces(QVector3D normal,FaceConstItr mf, float maxNormalDiff = 0.1f, size_t maxCount = 10000)const;
 
-			/********************** Stuff that can be public **********************/
-			const Bounds3D& bounds()const;
 			void setSceneEntity(const Render::SceneEntity* entity);
 			const Render::SceneEntity* entity()const;
 			QVector4D toWorld(const QVector4D& local)const;
@@ -177,7 +179,14 @@ namespace Hix
 			QVector3D ptToLocal(const QVector3D& world)const;
 			QVector3D vectorToLocal(const QVector3D& world)const;
 
+			VertexConstItr getVtxAtLocalPos(const QVector3D& pos)const;
+			std::unordered_map<FaceConstItr, QVector3D> cacheWorldFN()const;
+			std::unordered_map<VertexConstItr, QVector3D> cacheWorldPos()const;
+			std::unordered_map<VertexConstItr, QVector3D> cacheWorldVN()const;
+
+
 		private:
+			void rehashVtcs();
 			void vertexMove(const QVector3D& direction);
 			const Render::SceneEntity* _entity = nullptr;
 			/********************** Helper Functions **********************/
@@ -196,11 +205,7 @@ namespace Hix
 			std::unordered_multimap<size_t, VertexConstItr> _verticesHash;
 			TrackedIndexedList<MeshVertex, std::allocator<MeshVertex>, VertexItrFactory> vertices;
 			TrackedIndexedList<HalfEdge, std::allocator<HalfEdge>, HalfEdgeItrFactory> halfEdges;
-			TrackedIndexedList<MeshFace, std::allocator<MeshFace>, FaceItrFactory> faces;
-
-			//axis aligned bound box, needs to be recalculated even when just transform changed.
-			Bounds3D _bounds;
-			
+			TrackedIndexedList<MeshFace, std::allocator<MeshFace>, FaceItrFactory> faces;			
 
 		};
 

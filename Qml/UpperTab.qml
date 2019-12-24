@@ -4,6 +4,7 @@ import QtQuick.Layouts 1.0
 import QtQuick.Controls 1.0
 //import QtQuick.Controls.Styles 1.0
 import QtQuick.Controls.Styles 1.4
+import QtQuick.Dialogs 1.0
 
 
 
@@ -426,20 +427,13 @@ Rectangle {
             anchors.left: third_tab_button_scale.right
             iconSource1: "qrc:/resource/upper_autorepair.png"
             iconSource2: "qrc:/Resource/upper2_autorepair.png"
-            iconText: qsTr("Auto Repair")
-            /*
-            Connections {
-                target: box_uppertab
-                box: third_tab_button_autorepair.iconText
-            }
-            visible: if(box_uppertab.box != iconText) return false;
-            */
-            signal runGroupFeature(int type, string state, double arg1, double arg2, double arg3, var config);
-            onButtonClicked:{
-                if(!qm.isSelected() && (state == "active"))
-                    window.resultPopUp.openResultPopUp("","You must select at least one model.","")
-                else
-                    runGroupFeature(ftrRepair, state, 0, 0, 0, null);
+            iconText: qsTr("Model Builder")
+			 MouseArea{
+                anchors.fill: parent
+                onClicked:{
+                    all_off()
+					fileDialogMB.open();
+                }
             }
         }
 
@@ -569,6 +563,20 @@ Rectangle {
         }
     }
 
+	
+	FileDialog {
+		id: settingFileDialog
+		title: "Please choose a settings file"
+		folder: shortcuts.home
+		nameFilters: ["Setting files(*.json)"]
+		visible: false
+		onAccepted: {
+			var filepath = settingFileDialog.fileUrl.toString().replace(/^(file:\/{3})/,"");
+			qm.settingFileChanged(filepath);
+		}
+		onRejected: {
+		}
+	}
     Item{
         id : fifthtab
         width : buttonWidth *1
@@ -580,7 +588,6 @@ Rectangle {
 
         //color: "transparent"
 
-
         UpperButton{
             id : fifth_tab_button_setting
             objectName : "Setting"
@@ -589,11 +596,23 @@ Rectangle {
             iconSource2: "qrc:/Resource/upper2_setting.png"
             iconText: qsTr("Setting")
 
-            onButtonClicked:{
-                if(state == "active")
-                    settingPopup.visible = true
-                else
-                    settingPopup.visible = false
+            // onButtonClicked:{
+            //     if(state == "active")
+			// 	{
+			// 	    //settingPopup.visible = true
+            //         settingFileDialog.open();
+			// 	}
+            //     else
+			// 	{
+            //         //settingPopup.visible = false
+			// 	}
+            // }
+			    MouseArea{
+                anchors.fill: parent
+                onClicked:{
+                    all_off()
+                    settingFileDialog.open();
+                }
             }
         }
 
@@ -745,10 +764,10 @@ Rectangle {
                 else
                     closeMove();
             }
-			signal runFeature(int type, int X, int Y);
+			signal applyMove(int type, real X, real Y);
             onApplyClicked: {
                 console.log("move")
-                runFeature(ftrMove,popup_move.numberbox1_number,popup_move.numberbox2_number);
+                applyMove(ftrMove,popup_move.numberbox1_number,popup_move.numberbox2_number);
             }
             function onApplyFinishButton(){
                 popup_move.colorApplyFinishButton(0)
@@ -781,10 +800,10 @@ Rectangle {
             //numbox_default: 0
             numbox_updown_scale: 5
             number_unit: "°"
-            signal runFeature(int type, int X, int Y, int Z);
+            signal applyRotation(int type, real X, real Y, real Z);
             onApplyClicked: {
                 console.log("rotate")
-                runFeature(ftrRotate,popup_rotate.numberbox1_number,popup_rotate.numberbox2_number,popup_rotate.numberbox3_number);
+                applyRotation(ftrRotate,popup_rotate.numberbox1_number,popup_rotate.numberbox2_number,popup_rotate.numberbox3_number);
             }
             signal runGroupFeature(int type, string state, double arg1, double arg2, double arg3, var config);
             signal closeRotate();
@@ -974,8 +993,8 @@ Rectangle {
 
             signal openScale();
             signal closeScale();
+			signal applyScale(double arg1, double arg2, double arg3);
             //signal runFeature(int type, double scaleX, double scaleY, double scaleZ);
-            signal runGroupFeature(int type, string state, double arg1, double arg2, double arg3, var config);
 
             state: {
                 if (third_tab_button_scale.state=="active" && qm.isSelected()){
@@ -1011,29 +1030,30 @@ Rectangle {
                 console.log("scale called x y z" + numberbox1_number + numberbox2_number + numberbox3_number);
                 console.log("scale called" + numbox_value_detail2);
                 if (numbox_value_detail2 != 100) // scale by scale value
-                    runGroupFeature(ftrScale, state, numbox_value_detail2/100, numbox_value_detail2/100, numbox_value_detail2/100, null);
+                    applyScale(numbox_value_detail2/100, 
+							   numbox_value_detail2/100,
+							   numbox_value_detail2/100);
                     //runFeature(ftrScale, numbox_value_detail2/100, numbox_value_detail2/100, numbox_value_detail2/100);
                 else if (scale_lock.source == "qrc:/Resource/popup_image/scale_lock.png"){ // scale by definite mm with locked
                     console.log("scale is locked");
                     if(numberbox1_number != numberbox1_number_origin) {
-                        runGroupFeature(ftrScale, state,
-                                        numberbox1_number/numberbox1_number_origin,
-                                        numberbox1_number/numberbox1_number_origin,
-                                        numberbox1_number/numberbox1_number_origin, null);
+                        applyScale(numberbox1_number/numberbox1_number_origin,
+                                   numberbox1_number/numberbox1_number_origin,
+                                   numberbox1_number/numberbox1_number_origin);
                     } else if (numberbox2_number != numberbox2_number_origin) {
-                        runGroupFeature(ftrScale, state,
-                                        numberbox2_number/numberbox2_number_origin,
-                                        numberbox2_number/numberbox2_number_origin,
-                                        numberbox2_number/numberbox2_number_origin, null);
+                         (numberbox2_number/numberbox2_number_origin,
+                                   numberbox2_number/numberbox2_number_origin,
+                                   numberbox2_number/numberbox2_number_origin);
                     } else {
-                        runGroupFeature(ftrScale, state,
-                                        numberbox3_number/numberbox3_number_origin,
-                                        numberbox3_number/numberbox3_number_origin,
-                                        numberbox3_number/numberbox3_number_origin, null);
+                        applyScale(numberbox3_number/numberbox3_number_origin,
+                                   numberbox3_number/numberbox3_number_origin,
+                                   numberbox3_number/numberbox3_number_origin);
                     }
                 }
                 else // scale by definite mm with unlocked
-                    runGroupFeature(ftrScale, state, numberbox1_number/numberbox1_number_origin, numberbox2_number/numberbox2_number_origin, numberbox3_number/numberbox3_number_origin, null);
+                    applyScale(numberbox1_number/numberbox1_number_origin,
+							   numberbox2_number/numberbox2_number_origin, 
+							   numberbox3_number/numberbox3_number_origin);
                     //runFeature(ftrScale, numberbox1_number/numberbox1_number_origin, numberbox2_number/numberbox2_number_origin, numberbox3_number/numberbox3_number_origin);
                 // update scale info
             }
@@ -1564,7 +1584,6 @@ Rectangle {
                     onClicked:  {
                         popup_manualSupport.clearSupports();
                         support_editButton.visible = false;
-                        support_cancelEditButton.visible = false;
                         popup_manualSupport.supportEditEnabled(false);
                         addText.text = "Edit supports"
 
@@ -1618,22 +1637,12 @@ Rectangle {
                         addText.color = "#888888"
                     }
                     onExited: {
-                        if (support_cancelEditButton.state == "clicked") {
-                            parent.color = "#f9f9f9"
-                            addText.color = "#888888"
-                        }
-                        else {
-                            parent.color = "#e5e5e5"
-                            addText.color = "black"
-                        }
                     }
                     onClicked: {
 						if(popup_manualSupport.editActive)
 						{
                             popup_manualSupport.supportEditEnabled(false);
-                            popup_manualSupport.supportApplyEdit();
                             popup_manualSupport.editActive = false;
-                            support_cancelEditButton.visible = false;
                             addText.text = "Edit supports"
                             popup_manualSupport.onApplyFinishButton();
 
@@ -1643,7 +1652,6 @@ Rectangle {
 						{
                             popup_manualSupport.editActive = true;
                             popup_manualSupport.supportEditEnabled(true);
-                            support_cancelEditButton.visible = true;
                             addText.text = "Done"
                             popup_manualSupport.offApplyFinishButton();
 
@@ -1666,68 +1674,6 @@ Rectangle {
                 ]
             }
             
-			Rectangle {
-                visible: false
-                id: support_cancelEditButton
-                color: parent.color
-                width: 178
-                height: 32
-                radius: 2
-                border.color: "#cccccc"
-                anchors.horizontalCenter: parent.horizontalCenter
-                anchors.top: support_editButton.bottom
-                anchors.topMargin: 20
-                Text {
-                    id: cancelText
-                    text: "Cancel"
-                    anchors.horizontalCenter: parent.horizontalCenter
-                    anchors.verticalCenter: parent.verticalCenter
-                    font.family: mainFont.name
-                    font.pixelSize: 9
-                }
-                MouseArea {
-                    anchors.fill: parent
-                    hoverEnabled: true
-                    onEntered: {
-                        parent.color = "#f9f9f9"
-                        cancelText.color = "#888888"
-                    }
-                    onExited: {
-                        if (support_cancelEditButton.state == "clicked") {
-                            parent.color = "#f9f9f9"
-                            cancelText.color = "#888888"
-                        }
-                        else {
-                            parent.color = "#e5e5e5"
-                            cancelText.color = "black"
-                        }
-                    }
-                    onClicked: {
-						if(popup_manualSupport.editActive)
-                        {
-                            popup_manualSupport.supportCancelEdit();
-                            popup_manualSupport.editActive = false;
-                            addText.text = "Edit supports"
-                            support_cancelEditButton.visible = false;
-                            popup_manualSupport.supportEditEnabled(false);
-
-                        }
-
-                    }
-                }
-                states: [
-                    State {
-                        name: "clicked"
-                        PropertyChanges { target: support_cancelEditButton; color: "#f9f9f9" }
-                        PropertyChanges { target: cancelText; color: "#888888" }
-                    },
-                    State {
-                        name: "unclicked"
-                        PropertyChanges { target: support_cancelEditButton; color: "#e5e5e5" }
-                        PropertyChanges { target: cancelText; color: "black" }
-                    }
-                ]
-            }
             Rectangle {
                 visible: true
                 id: support_raftRegenButton
@@ -1737,7 +1683,7 @@ Rectangle {
                 radius: 2
                 border.color: "#cccccc"
                 anchors.horizontalCenter: parent.horizontalCenter
-                anchors.top: support_cancelEditButton.bottom
+                anchors.top: support_editButton.bottom
                 anchors.topMargin: 20
                 Text {
                     id: supRegenText
@@ -1771,12 +1717,12 @@ Rectangle {
                 states: [
                     State {
                         name: "clicked"
-                        PropertyChanges { target: support_cancelEditButton; color: "#f9f9f9" }
+                        PropertyChanges { target: support_raftRegenButton; color: "#f9f9f9" }
                         PropertyChanges { target: cancelText; color: "#888888" }
                     },
                     State {
                         name: "unclicked"
-                        PropertyChanges { target: support_cancelEditButton; color: "#e5e5e5" }
+                        PropertyChanges { target: support_raftRegenButton; color: "#e5e5e5" }
                         PropertyChanges { target: cancelText; color: "black" }
                     }
                 ]
@@ -1786,8 +1732,6 @@ Rectangle {
             signal closeSupport();
 			signal generateAutoSupport();
             signal supportEditEnabled(bool enabled);
-            signal supportCancelEdit();
-            signal supportApplyEdit();
             signal clearSupports();
             signal regenerateRaft();
 
@@ -1801,11 +1745,9 @@ Rectangle {
             onApplyClicked:{
                 if(popup_manualSupport.editActive)
                 {
-                    popup_manualSupport.supportApplyEdit();
                     popup_manualSupport.supportEditEnabled(false);
                     popup_manualSupport.editActive = false;
                     addText.text = "Edit supports"
-                    support_cancelEditButton.visible = false;
 
                 }
                 all_off();

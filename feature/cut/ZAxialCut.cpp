@@ -2,6 +2,8 @@
 #include "../../glmodel.h"
 #include "../../qmlmanager.h"
 #include "../../common/GTEngine/Include/Mathematics/GteSplitMeshByPlane.h"
+#include "feature/addModel.h"
+#include "feature/deleteModel.h"
 using namespace Hix;
 using namespace Hix::Engine3D;
 using namespace Hix::Slicer;
@@ -18,7 +20,7 @@ namespace Hix
 			{
 
 			public:
-				ZAxialCutImp(GLModel* subject, float cuttingPlane, Mesh*& topMesh, Mesh*& botMesh, ZAxialCut::Result option);
+				ZAxialCutImp(GLModel* subject, float cuttingPlane, Mesh*& topMesh, Mesh*& botMesh);
 			private:
 				void divideTriangles();
 				void generateCutContour();
@@ -32,165 +34,80 @@ namespace Hix
 				std::unordered_set<Hix::Engine3D::FaceConstItr> _overlapFaces;
 				std::unordered_set<Hix::Engine3D::FaceConstItr> _topFaces;
 				std::vector<Hix::Slicer::Contour> _contours;
-				ZAxialCut::Result _option;
 			};
 		}
 	}
 }
 
 
-Hix::Features::Cut::ZAxialCut::ZAxialCut(GLModel* subject, float cuttingPlane, Hix::Features::Cut::ZAxialCut::Result option) :
-	_cuttingPlane(cuttingPlane)
+Hix::Features::Cut::ZAxialCut::ZAxialCut(GLModel* subject, float cuttingPlane) :
+	_cuttingPlane(cuttingPlane), top_no(1), bot_no(1)
 {
-	//do listed part first
-
-	Mesh* listedTopMesh = nullptr;
-	Mesh* listedBotMesh = nullptr;
-
-	ZAxialCutImp(subject, cuttingPlane, listedTopMesh, listedBotMesh, option);
-	bool deleteOriginal = false;
-	GLModel* botModel = nullptr;
-	GLModel* topModel = nullptr;
-	if (listedBotMesh == nullptr && listedTopMesh == nullptr)
+	qDebug() << "zmax: " << subject->recursiveAabb().zMax() << "plane : " << cuttingPlane << "zmin: " << subject->recursiveAabb().zMin();
+	if (cuttingPlane >= subject->recursiveAabb().zMax() || cuttingPlane <= subject->recursiveAabb().zMin())
 	{
+		return;
+	}//do listed part first
+
+	doChildrenRecursive(subject, cuttingPlane);
+	addFeature(new DeleteModel(subject));
+	//qmlManager->deleteModelFile(subject->ID());
+
+	qDebug() << qmlManager->glmodels.size();
+}
+
+void Hix::Features::Cut::ZAxialCut::doChildrenRecursive(GLModel* subject, float cuttingPlane)
+{
+	Mesh* childTopMesh = nullptr;
+	Mesh* childBotMesh = nullptr;
+	ZAxialCutImp(subject, cuttingPlane, childTopMesh, childBotMesh);
+	if(subject->getMesh()->getFaces().empty())
+	{ }
+	else if (childBotMesh == nullptr || childBotMesh->getFaces().empty())
+	{
+		auto addTopModel = new ListModel(subject->getMeshModd(), subject->modelName() + "_top", &subject->transform());
+		addFeature(addTopModel);
+		_upperModels.insert(subject);
 	}
-	else if (listedBotMesh == nullptr)
+	else if (childTopMesh == nullptr || childTopMesh->getFaces().empty())
 	{
-		topModel = subject;
-		topModel->setMesh(listedTopMesh);
-	}
-	else if (listedTopMesh == nullptr)
-	{
-		botModel = subject;
-		botModel->setMesh(listedBotMesh);
-
+		auto addBotModel = new ListModel(subject->getMeshModd(), subject->modelName() + "_bot", &subject->transform());
+		addFeature(addBotModel);
+		_upperModels.insert(subject);
 	}
 	else
 	{
-		botModel = qmlManager->createAndListModel(listedBotMesh, subject->modelName() + "_bot", nullptr);
-		topModel = qmlManager->createAndListModel(listedTopMesh, subject->modelName() + "_top", nullptr);
-		deleteOriginal = true;
+		auto addTopModel = new ListModel(childTopMesh, subject->modelName() + "_top", &subject->transform());
+		auto addBotModel = new ListModel(childBotMesh, subject->modelName() + "_bot", &subject->transform());
+		
+		_upperModels.insert(addTopModel->getAddedModel());
+		_lowerModels.insert(addBotModel->getAddedModel());
+		
+		addFeature(addTopModel);
+		addFeature(addBotModel);
 	}
-	_divisionMap.insert(std::make_pair(subject, std::make_pair(topModel, botModel)));
-	//do it for each unlisted children
-	doChildrenRecursive(subject, cuttingPlane, option);
-	//if parent exists, add to that parent, if no parent exists, promot to listed model
-	std::deque<GLModel*> promoteToListed;
-	for (auto child : _topChildren)
-	{
-		auto origParent = dynamic_cast<GLModel*>(child->parentEntity());
-		auto parentTB = _divisionMap[origParent];
-		if (parentTB.first != nullptr)
-		{
-			child->setParent(parentTB.first);
-			auto parent = child->parentEntity();
-			auto parent2 = child->parentEntity();
-		}
-		else
-		{
-			promoteToListed.push_back(child);
-		}
-	}
-	for (auto child : _botChildren)
-	{
-		auto origParent = dynamic_cast<GLModel*>(child->parentEntity());
-		auto parentTB = _divisionMap[origParent];
-		if (parentTB.second != nullptr)
-		{
-			child->setParent(parentTB.second);
-			auto parent = child->parentEntity();
-			auto parent2 = child->parentEntity();
-		}
-		else
-		{
-			promoteToListed.push_back(child);
-		}
-	}
-	std::vector<GLModel*> listed;
-	listed.reserve(promoteToListed.size() + 2);
-	for (auto each : promoteToListed)
-	{
-		listed.push_back(qmlManager->listModel(each));
-	}
-	if (botModel)
-	{
-		listed.push_back(botModel);
-	}
-	if (topModel)
-	{
-		listed.push_back(topModel);
-	}
-	//need to set listed parts to the bed
-	for (auto& each : listed)
-	{
-		each->setZToBed();
-	}
-	//delete split models
-	_divisionMap.erase(subject);
-	for (auto& split : _divisionMap)
-	{
-		size_t spltCnt = 0;
-		//top
-		if (split.second.first != nullptr && split.second.first != split.first)
-		{
-			++spltCnt;
-		}
-		//bot
-		if (split.second.second != nullptr && split.second.second != split.first)
-		{
-			++spltCnt;
-		}
-		if (spltCnt != 0)
-		{
-			//if split occured, the original model needs to be deleted
-			delete split.first;
-		}
-	}
-
-
-	if(deleteOriginal)
-		qmlManager->deleteModelFile(subject->ID);
-}
-
-void Hix::Features::Cut::ZAxialCut::doChildrenRecursive(GLModel* subject, float cuttingPlane, Result option)
-{
 	for (auto childNode : subject->childNodes())
 	{
 		auto model = dynamic_cast<GLModel*>(childNode);
 		if (model)
 		{
-			GLModel* botModel = nullptr;
-			GLModel* topModel = nullptr;
-			Mesh* childTopMesh = nullptr;
-			Mesh* childBotMesh = nullptr;
-			ZAxialCutImp(model, cuttingPlane, childTopMesh, childBotMesh, option);
-			if (childBotMesh == nullptr)
-			{
-				topModel = subject;
-				_topChildren.insert(topModel);
-			}
-			else if (childTopMesh == nullptr)
-			{
-				botModel = subject;
-				_botChildren.insert(botModel);
-			}
-			else
-			{
-				//need to set node hierarchy later
-				topModel = new GLModel(model->parentEntity(), childTopMesh, model->modelName() + "_top", 0, &model->transform());
-				botModel = new GLModel(model->parentEntity(), childBotMesh, model->modelName() + "_bot", 0, &model->transform());
-				_topChildren.insert(topModel);
-				_botChildren.insert(botModel);
-
-			}
-			_divisionMap.insert(std::make_pair(model, std::make_pair(botModel, topModel)));
-			doChildrenRecursive(model, cuttingPlane, option);
+			doChildrenRecursive(model, cuttingPlane);
 		}
 	}
 }
 
-Hix::Features::Cut::ZAxialCutImp::ZAxialCutImp(GLModel* subject, float cuttingPlane, Mesh*& topMesh, Mesh*& botMesh, ZAxialCut::Result option) :
-	_cuttingPlane(cuttingPlane), _origMesh(subject->getMesh()), _option((option))
+std::unordered_set<GLModel*>& Hix::Features::Cut::ZAxialCut::upperModels()
+{
+	return _upperModels;
+}
+
+std::unordered_set<GLModel*>& Hix::Features::Cut::ZAxialCut::lowerModels()
+{
+	return _lowerModels;
+}
+
+Hix::Features::Cut::ZAxialCutImp::ZAxialCutImp(GLModel* subject, float cuttingPlane, Mesh*& topMesh, Mesh*& botMesh) :
+	_cuttingPlane(cuttingPlane), _origMesh(subject->getMesh())
 {
 	//empty model
 	_bottomMesh = new Mesh();
@@ -202,10 +119,10 @@ Hix::Features::Cut::ZAxialCutImp::ZAxialCutImp(GLModel* subject, float cuttingPl
 		//empty node, add empty halves to both sides
 		botMesh = _bottomMesh;
 		topMesh = _topMesh;
-		subject->clearMesh();
+		//subject->clearMesh();
 		return;
 	}
-	else if (_bottomMesh->getFaces().size() == _origMesh->getFaces().size() && _option != ZAxialCut::Result::KeepTop)
+	else if (_bottomMesh->getFaces().size() == _origMesh->getFaces().size())
 	{
 		delete _topMesh;
 		delete _bottomMesh;
@@ -213,7 +130,7 @@ Hix::Features::Cut::ZAxialCutImp::ZAxialCutImp(GLModel* subject, float cuttingPl
 		botMesh = subject->getMeshModd();
 		return;
 	}
-	else if (_topMesh->getFaces().size() == _origMesh->getFaces().size() && _option != ZAxialCut::Result::KeepBottom)
+	else if (_topMesh->getFaces().size() == _origMesh->getFaces().size())
 	{
 		delete _topMesh;
 		delete _bottomMesh;
@@ -231,22 +148,9 @@ Hix::Features::Cut::ZAxialCutImp::ZAxialCutImp(GLModel* subject, float cuttingPl
 		}
 	}
 
-	if (_option == ZAxialCut::Result::KeepTop)
-	{
-		delete _bottomMesh;
-		_bottomMesh = nullptr;
-	}
-	else if (_option == ZAxialCut::Result::KeepBottom)
-	{
-		delete _topMesh;
-		_topMesh = nullptr;
-	}
-
 	botMesh = _bottomMesh;
 	topMesh = _topMesh;
-	subject->clearMesh();
-
-
+	//subject->clearMesh();
 }
 
 
@@ -392,7 +296,7 @@ void Hix::Features::Cut::ZAxialCutImp::fillOverlap(const Hix::Slicer::ContourSeg
 		std::vector<VertexConstItr> minority(std::move(highs));
 		if (isPyramid)
 		{
-			// /_\ //
+			// ▽
 			from = QVector3D(seg.from, _cuttingPlane);
 			to = QVector3D(seg.to, _cuttingPlane);
 			twoFacesAddedMesh = _bottomMesh;
@@ -400,7 +304,7 @@ void Hix::Features::Cut::ZAxialCutImp::fillOverlap(const Hix::Slicer::ContourSeg
 		}
 		else
 		{
-			// \_/ //
+			// △
 			from = QVector3D(seg.to, _cuttingPlane);
 			to = QVector3D(seg.from, _cuttingPlane);
 			majority.swap(minority);
