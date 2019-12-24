@@ -85,5 +85,12 @@
         <file>Qml/LeftPopupExtend.qml</file>
         <file>Qml/LeftPopupLayFlat.qml</file>
         <file>Qml/LeftPopupOrient.qml</file>
+        <file>Qml/LeftPopupCut.qml</file>
+        <file>Qml/LeftPopupSupport.qml</file>
+        <file>Qml/LeftPopupExport.qml</file>
+        <file>Qml/LeftPopupLabel.qml</file>
+        <file>Qml/LeftPopupShellOffset.qml</file>
+        <file>Qml/CtrScaleInputBox.qml</file>
+        <file>Qml/ProgressShell.qml</file>
     </qresource>
 </RCC>

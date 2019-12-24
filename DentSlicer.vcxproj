@@ -998,6 +998,7 @@
     <None Include="Qml\CtrDropdownBox.qml" />
     <None Include="Qml\CtrInputBox.qml" />
     <None Include="Qml\CtrLabelTextBox.qml" />
+    <None Include="Qml\CtrScaleInputBox.qml" />
     <None Include="Qml\FeedbackPopUp.qml" />
     <None Include="Qml\FileDialogLoad.qml" />
     <None Include="Qml\InputBox.qml" />
@@ -1005,12 +1006,17 @@
     <None Include="Qml\LayerViewSlider.qml" />
     <None Include="Qml\LeftPopup.qml" />
     <None Include="Qml\LeftPopupArrange.qml" />
+    <None Include="Qml\LeftPopupCut.qml" />
+    <None Include="Qml\LeftPopupExport.qml" />
     <None Include="Qml\LeftPopupExtend.qml" />
+    <None Include="Qml\LeftPopupLabel.qml" />
     <None Include="Qml\LeftPopupLayFlat.qml" />
     <None Include="Qml\LeftPopupMove.qml" />
     <None Include="Qml\LeftPopupOrient.qml" />
     <None Include="Qml\LeftPopupRotate.qml" />
     <None Include="Qml\LeftPopupScale.qml" />
+    <None Include="Qml\LeftPopupShellOffset.qml" />
+    <None Include="Qml\LeftPopupSupport.qml" />
     <None Include="Qml\LeftTab.qml" />
     <None Include="Qml\LeftTabExport.qml" />
     <None Include="Qml\LeftTabExportElement.qml" />
@@ -1036,6 +1042,7 @@
     <None Include="Qml\PartList.qml" />
     <None Include="Qml\PartListContentBox.qml" />
     <None Include="Qml\PrintInfo.qml" />
+    <None Include="Qml\ProgressShell.qml" />
     <None Include="Qml\RoundedButton.qml" />
     <None Include="Qml\SlideBar.qml" />
     <None Include="Qml\Toast.qml" />
@@ -1237,6 +1244,12 @@
     <Image Include="Resource\cut_free_on_border2.png" />
     <Image Include="Resource\drop_arrow_down.png" />
     <Image Include="Resource\drop_arrow_up.png" />
+    <Image Include="Resource\img_arrange.png" />
+    <Image Include="Resource\img_label.png" />
+    <Image Include="Resource\img_layflat.png" />
+    <Image Include="Resource\img_orient.png" />
+    <Image Include="Resource\img_scale_lock_revised.png" />
+    <Image Include="Resource\img_scale_unlock_revised.png" />
     <Image Include="Resource\menu_arrange.png" />
     <Image Include="Resource\menu_arrange_select_1.png" />
     <Image Include="Resource\menu_autorepair.png" />
@@ -1275,14 +1288,17 @@
     <Image Include="Resource\part_show_1.png" />
     <Image Include="Resource\part_show_select_1.png" />
     <Image Include="Resource\redo_arrow.png" />
+    <Image Include="Resource\support_setting.png" />
     <Image Include="Resource\toast_check.png" />
     <Image Include="Resource\toast_x.png" />
     <Image Include="Resource\traingle_up_1.5.png" />
     <Image Include="Resource\triangle_down.png" />
     <Image Include="Resource\triangle_down_1.5.png" />
+    <Image Include="Resource\triangle_down_hover.png" />
     <Image Include="Resource\triangle_right.png" />
     <Image Include="Resource\triangle_up.png" />
     <Image Include="Resource\triangle_up_1.5.png" />
+    <Image Include="Resource\triangle_up_hover.png" />
     <Image Include="Resource\undo_arrow.png" />
     <Image Include="Resource\vs_icon.png" />
   </ItemGroup>
