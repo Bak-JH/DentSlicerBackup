@@ -93,7 +93,6 @@ void Hix::QML::RoundButton::fNameChanged()
 
 
 
-
 void Hix::QML::LeftPopupShell::titleChanged()
 {
 	qDebug() << _title;
@@ -104,16 +103,13 @@ void Hix::QML::LeftPopupShell::bodyChanged()
 	qDebug() << _body;
 }
 
-void Hix::QML::LeftPopupShell::popupHeightChanged()
-{
-	qDebug() << _popupHeight;
-}
 
+/*
 void Hix::QML::InputBox::propNameChanged()
 {
 	qDebug() << _propName;
 }
-
+*/
 void Hix::QML::DropdownBox::dropNameChanged()
 {
 	qDebug() << _dropName;

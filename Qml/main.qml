@@ -260,28 +260,47 @@ Item{
 			anchors.leftMargin: 15
 			anchors.topMargin: 120
 		}
-		LeftPopupScale {
-			id: leftpopupscale
+		LeftPopupLayFlat {
+			id: leftpopuplayflat
 			anchors.top: uppertab.bottom
 			anchors.left: leftpopupmove.right
 			anchors.leftMargin: 15
 			anchors.topMargin: 120
 		}
-		LeftPopupRotate {
-			id: leftpopuprotate
+		LeftPopupLabel {
+			id: leftpopuplabel
 			anchors.top: uppertab.bottom
-			anchors.left: leftpopupscale.right
+			anchors.left: leftpopuplayflat.right
 			anchors.leftMargin: 15
 			anchors.topMargin: 120
 		}
-		LeftPopupOrient
+		LeftPopupScale
 		{
-			id: leftpopuporient
+			id: leftpopupscale
+			anchors.top: uppertab.bottom
+			anchors.left: leftpopuplabel.right
+			anchors.leftMargin: 15
+			anchors.topMargin: 120
+		}
+		LeftPopupSupport
+		{
+			id: leftpopupsupport
 			anchors.top: uppertab.bottom
 			anchors.left: lefttab.right
 			anchors.leftMargin: 15
-			anchors.topMargin: 400
+			anchors.topMargin: 420
 		}
+		/*
+		LeftPopupLabel
+		{
+			id: leftpopuplabel
+			anchors.top: uppertab.bottom
+			anchors.left: leftpopupsupport.right
+			anchors.leftMargin: 15
+			anchors.topMargin: 420
+		}
+		*/
+		
 		/*
 		Toast {
 			id: toast
@@ -298,6 +317,15 @@ Item{
 			anchors.left: lefttab.right
 			anchors.leftMargin: 15
 		}
+		
+		ProgressShell {
+			id: progressshell
+			anchors.top: uppertab.bottom
+			anchors.topMargin: 720
+			anchors.left: undoredo.right
+			anchors.leftMargin: 15
+		}
+		
 		/*
 		SlideBar {
 			id: slidebar
@@ -323,7 +351,7 @@ Item{
 			anchors.left: lefttab.right
 			anchors.leftMargin: 180
 		}
-		*/
+		
 		ViewMode {
 			id: viewmode
 			anchors.top: uppertab.bottom
@@ -331,7 +359,7 @@ Item{
 			anchors.leftMargin: 15
 			anchors.topMargin: 700
 		}
-
+		*/
 		PrintInfo {
 			id: printinfo
 			anchors.top: slidebar.top

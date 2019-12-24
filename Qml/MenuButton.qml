@@ -5,6 +5,7 @@ import hix.qml 1.0 as Hix
 Hix.RoundButton {
 	property string iconBasic
 	property string nameColor: "#9d9d9d"
+	property string featureName
 
 	width: 85
 	height: 90
@@ -22,7 +23,8 @@ Hix.RoundButton {
 		anchors.horizontalCenter: parent.horizontalCenter
 		anchors.bottom: parent.bottom
 		anchors.bottomMargin: 10
-		text: parent.fName
+		text: featureName
+		//text: parent.fName
 		color: nameColor
 		font.pointSize: 10
 		font.family: openRegular.name

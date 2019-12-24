@@ -35,7 +35,6 @@ namespace Hix
 			Q_OBJECT
 			Q_PROPERTY(QString title MEMBER _title NOTIFY titleChanged)
 			Q_PROPERTY(QString body MEMBER _body NOTIFY bodyChanged)
-			Q_PROPERTY(QString popupHeight MEMBER _popupHeight NOTIFY popupHeightChanged)
 
 		public:
 			LeftPopupShell(QQuickItem* parent = nullptr);
@@ -43,19 +42,17 @@ namespace Hix
 		public slots:
 			void titleChanged();
 			void bodyChanged();
-			void popupHeightChanged();
 
 		protected:
 			QString _title = "Name";
 			QString _body = "Click the surface to face it down";
-			QString _popupHeight = "560"; //"284";
 		};
 
 
 		class InputBox : public QQuickRectangle
 		{
 			Q_OBJECT
-			Q_PROPERTY(QString propName MEMBER _propName NOTIFY propNameChanged)
+			//Q_PROPERTY(QString propName MEMBER _propName NOTIFY propNameChanged)
 			Q_PROPERTY(QQuickSpinBox* inputRect MEMBER _inputRect)
 
 		public:
@@ -63,10 +60,10 @@ namespace Hix
 			QQuickSpinBox* _inputRect;
 
 		public slots:
-			void propNameChanged();
+			//void propNameChanged();
 
 		protected:
-			QString _propName = "Property";
+			//QString _propName = "Property";
 		};
 
 		class DropdownBox : public QQuickRectangle

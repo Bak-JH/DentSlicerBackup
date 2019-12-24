@@ -198,5 +198,14 @@
         <file>Resource/part_hide_select_1.png</file>
         <file>Resource/part_show_1.png</file>
         <file>Resource/part_show_select_1.png</file>
+        <file>Resource/img_arrange.png</file>
+        <file>Resource/img_label.png</file>
+        <file>Resource/img_layflat.png</file>
+        <file>Resource/img_orient.png</file>
+        <file>Resource/support_setting.png</file>
+        <file>Resource/triangle_down_hover.png</file>
+        <file>Resource/triangle_up_hover.png</file>
+        <file>Resource/img_scale_unlock_revised.png</file>
+        <file>Resource/img_scale_lock_revised.png</file>
     </qresource>
 </RCC>
