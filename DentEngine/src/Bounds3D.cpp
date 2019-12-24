@@ -42,6 +42,15 @@ void Hix::Engine3D::Bounds3D::update(const QVector3D& v)
 	if (v.z() < _bound[5]) _bound[5] = v.z();
 }
 
+void Hix::Engine3D::Bounds3D::localBoundUpdate(const Hix::Engine3D::Mesh& mesh)
+{
+	auto vtxCend = mesh.getVertices().cend();
+	for (auto vtx = mesh.getVertices().cbegin(); vtx != vtxCend; ++vtx)
+	{
+		update(vtx.localPosition());
+	}
+}
+
 Bounds3D& Hix::Engine3D::Bounds3D::operator+=(const Bounds3D& other)
 {
 	if (other._bound[0] > _bound[0]) _bound[0] = other._bound[0];
@@ -199,6 +208,11 @@ QVector3D Hix::Engine3D::Bounds3D::lengths() const
 	return QVector3D(lengthX(), lengthY(), lengthZ());
 }
 
+const std::array<float, 6>& Hix::Engine3D::Bounds3D::bound() const
+{
+	return _bound;
+}
+
 QVector3D Hix::Engine3D::Bounds3D::displaceWithin(const Bounds3D& child, QVector3D displacement) const
 {
 	QVector3D result;
@@ -240,3 +254,4 @@ bool Hix::Engine3D::Bounds3D::contains(const Hix::Engine3D::Bounds3D& other)cons
 	}
 	return false;
 }
+

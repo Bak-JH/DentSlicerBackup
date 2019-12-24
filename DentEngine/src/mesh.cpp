@@ -7,6 +7,8 @@
 #include <list>
 #include <set>
 #include "../../render/SceneEntity.h"
+#include "Bounds3D.h"
+
 #if defined(_DEBUG) || defined(QT_DEBUG )
 #define _STRICT_MESH
 //#define _STRICT_MESH_NO_SELF_INTERSECTION
@@ -156,7 +158,6 @@ Mesh::Mesh(const Mesh& o)
 	vertices = o.vertices;
 	halfEdges = o.halfEdges;
 	faces = o.faces;
-	_bounds = o._bounds;
 	//datas themselves do not contain dependency to mesh object
 	//but we use custom iterators to embed dependency to mesh object in order to tranverse to other datas
 	//ie) face -> edge and so on...
@@ -216,40 +217,49 @@ Mesh& Mesh::operator+=(const Mesh& o)
 
 void Mesh::vertexOffset(float factor){
 	vertices.markChangedAll();
-	_bounds.reset();
-	size_t count = 0;
 	auto end = vertices.end();
 	for(auto vtxItr = vertices.begin(); vtxItr != end; ++vtxItr)
 	{
-		if (count % 100 == 0)
-			QCoreApplication::processEvents();
 		QVector3D tmp = vtxItr.localPosition() - vtxItr.localVn() * factor;
 		vtxItr.ref().position = tmp;
-		_bounds.update(vtxItr.localPosition());
-		++count;
 	};
+	rehashVtcs();
+}
+
+void Mesh::vertexRotate(const QQuaternion& rot) {
+	for (auto& vertex : vertices)
+	{
+		vertex.position = rot.rotatedVector(vertex.position);
+	};
+	rehashVtcs();
+
+}
+void Hix::Engine3D::Mesh::rehashVtcs()
+{
+	_verticesHash.clear();
+	auto vEnd = vertices.cend();
+	for (auto itr = vertices.cbegin(); itr != vEnd; ++itr)
+	{
+		auto hashval = _vtxHasher(itr.localPosition());
+		_verticesHash.insert({ hashval, itr });
+	}
 }
 
 void Mesh::vertexMove(const QVector3D& direction) {
 	vertices.markChangedAll();
-	size_t count = 0;
 	for (auto& vertex : vertices)
 	{
-		if (count % 100 == 0)
-			QCoreApplication::processEvents();
 		QVector3D tmp = direction + vertex.position;
 		vertex.position = tmp;
-		++count;
 	};
-	_bounds.translate(direction);
+	rehashVtcs();
 
 }
 
 void Mesh::centerMesh(){
-    float x_center = (x_max() + x_min())/2;
-    float y_center = (y_max() + y_min())/2;
-    float z_center = (z_max() + z_min())/2;
-    vertexMove(-QVector3D(x_center, y_center, z_center));
+	Bounds3D bound;
+	bound.localBoundUpdate(*this);
+    vertexMove(-bound.centre());
 }
 
 
@@ -303,7 +313,6 @@ void Hix::Engine3D::Mesh::clear()
 	vertices.clear();
 	halfEdges.clear();
 	faces.clear();
-	_bounds = Bounds3D();
 }
 
 bool Mesh::addFace(const QVector3D& v0, const QVector3D& v1, const QVector3D& v2){
@@ -339,13 +348,12 @@ bool Mesh::addFace(const FaceConstItr& face)
 	return true;
 }
 
-
-
-void Mesh::removeFaces(const std::unordered_set<FaceConstItr>& faceItrs){
-
-	auto vtxDelGuard = vertices.getDeleteGuard();
-	auto hEdgeDelGuard = halfEdges.getDeleteGuard();
-	auto faceDelGuard = faces.getDeleteGuard();
+MeshDeleteGuard Hix::Engine3D::Mesh::removeFacesWithoutShifting(const std::unordered_set<FaceConstItr>& faceItrs)
+{
+	MeshDeleteGuard delguardContainer(this);
+	auto& vtxDelGuard = delguardContainer.vtxDeleteGuard;
+	auto& hEdgeDelGuard = delguardContainer.hEdgeDeleteGuard;
+	auto& faceDelGuard = delguardContainer.faceDeleteGuard;
 	std::unordered_set<VertexItr> maybeEmptyVtcs;
 	for (auto& faceConstItr : faceItrs)
 	{
@@ -373,7 +381,13 @@ void Mesh::removeFaces(const std::unordered_set<FaceConstItr>& faceItrs){
 			vtxDelGuard.deleteLater(vtxItr);
 		}
 	}
+	return delguardContainer;
+}
 
+
+
+void Mesh::removeFaces(const std::unordered_set<FaceConstItr>& faceItrs){
+	auto delguard = removeFacesWithoutShifting(faceItrs);
 }
 
 
@@ -464,10 +478,6 @@ void Mesh::removeVertexHash(QVector3D pos)
 	}
 }
 
-const Bounds3D& Hix::Engine3D::Mesh::bounds() const
-{
-	return _bounds;
-}
 
 void Hix::Engine3D::Mesh::setSceneEntity(const Render::SceneEntity* entity)
 {
@@ -510,6 +520,56 @@ QVector3D Hix::Engine3D::Mesh::vectorToLocal(const QVector3D& world) const
 	return _entity->vectorToLocal(world);
 }
 
+VertexConstItr Hix::Engine3D::Mesh::getVtxAtLocalPos(const QVector3D& pos) const
+{
+	auto hashval = _vtxHasher(pos);
+	auto binVtxs = _verticesHash.equal_range(hashval);
+	for (auto& curr = binVtxs.first; curr != binVtxs.second; ++curr)
+	{
+		if (curr->second.localPosition() == pos)
+		{
+			return curr->second;
+		}
+	}
+	return VertexConstItr();
+}
+
+std::unordered_map<FaceConstItr, QVector3D> Hix::Engine3D::Mesh::cacheWorldFN() const
+{
+	std::unordered_map<FaceConstItr, QVector3D> result;
+	result.reserve(faces.size());
+	auto cend = faces.cend();
+	for (auto itr = faces.cbegin(); itr != cend; ++itr)
+	{
+		result.emplace(std::make_pair(itr, itr.worldFn()));
+	}
+	return result;
+}
+
+std::unordered_map<VertexConstItr, QVector3D> Hix::Engine3D::Mesh::cacheWorldPos() const
+{
+	std::unordered_map<VertexConstItr, QVector3D> result;
+	result.reserve(vertices.size());
+	auto cend = vertices.cend();
+	for (auto itr = vertices.cbegin(); itr != cend; ++itr)
+	{
+		result.emplace(std::make_pair(itr, itr.worldPosition()));
+	}
+	return result;
+}
+
+std::unordered_map<VertexConstItr, QVector3D> Hix::Engine3D::Mesh::cacheWorldVN() const
+{
+	std::unordered_map<VertexConstItr, QVector3D> result;
+	result.reserve(vertices.size());
+	auto cend = vertices.cend();
+	for (auto itr = vertices.cbegin(); itr != cend; ++itr)
+	{
+		result.emplace(std::make_pair(itr, itr.worldVn()));
+	}
+	return result;
+}
+
 
 size_t Mesh::addOrRetrieveFaceVertex(const QVector3D& v){
 	//find if existing vtx can be used
@@ -526,7 +586,6 @@ size_t Mesh::addOrRetrieveFaceVertex(const QVector3D& v){
     vertices.emplace_back(mv);
 	auto last = vertices.cend() - 1;
 	_verticesHash.insert({ hashval, last });
-    _bounds.update(v);
     return  last.index();
 }
 
@@ -642,30 +701,49 @@ void Mesh::hEdgeIndexChangedCallback(size_t oldIdx, size_t newIdx)
 std::unordered_set<FaceConstItr> Mesh::findNearSimilarFaces(QVector3D normal, FaceConstItr  mf, float maxNormalDiff, size_t maxCount)const
 {
 	std::unordered_set<FaceConstItr> result;
+	std::unordered_set<FaceConstItr> explored;
 	std::deque<FaceConstItr>q;
 	result.reserve(maxCount);
+	explored.reserve(maxCount);
 	q.emplace_back(mf);
 	result.emplace(mf);
+	explored.emplace(mf);
 	while (!q.empty())
 	{
 		auto curr = q.front();
 		q.pop_front();
-		if (result.size() == maxCount)
-			return result;
+		if (explored.size() == maxCount)
+			break;
 		auto edge = curr.edge();
 		for (size_t i = 0; i < 3; ++i, edge.moveNext()) {
 			auto nFaces = edge.twinFaces();
 			for (auto nFace : nFaces)
 			{
-				if (result.find(nFace) == result.end() && (nFace.localFn() - normal).lengthSquared() < maxNormalDiff)
+				if (explored.find(nFace) == explored.end())
 				{
-					q.emplace_back(nFace);
-					result.emplace(nFace);
-
+					explored.emplace(nFace);
+					if ((nFace.localFn() - normal).lengthSquared() < maxNormalDiff)
+					{
+						q.emplace_back(nFace);
+						result.emplace(nFace);
+					}
+				}
+				else
+				{
+					if (result.find(nFace) == result.end())
+					{
+						qDebug() << "overtaken face?";
+					}
 				}
 			}
 		}
 	}
+	//fill holes
+	size_t fillCnt = 0;
+	do
+	{
+
+	} while (fillCnt != 0);
 	return result;
 }
 
@@ -1090,3 +1168,30 @@ size_t Hix::Engine3D::MeshVtxHasher::operator()(const QVector3D& hashed) const
 	return	digest;
 }
 
+Hix::Engine3D::MeshDeleteGuard::MeshDeleteGuard(Mesh* mesh): 
+	vtxDeleteGuard(mesh->getVertices().getDeleteGuard()), hEdgeDeleteGuard(mesh->getHalfEdges().getDeleteGuard()), faceDeleteGuard(mesh->getFaces().getDeleteGuard())
+{
+}
+
+void Hix::Engine3D::MeshDeleteGuard::flush()
+{
+	vtxDeleteGuard.flush();
+	hEdgeDeleteGuard.flush();
+	faceDeleteGuard.flush();
+}
+
+MeshDeleteGuard& Hix::Engine3D::MeshDeleteGuard::operator+=(MeshDeleteGuard&& other)
+{
+#ifdef _DEBUG
+	if (vtxDeleteGuard.container() != other.vtxDeleteGuard.container() ||
+		hEdgeDeleteGuard.container() != other.hEdgeDeleteGuard.container() ||
+		faceDeleteGuard.container() != other.faceDeleteGuard.container())
+	{
+		throw std::runtime_error("MeshDeleteGuard appending delete guards of different containers");
+	}
+#endif
+	vtxDeleteGuard += std::move(other.vtxDeleteGuard);
+	hEdgeDeleteGuard += std::move(other.hEdgeDeleteGuard);
+	faceDeleteGuard += std::move(other.faceDeleteGuard);
+	return *this;
+}

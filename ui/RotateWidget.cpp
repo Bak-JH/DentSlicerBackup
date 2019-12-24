@@ -2,6 +2,7 @@
 #include "../qmlmanager.h"
 #include "../input/raycastcontroller.h"
 #include "Widget3D.h"
+#include "feature/rotate.h"
 using namespace Hix::UI;
 using namespace Qt3DCore;
 using namespace Qt3DRender;
@@ -9,8 +10,7 @@ using namespace Qt3DExtras;
 
 const float RotateWidget::ROTATE_SPEED = 0.1;
 const float HALF_PI = M_PI / 2;
-RotateWidget::RotateWidget(const QVector3D& axis, Qt3DCore::QEntity* parent):QEntity(parent), _axis(axis),
-_parent(dynamic_cast<Widget3D*>(parent))
+RotateWidget::RotateWidget(const QVector3D& axis, Qt3DCore::QEntity* parent) :Widget(axis, parent)
 {
 
 	addComponent(&_torus);
@@ -39,8 +39,6 @@ _parent(dynamic_cast<Widget3D*>(parent))
 	{
 		_transform.setRotationY(90);
 	}
-	setEnabled(true);
-	addComponent(&_parent->layer);
 
 }
 
@@ -58,6 +56,7 @@ bool Hix::UI::RotateWidget::isDraggable(Hix::Input::MouseEventData& e, const Qt3
 
 void Hix::UI::RotateWidget::dragStarted(Hix::Input::MouseEventData& e, const Qt3DRender::QRayCasterHit& hit)
 {
+	dynamic_cast<Features::RotateMode*>(_parent->mode())->featureStarted();
 	_parent->setManipulated(true);
 	setHighlight(true);
 	_mouseOrigin = e.position;
@@ -104,6 +103,7 @@ void Hix::UI::RotateWidget::setHighlight(bool enable)
 	_material.setSpecular(color);
 }
 
+
 void Hix::UI::RotateWidget::doDrag(Hix::Input::MouseEventData& e)
 {
 	_mouseCurrent = e.position;
@@ -115,9 +115,10 @@ void Hix::UI::RotateWidget::doDrag(Hix::Input::MouseEventData& e)
 
 void Hix::UI::RotateWidget::dragEnded(Hix::Input::MouseEventData& e)
 {
+	dynamic_cast<Features::RotateMode*>(_parent->mode())->featureEnded();
 	_parent->setManipulated(false);
 	setHighlight(false);
-    qmlManager->totalRotateDone();
+    //qmlManager->totalRotateDone();
 }
 
 void Hix::UI::RotateWidget::onEntered()

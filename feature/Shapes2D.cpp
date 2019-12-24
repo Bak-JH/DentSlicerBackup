@@ -1,7 +1,7 @@
 #include "Shapes2D.h"
 #include "../DentEngine/src/ContourBuilder.h"
 #include "agCDT/CDT.h"
-//#include "../cork/src/isct/triangle.h"
+
 
 using namespace ClipperLib;
 
@@ -61,6 +61,112 @@ std::vector<CDT::Edge> QVectorToCDTEdge(const std::vector<QVectorType>& input)
 	}
 	return edges;
 }
+
+std::vector<std::vector<QVector3D>> Hix::Shapes2D::gridCircle(float radius, float offset)
+{
+	size_t singleAxisPositive = (size_t)(radius / offset);
+	size_t lineCnt = 1 + (singleAxisPositive * 2);
+	lineCnt *= 2;
+	std::vector<std::vector<QVector3D>> grid;
+	grid.reserve(lineCnt);
+	float radiusSqrd = std::pow(radius, 2);
+	std::vector<float> otherVal;
+	std::vector<float> offVal;
+	otherVal.reserve(singleAxisPositive);
+	offVal.reserve(singleAxisPositive);
+	float currOff = offset;
+	for (size_t i = 0; i < singleAxisPositive; ++i)
+	{
+		otherVal.emplace_back(std::sqrt(radiusSqrd - std::pow(currOff, 2)));
+		offVal.emplace_back(currOff);
+		currOff += offset;
+	}
+	//x axis, y axis
+	grid.push_back({ QVector3D(0, radius, 0), QVector3D(0, -radius, 0) });
+	grid.push_back({ QVector3D(radius, 0, 0), QVector3D(-radius, 0, 0) });
+	//-x axis
+	for (size_t i = 0; i < singleAxisPositive; ++i)
+	{
+		std::vector<QVector3D> line;
+		line.reserve(2);
+		line.emplace_back(QVector3D(-offVal[i], -otherVal[i], 0));
+		line.emplace_back(QVector3D(-offVal[i], otherVal[i], 0));
+		grid.emplace_back(std::move(line));
+	}
+	//+x axis
+	for (size_t i = 0; i < singleAxisPositive; ++i)
+	{
+		std::vector<QVector3D> line;
+		line.reserve(2);
+		line.emplace_back(QVector3D(offVal[i], -otherVal[i], 0));
+		line.emplace_back(QVector3D(offVal[i], otherVal[i], 0));
+		grid.emplace_back(std::move(line));
+	}
+	//-y axis
+	for (size_t i = 0; i < singleAxisPositive; ++i)
+	{
+		std::vector<QVector3D> line;
+		line.reserve(2);
+		line.emplace_back(QVector3D(-otherVal[i], -offVal[i], 0));
+		line.emplace_back(QVector3D(otherVal[i], -offVal[i], 0));
+		grid.emplace_back(std::move(line));
+	}
+	//+y axis
+	for (size_t i = 0; i < singleAxisPositive; ++i)
+	{
+		std::vector<QVector3D> line;
+		line.reserve(2);
+		line.emplace_back(QVector3D(-otherVal[i], offVal[i], 0));
+		line.emplace_back(QVector3D(otherVal[i], offVal[i], 0));
+		grid.emplace_back(std::move(line));
+	}
+	return grid;
+}
+std::vector<std::vector<QVector3D>> Hix::Shapes2D::gridRect(float xLength, float yLength, float offset)
+{
+	float xRad = xLength / 2.0f;
+	float yRad = yLength / 2.0f;
+	//cnt for positive axis
+	size_t xLineCnt = ((size_t)(xRad / offset));
+	size_t yLineCnt = ((size_t)(yRad / offset));
+	size_t lineCnt = xLineCnt*2 + yLineCnt*2 + 2;
+	std::vector<std::vector<QVector3D>> grid;
+	grid.reserve(lineCnt);
+	//x axis, y axis
+	grid.push_back({ QVector3D(0, yRad, 0), QVector3D(0, -yRad, 0) });
+	grid.push_back({ QVector3D(xRad, 0, 0), QVector3D(-xRad, 0, 0) });
+	//x axis
+	for (size_t i = 1; i < xLineCnt + 1; ++i)
+	{
+		float x = i * offset;
+		std::vector<QVector3D> line0;
+		line0.reserve(2);
+		line0.emplace_back(QVector3D(x, -yRad, 0));
+		line0.emplace_back(QVector3D(x, yRad, 0));
+		grid.emplace_back(std::move(line0));
+		std::vector<QVector3D> line1;
+		line1.reserve(2);
+		line1.emplace_back(QVector3D(-x, -yRad, 0));
+		line1.emplace_back(QVector3D(-x, yRad, 0));
+		grid.emplace_back(std::move(line1));
+	}
+	//y axis
+	for (size_t i = 1; i < yLineCnt + 1; ++i)
+	{
+		float y = i * offset;
+		std::vector<QVector3D> line0;
+		line0.reserve(2);
+		line0.emplace_back(QVector3D(-xRad, y, 0));
+		line0.emplace_back(QVector3D(xRad, y, 0));
+		grid.emplace_back(std::move(line0));
+		std::vector<QVector3D> line1;
+		line1.reserve(2);
+		line1.emplace_back(QVector3D(-xRad, -y, 0));
+		line1.emplace_back(QVector3D(xRad,  -y, 0));
+		grid.emplace_back(std::move(line1));
+	}
+	return grid;
+}
 void Hix::Shapes2D::rotateCW90(QVector2D& vec)
 {
 	//(y,-x)
@@ -77,6 +183,27 @@ void Hix::Shapes2D::rotateCCW90(QVector2D& vec)
 }
 
 
+std::vector<QVector3D> Hix::Shapes2D::generateCircle(float radius, size_t segCount)
+{
+
+	std::vector<QVector3D>circle;
+	circle.reserve(segCount);
+
+	constexpr  QVector3D normal(0, 0, 1);
+	float arcAngle = 360.0f / (float)segCount;
+	auto rot = QQuaternion::fromAxisAndAngle(normal, arcAngle);
+	auto pt = QVector3D(radius, 0, 0);
+
+	for (size_t i = 0; i < segCount; ++i)
+	{
+
+		circle.emplace_back(pt);
+		pt = rot.rotatedVector(pt);
+		pt.setZ(0);
+	}
+	return circle;
+}
+
 std::vector<QVector3D> Hix::Shapes2D::generateHexagon(float radius)
 {
 	std::vector<QVector3D>hexagon;
@@ -91,6 +218,7 @@ std::vector<QVector3D> Hix::Shapes2D::generateHexagon(float radius)
 
 		hexagon.emplace_back(pt);
 		pt = rot.rotatedVector(pt);
+		pt.setZ(0);
 	}
 	return hexagon;
 }
@@ -240,15 +368,27 @@ void Hix::Shapes2D::generateCapZPlane(Hix::Engine3D::Mesh* mesh, const std::vect
 	generateCapZPlaneImpl(mesh, zPos, vtcs, edges, isReverse);
 }
 
-std::vector<ClipperLib::Path> Hix::Shapes2D::combineContour(const std::vector<std::vector<QVector3D>>& contours)
+std::vector<std::vector<QVector3D>> Hix::Shapes2D::combineContour(const std::vector<std::vector<QVector3D>>& contours)
 {
-	std::vector<ClipperLib::Path> result;
+	std::vector<std::vector<QVector3D>> result;
 	ClipperLib::Clipper clipper;
 	std::vector<Path> clPaths;
+	std::unordered_map<ClipperLib::IntPoint, QVector3D> intToFloatMap;
 	clPaths.reserve(contours.size());
 	for (auto& each : contours)
 	{
 		clPaths.emplace_back(Hix::Polyclipping::toCLPath(each));
+	}
+	//map int point to float
+	for (size_t i = 0; i < clPaths.size(); ++i)
+	{
+		auto& path = clPaths[i];
+		auto& fPath = contours[i];
+
+		for (size_t j = 0; j < path.size(); ++j)
+		{
+			intToFloatMap[path[j]] = fPath[j];
+		}
 	}
 	for (auto& each : clPaths)
 	{
@@ -262,8 +402,22 @@ std::vector<ClipperLib::Path> Hix::Shapes2D::combineContour(const std::vector<st
 	{
 		for (auto& child : tree.Childs)
 		{
-			result.emplace_back(child->Contour);
+			std::vector<QVector3D> currPath;
+			for (auto& pt : child->Contour)
+			{
+				try
+				{
+					auto& floatPt = intToFloatMap.at(pt);
+					currPath.emplace_back(floatPt);
+				}
+				catch (...)
+				{
+					auto flPt = Hix::Polyclipping::toFloatPt(pt);
+					currPath.emplace_back(flPt);
+				}
 
+			}
+			result.emplace_back(std::move(currPath));
 		}
 	}
 	return result;

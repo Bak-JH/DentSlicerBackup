@@ -2,21 +2,20 @@
 #include "../qmlmanager.h"
 #include "../input/raycastcontroller.h"
 #include <math.h>
-#include "Highlightable.h"
+#include "Widget.h"
 
 using namespace Hix::UI;
 using namespace Hix::Input;
-Widget3D::Widget3D()
+Widget3D::Widget3D(Hix::Features::WidgetMode* mode) : _mode(mode)
 {
 	addComponent(&_transform);
-	layer.setRecursive(false);
 }
 
 Hix::UI::Widget3D::~Widget3D()
 {
 }
 
-void Hix::UI::Widget3D::addWidget(std::unique_ptr<Highlightable> widget)
+void Hix::UI::Widget3D::addWidget(std::unique_ptr<Widget> widget)
 {
 
 	_widgets.push_back(std::move(widget));
@@ -31,10 +30,20 @@ void Hix::UI::Widget3D::setVisible(bool show)
 		{
 			updatePosition();
 			setEnabled(true);
+			for (auto& each : _widgets)
+			{
+				each->setHitTestable(true);
+				each->setHoverable(true);
+			}
 		}
 		else
 		{
 			setEnabled(false);
+			for (auto& each : _widgets)
+			{
+				each->setHitTestable(false);
+				each->setHoverable(false);
+			}
 		}
 	}
 }
@@ -58,6 +67,12 @@ void Hix::UI::Widget3D::setManipulated(bool isManipulated)
 		}
 	}
 }
+
+Hix::Features::WidgetMode* Hix::UI::Widget3D::mode()
+{
+	return _mode;
+}
+
 bool Hix::UI::Widget3D::visible()
 {
 	return _visible;

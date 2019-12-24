@@ -4,6 +4,11 @@
 #include "CylindricalRaft.h"
 #include "glmodel.h"
 #include <functional>
+#include "../Mesh/BVH.h"
+#include "../Mesh/MTRayCaster.h"
+#include "../common/Debug.h"
+#include "qmlmanager.h"
+#include "feature/SupportFeature.h"
 using namespace Hix::Support;
 using namespace Hix::Memory;
 
@@ -41,31 +46,10 @@ float Hix::Support::SupportRaftManager::supportBottom()
 
 
 
-void Hix::Support::SupportRaftManager::autoGen(const GLModel& model, SlicingConfiguration::SupportType supType)
+void Hix::Support::SupportRaftManager::setSupportType(SlicingConfiguration::SupportType supType)
 {
-	_supportExist = true;
 	_supportType = supType;
-	autoGenRecurv(model);
 }
-
-
-
-void Hix::Support::SupportRaftManager::autoGenRecurv(const GLModel& model)
-{
-	for (auto childNode : model.childNodes())
-	{
-		auto mainModel = dynamic_cast<GLModel*>(childNode);
-		if (mainModel)
-		{
-			autoGenRecurv(*mainModel);
-		}
-	}
-	generateSupport(model);
-
-
-}
-
-
 
 std::vector<QVector3D> Hix::Support::SupportRaftManager::getSupportBasePts() const
 {
@@ -73,127 +57,115 @@ std::vector<QVector3D> Hix::Support::SupportRaftManager::getSupportBasePts() con
 	basePts.reserve(_supports.size());
 	for (auto& each : _supports)
 	{
-		auto editStatus = _pendingSupports.find(each.get());
-		if (editStatus == _pendingSupports.end() || editStatus->second == EditType::Added)
+		auto baseSupport = dynamic_cast<BaseSupport*>(each.first);
+		if (baseSupport && baseSupport->hasBasePt())
 		{
-			auto baseSupport = dynamic_cast<BaseSupport*>(each.get());
-			if (baseSupport)
-			{
-				basePts.emplace_back(baseSupport->getBasePt());
-			}
+			basePts.emplace_back(baseSupport->getBasePt());
 		}
 	}
 	return basePts;
 }
 
-void Hix::Support::SupportRaftManager::addSupport(const OverhangDetect::Overhang& overhang)
+SupportModel* Hix::Support::SupportRaftManager::addSupport(const OverhangDetect::Overhang& overhang)
 {
-	if (!_supportExist)
-		return;
 	switch (_supportType)
 	{
 	case SlicingConfiguration::SupportType::None:
+		return nullptr;
 		break;
 	case SlicingConfiguration::SupportType::Vertical:
 	{
-		auto newModel = new VerticalSupportModel(this, overhang);
-		_supports.emplace(toUnique(dynamic_cast<SupportModel*>(newModel)));
+		auto newModel = dynamic_cast<SupportModel*>(new VerticalSupportModel(this, overhang));
+		_supports.insert(std::make_pair(newModel, std::unique_ptr<SupportModel>(newModel)));
 		//since addition only happens in edit mode
-		newModel->setHitTestable(true);
-		_pendingSupports[newModel] = EditType::Added;
+
+		return newModel;
 	}
 	break;
 	default:
+		return nullptr;
 		break;
 	}
 }
 
-void Hix::Support::SupportRaftManager::removeSupport(SupportModel* e)
+SupportModel* Hix::Support::SupportRaftManager::addSupport(std::unique_ptr<SupportModel> target)
+{
+	auto temp = target.get();
+	_supports.insert(std::make_pair(temp,std::move(target)));
+	return temp;
+}
+
+std::unique_ptr<SupportModel> Hix::Support::SupportRaftManager::removeSupport(SupportModel* e)
 {
 	e->setEnabled(false);
 	e->setHitTestable(false);
-	_pendingSupports[e] = EditType::Removed;
+	auto result = std::move(_supports.find(e)->second);
+	_supports.erase(e);
+	return result;
 }
 
-void Hix::Support::SupportRaftManager::applyEdits()
+bool Hix::Support::SupportRaftManager::supportsEmpty()
 {
-	//remove all pending removes
-	for (auto& each : _pendingSupports)
-	{
-		if (each.second == EditType::Removed)
-		{
-			_supports.erase(toDummy(each.first));
-		}
-	}
+	return _supports.empty();
 }
 
-void Hix::Support::SupportRaftManager::cancelEdits()
-{
-	//remove all pending adds
-	for (auto& each : _pendingSupports)
-	{
-		if (each.second == EditType::Added)
-		{
-			_supports.erase(toDummy(each.first));
-		}
-		else
-		{
-			//enable hidden pending removes
-			each.first->setEnabled(true);
-			each.first->setHitTestable(true);
-
-		}
-	}
-}
-
-void Hix::Support::SupportRaftManager::generateSupport(const GLModel& model)
-{
-	Hix::OverhangDetect::Detector detector;
-	auto overhangs = detector.detectOverhang(model.getMesh());
-	switch (_supportType)
-	{
-	case SlicingConfiguration::SupportType::None:
-		break;
-	case SlicingConfiguration::SupportType::Vertical:
-	{
-		for (auto& each : overhangs)
-		{
-			auto newModel = new VerticalSupportModel(this, each);
-			_supports.emplace(toUnique(dynamic_cast<SupportModel*>(newModel)));
-		}
-	}
-	break;
-	default:
-		break;
-	}
-
-}
-
-void Hix::Support::SupportRaftManager::generateRaft()
+RaftModel* Hix::Support::SupportRaftManager::generateRaft()
 {
 	auto basePts = getSupportBasePts();
 	_raft = std::make_unique<CylindricalRaft>(this, basePts);
+	return _raft.get();
+} 
+
+RaftModel* Hix::Support::SupportRaftManager::addRaft(RaftModel* raft)
+{
+	_raft.reset(raft);
+	return _raft.get();
 }
 
-void  Hix::Support::SupportRaftManager::clear(GLModel& model)
+RaftModel* Hix::Support::SupportRaftManager::removeRaft()
 {
-	std::unordered_set<GLModel*> models;
-	std::unordered_set<const GLModel*> constModels;
+	auto copy = _raft.release();
+	copy->setParent((QNode*)nullptr);
+	_raft.reset();
+	return copy;
+}
+
+Hix::OverhangDetect::Overhangs Hix::Support::SupportRaftManager::detectOverhang(const GLModel& listed)
+{
+	std::unordered_set<const GLModel*> models;
+	listed.getChildrenModels(models);
+	Hix::OverhangDetect::Overhangs overhangs;
+	models.insert(&listed);
+	QVector3D straightDown(0, 0, -1);
+
+
+
+	for (auto model : models)
+	{
+		Hix::OverhangDetect::Detector detector;
+		auto eachOverhangs =   detector.detectOverhang(model->getMesh());
+		overhangs.insert(overhangs.end(), eachOverhangs.begin(), eachOverhangs.end());
+
+	}
+	//raycaster for support generation
+	prepareRaycaster(listed);
+	return overhangs;
+}
+
+void  Hix::Support::SupportRaftManager::clear(const GLModel& model)
+{
+	std::unordered_set<const GLModel*> models;
 
 	model.getChildrenModels(models);
-	for (auto each : models)
-	{
-		constModels.insert(each);
-	}
-	constModels.insert(&model);
-	clearImpl(constModels);
+	models.insert(&model);
+	clearImpl(models);
 }
 
 void Hix::Support::SupportRaftManager::clearImpl(const std::unordered_set<const GLModel*>& models)
 {
 	for (auto curr = _supports.begin(); curr != _supports.end();)
 	{
-		auto attachedSupport = dynamic_cast<ModelAttachedSupport*>(curr->get());
+		auto attachedSupport = dynamic_cast<ModelAttachedSupport*>(curr->second.get());
 		if (attachedSupport)
 		{
 			auto ptr = &attachedSupport->getAttachedModel();
@@ -207,10 +179,12 @@ void Hix::Support::SupportRaftManager::clearImpl(const std::unordered_set<const 
 			}
 		}
 	}
-	if (_supports.size() == 0)
-	{
-		clear();
-	}
+}
+
+void Hix::Support::SupportRaftManager::prepareRaycaster(const GLModel& model)
+{
+	_rayCaster.reset( new MTRayCaster());
+	_rayCaster->addAccelerator(new Hix::Engine3D::BVH(model));
 }
 
 const Hix::Render::SceneEntity* Hix::Support::SupportRaftManager::raftModel() const
@@ -224,19 +198,35 @@ std::vector<std::reference_wrapper<const Hix::Render::SceneEntity>> Hix::Support
 	entities.reserve(_supports.size());
 	for (auto& each : _supports)
 	{
-		entities.emplace_back(dynamic_cast<const Hix::Render::SceneEntity&>(*each.get()));
+		entities.emplace_back(dynamic_cast<const Hix::Render::SceneEntity&>(*each.first));
 	}
 	return entities;
 }
 
-
-void Hix::Support::SupportRaftManager::clear()
+std::vector<SupportModel*> Hix::Support::SupportRaftManager::modelAttachedSupports(const std::unordered_set<GLModel*>& models)const
 {
-	_supportExist = false;
-	_raftExist = false;
-	_supports.clear();
-	_pendingSupports.clear();
-	_raft.reset();
+	std::vector<SupportModel*> supps;
+	std::unordered_set<const GLModel*> childs;
+
+	for (auto model : models)
+	{
+		model->getChildrenModels(childs);
+		childs.insert(model);
+	}
+	for (auto curr = _supports.cbegin(); curr != _supports.cend(); ++curr)
+	{
+		auto attachedSupport = dynamic_cast<ModelAttachedSupport*>(curr->first);
+		if (attachedSupport)
+		{
+			auto ptr = &attachedSupport->getAttachedModel();
+			if (childs.find(ptr) != childs.end())
+			{
+				supps.push_back(curr->first);
+			}
+		}
+	}
+	return supps;
+
 }
 
 Qt3DCore::QEntity& Hix::Support::SupportRaftManager::rootEntity()
@@ -249,16 +239,22 @@ size_t Hix::Support::SupportRaftManager::supportCount() const
 	return _supports.size();
 }
 
+RayCaster& Hix::Support::SupportRaftManager::supportRaycaster()
+{
+	return *_rayCaster.get();
+}
+
+
 
 
 bool Hix::Support::SupportRaftManager::supportActive() const
 {
-	return _supportExist;
+	return true;
 }
 
 bool Hix::Support::SupportRaftManager::raftActive() const
 {
-	return _raftExist;
+	return _raft.get() != nullptr;
 }
 
 
@@ -278,7 +274,7 @@ void Hix::Support::SupportRaftManager::setSupportEditMode(Hix::Support::EditMode
 			//enable supports ray cast
 			for (auto& each : _supports)
 			{
-				each->setHitTestable(true);
+				each.first->setHitTestable(true);
 			}
 		}
 		else
@@ -286,7 +282,7 @@ void Hix::Support::SupportRaftManager::setSupportEditMode(Hix::Support::EditMode
 			//disable supports ray cast
 			for (auto& each : _supports)
 			{
-				each->setHitTestable(false);
+				each.first->setHitTestable(true);
 			}
 		}
 	}

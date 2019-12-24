@@ -9,6 +9,7 @@ namespace Hix
 		class BaseSupport
 		{
 		public:
+			virtual bool hasBasePt()const = 0;
 			virtual const QVector3D& getBasePt()const = 0;
 		};
 	}

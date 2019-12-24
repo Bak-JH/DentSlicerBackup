@@ -9,6 +9,7 @@ namespace Hix
 	}
 	namespace Engine3D
 	{
+		class Mesh;
 		//bounding box in 3D
 		class Bounds3D
 		{
@@ -16,7 +17,16 @@ namespace Hix
 		public:
 			Bounds3D();
 			Bounds3D(const Hix::Render::SceneEntity& bounded);
+			template<typename ItrType>
+			Bounds3D(ItrType itr, ItrType end) : Bounds3D()
+			{
+				for (; itr != end; ++itr)
+				{
+					update(*itr);
+				}
+			}
 			void update(const QVector3D& pt);
+			void localBoundUpdate(const Hix::Engine3D::Mesh& mesh);
 			Bounds3D& operator+=(const Bounds3D& other);
 			void translate(const QVector3D& displacement);
 			void scale(const QVector3D& scales);
@@ -42,6 +52,7 @@ namespace Hix
 			float lengthZ()const;
 			QVector3D centre()const;
 			QVector3D lengths()const;
+			const std::array<float, 6>& bound()const;
 			QVector3D displaceWithin(const Bounds3D& child, QVector3D displacement =  QVector3D())const;
 			std::array<float, 6> calculateMaxDisplacement(const Bounds3D & child)const;
 			bool contains(const Hix::Engine3D::Bounds3D& other)const;
@@ -52,7 +63,7 @@ namespace Hix
 			void setZLength(float length);
 
 		private:
-			std::array<float, 6> _bound{0,0,0,0,0,0};
+			std::array<float, 6> _bound;
 
 		};
 

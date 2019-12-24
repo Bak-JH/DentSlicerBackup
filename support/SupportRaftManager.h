@@ -2,7 +2,7 @@
 
 #include "DentEngine/src/configuration.h"
 #include "VerticalSupportModel.h"
-#include "../../common/HetUniquePtr.h"
+
 class GLModel;
 namespace Hix
 {
@@ -13,15 +13,11 @@ namespace Hix
 			None = 0,
 			Manual = 1
 		};
-		enum class EditType : uint8_t
-		{
-			Added = 0,
-			Removed = 1
-		};
+
 		using namespace Engine3D;
 		class SupportModel;
 		class RaftModel;
-		class SupportRaftManager
+		class SupportRaftManager : public QObject
 		{
 		public:
 			static float raftBottom();
@@ -37,34 +33,38 @@ namespace Hix
 			void  setSupportEditMode(EditMode mode);
 			//coordinate for bottom of support and raft
 
-			void autoGen(const GLModel& model, SlicingConfiguration::SupportType supType);
-			void addSupport(const OverhangDetect::Overhang& overhang);
-			void removeSupport(SupportModel* e);
-			void applyEdits();
-			void cancelEdits();
-			void generateSupport(const GLModel& model);
-			void generateRaft();
+			void setSupportType(SlicingConfiguration::SupportType supType);
+			SupportModel* addSupport(const OverhangDetect::Overhang& overhang);
+			SupportModel* addSupport(std::unique_ptr<SupportModel> target);
+			std::unique_ptr<SupportModel> removeSupport(SupportModel* e);
+
+			bool supportsEmpty();
+
+			RaftModel* generateRaft();
+			RaftModel* removeRaft();
+			RaftModel* addRaft(RaftModel* raft);
+			OverhangDetect::Overhangs detectOverhang(const GLModel& model);
 			//removed due to efficiency when deleting multiple
 			std::vector<std::reference_wrapper<const Hix::Render::SceneEntity>> supportModels()const;
+			std::vector<SupportModel*> modelAttachedSupports(const std::unordered_set<GLModel*>& models)const;
 			const Hix::Render::SceneEntity* raftModel()const;
-			void clear();
-			void clear(GLModel& model);
+			void clear(const GLModel& model);
 
 			Qt3DCore::QEntity& rootEntity();
 			size_t supportCount()const;
-		private:
-			void autoGenRecurv(const GLModel& model);
-			void clearImpl(const std::unordered_set<const GLModel*>& models);
+			//void checkOverhangCollision(GLModel* model, )
+			RayCaster& supportRaycaster();
 
+		private:
+			void clearImpl(const std::unordered_set<const GLModel*>& models);
+			void prepareRaycaster(const GLModel& model);
 			Qt3DCore::QEntity _root;
 			std::vector<QVector3D> getSupportBasePts()const;
-			bool _supportExist = false;
-			bool _raftExist = false;
-			std::unordered_map<SupportModel*, EditType> _pendingSupports;
 			EditMode _supportEditMode = EditMode::None;
 			SlicingConfiguration::SupportType _supportType;
-			std::unordered_set<Hix::Memory::HetUniquePtr<SupportModel>> _supports;
+			std::unordered_map<SupportModel*, std::unique_ptr<SupportModel>> _supports;
 			std::unique_ptr<RaftModel> _raft;
+			std::unique_ptr<RayCaster> _rayCaster;
 		};
 
 	}

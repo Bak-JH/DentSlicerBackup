@@ -4,7 +4,6 @@
 #include <stack>
 #include <algorithm>
 #include "DentEngine/src/polyclipping/clipper/clipper.hpp"
-#include "autoarrange.h"
 
 using namespace ClipperLib;
 
