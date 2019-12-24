@@ -6,10 +6,9 @@ import QtQuick.Controls 2.1
 LeftPopup {
 	property var sidePadding: 16
 	property var spaceOnTop: 44
-	property var spaceBtwCtr: 48
 	property var themeColor: "#00b9c8"
 	
-	featureName: qsTr("Orient")
+	featureName: qsTr("Cut")
 	leftPopupHeight: 250
 	width: 256
 
@@ -17,7 +16,7 @@ LeftPopup {
 		id: popupbody
 		//width: parent.width - sidePadding * 2
 		//height: 26
-		text: qsTr("Click Apply to rotate models.")
+		text: qsTr("Select how to cut the model.")
 		font.pointSize: 10
 		font.family: openRegular.name
 		anchors.top: parent.top
@@ -26,10 +25,12 @@ LeftPopup {
 		anchors.leftMargin: sidePadding
 	}
 
-	Image {
-		source: "qrc:/Resource/img_orient.png"
-		anchors.horizontalCenter: parent.horizontalCenter
+	CtrCutSwitch {
+		width: parent.width - sidePadding * 2
+		anchors.left: parent.left
+		anchors.leftMargin: sidePadding
 		anchors.top: popupbody.bottom
-		anchors.topMargin: 32
+		anchors.topMargin: 20
 	}
+
 }

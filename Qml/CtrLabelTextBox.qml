@@ -15,7 +15,7 @@ LabelTextBox {
 
 	TextField {
 		id: control
-		width: parent.width * 0.6
+		width: parent.width * 0.56 //0.6
 		height: 26
 		placeholderText: qsTr("Enter text here")
 		anchors.right: parent.right

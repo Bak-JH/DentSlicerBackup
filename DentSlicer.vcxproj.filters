@@ -973,6 +973,13 @@
     <None Include="Qml\LeftPopupExtend.qml" />
     <None Include="Qml\LeftPopupLayFlat.qml" />
     <None Include="Qml\LeftPopupOrient.qml" />
+    <None Include="Qml\LeftPopupCut.qml" />
+    <None Include="Qml\LeftPopupSupport.qml" />
+    <None Include="Qml\LeftPopupLabel.qml" />
+    <None Include="Qml\LeftPopupExport.qml" />
+    <None Include="Qml\LeftPopupShellOffset.qml" />
+    <None Include="Qml\CtrScaleInputBox.qml" />
+    <None Include="Qml\ProgressShell.qml" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Source Files">
@@ -1052,6 +1059,15 @@
     <Image Include="Resource\part_hide_select_1.png" />
     <Image Include="Resource\part_show_1.png" />
     <Image Include="Resource\part_show_select_1.png" />
+    <Image Include="Resource\img_arrange.png" />
+    <Image Include="Resource\img_label.png" />
+    <Image Include="Resource\img_layflat.png" />
+    <Image Include="Resource\img_orient.png" />
+    <Image Include="Resource\support_setting.png" />
+    <Image Include="Resource\triangle_down_hover.png" />
+    <Image Include="Resource\triangle_up_hover.png" />
+    <Image Include="Resource\img_scale_unlock_revised.png" />
+    <Image Include="Resource\img_scale_lock_revised.png" />
   </ItemGroup>
   <ItemGroup>
     <Font Include="Resource\font\OpenSans-Bold.ttf" />

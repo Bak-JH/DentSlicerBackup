@@ -6,18 +6,16 @@ import QtQuick.Controls 2.1
 LeftPopup {
 	property var sidePadding: 16
 	property var spaceOnTop: 44
-	property var spaceBtwCtr: 48
+	property var spaceBtwCtr: 44
 	property var themeColor: "#00b9c8"
 	
-	featureName: qsTr("Orient")
-	leftPopupHeight: 250
+	featureName: qsTr("Shell Offset")
+	leftPopupHeight: 220
 	width: 256
 
 	Text {
 		id: popupbody
-		//width: parent.width - sidePadding * 2
-		//height: 26
-		text: qsTr("Click Apply to rotate models.")
+		text: qsTr("Click Apply to create a shell inside the \nmodel.")
 		font.pointSize: 10
 		font.family: openRegular.name
 		anchors.top: parent.top
@@ -26,10 +24,14 @@ LeftPopup {
 		anchors.leftMargin: sidePadding
 	}
 
-	Image {
-		source: "qrc:/Resource/img_orient.png"
-		anchors.horizontalCenter: parent.horizontalCenter
+	CtrInputBox {
+		id: extendvalud
+		inputText: "Tickness(mm)"
+		width: parent.width - sidePadding * 2
+		anchors.left: parent.left
+		anchors.leftMargin: sidePadding
 		anchors.top: popupbody.bottom
-		anchors.topMargin: 32
+		anchors.topMargin: spaceBtwCtr
 	}
+	
 }
