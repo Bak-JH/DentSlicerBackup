@@ -6,8 +6,12 @@ import QtGraphicalEffects 1.12
 
 
 DropdownBox {
+
+	property string dropdownText
+	color: "transparent"
+
 	Text {
-		text: parent.dropName
+		text: dropdownText
 		anchors.verticalCenter: parent.verticalCenter
 		font.family: openRegular.name
 		color: "#666666"
@@ -17,7 +21,7 @@ DropdownBox {
 		anchors.right: parent.right
 		anchors.verticalCenter: parent.verticalCenter
 		model: parent.dropList
-		width: parent.width * 0.6
+		width: parent.width * 0.56 //0.6
 		height: 26
 		font.family: openRegular.name
 

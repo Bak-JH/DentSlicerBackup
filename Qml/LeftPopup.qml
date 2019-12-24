@@ -30,7 +30,7 @@ Item {
 			font.weight: Font.Bold
 			anchors.top: parent.top
 			anchors.left: parent.left
-			anchors.topMargin: myPadding
+			anchors.topMargin: myPadding-2
 			anchors.leftMargin: myPadding
 		}
 

@@ -6,26 +6,30 @@ import QtQuick.Controls 2.1
 
 LeftPopup {
 	property var sidePadding: 16
-	property var topPadding: 64
-	property var spaceBtwCtr: 48
+	property var spaceOnTop: 68
+	property var spaceBtwCtr: 56
 	property var themeColor: "#00b9c8"
 	
 	featureName: qsTr("Move")
-	leftPopupHeight: 284
+	leftPopupHeight: 268
 	width: 256
 
 	CtrInputBox {
 		id: moveX
+		fromNum: -100
+		toNum: 100
 		inputText: "X Offset(mm)"
 		width: parent.width - sidePadding * 2
 		anchors.left: parent.left
 		anchors.leftMargin: sidePadding
 		anchors.top: parent.top
-		anchors.topMargin: topPadding
+		anchors.topMargin: spaceOnTop
 	}
 
 	CtrInputBox {
 		id: moveY
+		fromNum: -100
+		toNum: 100
 		inputText: "Y Offset(mm)"
 		width: parent.width - sidePadding * 2
 		anchors.left: parent.left
@@ -36,6 +40,8 @@ LeftPopup {
 
 	CtrInputBox {
 		id: moveZ
+		fromNum: -100
+		toNum: 100
 		inputText: "Z Offset(mm)"
 		width: parent.width - sidePadding * 2
 		anchors.left: parent.left

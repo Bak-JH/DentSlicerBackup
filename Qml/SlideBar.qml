@@ -70,7 +70,7 @@ Item {
 				implicitWidth: 36
 				implicitHeight: 22
 				radius: 2
-				color: control.pressed ? "#f0f0f0" : "#929d9d"
+				color: control.pressed ? "#727d7d" : "#929d9d"
 				//border.color: "#bdbebf"
 			}
 			Rectangle {	//current position
@@ -93,6 +93,7 @@ Item {
 						anchors.leftMargin: (parent.width - 10 - width) / 2
 						text: Math.floor(control.value)
 						font.family: openSemiBold.name
+						font.pointSize: 10.5
 						color: "#ffffff"
 					}
 					onPaint: {

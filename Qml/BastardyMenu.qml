@@ -8,15 +8,17 @@ Item {
 	property string defaultColor: "#ffffff"
 	property string activeNameColor: "#1db2c4"
 
-	property var menus: [open, move, rotate, scale, cut, shelloffset, extend, label, layflat, orient, arrange, support, autorepair, save, extract]
-	property var menusStr: ["open", "move", "rotate", "scale", "cut", "shelloffset", "extend", "label", "layflat", "orient", "arrange", "support", "autorepair", "save", "extract"]
+	property var menus: [open, move, rotate, scale, cut, shelloffset, extend, label, layflat, orient, arrange, support, save, extract]
+	property var menusStr: ["open", "move", "rotate", "scale", "cut", "shelloffset", "extend", "label", "layflat", "orient", "arrange", "support", "save", "extract"]
 
-	function menuClick(id) {												// get every MenuButton inactive but selected one
-		for( var i = 0; i < menus.length; i++ ) {
-			menus[i].nameColor = "#9d9d9d"
-			menus[i].iconBasic = "qrc:/Resource/menu_"+menusStr[i]+".png"
+	function menuClick(id) {							// get every MenuButton inactive but selected one
+		if (menus) {
+			for( var i = 0; i < menus.length; i++ ) {
+				menus[i].nameColor = "#9d9d9d"
+				menus[i].iconBasic = "qrc:/Resource/menu_"+menusStr[i]+".png"
+			}
+			id.nameColor = activeNameColor				//change selected button's text color
 		}
-		id.nameColor = activeNameColor										//change selected button's text color
 	}
 	
 	Rectangle {
@@ -31,6 +33,7 @@ Item {
 			anchors.left: parent.left
 			anchors.leftMargin: parent.radius
 			iconBasic: "qrc:/Resource/menu_open.png"
+			featureName: "Open"
 			MouseArea {
 				anchors.fill: parent
 				hoverEnabled: true
@@ -57,6 +60,7 @@ Item {
 			id:move
 			anchors.left: divider1.right
 			iconBasic: "qrc:/Resource/menu_move.png"
+			featureName: "Move"
 			MouseArea {
 				anchors.fill: parent
 				hoverEnabled: true
@@ -75,6 +79,7 @@ Item {
 			id:rotate
 			anchors.left: move.right
 			iconBasic: "qrc:/Resource/menu_rotate.png"
+			featureName: "Rotate"
 			MouseArea {
 				anchors.fill: parent
 				hoverEnabled: true
@@ -93,6 +98,7 @@ Item {
 			id:scale
 			anchors.left: rotate.right
 			iconBasic: "qrc:/Resource/menu_scale.png"
+			featureName: "Scale"
 			MouseArea {
 				anchors.fill: parent
 				hoverEnabled: true
@@ -120,6 +126,7 @@ Item {
 			id:cut
 			anchors.left: divider2.right
 			iconBasic: "qrc:/Resource/menu_cut.png"
+			featureName: "Cut"
 			MouseArea {
 				anchors.fill: parent
 				hoverEnabled: true
@@ -138,6 +145,7 @@ Item {
 			id:shelloffset
 			anchors.left: cut.right
 			iconBasic: "qrc:/Resource/menu_shelloffset.png"
+			featureName: "Shell Offset"
 			MouseArea {
 				anchors.fill: parent
 				hoverEnabled: true
@@ -156,6 +164,7 @@ Item {
 			id:extend
 			anchors.left: shelloffset.right
 			iconBasic: "qrc:/Resource/menu_extend.png"
+			featureName: "Extend"
 			MouseArea {
 				anchors.fill: parent
 				hoverEnabled: true
@@ -174,6 +183,7 @@ Item {
 			id:label
 			anchors.left:extend.right
 			iconBasic: "qrc:/Resource/menu_label.png"
+			featureName: "Label"
 			MouseArea {
 				anchors.fill: parent
 				hoverEnabled: true
@@ -192,6 +202,7 @@ Item {
 			id:layflat
 			anchors.left: label.right
 			iconBasic: "qrc:/Resource/menu_layflat.png"
+			featureName: "Lay Flat"
 			MouseArea {
 				anchors.fill: parent
 				hoverEnabled: true
@@ -210,6 +221,7 @@ Item {
 			id:orient
 			anchors.left: layflat.right
 			iconBasic: "qrc:/Resource/menu_orient.png"
+			featureName: "Orient"
 			MouseArea {
 				anchors.fill: parent
 				hoverEnabled: true
@@ -228,6 +240,7 @@ Item {
 			id:arrange
 			anchors.left: orient.right
 			iconBasic: "qrc:/Resource/menu_arrange.png"
+			featureName: "Arrange"
 			MouseArea {
 				anchors.fill: parent
 				hoverEnabled: true
@@ -246,6 +259,7 @@ Item {
 			id:support
 			anchors.left: arrange.right
 			iconBasic: "qrc:/Resource/menu_support.png"
+			featureName: "Support"
 			MouseArea {
 				anchors.fill: parent
 				hoverEnabled: true
@@ -260,6 +274,7 @@ Item {
 				}
 			}
 		}
+		/*
 		MenuButton {
 			id:autorepair
 			anchors.left: support.right
@@ -278,9 +293,10 @@ Item {
 				}
 			}
 		}
+		*/
 		Rectangle {
 			id:divider3
-			anchors.left: autorepair.right
+			anchors.left: support.right
 			anchors.verticalCenter: parent.verticalCenter
 			width: 1
 			height: 80
@@ -290,6 +306,7 @@ Item {
 			id:save
 			anchors.left: divider3.right
 			iconBasic: "qrc:/Resource/menu_save.png"
+			featureName: "Save"
 			MouseArea {
 				anchors.fill: parent
 				hoverEnabled: true
@@ -308,6 +325,7 @@ Item {
 			id: extract
 			anchors.left: save.right
 			iconBasic: "qrc:/Resource/menu_extract.png"
+			featureName: "Export"
 			MouseArea {
 				anchors.fill: parent
 				hoverEnabled: true
