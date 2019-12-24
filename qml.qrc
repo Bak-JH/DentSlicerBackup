@@ -55,6 +55,33 @@
         <file>shaders/singleColor.geom</file>
         <file>shaders/flat.geom</file>
         <file>Qml/LeftTabSlicingOptionElementPercentage.qml</file>
-        <file>Qml/SamplePopup.qml</file>
+        <file>Qml/BastardyMenu.qml</file>
+        <file>Qml/MenuButton.qml</file>
+        <file>Qml/LeftPopup.qml</file>
+        <file>Qml/RoundedButton.qml</file>
+        <file>Qml/CtrInputBox.qml</file>
+        <file>Qml/CtrDropdownBox.qml</file>
+        <file>Qml/CtrCutSwitch.qml</file>
+        <file>Qml/Toast.qml</file>
+        <file>Qml/SlideBar.qml</file>
+        <file>Qml/CtrLabelTextBox.qml</file>
+        <file>Qml/CanvasTest.qml</file>
+        <file>Qml/ModalWindow.qml</file>
+        <file>Qml/Cam.qml</file>
+        <file>Qml/CamBox.qml</file>
+        <file>Qml/ViewMode.cpp</file>
+        <file>Qml/ViewMode.h</file>
+        <file>Qml/ViewMode.qml</file>
+        <file>Qml/UndoRedo.qml</file>
+        <file>Qml/PartList.qml</file>
+        <file>Qml/PartListContentBox.qml</file>
+        <file>Qml/PrintInfo.qml</file>
+        <file>Qml/LeftPopupMove.qml</file>
+        <file>Qml/LeftPopupRotate.qml</file>
+        <file>Qml/LeftPopupScale.qml</file>
+        <file>Qml/LeftPopupArrange.qml</file>
+        <file>Qml/LeftPopupExtend.qml</file>
+        <file>Qml/LeftPopupLayFlat.qml</file>
+        <file>Qml/LeftPopupOrient.qml</file>
     </qresource>
 </RCC>

@@ -181,6 +181,25 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="common\Tree\BVHBuilder.cpp">
+    <ClCompile Include="Qml\LeftPopup.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Qml\Toast.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Qml\SlideBar.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Qml\ModalWindow.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Qml\ViewMode.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Qml\PartList.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Qml\PrintInfo.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -910,6 +929,27 @@
     <QtMoc Include="qmlmanager.h" />
     <QtMoc Include="utils\quaternionhelper.h" />
     <QtMoc Include="utils\updatechecker.h" />
+    <QtMoc Include="Qml\LeftPopup.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="Qml\Toast.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="Qml\SlideBar.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="Qml\ModalWindow.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="Qml\ViewMode.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="Qml\PartList.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="Qml\PrintInfo.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
   </ItemGroup>
   <ItemGroup>
     <QtRcc Include="qml.qrc" />
@@ -1105,6 +1145,33 @@
     <None Include="resource\zoom_down.png" />
     <None Include="resource\zoom_up.png" />
     <None Include="icon.ico" />
+    <None Include="Qml\BastardyMenu.qml" />
+    <None Include="Qml\MenuButton.qml" />
+    <None Include="Qml\LeftPopup.qml" />
+    <None Include="Qml\InputBox.qml" />
+    <None Include="Qml\RoundedButton.qml" />
+    <None Include="Qml\CtrInputBox.qml" />
+    <None Include="Qml\CtrDropdownBox.qml" />
+    <None Include="Qml\CtrCutSwitch.qml" />
+    <None Include="Qml\Toast.qml" />
+    <None Include="Qml\SlideBar.qml" />
+    <None Include="Qml\CtrLabelTextBox.qml" />
+    <None Include="Qml\CanvasTest.qml" />
+    <None Include="Qml\ModalWindow.qml" />
+    <None Include="Qml\Cam.qml" />
+    <None Include="Qml\CamBox.qml" />
+    <None Include="Qml\ViewMode.qml" />
+    <None Include="Qml\UndoRedo.qml" />
+    <None Include="Qml\PartList.qml" />
+    <None Include="Qml\PartListContentBox.qml" />
+    <None Include="Qml\PrintInfo.qml" />
+    <None Include="Qml\LeftPopupMove.qml" />
+    <None Include="Qml\LeftPopupRotate.qml" />
+    <None Include="Qml\LeftPopupScale.qml" />
+    <None Include="Qml\LeftPopupArrange.qml" />
+    <None Include="Qml\LeftPopupExtend.qml" />
+    <None Include="Qml\LeftPopupLayFlat.qml" />
+    <None Include="Qml\LeftPopupOrient.qml" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Header Files">
@@ -1120,5 +1187,79 @@
   </ItemGroup>
   <ItemGroup>
     <CopyFileToFolders Include="settings.json" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="Resource\vs_icon.png" />
+    <Image Include="Resource\closebutton.png" />
+    <Image Include="Resource\triangle_down.png" />
+    <Image Include="Resource\triangle_up.png" />
+    <Image Include="Resource\triangle_down_1.5.png" />
+    <Image Include="Resource\drop_arrow_up.png" />
+    <Image Include="Resource\drop_arrow_down.png" />
+    <Image Include="Resource\traingle_up_1.5.png" />
+    <Image Include="Resource\triangle_up_1.5.png" />
+    <Image Include="Resource\cut_free_off_1.5.png" />
+    <Image Include="Resource\cut_flat_off_1.5.png" />
+    <Image Include="Resource\menu_extract.png" />
+    <Image Include="Resource\toast_check.png" />
+    <Image Include="Resource\toast_x.png" />
+    <Image Include="Resource\cam.png" />
+    <Image Include="Resource\cam_hover.png" />
+    <Image Include="Resource\cam_back_1.5.png" />
+    <Image Include="Resource\cam_bottom_1.5.png" />
+    <Image Include="Resource\cam_front_1.5.png" />
+    <Image Include="Resource\cam_left_1.5.png" />
+    <Image Include="Resource\cam_right_1.5.png" />
+    <Image Include="Resource\cam_top_1.5.png" />
+    <Image Include="Resource\cut_flat_off_border2.png" />
+    <Image Include="Resource\cut_free_off_border2.png" />
+    <Image Include="Resource\triangle_right.png" />
+    <Image Include="Resource\cut_flat_on_border2.png" />
+    <Image Include="Resource\cut_free_on_border2.png" />
+    <Image Include="Resource\part_show.png" />
+    <Image Include="Resource\part_remove.png" />
+    <Image Include="Resource\menu_arrange.png" />
+    <Image Include="Resource\menu_autorepair.png" />
+    <Image Include="Resource\menu_cut.png" />
+    <Image Include="Resource\menu_extend.png" />
+    <Image Include="Resource\menu_label.png" />
+    <Image Include="Resource\menu_layflat.png" />
+    <Image Include="Resource\menu_move.png" />
+    <Image Include="Resource\menu_open.png" />
+    <Image Include="Resource\menu_orient.png" />
+    <Image Include="Resource\menu_rotate.png" />
+    <Image Include="Resource\menu_save.png" />
+    <Image Include="Resource\menu_scale.png" />
+    <Image Include="Resource\menu_shelloffset.png" />
+    <Image Include="Resource\menu_support.png" />
+    <Image Include="Resource\undo_arrow.png" />
+    <Image Include="Resource\redo_arrow.png" />
+    <Image Include="Resource\menu_open_select_1.png" />
+    <Image Include="Resource\menu_arrange_select_1.png" />
+    <Image Include="Resource\menu_autorepair_select_1.png" />
+    <Image Include="Resource\menu_cut_select_1.png" />
+    <Image Include="Resource\menu_extend_select_1.png" />
+    <Image Include="Resource\menu_extract_select_1.png" />
+    <Image Include="Resource\menu_label_select_1.png" />
+    <Image Include="Resource\menu_layflat_select_1.png" />
+    <Image Include="Resource\menu_move_select_1.png" />
+    <Image Include="Resource\menu_orient_select_1.png" />
+    <Image Include="Resource\menu_rotate_select_1.png" />
+    <Image Include="Resource\menu_save_select_1.png" />
+    <Image Include="Resource\menu_shelloffset_select_1.png" />
+    <Image Include="Resource\menu_support_select_1.png" />
+    <Image Include="Resource\menu_scale_select_1.png" />
+    <Image Include="Resource\part_delete_1.png" />
+    <Image Include="Resource\part_hide_1.png" />
+    <Image Include="Resource\part_hide_select_1.png" />
+    <Image Include="Resource\part_show_1.png" />
+    <Image Include="Resource\part_show_select_1.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Font Include="Resource\font\OpenSans-Bold.ttf" />
+    <Font Include="Resource\font\OpenSans-ExtraBold.ttf" />
+    <Font Include="Resource\font\OpenSans-Light.ttf" />
+    <Font Include="Resource\font\OpenSans-Regular.ttf" />
+    <Font Include="Resource\font\OpenSans-SemiBold.ttf" />
   </ItemGroup>
 </Project>

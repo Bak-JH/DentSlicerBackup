@@ -44,6 +44,14 @@
 
 #include "feature/TwoManifoldBuilder.h"
 #include "render/CircleMeshEntity.h"
+#include "Qml/LeftPopup.h"
+#include "Qml/Toast.h"
+#include "Qml/SlideBar.h"
+#include "Qml/ModalWindow.h"
+#include "Qml/ViewMode.h"
+#include "Qml/PartList.h"
+#include "Qml/PrintInfo.h"
+
 #include <functional>
 using namespace Hix::Input;
 using namespace Hix::UI;
@@ -54,6 +62,19 @@ QmlManager::QmlManager(QObject *parent) : QObject(parent), _optBackend(this, scf
 	,layerViewFlags(LAYER_INFILL | LAYER_SUPPORTERS | LAYER_RAFT)
 	, _cursorEraser(QPixmap(":/Resource/cursor_eraser.png")), _currentMode(nullptr)
 {
+	qmlRegisterType<Hix::QML::CloseButton>("hix.qml", 1, 0, "CloseButton");
+	qmlRegisterType<Hix::QML::RoundButton>("hix.qml", 1, 0, "RoundButton");
+	qmlRegisterType<Hix::QML::LeftPopupShell>("hix.qml", 1, 0, "LeftPopupShell");
+	qmlRegisterType<Hix::QML::InputBox>("hix.qml", 1, 0, "InputBox");
+	qmlRegisterType<Hix::QML::DropdownBox>("hix.qml", 1, 0, "DropdownBox");
+	qmlRegisterType<Hix::QML::ToastShell>("hix.qml", 1, 0, "ToastShell");
+	qmlRegisterType<Hix::QML::SlideBarShell>("hix.qml", 1, 0, "SlideBarShell");
+	qmlRegisterType<Hix::QML::LabelTextBox>("hix.qml", 1, 0, "LabelTextBox");
+	qmlRegisterType<Hix::QML::ModalShell>("hix.qml", 1, 0, "ModalShell");
+	qmlRegisterType<Hix::QML::ViewModeShell>("hix.qml", 1, 0, "ViewModeShell");
+	qmlRegisterType<Hix::QML::PartListContent>("hix.qml", 1, 0, "PartListContent");
+	qmlRegisterType<Hix::QML::PartDeleteButton>("hix.qml", 1, 0, "PartDeleteButton");
+	qmlRegisterType<Hix::QML::PrintInfoText>("hix.qml", 1, 0, "PrintInfoText");
 }
 
 void QmlManager::initializeUI(QQmlApplicationEngine* e){
