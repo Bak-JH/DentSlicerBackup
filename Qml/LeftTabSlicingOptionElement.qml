@@ -39,6 +39,7 @@ Item {
             usrInputChanged(columnName, index);
         }
 
+		
         Image{
             id : arrow
 

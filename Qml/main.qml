@@ -1,4 +1,4 @@
-import QtQuick 2.4
+import QtQuick 2.6
 import QtQuick.Controls 1.4
 import QtQuick.Scene3D 2.0
 import QtQuick.Window 2.2
@@ -27,6 +27,10 @@ Item{
 
         property alias mainFont : mainFont
 
+		property alias openRegular: openRegular
+		property alias openSemiBold: openSemiBold
+		property alias openBold: openBold
+
         /*
         onActiveFocusItemChanged: {
             console.log("does window has chain", activeFocusOnTab);
@@ -45,6 +49,19 @@ Item{
             id : mediumFont
             source: "qrc:/Resource/font/NotoSans-SemiCondensedMedium.ttf"
         }
+
+		FontLoader {
+			id: openRegular
+            source: "qrc:/Resource/font/OpenSans-Regular.ttf"
+		}
+		FontLoader {
+			id: openSemiBold
+            source: "qrc:/Resource/font/OpenSans-SemiBold.ttf"
+		}
+		FontLoader {
+			id: openBold
+            source: "qrc:/Resource/font/OpenSans-Bold.ttf"
+		}
 
 //        LeftTabPartListElement {
 //            id: statechanger
@@ -212,8 +229,128 @@ Item{
             visible: false
         }
 
-        MouseArea{
+		BastardyMenu {
+			id: bastardymenu
+			anchors.top: uppertab.bottom
+			anchors.left: lefttab.right
+			anchors.leftMargin: 15
+			anchors.topMargin: 20
+		}
 
+		PartList{
+			id: partlist
+			anchors.top: uppertab.bottom
+            anchors.left: parent.left
+			z: 10
+		}
+		/*
+		LeftPopup {
+			id: leftpopup
+			anchors.top: uppertab.bottom
+			anchors.left: lefttab.right
+			anchors.leftMargin: 15
+			anchors.topMargin: 120
+		}
+		*/
+
+		LeftPopupMove {
+			id: leftpopupmove
+			anchors.top: uppertab.bottom
+			anchors.left: lefttab.right
+			anchors.leftMargin: 15
+			anchors.topMargin: 120
+		}
+		LeftPopupScale {
+			id: leftpopupscale
+			anchors.top: uppertab.bottom
+			anchors.left: leftpopupmove.right
+			anchors.leftMargin: 15
+			anchors.topMargin: 120
+		}
+		LeftPopupRotate {
+			id: leftpopuprotate
+			anchors.top: uppertab.bottom
+			anchors.left: leftpopupscale.right
+			anchors.leftMargin: 15
+			anchors.topMargin: 120
+		}
+		LeftPopupOrient
+		{
+			id: leftpopuporient
+			anchors.top: uppertab.bottom
+			anchors.left: lefttab.right
+			anchors.leftMargin: 15
+			anchors.topMargin: 400
+		}
+		/*
+		Toast {
+			id: toast
+			anchors.top: uppertab.bottom
+			anchors.topMargin: 600
+			anchors.left: lefttab.right
+			anchors.leftMargin: 15
+		}
+		*/
+		UndoRedo {
+			id: undoredo
+			anchors.top: uppertab.bottom
+			anchors.topMargin: 720
+			anchors.left: lefttab.right
+			anchors.leftMargin: 15
+		}
+		/*
+		SlideBar {
+			id: slidebar
+			anchors.top: uppertab.bottom
+			anchors.topMargin: 160
+			anchors.left: lefttab.right
+			anchors.leftMargin: 600
+		}
+		*/
+
+		Cam {
+			id: cam
+			anchors.top: uppertab.bottom
+			anchors.topMargin: 160
+			anchors.left: slidebar.right
+			anchors.leftMargin: 300
+		}
+		/*
+		CanvasTest {
+			id: canvastest
+			anchors.top: uppertab.bottom
+			anchors.topMargin: 160
+			anchors.left: lefttab.right
+			anchors.leftMargin: 180
+		}
+		*/
+		ViewMode {
+			id: viewmode
+			anchors.top: uppertab.bottom
+			anchors.left: lefttab.right
+			anchors.leftMargin: 15
+			anchors.topMargin: 700
+		}
+
+		PrintInfo {
+			id: printinfo
+			anchors.top: slidebar.top
+			anchors.topMargin: 500
+			anchors.left: slidebar.right
+			anchors.leftMargin: 100
+		}
+		
+		/*
+		ModalWindow {
+			id: modalwindow
+			anchors.top: uppertab.bottom
+			anchors.topMargin: 160
+			anchors.left: lefttab.right
+			anchors.leftMargin: 320
+		}
+		*/
+		
+        MouseArea{
             acceptedButtons: Qt.MiddleButton | Qt.RightButton
             anchors.fill: parent
             property int mode: 0;// 0 = none, 1 = translate, 2 = rotate, !#!@# qt...
