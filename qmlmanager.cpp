@@ -488,7 +488,7 @@ bool QmlManager::getGroupSelectionActive() {
 }
 
 QString QmlManager::getVersion(){
-    return version;
+    return QString::fromStdString(settings().deployInfo.version);
 }
 void QmlManager::keyboardHandlerFocus(){
     qDebug() << "keyboard focus on";

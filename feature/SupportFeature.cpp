@@ -171,6 +171,9 @@ Hix::Features::FeatureContainer* Hix::Features::SupportMode::generateAutoSupport
 
 Hix::Features::FeatureContainer* Hix::Features::SupportMode::clearSupport()
 {
+	if (qmlManager->supportRaftManager().supportsEmpty())
+		return nullptr;
+
 	Hix::Features::FeatureContainer* container = new FeatureContainer();
 	std::unordered_set<const GLModel*> models;
 	if(qmlManager->supportRaftManager().raftActive())
@@ -178,7 +181,7 @@ Hix::Features::FeatureContainer* Hix::Features::SupportMode::clearSupport()
 
 	for(auto each : qmlManager->supportRaftManager().modelAttachedSupports(_targetModels))
 		container->addFeature(new RemoveSupport(each));
-
+	
 	for (auto model : _targetModels)
 		container->addFeature(new Move(model, QVector3D(0, 0, -Hix::Support::SupportRaftManager::supportRaftMinLength())));	
 

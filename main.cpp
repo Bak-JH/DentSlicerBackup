@@ -55,7 +55,6 @@ int main(int argc, char** argv)
 #else
 
 	QApplication app(argc, argv);
-	QString version = "1.0.0";
 	/* Language patch
 	QTranslator translator ;
 	translator.load(":/lang_ko.qm");
@@ -66,7 +65,10 @@ int main(int argc, char** argv)
 	qRegisterMetaType<std::vector<QVector3D>>("std::vector<QVector3D>");
 	qRegisterMetaType<std::vector<float>>("std::vector<float>");
 	qmlRegisterType<GridMesh>("DentSlicer", 1, 0, "GridMesh");
-	//qmlRegisterType<SlicingConfiguration>("DentStudio", 1, 0, "SlicingConfiguration");
+
+	QScopedPointer<QuaternionHelper> qq(new QuaternionHelper);
+	qmlManager = new QmlManager();
+	QScopedPointer<QmlManager> qm(qmlManager);
 
 	/** Splash Image **/
 	QPixmap pixmap(":/Resource/splash_dentslicer.png");
@@ -76,18 +78,12 @@ int main(int argc, char** argv)
 	painter.setPen(penHText);
 
 	painter.drawText(QPoint(32, 290), "Dental 3D Printing Solution");
-	painter.drawText(QPoint(32, 310), "Version " + version);
+	painter.drawText(QPoint(32, 310), "Version " + qmlManager->getVersion());
 	//painter.drawText(QPoint(88,310), version);
 	painter.drawText(QPoint(32, 330), "Developed by HiX Inc.");
 
 	QSplashScreen* splash = new QSplashScreen(pixmap);
 	splash->show();
-
-
-	QScopedPointer<QuaternionHelper> qq(new QuaternionHelper);
-	qmlManager = new QmlManager();
-	qmlManager->version = version;
-	QScopedPointer<QmlManager> qm(qmlManager);
 
 	engine.rootContext()->setContextProperty("qm", qm.data());
 	//FindItemByName(&engine, "slicing_data")->setContextProperty("qm", qmlManager);
