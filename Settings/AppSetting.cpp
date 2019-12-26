@@ -12,7 +12,7 @@ typedef rapidjson::GenericStringBuffer<rapidjson::UTF8<>, rapidjson::MemoryPoolA
 Hix::Settings::AppSetting::AppSetting()
 {
 	auto appSettingsPath = deployInfo.settingsDir;
-	appSettingsPath.append("settings.json");
+	appSettingsPath.append("/settings.json");
 	parseJSON(appSettingsPath);
 }
 
