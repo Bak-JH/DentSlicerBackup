@@ -176,7 +176,7 @@ Item {
                     anchors.topMargin: 38
 
 
-                    text : "v1.0.0"
+                    text : "v" + qm.getVersion()
 
                     font.pixelSize: 14
                     font.family: mainFont.name

@@ -99,8 +99,6 @@ public:
     explicit QmlManager(QObject *parent = nullptr);
     QQmlApplicationEngine* engine;
 
-    QString version = "0.0.1";
-
     // UI components
 	Qt3DRender::QCamera* _camera;
     QObject* mainWindow;
