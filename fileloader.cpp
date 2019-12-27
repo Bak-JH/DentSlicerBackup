@@ -8,9 +8,9 @@
 
 using namespace Hix::Engine3D;
 /* Custom fgets function to support Mac line-ends in Ascii STL files. OpenSCAD produces this when used on Mac */
-void* FileLoader::fgets_(char* ptr, size_t len, std::filesystem::path f)
+void* FileLoader::fgets_(char* ptr, size_t len, std::fstream& f)
 {
-    while(len && fread(ptr, 1, 1, f) > 0)
+    while(len && f.read(ptr, 1).gcount() > 0)
     {
         if (*ptr == '\n' || *ptr == '\r')
         {
@@ -23,7 +23,7 @@ void* FileLoader::fgets_(char* ptr, size_t len, std::filesystem::path f)
     return nullptr;
 }
 
-inline char* readFace(char* ptr, size_t len, std::fstream f, char* save)
+inline char* readFace(char* ptr, size_t len, std::fstream& f, char* save)
 {
     while(len && f.read(ptr, 1).gcount() > 0)
     {
@@ -114,8 +114,8 @@ bool FileLoader::loadMeshSTL_binary(Mesh* mesh, std::filesystem::path filepath){
 	std::fstream f(filepath);
 	f.seekg(0L, SEEK_END);
 
-    long long file_size = ftell(f); //The file size is the position of the cursor after seeking to the end.
-    rewind(f); //Seek back to start.
+    long long file_size = f.tellg(); //The file size is the position of the cursor after seeking to the end.
+	f.seekg(0, SEEK_SET); //Seek back to start.
     size_t face_count = (file_size - 80 - sizeof(uint32_t)) / 50; //Subtract the size of the header. Every face uses exactly 50 bytes.
 
     char buffer[80];
@@ -126,17 +126,12 @@ bool FileLoader::loadMeshSTL_binary(Mesh* mesh, std::filesystem::path filepath){
         return false;
     }
 
-    uint32_t reported_face_count;
+    char faceBuffer[80];
     //Read the face count. We'll use it as a sort of redundancy code to check for file corruption.
-    if (fread(&reported_face_count, sizeof(uint32_t), 1, f) != 1)
+    if (f.read(faceBuffer, sizeof(uint32_t)).gcount() != 1)
     {
 		f.close();
         return false;
-    }
-    if (reported_face_count != face_count)
-    {
-        //qDebug() << "Face count reported by file (%s) is not equal to actual face count (%s). File could be corrupt!\n", std::to_string(reported_face_count).c_str(), std::to_string(face_count).c_str();
-        //logWarning("Face count reported by file (%s) is not equal to actual face count (%s). File could be corrupt!\n", std::to_string(reported_face_count).c_str(), std::to_string(face_count).c_str());
     }
 
     //For each face read:
@@ -147,7 +142,7 @@ bool FileLoader::loadMeshSTL_binary(Mesh* mesh, std::filesystem::path filepath){
     {
         if (i%1000==0)
             QCoreApplication::processEvents();
-        if (fread(buffer, 50, 1, f) != 1)
+        if (f.read(buffer, 1).gcount() != 1)
         {
 			f.close();
             return false;
@@ -242,15 +237,14 @@ bool FileLoader::loadMeshOBJ(Mesh* mesh, std::filesystem::path filepath){
     if(!f.is_open())
         return 0;
 
-    while((c = fgetc(f)) != EOF)
+    while((c = f.get()) != EOF)
         if(c == '\n')
             lines++;
 
-    f.close()
+	f.close();
 
     if(c != '\n')
         lines++;
-    qDebug()<< "test 1";
 
 	std::fstream file(filepath);
     if( !file.is_open() )
@@ -262,15 +256,15 @@ bool FileLoader::loadMeshOBJ(Mesh* mesh, std::filesystem::path filepath){
     while( 1 ){
         char lineHeader[128];
         // read the first word of the line
-        int res = fscanf(file, "%s", lineHeader);
-        if (res == EOF)
+        file >> lineHeader;
+        if (lineHeader == "")
             break; // EOF = End Of File. Quit the loop.
 
         // else : parse lineHeader
 
         if ( strcmp( lineHeader, "v" ) == 0 ){
             float v_x, v_y, v_z;
-            fscanf(file, "%f %f %f\n", &v_x, &v_y, &v_z );
+			file >> v_x >> v_y >> v_z;
             QVector3D vertex = QVector3D(v_x,v_y,v_z);
             temp_vertices.push_back(vertex);
         } else if ( strcmp( lineHeader, "f" ) == 0 ){
@@ -342,11 +336,11 @@ bool FileLoader::loadMeshOBJ(Mesh* mesh, std::filesystem::path filepath){
         } else{
             // Probably a comment, eat up the rest of the line
             char stupidBuffer[1000];
-            fgets(stupidBuffer, 1000, file);
+            file.get(stupidBuffer, 1000);
         }
 
     }
-    file.close()
+	file.close();
 
     return true;
 }
