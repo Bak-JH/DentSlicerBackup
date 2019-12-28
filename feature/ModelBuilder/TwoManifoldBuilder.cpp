@@ -1,7 +1,7 @@
 #include "TwoManifoldBuilder.h"
-#include "Shapes2D.h"
-#include "../common/Debug.h"
-#include "../qmlmanager.h"
+#include "../Shapes2D.h"
+#include "../../common/Debug.h"
+#include "../../qmlmanager.h"
 #include <cmath>
 //Few assumptions
 //1. Assume filling plane is XY plane.
@@ -801,3 +801,8 @@ Hix::Features::TwoManifoldBuilder::TwoManifoldBuilder(Hix::Engine3D::Mesh& model
 
 
 }
+
+Hix::Features::TwoManifoldBuilder::~TwoManifoldBuilder()
+{
+}
+

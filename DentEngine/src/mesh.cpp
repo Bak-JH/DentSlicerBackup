@@ -184,36 +184,14 @@ Mesh& Mesh::operator+=(const Mesh& o)
 
 /********************** Mesh Edit Functions***********************/
 
-//void Mesh::vertexApplyTransformation(const Qt3DCore::QTransform& transform)
-//{
-//	auto mat = transform.matrix();
-//	qDebug() << "fuuuckl" << mat;
-//	auto scale = transform.scale3D();
-//	vertices.markChangedAll();
-//	_bounds.reset();
-//	size_t count = 0;
-//	for (auto& vertex : vertices)
-//	{
-//		if (count % 100 == 0)
-//			QCoreApplication::processEvents();
-//		vertex.position = vertex.position * transform.matrix();
-//		_bounds.update(vertex.position);
-//		++count;
-//	};
-//
-//	for (auto& face : faces)
-//	{
-//		auto meshVertices = face.meshVertices();
-//		face.fn = QVector3D::normal(meshVertices[0].position(),
-//			meshVertices[1].position(),
-//			meshVertices[2].position());
-//	};
-//
-//	for (auto& vertex : vertices)
-//	{
-//		vertex.calculateNormalFromFaces();
-//	};
-//}
+void Mesh::vertexApplyTransformation(const Qt3DCore::QTransform& transform)
+{
+	for (auto& vertex : vertices)
+	{
+		vertex.position = vertex.position * transform.matrix();
+	};
+	rehashVtcs();
+}
 
 void Mesh::vertexOffset(float factor){
 	vertices.markChangedAll();
