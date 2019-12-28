@@ -99,6 +99,14 @@ void GLModel::updateAABBScale(const QVector3D& scale)
 }
 
 
+void GLModel::flushTransform()
+{
+	_mesh->vertexApplyTransformation(_transform);
+	_transform.setMatrix(QMatrix4x4());
+	updateRecursiveAabb();
+	updateMesh(_mesh);
+}
+
 void GLModel::moveDone()
 {
 	updatePrintable();

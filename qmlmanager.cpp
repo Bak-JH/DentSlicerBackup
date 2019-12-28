@@ -42,7 +42,7 @@
 #include "feature/deleteModel.h"
 #include "feature/addModel.h"
 
-#include "feature/TwoManifoldBuilder.h"
+#include "feature/ModelBuilder/ModelBuilderMode.h"
 #include "render/CircleMeshEntity.h"
 #include <functional>
 using namespace Hix::Input;
@@ -328,43 +328,6 @@ void QmlManager::openModelFile(QString fname){
 	//runArrange();
 	QApplication::setOverrideCursor(QCursor(Qt::ArrowCursor));
 }
-
-void QmlManager::openAndBuildModel(QString fname) {
-	openProgressPopUp();
-
-	auto mesh = new Mesh();
-	if (fname != "" && (fname.contains(".stl") || fname.contains(".STL"))) {
-		FileLoader::loadMeshSTL(mesh, fname.toLocal8Bit().constData());
-	}
-	else if (fname != "" && (fname.contains(".obj") || fname.contains(".OBJ"))) {
-		FileLoader::loadMeshOBJ(mesh, fname.toLocal8Bit().constData());
-	}
-	fname = filenameToModelName(fname.toStdString());
-	setProgress(0.1);
-	auto addModel = new ListModel(mesh, fname, nullptr);
-	_featureHistoryManager.addFeature(addModel);
-	auto latest = addModel->getAddedModel();
-
-	setProgress(0.2);
-	TwoManifoldBuilder modelBuilder(*mesh);
-	mesh->centerMesh();
-	setProgress(0.4);
-	//repair mode
-	if (Hix::Features::isRepairNeeded(mesh))
-	{
-		qmlManager->setProgressText("Repairing mesh.");
-		std::unordered_set<GLModel*> repairModels;
-		repairModels.insert(latest);
-		MeshRepair sfsdfs(repairModels);
-	}
-	setProgress(1.0);
-	// do auto arrange
-	if (glmodels.size() >= 2)
-		openArrange();
-	//runArrange();
-	QApplication::setOverrideCursor(QCursor(Qt::ArrowCursor));
-}
-
 
 
 

@@ -96,6 +96,9 @@ public:
 		Q_ASSERT(obj);
 		QMetaObject::invokeMethod(obj, std::forward<F>(fun));
 	}
+
+	static QString filenameToModelName(const std::string& s);
+
     explicit QmlManager(QObject *parent = nullptr);
     QQmlApplicationEngine* engine;
 
@@ -290,7 +293,6 @@ public:
 	void addToGLModels(std::unique_ptr<GLModel>&& target);
 	const Hix::Settings::AppSetting& settings()const;
 private:
-	QString filenameToModelName(const std::string& s);
 	Hix::Tasking::TaskManager _taskManager;
 	void setModelViewMode(int mode);
 	GLModel* getModelByID(int ID);
@@ -359,10 +361,6 @@ public slots:
     void openModelFile(QString filename);
 	std::unique_ptr<GLModel> removeFromGLModels(GLModel* target);
 	GLModel* releaseFromGLModels(GLModel* target);
-
-
-
-	void openAndBuildModel(QString filename);
 
     void deleteModelFileDone();
     void deleteModelFile(GLModel* target);

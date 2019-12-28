@@ -76,6 +76,7 @@ public:
 	void updateAABBMove(const QVector3D& translate);
 	void updateAABBScale(const QVector3D& scale);
 
+	void flushTransform();
 	void moveDone();
 	void rotateDone();
 	void scaleDone();

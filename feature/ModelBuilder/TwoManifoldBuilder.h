@@ -1,6 +1,6 @@
 #pragma once
-#include "../DentEngine/src/Mesh.h"
-#include "interfaces/Feature.h"
+#include "../../DentEngine/src/Mesh.h"
+#include "../interfaces/Feature.h"
 class GLModel;
 
 namespace Hix
@@ -9,10 +9,11 @@ namespace Hix
 	namespace Features
 	{
 
-		class TwoManifoldBuilder //: public Hix::Features::Feature
+		class TwoManifoldBuilder: public Hix::Features::Feature
 		{
 		public:
 			TwoManifoldBuilder(Hix::Engine3D::Mesh& model);
+			virtual ~TwoManifoldBuilder();
 		private:
 			Hix::Engine3D::Mesh& _model;
 			std::unordered_map<Hix::Engine3D::FaceConstItr, QVector3D> _fnCache;

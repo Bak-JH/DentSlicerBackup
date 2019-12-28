@@ -57,7 +57,6 @@
     <ClCompile Include="feature\convex_hull.cpp" />
     <ClCompile Include="feature\CSG\CorkMeshFactory.cpp" />
     <ClCompile Include="feature\cut\DrawingPlane.cpp" />
-    <ClCompile Include="feature\cut\MeshPlaneCut.cpp" />
     <ClCompile Include="feature\cut\polylinecut.cpp" />
     <ClCompile Include="feature\cut\ZAxialCut.cpp" />
     <ClCompile Include="feature\deleteModel.cpp" />
@@ -73,7 +72,6 @@
     <ClCompile Include="feature\layFlat.cpp" />
     <ClCompile Include="feature\layerview\CrossSectionPlane.cpp" />
     <ClCompile Include="feature\layerview\layerview.cpp" />
-    <ClCompile Include="feature\ModelBuilder.cpp" />
     <ClCompile Include="feature\move.cpp" />
     <ClCompile Include="feature\overhangDetect.cpp" />
     <ClCompile Include="feature\Plane3D.cpp" />
@@ -100,7 +98,6 @@
     <ClCompile Include="feature\repair\TMesh\vertex.cpp" />
     <ClCompile Include="feature\rotate.cpp" />
     <ClCompile Include="feature\SupportFeature.cpp" />
-    <ClCompile Include="feature\TwoManifoldBuilder.cpp" />
     <ClCompile Include="fileloader.cpp" />
     <ClCompile Include="feature\cut\FreeCutPtWidget.cpp" />
     <ClCompile Include="glmodel.cpp" />
@@ -184,6 +181,10 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Settings\DeployInfo.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="feature\ModelBuilder\TwoManifoldBuilder.cpp" />
+    <ClCompile Include="feature\ModelBuilder\ModelBuilderMode.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -648,7 +649,6 @@
     <ClInclude Include="feature\CSG\CorkMeshFactory.h" />
     <ClInclude Include="feature\CSG\CSG.h" />
     <ClInclude Include="feature\cut\DrawingPlane.h" />
-    <ClInclude Include="feature\cut\MeshPlaneCut.h" />
     <ClInclude Include="feature\cut\ZAxialCut.h" />
     <ClInclude Include="feature\deleteModel.h" />
     <ClInclude Include="feature\extension.h" />
@@ -664,7 +664,6 @@
     <ClInclude Include="feature\layFlat.h" />
     <ClInclude Include="feature\layerview\layerview.h" />
     <ClInclude Include="feature\interfaces\Mode.h" />
-    <ClInclude Include="feature\ModelBuilder.h" />
     <ClInclude Include="feature\move.h" />
     <ClInclude Include="feature\overhangDetect.h" />
     <ClInclude Include="feature\Plane3D.h" />
@@ -687,7 +686,6 @@
     <ClInclude Include="feature\repair\TMesh\vertex.h" />
     <ClInclude Include="feature\rotate.h" />
     <ClInclude Include="feature\SupportFeature.h" />
-    <ClInclude Include="feature\TwoManifoldBuilder.h" />
     <ClInclude Include="fileloader.h" />
     <ClInclude Include="feature\hollowshell.h" />
     <ClInclude Include="input\Clickable.h" />
@@ -887,6 +885,10 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Settings\DeployInfo.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="feature\ModelBuilder\TwoManifoldBuilder.h" />
+    <ClInclude Include="feature\ModelBuilder\ModelBuilderMode.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
