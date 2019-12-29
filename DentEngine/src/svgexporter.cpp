@@ -193,7 +193,7 @@ Edge thickness = 1\r\n\
 Distance to Part = 1\r\n\
 Max offset from Part = -1\r\n\
 Grid Base Plate Type = None").arg(QString::number((int)(scfg->layer_height*1000)),
-            QString::number(printerSetting.bedX), QString::number(printerSetting.bedY),
+            QString::number(printerSetting.bedBound.lengthX()), QString::number(printerSetting.bedBound.lengthY()),
             QString::number(printerSetting.sliceImageResolutionX), QString::number(printerSetting.sliceImageResolutionY),
             QString::number(scfg->layer_height)).toStdString().data());
     parametersfile.close();

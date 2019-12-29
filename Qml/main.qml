@@ -206,11 +206,6 @@ Item{
             id: filedialogload
             visible: false
         }
-		FileDialogLoad{
-            id: fileDialogMB
-			isModelBuilder: true
-            visible: false
-        }
 
         MouseArea{
 

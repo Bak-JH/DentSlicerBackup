@@ -58,7 +58,7 @@ Rectangle {
         second_tab_button_orient.state = "inactive";
         second_tab_button_rotate.state = "inactive";
         runGroupFeature(ftrRotate,"inactive", 0, 0, 0, null);
-        third_tab_button_autorepair.state = "inactive";
+        third_tab_button_modelbuilder.state = "inactive";
         third_tab_button_cut.state = "inactive";
         //third_tab_button_hollowshell.state = "inactive";
         third_tab_button_shelloffset.state = "inactive";
@@ -388,9 +388,6 @@ Rectangle {
 
         anchors.left : secondtab.right
         anchors.top : parent.top
-
-
-        //color: "transparent"
         UpperButton{
             id : third_tab_button_scale
             //state: inactive
@@ -415,34 +412,29 @@ Rectangle {
             onButtonClicked:{
                 if(!qm.isSelected() && (state == "active"))
                     window.resultPopUp.openResultPopUp("","You must select at least one model.","")
-
             }
-
-
         }
-
         UpperButton{
-            id : third_tab_button_autorepair
-            objectName: "repairButton"
+            id : third_tab_button_modelbuilder
             anchors.left: third_tab_button_scale.right
             iconSource1: "qrc:/resource/upper_autorepair.png"
             iconSource2: "qrc:/Resource/upper2_autorepair.png"
             iconText: qsTr("Model Builder")
-			 MouseArea{
-                anchors.fill: parent
-                onClicked:{
-                    all_off()
-					fileDialogMB.open();
+            onButtonClicked:{
+                if(state == "active")
+                {
+
                 }
+                 //runGroupFeature(ftrLayFlat, state, 0, 0, 0, null);
             }
         }
 
         UpperButton{
             id : third_tab_button_cut
             //state:"inactive"
-            anchors.left: third_tab_button_autorepair.right
+            anchors.left: third_tab_button_modelbuilder.right
             //anchors.leftMargin: 4
-            //anchors.bottom: third_tab_button_autorepair.bottom
+            //anchors.bottom: third_tab_button_modelbuilder.bottom
             //anchors.bottomMargin: 3
             iconSource1: "qrc:/resource/upper_cut.png"
             iconSource2: "qrc:/Resource/upper2_cut.png"
@@ -1088,45 +1080,86 @@ Rectangle {
 
         }
 
-        //10. PopUp - Auto Repair
+        // //10. PopUp - Auto Repair
+        // PopUp {
+        //     signal modelRepair();
+        //     id: popup_autorepair
+        //     objectName: "repairPopup"
+        //     funcname: "Auto Repair"
+        //     height: 220
+        //     detail1: "Click Apply to fix the model."
+        //     //detail2: ""
+        //     image: "qrc:/Resource/popup_image/image_autorepair.png"
+        //     detailline1_vis: false
+        //     detailline2_vis: false
+        //     imageHeight: 76            
+        //     okbutton_vis: false
+        //     applybutton_vis: false
+        //     applyfinishbutton_vis: true
+        //     descriptionimage_vis: true
+        //     //state: third_tab_button_modelbuilder.state=="active" ? "active" : "inactive"
+        //     state: {
+        //         if (third_tab_button_autorepair.state=="active" && qm.isSelected())
+        //         {
+        //             onApplyFinishButton(); 
+        //             return "active";
+
+        //         }
+        //         else
+        //             return "inactive"
+        //     }
+        //     onApplyClicked: {
+        //         console.log("auto repair");
+        //         modelRepair();
+        //     }
+        //     function onApplyFinishButton(){
+        //         console.log("r-on")
+        //         popup_autorepair.colorApplyFinishButton(2)
+        //     }
+        //     function offApplyFinishButton(){
+        //         console.log("r-off")
+        //         popup_autorepair.colorApplyFinishButton(0);
+        //     }
+        // }
+
+
+        //12. PopUp - Model Builder
         PopUp {
-            signal modelRepair();
-            id: popup_autorepair
-            objectName: "repairPopup"
-            funcname: "Auto Repair"
-            height: 220
-            detail1: "Click Apply to fix the model."
-            //detail2: ""
-            image: "qrc:/Resource/popup_image/image_autorepair.png"
+            objectName: "modelBuilderPopup"
+            id: popup_modelBuilder
+            funcname: "Model Builder"
+            height: 265
+
+            //image: ""
             detailline1_vis: false
             detailline2_vis: false
-            imageHeight: 76            
+            imageHeight: 40
             okbutton_vis: false
-            applybutton_vis: false
-            applyfinishbutton_vis: true
-            descriptionimage_vis: true
-            //state: third_tab_button_autorepair.state=="active" ? "active" : "inactive"
+            applybutton_vis: true
+            applyfinishbutton_vis: false
+            descriptionimage_vis: false
+            numbox_detail2_vis: false
+            rangeslider_vis :false
             state: {
-                if (third_tab_button_autorepair.state=="active" && qm.isSelected())
-                {
-                    onApplyFinishButton(); 
+                if (third_tab_button_modelbuilder.state == "active"){
+                    popup_modelBuilder.colorApplyFinishButton(2);
+                    rangeslider_vis = true;
+                    openModelBuilder();
                     return "active";
-
+                } else {
+                    rangeslider_vis = false;
+                    closeModelBuilder();
+                    return "inactive";
                 }
-                else
-                    return "inactive"
             }
+
+            //signal runFeature(int type);
+            signal openModelBuilder();
+            signal closeModelBuilder();
+            signal buildModel();
+
             onApplyClicked: {
-                console.log("auto repair");
-                modelRepair();
-            }
-            function onApplyFinishButton(){
-                console.log("r-on")
-                popup_autorepair.colorApplyFinishButton(2)
-            }
-            function offApplyFinishButton(){
-                console.log("r-off")
-                popup_autorepair.colorApplyFinishButton(0);
+                buildModel();
             }
         }
 

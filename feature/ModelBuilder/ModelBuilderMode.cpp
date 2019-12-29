@@ -3,12 +3,20 @@
 #include "../../qmlmanager.h"
 #include "../../glmodel.h"
 #include "../addModel.h"
-
+#include <unordered_set>
+#include "TwoManifoldBuilder.h"
 constexpr float ZMARGIN = 5;
+
+
 Hix::Features::ModelBuilderMode::ModelBuilderMode(): _topPlane(qmlManager->total, true), _bottPlane(qmlManager->total, true)
 {
 	QString fileName = QFileDialog::getOpenFileName(nullptr, "Select scanned surface file", "", "3D Model file (*.stl)");
-
+	if (fileName.isEmpty())
+	{
+		QMetaObject::invokeMethod(qmlManager->boxUpperTab, "all_off");
+		return;
+		//qmlManager->setCurrentMode(nullptr);
+	}
 
 	qmlManager->openProgressPopUp();
 	auto mesh = new Mesh();
@@ -26,6 +34,9 @@ Hix::Features::ModelBuilderMode::ModelBuilderMode(): _topPlane(qmlManager->total
 	_model->moveModel(QVector3D(0, 0, ZMARGIN));
 	_topPlane.transform().setTranslation(QVector3D(0, 0, _model->aabb().zMax()));
 	_bottPlane.transform().setTranslation(QVector3D(0, 0, _model->aabb().zMin()));
+	std::unordered_set<GLModel*> models { _model.get() };
+	_rotateMode.reset(new RotateModeNoUndo(models, &qmlManager->getRayCaster()));
+	qmlManager->setProgress(1.0);
 
 	//auto addModel = new ListModel(mesh, fileName, nullptr);
 	//qmlManager->featureHistoryManager().addFeature(addModel);
@@ -52,4 +63,25 @@ Hix::Features::ModelBuilderMode::ModelBuilderMode(): _topPlane(qmlManager->total
 
 Hix::Features::ModelBuilderMode::~ModelBuilderMode()
 {
+}
+
+void Hix::Features::ModelBuilderMode::build()
+{
+	auto cuttingPlane = _topPlane.transform().translation().z();
+	auto bottomPlane = _bottPlane.transform().translation().z();
+
+	qmlManager->featureHistoryManager().addFeature(new TwoManifoldBuilder(_model->getMeshModd(), _model->modelName() , cuttingPlane, bottomPlane));
+	_model->setMesh(nullptr);
+}
+
+void Hix::Features::ModelBuilderMode::getSliderSignalTop(double value)
+{
+	float zlength = _model->aabb().lengthZ() + ZMARGIN;
+	_topPlane.transform().setTranslation(QVector3D(0, 0, _model->aabb().zMin() + zlength * value / 1.8));
+}
+
+void Hix::Features::ModelBuilderMode::getSliderSignalBot(double value)
+{
+	float zlength = _model->aabb().lengthZ() + ZMARGIN;
+	_bottPlane.transform().setTranslation(QVector3D(0, 0, _model->aabb().zMin() + zlength * value / 1.8));
 }

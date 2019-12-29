@@ -9,8 +9,8 @@ Hix::Features::CrossSectionPlane::CrossSectionPlane(Qt3DCore::QEntity* owner): Q
 	_planeMaterial = new Qt3DExtras::QTextureMaterial(this);
 	_planeMaterial->setAlphaBlendingEnabled(false);
 	auto clipPlane = new Qt3DExtras::QPlaneMesh(this);
-	clipPlane->setHeight(qmlManager->settings().printerSetting.bedX);
-	clipPlane->setWidth(qmlManager->settings().printerSetting.bedY);
+	clipPlane->setHeight(qmlManager->settings().printerSetting.bedBound.lengthX());
+	clipPlane->setWidth(qmlManager->settings().printerSetting.bedBound.lengthY());
 	clipPlane->setEnabled(true);
 	_transform.setRotationY(-90);
 	_transform.setRotationZ(-90);

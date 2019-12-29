@@ -55,7 +55,7 @@ Hix::Features::Autoarrange::Autoarrange(const std::unordered_set<GLModel*>& sele
 		modelRectMap.insert(std::make_pair(rect, model));
 	}
 	rbp::SkylineBinPack skylinePacker;
-	skylinePacker.Init(qmlManager->settings().printerSetting.bedX * Hix::Polyclipping::INT_PT_RESOLUTION, qmlManager->settings().printerSetting.bedY* Hix::Polyclipping::INT_PT_RESOLUTION, false);
+	skylinePacker.Init(qmlManager->settings().printerSetting.bedBound.lengthX() * Hix::Polyclipping::INT_PT_RESOLUTION, qmlManager->settings().printerSetting.bedBound.lengthY() * Hix::Polyclipping::INT_PT_RESOLUTION, false);
 	skylinePacker.Insert(rectsInput, packedOutput, rbp::SkylineBinPack::LevelBottomLeft);
 	//calculate max occupied rect so that we can re-center
 	int xMax = 0;

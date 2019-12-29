@@ -15,7 +15,7 @@ namespace Hix
 			void updatePosition();
 			virtual void featureStarted() = 0;
 			virtual void featureEnded() = 0;
-
+			const std::unordered_set<GLModel*>& models()const;
 		protected:
 			std::unordered_set<GLModel*> _targetModels;
 			UI::Widget3D _widget;
