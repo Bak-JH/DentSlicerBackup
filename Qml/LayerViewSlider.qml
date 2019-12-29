@@ -5,7 +5,6 @@ import QtQuick.Controls.Styles 1.0
 Slider {
     id:slider
     objectName: "layerViewSlider"
-    property string name:"slider"
     //property real modelHeight: modelHeight
     property int layerCount: layerCount
 	property double layerThickness: 0

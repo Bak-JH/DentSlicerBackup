@@ -3,6 +3,7 @@
 #include "../../common/Debug.h"
 #include "../../qmlmanager.h"
 #include <cmath>
+#include "../addModel.h"
 //Few assumptions
 //1. Assume filling plane is XY plane.
 //2. Assume Model have a boundary edges that is roughly parallel to this plane
@@ -800,6 +801,22 @@ Hix::Features::TwoManifoldBuilder::TwoManifoldBuilder(Hix::Engine3D::Mesh& model
 	delFaces.flush();
 
 
+}
+
+Hix::Features::TwoManifoldBuilder::TwoManifoldBuilder(Hix::Engine3D::Mesh* model, const QString& name, float cuttingPlane, float bottomPlane) :_model(*model)
+{
+	auto boundary = getLongestBoundary(_model);
+	Hix::Plane3D::PDPlane bestFitPlane{QVector3D(0,0, cuttingPlane), QVector3D(0,0,1)};
+	auto delFaces = edgeRemoveOutlier(_model, boundary, bestFitPlane);
+	cuntourConcaveFill(_model, boundary, true);
+	auto vtxEnd = _model.getVertices().cend();
+	zCylinder(_model, boundary, true, bottomPlane);
+	buildBott(_model, boundary, true, bottomPlane);
+	delFaces.flush();
+
+	auto addModel = new Hix::Features::ListModel(&_model, name, nullptr);
+	addModel->getAddedModel()->setZToBed();
+	addFeature(addModel);
 }
 
 Hix::Features::TwoManifoldBuilder::~TwoManifoldBuilder()

@@ -12,6 +12,11 @@ namespace Hix
 		public:
 			FeatureHisroyManager();
 			void addFeature(Hix::Features::Feature* feature);
+			//gets the latest feature
+			const Hix::Features::Feature& peek()const;
+			bool empty()const;
+			//remove latest feature
+			void pop();
 			void undo();
 			void redo();
 

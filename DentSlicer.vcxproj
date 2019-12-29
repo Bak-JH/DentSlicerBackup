@@ -1091,12 +1091,12 @@
     <None Include="Qml\MeshTransformerZoom.qml" />
     <None Include="Qml\Model.qml" />
     <None Include="Qml\Plane.qml" />
+    <None Include="Qml\PlanesliderRange.qml" />
     <None Include="Qml\SamplePopup.qml" />
     <None Include="Resource\font\NotoSans-Regular.ttf" />
     <None Include="Resource\font\NotoSans-SemiCondensed.ttf" />
     <None Include="Resource\font\NotoSans-SemiCondensedMedium.ttf" />
     <None Include="Qml\Planeslider.qml" />
-    <None Include="Qml\Plate.qml" />
     <None Include="Qml\PopUp.qml" />
     <None Include="Qml\ProgressPopUp.qml" />
     <None Include="Qml\ResultPopup.qml" />

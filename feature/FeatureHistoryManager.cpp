@@ -36,6 +36,28 @@ void Hix::Features::FeatureHisroyManager::addFeature(Hix::Features::Feature* fea
 	_itr = _history.end();
 }
 
+const Hix::Features::Feature& Hix::Features::FeatureHisroyManager::peek()const
+{
+	return *(_history.back().get());
+}
+
+bool Hix::Features::FeatureHisroyManager::empty() const
+{
+	return _history.empty();
+}
+
+void Hix::Features::FeatureHisroyManager::pop()
+{
+	if (*_itr == _history.back())
+	{
+		if (_history.size() > 1)
+			--_itr;
+		else
+			_itr = _history.end();
+	}
+	_history.pop_back();
+}
+
 void Hix::Features::FeatureHisroyManager::undo()
 {
 	if (_itr == _history.begin())

@@ -958,7 +958,6 @@
     <None Include="Resource\font\NotoSans-SemiCondensed.ttf" />
     <None Include="Resource\font\NotoSans-SemiCondensedMedium.ttf" />
     <None Include="Qml\Planeslider.qml" />
-    <None Include="Qml\Plate.qml" />
     <None Include="Qml\PopUp.qml" />
     <None Include="Qml\ProgressPopUp.qml" />
     <None Include="Qml\ResultPopup.qml" />
@@ -1113,6 +1112,7 @@
     <None Include="resource\zoom_down.png" />
     <None Include="resource\zoom_up.png" />
     <None Include="icon.ico" />
+    <None Include="Qml\PlanesliderRange.qml" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Header Files">

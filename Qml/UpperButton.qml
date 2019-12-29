@@ -76,9 +76,9 @@ Rectangle{
         case "Feedback":
             buttonClicked();
             break;
-
-
-
+        case "Model Builder":
+            buttonClicked();
+            break;
         default:
             //console.log(functionname);
             break;

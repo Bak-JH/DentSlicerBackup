@@ -8,6 +8,8 @@ using namespace Hix::UI;
 using namespace Hix::Input;
 Widget3D::Widget3D(Hix::Features::WidgetMode* mode) : _mode(mode)
 {
+	QObject::connect(qmlManager, &QmlManager::cameraViewChangedNative, this, &Widget3D::updatePosition);
+
 	addComponent(&_transform);
 }
 
