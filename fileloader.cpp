@@ -4,7 +4,9 @@
 #include <QFile>
 #include <iostream>
 #include "DentEngine/src/mesh.h"
-#include <fstream> 
+#include <fstream>
+#include <string>
+#include <sstream>
 
 using namespace Hix::Engine3D;
 /* Custom fgets function to support Mac line-ends in Ascii STL files. OpenSCAD produces this when used on Mac */
@@ -25,7 +27,7 @@ void* FileLoader::fgets_(char* ptr, size_t len, std::fstream& f)
 
 inline char* readFace(char* ptr, size_t len, std::fstream& f, char* save)
 {
-    while(len && f.read(ptr, 1))
+    while(len && f.read(ptr, 1).gcount() > 0)
     {
         char c = *ptr;
         if (c == '\n' || c == '\r')
@@ -75,15 +77,9 @@ bool FileLoader::loadMeshSTL_ascii(Mesh* mesh, std::filesystem::path filepath)
 	f.seekg(0, SEEK_SET); //Seek back to start.
     size_t face_count = (file_size - 14) / 87; //Subtract the size of the header and conclusion. Every face uses more than 87 bytes.
 
-    int face_cnt = 0;
 
     while(fgets_(buffer, sizeof(buffer), f))
     {
-
-        if (face_cnt%1000==0)
-            QCoreApplication::processEvents();
-        face_cnt += 1;
-
         if (sscanf(buffer, " vertex %f %f %f", &f0, &f1, &f2) == 3)
         {
 			QVector3D vertex(f0, f1, f2);
@@ -111,50 +107,29 @@ bool FileLoader::loadMeshSTL_ascii(Mesh* mesh, std::filesystem::path filepath)
 }
 
 bool FileLoader::loadMeshSTL_binary(Mesh* mesh, std::filesystem::path filepath){
-	std::fstream f(filepath);
-	f.seekg(0L, SEEK_END);
-
-    long long file_size = f.tellg(); //The file size is the position of the cursor after seeking to the end.
-	f.seekg(0, SEEK_SET); //Seek back to start.
-    size_t face_count = (file_size - 80 - sizeof(uint32_t)) / 50; //Subtract the size of the header. Every face uses exactly 50 bytes.
-
-    char buffer[80];
-    //Skip the header
-    if (!f.read(buffer, 1))
+	std::fstream f(filepath, std::ios_base::in |std::ios_base::binary);
+	constexpr size_t HEADER_SIZE =  80;
+	constexpr size_t TRI_CNT_SIZE = 4;
+	constexpr size_t TRI_SIZE = 50;
+	//read header
+	f.seekg(HEADER_SIZE, std::ios_base::cur);
+	//read tri cnt
+	uint32_t triCnt = 0;
+	f.read(reinterpret_cast<char*>(&triCnt), sizeof(triCnt));
+    for (size_t i = 0; i < triCnt; ++i)
     {
-		f.close();
-        return false;
-    }
-
-    char faceBuffer[80];
-    //Read the face count. We'll use it as a sort of redundancy code to check for file corruption.
-    if (!f.read(faceBuffer, 1))
-    {
-		f.close();
-        return false;
-    }
-
-    //For each face read:
-    //float(x,y,z) = normal, float(X,Y,Z)*3 = vertexes, uint16_t = flags
-    // Every Face is 50 Bytes: Normal(3*float), Vertices(9*float), 2 Bytes Spacer
-
-	qDebug() << buffer;
-
-    for (unsigned int i = 0; i < face_count; i++)
-    {
-        if (i%1000==0)
-            QCoreApplication::processEvents();
-        if (!f.read(buffer, 1))
+		char buffer[TRI_SIZE];
+        if (!f.read(buffer, TRI_SIZE))
         {
 			f.close();
             return false;
         }
+
         float *v= ((float*)buffer)+3;
 
         QVector3D v0(v[0], v[1], v[2]);
         QVector3D v1(v[3], v[4], v[5]);
         QVector3D v2(v[6], v[7], v[8]);
-
         mesh->addFace(v0, v1, v2);
     }
 	f.close();
@@ -199,7 +174,7 @@ bool FileLoader::loadMeshSTL(Mesh* mesh, QUrl fileUrl)
 
     char buffer[6];
 	//qDebug() << "asdf" << fread(buffer, 5, 1, f);
-	if (!f.read(buffer, 1))
+	if (!f.read(buffer, 5))
     {
 		f.close();
 		//fclose(f);
@@ -207,7 +182,6 @@ bool FileLoader::loadMeshSTL(Mesh* mesh, QUrl fileUrl)
     }
 	//fclose(f);
 	f.close();
-	qDebug() << buffer;
 
     buffer[5] = '\0';
     if (stringcasecompare(buffer, "solid") == 0)
@@ -228,15 +202,17 @@ bool FileLoader::loadMeshSTL(Mesh* mesh, QUrl fileUrl)
     return loadMeshSTL_binary(mesh, filePath);
 }
 
-bool FileLoader::loadMeshOBJ(Mesh* mesh, std::filesystem::path filepath){
+bool FileLoader::loadMeshOBJ(Mesh* mesh, QUrl fileUrl){
     char c;
     int lines = 0;
-	std::fstream f(filepath);
+	std::filesystem::path filePath(fileUrl.toLocalFile().toStdWString());
+	std::fstream f(filePath);
+	constexpr size_t HEADER_SIZE = 145;
 
     if(!f.is_open())
         return 0;
 
-    while((c = f.get()) != EOF)
+    while(f.get(c))
         if(c == '\n')
             lines++;
 
@@ -245,31 +221,39 @@ bool FileLoader::loadMeshOBJ(Mesh* mesh, std::filesystem::path filepath){
     if(c != '\n')
         lines++;
 
-	std::fstream file(filepath);
+	std::fstream file(filePath);
     if( !file.is_open() )
         return false;
 
     std::vector<QVector3D> temp_vertices;
     temp_vertices.reserve(lines);
-    qDebug() << "test 2";
-    while( 1 ){
-        char lineHeader[128];
-        // read the first word of the line
-        file >> lineHeader;
-        if (lineHeader == "")
-            break; // EOF = End Of File. Quit the loop.
 
+	file.seekg(HEADER_SIZE, std::ios_base::cur);
+    while(file.tellg() != -1){
+		std::stringstream lineHeader;
+
+        // read the first word of the line
+		std::string readLine, type;
+		std::getline(file, readLine);
+
+		lineHeader << readLine;
+		lineHeader >> type;
+
+		//qDebug() << "head: " << file.tellg() << "ASDFdsafdasas" << line.c_str();
         // else : parse lineHeader
 
-        if ( strcmp( lineHeader, "v" ) == 0 ){
+        if (type == "v"){
             float v_x, v_y, v_z;
-			file >> v_x >> v_y >> v_z;
+			lineHeader >> v_x >> v_y >> v_z;
             QVector3D vertex = QVector3D(v_x,v_y,v_z);
+			qDebug() << vertex;
             temp_vertices.push_back(vertex);
-        } else if ( strcmp( lineHeader, "f" ) == 0 ){
+        } else if (type == "f"){
 			char line[100]{ 0 };
             char save;
             char *f = readFace(line, 100, file, &save);
+			
+			qDebug() << line;
 
             char *startptr = line + 1;
             char *endptr;
@@ -333,9 +317,6 @@ bool FileLoader::loadMeshOBJ(Mesh* mesh, std::filesystem::path filepath){
             }
 
         } else{
-            // Probably a comment, eat up the rest of the line
-            char stupidBuffer[1000];
-            file.get(stupidBuffer, 1000);
         }
 
     }

@@ -305,7 +305,7 @@ void QmlManager::openModelFile(){
 		FileLoader::loadMeshSTL(mesh, fileUrl);
 	}
 	else if (filename != "" && (filename.contains(".obj") || filename.contains(".OBJ"))) {
-		FileLoader::loadMeshOBJ(mesh, filename.toLocal8Bit().constData());
+		FileLoader::loadMeshOBJ(mesh, fileUrl);
 	}
 	filenameToModelName(filename.toStdString());
 	setProgress(0.3);
