@@ -10,7 +10,7 @@ using namespace Hix::Engine3D;
 /* Custom fgets function to support Mac line-ends in Ascii STL files. OpenSCAD produces this when used on Mac */
 void* FileLoader::fgets_(char* ptr, size_t len, std::fstream& f)
 {
-    while(len && f.read(ptr, 1).gcount() > 0)
+    while(len && f.read(ptr, 1))
     {
         if (*ptr == '\n' || *ptr == '\r')
         {
@@ -25,7 +25,7 @@ void* FileLoader::fgets_(char* ptr, size_t len, std::fstream& f)
 
 inline char* readFace(char* ptr, size_t len, std::fstream& f, char* save)
 {
-    while(len && f.read(ptr, 1).gcount() > 0)
+    while(len && f.read(ptr, 1))
     {
         char c = *ptr;
         if (c == '\n' || c == '\r')
@@ -120,7 +120,7 @@ bool FileLoader::loadMeshSTL_binary(Mesh* mesh, std::filesystem::path filepath){
 
     char buffer[80];
     //Skip the header
-    if (f.read(buffer, 1).gcount() != 1)
+    if (!f.read(buffer, 1))
     {
 		f.close();
         return false;
@@ -128,7 +128,7 @@ bool FileLoader::loadMeshSTL_binary(Mesh* mesh, std::filesystem::path filepath){
 
     char faceBuffer[80];
     //Read the face count. We'll use it as a sort of redundancy code to check for file corruption.
-    if (f.read(faceBuffer, sizeof(uint32_t)).gcount() != 1)
+    if (!f.read(faceBuffer, 1))
     {
 		f.close();
         return false;
@@ -138,11 +138,13 @@ bool FileLoader::loadMeshSTL_binary(Mesh* mesh, std::filesystem::path filepath){
     //float(x,y,z) = normal, float(X,Y,Z)*3 = vertexes, uint16_t = flags
     // Every Face is 50 Bytes: Normal(3*float), Vertices(9*float), 2 Bytes Spacer
 
+	qDebug() << buffer;
+
     for (unsigned int i = 0; i < face_count; i++)
     {
         if (i%1000==0)
             QCoreApplication::processEvents();
-        if (f.read(buffer, 1).gcount() != 1)
+        if (!f.read(buffer, 1))
         {
 			f.close();
             return false;
@@ -176,8 +178,7 @@ bool FileLoader::loadMeshSTL(Mesh* mesh, QUrl fileUrl)
     unsigned long long num_whitespace = 0; //Number of whitespace characters.
     char* whitespace = new char;
 
-	f.read(whitespace, 1);
-    if (f.gcount() != 1)
+    if (!f.read(whitespace, 1))
     {
 		f.close();
 		//fclose(f);
@@ -187,8 +188,7 @@ bool FileLoader::loadMeshSTL(Mesh* mesh, QUrl fileUrl)
     while(isspace(whitespace[0]))
     {
         num_whitespace++;
-		f.read(whitespace, 1);
-		if (f.gcount() != 1)
+		if (!f.read(whitespace, 1))
         {
 			f.close();
 			//fclose(f);
@@ -199,8 +199,7 @@ bool FileLoader::loadMeshSTL(Mesh* mesh, QUrl fileUrl)
 
     char buffer[6];
 	//qDebug() << "asdf" << fread(buffer, 5, 1, f);
-	f.read(buffer, 1);
-	if (f.gcount() != 1)
+	if (!f.read(buffer, 1))
     {
 		f.close();
 		//fclose(f);
