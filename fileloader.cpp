@@ -25,28 +25,25 @@ void* FileLoader::fgets_(char* ptr, size_t len, std::fstream& f)
     return nullptr;
 }
 
-inline char* readFace(char* ptr, size_t len, std::fstream& f, char* save)
+std::deque<int> readFace(std::string line)
 {
-    while(len && f.read(ptr, 1).gcount() > 0)
-    {
-        char c = *ptr;
-        if (c == '\n' || c == '\r')
-        {
-            *ptr = '\0';
-            return nullptr;
-        }
-        else if (c == ' ' || c == '/' || c == '0' || c == '1' || c == '2' || c == '3' || c == '4' || c == '5' || c == '6' || c == '7' || c == '8' || c == '9')
-        {
-            ptr++;
-            len--;
-        }
-        else {
-            *save = *ptr;
-            *ptr = '\0';
-            return ptr;
-        }
-    }
-    return nullptr;
+	std::deque<int> tokens;
+
+	std::string const delims{ " /" };
+	size_t beg, pos = 0;
+
+	line.erase(0, 1);
+
+	while ((beg = line.find_first_not_of(delims, pos)) != std::string::npos)
+	{
+		pos = line.find_first_of(delims, beg + 1);
+		tokens.push_back(std::stoi(line.substr(beg, pos - beg)));
+	}
+
+	
+
+
+	return tokens;
 }
 
 
@@ -234,87 +231,93 @@ bool FileLoader::loadMeshOBJ(Mesh* mesh, QUrl fileUrl){
 
         // read the first word of the line
 		std::string readLine, type;
-		std::getline(file, readLine);
-
+		getline(file, readLine);
 		lineHeader << readLine;
+
 		lineHeader >> type;
 
-		//qDebug() << "head: " << file.tellg() << "ASDFdsafdasas" << line.c_str();
-        // else : parse lineHeader
+		qDebug() << type.c_str();
 
-        if (type == "v"){
-            float v_x, v_y, v_z;
+		if (type == "v") {
+			float v_x, v_y, v_z;
 			lineHeader >> v_x >> v_y >> v_z;
-            QVector3D vertex = QVector3D(v_x,v_y,v_z);
-			qDebug() << vertex;
-            temp_vertices.push_back(vertex);
-        } else if (type == "f"){
+			QVector3D vertex = QVector3D(v_x, v_y, v_z);
+			temp_vertices.push_back(vertex);
+        } 
+		else if (type == "f"){
 			char line[100]{ 0 };
             char save;
-            char *f = readFace(line, 100, file, &save);
-			
-			qDebug() << line;
+            std::deque<int> tokens = readFace(readLine);
 
-            char *startptr = line + 1;
-            char *endptr;
-            unsigned int vertexIndex[3];
-            QVector3D v0, v1, v2;
+			int vertexCnt = std::count(readLine.begin(), readLine.end(), ' ')-1;
+			int offset = tokens.size() / vertexCnt;
+			for (auto each : tokens)
+				qDebug() << "tok: " << each;
+			qDebug() << "space count: " << vertexCnt << "offset : " << offset;
+			//
+			//qDebug() << lineHeader.str().c_str();
+			//qDebug() << line;
 
-            /*
-             * (1) f v1/vt1 v2/vt2 v3/vt3 ...
-             * (2) f v1/vt1/vn1 v2/vt2/vn2 v3/vt3/vn3 ...
-             * (3) f v1//vn1 v2//vn2 v3//vn3 ...
-             */
-            if ((endptr = strchr(startptr, '/'))) {
-                *endptr = '\0';
-                vertexIndex[0] = atoi(startptr);
-                v0 = temp_vertices[vertexIndex[0]-1];
+   //         char *startptr = line + 1;
+   //         char *endptr;
+   //         unsigned int vertexIndex[3];
+   //         QVector3D v0, v1, v2;
 
-                startptr = strchr(endptr + 1, ' ') + 1;
-                endptr = strchr(startptr, '/');
-                *endptr = '\0';
-                vertexIndex[1] = atoi(startptr);
-                v1 = temp_vertices[vertexIndex[1]-1];
+   //         /*
+   //          * (1) f v1/vt1 v2/vt2 v3/vt3 ...
+   //          * (2) f v1/vt1/vn1 v2/vt2/vn2 v3/vt3/vn3 ...
+   //          * (3) f v1//vn1 v2//vn2 v3//vn3 ...
+   //          */
+   //         if ((endptr = strchr(startptr, '/'))) {
+   //             *endptr = '\0';
+   //             vertexIndex[0] = atoi(startptr);
+   //             v0 = temp_vertices[vertexIndex[0]-1];
 
-                while ( (startptr = strchr(endptr + 1, ' ')) && *(startptr += 1)) {
-                    endptr = strchr(startptr, '/');
-                    *endptr = '\0';
-                    vertexIndex[2] = atoi(startptr);
-                    v2 = temp_vertices[vertexIndex[2]-1];
-                    mesh->addFace(v0, v1, v2);
-                    v1 = v2;
-                }
-            }
-            /* f v1 v2 v3 ... */
-            else {
-                endptr = strchr(startptr, ' ');
-                *endptr = '\0';
-                vertexIndex[0] = atoi(startptr);
-                v0 = temp_vertices[vertexIndex[0]-1];
+   //             startptr = strchr(endptr + 1, ' ') + 1;
+   //             endptr = strchr(startptr, '/');
+   //             *endptr = '\0';
+   //             vertexIndex[1] = atoi(startptr);
+   //             v1 = temp_vertices[vertexIndex[1]-1];
 
-                startptr = endptr + 1;
-                endptr = strchr(startptr, ' ');
-                *endptr = '\0';
-                vertexIndex[1] = atoi(startptr);
-                v1 = temp_vertices[vertexIndex[1]-1];
+   //             while ( (startptr = strchr(endptr + 1, ' ')) && *(startptr += 1)) {
+   //                 endptr = strchr(startptr, '/');
+   //                 *endptr = '\0';
+   //                 vertexIndex[2] = atoi(startptr);
+   //                 v2 = temp_vertices[vertexIndex[2]-1];
+   //                 mesh->addFace(v0, v1, v2);
+   //                 v1 = v2;
+   //             }
+   //         }
+   //         /* f v1 v2 v3 ... */
+   //         else {
+   //             endptr = strchr(startptr, ' ');
+   //             *endptr = '\0';
+   //             vertexIndex[0] = atoi(startptr);
+   //             v0 = temp_vertices[vertexIndex[0]-1];
 
-                bool flag = true;
-                while ( flag ) {
-                    startptr = endptr + 1;
-                    endptr = strchr(startptr, ' ');
-                    if ( !endptr || !(*(endptr + 1)) ) flag = false;
-                    else *endptr = '\0';
-                    vertexIndex[2] = atoi(startptr);
-                    v2 = temp_vertices[vertexIndex[2]-1];
-                    mesh->addFace(v0, v1, v2);
-                    v1 = v2;
-                }
-            }
+   //             startptr = endptr + 1;
+   //             endptr = strchr(startptr, ' ');
+   //             *endptr = '\0';
+   //             vertexIndex[1] = atoi(startptr);
+   //             v1 = temp_vertices[vertexIndex[1]-1];
 
-            if (f) { /* if no line separation (ex. f v1 v2 v3f v'1 v'2 v'3s n1...) */
-                *f = save;
-                file.seekg(-1, SEEK_CUR);
-            }
+   //             bool flag = true;
+   //             while ( flag ) {
+   //                 startptr = endptr + 1;
+   //                 endptr = strchr(startptr, ' ');
+   //                 if ( !endptr || !(*(endptr + 1)) ) flag = false;
+   //                 else *endptr = '\0';
+   //                 vertexIndex[2] = atoi(startptr);
+   //                 v2 = temp_vertices[vertexIndex[2]-1];
+   //                 mesh->addFace(v0, v1, v2);
+   //                 v1 = v2;
+   //             }
+   //         }
+
+   //         if (f) { /* if no line separation (ex. f v1 v2 v3f v'1 v'2 v'3s n1...) */
+   //             *f = save;
+   //             file.seekg(-1, SEEK_CUR);
+   //         }
 
         } else{
         }
