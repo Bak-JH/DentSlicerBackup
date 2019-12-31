@@ -356,7 +356,7 @@ public slots:
 	void modelRepair();
 
     void sendUpdateModelInfo(int, int, QString, float);
-    void openModelFile(QString filename);
+    void openModelFile();
 	std::unique_ptr<GLModel> removeFromGLModels(GLModel* target);
 	GLModel* releaseFromGLModels(GLModel* target);
 

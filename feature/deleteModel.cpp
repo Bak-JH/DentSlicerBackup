@@ -5,7 +5,7 @@
 Hix::Features::DeleteModel::DeleteModel(GLModel* target)
 {
 	_model = target;
-	redo();
+	redoImpl();
 }
 
 Hix::Features::DeleteModel::~DeleteModel()

@@ -202,16 +202,6 @@ Item{
 
         }
 
-        FileDialogLoad{
-            id: filedialogload
-            visible: false
-        }
-		FileDialogLoad{
-            id: fileDialogMB
-			isModelBuilder: true
-            visible: false
-        }
-
         MouseArea{
 
             acceptedButtons: Qt.MiddleButton | Qt.RightButton
