@@ -11,6 +11,7 @@ Hix::Features::WidgetMode::WidgetMode(const std::unordered_set<GLModel*>& target
 
 Hix::Features::WidgetMode::~WidgetMode()
 {
+	_controller->setHoverEnabled(false);
 }
 
 void Hix::Features::WidgetMode::updatePosition()
