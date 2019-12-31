@@ -129,11 +129,12 @@ void Hix::Features::RemoveRaft::redoImpl()
 Hix::Features::SupportMode::SupportMode(const std::unordered_set<GLModel*>& selectedModels)
 	: _targetModels(selectedModels)
 {
+	qmlManager->getRayCaster().setHoverEnabled(true);
 }
 
 Hix::Features::SupportMode::~SupportMode()
 {
-
+	qmlManager->getRayCaster().setHoverEnabled(false);
 }
 
 void Hix::Features::SupportMode::faceSelected(GLModel* selected, const Hix::Engine3D::FaceConstItr& selectedFace,

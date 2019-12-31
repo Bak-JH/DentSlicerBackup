@@ -282,7 +282,7 @@ void Hix::Support::SupportRaftManager::setSupportEditMode(Hix::Support::EditMode
 			//disable supports ray cast
 			for (auto& each : _supports)
 			{
-				each.first->setHitTestable(true);
+				each.first->setHitTestable(false);
 			}
 		}
 	}
