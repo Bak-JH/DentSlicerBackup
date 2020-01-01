@@ -202,11 +202,6 @@ Item{
 
         }
 
-        FileDialogLoad{
-            id: filedialogload
-            visible: false
-        }
-
         MouseArea{
 
             acceptedButtons: Qt.MiddleButton | Qt.RightButton

@@ -1067,7 +1067,6 @@
     <None Include="Qml\CameraManager.qml" />
     <None Include="Qml\CoordinateMesh.qml" />
     <None Include="Qml\FeedbackPopUp.qml" />
-    <None Include="Qml\FileDialogLoad.qml" />
     <None Include="Qml\LayerViewPopup.qml" />
     <None Include="Qml\LayerViewSlider.qml" />
     <None Include="Qml\LeftTab.qml" />

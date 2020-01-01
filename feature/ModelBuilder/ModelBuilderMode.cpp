@@ -11,22 +11,21 @@ constexpr float ZMARGIN = 5;
 
 Hix::Features::ModelBuilderMode::ModelBuilderMode(): _topPlane(qmlManager->total, true), _bottPlane(qmlManager->total, true)
 {
-	QString fileName = QFileDialog::getOpenFileName(nullptr, "Select scanned surface file", "", "3D Model file (*.stl)");
+	auto fileUrl = QFileDialog::getOpenFileUrl(nullptr, "Select scanned surface file", QUrl(), "3D Model file (*.stl)");
+	auto fileName = fileUrl.fileName();
 	if (fileName.isEmpty())
 	{
-		//QMetaObject::invokeMethod(qmlManager->modelBuilderPopup, "closeModelBuilderPopup");
-		//QMetaObject::invokeMethod(qmlManager->boxUpperTab, "all_off");
 		return;
-		//qmlManager->setCurrentMode(nullptr);
 	}
+
 
 	qmlManager->openProgressPopUp();
 	auto mesh = new Mesh();
 	if (fileName != "" && (fileName.contains(".stl") || fileName.contains(".STL"))) {
-		FileLoader::loadMeshSTL(mesh, fileName.toLocal8Bit().constData());
+		FileLoader::loadMeshSTL(mesh, fileUrl);
 	}
 	else if (fileName != "" && (fileName.contains(".obj") || fileName.contains(".OBJ"))) {
-		FileLoader::loadMeshOBJ(mesh, fileName.toLocal8Bit().constData());
+		FileLoader::loadMeshOBJ(mesh, fileUrl);
 	}
 	fileName = qmlManager->filenameToModelName(fileName.toStdString());
 	qmlManager->setProgress(0.1);
