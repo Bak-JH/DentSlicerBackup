@@ -71,7 +71,6 @@ Rectangle {
 
         fifth_tab_button_setting.state = "inactive";
         fifth_tab_button_feedback.state = "inactive";
-
         //arrangePopUp.closePopUp();
         resultPopUp.closePopUp();
         //deletePopUp.closePopUp();
@@ -79,7 +78,7 @@ Rectangle {
         feedbackPopUp.closePopUp();
         resultPopUp.closePopUp();
         //if(yesnoPopUp.isFlawOpen)
-            yesnoPopUp.closePopUp();
+        yesnoPopUp.closePopUp();
 
         //qm.keyboardHandlerFocus();
         scene3d.forceActiveFocus();
@@ -421,11 +420,13 @@ Rectangle {
             iconSource2: "qrc:/Resource/upper2_autorepair.png"
             iconText: qsTr("Model Builder")
             onButtonClicked:{
-                if(state == "active")
+                if(state == "inactive")
                 {
+					//popup_modelBuilder.visible = false;
+					popup_modelBuilder.state = "inactive";
 
-                }
-                 //runGroupFeature(ftrLayFlat, state, 0, 0, 0, null);
+				}
+
             }
         }
 
@@ -1157,9 +1158,19 @@ Rectangle {
             signal openModelBuilder();
             signal closeModelBuilder();
             signal buildModel();
-
+            function closeModelBuilderPopup(){
+                third_tab_button_modelbuilder.state = "inactive"; 
+                popup_modelBuilder.state = "inactive";
+            }
             onApplyClicked: {
                 buildModel();
+				rangeslider_vis = false;
+				closeModelBuilder();
+                all_off();
+            }
+            onFinishClicked: {
+                rangeslider_vis = false;
+                closeModelBuilder();
             }
         }
 

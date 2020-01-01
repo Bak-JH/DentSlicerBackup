@@ -113,8 +113,6 @@ void Hix::UI::RotateWidget::doDrag(Hix::Input::MouseEventData& e)
 	for (auto selectedModel : _parent->mode()->models()) {
 		auto rotation = QQuaternion::fromAxisAndAngle(_axis, dif);
 		selectedModel->rotateModel(rotation);
-		selectedModel->updatePrintable();
-
 	}
 
 }

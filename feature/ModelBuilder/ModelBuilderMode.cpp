@@ -5,6 +5,7 @@
 #include "../addModel.h"
 #include <unordered_set>
 #include "TwoManifoldBuilder.h"
+#include "../repair/meshrepair.h"
 constexpr float ZMARGIN = 5;
 
 
@@ -13,7 +14,8 @@ Hix::Features::ModelBuilderMode::ModelBuilderMode(): _topPlane(qmlManager->total
 	QString fileName = QFileDialog::getOpenFileName(nullptr, "Select scanned surface file", "", "3D Model file (*.stl)");
 	if (fileName.isEmpty())
 	{
-		QMetaObject::invokeMethod(qmlManager->boxUpperTab, "all_off");
+		//QMetaObject::invokeMethod(qmlManager->modelBuilderPopup, "closeModelBuilderPopup");
+		//QMetaObject::invokeMethod(qmlManager->boxUpperTab, "all_off");
 		return;
 		//qmlManager->setCurrentMode(nullptr);
 	}
@@ -32,33 +34,27 @@ Hix::Features::ModelBuilderMode::ModelBuilderMode(): _topPlane(qmlManager->total
 	_model->setHitTestable(true);
 	_model->setZToBed();
 	_model->moveModel(QVector3D(0, 0, ZMARGIN));
-	_topPlane.transform().setTranslation(QVector3D(0, 0, _model->aabb().zMax()));
-	_bottPlane.transform().setTranslation(QVector3D(0, 0, _model->aabb().zMin()));
+	_zLength = _model->aabb().lengthZ() + ZMARGIN;
+	auto topZ = _model->aabb().zMax();
+	auto botZ = _model->aabb().zMin();
+	_builder = new TwoManifoldBuilder(*_model->getMeshModd());
+	float cutPlane, botPlane;
+	QQuaternion rotation;
+	_builder->autogenOrientation(cutPlane, botPlane, rotation);
+	_model->transform().setRotation(rotation);
+	auto translationZ = _model->transform().translation().z();
+	cutPlane += translationZ;
+	botPlane += translationZ;
+	_topPlane.transform().setTranslation(QVector3D(0, 0, cutPlane));
+	_bottPlane.transform().setTranslation(QVector3D(0, 0, botPlane));
+	QMetaObject::invokeMethod(qmlManager->modelBuilderPopup, "setRangeSliderValueFirst", Q_ARG(QVariant, ((botPlane - ZMARGIN) / _zLength) * 1.8));
+	QMetaObject::invokeMethod(qmlManager->modelBuilderPopup, "setRangeSliderValueSecond", Q_ARG(QVariant, ((cutPlane - ZMARGIN)/ _zLength) * 1.8));
+
+
+
 	std::unordered_set<GLModel*> models { _model.get() };
 	_rotateMode.reset(new RotateModeNoUndo(models, &qmlManager->getRayCaster()));
 	qmlManager->setProgress(1.0);
-
-	//auto addModel = new ListModel(mesh, fileName, nullptr);
-	//qmlManager->featureHistoryManager().addFeature(addModel);
-	//auto latest = addModel->getAddedModel();
-
-	//qmlManager->setProgress(0.2);
-	//TwoManifoldBuilder modelBuilder(*mesh);
-	//mesh->centerMesh();
-	//qmlManager->setProgress(0.4);
-	//repair mode
-	//if (Hix::Features::isRepairNeeded(mesh))
-	//{
-	//	qmlManager->setProgressText("Repairing mesh.");
-	//	std::unordered_set<GLModel*> repairModels;
-	//	repairModels.insert(latest);
-	//	MeshRepair sfsdfs(repairModels);
-	//}
-	//setProgress(1.0);
-	//// do auto arrange
-	//if (glmodels.size() >= 2)
-	//	openArrange();
-	////runArrange();
 }
 
 Hix::Features::ModelBuilderMode::~ModelBuilderMode()
@@ -69,19 +65,28 @@ void Hix::Features::ModelBuilderMode::build()
 {
 	auto cuttingPlane = _topPlane.transform().translation().z();
 	auto bottomPlane = _bottPlane.transform().translation().z();
-
-	qmlManager->featureHistoryManager().addFeature(new TwoManifoldBuilder(_model->getMeshModd(), _model->modelName() , cuttingPlane, bottomPlane));
+	auto aabb0 = _model->aabb();
+	_model->flushTransform();
+	auto aabb1 = _model->aabb();
+	_builder->buildModel(_model->modelName(), cuttingPlane, bottomPlane);
+	qmlManager->featureHistoryManager().addFeature(_builder);
+	if (Hix::Features::isRepairNeeded(_builder->result()->getMesh()))
+	{
+		qmlManager->setProgressText("Repairing mesh.");
+		std::unordered_set<GLModel*> repairModels;
+		repairModels.insert(_builder->result());
+		MeshRepair rapairModels(repairModels);
+	}
 	_model->setMesh(nullptr);
 }
 
 void Hix::Features::ModelBuilderMode::getSliderSignalTop(double value)
 {
-	float zlength = _model->aabb().lengthZ() + ZMARGIN;
-	_topPlane.transform().setTranslation(QVector3D(0, 0, _model->aabb().zMin() + zlength * value / 1.8));
+	_topPlane.transform().setTranslation(QVector3D(0, 0, _model->aabb().zMin() + _zLength * value / 1.8));
 }
 
 void Hix::Features::ModelBuilderMode::getSliderSignalBot(double value)
 {
-	float zlength = _model->aabb().lengthZ() + ZMARGIN;
-	_bottPlane.transform().setTranslation(QVector3D(0, 0, _model->aabb().zMin() + zlength * value / 1.8));
+	_zLength = _model->aabb().lengthZ() + ZMARGIN;
+	_bottPlane.transform().setTranslation(QVector3D(0, 0, _model->aabb().zMin() + _zLength * value / 1.8));
 }

@@ -1118,9 +1118,6 @@ void QmlManager::runGroupFeature(int ftrType, QString state, double arg1, double
     {
         if (state == "active"){
 			for (auto selectedModel : selectedModels) {
-				if (selectedModel->updateLock)
-					return;
-				selectedModel->updateLock = true;
 				qmlManager->openProgressPopUp();
 				qDebug() << "tweak start";
 				rotateResult* rotateres = autoorientation::Tweak(selectedModel->getMesh(), true, 45, &selectedModel->appropriately_rotated);
@@ -1719,7 +1716,7 @@ void QmlManager::mbRangeSliderValueChangedFirst(double value)
 	auto builder = dynamic_cast<ModelBuilderMode*>(_currentMode.get());
 	if (builder)
 	{
-		builder->getSliderSignalTop(value);
+		builder->getSliderSignalBot(value);
 	}
 }
 
@@ -1728,6 +1725,6 @@ void QmlManager::mbRangeSliderValueChangedSecond(double value)
 	auto builder = dynamic_cast<ModelBuilderMode*>(_currentMode.get());
 	if (builder)
 	{
-		builder->getSliderSignalBot(value);
+		builder->getSliderSignalTop(value);
 	}
 }

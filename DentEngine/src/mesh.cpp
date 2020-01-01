@@ -188,7 +188,8 @@ void Mesh::vertexApplyTransformation(const Qt3DCore::QTransform& transform)
 {
 	for (auto& vertex : vertices)
 	{
-		vertex.position = vertex.position * transform.matrix();
+		QVector4D posVec (vertex.position, 1);
+		vertex.position = (transform.matrix() * posVec).toVector3D();
 	};
 	rehashVtcs();
 }

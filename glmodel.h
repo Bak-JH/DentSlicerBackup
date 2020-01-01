@@ -59,8 +59,6 @@ public:
     void changeViewMode(int viewMode);
 	void updateShader(int viewMode);
 
-    // implement lock as bool variable
-    bool updateLock;
 
 	void setBoundingBoxVisible(bool isEnabled);
 	// useless funcitons. why did you use them?

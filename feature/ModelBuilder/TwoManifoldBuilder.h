@@ -12,13 +12,15 @@ namespace Hix
 		class TwoManifoldBuilder :public Hix::Features::FeatureContainer
 		{
 		public:
-			TwoManifoldBuilder(Hix::Engine3D::Mesh* model, const QString& name, float cuttingPlane, float bottomPlane);
 			TwoManifoldBuilder(Hix::Engine3D::Mesh& model);
+			void autogenOrientation(float& cuttingPlane, float& bottomPlane, QQuaternion& rotation);
+			void buildModel(const QString& name, float cuttingPlane, float bottomPlane);
+			GLModel* result();
 			virtual ~TwoManifoldBuilder();
 
 		private:
 			Hix::Engine3D::Mesh& _model;
-			std::unordered_map<Hix::Engine3D::FaceConstItr, QVector3D> _fnCache;
+			GLModel* _result;
 		};
 	}
 }
