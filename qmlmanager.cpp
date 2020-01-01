@@ -287,21 +287,24 @@ void QmlManager::initializeUI(QQmlApplicationEngine* e){
 	_bed.drawBed();
 }
 
-void QmlManager::openModelFile(QString fname){
+void QmlManager::openModelFile(){
 	openProgressPopUp();
 
 	auto mesh = new Mesh();
-	if (fname != "" && (fname.contains(".stl") || fname.contains(".STL"))) {
-		FileLoader::loadMeshSTL(mesh, fname.toLocal8Bit().constData());
+	auto fileUrl = QFileDialog::getOpenFileUrl(nullptr, "Please choose a file", QUrl(), "3D files(*.stl *.obj)");
+	auto filename = fileUrl.fileName();
+	
+	if (filename != "" && (filename.contains(".stl") || filename.contains(".STL"))) {
+		FileLoader::loadMeshSTL(mesh, fileUrl);
 	}
-	else if (fname != "" && (fname.contains(".obj") || fname.contains(".OBJ"))) {
-		FileLoader::loadMeshOBJ(mesh, fname.toLocal8Bit().constData());
+	else if (filename != "" && (filename.contains(".obj") || filename.contains(".OBJ"))) {
+		FileLoader::loadMeshOBJ(mesh, fileUrl);
 	}
-	fname = filenameToModelName(fname.toStdString());
+	filenameToModelName(filename.toStdString());
 	setProgress(0.3);
 	mesh->centerMesh();
 
-	auto addModel = new ListModel(mesh, fname, nullptr);
+	auto addModel = new ListModel(mesh, filename, nullptr);
 	_featureHistoryManager.addFeature(addModel);
 
 	auto latest = addModel->getAddedModel();

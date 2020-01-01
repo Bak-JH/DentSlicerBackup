@@ -210,7 +210,7 @@ Rectangle {
                 anchors.fill: parent
                 onClicked:{
                     all_off()
-                    filedialogload.open();
+                    qm.openModelFile();
                 }
             }
         }
