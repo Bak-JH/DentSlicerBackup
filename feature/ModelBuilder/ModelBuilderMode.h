@@ -9,6 +9,7 @@ namespace Hix
 
 	namespace Features
 	{
+		class TwoManifoldBuilder;
 		class ModelBuilderMode : public Hix::Features::Mode
 		{
 		public:
@@ -23,6 +24,8 @@ namespace Hix
 			Hix::Render::PlaneMeshEntity _topPlane;
 			Hix::Render::PlaneMeshEntity _bottPlane;
 			std::unique_ptr<GLModel> _model;
+			float _zLength;
+			TwoManifoldBuilder* _builder = nullptr;
 		};
 	}
 }

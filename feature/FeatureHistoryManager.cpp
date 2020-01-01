@@ -12,13 +12,10 @@ void Hix::Features::FeatureHisroyManager::addFeature(Hix::Features::Feature* fea
 	{
 		return;
 	}
-
-	if (dynamic_cast<FeatureContainer*>(feature))
+	auto container = dynamic_cast<FeatureContainer*>(feature);
+	if (container && container->empty())
 	{
-		if (dynamic_cast<FeatureContainer*>(feature)->empty())
-		{
-			return;
-		}
+		return;
 	}
 
 	if (_history.end() != _itr)

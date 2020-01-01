@@ -161,6 +161,9 @@ Rectangle {
                 case "Label":
                     applyClicked();
                     break;
+                case "Model Builder":
+                    applyClicked();
+                    break;
                 default:
                     console.log(functionname);
                     break;
@@ -732,7 +735,14 @@ Rectangle {
             rangeSliderValueChangedSecond(value);
         }
     }
-
+	function setRangeSliderValueFirst(value)
+	{
+		rangeSlider.first.value = value;
+	}
+	function setRangeSliderValueSecond(value)
+	{
+		rangeSlider.second.value = value;
+	}
     //Number write down button
     Item{
         id: numberbox
