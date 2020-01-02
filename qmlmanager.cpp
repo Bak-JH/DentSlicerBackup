@@ -294,10 +294,16 @@ void QmlManager::openModelFile(){
 	auto fileUrl = QFileDialog::getOpenFileUrl(nullptr, "Please choose a file", QUrl(), "3D files(*.stl *.obj)");
 	auto filename = fileUrl.fileName();
 	
-	if (filename != "" && (filename.contains(".stl") || filename.contains(".STL"))) {
+	if (filename == "")
+	{
+		setProgress(1.0);
+		return;
+	}
+
+	if (filename.contains(".stl") || filename.contains(".STL")) {
 		FileLoader::loadMeshSTL(mesh, fileUrl);
 	}
-	else if (filename != "" && (filename.contains(".obj") || filename.contains(".OBJ"))) {
+	else if (filename.contains(".obj") || filename.contains(".OBJ")) {
 		FileLoader::loadMeshOBJ(mesh, fileUrl);
 	}
 	filenameToModelName(filename.toStdString());
@@ -883,7 +889,7 @@ QString QmlManager::filenameToModelName(const std::string& s)
 		return QString::fromStdString(s.substr(i + 1, s.length() - i));
 	}
 
-	return QString::fromStdString("");
+	return QString::fromStdString(s);
 }
 
 const std::unordered_set<GLModel*>& QmlManager::getSelectedModels()
