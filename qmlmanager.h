@@ -362,7 +362,7 @@ public slots:
 
 
 
-	void openAndBuildModel(QString filename);
+	void openAndBuildModel();
 
     void deleteModelFileDone();
     void deleteModelFile(GLModel* target);
