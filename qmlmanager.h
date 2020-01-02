@@ -96,6 +96,9 @@ public:
 		Q_ASSERT(obj);
 		QMetaObject::invokeMethod(obj, std::forward<F>(fun));
 	}
+
+	static QString filenameToModelName(const std::string& s);
+
     explicit QmlManager(QObject *parent = nullptr);
     QQmlApplicationEngine* engine;
 
@@ -143,13 +146,6 @@ public:
     QObject *flatButton;
     QObject *cutSlider;
 
-    // hollow shell components
-    QObject *hollowShellPopup;
-    QObject *hollowShellSlider;
-    Qt3DExtras::QSphereMesh* hollowShellSphereMesh;
-    Qt3DCore::QEntity* hollowShellSphereEntity;
-    Qt3DCore::QTransform* hollowShellSphereTransform;
-    QPhongMaterial* hollowShellSphereMaterial;
 
     // labelling components
     QObject *text3DInput;
@@ -202,6 +198,9 @@ public:
     QObject* layerRaftButton;
     QObject* layerViewSlider;
 
+	QObject* modelBuilderPopup;
+
+
     std::unordered_map<GLModel*, std::unique_ptr<GLModel>> glmodels;
 
     std::vector<size_t> copyMeshes;
@@ -244,8 +243,6 @@ public:
 	//gets lengths of volume containing all selected models
     Q_INVOKABLE QVector3D selectedModelsLengths();
     Q_INVOKABLE int getSelectedModelsSize();
-    Q_INVOKABLE float getBedXSize();
-    Q_INVOKABLE float getBedYSize();
     Q_INVOKABLE bool getGroupSelectionActive();
     Q_INVOKABLE void fixMesh();
     Q_INVOKABLE void disableObjectPickers();
@@ -278,19 +275,16 @@ public:
 	Hix::Engine3D::Bounds3D getSelectedBound()const;
 	void modelMoveWithAxis(QVector3D axis, double distance);
 	void modelMove(QVector3D displacement);
-	void modelRotateWithAxis(const QVector3D& axis, double degree);
 	QVector3D cameraViewVector();
 	Hix::Tasking::TaskManager& taskManager();
 	Hix::Support::SupportRaftManager& supportRaftManager();
 	Hix::Features::FeatureHisroyManager& featureHistoryManager();
 	Hix::Features::Mode* getCurrentMode();
-	void setCurrentMode(Hix::Features::Mode* mode);
 	void unselectPart(GLModel* target);
 	void addToGLModels(GLModel* target);
 	void addToGLModels(std::unique_ptr<GLModel>&& target);
 	const Hix::Settings::AppSetting& settings()const;
 private:
-	QString filenameToModelName(const std::string& s);
 	Hix::Tasking::TaskManager _taskManager;
 	void setModelViewMode(int mode);
 	GLModel* getModelByID(int ID);
@@ -320,6 +314,7 @@ private:
 signals:
     void updateModelInfo(int printing_time, int layer, QString xyz, float volume);
     void arrangeDone(std::vector<QVector3D>, std::vector<float>);
+	void cameraViewChangedNative();
 
 
 public slots:
@@ -359,10 +354,6 @@ public slots:
     void openModelFile();
 	std::unique_ptr<GLModel> removeFromGLModels(GLModel* target);
 	GLModel* releaseFromGLModels(GLModel* target);
-
-
-
-	void openAndBuildModel();
 
     void deleteModelFileDone();
     void deleteModelFile(GLModel* target);
@@ -417,6 +408,15 @@ public slots:
 	void openShellOffset();
 	void closeShellOffset();
 	void generateShellOffset(double factor);
+
+	//modelbuilder
+	void openModelBuilder();
+	void closeModelBuilder();
+	void buildModel();
+	void mbRangeSliderValueChangedFirst(double value);
+	void mbRangeSliderValueChangedSecond(double value);
+
+
 };
 
 

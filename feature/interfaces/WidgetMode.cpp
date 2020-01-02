@@ -18,4 +18,9 @@ void Hix::Features::WidgetMode::updatePosition()
 {
 	_widget.updatePosition();
 }
+
+const std::unordered_set<GLModel*>& Hix::Features::WidgetMode::models() const
+{
+	return _targetModels;
+}
  

@@ -1,8 +1,9 @@
 #include "TwoManifoldBuilder.h"
-#include "Shapes2D.h"
-#include "../common/Debug.h"
-#include "../qmlmanager.h"
+#include "../Shapes2D.h"
+#include "../../common/Debug.h"
+#include "../../qmlmanager.h"
 #include <cmath>
+#include "../addModel.h"
 //Few assumptions
 //1. Assume filling plane is XY plane.
 //2. Assume Model have a boundary edges that is roughly parallel to this plane
@@ -757,47 +758,47 @@ void buildBott(Hix::Engine3D::Mesh& mesh, const  std::deque<HalfEdgeConstItr>& b
 
 Hix::Features::TwoManifoldBuilder::TwoManifoldBuilder(Hix::Engine3D::Mesh& model):_model(model)
 {
+}
+
+void Hix::Features::TwoManifoldBuilder::autogenOrientation(float& cuttingPlane, float& bottomPlane, QQuaternion& rotation)
+{
 	auto boundary = getLongestBoundary(_model);
 	auto isBottEmpty = !isClockwise(boundary);
 	auto entireFitPlane = bestFittingPlaneEntireModel(_model, boundary, isBottEmpty);
-	auto delFaces = edgeRemoveOutlier(_model, boundary, entireFitPlane);
-	QVector3D zDirection;
-	if (isBottEmpty)
-	{
-		zDirection = QVector3D(0, 0, 1);
-	}
-	else
-	{
-		zDirection = QVector3D(0, 0, -1);
-
-	}
-	auto rotator = QQuaternion::rotationTo(entireFitPlane.normal, zDirection);
-	model.vertexRotate(rotator);
-	cuntourConcaveFill(_model, boundary, isBottEmpty);
-	auto vtxEnd = _model.getVertices().cend();
-	float zMin = std::numeric_limits<float>::max();
-	float zMax = std::numeric_limits<float>::lowest();
-	for (auto& e: boundary)
-	{
-		auto posZ = e.from().localPosition().z();
-		if (posZ < zMin)
-			zMin = posZ;
-		if (posZ > zMax)
-			zMax = posZ;
-	}
+	QVector3D zDirection(0, 0, 1);
+	rotation = QQuaternion::rotationTo(entireFitPlane.normal, zDirection);
+	Qt3DCore::QTransform transform;
+	transform.setRotation(rotation);
+	auto rotatedPlanePos = transform.matrix()* entireFitPlane.point;
 	constexpr float Z_OFFSET = 2.0f;
-	float zValue;
-	if (isBottEmpty)
-	{
-		zValue = zMin - Z_OFFSET;
-	}
-	else
-	{
-		zValue = zMax + Z_OFFSET;
-	}
-	zCylinder(_model, boundary, isBottEmpty, zValue);
-	buildBott(_model, boundary, isBottEmpty, zValue);
-	delFaces.flush();
+	cuttingPlane = rotatedPlanePos.z();
+	bottomPlane = cuttingPlane - Z_OFFSET;
 
 
 }
+
+void Hix::Features::TwoManifoldBuilder::buildModel(const QString& name, float cuttingPlane, float bottomPlane)
+{
+	auto boundary = getLongestBoundary(_model);
+	Hix::Plane3D::PDPlane bestFitPlane{ QVector3D(0,0, cuttingPlane), QVector3D(0,0,1) };
+	auto delFaces = edgeRemoveOutlier(_model, boundary, bestFitPlane);
+	cuntourConcaveFill(_model, boundary, true);
+	zCylinder(_model, boundary, true, bottomPlane);
+	buildBott(_model, boundary, true, bottomPlane);
+	delFaces.flush();
+
+	auto addModel = new Hix::Features::ListModel(&_model, name, nullptr);
+	_result = addModel->getAddedModel();
+	addModel->getAddedModel()->setZToBed();
+	addFeature(addModel);
+}
+
+GLModel* Hix::Features::TwoManifoldBuilder::result()
+{
+	return _result;
+}
+
+Hix::Features::TwoManifoldBuilder::~TwoManifoldBuilder()
+{
+}
+

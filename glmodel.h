@@ -59,8 +59,6 @@ public:
     void changeViewMode(int viewMode);
 	void updateShader(int viewMode);
 
-    // implement lock as bool variable
-    bool updateLock;
 
 	void setBoundingBoxVisible(bool isEnabled);
 	// useless funcitons. why did you use them?
@@ -76,6 +74,7 @@ public:
 	void updateAABBMove(const QVector3D& translate);
 	void updateAABBScale(const QVector3D& scale);
 
+	void flushTransform();
 	void moveDone();
 	void rotateDone();
 	void scaleDone();

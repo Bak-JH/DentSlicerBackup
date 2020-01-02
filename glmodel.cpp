@@ -99,6 +99,14 @@ void GLModel::updateAABBScale(const QVector3D& scale)
 }
 
 
+void GLModel::flushTransform()
+{
+	_mesh->vertexApplyTransformation(_transform);
+	_transform.setMatrix(QMatrix4x4());
+	updateRecursiveAabb();
+	updateMesh(_mesh);
+}
+
 void GLModel::moveDone()
 {
 	updatePrintable();
@@ -175,7 +183,8 @@ void GLModel::updatePrintable() {
 	}
 }
 
-GLModel::~GLModel(){
+GLModel::~GLModel()
+{
 }
 
  void GLModel::getChildrenModels(std::unordered_set<const GLModel*>& results)const
@@ -262,7 +271,6 @@ void GLModel::updateModelMesh() {
 	QMetaObject::invokeMethod((QObject*)qmlManager->scene3d, "disableScene3D");
 	updateMesh(_mesh);
 	qmlManager->sendUpdateModelInfo();
-	updateLock = false;
 	QMetaObject::invokeMethod(qmlManager->boxUpperTab, "enableUppertab");
 	QMetaObject::invokeMethod(qmlManager->boxLeftTab, "enableLefttab");
 	QMetaObject::invokeMethod((QObject*)qmlManager->scene3d, "enableScene3D");
