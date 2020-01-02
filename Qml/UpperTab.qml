@@ -432,7 +432,7 @@ Rectangle {
                 anchors.fill: parent
                 onClicked:{
                     all_off()
-					fileDialogMB.open();
+					qm.openAndBuildModel();
                 }
             }
         }
