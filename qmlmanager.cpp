@@ -301,10 +301,16 @@ void QmlManager::openModelFile(){
 	auto fileUrl = QFileDialog::getOpenFileUrl(nullptr, "Please choose a file", QUrl(), "3D files(*.stl *.obj)");
 	auto filename = fileUrl.fileName();
 	
-	if (filename != "" && (filename.contains(".stl") || filename.contains(".STL"))) {
+	if (filename == "")
+	{
+		setProgress(1.0);
+		return;
+	}
+
+	if (filename.contains(".stl") || filename.contains(".STL")) {
 		FileLoader::loadMeshSTL(mesh, fileUrl);
 	}
-	else if (filename != "" && (filename.contains(".obj") || filename.contains(".OBJ"))) {
+	else if (filename.contains(".obj") || filename.contains(".OBJ")) {
 		FileLoader::loadMeshOBJ(mesh, fileUrl);
 	}
 	filenameToModelName(filename.toStdString());
@@ -333,19 +339,28 @@ void QmlManager::openModelFile(){
 	QApplication::setOverrideCursor(QCursor(Qt::ArrowCursor));
 }
 
-void QmlManager::openAndBuildModel(QString fname) {
+void QmlManager::openAndBuildModel() {
 	openProgressPopUp();
 
 	auto mesh = new Mesh();
-	//if (fname != "" && (fname.contains(".stl") || fname.contains(".STL"))) {
-	//	FileLoader::loadMeshSTL(mesh, fname.toLocal8Bit().constData());
-	//}
-	//else if (fname != "" && (fname.contains(".obj") || fname.contains(".OBJ"))) {
-	//	FileLoader::loadMeshOBJ(mesh, fname.toLocal8Bit().constData());
-	//}
-	fname = filenameToModelName(fname.toStdString());
+	auto fileUrl = QFileDialog::getOpenFileUrl(nullptr, "Please choose a file", QUrl(), "3D files(*.stl *.obj)");
+	auto filename = fileUrl.fileName();
+
+	if (filename == "")
+	{
+		setProgress(1.0);
+		return;
+	}
+
+	if (filename.contains(".stl") || filename.contains(".STL")) {
+		FileLoader::loadMeshSTL(mesh, fileUrl);
+	}
+	else if (filename.contains(".obj") || filename.contains(".OBJ")) {
+		FileLoader::loadMeshOBJ(mesh, fileUrl);
+	}
+	filenameToModelName(filename.toStdString());
 	setProgress(0.1);
-	auto addModel = new ListModel(mesh, fname, nullptr);
+	auto addModel = new ListModel(mesh, filename, nullptr);
 	_featureHistoryManager.addFeature(addModel);
 	auto latest = addModel->getAddedModel();
 
