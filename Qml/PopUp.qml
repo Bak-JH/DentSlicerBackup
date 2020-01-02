@@ -54,6 +54,7 @@ Rectangle {
     property alias radiobutton1_vis : radiobutton1.visible
     property alias radiobutton2_vis : radiobutton2.visible
     property alias slider_vis : slider.visible
+    property alias rangeslider_vis : rangeSlider.visible
 
     //----------------------------------------------------------------
 
@@ -82,7 +83,6 @@ Rectangle {
     property alias numberbox1_text: numberbox1_text
     property alias numberbox2_text: numberbox2_text
     property alias numberbox3_text: numberbox3_text
-    property alias slider_value : slider.value
 
 
     /*
@@ -159,6 +159,9 @@ Rectangle {
                 case "Support":
                     break;
                 case "Label":
+                    applyClicked();
+                    break;
+                case "Model Builder":
                     applyClicked();
                     break;
                 default:
@@ -715,7 +718,31 @@ Rectangle {
             planeSliderValueChanged(value);
         }
     }
+    signal rangeSliderValueChangedFirst(double value);
+    signal rangeSliderValueChangedSecond(double value);
 
+    PlanesliderRange {
+        id: rangeSlider
+        visible: false
+        anchors.right: parent.right
+        anchors.rightMargin: -60
+        anchors.top: parent.top
+        anchors.topMargin: 0
+        onSliderValueChangedFirst: {
+            rangeSliderValueChangedFirst(value);
+        }
+        onSliderValueChangedSecond: {
+            rangeSliderValueChangedSecond(value);
+        }
+    }
+	function setRangeSliderValueFirst(value)
+	{
+		rangeSlider.first.value = value;
+	}
+	function setRangeSliderValueSecond(value)
+	{
+		rangeSlider.second.value = value;
+	}
     //Number write down button
     Item{
         id: numberbox

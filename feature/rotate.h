@@ -16,6 +16,7 @@ namespace Hix
 			virtual ~Rotate();
 			void undoImpl()override;
 			void redoImpl()override;
+			const GLModel* model()const;
 
 		private:
 			GLModel* _model;
@@ -34,8 +35,19 @@ namespace Hix
 			void featureEnded()override;
 			Hix::Features::FeatureContainerFlushSupport* applyRotate(const QQuaternion& rot);
 
-		private:
+		protected:
 			Hix::Features::FeatureContainerFlushSupport* _rotateContainer;
+		};
+
+		class RotateModeNoUndo : public RotateMode
+		{
+		public:
+			RotateModeNoUndo(const std::unordered_set<GLModel*>& targetModels, Input::RayCastController* controller);
+			virtual ~RotateModeNoUndo();
+			void featureStarted()override;
+			void featureEnded()override;
+
+
 		};
 
 		
