@@ -96,10 +96,6 @@ void Hix::UI::MoveWidget::doDrag(Hix::Input::MouseEventData& e)
 	qDebug() << diff;
 	_pastProj = currProj;
 	qmlManager->modelMoveWithAxis(_axis, diff * TRANSLATE_MULT);
-	//auto curAngle = calculateRot();
-	//auto dif = curAngle - _pastAngle;
-	//_pastAngle = curAngle;
-	//qmlManager->modelRotateWithAxis(_axis, dif);
 }
 
 void Hix::UI::MoveWidget::dragEnded(Hix::Input::MouseEventData& e)

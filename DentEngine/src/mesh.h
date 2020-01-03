@@ -134,6 +134,7 @@ namespace Hix
 			/********************** Undo state functions***********************/
 
 			/********************** Mesh Edit Functions***********************/
+			void vertexApplyTransformation(const Qt3DCore::QTransform& transform);
 			void vertexOffset(float factor);
 			void vertexRotate(const QQuaternion& rot);
 
