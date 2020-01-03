@@ -12,13 +12,10 @@ void Hix::Features::FeatureHisroyManager::addFeature(Hix::Features::Feature* fea
 	{
 		return;
 	}
-
-	if (dynamic_cast<FeatureContainer*>(feature))
+	auto container = dynamic_cast<FeatureContainer*>(feature);
+	if (container && container->empty())
 	{
-		if (dynamic_cast<FeatureContainer*>(feature)->empty())
-		{
-			return;
-		}
+		return;
 	}
 
 	if (_history.end() != _itr)
@@ -34,6 +31,28 @@ void Hix::Features::FeatureHisroyManager::addFeature(Hix::Features::Feature* fea
 
 	_history.emplace_back(std::unique_ptr<Feature>(feature));
 	_itr = _history.end();
+}
+
+const Hix::Features::Feature& Hix::Features::FeatureHisroyManager::peek()const
+{
+	return *(_history.back().get());
+}
+
+bool Hix::Features::FeatureHisroyManager::empty() const
+{
+	return _history.empty();
+}
+
+void Hix::Features::FeatureHisroyManager::pop()
+{
+	if (*_itr == _history.back())
+	{
+		if (_history.size() > 1)
+			--_itr;
+		else
+			_itr = _history.end();
+	}
+	_history.pop_back();
 }
 
 void Hix::Features::FeatureHisroyManager::undo()

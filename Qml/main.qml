@@ -216,17 +216,6 @@ Item{
             anchors.left: lefttab.right
             anchors.top : uppertab.bottom
             anchors.bottom: parent.bottom
-
-        }
-
-        FileDialogLoad{
-            id: filedialogload
-            visible: false
-        }
-		FileDialogLoad{
-            id: fileDialogMB
-			isModelBuilder: true
-            visible: false
         }
 
 		BastardyMenu {

@@ -68,8 +68,6 @@ Entity {
                                 buffers: ClearBuffers.ColorDepthBuffer
                                 clearColor: "#E5E5E5"
                             }
-
-
                             // RenderStateSet {
                             //     renderStates: [
                             //         CullFace { mode : CullFace.Back },       
@@ -82,7 +80,6 @@ Entity {
                             //         BlendEquation {blendFunction: BlendEquation.Add}
                             //     ]
                             // }
-
                             SortPolicy {
                                 sortTypes: [
                                     SortPolicy.BackToFront

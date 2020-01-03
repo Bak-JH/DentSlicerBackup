@@ -110,7 +110,11 @@ void Hix::UI::RotateWidget::doDrag(Hix::Input::MouseEventData& e)
 	auto curAngle = calculateRot();
 	auto dif = curAngle - _pastAngle;
 	_pastAngle = curAngle;
-	qmlManager->modelRotateWithAxis(_axis, dif);
+	for (auto selectedModel : _parent->mode()->models()) {
+		auto rotation = QQuaternion::fromAxisAndAngle(_axis, dif);
+		selectedModel->rotateModel(rotation);
+	}
+
 }
 
 void Hix::UI::RotateWidget::dragEnded(Hix::Input::MouseEventData& e)

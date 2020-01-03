@@ -5,9 +5,48 @@
 !define PRODUCT_DIR_REGKEY "Software\Microsoft\Windows\CurrentVersion\App Paths\DentSlicer.exe"
 !define PRODUCT_UNINST_KEY "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PRODUCT_NAME}"
 !define PRODUCT_UNINST_ROOT_KEY "HKLM"
+!define HIX_SETTINGS_DIR "$DOCUMENTS\Hix\DentSlicer\Settings"
 
 ; MUI 1.67 compatible ------
 !include "MUI.nsh"
+
+; Push $filenamestring (e.g. 'c:\this\and\that\filename.htm')
+; Push "\"
+; Call StrSlash
+; Pop $R0
+; ;Now $R0 contains 'c:/this/and/that/filename.htm'
+Function StrSlash
+  Exch $R3 ; $R3 = needle ("\" or "/")
+  Exch
+  Exch $R1 ; $R1 = String to replacement in (haystack)
+  Push $R2 ; Replaced haystack
+  Push $R4 ; $R4 = not $R3 ("/" or "\")
+  Push $R6
+  Push $R7 ; Scratch reg
+  StrCpy $R2 ""
+  StrLen $R6 $R1
+  StrCpy $R4 "\"
+  StrCmp $R3 "/" loop
+  StrCpy $R4 "/"  
+loop:
+  StrCpy $R7 $R1 1
+  StrCpy $R1 $R1 $R6 1
+  StrCmp $R7 $R3 found
+  StrCpy $R2 "$R2$R7"
+  StrCmp $R1 "" done loop
+found:
+  StrCpy $R2 "$R2$R4"
+  StrCmp $R1 "" done loop
+done:
+  StrCpy $R3 $R2
+  Pop $R7
+  Pop $R6
+  Pop $R4
+  Pop $R2
+  Pop $R1
+  Exch $R3
+FunctionEnd
+
 
 ; MUI Settings
 !define MUI_ABORTWARNING
@@ -24,6 +63,7 @@
 ; License page
 !insertmacro MUI_PAGE_LICENSE "license.txt"
 ; Directory page
+!define MUI_DIRECTORYPAGE_TEXT_TOP "${PRODUCT_NAME} will be installed in the following folder.$\r$\n Setting files and user configs will be installed in:   ${HIX_SETTINGS_DIR}"
 !insertmacro MUI_PAGE_DIRECTORY
 ; Instfiles page
 !insertmacro MUI_PAGE_INSTFILES
@@ -56,6 +96,22 @@ Section "MainSection" SEC01
   SetOutPath "$INSTDIR"
 
 ;NSISBuilder:copy
+
+
+  CopyFiles $INSTDIR\*.json "${HIX_SETTINGS_DIR}"
+  CopyFiles $INSTDIR\PrinterPresets\*.json "${HIX_SETTINGS_DIR}\PrinterPresets"
+
+
+  Push "${HIX_SETTINGS_DIR}" 
+  Push "\"
+  Call StrSlash
+  Pop $R0
+  ;Now $R0 contains 'c:/this/and/that/filename.htm'
+
+  nsJSON::Set /value `{}`
+  nsJSON::Set `version` /value `"${PRODUCT_VERSION}"`
+  nsJSON::Set `settingsDir` /value `"$R0"`
+  nsJSON::Serialize /format /file $INSTDIR\deploy.json
 SectionEnd
 
 Section -AdditionalIcons

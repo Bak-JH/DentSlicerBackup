@@ -2,6 +2,12 @@
 #include "slicer.h"
 #include "configuration.h"
 #include "../../qmlmanager.h"
+#include "../common/rapidjson/stringbuffer.h"
+#include "../common/rapidjson/writer.h"
+#include "../common/rapidjson/ostreamwrapper.h"
+#include "../common/rapidjson/prettywriter.h"
+#include <fstream>
+
 using namespace Hix::Slicer;
 #if defined(_DEBUG) || defined(QT_DEBUG)
 #define _DEBUG_SVG
@@ -61,23 +67,38 @@ void SVGexporter::exportSVG(Slices& shellSlices,QString outfoldername, bool isTe
 
 	//std::ofstream infofile(infofilename.toStdString().c_str(), std::ios::out);
 	QJsonObject jsonObject;
-	jsonObject["layer_height"] = round(scfg->layer_height * 100) / 100;
-	jsonObject["total_layer"] = currentSlice_idx;
-	jsonObject["bed_curing_time"] = 15000; // depends on scfg->resin_type
-	jsonObject["curing_time"] = 2100; // depends on scfg->resin_type
-	jsonObject["mirror_rot_time"] = 2000;
-	jsonObject["z_hop_height"] = 15;
-	jsonObject["min_speed"] = 350;
-	jsonObject["max_speed"] = 500;
-	jsonObject["resin_type"] = (uint8_t)scfg->resin_type;
-	jsonObject["contraction_ratio"] = scfg->contraction_ratio;
+
 	QJsonDocument jsonDocument(jsonObject);
 	QByteArray jsonBytes = jsonDocument.toJson();
 	infofile.write(jsonBytes);
 	infofile.close();
 
 
-    //exit(0);
+	char cbuf[1024]; rapidjson::MemoryPoolAllocator<> allocator(cbuf, sizeof cbuf);
+	rapidjson::Document doc(&allocator, 256);
+	doc.SetObject();
+	doc.AddMember("layer_height", round(scfg->layer_height * 100) / 100, allocator);
+	doc.AddMember("total_layer", currentSlice_idx, allocator);
+	doc.AddMember("resin_type", (uint8_t)scfg->resin_type, allocator);
+	doc.AddMember("contraction_ratio", scfg->contraction_ratio, allocator);
+
+	auto& printerConst = printerSetting.printerConstants;
+	if (printerConst)
+	{
+		auto obj = printerConst.value().GetObjectW();
+		for (auto itr = obj.MemberBegin(); itr != obj.MemberEnd(); ++itr)
+		{
+			rapidjson::Value val, key;
+			key.CopyFrom(itr->name, allocator);;
+			val.CopyFrom(itr->value, allocator);;
+			doc.AddMember(std::move(key), std::move(val), allocator);
+		}
+	}
+	std::ofstream of(infofilename.toStdString(), std::ios_base::trunc);
+	rapidjson::OStreamWrapper osw{ of };
+	rapidjson::PrettyWriter<rapidjson::OStreamWrapper> writer{ osw };
+	doc.Accept(writer);
+
 	if (!isTemp && printerSetting.infoFileType == Hix::Settings::PrinterSetting::InfoFileType::ThreeDelight)
 	{
 		SVGexporterPrivate::writeVittroOptions(outfoldername, currentSlice_idx);
@@ -172,7 +193,7 @@ Edge thickness = 1\r\n\
 Distance to Part = 1\r\n\
 Max offset from Part = -1\r\n\
 Grid Base Plate Type = None").arg(QString::number((int)(scfg->layer_height*1000)),
-            QString::number(printerSetting.bedX), QString::number(printerSetting.bedY),
+            QString::number(printerSetting.bedBound.lengthX()), QString::number(printerSetting.bedBound.lengthY()),
             QString::number(printerSetting.sliceImageResolutionX), QString::number(printerSetting.sliceImageResolutionY),
             QString::number(scfg->layer_height)).toStdString().data());
     parametersfile.close();

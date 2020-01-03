@@ -5,7 +5,6 @@
         <file>Qml/CameraController.qml</file>
         <file>Qml/CameraManager.qml</file>
         <file>Qml/CoordinateMesh.qml</file>
-        <file>Qml/FileDialogLoad.qml</file>
         <file>Qml/LeftTab.qml</file>
         <file>Qml/LeftTabPartList.qml</file>
         <file>Qml/LeftTabPartListElement.qml</file>
@@ -18,7 +17,6 @@
         <file>Qml/MeshTransformerZoom.qml</file>
         <file>Qml/Model.qml</file>
         <file>Qml/Planeslider.qml</file>
-        <file>Qml/Plate.qml</file>
         <file>Qml/PopUp.qml</file>
         <file>Qml/SCroll.qml</file>
         <file>Qml/SlicingData.qml</file>
@@ -90,5 +88,6 @@
         <file>Qml/LeftPopupShellOffset.qml</file>
         <file>Qml/CtrScaleInputBox.qml</file>
         <file>Qml/ProgressShell.qml</file>
+        <file>Qml/PlanesliderRange.qml</file>
     </qresource>
 </RCC>

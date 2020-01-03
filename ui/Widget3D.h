@@ -32,11 +32,13 @@ namespace Hix
 			void setVisible(bool show);
 			bool visible();
 			//need to place the widget between camera and the center
-			void updatePosition();
 			Qt3DCore::QTransform* transform();
 			bool isManipulated();
 			void setManipulated(bool isManipulated);
 			Hix::Features::WidgetMode* mode();
+
+		public slots:
+			void updatePosition();
 
 		protected:
 			Hix::Features::WidgetMode* _mode;

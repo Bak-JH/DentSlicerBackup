@@ -41,8 +41,7 @@
 #include "feature/move.h"
 #include "feature/deleteModel.h"
 #include "feature/addModel.h"
-
-#include "feature/TwoManifoldBuilder.h"
+#include "feature/ModelBuilder/ModelBuilderMode.h"
 #include "render/CircleMeshEntity.h"
 #include "Qml/LeftPopup.h"
 #include "Qml/Toast.h"
@@ -60,7 +59,7 @@ using namespace Hix::Tasking;
 using namespace Hix::Features;
 QmlManager::QmlManager(QObject *parent) : QObject(parent), _optBackend(this, scfg)
 	,layerViewFlags(LAYER_INFILL | LAYER_SUPPORTERS | LAYER_RAFT)
-	, _cursorEraser(QPixmap(":/Resource/cursor_eraser.png")), _currentMode(nullptr)
+	, _cursorEraser(QPixmap(":/Resource/cursor_eraser.png")), _currentMode(nullptr), viewMode(0)
 {
 	qmlRegisterType<Hix::QML::CloseButton>("hix.qml", 1, 0, "CloseButton");
 	qmlRegisterType<Hix::QML::RoundButton>("hix.qml", 1, 0, "RoundButton");
@@ -79,7 +78,6 @@ QmlManager::QmlManager(QObject *parent) : QObject(parent), _optBackend(this, scf
 
 void QmlManager::initializeUI(QQmlApplicationEngine* e){
     engine = e;
-
 	//initialize ray casting mouse input controller
 	QEntity* camera = dynamic_cast<QEntity*>(FindItemByName(engine, "cm"));
 	_rayCastController.initialize(camera);
@@ -126,17 +124,6 @@ void QmlManager::initializeUI(QQmlApplicationEngine* e){
 	QObject::connect(scalePopup, SIGNAL(applyScale(double, double, double)), this, SLOT(applyScale(double, double, double)));
 
 
-    // create hollowShellSphere and make it invisible
-    hollowShellSphereEntity = new Qt3DCore::QEntity(models);
-    hollowShellSphereMesh = new Qt3DExtras::QSphereMesh;
-    hollowShellSphereTransform = new Qt3DCore::QTransform;
-    hollowShellSphereMaterial = new Qt3DExtras::QPhongMaterial();
-    hollowShellSphereEntity->addComponent(hollowShellSphereMesh);
-    hollowShellSphereEntity->addComponent(hollowShellSphereTransform);
-    hollowShellSphereEntity->addComponent(hollowShellSphereMaterial);
-    hollowShellSphereMesh->setRadius(0);
-    hollowShellSphereEntity->setProperty("visible", false);
-
     partList = FindItemByName(engine, "partList");
 
     undoRedoButton = FindItemByName(engine, "undoRedoButton");
@@ -157,10 +144,6 @@ void QmlManager::initializeUI(QQmlApplicationEngine* e){
     curveButton = FindItemByName(engine, "curveButton");
     flatButton = FindItemByName(engine, "flatButton");
     cutSlider = FindItemByName(engine, "cutSlider");
-
-    // hollow shell components
-    hollowShellPopup = FindItemByName(engine, "hollowShellPopup");
-    hollowShellSlider = FindItemByName(engine, "cutSlider");
 
     // labelling components
     text3DInput = FindItemByName(engine, "text3DInput");
@@ -203,6 +186,7 @@ void QmlManager::initializeUI(QQmlApplicationEngine* e){
     // repair components
     repairPopup = FindItemByName(engine, "repairPopup");
 
+	modelBuilderPopup = FindItemByName(engine, "modelBuilderPopup");
     // arrange components
     progress_popup = FindItemByName(engine, "progress_popup");
 
@@ -310,25 +294,44 @@ void QmlManager::initializeUI(QQmlApplicationEngine* e){
 	QObject::connect(shelloffsetPopup, SIGNAL(resultSliderValueChanged(double)), this, SLOT(getSliderSignal(double)));
 
 	QObject::connect(layerViewSlider, SIGNAL(sliderValueChanged(int)), this, SLOT(getCrossSectionSignal(int)));
+
+	QObject::connect(modelBuilderPopup, SIGNAL(openModelBuilder()), this, SLOT(openModelBuilder()));
+	QObject::connect(modelBuilderPopup, SIGNAL(closeModelBuilder()), this, SLOT(closeModelBuilder()));
+	QObject::connect(modelBuilderPopup, SIGNAL(buildModel()), this, SLOT(buildModel()));
+	QObject::connect(modelBuilderPopup, SIGNAL(rangeSliderValueChangedFirst(double)), this, SLOT(mbRangeSliderValueChangedFirst(double)));
+	QObject::connect(modelBuilderPopup, SIGNAL(rangeSliderValueChangedSecond(double)), this, SLOT(mbRangeSliderValueChangedSecond(double)));
+
+
+
+	
 	//init settings
 	_bed.drawBed();
 }
 
-void QmlManager::openModelFile(QString fname){
+void QmlManager::openModelFile(){
 	openProgressPopUp();
 
 	auto mesh = new Mesh();
-	if (fname != "" && (fname.contains(".stl") || fname.contains(".STL"))) {
-		FileLoader::loadMeshSTL(mesh, fname.toLocal8Bit().constData());
+	auto fileUrl = QFileDialog::getOpenFileUrl(nullptr, "Please choose a file", QUrl(), "3D files(*.stl *.obj)");
+	auto filename = fileUrl.fileName();
+	
+	if (filename == "")
+	{
+		setProgress(1.0);
+		return;
 	}
-	else if (fname != "" && (fname.contains(".obj") || fname.contains(".OBJ"))) {
-		FileLoader::loadMeshOBJ(mesh, fname.toLocal8Bit().constData());
+
+	if (filename.contains(".stl") || filename.contains(".STL")) {
+		FileLoader::loadMeshSTL(mesh, fileUrl);
 	}
-	fname = filenameToModelName(fname.toStdString());
+	else if (filename.contains(".obj") || filename.contains(".OBJ")) {
+		FileLoader::loadMeshOBJ(mesh, fileUrl);
+	}
+	filenameToModelName(filename.toStdString());
 	setProgress(0.3);
 	mesh->centerMesh();
 
-	auto addModel = new ListModel(mesh, fname, nullptr);
+	auto addModel = new ListModel(mesh, filename, nullptr);
 	_featureHistoryManager.addFeature(addModel);
 
 	auto latest = addModel->getAddedModel();
@@ -350,50 +353,12 @@ void QmlManager::openModelFile(QString fname){
 	QApplication::setOverrideCursor(QCursor(Qt::ArrowCursor));
 }
 
-void QmlManager::openAndBuildModel(QString fname) {
-	openProgressPopUp();
-
-	auto mesh = new Mesh();
-	if (fname != "" && (fname.contains(".stl") || fname.contains(".STL"))) {
-		FileLoader::loadMeshSTL(mesh, fname.toLocal8Bit().constData());
-	}
-	else if (fname != "" && (fname.contains(".obj") || fname.contains(".OBJ"))) {
-		FileLoader::loadMeshOBJ(mesh, fname.toLocal8Bit().constData());
-	}
-	fname = filenameToModelName(fname.toStdString());
-	setProgress(0.1);
-	auto addModel = new ListModel(mesh, fname, nullptr);
-	_featureHistoryManager.addFeature(addModel);
-	auto latest = addModel->getAddedModel();
-
-	setProgress(0.2);
-	TwoManifoldBuilder modelBuilder(*mesh);
-	mesh->centerMesh();
-	setProgress(0.4);
-	//repair mode
-	if (Hix::Features::isRepairNeeded(mesh))
-	{
-		qmlManager->setProgressText("Repairing mesh.");
-		std::unordered_set<GLModel*> repairModels;
-		repairModels.insert(latest);
-		MeshRepair sfsdfs(repairModels);
-	}
-	setProgress(1.0);
-	// do auto arrange
-	if (glmodels.size() >= 2)
-		openArrange();
-	//runArrange();
-	QApplication::setOverrideCursor(QCursor(Qt::ArrowCursor));
-}
-
-
 
 
 void QmlManager::modelRepair()
 {
 	//_currentFeature.reset(new MeshRepair(selectedModels));
 	//if cut is finished;
-	_currentMode.reset();
 
 }
 
@@ -495,13 +460,6 @@ int QmlManager::getSelectedModelsSize() {
     return selectedModels.size();
 }
 
-float QmlManager::getBedXSize(){
-    return _setting.printerSetting.bedX;
-}
-
-float QmlManager::getBedYSize(){
-	return _setting.printerSetting.bedY;
-}
 
 
 bool QmlManager::getGroupSelectionActive() {
@@ -509,7 +467,7 @@ bool QmlManager::getGroupSelectionActive() {
 }
 
 QString QmlManager::getVersion(){
-    return version;
+    return QString::fromStdString(settings().deployInfo.version);
 }
 void QmlManager::keyboardHandlerFocus(){
     qDebug() << "keyboard focus on";
@@ -952,7 +910,7 @@ QString QmlManager::filenameToModelName(const std::string& s)
 		return QString::fromStdString(s.substr(i + 1, s.length() - i));
 	}
 
-	return QString::fromStdString("");
+	return QString::fromStdString(s);
 }
 
 const std::unordered_set<GLModel*>& QmlManager::getSelectedModels()
@@ -1079,18 +1037,6 @@ void QmlManager::modelMove(QVector3D displacement)
 		selectedModel->moveModel(bndCheckedDisp);
 	}
 }
-void QmlManager::modelRotateWithAxis(const QVector3D& axis, double angle)
-{
-	auto axis4D = axis.toVector4D();
-	for (auto selectedModel : selectedModels) {
-		auto rotation = QQuaternion::fromAxisAndAngle(axis, angle);
-		selectedModel->rotateModel(rotation);
-		selectedModel->updatePrintable();
-
-	}
-
-
-}
 
 QVector3D QmlManager::cameraViewVector()
 {
@@ -1155,9 +1101,7 @@ void QmlManager::save() {
 
 void QmlManager::cameraViewChanged()
 {
-	auto widget = dynamic_cast<Hix::Features::WidgetMode*>(_currentMode.get());
-	if(widget)
-		widget->updatePosition();
+	emit cameraViewChangedNative();
 }
 
 void QmlManager::groupSelectionActivate(bool active){
@@ -1204,9 +1148,6 @@ void QmlManager::runGroupFeature(int ftrType, QString state, double arg1, double
     {
         if (state == "active"){
 			for (auto selectedModel : selectedModels) {
-				if (selectedModel->updateLock)
-					return;
-				selectedModel->updateLock = true;
 				qmlManager->openProgressPopUp();
 				qDebug() << "tweak start";
 				rotateResult* rotateres = autoorientation::Tweak(selectedModel->getMesh(), true, 45, &selectedModel->appropriately_rotated);
@@ -1778,4 +1719,42 @@ void QmlManager::settingFileChanged(QString path)
 {
 	_setting.setPrinterPath(path.toStdString());
 	_bed.drawBed();
+}
+
+void QmlManager::openModelBuilder()
+{
+	_currentMode.reset(new ModelBuilderMode());
+
+}
+
+void QmlManager::closeModelBuilder()
+{
+	_currentMode.reset();
+}
+
+void QmlManager::buildModel()
+{
+	auto builder = dynamic_cast<ModelBuilderMode*>(_currentMode.get());
+	if (builder)
+	{
+		builder->build();
+	}
+}
+
+void QmlManager::mbRangeSliderValueChangedFirst(double value)
+{
+	auto builder = dynamic_cast<ModelBuilderMode*>(_currentMode.get());
+	if (builder)
+	{
+		builder->getSliderSignalBot(value);
+	}
+}
+
+void QmlManager::mbRangeSliderValueChangedSecond(double value)
+{
+	auto builder = dynamic_cast<ModelBuilderMode*>(_currentMode.get());
+	if (builder)
+	{
+		builder->getSliderSignalTop(value);
+	}
 }
