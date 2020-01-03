@@ -64,6 +64,7 @@ QmlManager::QmlManager(QObject *parent) : QObject(parent), _optBackend(this, scf
 	qmlRegisterType<Hix::QML::CloseButton>("hix.qml", 1, 0, "CloseButton");
 	qmlRegisterType<Hix::QML::RoundButton>("hix.qml", 1, 0, "RoundButton");
 	qmlRegisterType<Hix::QML::LeftPopupShell>("hix.qml", 1, 0, "LeftPopupShell");
+	qmlRegisterType<Hix::QML::LeftPopupContent>("hix.qml", 1, 0, "LeftPopupContent");
 	qmlRegisterType<Hix::QML::InputBox>("hix.qml", 1, 0, "InputBox");
 	qmlRegisterType<Hix::QML::DropdownBox>("hix.qml", 1, 0, "DropdownBox");
 	qmlRegisterType<Hix::QML::ToastShell>("hix.qml", 1, 0, "ToastShell");

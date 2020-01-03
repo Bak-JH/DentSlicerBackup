@@ -9,8 +9,8 @@ LeftPopup {
 	property var spaceOnTop: 68
 	property var spaceBtwCtr: 56
 	property var themeColor: "#00b9c8"
-	
-	featureName: qsTr("Move")
+
+	title: qsTr("Move")
 	leftPopupHeight: 268
 	width: 256
 
@@ -18,11 +18,11 @@ LeftPopup {
 		id: moveX
 		fromNum: -100
 		toNum: 100
-		inputText: "X Offset(mm)"
-		width: parent.width - sidePadding * 2
-		anchors.left: parent.left
+		inputLabel.text: "X Offset(mm)"
+		width: parent.content.width - sidePadding * 2
+		anchors.left: parent.content.left
 		anchors.leftMargin: sidePadding
-		anchors.top: parent.top
+		anchors.top: parent.content.top
 		anchors.topMargin: spaceOnTop
 	}
 
@@ -30,9 +30,9 @@ LeftPopup {
 		id: moveY
 		fromNum: -100
 		toNum: 100
-		inputText: "Y Offset(mm)"
-		width: parent.width - sidePadding * 2
-		anchors.left: parent.left
+		inputLabel.text: "Y Offset(mm)"
+		width: parent.content.width - sidePadding * 2
+		anchors.left: parent.content.left
 		anchors.leftMargin: sidePadding
 		anchors.top: moveX.bottom
 		anchors.topMargin: spaceBtwCtr
@@ -42,9 +42,9 @@ LeftPopup {
 		id: moveZ
 		fromNum: -100
 		toNum: 100
-		inputText: "Z Offset(mm)"
-		width: parent.width - sidePadding * 2
-		anchors.left: parent.left
+		inputLabel.text: "Z Offset(mm)"
+		width: parent.content.width - sidePadding * 2
+		anchors.left: parent.content.left
 		anchors.leftMargin: sidePadding
 		anchors.top: moveY.bottom
 		anchors.topMargin: spaceBtwCtr
