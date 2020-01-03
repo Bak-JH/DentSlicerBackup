@@ -6,7 +6,7 @@
 #include <unordered_set>
 #include "TwoManifoldBuilder.h"
 #include "../repair/meshrepair.h"
-constexpr float ZMARGIN = 5;
+constexpr float ZMARGIN = 10;
 
 
 Hix::Features::ModelBuilderMode::ModelBuilderMode(): _topPlane(qmlManager->total, true), _bottPlane(qmlManager->total, true)
@@ -33,21 +33,20 @@ Hix::Features::ModelBuilderMode::ModelBuilderMode(): _topPlane(qmlManager->total
 	_model->setHitTestable(true);
 	_model->setZToBed();
 	_model->moveModel(QVector3D(0, 0, ZMARGIN));
-	_zLength = _model->aabb().lengthZ() + ZMARGIN;
-	auto topZ = _model->aabb().zMax();
-	auto botZ = _model->aabb().zMin();
 	_builder = new TwoManifoldBuilder(*_model->getMeshModd());
 	float cutPlane, botPlane;
 	QQuaternion rotation;
 	_builder->autogenOrientation(cutPlane, botPlane, rotation);
 	_model->transform().setRotation(rotation);
+	_model->updateRecursiveAabb();
+	_zLength = _model->aabb().lengthZ() + ZMARGIN;
 	auto translationZ = _model->transform().translation().z();
 	cutPlane += translationZ;
 	botPlane += translationZ;
-	_topPlane.transform().setTranslation(QVector3D(0, 0, cutPlane - ZMARGIN));
-	_bottPlane.transform().setTranslation(QVector3D(0, 0, botPlane - ZMARGIN));
-	QMetaObject::invokeMethod(qmlManager->modelBuilderPopup, "setRangeSliderValueFirst", Q_ARG(QVariant, ((botPlane - ZMARGIN) / _zLength) * 1.8));
-	QMetaObject::invokeMethod(qmlManager->modelBuilderPopup, "setRangeSliderValueSecond", Q_ARG(QVariant, ((cutPlane - ZMARGIN)/ _zLength) * 1.8));
+	_topPlane.transform().setTranslation(QVector3D(0, 0, cutPlane));
+	_bottPlane.transform().setTranslation(QVector3D(0, 0, botPlane));
+	QMetaObject::invokeMethod(qmlManager->modelBuilderPopup, "setRangeSliderValueFirst", Q_ARG(QVariant, (botPlane/ _zLength) * 1.8));
+	QMetaObject::invokeMethod(qmlManager->modelBuilderPopup, "setRangeSliderValueSecond", Q_ARG(QVariant, (cutPlane/ _zLength) * 1.8));
 
 
 
@@ -86,6 +85,5 @@ void Hix::Features::ModelBuilderMode::getSliderSignalTop(double value)
 
 void Hix::Features::ModelBuilderMode::getSliderSignalBot(double value)
 {
-	_zLength = _model->aabb().lengthZ() + ZMARGIN;
 	_bottPlane.transform().setTranslation(QVector3D(0, 0, _zLength * value / 1.8));
 }
