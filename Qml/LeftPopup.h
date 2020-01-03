@@ -1,117 +1,64 @@
   #pragma once
 #include <QtQuick/private/qquickrectangle_p.h>
-#include <QtQuick/private/qquickmousearea_p.h>
-#include <QtQuick/private/qquickevents_p_p.h>
 #include <QtQuick/private/qquicktext_p.h>
-#include <QtQuickTemplates2/private/qquickspinbox_p.h>
-#include <QtQuickTemplates2/private/qquickcombobox_p.h>
-#include <QSpinBox>
+#include "Buttons.h"
+#include "Inputs.h"
 //#include <QComboBox>
-#include <QWidget>
-
 
 namespace Hix
 {
 	namespace QML
-	{	
-		
-		class CloseButton : public QQuickRectangle
-		{
-			Q_OBJECT
+	{
+		class CloseButton;
+		class RoundButton;
+		class LeftPopupContent;
 
-		public:
-			CloseButton(QQuickItem* parent = nullptr);
-
-		public slots:
-			void onClick();
-
-		private:
-			QQuickMouseArea* _mouseArea;
-		};
-		
-
-		class LeftPopupShell : public QQuickRectangle
+		class LeftPopupShell : public QQuickItem
 		{
 			Q_OBJECT
 			Q_PROPERTY(QString title MEMBER _title NOTIFY titleChanged)
-			Q_PROPERTY(QString body MEMBER _body NOTIFY bodyChanged)
+			Q_PROPERTY(QString bodyText MEMBER _bodyText NOTIFY bodyChanged)
+			//Q_PROPERTY(LeftPopupContent* content MEMBER _content)
+			Q_PROPERTY(LeftPopupContent* content READ content CONSTANT FINAL)
 
 		public:
 			LeftPopupShell(QQuickItem* parent = nullptr);
+			QString title()const;
+			LeftPopupContent* content() const;
 
-		public slots:
+
+		signals:
 			void titleChanged();
 			void bodyChanged();
 
 		protected:
 			QString _title = "Name";
-			QString _body = "Click the surface to face it down";
+			QString _bodyText = "Click the surface to face it down";
+			LeftPopupContent* _content;
 		};
 
-
-		class InputBox : public QQuickRectangle
+		class LeftPopupContent : public QQuickRectangle
 		{
 			Q_OBJECT
-			//Q_PROPERTY(QString propName MEMBER _propName NOTIFY propNameChanged)
-			Q_PROPERTY(QQuickSpinBox* inputRect MEMBER _inputRect)
+			Q_PROPERTY(CloseButton* closeButton MEMBER _closeButton)
+			Q_PROPERTY(RoundButton* roundButton MEMBER _roundButton)
+			Q_PROPERTY(QQuickText* title MEMBER _title)
 
 		public:
-			InputBox(QQuickItem* parent = nullptr);
-			QQuickSpinBox* _inputRect;
+			LeftPopupContent(QQuickItem* parent = nullptr);
 
-		public slots:
-			//void propNameChanged();
-
-		protected:
-			//QString _propName = "Property";
+		private:
+			CloseButton* _closeButton;
+			RoundButton* _roundButton;
+			QQuickText* _title;
 		};
 
-		class DropdownBox : public QQuickRectangle
-		{
-			Q_OBJECT
-			Q_PROPERTY(QString dropName MEMBER _dropName NOTIFY dropNameChanged)
-			Q_PROPERTY(QQuickComboBox* dropRect MEMBER _dropRect)
-			Q_PROPERTY(QStringList dropList MEMBER _dropList)
-
-		public:
-			DropdownBox(QQuickItem* parent = nullptr);
-			QQuickComboBox* _dropRect;
-
-		public slots:
-			void dropNameChanged();
-
-		protected:
 		
-			QString _dropName = "Dropdown";
-			QStringList _dropList = { "Banana", "Apple", "Coconut", "Almond" };
-		};
+
+		
 
 
-		class RoundButton : public QQuickRectangle
-		{
-			Q_OBJECT
-			Q_PROPERTY(QString fName MEMBER _fName NOTIFY fNameChanged)
-
-		public:
-			RoundButton(QQuickItem* parent = nullptr);
-
-		signals:
-			void clicked();
-			void entered();
-			void exited();
-
-		public slots:
-			void onClick();
-			void onEntered();
-			void onExited();
-			void fNameChanged();
-			//void onEnable();
-			//void onDisable();
-
-		protected:
-			QString _fName = "Move";
-			QQuickMouseArea* _mouseArea;
-		};
+		
 		//class TextButton : public RoundButton
 		//{
 		//	Q_OBJECT

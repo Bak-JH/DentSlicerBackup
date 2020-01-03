@@ -4,23 +4,23 @@ import QtQuick.Controls 2.1
 import QtQuick.Controls.Styles 1.4
 import QtGraphicalEffects 1.12
 
-Hix.InputBox {
-
+Hix.InputBox
+{
+	id: inputbox
 	property string inputText
 	property var fromNum
 	property var toNum
 
-	Text {
-		//text: parent.propName
-		text: inputText
+	inputLabel
+	{
 		font.family: openRegular.name
-		anchors.left: parent.left
+		anchors.left: inputbox.left
 		//anchors.top: parent.top
 		//anchors.topMargin: height / 2
 		color: "#666666"
-		anchors.verticalCenter: parent.verticalCenter
-		//verticalAlignment: Text.AlignVCenter
+		anchors.verticalCenter: inputbox.verticalCenter
 	}
+
 
 	SpinBox {
 		id: control

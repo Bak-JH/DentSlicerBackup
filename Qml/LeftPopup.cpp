@@ -1,50 +1,32 @@
 #include "LeftPopup.h"
 
+using namespace  Hix::QML;
 
-Hix::QML::CloseButton::CloseButton(QQuickItem* parent) : _mouseArea(new QQuickMouseArea(this))
+
+QString Hix::QML::LeftPopupShell::title() const
 {
-	setParent(parent);
-	connect(_mouseArea, &QQuickMouseArea::clicked, this, &CloseButton::onClick);
-	qvariant_cast<QObject*>(
-		_mouseArea->property("anchors")
-		)->setProperty("fill", _mouseArea->property("parent"));
-}
-void Hix::QML::CloseButton::onClick()
-{
-	qDebug() << "close clicked";
+	return _title;
 }
 
-
-
-Hix::QML::RoundButton::RoundButton(QQuickItem* parent) :QQuickRectangle(parent), _mouseArea(new QQuickMouseArea(this))
+LeftPopupContent* Hix::QML::LeftPopupShell::content() const
 {
-	connect(_mouseArea, &QQuickMouseArea::clicked, this, &RoundButton::onClick);
-	connect(_mouseArea, &QQuickMouseArea::entered, this, &RoundButton::onEntered);
-	connect(_mouseArea, &QQuickMouseArea::exited, this, &RoundButton::onExited);
-
-	_mouseArea->setHoverEnabled(true);
-	qvariant_cast<QObject*>(
-		_mouseArea->property("anchors")
-		)->setProperty("fill", _mouseArea->property("parent"));
+	return _content;
 }
 
 
-void Hix::QML::RoundButton::onClick()
+
+Hix::QML::LeftPopupShell::LeftPopupShell(QQuickItem* parent) : QQuickItem(parent)
 {
-	emit clicked();
+	_content = new LeftPopupContent(this);
 }
-void Hix::QML::RoundButton::onEntered()
+
+Hix::QML::LeftPopupContent::LeftPopupContent(QQuickItem* parent) : QQuickRectangle(parent)
 {
-	emit entered();
+	_closeButton = new CloseButton(this);
+	_roundButton = new RoundButton(this);
+	_title = new QQuickText(this);
 }
-void Hix::QML::RoundButton::onExited()
-{
-	emit exited();
-}
-void Hix::QML::RoundButton::fNameChanged()
-{
-	emit fNameChanged();
-}
+
 
 //
 //Hix::QML::TextButton::TextButton(QQuickItem* parent) : RoundButton(parent)
@@ -86,48 +68,3 @@ void Hix::QML::RoundButton::fNameChanged()
 //	//qDebug() << _btncolor;
 //
 //}
-
-
-
-
-
-
-
-void Hix::QML::LeftPopupShell::titleChanged()
-{
-	qDebug() << _title;
-}
-
-void Hix::QML::LeftPopupShell::bodyChanged()
-{
-	qDebug() << _body;
-}
-
-
-/*
-void Hix::QML::InputBox::propNameChanged()
-{
-	qDebug() << _propName;
-}
-*/
-void Hix::QML::DropdownBox::dropNameChanged()
-{
-	qDebug() << _dropName;
-}
-
-
-Hix::QML::LeftPopupShell::LeftPopupShell(QQuickItem* parent)
-{
-	setParent(parent);
-}
-
-Hix::QML::InputBox::InputBox(QQuickItem* parent):_inputRect(new QQuickSpinBox(this))
-{
-	setParent(parent);
-}
-
-Hix::QML::DropdownBox::DropdownBox(QQuickItem* parent):_dropRect(new QQuickComboBox(this))
-{
-	setParent(parent);
-}
-

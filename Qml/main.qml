@@ -249,6 +249,7 @@ Item{
 			anchors.leftMargin: 15
 			anchors.topMargin: 120
 		}
+		/*
 		LeftPopupLayFlat {
 			id: leftpopuplayflat
 			anchors.top: uppertab.bottom
@@ -279,6 +280,7 @@ Item{
 			anchors.leftMargin: 15
 			anchors.topMargin: 420
 		}
+
 		/*
 		LeftPopupLabel
 		{

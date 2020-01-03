@@ -167,14 +167,19 @@
     <ClCompile Include="feature\stlexporter.cpp" />
     <ClCompile Include="DentEngine\src\svgexporter.cpp" />
     <ClCompile Include="utils\updatechecker.cpp" />
-    <ClCompile Include="manager\DialogManager.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Settings\DeployInfo.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="feature\ModelBuilder\TwoManifoldBuilder.cpp" />
     <ClCompile Include="feature\ModelBuilder\ModelBuilderMode.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="feature\ModelBuilder\TwoManifoldBuilder.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Qml\Buttons.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Qml\Inputs.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -1031,7 +1036,10 @@
     <QtMoc Include="qmlmanager.h" />
     <QtMoc Include="utils\quaternionhelper.h" />
     <QtMoc Include="utils\updatechecker.h" />
-    <QtMoc Include="manager\DialogManager.h">
+    <QtMoc Include="Qml\Buttons.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="Qml\Inputs.h">
       <Filter>Header Files</Filter>
     </QtMoc>
   </ItemGroup>
@@ -1100,7 +1108,6 @@
     <None Include="Qml\PartList.qml" />
     <None Include="Qml\PartListContentBox.qml" />
     <None Include="Qml\PrintInfo.qml" />
-    <None Include="Qml\RoundedButton.qml" />
     <None Include="Qml\SlideBar.qml" />
     <None Include="Qml\Toast.qml" />
     <None Include="Qml\UndoRedo.qml" />
@@ -1297,6 +1304,8 @@
     <None Include="Qml\LeftPopupShellOffset.qml" />
     <None Include="Qml\CtrScaleInputBox.qml" />
     <None Include="Qml\ProgressShell.qml" />
+    <None Include="Qml\FileDialogLoad.qml" />
+    <None Include="Qml\PlanesliderRange.qml" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Source Files">
