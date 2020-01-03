@@ -323,6 +323,7 @@
     <ClCompile Include="feature\repair\TMesh\triangle.cpp" />
     <ClCompile Include="feature\repair\TMesh\vertex.cpp" />
     <ClCompile Include="feature\rotate.cpp" />
+    <ClCompile Include="feature\Shapes2D.cpp" />
     <ClCompile Include="feature\SupportFeature.cpp" />
     <ClCompile Include="feature\ModelBuilder\TwoManifoldBuilder.cpp" />
     <ClCompile Include="fileloader.cpp" />
@@ -346,7 +347,6 @@
     <ClCompile Include="render\PlaneMeshEntity.cpp" />
     <ClCompile Include="render\SceneEntity.cpp" />
     <ClCompile Include="render\SceneEntityWithMaterial.cpp" />
-    <ClCompile Include="feature\Shapes2D.cpp" />
     <ClCompile Include="Settings\AppSetting.cpp" />
     <ClCompile Include="Settings\DeployInfo.cpp" />
     <ClCompile Include="Settings\JSONParsedSetting.cpp" />
@@ -865,7 +865,6 @@
     <ClInclude Include="DentEngine\src\SlicerDebugInfoExport.h" />
     <ClInclude Include="feature\addModel.h" />
     <ClInclude Include="feature\agCDT\CDT.h" />
-    <ClInclude Include="feature\agCDT\CDT.hpp" />
     <ClInclude Include="feature\agCDT\CDTUtils.h" />
     <ClInclude Include="feature\agCDT\CDTUtils.hpp" />
     <ClInclude Include="feature\agCDT\PointRTree.h" />
