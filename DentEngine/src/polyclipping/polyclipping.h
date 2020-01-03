@@ -9,7 +9,7 @@ namespace Hix
 {
 	namespace Polyclipping
 	{
-		static constexpr int INT_PT_RESOLUTION = 1000;
+		static constexpr int INT_PT_RESOLUTION = 100000;
 		static constexpr float FLOAT_PT_RESOLUTION = 1.0 / INT_PT_RESOLUTION;
 		// converts float point to int in microns
 		void  addPoint(float x, float y, ClipperLib::Path* path);
