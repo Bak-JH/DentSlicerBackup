@@ -117,7 +117,6 @@
     <ClCompile Include="render\PlaneMeshEntity.cpp" />
     <ClCompile Include="render\SceneEntity.cpp" />
     <ClCompile Include="render\SceneEntityWithMaterial.cpp" />
-    <ClCompile Include="feature\Shapes2D.cpp" />
     <ClCompile Include="slice\SlicingOptBackend.cpp" />
     <ClCompile Include="support\CylindricalRaft.cpp" />
     <ClCompile Include="support\ModelAttachedSupport.cpp" />
@@ -185,6 +184,9 @@
     </ClCompile>
     <ClCompile Include="feature\ModelBuilder\TwoManifoldBuilder.cpp" />
     <ClCompile Include="feature\ModelBuilder\ModelBuilderMode.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="feature\Shapes2D.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -627,7 +629,6 @@
     <ClInclude Include="DentEngine\src\SlicerDebugInfoExport.h" />
     <ClInclude Include="feature\addModel.h" />
     <ClInclude Include="feature\agCDT\CDT.h" />
-    <ClInclude Include="feature\agCDT\CDT.hpp" />
     <ClInclude Include="feature\agCDT\CDTUtils.h" />
     <ClInclude Include="feature\agCDT\CDTUtils.hpp" />
     <ClInclude Include="feature\agCDT\PointRTree.h" />
