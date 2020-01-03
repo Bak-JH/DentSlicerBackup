@@ -315,7 +315,7 @@ void generateCapZPlaneImpl(Hix::Engine3D::Mesh* mesh, float zPos, const std::vec
 	CDT::Triangulation<double> cdt = CDT::Triangulation<double>(CDT::FindingClosestPoint::BoostRTree);
 	// ... same as above
 	cdt.insertVertices(vtcs);
-	cdt.insertEdges(edges);
+	cdt.tryInsertEdges(edges);
 	cdt.eraseOuterTriangles();
 	//TODO: is input vtcs different from output vtcs?
 	auto& vtcsOut = cdt.vertices;
@@ -402,22 +402,30 @@ std::vector<std::vector<QVector3D>> Hix::Shapes2D::combineContour(const std::vec
 	{
 		for (auto& child : tree.Childs)
 		{
-			std::vector<QVector3D> currPath;
-			for (auto& pt : child->Contour)
-			{
-				try
-				{
-					auto& floatPt = intToFloatMap.at(pt);
-					currPath.emplace_back(floatPt);
-				}
-				catch (...)
-				{
-					auto flPt = Hix::Polyclipping::toFloatPt(pt);
-					currPath.emplace_back(flPt);
-				}
+			//clean path
+			auto& contour = child->Contour;
+			ClipperLib::Paths cleanedPolys;
+			ClipperLib::SimplifyPolygon(contour, cleanedPolys, pftNonZero);
 
+			for (auto& p : cleanedPolys)
+			{
+				std::vector<QVector3D> currPath;
+				for (auto& pt : p)
+				{
+					try
+					{
+						auto& floatPt = intToFloatMap.at(pt);
+						currPath.emplace_back(floatPt);
+					}
+					catch (...)
+					{
+						auto flPt = Hix::Polyclipping::toFloatPt(pt);
+						currPath.emplace_back(flPt);
+					}
+				}
+				result.emplace_back(std::move(currPath));
 			}
-			result.emplace_back(std::move(currPath));
+
 		}
 	}
 	return result;

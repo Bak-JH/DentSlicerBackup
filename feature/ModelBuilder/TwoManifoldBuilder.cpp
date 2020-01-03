@@ -738,17 +738,20 @@ void buildBott(Hix::Engine3D::Mesh& mesh, const  std::deque<HalfEdgeConstItr>& b
 	{
 		auto pos = each.from().localPosition();
 		latest.emplace_back(QVector3D(pos.x(), pos.y(), 0));
-
 	}
 	auto paths =  Hix::Shapes2D::combineContour(shapes);
-	auto& outer = *paths.begin();
-	std::vector<QVector2D> contour;
-	for (auto& each : outer)
+	//Hix::Debug::DebugRenderObject::getInstance().addPaths(paths);
+	//Hix::Debug::DebugRenderObject::getInstance().addLine(std::vector<QVector3D>{QVector3D(21.764999389648438, 16.499000549316406, -0.01),
+	//	QVector3D(21.791500091552734, 16.455501556396484, -0.01)}, QColor(200,0,0));
+	for (auto& p : paths)
 	{
-		contour.emplace_back(QVector2D(each));
+		std::vector<QVector2D> contour;
+		for (auto& each : p)
+		{
+			contour.emplace_back(QVector2D(each));
+		}
+		Hix::Shapes2D::generateCapZPlane(&mesh, contour, zVal, isBottEmpty);
 	}
-	Hix::Shapes2D::generateCapZPlane(&mesh, contour, zVal, isBottEmpty);
-
 }
 
 
