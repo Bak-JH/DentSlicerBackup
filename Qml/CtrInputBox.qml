@@ -4,53 +4,54 @@ import QtQuick.Controls 2.1
 import QtQuick.Controls.Styles 1.4
 import QtGraphicalEffects 1.12
 
-Hix.InputBox
-{
+Hix.InputBox {
 	id: inputbox
 	property string inputText
 	property var fromNum
 	property var toNum
 
-	inputLabel
-	{
+	label {
+		//text: parent.propName
+		text: inputText
 		font.family: openRegular.name
 		anchors.left: inputbox.left
 		//anchors.top: parent.top
 		//anchors.topMargin: height / 2
 		color: "#666666"
 		anchors.verticalCenter: inputbox.verticalCenter
+		//verticalAlignment: Text.AlignVCenter
 	}
 
-
-	SpinBox {
-		id: control
+	spinbox {
 		font.family: openRegular.name
 		value: 0
 		from: fromNum
 		to: toNum
-		width: parent.width * 0.46//0.5
+		width: inputbox.width * 0.46//0.5
 		height: 26
-		anchors.right: parent.right
-		anchors.rightMargin: parent.width * 0.1
-		anchors.verticalCenter: parent.verticalCenter
+		anchors.right: inputbox.right
+		anchors.rightMargin: inputbox.width * 0.1
+		anchors.verticalCenter: inputbox.verticalCenter
 		editable: true
+
 		//from: parent.inputRect.from
 		//to: parent.inputRect.to
 
+		/*
 		contentItem: TextInput {
 			z: 2
-			text: control.textFromValue(control.value, control.locale)
-			font: control.font
+			text: "test"//spinbox.textFromValue(spinbox.value, spinbox.locale)
+			font: spinbox.font
 			selectionColor: "#21be2b"
 			selectedTextColor: "#ffffff"
 			//horizontalAlignment: Qt.AlignHCenter
 			verticalAlignment: Qt.AlignVCenter
 
-			readOnly: !control.editable
-			validator: control.validator
+			readOnly: !spinbox.editable
+			validator: spinbox.validator
 			inputMethodHints: Qt.ImhFormattedNumbersOnly
 		}
-
+		/*
 		up.indicator: Rectangle {
 			id: uparrow
 			//x: control.mirrored ? 0 : parent.width - width
@@ -108,22 +109,15 @@ Hix.InputBox
 				onReleased: { control.decrease(); }
 			}
 		}
-
+		*/
+		
 		background: Rectangle {
 			id: rect
-			color: control.hovered ? "#ffffff" : "#f6feff"
+			color: spinbox.hovered ? "#ffffff" : "#f6feff"
 			//border.color: "#d3dfe0"
-			border.color: control.hovered ? "#b3bfc0": "#d3dfe0"
+			border.color: spinbox.hovered ? "#b3bfc0": "#d3dfe0"
 			radius: 2
 		}
-		DropShadow {
-			//visible: control.hovered ? true : false
-			visible: false
-			anchors.fill: rect
-			radius: 4.0
-			samples: 9
-			color: "#30000000"
-			source: rect
-		}
+
 	}
 }

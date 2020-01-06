@@ -31,7 +31,7 @@ namespace Hix
 			void titleChanged();
 			void bodyChanged();
 
-		protected:
+		private:
 			QString _title = "Name";
 			QString _bodyText = "Click the surface to face it down";
 			LeftPopupContent* _content;

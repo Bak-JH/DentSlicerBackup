@@ -1,11 +1,11 @@
 import QtQuick 2.6
-import hix.qml 1.0
+import hix.qml 1.0 as Hix
 
 import QtGraphicalEffects 1.12
 import QtQuick.Controls 2.1
 
 
-LeftPopupShell 
+Hix.LeftPopupShell 
 {
 	id: leftpopupshell
 	property var myPadding: 16
