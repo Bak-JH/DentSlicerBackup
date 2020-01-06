@@ -18,7 +18,7 @@ LeftPopup {
 		id: moveX
 		fromNum: -100
 		toNum: 100
-		inputLabel.text: "X Offset(mm)"
+		label.text: "X Offset(mm)"
 		width: parent.content.width - sidePadding * 2
 		anchors.left: parent.content.left
 		anchors.leftMargin: sidePadding
@@ -30,7 +30,7 @@ LeftPopup {
 		id: moveY
 		fromNum: -100
 		toNum: 100
-		inputLabel.text: "Y Offset(mm)"
+		label.text: "Y Offset(mm)"
 		width: parent.content.width - sidePadding * 2
 		anchors.left: parent.content.left
 		anchors.leftMargin: sidePadding
@@ -42,7 +42,7 @@ LeftPopup {
 		id: moveZ
 		fromNum: -100
 		toNum: 100
-		inputLabel.text: "Z Offset(mm)"
+		label.text: "Z Offset(mm)"
 		width: parent.content.width - sidePadding * 2
 		anchors.left: parent.content.left
 		anchors.leftMargin: sidePadding

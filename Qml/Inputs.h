@@ -1,6 +1,7 @@
 #pragma once
 #include <QtQuick/private/qquickrectangle_p.h>
 #include <QtQuick/private/qquicktext_p.h>
+#include <QtQuick/private/qquicktextinput_p.h>
 #include <QtQuickTemplates2/private/qquickspinbox_p.h>
 #include <QtQuickTemplates2/private/qquickcombobox_p.h>
 
@@ -8,21 +9,31 @@ namespace Hix
 {
 	namespace QML
 	{
-		class InputBox : public QQuickSpinBox
+		class InputSpinBox;
+		class InputBox : public QQuickItem
 		{
 			Q_OBJECT
 				//Q_PROPERTY(QString propName MEMBER _propName NOTIFY propNameChanged)
-				Q_PROPERTY(QQuickText* inputLabel MEMBER _inputLabel)
+			Q_PROPERTY(QQuickText* label MEMBER _label)
+			Q_PROPERTY(InputSpinBox* spinbox READ spinbox CONSTANT FINAL)
 
 		public:
 			InputBox(QQuickItem* parent = nullptr);
-			QQuickText* _inputLabel;
+			InputSpinBox* spinbox()const;
 
-		public slots:
-			//void propNameChanged();
+		signals:
+			void propertyChanged();
 
-		protected:
-			//QString _propName = "Property";
+		private:
+			QQuickText* _label;
+			InputSpinBox* _spinbox;
+		};
+
+		class InputSpinBox : public QQuickSpinBox
+		{
+			Q_OBJECT
+		public:
+			InputSpinBox(QQuickItem* parent = nullptr);
 		};
 
 		class DropdownBox : public QQuickRectangle
