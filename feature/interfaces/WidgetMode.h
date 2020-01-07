@@ -1,6 +1,6 @@
 #pragma once
 #include "feature/interfaces/Mode.h"
-#include "ui/Widget3D.h"
+#include "widget/Widget3D.h"
 #include "input/raycastcontroller.h"
 
 namespace Hix

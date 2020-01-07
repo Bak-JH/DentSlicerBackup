@@ -10,34 +10,40 @@ Hix.LeftPopupShell
 	id: leftpopupshell
 	property var myPadding: 16
 	property var themeColor: "#00b9c8"
-	property int leftPopupHeight
-	content
+
+	property var featureName
+	property var leftPopupHeight
+
+	Rectangle 
 	{
 		width: 256
-		height: 300
+		implicitWidth: width
+		height: leftPopupHeight
+		//height: popupHeight
 		color: "#F6FEFF"
 		radius: 8
 
-		title
-		{
+		Text {
 			id: popuptitle
+			//text: featureName
 			text: leftpopupshell.title
 			font.pointSize: 11
 			font.family: openRegular.name
 			font.weight: Font.Bold
-			anchors.top: content.top
-			anchors.left: content.left
+			anchors.top: parent.top
+			anchors.left: parent.left
 			anchors.topMargin: myPadding-2
 			anchors.leftMargin: myPadding
 		}
 
-		closeButton
+		Hix.CloseButton 
 		{
 			id: closeButton
 			width: 16
 			height: 16
-			anchors.top: content.top
-			anchors.right: content.right
+			//color: "transparent"
+			anchors.top: parent.top
+			anchors.right: parent.right
 			anchors.topMargin: myPadding
 			anchors.rightMargin: myPadding
 			image 
@@ -48,7 +54,7 @@ Hix.LeftPopupShell
 			}
 		}
 
-		roundButton
+		Hix.RoundButton
 		{
 			id: roundButton
 			width: 224
@@ -56,11 +62,12 @@ Hix.LeftPopupShell
 			radius: 16
 			color: "#00b9c8"
 
-			anchors.bottom: content.bottom
+			anchors.bottom: parent.bottom
 			anchors.bottomMargin: 16
-			anchors.horizontalCenter: content.horizontalCenter
+			anchors.horizontalCenter: parent.horizontalCenter
 
-			labelText {
+			labelText 
+			{
 				color: "#FFFFFF"
 				font.pointSize: 10
 				text: "Apply"
@@ -71,16 +78,17 @@ Hix.LeftPopupShell
 			}
 
 			onClicked: { console.log("clicked"); }
-			onEntered: { roundButton.color = "#21959e" }
-			onExited: { roundButton.color = "#00b9c8" }
+			onEntered: { color = "#21959e" }
+			onExited: { color = "#00b9c8" }
 		}
 	}
-
-	DropShadow {
-		anchors.fill: content
+	
+	DropShadow 
+	{
+		anchors.fill: leftpopupshell
 		radius: 10.0
 		samples: 21
 		color: "#55000000"
-		source: content
+		source: leftpopupshell
 	}
 }

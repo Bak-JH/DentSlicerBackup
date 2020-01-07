@@ -13,27 +13,18 @@ namespace Hix
 		class InputBox : public QQuickItem
 		{
 			Q_OBJECT
-				//Q_PROPERTY(QString propName MEMBER _propName NOTIFY propNameChanged)
 			Q_PROPERTY(QQuickText* label MEMBER _label)
-			Q_PROPERTY(InputSpinBox* spinbox READ spinbox CONSTANT FINAL)
+			Q_PROPERTY(int value MEMBER _value)
 
 		public:
 			InputBox(QQuickItem* parent = nullptr);
-			InputSpinBox* spinbox()const;
-
+			Q_INVOKABLE void test() { qDebug() << _value; }
 		signals:
 			void propertyChanged();
 
 		private:
 			QQuickText* _label;
-			InputSpinBox* _spinbox;
-		};
-
-		class InputSpinBox : public QQuickSpinBox
-		{
-			Q_OBJECT
-		public:
-			InputSpinBox(QQuickItem* parent = nullptr);
+			int _value = 0;
 		};
 
 		class DropdownBox : public QQuickRectangle

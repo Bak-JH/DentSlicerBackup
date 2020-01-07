@@ -117,13 +117,6 @@
     <ClCompile Include="Mesh\RayAccelerator.cpp" />
     <ClCompile Include="Mesh\RayCaster.cpp" />
     <ClCompile Include="render\CircleMeshEntity.cpp" />
-    <ClCompile Include="Qml\LeftPopup.cpp" />
-    <ClCompile Include="Qml\ModalWindow.cpp" />
-    <ClCompile Include="Qml\PartList.cpp" />
-    <ClCompile Include="Qml\PrintInfo.cpp" />
-    <ClCompile Include="Qml\SlideBar.cpp" />
-    <ClCompile Include="Qml\Toast.cpp" />
-    <ClCompile Include="Qml\ViewMode.cpp" />
     <ClCompile Include="render\lights.cpp" />
     <ClCompile Include="render\LineMeshEntity.cpp" />
     <ClCompile Include="render\ModelMaterial.cpp" />
@@ -141,13 +134,7 @@
     <ClCompile Include="support\SupportModel.cpp" />
     <ClCompile Include="support\SupportRaftManager.cpp" />
     <ClCompile Include="support\VerticalSupportModel.cpp" />
-    <ClCompile Include="ui\CubeWidget.cpp" />
-    <ClCompile Include="ui\GridBed.cpp" />
-    <ClCompile Include="ui\MoveWidget.cpp" />
-    <ClCompile Include="ui\RotateWidget.cpp" />
     <ClCompile Include="feature\scale.cpp" />
-    <ClCompile Include="ui\Widget.cpp" />
-    <ClCompile Include="ui\Widget3D.cpp" />
     <ClCompile Include="unitTest\RandomGen.cpp" />
     <ClCompile Include="unitTest\RunTests.cpp" />
     <ClCompile Include="utils\gridmesh.cpp" />
@@ -176,12 +163,25 @@
     <ClCompile Include="feature\ModelBuilder\TwoManifoldBuilder.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Qml\Buttons.cpp">
+    <ClCompile Include="widget\CubeWidget.cpp" />
+    <ClCompile Include="widget\GridBed.cpp" />
+    <ClCompile Include="widget\MoveWidget.cpp" />
+    <ClCompile Include="widget\RotateWidget.cpp" />
+    <ClCompile Include="widget\Widget.cpp" />
+    <ClCompile Include="widget\Widget3D.cpp" />
+    <ClCompile Include="Qml\components\Buttons.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Qml\Inputs.cpp">
+    <ClCompile Include="Qml\components\Inputs.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Qml\components\LeftPopup.cpp" />
+    <ClCompile Include="Qml\components\ModalWindow.cpp" />
+    <ClCompile Include="Qml\components\PartList.cpp" />
+    <ClCompile Include="Qml\components\PrintInfo.cpp" />
+    <ClCompile Include="Qml\components\SlideBar.cpp" />
+    <ClCompile Include="Qml\components\Toast.cpp" />
+    <ClCompile Include="Qml\components\ViewMode.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="common\Debug.h" />
@@ -744,15 +744,10 @@
     <ClInclude Include="support\CylindricalRaft.h" />
     <ClInclude Include="support\ModelAttachedSupport.h" />
     <ClInclude Include="support\RaftModel.h" />
-    <ClInclude Include="ui\GridBed.h" />
-    <ClInclude Include="ui\Highlightable.h" />
     <ClInclude Include="input\Hoverable.h" />
-    <ClInclude Include="ui\MoveWidget.h" />
-    <ClInclude Include="ui\RotateWidget.h" />
     <ClInclude Include="support\VerticalSupportModel.h" />
     <ClInclude Include="support\SupportRaftManager.h" />
     <ClInclude Include="feature\scale.h" />
-    <ClInclude Include="ui\Widget.h" />
     <ClInclude Include="render\Color.h" />
     <ClInclude Include="unitTest\catch.hpp" />
     <ClInclude Include="unitTest\RandomGen.h" />
@@ -935,6 +930,11 @@
     <ClInclude Include="feature\ModelBuilder\ModelBuilderMode.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="widget\GridBed.h" />
+    <ClInclude Include="widget\Highlightable.h" />
+    <ClInclude Include="widget\MoveWidget.h" />
+    <ClInclude Include="widget\RotateWidget.h" />
+    <ClInclude Include="widget\Widget.h" />
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="debug\moc_predefs.h.cbt" />
@@ -1019,29 +1019,29 @@
     <QtMoc Include="input\raycastcontroller.h" />
     <QtMoc Include="render\LineMeshEntity.h" />
     <QtMoc Include="render\PlaneMeshEntity.h" />
-    <QtMoc Include="Qml\LeftPopup.h" />
-    <QtMoc Include="Qml\Toast.h" />
-    <QtMoc Include="Qml\SlideBar.h" />
-    <QtMoc Include="Qml\ModalWindow.h" />
-    <QtMoc Include="Qml\ViewMode.h" />
-    <QtMoc Include="Qml\PartList.h" />
-    <QtMoc Include="Qml\PrintInfo.h" />
     <QtMoc Include="render\ModelMaterial.h" />
     <QtMoc Include="render\lights.h" />
-    <QtMoc Include="ui\Widget3D.h" />
     <QtMoc Include="slice\SlicingOptBackend.h" />
-    <QtMoc Include="ui\CubeWidget.h" />
     <QtMoc Include="render\SceneEntity.h" />
     <QtMoc Include="render\SceneEntityWithMaterial.h" />
     <QtMoc Include="qmlmanager.h" />
     <QtMoc Include="utils\quaternionhelper.h" />
     <QtMoc Include="utils\updatechecker.h" />
-    <QtMoc Include="Qml\Buttons.h">
+    <QtMoc Include="widget\CubeWidget.h" />
+    <QtMoc Include="widget\Widget3D.h" />
+    <QtMoc Include="Qml\components\Buttons.h">
       <Filter>Header Files</Filter>
     </QtMoc>
-    <QtMoc Include="Qml\Inputs.h">
+    <QtMoc Include="Qml\components\Inputs.h">
       <Filter>Header Files</Filter>
     </QtMoc>
+    <QtMoc Include="Qml\components\LeftPopup.h" />
+    <QtMoc Include="Qml\components\ModalWindow.h" />
+    <QtMoc Include="Qml\components\PartList.h" />
+    <QtMoc Include="Qml\components\PrintInfo.h" />
+    <QtMoc Include="Qml\components\SlideBar.h" />
+    <QtMoc Include="Qml\components\Toast.h" />
+    <QtMoc Include="Qml\components\ViewMode.h" />
   </ItemGroup>
   <ItemGroup>
     <QtRcc Include="qml.qrc" />
@@ -1274,7 +1274,6 @@
     <None Include="Qml\MenuButton.qml" />
     <None Include="Qml\LeftPopup.qml" />
     <None Include="Qml\InputBox.qml" />
-    <None Include="Qml\RoundedButton.qml" />
     <None Include="Qml\CtrInputBox.qml" />
     <None Include="Qml\CtrDropdownBox.qml" />
     <None Include="Qml\CtrCutSwitch.qml" />

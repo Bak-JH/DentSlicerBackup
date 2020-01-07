@@ -43,13 +43,13 @@
 #include "feature/addModel.h"
 #include "feature/ModelBuilder/ModelBuilderMode.h"
 #include "render/CircleMeshEntity.h"
-#include "Qml/LeftPopup.h"
-#include "Qml/Toast.h"
-#include "Qml/SlideBar.h"
-#include "Qml/ModalWindow.h"
-#include "Qml/ViewMode.h"
-#include "Qml/PartList.h"
-#include "Qml/PrintInfo.h"
+#include "Qml/components/LeftPopup.h"
+#include "Qml/components/Toast.h"
+#include "Qml/components/SlideBar.h"
+#include "Qml/components/ModalWindow.h"
+#include "Qml/components/ViewMode.h"
+#include "Qml/components/PartList.h"
+#include "Qml/components/PrintInfo.h"
 
 #include <functional>
 using namespace Hix::Input;
@@ -64,9 +64,7 @@ QmlManager::QmlManager(QObject *parent) : QObject(parent), _optBackend(this, scf
 	qmlRegisterType<Hix::QML::CloseButton>("hix.qml", 1, 0, "CloseButton");
 	qmlRegisterType<Hix::QML::RoundButton>("hix.qml", 1, 0, "RoundButton");
 	qmlRegisterType<Hix::QML::LeftPopupShell>("hix.qml", 1, 0, "LeftPopupShell");
-	qmlRegisterType<Hix::QML::LeftPopupContent>("hix.qml", 1, 0, "LeftPopupContent");
 	qmlRegisterType<Hix::QML::InputBox>("hix.qml", 1, 0, "InputBox");
-	qmlRegisterType<Hix::QML::InputSpinBox>("hix.qml", 1, 0, "InputSpinBox");
 	qmlRegisterType<Hix::QML::DropdownBox>("hix.qml", 1, 0, "DropdownBox");
 	qmlRegisterType<Hix::QML::ToastShell>("hix.qml", 1, 0, "ToastShell");
 	qmlRegisterType<Hix::QML::SlideBarShell>("hix.qml", 1, 0, "SlideBarShell");

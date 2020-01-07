@@ -5,53 +5,53 @@ import QtQuick.Controls.Styles 1.4
 import QtGraphicalEffects 1.12
 
 Hix.InputBox {
-	id: inputbox
+	id: inputBox
 	property string inputText
 	property var fromNum
 	property var toNum
-
-	label {
-		//text: parent.propName
-		text: inputText
+	
+	label 
+	{
 		font.family: openRegular.name
-		anchors.left: inputbox.left
-		//anchors.top: parent.top
-		//anchors.topMargin: height / 2
+		anchors.left: parent.left
 		color: "#666666"
-		anchors.verticalCenter: inputbox.verticalCenter
-		//verticalAlignment: Text.AlignVCenter
+		anchors.verticalCenter: control.verticalCenter
 	}
-
-	spinbox {
+	
+	SpinBox {
+		id: control
 		font.family: openRegular.name
-		value: 0
+		value: inputBox.value
 		from: fromNum
 		to: toNum
-		width: inputbox.width * 0.46//0.5
+		width: parent.width * 0.46//0.5
 		height: 26
-		anchors.right: inputbox.right
-		anchors.rightMargin: inputbox.width * 0.1
-		anchors.verticalCenter: inputbox.verticalCenter
+		anchors.right: parent.right
+		anchors.rightMargin: parent.width * 0.1
+		anchors.verticalCenter: parent.verticalCenter
 		editable: true
-
 		//from: parent.inputRect.from
 		//to: parent.inputRect.to
+		
+		onValueChanged: {
+			inputBox.value = value;
+			inputBox.test();
+		}
 
-		/*
 		contentItem: TextInput {
-			z: 2
-			text: "test"//spinbox.textFromValue(spinbox.value, spinbox.locale)
-			font: spinbox.font
+			text: control.textFromValue(control.value, control.locale)
+			font: control.font
 			selectionColor: "#21be2b"
 			selectedTextColor: "#ffffff"
+			anchors.verticalCenter: control.verticalCenter
 			//horizontalAlignment: Qt.AlignHCenter
 			verticalAlignment: Qt.AlignVCenter
 
-			readOnly: !spinbox.editable
-			validator: spinbox.validator
+			readOnly: !control.editable
+			validator: control.validator
 			inputMethodHints: Qt.ImhFormattedNumbersOnly
 		}
-		/*
+		
 		up.indicator: Rectangle {
 			id: uparrow
 			//x: control.mirrored ? 0 : parent.width - width
@@ -109,15 +109,23 @@ Hix.InputBox {
 				onReleased: { control.decrease(); }
 			}
 		}
-		*/
 		
 		background: Rectangle {
 			id: rect
-			color: spinbox.hovered ? "#ffffff" : "#f6feff"
+			color: control.hovered ? "#ffffff" : "#f6feff"
 			//border.color: "#d3dfe0"
-			border.color: spinbox.hovered ? "#b3bfc0": "#d3dfe0"
+			border.color: control.hovered ? "#b3bfc0": "#d3dfe0"
 			radius: 2
 		}
-
+		DropShadow {
+			//visible: control.hovered ? true : false
+			visible: false
+			anchors.fill: rect
+			radius: 4.0
+			samples: 9
+			color: "#30000000"
+			source: rect
+		}
+		
 	}
 }
