@@ -22,8 +22,15 @@ namespace Hix
 		public:
 			CloseButton(QQuickItem* parent = nullptr);
 
+		signals:
+			void clicked();
+			void entered();
+			void exited();
+
 		public slots:
 			void onClick();
+			void onEntered();
+			void onExited();
 
 		private:
 			QQuickMouseArea* _mouseArea;

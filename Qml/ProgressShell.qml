@@ -19,6 +19,15 @@ Item {
 			anchors.horizontalCenter: parent.horizontalCenter
 		}
 
+		Rectangle {
+			width: 600
+			height: 10
+			radius: height / 2
+			color: "#eeeeee"
+			anchors.horizontalCenter: parent.horizontalCenter
+			anchors.bottom: parent.bottom
+			anchors.bottomMargin: 30
+		}
 	}
 	
 	DropShadow {

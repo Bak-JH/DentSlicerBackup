@@ -92,8 +92,6 @@
         <file>Resource/splash.png</file>
         <file>Resource/upper_extend.png</file>
         <file>Resource/splash2.png</file>
-        <file>Resource/mesh/plate.stl</file>
-        <file>Resource/mesh/plate_plane.stl</file>
         <file>Resource/mesh/arrow.stl</file>
         <file>Resource/font/NotoSans-Regular.ttf</file>
         <file>Resource/font/NotoSans-SemiCondensed.ttf</file>
@@ -139,8 +137,6 @@
         <file>Resource/drop_arrow_down.png</file>
         <file>Resource/drop_arrow_up.png</file>
         <file>Resource/triangle_up_1.5.png</file>
-        <file>Resource/cut_flat_off_1.5.png</file>
-        <file>Resource/cut_free_off_1.5.png</file>
         <file>Resource/menu_extract.png</file>
         <file>Resource/toast_check.png</file>
         <file>Resource/toast_x.png</file>
@@ -201,7 +197,6 @@
         <file>Resource/part_show_1.png</file>
         <file>Resource/part_show_select_1.png</file>
         <file>Resource/img_arrange.png</file>
-        <file>Resource/img_label.png</file>
         <file>Resource/img_layflat.png</file>
         <file>Resource/img_orient.png</file>
         <file>Resource/support_setting.png</file>
@@ -209,5 +204,16 @@
         <file>Resource/triangle_up_hover.png</file>
         <file>Resource/img_scale_unlock_revised.png</file>
         <file>Resource/img_scale_lock_revised.png</file>
+        <file>Resource/cut_flat_off.png</file>
+        <file>Resource/cut_flat_on.png</file>
+        <file>Resource/cut_free_off.png</file>
+        <file>Resource/cut_free_on.png</file>
+        <file>Resource/img_label.png</file>
+        <file>Resource/ic_refresh.png</file>
+        <file>Resource/closebutton_hover.png</file>
+        <file>Resource/btn_modelbuild_help.png</file>
+        <file>Resource/img_modelbuild_popup.png</file>
+        <file>Resource/btn_setting.png</file>
+        <file>Resource/btn_setting_refresh.png</file>
     </qresource>
 </RCC>

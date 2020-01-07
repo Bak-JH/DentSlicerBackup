@@ -253,53 +253,32 @@ Item{
 		}
 		*/
 
-		LeftPopupMove {
-			id: leftpopupmove
-			anchors.top: uppertab.bottom
-			anchors.left: lefttab.right
-			anchors.leftMargin: 15
-			anchors.topMargin: 120
-		}
-		LeftPopupLayFlat {
-			id: leftpopuplayflat
-			anchors.top: uppertab.bottom
-			anchors.left: leftpopupmove.right
-			anchors.leftMargin: 15
-			anchors.topMargin: 120
-		}
-		LeftPopupLabel {
-			id: leftpopuplabel
-			anchors.top: uppertab.bottom
-			anchors.left: leftpopuplayflat.right
-			anchors.leftMargin: 15
-			anchors.topMargin: 120
-		}
-		LeftPopupScale
-		{
-			id: leftpopupscale
-			anchors.top: uppertab.bottom
-			anchors.left: leftpopuplabel.right
-			anchors.leftMargin: 15
-			anchors.topMargin: 120
-		}
-		LeftPopupSupport
-		{
+		LeftPopupSupport {
 			id: leftpopupsupport
 			anchors.top: uppertab.bottom
 			anchors.left: lefttab.right
 			anchors.leftMargin: 15
-			anchors.topMargin: 420
+			anchors.topMargin: 120
 		}
-		/*
-		LeftPopupLabel
+
+		
+		LeftPopupModelBuild
 		{
-			id: leftpopuplabel
+			id: leftpopupmodelbuild
 			anchors.top: uppertab.bottom
-			anchors.left: leftpopupsupport.right
+			anchors.left: lefttab.right
 			anchors.leftMargin: 15
 			anchors.topMargin: 420
 		}
-		*/
+
+		PrintSetting
+		{
+			id: printsetting
+			anchors.top: uppertab.bottom
+			anchors.left: leftpopupmodelbuild.right
+			anchors.leftMargin: 15
+			anchors.topMargin: 420
+		}
 		
 		/*
 		Toast {
@@ -321,18 +300,25 @@ Item{
 		ProgressShell {
 			id: progressshell
 			anchors.top: uppertab.bottom
-			anchors.topMargin: 720
+			anchors.topMargin: 320
 			anchors.left: undoredo.right
-			anchors.leftMargin: 15
+			anchors.leftMargin: 40
+		}
+		/*
+		ModelBuildSlider {
+			id: modelbuildslider
+			anchors.top: uppertab.bottom
+			anchors.topMargin: 160
+			anchors.left: lefttab.right
+			anchors.leftMargin: 600
 		}
 		
-		/*
 		SlideBar {
 			id: slidebar
 			anchors.top: uppertab.bottom
 			anchors.topMargin: 160
 			anchors.left: lefttab.right
-			anchors.leftMargin: 600
+			anchors.leftMargin: 720
 		}
 		*/
 
@@ -351,7 +337,7 @@ Item{
 			anchors.left: lefttab.right
 			anchors.leftMargin: 180
 		}
-		
+		*/
 		ViewMode {
 			id: viewmode
 			anchors.top: uppertab.bottom
@@ -359,7 +345,7 @@ Item{
 			anchors.leftMargin: 15
 			anchors.topMargin: 700
 		}
-		*/
+		
 		PrintInfo {
 			id: printinfo
 			anchors.top: slidebar.top
@@ -368,15 +354,7 @@ Item{
 			anchors.leftMargin: 100
 		}
 		
-		/*
-		ModalWindow {
-			id: modalwindow
-			anchors.top: uppertab.bottom
-			anchors.topMargin: 160
-			anchors.left: lefttab.right
-			anchors.leftMargin: 320
-		}
-		*/
+		
 		
         MouseArea{
             acceptedButtons: Qt.MiddleButton | Qt.RightButton

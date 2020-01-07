@@ -13,29 +13,28 @@ Item{
 
 	Hix.RoundButton {
 		id: cambuttonshell
-		width: 90
+		width: 60
 		height: width
 		radius: width / 2
 		color: "#ffffff"
-		//color: hovered ? "#eeeeee" : "#ffffff"
-
+		Image {
+			id: camicon
+			source: "qrc:/Resource/cam.png"
+			anchors.horizontalCenter: parent.horizontalCenter
+			anchors.top: parent.top
+			anchors.topMargin: parent.height * 0.15
+		}
 		Text {
 			text: qsTr("CAM")
 			font.family: openSemiBold.name
 			font.pointSize: 10
 			color: "#aaaaaa"
 			anchors.horizontalCenter: parent.horizontalCenter
+			//anchors.verticalCenter: parent.verticalCenter
 			anchors.top: parent.top
-			anchors.topMargin: parent.height * 0.1
+			anchors.topMargin: parent.height * 0.4
 		}
-		Image {
-			id: camicon
-			source: "qrc:/Resource/cam.png"
-			anchors.left: parent.left
-			anchors.leftMargin: parent.width * 0.2
-			anchors.bottom: parent.bottom
-			anchors.bottomMargin: parent.height * 0.3
-		}
+		
 		Image {
 			source: "qrc:/Resource/triangle_down.png"
 			anchors.horizontalCenter: parent.horizontalCenter
@@ -61,9 +60,9 @@ Item{
 		id:campopupshell
 		visible: false
 		anchors.top: cambuttonshell.bottom
-		anchors.topMargin: cambuttonshell.width * 0.1
+		anchors.topMargin: 12 //cambuttonshell.width * 0.1
 		anchors.right: cambuttonshell.right
-		anchors.rightMargin: 6
+		//anchors.rightMargin: -6
 
 		width: 218
 		height: 234
@@ -90,7 +89,7 @@ Item{
 				var h = h0 - windowRadius * 2;	//straight part
 				var s = 20;		//triangle part height
 				//var h1 = h - s - 24;
-				var w1 = 22;
+				var w1 = 12; //22;
 
 				ctx.beginPath();
 				ctx.fillStyle = "#ffffff";
