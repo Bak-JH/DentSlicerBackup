@@ -1,6 +1,6 @@
 #include "rotate.h"
 #include "qmlmanager.h"
-#include "ui/RotateWidget.h"
+#include "widget/RotateWidget.h"
 
 Hix::Features::RotateMode::RotateMode(const std::unordered_set<GLModel*>& targetModels, Hix::Input::RayCastController* controller) 
 		: WidgetMode(targetModels, controller)

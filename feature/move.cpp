@@ -1,5 +1,5 @@
 #include "move.h"
-#include "ui/MoveWidget.h"
+#include "widget/MoveWidget.h"
 #include "qmlmanager.h"
 
 Hix::Features::MoveMode::MoveMode

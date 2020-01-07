@@ -27,7 +27,7 @@
 #include "support/SupportRaftManager.h"
 #include "feature/FeatureHistoryManager.h"
 #include "feature/interfaces/Feature.h"
-#include "ui/GridBed.h"
+#include "widget/GridBed.h"
 #include "Settings/AppSetting.h"
 #define VIEW_MODE_OBJECT 0
 #define VIEW_MODE_LAYER 2

@@ -17,48 +17,18 @@ namespace Hix
 		{
 			Q_OBJECT
 			Q_PROPERTY(QString title MEMBER _title NOTIFY titleChanged)
-			Q_PROPERTY(QString bodyText MEMBER _bodyText NOTIFY bodyChanged)
-			//Q_PROPERTY(LeftPopupContent* content MEMBER _content)
-			Q_PROPERTY(LeftPopupContent* content READ content CONSTANT FINAL)
 
 		public:
 			LeftPopupShell(QQuickItem* parent = nullptr);
-			QString title()const;
-			LeftPopupContent* content() const;
 
 
 		signals:
 			void titleChanged();
-			void bodyChanged();
 
 		private:
 			QString _title = "Name";
-			QString _bodyText = "Click the surface to face it down";
-			LeftPopupContent* _content;
 		};
 
-		class LeftPopupContent : public QQuickRectangle
-		{
-			Q_OBJECT
-			Q_PROPERTY(CloseButton* closeButton MEMBER _closeButton)
-			Q_PROPERTY(RoundButton* roundButton MEMBER _roundButton)
-			Q_PROPERTY(QQuickText* title MEMBER _title)
-
-		public:
-			LeftPopupContent(QQuickItem* parent = nullptr);
-
-		private:
-			CloseButton* _closeButton;
-			RoundButton* _roundButton;
-			QQuickText* _title;
-		};
-
-		
-
-		
-
-
-		
 		//class TextButton : public RoundButton
 		//{
 		//	Q_OBJECT

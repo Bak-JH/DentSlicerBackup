@@ -2,29 +2,8 @@
 
 using namespace  Hix::QML;
 
-
-QString Hix::QML::LeftPopupShell::title() const
-{
-	return _title;
-}
-
-LeftPopupContent* Hix::QML::LeftPopupShell::content() const
-{
-	return _content;
-}
-
-
-
 Hix::QML::LeftPopupShell::LeftPopupShell(QQuickItem* parent) : QQuickItem(parent)
 {
-	_content = new LeftPopupContent(this);
-}
-
-Hix::QML::LeftPopupContent::LeftPopupContent(QQuickItem* parent) : QQuickRectangle(parent)
-{
-	_closeButton = new CloseButton(this);
-	_roundButton = new RoundButton(this);
-	_title = new QQuickText(this);
 }
 
 

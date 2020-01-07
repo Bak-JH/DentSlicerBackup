@@ -66,8 +66,6 @@
         <file>Qml/ModalWindow.qml</file>
         <file>Qml/Cam.qml</file>
         <file>Qml/CamBox.qml</file>
-        <file>Qml/ViewMode.cpp</file>
-        <file>Qml/ViewMode.h</file>
         <file>Qml/ViewMode.qml</file>
         <file>Qml/UndoRedo.qml</file>
         <file>Qml/PartList.qml</file>
