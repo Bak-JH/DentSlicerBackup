@@ -30,6 +30,8 @@
     <ClCompile Include="common\GTEngine\Source\Mathematics\MSW\GteIntelSSE.cpp" />
     <ClCompile Include="common\Task.cpp" />
     <ClCompile Include="common\TaskManager.cpp" />
+    <ClCompile Include="common\Tree\BVHBuilder.cpp" />
+    <ClCompile Include="common\Tree\TreeBuilder.cpp" />
     <ClCompile Include="DentEngine\src\Bounds3D.cpp" />
     <ClCompile Include="DentEngine\src\ContourBuilder.cpp" />
     <ClCompile Include="DentEngine\src\Planes.cpp" />
@@ -65,6 +67,8 @@
     <ClCompile Include="feature\Extrude.cpp" />
     <ClCompile Include="feature\cut\modelcut.cpp" />
     <ClCompile Include="feature\FeatureHistoryManager.cpp" />
+    <ClCompile Include="feature\interfaces\Feature.cpp" />
+    <ClCompile Include="feature\interfaces\FlushSupport.cpp" />
     <ClCompile Include="feature\interfaces\Mode.cpp" />
     <ClCompile Include="feature\interfaces\PPShaderMode.cpp" />
     <ClCompile Include="feature\interfaces\SelectFaceMode.cpp" />
@@ -108,12 +112,21 @@
     <ClCompile Include="input\HitTestAble.cpp" />
     <ClCompile Include="input\Hoverable.cpp" />
     <ClCompile Include="input\raycastcontroller.cpp" />
+    <ClCompile Include="common\Tree\LineTree.cpp" />
     <ClCompile Include="Mesh\BVH.cpp" />
     <ClCompile Include="Mesh\HixBVH.cpp" />
     <ClCompile Include="Mesh\MeshCache.cpp" />
     <ClCompile Include="Mesh\MTRayCaster.cpp" />
     <ClCompile Include="Mesh\RayAccelerator.cpp" />
     <ClCompile Include="Mesh\RayCaster.cpp" />
+    <ClCompile Include="render\CircleMeshEntity.cpp" />
+    <ClCompile Include="Qml\LeftPopup.cpp" />
+    <ClCompile Include="Qml\ModalWindow.cpp" />
+    <ClCompile Include="Qml\PartList.cpp" />
+    <ClCompile Include="Qml\PrintInfo.cpp" />
+    <ClCompile Include="Qml\SlideBar.cpp" />
+    <ClCompile Include="Qml\Toast.cpp" />
+    <ClCompile Include="Qml\ViewMode.cpp" />
     <ClCompile Include="render\lights.cpp" />
     <ClCompile Include="render\LineMeshEntity.cpp" />
     <ClCompile Include="render\ModelMaterial.cpp" />
@@ -121,6 +134,9 @@
     <ClCompile Include="render\SceneEntity.cpp" />
     <ClCompile Include="render\SceneEntityWithMaterial.cpp" />
     <ClCompile Include="feature\Shapes2D.cpp" />
+    <ClCompile Include="Settings\AppSetting.cpp" />
+    <ClCompile Include="Settings\JSONParsedSetting.cpp" />
+    <ClCompile Include="Settings\PrinterSetting.cpp" />
     <ClCompile Include="slice\SlicingOptBackend.cpp" />
     <ClCompile Include="support\CylindricalRaft.cpp" />
     <ClCompile Include="support\ModelAttachedSupport.cpp" />
@@ -129,6 +145,7 @@
     <ClCompile Include="support\SupportRaftManager.cpp" />
     <ClCompile Include="support\VerticalSupportModel.cpp" />
     <ClCompile Include="ui\CubeWidget.cpp" />
+    <ClCompile Include="ui\GridBed.cpp" />
     <ClCompile Include="ui\MoveWidget.cpp" />
     <ClCompile Include="ui\RotateWidget.cpp" />
     <ClCompile Include="feature\scale.cpp" />
@@ -153,55 +170,6 @@
     <ClCompile Include="feature\stlexporter.cpp" />
     <ClCompile Include="DentEngine\src\svgexporter.cpp" />
     <ClCompile Include="utils\updatechecker.cpp" />
-    <ClCompile Include="feature\interfaces\Feature.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="feature\interfaces\FlushSupport.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Settings\AppSetting.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Settings\PrinterSetting.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Settings\JSONParsedSetting.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="render\CircleMeshEntity.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="ui\GridBed.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="common\Tree\LineTree.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="common\Tree\TreeBuilder.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="common\Tree\BVHBuilder.cpp">
-    <ClCompile Include="Qml\LeftPopup.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Qml\Toast.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Qml\SlideBar.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Qml\ModalWindow.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Qml\ViewMode.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Qml\PartList.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Qml\PrintInfo.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="common\Debug.h" />
@@ -591,8 +559,48 @@
     <ClInclude Include="common\IteratorWrapper.h" />
     <ClInclude Include="common\moodycamel\atomicops.h" />
     <ClInclude Include="common\moodycamel\readerwriterqueue.h" />
+    <ClInclude Include="common\Tree\BVHBuilder.h" />
+    <ClInclude Include="common\Tree\NTree.h" />
+    <ClInclude Include="common\Tree\NTreeDeque.h" />
     <ClInclude Include="common\RamosEnum.h" />
     <ClInclude Include="common\RandomAccessIteratorBase.h" />
+    <ClInclude Include="common\rapidjson\allocators.h" />
+    <ClInclude Include="common\rapidjson\cursorstreamwrapper.h" />
+    <ClInclude Include="common\rapidjson\document.h" />
+    <ClInclude Include="common\rapidjson\encodedstream.h" />
+    <ClInclude Include="common\rapidjson\encodings.h" />
+    <ClInclude Include="common\rapidjson\error\en.h" />
+    <ClInclude Include="common\rapidjson\error\error.h" />
+    <ClInclude Include="common\rapidjson\filereadstream.h" />
+    <ClInclude Include="common\rapidjson\filewritestream.h" />
+    <ClInclude Include="common\rapidjson\fwd.h" />
+    <ClInclude Include="common\rapidjson\internal\biginteger.h" />
+    <ClInclude Include="common\rapidjson\internal\clzll.h" />
+    <ClInclude Include="common\rapidjson\internal\diyfp.h" />
+    <ClInclude Include="common\rapidjson\internal\dtoa.h" />
+    <ClInclude Include="common\rapidjson\internal\ieee754.h" />
+    <ClInclude Include="common\rapidjson\internal\itoa.h" />
+    <ClInclude Include="common\rapidjson\internal\meta.h" />
+    <ClInclude Include="common\rapidjson\internal\pow10.h" />
+    <ClInclude Include="common\rapidjson\internal\regex.h" />
+    <ClInclude Include="common\rapidjson\internal\stack.h" />
+    <ClInclude Include="common\rapidjson\internal\strfunc.h" />
+    <ClInclude Include="common\rapidjson\internal\strtod.h" />
+    <ClInclude Include="common\rapidjson\internal\swap.h" />
+    <ClInclude Include="common\rapidjson\istreamwrapper.h" />
+    <ClInclude Include="common\rapidjson\memorybuffer.h" />
+    <ClInclude Include="common\rapidjson\memorystream.h" />
+    <ClInclude Include="common\rapidjson\msinttypes\inttypes.h" />
+    <ClInclude Include="common\rapidjson\msinttypes\stdint.h" />
+    <ClInclude Include="common\rapidjson\ostreamwrapper.h" />
+    <ClInclude Include="common\rapidjson\pointer.h" />
+    <ClInclude Include="common\rapidjson\prettywriter.h" />
+    <ClInclude Include="common\rapidjson\rapidjson.h" />
+    <ClInclude Include="common\rapidjson\reader.h" />
+    <ClInclude Include="common\rapidjson\schema.h" />
+    <ClInclude Include="common\rapidjson\stream.h" />
+    <ClInclude Include="common\rapidjson\stringbuffer.h" />
+    <ClInclude Include="common\rapidjson\writer.h" />
     <ClInclude Include="common\Singleton.h" />
     <ClInclude Include="common\Task.h" />
     <ClInclude Include="common\taskflow\core\executor.hpp" />
@@ -630,6 +638,7 @@
     <ClInclude Include="common\taskflow\utility\traits.hpp" />
     <ClInclude Include="common\TaskManager.h" />
     <ClInclude Include="common\TrackedIndexedList.h" />
+    <ClInclude Include="common\Tree\TreeBuilder.h" />
     <ClInclude Include="DentEngine\src\Bounds3D.h" />
     <ClInclude Include="DentEngine\src\ContourBuilder.h" />
     <ClInclude Include="DentEngine\src\MeshIterators.h" />
@@ -673,6 +682,7 @@
     <ClInclude Include="feature\cut\modelcut.h" />
     <ClInclude Include="feature\FeatureHistoryManager.h" />
     <ClInclude Include="feature\interfaces\Feature.h" />
+    <ClInclude Include="feature\interfaces\FlushSupport.h" />
     <ClInclude Include="feature\interfaces\PPShaderMode.h" />
     <ClInclude Include="feature\interfaces\SelectFaceMode.h" />
     <ClInclude Include="feature\interfaces\WidgetMode.h" />
@@ -710,16 +720,22 @@
     <ClInclude Include="input\Draggable.h" />
     <ClInclude Include="feature\Shapes2D.h" />
     <ClInclude Include="input\HitTestAble.h" />
+    <ClInclude Include="common\Tree\LineTree.h" />
     <ClInclude Include="Mesh\BVH.h" />
     <ClInclude Include="Mesh\HixBVH.h" />
     <ClInclude Include="Mesh\MeshCache.h" />
     <ClInclude Include="Mesh\MTRayCaster.h" />
     <ClInclude Include="Mesh\RayAccelerator.h" />
     <ClInclude Include="Mesh\RayCaster.h" />
+    <ClInclude Include="render\CircleMeshEntity.h" />
+    <ClInclude Include="Settings\AppSetting.h" />
+    <ClInclude Include="Settings\JSONParsedSetting.h" />
+    <ClInclude Include="Settings\PrinterSetting.h" />
     <ClInclude Include="support\BaseSupport.h" />
     <ClInclude Include="support\CylindricalRaft.h" />
     <ClInclude Include="support\ModelAttachedSupport.h" />
     <ClInclude Include="support\RaftModel.h" />
+    <ClInclude Include="ui\GridBed.h" />
     <ClInclude Include="ui\Highlightable.h" />
     <ClInclude Include="input\Hoverable.h" />
     <ClInclude Include="ui\MoveWidget.h" />
@@ -731,6 +747,7 @@
     <ClInclude Include="render\Color.h" />
     <ClInclude Include="unitTest\catch.hpp" />
     <ClInclude Include="unitTest\RandomGen.h" />
+    <ClInclude Include="unitTest\tests\BVHTest.h" />
     <ClInclude Include="unitTest\tests\Float3DVectorHash.h" />
     <ClInclude Include="unitTest\tests\IndexedListTest.h" />
     <ClInclude Include="unitTest\RunTests.h" />
@@ -755,153 +772,6 @@
     <ClInclude Include="DentEngine\src\polyclipping\poly2tri\common\utils.h" />
     <ClInclude Include="utils\utils.h" />
     <ClInclude Include="utils\winsparkle\winsparkle.h" />
-    <ClInclude Include="feature\interfaces\FlushSupport.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="common\rapidjson\error\en.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="common\rapidjson\error\error.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="common\rapidjson\internal\biginteger.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="common\rapidjson\internal\clzll.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="common\rapidjson\internal\diyfp.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="common\rapidjson\internal\dtoa.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="common\rapidjson\internal\ieee754.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="common\rapidjson\internal\itoa.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="common\rapidjson\internal\meta.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="common\rapidjson\internal\pow10.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="common\rapidjson\internal\regex.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="common\rapidjson\internal\stack.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="common\rapidjson\internal\strfunc.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="common\rapidjson\internal\strtod.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="common\rapidjson\internal\swap.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="common\rapidjson\msinttypes\inttypes.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="common\rapidjson\msinttypes\stdint.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="common\rapidjson\allocators.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="common\rapidjson\cursorstreamwrapper.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="common\rapidjson\document.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="common\rapidjson\encodedstream.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="common\rapidjson\encodings.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="common\rapidjson\filereadstream.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="common\rapidjson\filewritestream.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="common\rapidjson\fwd.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="common\rapidjson\istreamwrapper.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="common\rapidjson\memorybuffer.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="common\rapidjson\memorystream.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="common\rapidjson\ostreamwrapper.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="common\rapidjson\pointer.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="common\rapidjson\prettywriter.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="common\rapidjson\rapidjson.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="common\rapidjson\reader.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="common\rapidjson\schema.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="common\rapidjson\stream.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="common\rapidjson\stringbuffer.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="common\rapidjson\writer.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Settings\AppSetting.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Settings\PrinterSetting.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Settings\JSONParsedSetting.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="render\CircleMeshEntity.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="ui\GridBed.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="common\Tree\NTreeDeque.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="common\Tree\NTree.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="common\Tree\LineTree.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="common\Tree\TreeBuilder.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="common\Tree\BVHBuilder.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="unitTest\tests\BVHTest.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="debug\moc_predefs.h.cbt" />
@@ -909,6 +779,90 @@
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="DentSlicer.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="Resource\cam.png" />
+    <Image Include="Resource\cam_back_1.5.png" />
+    <Image Include="Resource\cam_bottom_1.5.png" />
+    <Image Include="Resource\cam_front_1.5.png" />
+    <Image Include="Resource\cam_hover.png" />
+    <Image Include="Resource\cam_left_1.5.png" />
+    <Image Include="Resource\cam_right_1.5.png" />
+    <Image Include="Resource\cam_top_1.5.png" />
+    <Image Include="Resource\closebutton.png" />
+    <Image Include="Resource\cut_flat_off_border2.png" />
+    <Image Include="Resource\cut_flat_on_border2.png" />
+    <Image Include="Resource\cut_free_off_border2.png" />
+    <Image Include="Resource\cut_free_on_border2.png" />
+    <Image Include="Resource\drop_arrow_down.png" />
+    <Image Include="Resource\drop_arrow_up.png" />
+    <Image Include="Resource\img_arrange.png" />
+    <Image Include="Resource\img_label.png" />
+    <Image Include="Resource\img_layflat.png" />
+    <Image Include="Resource\img_orient.png" />
+    <Image Include="Resource\img_scale_lock_revised.png" />
+    <Image Include="Resource\img_scale_unlock_revised.png" />
+    <Image Include="Resource\menu_arrange.png" />
+    <Image Include="Resource\menu_arrange_select_1.png" />
+    <Image Include="Resource\menu_autorepair.png" />
+    <Image Include="Resource\menu_autorepair_select_1.png" />
+    <Image Include="Resource\menu_cut.png" />
+    <Image Include="Resource\menu_cut_select_1.png" />
+    <Image Include="Resource\menu_extend.png" />
+    <Image Include="Resource\menu_extend_select_1.png" />
+    <Image Include="Resource\menu_extract.png" />
+    <Image Include="Resource\menu_extract_select_1.png" />
+    <Image Include="Resource\menu_label.png" />
+    <Image Include="Resource\menu_label_select_1.png" />
+    <Image Include="Resource\menu_layflat.png" />
+    <Image Include="Resource\menu_layflat_select_1.png" />
+    <Image Include="Resource\menu_move.png" />
+    <Image Include="Resource\menu_move_select_1.png" />
+    <Image Include="Resource\menu_open.png" />
+    <Image Include="Resource\menu_open_select_1.png" />
+    <Image Include="Resource\menu_orient.png" />
+    <Image Include="Resource\menu_orient_select_1.png" />
+    <Image Include="Resource\menu_rotate.png" />
+    <Image Include="Resource\menu_rotate_select_1.png" />
+    <Image Include="Resource\menu_save.png" />
+    <Image Include="Resource\menu_save_select_1.png" />
+    <Image Include="Resource\menu_scale.png" />
+    <Image Include="Resource\menu_scale_select_1.png" />
+    <Image Include="Resource\menu_shelloffset.png" />
+    <Image Include="Resource\menu_shelloffset_select_1.png" />
+    <Image Include="Resource\menu_support.png" />
+    <Image Include="Resource\menu_support_select_1.png" />
+    <Image Include="Resource\part_delete_1.png" />
+    <Image Include="Resource\part_hide_1.png" />
+    <Image Include="Resource\part_hide_select_1.png" />
+    <Image Include="Resource\part_remove.png" />
+    <Image Include="Resource\part_show.png" />
+    <Image Include="Resource\part_show_1.png" />
+    <Image Include="Resource\part_show_select_1.png" />
+    <Image Include="Resource\redo_arrow.png" />
+    <Image Include="Resource\support_setting.png" />
+    <Image Include="Resource\toast_check.png" />
+    <Image Include="Resource\toast_x.png" />
+    <Image Include="Resource\traingle_up_1.5.png" />
+    <Image Include="Resource\triangle_down.png" />
+    <Image Include="Resource\triangle_down_1.5.png" />
+    <Image Include="Resource\triangle_down_hover.png" />
+    <Image Include="Resource\triangle_right.png" />
+    <Image Include="Resource\triangle_up.png" />
+    <Image Include="Resource\triangle_up_1.5.png" />
+    <Image Include="Resource\triangle_up_hover.png" />
+    <Image Include="Resource\undo_arrow.png" />
+    <Image Include="Resource\vs_icon.png" />
+    <Image Include="Resource\cut_flat_off.png" />
+    <Image Include="Resource\cut_flat_on.png" />
+    <Image Include="Resource\cut_free_off.png" />
+    <Image Include="Resource\cut_free_on.png" />
+    <Image Include="Resource\ic_refresh.png" />
+    <Image Include="Resource\closebutton_hover.png" />
+    <Image Include="Resource\img_modelbuild_popup.png" />
+    <Image Include="Resource\btn_modelbuild_help.png" />
+    <Image Include="Resource\btn_setting.png" />
+    <Image Include="Resource\btn_setting_refresh.png" />
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="feature\layerview\CrossSectionPlane.h" />
@@ -919,6 +873,13 @@
     <QtMoc Include="input\raycastcontroller.h" />
     <QtMoc Include="render\LineMeshEntity.h" />
     <QtMoc Include="render\PlaneMeshEntity.h" />
+    <QtMoc Include="Qml\LeftPopup.h" />
+    <QtMoc Include="Qml\Toast.h" />
+    <QtMoc Include="Qml\SlideBar.h" />
+    <QtMoc Include="Qml\ModalWindow.h" />
+    <QtMoc Include="Qml\ViewMode.h" />
+    <QtMoc Include="Qml\PartList.h" />
+    <QtMoc Include="Qml\PrintInfo.h" />
     <QtMoc Include="render\ModelMaterial.h" />
     <QtMoc Include="render\lights.h" />
     <QtMoc Include="ui\Widget3D.h" />
@@ -929,41 +890,53 @@
     <QtMoc Include="qmlmanager.h" />
     <QtMoc Include="utils\quaternionhelper.h" />
     <QtMoc Include="utils\updatechecker.h" />
-    <QtMoc Include="Qml\LeftPopup.h">
-      <Filter>Header Files</Filter>
-    </QtMoc>
-    <QtMoc Include="Qml\Toast.h">
-      <Filter>Header Files</Filter>
-    </QtMoc>
-    <QtMoc Include="Qml\SlideBar.h">
-      <Filter>Header Files</Filter>
-    </QtMoc>
-    <QtMoc Include="Qml\ModalWindow.h">
-      <Filter>Header Files</Filter>
-    </QtMoc>
-    <QtMoc Include="Qml\ViewMode.h">
-      <Filter>Header Files</Filter>
-    </QtMoc>
-    <QtMoc Include="Qml\PartList.h">
-      <Filter>Header Files</Filter>
-    </QtMoc>
-    <QtMoc Include="Qml\PrintInfo.h">
-      <Filter>Header Files</Filter>
-    </QtMoc>
   </ItemGroup>
   <ItemGroup>
     <QtRcc Include="qml.qrc" />
     <QtRcc Include="resources.qrc" />
   </ItemGroup>
   <ItemGroup>
+    <CopyFileToFolders Include="settings.json" />
+  </ItemGroup>
+  <ItemGroup>
+    <Font Include="Resource\font\OpenSans-Bold.ttf" />
+    <Font Include="Resource\font\OpenSans-ExtraBold.ttf" />
+    <Font Include="Resource\font\OpenSans-Light.ttf" />
+    <Font Include="Resource\font\OpenSans-Regular.ttf" />
+    <Font Include="Resource\font\OpenSans-SemiBold.ttf" />
+  </ItemGroup>
+  <ItemGroup>
     <None Include="packages.config" />
+    <None Include="Qml\BastardyMenu.qml" />
+    <None Include="Qml\Cam.qml" />
+    <None Include="Qml\CamBox.qml" />
     <None Include="Qml\CameraController.qml" />
     <None Include="Qml\CameraManager.qml" />
+    <None Include="Qml\CanvasTest.qml" />
     <None Include="Qml\CoordinateMesh.qml" />
+    <None Include="Qml\CtrCutSwitch.qml" />
+    <None Include="Qml\CtrDropdownBox.qml" />
+    <None Include="Qml\CtrInputBox.qml" />
+    <None Include="Qml\CtrLabelTextBox.qml" />
+    <None Include="Qml\CtrScaleInputBox.qml" />
     <None Include="Qml\FeedbackPopUp.qml" />
     <None Include="Qml\FileDialogLoad.qml" />
+    <None Include="Qml\InputBox.qml" />
     <None Include="Qml\LayerViewPopup.qml" />
     <None Include="Qml\LayerViewSlider.qml" />
+    <None Include="Qml\LeftPopup.qml" />
+    <None Include="Qml\LeftPopupArrange.qml" />
+    <None Include="Qml\LeftPopupCut.qml" />
+    <None Include="Qml\LeftPopupExport.qml" />
+    <None Include="Qml\LeftPopupExtend.qml" />
+    <None Include="Qml\LeftPopupLabel.qml" />
+    <None Include="Qml\LeftPopupLayFlat.qml" />
+    <None Include="Qml\LeftPopupMove.qml" />
+    <None Include="Qml\LeftPopupOrient.qml" />
+    <None Include="Qml\LeftPopupRotate.qml" />
+    <None Include="Qml\LeftPopupScale.qml" />
+    <None Include="Qml\LeftPopupShellOffset.qml" />
+    <None Include="Qml\LeftPopupSupport.qml" />
     <None Include="Qml\LeftTab.qml" />
     <None Include="Qml\LeftTabExport.qml" />
     <None Include="Qml\LeftTabExportElement.qml" />
@@ -978,14 +951,24 @@
     <None Include="Qml\LeftTabViewMode.qml" />
     <None Include="Qml\Login.qml" />
     <None Include="Qml\MainView.qml" />
+    <None Include="Qml\MenuButton.qml" />
     <None Include="Qml\MeshPlate.qml" />
     <None Include="Qml\MeshTransformerMove.qml" />
     <None Include="Qml\MeshTransformerRotate.qml" />
     <None Include="Qml\MeshTransformerTab.qml" />
     <None Include="Qml\MeshTransformerZoom.qml" />
+    <None Include="Qml\ModalWindow.qml" />
     <None Include="Qml\Model.qml" />
     <None Include="Qml\Plane.qml" />
-    <None Include="Qml\SamplePopup.qml" />
+    <None Include="Qml\PartList.qml" />
+    <None Include="Qml\PartListContentBox.qml" />
+    <None Include="Qml\PrintInfo.qml" />
+    <None Include="Qml\ProgressShell.qml" />
+    <None Include="Qml\RoundedButton.qml" />
+    <None Include="Qml\SlideBar.qml" />
+    <None Include="Qml\Toast.qml" />
+    <None Include="Qml\UndoRedo.qml" />
+    <None Include="Qml\ViewMode.qml" />
     <None Include="Resource\font\NotoSans-Regular.ttf" />
     <None Include="Resource\font\NotoSans-SemiCondensed.ttf" />
     <None Include="Resource\font\NotoSans-SemiCondensedMedium.ttf" />
@@ -1145,137 +1128,9 @@
     <None Include="resource\zoom_down.png" />
     <None Include="resource\zoom_up.png" />
     <None Include="icon.ico" />
-    <None Include="Qml\BastardyMenu.qml" />
-    <None Include="Qml\MenuButton.qml" />
-    <None Include="Qml\LeftPopup.qml" />
-    <None Include="Qml\InputBox.qml" />
-    <None Include="Qml\RoundedButton.qml" />
-    <None Include="Qml\CtrInputBox.qml" />
-    <None Include="Qml\CtrDropdownBox.qml" />
-    <None Include="Qml\CtrCutSwitch.qml" />
-    <None Include="Qml\Toast.qml" />
-    <None Include="Qml\SlideBar.qml" />
-    <None Include="Qml\CtrLabelTextBox.qml" />
-    <None Include="Qml\CanvasTest.qml" />
-    <None Include="Qml\ModalWindow.qml" />
-    <None Include="Qml\Cam.qml" />
-    <None Include="Qml\CamBox.qml" />
-    <None Include="Qml\ViewMode.qml" />
-    <None Include="Qml\UndoRedo.qml" />
-    <None Include="Qml\PartList.qml" />
-    <None Include="Qml\PartListContentBox.qml" />
-    <None Include="Qml\PrintInfo.qml" />
-    <None Include="Qml\LeftPopupMove.qml" />
-    <None Include="Qml\LeftPopupRotate.qml" />
-    <None Include="Qml\LeftPopupScale.qml" />
-    <None Include="Qml\LeftPopupArrange.qml" />
-    <None Include="Qml\LeftPopupExtend.qml" />
-    <None Include="Qml\LeftPopupLayFlat.qml" />
-    <None Include="Qml\LeftPopupOrient.qml" />
-    <None Include="Qml\LeftPopupCut.qml" />
-    <None Include="Qml\LeftPopupSupport.qml" />
-    <None Include="Qml\LeftPopupLabel.qml" />
-    <None Include="Qml\LeftPopupExport.qml" />
-    <None Include="Qml\LeftPopupShellOffset.qml" />
-    <None Include="Qml\CtrScaleInputBox.qml" />
-    <None Include="Qml\ProgressShell.qml" />
-  </ItemGroup>
-  <ItemGroup>
-    <Filter Include="Header Files">
-      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
-      <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
-      <ParseFiles>true</ParseFiles>
-    </Filter>
-    <Filter Include="Source Files">
-      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
-      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
-      <ParseFiles>true</ParseFiles>
-    </Filter>
-  </ItemGroup>
-  <ItemGroup>
-    <CopyFileToFolders Include="settings.json" />
-  </ItemGroup>
-  <ItemGroup>
-    <Image Include="Resource\vs_icon.png" />
-    <Image Include="Resource\closebutton.png" />
-    <Image Include="Resource\triangle_down.png" />
-    <Image Include="Resource\triangle_up.png" />
-    <Image Include="Resource\triangle_down_1.5.png" />
-    <Image Include="Resource\drop_arrow_up.png" />
-    <Image Include="Resource\drop_arrow_down.png" />
-    <Image Include="Resource\traingle_up_1.5.png" />
-    <Image Include="Resource\triangle_up_1.5.png" />
-    <Image Include="Resource\cut_free_off_1.5.png" />
-    <Image Include="Resource\cut_flat_off_1.5.png" />
-    <Image Include="Resource\menu_extract.png" />
-    <Image Include="Resource\toast_check.png" />
-    <Image Include="Resource\toast_x.png" />
-    <Image Include="Resource\cam.png" />
-    <Image Include="Resource\cam_hover.png" />
-    <Image Include="Resource\cam_back_1.5.png" />
-    <Image Include="Resource\cam_bottom_1.5.png" />
-    <Image Include="Resource\cam_front_1.5.png" />
-    <Image Include="Resource\cam_left_1.5.png" />
-    <Image Include="Resource\cam_right_1.5.png" />
-    <Image Include="Resource\cam_top_1.5.png" />
-    <Image Include="Resource\cut_flat_off_border2.png" />
-    <Image Include="Resource\cut_free_off_border2.png" />
-    <Image Include="Resource\triangle_right.png" />
-    <Image Include="Resource\cut_flat_on_border2.png" />
-    <Image Include="Resource\cut_free_on_border2.png" />
-    <Image Include="Resource\part_show.png" />
-    <Image Include="Resource\part_remove.png" />
-    <Image Include="Resource\menu_arrange.png" />
-    <Image Include="Resource\menu_autorepair.png" />
-    <Image Include="Resource\menu_cut.png" />
-    <Image Include="Resource\menu_extend.png" />
-    <Image Include="Resource\menu_label.png" />
-    <Image Include="Resource\menu_layflat.png" />
-    <Image Include="Resource\menu_move.png" />
-    <Image Include="Resource\menu_open.png" />
-    <Image Include="Resource\menu_orient.png" />
-    <Image Include="Resource\menu_rotate.png" />
-    <Image Include="Resource\menu_save.png" />
-    <Image Include="Resource\menu_scale.png" />
-    <Image Include="Resource\menu_shelloffset.png" />
-    <Image Include="Resource\menu_support.png" />
-    <Image Include="Resource\undo_arrow.png" />
-    <Image Include="Resource\redo_arrow.png" />
-    <Image Include="Resource\menu_open_select_1.png" />
-    <Image Include="Resource\menu_arrange_select_1.png" />
-    <Image Include="Resource\menu_autorepair_select_1.png" />
-    <Image Include="Resource\menu_cut_select_1.png" />
-    <Image Include="Resource\menu_extend_select_1.png" />
-    <Image Include="Resource\menu_extract_select_1.png" />
-    <Image Include="Resource\menu_label_select_1.png" />
-    <Image Include="Resource\menu_layflat_select_1.png" />
-    <Image Include="Resource\menu_move_select_1.png" />
-    <Image Include="Resource\menu_orient_select_1.png" />
-    <Image Include="Resource\menu_rotate_select_1.png" />
-    <Image Include="Resource\menu_save_select_1.png" />
-    <Image Include="Resource\menu_shelloffset_select_1.png" />
-    <Image Include="Resource\menu_support_select_1.png" />
-    <Image Include="Resource\menu_scale_select_1.png" />
-    <Image Include="Resource\part_delete_1.png" />
-    <Image Include="Resource\part_hide_1.png" />
-    <Image Include="Resource\part_hide_select_1.png" />
-    <Image Include="Resource\part_show_1.png" />
-    <Image Include="Resource\part_show_select_1.png" />
-    <Image Include="Resource\img_arrange.png" />
-    <Image Include="Resource\img_label.png" />
-    <Image Include="Resource\img_layflat.png" />
-    <Image Include="Resource\img_orient.png" />
-    <Image Include="Resource\support_setting.png" />
-    <Image Include="Resource\triangle_down_hover.png" />
-    <Image Include="Resource\triangle_up_hover.png" />
-    <Image Include="Resource\img_scale_unlock_revised.png" />
-    <Image Include="Resource\img_scale_lock_revised.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Font Include="Resource\font\OpenSans-Bold.ttf" />
-    <Font Include="Resource\font\OpenSans-ExtraBold.ttf" />
-    <Font Include="Resource\font\OpenSans-Light.ttf" />
-    <Font Include="Resource\font\OpenSans-Regular.ttf" />
-    <Font Include="Resource\font\OpenSans-SemiBold.ttf" />
+    <None Include="Qml\ModelBuildSlider.qml" />
+    <None Include="Qml\LeftPopupModelBuild.qml" />
+    <None Include="Qml\PrintSetting.qml" />
+    <None Include="Qml\PrintSettingPopup.qml" />
   </ItemGroup>
 </Project>

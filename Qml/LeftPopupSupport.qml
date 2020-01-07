@@ -9,7 +9,8 @@ Item {
 	property var spaceBtwCtr: 48
 	property var themeColor: "#00b9c8"
 
-	//width: 256
+	width: 256
+	height: 196
 
 	function settingToggle() {
 		if (supportsettingpopup.visible == false) { supportsettingpopup.visible = true; }
@@ -44,10 +45,13 @@ Item {
 			anchors.topMargin: sidePadding
 			anchors.rightMargin: sidePadding
 			Image {
+				id: closeimg
 				source: "qrc:/Resource/closebutton.png"
 				anchors.top: parent.top
 				anchors.right: parent.right
 			}
+			onEntered: { closeimg.source = "qrc:/Resource/closebutton_hover.png" }
+			onExited: { closeimg.source = "qrc:/Resource/closebutton.png" }
 		}
 		Hix.RoundButton {
 			id: supportbutton1
@@ -143,7 +147,7 @@ Item {
 		height: 224
 		color: "transparent"
 		anchors.left: leftpopupshell.right
-		anchors.leftMargin: 20
+		anchors.leftMargin: 12
 		anchors.top: parent.top
 		anchors.topMargin: 42
 		visible: false

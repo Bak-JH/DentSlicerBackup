@@ -41,10 +41,13 @@ Item {
 			anchors.topMargin: sidePadding
 			anchors.rightMargin: sidePadding
 			Image {
+				id: closeimg
 				source: "qrc:/Resource/closebutton.png"
 				anchors.top: parent.top
 				anchors.right: parent.right
 			}
+			onEntered: { closeimg.source = "qrc:/Resource/closebutton_hover.png" }
+			onExited: { closeimg.source = "qrc:/Resource/closebutton.png" }
 		}
 		
 		Text {

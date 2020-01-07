@@ -76,7 +76,6 @@ Item {
 			Rectangle {	//current position
 				width: 58
 				height: 34
-				//color: "transparent"
 				anchors.right: handle.left
 				//color: "transparent"
 				//x: 0 - control.availableWidth * 1.2

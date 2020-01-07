@@ -5,6 +5,10 @@ Hix::QML::CloseButton::CloseButton(QQuickItem* parent) : _mouseArea(new QQuickMo
 {
 	setParent(parent);
 	connect(_mouseArea, &QQuickMouseArea::clicked, this, &CloseButton::onClick);
+	connect(_mouseArea, &QQuickMouseArea::entered, this, &CloseButton::onEntered);
+	connect(_mouseArea, &QQuickMouseArea::exited, this, &CloseButton::onExited);
+
+	_mouseArea->setHoverEnabled(true);
 	qvariant_cast<QObject*>(
 		_mouseArea->property("anchors")
 		)->setProperty("fill", _mouseArea->property("parent"));
@@ -12,8 +16,16 @@ Hix::QML::CloseButton::CloseButton(QQuickItem* parent) : _mouseArea(new QQuickMo
 void Hix::QML::CloseButton::onClick()
 {
 	qDebug() << "close clicked";
+	emit clicked();
 }
-
+void Hix::QML::CloseButton::onEntered()
+{
+	emit entered();
+}
+void Hix::QML::CloseButton::onExited()
+{
+	emit exited();
+}
 
 
 Hix::QML::RoundButton::RoundButton(QQuickItem* parent) :QQuickRectangle(parent), _mouseArea(new QQuickMouseArea(this))

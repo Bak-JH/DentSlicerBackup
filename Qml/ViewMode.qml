@@ -52,8 +52,9 @@ Item {
 		height: 88
 		color: "transparent"
 		anchors.left: viewmodeshell.right
-		anchors.leftMargin: 20
+		anchors.leftMargin: 12
 		anchors.top: parent.top
+		visible: false
 
 		Canvas {
 			id: canvas

@@ -42,7 +42,7 @@ Item {
 		}
 		*/
 	
-		Component {//리스트 뷰의 틀을 만든다.
+		Component { // 리스트 뷰의 틀을 만든다.
 			id: contactDelegate
 			Item {
 				width: 224; height: 28
