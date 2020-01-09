@@ -43,14 +43,7 @@ namespace Hix
 		using namespace Hix::Engine3D;
 		struct ContourSegment
 		{
-			enum FlipResult : uint8_t
-			{
-				NotFlipped = 0,
-				Flipped = 1,
-				UnknownDirection = 2
-			};
 			ContourSegment();
-			//constructor helper;
 			bool isValid()const;
 			float dist()const;
 			FaceConstItr face;
@@ -61,7 +54,6 @@ namespace Hix
 		class Contour
 		{
 		public:
-			//Contour(const ContourSegment* start);
 			bool isClosed()const;
 			//attempts to close the unclosed contour, if the gap is too large, give up.
 			bool tryClose();
@@ -86,6 +78,7 @@ namespace Hix
 		public:
 			ContourBuilder(const Mesh* mesh, std::unordered_set<FaceConstItr>& intersectingFaces, float z);
 			std::vector<Contour> buildContours();
+			std::vector<ContourSegment> generateContourSegments();
 			std::vector<Contour> flushIncompleteContours();
 			static bool isArea(const Contour& contour);
 

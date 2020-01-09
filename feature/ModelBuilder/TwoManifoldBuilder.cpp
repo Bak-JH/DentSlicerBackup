@@ -4,6 +4,8 @@
 #include "../../qmlmanager.h"
 #include <cmath>
 #include "../addModel.h"
+#include "../cut/ZAxialCut.h"
+
 //Few assumptions
 //1. Assume filling plane is XY plane.
 //2. Assume Model have a boundary edges that is roughly parallel to this plane
@@ -60,6 +62,7 @@ QVector3D faceNormalAvg(const Mesh& mesh)
 
 std::deque<std::deque<HalfEdgeConstItr>> formBoundaryPaths(std::unordered_set<HalfEdgeConstItr>& boundaryEdges)
 {
+	auto orig = boundaryEdges;
 	std::deque<std::deque<HalfEdgeConstItr>> boundaries;
 	while (!boundaryEdges.empty())
 	{
@@ -103,6 +106,14 @@ std::deque<std::deque<HalfEdgeConstItr>> formBoundaryPaths(std::unordered_set<Ha
 			}
 			if (!success || boundaryEdges.find(curr) == boundaryEdges.end())
 			{
+				//auto test = curr.isBoundary();
+				//auto origFind = orig.find(curr);
+				//auto bFind = std::find(boundary.begin(), boundary.end(), curr);
+				//if (bFind != boundary.end())
+				//{
+				//	Hix::Debug::DebugRenderObject::getInstance().outlineFace(bFind->owningFace());
+
+				//}
 				success = false;
 				break;
 			}
@@ -783,13 +794,12 @@ void Hix::Features::TwoManifoldBuilder::autogenOrientation(float& cuttingPlane, 
 void Hix::Features::TwoManifoldBuilder::buildModel(const QString& name, float cuttingPlane, float bottomPlane)
 {
 	auto boundary = getLongestBoundary(_model);
-	Hix::Plane3D::PDPlane bestFitPlane{ QVector3D(0,0, cuttingPlane), QVector3D(0,0,1) };
-	auto delFaces = edgeRemoveOutlier(_model, boundary, bestFitPlane);
+	auto size = boundary.size();
 	cuntourConcaveFill(_model, boundary, true);
+	Hix::Features::Cut::MeshZCutAway(_model, cuttingPlane, true);
+	boundary = getLongestBoundary(_model);
 	zCylinder(_model, boundary, true, bottomPlane);
 	buildBott(_model, boundary, true, bottomPlane);
-	delFaces.flush();
-
 	auto addModel = new Hix::Features::ListModel(&_model, name, nullptr);
 	_result = addModel->getAddedModel();
 	addModel->getAddedModel()->setZToBed();

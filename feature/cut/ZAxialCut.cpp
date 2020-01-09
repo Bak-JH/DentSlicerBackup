@@ -20,12 +20,21 @@ namespace Hix
 			{
 
 			public:
+				struct SplitTriangle
+				{
+					std::vector<std::array<QVector3D, 3>> topTris;
+					std::vector<std::array<QVector3D, 3>> botTris;
+				};
+				//cut only and discard cut bits
+				ZAxialCutImp(Mesh& origMesh, float cuttingPlane, bool keepTop);
+				//standard cut
 				ZAxialCutImp(GLModel* subject, float cuttingPlane, Mesh*& topMesh, Mesh*& botMesh);
-			private:
+			protected:
 				void divideTriangles();
 				void generateCutContour();
 				void generateCaps();
-				void fillOverlap(const Hix::Slicer::ContourSegment& seg);
+				SplitTriangle fillOverlap(const Hix::Slicer::ContourSegment& seg);
+
 				float _cuttingPlane;
 				const Engine3D::Mesh* _origMesh;
 				Engine3D::Mesh* _bottomMesh;
@@ -43,7 +52,6 @@ namespace Hix
 Hix::Features::Cut::ZAxialCut::ZAxialCut(GLModel* subject, float cuttingPlane) :
 	_cuttingPlane(cuttingPlane), top_no(1), bot_no(1)
 {
-	qDebug() << "zmax: " << subject->recursiveAabb().zMax() << "plane : " << cuttingPlane << "zmin: " << subject->recursiveAabb().zMin();
 	if (cuttingPlane >= subject->recursiveAabb().zMax() || cuttingPlane <= subject->recursiveAabb().zMin())
 	{
 		return;
@@ -106,6 +114,50 @@ std::unordered_set<GLModel*>& Hix::Features::Cut::ZAxialCut::lowerModels()
 	return _lowerModels;
 }
 
+
+Hix::Features::Cut::ZAxialCutImp::ZAxialCutImp(Mesh& origMesh, float cuttingPlane, bool keepTop) : _origMesh(&origMesh), _cuttingPlane(cuttingPlane)
+{
+	_bottomMesh = new Mesh();
+	_topMesh = new Mesh();
+	divideTriangles();
+	ContourBuilder contourBuilder(_origMesh, _overlapFaces, _cuttingPlane);
+	auto segments = contourBuilder.generateContourSegments();
+	for (auto& seg : segments)
+	{
+		if (seg.face.initialized())
+		{
+			auto result = fillOverlap(seg);
+			if (keepTop)
+			{
+				for (auto& t : result.topTris)
+				{
+					origMesh.addFace(t[0], t[1], t[2]);
+				}
+			}
+			else
+			{
+				for (auto& t : result.botTris)
+				{
+					origMesh.addFace(t[0], t[1], t[2]);
+				}
+			}
+		}
+	}
+	//remove bott or top faces
+	if (keepTop)
+	{
+		origMesh.removeFaces(_botFaces);
+	}
+	else
+	{
+		origMesh.removeFaces(_topFaces);
+	}
+	delete _bottomMesh;
+	delete _topMesh;
+	_bottomMesh = nullptr;
+	_topMesh = nullptr;
+}
+
 Hix::Features::Cut::ZAxialCutImp::ZAxialCutImp(GLModel* subject, float cuttingPlane, Mesh*& topMesh, Mesh*& botMesh) :
 	_cuttingPlane(cuttingPlane), _origMesh(subject->getMesh())
 {
@@ -144,13 +196,25 @@ Hix::Features::Cut::ZAxialCutImp::ZAxialCutImp(GLModel* subject, float cuttingPl
 	{
 		for (auto& seg : contour.segments)
 		{
-			fillOverlap(seg);
+			if (seg.face.initialized())
+			{
+				auto result = fillOverlap(seg);
+				for (auto &t : result.botTris)
+				{
+					_bottomMesh->addFace(t[0], t[1], t[2]);
+				}
+				for (auto& t : result.topTris)
+				{
+					_topMesh->addFace(t[0], t[1], t[2]);
+				}
+			}
 		}
 	}
 
 	botMesh = _bottomMesh;
 	topMesh = _topMesh;
 	//subject->clearMesh();
+
 }
 
 
@@ -244,13 +308,12 @@ void Hix::Features::Cut::ZAxialCutImp::generateCaps()
 	}
 }
 
-void Hix::Features::Cut::ZAxialCutImp::fillOverlap(const Hix::Slicer::ContourSegment& seg)
+Hix::Features::Cut::ZAxialCutImp::SplitTriangle Hix::Features::Cut::ZAxialCutImp::fillOverlap(const Hix::Slicer::ContourSegment& seg)
 {
+	Hix::Features::Cut::ZAxialCutImp::SplitTriangle result;
+
 	auto face = seg.face;
-	if (!face.initialized())
-	{
-		return;
-	}
+
 	auto mvs = face.meshVertices();
 	std::vector<VertexConstItr> highs;
 	std::vector<VertexConstItr> lows;
@@ -281,14 +344,13 @@ void Hix::Features::Cut::ZAxialCutImp::fillOverlap(const Hix::Slicer::ContourSeg
 		QVector3D to(seg.to, _cuttingPlane);
 		from = _origMesh->ptToLocal(from);
 		to = _origMesh->ptToLocal(to);
-		_topMesh->addFace(seg.from, seg.to, highs[0].localPosition());
-		_bottomMesh->addFace(seg.to, seg.from, lows[0].localPosition());
+		result.topTris.push_back({ seg.from, seg.to, highs[0].localPosition() });
+		result.botTris.push_back({ seg.to, seg.from, lows[0].localPosition() });
 	}
 	else
 	{
 		//two edges case
-
-		Mesh* twoFacesAddedMesh, * oneFaceAddedMesh;
+		std::vector<std::array<QVector3D, 3>>* twoFacesAdded, * oneFaceAdded;
 		QVector3D from;
 		QVector3D to;
 		bool isPyramid = lows.size() > highs.size();
@@ -299,8 +361,8 @@ void Hix::Features::Cut::ZAxialCutImp::fillOverlap(const Hix::Slicer::ContourSeg
 			// ▽
 			from = QVector3D(seg.from, _cuttingPlane);
 			to = QVector3D(seg.to, _cuttingPlane);
-			twoFacesAddedMesh = _bottomMesh;
-			oneFaceAddedMesh = _topMesh;
+			twoFacesAdded = &result.botTris;
+			oneFaceAdded = &result.topTris;
 		}
 		else
 		{
@@ -308,8 +370,8 @@ void Hix::Features::Cut::ZAxialCutImp::fillOverlap(const Hix::Slicer::ContourSeg
 			from = QVector3D(seg.to, _cuttingPlane);
 			to = QVector3D(seg.from, _cuttingPlane);
 			majority.swap(minority);
-			twoFacesAddedMesh = _topMesh;
-			oneFaceAddedMesh = _bottomMesh;
+			twoFacesAdded = &result.topTris;
+			oneFaceAdded = &result.botTris;
 		}
 		from = _origMesh->ptToLocal(from);
 		to = _origMesh->ptToLocal(to);
@@ -320,13 +382,14 @@ void Hix::Features::Cut::ZAxialCutImp::fillOverlap(const Hix::Slicer::ContourSeg
 		majority[1] = hintEdge.to();
 
 		//face goes in this order, f-> t -> minority
-		oneFaceAddedMesh->addFace(from, to, minority[0].localPosition());
+		oneFaceAdded->push_back({ from, to, minority[0].localPosition() });
+
 		// maj[0]->t->f 
 		// maj[0]->maj[1]->t 
-		twoFacesAddedMesh->addFace(majority[0].localPosition(), to, from);
-		twoFacesAddedMesh->addFace(majority[0].localPosition(), majority[1].localPosition(), to);
+		twoFacesAdded->push_back({ majority[0].localPosition(), to, from });
+		twoFacesAdded->push_back({ majority[0].localPosition(), majority[1].localPosition(), to });
 	}
-
+	return result;
 
 
 }
@@ -334,3 +397,7 @@ void Hix::Features::Cut::ZAxialCutImp::fillOverlap(const Hix::Slicer::ContourSeg
 
 
 
+void Hix::Features::Cut::MeshZCutAway(Hix::Engine3D::Mesh& mesh, float cuttingPlane, bool keepTop)
+{
+	ZAxialCutImp(mesh, cuttingPlane, keepTop);
+}

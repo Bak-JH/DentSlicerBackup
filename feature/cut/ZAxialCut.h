@@ -34,6 +34,7 @@ namespace Hix
 				std::unordered_set<GLModel*> _lowerModels;
 
 			};
+			void MeshZCutAway(Hix::Engine3D::Mesh& mesh, float cuttingPlane, bool keepTop);
 		}
 	}
 }

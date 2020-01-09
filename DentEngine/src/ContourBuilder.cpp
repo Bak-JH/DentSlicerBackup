@@ -3,6 +3,7 @@
 #include "SlicerDebug.h"
 #include "SlicerDebugInfoExport.h"
 #include "configuration.h"
+#include <algorithm>
 using namespace Hix::Slicer;
 using namespace Hix::Engine3D;
 using namespace Hix::Shapes2D;
@@ -290,6 +291,23 @@ void ContourBuilder::buildSegment(const FaceConstItr& mf)
 	_toHash.insert(std::make_pair(newSeg.to, &newSeg));
 
 }
+
+std::vector<ContourSegment> ContourBuilder::generateContourSegments()
+{
+	std::vector<ContourSegment> result;
+	for (const auto& each : _intersectList)
+	{
+		buildSegment(each);
+	}
+	result.reserve(_segments.size());
+	std::transform(_segments.cbegin(), _segments.cend(), std::back_inserter(result),
+		[](const auto& each)-> ContourSegment {
+			return each.second;
+		}
+		);
+	return result;
+}
+
 
 std::vector<Contour> ContourBuilder::buildContours()
 {
