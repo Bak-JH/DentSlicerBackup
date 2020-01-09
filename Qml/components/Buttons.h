@@ -9,31 +9,49 @@ namespace Hix
 {
 	namespace QML
 	{
-		/// CloseButton ///
-		class CloseButton : public QQuickRectangle
+		/// Button baseclass ///
+		class Button : public QQuickRectangle
 		{
 			Q_OBJECT
-				Q_PROPERTY(QQuickImage* image MEMBER _image)
+		public:
+			Button(QQuickItem* parent = nullptr);
+			virtual ~Button();
+
+		public slots:
+			virtual void onClick() = 0;
+			virtual void onEntered();
+			virtual void onExited();
+
+		protected:
+			QQuickMouseArea* _mouseArea;
+		};
+
+		/// CloseButton ///
+		class CloseButton : public Button
+		{
+			Q_OBJECT
+			Q_PROPERTY(QQuickImage* image MEMBER _image)
 
 		public:
 			CloseButton(QQuickItem* parent = nullptr);
+			virtual ~CloseButton();
 
 		public slots:
-			void onClick();
+			void onClick()override;
 
 		private:
-			QQuickMouseArea* _mouseArea;
 			QQuickImage* _image;
 		};
 
 		/// Round Button ///
-		class RoundButton : public QQuickRectangle
+		class RoundButton : public Button
 		{
 			Q_OBJECT
 			Q_PROPERTY(QQuickText* labelText MEMBER _labelText)
 
 		public:
 			RoundButton(QQuickItem* parent = nullptr);
+			virtual ~RoundButton();
 
 		signals:
 			void clicked();
@@ -41,9 +59,9 @@ namespace Hix
 			void exited();
 
 		public slots:
-			void onClick();
-			void onEntered();
-			void onExited();
+			void onClick()override;
+			void onEntered()override;
+			void onExited()override;
 			void fNameChanged();
 			//void onEnable();
 			//void onDisable();
@@ -51,7 +69,25 @@ namespace Hix
 		protected:
 			QQuickText* _labelText;
 			QString _fName = "Name";
-			QQuickMouseArea* _mouseArea;
+		};
+
+		class MenuButton : public Button
+		{
+			Q_OBJECT
+			Q_PROPERTY(QQuickText* name MEMBER _name)
+			Q_PROPERTY(QQuickImage* image MEMBER _image)
+		public:
+			MenuButton(QQuickItem* parent = nullptr);
+			virtual ~MenuButton();
+
+		public slots:
+			void onClick()override;
+			void onEntered()override;
+			void onExited()override;
+
+		private:
+			QQuickText* _name;
+			QQuickImage* _image;
 		};
 	}
 }

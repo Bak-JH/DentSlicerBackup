@@ -2,7 +2,7 @@ import QtQuick 2.6
 import hix.qml 1.0 as Hix
 
 //MenuBtnShell {
-Hix.RoundButton {
+Hix.MenuButton {
 	property string iconBasic
 	property string nameColor: "#9d9d9d"
 	property string featureName
@@ -11,7 +11,7 @@ Hix.RoundButton {
 	height: 90
 	//color: hovered ? "#eeeeee" : "#ffffff"
 	
-	Image {
+	image {
 		sourceSize.width: width
 		anchors.top: parent.top;
 		anchors.topMargin: (parent.height - height) * 0.5 - parent.height * 0.08
@@ -19,7 +19,7 @@ Hix.RoundButton {
 		//source: fimg
 		source: iconBasic
 	}
-	Text {
+	name {
 		anchors.horizontalCenter: parent.horizontalCenter
 		anchors.bottom: parent.bottom
 		anchors.bottomMargin: 10
