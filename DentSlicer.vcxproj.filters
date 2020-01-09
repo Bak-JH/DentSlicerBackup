@@ -902,9 +902,6 @@
     <ClInclude Include="render\CircleMeshEntity.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="ui\GridBed.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="common\Tree\NTreeDeque.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -1059,7 +1056,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
-    <None Include="Qml\BastardyMenu.qml" />
     <None Include="Qml\Cam.qml" />
     <None Include="Qml\CamBox.qml" />
     <None Include="Qml\CameraController.qml" />
@@ -1305,6 +1301,7 @@
     <None Include="Qml\ProgressShell.qml" />
     <None Include="Qml\FileDialogLoad.qml" />
     <None Include="Qml\PlanesliderRange.qml" />
+    <None Include="Qml\BastardyMenu.qml" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Source Files">

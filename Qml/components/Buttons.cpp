@@ -2,16 +2,42 @@
 
 using namespace Hix::QML;
 
-/// Close Button ///
-Hix::QML::CloseButton::CloseButton(QQuickItem* parent) : QQuickRectangle(parent), _mouseArea(new QQuickMouseArea(this))
+/// Button baseclass ///
+Hix::QML::Button::Button(QQuickItem* parent) : QQuickRectangle(parent)
 {
-	_image = new QQuickImage(this);
-
 	// mouse area
-	connect(_mouseArea, &QQuickMouseArea::clicked, this, &CloseButton::onClick);
+	connect(_mouseArea, &QQuickMouseArea::clicked, this, &Button::onClick);
+	connect(_mouseArea, &QQuickMouseArea::entered, this, &Button::onEntered);
+	connect(_mouseArea, &QQuickMouseArea::exited, this, &Button::onExited);
+
 	qvariant_cast<QObject*>(
 		_mouseArea->property("anchors")
 		)->setProperty("fill", _mouseArea->property("parent"));
+	_mouseArea->setHoverEnabled(true);
+}
+
+Hix::QML::Button::~Button()
+{
+}
+
+void Hix::QML::Button::onEntered()
+{
+}
+
+void Hix::QML::Button::onExited()
+{
+}
+
+
+
+/// Close Button ///
+Hix::QML::CloseButton::CloseButton(QQuickItem* parent) : Button(parent)
+{
+	_image = new QQuickImage(this);
+}
+
+Hix::QML::CloseButton::~CloseButton()
+{
 }
 
 void Hix::QML::CloseButton::onClick()
@@ -22,21 +48,14 @@ void Hix::QML::CloseButton::onClick()
 
 
 /// Round Button ///
-Hix::QML::RoundButton::RoundButton(QQuickItem* parent) :QQuickRectangle(parent), _mouseArea(new QQuickMouseArea(this))
+Hix::QML::RoundButton::RoundButton(QQuickItem* parent) :Button(parent)
 {
 	_labelText = new QQuickText(this);
-
-	// mouse area
-	connect(_mouseArea, &QQuickMouseArea::clicked, this, &RoundButton::onClick);
-	connect(_mouseArea, &QQuickMouseArea::entered, this, &RoundButton::onEntered);
-	connect(_mouseArea, &QQuickMouseArea::exited, this, &RoundButton::onExited);
-
-	_mouseArea->setHoverEnabled(true);
-	qvariant_cast<QObject*>(
-		_mouseArea->property("anchors")
-		)->setProperty("fill", _mouseArea->property("parent"));
 }
 
+Hix::QML::RoundButton::~RoundButton()
+{
+}
 
 void Hix::QML::RoundButton::onClick()
 {
@@ -53,4 +72,29 @@ void Hix::QML::RoundButton::onExited()
 void Hix::QML::RoundButton::fNameChanged()
 {
 	emit fNameChanged();
+}
+
+
+
+/// Menu Button ///
+Hix::QML::MenuButton::MenuButton(QQuickItem* parent) :Button(parent)
+{
+	_name = new QQuickText(this);
+	_image = new QQuickImage(this);
+}
+
+Hix::QML::MenuButton::~MenuButton()
+{
+}
+
+void Hix::QML::RoundButton::onClick()
+{
+}
+
+void Hix::QML::MenuButton::onEntered()
+{
+}
+
+void Hix::QML::MenuButton::onExited()
+{
 }
