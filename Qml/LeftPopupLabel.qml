@@ -1,7 +1,6 @@
 import QtQuick 2.6
 import hix.qml 1.0
 import QtGraphicalEffects 1.12
-import QtQuick.Controls 2.1
 
 LeftPopup {
 	property var sidePadding: 16
@@ -43,7 +42,7 @@ LeftPopup {
 
 	CtrDropdownBox {
 		id: labelfont
-		dropdownText: "Font"
+		dropName: "Font"
 		width: parent.width - sidePadding * 2
 		anchors.left: parent.left
 		anchors.leftMargin: sidePadding
@@ -70,67 +69,13 @@ LeftPopup {
 		anchors.top: labelfontsize.bottom
 		anchors.topMargin: spaceBtwCtr
 	}
-	Rectangle {
+	
+	CtrToggleSwitch {
+		id: toggleSwitch
+		width: parent.width / 2
 		anchors.top: labelheight.bottom
 		anchors.topMargin: 16
 		anchors.right: parent.right
 		anchors.rightMargin: sidePadding - 2
-		color: "transparent"
-		width: parent.width / 2
-		height: 16
-		Text {
-			id: emboss
-			text: "Emboss"
-			font.family: openSemiBold.name
-			font.pointSize: 8.5
-			color: control.checked ? "#aaaaaa" : "#1db2c4"
-			anchors.verticalCenter: parent.verticalCenter
-		}
-		Switch {
-			id: control
-			anchors.left: emboss.right
-			anchors.verticalCenter: parent.verticalCenter
-			//text: qsTr("Embossed / Engraved")
-
-			indicator: Rectangle {
-				implicitWidth: 28
-				implicitHeight: 8
-				x: control.leftPadding
-				y: parent.height / 2 - height / 2
-				radius: implicitHeight / 2
-				color: "#ffffff"
-				border.color: "#cccccc"
-				anchors.verticalCenter: parent.verticalCenter
-
-				Rectangle {
-					x: control.checked ? parent.width - width : 0
-					width: 16
-					height: width
-					radius: width / 2
-					color: control.down ? "#cccccc" : "#ffffff"
-					border.color: "#999999"
-					anchors.verticalCenter: parent.verticalCenter
-				}
-			}
-			/*
-			contentItem: Text {
-				text: "Embossed"
-				opacity: enabled ? 1.0 : 0.3
-				color: control.down ? "#17a81a" : "#21be2b"
-				verticalAlignment: Text.AlignVCenter
-				leftPadding: control.indicator.width + control.spacing
-			}
-			*/
-		}
-		Text {
-			anchors.left: emboss.right
-			anchors.leftMargin: 40
-			text: "Engrave"
-			font.family: openSemiBold.name
-			font.pointSize: 8.5
-			color: control.checked ? "#1db2c4" : "#aaaaaa"
-			anchors.verticalCenter: parent.verticalCenter
-		}
 	}
-	
 }

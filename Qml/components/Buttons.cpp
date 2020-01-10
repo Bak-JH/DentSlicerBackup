@@ -97,3 +97,14 @@ void Hix::QML::MenuButton::onExited()
 {
 	emit exited();
 }
+
+
+
+/// Toggle Switch ///
+Hix::QML::ToggleSwitch::ToggleSwitch(QQuickItem* parent) :Button(parent)
+{
+}
+
+Hix::QML::ToggleSwitch::~ToggleSwitch()
+{
+}

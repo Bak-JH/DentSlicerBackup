@@ -1303,6 +1303,7 @@
     <None Include="Qml\BastardyMenu.qml" />
     <None Include="Qml\FeatureMenu.qml" />
     <None Include="Qml\MenuItem.qml" />
+    <None Include="Qml\CtrToggleSwitch.qml" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Source Files">

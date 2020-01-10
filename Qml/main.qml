@@ -249,7 +249,7 @@ Item{
 			anchors.leftMargin: 15
 			anchors.topMargin: 120
 		}
-		/*
+		
 		LeftPopupLayFlat {
 			id: leftpopuplayflat
 			anchors.top: uppertab.bottom
@@ -257,13 +257,14 @@ Item{
 			anchors.leftMargin: 15
 			anchors.topMargin: 120
 		}
+		
 		LeftPopupLabel {
 			id: leftpopuplabel
 			anchors.top: uppertab.bottom
 			anchors.left: leftpopuplayflat.right
 			anchors.leftMargin: 15
 			anchors.topMargin: 120
-		}
+		}/*
 		LeftPopupScale
 		{
 			id: leftpopupscale

@@ -9,7 +9,7 @@ namespace Hix
 {
 	namespace QML
 	{
-		/// Button baseclass ///
+		/// Button base class ///
 		class Button : public QQuickRectangle
 		{
 			Q_OBJECT
@@ -30,7 +30,6 @@ namespace Hix
 		class CloseButton : public Button
 		{
 			Q_OBJECT
-
 		public:
 			CloseButton(QQuickItem* parent = nullptr);
 			virtual ~CloseButton();
@@ -43,7 +42,6 @@ namespace Hix
 		class RoundButton : public Button
 		{
 			Q_OBJECT
-
 		public:
 			RoundButton(QQuickItem* parent = nullptr);
 			virtual ~RoundButton();
@@ -60,6 +58,7 @@ namespace Hix
 			void fNameChanged();
 		};
 
+		/// Menu Button ///
 		class MenuButton : public Button
 		{
 			Q_OBJECT
@@ -76,6 +75,20 @@ namespace Hix
 			void onClick()override;
 			void onEntered()override;
 			void onExited()override;
+		};
+
+		/// Toggle Switch ///
+		class ToggleSwitch : public Button
+		{
+			Q_OBJECT
+			Q_PROPERTY(bool isLeft MEMBER _isLeft)
+
+		public:
+			ToggleSwitch(QQuickItem* parent = nullptr);
+			virtual ~ToggleSwitch();
+
+		private:
+			bool _isLeft = true;
 		};
 	}
 }
