@@ -158,8 +158,6 @@
         <file>Resource/triangle_right.png</file>
         <file>Resource/cut_flat_on_border2.png</file>
         <file>Resource/cut_free_on_border2.png</file>
-        <file>Resource/part_show.png</file>
-        <file>Resource/part_remove.png</file>
         <file>Resource/menu_arrange.png</file>
         <file>Resource/menu_autorepair.png</file>
         <file>Resource/menu_cut.png</file>
@@ -191,7 +189,6 @@
         <file>Resource/menu_scale_select_1.png</file>
         <file>Resource/menu_shelloffset_select_1.png</file>
         <file>Resource/menu_support_select_1.png</file>
-        <file>Resource/part_delete_1.png</file>
         <file>Resource/part_hide_1.png</file>
         <file>Resource/part_hide_select_1.png</file>
         <file>Resource/part_show_1.png</file>
@@ -215,5 +212,7 @@
         <file>Resource/img_modelbuild_popup.png</file>
         <file>Resource/btn_setting.png</file>
         <file>Resource/btn_setting_refresh.png</file>
+        <file>Resource/arrow_right.png</file>
+        <file>Resource/part_remove_1.png</file>
     </qresource>
 </RCC>

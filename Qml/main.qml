@@ -312,7 +312,7 @@ Item{
 			anchors.left: lefttab.right
 			anchors.leftMargin: 600
 		}
-		
+		*/
 		SlideBar {
 			id: slidebar
 			anchors.top: uppertab.bottom
@@ -320,7 +320,7 @@ Item{
 			anchors.left: lefttab.right
 			anchors.leftMargin: 720
 		}
-		*/
+		
 
 		Cam {
 			id: cam

@@ -17,6 +17,8 @@ Item {
 			text: "something"
 			font.family: openRegular.name
 			anchors.horizontalCenter: parent.horizontalCenter
+			anchors.top: parent.top
+			anchors.topMargin: parent.height * 0.24
 		}
 
 		Rectangle {
@@ -27,6 +29,14 @@ Item {
 			anchors.horizontalCenter: parent.horizontalCenter
 			anchors.bottom: parent.bottom
 			anchors.bottomMargin: 30
+			Rectangle {
+				width: 250
+				height: 10
+				radius: height / 2
+				color: "#19d6e0"
+				anchors.left: parent.left
+				anchors.verticalCenter: parent.verticalCenter
+			}
 		}
 	}
 	
@@ -37,5 +47,4 @@ Item {
 		color: "#55000000"
 		source: progressshell
 	}
-	
 }

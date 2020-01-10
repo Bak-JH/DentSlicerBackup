@@ -832,11 +832,8 @@
     <Image Include="Resource\menu_shelloffset_select_1.png" />
     <Image Include="Resource\menu_support.png" />
     <Image Include="Resource\menu_support_select_1.png" />
-    <Image Include="Resource\part_delete_1.png" />
     <Image Include="Resource\part_hide_1.png" />
     <Image Include="Resource\part_hide_select_1.png" />
-    <Image Include="Resource\part_remove.png" />
-    <Image Include="Resource\part_show.png" />
     <Image Include="Resource\part_show_1.png" />
     <Image Include="Resource\part_show_select_1.png" />
     <Image Include="Resource\redo_arrow.png" />
@@ -863,6 +860,8 @@
     <Image Include="Resource\btn_modelbuild_help.png" />
     <Image Include="Resource\btn_setting.png" />
     <Image Include="Resource\btn_setting_refresh.png" />
+    <Image Include="Resource\arrow_right.png" />
+    <Image Include="Resource\part_remove_1.png" />
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="feature\layerview\CrossSectionPlane.h" />

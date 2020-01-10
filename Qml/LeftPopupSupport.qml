@@ -54,13 +54,13 @@ Item {
 			onExited: { closeimg.source = "qrc:/Resource/closebutton.png" }
 		}
 		Hix.RoundButton {
-			id: supportbutton1
+			id: generatesupports
 			width: 186
 			height: 32
 			radius: 16
 			//color: enabled ? "#00b9c8" : "#cccccc"
 			color: "#00b9c8"
-			anchors.bottom: supportbutton2.top
+			anchors.bottom: editsupports.top
 			anchors.bottomMargin: 16
 			anchors.left: parent.left
 			anchors.leftMargin: sidePadding
@@ -82,7 +82,7 @@ Item {
 			width: 32
 			height: width
 			radius: width / 2
-			anchors.bottom: supportbutton1.bottom
+			anchors.bottom: generatesupports.bottom
 			anchors.right: parent.right
 			anchors.rightMargin: sidePadding
 			Image {
@@ -96,12 +96,12 @@ Item {
 		}
 
 		Hix.RoundButton {
-			id: supportbutton2
+			id: editsupports
 			width: 224
 			height: 32
-			radius: 16
+			radius: height / 2
 			color: "#00b9c8"
-			anchors.bottom: supportbutton3.top
+			anchors.bottom: clearsupports.top
 			anchors.bottomMargin: sidePadding
 			anchors.horizontalCenter: parent.horizontalCenter
 			Text {
@@ -112,16 +112,78 @@ Item {
 				text: "Edit Supports"
 				font.family: openSemiBold.name
 			}
-			onClicked: { console.log("clicked"); }
+			onClicked: { console.log("clicked"); editsupports.visible=false; editbuttons.visible=true; }
 			onEntered: { color = "#21959e" }
 			onExited: { color = "#00b9c8" }
 		}
-		
-		Hix.RoundButton {
-			id: supportbutton3
+
+		Rectangle {
+			id: editbuttons
 			width: 224
 			height: 32
-			radius: 16
+			anchors.bottom: clearsupports.top
+			anchors.bottomMargin: sidePadding
+			anchors.horizontalCenter: parent.horizontalCenter
+			visible: false
+			Rectangle {
+				id: leftround
+				width: 32
+				height: width
+				color: "#00b9c8"
+				radius: height / 2
+				anchors.left: parent.left
+			}
+			Hix.RoundButton {
+				width: ((parent.width - 2) / 2) - 16
+				height: parent.height
+				color: "#00b9c8"
+				anchors.left: parent.left
+				anchors.leftMargin: 16
+				onEntered: { color = "#21959e"; leftround.color = "#21959e" }
+				onExited: { color = "#00b9c8"; leftround.color = "#00b9c8" }
+				Text {
+					anchors.left: parent.left
+					anchors.leftMargin: 8
+					anchors.verticalCenter: parent.verticalCenter
+					color: "#FFFFFF"
+					font.pointSize: 10
+					text: "Apply edits"
+					font.family: openSemiBold.name
+				}
+			}
+			Rectangle {
+				id: rightround
+				width: 32
+				height: width
+				color: "#00b9c8"
+				radius: height / 2
+				anchors.right: parent.right
+			}
+			Hix.RoundButton {
+				width: ((parent.width - 2) / 2) - 16
+				height: parent.height
+				color: "#00b9c8"
+				anchors.right: parent.right
+				anchors.rightMargin: 16
+				onEntered: { color = "#21959e"; rightround.color = "#21959e" }
+				onExited: { color = "#00b9c8"; rightround.color = "#00b9c8" }
+				Text {
+					anchors.right: parent.right
+					anchors.rightMargin: 6
+					anchors.verticalCenter: parent.verticalCenter
+					color: "#FFFFFF"
+					font.pointSize: 10
+					text: "Cancel edits"
+					font.family: openSemiBold.name
+				}
+			}
+		}
+		
+		Hix.RoundButton {
+			id: clearsupports
+			width: 224
+			height: 32
+			radius: height / 2
 			color: "#00b9c8"
 			anchors.bottom: parent.bottom
 			anchors.bottomMargin: 16
