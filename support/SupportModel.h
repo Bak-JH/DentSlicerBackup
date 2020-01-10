@@ -1,7 +1,7 @@
 #pragma once
 
 #include "render/SceneEntityWithMaterial.h"
-#include "ui/Highlightable.h"
+#include "widget/Highlightable.h"
 #include "input/Clickable.h"
 #include "input/Hoverable.h"
 #include "input/HitTestAble.h"

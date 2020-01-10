@@ -15,7 +15,6 @@ using namespace ClipperLib;
 Hix::Features::ModelCut::ModelCut(const std::unordered_set<GLModel*>& selectedModels, Hix::Engine3D::Bounds3D bound):
 	_models(selectedModels), _cuttingPlane(qmlManager->total), _modelsBound(bound)
 {
-	qmlManager->getRayCaster().setHoverEnabled(true);
 }
 
 Hix::Features::ModelCut::~ModelCut()
@@ -32,7 +31,7 @@ void ModelCut::cutModeSelected(int type) {
 		_cutType = ZAxial;
 		_cuttingPlane.enableDrawing(false);
 		_cuttingPlane.clearPt();
-		//qmlManager->getRayCaster().setHoverEnabled(false);
+		qmlManager->getRayCaster().setHoverEnabled(false);
 		_cuttingPlane.transform().setTranslation(QVector3D(0, 0, _modelsBound.zMin() + 1 * _modelsBound.lengthZ() / 1.8));
 		_cuttingPlane.enablePlane(true);
 	}

@@ -5,7 +5,6 @@
         <file>Qml/CameraController.qml</file>
         <file>Qml/CameraManager.qml</file>
         <file>Qml/CoordinateMesh.qml</file>
-        <file>Qml/FileDialogLoad.qml</file>
         <file>Qml/LeftTab.qml</file>
         <file>Qml/LeftTabPartList.qml</file>
         <file>Qml/LeftTabPartListElement.qml</file>
@@ -18,7 +17,6 @@
         <file>Qml/MeshTransformerZoom.qml</file>
         <file>Qml/Model.qml</file>
         <file>Qml/Planeslider.qml</file>
-        <file>Qml/Plate.qml</file>
         <file>Qml/PopUp.qml</file>
         <file>Qml/SCroll.qml</file>
         <file>Qml/SlicingData.qml</file>
@@ -55,10 +53,7 @@
         <file>shaders/singleColor.geom</file>
         <file>shaders/flat.geom</file>
         <file>Qml/LeftTabSlicingOptionElementPercentage.qml</file>
-        <file>Qml/BastardyMenu.qml</file>
-        <file>Qml/MenuButton.qml</file>
         <file>Qml/LeftPopup.qml</file>
-        <file>Qml/RoundedButton.qml</file>
         <file>Qml/CtrInputBox.qml</file>
         <file>Qml/CtrDropdownBox.qml</file>
         <file>Qml/CtrCutSwitch.qml</file>
@@ -69,8 +64,6 @@
         <file>Qml/ModalWindow.qml</file>
         <file>Qml/Cam.qml</file>
         <file>Qml/CamBox.qml</file>
-        <file>Qml/ViewMode.cpp</file>
-        <file>Qml/ViewMode.h</file>
         <file>Qml/ViewMode.qml</file>
         <file>Qml/UndoRedo.qml</file>
         <file>Qml/PartList.qml</file>
@@ -94,5 +87,8 @@
         <file>Qml/LeftPopupModelBuild.qml</file>
         <file>Qml/PrintSetting.qml</file>
         <file>Qml/PrintSettingPopup.qml</file>
+        <file>Qml/PlanesliderRange.qml</file>
+        <file>Qml/FeatureMenu.qml</file>
+        <file>Qml/MenuItem.qml</file>
     </qresource>
 </RCC>

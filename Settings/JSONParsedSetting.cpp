@@ -38,3 +38,57 @@ void Hix::Settings::JSONParsedSetting::refresh()
 		}
 	}
 }
+
+//rapidjson::Value Hix::Settings::JSON::parseObj(const rapidjson::Document& doc, const std::string& key)
+//{
+//
+//
+//	auto& genVal = doc[key.c_str()];
+//	if (genVal.IsObject())
+//	{
+//		char cbuf[1024]; rapidjson::MemoryPoolAllocator<> allocator(cbuf, sizeof cbuf);
+//		rapidjson::Value subObject;
+//		subObject.CopyFrom(genVal, allocator);
+//
+//		//for (rapidjson::Value::ConstMemberIterator  itr = input.MemberBegin(); itr != input.MemberEnd(); ++itr)
+//		//{
+//		//	rapidjson::Value val(itr->name);
+//
+//		//	out.AddMember(itr->name, itr->value, allocator);
+//		//}
+//
+//		//out.SetObject();
+//		////doc.AddMember("printerPresetPath", printerPresetPath, allocator);
+//		//for (auto& m : genVal.GetObject())
+//		//{
+//		//	//out.AddMember(m.name.GetString(), m.value.GetString(), allocator);
+//		//	out.AddMember("sfsdf", m.value, allocator);
+//
+//		//}
+//
+//
+//		return genVal.GetObject();
+//	}
+//	else
+//	{
+//		throw std::runtime_error("failed to parse " + key);
+//	}
+//}
+
+std::optional<rapidjson::Value> Hix::Settings::JSON::tryParseObj(const rapidjson::Document& doc, const std::string& key, rapidjson::MemoryPoolAllocator<>& allocator)
+{
+	try
+	{
+		auto& genVal = doc[key.c_str()];
+		if (genVal.IsObject())
+		{
+			rapidjson::Value subObject;
+			subObject.CopyFrom(genVal, allocator);
+			return subObject;
+		}
+	}
+	catch (...)
+	{
+	}
+	return std::optional<rapidjson::Value>();
+}

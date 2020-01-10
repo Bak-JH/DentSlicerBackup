@@ -5,27 +5,23 @@ import QtQuick.Controls.Styles 1.4
 import QtGraphicalEffects 1.12
 
 Hix.InputBox {
-
+	id: inputBox
 	property string inputText
 	property var fromNum
 	property var toNum
-
-	Text {
-		//text: parent.propName
-		text: inputText
+	
+	label 
+	{
 		font.family: openRegular.name
 		anchors.left: parent.left
-		//anchors.top: parent.top
-		//anchors.topMargin: height / 2
 		color: "#666666"
-		anchors.verticalCenter: parent.verticalCenter
-		//verticalAlignment: Text.AlignVCenter
+		anchors.verticalCenter: control.verticalCenter
 	}
-
+	
 	SpinBox {
 		id: control
 		font.family: openRegular.name
-		value: 0
+		value: inputBox.value
 		from: fromNum
 		to: toNum
 		width: parent.width * 0.46//0.5
@@ -36,13 +32,18 @@ Hix.InputBox {
 		editable: true
 		//from: parent.inputRect.from
 		//to: parent.inputRect.to
+		
+		onValueChanged: {
+			inputBox.value = value;
+			inputBox.test();
+		}
 
 		contentItem: TextInput {
-			z: 2
 			text: control.textFromValue(control.value, control.locale)
 			font: control.font
 			selectionColor: "#21be2b"
 			selectedTextColor: "#ffffff"
+			anchors.verticalCenter: control.verticalCenter
 			//horizontalAlignment: Qt.AlignHCenter
 			verticalAlignment: Qt.AlignVCenter
 
@@ -50,7 +51,7 @@ Hix.InputBox {
 			validator: control.validator
 			inputMethodHints: Qt.ImhFormattedNumbersOnly
 		}
-
+		
 		up.indicator: Rectangle {
 			id: uparrow
 			//x: control.mirrored ? 0 : parent.width - width
@@ -108,7 +109,7 @@ Hix.InputBox {
 				onReleased: { control.decrease(); }
 			}
 		}
-
+		
 		background: Rectangle {
 			id: rect
 			color: control.hovered ? "#ffffff" : "#f6feff"
@@ -125,5 +126,6 @@ Hix.InputBox {
 			color: "#30000000"
 			source: rect
 		}
+		
 	}
 }

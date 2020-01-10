@@ -4,6 +4,7 @@
 #include <string>
 #include <unordered_map>
 #include <algorithm>
+#include <optional>
 namespace Hix
 {
 	namespace Settings
@@ -14,11 +15,18 @@ namespace Hix
 			template<typename ValType>
 			void tryParse(const rapidjson::Document& doc, const std::string& key, ValType& value)
 			{
-				auto& genVal = doc[key.c_str()];
-				if (genVal.Is<ValType>())
+				try
 				{
-					value = genVal.Get<ValType>();
+					auto& genVal = doc[key.c_str()];
+					if (genVal.Is<ValType>())
+					{
+						value = genVal.Get<ValType>();
+					}
 				}
+				catch (...)
+				{
+				}
+
 			}
 			template<typename ValType>
 			void parse(const rapidjson::Document& doc, const std::string& key, ValType& value)
@@ -38,17 +46,23 @@ namespace Hix
 			template<typename ValType>
 			void tryParseStrToEnum(const rapidjson::Document& doc, const std::string& key, ValType& value, const std::unordered_map<std::string, ValType>& map)
 			{
-				auto& genVal = doc[key.c_str()];
-				std::string str;
-				if (genVal.Is<std::string>())
+				try
 				{
-					str = genVal.Get<std::string>();
-					std::transform(str.begin(), str.end(), str.begin(), [](unsigned char c) { return std::tolower(c); });
-					auto enumResult = map.find(str);
-					if (enumResult != map.cend())
+					auto& genVal = doc[key.c_str()];
+					std::string str;
+					if (genVal.Is<std::string>())
 					{
-						value = enumResult->second;
+						str = genVal.Get<std::string>();
+						std::transform(str.begin(), str.end(), str.begin(), [](unsigned char c) { return std::tolower(c); });
+						auto enumResult = map.find(str);
+						if (enumResult != map.cend())
+						{
+							value = enumResult->second;
+						}
 					}
+				}
+				catch (...)
+				{
 				}
 			}
 			template<typename ValType>
@@ -69,6 +83,8 @@ namespace Hix
 				}
 				throw std::runtime_error("failed to parse " + key);
 			}
+			//rapidjson::Value parseObj(const rapidjson::Document& doc, const std::string& key);
+			std::optional<rapidjson::Value> tryParseObj(const rapidjson::Document& doc, const std::string& key, rapidjson::MemoryPoolAllocator<>& allocator);
 		}
 		class JSONParsedSetting
 		{
