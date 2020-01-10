@@ -33,7 +33,6 @@ void Hix::QML::Button::onExited()
 /// Close Button ///
 Hix::QML::CloseButton::CloseButton(QQuickItem* parent) : Button(parent)
 {
-	_image = new QQuickImage(this);
 }
 
 Hix::QML::CloseButton::~CloseButton()
@@ -50,7 +49,6 @@ void Hix::QML::CloseButton::onClick()
 /// Round Button ///
 Hix::QML::RoundButton::RoundButton(QQuickItem* parent) :Button(parent)
 {
-	_labelText = new QQuickText(this);
 }
 
 Hix::QML::RoundButton::~RoundButton()
@@ -79,8 +77,6 @@ void Hix::QML::RoundButton::fNameChanged()
 /// Menu Button ///
 Hix::QML::MenuButton::MenuButton(QQuickItem* parent) :Button(parent)
 {
-	_name = new QQuickText(this);
-	_image = new QQuickImage(this);
 }
 
 Hix::QML::MenuButton::~MenuButton()
@@ -89,14 +85,15 @@ Hix::QML::MenuButton::~MenuButton()
 
 void Hix::QML::MenuButton::onClick()
 {
-	qDebug() << _image->width() << _image->height();
+	emit clicked();
 }
 
 void Hix::QML::MenuButton::onEntered()
 {
+	emit entered();
 }
 
-void Hix::QML::MenuButton
-::onExited()
+void Hix::QML::MenuButton::onExited()
 {
+	emit exited();
 }
