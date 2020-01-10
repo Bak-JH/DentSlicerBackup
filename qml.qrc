@@ -53,8 +53,6 @@
         <file>shaders/singleColor.geom</file>
         <file>shaders/flat.geom</file>
         <file>Qml/LeftTabSlicingOptionElementPercentage.qml</file>
-        <file>Qml/BastardyMenu.qml</file>
-        <file>Qml/MenuButton.qml</file>
         <file>Qml/LeftPopup.qml</file>
         <file>Qml/CtrInputBox.qml</file>
         <file>Qml/CtrDropdownBox.qml</file>
@@ -86,5 +84,7 @@
         <file>Qml/CtrScaleInputBox.qml</file>
         <file>Qml/ProgressShell.qml</file>
         <file>Qml/PlanesliderRange.qml</file>
+        <file>Qml/FeatureMenu.qml</file>
+        <file>Qml/MenuItem.qml</file>
     </qresource>
 </RCC>

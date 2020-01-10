@@ -3,7 +3,7 @@
 using namespace Hix::QML;
 
 /// Button baseclass ///
-Hix::QML::Button::Button(QQuickItem* parent) : QQuickRectangle(parent)
+Hix::QML::Button::Button(QQuickItem* parent) : QQuickRectangle(parent), _mouseArea(new QQuickMouseArea(this))
 {
 	// mouse area
 	connect(_mouseArea, &QQuickMouseArea::clicked, this, &Button::onClick);
@@ -87,14 +87,16 @@ Hix::QML::MenuButton::~MenuButton()
 {
 }
 
-void Hix::QML::RoundButton::onClick()
+void Hix::QML::MenuButton::onClick()
 {
+	qDebug() << _image->width() << _image->height();
 }
 
 void Hix::QML::MenuButton::onEntered()
 {
 }
 
-void Hix::QML::MenuButton::onExited()
+void Hix::QML::MenuButton
+::onExited()
 {
 }

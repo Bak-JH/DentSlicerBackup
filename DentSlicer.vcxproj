@@ -14,6 +14,7 @@
     <ProjectGuid>{7F7BCB7E-FAF0-39AA-8657-C3F104D9A8E3}</ProjectGuid>
     <RootNamespace>DentSlicer</RootNamespace>
     <Keyword>Qt4VSv1.0</Keyword>
+    <WindowsTargetPlatformVersion>10.0.18362.0</WindowsTargetPlatformVersion>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
     <WindowsTargetPlatformMinVersion>10.0.18362.0</WindowsTargetPlatformMinVersion>
   </PropertyGroup>
@@ -1107,7 +1108,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
-    <None Include="Qml\BastardyMenu.qml" />
+    <None Include="Qml\FeatureMenu.qml" />
     <None Include="Qml\Cam.qml" />
     <None Include="Qml\CamBox.qml" />
     <None Include="Qml\CameraController.qml" />
@@ -1151,7 +1152,7 @@
     <None Include="Qml\LeftTabViewMode.qml" />
     <None Include="Qml\Login.qml" />
     <None Include="Qml\MainView.qml" />
-    <None Include="Qml\MenuButton.qml" />
+    <None Include="Qml\MenuItem.qml" />
     <None Include="Qml\MeshPlate.qml" />
     <None Include="Qml\MeshTransformerMove.qml" />
     <None Include="Qml\MeshTransformerRotate.qml" />

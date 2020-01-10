@@ -74,8 +74,8 @@ namespace Hix
 		class MenuButton : public Button
 		{
 			Q_OBJECT
-			Q_PROPERTY(QQuickText* name MEMBER _name)
-			Q_PROPERTY(QQuickImage* image MEMBER _image)
+			Q_PROPERTY(QQuickText* featureName MEMBER _name)
+			Q_PROPERTY(QQuickImage* icon MEMBER _image)
 		public:
 			MenuButton(QQuickItem* parent = nullptr);
 			virtual ~MenuButton();
