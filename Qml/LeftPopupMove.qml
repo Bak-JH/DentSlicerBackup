@@ -25,7 +25,7 @@ LeftPopup {
 		anchors.top: parent.top
 		anchors.topMargin: spaceOnTop
 	}
-	/*
+	
 	CtrInputBox {
 		id: moveY
 		fromNum: -100
@@ -48,7 +48,7 @@ LeftPopup {
 		anchors.leftMargin: sidePadding
 		anchors.top: moveY.bottom
 		anchors.topMargin: spaceBtwCtr
-	}*/
+	}
 }
 /*
 Item {

@@ -30,8 +30,6 @@ Rectangle {
 		Image {
 			id: flatimg
 			sourceSize.width: parent.width * 0.6
-			//width: parent.width * 0.8
-			//height: parent.height * 0.6
 			anchors.horizontalCenter: parent.horizontalCenter
 			anchors.top: parent.top
 			anchors.topMargin: parent.height * 0.15
@@ -77,8 +75,6 @@ Rectangle {
 		height: 96
 		radius: cutRadius
 		color: btncolor
-		//color: "#f6feff"
-		//border.color: "#b2c4c6"
 		border.color: "#d3dfe0"
 		border.width: 1
 		anchors.right: parent.right
@@ -87,7 +83,6 @@ Rectangle {
 		Image {
 			id: freeimg
 			sourceSize.width: parent.width * 0.6
-			//height: parent.height * 0.6
 			anchors.horizontalCenter: parent.horizontalCenter
 			anchors.top: parent.top
 			anchors.topMargin: parent.height * 0.15
@@ -106,12 +101,6 @@ Rectangle {
 		}
 
 		onClicked: { hitFreeCut() }
-		/*
-		onBtnColorChanged : {
-			color = changedColor
-		}
-		*/
-
 
 		states: [
 			State {

@@ -86,5 +86,6 @@
         <file>Qml/PlanesliderRange.qml</file>
         <file>Qml/FeatureMenu.qml</file>
         <file>Qml/MenuItem.qml</file>
+        <file>Qml/CtrToggleSwitch.qml</file>
     </qresource>
 </RCC>
