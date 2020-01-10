@@ -10,28 +10,26 @@ Hix.MenuButton {
 
 	width: 85
 	height: 90
-	color: "#ffffff"
+	color: "#FFFFFF"
 	//color: hovered ? "#eeeeee" : "#ffffff"
-	/*
-	featureName {
-		anchors.horizontalCenter: menuButton.horizontalCenter
-		anchors.bottom: menuButton.bottom
+	
+	Image {
+		sourceSize.width: width
+		anchors.top: parent.top;
+		anchors.topMargin: (parent.height - height) * 0.5 - parent.height * 0.08
+		anchors.horizontalCenter: parent.horizontalCenter;
+		//source: fimg
+		source: iconBasic
+	}
+	Text {
+		anchors.horizontalCenter: parent.horizontalCenter
+		anchors.bottom: parent.bottom
 		anchors.bottomMargin: 10
+		text: featureName
 		//text: parent.fName
 		color: nameColor
 		font.pointSize: 10
 		font.family: openRegular.name
-	}
-	*/
-	icon {
-		id: icon
-		sourceSize.width: width
-		sourceSize.height: height
-		anchors.top: menuButton.top
-		anchors.topMargin: (90 - height) * 0.5 - 90 * 0.05
-		anchors.horizontalCenter: menuButton.horizontalCenter;
-		//anchors.verticalCenter: menuButton.verticalCenter;
-		//source: fimg
 	}
 
 	

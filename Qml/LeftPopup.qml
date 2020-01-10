@@ -31,8 +31,8 @@ Hix.LeftPopupShell
 			font.pointSize: 11
 			font.family: openRegular.name
 			font.weight: Font.Bold
-			anchors.top: shell.top
-			anchors.left: shell.left
+			anchors.top: parent.top
+			anchors.left: parent.left
 			anchors.topMargin: myPadding-2
 			anchors.leftMargin: myPadding
 		}
@@ -47,7 +47,7 @@ Hix.LeftPopupShell
 			anchors.right: parent.right
 			anchors.topMargin: myPadding
 			anchors.rightMargin: myPadding
-			image 
+			Image 
 			{
 				source: "qrc:/Resource/closebutton.png"
 				anchors.top: closeButton.top
@@ -67,7 +67,7 @@ Hix.LeftPopupShell
 			anchors.bottomMargin: 16
 			anchors.horizontalCenter: parent.horizontalCenter
 
-			labelText 
+			Text 
 			{
 				color: "#FFFFFF"
 				font.pointSize: 10
