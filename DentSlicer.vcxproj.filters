@@ -1092,7 +1092,6 @@
     <None Include="Qml\LeftTabViewMode.qml" />
     <None Include="Qml\Login.qml" />
     <None Include="Qml\MainView.qml" />
-    <None Include="Qml\MenuButton.qml" />
     <None Include="Qml\MeshPlate.qml" />
     <None Include="Qml\MeshTransformerMove.qml" />
     <None Include="Qml\MeshTransformerRotate.qml" />
@@ -1302,6 +1301,8 @@
     <None Include="Qml\FileDialogLoad.qml" />
     <None Include="Qml\PlanesliderRange.qml" />
     <None Include="Qml\BastardyMenu.qml" />
+    <None Include="Qml\FeatureMenu.qml" />
+    <None Include="Qml\MenuItem.qml" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Source Files">

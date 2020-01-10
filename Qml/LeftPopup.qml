@@ -16,6 +16,7 @@ Hix.LeftPopupShell
 
 	Rectangle 
 	{
+		id: shell
 		width: 256
 		implicitWidth: width
 		height: leftPopupHeight
@@ -30,8 +31,8 @@ Hix.LeftPopupShell
 			font.pointSize: 11
 			font.family: openRegular.name
 			font.weight: Font.Bold
-			anchors.top: parent.top
-			anchors.left: parent.left
+			anchors.top: shell.top
+			anchors.left: shell.left
 			anchors.topMargin: myPadding-2
 			anchors.leftMargin: myPadding
 		}

@@ -1,5 +1,5 @@
 import QtQuick 2.4
-import hix.qml 1.0
+import hix.qml 1.0 as Hix
 
 import QtGraphicalEffects 1.12
 
@@ -24,16 +24,16 @@ Item {
 	Rectangle {
 		width: 1365
 		height: 90
-		id: bastardymenu
+		id: menuItem
 		radius: 45
-		color: "#FFFFFF"
 
-		MenuButton {
+		MenuItem {
 			id:open
-			anchors.left: parent.left
-			anchors.leftMargin: parent.radius
-			iconBasic: "qrc:/Resource/menu_open.png"
-			featureName: "Open"
+			anchors.left: menuItem.left
+			anchors.leftMargin: menuItem.radius
+			icon.source: "qrc:/Resource/menu_open.png"
+			//featureName.text: "Open"
+			/*
 			MouseArea {
 				anchors.fill: parent
 				hoverEnabled: true
@@ -46,8 +46,9 @@ Item {
 					if (parent.nameColor == activeNameColor) {}	// exit from already selected button
 					else parent.color = defaultColor	// exit from unselected button
 				}
-			}
+			}*/
 		}
+		/*
 		Rectangle {
 			id:divider1
 			anchors.left: open.right
@@ -59,8 +60,8 @@ Item {
 		MenuButton {
 			id:move
 			anchors.left: divider1.right
-			iconBasic: "qrc:/Resource/menu_move.png"
-			featureName: "Move"
+			icon.source: "qrc:/Resource/menu_move.png"
+			featureName.text: "Move"
 			MouseArea {
 				anchors.fill: parent
 				hoverEnabled: true
@@ -78,8 +79,8 @@ Item {
 		MenuButton {
 			id:rotate
 			anchors.left: move.right
-			iconBasic: "qrc:/Resource/menu_rotate.png"
-			featureName: "Rotate"
+			icon.source: "qrc:/Resource/menu_rotate.png"
+			featureName.text: "Rotate"
 			MouseArea {
 				anchors.fill: parent
 				hoverEnabled: true
@@ -97,8 +98,8 @@ Item {
 		MenuButton {
 			id:scale
 			anchors.left: rotate.right
-			iconBasic: "qrc:/Resource/menu_scale.png"
-			featureName: "Scale"
+			icon.source: "qrc:/Resource/menu_scale.png"
+			featureName.text: "Scale"
 			MouseArea {
 				anchors.fill: parent
 				hoverEnabled: true
@@ -125,8 +126,8 @@ Item {
 		MenuButton {
 			id:cut
 			anchors.left: divider2.right
-			iconBasic: "qrc:/Resource/menu_cut.png"
-			featureName: "Cut"
+			icon.source: "qrc:/Resource/menu_cut.png"
+			featureName.text: "Cut"
 			MouseArea {
 				anchors.fill: parent
 				hoverEnabled: true
@@ -144,8 +145,8 @@ Item {
 		MenuButton {
 			id:shelloffset
 			anchors.left: cut.right
-			iconBasic: "qrc:/Resource/menu_shelloffset.png"
-			featureName: "Shell Offset"
+			icon.source: "qrc:/Resource/menu_shelloffset.png"
+			featureName.text: "Shell Offset"
 			MouseArea {
 				anchors.fill: parent
 				hoverEnabled: true
@@ -163,8 +164,8 @@ Item {
 		MenuButton {
 			id:extend
 			anchors.left: shelloffset.right
-			iconBasic: "qrc:/Resource/menu_extend.png"
-			featureName: "Extend"
+			icon.source: "qrc:/Resource/menu_extend.png"
+			featureName.text: "Extend"
 			MouseArea {
 				anchors.fill: parent
 				hoverEnabled: true
@@ -182,8 +183,8 @@ Item {
 		MenuButton {
 			id:label
 			anchors.left:extend.right
-			iconBasic: "qrc:/Resource/menu_label.png"
-			featureName: "Label"
+			icon.source: "qrc:/Resource/menu_label.png"
+			featureName.text: "Label"
 			MouseArea {
 				anchors.fill: parent
 				hoverEnabled: true
@@ -201,8 +202,8 @@ Item {
 		MenuButton {
 			id:layflat
 			anchors.left: label.right
-			iconBasic: "qrc:/Resource/menu_layflat.png"
-			featureName: "Lay Flat"
+			icon.source: "qrc:/Resource/menu_layflat.png"
+			featureName.text: "Lay Flat"
 			MouseArea {
 				anchors.fill: parent
 				hoverEnabled: true
@@ -220,8 +221,8 @@ Item {
 		MenuButton {
 			id:orient
 			anchors.left: layflat.right
-			iconBasic: "qrc:/Resource/menu_orient.png"
-			featureName: "Orient"
+			icon.source: "qrc:/Resource/menu_orient.png"
+			featureName.text: "Orient"
 			MouseArea {
 				anchors.fill: parent
 				hoverEnabled: true
@@ -239,8 +240,8 @@ Item {
 		MenuButton {
 			id:arrange
 			anchors.left: orient.right
-			iconBasic: "qrc:/Resource/menu_arrange.png"
-			featureName: "Arrange"
+			icon.source: "qrc:/Resource/menu_arrange.png"
+			featureName.text: "Arrange"
 			MouseArea {
 				anchors.fill: parent
 				hoverEnabled: true
@@ -258,8 +259,8 @@ Item {
 		MenuButton {
 			id:support
 			anchors.left: arrange.right
-			iconBasic: "qrc:/Resource/menu_support.png"
-			featureName: "Support"
+			icon.source: "qrc:/Resource/menu_support.png"
+			featureName.text: "Support"
 			MouseArea {
 				anchors.fill: parent
 				hoverEnabled: true
@@ -278,7 +279,7 @@ Item {
 		MenuButton {
 			id:autorepair
 			anchors.left: support.right
-			iconBasic: "qrc:/Resource/menu_autorepair.png"
+			icon.source: "qrc:/Resource/menu_autorepair.png"
 			MouseArea {
 				anchors.fill: parent
 				hoverEnabled: true
@@ -293,7 +294,7 @@ Item {
 				}
 			}
 		}
-		*/
+		
 		Rectangle {
 			id:divider3
 			anchors.left: support.right
@@ -305,8 +306,8 @@ Item {
 		MenuButton {
 			id:save
 			anchors.left: divider3.right
-			iconBasic: "qrc:/Resource/menu_save.png"
-			featureName: "Save"
+			icon.source: "qrc:/Resource/menu_save.png"
+			featureName.text: "Save"
 			MouseArea {
 				anchors.fill: parent
 				hoverEnabled: true
@@ -324,8 +325,8 @@ Item {
 		MenuButton {
 			id: extract
 			anchors.left: save.right
-			iconBasic: "qrc:/Resource/menu_extract.png"
-			featureName: "Export"
+			icon.source: "qrc:/Resource/menu_extract.png"
+			featureName.text: "Export"
 			MouseArea {
 				anchors.fill: parent
 				hoverEnabled: true
@@ -340,7 +341,7 @@ Item {
 				}
 			}
 		}
-		
+		*/
 	}
 
 	DropShadow {
