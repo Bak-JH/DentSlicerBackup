@@ -1,6 +1,6 @@
 #include "rotate.h"
 #include "qmlmanager.h"
-#include "ui/RotateWidget.h"
+#include "widget/RotateWidget.h"
 
 Hix::Features::RotateMode::RotateMode(const std::unordered_set<GLModel*>& targetModels, Hix::Input::RayCastController* controller) 
 		: WidgetMode(targetModels, controller)
@@ -83,4 +83,30 @@ void Hix::Features::Rotate::redoImpl()
 	_model->aabb() = _nextAabb;
 	qmlManager->cameraViewChanged();
 	_model->updateMesh();
+}
+
+const GLModel* Hix::Features::Rotate::model() const
+{
+	return _model;
+}
+
+Hix::Features::RotateModeNoUndo::RotateModeNoUndo(const std::unordered_set<GLModel*>& targetModels, Input::RayCastController* controller):RotateMode(targetModels, controller)
+{
+}
+
+Hix::Features::RotateModeNoUndo::~RotateModeNoUndo()
+{
+}
+
+void Hix::Features::RotateModeNoUndo::featureStarted()
+{
+}
+
+void Hix::Features::RotateModeNoUndo::featureEnded()
+{
+	for (auto& each : _targetModels)
+	{
+		each->updateRecursiveAabb();
+	}
+	_widget.updatePosition();
 }

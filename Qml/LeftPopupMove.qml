@@ -9,8 +9,8 @@ LeftPopup {
 	property var spaceOnTop: 68
 	property var spaceBtwCtr: 56
 	property var themeColor: "#00b9c8"
-	
-	featureName: qsTr("Move")
+
+	title: qsTr("Move")
 	leftPopupHeight: 268
 	width: 256
 
@@ -18,19 +18,19 @@ LeftPopup {
 		id: moveX
 		fromNum: -100
 		toNum: 100
-		inputText: "X Offset(mm)"
+		label.text: "X Offset(mm)"
 		width: parent.width - sidePadding * 2
 		anchors.left: parent.left
 		anchors.leftMargin: sidePadding
 		anchors.top: parent.top
 		anchors.topMargin: spaceOnTop
 	}
-
+	/*
 	CtrInputBox {
 		id: moveY
 		fromNum: -100
 		toNum: 100
-		inputText: "Y Offset(mm)"
+		label.text: "Y Offset(mm)"
 		width: parent.width - sidePadding * 2
 		anchors.left: parent.left
 		anchors.leftMargin: sidePadding
@@ -42,13 +42,13 @@ LeftPopup {
 		id: moveZ
 		fromNum: -100
 		toNum: 100
-		inputText: "Z Offset(mm)"
+		label.text: "Z Offset(mm)"
 		width: parent.width - sidePadding * 2
 		anchors.left: parent.left
 		anchors.leftMargin: sidePadding
 		anchors.top: moveY.bottom
 		anchors.topMargin: spaceBtwCtr
-	}
+	}*/
 }
 /*
 Item {

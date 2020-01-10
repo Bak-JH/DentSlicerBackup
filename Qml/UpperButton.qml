@@ -76,9 +76,9 @@ Rectangle{
         case "Feedback":
             buttonClicked();
             break;
-
-
-
+        case "Model Builder":
+            buttonClicked();
+            break;
         default:
             //console.log(functionname);
             break;
@@ -158,7 +158,21 @@ Rectangle{
     ]
 
     state: "inactive"
+	function clickedFn()
+	{
+	    if( qm.getViewMode() !== 0  && iconText !== "Support") {
+            return;
+        }
 
+        if (state == "inactive"){
+            all_off();
+            state = "active";
+        }
+        else {
+            state = "inactive";
+        }
+        do_buttonclick(iconText)
+	}
     MouseArea {
         id: mouse
         anchors.fill: parent
@@ -173,18 +187,7 @@ Rectangle{
         }
 
         onClicked:{
-            if( qm.getViewMode() !== 0  && iconText !== "Support") {
-                return;
-            }
-
-            if (parent.state == "inactive"){
-                all_off();
-                parent.state = "active";
-            }
-            else {
-                parent.state = "inactive";
-            }
-            do_buttonclick(iconText)
+			clickedFn();
         }
 
     }

@@ -1,7 +1,7 @@
 #include "AppSetting.h"
 #include <fstream>
 #include "../common/rapidjson/stringbuffer.h"
-#include "../common/rapidjson/writer.h"
+#include "../common/rapidjson/PrettyWriter.h"
 #include "../common/rapidjson/ostreamwrapper.h"
 
 
@@ -11,8 +11,8 @@ typedef rapidjson::GenericStringBuffer<rapidjson::UTF8<>, rapidjson::MemoryPoolA
 
 Hix::Settings::AppSetting::AppSetting()
 {
-	auto appSettingsPath = std::filesystem::current_path();
-	appSettingsPath.append("settings.json");
+	auto appSettingsPath = deployInfo.settingsDir;
+	appSettingsPath.append("/settings.json");
 	parseJSON(appSettingsPath);
 }
 
@@ -23,6 +23,7 @@ Hix::Settings::AppSetting::~AppSetting()
 void Hix::Settings::AppSetting::refresh()
 {
 	JSONParsedSetting::refresh();
+	deployInfo.refresh();
 	auto printerPath = std::filesystem::current_path();
 	printerPath.append(printerPresetPath);
 	printerSetting.parseJSON(printerPath);
@@ -41,7 +42,7 @@ void Hix::Settings::AppSetting::setPrinterPath(const std::string& path)
 
 	std::ofstream of(_jsonPath, std::ios_base::trunc);
 	rapidjson::OStreamWrapper osw{ of };
-	rapidjson::Writer<rapidjson::OStreamWrapper> writer{ osw };
+	rapidjson::PrettyWriter<rapidjson::OStreamWrapper> writer{ osw };
 	doc.Accept(writer);
 	refresh();
 }

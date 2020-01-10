@@ -1,19 +1,22 @@
 import QtQuick 2.6
-import hix.qml 1.0
+import hix.qml 1.0 as Hix
 
 import QtGraphicalEffects 1.12
 import QtQuick.Controls 2.1
 
 
-Item {
+Hix.LeftPopupShell 
+{
+	id: leftpopupshell
 	property var myPadding: 16
 	property var themeColor: "#00b9c8"
 
 	property var featureName
 	property var leftPopupHeight
 
-	LeftPopupShell {
-		id: leftpopupshell
+	Rectangle 
+	{
+		id: shell
 		width: 256
 		implicitWidth: width
 		height: leftPopupHeight
@@ -23,18 +26,20 @@ Item {
 
 		Text {
 			id: popuptitle
-			text: featureName
-			//text: parent.title
+			//text: featureName
+			text: leftpopupshell.title
 			font.pointSize: 11
 			font.family: openRegular.name
 			font.weight: Font.Bold
-			anchors.top: parent.top
-			anchors.left: parent.left
+			anchors.top: shell.top
+			anchors.left: shell.left
 			anchors.topMargin: myPadding-2
 			anchors.leftMargin: myPadding
 		}
 
-		CloseButton {
+		Hix.CloseButton 
+		{
+			id: closeButton
 			width: 16
 			height: 16
 			//color: "transparent"
@@ -45,74 +50,44 @@ Item {
 			Image {
 				id: closeimg
 				source: "qrc:/Resource/closebutton.png"
-				anchors.top: parent.top
-				anchors.right: parent.right
+				anchors.top: closeButton.top
+				anchors.right: closeButton.right
 			}
 			onEntered: { closeimg.source = "qrc:/Resource/closebutton_hover.png" }
 			onExited: { closeimg.source = "qrc:/Resource/closebutton.png" }
 		}
-		/*
-		Text {
-			id: popupbody
-			text: parent.body
-			font.pointSize: 10
-			font.family: openRegular.name
-			anchors.top: parent.top
-			anchors.left: parent.left
-			anchors.topMargin: 40
-			anchors.leftMargin: myPadding
-		}
-		
-		CtrInputBox {
-			width: parent.width - myPadding * 2
-			anchors.left: parent.left
-			anchors.leftMargin: myPadding
-			anchors.top: popuptitle.bottom
-			anchors.topMargin: 48
-		}
-		
-		CtrDropdownBox {
-			width: parent.width - myPadding * 2
-			anchors.left: parent.left
-			anchors.leftMargin: myPadding
-			anchors.top: parent.top
-			anchors.topMargin: 120
-		}
 
-		CtrCutSwitch {
-			width: parent.width - myPadding * 2
-			anchors.left: parent.left
-			anchors.leftMargin: myPadding
-			anchors.top: parent.top
-			anchors.topMargin: 144
-		}
+		Hix.RoundButton
+		{
+			id: roundButton
+			width: 224
+			height: 32
+			radius: 16
+			color: "#00b9c8"
 
-		CtrLabelTextBox {
-			width: parent.width - myPadding * 2
-			anchors.left: parent.left
-			anchors.leftMargin: myPadding
-			anchors.top: parent.top
-			anchors.topMargin: 260
-		}
-
-		CtrScaleXYZ {
-			width: parent.width - myPadding * 2
-			anchors.left: parent.left
-			anchors.leftMargin: myPadding
-			anchors.top: parent.top
-			anchors.topMargin: 300
-		}
-		*/
-
-
-		RoundedButton {
 			anchors.bottom: parent.bottom
 			anchors.bottomMargin: 16
 			anchors.horizontalCenter: parent.horizontalCenter
+
+			labelText 
+			{
+				color: "#FFFFFF"
+				font.pointSize: 10
+				text: "Apply"
+				font.family: openSemiBold.name
+				
+				anchors.horizontalCenter: roundButton.horizontalCenter
+				anchors.verticalCenter: roundButton.verticalCenter
+			}
+
+			onClicked: { console.log("clicked"); }
+			onEntered: { color = "#21959e" }
+			onExited: { color = "#00b9c8" }
 		}
 	}
 	
-	DropShadow {
+	DropShadow 
+	{
 		anchors.fill: leftpopupshell
 		radius: 10.0
 		samples: 21
