@@ -35,7 +35,7 @@ Item {
 		}
 		Image {
 			id: viewtriangle
-			source: "qrc:/Resource/triangle_right.png"
+			source: "qrc:/Resource/arrow_right.png"
 			anchors.verticalCenter: parent.verticalCenter
 			anchors.right: parent.right
 			anchors.rightMargin: myPadding

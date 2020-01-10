@@ -50,11 +50,20 @@ Item {
 					anchors.verticalCenter: parent.verticalCenter
 					Hix.RoundButton{
 						width: 224; height: 28
-						color: "lightblue"
+						//color: "#f5f5f5"
 						Text { 
+							id: modelname
 							text: name
 							font.family: openRegular.name
 							anchors.verticalCenter: parent.verticalCenter
+							anchors.left: parent.left
+							anchors.leftMargin: 8
+						}
+						onClicked: {
+							color="#f5f5f5"
+							modelname.color="#1db2c4"
+							if(showhideimg.source == "qrc:/Resource/part_show_1.png") showhideimg.source = "qrc:/Resource/part_show_select_1.png"
+							else if(showhideimg.source == "qrc:/Resource/part_hide_1.png") showhideimg.source = "qrc:/Resource/part_hide_select_1.png"
 						}
 					}
 				}
@@ -65,20 +74,18 @@ Item {
 					anchors.right: parent.right
 					anchors.rightMargin: 6
 					anchors.verticalCenter: parent.verticalCenter
+					color: "transparent"
 					Image {
 						id: showhideimg
 						source: "qrc:/Resource/part_show_1.png"
 						anchors.verticalCenter: parent.verticalCenter
-						//anchors.right: parent.right
-						//anchors.rightMargin: width /2
-						//anchors.verticalCenter: parent.verticalCenter
-						//width: sourceSize.width / 1.5
-						//height: sourceSize.height / 1.5
 					}
 					onClicked: {
 						console.log("showhide clicked")
 						if(showhideimg.source == "qrc:/Resource/part_show_1.png") showhideimg.source = "qrc:/Resource/part_hide_1.png"
-						else showhideimg.source = "qrc:/Resource/part_show_1.png"
+						else if(showhideimg.source == "qrc:/Resource/part_hide_1.png") showhideimg.source = "qrc:/Resource/part_show_1.png"
+						else if(showhideimg.source == "qrc:/Resource/part_show_select_1.png") showhideimg.source = "qrc:/Resource/part_hide_select_1.png"
+						else if(showhideimg.source == "qrc:/Resource/part_hide_select_1.png") showhideimg.source = "qrc:/Resource/part_show_select_1.png"
 					}
 				}
 			}
@@ -133,7 +140,7 @@ Item {
 			Image {
 				anchors.right: parent.right
 				anchors.bottom: parent.bottom
-				source: "qrc:/Resource/part_delete_1.png"
+				source: "qrc:/Resource/part_remove_1.png"
 				//sourceSize.width: width
 			}
 			onClicked: { console.log("delete clicked") }

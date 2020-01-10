@@ -52,13 +52,13 @@ Item {
 				color: "#e4e5e5"
 
 				Rectangle {
+					visible: true	// false in Flat Cut
 					anchors.bottom: parent.bottom
 					width: parent.width
 					height: parent.height - control.visualPosition * parent.height
 					color: "#19d6e0"
 					radius: width / 2
 				}
-			
 			}
 
 			handle: Rectangle {
@@ -71,13 +71,11 @@ Item {
 				implicitHeight: 22
 				radius: 2
 				color: control.pressed ? "#727d7d" : "#929d9d"
-				//border.color: "#bdbebf"
 			}
 			Rectangle {	//current position
 				width: 58
 				height: 34
 				anchors.right: handle.left
-				//color: "transparent"
 				//x: 0 - control.availableWidth * 1.2
 				y: control.bottomPadding + control.visualPosition * (control.availableHeight - height)
 				visible: control.pressed ? true : false
@@ -126,30 +124,9 @@ Item {
 						ctx.arc(startX-w, startY, windowRadius, Math.PI, Math.PI * 1.5, false);
 						ctx.lineTo(startX, startY-windowRadius);
 						ctx.fill();
-
 					}
 				}
-	
 			}
-			/*
-			Rectangle {
-				id: currentPos
-				width: 48
-				height: 34
-				color: "#00b9c8"
-				x: 0 - control.availableWidth * 1.2
-				y: control.bottomPadding + control.visualPosition * (control.availableHeight - height)
-				visible: control.pressed ? true : false
-				Text {
-					//text: control.parent.slideRect.visualPosition
-					anchors.verticalCenter: parent.verticalCenter
-					anchors.horizontalCenter: parent.horizontalCenter
-					text: Math.floor(control.value)
-					font.family: openRegular.name
-					color: "#ffffff"
-				}
-			}
-			*/
 		}
 	}
 	DropShadow {
