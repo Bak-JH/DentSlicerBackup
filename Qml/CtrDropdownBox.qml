@@ -10,7 +10,7 @@ DropdownBox {
 	color: "transparent"
 
 	Text {
-		text: parent.dropName
+		text: parent.labelText
 		anchors.verticalCenter: parent.verticalCenter
 		font.family: openRegular.name
 		color: "#666666"
@@ -24,6 +24,8 @@ DropdownBox {
 		height: 26
 		font.family: openRegular.name
 
+		onActivated: { console.log(parent.dropList) }
+
 		delegate: ItemDelegate {	// popup
 			width: control.width
 			contentItem: Text {
@@ -35,8 +37,6 @@ DropdownBox {
 			}
 			highlighted: control.highlightedIndex === index
 			background: Rectangle {
-				//anchors.fill: parent.highlighted
-				//height: control.height
 				color: hovered ? "#43becd" : "#ffffff"
 			}
 		}
@@ -59,26 +59,12 @@ DropdownBox {
 				anchors.right: parent.right
 				anchors.verticalCenter: parent.verticalCenter
 			}
-			/*
-			onPaint: {
-				context.reset();
-				context.moveTo(0, 0);
-				context.lineTo(width, 0);
-				context.lineTo(width / 2, height);
-				context.closePath();
-				context.fillStyle = control.pressed ? "#17a81a" : "#21be2b";
-				context.fill();
-			}
-			*/
 		}
 
 		contentItem: Text {	// selected value on top, not in popup
-			//leftPadding: 0
 			leftPadding: 12
-			//rightPadding: control.indicator.width + control.spacing
-			text: control.displayText
+ 			text: control.displayText
 			font: control.font
-			//color: control.pressed ? "#17a81a" : "#000000"
 			color: "#000000"
 			verticalAlignment: Text.AlignVCenter
 			elide: Text.ElideRight
@@ -88,20 +74,17 @@ DropdownBox {
 			id: bgrect
 			color: control.hovered ? "#ffffff" : "#f6feff"
 			border.color: control.hovered ? "#b3bfc0": "#d3dfe0"
-			//border.width: control.visualFocus ? 2 : 1
 			radius: 2
 		}
 		
 		DropShadow {
 			visible: false
-			//visible: control.hovered ? true : false
 			anchors.fill: bgrect
 			radius: 4.0
 			samples: 9
 			color: "#30000000"
 			source: bgrect
 			Image {
-				//source: control.popup.visible ? "qrc:/Resource/drop_arrow_up.png" : "qrc:/Resource/drop_arrow_down.png"
 				source: "qrc:/Resource/drop_arrow_up.png"
 				anchors.right: parent.right
 				anchors.rightMargin: control.rightPadding
@@ -117,7 +100,6 @@ DropdownBox {
 
 			contentItem: ListView {
 				clip: true
-				//implicitHeight: contentHeight
 				implicitHeight: contentHeight * 0.7
 				model: control.popup.visible ? control.delegateModel : null
 				currentIndex: control.highlightedIndex
@@ -133,7 +115,6 @@ DropdownBox {
 						implicitWidth: 6
 						color: "#aaaaaaaa"
 						radius: 1
-						//visible: MouseArea.pressed ? true : false
 					}
 				}
 			}
@@ -142,25 +123,7 @@ DropdownBox {
 				id: drpopuprect
 				border.color: "#b3bfc0"
 				radius: 2
-				/*
-				layer.enabled: true
-				layer.effect: DropShadow {
-					//transparentBorder: false
-					radius: 4.0
-					samples: 9
-					color: "#30000000"
-				}
-				*/
 			}
-			/*
-			DropShadow {
-				anchors.fill: drpopuprect
-				radius: 4.0
-				samples: 9
-				color: "#30000000"
-				source: drpopuprect
-			}
-			*/
 		}
 	}
 }

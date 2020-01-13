@@ -108,3 +108,20 @@ Hix::QML::ToggleSwitch::ToggleSwitch(QQuickItem* parent) :Button(parent)
 Hix::QML::ToggleSwitch::~ToggleSwitch()
 {
 }
+
+void Hix::QML::ToggleSwitch::onClick()
+{
+}
+
+/// Image Toggle Switch ///
+Hix::QML::ImageToggleSwitch::ImageToggleSwitch(QQuickItem* parent) :Button(parent)
+{
+}
+
+Hix::QML::ImageToggleSwitch::~ImageToggleSwitch()
+{
+}
+
+void Hix::QML::ImageToggleSwitch::onClick()
+{
+}

@@ -5,13 +5,16 @@ import QtQuick.Controls.Styles 1.4
 import QtGraphicalEffects 1.12
 
 Hix.InputBox {
-	id: inputBox
-	property string inputText
+	property alias control: control
 	property var fromNum
 	property var toNum
 	
-	label 
+	onValueChanged:{ control.value = value }
+	onLabelTextChanged:{ console.log(labelText) }
+
+	Text 
 	{
+		text: parent.labelText
 		font.family: openRegular.name
 		anchors.left: parent.left
 		color: "#666666"
@@ -21,7 +24,7 @@ Hix.InputBox {
 	SpinBox {
 		id: control
 		font.family: openRegular.name
-		value: inputBox.value
+		value: parent.value
 		from: fromNum
 		to: toNum
 		width: parent.width * 0.46//0.5
@@ -30,12 +33,9 @@ Hix.InputBox {
 		anchors.rightMargin: parent.width * 0.1
 		anchors.verticalCenter: parent.verticalCenter
 		editable: true
-		//from: parent.inputRect.from
-		//to: parent.inputRect.to
 		
 		onValueChanged: {
-			inputBox.value = value;
-			inputBox.test();
+			parent.value = value;
 		}
 
 		contentItem: TextInput {
@@ -54,19 +54,12 @@ Hix.InputBox {
 		
 		up.indicator: Rectangle {
 			id: uparrow
-			//x: control.mirrored ? 0 : parent.width - width
 			anchors.left: parent.right
 			anchors.leftMargin: parent.width * 0.09 // this value + implicitWidth = parent.width * 0.2
 			anchors.top: parent.top
-			//y: 0
 			
 			implicitWidth: parent.width * 0.11 // this value + anchors.leftMargin = parent.width * 0.2
-			//implicitHeight: parent.height / 2
-			implicitHeight: implicitWidth * 0.9
-
-			//color: control.up.pressed ? "#e4e4e4" : "#f6f6f6"
-			//border.color: enabled ? "#21be2b" : "#bdbebf"
-			
+			implicitHeight: implicitWidth * 0.9			
 		
 			Image {
 				id: upindicator
@@ -86,7 +79,7 @@ Hix.InputBox {
 		}
 
 		down.indicator: Rectangle {
-			//x: control.mirrored ? parent.width - width : 0
+			id: downarrow
 			anchors.left: parent.right
 			anchors.leftMargin: parent.width * 0.09 // this value + implicitWidth = parent.width * 0.2
 			anchors.bottom: parent.bottom
@@ -113,12 +106,10 @@ Hix.InputBox {
 		background: Rectangle {
 			id: rect
 			color: control.hovered ? "#ffffff" : "#f6feff"
-			//border.color: "#d3dfe0"
 			border.color: control.hovered ? "#b3bfc0": "#d3dfe0"
 			radius: 2
 		}
 		DropShadow {
-			//visible: control.hovered ? true : false
 			visible: false
 			anchors.fill: rect
 			radius: 4.0

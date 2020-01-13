@@ -64,14 +64,18 @@ QmlManager::QmlManager(QObject *parent) : QObject(parent), _optBackend(this, scf
 	qmlRegisterType<Hix::QML::CloseButton>("hix.qml", 1, 0, "CloseButton");
 	qmlRegisterType<Hix::QML::RoundButton>("hix.qml", 1, 0, "RoundButton");
 	qmlRegisterType<Hix::QML::MenuButton>("hix.qml", 1, 0, "MenuButton");
+	qmlRegisterType<Hix::QML::ToggleSwitch>("hix.qml", 1, 0, "ToggleSwitch");
+	qmlRegisterType<Hix::QML::ImageToggleSwitch>("hix.qml", 1, 0, "ImageToggleSwitch");
+
 	qmlRegisterType<Hix::QML::LeftPopupShell>("hix.qml", 1, 0, "LeftPopupShell");
-	qmlRegisterType<Hix::QML::InputBox>("hix.qml", 1, 0, "InputBox");
-	qmlRegisterType<Hix::QML::DropdownBox>("hix.qml", 1, 0, "DropdownBox");
 	qmlRegisterType<Hix::QML::ToastShell>("hix.qml", 1, 0, "ToastShell");
 	qmlRegisterType<Hix::QML::SlideBarShell>("hix.qml", 1, 0, "SlideBarShell");
-	qmlRegisterType<Hix::QML::LabelTextBox>("hix.qml", 1, 0, "LabelTextBox");
 	qmlRegisterType<Hix::QML::ModalShell>("hix.qml", 1, 0, "ModalShell");
 	qmlRegisterType<Hix::QML::ViewModeShell>("hix.qml", 1, 0, "ViewModeShell");
+
+	qmlRegisterType<Hix::QML::InputBox>("hix.qml", 1, 0, "InputBox");
+	qmlRegisterType<Hix::QML::DropdownBox>("hix.qml", 1, 0, "DropdownBox");
+	qmlRegisterType<Hix::QML::LabelTextBox>("hix.qml", 1, 0, "LabelTextBox");
 	qmlRegisterType<Hix::QML::PartListContent>("hix.qml", 1, 0, "PartListContent");
 	qmlRegisterType<Hix::QML::PartDeleteButton>("hix.qml", 1, 0, "PartDeleteButton");
 	qmlRegisterType<Hix::QML::PrintInfoText>("hix.qml", 1, 0, "PrintInfoText");

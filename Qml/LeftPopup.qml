@@ -86,10 +86,10 @@ Hix.LeftPopupShell
 	
 	DropShadow 
 	{
-		anchors.fill: leftpopupshell
+		anchors.fill: shell
 		radius: 10.0
 		samples: 21
 		color: "#55000000"
-		source: leftpopupshell
+		source: shell
 	}
 }

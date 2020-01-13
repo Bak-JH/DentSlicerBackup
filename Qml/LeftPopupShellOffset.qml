@@ -24,9 +24,9 @@ LeftPopup {
 		anchors.leftMargin: sidePadding
 	}
 
-	CtrInputBox {
-		id: extendvalud
-		inputText: "Tickness(mm)"
+	CtrSpinBox {
+		id: extendvalue
+		labelText: "Tickness(mm)"
 		width: parent.width - sidePadding * 2
 		anchors.left: parent.left
 		anchors.leftMargin: sidePadding

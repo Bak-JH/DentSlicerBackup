@@ -1064,8 +1064,6 @@
     <None Include="Qml\CoordinateMesh.qml" />
     <None Include="Qml\CtrCutSwitch.qml" />
     <None Include="Qml\CtrDropdownBox.qml" />
-    <None Include="Qml\CtrInputBox.qml" />
-    <None Include="Qml\CtrLabelTextBox.qml" />
     <None Include="Qml\FeedbackPopUp.qml" />
     <None Include="Qml\InputBox.qml" />
     <None Include="Qml\LayerViewPopup.qml" />
@@ -1269,12 +1267,12 @@
     <None Include="Qml\MenuButton.qml" />
     <None Include="Qml\LeftPopup.qml" />
     <None Include="Qml\InputBox.qml" />
-    <None Include="Qml\CtrInputBox.qml" />
+    <None Include="Qml\CtrSpinBox.qml" />
     <None Include="Qml\CtrDropdownBox.qml" />
     <None Include="Qml\CtrCutSwitch.qml" />
     <None Include="Qml\Toast.qml" />
     <None Include="Qml\SlideBar.qml" />
-    <None Include="Qml\CtrLabelTextBox.qml" />
+    <None Include="Qml\CtrTextBox.qml" />
     <None Include="Qml\CanvasTest.qml" />
     <None Include="Qml\ModalWindow.qml" />
     <None Include="Qml\Cam.qml" />
@@ -1304,6 +1302,8 @@
     <None Include="Qml\FeatureMenu.qml" />
     <None Include="Qml\MenuItem.qml" />
     <None Include="Qml\CtrToggleSwitch.qml" />
+    <None Include="Qml\CtrTextBox.qml" />
+    <None Include="Qml\CtrSpinBox.qml" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Source Files">

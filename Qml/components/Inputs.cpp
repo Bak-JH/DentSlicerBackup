@@ -4,15 +4,17 @@ using namespace Hix::QML;
 
 Hix::QML::InputBox::InputBox(QQuickItem* parent) : QQuickItem(parent)
 {
-	_label = new QQuickText(this);
 }
 
-Hix::QML::DropdownBox::DropdownBox(QQuickItem* parent) : _dropRect(new QQuickComboBox(this))
+Hix::QML::InputBox::~InputBox()
 {
-	setParent(parent);
 }
 
-void Hix::QML::DropdownBox::dropNameChanged()
+
+Hix::QML::DropdownBox::DropdownBox(QQuickItem* parent)
 {
-	qDebug() << _dropName;
+}
+
+Hix::QML::DropdownBox::~DropdownBox()
+{
 }

@@ -1,7 +1,8 @@
 import QtQuick 2.0
 import QtQuick.Controls 2.1
+import hix.qml 1.0 as Hix
 
-Rectangle {
+Hix.ToggleSwitch {
 	color: "transparent"
 	height: 16
 	Text {
@@ -16,6 +17,7 @@ Rectangle {
 		id: control
 		anchors.left: emboss.right
 		anchors.verticalCenter: parent.verticalCenter
+		checked: parent.isChecked
 
 		indicator: Rectangle {
 			implicitWidth: 28
@@ -36,6 +38,10 @@ Rectangle {
 				border.color: "#999999"
 				anchors.verticalCenter: parent.verticalCenter
 			}
+		}
+
+		onToggled: {
+			isChecked = checked;
 		}
 	}
 	Text {

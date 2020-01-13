@@ -264,7 +264,7 @@ Item{
 			anchors.left: leftpopuplayflat.right
 			anchors.leftMargin: 15
 			anchors.topMargin: 120
-		}/*
+		}
 		LeftPopupScale
 		{
 			id: leftpopupscale
@@ -282,6 +282,13 @@ Item{
 			anchors.topMargin: 420
 		}
 
+		LeftPopupCut {
+			id: leftpopupcut
+			anchors.top: uppertab.bottom
+			anchors.left: leftpopupsupport.right
+			anchors.leftMargin: 15
+			anchors.topMargin: 420
+		}
 		/*
 		LeftPopupLabel
 		{
