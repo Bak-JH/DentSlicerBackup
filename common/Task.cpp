@@ -4,28 +4,31 @@ Hix::Tasking::Task::~Task()
 {
 }
 
-Hix::Tasking::UITask::UITask(std::function<void()> functor)
+Hix::Tasking::UITask::UITask(std::function<void()> functor): _f(functor)
 {
 
-	_flow.emplace([functor]() {
-		QmlManager::postToObject(functor, qmlManager);
-		});	
 }
 
-tf::Taskflow& Hix::Tasking::UITask::getFlow()
+void Hix::Tasking::UITask::run()
 {
-	return _flow;
+	QmlManager::postToObject(_f, qmlManager);
+
 }
+
 
 Hix::Tasking::UITask::~UITask()
 {
 }
 
-tf::Taskflow& Hix::Tasking::GenericTask::getFlow()
+
+Hix::Tasking::EmptyTask::EmptyTask()
 {
-	return _flow;
 }
 
-Hix::Tasking::GenericTask::~GenericTask()
+void Hix::Tasking::EmptyTask::run()
+{
+}
+
+Hix::Tasking::EmptyTask::~EmptyTask()
 {
 }

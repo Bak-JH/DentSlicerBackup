@@ -1,6 +1,5 @@
 #pragma once
-#include "taskflow/taskflow.hpp"
-
+#include <functional>
 
 namespace Hix
 {
@@ -9,28 +8,27 @@ namespace Hix
 		class Task
 		{
 		public:
-			virtual tf::Taskflow& getFlow() = 0;
+			virtual void run();
 			virtual ~Task();
 		};
 
-		class GenericTask: public Task
+		class EmptyTask : public Task
 		{
 		public:
-			tf::Taskflow& getFlow()override;
-			virtual ~GenericTask();
-
-		protected:
-			tf::Taskflow _flow;
+			EmptyTask();
+			void run()override;
+			virtual ~EmptyTask();
 		};
+
+
 		class UITask: public Task
 		{
 		public:
 			UITask(std::function<void()> functor);
-			tf::Taskflow& getFlow()override;
+			void run()override;
 			virtual ~UITask();
-
 		private:
-			tf::Taskflow _flow;
+			std::function<void()> _f;
 		};
 	}
 }
