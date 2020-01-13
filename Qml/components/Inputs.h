@@ -13,37 +13,38 @@ namespace Hix
 		class InputBox : public QQuickItem
 		{
 			Q_OBJECT
-			Q_PROPERTY(QQuickText* label MEMBER _label)
-			Q_PROPERTY(int value MEMBER _value)
+			Q_PROPERTY(QString labelText MEMBER _labelText NOTIFY labelTextChanged)
+			Q_PROPERTY(int value MEMBER _value NOTIFY valueChanged)
 
 		public:
 			InputBox(QQuickItem* parent = nullptr);
-			Q_INVOKABLE void test() { qDebug() << _value; }
+			virtual ~InputBox();
+
 		signals:
-			void propertyChanged();
+			void valueChanged();
+			void labelTextChanged();
 
 		private:
-			QQuickText* _label;
+			QString _labelText = "Inputbox";
 			int _value = 0;
 		};
 
 		class DropdownBox : public QQuickRectangle
 		{
 			Q_OBJECT
-			Q_PROPERTY(QString dropName MEMBER _dropName NOTIFY dropNameChanged)
+			Q_PROPERTY(QString labelText MEMBER _labelText NOTIFY labelTextChanged)
 			Q_PROPERTY(QStringList dropList MEMBER _dropList)
 
 		public:
 			DropdownBox(QQuickItem* parent = nullptr);
-			QQuickComboBox* _dropRect;
+			virtual ~DropdownBox();
 
-		public slots:
-			void dropNameChanged();
+		signals:
+			void labelTextChanged();
 
 		protected:
-
-			QString _dropName = "Dropdown";
-			QStringList _dropList = { "Banana", "Apple", "Coconut", "Almond" };
+			QString _labelText = "Dropdown";
+			QStringList _dropList;
 		};
 	}
 }

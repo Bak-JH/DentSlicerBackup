@@ -1118,8 +1118,8 @@
     <None Include="Qml\CoordinateMesh.qml" />
     <None Include="Qml\CtrCutSwitch.qml" />
     <None Include="Qml\CtrDropdownBox.qml" />
-    <None Include="Qml\CtrInputBox.qml" />
-    <None Include="Qml\CtrLabelTextBox.qml" />
+    <None Include="Qml\CtrSpinBox.qml" />
+    <None Include="Qml\CtrTextBox.qml" />
     <None Include="Qml\CtrScaleInputBox.qml" />
     <None Include="Qml\FeedbackPopUp.qml" />
     <None Include="Qml\FileDialogLoad.qml" />

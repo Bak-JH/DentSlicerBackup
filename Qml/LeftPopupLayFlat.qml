@@ -9,7 +9,7 @@ LeftPopup {
 	property var spaceBtwCtr: 48
 	property var themeColor: "#00b9c8"
 	
-	title: qsTr("Move")
+	title: qsTr("Lay Flat")
 	leftPopupHeight: 220
 	width: 256
 		

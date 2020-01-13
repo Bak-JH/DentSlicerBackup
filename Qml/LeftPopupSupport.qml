@@ -3,21 +3,22 @@ import hix.qml 1.0 as Hix
 import QtGraphicalEffects 1.12
 import QtQuick.Controls 2.1
 
-Item {
+Hix.LeftPopupShell {
+	id: leftpopupshell
 	property var sidePadding: 16
 	property var spaceOnTop: 44
 	property var spaceBtwCtr: 48
 	property var themeColor: "#00b9c8"
 
-	//width: 256
+	width: 256
 
 	function settingToggle() {
 		if (supportsettingpopup.visible == false) { supportsettingpopup.visible = true; }
 		else { supportsettingpopup.visible = false; }
 	}
-
-	Hix.LeftPopupShell {
-		id: leftpopupshell
+	Rectangle
+	 {
+		id: shell
 		width: 256
 		height: 196
 		//height: popupHeight
@@ -142,7 +143,7 @@ Item {
 		width: 296
 		height: 224
 		color: "transparent"
-		anchors.left: leftpopupshell.right
+		anchors.left: shell.right
 		anchors.leftMargin: 20
 		anchors.top: parent.top
 		anchors.topMargin: 42
@@ -253,10 +254,10 @@ Item {
 	}
 	
 	DropShadow {
-		anchors.fill: leftpopupshell
+		anchors.fill: shell
 		radius: 10.0
 		samples: 21
 		color: "#55000000"
-		source: leftpopupshell
+		source: shell
 	}
 }

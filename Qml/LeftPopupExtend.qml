@@ -25,9 +25,9 @@ LeftPopup {
 		anchors.leftMargin: sidePadding
 	}
 
-	CtrInputBox {
+	CtrSpinBox {
 		id: extendvalue
-		inputText: "Extend Value \n (mm)"
+		labelText: "Extend Value \n (mm)"
 		width: parent.width - sidePadding * 2
 		anchors.left: parent.left
 		anchors.leftMargin: sidePadding

@@ -14,11 +14,11 @@ LeftPopup {
 	leftPopupHeight: 284
 	width: 256
 
-	CtrInputBox {
+	CtrSpinBox {
 		id: rotateX
 		fromNum: -360
 		toNum: 360
-		inputText: "X Offset(deg)"
+		labelText: "X Offset(deg)"
 		width: parent.width - sidePadding * 2
 		anchors.left: parent.left
 		anchors.leftMargin: sidePadding
@@ -26,11 +26,11 @@ LeftPopup {
 		anchors.topMargin: spaceOnTop
 	}
 
-	CtrInputBox {
+	CtrSpinBox {
 		id: rotateY
 		fromNum: -360
 		toNum: 360
-		inputText: "Y Offset(deg)"
+		labelText: "Y Offset(deg)"
 		width: parent.width - sidePadding * 2
 		anchors.left: parent.left
 		anchors.leftMargin: sidePadding
@@ -38,11 +38,11 @@ LeftPopup {
 		anchors.topMargin: spaceBtwCtr
 	}
 
-	CtrInputBox {
+	CtrSpinBox {
 		id: rotateZ
 		fromNum: -360
 		toNum: 360
-		inputText: "Z Offset(deg)"
+		labelText: "Z Offset(deg)"
 		width: parent.width - sidePadding * 2
 		anchors.left: parent.left
 		anchors.leftMargin: sidePadding

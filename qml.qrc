@@ -54,12 +54,10 @@
         <file>shaders/flat.geom</file>
         <file>Qml/LeftTabSlicingOptionElementPercentage.qml</file>
         <file>Qml/LeftPopup.qml</file>
-        <file>Qml/CtrInputBox.qml</file>
         <file>Qml/CtrDropdownBox.qml</file>
         <file>Qml/CtrCutSwitch.qml</file>
         <file>Qml/Toast.qml</file>
         <file>Qml/SlideBar.qml</file>
-        <file>Qml/CtrLabelTextBox.qml</file>
         <file>Qml/CanvasTest.qml</file>
         <file>Qml/ModalWindow.qml</file>
         <file>Qml/Cam.qml</file>
@@ -87,5 +85,7 @@
         <file>Qml/FeatureMenu.qml</file>
         <file>Qml/MenuItem.qml</file>
         <file>Qml/CtrToggleSwitch.qml</file>
+        <file>Qml/CtrSpinBox.qml</file>
+        <file>Qml/CtrTextBox.qml</file>
     </qresource>
 </RCC>

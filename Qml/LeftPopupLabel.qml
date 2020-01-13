@@ -30,8 +30,8 @@ LeftPopup {
 		anchors.top: popupbody.bottom
 		anchors.topMargin: 16
 	}
-
-	CtrLabelTextBox {
+	
+	CtrTextBox {
 		id: labeltext
 		width: parent.width - sidePadding * 2
 		anchors.left: parent.left
@@ -39,10 +39,11 @@ LeftPopup {
 		anchors.top: labelimg.bottom
 		anchors.topMargin: 32
 	}
-
+	
 	CtrDropdownBox {
 		id: labelfont
-		dropName: "Font"
+		labelText: "Font"
+		dropList: Qt.fontFamilies()
 		width: parent.width - sidePadding * 2
 		anchors.left: parent.left
 		anchors.leftMargin: sidePadding
@@ -50,9 +51,9 @@ LeftPopup {
 		anchors.topMargin: spaceBtwCtr
 	}
 
-	CtrInputBox {
+	CtrSpinBox {
 		id: labelfontsize
-		inputText: "Font Size"
+		labelText: "Font Size"
 		width: parent.width - sidePadding * 2
 		anchors.left: parent.left
 		anchors.leftMargin: sidePadding
@@ -60,9 +61,9 @@ LeftPopup {
 		anchors.topMargin: spaceBtwCtr
 	}
 
-	CtrInputBox {
+	CtrSpinBox {
 		id: labelheight
-		inputText: "Label Height"
+		labelText: "Label Height"
 		width: parent.width - sidePadding * 2
 		anchors.left: parent.left
 		anchors.leftMargin: sidePadding

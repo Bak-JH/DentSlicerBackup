@@ -81,14 +81,34 @@ namespace Hix
 		class ToggleSwitch : public Button
 		{
 			Q_OBJECT
-			Q_PROPERTY(bool isLeft MEMBER _isLeft)
+			Q_PROPERTY(bool isChecked MEMBER _isChecked)
 
 		public:
 			ToggleSwitch(QQuickItem* parent = nullptr);
 			virtual ~ToggleSwitch();
 
+		public slots:
+			void onClick()override;
+
 		private:
-			bool _isLeft = true;
+			bool _isChecked = false;
+		};
+
+		/// Image Toggle Switch ///
+		class ImageToggleSwitch : public Button
+		{
+			Q_OBJECT
+			Q_PROPERTY(bool isChecked MEMBER _isChecked)
+
+		public:
+			ImageToggleSwitch(QQuickItem* parent = nullptr);
+			virtual ~ImageToggleSwitch();
+
+		public slots:
+			void onClick()override;
+
+		private:
+			bool _isChecked = false;
 		};
 	}
 }

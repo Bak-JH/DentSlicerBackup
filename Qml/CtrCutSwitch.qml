@@ -4,7 +4,7 @@ import QtQuick.Controls 2.1
 import QtQuick.Controls.Styles 1.4
 import QtGraphicalEffects 1.12
 
-Rectangle {
+Hix.ImageToggleSwitch {
 	property int cutRadius: 8;
 
 	function hitFlatCut() {
