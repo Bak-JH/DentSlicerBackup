@@ -182,6 +182,9 @@
     <ClCompile Include="Qml\components\SlideBar.cpp" />
     <ClCompile Include="Qml\components\Toast.cpp" />
     <ClCompile Include="Qml\components\ViewMode.cpp" />
+    <ClCompile Include="feature\UndoRedo.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="common\Debug.h" />
@@ -932,6 +935,9 @@
     <ClInclude Include="widget\MoveWidget.h" />
     <ClInclude Include="widget\RotateWidget.h" />
     <ClInclude Include="widget\Widget.h" />
+    <ClInclude Include="feature\UndoRedo.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="debug\moc_predefs.h.cbt" />
@@ -1265,8 +1271,6 @@
     <None Include="resource\zoom_down.png" />
     <None Include="resource\zoom_up.png" />
     <None Include="icon.ico" />
-    <None Include="Qml\BastardyMenu.qml" />
-    <None Include="Qml\MenuButton.qml" />
     <None Include="Qml\LeftPopup.qml" />
     <None Include="Qml\InputBox.qml" />
     <None Include="Qml\CtrInputBox.qml" />
