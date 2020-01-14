@@ -1,6 +1,7 @@
 #pragma once
 #include <qvector3d.h>
 #include <array>
+#include <unordered_set>
 namespace Hix
 {
 	namespace Render
@@ -66,6 +67,18 @@ namespace Hix
 			std::array<float, 6> _bound;
 
 		};
+
+		template<typename SceneEntityDType>
+		Hix::Engine3D::Bounds3D combineBounds(const std::unordered_set<SceneEntityDType*>& set)
+		{
+			Hix::Engine3D::Bounds3D bound;
+			for (auto& e : set)
+			{
+				bound += e->recursiveAabb();
+			}
+			return bound;
+		}
+
 
 
 	}

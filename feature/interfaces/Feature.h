@@ -2,6 +2,7 @@
 #include <unordered_set>
 #include <memory>
 #include <deque>
+#include "../../Tasking/Task.h"
 class GLModel;
 namespace Hix
 {
@@ -9,13 +10,14 @@ namespace Hix
 	{
 
 
-		class Feature
+		class Feature: public Hix::Tasking::Task
 		{
 		public:
 			Feature();
 			virtual ~Feature();
 			void undo();
 			void redo();
+		protected:
 			virtual void undoImpl() = 0;
 			virtual void redoImpl() = 0;
 
