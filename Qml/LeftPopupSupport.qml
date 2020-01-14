@@ -17,7 +17,7 @@ Item {
 		else { supportsettingpopup.visible = false; }
 	}
 
-	Hix.LeftPopupShell {
+	Rectangle {
 		id: leftpopupshell
 		width: 256
 		height: 196
