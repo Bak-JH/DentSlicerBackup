@@ -34,8 +34,14 @@ namespace Hix
 			CloseButton(QQuickItem* parent = nullptr);
 			virtual ~CloseButton();
 
+		signals:
+			void entered();
+			void exited();
+
 		public slots:
 			void onClick()override;
+			void onEntered()override;
+			void onExited()override;
 		};
 
 		/// Round Button ///

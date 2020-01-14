@@ -7,7 +7,7 @@ import QtGraphicalEffects 1.12
 Item {
 	Rectangle {
 		id: printinfo
-		width :440
+		width :400
 		height: 72
 		radius: height / 2
 		Hix.RoundButton {
@@ -21,11 +21,17 @@ Item {
 			anchors.verticalCenter: parent.verticalCenter
 			onEntered: { color = "#00b9c8" }	//themeColor
 			onExited: { color = "#19d6e0" }
+			Image {
+				source: "qrc:/Resource/ic_refresh.png"
+				anchors.verticalCenter: parent.verticalCenter
+				anchors.horizontalCenter: parent.horizontalCenter
+			}
 		}
 		Hix.PrintInfoText {
 			width: 240
 			height: parent.height * 0.6
 			anchors.left: refresh.right
+			anchors.leftMargin: printinfo.width * 0.05
 			anchors.verticalCenter: parent.verticalCenter
 			Text {
 				id: time
@@ -41,7 +47,7 @@ Item {
 				font.family: openRegular.name
 				color: "#000000"
 				anchors.left: time.left
-				anchors.leftMargin: parent.width / 2
+				anchors.leftMargin: printinfo.width * 0.32
 				anchors.top: parent.top
 			}
 			Text {
@@ -58,7 +64,7 @@ Item {
 				font.family: openRegular.name
 				color: "#000000"
 				anchors.left: size.left
-				anchors.leftMargin: parent.width / 2
+				anchors.leftMargin: printinfo.width * 0.32
 				anchors.bottom: parent.bottom
 			}
 		}

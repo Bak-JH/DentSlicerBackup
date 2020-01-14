@@ -43,12 +43,14 @@ Hix.LeftPopupShell
 			anchors.right: parent.right
 			anchors.topMargin: myPadding
 			anchors.rightMargin: myPadding
-			Image 
-			{
+			Image {
+				id: closeimg
 				source: "qrc:/Resource/closebutton.png"
 				anchors.top: closeButton.top
 				anchors.right: closeButton.right
 			}
+			onEntered: { closeimg.source = "qrc:/Resource/closebutton_hover.png" }
+			onExited: { closeimg.source = "qrc:/Resource/closebutton.png" }
 		}
 
 		Hix.RoundButton

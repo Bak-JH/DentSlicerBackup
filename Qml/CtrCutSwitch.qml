@@ -29,11 +29,10 @@ Hix.ImageToggleSwitch {
 
 		Image {
 			id: flatimg
-			sourceSize.width: parent.width * 0.6
 			anchors.horizontalCenter: parent.horizontalCenter
 			anchors.top: parent.top
 			anchors.topMargin: parent.height * 0.15
-			source: "qrc:/Resource/cut_flat_off_border2.png"
+			source: "qrc:/Resource/cut_flat_off.png"
 		}
 
 		Text {
@@ -55,7 +54,7 @@ Hix.ImageToggleSwitch {
 				PropertyChanges { target: flatbtn; border.color: "transparent" }
 				PropertyChanges { target: flattext; color: "#ffffff" }
 				PropertyChanges { target: flattext; font.family: openSemiBold.name }
-				PropertyChanges { target: flatimg; source: "qrc:/Resource/cut_flat_on_border2.png" }
+				PropertyChanges { target: flatimg; source: "qrc:/Resource/cut_flat_on.png" }
 			},
 			State {
 				name: "flatOff"
@@ -63,7 +62,7 @@ Hix.ImageToggleSwitch {
 				PropertyChanges { target: flatbtn; border.color: "#b2c4c6" }
 				PropertyChanges { target: flattext; color: "#859597" }
 				PropertyChanges { target: flattext; font.family: openRegular.name }
-				PropertyChanges { target: flatimg; source: "qrc:/Resource/cut_flat_off_border2.png" }
+				PropertyChanges { target: flatimg; source: "qrc:/Resource/cut_flat_off.png" }
 			}
 		]
 	}
@@ -82,11 +81,10 @@ Hix.ImageToggleSwitch {
 
 		Image {
 			id: freeimg
-			sourceSize.width: parent.width * 0.6
 			anchors.horizontalCenter: parent.horizontalCenter
 			anchors.top: parent.top
 			anchors.topMargin: parent.height * 0.15
-			source: "qrc:/Resource/cut_free_off_border2.png"
+			source: "qrc:/Resource/cut_free_off.png"
 		}
 
 		Text {
@@ -109,7 +107,7 @@ Hix.ImageToggleSwitch {
 				PropertyChanges { target: freebtn; border.color: "transparent" }
 				PropertyChanges { target: freetext; color: "#ffffff" }
 				PropertyChanges { target: freetext; font.family: openSemiBold.name }
-				PropertyChanges { target: freeimg; source: "qrc:/Resource/cut_free_on_border2.png" }
+				PropertyChanges { target: freeimg; source: "qrc:/Resource/cut_free_on.png" }
 			},
 			State {
 				name: "freeOff"
@@ -117,7 +115,7 @@ Hix.ImageToggleSwitch {
 				PropertyChanges { target: freebtn; border.color: "#b2c4c6" }
 				PropertyChanges { target: freetext; color: "#859597" }
 				PropertyChanges { target: freetext; font.family: openRegular.name }
-				PropertyChanges { target: freeimg; source: "qrc:/Resource/cut_free_off_border2.png" }
+				PropertyChanges { target: freeimg; source: "qrc:/Resource/cut_free_off.png" }
 			}
 		]
 	}
