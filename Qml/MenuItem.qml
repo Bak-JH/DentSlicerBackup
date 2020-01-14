@@ -11,14 +11,12 @@ Hix.MenuButton {
 	width: 85
 	height: 90
 	color: "#FFFFFF"
-	//color: hovered ? "#eeeeee" : "#ffffff"
 	
 	Image {
 		sourceSize.width: width
 		anchors.top: parent.top;
 		anchors.topMargin: (parent.height - height) * 0.5 - parent.height * 0.08
 		anchors.horizontalCenter: parent.horizontalCenter;
-		//source: fimg
 		source: iconBasic
 	}
 	Text {
@@ -26,7 +24,6 @@ Hix.MenuButton {
 		anchors.bottom: parent.bottom
 		anchors.bottomMargin: 10
 		text: featureName
-		//text: parent.fName
 		color: nameColor
 		font.pointSize: 10
 		font.family: openRegular.name
@@ -34,46 +31,3 @@ Hix.MenuButton {
 
 	
 }
-
-
-	/*
-	states: [
-        State {
-            name: "inactive"
-            PropertyChanges {target: menubuttonshell; color: "#fefefe"}
-        },
-        State {
-            name: "active";
-            PropertyChanges {target: menubuttonshell; color: "#00ff00"}
-        }
-    ]
-	
-	MouseArea {
-		anchors.fill: parent
-		hoverEnabled: true
-		
-		onClicked: { 
-			console.log("clicked");
-			parent.color = "#ff0000";
-		}
-		onEntered: {
-			if (parent.color == "#ffffff") {
-				parent.color = "#eeeeee";
-			}
-			else if (parent.color == "#ff0000")
-				parent.color = "#ff0000";
-			else
-				parent.color = "#ffffff";
-		}
-		onExited: {
-			console.log("exit");
-			console.log(parent.color);
-			if (parent.color == "#ff0000") {
-				parent.color = "#ff0000";
-			}
-			else {
-				parent.color = "#ffffff";
-			}
-		}
-	}
-	*/

@@ -5,7 +5,6 @@ import QtQuick.Controls.Styles 1.4
 import QtGraphicalEffects 1.12
 
 Item {
-	property var themeColor: "#00b9c8"
 	Hix.ToastShell {
 		id: toastshell
 		width: 500
@@ -18,7 +17,7 @@ Item {
 			width: 36
 			height: width
 			radius: width / 2
-			color: themeColor
+			color: "#00b9c8" // themeColor
 			anchors.verticalCenter: parent.verticalCenter
 			anchors.left: parent.left
 			anchors.leftMargin: (toastshell.height - height) / 2

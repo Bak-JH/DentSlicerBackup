@@ -44,7 +44,6 @@ Hix.InputBox {
 			selectionColor: "#21be2b"
 			selectedTextColor: "#ffffff"
 			anchors.verticalCenter: control.verticalCenter
-			//horizontalAlignment: Qt.AlignHCenter
 			verticalAlignment: Qt.AlignVCenter
 
 			readOnly: !control.editable

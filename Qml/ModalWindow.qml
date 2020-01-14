@@ -5,7 +5,6 @@ import QtQuick.Controls.Styles 1.4
 import QtGraphicalEffects 1.12
 
 Item {
-	property var themeColor: "#00b9c8"
 	property var buttonsWidth: 320
 	property var buttonSpace: 32
 

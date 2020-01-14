@@ -5,11 +5,6 @@ import QtQuick.Controls 2.1
 
 
 LeftPopup {
-	property var sidePadding: 16
-	property var spaceOnTop: 68
-	property var spaceBtwCtr: 56
-	property var themeColor: "#00b9c8"
-
 	title: qsTr("Move")
 	leftPopupHeight: 268
 	width: 256
@@ -19,11 +14,11 @@ LeftPopup {
 		fromNum: -100
 		toNum: 100
 		labelText: "X Offset(mm)"
-		width: parent.width - sidePadding * 2
+		width: parent.width - 16 * 2
 		anchors.left: parent.left
-		anchors.leftMargin: sidePadding
+		anchors.leftMargin: 16
 		anchors.top: parent.top
-		anchors.topMargin: spaceOnTop
+		anchors.topMargin: 68
 	}
 	
 	CtrSpinBox {
@@ -31,11 +26,11 @@ LeftPopup {
 		fromNum: -100
 		toNum: 100
 		labelText: "Y Offset(mm)"
-		width: parent.width - sidePadding * 2
+		width: parent.width - 16 * 2
 		anchors.left: parent.left
-		anchors.leftMargin: sidePadding
+		anchors.leftMargin: 16
 		anchors.top: moveX.bottom
-		anchors.topMargin: spaceBtwCtr
+		anchors.topMargin: 56
 	}
 
 	CtrSpinBox {
@@ -43,10 +38,10 @@ LeftPopup {
 		fromNum: -100
 		toNum: 100
 		labelText: "Z Offset(mm)"
-		width: parent.width - sidePadding * 2
+		width: parent.width - 16 * 2
 		anchors.left: parent.left
-		anchors.leftMargin: sidePadding
+		anchors.leftMargin: 16
 		anchors.top: moveY.bottom
-		anchors.topMargin: spaceBtwCtr
+		anchors.topMargin: 56
 	}
 }
