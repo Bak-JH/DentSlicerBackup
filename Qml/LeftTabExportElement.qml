@@ -6,22 +6,12 @@ import QtQuick.Layouts 1.3
 import QtQuick.Controls.Private 1.0
 
 Item {
-    //width: 200
     width : 224
     height: 20
 
     Layout.alignment: Qt.AlignHCenter
-    //anchors.horizontalCenter: parent.horizontalCenter
     property string columnName
     property string columnContent
-
-    /*
-    Rectangle{
-        width: parent.width
-        height: parent.height
-        anchors.fill: parent
-        color: "blue"
-    }*/
 
     Text{
         id:leftText

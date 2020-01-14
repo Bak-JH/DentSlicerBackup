@@ -237,27 +237,7 @@ Item {
 				if (nameColor == activeNameColor) {}	// exit from already selected button
 				else color = defaultColor	// exit from unselected button
 			}
-		}
-		/*
-		MenuItem {
-			id:autorepair
-			anchors.left: support.right
-			iconBasic: "qrc:/Resource/menu_autorepair.png"
-
-
-
-				onClicked: { menuClick(autorepair); color = defaultColor; nameColor = activeNameColor; iconBasic="qrc:/Resource/menu_autorepair_select_1.png" }
-				onEntered: {
-					if (nameColor == activeNameColor) {}	// hover on already selected button
-					else color = hoverColor	// hover on unselected button
-				}
-				onExited: {
-					if (nameColor == activeNameColor) {}	// exit from already selected button
-					else color = defaultColor	// exit from unselected button
-				}
-			}
-		}
-		*/
+		}	
 		Rectangle {
 			id:divider3
 			anchors.left: support.right
