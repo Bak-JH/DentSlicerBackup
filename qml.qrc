@@ -91,5 +91,6 @@
         <file>Qml/CtrToggleSwitch.qml</file>
         <file>Qml/CtrSpinBox.qml</file>
         <file>Qml/CtrTextBox.qml</file>
+        <file>Qml/ProgressRevised.qml</file>
     </qresource>
 </RCC>
