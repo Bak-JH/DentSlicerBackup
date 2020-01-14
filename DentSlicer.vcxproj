@@ -1169,6 +1169,7 @@
     <None Include="Qml\PrintInfo.qml" />
     <None Include="Qml\PrintSetting.qml" />
     <None Include="Qml\PrintSettingPopup.qml" />
+    <None Include="Qml\ProgressRevised.qml" />
     <None Include="Qml\ProgressShell.qml" />
     <None Include="Qml\SlideBar.qml" />
     <None Include="Qml\Toast.qml" />
@@ -1379,6 +1380,8 @@
     <Image Include="Resource\cut_free_off_border2.png" />
     <Image Include="Resource\cut_free_on.png" />
     <Image Include="Resource\cut_free_on_border2.png" />
+    <Image Include="Resource\dentslicer_loading.gif" />
+    <Image Include="Resource\dentslicer_loading_2.gif" />
     <Image Include="Resource\drop_arrow_down.png" />
     <Image Include="Resource\drop_arrow_up.png" />
     <Image Include="Resource\ic_refresh.png" />
@@ -1424,6 +1427,8 @@
     <Image Include="Resource\part_remove_1.png" />
     <Image Include="Resource\part_show_1.png" />
     <Image Include="Resource\part_show_select_1.png" />
+    <Image Include="Resource\progress_check.png" />
+    <Image Include="Resource\progress_loading.png" />
     <Image Include="Resource\redo_arrow.png" />
     <Image Include="Resource\support_setting.png" />
     <Image Include="Resource\toast_check.png" />
@@ -1445,6 +1450,9 @@
     <Font Include="Resource\font\OpenSans-Light.ttf" />
     <Font Include="Resource\font\OpenSans-Regular.ttf" />
     <Font Include="Resource\font\OpenSans-SemiBold.ttf" />
+  </ItemGroup>
+  <ItemGroup>
+    <Media Include="Resource\dentslicer_loading.mp4" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Condition="Exists('$(QtMsBuild)\qt.targets')">

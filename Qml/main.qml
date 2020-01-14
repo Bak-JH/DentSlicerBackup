@@ -17,9 +17,6 @@ Item{
 
         objectName: "mainWindow"
         property alias lefttabExport: lefttabExport
-        property alias progressPopUp: progressPopUp
-        property alias resultPopUp: resultPopUp
-        property alias yesnoPopUp: yesnoPopUp
         property alias mttab : mttab
 
         property alias mainFont : mainFont
@@ -196,6 +193,31 @@ Item{
 			id: leftpopuplabel
 			anchors.top: featureMenu.bottom
 			anchors.left: leftpopuplayflat.right
+            anchors.leftMargin: 15
+			anchors.topMargin: 20
+		}
+		/*
+		FeatureMenu {
+			id: bastardymenu
+			anchors.top: uppertab.bottom
+			anchors.left: lefttab.right
+			anchors.leftMargin: 15
+			anchors.topMargin: 20
+		}
+		*/
+
+		ProgressRevised{
+			id: progressrevised
+			anchors.top: uppertab.bottom
+			anchors.left: lefttab.right
+			anchors.leftMargin: 15
+			anchors.topMargin: 120
+		}
+		/*
+		LeftPopup {
+			id: leftpopup
+			anchors.top: uppertab.bottom
+			anchors.left: lefttab.right
 			anchors.leftMargin: 15
 			anchors.topMargin: 20
 		}
@@ -204,6 +226,14 @@ Item{
 			id: leftpopupscale
 			anchors.top: featureMenu.bottom
 			anchors.left: leftpopuplabel.right
+            anchors.leftMargin: 15
+			anchors.topMargin: 20
+		}
+
+		LeftPopupMove {
+			id: leftpopupmove
+			anchors.top: uppertab.bottom
+			anchors.left: lefttab.right
 			anchors.leftMargin: 15
 			anchors.topMargin: 20
 		}
@@ -216,7 +246,6 @@ Item{
 			anchors.topMargin: 250
 		}
 
-		
 		LeftPopupModelBuild
 		{
 			id: leftpopupmodelbuild
@@ -225,6 +254,7 @@ Item{
 			anchors.leftMargin: 15
 			anchors.topMargin: 250
 		}
+		*/
 
 		LeftPopupCut {
 			id: leftpopupcut
@@ -242,7 +272,7 @@ Item{
 			anchors.topMargin: 250
 		}
 		
-		/*
+		
 		Toast {
 			id: toast
 			anchors.top: uppertab.bottom
@@ -250,7 +280,7 @@ Item{
 			anchors.left: lefttab.right
 			anchors.leftMargin: 15
 		}
-		*/
+		
 		UndoRedo {
 			id: undoredo
 			anchors.top: featureMenu.bottom
