@@ -5,8 +5,8 @@ import QtQuick.Controls 2.1
 
 LeftPopup {
 	title: qsTr("Lay Flat")
-	leftPopupHeight: 220
 	width: 256
+	leftPopupHeight: 220
 		
 	Text {
 		id: popupbody

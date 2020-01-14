@@ -81,6 +81,10 @@
         <file>Qml/LeftPopupShellOffset.qml</file>
         <file>Qml/CtrScaleInputBox.qml</file>
         <file>Qml/ProgressShell.qml</file>
+        <file>Qml/ModelBuildSlider.qml</file>
+        <file>Qml/LeftPopupModelBuild.qml</file>
+        <file>Qml/PrintSetting.qml</file>
+        <file>Qml/PrintSettingPopup.qml</file>
         <file>Qml/PlanesliderRange.qml</file>
         <file>Qml/FeatureMenu.qml</file>
         <file>Qml/MenuItem.qml</file>

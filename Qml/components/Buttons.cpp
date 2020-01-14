@@ -39,9 +39,18 @@ Hix::QML::CloseButton::~CloseButton()
 {
 }
 
+void Hix::QML::CloseButton::onEntered()
+{
+	emit entered();
+}
+
+void Hix::QML::CloseButton::onExited()
+{
+	emit exited();
+}
+
 void Hix::QML::CloseButton::onClick()
 {
-	qDebug() << parentItem()->parentItem()->objectName();
 	parentItem()->parentItem()->setVisible(false);
 }
 

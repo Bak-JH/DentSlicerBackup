@@ -1133,6 +1133,7 @@
     <None Include="Qml\LeftPopupExtend.qml" />
     <None Include="Qml\LeftPopupLabel.qml" />
     <None Include="Qml\LeftPopupLayFlat.qml" />
+    <None Include="Qml\LeftPopupModelBuild.qml" />
     <None Include="Qml\LeftPopupMove.qml" />
     <None Include="Qml\LeftPopupOrient.qml" />
     <None Include="Qml\LeftPopupRotate.qml" />
@@ -1161,10 +1162,13 @@
     <None Include="Qml\MeshTransformerZoom.qml" />
     <None Include="Qml\ModalWindow.qml" />
     <None Include="Qml\Model.qml" />
+    <None Include="Qml\ModelBuildSlider.qml" />
     <None Include="Qml\Plane.qml" />
     <None Include="Qml\PartList.qml" />
     <None Include="Qml\PartListContentBox.qml" />
     <None Include="Qml\PrintInfo.qml" />
+    <None Include="Qml\PrintSetting.qml" />
+    <None Include="Qml\PrintSettingPopup.qml" />
     <None Include="Qml\ProgressShell.qml" />
     <None Include="Qml\SlideBar.qml" />
     <None Include="Qml\Toast.qml" />
@@ -1353,6 +1357,10 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <Image Include="Resource\arrow_right.png" />
+    <Image Include="Resource\btn_modelbuild_help.png" />
+    <Image Include="Resource\btn_setting.png" />
+    <Image Include="Resource\btn_setting_refresh.png" />
     <Image Include="Resource\cam.png" />
     <Image Include="Resource\cam_back_1.5.png" />
     <Image Include="Resource\cam_bottom_1.5.png" />
@@ -1362,17 +1370,22 @@
     <Image Include="Resource\cam_right_1.5.png" />
     <Image Include="Resource\cam_top_1.5.png" />
     <Image Include="Resource\closebutton.png" />
-    <Image Include="Resource\cut_flat_off_1.5.png" />
+    <Image Include="Resource\closebutton_hover.png" />
+    <Image Include="Resource\cut_flat_off.png" />
     <Image Include="Resource\cut_flat_off_border2.png" />
+    <Image Include="Resource\cut_flat_on.png" />
     <Image Include="Resource\cut_flat_on_border2.png" />
-    <Image Include="Resource\cut_free_off_1.5.png" />
+    <Image Include="Resource\cut_free_off.png" />
     <Image Include="Resource\cut_free_off_border2.png" />
+    <Image Include="Resource\cut_free_on.png" />
     <Image Include="Resource\cut_free_on_border2.png" />
     <Image Include="Resource\drop_arrow_down.png" />
     <Image Include="Resource\drop_arrow_up.png" />
+    <Image Include="Resource\ic_refresh.png" />
     <Image Include="Resource\img_arrange.png" />
     <Image Include="Resource\img_label.png" />
     <Image Include="Resource\img_layflat.png" />
+    <Image Include="Resource\img_modelbuild_popup.png" />
     <Image Include="Resource\img_orient.png" />
     <Image Include="Resource\img_scale_lock_revised.png" />
     <Image Include="Resource\img_scale_unlock_revised.png" />
@@ -1406,11 +1419,9 @@
     <Image Include="Resource\menu_shelloffset_select_1.png" />
     <Image Include="Resource\menu_support.png" />
     <Image Include="Resource\menu_support_select_1.png" />
-    <Image Include="Resource\part_delete_1.png" />
     <Image Include="Resource\part_hide_1.png" />
     <Image Include="Resource\part_hide_select_1.png" />
-    <Image Include="Resource\part_remove.png" />
-    <Image Include="Resource\part_show.png" />
+    <Image Include="Resource\part_remove_1.png" />
     <Image Include="Resource\part_show_1.png" />
     <Image Include="Resource\part_show_select_1.png" />
     <Image Include="Resource\redo_arrow.png" />

@@ -212,6 +212,16 @@ Item{
 			id: leftpopupsupport
 			anchors.top: featureMenu.bottom
 			anchors.left: partlist.right
+            anchors.leftMargin: 15
+			anchors.topMargin: 250
+		}
+
+		
+		LeftPopupModelBuild
+		{
+			id: leftpopupmodelbuild
+			anchors.top: featureMenu.bottom
+			anchors.left: partlist.right
 			anchors.leftMargin: 15
 			anchors.topMargin: 250
 		}
@@ -220,10 +230,27 @@ Item{
 			id: leftpopupcut
 			anchors.top: featureMenu.bottom
 			anchors.left: leftpopupsupport.right
+            anchors.leftMargin: 15
+			anchors.topMargin: 250
+		}
+		PrintSetting
+		{
+			id: printsetting
+			anchors.top: uppertab.bottom
+			anchors.left: leftpopupmodelbuild.right
 			anchors.leftMargin: 15
 			anchors.topMargin: 250
 		}
-
+		
+		/*
+		Toast {
+			id: toast
+			anchors.top: uppertab.bottom
+			anchors.topMargin: 600
+			anchors.left: lefttab.right
+			anchors.leftMargin: 15
+		}
+		*/
 		UndoRedo {
 			id: undoredo
 			anchors.top: featureMenu.bottom
@@ -235,10 +262,27 @@ Item{
 		ProgressShell {
 			id: progressshell
 			anchors.top: featureMenu.bottom
-			anchors.topMargin: 720
+			anchors.topMargin: 320
 			anchors.left: undoredo.right
-			anchors.leftMargin: 15
+			anchors.leftMargin: 40
 		}
+		/*
+		ModelBuildSlider {
+			id: modelbuildslider
+			anchors.top: uppertab.bottom
+			anchors.topMargin: 160
+			anchors.left: lefttab.right
+			anchors.leftMargin: 600
+		}
+		*/
+		SlideBar {
+			id: slidebar
+			anchors.top: uppertab.bottom
+			anchors.topMargin: 160
+			anchors.left: lefttab.right
+			anchors.leftMargin: 720
+		}
+		
 
 		Cam {
 			id: cam
@@ -247,7 +291,23 @@ Item{
 			anchors.left: slidebar.right
 			anchors.leftMargin: 300
 		}
-
+		/*
+		CanvasTest {
+			id: canvastest
+			anchors.top: uppertab.bottom
+			anchors.topMargin: 160
+			anchors.left: lefttab.right
+			anchors.leftMargin: 180
+		}
+		*/
+		ViewMode {
+			id: viewmode
+			anchors.top: uppertab.bottom
+			anchors.left: lefttab.right
+			anchors.leftMargin: 15
+			anchors.topMargin: 700
+		}
+		
 		PrintInfo {
 			id: printinfo
 			anchors.top: slidebar.top

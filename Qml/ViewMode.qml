@@ -35,7 +35,7 @@ Item {
 		}
 		Image {
 			id: viewtriangle
-			source: "qrc:/Resource/triangle_right.png"
+			source: "qrc:/Resource/arrow_right.png"
 			anchors.verticalCenter: parent.verticalCenter
 			anchors.right: parent.right
 			anchors.rightMargin: myPadding
@@ -52,8 +52,9 @@ Item {
 		height: 88
 		color: "transparent"
 		anchors.left: viewmodeshell.right
-		anchors.leftMargin: 20
+		anchors.leftMargin: 12
 		anchors.top: parent.top
+		visible: false
 
 		Canvas {
 			id: canvas
