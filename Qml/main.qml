@@ -217,7 +217,7 @@ Item{
             anchors.top : uppertab.bottom
             anchors.bottom: parent.bottom
         }
-		
+		/*
 		FeatureMenu {
 			id: bastardymenu
 			anchors.top: uppertab.bottom
@@ -225,12 +225,20 @@ Item{
 			anchors.leftMargin: 15
 			anchors.topMargin: 20
 		}
+		*/
 
 		PartList{
 			id: partlist
 			anchors.top: uppertab.bottom
             anchors.left: parent.left
 			z: 10
+		}
+		ProgressRevised{
+			id: progressrevised
+			anchors.top: uppertab.bottom
+			anchors.left: lefttab.right
+			anchors.leftMargin: 15
+			anchors.topMargin: 120
 		}
 		/*
 		LeftPopup {
@@ -240,17 +248,15 @@ Item{
 			anchors.leftMargin: 15
 			anchors.topMargin: 120
 		}
-		*/
 
-		LeftPopupSupport {
-			id: leftpopupsupport
+		LeftPopupMove {
+			id: leftpopupmove
 			anchors.top: uppertab.bottom
 			anchors.left: lefttab.right
 			anchors.leftMargin: 15
 			anchors.topMargin: 120
 		}
 
-		
 		LeftPopupModelBuild
 		{
 			id: leftpopupmodelbuild
@@ -259,6 +265,7 @@ Item{
 			anchors.leftMargin: 15
 			anchors.topMargin: 420
 		}
+		*/
 
 		PrintSetting
 		{
@@ -269,7 +276,7 @@ Item{
 			anchors.topMargin: 420
 		}
 		
-		/*
+		
 		Toast {
 			id: toast
 			anchors.top: uppertab.bottom
@@ -277,7 +284,7 @@ Item{
 			anchors.left: lefttab.right
 			anchors.leftMargin: 15
 		}
-		*/
+		
 		UndoRedo {
 			id: undoredo
 			anchors.top: uppertab.bottom
