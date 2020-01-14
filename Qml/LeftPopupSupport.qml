@@ -5,11 +5,6 @@ import QtQuick.Controls 2.1
 
 Hix.LeftPopupShell {
 	id: leftpopupshell
-	property var sidePadding: 16
-	property var spaceOnTop: 44
-	property var spaceBtwCtr: 48
-	property var themeColor: "#00b9c8"
-
 	width: 256
 
 	function settingToggle() {
@@ -21,7 +16,6 @@ Hix.LeftPopupShell {
 		id: shell
 		width: 256
 		height: 196
-		//height: popupHeight
 		color: "#F6FEFF"
 		radius: 8
 
@@ -33,8 +27,8 @@ Hix.LeftPopupShell {
 			font.weight: Font.Bold
 			anchors.top: parent.top
 			anchors.left: parent.left
-			anchors.topMargin: sidePadding-2
-			anchors.leftMargin: sidePadding
+			anchors.topMargin: 14
+			anchors.leftMargin: 16
 		}
 
 		Hix.CloseButton {
@@ -42,8 +36,8 @@ Hix.LeftPopupShell {
 			height: 16
 			anchors.top: parent.top
 			anchors.right: parent.right
-			anchors.topMargin: sidePadding
-			anchors.rightMargin: sidePadding
+			anchors.topMargin: 16
+			anchors.rightMargin: 16
 			Image {
 				source: "qrc:/Resource/closebutton.png"
 				anchors.top: parent.top
@@ -60,7 +54,7 @@ Hix.LeftPopupShell {
 			anchors.bottom: supportbutton2.top
 			anchors.bottomMargin: 16
 			anchors.left: parent.left
-			anchors.leftMargin: sidePadding
+			anchors.leftMargin: 16
 			Text {
 				anchors.horizontalCenter: parent.horizontalCenter
 				anchors.verticalCenter: parent.verticalCenter
@@ -81,7 +75,7 @@ Hix.LeftPopupShell {
 			radius: width / 2
 			anchors.bottom: supportbutton1.bottom
 			anchors.right: parent.right
-			anchors.rightMargin: sidePadding
+			anchors.rightMargin: 16
 			Image {
 				source: "qrc:/Resource/support_setting.png"
 				anchors.verticalCenter: parent.verticalCenter
@@ -99,7 +93,7 @@ Hix.LeftPopupShell {
 			radius: 16
 			color: "#00b9c8"
 			anchors.bottom: supportbutton3.top
-			anchors.bottomMargin: sidePadding
+			anchors.bottomMargin: 16
 			anchors.horizontalCenter: parent.horizontalCenter
 			Text {
 				anchors.horizontalCenter: parent.horizontalCenter
@@ -194,52 +188,52 @@ Hix.LeftPopupShell {
 			CtrDropdownBox {
 				id: supporttype
 				dropdownText: "Support Type"
-				width: parent.width - sidePadding * 2 - 16	// 16 = triangle height
+				width: parent.width - 16 * 2 - 16	// 16 = triangle height
 				height: 26
 				anchors.left: parent.left
-				anchors.leftMargin: sidePadding + 16	// 16 = triangle height
+				anchors.leftMargin: 32	// 16 = triangle height
 				anchors.top: parent.top
-				anchors.topMargin: sidePadding
+				anchors.topMargin: 16
 			}
 			CtrDropdownBox {
 				id: supportdensity
 				dropdownText: "Support Density"
-				width: parent.width - sidePadding * 2 - 16	// 16 = triangle height
+				width: parent.width - 16 * 2 - 16	// 16 = triangle height
 				height: 26
 				anchors.left: parent.left
-				anchors.leftMargin: sidePadding + 16	// 16 = triangle height
+				anchors.leftMargin: 32	// 16 = triangle height
 				anchors.top: supporttype.bottom
-				anchors.topMargin: sidePadding
+				anchors.topMargin: 16
 			}
 			CtrDropdownBox {
 				id: maxradius
 				dropdownText: "Max.radius"
-				width: parent.width - sidePadding * 2 - 16	// 16 = triangle height
+				width: parent.width - 16 * 2 - 16	// 16 = triangle height
 				height: 26
 				anchors.left: parent.left
-				anchors.leftMargin: sidePadding + 16	// 16 = triangle height
+				anchors.leftMargin: 32	// 16 = triangle height
 				anchors.top: supportdensity.bottom
-				anchors.topMargin: sidePadding
+				anchors.topMargin: 16
 			}
 			CtrDropdownBox {
 				id: minradius
 				dropdownText: "Min.radius"
-				width: parent.width - sidePadding * 2 - 16	// 16 = triangle height
+				width: parent.width - 16 * 2 - 16	// 16 = triangle height
 				height: 26
 				anchors.left: parent.left
-				anchors.leftMargin: sidePadding + 16	// 16 = triangle height
+				anchors.leftMargin: 32	// 16 = triangle height
 				anchors.top: maxradius.bottom
-				anchors.topMargin: sidePadding
+				anchors.topMargin: 16
 			}
 			CtrDropdownBox {
 				id: rafttype
 				dropdownText: "Raft Type"
-				width: parent.width - sidePadding * 2 - 16	// 16 = triangle height
+				width: parent.width - 16 * 2 - 16	// 16 = triangle height
 				height: 26
 				anchors.left: parent.left
-				anchors.leftMargin: sidePadding + 16	// 16 = triangle height
+				anchors.leftMargin: 32	// 16 = triangle height
 				anchors.top: minradius.bottom
-				anchors.topMargin: sidePadding
+				anchors.topMargin: 16
 			}
 
 		}

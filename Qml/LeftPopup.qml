@@ -9,9 +9,6 @@ Hix.LeftPopupShell
 {
 	id: leftpopupshell
 	property var myPadding: 16
-	property var themeColor: "#00b9c8"
-
-	property var featureName
 	property var leftPopupHeight
 
 	Rectangle 
@@ -26,7 +23,6 @@ Hix.LeftPopupShell
 
 		Text {
 			id: popuptitle
-			//text: featureName
 			text: leftpopupshell.title
 			font.pointSize: 11
 			font.family: openRegular.name

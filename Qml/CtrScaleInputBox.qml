@@ -16,7 +16,7 @@ Item {
 	CtrSpinBox {
 		id: scaleX
 		labelText: "X Size(mm)"
-		width: parent.width - sidePadding * 2
+		width: parent.width - 16 * 2
 		control.anchors.rightMargin: width * 0.2
 		control.width: width * 0.46 * 0.8
 		control.up.indicator.anchors.leftMargin: control.width * 0.09 / 0.8
@@ -24,15 +24,15 @@ Item {
 		control.down.indicator.anchors.leftMargin: control.width * 0.09 / 0.8
 		control.down.indicator.implicitWidth: control.width * 0.11 / 0.8
 		anchors.left: parent.left
-		anchors.leftMargin: sidePadding
+		anchors.leftMargin: 16
 		anchors.top: parent.top
-		anchors.topMargin: spaceOnTop
+		anchors.topMargin: 68
 	}
 
 	CtrSpinBox {
 		id: scaleY
 		labelText: "Y Size(mm)"
-		width: parent.width - sidePadding * 2
+		width: parent.width - 16 * 2
 		control.anchors.rightMargin: width * 0.2
 		control.width: width * 0.46 * 0.8
 		control.up.indicator.anchors.leftMargin: control.width * 0.09 / 0.8
@@ -40,15 +40,15 @@ Item {
 		control.down.indicator.anchors.leftMargin: control.width * 0.09 / 0.8
 		control.down.indicator.implicitWidth: control.width * 0.11 / 0.8
 		anchors.left: parent.left
-		anchors.leftMargin: sidePadding
+		anchors.leftMargin: 16
 		anchors.top: scaleX.bottom
-		anchors.topMargin: spaceBtwCtr
+		anchors.topMargin: 56
 	}
 
 	CtrSpinBox {
 		id: scaleZ
 		labelText: "Z Size(mm)"
-		width: parent.width - sidePadding * 2
+		width: parent.width - 16 * 2
 		control.anchors.rightMargin: width * 0.2
 		control.width: width * 0.46 * 0.8
 		control.up.indicator.anchors.leftMargin: control.width * 0.09 / 0.8
@@ -56,9 +56,9 @@ Item {
 		control.down.indicator.anchors.leftMargin: control.width * 0.09 / 0.8
 		control.down.indicator.implicitWidth: control.width * 0.11 / 0.8
 		anchors.left: parent.left
-		anchors.leftMargin: sidePadding
+		anchors.leftMargin: 16
 		anchors.top: scaleY.bottom
-		anchors.topMargin: spaceBtwCtr
+		anchors.topMargin: 56
 	}
 
 	Hix.RoundButton {

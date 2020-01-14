@@ -3,13 +3,8 @@ import hix.qml 1.0
 import QtGraphicalEffects 1.12
 
 LeftPopup {
-	property var sidePadding: 16
-	property var spaceOnTop: 44
-	property var spaceBtwCtr: 44
-	property var themeColor: "#00b9c8"
-	
-	featureName: qsTr("Label")
-	leftPopupHeight: 428 //400
+	title: qsTr("Label")
+	leftPopupHeight: 428
 	width: 256
 
 	Text {
@@ -19,8 +14,8 @@ LeftPopup {
 		font.family: openRegular.name
 		anchors.top: parent.top
 		anchors.left: parent.left
-		anchors.topMargin: spaceOnTop
-		anchors.leftMargin: sidePadding
+		anchors.topMargin: 44
+		anchors.leftMargin: 16
 	}
 
 	Image {
@@ -33,9 +28,9 @@ LeftPopup {
 	
 	CtrTextBox {
 		id: labeltext
-		width: parent.width - sidePadding * 2
+		width: parent.width - 16 * 2
 		anchors.left: parent.left
-		anchors.leftMargin: sidePadding
+		anchors.leftMargin: 16
 		anchors.top: labelimg.bottom
 		anchors.topMargin: 32
 	}
@@ -44,31 +39,31 @@ LeftPopup {
 		id: labelfont
 		labelText: "Font"
 		dropList: Qt.fontFamilies()
-		width: parent.width - sidePadding * 2
+		width: parent.width - 16 * 2
 		anchors.left: parent.left
-		anchors.leftMargin: sidePadding
+		anchors.leftMargin: 16
 		anchors.top: labeltext.bottom
-		anchors.topMargin: spaceBtwCtr
+		anchors.topMargin: 44
 	}
 
 	CtrSpinBox {
 		id: labelfontsize
 		labelText: "Font Size"
-		width: parent.width - sidePadding * 2
+		width: parent.width - 16 * 2
 		anchors.left: parent.left
-		anchors.leftMargin: sidePadding
+		anchors.leftMargin: 16
 		anchors.top: labelfont.bottom
-		anchors.topMargin: spaceBtwCtr
+		anchors.topMargin: 44
 	}
 
 	CtrSpinBox {
 		id: labelheight
 		labelText: "Label Height"
-		width: parent.width - sidePadding * 2
+		width: parent.width - 16 * 2
 		anchors.left: parent.left
-		anchors.leftMargin: sidePadding
+		anchors.leftMargin: 16
 		anchors.top: labelfontsize.bottom
-		anchors.topMargin: spaceBtwCtr
+		anchors.topMargin: 44
 	}
 	
 	CtrToggleSwitch {
@@ -77,6 +72,6 @@ LeftPopup {
 		anchors.top: labelheight.bottom
 		anchors.topMargin: 16
 		anchors.right: parent.right
-		anchors.rightMargin: sidePadding - 2
+		anchors.rightMargin: 16 - 2
 	}
 }

@@ -4,12 +4,7 @@ import QtGraphicalEffects 1.12
 import QtQuick.Controls 2.1
 
 LeftPopup {
-	property var sidePadding: 16
-	property var spaceOnTop: 44
-	property var spaceBtwCtr: 44
-	property var themeColor: "#00b9c8"
-	
-	featureName: qsTr("Shell Offset")
+	title: qsTr("Shell Offset")
 	leftPopupHeight: 220
 	width: 256
 
@@ -20,18 +15,18 @@ LeftPopup {
 		font.family: openRegular.name
 		anchors.top: parent.top
 		anchors.left: parent.left
-		anchors.topMargin: spaceOnTop
-		anchors.leftMargin: sidePadding
+		anchors.topMargin: 44
+		anchors.leftMargin: 16
 	}
 
 	CtrSpinBox {
 		id: extendvalue
 		labelText: "Tickness(mm)"
-		width: parent.width - sidePadding * 2
+		width: parent.width - 16 * 2
 		anchors.left: parent.left
-		anchors.leftMargin: sidePadding
+		anchors.leftMargin: 16
 		anchors.top: popupbody.bottom
-		anchors.topMargin: spaceBtwCtr
+		anchors.topMargin: 44
 	}
 	
 }

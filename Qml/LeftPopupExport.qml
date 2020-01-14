@@ -4,69 +4,64 @@ import QtGraphicalEffects 1.12
 import QtQuick.Controls 2.1
 
 LeftPopup {
-	property var sidePadding: 16
-	property var spaceOnTop: 64
-	property var spaceBtwCtr: 44
-	property var themeColor: "#00b9c8"
-	
-	featureName: qsTr("Export")
+	title: qsTr("Export")
 	leftPopupHeight: 360
 	width: 256
 
 	CtrDropdownBox {
 		id: layerheight
 		dropdownText: "Layer Height"
-		width: parent.width - sidePadding * 2
+		width: parent.width	 - 16 * 2
 		anchors.left: parent.left
-		anchors.leftMargin: sidePadding
+		anchors.leftMargin: 16
 		anchors.top: parent.top
-		anchors.topMargin: spaceOnTop
+		anchors.topMargin: 64
 	}
 
 	CtrDropdownBox {
 		id: resintype
 		dropdownText: "Resin Type"
-		width: parent.width - sidePadding * 2
+		width: parent.width - 16 * 2
 		anchors.left: parent.left
-		anchors.leftMargin: sidePadding
+		anchors.leftMargin: 16
 		anchors.top: layerheight.bottom
-		anchors.topMargin: spaceBtwCtr
+		anchors.topMargin: 44
 	}
 
 	CtrDropdownBox {
 		id: infilltype
 		dropdownText: "infill Type"
-		width: parent.width - sidePadding * 2
+		width: parent.width - 16 * 2
 		anchors.left: parent.left
-		anchors.leftMargin: sidePadding
+		anchors.leftMargin: 16
 		anchors.top: resintype.bottom
-		anchors.topMargin: spaceBtwCtr
+		anchors.topMargin: 44
 	}
 	CtrDropdownBox {
 		id: silcingmode
 		dropdownText: "Slicing Mode"
-		width: parent.width - sidePadding * 2
+		width: parent.width - 16 * 2
 		anchors.left: parent.left
-		anchors.leftMargin: sidePadding
+		anchors.leftMargin: 16
 		anchors.top: infilltype.bottom
-		anchors.topMargin: spaceBtwCtr
+		anchors.topMargin: 44
 	}
 	CtrDropdownBox {
 		id: imageinversion
 		dropdownText: "Image Inversion"
-		width: parent.width - sidePadding * 2
+		width: parent.width - 16 * 2
 		anchors.left: parent.left
-		anchors.leftMargin: sidePadding
+		anchors.leftMargin: 16
 		anchors.top: silcingmode.bottom
-		anchors.topMargin: spaceBtwCtr
+		anchors.topMargin: 44
 	}
 	CtrDropdownBox {
 		id: contractionratio
 		dropdownText: "Contractin Ratio"
-		width: parent.width - sidePadding * 2
+		width: parent.width - 16 * 2
 		anchors.left: parent.left
-		anchors.leftMargin: sidePadding
+		anchors.leftMargin: 16
 		anchors.top: imageinversion.bottom
-		anchors.topMargin: spaceBtwCtr
+		anchors.topMargin: 44
 	}
 }

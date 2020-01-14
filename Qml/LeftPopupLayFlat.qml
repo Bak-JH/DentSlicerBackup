@@ -4,11 +4,6 @@ import QtGraphicalEffects 1.12
 import QtQuick.Controls 2.1
 
 LeftPopup {
-	property var sidePadding: 16
-	property var spaceOnTop: 44
-	property var spaceBtwCtr: 48
-	property var themeColor: "#00b9c8"
-	
 	title: qsTr("Lay Flat")
 	leftPopupHeight: 220
 	width: 256
@@ -20,8 +15,8 @@ LeftPopup {
 		font.family: openRegular.name
 		anchors.top: parent.top
 		anchors.left: parent.left
-		anchors.topMargin: spaceOnTop
-		anchors.leftMargin: sidePadding
+		anchors.topMargin: 44
+		anchors.leftMargin: 16
 	}
 
 	Image {

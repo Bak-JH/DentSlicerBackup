@@ -5,12 +5,7 @@ import QtQuick.Controls 2.1
 
 
 LeftPopup {
-	property var sidePadding: 16
-	property var spaceOnTop: 68
-	property var spaceBtwCtr: 56
-	property var themeColor: "#00b9c8"
-	
-	featureName: qsTr("Rotate")
+	title: qsTr("Rotate")
 	leftPopupHeight: 284
 	width: 256
 
@@ -19,11 +14,11 @@ LeftPopup {
 		fromNum: -360
 		toNum: 360
 		labelText: "X Offset(deg)"
-		width: parent.width - sidePadding * 2
+		width: parent.width - 16 * 2
 		anchors.left: parent.left
-		anchors.leftMargin: sidePadding
+		anchors.leftMargin: 16
 		anchors.top: parent.top
-		anchors.topMargin: spaceOnTop
+		anchors.topMargin: 68
 	}
 
 	CtrSpinBox {
@@ -31,11 +26,11 @@ LeftPopup {
 		fromNum: -360
 		toNum: 360
 		labelText: "Y Offset(deg)"
-		width: parent.width - sidePadding * 2
+		width: parent.width - 16 * 2
 		anchors.left: parent.left
-		anchors.leftMargin: sidePadding
+		anchors.leftMargin: 16
 		anchors.top: rotateX.bottom
-		anchors.topMargin: spaceBtwCtr
+		anchors.topMargin: 56
 	}
 
 	CtrSpinBox {
@@ -43,10 +38,10 @@ LeftPopup {
 		fromNum: -360
 		toNum: 360
 		labelText: "Z Offset(deg)"
-		width: parent.width - sidePadding * 2
+		width: parent.width - 16 * 2
 		anchors.left: parent.left
-		anchors.leftMargin: sidePadding
+		anchors.leftMargin: 16
 		anchors.top: rotateY.bottom
-		anchors.topMargin: spaceBtwCtr
+		anchors.topMargin: 56
 	}
 }
