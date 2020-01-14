@@ -28,8 +28,6 @@
     <ClCompile Include="common\GTEngine\Source\Mathematics\GteVETNonmanifoldMesh.cpp" />
     <ClCompile Include="common\GTEngine\Source\Mathematics\MSW\GteCPUQueryInstructions.cpp" />
     <ClCompile Include="common\GTEngine\Source\Mathematics\MSW\GteIntelSSE.cpp" />
-    <ClCompile Include="common\Task.cpp" />
-    <ClCompile Include="common\TaskManager.cpp" />
     <ClCompile Include="common\Tree\BVHBuilder.cpp" />
     <ClCompile Include="common\Tree\TreeBuilder.cpp" />
     <ClCompile Include="DentEngine\src\Bounds3D.cpp" />
@@ -185,6 +183,11 @@
     <ClCompile Include="feature\UndoRedo.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="feature\sliceExport.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Tasking\TaskManager.cpp" />
+    <ClCompile Include="Tasking\Task.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="common\Debug.h" />
@@ -617,7 +620,6 @@
     <ClInclude Include="common\rapidjson\stringbuffer.h" />
     <ClInclude Include="common\rapidjson\writer.h" />
     <ClInclude Include="common\Singleton.h" />
-    <ClInclude Include="common\Task.h" />
     <ClInclude Include="common\taskflow\core\executor.hpp" />
     <ClInclude Include="common\taskflow\core\flow_builder.hpp" />
     <ClInclude Include="common\taskflow\core\graph.hpp" />
@@ -651,7 +653,6 @@
     <ClInclude Include="common\taskflow\utility\passive_vector.hpp" />
     <ClInclude Include="common\taskflow\utility\singular_allocator.hpp" />
     <ClInclude Include="common\taskflow\utility\traits.hpp" />
-    <ClInclude Include="common\TaskManager.h" />
     <ClInclude Include="common\TrackedIndexedList.h" />
     <ClInclude Include="common\Tree\TreeBuilder.h" />
     <ClInclude Include="DentEngine\src\Bounds3D.h" />
@@ -938,6 +939,11 @@
     <ClInclude Include="feature\UndoRedo.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="feature\sliceExport.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Tasking\TaskManager.h" />
+    <ClInclude Include="Tasking\Task.h" />
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="debug\moc_predefs.h.cbt" />

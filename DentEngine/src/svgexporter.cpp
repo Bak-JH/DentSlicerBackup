@@ -21,6 +21,10 @@ namespace SVGexporterPrivate
 
 
 void SVGexporter::exportSVG(Slices& shellSlices,QString outfoldername, bool isTemp){
+    if (isTemp || scfg->slice_invert == SlicingConfiguration::Invert::InvertXAxis)
+        _invert = true;
+    else
+        _invert = false;
 	auto& printerSetting = qmlManager->settings().printerSetting;
 
 	_ppmmX = printerSetting.pixelPerMMX();
@@ -45,7 +49,7 @@ void SVGexporter::exportSVG(Slices& shellSlices,QString outfoldername, bool isTe
             writeGroupHeader(currentSlice_idx, scfg->layer_height*(currentSlice_idx+1), contentStream);
         
         for (int j=0; j<shellSlice_polytree.ChildCount(); j++){
-            parsePolyTreeAndWrite(shellSlice_polytree.Childs[j], isTemp, contentStream);
+            parsePolyTreeAndWrite(shellSlice_polytree.Childs[j], contentStream);
         }
 
 		writeGroupFooter(contentStream);
@@ -99,7 +103,7 @@ void SVGexporter::exportSVG(Slices& shellSlices,QString outfoldername, bool isTe
 	rapidjson::PrettyWriter<rapidjson::OStreamWrapper> writer{ osw };
 	doc.Accept(writer);
 
-	if (!isTemp && printerSetting.infoFileType == Hix::Settings::PrinterSetting::InfoFileType::ThreeDelight)
+	if (printerSetting.infoFileType == Hix::Settings::PrinterSetting::InfoFileType::ThreeDelight)
 	{
 		SVGexporterPrivate::writeVittroOptions(outfoldername, currentSlice_idx);
 	}
@@ -202,11 +206,11 @@ Grid Base Plate Type = None").arg(QString::number((int)(scfg->layer_height*1000)
 
 
 
-void SVGexporter::parsePolyTreeAndWrite(const PolyNode* pn, bool isTemp, std::stringstream& content){
-    writePolygon(pn, isTemp, content);
+void SVGexporter::parsePolyTreeAndWrite(const PolyNode* pn, std::stringstream& content){
+    writePolygon(pn, content);
     for (int i=0; i<pn->ChildCount(); i++){
         PolyNode* new_pn = pn->Childs[i];
-        parsePolyTreeAndWrite(new_pn, isTemp, content);
+        parsePolyTreeAndWrite(new_pn, content);
     }
 
     /*while (pn != NULL){
@@ -217,10 +221,10 @@ void SVGexporter::parsePolyTreeAndWrite(const PolyNode* pn, bool isTemp, std::st
 
 }
 
-void SVGexporter::writePolygon(const PolyNode* contour, bool isTemp, std::stringstream& content){
+void SVGexporter::writePolygon(const PolyNode* contour, std::stringstream& content){
     content << "      <polygon contour:type=\"contour\" points=\"";
     for (IntPoint point: contour->Contour){
-		if (!isTemp && scfg->slice_invert == SlicingConfiguration::Invert::InvertXAxis)
+		if (_invert)
 		{
 			point.X = -1 * point.X;
 		}
@@ -242,10 +246,10 @@ void SVGexporter::writePolygon(const PolyNode* contour, bool isTemp, std::string
     }
 }
 
-void SVGexporter::writePolygon(ClipperLib::Path& contour, bool isTemp, std::stringstream& content){
+void SVGexporter::writePolygon(ClipperLib::Path& contour, std::stringstream& content){
     content << "      <polygon contour:type=\"contour\" points=\"";
     for (IntPoint point: contour){
-		if (!isTemp && scfg->slice_invert == SlicingConfiguration::Invert::InvertXAxis)
+		if (_invert)
 		{
 			point.X = -1 * point.X;
 		}

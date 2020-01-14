@@ -22,7 +22,7 @@
 #include <QKeyboardHandler>
 #include "input/raycastcontroller.h"
 #include "feature/overhangDetect.h"
-#include "common/TaskManager.h"
+#include "Tasking/TaskManager.h"
 #include "slice/SlicingOptBackend.h"
 #include "support/SupportRaftManager.h"
 #include "feature/FeatureHistoryManager.h"
@@ -286,13 +286,7 @@ public:
 	const Hix::Settings::AppSetting& settings()const;
 private:
 	Hix::Tasking::TaskManager _taskManager;
-	void setModelViewMode(int mode);
 	GLModel* getModelByID(int ID);
-	//do not mix UI work with background thread
-	//std::future<Slicer*> exportSelected(bool isTemp);
-	QString getExportPath();
-	//do not make non-async version of this as taskflow allows to spawn  internal dynamic tasks for better throughoutput.
-	Hix::Tasking::GenericTask* exportSelectedAsync(QString exportPath, bool isTemp);
 	bool groupSelectionActive = false;
     int viewMode;
     int layerViewFlags;

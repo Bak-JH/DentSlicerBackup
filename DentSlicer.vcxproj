@@ -248,8 +248,8 @@
     <ClCompile Include="common\GTEngine\Source\Mathematics\GteVETNonmanifoldMesh.cpp" />
     <ClCompile Include="common\GTEngine\Source\Mathematics\MSW\GteCPUQueryInstructions.cpp" />
     <ClCompile Include="common\GTEngine\Source\Mathematics\MSW\GteIntelSSE.cpp" />
-    <ClCompile Include="common\Task.cpp" />
-    <ClCompile Include="common\TaskManager.cpp" />
+    <ClCompile Include="Tasking\Task.cpp" />
+    <ClCompile Include="Tasking\TaskManager.cpp" />
     <ClCompile Include="common\Tree\BVHBuilder.cpp" />
     <ClCompile Include="common\Tree\TreeBuilder.cpp" />
     <ClCompile Include="DentEngine\src\Bounds3D.cpp" />
@@ -322,6 +322,7 @@
     <ClCompile Include="feature\repair\TMesh\triangle.cpp" />
     <ClCompile Include="feature\repair\TMesh\vertex.cpp" />
     <ClCompile Include="feature\rotate.cpp" />
+    <ClCompile Include="feature\sliceExport.cpp" />
     <ClCompile Include="feature\SupportFeature.cpp" />
     <ClCompile Include="feature\ModelBuilder\TwoManifoldBuilder.cpp" />
     <ClCompile Include="feature\UndoRedo.cpp" />
@@ -825,7 +826,7 @@
     <ClInclude Include="common\rapidjson\stringbuffer.h" />
     <ClInclude Include="common\rapidjson\writer.h" />
     <ClInclude Include="common\Singleton.h" />
-    <ClInclude Include="common\Task.h" />
+    <ClInclude Include="Tasking\Task.h" />
     <ClInclude Include="common\taskflow\core\executor.hpp" />
     <ClInclude Include="common\taskflow\core\flow_builder.hpp" />
     <ClInclude Include="common\taskflow\core\graph.hpp" />
@@ -859,7 +860,7 @@
     <ClInclude Include="common\taskflow\utility\passive_vector.hpp" />
     <ClInclude Include="common\taskflow\utility\singular_allocator.hpp" />
     <ClInclude Include="common\taskflow\utility\traits.hpp" />
-    <ClInclude Include="common\TaskManager.h" />
+    <ClInclude Include="Tasking\TaskManager.h" />
     <ClInclude Include="common\TrackedIndexedList.h" />
     <ClInclude Include="common\Tree\TreeBuilder.h" />
     <ClInclude Include="DentEngine\src\Bounds3D.h" />
@@ -944,6 +945,7 @@
     <ClInclude Include="feature\repair\TMesh\triangle.h" />
     <ClInclude Include="feature\repair\TMesh\vertex.h" />
     <ClInclude Include="feature\rotate.h" />
+    <ClInclude Include="feature\sliceExport.h" />
     <ClInclude Include="feature\SupportFeature.h" />
     <ClInclude Include="feature\ModelBuilder\TwoManifoldBuilder.h" />
     <ClInclude Include="feature\UndoRedo.h" />

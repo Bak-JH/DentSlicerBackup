@@ -42,6 +42,7 @@
 #include "feature/deleteModel.h"
 #include "feature/addModel.h"
 #include "feature/ModelBuilder/ModelBuilderMode.h"
+#include "feature/sliceExport.h"
 #include "render/CircleMeshEntity.h"
 #include "Qml/components/LeftPopup.h"
 #include "Qml/components/Toast.h"
@@ -521,12 +522,7 @@ void QmlManager::resetCursor(){
 
 Hix::Engine3D::Bounds3D QmlManager::getSelectedBound()const
 {
-	Hix::Engine3D::Bounds3D bound;
-	for (auto& selected : selectedModels)
-	{
-		bound += selected->recursiveAabb();
-	}
-	return bound;
+	return Hix::Engine3D::combineBounds(selectedModels);
 }
 
 
@@ -1166,11 +1162,13 @@ void QmlManager::runGroupFeature(int ftrType, QString state, double arg1, double
     case ftrScale:
         break;
     case ftrExport:
-        // save to temporary folder
-        qDebug() << "file export called";
-		auto exportTaskFlow = exportSelectedAsync(getExportPath(), false);
-		_taskManager.enqueTask(exportTaskFlow);
+	{
+		//mode-less since no UI change except for the file dialog.
+		Hix::Features::ExportMode exportMode;
 		break;
+
+	}
+
     }
 }
 
@@ -1394,99 +1392,26 @@ void QmlManager::setViewMode(int viewMode) {
 		QMetaObject::invokeMethod(boxUpperTab, "all_off");
         //if (viewMode == 0) viewObjectButton->setProperty("checked", true);
         if (viewMode == 2) viewLayerButton->setProperty("checked", true);
-
-        this->viewMode = viewMode;
-
-		bool sliceNeeded = false;
-
+		this->viewMode = viewMode;
 		switch (viewMode) {
 		case VIEW_MODE_OBJECT:
+		{
 			QMetaObject::invokeMethod(yesno_popup, "closePopUp");
 			QMetaObject::invokeMethod(leftTabViewMode, "setObjectView");
+			auto layerview = dynamic_cast<LayerView*>(_currentMode.get());
+			if (layerview)
+				_currentMode.reset();
 			break;
-
+		}
 		case VIEW_MODE_LAYER:
-			sliceNeeded = true;
+		{
+			_currentMode.reset(new LayerView(selectedModels, getSelectedBound()));
 			break;
 		}
-		if (sliceNeeded)
-		{
-			auto exportTaskFlow = exportSelectedAsync(QDir::tempPath(), true);
-			auto f = std::bind(&QmlManager::setModelViewMode, this, viewMode);
-			_taskManager.enqueTask(exportTaskFlow);
-			_taskManager.enqueUITask(f);
-		}
-		else
-		{
-			setModelViewMode(viewMode);
 		}
     }
 }
-QString QmlManager::getExportPath()
-{
-	QString fileName;
-	fileName = QFileDialog::getSaveFileName(nullptr, tr("Export sliced file"), "");
-	return fileName;
-}
-Hix::Tasking::GenericTask* QmlManager::exportSelectedAsync(QString exportPath, bool isTemp)
-{
-	if (exportPath.isEmpty())
-		return nullptr;
-	if (selectedModels.empty())
-		return nullptr;
-	auto task = new GenericTask();
-	task->getFlow().emplace([this, exportPath, isTemp](tf::Subflow& subflow) {
 
-
-		STLexporter* ste = new STLexporter();
-
-		qmlManager->openProgressPopUp();
-
-
-		
-		// need to generate support, raft
-		std::vector<std::reference_wrapper<const GLModel>> constSelectedModels;
-		constSelectedModels.reserve(selectedModels.size());
-		std::transform(std::begin(selectedModels), std::end(selectedModels), std::back_inserter(constSelectedModels),
-			[](GLModel* ptr)-> std::reference_wrapper<const GLModel> {
-				return std::cref(*ptr);
-			});
-		//constSelectedModels.reserve(selectedModels.size());
-		//for (auto each : selectedModels)
-		//{
-		//	constSelectedModels.emplace_back(each);
-		//}
-		auto selectedBound = getSelectedBound();
-		auto result = SlicingEngine::sliceModels(isTemp, subflow, selectedBound.zMax(), constSelectedModels, _supportRaftManager, exportPath);
-		QMetaObject::invokeMethod(layerViewSlider, "setThickness", Q_ARG(QVariant, (scfg->layer_height)));
-		QMetaObject::invokeMethod(layerViewSlider, "setLayerCount", Q_ARG(QVariant, (result.layerCount -1))); //0 based index
-	});
-	return task;
-
-}
-void QmlManager::setModelViewMode(int mode)
-{
-
-	switch (mode) {
-	case VIEW_MODE_OBJECT:
-	{
-		//auto layerview = dynamic_cast<LayerView*>(_currentFeature.get());
-		//if (layerview)
-		//{
-		//	_currentMode.reset();
-		//}		
-		//break;
-	}
-
-
-	case VIEW_MODE_LAYER:
-	{
-		//_currentFeature.reset(new LayerView(selectedModels, getSelectedBound()));
-		break;
-	}
-
-	}
-}
 int QmlManager::getViewMode() {
     return viewMode;
 }

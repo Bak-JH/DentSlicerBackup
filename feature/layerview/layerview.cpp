@@ -1,5 +1,6 @@
 #include "layerview.h"
 #include "../../qmlmanager.h"
+#include "../sliceExport.h"
 using namespace Hix;
 using namespace Hix::Features;
 using namespace Hix::Features::Cut;
@@ -12,6 +13,20 @@ using namespace ClipperLib;
 Hix::Features::LayerView::LayerView(const std::unordered_set<GLModel*>& selectedModels, Hix::Engine3D::Bounds3D bound):
 	_models(selectedModels), _crossSectionPlane(qmlManager->total), _modelsBound(bound)
 {
+	SlicingEngine::Result result;
+	SliceExport se(_models);
+	try
+	{
+		se.run();
+		result = se.getResult();
+	}
+	catch (...)
+	{
+		qDebug() << "slice export failed";
+		return;
+	}
+
+	//prepare layers
 	for (auto& model : _models)
 	{
 		model->changeViewMode(VIEW_MODE_LAYER);
