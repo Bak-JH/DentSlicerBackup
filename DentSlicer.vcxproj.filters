@@ -783,6 +783,9 @@
     <ResourceCompile Include="DentSlicer.rc" />
   </ItemGroup>
   <ItemGroup>
+    <Media Include="Resource\dentslicer_loading.mp4" />
+  </ItemGroup>
+  <ItemGroup>
     <Image Include="Resource\arrow_right.png" />
     <Image Include="Resource\btn_modelbuild_help.png" />
     <Image Include="Resource\btn_setting.png" />
@@ -805,6 +808,8 @@
     <Image Include="Resource\cut_free_off_border2.png" />
     <Image Include="Resource\cut_free_on.png" />
     <Image Include="Resource\cut_free_on_border2.png" />
+    <Image Include="Resource\dentslicer_loading.gif" />
+    <Image Include="Resource\dentslicer_loading_2.gif" />
     <Image Include="Resource\drop_arrow_down.png" />
     <Image Include="Resource\drop_arrow_up.png" />
     <Image Include="Resource\ic_refresh.png" />
@@ -850,6 +855,8 @@
     <Image Include="Resource\part_remove_1.png" />
     <Image Include="Resource\part_show_1.png" />
     <Image Include="Resource\part_show_select_1.png" />
+    <Image Include="Resource\progress_check.png" />
+    <Image Include="Resource\progress_loading.png" />
     <Image Include="Resource\redo_arrow.png" />
     <Image Include="Resource\support_setting.png" />
     <Image Include="Resource\toast_check.png" />
@@ -861,12 +868,9 @@
     <Image Include="Resource\triangle_right.png" />
     <Image Include="Resource\triangle_up.png" />
     <Image Include="Resource\triangle_up_1.5.png" />
+    <Image Include="Resource\triangle_up_hover.png" />
     <Image Include="Resource\undo_arrow.png" />
     <Image Include="Resource\vs_icon.png" />
-    <Image Include="Resource\dentslicer_loading.gif" />
-    <Image Include="Resource\dentslicer_loading_2.gif" />
-    <Image Include="Resource\progress_check.png" />
-    <Image Include="Resource\progress_loading.png" />
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="feature\layerview\CrossSectionPlane.h" />
@@ -913,34 +917,17 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
-    <None Include="Qml\FeatureMenu.qml" />
     <None Include="Qml\Cam.qml" />
     <None Include="Qml\CamBox.qml" />
     <None Include="Qml\CameraController.qml" />
     <None Include="Qml\CameraManager.qml" />
     <None Include="Qml\CanvasTest.qml" />
     <None Include="Qml\CoordinateMesh.qml" />
-    <None Include="Qml\CtrCutSwitch.qml" />
-    <None Include="Qml\CtrDropdownBox.qml" />
     <None Include="Qml\FeedbackPopUp.qml" />
     <None Include="Qml\FileDialogLoad.qml" />
     <None Include="Qml\InputBox.qml" />
     <None Include="Qml\LayerViewPopup.qml" />
     <None Include="Qml\LayerViewSlider.qml" />
-    <None Include="Qml\LeftPopup.qml" />
-    <None Include="Qml\LeftPopupArrange.qml" />
-    <None Include="Qml\LeftPopupCut.qml" />
-    <None Include="Qml\LeftPopupExport.qml" />
-    <None Include="Qml\LeftPopupExtend.qml" />
-    <None Include="Qml\LeftPopupLabel.qml" />
-    <None Include="Qml\LeftPopupLayFlat.qml" />
-    <None Include="Qml\LeftPopupModelBuild.qml" />
-    <None Include="Qml\LeftPopupMove.qml" />
-    <None Include="Qml\LeftPopupOrient.qml" />
-    <None Include="Qml\LeftPopupRotate.qml" />
-    <None Include="Qml\LeftPopupScale.qml" />
-    <None Include="Qml\LeftPopupShellOffset.qml" />
-    <None Include="Qml\LeftPopupSupport.qml" />
     <None Include="Qml\LeftTab.qml" />
     <None Include="Qml\LeftTabExport.qml" />
     <None Include="Qml\LeftTabExportElement.qml" />
@@ -970,6 +957,7 @@
     <None Include="Qml\PrintInfo.qml" />
     <None Include="Qml\PrintSetting.qml" />
     <None Include="Qml\PrintSettingPopup.qml" />
+    <None Include="Qml\ProgressRevised.qml" />
     <None Include="Qml\ProgressShell.qml" />
     <None Include="Qml\SlideBar.qml" />
     <None Include="Qml\Toast.qml" />
@@ -1134,145 +1122,26 @@
     <None Include="resource\zoom_down.png" />
     <None Include="resource\zoom_up.png" />
     <None Include="icon.ico" />
-    <None Include="Qml\ModelBuildSlider.qml" />
-    <None Include="Qml\LeftPopupModelBuild.qml" />
-    <None Include="Qml\PrintSetting.qml" />
-    <None Include="Qml\PrintSettingPopup.qml" />
-    <None Include="Qml\BastardyMenu.qml" />
-    <None Include="Qml\MenuButton.qml" />
-    <None Include="Qml\LeftPopup.qml" />
-    <None Include="Qml\InputBox.qml" />
-    <None Include="Qml\CtrSpinBox.qml" />
-    <None Include="Qml\CtrDropdownBox.qml" />
-    <None Include="Qml\CtrCutSwitch.qml" />
-    <None Include="Qml\Toast.qml" />
-    <None Include="Qml\SlideBar.qml" />
-    <None Include="Qml\CtrTextBox.qml" />
-    <None Include="Qml\CanvasTest.qml" />
-    <None Include="Qml\ModalWindow.qml" />
-    <None Include="Qml\Cam.qml" />
-    <None Include="Qml\CamBox.qml" />
-    <None Include="Qml\ViewMode.qml" />
-    <None Include="Qml\UndoRedo.qml" />
-    <None Include="Qml\PartList.qml" />
-    <None Include="Qml\PartListContentBox.qml" />
-    <None Include="Qml\PrintInfo.qml" />
-    <None Include="Qml\LeftPopupMove.qml" />
-    <None Include="Qml\LeftPopupRotate.qml" />
-    <None Include="Qml\LeftPopupScale.qml" />
-    <None Include="Qml\LeftPopupArrange.qml" />
-    <None Include="Qml\LeftPopupExtend.qml" />
-    <None Include="Qml\LeftPopupLayFlat.qml" />
-    <None Include="Qml\LeftPopupOrient.qml" />
-    <None Include="Qml\LeftPopupCut.qml" />
-    <None Include="Qml\LeftPopupSupport.qml" />
-    <None Include="Qml\LeftPopupLabel.qml" />
-    <None Include="Qml\LeftPopupExport.qml" />
-    <None Include="Qml\LeftPopupShellOffset.qml" />
-    <None Include="Qml\CtrScaleInputBox.qml" />
-    <None Include="Qml\ProgressShell.qml" />
-    <None Include="Qml\FileDialogLoad.qml" />
-    <None Include="Qml\PlanesliderRange.qml" />
-    <None Include="Qml\BastardyMenu.qml" />
+    <None Include="Qml\Controls\CtrCutSwitch.qml" />
+    <None Include="Qml\Controls\CtrDropdownBox.qml" />
+    <None Include="Qml\Controls\CtrScaleInputBox.qml" />
+    <None Include="Qml\Controls\CtrSpinBox.qml" />
+    <None Include="Qml\Controls\CtrTextBox.qml" />
+    <None Include="Qml\Controls\CtrToggleSwitch.qml" />
+    <None Include="Qml\FeaturePopup\LeftPopup.qml" />
+    <None Include="Qml\FeaturePopup\LeftPopupCut.qml" />
+    <None Include="Qml\FeaturePopup\LeftPopupArrange.qml" />
+    <None Include="Qml\FeaturePopup\LeftPopupExport.qml" />
+    <None Include="Qml\FeaturePopup\LeftPopupExtend.qml" />
+    <None Include="Qml\FeaturePopup\LeftPopupLayFlat.qml" />
+    <None Include="Qml\FeaturePopup\LeftPopupLabel.qml" />
+    <None Include="Qml\FeaturePopup\LeftPopupModelBuild.qml" />
+    <None Include="Qml\FeaturePopup\LeftPopupOrient.qml" />
+    <None Include="Qml\FeaturePopup\LeftPopupMove.qml" />
+    <None Include="Qml\FeaturePopup\LeftPopupRotate.qml" />
+    <None Include="Qml\FeaturePopup\LeftPopupScale.qml" />
+    <None Include="Qml\FeaturePopup\LeftPopupShellOffset.qml" />
+    <None Include="Qml\FeaturePopup\LeftPopupSupport.qml" />
     <None Include="Qml\FeatureMenu.qml" />
-    <None Include="Qml\MenuItem.qml" />
-    <None Include="Qml\CtrToggleSwitch.qml" />
-    <None Include="Qml\CtrTextBox.qml" />
-    <None Include="Qml\CtrSpinBox.qml" />
-    <None Include="Qml\ProgressRevised.qml" />
-  </ItemGroup>
-  <ItemGroup>
-    <Filter Include="Source Files">
-      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
-      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
-      <ParseFiles>true</ParseFiles>
-    </Filter>
-    <Filter Include="Header Files">
-      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
-      <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
-      <ParseFiles>true</ParseFiles>
-    </Filter>
-  </ItemGroup>
-  <ItemGroup>
-    <CopyFileToFolders Include="settings.json" />
-  </ItemGroup>
-  <ItemGroup>
-    <Image Include="Resource\vs_icon.png" />
-    <Image Include="Resource\closebutton.png" />
-    <Image Include="Resource\triangle_down.png" />
-    <Image Include="Resource\triangle_up.png" />
-    <Image Include="Resource\triangle_down_1.5.png" />
-    <Image Include="Resource\drop_arrow_up.png" />
-    <Image Include="Resource\drop_arrow_down.png" />
-    <Image Include="Resource\traingle_up_1.5.png" />
-    <Image Include="Resource\triangle_up_1.5.png" />
-    <Image Include="Resource\cut_free_off_1.5.png" />
-    <Image Include="Resource\cut_flat_off_1.5.png" />
-    <Image Include="Resource\menu_extract.png" />
-    <Image Include="Resource\toast_check.png" />
-    <Image Include="Resource\toast_x.png" />
-    <Image Include="Resource\cam.png" />
-    <Image Include="Resource\cam_hover.png" />
-    <Image Include="Resource\cam_back_1.5.png" />
-    <Image Include="Resource\cam_bottom_1.5.png" />
-    <Image Include="Resource\cam_front_1.5.png" />
-    <Image Include="Resource\cam_left_1.5.png" />
-    <Image Include="Resource\cam_right_1.5.png" />
-    <Image Include="Resource\cam_top_1.5.png" />
-    <Image Include="Resource\cut_flat_off_border2.png" />
-    <Image Include="Resource\cut_free_off_border2.png" />
-    <Image Include="Resource\triangle_right.png" />
-    <Image Include="Resource\cut_flat_on_border2.png" />
-    <Image Include="Resource\cut_free_on_border2.png" />
-    <Image Include="Resource\part_show.png" />
-    <Image Include="Resource\part_remove.png" />
-    <Image Include="Resource\menu_arrange.png" />
-    <Image Include="Resource\menu_autorepair.png" />
-    <Image Include="Resource\menu_cut.png" />
-    <Image Include="Resource\menu_extend.png" />
-    <Image Include="Resource\menu_label.png" />
-    <Image Include="Resource\menu_layflat.png" />
-    <Image Include="Resource\menu_move.png" />
-    <Image Include="Resource\menu_open.png" />
-    <Image Include="Resource\menu_orient.png" />
-    <Image Include="Resource\menu_rotate.png" />
-    <Image Include="Resource\menu_save.png" />
-    <Image Include="Resource\menu_scale.png" />
-    <Image Include="Resource\menu_shelloffset.png" />
-    <Image Include="Resource\menu_support.png" />
-    <Image Include="Resource\undo_arrow.png" />
-    <Image Include="Resource\redo_arrow.png" />
-    <Image Include="Resource\menu_open_select_1.png" />
-    <Image Include="Resource\menu_arrange_select_1.png" />
-    <Image Include="Resource\menu_autorepair_select_1.png" />
-    <Image Include="Resource\menu_cut_select_1.png" />
-    <Image Include="Resource\menu_extend_select_1.png" />
-    <Image Include="Resource\menu_extract_select_1.png" />
-    <Image Include="Resource\menu_label_select_1.png" />
-    <Image Include="Resource\menu_layflat_select_1.png" />
-    <Image Include="Resource\menu_move_select_1.png" />
-    <Image Include="Resource\menu_orient_select_1.png" />
-    <Image Include="Resource\menu_rotate_select_1.png" />
-    <Image Include="Resource\menu_save_select_1.png" />
-    <Image Include="Resource\menu_shelloffset_select_1.png" />
-    <Image Include="Resource\menu_support_select_1.png" />
-    <Image Include="Resource\menu_scale_select_1.png" />
-    <Image Include="Resource\part_delete_1.png" />
-    <Image Include="Resource\part_hide_1.png" />
-    <Image Include="Resource\part_hide_select_1.png" />
-    <Image Include="Resource\part_show_1.png" />
-    <Image Include="Resource\part_show_select_1.png" />
-    <Image Include="Resource\img_arrange.png" />
-    <Image Include="Resource\img_label.png" />
-    <Image Include="Resource\img_layflat.png" />
-    <Image Include="Resource\img_orient.png" />
-    <Image Include="Resource\support_setting.png" />
-    <Image Include="Resource\triangle_down_hover.png" />
-    <Image Include="Resource\triangle_up_hover.png" />
-    <Image Include="Resource\img_scale_unlock_revised.png" />
-    <Image Include="Resource\img_scale_lock_revised.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Media Include="Resource\dentslicer_loading.mp4" />
   </ItemGroup>
 </Project>

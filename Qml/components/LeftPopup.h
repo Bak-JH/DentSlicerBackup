@@ -3,6 +3,7 @@
 #include <QtQuick/private/qquicktext_p.h>
 #include "Buttons.h"
 #include "Inputs.h"
+#include "QtQml/private/qqmllistmodel_p.h"
 //#include <QComboBox>
 
 namespace Hix
@@ -29,6 +30,23 @@ namespace Hix
 			QString _title = "Name";
 		};
 
+		class ProgressPopupShell : public QQuickRectangle
+		{
+			Q_OBJECT
+			Q_PROPERTY(QString title MEMBER _title NOTIFY titleChanged)
+
+		public:
+			ProgressPopupShell(QQuickItem* parent = nullptr);
+			virtual ~ProgressPopupShell();
+			Q_INVOKABLE void appendFeature(QString featureName);
+
+		signals:
+			void titleChanged();
+			void listChanged();
+
+		private:
+			QString _title = "Name";
+		};
 		//class TextButton : public RoundButton
 		//{
 		//	Q_OBJECT

@@ -68,6 +68,7 @@ QmlManager::QmlManager(QObject *parent) : QObject(parent), _optBackend(this, scf
 	qmlRegisterType<Hix::QML::ImageToggleSwitch>("hix.qml", 1, 0, "ImageToggleSwitch");
 
 	qmlRegisterType<Hix::QML::LeftPopupShell>("hix.qml", 1, 0, "LeftPopupShell");
+	qmlRegisterType<Hix::QML::ProgressPopupShell>("hix.qml", 1, 0, "ProgressPopupShell");
 	qmlRegisterType<Hix::QML::ToastShell>("hix.qml", 1, 0, "ToastShell");
 	qmlRegisterType<Hix::QML::SlideBarShell>("hix.qml", 1, 0, "SlideBarShell");
 	qmlRegisterType<Hix::QML::ModalShell>("hix.qml", 1, 0, "ModalShell");
@@ -336,7 +337,7 @@ void QmlManager::openModelFile(){
 	setProgress(0.3);
 	mesh->centerMesh();
 
-	auto addModel = new ListModel(mesh, filename, nullptr);
+	auto addModel = new Hix::Features::ListModel(mesh, filename, nullptr);
 	_featureHistoryManager.addFeature(addModel);
 
 	auto latest = addModel->getAddedModel();
@@ -1200,7 +1201,7 @@ void QmlManager::pasteModel(){
     for (auto copyIdx : copyMeshes){
 		auto model = getModelByID(copyIdx);
 		QString temp = model->modelName() + "_copy";
-		_featureHistoryManager.addFeature( new ListModel(new Mesh(*model->getMesh()), temp, nullptr));
+		_featureHistoryManager.addFeature( new Hix::Features::ListModel(new Mesh(*model->getMesh()), temp, nullptr));
     }
     openArrange();
     return;
