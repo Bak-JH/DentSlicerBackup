@@ -4,6 +4,8 @@ import QtQuick.Scene3D 2.0
 import QtQuick.Window 2.2
 import QtQuick.Controls.Styles 1.4
 import QtQuick.Dialogs 1.2
+import "Controls"
+import "FeaturePopup"
 
 Item{
     ApplicationWindow {
@@ -137,11 +139,10 @@ Item{
 
 		PartList{
 			id: partlist
-			width : 265
             height : parent.height - featureMenu.height
 			anchors.top: featureMenu.bottom
             anchors.left: parent.left
-			z: 10
+			//z: 10
 		}
 
         LeftTabExport{
@@ -206,13 +207,7 @@ Item{
 		}
 		*/
 
-		ProgressRevised{
-			id: progressrevised
-			anchors.top: uppertab.bottom
-			anchors.left: lefttab.right
-			anchors.leftMargin: 15
-			anchors.topMargin: 120
-		}
+		
 		/*
 		LeftPopup {
 			id: leftpopup
@@ -288,9 +283,10 @@ Item{
 			anchors.left: partlist.right
 			anchors.leftMargin: 15
 		}
-		
+
 		ProgressShell {
 			id: progressshell
+			objectName: "progressShell"
 			anchors.top: featureMenu.bottom
 			anchors.topMargin: 320
 			anchors.left: undoredo.right
@@ -344,6 +340,13 @@ Item{
 			anchors.topMargin: 500
 			anchors.left: slidebar.right
 			anchors.leftMargin: 100
+		}
+		ProgressRevised{
+			id: progressrevised
+			anchors.top: uppertab.bottom
+			anchors.left: lefttab.right
+			anchors.leftMargin: 15
+			anchors.topMargin: 120
 		}
 		
         MouseArea{
@@ -455,6 +458,7 @@ Item{
             anchors.verticalCenter: parent.verticalCenter
         }
     }
+
 
     Login{
         id : loginWindow

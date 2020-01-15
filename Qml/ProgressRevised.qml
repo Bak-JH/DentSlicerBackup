@@ -5,7 +5,34 @@ import QtQuick.Controls.Styles 1.4
 import QtGraphicalEffects 1.12
 //import QtMultimedia 5.14
 
-Item {
+Hix.ProgressPopupShell {
+	id: shell
+	width: window.width
+	height: window.height
+	color: "#00000000"
+
+	ListModel
+	{		// 리스트뷰에 담을 데이터들을 선언.
+		id:model
+		objectName: "model"
+
+		function appendFeature(featureName)
+		{
+			model.append({"name" : featureName});
+		}
+	}
+	
+	MouseArea {
+		id: blockingArea
+		objectName: "blockingArea"
+		anchors.fill: parent
+		propagateComposedEvents: false
+        hoverEnabled: true
+        preventStealing: true
+		
+		onClicked: { appendFeature("abcd"); } //TODO: delete later
+	}
+
 	Rectangle {
 		id: popup
 		width: 216
@@ -67,13 +94,6 @@ Item {
 					}
 				}
 			}
-		}
-
-		ListModel {		// 리스트뷰에 담을 데이터들을 선언.
-			id:model
-			ListElement { name: "Model import" }
-			ListElement { name: "Mesh repair" }
-			ListElement { name: "Auto arrange" }
 		}
 
 		Rectangle {

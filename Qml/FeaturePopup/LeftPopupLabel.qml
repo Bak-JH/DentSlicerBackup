@@ -1,6 +1,7 @@
 import QtQuick 2.6
 import hix.qml 1.0
 import QtGraphicalEffects 1.12
+import "../Controls"
 
 LeftPopup {
 	title: qsTr("Label")
