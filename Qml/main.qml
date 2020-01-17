@@ -1,5 +1,5 @@
 import QtQuick 2.6
-import QtQuick.Controls 1.4
+import QtQuick.Controls 2.1
 import QtQuick.Scene3D 2.0
 import QtQuick.Window 2.2
 import QtQuick.Controls.Styles 1.4
@@ -139,7 +139,6 @@ Item{
 
 		PartList{
 			id: partlist
-            height : parent.height - featureMenu.height
 			anchors.top: featureMenu.bottom
             anchors.left: parent.left
 			//z: 10
@@ -240,7 +239,7 @@ Item{
             anchors.leftMargin: 15
 			anchors.topMargin: 250
 		}
-
+		*/
 		LeftPopupModelBuild
 		{
 			id: leftpopupmodelbuild
@@ -249,7 +248,7 @@ Item{
 			anchors.leftMargin: 15
 			anchors.topMargin: 250
 		}
-		*/
+		
 
 		LeftPopupCut {
 			id: leftpopupcut
@@ -270,9 +269,9 @@ Item{
 		
 		Toast {
 			id: toast
-			anchors.top: uppertab.bottom
+			anchors.bottom: window.bottom
 			anchors.topMargin: 600
-			anchors.left: lefttab.right
+			anchors.left: window.left
 			anchors.leftMargin: 15
 		}
 		
@@ -284,69 +283,44 @@ Item{
 			anchors.leftMargin: 15
 		}
 
-		ProgressShell {
-			id: progressshell
-			objectName: "progressShell"
-			anchors.top: featureMenu.bottom
-			anchors.topMargin: 320
-			anchors.left: undoredo.right
-			anchors.leftMargin: 40
-		}
-		/*
-		ModelBuildSlider {
-			id: modelbuildslider
-			anchors.top: uppertab.bottom
-			anchors.topMargin: 160
-			anchors.left: lefttab.right
-			anchors.leftMargin: 600
-		}
-		*/
 		SlideBar {
 			id: slidebar
 			anchors.top: uppertab.bottom
 			anchors.topMargin: 160
-			anchors.left: lefttab.right
-			anchors.leftMargin: 720
+			anchors.left: leftpopuplabel.right
+			anchors.leftMargin: 15
 		}
 		
+		ModelBuildSlider {
+			id: buildslidebar
+			anchors.top: uppertab.bottom
+			anchors.topMargin: 160
+			anchors.left: slidebar.right
+			anchors.leftMargin: 15
+		}
 
 		Cam {
 			id: cam
 			anchors.top: featureMenu.bottom
 			anchors.topMargin: 160
 			anchors.left: slidebar.right
-			anchors.leftMargin: 300
+			anchors.leftMargin: 15
 		}
-		/*
-		CanvasTest {
-			id: canvastest
-			anchors.top: uppertab.bottom
-			anchors.topMargin: 160
-			anchors.left: lefttab.right
-			anchors.leftMargin: 180
-		}
-		*/
+
 		ViewMode {
 			id: viewmode
-			anchors.top: uppertab.bottom
-			anchors.left: lefttab.right
+			anchors.top: partlist.bottom
+			anchors.left: window.left
 			anchors.leftMargin: 15
-			anchors.topMargin: 700
+			anchors.topMargin: 15
 		}
-		
+
 		PrintInfo {
 			id: printinfo
 			anchors.top: slidebar.top
 			anchors.topMargin: 500
 			anchors.left: slidebar.right
 			anchors.leftMargin: 100
-		}
-		ProgressRevised{
-			id: progressrevised
-			anchors.top: uppertab.bottom
-			anchors.left: lefttab.right
-			anchors.leftMargin: 15
-			anchors.topMargin: 120
 		}
 		
         MouseArea{
@@ -437,11 +411,6 @@ Item{
             }
         }
 
-       
-        ProgressPopUp{
-            id : progressPopUp
-        }
-
         ResultPopup{
             id : resultPopUp
         }
@@ -457,8 +426,13 @@ Item{
             anchors.rightMargin:20
             anchors.verticalCenter: parent.verticalCenter
         }
-    }
 
+		ProgressPopup {
+			id: progressPopup
+			enabled: false
+			visible: false
+		}
+    }
 
     Login{
         id : loginWindow

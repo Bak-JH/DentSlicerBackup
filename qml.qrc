@@ -26,8 +26,6 @@
         <file>Qml/UpperTab.qml</file>
         <file>Qml/ViewButton.qml</file>
         <file>Qml/ViewChange.qml</file>
-        <file>Qml/ProgressPopUp.qml</file>
-        <file>Qml/ResultPopup.qml</file>
         <file>Qml/LeftTabExport.qml</file>
         <file>Qml/LeftTabExportElement.qml</file>
         <file>Qml/Login.qml</file>
@@ -62,15 +60,12 @@
         <file>Qml/ViewMode.qml</file>
         <file>Qml/UndoRedo.qml</file>
         <file>Qml/PartList.qml</file>
-        <file>Qml/PartListContentBox.qml</file>
         <file>Qml/PrintInfo.qml</file>
-        <file>Qml/ProgressShell.qml</file>
         <file>Qml/ModelBuildSlider.qml</file>
         <file>Qml/PrintSetting.qml</file>
         <file>Qml/PrintSettingPopup.qml</file>
         <file>Qml/PlanesliderRange.qml</file>
         <file>Qml/MenuItem.qml</file>
-        <file>Qml/ProgressRevised.qml</file>
         <file>Qml/FeatureMenu.qml</file>
         <file>Qml/Controls/CtrCutSwitch.qml</file>
         <file>Qml/Controls/CtrDropdownBox.qml</file>
@@ -92,5 +87,7 @@
         <file>Qml/FeaturePopup/LeftPopupScale.qml</file>
         <file>Qml/FeaturePopup/LeftPopupShellOffset.qml</file>
         <file>Qml/FeaturePopup/LeftPopupSupport.qml</file>
+        <file>Qml/ResultPopup.qml</file>
+        <file>Qml/ProgressPopup.qml</file>
     </qresource>
 </RCC>

@@ -1,12 +1,6 @@
 #include "Toast.h"
 
-void Hix::QML::ToastShell::toastmsgChanged()
+Hix::QML::ToastShell::ToastShell(QQuickItem* parent) : QQuickItem(parent)
 {
-	qDebug() << _toastmsg;
-}
-
-Hix::QML::ToastShell::ToastShell(QQuickItem* parent)
-{
-	setParent(parent);
 }
 

@@ -6,7 +6,6 @@ import "../Controls"
 
 Hix.LeftPopupShell {
 	id: leftpopupshell
-	width: 256
 	height: 196
 
 	function settingToggle() {

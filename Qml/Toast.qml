@@ -4,11 +4,14 @@ import QtQuick.Controls 2.1
 import QtQuick.Controls.Styles 1.4
 import QtGraphicalEffects 1.12
 
-Item {
-	Hix.ToastShell {
-		id: toastshell
-		width: 500
-		height: 60
+Hix.ToastShell {
+	id: root
+	width: 500
+	height: 60
+		Rectangle{
+		id: shell
+		width: parent.width
+		height: parent.height
 		radius: 8
 		color: "#f6feff"
 	
@@ -20,7 +23,7 @@ Item {
 			color: "#00b9c8" // themeColor
 			anchors.verticalCenter: parent.verticalCenter
 			anchors.left: parent.left
-			anchors.leftMargin: (toastshell.height - height) / 2
+			anchors.leftMargin: (root.height - height) / 2
 			Image {
 				source: "qrc:/Resource/toast_check.png"
 				anchors.verticalCenter: parent.verticalCenter
@@ -28,7 +31,7 @@ Item {
 			}
 		}
 		Text {
-			text: parent.toastmsg
+			text: root.toastmsg
 			anchors.verticalCenter: parent.verticalCenter
 			anchors.left: circle.right
 			anchors.leftMargin: circle.width / 4
@@ -39,7 +42,7 @@ Item {
 			height: 16
 			anchors.verticalCenter: parent.verticalCenter
 			anchors.right: parent.right
-			anchors.rightMargin: (toastshell.height - height) / 2
+			anchors.rightMargin: (root.height - height) / 2
 			Image {
 				source: "qrc:/Resource/closebutton.png"
 				anchors.fill: parent
@@ -47,10 +50,10 @@ Item {
 		}
 	}
 	DropShadow {
-		anchors.fill: toastshell
+		anchors.fill: shell
 		radius: 10.0
 		samples: 21
 		color: "#55000000"
-		source: toastshell
+		source: shell
 	}
 }

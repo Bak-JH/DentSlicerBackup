@@ -1,4 +1,4 @@
-#include "LeftPopup.h"
+#include "PopupShell.h"
 #include "qmlmanager.h"
 
 using namespace  Hix::QML;
@@ -18,6 +18,6 @@ Hix::QML::ProgressPopupShell::~ProgressPopupShell()
 
 Q_INVOKABLE void Hix::QML::ProgressPopupShell::appendFeature(QString featureName)
 {
-	QObject* listModel = FindItemByName(qmlManager->engine, "model");
+	QObject* listModel = FindItemByName(qmlManager->engine, "featueList");
 	QMetaObject::invokeMethod(listModel, "appendFeature", Q_ARG(QVariant, featureName));
 }

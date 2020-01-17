@@ -9,14 +9,40 @@ namespace Hix
 {
 	namespace QML
 	{
-		class SlideBarShell : public QQuickRectangle
+		class SlideBarShell : public QQuickItem
 		{
 			Q_OBJECT
-			Q_PROPERTY(QQuickSlider* slideRect MEMBER _slideRect)
+			Q_PROPERTY(double min MEMBER _min NOTIFY minimumChanged)
+			Q_PROPERTY(double max MEMBER _max NOTIFY maximumChanged)
 
 		public:
 			SlideBarShell(QQuickItem* parent = nullptr);
-			QQuickSlider* _slideRect;
+			virtual ~SlideBarShell();
+
+		signals:
+			void minimumChanged();
+			void maximumChanged();
+
+		private:
+			double _min = 0, _max = 100;
+		};
+
+		class RangeSlideBarShell : public QQuickItem
+		{
+			Q_OBJECT
+				Q_PROPERTY(double min MEMBER _min NOTIFY minimumChanged)
+				Q_PROPERTY(double max MEMBER _max NOTIFY maximumChanged)
+
+		public:
+			RangeSlideBarShell(QQuickItem* parent = nullptr);
+			virtual ~RangeSlideBarShell();
+
+		signals:
+			void minimumChanged();
+			void maximumChanged();
+
+		private:
+			double _min = 0, _max = 100;
 		};
 	}
 }

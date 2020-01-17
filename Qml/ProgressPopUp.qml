@@ -1,112 +1,123 @@
-import QtQuick 2.0
-import QtQuick.Controls 1.4
+import QtQuick 2.6
+import hix.qml 1.0 as Hix
+import QtQuick.Controls 2.1
 import QtQuick.Controls.Styles 1.4
+import QtGraphicalEffects 1.12
+//import QtMultimedia 5.14
 
-Rectangle {
-    id: progress_popup
-    objectName: "progress_popup"
-    width: 462
-    height: 110
-    anchors.centerIn: parent
-    visible : false
+Hix.ProgressPopupShell {
+	id: shell
+	width: window.width
+	height: window.height
+	color: "#00000000"
 
-    color: "#E5E5E5"
-    //color: "red"
-    border.width: 1
-    border.color:"#CCCCCC"
+	ListModel // listview data
+	{		
+		id:model
+		objectName: "featueList"
 
-    property int progressNumber
-    property string progressText : "calculating..."
+		function appendFeature(featureName)
+		{
+			model.append({"name" : featureName});
+		}
+	}
+	
+	MouseArea {
+		id: blockingArea
+		objectName: "blockingArea"
+		anchors.fill: parent
+		propagateComposedEvents: false
+        hoverEnabled: true
+        preventStealing: true
+	}
 
-    Rectangle{//shadow
-        id : shadowRect
-        width: parent.width-2
-        height: parent.height-2
-        anchors.bottom: parent.bottom
-        anchors.right: parent.right
+	Rectangle {
+		id: popup
+		width: 216
+		height: 300
+		radius: 8
+		color: "#ffffff"
 
-        color: "#CCCCCC"
-    }
+		property bool running: true
 
-    Rectangle{//main
-        id : contentRect
-        width: parent.width-2
-        height: parent.height-2
-        anchors.top: parent.top
-        anchors.left: parent.left
+		Image {
+			id: img
+			source: "qrc:/Resource/progress_loading.png"
+			anchors.horizontalCenter: parent.horizontalCenter
+			anchors.top: parent.top
+			anchors.topMargin: 40
 
-        color: "#ffffff"
+			RotationAnimation on rotation {
+				from: 0
+				to: 360
+				duration: 1200
+				running: root.runing
+				loops: Animation.Infinite;
+				easing.type: Easing.InOutQuad
+			}
+		}
 
-        Text {
-            id: progress_text1
+		Component { // listview item style
+			id: contactDelegate
+			Item {
+				width: parent.width * 0.92
+				height: 28
+				anchors.horizontalCenter: parent.horizontalCenter
+				Column {
+					anchors.verticalCenter: parent.verticalCenter
+					Text { 
+						id: modelname
+						text: name
+						font.family: openRegular.name
+						font.pointSize: 10
+						anchors.verticalCenter: parent.verticalCenter
+						anchors.left: parent.left
+						anchors.leftMargin: 8
+					}
+	
+				}
+				Rectangle{
+					id: showhide
+					width: 20
+					height: width
+					anchors.right: parent.right
+					anchors.rightMargin: 8
+					anchors.verticalCenter: parent.verticalCenter
+					color: "yellow"
+					Image {
+						id: showhideimg
+						source: "qrc:/Resource/progress_check.png"
+						anchors.verticalCenter: parent.verticalCenter
+					}
+				}
+			}
+		}
 
-            text: "0% complete"
-            anchors.top: parent.top
-            anchors.topMargin: 20
-            anchors.horizontalCenter: parent.horizontalCenter
-            font.pixelSize: 20
-            color: "black"
-            font.family: mainFont.name
-        }
-        Text {
-            id: progress_text2
-            text: "Calculating..."
-            anchors.top : parent.top
-            anchors.horizontalCenter: parent.horizontalCenter
-            anchors.topMargin: 48
-            font.pixelSize: 18
-            color: "#666666"
-            font.family: mainFont.name
-        }
-
-        ProgressBar {
-            id:progress_value
-            value: 0
-            anchors.horizontalCenter: parent.horizontalCenter
-            anchors.bottom: parent.bottom
-            anchors.bottomMargin: 22
-            style:ProgressBarStyle {
-                background: Rectangle{
-                    color:"#EFEFEF"
-                    implicitWidth: 410
-                    implicitHeight: 8
-                }
-                progress: Rectangle{
-                    color:"#44A6B6"
-                    implicitHeight: 8
-                    implicitWidth: progress_value.value
-                }
-            }
-        }
-    }
-
-    function openPopUp(){
-        progress_value.value=0;
-        progress_popup.visible = true;
-        progress_text1.text = "0% complete";
-        progress_text2.text = "Working...";
-        uppertab.disableUppertab();
-        lefttab.disableLefttab();
-        scene3d.disableScene3D();
-    }
-
-    function updateNumber(value){
-        progress_value.value=value;
-        progress_text1.text=Math.round(value*100) + "% complete";
-        if(value===1){
-            progress_popup.visible = false;
-            progress_text1.text = "0% complete";
-            uppertab.enableUppertab();
-            lefttab.enableLefttab();
-            scene3d.enableScene3D();
-            //result_orient.state="active";
-            //result_text.text="Orientation Complete.";
-        }
-    }
-
-    function updateText(inputText){
-        //console.log("upupuputtttt " + inputText);
-        progress_text2.text = inputText;
-    }
-
+		Rectangle {
+			width: parent.width
+			height: parent.height * 0.3
+			anchors.right: parent.right
+			anchors.top: popup.top
+			anchors.topMargin: 168
+			ListView {
+				anchors.fill: parent
+				clip: true
+				width: parent.width
+				height: parent.height
+				model: model
+				delegate: contactDelegate
+				focus: true
+			}
+		}
+	}
+	
+	DropShadow 
+	{
+		anchors.fill: popup
+		radius: 10.0
+		samples: 21
+		color: "#55000000"
+		source: popup
+	}
+	
 }

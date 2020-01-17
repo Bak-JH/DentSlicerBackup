@@ -12,7 +12,7 @@ namespace Hix
 		class ModalShell : public QQuickRectangle
 		{
 			Q_OBJECT
-				Q_PROPERTY(QString modalmsg MEMBER _modalmsg NOTIFY modalmsgChanged)
+			Q_PROPERTY(QString modalmsg MEMBER _modalmsg NOTIFY modalmsgChanged)
 
 		public:
 			ModalShell(QQuickItem* parent = nullptr);

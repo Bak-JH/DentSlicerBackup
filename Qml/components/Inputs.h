@@ -9,16 +9,15 @@ namespace Hix
 {
 	namespace QML
 	{
-		class InputSpinBox;
-		class InputBox : public QQuickItem
+		class InputSpinBox : public QQuickItem
 		{
 			Q_OBJECT
 			Q_PROPERTY(QString labelText MEMBER _labelText NOTIFY labelTextChanged)
 			Q_PROPERTY(int value MEMBER _value NOTIFY valueChanged)
 
 		public:
-			InputBox(QQuickItem* parent = nullptr);
-			virtual ~InputBox();
+			InputSpinBox(QQuickItem* parent = nullptr);
+			virtual ~InputSpinBox();
 
 		signals:
 			void valueChanged();
@@ -27,6 +26,25 @@ namespace Hix
 		private:
 			QString _labelText = "Inputbox";
 			int _value = 0;
+		};
+
+		class TextInputBox : public QQuickItem
+		{
+			Q_OBJECT
+			Q_PROPERTY(QString labelText MEMBER _labelText NOTIFY labelTextChanged)
+			Q_PROPERTY(QString inputText MEMBER _text NOTIFY inputTextChanged)
+
+		public:
+			TextInputBox(QQuickItem* parent = nullptr);
+			virtual ~TextInputBox();
+
+		signals:
+			void inputTextChanged();
+			void labelTextChanged();
+
+		private:
+			QString _labelText = "Inputbox";
+			QString _text;
 		};
 
 		class DropdownBox : public QQuickRectangle

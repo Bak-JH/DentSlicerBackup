@@ -1,14 +1,17 @@
 import QtQuick 2.6
-import hix.qml 1.0
+import hix.qml 1.0 as Hix
 import QtQuick.Controls 2.1
 import QtQuick.Controls.Styles 1.4
 import QtGraphicalEffects 1.12
 
-Item {
-	SlideBarShell {
-		id: slidebarshell
-		width: 64
-		height: 600
+Hix.SlideBarShell {
+	id: root
+	width: 64
+	height: 600
+	Rectangle {
+		id: shell
+		width: parent.width
+		height: parent.height
 		radius: width / 2
 		color: "#ffffff"
 
@@ -22,7 +25,7 @@ Item {
 		}
 		Text {
 			id: zero
-			text: qsTr("0")
+			text: control.from
 			font.family: openRegular.name
 			anchors.horizontalCenter: parent.horizontalCenter
 			anchors.top: control.bottom
@@ -31,8 +34,8 @@ Item {
 
 		Slider {
 			id: control
-			from: parent.slideRect.from
-			to: 154 //parent.slideRect.to
+			from: root.min
+			to: root.max
 			value: (from + to) / 2
 			orientation: Qt.Vertical
 			anchors.horizontalCenter: parent.horizontalCenter
@@ -63,8 +66,6 @@ Item {
 
 			handle: Rectangle {
 				id: handle
-				//x: control.leftPadding + control.visualPosition * (control.availableWidth - width)
-				//y: control.topPadding + control.availableHeight / 2 - height / 2
 				x: control.leftPadding + control.availableWidth / 2 - width / 2
 				y: control.bottomPadding + control.visualPosition * (control.availableHeight - height)
 				implicitWidth: 36
@@ -130,10 +131,10 @@ Item {
 		}
 	}
 	DropShadow {
-		anchors.fill: slidebarshell
+		anchors.fill: shell
 		radius: 10.0
 		samples: 21
 		color: "#55000000"
-		source: slidebarshell
+		source: shell
 	}
 }

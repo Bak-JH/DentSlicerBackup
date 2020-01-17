@@ -9,15 +9,17 @@ namespace Hix
 {
 	namespace QML
 	{
-		class ToastShell : public QQuickRectangle
+		class ToastShell : public QQuickItem
 		{
 			Q_OBJECT
 			Q_PROPERTY(QString toastmsg MEMBER _toastmsg NOTIFY toastmsgChanged)
 
-		public:
+			enum MesssageType { Done, Warning, Error };
+
+		public:	
 			ToastShell(QQuickItem* parent = nullptr);
 
-		public slots:
+		signals:
 			void toastmsgChanged();
 
 		//private:

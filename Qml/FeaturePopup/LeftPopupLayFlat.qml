@@ -6,8 +6,7 @@ import "../Controls"
 
 LeftPopup {
 	title: qsTr("Lay Flat")
-	width: 256
-	leftPopupHeight: 220
+	height: 220
 		
 	Text {
 		id: popupbody

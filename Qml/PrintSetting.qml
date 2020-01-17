@@ -17,7 +17,6 @@ Item{
 		height: width
 		radius: width / 2
 		color: "#ffffff"
-		//color: hovered ? "#eeeeee" : "#ffffff"
 		
 		Image {
 			id: settingimg

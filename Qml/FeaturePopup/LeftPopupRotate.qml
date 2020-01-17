@@ -6,8 +6,7 @@ import "../Controls"
 
 LeftPopup {
 	title: qsTr("Rotate")
-	leftPopupHeight: 284
-	width: 256
+	height: 284
 
 	CtrSpinBox {
 		id: rotateX

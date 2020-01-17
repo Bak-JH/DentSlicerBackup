@@ -4,7 +4,10 @@ import QtQuick.Controls 2.1 //1.4
 import QtQuick.Controls.Styles 1.4
 import QtGraphicalEffects 1.12
 
-Item {
+Hix.PartList {
+	id: root
+	width: 256
+	height: 320
 	property var myPadding: 16
 
 	function showHideToggle() {
@@ -12,10 +15,20 @@ Item {
 		else showhideimg.source = "qrc:/Resource/part_show_1.png"
 	}
 
+	ListModel {		// 리스트뷰에 담을 데이터들을 선언.
+		id:model
+		objectName: "modelList"
+
+		function appendModel(modelName)
+		{
+			model.append({"name" : modelName});
+		}
+	}
+
 	Rectangle {
-		id: partlistshell
-		width: 256
-		height: 320
+		id: shell
+		width: root.width
+		height: root.height
 		radius: 8
 		Text {
 			id: listtitle
@@ -27,20 +40,6 @@ Item {
 			anchors.left: parent.left
 			anchors.leftMargin: myPadding
 		}
-		/*
-		ScrollView {
-			width: 224
-			height: 200
-			anchors.horizontalCenter: parent.horizontalCenter
-			clip: true
-			PartListContentBox {
-				anchors.horizontalCenter: parent.horizontalCenter
-			}
-			PartListContentBox {
-				anchors.horizontalCenter: parent.horizontalCenter
-			}
-		}
-		*/
 	
 		Component { // 리스트 뷰의 틀을 만든다.
 			id: contactDelegate
@@ -91,13 +90,6 @@ Item {
 			}
 		}
 
-		ListModel {		// 리스트뷰에 담을 데이터들을 선언.
-			id:model
-			ListElement { name: "model1.stl" }
-			ListElement { name: "model2.stl" }
-			ListElement { name: "model3.stl" }
-		}
-
 		Rectangle {
 			width: 256 - 16;
 			height: 212;
@@ -143,15 +135,15 @@ Item {
 				source: "qrc:/Resource/part_remove_1.png"
 				//sourceSize.width: width
 			}
-			onClicked: { console.log("delete clicked") }
+			onClicked: { console.log("delete clicked"); }
 		}
 
 	}
 	DropShadow {
-		anchors.fill: partlistshell
+		anchors.fill: shell
 		radius: 10.0
 		samples: 21
 		color: "#55000000"
-		source: partlistshell
+		source: shell
 	}
 }
