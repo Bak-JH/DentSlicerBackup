@@ -7,23 +7,23 @@ import QtQuick.Controls 2.1
 
 Hix.LeftPopupShell 
 {
-	id: leftpopupshell
+	id: root
+	width: 256
+
 	property var myPadding: 16
 	property var leftPopupHeight
 
 	Rectangle 
 	{
 		id: shell
-		width: 256
-		implicitWidth: width
-		height: leftPopupHeight
-		//height: popupHeight
+		width: parent.width
+		height: parent.height
 		color: "#F6FEFF"
 		radius: 8
 
 		Text {
 			id: popuptitle
-			text: leftpopupshell.title
+			text: root.title
 			font.pointSize: 11
 			font.family: openRegular.name
 			font.weight: Font.Bold

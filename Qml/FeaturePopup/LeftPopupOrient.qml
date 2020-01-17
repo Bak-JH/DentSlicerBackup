@@ -5,8 +5,7 @@ import QtQuick.Controls 2.1
 
 LeftPopup {
 	title: qsTr("Orient")
-	leftPopupHeight: 250
-	width: 256
+	height: 250
 
 	Text {
 		id: popupbody

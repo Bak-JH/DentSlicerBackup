@@ -6,8 +6,7 @@ import "../Controls"
 
 LeftPopup {
 	title: qsTr("Scale")
-	leftPopupHeight: 336
-	width: 256
+	height: 336
 
 	CtrScaleInputBox {
 		id: scaleBox

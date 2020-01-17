@@ -6,8 +6,7 @@ import "../Controls"
 
 LeftPopup {
 	title: qsTr("Extend")
-	leftPopupHeight: 220
-	width: 256
+	height: 220
 
 	Text {
 		id: popupbody

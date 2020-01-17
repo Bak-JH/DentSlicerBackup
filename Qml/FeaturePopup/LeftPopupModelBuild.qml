@@ -4,10 +4,9 @@ import QtGraphicalEffects 1.12
 import QtQuick.Controls 2.1
 
 LeftPopup {
-	title: qsTr("Model Build")
-	leftPopupHeight: 168
-	width: 256
 	id: leftpopupshell
+	title: qsTr("Model Build")
+	height: 168
 
 	function helpToggle() {
 		if (modelbuildhelp.visible == false) { modelbuildhelp.visible = true; }

@@ -121,7 +121,6 @@
     <ClCompile Include="Qml\components\Buttons.cpp" />
     <ClCompile Include="Qml\components\Inputs.cpp" />
     <ClCompile Include="render\CircleMeshEntity.cpp" />
-    <ClCompile Include="Qml\components\LeftPopup.cpp" />
     <ClCompile Include="Qml\components\ModalWindow.cpp" />
     <ClCompile Include="Qml\components\PartList.cpp" />
     <ClCompile Include="Qml\components\PrintInfo.cpp" />
@@ -172,6 +171,9 @@
     <ClCompile Include="feature\stlexporter.cpp" />
     <ClCompile Include="DentEngine\src\svgexporter.cpp" />
     <ClCompile Include="utils\updatechecker.cpp" />
+    <ClCompile Include="Qml\components\PopupShell.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="common\Debug.h" />
@@ -883,7 +885,6 @@
     <QtMoc Include="render\PlaneMeshEntity.h" />
     <QtMoc Include="Qml\components\Buttons.h" />
     <QtMoc Include="Qml\components\Inputs.h" />
-    <QtMoc Include="Qml\components\LeftPopup.h" />
     <QtMoc Include="Qml\components\Toast.h" />
     <QtMoc Include="Qml\components\SlideBar.h" />
     <QtMoc Include="Qml\components\ModalWindow.h" />
@@ -900,6 +901,9 @@
     <QtMoc Include="qmlmanager.h" />
     <QtMoc Include="utils\quaternionhelper.h" />
     <QtMoc Include="utils\updatechecker.h" />
+    <QtMoc Include="Qml\components\PopupShell.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
   </ItemGroup>
   <ItemGroup>
     <QtRcc Include="qml.qrc" />
@@ -953,12 +957,9 @@
     <None Include="Qml\ModelBuildSlider.qml" />
     <None Include="Qml\Plane.qml" />
     <None Include="Qml\PartList.qml" />
-    <None Include="Qml\PartListContentBox.qml" />
     <None Include="Qml\PrintInfo.qml" />
     <None Include="Qml\PrintSetting.qml" />
     <None Include="Qml\PrintSettingPopup.qml" />
-    <None Include="Qml\ProgressRevised.qml" />
-    <None Include="Qml\ProgressShell.qml" />
     <None Include="Qml\SlideBar.qml" />
     <None Include="Qml\Toast.qml" />
     <None Include="Qml\UndoRedo.qml" />
@@ -969,7 +970,6 @@
     <None Include="Resource\font\NotoSans-SemiCondensedMedium.ttf" />
     <None Include="Qml\Planeslider.qml" />
     <None Include="Qml\PopUp.qml" />
-    <None Include="Qml\ProgressPopUp.qml" />
     <None Include="Qml\ResultPopup.qml" />
     <None Include="Qml\SCroll.qml" />
     <None Include="Qml\SettingPopup.qml" />
@@ -1143,5 +1143,18 @@
     <None Include="Qml\FeaturePopup\LeftPopupShellOffset.qml" />
     <None Include="Qml\FeaturePopup\LeftPopupSupport.qml" />
     <None Include="Qml\FeatureMenu.qml" />
+    <None Include="Qml\ProgressPopup.qml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
+      <ParseFiles>true</ParseFiles>
+    </Filter>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+      <ParseFiles>true</ParseFiles>
+    </Filter>
   </ItemGroup>
 </Project>

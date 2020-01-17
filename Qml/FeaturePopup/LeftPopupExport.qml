@@ -6,8 +6,7 @@ import "../Controls"
 
 LeftPopup {
 	title: qsTr("Export")
-	leftPopupHeight: 360
-	width: 256
+	height: 360
 
 	CtrDropdownBox {
 		id: layerheight
