@@ -7,10 +7,12 @@ import QtGraphicalEffects 1.12
 
 DropdownBox {
 	property string dropdownText
+	property alias label: label
 	color: "transparent"
 
 	Text {
-		text: parent.labelText
+		id: label
+		text: ""
 		anchors.verticalCenter: parent.verticalCenter
 		font.family: openRegular.name
 		color: "#666666"
@@ -24,7 +26,7 @@ DropdownBox {
 		height: 26
 		font.family: openRegular.name
 
-		onActivated: { console.log(parent.dropList) }
+		onActivated: { parent.index = currentIndex }
 
 		delegate: ItemDelegate {	// popup
 			width: control.width

@@ -5,7 +5,10 @@ using namespace  Hix::QML;
 
 Hix::QML::LeftPopupShell::LeftPopupShell(QQuickItem* parent) : QQuickItem(parent)
 {
-	
+}
+
+Hix::QML::LeftPopupShell::~LeftPopupShell()
+{
 }
 
 Hix::QML::ProgressPopupShell::ProgressPopupShell(QQuickItem* parent) : QQuickRectangle(parent)

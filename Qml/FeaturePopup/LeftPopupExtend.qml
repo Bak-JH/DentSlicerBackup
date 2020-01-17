@@ -5,7 +5,7 @@ import QtQuick.Controls 2.1
 import "../Controls"
 
 LeftPopup {
-	title: qsTr("Extend")
+	popuptitle.text: qsTr("Extend")
 	height: 220
 
 	Text {
@@ -21,7 +21,7 @@ LeftPopup {
 
 	CtrSpinBox {
 		id: extendvalue
-		labelText: "Extend Value \n (mm)"
+		label.text: "Extend Value \n (mm)"
 		width: parent.width - 16 * 2
 		anchors.left: parent.left
 		anchors.leftMargin: 16

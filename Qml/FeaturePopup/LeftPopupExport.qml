@@ -5,7 +5,7 @@ import QtQuick.Controls 2.1
 import "../Controls"
 
 LeftPopup {
-	title: qsTr("Export")
+	popuptitle.text: qsTr("Export")
 	height: 360
 
 	CtrDropdownBox {

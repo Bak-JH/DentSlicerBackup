@@ -2,7 +2,7 @@ import QtQuick 2.6
 import hix.qml 1.0 as Hix
 
 //MenuBtnShell {
-Hix.MenuButton {
+Hix.Button {
 	id: menuButton
 	property string iconBasic
 	property string nameColor: "#9d9d9d"

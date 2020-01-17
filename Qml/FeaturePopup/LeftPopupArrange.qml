@@ -4,7 +4,7 @@ import QtGraphicalEffects 1.12
 import QtQuick.Controls 2.1
 
 LeftPopup {
-	title: qsTr("Arrange")
+	popuptitle.text: qsTr("Arrange")
 	height: 250
 
 	Text {

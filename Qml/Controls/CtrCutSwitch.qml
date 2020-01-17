@@ -5,8 +5,7 @@ import QtQuick.Controls.Styles 1.4
 import QtGraphicalEffects 1.12
 
 Hix.ImageToggleSwitch {
-	property int cutRadius: 8;
-
+	id: root
 	function hitFlatCut() {
 		if (flatbtn.state == "flatOff") { flatbtn.state = "flatOn"; freebtn.state = "freeOff"; }
 		else { flatbtn.state = "flatOn" }
@@ -17,11 +16,11 @@ Hix.ImageToggleSwitch {
 		else { freebtn.state = "freeOn" }
 	}
 
-	Hix.RoundButton {
+	Hix.Button {
 		id: flatbtn
 		width: 104
 		height: 96
-		radius: cutRadius
+		radius: 8
 		color: "#f6feff"
 		border.color: "#b2c4c6"
 		border.width: 1
@@ -45,7 +44,7 @@ Hix.ImageToggleSwitch {
 			anchors.horizontalCenter: parent.horizontalCenter
 		}
 
-		onClicked: { hitFlatCut() }
+		onClicked: { hitFlatCut(); root.setChecked(false) }
 
 		states: [
 			State {
@@ -68,11 +67,11 @@ Hix.ImageToggleSwitch {
 	}
 
 	//FreeCutButton {
-	Hix.RoundButton {
+	Hix.Button {
 		id: freebtn
 		width: 104
 		height: 96
-		radius: cutRadius
+		radius: 8
 		color: btncolor
 		border.color: "#d3dfe0"
 		border.width: 1
@@ -98,7 +97,7 @@ Hix.ImageToggleSwitch {
 			anchors.horizontalCenter: parent.horizontalCenter
 		}
 
-		onClicked: { hitFreeCut() }
+		onClicked: { hitFreeCut(); root.setChecked (true) }
 
 		states: [
 			State {

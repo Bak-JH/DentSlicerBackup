@@ -6,15 +6,16 @@ import QtGraphicalEffects 1.12
 
 Hix.InputSpinBox {
 	property alias control: control
+	property alias label: label
 	property var fromNum
 	property var toNum
 	
 	onValueChanged:{ control.value = value }
-	onLabelTextChanged:{ console.log(labelText) }
 
 	Text 
 	{
-		text: parent.labelText
+		id: label
+		text: ""
 		font.family: openRegular.name
 		anchors.left: parent.left
 		color: "#666666"

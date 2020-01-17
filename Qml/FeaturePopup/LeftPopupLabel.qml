@@ -37,7 +37,7 @@ LeftPopup {
 	
 	CtrDropdownBox {
 		id: labelfont
-		labelText: "Font"
+		label.text: "Font"
 		dropList: Qt.fontFamilies()
 		width: parent.width - 16 * 2
 		anchors.left: parent.left
@@ -48,7 +48,7 @@ LeftPopup {
 
 	CtrSpinBox {
 		id: labelfontsize
-		labelText: "Font Size"
+		label.text: "Font Size"
 		width: parent.width - 16 * 2
 		anchors.left: parent.left
 		anchors.leftMargin: 16
@@ -58,7 +58,7 @@ LeftPopup {
 
 	CtrSpinBox {
 		id: labelheight
-		labelText: "Label Height"
+		label.text: "Label Height"
 		width: parent.width - 16 * 2
 		anchors.left: parent.left
 		anchors.leftMargin: 16

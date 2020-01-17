@@ -148,7 +148,7 @@ Item {
 			}
 		}
 
-		Hix.RoundButton {
+		Hix.Button {
 			id: refreshbtn
 			width: 24
 			height: width
@@ -174,7 +174,7 @@ Item {
 			anchors.bottom: parent.bottom
 			anchors.bottomMargin: parent.height * 0.2
 
-			Hix.RoundButton {
+			Hix.Button {
 				id: leftbtn
 				width: (buttonsWidth - buttonSpace) / 2
 				height: 32
@@ -194,7 +194,7 @@ Item {
 				onExited: { color = "#00b9c8" }
 			}
 
-			Hix.RoundButton {
+			Hix.Button {
 				id: rightbtn
 				width: buttonsWidth - leftbtn.width - buttonSpace
 				height: 32

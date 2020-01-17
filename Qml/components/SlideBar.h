@@ -14,17 +14,20 @@ namespace Hix
 			Q_OBJECT
 			Q_PROPERTY(double min MEMBER _min NOTIFY minimumChanged)
 			Q_PROPERTY(double max MEMBER _max NOTIFY maximumChanged)
+			Q_PROPERTY(double value MEMBER _value NOTIFY valueChanged)
 
 		public:
 			SlideBarShell(QQuickItem* parent = nullptr);
 			virtual ~SlideBarShell();
+			void setMin(double pMin);
 
 		signals:
 			void minimumChanged();
 			void maximumChanged();
+			void valueChanged();
 
 		private:
-			double _min = 0, _max = 100;
+			double _min = 0, _max = 100, _value = 0;
 		};
 
 		class RangeSlideBarShell : public QQuickItem
@@ -42,7 +45,7 @@ namespace Hix
 			void maximumChanged();
 
 		private:
-			double _min = 0, _max = 100;
+			double _min = 0, _max = 100, _lowerValue, _upperValue;
 		};
 	}
 }

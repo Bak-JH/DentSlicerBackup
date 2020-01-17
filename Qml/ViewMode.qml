@@ -101,7 +101,7 @@ Item {
 			}
 
 
-			Hix.RoundButton {
+			Hix.Button {
 				id: objectviewbutton
 				width: 160
 				height: 36
@@ -126,7 +126,7 @@ Item {
 				}
 			}
 
-			Hix.RoundButton {
+			Hix.Button {
 				id: layerviewbutton
 				width: 160
 				height: 36

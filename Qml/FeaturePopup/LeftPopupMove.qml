@@ -12,7 +12,7 @@ LeftPopup {
 		id: moveX
 		fromNum: -100
 		toNum: 100
-		labelText: "X Offset(mm)"
+		label.text: "X Offset(mm)"
 		width: parent.width - 16 * 2
 		anchors.left: parent.left
 		anchors.leftMargin: 16
@@ -24,7 +24,7 @@ LeftPopup {
 		id: moveY
 		fromNum: -100
 		toNum: 100
-		labelText: "Y Offset(mm)"
+		label.text: "Y Offset(mm)"
 		width: parent.width - 16 * 2
 		anchors.left: parent.left
 		anchors.leftMargin: 16
@@ -36,7 +36,7 @@ LeftPopup {
 		id: moveZ
 		fromNum: -100
 		toNum: 100
-		labelText: "Z Offset(mm)"
+		label.text: "Z Offset(mm)"
 		width: parent.width - 16 * 2
 		anchors.left: parent.left
 		anchors.leftMargin: 16
