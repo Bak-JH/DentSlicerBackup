@@ -10,7 +10,7 @@ Item {
 		width :400
 		height: 72
 		radius: height / 2
-		Hix.RoundButton {
+		Hix.Button {
 			id: refresh
 			width: parent.height - 16
 			height: width

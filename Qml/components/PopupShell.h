@@ -17,11 +17,11 @@ namespace Hix
 		class LeftPopupShell : public QQuickItem
 		{
 			Q_OBJECT
-			Q_PROPERTY(QString title MEMBER _title NOTIFY titleChanged)
+			Q_PROPERTY(QString title MEMBER _title)
 
 		public:
 			LeftPopupShell(QQuickItem* parent = nullptr);
-
+			virtual ~LeftPopupShell();
 
 		signals:
 			void titleChanged();
@@ -33,18 +33,10 @@ namespace Hix
 		class ProgressPopupShell : public QQuickRectangle
 		{
 			Q_OBJECT
-			Q_PROPERTY(QString title MEMBER _title NOTIFY titleChanged)
-
 		public:
 			ProgressPopupShell(QQuickItem* parent = nullptr);
 			virtual ~ProgressPopupShell();
 			Q_INVOKABLE void appendFeature(QString featureName);
-
-		signals:
-			void titleChanged();
-
-		private:
-			QString _title = "Name";
 		};
 	}
 }

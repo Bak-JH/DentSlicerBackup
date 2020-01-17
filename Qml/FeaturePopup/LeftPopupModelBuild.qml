@@ -27,7 +27,7 @@ LeftPopup {
 		anchors.leftMargin: 16
 	}
 
-	Hix.RoundButton {
+	Hix.Button {
 		width: 30
 		height: width
 		radius: width / 2

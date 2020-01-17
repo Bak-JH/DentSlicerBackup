@@ -252,10 +252,10 @@ Item{
 
 		LeftPopupCut {
 			id: leftpopupcut
-			anchors.top: featureMenu.bottom
-			anchors.left: leftpopupsupport.right
+			anchors.top: leftpopupmove.bottom
+			anchors.left: leftpopupmove.left
             anchors.leftMargin: 15
-			anchors.topMargin: 250
+			anchors.topMargin: 15
 		}
 		PrintSetting
 		{

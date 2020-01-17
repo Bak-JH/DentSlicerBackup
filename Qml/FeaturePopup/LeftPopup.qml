@@ -11,7 +11,6 @@ Hix.LeftPopupShell
 	width: 256
 
 	property var myPadding: 16
-	property var leftPopupHeight
 
 	Rectangle 
 	{
@@ -53,7 +52,7 @@ Hix.LeftPopupShell
 			onExited: { closeimg.source = "qrc:/Resource/closebutton.png" }
 		}
 
-		Hix.RoundButton
+		Hix.Button
 		{
 			id: roundButton
 			width: 224

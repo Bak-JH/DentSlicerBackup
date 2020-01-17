@@ -5,7 +5,9 @@ import QtQuick.Controls.Styles 1.4
 import QtGraphicalEffects 1.12
 
 Hix.TextInputBox {
+	property alias label: label
 	Text {
+		id: label
 		text: qsTr("Text")
 		font.family: openRegular.name
 		anchors.left: parent.left
@@ -25,6 +27,10 @@ Hix.TextInputBox {
 			color: control.hovered ? "#ffffff" : "#f6feff"
 			border.color: control.hovered ? "#b3bfc0": "#d3dfe0"
 			radius: 2
+		}
+
+		onAccepted: {
+			parent.inputText = text
 		}
 	}
 }

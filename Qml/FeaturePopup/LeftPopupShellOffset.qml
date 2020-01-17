@@ -21,7 +21,7 @@ LeftPopup {
 
 	CtrSpinBox {
 		id: extendvalue
-		labelText: "Tickness(mm)"
+		label.text: "Tickness(mm)"
 		width: parent.width - 16 * 2
 		anchors.left: parent.left
 		anchors.leftMargin: 16

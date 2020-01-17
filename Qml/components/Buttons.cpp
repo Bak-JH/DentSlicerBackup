@@ -6,7 +6,7 @@ using namespace Hix::QML;
 Hix::QML::Button::Button(QQuickItem* parent) : QQuickRectangle(parent), _mouseArea(new QQuickMouseArea(this))
 {
 	// mouse area
-	connect(_mouseArea, &QQuickMouseArea::clicked, this, &Button::onClick);
+	connect(_mouseArea, &QQuickMouseArea::clicked, this, &Button::onClicked);
 	connect(_mouseArea, &QQuickMouseArea::entered, this, &Button::onEntered);
 	connect(_mouseArea, &QQuickMouseArea::exited, this, &Button::onExited);
 
@@ -20,12 +20,19 @@ Hix::QML::Button::~Button()
 {
 }
 
+void Hix::QML::Button::onClicked()
+{
+	emit clicked();
+}
+
 void Hix::QML::Button::onEntered()
 {
+	emit entered();
 }
 
 void Hix::QML::Button::onExited()
 {
+	emit exited();
 }
 
 
@@ -39,75 +46,11 @@ Hix::QML::CloseButton::~CloseButton()
 {
 }
 
-void Hix::QML::CloseButton::onEntered()
-{
-	emit entered();
-}
-
-void Hix::QML::CloseButton::onExited()
-{
-	emit exited();
-}
-
-void Hix::QML::CloseButton::onClick()
+void Hix::QML::CloseButton::onClicked()
 {
 	parentItem()->parentItem()->setVisible(false);
+	Button::onClicked();
 }
-
-
-/// Round Button ///
-Hix::QML::RoundButton::RoundButton(QQuickItem* parent) :Button(parent)
-{
-}
-
-Hix::QML::RoundButton::~RoundButton()
-{
-}
-
-void Hix::QML::RoundButton::onClick()
-{
-	emit clicked();
-}
-void Hix::QML::RoundButton::onEntered()
-{
-	emit entered();
-}
-void Hix::QML::RoundButton::onExited()
-{
-	emit exited();
-}
-void Hix::QML::RoundButton::fNameChanged()
-{
-	emit fNameChanged();
-}
-
-
-
-/// Menu Button ///
-Hix::QML::MenuButton::MenuButton(QQuickItem* parent) :Button(parent)
-{
-}
-
-Hix::QML::MenuButton::~MenuButton()
-{
-}
-
-void Hix::QML::MenuButton::onClick()
-{
-	emit clicked();
-}
-
-void Hix::QML::MenuButton::onEntered()
-{
-	emit entered();
-}
-
-void Hix::QML::MenuButton::onExited()
-{
-	emit exited();
-}
-
-
 
 /// Toggle Switch ///
 Hix::QML::ToggleSwitch::ToggleSwitch(QQuickItem* parent) :Button(parent)
@@ -118,12 +61,19 @@ Hix::QML::ToggleSwitch::~ToggleSwitch()
 {
 }
 
-void Hix::QML::ToggleSwitch::onClick()
+bool Hix::QML::ToggleSwitch::isChecked() const
 {
+	return _isChecked;
+}
+
+void Hix::QML::ToggleSwitch::onClicked()
+{
+	_isChecked = _isChecked ? false : true;
+	Button::onClicked();
 }
 
 /// Image Toggle Switch ///
-Hix::QML::ImageToggleSwitch::ImageToggleSwitch(QQuickItem* parent) :Button(parent)
+Hix::QML::ImageToggleSwitch::ImageToggleSwitch(QQuickItem* parent) : QQuickItem(parent)
 {
 }
 
@@ -131,6 +81,12 @@ Hix::QML::ImageToggleSwitch::~ImageToggleSwitch()
 {
 }
 
-void Hix::QML::ImageToggleSwitch::onClick()
+bool Hix::QML::ImageToggleSwitch::isChecked() const
 {
+	return _isChecked;
+}
+
+Q_INVOKABLE void Hix::QML::ImageToggleSwitch::setChecked(bool isChecked)
+{
+	_isChecked = isChecked;
 }

@@ -62,8 +62,7 @@ QmlManager::QmlManager(QObject *parent) : QObject(parent), _optBackend(this, scf
 	, _cursorEraser(QPixmap(":/Resource/cursor_eraser.png")), _currentMode(nullptr), viewMode(0)
 {
 	qmlRegisterType<Hix::QML::CloseButton>("hix.qml", 1, 0, "CloseButton");
-	qmlRegisterType<Hix::QML::RoundButton>("hix.qml", 1, 0, "RoundButton");
-	qmlRegisterType<Hix::QML::MenuButton>("hix.qml", 1, 0, "MenuButton");
+	qmlRegisterType<Hix::QML::Button>("hix.qml", 1, 0, "Button");
 	qmlRegisterType<Hix::QML::ToggleSwitch>("hix.qml", 1, 0, "ToggleSwitch");
 	qmlRegisterType<Hix::QML::ImageToggleSwitch>("hix.qml", 1, 0, "ImageToggleSwitch");
 

@@ -12,7 +12,7 @@ LeftPopup {
 		id: rotateX
 		fromNum: -360
 		toNum: 360
-		labelText: "X Offset(deg)"
+		label.text: "X Offset(deg)"
 		width: parent.width - 16 * 2
 		anchors.left: parent.left
 		anchors.leftMargin: 16
@@ -24,7 +24,7 @@ LeftPopup {
 		id: rotateY
 		fromNum: -360
 		toNum: 360
-		labelText: "Y Offset(deg)"
+		label.text: "Y Offset(deg)"
 		width: parent.width - 16 * 2
 		anchors.left: parent.left
 		anchors.leftMargin: 16
@@ -36,7 +36,7 @@ LeftPopup {
 		id: rotateZ
 		fromNum: -360
 		toNum: 360
-		labelText: "Z Offset(deg)"
+		label.text: "Z Offset(deg)"
 		width: parent.width - 16 * 2
 		anchors.left: parent.left
 		anchors.leftMargin: 16

@@ -16,7 +16,7 @@ LeftPopup {
 		id: scale
 		fromNum: 0
 		toNum: 1000
-		labelText: "Scale(%)"
+		label.text: "Scale(%)"
 		width: parent.width - 16 * 2
 		anchors.left: parent.left
 		anchors.leftMargin: 16

@@ -47,7 +47,7 @@ Hix.PartList {
 				width: 224; height: 28
 				Column {
 					anchors.verticalCenter: parent.verticalCenter
-					Hix.RoundButton{
+					Hix.Button{
 						width: 224; height: 28
 						//color: "#f5f5f5"
 						Text { 
@@ -66,7 +66,7 @@ Hix.PartList {
 						}
 					}
 				}
-				Hix.RoundButton{
+				Hix.Button{
 					id: showhide
 					width: 16
 					height: width
@@ -122,7 +122,7 @@ Hix.PartList {
 			}
 		}
 
-		Hix.RoundButton {
+		Hix.Button {
 			width: 14
 			height: width
 			anchors.right: parent.right

@@ -48,7 +48,7 @@ Hix.LeftPopupShell {
 			onEntered: { closeimg.source = "qrc:/Resource/closebutton_hover.png" }
 			onExited: { closeimg.source = "qrc:/Resource/closebutton.png" }
 		}
-		Hix.RoundButton {
+		Hix.Button {
 			id: generatesupports
 			width: 186
 			height: 32
@@ -72,7 +72,7 @@ Hix.LeftPopupShell {
 			onExited: { color = "#00b9c8" }
 		}
 
-		Hix.RoundButton {
+		Hix.Button {
 			id: supportsettingbutton
 			width: 32
 			height: width
@@ -90,7 +90,7 @@ Hix.LeftPopupShell {
 			onExited: { color = "transparent" }
 		}
 
-		Hix.RoundButton {
+		Hix.Button {
 			id: editsupports
 			width: 224
 			height: 32
@@ -128,7 +128,7 @@ Hix.LeftPopupShell {
 				radius: height / 2
 				anchors.left: parent.left
 			}
-			Hix.RoundButton {
+			Hix.Button {
 				width: ((parent.width - 2) / 2) - 16
 				height: parent.height
 				color: "#00b9c8"
@@ -154,7 +154,7 @@ Hix.LeftPopupShell {
 				radius: height / 2
 				anchors.right: parent.right
 			}
-			Hix.RoundButton {
+			Hix.Button {
 				width: ((parent.width - 2) / 2) - 16
 				height: parent.height
 				color: "#00b9c8"
@@ -174,7 +174,7 @@ Hix.LeftPopupShell {
 			}
 		}
 		
-		Hix.RoundButton {
+		Hix.Button {
 			id: clearsupports
 			width: 224
 			height: 32

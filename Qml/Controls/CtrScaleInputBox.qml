@@ -15,7 +15,7 @@ Item {
 
 	CtrSpinBox {
 		id: scaleX
-		labelText: "X Size(mm)"
+		label.text: "X Size(mm)"
 		width: parent.width - 16 * 2
 		control.anchors.rightMargin: width * 0.2
 		control.width: width * 0.46 * 0.8
@@ -31,7 +31,7 @@ Item {
 
 	CtrSpinBox {
 		id: scaleY
-		labelText: "Y Size(mm)"
+		label.text: "Y Size(mm)"
 		width: parent.width - 16 * 2
 		control.anchors.rightMargin: width * 0.2
 		control.width: width * 0.46 * 0.8
@@ -47,7 +47,7 @@ Item {
 
 	CtrSpinBox {
 		id: scaleZ
-		labelText: "Z Size(mm)"
+		label.text: "Z Size(mm)"
 		width: parent.width - 16 * 2
 		control.anchors.rightMargin: width * 0.2
 		control.width: width * 0.46 * 0.8
@@ -61,7 +61,7 @@ Item {
 		anchors.topMargin: 56
 	}
 
-	Hix.RoundButton {
+	Hix.Button {
 		color: "transparent"
 		width: 22
 		height: 128

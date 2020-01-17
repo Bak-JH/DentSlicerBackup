@@ -4,6 +4,7 @@
 #include <QtQuick/private/qquicktextinput_p.h>
 #include <QtQuickTemplates2/private/qquickspinbox_p.h>
 #include <QtQuickTemplates2/private/qquickcombobox_p.h>
+#include <string>
 
 namespace Hix
 {
@@ -12,57 +13,55 @@ namespace Hix
 		class InputSpinBox : public QQuickItem
 		{
 			Q_OBJECT
-			Q_PROPERTY(QString labelText MEMBER _labelText NOTIFY labelTextChanged)
 			Q_PROPERTY(int value MEMBER _value NOTIFY valueChanged)
 
 		public:
 			InputSpinBox(QQuickItem* parent = nullptr);
 			virtual ~InputSpinBox();
+			int getValue()const;
+			void setValue(int value);
 
 		signals:
 			void valueChanged();
-			void labelTextChanged();
 
 		private:
-			QString _labelText = "Inputbox";
 			int _value = 0;
 		};
 
 		class TextInputBox : public QQuickItem
 		{
 			Q_OBJECT
-			Q_PROPERTY(QString labelText MEMBER _labelText NOTIFY labelTextChanged)
 			Q_PROPERTY(QString inputText MEMBER _text NOTIFY inputTextChanged)
 
 		public:
 			TextInputBox(QQuickItem* parent = nullptr);
 			virtual ~TextInputBox();
+			std::string getInputText()const;
+			void setInputText(std::string text);
 
 		signals:
 			void inputTextChanged();
-			void labelTextChanged();
 
 		private:
-			QString _labelText = "Inputbox";
 			QString _text;
 		};
 
 		class DropdownBox : public QQuickRectangle
 		{
 			Q_OBJECT
-			Q_PROPERTY(QString labelText MEMBER _labelText NOTIFY labelTextChanged)
 			Q_PROPERTY(QStringList dropList MEMBER _dropList)
+			Q_PROPERTY(int index MEMBER _index NOTIFY indexChanged)
 
 		public:
 			DropdownBox(QQuickItem* parent = nullptr);
 			virtual ~DropdownBox();
 
 		signals:
-			void labelTextChanged();
+			void indexChanged();
 
 		protected:
-			QString _labelText = "Dropdown";
 			QStringList _dropList;
+			int _index;
 		};
 	}
 }
