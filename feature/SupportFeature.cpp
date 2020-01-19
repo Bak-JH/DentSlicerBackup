@@ -8,32 +8,26 @@
 /////////////////////
 ///  Add Support  ///
 /////////////////////
-Hix::Features::AddSupport::AddSupport(const Hix::Engine3D::FaceConstItr face, QVector3D point)
-{
-	Hix::OverhangDetect::Overhang newOverhang(face, point);
-	_addedModel = qmlManager->supportRaftManager().addSupport(newOverhang);
-	_addedModel->setHitTestable(true);
-}
-
-Hix::Features::AddSupport::AddSupport(const OverhangDetect::Overhang& overhang)
-{
-	_addedModel = qmlManager->supportRaftManager().addSupport(overhang);
-}
+Hix::Features::AddSupport::AddSupport(const OverhangDetect::Overhang& overhang):_overhang(overhang)
+{}
 
 Hix::Features::AddSupport::~AddSupport()
-{
-}
+{}
 
 void Hix::Features::AddSupport::undoImpl()
 {
-	_removedModel = qmlManager->supportRaftManager().removeSupport(_addedModel).release();
+	_model = qmlManager->supportRaftManager().removeSupport(std::get<SupportModel*>(_model));
 }
 
 void Hix::Features::AddSupport::redoImpl()
 {
-	_removedModel->setEnabled(true);
-	_removedModel->setHitTestable(true);
-	_addedModel = qmlManager->supportRaftManager().addSupport(std::unique_ptr<SupportModel>(_removedModel));
+	_model = qmlManager->supportRaftManager().addSupport(std::move(std::get<std::unique_ptr<SupportModel>>(_model)));
+}
+
+void Hix::Features::AddSupport::runImpl()
+{
+	auto newModel = qmlManager->supportRaftManager().addSupport(_overhang);
+	_model = newModel;
 }
 
 
@@ -41,10 +35,8 @@ void Hix::Features::AddSupport::redoImpl()
 ////////////////////////
 ///  Remove Support  ///
 ////////////////////////
-Hix::Features::RemoveSupport::RemoveSupport(SupportModel* target)
-{
-	_removedModel = qmlManager->supportRaftManager().removeSupport(target).release();
-}
+Hix::Features::RemoveSupport::RemoveSupport(SupportModel* target): _model(target)
+{}
 
 Hix::Features::RemoveSupport::~RemoveSupport()
 {
@@ -52,14 +44,17 @@ Hix::Features::RemoveSupport::~RemoveSupport()
 
 void Hix::Features::RemoveSupport::undoImpl()
 {
-	_removedModel->setEnabled(true);
-	_removedModel->setHitTestable(true);
-	_addedModel = qmlManager->supportRaftManager().addSupport(std::unique_ptr<SupportModel>(_removedModel));
+	_model = qmlManager->supportRaftManager().addSupport(std::move(std::get<std::unique_ptr<SupportModel>>(_model)));
 }
 
 void Hix::Features::RemoveSupport::redoImpl()
 {
-	_removedModel = qmlManager->supportRaftManager().removeSupport(_addedModel).release();
+	_model = qmlManager->supportRaftManager().removeSupport(std::get<SupportModel*>(_model));
+}
+
+void Hix::Features::RemoveSupport::runImpl()
+{
+	redoImpl();
 }
 
 
@@ -68,27 +63,25 @@ void Hix::Features::RemoveSupport::redoImpl()
 ///  Add Raft  ///
 //////////////////
 Hix::Features::AddRaft::AddRaft()
-{
-	_addedRaft = qmlManager->supportRaftManager().generateRaft();
-}
+{}
 
 Hix::Features::AddRaft::~AddRaft()
-{
-	//delete _addedRaft;
-	//delete _deletedRaft;
-}
+{}
 
 void Hix::Features::AddRaft::undoImpl()
 {
-	_deletedRaft = _addedRaft;
-	_addedRaft->setParent((QNode*)nullptr);
-	_deletedRaft = qmlManager->supportRaftManager().removeRaft();
+	_model = qmlManager->supportRaftManager().removeRaft();
 }
 
 void Hix::Features::AddRaft::redoImpl()
 {
-	_deletedRaft->setParent(qmlManager->total);
-	qmlManager->supportRaftManager().addRaft(_deletedRaft);
+	_model = qmlManager->supportRaftManager().addRaft(std::move(std::get<std::unique_ptr<RaftModel>>(_model)));
+}
+
+void Hix::Features::AddRaft::runImpl()
+{
+	_model = qmlManager->supportRaftManager().generateRaft();
+
 }
 
 
@@ -97,28 +90,25 @@ void Hix::Features::AddRaft::redoImpl()
 ///  Remove Raft  ///
 /////////////////////
 Hix::Features::RemoveRaft::RemoveRaft()
-{
-	_deletedRaft = qmlManager->supportRaftManager().removeRaft();
-}
+{}
 
 Hix::Features::RemoveRaft::~RemoveRaft()
-{
-	//delete _addedRaft;
-	//delete _deletedRaft;
-}
+{}
 
 
 void Hix::Features::RemoveRaft::undoImpl()
 {
-	_addedRaft = _deletedRaft;
-	_deletedRaft->setParent(qmlManager->total);
-	qmlManager->supportRaftManager().addRaft(_deletedRaft);
+	qmlManager->supportRaftManager().addRaft(std::move(std::get<std::unique_ptr<RaftModel>>(_model)));
 }
 
 void Hix::Features::RemoveRaft::redoImpl()
 {
-	_deletedRaft = qmlManager->supportRaftManager().removeRaft();
-	_addedRaft->setParent((QNode*)nullptr);
+	_model = qmlManager->supportRaftManager().removeRaft();
+}
+
+void Hix::Features::RemoveRaft::runImpl()
+{
+	redoImpl();
 }
 
 
@@ -142,7 +132,8 @@ void Hix::Features::SupportMode::faceSelected(GLModel* selected, const Hix::Engi
 {
 	auto suppMode = qmlManager->supportRaftManager().supportEditMode();
 	if (suppMode == Hix::Support::EditMode::Manual) {
-		qmlManager->featureHistoryManager().addFeature(new AddSupport(selectedFace, selected->ptToRoot(hit.localIntersection())));
+		Hix::OverhangDetect::Overhang newOverhang(selectedFace, selected->ptToRoot(hit.localIntersection()));
+		qmlManager->taskManager().enqueTask(new AddSupport(newOverhang));
 	}
 }
 
@@ -201,19 +192,6 @@ Hix::Features::Feature* Hix::Features::SupportMode::removeRaft()
 
 void Hix::Features::SupportMode::removeSupport(SupportModel* target)
 {
-	qmlManager->featureHistoryManager().addFeature(new RemoveSupport(target));
+	qmlManager->taskManager().enqueTask(new RemoveSupport(target));
 }
 
-std::unique_ptr<Hix::Features::FeatureContainer> Hix::Features::clearSupport(std::unordered_set<GLModel*>& models)
-{
-	auto container = std::unique_ptr<Hix::Features::FeatureContainer>();
-	for (auto each : qmlManager->supportRaftManager().modelAttachedSupports(models))
-	{
-		container->addFeature(new RemoveSupport(each));
-	}
-
-	for (auto model : models)
-		model->setZToBed();
-
-	return container;
-}

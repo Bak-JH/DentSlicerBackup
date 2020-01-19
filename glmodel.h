@@ -27,7 +27,7 @@ class GLModel : public Hix::Render::SceneEntityWithMaterial, public Hix::Input::
 {
     Q_OBJECT
 public:
-
+	static QString filenameToModelName(const std::string& s);
     //probably interface this as well
 	void clicked	(Hix::Input::MouseEventData&,const Qt3DRender::QRayCasterHit&) override;
 	bool isDraggable(Hix::Input::MouseEventData& v,const Qt3DRender::QRayCasterHit&) override;

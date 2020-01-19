@@ -25,7 +25,7 @@ void Hix::Features::MoveMode::featureStarted()
 void Hix::Features::MoveMode::featureEnded()
 {
 	if(!_moveContainer->empty())
-		qmlManager->featureHistoryManager().addFeature(_moveContainer);
+		qmlManager->taskManager().enqueTask(_moveContainer);
 
 	for (auto& each : _targetModels)
 		each->moveDone();
@@ -46,20 +46,12 @@ Hix::Features::FeatureContainerFlushSupport* Hix::Features::MoveMode::applyMove(
 
 
 
-Hix::Features::Move::Move(GLModel* target, const QVector3D& to) : _model(target)
+Hix::Features::Move::Move(GLModel* target, const QVector3D& to) : _model(target), _to(to)
 {
-	_prevMatrix = target->transform().matrix();
-	_prevAabb = target->aabb();
-	target->moveModel(to);
-
-	if(qmlManager->isActive<Hix::Features::WidgetMode>())
-		qmlManager->cameraViewChanged();
 }
 
 Hix::Features::Move::Move(GLModel* target) : _model(target)
 {
-	_prevMatrix = target->transform().matrix();
-	_prevAabb = target->aabb();
 }
 
 Hix::Features::Move::~Move()
@@ -85,4 +77,22 @@ void Hix::Features::Move::redoImpl()
 	_model->aabb() = _nextAabb;
 	qmlManager->cameraViewChanged();
 	_model->updateMesh();
+}
+
+void Hix::Features::Move::runImpl()
+{
+	_prevMatrix = _model->transform().matrix();
+	_prevAabb = _model->aabb();
+	if (_to)
+	{
+		_model->moveModel(_to.value());
+		if (qmlManager->isActive<Hix::Features::WidgetMode>())
+			qmlManager->cameraViewChanged();
+	}
+}
+
+Hix::Features::Move::ZToBed::ZToBed(GLModel* target): Move(target)
+{
+	auto listedModel = target->getRootModel();
+	_to = QVector3D(0, 0, -listedModel->recursiveAabb().zMin());
 }

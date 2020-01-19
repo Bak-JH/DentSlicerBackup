@@ -8,7 +8,7 @@ Hix::Features::FlushSupport::FlushSupport()
 	auto flshSupp = qmlManager->supportRaftManager().modelAttachedSupports(selectedModels);
 	if (!flshSupp.empty())
 	{
-		qmlManager->featureHistoryManager().addFeature(SupportMode(selectedModels).clearSupport());
+		qmlManager->taskManager().enqueTask(SupportMode(selectedModels).clearSupport());
 	}
 }
 
@@ -19,7 +19,7 @@ Hix::Features::FlushSupport::FlushSupport()
 //	auto flshSupp = qmlManager->supportRaftManager().modelAttachedSupports(selectedModels);
 //	if (!flshSupp.empty())
 //	{
-//		qmlManager->featureHistoryManager().addFeature(SupportMode(selectedModels).clearSupport());
+//		qmlManager->taskManager().enqueTask(SupportMode(selectedModels).clearSupport());
 //	}
 //}
 

@@ -425,3 +425,16 @@ QVector4D GLModel::getPrimitiveColorCode(const Hix::Engine3D::Mesh* mesh, FaceCo
 	}
 
 }
+
+
+QString GLModel::filenameToModelName(const std::string& s)
+{
+	char sep = '/';
+
+	size_t i = s.rfind(sep, s.length());
+	if (i != std::string::npos) {
+		return QString::fromStdString(s.substr(i + 1, s.length() - i));
+	}
+
+	return QString::fromStdString(s);
+}

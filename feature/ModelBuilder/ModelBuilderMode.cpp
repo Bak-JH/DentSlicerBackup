@@ -27,7 +27,7 @@ Hix::Features::ModelBuilderMode::ModelBuilderMode(): _topPlane(qmlManager->total
 	else if (fileName != "" && (fileName.contains(".obj") || fileName.contains(".OBJ"))) {
 		FileLoader::loadMeshOBJ(mesh, fileUrl);
 	}
-	fileName = qmlManager->filenameToModelName(fileName.toStdString());
+	fileName = GLModel::filenameToModelName(fileName.toStdString());
 	qmlManager->setProgress(0.1);
 	_model.reset(new GLModel(qmlManager->models, mesh, fileName, nullptr));
 	_model->setHitTestable(true);
@@ -36,10 +36,9 @@ Hix::Features::ModelBuilderMode::ModelBuilderMode(): _topPlane(qmlManager->total
 	_zLength = _model->aabb().lengthZ() + ZMARGIN;
 	auto topZ = _model->aabb().zMax();
 	auto botZ = _model->aabb().zMin();
-	_builder = new TwoManifoldBuilder(*_model->getMeshModd());
 	float cutPlane, botPlane;
 	QQuaternion rotation;
-	_builder->autogenOrientation(cutPlane, botPlane, rotation);
+	guessOrientation(*_model->getMeshModd(), cutPlane, botPlane, rotation);
 	_model->transform().setRotation(rotation);
 	auto translationZ = _model->transform().translation().z();
 	cutPlane += translationZ;
@@ -48,7 +47,6 @@ Hix::Features::ModelBuilderMode::ModelBuilderMode(): _topPlane(qmlManager->total
 	_bottPlane.transform().setTranslation(QVector3D(0, 0, botPlane - ZMARGIN));
 	QMetaObject::invokeMethod(qmlManager->modelBuilderPopup, "setRangeSliderValueFirst", Q_ARG(QVariant, ((botPlane - ZMARGIN) / _zLength) * 1.8));
 	QMetaObject::invokeMethod(qmlManager->modelBuilderPopup, "setRangeSliderValueSecond", Q_ARG(QVariant, ((cutPlane - ZMARGIN)/ _zLength) * 1.8));
-
 
 
 	std::unordered_set<GLModel*> models { _model.get() };
@@ -67,15 +65,8 @@ void Hix::Features::ModelBuilderMode::build()
 	auto aabb0 = _model->aabb();
 	_model->flushTransform();
 	auto aabb1 = _model->aabb();
-	_builder->buildModel(_model->modelName(), cuttingPlane, bottomPlane);
-	qmlManager->featureHistoryManager().addFeature(_builder);
-	if (Hix::Features::isRepairNeeded(_builder->result()->getMesh()))
-	{
-		qmlManager->setProgressText("Repairing mesh.");
-		std::unordered_set<GLModel*> repairModels;
-		repairModels.insert(_builder->result());
-		MeshRepair rapairModels(repairModels);
-	}
+	TwoManifoldBuilder* builder = new TwoManifoldBuilder(*_model->getMeshModd(), _model->modelName(), cuttingPlane, bottomPlane);
+	qmlManager->taskManager().enqueTask(builder);
 	_model->setMesh(nullptr);
 }
 

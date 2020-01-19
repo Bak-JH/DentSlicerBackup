@@ -97,7 +97,6 @@ public:
 		QMetaObject::invokeMethod(obj, std::forward<F>(fun));
 	}
 
-	static QString filenameToModelName(const std::string& s);
 
     explicit QmlManager(QObject *parent = nullptr);
     QQmlApplicationEngine* engine;

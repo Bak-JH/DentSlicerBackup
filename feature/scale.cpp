@@ -23,14 +23,8 @@ Hix::Features::FeatureContainerFlushSupport* Hix::Features::ScaleMode::applyScal
 
 
 Hix::Features::Scale::Scale(GLModel* targetModel, QVector3D& scale)
-	: _model(targetModel)
-{
-	_prevMatrix = targetModel->transform().matrix();
-	_prevAabb = targetModel->aabb();
-	targetModel->scaleModel(scale);
-	targetModel->scaleDone();
-	qmlManager->sendUpdateModelInfo();
-}
+	: _model(targetModel), _scale(scale)
+{}
 
 Hix::Features::Scale::~Scale()
 {
@@ -55,4 +49,13 @@ void Hix::Features::Scale::redoImpl()
 	_model->aabb() = _nextAabb;
 	qmlManager->sendUpdateModelInfo();
 	_model->updateMesh();
+}
+
+void Hix::Features::Scale::runImpl()
+{
+	_prevMatrix = _model->transform().matrix();
+	_prevAabb = _model->aabb();
+	_model->scaleModel(_scale);
+	_model->scaleDone();
+	qmlManager->sendUpdateModelInfo();
 }

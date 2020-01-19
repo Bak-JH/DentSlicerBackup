@@ -12,12 +12,14 @@ namespace Hix
 	}
 	namespace Features
 	{
-		class MeshRepair
+		class MeshRepair: public Hix::Tasking::Task
 		{
 		public:
 			MeshRepair(const std::unordered_set<GLModel*>& selectedModels);
 			virtual ~MeshRepair();
+			void run()override;
 		private:
+			std::unordered_set<GLModel*> _selectedModels;
 			void repairImpl(GLModel* subject, const QString& modelName);
 
 		};

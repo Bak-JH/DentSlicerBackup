@@ -1,5 +1,5 @@
 #pragma once
-#include "../common/Task.h"
+#include "../Tasking/Task.h"
 
 namespace Hix
 {
@@ -11,10 +11,16 @@ namespace Hix
 		public:
 			Undo();
 			void run()override;
-		private:
-			Hix::Features::Feature& _feature;
+			virtual ~Undo();
 		};
 
+		class Redo : public Hix::Tasking::Task
+		{
+		public:
+			Redo();
+			void run()override;
+			virtual ~Redo();
+		};
 
 	}
 }
