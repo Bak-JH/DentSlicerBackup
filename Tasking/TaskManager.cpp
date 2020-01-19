@@ -16,17 +16,14 @@ void TaskManager::run()
 		_queue.wait_dequeue(taskVariant);
 		std::visit([this](auto&& task) {
 			using T = std::decay_t<decltype(task)>;
-			bool success = false;
 			//for small copy by value tasks and larger copy by pointer tasks
-			if constexpr (std::is_same_v<T, Hix::Tasking::Task>)
+			if constexpr (std::is_same_v<T, std::unique_ptr<Hix::Tasking::Task>>)
 			{
-				success = tryTask(task);
+				task->run();
 			}
 			else if constexpr (std::is_same_v<T, Hix::Tasking::Task*>)
 			{
-				success = tryTask(*task);
-				if (!success)
-					delete task;
+				task->run();
 			}
 		}, taskVariant);
 	}
@@ -40,9 +37,9 @@ void TaskManager::enqueTask(Hix::Tasking::Task* task)
 	}
 }
 
-void Hix::Tasking::TaskManager::enqueTask(const Hix::Tasking::Task& task)
+void Hix::Tasking::TaskManager::enqueTask(std::unique_ptr<Hix::Tasking::Task> task)
 {
-	_queue.enqueue(task);
+	_queue.enqueue(std::move(task));
 }
 
 TaskManager::~TaskManager()
@@ -53,30 +50,3 @@ TaskManager::~TaskManager()
 	_taskThread.join();
 }
 
-bool Hix::Tasking::TaskManager::tryTask(Hix::Tasking::Task& task)
-{
-	bool success = false;
-	try
-	{
-		task.run();
-		success = true;
-	}
-	catch (std::exception & e)
-	{
-		//popup, log, send error report
-	}
-	catch (...)
-	{
-		//incase of custom unknown exception, gracefully exit
-	}
-	//if feature add to history
-	if (success)
-	{
-		auto feature = dynamic_cast<Hix::Features::Feature*>(&task);
-		if (feature)
-		{
-			qmlManager->featureHistoryManager().addFeature(feature);
-		}
-	}
-	return success;
-}

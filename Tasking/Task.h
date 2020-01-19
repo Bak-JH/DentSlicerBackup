@@ -8,7 +8,7 @@ namespace Hix
 		class Task
 		{
 		public:
-			virtual void run();
+			virtual void run() = 0;
 			virtual ~Task();
 		};
 

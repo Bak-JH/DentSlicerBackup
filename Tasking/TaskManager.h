@@ -18,12 +18,11 @@ namespace Hix
 			TaskManager();
 			void run();
 			void enqueTask(Hix::Tasking::Task* task);
-			void enqueTask(const Hix::Tasking::Task& task);
+			void enqueTask(std::unique_ptr<Hix::Tasking::Task> task);
 
 			~TaskManager();
 		private:
-			using TaskVariant = std::variant<Hix::Tasking::Task, Hix::Tasking::Task*>;
-			bool tryTask(Hix::Tasking::Task& task);
+			using TaskVariant = std::variant<std::unique_ptr<Hix::Tasking::Task>, Hix::Tasking::Task*>;
 
 			moodycamel::BlockingReaderWriterQueue<TaskVariant> _queue;
 			bool _end = false;

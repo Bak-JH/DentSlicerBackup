@@ -25,7 +25,6 @@ namespace Hix
 			Hix::Render::PlaneMeshEntity _bottPlane;
 			std::unique_ptr<GLModel> _model;
 			float _zLength;
-			TwoManifoldBuilder* _builder = nullptr;
 		};
 	}
 }

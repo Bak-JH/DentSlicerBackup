@@ -21,21 +21,23 @@ namespace Hix
 		};
 
 
-		class Extend: public Feature //pee pee hee hee
+		class Extend: public Feature
 		{
 		public:
 			Extend(GLModel* targetModel, const QVector3D& targetFaceNormal,
 					const std::unordered_set<FaceConstItr>& targetFaces, double distance);
 			virtual ~Extend();
+		protected:
 			void undoImpl()override;
 			void redoImpl()override;
-
+			void runImpl()override;
 		private:
 			void coverCap(GLModel* model, QVector3D normal, const std::unordered_set<FaceConstItr>& extension_faces, double distance);
 
 			GLModel* _model;
 			QVector3D _normal;
 			std::unordered_set<FaceConstItr> _extensionFaces;
+			double _distance;
 			Mesh* _prevMesh;
 			Mesh* _nextMesh;
 		};

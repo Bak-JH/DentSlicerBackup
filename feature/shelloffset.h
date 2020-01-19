@@ -23,17 +23,34 @@ namespace Hix
 
 		};
 
-		class ShellOffset : public Hix::Features::Feature
+		class HollowMesh : public Hix::Features::Feature
+		{
+		public:
+			HollowMesh(GLModel* target, float offset);
+			virtual ~HollowMesh();
+		protected:
+			void undoImpl()override;
+			void redoImpl()override;
+			void runImpl()override;
+
+		private:
+			float _offset;
+			GLModel* _target;
+			std::unique_ptr<Hix::Engine3D::Mesh> _prevMesh;
+		};
+
+		class ShellOffset : public Hix::Features::FeatureContainer
 		{
 		public:
 			ShellOffset(GLModel* target, float offset, float zPlane);
 			virtual ~ShellOffset();
-			void undoImpl()override;
-			void redoImpl()override;
+		protected:
+			void runImpl()override;
 
 		private:
-			Mesh* _prevMesh;
-			FeatureContainer* _container;
+			float _offset;
+			float _zPlane;
+			GLModel* _target;
 		};
 	}
 };

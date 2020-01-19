@@ -14,10 +14,11 @@ namespace Hix
 		public:
 			DeleteModel(GLModel* target);
 			virtual ~DeleteModel();
+			GLModel* getDeletedModel();
+		protected:
 			void undoImpl()override;
 			void redoImpl()override;
-			GLModel* getDeletedModel();
-
+			void runImpl()override;
 		private:
 			struct RedoInfo
 			{

@@ -4,13 +4,9 @@
 
 
 
-Hix::Features::AddModel::AddModel(Qt3DCore::QEntity* parent, Hix::Engine3D::Mesh* mesh, QString fname, const Qt3DCore::QTransform* transform)
-{
-	auto model = new GLModel(parent, mesh, fname, transform);
-	model->setHitTestable(true);
-	model->setZToBed();
-	_model = model;
-}
+Hix::Features::AddModel::AddModel(Qt3DCore::QEntity* parent, Hix::Engine3D::Mesh* mesh, QString fname, const Qt3DCore::QTransform* transform): 
+	_parent(parent), _mesh(mesh), _fname(fname), _transform(transform)
+{}
 
 Hix::Features::AddModel::~AddModel()
 {
@@ -33,6 +29,14 @@ void Hix::Features::AddModel::redoImpl()
 	
 }
 
+void Hix::Features::AddModel::runImpl()
+{
+	auto model = new GLModel(_parent, _mesh, _fname, _transform);
+	model->setHitTestable(true);
+	model->setZToBed();
+	_model = model;
+}
+
 GLModel* Hix::Features::AddModel::getAddedModel()
 {
 	auto idx = _model.index();
@@ -50,11 +54,7 @@ GLModel* Hix::Features::AddModel::getAddedModel()
 
 
 Hix::Features::ListModel::ListModel(Hix::Engine3D::Mesh* mesh, QString fname, const Qt3DCore::QTransform* transform) : AddModel(qmlManager->models, mesh, fname, transform)
-{
-	auto rawModel = std::get<GLModel*>(_model);
-	qmlManager->addToGLModels(rawModel);
-	qmlManager->addPart(fname, rawModel->ID());
-}
+{}
 
 Hix::Features::ListModel::~ListModel()
 {
@@ -76,4 +76,12 @@ void Hix::Features::ListModel::redoImpl()
 	auto raw = std::get<GLModel*>(_model);
 	qmlManager->addPart(raw->modelName(), raw->ID());
 	qmlManager->addToGLModels(raw);
+}
+
+void Hix::Features::ListModel::runImpl()
+{
+	AddModel::runImpl();
+	auto rawModel = std::get<GLModel*>(_model);
+	qmlManager->addToGLModels(rawModel);
+	qmlManager->addPart(_fname, rawModel->ID());
 }

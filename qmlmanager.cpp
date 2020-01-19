@@ -43,6 +43,8 @@
 #include "feature/addModel.h"
 #include "feature/ModelBuilder/ModelBuilderMode.h"
 #include "feature/sliceExport.h"
+#include "feature/UndoRedo.h"
+
 #include "render/CircleMeshEntity.h"
 #include "Qml/components/LeftPopup.h"
 #include "Qml/components/Toast.h"
@@ -313,46 +315,6 @@ void QmlManager::initializeUI(QQmlApplicationEngine* e){
 void QmlManager::openModelFile(){
 	openProgressPopUp();
 
-	auto mesh = new Mesh();
-	auto fileUrl = QFileDialog::getOpenFileUrl(nullptr, "Please choose a file", QUrl(), "3D files(*.stl *.obj)");
-	auto filename = fileUrl.fileName();
-	
-	if (filename == "")
-	{
-		setProgress(1.0);
-		return;
-	}
-
-	if (filename.contains(".stl") || filename.contains(".STL")) {
-		FileLoader::loadMeshSTL(mesh, fileUrl);
-	}
-	else if (filename.contains(".obj") || filename.contains(".OBJ")) {
-		FileLoader::loadMeshOBJ(mesh, fileUrl);
-	}
-	filenameToModelName(filename.toStdString());
-	setProgress(0.3);
-	mesh->centerMesh();
-
-	auto addModel = new ListModel(mesh, filename, nullptr);
-	_featureHistoryManager.addFeature(addModel);
-
-	auto latest = addModel->getAddedModel();
-	latest->setZToBed();
-	setProgress(0.6);
-	//repair mode
-	if (Hix::Features::isRepairNeeded(mesh))
-	{
-		qmlManager->setProgressText("Repairing mesh.");
-		std::unordered_set<GLModel*> repairModels;
-		repairModels.insert(latest);
-		new MeshRepair(repairModels);
-	}
-	setProgress(1.0);
-	// do auto arrange
-	if (glmodels.size() >= 2)
-		openArrange();
-	//runArrange();
-	QApplication::setOverrideCursor(QCursor(Qt::ArrowCursor));
 }
 
 
@@ -421,7 +383,7 @@ void QmlManager::deleteModelFileDone() {
 
 void QmlManager::deleteModelFile(GLModel* model){
     qDebug() << "deletemodelfile" << glmodels.size();
-	_featureHistoryManager.addFeature(new DeleteModel(model));
+	_taskManager.enqueTask(new DeleteModel(model));
     deleteModelFileDone();
 }
 
@@ -438,7 +400,7 @@ void QmlManager::deleteSelectedModels() {
 		container->addFeature(new DeleteModel(*it));
 	}
 	if(!container->empty())
-		_featureHistoryManager.addFeature(container);
+		_taskManager.enqueTask(container);
     deleteModelFileDone();
 
     return;
@@ -557,8 +519,10 @@ void QmlManager::sendUpdateModelInfo(int printing_time, int layer, QString xyz, 
 }
 
 void QmlManager::openArrange(){
-    //arrangePopup->setProperty("visible", true);
-    openYesNoPopUp(false, "Click OK to auto-arrange models.", "", "", 18, "qrc:/Resource/popup_image/image_arrange.png", ftrArrange, 1);
+	if (glmodels.size() > 1)
+	{
+		openYesNoPopUp(false, "Click OK to auto-arrange models.", "", "", 18, "qrc:/Resource/popup_image/image_arrange.png", ftrArrange, 1);
+	}
 }
 
 void QmlManager::runArrange(){
@@ -833,8 +797,9 @@ void QmlManager::closeLayFlat()
 
 void QmlManager::generateLayFlat()
 {
-	auto layflat = dynamic_cast<LayFlatMode*>(_currentMode.get())->applyLayFlat();
-	_featureHistoryManager.addFeature(layflat);
+	auto layflat = dynamic_cast<LayFlatMode*>(_currentMode.get());
+	if (layflat)
+		layflat->applyLayFlat();
 }
 
 void QmlManager::openLabelling()
@@ -878,7 +843,7 @@ void QmlManager::generateLabelMesh()
 {
 	auto labelling = dynamic_cast<LabellingMode*>(_currentMode.get())->applyLabelMesh();
 	if(labelling != nullptr)
-		_featureHistoryManager.addFeature(labelling);
+		_taskManager.enqueTask(labelling);
 }
 
 void QmlManager::openExtension()
@@ -895,19 +860,7 @@ void QmlManager::generateExtensionFaces(double distance)
 {
 	auto extend = dynamic_cast<ExtendMode*>(_currentMode.get())->applyExtend(distance);
 	if(extend != nullptr)
-		_featureHistoryManager.addFeature(extend);
-}
-
-QString QmlManager::filenameToModelName(const std::string& s)
-{
-	char sep = '/';
-
-	size_t i = s.rfind(sep, s.length());
-	if (i != std::string::npos) {
-		return QString::fromStdString(s.substr(i + 1, s.length() - i));
-	}
-
-	return QString::fromStdString(s);
+		_taskManager.enqueTask(extend);
 }
 
 const std::unordered_set<GLModel*>& QmlManager::getSelectedModels()
@@ -1003,7 +956,7 @@ void QmlManager::doDelete(){
 		container->addFeature(new DeleteModel(model));
 	}
 
-	_featureHistoryManager.addFeature(container);
+	_taskManager.enqueTask(container);
 	deleteModelFileDone();
 }
 
@@ -1059,7 +1012,7 @@ void QmlManager::applyMove(int axis, qreal X, qreal Y){
 	QVector3D displacement(X, Y, 0);
 
 	auto move = dynamic_cast<Hix::Features::MoveMode*>(_currentMode.get())->applyMove(displacement);
-	_featureHistoryManager.addFeature(move);
+	_taskManager.enqueTask(move);
 
 }
 void QmlManager::applyRotation(int mode, qreal X, qreal Y, qreal Z){
@@ -1069,7 +1022,7 @@ void QmlManager::applyRotation(int mode, qreal X, qreal Y, qreal Z){
 	for (auto selectedModel : selectedModels) {
 		auto rotation = QQuaternion::fromEulerAngles(X,Y,Z);
 		auto rotate = dynamic_cast<Hix::Features::RotateMode*>(_currentMode.get())->applyRotate(rotation);
-		_featureHistoryManager.addFeature(rotate);
+		_taskManager.enqueTask(rotate);
     }
 }
 void QmlManager::resetLayflat(){
@@ -1173,11 +1126,11 @@ void QmlManager::runGroupFeature(int ftrType, QString state, double arg1, double
 }
 
 void QmlManager::unDo(){
-	_featureHistoryManager.undo();
+	_taskManager.enqueTask(std::make_unique<Undo>());
 }
 
 void QmlManager::reDo(){
-	_featureHistoryManager.redo();
+	_taskManager.enqueTask(std::make_unique<Redo>());
 }
 
 void QmlManager::copyModel(){
@@ -1194,7 +1147,7 @@ void QmlManager::pasteModel(){
     for (auto copyIdx : copyMeshes){
 		auto model = getModelByID(copyIdx);
 		QString temp = model->modelName() + "_copy";
-		_featureHistoryManager.addFeature( new ListModel(new Mesh(*model->getMesh()), temp, nullptr));
+		_taskManager.enqueTask(new ListModel(new Mesh(*model->getMesh()), temp, nullptr));
     }
     openArrange();
     return;
@@ -1302,7 +1255,7 @@ void QmlManager::applyScale(double arg1, double arg2, double arg3)
 	float scaleZ = arg3;
 
 	auto scale = dynamic_cast<ScaleMode*>(_currentMode.get())->applyScale(QVector3D(scaleX, scaleY, scaleZ));
-	_featureHistoryManager.addFeature(scale);
+	_taskManager.enqueTask(scale);
 }
 
 void QmlManager::openOrientation(){
@@ -1495,7 +1448,7 @@ void QmlManager::generateAutoSupport()
 {
 	auto autoGenSupport = dynamic_cast<SupportMode*>(_currentMode.get())->generateAutoSupport();
 	if (autoGenSupport != nullptr)
-		_featureHistoryManager.addFeature(autoGenSupport);
+		_taskManager.enqueTask(autoGenSupport);
 }
 
 
@@ -1514,9 +1467,11 @@ void QmlManager::supportEditEnabled(bool enabled)
 }
 void QmlManager::clearSupports()
 {
-	auto clearSupport = dynamic_cast<SupportMode*>(_currentMode.get())->clearSupport();
-	if(clearSupport != nullptr)
-		_featureHistoryManager.addFeature(clearSupport);
+	auto mode = dynamic_cast<SupportMode*>(_currentMode.get());
+	if (mode)
+	{
+		_taskManager.enqueTask(mode->clearSupport());
+	}
 }
 
 
@@ -1539,7 +1494,7 @@ void QmlManager::regenerateRaft()
 	}
 	//add
 	container->addFeature(dynamic_cast<SupportMode*>(_currentMode.get())->generateRaft());
-		_featureHistoryManager.addFeature(container);
+		_taskManager.enqueTask(container);
 }
 
 //temp features
@@ -1613,7 +1568,7 @@ void QmlManager::generateShellOffset(double factor) {
 	openProgressPopUp();
 	setProgress(0.1);
 	auto shellOffset = dynamic_cast<ShellOffsetMode*>(_currentMode.get());
-	_featureHistoryManager.addFeature(shellOffset->doOffset(factor));
+	_taskManager.enqueTask(shellOffset->doOffset(factor));
 	setProgress(1.0);
 
 }
