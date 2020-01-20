@@ -55,6 +55,8 @@ namespace Hix
 		public:
 			DropdownBox(QQuickItem* parent = nullptr);
 			virtual ~DropdownBox();
+			int getIndex()const;
+			void setIndex(int index);
 
 		signals:
 			void indexChanged();

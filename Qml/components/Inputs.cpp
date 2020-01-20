@@ -50,3 +50,14 @@ Hix::QML::DropdownBox::DropdownBox(QQuickItem* parent)
 Hix::QML::DropdownBox::~DropdownBox()
 {
 }
+
+int Hix::QML::DropdownBox::getIndex() const
+{
+	return _index;
+}
+
+void Hix::QML::DropdownBox::setIndex(int index)
+{
+	_index = index;
+	emit indexChanged();
+}
