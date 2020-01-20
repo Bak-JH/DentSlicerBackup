@@ -8,6 +8,10 @@ Hix.ToastShell {
 	id: root
 	width: 500
 	height: 60
+	
+	property string msgTypeImgSource: "qrc:/Resource/toast_check.png"
+	property string msgTypeColor: "#00b9c8"
+
 	Rectangle{
 		id: shell
 		width: parent.width
@@ -20,13 +24,13 @@ Hix.ToastShell {
 			width: 36
 			height: width
 			radius: width / 2
-			color: "#00b9c8" // themeColor
+			color: root.msgTypeColor // themeColor
 			anchors.verticalCenter: parent.verticalCenter
 			anchors.left: parent.left
 			anchors.leftMargin: (root.height - height) / 2
 			Image {
 				id: img
-				source: "qrc:/Resource/toast_check.png"
+				source: root.msgTypeImgSource
 				anchors.verticalCenter: parent.verticalCenter
 				anchors.horizontalCenter: parent.horizontalCenter
 
@@ -69,8 +73,19 @@ Hix.ToastShell {
 	onMessageTypeChanged: {
 		console.log("messageTypeChanged")
 		if(messageType == Hix.ToastShell.Done)
-			msgtype.img.source = "qrc:/Resource/toast_check.png"
+		{
+			msgTypeImgSource = "qrc:/Resource/toast_check.png"
+			msgTypeColor = "#00b9c8"
+		}
 		else if (messageType == Hix.ToastShell.ExpectedError)
-			console.log(shell.msgtype.img) //= "qrc:/Resource/closebutton.png"
+		{
+			msgTypeImgSource = "qrc:/Resource/closebutton.png"
+			msgTypeColor = "#FFF000"
+		}
+		else if (messageType == Hix.ToastShell.UnExpectedError)
+		{
+			msgTypeImgSource = "qrc:/Resource/closebutton.png"
+			msgTypeColor = "#FFF000"
+		}
 	}
 }
