@@ -4,14 +4,27 @@ import QtQuick.Controls 2.1
 import QtQuick.Controls.Styles 1.4
 import QtGraphicalEffects 1.12
 
-Item {
+Hix.ModalShell {
+	id: root
+	width: 420
+	height: 240
 	property var buttonsWidth: 320
 	property var buttonSpace: 32
 
-	Hix.ModalShell {
-		id: modalshell
-		width: 420
-		height: 240
+	MouseArea {
+		id: blockingArea
+		width: window.width
+		height: window.height
+		anchors.fill: window
+		propagateComposedEvents: false
+        hoverEnabled: true
+        preventStealing: true
+	}
+
+	Rectangle {
+		id: shell
+		width: parent.width
+		height: parent.height
 		radius: 8
 		color: "#ffffff"
 
@@ -31,7 +44,7 @@ Item {
 		}
 		
 		Text {
-			text: parent.modalmsg
+			text: root.modalMessage
 			font.family: openRegular.name
 			font.pointSize: 10
 			anchors.horizontalCenter: parent.horizontalCenter
@@ -92,10 +105,10 @@ Item {
 	}
 
 	DropShadow {
-		anchors.fill: modalshell
+		anchors.fill: shell
 		radius: 10.0
 		samples: 21
 		color: "#55000000"
-		source: modalshell
+		source: shell
 	}
 }

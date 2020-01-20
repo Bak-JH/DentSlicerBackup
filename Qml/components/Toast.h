@@ -22,7 +22,6 @@ namespace Hix
 
 			enum MessageType { Done, ExpectedError, UnExpectedError };
 			void setMessage(MessageType type, std::string text);
-			Q_INVOKABLE void test(MessageType type) { _msgType = type; emit messageTypeChanged(); }
 
 		signals:
 			void messageChanged();

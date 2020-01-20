@@ -1144,6 +1144,7 @@
     <None Include="Qml\FeaturePopup\LeftPopupSupport.qml" />
     <None Include="Qml\FeatureMenu.qml" />
     <None Include="Qml\ProgressPopup.qml" />
+    <None Include="Qml\FeaturePopup\SidePopup.qml" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Header Files">

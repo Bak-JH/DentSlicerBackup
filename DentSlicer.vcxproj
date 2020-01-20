@@ -1120,6 +1120,7 @@
     <None Include="Qml\Controls\CtrSpinBox.qml" />
     <None Include="Qml\Controls\CtrTextBox.qml" />
     <None Include="Qml\Controls\CtrScaleInputBox.qml" />
+    <None Include="Qml\FeaturePopup\SidePopup.qml" />
     <None Include="Qml\FeedbackPopUp.qml" />
     <None Include="Qml\FileDialogLoad.qml" />
     <None Include="Qml\InputBox.qml" />

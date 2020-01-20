@@ -71,7 +71,6 @@ QmlManager::QmlManager(QObject *parent) : QObject(parent), _optBackend(this, scf
 	qmlRegisterType<Hix::QML::ToastShell>("hix.qml", 1, 0, "ToastShell");
 	qmlRegisterType<Hix::QML::SlideBarShell>("hix.qml", 1, 0, "SlideBarShell");
 	qmlRegisterType<Hix::QML::RangeSlideBarShell>("hix.qml", 1, 0, "RangeSlideBarShell");
-
 	qmlRegisterType<Hix::QML::ModalShell>("hix.qml", 1, 0, "ModalShell");
 	qmlRegisterType<Hix::QML::ViewModeShell>("hix.qml", 1, 0, "ViewModeShell");
 
@@ -80,8 +79,8 @@ QmlManager::QmlManager(QObject *parent) : QObject(parent), _optBackend(this, scf
 	qmlRegisterType<Hix::QML::TextInputBox>("hix.qml", 1, 0, "TextInputBox");
 
 	qmlRegisterType<Hix::QML::PartList>("hix.qml", 1, 0, "PartList");
-
 	qmlRegisterType<Hix::QML::PartDeleteButton>("hix.qml", 1, 0, "PartDeleteButton");
+
 	qmlRegisterType<Hix::QML::PrintInfoText>("hix.qml", 1, 0, "PrintInfoText");
 }
 

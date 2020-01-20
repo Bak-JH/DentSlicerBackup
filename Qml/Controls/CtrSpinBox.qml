@@ -5,6 +5,7 @@ import QtQuick.Controls.Styles 1.4
 import QtGraphicalEffects 1.12
 
 Hix.InputSpinBox {
+	id: root
 	property alias control: control
 	property alias label: label
 	property var fromNum
@@ -34,13 +35,14 @@ Hix.InputSpinBox {
 		anchors.rightMargin: parent.width * 0.1
 		anchors.verticalCenter: parent.verticalCenter
 		editable: true
-		
-		onValueChanged: {
-			parent.value = value;
+
+		validator: DoubleValidator {
+			bottom: fromNum
+			top: toNum
 		}
 
 		contentItem: TextInput {
-			text: control.textFromValue(control.value, control.locale)
+			text: root.value.toFixed(2)
 			font: control.font
 			selectionColor: "#21be2b"
 			selectedTextColor: "#ffffff"
@@ -50,6 +52,10 @@ Hix.InputSpinBox {
 			readOnly: !control.editable
 			validator: control.validator
 			inputMethodHints: Qt.ImhFormattedNumbersOnly
+
+			onAccepted: {
+				root.value = text
+			}
 		}
 		
 		up.indicator: Rectangle {
@@ -72,7 +78,7 @@ Hix.InputSpinBox {
 			MouseArea {
 				anchors.fill: parent
 				hoverEnabled: true
-				onReleased: { control.increase(); }
+				onReleased: { root.value += 1.00 }
 				onEntered: { upindicator.source = "qrc:/Resource/triangle_up_hover.png" }
 				onExited: { upindicator.source = "qrc:/Resource/triangle_up.png" }
 			}
@@ -97,9 +103,9 @@ Hix.InputSpinBox {
 			MouseArea {
 				anchors.fill: parent
 				hoverEnabled: true
+				onReleased: { root.value -= 1.00 }
 				onEntered: { downindicator.source = "qrc:/Resource/triangle_down_hover.png" }
 				onExited: { downindicator.source = "qrc:/Resource/triangle_down.png" }
-				onReleased: { control.decrease(); }
 			}
 		}
 		

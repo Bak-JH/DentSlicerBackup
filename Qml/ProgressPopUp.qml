@@ -3,19 +3,18 @@ import hix.qml 1.0 as Hix
 import QtQuick.Controls 2.1
 import QtQuick.Controls.Styles 1.4
 import QtGraphicalEffects 1.12
-//import QtMultimedia 5.14
 
 Hix.ProgressPopupShell {
 	id: shell
-	width: window.width
-	height: window.height
+	width: 216
+	height: 300
 	color: "#00000000"
 
 	ListModel // listview data
 	{		
 		id:model
 		objectName: "featueList"
-
+		
 		function appendFeature(featureName)
 		{
 			model.append({"name" : featureName});
@@ -24,8 +23,9 @@ Hix.ProgressPopupShell {
 	
 	MouseArea {
 		id: blockingArea
-		objectName: "blockingArea"
-		anchors.fill: parent
+		width: window.width
+		height: window.height
+		anchors.fill: window
 		propagateComposedEvents: false
         hoverEnabled: true
         preventStealing: true
@@ -33,12 +33,10 @@ Hix.ProgressPopupShell {
 
 	Rectangle {
 		id: popup
-		width: 216
-		height: 300
+		width: parent.width
+		height: parent.height
 		radius: 8
 		color: "#ffffff"
-
-		property bool running: true
 
 		Image {
 			id: img
@@ -51,7 +49,7 @@ Hix.ProgressPopupShell {
 				from: 0
 				to: 360
 				duration: 1200
-				running: root.runing
+				running: true
 				loops: Animation.Infinite;
 				easing.type: Easing.InOutQuad
 			}
