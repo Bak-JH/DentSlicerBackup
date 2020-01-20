@@ -9,15 +9,15 @@ namespace Hix
 {
 	namespace QML
 	{
-		class ModalShell : public QQuickRectangle
+		class ModalShell : public QQuickItem
 		{
 			Q_OBJECT
-			Q_PROPERTY(QString modalmsg MEMBER _modalmsg NOTIFY modalmsgChanged)
+			Q_PROPERTY(QString modalMessage MEMBER _modalmsg NOTIFY modalmsgChanged)
 
 		public:
 			ModalShell(QQuickItem* parent = nullptr);
 
-		public slots:
+		signals:
 			void modalmsgChanged();
 
 		protected:

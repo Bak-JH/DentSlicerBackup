@@ -230,7 +230,7 @@ Item{
 			anchors.left: lefttab.right
 			anchors.leftMargin: 15
 			anchors.topMargin: 20
-		}
+		}*/
 		LeftPopupSupport
 		{
 			id: leftpopupsupport
@@ -239,15 +239,7 @@ Item{
             anchors.leftMargin: 15
 			anchors.topMargin: 250
 		}
-		*/
-		LeftPopupModelBuild
-		{
-			id: leftpopupmodelbuild
-			anchors.top: featureMenu.bottom
-			anchors.left: partlist.right
-			anchors.leftMargin: 15
-			anchors.topMargin: 250
-		}
+		
 		
 
 		LeftPopupCut {
@@ -427,8 +419,16 @@ Item{
             anchors.verticalCenter: parent.verticalCenter
         }
 
-		ProgressPopup {
+		ProgressPopup 
+		{
 			id: progressPopup
+			enabled: false
+			visible: false
+		}
+
+		ModalWindow
+		{
+			id: modalWindow
 			enabled: false
 			visible: false
 		}

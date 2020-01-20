@@ -89,5 +89,6 @@
         <file>Qml/FeaturePopup/LeftPopupSupport.qml</file>
         <file>Qml/ResultPopup.qml</file>
         <file>Qml/ProgressPopup.qml</file>
+        <file>Qml/FeaturePopup/SidePopup.qml</file>
     </qresource>
 </RCC>

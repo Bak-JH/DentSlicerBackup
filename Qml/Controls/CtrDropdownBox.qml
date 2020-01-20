@@ -8,7 +8,6 @@ import QtGraphicalEffects 1.12
 DropdownBox {
 	property string dropdownText
 	property alias label: label
-	color: "transparent"
 
 	Text {
 		id: label

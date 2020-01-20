@@ -8,7 +8,7 @@ namespace Hix
 {
 	namespace QML
 	{
-		class ViewModeShell : public QQuickRectangle
+		class ViewModeShell : public QQuickItem
 		{
 			Q_OBJECT
 			Q_PROPERTY(QString viewtype MEMBER _viewtype NOTIFY viewtypeChanged)

@@ -33,14 +33,6 @@ Hix.ToastShell {
 				source: root.msgTypeImgSource
 				anchors.verticalCenter: parent.verticalCenter
 				anchors.horizontalCenter: parent.horizontalCenter
-
-				MouseArea{
-					anchors.fill:parent
-					
-					onClicked: {
-						root.test(Hix.ToastShell.ExpectedError)
-					}
-				}
 			}
 		}
 		Text {

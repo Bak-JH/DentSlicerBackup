@@ -12,12 +12,12 @@ Hix::QML::InputSpinBox::~InputSpinBox()
 {
 }
 
-int Hix::QML::InputSpinBox::getValue() const
+double Hix::QML::InputSpinBox::getValue() const
 {
 	return _value;
 }
 
-void Hix::QML::InputSpinBox::setValue(int value)
+void Hix::QML::InputSpinBox::setValue(double value)
 {
 	_value = value;
 	emit valueChanged();
@@ -43,7 +43,7 @@ void Hix::QML::TextInputBox::setInputText(std::string text)
 	emit inputTextChanged();
 }
 
-Hix::QML::DropdownBox::DropdownBox(QQuickItem* parent)
+Hix::QML::DropdownBox::DropdownBox(QQuickItem* parent) : QQuickItem(parent)
 {
 }
 

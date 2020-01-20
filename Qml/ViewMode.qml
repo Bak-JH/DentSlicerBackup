@@ -3,17 +3,22 @@ import hix.qml 1.0 as Hix
 import QtQuick.Controls 2.1
 import QtQuick.Controls.Styles 1.4
 import QtGraphicalEffects 1.12
+import "FeaturePopup"
 
-Item {
+Hix.ViewModeShell {
+	id: root
+	width: 256
+	height: 50
+	
 	property var myPadding: 16
 	function viewPopupToggle() {
 		if (viewmodepopup.visible == false) { viewmodepopup.visible = true; }
 		else { viewmodepopup.visible = false; }
 	}
-	Hix.ViewModeShell {
-		id: viewmodeshell
-		width: 256
-		height: 50
+	Rectangle {
+		id: shell
+		width: parent.width
+		height: parent.height
 		radius: 8
 		Text {
 			text: qsTr("View Mode")
@@ -46,126 +51,67 @@ Item {
 			onClicked: { viewPopupToggle(); }
 		}
 	}
-	Rectangle {
+	SidePopup {
 		id: viewmodepopup
 		width: 184
 		height: 88
-		color: "transparent"
-		anchors.left: viewmodeshell.right
-		anchors.leftMargin: 12
-		anchors.top: parent.top
-		visible: false
 
-		Canvas {
-			id: canvas
-			anchors.fill: parent
-			onPaint: {
-				var ctx = getContext("2d");
-				ctx.reset();
-
-				var centreX = width / 2;
-				var centreY = height / 2;
-
-				var windowRadius = 8;
-				var startX = width - windowRadius;
-				var startY = windowRadius;
-
-				//168*88
-				var w0 = 168
-				var h0 = 88
-				var w = w0 - windowRadius * 2;	//straight part
-				var h = h0 - windowRadius * 2;	//straight part
-				var s = 20;		//triangle part height
-				var h1 = h - s - 8;
-			
-
-				//ctx.shadowBlur = 9;
-				//ctx.shadowColor = "#30000000";
-
-				ctx.beginPath();
-				ctx.fillStyle = "#ffffff";
-				ctx.moveTo(startX, startY-windowRadius);
-				ctx.arc(startX, startY, windowRadius, Math.PI * 1.5, Math.PI * 2, false);
-				//ctx.moveTo(startX+windowRadius, startY);
-				ctx.lineTo(startX+windowRadius, startY+h);
-				ctx.arc(startX, startY+h, windowRadius, 0, Math.PI * 0.5, false);
-				ctx.lineTo(startX-w, startY+h+windowRadius);
-				ctx.arc(startX-w, startY+h, windowRadius, Math.PI * 0.5, Math.PI, false);
-				ctx.lineTo(startX-w-windowRadius, startY+h-h1);
-				ctx.lineTo(startX-w-windowRadius-16, startY+h-h1-s/2);
-				ctx.lineTo(startX-w-windowRadius, startY+h-h1-s);
-				ctx.lineTo(startX-w-windowRadius, startY);
-				ctx.arc(startX-w, startY, windowRadius, Math.PI, Math.PI * 1.5, false);
-				ctx.lineTo(startX, startY-windowRadius);
-				ctx.fill();
+		Hix.Button {
+			id: objectviewbutton
+			width: 160
+			height: 36
+			anchors.top: parent.top
+			anchors.topMargin: (parent.height - height * 2) / 2
+			anchors.right: parent.right
+			anchors.rightMargin: (parent.width - width - 16) / 2
+			Text {
+				id: objecttext
+				anchors.horizontalCenter: parent.horizontalCenter
+				anchors.verticalCenter: parent.verticalCenter
+				font.pointSize: 10
+				text: qsTr("Object View")
+				font.family: openRegular.name
 			}
-
-
-			Hix.Button {
-				id: objectviewbutton
-				width: 160
-				height: 36
-				anchors.top: parent.top
-				anchors.topMargin: (parent.height - height * 2) / 2
-				anchors.right: parent.right
-				anchors.rightMargin: (parent.width - width - 16) / 2
-				Text {
-					id: objecttext
-					anchors.horizontalCenter: parent.horizontalCenter
-					anchors.verticalCenter: parent.verticalCenter
-					font.pointSize: 10
-					text: qsTr("Object View")
-					font.family: openRegular.name
-				}
-				onClicked: {
-					console.log("clicked")
-					objecttext.color = "#1db2c4"
-					objecttext.font.family = openSemiBold.name
-					layertext.color = "#000000"
-					layertext.font.family = openRegular.name
-				}
+			onClicked: {
+				console.log("clicked")
+				objecttext.color = "#1db2c4"
+				objecttext.font.family = openSemiBold.name
+				layertext.color = "#000000"
+				layertext.font.family = openRegular.name
 			}
-
-			Hix.Button {
-				id: layerviewbutton
-				width: 160
-				height: 36
-				anchors.top: objectviewbutton.bottom
-				anchors.right: parent.right
-				anchors.rightMargin: (parent.width - width - 16) / 2
-				Text {
-					id: layertext
-					anchors.horizontalCenter: parent.horizontalCenter
-					anchors.verticalCenter: parent.verticalCenter
-					font.pointSize: 10
-					text: qsTr("Layer View")
-					font.family: openRegular.name
-				}
-				onClicked: {
-					console.log("clicked")
-					layertext.color = "#1db2c4"
-					layertext.font.family = openSemiBold.name
-					objecttext.color = "#000000"
-					objecttext.font.family = openRegular.name
-				}
-			}
-
 		}
-		DropShadow {
-			anchors.fill: canvas
-			radius: 10.0
-			samples:21
-			color: "#55000000"
-			source: canvas
+
+		Hix.Button {
+			id: layerviewbutton
+			width: 160
+			height: 36
+			anchors.top: objectviewbutton.bottom
+			anchors.right: parent.right
+			anchors.rightMargin: (parent.width - width - 16) / 2
+			Text {
+				id: layertext
+				anchors.horizontalCenter: parent.horizontalCenter
+				anchors.verticalCenter: parent.verticalCenter
+				font.pointSize: 10
+				text: qsTr("Layer View")
+				font.family: openRegular.name
+			}
+			onClicked: {
+				console.log("clicked")
+				layertext.color = "#1db2c4"
+				layertext.font.family = openSemiBold.name
+				objecttext.color = "#000000"
+				objecttext.font.family = openRegular.name
+			}
 		}
-	
+
 	}
 
 	DropShadow {
-		anchors.fill: viewmodeshell
+		anchors.fill: shell
 		radius: 10.0
 		samples: 21
 		color: "#55000000"
-		source: viewmodeshell
+		source: shell
 	}
 }

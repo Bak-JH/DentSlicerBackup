@@ -13,19 +13,19 @@ namespace Hix
 		class InputSpinBox : public QQuickItem
 		{
 			Q_OBJECT
-			Q_PROPERTY(int value MEMBER _value NOTIFY valueChanged)
+			Q_PROPERTY(double value MEMBER _value NOTIFY valueChanged)
 
 		public:
 			InputSpinBox(QQuickItem* parent = nullptr);
 			virtual ~InputSpinBox();
-			int getValue()const;
-			void setValue(int value);
+			double getValue()const;
+			void setValue(double value);
 
 		signals:
 			void valueChanged();
 
 		private:
-			int _value = 0;
+			double _value = 0;
 		};
 
 		class TextInputBox : public QQuickItem
@@ -46,7 +46,7 @@ namespace Hix
 			QString _text;
 		};
 
-		class DropdownBox : public QQuickRectangle
+		class DropdownBox : public QQuickItem
 		{
 			Q_OBJECT
 			Q_PROPERTY(QStringList dropList MEMBER _dropList)

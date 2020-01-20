@@ -4,7 +4,7 @@
 #include "Buttons.h"
 #include "Inputs.h"
 #include "QtQml/private/qqmllistmodel_p.h"
-//#include <QComboBox>
+#include <string>
 
 namespace Hix
 {
@@ -36,7 +36,8 @@ namespace Hix
 		public:
 			ProgressPopupShell(QQuickItem* parent = nullptr);
 			virtual ~ProgressPopupShell();
-			Q_INVOKABLE void appendFeature(QString featureName);
+			void appendFeature(std::string featureName);
+			void appendFeatureList(QStringList featureName);
 		};
 	}
 }

@@ -1,8 +1,7 @@
 #include "ViewMode.h"
 
-Hix::QML::ViewModeShell::ViewModeShell(QQuickItem* parent)
+Hix::QML::ViewModeShell::ViewModeShell(QQuickItem* parent) : QQuickItem(parent)
 {
-	setParent(parent);
 }
 
 void Hix::QML::ViewModeShell::viewtypeChanged()
