@@ -12,7 +12,6 @@ DropdownBox {
 
 	Text {
 		id: label
-		text: ""
 		anchors.verticalCenter: parent.verticalCenter
 		font.family: openRegular.name
 		color: "#666666"
