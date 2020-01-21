@@ -79,7 +79,6 @@ QmlManager::QmlManager(QObject *parent) : QObject(parent), _optBackend(this, scf
 	qmlRegisterType<Hix::QML::TextInputBox>("hix.qml", 1, 0, "TextInputBox");
 
 	qmlRegisterType<Hix::QML::PartList>("hix.qml", 1, 0, "PartList");
-	qmlRegisterType<Hix::QML::PartDeleteButton>("hix.qml", 1, 0, "PartDeleteButton");
 
 	qmlRegisterType<Hix::QML::PrintInfoText>("hix.qml", 1, 0, "PrintInfoText");
 }
@@ -314,6 +313,9 @@ void QmlManager::initializeUI(QQmlApplicationEngine* e){
 	
 	//init settings
 	_bed.drawBed();
+
+	//TODO: delete later. this line is for testing
+	//openModelFile(); 
 }
 
 void QmlManager::openModelFile(){
@@ -343,6 +345,8 @@ void QmlManager::openModelFile(){
 	_featureHistoryManager.addFeature(addModel);
 
 	auto latest = addModel->getAddedModel();
+	//TODO: delete later. this line is for testing
+	//dynamic_cast<Hix::QML::PartList*>(partList)->appendModel(latest);
 	latest->setZToBed();
 	setProgress(0.6);
 	//repair mode

@@ -1,5 +1,6 @@
 #include "PartList.h"
 #include "qmlmanager.h"
+#include <QVariant>
 
 Hix::QML::PartList::PartList(QQuickItem* parent) : QQuickItem(parent)
 {
@@ -9,29 +10,32 @@ Hix::QML::PartList::~PartList()
 {
 }
 
-Q_INVOKABLE void Hix::QML::PartList::appendModel(QString modelName)
+void Hix::QML::PartList::appendModel(GLModel* model)
+{
+	qDebug() << "model: " << model;
+	QObject* listModel = FindItemByName(qmlManager->engine, "modelList");
+	QMetaObject::invokeMethod(listModel, "appendModel", 
+		Q_ARG(QVariant, model->modelName()), Q_ARG(QVariant, QVariant::fromValue<GLModel*>(model)));
+}
+
+//void Hix::QML::PartList::deleteModels(std::unordered_set<GLModel*>& selected)
+//{
+//	QObject* listModel = FindItemByName(qmlManager->engine, "modelList");
+//
+//	for (auto each : selected)
+//		QMetaObject::invokeMethod(listModel, "deleteModel", Q_ARG(QVariant, QVariant::fromValue<GLModel*>(each)));;
+//
+//	// delete code
+//	// blah blah blah
+//}
+
+Q_INVOKABLE void Hix::QML::PartList::deleteModels()
 {
 	QObject* listModel = FindItemByName(qmlManager->engine, "modelList");
-	QMetaObject::invokeMethod(listModel, "appendModel", Q_ARG(QVariant, modelName));;
-}
 
+	for (auto each : qmlManager->getSelectedModels())
+		QMetaObject::invokeMethod(listModel, "deleteModel", Q_ARG(QVariant, QVariant::fromValue<GLModel*>(each)));;
 
-
-Hix::QML::PartDeleteButton::PartDeleteButton(QQuickItem* parent) : _mouseArea(new QQuickMouseArea(this))
-{
-	setParent(parent);
-	connect(_mouseArea, &QQuickMouseArea::clicked, this, &PartDeleteButton::onClick);
-	qvariant_cast<QObject*>(
-		_mouseArea->property("anchors")
-		)->setProperty("fill", _mouseArea->property("parent"));
-
-}
-
-Hix::QML::PartDeleteButton::~PartDeleteButton()
-{
-}
-
-void Hix::QML::PartDeleteButton::onClick()
-{
-	qDebug() << "part clicked";
+	// delete code
+	// blah blah blah
 }
