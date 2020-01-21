@@ -3,6 +3,8 @@
 #include <QtQuick/private/qquickmousearea_p.h>
 #include <QtQuick/private/qquickevents_p_p.h>
 #include <QtQuick/private/qquicktext_p.h>
+#include "Buttons.h"
+#include "glmodel.h"
 
 namespace Hix
 {
@@ -14,22 +16,8 @@ namespace Hix
 		public:
 			PartList(QQuickItem* parent = nullptr);
 			virtual ~PartList();
-			Q_INVOKABLE void appendModel(QString featureName);
-
-		};
-
-		class PartDeleteButton : public QQuickRectangle
-		{
-			Q_OBJECT
-		public:
-			PartDeleteButton(QQuickItem* parent = nullptr);
-			virtual ~PartDeleteButton();
-		public slots:
-			void onClick();
-
-		private:
-			QQuickMouseArea* _mouseArea;
-
+			void appendModel(GLModel* model);
+			Q_INVOKABLE void deleteModels();
 		};
 	}
-}
+}	

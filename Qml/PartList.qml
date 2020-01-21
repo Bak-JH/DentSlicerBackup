@@ -6,10 +6,12 @@ import QtGraphicalEffects 1.12
 
 Hix.PartList {
 	id: root
+	objectName: "partList"
 	width: 256
 	height: 320
 	property var myPadding: 16
-
+	property var modelList: []
+	
 	function showHideToggle() {
 		if(showhideimg.source == "qrc:/Resource/part_show_1.png") showhide.source = "qrc:/Resource/part_hide_1.png"
 		else showhideimg.source = "qrc:/Resource/part_show_1.png"
@@ -18,10 +20,19 @@ Hix.PartList {
 	ListModel {		// 리스트뷰에 담을 데이터들을 선언.
 		id:model
 		objectName: "modelList"
-
-		function appendModel(modelName)
+		function appendModel(modelName, modelPointer)
 		{
-			model.append({"name" : modelName});
+			model.append({"name" : modelName, "modelPointer" : modelPointer});
+			modelList.push(modelPointer)
+		}
+
+		function deleteModel(modelPointer)
+		{
+			for(var n = 0; n < model.count; ++n)
+			{
+				if(model.get(n).modelPointer == modelPointer)
+					model.remove(n)
+			}
 		}
 	}
 
@@ -135,7 +146,7 @@ Hix.PartList {
 				source: "qrc:/Resource/part_remove_1.png"
 				//sourceSize.width: width
 			}
-			onClicked: { console.log("delete clicked"); }
+			onClicked: { root.deleteModels() }//TODO: delete later
 		}
 
 	}

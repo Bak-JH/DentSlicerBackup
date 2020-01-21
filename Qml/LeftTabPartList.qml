@@ -5,7 +5,6 @@ import QtQuick.Controls.Styles 1.4
 import QtQuick.Layouts 1.3
 
 Rectangle {
-    objectName: "partList"
     property real originalHeight: 336
     width : 264
     height : originalHeight
