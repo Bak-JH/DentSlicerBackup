@@ -121,8 +121,6 @@
     <ClCompile Include="Qml\components\Buttons.cpp" />
     <ClCompile Include="Qml\components\Inputs.cpp" />
     <ClCompile Include="render\CircleMeshEntity.cpp" />
-    <ClCompile Include="Qml\components\ModalWindow.cpp" />
-    <ClCompile Include="Qml\components\PartList.cpp" />
     <ClCompile Include="Qml\components\PrintInfo.cpp" />
     <ClCompile Include="Qml\components\SlideBar.cpp" />
     <ClCompile Include="Qml\components\Toast.cpp" />
@@ -887,9 +885,7 @@
     <QtMoc Include="Qml\components\Inputs.h" />
     <QtMoc Include="Qml\components\Toast.h" />
     <QtMoc Include="Qml\components\SlideBar.h" />
-    <QtMoc Include="Qml\components\ModalWindow.h" />
     <QtMoc Include="Qml\components\ViewMode.h" />
-    <QtMoc Include="Qml\components\PartList.h" />
     <QtMoc Include="Qml\components\PrintInfo.h" />
     <QtMoc Include="render\ModelMaterial.h" />
     <QtMoc Include="render\lights.h" />
@@ -954,7 +950,6 @@
     <None Include="Qml\MeshTransformerZoom.qml" />
     <None Include="Qml\ModalWindow.qml" />
     <None Include="Qml\Model.qml" />
-    <None Include="Qml\ModelBuildSlider.qml" />
     <None Include="Qml\Plane.qml" />
     <None Include="Qml\PartList.qml" />
     <None Include="Qml\PrintInfo.qml" />
@@ -1145,6 +1140,8 @@
     <None Include="Qml\FeatureMenu.qml" />
     <None Include="Qml\ProgressPopup.qml" />
     <None Include="Qml\FeaturePopup\SidePopup.qml" />
+    <None Include="cpp.hint" />
+    <None Include="Qml\RangedSlider.qml" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Header Files">

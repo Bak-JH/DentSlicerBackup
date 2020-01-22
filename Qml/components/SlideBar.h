@@ -23,7 +23,7 @@ namespace Hix
 			void setMax(double pMax);
 			double getMin()const;
 			double getMax()const;
-			double value()const;
+			double getValue()const;
 
 		signals:
 			void minimumChanged();

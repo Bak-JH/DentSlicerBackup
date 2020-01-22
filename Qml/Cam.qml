@@ -11,7 +11,7 @@ Item{
 		else { campopupshell.visible = false; }
 	}
 
-	Hix.Button {
+	Hix.RoundButton {
 		id: cambuttonshell
 		width: 60
 		height: width

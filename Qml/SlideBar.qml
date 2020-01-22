@@ -77,7 +77,6 @@ Hix.SlideBarShell {
 				width: 58
 				height: 34
 				anchors.right: handle.left
-				//x: 0 - control.availableWidth * 1.2
 				y: control.bottomPadding + control.visualPosition * (control.availableHeight - height)
 				visible: control.pressed ? true : false
 				
@@ -85,7 +84,6 @@ Hix.SlideBarShell {
 					id: canvas
 					anchors.fill: parent
 					Text {
-						//text: control.parent.slideRect.visualPosition
 						anchors.verticalCenter: parent.verticalCenter
 						anchors.left: parent.left
 						anchors.leftMargin: (parent.width - 10 - width) / 2

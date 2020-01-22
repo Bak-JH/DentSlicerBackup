@@ -47,14 +47,4 @@ Item{
 		color: "#55000000"
 		source: settingbutton
 	}
-	/*
-	DropShadow {
-		anchors.fill: canvas
-		radius: 10.0
-		samples:21
-		color: "#55000000"
-		source: canvas
-	}
-	*/
-	
 }

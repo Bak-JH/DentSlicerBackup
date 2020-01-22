@@ -31,7 +31,7 @@ double Hix::QML::SlideBarShell::getMax() const
 	return _max;
 }
 
-double Hix::QML::SlideBarShell::value() const
+double Hix::QML::SlideBarShell::getValue() const
 {
 	return _value;
 }

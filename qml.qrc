@@ -61,7 +61,6 @@
         <file>Qml/UndoRedo.qml</file>
         <file>Qml/PartList.qml</file>
         <file>Qml/PrintInfo.qml</file>
-        <file>Qml/ModelBuildSlider.qml</file>
         <file>Qml/PrintSetting.qml</file>
         <file>Qml/PrintSettingPopup.qml</file>
         <file>Qml/PlanesliderRange.qml</file>
@@ -90,5 +89,6 @@
         <file>Qml/ResultPopup.qml</file>
         <file>Qml/ProgressPopup.qml</file>
         <file>Qml/FeaturePopup/SidePopup.qml</file>
+        <file>Qml/RangedSlider.qml</file>
     </qresource>
 </RCC>
