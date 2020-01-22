@@ -283,7 +283,7 @@ Item{
 			anchors.leftMargin: 15
 		}
 		
-		ModelBuildSlider {
+		RangedSlider {
 			id: buildslidebar
 			anchors.top: uppertab.bottom
 			anchors.topMargin: 160
@@ -431,6 +431,13 @@ Item{
 			id: modalWindow
 			enabled: false
 			visible: false
+		}
+
+		PrintSettingPopup
+		{
+			id: printsettingpopup
+			//enabled: false
+			//visible: false
 		}
     }
 

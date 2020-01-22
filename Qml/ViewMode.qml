@@ -27,7 +27,7 @@ Hix.ViewModeShell {
 			color: "#888888"
 			anchors.verticalCenter: parent.verticalCenter
 			anchors.left: parent.left
-			anchors.leftMargin: myPadding
+			anchors.leftMargin: 16
 		}
 		Text {
 			text: parent.viewtype
@@ -36,14 +36,14 @@ Hix.ViewModeShell {
 			color: "#1db2c4"
 			anchors.verticalCenter: parent.verticalCenter
 			anchors.right: parent.right
-			anchors.rightMargin: myPadding * 2 + viewtriangle.width
+			anchors.rightMargin: 16 * 2 + viewtriangle.width
 		}
 		Image {
 			id: viewtriangle
 			source: "qrc:/Resource/arrow_right.png"
 			anchors.verticalCenter: parent.verticalCenter
 			anchors.right: parent.right
-			anchors.rightMargin: myPadding
+			anchors.rightMargin: 16
 		}
 		MouseArea {
 			anchors.fill: parent
@@ -73,7 +73,7 @@ Hix.ViewModeShell {
 				font.family: openRegular.name
 			}
 			onClicked: {
-				console.log("clicked")
+				root.setViewType(Hix.ViewModeShell.ObjectView)
 				objecttext.color = "#1db2c4"
 				objecttext.font.family = openSemiBold.name
 				layertext.color = "#000000"
@@ -97,7 +97,7 @@ Hix.ViewModeShell {
 				font.family: openRegular.name
 			}
 			onClicked: {
-				console.log("clicked")
+				root.setViewType(Hix.ViewModeShell.LayerView)
 				layertext.color = "#1db2c4"
 				layertext.font.family = openSemiBold.name
 				objecttext.color = "#000000"

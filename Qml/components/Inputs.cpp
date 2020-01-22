@@ -23,6 +23,13 @@ void Hix::QML::InputSpinBox::setValue(double value)
 	emit valueChanged();
 }
 
+void Hix::QML::InputSpinBox::setRange(double min, double max)
+{
+	_min = min;
+	_max = max;
+	emit rangeChanged();
+}
+
 Hix::QML::TextInputBox::TextInputBox(QQuickItem* parent) : QQuickItem(parent)
 {
 }
@@ -35,7 +42,7 @@ std::string Hix::QML::TextInputBox::getInputText() const
 {
 	std::wstring_convert<std::codecvt_utf8_utf16<char16_t>, char16_t> utf16_to_utf8;
 	return utf16_to_utf8.to_bytes(_text.toStdU16String());
-}
+}	
 
 void Hix::QML::TextInputBox::setInputText(std::string text)
 {
@@ -60,4 +67,10 @@ void Hix::QML::DropdownBox::setIndex(int index)
 {
 	_index = index;
 	emit indexChanged();
+}
+
+void Hix::QML::DropdownBox::setList(QStringList list)
+{
+	_dropList = list;
+	emit listChanged();
 }

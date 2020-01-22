@@ -11,16 +11,23 @@ namespace Hix
 		class ViewModeShell : public QQuickItem
 		{
 			Q_OBJECT
-			Q_PROPERTY(QString viewtype MEMBER _viewtype NOTIFY viewtypeChanged)
+			Q_PROPERTY(ViewType viewtype MEMBER _viewtype NOTIFY viewtypeChanged)
+			Q_ENUMS(ViewType)
 
 		public:
 			ViewModeShell(QQuickItem* parent = nullptr);
+			virtual ~ViewModeShell();
 
-		public slots:
+			enum ViewType { ObjectView, LayerView };
+
+			Q_INVOKABLE void setViewType(ViewType type);
+			ViewType getViewType()const;
+
+		signals:
 			void viewtypeChanged();
 
 		protected:
-			QString _viewtype = "Object View";
+			ViewType _viewtype = ViewType::ObjectView;
 
 		};
 		

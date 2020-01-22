@@ -10,7 +10,6 @@ Hix.PartList {
 	width: 256
 	height: 320
 	property var myPadding: 16
-	property var modelList: []
 	
 	function showHideToggle() {
 		if(showhideimg.source == "qrc:/Resource/part_show_1.png") showhide.source = "qrc:/Resource/part_hide_1.png"
@@ -23,7 +22,6 @@ Hix.PartList {
 		function appendModel(modelName, modelPointer)
 		{
 			model.append({"name" : modelName, "modelPointer" : modelPointer});
-			modelList.push(modelPointer)
 		}
 
 		function deleteModel(modelPointer)

@@ -21,5 +21,3 @@ private:
 	void addOptionDialogPercentage(QString opName, int defaultVal);
 
 };
-
-	

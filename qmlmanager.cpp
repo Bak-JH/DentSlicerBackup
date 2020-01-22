@@ -46,9 +46,7 @@
 #include "Qml/components/PopupShell.h"
 #include "Qml/components/Toast.h"
 #include "Qml/components/SlideBar.h"
-#include "Qml/components/ModalWindow.h"
 #include "Qml/components/ViewMode.h"
-#include "Qml/components/PartList.h"
 #include "Qml/components/PrintInfo.h"
 
 #include <functional>

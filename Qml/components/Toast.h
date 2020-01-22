@@ -20,7 +20,7 @@ namespace Hix
 			ToastShell(QQuickItem* parent = nullptr);
 			virtual ~ToastShell();
 
-			enum MessageType { Done, ExpectedError, UnExpectedError };
+			enum class MessageType { Done, ExpectedError, UnExpectedError };
 			void setMessage(MessageType type, std::string text);
 
 		signals:
@@ -32,7 +32,7 @@ namespace Hix
 
 		private:
 			QString _message = "Support generation completed";
-			MessageType _msgType;
+			MessageType _msgType = MessageType::Done;
 		};
 		
 	}

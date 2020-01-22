@@ -1,10 +1,10 @@
 import QtQuick 2.6
-import hix.qml 1.0
+import hix.qml 1.0 as Hix
 import QtQuick.Controls 2.1
 import QtQuick.Controls.Styles 1.4
 import QtGraphicalEffects 1.12
 
-RangeSlideBarShell {
+Hix.RangeSlideBarShell {
 		id: root
 		width: 64
 		height: 600

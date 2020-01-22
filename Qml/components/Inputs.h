@@ -14,18 +14,23 @@ namespace Hix
 		{
 			Q_OBJECT
 			Q_PROPERTY(double value MEMBER _value NOTIFY valueChanged)
+			Q_PROPERTY(double min MEMBER _min NOTIFY rangeChanged)
+			Q_PROPERTY(double max MEMBER _max NOTIFY rangeChanged)
 
 		public:
 			InputSpinBox(QQuickItem* parent = nullptr);
 			virtual ~InputSpinBox();
 			double getValue()const;
 			void setValue(double value);
+			void setRange(double min, double max);
 
 		signals:
 			void valueChanged();
+			void rangeChanged();
 
 		private:
 			double _value = 0;
+			double _min, _max;
 		};
 
 		class TextInputBox : public QQuickItem
@@ -49,7 +54,7 @@ namespace Hix
 		class DropdownBox : public QQuickItem
 		{
 			Q_OBJECT
-			Q_PROPERTY(QStringList dropList MEMBER _dropList)
+			Q_PROPERTY(QStringList dropList MEMBER _dropList NOTIFY listChanged)
 			Q_PROPERTY(int index MEMBER _index NOTIFY indexChanged)
 
 		public:
@@ -57,9 +62,11 @@ namespace Hix
 			virtual ~DropdownBox();
 			int getIndex()const;
 			void setIndex(int index);
+			void setList(QStringList list);
 
 		signals:
 			void indexChanged();
+			void listChanged();
 
 		protected:
 			QStringList _dropList;

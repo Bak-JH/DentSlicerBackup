@@ -205,7 +205,7 @@ Hix.LeftPopupShell {
 
 		CtrDropdownBox {
 			id: supporttype
-			dropdownText: "Support Type"
+			label.text: "Support Type"
 			width: parent.width - 16 * 2 - 16	// 16 = triangle height
 			height: 26
 			anchors.left: parent.left
@@ -215,7 +215,7 @@ Hix.LeftPopupShell {
 		}
 		CtrDropdownBox {
 			id: supportdensity
-			dropdownText: "Support Density"
+			label.text: "Support Density"
 			width: parent.width - 16 * 2 - 16	// 16 = triangle height
 			height: 26
 			anchors.left: parent.left
@@ -225,7 +225,7 @@ Hix.LeftPopupShell {
 		}
 		CtrDropdownBox {
 			id: maxradius
-			dropdownText: "Max.radius"
+			label.text: "Max.radius"
 			width: parent.width - 16 * 2 - 16	// 16 = triangle height
 			height: 26
 			anchors.left: parent.left
@@ -235,7 +235,7 @@ Hix.LeftPopupShell {
 		}
 		CtrDropdownBox {
 			id: minradius
-			dropdownText: "Min.radius"
+			label.text: "Min.radius"
 			width: parent.width - 16 * 2 - 16	// 16 = triangle height
 			height: 26
 			anchors.left: parent.left
@@ -245,7 +245,7 @@ Hix.LeftPopupShell {
 		}
 		CtrDropdownBox {
 			id: rafttype
-			dropdownText: "Raft Type"
+			label.text: "Raft Type"
 			width: parent.width - 16 * 2 - 16	// 16 = triangle height
 			height: 26
 			anchors.left: parent.left
