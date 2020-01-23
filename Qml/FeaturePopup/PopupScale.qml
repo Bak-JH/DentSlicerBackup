@@ -4,7 +4,7 @@ import QtGraphicalEffects 1.12
 import QtQuick.Controls 2.1
 import "../Controls"
 
-LeftPopup {
+FeaturePopup {
 	title: qsTr("Scale")
 	height: 336
 

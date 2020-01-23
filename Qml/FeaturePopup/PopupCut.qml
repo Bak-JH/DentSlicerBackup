@@ -4,13 +4,13 @@ import QtGraphicalEffects 1.12
 import QtQuick.Controls 2.1
 import "../Controls"
 
-LeftPopup {
-	title: qsTr("Shell Offset")
-	height: 220
+FeaturePopup {
+	title: qsTr("Cut")
+	height: 250
 
 	Text {
 		id: popupbody
-		text: qsTr("Click Apply to create a shell inside the \nmodel.")
+		text: qsTr("Select how to cut the model.")
 		font.pointSize: 10
 		font.family: openRegular.name
 		anchors.top: parent.top
@@ -19,14 +19,12 @@ LeftPopup {
 		anchors.leftMargin: 16
 	}
 
-	CtrSpinBox {
-		id: extendvalue
-		label.text: "Tickness(mm)"
+	CtrCutSwitch {
 		width: parent.width - 16 * 2
 		anchors.left: parent.left
 		anchors.leftMargin: 16
 		anchors.top: popupbody.bottom
-		anchors.topMargin: 44
+		anchors.topMargin: 20
 	}
-	
+
 }

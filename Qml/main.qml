@@ -173,7 +173,7 @@ Item{
 		
 
 
-		LeftPopupMove {
+		PopupMove {
 			id: leftpopupmove
 			anchors.top: featureMenu.bottom
 			anchors.left: partlist.right
@@ -181,7 +181,7 @@ Item{
 			anchors.topMargin: 20
 		}
 		
-		LeftPopupLayFlat {
+		PopupLayFlat {
 			id: leftpopuplayflat
 			anchors.top: featureMenu.bottom
 			anchors.left: leftpopupmove.right
@@ -189,7 +189,7 @@ Item{
 			anchors.topMargin: 20
 		}
 		
-		LeftPopupLabel {
+		PopupLabel {
 			id: leftpopuplabel
 			anchors.top: featureMenu.bottom
 			anchors.left: leftpopuplayflat.right
@@ -208,7 +208,7 @@ Item{
 
 		
 		/*
-		LeftPopup {
+		FeaturePopup {
 			id: leftpopup
 			anchors.top: uppertab.bottom
 			anchors.left: lefttab.right
@@ -231,7 +231,7 @@ Item{
 			anchors.leftMargin: 15
 			anchors.topMargin: 20
 		}*/
-		LeftPopupSupport
+		PopupSupport
 		{
 			id: leftpopupsupport
 			anchors.top: featureMenu.bottom
@@ -242,7 +242,7 @@ Item{
 		
 		
 
-		LeftPopupCut {
+		PopupCut {
 			id: leftpopupcut
 			anchors.top: leftpopupmove.bottom
 			anchors.left: leftpopupmove.left
@@ -407,18 +407,6 @@ Item{
             id : resultPopUp
         }
 
-        YesNoPopup{
-            id : yesnoPopUp
-        }
-
-        LayerViewSlider {
-            id: layerViewSlider
-            objectName: "layerViewSlider"
-            anchors.right: parent.right
-            anchors.rightMargin:20
-            anchors.verticalCenter: parent.verticalCenter
-        }
-
 		ProgressPopup 
 		{
 			id: progressPopup
@@ -429,15 +417,15 @@ Item{
 		ModalWindow
 		{
 			id: modalWindow
-			enabled: false
-			visible: false
+			//enabled: false
+			//visible: false
 		}
 
 		PrintSettingPopup
 		{
 			id: printsettingpopup
-			//enabled: false
-			//visible: false
+			enabled: false
+			visible: false
 		}
     }
 

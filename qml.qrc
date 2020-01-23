@@ -4,10 +4,6 @@
         <file>grid2.png</file>
         <file>Qml/CameraController.qml</file>
         <file>Qml/CameraManager.qml</file>
-        <file>Qml/CoordinateMesh.qml</file>
-        <file>Qml/LeftTab.qml</file>
-        <file>Qml/LeftTabPartList.qml</file>
-        <file>Qml/LeftTabPartListElement.qml</file>
         <file>Qml/LeftTabSlicingOption.qml</file>
         <file>Qml/LeftTabSlicingOptionElement.qml</file>
         <file>Qml/LeftTabViewMode.qml</file>
@@ -18,26 +14,19 @@
         <file>Qml/Model.qml</file>
         <file>Qml/Planeslider.qml</file>
         <file>Qml/PopUp.qml</file>
-        <file>Qml/SCroll.qml</file>
         <file>Qml/SlicingData.qml</file>
         <file>Qml/SlicingDataElement.qml</file>
         <file>Qml/UICore.qml</file>
-        <file>Qml/UpperButton.qml</file>
-        <file>Qml/UpperTab.qml</file>
         <file>Qml/ViewButton.qml</file>
         <file>Qml/ViewChange.qml</file>
         <file>Qml/LeftTabExport.qml</file>
         <file>Qml/LeftTabExportElement.qml</file>
         <file>Qml/Login.qml</file>
-        <file>Qml/FeedbackPopUp.qml</file>
         <file>Qml/LeftTabSlicingOptionElement2.qml</file>
         <file>Qml/LeftTabSlicingOptionElement3.qml</file>
         <file>Resource/mesh/box.stl</file>
         <file>Resource/mesh/box2.stl</file>
-        <file>Qml/YesNoPopup.qml</file>
-        <file>Qml/LayerViewPopup.qml</file>
         <file>Qml/UndoRedoButton.qml</file>
-        <file>Qml/LayerViewSlider.qml</file>
         <file>Qml/SettingPopup.qml</file>
         <file>Resource/mesh/plate_logo.stl</file>
         <file>Resource/mesh/boundedBox3.stl</file>
@@ -72,23 +61,25 @@
         <file>Qml/Controls/CtrSpinBox.qml</file>
         <file>Qml/Controls/CtrTextBox.qml</file>
         <file>Qml/Controls/CtrToggleSwitch.qml</file>
-        <file>Qml/FeaturePopup/LeftPopup.qml</file>
-        <file>Qml/FeaturePopup/LeftPopupArrange.qml</file>
-        <file>Qml/FeaturePopup/LeftPopupCut.qml</file>
-        <file>Qml/FeaturePopup/LeftPopupExport.qml</file>
-        <file>Qml/FeaturePopup/LeftPopupExtend.qml</file>
-        <file>Qml/FeaturePopup/LeftPopupLabel.qml</file>
-        <file>Qml/FeaturePopup/LeftPopupLayFlat.qml</file>
-        <file>Qml/FeaturePopup/LeftPopupModelBuild.qml</file>
-        <file>Qml/FeaturePopup/LeftPopupMove.qml</file>
-        <file>Qml/FeaturePopup/LeftPopupOrient.qml</file>
-        <file>Qml/FeaturePopup/LeftPopupRotate.qml</file>
-        <file>Qml/FeaturePopup/LeftPopupScale.qml</file>
-        <file>Qml/FeaturePopup/LeftPopupShellOffset.qml</file>
-        <file>Qml/FeaturePopup/LeftPopupSupport.qml</file>
         <file>Qml/ResultPopup.qml</file>
         <file>Qml/ProgressPopup.qml</file>
         <file>Qml/FeaturePopup/SidePopup.qml</file>
         <file>Qml/RangedSlider.qml</file>
+        <file>Qml/FeaturePopup/FeaturePopup.qml</file>
+        <file>Qml/FeaturePopup/PopupArrange.qml</file>
+        <file>Qml/FeaturePopup/PopupCut.qml</file>
+        <file>Qml/FeaturePopup/PopupExport.qml</file>
+        <file>Qml/FeaturePopup/PopupExtend.qml</file>
+        <file>Qml/FeaturePopup/PopupLabel.qml</file>
+        <file>Qml/FeaturePopup/PopupLayFlat.qml</file>
+        <file>Qml/FeaturePopup/PopupModelBuild.qml</file>
+        <file>Qml/FeaturePopup/PopupMove.qml</file>
+        <file>Qml/FeaturePopup/PopupOrient.qml</file>
+        <file>Qml/FeaturePopup/PopupRotate.qml</file>
+        <file>Qml/FeaturePopup/PopupScale.qml</file>
+        <file>Qml/FeaturePopup/PopupShellOffset.qml</file>
+        <file>Qml/FeaturePopup/PopupSupport.qml</file>
+        <file>Qml/CoordinateMesh.qml</file>
+        <file>Qml/ModalWindowButton.qml</file>
     </qresource>
 </RCC>
