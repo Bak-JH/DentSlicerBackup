@@ -5,7 +5,7 @@ import QtGraphicalEffects 1.12
 import QtQuick.Controls 2.1
 
 
-Hix.LeftPopupShell 
+Hix.FeaturePopupShell 
 {
 	id: root
 	width: 256

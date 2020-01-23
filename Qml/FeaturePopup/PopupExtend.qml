@@ -2,14 +2,15 @@ import QtQuick 2.6
 import hix.qml 1.0
 import QtGraphicalEffects 1.12
 import QtQuick.Controls 2.1
+import "../Controls"
 
-LeftPopup {
-	title: qsTr("Orient")
-	height: 250
+FeaturePopup {
+	popuptitle.text: qsTr("Extend")
+	height: 220
 
 	Text {
 		id: popupbody
-		text: qsTr("Click Apply to rotate models.")
+		text: qsTr("Click Apply to fix the model.")
 		font.pointSize: 10
 		font.family: openRegular.name
 		anchors.top: parent.top
@@ -18,10 +19,13 @@ LeftPopup {
 		anchors.leftMargin: 16
 	}
 
-	Image {
-		source: "qrc:/Resource/img_orient.png"
-		anchors.horizontalCenter: parent.horizontalCenter
+	CtrSpinBox {
+		id: extendvalue
+		label.text: "Extend Value \n (mm)"
+		width: parent.width - 16 * 2
+		anchors.left: parent.left
+		anchors.leftMargin: 16
 		anchors.top: popupbody.bottom
-		anchors.topMargin: 32
+		anchors.topMargin: 52
 	}
 }

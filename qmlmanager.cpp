@@ -64,7 +64,7 @@ QmlManager::QmlManager(QObject *parent) : QObject(parent), _optBackend(this, scf
 	qmlRegisterType<Hix::QML::ToggleSwitch>("hix.qml", 1, 0, "ToggleSwitch");
 	qmlRegisterType<Hix::QML::ImageToggleSwitch>("hix.qml", 1, 0, "ImageToggleSwitch");
 
-	qmlRegisterType<Hix::QML::LeftPopupShell>("hix.qml", 1, 0, "LeftPopupShell");
+	qmlRegisterType<Hix::QML::FeaturePopupShell>("hix.qml", 1, 0, "FeaturePopupShell");
 	qmlRegisterType<Hix::QML::ProgressPopupShell>("hix.qml", 1, 0, "ProgressPopupShell");
 	qmlRegisterType<Hix::QML::ToastShell>("hix.qml", 1, 0, "ToastShell");
 	qmlRegisterType<Hix::QML::SlideBarShell>("hix.qml", 1, 0, "SlideBarShell");

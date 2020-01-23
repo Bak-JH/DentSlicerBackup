@@ -2,16 +2,15 @@ import QtQuick 2.6
 import hix.qml 1.0
 import QtGraphicalEffects 1.12
 import QtQuick.Controls 2.1
+import "../Controls"
 
-LeftPopup {
-	popuptitle.text: qsTr("Arrange")
-	height: 250
-
+FeaturePopup {
+	title: qsTr("Lay Flat")
+	height: 220
+		
 	Text {
 		id: popupbody
-		width: parent.width - 16 * 2
-		height: 26
-		text: qsTr("Click Apply to align models.")
+		text: "Click the surface to face it down."
 		font.pointSize: 10
 		font.family: openRegular.name
 		anchors.top: parent.top
@@ -21,9 +20,9 @@ LeftPopup {
 	}
 
 	Image {
-		source: "qrc:/Resource/img_arrange.png"
+		source: "qrc:/Resource/img_layflat.png"
 		anchors.horizontalCenter: parent.horizontalCenter
 		anchors.top: popupbody.bottom
-		anchors.topMargin: 20
+		anchors.topMargin: 32
 	}
 }

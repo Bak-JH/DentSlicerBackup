@@ -4,13 +4,13 @@ import QtGraphicalEffects 1.12
 import QtQuick.Controls 2.1
 import "../Controls"
 
-LeftPopup {
-	popuptitle.text: qsTr("Extend")
+FeaturePopup {
+	title: qsTr("Shell Offset")
 	height: 220
 
 	Text {
 		id: popupbody
-		text: qsTr("Click Apply to fix the model.")
+		text: qsTr("Click Apply to create a shell inside the \nmodel.")
 		font.pointSize: 10
 		font.family: openRegular.name
 		anchors.top: parent.top
@@ -21,11 +21,12 @@ LeftPopup {
 
 	CtrSpinBox {
 		id: extendvalue
-		label.text: "Extend Value \n (mm)"
+		label.text: "Tickness(mm)"
 		width: parent.width - 16 * 2
 		anchors.left: parent.left
 		anchors.leftMargin: 16
 		anchors.top: popupbody.bottom
-		anchors.topMargin: 52
+		anchors.topMargin: 44
 	}
+	
 }

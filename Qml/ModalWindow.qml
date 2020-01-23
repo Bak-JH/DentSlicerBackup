@@ -11,6 +11,27 @@ Hix.ModalShell {
 	property var buttonsWidth: 320
 	property var buttonSpace: 32
 
+	function setButtons(textList)
+	{
+		var count = 1, prevBtnOption;
+		for(var text in textList)
+		{
+			var newBtn = Qt.createComponent("ModalWindowButton.qml");
+			var newBtnOption = 
+							newBtn.createObject(buttonarea,
+							{
+								"id" : "button" + count,
+								"btnText" : textList[text],
+								"width" : (320 - (32 * (textList.length - 1))) / textList.length,
+								"color" : "#00b9c8",
+								"anchors.left" : count == 1 ? buttonarea.left : prevBtnOption.right,
+								"anchors.leftMargin" : count == 1 ? 0 : 32
+							});
+			prevBtnOption = newBtnOption;
+			count++;
+		}
+	}
+
 	MouseArea {
 		id: blockingArea
 		width: window.width
@@ -51,14 +72,15 @@ Hix.ModalShell {
 			anchors.top: parent.top
 			anchors.topMargin: parent.height * 0.4
 		}
-
+		
 		Rectangle {
+			id: buttonarea
 			width: buttonsWidth
 			height: 32
 			anchors.horizontalCenter: parent.horizontalCenter
 			anchors.bottom: parent.bottom
 			anchors.bottomMargin: parent.height * 0.2
-
+			
 			Hix.Button {
 				id: leftbtn
 				width: (buttonsWidth - buttonSpace) / 2
@@ -79,7 +101,7 @@ Hix.ModalShell {
 				onEntered: { color = "#21959e" }
 				onExited: { color = "#00b9c8" }
 			}
-
+			
 			Hix.Button {
 				id: rightbtn
 				width: buttonsWidth - leftbtn.width - buttonSpace
@@ -97,7 +119,7 @@ Hix.ModalShell {
 					text: "Apply"
 					font.family: openSemiBold.name
 				}
-				onClicked: { console.log("clicked"); }
+				onClicked: { console.log("clicked");}
 				onEntered: { color = "#21959e" }
 				onExited: { color = "#00b9c8" }
 			}

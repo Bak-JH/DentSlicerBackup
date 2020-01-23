@@ -13,16 +13,15 @@ namespace Hix
 	{
 		class CloseButton;
 		class RoundButton;
-		class LeftPopupContent;
 
-		class LeftPopupShell : public QQuickItem
+		class FeaturePopupShell : public QQuickItem
 		{
 			Q_OBJECT
 			Q_PROPERTY(QString title MEMBER _title)
 
 		public:
-			LeftPopupShell(QQuickItem* parent = nullptr);
-			virtual ~LeftPopupShell();
+			FeaturePopupShell(QQuickItem* parent = nullptr);
+			virtual ~FeaturePopupShell();
 
 		signals:
 			void titleChanged();
@@ -43,7 +42,7 @@ namespace Hix
 
 		class ModalShell : public QQuickItem
 		{
-			Q_OBJECT
+			Q_OBJECT	
 			Q_PROPERTY(QString modalMessage MEMBER _modalmsg NOTIFY modalmsgChanged)
 
 		public:

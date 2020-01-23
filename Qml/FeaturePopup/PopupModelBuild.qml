@@ -3,7 +3,7 @@ import hix.qml 1.0 as Hix
 import QtGraphicalEffects 1.12
 import QtQuick.Controls 2.1
 
-LeftPopup {
+FeaturePopup {
 	id: leftpopupshell
 	title: qsTr("Model Build")
 	height: 168

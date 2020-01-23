@@ -4,43 +4,43 @@ import QtGraphicalEffects 1.12
 import QtQuick.Controls 2.1
 import "../Controls"
 
-LeftPopup {
-	title: qsTr("Move")
-	height: 268
+FeaturePopup {
+	title: qsTr("Rotate")
+	height: 284
 
 	CtrSpinBox {
-		id: moveX
-		fromNum: -100
-		toNum: 100
-		label.text: "X Offset(mm)"
+		id: rotateX
+		fromNum: -360
+		toNum: 360
+		label.text: "X Offset(deg)"
 		width: parent.width - 16 * 2
 		anchors.left: parent.left
 		anchors.leftMargin: 16
 		anchors.top: parent.top
 		anchors.topMargin: 68
 	}
-	
+
 	CtrSpinBox {
-		id: moveY
-		fromNum: -100
-		toNum: 100
-		label.text: "Y Offset(mm)"
+		id: rotateY
+		fromNum: -360
+		toNum: 360
+		label.text: "Y Offset(deg)"
 		width: parent.width - 16 * 2
 		anchors.left: parent.left
 		anchors.leftMargin: 16
-		anchors.top: moveX.bottom
+		anchors.top: rotateX.bottom
 		anchors.topMargin: 56
 	}
 
 	CtrSpinBox {
-		id: moveZ
-		fromNum: -100
-		toNum: 100
-		label.text: "Z Offset(mm)"
+		id: rotateZ
+		fromNum: -360
+		toNum: 360
+		label.text: "Z Offset(deg)"
 		width: parent.width - 16 * 2
 		anchors.left: parent.left
 		anchors.leftMargin: 16
-		anchors.top: moveY.bottom
+		anchors.top: rotateY.bottom
 		anchors.topMargin: 56
 	}
 }

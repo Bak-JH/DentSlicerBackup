@@ -2,15 +2,14 @@ import QtQuick 2.6
 import hix.qml 1.0
 import QtGraphicalEffects 1.12
 import QtQuick.Controls 2.1
-import "../Controls"
 
-LeftPopup {
-	title: qsTr("Cut")
+FeaturePopup {
+	title: qsTr("Orient")
 	height: 250
 
 	Text {
 		id: popupbody
-		text: qsTr("Select how to cut the model.")
+		text: qsTr("Click Apply to rotate models.")
 		font.pointSize: 10
 		font.family: openRegular.name
 		anchors.top: parent.top
@@ -19,12 +18,10 @@ LeftPopup {
 		anchors.leftMargin: 16
 	}
 
-	CtrCutSwitch {
-		width: parent.width - 16 * 2
-		anchors.left: parent.left
-		anchors.leftMargin: 16
+	Image {
+		source: "qrc:/Resource/img_orient.png"
+		anchors.horizontalCenter: parent.horizontalCenter
 		anchors.top: popupbody.bottom
-		anchors.topMargin: 20
+		anchors.topMargin: 32
 	}
-
 }
