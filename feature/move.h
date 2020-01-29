@@ -36,12 +36,13 @@ namespace Hix
 		class MoveMode : public WidgetMode
 		{
 		public:
+
 			MoveMode(const std::unordered_set<GLModel*>& targetModels, Input::RayCastController* controller);
 			virtual ~MoveMode();
 			void featureStarted()override;
 			void featureEnded()override;
 			FeatureContainerFlushSupport* applyMove(const QVector3D& to);
-		private:
+
 			Hix::Features::FeatureContainerFlushSupport* _moveContainer = nullptr;
 		};
 	}

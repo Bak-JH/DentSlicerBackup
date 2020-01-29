@@ -289,8 +289,8 @@ bool GLModel::isDraggable(Hix::Input::MouseEventData& e,const Qt3DRender::QRayCa
 
 void GLModel::dragStarted(Hix::Input::MouseEventData& e, const Qt3DRender::QRayCasterHit& hit)
 {
-	if(!qmlManager->isActive<Hix::Features::MoveMode>())
-		qmlManager->moveButton->setProperty("state", "active");
+	//if(!qmlManager->isActive<Hix::Features::MoveMode>())
+	//	qmlManager->moveButton->setProperty("state", "active");
 
 	dynamic_cast<Hix::Features::MoveMode*>(qmlManager->getCurrentMode())->featureStarted();
 	auto listed = getRootModel();

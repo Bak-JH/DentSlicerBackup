@@ -59,7 +59,7 @@ void DrawingPlane::clicked(Hix::Input::MouseEventData& m, const Qt3DRender::QRay
 	newLatest->setTranslation(pos);
 	if (_ptWidgets.size() >= 2)
 	{
-		QMetaObject::invokeMethod(qmlManager->cutPopup, "colorApplyFinishButton", Q_ARG(QVariant, 2));
+		//QMetaObject::invokeMethod(qmlManager->cutPopup, "colorApplyFinishButton", Q_ARG(QVariant, 2));
 	}
 
 }
@@ -88,7 +88,7 @@ void Hix::Features::Cut::DrawingPlane::removePt(FreeCutPtWidget* pt)
 	
 	if (_ptWidgets.size() < 2)
 	{
-		QMetaObject::invokeMethod(qmlManager->cutPopup, "colorApplyFinishButton", Q_ARG(QVariant, 0));
+		//QMetaObject::invokeMethod(qmlManager->cutPopup, "colorApplyFinishButton", Q_ARG(QVariant, 0));
 	}
 
 }

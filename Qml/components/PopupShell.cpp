@@ -11,6 +11,11 @@ Hix::QML::LeftPopupShell::~LeftPopupShell()
 {
 }
 
+QQuickItem* Hix::QML::LeftPopupShell::getQItem()
+{
+	return this;
+}
+
 Hix::QML::ProgressPopupShell::ProgressPopupShell(QQuickItem* parent) : QQuickRectangle(parent)
 {
 }
@@ -24,3 +29,5 @@ Q_INVOKABLE void Hix::QML::ProgressPopupShell::appendFeature(QString featureName
 	QObject* listModel = FindItemByName(qmlManager->engine, "featueList");
 	QMetaObject::invokeMethod(listModel, "appendFeature", Q_ARG(QVariant, featureName));
 }
+
+

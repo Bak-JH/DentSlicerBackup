@@ -45,8 +45,8 @@ Hix::Features::ModelBuilderMode::ModelBuilderMode(): _topPlane(qmlManager->total
 	botPlane += translationZ;
 	_topPlane.transform().setTranslation(QVector3D(0, 0, cutPlane - ZMARGIN));
 	_bottPlane.transform().setTranslation(QVector3D(0, 0, botPlane - ZMARGIN));
-	QMetaObject::invokeMethod(qmlManager->modelBuilderPopup, "setRangeSliderValueFirst", Q_ARG(QVariant, ((botPlane - ZMARGIN) / _zLength) * 1.8));
-	QMetaObject::invokeMethod(qmlManager->modelBuilderPopup, "setRangeSliderValueSecond", Q_ARG(QVariant, ((cutPlane - ZMARGIN)/ _zLength) * 1.8));
+	//QMetaObject::invokeMethod(qmlManager->modelBuilderPopup, "setRangeSliderValueFirst", Q_ARG(QVariant, ((botPlane - ZMARGIN) / _zLength) * 1.8));
+	//QMetaObject::invokeMethod(qmlManager->modelBuilderPopup, "setRangeSliderValueSecond", Q_ARG(QVariant, ((cutPlane - ZMARGIN)/ _zLength) * 1.8));
 
 
 	std::unordered_set<GLModel*> models { _model.get() };
