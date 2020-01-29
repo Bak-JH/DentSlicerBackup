@@ -86,21 +86,15 @@ int main(int argc, char** argv)
 	splash->show();
 
 	engine.rootContext()->setContextProperty("qm", qm.data());
-	//FindItemByName(&engine, "slicing_data")->setContextProperty("qm", qmlManager);
 	engine.rootContext()->setContextProperty("qq", qq.data());
-	//engine.rootContext()->setContextProperty("se",se.data());
 
 	engine.load(QUrl(QStringLiteral("qrc:/Qml/main.qml")));
 
 	// update module codes
 	UpdateChecker* up = new UpdateChecker();
 	up->checkForUpdates();
-	//initWinSparkle();
-	//checkForUpdates();
 
 
-	//language patch
-	//engine.retranslate();
 
 	qmlManager->initializeUI(&engine);
 	splash->close();

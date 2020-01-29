@@ -28,6 +28,9 @@
     <ClCompile Include="common\GTEngine\Source\Mathematics\GteVETNonmanifoldMesh.cpp" />
     <ClCompile Include="common\GTEngine\Source\Mathematics\MSW\GteCPUQueryInstructions.cpp" />
     <ClCompile Include="common\GTEngine\Source\Mathematics\MSW\GteIntelSSE.cpp" />
+    <ClCompile Include="feature\ImportModel.cpp" />
+    <ClCompile Include="Tasking\Task.cpp" />
+    <ClCompile Include="Tasking\TaskManager.cpp" />
     <ClCompile Include="common\Tree\BVHBuilder.cpp" />
     <ClCompile Include="common\Tree\TreeBuilder.cpp" />
     <ClCompile Include="DentEngine\src\Bounds3D.cpp" />
@@ -100,8 +103,10 @@
     <ClCompile Include="feature\repair\TMesh\triangle.cpp" />
     <ClCompile Include="feature\repair\TMesh\vertex.cpp" />
     <ClCompile Include="feature\rotate.cpp" />
+    <ClCompile Include="feature\sliceExport.cpp" />
     <ClCompile Include="feature\SupportFeature.cpp" />
     <ClCompile Include="feature\ModelBuilder\TwoManifoldBuilder.cpp" />
+    <ClCompile Include="feature\UndoRedo.cpp" />
     <ClCompile Include="fileloader.cpp" />
     <ClCompile Include="feature\cut\FreeCutPtWidget.cpp" />
     <ClCompile Include="glmodel.cpp" />
@@ -118,6 +123,7 @@
     <ClCompile Include="Mesh\RayCaster.cpp" />
     <ClCompile Include="Qml\components\Buttons.cpp" />
     <ClCompile Include="Qml\components\Inputs.cpp" />
+    <ClCompile Include="Qml\components\PopupShell.cpp" />
     <ClCompile Include="render\CircleMeshEntity.cpp" />
     <ClCompile Include="Qml\components\ModalWindow.cpp" />
     <ClCompile Include="Qml\components\PartList.cpp" />
@@ -169,17 +175,24 @@
     <ClCompile Include="feature\stlexporter.cpp" />
     <ClCompile Include="DentEngine\src\svgexporter.cpp" />
     <ClCompile Include="utils\updatechecker.cpp" />
-    <ClCompile Include="Qml\components\PopupShell.cpp">
+    <ClCompile Include="Qml\components\ControlOwner.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="feature\UndoRedo.cpp">
+    <ClCompile Include="Qml\components\InputControl.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="feature\sliceExport.cpp">
+    <ClCompile Include="feature\interfaces\ModeDialog.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Tasking\TaskManager.cpp" />
-    <ClCompile Include="Tasking\Task.cpp" />
+    <ClCompile Include="Qml\features\ModeDialogQMLParsed.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Qml\components\FeatureMenu.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Qml\util\QMLUtil.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="common\Debug.h" />
@@ -612,6 +625,8 @@
     <ClInclude Include="common\rapidjson\stringbuffer.h" />
     <ClInclude Include="common\rapidjson\writer.h" />
     <ClInclude Include="common\Singleton.h" />
+    <ClInclude Include="feature\ImportModel.h" />
+    <ClInclude Include="Tasking\Task.h" />
     <ClInclude Include="common\taskflow\core\executor.hpp" />
     <ClInclude Include="common\taskflow\core\flow_builder.hpp" />
     <ClInclude Include="common\taskflow\core\graph.hpp" />
@@ -645,6 +660,7 @@
     <ClInclude Include="common\taskflow\utility\passive_vector.hpp" />
     <ClInclude Include="common\taskflow\utility\singular_allocator.hpp" />
     <ClInclude Include="common\taskflow\utility\traits.hpp" />
+    <ClInclude Include="Tasking\TaskManager.h" />
     <ClInclude Include="common\TrackedIndexedList.h" />
     <ClInclude Include="common\Tree\TreeBuilder.h" />
     <ClInclude Include="DentEngine\src\Bounds3D.h" />
@@ -719,8 +735,10 @@
     <ClInclude Include="feature\repair\TMesh\triangle.h" />
     <ClInclude Include="feature\repair\TMesh\vertex.h" />
     <ClInclude Include="feature\rotate.h" />
+    <ClInclude Include="feature\sliceExport.h" />
     <ClInclude Include="feature\SupportFeature.h" />
     <ClInclude Include="feature\ModelBuilder\TwoManifoldBuilder.h" />
+    <ClInclude Include="feature\UndoRedo.h" />
     <ClInclude Include="fileloader.h" />
     <ClInclude Include="feature\hollowshell.h" />
     <ClInclude Include="input\Clickable.h" />
@@ -780,14 +798,24 @@
     <ClInclude Include="DentEngine\src\polyclipping\poly2tri\common\utils.h" />
     <ClInclude Include="utils\utils.h" />
     <ClInclude Include="utils\winsparkle\winsparkle.h" />
-    <ClInclude Include="feature\UndoRedo.h">
+    <ClInclude Include="Qml\components\InputControl.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="feature\sliceExport.h">
+    <ClInclude Include="Qml\components\ControlOwner.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Tasking\TaskManager.h" />
-    <ClInclude Include="Tasking\Task.h" />
+    <ClInclude Include="feature\interfaces\ModeFactory.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="feature\interfaces\ModeDialog.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Qml\features\ModeDialogQMLParsed.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Qml\util\QMLUtil.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="debug\moc_predefs.h.cbt" />
@@ -897,6 +925,7 @@
     <QtMoc Include="render\PlaneMeshEntity.h" />
     <QtMoc Include="Qml\components\Buttons.h" />
     <QtMoc Include="Qml\components\Inputs.h" />
+    <QtMoc Include="Qml\components\PopupShell.h" />
     <QtMoc Include="Qml\components\Toast.h" />
     <QtMoc Include="Qml\components\SlideBar.h" />
     <QtMoc Include="Qml\components\ModalWindow.h" />
@@ -913,7 +942,7 @@
     <QtMoc Include="qmlmanager.h" />
     <QtMoc Include="utils\quaternionhelper.h" />
     <QtMoc Include="utils\updatechecker.h" />
-    <QtMoc Include="Qml\components\PopupShell.h">
+    <QtMoc Include="Qml\components\FeatureMenu.h">
       <Filter>Header Files</Filter>
     </QtMoc>
   </ItemGroup>
@@ -933,17 +962,37 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+    <None Include="Qml\Controls\CtrToggleSwitch.qml" />
+    <None Include="Qml\FeatureMenu.qml" />
     <None Include="Qml\Cam.qml" />
     <None Include="Qml\CamBox.qml" />
     <None Include="Qml\CameraController.qml" />
     <None Include="Qml\CameraManager.qml" />
     <None Include="Qml\CanvasTest.qml" />
     <None Include="Qml\CoordinateMesh.qml" />
+    <None Include="Qml\Controls\CtrDropdownBox.qml" />
+    <None Include="Qml\Controls\CtrSpinBox.qml" />
+    <None Include="Qml\Controls\CtrTextBox.qml" />
+    <None Include="Qml\Controls\CtrScaleInputBox.qml" />
     <None Include="Qml\FeedbackPopUp.qml" />
     <None Include="Qml\FileDialogLoad.qml" />
     <None Include="Qml\InputBox.qml" />
     <None Include="Qml\LayerViewPopup.qml" />
     <None Include="Qml\LayerViewSlider.qml" />
+    <None Include="Qml\FeaturePopup\LeftPopup.qml" />
+    <None Include="Qml\FeaturePopup\LeftPopupArrange.qml" />
+    <None Include="Qml\FeaturePopup\LeftPopupCut.qml" />
+    <None Include="Qml\FeaturePopup\LeftPopupExport.qml" />
+    <None Include="Qml\FeaturePopup\LeftPopupExtend.qml" />
+    <None Include="Qml\FeaturePopup\LeftPopupLabel.qml" />
+    <None Include="Qml\FeaturePopup\LeftPopupLayFlat.qml" />
+    <None Include="Qml\FeaturePopup\LeftPopupModelBuild.qml" />
+    <None Include="Qml\FeaturePopup\LeftPopupMove.qml" />
+    <None Include="Qml\FeaturePopup\LeftPopupOrient.qml" />
+    <None Include="Qml\FeaturePopup\LeftPopupRotate.qml" />
+    <None Include="Qml\FeaturePopup\LeftPopupScale.qml" />
+    <None Include="Qml\FeaturePopup\LeftPopupShellOffset.qml" />
+    <None Include="Qml\FeaturePopup\LeftPopupSupport.qml" />
     <None Include="Qml\LeftTab.qml" />
     <None Include="Qml\LeftTabExport.qml" />
     <None Include="Qml\LeftTabExportElement.qml" />
@@ -972,6 +1021,7 @@
     <None Include="Qml\PrintInfo.qml" />
     <None Include="Qml\PrintSetting.qml" />
     <None Include="Qml\PrintSettingPopup.qml" />
+    <None Include="Qml\ProgressPopup.qml" />
     <None Include="Qml\SlideBar.qml" />
     <None Include="Qml\Toast.qml" />
     <None Include="Qml\UndoRedo.qml" />
@@ -1134,28 +1184,7 @@
     <None Include="resource\zoom_down.png" />
     <None Include="resource\zoom_up.png" />
     <None Include="icon.ico" />
-    <None Include="Qml\Controls\CtrCutSwitch.qml" />
-    <None Include="Qml\Controls\CtrDropdownBox.qml" />
-    <None Include="Qml\Controls\CtrScaleInputBox.qml" />
-    <None Include="Qml\Controls\CtrSpinBox.qml" />
-    <None Include="Qml\Controls\CtrTextBox.qml" />
-    <None Include="Qml\Controls\CtrToggleSwitch.qml" />
-    <None Include="Qml\FeaturePopup\LeftPopup.qml" />
-    <None Include="Qml\FeaturePopup\LeftPopupCut.qml" />
-    <None Include="Qml\FeaturePopup\LeftPopupArrange.qml" />
-    <None Include="Qml\FeaturePopup\LeftPopupExport.qml" />
-    <None Include="Qml\FeaturePopup\LeftPopupExtend.qml" />
-    <None Include="Qml\FeaturePopup\LeftPopupLayFlat.qml" />
-    <None Include="Qml\FeaturePopup\LeftPopupLabel.qml" />
-    <None Include="Qml\FeaturePopup\LeftPopupModelBuild.qml" />
-    <None Include="Qml\FeaturePopup\LeftPopupOrient.qml" />
-    <None Include="Qml\FeaturePopup\LeftPopupMove.qml" />
-    <None Include="Qml\FeaturePopup\LeftPopupRotate.qml" />
-    <None Include="Qml\FeaturePopup\LeftPopupScale.qml" />
-    <None Include="Qml\FeaturePopup\LeftPopupShellOffset.qml" />
-    <None Include="Qml\FeaturePopup\LeftPopupSupport.qml" />
-    <None Include="Qml\FeatureMenu.qml" />
-    <None Include="Qml\ProgressPopup.qml" />
+    <None Include="Qml\Controls\CtrToggleImgSwitch.qml" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Header Files">

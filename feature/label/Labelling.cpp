@@ -203,8 +203,8 @@ Hix::Features::Feature* Hix::Features::LabellingMode::applyLabelMesh()
 {
 	if (!_previewModel)
 	{
-		qDebug() << "no labellingTextPreview";
-		QMetaObject::invokeMethod(qmlManager->labelPopup, "noModel");
+		//qDebug() << "no labellingTextPreview";
+		//QMetaObject::invokeMethod(qmlManager->labelPopup, "noModel");
 		return nullptr;
 	}
 

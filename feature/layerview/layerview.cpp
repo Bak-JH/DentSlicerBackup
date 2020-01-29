@@ -33,17 +33,17 @@ Hix::Features::LayerView::LayerView(const std::unordered_set<GLModel*>& selected
 		model->updateModelMesh();
 		model->meshMaterial().setParameterValue("fuckingStuipidWorldMatrix", QVariant::fromValue(model->toRootMatrix()));
 	}
-	qmlManager->layerViewPopup->setProperty("visible", true);
-	qmlManager->layerViewSlider->setProperty("visible", true);
-	QMetaObject::invokeMethod(qmlManager->layerViewSlider, "setThickness", Q_ARG(QVariant, (scfg->layer_height)));
-	QMetaObject::invokeMethod(qmlManager->layerViewSlider, "setHeight",
-		Q_ARG(QVariant,	(_modelsBound.zMax() - _modelsBound.zMin() + scfg->raft_thickness + scfg->support_base_height)));
+	//qmlManager->layerViewPopup->setProperty("visible", true);
+	//qmlManager->layerViewSlider->setProperty("visible", true);
+	//QMetaObject::invokeMethod(qmlManager->layerViewSlider, "setThickness", Q_ARG(QVariant, (scfg->layer_height)));
+	//QMetaObject::invokeMethod(qmlManager->layerViewSlider, "setHeight",
+	//	Q_ARG(QVariant,	(_modelsBound.zMax() - _modelsBound.zMin() + scfg->raft_thickness + scfg->support_base_height)));
 
 	_crossSectionPlane.enablePlane(true);
-	QVariant maxLayerCount;
-	QMetaObject::invokeMethod(qmlManager->layerViewSlider, "getMaxLayer", Qt::DirectConnection, Q_RETURN_ARG(QVariant, maxLayerCount));
-	_maxLayer = maxLayerCount.toInt();
-	crossSectionSliderSignal(_maxLayer);
+	//QVariant maxLayerCount;
+	//QMetaObject::invokeMethod(qmlManager->layerViewSlider, "getMaxLayer", Qt::DirectConnection, Q_RETURN_ARG(QVariant, maxLayerCount));
+	//_maxLayer = maxLayerCount.toInt();
+	//crossSectionSliderSignal(_maxLayer);
 
 }
 
@@ -54,8 +54,8 @@ Hix::Features::LayerView::~LayerView()
 		model->changeViewMode(VIEW_MODE_OBJECT);
 		model->updateModelMesh();
 	}
-	qmlManager->layerViewPopup->setProperty("visible", false);
-	qmlManager->layerViewSlider->setProperty("visible", false);
+	//qmlManager->layerViewPopup->setProperty("visible", false);
+	//qmlManager->layerViewSlider->setProperty("visible", false);
 }
 
 void Hix::Features::LayerView::crossSectionSliderSignal(int value)

@@ -5,9 +5,10 @@ import hix.qml 1.0 as Hix
 Hix.ToggleSwitch {
 	color: "transparent"
 	height: 16
+	property alias leftText: leftText
+	property alias rightText: rightText
 	Text {
-		id: emboss
-		text: "Emboss"
+		id: leftText
 		font.family: openSemiBold.name
 		font.pointSize: 8.5
 		color: control.checked ? "#aaaaaa" : "#1db2c4"
@@ -15,7 +16,7 @@ Hix.ToggleSwitch {
 	}
 	Switch {
 		id: control
-		anchors.left: emboss.right
+		anchors.left: leftText.right
 		anchors.verticalCenter: parent.verticalCenter
 		checked: parent.isChecked
 
@@ -45,9 +46,9 @@ Hix.ToggleSwitch {
 		}
 	}
 	Text {
-		anchors.left: emboss.right
+		id: rightText
+		anchors.left: leftText.right
 		anchors.leftMargin: 40
-		text: "Engrave"
 		font.family: openSemiBold.name
 		font.pointSize: 8.5
 		color: control.checked ? "#1db2c4" : "#aaaaaa"
