@@ -419,7 +419,9 @@ Item{
 			id: modalWindow
 			enabled: false
 			visible: false
-			
+			Component.onCompleted: {
+				modalWindow.setButtons([["Apply", "#00b9c8", "#21959e"], ["Cancel", "#abb3b3", "#8b9393"]]);
+			}
 			Text {
 				parent: modalWindow.contentArea
 				text: modalWindow.modalMessage
@@ -439,6 +441,9 @@ Item{
 			anchors.left: leftpopupmove.right
 			anchors.leftMargin: 15
 			anchors.topMargin: 20
+			Component.onCompleted: {
+				printsettingpopup.setButtons([["Apply", "#00b9c8", "#21959e"], ["Cancel", "#abb3b3", "#8b9393"]]);
+			}
 			//enabled: false
 			//visible: false
 		}
