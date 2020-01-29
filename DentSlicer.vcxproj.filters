@@ -746,7 +746,6 @@
     <ClInclude Include="support\SupportRaftManager.h" />
     <ClInclude Include="feature\scale.h" />
     <ClInclude Include="widget\Widget.h" />
-    <ClInclude Include="render\Color.h" />
     <ClInclude Include="unitTest\catch.hpp" />
     <ClInclude Include="unitTest\RandomGen.h" />
     <ClInclude Include="unitTest\tests\BVHTest.h" />
@@ -774,6 +773,7 @@
     <ClInclude Include="DentEngine\src\polyclipping\poly2tri\common\utils.h" />
     <ClInclude Include="utils\utils.h" />
     <ClInclude Include="utils\winsparkle\winsparkle.h" />
+    <ClInclude Include="render\Color.h" />
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="debug\moc_predefs.h.cbt" />

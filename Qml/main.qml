@@ -419,13 +419,28 @@ Item{
 			id: modalWindow
 			//enabled: false
 			//visible: false
+			
+			Text {
+				parent: modalWindow.contentArea
+				text: modalWindow.modalMessage
+				font.family: openRegular.name
+				font.pointSize: 10
+				anchors.horizontalCenter: parent.horizontalCenter
+				anchors.verticalCenter: parent.verticalCenter
+
+			}
+			
 		}
 
 		PrintSettingPopup
 		{
 			id: printsettingpopup
-			enabled: false
-			visible: false
+			anchors.top: featureMenu.bottom
+			anchors.left: leftpopupmove.right
+			anchors.leftMargin: 15
+			anchors.topMargin: 20
+			//enabled: false
+			//visible: false
 		}
     }
 

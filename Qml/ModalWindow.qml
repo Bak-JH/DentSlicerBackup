@@ -10,25 +10,27 @@ Hix.ModalShell {
 	height: 240
 	property var buttonsWidth: 320
 	property var buttonSpace: 32
+	property alias contentArea: contentArea
 
-	function setButtons(textList)
+	function setButtons(buttonSet)
 	{
-		var count = 1, prevBtnOption;
-		for(var text in textList)
+		var prevBtnOption;
+		for(var button in buttonSet)
 		{
+			console.log(button)
 			var newBtn = Qt.createComponent("ModalWindowButton.qml");
 			var newBtnOption = 
 							newBtn.createObject(buttonarea,
 							{
-								"id" : "button" + count,
-								"btnText" : textList[text],
-								"width" : (320 - (32 * (textList.length - 1))) / textList.length,
-								"color" : "#00b9c8",
-								"anchors.left" : count == 1 ? buttonarea.left : prevBtnOption.right,
-								"anchors.leftMargin" : count == 1 ? 0 : 32
+								"id" : "button" + (button+1),
+								"btnText" : buttonSet[button][0],
+								"width" : (320 - (32 * (buttonSet.length - 1))) / buttonSet.length,
+								"defaultColor" : buttonSet[button][1],
+								"hoverColor" : buttonSet[button][2],
+								"anchors.left" : button == 0 ? buttonarea.left : prevBtnOption.right,
+								"anchors.leftMargin" : button == 0 ? 0 : 32
 							});
 			prevBtnOption = newBtnOption;
-			count++;
 		}
 	}
 
@@ -50,6 +52,7 @@ Hix.ModalShell {
 		color: "#ffffff"
 
 		Hix.CloseButton {
+			id: closeButton
 			width: 16
 			height: 16
 			color: transparent
@@ -64,23 +67,24 @@ Hix.ModalShell {
 			}
 		}
 		
-		Text {
-			text: root.modalMessage
-			font.family: openRegular.name
-			font.pointSize: 10
-			anchors.horizontalCenter: parent.horizontalCenter
-			anchors.top: parent.top
-			anchors.topMargin: parent.height * 0.4
+		Item {
+			id: contentArea
+			anchors.top: closeButton.bottom
+			anchors.topMargin: closeButton.height * 0.4
+			anchors.bottom: buttonarea.top
+			anchors.bottomMargin: closeButton.height * 0.4
+			anchors.left: buttonarea.left
+			anchors.right: buttonarea.right
 		}
 		
 		Rectangle {
 			id: buttonarea
-			width: buttonsWidth
+			width: 320
 			height: 32
 			anchors.horizontalCenter: parent.horizontalCenter
 			anchors.bottom: parent.bottom
 			anchors.bottomMargin: parent.height * 0.2
-			
+
 			Hix.Button {
 				id: leftbtn
 				width: (buttonsWidth - buttonSpace) / 2
@@ -119,7 +123,7 @@ Hix.ModalShell {
 					text: "Apply"
 					font.family: openSemiBold.name
 				}
-				onClicked: { console.log("clicked");}
+				onClicked: { console.log(contentArea.height); root.setButtons([["Apply", "#00b9c8", "#21959e"], ["Cancel", "#abb3b3", "#8b9393"]]); }
 				onEntered: { color = "#21959e" }
 				onExited: { color = "#00b9c8" }
 			}
