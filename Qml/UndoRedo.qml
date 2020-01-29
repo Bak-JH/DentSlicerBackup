@@ -8,7 +8,7 @@ Item {
 	property var btnSize: 60
 	width: 180
 
-	Hix.RoundButton {
+	Hix.Button {
 		id: undo
 		color: "#ffffff"
 		width: btnSize
@@ -23,7 +23,7 @@ Item {
 		onEntered: { color = "#eeeeee" }
 		onExited: { color = "#ffffff" }
 	}
-	Hix. RoundButton {
+	Hix.Button {
 		id: redo
 		color: "#ffffff"
 		width: btnSize

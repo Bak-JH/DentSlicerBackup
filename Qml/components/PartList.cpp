@@ -1,24 +1,21 @@
 #include "PartList.h"
+#include "qmlmanager.h"
 
-Hix::QML::PartListContent::PartListContent(QQuickItem* parent) : _mouseArea(new QQuickMouseArea(this))
+Hix::QML::PartList::PartList(QQuickItem* parent) : QQuickItem(parent)
 {
-	setParent(parent);
-	connect(_mouseArea, &QQuickMouseArea::clicked, this, &PartListContent::onClick);
-	qvariant_cast<QObject*>(
-		_mouseArea->property("anchors")
-		)->setProperty("fill", _mouseArea->property("parent"));
-
 }
 
-void Hix::QML::PartListContent::onClick()
+Hix::QML::PartList::~PartList()
 {
-	qDebug() << "part clicked";
 }
 
-void Hix::QML::PartDeleteButton::onClick()
+Q_INVOKABLE void Hix::QML::PartList::appendModel(QString modelName)
 {
-	qDebug() << "part clicked";
+	QObject* listModel = FindItemByName(qmlManager->engine, "modelList");
+	QMetaObject::invokeMethod(listModel, "appendModel", Q_ARG(QVariant, modelName));;
 }
+
+
 
 Hix::QML::PartDeleteButton::PartDeleteButton(QQuickItem* parent) : _mouseArea(new QQuickMouseArea(this))
 {
@@ -28,4 +25,13 @@ Hix::QML::PartDeleteButton::PartDeleteButton(QQuickItem* parent) : _mouseArea(ne
 		_mouseArea->property("anchors")
 		)->setProperty("fill", _mouseArea->property("parent"));
 
+}
+
+Hix::QML::PartDeleteButton::~PartDeleteButton()
+{
+}
+
+void Hix::QML::PartDeleteButton::onClick()
+{
+	qDebug() << "part clicked";
 }

@@ -1,14 +1,17 @@
 import QtQuick 2.6
-import hix.qml 1.0
+import hix.qml 1.0 as Hix
 import QtQuick.Controls 2.1
 import QtQuick.Controls.Styles 1.4
 import QtGraphicalEffects 1.12
 
-Item {
-	SlideBarShell {
-		id: slidebarshell
-		width: 64
-		height: 600
+Hix.SlideBarShell {
+	id: root
+	width: 64
+	height: 600
+	Rectangle {
+		id: shell
+		width: parent.width
+		height: parent.height
 		radius: width / 2
 		color: "#ffffff"
 
@@ -22,7 +25,7 @@ Item {
 		}
 		Text {
 			id: zero
-			text: qsTr("0")
+			text: control.from
 			font.family: openRegular.name
 			anchors.horizontalCenter: parent.horizontalCenter
 			anchors.top: control.bottom
@@ -31,8 +34,8 @@ Item {
 
 		Slider {
 			id: control
-			from: parent.slideRect.from
-			to: 154 //parent.slideRect.to
+			from: root.min
+			to: root.max
 			value: (from + to) / 2
 			orientation: Qt.Vertical
 			anchors.horizontalCenter: parent.horizontalCenter
@@ -52,33 +55,28 @@ Item {
 				color: "#e4e5e5"
 
 				Rectangle {
+					visible: true	// false in Flat Cut
 					anchors.bottom: parent.bottom
 					width: parent.width
 					height: parent.height - control.visualPosition * parent.height
 					color: "#19d6e0"
 					radius: width / 2
 				}
-			
 			}
 
 			handle: Rectangle {
 				id: handle
-				//x: control.leftPadding + control.visualPosition * (control.availableWidth - width)
-				//y: control.topPadding + control.availableHeight / 2 - height / 2
 				x: control.leftPadding + control.availableWidth / 2 - width / 2
 				y: control.bottomPadding + control.visualPosition * (control.availableHeight - height)
 				implicitWidth: 36
 				implicitHeight: 22
 				radius: 2
 				color: control.pressed ? "#727d7d" : "#929d9d"
-				//border.color: "#bdbebf"
 			}
 			Rectangle {	//current position
 				width: 58
 				height: 34
-				//color: "transparent"
 				anchors.right: handle.left
-				//color: "transparent"
 				//x: 0 - control.availableWidth * 1.2
 				y: control.bottomPadding + control.visualPosition * (control.availableHeight - height)
 				visible: control.pressed ? true : false
@@ -91,7 +89,7 @@ Item {
 						anchors.verticalCenter: parent.verticalCenter
 						anchors.left: parent.left
 						anchors.leftMargin: (parent.width - 10 - width) / 2
-						text: Math.floor(control.value)
+						text: control.value.toFixed(2)
 						font.family: openSemiBold.name
 						font.pointSize: 10.5
 						color: "#ffffff"
@@ -127,37 +125,16 @@ Item {
 						ctx.arc(startX-w, startY, windowRadius, Math.PI, Math.PI * 1.5, false);
 						ctx.lineTo(startX, startY-windowRadius);
 						ctx.fill();
-
 					}
 				}
-	
 			}
-			/*
-			Rectangle {
-				id: currentPos
-				width: 48
-				height: 34
-				color: "#00b9c8"
-				x: 0 - control.availableWidth * 1.2
-				y: control.bottomPadding + control.visualPosition * (control.availableHeight - height)
-				visible: control.pressed ? true : false
-				Text {
-					//text: control.parent.slideRect.visualPosition
-					anchors.verticalCenter: parent.verticalCenter
-					anchors.horizontalCenter: parent.horizontalCenter
-					text: Math.floor(control.value)
-					font.family: openRegular.name
-					color: "#ffffff"
-				}
-			}
-			*/
 		}
 	}
 	DropShadow {
-		anchors.fill: slidebarshell
+		anchors.fill: shell
 		radius: 10.0
 		samples: 21
 		color: "#55000000"
-		source: slidebarshell
+		source: shell
 	}
 }

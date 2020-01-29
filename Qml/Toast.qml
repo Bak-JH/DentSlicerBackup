@@ -4,35 +4,46 @@ import QtQuick.Controls 2.1
 import QtQuick.Controls.Styles 1.4
 import QtGraphicalEffects 1.12
 
-Item {
-	property var themeColor: "#00b9c8"
-	Hix.ToastShell {
-		id: toastshell
-		width: 500
-		height: 60
+Hix.ToastShell {
+	id: root
+	width: 500
+	height: 60
+	Rectangle{
+		id: shell
+		width: parent.width
+		height: parent.height
 		radius: 8
 		color: "#f6feff"
 	
 		Rectangle {
-			id: circle
+			id: msgtype
 			width: 36
 			height: width
 			radius: width / 2
-			color: themeColor
+			color: "#00b9c8" // themeColor
 			anchors.verticalCenter: parent.verticalCenter
 			anchors.left: parent.left
-			anchors.leftMargin: (toastshell.height - height) / 2
+			anchors.leftMargin: (root.height - height) / 2
 			Image {
+				id: img
 				source: "qrc:/Resource/toast_check.png"
 				anchors.verticalCenter: parent.verticalCenter
 				anchors.horizontalCenter: parent.horizontalCenter
+
+				MouseArea{
+					anchors.fill:parent
+					
+					onClicked: {
+						root.test(Hix.ToastShell.ExpectedError)
+					}
+				}
 			}
 		}
 		Text {
-			text: parent.toastmsg
+			text: root.message
 			anchors.verticalCenter: parent.verticalCenter
-			anchors.left: circle.right
-			anchors.leftMargin: circle.width / 4
+			anchors.left: msgtype.right
+			anchors.leftMargin: msgtype.width / 4
 			font.family: openRegular.name
 		}
 		Hix.CloseButton {
@@ -40,7 +51,7 @@ Item {
 			height: 16
 			anchors.verticalCenter: parent.verticalCenter
 			anchors.right: parent.right
-			anchors.rightMargin: (toastshell.height - height) / 2
+			anchors.rightMargin: (root.height - height) / 2
 			Image {
 				source: "qrc:/Resource/closebutton.png"
 				anchors.fill: parent
@@ -48,10 +59,18 @@ Item {
 		}
 	}
 	DropShadow {
-		anchors.fill: toastshell
+		anchors.fill: shell
 		radius: 10.0
 		samples: 21
 		color: "#55000000"
-		source: toastshell
+		source: shell
+	}
+
+	onMessageTypeChanged: {
+		console.log("messageTypeChanged")
+		if(messageType == Hix.ToastShell.Done)
+			msgtype.img.source = "qrc:/Resource/toast_check.png"
+		else if (messageType == Hix.ToastShell.ExpectedError)
+			console.log(shell.msgtype.img) //= "qrc:/Resource/closebutton.png"
 	}
 }

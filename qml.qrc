@@ -26,8 +26,6 @@
         <file>Qml/UpperTab.qml</file>
         <file>Qml/ViewButton.qml</file>
         <file>Qml/ViewChange.qml</file>
-        <file>Qml/ProgressPopUp.qml</file>
-        <file>Qml/ResultPopup.qml</file>
         <file>Qml/LeftTabExport.qml</file>
         <file>Qml/LeftTabExportElement.qml</file>
         <file>Qml/Login.qml</file>
@@ -53,13 +51,8 @@
         <file>shaders/singleColor.geom</file>
         <file>shaders/flat.geom</file>
         <file>Qml/LeftTabSlicingOptionElementPercentage.qml</file>
-        <file>Qml/LeftPopup.qml</file>
-        <file>Qml/CtrInputBox.qml</file>
-        <file>Qml/CtrDropdownBox.qml</file>
-        <file>Qml/CtrCutSwitch.qml</file>
         <file>Qml/Toast.qml</file>
         <file>Qml/SlideBar.qml</file>
-        <file>Qml/CtrLabelTextBox.qml</file>
         <file>Qml/CanvasTest.qml</file>
         <file>Qml/ModalWindow.qml</file>
         <file>Qml/Cam.qml</file>
@@ -67,25 +60,34 @@
         <file>Qml/ViewMode.qml</file>
         <file>Qml/UndoRedo.qml</file>
         <file>Qml/PartList.qml</file>
-        <file>Qml/PartListContentBox.qml</file>
         <file>Qml/PrintInfo.qml</file>
-        <file>Qml/LeftPopupMove.qml</file>
-        <file>Qml/LeftPopupRotate.qml</file>
-        <file>Qml/LeftPopupScale.qml</file>
-        <file>Qml/LeftPopupArrange.qml</file>
-        <file>Qml/LeftPopupExtend.qml</file>
-        <file>Qml/LeftPopupLayFlat.qml</file>
-        <file>Qml/LeftPopupOrient.qml</file>
-        <file>Qml/LeftPopupCut.qml</file>
-        <file>Qml/LeftPopupSupport.qml</file>
-        <file>Qml/LeftPopupExport.qml</file>
-        <file>Qml/LeftPopupLabel.qml</file>
-        <file>Qml/LeftPopupShellOffset.qml</file>
-        <file>Qml/CtrScaleInputBox.qml</file>
-        <file>Qml/ProgressShell.qml</file>
+        <file>Qml/ModelBuildSlider.qml</file>
+        <file>Qml/PrintSetting.qml</file>
+        <file>Qml/PrintSettingPopup.qml</file>
         <file>Qml/PlanesliderRange.qml</file>
-        <file>Qml/FeatureMenu.qml</file>
         <file>Qml/MenuItem.qml</file>
-        <file>Qml/CtrToggleSwitch.qml</file>
+        <file>Qml/FeatureMenu.qml</file>
+        <file>Qml/Controls/CtrCutSwitch.qml</file>
+        <file>Qml/Controls/CtrDropdownBox.qml</file>
+        <file>Qml/Controls/CtrScaleInputBox.qml</file>
+        <file>Qml/Controls/CtrSpinBox.qml</file>
+        <file>Qml/Controls/CtrTextBox.qml</file>
+        <file>Qml/Controls/CtrToggleSwitch.qml</file>
+        <file>Qml/FeaturePopup/LeftPopup.qml</file>
+        <file>Qml/FeaturePopup/LeftPopupArrange.qml</file>
+        <file>Qml/FeaturePopup/LeftPopupCut.qml</file>
+        <file>Qml/FeaturePopup/LeftPopupExport.qml</file>
+        <file>Qml/FeaturePopup/LeftPopupExtend.qml</file>
+        <file>Qml/FeaturePopup/LeftPopupLabel.qml</file>
+        <file>Qml/FeaturePopup/LeftPopupLayFlat.qml</file>
+        <file>Qml/FeaturePopup/LeftPopupModelBuild.qml</file>
+        <file>Qml/FeaturePopup/LeftPopupMove.qml</file>
+        <file>Qml/FeaturePopup/LeftPopupOrient.qml</file>
+        <file>Qml/FeaturePopup/LeftPopupRotate.qml</file>
+        <file>Qml/FeaturePopup/LeftPopupScale.qml</file>
+        <file>Qml/FeaturePopup/LeftPopupShellOffset.qml</file>
+        <file>Qml/FeaturePopup/LeftPopupSupport.qml</file>
+        <file>Qml/ResultPopup.qml</file>
+        <file>Qml/ProgressPopup.qml</file>
     </qresource>
 </RCC>

@@ -17,8 +17,13 @@ namespace Hix
 			Button(QQuickItem* parent = nullptr);
 			virtual ~Button();
 
-		public slots:
-			virtual void onClick() = 0;
+		signals:
+			void clicked();
+			void entered();
+			void exited();
+
+		protected slots:
+			virtual void onClicked();
 			virtual void onEntered();
 			virtual void onExited();
 
@@ -34,61 +39,45 @@ namespace Hix
 			CloseButton(QQuickItem* parent = nullptr);
 			virtual ~CloseButton();
 
-		public slots:
-			void onClick()override;
-		};
-
-		/// Round Button ///
-		class RoundButton : public Button
-		{
-			Q_OBJECT
-		public:
-			RoundButton(QQuickItem* parent = nullptr);
-			virtual ~RoundButton();
-
-		signals:
-			void clicked();
-			void entered();
-			void exited();
-
-		public slots:
-			void onClick()override;
-			void onEntered()override;
-			void onExited()override;
-			void fNameChanged();
-		};
-
-		/// Menu Button ///
-		class MenuButton : public Button
-		{
-			Q_OBJECT
-		public:
-			MenuButton(QQuickItem* parent = nullptr);
-			virtual ~MenuButton();
-
-		signals:
-			void clicked();
-			void entered();
-			void exited();
-
-		public slots:
-			void onClick()override;
-			void onEntered()override;
-			void onExited()override;
+		private slots:
+			void onClicked()override;
 		};
 
 		/// Toggle Switch ///
 		class ToggleSwitch : public Button
 		{
 			Q_OBJECT
-			Q_PROPERTY(bool isLeft MEMBER _isLeft)
+			Q_PROPERTY(bool isChecked MEMBER _isChecked NOTIFY checkedChanged)
 
 		public:
 			ToggleSwitch(QQuickItem* parent = nullptr);
 			virtual ~ToggleSwitch();
+			bool isChecked()const;
+
+		signals:
+			void checkedChanged();
+
+		private slots:
+			void onClicked()override;
 
 		private:
-			bool _isLeft = true;
+			bool _isChecked = false;
+		};
+
+		/// Image Toggle Switch ///
+		class ImageToggleSwitch : public QQuickItem
+		{
+			Q_OBJECT
+			Q_PROPERTY(bool isChecked MEMBER _isChecked)
+
+		public:
+			ImageToggleSwitch(QQuickItem* parent = nullptr);
+			virtual ~ImageToggleSwitch();
+			bool isChecked()const;
+			Q_INVOKABLE void setChecked(bool isChecked);
+
+		private:
+			bool _isChecked = false;
 		};
 	}
 }

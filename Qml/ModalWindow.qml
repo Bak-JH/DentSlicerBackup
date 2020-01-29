@@ -5,7 +5,6 @@ import QtQuick.Controls.Styles 1.4
 import QtGraphicalEffects 1.12
 
 Item {
-	property var themeColor: "#00b9c8"
 	property var buttonsWidth: 320
 	property var buttonSpace: 32
 
@@ -47,7 +46,7 @@ Item {
 			anchors.bottom: parent.bottom
 			anchors.bottomMargin: parent.height * 0.2
 
-			Hix.RoundButton {
+			Hix.Button {
 				id: leftbtn
 				width: (buttonsWidth - buttonSpace) / 2
 				height: 32
@@ -68,7 +67,7 @@ Item {
 				onExited: { color = "#00b9c8" }
 			}
 
-			Hix.RoundButton {
+			Hix.Button {
 				id: rightbtn
 				width: buttonsWidth - leftbtn.width - buttonSpace
 				height: 32
