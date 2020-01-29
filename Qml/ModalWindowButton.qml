@@ -3,10 +3,13 @@ import hix.qml 1.0 as Hix
 Hix.Button 
 {
 	property string btnText;
+	property string hoverColor;
+	property string defaultColor;
 
 	id: button
 	height: 32
 	radius: height / 2
+	color: defaultColor
 
 	Text {
 		anchors.horizontalCenter: parent.horizontalCenter
@@ -17,6 +20,6 @@ Hix.Button
 		font.family: openSemiBold.name
 	}
 	onClicked: { console.log("clicked"); }
-	onEntered: { button.color = "#21959e" }
-	onExited: { button.color = "#00b9c8" }
+	onEntered: { button.color = hoverColor }
+	onExited: { button.color = defaultColor}
 }
