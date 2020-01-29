@@ -1,7 +1,20 @@
 #include "SlideBar.h"
 
 
-Hix::QML::SlideBarShell::SlideBarShell(QQuickItem* parent) :_slideRect(new QQuickSlider(this))
+Hix::QML::SlideBarShell::SlideBarShell(QQuickItem* parent) : QQuickItem(parent)
 {
-	setParent(parent);
+}
+
+Hix::QML::SlideBarShell::~SlideBarShell()
+{
+}
+
+
+
+Hix::QML::RangeSlideBarShell::RangeSlideBarShell(QQuickItem* parent) : QQuickItem(parent)
+{
+}
+
+Hix::QML::RangeSlideBarShell::~RangeSlideBarShell()
+{
 }

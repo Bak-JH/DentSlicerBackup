@@ -4,7 +4,10 @@ import QtQuick.Controls 2.1 //1.4
 import QtQuick.Controls.Styles 1.4
 import QtGraphicalEffects 1.12
 
-Item {
+Hix.PartList {
+	id: root
+	width: 256
+	height: 320
 	property var myPadding: 16
 
 	function showHideToggle() {
@@ -12,10 +15,20 @@ Item {
 		else showhideimg.source = "qrc:/Resource/part_show_1.png"
 	}
 
+	ListModel {		// 리스트뷰에 담을 데이터들을 선언.
+		id:model
+		objectName: "modelList"
+
+		function appendModel(modelName)
+		{
+			model.append({"name" : modelName});
+		}
+	}
+
 	Rectangle {
-		id: partlistshell
-		width: 256
-		height: 320
+		id: shell
+		width: root.width
+		height: root.height
 		radius: 8
 		Text {
 			id: listtitle
@@ -27,68 +40,54 @@ Item {
 			anchors.left: parent.left
 			anchors.leftMargin: myPadding
 		}
-		/*
-		ScrollView {
-			width: 224
-			height: 200
-			anchors.horizontalCenter: parent.horizontalCenter
-			clip: true
-			PartListContentBox {
-				anchors.horizontalCenter: parent.horizontalCenter
-			}
-			PartListContentBox {
-				anchors.horizontalCenter: parent.horizontalCenter
-			}
-		}
-		*/
 	
-		Component {//리스트 뷰의 틀을 만든다.
+		Component { // 리스트 뷰의 틀을 만든다.
 			id: contactDelegate
 			Item {
 				width: 224; height: 28
 				Column {
 					anchors.verticalCenter: parent.verticalCenter
-					Hix.RoundButton{
+					Hix.Button{
 						width: 224; height: 28
-						color: "lightblue"
+						//color: "#f5f5f5"
 						Text { 
+							id: modelname
 							text: name
 							font.family: openRegular.name
 							anchors.verticalCenter: parent.verticalCenter
+							anchors.left: parent.left
+							anchors.leftMargin: 8
+						}
+						onClicked: {
+							color="#f5f5f5"
+							modelname.color="#1db2c4"
+							if(showhideimg.source == "qrc:/Resource/part_show_1.png") showhideimg.source = "qrc:/Resource/part_show_select_1.png"
+							else if(showhideimg.source == "qrc:/Resource/part_hide_1.png") showhideimg.source = "qrc:/Resource/part_hide_select_1.png"
 						}
 					}
 				}
-				Hix.RoundButton{
+				Hix.Button{
 					id: showhide
 					width: 16
 					height: width
 					anchors.right: parent.right
 					anchors.rightMargin: 6
 					anchors.verticalCenter: parent.verticalCenter
+					color: "transparent"
 					Image {
 						id: showhideimg
 						source: "qrc:/Resource/part_show_1.png"
 						anchors.verticalCenter: parent.verticalCenter
-						//anchors.right: parent.right
-						//anchors.rightMargin: width /2
-						//anchors.verticalCenter: parent.verticalCenter
-						//width: sourceSize.width / 1.5
-						//height: sourceSize.height / 1.5
 					}
 					onClicked: {
 						console.log("showhide clicked")
 						if(showhideimg.source == "qrc:/Resource/part_show_1.png") showhideimg.source = "qrc:/Resource/part_hide_1.png"
-						else showhideimg.source = "qrc:/Resource/part_show_1.png"
+						else if(showhideimg.source == "qrc:/Resource/part_hide_1.png") showhideimg.source = "qrc:/Resource/part_show_1.png"
+						else if(showhideimg.source == "qrc:/Resource/part_show_select_1.png") showhideimg.source = "qrc:/Resource/part_hide_select_1.png"
+						else if(showhideimg.source == "qrc:/Resource/part_hide_select_1.png") showhideimg.source = "qrc:/Resource/part_show_select_1.png"
 					}
 				}
 			}
-		}
-
-		ListModel {		// 리스트뷰에 담을 데이터들을 선언.
-			id:model
-			ListElement { name: "model1.stl" }
-			ListElement { name: "model2.stl" }
-			ListElement { name: "model3.stl" }
 		}
 
 		Rectangle {
@@ -123,7 +122,7 @@ Item {
 			}
 		}
 
-		Hix.RoundButton {
+		Hix.Button {
 			width: 14
 			height: width
 			anchors.right: parent.right
@@ -133,18 +132,18 @@ Item {
 			Image {
 				anchors.right: parent.right
 				anchors.bottom: parent.bottom
-				source: "qrc:/Resource/part_delete_1.png"
+				source: "qrc:/Resource/part_remove_1.png"
 				//sourceSize.width: width
 			}
-			onClicked: { console.log("delete clicked") }
+			onClicked: { console.log("delete clicked"); }
 		}
 
 	}
 	DropShadow {
-		anchors.fill: partlistshell
+		anchors.fill: shell
 		radius: 10.0
 		samples: 21
 		color: "#55000000"
-		source: partlistshell
+		source: shell
 	}
 }

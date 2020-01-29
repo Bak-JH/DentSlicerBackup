@@ -4,7 +4,7 @@ import QtQuick.Controls 2.1
 import QtQuick.Controls.Styles 1.4
 import QtGraphicalEffects 1.12
 
-Hix.RoundButton {
+Hix.Button {
 	width: 58
 	height: width
 	radius: 6

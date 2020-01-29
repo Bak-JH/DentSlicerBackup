@@ -1,12 +1,18 @@
 #include "Toast.h"
 
-void Hix::QML::ToastShell::toastmsgChanged()
+Hix::QML::ToastShell::ToastShell(QQuickItem* parent) : QQuickItem(parent)
 {
-	qDebug() << _toastmsg;
 }
 
-Hix::QML::ToastShell::ToastShell(QQuickItem* parent)
+Hix::QML::ToastShell::~ToastShell()
 {
-	setParent(parent);
 }
 
+void Hix::QML::ToastShell::setMessage(MessageType type, std::string text)
+{
+	_msgType = type;
+	_message = QString::fromStdString(text);
+
+	emit messageChanged();
+	emit messageTypeChanged();
+}

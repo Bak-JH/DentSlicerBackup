@@ -8,30 +8,22 @@ namespace Hix
 {
 	namespace QML
 	{
-		class PartListContent : public QQuickRectangle
+		class PartList : public QQuickItem
 		{
 			Q_OBJECT
-			Q_PROPERTY(QString modelname MEMBER _modelname)
 		public:
-			PartListContent(QQuickItem* parent = nullptr);
+			PartList(QQuickItem* parent = nullptr);
+			virtual ~PartList();
+			Q_INVOKABLE void appendModel(QString featureName);
 
-		public slots:
-			void onClick();
-
-		private:
-			QQuickMouseArea* _mouseArea;
-
-		protected:
-			QString _modelname = "testmodel.stl";
 		};
 
 		class PartDeleteButton : public QQuickRectangle
 		{
 			Q_OBJECT
-
 		public:
 			PartDeleteButton(QQuickItem* parent = nullptr);
-
+			virtual ~PartDeleteButton();
 		public slots:
 			void onClick();
 
