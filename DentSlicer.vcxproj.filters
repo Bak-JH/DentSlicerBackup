@@ -867,6 +867,10 @@
     <Image Include="Resource\dentslicer_loading_2.gif" />
     <Image Include="Resource\progress_check.png" />
     <Image Include="Resource\progress_loading.png" />
+    <Image Include="Resource\btn_setting_refresh_1.5.png" />
+    <Image Include="Resource\btn_setting_refresh_big.png" />
+    <Image Include="Resource\toast_exception.png" />
+    <Image Include="Resource\progress_loading_yellow.png" />
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="feature\layerview\CrossSectionPlane.h" />
@@ -1138,8 +1142,6 @@
     <None Include="Qml\LeftPopupModelBuild.qml" />
     <None Include="Qml\PrintSetting.qml" />
     <None Include="Qml\PrintSettingPopup.qml" />
-    <None Include="Qml\BastardyMenu.qml" />
-    <None Include="Qml\MenuButton.qml" />
     <None Include="Qml\LeftPopup.qml" />
     <None Include="Qml\InputBox.qml" />
     <None Include="Qml\CtrSpinBox.qml" />
@@ -1173,13 +1175,15 @@
     <None Include="Qml\ProgressShell.qml" />
     <None Include="Qml\FileDialogLoad.qml" />
     <None Include="Qml\PlanesliderRange.qml" />
-    <None Include="Qml\BastardyMenu.qml" />
     <None Include="Qml\FeatureMenu.qml" />
     <None Include="Qml\MenuItem.qml" />
     <None Include="Qml\CtrToggleSwitch.qml" />
     <None Include="Qml\CtrTextBox.qml" />
     <None Include="Qml\CtrSpinBox.qml" />
     <None Include="Qml\ProgressRevised.qml" />
+    <None Include="Qml\ErrorToast.qml" />
+    <None Include="Qml\ExceptionToast.qml" />
+    <None Include="Qml\ProgressException.qml" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Source Files">
@@ -1206,8 +1210,6 @@
     <Image Include="Resource\drop_arrow_down.png" />
     <Image Include="Resource\traingle_up_1.5.png" />
     <Image Include="Resource\triangle_up_1.5.png" />
-    <Image Include="Resource\cut_free_off_1.5.png" />
-    <Image Include="Resource\cut_flat_off_1.5.png" />
     <Image Include="Resource\menu_extract.png" />
     <Image Include="Resource\toast_check.png" />
     <Image Include="Resource\toast_x.png" />
@@ -1224,8 +1226,6 @@
     <Image Include="Resource\triangle_right.png" />
     <Image Include="Resource\cut_flat_on_border2.png" />
     <Image Include="Resource\cut_free_on_border2.png" />
-    <Image Include="Resource\part_show.png" />
-    <Image Include="Resource\part_remove.png" />
     <Image Include="Resource\menu_arrange.png" />
     <Image Include="Resource\menu_autorepair.png" />
     <Image Include="Resource\menu_cut.png" />
@@ -1257,7 +1257,6 @@
     <Image Include="Resource\menu_shelloffset_select_1.png" />
     <Image Include="Resource\menu_support_select_1.png" />
     <Image Include="Resource\menu_scale_select_1.png" />
-    <Image Include="Resource\part_delete_1.png" />
     <Image Include="Resource\part_hide_1.png" />
     <Image Include="Resource\part_hide_select_1.png" />
     <Image Include="Resource\part_show_1.png" />

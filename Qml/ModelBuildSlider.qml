@@ -5,10 +5,12 @@ import QtQuick.Controls.Styles 1.4
 import QtGraphicalEffects 1.12
 
 Item {
+	width: 64
+	height: 600
 	Rectangle {
 		id: slidebarshell
-		width: 64
-		height: 600
+		width: parent.width
+		height: parent.height
 		radius: width / 2
 		color: "#ffffff"
 		

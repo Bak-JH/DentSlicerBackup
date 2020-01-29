@@ -6,6 +6,7 @@ import QtQuick.Controls.Styles 1.4
 import QtQuick.Dialogs 1.2
 
 Item{
+	property var sidePadding: 20
     ApplicationWindow {
         title: qsTr("DentSlicer")
         id : window
@@ -25,28 +26,12 @@ Item{
 		property alias openSemiBold: openSemiBold
 		property alias openBold: openBold
 
-        FontLoader{
-            id : mainFont
-            source: "qrc:/Resource/font/NotoSans-SemiCondensed.ttf"
 
-        }
-        FontLoader{
-            id : mediumFont
-            source: "qrc:/Resource/font/NotoSans-SemiCondensedMedium.ttf"
-        }
-
-		FontLoader {
-			id: openRegular
-            source: "qrc:/Resource/font/OpenSans-Regular.ttf"
-		}
-		FontLoader {
-			id: openSemiBold
-            source: "qrc:/Resource/font/OpenSans-SemiBold.ttf"
-		}
-		FontLoader {
-			id: openBold
-            source: "qrc:/Resource/font/OpenSans-Bold.ttf"
-		}
+        FontLoader{ id : mainFont; source: "qrc:/Resource/font/NotoSans-SemiCondensed.ttf" }
+        FontLoader{ id : mediumFont; source: "qrc:/Resource/font/NotoSans-SemiCondensedMedium.ttf" }
+		FontLoader{ id: openRegular; source: "qrc:/Resource/font/OpenSans-Regular.ttf" }
+		FontLoader{ id: openSemiBold; source: "qrc:/Resource/font/OpenSans-SemiBold.ttf" }
+		FontLoader{ id: openBold; source: "qrc:/Resource/font/OpenSans-Bold.ttf" }
 
         DropArea {
             id: drop
@@ -131,19 +116,58 @@ Item{
 			height: 100
 			anchors.top: parent.top
 			anchors.left: partlist.right
-			anchors.leftMargin: 15
-			anchors.topMargin: 5
+			anchors.leftMargin: 72
+			anchors.topMargin: sidePadding
 		}
 
 		PartList{
 			id: partlist
-			width : 265
-            height : parent.height - featureMenu.height
-			anchors.top: featureMenu.bottom
+			//width : 265
+            //height : parent.height - featureMenu.height
+			anchors.top: parent.top
+			anchors.topMargin: sidePadding
             anchors.left: parent.left
+			anchors.leftMargin: sidePadding
 			z: 10
 		}
 
+		ViewMode {
+			id: viewmode
+			anchors.top: partlist.bottom
+			anchors.topMargin: sidePadding
+			anchors.left: parent.left
+			anchors.leftMargin: sidePadding
+		}
+
+		UndoRedo {
+			id: undoredo
+			anchors.bottom: parent.bottom
+			anchors.bottomMargin: 32
+			anchors.horizontalCenter: partlist.horizontalCenter
+		}
+
+		PrintSetting {
+			id: printsetting
+			anchors.top: parent.top
+			anchors.topMargin: sidePadding
+			anchors.right: parent.right
+			anchors.rightMargin: sidePadding
+		}
+		/*
+		PrintSettingPopup {
+			id: printsettingpoup
+			anchors.horizontalCenter: parent.horizontalCenter
+			anchors.verticalCenter: parent.verticalCenter
+		}
+		*/
+		Cam {
+			id: cam
+			anchors.top: printsetting.bottom
+			anchors.topMargin: sidePadding * 1.5
+			anchors.right: parent.right
+			anchors.rightMargin: sidePadding + 15
+		}
+		
         LeftTabExport{
             id : lefttabExport
             width : 264
@@ -153,7 +177,7 @@ Item{
             anchors.left: partlist.right
             visible: false
         }
-
+		
         MeshTransformerTab{
             id:mttab
             objectName: "mttab"
@@ -171,179 +195,161 @@ Item{
             anchors.bottom: parent.bottom
         }
 		
-
-
-		LeftPopupMove {
-			id: leftpopupmove
-			anchors.top: featureMenu.bottom
-			anchors.left: partlist.right
-			anchors.leftMargin: 15
-			anchors.topMargin: 20
-		}
-		
-		LeftPopupLayFlat {
-			id: leftpopuplayflat
-			anchors.top: featureMenu.bottom
-			anchors.left: leftpopupmove.right
-			anchors.leftMargin: 15
-			anchors.topMargin: 20
-		}
-		
-		LeftPopupLabel {
-			id: leftpopuplabel
-			anchors.top: featureMenu.bottom
-			anchors.left: leftpopuplayflat.right
-            anchors.leftMargin: 15
-			anchors.topMargin: 20
-		}
 		/*
-		FeatureMenu {
-			id: bastardymenu
-			anchors.top: uppertab.bottom
-			anchors.left: lefttab.right
-			anchors.leftMargin: 15
-			anchors.topMargin: 20
-		}
-		*/
-
-		ProgressRevised{
-			id: progressrevised
-			anchors.top: uppertab.bottom
-			anchors.left: lefttab.right
-			anchors.leftMargin: 15
-			anchors.topMargin: 120
-		}
-		/*
-		LeftPopup {
-			id: leftpopup
-			anchors.top: uppertab.bottom
-			anchors.left: lefttab.right
-			anchors.leftMargin: 15
-			anchors.topMargin: 20
-		}
-		LeftPopupScale
-		{
-			id: leftpopupscale
-			anchors.top: featureMenu.bottom
-			anchors.left: leftpopuplabel.right
-            anchors.leftMargin: 15
-			anchors.topMargin: 20
-		}
-
-		LeftPopupMove {
-			id: leftpopupmove
-			anchors.top: uppertab.bottom
-			anchors.left: lefttab.right
-			anchors.leftMargin: 15
-			anchors.topMargin: 20
-		}
-		LeftPopupSupport
-		{
-			id: leftpopupsupport
-			anchors.top: featureMenu.bottom
-			anchors.left: partlist.right
-            anchors.leftMargin: 15
-			anchors.topMargin: 250
-		}
-
-		LeftPopupModelBuild
-		{
+		LeftPopupModelBuild {
 			id: leftpopupmodelbuild
-			anchors.top: featureMenu.bottom
-			anchors.left: partlist.right
-			anchors.leftMargin: 15
-			anchors.topMargin: 250
+			anchors.top: viewmode.bottom
+			anchors.topMargin: sidePadding
+			anchors.left: parent.left
+			anchors.leftMargin: sidePadding
 		}
 		*/
-
+		
+		LeftPopupMove {
+			id: leftpopupmove
+			anchors.top: viewmode.bottom
+			anchors.topMargin: sidePadding
+			anchors.left: parent.left
+			anchors.leftMargin: sidePadding
+		}
+		/*
+		LeftPopupRotate {
+			id: leftpopupRotate
+			anchors.top: viewmode.bottom
+			anchors.topMargin: sidePadding
+			anchors.left: parent.left
+			anchors.leftMargin: sidePadding
+		}
+		LeftPopupScale {
+			id: leftpopupscale
+			anchors.top: viewmode.bottom
+			anchors.topMargin: sidePadding
+			anchors.left: parent.left
+			anchors.leftMargin: sidePadding
+		}
 		LeftPopupCut {
 			id: leftpopupcut
-			anchors.top: featureMenu.bottom
-			anchors.left: leftpopupsupport.right
-            anchors.leftMargin: 15
-			anchors.topMargin: 250
+			anchors.top: viewmode.bottom
+			anchors.topMargin: sidePadding
+			anchors.left: parent.right
+            anchors.leftMargin: sidePadding
 		}
-		PrintSetting
-		{
-			id: printsetting
-			anchors.top: uppertab.bottom
-			anchors.left: leftpopupmodelbuild.right
-			anchors.leftMargin: 15
-			anchors.topMargin: 250
+		LeftPopupShellOffset {
+			id: leftpopupshelloffset
+			anchors.top: viewmode.bottom
+			anchors.topMargin: sidePadding
+			anchors.left: parent.right
+            anchors.leftMargin: sidePadding
 		}
-		
+		LeftPopupExtend {
+			id: leftpopupextend
+			anchors.top: viewmode.bottom
+			anchors.topMargin: sidePadding
+			anchors.left: parent.right
+            anchors.leftMargin: sidePadding
+		}
+		LeftPopupLabel {
+			id: leftpopuplabel
+			anchors.top: viewmode.bottom
+			anchors.topMargin: sidePadding
+			anchors.left: parent.left
+			anchors.leftMargin: sidePadding
+		}
+		LeftPopupLayFlat {
+			id: leftpopuplayflat
+			anchors.top: viewmode.bottom
+			anchors.topMargin: sidePadding
+			anchors.left: parent.left
+			anchors.leftMargin: sidePadding
+		}
+		LeftPopupOrient {
+			id: leftpopuporient
+			anchors.top: viewmode.bottom
+			anchors.topMargin: sidePadding
+			anchors.left: parent.left
+			anchors.leftMargin: sidePadding
+		}
+		LeftPopupArrange {
+			id: leftpopuparrange
+			anchors.top: viewmode.bottom
+			anchors.topMargin: sidePadding
+			anchors.left: parent.left
+			anchors.leftMargin: sidePadding
+		}
+		LeftPopupSupport {
+			id: leftpopupsupport
+			anchors.top: viewmode.bottom
+			anchors.topMargin: sidePadding
+			anchors.left: parent.left
+			anchors.leftMargin: sidePadding
+		}
+		LeftPopupExport {
+			id: leftpopupexport
+			anchors.top: viewmode.bottom
+			anchors.topMargin: sidePadding
+			anchors.left: parent.left
+			anchors.leftMargin: sidePadding
+		}
+		*/
+		ProgressRevised {
+			id: progressrevised
+			anchors.verticalCenter: parent.verticalCenter
+			anchors.horizontalCenter: parent.horizontalCenter
+		}
+		ProgressException {
+			id: progressexception
+			anchors.verticalCenter: parent.verticalCenter
+			anchors.horizontalCenter: parent.horizontalCenter
+		}
+		/*
+		ModalWindow {
+			id: modalwindow
+			anchors.verticalCenter: parent.verticalCenter
+			anchors.horizontalCenter: parent.horizontalCenter
+		}
 		
 		Toast {
 			id: toast
-			anchors.top: uppertab.bottom
-			anchors.topMargin: 600
-			anchors.left: lefttab.right
-			anchors.leftMargin: 15
+			anchors.bottom: parent.bottom
+			anchors.bottomMargin: sidePadding
+			anchors.horizontalCenter: parent.horizontalCenter
 		}
-		
-		UndoRedo {
-			id: undoredo
-			anchors.top: featureMenu.bottom
-			anchors.topMargin: 720
-			anchors.left: partlist.right
-			anchors.leftMargin: 15
-		}
-		
-		ProgressShell {
-			id: progressshell
-			anchors.top: featureMenu.bottom
-			anchors.topMargin: 320
-			anchors.left: undoredo.right
-			anchors.leftMargin: 40
+		*/
+		ErrorToast {
+			id: errortoast
+			anchors.bottom: parent.bottom
+			anchors.bottomMargin: sidePadding
+			anchors.horizontalCenter: parent.horizontalCenter
 		}
 		/*
+		ExceptionToast {
+			id: exceptiontoast
+			anchors.bottom: parent.bottom
+			anchors.bottomMargin: sidePadding
+			anchors.horizontalCenter: parent.horizontalCenter
+		}
+		
 		ModelBuildSlider {
 			id: modelbuildslider
-			anchors.top: uppertab.bottom
-			anchors.topMargin: 160
-			anchors.left: lefttab.right
-			anchors.leftMargin: 600
-		}
-		*/
-		SlideBar {
-			id: slidebar
-			anchors.top: uppertab.bottom
-			anchors.topMargin: 160
-			anchors.left: lefttab.right
-			anchors.leftMargin: 720
+			anchors.top: cam.bottom
+			anchors.topMargin: sidePadding * 1.5
+			anchors.horizontalCenter: cam.horizontalCenter
 		}
 		
-
-		Cam {
-			id: cam
-			anchors.top: featureMenu.bottom
-			anchors.topMargin: 160
-			anchors.left: slidebar.right
-			anchors.leftMargin: 300
-		}
-		/*
-		CanvasTest {
-			id: canvastest
-			anchors.top: uppertab.bottom
-			anchors.topMargin: 160
-			anchors.left: lefttab.right
-			anchors.leftMargin: 180
+		SlideBar {
+			id: slidebar
+			anchors.top: cam.bottom
+			anchors.topMargin: sidePadding * 1.5
+			anchors.horizontalCenter: cam.horizontalCenter
 		}
 		*/
-		ViewMode {
-			id: viewmode
-			anchors.top: uppertab.bottom
-			anchors.left: lefttab.right
-			anchors.leftMargin: 15
-			anchors.topMargin: 700
-		}
 		
 		PrintInfo {
 			id: printinfo
-			anchors.top: slidebar.top
-			anchors.topMargin: 500
-			anchors.left: slidebar.right
-			anchors.leftMargin: 100
+			anchors.bottom: parent.bottom
+			anchors.bottomMargin: sidePadding
+			anchors.right: parent.right
+			anchors.rightMargin: sidePadding
 		}
 		
         MouseArea{

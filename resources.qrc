@@ -219,5 +219,9 @@
         <file>Resource/dentslicer_loading.mp4</file>
         <file>Resource/progress_check.png</file>
         <file>Resource/progress_loading.png</file>
+        <file>Resource/btn_setting_refresh_1.5.png</file>
+        <file>Resource/btn_setting_refresh_big.png</file>
+        <file>Resource/toast_exception.png</file>
+        <file>Resource/progress_loading_yellow.png</file>
     </qresource>
 </RCC>

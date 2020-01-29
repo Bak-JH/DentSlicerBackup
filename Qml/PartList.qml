@@ -6,6 +6,8 @@ import QtGraphicalEffects 1.12
 
 Item {
 	property var myPadding: 16
+	width: 256
+	height: 320
 
 	function showHideToggle() {
 		if(showhideimg.source == "qrc:/Resource/part_show_1.png") showhide.source = "qrc:/Resource/part_hide_1.png"
