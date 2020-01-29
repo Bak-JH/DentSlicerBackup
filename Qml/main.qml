@@ -316,7 +316,7 @@ Item{
 		}
 		
         MouseArea{
-            acceptedButtons: Qt.MiddleButton | Qt.RightButton
+            acceptedButtons: Qt.MiddleButton | Qt.RightButton | Qt.LeftButton
             anchors.fill: parent
             property int mode: 0;// 0 = none, 1 = translate, 2 = rotate, !#!@# qt...
             property vector2d prevPosition;
@@ -329,7 +329,7 @@ Item{
                 {
                     mode = 2;
                 }
-                else
+                else if(mouse.button == Qt.MiddleButton)
                 {
                     mode = 1;
                 }
@@ -417,8 +417,8 @@ Item{
 		ModalWindow
 		{
 			id: modalWindow
-			//enabled: false
-			//visible: false
+			enabled: false
+			visible: false
 			
 			Text {
 				parent: modalWindow.contentArea
