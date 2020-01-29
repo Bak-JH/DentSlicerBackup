@@ -18,7 +18,7 @@ Hix.ModalShell {
 		var prevBtnOption;
 		for(var button in buttonSet)
 		{
-			console.log(button)
+			console.log(buttonSet[button])
 			var newBtn = Qt.createComponent("ModalWindowButton.qml");
 			var newBtnOption = 
 							newBtn.createObject(buttonarea,
