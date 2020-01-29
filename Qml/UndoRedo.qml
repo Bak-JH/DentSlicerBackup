@@ -7,6 +7,7 @@ import QtGraphicalEffects 1.12
 Item {
 	property var btnSize: 60
 	width: 180
+	height: btnSize
 
 	Hix.RoundButton {
 		id: undo

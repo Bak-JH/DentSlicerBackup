@@ -5,6 +5,9 @@ import QtQuick.Controls.Styles 1.4
 import QtGraphicalEffects 1.12
 
 Item {
+	width: 256
+	height: 50
+
 	property var myPadding: 16
 	function viewPopupToggle() {
 		if (viewmodepopup.visible == false) { viewmodepopup.visible = true; }

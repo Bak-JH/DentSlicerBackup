@@ -8,6 +8,8 @@ Item {
 	property var themeColor: "#00b9c8"
 	property var buttonsWidth: 320
 	property var buttonSpace: 32
+	width: 420
+	height: 240
 
 	Hix.ModalShell {
 		id: modalshell
@@ -150,7 +152,7 @@ Item {
 
 		Hix.RoundButton {
 			id: refreshbtn
-			width: 24
+			width: 26
 			height: width
 			radius: width / 2
 			color: "#ffffff"
@@ -161,6 +163,8 @@ Item {
 			anchors.leftMargin: 8
 			Image {
 				source: "qrc:/Resource/btn_setting_refresh.png"
+				//sourceSize.width: 18 * 1.2
+				//sourceSize.height: 16 * 1.2
 				anchors.horizontalCenter: parent.horizontalCenter
 				anchors.verticalCenter: parent.verticalCenter
 			}

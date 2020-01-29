@@ -5,6 +5,9 @@ import QtQuick.Controls.Styles 1.4
 import QtGraphicalEffects 1.12
 
 Item{
+	width: 90
+	height: width
+
 	property var camHoverColor: "#eeeeee"
 	function camToggle() {
 		if (campopupshell.visible == false) { campopupshell.visible = true; }

@@ -12,30 +12,30 @@ Item {
 		width: parent.width
 		height: parent.height
 		radius: 8
-		color: "#f6feff"
+		color: "#fff9f4"
 	
 		Rectangle {
 			id: circle
 			width: 36
 			height: width
 			radius: width / 2
-			color: "#00b9c8" // themeColor
+			color: "#ffa545"
 			anchors.verticalCenter: parent.verticalCenter
 			anchors.left: parent.left
 			anchors.leftMargin: (toastshell.height - height) / 2
 			Image {
-				source: "qrc:/Resource/toast_check.png"
+				source: "qrc:/Resource/toast_exception.png"
 				anchors.verticalCenter: parent.verticalCenter
 				anchors.horizontalCenter: parent.horizontalCenter
 			}
 		}
 		Text {
 			text: parent.toastmsg
-			color: "#008f9b"
+			color: "#f1820b"
 			anchors.verticalCenter: parent.verticalCenter
 			anchors.left: circle.right
 			anchors.leftMargin: circle.width / 4
-			font.family: openRegular.name
+			font.family: openSemiBold.name
 			font.pointSize: 10
 		}
 		/*

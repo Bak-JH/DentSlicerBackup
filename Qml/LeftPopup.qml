@@ -38,7 +38,7 @@ Hix.LeftPopupShell
 			id: closeButton
 			width: 16
 			height: 16
-			//color: "transparent"
+			color: "transparent"
 			anchors.top: parent.top
 			anchors.right: parent.right
 			anchors.topMargin: myPadding

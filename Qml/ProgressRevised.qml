@@ -6,10 +6,12 @@ import QtGraphicalEffects 1.12
 //import QtMultimedia 5.14
 
 Item {
+	width: 216
+	height: 300
 	Rectangle {
 		id: popup
-		width: 216
-		height: 300
+		width: parent.width
+		height: parent.height
 		radius: 8
 		color: "#ffffff"
 
@@ -25,45 +27,58 @@ Item {
 			RotationAnimation on rotation {
 				from: 0
 				to: 360
-				duration: 1200
+				duration: 1500
 				running: root.runing
 				loops: Animation.Infinite;
 				easing.type: Easing.InOutQuad
 				//easing.amplitude: 5
 			}
 		}
+		Text {
+			text: qsTr("35") + "%"
+			font.family: openSemiBold.name
+			font.pointSize: 18
+			color: "#1db2c4"
+			anchors.horizontalCenter: parent.horizontalCenter
+			anchors.verticalCenter: img.verticalCenter
+		}
 
 		Component { // 리스트 뷰의 틀을 만든다.
 			id: contactDelegate
-			Item {
-				width: parent.width * 0.92
+			Rectangle {
+				width: parent.width * 0.9
 				height: 28
 				anchors.horizontalCenter: parent.horizontalCenter
+				//color: "#eeeeee"
+				radius: 4
 				Column {
 					anchors.verticalCenter: parent.verticalCenter
 					Text { 
 						id: modelname
 						text: name
+						color: "#666666"
 						font.family: openRegular.name
 						font.pointSize: 10
 						anchors.verticalCenter: parent.verticalCenter
 						anchors.left: parent.left
-						anchors.leftMargin: 8
+						anchors.leftMargin: 4
 					}
 	
 				}
 				Rectangle{
-					id: showhide
-					width: 20
+					id: check
+					width: 22
 					height: width
 					anchors.right: parent.right
-					anchors.rightMargin: 8
+					anchors.rightMargin: 4
 					anchors.verticalCenter: parent.verticalCenter
-					color: "yellow"
+					color: "transparent"
 					Image {
-						id: showhideimg
+						id: checkimg
 						source: "qrc:/Resource/progress_check.png"
+						//anchors.fill: parent
 						anchors.verticalCenter: parent.verticalCenter
+						anchors.horizontalCenter: parent.horizontalCenter
 					}
 				}
 			}

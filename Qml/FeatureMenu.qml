@@ -4,6 +4,8 @@ import hix.qml 1.0
 import QtGraphicalEffects 1.12
 
 Item {
+	width: 1365
+	height: 90
 	property string hoverColor: "#eeeeee"
 	property string defaultColor: "#ffffff"
 	property string activeNameColor: "#1db2c4"

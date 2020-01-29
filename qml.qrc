@@ -92,5 +92,8 @@
         <file>Qml/CtrSpinBox.qml</file>
         <file>Qml/CtrTextBox.qml</file>
         <file>Qml/ProgressRevised.qml</file>
+        <file>Qml/ErrorToast.qml</file>
+        <file>Qml/ExceptionToast.qml</file>
+        <file>Qml/ProgressException.qml</file>
     </qresource>
 </RCC>
