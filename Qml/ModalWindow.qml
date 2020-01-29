@@ -3,6 +3,7 @@ import hix.qml 1.0 as Hix
 import QtQuick.Controls 2.1
 import QtQuick.Controls.Styles 1.4
 import QtGraphicalEffects 1.12
+import QtQuick.Layouts 1.12
 
 Hix.ModalShell {
 	id: root
@@ -22,13 +23,14 @@ Hix.ModalShell {
 			var newBtnOption = 
 							newBtn.createObject(buttonarea,
 							{
+								"Layout.fillWidth" : true,
 								"id" : "button" + (button+1),
 								"btnText" : buttonSet[button][0],
 								"width" : (320 - (32 * (buttonSet.length - 1))) / buttonSet.length,
 								"defaultColor" : buttonSet[button][1],
-								"hoverColor" : buttonSet[button][2],
-								"anchors.left" : button == 0 ? buttonarea.left : prevBtnOption.right,
-								"anchors.leftMargin" : button == 0 ? 0 : 32
+								"hoverColor" : buttonSet[button][2]
+								//"anchors.left" : button == 0 ? buttonarea.left : prevBtnOption.right,
+								//"anchors.leftMargin" : button == 0 ? 0 : 32
 							});
 			prevBtnOption = newBtnOption;
 		}
@@ -77,14 +79,15 @@ Hix.ModalShell {
 			anchors.right: buttonarea.right
 		}
 		
-		Rectangle {
+		RowLayout {
 			id: buttonarea
 			width: 320
 			height: 32
+			spacing: 32
 			anchors.horizontalCenter: parent.horizontalCenter
 			anchors.bottom: parent.bottom
 			anchors.bottomMargin: parent.height * 0.2
-
+			/*
 			Hix.Button {
 				id: leftbtn
 				width: (buttonsWidth - buttonSpace) / 2
@@ -127,6 +130,7 @@ Hix.ModalShell {
 				onEntered: { color = "#21959e" }
 				onExited: { color = "#00b9c8" }
 			}
+			*/
 		}
 	}
 
