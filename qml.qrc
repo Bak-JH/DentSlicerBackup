@@ -42,7 +42,6 @@
         <file>Qml/LeftTabSlicingOptionElementPercentage.qml</file>
         <file>Qml/Toast.qml</file>
         <file>Qml/SlideBar.qml</file>
-        <file>Qml/CanvasTest.qml</file>
         <file>Qml/ModalWindow.qml</file>
         <file>Qml/Cam.qml</file>
         <file>Qml/CamBox.qml</file>

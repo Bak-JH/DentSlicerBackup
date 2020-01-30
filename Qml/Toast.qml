@@ -63,10 +63,6 @@ Hix.ToastShell {
 			onExited: { closeimg.source = "qrc:/Resource/closebutton.png" }
 		}
 		*/
-		MouseArea {
-			anchors.fill: shell
-			onClicked: { messageType < 3 || messageType <= 0? messageType++ : messageType--; }
-		}
 	}
 	DropShadow {
 		anchors.fill: shell

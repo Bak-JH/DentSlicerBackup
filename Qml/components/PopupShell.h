@@ -23,31 +23,37 @@ namespace Hix
 			FeaturePopupShell(QQuickItem* parent = nullptr);
 			virtual ~FeaturePopupShell();
 
-		signals:
-			void titleChanged();
-
 		private:
 			QString _title = "Name";
 		};
 
-		class ProgressPopupShell : public QQuickRectangle
+		class ProgressPopupShell : public QQuickItem
 		{
 			Q_OBJECT
+			Q_PROPERTY(int percent MEMBER _percent NOTIFY percentChanged)
 		public:
 			ProgressPopupShell(QQuickItem* parent = nullptr);
 			virtual ~ProgressPopupShell();
 			void appendFeature(std::string featureName);
 			void appendFeatureList(QStringList featureName);
-		};
+			void setPercentage(int percent);
+
+		signals:
+			void percentChanged();
+
+		private:
+			int _percent = 0;
+		};	
 
 		class ModalShell : public QQuickItem
 		{
-			Q_OBJECT	
+			Q_OBJECT
 			Q_PROPERTY(QString modalMessage MEMBER _modalmsg NOTIFY modalmsgChanged)
 
 		public:
 			ModalShell(QQuickItem* parent = nullptr);
 			virtual ~ModalShell();
+			void setMessage(std::string message);
 
 		signals:
 			void modalmsgChanged();
