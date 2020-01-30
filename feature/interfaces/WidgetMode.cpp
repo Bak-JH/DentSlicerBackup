@@ -2,7 +2,7 @@
 #include "qmlmanager.h"
 #include "glmodel.h"
 
-Hix::Features::WidgetMode::WidgetMode(const std::unordered_set<GLModel*>& targetModels, Input::RayCastController* controller)
+Hix::Features::WidgetMode::WidgetMode()
 	: _targetModels(targetModels), _controller(controller), _widget(this)
 {
 	_widget.setParent(qmlManager->total);

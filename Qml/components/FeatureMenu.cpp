@@ -21,7 +21,7 @@ Hix::QML::FeatureMenu::~FeatureMenu()
 {
 }
 
-void Hix::QML::FeatureMenu::addButton(MenuButtonArg& args)
+void Hix::QML::FeatureMenu::addButton(const MenuButtonArg& args)
 {
 	auto button = dynamic_cast<Hix::QML::Button*>(_component->create(qmlContext(this)));
 	button->setParentItem(_featureItems);

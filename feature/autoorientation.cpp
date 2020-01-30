@@ -645,4 +645,12 @@ rotateResult* autoorientationPrivate::euler(Liste bestside){
     return result;
 }
 
+Hix::Features::AutoOrientateMode::AutoOrientateMode()
+{
+    //TODO
+    qmlManager->setMode(nullptr);
+}
 
+Hix::Features::AutoOrientateMode::~AutoOrientateMode()
+{
+}

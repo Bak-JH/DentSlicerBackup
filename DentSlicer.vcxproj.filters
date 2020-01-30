@@ -172,7 +172,6 @@
     <ClCompile Include="feature\shelloffset.cpp" />
     <ClCompile Include="DentEngine\src\slicer.cpp" />
     <ClCompile Include="slice\slicingengine.cpp" />
-    <ClCompile Include="feature\stlexporter.cpp" />
     <ClCompile Include="DentEngine\src\svgexporter.cpp" />
     <ClCompile Include="utils\updatechecker.cpp" />
     <ClCompile Include="Qml\components\ControlOwner.cpp">
@@ -194,6 +193,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="feature\FeaturesLoader.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="feature\stlexport.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -794,7 +796,6 @@
     <ClInclude Include="feature\shelloffset.h" />
     <ClInclude Include="DentEngine\src\slicer.h" />
     <ClInclude Include="slice\slicingengine.h" />
-    <ClInclude Include="feature\stlexporter.h" />
     <ClInclude Include="DentEngine\src\svgexporter.h" />
     <ClInclude Include="DentEngine\src\polyclipping\poly2tri\sweep\sweep.h" />
     <ClInclude Include="DentEngine\src\polyclipping\poly2tri\sweep\sweep_context.h" />
@@ -820,6 +821,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="feature\FeaturesLoader.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="feature\stlexport.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

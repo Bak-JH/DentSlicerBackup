@@ -6,7 +6,20 @@
 #include "../qmlmanager.h"
 
 #include "ImportModel.h"
+#include "move.h"
+#include "rotate.h"
+#include "scale.h"
+#include "cut/modelcut.h"
+#include "shelloffset.h"
 
+#include "extension.h"
+#include "label/Labelling.h"
+#include "layFlat.h"
+#include "autoorientation.h"
+#include "arrange/autoarrange.h"
+#include "SupportFeature.h"
+#include "stlexport.h"
+#include "sliceExport.h"
 
 
 const std::string ICO_PRE("qrc:/Resource/");
@@ -28,11 +41,15 @@ MenuButtonArg createIconArg(const std::string& name)
 template<typename ModeType>
 std::function<void()> openFeatureModeFunctor()
 {
-	static_assert(std::is_base_of<Hix::Features::Mode, ModeType>);
+	static_assert(std::is_base_of<Hix::Features::Mode, ModeType>{});
 	std::function<void()> functor = []() {
 		if (!qmlManager->isFeatureActive())
 		{
 			qmlManager->setMode(new ModeType());
+		}
+		else if (qmlManager->isActive<ModeType>())
+		{
+			qmlManager->setMode(nullptr);
 		}
 	};
 }
@@ -47,4 +64,26 @@ MenuButtonArg createButtonArg(const std::string& name)
 
 void Hix::Features::FeaturesLoader::loadFeatureButtons(Hix::QML::FeatureMenu& menu)
 {
+	
+	menu.addButton(createButtonArg<Hix::Features::ImportModelMode>("open"));
+	menu.addDivider();
+
+	menu.addButton(createButtonArg<Hix::Features::MoveMode>("move"));
+	menu.addButton(createButtonArg<Hix::Features::RotateMode>("rotate"));
+	menu.addButton(createButtonArg<Hix::Features::ScaleMode>("scale"));
+	menu.addDivider();
+
+	menu.addButton(createButtonArg<Hix::Features::ModelCut>("cut"));
+	menu.addButton(createButtonArg<Hix::Features::ShellOffsetMode>("shelloffset"));
+	menu.addButton(createButtonArg<Hix::Features::ExtendMode>("extend"));
+	menu.addButton(createButtonArg<Hix::Features::LabellingMode>("label"));
+	menu.addButton(createButtonArg<Hix::Features::LayFlatMode>("layflat"));
+	menu.addButton(createButtonArg<Hix::Features::AutoOrientateMode>("orient"));
+	menu.addButton(createButtonArg<Hix::Features::AutoArrangeMode>("arrange"));
+	
+	menu.addButton(createButtonArg<Hix::Features::SupportMode>("support"));
+	menu.addDivider();
+
+	menu.addButton(createButtonArg<Hix::Features::STLExportMode>("save"));
+	menu.addButton(createButtonArg<Hix::Features::SliceExportMode>("extract"));
 }

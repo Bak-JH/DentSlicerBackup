@@ -9,11 +9,11 @@ namespace Hix
 
 	namespace Features
 	{
-		class ExportMode : public Hix::Features::Mode
+		class SliceExportMode : public Hix::Features::Mode
 		{
 		public:
-			ExportMode();
-			virtual ~ExportMode();
+			SliceExportMode();
+			virtual ~SliceExportMode();
 		private:
 		};
 
