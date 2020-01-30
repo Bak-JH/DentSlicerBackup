@@ -1157,6 +1157,9 @@
     <None Include="Qml\PrintSetting.qml" />
     <None Include="Qml\PrintSettingPopup.qml" />
     <None Include="Qml\ProgressPopup.qml" />
+    <None Include="Qml\ProgressException.qml" />
+    <None Include="Qml\ProgressRevised.qml" />
+    <None Include="Qml\ProgressShell.qml" />
     <None Include="Qml\SlideBar.qml" />
     <None Include="Qml\Toast.qml" />
     <None Include="Qml\UndoRedo.qml" />
@@ -1343,6 +1346,8 @@
     <Image Include="Resource\btn_modelbuild_help.png" />
     <Image Include="Resource\btn_setting.png" />
     <Image Include="Resource\btn_setting_refresh.png" />
+    <Image Include="Resource\btn_setting_refresh_1.5.png" />
+    <Image Include="Resource\btn_setting_refresh_big.png" />
     <Image Include="Resource\cam.png" />
     <Image Include="Resource\cam_back_1.5.png" />
     <Image Include="Resource\cam_bottom_1.5.png" />
@@ -1410,9 +1415,11 @@
     <Image Include="Resource\part_show_select_1.png" />
     <Image Include="Resource\progress_check.png" />
     <Image Include="Resource\progress_loading.png" />
+    <Image Include="Resource\progress_loading_yellow.png" />
     <Image Include="Resource\redo_arrow.png" />
     <Image Include="Resource\support_setting.png" />
     <Image Include="Resource\toast_check.png" />
+    <Image Include="Resource\toast_exception.png" />
     <Image Include="Resource\toast_x.png" />
     <Image Include="Resource\traingle_up_1.5.png" />
     <Image Include="Resource\triangle_down.png" />

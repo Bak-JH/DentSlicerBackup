@@ -6,11 +6,12 @@ import QtGraphicalEffects 1.12
 
 Hix.ToastShell {
 	id: root
-	width: 500
-	height: 60
+	width: 520
+	height: 72
 	
 	property string msgTypeImgSource: "qrc:/Resource/toast_check.png"
 	property string msgTypeColor: "#00b9c8"
+	property string textColor: "#008f9b"
 
 	Rectangle{
 		id: shell
@@ -37,21 +38,34 @@ Hix.ToastShell {
 		}
 		Text {
 			text: root.message
+			color: textColor
 			anchors.verticalCenter: parent.verticalCenter
 			anchors.left: msgtype.right
 			anchors.leftMargin: msgtype.width / 4
 			font.family: openRegular.name
+			font.pointSize: 10
 		}
+		/*
 		Hix.CloseButton {
 			width: 16
 			height: 16
+			color: "transparent"
 			anchors.verticalCenter: parent.verticalCenter
 			anchors.right: parent.right
 			anchors.rightMargin: (root.height - height) / 2
 			Image {
+				id: closeimg
 				source: "qrc:/Resource/closebutton.png"
-				anchors.fill: parent
+				anchors.verticalCenter: parent.verticalCenter
+				anchors.horizontalCenter: parent.horizontalCenter
 			}
+			onEntered: { closeimg.source = "qrc:/Resource/closebutton_hover.png" }
+			onExited: { closeimg.source = "qrc:/Resource/closebutton.png" }
+		}
+		*/
+		MouseArea {
+			anchors.fill: shell
+			onClicked: { messageType < 3 || messageType <= 0? messageType++ : messageType--; }
 		}
 	}
 	DropShadow {
@@ -68,16 +82,22 @@ Hix.ToastShell {
 		{
 			msgTypeImgSource = "qrc:/Resource/toast_check.png"
 			msgTypeColor = "#00b9c8"
+			textColor = "#008f9b"
+			shell.color = "#f6feff"
 		}
 		else if (messageType == Hix.ToastShell.ExpectedError)
 		{
-			msgTypeImgSource = "qrc:/Resource/closebutton.png"
-			msgTypeColor = "#FFF000"
+			msgTypeImgSource = "qrc:/Resource/toast_x.png"
+			msgTypeColor = "#ee5065"
+			textColor = "#e64358"
+			shell.color = "#fff6f7"
 		}
 		else if (messageType == Hix.ToastShell.UnExpectedError)
 		{
-			msgTypeImgSource = "qrc:/Resource/closebutton.png"
-			msgTypeColor = "#FFF000"
+			msgTypeImgSource = "qrc:/Resource/toast_exception.png"
+			msgTypeColor = "#ffa545"
+			textColor = "#f1820b"
+			shell.color = "#fff9f4"
 		}
 	}
 }

@@ -120,6 +120,7 @@
     <ClCompile Include="Mesh\RayCaster.cpp" />
     <ClCompile Include="Qml\components\Buttons.cpp" />
     <ClCompile Include="Qml\components\Inputs.cpp" />
+    <ClCompile Include="Qml\components\PopupShell.cpp" />
     <ClCompile Include="render\CircleMeshEntity.cpp" />
     <ClCompile Include="Qml\components\PrintInfo.cpp" />
     <ClCompile Include="Qml\components\SlideBar.cpp" />
@@ -169,9 +170,6 @@
     <ClCompile Include="feature\stlexporter.cpp" />
     <ClCompile Include="DentEngine\src\svgexporter.cpp" />
     <ClCompile Include="utils\updatechecker.cpp" />
-    <ClCompile Include="Qml\components\PopupShell.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="common\Debug.h" />
@@ -746,6 +744,7 @@
     <ClInclude Include="support\SupportRaftManager.h" />
     <ClInclude Include="feature\scale.h" />
     <ClInclude Include="widget\Widget.h" />
+    <ClInclude Include="render\Color.h" />
     <ClInclude Include="unitTest\catch.hpp" />
     <ClInclude Include="unitTest\RandomGen.h" />
     <ClInclude Include="unitTest\tests\BVHTest.h" />
@@ -773,7 +772,6 @@
     <ClInclude Include="DentEngine\src\polyclipping\poly2tri\common\utils.h" />
     <ClInclude Include="utils\utils.h" />
     <ClInclude Include="utils\winsparkle\winsparkle.h" />
-    <ClInclude Include="render\Color.h" />
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="debug\moc_predefs.h.cbt" />
@@ -790,6 +788,8 @@
     <Image Include="Resource\btn_modelbuild_help.png" />
     <Image Include="Resource\btn_setting.png" />
     <Image Include="Resource\btn_setting_refresh.png" />
+    <Image Include="Resource\btn_setting_refresh_1.5.png" />
+    <Image Include="Resource\btn_setting_refresh_big.png" />
     <Image Include="Resource\cam.png" />
     <Image Include="Resource\cam_back_1.5.png" />
     <Image Include="Resource\cam_bottom_1.5.png" />
@@ -857,9 +857,11 @@
     <Image Include="Resource\part_show_select_1.png" />
     <Image Include="Resource\progress_check.png" />
     <Image Include="Resource\progress_loading.png" />
+    <Image Include="Resource\progress_loading_yellow.png" />
     <Image Include="Resource\redo_arrow.png" />
     <Image Include="Resource\support_setting.png" />
     <Image Include="Resource\toast_check.png" />
+    <Image Include="Resource\toast_exception.png" />
     <Image Include="Resource\toast_x.png" />
     <Image Include="Resource\traingle_up_1.5.png" />
     <Image Include="Resource\triangle_down.png" />
@@ -883,6 +885,7 @@
     <QtMoc Include="render\PlaneMeshEntity.h" />
     <QtMoc Include="Qml\components\Buttons.h" />
     <QtMoc Include="Qml\components\Inputs.h" />
+    <QtMoc Include="Qml\components\PopupShell.h" />
     <QtMoc Include="Qml\components\Toast.h" />
     <QtMoc Include="Qml\components\SlideBar.h" />
     <QtMoc Include="Qml\components\ViewMode.h" />
@@ -897,9 +900,6 @@
     <QtMoc Include="qmlmanager.h" />
     <QtMoc Include="utils\quaternionhelper.h" />
     <QtMoc Include="utils\updatechecker.h" />
-    <QtMoc Include="Qml\components\PopupShell.h">
-      <Filter>Header Files</Filter>
-    </QtMoc>
   </ItemGroup>
   <ItemGroup>
     <QtRcc Include="qml.qrc" />
@@ -916,14 +916,37 @@
     <Font Include="Resource\font\OpenSans-SemiBold.ttf" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="cpp.hint" />
     <None Include="packages.config" />
+    <None Include="Qml\Controls\CtrToggleSwitch.qml" />
+    <None Include="Qml\FeatureMenu.qml" />
     <None Include="Qml\Cam.qml" />
     <None Include="Qml\CamBox.qml" />
     <None Include="Qml\CameraController.qml" />
     <None Include="Qml\CameraManager.qml" />
     <None Include="Qml\CanvasTest.qml" />
+    <None Include="Qml\Controls\CtrCutSwitch.qml" />
+    <None Include="Qml\Controls\CtrDropdownBox.qml" />
+    <None Include="Qml\Controls\CtrSpinBox.qml" />
+    <None Include="Qml\Controls\CtrTextBox.qml" />
+    <None Include="Qml\Controls\CtrScaleInputBox.qml" />
+    <None Include="Qml\FeaturePopup\SidePopup.qml" />
     <None Include="Qml\FileDialogLoad.qml" />
     <None Include="Qml\InputBox.qml" />
+    <None Include="Qml\FeaturePopup\FeaturePopup.qml" />
+    <None Include="Qml\FeaturePopup\PopupArrange.qml" />
+    <None Include="Qml\FeaturePopup\PopupCut.qml" />
+    <None Include="Qml\FeaturePopup\PopupExport.qml" />
+    <None Include="Qml\FeaturePopup\PopupExtend.qml" />
+    <None Include="Qml\FeaturePopup\PopupLabel.qml" />
+    <None Include="Qml\FeaturePopup\PopupLayFlat.qml" />
+    <None Include="Qml\FeaturePopup\PopupModelBuild.qml" />
+    <None Include="Qml\FeaturePopup\PopupMove.qml" />
+    <None Include="Qml\FeaturePopup\PopupOrient.qml" />
+    <None Include="Qml\FeaturePopup\PopupRotate.qml" />
+    <None Include="Qml\FeaturePopup\PopupScale.qml" />
+    <None Include="Qml\FeaturePopup\PopupShellOffset.qml" />
+    <None Include="Qml\FeaturePopup\PopupSupport.qml" />
     <None Include="Qml\LeftTabExport.qml" />
     <None Include="Qml\LeftTabExportElement.qml" />
     <None Include="Qml\LeftTabSlicingOption.qml" />
@@ -942,12 +965,18 @@
     <None Include="Qml\MeshTransformerTab.qml" />
     <None Include="Qml\MeshTransformerZoom.qml" />
     <None Include="Qml\ModalWindow.qml" />
+    <None Include="Qml\ModalWindowButton.qml" />
     <None Include="Qml\Model.qml" />
+    <None Include="Qml\RangedSlider.qml" />
     <None Include="Qml\Plane.qml" />
     <None Include="Qml\PartList.qml" />
     <None Include="Qml\PrintInfo.qml" />
     <None Include="Qml\PrintSetting.qml" />
     <None Include="Qml\PrintSettingPopup.qml" />
+    <None Include="Qml\ProgressPopup.qml" />
+    <None Include="Qml\ProgressException.qml" />
+    <None Include="Qml\ProgressRevised.qml" />
+    <None Include="Qml\ProgressShell.qml" />
     <None Include="Qml\SlideBar.qml" />
     <None Include="Qml\Toast.qml" />
     <None Include="Qml\UndoRedo.qml" />
@@ -1106,43 +1135,5 @@
     <None Include="resource\zoom_down.png" />
     <None Include="resource\zoom_up.png" />
     <None Include="icon.ico" />
-    <None Include="Qml\Controls\CtrCutSwitch.qml" />
-    <None Include="Qml\Controls\CtrDropdownBox.qml" />
-    <None Include="Qml\Controls\CtrScaleInputBox.qml" />
-    <None Include="Qml\Controls\CtrSpinBox.qml" />
-    <None Include="Qml\Controls\CtrTextBox.qml" />
-    <None Include="Qml\Controls\CtrToggleSwitch.qml" />
-    <None Include="Qml\FeatureMenu.qml" />
-    <None Include="Qml\ProgressPopup.qml" />
-    <None Include="Qml\FeaturePopup\SidePopup.qml" />
-    <None Include="cpp.hint" />
-    <None Include="Qml\RangedSlider.qml" />
-    <None Include="Qml\FeaturePopup\FeaturePopup.qml" />
-    <None Include="Qml\FeaturePopup\PopupArrange.qml" />
-    <None Include="Qml\FeaturePopup\PopupSupport.qml" />
-    <None Include="Qml\FeaturePopup\PopupShellOffset.qml" />
-    <None Include="Qml\FeaturePopup\PopupScale.qml" />
-    <None Include="Qml\FeaturePopup\PopupCut.qml" />
-    <None Include="Qml\FeaturePopup\PopupExport.qml" />
-    <None Include="Qml\FeaturePopup\PopupExtend.qml" />
-    <None Include="Qml\FeaturePopup\PopupLabel.qml" />
-    <None Include="Qml\FeaturePopup\PopupModelBuild.qml" />
-    <None Include="Qml\FeaturePopup\PopupLayFlat.qml" />
-    <None Include="Qml\FeaturePopup\PopupMove.qml" />
-    <None Include="Qml\FeaturePopup\PopupOrient.qml" />
-    <None Include="Qml\FeaturePopup\PopupRotate.qml" />
-    <None Include="Qml\ModalWindowButton.qml" />
-  </ItemGroup>
-  <ItemGroup>
-    <Filter Include="Header Files">
-      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
-      <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
-      <ParseFiles>true</ParseFiles>
-    </Filter>
-    <Filter Include="Source Files">
-      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
-      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
-      <ParseFiles>true</ParseFiles>
-    </Filter>
   </ItemGroup>
 </Project>
