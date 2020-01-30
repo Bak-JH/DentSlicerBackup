@@ -55,6 +55,7 @@ Hix.ViewModeShell {
 		id: viewmodepopup
 		width: 184
 		height: 88
+		popupColor: "#FFFFFF"
 
 		Hix.Button {
 			id: objectviewbutton

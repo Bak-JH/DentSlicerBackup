@@ -392,8 +392,6 @@ Item{
 		ModalWindow
 		{
 			id: modalWindow
-			enabled: false
-			visible: false
 			Component.onCompleted: {
 				modalWindow.setButtons([["Apply", "#00b9c8", "#21959e"], ["Cancel", "#abb3b3", "#8b9393"]]);
 			}
@@ -407,6 +405,8 @@ Item{
 
 			}
 			
+			enabled: false
+			visible: false
 		}
 
 		PrintSettingPopup
@@ -419,8 +419,9 @@ Item{
 			Component.onCompleted: {
 				printsettingpopup.setButtons([["Apply", "#00b9c8", "#21959e"], ["Cancel", "#abb3b3", "#8b9393"]]);
 			}
-			//enabled: false
-			//visible: false
+
+			enabled: false
+			visible: false
 		}
     }
 

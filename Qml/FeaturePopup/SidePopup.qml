@@ -9,6 +9,8 @@ Rectangle {
     anchors.top: parent.top
     visible: false
 
+	property string popupColor: "#f6feff"
+
     Canvas {
         id: canvas
         anchors.fill: parent
@@ -35,7 +37,7 @@ Rectangle {
 
 
             ctx.beginPath();
-            ctx.fillStyle = "#f6feff";
+            ctx.fillStyle = popupColor;
             ctx.moveTo(startX, startY-windowRadius);
             ctx.arc(startX, startY, windowRadius, Math.PI * 1.5, Math.PI * 2, false);
             ctx.lineTo(startX+windowRadius, startY+h);

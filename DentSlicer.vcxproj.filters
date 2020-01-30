@@ -924,7 +924,6 @@
     <None Include="Qml\CamBox.qml" />
     <None Include="Qml\CameraController.qml" />
     <None Include="Qml\CameraManager.qml" />
-    <None Include="Qml\CanvasTest.qml" />
     <None Include="Qml\Controls\CtrCutSwitch.qml" />
     <None Include="Qml\Controls\CtrDropdownBox.qml" />
     <None Include="Qml\Controls\CtrSpinBox.qml" />

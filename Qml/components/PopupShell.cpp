@@ -13,7 +13,7 @@ Hix::QML::FeaturePopupShell::~FeaturePopupShell()
 
 
 
-Hix::QML::ProgressPopupShell::ProgressPopupShell(QQuickItem* parent) : QQuickRectangle(parent)
+Hix::QML::ProgressPopupShell::ProgressPopupShell(QQuickItem* parent) : QQuickItem(parent)
 {
 }
 
@@ -35,6 +35,12 @@ void Hix::QML::ProgressPopupShell::appendFeatureList(QStringList featureList)
 	}
 }
 
+void Hix::QML::ProgressPopupShell::setPercentage(int percent)
+{
+	_percent = percent;
+	emit percentChanged();
+}
+
 
 
 Hix::QML::ModalShell::ModalShell(QQuickItem* parent) : QQuickItem(parent)
@@ -43,6 +49,12 @@ Hix::QML::ModalShell::ModalShell(QQuickItem* parent) : QQuickItem(parent)
 
 Hix::QML::ModalShell::~ModalShell()
 {
+}
+
+void Hix::QML::ModalShell::setMessage(std::string message)
+{
+	_modalmsg = QString::fromStdString(message);
+	emit modalmsgChanged();
 }
 
 
