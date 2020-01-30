@@ -7,7 +7,7 @@
 constexpr float ZMARGIN = 5;
 
 
-Hix::Features::ExportMode::ExportMode()
+Hix::Features::SliceExportMode::SliceExportMode()
 {
 	auto fileUrl = QFileDialog::getSaveFileUrl(nullptr, "Export sliced file", QUrl());
 	auto path = fileUrl.path();
@@ -21,7 +21,7 @@ Hix::Features::ExportMode::ExportMode()
 
 }
 
-Hix::Features::ExportMode::~ExportMode()
+Hix::Features::SliceExportMode::~SliceExportMode()
 {
 }
 

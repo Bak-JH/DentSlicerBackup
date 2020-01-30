@@ -1,12 +1,12 @@
-#ifndef AUTOORIENTATION_H
-#define AUTOORIENTATION_H
+#pragma once
 #include "QMatrix4x4"
 #include <math.h>
 #include <algorithm>
 #include <map>
 #include <string>
 #include <QTime>
-
+#include "interfaces/Feature.h"
+#include "interfaces/Mode.h"
 namespace Hix
 {
 	namespace Engine3D
@@ -38,6 +38,22 @@ public:
     bool isActive=false;
 };
 
+
+namespace Hix
+{
+
+	namespace Features
+	{
+		class AutoOrientateMode : public Hix::Features::Mode
+		{
+		public:
+			AutoOrientateMode();
+			virtual ~AutoOrientateMode();
+		private:
+		};
+	}
+}
+
 namespace autoorientation
 {
 
@@ -46,4 +62,3 @@ namespace autoorientation
 
 
 };
-#endif // AUTOORIENTATION_H

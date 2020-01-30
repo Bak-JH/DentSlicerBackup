@@ -24,7 +24,7 @@ namespace Hix
 		public:
 			FeatureMenu(QQuickItem* parent = nullptr);
 			virtual ~FeatureMenu();
-			void addButton(MenuButtonArg& args);
+			void addButton(const MenuButtonArg& args);
 			void addDivider();
 		protected:
 			void componentComplete() override;

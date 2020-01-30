@@ -47,7 +47,7 @@ void Hix::Features::ShellOffset::runImpl()
 {
 	addFeature(new HollowMesh(_target, _offset));
 	addFeature(new ZAxialCut(_target, _zPlane, Hix::Features::Cut::KeepTop));
-	runImpl();
+	FeatureContainer::runImpl();
 }
 
 Hix::Features::HollowMesh::HollowMesh(GLModel* target, float offset) : _target(target), _offset(offset)

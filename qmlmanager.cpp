@@ -24,7 +24,6 @@
 #include "utils/utils.h"
 #include "render/lights.h"
 #include "DentEngine/src/configuration.h"
-#include "feature/stlexporter.h"
 #include "DentEngine/src/MeshIterators.h"
 #include "feature/cut/modelcut.h"
 #include "feature/label/Labelling.h"
@@ -44,6 +43,7 @@
 #include "feature/ModelBuilder/ModelBuilderMode.h"
 #include "feature/sliceExport.h"
 #include "feature/UndoRedo.h"
+#include "feature/stlexport.h"
 
 #include "render/CircleMeshEntity.h"
 #include "Qml/components/PopupShell.h"

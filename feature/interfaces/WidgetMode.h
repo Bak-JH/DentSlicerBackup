@@ -10,7 +10,7 @@ namespace Hix
 		class WidgetMode : public Mode
 		{
 		public:
-			WidgetMode(const std::unordered_set<GLModel*>& targetModels, Input::RayCastController* controller);
+			WidgetMode();
 			virtual ~WidgetMode();
 			void updatePosition();
 			virtual void featureStarted() = 0;

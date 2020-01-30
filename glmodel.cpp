@@ -8,7 +8,6 @@
 #include "qmlmanager.h"
 #include "feature/shelloffset.h"
 //#include "feature/supportview.h"
-#include "feature/stlexporter.h"
 #include "utils/utils.h"
 #include <QtConcurrent/QtConcurrent>
 #include <QFuture>
