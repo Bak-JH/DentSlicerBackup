@@ -57,16 +57,19 @@ Hix.ModalShell {
 			id: closeButton
 			width: 16
 			height: 16
-			color: transparent
+			color: "transparent"
 			anchors.top: parent.top
 			anchors.right: parent.right
 			anchors.topMargin: 16
 			anchors.rightMargin: 16
 			Image {
+				id: closeimg
 				source: "qrc:/Resource/closebutton.png"
 				anchors.top: parent.top
 				anchors.right: parent.right
 			}
+			onEntered: { closeimg.source = "qrc:/Resource/closebutton_hover.png" }
+			onExited: { closeimg.source = "qrc:/Resource/closebutton.png" }
 		}
 		
 		Item {
@@ -114,7 +117,7 @@ Hix.ModalShell {
 				width: buttonsWidth - leftbtn.width - buttonSpace
 				height: 32
 				radius: height / 2
-				color: "#00b9c8"	//themecolor
+				color: "#abb3b3"	//themecolor
 				anchors.left: leftbtn.right
 				anchors.leftMargin: buttonSpace
 
@@ -127,8 +130,8 @@ Hix.ModalShell {
 					font.family: openSemiBold.name
 				}
 				onClicked: { console.log(contentArea.height); root.setButtons([["Apply", "#00b9c8", "#21959e"], ["Cancel", "#abb3b3", "#8b9393"]]); }
-				onEntered: { color = "#21959e" }
-				onExited: { color = "#00b9c8" }
+				onEntered: { color = "#8b9393" }
+				onExited: { color = "#abb3b3" }
 			}
 			*/
 		}

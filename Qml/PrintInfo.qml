@@ -5,6 +5,8 @@ import QtQuick.Controls.Styles 1.4
 import QtGraphicalEffects 1.12
 
 Item {
+	width :400
+	height: 72
 	Rectangle {
 		id: printinfo
 		width :400

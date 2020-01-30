@@ -81,5 +81,6 @@
         <file>Qml/FeaturePopup/PopupSupport.qml</file>
         <file>Qml/CoordinateMesh.qml</file>
         <file>Qml/ModalWindowButton.qml</file>
+        <file>Qml/ProgressException.qml</file>
     </qresource>
 </RCC>

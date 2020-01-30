@@ -16,7 +16,7 @@ Hix.PartList {
 		else showhideimg.source = "qrc:/Resource/part_show_1.png"
 	}
 
-	ListModel {		// ¸®½ºÆ®ºä¿¡ ´ãÀ» µ¥ÀÌÅÍµéÀ» ¼±¾ð.
+	ListModel {		// ï¿½ï¿½ï¿½ï¿½Æ®ï¿½ä¿¡ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Íµï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½.
 		id:model
 		objectName: "modelList"
 		function appendModel(modelName, modelPointer)
@@ -50,7 +50,7 @@ Hix.PartList {
 			anchors.leftMargin: myPadding
 		}
 	
-		Component { // ¸®½ºÆ® ºäÀÇ Æ²À» ¸¸µç´Ù.
+		Component { // ï¿½ï¿½ï¿½ï¿½Æ® ï¿½ï¿½ï¿½ï¿½ Æ²ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½.
 			id: contactDelegate
 			Item {
 				width: 224; height: 28
@@ -111,8 +111,8 @@ Hix.PartList {
 				clip: true
 				width: 240;
 				height: 212;
-				model: model	// ¼±¾ðµÈ µ¥ÀÌÅÍµéÀ» ¸®½ºÆ®ºä¿¡ ³Ö´Â´Ù.
-				delegate: contactDelegate	// delegate: ¸®½ºÆ® ÇÑ°³ÀÇ Æ²
+				model: model	// ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Íµï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½Æ®ï¿½ä¿¡ ï¿½Ö´Â´ï¿½.
+				delegate: contactDelegate	// delegate: ï¿½ï¿½ï¿½ï¿½Æ® ï¿½Ñ°ï¿½ï¿½ï¿½ Æ²
 				//highlight: Rectangle { color: "lightsteelblue"; radius: 2 }
 				focus: true
 

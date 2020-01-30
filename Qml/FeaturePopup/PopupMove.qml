@@ -1,12 +1,12 @@
 import QtQuick 2.6
-import hix.qml 1.0
+import hix.qml 1.0 as Hix
 import QtGraphicalEffects 1.12
 import QtQuick.Controls 2.1
 import "../Controls"
 
 FeaturePopup {
 	title: qsTr("Move")
-	height: 268
+	height: 320
 
 	CtrSpinBox {
 		id: moveX
@@ -42,5 +42,33 @@ FeaturePopup {
 		anchors.leftMargin: 16
 		anchors.top: moveY.bottom
 		anchors.topMargin: 56
+	}
+
+	Hix.Button {
+		id: snapButton
+		width: 224
+		height: 32
+		radius: 16
+		color: "transparent"
+		border.color: "#b2c4c6"
+
+		anchors.bottom: parent.bottom
+		anchors.bottomMargin: 64
+		anchors.horizontalCenter: parent.horizontalCenter
+
+		Text 
+		{
+			color: "#859597"
+			font.pointSize: 10
+			text: "Snap to ground"
+			font.family: openSemiBold.name
+				
+			anchors.horizontalCenter: snapButton.horizontalCenter
+			anchors.verticalCenter: snapButton.verticalCenter
+		}
+
+		onClicked: { console.log("clicked"); }
+		onEntered: { color = "#dde5e6" }
+		onExited: { color = "transparent" }
 	}
 }

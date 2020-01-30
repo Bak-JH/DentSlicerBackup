@@ -127,7 +127,7 @@ ModalWindow {
 
 		Hix.Button {
 			id: refreshbtn
-			width: 24
+			width: 26
 			height: width
 			radius: width / 2
 			color: "#ffffff"
@@ -139,6 +139,8 @@ ModalWindow {
 			anchors.leftMargin: 8
 			Image {
 				source: "qrc:/Resource/btn_setting_refresh.png"
+				//sourceSize.width: 18 * 1.2
+				//sourceSize.height: 16 * 1.2
 				anchors.horizontalCenter: parent.horizontalCenter
 				anchors.verticalCenter: parent.verticalCenter
 			}
