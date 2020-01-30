@@ -61,32 +61,21 @@ Hix::QML::ToggleSwitch::~ToggleSwitch()
 {
 }
 
-bool Hix::QML::ToggleSwitch::isChecked() const
+void Hix::QML::ToggleSwitch::initialize(QVariant leftVal, QVariant rightVal)
 {
-	return _isChecked;
 }
+
+QVariant Hix::QML::ToggleSwitch::value() const
+{
+	if (_isLeft)
+		return _leftVal;
+	else
+		return _rightVal;
+}
+
 
 void Hix::QML::ToggleSwitch::onClicked()
 {
-	_isChecked = _isChecked ? false : true;
 	Button::onClicked();
 }
 
-/// Image Toggle Switch ///
-Hix::QML::ImageToggleSwitch::ImageToggleSwitch(QQuickItem* parent) : QQuickItem(parent)
-{
-}
-
-Hix::QML::ImageToggleSwitch::~ImageToggleSwitch()
-{
-}
-
-bool Hix::QML::ImageToggleSwitch::isChecked() const
-{
-	return _isChecked;
-}
-
-Q_INVOKABLE void Hix::QML::ImageToggleSwitch::setChecked(bool isChecked)
-{
-	_isChecked = isChecked;
-}

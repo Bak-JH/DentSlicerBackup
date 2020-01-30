@@ -27,7 +27,7 @@ void Hix::Features::RotateMode::featureStarted()
 void Hix::Features::RotateMode::featureEnded()
 {
 	if (!_rotateContainer->empty())
-		qmlManager->featureHistoryManager().addFeature(_rotateContainer);
+		qmlManager->taskManager().enqueTask(_rotateContainer);
 	for (auto& each : _targetModels)
 	{
 		each->rotateDone();
@@ -45,19 +45,11 @@ Hix::Features::FeatureContainerFlushSupport* Hix::Features::RotateMode::applyRot
 }
 
 Hix::Features::Rotate::Rotate(GLModel* target) : _model(target)
-{
-	_prevMatrix = target->transform().matrix();
-	_prevAabb = target->aabb();
-}
+{}
 
-Hix::Features::Rotate::Rotate(GLModel* target, const QQuaternion& rot) : _model(target)
+Hix::Features::Rotate::Rotate(GLModel* target, const QQuaternion& rot) : _model(target), _rot(rot)
 {
-	_prevMatrix = target->transform().matrix();
-	_prevAabb = target->aabb();
-	target->rotateModel(rot);
 
-	if (qmlManager->isActive<Hix::Features::WidgetMode>())
-		qmlManager->cameraViewChanged();
 }
 
 Hix::Features::Rotate::~Rotate()
@@ -83,6 +75,18 @@ void Hix::Features::Rotate::redoImpl()
 	_model->aabb() = _nextAabb;
 	qmlManager->cameraViewChanged();
 	_model->updateMesh();
+}
+
+void Hix::Features::Rotate::runImpl()
+{
+	_prevMatrix = _model->transform().matrix();
+	_prevAabb = _model->aabb();
+	if (_rot)
+	{
+		_model->rotateModel(_rot.value());
+		if (qmlManager->isActive<Hix::Features::WidgetMode>())
+			qmlManager->cameraViewChanged();
+	}
 }
 
 const GLModel* Hix::Features::Rotate::model() const

@@ -68,31 +68,36 @@ std::vector<QVector3D> Hix::Support::SupportRaftManager::getSupportBasePts() con
 
 SupportModel* Hix::Support::SupportRaftManager::addSupport(const OverhangDetect::Overhang& overhang)
 {
+	SupportModel* newModel = nullptr;
 	switch (_supportType)
 	{
 	case SlicingConfiguration::SupportType::None:
-		return nullptr;
 		break;
 	case SlicingConfiguration::SupportType::Vertical:
 	{
-		auto newModel = dynamic_cast<SupportModel*>(new VerticalSupportModel(this, overhang));
+		newModel = dynamic_cast<SupportModel*>(new VerticalSupportModel(this, overhang));
 		_supports.insert(std::make_pair(newModel, std::unique_ptr<SupportModel>(newModel)));
-		//since addition only happens in edit mode
-
-		return newModel;
 	}
 	break;
 	default:
-		return nullptr;
 		break;
 	}
+	if (newModel)
+	{
+		newModel->setEnabled(true);
+		if (supportEditMode() == Support::EditMode::Manual)
+			newModel->setHitTestable(true);
+	}
+	return newModel;
 }
 
 SupportModel* Hix::Support::SupportRaftManager::addSupport(std::unique_ptr<SupportModel> target)
 {
-	auto temp = target.get();
-	_supports.insert(std::make_pair(temp,std::move(target)));
-	return temp;
+	auto key = target.get();
+	_supports.insert(std::make_pair(key,std::move(target)));
+	key->setEnabled(true);
+	key->setHitTestable(true);
+	return key;
 }
 
 std::unique_ptr<SupportModel> Hix::Support::SupportRaftManager::removeSupport(SupportModel* e)
@@ -116,18 +121,17 @@ RaftModel* Hix::Support::SupportRaftManager::generateRaft()
 	return _raft.get();
 } 
 
-RaftModel* Hix::Support::SupportRaftManager::addRaft(RaftModel* raft)
+RaftModel* Hix::Support::SupportRaftManager::addRaft(std::unique_ptr<RaftModel> raft)
 {
-	_raft.reset(raft);
+	_raft = std::move(raft);
+	_raft->setParent(&rootEntity());
 	return _raft.get();
 }
 
-RaftModel* Hix::Support::SupportRaftManager::removeRaft()
+std::unique_ptr<RaftModel> Hix::Support::SupportRaftManager::removeRaft()
 {
-	auto copy = _raft.release();
-	copy->setParent((QNode*)nullptr);
-	_raft.reset();
-	return copy;
+	_raft->setParent((QNode*)nullptr);
+	return std::move(_raft);
 }
 
 Hix::OverhangDetect::Overhangs Hix::Support::SupportRaftManager::detectOverhang(const GLModel& listed)

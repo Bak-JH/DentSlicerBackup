@@ -64,8 +64,7 @@ void Hix::Features::ModelCut::applyCut()
 	{
 		for (auto each : _models)
 		{
-			qmlManager->featureHistoryManager().
-				addFeature(new ZAxialCut(each, _cuttingPlane.transform().translation().z()));
+			qmlManager->taskManager().enqueTask(new ZAxialCut(each, _cuttingPlane.transform().translation().z(), Hix::Features::Cut::KeepBoth));
 		}
 		break;
 	}
@@ -73,8 +72,7 @@ void Hix::Features::ModelCut::applyCut()
 	{
 		for (auto each : _models)
 		{
-			qmlManager->featureHistoryManager().
-				addFeature(new PolylineCut(each, _cuttingPlane.contour()));
+			qmlManager->taskManager().enqueTask(new PolylineCut(each, _cuttingPlane.contour()));
 		}
 		break;
 	}

@@ -1,8 +1,8 @@
 #pragma once
 #include <QtQuick/private/qquickrectangle_p.h>
 #include <QtQuick/private/qquicktext_p.h>
-#include "Buttons.h"
-#include "Inputs.h"
+#include "ControlOwner.h"
+
 #include "QtQml/private/qqmllistmodel_p.h"
 #include <string>
 #include "glmodel.h"
@@ -11,10 +11,10 @@ namespace Hix
 {
 	namespace QML
 	{
-		class CloseButton;
-		class RoundButton;
 
-		class FeaturePopupShell : public QQuickItem
+		class ModeFactory;
+
+		class FeaturePopupShell : public QQuickItem, public ControlOwner
 		{
 			Q_OBJECT
 			Q_PROPERTY(QString title MEMBER _title)
@@ -23,8 +23,19 @@ namespace Hix
 			FeaturePopupShell(QQuickItem* parent = nullptr);
 			virtual ~FeaturePopupShell();
 
+			template<typename CtrlType, typename... InitArgs>
+			CtrlType* findAndInitControl(std::string ctrlID, InitArgs ...)
+			{
+				CtrlType* control = blablabal();
+				control->initialize(InitArgs ...);
+			}
+
+		protected:
+			QQuickItem* getQItem()override;
+
 		private:
 			QString _title = "Name";
+			//std::unique_ptr<ModeFactory> _modeFactory;
 		};
 
 		class ProgressPopupShell : public QQuickItem

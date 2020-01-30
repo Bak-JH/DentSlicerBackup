@@ -98,31 +98,9 @@ Hix::Features::FeatureContainerFlushSupport* Hix::Features::ExtendMode::applyExt
 
 Hix::Features::Extend::Extend(GLModel* targetModel, const QVector3D& targetFaceNormal,
 								const std::unordered_set<FaceConstItr>& targetFaces, double distance)
-	: _model(targetModel), _normal(targetFaceNormal), _extensionFaces(targetFaces)
+	: _model(targetModel), _normal(targetFaceNormal), _extensionFaces(targetFaces), _distance(distance)
 {
 
-	_prevMesh = new Mesh(*_model->getMeshModd());
-	_model->unselectMeshFaces();
-	std::deque<HalfEdgeConstItr> path;
-	try
-	{
-		path = boundaryPath(_extensionFaces);
-	}
-	catch (...)
-	{
-		return;
-	}
-	extendAlongOutline(_model->getMeshModd(), _normal, distance, path);
-	coverCap(_model, _normal, _extensionFaces, distance);
-
-	_model->getMeshModd()->removeFaces(_extensionFaces);
-	_model->unselectMeshFaces();
-	_model->updateMesh();
-
-	_nextMesh = _model->getMeshModd();
-
-	_model->setZToBed();
-	_extensionFaces.clear();
 }
 
 Hix::Features::Extend::~Extend()
@@ -150,6 +128,25 @@ void Hix::Features::Extend::redoImpl()
 	_model->unselectMeshFaces();
 	_model->updateMesh(true);
 	_model->setZToBed();
+}
+
+void Hix::Features::Extend::runImpl()
+{
+	_prevMesh = new Mesh(*_model->getMeshModd());
+	_model->unselectMeshFaces();
+	std::deque<HalfEdgeConstItr> path;
+	path = boundaryPath(_extensionFaces);
+	extendAlongOutline(_model->getMeshModd(), _normal, _distance, path);
+	coverCap(_model, _normal, _extensionFaces, _distance);
+
+	_model->getMeshModd()->removeFaces(_extensionFaces);
+	_model->unselectMeshFaces();
+	_model->updateMesh();
+
+	_nextMesh = _model->getMeshModd();
+
+	_model->setZToBed();
+	_extensionFaces.clear();
 }
 
 void Hix::Features::Extend::coverCap(GLModel* model, QVector3D normal,const std::unordered_set<FaceConstItr>& extension_faces, double distance){

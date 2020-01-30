@@ -41,8 +41,8 @@ namespace Hix
 			bool supportsEmpty();
 
 			RaftModel* generateRaft();
-			RaftModel* removeRaft();
-			RaftModel* addRaft(RaftModel* raft);
+			std::unique_ptr<RaftModel> removeRaft();
+			RaftModel* addRaft(std::unique_ptr<RaftModel> raft);
 			OverhangDetect::Overhangs detectOverhang(const GLModel& model);
 			//removed due to efficiency when deleting multiple
 			std::vector<std::reference_wrapper<const Hix::Render::SceneEntity>> supportModels()const;

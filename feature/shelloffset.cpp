@@ -35,43 +35,50 @@ Hix::Features::Feature* Hix::Features::ShellOffsetMode::doOffset(float offset)
 
 
 
-Hix::Features::ShellOffset::ShellOffset(GLModel* target, float offset, float zPlane) : _prevMesh(target->getMeshModd())
-{
-	_container = new FeatureContainer();
-	Mesh offsetMesh(*target->getMeshModd());
-
-	qDebug() << "copy, offset, reverse, add";
-	qmlManager->setProgress(0.42);
-	offsetMesh.vertexOffset(-offset);
-	offsetMesh.reverseFaces();
-
-	// 승환 60%
-	qmlManager->setProgress(0.54);
-	target->getMeshModd()->operator+=(offsetMesh);
-
-	qDebug() << "cut and fill hole";
-
-	qmlManager->setProgress(0.70);
-	// 승환 100%
-	qmlManager->setProgress(1);
-	auto cut = new ZAxialCut(target, zPlane);
-	_container->addFeature(cut);
-
-	for (auto& each : cut->lowerModels())
-		_container->addFeature(new DeleteModel(each));
-
-}
+Hix::Features::ShellOffset::ShellOffset(GLModel* target, float offset, float zPlane) : _target(target), _offset(offset), _zPlane(zPlane)
+{}
 
 Hix::Features::ShellOffset::~ShellOffset()
 {
 }
 
-void Hix::Features::ShellOffset::undoImpl()
+
+void Hix::Features::ShellOffset::runImpl()
 {
-	_container->undo();
+	addFeature(new HollowMesh(_target, _offset));
+	addFeature(new ZAxialCut(_target, _zPlane, Hix::Features::Cut::KeepTop));
+	runImpl();
 }
 
-void Hix::Features::ShellOffset::redoImpl()
+Hix::Features::HollowMesh::HollowMesh(GLModel* target, float offset) : _target(target), _offset(offset)
+{}
+
+Hix::Features::HollowMesh::~HollowMesh()
 {
-	_container->redo();
+}
+
+void Hix::Features::HollowMesh::undoImpl()
+{
+	auto tmp = _target->getMeshModd();
+	_target->setMesh(_prevMesh.release());
+	_prevMesh.reset(tmp);
+}
+
+void Hix::Features::HollowMesh::redoImpl()
+{
+	auto tmp = _target->getMeshModd();
+	_target->setMesh(_prevMesh.release());
+	_prevMesh.reset(tmp);
+}
+
+void Hix::Features::HollowMesh::runImpl()
+{
+	_prevMesh.reset(_target->getMeshModd());
+	auto hollowMesh = new Mesh(*_prevMesh.get());
+	Mesh offsetMesh(*_target->getMeshModd());
+	offsetMesh.vertexOffset(-_offset);
+	offsetMesh.reverseFaces();
+	*hollowMesh += offsetMesh;
+	_target->setMesh(hollowMesh);
+
 }

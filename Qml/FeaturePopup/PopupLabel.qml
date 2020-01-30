@@ -68,6 +68,14 @@ FeaturePopup {
 	
 	CtrToggleSwitch {
 		id: toggleSwitch
+		leftText
+		{
+			text: "Emboss"
+		}
+		rightText
+		{
+			text: "Engrave"
+		}
 		width: parent.width / 2
 		anchors.top: labelheight.bottom
 		anchors.topMargin: 16

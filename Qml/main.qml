@@ -19,7 +19,6 @@ Item{
         visible: false
 
         objectName: "mainWindow"
-        property alias lefttabExport: lefttabExport
         property alias mttab : mttab
 
         property alias mainFont : mainFont
@@ -34,65 +33,62 @@ Item{
 		FontLoader{ id: openRegular; source: "qrc:/Resource/font/OpenSans-Regular.ttf" }
 		FontLoader{ id: openSemiBold; source: "qrc:/Resource/font/OpenSans-SemiBold.ttf" }
 		FontLoader{ id: openBold; source: "qrc:/Resource/font/OpenSans-Bold.ttf" }
-
-        DropArea {
-            id: drop
-            anchors.fill: parent
-            property var dragList : []
-
-            onEntered: {
-                console.log("[Droparea] entered");
-                for(var i = 0; i < drag.urls.length; i++)
-                    dragList.push(drag.urls[i])
-            }
-
-            onExited: {
-                dragList = []
-                console.log("[Droparea] exited")
-            }
-
-            onDropped: {
-                console.log("[Droparea] dropped")
-                for(var i = 0; i < dragList.length; i++)
-                    validateFileExtension(dragList[i])
-
-                dragList = []
-            }
-
-            // Only STLs
-            function validateFileExtension(filePath) {
-                console.log(filePath)
-                var filepath = filePath.toString().replace(/^(file:\/{3})/,"")
-                console.log("opening" + filepath)
-
-                if(filePath.split('.').pop().toLowerCase() === "stl") {
-                    qm.openModelFile(filepath)
-                    return filePath.split('.').pop().toLowerCase() === "stl"
-                }
-                else if(filePath.split('.').pop().toLowerCase() === "obj") {
-                    qm.openModelFile(filepath)
-                    return filePath.split('.').pop().toLowerCase() === "obj"
-                }
-
-            }
-        }
-
+		
         Rectangle{
-            id : back
-            anchors.top : featureMenu.bottom
-            anchors.left : partlist.right
-            anchors.right : parent.right
-            anchors.bottom : parent.bottom
+            id: mainItem
             color: "#E5E5E5"
+            anchors.top : window.top
+            anchors.left : window.left
+            anchors.right : window.right
+            anchors.bottom : window.bottom
+            DropArea {
+                id: drop
+                anchors.fill: parent
+                property var dragList : []
 
+                onEntered: {
+                    console.log("[Droparea] entered");
+                    for(var i = 0; i < drag.urls.length; i++)
+                        dragList.push(drag.urls[i])
+                }
+
+                onExited: {
+                    dragList = []
+                    console.log("[Droparea] exited")
+                }
+
+                onDropped: {
+                    console.log("[Droparea] dropped")
+                    for(var i = 0; i < dragList.length; i++)
+                        validateFileExtension(dragList[i])
+
+                    dragList = []
+                }
+
+                // Only STLs
+                function validateFileExtension(filePath) {
+                    console.log(filePath)
+                    var filepath = filePath.toString().replace(/^(file:\/{3})/,"")
+                    console.log("opening" + filepath)
+
+                    if(filePath.split('.').pop().toLowerCase() === "stl") {
+                        qm.openModelFile(filepath)
+                        return filePath.split('.').pop().toLowerCase() === "stl"
+                    }
+                    else if(filePath.split('.').pop().toLowerCase() === "obj") {
+                        qm.openModelFile(filepath)
+                        return filePath.split('.').pop().toLowerCase() === "obj"
+                    }
+
+                }
+            }
             Scene3D {
                 id: scene3d
                 objectName: "scene3d"
-
                 anchors.top : parent.top
                 anchors.left : parent.left
-                anchors.right : parent.right
-                anchors.bottom : parent.bottom
+                width: window.width
+                height: window.height
                 focus: true
                 hoverEnabled: true
                 aspects: ["input", "logic"]
@@ -307,80 +303,76 @@ Item{
                 else if(mouse.button == Qt.MiddleButton)
                 {
                     mode = 1;
-                }
-                prevPosition = Qt.vector2d(mouseX,mouseY);
-            }
-            onReleased:  {
-                mode = 0;
-                mttab.updatePosition()
-                qm.enableObjectPickers();
-            }
+				}
+			}
+			onReleased:  {
+				mode = 0;
+				mttab.updatePosition()
+				qm.enableObjectPickers();
+			}
 
-            onPositionChanged: {
-                if(mode != 0 && !qm.freecutActive)
-                {
-                    currPosition = Qt.vector2d(mouseX,mouseY);
-                    qm.disableObjectPickers();
+			onPositionChanged: {
+				if(mode != 0 && !qm.freecutActive)
+				{
+					currPosition = Qt.vector2d(mouseX,mouseY);
+					qm.disableObjectPickers();
 
-                    if(mode == 1){//mouse wheel drag
-                        sceneRoot.cm.camera.translateWorld(Qt.vector3d((-1)*(currPosition.x - prevPosition.x)/1000,0,0),0);
-                        sceneRoot.cm.camera.translateWorld(Qt.vector3d(0,(1)*(currPosition.y - prevPosition.y)/1000,0),0);
-                    }
-                    else
-                    {
-                        sceneRoot.systemTransform.rotationZ += rotationSpeed *(currPosition.x - prevPosition.x);
-                        sceneRoot.systemTransform.rotationX += rotationSpeed *(currPosition.y - prevPosition.y);
-                    }
-                    prevPosition = currPosition;
-                    sceneRoot.cameraViewChanged();
-
-                }
-
-
+					if(mode == 1){//mouse wheel drag
+						sceneRoot.cm.camera.translateWorld(Qt.vector3d((-1)*(currPosition.x - prevPosition.x)/1000,0,0),0);
+						sceneRoot.cm.camera.translateWorld(Qt.vector3d(0,(1)*(currPosition.y - prevPosition.y)/1000,0),0);
+					}
+					else
+					{
+						sceneRoot.systemTransform.rotationZ += rotationSpeed *(currPosition.x - prevPosition.x);
+						sceneRoot.systemTransform.rotationX += rotationSpeed *(currPosition.y - prevPosition.y);
+					}
+					prevPosition = currPosition;
+					sceneRoot.cameraViewChanged();
+				}
             }
 
-            onWheel: {
-                qm.disableObjectPickers();
-                // mouse wheel scaling: model and bed zooms, camera moves to mouse pointer direction
-                var d = wheel.angleDelta.y;
-                var scaleTmp = sceneRoot.systemTransform.scale3D;
+			onWheel: {
+				qm.disableObjectPickers();
+				// mouse wheel scaling: model and bed zooms, camera moves to mouse pointer direction
+				var d = wheel.angleDelta.y;
+				var scaleTmp = sceneRoot.systemTransform.scale3D;
 
-                var v_c = sceneRoot.cm.camera.position.plus(Qt.vector3d(0.015, 0.16, -100));
-                var v_m = {};                               // absolute position of mouse pointer
-                var v_relative = Qt.vector3d(0,0,0);        // relative position of mouse pointer based on camera
+				var v_c = sceneRoot.cm.camera.position.plus(Qt.vector3d(0.015, 0.16, -100));
+				var v_m = {};                               // absolute position of mouse pointer
+				var v_relative = Qt.vector3d(0,0,0);        // relative position of mouse pointer based on camera
 
-                v_m.x = wheel.x - partlist.width;
-                v_m.y = wheel.y - featureMenu.height;
+				v_m.x = wheel.x - partlist.width;
+				v_m.y = wheel.y - featureMenu.height;
 
-                var height3d = (window.height - featureMenu.height)
+				var height3d = (window.height - featureMenu.height)
 
-                v_relative.x = (v_m.x / scene3d.width) - 0.5;
-                v_relative.y = - ((v_m.y + ((scene3d.width - height3d)/2)) / scene3d.width) + 0.5;
+				v_relative.x = (v_m.x / scene3d.width) - 0.5;
+				v_relative.y = - ((v_m.y + ((scene3d.width - height3d)/2)) / scene3d.width) + 0.5;
 
-                v_relative.z = 0;
+				v_relative.z = 0;
 
-                if (d>0) {
-                    sceneRoot.systemTransform.scale3D = scaleTmp.times(1.08);
-                    v_c = v_c.plus(v_relative);
-                    sceneRoot.cm.camera.translateWorld(v_c.times(0.08));
+				if (d>0) {
+					sceneRoot.systemTransform.scale3D = scaleTmp.times(1.08);
+					v_c = v_c.plus(v_relative);
+					sceneRoot.cm.camera.translateWorld(v_c.times(0.08));
 
-                    mttab.updatePosition();
-                }
-                else {
-                    sceneRoot.systemTransform.scale3D = scaleTmp.times(0.92);
-                    v_c = v_c.plus(v_relative);
-                    sceneRoot.cm.camera.translateWorld(v_c.times(-0.08));
+					mttab.updatePosition();
+				}
+				else {
+					sceneRoot.systemTransform.scale3D = scaleTmp.times(0.92);
+					v_c = v_c.plus(v_relative);
+					sceneRoot.cm.camera.translateWorld(v_c.times(-0.08));
 
-                    mttab.updatePosition();
-                }
-                sceneRoot.cameraViewChanged();
-                qm.enableObjectPickers();
-            }
-        }
+					mttab.updatePosition();
+				}
+				sceneRoot.cameraViewChanged();
+				qm.enableObjectPickers();
+			}
+		}
 
-        ResultPopup{
-            id : resultPopUp
-        }
+		ResultPopup{
+			id : resultPopUp
+		}
 
 		ProgressPopup 
 		{
