@@ -28,8 +28,9 @@
     <ClCompile Include="common\GTEngine\Source\Mathematics\GteVETNonmanifoldMesh.cpp" />
     <ClCompile Include="common\GTEngine\Source\Mathematics\MSW\GteCPUQueryInstructions.cpp" />
     <ClCompile Include="common\GTEngine\Source\Mathematics\MSW\GteIntelSSE.cpp" />
-    <ClCompile Include="common\Task.cpp" />
-    <ClCompile Include="common\TaskManager.cpp" />
+    <ClCompile Include="feature\ImportModel.cpp" />
+    <ClCompile Include="Tasking\Task.cpp" />
+    <ClCompile Include="Tasking\TaskManager.cpp" />
     <ClCompile Include="common\Tree\BVHBuilder.cpp" />
     <ClCompile Include="common\Tree\TreeBuilder.cpp" />
     <ClCompile Include="DentEngine\src\Bounds3D.cpp" />
@@ -102,8 +103,10 @@
     <ClCompile Include="feature\repair\TMesh\triangle.cpp" />
     <ClCompile Include="feature\repair\TMesh\vertex.cpp" />
     <ClCompile Include="feature\rotate.cpp" />
+    <ClCompile Include="feature\sliceExport.cpp" />
     <ClCompile Include="feature\SupportFeature.cpp" />
     <ClCompile Include="feature\ModelBuilder\TwoManifoldBuilder.cpp" />
+    <ClCompile Include="feature\UndoRedo.cpp" />
     <ClCompile Include="fileloader.cpp" />
     <ClCompile Include="feature\cut\FreeCutPtWidget.cpp" />
     <ClCompile Include="glmodel.cpp" />
@@ -170,6 +173,27 @@
     <ClCompile Include="feature\stlexporter.cpp" />
     <ClCompile Include="DentEngine\src\svgexporter.cpp" />
     <ClCompile Include="utils\updatechecker.cpp" />
+    <ClCompile Include="Qml\components\ControlOwner.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Qml\components\InputControl.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="feature\interfaces\ModeDialog.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Qml\features\ModeDialogQMLParsed.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Qml\components\FeatureMenu.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Qml\util\QMLUtil.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="feature\FeaturesLoader.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="common\Debug.h" />
@@ -602,7 +626,8 @@
     <ClInclude Include="common\rapidjson\stringbuffer.h" />
     <ClInclude Include="common\rapidjson\writer.h" />
     <ClInclude Include="common\Singleton.h" />
-    <ClInclude Include="common\Task.h" />
+    <ClInclude Include="feature\ImportModel.h" />
+    <ClInclude Include="Tasking\Task.h" />
     <ClInclude Include="common\taskflow\core\executor.hpp" />
     <ClInclude Include="common\taskflow\core\flow_builder.hpp" />
     <ClInclude Include="common\taskflow\core\graph.hpp" />
@@ -636,7 +661,7 @@
     <ClInclude Include="common\taskflow\utility\passive_vector.hpp" />
     <ClInclude Include="common\taskflow\utility\singular_allocator.hpp" />
     <ClInclude Include="common\taskflow\utility\traits.hpp" />
-    <ClInclude Include="common\TaskManager.h" />
+    <ClInclude Include="Tasking\TaskManager.h" />
     <ClInclude Include="common\TrackedIndexedList.h" />
     <ClInclude Include="common\Tree\TreeBuilder.h" />
     <ClInclude Include="DentEngine\src\Bounds3D.h" />
@@ -711,8 +736,10 @@
     <ClInclude Include="feature\repair\TMesh\triangle.h" />
     <ClInclude Include="feature\repair\TMesh\vertex.h" />
     <ClInclude Include="feature\rotate.h" />
+    <ClInclude Include="feature\sliceExport.h" />
     <ClInclude Include="feature\SupportFeature.h" />
     <ClInclude Include="feature\ModelBuilder\TwoManifoldBuilder.h" />
+    <ClInclude Include="feature\UndoRedo.h" />
     <ClInclude Include="fileloader.h" />
     <ClInclude Include="feature\hollowshell.h" />
     <ClInclude Include="input\Clickable.h" />
@@ -772,6 +799,27 @@
     <ClInclude Include="DentEngine\src\polyclipping\poly2tri\common\utils.h" />
     <ClInclude Include="utils\utils.h" />
     <ClInclude Include="utils\winsparkle\winsparkle.h" />
+    <ClInclude Include="Qml\components\InputControl.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Qml\components\ControlOwner.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="feature\interfaces\ModeFactory.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="feature\interfaces\ModeDialog.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Qml\features\ModeDialogQMLParsed.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Qml\util\QMLUtil.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="feature\FeaturesLoader.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="debug\moc_predefs.h.cbt" />
@@ -900,6 +948,9 @@
     <QtMoc Include="qmlmanager.h" />
     <QtMoc Include="utils\quaternionhelper.h" />
     <QtMoc Include="utils\updatechecker.h" />
+    <QtMoc Include="Qml\components\FeatureMenu.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
   </ItemGroup>
   <ItemGroup>
     <QtRcc Include="qml.qrc" />
@@ -925,6 +976,7 @@
     <None Include="Qml\CameraController.qml" />
     <None Include="Qml\CameraManager.qml" />
     <None Include="Qml\Controls\CtrCutSwitch.qml" />
+    <None Include="Qml\CoordinateMesh.qml" />
     <None Include="Qml\Controls\CtrDropdownBox.qml" />
     <None Include="Qml\Controls\CtrSpinBox.qml" />
     <None Include="Qml\Controls\CtrTextBox.qml" />
@@ -1134,5 +1186,18 @@
     <None Include="resource\zoom_down.png" />
     <None Include="resource\zoom_up.png" />
     <None Include="icon.ico" />
+    <None Include="Qml\Controls\CtrToggleImgSwitch.qml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
+      <ParseFiles>true</ParseFiles>
+    </Filter>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+      <ParseFiles>true</ParseFiles>
+    </Filter>
   </ItemGroup>
 </Project>

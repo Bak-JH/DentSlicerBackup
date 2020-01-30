@@ -12,15 +12,17 @@ namespace Hix
 		class AddSupport : public Feature
 		{
 		public:
-			AddSupport(const Hix::Engine3D::FaceConstItr face, QVector3D point);
 			AddSupport(const OverhangDetect::Overhang& overhang);
 			virtual ~AddSupport();
+		protected:
 			void undoImpl()override;
 			void redoImpl()override;
+			void runImpl()override;
 
 		private:
-			SupportModel* _removedModel;
-			SupportModel* _addedModel;
+			OverhangDetect::Overhang _overhang;
+			std::variant<SupportModel*, std::unique_ptr<SupportModel>> _model;
+
 		};
 
 		class RemoveSupport : public Feature
@@ -28,12 +30,13 @@ namespace Hix
 		public:
 			RemoveSupport(SupportModel* target);
 			virtual ~RemoveSupport();
+		protected:
 			void undoImpl()override;
 			void redoImpl()override;
+			void runImpl()override;
 
 		private:
-			SupportModel* _removedModel;
-			SupportModel* _addedModel;
+			std::variant<SupportModel*, std::unique_ptr<SupportModel>> _model;
 		};
 
 		class AddRaft : public Feature
@@ -41,12 +44,13 @@ namespace Hix
 		public: 
 			AddRaft();
 			virtual ~AddRaft();
+		protected:
 			void undoImpl()override;
 			void redoImpl()override;
+			void runImpl()override;
 
 		private:
-			RaftModel* _addedRaft;
-			RaftModel* _deletedRaft;
+			std::variant<RaftModel*, std::unique_ptr<RaftModel>> _model;
 		};
 		
 		class RemoveRaft : public Feature
@@ -54,16 +58,14 @@ namespace Hix
 		public: 
 			RemoveRaft();
 			virtual ~RemoveRaft();
+		protected:
 			void undoImpl()override;
 			void redoImpl()override;
+			void runImpl()override;
 
 		private:
-			RaftModel* _addedRaft;
-			RaftModel* _deletedRaft;
+			std::variant<RaftModel*, std::unique_ptr<RaftModel>> _model;
 		};
-
-		std::unique_ptr<Hix::Features::FeatureContainer> clearSupport(std::unordered_set<GLModel*>& models);
-
 
 		class SupportMode: public SelectFaceMode
 		{

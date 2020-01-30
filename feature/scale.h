@@ -12,10 +12,13 @@ namespace Hix
 		public:
 			Scale(GLModel* targetModel, QVector3D& scale);
 			virtual ~Scale();
+		protected:
 			void undoImpl()override;
 			void redoImpl()override;
+			void runImpl()override;
 
 		private:
+			QVector3D _scale;
 			GLModel* _model;
 			QMatrix4x4 _prevMatrix;
 			Engine3D::Bounds3D _prevAabb;

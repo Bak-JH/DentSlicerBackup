@@ -4,10 +4,7 @@
 
 #include <QString>
 
-namespace tf
-{
-	class Subflow;
-}
+
 namespace Hix
 {
 	namespace Support
@@ -28,7 +25,7 @@ namespace SlicingEngine
 		QString size;
 		float volume;
 	};
-	Result sliceModels (bool isTemp, tf::Subflow& subflow,float zMax, std::vector<std::reference_wrapper<const GLModel>>models, const Hix::Support::SupportRaftManager& suppRaft, QString filename = "");
+	Result sliceModels (bool isTemp, float zMax, std::vector<std::reference_wrapper<const GLModel>>models, const Hix::Support::SupportRaftManager& suppRaft, QString filename = "");
 };
 
 //extern QmlManager qm;

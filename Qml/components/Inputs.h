@@ -5,12 +5,12 @@
 #include <QtQuickTemplates2/private/qquickspinbox_p.h>
 #include <QtQuickTemplates2/private/qquickcombobox_p.h>
 #include <string>
-
+#include "InputControl.h"
 namespace Hix
 {
 	namespace QML
 	{
-		class InputSpinBox : public QQuickItem
+		class InputSpinBox : public QQuickItem, public InputControl
 		{
 			Q_OBJECT
 			Q_PROPERTY(double value MEMBER _value NOTIFY valueChanged)
@@ -33,7 +33,7 @@ namespace Hix
 			double _min, _max;
 		};
 
-		class TextInputBox : public QQuickItem
+		class TextInputBox : public QQuickItem, public InputControl
 		{
 			Q_OBJECT
 			Q_PROPERTY(QString inputText MEMBER _text NOTIFY inputTextChanged)
@@ -51,7 +51,7 @@ namespace Hix
 			QString _text;
 		};
 
-		class DropdownBox : public QQuickItem
+		class DropdownBox : public QQuickItem,  public InputControl
 		{
 			Q_OBJECT
 			Q_PROPERTY(QStringList dropList MEMBER _dropList NOTIFY listChanged)

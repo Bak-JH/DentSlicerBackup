@@ -289,8 +289,8 @@ bool GLModel::isDraggable(Hix::Input::MouseEventData& e,const Qt3DRender::QRayCa
 
 void GLModel::dragStarted(Hix::Input::MouseEventData& e, const Qt3DRender::QRayCasterHit& hit)
 {
-	if(!qmlManager->isActive<Hix::Features::MoveMode>())
-		qmlManager->moveButton->setProperty("state", "active");
+	//if(!qmlManager->isActive<Hix::Features::MoveMode>())
+	//	qmlManager->moveButton->setProperty("state", "active");
 
 	dynamic_cast<Hix::Features::MoveMode*>(qmlManager->getCurrentMode())->featureStarted();
 	auto listed = getRootModel();
@@ -424,4 +424,17 @@ QVector4D GLModel::getPrimitiveColorCode(const Hix::Engine3D::Mesh* mesh, FaceCo
 		return Hix::Render::Colors::Selected;
 	}
 
+}
+
+
+QString GLModel::filenameToModelName(const std::string& s)
+{
+	char sep = '/';
+
+	size_t i = s.rfind(sep, s.length());
+	if (i != std::string::npos) {
+		return QString::fromStdString(s.substr(i + 1, s.length() - i));
+	}
+
+	return QString::fromStdString(s);
 }

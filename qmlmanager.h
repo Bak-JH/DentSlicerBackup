@@ -22,7 +22,7 @@
 #include <QKeyboardHandler>
 #include "input/raycastcontroller.h"
 #include "feature/overhangDetect.h"
-#include "common/TaskManager.h"
+#include "Tasking/TaskManager.h"
 #include "slice/SlicingOptBackend.h"
 #include "support/SupportRaftManager.h"
 #include "feature/FeatureHistoryManager.h"
@@ -68,6 +68,10 @@ namespace Hix
 	{
 		class Feature;
 	}
+    namespace QML
+    {
+        class FeatureMenu;
+    }
 }
 class QQuickItem;
 class QmlManager : public QObject
@@ -97,13 +101,13 @@ public:
 		QMetaObject::invokeMethod(obj, std::forward<F>(fun));
 	}
 
-	static QString filenameToModelName(const std::string& s);
 
     explicit QmlManager(QObject *parent = nullptr);
     QQmlApplicationEngine* engine;
 
     // UI components
 	Qt3DRender::QCamera* _camera;
+    QQuickItem* mainItem;
     QObject* mainWindow;
     QObject* loginWindow;
     QObject* loginButton;
@@ -125,80 +129,15 @@ public:
     // model rotate components
     QObject *rotatePopup;
 
-    // model move components
-    QObject *moveButton;
-    QObject *movePopup;
-    Qt3DCore::QEntity *managerModel;
+
 
     // selection popup
     QObject* yesno_popup;
     QObject* result_popup;
 
-    // model layflat components;
-    QObject *layflatPopup;
-    QObject *layflatButton;
 
     QObject* partList;
 
-    // model cut components
-    QObject *cutPopup;
-    QObject *curveButton;
-    QObject *flatButton;
-    QObject *cutSlider;
-
-
-    // labelling components
-    QObject *text3DInput;
-    QObject *labelPopup;
-    QObject *labelFontBox;
-    QObject *labelFontBoldBox;
-    QObject *labelFontSizeBox;
-
-    // orientation components
-    QObject* orientPopup;
-    QObject* progress_popup;
-    QObject* orientButton;
-
-    // scale components
-    QObject* scalePopup;
-
-    // extension components
-    QObject* extensionPopup;
-    QObject* extensionButton;
-
-    // shell offset components
-    QObject* shelloffsetPopup;
-
-    // manual support components
-    QObject* manualSupportPopup;
-
-    // auto repair components
-    QObject* repairPopup;
-    QObject* repairButton;
-
-    // auto arrange components
-    //QObject* arrangePopup;
-
-    // save components
-    QObject* saveButton;
-    //QObject* savePopup;
-
-    // export components
-    //QObject* exportButton;
-    QObject* exportOKButton;
-
-    // view mode buttons
-    QObject* leftTabViewMode;
-    QObject* viewObjectButton;
-    QObject* viewLayerButton;
-
-    QObject* layerViewPopup;
-    QObject* layerInfillButton;
-    QObject* layerSupportersButton;
-    QObject* layerRaftButton;
-    QObject* layerViewSlider;
-
-	QObject* modelBuilderPopup;
 
 
     std::unordered_map<GLModel*, std::unique_ptr<GLModel>> glmodels;
@@ -215,7 +154,7 @@ public:
     QString groupFunctionState;
     int groupFunctionIndex;
     float progress = 0;
-    void initializeUI(QQmlApplicationEngine *e);
+    void initializeUI();
     void openModelFile_internal(QString filename);
     void openArrange();
     void addPart(QString fileName, int ID);
@@ -229,6 +168,8 @@ public:
 	void modelSelected(int);
 	
 	Hix::Features::Mode* currentMode()const;
+	//TODO: temp
+	void setMode(Hix::Features::Mode*);
 
 	//remove this
 	const std::unordered_set<GLModel*>& getSelectedModels();
@@ -286,13 +227,7 @@ public:
 	const Hix::Settings::AppSetting& settings()const;
 private:
 	Hix::Tasking::TaskManager _taskManager;
-	void setModelViewMode(int mode);
 	GLModel* getModelByID(int ID);
-	//do not mix UI work with background thread
-	//std::future<Slicer*> exportSelected(bool isTemp);
-	QString getExportPath();
-	//do not make non-async version of this as taskflow allows to spawn  internal dynamic tasks for better throughoutput.
-	Hix::Tasking::GenericTask* exportSelectedAsync(QString exportPath, bool isTemp);
 	bool groupSelectionActive = false;
     int viewMode;
     int layerViewFlags;
@@ -323,14 +258,9 @@ public slots:
 	void cutModeSelected(int);
 	void openCut();
 	void closeCut();
-	void extensionSelect();
-	void extensionUnSelect();
-	void layFlatSelect();
-	void layFlatUnSelect();
 
 
-	void openLabelling();
-	void closeLabelling();
+
 	void setLabelText(QString text);
 	void setLabelFontName(QString fontName);
 	void setLabelFontBold(bool isBold);
@@ -369,11 +299,8 @@ public slots:
 
 	void totalScaleDone();
 
-    void resetLayflat();
     void cleanselectedModel(int);
    
-    void manualSupportSelect();
-    void manualSupportUnselect();
     void openRotate();
     void closeRotate();
     void openMove();

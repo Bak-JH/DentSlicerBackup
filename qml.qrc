@@ -54,7 +54,6 @@
         <file>Qml/PlanesliderRange.qml</file>
         <file>Qml/MenuItem.qml</file>
         <file>Qml/FeatureMenu.qml</file>
-        <file>Qml/Controls/CtrCutSwitch.qml</file>
         <file>Qml/Controls/CtrDropdownBox.qml</file>
         <file>Qml/Controls/CtrScaleInputBox.qml</file>
         <file>Qml/Controls/CtrSpinBox.qml</file>
@@ -81,5 +80,6 @@
         <file>Qml/CoordinateMesh.qml</file>
         <file>Qml/ModalWindowButton.qml</file>
         <file>Qml/ProgressException.qml</file>
+        <file>Qml/Controls/CtrToggleImgSwitch.qml</file>
     </qresource>
 </RCC>

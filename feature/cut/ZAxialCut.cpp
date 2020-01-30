@@ -5,10 +5,10 @@
 #include "feature/addModel.h"
 #include "feature/deleteModel.h"
 using namespace Hix;
+using namespace Hix::Features::Cut;
 using namespace Hix::Engine3D;
 using namespace Hix::Slicer;
 using namespace ClipperLib;
-
 namespace Hix
 {
 
@@ -20,7 +20,7 @@ namespace Hix
 			{
 
 			public:
-				ZAxialCutImp(GLModel* subject, float cuttingPlane, Mesh*& topMesh, Mesh*& botMesh);
+				ZAxialCutImp(GLModel* subject, float cuttingPlane, Mesh*& topMesh, Mesh*& botMesh, Hix::Features::Cut::KeepType keep);
 			private:
 				void divideTriangles();
 				void generateCutContour();
@@ -28,60 +28,58 @@ namespace Hix
 				void fillOverlap(const Hix::Slicer::ContourSegment& seg);
 				float _cuttingPlane;
 				const Engine3D::Mesh* _origMesh;
-				Engine3D::Mesh* _bottomMesh;
-				Engine3D::Mesh* _topMesh;
+				std::unique_ptr<Engine3D::Mesh> _bottomMesh;
+				std::unique_ptr<Engine3D::Mesh> _topMesh;
 				std::unordered_set<Hix::Engine3D::FaceConstItr> _botFaces;
 				std::unordered_set<Hix::Engine3D::FaceConstItr> _overlapFaces;
 				std::unordered_set<Hix::Engine3D::FaceConstItr> _topFaces;
 				std::vector<Hix::Slicer::Contour> _contours;
+				Hix::Features::Cut::KeepType _keepType;
 			};
 		}
 	}
 }
 
 
-Hix::Features::Cut::ZAxialCut::ZAxialCut(GLModel* subject, float cuttingPlane) :
-	_cuttingPlane(cuttingPlane), top_no(1), bot_no(1)
+Hix::Features::Cut::ZAxialCut::ZAxialCut(GLModel* subject, float cuttingPlane, KeepType keep) :
+	_cuttingPlane(cuttingPlane), _subject(subject), _keep(keep)
 {
-	qDebug() << "zmax: " << subject->recursiveAabb().zMax() << "plane : " << cuttingPlane << "zmin: " << subject->recursiveAabb().zMin();
-	if (cuttingPlane >= subject->recursiveAabb().zMax() || cuttingPlane <= subject->recursiveAabb().zMin())
+
+
+}
+
+void Hix::Features::Cut::ZAxialCut::runImpl()
+{
+	if (_cuttingPlane >= _subject->recursiveAabb().zMax() || _cuttingPlane <= _subject->recursiveAabb().zMin())
 	{
-		return;
+		throw std::runtime_error("Z Axial Cut cutting plane on the z limit of the model");
 	}//do listed part first
-
-	doChildrenRecursive(subject, cuttingPlane);
-	addFeature(new DeleteModel(subject));
-	//qmlManager->deleteModelFile(subject->ID());
-
-	qDebug() << qmlManager->glmodels.size();
+	doChildrenRecursive(_subject, _cuttingPlane);
+	addFeature(new DeleteModel(_subject));
+	Hix::Features::FeatureContainerFlushSupport::runImpl();
 }
 
 void Hix::Features::Cut::ZAxialCut::doChildrenRecursive(GLModel* subject, float cuttingPlane)
 {
 	Mesh* childTopMesh = nullptr;
 	Mesh* childBotMesh = nullptr;
-	ZAxialCutImp(subject, cuttingPlane, childTopMesh, childBotMesh);
+	ZAxialCutImp(subject, cuttingPlane, childTopMesh, childBotMesh, _keep);
 	if(subject->getMesh()->getFaces().empty())
 	{ }
 	else if (childBotMesh == nullptr || childBotMesh->getFaces().empty())
 	{
 		auto addTopModel = new ListModel(subject->getMeshModd(), subject->modelName() + "_top", &subject->transform());
 		addFeature(addTopModel);
-		_upperModels.insert(subject);
 	}
 	else if (childTopMesh == nullptr || childTopMesh->getFaces().empty())
 	{
 		auto addBotModel = new ListModel(subject->getMeshModd(), subject->modelName() + "_bot", &subject->transform());
 		addFeature(addBotModel);
-		_upperModels.insert(subject);
 	}
 	else
 	{
 		auto addTopModel = new ListModel(childTopMesh, subject->modelName() + "_top", &subject->transform());
 		auto addBotModel = new ListModel(childBotMesh, subject->modelName() + "_bot", &subject->transform());
-		
-		_upperModels.insert(addTopModel->getAddedModel());
-		_lowerModels.insert(addBotModel->getAddedModel());
 		
 		addFeature(addTopModel);
 		addFeature(addBotModel);
@@ -96,46 +94,30 @@ void Hix::Features::Cut::ZAxialCut::doChildrenRecursive(GLModel* subject, float 
 	}
 }
 
-std::unordered_set<GLModel*>& Hix::Features::Cut::ZAxialCut::upperModels()
+Hix::Features::Cut::ZAxialCutImp::ZAxialCutImp(GLModel* subject, float cuttingPlane, Mesh*& topMesh, Mesh*& botMesh, Hix::Features::Cut::KeepType keepType) :
+	_cuttingPlane(cuttingPlane), _origMesh(subject->getMesh()), _keepType(keepType)
 {
-	return _upperModels;
-}
-
-std::unordered_set<GLModel*>& Hix::Features::Cut::ZAxialCut::lowerModels()
-{
-	return _lowerModels;
-}
-
-Hix::Features::Cut::ZAxialCutImp::ZAxialCutImp(GLModel* subject, float cuttingPlane, Mesh*& topMesh, Mesh*& botMesh) :
-	_cuttingPlane(cuttingPlane), _origMesh(subject->getMesh())
-{
-	//empty model
-	_bottomMesh = new Mesh();
-	_topMesh = new Mesh();
-	divideTriangles();
+	if(_keepType != KeepBottom)
+		_topMesh.reset( new Mesh());
+	if(_keepType != KeepTop)
+		_bottomMesh.reset(new Mesh());
 	//early exit, no cut needed
 	if (_origMesh->getFaces().size() == 0)
 	{
 		//empty node, add empty halves to both sides
-		botMesh = _bottomMesh;
-		topMesh = _topMesh;
-		//subject->clearMesh();
+		botMesh = _bottomMesh.release();
+		topMesh = _topMesh.release();
 		return;
 	}
-	else if (_bottomMesh->getFaces().size() == _origMesh->getFaces().size())
+	divideTriangles();
+	if (_bottomMesh->getFaces().size() == _origMesh->getFaces().size())
 	{
-		delete _topMesh;
-		delete _bottomMesh;
-		topMesh = nullptr;
 		botMesh = subject->getMeshModd();
 		return;
 	}
 	else if (_topMesh->getFaces().size() == _origMesh->getFaces().size())
 	{
-		delete _topMesh;
-		delete _bottomMesh;
 		topMesh = subject->getMeshModd();
-		botMesh = nullptr;
 		return;
 	}
 	generateCutContour();
@@ -147,10 +129,10 @@ Hix::Features::Cut::ZAxialCutImp::ZAxialCutImp(GLModel* subject, float cuttingPl
 			fillOverlap(seg);
 		}
 	}
-
-	botMesh = _bottomMesh;
-	topMesh = _topMesh;
-	//subject->clearMesh();
+	if(_bottomMesh)
+		botMesh = _bottomMesh.release();
+	if(_topMesh)
+		topMesh = _topMesh.release();
 }
 
 
@@ -180,13 +162,19 @@ void Hix::Features::Cut::ZAxialCutImp::divideTriangles()
 		}
 	}
 	//add non cut faces to each halves
-	for (auto& each : _botFaces)
+	if (_bottomMesh)
 	{
-		_bottomMesh->addFace(each);
+		for (auto& each : _botFaces)
+		{
+			_bottomMesh->addFace(each);
+		}
 	}
-	for (auto& each : _topFaces)
+	if (_topMesh)
 	{
-		_topMesh->addFace(each);
+		for (auto& each : _topFaces)
+		{
+			_topMesh->addFace(each);
+		}
 	}
 }
 
@@ -238,8 +226,10 @@ void Hix::Features::Cut::ZAxialCutImp::generateCaps()
 				_origMesh->ptToLocal(QVector3D(trig[2], _cuttingPlane))
 
 			};
-			_bottomMesh->addFace(vertices[0], vertices[1], vertices[2]);
-			_topMesh->addFace(vertices[2], vertices[1], vertices[0]);
+			if(_bottomMesh)
+				_bottomMesh->addFace(vertices[0], vertices[1], vertices[2]);
+			if(_topMesh)
+				_topMesh->addFace(vertices[2], vertices[1], vertices[0]);
 		}
 	}
 }
@@ -281,8 +271,10 @@ void Hix::Features::Cut::ZAxialCutImp::fillOverlap(const Hix::Slicer::ContourSeg
 		QVector3D to(seg.to, _cuttingPlane);
 		from = _origMesh->ptToLocal(from);
 		to = _origMesh->ptToLocal(to);
-		_topMesh->addFace(seg.from, seg.to, highs[0].localPosition());
-		_bottomMesh->addFace(seg.to, seg.from, lows[0].localPosition());
+		if (_topMesh)
+			_topMesh->addFace(seg.from, seg.to, highs[0].localPosition());
+		if (_bottomMesh)
+			_bottomMesh->addFace(seg.to, seg.from, lows[0].localPosition());
 	}
 	else
 	{
@@ -299,8 +291,8 @@ void Hix::Features::Cut::ZAxialCutImp::fillOverlap(const Hix::Slicer::ContourSeg
 			// ▽
 			from = QVector3D(seg.from, _cuttingPlane);
 			to = QVector3D(seg.to, _cuttingPlane);
-			twoFacesAddedMesh = _bottomMesh;
-			oneFaceAddedMesh = _topMesh;
+			twoFacesAddedMesh = _bottomMesh.get();
+			oneFaceAddedMesh = _topMesh.get();
 		}
 		else
 		{
@@ -308,8 +300,8 @@ void Hix::Features::Cut::ZAxialCutImp::fillOverlap(const Hix::Slicer::ContourSeg
 			from = QVector3D(seg.to, _cuttingPlane);
 			to = QVector3D(seg.from, _cuttingPlane);
 			majority.swap(minority);
-			twoFacesAddedMesh = _topMesh;
-			oneFaceAddedMesh = _bottomMesh;
+			twoFacesAddedMesh = _topMesh.get();
+			oneFaceAddedMesh = _bottomMesh.get();
 		}
 		from = _origMesh->ptToLocal(from);
 		to = _origMesh->ptToLocal(to);
@@ -320,11 +312,16 @@ void Hix::Features::Cut::ZAxialCutImp::fillOverlap(const Hix::Slicer::ContourSeg
 		majority[1] = hintEdge.to();
 
 		//face goes in this order, f-> t -> minority
-		oneFaceAddedMesh->addFace(from, to, minority[0].localPosition());
+		if(oneFaceAddedMesh)
+			oneFaceAddedMesh->addFace(from, to, minority[0].localPosition());
 		// maj[0]->t->f 
-		// maj[0]->maj[1]->t 
-		twoFacesAddedMesh->addFace(majority[0].localPosition(), to, from);
-		twoFacesAddedMesh->addFace(majority[0].localPosition(), majority[1].localPosition(), to);
+		// maj[0]->maj[1]->t
+		if (twoFacesAddedMesh)
+		{
+			twoFacesAddedMesh->addFace(majority[0].localPosition(), to, from);
+			twoFacesAddedMesh->addFace(majority[0].localPosition(), majority[1].localPosition(), to);
+		}
+
 	}
 
 

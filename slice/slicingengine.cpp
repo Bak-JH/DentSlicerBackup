@@ -19,7 +19,7 @@ using namespace Hix;
 using namespace Hix::Slicer;
 using namespace Hix::Render;
 
-SlicingEngine::Result SlicingEngine::sliceModels(bool isTemp, tf::Subflow& subflow, float zMax,
+SlicingEngine::Result SlicingEngine::sliceModels(bool isTemp, float zMax,
 	std::vector<std::reference_wrapper<const GLModel>> models, const Hix::Support::SupportRaftManager& suppRaft, QString filename){
 
 	constexpr float BOTT = 0.0f;

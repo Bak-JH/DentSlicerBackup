@@ -4,24 +4,14 @@ import QtQuick.Controls 2.1
 import QtQuick.Controls.Styles 1.4
 import QtGraphicalEffects 1.12
 
-Hix.ImageToggleSwitch {
+Hix.ToggleSwitch {
 	id: root
-	function hitFlatCut() {
-		if (flatbtn.state == "flatOff") { flatbtn.state = "flatOn"; freebtn.state = "freeOff"; }
-		else { flatbtn.state = "flatOn" }
-	}
-
-	function hitFreeCut() {
-		if (freebtn.state == "freeOff") { freebtn.state = "freeOn"; flatbtn.state = "flatOff"; }
-		else { freebtn.state = "freeOn" }
-	}
 
 	Hix.Button {
 		id: flatbtn
 		width: 104
 		height: 96
 		radius: 8
-		color: "#f6feff"
 		border.color: "#b2c4c6"
 		border.width: 1
 		state: "flatOff"
@@ -44,7 +34,7 @@ Hix.ImageToggleSwitch {
 			anchors.horizontalCenter: parent.horizontalCenter
 		}
 
-		onClicked: { hitFlatCut(); root.setChecked(false) }
+		onClicked: { hitFlatCut(); root.isLeft = true; }
 
 		states: [
 			State {
@@ -97,7 +87,7 @@ Hix.ImageToggleSwitch {
 			anchors.horizontalCenter: parent.horizontalCenter
 		}
 
-		onClicked: { hitFreeCut(); root.setChecked (true) }
+		onClicked: { hitFreeCut(); root.isLeft = false; }
 
 		states: [
 			State {

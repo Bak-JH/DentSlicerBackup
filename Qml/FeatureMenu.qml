@@ -1,285 +1,127 @@
 import QtQuick 2.4
-import hix.qml 1.0
-
+import hix.qml 1.0 as Hix
+import QtQuick.Layouts 1.3
 import QtGraphicalEffects 1.12
 
-Item {
-	width: 1365
-	height: 90
-	property string hoverColor: "#eeeeee"
-	property string defaultColor: "#ffffff"
+Hix.FeatureMenu {
+
 	property string activeNameColor: "#1db2c4"
-
-	property var menus: [open, move, rotate, scale, cut, shelloffset, extend, label, layflat, orient, arrange, support, save, extract]
-	property var menusStr: ["open", "move", "rotate", "scale", "cut", "shelloffset", "extend", "label", "layflat", "orient", "arrange", "support", "save", "extract"]
-
-	function menuClick(id) {							// get every MenuItem inactive but selected one
-		if (menus) {
-			for( var i = 0; i < menus.length; i++ ) {
-				menus[i].nameColor = "#9d9d9d"
-				menus[i].iconBasic = "qrc:/Resource/menu_"+menusStr[i]+".png"
-			}
-			id.nameColor = activeNameColor				//change selected button's text color
-		}
-	}
 	
 	Rectangle {
 		width: 1365
 		height: 90
-		id: featureMenu
 		radius: 45
 		color: "#FFFFFF"
-
-		MenuItem {
-			id:open
+		RowLayout {
 			anchors.left: parent.left
 			anchors.leftMargin: parent.radius
-			iconBasic: "qrc:/Resource/menu_open.png"
-			featureName: "Open"
+            id: featureItems
+			objectName: "featureItems"
+			MenuItem {
+				id:open
+				iconBasic: "qrc:/Resource/menu_open.png"
+				iconSelected: "qrc:/Resource/menu_open_select_1.png" 
+				featureName: "Open"
+			}
+			Rectangle {
+				id:divider1
+				width: 1
+				height: 80
+				color: "#dddddd"
+			}
+			MenuItem {
+				id:move
+				iconBasic: "qrc:/Resource/menu_move.png"
+				iconSelected: "qrc:/Resource/menu_move_select_1.png" 
+				featureName: "Move"
+			}
+			MenuItem {
+				id:rotate
+				iconBasic: "qrc:/Resource/menu_rotate.png"
+				iconSelected: "qrc:/Resource/menu_rotate_select_1.png" 
+				featureName: "Rotate"
+			}
+			MenuItem {
+				id:scale
+				iconBasic: "qrc:/Resource/menu_scale.png"
+				iconSelected: "qrc:/Resource/menu_scale_select_1.png" 
+				featureName: "Scale"
+			}
+			Rectangle {
+				id:divider2
+				width: 1
+				height: 80
+				color: "#dddddd"
+			}
 
-			onClicked: { menuClick(open); color = defaultColor; nameColor = activeNameColor; iconBasic="qrc:/Resource/menu_open_select_1.png" }
-			onEntered: {
-				if (nameColor == activeNameColor) {}	// hover on already selected button
-				else color = hoverColor	// hover on unselected button
+			MenuItem {
+				id:cut
+				iconBasic: "qrc:/Resource/menu_cut.png"
+				iconSelected: "qrc:/Resource/menu_cut_select_1.png" 
+				featureName: "Cut"
 			}
-			onExited: {
-				if (nameColor == activeNameColor) {}	// exit from already selected button
-				else color = defaultColor	// exit from unselected button
+			MenuItem {
+				id:shelloffset
+				iconBasic: "qrc:/Resource/menu_shelloffset.png"
+				iconSelected: "qrc:/Resource/menu_shelloffset_select_1.png"
+				featureName: "Shell Offset"
 			}
-		}
-		Rectangle {
-			id:divider1
-			anchors.left: open.right
-			anchors.verticalCenter: parent.verticalCenter
-			width: 1
-			height: 80
-			color: "#dddddd"
-		}
-		MenuItem {
-			id:move
-			anchors.left: divider1.right
-			iconBasic: "qrc:/Resource/menu_move.png"
-			featureName: "Move"
-
-			onClicked: { menuClick(move); color = defaultColor; nameColor = activeNameColor; iconBasic="qrc:/Resource/menu_move_select_1.png" }
-			onEntered: {
-				if (nameColor == activeNameColor) {}	// hover on already selected button
-				else color = hoverColor	// hover on unselected button
+			MenuItem {
+				id:extend
+				iconBasic: "qrc:/Resource/menu_extend.png"
+				iconSelected: "qrc:/Resource/menu_extend_select_1.png"
+				featureName: "Extend"
 			}
-			onExited: {
-				if (nameColor == activeNameColor) {}	// exit from already selected button
-				else color = defaultColor	// exit from unselected button
+			MenuItem {
+				id:label
+				iconBasic: "qrc:/Resource/menu_label.png"
+				iconSelected: "qrc:/Resource/menu_label_select_1.png"
+				featureName: "Label"
 			}
-		}
-		MenuItem {
-			id:rotate
-			anchors.left: move.right
-			iconBasic: "qrc:/Resource/menu_rotate.png"
-			featureName: "Rotate"
-
-			onClicked: { menuClick(rotate); color = defaultColor; nameColor = activeNameColor; iconBasic="qrc:/Resource/menu_rotate_select_1.png" }
-			onEntered: {
-				if (nameColor == activeNameColor) {}	// hover on already selected button
-				else color = hoverColor	// hover on unselected button
+			MenuItem {
+				id:layflat
+				iconBasic: "qrc:/Resource/menu_layflat.png"
+				iconSelected: "qrc:/Resource/menu_layflat_select_1.png"
+				featureName: "Lay Flat"
 			}
-			onExited: {
-				if (nameColor == activeNameColor) {}	// exit from already selected button
-				else color = defaultColor	// exit from unselected button
+			MenuItem {
+				id:orient
+				iconBasic: "qrc:/Resource/menu_orient.png"
+				iconSelected: "qrc:/Resource/menu_orient_select_1.png"
+				featureName: "Orient"
 			}
-		}
-		MenuItem {
-			id:scale
-			anchors.left: rotate.right
-			iconBasic: "qrc:/Resource/menu_scale.png"
-			featureName: "Scale"
-
-			onClicked: { menuClick(scale); color = defaultColor; nameColor = activeNameColor; iconBasic="qrc:/Resource/menu_scale_select_1.png" }
-			onEntered: {
-				if (nameColor == activeNameColor) {}	// hover on already selected button
-				else color = hoverColor	// hover on unselected button
+			MenuItem {
+				id:arrange
+				iconBasic: "qrc:/Resource/menu_arrange.png"
+				iconSelected: "qrc:/Resource/menu_arrange_select_1.png"
+				featureName: "Arrange"
 			}
-			onExited: {
-				if (nameColor == activeNameColor) {}	// exit from already selected button
-				else color = defaultColor	// exit from unselected button
+			MenuItem {
+				id:support
+				iconBasic: "qrc:/Resource/menu_support.png"
+				iconSelected: "qrc:/Resource/menu_support_select_1.png"
+				featureName: "Support"
+			}	
+			Rectangle {
+				id:divider3
+				width: 1
+				height: 80
+				color: "#dddddd"
 			}
-		}
-		Rectangle {
-			id:divider2
-			anchors.left: scale.right
-			anchors.verticalCenter: parent.verticalCenter
-			width: 1
-			height: 80
-			color: "#dddddd"
-		}
-
-		MenuItem {
-			id:cut
-			anchors.left: divider2.right
-			iconBasic: "qrc:/Resource/menu_cut.png"
-			featureName: "Cut"
-
-			onClicked: { menuClick(cut); color = defaultColor; nameColor = activeNameColor; iconBasic="qrc:/Resource/menu_cut_select_1.png" }
-			onEntered: {
-				if (nameColor == activeNameColor) {}	// hover on already selected button
-				else color = hoverColor	// hover on unselected button
+			MenuItem {
+				id:save
+				iconBasic: "qrc:/Resource/menu_save.png"
+				iconSelected: "qrc:/Resource/menu_save_select_1.png"
+				featureName: "Save"
 			}
-			onExited: {
-				if (nameColor == activeNameColor) {}	// exit from already selected button
-				else color = defaultColor	// exit from unselected button
+			MenuItem {
+				id: extract
+				iconBasic: "qrc:/Resource/menu_extract.png"
+				iconSelected: "qrc:/Resource/menu_extract_select_1.png"
+				featureName: "Export"
 			}
-		}
-		MenuItem {
-			id:shelloffset
-			anchors.left: cut.right
-			iconBasic: "qrc:/Resource/menu_shelloffset.png"
-			featureName: "Shell Offset"
-
-			onClicked: { menuClick(shelloffset); color = defaultColor; nameColor = activeNameColor; iconBasic="qrc:/Resource/menu_shelloffset_select_1.png" }
-			onEntered: {
-				if (nameColor == activeNameColor) {}	// hover on already selected button
-				else color = hoverColor	// hover on unselected button
-			}
-			onExited: {
-				if (nameColor == activeNameColor) {}	// exit from already selected button
-				else color = defaultColor	// exit from unselected button
-			}
-		}
-		MenuItem {
-			id:extend
-			anchors.left: shelloffset.right
-			iconBasic: "qrc:/Resource/menu_extend.png"
-			featureName: "Extend"
-
-			onClicked: { menuClick(extend); color = defaultColor; nameColor = activeNameColor; iconBasic="qrc:/Resource/menu_extend_select_1.png" }
-			onEntered: {
-				if (nameColor == activeNameColor) {}	// hover on already selected button
-				else color = hoverColor	// hover on unselected button
-			}
-			onExited: {
-				if (nameColor == activeNameColor) {}	// exit from already selected button
-				else color = defaultColor	// exit from unselected button
-			}
-		}
-		MenuItem {
-			id:label
-			anchors.left:extend.right
-			iconBasic: "qrc:/Resource/menu_label.png"
-			featureName: "Label"
-
-			onClicked: { menuClick(label); color = defaultColor; nameColor = activeNameColor; iconBasic="qrc:/Resource/menu_label_select_1.png" }
-			onEntered: {
-				if (nameColor == activeNameColor) {}	// hover on already selected button
-				else color = hoverColor	// hover on unselected button
-			}
-			onExited: {
-				if (nameColor == activeNameColor) {}	// exit from already selected button
-				else color = defaultColor	// exit from unselected button
-			}
-		}
-		MenuItem {
-			id:layflat
-			anchors.left: label.right
-			iconBasic: "qrc:/Resource/menu_layflat.png"
-			featureName: "Lay Flat"
-
-			onClicked: { menuClick(layflat); color = defaultColor; nameColor = activeNameColor; iconBasic="qrc:/Resource/menu_layflat_select_1.png" }
-			onEntered: {
-				if (nameColor == activeNameColor) {}	// hover on already selected button
-				else color = hoverColor	// hover on unselected button
-			}
-			onExited: {
-				if (nameColor == activeNameColor) {}	// exit from already selected button
-				else color = defaultColor	// exit from unselected button
-			}
-		}
-		MenuItem {
-			id:orient
-			anchors.left: layflat.right
-			iconBasic: "qrc:/Resource/menu_orient.png"
-			featureName: "Orient"
-
-			onClicked: { menuClick(orient); color = defaultColor; nameColor = activeNameColor; iconBasic="qrc:/Resource/menu_orient_select_1.png" }
-			onEntered: {
-				if (nameColor == activeNameColor) {}	// hover on already selected button
-				else color = hoverColor	// hover on unselected button
-			}
-			onExited: {
-				if (nameColor == activeNameColor) {}	// exit from already selected button
-				else color = defaultColor	// exit from unselected button
-			}
-		}
-		MenuItem {
-			id:arrange
-			anchors.left: orient.right
-			iconBasic: "qrc:/Resource/menu_arrange.png"
-			featureName: "Arrange"
-
-			onClicked: { menuClick(arrange); color = defaultColor; nameColor = activeNameColor; iconBasic="qrc:/Resource/menu_arrange_select_1.png" }
-			onEntered: {
-				if (nameColor == activeNameColor) {}	// hover on already selected button
-				else color = hoverColor	// hover on unselected button
-			}
-			onExited: {
-				if (nameColor == activeNameColor) {}	// exit from already selected button
-				else color = defaultColor	// exit from unselected button
-			}
-		}
-		MenuItem {
-			id:support
-			anchors.left: arrange.right
-			iconBasic: "qrc:/Resource/menu_support.png"
-			featureName: "Support"
-
-			onClicked: { menuClick(support); color = defaultColor; nameColor = activeNameColor; iconBasic="qrc:/Resource/menu_support_select_1.png" }
-			onEntered: {
-				if (nameColor == activeNameColor) {}	// hover on already selected button
-				else color = hoverColor	// hover on unselected button
-			}
-			onExited: {
-				if (nameColor == activeNameColor) {}	// exit from already selected button
-				else color = defaultColor	// exit from unselected button
-			}
-		}	
-		Rectangle {
-			id:divider3
-			anchors.left: support.right
-			anchors.verticalCenter: parent.verticalCenter
-			width: 1
-			height: 80
-			color: "#dddddd"
-		}
-		MenuItem {
-			id:save
-			anchors.left: divider3.right
-			iconBasic: "qrc:/Resource/menu_save.png"
-			featureName: "Save"
-
-			onClicked: { menuClick(save); color = defaultColor; nameColor = activeNameColor; iconBasic="qrc:/Resource/menu_save_select_1.png" }
-			onEntered: {
-				if (nameColor == activeNameColor) {}	// hover on already selected button
-				else color = hoverColor	// hover on unselected button
-			}
-			onExited: {
-				if (nameColor == activeNameColor) {}	// exit from already selected button
-				else color = defaultColor	// exit from unselected button
-			}
-		}
-		MenuItem {
-			id: extract
-			anchors.left: save.right
-			iconBasic: "qrc:/Resource/menu_extract.png"
-			featureName: "Export"
-
-			onClicked: { menuClick(extract); color = defaultColor; nameColor = activeNameColor; iconBasic="qrc:/Resource/menu_extract_select_1.png" }
-			onEntered: {
-				if (nameColor == activeNameColor) {}	// hover on already selected button
-				else color = hoverColor	// hover on unselected button
-			}
-			onExited: {
-				if (nameColor == activeNameColor) {}	// exit from already selected button
-				else color = defaultColor	// exit from unselected button
-			}
-		}
+        }
+		
 		
 	}
 

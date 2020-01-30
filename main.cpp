@@ -60,15 +60,16 @@ int main(int argc, char** argv)
 	translator.load(":/lang_ko.qm");
 	app.installTranslator(&translator);
 	*/
-
+	qmlManager = new QmlManager();
+	QScopedPointer<QmlManager> qm(qmlManager);
 	QQmlApplicationEngine engine;
+	qmlManager->engine = &engine;
 	qRegisterMetaType<std::vector<QVector3D>>("std::vector<QVector3D>");
 	qRegisterMetaType<std::vector<float>>("std::vector<float>");
 	qmlRegisterType<GridMesh>("DentSlicer", 1, 0, "GridMesh");
 
 	QScopedPointer<QuaternionHelper> qq(new QuaternionHelper);
-	qmlManager = new QmlManager();
-	QScopedPointer<QmlManager> qm(qmlManager);
+
 
 	/** Splash Image **/
 	QPixmap pixmap(":/Resource/splash_dentslicer.png");
@@ -86,23 +87,17 @@ int main(int argc, char** argv)
 	splash->show();
 
 	engine.rootContext()->setContextProperty("qm", qm.data());
-	//FindItemByName(&engine, "slicing_data")->setContextProperty("qm", qmlManager);
 	engine.rootContext()->setContextProperty("qq", qq.data());
-	//engine.rootContext()->setContextProperty("se",se.data());
 
 	engine.load(QUrl(QStringLiteral("qrc:/Qml/main.qml")));
 
 	// update module codes
 	UpdateChecker* up = new UpdateChecker();
 	up->checkForUpdates();
-	//initWinSparkle();
-	//checkForUpdates();
 
 
-	//language patch
-	//engine.retranslate();
 
-	qmlManager->initializeUI(&engine);
+	qmlManager->initializeUI();
 	splash->close();
 
 #if  defined(QT_DEBUG) || defined(_DEBUG)
@@ -111,19 +106,19 @@ int main(int argc, char** argv)
 	qmlManager->loginWindow->setProperty("visible", true);
 #endif
 
-	QSurfaceFormat format;
-	format.setMajorVersion(4);
-	format.setMinorVersion(3);
-	format.setProfile(QSurfaceFormat::CoreProfile);
+	//QSurfaceFormat format;
+	//format.setMajorVersion(4);
+	//format.setMinorVersion(3);
+	//format.setProfile(QSurfaceFormat::CoreProfile);
 
-	QOpenGLContext gl_ctx;
-	gl_ctx.setFormat(format);
-	if (!gl_ctx.create())
-		throw std::runtime_error("context creation failed");
+	//QOpenGLContext gl_ctx;
+	//gl_ctx.setFormat(format);
+	//if (!gl_ctx.create())
+	//	throw std::runtime_error("context creation failed");
 
-	QOffscreenSurface surface;
-	surface.create();
-	gl_ctx.makeCurrent(&surface);
+	//QOffscreenSurface surface;
+	//surface.create();
+	//gl_ctx.makeCurrent(&surface);
 
 	return app.exec();
 #endif

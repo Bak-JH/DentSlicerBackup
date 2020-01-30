@@ -2,11 +2,8 @@
 #include "glmodel.h"
 #include "qmlmanager.h"
 
-Hix::Features::DeleteModel::DeleteModel(GLModel* target)
-{
-	_model = target;
-	redoImpl();
-}
+Hix::Features::DeleteModel::DeleteModel(GLModel* target):_model(target)
+{}
 
 Hix::Features::DeleteModel::~DeleteModel()
 {
@@ -38,6 +35,11 @@ void Hix::Features::DeleteModel::redoImpl()
 		qmlManager->releaseFromGLModels(raw);
 	}
 	_model = RedoInfo{ std::unique_ptr<GLModel>(raw), parent };
+}
+
+void Hix::Features::DeleteModel::runImpl()
+{
+	redoImpl();
 }
 
 GLModel* Hix::Features::DeleteModel::getDeletedModel()

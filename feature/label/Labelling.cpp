@@ -203,8 +203,8 @@ Hix::Features::Feature* Hix::Features::LabellingMode::applyLabelMesh()
 {
 	if (!_previewModel)
 	{
-		qDebug() << "no labellingTextPreview";
-		QMetaObject::invokeMethod(qmlManager->labelPopup, "noModel");
+		//qDebug() << "no labellingTextPreview";
+		//QMetaObject::invokeMethod(qmlManager->labelPopup, "noModel");
 		return nullptr;
 	}
 
@@ -216,8 +216,6 @@ Hix::Features::Feature* Hix::Features::LabellingMode::applyLabelMesh()
 Hix::Features::Labelling::Labelling(GLModel* parentModel, GLModel* previewModel)
 	: _targetModel(parentModel), _label(previewModel)
 {
-	_targetModel->setMaterialColor(Hix::Render::Colors::Selected);
-	_targetModel->updateModelMesh();
 }
 
 Hix::Features::Labelling::~Labelling()
@@ -234,4 +232,10 @@ void Hix::Features::Labelling::redoImpl()
 	if (!qmlManager->isSelected(_targetModel))
 		_label->setMaterialColor(Hix::Render::Colors::Default);
 	_label->QNode::setParent(_targetModel);
+}
+
+void Hix::Features::Labelling::runImpl()
+{
+	_targetModel->setMaterialColor(Hix::Render::Colors::Selected);
+	_targetModel->updateModelMesh();
 }

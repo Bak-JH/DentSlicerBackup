@@ -10,7 +10,10 @@ Hix::QML::FeaturePopupShell::FeaturePopupShell(QQuickItem* parent) : QQuickItem(
 Hix::QML::FeaturePopupShell::~FeaturePopupShell()
 {
 }
-
+QQuickItem* Hix::QML::FeaturePopupShell::getQItem()
+{
+	return this;
+}
 
 
 Hix::QML::ProgressPopupShell::ProgressPopupShell(QQuickItem* parent) : QQuickItem(parent)
