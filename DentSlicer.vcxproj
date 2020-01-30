@@ -248,6 +248,7 @@
     <ClCompile Include="common\GTEngine\Source\Mathematics\GteVETNonmanifoldMesh.cpp" />
     <ClCompile Include="common\GTEngine\Source\Mathematics\MSW\GteCPUQueryInstructions.cpp" />
     <ClCompile Include="common\GTEngine\Source\Mathematics\MSW\GteIntelSSE.cpp" />
+    <ClCompile Include="feature\FeaturesLoader.cpp" />
     <ClCompile Include="feature\ImportModel.cpp" />
     <ClCompile Include="feature\interfaces\ModeDialog.cpp" />
     <ClCompile Include="Qml\components\ControlOwner.cpp" />
@@ -833,6 +834,7 @@
     <ClInclude Include="common\rapidjson\stringbuffer.h" />
     <ClInclude Include="common\rapidjson\writer.h" />
     <ClInclude Include="common\Singleton.h" />
+    <ClInclude Include="feature\FeaturesLoader.h" />
     <ClInclude Include="feature\ImportModel.h" />
     <ClInclude Include="feature\interfaces\ModeDialog.h" />
     <ClInclude Include="feature\interfaces\ModeFactory.h" />

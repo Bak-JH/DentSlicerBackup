@@ -46,7 +46,7 @@ namespace Hix
 			QString _text;
 		};
 
-		class DropdownBox : public QQuickItem, public InputControl
+		class DropdownBox : public QQuickRectangle, public InputControl
 		{
 			Q_OBJECT
 			Q_PROPERTY(QStringList dropList MEMBER _dropList)

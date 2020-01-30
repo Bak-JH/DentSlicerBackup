@@ -18,7 +18,7 @@ Hix.ToggleSwitch {
 		id: control
 		anchors.left: leftText.right
 		anchors.verticalCenter: parent.verticalCenter
-		checked: parent.isChecked
+		checked: parent.isLeft
 
 		indicator: Rectangle {
 			implicitWidth: 28
@@ -42,7 +42,7 @@ Hix.ToggleSwitch {
 		}
 
 		onToggled: {
-			isChecked = checked;
+			isLeft = checked;
 		}
 	}
 	Text {

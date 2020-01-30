@@ -193,6 +193,9 @@
     <ClCompile Include="Qml\util\QMLUtil.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="feature\FeaturesLoader.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="common\Debug.h" />
@@ -814,6 +817,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Qml\util\QMLUtil.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="feature\FeaturesLoader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

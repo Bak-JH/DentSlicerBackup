@@ -3,7 +3,7 @@
 #include <qquickitem.h>
 #include <qstring.h>
 #include <qqmlcontext.h>
-
+#include "../../qmlmanager.h"
 
 
 QQuickItem* Hix::QML::findChildItemByName(QQuickItem* start, const QString& name)
@@ -13,8 +13,8 @@ QQuickItem* Hix::QML::findChildItemByName(QQuickItem* start, const QString& name
 
 	while (!s.empty())
 	{
-		auto curr = s.back();
-		s.pop_back();
+		auto curr = s.front();
+		s.pop_front();
 		if (curr->objectName() == name)
 		{
 			return curr;
@@ -25,20 +25,22 @@ QQuickItem* Hix::QML::findChildItemByName(QQuickItem* start, const QString& name
 			s.push_back(each);
 		}
 	}
-	return nullptr;
+	throw std::runtime_error("failed to find QML element by name" + name.toStdString());
 }
 
 QQuickItem* Hix::QML::findChildItemByID(QQuickItem* start, const QString& id)
 {
 	std::deque<QQuickItem*> s;
 	s.push_back(start);
+	//auto rootContext = qmlManager->engine->rootContext();
+	auto engine = qmlManager->engine;
 
 	while (!s.empty())
 	{
-		auto curr = s.back();
-		s.pop_back();
-		QQmlContext* const context = qmlContext(curr);
-		if (context->nameForObject(curr) == id)
+		auto curr = s.front();
+		s.pop_front();
+		auto context = qmlContext(curr);
+		if (context && context->nameForObject(curr) == id)
 		{
 			return curr;
 		}
@@ -48,6 +50,6 @@ QQuickItem* Hix::QML::findChildItemByID(QQuickItem* start, const QString& id)
 			s.push_back(each);
 		}
 	}
-	return nullptr;
+	throw std::runtime_error("failed to find QML element by id" + id.toStdString());
 
 }

@@ -5,6 +5,7 @@
 
 #include <string>
 #include <functional>
+#include <optional>
 namespace Hix
 {
 	namespace QML
@@ -14,6 +15,7 @@ namespace Hix
 			std::string featureName;
 			std::string defaultButtonImgPath;
 			std::string activeButtonImgPath;
+			std::function<void()>  functor;
 		};
 		/// Button base class ///
 		class FeatureMenu : public QQuickItem
@@ -26,9 +28,10 @@ namespace Hix
 			void addDivider();
 		protected:
 			void componentComplete() override;
+			
 
 		private:
-			QQmlComponent _component;
+			std::optional<QQmlComponent> _component;
 			QQuickItem* _featureItems;
 		};
 	}

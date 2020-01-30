@@ -4,7 +4,7 @@ import QtQuick.Controls 2.1
 import QtQuick.Controls.Styles 1.4
 import QtGraphicalEffects 1.12
 
-Hix.ImageToggleSwitch {
+Hix.ToggleSwitch {
 	id: root
 
 	Hix.Button {
@@ -34,7 +34,7 @@ Hix.ImageToggleSwitch {
 			anchors.horizontalCenter: parent.horizontalCenter
 		}
 
-		onClicked: { hitFlatCut(); root.setChecked(false) }
+		onClicked: { hitFlatCut(); root.isLeft = true; }
 
 		states: [
 			State {
@@ -87,7 +87,7 @@ Hix.ImageToggleSwitch {
 			anchors.horizontalCenter: parent.horizontalCenter
 		}
 
-		onClicked: { hitFreeCut(); root.setChecked (true) }
+		onClicked: { hitFreeCut(); root.isLeft = false; }
 
 		states: [
 			State {

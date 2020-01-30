@@ -43,7 +43,7 @@ void Hix::QML::TextInputBox::setInputText(std::string text)
 	emit inputTextChanged();
 }
 
-Hix::QML::DropdownBox::DropdownBox(QQuickItem* parent)
+Hix::QML::DropdownBox::DropdownBox(QQuickItem* parent): QQuickRectangle(parent)
 {
 }
 
