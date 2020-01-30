@@ -51,7 +51,7 @@ Hix.ProgressPopupShell {
 				from: 0
 				to: 360
 				duration: 1200
-				running: root.runing
+				// running: root.runing
 				loops: Animation.Infinite;
 				easing.type: Easing.InOutQuad
 			}

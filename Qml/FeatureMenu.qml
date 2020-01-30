@@ -1,21 +1,22 @@
 import QtQuick 2.4
-import hix.qml 1.0
-
+import hix.qml 1.0 as Hix
+import QtQuick.Layouts 1.3
 import QtGraphicalEffects 1.12
 
-Item {
+Hix.FeatureMenu {
 
 	property string activeNameColor: "#1db2c4"
 	
 	Rectangle {
 		width: 1365
 		height: 90
-		id: featureMenu
 		radius: 45
 		color: "#FFFFFF"
 		RowLayout {
+			anchors.left: parent.left
+			anchors.leftMargin: parent.radius
             id: featureItems
-			spacing: parent.radius
+			objectName: "featureItems"
 			MenuItem {
 				id:open
 				iconBasic: "qrc:/Resource/menu_open.png"

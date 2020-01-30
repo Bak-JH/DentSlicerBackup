@@ -88,5 +88,6 @@
         <file>Qml/FeaturePopup/LeftPopupSupport.qml</file>
         <file>Qml/ResultPopup.qml</file>
         <file>Qml/ProgressPopup.qml</file>
+        <file>Qml/Controls/CtrToggleImgSwitch.qml</file>
     </qresource>
 </RCC>

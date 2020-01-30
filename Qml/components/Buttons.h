@@ -49,10 +49,12 @@ namespace Hix
 		class ToggleSwitch : public Button
 		{
 			Q_OBJECT
+			Q_PROPERTY(bool isLeft MEMBER _isLeft)
 		public:
 			ToggleSwitch(QQuickItem* parent = nullptr);
 			virtual ~ToggleSwitch();
 			void initialize(QVariant leftVal, QVariant rightVal);
+			//void setIsLeft(bool isLeft);
 			QVariant value()const;
 		signals:
 			void checkedChanged();

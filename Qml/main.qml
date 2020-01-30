@@ -18,7 +18,6 @@ Item{
         visible: false
 
         objectName: "mainWindow"
-        property alias lefttabExport: lefttabExport
         property alias mttab : mttab
 
         property alias mainFont : mainFont
@@ -49,8 +48,9 @@ Item{
 			id: openBold
             source: "qrc:/Resource/font/OpenSans-Bold.ttf"
 		}
-        Item{
+        Rectangle{
             id: mainItem
+            color: "#E5E5E5"
             anchors.top : window.top
             anchors.left : window.left
             anchors.right : window.right
@@ -96,45 +96,36 @@ Item{
 
                 }
             }
+            Scene3D {
+                id: scene3d
+                objectName: "scene3d"
+                anchors.top : parent.top
+                anchors.left : parent.left
+                width: window.width
+                height: window.height
+                focus: true
+                hoverEnabled: true
+                aspects: ["input", "logic"]
+                cameraAspectRatioMode: Scene3D.UserAspectRatio
 
-            Rectangle{
-                id : back
-                anchors.top : featureMenu.bottom
-                anchors.left : partlist.right
-                anchors.right : parent.right
-                anchors.bottom : parent.bottom
-                color: "#E5E5E5"
+                function disableScene3D(){
+                    scene3d.enabled = false;
+                }
 
-                Scene3D {
-                    id: scene3d
-                    objectName: "scene3d"
+                function enableScene3D(){
+                    scene3d.enabled = true;
+                }
 
-                    anchors.top : parent.top
-                    anchors.left : parent.left
-                    anchors.right : parent.right
-                    anchors.bottom : parent.bottom
-                    focus: true
-                    hoverEnabled: true
-                    aspects: ["input", "logic"]
-                    cameraAspectRatioMode: Scene3D.UserAspectRatio
-
-                    function disableScene3D(){
-                        scene3d.enabled = false;
-                    }
-
-                    function enableScene3D(){
-                        scene3d.enabled = true;
-                    }
-
-                    MainView {
-                        objectName: "MainView"
-                        id: sceneRoot
-                    }
+                MainView {
+                    objectName: "MainView"
+                    id: sceneRoot
                 }
             }
+            
 
 		    FeatureMenu {
 			    id: featureMenu
+                objectName: "featureMenu"
 			    height: 100
 			    anchors.top: parent.top
 			    anchors.left: partlist.right
@@ -201,50 +192,8 @@ Item{
                 anchors.leftMargin: 15
 			    anchors.topMargin: 20
 		    }
-		    /*
-		    FeatureMenu {
-			    id: bastardymenu
-			    anchors.top: uppertab.bottom
-			    anchors.left: lefttab.right
-			    anchors.leftMargin: 15
-			    anchors.topMargin: 20
-		    }
-		    */
 
-		
-		    /*
-		    LeftPopup {
-			    id: leftpopup
-			    anchors.top: uppertab.bottom
-			    anchors.left: lefttab.right
-			    anchors.leftMargin: 15
-			    anchors.topMargin: 20
-		    }
-		    LeftPopupScale
-		    {
-			    id: leftpopupscale
-			    anchors.top: featureMenu.bottom
-			    anchors.left: leftpopuplabel.right
-                anchors.leftMargin: 15
-			    anchors.topMargin: 20
-		    }
 
-		    LeftPopupMove {
-			    id: leftpopupmove
-			    anchors.top: uppertab.bottom
-			    anchors.left: lefttab.right
-			    anchors.leftMargin: 15
-			    anchors.topMargin: 20
-		    }
-		    LeftPopupSupport
-		    {
-			    id: leftpopupsupport
-			    anchors.top: featureMenu.bottom
-			    anchors.left: partlist.right
-                anchors.leftMargin: 15
-			    anchors.topMargin: 250
-		    }
-		    */
 		    LeftPopupModelBuild
 		    {
 			    id: leftpopupmodelbuild
@@ -265,7 +214,6 @@ Item{
 		    PrintSetting
 		    {
 			    id: printsetting
-			    anchors.top: uppertab.bottom
 			    anchors.left: leftpopupmodelbuild.right
 			    anchors.leftMargin: 15
 			    anchors.topMargin: 250
@@ -290,7 +238,6 @@ Item{
 
 		    SlideBar {
 			    id: slidebar
-			    anchors.top: uppertab.bottom
 			    anchors.topMargin: 160
 			    anchors.left: leftpopuplabel.right
 			    anchors.leftMargin: 15
@@ -298,7 +245,6 @@ Item{
 		
 		    ModelBuildSlider {
 			    id: buildslidebar
-			    anchors.top: uppertab.bottom
 			    anchors.topMargin: 160
 			    anchors.left: slidebar.right
 			    anchors.leftMargin: 15

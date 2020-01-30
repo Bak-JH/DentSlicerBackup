@@ -154,7 +154,7 @@ public:
     QString groupFunctionState;
     int groupFunctionIndex;
     float progress = 0;
-    void initializeUI(QQmlApplicationEngine *e);
+    void initializeUI();
     void openModelFile_internal(QString filename);
     void openArrange();
     void addPart(QString fileName, int ID);
@@ -168,6 +168,8 @@ public:
 	void modelSelected(int);
 	
 	Hix::Features::Mode* currentMode()const;
+	//TODO: temp
+	void setMode(Hix::Features::Mode*);
 
 	//remove this
 	const std::unordered_set<GLModel*>& getSelectedModels();

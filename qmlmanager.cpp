@@ -55,6 +55,7 @@
 #include "Qml/components/PrintInfo.h"
 #include "Qml/components/Buttons.h"
 #include "Qml/components/Inputs.h"
+#include "Qml/components/FeatureMenu.h"
 
 
 #include <functional>
@@ -87,25 +88,28 @@ QmlManager::QmlManager(QObject *parent) : QObject(parent), _optBackend(this, scf
 
 	qmlRegisterType<Hix::QML::PartDeleteButton>("hix.qml", 1, 0, "PartDeleteButton");
 	qmlRegisterType<Hix::QML::PrintInfoText>("hix.qml", 1, 0, "PrintInfoText");
+
+	qmlRegisterType<Hix::QML::FeatureMenu>("hix.qml", 1, 0, "FeatureMenu");
+
 }
 
-void QmlManager::initializeUI(QQmlApplicationEngine* e){
-    engine = e;
+void QmlManager::initializeUI(){
+	mainItem = dynamic_cast<QQuickItem*>(FindItemByName(engine, "mainItem"));
+	mainWindow = FindItemByName(engine, "mainWindow");
+	loginWindow = FindItemByName(engine, "loginWindow");
+	loginButton = FindItemByName(engine, "loginButton");
+	mv = dynamic_cast<QEntity*> (FindItemByName(engine, "MainView"));
+	QMetaObject::invokeMethod(mv, "initCamera");
+
 	//initialize ray casting mouse input controller
 	QEntity* camera = dynamic_cast<QEntity*>(FindItemByName(engine, "cm"));
 	_rayCastController.initialize(camera);
-	mainItem = dynamic_cast<QQuickItem*>(FindItemByName(engine, "mainItem"));
 
-    mainWindow = FindItemByName(engine, "mainWindow");
-    loginWindow = FindItemByName(engine, "loginWindow");
-    loginButton = FindItemByName(engine, "loginButton");
     keyboardHandler = (Qt3DInput::QKeyboardHandler*)FindItemByName(engine, "keyboardHandler");
     models = (QEntity *)FindItemByName(engine, "Models");
     Lights* lights = new Lights(models);
-    mv = dynamic_cast<QEntity*> (FindItemByName(engine, "MainView"));
     systemTransform = (Qt3DCore::QTransform *) FindItemByName(engine, "systemTransform");
     mttab = (QEntity *)FindItemByName(engine, "mttab");
-    QMetaObject::invokeMethod(mv, "initCamera");
 
 	total = dynamic_cast<QEntity*> (FindItemByName(engine, "total"));
 	_camera = dynamic_cast<Qt3DRender::QCamera*> (FindItemByName(engine, "camera"));
@@ -1457,4 +1461,9 @@ void QmlManager::mbRangeSliderValueChangedSecond(double value)
 	{
 		builder->getSliderSignalTop(value);
 	}
+}
+
+void QmlManager::setMode(Hix::Features::Mode* mode)
+{
+	_currentMode.reset(mode);
 }
