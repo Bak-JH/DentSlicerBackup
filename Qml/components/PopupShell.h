@@ -3,9 +3,7 @@
 #include <QtQuick/private/qquicktext_p.h>
 #include "ControlOwner.h"
 
-#include "QtQml/private/qqmllistmodel_p.h"
-#include <string>
-#include "glmodel.h"
+class GLModel;
 
 namespace Hix
 {
