@@ -3,7 +3,6 @@
 #include "../sliceExport.h"
 using namespace Hix;
 using namespace Hix::Features;
-using namespace Hix::Features::Cut;
 using namespace Hix::Engine3D;
 using namespace Hix::Slicer;
 using namespace ClipperLib;

@@ -3,13 +3,16 @@
 #include "render/Color.h"
 #include "glmodel.h"
 #include "../qmlmanager.h"
+#include "Qml/features/ModeDialogQMLParsed.h"
 using namespace Hix::Debug;
+using namespace Hix::Features;
 
 Hix::Features::ExtendMode::ExtendMode() 
 	:PPShaderMode(qmlManager->getSelectedModels())
 {
-	
+	new ModeDialogQMLParsed(EXTEND_POPUP_URL);
 }
+
 std::deque<HalfEdgeConstItr> boundaryPath(const std::unordered_set<FaceConstItr>& faces)
 {
 	std::unordered_map<VertexConstItr, HalfEdgeConstItr> edgeMap;

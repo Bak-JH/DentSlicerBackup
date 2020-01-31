@@ -10,7 +10,7 @@
 #include "qmlmanager.h"
 #include "feature/SupportFeature.h"
 using namespace Hix::Support;
-using namespace Hix::Memory;
+using namespace Qt3DCore;
 
 Hix::Support::SupportRaftManager::SupportRaftManager()
 {
