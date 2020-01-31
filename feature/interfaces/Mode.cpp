@@ -1,4 +1,5 @@
 #include "Mode.h"
+#include "../../Qml/features/ModeDialogQMLParsed.h"	
 using namespace Hix::Features;
 
 Hix::Features::Mode::Mode()
