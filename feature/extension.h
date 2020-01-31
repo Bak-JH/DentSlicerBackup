@@ -47,7 +47,7 @@ namespace Hix
 		class ExtendMode: public SelectFaceMode, public PPShaderMode
 		{
 		public:
-			ExtendMode(const std::unordered_set<GLModel*> & selectedModels);
+			ExtendMode();
 			virtual ~ExtendMode();
 			void faceSelected(GLModel* selected, const Hix::Engine3D::FaceConstItr& selectedFace, const Hix::Input::MouseEventData& mouse, const Qt3DRender::QRayCasterHit& hit)override;
 			FeatureContainerFlushSupport* applyExtend(double distance);

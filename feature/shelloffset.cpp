@@ -9,11 +9,21 @@
 using namespace Hix::Engine3D;
 using namespace Hix::Features;
 using namespace Hix::Features::Cut;
-Hix::Features::ShellOffsetMode::ShellOffsetMode(GLModel* glmodel) : _subject(glmodel), _cuttingPlane(qmlManager->total)
+Hix::Features::ShellOffsetMode::ShellOffsetMode():_cuttingPlane(qmlManager->total)
 {
-	_modelBound = _subject->recursiveAabb();
-	_cuttingPlane.enablePlane(true);
-	_cuttingPlane.transform().setTranslation(QVector3D(0, 0, _modelBound.zMin() + 1 * _modelBound.lengthZ() / 1.8));
+	auto selectedModels = qmlManager->getSelectedModels();
+	if (selectedModels.size() == 1)
+	{
+		_modelBound = _subject->recursiveAabb();
+		_cuttingPlane.enablePlane(true);
+		_cuttingPlane.transform().setTranslation(QVector3D(0, 0, _modelBound.zMin() + 1 * _modelBound.lengthZ() / 1.8));
+		_subject = *selectedModels.begin();
+	}
+	else
+	{
+		qmlManager->openResultPopUp("A single model must be selected", "", "");
+		throw std::runtime_error("A single model must be selected");
+	}
 }
 
 Hix::Features::ShellOffsetMode::~ShellOffsetMode()
@@ -47,7 +57,7 @@ void Hix::Features::ShellOffset::runImpl()
 {
 	addFeature(new HollowMesh(_target, _offset));
 	addFeature(new ZAxialCut(_target, _zPlane, Hix::Features::Cut::KeepTop));
-	runImpl();
+	FeatureContainer::runImpl();
 }
 
 Hix::Features::HollowMesh::HollowMesh(GLModel* target, float offset) : _target(target), _offset(offset)

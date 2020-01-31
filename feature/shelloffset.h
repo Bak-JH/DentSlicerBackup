@@ -11,7 +11,7 @@ namespace Hix
 		class ShellOffsetMode : public Hix::Features::Mode
 		{
 		public:
-			ShellOffsetMode(GLModel* glmodel);
+			ShellOffsetMode();
 			virtual ~ShellOffsetMode();
 			void getSliderSignal(double value);
 			Hix::Features::Feature* doOffset(float offset);

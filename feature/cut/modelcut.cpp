@@ -12,8 +12,8 @@ using namespace ClipperLib;
 
 
 
-Hix::Features::ModelCut::ModelCut(const std::unordered_set<GLModel*>& selectedModels, Hix::Engine3D::Bounds3D bound):
-	_models(selectedModels), _cuttingPlane(qmlManager->total), _modelsBound(bound)
+Hix::Features::ModelCut::ModelCut():
+	_models(qmlManager->getSelectedModels()), _cuttingPlane(qmlManager->total), _modelsBound(qmlManager->getSelectedBound())
 {
 }
 

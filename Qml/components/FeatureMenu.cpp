@@ -3,7 +3,7 @@
 #include "../util/QMLUtil.h"
 #include <QtQuick/private/qquickrectangle_p.h>
 #include "Buttons.h"
-
+#include "../../feature/FeaturesLoader.h"
 
 
 using namespace Hix::QML;
@@ -21,14 +21,14 @@ Hix::QML::FeatureMenu::~FeatureMenu()
 {
 }
 
-void Hix::QML::FeatureMenu::addButton(MenuButtonArg& args)
+void Hix::QML::FeatureMenu::addButton(const MenuButtonArg& args)
 {
 	auto button = dynamic_cast<Hix::QML::Button*>(_component->create(qmlContext(this)));
 	button->setParentItem(_featureItems);
 	button->setProperty("iconBasic", QString::fromStdString(args.defaultButtonImgPath));
 	button->setProperty("iconSelected", QString::fromStdString(args.activeButtonImgPath));
 	button->setProperty("featureName", QString::fromStdString(args.featureName));
-	
+	QObject::connect(button, &Hix::QML::Button::clicked, args.functor);
 }
 
 void Hix::QML::FeatureMenu::addDivider()
@@ -48,7 +48,8 @@ void Hix::QML::FeatureMenu::componentComplete()
 	__super::componentComplete();
 	_featureItems = findChildItemByID(this, "featureItems");
 	_component.emplace(qmlManager->engine, MENU_ITEM_URL);
-
+	Hix::Features::FeaturesLoader loader;
+	loader.loadFeatureButtons(*this);
 	//TODO: temp, move this to license manager and application loader
 	
 

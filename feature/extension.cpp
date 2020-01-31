@@ -2,11 +2,11 @@
 #include "render/ModelMaterial.h"
 #include "render/Color.h"
 #include "glmodel.h"
-
+#include "../qmlmanager.h"
 using namespace Hix::Debug;
 
-Hix::Features::ExtendMode::ExtendMode(const std::unordered_set<GLModel*>& selectedModels) 
-	:PPShaderMode(selectedModels)
+Hix::Features::ExtendMode::ExtendMode() 
+	:PPShaderMode(qmlManager->getSelectedModels())
 {
 	
 }

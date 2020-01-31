@@ -2,13 +2,11 @@
 #include "qmlmanager.h"
 #include "widget/RotateWidget.h"
 
-Hix::Features::RotateMode::RotateMode(const std::unordered_set<GLModel*>& targetModels, Hix::Input::RayCastController* controller) 
-		: WidgetMode(targetModels, controller)
+Hix::Features::RotateMode::RotateMode(): WidgetMode(), _targetModels(qmlManager->getSelectedModels())
 {
 	_widget.addWidget(std::make_unique<Hix::UI::RotateWidget>(QVector3D(1, 0, 0), &_widget));
 	_widget.addWidget(std::make_unique<Hix::UI::RotateWidget>(QVector3D(0, 1, 0), &_widget));
 	_widget.addWidget(std::make_unique<Hix::UI::RotateWidget>(QVector3D(0, 0, 1), &_widget));
-	_widget.setVisible(true);
 }
 
 Hix::Features::RotateMode::~RotateMode()
@@ -33,7 +31,18 @@ void Hix::Features::RotateMode::featureEnded()
 		each->rotateDone();
 		qmlManager->sendUpdateModelInfo();
 	}
-	_widget.updatePosition();
+	updatePosition();
+}
+
+QVector3D Hix::Features::RotateMode::getWidgetPosition()
+{
+	return 	Hix::Engine3D::combineBounds(_targetModels).centre();
+
+}
+
+std::unordered_set<GLModel*>& Hix::Features::RotateMode::models()
+{
+	return _targetModels;
 }
 
 Hix::Features::FeatureContainerFlushSupport* Hix::Features::RotateMode::applyRotate(const QQuaternion& rot)
@@ -94,8 +103,9 @@ const GLModel* Hix::Features::Rotate::model() const
 	return _model;
 }
 
-Hix::Features::RotateModeNoUndo::RotateModeNoUndo(const std::unordered_set<GLModel*>& targetModels, Input::RayCastController* controller):RotateMode(targetModels, controller)
+Hix::Features::RotateModeNoUndo::RotateModeNoUndo(const std::unordered_set<GLModel*>& targetModels):RotateMode()
 {
+	_targetModels = targetModels;
 }
 
 Hix::Features::RotateModeNoUndo::~RotateModeNoUndo()
@@ -112,5 +122,6 @@ void Hix::Features::RotateModeNoUndo::featureEnded()
 	{
 		each->updateRecursiveAabb();
 	}
-	_widget.updatePosition();
+	updatePosition();
 }
+

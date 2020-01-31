@@ -70,7 +70,7 @@ namespace Hix
 		class SupportMode: public SelectFaceMode
 		{
 		public:
-			SupportMode(const std::unordered_set<GLModel*>& selectedModels);
+			SupportMode();
 			virtual ~SupportMode();
 			void faceSelected(GLModel* selected, const Hix::Engine3D::FaceConstItr& selectedFace, const Hix::Input::MouseEventData& mouse, const Qt3DRender::QRayCasterHit& hit)override;
 			Hix::Features::FeatureContainer* generateAutoSupport();
