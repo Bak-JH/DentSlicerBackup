@@ -7,6 +7,7 @@
 #include "input/HitTestAble.h"
 
 #include "feature/overhangDetect.h"
+using namespace Qt3DCore;
 using namespace Qt3DRender;
 using namespace Qt3DExtras;
 

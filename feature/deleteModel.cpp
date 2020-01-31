@@ -2,8 +2,6 @@
 #include "glmodel.h"
 #include "qmlmanager.h"
 
-using namespace Qt3DCore;
-
 Hix::Features::DeleteModel::DeleteModel(GLModel* target):_model(target)
 {}
 

@@ -1,11 +1,9 @@
 #include "ModeDialogQMLParsed.h"
 #include "../../qmlmanager.h"
 #include "../components/PopupShell.h"
-
 using namespace Hix::QML;
 using namespace Hix::Features;
-
-Hix::Features::ModeDialogQMLParsed::ModeDialogQMLParsed(const QUrl qmlSourcePath): _component(qmlManager->engine, qmlSourcePath)
+Hix::Features::ModeDialogQMLParsed::ModeDialogQMLParsed(QUrl qmlSourcePath): _component(qmlManager->engine, qmlSourcePath)
 {
 	auto popupShell = dynamic_cast<FeaturePopupShell*>(_component.create());
 	_popup.reset(popupShell);

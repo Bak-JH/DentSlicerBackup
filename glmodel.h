@@ -15,6 +15,7 @@
 #include "render/ModelMaterial.h"
 #define MAX_BUF_LEN 2000000
 
+using namespace Qt3DCore;
 using namespace Qt3DRender;
 using namespace Qt3DExtras;
 
@@ -35,7 +36,7 @@ public:
 	void dragEnded(Hix::Input::MouseEventData&) override;
 
     // load teeth model default
-    GLModel(Qt3DCore::QEntity* parent=nullptr, Hix::Engine3D::Mesh* loadMesh=nullptr, QString fname="", const Qt3DCore::QTransform* transform = nullptr); // main constructor for mainmesh and shadowmesh
+    GLModel(QEntity* parent=nullptr, Hix::Engine3D::Mesh* loadMesh=nullptr, QString fname="", const Qt3DCore::QTransform* transform = nullptr); // main constructor for mainmesh and shadowmesh
 	virtual ~GLModel();
 
 	void getChildrenModels(std::unordered_set<const GLModel*>& results)const;

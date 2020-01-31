@@ -36,7 +36,6 @@ Item{
 		
         Rectangle{
             id: mainItem
-            objectName: "mainItem"
             color: "#E5E5E5"
             anchors.top : window.top
             anchors.left : window.left
