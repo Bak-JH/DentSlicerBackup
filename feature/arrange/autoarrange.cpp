@@ -28,9 +28,8 @@ namespace std
 
 Hix::Features::AutoArrangeMode::AutoArrangeMode()
 {
-	auto work = new AutoArrange(qmlManager->getSelectedModels());
+	auto work = new AutoArrange(qmlManager->getAllModels());
 	qmlManager->taskManager().enqueTask(work);
-	qmlManager->setMode(nullptr);
 }
 
 Hix::Features::AutoArrangeMode::~AutoArrangeMode()

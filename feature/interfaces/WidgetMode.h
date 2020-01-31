@@ -15,9 +15,8 @@ namespace Hix
 			void updatePosition();
 			virtual void featureStarted() = 0;
 			virtual void featureEnded() = 0;
-			const std::unordered_set<GLModel*>& models()const;
+			virtual QVector3D getWidgetPosition() = 0;
 		protected:
-			std::unordered_set<GLModel*> _targetModels;
 			UI::Widget3D _widget;
 			Input::RayCastController* _controller;
 		};

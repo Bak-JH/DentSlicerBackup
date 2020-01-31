@@ -7,7 +7,7 @@ namespace Hix
 {
 	namespace Features
 	{
-		class AutoArrangeMode : public Hix::Features::Mode
+		class AutoArrangeMode : public Hix::Features::InstantMode
 		{
 		public:
 			AutoArrangeMode();

@@ -116,8 +116,8 @@ void Hix::Features::RemoveRaft::runImpl()
 ////////////////////
 /// Support Mode ///
 ////////////////////
-Hix::Features::SupportMode::SupportMode(const std::unordered_set<GLModel*>& selectedModels)
-	: _targetModels(selectedModels)
+Hix::Features::SupportMode::SupportMode()
+	: _targetModels(qmlManager->getSelectedModels())
 {
 	qmlManager->getRayCaster().setHoverEnabled(true);
 }

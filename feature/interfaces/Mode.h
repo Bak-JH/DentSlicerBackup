@@ -11,5 +11,11 @@ namespace Hix
 			Mode();
 			virtual ~Mode();
 		};
+		class InstantMode : public Mode
+		{
+		public:
+			InstantMode();
+			virtual ~InstantMode();
+		};
 	}
 }

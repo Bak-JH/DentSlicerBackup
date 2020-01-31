@@ -9,3 +9,11 @@ Hix::Features::Mode::Mode()
 Hix::Features::Mode::~Mode()
 {
 }
+
+Hix::Features::InstantMode::InstantMode()
+{
+}
+
+Hix::Features::InstantMode::~InstantMode()
+{
+}
