@@ -13,6 +13,7 @@ namespace Hix
 	namespace Features
 	{
 		using namespace Engine3D;
+		const QUrl EXTEND_POPUP_URL = QUrl("qrc:/Qml/FeaturePopup/PopupExtend.qml");
 
 		struct ExtendArg
 		{

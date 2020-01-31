@@ -3,7 +3,6 @@
 #include <QObject>
 #include <QDebug>
 #include <QProcess>
-#include "feature/stlexporter.h"
 #include "DentEngine/src/svgexporter.h"
 #include "slicingengine.h"
 #include "qmlmanager.h"
@@ -14,6 +13,7 @@
 #include "feature/overhangDetect.h"
 #include "DentEngine/src/SlicerDebug.h"
 #include "DentEngine/src/SlicerDebugInfoExport.h"
+#include "support/SupportRaftManager.h"
 
 using namespace Hix;
 using namespace Hix::Slicer;
