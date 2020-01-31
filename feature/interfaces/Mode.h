@@ -12,7 +12,7 @@ namespace Hix
 			Mode();
 			virtual ~Mode();
 		protected:
-			std::unique_ptr< ModeDialogQMLParsed> _dialog;
+			std::unique_ptr<ModeDialogQMLParsed> _dialog;
 		};
 		class InstantMode : public Mode
 		{

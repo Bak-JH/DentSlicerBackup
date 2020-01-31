@@ -2,33 +2,17 @@
 #define QMLMANAGER_H
 
 
-#include <QObject>
-#include <QDebug>
-#include <QString>
-#include <QGuiApplication>
 #include <QQmlApplicationEngine>
-#include <QQmlEngine>
-#include <QMouseEvent>
-#include <QCoreApplication>
-#include <QEvent>
-#include <QPointF>
-#include <QCursor>
-#include <QQmlProperty>
-#include "feature/shelloffset.h"
-#include "glmodel.h"
-#include "QtConcurrent/QtConcurrentRun"
-#include "QFuture"
+#include <Qt3DInput>
 #include "utils/httpreq.h"
-#include <QKeyboardHandler>
 #include "input/raycastcontroller.h"
-#include "feature/overhangDetect.h"
 #include "Tasking/TaskManager.h"
 #include "slice/SlicingOptBackend.h"
 #include "support/SupportRaftManager.h"
 #include "feature/FeatureHistoryManager.h"
-#include "feature/interfaces/Feature.h"
 #include "widget/GridBed.h"
 #include "Settings/AppSetting.h"
+#include "glmodel.h"
 #define VIEW_MODE_OBJECT 0
 #define VIEW_MODE_LAYER 2
 
@@ -67,12 +51,14 @@ namespace Hix
 	namespace Features
 	{
 		class Feature;
+		class Mode;
 	}
     namespace QML
     {
         class FeatureMenu;
     }
 }
+
 class QQuickItem;
 class QmlManager : public QObject
 {
@@ -114,10 +100,10 @@ public:
     QObject* boxUpperTab;
     QObject* boxLeftTab;
 	QQuickItem* scene3d;
-    QEntity* models;
-	QEntity* total;
+    Qt3DCore::QEntity* models;
+	Qt3DCore::QEntity* total;
     Qt3DCore::QTransform* systemTransform;
-	QEntity* mv;
+	Qt3DCore::QEntity* mv;
 	Qt3DCore::QEntity* boundedBox;
     Qt3DCore::QEntity *mttab;
     QObject* undoRedoButton;
