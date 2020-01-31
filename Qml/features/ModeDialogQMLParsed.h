@@ -1,7 +1,8 @@
 #pragma once
 #include "../../feature/interfaces/ModeDialog.h"
+#include <qstring.h>
 #include <qqmlcomponent.h>
-
+#include <qquickitem.h>
 namespace Hix
 {
 	namespace QML
@@ -13,7 +14,7 @@ namespace Hix
 		class ModeDialogQMLParsed: public ModeDialog
 		{
 		public:
-			ModeDialogQMLParsed(const QUrl qmlSourcePath);
+			ModeDialogQMLParsed(QUrl qmlSourcePath);
 			virtual ~ModeDialogQMLParsed();
 			Hix::QML::ControlOwner& controlOwner()override;
 		protected:

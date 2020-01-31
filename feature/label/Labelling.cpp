@@ -5,7 +5,6 @@
 using namespace Hix::Engine3D;
 using namespace Hix::Polyclipping;
 using namespace Hix::Shapes2D;
-using namespace Qt3DCore;
 using namespace Hix::Features::Extrusion;
 using namespace ClipperLib;
 
