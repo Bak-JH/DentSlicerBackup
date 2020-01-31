@@ -5,7 +5,9 @@
 #include <unordered_set>
 #include "../../DentEngine/src/polyclipping/polyclipping.h"
 #include "../../qmlmanager.h"
-
+#include "../move.h"
+using namespace Hix::Features;
+using namespace Hix::Engine3D;
 constexpr float MARGIN = 20;
 namespace std
 {
@@ -24,20 +26,35 @@ namespace std
 	};
 }
 
-void translateFromBottLeft(GLModel* model, float xTranslate, float yTranslate)
+Hix::Features::AutoArrangeMode::AutoArrangeMode()
+{
+	auto work = new AutoArrange(qmlManager->getAllModels());
+	qmlManager->taskManager().enqueTask(work);
+}
+
+Hix::Features::AutoArrangeMode::~AutoArrangeMode()
+{
+}
+
+
+Hix::Features::Move* translateFromBottLeft(GLModel* model, float xTranslate, float yTranslate)
 {
 	auto bound = model->recursiveAabb();
 	auto currTranslation = model->transform().translation();
 	QVector3D translation(-bound.xMin() + xTranslate, -bound.yMin() + yTranslate,0);
-	model->moveModel(translation);
+	return new Move(model, translation);
 }
-Hix::Features::Autoarrange::Autoarrange(const std::unordered_set<GLModel*>& selected)
+Hix::Features::AutoArrange::AutoArrange(const std::unordered_set<GLModel*>& selected): _selected(selected)
+{
+}
+
+void Hix::Features::AutoArrange::runImpl()
 {
 	std::unordered_multimap<rbp::RectSize, GLModel*> modelRectMap;
 	std::unordered_set<GLModel*> widthLonger;
 	std::vector<rbp::RectSize> rectsInput;
 	std::vector<rbp::Rect> packedOutput;
-	for (auto model : selected)
+	for (auto model : _selected)
 	{
 		auto bound = model->recursiveAabb();
 		int x = bound.lengthX() * Hix::Polyclipping::INT_PT_RESOLUTION + MARGIN;
@@ -50,7 +67,7 @@ Hix::Features::Autoarrange::Autoarrange(const std::unordered_set<GLModel*>& sele
 		{
 			widthLonger.insert(model);
 		}
-		rbp::RectSize rect{x,y};
+		rbp::RectSize rect{ x,y };
 		rectsInput.push_back(rect);
 		modelRectMap.insert(std::make_pair(rect, model));
 	}
@@ -69,14 +86,14 @@ Hix::Features::Autoarrange::Autoarrange(const std::unordered_set<GLModel*>& sele
 		if (yMax < y)
 			yMax = y;
 	}
-	int xCenter = xMax/2;
-	int yCenter = yMax/2;
+	int xCenter = xMax / 2;
+	int yCenter = yMax / 2;
 
 	for (auto& each : packedOutput)
 	{
 		bool isRectWidthLonger = true;
 		bool isModelWidthLonger = true;
-		rbp::RectSize lookupRect { each.width, each.height };
+		rbp::RectSize lookupRect{ each.width, each.height };
 		if (lookupRect.width < lookupRect.height)
 		{
 			std::swap(lookupRect.width, lookupRect.height);
@@ -97,7 +114,9 @@ Hix::Features::Autoarrange::Autoarrange(const std::unordered_set<GLModel*>& sele
 		}
 		float xTranslate = double(each.x - xCenter) / Hix::Polyclipping::INT_PT_RESOLUTION;
 		float yTranslate = double(each.y - yCenter) / Hix::Polyclipping::INT_PT_RESOLUTION;
-		translateFromBottLeft(model, xTranslate, yTranslate);
+		addFeature(translateFromBottLeft(model, xTranslate, yTranslate));
 		modelRectMap.erase(equalRange.first);
 	}
+	FeatureContainer::runImpl();
 }
+

@@ -1,8 +1,9 @@
 #pragma once
-#include "qmlmanager.h"
 #include "feature/interfaces/Mode.h"
 #include "feature/interfaces/FlushSupport.h"
-
+#include <qvector3d.h>
+#include <qmatrix4x4.h>
+#include "../DentEngine/src/Bounds3D.h"
 namespace Hix
 {
 	namespace Features
@@ -29,7 +30,7 @@ namespace Hix
 		class ScaleMode : public Mode
 		{
 		public:
-			ScaleMode(const std::unordered_set<GLModel*>& selectedModels);
+			ScaleMode();
 			virtual ~ScaleMode();
 
 			FeatureContainerFlushSupport* applyScale(QVector3D scale);

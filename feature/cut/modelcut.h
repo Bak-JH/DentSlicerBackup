@@ -15,7 +15,7 @@ namespace Hix
 				ZAxial,
 				Polyline
 			};
-			ModelCut(const std::unordered_set<GLModel*>& selectedModels, Hix::Engine3D::Bounds3D bound);
+			ModelCut();
 			virtual ~ModelCut();
 			void cutModeSelected(int type);
 			void getSliderSignal(double value);

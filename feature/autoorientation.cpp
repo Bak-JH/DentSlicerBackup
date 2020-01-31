@@ -645,4 +645,11 @@ rotateResult* autoorientationPrivate::euler(Liste bestside){
     return result;
 }
 
+Hix::Features::AutoOrientateMode::AutoOrientateMode()
+{
+    //TODO
+}
 
+Hix::Features::AutoOrientateMode::~AutoOrientateMode()
+{
+}

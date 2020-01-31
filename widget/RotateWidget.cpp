@@ -110,7 +110,8 @@ void Hix::UI::RotateWidget::doDrag(Hix::Input::MouseEventData& e)
 	auto curAngle = calculateRot();
 	auto dif = curAngle - _pastAngle;
 	_pastAngle = curAngle;
-	for (auto selectedModel : _parent->mode()->models()) {
+	;
+	for (auto selectedModel : dynamic_cast<Features::RotateMode*>(_parent->mode())->models()) {
 		auto rotation = QQuaternion::fromAxisAndAngle(_axis, dif);
 		selectedModel->rotateModel(rotation);
 	}

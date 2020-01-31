@@ -24,7 +24,6 @@
 #include "utils/utils.h"
 #include "render/lights.h"
 #include "DentEngine/src/configuration.h"
-#include "feature/stlexporter.h"
 #include "DentEngine/src/MeshIterators.h"
 #include "feature/cut/modelcut.h"
 #include "feature/label/Labelling.h"
@@ -44,6 +43,7 @@
 #include "feature/ModelBuilder/ModelBuilderMode.h"
 #include "feature/sliceExport.h"
 #include "feature/UndoRedo.h"
+#include "feature/stlexport.h"
 
 #include "render/CircleMeshEntity.h"
 #include "Qml/components/PopupShell.h"
@@ -390,19 +390,6 @@ void QmlManager::openArrange(){
 	}
 }
 
-void QmlManager::runArrange(){
-
-	std::unordered_set<GLModel*> listedModels;
-	for (auto& each : glmodels)
-	{
-		listedModels.insert(each.first);
-	}
-    qmlManager->openProgressPopUp();
-	Autoarrange arrange(listedModels);
-	qmlManager->setProgress(1);
-
-}
-
 
 
 GLModel* QmlManager::findGLModelByName(QString modelName){
@@ -644,7 +631,7 @@ Hix::Features::Mode* QmlManager::currentMode()const
 
 void QmlManager::openLayFlat()
 {
-	_currentMode.reset(new LayFlatMode(selectedModels));
+	_currentMode.reset(new LayFlatMode());
 }
 
 void QmlManager::closeLayFlat()
@@ -695,7 +682,7 @@ void QmlManager::generateLabelMesh()
 
 void QmlManager::openExtension()
 {
-	_currentMode.reset(new ExtendMode(selectedModels));
+	_currentMode.reset(new ExtendMode());
 }
 
 void QmlManager::closeExtension()
@@ -852,29 +839,15 @@ void QmlManager::applyRotation(int mode, qreal X, qreal Y, qreal Z){
     }
 }
 
-void QmlManager::save() {
-    STLexporter* ste = new STLexporter();
 
-    qDebug() << "file save called";
-    if (selectedModels.empty()) {
-        qmlManager->closeSave();
-        QMetaObject::invokeMethod(boxUpperTab, "all_off");
-        return;
-    }
-    QString fileName = QFileDialog::getSaveFileName(nullptr, tr("Save to STL file"), "", tr("3D Model file (*.stl)"));
-    if(fileName == "") {
-        qmlManager->closeSave();
-        QMetaObject::invokeMethod(boxUpperTab, "all_off");
-        return;
-    }
-    qmlManager->openProgressPopUp();
-    QFuture<void> future = QtConcurrent::run(ste, &STLexporter::exportSTL, fileName);
-    return;
-}
 
 void QmlManager::cameraViewChanged()
 {
-	emit cameraViewChangedNative();
+	auto widgetMode = dynamic_cast<Hix::Features::WidgetMode*>(_currentMode.get());
+	if (widgetMode)
+	{
+		widgetMode->updatePosition();
+	}
 }
 
 void QmlManager::groupSelectionActivate(bool active){
@@ -940,7 +913,6 @@ void QmlManager::runGroupFeature(int ftrType, QString state, double arg1, double
     case ftrExport:
 	{
 		//mode-less since no UI change except for the file dialog.
-		Hix::Features::ExportMode exportMode;
 		break;
 
 	}
@@ -1021,19 +993,11 @@ void QmlManager::setProgress(float value){
     //}
 }
 
-void QmlManager::openSave() {
-    qDebug() << "open Save";
-    return;
-}
 
-void QmlManager::closeSave() {
-    qDebug() << "close Save";
-    return;
-}
 
 void QmlManager::openMove(){
     //moveActive = true;
-	_currentMode.reset(new MoveMode(selectedModels, &_rayCastController));
+	_currentMode.reset(new MoveMode());
     return;
 }
 
@@ -1047,7 +1011,7 @@ void QmlManager::closeMove(){
 void QmlManager::openRotate(){
     qDebug() << "open Rotate";
 
-	_currentMode.reset(new RotateMode(selectedModels, &_rayCastController));
+	_currentMode.reset(new RotateMode());
 
 	QMetaObject::invokeMethod(qmlManager->boundedBox, "hideBox");
     slicingData->setProperty("visible", false);
@@ -1063,7 +1027,7 @@ void QmlManager::closeRotate(){
 
 void QmlManager::openScale() 
 {
-	_currentMode.reset(new ScaleMode(selectedModels));
+	_currentMode.reset(new ScaleMode());
 }
 
 void QmlManager::closeScale() 
@@ -1259,7 +1223,7 @@ QVector2D QmlManager::world2Screen(QVector3D target) {
 void QmlManager::openSupport()
 {
 	//just empty placeholder to give modality to Support.
-	_currentMode.reset(new SupportMode(selectedModels));
+	_currentMode.reset(new SupportMode());
 }
 void QmlManager::closeSupport()
 {
@@ -1334,7 +1298,7 @@ void QmlManager::cutModeSelected(int mode)
 }
 void QmlManager::openCut()
 {
-	_currentMode.reset(new ModelCut(selectedModels, getSelectedBound()));
+	_currentMode.reset(new ModelCut());
 
 }
 void QmlManager::closeCut()
@@ -1368,22 +1332,6 @@ void QmlManager::getCrossSectionSignal(int val)
 }
 
 
-void QmlManager::openShellOffset() {
-	if (selectedModels.size() == 1)
-	{
-		_currentMode.reset(new ShellOffsetMode(*selectedModels.begin()));
-
-	}
-	else
-	{
-		qmlManager->openResultPopUp("A single model must be selected", "", "");
-	}
-
-}
-
-void QmlManager::closeShellOffset() {
-	_currentMode.reset();
-}
 
 
 // for shell offset
@@ -1465,5 +1413,22 @@ void QmlManager::mbRangeSliderValueChangedSecond(double value)
 
 void QmlManager::setMode(Hix::Features::Mode* mode)
 {
+
 	_currentMode.reset(mode);
+	auto instantMode = dynamic_cast<Hix::Features::InstantMode*>(mode);
+	if (instantMode)
+	{
+		_currentMode.reset(nullptr);
+	}
+
+}
+
+const std::unordered_set<GLModel*>& QmlManager::getAllModels()
+{
+	std::unordered_set<GLModel*> listedModels;
+	for (auto& each : glmodels)
+	{
+		listedModels.insert(each.first);
+	}
+	return listedModels;
 }
