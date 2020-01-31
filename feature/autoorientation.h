@@ -44,7 +44,7 @@ namespace Hix
 
 	namespace Features
 	{
-		class AutoOrientateMode : public Hix::Features::Mode
+		class AutoOrientateMode : public Hix::Features::InstantMode
 		{
 		public:
 			AutoOrientateMode();

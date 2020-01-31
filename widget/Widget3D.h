@@ -37,16 +37,12 @@ namespace Hix
 			void setManipulated(bool isManipulated);
 			Hix::Features::WidgetMode* mode();
 
-		public slots:
-			void updatePosition();
-
 		protected:
 			Hix::Features::WidgetMode* _mode;
 
 		private:
 			std::vector<std::unique_ptr<Hix::UI::Widget>> _widgets;
 			bool _visible = false;
-			QVector3D _center;
 			Qt3DCore::QTransform _transform;
 			bool _isManipulated = false;
 

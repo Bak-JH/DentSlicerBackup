@@ -22,7 +22,7 @@
 #include "sliceExport.h"
 
 
-const std::string ICO_PRE("qrc:/Resource/");
+const std::string ICO_PRE("qrc:/Resource/menu_");
 const std::string ICO_BASIC_SUF(".png");
 const std::string ICO_SELECTED_SUF("_select_1.png");
 
@@ -45,13 +45,24 @@ std::function<void()> openFeatureModeFunctor()
 	std::function<void()> functor = []() {
 		if (!qmlManager->isFeatureActive())
 		{
-			qmlManager->setMode(new ModeType());
+			try
+			{
+				ModeType* newMode = new ModeType();
+				qmlManager->setMode(newMode);
+			}
+			catch (...)
+			{
+				qDebug() << "mode creation failed";
+				qmlManager->setMode(nullptr);
+			}
+
 		}
 		else if (qmlManager->isActive<ModeType>())
 		{
 			qmlManager->setMode(nullptr);
 		}
 	};
+	return functor;
 }
 
 template<typename ModeType>

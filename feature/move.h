@@ -37,13 +37,18 @@ namespace Hix
 		{
 		public:
 
-			MoveMode(const std::unordered_set<GLModel*>& targetModels, Input::RayCastController* controller);
+			MoveMode();
 			virtual ~MoveMode();
 			void featureStarted()override;
 			void featureEnded()override;
+			QVector3D getWidgetPosition()override;
+
 			FeatureContainerFlushSupport* applyMove(const QVector3D& to);
 
+		private:
 			Hix::Features::FeatureContainerFlushSupport* _moveContainer = nullptr;
+			std::unordered_set<GLModel*> _targetModels;
+
 		};
 	}
 }

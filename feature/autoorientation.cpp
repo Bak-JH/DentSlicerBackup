@@ -648,7 +648,6 @@ rotateResult* autoorientationPrivate::euler(Liste bestside){
 Hix::Features::AutoOrientateMode::AutoOrientateMode()
 {
     //TODO
-    qmlManager->setMode(nullptr);
 }
 
 Hix::Features::AutoOrientateMode::~AutoOrientateMode()

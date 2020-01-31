@@ -2,13 +2,10 @@
 #include "widget/MoveWidget.h"
 #include "qmlmanager.h"
 
-Hix::Features::MoveMode::MoveMode
-(const std::unordered_set<GLModel*>& targetModels, Input::RayCastController* controller)
-	: WidgetMode(targetModels, controller)
+Hix::Features::MoveMode::MoveMode():WidgetMode(), _targetModels(qmlManager->getSelectedModels())
 {
 	_widget.addWidget(std::make_unique<Hix::UI::MoveWidget>(QVector3D(1, 0, 0), &_widget));
 	_widget.addWidget(std::make_unique<Hix::UI::MoveWidget>(QVector3D(0, 1, 0), &_widget));
-	_widget.setVisible(true);
 }
 
 Hix::Features::MoveMode::~MoveMode()
@@ -31,7 +28,7 @@ void Hix::Features::MoveMode::featureEnded()
 		each->moveDone();
 	
 	qmlManager->sendUpdateModelInfo();
-	_widget.updatePosition();
+	updatePosition();
 }
 
 Hix::Features::FeatureContainerFlushSupport* Hix::Features::MoveMode::applyMove(const QVector3D& to)
@@ -43,6 +40,11 @@ Hix::Features::FeatureContainerFlushSupport* Hix::Features::MoveMode::applyMove(
 }
 
 
+QVector3D Hix::Features::MoveMode::getWidgetPosition()
+{
+	return 	Hix::Engine3D::combineBounds(_targetModels).centre();
+
+}
 
 
 

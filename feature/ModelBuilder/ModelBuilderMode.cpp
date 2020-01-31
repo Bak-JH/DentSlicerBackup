@@ -50,7 +50,7 @@ Hix::Features::ModelBuilderMode::ModelBuilderMode(): _topPlane(qmlManager->total
 
 
 	std::unordered_set<GLModel*> models { _model.get() };
-	_rotateMode.reset(new RotateModeNoUndo(models, &qmlManager->getRayCaster()));
+	_rotateMode.reset(new RotateModeNoUndo(models));
 	qmlManager->setProgress(1.0);
 }
 

@@ -1,7 +1,7 @@
 #include "scale.h"
+#include "qmlmanager.h"
 
-Hix::Features::ScaleMode::ScaleMode(const std::unordered_set<GLModel*>& selectedModels)
-	: _targetModels(selectedModels)
+Hix::Features::ScaleMode::ScaleMode(): _targetModels(qmlManager->getSelectedModels())
 {
 }
 

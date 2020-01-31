@@ -171,8 +171,9 @@ public:
 	//TODO: temp
 	void setMode(Hix::Features::Mode*);
 
-	//remove this
 	const std::unordered_set<GLModel*>& getSelectedModels();
+	const std::unordered_set<GLModel*>& getAllModels();
+
 	QVector2D world2Screen(QVector3D target);
 
     GLModel* findGLModelByName(QString filename);
@@ -205,7 +206,6 @@ public:
     Q_INVOKABLE void unselectAll();
     Q_INVOKABLE void modelVisible(int ID, bool isVisible);
     Q_INVOKABLE void doDelete();
-    Q_INVOKABLE void runArrange();
     Q_INVOKABLE void setViewMode(int viewMode);
     Q_INVOKABLE int getViewMode();
     Q_INVOKABLE void sendUpdateModelInfo();
@@ -249,7 +249,6 @@ private:
 signals:
     void updateModelInfo(int printing_time, int layer, QString xyz, float volume);
     void arrangeDone(std::vector<QVector3D>, std::vector<float>);
-	void cameraViewChangedNative();
 
 
 public slots:
@@ -312,9 +311,6 @@ public slots:
 
     void openOrientation();
     void closeOrientation();
-    void openSave();
-    void closeSave();
-    void save();
 	void cameraViewChanged();
     void viewObjectChanged(bool checksed);
     void viewLayerChanged(bool checked);
@@ -332,8 +328,7 @@ public slots:
     void layerSupportersButtonChanged(bool chacked);
     void layerRaftButtonChanged(bool chacked);
 
-	void openShellOffset();
-	void closeShellOffset();
+
 	void generateShellOffset(double factor);
 
 	//modelbuilder

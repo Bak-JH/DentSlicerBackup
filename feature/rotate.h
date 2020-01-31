@@ -32,25 +32,27 @@ namespace Hix
 		class RotateMode : public WidgetMode
 		{
 		public:
-			RotateMode(const std::unordered_set<GLModel*>& targetModels, Input::RayCastController* controller);
+			RotateMode();
 			virtual ~RotateMode();
 			void featureStarted()override;
 			void featureEnded()override;
+			QVector3D getWidgetPosition()override;
+			std::unordered_set<GLModel*>& models();
 			Hix::Features::FeatureContainerFlushSupport* applyRotate(const QQuaternion& rot);
 
 		protected:
 			Hix::Features::FeatureContainerFlushSupport* _rotateContainer;
+			std::unordered_set<GLModel*> _targetModels;
+
 		};
 
 		class RotateModeNoUndo : public RotateMode
 		{
 		public:
-			RotateModeNoUndo(const std::unordered_set<GLModel*>& targetModels, Input::RayCastController* controller);
+			RotateModeNoUndo(const std::unordered_set<GLModel*>& targetModels);
 			virtual ~RotateModeNoUndo();
 			void featureStarted()override;
 			void featureEnded()override;
-
-
 		};
 
 		
