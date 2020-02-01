@@ -1,8 +1,7 @@
 #pragma once
-#include "../../feature/interfaces/ModeDialog.h"
-#include <qstring.h>
 #include <qqmlcomponent.h>
-#include <qquickitem.h>
+#include <qurl.h>
+#include "../../feature/interfaces/ModeDialog.h"
 namespace Hix
 {
 	namespace QML

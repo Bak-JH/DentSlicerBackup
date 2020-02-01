@@ -91,7 +91,7 @@ QmlManager::QmlManager(QObject *parent) : QObject(parent), _optBackend(this, scf
 }
 
 void QmlManager::initializeUI(){
-	mainItem = dynamic_cast<QQuickItem*>(FindItemByName(engine, "mainItem"));
+	featureArea = dynamic_cast<QQuickItem*>(FindItemByName(engine, "featureArea"));
 	mainWindow = FindItemByName(engine, "mainWindow");
 	loginWindow = FindItemByName(engine, "loginWindow");
 	loginButton = FindItemByName(engine, "loginButton");

@@ -107,7 +107,7 @@ public:
 
     // UI components
 	Qt3DRender::QCamera* _camera;
-    QQuickItem* mainItem;
+    QQuickItem* featureArea;
     QObject* mainWindow;
     QObject* loginWindow;
     QObject* loginButton;
