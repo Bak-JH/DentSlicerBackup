@@ -35,7 +35,6 @@ Item{
 		FontLoader{ id: openBold; source: "qrc:/Resource/font/OpenSans-Bold.ttf" }
 		
         Rectangle{
-            id: mainItem
             color: "#E5E5E5"
             anchors.top : window.top
             anchors.left : window.left
@@ -186,16 +185,23 @@ Item{
             anchors.top : featureMenu.bottom
             anchors.bottom: parent.bottom
         }
-		
-
-
-		PopupMove {
-			id: leftpopupmove
+		Item {
+			id: featureArea
+			objectName: "featureArea"
 			anchors.top: viewmode.bottom
 			anchors.topMargin: sidePadding
 			anchors.left: parent.left
 			anchors.leftMargin: sidePadding
 		}
+
+
+		// PopupMove {
+		// 	id: leftpopupmove
+		// 	anchors.top: viewmode.bottom
+		// 	anchors.topMargin: sidePadding
+		// 	anchors.left: parent.left
+		// 	anchors.leftMargin: sidePadding
+		// }
 		/*
 		PopupCut {
 			id: leftpopupcut
@@ -230,14 +236,14 @@ Item{
 			anchors.leftMargin: 15
 			anchors.topMargin: 20
 		}*/
-		PopupSupport
-		{
-			id: leftpopupsupport
-			anchors.top: viewmode.bottom
-			anchors.topMargin: sidePadding
-			anchors.left: parent.left
-			anchors.leftMargin: sidePadding
-		}
+		// PopupSupport
+		// {
+		// 	id: leftpopupsupport
+		// 	anchors.top: viewmode.bottom
+		// 	anchors.topMargin: sidePadding
+		// 	anchors.left: parent.left
+		// 	anchors.leftMargin: sidePadding
+		// }
 		
 		
 

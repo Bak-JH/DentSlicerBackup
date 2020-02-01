@@ -34,10 +34,11 @@ void Hix::QML::FeatureMenu::addButton(const MenuButtonArg& args)
 void Hix::QML::FeatureMenu::addDivider()
 {
 	auto rect = new QQuickRectangle();
-	rect->setParentItem(_featureItems);
 	rect->setProperty("width", 1);
 	rect->setProperty("height", 80);
 	rect->setProperty("color", "#dddddd");
+	rect->setParentItem(_featureItems);
+
 
 }
 

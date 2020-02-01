@@ -5,7 +5,7 @@ import QtQuick.Controls 2.1
 import "../Controls"
 
 FeaturePopup {
-	popuptitle.text: qsTr("Extend")
+	title: qsTr("Extend")
 	height: 220
 
 	Text {

@@ -3,11 +3,13 @@
 #include "render/Color.h"
 #include "glmodel.h"
 #include "../qmlmanager.h"
+#include "../qml/features/ModeDialogQMLParsed.h"
 using namespace Hix::Debug;
-
+const QUrl EXTEND_POPUP_URL = QUrl("qrc:/Qml/FeaturePopup/PopupExtend.qml");
 Hix::Features::ExtendMode::ExtendMode() 
 	:PPShaderMode(qmlManager->getSelectedModels())
 {
+	_dialog.reset(new ModeDialogQMLParsed(EXTEND_POPUP_URL));
 	
 }
 std::deque<HalfEdgeConstItr> boundaryPath(const std::unordered_set<FaceConstItr>& faces)
