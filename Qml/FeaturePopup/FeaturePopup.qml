@@ -9,7 +9,7 @@ Hix.FeaturePopupShell
 {
 	id: root
 	width: 256
-
+	property var title
 	property var myPadding: 16
 
 	Rectangle 
@@ -20,65 +20,65 @@ Hix.FeaturePopupShell
 		color: "#F6FEFF"
 		radius: 8
 
-		Text {
-			id: popuptitle
-			text: root.title
-			font.pointSize: 11
-			font.family: openRegular.name
-			font.weight: Font.Bold
-			anchors.top: parent.top
-			anchors.left: parent.left
-			anchors.topMargin: myPadding-2
-			anchors.leftMargin: myPadding
-		}
+		// Text {
+		// 	id: popuptitle
+		// 	text: root.title
+		// 	font.pointSize: 11
+		// 	font.family: openRegular.name
+		// 	font.weight: Font.Bold
+		// 	anchors.top: parent.top
+		// 	anchors.left: parent.left
+		// 	anchors.topMargin: myPadding-2
+		// 	anchors.leftMargin: myPadding
+		// }
 
-		Hix.Button 
-		{
-			id: closeButton
-			width: 16
-			height: 16
-			color: "transparent"
-			anchors.top: parent.top
-			anchors.right: parent.right
-			anchors.topMargin: myPadding
-			anchors.rightMargin: myPadding
-			Image {
-				id: closeimg
-				source: "qrc:/Resource/closebutton.png"
-				anchors.top: closeButton.top
-				anchors.right: closeButton.right
-			}
-			onEntered: { closeimg.source = "qrc:/Resource/closebutton_hover.png" }
-			onExited: { closeimg.source = "qrc:/Resource/closebutton.png" }
-		}
+		// Hix.Button 
+		// {
+		// 	id: closeButton
+		// 	width: 16
+		// 	height: 16
+		// 	color: "transparent"
+		// 	anchors.top: parent.top
+		// 	anchors.right: parent.right
+		// 	anchors.topMargin: myPadding
+		// 	anchors.rightMargin: myPadding
+		// 	Image {
+		// 		id: closeimg
+		// 		source: "qrc:/Resource/closebutton.png"
+		// 		anchors.top: closeButton.top
+		// 		anchors.right: closeButton.right
+		// 	}
+		// 	onEntered: { closeimg.source = "qrc:/Resource/closebutton_hover.png" }
+		// 	onExited: { closeimg.source = "qrc:/Resource/closebutton.png" }
+		// }
 
-		Hix.Button
-		{
-			id: applyButton
-			width: 224
-			height: 32
-			radius: 16
-			color: "#00b9c8"
+		// Hix.Button
+		// {
+		// 	id: applyButton
+		// 	width: 224
+		// 	height: 32
+		// 	radius: 16
+		// 	color: "#00b9c8"
 
-			anchors.bottom: parent.bottom
-			anchors.bottomMargin: 16
-			anchors.horizontalCenter: parent.horizontalCenter
+		// 	anchors.bottom: parent.bottom
+		// 	anchors.bottomMargin: 16
+		// 	anchors.horizontalCenter: parent.horizontalCenter
 
-			Text 
-			{
-				color: "#FFFFFF"
-				font.pointSize: 10
-				text: "Apply"
-				font.family: openSemiBold.name
+		// 	Text 
+		// 	{
+		// 		color: "#FFFFFF"
+		// 		font.pointSize: 10
+		// 		text: "Apply"
+		// 		font.family: openSemiBold.name
 				
-				anchors.horizontalCenter: applyButton.horizontalCenter
-				anchors.verticalCenter: applyButton.verticalCenter
-			}
+		// 		anchors.horizontalCenter: applyButton.horizontalCenter
+		// 		anchors.verticalCenter: applyButton.verticalCenter
+		// 	}
 
-			onClicked: { console.log("clicked"); }
-			onEntered: { color = "#21959e" }
-			onExited: { color = "#00b9c8" }
-		}
+		// 	onClicked: { console.log("clicked"); }
+		// 	onEntered: { color = "#21959e" }
+		// 	onExited: { color = "#00b9c8" }
+		// }
 	}
 	
 	DropShadow 
