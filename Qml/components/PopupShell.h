@@ -17,8 +17,7 @@ namespace Hix
 		class FeaturePopupShell : public QQuickItem, public ControlOwner
 		{
 			Q_OBJECT
-			Q_PROPERTY(QString title MEMBER _title)
-			Q_PROPERTY(bool applyReady MEMBER _applyReady)
+			//Q_PROPERTY(bool applyReady MEMBER _applyReady)
 
 		public:
 			FeaturePopupShell(QQuickItem* parent = nullptr);
@@ -32,10 +31,9 @@ namespace Hix
 
 
 		private:
-			QString _title = "Name";
-			bool _applyReady = false;
-			Controls::Button* _closeButton;
-			Controls::Button* _applyButton;
+			//bool _applyReady = false;
+			Controls::Button* _closeButton = nullptr;
+			Controls::Button* _applyButton = nullptr;
 
 		};
 

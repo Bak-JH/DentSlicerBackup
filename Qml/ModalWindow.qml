@@ -53,7 +53,7 @@ Hix.ModalShell {
 		radius: 8
 		color: "#ffffff"
 
-		Hix.CloseButton {
+		Hix.Button {
 			id: closeButton
 			width: 16
 			height: 16

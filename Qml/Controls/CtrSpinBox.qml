@@ -8,8 +8,8 @@ Hix.InputSpinBox {
 	id: root
 	property alias control: control
 	property alias label: label
-	property var fromNum
-	property var toNum
+	property double  fromNum
+	property double  toNum
 	
 	onValueChanged:{ control.value = value }
 

@@ -3,7 +3,6 @@
 #include <QObject>
 #include <QDebug>
 #include <QProcess>
-#include "feature/stlexporter.h"
 #include "DentEngine/src/svgexporter.h"
 #include "slicingengine.h"
 #include "qmlmanager.h"

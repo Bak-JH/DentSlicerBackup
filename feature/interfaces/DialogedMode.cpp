@@ -11,8 +11,10 @@ using namespace Hix::QML;
 
 Hix::Features::DialogedMode::DialogedMode(const QUrl& dialogUrl)
 {
-	QQmlComponent component(qmlManager->engine, dialogUrl);
-	auto qmlInstance = component.create(qmlContext(qmlManager->featureArea));
+	//QQmlComponent component(qmlManager->engine, dialogUrl);
+	QQmlComponent*  component = new QQmlComponent(qmlManager->engine, dialogUrl);
+
+	auto qmlInstance = component->create(qmlContext(qmlManager->featureArea));
 	auto popupShell = dynamic_cast<FeaturePopupShell*>(qmlInstance);
 	_popup.reset(popupShell);
 	_popup->setParentItem(qmlManager->featureArea);

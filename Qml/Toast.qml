@@ -46,7 +46,7 @@ Hix.ToastShell {
 			font.pointSize: 10
 		}
 		/*
-		Hix.CloseButton {
+		Hix.Button {
 			width: 16
 			height: 16
 			color: "transparent"

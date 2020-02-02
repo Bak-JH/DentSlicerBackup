@@ -175,7 +175,15 @@ Item{
             anchors.left: partlist.right
             anchors.top : featureMenu.bottom
         }
-
+		PopupLabel {
+			// id: featureArea
+			// objectName: "featureArea"
+			anchors.top: viewmode.bottom
+			anchors.topMargin: sidePadding
+			anchors.left: parent.left
+			anchors.leftMargin: sidePadding
+		}
+		
         UICore{
             id:ui
             width: (window.width - partlist.width) * 1
@@ -185,14 +193,15 @@ Item{
             anchors.top : featureMenu.bottom
             anchors.bottom: parent.bottom
         }
-		Item {
-			id: featureArea
-			objectName: "featureArea"
-			anchors.top: viewmode.bottom
-			anchors.topMargin: sidePadding
-			anchors.left: parent.left
-			anchors.leftMargin: sidePadding
-		}
+		// Item {
+		// 	id: featureArea
+		// 	objectName: "featureArea"
+		// 	anchors.top: viewmode.bottom
+		// 	anchors.topMargin: sidePadding
+		// 	anchors.left: parent.left
+		// 	anchors.leftMargin: sidePadding
+		// }
+
 
 
 		// PopupMove {

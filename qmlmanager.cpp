@@ -66,12 +66,7 @@ QmlManager::QmlManager(QObject *parent) : QObject(parent), _optBackend(this, scf
 	,layerViewFlags(LAYER_INFILL | LAYER_SUPPORTERS | LAYER_RAFT)
 	, _cursorEraser(QPixmap(":/Resource/cursor_eraser.png")), _currentMode(nullptr), viewMode(0)
 {
-	qmlRegisterType<Hix::QML::Controls::Button>("hix.qml", 1, 0, "Button");
-	qmlRegisterType<Hix::QML::Controls::ToggleSwitch>("hix.qml", 1, 0, "ToggleSwitch");
 
-	qmlRegisterType<Hix::QML::Controls::DropdownBox>("hix.qml", 1, 0, "DropdownBox");
-	qmlRegisterType<Hix::QML::Controls::InputSpinBox>("hix.qml", 1, 0, "InputSpinBox");
-	qmlRegisterType<Hix::QML::Controls::TextInputBox>("hix.qml", 1, 0, "TextInputBox");
 
 	qmlRegisterType<Hix::QML::FeaturePopupShell>("hix.qml", 1, 0, "FeaturePopupShell");
 	qmlRegisterType<Hix::QML::ProgressPopupShell>("hix.qml", 1, 0, "ProgressPopupShell");
@@ -87,10 +82,16 @@ QmlManager::QmlManager(QObject *parent) : QObject(parent), _optBackend(this, scf
 
 	qmlRegisterType<Hix::QML::FeatureMenu>("hix.qml", 1, 0, "FeatureMenu");
 
+	qmlRegisterType<Hix::QML::Controls::Button>("hix.qml", 1, 0, "Button");
+	qmlRegisterType<Hix::QML::Controls::ToggleSwitch>("hix.qml", 1, 0, "ToggleSwitch");
+
+	qmlRegisterType<Hix::QML::Controls::DropdownBox>("hix.qml", 1, 0, "DropdownBox");
+	qmlRegisterType<Hix::QML::Controls::InputSpinBox>("hix.qml", 1, 0, "InputSpinBox");
+	qmlRegisterType<Hix::QML::Controls::TextInputBox>("hix.qml", 1, 0, "TextInputBox");
 }
 
 void QmlManager::initializeUI(){
-	featureArea = dynamic_cast<QQuickItem*>(FindItemByName(engine, "featureArea"));
+	//featureArea = dynamic_cast<QQuickItem*>(FindItemByName(engine, "featureArea"));
 	mainWindow = FindItemByName(engine, "mainWindow");
 	loginWindow = FindItemByName(engine, "loginWindow");
 	loginButton = FindItemByName(engine, "loginButton");

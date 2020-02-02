@@ -32,7 +32,7 @@ Hix.FeaturePopupShell {
 			anchors.leftMargin: 16
 		}
 
-		Hix.CloseButton {
+		Hix.Button {
 			width: 16
 			height: 16
 			anchors.top: parent.top
