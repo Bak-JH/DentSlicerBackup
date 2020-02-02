@@ -1,6 +1,6 @@
 #include "PopupShell.h"
 #include "qmlmanager.h"
-
+#include "Buttons.h"
 using namespace  Hix::QML;
 
 Hix::QML::FeaturePopupShell::FeaturePopupShell(QQuickItem* parent) : QQuickItem(parent)

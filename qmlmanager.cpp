@@ -66,9 +66,12 @@ QmlManager::QmlManager(QObject *parent) : QObject(parent), _optBackend(this, scf
 	,layerViewFlags(LAYER_INFILL | LAYER_SUPPORTERS | LAYER_RAFT)
 	, _cursorEraser(QPixmap(":/Resource/cursor_eraser.png")), _currentMode(nullptr), viewMode(0)
 {
-	qmlRegisterType<Hix::QML::CloseButton>("hix.qml", 1, 0, "CloseButton");
-	qmlRegisterType<Hix::QML::Button>("hix.qml", 1, 0, "Button");
-	qmlRegisterType<Hix::QML::ToggleSwitch>("hix.qml", 1, 0, "ToggleSwitch");
+	qmlRegisterType<Hix::QML::Controls::Button>("hix.qml", 1, 0, "Button");
+	qmlRegisterType<Hix::QML::Controls::ToggleSwitch>("hix.qml", 1, 0, "ToggleSwitch");
+
+	qmlRegisterType<Hix::QML::Controls::DropdownBox>("hix.qml", 1, 0, "DropdownBox");
+	qmlRegisterType<Hix::QML::Controls::InputSpinBox>("hix.qml", 1, 0, "InputSpinBox");
+	qmlRegisterType<Hix::QML::Controls::TextInputBox>("hix.qml", 1, 0, "TextInputBox");
 
 	qmlRegisterType<Hix::QML::FeaturePopupShell>("hix.qml", 1, 0, "FeaturePopupShell");
 	qmlRegisterType<Hix::QML::ProgressPopupShell>("hix.qml", 1, 0, "ProgressPopupShell");
@@ -77,10 +80,6 @@ QmlManager::QmlManager(QObject *parent) : QObject(parent), _optBackend(this, scf
 	qmlRegisterType<Hix::QML::RangeSlideBarShell>("hix.qml", 1, 0, "RangeSlideBarShell");
 	qmlRegisterType<Hix::QML::ModalShell>("hix.qml", 1, 0, "ModalShell");
 	qmlRegisterType<Hix::QML::ViewModeShell>("hix.qml", 1, 0, "ViewModeShell");
-
-	qmlRegisterType<Hix::QML::DropdownBox>("hix.qml", 1, 0, "DropdownBox");
-	qmlRegisterType<Hix::QML::InputSpinBox>("hix.qml", 1, 0, "InputSpinBox");
-	qmlRegisterType<Hix::QML::TextInputBox>("hix.qml", 1, 0, "TextInputBox");
 
 	qmlRegisterType<Hix::QML::PartList>("hix.qml", 1, 0, "PartList");
 
@@ -690,12 +689,6 @@ void QmlManager::closeExtension()
 	_currentMode.reset();
 }
 
-void QmlManager::generateExtensionFaces(double distance)
-{
-	auto extend = dynamic_cast<ExtendMode*>(_currentMode.get())->applyExtend(distance);
-	if(extend != nullptr)
-		_taskManager.enqueTask(extend);
-}
 
 const std::unordered_set<GLModel*>& QmlManager::getSelectedModels()
 {

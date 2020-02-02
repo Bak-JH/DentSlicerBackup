@@ -7,10 +7,16 @@
 #include "interfaces/Mode.h"
 #include "feature/interfaces/FlushSupport.h"
 #include "interfaces/DialogedMode.h"
-#include "../qml/components/ControlOwner.h"
 class GLModel;
 namespace Hix
 {
+	namespace QML
+	{
+		namespace Controls
+		{
+			class InputSpinBox;
+		}
+	}
 	namespace Features
 	{
 		using namespace Engine3D;
@@ -56,7 +62,7 @@ namespace Hix
 		private:
 			QVector3D _normal;
 			std::unordered_map<GLModel*, ExtendArg> _args;
-			Hix::QML::Controls::InputSpinBox* _spinBox;
+			Hix::QML::Controls::InputSpinBox* _extendValue;
 		};
 	}
 }

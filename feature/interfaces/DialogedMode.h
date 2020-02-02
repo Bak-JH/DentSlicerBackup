@@ -1,12 +1,14 @@
 #pragma once
 #include "Mode.h"
 #include <unordered_set>
-#include "../../DentEngine/src/mesh.h"
-#include "../../Qml/features/ModeDialogQMLParsed.h"	
-class GLModel;
 class QUrl;
 namespace Hix
 {
+	namespace QML
+	{
+		class FeaturePopupShell;
+		class ControlOwner;
+	}
 	namespace Features
 	{
 
@@ -15,9 +17,9 @@ namespace Hix
 		public:
 			DialogedMode(const QUrl& dialogUrl);
 			virtual ~DialogedMode();
-			
+			Hix::QML::ControlOwner& controlOwner();
 		protected:
-			ModeDialogQMLParsed _dialog;
+			std::unique_ptr<Hix::QML::FeaturePopupShell> _popup;
 		};
 
 	}

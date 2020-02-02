@@ -27,7 +27,7 @@ namespace Hix
 			void getControl(InputCtrlType*& ctrlPtrOut, const std::string& id)const
 			{
 				static_assert(std::is_base_of<InputControl, InputCtrlType>{});
-				ctrPtrOut = dynamic_cast<InputCtrlType*>(getControlById(id));
+				ctrlPtrOut = dynamic_cast<InputCtrlType*>(getControlById(id));
 			}
 		protected:
 			virtual QQuickItem* getQItem() = 0;

@@ -269,7 +269,6 @@ public slots:
 
 	void openExtension();
 	void closeExtension();
-	void generateExtensionFaces(double distance);
 
 	void openLayFlat();
 	void closeLayFlat();
