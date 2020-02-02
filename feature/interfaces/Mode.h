@@ -5,14 +5,13 @@ namespace Hix
 {
 	namespace Features
 	{
-		class ModeDialogQMLParsed;
 		class Mode
 		{
 		public:
 			Mode();
 			virtual ~Mode();
-		protected:
-			std::unique_ptr< ModeDialogQMLParsed> _dialog;
+			virtual void apply() {}; //TODO remove this when alls compiled
+
 		};
 		class InstantMode : public Mode
 		{

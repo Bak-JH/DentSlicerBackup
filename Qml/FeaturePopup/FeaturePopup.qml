@@ -32,7 +32,7 @@ Hix.FeaturePopupShell
 			anchors.leftMargin: myPadding
 		}
 
-		Hix.CloseButton 
+		Hix.Button 
 		{
 			id: closeButton
 			width: 16
@@ -54,7 +54,7 @@ Hix.FeaturePopupShell
 
 		Hix.Button
 		{
-			id: roundButton
+			id: applyButton
 			width: 224
 			height: 32
 			radius: 16
@@ -71,8 +71,8 @@ Hix.FeaturePopupShell
 				text: "Apply"
 				font.family: openSemiBold.name
 				
-				anchors.horizontalCenter: roundButton.horizontalCenter
-				anchors.verticalCenter: roundButton.verticalCenter
+				anchors.horizontalCenter: applyButton.horizontalCenter
+				anchors.verticalCenter: applyButton.verticalCenter
 			}
 
 			onClicked: { console.log("clicked"); }

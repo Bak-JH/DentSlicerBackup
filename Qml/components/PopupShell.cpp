@@ -10,9 +10,26 @@ Hix::QML::FeaturePopupShell::FeaturePopupShell(QQuickItem* parent) : QQuickItem(
 Hix::QML::FeaturePopupShell::~FeaturePopupShell()
 {
 }
+void Hix::QML::FeaturePopupShell::componentComplete()
+{
+	registerOwningControls();
+	getControl(_closeButton, "closeButton");
+	getControl(_applyButton, "applyButton");
+
+}
 QQuickItem* Hix::QML::FeaturePopupShell::getQItem()
 {
 	return this;
+}
+
+Controls::Button& Hix::QML::FeaturePopupShell::closeButton()
+{
+	return *_closeButton;
+}
+
+Controls::Button& Hix::QML::FeaturePopupShell::applyButton()
+{
+	return *_applyButton;
 }
 
 

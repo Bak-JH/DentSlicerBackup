@@ -13,7 +13,7 @@ Hix::QML::ControlOwner::~ControlOwner()
 }
 
 
-std::unordered_map<std::string, InputControl*> DFSQQuickItems(QQuickItem* start)
+std::unordered_map<std::string, InputControl*> BFSQuickItem(QQuickItem* start)
 {
 	std::unordered_map<std::string, InputControl*> map;
 	std::deque<QQuickItem*> s;
@@ -21,8 +21,8 @@ std::unordered_map<std::string, InputControl*> DFSQQuickItems(QQuickItem* start)
 
 	while (!s.empty())
 	{
-		auto curr = s.back();
-		s.pop_back();
+		auto curr = s.front();
+		s.pop_front();
 
 		auto neighbors = curr->childItems();
 		for (auto& each : neighbors)
@@ -30,9 +30,12 @@ std::unordered_map<std::string, InputControl*> DFSQQuickItems(QQuickItem* start)
 			auto inputControl = dynamic_cast<InputControl*>(each);
 			if (inputControl)
 			{
-				QQmlContext* const context = qmlContext(each);
-				auto qID = context->nameForObject(each);
-				map.emplace(qID.toStdString(), inputControl);
+				auto context = qmlContext(each);
+				if (context)
+				{
+					auto qID = context->nameForObject(each);
+					map.emplace(qID.toStdString(), inputControl);
+				}
 			}
 			s.emplace_back(each);
 		}
@@ -43,7 +46,7 @@ std::unordered_map<std::string, InputControl*> DFSQQuickItems(QQuickItem* start)
 
 void Hix::QML::ControlOwner::registerOwningControls()
 {
-	_inputControls = DFSQQuickItems(getQItem());
+	_inputControls = BFSQuickItem(getQItem());
 }
 
 InputControl* Hix::QML::ControlOwner::getControlById(const std::string& id) const

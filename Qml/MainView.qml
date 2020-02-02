@@ -50,36 +50,36 @@ Entity {
     }*/
 
 
-    // Entity{
-    //     id : total
-    //     objectName:"total"
-    //     Transform{
-    //         id: systemTransform
-    //         objectName : "systemTransform"
-    //         scale3D: Qt.vector3d(0.004,0.004,0.004)
-    //         rotationX : -70
-    //         rotationY : 0
-    //         rotationZ : -40
-    //     }
+    Entity{
+        id : total
+        objectName:"total"
+        Transform{
+            id: systemTransform
+            objectName : "systemTransform"
+            scale3D: Qt.vector3d(0.004,0.004,0.004)
+            rotationX : -70
+            rotationY : 0
+            rotationZ : -40
+        }
 
-    //     components: [systemTransform]
+        components: [systemTransform]
 
-    //     /* Grid Mesh */
+        /* Grid Mesh */
 
-    //     PhongMaterial{
-    //         id : meshMaterial
-    //         ambient: Qt.rgba(100/255, 100/255, 100/255, 1 )
-    //         diffuse: Qt.rgba(100/255, 100/255, 100/255, 1 )
-    //         specular: Qt.rgba(100/255, 100/255, 100/255, 1 )
-    //         shininess: 0
-    //     }
-	// 	Model{
-    //         id: meshEntity4
-    //         //inputSource:"file:///C:/Users/user/Downloads/Spider_ascii.stl"
-    //     }
-    //     CoordinateMesh{}
+        PhongMaterial{
+            id : meshMaterial
+            ambient: Qt.rgba(100/255, 100/255, 100/255, 1 )
+            diffuse: Qt.rgba(100/255, 100/255, 100/255, 1 )
+            specular: Qt.rgba(100/255, 100/255, 100/255, 1 )
+            shininess: 0
+        }
+		Model{
+            id: meshEntity4
+            //inputSource:"file:///C:/Users/user/Downloads/Spider_ascii.stl"
+        }
+        CoordinateMesh{}
 
-    // }
+    }
 
 
     KeyboardDevice{

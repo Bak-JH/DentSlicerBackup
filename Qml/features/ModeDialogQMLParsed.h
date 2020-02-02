@@ -13,12 +13,13 @@ namespace Hix
 		class ModeDialogQMLParsed: public ModeDialog
 		{
 		public:
-			ModeDialogQMLParsed(QUrl qmlSourcePath);
+			ModeDialogQMLParsed(Mode* mode, QUrl qmlSourcePath);
 			virtual ~ModeDialogQMLParsed();
 			Hix::QML::ControlOwner& controlOwner()override;
 		protected:
 			QQmlComponent _component;
 			std::unique_ptr<Hix::QML::FeaturePopupShell> _popup;
+			Mode* _mode;
 		};
 	}
 }
