@@ -7,10 +7,9 @@
 using namespace Hix::Debug;
 const QUrl EXTEND_POPUP_URL = QUrl("qrc:/Qml/FeaturePopup/PopupExtend.qml");
 Hix::Features::ExtendMode::ExtendMode() 
-	:PPShaderMode(qmlManager->getSelectedModels())
+	:PPShaderMode(qmlManager->getSelectedModels()), DialogedMode(EXTEND_POPUP_URL)
 {
-	_dialog.reset(new ModeDialogQMLParsed(EXTEND_POPUP_URL));
-	
+
 }
 std::deque<HalfEdgeConstItr> boundaryPath(const std::unordered_set<FaceConstItr>& faces)
 {
@@ -78,11 +77,12 @@ void Hix::Features::ExtendMode::faceSelected(GLModel* selected, const Hix::Engin
 	PPShaderMode::colorFaces(selected, latest);
 }
 
-Hix::Features::FeatureContainerFlushSupport* Hix::Features::ExtendMode::applyExtend(double distance)
+void Hix::Features::ExtendMode::apply()
 {
 	if (_args.empty())
-		return nullptr;
+		return;
 
+	auto distance
 	Hix::Features::FeatureContainerFlushSupport* container = new FeatureContainerFlushSupport();
 	for (auto& each : _args)
 	{

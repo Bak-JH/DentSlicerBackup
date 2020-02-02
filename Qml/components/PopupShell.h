@@ -18,24 +18,25 @@ namespace Hix
 		{
 			Q_OBJECT
 			Q_PROPERTY(QString title MEMBER _title)
+			Q_PROPERTY(bool applyReady MEMBER _applyReady)
 
 		public:
 			FeaturePopupShell(QQuickItem* parent = nullptr);
 			virtual ~FeaturePopupShell();
-
-			template<typename CtrlType, typename... InitArgs>
-			CtrlType* findAndInitControl(std::string ctrlID, InitArgs ...)
-			{
-				CtrlType* control = blablabal();
-				control->initialize(InitArgs ...);
-			}
+			Controls::Button& closeButton();
+			Controls::Button& applyButton();
 
 		protected:
+			void componentComplete() override;
 			QQuickItem* getQItem()override;
+
 
 		private:
 			QString _title = "Name";
-			//std::unique_ptr<ModeFactory> _modeFactory;
+			bool _applyReady = false;
+			Controls::Button* _closeButton;
+			Controls::Button* _applyButton;
+
 		};
 
 		class ProgressPopupShell : public QQuickItem

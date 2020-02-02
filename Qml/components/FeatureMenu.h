@@ -10,6 +10,7 @@ namespace Hix
 {
 	namespace QML
 	{
+
 		struct MenuButtonArg
 		{
 			std::string featureName;

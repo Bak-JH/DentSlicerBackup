@@ -196,6 +196,9 @@
     <ClCompile Include="feature\stlexport.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="feature\interfaces\DialogedMode.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="common\Debug.h" />
@@ -824,6 +827,9 @@
     <ClInclude Include="feature\stlexport.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="feature\interfaces\DialogedMode.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="debug\moc_predefs.h.cbt" />
@@ -979,7 +985,6 @@
     <None Include="Qml\CamBox.qml" />
     <None Include="Qml\CameraController.qml" />
     <None Include="Qml\CameraManager.qml" />
-    <None Include="Qml\Controls\CtrCutSwitch.qml" />
     <None Include="Qml\CoordinateMesh.qml" />
     <None Include="Qml\Controls\CtrDropdownBox.qml" />
     <None Include="Qml\Controls\CtrSpinBox.qml" />
@@ -1191,6 +1196,7 @@
     <None Include="resource\zoom_up.png" />
     <None Include="icon.ico" />
     <None Include="Qml\Controls\CtrToggleImgSwitch.qml" />
+    <None Include="Qml\CanvasTest.qml" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Header Files">

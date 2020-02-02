@@ -1,9 +1,9 @@
 #include "Buttons.h"
 
-using namespace Hix::QML;
+using namespace Hix::QML::Controls;
 
 /// Button baseclass ///
-Hix::QML::Button::Button(QQuickItem* parent) : QQuickRectangle(parent), _mouseArea(new QQuickMouseArea(this))
+Hix::QML::Controls::Button::Button(QQuickItem* parent) : QQuickRectangle(parent), _mouseArea(new QQuickMouseArea(this))
 {
 	// mouse area
 	connect(_mouseArea, &QQuickMouseArea::clicked, this, &Button::onClicked);
@@ -16,56 +16,42 @@ Hix::QML::Button::Button(QQuickItem* parent) : QQuickRectangle(parent), _mouseAr
 	_mouseArea->setHoverEnabled(true);
 }
 
-Hix::QML::Button::~Button()
+Hix::QML::Controls::Button::~Button()
 {
 }
 
-void Hix::QML::Button::onClicked()
+void Hix::QML::Controls::Button::onClicked()
 {
 	emit clicked();
 }
 
-void Hix::QML::Button::onEntered()
+void Hix::QML::Controls::Button::onEntered()
 {
 	emit entered();
 }
 
-void Hix::QML::Button::onExited()
+void Hix::QML::Controls::Button::onExited()
 {
 	emit exited();
 }
 
 
 
-/// Close Button ///
-Hix::QML::CloseButton::CloseButton(QQuickItem* parent) : Button(parent)
-{
-}
-
-Hix::QML::CloseButton::~CloseButton()
-{
-}
-
-void Hix::QML::CloseButton::onClicked()
-{
-	parentItem()->parentItem()->setVisible(false);
-	Button::onClicked();
-}
 
 /// Toggle Switch ///
-Hix::QML::ToggleSwitch::ToggleSwitch(QQuickItem* parent) :Button(parent)
+Hix::QML::Controls::ToggleSwitch::ToggleSwitch(QQuickItem* parent) :Button(parent)
 {
 }
 
-Hix::QML::ToggleSwitch::~ToggleSwitch()
+Hix::QML::Controls::ToggleSwitch::~ToggleSwitch()
 {
 }
 
-void Hix::QML::ToggleSwitch::initialize(QVariant leftVal, QVariant rightVal)
+void Hix::QML::Controls::ToggleSwitch::initialize(QVariant leftVal, QVariant rightVal)
 {
 }
 
-QVariant Hix::QML::ToggleSwitch::value() const
+QVariant Hix::QML::Controls::ToggleSwitch::value() const
 {
 	if (_isLeft)
 		return _leftVal;
@@ -74,7 +60,7 @@ QVariant Hix::QML::ToggleSwitch::value() const
 }
 
 
-void Hix::QML::ToggleSwitch::onClicked()
+void Hix::QML::Controls::ToggleSwitch::onClicked()
 {
 	Button::onClicked();
 }

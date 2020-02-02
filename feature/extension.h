@@ -6,7 +6,8 @@
 #include "interfaces/PPShaderMode.h"
 #include "interfaces/Mode.h"
 #include "feature/interfaces/FlushSupport.h"
-
+#include "interfaces/DialogedMode.h"
+#include "../qml/components/ControlOwner.h"
 class GLModel;
 namespace Hix
 {
@@ -44,17 +45,18 @@ namespace Hix
 
 
 
-		class ExtendMode: public SelectFaceMode, public PPShaderMode
+		class ExtendMode: public SelectFaceMode, public PPShaderMode, public DialogedMode
 		{
 		public:
 			ExtendMode();
 			virtual ~ExtendMode();
 			void faceSelected(GLModel* selected, const Hix::Engine3D::FaceConstItr& selectedFace, const Hix::Input::MouseEventData& mouse, const Qt3DRender::QRayCasterHit& hit)override;
-			FeatureContainerFlushSupport* applyExtend(double distance);
+			void apply()override;
 
 		private:
 			QVector3D _normal;
 			std::unordered_map<GLModel*, ExtendArg> _args;
+			Hix::QML::Controls::InputSpinBox* _spinBox;
 		};
 	}
 }
