@@ -1,6 +1,9 @@
 #include "PopupShell.h"
 #include "qmlmanager.h"
 #include "Buttons.h"
+#include <QtQuick/private/qquickrectangle_p.h>
+#include <QtQuick/private/qquicktext_p.h>
+#include "glmodel.h"
 using namespace  Hix::QML;
 
 Hix::QML::FeaturePopupShell::FeaturePopupShell(QQuickItem* parent) : QQuickItem(parent)
@@ -15,6 +18,7 @@ void Hix::QML::FeaturePopupShell::componentComplete()
 	registerOwningControls();
 	getControl(_closeButton, "closeButton");
 	getControl(_applyButton, "applyButton");
+	__super::componentComplete();
 
 }
 QQuickItem* Hix::QML::FeaturePopupShell::getQItem()
