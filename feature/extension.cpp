@@ -1,15 +1,19 @@
 #include "extension.h"
+#include "../qml/components/Inputs.h"
+#include "../qml/components/ControlOwner.h"
+#include "../qmlmanager.h"
 #include "render/ModelMaterial.h"
 #include "render/Color.h"
 #include "glmodel.h"
-#include "../qmlmanager.h"
-#include "../qml/features/ModeDialogQMLParsed.h"
+
+
 using namespace Hix::Debug;
 const QUrl EXTEND_POPUP_URL = QUrl("qrc:/Qml/FeaturePopup/PopupExtend.qml");
 Hix::Features::ExtendMode::ExtendMode() 
 	:PPShaderMode(qmlManager->getSelectedModels()), DialogedMode(EXTEND_POPUP_URL)
 {
-
+	auto& co = controlOwner();
+	co.getControl(_extendValue, "extendvalue");
 }
 std::deque<HalfEdgeConstItr> boundaryPath(const std::unordered_set<FaceConstItr>& faces)
 {
@@ -82,7 +86,7 @@ void Hix::Features::ExtendMode::apply()
 	if (_args.empty())
 		return;
 
-	auto distance
+	auto distance = _extendValue->getValue();
 	Hix::Features::FeatureContainerFlushSupport* container = new FeatureContainerFlushSupport();
 	for (auto& each : _args)
 	{
@@ -90,8 +94,7 @@ void Hix::Features::ExtendMode::apply()
 		container->addFeature(new Extend(each.first, arg.normal, arg.extensionFaces, distance));
 	}
 	_args.clear();
-
-	return container;
+	qmlManager->taskManager().enqueTask(container);
 }
 
 

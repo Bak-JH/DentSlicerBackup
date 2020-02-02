@@ -178,12 +178,6 @@
     <ClCompile Include="Qml\components\InputControl.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="feature\interfaces\ModeDialog.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Qml\features\ModeDialogQMLParsed.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Qml\components\FeatureMenu.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -810,12 +804,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="feature\interfaces\ModeFactory.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="feature\interfaces\ModeDialog.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Qml\features\ModeDialogQMLParsed.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Qml\util\QMLUtil.h">

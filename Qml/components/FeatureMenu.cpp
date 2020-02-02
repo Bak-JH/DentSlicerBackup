@@ -23,12 +23,12 @@ Hix::QML::FeatureMenu::~FeatureMenu()
 
 void Hix::QML::FeatureMenu::addButton(const MenuButtonArg& args)
 {
-	auto button = dynamic_cast<Hix::QML::Button*>(_component->create(qmlContext(this)));
+	auto button = dynamic_cast<Hix::QML::Controls::Button*>(_component->create(qmlContext(this)));
 	button->setParentItem(_featureItems);
 	button->setProperty("iconBasic", QString::fromStdString(args.defaultButtonImgPath));
 	button->setProperty("iconSelected", QString::fromStdString(args.activeButtonImgPath));
 	button->setProperty("featureName", QString::fromStdString(args.featureName));
-	QObject::connect(button, &Hix::QML::Button::clicked, args.functor);
+	QObject::connect(button, &Hix::QML::Controls::Button::clicked, args.functor);
 }
 
 void Hix::QML::FeatureMenu::addDivider()
