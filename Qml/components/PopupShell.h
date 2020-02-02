@@ -1,12 +1,9 @@
 #pragma once
-#include <QtQuick/private/qquickrectangle_p.h>
-#include <QtQuick/private/qquicktext_p.h>
 #include "ControlOwner.h"
-
+#include <qquickitem.h>
 #include "QtQml/private/qqmllistmodel_p.h"
 #include <string>
-#include "glmodel.h"
-
+class GLModel;
 namespace Hix
 {
 	namespace QML
@@ -17,8 +14,6 @@ namespace Hix
 		class FeaturePopupShell : public QQuickItem, public ControlOwner
 		{
 			Q_OBJECT
-			//Q_PROPERTY(bool applyReady MEMBER _applyReady)
-
 		public:
 			FeaturePopupShell(QQuickItem* parent = nullptr);
 			virtual ~FeaturePopupShell();
