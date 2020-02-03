@@ -51,17 +51,9 @@ void Hix::QML::Controls::ToggleSwitch::initialize(QVariant leftVal, QVariant rig
 {
 }
 
-QVariant Hix::QML::Controls::ToggleSwitch::value() const
-{
-	if (_isLeft)
-		return _leftVal;
-	else
-		return _rightVal;
-}
-
-
 void Hix::QML::Controls::ToggleSwitch::onClicked()
 {
+	_isChecked = !_isChecked;
 	Button::onClicked();
 }
 

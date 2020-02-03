@@ -119,6 +119,7 @@ Item{
 
 		PartList{
 			id: partlist
+			objectName: "partList"
 			//width : 265
             //height : parent.height - featureMenu.height
 			anchors.top: parent.top

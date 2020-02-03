@@ -382,17 +382,12 @@ Hix::Features::MeshRepair::~MeshRepair()
 
 void Hix::Features::MeshRepair::run()
 {
-	try
+
+	for (auto model : _selectedModels)
 	{
-		for (auto model : _selectedModels)
-		{
-			repairImpl(model, model->modelName());
-		}
+		repairImpl(model, model->modelName());
 	}
-	catch (...)
-	{
-		qDebug() << "repair failed";
-	}
+
 
 }
 

@@ -20,6 +20,7 @@ namespace Hix
 			Hix::QML::ControlOwner& controlOwner();
 		protected:
 			std::unique_ptr<Hix::QML::FeaturePopupShell> _popup;
+			bool isReady()const;
 		};
 
 	}

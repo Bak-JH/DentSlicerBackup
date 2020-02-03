@@ -11,22 +11,15 @@ namespace Hix
 	namespace QML
 	{
 
-		struct MenuButtonArg
-		{
-			std::string featureName;
-			std::string defaultButtonImgPath;
-			std::string activeButtonImgPath;
-			std::function<void()>  functor;
-		};
-		/// Button base class ///
+
 		class FeatureMenu : public QQuickItem
 		{
 			Q_OBJECT
 		public:
 			FeatureMenu(QQuickItem* parent = nullptr);
 			virtual ~FeatureMenu();
-			void addButton(const MenuButtonArg& args);
-			void addDivider();
+			QQuickItem* featureItems();
+
 		protected:
 			void componentComplete() override;
 			
