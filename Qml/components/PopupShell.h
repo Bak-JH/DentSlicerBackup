@@ -9,7 +9,6 @@ namespace Hix
 	namespace QML
 	{
 
-		class ModeFactory;
 
 		class FeaturePopupShell : public QQuickItem, public ControlOwner
 		{

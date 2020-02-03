@@ -20,9 +20,7 @@ Item{
 
         objectName: "mainWindow"
         property alias mttab : mttab
-
         property alias mainFont : mainFont
-
 		property alias openRegular: openRegular
 		property alias openSemiBold: openSemiBold
 		property alias openBold: openBold
@@ -126,7 +124,6 @@ Item{
 			anchors.topMargin: sidePadding
             anchors.left: parent.left
 			anchors.leftMargin: sidePadding
-			//z: 10
 		}
 
 		ViewMode {
@@ -177,23 +174,6 @@ Item{
             anchors.top : featureMenu.bottom
         }
 
-        UICore{
-            id:ui
-            width: (window.width - partlist.width) * 1
-            height: (window.height - featureMenu.height) * 1
-
-            anchors.left: partlist.right
-            anchors.top : featureMenu.bottom
-            anchors.bottom: parent.bottom
-        }
-		// Item {
-		// 	id: featureArea
-		// 	objectName: "featureArea"
-		// 	anchors.top: viewmode.bottom
-		// 	anchors.topMargin: sidePadding
-		// 	anchors.left: parent.left
-		// 	anchors.leftMargin: sidePadding
-		// }
 		Item {
 			id: featureArea
 			objectName: "featureArea"
@@ -203,72 +183,12 @@ Item{
 			anchors.leftMargin: sidePadding
 		}
 
-
-		// PopupMove {
-		// 	id: leftpopupmove
-		// 	anchors.top: viewmode.bottom
-		// 	anchors.topMargin: sidePadding
-		// 	anchors.left: parent.left
-		// 	anchors.leftMargin: sidePadding
+		// Toast {
+		// 	id: toast
+		// 	anchors.bottom: parent.bottom
+		// 	anchors.bottomMargin: sidePadding
+		// 	anchors.horizontalCenter: parent.horizontalCenter
 		// }
-		/*
-		PopupCut {
-			id: leftpopupcut
-			anchors.top: viewmode.bottom
-			anchors.topMargin: sidePadding
-			anchors.left: parent.right
-            anchors.leftMargin: sidePadding
-		}
-		
-
-		
-		/*
-		FeaturePopup {
-			id: leftpopup
-			anchors.top: uppertab.bottom
-			anchors.left: lefttab.right
-			anchors.leftMargin: 15
-			anchors.topMargin: 20
-		}
-		LeftPopupLabel {
-			id: leftpopuplabel
-			anchors.top: viewmode.bottom
-			anchors.topMargin: sidePadding
-			anchors.left: parent.left
-			anchors.leftMargin: sidePadding
-		}
-
-		LeftPopupMove {
-			id: leftpopupmove
-			anchors.top: uppertab.bottom
-			anchors.left: lefttab.right
-			anchors.leftMargin: 15
-			anchors.topMargin: 20
-		}*/
-		// PopupSupport
-		// {
-		// 	id: leftpopupsupport
-		// 	anchors.top: viewmode.bottom
-		// 	anchors.topMargin: sidePadding
-		// 	anchors.left: parent.left
-		// 	anchors.leftMargin: sidePadding
-		// }
-		
-		
-
-		/*
-		ModalWindow {
-			id: modalwindow
-			anchors.verticalCenter: parent.verticalCenter
-			anchors.horizontalCenter: parent.horizontalCenter
-		}
-		*/
-		Toast {
-			id: toast
-			anchors.bottom: parent.bottom
-			anchors.bottomMargin: sidePadding
-			anchors.horizontalCenter: parent.horizontalCenter
-		}
 		
 		/*
 		ExceptionToast {
@@ -314,6 +234,7 @@ Item{
                 if(mouse.button == Qt.RightButton)
                 {
                     mode = 2;
+					prevPosition = Qt.vector2d(mouseX,mouseY);
                 }
                 else if(mouse.button == Qt.MiddleButton)
                 {
@@ -323,14 +244,12 @@ Item{
 			onReleased:  {
 				mode = 0;
 				mttab.updatePosition()
-				qm.enableObjectPickers();
 			}
 
 			onPositionChanged: {
-				if(mode != 0 && !qm.freecutActive)
+				if(mode != 0)
 				{
 					currPosition = Qt.vector2d(mouseX,mouseY);
-					qm.disableObjectPickers();
 
 					if(mode == 1){//mouse wheel drag
 						sceneRoot.cm.camera.translateWorld(Qt.vector3d((-1)*(currPosition.x - prevPosition.x)/1000,0,0),0);
@@ -345,9 +264,7 @@ Item{
 					sceneRoot.cameraViewChanged();
 				}
             }
-
 			onWheel: {
-				qm.disableObjectPickers();
 				// mouse wheel scaling: model and bed zooms, camera moves to mouse pointer direction
 				var d = wheel.angleDelta.y;
 				var scaleTmp = sceneRoot.systemTransform.scale3D;
@@ -356,13 +273,10 @@ Item{
 				var v_m = {};                               // absolute position of mouse pointer
 				var v_relative = Qt.vector3d(0,0,0);        // relative position of mouse pointer based on camera
 
-				v_m.x = wheel.x - partlist.width;
-				v_m.y = wheel.y - featureMenu.height;
-
-				var height3d = (window.height - featureMenu.height)
-
+				v_m.x = wheel.x;
+				v_m.y = wheel.y;
 				v_relative.x = (v_m.x / scene3d.width) - 0.5;
-				v_relative.y = - ((v_m.y + ((scene3d.width - height3d)/2)) / scene3d.width) + 0.5;
+				v_relative.y = - ((v_m.y + ((scene3d.width - scene3d.height)/2)) / scene3d.width) + 0.5;
 
 				v_relative.z = 0;
 
@@ -377,64 +291,69 @@ Item{
 					sceneRoot.systemTransform.scale3D = scaleTmp.times(0.92);
 					v_c = v_c.plus(v_relative);
 					sceneRoot.cm.camera.translateWorld(v_c.times(-0.08));
-
 					mttab.updatePosition();
 				}
 				sceneRoot.cameraViewChanged();
-				qm.enableObjectPickers();
 			}
 		}
 
-		ResultPopup{
-			id : resultPopUp
-		}
+		// ResultPopup{
+		// 	id : resultPopUp
+		// }
 
-		ProgressPopup 
-		{
-			id: progressPopup
-			enabled: false
-			visible: false
-		}
+		// ProgressPopup 
+		// {
+		// 	id: progressPopup
+		// 	enabled: false
+		// 	visible: false
+		// }
 
-		ModalWindow
-		{
-			id: modalWindow
-			Component.onCompleted: {
-				modalWindow.setButtons([["Apply", "#00b9c8", "#21959e"], ["Cancel", "#abb3b3", "#8b9393"]]);
-			}
-			Text {
-				parent: modalWindow.contentArea
-				text: modalWindow.modalMessage
-				font.family: openRegular.name
-				font.pointSize: 10
-				anchors.horizontalCenter: parent.horizontalCenter
-				anchors.verticalCenter: parent.verticalCenter
 
-			}
-			
-			enabled: false
-			visible: false
-		}
 
-		PrintSettingPopup
-		{
-			id: printsettingpopup
-			anchors.top: featureMenu.bottom
-			anchors.left: leftpopupmove.right
-			anchors.leftMargin: 15
-			anchors.topMargin: 20
-			Component.onCompleted: {
-				printsettingpopup.setButtons([["Apply", "#00b9c8", "#21959e"], ["Cancel", "#abb3b3", "#8b9393"]]);
-			}
+		// PrintSettingPopup
+		// {
+		// 	id: printsettingpopup
+		// 	anchors.top: featureMenu.bottom
+		// 	anchors.left: leftpopupmove.right
+		// 	anchors.leftMargin: 15
+		// 	anchors.topMargin: 20
+		// 	Component.onCompleted: {
+		// 		printsettingpopup.setButtons([["Apply", "#00b9c8", "#21959e"], ["Cancel", "#abb3b3", "#8b9393"]]);
+		// 	}
 
-			enabled: false
-			visible: false
-		}
+		// 	enabled: false
+		// 	visible: false
+		// }
     }
 
     Login{
         id : loginWindow
         objectName: "loginWindow"
+    }
+	
+    function world2Screen(target){
+        var tmp = Qt.vector3d(0,0,0)
+        tmp = target
+        target = tmp.times(sceneRoot.systemTransform.scale3D)
+
+        var theta = (-1)*sceneRoot.systemTransform.rotationX/180.0*Math.PI
+        var alpha = (-1)*sceneRoot.systemTransform.rotationZ/180.0*Math.PI
+
+
+        target = Qt.vector3d(target.x * Math.cos(alpha)+target.y*Math.sin(alpha),
+                             target.x * (-1) * Math.sin(alpha) + target.y*Math.cos(alpha),
+                             target.z)
+        var target3 = Qt.vector3d(target.x,
+                             target.y * Math.cos(theta)+target.z*Math.sin(theta),
+                             (-1)*target.y*Math.sin(theta)+target.z*Math.cos(theta))
+        console.log(target3.x,target3.y,target.z)
+        var point2 = target3
+        var matrix = Qt.matrix4x4(0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0);
+        matrix = sceneRoot.cm.cameraLens.projectionMatrix.times(sceneRoot.cm.camera.viewMatrix);//
+        point2 = matrix.times(point2)
+        point2.x = (point2.x+1) * scene3d.width/2;
+        point2.y = (-1 * point2.y+1) * scene3d.height/2;
+        return Qt.vector2d(point2.x,point2.y)
     }
 }
 
