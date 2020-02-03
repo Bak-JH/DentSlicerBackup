@@ -29,12 +29,11 @@ Entity {
 
     // property alias total: total
     property alias cm: cm
-    // property alias systemTransform: systemTransform
+    property alias systemTransform: systemTransform
     property alias keyboardHandler: keyboardHandler
 
     property int ftrDelete : 18
     signal cameraViewChanged();
-    //CoordinateMesh{} // 기준좌표 체크
 
     CameraManager{
         objectName: "cm"
@@ -44,10 +43,6 @@ Entity {
             cameraViewChanged();
         }
     }
-
-    /*SlicingConfiguration {
-        id : slicingConfiguration
-    }*/
 
 
     Entity{

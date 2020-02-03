@@ -8,6 +8,7 @@ Hix.FeatureMenu {
 	property string activeNameColor: "#1db2c4"
 	
 	Rectangle {
+		id: featureMenuRect
 		width: 1365
 		height: 90
 		radius: 45
@@ -24,11 +25,11 @@ Hix.FeatureMenu {
 	}
 
 	DropShadow {
-		anchors.fill: featureMenu
+		anchors.fill: featureMenuRect
 		radius: 10.0
         samples: 21
         color: "#55000000"
-		source: featureMenu
+		source: featureMenuRect
 	}
 
 }
