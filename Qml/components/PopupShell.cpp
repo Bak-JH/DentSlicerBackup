@@ -26,6 +26,16 @@ QQuickItem* Hix::QML::FeaturePopupShell::getQItem()
 	return this;
 }
 
+void Hix::QML::FeaturePopupShell::setApplyReady(bool isReady)
+{
+	_applyReady = isReady;
+}
+
+bool Hix::QML::FeaturePopupShell::getApplyReady() const
+{
+	return _applyReady;
+}
+
 Controls::Button& Hix::QML::FeaturePopupShell::closeButton()
 {
 	return *_closeButton;

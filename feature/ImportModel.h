@@ -11,7 +11,7 @@ namespace Hix
 	namespace Features
 	{
 		class ListModel;
-		class ImportModel :public Hix::Features::Feature
+		class ImportModel :public Feature
 		{
 		public:
 			ImportModel(QUrl fileUrl);
@@ -24,7 +24,7 @@ namespace Hix
 			QUrl _fileUrl;
 			std::unique_ptr< Hix::Features::ListModel> _listModelFeature;
 		};
-		class ImportModelMode : public Hix::Features::Mode
+		class ImportModelMode : public Hix::Features::InstantMode
 		{
 		public:
 			ImportModelMode();

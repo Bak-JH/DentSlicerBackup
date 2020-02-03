@@ -23,7 +23,7 @@ Hix::Features::DialogedMode::DialogedMode(const QUrl& dialogUrl)
 	QObject::connect(&closeButton, &Hix::QML::Controls::Button::clicked, [this]() {
 		qmlManager->setMode(nullptr);
 		});
-	QObject::connect(&closeButton, &Hix::QML::Controls::Button::clicked, [this]() {
+	QObject::connect(&applyButton, &Hix::QML::Controls::Button::clicked, [this]() {
 		apply();
 		});
 }
@@ -35,4 +35,9 @@ Hix::Features::DialogedMode::~DialogedMode()
 Hix::QML::ControlOwner& Hix::Features::DialogedMode::controlOwner()
 {
 	return *_popup.get();
+}
+
+bool Hix::Features::DialogedMode::isReady() const
+{
+	return _popup->getApplyReady();
 }

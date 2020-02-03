@@ -92,6 +92,7 @@ QmlManager::QmlManager(QObject *parent) : QObject(parent), _optBackend(this, scf
 
 void QmlManager::initializeUI(){
 	featureArea = dynamic_cast<QQuickItem*>(FindItemByName(engine, "featureArea"));
+	partList = dynamic_cast<QQuickItem*>(FindItemByName(engine, "partlist"));
 	mainWindow = FindItemByName(engine, "mainWindow");
 	loginWindow = FindItemByName(engine, "loginWindow");
 	loginButton = FindItemByName(engine, "loginButton");
@@ -1407,14 +1408,12 @@ void QmlManager::mbRangeSliderValueChangedSecond(double value)
 
 void QmlManager::setMode(Hix::Features::Mode* mode)
 {
-
 	_currentMode.reset(mode);
 	auto instantMode = dynamic_cast<Hix::Features::InstantMode*>(mode);
 	if (instantMode)
 	{
 		_currentMode.reset(nullptr);
 	}
-
 }
 
 const std::unordered_set<GLModel*>& QmlManager::getAllModels()

@@ -136,7 +136,7 @@ public:
     QObject* result_popup;
 
 
-    QObject* partList;
+	QQuickItem* partList;
 
 
 

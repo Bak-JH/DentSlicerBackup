@@ -61,6 +61,7 @@ void Hix::Features::ImportModel::runImpl()
 		std::unordered_set<GLModel*> repairModels;
 		repairModels.insert(_listModelFeature->getAddedModel());
 		MeshRepair repair(repairModels);
+		repair.run();
 	}
 	// do auto arrange
 	qmlManager->openArrange();

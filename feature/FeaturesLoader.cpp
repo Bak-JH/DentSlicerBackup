@@ -21,34 +21,36 @@
 #include "stlexport.h"
 #include "sliceExport.h"
 
+#include "Qml/components/Buttons.h"
+#include "Qml/util/QMLUtil.h"
+
 
 const std::string ICO_PRE("qrc:/Resource/menu_");
 const std::string ICO_BASIC_SUF(".png");
 const std::string ICO_SELECTED_SUF("_select_1.png");
+const QUrl MENU_ITEM_URL = QUrl("qrc:/Qml/MenuItem.qml");
 
 using namespace Hix::QML;
 using namespace Hix::Features;
 
-MenuButtonArg createIconArg(const std::string& name)
+
+Hix::Features::FeaturesLoader::FeaturesLoader(QQmlEngine* e, Hix::QML::FeatureMenu* menu) 
+		: _component(e, MENU_ITEM_URL), _menu(menu)
 {
-	MenuButtonArg arg{
-		name,
-		ICO_PRE + name + ICO_BASIC_SUF,
-		ICO_PRE + name + ICO_SELECTED_SUF };
-	return arg;
 }
 
 template<typename ModeType>
-std::function<void()> openFeatureModeFunctor()
+std::function<void()> openFeatureModeFunctor(Hix::QML::Controls::Button* button)
 {
 	static_assert(std::is_base_of<Hix::Features::Mode, ModeType>{});
-	std::function<void()> functor = []() {
+	std::function<void()> functor = [button]() {
 		if (!qmlManager->isFeatureActive())
 		{
 			try
 			{
 				ModeType* newMode = new ModeType();
 				qmlManager->setMode(newMode);
+				newMode->addButton(button);
 			}
 			catch (...)
 			{
@@ -65,36 +67,63 @@ std::function<void()> openFeatureModeFunctor()
 	return functor;
 }
 
-template<typename ModeType>
-MenuButtonArg createButtonArg(const std::string& name)
+void  setStr(const std::string& name, Hix::QML::Controls::Button* button)
 {
-	MenuButtonArg arg = createIconArg(name);
-	arg.functor = openFeatureModeFunctor<ModeType>();
-	return arg;
+	button->setProperty("iconBasic", QString::fromStdString(ICO_PRE + name + ICO_BASIC_SUF));
+	button->setProperty("iconSelected", QString::fromStdString(ICO_PRE + name + ICO_SELECTED_SUF));
+	button->setProperty("featureName", QString::fromStdString(name));
 }
 
-void Hix::Features::FeaturesLoader::loadFeatureButtons(Hix::QML::FeatureMenu& menu)
+template<typename ModeType>
+void addButton(const std::string& name, FeaturesLoader* loader)
 {
-	
-	menu.addButton(createButtonArg<Hix::Features::ImportModelMode>("open"));
-	menu.addDivider();
+	auto& menu = loader->menu();
+	auto button = dynamic_cast<Hix::QML::Controls::Button*>(loader->parsedComp().create(qmlContext(&menu)));
+	button->setParentItem(menu.featureItems());
+	setStr(name, button);
+	auto functor = openFeatureModeFunctor<ModeType>(button);
+	QObject::connect(button, &Hix::QML::Controls::Button::clicked, functor);
+}
 
-	menu.addButton(createButtonArg<Hix::Features::MoveMode>("move"));
-	menu.addButton(createButtonArg<Hix::Features::RotateMode>("rotate"));
-	menu.addButton(createButtonArg<Hix::Features::ScaleMode>("scale"));
-	menu.addDivider();
+void Hix::Features::FeaturesLoader::addDivider()
+{
+	auto rect = new QQuickRectangle();
+	rect->setProperty("width", 1);
+	rect->setProperty("height", 80);
+	rect->setProperty("color", "#dddddd");
+	rect->setParentItem(_menu->featureItems());
+}
 
-	menu.addButton(createButtonArg<Hix::Features::ModelCut>("cut"));
-	menu.addButton(createButtonArg<Hix::Features::ShellOffsetMode>("shelloffset"));
-	menu.addButton(createButtonArg<Hix::Features::ExtendMode>("extend"));
-	menu.addButton(createButtonArg<Hix::Features::LabellingMode>("label"));
-	menu.addButton(createButtonArg<Hix::Features::LayFlatMode>("layflat"));
-	menu.addButton(createButtonArg<Hix::Features::AutoOrientateMode>("orient"));
-	menu.addButton(createButtonArg<Hix::Features::AutoArrangeMode>("arrange"));
-	
-	menu.addButton(createButtonArg<Hix::Features::SupportMode>("support"));
-	menu.addDivider();
+QQmlComponent& Hix::Features::FeaturesLoader::parsedComp()
+{
+	return _component;
+}
 
-	menu.addButton(createButtonArg<Hix::Features::STLExportMode>("save"));
-	menu.addButton(createButtonArg<Hix::Features::SliceExportMode>("extract"));
+Hix::QML::FeatureMenu& Hix::Features::FeaturesLoader::menu()
+{
+	return *_menu;
+}
+
+void Hix::Features::FeaturesLoader::loadFeatureButtons()
+{
+	addButton<Hix::Features::ImportModelMode>("open",this);
+	addDivider();
+
+	addButton<Hix::Features::MoveMode>("move" ,this);
+	addButton<Hix::Features::RotateMode>("rotate" ,this);
+	addButton<Hix::Features::ScaleMode>("scale" ,this);
+	addDivider();
+
+	addButton<Hix::Features::ModelCut>("cut" ,this);
+	addButton<Hix::Features::ShellOffsetMode>("shelloffset" ,this);
+	addButton<Hix::Features::ExtendMode>("extend" ,this);
+	addButton<Hix::Features::LabellingMode>("label" ,this);
+	addButton<Hix::Features::LayFlatMode>("layflat" ,this);
+	addButton<Hix::Features::AutoOrientateMode>("orient" ,this);
+	addButton<Hix::Features::AutoArrangeMode>("arrange" ,this);
+	addButton<Hix::Features::SupportMode>("support" ,this);
+	addDivider();
+
+	addButton<Hix::Features::STLExportMode>("save" ,this);
+	addButton<Hix::Features::SliceExportMode>("extract" ,this);
 }
