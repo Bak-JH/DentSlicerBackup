@@ -158,16 +158,8 @@ void QmlManager::initializeUI(){
     QObject::connect(mv, SIGNAL(copy()), this, SLOT(copyModel()));
     QObject::connect(mv, SIGNAL(paste()), this, SLOT(pasteModel()));
     QObject::connect(mv, SIGNAL(groupSelectionActivate(bool)), this, SLOT(groupSelectionActivate(bool)));
-
     QObject::connect(yesno_popup, SIGNAL(runGroupFeature(int, QString, double, double, double, QVariant)),this,SLOT(runGroupFeature(int,QString, double, double, double, QVariant)));
-
 	QObject::connect(mv, SIGNAL(cameraViewChanged()), this, SLOT(cameraViewChanged()));
-
-
-
-
-	// model cut popup codes
-
 
 
 
@@ -176,8 +168,6 @@ void QmlManager::initializeUI(){
 	//init settings
 	_bed.drawBed();
 
-	//TODO: delete later. this line is for testing
-	//openModelFile(); 
 }
 
 void QmlManager::openModelFile(){
