@@ -53,7 +53,7 @@ GLModel* Hix::Features::AddModel::getAddedModel()
 }
 
 
-Hix::Features::ListModel::ListModel(Hix::Engine3D::Mesh* mesh, QString fname, const Qt3DCore::QTransform* transform) : AddModel(qmlManager->models, mesh, fname, transform)
+Hix::Features::ListModel::ListModel(Hix::Engine3D::Mesh* mesh, QString fname, const Qt3DCore::QTransform* transform) : AddModel(qmlManager->total, mesh, fname, transform)
 {}
 
 Hix::Features::ListModel::~ListModel()

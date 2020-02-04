@@ -40,7 +40,7 @@ Hix::Features::FeaturesLoader::FeaturesLoader(QQmlEngine* e, Hix::QML::FeatureMe
 }
 
 template<typename ModeType>
-std::function<void()> openFeatureModeFunctor(Hix::QML::Controls::Button* button)
+std::function<void()> openFeatureModeFunctor(Hix::QML::Controls::ToggleSwitch* button)
 {
 	static_assert(std::is_base_of<Hix::Features::Mode, ModeType>{});
 	std::function<void()> functor = [button]() {
@@ -49,8 +49,8 @@ std::function<void()> openFeatureModeFunctor(Hix::QML::Controls::Button* button)
 			try
 			{
 				ModeType* newMode = new ModeType();
-				qmlManager->setMode(newMode);
 				newMode->addButton(button);
+				qmlManager->setMode(newMode);
 			}
 			catch (...)
 			{
@@ -59,13 +59,20 @@ std::function<void()> openFeatureModeFunctor(Hix::QML::Controls::Button* button)
 			}
 
 		}
-		else if (qmlManager->isActive<ModeType>())
-		{
-			qmlManager->setMode(nullptr);
-		}
 	};
 	return functor;
 }
+
+template<typename ModeType>
+std::function<void()> closeFeatureModeFunctor(Hix::QML::Controls::ToggleSwitch* button)
+{
+	static_assert(std::is_base_of<Hix::Features::Mode, ModeType>{});
+	std::function<void()> functor = [button]() {
+			qmlManager->setMode(nullptr);
+	};
+	return functor;
+}
+
 
 void  setStr(const std::string& name, Hix::QML::Controls::Button* button)
 {
@@ -78,11 +85,13 @@ template<typename ModeType>
 void addButton(const std::string& name, FeaturesLoader* loader)
 {
 	auto& menu = loader->menu();
-	auto button = dynamic_cast<Hix::QML::Controls::Button*>(loader->parsedComp().create(qmlContext(&menu)));
+	auto button = dynamic_cast<Hix::QML::Controls::ToggleSwitch*>(loader->parsedComp().create(qmlContext(&menu)));
 	button->setParentItem(menu.featureItems());
 	setStr(name, button);
-	auto functor = openFeatureModeFunctor<ModeType>(button);
-	QObject::connect(button, &Hix::QML::Controls::Button::clicked, functor);
+	auto openfunctor = openFeatureModeFunctor<ModeType>(button);
+	auto closefunctor = closeFeatureModeFunctor<ModeType>(button);
+	QObject::connect(button, &Hix::QML::Controls::ToggleSwitch::checked, openfunctor);
+	QObject::connect(button, &Hix::QML::Controls::ToggleSwitch::unchecked, closefunctor);
 }
 
 void Hix::Features::FeaturesLoader::addDivider()

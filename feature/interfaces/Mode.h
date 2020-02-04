@@ -7,7 +7,7 @@ namespace Hix
 	{
 		namespace Controls
 		{
-			class Button;
+			class ToggleSwitch;
 		}
 	}
 	namespace Features
@@ -16,11 +16,11 @@ namespace Hix
 		{
 		public:
 			Mode();
-			void addButton(Hix::QML::Controls::Button* button);
+			void addButton(Hix::QML::Controls::ToggleSwitch* button);
 			virtual ~Mode();
 			virtual void apply() {}; //TODO remove this when alls compiled
 		protected:
-			Hix::QML::Controls::Button* _button = nullptr;
+			Hix::QML::Controls::ToggleSwitch* _button = nullptr;
 		};
 		class InstantMode : public Mode
 		{
