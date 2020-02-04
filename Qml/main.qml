@@ -234,12 +234,13 @@ Item{
                 if(mouse.button == Qt.RightButton)
                 {
                     mode = 2;
-					prevPosition = Qt.vector2d(mouseX,mouseY);
                 }
                 else if(mouse.button == Qt.MiddleButton)
                 {
                     mode = 1;
 				}
+				prevPosition = Qt.vector2d(mouseX,mouseY);
+
 			}
 			onReleased:  {
 				mode = 0;

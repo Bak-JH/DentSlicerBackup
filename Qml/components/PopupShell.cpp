@@ -8,10 +8,12 @@ using namespace  Hix::QML;
 
 Hix::QML::FeaturePopupShell::FeaturePopupShell(QQuickItem* parent) : QQuickItem(parent)
 {
+	qDebug() << "created feature";
 }
 
 Hix::QML::FeaturePopupShell::~FeaturePopupShell()
 {
+	qDebug() << "deleted feature";
 }
 void Hix::QML::FeaturePopupShell::componentComplete()
 {

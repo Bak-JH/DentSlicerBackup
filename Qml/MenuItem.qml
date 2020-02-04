@@ -35,20 +35,17 @@ Hix.ToggleSwitch {
 		font.pointSize: 10
 		font.family: openRegular.name
 	}
-	onClicked: { 
-		isActive = !isActive
-		if(isActive)
-		{
-			color = defaultColor;
-			text.color = activeNameColor;
-			iconImg.source = iconSelected;
-		}
-		else
-		{
-			text.color = nameColor;
-			iconImg.source = iconBasic;
-		}
+
+	onChecked: { 
+		text.color = activeNameColor;
+		iconImg.source = iconSelected;
 	}
+	
+	onUnchecked: {
+		text.color = nameColor;
+		iconImg.source = iconBasic;
+	}
+	
 	onEntered: {
 		if (nameColor == activeNameColor) {}	// hover on already selected button
 		else color = hoverColor	// hover on unselected button
