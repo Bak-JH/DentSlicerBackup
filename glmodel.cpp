@@ -43,7 +43,6 @@ GLModel::GLModel(QEntity*parent, Mesh* loadMesh, QString fname, const Qt3DCore::
 {
 
 	initHitTest();
-    qDebug() << "new model made _______________________________"<<this<< "parent:"<<parent;
     // set shader mode and color
 	setMaterialMode(Hix::Render::ShaderMode::SingleColor);
 	setMaterialColor(Hix::Render::Colors::Default);
@@ -53,11 +52,28 @@ GLModel::GLModel(QEntity*parent, Mesh* loadMesh, QString fname, const Qt3DCore::
 		_transform.setMatrix(transform->matrix());
 	}
 	setMesh(loadMesh);
-
-	// 승환 75%
-	qmlManager->setProgress(0.73);
 	QObject::connect(this, SIGNAL(_updateModelMesh()), this, SLOT(updateModelMesh()));
+}
 
+//copy
+GLModel::GLModel(const GLModel& o) : GLModel(o.parentEntity(), new Mesh(*o.getMesh()), o._name, &o._transform)
+{
+	//copy children models
+	o.copyChildrenRecursive(this);
+}
+
+GLModel* GLModel::copyChildrenRecursive(GLModel* newParent) const
+{
+	for (auto child : childNodes())
+	{
+		auto model = dynamic_cast<GLModel*>(child);
+		if (model)
+		{
+			auto copy = new GLModel(model);
+			copy->setParent(newParent);
+			callRecursive(model, &GLModel::copyChildrenRecursive, copy);
+		}
+	}
 }
 
 void GLModel::moveModel(const QVector3D& movement) {
@@ -186,7 +202,8 @@ GLModel::~GLModel()
 {
 }
 
- void GLModel::getChildrenModels(std::unordered_set<const GLModel*>& results)const
+
+void GLModel::getChildrenModels(std::unordered_set<const GLModel*>& results)const
 {
 	 
 	for (auto child : childNodes())
@@ -240,11 +257,6 @@ void GLModel::clicked(MouseEventData& pick, const Qt3DRender::QRayCasterHit& hit
 		if (pick.button == Qt::MouseButton::LeftButton)
 		{
 			qmlManager->modelSelected(listed->ID());
-		}
-		else if (pick.button == Qt::MouseButton::RightButton && qmlManager->isSelected(listed))
-		{
-			qDebug() << "mttab alive";
-			QMetaObject::invokeMethod(qmlManager->mttab, "tabOnOff");
 		}
 		return;
 	}

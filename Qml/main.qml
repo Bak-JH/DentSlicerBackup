@@ -33,6 +33,7 @@ Item{
 		FontLoader{ id: openBold; source: "qrc:/Resource/font/OpenSans-Bold.ttf" }
 		
         Rectangle{
+			id: uiRoot
             color: "#E5E5E5"
             anchors.top : window.top
             anchors.left : window.left

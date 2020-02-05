@@ -5,7 +5,6 @@ import Qt3D.Extras 2.0
 
 Entity {
 
-    objectName: "Models"
     property string inputSource;
 
     //property alias testMesh: testMesh

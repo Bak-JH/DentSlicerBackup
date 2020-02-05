@@ -16,21 +16,22 @@ Hix.PartList {
 		else showhideimg.source = "qrc:/Resource/part_show_1.png"
 	}
 
-	ListModel {		// ����Ʈ�信 ���� �����͵��� ����.
+
+	ListModel {
 		id:model
 		objectName: "modelList"
-		function appendModel(modelName, modelPointer)
-		{
-			model.append({"name" : modelName, "modelPointer" : modelPointer});
-		}
+	}
+	function appendModel(modelName, modelPointer)
+	{
+		model.append({"name" : modelName, "modelPointer" : modelPointer});
+	}
 
-		function deleteModel(modelPointer)
+	function deleteModel(modelPointer)
+	{
+		for(var n = 0; n < model.count; ++n)
 		{
-			for(var n = 0; n < model.count; ++n)
-			{
-				if(model.get(n).modelPointer == modelPointer)
-					model.remove(n)
-			}
+			if(model.get(n).modelPointer == modelPointer)
+				model.remove(n)
 		}
 	}
 
@@ -50,9 +51,9 @@ Hix.PartList {
 			anchors.leftMargin: myPadding
 		}
 	
-		Component { // ����Ʈ ���� Ʋ�� �����.
+		Component { 
 			id: contactDelegate
-			Item {
+			Hix.PartListItem {
 				width: 224; height: 28
 				Column {
 					anchors.verticalCenter: parent.verticalCenter
@@ -111,8 +112,8 @@ Hix.PartList {
 				clip: true
 				width: 240;
 				height: 212;
-				model: model	// ����� �����͵��� ����Ʈ�信 �ִ´�.
-				delegate: contactDelegate	// delegate: ����Ʈ �Ѱ��� Ʋ
+				model: model	
+				delegate: contactDelegate	
 				//highlight: Rectangle { color: "lightsteelblue"; radius: 2 }
 				focus: true
 
@@ -132,6 +133,7 @@ Hix.PartList {
 		}
 
 		Hix.Button {
+			id: deleteButton
 			width: 14
 			height: width
 			anchors.right: parent.right
@@ -144,7 +146,6 @@ Hix.PartList {
 				source: "qrc:/Resource/part_remove_1.png"
 				//sourceSize.width: width
 			}
-			onClicked: { root.deleteModels() }//TODO: delete later
 		}
 
 	}

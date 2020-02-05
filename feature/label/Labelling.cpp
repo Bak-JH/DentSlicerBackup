@@ -2,6 +2,8 @@
 #include "qmlmanager.h"
 #include "../Shapes2D.h"
 #include "../Extrude.h"
+#include "../../glmodel.h"
+
 using namespace Hix::Engine3D;
 using namespace Hix::Polyclipping;
 using namespace Hix::Shapes2D;

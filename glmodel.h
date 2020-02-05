@@ -36,9 +36,11 @@ public:
 	void dragEnded(Hix::Input::MouseEventData&) override;
 
     // load teeth model default
-    GLModel(QEntity* parent=nullptr, Hix::Engine3D::Mesh* loadMesh=nullptr, QString fname="", const Qt3DCore::QTransform* transform = nullptr); // main constructor for mainmesh and shadowmesh
+    GLModel(QEntity* parent=nullptr, Hix::Engine3D::Mesh* loadMesh=nullptr, QString fname="", const Qt3DCore::QTransform* transform = nullptr);
+	GLModel(const GLModel& o);
 	virtual ~GLModel();
 
+	GLModel* copyChildrenRecursive(GLModel* newParent)const;
 	void getChildrenModels(std::unordered_set<const GLModel*>& results)const;
 
 	bool appropriately_rotated=false;
