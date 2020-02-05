@@ -14,7 +14,6 @@ QmlManager* qmlManager;
 #else
 
 #include <QApplication>
-#include <QQmlApplicationEngine>
 #include <QQmlEngine>
 #include <QQmlContext>
 #include "utils/quaternionhelper.h"
@@ -27,7 +26,8 @@ QmlManager* qmlManager;
 #include <QSplashScreen>
 #include "utils/updatechecker.h"
 #include "utils/gridmesh.h"
-
+#include "qml/components/HixQML.h"
+#include "application/ApplicationManager.h"
 using namespace Qt3DCore;
 
 #endif
@@ -60,15 +60,9 @@ int main(int argc, char** argv)
 	translator.load(":/lang_ko.qm");
 	app.installTranslator(&translator);
 	*/
-	qmlManager = new QmlManager();
-	QScopedPointer<QmlManager> qm(qmlManager);
-	QQmlApplicationEngine engine;
-	qmlManager->engine = &engine;
+	Hix::QML::registerTypes();
 	qRegisterMetaType<std::vector<QVector3D>>("std::vector<QVector3D>");
 	qRegisterMetaType<std::vector<float>>("std::vector<float>");
-	qmlRegisterType<GridMesh>("DentSlicer", 1, 0, "GridMesh");
-
-	QScopedPointer<QuaternionHelper> qq(new QuaternionHelper);
 
 
 	/** Splash Image **/
@@ -77,27 +71,17 @@ int main(int argc, char** argv)
 	QPen penHText(QColor("#777777"));
 	painter.setFont(QFont("Arial", 9));
 	painter.setPen(penHText);
-
 	painter.drawText(QPoint(32, 290), "Dental 3D Printing Solution");
 	painter.drawText(QPoint(32, 310), "Version " + qmlManager->getVersion());
-	//painter.drawText(QPoint(88,310), version);
 	painter.drawText(QPoint(32, 330), "Developed by HiX Inc.");
-
 	QSplashScreen* splash = new QSplashScreen(pixmap);
 	splash->show();
-
-	engine.rootContext()->setContextProperty("qm", qm.data());
-	engine.rootContext()->setContextProperty("qq", qq.data());
-
+	auto& engine = Hix::Application::ApplicationManager::getInstance().engine();
 	engine.load(QUrl(QStringLiteral("qrc:/Qml/main.qml")));
-
+	qmlManager = new QmlManager();
 	// update module codes
 	UpdateChecker* up = new UpdateChecker();
 	up->checkForUpdates();
-
-
-
-	qmlManager->initializeUI();
 	splash->close();
 
 #if  defined(QT_DEBUG) || defined(_DEBUG)
@@ -105,21 +89,6 @@ int main(int argc, char** argv)
 #else
 	qmlManager->loginWindow->setProperty("visible", true);
 #endif
-
-	//QSurfaceFormat format;
-	//format.setMajorVersion(4);
-	//format.setMinorVersion(3);
-	//format.setProfile(QSurfaceFormat::CoreProfile);
-
-	//QOpenGLContext gl_ctx;
-	//gl_ctx.setFormat(format);
-	//if (!gl_ctx.create())
-	//	throw std::runtime_error("context creation failed");
-
-	//QOffscreenSurface surface;
-	//surface.create();
-	//gl_ctx.makeCurrent(&surface);
-
 	return app.exec();
 #endif
 

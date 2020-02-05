@@ -69,7 +69,7 @@ Entity {
             shininess: 0
         }
 		Model{
-            id: meshEntity4
+            id: models
             //inputSource:"file:///C:/Users/user/Downloads/Spider_ascii.stl"
         }
         CoordinateMesh{}

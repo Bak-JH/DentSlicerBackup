@@ -13,7 +13,7 @@ Hix::QML::ControlOwner::~ControlOwner()
 }
 
 
-std::unordered_map<std::string, InputControl*> BFSQuickItem(QQuickItem* start)
+std::unordered_map<std::string, InputControl*> BFSAllItems(QQuickItem* start)
 {
 	std::unordered_map<std::string, InputControl*> map;
 	std::deque<QQuickItem*> s;
@@ -46,7 +46,7 @@ std::unordered_map<std::string, InputControl*> BFSQuickItem(QQuickItem* start)
 
 void Hix::QML::ControlOwner::registerOwningControls()
 {
-	_inputControls = BFSQuickItem(getQItem());
+	_inputControls = BFSAllItems(getQItem());
 }
 
 InputControl* Hix::QML::ControlOwner::getControlById(const std::string& id) const

@@ -1,5 +1,4 @@
 #pragma once
-#include "../../glmodel.h"
 #include <QFont>
 #include <QString>
 #include "../interfaces/SelectFaceMode.h"

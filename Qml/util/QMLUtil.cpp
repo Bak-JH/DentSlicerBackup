@@ -6,7 +6,7 @@
 #include "../../qmlmanager.h"
 
 
-QQuickItem* Hix::QML::findChildItemByName(QQuickItem* start, const QString& name)
+QQuickItem* Hix::QML::findChildQItemByName(QQuickItem* start, const QString& name)
 {
 	std::deque<QQuickItem*> s;
 	s.push_back(start);
@@ -28,13 +28,10 @@ QQuickItem* Hix::QML::findChildItemByName(QQuickItem* start, const QString& name
 	throw std::runtime_error("failed to find QML element by name" + name.toStdString());
 }
 
-QQuickItem* Hix::QML::findChildItemByID(QQuickItem* start, const QString& id)
+QQuickItem* Hix::QML::findChildQItemByID(QQuickItem* start, const QString& id)
 {
 	std::deque<QQuickItem*> s;
 	s.push_back(start);
-	//auto rootContext = qmlManager->engine->rootContext();
-	auto engine = qmlManager->engine;
-
 	while (!s.empty())
 	{
 		auto curr = s.front();
