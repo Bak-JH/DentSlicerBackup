@@ -5,8 +5,7 @@ import QtQuick.Controls.Styles 1.4
 import QtGraphicalEffects 1.12
 
 Hix.PartList {
-	id: root
-	objectName: "partList"
+	id: partList
 	width: 256
 	height: 320
 	property var myPadding: 16
@@ -19,19 +18,19 @@ Hix.PartList {
 		model.append({"name" : modelName, "modelPointer" : modelPointer});
 	}
 
-	function deleteModel(modelPointer)
-	{
-		for(var n = 0; n < model.count; ++n)
-		{
-			if(model.get(n).modelPointer == modelPointer)
-				model.remove(n)
-		}
-	}
+	// function deleteModel(modelPointer)
+	// {
+	// 	for(var n = 0; n < model.count; ++n)
+	// 	{
+	// 		if(model.get(n).modelPointer == modelPointer)
+	// 			model.remove(n)
+	// 	}
+	// }
 
 	Rectangle {
 		id: shell
-		width: root.width
-		height: root.height
+		width: partList.width
+		height: partList.height
 		radius: 8
 		Text {
 			id: listtitle
