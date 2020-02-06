@@ -16,14 +16,15 @@ namespace Hix
 			virtual ~FeaturePopupShell();
 			Controls::Button& closeButton();
 			Controls::Button& applyButton();
+			bool getApplyReady()const;
 
 		protected:
 			void componentComplete() override;
 			QQuickItem* getQItem()override;
-
+			void setApplyReady(bool isReady);
 
 		private:
-			//bool _applyReady = false;
+			bool _applyReady = false;
 			Controls::Button* _closeButton = nullptr;
 			Controls::Button* _applyButton = nullptr;
 

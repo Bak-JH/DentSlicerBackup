@@ -2,7 +2,7 @@
 #include <qquickitem.h>
 #include <unordered_set>
 #include "../DentEngine/src/Bounds3D.h"
-
+#include "ControlOwner.h"
 class GLModel;
 
 namespace Hix
@@ -15,7 +15,7 @@ namespace Hix
 			class Button;
 		}
 
-		class PartList : public QQuickItem
+		class PartList : public QQuickItem, public ControlOwner
 		{
 			Q_OBJECT
 		public:
@@ -31,11 +31,13 @@ namespace Hix
 		protected:
 			void deleteSelectedModels();
 			void componentComplete() override;
+			QQuickItem* getQItem()override;
+
 			Hix::QML::Controls::Button* _deleteButton;
 			std::unordered_set<GLModel*> _selectedModels;
 		};
 
-		class PartListItem : public QQuickItem
+		class PartListItem : public QQuickItem, public ControlOwner
 		{
 			Q_OBJECT
 		public:
@@ -43,6 +45,10 @@ namespace Hix
 			virtual ~PartListItem();
 		protected:
 			void componentComplete() override;
+			QQuickItem* getQItem()override;
+
+			Hix::QML::Controls::ToggleSwitch* _hideButton;
+			Hix::QML::Controls::ToggleSwitch* _selectButton;
 			GLModel* _model = nullptr;
 			bool _selected = false;
 		};

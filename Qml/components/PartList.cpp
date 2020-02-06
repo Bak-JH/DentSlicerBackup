@@ -27,11 +27,12 @@ void Hix::QML::PartList::listModel(GLModel* model)
 
 bool Hix::QML::PartList::isSelected(GLModel* model)const
 {
-	return false;
+	return _selectedModels.find(model) != _selectedModels.end();
 }
 
 void Hix::QML::PartList::selectPart(GLModel* model)
 {
+	auto 
 }
 
 void Hix::QML::PartList::unselectPart(GLModel* model)
@@ -52,9 +53,41 @@ void Hix::QML::PartList::deleteSelectedModels()
 {
 	//run delete feature
 }
+QQuickItem* Hix::QML::PartList::getQItem()
+{
+	return this;
+}
 
 void Hix::QML::PartList::componentComplete()
 {
 	__super::componentComplete();
-	Hix::QML::getItemByID(this, _deleteButton, "deleteButton");
+	registerOwningControls();
+	getControl(_deleteButton, "deleteButton");
+}	
+
+
+QQuickItem* Hix::QML::PartListItem::getQItem()
+{
+	return this;
+}
+
+
+Hix::QML::PartListItem::PartListItem(QQuickItem* parent) : QQuickItem(parent)
+{
+
+}
+
+
+Hix::QML::PartListItem::~PartListItem()
+{
+}
+
+void Hix::QML::PartListItem::componentComplete()
+{
+	__super::componentComplete();
+	registerOwningControls();
+	getControl(_hideButton, "hideButton");
+	getControl(_selectButton, "selectButton");
+	_model = this->property("modelPointer").value<GLModel*>();
+
 }

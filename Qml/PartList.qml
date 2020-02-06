@@ -10,13 +10,6 @@ Hix.PartList {
 	width: 256
 	height: 320
 	property var myPadding: 16
-	
-	function showHideToggle() {
-		if(showhideimg.source == "qrc:/Resource/part_show_1.png") showhide.source = "qrc:/Resource/part_hide_1.png"
-		else showhideimg.source = "qrc:/Resource/part_show_1.png"
-	}
-
-
 	ListModel {
 		id:model
 		objectName: "modelList"
@@ -57,9 +50,9 @@ Hix.PartList {
 				width: 224; height: 28
 				Column {
 					anchors.verticalCenter: parent.verticalCenter
-					Hix.Button{
+					Hix.ToggleSwitch{
+						id: selectButton
 						width: 224; height: 28
-						//color: "#f5f5f5"
 						Text { 
 							id: modelname
 							text: name
@@ -68,16 +61,28 @@ Hix.PartList {
 							anchors.left: parent.left
 							anchors.leftMargin: 8
 						}
-						onClicked: {
+						onChecked: {
 							color="#f5f5f5"
 							modelname.color="#1db2c4"
-							if(showhideimg.source == "qrc:/Resource/part_show_1.png") showhideimg.source = "qrc:/Resource/part_show_select_1.png"
-							else if(showhideimg.source == "qrc:/Resource/part_hide_1.png") showhideimg.source = "qrc:/Resource/part_hide_select_1.png"
+							if(hideButton.isChecked)
+								showhideimg.source = "qrc:/Resource/part_hide_select_1.png"
+							else
+								showhideimg.source = "qrc:/Resource/part_show_select_1.png"
 						}
+						onUnchecked: {
+							color="white"
+							modelname.color="black"
+							if(hideButton.isChecked)
+								showhideimg.source = "qrc:/Resource/part_hide_1.png"
+							else
+								showhideimg.source = "qrc:/Resource/part_show_1.png"
+						}
+
+
 					}
 				}
-				Hix.Button{
-					id: showhide
+				Hix.ToggleSwitch{
+					id: hideButton
 					width: 16
 					height: width
 					anchors.right: parent.right
@@ -89,12 +94,17 @@ Hix.PartList {
 						source: "qrc:/Resource/part_show_1.png"
 						anchors.verticalCenter: parent.verticalCenter
 					}
-					onClicked: {
-						console.log("showhide clicked")
-						if(showhideimg.source == "qrc:/Resource/part_show_1.png") showhideimg.source = "qrc:/Resource/part_hide_1.png"
-						else if(showhideimg.source == "qrc:/Resource/part_hide_1.png") showhideimg.source = "qrc:/Resource/part_show_1.png"
-						else if(showhideimg.source == "qrc:/Resource/part_show_select_1.png") showhideimg.source = "qrc:/Resource/part_hide_select_1.png"
-						else if(showhideimg.source == "qrc:/Resource/part_hide_select_1.png") showhideimg.source = "qrc:/Resource/part_show_select_1.png"
+					onChecked: {
+						if(selectButton.isChecked)
+							showhideimg.source = "qrc:/Resource/part_show_select_1.png"
+						else
+							showhideimg.source = "qrc:/Resource/part_show_1.png"
+					}
+					onUnchecked: {
+						if(selectButton.isChecked)
+							showhideimg.source = "qrc:/Resource/part_hide_select_1.png"
+						else
+							showhideimg.source = "qrc:/Resource/part_hide_1.png"
 					}
 				}
 			}
