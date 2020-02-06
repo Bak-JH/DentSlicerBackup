@@ -41,7 +41,7 @@ GLModel::GLModel(QEntity*parent, Mesh* loadMesh, QString fname, const Qt3DCore::
     : SceneEntityWithMaterial(parent)
     , _name(fname)
 {
-
+	QObject::connect(this, &QNode::enabledChanged, this, &GLModel::qnodeEnabledChanged);
 	initHitTest();
     // set shader mode and color
 	setMaterialMode(Hix::Render::ShaderMode::SingleColor);
@@ -223,6 +223,12 @@ void GLModel::initHitTest()
 	addComponent(&_layer);
 	_layer.setRecursive(false);
 
+}
+
+void GLModel::qnodeEnabledChanged(bool isEnabled)
+{
+	setHitTestable(isEnabled);
+	//setHoverable(isEnabled);
 }
 
 void GLModel::setHitTestable(bool isEnable)

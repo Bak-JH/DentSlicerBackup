@@ -89,6 +89,7 @@ public:
 
 protected:
 	void initHitTest()override;
+	void qnodeEnabledChanged(bool isEnabled);
 
 private:
 	QString _name;

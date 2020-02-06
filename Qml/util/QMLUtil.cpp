@@ -50,3 +50,33 @@ QQuickItem* Hix::QML::findChildQItemByID(QQuickItem* start, const QString& id)
 	throw std::runtime_error("failed to find QML element by id" + id.toStdString());
 
 }
+
+QQuickItem* Hix::QML::findParendQItemByName(QQuickItem* start, const QString& name)
+{
+	auto parent = start->parentItem();
+	while (parent != nullptr)
+	{
+		if (parent->objectName() == name)
+		{
+			return parent;
+		}
+		parent = parent->parentItem();
+	}
+	throw std::runtime_error("failed to find QML element by name" + name.toStdString());
+}
+
+QQuickItem* Hix::QML::findParendQItemByID(QQuickItem* start, const QString& id)
+{
+	auto parent = start->parentItem();
+	while (parent != nullptr)
+	{
+		auto context = qmlContext(parent);
+		if (context && context->nameForObject(parent) == id)
+		{
+			return parent;
+		}
+		parent = parent->parentItem();
+	}
+	throw std::runtime_error("failed to find QML element by id" + id.toStdString());
+
+}
