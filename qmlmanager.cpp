@@ -66,6 +66,7 @@ QmlManager::QmlManager(QObject *parent) : QObject(parent), _optBackend(this, scf
 {
 	auto engine =  &Hix::Application::ApplicationManager::getInstance().engine();
 	featureArea = dynamic_cast<QQuickItem*>(FindItemByName(engine, "featureArea"));
+	partList = dynamic_cast<QQuickItem*>(FindItemByName(engine, "partlist"));
 	mainWindow = FindItemByName(engine, "mainWindow");
 	loginWindow = FindItemByName(engine, "loginWindow");
 	loginButton = FindItemByName(engine, "loginButton");
@@ -809,14 +810,12 @@ void QmlManager::settingFileChanged(QString path)
 
 void QmlManager::setMode(Hix::Features::Mode* mode)
 {
-
 	_currentMode.reset(mode);
 	auto instantMode = dynamic_cast<Hix::Features::InstantMode*>(mode);
 	if (instantMode)
 	{
 		_currentMode.reset(nullptr);
 	}
-
 }
 
 const std::unordered_set<GLModel*>& QmlManager::getAllModels()

@@ -118,6 +118,9 @@ Item{
 
 		PartList{
 			id: partlist
+			objectName: "partList"
+			//width : 265
+            //height : parent.height - featureMenu.height
 			anchors.top: parent.top
 			anchors.topMargin: sidePadding
             anchors.left: parent.left
@@ -232,12 +235,13 @@ Item{
                 if(mouse.button == Qt.RightButton)
                 {
                     mode = 2;
-					prevPosition = Qt.vector2d(mouseX,mouseY);
                 }
                 else if(mouse.button == Qt.MiddleButton)
                 {
                     mode = 1;
 				}
+				prevPosition = Qt.vector2d(mouseX,mouseY);
+
 			}
 			onReleased:  {
 				mode = 0;

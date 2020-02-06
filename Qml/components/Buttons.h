@@ -38,23 +38,22 @@ namespace Hix
 			class ToggleSwitch : public Button
 			{
 				Q_OBJECT
-					Q_PROPERTY(bool isLeft MEMBER _isLeft)
+				Q_PROPERTY(bool isChecked MEMBER _isChecked NOTIFY checked)
+			
 			public:
 				ToggleSwitch(QQuickItem* parent = nullptr);
 				virtual ~ToggleSwitch();
-				void initialize(QVariant leftVal, QVariant rightVal);
-				//void setIsLeft(bool isLeft);
-				QVariant value()const;
+				bool isChecked()const;
+				void setChecked(bool isChecked);
 			signals:
-				void checkedChanged();
+				void checked();
+				void unchecked();
 
 			private slots:
 				void onClicked()override;
 
 			private:
-				QVariant _leftVal;
-				QVariant _rightVal;
-				bool _isLeft = true;
+				bool _isChecked = false;
 			};
 		}
 

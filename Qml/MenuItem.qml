@@ -2,7 +2,7 @@ import QtQuick 2.6
 import hix.qml 1.0 as Hix
 
 //MenuBtnShell {
-Hix.Button {
+Hix.ToggleSwitch {
 	id: menuButton
 	property string iconBasic
 	property string iconSelected
@@ -35,20 +35,17 @@ Hix.Button {
 		font.pointSize: 10
 		font.family: openRegular.name
 	}
-	onClicked: { 
-		isActive = !isActive
-		if(isActive)
-		{
-			color = defaultColor;
-			text.color = activeNameColor;
-			iconImg.source = iconSelected;
-		}
-		else
-		{
-			text.color = nameColor;
-			iconImg.source = iconBasic;
-		}
+
+	onChecked: { 
+		text.color = activeNameColor;
+		iconImg.source = iconSelected;
 	}
+	
+	onUnchecked: {
+		text.color = nameColor;
+		iconImg.source = iconBasic;
+	}
+	
 	onEntered: {
 		if (nameColor == activeNameColor) {}	// hover on already selected button
 		else color = hoverColor	// hover on unselected button

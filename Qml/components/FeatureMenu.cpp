@@ -4,11 +4,11 @@
 #include <QtQuick/private/qquickrectangle_p.h>
 #include "Buttons.h"
 #include "../../feature/FeaturesLoader.h"
+#include <qqmlcomponent.h>
 
 
 using namespace Hix::QML;
 
-const QUrl MENU_ITEM_URL = QUrl("qrc:/Qml/MenuItem.qml");
 
 
 
@@ -21,26 +21,11 @@ Hix::QML::FeatureMenu::~FeatureMenu()
 {
 }
 
-void Hix::QML::FeatureMenu::addButton(const MenuButtonArg& args)
+QQuickItem* Hix::QML::FeatureMenu::featureItems()
 {
-	auto button = dynamic_cast<Hix::QML::Controls::Button*>(_component->create(qmlContext(this)));
-	button->setParentItem(_featureItems);
-	button->setProperty("iconBasic", QString::fromStdString(args.defaultButtonImgPath));
-	button->setProperty("iconSelected", QString::fromStdString(args.activeButtonImgPath));
-	button->setProperty("featureName", QString::fromStdString(args.featureName));
-	QObject::connect(button, &Hix::QML::Controls::Button::clicked, args.functor);
+	return _featureItems;
 }
 
-void Hix::QML::FeatureMenu::addDivider()
-{
-	auto rect = new QQuickRectangle();
-	rect->setProperty("width", 1);
-	rect->setProperty("height", 80);
-	rect->setProperty("color", "#dddddd");
-	rect->setParentItem(_featureItems);
-
-
-}
 
 
 
@@ -48,9 +33,8 @@ void Hix::QML::FeatureMenu::componentComplete()
 {
 	__super::componentComplete();
 	_featureItems = findChildItemByID(this, "featureItems");
-	_component.emplace(qmlManager->engine, MENU_ITEM_URL);
-	Hix::Features::FeaturesLoader loader;
-	loader.loadFeatureButtons(*this);
+	Hix::Features::FeaturesLoader loader(qmlManager->engine, this);
+	loader.loadFeatureButtons();
 	//TODO: temp, move this to license manager and application loader
 	
 
