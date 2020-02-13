@@ -3,24 +3,33 @@
 #include "interfaces/Feature.h"
 #include "glmodel.h"
 #include "cut/DrawingPlane.h"
+#include "interfaces/DialogedMode.h"
 
 namespace Hix
 {
+	namespace QML
+	{
+		namespace Controls
+		{
+			class InputSpinBox;
+		}
+	}
+
 	namespace Features
 	{
-		class ShellOffsetMode : public Hix::Features::Mode
+		class ShellOffsetMode : public DialogedMode
 		{
 		public:
 			ShellOffsetMode();
 			virtual ~ShellOffsetMode();
 			void getSliderSignal(double value);
-			Hix::Features::Feature* doOffset(float offset);
+			void apply()override;
 		private:
 			GLModel* _subject = nullptr;
 			float _zPlane = 0;
 			Hix::Engine3D::Bounds3D _modelBound;
 			Hix::Features::Cut::DrawingPlane _cuttingPlane;
-
+			Hix::QML::Controls::InputSpinBox* _offsetValue;
 		};
 
 		class HollowMesh : public Hix::Features::Feature

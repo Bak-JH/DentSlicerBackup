@@ -3,6 +3,7 @@
 
 namespace Hix
 {
+	class ProgressManager;
 	namespace Tasking
 	{
 		class Task
@@ -10,6 +11,10 @@ namespace Hix
 		public:
 			virtual void run() = 0;
 			virtual ~Task();
+			void setProgressManager(Hix::ProgressManager& manager);
+
+		protected:
+			Hix::ProgressManager* _progressManager;
 		};
 
 		class EmptyTask : public Task

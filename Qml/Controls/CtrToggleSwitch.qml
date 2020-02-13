@@ -42,7 +42,7 @@ Hix.ToggleSwitch {
 		}
 
 		onToggled: {
-			isLeft = checked;
+			isChecked = checked;
 		}
 	}
 	Text {

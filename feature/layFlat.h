@@ -4,6 +4,8 @@
 #include "interfaces/PPShaderMode.h"
 #include "DentEngine/src/Bounds3D.h"
 #include "interfaces/FlushSupport.h"
+#include "interfaces/DialogedMode.h"
+
 class GLModel;
 
 namespace Hix
@@ -30,13 +32,13 @@ namespace Hix
 
 
 
-		class LayFlatMode : public SelectFaceMode, public PPShaderMode
+		class LayFlatMode : public SelectFaceMode, public PPShaderMode, public DialogedMode
 		{
 		public:
 			LayFlatMode();
 			virtual ~LayFlatMode();
 			void faceSelected(GLModel* selected, const Hix::Engine3D::FaceConstItr& selectedFace, const Hix::Input::MouseEventData& mouse, const Qt3DRender::QRayCasterHit& hit)override;
-			void applyLayFlat();
+			void apply()override;
 
 		private:
 			std::unordered_map<GLModel*, QVector3D> _args;

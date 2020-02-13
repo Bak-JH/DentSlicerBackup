@@ -30,7 +30,7 @@ Hix.ViewModeShell {
 			anchors.leftMargin: 16
 		}
 		Text {
-			text: parent.viewtype
+			text: "text"//parent.viewtype
 			font.family: openRegular.name
 			font.pointSize: 10
 			color: "#1db2c4"

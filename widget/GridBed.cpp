@@ -14,7 +14,7 @@ constexpr float CIRCLE_SEG_CNT = 40;
 constexpr float GRID_Z_OFFSET = std::numeric_limits<float>::epsilon() * 100;
 Hix::UI::GridBed::GridBed()
 {
-	_logo.reset(new QEntity());
+	_logo.reset(new Qt3DCore::QEntity());
 	Qt3DRender::QMesh* mesh = new Qt3DRender::QMesh();
 	mesh->setSource(QUrl(QStringLiteral("qrc:/Resource/mesh/plate_logo.stl")));
 	auto mat = new Qt3DExtras::QPhongMaterial();

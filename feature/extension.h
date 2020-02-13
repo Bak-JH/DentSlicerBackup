@@ -17,6 +17,7 @@ namespace Hix
 			class InputSpinBox;
 		}
 	}
+
 	namespace Features
 	{
 		using namespace Engine3D;

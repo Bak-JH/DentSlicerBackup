@@ -1,11 +1,20 @@
 #include "move.h"
 #include "widget/MoveWidget.h"
+#include "../qml/components/ControlOwner.h"
+#include "../qml/components/Inputs.h"
 #include "qmlmanager.h"
 
-Hix::Features::MoveMode::MoveMode():WidgetMode(), _targetModels(qmlManager->getSelectedModels())
+const QUrl MOVE_POPUP_URL = QUrl("qrc:/Qml/FeaturePopup/PopupMove.qml");
+
+Hix::Features::MoveMode::MoveMode():WidgetMode(), _targetModels(qmlManager->getSelectedModels()), DialogedMode(MOVE_POPUP_URL)
 {
 	_widget.addWidget(std::make_unique<Hix::UI::MoveWidget>(QVector3D(1, 0, 0), &_widget));
 	_widget.addWidget(std::make_unique<Hix::UI::MoveWidget>(QVector3D(0, 1, 0), &_widget));
+
+	auto& co = controlOwner();
+	co.getControl(_xValue, "moveX");
+	co.getControl(_yValue, "moveY");
+	co.getControl(_zValue, "moveZ");
 }
 
 Hix::Features::MoveMode::~MoveMode()
@@ -31,12 +40,15 @@ void Hix::Features::MoveMode::featureEnded()
 	updatePosition();
 }
 
-Hix::Features::FeatureContainerFlushSupport* Hix::Features::MoveMode::applyMove(const QVector3D& to)
+void Hix::Features::MoveMode::apply()
 {
+	auto to = QVector3D(_xValue->getValue(), _yValue->getValue(), _zValue->getValue());
+
 	Hix::Features::FeatureContainerFlushSupport* container = new FeatureContainerFlushSupport();
 	for (auto& target : _targetModels)
 		container->addFeature(new Move(target, to));
-	return container;
+
+	qmlManager->taskManager().enqueTask(container);
 }
 
 

@@ -7,7 +7,7 @@ namespace Hix
 {
 	namespace Features
 	{
-		class WidgetMode : public Mode
+		class WidgetMode : virtual public Mode
 		{
 		public:
 			WidgetMode();

@@ -1,7 +1,13 @@
 #include "Task.h"
 #include "../qmlmanager.h"
+
 Hix::Tasking::Task::~Task()
 {
+}
+
+void Hix::Tasking::Task::setProgressManager(Hix::ProgressManager& manager)
+{
+	_progressManager = &manager;
 }
 
 Hix::Tasking::UITask::UITask(std::function<void()> functor): _f(functor)

@@ -38,7 +38,7 @@ namespace Hix
 			class ToggleSwitch : public Button
 			{
 				Q_OBJECT
-				Q_PROPERTY(bool isChecked MEMBER _isChecked NOTIFY checked)
+				Q_PROPERTY(bool isChecked MEMBER _isChecked NOTIFY checkedChanged)
 			
 			public:
 				ToggleSwitch(QQuickItem* parent = nullptr);
@@ -47,6 +47,7 @@ namespace Hix
 				bool isChecked()const;
 				void setChecked(bool isChecked);
 			signals:
+				void checkedChanged();
 				void checked();
 				void unchecked();
 

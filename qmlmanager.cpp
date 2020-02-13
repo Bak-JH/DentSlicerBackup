@@ -54,9 +54,11 @@
 #include "Qml/components/Buttons.h"
 #include "Qml/components/Inputs.h"
 #include "Qml/components/FeatureMenu.h"
+#include "Qml/ProgressManager.h"
 
 
 #include <functional>
+using namespace Qt3DCore;
 using namespace Hix::Input;
 using namespace Hix::UI;
 using namespace Hix::Render;
@@ -90,8 +92,9 @@ QmlManager::QmlManager(QObject *parent) : QObject(parent), _optBackend(this, scf
 	qmlRegisterType<Hix::QML::Controls::TextInputBox>("hix.qml", 1, 0, "TextInputBox");
 }
 
-void QmlManager::initializeUI(){
+void QmlManager::initializeUI() {
 	featureArea = dynamic_cast<QQuickItem*>(FindItemByName(engine, "featureArea"));
+	popupArea = dynamic_cast<QQuickItem*>(FindItemByName(engine, "popupArea"));
 	partList = dynamic_cast<QQuickItem*>(FindItemByName(engine, "partlist"));
 	mainWindow = FindItemByName(engine, "mainWindow");
 	loginWindow = FindItemByName(engine, "loginWindow");
@@ -103,11 +106,11 @@ void QmlManager::initializeUI(){
 	QEntity* camera = dynamic_cast<QEntity*>(FindItemByName(engine, "cm"));
 	_rayCastController.initialize(camera);
 
-    keyboardHandler = (Qt3DInput::QKeyboardHandler*)FindItemByName(engine, "keyboardHandler");
-    models = (QEntity *)FindItemByName(engine, "Models");
-    Lights* lights = new Lights(models);
-    systemTransform = (Qt3DCore::QTransform *) FindItemByName(engine, "systemTransform");
-    mttab = (QEntity *)FindItemByName(engine, "mttab");
+	keyboardHandler = (Qt3DInput::QKeyboardHandler*)FindItemByName(engine, "keyboardHandler");
+	models = (QEntity*)FindItemByName(engine, "Models");
+	Lights* lights = new Lights(models);
+	systemTransform = (Qt3DCore::QTransform*) FindItemByName(engine, "systemTransform");
+	mttab = (QEntity*)FindItemByName(engine, "mttab");
 
 	total = dynamic_cast<QEntity*> (FindItemByName(engine, "total"));
 	_camera = dynamic_cast<Qt3DRender::QCamera*> (FindItemByName(engine, "camera"));
@@ -121,54 +124,49 @@ void QmlManager::initializeUI(){
 	boundedBox = (QEntity*)FindItemByName(engine, "boundedBox");
 
 
-    undoRedoButton = FindItemByName(engine, "undoRedoButton");
-    slicingData = FindItemByName(engine, "slicingData");
+	undoRedoButton = FindItemByName(engine, "undoRedoButton");
+	slicingData = FindItemByName(engine, "slicingData");
 
 
 	ltso = FindItemByName(engine, "ltso");
 	_optBackend.createSlicingOptControls();
 
-    // selection popup
-    yesno_popup = FindItemByName(engine, "yesno_popup");
-    result_popup = FindItemByName(engine, "result_popup");
+	// selection popup
+	yesno_popup = FindItemByName(engine, "yesno_popup");
+	result_popup = FindItemByName(engine, "result_popup");
 
 
-    QObject::connect(mttab,SIGNAL(runGroupFeature(int,QString, double, double, double,QVariant)),this,SLOT(runGroupFeature(int,QString, double, double, double, QVariant)));
-
-
-
-    boxUpperTab = FindItemByName(engine, "boxUpperTab");
-    boxLeftTab = FindItemByName(engine, "boxLeftTab");
-    scene3d = dynamic_cast<QQuickItem*> (FindItemByName(engine, "scene3d"));
-
-    QObject::connect(boxUpperTab,SIGNAL(runGroupFeature(int,QString, double, double, double, QVariant)),this,SLOT(runGroupFeature(int,QString, double, double, double, QVariant)));
-
-    QObject::connect(this, SIGNAL(arrangeDone(std::vector<QVector3D>, std::vector<float>)), this, SLOT(applyArrangeResult(std::vector<QVector3D>, std::vector<float>)));
+	QObject::connect(mttab, SIGNAL(runGroupFeature(int, QString, double, double, double, QVariant)), this, SLOT(runGroupFeature(int, QString, double, double, double, QVariant)));
 
 
 
-    QObject::connect(undoRedoButton, SIGNAL(unDo()), this, SLOT(unDo()));
-    QObject::connect(undoRedoButton, SIGNAL(reDo()), this, SLOT(reDo()));
-    QObject::connect(mv, SIGNAL(unDo()), this, SLOT(unDo()));
-    QObject::connect(mv, SIGNAL(reDo()), this, SLOT(reDo()));
+	boxUpperTab = FindItemByName(engine, "boxUpperTab");
+	boxLeftTab = FindItemByName(engine, "boxLeftTab");
+	scene3d = dynamic_cast<QQuickItem*> (FindItemByName(engine, "scene3d"));
 
-    httpreq* hr = new httpreq();
-    QObject::connect(loginButton, SIGNAL(loginTrial(QString)), hr, SLOT(get_iv(QString)));
+	QObject::connect(boxUpperTab, SIGNAL(runGroupFeature(int, QString, double, double, double, QVariant)), this, SLOT(runGroupFeature(int, QString, double, double, double, QVariant)));
+
+	QObject::connect(this, SIGNAL(arrangeDone(std::vector<QVector3D>, std::vector<float>)), this, SLOT(applyArrangeResult(std::vector<QVector3D>, std::vector<float>)));
 
 
-    QObject::connect(mv, SIGNAL(copy()), this, SLOT(copyModel()));
-    QObject::connect(mv, SIGNAL(paste()), this, SLOT(pasteModel()));
-    QObject::connect(mv, SIGNAL(groupSelectionActivate(bool)), this, SLOT(groupSelectionActivate(bool)));
-    QObject::connect(yesno_popup, SIGNAL(runGroupFeature(int, QString, double, double, double, QVariant)),this,SLOT(runGroupFeature(int,QString, double, double, double, QVariant)));
+
+	QObject::connect(undoRedoButton, SIGNAL(unDo()), this, SLOT(unDo()));
+	QObject::connect(undoRedoButton, SIGNAL(reDo()), this, SLOT(reDo()));
+	QObject::connect(mv, SIGNAL(unDo()), this, SLOT(unDo()));
+	QObject::connect(mv, SIGNAL(reDo()), this, SLOT(reDo()));
+
+	httpreq* hr = new httpreq();
+	QObject::connect(loginButton, SIGNAL(loginTrial(QString)), hr, SLOT(get_iv(QString)));
+
+
+	QObject::connect(mv, SIGNAL(copy()), this, SLOT(copyModel()));
+	QObject::connect(mv, SIGNAL(paste()), this, SLOT(pasteModel()));
+	QObject::connect(mv, SIGNAL(groupSelectionActivate(bool)), this, SLOT(groupSelectionActivate(bool)));
+	QObject::connect(yesno_popup, SIGNAL(runGroupFeature(int, QString, double, double, double, QVariant)), this, SLOT(runGroupFeature(int, QString, double, double, double, QVariant)));
 	QObject::connect(mv, SIGNAL(cameraViewChanged()), this, SLOT(cameraViewChanged()));
 
-
-
-
-	
 	//init settings
 	_bed.drawBed();
-
 }
 
 void QmlManager::openModelFile(){
@@ -351,14 +349,14 @@ void QmlManager::sendUpdateModelInfo(){
     if (selectedModels.size() == 0 || this->viewMode == VIEW_MODE_LAYER){
         qDebug() << "sendUpdateModelInfo() - no selected model";
 
-        slicingData->setProperty("visible", false);
+        //slicingData->setProperty("visible", false);
 		QMetaObject::invokeMethod(boundedBox, "hideBox"); // Bounded Box
         return;
     }
 
     qDebug() << "sendUpdateModelInfo() - selected model exists";
 
-    slicingData->setProperty("visible", true);
+    //slicingData->setProperty("visible", true);
 
 
 	auto selectedSize = selectedModelsLengths();
@@ -634,28 +632,7 @@ void QmlManager::generateLayFlat()
 {
 	auto layflat = dynamic_cast<LayFlatMode*>(_currentMode.get());
 	if (layflat)
-		layflat->applyLayFlat();
-}
-
-
-void QmlManager::setLabelText(QString text)
-{
-	dynamic_cast<LabellingMode*>(_currentMode.get())->setText(text);
-}
-
-void QmlManager::setLabelFontName(QString fontName)
-{
-	dynamic_cast<LabellingMode*>(_currentMode.get())->setFontName(fontName);
-}
-
-void QmlManager::setLabelFontBold(bool isBold)
-{
-	dynamic_cast<LabellingMode*>(_currentMode.get())->setFontBold(isBold);
-}
-
-void QmlManager::setLabelFontSize(int fontSize)
-{
-	dynamic_cast<LabellingMode*>(_currentMode.get())->setFontSize(fontSize);
+		layflat->apply();
 }
 
 void QmlManager::stateChangeLabelling()
@@ -806,11 +783,6 @@ Hix::Support::SupportRaftManager& QmlManager::supportRaftManager()
 void QmlManager::applyMove(int axis, qreal X, qreal Y){
     if (selectedModels.empty())
         return;
-
-	QVector3D displacement(X, Y, 0);
-
-	auto move = dynamic_cast<Hix::Features::MoveMode*>(_currentMode.get())->applyMove(displacement);
-	_taskManager.enqueTask(move);
 
 }
 void QmlManager::applyRotation(int mode, qreal X, qreal Y, qreal Z){
@@ -1320,13 +1292,9 @@ void QmlManager::getCrossSectionSignal(int val)
 
 
 // for shell offset
-void QmlManager::generateShellOffset(double factor) {
-	openProgressPopUp();
-	setProgress(0.1);
-	auto shellOffset = dynamic_cast<ShellOffsetMode*>(_currentMode.get());
-	_taskManager.enqueTask(shellOffset->doOffset(factor));
-	setProgress(1.0);
-
+void QmlManager::generateShellOffset(double factor)
+{	
+	_currentMode.reset(new SupportMode());
 }
 
 bool QmlManager::isFeatureActive()

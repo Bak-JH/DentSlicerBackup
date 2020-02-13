@@ -74,7 +74,7 @@ std::function<void()> closeFeatureModeFunctor(Hix::QML::Controls::ToggleSwitch* 
 }
 
 
-void  setStr(const std::string& name, Hix::QML::Controls::Button* button)
+void setStr(const std::string& name, Hix::QML::Controls::Button* button)
 {
 	button->setProperty("iconBasic", QString::fromStdString(ICO_PRE + name + ICO_BASIC_SUF));
 	button->setProperty("iconSelected", QString::fromStdString(ICO_PRE + name + ICO_SELECTED_SUF));

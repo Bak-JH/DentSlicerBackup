@@ -27,7 +27,7 @@ void Hix::Features::DeleteModel::redoImpl()
 {
 	auto raw = std::get<GLModel*>(_model);
 	auto parent = raw->parentNode();
-	raw->QNode::setParent((QNode*)nullptr);
+	raw->QNode::setParent((Qt3DCore::QNode*)nullptr);
 	if (parent == qmlManager->models)
 	{
 		qmlManager->unselectPart(raw);

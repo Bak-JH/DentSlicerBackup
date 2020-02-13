@@ -10,6 +10,7 @@
 
 namespace Hix
 {
+	class ProgressManager;
 	namespace Tasking
 	{
 		class TaskManager
@@ -27,6 +28,7 @@ namespace Hix
 			moodycamel::BlockingReaderWriterQueue<TaskVariant> _queue;
 			bool _end = false;
 			std::thread _taskThread;
+			Hix::ProgressManager* _progressManager;
 		};
 	}
 }

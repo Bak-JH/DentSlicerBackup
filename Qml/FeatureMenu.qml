@@ -14,14 +14,11 @@ Hix.FeatureMenu {
 		radius: 45
 		color: "#FFFFFF"
 		RowLayout {
+		    id: featureItems
+			objectName: "featureItems"
 			anchors.left: parent.left
 			anchors.leftMargin: parent.radius
-            id: featureItems
-			objectName: "featureItems"
-
         }
-		
-		
 	}
 
 	DropShadow {

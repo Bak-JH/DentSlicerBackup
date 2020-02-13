@@ -1,12 +1,21 @@
 #include "rotate.h"
-#include "qmlmanager.h"
 #include "widget/RotateWidget.h"
+#include "../qml/components/ControlOwner.h"
+#include "../qml/components/Inputs.h"
+#include "qmlmanager.h"
 
-Hix::Features::RotateMode::RotateMode(): WidgetMode(), _targetModels(qmlManager->getSelectedModels())
+const QUrl ROTATE_POPUP_URL = QUrl("qrc:/Qml/FeaturePopup/PopupRotate.qml");
+
+Hix::Features::RotateMode::RotateMode(): WidgetMode(), _targetModels(qmlManager->getSelectedModels()), DialogedMode(ROTATE_POPUP_URL)
 {
 	_widget.addWidget(std::make_unique<Hix::UI::RotateWidget>(QVector3D(1, 0, 0), &_widget));
 	_widget.addWidget(std::make_unique<Hix::UI::RotateWidget>(QVector3D(0, 1, 0), &_widget));
 	_widget.addWidget(std::make_unique<Hix::UI::RotateWidget>(QVector3D(0, 0, 1), &_widget));
+
+	auto& co = controlOwner();
+	co.getControl(_xValue, "rotateX");
+	co.getControl(_yValue, "rotateY");
+	co.getControl(_zValue, "rotateZ");
 }
 
 Hix::Features::RotateMode::~RotateMode()

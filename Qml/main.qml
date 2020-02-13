@@ -183,6 +183,9 @@ Item{
 			anchors.leftMargin: sidePadding
 		}
 
+
+
+
 		// Toast {
 		// 	id: toast
 		// 	anchors.bottom: parent.bottom
@@ -222,7 +225,7 @@ Item{
 		}
 		
         MouseArea{
-            acceptedButtons: Qt.MiddleButton | Qt.RightButton | Qt.LeftButton
+            acceptedButtons: Qt.MiddleButton | Qt.RightButton
             anchors.fill: parent
             property int mode: 0;// 0 = none, 1 = translate, 2 = rotate, !#!@# qt...
             property vector2d prevPosition;
@@ -321,10 +324,15 @@ Item{
 		// 	Component.onCompleted: {
 		// 		printsettingpopup.setButtons([["Apply", "#00b9c8", "#21959e"], ["Cancel", "#abb3b3", "#8b9393"]]);
 		// 	}
-
 		// 	enabled: false
 		// 	visible: false
 		// }
+		Item {
+			id: popupArea
+			anchors.horizontalCenter: window.horizontalCenter
+			anchors.verticalCenter: window.verticalCenter
+			objectName: "popupArea"
+		}
     }
 
     Login{

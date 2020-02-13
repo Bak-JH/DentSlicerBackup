@@ -2,9 +2,9 @@
 #include "qmlmanager.h"
 using namespace Hix::Features;
 
-
+const QUrl LAYFLAT_POPUP_URL = QUrl("qrc:/Qml/FeaturePopup/PopupLayFlat.qml");
 Hix::Features::LayFlatMode::LayFlatMode()
-	: PPShaderMode(qmlManager->getSelectedModels())
+	: PPShaderMode(qmlManager->getSelectedModels()), DialogedMode(LAYFLAT_POPUP_URL)
 {
 }
 
@@ -21,7 +21,7 @@ void Hix::Features::LayFlatMode::faceSelected(GLModel* selected, const Hix::Engi
 	_args[listed] = listed->vectorToLocal(worldFn);
 }
 
-void Hix::Features::LayFlatMode::applyLayFlat()
+void Hix::Features::LayFlatMode::apply()
 {
 	if (_args.empty())
 		return;
@@ -33,7 +33,6 @@ void Hix::Features::LayFlatMode::applyLayFlat()
 	}
 	_args.clear();
 	qmlManager->taskManager().enqueTask(container);
-
 }
 
 

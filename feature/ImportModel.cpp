@@ -20,6 +20,8 @@ Hix::Features::ImportModelMode::~ImportModelMode()
 {
 }
 
+
+
 Hix::Features::ImportModel::ImportModel(QUrl fileUrl): _fileUrl(fileUrl)
 {}
 
@@ -63,6 +65,7 @@ void Hix::Features::ImportModel::runImpl()
 		MeshRepair repair(repairModels);
 		repair.run();
 	}
+
 	// do auto arrange
 	qmlManager->openArrange();
 }

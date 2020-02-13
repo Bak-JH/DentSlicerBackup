@@ -1,13 +1,21 @@
 #pragma once
-#include "feature/interfaces/Mode.h"
+#include "../interfaces/DialogedMode.h"
 #include "DentEngine/src/ContourBuilder.h"
 #include "DentEngine/src/Bounds3D.h"
 #include "DrawingPlane.h"
 namespace Hix
 {
+	namespace QML
+	{
+		namespace Controls
+		{
+			class ToggleSwitch;
+		}
+	}
+
 	namespace Features
 	{
-		class ModelCut : public Mode
+		class ModelCut : public DialogedMode
 		{
 		public:
 			enum CutType
@@ -34,6 +42,7 @@ namespace Hix
 			Hix::Features::Cut::DrawingPlane _cuttingPlane;
 			Hix::Engine3D::Bounds3D _modelsBound;
 			std::unordered_set<GLModel*> _models;
+			Hix::QML::Controls::ToggleSwitch* _cutSwitch;
 		};
 	}
 }

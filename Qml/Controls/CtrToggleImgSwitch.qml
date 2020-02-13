@@ -34,7 +34,7 @@ Hix.ToggleSwitch {
 			anchors.horizontalCenter: parent.horizontalCenter
 		}
 
-		onClicked: { hitFlatCut(); root.isLeft = true; }
+		onClicked: { root.isChecked = false; }
 
 		states: [
 			State {
@@ -62,7 +62,6 @@ Hix.ToggleSwitch {
 		width: 104
 		height: 96
 		radius: 8
-		color: btncolor
 		border.color: "#d3dfe0"
 		border.width: 1
 		anchors.right: parent.right
@@ -87,7 +86,7 @@ Hix.ToggleSwitch {
 			anchors.horizontalCenter: parent.horizontalCenter
 		}
 
-		onClicked: { hitFreeCut(); root.isLeft = false; }
+		onClicked: { root.isChecked = true; }
 
 		states: [
 			State {
@@ -108,4 +107,18 @@ Hix.ToggleSwitch {
 			}
 		]
 	}
+
+	onCheckedChanged: {
+		if(root.isChecked)
+		{
+			flatbtn.state = "flatOff"; 
+			freebtn.state = "freeOn"; 
+		}
+		else
+		{
+			flatbtn.state = "flatOn"; 
+			freebtn.state = "freeOff";
+		}
+	}
+
 }
