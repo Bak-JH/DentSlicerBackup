@@ -16,6 +16,12 @@ namespace Hix
 		class ApplicationManager: public Hix::Common::Singleton<ApplicationManager>
 		{
 		public:
+
+			ApplicationManager(const ApplicationManager& other) = delete;
+			ApplicationManager(ApplicationManager&& other) = delete;
+			ApplicationManager& operator=(ApplicationManager other) = delete;
+			ApplicationManager& operator=(ApplicationManager&& other) = delete;
+
 			QQmlApplicationEngine& engine();
 			void init();
 			QQuickItem* getUIRoot()const;

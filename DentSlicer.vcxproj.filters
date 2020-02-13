@@ -1236,6 +1236,7 @@
     <None Include="icon.ico" />
     <None Include="Qml\Controls\CtrToggleImgSwitch.qml" />
     <None Include="Qml\CanvasTest.qml" />
+    <None Include="Qml\PartListItem.qml" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Header Files">

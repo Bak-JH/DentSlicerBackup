@@ -1,8 +1,10 @@
 #pragma once
 #include <qquickitem.h>
+#include <qqmlcomponent.h>
 #include <unordered_set>
 #include "../DentEngine/src/Bounds3D.h"
 #include "ControlOwner.h"
+
 class GLModel;
 
 namespace Hix
@@ -36,7 +38,8 @@ namespace Hix
 			Hix::QML::Controls::Button* _deleteButton;
 			std::unordered_set<GLModel*> _selectedModels;
 			std::unordered_map<GLModel*, std::unique_ptr<PartListItem>> _items;
-			friend class PartListItemAttorny;
+			QQuickItem* _itemContainer;
+			QQmlComponent _component;
 		};
 
 
@@ -49,14 +52,15 @@ namespace Hix
 			void setSelected(bool isSelected);
 			bool isSelected()const;
 			bool visible()const;
+			Hix::QML::Controls::ToggleSwitch* hideButton();
+			Hix::QML::Controls::ToggleSwitch* selectButton();
+
 		protected:
 			void componentComplete() override;
 			QQuickItem* getQItem()override;
 
 			Hix::QML::Controls::ToggleSwitch* _hideButton;
 			Hix::QML::Controls::ToggleSwitch* _selectButton;
-			GLModel* _model = nullptr;
-			PartList* _parent = nullptr;
 			bool _selected = false;
 		};
 	}

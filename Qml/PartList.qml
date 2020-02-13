@@ -9,24 +9,6 @@ Hix.PartList {
 	width: 256
 	height: 320
 	property var myPadding: 16
-	ListModel {
-		id:model
-		objectName: "modelList"
-	}
-	function appendModel(modelName, modelPointer)
-	{
-		model.append({"name" : modelName, "modelPointer" : modelPointer});
-	}
-
-	// function deleteModel(modelPointer)
-	// {
-	// 	for(var n = 0; n < model.count; ++n)
-	// 	{
-	// 		if(model.get(n).modelPointer == modelPointer)
-	// 			model.remove(n)
-	// 	}
-	// }
-
 	Rectangle {
 		id: shell
 		width: partList.width
@@ -42,73 +24,6 @@ Hix.PartList {
 			anchors.left: parent.left
 			anchors.leftMargin: myPadding
 		}
-	
-		Component { 
-			id: contactDelegate
-			Hix.PartListItem {
-				width: 224; height: 28
-				Column {
-					anchors.verticalCenter: parent.verticalCenter
-					Hix.ToggleSwitch{
-						id: selectButton
-						width: 224; height: 28
-						Text { 
-							id: modelname
-							text: name
-							font.family: openRegular.name
-							anchors.verticalCenter: parent.verticalCenter
-							anchors.left: parent.left
-							anchors.leftMargin: 8
-						}
-						onChecked: {
-							color="#f5f5f5"
-							modelname.color="#1db2c4"
-							if(hideButton.isChecked)
-								showhideimg.source = "qrc:/Resource/part_hide_select_1.png"
-							else
-								showhideimg.source = "qrc:/Resource/part_show_select_1.png"
-						}
-						onUnchecked: {
-							color="white"
-							modelname.color="black"
-							if(hideButton.isChecked)
-								showhideimg.source = "qrc:/Resource/part_hide_1.png"
-							else
-								showhideimg.source = "qrc:/Resource/part_show_1.png"
-						}
-
-
-					}
-				}
-				Hix.ToggleSwitch{
-					id: hideButton
-					width: 16
-					height: width
-					anchors.right: parent.right
-					anchors.rightMargin: 6
-					anchors.verticalCenter: parent.verticalCenter
-					color: "transparent"
-					Image {
-						id: showhideimg
-						source: "qrc:/Resource/part_show_1.png"
-						anchors.verticalCenter: parent.verticalCenter
-					}
-					onChecked: {
-						if(selectButton.isChecked)
-							showhideimg.source = "qrc:/Resource/part_show_select_1.png"
-						else
-							showhideimg.source = "qrc:/Resource/part_show_1.png"
-					}
-					onUnchecked: {
-						if(selectButton.isChecked)
-							showhideimg.source = "qrc:/Resource/part_hide_select_1.png"
-						else
-							showhideimg.source = "qrc:/Resource/part_hide_1.png"
-					}
-				}
-			}
-		}
-
 		Rectangle {
 			width: 256 - 16;
 			height: 212;
@@ -116,16 +31,19 @@ Hix.PartList {
 			anchors.right: parent.right
 			anchors.top: listtitle.bottom
 			anchors.topMargin: 8
-			ListView {
+			ScrollView {
 				anchors.fill: parent
 				clip: true
 				width: 240;
 				height: 212;
-				model: model	
-				delegate: contactDelegate	
-				//highlight: Rectangle { color: "lightsteelblue"; radius: 2 }
 				focus: true
+				RowLayout
+				{
+					id: itemContainer
+					anchors.left: parent.left
+					anchors.right: parent.right
 
+				}
 				ScrollBar.vertical: ScrollBar{
 					id: control
 					//width: 12

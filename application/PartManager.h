@@ -22,6 +22,12 @@ namespace Hix
 		{
 		public:
 			PartManager();
+
+			PartManager(const PartManager& other) = delete;
+			PartManager(PartManager&& other) = delete;
+			PartManager& operator=(PartManager other) = delete;
+			PartManager& operator=(PartManager&& other) = delete;
+
 			void addPart(std::unique_ptr<GLModel>&& model);
 			std::unique_ptr<GLModel> removePart(GLModel* model);
 			//checks if given model is top level AKA listed model pre-tree
