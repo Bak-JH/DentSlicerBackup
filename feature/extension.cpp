@@ -9,6 +9,7 @@
 
 using namespace Hix::Debug;
 const QUrl EXTEND_POPUP_URL = QUrl("qrc:/Qml/FeaturePopup/PopupExtend.qml");
+
 Hix::Features::ExtendMode::ExtendMode() 
 	:PPShaderMode(qmlManager->getSelectedModels()), DialogedMode(EXTEND_POPUP_URL)
 {
@@ -88,11 +89,13 @@ void Hix::Features::ExtendMode::apply()
 
 	auto distance = _extendValue->getValue();
 	Hix::Features::FeatureContainerFlushSupport* container = new FeatureContainerFlushSupport();
+
 	for (auto& each : _args)
 	{
 		auto& arg = each.second;
 		container->addFeature(new Extend(each.first, arg.normal, arg.extensionFaces, distance));
 	}
+
 	_args.clear();
 	qmlManager->taskManager().enqueTask(container);
 }

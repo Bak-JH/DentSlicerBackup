@@ -1,7 +1,10 @@
 #include "Labelling.h"
+#include "Qml/components/Inputs.h"
+#include "../qml/components/ControlOwner.h"
 #include "qmlmanager.h"
 #include "../Shapes2D.h"
 #include "../Extrude.h"
+
 using namespace Hix::Engine3D;
 using namespace Hix::Polyclipping;
 using namespace Hix::Shapes2D;
@@ -9,6 +12,7 @@ using namespace Hix::Features::Extrusion;
 using namespace ClipperLib;
 
 //Mesh* generateLabelMesh(const QVector3D translation, const QVector3D normal, const QString text, const QFont font)
+const QUrl LABEL_POPUP_URL = QUrl("qrc:/Qml/FeaturePopup/PopupLabel.qml");
 
 GLModel* Hix::Features::LabellingMode::generatePreviewModel()
 {
@@ -16,7 +20,8 @@ GLModel* Hix::Features::LabellingMode::generatePreviewModel()
 	auto labelMesh = new Mesh();
 	QPainterPath painterPath;
 	painterPath.setFillRule(Qt::WindingFill);
-	painterPath.addText(0, 0, _font, _text);
+	//QFont font(_fontStyle->getIndex());
+	//painterPath.addText(0, 0, _font, QString::fromStdString(_inputText->getInputText()));
 
 	auto width = painterPath.boundingRect().width();
 	auto height = painterPath.boundingRect().height();
@@ -90,11 +95,17 @@ GLModel* Hix::Features::LabellingMode::generatePreviewModel()
 	return new GLModel(_targetModel, labelMesh, "label", 0);
 }
 
-Hix::Features::LabellingMode::LabellingMode()
+
+
+Hix::Features::LabellingMode::LabellingMode() : DialogedMode(LABEL_POPUP_URL)
 {
+	auto& co = controlOwner();
+	co.getControl(_inputText, "labeltext");
+	co.getControl(_fontStyle, "labelfont");
+	co.getControl(_fontSize, "labelfontsize");
+	co.getControl(_labelHeight, "labelheight");
+	co.getControl(_labelType, "labeltype");
 }
-
-
 
 Hix::Features::LabellingMode::~LabellingMode()
 {
@@ -153,51 +164,50 @@ void Hix::Features::LabellingMode::updateLabelMesh(const QVector3D& localInterse
 	_matrix = newTransform.matrix();
 	_scale = newTransform.scale3D();
 }
-
-void Hix::Features::LabellingMode::setText(const QString& text)
-{
-	if (_text != text)
-	{
-		_text = text;
-		_isDirty = true;
-		_previewModel.reset(generatePreviewModel());
-		_previewModel->transform().setMatrix(_matrix);
-		_previewModel->updateAABBScale(_scale);
-	}
-}
-
-void Hix::Features::LabellingMode::setFontName(const QString& fontName)
-{
-	_font.setFamily(fontName);
-	_isDirty = true;
-	_previewModel.reset(generatePreviewModel());
-	_previewModel->transform().setMatrix(_matrix);
-	_previewModel->updateAABBScale(_scale);
-}
-
-void Hix::Features::LabellingMode::setFontBold(bool isBold)
-{
-	if (_font.bold() != isBold)
-	{
-		_font.setBold(isBold);
-		_isDirty = true;	
-		_previewModel.reset(generatePreviewModel());
-		_previewModel->transform().setMatrix(_matrix);
-		_previewModel->updateAABBScale(_scale);
-	}
-}
-
-void Hix::Features::LabellingMode::setFontSize(int fontSize)
-{
-	if (_font.pointSize()!= fontSize)
-	{
-		_font.setPointSize(fontSize);
-		_isDirty = true;
-		_previewModel.reset(generatePreviewModel());
-		_previewModel->transform().setMatrix(_matrix);
-		_previewModel->updateAABBScale(_scale);
-	}
-}
+//
+//void Hix::Features::LabellingMode::setText(const QString& text)
+//{
+//	if (_inputText->getInputText() != text.toStdString())
+//	{
+//		_isDirty = true;
+//		_previewModel.reset(generatePreviewModel());
+//		_previewModel->transform().setMatrix(_matrix);
+//		_previewModel->updateAABBScale(_scale);
+//	}
+//}
+//
+//void Hix::Features::LabellingMode::setFontName(const QString& fontName)
+//{
+//	_font.setFamily(fontName);
+//	_isDirty = true;
+//	_previewModel.reset(generatePreviewModel());
+//	_previewModel->transform().setMatrix(_matrix);
+//	_previewModel->updateAABBScale(_scale);
+//}
+//
+//void Hix::Features::LabellingMode::setFontBold(bool isBold)
+//{
+//	if (_font.bold() != isBold)
+//	{
+//		_font.setBold(isBold);
+//		_isDirty = true;	
+//		_previewModel.reset(generatePreviewModel());
+//		_previewModel->transform().setMatrix(_matrix);
+//		_previewModel->updateAABBScale(_scale);
+//	}
+//}
+//
+//void Hix::Features::LabellingMode::setFontSize(int fontSize)
+//{
+//	if (_font.pointSize()!= fontSize)
+//	{
+//		_font.setPointSize(fontSize);
+//		_isDirty = true;
+//		_previewModel.reset(generatePreviewModel());
+//		_previewModel->transform().setMatrix(_matrix);
+//		_previewModel->updateAABBScale(_scale);
+//	}
+//}
 
 Hix::Features::Feature* Hix::Features::LabellingMode::applyLabelMesh()
 {
@@ -224,7 +234,7 @@ Hix::Features::Labelling::~Labelling()
 
 void Hix::Features::Labelling::undoImpl()
 {
-	_label->QNode::setParent((QNode*)nullptr);
+	_label->QNode::setParent((Qt3DCore::QNode*)nullptr);
 }
 
 void Hix::Features::Labelling::redoImpl()

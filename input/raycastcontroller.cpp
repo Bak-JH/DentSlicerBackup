@@ -211,19 +211,19 @@ void RayCastController::mouseReleased(Qt3DInput::QMouseEvent* mouse)
 				//is a click, so stop verifier from working to figure out if it's a click
 				_isClickVerified.notify_all();
 				//if successfully cancelled
-				auto test = _verifyClickTask.get();
-				if (!test)
-				{
-					if (qmlManager->yesno_popup->property("isFlawOpen").toBool())
-						return;
+				//auto test = _verifyClickTask.get();
+				//if (!test)
+				//{
+				//	if (qmlManager->yesno_popup->property("isFlawOpen").toBool())
+				//		return;
 
-					bool busy = false;
-					if (!_mouseEvent.position.isNull() && mousePosInBound(mouse))
-					{
-						_rayCastMode = RayCastMode::Click;
-						_rayCaster.trigger(_mouseEvent.position);
-					}
-				}
+				//	bool busy = false;
+				//	if (!_mouseEvent.position.isNull() && mousePosInBound(mouse))
+				//	{
+				//		_rayCastMode = RayCastMode::Click;
+				//		_rayCaster.trigger(_mouseEvent.position);
+				//	}
+				//}
 			}
 
 		}

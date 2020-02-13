@@ -1,10 +1,18 @@
 #include "scale.h"
+#include "../qml/components/Inputs.h"
+#include "../qml/components/ControlOwner.h"
 #include "qmlmanager.h"
 
-Hix::Features::ScaleMode::ScaleMode(): _targetModels(qmlManager->getSelectedModels())
-{
-}
+const QUrl SCALE_POPUP_URL = QUrl("qrc:/Qml/FeaturePopup/PopupScale.qml");
 
+Hix::Features::ScaleMode::ScaleMode() : _targetModels(qmlManager->getSelectedModels()), DialogedMode(SCALE_POPUP_URL)
+{
+	auto& co = controlOwner();
+	co.getControl(_precentValue, "scaleValue");
+	co.getControl(_xValue, "scaleX");
+	co.getControl(_yValue, "scaleY");
+	co.getControl(_zValue, "scaleZ");
+}
 Hix::Features::ScaleMode::~ScaleMode()
 {
 }
@@ -16,6 +24,14 @@ Hix::Features::FeatureContainerFlushSupport* Hix::Features::ScaleMode::applyScal
 		container->addFeature(new Scale(target, scale));
 
 	return container;
+}
+
+void Hix::Features::ScaleMode::apply()
+{
+	auto scale = QVector3D();
+	Hix::Features::FeatureContainerFlushSupport* container = new FeatureContainerFlushSupport();
+	for (auto& target : _targetModels)
+		container->addFeature(new Scale(target, scale));
 }
 
 

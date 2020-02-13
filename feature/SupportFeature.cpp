@@ -1,9 +1,9 @@
 #include "SupportFeature.h"
 #include "../../input/raycastcontroller.h"
 #include "render/Color.h"
-#include "../../qmlmanager.h"
 #include "feature/move.h"
 #include "support/RaftModel.h"
+#include "../../qmlmanager.h"
 
 /////////////////////
 ///  Add Support  ///
@@ -116,8 +116,10 @@ void Hix::Features::RemoveRaft::runImpl()
 ////////////////////
 /// Support Mode ///
 ////////////////////
+const QUrl SUPPORT_POPUP_URL = QUrl("qrc:/Qml/FeaturePopup/PopupSupport.qml");
+
 Hix::Features::SupportMode::SupportMode()
-	: _targetModels(qmlManager->getSelectedModels())
+	: _targetModels(qmlManager->getSelectedModels()), DialogedMode(SUPPORT_POPUP_URL)
 {
 	qmlManager->getRayCaster().setHoverEnabled(true);
 }

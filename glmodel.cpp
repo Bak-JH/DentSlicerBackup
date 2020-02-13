@@ -37,7 +37,7 @@ using namespace Hix::Engine3D;
 using namespace Hix::Input;
 using namespace Hix::Render;
 
-GLModel::GLModel(QEntity*parent, Mesh* loadMesh, QString fname, const Qt3DCore::QTransform* transform)
+GLModel::GLModel(Qt3DCore::QEntity*parent, Mesh* loadMesh, QString fname, const Qt3DCore::QTransform* transform)
     : SceneEntityWithMaterial(parent)
     , _name(fname)
 {

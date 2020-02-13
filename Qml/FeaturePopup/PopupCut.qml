@@ -20,6 +20,7 @@ FeaturePopup {
 	}
 
 	CtrToggleImgSwitch {
+		id: cutswitch
 		width: parent.width - 16 * 2
 		anchors.left: parent.left
 		anchors.leftMargin: 16

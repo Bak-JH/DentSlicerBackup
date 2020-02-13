@@ -1,5 +1,6 @@
 #pragma once
 #include "interfaces/SelectFaceMode.h"
+#include "interfaces/DialogedMode.h"
 #include "support/SupportModel.h"
 #include "support/SupportRaftManager.h"
 #include "DentEngine/src/configuration.h"
@@ -67,7 +68,7 @@ namespace Hix
 			std::variant<RaftModel*, std::unique_ptr<RaftModel>> _model;
 		};
 
-		class SupportMode: public SelectFaceMode
+		class SupportMode: public SelectFaceMode, public DialogedMode
 		{
 		public:
 			SupportMode();

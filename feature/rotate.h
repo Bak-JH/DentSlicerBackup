@@ -3,9 +3,19 @@
 #include "feature/interfaces/WidgetMode.h"
 #include "widget/Widget3D.h"
 #include "DentEngine/src/Bounds3D.h"
+#include "interfaces/DialogedMode.h"
 #include <optional>
+
 namespace Hix
 {
+	namespace QML
+	{
+		namespace Controls
+		{
+			class InputSpinBox;
+		}
+	}
+
 	namespace Features
 	{
 		class Rotate : public Feature
@@ -29,7 +39,7 @@ namespace Hix
 			Engine3D::Bounds3D _nextAabb;
 		};
 
-		class RotateMode : public WidgetMode
+		class RotateMode : public WidgetMode, public DialogedMode
 		{
 		public:
 			RotateMode();
@@ -43,6 +53,11 @@ namespace Hix
 		protected:
 			Hix::Features::FeatureContainerFlushSupport* _rotateContainer;
 			std::unordered_set<GLModel*> _targetModels;
+
+		private:
+			Hix::QML::Controls::InputSpinBox* _xValue;
+			Hix::QML::Controls::InputSpinBox* _yValue;
+			Hix::QML::Controls::InputSpinBox* _zValue;
 
 		};
 

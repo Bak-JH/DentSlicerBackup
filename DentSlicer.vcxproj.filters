@@ -193,6 +193,12 @@
     <ClCompile Include="feature\interfaces\DialogedMode.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Qml\ProgressManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="feature\interfaces\Progress.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="common\Debug.h" />
@@ -818,6 +824,15 @@
     <ClInclude Include="feature\interfaces\DialogedMode.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Qml\ProgressManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="feature\interfaces\Progress.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="support\SupportModel.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="debug\moc_predefs.h.cbt" />
@@ -1185,6 +1200,7 @@
     <None Include="icon.ico" />
     <None Include="Qml\Controls\CtrToggleImgSwitch.qml" />
     <None Include="Qml\CanvasTest.qml" />
+    <None Include="Qml\ProgressFeatureItem.qml" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Header Files">

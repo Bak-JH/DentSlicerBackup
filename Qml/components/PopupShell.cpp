@@ -4,6 +4,8 @@
 #include <QtQuick/private/qquickrectangle_p.h>
 #include <QtQuick/private/qquicktext_p.h>
 #include "glmodel.h"
+#include "QtQml/private/qqmllistmodel_p.h"
+
 using namespace  Hix::QML;
 
 Hix::QML::FeaturePopupShell::FeaturePopupShell(QQuickItem* parent) : QQuickItem(parent)
@@ -48,13 +50,13 @@ Controls::Button& Hix::QML::FeaturePopupShell::applyButton()
 	return *_applyButton;
 }
 
-
 Hix::QML::ProgressPopupShell::ProgressPopupShell(QQuickItem* parent) : QQuickItem(parent)
 {
 }
 
 Hix::QML::ProgressPopupShell::~ProgressPopupShell()
 {
+	qDebug() << "deleted feature";
 }
 
 void Hix::QML::ProgressPopupShell::appendFeature(std::string featureName)
@@ -75,6 +77,45 @@ void Hix::QML::ProgressPopupShell::setPercentage(int percent)
 {
 	_percent = percent;
 	emit percentChanged();
+}
+
+QQuickItem* Hix::QML::ProgressPopupShell::featureLayout()
+{
+	return _featureLayout;
+}
+
+void Hix::QML::ProgressPopupShell::componentComplete()
+{
+	_featureLayout = findFeatureLayout();
+	__super::componentComplete();
+}
+
+QQuickItem* Hix::QML::ProgressPopupShell::findFeatureLayout()
+{
+	std::deque<QQuickItem*> s;
+	s.emplace_back(this);
+	bool isFound = false;
+	while (!s.empty())
+	{
+		auto curr = s.front();
+		s.pop_front();
+
+		auto neighbors = curr->childItems();
+		for (auto& each : neighbors)
+		{
+			auto context = qmlContext(each);
+			if (context)
+			{
+				auto qID = context->nameForObject(each);
+				if (qID == "featureList")
+				{
+					return each;
+				}
+			}
+			s.emplace_back(each);
+		}
+	}
+	return nullptr;
 }
 
 

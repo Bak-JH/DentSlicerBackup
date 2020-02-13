@@ -67,7 +67,7 @@ FeaturePopup {
 	}
 	
 	CtrToggleSwitch {
-		id: toggleSwitch
+		id: labeltype
 		leftText
 		{
 			text: "Emboss"

@@ -1,8 +1,10 @@
 #include "modelcut.h"
-#include "../../qmlmanager.h"
 #include "ZAxialCut.h"
 #include "polylinecut.h"
-#include "feature/interfaces/Feature.h"
+#include "../qml/components/Buttons.h"
+#include "../qml/components/ControlOwner.h"
+#include "../../qmlmanager.h"
+
 using namespace Hix;
 using namespace Hix::Features;
 using namespace Hix::Features::Cut;
@@ -10,11 +12,14 @@ using namespace Hix::Engine3D;
 using namespace Hix::Slicer;
 using namespace ClipperLib;
 
-
+const QUrl CUT_POPUP_URL = QUrl("qrc:/Qml/FeaturePopup/PopupCut.qml");
 
 Hix::Features::ModelCut::ModelCut():
-	_models(qmlManager->getSelectedModels()), _cuttingPlane(qmlManager->total), _modelsBound(qmlManager->getSelectedBound())
+	_models(qmlManager->getSelectedModels()), _cuttingPlane(qmlManager->total), 
+	_modelsBound(qmlManager->getSelectedBound()), DialogedMode(CUT_POPUP_URL)
 {
+	auto& co = controlOwner();
+	co.getControl(_cutSwitch, "cutswitch");
 }
 
 Hix::Features::ModelCut::~ModelCut()
@@ -26,7 +31,7 @@ Hix::Features::ModelCut::~ModelCut()
 void ModelCut::cutModeSelected(int type) {
 	//if flat cut		
 
-	if (type == 1)
+	if (!_cutSwitch->isChecked())
 	{
 		_cutType = ZAxial;
 		_cuttingPlane.enableDrawing(false);
@@ -35,7 +40,7 @@ void ModelCut::cutModeSelected(int type) {
 		_cuttingPlane.transform().setTranslation(QVector3D(0, 0, _modelsBound.zMin() + 1 * _modelsBound.lengthZ() / 1.8));
 		_cuttingPlane.enablePlane(true);
 	}
-	else if (type == 2)
+	else if (_cutSwitch->isChecked())
 	{
 		_cutType = Polyline;
 		_cuttingPlane.enableDrawing(true);

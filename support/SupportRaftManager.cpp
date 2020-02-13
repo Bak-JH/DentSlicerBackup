@@ -9,6 +9,7 @@
 #include "../common/Debug.h"
 #include "qmlmanager.h"
 #include "feature/SupportFeature.h"
+using namespace Qt3DCore;
 using namespace Hix::Support;
 using namespace Hix::Memory;
 

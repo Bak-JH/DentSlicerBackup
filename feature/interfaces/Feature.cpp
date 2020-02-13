@@ -3,7 +3,7 @@
 #include <QDebug>
 using namespace Hix::Features;
 
-Hix::Features::Feature::Feature()
+Hix::Features::Feature::Feature(): _progress()
 {
 }
 
@@ -48,7 +48,10 @@ void Hix::Features::Feature::redo()noexcept
 	}
 }
 
-
+void Feature::postUIthread(std::function<void()>&& func)
+{
+	QMetaObject::invokeMethod(qmlManager, func, Qt::BlockingQueuedConnection);
+}
 void Hix::Features::Feature::run()noexcept
 {
 

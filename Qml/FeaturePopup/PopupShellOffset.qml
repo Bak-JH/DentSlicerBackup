@@ -20,7 +20,7 @@ FeaturePopup {
 	}
 
 	CtrSpinBox {
-		id: extendvalue
+		id: offsetValue
 		label.text: "Tickness(mm)"
 		width: parent.width - 16 * 2
 		anchors.left: parent.left

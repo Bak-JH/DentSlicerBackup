@@ -1,16 +1,23 @@
 #include "shelloffset.h"
-#include "qmlmanager.h"
+#include "../qml/components/Inputs.h"
+#include "../qml/components/ControlOwner.h"
 #include "feature/repair/meshrepair.h"
 #include "DentEngine/src/mesh.h"
 #include "cut/ZAxialCut.h"
 #include "deleteModel.h"
+#include "qmlmanager.h"
 // offset shell with mm
 
 using namespace Hix::Engine3D;
 using namespace Hix::Features;
 using namespace Hix::Features::Cut;
-Hix::Features::ShellOffsetMode::ShellOffsetMode():_cuttingPlane(qmlManager->total)
+const QUrl OFFSET_POPUP_URL = QUrl("qrc:/Qml/FeaturePopup/PopupShellOffset.qml");
+
+Hix::Features::ShellOffsetMode::ShellOffsetMode():_cuttingPlane(qmlManager->total), DialogedMode(OFFSET_POPUP_URL)
 {
+	auto& co = controlOwner();
+	co.getControl(_offsetValue, "offsetValue");
+
 	auto selectedModels = qmlManager->getSelectedModels();
 	if (selectedModels.size() == 1)
 	{
@@ -19,11 +26,11 @@ Hix::Features::ShellOffsetMode::ShellOffsetMode():_cuttingPlane(qmlManager->tota
 		_cuttingPlane.transform().setTranslation(QVector3D(0, 0, _modelBound.zMin() + 1 * _modelBound.lengthZ() / 1.8));
 		_subject = *selectedModels.begin();
 	}
-	else
-	{
-		qmlManager->openResultPopUp("A single model must be selected", "", "");
-		throw std::runtime_error("A single model must be selected");
-	}
+	//else
+	//{
+	//	qmlManager->openResultPopUp("A single model must be selected", "", "");
+	//	throw std::runtime_error("A single model must be selected");
+	//}
 }
 
 Hix::Features::ShellOffsetMode::~ShellOffsetMode()
@@ -36,9 +43,9 @@ void Hix::Features::ShellOffsetMode::getSliderSignal(double value)
 	_cuttingPlane.transform().setTranslation(QVector3D(0, 0, _modelBound.zMin() + value * zlength / 1.8));
 }
 
-Hix::Features::Feature* Hix::Features::ShellOffsetMode::doOffset(float offset)
+void Hix::Features::ShellOffsetMode::apply()
 {
-	return new ShellOffset(_subject, offset, _cuttingPlane.transform().translation().z());
+
 }
 
 

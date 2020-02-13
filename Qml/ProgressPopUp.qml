@@ -3,12 +3,13 @@ import hix.qml 1.0 as Hix
 import QtQuick.Controls 2.1
 import QtQuick.Controls.Styles 1.4
 import QtGraphicalEffects 1.12
+import QtQuick.Layouts 1.3
 
 Hix.ProgressPopupShell {
 	id: root
-	width: 216
-	height: 300
-
+	width: window.width
+	height: window.height
+	
 	property string imgSource: "qrc:/Resource/progress_loading.png"
 
 	function reportError()
@@ -17,23 +18,10 @@ Hix.ProgressPopupShell {
 		var newBtn = Qt.createComponent("ProgressException.qml");
 		var newBtnOption = newBtn.createObject(content);
 	}
-
-	ListModel // listview data
-	{		
-		id:model
-		objectName: "featueList"
-		
-		function appendFeature(featureName)
-		{
-			model.append({"name" : featureName});
-		}
-	}
 	
 	MouseArea {
 		id: blockingArea
-		width: window.width
-		height: window.height
-		anchors.fill: window
+		anchors.fill: parent
 		propagateComposedEvents: false
         hoverEnabled: true
         preventStealing: true
@@ -41,10 +29,13 @@ Hix.ProgressPopupShell {
 
 	Rectangle {
 		id: shell
-		width: parent.width
-		height: parent.height
+		width: 216
+		height: 305
 		radius: 8
 		color: "#ffffff"
+
+		anchors.horizontalCenter: parent.horizontalCenter
+		anchors.verticalCenter: parent.verticalCenter
 
 		Item {
 			id: content
@@ -78,57 +69,14 @@ Hix.ProgressPopupShell {
 				anchors.verticalCenter: img.verticalCenter
 			}
 
-			Component { // listview item style
-				id: contactDelegate
-				Item {
-					width: parent.width * 0.92
-					height: 28
-					anchors.horizontalCenter: parent.horizontalCenter
-					Column {
-						anchors.verticalCenter: parent.verticalCenter
-						Text { 
-							id: modelname
-							text: name
-							font.family: openRegular.name
-							font.pointSize: 10
-							anchors.verticalCenter: parent.verticalCenter
-							anchors.left: parent.left
-							anchors.leftMargin: 8
-						}
-	
-					}
-					Rectangle{
-						id: showhide
-						width: 20
-						height: width
-						anchors.right: parent.right
-						anchors.rightMargin: 8
-						anchors.verticalCenter: parent.verticalCenter
-						color: "yellow"
-						Image {
-							id: showhideimg
-							source: "qrc:/Resource/progress_check.png"
-							anchors.verticalCenter: parent.verticalCenter
-						}
-						}
-				}
-			}
-
-			Rectangle {
-				width: parent.width
-				height: parent.height * 0.3
-				anchors.right: parent.right
+			
+			ColumnLayout {
+				id: featureList
+				width: 200
+				anchors.horizontalCenter: parent.horizontalCenter
 				anchors.top: img.bottom
-				anchors.topMargin: 10
-				ListView {
-					anchors.fill: parent
-					clip: true
-					width: parent.width
-					height: parent.height
-					model: model
-					delegate: contactDelegate
-					focus: true
-				}
+				anchors.topMargin: 5
+				spacing: 2
 			}
 		}
 	}

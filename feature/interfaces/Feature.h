@@ -3,6 +3,7 @@
 #include <memory>
 #include <deque>
 #include "../../Tasking/Task.h"
+#include "Progress.h"
 class GLModel;
 namespace Hix
 {
@@ -20,12 +21,22 @@ namespace Hix
 			void run()noexcept override;
 
 		protected:
+			template<typename ReturnType>
+			ReturnType postUIthread(std::function<ReturnType()>&& func)
+			{
+				ReturnType ret;
+				QMetaObject::invokeMethod(qmlManager, func, Qt::BlockingQueuedConnection, &ret);
+				return ret;
+			}
+			void postUIthread(std::function<void()>&& func);
+
 			void tryRunFeature(Feature& other);
 			void tryUndoFeature(Feature& other);
 			void tryRedoFeature(Feature& other);
 			virtual void runImpl() = 0;
 			virtual void undoImpl() = 0;
 			virtual void redoImpl() = 0;
+			Progress _progress;
 			//friend class FeatureAttorney;
 		};
 

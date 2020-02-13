@@ -1,7 +1,6 @@
 #pragma once
 #include "ControlOwner.h"
 #include <qquickitem.h>
-#include "QtQml/private/qqmllistmodel_p.h"
 #include <string>
 class GLModel;
 namespace Hix
@@ -42,12 +41,18 @@ namespace Hix
 			void appendFeature(std::string featureName);
 			void appendFeatureList(QStringList featureName);
 			void setPercentage(int percent);
+			QQuickItem* featureLayout();
 
 		signals:
 			void percentChanged();
+			
+		protected:
+			void componentComplete() override;
 
 		private:
 			int _percent = 0;
+			QQuickItem* _featureLayout = nullptr;
+			QQuickItem* findFeatureLayout();
 		};	
 
 		class ModalShell : public QQuickItem

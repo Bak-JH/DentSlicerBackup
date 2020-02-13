@@ -108,16 +108,17 @@ public:
     // UI components
 	Qt3DRender::QCamera* _camera;
     QQuickItem* featureArea;
+    QQuickItem* popupArea;
     QObject* mainWindow;
     QObject* loginWindow;
     QObject* loginButton;
     QObject* boxUpperTab;
     QObject* boxLeftTab;
 	QQuickItem* scene3d;
-    QEntity* models;
-	QEntity* total;
+    Qt3DCore::QEntity* models;
+	Qt3DCore::QEntity* total;
     Qt3DCore::QTransform* systemTransform;
-	QEntity* mv;
+	Qt3DCore::QEntity* mv;
 	Qt3DCore::QEntity* boundedBox;
     Qt3DCore::QEntity *mttab;
     QObject* undoRedoButton;
@@ -260,10 +261,6 @@ public slots:
 
 
 
-	void setLabelText(QString text);
-	void setLabelFontName(QString fontName);
-	void setLabelFontBold(bool isBold);
-	void setLabelFontSize(int fontSize);
 	void stateChangeLabelling();
 	void generateLabelMesh();
 

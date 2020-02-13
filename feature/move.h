@@ -3,10 +3,19 @@
 #include "feature/interfaces/WidgetMode.h"
 #include "widget/Widget3D.h"
 #include "DentEngine/src/Bounds3D.h"
+#include "interfaces/DialogedMode.h"
 #include <optional>
 
 namespace Hix
 {
+	namespace QML
+	{
+		namespace Controls
+		{
+			class InputSpinBox;
+		}
+	}
+
 	namespace Features
 	{
 		class Move : public Feature
@@ -33,7 +42,7 @@ namespace Hix
 			ZToBed(GLModel* target);
 		};
 
-		class MoveMode : public WidgetMode
+		class MoveMode : public WidgetMode, public DialogedMode
 		{
 		public:
 
@@ -42,13 +51,14 @@ namespace Hix
 			void featureStarted()override;
 			void featureEnded()override;
 			QVector3D getWidgetPosition()override;
-
-			FeatureContainerFlushSupport* applyMove(const QVector3D& to);
+			void apply()override;
 
 		private:
 			Hix::Features::FeatureContainerFlushSupport* _moveContainer = nullptr;
 			std::unordered_set<GLModel*> _targetModels;
-
+			Hix::QML::Controls::InputSpinBox* _xValue;
+			Hix::QML::Controls::InputSpinBox* _yValue;
+			Hix::QML::Controls::InputSpinBox* _zValue;
 		};
 	}
 }

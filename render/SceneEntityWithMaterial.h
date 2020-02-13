@@ -7,7 +7,6 @@ namespace Hix
 {
 	namespace Render
 	{
-		using namespace Qt3DCore;
 		using namespace Qt3DRender;
 		using namespace Qt3DExtras;
 		using namespace Hix::Engine3D;
@@ -17,7 +16,7 @@ namespace Hix
 		public:
 
 
-			SceneEntityWithMaterial(QEntity* parent = nullptr); // main constructor for mainmesh and shadowmesh
+			SceneEntityWithMaterial(Qt3DCore::QEntity* parent = nullptr); // main constructor for mainmesh and shadowmesh
 			virtual ~SceneEntityWithMaterial();
 			Hix::Render::ModelMaterial& meshMaterial();
 
