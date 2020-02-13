@@ -14,15 +14,9 @@
 #include "../feature/deleteModel.h"
 using namespace Hix::QML;
 using namespace Hix::Features;
+const QUrl ITEM_URL = QUrl("qrc:/Qml/PartListItem.qml");
 
-class Hix::QML::PartListItemAttorny
-{
-private:
-	static void itemAdded(PartList* parent, GLModel* model, PartListItem* item);
-	friend class PartListItem;
-};
-
-Hix::QML::PartList::PartList(QQuickItem* parent) : QQuickItem(parent)
+Hix::QML::PartList::PartList(QQuickItem* parent) : QQuickItem(parent), _component(&Hix::Application::ApplicationManager::getInstance().getInstance().engine(), ITEM_URL)
 {
 }
 
@@ -32,8 +26,23 @@ Hix::QML::PartList::~PartList()
 
 void Hix::QML::PartList::listModel(GLModel* model)
 {
-	QMetaObject::invokeMethod(this, "appendModel",
-		Q_ARG(QVariant, model->modelName()), Q_ARG(QVariant, QVariant::fromValue<GLModel*>(model)));
+	auto item = dynamic_cast<Hix::QML::PartListItem*>(_component.create(qmlContext(this)));
+	item->setParentItem(_itemContainer);
+	_items.emplace(model, item);
+	//event handler
+	QObject::connect(item->selectButton(), &Hix::QML::Controls::ToggleSwitch::checked, [this, model]() {
+		setModelSelected(model, true);
+		});
+	QObject::connect(item->selectButton(), &Hix::QML::Controls::ToggleSwitch::unchecked, [this, model]() {
+		setModelSelected(model, false);
+		});
+	QObject::connect(item->hideButton(), &Hix::QML::Controls::ToggleSwitch::checked, [this, model]() {
+		model->setEnabled(false);
+		});
+	QObject::connect(item->hideButton(), &Hix::QML::Controls::ToggleSwitch::unchecked, [this, model]() {
+		model->setEnabled(true);
+		});
+
 }
 
 void Hix::QML::PartList::unlistModel(GLModel* model)
@@ -91,6 +100,7 @@ void Hix::QML::PartList::componentComplete()
 {
 	__super::componentComplete();
 	registerOwningControls();
+	getItemByID(this, _itemContainer, "itemContainer");
 	getControl(_deleteButton, "deleteButton");
 	QObject::connect(_deleteButton, &Hix::QML::Controls::Button::clicked, Hix::Features::openFeatureModeFunctor<DeleteModelMode>(nullptr));
 }	
@@ -139,30 +149,21 @@ bool Hix::QML::PartListItem::visible() const
 	return !_hideButton->isChecked();
 }
 
+Hix::QML::Controls::ToggleSwitch* Hix::QML::PartListItem::hideButton()
+{
+	return _hideButton;
+}
+
+Hix::QML::Controls::ToggleSwitch* Hix::QML::PartListItem::selectButton()
+{
+	return _selectButton;
+}
+
 void Hix::QML::PartListItem::componentComplete()
 {
 	__super::componentComplete();
 	registerOwningControls();
 	getControl(_hideButton, "hideButton");
 	getControl(_selectButton, "selectButton");
-	getParentByID(this, _parent, "partList");
-	_model = this->property("modelPointer").value<GLModel*>();
-	PartListItemAttorny::itemAdded(_parent, _model, this);
-	QObject::connect(_selectButton, &Hix::QML::Controls::ToggleSwitch::checked, [this]() {
-		_parent->setModelSelected(this->_model, true);
-		});
-	QObject::connect(_selectButton, &Hix::QML::Controls::ToggleSwitch::unchecked, [this]() {
-		_parent->setModelSelected(this->_model, false);
-		});
-	QObject::connect(_hideButton, &Hix::QML::Controls::ToggleSwitch::checked, [this]() {
-		_model->setEnabled(false);
-		});
-	QObject::connect(_hideButton, &Hix::QML::Controls::ToggleSwitch::unchecked, [this]() {
-		_model->setEnabled(true);
-		});
-}
 
-void Hix::QML::PartListItemAttorny::itemAdded(PartList* parent, GLModel* model, PartListItem* item)
-{
-	parent->_items.emplace(model, item);
 }

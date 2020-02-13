@@ -13,9 +13,10 @@ void Hix::Application::PartManager::addPart(std::unique_ptr<GLModel>&& model)
 	if (find == _models.end())
 	{
 		_models.emplace(std::make_pair(raw, model));
+		//list model
+		_partList->listModel(raw);
 	}
 }
-
 
 std::unique_ptr<GLModel> Hix::Application::PartManager::removePart(GLModel* model)
 {

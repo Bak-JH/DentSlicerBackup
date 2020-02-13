@@ -17,9 +17,8 @@ void Hix::Features::AddModel::undoImpl()
 {
 	auto raw = std::get<GLModel*>(_model);
 	auto parent = raw->parentNode();
-	bool isListed = ApplicationManager::getInstance().partManager().isTopLevel(raw);
 	raw->QNode::setParent((QNode*)nullptr);
-	_model = UndoInfo{ std::unique_ptr<GLModel>(raw), parent, isListed};
+	_model = UndoInfo{ std::unique_ptr<GLModel>(raw), parent};
 }
 
 void Hix::Features::AddModel::redoImpl()
@@ -84,6 +83,7 @@ void Hix::Features::ListModel::runImpl()
 {
 	AddModel::runImpl();
 	auto rawModel = std::get<GLModel*>(_model);
-	qmlManager->addToGLModels(rawModel);
+	auto& partManager = ApplicationManager::getInstance().partManager();
+	partManager.addPart(std::unique_ptr<GLModel>(rawModel));
 	qmlManager->addPart(_fname, rawModel->ID());
 }

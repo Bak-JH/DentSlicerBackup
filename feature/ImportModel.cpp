@@ -57,7 +57,7 @@ void Hix::Features::ImportModel::runImpl()
 	//repair mode
 	if (Hix::Features::isRepairNeeded(mesh))
 	{
-		qmlManager->setProgressText("Repairing mesh.");
+		//qmlManager->setProgressText("Repairing mesh.");
 		std::unordered_set<GLModel*> repairModels;
 		repairModels.insert(_listModelFeature->getAddedModel());
 		MeshRepair repair(repairModels);

@@ -18,6 +18,11 @@ namespace Hix
 		{
 		public:
 			ModalDialogManager();
+			ModalDialogManager(const ModalDialogManager& other) = delete;
+			ModalDialogManager(ModalDialogManager&& other) = delete;
+			ModalDialogManager& operator=(ModalDialogManager other) = delete;
+			ModalDialogManager& operator=(ModalDialogManager&& other) = delete;
+
 			void openOkCancelDialog(const std::string& msg, const std::string& okButtonStr,
 				const std::string& cancelButtonStr, std::function<void()>&& okFunctor, const std::function<void()>&& cancelFunctor);
 			void closeDialog();
