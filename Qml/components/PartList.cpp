@@ -10,7 +10,10 @@
 #include "../../feature/deleteModel.h"
 #include "../../qmlmanager.h"
 #include "../application/ApplicationManager.h"
-using namespace  Hix::QML;
+#include "../feature/FeaturesLoader.h"
+#include "../feature/deleteModel.h"
+using namespace Hix::QML;
+using namespace Hix::Features;
 
 class Hix::QML::PartListItemAttorny
 {
@@ -31,6 +34,12 @@ void Hix::QML::PartList::listModel(GLModel* model)
 {
 	QMetaObject::invokeMethod(this, "appendModel",
 		Q_ARG(QVariant, model->modelName()), Q_ARG(QVariant, QVariant::fromValue<GLModel*>(model)));
+}
+
+void Hix::QML::PartList::unlistModel(GLModel* model)
+{
+	_selectedModels.erase(model);
+	_items.erase(model);
 }
 
 bool Hix::QML::PartList::isListed(GLModel* model) const
@@ -72,13 +81,7 @@ Hix::Engine3D::Bounds3D Hix::QML::PartList::selectedBound() const
 	return Hix::Engine3D::combineBounds(_selectedModels);
 }
 
-void Hix::QML::PartList::deleteSelectedModels()
-{
 
-	//run delete feature
-	_selectedModels.clear();
-
-}
 QQuickItem* Hix::QML::PartList::getQItem()
 {
 	return this;
@@ -89,6 +92,7 @@ void Hix::QML::PartList::componentComplete()
 	__super::componentComplete();
 	registerOwningControls();
 	getControl(_deleteButton, "deleteButton");
+	QObject::connect(_deleteButton, &Hix::QML::Controls::Button::clicked, Hix::Features::openFeatureModeFunctor<DeleteModelMode>(nullptr));
 }	
 
 

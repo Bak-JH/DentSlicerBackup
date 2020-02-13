@@ -22,6 +22,7 @@ namespace Hix
 			PartList(QQuickItem* parent = nullptr);
 			virtual ~PartList();
 			void listModel(GLModel* model);
+			void unlistModel(GLModel* model);
 			bool isListed(GLModel* model)const;
 			bool isSelected(GLModel* model)const;
 			void setModelSelected(GLModel* model, bool isSelected);
@@ -29,7 +30,6 @@ namespace Hix
 			Hix::Engine3D::Bounds3D selectedBound()const;
 
 		protected:
-			void deleteSelectedModels();
 			void componentComplete() override;
 			QQuickItem* getQItem()override;
 

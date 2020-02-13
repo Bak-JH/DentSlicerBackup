@@ -211,6 +211,12 @@
     <ClCompile Include="Qml\components\PartList.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Qml\components\ModalShell.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="application\ModalDialogManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="common\Debug.h" />
@@ -851,6 +857,12 @@
     <ClInclude Include="application\PartManager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="support\SupportModel.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="application\ModalDialogManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="debug\moc_predefs.h.cbt" />
@@ -983,6 +995,9 @@
       <Filter>Header Files</Filter>
     </QtMoc>
     <QtMoc Include="Qml\components\PartList.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="Qml\components\ModalShell.h">
       <Filter>Header Files</Filter>
     </QtMoc>
   </ItemGroup>

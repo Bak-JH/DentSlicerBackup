@@ -1,8 +1,9 @@
 #include "addModel.h"
 #include "qmlmanager.h"
+#include "../application/ApplicationManager.h"
 
-
-
+using namespace Hix::Features;
+using namespace Hix::Application;
 
 Hix::Features::AddModel::AddModel(Qt3DCore::QEntity* parent, Hix::Engine3D::Mesh* mesh, QString fname, const Qt3DCore::QTransform* transform): 
 	_parent(parent), _mesh(mesh), _fname(fname), _transform(transform)
@@ -16,8 +17,9 @@ void Hix::Features::AddModel::undoImpl()
 {
 	auto raw = std::get<GLModel*>(_model);
 	auto parent = raw->parentNode();
+	bool isListed = ApplicationManager::getInstance().partManager().isTopLevel(raw);
 	raw->QNode::setParent((QNode*)nullptr);
-	_model = UndoInfo{ std::unique_ptr<GLModel>(raw), parent };
+	_model = UndoInfo{ std::unique_ptr<GLModel>(raw), parent, isListed};
 }
 
 void Hix::Features::AddModel::redoImpl()

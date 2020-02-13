@@ -24,8 +24,10 @@ namespace Hix
 			PartManager();
 			void addPart(std::unique_ptr<GLModel>&& model);
 			std::unique_ptr<GLModel> removePart(GLModel* model);
-			void isSelected(GLModel* model);
-			void selectPart(GLModel* model);
+			//checks if given model is top level AKA listed model pre-tree
+			bool isTopLevel(GLModel* model)const;
+			bool isSelected(GLModel* model)const;
+			void setSelected(GLModel* model, bool selected);
 			void selectAll();
 			void unselectAll();
 			std::unordered_set<GLModel*> selectedModels()const;

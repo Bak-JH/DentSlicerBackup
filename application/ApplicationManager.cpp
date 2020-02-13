@@ -49,11 +49,25 @@ void Hix::Application::ApplicationManager::init()
 	findItem(root, _sceneRoot, "sceneRoot");
 	Qt3DCore::QEntity* partRoot = nullptr;
 	findItem(_sceneRoot, partRoot, "models");
-	PartManagerLoader::init(_manager, partRoot);
+	QQuickItem* modalItem;
+	findItem(root, modalItem, "dialogItem");
+	PartManagerLoader::init(_partManager, partRoot);
+	ModalDialogManagerLoader::init(_modalManager, modalItem);
+
 
 }
 
 QQuickItem* Hix::Application::ApplicationManager::getUIRoot()const
 {
 	return _uiRoot;
+}
+
+PartManager& Hix::Application::ApplicationManager::partManager()
+{
+	return _partManager;
+}
+
+ModalDialogManager& Hix::Application::ApplicationManager::modalDialogManager()
+{
+	return _modalManager;
 }

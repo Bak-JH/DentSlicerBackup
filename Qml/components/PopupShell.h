@@ -47,24 +47,5 @@ namespace Hix
 		private:
 			int _percent = 0;
 		};	
-
-		class ModalShell : public QQuickItem
-		{
-			Q_OBJECT
-			Q_PROPERTY(QString modalMessage MEMBER _modalmsg NOTIFY modalmsgChanged)
-
-		public:
-			ModalShell(QQuickItem* parent = nullptr);
-			virtual ~ModalShell();
-			void setMessage(std::string message);
-
-		signals:
-			void modalmsgChanged();
-
-		protected:
-			QString _modalmsg = "Are you sure?";
-		};
-
-
 	}
 }

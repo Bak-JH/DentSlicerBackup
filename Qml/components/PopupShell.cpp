@@ -80,19 +80,3 @@ void Hix::QML::ProgressPopupShell::setPercentage(int percent)
 
 
 
-Hix::QML::ModalShell::ModalShell(QQuickItem* parent) : QQuickItem(parent)
-{
-}
-
-Hix::QML::ModalShell::~ModalShell()
-{
-}
-
-void Hix::QML::ModalShell::setMessage(std::string message)
-{
-	_modalmsg = QString::fromStdString(message);
-	emit modalmsgChanged();
-}
-
-
-

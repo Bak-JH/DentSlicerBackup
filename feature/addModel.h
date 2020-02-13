@@ -24,6 +24,7 @@ namespace Hix
 			{
 				std::unique_ptr<GLModel> undoModel;
 				Qt3DCore::QNode* parent;
+				bool isListed;
 			};
 			std::variant<GLModel*, UndoInfo> _model;
 			Qt3DCore::QEntity* _parent;

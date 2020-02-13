@@ -299,6 +299,13 @@ Item{
 			}
 		}
 
+		Item 
+		{
+			id: dialogItem
+		}
+
+
+
 		// ResultPopup{
 		// 	id : resultPopUp
 		// }
