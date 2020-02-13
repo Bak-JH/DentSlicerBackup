@@ -39,6 +39,7 @@ Hix::Features::FeaturesLoader::FeaturesLoader(QQmlEngine* e, Hix::QML::FeatureMe
 {
 }
 
+
 template<typename ModeType>
 std::function<void()> openFeatureModeFunctor(Hix::QML::Controls::ToggleSwitch* button)
 {

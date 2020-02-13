@@ -9,6 +9,12 @@ namespace Hix
 {
 	namespace Features
 	{
+		class DeleteModelMode : public Mode
+		{
+		public:
+			DeleteModelMode();
+			virtual ~DeleteModelMode();
+		};
 		class DeleteModel : public Feature, public FlushSupport
 		{
 		public:
@@ -24,8 +30,10 @@ namespace Hix
 			{
 				std::unique_ptr<GLModel> redoModel;
 				Qt3DCore::QNode* parent;
+				bool isListed;
+
 			};
 			std::variant<GLModel*, RedoInfo> _model;
 		};
 	}
-}
+}                                                                                

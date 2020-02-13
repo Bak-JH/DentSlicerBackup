@@ -19,50 +19,78 @@ void Hix::Application::PartManager::addPart(std::unique_ptr<GLModel>&& model)
 
 std::unique_ptr<GLModel> Hix::Application::PartManager::removePart(GLModel* model)
 {
+	_partList->unlistModel(model);
 	auto node = _models.extract(model);
 	return std::unique_ptr<GLModel>(std::move(node.mapped()));
 }
 
-void Hix::Application::PartManager::isSelected(GLModel* model)
+bool Hix::Application::PartManager::isTopLevel(GLModel* model) const
 {
-
+	return _models.find(model) != _models.end();
 }
 
-void Hix::Application::PartManager::selectPart(GLModel* model)
+bool Hix::Application::PartManager::isSelected(GLModel* model)const
 {
+	return _partList->isSelected(model);
 }
+
+void Hix::Application::PartManager::setSelected(GLModel* model, bool selected)
+{
+	_partList->setModelSelected(model, selected);
+}
+
 
 void Hix::Application::PartManager::selectAll()
 {
+	for (auto& each : _models)
+	{
+		auto modelRaw = each.first;
+		if (!_partList->isSelected(modelRaw))
+		{
+			_partList->setModelSelected(modelRaw, true);
+		}
+	}
 }
 
 void Hix::Application::PartManager::unselectAll()
 {
+	for (auto& each : _models)
+	{
+		auto modelRaw = each.first;
+		if (_partList->isSelected(modelRaw))
+		{
+			_partList->setModelSelected(modelRaw, false);
+		}
+	}
 }
 
 std::unordered_set<GLModel*> Hix::Application::PartManager::selectedModels() const
 {
-	return std::unordered_set<GLModel*>();
+	return _partList->selectedModels();
 }
 
 std::unordered_set<GLModel*> Hix::Application::PartManager::allModels() const
 {
-	return std::unordered_set<GLModel*>();
+	std::unordered_set<GLModel*> allModels;
+	std::transform(_models.begin(), _models.end(), std::back_inserter(allModels), [](auto& pair)->GLModel* {
+		return pair.first;
+		});
+	return allModels;
 }
 
 Hix::Engine3D::Bounds3D Hix::Application::PartManager::selectedBound() const
 {
-	return Hix::Engine3D::Bounds3D();
+	return Hix::Engine3D::combineBounds(selectedModels());
 }
 
 QVector3D Hix::Application::PartManager::getSelectedCenter() const
 {
-	return QVector3D();
+	return selectedBound().centre();
 }
 
 QVector3D Hix::Application::PartManager::selectedModelsLengths() const
 {
-	return QVector3D();
+	return selectedBound().lengths();
 }
 
 void Hix::Application::PartManagerLoader::init(PartManager& manager, Qt3DCore::QEntity* entity)

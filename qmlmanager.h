@@ -80,7 +80,6 @@ public:
     QObject* boxUpperTab;
     QObject* boxLeftTab;
 	QQuickItem* scene3d;
-    QEntity* models;
 	QEntity* total;
     Qt3DCore::QTransform* systemTransform;
 	QEntity* mv;

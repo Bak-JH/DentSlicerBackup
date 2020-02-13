@@ -2,6 +2,8 @@
 #include "../common/Singleton.h"
 #include <QQmlApplicationEngine>
 #include "PartManager.h"
+#include "ModalDialogManager.h"
+
 class QQuickItem;
 namespace Qt3DCore
 {
@@ -17,9 +19,12 @@ namespace Hix
 			QQmlApplicationEngine& engine();
 			void init();
 			QQuickItem* getUIRoot()const;
+			PartManager& partManager();
+			ModalDialogManager& modalDialogManager();
 		private:
 			QQmlApplicationEngine _engine;
-			PartManager _manager;
+			PartManager _partManager;
+			ModalDialogManager _modalManager;
 			Qt3DCore::QEntity* _sceneRoot;
 			QQuickItem* _uiRoot;
 		};
