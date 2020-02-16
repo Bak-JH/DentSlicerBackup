@@ -1,5 +1,4 @@
 #include "ModalDialogManager.h"
-#include "../Qml/components/ModalShell.h"
 using namespace Hix::QML;
 using namespace Hix::Application;
 Hix::Application::ModalDialogManager::ModalDialogManager()

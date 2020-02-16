@@ -7,7 +7,9 @@
 
 using namespace Hix::Engine3D;
 using namespace Hix::Support;
-
+using namespace Qt3DCore;
+using namespace Qt3DRender;
+using namespace Qt3DExtras;
 
 
 Hix::Support::SupportModel::SupportModel(SupportRaftManager* manager):

@@ -12,6 +12,10 @@
 
 constexpr float RAFT_JOINT_CNT = 2;
 
+using namespace Qt3DCore;
+using namespace Qt3DRender;
+using namespace Qt3DExtras;
+
 using namespace Hix::Engine3D;
 using namespace Hix::Input;
 using namespace Hix::Render;

@@ -9,7 +9,7 @@ namespace Hix
 		class FlushSupport
 		{
 		public:
-			FlushSupport(std::unordered_set<GLModel*>& models);
+			FlushSupport(const std::unordered_set<GLModel*>& models);
 			FlushSupport(GLModel* model);
 
 			virtual ~FlushSupport();
@@ -17,7 +17,7 @@ namespace Hix
 		class FeatureContainerFlushSupport : public FeatureContainer, public FlushSupport
 		{
 		public:
-			FeatureContainerFlushSupport(std::unordered_set<GLModel*>& models);
+			FeatureContainerFlushSupport(const std::unordered_set<GLModel*>& models);
 			FeatureContainerFlushSupport(GLModel* model);
 			virtual ~FeatureContainerFlushSupport();
 		};

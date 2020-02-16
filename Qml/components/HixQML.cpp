@@ -8,7 +8,7 @@
 #include "Inputs.h"
 #include "FeatureMenu.h"
 #include "PartList.h"
-
+#include "ModalShell.h"
 void Hix::QML::registerTypes()
 {
 
@@ -23,7 +23,7 @@ void Hix::QML::registerTypes()
 	qmlRegisterType<Hix::QML::PartList>("hix.qml", 1, 0, "PartList");
 	qmlRegisterType<Hix::QML::PartListItem>("hix.qml", 1, 0, "PartListItem");
 
-	qmlRegisterType<Hix::QML::PrintInfoText>("hix.qml", 1, 0, "PrintInfoText");
+	qmlRegisterType<Hix::QML::PrintInfo>("hix.qml", 1, 0, "PrintInfoText");
 
 	qmlRegisterType<Hix::QML::FeatureMenu>("hix.qml", 1, 0, "FeatureMenu");
 

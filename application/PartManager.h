@@ -14,6 +14,11 @@ namespace Hix
 	namespace QML
 	{
 		class PartList;
+		class PrintInfo;
+	}
+	namespace Features
+	{
+		class ListModel;
 	}
 	namespace Application
 	{
@@ -41,19 +46,22 @@ namespace Hix
 			Hix::Engine3D::Bounds3D selectedBound()const;
 			QVector3D getSelectedCenter()const;
 			QVector3D selectedModelsLengths()const;
-
+			Qt3DCore::QEntity* modelRoot();
 		private:
 			Qt3DCore::QEntity* _root;
 			std::unordered_map<GLModel*, std::unique_ptr<GLModel>> _models;
 			Hix::QML::PartList* _partList;
+
 			friend class PartManagerLoader;
 		};
+
 		class PartManagerLoader
 		{
 		private:
 			static void init(PartManager& manager, Qt3DCore::QEntity* entity);
 			friend class Hix::Application::ApplicationManager;
 		};
+
 
 
 

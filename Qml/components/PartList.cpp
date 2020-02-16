@@ -61,8 +61,9 @@ bool Hix::QML::PartList::isSelected(GLModel* model)const
 	return _selectedModels.find(model) != _selectedModels.end();
 }
 
-void Hix::QML::PartList::setModelSelected(GLModel* model, bool isSelected)
+bool Hix::QML::PartList::setModelSelected(GLModel* model, bool isSelected)
 {
+
 	auto listed = _items.find(model);
 	if (listed != _items.end())
 	{
@@ -75,8 +76,10 @@ void Hix::QML::PartList::setModelSelected(GLModel* model, bool isSelected)
 			else
 				_selectedModels.erase(model);
 			listed->second->setSelected(isSelected);
+			return true;
 		}
 	}
+	return false;
 }
 
 

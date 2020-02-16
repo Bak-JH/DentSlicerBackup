@@ -6,6 +6,7 @@
 #include "../../DentEngine/src/polyclipping/polyclipping.h"
 #include "../../qmlmanager.h"
 #include "../move.h"
+#include "../../application/ApplicationManager.h"
 using namespace Hix::Features;
 using namespace Hix::Engine3D;
 constexpr float MARGIN = 20;
@@ -28,7 +29,7 @@ namespace std
 
 Hix::Features::AutoArrangeMode::AutoArrangeMode()
 {
-	auto work = new AutoArrange(qmlManager->getAllModels());
+	auto work = new AutoArrange(Hix::Application::ApplicationManager::getInstance().partManager().allModels());
 	qmlManager->taskManager().enqueTask(work);
 }
 

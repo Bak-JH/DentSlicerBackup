@@ -4,6 +4,7 @@
 #include "../../qmlmanager.h"
 #include "feature/move.h"
 #include "support/RaftModel.h"
+#include "application/ApplicationManager.h"
 
 /////////////////////
 ///  Add Support  ///
@@ -117,7 +118,7 @@ void Hix::Features::RemoveRaft::runImpl()
 /// Support Mode ///
 ////////////////////
 Hix::Features::SupportMode::SupportMode()
-	: _targetModels(qmlManager->getSelectedModels())
+	: _targetModels(Hix::Application::ApplicationManager::getInstance().partManager().selectedModels())
 {
 	qmlManager->getRayCaster().setHoverEnabled(true);
 }
@@ -162,13 +163,12 @@ Hix::Features::FeatureContainer* Hix::Features::SupportMode::generateAutoSupport
 	return container;
 }
 
-Hix::Features::FeatureContainer* Hix::Features::SupportMode::clearSupport(std::unordered_set<GLModel*>& models)
+Hix::Features::FeatureContainer* Hix::Features::SupportMode::clearSupport(const std::unordered_set<GLModel*>& models)
 {
 	if (qmlManager->supportRaftManager().supportsEmpty())
 		return nullptr;
 
 	Hix::Features::FeatureContainer* container = new FeatureContainer();
-	std::unordered_set<const GLModel*> models;
 	if (qmlManager->supportRaftManager().raftActive())
 		container->addFeature(new RemoveRaft());
 

@@ -4,6 +4,7 @@
 
 using namespace Hix::Features;
 using namespace Hix::Application;
+using namespace Qt3DCore;
 
 Hix::Features::AddModel::AddModel(Qt3DCore::QEntity* parent, Hix::Engine3D::Mesh* mesh, QString fname, const Qt3DCore::QTransform* transform): 
 	_parent(parent), _mesh(mesh), _fname(fname), _transform(transform)
@@ -54,7 +55,8 @@ GLModel* Hix::Features::AddModel::getAddedModel()
 }
 
 
-Hix::Features::ListModel::ListModel(Hix::Engine3D::Mesh* mesh, QString fname, const Qt3DCore::QTransform* transform) : AddModel(qmlManager->total, mesh, fname, transform)
+Hix::Features::ListModel::ListModel(Hix::Engine3D::Mesh* mesh, QString fname, const Qt3DCore::QTransform* transform) : 
+	AddModel(ApplicationManager::getInstance().partManager().modelRoot(), mesh, fname, transform)
 {}
 
 Hix::Features::ListModel::~ListModel()
@@ -65,18 +67,17 @@ void Hix::Features::ListModel::undoImpl()
 {
 	AddModel::undoImpl();
 	auto raw = std::get<UndoInfo>(_model).undoModel.get();
-	qmlManager->deletePartListItem(raw->ID());
-	qmlManager->unselectPart(raw);
-	qmlManager->releaseFromGLModels(raw);
-
+	auto& partManager = ApplicationManager::getInstance().partManager();
+	auto owningPtr = partManager.removePart(raw);
+	owningPtr.release(); //since unique_ptr ownership is stolen in AddModel::undoImpl
 }
 
 void Hix::Features::ListModel::redoImpl()
 {
 	AddModel::redoImpl();
 	auto raw = std::get<GLModel*>(_model);
-	qmlManager->addPart(raw->modelName(), raw->ID());
-	qmlManager->addToGLModels(raw);
+	auto& partManager = ApplicationManager::getInstance().partManager();
+	partManager.addPart(std::unique_ptr<GLModel>(raw));
 }
 
 void Hix::Features::ListModel::runImpl()
@@ -85,5 +86,4 @@ void Hix::Features::ListModel::runImpl()
 	auto rawModel = std::get<GLModel*>(_model);
 	auto& partManager = ApplicationManager::getInstance().partManager();
 	partManager.addPart(std::unique_ptr<GLModel>(rawModel));
-	qmlManager->addPart(_fname, rawModel->ID());
 }

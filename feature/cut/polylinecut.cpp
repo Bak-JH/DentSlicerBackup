@@ -30,7 +30,7 @@ using namespace Hix::Features::CSG;
 using namespace Hix::Features::Cut;
 
 
-Hix::Features::Cut::PolylineCut::PolylineCut(GLModel * origModel, std::vector<QVector3D> cuttingPoints): _target(origModel), _cuttingPoints(cuttingPoints)
+Hix::Features::Cut::PolylineCut::PolylineCut(GLModel * origModel, std::vector<QVector3D> cuttingPoints): FeatureContainerFlushSupport(origModel), _target(origModel), _cuttingPoints(cuttingPoints)
 {
 }
 

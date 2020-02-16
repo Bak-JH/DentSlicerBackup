@@ -64,5 +64,5 @@ void Hix::Features::ImportModel::runImpl()
 		repair.run();
 	}
 	// do auto arrange
-	qmlManager->openArrange();
+	//qmlManager->openArrange();
 }

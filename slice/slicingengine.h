@@ -1,9 +1,6 @@
-#ifndef SLICINGENGINE_H
-#define SLICINGENGINE_H
-
-
+#pragma once
 #include <QString>
-
+#include <unordered_set>
 
 namespace Hix
 {
@@ -25,9 +22,7 @@ namespace SlicingEngine
 		QString size;
 		float volume;
 	};
-	Result sliceModels (bool isTemp, float zMax, std::vector<std::reference_wrapper<const GLModel>>models, const Hix::Support::SupportRaftManager& suppRaft, QString filename = "");
+	Result sliceModels (bool isTemp, float zMax, const std::unordered_set<GLModel*>& models, const Hix::Support::SupportRaftManager& suppRaft, QString filename = "");
 };
 
-//extern QmlManager qm;
 
-#endif // SLICINGENGINE_H

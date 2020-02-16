@@ -4,6 +4,8 @@
 #include "DentEngine/src/mesh.h"
 #include "cut/ZAxialCut.h"
 #include "deleteModel.h"
+#include "application/ApplicationManager.h"
+
 // offset shell with mm
 
 using namespace Hix::Engine3D;
@@ -11,7 +13,7 @@ using namespace Hix::Features;
 using namespace Hix::Features::Cut;
 Hix::Features::ShellOffsetMode::ShellOffsetMode():_cuttingPlane(qmlManager->total)
 {
-	auto selectedModels = qmlManager->getSelectedModels();
+	auto selectedModels = Hix::Application::ApplicationManager::getInstance().partManager().selectedModels();
 	if (selectedModels.size() == 1)
 	{
 		_modelBound = _subject->recursiveAabb();
@@ -21,7 +23,6 @@ Hix::Features::ShellOffsetMode::ShellOffsetMode():_cuttingPlane(qmlManager->tota
 	}
 	else
 	{
-		qmlManager->openResultPopUp("A single model must be selected", "", "");
 		throw std::runtime_error("A single model must be selected");
 	}
 }

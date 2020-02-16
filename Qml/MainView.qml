@@ -68,7 +68,7 @@ Entity {
             specular: Qt.rgba(100/255, 100/255, 100/255, 1 )
             shininess: 0
         }
-		Model{
+		Entity{
             id: models
             //inputSource:"file:///C:/Users/user/Downloads/Spider_ascii.stl"
         }

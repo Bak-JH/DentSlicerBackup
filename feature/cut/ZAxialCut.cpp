@@ -41,7 +41,7 @@ namespace Hix
 }
 
 
-Hix::Features::Cut::ZAxialCut::ZAxialCut(GLModel* subject, float cuttingPlane, KeepType keep) :
+Hix::Features::Cut::ZAxialCut::ZAxialCut(GLModel* subject, float cuttingPlane, KeepType keep) : FeatureContainerFlushSupport(subject),
 	_cuttingPlane(cuttingPlane), _subject(subject), _keep(keep)
 {
 

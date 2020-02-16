@@ -26,7 +26,7 @@ Hix::Input::KeyboardController::KeyboardController(Qt3DCore::QNode* parent): _ke
 		}
 		if (e->matches(QKeySequence::SelectAll))
 		{
-			qmlManager->selectAll();
+			//qmlManager->selectAll();
 		}
 		else if(e->matches(QKeySequence::Undo))
 		{

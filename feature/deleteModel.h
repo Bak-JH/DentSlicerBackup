@@ -1,5 +1,6 @@
 #pragma once
 #include "feature/interfaces/Feature.h"
+#include "feature/interfaces/Mode.h"
 #include "feature/interfaces/FlushSupport.h"
 #include <QObject>
 #include <Qt3DCore>

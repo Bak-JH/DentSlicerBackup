@@ -5,12 +5,12 @@
 #include "render/ModelMaterial.h"
 #include "render/Color.h"
 #include "glmodel.h"
-
+#include "application/ApplicationManager.h"
 
 using namespace Hix::Debug;
 const QUrl EXTEND_POPUP_URL = QUrl("qrc:/Qml/FeaturePopup/PopupExtend.qml");
 Hix::Features::ExtendMode::ExtendMode() 
-	:PPShaderMode(qmlManager->getSelectedModels()), DialogedMode(EXTEND_POPUP_URL)
+	:PPShaderMode(Hix::Application::ApplicationManager::getInstance().partManager().selectedModels()), DialogedMode(EXTEND_POPUP_URL)
 {
 	auto& co = controlOwner();
 	co.getControl(_extendValue, "extendvalue");
@@ -87,7 +87,7 @@ void Hix::Features::ExtendMode::apply()
 		return;
 
 	auto distance = _extendValue->getValue();
-	Hix::Features::FeatureContainerFlushSupport* container = new FeatureContainerFlushSupport();
+	Hix::Features::FeatureContainerFlushSupport* container = new FeatureContainerFlushSupport(Hix::Application::ApplicationManager::getInstance().partManager().selectedModels());
 	for (auto& each : _args)
 	{
 		auto& arg = each.second;

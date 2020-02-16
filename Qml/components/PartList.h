@@ -27,10 +27,10 @@ namespace Hix
 			void unlistModel(GLModel* model);
 			bool isListed(GLModel* model)const;
 			bool isSelected(GLModel* model)const;
-			void setModelSelected(GLModel* model, bool isSelected);
+			//returns if select changed
+			bool setModelSelected(GLModel* model, bool isSelected);
 			std::unordered_set<GLModel*> selectedModels()const;
 			Hix::Engine3D::Bounds3D selectedBound()const;
-
 		protected:
 			void componentComplete() override;
 			QQuickItem* getQItem()override;

@@ -38,8 +38,8 @@ QVector3D fn_unnorm(const FaceConstItr& face)
 }
 
 rotateResult* autoorientation::Tweak(const Mesh* mesh, bool bi_algorithmic,int CA,bool *appropriately_rotated){
-    qmlManager->setProgress(0);
-    qmlManager->setProgressText("startttttt");
+    //qmlManager->setProgress(0);
+    //qmlManager->setProgressText("startttttt");
 
     float n[]={0.0, 0.0, 1.0};
     int best_n; //orientation의 갯수, 여기 갯수에서 +1 한 것이 총 orientation 갯수가 됩니다.
@@ -93,11 +93,11 @@ rotateResult* autoorientation::Tweak(const Mesh* mesh, bool bi_algorithmic,int C
         liste[i].lineL=lineL;
         liste[i].isActive=true;
         //free(temp);
-        qmlManager->setProgress(i*0.04/(best_n+1)+0.95);
+        //qmlManager->setProgress(i*0.04/(best_n+1)+0.95);
     }
 
-    qmlManager->setProgress(0.99);
-    qmlManager->setProgressText("99");
+    //qmlManager->setProgress(0.99);
+    //qmlManager->setProgressText("99");
     bool minFlag=true;
     //qt에서 최댓값이 얼마인지 몰라 flag로 만들었습니다.
     float Unprintability;
@@ -140,10 +140,10 @@ rotateResult* autoorientation::Tweak(const Mesh* mesh, bool bi_algorithmic,int C
     }else{
         *appropriately_rotated=false;
         qDebug() << "?";
-        qmlManager->setProgress(1);
-        qmlManager->setProgressText("Done");
+        //qmlManager->setProgress(1);
+        //qmlManager->setProgressText("Done");
 
-        qmlManager->openResultPopUp("","Orientation Done","");
+        //qmlManager->openResultPopUp("","Orientation Done","");
         return NULL;
     }
     //━━━━━━━━━━━━━━━━━━━━ 내용 출력 ━━━━━━━━━━━━━━━━━━━
@@ -171,10 +171,10 @@ rotateResult* autoorientation::Tweak(const Mesh* mesh, bool bi_algorithmic,int C
     }
     //━━━━━━━━━━━━━━━━━━━━ 내용 출력 ━━━━━━━━━━━━━━━━━━━
     //free(orientations);
-    qmlManager->setProgress(1);
-    qmlManager->setProgressText("Done");
+    //qmlManager->setProgress(1);
+    //qmlManager->setProgressText("Done");
 
-    qmlManager->openResultPopUp("","Orientation Done","");
+    //qmlManager->openResultPopUp("","Orientation Done","");
     return result;
 }
 float autoorientationPrivate::target_function(float touching,float overhang,float line){
@@ -340,14 +340,14 @@ std::vector<Orient*> autoorientationPrivate::area_cumulation(const Mesh* mesh,fl
         }
 		//?!
         if(i%3000==0){
-            qmlManager->setProgress((float)i*0.15/mesh->getFaces().size());
-            qmlManager->setProgressText("orientation.....");
+            //qmlManager->setProgress((float)i*0.15/mesh->getFaces().size());
+            //qmlManager->setProgressText("orientation.....");
         }
 		++i;
     }
 
-    qmlManager->setProgress(0.15);
-    qmlManager->setProgressText("orientation.....");
+    //qmlManager->setProgress(0.15);
+    //qmlManager->setProgressText("orientation.....");
     //map에 있는 값들의 value를 오름차순해서, 상위 best_n개를 뽑아야합니다.
     //python 원문에서는 Counter(map).most_common(best_n)으로 간단히 구현되는 것이지만,
     //역시 c++에는 없으므로 만들었습니다.
@@ -432,8 +432,8 @@ std::vector<Orient*> autoorientationPrivate::egde_plus_vertex(const Mesh* mesh, 
 
         //free(randomNormal);
         if(i%3000==0){
-            qmlManager->setProgress((float)i*0.80/(vcount*it)+0.15);
-            qmlManager->setProgressText("orientation.....");
+            //qmlManager->setProgress((float)i*0.80/(vcount*it)+0.15);
+            //qmlManager->setProgressText("orientation.....");
         }
 		if (faceItr != mesh->getFaces().cend())
 			++faceItr;
@@ -441,8 +441,8 @@ std::vector<Orient*> autoorientationPrivate::egde_plus_vertex(const Mesh* mesh, 
 			break;
     }
 
-    qmlManager->setProgress(0.95);
-    qmlManager->setProgressText("orientation.....");
+    //qmlManager->setProgress(0.95);
+    //qmlManager->setProgressText("orientation.....");
     std::map<QString,float>::iterator it_map;
     std::vector<float> val(best_n);
     std::vector<QString> val_n(best_n);

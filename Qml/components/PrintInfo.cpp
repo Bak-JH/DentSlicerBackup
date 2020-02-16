@@ -1,26 +1,16 @@
 #include "PrintInfo.h"
-
-Hix::QML::PrintInfoText::PrintInfoText(QQuickItem* parent)
+#include <qvector3d.h>
+Hix::QML::PrintInfo::PrintInfo(QQuickItem* parent)
 {
 	setParent(parent);
 }
 
-void Hix::QML::PrintInfoText::printtimeChanged()
+void Hix::QML::PrintInfo::printVolumeChanged(const QVector3D& bound)
 {
-	qDebug() << _printtime;
-}
+	_printsize =
+		QString::number(bound.x(), 'e', 2) + "mm x " +
+		QString::number(bound.y(), 'e', 2) + "mm x " +
+		QString::number(bound.z(), 'e', 2) + "mm";
+	_printvolume = QString::number(bound.x() * bound.y() * bound.z(), 'e', 2) + "mL";
 
-void Hix::QML::PrintInfoText::printlayerChanged()
-{
-	qDebug() << _printlayer;
-}
-
-void Hix::QML::PrintInfoText::printsizeChanged()
-{
-	qDebug() << _printsize;
-}
-
-void Hix::QML::PrintInfoText::printvolumeChanged()
-{
-	qDebug() << _printvolume;
 }
