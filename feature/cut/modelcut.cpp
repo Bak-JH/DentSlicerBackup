@@ -3,6 +3,7 @@
 #include "ZAxialCut.h"
 #include "polylinecut.h"
 #include "feature/interfaces/Feature.h"
+#include "../application/ApplicationManager.h"
 using namespace Hix;
 using namespace Hix::Features;
 using namespace Hix::Features::Cut;
@@ -13,7 +14,8 @@ using namespace ClipperLib;
 
 
 Hix::Features::ModelCut::ModelCut():
-	_models(qmlManager->getSelectedModels()), _cuttingPlane(qmlManager->total), _modelsBound(qmlManager->getSelectedBound())
+	_models(Hix::Application::ApplicationManager::getInstance().partManager().selectedModels()), _cuttingPlane(qmlManager->total),
+	_modelsBound(Hix::Application::ApplicationManager::getInstance().partManager().selectedBound())
 {
 }
 
@@ -79,5 +81,5 @@ void Hix::Features::ModelCut::applyCut()
 	default:
 		break;
 	}
-	qmlManager->unselectAll();
+	//Hix::Application::ApplicationManager::getInstance().partManager().unselectAll();
 }

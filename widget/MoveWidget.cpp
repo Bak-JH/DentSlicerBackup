@@ -3,7 +3,7 @@
 #include "../input/raycastcontroller.h"
 #include "Widget3D.h"
 #include "feature/move.h"
-
+#include "../application/ApplicationManager.h"
 //const float MoveWidget::ROTATE_SPEED = 0.1;
 //const float HALF_PI = M_PI / 2;
 const QUrl Hix::UI::MoveWidget::ARROW_MESH_URL(QStringLiteral("qrc:/Resource/mesh/arrow.stl"));
@@ -95,7 +95,8 @@ void Hix::UI::MoveWidget::doDrag(Hix::Input::MouseEventData& e)
 	auto diff = currProj - _pastProj;
 	qDebug() << diff;
 	_pastProj = currProj;
-	qmlManager->modelMoveWithAxis(_axis, diff * TRANSLATE_MULT);
+	auto mode = dynamic_cast<Features::MoveMode*>(_parent->mode());
+	mode->modelMoveWithAxis(_axis, diff * TRANSLATE_MULT);
 }
 
 void Hix::UI::MoveWidget::dragEnded(Hix::Input::MouseEventData& e)
@@ -104,9 +105,7 @@ void Hix::UI::MoveWidget::dragEnded(Hix::Input::MouseEventData& e)
 	_transform.setScale3D(QVector3D(0.3f, 0.3f, 0.3f));
 	_parent->setManipulated(false);
 	setHighlight(false);
-    //qmlManager->totalMoveDone();
 }
-
 
 
 

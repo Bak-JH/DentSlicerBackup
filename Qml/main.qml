@@ -215,7 +215,6 @@ Item{
 		*/
 		
 		PrintInfo {
-			id: printinfo
 			anchors.bottom: parent.bottom
 			anchors.bottomMargin: sidePadding
 			anchors.right: parent.right

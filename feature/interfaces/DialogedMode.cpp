@@ -2,7 +2,7 @@
 #include <qstring.h>
 #include <qquickitem.h>
 #include <qqmlcomponent.h>
-
+#include "../../application/ApplicationManager.h"
 #include "../../qmlmanager.h"
 #include "../qml/components/PopupShell.h"
 #include "../qml/components/Buttons.h"
@@ -12,7 +12,7 @@ using namespace Hix::QML;
 Hix::Features::DialogedMode::DialogedMode(const QUrl& dialogUrl)
 {
 	//QQmlComponent component(qmlManager->engine, dialogUrl);
-	QQmlComponent*  component = new QQmlComponent(qmlManager->engine, dialogUrl);
+	QQmlComponent*  component = new QQmlComponent(&Hix::Application::ApplicationManager::getInstance().engine(), dialogUrl);
 
 	auto qmlInstance = component->create(qmlContext(qmlManager->featureArea));
 	auto popupShell = dynamic_cast<FeaturePopupShell*>(qmlInstance);

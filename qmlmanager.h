@@ -80,9 +80,10 @@ public:
     QObject* boxUpperTab;
     QObject* boxLeftTab;
 	QQuickItem* scene3d;
-	QEntity* total;
+	Qt3DCore::QEntity* total;
+
     Qt3DCore::QTransform* systemTransform;
-	QEntity* mv;
+	Qt3DCore::QEntity* mv;
     Qt3DCore::QEntity *mttab;
     QObject* undoRedoButton;
     QObject* slicingData;
@@ -112,30 +113,18 @@ public:
     Q_INVOKABLE void resetCursor();
 	Q_INVOKABLE void settingFileChanged(QString path);
 
-    Q_INVOKABLE bool isSelected();
-	Q_INVOKABLE bool isSelected(int ID);
-	bool isSelected(GLModel* model);
+
     void showCubeWidgets(GLModel* model);
 	void addSupport(std::unique_ptr<Hix::Features::FeatureContainer> container);
 
-    Q_INVOKABLE void selectPart(int ID);
-    Q_INVOKABLE void unselectPart(int ID);
-    Q_INVOKABLE void unselectAll();
-    Q_INVOKABLE void modelVisible(int ID, bool isVisible);
-    Q_INVOKABLE void doDelete();
-    Q_INVOKABLE void sendUpdateModelInfo();
-    Q_INVOKABLE void backgroundClicked();
-    Q_INVOKABLE void deleteSelectedModels();
 
-	Hix::Engine3D::Bounds3D getSelectedBound()const;
-	void modelMoveWithAxis(QVector3D axis, double distance);
-	void modelMove(QVector3D displacement);
+	//void modelMoveWithAxis(QVector3D axis, double distance);
+	//void modelMove(QVector3D displacement);
 	QVector3D cameraViewVector();
 	Hix::Tasking::TaskManager& taskManager();
 	Hix::Support::SupportRaftManager& supportRaftManager();
 	Hix::Features::FeatureHisroyManager& featureHistoryManager();
 	Hix::Features::Mode* getCurrentMode();
-	void unselectPart(GLModel* target);
 	void addToGLModels(GLModel* target);
 	void addToGLModels(std::unique_ptr<GLModel>&& target);
 	const Hix::Settings::AppSetting& settings()const;
@@ -143,9 +132,6 @@ private:
 	Hix::Tasking::TaskManager _taskManager;
 	GLModel* getModelByID(int ID);
     int viewMode;
-	//TODO: get rid of this
-	GLModel* _lastSelected;
-	std::unordered_set<GLModel*> selectedModels;
 
 	SlicingOptBackend _optBackend;
 	//Ray cast
@@ -164,21 +150,6 @@ signals:
 
 
 public slots:
-
-
-
-
-    void sendUpdateModelInfo(int, int, QString, float);
-	std::unique_ptr<GLModel> removeFromGLModels(GLModel* target);
-	GLModel* releaseFromGLModels(GLModel* target);
-
-    void deleteModelFileDone();
-    void deleteModelFile(GLModel* target);
-
-    void groupSelectionActivate(bool);
-    bool multipleModelSelected(int ID);
-
-
 	void openSupport();
 	void closeSupport();
 	void clearSupports();

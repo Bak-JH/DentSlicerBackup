@@ -2,6 +2,8 @@
 #include "ApplicationManager.h"
 #include "../Qml/components/PartList.h"
 #include "../Qml/util/QMLUtil.h"
+#include "../Qml/components/PrintInfo.h"
+#include "../glmodel.h"
 Hix::Application::PartManager::PartManager()
 {
 }
@@ -12,7 +14,7 @@ void Hix::Application::PartManager::addPart(std::unique_ptr<GLModel>&& model)
 	auto find = _models.find(raw);
 	if (find == _models.end())
 	{
-		_models.emplace(std::make_pair(raw, model));
+		_models.emplace(raw, std::move(model));
 		//list model
 		_partList->listModel(raw);
 	}
@@ -37,7 +39,10 @@ bool Hix::Application::PartManager::isSelected(GLModel* model)const
 
 void Hix::Application::PartManager::setSelected(GLModel* model, bool selected)
 {
-	_partList->setModelSelected(model, selected);
+	if (_partList->setModelSelected(model, selected))
+	{
+		model->updatePrintable();
+	}
 }
 
 
@@ -73,7 +78,7 @@ std::unordered_set<GLModel*> Hix::Application::PartManager::selectedModels() con
 std::unordered_set<GLModel*> Hix::Application::PartManager::allModels() const
 {
 	std::unordered_set<GLModel*> allModels;
-	std::transform(_models.begin(), _models.end(), std::back_inserter(allModels), [](auto& pair)->GLModel* {
+	std::transform(_models.begin(), _models.end(), std::inserter(allModels, allModels.begin()), [](auto& pair)->GLModel* {
 		return pair.first;
 		});
 	return allModels;
@@ -92,6 +97,11 @@ QVector3D Hix::Application::PartManager::getSelectedCenter() const
 QVector3D Hix::Application::PartManager::selectedModelsLengths() const
 {
 	return selectedBound().lengths();
+}
+
+Qt3DCore::QEntity* Hix::Application::PartManager::modelRoot()
+{
+	return _root;
 }
 
 void Hix::Application::PartManagerLoader::init(PartManager& manager, Qt3DCore::QEntity* entity)

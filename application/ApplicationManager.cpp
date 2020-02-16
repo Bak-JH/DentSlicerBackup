@@ -3,12 +3,15 @@
 #include "Qml/util/QMLUtil.h"
 #include <Qt3DCore>
 #include <qquickitem.h>
+#include <deque>
+#include <qqmlcontext.h>
+#include "../Qml/components/PrintInfo.h"
 using namespace Hix::Application;
 
 template<typename QType>
-void findItem(QObject* start, QType*& found, const std::string& id)
+void findItem(QObject* start, QType*& found, const QString& id)
 {
-	std::unordered_map<std::string, InputControl*> map;
+	std::unordered_map<std::string, QType*> map;
 	std::deque<QObject*> s;
 	s.emplace_back(start);
 
@@ -53,7 +56,9 @@ void Hix::Application::ApplicationManager::init()
 	findItem(root, modalItem, "dialogItem");
 	PartManagerLoader::init(_partManager, partRoot);
 	ModalDialogManagerLoader::init(_modalManager, modalItem);
-
+	QQuickItem* printInfoQ;
+	findItem(root, printInfoQ, "printinfo");
+	_printInfo = dynamic_cast<Hix::QML::PrintInfo*>(printInfoQ);
 
 }
 
@@ -70,4 +75,9 @@ PartManager& Hix::Application::ApplicationManager::partManager()
 ModalDialogManager& Hix::Application::ApplicationManager::modalDialogManager()
 {
 	return _modalManager;
+}
+
+void Hix::Application::ApplicationManager::stateChanged()
+{
+	_printInfo->printVolumeChanged(_partManager.selectedModelsLengths());
 }

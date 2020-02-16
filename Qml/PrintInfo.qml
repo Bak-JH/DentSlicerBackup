@@ -4,7 +4,8 @@ import QtQuick.Controls 2.1
 import QtQuick.Controls.Styles 1.4
 import QtGraphicalEffects 1.12
 
-Item {
+Hix.PrintInfoText {
+	id: printInfo
 	width :400
 	height: 72
 	Rectangle {
@@ -29,32 +30,31 @@ Item {
 				anchors.horizontalCenter: parent.horizontalCenter
 			}
 		}
-		Hix.PrintInfoText {
+		Rectangle{
 			width: 240
 			height: parent.height * 0.6
 			anchors.left: refresh.right
 			anchors.leftMargin: printinfo.width * 0.05
 			anchors.verticalCenter: parent.verticalCenter
-			Text {
-				id: time
-				text: qsTr("<font color=\"#888888\">Time </font>") + parent.printtime
-				color: "#000000"
-				font.family: openRegular.name
-				anchors.left: parent.left
-					
-			}
-			Text {
-				id: layer
-				text: qsTr("<font color=\"#888888\">Layer </font>") + parent.printlayer
-				font.family: openRegular.name
-				color: "#000000"
-				anchors.left: time.left
-				anchors.leftMargin: printinfo.width * 0.32
-				anchors.top: parent.top
-			}
+			// Text {
+			// 	id: time
+			// 	text: qsTr("<font color=\"#888888\">Time </font>") + printInfo.printtime
+			// 	color: "#000000"
+			// 	font.family: openRegular.name
+			// 	anchors.left: parent.left
+			// }
+			// Text {
+			// 	id: layer
+			// 	text: qsTr("<font color=\"#888888\">Layer </font>") + printInfo.printlayer
+			// 	font.family: openRegular.name
+			// 	color: "#000000"
+			// 	anchors.left: time.left
+			// 	anchors.leftMargin: printinfo.width * 0.32
+			// 	anchors.top: parent.top
+			// }
 			Text {
 				id: size
-				text: qsTr("<font color=\"#888888\">Size </font>") + parent.printsize
+				text: qsTr("<font color=\"#888888\">Size </font>") + printInfo.printsize
 				font.family: openRegular.name
 				color: "#000000"
 				anchors.left: parent.left
@@ -62,7 +62,7 @@ Item {
 			}
 			Text {
 				id: volume
-				text: qsTr("<font color=\"#888888\">Volume </font>") + parent.printvolume
+				text: qsTr("<font color=\"#888888\">Volume </font>") + printInfo.printvolume
 				font.family: openRegular.name
 				color: "#000000"
 				anchors.left: size.left

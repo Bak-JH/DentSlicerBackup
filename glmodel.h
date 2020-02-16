@@ -15,9 +15,6 @@
 #include "render/ModelMaterial.h"
 #define MAX_BUF_LEN 2000000
 
-using namespace Qt3DCore;
-using namespace Qt3DRender;
-using namespace Qt3DExtras;
 
 class GLModel;
 class OverhangPoint;
@@ -40,7 +37,7 @@ public:
 	GLModel(const GLModel& o);
 	virtual ~GLModel();
 
-	GLModel* copyChildrenRecursive(GLModel* newParent)const;
+	void copyChildrenRecursive(GLModel* newParent)const;
 	void getChildrenModels(std::unordered_set<const GLModel*>& results)const;
 
 	bool appropriately_rotated=false;

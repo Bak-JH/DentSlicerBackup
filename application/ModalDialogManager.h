@@ -3,13 +3,15 @@
 #include <qcolor.h>
 #include <functional>
 #include <memory>
+#include "../Qml/components/ModalShell.h"
+
 class QQuickItem;
 
 namespace Hix
 {
 	namespace QML
 	{
-		class ModalShell;
+		//class ModalShell;
 	}
 	namespace Application
 	{

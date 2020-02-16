@@ -3,7 +3,6 @@
 #include <QTorusMesh>
 
 
-
 namespace Hix
 {
 	namespace UI
@@ -21,8 +20,10 @@ namespace Hix
 			void onEntered()override;
 			void onExited() override;
 			void setHighlight(bool enable) override;
+
 		private:
 			double calculateMove();
+
 			QPoint _mouseOrigin;
 			QPoint _mouseCurrent;
 			QPoint _mousePrev;

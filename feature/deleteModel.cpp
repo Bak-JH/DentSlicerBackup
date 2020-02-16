@@ -3,6 +3,7 @@
 #include "qmlmanager.h"
 #include "../application/ApplicationManager.h"
 using namespace Hix::Application;
+using namespace Qt3DCore;
 Hix::Features::DeleteModel::DeleteModel(GLModel* target):FlushSupport(target), _model(target)
 {
 
@@ -15,15 +16,18 @@ Hix::Features::DeleteModel::~DeleteModel()
 void Hix::Features::DeleteModel::undoImpl()
 {
 	auto& info = std::get<RedoInfo>(_model);
-	auto& model = info.redoModel;
-	auto raw = model.release();
-	_model = raw;
-	model->setParent(info.parent);
+	auto raw = info.redoModel.get();
 	if (info.isListed)
 	{
-		qmlManager->addPart(raw->modelName(), raw->ID());
-		qmlManager->addToGLModels(raw);
+		auto& partManager = ApplicationManager::getInstance().partManager();
+		partManager.addPart(std::move(info.redoModel));
 	}
+	else
+	{
+		info.redoModel.release();
+	}
+	raw->setParent(info.parent);
+	_model = raw;
 }
 
 void Hix::Features::DeleteModel::redoImpl()
@@ -34,11 +38,13 @@ void Hix::Features::DeleteModel::redoImpl()
 	raw->QNode::setParent((QNode*)nullptr);
 	if (isListed)
 	{
-		qmlManager->unselectPart(raw);
-		qmlManager->deletePartListItem(raw->ID());
-		qmlManager->releaseFromGLModels(raw);
+		auto& partManager = ApplicationManager::getInstance().partManager();
+		_model = RedoInfo{ partManager.removePart(raw), parent, isListed };
 	}
-	_model = RedoInfo{ std::unique_ptr<GLModel>(raw), parent, isListed };
+	else
+	{
+		_model = RedoInfo{ std::unique_ptr<GLModel>(raw), parent, isListed };
+	}
 }
 
 void Hix::Features::DeleteModel::runImpl()

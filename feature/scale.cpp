@@ -1,7 +1,7 @@
 #include "scale.h"
 #include "qmlmanager.h"
-
-Hix::Features::ScaleMode::ScaleMode(): _targetModels(qmlManager->getSelectedModels())
+#include "application/ApplicationManager.h"
+Hix::Features::ScaleMode::ScaleMode(): _targetModels(Hix::Application::ApplicationManager::getInstance().partManager().selectedModels())
 {
 }
 
@@ -11,7 +11,7 @@ Hix::Features::ScaleMode::~ScaleMode()
 
 Hix::Features::FeatureContainerFlushSupport* Hix::Features::ScaleMode::applyScale(QVector3D scale)
 {
-	Hix::Features::FeatureContainerFlushSupport* container = new FeatureContainerFlushSupport();
+	Hix::Features::FeatureContainerFlushSupport* container = new FeatureContainerFlushSupport(_targetModels);
 	for (auto& target : _targetModels)
 		container->addFeature(new Scale(target, scale));
 
@@ -39,7 +39,6 @@ void Hix::Features::Scale::undoImpl()
 
 	_model->transform().setMatrix(_prevMatrix);
 	_model->aabb() = _prevAabb;
-	qmlManager->sendUpdateModelInfo();
 	_model->updateMesh();
 }
 
@@ -47,7 +46,6 @@ void Hix::Features::Scale::redoImpl()
 {
 	_model->transform().setMatrix(_nextMatrix);
 	_model->aabb() = _nextAabb;
-	qmlManager->sendUpdateModelInfo();
 	_model->updateMesh();
 }
 
@@ -57,5 +55,4 @@ void Hix::Features::Scale::runImpl()
 	_prevAabb = _model->aabb();
 	_model->scaleModel(_scale);
 	_model->scaleDone();
-	qmlManager->sendUpdateModelInfo();
 }

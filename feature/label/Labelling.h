@@ -3,6 +3,7 @@
 #include <QString>
 #include "../interfaces/SelectFaceMode.h"
 #include "../interfaces/FlushSupport.h"
+#include "../../DentEngine/src/Bounds3D.h"
 namespace Hix
 {
 	namespace Features

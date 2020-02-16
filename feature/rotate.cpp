@@ -1,8 +1,8 @@
 #include "rotate.h"
 #include "qmlmanager.h"
 #include "widget/RotateWidget.h"
-
-Hix::Features::RotateMode::RotateMode(): WidgetMode(), _targetModels(qmlManager->getSelectedModels())
+#include "application/ApplicationManager.h"
+Hix::Features::RotateMode::RotateMode(): WidgetMode(), _targetModels(Hix::Application::ApplicationManager::getInstance().partManager().selectedModels())
 {
 	_widget.addWidget(std::make_unique<Hix::UI::RotateWidget>(QVector3D(1, 0, 0), &_widget));
 	_widget.addWidget(std::make_unique<Hix::UI::RotateWidget>(QVector3D(0, 1, 0), &_widget));
@@ -16,7 +16,7 @@ Hix::Features::RotateMode::~RotateMode()
 
 void Hix::Features::RotateMode::featureStarted()
 {
-	_rotateContainer = new FeatureContainerFlushSupport();
+	_rotateContainer = new FeatureContainerFlushSupport(_targetModels);
 	for (auto& target : _targetModels)
 		_rotateContainer->addFeature(new Rotate(target));
 
@@ -29,7 +29,6 @@ void Hix::Features::RotateMode::featureEnded()
 	for (auto& each : _targetModels)
 	{
 		each->rotateDone();
-		qmlManager->sendUpdateModelInfo();
 	}
 	updatePosition();
 }
@@ -47,7 +46,7 @@ std::unordered_set<GLModel*>& Hix::Features::RotateMode::models()
 
 Hix::Features::FeatureContainerFlushSupport* Hix::Features::RotateMode::applyRotate(const QQuaternion& rot)
 {
-	Hix::Features::FeatureContainerFlushSupport* container = new FeatureContainerFlushSupport();
+	Hix::Features::FeatureContainerFlushSupport* container = new FeatureContainerFlushSupport(_targetModels);
 	for (auto& target : _targetModels)
 		container->addFeature(new Rotate(target, rot));
 	return container;

@@ -9,6 +9,7 @@
 #include "input/Clickable.h"
 
 #include "utils/mathutils.h"
+#include "../application/ApplicationManager.h"
 
 #include <chrono>
 using namespace Qt3DRender;
@@ -214,8 +215,8 @@ void RayCastController::mouseReleased(Qt3DInput::QMouseEvent* mouse)
 				auto test = _verifyClickTask.get();
 				if (!test)
 				{
-					if (qmlManager->yesno_popup->property("isFlawOpen").toBool())
-						return;
+					//if (qmlManager->yesno_popup->property("isFlawOpen").toBool())
+					//	return;
 
 					bool busy = false;
 					if (!_mouseEvent.position.isNull() && mousePosInBound(mouse))
@@ -334,7 +335,7 @@ void RayCastController::hitsChanged(const Qt3DRender::QAbstractRayCaster::Hits& 
 	}
 	else if(_rayCastMode == Click)
 	{
-		qmlManager->backgroundClicked();
+		Hix::Application::ApplicationManager::getInstance().partManager().unselectAll();
 	}
 }
 

@@ -1,5 +1,6 @@
 #include "Feature.h"
 #include "qmlmanager.h"
+#include "application/ApplicationManager.h"
 #include <QDebug>
 using namespace Hix::Features;
 
@@ -14,38 +15,14 @@ Hix::Features::Feature::~Feature()
 
 void Hix::Features::Feature::undo()noexcept
 {
-	try
-	{
-		qmlManager->unselectAll();
-		undoImpl();
-	}
-	catch (std::exception & e)
-	{
-		qDebug() << e.what();
-		//popup, log, send error report
-	}
-	catch (...)
-	{
-		qDebug() << "undo failed, unkown exception";
-	}
+	//Hix::Application::ApplicationManager::getInstance().partManager().unselectAll();
+	undoImpl();
 }
 
 void Hix::Features::Feature::redo()noexcept
 {
-	try
-	{
-		qmlManager->unselectAll();
-		redoImpl();
-	}
-	catch (std::exception & e)
-	{
-		qDebug() << e.what();
-		//popup, log, send error report
-	}
-	catch (...)
-	{
-		qDebug() << "undo failed, unkown exception";
-	}
+	//Hix::Application::ApplicationManager::getInstance().partManager().unselectAll();
+	redoImpl();
 }
 
 

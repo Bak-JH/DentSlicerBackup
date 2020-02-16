@@ -6,10 +6,10 @@ namespace Hix
 {
 	namespace QML
 	{
-		QQuickItem* findChildQItemByName(QQuickItem* start, const QString& name);
-		QQuickItem* findChildQItemByID(QQuickItem* start, const QString& id);
-		QQuickItem* findParendQItemByName(QQuickItem* start, const QString& name);
-		QQuickItem* findParendQItemByID(QQuickItem* start, const QString& id);
+		QQuickItem* findChildQItemByName(QQuickItem* start, const std::string& name);
+		QQuickItem* findChildQItemByID(QQuickItem* start, const std::string& id);
+		QQuickItem* findParendQItemByName(QQuickItem* start, const std::string& name);
+		QQuickItem* findParendQItemByID(QQuickItem* start, const std::string& id);
 
 
 		template<typename ItemType>
