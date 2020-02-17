@@ -3,7 +3,9 @@
 #include "polylinecut.h"
 #include "../qml/components/Buttons.h"
 #include "../qml/components/ControlOwner.h"
-#include "../../qmlmanager.h"
+#include "feature/interfaces/Feature.h"
+#include "../application/ApplicationManager.h"
+#include "qmlmanager.h"
 
 using namespace Hix;
 using namespace Hix::Features;
@@ -15,8 +17,8 @@ using namespace ClipperLib;
 const QUrl CUT_POPUP_URL = QUrl("qrc:/Qml/FeaturePopup/PopupCut.qml");
 
 Hix::Features::ModelCut::ModelCut():
-	_models(qmlManager->getSelectedModels()), _cuttingPlane(qmlManager->total), 
-	_modelsBound(qmlManager->getSelectedBound()), DialogedMode(CUT_POPUP_URL)
+	_models(Hix::Application::ApplicationManager::getInstance().partManager().selectedModels()), _cuttingPlane(qmlManager->total),
+	_modelsBound(Hix::Application::ApplicationManager::getInstance().partManager().selectedBound()), DialogedMode(CUT_POPUP_URL)
 {
 	auto& co = controlOwner();
 	co.getControl(_cutSwitch, "cutswitch");
@@ -84,5 +86,5 @@ void Hix::Features::ModelCut::applyCut()
 	default:
 		break;
 	}
-	qmlManager->unselectAll();
+	//Hix::Application::ApplicationManager::getInstance().partManager().unselectAll();
 }

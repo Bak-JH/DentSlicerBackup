@@ -12,7 +12,6 @@ import Qt3D.Render 2.0
 import Qt3D.Input 2.0
 import Qt3D.Extras 2.0
 import QtQuick 2.7
-import DentSlicer 1.0
 //import GLQML 1.0
 
 
@@ -68,9 +67,9 @@ Entity {
             specular: Qt.rgba(100/255, 100/255, 100/255, 1 )
             shininess: 0
         }
-		Model{
-            id: meshEntity4
-            inputSource:"file:///C:/Users/user/Downloads/bitcoin.stl"
+		Entity{
+            id: models
+            //inputSource:"file:///C:/Users/user/Downloads/Spider_ascii.stl"
         }
         CoordinateMesh{}
 

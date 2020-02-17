@@ -12,7 +12,7 @@ using namespace Hix::UI;
 constexpr float LOGO_MARGIN = 2;
 constexpr float CIRCLE_SEG_CNT = 40;
 constexpr float GRID_Z_OFFSET = std::numeric_limits<float>::epsilon() * 100;
-Hix::UI::GridBed::GridBed()
+Hix::UI::GridBed::GridBed(Qt3DCore::QEntity* parent): _parent(parent)
 {
 	_logo.reset(new Qt3DCore::QEntity());
 	Qt3DRender::QMesh* mesh = new Qt3DRender::QMesh();
@@ -33,34 +33,33 @@ Hix::UI::GridBed::~GridBed()
 }
 void Hix::UI::GridBed::drawBed()
 {
-	auto parent = qmlManager->total;
-	_logo->setParent(parent);
+	_logo->setParent(_parent);
 	auto& printerSettings = qmlManager->settings().printerSetting;
 	switch (printerSettings.bedShape)
 	{
 	case Hix::Settings::PrinterSetting::BedShape::Circle:
 	{
-		auto bed = new CircleMeshEntity(printerSettings.bedRadius, CIRCLE_SEG_CNT, Qt::white, parent);
+		auto bed = new CircleMeshEntity(printerSettings.bedRadius, CIRCLE_SEG_CNT, Qt::white, _parent);
 		_bedShape.reset(bed);
 		auto circleGrid = Hix::Shapes2D::gridCircle(printerSettings.bedRadius, 5); //5mm
 		for (auto& p : circleGrid)
 		{
 			Hix::Shapes2D::setZ(GRID_Z_OFFSET, p.begin(), p.end());
 		}
-		_grid.reset(new LineMeshEntity(circleGrid, parent, Qt::black));
+		_grid.reset(new LineMeshEntity(circleGrid, _parent, Qt::black));
 		_logoTransform.setTranslation(QVector3D(0, -LOGO_MARGIN -printerSettings.bedRadius, 0));
 		break;
 	}
 	case Hix::Settings::PrinterSetting::BedShape::Rect:
 	{
-		auto bed = new PlaneMeshEntity(parent, printerSettings.bedX, printerSettings.bedY, Qt::white);
+		auto bed = new PlaneMeshEntity(_parent, printerSettings.bedX, printerSettings.bedY, Qt::white);
 		_bedShape.reset(bed);
 		auto rectGrid = Hix::Shapes2D::gridRect(printerSettings.bedX, printerSettings.bedY, 5); //5mm
 		for (auto& p : rectGrid)
 		{
 			Hix::Shapes2D::setZ(GRID_Z_OFFSET, p.begin(), p.end());
 		}
-		_grid.reset(new LineMeshEntity(rectGrid, parent, Qt::black));
+		_grid.reset(new LineMeshEntity(rectGrid, _parent, Qt::black));
 		_logoTransform.setTranslation(QVector3D(0,  -LOGO_MARGIN -printerSettings.bedY/2.0f, 0));
 		break;
 	}

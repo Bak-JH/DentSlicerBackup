@@ -2,7 +2,6 @@
 #include "ControlOwner.h"
 #include <qquickitem.h>
 #include <string>
-class GLModel;
 namespace Hix
 {
 	namespace QML
@@ -54,32 +53,5 @@ namespace Hix
 			QQuickItem* _featureLayout = nullptr;
 			QQuickItem* findFeatureLayout();
 		};	
-
-		class ModalShell : public QQuickItem
-		{
-			Q_OBJECT
-			Q_PROPERTY(QString modalMessage MEMBER _modalmsg NOTIFY modalmsgChanged)
-
-		public:
-			ModalShell(QQuickItem* parent = nullptr);
-			virtual ~ModalShell();
-			void setMessage(std::string message);
-
-		signals:
-			void modalmsgChanged();
-
-		protected:
-			QString _modalmsg = "Are you sure?";
-		};
-
-		class PartList : public QQuickItem
-		{
-			Q_OBJECT
-		public:
-			PartList(QQuickItem* parent = nullptr);
-			virtual ~PartList();
-			void appendModel(GLModel* model);
-			Q_INVOKABLE void deleteModels();
-		};
 	}
 }

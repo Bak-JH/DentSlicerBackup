@@ -1,6 +1,8 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
+    <ClCompile Include="application\ApplicationManager.cpp" />
+    <ClCompile Include="application\ModalDialogManager.cpp" />
     <ClCompile Include="common\Debug.cpp" />
     <ClCompile Include="common\debugging\DebugRenderObject.cpp" />
     <ClCompile Include="common\GTEngine\Source\GTEnginePCH.cpp" />
@@ -28,7 +30,22 @@
     <ClCompile Include="common\GTEngine\Source\Mathematics\GteVETNonmanifoldMesh.cpp" />
     <ClCompile Include="common\GTEngine\Source\Mathematics\MSW\GteCPUQueryInstructions.cpp" />
     <ClCompile Include="common\GTEngine\Source\Mathematics\MSW\GteIntelSSE.cpp" />
+    <ClCompile Include="feature\CopyPaste.cpp" />
+    <ClCompile Include="feature\FeaturesLoader.cpp" />
     <ClCompile Include="feature\ImportModel.cpp" />
+    <ClCompile Include="feature\interfaces\DialogedMode.cpp" />
+    <ClCompile Include="feature\interfaces\Progress.cpp" />
+    <ClCompile Include="feature\stlexport.cpp" />
+    <ClCompile Include="input\KeyboardController.cpp" />
+    <ClCompile Include="application\PartManager.cpp" />
+    <ClCompile Include="Qml\components\ControlOwner.cpp" />
+    <ClCompile Include="Qml\components\FeatureMenu.cpp" />
+    <ClCompile Include="Qml\components\HixQML.cpp" />
+    <ClCompile Include="Qml\components\InputControl.cpp" />
+    <ClCompile Include="Qml\ProgressManager.cpp" />
+    <ClCompile Include="Qml\components\ModalShell.cpp" />
+    <ClCompile Include="Qml\components\PartList.cpp" />
+    <ClCompile Include="Qml\util\QMLUtil.cpp" />
     <ClCompile Include="Tasking\Task.cpp" />
     <ClCompile Include="Tasking\TaskManager.cpp" />
     <ClCompile Include="common\Tree\BVHBuilder.cpp" />
@@ -125,7 +142,6 @@
     <ClCompile Include="Qml\components\Inputs.cpp" />
     <ClCompile Include="Qml\components\PopupShell.cpp" />
     <ClCompile Include="render\CircleMeshEntity.cpp" />
-    <ClCompile Include="Qml\components\PrintInfo.cpp" />
     <ClCompile Include="Qml\components\SlideBar.cpp" />
     <ClCompile Include="Qml\components\Toast.cpp" />
     <ClCompile Include="Qml\components\ViewMode.cpp" />
@@ -172,35 +188,14 @@
     <ClCompile Include="slice\slicingengine.cpp" />
     <ClCompile Include="DentEngine\src\svgexporter.cpp" />
     <ClCompile Include="utils\updatechecker.cpp" />
-    <ClCompile Include="Qml\components\ControlOwner.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Qml\components\InputControl.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Qml\components\FeatureMenu.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Qml\util\QMLUtil.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="feature\FeaturesLoader.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="feature\stlexport.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="feature\interfaces\DialogedMode.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Qml\ProgressManager.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="feature\interfaces\Progress.cpp">
+    <ClCompile Include="Qml\components\PrintInfo.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="application\ApplicationManager.h" />
+    <ClInclude Include="application\ModalDialogManager.h" />
+    <ClInclude Include="application\PartManager.h" />
     <ClInclude Include="common\Debug.h" />
     <ClInclude Include="common\debugging\DebugRenderObject.h" />
     <ClInclude Include="common\delaunator.hpp" />
@@ -631,7 +626,20 @@
     <ClInclude Include="common\rapidjson\stringbuffer.h" />
     <ClInclude Include="common\rapidjson\writer.h" />
     <ClInclude Include="common\Singleton.h" />
+    <ClInclude Include="feature\CopyPaste.h" />
+    <ClInclude Include="feature\FeaturesLoader.h" />
     <ClInclude Include="feature\ImportModel.h" />
+    <ClInclude Include="feature\interfaces\DialogedMode.h" />
+    <ClInclude Include="feature\interfaces\ModeFactory.h" />
+    <ClInclude Include="feature\interfaces\Progress.h" />
+    <ClInclude Include="feature\stlexport.h" />
+    <ClInclude Include="input\KeyboardController.h" />
+    <ClInclude Include="Qml\components\ControlOwner.h" />
+    <ClInclude Include="Qml\components\HixQML.h" />
+    <ClInclude Include="Qml\components\InputControl.h" />
+    <ClInclude Include="Qml\ProgressManager.h" />
+    <ClInclude Include="Qml\util\QMLUtil.h" />
+    <ClInclude Include="support\SupportModel.h" />
     <ClInclude Include="Tasking\Task.h" />
     <ClInclude Include="common\taskflow\core\executor.hpp" />
     <ClInclude Include="common\taskflow\core\flow_builder.hpp" />
@@ -803,36 +811,6 @@
     <ClInclude Include="DentEngine\src\polyclipping\poly2tri\common\utils.h" />
     <ClInclude Include="utils\utils.h" />
     <ClInclude Include="utils\winsparkle\winsparkle.h" />
-    <ClInclude Include="Qml\components\InputControl.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Qml\components\ControlOwner.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="feature\interfaces\ModeFactory.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Qml\util\QMLUtil.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="feature\FeaturesLoader.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="feature\stlexport.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="feature\interfaces\DialogedMode.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Qml\ProgressManager.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="support\SupportModel.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="feature\interfaces\Progress.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="debug\moc_predefs.h.cbt" />
@@ -936,6 +914,9 @@
     <Image Include="Resource\vs_icon.png" />
   </ItemGroup>
   <ItemGroup>
+    <QtMoc Include="Qml\components\FeatureMenu.h" />
+    <QtMoc Include="Qml\components\PartList.h" />
+    <QtMoc Include="Qml\components\ModalShell.h" />
     <QtMoc Include="feature\layerview\CrossSectionPlane.h" />
     <QtMoc Include="glmodel.h" />
     <QtMoc Include="utils\gridmesh.h" />
@@ -961,9 +942,6 @@
     <QtMoc Include="qmlmanager.h" />
     <QtMoc Include="utils\quaternionhelper.h" />
     <QtMoc Include="utils\updatechecker.h" />
-    <QtMoc Include="Qml\components\FeatureMenu.h">
-      <Filter>Header Files</Filter>
-    </QtMoc>
   </ItemGroup>
   <ItemGroup>
     <QtRcc Include="qml.qrc" />
@@ -983,12 +961,15 @@
     <None Include="cpp.hint" />
     <None Include="packages.config" />
     <None Include="Qml\Controls\CtrToggleSwitch.qml" />
+    <None Include="Qml\ProgressItem.qml" />
     <None Include="Qml\FeatureMenu.qml" />
     <None Include="Qml\Cam.qml" />
     <None Include="Qml\CamBox.qml" />
     <None Include="Qml\CameraController.qml" />
     <None Include="Qml\CameraManager.qml" />
+    <None Include="Qml\CanvasTest.qml" />
     <None Include="Qml\CoordinateMesh.qml" />
+    <None Include="Qml\Controls\CtrToggleImgSwitch.qml" />
     <None Include="Qml\Controls\CtrDropdownBox.qml" />
     <None Include="Qml\Controls\CtrSpinBox.qml" />
     <None Include="Qml\Controls\CtrTextBox.qml" />
@@ -1030,6 +1011,7 @@
     <None Include="Qml\ModalWindow.qml" />
     <None Include="Qml\ModalWindowButton.qml" />
     <None Include="Qml\Model.qml" />
+    <None Include="Qml\PartListItem.qml" />
     <None Include="Qml\RangedSlider.qml" />
     <None Include="Qml\Plane.qml" />
     <None Include="Qml\PartList.qml" />
@@ -1198,16 +1180,8 @@
     <None Include="resource\zoom_down.png" />
     <None Include="resource\zoom_up.png" />
     <None Include="icon.ico" />
-    <None Include="Qml\Controls\CtrToggleImgSwitch.qml" />
-    <None Include="Qml\CanvasTest.qml" />
-    <None Include="Qml\ProgressItem.qml" />
   </ItemGroup>
   <ItemGroup>
-    <Filter Include="Header Files">
-      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
-      <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
-      <ParseFiles>true</ParseFiles>
-    </Filter>
     <Filter Include="Source Files">
       <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
       <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>

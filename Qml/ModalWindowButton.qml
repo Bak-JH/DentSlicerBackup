@@ -10,6 +10,7 @@ Hix.Button
 	height: 32
 	radius: height / 2
 	color: defaultColor
+	Layout.fillWidth: true
 
 	Text {
 		anchors.horizontalCenter: parent.horizontalCenter

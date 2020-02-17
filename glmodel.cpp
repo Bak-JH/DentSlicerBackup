@@ -24,6 +24,7 @@
 #include "feature/layFlat.h"
 #include "feature/interfaces/SelectFaceMode.h"
 #include "feature/move.h"
+#include "application/ApplicationManager.h"
 
 #define ATTRIBUTE_SIZE_INCREMENT 200
 #if defined(_DEBUG) || defined(QT_DEBUG)
@@ -31,19 +32,22 @@
 #endif
 
 
+using namespace Qt3DCore;
+using namespace Qt3DRender;
+using namespace Qt3DExtras;
 
 using namespace Utils::Math;
 using namespace Hix::Engine3D;
 using namespace Hix::Input;
 using namespace Hix::Render;
+using namespace Hix::Application;
 
 GLModel::GLModel(Qt3DCore::QEntity*parent, Mesh* loadMesh, QString fname, const Qt3DCore::QTransform* transform)
     : SceneEntityWithMaterial(parent)
     , _name(fname)
 {
-
+	QObject::connect(this, &QNode::enabledChanged, this, &GLModel::qnodeEnabledChanged);
 	initHitTest();
-    qDebug() << "new model made _______________________________"<<this<< "parent:"<<parent;
     // set shader mode and color
 	setMaterialMode(Hix::Render::ShaderMode::SingleColor);
 	setMaterialColor(Hix::Render::Colors::Default);
@@ -53,11 +57,28 @@ GLModel::GLModel(Qt3DCore::QEntity*parent, Mesh* loadMesh, QString fname, const 
 		_transform.setMatrix(transform->matrix());
 	}
 	setMesh(loadMesh);
-
-	// 승환 75%
-	qmlManager->setProgress(0.73);
 	QObject::connect(this, SIGNAL(_updateModelMesh()), this, SLOT(updateModelMesh()));
+}
 
+//copy
+GLModel::GLModel(const GLModel& o) : GLModel(o.parentEntity(), new Mesh(*o.getMesh()), o._name, &o._transform)
+{
+	//copy children models
+	o.copyChildrenRecursive(this);
+}
+
+void GLModel::copyChildrenRecursive(GLModel* newParent) const
+{
+	for (auto child : childNodes())
+	{
+		auto model = dynamic_cast<GLModel*>(child);
+		if (model)
+		{
+			auto copy = new GLModel(model);
+			copy->setParent(newParent);
+			callRecursive(model, &GLModel::copyChildrenRecursive, copy);
+		}
+	}
 }
 
 void GLModel::moveModel(const QVector3D& movement) {
@@ -171,7 +192,7 @@ void GLModel::updatePrintable() {
 	}
 	else
 	{
-		if (qmlManager->isSelected(this))
+		if (ApplicationManager::getInstance().partManager().isSelected(this))
 		{
 			setMaterialColor(Hix::Render::Colors::Selected);
 		}
@@ -186,7 +207,8 @@ GLModel::~GLModel()
 {
 }
 
- void GLModel::getChildrenModels(std::unordered_set<const GLModel*>& results)const
+
+void GLModel::getChildrenModels(std::unordered_set<const GLModel*>& results)const
 {
 	 
 	for (auto child : childNodes())
@@ -206,6 +228,12 @@ void GLModel::initHitTest()
 	addComponent(&_layer);
 	_layer.setRecursive(false);
 
+}
+
+void GLModel::qnodeEnabledChanged(bool isEnabled)
+{
+	setHitTestable(isEnabled);
+	//setHoverable(isEnabled);
 }
 
 void GLModel::setHitTestable(bool isEnable)
@@ -235,22 +263,19 @@ int GLModel::ID() const
 void GLModel::clicked(MouseEventData& pick, const Qt3DRender::QRayCasterHit& hit)
 {
 	auto listed = getRootModel();
+	auto& partManager = Hix::Application::ApplicationManager::getInstance().partManager();
+	auto isSelected = partManager.isSelected(listed);
 	if (!qmlManager->isFeatureActive() || qmlManager->isActive<Hix::Features::WidgetMode>())
 	{
 		if (pick.button == Qt::MouseButton::LeftButton)
 		{
-			qmlManager->modelSelected(listed->ID());
-		}
-		else if (pick.button == Qt::MouseButton::RightButton && qmlManager->isSelected(listed))
-		{
-			qDebug() << "mttab alive";
-			QMetaObject::invokeMethod(qmlManager->mttab, "tabOnOff");
+			partManager.setSelected(listed, !isSelected);
 		}
 		return;
 	}
 
     //triangle index section
-    if (hit.primitiveIndex() >= _mesh->getFaces().size() || hit.localIntersection() == QVector3D(0, 0, 0) || !qmlManager->isSelected(listed))
+    if (hit.primitiveIndex() >= _mesh->getFaces().size() || hit.localIntersection() == QVector3D(0, 0, 0) || !isSelected)
     {
     }
 	else
@@ -265,21 +290,16 @@ void GLModel::clicked(MouseEventData& pick, const Qt3DRender::QRayCasterHit& hit
 	}
 }
 void GLModel::updateModelMesh() {
-	QMetaObject::invokeMethod(qmlManager->boxUpperTab, "disableUppertab");
-	QMetaObject::invokeMethod(qmlManager->boxLeftTab, "disableLefttab");
-	QMetaObject::invokeMethod((QObject*)qmlManager->scene3d, "disableScene3D");
+	//QMetaObject::invokeMethod((QObject*)qmlManager->scene3d, "disableScene3D");
 	updateMesh(_mesh);
-	qmlManager->sendUpdateModelInfo();
-	QMetaObject::invokeMethod(qmlManager->boxUpperTab, "enableUppertab");
-	QMetaObject::invokeMethod(qmlManager->boxLeftTab, "enableLefttab");
-	QMetaObject::invokeMethod((QObject*)qmlManager->scene3d, "enableScene3D");
+	//QMetaObject::invokeMethod((QObject*)qmlManager->scene3d, "enableScene3D");
 }
 
 
 bool GLModel::isDraggable(Hix::Input::MouseEventData& e,const Qt3DRender::QRayCasterHit&)
 {
 	auto listed = getRootModel();
-	if (e.button == Qt3DInput::QMouseEvent::Buttons::LeftButton && qmlManager->isSelected(listed) && (!qmlManager->isFeatureActive() || qmlManager->isActive<Hix::Features::MoveMode>()))
+	if (e.button == Qt3DInput::QMouseEvent::Buttons::LeftButton && ApplicationManager::getInstance().partManager().isSelected(listed) && (!qmlManager->isFeatureActive() || qmlManager->isActive<Hix::Features::MoveMode>()))
 	{
 		return true;
 	}
@@ -325,7 +345,8 @@ void GLModel::doDrag(Hix::Input::MouseEventData& v)
 	float a = (target.x() - b * yAxis2D.x()) / xAxis2D.x();
 
 	// move ax + by amount
-	qmlManager->modelMove(QVector3D(a, b, 0));
+	auto mode = dynamic_cast<Hix::Features::MoveMode*>(qmlManager->getCurrentMode());
+	mode->modelMove(QVector3D(a, b, 0));
 	prevPoint = currentPoint;
 }
 
@@ -357,45 +378,45 @@ void GLModel:: unselectMeshFaces(){
 }
 
 void GLModel::changeViewMode(int viewMode) {
-    if( this->viewMode == viewMode ) {
-        return;
-    }
+ //   if( this->viewMode == viewMode ) {
+ //       return;
+ //   }
 
-    this->viewMode = viewMode;
-    qDebug() << "changeViewMode" << viewMode;
-    QMetaObject::invokeMethod(qmlManager->boxUpperTab, "all_off");
+ //   this->viewMode = viewMode;
+ //   qDebug() << "changeViewMode" << viewMode;
+ //   QMetaObject::invokeMethod(qmlManager->boxUpperTab, "all_off");
 
-    switch( viewMode ) {
-    case VIEW_MODE_OBJECT:
-        break;
-    case VIEW_MODE_LAYER:
-        break;
-    }
-	updateShader(viewMode);
+ //   switch( viewMode ) {
+ //   case VIEW_MODE_OBJECT:
+ //       break;
+ //   case VIEW_MODE_LAYER:
+ //       break;
+ //   }
+	//updateShader(viewMode);
 
 
-    emit _updateModelMesh();
+ //   emit _updateModelMesh();
 }
 
 
 void GLModel::updateShader(int viewMode)
 {
 
-	switch (viewMode) {
-	case VIEW_MODE_OBJECT:
-		if (faceSelectionActive())
-		{
-			setMaterialMode(Hix::Render::ShaderMode::PerPrimitiveColor);
-		}
-		else
-		{
-			setMaterialMode(Hix::Render::ShaderMode::SingleColor);
-		}
-		break;
-	case VIEW_MODE_LAYER:
-		setMaterialMode(Hix::Render::ShaderMode::LayerMode);
-		break;
-	}
+	//switch (viewMode) {
+	//case VIEW_MODE_OBJECT:
+	//	if (faceSelectionActive())
+	//	{
+	//		setMaterialMode(Hix::Render::ShaderMode::PerPrimitiveColor);
+	//	}
+	//	else
+	//	{
+	//		setMaterialMode(Hix::Render::ShaderMode::SingleColor);
+	//	}
+	//	break;
+	//case VIEW_MODE_LAYER:
+	//	setMaterialMode(Hix::Render::ShaderMode::LayerMode);
+	//	break;
+	//}
 
 
 

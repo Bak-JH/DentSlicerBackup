@@ -82,5 +82,6 @@
         <file>Qml/ProgressException.qml</file>
         <file>Qml/Controls/CtrToggleImgSwitch.qml</file>
         <file>Qml/ProgressItem.qml</file>
+        <file>Qml/PartListItem.qml</file>
     </qresource>
 </RCC>

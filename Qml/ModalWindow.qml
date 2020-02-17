@@ -15,7 +15,6 @@ Hix.ModalShell {
 
 	function setButtons(buttonSet)
 	{
-		var prevBtnOption;
 		for(var button in buttonSet)
 		{
 			console.log(buttonSet[button])
@@ -23,16 +22,13 @@ Hix.ModalShell {
 			var newBtnOption = 
 							newBtn.createObject(buttonarea,
 							{
-								"Layout.fillWidth" : true,
-								"id" : "button" + (button+1),
+								// "id" : "button" + (button+1),
+								// "Layout.fillWidth" : true,
+								// "width" : (320 - (32 * (buttonSet.length - 1))) / buttonSet.length,
 								"btnText" : buttonSet[button][0],
-								"width" : (320 - (32 * (buttonSet.length - 1))) / buttonSet.length,
 								"defaultColor" : buttonSet[button][1],
 								"hoverColor" : buttonSet[button][2]
-								//"anchors.left" : button == 0 ? buttonarea.left : prevBtnOption.right,
-								//"anchors.leftMargin" : button == 0 ? 0 : 32
 							});
-			prevBtnOption = newBtnOption;
 		}
 	}
 

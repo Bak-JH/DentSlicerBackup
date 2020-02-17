@@ -1,35 +1,23 @@
 #pragma once
-#include <QtQuick/private/qquickrectangle_p.h>
-#include <QtQuick/private/qquickmousearea_p.h>
-#include <QtQuick/private/qquickevents_p_p.h>
-#include <QtQuick/private/qquicktext_p.h>
-
+#include <qquickitem.h>
+class QVector3D;
 namespace Hix
 {
 	namespace QML
 	{
-		class PrintInfoText : public QQuickRectangle
+		class PrintInfo : public QQuickItem
 		{
 			Q_OBJECT
-			Q_PROPERTY(QString printtime MEMBER _printtime NOTIFY printtimeChanged)
-			Q_PROPERTY(QString printlayer MEMBER _printlayer NOTIFY printlayerChanged)
-			Q_PROPERTY(QString printsize MEMBER _printsize NOTIFY printsizeChanged)
-			Q_PROPERTY(QString printvolume MEMBER _printvolume NOTIFY printvolumeChanged)
+			Q_PROPERTY(QString printsize MEMBER _printsize)
+			Q_PROPERTY(QString printvolume MEMBER _printvolume)
 
 		public:
-			PrintInfoText(QQuickItem* parent = nullptr);
-
-		public slots:
-			void printtimeChanged();
-			void printlayerChanged();
-			void printsizeChanged();
-			void printvolumeChanged();
+			PrintInfo(QQuickItem* parent = nullptr);
+			void printVolumeChanged(const QVector3D& bound);
 
 		protected:
-			QString _printtime = "0hr 0min";
-			QString _printlayer = "0hr 0min";
-			QString _printsize = "0hr 0min";
-			QString _printvolume = "0hr 0min";
+			QString _printsize = "0mm x 0mm x 0mm";
+			QString _printvolume = "0mL";
 		};		
 	}
 }

@@ -12,6 +12,7 @@
 using namespace Qt3DCore;
 using namespace Hix::Support;
 using namespace Hix::Memory;
+using namespace Qt3DCore;
 
 Hix::Support::SupportRaftManager::SupportRaftManager()
 {

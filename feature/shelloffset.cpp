@@ -5,7 +5,9 @@
 #include "DentEngine/src/mesh.h"
 #include "cut/ZAxialCut.h"
 #include "deleteModel.h"
+#include "application/ApplicationManager.h"
 #include "qmlmanager.h"
+
 // offset shell with mm
 
 using namespace Hix::Engine3D;
@@ -18,7 +20,7 @@ Hix::Features::ShellOffsetMode::ShellOffsetMode():_cuttingPlane(qmlManager->tota
 	auto& co = controlOwner();
 	co.getControl(_offsetValue, "offsetValue");
 
-	auto selectedModels = qmlManager->getSelectedModels();
+	auto selectedModels = Hix::Application::ApplicationManager::getInstance().partManager().selectedModels();
 	if (selectedModels.size() == 1)
 	{
 		_modelBound = _subject->recursiveAabb();
@@ -26,11 +28,10 @@ Hix::Features::ShellOffsetMode::ShellOffsetMode():_cuttingPlane(qmlManager->tota
 		_cuttingPlane.transform().setTranslation(QVector3D(0, 0, _modelBound.zMin() + 1 * _modelBound.lengthZ() / 1.8));
 		_subject = *selectedModels.begin();
 	}
-	//else
-	//{
-	//	qmlManager->openResultPopUp("A single model must be selected", "", "");
-	//	throw std::runtime_error("A single model must be selected");
-	//}
+	else
+	{
+		throw std::runtime_error("A single model must be selected");
+	}
 }
 
 Hix::Features::ShellOffsetMode::~ShellOffsetMode()

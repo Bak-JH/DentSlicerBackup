@@ -47,9 +47,7 @@ Hix::QML::Controls::ToggleSwitch::~ToggleSwitch()
 {
 }
 
-void Hix::QML::Controls::ToggleSwitch::initialize(QVariant leftVal, QVariant rightVal)
-{
-}
+
 
 bool Hix::QML::Controls::ToggleSwitch::isChecked() const
 {
