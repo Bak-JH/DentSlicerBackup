@@ -36,7 +36,6 @@ namespace Hix
 			virtual void runImpl() = 0;
 			virtual void undoImpl() = 0;
 			virtual void redoImpl() = 0;
-			Progress _progress;
 			//friend class FeatureAttorney;
 		};
 

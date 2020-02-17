@@ -7,10 +7,10 @@
 #include "Task.h"
 #include "../common/moodycamel/readerwriterqueue.h"
 #include <variant>
+#include "Qml/ProgressManager.h"
 
 namespace Hix
 {
-	class ProgressManager;
 	namespace Tasking
 	{
 		class TaskManager
@@ -28,7 +28,7 @@ namespace Hix
 			moodycamel::BlockingReaderWriterQueue<TaskVariant> _queue;
 			bool _end = false;
 			std::thread _taskThread;
-			Hix::ProgressManager* _progressManager;
+			Hix::ProgressManager _progressManager;
 		};
 	}
 }

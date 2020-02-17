@@ -5,7 +5,7 @@
 using namespace Hix::QML;
 
 const QUrl POPUP_URL = QUrl("qrc:/Qml/ProgressPopup.qml");
-const QUrl POPUP_ITEM_URL = QUrl("qrc:/Qml/ProgressFeatureItem.qml");
+const QUrl POPUP_ITEM_URL = QUrl("qrc:/Qml/ProgressItem.qml");
 Hix::ProgressManager::ProgressManager()
 {
 }
@@ -16,11 +16,27 @@ Hix::ProgressManager::~ProgressManager()
 
 void Hix::ProgressManager::generatePopup()
 {
-	QQmlComponent* component = new QQmlComponent(qmlManager->engine, POPUP_URL);
-	auto qmlInstance = component->create(qmlContext(qmlManager->popupArea));
-	auto popupShell = dynamic_cast<Hix::QML::ProgressPopupShell*>(qmlInstance);
-	_popup.reset(popupShell);
-	_popup->setParentItem(qmlManager->popupArea);
+	std::function<void()> generate = [this]()
+	{
+		QQmlComponent* component = new QQmlComponent(qmlManager->engine, POPUP_URL);
+		auto qmlInstance = component->create(qmlContext(qmlManager->popupArea));
+		auto popupShell = dynamic_cast<Hix::QML::ProgressPopupShell*>(qmlInstance);
+		_popup.reset(popupShell);
+		_popup->setParentItem(qmlManager->popupArea);
+	};
+	QMetaObject::invokeMethod(qmlManager, generate, Qt::BlockingQueuedConnection);
+}
+
+void Hix::ProgressManager::addProgress(Hix::Progress* progress)
+{
+	std::function<void()> addItem = [this, &progress]()
+	{
+		_component = new QQmlComponent(qmlManager->engine, POPUP_ITEM_URL);
+		auto item = dynamic_cast<QQuickItem*>(_component->create(qmlContext(_popup->featureLayout())));
+		item->setProperty("featureName", QString::fromStdString(progress->getDisplayText()));
+		item->setParentItem(_popup->featureLayout());
+	};
+	QMetaObject::invokeMethod(qmlManager, addItem, Qt::BlockingQueuedConnection);
 }
 
 void Hix::ProgressManager::deletePopup()
@@ -34,12 +50,5 @@ void Hix::ProgressManager::deletePopup()
 
 void Hix::ProgressManager::draw()
 {
-	_component = new QQmlComponent(qmlManager->engine, POPUP_ITEM_URL);
-
-	auto layout = _popup->featureLayout();
-	auto item = dynamic_cast<QQuickItem*>(_component->create(qmlContext(layout)));
-	item->setParentItem(layout);
-
-	auto item1 = dynamic_cast<QQuickItem*>(_component->create(qmlContext(layout)));
-	item1->setParentItem(layout);
+	
 }

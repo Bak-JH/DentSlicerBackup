@@ -3,8 +3,9 @@
 #include <QDebug>
 using namespace Hix::Features;
 
-Hix::Features::Feature::Feature(): _progress()
-{
+Hix::Features::Feature::Feature()
+{ 
+	//_progress = new Progress();
 }
 
 

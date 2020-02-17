@@ -10,6 +10,11 @@ void Hix::Tasking::Task::setProgressManager(Hix::ProgressManager& manager)
 	_progressManager = &manager;
 }
 
+Hix::Progress* Hix::Tasking::Task::progress()
+{
+	return &_progress;
+}
+
 Hix::Tasking::UITask::UITask(std::function<void()> functor): _f(functor)
 {
 
