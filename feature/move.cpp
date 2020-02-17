@@ -3,10 +3,10 @@
 #include "../qml/components/ControlOwner.h"
 #include "../qml/components/Inputs.h"
 #include "qmlmanager.h"
+#include "application/ApplicationManager.h"
 
 const QUrl MOVE_POPUP_URL = QUrl("qrc:/Qml/FeaturePopup/PopupMove.qml");
-
-Hix::Features::MoveMode::MoveMode():WidgetMode(), _targetModels(qmlManager->getSelectedModels()), DialogedMode(MOVE_POPUP_URL)
+Hix::Features::MoveMode::MoveMode() : WidgetMode(), _targetModels(Hix::Application::ApplicationManager::getInstance().partManager().selectedModels()), DialogedMode(MOVE_POPUP_URL)
 {
 	_widget.addWidget(std::make_unique<Hix::UI::MoveWidget>(QVector3D(1, 0, 0), &_widget));
 	_widget.addWidget(std::make_unique<Hix::UI::MoveWidget>(QVector3D(0, 1, 0), &_widget));
@@ -23,7 +23,7 @@ Hix::Features::MoveMode::~MoveMode()
 
 void Hix::Features::MoveMode::featureStarted()
 {
-	_moveContainer = new FeatureContainerFlushSupport();
+	_moveContainer = new FeatureContainerFlushSupport(_targetModels);
 	for (auto& target : _targetModels)
 		_moveContainer->addFeature(new Move(target));
 }
@@ -35,8 +35,6 @@ void Hix::Features::MoveMode::featureEnded()
 
 	for (auto& each : _targetModels)
 		each->moveDone();
-	
-	qmlManager->sendUpdateModelInfo();
 	updatePosition();
 }
 
@@ -44,7 +42,7 @@ void Hix::Features::MoveMode::apply()
 {
 	auto to = QVector3D(_xValue->getValue(), _yValue->getValue(), _zValue->getValue());
 
-	Hix::Features::FeatureContainerFlushSupport* container = new FeatureContainerFlushSupport();
+	Hix::Features::FeatureContainerFlushSupport* container = new FeatureContainerFlushSupport(_targetModels);
 	for (auto& target : _targetModels)
 		container->addFeature(new Move(target, to));
 
@@ -58,6 +56,21 @@ QVector3D Hix::Features::MoveMode::getWidgetPosition()
 
 }
 
+
+void Hix::Features::MoveMode::modelMoveWithAxis(QVector3D axis, double distance) { // for QML Signal -> float is not working in qml signal parameter
+	auto displacement = distance * axis;
+	modelMove(displacement);
+}
+
+void Hix::Features::MoveMode::modelMove(QVector3D displacement)
+{
+	QVector3D bndCheckedDisp;
+	const auto& printBound = qmlManager->settings().printerSetting.bedBound;
+	for (auto selectedModel : _targetModels) {
+		bndCheckedDisp = printBound.displaceWithin(selectedModel->recursiveAabb(), displacement);
+		selectedModel->moveModel(bndCheckedDisp);
+	}
+}
 
 
 Hix::Features::Move::Move(GLModel* target, const QVector3D& to) : _model(target), _to(to)

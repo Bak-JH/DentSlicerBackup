@@ -1,55 +1,88 @@
 #include "QMLUtil.h"
 #include <deque>
-#include <qquickitem.h>
+#include <QObject.h>
 #include <qstring.h>
 #include <qqmlcontext.h>
 #include "../../qmlmanager.h"
 
 
-QQuickItem* Hix::QML::findChildItemByName(QQuickItem* start, const QString& name)
+QObject* Hix::QML::findChildQItemByName(QObject* start, const std::string& name)
 {
-	std::deque<QQuickItem*> s;
+	std::deque<QObject*> s;
 	s.push_back(start);
-
+	QString str = QString::fromStdString(name);
 	while (!s.empty())
 	{
 		auto curr = s.front();
 		s.pop_front();
-		if (curr->objectName() == name)
+		if (curr->objectName() == str)
 		{
 			return curr;
 		}
-		auto neighbors = curr->childItems();
+		auto neighbors = curr->children();
 		for (auto& each : neighbors)
 		{
 			s.push_back(each);
 		}
 	}
-	throw std::runtime_error("failed to find QML element by name" + name.toStdString());
+	throw std::runtime_error("failed to find QML element by name" + name);
 }
 
-QQuickItem* Hix::QML::findChildItemByID(QQuickItem* start, const QString& id)
+QObject* Hix::QML::findChildQItemByID(QObject* start, const std::string& id)
 {
-	std::deque<QQuickItem*> s;
+	qDebug() << "start";
+	std::deque<QObject*> s;
 	s.push_back(start);
-	//auto rootContext = qmlManager->engine->rootContext();
-	auto engine = qmlManager->engine;
-
+	QString str = QString::fromStdString(id);
 	while (!s.empty())
 	{
 		auto curr = s.front();
 		s.pop_front();
 		auto context = qmlContext(curr);
-		if (context && context->nameForObject(curr) == id)
+		if (context && context->nameForObject(curr) == str)
 		{
+			auto nameInContext = context->nameForObject(curr);
+			qDebug() << nameInContext;
 			return curr;
 		}
-		auto neighbors = curr->childItems();
+		auto neighbors = curr->children();
 		for (auto& each : neighbors)
 		{
 			s.push_back(each);
 		}
 	}
-	throw std::runtime_error("failed to find QML element by id" + id.toStdString());
+	throw std::runtime_error("failed to find QML element by id" + id);
+
+}
+
+QObject* Hix::QML::findParendQItemByName(QObject* start, const std::string& name)
+{
+	auto parent = start->parent();
+	QString str = QString::fromStdString(name);
+	while (parent != nullptr)
+	{
+		if (parent->objectName() == str)
+		{
+			return parent;
+		}
+		parent = parent->parent();
+	}
+	throw std::runtime_error("failed to find QML element by name" + name);
+}
+
+QObject* Hix::QML::findParendQItemByID(QObject* start, const std::string& id)
+{
+	auto parent = start->parent();
+	QString str = QString::fromStdString(id);
+	while (parent != nullptr)
+	{
+		auto context = qmlContext(parent);
+		if (context && context->nameForObject(parent) == str)
+		{
+			return parent;
+		}
+		parent = parent->parent();
+	}
+	throw std::runtime_error("failed to find QML element by id" + id);
 
 }

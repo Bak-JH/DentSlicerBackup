@@ -3,8 +3,6 @@
 #include "render/SceneEntityWithMaterial.h"
 #include "widget/Highlightable.h"
 #include "feature/overhangDetect.h"
-using namespace Qt3DRender;
-using namespace Qt3DExtras;
 
 
 class GLModel;

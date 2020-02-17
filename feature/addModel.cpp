@@ -1,8 +1,10 @@
 #include "addModel.h"
 #include "qmlmanager.h"
+#include "../application/ApplicationManager.h"
 
-
-
+using namespace Hix::Features;
+using namespace Hix::Application;
+using namespace Qt3DCore;
 
 Hix::Features::AddModel::AddModel(Qt3DCore::QEntity* parent, Hix::Engine3D::Mesh* mesh, QString fname, const Qt3DCore::QTransform* transform): 
 	_parent(parent), _mesh(mesh), _fname(fname), _transform(transform)
@@ -67,7 +69,8 @@ GLModel* Hix::Features::AddModel::getAddedModel()
 }
 
 
-Hix::Features::ListModel::ListModel(Hix::Engine3D::Mesh* mesh, QString fname, const Qt3DCore::QTransform* transform) : AddModel(qmlManager->total, mesh, fname, transform)
+Hix::Features::ListModel::ListModel(Hix::Engine3D::Mesh* mesh, QString fname, const Qt3DCore::QTransform* transform) : 
+	AddModel(ApplicationManager::getInstance().partManager().modelRoot(), mesh, fname, transform)
 {}
 
 Hix::Features::ListModel::~ListModel()
@@ -81,9 +84,9 @@ void Hix::Features::ListModel::undoImpl()
 	std::function<void()> undo = [this]()
 	{
 		auto raw = std::get<UndoInfo>(_model).undoModel.get();
-		qmlManager->deletePartListItem(raw->ID());
-		qmlManager->unselectPart(raw);
-		qmlManager->releaseFromGLModels(raw);
+		auto& partManager = ApplicationManager::getInstance().partManager();
+		auto owningPtr = partManager.removePart(raw);
+		owningPtr.release(); //since unique_ptr ownership is stolen in AddModel::undoImpl
 	};
 	postUIthread(std::move(undo));
 }
@@ -95,8 +98,8 @@ void Hix::Features::ListModel::redoImpl()
 	std::function<void()> redo = [this]()
 	{
 		auto raw = std::get<GLModel*>(_model);
-		qmlManager->addPart(raw->modelName(), raw->ID());
-		qmlManager->addToGLModels(raw);
+		auto& partManager = ApplicationManager::getInstance().partManager();
+		partManager.addPart(std::unique_ptr<GLModel>(raw));
 	};
 	postUIthread(std::move(redo));
 }
@@ -108,8 +111,8 @@ void Hix::Features::ListModel::runImpl()
 	std::function<void()> redo = [this]()
 	{
 		auto rawModel = std::get<GLModel*>(_model);
-		qmlManager->addToGLModels(rawModel);
-		qmlManager->addPart(_fname, rawModel->ID());
+		auto& partManager = ApplicationManager::getInstance().partManager();
+		partManager.addPart(std::unique_ptr<GLModel>(rawModel));
 	};
 	QMetaObject::invokeMethod(qmlManager, redo, Qt::BlockingQueuedConnection);
 }

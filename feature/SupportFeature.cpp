@@ -3,7 +3,8 @@
 #include "render/Color.h"
 #include "feature/move.h"
 #include "support/RaftModel.h"
-#include "../../qmlmanager.h"
+#include "application/ApplicationManager.h"
+#include "qmlmanager.h"
 
 /////////////////////
 ///  Add Support  ///
@@ -119,7 +120,7 @@ void Hix::Features::RemoveRaft::runImpl()
 const QUrl SUPPORT_POPUP_URL = QUrl("qrc:/Qml/FeaturePopup/PopupSupport.qml");
 
 Hix::Features::SupportMode::SupportMode()
-	: _targetModels(qmlManager->getSelectedModels()), DialogedMode(SUPPORT_POPUP_URL)
+	: _targetModels(Hix::Application::ApplicationManager::getInstance().partManager().selectedModels()), DialogedMode(SUPPORT_POPUP_URL)
 {
 	qmlManager->getRayCaster().setHoverEnabled(true);
 }
@@ -139,15 +140,16 @@ void Hix::Features::SupportMode::faceSelected(GLModel* selected, const Hix::Engi
 	}
 }
 
-Hix::Features::FeatureContainer* Hix::Features::SupportMode::generateAutoSupport()
+Hix::Features::FeatureContainer* Hix::Features::SupportMode::generateAutoSupport(std::unordered_set<GLModel*>& models)
 {
+
 	if (!qmlManager->supportRaftManager().supportsEmpty())
 		return nullptr;
 
 	qmlManager->supportRaftManager().setSupportType(scfg->support_type);
 	Hix::Features::FeatureContainer* container = new FeatureContainer();
 
-	for (auto selectedModel : _targetModels)
+	for (auto selectedModel : models)
 	{
 		if (scfg->support_type != SlicingConfiguration::SupportType::None)
 		{
@@ -163,24 +165,24 @@ Hix::Features::FeatureContainer* Hix::Features::SupportMode::generateAutoSupport
 	return container;
 }
 
-Hix::Features::FeatureContainer* Hix::Features::SupportMode::clearSupport()
+Hix::Features::FeatureContainer* Hix::Features::SupportMode::clearSupport(const std::unordered_set<GLModel*>& models)
 {
 	if (qmlManager->supportRaftManager().supportsEmpty())
 		return nullptr;
 
 	Hix::Features::FeatureContainer* container = new FeatureContainer();
-	std::unordered_set<const GLModel*> models;
-	if(qmlManager->supportRaftManager().raftActive())
+	if (qmlManager->supportRaftManager().raftActive())
 		container->addFeature(new RemoveRaft());
 
-	for(auto each : qmlManager->supportRaftManager().modelAttachedSupports(_targetModels))
+	for (auto each : qmlManager->supportRaftManager().modelAttachedSupports(models))
 		container->addFeature(new RemoveSupport(each));
-	
-	for (auto model : _targetModels)
-		container->addFeature(new Move(model, QVector3D(0, 0, -Hix::Support::SupportRaftManager::supportRaftMinLength())));	
+
+	for (auto model : models)
+		container->addFeature(new Move(model, QVector3D(0, 0, -Hix::Support::SupportRaftManager::supportRaftMinLength())));
 
 	return container;
 }
+
 
 Hix::Features::Feature* Hix::Features::SupportMode::generateRaft()
 {

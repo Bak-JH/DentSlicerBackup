@@ -103,11 +103,11 @@ void SlicingOptBackend::addOptionDialogCombo(QString opName, std::array<std::str
 	{
 		enumStrings.push_back(each.data());
 	}
-	QMetaObject::invokeMethod(_qmlManager->ltso, "addOptionElementCombo",
-		Q_ARG(QVariant, opName),
-		Q_ARG(QVariant, enumStrings),
-		Q_ARG(QVariant, defaultIdx)
-	);
+	//QMetaObject::invokeMethod(_qmlManager->ltso, "addOptionElementCombo",
+	//	Q_ARG(QVariant, opName),
+	//	Q_ARG(QVariant, enumStrings),
+	//	Q_ARG(QVariant, defaultIdx)
+	//);
 }
 
 void SlicingOptBackend::createSlicingOptControls()
@@ -124,16 +124,16 @@ void SlicingOptBackend::createSlicingOptControls()
 	addOptionDialogPercentage(QString("Support density"), 50);
 	addOptionDialogCombo(QString("Contraction Ratio"), ContractionRatio, 1);
 
-	QObject::connect(_qmlManager->ltso, SIGNAL(optionChanged(QString, QVariant)), this, SLOT(onOptionChanged(QString, QVariant)));
+	//QObject::connect(_qmlManager->ltso, SIGNAL(optionChanged(QString, QVariant)), this, SLOT(onOptionChanged(QString, QVariant)));
 
 }
 
 void SlicingOptBackend::addOptionDialogPercentage(QString opName, int defaultVal)
 {
-	QMetaObject::invokeMethod(_qmlManager->ltso, "addOptionElementPercentage",
-		Q_ARG(QVariant, opName),
-		Q_ARG(QVariant, defaultVal)
-	);
+	//QMetaObject::invokeMethod(_qmlManager->ltso, "addOptionElementPercentage",
+	//	Q_ARG(QVariant, opName),
+	//	Q_ARG(QVariant, defaultVal)
+	//);
 }
 
 

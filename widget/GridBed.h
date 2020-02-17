@@ -9,7 +9,7 @@ namespace Hix
 		class GridBed
 		{
 		public:
-			GridBed();
+			GridBed(Qt3DCore::QEntity* parent);
 			virtual ~GridBed();
 			void drawBed();
 		protected:
@@ -17,7 +17,7 @@ namespace Hix
 			std::unique_ptr<Qt3DCore::QEntity> _grid;
 			std::unique_ptr<Qt3DCore::QEntity> _logo;
 			Qt3DCore::QTransform _logoTransform;
-
+			Qt3DCore::QEntity* _parent;
 		};
 	}
 }

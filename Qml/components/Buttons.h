@@ -43,7 +43,6 @@ namespace Hix
 			public:
 				ToggleSwitch(QQuickItem* parent = nullptr);
 				virtual ~ToggleSwitch();
-				void initialize(QVariant leftVal, QVariant rightVal);
 				bool isChecked()const;
 				void setChecked(bool isChecked);
 			signals:

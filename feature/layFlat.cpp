@@ -1,10 +1,11 @@
 #include "layFlat.h"
 #include "qmlmanager.h"
+#include "application/ApplicationManager.h"
 using namespace Hix::Features;
 
 const QUrl LAYFLAT_POPUP_URL = QUrl("qrc:/Qml/FeaturePopup/PopupLayFlat.qml");
 Hix::Features::LayFlatMode::LayFlatMode()
-	: PPShaderMode(qmlManager->getSelectedModels()), DialogedMode(LAYFLAT_POPUP_URL)
+	: PPShaderMode(Hix::Application::ApplicationManager::getInstance().partManager().selectedModels()), DialogedMode(LAYFLAT_POPUP_URL)
 {
 }
 
@@ -26,7 +27,7 @@ void Hix::Features::LayFlatMode::apply()
 	if (_args.empty())
 		return;
 
-	Hix::Features::FeatureContainerFlushSupport* container = new FeatureContainerFlushSupport();
+	Hix::Features::FeatureContainerFlushSupport* container = new FeatureContainerFlushSupport(Hix::Application::ApplicationManager::getInstance().partManager().selectedModels());
 	for (auto& each : _args)
 	{
 		container->addFeature(new LayFlat(each.first, each.second));

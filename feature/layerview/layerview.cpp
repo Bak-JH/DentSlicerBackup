@@ -29,7 +29,7 @@ Hix::Features::LayerView::LayerView(const std::unordered_set<GLModel*>& selected
 	//prepare layers
 	for (auto& model : _models)
 	{
-		model->changeViewMode(VIEW_MODE_LAYER);
+		//model->changeViewMode(VIEW_MODE_LAYER);
 		model->updateModelMesh();
 		model->meshMaterial().setParameterValue("fuckingStuipidWorldMatrix", QVariant::fromValue(model->toRootMatrix()));
 	}
@@ -51,7 +51,7 @@ Hix::Features::LayerView::~LayerView()
 {
 	for (auto& model : _models)
 	{
-		model->changeViewMode(VIEW_MODE_OBJECT);
+		//model->changeViewMode(VIEW_MODE_OBJECT);
 		model->updateModelMesh();
 	}
 	//qmlManager->layerViewPopup->setProperty("visible", false);

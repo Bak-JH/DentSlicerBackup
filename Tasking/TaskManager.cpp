@@ -1,6 +1,7 @@
 #include "TaskManager.h"
 #include <stdexcept>
 #include <qmlmanager.h>
+#include "application/ApplicationManager.h"
 using namespace Hix::Tasking;
 
 
@@ -34,7 +35,9 @@ void TaskManager::run()
 		_progressManager.addProgress(rTask->progress());
 
 		rTask->run();
+
 		_progressManager.deletePopup();
+		Hix::Application::ApplicationManager::getInstance().stateChanged();
 	}
 }
 

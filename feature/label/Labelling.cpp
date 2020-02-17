@@ -4,12 +4,16 @@
 #include "qmlmanager.h"
 #include "../Shapes2D.h"
 #include "../Extrude.h"
+#include "../../glmodel.h"
+#include "../../application/ApplicationManager.h"
 
 using namespace Hix::Engine3D;
 using namespace Hix::Polyclipping;
 using namespace Hix::Shapes2D;
 using namespace Hix::Features::Extrusion;
 using namespace ClipperLib;
+using namespace Qt3DCore;
+using namespace Hix::Application;
 
 //Mesh* generateLabelMesh(const QVector3D translation, const QVector3D normal, const QString text, const QFont font)
 const QUrl LABEL_POPUP_URL = QUrl("qrc:/Qml/FeaturePopup/PopupLabel.qml");
@@ -224,7 +228,7 @@ Hix::Features::Feature* Hix::Features::LabellingMode::applyLabelMesh()
 
 
 Hix::Features::Labelling::Labelling(GLModel* parentModel, GLModel* previewModel)
-	: _targetModel(parentModel), _label(previewModel)
+	:FlushSupport(parentModel),_targetModel(parentModel), _label(previewModel)
 {
 }
 
@@ -239,7 +243,7 @@ void Hix::Features::Labelling::undoImpl()
 
 void Hix::Features::Labelling::redoImpl()
 {
-	if (!qmlManager->isSelected(_targetModel))
+	if (!ApplicationManager::getInstance().partManager().isSelected(_targetModel))
 		_label->setMaterialColor(Hix::Render::Colors::Default);
 	_label->QNode::setParent(_targetModel);
 }

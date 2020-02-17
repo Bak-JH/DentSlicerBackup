@@ -2,10 +2,10 @@
 #include "../qml/components/Inputs.h"
 #include "../qml/components/ControlOwner.h"
 #include "qmlmanager.h"
+#include "application/ApplicationManager.h"
 
 const QUrl SCALE_POPUP_URL = QUrl("qrc:/Qml/FeaturePopup/PopupScale.qml");
-
-Hix::Features::ScaleMode::ScaleMode() : _targetModels(qmlManager->getSelectedModels()), DialogedMode(SCALE_POPUP_URL)
+Hix::Features::ScaleMode::ScaleMode(): _targetModels(Hix::Application::ApplicationManager::getInstance().partManager().selectedModels()), DialogedMode(SCALE_POPUP_URL)
 {
 	auto& co = controlOwner();
 	co.getControl(_precentValue, "scaleValue");
@@ -19,7 +19,7 @@ Hix::Features::ScaleMode::~ScaleMode()
 
 Hix::Features::FeatureContainerFlushSupport* Hix::Features::ScaleMode::applyScale(QVector3D scale)
 {
-	Hix::Features::FeatureContainerFlushSupport* container = new FeatureContainerFlushSupport();
+	Hix::Features::FeatureContainerFlushSupport* container = new FeatureContainerFlushSupport(_targetModels);
 	for (auto& target : _targetModels)
 		container->addFeature(new Scale(target, scale));
 
@@ -29,7 +29,7 @@ Hix::Features::FeatureContainerFlushSupport* Hix::Features::ScaleMode::applyScal
 void Hix::Features::ScaleMode::apply()
 {
 	auto scale = QVector3D();
-	Hix::Features::FeatureContainerFlushSupport* container = new FeatureContainerFlushSupport();
+	Hix::Features::FeatureContainerFlushSupport* container = new FeatureContainerFlushSupport(_targetModels);
 	for (auto& target : _targetModels)
 		container->addFeature(new Scale(target, scale));
 }
@@ -55,7 +55,6 @@ void Hix::Features::Scale::undoImpl()
 
 	_model->transform().setMatrix(_prevMatrix);
 	_model->aabb() = _prevAabb;
-	qmlManager->sendUpdateModelInfo();
 	_model->updateMesh();
 }
 
@@ -63,7 +62,6 @@ void Hix::Features::Scale::redoImpl()
 {
 	_model->transform().setMatrix(_nextMatrix);
 	_model->aabb() = _nextAabb;
-	qmlManager->sendUpdateModelInfo();
 	_model->updateMesh();
 }
 
@@ -73,5 +71,4 @@ void Hix::Features::Scale::runImpl()
 	_prevAabb = _model->aabb();
 	_model->scaleModel(_scale);
 	_model->scaleDone();
-	qmlManager->sendUpdateModelInfo();
 }

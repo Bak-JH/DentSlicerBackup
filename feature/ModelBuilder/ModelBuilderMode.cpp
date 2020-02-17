@@ -6,6 +6,8 @@
 #include <unordered_set>
 #include "TwoManifoldBuilder.h"
 #include "../repair/meshrepair.h"
+#include "application/ApplicationManager.h"
+
 constexpr float ZMARGIN = 5;
 
 
@@ -19,7 +21,7 @@ Hix::Features::ModelBuilderMode::ModelBuilderMode(): _topPlane(qmlManager->total
 	}
 
 
-	qmlManager->openProgressPopUp();
+	//qmlManager->openProgressPopUp();
 	auto mesh = new Mesh();
 	if (fileName != "" && (fileName.contains(".stl") || fileName.contains(".STL"))) {
 		FileLoader::loadMeshSTL(mesh, fileUrl);
@@ -28,9 +30,8 @@ Hix::Features::ModelBuilderMode::ModelBuilderMode(): _topPlane(qmlManager->total
 		FileLoader::loadMeshOBJ(mesh, fileUrl);
 	}
 	fileName = GLModel::filenameToModelName(fileName.toStdString());
-	qmlManager->setProgress(0.1);
-	_model.reset(new GLModel(qmlManager->models, mesh, fileName, nullptr));
-	_model->setHitTestable(true);
+	//qmlManager->setProgress(0.1);
+	_model.reset(new GLModel(Hix::Application::ApplicationManager::getInstance().partManager().modelRoot(), mesh, fileName, nullptr));
 	_model->setZToBed();
 	_model->moveModel(QVector3D(0, 0, ZMARGIN));
 	_zLength = _model->aabb().lengthZ() + ZMARGIN;
@@ -51,7 +52,7 @@ Hix::Features::ModelBuilderMode::ModelBuilderMode(): _topPlane(qmlManager->total
 
 	std::unordered_set<GLModel*> models { _model.get() };
 	_rotateMode.reset(new RotateModeNoUndo(models));
-	qmlManager->setProgress(1.0);
+	//qmlManager->setProgress(1.0);
 }
 
 Hix::Features::ModelBuilderMode::~ModelBuilderMode()

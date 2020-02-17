@@ -3,6 +3,7 @@
 #include "../qmlmanager.h"
 #include "../glmodel.h"
 #include "addModel.h"
+#include "../application/ApplicationManager.h"
 #include <unordered_set>
 constexpr float ZMARGIN = 5;
 
@@ -16,7 +17,7 @@ Hix::Features::SliceExportMode::SliceExportMode()
 	{
 		return;
 	}
-	auto se = new SliceExport(qmlManager->getSelectedModels(), path);
+	auto se = new SliceExport(Hix::Application::ApplicationManager::getInstance().partManager().allModels(), path);
 	qmlManager->taskManager().enqueTask(se);
 
 }
@@ -36,15 +37,8 @@ Hix::Features::SliceExport::SliceExport(const std::unordered_set<GLModel*>& sele
 void Hix::Features::SliceExport::run()
 {
 	// need to generate support, raft
-	std::vector<std::reference_wrapper<const GLModel>> constSelectedModels;
-	constSelectedModels.reserve(_models.size());
-	std::transform(std::begin(_models), std::end(_models), std::back_inserter(constSelectedModels),
-		[](GLModel* ptr)-> std::reference_wrapper<const GLModel> {
-			return std::cref(*ptr);
-		});
-
 	auto selectedBound = Hix::Engine3D::combineBounds(_models);
-	_result = SlicingEngine::sliceModels(_isTemp, selectedBound.zMax(), constSelectedModels, qmlManager->supportRaftManager(), _path);
+	_result = SlicingEngine::sliceModels(_isTemp, selectedBound.zMax(), _models, qmlManager->supportRaftManager(), _path);
 
 }
 

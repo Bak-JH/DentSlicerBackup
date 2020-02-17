@@ -1,5 +1,6 @@
 #pragma once
 #include "feature/interfaces/Feature.h"
+#include "feature/interfaces/Mode.h"
 #include "feature/interfaces/FlushSupport.h"
 #include <QObject>
 #include <Qt3DCore>
@@ -9,6 +10,12 @@ namespace Hix
 {
 	namespace Features
 	{
+		class DeleteModelMode : public Mode
+		{
+		public:
+			DeleteModelMode();
+			virtual ~DeleteModelMode();
+		};
 		class DeleteModel : public Feature, public FlushSupport
 		{
 		public:
@@ -24,8 +31,10 @@ namespace Hix
 			{
 				std::unique_ptr<GLModel> redoModel;
 				Qt3DCore::QNode* parent;
+				bool isListed;
+
 			};
 			std::variant<GLModel*, RedoInfo> _model;
 		};
 	}
-}
+}                                                                                

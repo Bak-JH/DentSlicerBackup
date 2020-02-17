@@ -1,10 +1,10 @@
 #pragma once
-#include "../../glmodel.h"
 #include <QFont>
 #include <QString>
 #include "../interfaces/SelectFaceMode.h"
 #include "../interfaces/FlushSupport.h"
 #include "../interfaces/DialogedMode.h"
+#include "../../DentEngine/src/Bounds3D.h"
 namespace Hix
 {
 	namespace QML

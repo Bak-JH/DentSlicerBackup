@@ -9,6 +9,7 @@
 #include "input/Clickable.h"
 
 #include "utils/mathutils.h"
+#include "../application/ApplicationManager.h"
 
 #include <chrono>
 using namespace Qt3DRender;
@@ -96,7 +97,7 @@ bool RayCastController::hoverEnabled()const
 
 bool Hix::Input::RayCastController::mousePosInBound(const Qt3DInput::QMouseEvent* mv)
 {
-	auto sceneScreen = qmlManager->scene3d;
+	auto sceneScreen = Hix::Application::ApplicationManager::getInstance().getWindowRoot();
 	if (mv->x() >= 0 && mv->x() < sceneScreen->width() && mv->y() > 0 && mv->y() < sceneScreen->height())
 	{
 		return true;
@@ -211,19 +212,19 @@ void RayCastController::mouseReleased(Qt3DInput::QMouseEvent* mouse)
 				//is a click, so stop verifier from working to figure out if it's a click
 				_isClickVerified.notify_all();
 				//if successfully cancelled
-				//auto test = _verifyClickTask.get();
-				//if (!test)
-				//{
-				//	if (qmlManager->yesno_popup->property("isFlawOpen").toBool())
-				//		return;
+				auto test = _verifyClickTask.get();
+				if (!test)
+				{
+					//if (qmlManager->yesno_popup->property("isFlawOpen").toBool())
+					//	return;
 
-				//	bool busy = false;
-				//	if (!_mouseEvent.position.isNull() && mousePosInBound(mouse))
-				//	{
-				//		_rayCastMode = RayCastMode::Click;
-				//		_rayCaster.trigger(_mouseEvent.position);
-				//	}
-				//}
+					bool busy = false;
+					if (!_mouseEvent.position.isNull() && mousePosInBound(mouse))
+					{
+						_rayCastMode = RayCastMode::Click;
+						_rayCaster.trigger(_mouseEvent.position);
+					}
+				}
 			}
 
 		}
@@ -334,7 +335,7 @@ void RayCastController::hitsChanged(const Qt3DRender::QAbstractRayCaster::Hits& 
 	}
 	else if(_rayCastMode == Click)
 	{
-		qmlManager->backgroundClicked();
+		Hix::Application::ApplicationManager::getInstance().partManager().unselectAll();
 	}
 }
 

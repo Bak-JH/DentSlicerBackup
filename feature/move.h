@@ -52,6 +52,9 @@ namespace Hix
 			void featureEnded()override;
 			QVector3D getWidgetPosition()override;
 			void apply()override;
+			void modelMoveWithAxis(QVector3D axis, double distance);
+			void modelMove(QVector3D displacement);
+			FeatureContainerFlushSupport* applyMove(const QVector3D& to);
 
 		private:
 			Hix::Features::FeatureContainerFlushSupport* _moveContainer = nullptr;

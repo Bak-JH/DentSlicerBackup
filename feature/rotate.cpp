@@ -1,12 +1,10 @@
 #include "rotate.h"
 #include "widget/RotateWidget.h"
-#include "../qml/components/ControlOwner.h"
-#include "../qml/components/Inputs.h"
+#include "application/ApplicationManager.h"
 #include "qmlmanager.h"
-
+#include "../Qml/components/Inputs.h"
 const QUrl ROTATE_POPUP_URL = QUrl("qrc:/Qml/FeaturePopup/PopupRotate.qml");
-
-Hix::Features::RotateMode::RotateMode(): WidgetMode(), _targetModels(qmlManager->getSelectedModels()), DialogedMode(ROTATE_POPUP_URL)
+Hix::Features::RotateMode::RotateMode(): WidgetMode(), _targetModels(Hix::Application::ApplicationManager::getInstance().partManager().selectedModels()), DialogedMode(ROTATE_POPUP_URL)
 {
 	_widget.addWidget(std::make_unique<Hix::UI::RotateWidget>(QVector3D(1, 0, 0), &_widget));
 	_widget.addWidget(std::make_unique<Hix::UI::RotateWidget>(QVector3D(0, 1, 0), &_widget));
@@ -25,7 +23,7 @@ Hix::Features::RotateMode::~RotateMode()
 
 void Hix::Features::RotateMode::featureStarted()
 {
-	_rotateContainer = new FeatureContainerFlushSupport();
+	_rotateContainer = new FeatureContainerFlushSupport(_targetModels);
 	for (auto& target : _targetModels)
 		_rotateContainer->addFeature(new Rotate(target));
 
@@ -38,7 +36,6 @@ void Hix::Features::RotateMode::featureEnded()
 	for (auto& each : _targetModels)
 	{
 		each->rotateDone();
-		qmlManager->sendUpdateModelInfo();
 	}
 	updatePosition();
 }
@@ -56,7 +53,7 @@ std::unordered_set<GLModel*>& Hix::Features::RotateMode::models()
 
 Hix::Features::FeatureContainerFlushSupport* Hix::Features::RotateMode::applyRotate(const QQuaternion& rot)
 {
-	Hix::Features::FeatureContainerFlushSupport* container = new FeatureContainerFlushSupport();
+	Hix::Features::FeatureContainerFlushSupport* container = new FeatureContainerFlushSupport(_targetModels);
 	for (auto& target : _targetModels)
 		container->addFeature(new Rotate(target, rot));
 	return container;
