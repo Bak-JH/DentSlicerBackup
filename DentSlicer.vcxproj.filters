@@ -827,10 +827,10 @@
     <ClInclude Include="Qml\ProgressManager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="feature\interfaces\Progress.h">
+    <ClInclude Include="support\SupportModel.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="support\SupportModel.h">
+    <ClInclude Include="feature\interfaces\Progress.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -1200,7 +1200,7 @@
     <None Include="icon.ico" />
     <None Include="Qml\Controls\CtrToggleImgSwitch.qml" />
     <None Include="Qml\CanvasTest.qml" />
-    <None Include="Qml\ProgressFeatureItem.qml" />
+    <None Include="Qml\ProgressItem.qml" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Header Files">

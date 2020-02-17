@@ -8,12 +8,12 @@ Hix::Progress::~Progress()
 {
 }
 
-void Hix::Progress::setDisplayText(std::string& text)
+void Hix::Progress::setDisplayText(std::string text)
 {
 	_displayText = text;
 }
 
-std::string Hix::Progress::getDisplayText() const
+std::string Hix::Progress::getDisplayText()
 {
 	return _displayText;
 }

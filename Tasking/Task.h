@@ -1,9 +1,11 @@
 #pragma once
 #include <functional>
+#include "feature/interfaces/Progress.h"
 
 namespace Hix
 {
 	class ProgressManager;
+	class Progress;
 	namespace Tasking
 	{
 		class Task
@@ -12,9 +14,11 @@ namespace Hix
 			virtual void run() = 0;
 			virtual ~Task();
 			void setProgressManager(Hix::ProgressManager& manager);
+			Progress* progress();
 
 		protected:
 			Hix::ProgressManager* _progressManager;
+			Progress _progress;
 		};
 
 		class EmptyTask : public Task

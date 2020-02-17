@@ -6,7 +6,9 @@
 
 Hix::Features::AddModel::AddModel(Qt3DCore::QEntity* parent, Hix::Engine3D::Mesh* mesh, QString fname, const Qt3DCore::QTransform* transform): 
 	_parent(parent), _mesh(mesh), _fname(fname), _transform(transform)
-{}
+{
+	
+}
 
 Hix::Features::AddModel::~AddModel()	
 {

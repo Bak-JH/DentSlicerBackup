@@ -6,9 +6,11 @@ Rectangle {
     height: 28
     //color: "#000000"
 
+	property string featureName;
+
 	Text {
-        id: modelname
-        text: "test"
+        id: item
+        text: featureName
         font.family: openRegular.name
         font.pointSize: 10
         anchors.verticalCenter: parent.verticalCenter

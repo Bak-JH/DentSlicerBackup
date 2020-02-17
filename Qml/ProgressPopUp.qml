@@ -75,7 +75,7 @@ Hix.ProgressPopupShell {
 				width: 200
 				anchors.horizontalCenter: parent.horizontalCenter
 				anchors.top: img.bottom
-				anchors.topMargin: 5
+				anchors.topMargin: 15
 				spacing: 2
 			}
 		}

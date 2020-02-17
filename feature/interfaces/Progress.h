@@ -12,8 +12,8 @@ namespace Hix
 	public:
 		Progress();
 		virtual ~Progress();
-		void setDisplayText(std::string& text);
-		std::string getDisplayText()const;
+		void setDisplayText(std::string text);
+		std::string getDisplayText();
 
 	private:
 		Hix::Features::Feature* _currentFeature;

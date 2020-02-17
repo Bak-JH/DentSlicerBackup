@@ -23,7 +23,9 @@ Hix::Features::ImportModelMode::~ImportModelMode()
 
 
 Hix::Features::ImportModel::ImportModel(QUrl fileUrl): _fileUrl(fileUrl)
-{}
+{
+	_progress.setDisplayText("Import Model");
+}
 
 Hix::Features::ImportModel::~ImportModel()
 {
