@@ -20,7 +20,7 @@ public:
     bool first_login = true;
 
     QByteArray req_reply;
-    httpreq();
+    httpreq(QObject* loginWindow, QObject* loginButton);
     ~httpreq();
 
     void get_csrf_token();
@@ -33,6 +33,10 @@ public slots:
     void login(QString id, QString pw);
     void get_iv(QString key);
     void replyFinished(QNetworkReply *reply);
+
+private:
+    QObject* _loginWindow;
+    QObject* _loginButton;
 };
 
 #endif // HTTPREQ_H

@@ -18,7 +18,6 @@
 #include "glmodel.h"
 #include "QtConcurrent/QtConcurrentRun"
 #include "QFuture"
-#include "utils/httpreq.h"
 #include "input/raycastcontroller.h"
 #include "feature/overhangDetect.h"
 #include "Tasking/TaskManager.h"
@@ -75,19 +74,10 @@ public:
 	Qt3DRender::QCamera* _camera;
     QQuickItem* featureArea;
     QObject* mainWindow;
-    QObject* loginWindow;
-    QObject* loginButton;
-    QObject* boxUpperTab;
-    QObject* boxLeftTab;
-	QQuickItem* scene3d;
 	Qt3DCore::QEntity* total;
 
     Qt3DCore::QTransform* systemTransform;
 	Qt3DCore::QEntity* mv;
-    Qt3DCore::QEntity *mttab;
-    QObject* undoRedoButton;
-    QObject* slicingData;
-	QQuickItem* partList;
 
 
 
@@ -125,28 +115,19 @@ public:
 	Hix::Support::SupportRaftManager& supportRaftManager();
 	Hix::Features::FeatureHisroyManager& featureHistoryManager();
 	Hix::Features::Mode* getCurrentMode();
-	void addToGLModels(GLModel* target);
-	void addToGLModels(std::unique_ptr<GLModel>&& target);
 	const Hix::Settings::AppSetting& settings()const;
+	//tmp
+	Hix::UI::GridBed _bed;
 private:
 	Hix::Tasking::TaskManager _taskManager;
-	GLModel* getModelByID(int ID);
-    int viewMode;
-
 	SlicingOptBackend _optBackend;
-	//Ray cast
 	Hix::Input::RayCastController _rayCastController;
-
 	//cursors
 	QCursor _cursorEraser;
 	Hix::Support::SupportRaftManager _supportRaftManager;
 	std::unique_ptr<Hix::Features::Mode> _currentMode;
 	Hix::Features::FeatureHisroyManager _featureHistoryManager;
 	Hix::Settings::AppSetting _setting;
-	Hix::UI::GridBed _bed;
-signals:
-    void updateModelInfo(int printing_time, int layer, QString xyz, float volume);
-    void arrangeDone(std::vector<QVector3D>, std::vector<float>);
 
 
 public slots:

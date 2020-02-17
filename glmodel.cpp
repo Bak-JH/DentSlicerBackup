@@ -290,13 +290,9 @@ void GLModel::clicked(MouseEventData& pick, const Qt3DRender::QRayCasterHit& hit
 	}
 }
 void GLModel::updateModelMesh() {
-	QMetaObject::invokeMethod(qmlManager->boxUpperTab, "disableUppertab");
-	QMetaObject::invokeMethod(qmlManager->boxLeftTab, "disableLefttab");
-	QMetaObject::invokeMethod((QObject*)qmlManager->scene3d, "disableScene3D");
+	//QMetaObject::invokeMethod((QObject*)qmlManager->scene3d, "disableScene3D");
 	updateMesh(_mesh);
-	QMetaObject::invokeMethod(qmlManager->boxUpperTab, "enableUppertab");
-	QMetaObject::invokeMethod(qmlManager->boxLeftTab, "enableLefttab");
-	QMetaObject::invokeMethod((QObject*)qmlManager->scene3d, "enableScene3D");
+	//QMetaObject::invokeMethod((QObject*)qmlManager->scene3d, "enableScene3D");
 }
 
 

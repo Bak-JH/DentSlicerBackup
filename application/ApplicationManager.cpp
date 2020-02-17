@@ -7,7 +7,7 @@
 #include <qqmlcontext.h>
 #include "../Qml/components/PrintInfo.h"
 using namespace Hix::Application;
-
+using namespace Hix::QML;
 template<typename QType>
 void findItem(QObject* start, QType*& found, const QString& id)
 {
@@ -47,17 +47,31 @@ QQmlApplicationEngine& Hix::Application::ApplicationManager::engine()
 
 void Hix::Application::ApplicationManager::init()
 {
-	auto root = _engine.rootObjects().first();
-	findItem(root, _uiRoot, "uiRoot");
-	findItem(root, _sceneRoot, "sceneRoot");
+	//auto root = _engine.rootObjects().first();
+	//findItem(root, _uiRoot, "uiRoot");
+	//findItem(root, _sceneRoot, "sceneRoot");
+	//Qt3DCore::QEntity* partRoot = nullptr;
+	//findItem(_sceneRoot, partRoot, "models");
+	//QQuickItem* modalItem;
+	//findItem(root, modalItem, "dialogItem");
+	//PartManagerLoader::init(_partManager, partRoot);
+	//ModalDialogManagerLoader::init(_modalManager, modalItem);
+	//QQuickItem* printInfoQ;
+	//findItem(root, printInfoQ, "printinfo");
+	_windowRoot = dynamic_cast<QQuickItem*>(_engine.rootObjects().first());
+
+	getItemByID(_windowRoot, _uiRoot, "uiRoot");
+	getItemByID(_windowRoot, _sceneRoot, "sceneRoot");
+	getItemByID(_windowRoot, _entityRoot, "total");
 	Qt3DCore::QEntity* partRoot = nullptr;
-	findItem(_sceneRoot, partRoot, "models");
+	getItemByID(_sceneRoot, partRoot, "models");
 	QQuickItem* modalItem;
-	findItem(root, modalItem, "dialogItem");
+	getItemByID(_windowRoot, modalItem, "dialogItem");
 	PartManagerLoader::init(_partManager, partRoot);
 	ModalDialogManagerLoader::init(_modalManager, modalItem);
 	QQuickItem* printInfoQ;
-	findItem(root, printInfoQ, "printinfo");
+	getItemByID(_windowRoot, printInfoQ, "printinfo");
+
 	_printInfo = dynamic_cast<Hix::QML::PrintInfo*>(printInfoQ);
 
 }
@@ -65,6 +79,16 @@ void Hix::Application::ApplicationManager::init()
 QQuickItem* Hix::Application::ApplicationManager::getUIRoot()const
 {
 	return _uiRoot;
+}
+
+QQuickItem* Hix::Application::ApplicationManager::getWindowRoot() const
+{
+	return _windowRoot;
+}
+
+Qt3DCore::QEntity* Hix::Application::ApplicationManager::getEntityRoot() const
+{
+	return _entityRoot;
 }
 
 PartManager& Hix::Application::ApplicationManager::partManager()
