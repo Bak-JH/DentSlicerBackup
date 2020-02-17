@@ -97,7 +97,7 @@ bool RayCastController::hoverEnabled()const
 
 bool Hix::Input::RayCastController::mousePosInBound(const Qt3DInput::QMouseEvent* mv)
 {
-	auto sceneScreen = qmlManager->scene3d;
+	auto sceneScreen = Hix::Application::ApplicationManager::getInstance().getWindowRoot();
 	if (mv->x() >= 0 && mv->x() < sceneScreen->width() && mv->y() > 0 && mv->y() < sceneScreen->height())
 	{
 		return true;

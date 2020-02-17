@@ -27,7 +27,10 @@ QmlManager* qmlManager;
 #include "utils/updatechecker.h"
 #include "utils/gridmesh.h"
 #include "qml/components/HixQML.h"
+#include "qml/util/QMLUtil.h"
 #include "application/ApplicationManager.h"
+#include "utils/httpreq.h"
+
 using namespace Qt3DCore;
 
 #endif
@@ -64,7 +67,12 @@ int main(int argc, char** argv)
 	qRegisterMetaType<std::vector<QVector3D>>("std::vector<QVector3D>");
 	qRegisterMetaType<std::vector<float>>("std::vector<float>");
 
-
+	auto& appManager = Hix::Application::ApplicationManager::getInstance();
+	auto& engine = appManager.engine();
+	engine.load(QUrl(QStringLiteral("qrc:/Qml/main.qml")));
+	appManager.init();
+	qmlManager = new QmlManager();
+	qmlManager->_bed.drawBed();
 	/** Splash Image **/
 	QPixmap pixmap(":/Resource/splash_dentslicer.png");
 	QPainter painter(&pixmap);
@@ -76,12 +84,17 @@ int main(int argc, char** argv)
 	painter.drawText(QPoint(32, 330), "Developed by HiX Inc.");
 	QSplashScreen* splash = new QSplashScreen(pixmap);
 	splash->show();
-	auto& engine = Hix::Application::ApplicationManager::getInstance().engine();
-	engine.load(QUrl(QStringLiteral("qrc:/Qml/main.qml")));
-	qmlManager = new QmlManager();
+
 	// update module codes
 	UpdateChecker* up = new UpdateChecker();
 	up->checkForUpdates();
+
+	//login
+	QObject* loginWindow, *loginButton;
+	Hix::QML::getItemByID(appManager.getWindowRoot(), loginWindow, "loginWindow");
+	Hix::QML::getItemByID(appManager.getWindowRoot(), loginButton, "loginButton");
+	httpreq* hr = new httpreq(loginWindow, loginButton);
+
 	splash->close();
 
 #if  defined(QT_DEBUG) || defined(_DEBUG)

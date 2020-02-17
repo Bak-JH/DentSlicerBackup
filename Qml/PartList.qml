@@ -1,8 +1,9 @@
 import QtQuick 2.6
 import hix.qml 1.0 as Hix
-import QtQuick.Controls 2.1 //1.4
+import QtQuick.Controls 2.12
 import QtQuick.Controls.Styles 1.4
 import QtGraphicalEffects 1.12
+import QtQuick.Layouts 1.12
 
 Hix.PartList {
 	id: partList

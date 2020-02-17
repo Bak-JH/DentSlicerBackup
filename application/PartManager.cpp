@@ -110,3 +110,4 @@ void Hix::Application::PartManagerLoader::init(PartManager& manager, Qt3DCore::Q
 	Hix::QML::getItemByID(Hix::Application::ApplicationManager::getInstance().getUIRoot(), manager._partList, "partList");
 
 }
+                                                                                                                       

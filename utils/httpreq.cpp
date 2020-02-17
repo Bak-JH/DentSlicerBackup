@@ -10,14 +10,14 @@
 #include "qmlmanager.h"
 #include <QCryptographicHash>
 
-httpreq::httpreq()
+httpreq::httpreq(QObject* loginWindow, QObject* loginButton): _loginWindow(loginWindow), _loginButton(loginButton)
 {
     main_url = "http://18.184.77.105:8014/";
 
     manager = new QNetworkAccessManager();
 
     this->connect(manager, SIGNAL(finished(QNetworkReply*)), SLOT(replyFinished(QNetworkReply*)));
-
+    QObject::connect(_loginButton, SIGNAL(loginTrial(QString)), this, SLOT(get_iv(QString)));
     get_csrf_token();
 }
 
@@ -76,7 +76,7 @@ void httpreq::replyFinished(QNetworkReply *reply)
 
         qDebug() << "authorized";
 
-        QMetaObject::invokeMethod(qmlManager->loginButton, "loginSuccess");
+        QMetaObject::invokeMethod(_loginButton, "loginSuccess");
     } else if (strstr(req_reply, "csrftoken")){ // sets session cookie and csrf token
         QVariant cookieVar = reply->header(QNetworkRequest::SetCookieHeader);
         if (cookieVar.isValid()) {
@@ -101,19 +101,19 @@ void httpreq::replyFinished(QNetworkReply *reply)
         //QMessageBox::information(w, "암호화 에러", "서버에서 요청을 거부했습니다.");
         qDebug() << "violation occured";
 
-        QMetaObject::invokeMethod(qmlManager->loginButton, "loginFail");
+        QMetaObject::invokeMethod(_loginButton, "loginFail");
 
         // open login
-        qmlManager->loginWindow->setProperty("visible",true);
+        _loginWindow->setProperty("visible",true);
     } else {
         get_csrf_token();
         //QMessageBox::information(w, "암호화 에러", "서버에서 요청을 처리할 수 없습니다.");
         qDebug() << "some error on http_req" << encoded << req_reply;
 
-        QMetaObject::invokeMethod(qmlManager->loginButton, "loginFail");
+        QMetaObject::invokeMethod(_loginButton, "loginFail");
 
         // open login
-        qmlManager->loginWindow->setProperty("visible",true);
+        _loginWindow->setProperty("visible",true);
     }
 
 }
@@ -305,7 +305,7 @@ void httpreq::check_stored_serial(){
     }
     else {
         // open login
-        qmlManager->loginWindow->setProperty("visible",true);
+        _loginWindow->setProperty("visible",true);
     }
 
 }

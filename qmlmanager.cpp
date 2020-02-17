@@ -45,7 +45,7 @@
 #include "feature/sliceExport.h"
 #include "feature/UndoRedo.h"
 #include "feature/stlexport.h"
-
+#include "qml/util/QMLUtil.h"
 #include "render/CircleMeshEntity.h"
 
 
@@ -55,111 +55,37 @@ using namespace Hix::UI;
 using namespace Hix::Render;
 using namespace Hix::Tasking;
 using namespace Hix::Features;
-
-
-QObject* FindItemByName(QList<QObject*> nodes, const QString& name);
-QObject* FindItemByName(QQmlApplicationEngine* engine, const QString& name);
+using namespace Hix::QML;
 
 
 QmlManager::QmlManager(QObject *parent) : QObject(parent), _optBackend(this, scfg)
-	, _cursorEraser(QPixmap(":/Resource/cursor_eraser.png")), _currentMode(nullptr), viewMode(0)
+	, _cursorEraser(QPixmap(":/Resource/cursor_eraser.png")), _currentMode(nullptr),
+	_bed(Hix::Application::ApplicationManager::getInstance().getEntityRoot())
 {
-	auto engine =  &Hix::Application::ApplicationManager::getInstance().engine();
-	featureArea = dynamic_cast<QQuickItem*>(FindItemByName(engine, "featureArea"));
-	partList = dynamic_cast<QQuickItem*>(FindItemByName(engine, "partlist"));
-	mainWindow = FindItemByName(engine, "mainWindow");
-	loginWindow = FindItemByName(engine, "loginWindow");
-	loginButton = FindItemByName(engine, "loginButton");
-	mv = dynamic_cast<QEntity*> (FindItemByName(engine, "MainView"));
+	auto root =  Hix::Application::ApplicationManager::getInstance().getWindowRoot();
+	getItemByName(root, featureArea, "featureArea");
+	getItemByName(root, mainWindow, "mainWindow");
+	getItemByName(root, mv, "MainView");
 	QMetaObject::invokeMethod(mv, "initCamera");
-
 	//initialize ray casting mouse input controller
-	QEntity* camera = dynamic_cast<QEntity*>(FindItemByName(engine, "cm"));
+	QEntity* camera;
+	getItemByName(root, camera, "cm");
 	_rayCastController.initialize(camera);
-
-	auto models = (QEntity*)FindItemByName(engine, "Models");
+	QEntity* models;
+	getItemByID(root, models, "models");
 	Lights* lights = new Lights(models);
-	systemTransform = (Qt3DCore::QTransform*) FindItemByName(engine, "systemTransform");
-	mttab = (QEntity*)FindItemByName(engine, "mttab");
-
-	total = dynamic_cast<QEntity*> (FindItemByName(engine, "total"));
-	_camera = dynamic_cast<Qt3DRender::QCamera*> (FindItemByName(engine, "camera"));
+	getItemByName(root, systemTransform, "systemTransform");
+	getItemByName(root, total, "total");
+	getItemByName(root, _camera, "camera");
 
 	_supportRaftManager.initialize(models);
 #ifdef _DEBUG
 	Hix::Debug::DebugRenderObject::getInstance().initialize(models);
 #endif
-
-
-
-
-	undoRedoButton = FindItemByName(engine, "undoRedoButton");
-	slicingData = FindItemByName(engine, "slicingData");
-
-
-	_optBackend.createSlicingOptControls();
-
-
-
-
-	QObject::connect(mttab, SIGNAL(runGroupFeature(int, QString, double, double, double, QVariant)), this, SLOT(runGroupFeature(int, QString, double, double, double, QVariant)));
-
-
-
-	boxUpperTab = FindItemByName(engine, "boxUpperTab");
-	boxLeftTab = FindItemByName(engine, "boxLeftTab");
-	scene3d = dynamic_cast<QQuickItem*> (FindItemByName(engine, "scene3d"));
-
-	QObject::connect(boxUpperTab, SIGNAL(runGroupFeature(int, QString, double, double, double, QVariant)), this, SLOT(runGroupFeature(int, QString, double, double, double, QVariant)));
-
-	QObject::connect(this, SIGNAL(arrangeDone(std::vector<QVector3D>, std::vector<float>)), this, SLOT(applyArrangeResult(std::vector<QVector3D>, std::vector<float>)));
-
-
-
-	httpreq* hr = new httpreq();
-	QObject::connect(loginButton, SIGNAL(loginTrial(QString)), hr, SLOT(get_iv(QString)));
-
-
-	QObject::connect(mv, SIGNAL(copy()), this, SLOT(copyModel()));
-	QObject::connect(mv, SIGNAL(paste()), this, SLOT(pasteModel()));
-	QObject::connect(mv, SIGNAL(groupSelectionActivate(bool)), this, SLOT(groupSelectionActivate(bool)));
-	QObject::connect(mv, SIGNAL(cameraViewChanged()), this, SLOT(cameraViewChanged()));
-
+	//_optBackend.createSlicingOptControls();
 	//init settings
-	_bed.drawBed();
 
 }
-
-
-GLModel* QmlManager::getModelByID(int ID)
-{
-	for (auto& modelItr : glmodels)
-	{
-		if (modelItr.first->ID() == ID)
-			return modelItr.first;
-	}
-
-	return nullptr;
-}
-
-
-
-void QmlManager::addToGLModels(GLModel* target)
-{
-	if (target)
-	{
-		glmodels[target] = std::move(std::unique_ptr<GLModel>(target));
-	}
-}
-
-void QmlManager::addToGLModels(std::unique_ptr<GLModel>&& target)
-{
-	if (target)
-	{
-		glmodels[target.get()] = std::move(target);
-	}
-}
-
 
 QString QmlManager::getVersion(){
     return QString::fromStdString(settings().deployInfo.version);
@@ -489,28 +415,6 @@ void QmlManager::cameraViewChanged()
 //
 
 
-QObject* FindItemByName(QList<QObject*> nodes, const QString& name)
-{
-    for(int i = 0; i < nodes.size(); i++){
-        // search for node
-        if (nodes.at(i) && nodes.at(i)->objectName() == name){
-            return dynamic_cast<QObject*>(nodes.at(i));
-        }
-        // search in children
-        else if (nodes.at(i) && nodes.at(i)->children().size() > 0){
-            QObject* item = FindItemByName(nodes.at(i)->children(), name);
-            if (item)
-                return item;
-        }
-    }
-    // not found
-    return NULL;
-}
-
-QObject* FindItemByName(QQmlApplicationEngine* engine, const QString& name)
-{
-	return FindItemByName(engine, name);
-}
 
 //void QmlManager::unselectPart(GLModel* target)
 //{
@@ -541,7 +445,7 @@ QObject* FindItemByName(QQmlApplicationEngine* engine, const QString& name)
 QVector2D QmlManager::world2Screen(QVector3D target) {
 	QVariant value;
 	qRegisterMetaType<QVariant>("QVariant");
-	QMetaObject::invokeMethod(mttab, "world2Screen", Qt::DirectConnection, Q_RETURN_ARG(QVariant, value),
+	QMetaObject::invokeMethod(mainWindow, "world2Screen", Qt::DirectConnection, Q_RETURN_ARG(QVariant, value),
 		Q_ARG(QVariant, target));
 	QVector2D result = qvariant_cast<QVector2D>(value);
 	return result;
