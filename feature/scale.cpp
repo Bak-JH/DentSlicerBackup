@@ -40,7 +40,9 @@ void Hix::Features::ScaleMode::apply()
 
 Hix::Features::Scale::Scale(GLModel* targetModel, QVector3D& scale)
 	: _model(targetModel), _scale(scale)
-{}
+{
+	_progress.setDisplayText("Scale Model");
+}
 
 Hix::Features::Scale::~Scale()
 {

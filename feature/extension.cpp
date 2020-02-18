@@ -107,7 +107,7 @@ Hix::Features::Extend::Extend(GLModel* targetModel, const QVector3D& targetFaceN
 								const std::unordered_set<FaceConstItr>& targetFaces, double distance)
 	: _model(targetModel), _normal(targetFaceNormal), _extensionFaces(targetFaces), _distance(distance)
 {
-
+	_progress.setDisplayText("Extending Mesh");
 }
 
 Hix::Features::Extend::~Extend()

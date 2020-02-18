@@ -60,11 +60,13 @@ Hix::Features::FeatureContainerFlushSupport* Hix::Features::RotateMode::applyRot
 }
 
 Hix::Features::Rotate::Rotate(GLModel* target) : _model(target)
-{}
+{
+	_progress.setDisplayText("Rotate Model");
+}
 
 Hix::Features::Rotate::Rotate(GLModel* target, const QQuaternion& rot) : _model(target), _rot(rot)
 {
-
+	_progress.setDisplayText("Rotate Model");
 }
 
 Hix::Features::Rotate::~Rotate()

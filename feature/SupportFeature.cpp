@@ -10,7 +10,9 @@
 ///  Add Support  ///
 /////////////////////
 Hix::Features::AddSupport::AddSupport(const OverhangDetect::Overhang& overhang):_overhang(overhang)
-{}
+{
+
+}
 
 Hix::Features::AddSupport::~AddSupport()
 {}

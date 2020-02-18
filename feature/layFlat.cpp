@@ -42,6 +42,7 @@ void Hix::Features::LayFlatMode::apply()
 
 Hix::Features::LayFlat::LayFlat(GLModel* selectedModel, QVector3D normal) : _model(selectedModel), _normal(normal)
 {
+	_progress.setDisplayText("Lay Flat Model");
 }
 
 void Hix::Features::LayFlat::undoImpl()
