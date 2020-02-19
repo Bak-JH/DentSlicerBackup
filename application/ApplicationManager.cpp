@@ -6,6 +6,7 @@
 #include <deque>
 #include <qqmlcontext.h>
 #include "../Qml/components/PrintInfo.h"
+#include "../input/raycastcontroller.h"
 using namespace Hix::Application;
 using namespace Hix::QML;
 template<typename QType>
@@ -63,6 +64,8 @@ void Hix::Application::ApplicationManager::init()
 	getItemByID(_windowRoot, _uiRoot, "uiRoot");
 	getItemByID(_windowRoot, _sceneRoot, "sceneRoot");
 	getItemByID(_windowRoot, _entityRoot, "total");
+	getItemByID(_windowRoot, _scene3D, "scene3d");
+
 	Qt3DCore::QEntity* partRoot = nullptr;
 	getItemByID(_sceneRoot, partRoot, "models");
 	QQuickItem* modalItem;
@@ -71,7 +74,6 @@ void Hix::Application::ApplicationManager::init()
 	ModalDialogManagerLoader::init(_modalManager, modalItem);
 	QQuickItem* printInfoQ;
 	getItemByID(_windowRoot, printInfoQ, "printInfo");
-
 	_printInfo = dynamic_cast<Hix::QML::PrintInfo*>(printInfoQ);
 
 }
@@ -86,9 +88,19 @@ QQuickItem* Hix::Application::ApplicationManager::getWindowRoot() const
 	return _windowRoot;
 }
 
+QQuickItem* Hix::Application::ApplicationManager::getScene3D() const
+{
+	return _scene3D;
+}
+
 Qt3DCore::QEntity* Hix::Application::ApplicationManager::getEntityRoot() const
 {
 	return _entityRoot;
+}
+
+Qt3DCore::QEntity* Hix::Application::ApplicationManager::getSceneRoot() const
+{
+	return _sceneRoot;
 }
 
 PartManager& Hix::Application::ApplicationManager::partManager()

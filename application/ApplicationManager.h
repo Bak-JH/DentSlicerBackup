@@ -31,8 +31,10 @@ namespace Hix
 			void init();
 			QQuickItem* getUIRoot()const;
 			QQuickItem* getWindowRoot()const;
+			QQuickItem* getScene3D()const;
 			//TODO: temp
 			Qt3DCore::QEntity* getEntityRoot()const;
+			Qt3DCore::QEntity* getSceneRoot()const;
 
 			PartManager& partManager();
 			ModalDialogManager& modalDialogManager();
@@ -47,6 +49,7 @@ namespace Hix
 			Qt3DCore::QEntity* _sceneRoot;
 			//root for all mesh entities including 3D uis TODO:TEMP
 			Qt3DCore::QEntity* _entityRoot;
+			QQuickItem* _scene3D;
 
 			//root container of qquickitems in the MAIN application
 			QQuickItem* _uiRoot;
