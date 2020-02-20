@@ -48,7 +48,7 @@ namespace Hix
 			void featureEnded()override;
 			QVector3D getWidgetPosition()override;
 			std::unordered_set<GLModel*>& models();
-			Hix::Features::FeatureContainerFlushSupport* applyRotate(const QQuaternion& rot);
+			void apply()override;
 
 		protected:
 			Hix::Features::FeatureContainerFlushSupport* _rotateContainer;
