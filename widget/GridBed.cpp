@@ -4,7 +4,6 @@
 #include "../render/LineMeshEntity.h"
 #include "../render/PlaneMeshEntity.h"
 #include "../feature/Shapes2D.h"
-#include "../qmlmanager.h"
 using namespace Hix;
 using namespace Hix::Render;
 using namespace Hix::Settings;
@@ -12,7 +11,7 @@ using namespace Hix::UI;
 constexpr float LOGO_MARGIN = 2;
 constexpr float CIRCLE_SEG_CNT = 40;
 constexpr float GRID_Z_OFFSET = std::numeric_limits<float>::epsilon() * 100;
-Hix::UI::GridBed::GridBed(Qt3DCore::QEntity* parent): _parent(parent)
+Hix::UI::GridBed::GridBed(Qt3DCore::QEntity* parent)
 {
 	_logo.reset(new Qt3DCore::QEntity());
 	Qt3DRender::QMesh* mesh = new Qt3DRender::QMesh();
