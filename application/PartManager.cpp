@@ -4,6 +4,7 @@
 #include "../Qml/util/QMLUtil.h"
 #include "../Qml/components/PrintInfo.h"
 #include "../glmodel.h"
+#include <qquickitem.h>
 Hix::Application::PartManager::PartManager()
 {
 }
@@ -104,10 +105,9 @@ Qt3DCore::QEntity* Hix::Application::PartManager::modelRoot()
 	return _root;
 }
 
-void Hix::Application::PartManagerLoader::init(PartManager& manager, Qt3DCore::QEntity* entity)
+void Hix::Application::PartManagerLoader::init(PartManager& manager, QObject* root)
 {
-	manager._root = entity;
-	Hix::QML::getItemByID(Hix::Application::ApplicationManager::getInstance().getUIRoot(), manager._partList, "partList");
-
+	Hix::QML::getItemByID(root, manager._root, "models");
+	Hix::QML::getItemByID(root, manager._partList, "partList");
 }
                                                                                                                        

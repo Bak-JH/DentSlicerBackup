@@ -35,7 +35,4 @@ void Hix::QML::FeatureMenu::componentComplete()
 	getItemByID(this, _featureItems, "featureItems");
 	Hix::Features::FeaturesLoader loader(&Hix::Application::ApplicationManager::getInstance().engine(), this);
 	loader.loadFeatureButtons();
-	//TODO: temp, move this to license manager and application loader
-	
-
 }

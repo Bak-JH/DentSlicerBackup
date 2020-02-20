@@ -7,39 +7,22 @@
 #include <qqmlcontext.h>
 #include "../Qml/components/PrintInfo.h"
 #include "../input/raycastcontroller.h"
+
+//debug
+#include <QDebug>
+//for absolute correctness
+#ifdef _DEBUG
+//#define _STRICT_DEBUG
+#include "common/debugging/DebugRenderObject.h"
+#endif
+
 using namespace Hix::Application;
 using namespace Hix::QML;
-template<typename QType>
-void findItem(QObject* start, QType*& found, const QString& id)
+using namespace Hix::Input;
+
+Hix::Application::ApplicationManager::ApplicationManager(): _optBackend(this, scfg)
 {
-	std::unordered_map<std::string, QType*> map;
-	std::deque<QObject*> s;
-	s.emplace_back(start);
-
-	while (!s.empty())
-	{
-		auto curr = s.front();
-		s.pop_front();
-
-		auto neighbors = curr->children();
-		for (auto& each : neighbors)
-		{
-			auto inputControl = dynamic_cast<QObject*>(each);
-			if (inputControl)
-			{
-				auto context = qmlContext(each);
-				if (context && context->nameForObject(curr) == id)
-				{
-					found = dynamic_cast<QType*>(curr);
-					return;
-				}
-			}
-			s.emplace_back(each);
-		}
-	}
-	throw std::runtime_error("findItem failed");
 }
-
 
 QQmlApplicationEngine& Hix::Application::ApplicationManager::engine()
 {
@@ -48,30 +31,24 @@ QQmlApplicationEngine& Hix::Application::ApplicationManager::engine()
 
 void Hix::Application::ApplicationManager::init()
 {
-	//auto root = _engine.rootObjects().first();
-	//findItem(root, _uiRoot, "uiRoot");
-	//findItem(root, _sceneRoot, "sceneRoot");
-	//Qt3DCore::QEntity* partRoot = nullptr;
-	//findItem(_sceneRoot, partRoot, "models");
-	//QQuickItem* modalItem;
-	//findItem(root, modalItem, "dialogItem");
-	//PartManagerLoader::init(_partManager, partRoot);
-	//ModalDialogManagerLoader::init(_modalManager, modalItem);
-	//QQuickItem* printInfoQ;
-	//findItem(root, printInfoQ, "printinfo");
 	_windowRoot = dynamic_cast<QQuickItem*>(_engine.rootObjects().first());
 
 	getItemByID(_windowRoot, _uiRoot, "uiRoot");
-	getItemByID(_windowRoot, _sceneRoot, "sceneRoot");
 	getItemByID(_windowRoot, _entityRoot, "total");
 	getItemByID(_windowRoot, _scene3D, "scene3d");
-
-	Qt3DCore::QEntity* partRoot = nullptr;
-	getItemByID(_sceneRoot, partRoot, "models");
+	getItemByID(_windowRoot, _featureArea, "featureArea");
+	//other singleton managers
 	QQuickItem* modalItem;
 	getItemByID(_windowRoot, modalItem, "dialogItem");
-	PartManagerLoader::init(_partManager, partRoot);
+	SceneManagerLoader::init(_sceneManager, _uiRoot);
+	PartManagerLoader::init(_partManager, _uiRoot);
 	ModalDialogManagerLoader::init(_modalManager, modalItem);
+	RayCastControllerLoader::init(_rayCastController, _sceneManager.root());
+	_supportRaftManager.initialize(_partManager.modelRoot());
+#ifdef _DEBUG
+	Hix::Debug::DebugRenderObject::getInstance().initialize(_partManager.modelRoot());
+#endif
+	//print info
 	QQuickItem* printInfoQ;
 	getItemByID(_windowRoot, printInfoQ, "printInfo");
 	_printInfo = dynamic_cast<Hix::QML::PrintInfo*>(printInfoQ);
@@ -98,11 +75,6 @@ Qt3DCore::QEntity* Hix::Application::ApplicationManager::getEntityRoot() const
 	return _entityRoot;
 }
 
-Qt3DCore::QEntity* Hix::Application::ApplicationManager::getSceneRoot() const
-{
-	return _sceneRoot;
-}
-
 PartManager& Hix::Application::ApplicationManager::partManager()
 {
 	return _partManager;
@@ -112,6 +84,32 @@ ModalDialogManager& Hix::Application::ApplicationManager::modalDialogManager()
 {
 	return _modalManager;
 }
+
+Hix::Input::RayCastController& Hix::Application::ApplicationManager::getRayCaster()
+{
+	return _rayCastController;
+}
+
+const Hix::Settings::AppSetting& Hix::Application::ApplicationManager::settings() const
+{
+	return _setting;
+}
+
+Hix::Tasking::TaskManager& Hix::Application::ApplicationManager::taskManager()
+{
+	return _taskManager;
+}
+
+Hix::Support::SupportRaftManager& Hix::Application::ApplicationManager::supportRaftManager()
+{
+	return _supportRaftManager;
+}
+
+QString Hix::Application::ApplicationManager::getVersion() const
+{
+	return QString::fromStdString(settings().deployInfo.version);
+}
+
 
 void Hix::Application::ApplicationManager::stateChanged()
 {
