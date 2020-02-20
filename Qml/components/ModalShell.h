@@ -21,10 +21,11 @@ namespace Hix
 			Q_OBJECT
 				Q_PROPERTY(QString modalMessage MEMBER _msg NOTIFY modalmsgChanged)
 		public:
-			ModalShell(QQuickItem* parent, const std::string&msg, std::deque<ModalShellButtonArg>&& args);
 			ModalShell(QQuickItem* parent = nullptr);
 			virtual ~ModalShell();
 			void addButton(const std::string& buttonName, const QColor& color, const QColor& highlightColor, std::function<void()>&& functor);
+			void setButtonArgs(const std::string& message, std::deque<ModalShellButtonArg>&& args);
+			void setMessage(std::string& message);
 		signals:
 			void modalmsgChanged();
 

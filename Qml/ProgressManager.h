@@ -20,7 +20,5 @@ namespace Hix
 
 	private:
 		std::unique_ptr<Hix::QML::ProgressPopupShell> _popup;
-		QQmlComponent* _component;
-		std::deque<std::string> _featureList;
 	};
 }

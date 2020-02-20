@@ -72,7 +72,9 @@ QmlManager::QmlManager(QObject *parent) : QObject(parent), _optBackend(this, scf
 	//initialize ray casting mouse input controller
 	QEntity* camera;
 	getItemByName(root, camera, "cm");
-	_rayCastController.initialize(camera);
+	//_rayCastController.initialize(camera);
+	_rayCastController.initialize(mv);
+
 	QEntity* models;
 	getItemByID(root, models, "models");
 	Lights* lights = new Lights(models);
@@ -81,9 +83,6 @@ QmlManager::QmlManager(QObject *parent) : QObject(parent), _optBackend(this, scf
 	getItemByName(root, _camera, "camera");
 
 	_supportRaftManager.initialize(models);
-#ifdef _DEBUG
-	Hix::Debug::DebugRenderObject::getInstance().initialize(models);
-#endif
 	//_optBackend.createSlicingOptControls();
 	//init settings
 

@@ -51,22 +51,24 @@ std::unordered_set<GLModel*>& Hix::Features::RotateMode::models()
 	return _targetModels;
 }
 
-Hix::Features::FeatureContainerFlushSupport* Hix::Features::RotateMode::applyRotate(const QQuaternion& rot)
+void Hix::Features::RotateMode::apply()
 {
+	auto rotation = QQuaternion(QVector3D(_xValue->getValue(), _yValue->getValue(), _zValue->getValue()));
 	Hix::Features::FeatureContainerFlushSupport* container = new FeatureContainerFlushSupport(_targetModels);
+
 	for (auto& target : _targetModels)
-		container->addFeature(new Rotate(target, rot));
-	return container;
+		container->addFeature(new Rotate(target, rotation));
+
+	container->progress()->setDisplayText("Rotate Model");
+	qmlManager->taskManager().enqueTask(container);
 }
 
 Hix::Features::Rotate::Rotate(GLModel* target) : _model(target)
 {
-	_progress.setDisplayText("Rotate Model");
 }
 
 Hix::Features::Rotate::Rotate(GLModel* target, const QQuaternion& rot) : _model(target), _rot(rot)
 {
-	_progress.setDisplayText("Rotate Model");
 }
 
 Hix::Features::Rotate::~Rotate()

@@ -41,11 +41,12 @@ void Hix::Features::MoveMode::featureEnded()
 void Hix::Features::MoveMode::apply()
 {
 	auto to = QVector3D(_xValue->getValue(), _yValue->getValue(), _zValue->getValue());
-
 	Hix::Features::FeatureContainerFlushSupport* container = new FeatureContainerFlushSupport(_targetModels);
+	
 	for (auto& target : _targetModels)
 		container->addFeature(new Move(target, to));
 
+	container->progress()->setDisplayText("Move Model");
 	qmlManager->taskManager().enqueTask(container);
 }
 
@@ -75,12 +76,10 @@ void Hix::Features::MoveMode::modelMove(QVector3D displacement)
 
 Hix::Features::Move::Move(GLModel* target, const QVector3D& to) : _model(target), _to(to)
 {
-	_progress.setDisplayText("Move Model");
 }
 
 Hix::Features::Move::Move(GLModel* target) : _model(target)
 {
-	_progress.setDisplayText("Move Model");
 }
 
 Hix::Features::Move::~Move()

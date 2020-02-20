@@ -7,9 +7,6 @@
 #include "../util/QMLUtil.h"
 #include "glmodel.h"
 using namespace  Hix::QML;
-Hix::QML::ModalShell::ModalShell(QQuickItem* parent, const std::string& msg, std::deque<ModalShellButtonArg>&& args): QQuickItem(parent), _msg(QString::fromStdString(msg)), _buttonArgs(args)
-{
-}
 Hix::QML::ModalShell::ModalShell(QQuickItem* parent) : QQuickItem(parent)
 {
 }
@@ -28,11 +25,12 @@ void Hix::QML::ModalShell::addButton(const std::string& buttonName, const QColor
 	rect->setParentItem(_buttonArea);
 }
 
-//void Hix::QML::ModalShell::setMessage(std::string message)
-//{
-//	_modalmsg = QString::fromStdString(message);
-//	emit modalmsgChanged();
-//}
+void Hix::QML::ModalShell::setButtonArgs(const std::string& message, std::deque<ModalShellButtonArg>&& args)
+{
+	_msg.fromStdString(message);
+	_buttonArgs = std::move(args);
+	//emit modalmsgChanged();
+}
 
 void Hix::QML::ModalShell::componentComplete()
 {

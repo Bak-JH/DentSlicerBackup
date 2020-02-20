@@ -11,12 +11,10 @@ using namespace  Hix::QML;
 
 Hix::QML::FeaturePopupShell::FeaturePopupShell(QQuickItem* parent) : QQuickItem(parent)
 {
-	qDebug() << "created feature";
 }
 
 Hix::QML::FeaturePopupShell::~FeaturePopupShell()
 {
-	qDebug() << "deleted feature";
 }
 void Hix::QML::FeaturePopupShell::componentComplete()
 {
@@ -57,7 +55,7 @@ Hix::QML::ProgressPopupShell::ProgressPopupShell(QQuickItem* parent) : QQuickIte
 
 Hix::QML::ProgressPopupShell::~ProgressPopupShell()
 {
-	qDebug() << "deleted feature";
+	qDebug() << "deleted progress";
 }
 
 void Hix::QML::ProgressPopupShell::appendFeature(std::string featureName)

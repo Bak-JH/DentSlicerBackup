@@ -7,6 +7,9 @@
 #include <qqmlcontext.h>
 #include "../Qml/components/PrintInfo.h"
 #include "../input/raycastcontroller.h"
+#ifdef _DEBUG
+#include "common/debugging/DebugRenderObject.h"
+#endif
 using namespace Hix::Application;
 using namespace Hix::QML;
 template<typename QType>
@@ -68,14 +71,17 @@ void Hix::Application::ApplicationManager::init()
 
 	Qt3DCore::QEntity* partRoot = nullptr;
 	getItemByID(_sceneRoot, partRoot, "models");
-	QQuickItem* modalItem;
-	getItemByID(_windowRoot, modalItem, "dialogItem");
+	QQuickItem* popupArea;
+	getItemByID(_windowRoot, popupArea, "popupArea");
 	PartManagerLoader::init(_partManager, partRoot);
-	ModalDialogManagerLoader::init(_modalManager, modalItem);
+	ModalDialogManagerLoader::init(_modalManager, popupArea);
 	QQuickItem* printInfoQ;
 	getItemByID(_windowRoot, printInfoQ, "printInfo");
 	_printInfo = dynamic_cast<Hix::QML::PrintInfo*>(printInfoQ);
 
+#ifdef _DEBUG
+	Hix::Debug::DebugRenderObject::getInstance().initialize(_partManager.modelRoot());
+#endif
 }
 
 QQuickItem* Hix::Application::ApplicationManager::getUIRoot()const
