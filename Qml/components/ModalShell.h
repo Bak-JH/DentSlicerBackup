@@ -19,13 +19,14 @@ namespace Hix
 		class ModalShell : public QQuickItem, public ControlOwner
 		{
 			Q_OBJECT
-				Q_PROPERTY(QString modalMessage MEMBER _msg NOTIFY modalmsgChanged)
+			Q_PROPERTY(QString modalMessage MEMBER _msg NOTIFY modalmsgChanged)
+
 		public:
 			ModalShell(QQuickItem* parent = nullptr);
 			virtual ~ModalShell();
-			void addButton(const std::string& buttonName, const QColor& color, const QColor& highlightColor, std::function<void()>&& functor);
-			void setButtonArgs(const std::string& message, std::deque<ModalShellButtonArg>&& args);
-			void setMessage(std::string& message);
+			void addButton(std::deque<ModalShellButtonArg>&& args);
+			void setMessage(const std::string& message);
+			Controls::Button& closeButton();
 		signals:
 			void modalmsgChanged();
 
@@ -34,6 +35,7 @@ namespace Hix
 			QQuickItem* getQItem()override;
 			QString _msg;
 			QQuickItem* _buttonArea;
+			Controls::Button* _closeButton = nullptr;
 			std::deque<ModalShellButtonArg> _buttonArgs;
 
 		};

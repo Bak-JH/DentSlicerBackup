@@ -78,10 +78,10 @@
         <file>Qml/FeaturePopup/PopupShellOffset.qml</file>
         <file>Qml/FeaturePopup/PopupSupport.qml</file>
         <file>Qml/CoordinateMesh.qml</file>
-        <file>Qml/ModalWindowButton.qml</file>
         <file>Qml/ProgressException.qml</file>
         <file>Qml/Controls/CtrToggleImgSwitch.qml</file>
         <file>Qml/ProgressItem.qml</file>
         <file>Qml/PartListItem.qml</file>
+        <file>Qml/ModalWindowButton.qml</file>
     </qresource>
 </RCC>

@@ -9,34 +9,12 @@ Hix.ModalShell {
 	id: root
 	width: 420
 	height: 240
-	property var buttonsWidth: 320
-	property var buttonSpace: 32
-	property alias contentArea: contentArea
-
-	function setButtons(buttonSet)
-	{
-		for(var button in buttonSet)
-		{
-			console.log(buttonSet[button])
-			var newBtn = Qt.createComponent("ModalWindowButton.qml");
-			var newBtnOption = 
-							newBtn.createObject(buttonarea,
-							{
-								// "id" : "button" + (button+1),
-								// "Layout.fillWidth" : true,
-								// "width" : (320 - (32 * (buttonSet.length - 1))) / buttonSet.length,
-								"btnText" : buttonSet[button][0],
-								"defaultColor" : buttonSet[button][1],
-								"hoverColor" : buttonSet[button][2]
-							});
-		}
-	}
 
 	MouseArea {
 		id: blockingArea
 		width: window.width
 		height: window.height
-		anchors.fill: window
+		//anchors.fill: window
 		propagateComposedEvents: false
         hoverEnabled: true
         preventStealing: true
@@ -76,6 +54,15 @@ Hix.ModalShell {
 			anchors.bottomMargin: closeButton.height * 0.4
 			anchors.left: buttonarea.left
 			anchors.right: buttonarea.right
+
+			Text {
+				id:contentText
+				text: root.modalMessage
+				font.family: openRegular.name
+				font.pointSize: 10
+				anchors.horizontalCenter: parent.horizontalCenter
+				anchors.verticalCenter: parent.verticalCenter
+			}
 		}
 		
 		RowLayout {
@@ -83,53 +70,11 @@ Hix.ModalShell {
 			width: 320
 			height: 32
 			spacing: 32
+			// Layout.preferredWidth: 32
+            Layout.fillWidth: true
 			anchors.horizontalCenter: parent.horizontalCenter
 			anchors.bottom: parent.bottom
 			anchors.bottomMargin: parent.height * 0.2
-			/*
-			Hix.Button {
-				id: leftbtn
-				width: (buttonsWidth - buttonSpace) / 2
-				height: 32
-				radius: height / 2
-				color: "#00b9c8"	//themecolor
-				anchors.left: parent.left
-
-				Text {
-					anchors.horizontalCenter: parent.horizontalCenter
-					anchors.verticalCenter: parent.verticalCenter
-					color: "#FFFFFF"
-					font.pointSize: 10
-					text: "Apply"
-					font.family: openSemiBold.name
-				}
-				onClicked: { console.log("clicked"); }
-				onEntered: { color = "#21959e" }
-				onExited: { color = "#00b9c8" }
-			}
-			
-			Hix.Button {
-				id: rightbtn
-				width: buttonsWidth - leftbtn.width - buttonSpace
-				height: 32
-				radius: height / 2
-				color: "#abb3b3"	//themecolor
-				anchors.left: leftbtn.right
-				anchors.leftMargin: buttonSpace
-
-				Text {
-					anchors.horizontalCenter: parent.horizontalCenter
-					anchors.verticalCenter: parent.verticalCenter
-					color: "#FFFFFF"
-					font.pointSize: 10
-					text: "Apply"
-					font.family: openSemiBold.name
-				}
-				onClicked: { console.log(contentArea.height); root.setButtons([["Apply", "#00b9c8", "#21959e"], ["Cancel", "#abb3b3", "#8b9393"]]); }
-				onEntered: { color = "#8b9393" }
-				onExited: { color = "#abb3b3" }
-			}
-			*/
 		}
 	}
 
