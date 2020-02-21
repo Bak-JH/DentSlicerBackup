@@ -55,7 +55,6 @@ Hix::QML::ProgressPopupShell::ProgressPopupShell(QQuickItem* parent) : QQuickIte
 
 Hix::QML::ProgressPopupShell::~ProgressPopupShell()
 {
-	qDebug() << "deleted progress";
 }
 
 void Hix::QML::ProgressPopupShell::appendFeature(std::string featureName)

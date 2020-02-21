@@ -1,6 +1,6 @@
 import QtQuick 2.6
 import hix.qml 1.0 as Hix 
-Hix.Button 
+Hix.Button
 {
 	property string btnText;
 	property string hoverColor;
@@ -10,7 +10,6 @@ Hix.Button
 	height: 32
 	radius: height / 2
 	color: defaultColor
-	Layout.fillWidth: true
 
 	Text {
 		anchors.horizontalCenter: parent.horizontalCenter
@@ -20,7 +19,9 @@ Hix.Button
 		text: button.btnText
 		font.family: openSemiBold.name
 	}
+	
 	onClicked: { console.log("clicked"); }
 	onEntered: { button.color = hoverColor }
 	onExited: { button.color = defaultColor}
+	
 }
