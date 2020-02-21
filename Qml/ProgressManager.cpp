@@ -1,7 +1,7 @@
 #include "ProgressManager.h"
 #include "feature/interfaces/Progress.h"
 #include "../application/ApplicationManager.h"
-#include "qmlmanager.h"
+
 
 using namespace Hix::QML;
 

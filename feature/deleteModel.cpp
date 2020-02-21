@@ -1,6 +1,6 @@
 #include "deleteModel.h"
 #include "glmodel.h"
-#include "qmlmanager.h"
+
 #include "../application/ApplicationManager.h"
 using namespace Hix::Application;
 using namespace Qt3DCore;
