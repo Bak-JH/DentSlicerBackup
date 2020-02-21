@@ -4,7 +4,7 @@
 #include "feature/move.h"
 #include "support/RaftModel.h"
 #include "application/ApplicationManager.h"
-#include "qmlmanager.h"
+
 
 using namespace Hix::Features;
 using namespace Hix::Application;
