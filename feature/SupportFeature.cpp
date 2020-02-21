@@ -6,6 +6,8 @@
 #include "application/ApplicationManager.h"
 #include "qmlmanager.h"
 
+using namespace Hix::Features;
+using namespace Hix::Application;
 /////////////////////
 ///  Add Support  ///
 /////////////////////
@@ -183,6 +185,20 @@ Hix::Features::FeatureContainer* Hix::Features::SupportMode::clearSupport(const 
 		container->addFeature(new Move(model, QVector3D(0, 0, -Hix::Support::SupportRaftManager::supportRaftMinLength())));
 
 	return container;
+}
+
+void Hix::Features::SupportMode::regenerateRaft()
+{
+	Hix::Features::FeatureContainer* container = new FeatureContainer();
+	if (ApplicationManager::getInstance().supportRaftManager().raftActive())
+	{
+		//delete
+		container->addFeature(removeRaft());
+	}
+	//add
+	container->addFeature(generateRaft());
+	qmlManager->taskManager().enqueTask(container);
+
 }
 
 
