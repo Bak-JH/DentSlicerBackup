@@ -1,8 +1,4 @@
 
-#include "qmlmanager.h"
-QmlManager* qmlManager;
-
-
 
 #if defined(_DEBUG) || defined(QT_DEBUG )
 //run unit test?
@@ -71,8 +67,7 @@ int main(int argc, char** argv)
 	auto& engine = appManager.engine();
 	engine.load(QUrl(QStringLiteral("qrc:/Qml/main.qml")));
 	appManager.init();
-	qmlManager = new QmlManager();
-	qmlManager->_bed.drawBed();
+
 	/** Splash Image **/
 	QPixmap pixmap(":/Resource/splash_dentslicer.png");
 	QPainter painter(&pixmap);
@@ -80,7 +75,7 @@ int main(int argc, char** argv)
 	painter.setFont(QFont("Arial", 9));
 	painter.setPen(penHText);
 	painter.drawText(QPoint(32, 290), "Dental 3D Printing Solution");
-	painter.drawText(QPoint(32, 310), "Version " + qmlManager->getVersion());
+	painter.drawText(QPoint(32, 310), "Version " + Hix::Application::ApplicationManager::getInstance().getVersion());
 	painter.drawText(QPoint(32, 330), "Developed by HiX Inc.");
 	QSplashScreen* splash = new QSplashScreen(pixmap);
 	splash->show();
@@ -89,19 +84,18 @@ int main(int argc, char** argv)
 	UpdateChecker* up = new UpdateChecker();
 	up->checkForUpdates();
 
-	//login
-	QObject* loginWindow, *loginButton;
+	//login or make main window visible
+	QObject* loginWindow, *loginButton, *mainWindow;
 	Hix::QML::getItemByID(appManager.getWindowRoot(), loginWindow, "loginWindow");
 	Hix::QML::getItemByID(appManager.getWindowRoot(), loginButton, "loginButton");
+	Hix::QML::getItemByID(appManager.getWindowRoot(), mainWindow, "mainWindow");
 	httpreq* hr = new httpreq(loginWindow, loginButton);
-
-	splash->close();
-
 #if  defined(QT_DEBUG) || defined(_DEBUG)
-	qmlManager->mainWindow->setProperty("visible", true);
+	mainWindow->setProperty("visible", true);
 #else
-	qmlManager->loginWindow->setProperty("visible", true);
+	loginWindow->setProperty("visible", true);
 #endif
+	splash->close();
 	return app.exec();
 #endif
 

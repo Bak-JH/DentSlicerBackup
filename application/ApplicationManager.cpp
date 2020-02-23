@@ -20,7 +20,7 @@ using namespace Hix::Application;
 using namespace Hix::QML;
 using namespace Hix::Input;
 
-Hix::Application::ApplicationManager::ApplicationManager(): _optBackend(this, scfg)
+Hix::Application::ApplicationManager::ApplicationManager(): _optBackend(scfg)
 {
 }
 
@@ -55,25 +55,25 @@ void Hix::Application::ApplicationManager::init()
 
 }
 
-QQuickItem* Hix::Application::ApplicationManager::getUIRoot()const
-{
-	return _uiRoot;
-}
-
+//QQuickItem* Hix::Application::ApplicationManager::getUIRoot()const
+//{
+//	return _uiRoot;
+//}
+//
 QQuickItem* Hix::Application::ApplicationManager::getWindowRoot() const
 {
 	return _windowRoot;
 }
 
-QQuickItem* Hix::Application::ApplicationManager::getScene3D() const
-{
-	return _scene3D;
-}
+//QQuickItem* Hix::Application::ApplicationManager::getScene3D() const
+//{
+//	return _scene3D;
+//}
 
-Qt3DCore::QEntity* Hix::Application::ApplicationManager::getEntityRoot() const
-{
-	return _entityRoot;
-}
+//Qt3DCore::QEntity* Hix::Application::ApplicationManager::getEntityRoot() const
+//{
+//	return _entityRoot;
+//}
 
 PartManager& Hix::Application::ApplicationManager::partManager()
 {
@@ -83,6 +83,21 @@ PartManager& Hix::Application::ApplicationManager::partManager()
 ModalDialogManager& Hix::Application::ApplicationManager::modalDialogManager()
 {
 	return _modalManager;
+}
+
+SceneManager& Hix::Application::ApplicationManager::sceneManager()
+{
+	return _sceneManager;
+}
+
+FeatureManager& Hix::Application::ApplicationManager::featureManager()
+{
+	return _featureManager;
+}
+
+MouseCursorManager& Hix::Application::ApplicationManager::cursorManager()
+{
+	return _cursorManager;
 }
 
 Hix::Input::RayCastController& Hix::Application::ApplicationManager::getRayCaster()

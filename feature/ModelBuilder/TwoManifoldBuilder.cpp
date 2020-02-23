@@ -1,7 +1,7 @@
 #include "TwoManifoldBuilder.h"
 #include "../Shapes2D.h"
 #include "../../common/Debug.h"
-#include "../../qmlmanager.h"
+#include "../../glmodel.h"
 #include <cmath>
 #include "../addModel.h"
 #include "../repair/meshrepair.h"

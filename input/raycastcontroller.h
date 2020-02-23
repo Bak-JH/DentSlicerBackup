@@ -26,6 +26,10 @@ namespace Qt3DInput
 }
 namespace Hix
 {
+	namespace Application
+	{
+		class ApplicationManager;
+	}
 	namespace Input
 	{
 		class Draggable;

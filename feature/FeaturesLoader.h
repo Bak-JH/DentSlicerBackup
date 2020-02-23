@@ -1,6 +1,8 @@
 #pragma once
 #include <qqmlcomponent.h>
 #include <string>
+#include "../application/ApplicationManager.h"
+
 class QQuickItem;
 namespace Hix
 {
@@ -20,18 +22,18 @@ namespace Hix
 		{
 			static_assert(std::is_base_of<Hix::Features::Mode, ModeType>{});
 			std::function<void()> functor = [button]() {
-				if (!qmlManager->isFeatureActive())
+				if (!Hix::Application::ApplicationManager::getInstance().featureManager().isFeatureActive())
 				{
 					try
 					{
 						ModeType* newMode = new ModeType();
 						newMode->addButton(button);
-						qmlManager->setMode(newMode);
+						Hix::Application::ApplicationManager::getInstance().featureManager().setMode(newMode);
 					}
 					catch (...)
 					{
 						qDebug() << "mode creation failed";
-						qmlManager->setMode(nullptr);
+						Hix::Application::ApplicationManager::getInstance().featureManager().setMode(nullptr);
 					}
 
 				}

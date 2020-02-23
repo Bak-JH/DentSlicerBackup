@@ -1,7 +1,7 @@
 #include "rotate.h"
 #include "widget/RotateWidget.h"
 #include "application/ApplicationManager.h"
-#include "qmlmanager.h"
+#include "../glmodel.h"
 #include "../Qml/components/Inputs.h"
 const QUrl ROTATE_POPUP_URL = QUrl("qrc:/Qml/FeaturePopup/PopupRotate.qml");
 Hix::Features::RotateMode::RotateMode(): WidgetMode(), _targetModels(Hix::Application::ApplicationManager::getInstance().partManager().selectedModels()), DialogedMode(ROTATE_POPUP_URL)
@@ -32,7 +32,7 @@ void Hix::Features::RotateMode::featureStarted()
 void Hix::Features::RotateMode::featureEnded()
 {
 	if (!_rotateContainer->empty())
-		qmlManager->taskManager().enqueTask(_rotateContainer);
+		Hix::Application::ApplicationManager::getInstance().taskManager().enqueTask(_rotateContainer);
 	for (auto& each : _targetModels)
 	{
 		each->rotateDone();
@@ -82,7 +82,7 @@ void Hix::Features::Rotate::undoImpl()
 
 	_model->transform().setMatrix(_prevMatrix);
 	_model->aabb() = _prevAabb;
-	qmlManager->cameraViewChanged();
+	UpdateWidgetModePos();
 	_model->updateMesh();
 }
 
@@ -90,7 +90,7 @@ void Hix::Features::Rotate::redoImpl()
 {
 	_model->transform().setMatrix(_nextMatrix);
 	_model->aabb() = _nextAabb;
-	qmlManager->cameraViewChanged();
+	UpdateWidgetModePos();
 	_model->updateMesh();
 }
 
@@ -101,8 +101,8 @@ void Hix::Features::Rotate::runImpl()
 	if (_rot)
 	{
 		_model->rotateModel(_rot.value());
-		if (qmlManager->isActive<Hix::Features::WidgetMode>())
-			qmlManager->cameraViewChanged();
+		UpdateWidgetModePos();
+
 	}
 }
 

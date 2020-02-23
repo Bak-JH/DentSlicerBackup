@@ -1,11 +1,11 @@
 #include "WidgetMode.h"
-#include "qmlmanager.h"
+#include "application/ApplicationManager.h"
 #include "glmodel.h"
 
 Hix::Features::WidgetMode::WidgetMode()
-	: _controller(&qmlManager->getRayCaster()), _widget(this)
+	: _controller(&Hix::Application::ApplicationManager::getInstance().getRayCaster()), _widget(this)
 {
-	_widget.setParent(qmlManager->total);
+	_widget.setParent(Hix::Application::ApplicationManager::getInstance().sceneManager().total());
 	_controller->setHoverEnabled(true);
 	_widget.setVisible(true);
 }
@@ -19,12 +19,13 @@ void Hix::Features::WidgetMode::updatePosition()
 {
 	if (_widget.visible())
 	{
-		auto syszoom = qmlManager->systemTransform->scale3D();
+		auto sysTransform = Hix::Application::ApplicationManager::getInstance().sceneManager().systemTransform();
+		auto syszoom = sysTransform->scale3D();
 		auto transform = _widget.transform();
 		auto centre = getWidgetPosition();
 		transform->setScale3D(QVector3D(0.01 / syszoom.x(), 0.01 / syszoom.y(), 0.01 / syszoom.z()));
-		auto theta = qmlManager->systemTransform->rotationX() / 180.0 * M_PI;
-		auto alpha = qmlManager->systemTransform->rotationZ() / 180.0 * M_PI;
+		auto theta = sysTransform->rotationX() / 180.0 * M_PI;
+		auto alpha = sysTransform->rotationZ() / 180.0 * M_PI;
 		transform->setTranslation(QVector3D(
 			centre.x() + 100 * std::sin(theta) * std::sin(alpha),
 			centre.y() + 100 * std::sin(theta) * std::cos(alpha),
@@ -32,3 +33,11 @@ void Hix::Features::WidgetMode::updatePosition()
 	}
 }
 
+void Hix::Features::UpdateWidgetModePos()
+{
+	auto widgetMode = dynamic_cast<WidgetMode*>(Hix::Application::ApplicationManager::getInstance().featureManager().currentMode());
+	if (widgetMode)
+	{
+		widgetMode->updatePosition();
+	}
+}

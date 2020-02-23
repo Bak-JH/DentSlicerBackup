@@ -8,7 +8,7 @@
 #include "Buttons.h"
 
 #include "../../feature/deleteModel.h"
-#include "../../qmlmanager.h"
+
 #include "../application/ApplicationManager.h"
 #include "../feature/FeaturesLoader.h"
 #include "../feature/deleteModel.h"

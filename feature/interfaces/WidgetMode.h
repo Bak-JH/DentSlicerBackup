@@ -7,6 +7,7 @@ namespace Hix
 {
 	namespace Features
 	{
+		void UpdateWidgetModePos();
 		class WidgetMode : virtual public Mode
 		{
 		public:

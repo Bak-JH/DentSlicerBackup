@@ -6,7 +6,7 @@
 #include "cut/ZAxialCut.h"
 #include "deleteModel.h"
 #include "application/ApplicationManager.h"
-#include "qmlmanager.h"
+
 
 // offset shell with mm
 
@@ -15,7 +15,7 @@ using namespace Hix::Features;
 using namespace Hix::Features::Cut;
 const QUrl OFFSET_POPUP_URL = QUrl("qrc:/Qml/FeaturePopup/PopupShellOffset.qml");
 
-Hix::Features::ShellOffsetMode::ShellOffsetMode():_cuttingPlane(qmlManager->total), DialogedMode(OFFSET_POPUP_URL)
+Hix::Features::ShellOffsetMode::ShellOffsetMode():_cuttingPlane(Hix::Application::ApplicationManager::getInstance().sceneManager().total()), DialogedMode(OFFSET_POPUP_URL)
 {
 	auto& co = controlOwner();
 	co.getControl(_offsetValue, "offsetValue");

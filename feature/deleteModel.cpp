@@ -81,11 +81,11 @@ Hix::Features::DeleteModelMode::DeleteModelMode()
 			{
 				container->addFeature(new DeleteModel(model));
 			}
-			qmlManager->taskManager().enqueTask(container);
-			qmlManager->setMode(nullptr);
+			Hix::Application::ApplicationManager::getInstance().taskManager().enqueTask(container);
+			Hix::Application::ApplicationManager::getInstance().featureManager().setMode(nullptr);
 		},
 		[]() {
-			qmlManager->setMode(nullptr);
+			Hix::Application::ApplicationManager::getInstance().featureManager().setMode(nullptr);
 		}
 	);
 }

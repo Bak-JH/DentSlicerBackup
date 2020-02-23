@@ -3,7 +3,7 @@
 #include <qapplication.h>
 using namespace Hix::Application;
 
-Hix::Application::MouseCursorManager::MouseCursorManager(): _cursorEraser(QPixmap(":/Resource/cursor_eraser.png"))
+Hix::Application::MouseCursorManager::MouseCursorManager(): _cursorEraser(QPixmap(":/Resource/cursor_eraser.png")), _currentCursor(CursorType::Default)
 {
 }
 

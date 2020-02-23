@@ -1,5 +1,5 @@
 #include "CubeWidget.h"
-#include "qmlmanager.h"
+
 #include "input/raycastcontroller.h"
 #include "Widget3D.h"
 

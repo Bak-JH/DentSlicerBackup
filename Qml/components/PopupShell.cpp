@@ -62,7 +62,7 @@ Hix::QML::ProgressPopupShell::~ProgressPopupShell()
 
 void Hix::QML::ProgressPopupShell::appendFeature(std::string featureName)
 {
-	//QObject* listModel = FindItemByName(qmlManager->engine, "featureList");
+	//QObject* listModel = FindItemByName(Hix::Application::ApplicationManager::getInstance().engine, "featureList");
 	//QMetaObject::invokeMethod(listModel, "appendFeature", Q_ARG(QVariant, QString::fromStdString(featureName)));
 }
 

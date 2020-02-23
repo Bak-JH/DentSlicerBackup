@@ -2,7 +2,7 @@
 #include <qquickitem.h>
 
 #include "glmodel.h"
-#include "qmlmanager.h"
+
 
 #include "input/Draggable.h"
 #include "input/Hoverable.h"
@@ -71,7 +71,7 @@ bool RayCastController::hoverEnabled()const
 
 bool Hix::Input::RayCastController::mousePosInBound(const Qt3DInput::QMouseEvent* mv)
 {
-	auto sceneScreen = Hix::Application::ApplicationManager::getInstance().getScene3D();
+	auto sceneScreen = Hix::Application::ApplicationManager::getInstance().sceneManager().scene3d();
 	if (mv->x() >= 0 && mv->x() < sceneScreen->width() && mv->y() > 0 && mv->y() < sceneScreen->height())
 	{
 		return true;
@@ -140,7 +140,7 @@ void RayCastController::mouseReleased(Qt3DInput::QMouseEvent* mouse)
 	{
 		_mouseEvent = MouseEventData(mouse);
 		mouse->setAccepted(true);
-		qmlManager->resetCursor();
+		Hix::Application::ApplicationManager::getInstance().cursorManager().setCursor(Hix::Application::CursorType::Default);
 		_mouseBusy = false;
 
 		//if drag, stop dragging
