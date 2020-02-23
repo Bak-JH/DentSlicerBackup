@@ -19,6 +19,11 @@ void Hix::Application::ModalDialogManager::closeDialog()
 {
 }
 
+QQuickItem* Hix::Application::ModalDialogManager::popupArea()
+{
+	return _root;
+}
+
 void Hix::Application::ModalDialogManagerLoader::init(ModalDialogManager& manager, QQuickItem* entity)
 {
 	manager._root = entity;

@@ -9,6 +9,10 @@ Hix::Application::PartManager::PartManager()
 {
 }
 
+Hix::Application::PartManager::~PartManager()
+{
+}
+
 void Hix::Application::PartManager::addPart(std::unique_ptr<GLModel>&& model)
 {
 	auto raw = model.get();

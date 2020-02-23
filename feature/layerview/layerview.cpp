@@ -1,6 +1,8 @@
 #include "layerview.h"
-#include "../../qmlmanager.h"
+#include "../../application/ApplicationManager.h"
 #include "../sliceExport.h"
+#include "../cut/modelcut.h"
+#include "../../glmodel.h"
 using namespace Hix;
 using namespace Hix::Features;
 using namespace Hix::Features::Cut;
@@ -11,7 +13,7 @@ using namespace ClipperLib;
 
 
 Hix::Features::LayerView::LayerView(const std::unordered_set<GLModel*>& selectedModels, Hix::Engine3D::Bounds3D bound):
-	_models(selectedModels), _crossSectionPlane(qmlManager->total), _modelsBound(bound)
+	_models(selectedModels), _crossSectionPlane(Hix::Application::ApplicationManager::getInstance().sceneManager().total()), _modelsBound(bound)
 {
 	SlicingEngine::Result result;
 	SliceExport se(_models);
@@ -33,15 +35,15 @@ Hix::Features::LayerView::LayerView(const std::unordered_set<GLModel*>& selected
 		model->updateModelMesh();
 		model->meshMaterial().setParameterValue("fuckingStuipidWorldMatrix", QVariant::fromValue(model->toRootMatrix()));
 	}
-	//qmlManager->layerViewPopup->setProperty("visible", true);
-	//qmlManager->layerViewSlider->setProperty("visible", true);
-	//QMetaObject::invokeMethod(qmlManager->layerViewSlider, "setThickness", Q_ARG(QVariant, (scfg->layer_height)));
-	//QMetaObject::invokeMethod(qmlManager->layerViewSlider, "setHeight",
+	//Hix::Application::ApplicationManager::getInstance().layerViewPopup->setProperty("visible", true);
+	//Hix::Application::ApplicationManager::getInstance().layerViewSlider->setProperty("visible", true);
+	//QMetaObject::invokeMethod(Hix::Application::ApplicationManager::getInstance().layerViewSlider, "setThickness", Q_ARG(QVariant, (scfg->layer_height)));
+	//QMetaObject::invokeMethod(Hix::Application::ApplicationManager::getInstance().layerViewSlider, "setHeight",
 	//	Q_ARG(QVariant,	(_modelsBound.zMax() - _modelsBound.zMin() + scfg->raft_thickness + scfg->support_base_height)));
 
 	_crossSectionPlane.enablePlane(true);
 	//QVariant maxLayerCount;
-	//QMetaObject::invokeMethod(qmlManager->layerViewSlider, "getMaxLayer", Qt::DirectConnection, Q_RETURN_ARG(QVariant, maxLayerCount));
+	//QMetaObject::invokeMethod(Hix::Application::ApplicationManager::getInstance().layerViewSlider, "getMaxLayer", Qt::DirectConnection, Q_RETURN_ARG(QVariant, maxLayerCount));
 	//_maxLayer = maxLayerCount.toInt();
 	//crossSectionSliderSignal(_maxLayer);
 
@@ -54,8 +56,8 @@ Hix::Features::LayerView::~LayerView()
 		//model->changeViewMode(VIEW_MODE_OBJECT);
 		model->updateModelMesh();
 	}
-	//qmlManager->layerViewPopup->setProperty("visible", false);
-	//qmlManager->layerViewSlider->setProperty("visible", false);
+	//Hix::Application::ApplicationManager::getInstance().layerViewPopup->setProperty("visible", false);
+	//Hix::Application::ApplicationManager::getInstance().layerViewSlider->setProperty("visible", false);
 }
 
 void Hix::Features::LayerView::crossSectionSliderSignal(int value)

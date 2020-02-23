@@ -4,12 +4,13 @@
 #include "PartManager.h"
 #include "ModalDialogManager.h"
 #include "SceneManager.h"
+#include "FeatureManager.h"
 #include "../input/raycastcontroller.h"
 #include "../Settings/AppSetting.h"
 #include "../Tasking/TaskManager.h"
 #include "../slice/SlicingOptBackend.h"
 #include "../support/SupportRaftManager.h"
-
+#include "MouseCursorManager.h"
 class QQuickItem;
 namespace Qt3DCore
 {
@@ -35,18 +36,20 @@ namespace Hix
 
 			QQmlApplicationEngine& engine();
 			void init();
-			QQuickItem* getUIRoot()const;
-			QQuickItem* getWindowRoot()const;
-			QQuickItem* getScene3D()const;
+			//QQuickItem* getUIRoot()const;
+			//QQuickItem* getScene3D()const;
+			//Qt3DCore::QEntity* getEntityRoot()const;
 
 			//TODO: temp
-			Qt3DCore::QEntity* getEntityRoot()const;
 			void stateChanged();
 			//TODO: temp end
 
-
+			QQuickItem* getWindowRoot()const;
 			PartManager& partManager();
 			ModalDialogManager& modalDialogManager();
+			SceneManager& sceneManager();
+			FeatureManager& featureManager();
+			MouseCursorManager& cursorManager();
 			Hix::Input::RayCastController& getRayCaster();
 			const Hix::Settings::AppSetting& settings()const;
 			Hix::Tasking::TaskManager& taskManager();
@@ -59,9 +62,12 @@ namespace Hix
 			PartManager _partManager;
 			ModalDialogManager _modalManager;
 			SceneManager _sceneManager;
+			FeatureManager _featureManager;
+			MouseCursorManager _cursorManager;
 			Hix::Input::RayCastController _rayCastController;
 			Hix::Tasking::TaskManager _taskManager;
 			Hix::Support::SupportRaftManager _supportRaftManager;
+
 
 			Hix::Settings::AppSetting _setting;
 

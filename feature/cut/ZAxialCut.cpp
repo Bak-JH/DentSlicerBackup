@@ -1,6 +1,6 @@
 ﻿#include "ZAxialCut.h"
 #include "../../glmodel.h"
-#include "../../qmlmanager.h"
+
 #include "../../common/GTEngine/Include/Mathematics/GteSplitMeshByPlane.h"
 #include "feature/addModel.h"
 #include "feature/deleteModel.h"

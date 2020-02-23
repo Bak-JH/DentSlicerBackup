@@ -1,6 +1,6 @@
 #include "PPShaderMode.h"
 #include "../../glmodel.h"
-#include "../../qmlmanager.h"
+
 
 Hix::Features::PPShaderMode::PPShaderMode(const std::unordered_set<GLModel*>& selectedModels)
 	:_subjects(selectedModels), Mode()

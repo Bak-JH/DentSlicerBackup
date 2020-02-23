@@ -9,12 +9,11 @@ class SlicingOptBackend : public QObject
 {
 	Q_OBJECT
 public:
-	SlicingOptBackend(QmlManager* qmlManager, SlicingConfiguration* config);
+	SlicingOptBackend(SlicingConfiguration* config);
 	void createSlicingOptControls();
 public slots:
 	void onOptionChanged(QString, QVariant);
 private:
-	QmlManager* _qmlManager;
 	SlicingConfiguration* _config;
 	template<std::size_t arraySizeType>
 	void addOptionDialogCombo(QString opName, std::array<std::string_view, arraySizeType> content, int defaultVal);

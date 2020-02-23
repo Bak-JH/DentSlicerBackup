@@ -28,7 +28,7 @@ namespace Hix
 		{
 		public:
 			PartManager();
-
+			~PartManager();
 			PartManager(const PartManager& other) = delete;
 			PartManager(PartManager&& other) = delete;
 			PartManager& operator=(PartManager other) = delete;

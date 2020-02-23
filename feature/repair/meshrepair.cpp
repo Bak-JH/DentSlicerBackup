@@ -4,7 +4,7 @@
 #include <time.h>
 #include "TMesh/tmesh.h"
 #include "../../glmodel.h"
-#include "../../qmlmanager.h"
+
 #include"../../common/Debug.h"
 using namespace T_MESH;
 using namespace Hix::Engine3D;
@@ -456,7 +456,7 @@ void Hix::Features::MeshRepair::repairImpl(GLModel* subject, const QString& mode
 		auto emptyTransform = Qt3DCore::QTransform();
 		for (auto& comp : seperated)
 		{
-			//qmlManager->createAndListModel(comp, modelName + "_child" + QString::number(childIdx), &subject->transform());
+			//Hix::Application::ApplicationManager::getInstance().createAndListModel(comp, modelName + "_child" + QString::number(childIdx), &subject->transform());
 			auto newModel = new GLModel(subject, comp, modelName + "_child" + QString::number(childIdx), &emptyTransform);
 			++childIdx;
 		}

@@ -4,6 +4,7 @@
 #include <memory>
 #include <qvector3d.h>
 #include "../feature/FeatureHistoryManager.h"
+#include "../feature/interfaces/Mode.h"
 class GLModel;
 class QQuickItem;
 namespace Qt3DCore
@@ -63,10 +64,10 @@ namespace Hix
 			Hix::Features::FeatureHistoryManager _featureHistoryManager;
 
 
-			friend class SceneManagerLoader;
+			friend class FeatureManagerLoader;
 		};
 
-		class SceneManagerLoader
+		class FeatureManagerLoader
 		{
 		private:
 			static void init(FeatureManager& manager, QObject* root);

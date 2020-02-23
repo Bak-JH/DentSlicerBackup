@@ -1,6 +1,6 @@
 #include "TaskManager.h"
 #include <stdexcept>
-#include <qmlmanager.h>
+
 #include "application/ApplicationManager.h"
 using namespace Hix::Tasking;
 

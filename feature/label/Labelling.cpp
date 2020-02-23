@@ -1,7 +1,7 @@
 #include "Labelling.h"
 #include "Qml/components/Inputs.h"
 #include "../qml/components/ControlOwner.h"
-#include "qmlmanager.h"
+
 #include "../Shapes2D.h"
 #include "../Extrude.h"
 #include "../../glmodel.h"
@@ -218,7 +218,7 @@ Hix::Features::Feature* Hix::Features::LabellingMode::applyLabelMesh()
 	if (!_previewModel)
 	{
 		//qDebug() << "no labellingTextPreview";
-		//QMetaObject::invokeMethod(qmlManager->labelPopup, "noModel");
+		//QMetaObject::invokeMethod(Hix::Application::ApplicationManager::getInstance().labelPopup, "noModel");
 		return nullptr;
 	}
 

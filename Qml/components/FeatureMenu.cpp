@@ -1,5 +1,5 @@
 #include "FeatureMenu.h"
-#include "../../qmlmanager.h"
+
 #include "../util/QMLUtil.h"
 #include <QtQuick/private/qquickrectangle_p.h>
 #include "Buttons.h"

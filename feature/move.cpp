@@ -2,7 +2,7 @@
 #include "widget/MoveWidget.h"
 #include "../qml/components/ControlOwner.h"
 #include "../qml/components/Inputs.h"
-#include "qmlmanager.h"
+#include "../glmodel.h"
 #include "application/ApplicationManager.h"
 
 const QUrl MOVE_POPUP_URL = QUrl("qrc:/Qml/FeaturePopup/PopupMove.qml");
@@ -31,7 +31,7 @@ void Hix::Features::MoveMode::featureStarted()
 void Hix::Features::MoveMode::featureEnded()
 {
 	if(!_moveContainer->empty())
-		qmlManager->taskManager().enqueTask(_moveContainer);
+		Hix::Application::ApplicationManager::getInstance().taskManager().enqueTask(_moveContainer);
 
 	for (auto& each : _targetModels)
 		each->moveDone();
@@ -46,7 +46,7 @@ void Hix::Features::MoveMode::apply()
 	for (auto& target : _targetModels)
 		container->addFeature(new Move(target, to));
 
-	qmlManager->taskManager().enqueTask(container);
+	Hix::Application::ApplicationManager::getInstance().taskManager().enqueTask(container);
 }
 
 
@@ -65,7 +65,7 @@ void Hix::Features::MoveMode::modelMoveWithAxis(QVector3D axis, double distance)
 void Hix::Features::MoveMode::modelMove(QVector3D displacement)
 {
 	QVector3D bndCheckedDisp;
-	const auto& printBound = qmlManager->settings().printerSetting.bedBound;
+	const auto& printBound = Hix::Application::ApplicationManager::getInstance().settings().printerSetting.bedBound;
 	for (auto selectedModel : _targetModels) {
 		bndCheckedDisp = printBound.displaceWithin(selectedModel->recursiveAabb(), displacement);
 		selectedModel->moveModel(bndCheckedDisp);
@@ -96,7 +96,7 @@ void Hix::Features::Move::undoImpl()
 
 	_model->transform().setMatrix(_prevMatrix);
 	_model->aabb() = _prevAabb;
-	qmlManager->cameraViewChanged();
+	UpdateWidgetModePos();
 	_model->updateMesh();
 }
 
@@ -104,7 +104,7 @@ void Hix::Features::Move::redoImpl()
 {
 	_model->transform().setMatrix(_nextMatrix);
 	_model->aabb() = _nextAabb;
-	qmlManager->cameraViewChanged();
+	UpdateWidgetModePos();
 	_model->updateMesh();
 }
 
@@ -115,8 +115,7 @@ void Hix::Features::Move::runImpl()
 	if (_to)
 	{
 		_model->moveModel(_to.value());
-		if (qmlManager->isActive<Hix::Features::WidgetMode>())
-			qmlManager->cameraViewChanged();
+		UpdateWidgetModePos();
 	}
 }
 

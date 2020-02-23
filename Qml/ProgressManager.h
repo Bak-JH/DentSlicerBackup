@@ -2,7 +2,6 @@
 #include "Qml/components/PopupShell.h"
 #include <QQmlApplicationEngine>
 #include <deque>
-
 namespace Hix
 {
 	class Progress;

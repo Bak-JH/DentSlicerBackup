@@ -3,7 +3,7 @@
 #include <functional>
 #include "../Qml/components/FeatureMenu.h"
 #include "interfaces/Mode.h"
-#include "../qmlmanager.h"
+
 
 #include "ImportModel.h"
 #include "move.h"
@@ -23,7 +23,6 @@
 
 #include "Qml/components/Buttons.h"
 #include "Qml/util/QMLUtil.h"
-
 
 const std::string ICO_PRE("qrc:/Resource/menu_");
 const std::string ICO_BASIC_SUF(".png");
@@ -46,7 +45,7 @@ std::function<void()> closeFeatureModeFunctor(Hix::QML::Controls::ToggleSwitch* 
 {
 	static_assert(std::is_base_of<Hix::Features::Mode, ModeType>{});
 	std::function<void()> functor = [button]() {
-			qmlManager->setMode(nullptr);
+			Hix::Application::ApplicationManager::getInstance().featureManager().setMode(nullptr);
 	};
 	return functor;
 }

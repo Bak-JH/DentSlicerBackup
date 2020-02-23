@@ -1,6 +1,7 @@
 #include "stlexport.h"
-#include "qmlmanager.h"
+#include <qfiledialog.h>
 #include "application/ApplicationManager.h"
+#include "glmodel.h"
 using namespace Hix::Engine3D;
 using namespace Hix::Features;
 
@@ -15,7 +16,7 @@ Hix::Features::STLExportMode::STLExportMode()
         return;
     }
     auto se = new STLExport(Hix::Application::ApplicationManager::getInstance().partManager().allModels(), path);
-    qmlManager->taskManager().enqueTask(se);
+    Hix::Application::ApplicationManager::getInstance().taskManager().enqueTask(se);
 }
 
 Hix::Features::STLExportMode::~STLExportMode()
@@ -46,7 +47,7 @@ void STLExport::exportSTL()
     outfile.open(QFile::WriteOnly);
 
     writeHeader(contentStream);
-    //qmlManager->setProgress(0.5);
+    //Hix::Application::ApplicationManager::getInstance().setProgress(0.5);
 
 	for (auto& sm : _models)
 	{

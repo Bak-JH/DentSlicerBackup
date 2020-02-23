@@ -5,7 +5,7 @@
 #include <qvector3d.h>
 #include "../DentEngine/src/Bounds3D.h"
 #include "../widget/GridBed.h"
-
+class QQuickItem;
 class GLModel;
 namespace Qt3DCore
 {
@@ -42,7 +42,10 @@ namespace Hix
 			SceneManager& operator=(SceneManager&& other) = delete;
 			QVector2D worldToScreen(QVector3D target);
 			Qt3DCore::QEntity* root();
+			Qt3DCore::QEntity* total();
 			QVector3D cameraViewVector()const;
+			const Qt3DCore::QTransform* systemTransform()const;
+			QQuickItem* scene3d();
 
 		private:
 			QQuickItem* _scene3d;

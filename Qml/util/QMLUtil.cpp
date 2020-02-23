@@ -2,9 +2,9 @@
 #include <deque>
 #include <QObject.h>
 #include <qstring.h>
-#include <qqmlcontext.h>
-#include "../../qmlmanager.h"
-
+#include <qdebug.h>
+#include <QQmlContext>
+#include <qqml.h>
 
 QObject* Hix::QML::findChildQItemByName(QObject* start, const std::string& name)
 {

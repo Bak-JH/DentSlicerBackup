@@ -45,9 +45,7 @@ Hix::Features::FeatureHistoryManager& Hix::Application::FeatureManager::featureH
 
 
 
-void Hix::Application::SceneManagerLoader::init(FeatureManager& manager, QObject* root)
+void Hix::Application::FeatureManagerLoader::init(FeatureManager& manager, QObject* root)
 {
-
 	Hix::QML::getItemByID(root, manager._featureArea, "featureArea");
-
 }

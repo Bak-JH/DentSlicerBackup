@@ -6,6 +6,7 @@
 #include "interfaces/DialogedMode.h"
 #include <optional>
 
+class GLModel;
 namespace Hix
 {
 	namespace QML

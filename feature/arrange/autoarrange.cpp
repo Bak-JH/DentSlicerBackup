@@ -4,7 +4,7 @@
 #include <unordered_map>
 #include <unordered_set>
 #include "../../DentEngine/src/polyclipping/polyclipping.h"
-#include "../../qmlmanager.h"
+
 #include "../move.h"
 #include "../../application/ApplicationManager.h"
 using namespace Hix::Features;
@@ -30,7 +30,7 @@ namespace std
 Hix::Features::AutoArrangeMode::AutoArrangeMode()
 {
 	auto work = new AutoArrange(Hix::Application::ApplicationManager::getInstance().partManager().allModels());
-	qmlManager->taskManager().enqueTask(work);
+	Hix::Application::ApplicationManager::getInstance().taskManager().enqueTask(work);
 }
 
 Hix::Features::AutoArrangeMode::~AutoArrangeMode()
@@ -73,7 +73,7 @@ void Hix::Features::AutoArrange::runImpl()
 		modelRectMap.insert(std::make_pair(rect, model));
 	}
 	rbp::SkylineBinPack skylinePacker;
-	skylinePacker.Init(qmlManager->settings().printerSetting.bedBound.lengthX() * Hix::Polyclipping::INT_PT_RESOLUTION, qmlManager->settings().printerSetting.bedBound.lengthY() * Hix::Polyclipping::INT_PT_RESOLUTION, false);
+	skylinePacker.Init(Hix::Application::ApplicationManager::getInstance().settings().printerSetting.bedBound.lengthX() * Hix::Polyclipping::INT_PT_RESOLUTION, Hix::Application::ApplicationManager::getInstance().settings().printerSetting.bedBound.lengthY() * Hix::Polyclipping::INT_PT_RESOLUTION, false);
 	skylinePacker.Insert(rectsInput, packedOutput, rbp::SkylineBinPack::LevelBottomLeft);
 	//calculate max occupied rect so that we can re-center
 	int xMax = 0;

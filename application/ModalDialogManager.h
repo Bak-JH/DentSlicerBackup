@@ -28,6 +28,7 @@ namespace Hix
 			void openOkCancelDialog(const std::string& msg, const std::string& okButtonStr,
 				const std::string& cancelButtonStr, std::function<void()>&& okFunctor, const std::function<void()>&& cancelFunctor);
 			void closeDialog();
+			QQuickItem* popupArea();
 		private:
 			std::unique_ptr<Hix::QML::ModalShell> _popup;
 			QQuickItem* _root;

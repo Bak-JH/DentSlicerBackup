@@ -1,6 +1,7 @@
 #pragma once
 #include <memory>
 #include <Qt3DCore>
+#include "../Settings/AppSetting.h"
 
 namespace Hix
 {
@@ -9,7 +10,7 @@ namespace Hix
 		class GridBed
 		{
 		public:
-			GridBed(Qt3DCore::QEntity* parent);
+			GridBed();
 			virtual ~GridBed();
 			void drawBed();
 		protected:

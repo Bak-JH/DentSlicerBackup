@@ -1,6 +1,7 @@
 #include "Draggable.h"
-#include "../qmlmanager.h"
+#include "../../application/ApplicationManager.h"
+
 Hix::Input::Draggable::~Draggable()
 {
-	qmlManager->getRayCaster().draggableObjectDeleted(this);
+	Hix::Application::ApplicationManager::getInstance().getRayCaster().draggableObjectDeleted(this);
 }
