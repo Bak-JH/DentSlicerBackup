@@ -1,5 +1,4 @@
-#ifndef GLMODEL_H
-#define GLMODEL_H
+#pragma once
 
 #include "render/SceneEntityWithMaterial.h"
 #include "fileloader.h"
@@ -117,7 +116,3 @@ public slots:
     friend class featureThread;
     friend class STLexporter;
 };
-
-
-
-#endif // GLMODEL_H

@@ -5,6 +5,7 @@
 #include "../../Tasking/Task.h"
 #include "Progress.h"
 class GLModel;
+class QObject;
 namespace Hix
 {
 	namespace Features
@@ -21,11 +22,12 @@ namespace Hix
 			void run()noexcept override;
 
 		protected:
+			QObject* uiThreadObject()const;
 			template<typename ReturnType>
 			ReturnType postUIthread(std::function<ReturnType()>&& func)
 			{
 				ReturnType ret;
-				QMetaObject::invokeMethod(qmlManager, func, Qt::BlockingQueuedConnection, &ret);
+				QMetaObject::invokeMethod(uiThreadObject(), func, Qt::BlockingQueuedConnection, &ret);
 				return ret;
 			}
 			void postUIthread(std::function<void()>&& func);
@@ -65,6 +67,7 @@ namespace Hix
 			void addFeature(Feature* feature);
 			virtual ~FeatureContainer();
 			const bool empty();
+			std::deque<std::unique_ptr<Feature>>& getContainer();
 		protected:
 			void undoImpl()override;
 			void redoImpl()override;

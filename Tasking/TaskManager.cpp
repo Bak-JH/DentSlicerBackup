@@ -1,6 +1,6 @@
 #include "TaskManager.h"
 #include <stdexcept>
-#include <qmlmanager.h>
+
 #include "application/ApplicationManager.h"
 using namespace Hix::Tasking;
 
@@ -32,7 +32,20 @@ void TaskManager::run()
 		}, taskVariant);
 
 		_progressManager.generatePopup();
-		_progressManager.addProgress(rTask->progress());
+
+		auto container = dynamic_cast<Hix::Features::FeatureContainer*>(rTask);
+		if (container)
+		{
+			for (auto& each : container->getContainer())
+			{
+				qDebug() << "container: " << each->progress()->getDisplayText();
+				_progressManager.addProgress(each->progress());
+			}
+		}
+		else
+		{
+			_progressManager.addProgress(rTask->progress());
+		}
 
 		rTask->run();
 

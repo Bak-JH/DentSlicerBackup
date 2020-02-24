@@ -1,5 +1,5 @@
 #include "Widget3D.h"
-#include "../qmlmanager.h"
+
 #include "../input/raycastcontroller.h"
 #include <math.h>
 #include "Widget.h"

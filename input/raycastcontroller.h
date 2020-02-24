@@ -26,6 +26,10 @@ namespace Qt3DInput
 }
 namespace Hix
 {
+	namespace Application
+	{
+		class ApplicationManager;
+	}
 	namespace Input
 	{
 		class Draggable;
@@ -48,9 +52,6 @@ namespace Hix
 			Q_OBJECT
 		public:
 			RayCastController();
-			void initialize(Qt3DCore::QEntity* camera);
-
-
 			//for ray casting optimization using the bounding box
 			//Qt3DRender::QLayer _modelLayer;
 			void addInputLayer(Qt3DRender::QLayer* layer);
@@ -105,9 +106,18 @@ namespace Hix
 
 			static const std::chrono::milliseconds MAX_CLICK_DURATION;
 			static const float MAX_CLICK_MOVEMENT;
-		signals:
-
+			friend class RayCastControllerLoader;
 		};
+
+		class RayCastControllerLoader
+		{
+		private:
+			static void init(RayCastController& manager, Qt3DCore::QEntity* parentEntity);
+			friend class Hix::Application::ApplicationManager;
+		};
+
+
+
 
 	}
 }

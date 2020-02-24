@@ -2,10 +2,13 @@
 #pragma once
 #include <Qt3DCore>
 #include "feature/interfaces/Feature.h"
-#include "DentEngine/src/mesh.h"
-#include "glmodel.h"
+class GLModel;
 namespace Hix
 {
+	namespace Engine3D
+	{
+		class Mesh;
+	}
 	namespace Features
 	{
 

@@ -5,6 +5,7 @@
 #include <qvector3d.h>
 #include "../DentEngine/src/Bounds3D.h"
 class GLModel;
+class QQuickItem;
 namespace Qt3DCore
 {
 	class QEntity;
@@ -27,7 +28,7 @@ namespace Hix
 		{
 		public:
 			PartManager();
-
+			~PartManager();
 			PartManager(const PartManager& other) = delete;
 			PartManager(PartManager&& other) = delete;
 			PartManager& operator=(PartManager other) = delete;
@@ -58,7 +59,7 @@ namespace Hix
 		class PartManagerLoader
 		{
 		private:
-			static void init(PartManager& manager, Qt3DCore::QEntity* entity);
+			static void init(PartManager& manager, QObject* root);
 			friend class Hix::Application::ApplicationManager;
 		};
 

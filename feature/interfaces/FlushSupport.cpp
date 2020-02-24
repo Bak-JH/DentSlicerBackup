@@ -1,26 +1,26 @@
 #include "FlushSupport.h"
-#include "qmlmanager.h"
 #include "feature/SupportFeature.h"
+#include "../../application/ApplicationManager.h"
 
 
 
 
 Hix::Features::FlushSupport::FlushSupport(const std::unordered_set<GLModel*>& models)
 {
-	auto flshSupp = qmlManager->supportRaftManager().modelAttachedSupports(models);
+	auto flshSupp = Hix::Application::ApplicationManager::getInstance().supportRaftManager().modelAttachedSupports(models);
 	if (!flshSupp.empty())
 	{
-		qmlManager->taskManager().enqueTask(SupportMode().clearSupport(models));
+		Hix::Application::ApplicationManager::getInstance().taskManager().enqueTask(SupportMode().clearSupport(models));
 	}
 }
 
 Hix::Features::FlushSupport::FlushSupport(GLModel* model)
 {
 	std::unordered_set<GLModel*> models{ model };
-	auto flshSupp = qmlManager->supportRaftManager().modelAttachedSupports(models);
+	auto flshSupp = Hix::Application::ApplicationManager::getInstance().supportRaftManager().modelAttachedSupports(models);
 	if (!flshSupp.empty())
 	{
-		qmlManager->taskManager().enqueTask(SupportMode().clearSupport(models));
+		Hix::Application::ApplicationManager::getInstance().taskManager().enqueTask(SupportMode().clearSupport(models));
 	}
 }
 

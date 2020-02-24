@@ -1,16 +1,17 @@
 #include "deleteModel.h"
 #include "glmodel.h"
-#include "qmlmanager.h"
+
 #include "../application/ApplicationManager.h"
 using namespace Hix::Application;
 using namespace Qt3DCore;
 Hix::Features::DeleteModel::DeleteModel(GLModel* target):FlushSupport(target), _model(target)
 {
-
+	_progress.setDisplayText("Delete Model");
 }
 
 Hix::Features::DeleteModel::~DeleteModel()
 {
+	
 }
 
 void Hix::Features::DeleteModel::undoImpl()
@@ -35,7 +36,8 @@ void Hix::Features::DeleteModel::redoImpl()
 	auto raw = std::get<GLModel*>(_model);
 	auto parent = raw->parentNode();
 	bool isListed = ApplicationManager::getInstance().partManager().isTopLevel(raw);
-	raw->QNode::setParent((Qt3DCore::QNode*)nullptr);
+	auto deleteModel = [&raw]() { raw->QNode::setParent((Qt3DCore::QNode*)nullptr); };
+	postUIthread(deleteModel);
 	if (isListed)
 	{
 		auto& partManager = ApplicationManager::getInstance().partManager();
@@ -45,11 +47,17 @@ void Hix::Features::DeleteModel::redoImpl()
 	{
 		_model = RedoInfo{ std::unique_ptr<GLModel>(raw), parent, isListed };
 	}
+	
 }
 
 void Hix::Features::DeleteModel::runImpl()
 {
+	auto closeModal = []() { 
+		Hix::Application::ApplicationManager::getInstance().modalDialogManager().closeDialog(); 
+	};
+	qDebug() << _progress.getDisplayText();
 	redoImpl();
+	postUIthread(closeModal);
 }
 
 GLModel* Hix::Features::DeleteModel::getDeletedModel()
@@ -69,8 +77,6 @@ GLModel* Hix::Features::DeleteModel::getDeletedModel()
 
 Hix::Features::DeleteModelMode::DeleteModelMode()
 {
-
-
 	Hix::Application::ApplicationManager::getInstance().modalDialogManager().openOkCancelDialog(
 		"Delete selected models?", "Ok", "Cancel", 
 		[]() {
@@ -81,11 +87,11 @@ Hix::Features::DeleteModelMode::DeleteModelMode()
 			{
 				container->addFeature(new DeleteModel(model));
 			}
-			qmlManager->taskManager().enqueTask(container);
-			qmlManager->setMode(nullptr);
+			Hix::Application::ApplicationManager::getInstance().taskManager().enqueTask(container);
+			//Hix::Application::ApplicationManager::getInstance().featureManager().setMode(nullptr);
 		},
 		[]() {
-			qmlManager->setMode(nullptr);
+			Hix::Application::ApplicationManager::getInstance().featureManager().setMode(nullptr);
 		}
 	);
 }

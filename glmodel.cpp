@@ -5,7 +5,7 @@
 #include <cfloat>
 #include <exception>
 
-#include "qmlmanager.h"
+
 #include "feature/shelloffset.h"
 //#include "feature/supportview.h"
 #include "utils/utils.h"
@@ -180,7 +180,7 @@ void GLModel::changeColor(const QVector4D& color)
 
 bool GLModel::isPrintable()const
 {
-	const auto& bedBound = qmlManager->settings().printerSetting.bedBound;
+	const auto& bedBound = Hix::Application::ApplicationManager::getInstance().settings().printerSetting.bedBound;
 	return bedBound.contains(_aabb);
 }
 
@@ -244,11 +244,11 @@ void GLModel::setHitTestable(bool isEnable)
 		if (_hitEnabled)
 		{
 			
-			qmlManager->getRayCaster().addInputLayer(&_layer);
+			Hix::Application::ApplicationManager::getInstance().getRayCaster().addInputLayer(&_layer);
 		}
 		else
 		{
-			qmlManager->getRayCaster().removeInputLayer(&_layer);
+			Hix::Application::ApplicationManager::getInstance().getRayCaster().removeInputLayer(&_layer);
 		}
 	}
 	callRecursive(this, &GLModel::setHitTestable, isEnable);
@@ -265,7 +265,7 @@ void GLModel::clicked(MouseEventData& pick, const Qt3DRender::QRayCasterHit& hit
 	auto listed = getRootModel();
 	auto& partManager = Hix::Application::ApplicationManager::getInstance().partManager();
 	auto isSelected = partManager.isSelected(listed);
-	if (!qmlManager->isFeatureActive() || qmlManager->isActive<Hix::Features::WidgetMode>())
+	if (!Hix::Application::ApplicationManager::getInstance().featureManager().isFeatureActive() || Hix::Application::ApplicationManager::getInstance().featureManager().isActive<Hix::Features::WidgetMode>())
 	{
 		if (pick.button == Qt::MouseButton::LeftButton)
 		{
@@ -280,7 +280,7 @@ void GLModel::clicked(MouseEventData& pick, const Qt3DRender::QRayCasterHit& hit
     }
 	else
 	{
-		auto selectFaceFeature = dynamic_cast<Hix::Features::SelectFaceMode*>(qmlManager->currentMode());
+		auto selectFaceFeature = dynamic_cast<Hix::Features::SelectFaceMode*>(Hix::Application::ApplicationManager::getInstance().featureManager().currentMode());
 		if (selectFaceFeature)
 		{
 			auto selectedFace = _mesh->getFaces().cbegin() + hit.primitiveIndex();
@@ -290,16 +290,16 @@ void GLModel::clicked(MouseEventData& pick, const Qt3DRender::QRayCasterHit& hit
 	}
 }
 void GLModel::updateModelMesh() {
-	//QMetaObject::invokeMethod((QObject*)qmlManager->scene3d, "disableScene3D");
+	//QMetaObject::invokeMethod((QObject*)Hix::Application::ApplicationManager::getInstance().scene3d, "disableScene3D");
 	updateMesh(_mesh);
-	//QMetaObject::invokeMethod((QObject*)qmlManager->scene3d, "enableScene3D");
+	//QMetaObject::invokeMethod((QObject*)Hix::Application::ApplicationManager::getInstance().scene3d, "enableScene3D");
 }
 
 
 bool GLModel::isDraggable(Hix::Input::MouseEventData& e,const Qt3DRender::QRayCasterHit&)
 {
 	auto listed = getRootModel();
-	if (e.button == Qt3DInput::QMouseEvent::Buttons::LeftButton && ApplicationManager::getInstance().partManager().isSelected(listed) && (!qmlManager->isFeatureActive() || qmlManager->isActive<Hix::Features::MoveMode>()))
+	if (e.button == Qt3DInput::QMouseEvent::Buttons::LeftButton && ApplicationManager::getInstance().partManager().isSelected(listed) && (!Hix::Application::ApplicationManager::getInstance().featureManager().isFeatureActive() || Hix::Application::ApplicationManager::getInstance().featureManager().isActive<Hix::Features::MoveMode>()))
 	{
 		return true;
 	}
@@ -308,36 +308,37 @@ bool GLModel::isDraggable(Hix::Input::MouseEventData& e,const Qt3DRender::QRayCa
 
 void GLModel::dragStarted(Hix::Input::MouseEventData& e, const Qt3DRender::QRayCasterHit& hit)
 {
-	//if(!qmlManager->isActive<Hix::Features::MoveMode>())
-	//	qmlManager->moveButton->setProperty("state", "active");
+	//if(!Hix::Application::ApplicationManager::getInstance().featureManager().isActive<Hix::Features::MoveMode>())
+	//	Hix::Application::ApplicationManager::getInstance().moveButton->setProperty("state", "active");
 
-	dynamic_cast<Hix::Features::MoveMode*>(qmlManager->getCurrentMode())->featureStarted();
+	dynamic_cast<Hix::Features::MoveMode*>(Hix::Application::ApplicationManager::getInstance().featureManager().currentMode())->featureStarted();
 	auto listed = getRootModel();
-	//if (qmlManager->supportRaftManager().supportActive())
+	//if (Hix::Application::ApplicationManager::getInstance().supportRaftManager().supportActive())
 	//{
-	//	size_t prevCount = qmlManager->supportRaftManager().supportCount();
-	//	qmlManager->supportRaftManager().clear(*listed);
-	//	if (qmlManager->supportRaftManager().supportCount() != prevCount)
+	//	size_t prevCount = Hix::Application::ApplicationManager::getInstance().supportRaftManager().supportCount();
+	//	Hix::Application::ApplicationManager::getInstance().supportRaftManager().clear(*listed);
+	//	if (Hix::Application::ApplicationManager::getInstance().supportRaftManager().supportCount() != prevCount)
 	//	{
 	//		listed->setZToBed();
 	//	}
 	//}
 	lastpoint = hit.localIntersection();
 	prevPoint = (QVector2D)e.position;
-	qmlManager->setClosedHandCursor();
+	Hix::Application::ApplicationManager::getInstance().cursorManager().setCursor(CursorType::ClosedHand);
+
 }
 
 void GLModel::doDrag(Hix::Input::MouseEventData& v)
 {
 	QVector2D currentPoint = QVector2D(v.position.x(), v.position.y());
-	//auto pt = qmlManager->world2Screen(QVector3D(0, 0, 0));
-	//auto pt2 = qmlManager->world2Screen(lastpoint);
+	//auto pt = Hix::Application::ApplicationManager::getInstance().sceneManager().worldToScreen(QVector3D(0, 0, 0));
+	//auto pt2 = Hix::Application::ApplicationManager::getInstance().sceneManager().worldToScreen(lastpoint);
 
 	//qDebug()<< currentPoint << pt << pt2;
 	QVector3D xAxis3D = QVector3D(1, 0, 0);
 	QVector3D yAxis3D = QVector3D(0, 1, 0);
-	QVector2D xAxis2D = (qmlManager->world2Screen(lastpoint + xAxis3D) - qmlManager->world2Screen(lastpoint));
-	QVector2D yAxis2D = (qmlManager->world2Screen(lastpoint + yAxis3D) - qmlManager->world2Screen(lastpoint));
+	QVector2D xAxis2D = (Hix::Application::ApplicationManager::getInstance().sceneManager().worldToScreen(lastpoint + xAxis3D) - Hix::Application::ApplicationManager::getInstance().sceneManager().worldToScreen(lastpoint));
+	QVector2D yAxis2D = (Hix::Application::ApplicationManager::getInstance().sceneManager().worldToScreen(lastpoint + yAxis3D) - Hix::Application::ApplicationManager::getInstance().sceneManager().worldToScreen(lastpoint));
 	QVector2D target = currentPoint - prevPoint;
 
 	float b = (target.y() * xAxis2D.x() - target.x() * xAxis2D.y()) /
@@ -345,15 +346,15 @@ void GLModel::doDrag(Hix::Input::MouseEventData& v)
 	float a = (target.x() - b * yAxis2D.x()) / xAxis2D.x();
 
 	// move ax + by amount
-	auto mode = dynamic_cast<Hix::Features::MoveMode*>(qmlManager->getCurrentMode());
+	auto mode = dynamic_cast<Hix::Features::MoveMode*>(Hix::Application::ApplicationManager::getInstance().featureManager().currentMode());
 	mode->modelMove(QVector3D(a, b, 0));
 	prevPoint = currentPoint;
 }
 
 void GLModel::dragEnded(Hix::Input::MouseEventData&)
 {
-	dynamic_cast<Hix::Features::MoveMode*>(qmlManager->getCurrentMode())->featureEnded();
-    //qmlManager->totalMoveDone();
+	dynamic_cast<Hix::Features::MoveMode*>(Hix::Application::ApplicationManager::getInstance().featureManager().currentMode())->featureEnded();
+    //Hix::Application::ApplicationManager::getInstance().totalMoveDone();
 }
 
 
@@ -384,7 +385,7 @@ void GLModel::changeViewMode(int viewMode) {
 
  //   this->viewMode = viewMode;
  //   qDebug() << "changeViewMode" << viewMode;
- //   QMetaObject::invokeMethod(qmlManager->boxUpperTab, "all_off");
+ //   QMetaObject::invokeMethod(Hix::Application::ApplicationManager::getInstance().boxUpperTab, "all_off");
 
  //   switch( viewMode ) {
  //   case VIEW_MODE_OBJECT:
@@ -429,8 +430,8 @@ bool GLModel::perPrimitiveColorActive() const
 }
 bool GLModel::faceSelectionActive() const
 {
-	return qmlManager->isActive<Hix::Features::ExtendMode>() ||
-		qmlManager->isActive<Hix::Features::LayFlat>();
+	return Hix::Application::ApplicationManager::getInstance().featureManager().isActive<Hix::Features::ExtendMode>() ||
+		Hix::Application::ApplicationManager::getInstance().featureManager().isActive<Hix::Features::LayFlat>();
 }
 
 QVector4D GLModel::getPrimitiveColorCode(const Hix::Engine3D::Mesh* mesh, FaceConstItr itr)

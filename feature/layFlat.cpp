@@ -1,5 +1,5 @@
 #include "layFlat.h"
-#include "qmlmanager.h"
+#include "../glmodel.h"
 #include "application/ApplicationManager.h"
 using namespace Hix::Features;
 
@@ -33,7 +33,7 @@ void Hix::Features::LayFlatMode::apply()
 		container->addFeature(new LayFlat(each.first, each.second));
 	}
 	_args.clear();
-	qmlManager->taskManager().enqueTask(container);
+	Hix::Application::ApplicationManager::getInstance().taskManager().enqueTask(container);
 }
 
 
@@ -52,7 +52,6 @@ void Hix::Features::LayFlat::undoImpl()
 
 	_model->transform().setMatrix(_prevMatrix);
 	_model->aabb() = _prevAabb;
-	qmlManager->cameraViewChanged();
 	_model->setZToBed();
 	_model->unselectMeshFaces();
 	_model->updateMesh(true);
@@ -68,7 +67,6 @@ void Hix::Features::LayFlat::redoImpl()
 
 	_model->transform().setMatrix(_prevMatrix);
 	_model->aabb() = _prevAabb;
-	qmlManager->cameraViewChanged();
 	_model->setZToBed();
 	_model->unselectMeshFaces();
 	_model->updateMesh(true);
@@ -92,7 +90,7 @@ void Hix::Features::LayFlat::runImpl()
 	_model->transform().setRotation(_model->transform().rotation() * rot);
 	_model->updateRecursiveAabb();
 	_model->setZToBed();
-	//qmlManager->resetLayflat();
+	//Hix::Application::ApplicationManager::getInstance().resetLayflat();
 }
 
 Hix::Features::LayFlat::~LayFlat()

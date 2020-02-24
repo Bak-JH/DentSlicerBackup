@@ -1,9 +1,10 @@
 #include <QFileDialog>
-#include "../qmlmanager.h"
+
 #include "../glmodel.h"
 #include "addModel.h"
 #include "repair/meshrepair.h"
 #include "ImportModel.h"
+#include "../application/ApplicationManager.h"
 
 Hix::Features::ImportModelMode::ImportModelMode()
 {
@@ -11,7 +12,7 @@ Hix::Features::ImportModelMode::ImportModelMode()
 	auto fileUrl = QFileDialog::getOpenFileUrl(nullptr, "Please choose a file", QUrl(), "3D files(*.stl *.obj)");
 	if (!fileUrl.isEmpty())
 	{
-		qmlManager->taskManager().enqueTask(new ImportModel(fileUrl));
+		Hix::Application::ApplicationManager::getInstance().taskManager().enqueTask(new ImportModel(fileUrl));
 	}
 	//QApplication::setOverrideCursor(QCursor(Qt::ArrowCursor));
 }
@@ -61,7 +62,7 @@ void Hix::Features::ImportModel::runImpl()
 	//repair mode
 	if (Hix::Features::isRepairNeeded(mesh))
 	{
-		//qmlManager->setProgressText("Repairing mesh.");
+		//Hix::Application::ApplicationManager::getInstance().setProgressText("Repairing mesh.");
 		std::unordered_set<GLModel*> repairModels;
 		repairModels.insert(_listModelFeature->getAddedModel());
 		MeshRepair repair(repairModels);
@@ -69,5 +70,5 @@ void Hix::Features::ImportModel::runImpl()
 	}
 
 	// do auto arrange
-	//qmlManager->openArrange();
+	//Hix::Application::ApplicationManager::getInstance().openArrange();
 }

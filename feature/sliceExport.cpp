@@ -1,6 +1,6 @@
 #include "sliceExport.h"
 #include <QFileDialog>
-#include "../qmlmanager.h"
+
 #include "../glmodel.h"
 #include "addModel.h"
 #include "../application/ApplicationManager.h"
@@ -18,7 +18,7 @@ Hix::Features::SliceExportMode::SliceExportMode()
 		return;
 	}
 	auto se = new SliceExport(Hix::Application::ApplicationManager::getInstance().partManager().allModels(), path);
-	qmlManager->taskManager().enqueTask(se);
+	Hix::Application::ApplicationManager::getInstance().taskManager().enqueTask(se);
 
 }
 
@@ -38,7 +38,7 @@ void Hix::Features::SliceExport::run()
 {
 	// need to generate support, raft
 	auto selectedBound = Hix::Engine3D::combineBounds(_models);
-	_result = SlicingEngine::sliceModels(_isTemp, selectedBound.zMax(), _models, qmlManager->supportRaftManager(), _path);
+	_result = SlicingEngine::sliceModels(_isTemp, selectedBound.zMax(), _models, Hix::Application::ApplicationManager::getInstance().supportRaftManager(), _path);
 
 }
 

@@ -1,5 +1,5 @@
 #include "MoveWidget.h"
-#include "../qmlmanager.h"
+
 #include "../input/raycastcontroller.h"
 #include "Widget3D.h"
 #include "feature/move.h"
@@ -75,15 +75,15 @@ void Hix::UI::MoveWidget::setHighlight(bool enable)
 
 double Hix::UI::MoveWidget::calculateMove()
 {
-	auto origin = qmlManager->world2Screen(_parent->transform()->translation());
-	auto positivePt = qmlManager->world2Screen(_parent->transform()->translation() + _axis);
+	auto origin = Hix::Application::ApplicationManager::getInstance().sceneManager().worldToScreen(_parent->transform()->translation());
+	auto positivePt = Hix::Application::ApplicationManager::getInstance().sceneManager().worldToScreen(_parent->transform()->translation() + _axis);
 	auto prjVector = positivePt - origin;
 	auto projectedVector = QVector2D(_mouseCurrent) - origin;
 	//project mouse point to axis
 	auto scalarProj = QVector2D::dotProduct(prjVector, projectedVector) / prjVector.length();
 	//need to figure out how much a 1 unit movement from screen equals to world
-	auto a = qmlManager->world2Screen(_axis);
-	auto b = qmlManager->world2Screen(_axis*2);
+	auto a = Hix::Application::ApplicationManager::getInstance().sceneManager().worldToScreen(_axis);
+	auto b = Hix::Application::ApplicationManager::getInstance().sceneManager().worldToScreen(_axis*2);
 	auto c = (b - a).length();
 	return scalarProj/c;
 }

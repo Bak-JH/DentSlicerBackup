@@ -1,5 +1,5 @@
 #include "CrossSectionPlane.h"
-#include "../../qmlmanager.h"
+#include "../../application/ApplicationManager.h"
 using namespace Hix::Input;
 using namespace Hix::Features;
 
@@ -9,8 +9,8 @@ Hix::Features::CrossSectionPlane::CrossSectionPlane(Qt3DCore::QEntity* owner): Q
 	_planeMaterial = new Qt3DExtras::QTextureMaterial(this);
 	_planeMaterial->setAlphaBlendingEnabled(false);
 	auto clipPlane = new Qt3DExtras::QPlaneMesh(this);
-	clipPlane->setHeight(qmlManager->settings().printerSetting.bedBound.lengthX());
-	clipPlane->setWidth(qmlManager->settings().printerSetting.bedBound.lengthY());
+	clipPlane->setHeight(Hix::Application::ApplicationManager::getInstance().settings().printerSetting.bedBound.lengthX());
+	clipPlane->setWidth(Hix::Application::ApplicationManager::getInstance().settings().printerSetting.bedBound.lengthY());
 	clipPlane->setEnabled(true);
 	_transform.setRotationY(-90);
 	_transform.setRotationZ(-90);

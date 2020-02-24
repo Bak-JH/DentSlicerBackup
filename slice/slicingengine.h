@@ -12,7 +12,6 @@ namespace Hix
 
 class GLModel;
 
-using namespace Hix::Engine3D;
 namespace SlicingEngine
 {
 	struct Result

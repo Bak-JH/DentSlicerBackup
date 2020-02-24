@@ -1,5 +1,5 @@
 #include "FeatureMenu.h"
-#include "../../qmlmanager.h"
+
 #include "../util/QMLUtil.h"
 #include <QtQuick/private/qquickrectangle_p.h>
 #include "Buttons.h"
@@ -35,7 +35,4 @@ void Hix::QML::FeatureMenu::componentComplete()
 	getItemByID(this, _featureItems, "featureItems");
 	Hix::Features::FeaturesLoader loader(&Hix::Application::ApplicationManager::getInstance().engine(), this);
 	loader.loadFeatureButtons();
-	//TODO: temp, move this to license manager and application loader
-	
-
 }

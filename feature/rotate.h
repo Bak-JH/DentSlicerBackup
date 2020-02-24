@@ -5,7 +5,7 @@
 #include "DentEngine/src/Bounds3D.h"
 #include "interfaces/DialogedMode.h"
 #include <optional>
-
+class GLModel;
 namespace Hix
 {
 	namespace QML

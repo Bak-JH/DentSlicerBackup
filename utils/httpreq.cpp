@@ -7,7 +7,7 @@
 #include <QApplication>
 #include <QSsl>
 #include <QMessageBox>
-#include "qmlmanager.h"
+
 #include <QCryptographicHash>
 
 httpreq::httpreq(QObject* loginWindow, QObject* loginButton): _loginWindow(loginWindow), _loginButton(loginButton)

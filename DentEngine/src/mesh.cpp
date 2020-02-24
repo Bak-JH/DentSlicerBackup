@@ -1,5 +1,5 @@
 #include "mesh.h"
-#include "qmlmanager.h"
+
 #include <QCoreApplication>
 #include "utils/mathutils.h"
 #include "configuration.h"

@@ -1,5 +1,5 @@
 #pragma once
-#include <string>
+#include <QString>
 
 namespace Hix
 {
@@ -13,7 +13,7 @@ namespace Hix
 		Progress();
 		virtual ~Progress();
 		void setDisplayText(std::string text);
-		std::string getDisplayText();
+		QString getDisplayText();
 
 	private:
 		Hix::Features::Feature* _currentFeature;

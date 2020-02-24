@@ -13,7 +13,7 @@ void Hix::Progress::setDisplayText(std::string text)
 	_displayText = text;
 }
 
-std::string Hix::Progress::getDisplayText()
+QString Hix::Progress::getDisplayText()
 {
-	return _displayText;
+	return QString::fromStdString(_displayText);
 }

@@ -1,11 +1,13 @@
 #include "svgexporter.h"
 #include "slicer.h"
 #include "configuration.h"
-#include "../../qmlmanager.h"
+
 #include "../common/rapidjson/stringbuffer.h"
 #include "../common/rapidjson/writer.h"
 #include "../common/rapidjson/ostreamwrapper.h"
 #include "../common/rapidjson/prettywriter.h"
+#include "../../application/ApplicationManager.h"
+
 #include <fstream>
 
 using namespace Hix::Slicer;
@@ -25,7 +27,7 @@ void SVGexporter::exportSVG(Slices& shellSlices,QString outfoldername, bool isTe
         _invert = true;
     else
         _invert = false;
-	auto& printerSetting = qmlManager->settings().printerSetting;
+	auto& printerSetting = Hix::Application::ApplicationManager::getInstance().settings().printerSetting;
 
 	_ppmmX = printerSetting.pixelPerMMX();
 	_ppmmY = printerSetting.pixelPerMMY();
@@ -129,7 +131,7 @@ material consumption estimation = 29.9781\r\n").arg(QString::number((int)(scfg->
 
 
     // do run svg 2 png
-	auto& printerSetting = qmlManager->settings().printerSetting;
+	auto& printerSetting = Hix::Application::ApplicationManager::getInstance().settings().printerSetting;
 	for (int i=0; i<max_slices; i++){
         QString svgfilename = outfoldername + "/" + QString::number(i) + ".svg";
         QSvgRenderer renderer(svgfilename);

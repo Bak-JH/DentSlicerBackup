@@ -32,6 +32,7 @@ void Hix::Settings::PrinterSetting::initialize()
 	bedOffsetY = 0.0f;
 	bedBound.reset();
 	bedBound.setZMin(0.0f);
+
 }
 
 void Hix::Settings::PrinterSetting::parseJSONImpl(const rapidjson::Document& doc)

@@ -1,5 +1,6 @@
 #include "UndoRedo.h"
-#include "../qmlmanager.h"
+#include "../application/ApplicationManager.h"
+
 Hix::Features::Undo::Undo()
 {
 }
@@ -8,7 +9,7 @@ void Hix::Features::Undo::run()
 {
 	try
 	{
-		qmlManager->featureHistoryManager().undo();
+		Hix::Application::ApplicationManager::getInstance().featureManager().featureHistoryManager().undo();
 	}
 	catch (...)
 	{
@@ -29,7 +30,7 @@ void Hix::Features::Redo::run()
 {
 	try
 	{
-		qmlManager->featureHistoryManager().redo();
+		Hix::Application::ApplicationManager::getInstance().featureManager().featureHistoryManager().redo();
 	}
 	catch (...)
 	{

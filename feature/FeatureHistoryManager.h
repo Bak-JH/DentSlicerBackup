@@ -7,10 +7,10 @@ namespace Hix
 {
 	namespace Features
 	{
-		class FeatureHisroyManager
+		class FeatureHistoryManager
 		{
 		public:
-			FeatureHisroyManager();
+			FeatureHistoryManager();
 			void addFeature(Hix::Features::Feature* feature);
 			//gets the latest feature
 			const Hix::Features::Feature& peek()const;

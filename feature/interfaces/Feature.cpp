@@ -1,5 +1,5 @@
 #include "Feature.h"
-#include "qmlmanager.h"
+
 #include "application/ApplicationManager.h"
 #include <QDebug>
 using namespace Hix::Features;
@@ -28,7 +28,7 @@ void Hix::Features::Feature::redo()noexcept
 
 void Feature::postUIthread(std::function<void()>&& func)
 {
-	QMetaObject::invokeMethod(qmlManager, func, Qt::BlockingQueuedConnection);
+	QMetaObject::invokeMethod(&Hix::Application::ApplicationManager::getInstance().engine(), func, Qt::BlockingQueuedConnection);
 }
 void Hix::Features::Feature::run()noexcept
 {
@@ -51,12 +51,17 @@ void Hix::Features::Feature::run()noexcept
 	//if feature add to history
 	if (success)
 	{
-		qmlManager->featureHistoryManager().addFeature(this);
+		Hix::Application::ApplicationManager::getInstance().featureManager().featureHistoryManager().addFeature(this);
 	}
 	else
 	{
 		delete this;
 	}
+}
+
+QObject* Hix::Features::Feature::uiThreadObject() const
+{
+	return &Hix::Application::ApplicationManager::getInstance().engine();
 }
 
 void Hix::Features::Feature::tryRunFeature(Feature& other)
@@ -124,4 +129,9 @@ void Hix::Features::FeatureContainer::runImpl()
 const bool Hix::Features::FeatureContainer::empty()
 {
 	return _container.empty();
+}
+
+std::deque<std::unique_ptr<Feature>>& Hix::Features::FeatureContainer::getContainer()
+{
+	return _container;
 }
