@@ -1,9 +1,11 @@
 #include "FreeCutPtWidget.h"
 #include "DrawingPlane.h"
-#include "../../qmlmanager.h"
+#include "../../application/ApplicationManager.h"
+
 #include "render/LineMeshEntity.h"
 
 using namespace Hix::Features::Cut;
+using namespace Hix::Application;
 #if defined(_DEBUG) || defined(QT_DEBUG)
 #define _STRICT_FREECUT
 #endif
@@ -23,17 +25,17 @@ FreeCutPtWidget::~FreeCutPtWidget()
 }
 void FreeCutPtWidget::onEntered()
 {
-	qmlManager->setEraserCursor();
+	Hix::Application::ApplicationManager::getInstance().cursorManager().setCursor(CursorType::Eraser);
 }
 
 void FreeCutPtWidget::onExited()
 {
-	qmlManager->resetCursor();
+	Hix::Application::ApplicationManager::getInstance().cursorManager().setCursor(CursorType::Default);
 }
 
 void FreeCutPtWidget::clicked(Hix::Input::MouseEventData& e, const Qt3DRender::QRayCasterHit& hit)
 {
-	qmlManager->resetCursor();
+	Hix::Application::ApplicationManager::getInstance().cursorManager().setCursor(CursorType::Default);
 	_drawingPlane->removePt(this);
 	//don't do anything for obvious reasons.
 }

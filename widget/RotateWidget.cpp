@@ -1,8 +1,10 @@
 #include "RotateWidget.h"
-#include "../qmlmanager.h"
+
 #include "../input/raycastcontroller.h"
 #include "Widget3D.h"
 #include "feature/rotate.h"
+#include "../application/ApplicationManager.h"
+#include "../glmodel.h"
 using namespace Hix::UI;
 using namespace Qt3DCore;
 using namespace Qt3DRender;
@@ -68,7 +70,7 @@ void Hix::UI::RotateWidget::dragStarted(Hix::Input::MouseEventData& e, const Qt3
 double Hix::UI::RotateWidget::calculateRot()
 {
 	//find angle between (center, mouse start) and (center, current mouse)
-	auto origin = qmlManager->world2Screen(_parent->transform()->translation());
+	auto origin = Hix::Application::ApplicationManager::getInstance().sceneManager().worldToScreen(_parent->transform()->translation());
 	auto origVector = QVector2D(_mouseOrigin) - origin;
 	auto currVector = QVector2D(_mouseCurrent) - origin;
 	auto dotProduct = QVector2D::dotProduct(origVector, currVector);
@@ -77,8 +79,8 @@ double Hix::UI::RotateWidget::calculateRot()
 	double degreeangle = angle * 180 / M_PI;
 
 	//find angle between (vector into camera) and (rotating axis)
-	auto axisWorldVector = qmlManager->systemTransform->rotation().rotatedVector(_axis);
-	auto cameraVector = qmlManager->cameraViewVector();
+	auto axisWorldVector = Hix::Application::ApplicationManager::getInstance().sceneManager().systemTransform()->rotation().rotatedVector(_axis);
+	auto cameraVector = Hix::Application::ApplicationManager::getInstance().sceneManager().cameraViewVector();
 
 	auto cosAngle = QVector3D::dotProduct(axisWorldVector, cameraVector)
 		/(axisWorldVector.length() + cameraVector.length()) ;
@@ -123,7 +125,7 @@ void Hix::UI::RotateWidget::dragEnded(Hix::Input::MouseEventData& e)
 	dynamic_cast<Features::RotateMode*>(_parent->mode())->featureEnded();
 	_parent->setManipulated(false);
 	setHighlight(false);
-    //qmlManager->totalRotateDone();
+    //Hix::Application::ApplicationManager::getInstance().totalRotateDone();
 }
 
 void Hix::UI::RotateWidget::onEntered()

@@ -15,7 +15,7 @@ void Hix::Application::ModalDialogManager::openOkCancelDialog(const std::string&
 	std::function<void()>&& okFunctor, const std::function<void()>&& cancelFunctor)
 {
 	QQmlComponent* component = new QQmlComponent(&Hix::Application::ApplicationManager::getInstance().engine(), POPUP_URL);
-	auto qmlInstance = component->create(qmlContext(qmlManager->popupArea));
+	auto qmlInstance = component->create(qmlContext(_root));
 	auto popupShell = dynamic_cast<Hix::QML::ModalShell*>(qmlInstance);
 
 	std::deque<ModalShellButtonArg> buttonArgs{
@@ -25,7 +25,7 @@ void Hix::Application::ModalDialogManager::openOkCancelDialog(const std::string&
 	_popup.reset(popupShell);
 	_popup->setMessage(msg);
 	_popup->addButton(std::move(buttonArgs));
-	_popup->setParentItem(qmlManager->popupArea);
+	_popup->setParentItem(_root);
 
 	QObject::connect(&_popup->closeButton(), &Hix::QML::Controls::Button::clicked, [this]() {
 		closeDialog();
@@ -35,6 +35,11 @@ void Hix::Application::ModalDialogManager::openOkCancelDialog(const std::string&
 void Hix::Application::ModalDialogManager::closeDialog()
 {
 	_popup.reset();
+}
+
+QQuickItem* Hix::Application::ModalDialogManager::popupArea()
+{
+	return _root;
 }
 
 void Hix::Application::ModalDialogManagerLoader::init(ModalDialogManager& manager, QQuickItem* entity)

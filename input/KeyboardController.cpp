@@ -1,7 +1,7 @@
 #include "KeyboardController.h"
 #include <QNode>
 #include <QKeyboardHandler>
-#include "../qmlmanager.h"
+
 #include "../feature/UndoRedo.h"
 using namespace Hix::Input;
 
@@ -26,7 +26,7 @@ Hix::Input::KeyboardController::KeyboardController(Qt3DCore::QNode* parent): _ke
 		}
 		if (e->matches(QKeySequence::SelectAll))
 		{
-			//qmlManager->selectAll();
+			//Hix::Application::ApplicationManager::getInstance().selectAll();
 		}
 		else if(e->matches(QKeySequence::Undo))
 		{

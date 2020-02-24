@@ -1,5 +1,5 @@
 #include "SlicingOptBackend.h"
-#include "../qmlmanager.h"
+
 #include "../DentEngine/src/configuration.h"
 #include <regex>
 
@@ -89,7 +89,7 @@ void resStringToInt(std::string_view str, int& x, int& y)
 
 }
 
-SlicingOptBackend::SlicingOptBackend(QmlManager* qmlManager, SlicingConfiguration* config): _qmlManager(qmlManager), _config(config)
+SlicingOptBackend::SlicingOptBackend(SlicingConfiguration* config):  _config(config)
 {
 
 }

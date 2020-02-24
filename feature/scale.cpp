@@ -1,7 +1,7 @@
 #include "scale.h"
 #include "../qml/components/Inputs.h"
 #include "../qml/components/ControlOwner.h"
-#include "qmlmanager.h"
+#include "../glmodel.h"
 #include "application/ApplicationManager.h"
 
 const QUrl SCALE_POPUP_URL = QUrl("qrc:/Qml/FeaturePopup/PopupScale.qml");

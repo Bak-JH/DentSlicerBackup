@@ -5,109 +5,69 @@
  *
  *
  *
- *
-*/
+// *
+//*/
+//
+////for absolute correctness
+//#ifdef _DEBUG
+////#define _STRICT_DEBUG
+//#include "common/debugging/DebugRenderObject.h"
+//#endif
+//#include <Qt3DCore>
+//#include <qquickitem.h>
+//#include <ctype.h>
+//#include <QCoreApplication>
+//#include <QTextStream>
+//#include <QFileDialog>
+//#include <exception>
+//#include "qmlmanager.h"
+//#include "Application/ApplicationManager.h"
+//#include "utils/utils.h"
+//#include "DentEngine/src/configuration.h"
+//#include "DentEngine/src/MeshIterators.h"
+//#include "feature/cut/modelcut.h"
+//#include "feature/label/Labelling.h"
+//#include "feature/layFlat.h"
+//#include "feature/repair/meshrepair.h"
+//#include "feature/layerview/layerview.h"
+//#include "feature/SupportFeature.h"
+//#include "feature/extension.h"
+//#include "feature/scale.h"
+//#include "feature/arrange/autoarrange.h"
+//#include "feature/interfaces/WidgetMode.h"
+//#include "feature/interfaces/PPShaderMode.h"
+//#include "feature/rotate.h"
+//#include "feature/move.h"
+//#include "feature/deleteModel.h"
+//#include "feature/addModel.h"
+//#include "feature/ModelBuilder/ModelBuilderMode.h"
+//#include "feature/sliceExport.h"
+//#include "feature/UndoRedo.h"
+//#include "feature/stlexport.h"
+//#include "qml/util/QMLUtil.h"
+//#include "render/CircleMeshEntity.h"
+//
+//
+//#include <functional>
+//using namespace Qt3DCore;
+//using namespace Hix::Input;
+//using namespace Hix::UI;
+//using namespace Hix::Render;
+//using namespace Hix::Tasking;
+//using namespace Hix::Features;
+//using namespace Hix::QML;
 
-//for absolute correctness
-#ifdef _DEBUG
-//#define _STRICT_DEBUG
-#include "common/debugging/DebugRenderObject.h"
-#endif
-#include <Qt3DCore>
-#include <qquickitem.h>
-#include <ctype.h>
-#include <QCoreApplication>
-#include <QTextStream>
-#include <QFileDialog>
-#include <exception>
-#include "qmlmanager.h"
-#include "Application/ApplicationManager.h"
-#include "utils/utils.h"
-#include "render/lights.h"
-#include "DentEngine/src/configuration.h"
-#include "DentEngine/src/MeshIterators.h"
-#include "feature/cut/modelcut.h"
-#include "feature/label/Labelling.h"
-#include "feature/layFlat.h"
-#include "feature/repair/meshrepair.h"
-#include "feature/layerview/layerview.h"
-#include "feature/SupportFeature.h"
-#include "feature/extension.h"
-#include "feature/scale.h"
-#include "feature/arrange/autoarrange.h"
-#include "feature/interfaces/WidgetMode.h"
-#include "feature/interfaces/PPShaderMode.h"
-#include "feature/rotate.h"
-#include "feature/move.h"
-#include "feature/deleteModel.h"
-#include "feature/addModel.h"
-#include "feature/ModelBuilder/ModelBuilderMode.h"
-#include "feature/sliceExport.h"
-#include "feature/UndoRedo.h"
-#include "feature/stlexport.h"
-#include "qml/util/QMLUtil.h"
-#include "render/CircleMeshEntity.h"
+//
+//QmlManager::QmlManager(QObject *parent) : QObject(parent), _optBackend(this, scfg)
+//{
+//
+//
+//
+//	//_optBackend.createSlicingOptControls();
+//	//init settings
+//
+//}
 
-
-#include <functional>
-using namespace Qt3DCore;
-using namespace Hix::Input;
-using namespace Hix::UI;
-using namespace Hix::Render;
-using namespace Hix::Tasking;
-using namespace Hix::Features;
-using namespace Hix::QML;
-
-
-QmlManager::QmlManager(QObject *parent) : QObject(parent), _optBackend(this, scfg)
-	, _cursorEraser(QPixmap(":/Resource/cursor_eraser.png")), _currentMode(nullptr),
-	_bed(Hix::Application::ApplicationManager::getInstance().getEntityRoot())
-{
-	auto root =  Hix::Application::ApplicationManager::getInstance().getWindowRoot();
-	getItemByName(root, featureArea, "featureArea");
-	getItemByName(root, popupArea, "popupArea");
-	getItemByName(root, mainWindow, "mainWindow");
-	getItemByName(root, mv, "MainView");
-	QMetaObject::invokeMethod(mv, "initCamera");
-	//initialize ray casting mouse input controller
-	QEntity* camera;
-	getItemByName(root, camera, "cm");
-	//_rayCastController.initialize(camera);
-	_rayCastController.initialize(mv);
-
-	QEntity* models;
-	getItemByID(root, models, "models");
-	Lights* lights = new Lights(models);
-	getItemByName(root, systemTransform, "systemTransform");
-	getItemByName(root, total, "total");
-	getItemByName(root, _camera, "camera");
-
-	_supportRaftManager.initialize(models);
-	//_optBackend.createSlicingOptControls();
-	//init settings
-
-}
-
-QString QmlManager::getVersion(){
-    return QString::fromStdString(settings().deployInfo.version);
-}
-
-
-
-void QmlManager::setHandCursor(){
-    QApplication::setOverrideCursor(QCursor(Qt::PointingHandCursor));
-}
-void QmlManager::setClosedHandCursor(){
-    QApplication::setOverrideCursor(QCursor(Qt::ClosedHandCursor));
-}
-
-void QmlManager::setEraserCursor() {
-	QApplication::setOverrideCursor(_cursorEraser);
-}
-
-void QmlManager::resetCursor(){
-    QApplication::setOverrideCursor(QCursor(Qt::ArrowCursor));
-}
 
 
 
@@ -291,15 +251,8 @@ void QmlManager::resetCursor(){
 //    sendUpdateModelInfo();
 //}
 
-Hix::Features::Mode* QmlManager::currentMode()const
-{
-	return _currentMode.get();
-}
 
 
-void QmlManager::showCubeWidgets(GLModel* model)
-{
-}
 
 
 //
@@ -319,11 +272,6 @@ void QmlManager::showCubeWidgets(GLModel* model)
 //	deleteModelFileDone();
 //}
 
-RayCastController& QmlManager::getRayCaster()
-{
-	return _rayCastController;
-}
-
 
 //void QmlManager::modelMoveWithAxis(QVector3D axis, double distance) { // for QML Signal -> float is not working in qml signal parameter
 //	auto displacement = distance * axis;
@@ -340,33 +288,10 @@ RayCastController& QmlManager::getRayCaster()
 //	}
 //}
 
-QVector3D QmlManager::cameraViewVector()
-{
-	return _camera->position() - systemTransform->translation();
-}
-
-TaskManager& QmlManager::taskManager()
-{
-	return _taskManager;
-}
-
-Hix::Support::SupportRaftManager& QmlManager::supportRaftManager()
-{
-	return _supportRaftManager;
-}
 
 
 
 
-
-void QmlManager::cameraViewChanged()
-{
-	auto widgetMode = dynamic_cast<Hix::Features::WidgetMode*>(_currentMode.get());
-	if (widgetMode)
-	{
-		widgetMode->updatePosition();
-	}
-}
 
 //void QmlManager::groupSelectionActivate(bool active){
 //    if (active){
@@ -443,122 +368,78 @@ void QmlManager::cameraViewChanged()
 //    //QMetaObject::invokeMethod(boundedBox, "hideBox"); // Bounded Box
 //    sendUpdateModelInfo();
 //}
-QVector2D QmlManager::world2Screen(QVector3D target) {
-	QVariant value;
-	qRegisterMetaType<QVariant>("QVariant");
-	QMetaObject::invokeMethod(mainWindow, "world2Screen", Qt::DirectConnection, Q_RETURN_ARG(QVariant, value),
-		Q_ARG(QVariant, target));
-	QVector2D result = qvariant_cast<QVector2D>(value);
-	return result;
-}
-
-
-void QmlManager::openSupport()
-{
-	//just empty placeholder to give modality to Support.
-	_currentMode.reset(new SupportMode());
-}
-void QmlManager::closeSupport()
-{
-	supportEditEnabled(false);
-	_currentMode.reset();
-}
-
-void QmlManager::generateAutoSupport()
-{
-	//auto autoGenSupport = dynamic_cast<SupportMode*>(_currentMode.get())->generateAutoSupport();
-	//if (autoGenSupport != nullptr)
-	//	_taskManager.enqueTask(autoGenSupport);
-}
-
-
-void QmlManager::supportEditEnabled(bool enabled)
-{
-	if (enabled)
-	{
-		_supportRaftManager.setSupportEditMode(Hix::Support::EditMode::Manual);
-		//qmlManager->openResultPopUp("Click a model surface to add support.", "", "Click an existing support to remove it.");
-	}
-	else
-	{
-		_supportRaftManager.setSupportEditMode(Hix::Support::EditMode::None);
-	}
-
-}
-void QmlManager::clearSupports()
-{
-	//auto mode = dynamic_cast<SupportMode*>(_currentMode.get());
-	//if (mode)
-	//{
-	//	_taskManager.enqueTask(mode->clearSupport());
-	//}
-}
-
-
-void QmlManager::supportApplyEdit()
-{
-}
-
-
-void QmlManager::supportCancelEdit()
-{
-}
-
-void QmlManager::regenerateRaft()
-{
-	Hix::Features::FeatureContainer* container = new FeatureContainer();
-	if (_supportRaftManager.raftActive())
-	{
-		//delete
-		container->addFeature(dynamic_cast<SupportMode*>(_currentMode.get())->removeRaft());
-	}
-	//add
-	container->addFeature(dynamic_cast<SupportMode*>(_currentMode.get())->generateRaft());
-		_taskManager.enqueTask(container);
-}
-
-//temp features
 
 
 
+//void QmlManager::openSupport()
+//{
+//	//just empty placeholder to give modality to Support.
+//	_currentMode.reset(new SupportMode());
+//}
+//void QmlManager::closeSupport()
+//{
+//	supportEditEnabled(false);
+//	_currentMode.reset();
+//}
+//
+//void QmlManager::generateAutoSupport()
+//{
+//	//auto autoGenSupport = dynamic_cast<SupportMode*>(_currentMode.get())->generateAutoSupport();
+//	//if (autoGenSupport != nullptr)
+//	//	_taskManager.enqueTask(autoGenSupport);
+//}
+//
+//
+//void QmlManager::supportEditEnabled(bool enabled)
+//{
+//	if (enabled)
+//	{
+//		_supportRaftManager.setSupportEditMode(Hix::Support::EditMode::Manual);
+//		//qmlManager->openResultPopUp("Click a model surface to add support.", "", "Click an existing support to remove it.");
+//	}
+//	else
+//	{
+//		_supportRaftManager.setSupportEditMode(Hix::Support::EditMode::None);
+//	}
+//
+//}
+//void QmlManager::clearSupports()
+//{
+//	//auto mode = dynamic_cast<SupportMode*>(_currentMode.get());
+//	//if (mode)
+//	//{
+//	//	_taskManager.enqueTask(mode->clearSupport());
+//	//}
+//}
+//
+//
+//void QmlManager::supportApplyEdit()
+//{
+//}
+//
+//
+//void QmlManager::supportCancelEdit()
+//{
+//}
+//
+//void QmlManager::regenerateRaft()
+//{
+//	Hix::Features::FeatureContainer* container = new FeatureContainer();
+//	if (_supportRaftManager.raftActive())
+//	{
+//		//delete
+//		container->addFeature(dynamic_cast<SupportMode*>(_currentMode.get())->removeRaft());
+//	}
+//	//add
+//	container->addFeature(dynamic_cast<SupportMode*>(_currentMode.get())->generateRaft());
+//		_taskManager.enqueTask(container);
+//}
 
 
-bool QmlManager::isFeatureActive()
-{
-	return _currentMode.get() != nullptr;
-}
 
-
-Hix::Features::Mode* QmlManager::getCurrentMode()
-{
-	return _currentMode.get();
-}
-
-Hix::Features::FeatureHisroyManager& QmlManager::featureHistoryManager()
-{
-	return _featureHistoryManager;
-}
-
-const Hix::Settings::AppSetting& QmlManager::settings() const
-{
-	return _setting;
-}
-
-
-
-void QmlManager::settingFileChanged(QString path)
-{
-	_setting.setPrinterPath(path.toStdString());
-	_bed.drawBed();
-}
-
-void QmlManager::setMode(Hix::Features::Mode* mode)
-{
-	_currentMode.reset(mode);
-	auto instantMode = dynamic_cast<Hix::Features::InstantMode*>(mode);
-	if (instantMode)
-	{
-		_currentMode.reset(nullptr);
-	}
-}
+//void QmlManager::settingFileChanged(QString path)
+//{
+//	_setting.setPrinterPath(path.toStdString());
+//	_bed.drawBed();
+//}
 

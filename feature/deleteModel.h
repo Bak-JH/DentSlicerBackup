@@ -6,6 +6,7 @@
 #include <Qt3DCore>
 #include <variant>
 #include <memory>
+class GLModel;
 namespace Hix
 {
 	namespace Features

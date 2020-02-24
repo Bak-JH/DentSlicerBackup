@@ -1,5 +1,17 @@
 #include "Task.h"
-#include "../qmlmanager.h"
+
+//template <typename F>
+//static void postToObject(F&& fun, QObject* obj = qApp) {
+//	QMetaObject::invokeMethod(obj, std::forward<F>(fun));
+//}
+//
+//
+//template <typename F>
+//static void postToThread(F&& fun, QThread* thread = qApp->thread()) {
+//	auto* obj = QAbstractEventDispatcher::instance(thread);
+//	Q_ASSERT(obj);
+//	QMetaObject::invokeMethod(obj, std::forward<F>(fun));
+//}
 
 Hix::Tasking::Task::~Task()
 {
@@ -22,7 +34,7 @@ Hix::Tasking::UITask::UITask(std::function<void()> functor): _f(functor)
 
 void Hix::Tasking::UITask::run()
 {
-	QmlManager::postToObject(_f, qmlManager);
+	//QmlManager::postToObject(_f, qmlManager);
 
 }
 

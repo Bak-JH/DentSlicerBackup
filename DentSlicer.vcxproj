@@ -222,7 +222,10 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="application\ApplicationManager.cpp" />
+    <ClCompile Include="application\FeatureManager.cpp" />
     <ClCompile Include="application\ModalDialogManager.cpp" />
+    <ClCompile Include="application\MouseCursorManager.cpp" />
+    <ClCompile Include="application\SceneManager.cpp" />
     <ClCompile Include="common\Debug.cpp" />
     <ClCompile Include="common\debugging\DebugRenderObject.cpp" />
     <ClCompile Include="common\GTEngine\Source\GTEnginePCH.cpp" />
@@ -401,7 +404,6 @@
     <ClCompile Include="utils\mathutils.cpp" />
     <ClCompile Include="DentEngine\src\mesh.cpp" />
     <ClCompile Include="DentEngine\src\utils\metric.cpp" />
-    <ClCompile Include="qmlmanager.cpp" />
     <ClCompile Include="utils\qtriangulator.cpp" />
     <ClCompile Include="utils\quaternionhelper.cpp" />
     <ClCompile Include="feature\shelloffset.cpp" />
@@ -412,8 +414,11 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="application\ApplicationManager.h" />
+    <ClInclude Include="application\FeatureManager.h" />
     <ClInclude Include="application\ModalDialogManager.h" />
+    <ClInclude Include="application\MouseCursorManager.h" />
     <ClInclude Include="application\PartManager.h" />
+    <ClInclude Include="application\SceneManager.h" />
     <ClInclude Include="common\Debug.h" />
     <ClInclude Include="common\debugging\DebugRenderObject.h" />
     <ClInclude Include="common\delaunator.hpp" />
@@ -1115,8 +1120,6 @@
     </ClInclude>
     <ClInclude Include="utils\qbezier.h" />
     <ClInclude Include="utils\qdatabuffer_p.h" />
-    <QtMoc Include="qmlmanager.h">
-    </QtMoc>
     <ClInclude Include="utils\qrbtree.h" />
     <ClInclude Include="utils\qtriangulator_p.h" />
     <QtMoc Include="utils\quaternionhelper.h">

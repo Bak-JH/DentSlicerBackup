@@ -76,11 +76,12 @@ namespace Hix
 			void faceSelected(GLModel* selected, const Hix::Engine3D::FaceConstItr& selectedFace, const Hix::Input::MouseEventData& mouse, const Qt3DRender::QRayCasterHit& hit)override;
 			static Hix::Features::FeatureContainer* generateAutoSupport(std::unordered_set<GLModel*>& models);
 			static Hix::Features::FeatureContainer* clearSupport(const std::unordered_set<GLModel*>& models);
+			void regenerateRaft();
+		private:
 			Hix::Features::Feature* generateRaft();
 			Hix::Features::Feature* removeRaft();
 			void removeSupport(SupportModel* target);
-
-		private:
+			friend class Hix::Support::SupportModel;
 			std::unordered_set<GLModel*> _targetModels;
 		};
 	}

@@ -7,13 +7,13 @@ import QtQuick.Layouts 1.12
 
 Hix.ModalShell {
 	id: root
-	width: 420
-	height: 240
+	width: window.width
+	height: window.height
 
 	MouseArea {
 		id: blockingArea
-		width: window.width
-		height: window.height
+		width: parent.width
+		height: parent.height
 		//anchors.fill: window
 		propagateComposedEvents: false
         hoverEnabled: true
@@ -22,10 +22,13 @@ Hix.ModalShell {
 
 	Rectangle {
 		id: shell
-		width: parent.width
-		height: parent.height
+		width: 420
+		height: 240
 		radius: 8
 		color: "#ffffff"
+
+		anchors.horizontalCenter: parent.horizontalCenter
+		anchors.verticalCenter: parent.verticalCenter
 
 		Hix.Button {
 			id: closeButton

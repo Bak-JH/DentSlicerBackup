@@ -1,5 +1,6 @@
 #include "HitTestAble.h"
-#include "../qmlmanager.h"
+#include "../application/ApplicationManager.h"
+
 using namespace Hix::Input;
 
 void HitTestAble::setHitTestable(bool isEnable)
@@ -9,11 +10,11 @@ void HitTestAble::setHitTestable(bool isEnable)
 		_hitEnabled = isEnable;
 		if (_hitEnabled)
 		{
-			qmlManager->getRayCaster().addInputLayer(&_layer);
+			Hix::Application::ApplicationManager::getInstance().getRayCaster().addInputLayer(&_layer);
 		}
 		else
 		{
-			qmlManager->getRayCaster().removeInputLayer(&_layer);
+			Hix::Application::ApplicationManager::getInstance().getRayCaster().removeInputLayer(&_layer);
 		}
 	}
 }
@@ -25,11 +26,11 @@ void Hix::Input::HitTestAble::setHoverable(bool isEnable)
 		_hoverEnabled = isEnable;
 		if (_hoverEnabled)
 		{
-			qmlManager->getRayCaster().addHoverLayer(&_layer);
+			Hix::Application::ApplicationManager::getInstance().getRayCaster().addHoverLayer(&_layer);
 		}
 		else
 		{
-			qmlManager->getRayCaster().removeHoverLayer(&_layer);
+			Hix::Application::ApplicationManager::getInstance().getRayCaster().removeHoverLayer(&_layer);
 		}
 	}
 }

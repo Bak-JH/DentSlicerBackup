@@ -1,5 +1,6 @@
 #include "addModel.h"
-#include "qmlmanager.h"
+#include "glmodel.h"
+#include "DentEngine/src/mesh.h"
 #include "../application/ApplicationManager.h"
 
 using namespace Hix::Features;
@@ -114,5 +115,5 @@ void Hix::Features::ListModel::runImpl()
 		auto& partManager = ApplicationManager::getInstance().partManager();
 		partManager.addPart(std::unique_ptr<GLModel>(rawModel));
 	};
-	QMetaObject::invokeMethod(qmlManager, redo, Qt::BlockingQueuedConnection);
+	QMetaObject::invokeMethod(&Hix::Application::ApplicationManager::getInstance().engine(), redo, Qt::BlockingQueuedConnection);
 }

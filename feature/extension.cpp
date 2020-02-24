@@ -1,7 +1,7 @@
 #include "extension.h"
 #include "../qml/components/Inputs.h"
 #include "../qml/components/ControlOwner.h"
-#include "../qmlmanager.h"
+
 #include "render/ModelMaterial.h"
 #include "render/Color.h"
 #include "glmodel.h"
@@ -96,7 +96,7 @@ void Hix::Features::ExtendMode::apply()
 	}
 
 	_args.clear();
-	qmlManager->taskManager().enqueTask(container);
+	Hix::Application::ApplicationManager::getInstance().taskManager().enqueTask(container);
 }
 
 
