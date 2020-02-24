@@ -76,10 +76,12 @@ void Hix::Features::MoveMode::modelMove(QVector3D displacement)
 
 Hix::Features::Move::Move(GLModel* target, const QVector3D& to) : _model(target), _to(to)
 {
+	_progress.setDisplayText("Move Model");
 }
 
 Hix::Features::Move::Move(GLModel* target) : _model(target)
 {
+	_progress.setDisplayText("Move Model");
 }
 
 Hix::Features::Move::~Move()

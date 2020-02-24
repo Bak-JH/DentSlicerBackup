@@ -40,6 +40,7 @@ void Hix::Application::ApplicationManager::init()
 	//other singleton managers
 	QQuickItem* modalItem;
 	getItemByID(_windowRoot, modalItem, "dialogItem");
+	FeatureManagerLoader::init(_featureManager, _featureArea);
 	SceneManagerLoader::init(_sceneManager, _uiRoot);
 	PartManagerLoader::init(_partManager, _uiRoot);
 	ModalDialogManagerLoader::init(_modalManager, modalItem);

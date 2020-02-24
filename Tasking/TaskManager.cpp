@@ -38,7 +38,6 @@ void TaskManager::run()
 		{
 			for (auto& each : container->getContainer())
 			{
-				qDebug() << "container: " << each->progress()->getDisplayText();
 				_progressManager.addProgress(each->progress());
 			}
 		}
