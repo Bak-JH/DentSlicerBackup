@@ -14,7 +14,7 @@ Hix.ToggleSwitch {
 		radius: 8
 		border.color: "#b2c4c6"
 		border.width: 1
-		state: "flatOff"
+		state: "flatOn"
 
 		Image {
 			id: flatimg

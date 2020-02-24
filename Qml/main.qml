@@ -216,7 +216,7 @@ Item{
 			}
 			
 			MouseArea{
-				acceptedButtons: Qt.MiddleButton | Qt.RightButton | Qt.LeftButton
+				acceptedButtons: Qt.MiddleButton | Qt.RightButton
 				anchors.fill: parent
 				property int mode: 0;// 0 = none, 1 = translate, 2 = rotate, !#!@# qt...
 				property vector2d prevPosition;

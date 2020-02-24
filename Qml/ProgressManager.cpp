@@ -33,6 +33,7 @@ void Hix::ProgressManager::addProgress(Hix::Progress* progress)
 {
 	std::function<void()> addItem = [this, &progress]()
 	{
+		qDebug() << progress->getDisplayText();
 		QQmlComponent* component = new QQmlComponent(&Hix::Application::ApplicationManager::getInstance().engine(), POPUP_ITEM_URL);
 		auto item = dynamic_cast<QQuickItem*>(component->create(qmlContext(_popup->featureLayout())));
 		item->setProperty("featureName", progress->getDisplayText());

@@ -59,16 +59,17 @@ void Hix::Features::RotateMode::apply()
 	for (auto& target : _targetModels)
 		container->addFeature(new Rotate(target, rotation));
 
-	container->progress()->setDisplayText("Rotate Model");
 	Hix::Application::ApplicationManager::getInstance().taskManager().enqueTask(container);
 }
 
 Hix::Features::Rotate::Rotate(GLModel* target) : _model(target)
 {
+	_progress.setDisplayText("Rotate Model");
 }
 
 Hix::Features::Rotate::Rotate(GLModel* target, const QQuaternion& rot) : _model(target), _rot(rot)
 {
+	_progress.setDisplayText("Rotate Model");
 }
 
 Hix::Features::Rotate::~Rotate()

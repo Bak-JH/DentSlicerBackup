@@ -54,7 +54,7 @@ namespace Hix
 				void onClicked()override;
 
 			private:
-				bool _isChecked = false;
+				bool _isChecked = false; //isRight toggleImgSwitch
 			};
 		}
 

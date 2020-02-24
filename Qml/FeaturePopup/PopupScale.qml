@@ -18,6 +18,7 @@ FeaturePopup {
 		label.text: "X Size(mm)"
 		fromNum: -100
 		toNum: 100
+		value: 1
 		width: parent.width - 16 * 2
 		control.anchors.rightMargin: width * 0.2
 		control.width: width * 0.46 * 0.8
@@ -37,6 +38,7 @@ FeaturePopup {
 		width: parent.width - 16 * 2
 		fromNum: -100
 		toNum: 100
+		value: 1
 		control.anchors.rightMargin: width * 0.2
 		control.width: width * 0.46 * 0.8
 		control.up.indicator.anchors.leftMargin: control.width * 0.09 / 0.8
@@ -55,6 +57,7 @@ FeaturePopup {
 		width: parent.width - 16 * 2
 		fromNum: -100
 		toNum: 100
+		value: 1
 		control.anchors.rightMargin: width * 0.2
 		control.width: width * 0.46 * 0.8
 		control.up.indicator.anchors.leftMargin: control.width * 0.09 / 0.8
