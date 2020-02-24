@@ -35,10 +35,7 @@ Item{
         Rectangle{
 			id: uiRoot
             color: "#E5E5E5"
-            anchors.top : window.top
-            anchors.left : window.left
-            anchors.right : window.right
-            anchors.bottom : window.bottom
+			anchors.fill: parent
             DropArea {
                 id: drop
                 anchors.fill: parent
@@ -138,7 +135,6 @@ Item{
 				anchors.bottomMargin: 32
 				anchors.horizontalCenter: partList.horizontalCenter
 			}
-
 			PrintSetting {
 				id: printsetting
 				anchors.top: parent.top
