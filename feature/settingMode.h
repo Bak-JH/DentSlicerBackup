@@ -1,6 +1,8 @@
 #pragma once
 #include "interfaces/Mode.h"
 #include "interfaces/DialogedMode.h"
+#include <filesystem>
+
 class GLModel;
 namespace Hix
 {
@@ -8,7 +10,7 @@ namespace Hix
 	{
 		namespace Controls
 		{
-			class InputSpinBox;
+			class DropdownBox;
 		}
 	}
 
@@ -23,7 +25,9 @@ namespace Hix
 
 
 		private:
-			Hix::QML::Controls::InputSpinBox* _extendValue;
+			Hix::QML::Controls::DropdownBox* _printerPresets;
+			std::deque<std::filesystem::path> _presetPaths; //same index as combo box
+			int _oldIndex;
 		};
 	}
 }

@@ -18,7 +18,10 @@ namespace Qt3DCore
 }
 namespace Hix
 {
-
+	namespace Features
+	{
+		class SettingMode;
+	}
 	namespace QML
 	{
 		class PrintInfo;
@@ -73,6 +76,16 @@ namespace Hix
 			//root of entire window application ie) including login window
 			QQuickItem* _windowRoot;
 			Hix::QML::PrintInfo* _printInfo;
+			friend class SettingsChanger;
+		};
+
+
+
+		class SettingsChanger
+		{
+		private:
+			static Hix::Settings::AppSetting& settings(Hix::Application::ApplicationManager& appMan);
+			friend class Hix::Features::SettingMode;
 		};
 
 

@@ -54,6 +54,11 @@ QQuickItem* Hix::Application::SceneManager::scene3d()
 	return _scene3d;
 }
 
+void Hix::Application::SceneManager::drawBed()
+{
+	_bed.drawBed();
+}
+
 
 
 
@@ -72,8 +77,6 @@ void Hix::Application::SceneManagerLoader::init(SceneManager& manager, QObject* 
 
 	//init lights
 	Lights* lights = new Lights(manager._total);
-	manager._bed.drawBed();
-
 	//widget mode update when camera changed
 	//QObject::connect(manager._root, SIGNAL(cameraViewChanged()), []() {
 	//	Hix::Features::UpdateWidgetModePos();

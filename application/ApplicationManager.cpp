@@ -46,6 +46,9 @@ void Hix::Application::ApplicationManager::init()
 #ifdef _DEBUG
 	Hix::Debug::DebugRenderObject::getInstance().initialize(_partManager.modelRoot());
 #endif
+
+	//settings
+	_setting.refresh();
 	//print info
 	QQuickItem* printInfoQ;
 	getItemByID(_windowRoot, printInfoQ, "printInfo");
@@ -115,4 +118,9 @@ QString Hix::Application::ApplicationManager::getVersion() const
 void Hix::Application::ApplicationManager::stateChanged()
 {
 	_printInfo->printVolumeChanged(_partManager.selectedModelsLengths());
+}
+
+Hix::Settings::AppSetting& Hix::Application::SettingsChanger::settings(Hix::Application::ApplicationManager& appMan)
+{
+	return appMan._setting;
 }

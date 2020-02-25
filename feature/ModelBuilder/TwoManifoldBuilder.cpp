@@ -5,6 +5,7 @@
 #include <cmath>
 #include "../addModel.h"
 #include "../repair/meshrepair.h"
+#include "../Plane3D.h"
 //Few assumptions
 //1. Assume filling plane is XY plane.
 //2. Assume Model have a boundary edges that is roughly parallel to this plane
