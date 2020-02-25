@@ -285,32 +285,5 @@ Rectangle {
     }
 
 
-    function world2Screen(target){
-
-        var tmp = Qt.vector3d(0,0,0)
-        tmp = target
-        target = tmp.times(sceneRoot.systemTransform.scale3D)
-
-        var theta = (-1)*sceneRoot.systemTransform.rotationX/180.0*Math.PI
-        var alpha = (-1)*sceneRoot.systemTransform.rotationZ/180.0*Math.PI
-
-        target = Qt.vector3d(target.x * Math.cos(alpha)+target.y*Math.sin(alpha),
-                             target.x * (-1) * Math.sin(alpha) + target.y*Math.cos(alpha),
-                             target.z)
-        var target3 = Qt.vector3d(target.x,
-                             target.y * Math.cos(theta)+target.z*Math.sin(theta),
-                             (-1)*target.y*Math.sin(theta)+target.z*Math.cos(theta))
-
-        var point2 = target3
-        var matrix = Qt.matrix4x4(0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0);
-        matrix = sceneRoot.cm.cameraLens.projectionMatrix.times(sceneRoot.cm.camera.viewMatrix);//
-        point2 = matrix.times(point2)
-        point2.x = (point2.x+1) * scene3d.width/2;
-        point2.y = (-1 * point2.y+1) * scene3d.height/2;
-        return Qt.vector2d(point2.x,point2.y)
-
-    }
-
-
 }
 

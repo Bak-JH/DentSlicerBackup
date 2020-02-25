@@ -11,12 +11,19 @@ Hix::Settings::DeployInfo::DeployInfo()
 
 }
 
+std::filesystem::path Hix::Settings::DeployInfo::printerPresetsDir() const
+{
+	std::filesystem::path presetPath = settingsDir + "/PrinterPresets";
+	return presetPath;
+}
+
 void Hix::Settings::DeployInfo::initialize()
 {
+	settingsDir = std::filesystem::current_path().string();
 }
 
 void Hix::Settings::DeployInfo::parseJSONImpl(const rapidjson::Document& doc)
 {
 	parse(doc, "version", version);
-	parse(doc, "settingsDir", settingsDir);
+	tryParse(doc, "settingsDir", settingsDir);
 }
