@@ -4,8 +4,10 @@ import QtQuick.Controls 2.1
 import QtQuick.Controls.Styles 1.4
 import QtGraphicalEffects 1.12
 
-ModalWindow {
+FeaturePopup {
 	id: root
+	title: qsTr("Settings")
+	height: 220
 	Item {
 		parent: contentArea
 		height: 45

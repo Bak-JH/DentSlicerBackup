@@ -23,7 +23,7 @@ namespace Hix
 			ShellOffsetMode();
 			virtual ~ShellOffsetMode();
 			void getSliderSignal(double value);
-			void apply()override;
+			void applyButtonClicked()override;
 		private:
 			GLModel* _subject = nullptr;
 			float _zPlane = 0;

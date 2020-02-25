@@ -38,7 +38,7 @@ void Hix::Features::MoveMode::featureEnded()
 	updatePosition();
 }
 
-void Hix::Features::MoveMode::apply()
+void Hix::Features::MoveMode::applyButtonClicked()
 {
 	auto to = QVector3D(_xValue->getValue(), _yValue->getValue(), _zValue->getValue());
 	Hix::Features::FeatureContainerFlushSupport* container = new FeatureContainerFlushSupport(_targetModels);

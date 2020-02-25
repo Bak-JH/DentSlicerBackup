@@ -48,7 +48,7 @@ namespace Hix
 			void featureEnded()override;
 			QVector3D getWidgetPosition()override;
 			std::unordered_set<GLModel*>& models();
-			void apply()override;
+			void applyButtonClicked()override;
 
 		protected:
 			Hix::Features::FeatureContainerFlushSupport* _rotateContainer;

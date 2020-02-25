@@ -26,7 +26,7 @@ Hix::Features::FeatureContainerFlushSupport* Hix::Features::ScaleMode::applyScal
 	return container;
 }
 
-void Hix::Features::ScaleMode::apply()
+void Hix::Features::ScaleMode::applyButtonClicked()
 {
 	auto scale = QVector3D(_xValue->getValue(), _yValue->getValue(), _zValue->getValue());
 	Hix::Features::FeatureContainerFlushSupport* container = new FeatureContainerFlushSupport(_targetModels);

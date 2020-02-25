@@ -225,6 +225,10 @@ Hix::Features::Feature* Hix::Features::LabellingMode::applyLabelMesh()
 	return new Labelling(_targetModel, _previewModel.release());
 }
 
+void Hix::Features::LabellingMode::applyButtonClicked()
+{
+}
+
 
 
 Hix::Features::Labelling::Labelling(GLModel* parentModel, GLModel* previewModel)

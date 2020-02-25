@@ -36,9 +36,6 @@ namespace Hix
 
 			QQmlApplicationEngine& engine();
 			void init();
-			//QQuickItem* getUIRoot()const;
-			//QQuickItem* getScene3D()const;
-			//Qt3DCore::QEntity* getEntityRoot()const;
 
 			//TODO: temp
 			void stateChanged();
@@ -73,19 +70,8 @@ namespace Hix
 
 			//TODO:temp legacy
 			SlicingOptBackend _optBackend;
-
-
-
-			//root for all mesh entities including 3D uis TODO:TEMP
-			Qt3DCore::QEntity* _entityRoot;
-			QQuickItem* _scene3D;
-
-			//root container of qquickitems in the MAIN application
-			QQuickItem* _uiRoot;
 			//root of entire window application ie) including login window
 			QQuickItem* _windowRoot;
-			//place where feature popup appears
-			QQuickItem* _featureArea;
 			Hix::QML::PrintInfo* _printInfo;
 		};
 

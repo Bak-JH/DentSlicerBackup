@@ -22,7 +22,7 @@ void Hix::Features::LayFlatMode::faceSelected(GLModel* selected, const Hix::Engi
 	_args[listed] = listed->vectorToLocal(worldFn);
 }
 
-void Hix::Features::LayFlatMode::apply()
+void Hix::Features::LayFlatMode::applyButtonClicked()
 {
 	if (_args.empty())
 		return;
