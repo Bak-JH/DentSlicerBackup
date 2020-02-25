@@ -53,7 +53,7 @@ void Hix::Application::ModalDialogManager::openDialog(const std::string& msg, st
 void Hix::Application::ModalDialogManager::needToSelectModels()
 {
 	openCancelDialog(
-		"Need to select more than one or more models.", "Ok",
+		"Need to select one or more models.", "Ok",
 		[this]() {
 			Hix::Application::ApplicationManager::getInstance().featureManager().setMode(nullptr);
 			closeDialog();
