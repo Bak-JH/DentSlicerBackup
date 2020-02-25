@@ -82,7 +82,7 @@ void Hix::Features::ExtendMode::faceSelected(GLModel* selected, const Hix::Engin
 	PPShaderMode::colorFaces(selected, latest);
 }
 
-void Hix::Features::ExtendMode::apply()
+void Hix::Features::ExtendMode::applyButtonClicked()
 {
 	if (_args.empty())
 		return;

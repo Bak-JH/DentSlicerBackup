@@ -77,6 +77,8 @@ namespace Hix
 			static Hix::Features::FeatureContainer* generateAutoSupport(std::unordered_set<GLModel*>& models);
 			static Hix::Features::FeatureContainer* clearSupport(const std::unordered_set<GLModel*>& models);
 			void regenerateRaft();
+			void applyButtonClicked()override;
+
 		private:
 			Hix::Features::Feature* generateRaft();
 			Hix::Features::Feature* removeRaft();

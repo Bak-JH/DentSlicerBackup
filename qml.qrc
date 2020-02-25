@@ -50,7 +50,6 @@
         <file>Qml/PartList.qml</file>
         <file>Qml/PrintInfo.qml</file>
         <file>Qml/PrintSetting.qml</file>
-        <file>Qml/PrintSettingPopup.qml</file>
         <file>Qml/PlanesliderRange.qml</file>
         <file>Qml/MenuItem.qml</file>
         <file>Qml/FeatureMenu.qml</file>
@@ -83,5 +82,6 @@
         <file>Qml/ProgressItem.qml</file>
         <file>Qml/PartListItem.qml</file>
         <file>Qml/ModalWindowButton.qml</file>
+        <file>Qml/FeaturePopup/PrintSettingPopup.qml</file>
     </qresource>
 </RCC>

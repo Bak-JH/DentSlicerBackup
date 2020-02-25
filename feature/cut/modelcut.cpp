@@ -88,3 +88,7 @@ void Hix::Features::ModelCut::applyCut()
 	}
 	//Hix::Application::ApplicationManager::getInstance().partManager().unselectAll();
 }
+
+void Hix::Features::ModelCut::applyButtonClicked()
+{
+}
