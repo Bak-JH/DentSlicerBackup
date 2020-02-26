@@ -58,7 +58,7 @@ Hix.ProgressPopupShell {
 					easing.type: Easing.InOutQuad
 				}
 			}
-
+			/*
 			Text {
 				id: percentage
 				text: root.percent + "%"
@@ -68,7 +68,7 @@ Hix.ProgressPopupShell {
 				anchors.horizontalCenter: parent.horizontalCenter
 				anchors.verticalCenter: img.verticalCenter
 			}
-
+			*/
 			
 			ColumnLayout {
 				id: featureList

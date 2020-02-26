@@ -38,7 +38,7 @@ Hix.PartList {
 				width: 240;
 				height: 212;
 				focus: true
-				RowLayout
+				ColumnLayout
 				{
 					id: itemContainer
 					anchors.left: parent.left

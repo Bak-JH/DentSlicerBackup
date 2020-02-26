@@ -26,9 +26,16 @@ namespace Hix
 				{
 					try
 					{
+
 						ModeType* newMode = new ModeType();
 						newMode->addButton(button);
 						Hix::Application::ApplicationManager::getInstance().featureManager().setMode(newMode);
+						
+					}
+					catch (const std::runtime_error& e)
+					{
+						qDebug() << e.what();
+						Hix::Application::ApplicationManager::getInstance().featureManager().setMode(nullptr);
 					}
 					catch (...)
 					{

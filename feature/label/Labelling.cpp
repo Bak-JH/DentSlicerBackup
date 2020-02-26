@@ -121,24 +121,7 @@ void Hix::Features::LabellingMode::faceSelected(GLModel* selected, const Hix::En
 	updateLabelMesh(hit.localIntersection(), selectedFace);
 
 }
-//void xyPlanePath(const QVector3D& worldStart, const Hix::Engine3D::FaceConstItr& face, float width)
-//{
-//	auto radius = width / 2;
-//	auto worldZ = worldStart.z();
-//	auto nFaces = face.neighborFaces();
-//	std::unordered_set<FaceConstItr> explored;
-//	explored.insert(face);
-//	std::deque<FaceConstItr> qL;
-//	std::deque<FaceConstItr> qR;
-//	for (auto& nf : nFaces)
-//	{
-//		auto sortedZ = nf.sortZ();
-//		if (sortedZ[2] >= worldZ && sortedZ[0] <= worldZ)
-//		{
-//			//q
-//		}
-//	}
-//}
+
 void Hix::Features::LabellingMode::updateLabelMesh(const QVector3D& localIntersection, const Hix::Engine3D::FaceConstItr& face)
 {
 	//setMaterialColor(Hix::Render::Colors::Support);
@@ -168,50 +151,6 @@ void Hix::Features::LabellingMode::updateLabelMesh(const QVector3D& localInterse
 	_matrix = newTransform.matrix();
 	_scale = newTransform.scale3D();
 }
-//
-//void Hix::Features::LabellingMode::setText(const QString& text)
-//{
-//	if (_inputText->getInputText() != text.toStdString())
-//	{
-//		_isDirty = true;
-//		_previewModel.reset(generatePreviewModel());
-//		_previewModel->transform().setMatrix(_matrix);
-//		_previewModel->updateAABBScale(_scale);
-//	}
-//}
-//
-//void Hix::Features::LabellingMode::setFontName(const QString& fontName)
-//{
-//	_font.setFamily(fontName);
-//	_isDirty = true;
-//	_previewModel.reset(generatePreviewModel());
-//	_previewModel->transform().setMatrix(_matrix);
-//	_previewModel->updateAABBScale(_scale);
-//}
-//
-//void Hix::Features::LabellingMode::setFontBold(bool isBold)
-//{
-//	if (_font.bold() != isBold)
-//	{
-//		_font.setBold(isBold);
-//		_isDirty = true;	
-//		_previewModel.reset(generatePreviewModel());
-//		_previewModel->transform().setMatrix(_matrix);
-//		_previewModel->updateAABBScale(_scale);
-//	}
-//}
-//
-//void Hix::Features::LabellingMode::setFontSize(int fontSize)
-//{
-//	if (_font.pointSize()!= fontSize)
-//	{
-//		_font.setPointSize(fontSize);
-//		_isDirty = true;
-//		_previewModel.reset(generatePreviewModel());
-//		_previewModel->transform().setMatrix(_matrix);
-//		_previewModel->updateAABBScale(_scale);
-//	}
-//}
 
 Hix::Features::Feature* Hix::Features::LabellingMode::applyLabelMesh()
 {

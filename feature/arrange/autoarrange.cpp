@@ -47,6 +47,7 @@ Hix::Features::Move* translateFromBottLeft(GLModel* model, float xTranslate, flo
 }
 Hix::Features::AutoArrange::AutoArrange(const std::unordered_set<GLModel*>& selected): _selected(selected)
 {
+	_progress.setDisplayText("Arrange Models");
 }
 
 void Hix::Features::AutoArrange::runImpl()
