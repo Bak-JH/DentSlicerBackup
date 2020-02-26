@@ -49,6 +49,8 @@ FeaturePopup {
 	CtrSpinBox {
 		id: labelfontsize
 		label.text: "Font Size"
+		fromNum: 0
+		toNum: 256
 		width: parent.width - 16 * 2
 		anchors.left: parent.left
 		anchors.leftMargin: 16
@@ -59,6 +61,8 @@ FeaturePopup {
 	CtrSpinBox {
 		id: labelheight
 		label.text: "Label Height"
+		fromNum: 0
+		toNum: 256
 		width: parent.width - 16 * 2
 		anchors.left: parent.left
 		anchors.leftMargin: 16

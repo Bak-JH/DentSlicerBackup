@@ -25,15 +25,19 @@ namespace Hix
 			};
 			ModelCut();
 			virtual ~ModelCut();
-			void cutModeSelected(int type);
+			void cutModeSelected();
 			void getSliderSignal(double value);
-			void applyCut();
+			void apply()override;
 				
 			// polyline
 			void addCuttingPoint(QVector3D v);
 			void removeCuttingPoint(int idx);
 			void removeCuttingPoints();
 			void drawLine(QVector3D endpoint);
+
+		public slots:
+			void onChecked();
+			void onUnchecked();
 
 		private:
 			//cutting

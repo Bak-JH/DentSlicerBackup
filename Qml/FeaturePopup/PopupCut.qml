@@ -26,6 +26,13 @@ FeaturePopup {
 		anchors.leftMargin: 16
 		anchors.top: popupbody.bottom
 		anchors.topMargin: 20
+		
+		leftBtnImgSource: "qrc:/Resource/cut_flat"
+		leftBtnText: "Flat Cut"
+
+		rightBtnImgSource: "qrc:/Resource/cut_free"
+		rightBtnText: "Free Cut"
+		
 	}
 
 }

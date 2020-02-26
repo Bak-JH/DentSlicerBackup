@@ -22,6 +22,8 @@ FeaturePopup {
 	CtrSpinBox {
 		id: extendvalue
 		label.text: "Extend Value \n (mm)"
+		fromNum: -100
+		toNum: 100
 		width: parent.width - 16 * 2
 		anchors.left: parent.left
 		anchors.leftMargin: 16

@@ -17,11 +17,14 @@ using namespace ClipperLib;
 const QUrl CUT_POPUP_URL = QUrl("qrc:/Qml/FeaturePopup/PopupCut.qml");
 
 Hix::Features::ModelCut::ModelCut():
-	_models(Hix::Application::ApplicationManager::getInstance().partManager().selectedModels()), _cuttingPlane(Hix::Application::ApplicationManager::getInstance().sceneManager().total()),
+	_models(Hix::Application::ApplicationManager::getInstance().partManager().selectedModels()),
+	_cuttingPlane(Hix::Application::ApplicationManager::getInstance().sceneManager().total()),
 	_modelsBound(Hix::Application::ApplicationManager::getInstance().partManager().selectedBound()), DialogedMode(CUT_POPUP_URL)
 {
 	auto& co = controlOwner();
 	co.getControl(_cutSwitch, "cutswitch");
+	QObject::connect(_cutSwitch, &Hix::QML::Controls::ToggleSwitch::checkedChanged, [this]() { cutModeSelected(); });
+	cutModeSelected();
 }
 
 Hix::Features::ModelCut::~ModelCut()
@@ -30,9 +33,9 @@ Hix::Features::ModelCut::~ModelCut()
 	_cuttingPlane.enablePlane(false);
 }
 
-void ModelCut::cutModeSelected(int type) {
+void ModelCut::cutModeSelected() 
+{
 	//if flat cut		
-
 	if (!_cutSwitch->isChecked())
 	{
 		_cutType = ZAxial;
@@ -63,7 +66,7 @@ void ModelCut::getSliderSignal(double value) {
 	_cuttingPlane.transform().setTranslation(QVector3D(0, 0, _modelsBound.zMin() + value * zlength / 1.8));
 }
 
-void Hix::Features::ModelCut::applyCut()
+void Hix::Features::ModelCut::apply()
 {
 	switch (_cutType)
 	{

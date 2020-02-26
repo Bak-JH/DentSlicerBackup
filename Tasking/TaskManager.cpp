@@ -34,7 +34,7 @@ void TaskManager::run()
 		_progressManager.generatePopup();
 
 		auto container = dynamic_cast<Hix::Features::FeatureContainer*>(rTask);
-		if (container)
+		if (container && container->progress()->getDisplayText() == "")
 		{
 			for (auto& each : container->getContainer())
 			{

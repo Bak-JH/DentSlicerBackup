@@ -6,119 +6,111 @@ import QtGraphicalEffects 1.12
 
 Hix.ToggleSwitch {
 	id: root
+	property string leftBtnImgSource
+	property string rightBtnImgSource
+	property string leftBtnText: "left Item"
+	property string rightBtnText: "right Item"
+
+	function setButtonSelected(isSelected)
+	{
+		if(isSelected)
+		{
+			rightBtn.color = "#21959e";
+			rightBtn.border.color = "transparent";
+			rightBtnLabel.color = "#FFFFFF";
+			rightBtnLabel.font.family = openSemiBold.name;
+			rightBtnImg.source = rightBtnImgSource + "_on.png";
+
+			leftBtn.color = "#f6feff";
+			leftBtn.border.color = "#b2c4c6";
+			leftBtnLabel.color = "#859597";
+			leftBtnLabel.font.family = openRegular.name;
+			leftBtnImg.source = leftBtnImgSource + "_off.png";
+		}
+		else
+		{
+			leftBtn.color = "#21959e";
+			leftBtn.border.color = "transparent";
+			leftBtnLabel.color = "#FFFFFF";
+			leftBtnLabel.font.family = openSemiBold.name;
+			leftBtnImg.source = leftBtnImgSource + "_on.png";
+
+			rightBtn.color = "#f6feff";
+			rightBtn.border.color = "#b2c4c6";
+			rightBtnLabel.color = "#859597";
+			rightBtnLabel.font.family = openRegular.name;
+			rightBtnImg.source = rightBtnImgSource + "_off.png";
+		}
+	}
 
 	Hix.Button {
-		id: flatbtn
+		id: leftBtn
 		width: 104
 		height: 96
 		radius: 8
-		border.color: "#b2c4c6"
+		color: "#21959e"
+		border.color: "transparent"
 		border.width: 1
-		state: "flatOn"
+
+		//property alias Img : leftBtnImg
+		//property alias Label: leftBtnLabel
 
 		Image {
-			id: flatimg
+			id: leftBtnImg
 			anchors.horizontalCenter: parent.horizontalCenter
 			anchors.top: parent.top
 			anchors.topMargin: parent.height * 0.15
-			source: "qrc:/Resource/cut_flat_off.png"
+			source: root.leftBtnImgSource + "_on.png"
 		}
 
 		Text {
-			id: flattext
+			id: leftBtnLabel
+			text: root.leftBtnText
 			font.pointSize: 10
-			font.family: openRegular.name
-			text: qsTr("Flat Cut")
+			font.family: openSemiBold.name
+			color: "#FFFFFF"
 			anchors.bottom: parent.bottom
 			anchors.bottomMargin: parent.height * 0.08
 			anchors.horizontalCenter: parent.horizontalCenter
 		}
 
 		onClicked: { root.isChecked = false; }
-
-		states: [
-			State {
-				name: "flatOn"
-				PropertyChanges { target: flatbtn; color: "#21959e" }
-				PropertyChanges { target: flatbtn; border.color: "transparent" }
-				PropertyChanges { target: flattext; color: "#ffffff" }
-				PropertyChanges { target: flattext; font.family: openSemiBold.name }
-				PropertyChanges { target: flatimg; source: "qrc:/Resource/cut_flat_on.png" }
-			},
-			State {
-				name: "flatOff"
-				PropertyChanges { target: flatbtn; color: "#f6feff" }
-				PropertyChanges { target: flatbtn; border.color: "#b2c4c6" }
-				PropertyChanges { target: flattext; color: "#859597" }
-				PropertyChanges { target: flattext; font.family: openRegular.name }
-				PropertyChanges { target: flatimg; source: "qrc:/Resource/cut_flat_off.png" }
-			}
-		]
 	}
 
 	//FreeCutButton {
 	Hix.Button {
-		id: freebtn
+		id: rightBtn
 		width: 104
 		height: 96
 		radius: 8
-		border.color: "#d3dfe0"
+		color: "#f6feff"
+		border.color: "#b2c4c6"
 		border.width: 1
 		anchors.right: parent.right
-		state: "freeOff"
 
 		Image {
-			id: freeimg
+			id: rightBtnImg
 			anchors.horizontalCenter: parent.horizontalCenter
 			anchors.top: parent.top
 			anchors.topMargin: parent.height * 0.15
-			source: "qrc:/Resource/cut_free_off.png"
+			source: root.rightBtnImgSource + "_off.png"
 		}
 
 		Text {
-			id: freetext
-			text: qsTr("Free Cut")
+			id: rightBtnLabel
+			text: root.rightBtnText
 			font.pointSize: 10
 			font.family: openRegular.name
-			color: "#859597"
 			anchors.bottom: parent.bottom
 			anchors.bottomMargin: parent.height * 0.08
 			anchors.horizontalCenter: parent.horizontalCenter
 		}
 
 		onClicked: { root.isChecked = true; }
-
-		states: [
-			State {
-				name: "freeOn"
-				PropertyChanges { target: freebtn; color: "#21959e" }
-				PropertyChanges { target: freebtn; border.color: "transparent" }
-				PropertyChanges { target: freetext; color: "#ffffff" }
-				PropertyChanges { target: freetext; font.family: openSemiBold.name }
-				PropertyChanges { target: freeimg; source: "qrc:/Resource/cut_free_on.png" }
-			},
-			State {
-				name: "freeOff"
-				PropertyChanges { target: freebtn; color: "#f6feff" }
-				PropertyChanges { target: freebtn; border.color: "#b2c4c6" }
-				PropertyChanges { target: freetext; color: "#859597" }
-				PropertyChanges { target: freetext; font.family: openRegular.name }
-				PropertyChanges { target: freeimg; source: "qrc:/Resource/cut_free_off.png" }
-			}
-		]
 	}
 
 	onCheckedChanged: {
-		if(root.isChecked)
-		{
-			flatbtn.state = "flatOff"; 
-			freebtn.state = "freeOn"; 
-		}
-		else
-		{
-			flatbtn.state = "flatOn"; 
-			freebtn.state = "freeOff";
-		}
+		setButtonSelected(root.isChecked);
 	}
 
 }
