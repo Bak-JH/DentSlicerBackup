@@ -34,6 +34,7 @@ namespace Hix
 			void removeCuttingPoint(int idx);
 			void removeCuttingPoints();
 			void drawLine(QVector3D endpoint);
+			void applyButtonClicked()override;
 
 		public slots:
 			void onChecked();

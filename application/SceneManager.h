@@ -46,7 +46,7 @@ namespace Hix
 			QVector3D cameraViewVector()const;
 			const Qt3DCore::QTransform* systemTransform()const;
 			QQuickItem* scene3d();
-
+			void drawBed();
 		private:
 			QQuickItem* _scene3d;
 			Qt3DCore::QEntity* _root;

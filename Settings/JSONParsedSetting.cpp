@@ -12,6 +12,7 @@ void Hix::Settings::JSONParsedSetting::parseJSON(const std::filesystem::path& js
 
 void Hix::Settings::JSONParsedSetting::refresh()
 {
+	//initialize to default values
 	initialize();
 	//check path
 	auto status = std::filesystem::status(_jsonPath);

@@ -24,6 +24,10 @@ namespace Hix
 		class PartList;
 		class PrintInfo;
 		class FeatureMenu;
+		namespace Controls
+		{
+			class Button;
+		}
 	}
 	namespace Features
 	{
@@ -58,6 +62,7 @@ namespace Hix
 			void setMode(Hix::Features::Mode*);
 			Hix::Features::FeatureHistoryManager& featureHistoryManager();
 		private:
+			Hix::QML::Controls::Button* _settingButton;
 			Hix::QML::FeatureMenu* _menu;
 			QQuickItem* _featureArea;
 			std::unique_ptr<Hix::Features::Mode> _currentMode;

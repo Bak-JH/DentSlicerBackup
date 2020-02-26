@@ -18,7 +18,7 @@ namespace Hix
 	namespace Features
 	{
 		template<typename ModeType>
-		std::function<void()> openFeatureModeFunctor(Hix::QML::Controls::ToggleSwitch* button)
+		std::function<void()> openFeatureModeFunctor(Hix::QML::Controls::ToggleSwitch* button = nullptr)
 		{
 			static_assert(std::is_base_of<Hix::Features::Mode, ModeType>{});
 			std::function<void()> functor = [button]() {

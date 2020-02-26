@@ -38,7 +38,7 @@ namespace Hix
 			LayFlatMode();
 			virtual ~LayFlatMode();
 			void faceSelected(GLModel* selected, const Hix::Engine3D::FaceConstItr& selectedFace, const Hix::Input::MouseEventData& mouse, const Qt3DRender::QRayCasterHit& hit)override;
-			void apply()override;
+			void applyButtonClicked()override;
 
 		private:
 			std::unordered_map<GLModel*, QVector3D> _args;

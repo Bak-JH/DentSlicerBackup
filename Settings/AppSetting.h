@@ -18,8 +18,9 @@ namespace Hix
 			PrinterSetting printerSetting;
 			DeployInfo deployInfo;
 		protected:
-			void initialize()override;
 			void parseJSONImpl(const rapidjson::Document& doc)override;
+			void initialize()override;
+			void settingChanged();
 
 
 		};
