@@ -1,7 +1,6 @@
-#ifndef EXTENSION_H
-#define EXTENSION_H
+#pragma once
 #include "DentEngine/src/mesh.h"
-#include <Qt3DRender>
+#include <qvector3d.h>
 #include "interfaces/SelectFaceMode.h"
 #include "interfaces/PPShaderMode.h"
 #include "interfaces/Mode.h"
@@ -58,7 +57,7 @@ namespace Hix
 			ExtendMode();
 			virtual ~ExtendMode();
 			void faceSelected(GLModel* selected, const Hix::Engine3D::FaceConstItr& selectedFace, const Hix::Input::MouseEventData& mouse, const Qt3DRender::QRayCasterHit& hit)override;
-			void apply()override;
+			void applyButtonClicked()override;
 
 		private:
 			QVector3D _normal;
@@ -68,4 +67,3 @@ namespace Hix
 	}
 }
 
-#endif // EXTENSION_H

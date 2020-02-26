@@ -1,11 +1,16 @@
 #include "FeatureManager.h"
 #include "ApplicationManager.h"
 #include "../Qml/util/QMLUtil.h"
-#include "../glmodel.h"
+#include "../Qml/components/Buttons.h"
 #include "../Qml/components/FeatureMenu.h"
+#include "../feature/FeaturesLoader.h"
+#include "../glmodel.h"
 #include "../feature/interfaces/Mode.h"
+#include "../feature/settingMode.h"
 #include <qquickitem.h>
 
+using namespace Hix::QML;
+using namespace Hix::Features;
 Hix::Application::FeatureManager::FeatureManager()
 {
 }
@@ -43,9 +48,10 @@ Hix::Features::FeatureHistoryManager& Hix::Application::FeatureManager::featureH
 }
 
 
-
-
 void Hix::Application::FeatureManagerLoader::init(FeatureManager& manager, QObject* root)
 {
 	Hix::QML::getItemByID(root, manager._featureArea, "featureArea");
+	Hix::QML::getItemByID(root, manager._menu, "featureMenu");
+	Hix::QML::getItemByID(root, manager._settingButton, "settingbutton");
+	QObject::connect(manager._settingButton, &Hix::QML::Controls::Button::clicked, openFeatureModeFunctor<SettingMode>());
 }

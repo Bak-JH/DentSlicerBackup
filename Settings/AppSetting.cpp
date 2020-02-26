@@ -3,7 +3,7 @@
 #include "../common/rapidjson/stringbuffer.h"
 #include "../common/rapidjson/PrettyWriter.h"
 #include "../common/rapidjson/ostreamwrapper.h"
-
+#include "../application/ApplicationManager.h"
 
 using namespace Hix::Settings;
 using namespace Hix::Settings::JSON;
@@ -13,7 +13,8 @@ Hix::Settings::AppSetting::AppSetting()
 {
 	auto appSettingsPath = deployInfo.settingsDir;
 	appSettingsPath.append("/settings.json");
-	parseJSON(appSettingsPath);
+	//parseJSON(appSettingsPath);
+	_jsonPath = appSettingsPath;
 }
 
 Hix::Settings::AppSetting::~AppSetting()
@@ -27,6 +28,7 @@ void Hix::Settings::AppSetting::refresh()
 	auto printerPath = std::filesystem::current_path();
 	printerPath.append(printerPresetPath);
 	printerSetting.parseJSON(printerPath);
+	settingChanged();
 }
 
 void Hix::Settings::AppSetting::setPrinterPath(const std::string& path)
@@ -47,6 +49,13 @@ void Hix::Settings::AppSetting::setPrinterPath(const std::string& path)
 	refresh();
 }
 
+void Hix::Settings::AppSetting::parseJSONImpl(const rapidjson::Document& doc)
+{
+	tryParse(doc, "printerPresetPath", printerPresetPath);
+	tryParse(doc, "enableErrorReport", enableErrorReport);
+
+}
+
 
 void Hix::Settings::AppSetting::initialize()
 {
@@ -54,9 +63,7 @@ void Hix::Settings::AppSetting::initialize()
 	enableErrorReport = true;
 }
 
-void Hix::Settings::AppSetting::parseJSONImpl(const rapidjson::Document& doc)
+void Hix::Settings::AppSetting::settingChanged()
 {
-	tryParse(doc, "printerPresetPath", printerPresetPath);
-	tryParse(doc, "enableErrorReport", enableErrorReport);
-
+	Hix::Application::ApplicationManager::getInstance().sceneManager().drawBed();
 }

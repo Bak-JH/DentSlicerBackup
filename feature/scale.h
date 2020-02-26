@@ -42,7 +42,7 @@ namespace Hix
 			virtual ~ScaleMode();
 
 			FeatureContainerFlushSupport* applyScale(QVector3D scale);
-			void apply()override;
+			void applyButtonClicked()override;
 		private:
 			std::unordered_set<GLModel*> _targetModels;
 			Hix::QML::Controls::InputSpinBox* _precentValue;

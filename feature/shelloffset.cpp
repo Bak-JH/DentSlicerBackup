@@ -44,7 +44,7 @@ void Hix::Features::ShellOffsetMode::getSliderSignal(double value)
 	_cuttingPlane.transform().setTranslation(QVector3D(0, 0, _modelBound.zMin() + value * zlength / 1.8));
 }
 
-void Hix::Features::ShellOffsetMode::apply()
+void Hix::Features::ShellOffsetMode::applyButtonClicked()
 {
 
 }

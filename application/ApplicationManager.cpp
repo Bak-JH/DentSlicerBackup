@@ -32,23 +32,23 @@ QQmlApplicationEngine& Hix::Application::ApplicationManager::engine()
 void Hix::Application::ApplicationManager::init()
 {
 	_windowRoot = dynamic_cast<QQuickItem*>(_engine.rootObjects().first());
-
-	getItemByID(_windowRoot, _uiRoot, "uiRoot");
-	getItemByID(_windowRoot, _entityRoot, "total");
-	getItemByID(_windowRoot, _scene3D, "scene3d");
-	getItemByID(_windowRoot, _featureArea, "featureArea");
+	QQuickItem* uiRoot;
+	getItemByID(_windowRoot, uiRoot, "uiRoot");
 	//other singleton managers
 	QQuickItem* modalItem;
 	getItemByID(_windowRoot, modalItem, "dialogItem");
-	FeatureManagerLoader::init(_featureManager, _featureArea);
-	SceneManagerLoader::init(_sceneManager, _uiRoot);
-	PartManagerLoader::init(_partManager, _uiRoot);
+	FeatureManagerLoader::init(_featureManager, uiRoot);
+	SceneManagerLoader::init(_sceneManager, uiRoot);
+	PartManagerLoader::init(_partManager, uiRoot);
 	ModalDialogManagerLoader::init(_modalManager, modalItem);
 	RayCastControllerLoader::init(_rayCastController, _sceneManager.root());
 	_supportRaftManager.initialize(_partManager.modelRoot());
 #ifdef _DEBUG
 	Hix::Debug::DebugRenderObject::getInstance().initialize(_partManager.modelRoot());
 #endif
+
+	//settings
+	_setting.refresh();
 	//print info
 	QQuickItem* printInfoQ;
 	getItemByID(_windowRoot, printInfoQ, "printInfo");
@@ -58,26 +58,11 @@ void Hix::Application::ApplicationManager::init()
 	Hix::Debug::DebugRenderObject::getInstance().initialize(_partManager.modelRoot());
 #endif
 }
-
-//QQuickItem* Hix::Application::ApplicationManager::getUIRoot()const
-//{
-//	return _uiRoot;
-//}
-//
 QQuickItem* Hix::Application::ApplicationManager::getWindowRoot() const
 {
 	return _windowRoot;
 }
 
-//QQuickItem* Hix::Application::ApplicationManager::getScene3D() const
-//{
-//	return _scene3D;
-//}
-
-//Qt3DCore::QEntity* Hix::Application::ApplicationManager::getEntityRoot() const
-//{
-//	return _entityRoot;
-//}
 
 PartManager& Hix::Application::ApplicationManager::partManager()
 {
@@ -133,4 +118,9 @@ QString Hix::Application::ApplicationManager::getVersion() const
 void Hix::Application::ApplicationManager::stateChanged()
 {
 	_printInfo->printVolumeChanged(_partManager.selectedModelsLengths());
+}
+
+Hix::Settings::AppSetting& Hix::Application::SettingsChanger::settings(Hix::Application::ApplicationManager& appMan)
+{
+	return appMan._setting;
 }

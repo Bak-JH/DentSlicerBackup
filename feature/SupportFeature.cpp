@@ -201,6 +201,10 @@ void Hix::Features::SupportMode::regenerateRaft()
 
 }
 
+void Hix::Features::SupportMode::applyButtonClicked()
+{
+}
+
 
 Hix::Features::Feature* Hix::Features::SupportMode::generateRaft()
 {

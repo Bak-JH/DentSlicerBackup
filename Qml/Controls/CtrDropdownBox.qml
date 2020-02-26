@@ -7,7 +7,6 @@ import QtGraphicalEffects 1.12
 
 DropdownBox {
 	property alias label: label
-
 	Text {
 		id: label
 		anchors.verticalCenter: parent.verticalCenter
@@ -22,7 +21,7 @@ DropdownBox {
 		width: parent.width * 0.56 //0.6
 		height: 26
 		font.family: openRegular.name
-
+		currentIndex: parent.index
 		onActivated: { parent.index = currentIndex }
 
 		delegate: ItemDelegate {	// popup

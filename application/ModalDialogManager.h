@@ -26,7 +26,15 @@ namespace Hix
 			ModalDialogManager& operator=(ModalDialogManager&& other) = delete;
 
 			void openOkCancelDialog(const std::string& msg, const std::string& okButtonStr,
-				const std::string& cancelButtonStr, std::function<void()>&& okFunctor, const std::function<void()>&& cancelFunctor);
+				const std::string& cancelButtonStr, std::function<void()>&& okFunctor, std::function<void()>&& cancelFunctor);
+			void openOkDialog(const std::string& msg, const std::string& okButtonStr,
+				std::function<void()>&& okFunctor);
+			void openCancelDialog(const std::string& msg, const std::string& cancelButtonStr,
+				std::function<void()>&& cancelFunctor);
+			void openDialog(const std::string& msg, std::deque<Hix::QML::ModalShellButtonArg>&& args, std::function<void()>&& cancelFunctor);
+
+			//for modes
+			void needToSelectModels();
 			void closeDialog();
 			QQuickItem* popupArea();
 		private:

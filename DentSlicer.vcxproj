@@ -253,6 +253,7 @@
     <ClCompile Include="common\GTEngine\Source\Mathematics\GteVETNonmanifoldMesh.cpp" />
     <ClCompile Include="common\GTEngine\Source\Mathematics\MSW\GteCPUQueryInstructions.cpp" />
     <ClCompile Include="common\GTEngine\Source\Mathematics\MSW\GteIntelSSE.cpp" />
+    <ClCompile Include="feature\settingMode.cpp" />
     <ClCompile Include="feature\CopyPaste.cpp" />
     <ClCompile Include="feature\FeaturesLoader.cpp" />
     <ClCompile Include="feature\ImportModel.cpp" />
@@ -849,6 +850,7 @@
     <ClInclude Include="common\rapidjson\stringbuffer.h" />
     <ClInclude Include="common\rapidjson\writer.h" />
     <ClInclude Include="common\Singleton.h" />
+    <ClInclude Include="feature\settingMode.h" />
     <ClInclude Include="feature\CopyPaste.h" />
     <ClInclude Include="feature\FeaturesLoader.h" />
     <ClInclude Include="feature\ImportModel.h" />
@@ -1160,6 +1162,7 @@
     <None Include="cpp.hint" />
     <None Include="packages.config" />
     <None Include="Qml\Controls\CtrToggleSwitch.qml" />
+    <None Include="Qml\FeaturePopup\PrintSettingPopup.qml" />
     <None Include="Qml\ProgressItem.qml" />
     <None Include="Qml\FeatureMenu.qml" />
     <None Include="Qml\Cam.qml" />
@@ -1216,7 +1219,6 @@
     <None Include="Qml\PartList.qml" />
     <None Include="Qml\PrintInfo.qml" />
     <None Include="Qml\PrintSetting.qml" />
-    <None Include="Qml\PrintSettingPopup.qml" />
     <None Include="Qml\ProgressPopup.qml" />
     <None Include="Qml\ProgressException.qml" />
     <None Include="Qml\ProgressRevised.qml" />

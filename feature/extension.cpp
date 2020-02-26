@@ -13,6 +13,10 @@ const QUrl EXTEND_POPUP_URL = QUrl("qrc:/Qml/FeaturePopup/PopupExtend.qml");
 Hix::Features::ExtendMode::ExtendMode() 
 	:PPShaderMode(Hix::Application::ApplicationManager::getInstance().partManager().selectedModels()), DialogedMode(EXTEND_POPUP_URL)
 {
+	if(Hix::Application::ApplicationManager::getInstance().partManager().selectedModels().empty())
+	{
+		Hix::Application::ApplicationManager::getInstance().modalDialogManager().needToSelectModels();
+	}
 	auto& co = controlOwner();
 	co.getControl(_extendValue, "extendvalue");
 }
@@ -82,7 +86,7 @@ void Hix::Features::ExtendMode::faceSelected(GLModel* selected, const Hix::Engin
 	PPShaderMode::colorFaces(selected, latest);
 }
 
-void Hix::Features::ExtendMode::apply()
+void Hix::Features::ExtendMode::applyButtonClicked()
 {
 	if (_args.empty())
 		return;
