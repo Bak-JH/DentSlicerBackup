@@ -10,14 +10,12 @@ constexpr float ZMARGIN = 5;
 
 Hix::Features::SliceExportMode::SliceExportMode()
 {
-	auto fileUrl = QFileDialog::getSaveFileUrl(nullptr, "Export sliced file", QUrl());
-	auto path = fileUrl.path();
-	auto fileName = fileUrl.fileName();
+	auto fileName = QFileDialog::getSaveFileName(nullptr, "Export sliced file", "");
 	if (fileName.isEmpty())
 	{
 		return;
 	}
-	auto se = new SliceExport(Hix::Application::ApplicationManager::getInstance().partManager().allModels(), path);
+	auto se = new SliceExport(Hix::Application::ApplicationManager::getInstance().partManager().allModels(), fileName);
 	Hix::Application::ApplicationManager::getInstance().taskManager().enqueTask(se);
 
 }
