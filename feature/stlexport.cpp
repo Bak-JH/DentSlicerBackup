@@ -8,14 +8,12 @@ using namespace Hix::Features;
 
 Hix::Features::STLExportMode::STLExportMode()
 {
-    auto fileUrl = QFileDialog::getSaveFileUrl(nullptr, "Save to STL file", QUrl(), "3D Model file (*.stl)");
-    auto path = fileUrl.path();
-    auto fileName = fileUrl.fileName();
+	auto fileName = QFileDialog::getSaveFileName(nullptr, "Save to STL file", "", "3D Model file (*.stl)");
     if (fileName.isEmpty())
     {
         return;
     }
-    auto se = new STLExport(Hix::Application::ApplicationManager::getInstance().partManager().allModels(), path);
+    auto se = new STLExport(Hix::Application::ApplicationManager::getInstance().partManager().allModels(), fileName);
     Hix::Application::ApplicationManager::getInstance().taskManager().enqueTask(se);
 }
 
@@ -40,12 +38,10 @@ void Hix::Features::STLExport::run()
 
 void STLExport::exportSTL()
 {
-
-
     QFile outfile(_path);
     std::stringstream contentStream;
-    outfile.open(QFile::WriteOnly);
-
+    auto opened =  outfile.open(QFile::WriteOnly);
+	auto err = outfile.errorString();
     writeHeader(contentStream);
     //Hix::Application::ApplicationManager::getInstance().setProgress(0.5);
 
@@ -69,7 +65,8 @@ void STLExport::exportSTL()
 		}
 	}
     writeFooter(contentStream);
-    outfile.write(QByteArray::fromStdString(contentStream.str()));
+	auto byteArray = QByteArray::fromStdString(contentStream.str());
+    outfile.write(byteArray);
     outfile.close();
     return;
 }
@@ -90,9 +87,9 @@ void STLExport::writeFace(const Mesh* mesh, const Hix::Engine3D::FaceConstItr& m
 }
 
 void STLExport::writeHeader(std::stringstream& content){
-    content << "solid legokangpalla\n";
+    content << "solid savetest\n";
 }
 
 void STLExport::writeFooter(std::stringstream& content){
-    content << "endsolid legokangpalla";
+    content << "endsolid savetest";
 }

@@ -15,7 +15,9 @@ using namespace Hix::Features;
 using namespace Hix::Features::Cut;
 const QUrl OFFSET_POPUP_URL = QUrl("qrc:/Qml/FeaturePopup/PopupShellOffset.qml");
 
-Hix::Features::ShellOffsetMode::ShellOffsetMode():_cuttingPlane(Hix::Application::ApplicationManager::getInstance().sceneManager().total()), DialogedMode(OFFSET_POPUP_URL)
+Hix::Features::ShellOffsetMode::ShellOffsetMode():
+	_cuttingPlane(Hix::Application::ApplicationManager::getInstance().sceneManager().total()),
+	DialogedMode(OFFSET_POPUP_URL)
 {
 	auto& co = controlOwner();
 	co.getControl(_offsetValue, "offsetValue");
@@ -23,10 +25,10 @@ Hix::Features::ShellOffsetMode::ShellOffsetMode():_cuttingPlane(Hix::Application
 	auto selectedModels = Hix::Application::ApplicationManager::getInstance().partManager().selectedModels();
 	if (selectedModels.size() == 1)
 	{
+		_subject = *selectedModels.begin();
 		_modelBound = _subject->recursiveAabb();
 		_cuttingPlane.enablePlane(true);
 		_cuttingPlane.transform().setTranslation(QVector3D(0, 0, _modelBound.zMin() + 1 * _modelBound.lengthZ() / 1.8));
-		_subject = *selectedModels.begin();
 	}
 	else
 	{
@@ -46,7 +48,12 @@ void Hix::Features::ShellOffsetMode::getSliderSignal(double value)
 
 void Hix::Features::ShellOffsetMode::applyButtonClicked()
 {
-
+	auto container = new Hix::Features::FeatureContainer();
+	for (auto each : Hix::Application::ApplicationManager::getInstance().partManager().selectedModels())
+	{
+		container->addFeature(new ShellOffset(each, _offsetValue->getValue(), _cuttingPlane.transform().translation().z()));
+	}
+	Hix::Application::ApplicationManager::getInstance().taskManager().enqueTask(container);
 }
 
 

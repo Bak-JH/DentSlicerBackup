@@ -109,13 +109,15 @@ Hix::Features::Cut::ZAxialCutImp::ZAxialCutImp(GLModel* subject, float cuttingPl
 		topMesh = _topMesh.release();
 		return;
 	}
+
 	divideTriangles();
-	if (_bottomMesh->getFaces().size() == _origMesh->getFaces().size())
+	
+	if (_bottomMesh && _bottomMesh->getFaces().size() == _origMesh->getFaces().size())
 	{
 		botMesh = subject->getMeshModd();
 		return;
 	}
-	else if (_topMesh->getFaces().size() == _origMesh->getFaces().size())
+	else if (_topMesh && _topMesh->getFaces().size() == _origMesh->getFaces().size())
 	{
 		topMesh = subject->getMeshModd();
 		return;

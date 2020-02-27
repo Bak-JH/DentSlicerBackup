@@ -30,7 +30,7 @@ Hix.ProgressPopupShell {
 	Rectangle {
 		id: shell
 		width: 216
-		height: 305
+		height: 216
 		radius: 8
 		color: "#ffffff"
 
@@ -46,8 +46,8 @@ Hix.ProgressPopupShell {
 				id: img
 				source: imgSource
 				anchors.horizontalCenter: parent.horizontalCenter
-				anchors.top: parent.top
-				anchors.topMargin: 40
+				anchors.verticalCenter: parent.verticalCenter
+
 
 				RotationAnimation on rotation {
 					from: 0
@@ -57,26 +57,6 @@ Hix.ProgressPopupShell {
 					loops: Animation.Infinite;
 					easing.type: Easing.InOutQuad
 				}
-			}
-			/*
-			Text {
-				id: percentage
-				text: root.percent + "%"
-				font.family: openSemiBold.name
-				font.pointSize: 18
-				color: "#1db2c4"
-				anchors.horizontalCenter: parent.horizontalCenter
-				anchors.verticalCenter: img.verticalCenter
-			}
-			*/
-			
-			ColumnLayout {
-				id: featureList
-				width: 200
-				anchors.horizontalCenter: parent.horizontalCenter
-				anchors.top: img.bottom
-				anchors.topMargin: 15
-				spacing: 2
 			}
 		}
 	}

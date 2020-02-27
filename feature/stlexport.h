@@ -13,12 +13,11 @@ namespace Hix
 
 	namespace Features
 	{
-		class STLExportMode : public Hix::Features::Mode
+		class STLExportMode : public Hix::Features::InstantMode
 		{
 		public:
 			STLExportMode();
 			virtual ~STLExportMode();
-		private:
 		};
 
 		class STLExport : public Hix::Tasking::Task

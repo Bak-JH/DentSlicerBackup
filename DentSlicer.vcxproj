@@ -1214,6 +1214,7 @@
     <None Include="Qml\ModalWindowButton.qml" />
     <None Include="Qml\Model.qml" />
     <None Include="Qml\PartListItem.qml" />
+    <None Include="Qml\ProgressPopupWithList.qml" />
     <None Include="Qml\RangedSlider.qml" />
     <None Include="Qml\Plane.qml" />
     <None Include="Qml\PartList.qml" />
