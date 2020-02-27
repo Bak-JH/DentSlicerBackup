@@ -834,6 +834,9 @@
     <ClInclude Include="feature\settingMode.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="DentEngine\src\mesh.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="debug\moc_predefs.h.cbt" />
