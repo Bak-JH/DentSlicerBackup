@@ -66,7 +66,7 @@ void ModelCut::getSliderSignal(double value) {
 	_cuttingPlane.transform().setTranslation(QVector3D(0, 0, _modelsBound.zMin() + value * zlength / 1.8));
 }
 
-void Hix::Features::ModelCut::apply()
+void Hix::Features::ModelCut::applyButtonClicked()
 {
 	switch (_cutType)
 	{
@@ -90,8 +90,4 @@ void Hix::Features::ModelCut::apply()
 		break;
 	}
 	//Hix::Application::ApplicationManager::getInstance().partManager().unselectAll();
-}
-
-void Hix::Features::ModelCut::applyButtonClicked()
-{
 }

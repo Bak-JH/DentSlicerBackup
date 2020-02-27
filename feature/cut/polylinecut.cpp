@@ -95,6 +95,7 @@ void Hix::Features::Cut::PolylineCut::cutCSG(const QString& subjectName, Hix::Re
 		if (seperateParts[i]->getFaces().empty())
 			continue;
 		auto addModel = new Hix::Features::ListModel(seperateParts[i], subjectName + "_cut" + QString::number(i), nullptr);
+		tryRunFeature(*addModel);
 		addModel->getAddedModel()->setZToBed();
 		addFeature(addModel);
 	}
@@ -102,6 +103,7 @@ void Hix::Features::Cut::PolylineCut::cutCSG(const QString& subjectName, Hix::Re
 	if (model)
 	{
 		auto deleteModel = new DeleteModel(model);
+		tryRunFeature(*deleteModel);
 		addFeature(deleteModel);
 	}
 	else

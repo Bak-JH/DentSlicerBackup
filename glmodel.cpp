@@ -310,7 +310,7 @@ void GLModel::dragStarted(Hix::Input::MouseEventData& e, const Qt3DRender::QRayC
 {
 	//if(!Hix::Application::ApplicationManager::getInstance().featureManager().isActive<Hix::Features::MoveMode>())
 	//	Hix::Application::ApplicationManager::getInstance().moveButton->setProperty("state", "active");
-
+	Hix::Application::ApplicationManager::getInstance().featureManager().setMode(new Hix::Features::MoveMode());
 	dynamic_cast<Hix::Features::MoveMode*>(Hix::Application::ApplicationManager::getInstance().featureManager().currentMode())->featureStarted();
 	auto listed = getRootModel();
 	//if (Hix::Application::ApplicationManager::getInstance().supportRaftManager().supportActive())
