@@ -1,14 +1,10 @@
 #pragma once
 #include "Mode.h"
 #include <unordered_set>
+#include "../../Qml/components/ControlForwardInclude.h"
 class QUrl;
 namespace Hix
 {
-	namespace QML
-	{
-		class FeaturePopupShell;
-		class ControlOwner;
-	}
 	namespace Features
 	{
 

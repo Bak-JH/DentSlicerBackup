@@ -1,5 +1,4 @@
-#ifndef CONFIGURATION_H
-#define CONFIGURATION_H
+#pragma once
 //#define tan_theta 0.1
 //#define tan_theta 0.57735026918962576450914878050196 // tan(30)
 //#define tan_theta 0.83909963117728 // tan(40)
@@ -32,6 +31,37 @@
 #include <QVector3D>
 #include <QVariant>
 #include "Bounds3D.h"
+
+
+constexpr std::array<std::string_view, 2> SupportTypeStr{
+	"None"		,
+	"Vertical"
+};
+constexpr std::array<std::string_view, 3> InfillTypeStr{
+	"None"		,
+	"Full"	,
+	"General"
+};
+
+constexpr std::array<std::string_view, 2> RaftTypeStr{
+	"None"		,
+	"General"
+};
+constexpr std::array<std::string_view, 2> SlicingModeStr{
+	"Uniform"		,
+	"Adaptive"
+};
+
+constexpr std::array<std::string_view, 3> LayerHeightStr{
+	"0.1","0.2","0.05"
+};
+
+
+constexpr std::array<std::string_view, 3> ResinTypeStr{
+	"Temporary",
+	"Clear",
+	"Castable"
+};
 
 class SlicingConfiguration
 {
@@ -69,12 +99,6 @@ public:
 
     // configurations
     float layer_height = 0.1f; // in mm
-    float nozzle_width = 0.0f; // in mm (diameter) , for printers with nozzles
-    float wall_thickness = 2.0f; // in mm
-    float fill_thickness = 1.0f; // in mm
-    float infill_density = 0.3f;
-
-    float contraction_ratio = TEMPORARY_CONTRACTION_RATIO;
 
 	Invert slice_invert = Invert::InvertXAxis;
 	SlicingMode slicing_mode = SlicingMode::Uniform; // uniform OR adaptive
@@ -96,4 +120,3 @@ private:
 };
 extern SlicingConfiguration* scfg;
 
-#endif // CONFIGURATION_H

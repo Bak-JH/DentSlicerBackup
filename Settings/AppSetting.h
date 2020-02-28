@@ -1,17 +1,19 @@
 #pragma once
 #include "PrinterSetting.h"
 #include "DeployInfo.h"
+#include "JSONWriteSetting.h"
 namespace Hix
 {
 	namespace Settings
 	{
-		class AppSetting:public JSONParsedSetting
+		class AppSetting:public JSONParsedSetting, public JSONWriteSetting
 		{
 		public:
 			AppSetting();
 			~AppSetting();
-			void refresh() override;
+			void parseJSON() override;
 			void setPrinterPath(const std::string& path);
+			void settingChanged();
 			bool enableErrorReport;
 			std::string printerPresetPath;
 			std::string version;
@@ -20,7 +22,8 @@ namespace Hix
 		protected:
 			void parseJSONImpl(const rapidjson::Document& doc)override;
 			void initialize()override;
-			void settingChanged();
+			const std::filesystem::path& jsonPath()override;
+			rapidjson::Document doc()override;
 
 
 		};
