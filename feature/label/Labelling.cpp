@@ -24,8 +24,8 @@ GLModel* Hix::Features::LabellingMode::generatePreviewModel()
 	auto labelMesh = new Mesh();
 	QPainterPath painterPath;
 	painterPath.setFillRule(Qt::WindingFill);
-	//QFont font(_fontStyle->getIndex());
-	//painterPath.addText(0, 0, _font, QString::fromStdString(_inputText->getInputText()));
+	QFont font(_fontStyle->getSelectedItem());
+	painterPath.addText(0, 0, font, QString::fromStdString(_inputText->getInputText()));
 
 	auto width = painterPath.boundingRect().width();
 	auto height = painterPath.boundingRect().height();

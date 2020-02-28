@@ -5,6 +5,7 @@ import QtQuick.Controls.Styles 1.4
 import QtGraphicalEffects 1.12
 
 Hix.TextInputBox {
+	id: root
 	property alias label: label
 	Text {
 		id: label
@@ -15,22 +16,42 @@ Hix.TextInputBox {
 		color: "#666666"
 	}
 
-	TextField {
+	Rectangle {
 		id: control
 		width: parent.width * 0.56 //0.6
 		height: 26
-		placeholderText: qsTr("Enter text here")
 		anchors.right: parent.right
 		anchors.verticalCenter: parent.verticalCenter
-		background: Rectangle {
-			id: bgrect
-			color: control.hovered ? "#ffffff" : "#f6feff"
-			border.color: control.hovered ? "#b3bfc0": "#d3dfe0"
-			radius: 2
+		color: "#f6feff"
+		border.color: "#d3dfe0"
+		radius: 2
+
+		MouseArea
+		{
+			anchors.fill: parent
+			hoverEnabled: true
+			onEntered: {
+				control.color = "#ffffff"
+				control.border.color = "#b3bfc0"
+			}
+			onExited: {
+				control.color = "#f6feff"
+				control.border.color = "#d3dfe0"
+			}
 		}
 
-		onAccepted: {
-			parent.inputText = text
+		TextInput{
+			width: parent.width - 3
+			height: parent.height
+			font.family: openRegular.name
+			verticalAlignment :Qt.AlignVCenter
+			leftPadding : 10
+			layer.enabled: true
+			
+			onTextChanged: {
+				root.inputText = text
+			}
+			
 		}
 	}
 }
