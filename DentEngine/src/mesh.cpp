@@ -199,7 +199,7 @@ void Mesh::vertexOffset(float factor){
 	auto end = vertices.end();
 	for(auto vtxItr = vertices.begin(); vtxItr != end; ++vtxItr)
 	{
-		QVector3D tmp = vtxItr.localPosition() - vtxItr.localVn() * factor;
+		QVector3D tmp = vtxItr.localPosition() + vtxItr.localVn() * factor;
 		vtxItr.ref().position = tmp;
 	};
 	rehashVtcs();
