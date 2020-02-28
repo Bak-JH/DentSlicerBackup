@@ -63,6 +63,11 @@ int Hix::QML::Controls::DropdownBox::getIndex() const
 	return _index;
 }
 
+QString Hix::QML::Controls::DropdownBox::getSelectedItem() const
+{
+	return _dropList.at(_index);
+}
+
 void Hix::QML::Controls::DropdownBox::setIndex(int index)
 {
 	_index = index;

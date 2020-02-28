@@ -38,7 +38,7 @@ namespace Hix
 			class TextInputBox : public QQuickItem, public InputControl
 			{
 				Q_OBJECT
-					Q_PROPERTY(QString inputText MEMBER _text NOTIFY inputTextChanged)
+				Q_PROPERTY(QString inputText MEMBER _text NOTIFY inputTextChanged)
 
 			public:
 				TextInputBox(QQuickItem* parent = nullptr);
@@ -63,6 +63,7 @@ namespace Hix
 				DropdownBox(QQuickItem* parent = nullptr);
 				virtual ~DropdownBox();
 				int getIndex()const;
+				QString getSelectedItem()const;
 				void setIndex(int index);
 				void setList(QStringList list);
 
