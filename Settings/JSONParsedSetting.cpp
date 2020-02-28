@@ -80,12 +80,15 @@ std::optional<rapidjson::Value> Hix::Settings::JSON::tryParseObj(const rapidjson
 {
 	try
 	{
-		auto& genVal = doc[key.c_str()];
-		if (genVal.IsObject())
+		if (doc.HasMember(key.c_str()))
 		{
-			rapidjson::Value subObject;
-			subObject.CopyFrom(genVal, allocator);
-			return subObject;
+			auto& genVal = doc[key.c_str()];
+			if (genVal.IsObject())
+			{
+				rapidjson::Value subObject;
+				subObject.CopyFrom(genVal, allocator);
+				return subObject;
+			}
 		}
 	}
 	catch (...)

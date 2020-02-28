@@ -17,11 +17,15 @@ namespace Hix
 			{
 				try
 				{
-					auto& genVal = doc[key.c_str()];
-					if (genVal.Is<ValType>())
+					if (doc.HasMember(key.c_str()))
 					{
-						value = genVal.Get<ValType>();
+						auto& genVal = doc[key.c_str()];
+						if (genVal.Is<ValType>())
+						{
+							value = genVal.Get<ValType>();
+						}
 					}
+
 				}
 				catch (...)
 				{
@@ -48,16 +52,19 @@ namespace Hix
 			{
 				try
 				{
-					auto& genVal = doc[key.c_str()];
-					std::string str;
-					if (genVal.Is<std::string>())
+					if (doc.HasMember(key.c_str()))
 					{
-						str = genVal.Get<std::string>();
-						std::transform(str.begin(), str.end(), str.begin(), [](unsigned char c) { return std::tolower(c); });
-						auto enumResult = map.find(str);
-						if (enumResult != map.cend())
+						auto& genVal = doc[key.c_str()];
+						std::string str;
+						if (genVal.Is<std::string>())
 						{
-							value = enumResult->second;
+							str = genVal.Get<std::string>();
+							std::transform(str.begin(), str.end(), str.begin(), [](unsigned char c) { return std::tolower(c); });
+							auto enumResult = map.find(str);
+							if (enumResult != map.cend())
+							{
+								value = enumResult->second;
+							}
 						}
 					}
 				}
