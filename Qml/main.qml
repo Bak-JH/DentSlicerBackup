@@ -110,6 +110,13 @@ Item{
 				anchors.leftMargin: 72
 				anchors.topMargin: sidePadding
 			}
+			PopupSupport {
+				id: pp
+				anchors.top: parent.top
+				anchors.left: partList.right
+				anchors.leftMargin: 72
+				anchors.topMargin: sidePadding
+			}
 
 			PartList{
 				id: partList

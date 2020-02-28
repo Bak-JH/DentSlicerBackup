@@ -42,12 +42,21 @@ Hix::Features::SettingMode::~SettingMode()
 
 void Hix::Features::SettingMode::applyButtonClicked()
 {
-	auto newIndex = _printerPresets->getIndex();
-	if (newIndex != _oldIndex)
+	if (isDirty())
 	{
-		auto path = _presetPaths[newIndex];
+		//set settings
+		auto path = _presetPaths[_printerPresets->getIndex()];
 		auto& moddableSetting = Hix::Application::SettingsChanger::settings(Hix::Application::ApplicationManager::getInstance());
-		moddableSetting.setPrinterPath(path.string());
+		moddableSetting.setPrinterPath(path.filename().string());
+
+		//save settings
+		moddableSetting.writeJson();
+		moddableSetting.settingChanged();
 	}
+}
+
+bool Hix::Features::SettingMode::isDirty() const
+{
+	return _printerPresets->getIndex() != _oldIndex;
 }
 

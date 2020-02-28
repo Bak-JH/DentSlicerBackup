@@ -1,21 +1,12 @@
 #pragma once
 #include <unordered_map>
 #include <string>
+#include "ControlForwardInclude.h"
 class QQuickItem;
 namespace Hix
 {
 	namespace QML
 	{
-		//forward declare controls
-		class InputControl;
-		namespace Controls
-		{
-			class Button;
-			class ToggleSwitch;
-			class InputSpinBox;
-			class TextInputBox;
-			class DropdownBox;
-		}
 		class ControlOwner
 		{
 		public:

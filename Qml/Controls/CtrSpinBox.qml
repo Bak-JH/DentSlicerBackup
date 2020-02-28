@@ -78,7 +78,7 @@ Hix.InputSpinBox {
 			MouseArea {
 				anchors.fill: parent
 				hoverEnabled: true
-				onReleased: { root.value += 1.00 }
+				onReleased: { root.value += root.increment }
 				onEntered: { upindicator.source = "qrc:/Resource/triangle_up_hover.png" }
 				onExited: { upindicator.source = "qrc:/Resource/triangle_up.png" }
 			}
@@ -103,7 +103,7 @@ Hix.InputSpinBox {
 			MouseArea {
 				anchors.fill: parent
 				hoverEnabled: true
-				onReleased: { root.value -= 1.00 }
+				onReleased: { root.value -= root.increment }
 				onEntered: { downindicator.source = "qrc:/Resource/triangle_down_hover.png" }
 				onExited: { downindicator.source = "qrc:/Resource/triangle_down.png" }
 			}

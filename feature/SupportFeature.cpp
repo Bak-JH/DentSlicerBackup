@@ -127,6 +127,17 @@ Hix::Features::SupportMode::SupportMode()
 	: _targetModels(Hix::Application::ApplicationManager::getInstance().partManager().selectedModels()), DialogedMode(SUPPORT_POPUP_URL)
 {
 	Hix::Application::ApplicationManager::getInstance().getRayCaster().setHoverEnabled(true);
+
+
+	//Hix::QML::Controls::Button* _generateSupportsBttn;
+	//Hix::QML::Controls::Button* _clearSupportsBttn;
+	//Hix::QML::Controls::ToggleSwitch* _manualEditBttn;
+
+	//Hix::QML::Controls::DropdownBox* _suppTypeBttn;
+	//Hix::QML::Controls::DropdownBox* _suppDensityBttn;
+	//Hix::QML::Controls::DropdownBox* _maxRadBttn;
+	//Hix::QML::Controls::DropdownBox* _minRadBttn;
+	//Hix::QML::Controls::DropdownBox* _minRaftTypeBttn;
 }
 
 Hix::Features::SupportMode::~SupportMode()
@@ -203,6 +214,7 @@ void Hix::Features::SupportMode::regenerateRaft()
 
 void Hix::Features::SupportMode::applyButtonClicked()
 {
+	//do nothing
 }
 
 

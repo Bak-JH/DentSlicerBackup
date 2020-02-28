@@ -85,6 +85,21 @@ namespace Hix
 			void removeSupport(SupportModel* target);
 			friend class Hix::Support::SupportModel;
 			std::unordered_set<GLModel*> _targetModels;
+
+			//UI
+			Hix::QML::Controls::Button* _generateSupportsBttn;
+			Hix::QML::Controls::Button* _clearSupportsBttn;
+			Hix::QML::Controls::ToggleSwitch* _manualEditBttn;
+			//UI slicing options
+			Hix::QML::Controls::DropdownBox* _suppTypeDrop;
+			Hix::QML::Controls::DropdownBox* _suppDensityDrop;
+			Hix::QML::Controls::InputSpinBox* _maxRadSpin;
+			Hix::QML::Controls::InputSpinBox* _minRadSpin;
+			Hix::QML::Controls::DropdownBox* _minRaftTypeDrop;
+
+
+
+
 		};
 	}
 }

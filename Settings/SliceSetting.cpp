@@ -1,0 +1,71 @@
+#include "SliceSetting.h"
+#include <fstream>
+#include "../common/rapidjson/stringbuffer.h"
+#include "../common/rapidjson/PrettyWriter.h"
+#include "../common/rapidjson/ostreamwrapper.h"
+#include "../application/ApplicationManager.h"
+
+using namespace Hix::Settings;
+using namespace Hix::Settings::JSON;
+
+const std::unordered_map<std::string, SliceSetting::SlicingMode> __sliceModeMap
+{ {"Adaptive", SliceSetting::SlicingMode::Adaptive},{"Uniform", SliceSetting::SlicingMode::Uniform} };
+
+Hix::Settings::SliceSetting::SliceSetting()
+{
+}
+
+Hix::Settings::SliceSetting::~SliceSetting()
+{
+}
+
+void Hix::Settings::SliceSetting::setLayerHeight(float val)
+{
+	layerHeight = val;
+}
+
+void Hix::Settings::SliceSetting::setSliceMode(SlicingMode val)
+{
+	slicingMode = val;
+}
+
+void Hix::Settings::SliceSetting::setInvertX(bool val)
+{
+	invertX = val;
+}
+
+
+
+void Hix::Settings::SliceSetting::parseJSONImpl(const rapidjson::Document& doc)
+{
+	tryParse(doc, "layerHeight", layerHeight);
+	tryParse(doc, "invertX", invertX);
+	tryParseStrToEnum(doc, "slicingMode", slicingMode, __sliceModeMap);
+
+}
+
+
+void Hix::Settings::SliceSetting::initialize()
+{
+	layerHeight = 0.1f;
+	invertX = true;
+	slicingMode = SliceSetting::SlicingMode::Uniform;
+}
+
+
+
+const std::filesystem::path& Hix::Settings::SliceSetting::jsonPath()
+{
+	return _jsonPath;
+}
+
+rapidjson::Document Hix::Settings::SliceSetting::doc()
+{
+	rapidjson::Document doc;
+	doc.SetObject();
+	doc.AddMember("layerHeight", layerHeight, doc.GetAllocator());
+	doc.AddMember("invertX", invertX, doc.GetAllocator());
+	doc.AddMember("slicingMode", __sliceModeMap[slicingMode], doc.GetAllocator());
+
+	return doc;
+}
