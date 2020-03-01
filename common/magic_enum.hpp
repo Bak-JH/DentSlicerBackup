@@ -131,6 +131,50 @@ struct static_string<0> {
   constexpr operator std::string_view() const noexcept { return {}; }
 };
 
+inline constexpr std::size_t final_length(std::string_view str) noexcept
+{
+    std::size_t size = str.size();
+    for (size_t i = 1; i < str.size(); ++i)
+    {
+        const auto& ch = str[i];
+        if (ch >= 'A' && ch <= 'Z')
+        {
+            ++size;
+        }
+    }
+    return size;
+
+}
+
+template<std::size_t N>
+inline constexpr static_string<N> camel_to_spaced(std::string_view str) noexcept
+{
+    std::array<char, N> temp{};
+    if (str.size() > 0)
+    {
+        temp[0] = str[0];
+    }
+    size_t arrIdx = 1;
+    for (size_t i = arrIdx; i < str.size(); ++i)
+    {
+        const auto& ch = str[i];
+        if (ch >= 'A' && ch <= 'Z')
+        {
+            //capital letter, add space before, and add the char
+            temp[arrIdx++] = ' ';
+            temp[arrIdx++] = ch;
+        }
+        else
+        {
+            temp[arrIdx++] = ch;
+        }
+    }
+    std::string_view twice{ temp.data(), temp.size() };
+    return static_string<N>(twice);
+
+}
+
+
 constexpr std::string_view pretty_name(std::string_view name) noexcept {
   for (std::size_t i = name.size(); i > 0; --i) {
     if (!((name[i - 1] >= '0' && name[i - 1] <= '9') ||
@@ -196,7 +240,8 @@ constexpr auto n() noexcept {
 #  elif defined(_MSC_VER)
   constexpr auto name = pretty_name({__FUNCSIG__, sizeof(__FUNCSIG__) - 17});
 #  endif
-  return static_string<name.size()>{name};
+  constexpr auto decameled = camel_to_spaced<final_length(name)>(name);
+  return static_string<decameled.size()>{decameled};
 #else
   return std::string_view{}; // Unsupported compiler.
 #endif
