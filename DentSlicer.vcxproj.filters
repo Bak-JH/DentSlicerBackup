@@ -848,6 +848,9 @@
     <ClInclude Include="Settings\SliceSetting.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="common\magic_enum.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="debug\moc_predefs.h.cbt" />

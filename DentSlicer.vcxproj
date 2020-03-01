@@ -806,6 +806,7 @@
     <ClInclude Include="common\HetUniquePtr.h" />
     <ClInclude Include="common\indexedlist.h" />
     <ClInclude Include="common\IteratorWrapper.h" />
+    <ClInclude Include="common\magic_enum.hpp" />
     <ClInclude Include="common\moodycamel\atomicops.h" />
     <ClInclude Include="common\moodycamel\readerwriterqueue.h" />
     <ClInclude Include="common\Tree\BVHBuilder.h" />
