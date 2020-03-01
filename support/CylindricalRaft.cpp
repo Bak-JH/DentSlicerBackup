@@ -1,6 +1,5 @@
 ﻿#include "CylindricalRaft.h"
 #include "SupportRaftManager.h"
-#include "../DentEngine/src/configuration.h"
 #include "../feature/Extrude.h"
 #include "../feature/Shapes2D.h"
 #include <QTransform>

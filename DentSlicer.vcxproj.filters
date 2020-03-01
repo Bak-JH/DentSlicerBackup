@@ -73,7 +73,6 @@
     <ClCompile Include="feature\autoorientation.cpp" />
     <ClCompile Include="DentEngine\src\polyclipping\clipper\clipper.cpp" />
     <ClCompile Include="DentEngine\src\cmdlineparser.cpp" />
-    <ClCompile Include="DentEngine\src\configuration.cpp" />
     <ClCompile Include="feature\convex_hull.cpp" />
     <ClCompile Include="feature\CSG\CorkMeshFactory.cpp" />
     <ClCompile Include="feature\cut\DrawingPlane.cpp" />
@@ -205,6 +204,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Settings\SliceSetting.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Settings\SupportSetting.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -719,7 +721,6 @@
     <ClInclude Include="feature\autoorientation.h" />
     <ClInclude Include="DentEngine\src\polyclipping\clipper\clipper.hpp" />
     <ClInclude Include="DentEngine\src\cmdlineparser.h" />
-    <ClInclude Include="DentEngine\src\configuration.h" />
     <ClInclude Include="DentEngine\src\polyclipping\polyclipping.h" />
     <ClInclude Include="DentEngine\src\polyclipping\QDebugPolyclipping.h" />
     <ClInclude Include="feature\convex_hull.h" />
@@ -848,6 +849,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="common\magic_enum.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Settings\SupportSetting.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="DentEngine\src\mesh.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

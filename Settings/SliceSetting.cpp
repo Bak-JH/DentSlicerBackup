@@ -8,9 +8,12 @@
 using namespace Hix::Settings;
 using namespace Hix::Settings::JSON;
 
+constexpr auto SLICE_FILE("sliceSettings.json");
 
-Hix::Settings::SliceSetting::SliceSetting()
+Hix::Settings::SliceSetting::SliceSetting(std::filesystem::path settingsPath)
 {
+	settingsPath.append(SLICE_FILE);
+	_jsonPath = settingsPath;
 }
 
 Hix::Settings::SliceSetting::~SliceSetting()
@@ -36,18 +39,18 @@ void Hix::Settings::SliceSetting::setInvertX(bool val)
 
 void Hix::Settings::SliceSetting::parseJSONImpl(const rapidjson::Document& doc)
 {
-	tryParse(doc, "layerHeight", layerHeight);
-	tryParse(doc, "invertX", invertX);
-	tryParseStrToEnum(doc, "slicingMode", slicingMode, __sliceModeMap);
+	parse(doc, "layerHeight", layerHeight);
+	parse(doc, "invertX", invertX);
+	parseStrToEnum(doc, "slicingMode", slicingMode);
 
 }
 
 
 void Hix::Settings::SliceSetting::initialize()
 {
-	layerHeight = 0.1f;
-	invertX = true;
-	slicingMode = SliceSetting::SlicingMode::Uniform;
+	//layerHeight = 0.1f;
+	//invertX = true;
+	//slicingMode = SliceSetting::SlicingMode::Uniform;
 }
 
 
@@ -63,7 +66,7 @@ rapidjson::Document Hix::Settings::SliceSetting::doc()
 	doc.SetObject();
 	doc.AddMember("layerHeight", layerHeight, doc.GetAllocator());
 	doc.AddMember("invertX", invertX, doc.GetAllocator());
-	doc.AddMember("slicingMode", __sliceModeMap[slicingMode], doc.GetAllocator());
+	doc.AddMember("slicingMode", std::string(magic_enum::enum_name(slicingMode)), doc.GetAllocator());
 
 	return doc;
 }

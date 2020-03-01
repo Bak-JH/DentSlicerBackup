@@ -273,6 +273,7 @@
     <ClCompile Include="Qml\util\QMLUtil.cpp" />
     <ClCompile Include="Settings\JSONWriteSetting.cpp" />
     <ClCompile Include="Settings\SliceSetting.cpp" />
+    <ClCompile Include="Settings\SupportSetting.cpp" />
     <ClCompile Include="Tasking\Task.cpp" />
     <ClCompile Include="Tasking\TaskManager.cpp" />
     <ClCompile Include="common\Tree\BVHBuilder.cpp" />
@@ -300,7 +301,6 @@
     <ClCompile Include="feature\autoorientation.cpp" />
     <ClCompile Include="DentEngine\src\polyclipping\clipper\clipper.cpp" />
     <ClCompile Include="DentEngine\src\cmdlineparser.cpp" />
-    <ClCompile Include="DentEngine\src\configuration.cpp" />
     <ClCompile Include="feature\convex_hull.cpp" />
     <ClCompile Include="feature\CSG\CorkMeshFactory.cpp" />
     <ClCompile Include="feature\cut\DrawingPlane.cpp" />
@@ -851,6 +851,7 @@
     <ClInclude Include="common\rapidjson\stringbuffer.h" />
     <ClInclude Include="common\rapidjson\writer.h" />
     <ClInclude Include="common\Singleton.h" />
+    <ClInclude Include="DentEngine\src\mesh.h" />
     <ClInclude Include="feature\settingMode.h" />
     <ClInclude Include="feature\CopyPaste.h" />
     <ClInclude Include="feature\FeaturesLoader.h" />
@@ -886,6 +887,7 @@
     <ClInclude Include="Qml\util\QMLUtil.h" />
     <ClInclude Include="Settings\JSONWriteSetting.h" />
     <ClInclude Include="Settings\SliceSetting.h" />
+    <ClInclude Include="Settings\SupportSetting.h" />
     <ClInclude Include="support\SupportModel.h" />
     <ClInclude Include="Tasking\Task.h" />
     <ClInclude Include="common\taskflow\core\executor.hpp" />
@@ -951,7 +953,6 @@
     <ClInclude Include="feature\autoorientation.h" />
     <ClInclude Include="DentEngine\src\polyclipping\clipper\clipper.hpp" />
     <ClInclude Include="DentEngine\src\cmdlineparser.h" />
-    <ClInclude Include="DentEngine\src\configuration.h" />
     <ClInclude Include="DentEngine\src\polyclipping\polyclipping.h" />
     <ClInclude Include="DentEngine\src\polyclipping\QDebugPolyclipping.h" />
     <ClInclude Include="feature\convex_hull.h" />

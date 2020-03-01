@@ -161,12 +161,12 @@ Hix::Features::FeatureContainer* Hix::Features::SupportMode::generateAutoSupport
 	if (!Hix::Application::ApplicationManager::getInstance().supportRaftManager().supportsEmpty())
 		return nullptr;
 
-	Hix::Application::ApplicationManager::getInstance().supportRaftManager().setSupportType(scfg->support_type);
+	//Hix::Application::ApplicationManager::getInstance().supportRaftManager().setSupportType(scfg->support_type);
 	Hix::Features::FeatureContainer* container = new FeatureContainer();
 
 	for (auto selectedModel : models)
 	{
-		if (scfg->support_type != SlicingConfiguration::SupportType::None)
+		if (Hix::Application::ApplicationManager::getInstance().settings().supportSetting.supportType != Hix::Settings::SupportSetting::SupportType::None)
 		{
 			container->addFeature(new Move(selectedModel, QVector3D(0, 0, Hix::Support::SupportRaftManager::supportRaftMinLength())));
 		}

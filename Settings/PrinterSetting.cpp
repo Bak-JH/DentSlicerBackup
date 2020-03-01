@@ -4,10 +4,6 @@ using namespace Hix::Settings::JSON;
 using namespace Hix::Settings;
 constexpr size_t MAX_NAME_LEN = 200;
 
-const std::unordered_map<std::string, PrinterSetting::InfoFileType> __infoFileMap
-	{ {"hix", PrinterSetting::InfoFileType::Hix},{"3delight", PrinterSetting::InfoFileType::ThreeDelight} };
-const std::unordered_map<std::string, PrinterSetting::BedShape> __bedShapeMap
-	{ {"circle", PrinterSetting::BedShape::Circle},{"rectangle", PrinterSetting::BedShape::Rect} };
 
 
 Hix::Settings::PrinterSetting::PrinterSetting(): _allocator(&_buffer, _buffer.size())
@@ -38,13 +34,13 @@ void Hix::Settings::PrinterSetting::initialize()
 void Hix::Settings::PrinterSetting::parseJSONImpl(const rapidjson::Document& doc)
 {
 	parse(doc, "presetName", presetName);
-	tryParseStrToEnum(doc, "infoFileType", infoFileType, __infoFileMap);
+	tryParseStrToEnum(doc, "infoFileType", infoFileType);
 	parse(doc, "sliceImageResolutionX", sliceImageResolutionX);
 	parse(doc, "sliceImageResolutionY", sliceImageResolutionY);
 	parse(doc, "screenX", screenX);
 	parse(doc, "screenY", screenY);
 	parse(doc, "bedHeight", bedHeight);
-	parseStrToEnum(doc, "bedShape", bedShape, __bedShapeMap);
+	parseStrToEnum(doc, "bedShape", bedShape);
 	tryParse(doc, "bedOffsetX", bedOffsetX);
 	tryParse(doc, "bedOffsetY", bedOffsetY);
 	bedBound.setZMax(bedHeight);

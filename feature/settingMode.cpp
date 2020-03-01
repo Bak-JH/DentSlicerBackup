@@ -50,7 +50,7 @@ void Hix::Features::SettingMode::applyButtonClicked()
 		moddableSetting.setPrinterPath(path.filename().string());
 
 		//save settings
-		moddableSetting.writeJson();
+		moddableSetting.writeJSON();
 		moddableSetting.settingChanged();
 	}
 }

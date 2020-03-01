@@ -16,7 +16,7 @@
 #include <QDir>
 #include <QMatrix3x3>
 #include <Qt3DCore/qpropertyupdatedchange.h>
-#include "DentEngine/src/configuration.h"
+
 #include "feature/Extrude.h"
 #include "feature/cut/modelcut.h"
 #include "feature/cut/DrawingPlane.h"

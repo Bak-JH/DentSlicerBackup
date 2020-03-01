@@ -1,6 +1,8 @@
 #pragma once
 #include <filesystem>
 #include "../common/rapidjson/document.h"
+#include "../common/magic_enum.hpp"
+
 #include <string>
 #include <unordered_map>
 #include <algorithm>
@@ -48,7 +50,7 @@ namespace Hix
 
 			//assume lower case strings for mapping
 			template<typename ValType>
-			void tryParseStrToEnum(const rapidjson::Document& doc, const std::string& key, ValType& value, const std::unordered_map<std::string, ValType>& map)
+			void tryParseStrToEnum(const rapidjson::Document& doc, const std::string& key, ValType& value)
 			{
 				try
 				{
@@ -59,11 +61,10 @@ namespace Hix
 						if (genVal.Is<std::string>())
 						{
 							str = genVal.Get<std::string>();
-							std::transform(str.begin(), str.end(), str.begin(), [](unsigned char c) { return std::tolower(c); });
-							auto enumResult = map.find(str);
-							if (enumResult != map.cend())
+							auto optEnum = magic_enum::enum_cast<ValType>(str);
+							if (optEnum)
 							{
-								value = enumResult->second;
+								value = optEnum.value();
 							}
 						}
 					}
@@ -73,20 +74,16 @@ namespace Hix
 				}
 			}
 			template<typename ValType>
-			void parseStrToEnum(const rapidjson::Document& doc, const std::string& key, ValType& value, const std::unordered_map<std::string, ValType>& map)
+			void parseStrToEnum(const rapidjson::Document& doc, const std::string& key, ValType& value)
 			{
 				auto& genVal = doc[key.c_str()];
 				std::string str;
 				if (genVal.Is<std::string>())
 				{
 					str = genVal.Get<std::string>();
-					std::transform(str.begin(), str.end(), str.begin(), [](unsigned char c) { return std::tolower(c); });
-					auto enumResult = map.find(str);
-					if (enumResult != map.cend())
-					{
-						value = enumResult->second;
-						return;
-					}
+					str = genVal.Get<std::string>();
+					value = magic_enum::enum_cast<ValType>(str).value();
+
 				}
 				throw std::runtime_error("failed to parse " + key);
 			}

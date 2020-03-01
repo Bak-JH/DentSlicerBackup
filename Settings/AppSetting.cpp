@@ -8,16 +8,15 @@
 using namespace Hix::Settings;
 using namespace Hix::Settings::JSON;
 typedef rapidjson::GenericStringBuffer<rapidjson::UTF8<>, rapidjson::MemoryPoolAllocator<>> StringBuffer;
-constexpr auto SETTING_FILE("/settings.json");
-constexpr auto SLICE_FILE("/sliceSettings.json");
+constexpr auto SETTING_FILE("settings.json");
 constexpr auto SUPPORT_FILE("/supportSettings.json");
 
-Hix::Settings::AppSetting::AppSetting()
+Hix::Settings::AppSetting::AppSetting(): sliceSetting(deployInfo.settingsDir), supportSetting(deployInfo.settingsDir)
 {
 	auto appSettingsPath = deployInfo.settingsDir;
 	//appSettingsPath.append("/settings.json");
 	//parseJSON(appSettingsPath);
-	appSettingsPath.append("settings.json");
+	appSettingsPath.append(SETTING_FILE);
 	_jsonPath = appSettingsPath;
 }
 
@@ -30,16 +29,15 @@ void Hix::Settings::AppSetting::parseJSON()
 	//auto printerPath = std::filesystem::current_path();
 //printerPath.append(printerPresetPath);
 //printerSetting.parseJSON(printerPath);
-	JSONParsedSetting::parseJSON();
 	deployInfo.parseJSON();
+	JSONParsedSetting::parseJSON();
 	printerSetting.parseJSON(printerPresetPath);
+	sliceSetting.parseJSON();
+	supportSetting.parseJSON();
 	settingChanged();
 }
 
-void Hix::Settings::AppSetting::setPrinterPath(const std::string& path)
-{
-	printerPresetPath = path;
-}
+
 
 void Hix::Settings::AppSetting::parseJSONImpl(const rapidjson::Document& doc)
 {
@@ -59,6 +57,14 @@ void Hix::Settings::AppSetting::initialize()
 void Hix::Settings::AppSetting::settingChanged()
 {
 	Hix::Application::ApplicationManager::getInstance().sceneManager().drawBed();
+}
+
+void Hix::Settings::AppSetting::writeJSON()
+{
+	__super::writeJSON();
+	//sliceSetting.writeJSON();
+	//supportSetting.parseJSON();
+
 }
 
 const std::filesystem::path& Hix::Settings::AppSetting::jsonPath()

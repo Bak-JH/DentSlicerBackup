@@ -76,7 +76,7 @@ void Hix::Features::LayerView::crossSectionSliderSignal(int value)
 	}
 
 
-	float h = scfg->layer_height * value + _modelsBound.zMin();
+	float h = Hix::Application::ApplicationManager::getInstance().settings().sliceSetting.layerHeight* value + _modelsBound.zMin();
 	// change phong material of original model
 	for (auto& model : _models)
 	{

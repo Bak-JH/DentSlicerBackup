@@ -1,6 +1,6 @@
 #pragma once
 
-#include "DentEngine/src/configuration.h"
+#include "../Settings/SupportSetting.h"
 #include "VerticalSupportModel.h"
 
 class GLModel;
@@ -33,7 +33,6 @@ namespace Hix
 			void  setSupportEditMode(EditMode mode);
 			//coordinate for bottom of support and raft
 
-			void setSupportType(SlicingConfiguration::SupportType supType);
 			SupportModel* addSupport(const OverhangDetect::Overhang& overhang);
 			SupportModel* addSupport(std::unique_ptr<SupportModel> target);
 			std::unique_ptr<SupportModel> removeSupport(SupportModel* e);
@@ -61,7 +60,7 @@ namespace Hix
 			Qt3DCore::QEntity _root;
 			std::vector<QVector3D> getSupportBasePts()const;
 			EditMode _supportEditMode = EditMode::None;
-			SlicingConfiguration::SupportType _supportType;
+			Hix::Settings::SupportSetting::SupportType _supportType;
 			std::unordered_map<SupportModel*, std::unique_ptr<SupportModel>> _supports;
 			std::unique_ptr<RaftModel> _raft;
 			std::unique_ptr<RayCaster> _rayCaster;

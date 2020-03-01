@@ -20,6 +20,9 @@ namespace Hix
 	namespace Features
 	{
 		class SettingMode;
+		class SupportMode;
+		class SliceExportMode;
+
 	}
 	namespace QML
 	{
@@ -81,6 +84,10 @@ namespace Hix
 		private:
 			static Hix::Settings::AppSetting& settings(Hix::Application::ApplicationManager& appMan);
 			friend class Hix::Features::SettingMode;
+			friend class Hix::Features::SupportMode;
+			friend class Hix::Features::SliceExportMode;
+
+
 		};
 
 
