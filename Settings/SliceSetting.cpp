@@ -8,8 +8,6 @@
 using namespace Hix::Settings;
 using namespace Hix::Settings::JSON;
 
-const std::unordered_map<std::string, SliceSetting::SlicingMode> __sliceModeMap
-{ {"Adaptive", SliceSetting::SlicingMode::Adaptive},{"Uniform", SliceSetting::SlicingMode::Uniform} };
 
 Hix::Settings::SliceSetting::SliceSetting()
 {

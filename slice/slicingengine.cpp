@@ -122,7 +122,7 @@ SlicingEngine::Result SlicingEngine::sliceModels(bool isTemp, float zMax,
 	auto bounds = Hix::Engine3D::combineBounds(models).lengths();
 	int64_t area = 0;
 
-	float volume = ((float)(area / pow(Hix::Application::ApplicationManager::getInstance().settings().printerSetting.pixelPerMMX()/ scfg->contraction_ratio, 2)) / 1000000) * scfg->layer_height;
+	float volume = ((float)(area / pow(Hix::Application::ApplicationManager::getInstance().settings().printerSetting.pixelPerMMX(), 2)) / 1000000) * scfg->layer_height;
     //Hix::Application::ApplicationManager::getInstance().setProgress(1);
     QStringList name_word = filename.split("/");
 
