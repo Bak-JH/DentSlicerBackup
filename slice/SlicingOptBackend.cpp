@@ -168,12 +168,12 @@ void SlicingOptBackend::onOptionChanged(QString opName, QVariant newVal)
 	}
 	else if (opName == "Support min radius")
 	{
-		_config->support_radius_min = std::stof(std::string(SupportRadiusMin[toInt]));
+		_config->supportRadiusMin = std::stof(std::string(SupportRadiusMin[toInt]));
 
 	}
 	else if (opName == "Support max radius")
 	{
-		_config->support_radius_max = std::stof(std::string(SupportRadiusMax[toInt]));
+		_config->supportRadiusMax = std::stof(std::string(SupportRadiusMax[toInt]));
 	}
 	else if (opName == "Slice image inversion")
 	{

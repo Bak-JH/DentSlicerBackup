@@ -1,4 +1,5 @@
 {
-    "printerPresetPath": "C:\\Users\\legok\\source\\repos\\DentStudio/PrinterPresets\\HixCapsule.json",
-    "enableErrorReport": true
+    "layerHeight": 0.1,
+    "slicingMode": "Uniform",
+    "invertX": true
 }

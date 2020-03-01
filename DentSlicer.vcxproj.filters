@@ -72,7 +72,6 @@
     <ClCompile Include="feature\arrange\SkylineBinPack.cpp" />
     <ClCompile Include="feature\autoorientation.cpp" />
     <ClCompile Include="DentEngine\src\polyclipping\clipper\clipper.cpp" />
-    <ClCompile Include="DentEngine\src\cmdlineparser.cpp" />
     <ClCompile Include="feature\convex_hull.cpp" />
     <ClCompile Include="feature\CSG\CorkMeshFactory.cpp" />
     <ClCompile Include="feature\cut\DrawingPlane.cpp" />
@@ -720,7 +719,6 @@
     <ClInclude Include="feature\arrange\SkylineBinPack.h" />
     <ClInclude Include="feature\autoorientation.h" />
     <ClInclude Include="DentEngine\src\polyclipping\clipper\clipper.hpp" />
-    <ClInclude Include="DentEngine\src\cmdlineparser.h" />
     <ClInclude Include="DentEngine\src\polyclipping\polyclipping.h" />
     <ClInclude Include="DentEngine\src\polyclipping\QDebugPolyclipping.h" />
     <ClInclude Include="feature\convex_hull.h" />

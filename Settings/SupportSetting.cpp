@@ -33,6 +33,10 @@ void Hix::Settings::SupportSetting::parseJSONImpl(const rapidjson::Document& doc
 	parseStrToEnum(doc, "raftType", raftType);
 }
 
+void Hix::Settings::SupportSetting::initialize()
+{
+}
+
 
 
 
@@ -55,6 +59,3 @@ rapidjson::Document Hix::Settings::SupportSetting::doc()
 	return doc;
 }
 
-void Hix::Settings::SupportSetting::setSupportType(SupportType val)
-{
-}

@@ -1,6 +1,5 @@
 #include "svgexporter.h"
 #include "slicer.h"
-#include "configuration.h"
 
 #include "../common/rapidjson/stringbuffer.h"
 #include "../common/rapidjson/writer.h"
@@ -23,7 +22,8 @@ namespace SVGexporterPrivate
 
 
 void SVGexporter::exportSVG(Slices& shellSlices,QString outfoldername, bool isTemp){
-    if (isTemp || scfg->slice_invert == SlicingConfiguration::Invert::InvertXAxis)
+    auto& setting = Hix::Application::ApplicationManager::getInstance().settings().sliceSetting;
+    if (isTemp || setting.invertX)
         _invert = true;
     else
         _invert = false;
@@ -45,10 +45,10 @@ void SVGexporter::exportSVG(Slices& shellSlices,QString outfoldername, bool isTe
 		PolyTree& shellSlice_polytree = shellSlices[i].polytree;
         outfile.open(QFile::WriteOnly);
         writeHeader(contentStream);
-        if (scfg->slicing_mode == SlicingConfiguration::SlicingMode::Uniform)
-            writeGroupHeader(currentSlice_idx, scfg->layer_height*(currentSlice_idx+1), contentStream);
+        if (setting.slicingMode == Hix::Settings::SliceSetting::SlicingMode::Uniform)
+            writeGroupHeader(currentSlice_idx, Hix::Application::ApplicationManager::getInstance().settings().sliceSetting.layerHeight*(currentSlice_idx+1), contentStream);
         else
-            writeGroupHeader(currentSlice_idx, scfg->layer_height*(currentSlice_idx+1), contentStream);
+            writeGroupHeader(currentSlice_idx, Hix::Application::ApplicationManager::getInstance().settings().sliceSetting.layerHeight*(currentSlice_idx+1), contentStream);
         
         for (int j=0; j<shellSlice_polytree.ChildCount(); j++){
             parsePolyTreeAndWrite(shellSlice_polytree.Childs[j], contentStream);
@@ -83,9 +83,8 @@ void SVGexporter::exportSVG(Slices& shellSlices,QString outfoldername, bool isTe
 	char cbuf[1024]; rapidjson::MemoryPoolAllocator<> allocator(cbuf, sizeof cbuf);
 	rapidjson::Document doc(&allocator, 256);
 	doc.SetObject();
-	doc.AddMember("layer_height", round(scfg->layer_height * 100) / 100, allocator);
+	doc.AddMember("layer_height", round(Hix::Application::ApplicationManager::getInstance().settings().sliceSetting.layerHeight * 100) / 100, allocator);
 	doc.AddMember("total_layer", currentSlice_idx, allocator);
-	doc.AddMember("resin_type", (uint8_t)scfg->resin_type, allocator);
 	auto& printerConst = printerSetting.printerConstants;
 	if (printerConst)
 	{
@@ -125,7 +124,7 @@ illumination time = 6\r\n\
 number of override slices = 0\r\n\
 override illumination time = 10\r\n\
 build time estimation = 2718\r\n\
-material consumption estimation = 29.9781\r\n").arg(QString::number((int)(scfg->layer_height*1000)), QString::number(max_slices)).toStdString().data());
+material consumption estimation = 29.9781\r\n").arg(QString::number((int)(Hix::Application::ApplicationManager::getInstance().settings().sliceSetting.layerHeight*1000)), QString::number(max_slices)).toStdString().data());
 
 
     // do run svg 2 png
@@ -139,7 +138,7 @@ material consumption estimation = 29.9781\r\n").arg(QString::number((int)(scfg->
         renderer.render(&painter);
         QString savesvgfilename = "S" + QString::number(i).rightJustified(6,'0') + "_P1.png";
         image.save(outfoldername + "/" + savesvgfilename);
-        buildscriptfile.write(QString("%1, %2, %3\r\n").arg(QString::number(i*scfg->layer_height), savesvgfilename, "6.0").toStdString().data());
+        buildscriptfile.write(QString("%1, %2, %3\r\n").arg(QString::number(i*Hix::Application::ApplicationManager::getInstance().settings().sliceSetting.layerHeight), savesvgfilename, "6.0").toStdString().data());
     }
     buildscriptfile.close();
 
@@ -196,10 +195,10 @@ Edge width = 1\r\n\
 Edge thickness = 1\r\n\
 Distance to Part = 1\r\n\
 Max offset from Part = -1\r\n\
-Grid Base Plate Type = None").arg(QString::number((int)(scfg->layer_height*1000)),
+Grid Base Plate Type = None").arg(QString::number((int)(Hix::Application::ApplicationManager::getInstance().settings().sliceSetting.layerHeight*1000)),
             QString::number(printerSetting.bedBound.lengthX()), QString::number(printerSetting.bedBound.lengthY()),
             QString::number(printerSetting.sliceImageResolutionX), QString::number(printerSetting.sliceImageResolutionY),
-            QString::number(scfg->layer_height)).toStdString().data());
+            QString::number(Hix::Application::ApplicationManager::getInstance().settings().sliceSetting.layerHeight)).toStdString().data());
     parametersfile.close();
 
 }

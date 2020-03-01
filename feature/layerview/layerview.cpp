@@ -37,7 +37,7 @@ Hix::Features::LayerView::LayerView(const std::unordered_set<GLModel*>& selected
 	}
 	//Hix::Application::ApplicationManager::getInstance().layerViewPopup->setProperty("visible", true);
 	//Hix::Application::ApplicationManager::getInstance().layerViewSlider->setProperty("visible", true);
-	//QMetaObject::invokeMethod(Hix::Application::ApplicationManager::getInstance().layerViewSlider, "setThickness", Q_ARG(QVariant, (scfg->layer_height)));
+	//QMetaObject::invokeMethod(Hix::Application::ApplicationManager::getInstance().layerViewSlider, "setThickness", Q_ARG(QVariant, (Hix::Application::ApplicationManager::getInstance().settings().sliceSetting.layerHeight)));
 	//QMetaObject::invokeMethod(Hix::Application::ApplicationManager::getInstance().layerViewSlider, "setHeight",
 	//	Q_ARG(QVariant,	(_modelsBound.zMax() - _modelsBound.zMin() + scfg->raft_thickness + scfg->support_base_height)));
 
@@ -65,7 +65,7 @@ void Hix::Features::LayerView::crossSectionSliderSignal(int value)
 	float zlength = _modelsBound.lengthZ();
 	_crossSectionPlane.transform().setTranslation(QVector3D(0, 0, _modelsBound.zMin() + (double)value * zlength / (double)_maxLayer));
 
-	//_transform.setTranslation(QVector3D(0, 0, value * scfg->layer_height - scfg->raft_thickness - scfg->support_base_height));
+	//_transform.setTranslation(QVector3D(0, 0, value * Hix::Application::ApplicationManager::getInstance().settings().sliceSetting.layerHeight - scfg->raft_thickness - scfg->support_base_height));
 
 
 	QDir dir(QDir::tempPath() + "_export");
