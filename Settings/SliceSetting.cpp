@@ -20,21 +20,6 @@ Hix::Settings::SliceSetting::~SliceSetting()
 {
 }
 
-void Hix::Settings::SliceSetting::setLayerHeight(float val)
-{
-	layerHeight = val;
-}
-
-void Hix::Settings::SliceSetting::setSliceMode(SlicingMode val)
-{
-	slicingMode = val;
-}
-
-void Hix::Settings::SliceSetting::setInvertX(bool val)
-{
-	invertX = val;
-}
-
 
 
 void Hix::Settings::SliceSetting::parseJSONImpl(const rapidjson::Document& doc)
@@ -48,9 +33,6 @@ void Hix::Settings::SliceSetting::parseJSONImpl(const rapidjson::Document& doc)
 
 void Hix::Settings::SliceSetting::initialize()
 {
-	//layerHeight = 0.1f;
-	//invertX = true;
-	//slicingMode = SliceSetting::SlicingMode::Uniform;
 }
 
 

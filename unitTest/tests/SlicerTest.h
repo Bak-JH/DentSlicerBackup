@@ -126,7 +126,7 @@ namespace SlicerTest
 			{
 			}
 
-			//float delta = scfg->layer_height;
+			//float delta = Hix::Application::ApplicationManager::getInstance().settings().sliceSetting.layerHeight;
 			//std::vector<std::vector<Contour>> contoursPerPlane;
 			//std::vector<float> planes;
 

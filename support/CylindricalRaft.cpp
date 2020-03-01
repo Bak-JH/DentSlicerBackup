@@ -8,7 +8,7 @@
 #include <pcl/surface/convex_hull.h>
 #include <pcl/point_types.h>
 #include "../render/LineMeshEntity.h"
-
+#include "../application/ApplicationManager.h"
 constexpr float RAFT_JOINT_CNT = 2;
 
 using namespace Qt3DCore;
@@ -60,7 +60,7 @@ void Hix::Support::CylindricalRaft::generateMeshForContour(Mesh* mesh, const std
 
 	//path is simple cylinder starting from 0,0,0 to 0,0,raft_height
 	path.emplace_back(QVector3D(0, 0, _manager->raftBottom()));
-	path.emplace_back(QVector3D(0, 0, scfg->raft_thickness));
+	path.emplace_back(QVector3D(0, 0, Hix::Application::ApplicationManager::getInstance().settings().supportSetting.raftThickness));
 
 	//create cylinder walls
 	std::vector<std::vector<QVector3D>> jointContours;
@@ -80,7 +80,7 @@ void Hix::Support::CylindricalRaft::generateMesh(const std::vector<QVector3D>& o
 	auto mesh = new Mesh();
 	//generate square for each overhang
 	//std::vector<std::vector<QVector3D>> cylinders;
-	auto square = Hix::Shapes2D::generateSquare(scfg->support_radius_max *1.8);
+	auto square = Hix::Shapes2D::generateSquare(Hix::Application::ApplicationManager::getInstance().settings().supportSetting.supportRadiusMax *1.8);
 
 	std::vector<QVector3D> contourPoints;
 	contourPoints.reserve(4 * overhangs.size());

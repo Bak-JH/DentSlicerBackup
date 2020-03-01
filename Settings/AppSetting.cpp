@@ -26,12 +26,13 @@ Hix::Settings::AppSetting::~AppSetting()
 
 void Hix::Settings::AppSetting::parseJSON()
 {
-	//auto printerPath = std::filesystem::current_path();
-//printerPath.append(printerPresetPath);
-//printerSetting.parseJSON(printerPath);
+
 	deployInfo.parseJSON();
 	JSONParsedSetting::parseJSON();
-	printerSetting.parseJSON(printerPresetPath);
+
+	auto printerPath = std::filesystem::current_path();
+	printerPath.append(printerPresetPath);
+	printerSetting.parseJSON(printerPath);
 	sliceSetting.parseJSON();
 	supportSetting.parseJSON();
 	settingChanged();

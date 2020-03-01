@@ -2,7 +2,6 @@
 #include "../../feature/Shapes2D.h"
 #include "SlicerDebug.h"
 #include "SlicerDebugInfoExport.h"
-#include "configuration.h"
 using namespace Hix::Slicer;
 using namespace Hix::Engine3D;
 using namespace Hix::Shapes2D;

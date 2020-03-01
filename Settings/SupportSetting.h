@@ -32,15 +32,6 @@ namespace Hix
 			float supportBaseHeight;
 			float raftThickness;
 
-			//void setSupportType(SupportType val);
-			//void setRaftType(RaftType val);
-
-			//void setSupportRadiusMax(float val);
-			//void setSupportRadiusMin(float val);
-			//void setSupportDensity(float val);
-			//void setSupportBaseHeight(float val);
-			//void setRaftThickness(float val);
-
 
 		protected:
 			void parseJSONImpl(const rapidjson::Document& doc)override;

@@ -28,7 +28,8 @@ Hix::Support::SupportRaftManager::~SupportRaftManager()
 
 float Hix::Support::SupportRaftManager::supportRaftMinLength()
 {
-	return Hix::Application::ApplicationManager::getInstance().settings().supportSetting.raftThickness+ scfg->support_base_height;
+	auto& setting = Hix::Application::ApplicationManager::getInstance().settings().supportSetting;
+	return setting.raftThickness + setting.supportBaseHeight;
 }
 
 float Hix::Support::SupportRaftManager::raftBottom()
@@ -41,7 +42,8 @@ float Hix::Support::SupportRaftManager::supportBottom()
 {
 	constexpr float FACTOR = 5.0f;
 	//to prevent z-fighting between raft and support bottoms
-	return Hix::Application::ApplicationManager::getInstance().settings().supportSetting->raft_thickness/ FACTOR;
+	auto& setting = Hix::Application::ApplicationManager::getInstance().settings().supportSetting;
+	return setting.raftThickness/ FACTOR;
 }
 
 

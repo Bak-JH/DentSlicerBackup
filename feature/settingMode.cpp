@@ -47,7 +47,7 @@ void Hix::Features::SettingMode::applyButtonClicked()
 		//set settings
 		auto path = _presetPaths[_printerPresets->getIndex()];
 		auto& moddableSetting = Hix::Application::SettingsChanger::settings(Hix::Application::ApplicationManager::getInstance());
-		moddableSetting.setPrinterPath(path.filename().string());
+		moddableSetting.printerPresetPath = path.filename().string();
 
 		//save settings
 		moddableSetting.writeJSON();

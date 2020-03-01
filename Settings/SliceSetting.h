@@ -16,12 +16,10 @@ namespace Hix
 
 			SliceSetting(std::filesystem::path settingsPath);
 			~SliceSetting();
+
 			float layerHeight;
 			SlicingMode slicingMode;
 			bool invertX;
-			void setLayerHeight(float);
-			void setSliceMode(SlicingMode);
-			void setInvertX(bool);
 
 		protected:
 			void parseJSONImpl(const rapidjson::Document& doc)override;
