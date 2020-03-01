@@ -19,7 +19,7 @@ Item{
         visible: false
 
         objectName: "mainWindow"
-        property alias mttab : mttab
+        // property alias mttab : mttab
         property alias mainFont : mainFont
 		property alias openRegular: openRegular
 		property alias openSemiBold: openSemiBold
@@ -110,14 +110,6 @@ Item{
 				anchors.leftMargin: 72
 				anchors.topMargin: sidePadding
 			}
-			PopupSupport {
-				id: pp
-				anchors.top: parent.top
-				anchors.left: partList.right
-				anchors.leftMargin: 72
-				anchors.topMargin: sidePadding
-			}
-
 			PartList{
 				id: partList
 				//width : 265
@@ -158,22 +150,13 @@ Item{
 				anchors.rightMargin: sidePadding + 15
 			}
 			
-			LeftTabExport{
-				id : lefttabExport
-				width : 264
-				height : parent.height - featureMenu.height
-
-				anchors.top: featureMenu.bottom
-				anchors.left: partList.right
-				visible: false
-			}
 			
-			MeshTransformerTab{
-				id:mttab
-				objectName: "mttab"
-				anchors.left: partList.right
-				anchors.top : featureMenu.bottom
-			}
+			// MeshTransformerTab{
+			// 	id:mttab
+			// 	objectName: "mttab"
+			// 	anchors.left: partList.right
+			// 	anchors.top : featureMenu.bottom
+			// }
 
 			Item {
 				id: featureArea
@@ -245,7 +228,7 @@ Item{
 				}
 				onReleased:  {
 					mode = 0;
-					mttab.updatePosition()
+					// mttab.updatePosition()
 				}
 
 				onPositionChanged: {
@@ -287,13 +270,13 @@ Item{
 						v_c = v_c.plus(v_relative);
 						sceneRoot.cm.camera.translateWorld(v_c.times(0.08));
 
-						mttab.updatePosition();
+						// mttab.updatePosition();
 					}
 					else {
 						sceneRoot.systemTransform.scale3D = scaleTmp.times(0.92);
 						v_c = v_c.plus(v_relative);
 						sceneRoot.cm.camera.translateWorld(v_c.times(-0.08));
-						mttab.updatePosition();
+						// mttab.updatePosition();
 					}
 					sceneRoot.cameraViewChanged();
 				}

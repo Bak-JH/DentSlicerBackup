@@ -75,8 +75,9 @@ FeaturePopup {
 		id: supportsettingpopup
 		width: 296
 		height: 224
-		anchors.topMargin: 42
-		// anchors.left: 42
+		anchors.topMargin: 37
+		anchors.left: generatesupports.right
+		anchors.leftMargin: 30
 
 		CtrDropdownBox {
 			id: supporttype

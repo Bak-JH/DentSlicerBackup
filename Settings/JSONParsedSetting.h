@@ -81,8 +81,8 @@ namespace Hix
 				if (genVal.Is<std::string>())
 				{
 					str = genVal.Get<std::string>();
-					str = genVal.Get<std::string>();
 					value = magic_enum::enum_cast<ValType>(str).value();
+					return;
 
 				}
 				throw std::runtime_error("failed to parse " + key);
