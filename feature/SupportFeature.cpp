@@ -5,9 +5,12 @@
 #include "support/RaftModel.h"
 #include "application/ApplicationManager.h"
 #include "../../glmodel.h"
+#include "../Qml/components/Inputs.h"
+#include "../Qml/components/Buttons.h"
 
 using namespace Hix::Features;
 using namespace Hix::Application;
+using namespace Hix::Settings;
 /////////////////////
 ///  Add Support  ///
 /////////////////////
@@ -128,16 +131,20 @@ Hix::Features::SupportMode::SupportMode()
 {
 	Hix::Application::ApplicationManager::getInstance().getRayCaster().setHoverEnabled(true);
 
+	auto& co = controlOwner();
+	co.getControl(_generateSupportsBttn, "generatesupports");
+	co.getControl(_clearSupportsBttn, "clearsupports");
+	co.getControl(_manualEditBttn, "editsupports");
+	co.getControl(_suppTypeDrop, "supporttype");
+	co.getControl(_raftTypeDrop, "rafttype");
+	co.getControl(_suppDensitySpin, "supportdensity");
+	co.getControl(_maxRadSpin, "maxradius");
+	co.getControl(_minRadSpin, "minradius");
 
-	//Hix::QML::Controls::Button* _generateSupportsBttn;
-	//Hix::QML::Controls::Button* _clearSupportsBttn;
-	//Hix::QML::Controls::ToggleSwitch* _manualEditBttn;
+	_suppTypeDrop->setEnums<SupportSetting::SupportType>();
+	_raftTypeDrop->setEnums<SupportSetting::RaftType>();
 
-	//Hix::QML::Controls::DropdownBox* _suppTypeBttn;
-	//Hix::QML::Controls::DropdownBox* _suppDensityBttn;
-	//Hix::QML::Controls::DropdownBox* _maxRadBttn;
-	//Hix::QML::Controls::DropdownBox* _minRadBttn;
-	//Hix::QML::Controls::DropdownBox* _minRaftTypeBttn;
+
 }
 
 Hix::Features::SupportMode::~SupportMode()

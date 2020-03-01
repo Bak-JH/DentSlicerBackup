@@ -7,15 +7,14 @@ import QtGraphicalEffects 1.12
 
 DropdownBox {
 	property alias label: label
-	Rectangle{
-		color: "#F6FEFF"
-		Text {
-			id: label
-			anchors.verticalCenter: parent.verticalCenter
-			font.family: openRegular.name
-			color: "#666666"
-		}
+	Text {
+		id: label
+		anchors.verticalCenter: parent.verticalCenter
+		font.family: openRegular.name
+		color: "#666666"
 	}
+
+
 	ComboBox {
 		id: control
 		anchors.right: parent.right

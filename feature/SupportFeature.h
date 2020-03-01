@@ -3,7 +3,7 @@
 #include "interfaces/DialogedMode.h"
 #include "support/SupportModel.h"
 #include "support/SupportRaftManager.h"
-
+#include "../Qml/components/ControlForwardInclude.h"
 
 namespace Hix
 {
@@ -92,10 +92,10 @@ namespace Hix
 			Hix::QML::Controls::ToggleSwitch* _manualEditBttn;
 			//UI slicing options
 			Hix::QML::Controls::DropdownBox* _suppTypeDrop;
-			Hix::QML::Controls::DropdownBox* _suppDensityDrop;
+			Hix::QML::Controls::DropdownBox* _raftTypeDrop;
+			Hix::QML::Controls::InputSpinBox* _suppDensitySpin;
 			Hix::QML::Controls::InputSpinBox* _maxRadSpin;
 			Hix::QML::Controls::InputSpinBox* _minRadSpin;
-			Hix::QML::Controls::DropdownBox* _minRaftTypeDrop;
 
 
 

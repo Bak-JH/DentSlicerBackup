@@ -80,7 +80,7 @@ namespace Hix
 					QStringList list;
 					for (auto& str : enumStrs)
 					{
-						list.push_back(str);
+						list.push_back(QString::fromStdString(std::string(str)));
 					}
 					setList(list);
 				}
