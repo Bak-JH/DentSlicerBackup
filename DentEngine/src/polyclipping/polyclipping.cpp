@@ -30,10 +30,10 @@ IntPoint Hix::Polyclipping::toPixelSize(const QVector2D& pt)
 	auto& pSet = Hix::Application::ApplicationManager::getInstance().settings().printerSetting;
 	IntPoint pixelSize;
 	float invert = scfg->slice_invert == SlicingConfiguration::Invert::InvertXAxis ? -1.0f : 1.0f;
-	pixelSize.X = std::round(pt.x()* invert * pSet.pixelPerMMX() / scfg->contraction_ratio
+	pixelSize.X = std::round(pt.x()* invert * pSet.pixelPerMMX()
 		+ (pSet.sliceImageResolutionX / 2));
 
-	pixelSize.Y = std::round(pt.y() * pSet.pixelPerMMY() / scfg->contraction_ratio
+	pixelSize.Y = std::round(pt.y() * pSet.pixelPerMMY()
 		+ (pSet.sliceImageResolutionY / 2));
 	return pixelSize;
 }

@@ -86,8 +86,6 @@ void SVGexporter::exportSVG(Slices& shellSlices,QString outfoldername, bool isTe
 	doc.AddMember("layer_height", round(scfg->layer_height * 100) / 100, allocator);
 	doc.AddMember("total_layer", currentSlice_idx, allocator);
 	doc.AddMember("resin_type", (uint8_t)scfg->resin_type, allocator);
-	doc.AddMember("contraction_ratio", scfg->contraction_ratio, allocator);
-
 	auto& printerConst = printerSetting.printerConstants;
 	if (printerConst)
 	{
@@ -232,11 +230,11 @@ void SVGexporter::writePolygon(const PolyNode* contour, std::stringstream& conte
 		}
 		auto fp = Hix::Polyclipping::toFloatPt(point) + _offsetXY;
         content << std::fixed << 
-			fp.x()*_ppmmX/scfg->contraction_ratio
+			fp.x()*_ppmmX
 			+ (_resX/2)
 			<< "," << std::fixed <<
 			_resY/2
-			- fp.y()*_ppmmY/scfg->contraction_ratio << " "; // doesn't need 100 actually// TODO fix this
+			- fp.y()*_ppmmY<< " "; // doesn't need 100 actually// TODO fix this
 
         // just fit to origin
         //outfile << std::fixed << (float)point.X/Hix::Polyclipping::INT_PT_RESOLUTION - scfg->origin.x() << "," << std::fixed << (float)point.Y/Hix::Polyclipping::INT_PT_RESOLUTION - scfg->origin.y() << " ";
@@ -257,11 +255,11 @@ void SVGexporter::writePolygon(ClipperLib::Path& contour, std::stringstream& con
 		}
 		auto fp = Hix::Polyclipping::toFloatPt(point) + _offsetXY;
         content << std::fixed << 
-			fp.x() * _ppmmX/scfg->contraction_ratio
+			fp.x() * _ppmmX
 			+ (_resX/2) 
 			<< ","<< std::fixed <<
 			_resY/2
-			- fp.y() * _ppmmY / scfg->contraction_ratio << " "; // doesn't need 100 actually
+			- fp.y() * _ppmmY << " "; // doesn't need 100 actually
 
         // just fit to origin
         //outfile << std::fixed << (float)point.X/Hix::Polyclipping::INT_PT_RESOLUTION - scfg->origin.x() << "," << std::fixed << (float)point.Y/Hix::Polyclipping::INT_PT_RESOLUTION - scfg->origin.y() << " ";

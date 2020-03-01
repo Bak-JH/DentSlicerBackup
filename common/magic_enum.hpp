@@ -69,6 +69,18 @@
 
 namespace magic_enum {
 
+    //trait for name conversion option, TODO: remove enum, user provided processing functor
+    enum class name_option
+    {
+        unchanged,
+        spaced_camel
+    };
+    template<typename T>
+    struct name_formatter
+    {
+        static constexpr name_option name_option = name_option::unchanged;
+    };
+
 // Enum value must be in range [MAGIC_ENUM_RANGE_MIN, MAGIC_ENUM_RANGE_MAX]. By default MAGIC_ENUM_RANGE_MIN = -128, MAGIC_ENUM_RANGE_MAX = 128.
 // If need another range for all enum types by default, redefine the macro MAGIC_ENUM_RANGE_MIN and MAGIC_ENUM_RANGE_MAX.
 // If need another range for specific enum type, add specialization enum_range for necessary enum type.
@@ -232,7 +244,7 @@ template <typename E>
 inline constexpr auto type_name_v = n<E>();
 
 template <typename E, E V>
-constexpr auto n() noexcept {
+constexpr auto n_decamel() noexcept {
   static_assert(is_enum_v<E>, "magic_enum::detail::n requires enum type.");
 #if defined(MAGIC_ENUM_SUPPORTED) && MAGIC_ENUM_SUPPORTED
 #  if defined(__clang__) || defined(__GNUC__)
@@ -240,15 +252,36 @@ constexpr auto n() noexcept {
 #  elif defined(_MSC_VER)
   constexpr auto name = pretty_name({__FUNCSIG__, sizeof(__FUNCSIG__) - 17});
 #  endif
-  constexpr auto decameled = camel_to_spaced<final_length(name)>(name);
-  return static_string<decameled.size()>{decameled};
+    constexpr auto decameled = camel_to_spaced<final_length(name)>(name);
+    return static_string<decameled.size()>{decameled};
+
+
 #else
   return std::string_view{}; // Unsupported compiler.
 #endif
 }
 
 template <typename E, E V>
+constexpr auto n() noexcept {
+    static_assert(is_enum_v<E>, "magic_enum::detail::n requires enum type.");
+#if defined(MAGIC_ENUM_SUPPORTED) && MAGIC_ENUM_SUPPORTED
+#  if defined(__clang__) || defined(__GNUC__)
+    constexpr auto name = pretty_name({ __PRETTY_FUNCTION__, sizeof(__PRETTY_FUNCTION__) - 2 });
+#  elif defined(_MSC_VER)
+    constexpr auto name = pretty_name({ __FUNCSIG__, sizeof(__FUNCSIG__) - 17 });
+#  endif
+    return static_string<name.size()>{name};
+
+#else
+    return std::string_view{}; // Unsupported compiler.
+#endif
+}
+
+template <typename E, E V>
 inline constexpr auto name_v = n<E, V>();
+
+template <typename E, E V>
+inline constexpr auto name_decamel_v = n_decamel<E, V>();
 
 template <typename E>
 constexpr int reflected_min() noexcept {
@@ -346,14 +379,31 @@ template <typename E, std::size_t... I>
 constexpr auto names(std::index_sequence<I...>) noexcept {
   static_assert(is_enum_v<E>, "magic_enum::detail::names requires enum type.");
 
-  return std::array<std::string_view, sizeof...(I)>{{name_v<E, values_v<E>[I]>...}};
+  if (name_formatter<E>::name_option == name_option::unchanged)
+  {
+      return std::array<std::string_view, sizeof...(I)>{ {name_v<E, values_v<E>[I]>...}};
+
+  }
+  else if(name_formatter<E>::name_option == name_option::spaced_camel)
+  {
+      return std::array<std::string_view, sizeof...(I)>{ {name_decamel_v<E, values_v<E>[I]>...}};
+
+  }
 }
 
 template <typename E, std::size_t... I>
 constexpr auto entries(std::index_sequence<I...>) noexcept {
   static_assert(is_enum_v<E>, "magic_enum::detail::entries requires enum type.");
+  if (name_formatter<E>::name_option == name_option::unchanged)
+  {
+      return std::array<std::pair<E, std::string_view>, sizeof...(I)>{ { {values_v<E>[I], name_v<E, values_v<E>[I]>}...}};
 
-  return std::array<std::pair<E, std::string_view>, sizeof...(I)>{{{values_v<E>[I], name_v<E, values_v<E>[I]>}...}};
+  }
+  else if(name_formatter<E>::name_option == name_option::spaced_camel)
+  {
+      return std::array<std::pair<E, std::string_view>, sizeof...(I)>{ { {values_v<E>[I], name_decamel_v<E, values_v<E>[I]>}...}};
+
+  }
 }
 
 template <typename T, typename R>

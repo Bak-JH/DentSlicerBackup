@@ -602,7 +602,6 @@
     <ClInclude Include="common\Tree\BVHBuilder.h" />
     <ClInclude Include="common\Tree\NTree.h" />
     <ClInclude Include="common\Tree\NTreeDeque.h" />
-    <ClInclude Include="common\RamosEnum.h" />
     <ClInclude Include="common\RandomAccessIteratorBase.h" />
     <ClInclude Include="common\rapidjson\allocators.h" />
     <ClInclude Include="common\rapidjson\cursorstreamwrapper.h" />
