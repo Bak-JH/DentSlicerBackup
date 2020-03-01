@@ -1,6 +1,5 @@
 #pragma once
-#include "PrinterSetting.h"
-#include "DeployInfo.h"
+#include "JSONParsedSetting.h"
 #include "JSONWriteSetting.h"
 namespace Hix
 {
@@ -15,7 +14,7 @@ namespace Hix
 				Adaptive
 			};
 
-			SliceSetting();
+			SliceSetting(std::filesystem::path settingsPath);
 			~SliceSetting();
 			float layerHeight;
 			SlicingMode slicingMode;

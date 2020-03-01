@@ -153,7 +153,7 @@ void SlicingOptBackend::onOptionChanged(QString opName, QVariant newVal)
 	}
 	else if (opName == "Support type")
 	{
-		_config->support_type = (SlicingConfiguration::SupportType)toInt;
+		_config->support_type = (Hix::Settings::SupportSetting::SupportType)toInt;
 
 	}
 	else if (opName == "Infill type")

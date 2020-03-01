@@ -7,7 +7,7 @@
 #include "../Mesh/BVH.h"
 #include "../Mesh/MTRayCaster.h"
 #include "../common/Debug.h"
-
+#include "../application/ApplicationManager.h"
 #include "feature/SupportFeature.h"
 using namespace Qt3DCore;
 using namespace Hix::Support;
@@ -28,7 +28,7 @@ Hix::Support::SupportRaftManager::~SupportRaftManager()
 
 float Hix::Support::SupportRaftManager::supportRaftMinLength()
 {
-	return scfg->raft_thickness + scfg->support_base_height;
+	return Hix::Application::ApplicationManager::getInstance().settings().supportSetting.raftThickness+ scfg->support_base_height;
 }
 
 float Hix::Support::SupportRaftManager::raftBottom()
@@ -41,16 +41,10 @@ float Hix::Support::SupportRaftManager::supportBottom()
 {
 	constexpr float FACTOR = 5.0f;
 	//to prevent z-fighting between raft and support bottoms
-	return scfg->raft_thickness/ FACTOR;
+	return Hix::Application::ApplicationManager::getInstance().settings().supportSetting->raft_thickness/ FACTOR;
 }
 
 
-
-
-void Hix::Support::SupportRaftManager::setSupportType(SlicingConfiguration::SupportType supType)
-{
-	_supportType = supType;
-}
 
 std::vector<QVector3D> Hix::Support::SupportRaftManager::getSupportBasePts() const
 {
@@ -72,9 +66,9 @@ SupportModel* Hix::Support::SupportRaftManager::addSupport(const OverhangDetect:
 	SupportModel* newModel = nullptr;
 	switch (_supportType)
 	{
-	case SlicingConfiguration::SupportType::None:
+	case Hix::Settings::SupportSetting::SupportType::None:
 		break;
-	case SlicingConfiguration::SupportType::Vertical:
+	case Hix::Settings::SupportSetting::SupportType::Vertical:
 	{
 		newModel = dynamic_cast<SupportModel*>(new VerticalSupportModel(this, overhang));
 		_supports.insert(std::make_pair(newModel, std::unique_ptr<SupportModel>(newModel)));

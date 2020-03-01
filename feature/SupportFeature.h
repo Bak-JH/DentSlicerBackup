@@ -3,7 +3,7 @@
 #include "interfaces/DialogedMode.h"
 #include "support/SupportModel.h"
 #include "support/SupportRaftManager.h"
-#include "DentEngine/src/configuration.h"
+
 
 namespace Hix
 {

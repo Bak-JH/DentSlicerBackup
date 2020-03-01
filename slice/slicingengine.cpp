@@ -7,7 +7,7 @@
 #include "slicingengine.h"
 
 #include "glmodel.h"
-#include "DentEngine/src/configuration.h"
+
 #include "DentEngine/src/slicer.h"
 #include "DentEngine/src/Planes.h"
 #include "feature/overhangDetect.h"

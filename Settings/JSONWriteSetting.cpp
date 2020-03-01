@@ -6,7 +6,7 @@
 #include <fstream>
 #include <QDebug>
 
-void Hix::Settings::JSONWriteSetting::writeJson()
+void Hix::Settings::JSONWriteSetting::writeJSON()
 {
 	//char cbuf[1024]; rapidjson::MemoryPoolAllocator<> allocator(cbuf, sizeof cbuf);
 	//rapidjson::Document doc(&allocator, 256);

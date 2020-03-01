@@ -2,6 +2,9 @@
 #include "PrinterSetting.h"
 #include "DeployInfo.h"
 #include "JSONWriteSetting.h"
+#include "SliceSetting.h"
+#include "SupportSetting.h"
+
 namespace Hix
 {
 	namespace Settings
@@ -12,13 +15,15 @@ namespace Hix
 			AppSetting();
 			~AppSetting();
 			void parseJSON() override;
-			void setPrinterPath(const std::string& path);
 			void settingChanged();
+			void writeJSON()override;
 			bool enableErrorReport;
+			DeployInfo deployInfo;
+			SliceSetting sliceSetting;
+			SupportSetting supportSetting;
+			PrinterSetting printerSetting;
 			std::string printerPresetPath;
 			std::string version;
-			PrinterSetting printerSetting;
-			DeployInfo deployInfo;
 		protected:
 			void parseJSONImpl(const rapidjson::Document& doc)override;
 			void initialize()override;
