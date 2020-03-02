@@ -11,7 +11,7 @@ Hix.InputSpinBox {
 	property double  fromNum
 	property double  toNum
 	
-	onValueChanged:{ console.log(value); control.text = root.value.toFixed(2); }
+	onValueChanged:{  controlInput.text = root.value.toFixed(2); }
 
 	Text 
 	{
@@ -42,6 +42,7 @@ Hix.InputSpinBox {
 		}
 
 		contentItem: TextInput {
+			id: controlInput
 			font: control.font
 			selectionColor: "#21be2b"
 			selectedTextColor: "#ffffff"
@@ -58,7 +59,6 @@ Hix.InputSpinBox {
 			}
 			onTextEdited:{
 				root.value = parseFloat(text);
-				console.log(root.value)
 			}
 		}
 		
