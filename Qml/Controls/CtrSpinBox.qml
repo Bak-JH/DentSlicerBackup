@@ -11,12 +11,20 @@ Hix.InputSpinBox {
 	property double  fromNum
 	property double  toNum
 	
-	onValueChanged:{  controlInput.text = root.value.toFixed(2); }
+	onValueChanged:{ 
+		if(root.value < fromNum)
+			root.value = fromNum
+		if(root.value > toNum)
+			root.value = toNum
+		
+		if(!isNaN(root.value)) {
+			controlInput.text = root.value;
+		}
+	}
 
 	Text 
 	{
 		id: label
-		text: ""
 		font.family: openRegular.name
 		anchors.left: parent.left
 		color: "#666666"
