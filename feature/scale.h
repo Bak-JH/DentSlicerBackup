@@ -41,7 +41,6 @@ namespace Hix
 			ScaleMode();
 			virtual ~ScaleMode();
 
-			FeatureContainerFlushSupport* applyScale(QVector3D scale);
 			void applyButtonClicked()override;
 		private:
 			std::unordered_set<GLModel*> _targetModels;
