@@ -14,7 +14,7 @@
 #include <QQmlContext>
 #include "utils/quaternionhelper.h"
 #include "slice/slicingengine.h"
-#include "DentEngine/src/configuration.h"
+
 #include "glmodel.h"
 #include <QQuickView>
 #include "QtConcurrent/QtConcurrent"

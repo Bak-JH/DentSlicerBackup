@@ -72,8 +72,6 @@
     <ClCompile Include="feature\arrange\SkylineBinPack.cpp" />
     <ClCompile Include="feature\autoorientation.cpp" />
     <ClCompile Include="DentEngine\src\polyclipping\clipper\clipper.cpp" />
-    <ClCompile Include="DentEngine\src\cmdlineparser.cpp" />
-    <ClCompile Include="DentEngine\src\configuration.cpp" />
     <ClCompile Include="feature\convex_hull.cpp" />
     <ClCompile Include="feature\CSG\CorkMeshFactory.cpp" />
     <ClCompile Include="feature\cut\DrawingPlane.cpp" />
@@ -156,7 +154,6 @@
     <ClCompile Include="Settings\DeployInfo.cpp" />
     <ClCompile Include="Settings\JSONParsedSetting.cpp" />
     <ClCompile Include="Settings\PrinterSetting.cpp" />
-    <ClCompile Include="slice\SlicingOptBackend.cpp" />
     <ClCompile Include="support\CylindricalRaft.cpp" />
     <ClCompile Include="support\ModelAttachedSupport.cpp" />
     <ClCompile Include="support\RaftModel.cpp" />
@@ -200,6 +197,15 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="feature\settingMode.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Settings\JSONWriteSetting.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Settings\SliceSetting.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Settings\SupportSetting.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -597,7 +603,6 @@
     <ClInclude Include="common\Tree\BVHBuilder.h" />
     <ClInclude Include="common\Tree\NTree.h" />
     <ClInclude Include="common\Tree\NTreeDeque.h" />
-    <ClInclude Include="common\RamosEnum.h" />
     <ClInclude Include="common\RandomAccessIteratorBase.h" />
     <ClInclude Include="common\rapidjson\allocators.h" />
     <ClInclude Include="common\rapidjson\cursorstreamwrapper.h" />
@@ -714,8 +719,6 @@
     <ClInclude Include="feature\arrange\SkylineBinPack.h" />
     <ClInclude Include="feature\autoorientation.h" />
     <ClInclude Include="DentEngine\src\polyclipping\clipper\clipper.hpp" />
-    <ClInclude Include="DentEngine\src\cmdlineparser.h" />
-    <ClInclude Include="DentEngine\src\configuration.h" />
     <ClInclude Include="DentEngine\src\polyclipping\polyclipping.h" />
     <ClInclude Include="DentEngine\src\polyclipping\QDebugPolyclipping.h" />
     <ClInclude Include="feature\convex_hull.h" />
@@ -832,6 +835,21 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="feature\settingMode.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Qml\components\ControlForwardInclude.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Settings\JSONWriteSetting.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Settings\SliceSetting.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="common\magic_enum.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Settings\SupportSetting.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="DentEngine\src\mesh.h">
@@ -961,7 +979,6 @@
     <QtMoc Include="render\ModelMaterial.h" />
     <QtMoc Include="render\lights.h" />
     <QtMoc Include="widget\Widget3D.h" />
-    <QtMoc Include="slice\SlicingOptBackend.h" />
     <QtMoc Include="widget\CubeWidget.h" />
     <QtMoc Include="render\SceneEntity.h" />
     <QtMoc Include="render\SceneEntityWithMaterial.h" />
@@ -1206,6 +1223,7 @@
     <None Include="icon.ico" />
     <None Include="Qml\FeaturePopup\PrintSettingPopup.qml" />
     <None Include="Qml\ProgressPopupWithList.qml" />
+    <None Include="Qml\Controls\CtrTextButton.qml" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Source Files">

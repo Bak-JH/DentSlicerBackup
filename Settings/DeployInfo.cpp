@@ -13,7 +13,7 @@ Hix::Settings::DeployInfo::DeployInfo()
 
 std::filesystem::path Hix::Settings::DeployInfo::printerPresetsDir() const
 {
-	std::filesystem::path presetPath = settingsDir + "/PrinterPresets";
+	std::filesystem::path presetPath = settingsDir + "\\PrinterPresets";
 	return presetPath;
 }
 

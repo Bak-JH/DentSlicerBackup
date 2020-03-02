@@ -1,6 +1,5 @@
 #include "SlicerDebugInfoExport.h"
 #include "SlicerDebug.h"
-#include "configuration.h"
 #include <QSvgGenerator>
 #include "../../application/ApplicationManager.h"
 

@@ -8,7 +8,6 @@
 #include "../input/raycastcontroller.h"
 #include "../Settings/AppSetting.h"
 #include "../Tasking/TaskManager.h"
-#include "../slice/SlicingOptBackend.h"
 #include "../support/SupportRaftManager.h"
 #include "MouseCursorManager.h"
 class QQuickItem;
@@ -21,6 +20,9 @@ namespace Hix
 	namespace Features
 	{
 		class SettingMode;
+		class SupportMode;
+		class SliceExportMode;
+
 	}
 	namespace QML
 	{
@@ -54,7 +56,6 @@ namespace Hix
 			const Hix::Settings::AppSetting& settings()const;
 			Hix::Tasking::TaskManager& taskManager();
 			Hix::Support::SupportRaftManager& supportRaftManager();
-
 			QString getVersion()const;
 
 		private:
@@ -67,12 +68,9 @@ namespace Hix
 			Hix::Input::RayCastController _rayCastController;
 			Hix::Tasking::TaskManager _taskManager;
 			Hix::Support::SupportRaftManager _supportRaftManager;
-
-
 			Hix::Settings::AppSetting _setting;
 
 			//TODO:temp legacy
-			SlicingOptBackend _optBackend;
 			//root of entire window application ie) including login window
 			QQuickItem* _windowRoot;
 			Hix::QML::PrintInfo* _printInfo;
@@ -86,6 +84,10 @@ namespace Hix
 		private:
 			static Hix::Settings::AppSetting& settings(Hix::Application::ApplicationManager& appMan);
 			friend class Hix::Features::SettingMode;
+			friend class Hix::Features::SupportMode;
+			friend class Hix::Features::SliceExportMode;
+
+
 		};
 
 

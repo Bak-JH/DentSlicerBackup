@@ -1,10 +1,9 @@
 ﻿#include "VerticalSupportModel.h"
 #include "SupportRaftManager.h"
-#include "../DentEngine/src/configuration.h"
 #include "../feature/Extrude.h"
 #include "SupportRaftManager.h"
 #include "../glmodel.h"
-
+#include "../application/ApplicationManager.h"
 constexpr  float SUPPORT_CONE_LENGTH =  1.0f;
 //constexpr  float SUPPORT_OVERLAP_LENGTH = SUPPORT_CONE_LENGTH/2;
 
@@ -136,7 +135,8 @@ float getRadius(const QVector3D& origin, float bottomZ)
 
 std::vector<QVector3D> Hix::Support::VerticalSupportModel::generateSupportPath(float bottom, std::vector<float>& scales)
 {	 
-	float minSupportScale = scfg->support_radius_min / scfg->support_radius_max;
+	auto& setting = Hix::Application::ApplicationManager::getInstance().settings().supportSetting;
+	float minSupportScale = setting.supportRadiusMin / setting.supportRadiusMax;
 
 
 	constexpr float intoMeshLength = 0.120f; //120 micron
@@ -144,7 +144,7 @@ std::vector<QVector3D> Hix::Support::VerticalSupportModel::generateSupportPath(f
 
 	std::vector<QVector3D> path;
 	float botNormalLength = 0.100f;
-	float layerHeight = scfg->layer_height;
+	float layerHeight = Hix::Application::ApplicationManager::getInstance().settings().sliceSetting.layerHeight;
 
 	auto zCloseMin = _overhang.coord().z() - layerHeight;
 	auto rayOrigin(_overhang.coord());
@@ -203,7 +203,8 @@ std::vector<QVector3D> Hix::Support::VerticalSupportModel::generateSupportPath(f
 			constexpr QVector3D zUp(0, 0, 1);
 			float currSmallestAngle = std::numeric_limits<float>::max();
 			std::vector<QVector3D> misses;
-			auto pyramidRayCasts = rayCastBottomPyramid(_manager->supportRaycaster(), upperZPath, 0, getRadius(upperZPath, 0), scfg->support_radius_max, misses);
+			auto radiusMax = Hix::Application::ApplicationManager::getInstance().settings().supportSetting.supportRadiusMax;
+			auto pyramidRayCasts = rayCastBottomPyramid(_manager->supportRaycaster(), upperZPath, 0, getRadius(upperZPath, 0), radiusMax, misses);
 			if (!misses.empty())
 			{
 				path.emplace_back(misses.front());
@@ -338,10 +339,11 @@ void Hix::Support::VerticalSupportModel::generateMesh()
 	std::vector<float> scales;
 	auto mesh = new Mesh();
 
+	auto radiusMax = Hix::Application::ApplicationManager::getInstance().settings().supportSetting.supportRadiusMax;
 	path = generateSupportPath(_manager->supportBottom(), scales);
 	if (!path.empty())
 	{
-		contour = generateHexagon(scfg->support_radius_max);
+		contour = generateHexagon(radiusMax);
 		std::vector<std::vector<QVector3D>> jointContours;
 		std::function<void(std::vector<QVector3D>&, float)> uniformScaler(Hix::Shapes2D::scaleContour);
 
