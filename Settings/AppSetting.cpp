@@ -8,12 +8,14 @@
 using namespace Hix::Settings;
 using namespace Hix::Settings::JSON;
 typedef rapidjson::GenericStringBuffer<rapidjson::UTF8<>, rapidjson::MemoryPoolAllocator<>> StringBuffer;
+constexpr auto SETTING_FILE("\\settings.json");
 
-Hix::Settings::AppSetting::AppSetting()
+Hix::Settings::AppSetting::AppSetting(): sliceSetting(deployInfo.settingsDir), supportSetting(deployInfo.settingsDir)
 {
 	auto appSettingsPath = deployInfo.settingsDir;
-	appSettingsPath.append("/settings.json");
+	//appSettingsPath.append("/settings.json");
 	//parseJSON(appSettingsPath);
+	appSettingsPath.append(SETTING_FILE);
 	_jsonPath = appSettingsPath;
 }
 
@@ -21,49 +23,60 @@ Hix::Settings::AppSetting::~AppSetting()
 {
 }
 
-void Hix::Settings::AppSetting::refresh()
+void Hix::Settings::AppSetting::parseJSON()
 {
-	JSONParsedSetting::refresh();
-	deployInfo.refresh();
-	auto printerPath = std::filesystem::current_path();
+
+	deployInfo.parseJSON();
+	JSONParsedSetting::parseJSON();
+
+	auto printerPath = deployInfo.printerPresetsDir();
 	printerPath.append(printerPresetPath);
 	printerSetting.parseJSON(printerPath);
+	sliceSetting.parseJSON();
+	supportSetting.parseJSON();
 	settingChanged();
 }
 
-void Hix::Settings::AppSetting::setPrinterPath(const std::string& path)
-{
-	//temp
 
-	printerPresetPath = path;
-	char cbuf[1024]; rapidjson::MemoryPoolAllocator<> allocator(cbuf, sizeof cbuf);
-	rapidjson::Document doc(&allocator, 256);
-	doc.SetObject();
-	doc.AddMember("printerPresetPath", printerPresetPath, allocator);
-	doc.AddMember("enableErrorReport", enableErrorReport, allocator);
-
-	std::ofstream of(_jsonPath, std::ios_base::trunc);
-	rapidjson::OStreamWrapper osw{ of };
-	rapidjson::PrettyWriter<rapidjson::OStreamWrapper> writer{ osw };
-	doc.Accept(writer);
-	refresh();
-}
 
 void Hix::Settings::AppSetting::parseJSONImpl(const rapidjson::Document& doc)
 {
-	tryParse(doc, "printerPresetPath", printerPresetPath);
+	parse(doc, "printerPresetPath", printerPresetPath);
 	tryParse(doc, "enableErrorReport", enableErrorReport);
-
 }
 
 
 void Hix::Settings::AppSetting::initialize()
 {
-	printerPresetPath = "PrinterPresets/HixCapsule.json";
+	//auto defaultPreset = deployInfo.settingsDir;
+	//defaultPreset.append("PrinterPresets/HixCapsule.json");
+	//printerPresetPath = defaultPreset;
 	enableErrorReport = true;
 }
 
 void Hix::Settings::AppSetting::settingChanged()
 {
 	Hix::Application::ApplicationManager::getInstance().sceneManager().drawBed();
+}
+
+void Hix::Settings::AppSetting::writeJSON()
+{
+	__super::writeJSON();
+	//sliceSetting.writeJSON();
+	//supportSetting.parseJSON();
+
+}
+
+const std::filesystem::path& Hix::Settings::AppSetting::jsonPath()
+{
+	return _jsonPath;
+}
+
+rapidjson::Document Hix::Settings::AppSetting::doc()
+{
+	rapidjson::Document doc;
+	doc.SetObject();
+	doc.AddMember("printerPresetPath", printerPresetPath, doc.GetAllocator());
+	doc.AddMember("enableErrorReport", enableErrorReport, doc.GetAllocator());
+	return doc;
 }

@@ -20,7 +20,7 @@ using namespace Hix::Application;
 using namespace Hix::QML;
 using namespace Hix::Input;
 
-Hix::Application::ApplicationManager::ApplicationManager(): _optBackend(scfg)
+Hix::Application::ApplicationManager::ApplicationManager()
 {
 }
 
@@ -48,7 +48,7 @@ void Hix::Application::ApplicationManager::init()
 #endif
 
 	//settings
-	_setting.refresh();
+	_setting.parseJSON();
 	//print info
 	QQuickItem* printInfoQ;
 	getItemByID(_windowRoot, printInfoQ, "printInfo");

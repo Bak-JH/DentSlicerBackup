@@ -13,6 +13,8 @@ DropdownBox {
 		font.family: openRegular.name
 		color: "#666666"
 	}
+
+
 	ComboBox {
 		id: control
 		anchors.right: parent.right

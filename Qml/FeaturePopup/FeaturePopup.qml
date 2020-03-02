@@ -11,7 +11,7 @@ Hix.FeaturePopupShell
 	width: 256
 	property var title
 	property var myPadding: 16
-
+	property var enableApply: true
 	Rectangle 
 	{
 		id: shell
@@ -37,7 +37,7 @@ Hix.FeaturePopupShell
 			id: closeButton
 			width: 16
 			height: 16
-			color: "transparent"
+			color: "#F6FEFF"
 			anchors.top: parent.top
 			anchors.right: parent.right
 			anchors.topMargin: myPadding
@@ -59,7 +59,7 @@ Hix.FeaturePopupShell
 			height: 32
 			radius: 16
 			color: "#00b9c8"
-
+			visible: enableApply
 			anchors.bottom: parent.bottom
 			anchors.bottomMargin: 16
 			anchors.horizontalCenter: parent.horizontalCenter

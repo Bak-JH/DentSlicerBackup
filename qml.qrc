@@ -83,5 +83,6 @@
         <file>Qml/PartListItem.qml</file>
         <file>Qml/ModalWindowButton.qml</file>
         <file>Qml/FeaturePopup/PrintSettingPopup.qml</file>
+        <file>Qml/Controls/CtrTextButton.qml</file>
     </qresource>
 </RCC>

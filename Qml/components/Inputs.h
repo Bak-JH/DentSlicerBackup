@@ -5,6 +5,7 @@
 #include <QtQuickTemplates2/private/qquickspinbox_p.h>
 #include <QtQuickTemplates2/private/qquickcombobox_p.h>
 #include <string>
+#include "../../common/magic_enum.hpp"
 #include "InputControl.h"
 namespace Hix
 {
@@ -18,6 +19,7 @@ namespace Hix
 					Q_PROPERTY(double value MEMBER _value NOTIFY valueChanged)
 					Q_PROPERTY(double min MEMBER _min NOTIFY rangeChanged)
 					Q_PROPERTY(double max MEMBER _max NOTIFY rangeChanged)
+					Q_PROPERTY(double increment MEMBER _increment NOTIFY incrementChanged)
 
 			public:
 				InputSpinBox(QQuickItem* parent = nullptr);
@@ -25,14 +27,18 @@ namespace Hix
 				double getValue()const;
 				void setValue(double value);
 				void setRange(double min, double max);
+				void setIncrement(double inc);
 
 			signals:
 				void valueChanged();
 				void rangeChanged();
+				void incrementChanged();
+
 
 			private:
 				double _value = 0;
 				double _min, _max;
+				double _increment = 1.0;
 			};
 
 			class TextInputBox : public QQuickItem, public InputControl
@@ -67,11 +73,32 @@ namespace Hix
 				void setIndex(int index);
 				void setList(QStringList list);
 
+				//for use with enum
+				template<typename EnumType>
+				void setEnums()
+				{
+					auto enumStrs = magic_enum::enum_names<EnumType>();
+					QStringList list;
+					for (auto& str : enumStrs)
+					{
+						list.push_back(QString::fromStdString(std::string(str)));
+					}
+					setList(list);
+				}
+				template<typename EnumType>
+				void getSelected(EnumType& out)
+				{
+					auto& str = _dropList[getIndex()];
+					out = magic_enum::enum_cast<Color>(std::string_view(str.data(), str.length())).value();
+				}
+
 			signals:
 				void indexChanged();
 				void listChanged();
 
 			protected:
+
+
 				QStringList _dropList;
 				int _index;
 			};

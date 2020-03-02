@@ -7,10 +7,10 @@ using namespace Hix::Settings;
 void Hix::Settings::JSONParsedSetting::parseJSON(const std::filesystem::path& jsonPath)
 {
 	_jsonPath = jsonPath;
-	refresh();
+	parseJSON();
 }
 
-void Hix::Settings::JSONParsedSetting::refresh()
+void Hix::Settings::JSONParsedSetting::parseJSON()
 {
 	//initialize to default values
 	initialize();

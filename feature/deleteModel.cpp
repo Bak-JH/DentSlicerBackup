@@ -92,6 +92,7 @@ Hix::Features::DeleteModelMode::DeleteModelMode()
 		},
 		[]() {
 			Hix::Application::ApplicationManager::getInstance().featureManager().setMode(nullptr);
+			Hix::Application::ApplicationManager::getInstance().modalDialogManager().closeDialog();
 		}
 	);
 }

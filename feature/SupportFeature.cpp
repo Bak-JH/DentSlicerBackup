@@ -5,9 +5,12 @@
 #include "support/RaftModel.h"
 #include "application/ApplicationManager.h"
 #include "../../glmodel.h"
+#include "../Qml/components/Inputs.h"
+#include "../Qml/components/Buttons.h"
 
 using namespace Hix::Features;
 using namespace Hix::Application;
+using namespace Hix::Settings;
 /////////////////////
 ///  Add Support  ///
 /////////////////////
@@ -127,6 +130,21 @@ Hix::Features::SupportMode::SupportMode()
 	: _targetModels(Hix::Application::ApplicationManager::getInstance().partManager().selectedModels()), DialogedMode(SUPPORT_POPUP_URL)
 {
 	Hix::Application::ApplicationManager::getInstance().getRayCaster().setHoverEnabled(true);
+
+	auto& co = controlOwner();
+	co.getControl(_generateSupportsBttn, "generatesupports");
+	co.getControl(_clearSupportsBttn, "clearsupports");
+	co.getControl(_manualEditBttn, "editsupports");
+	co.getControl(_suppTypeDrop, "supporttype");
+	co.getControl(_raftTypeDrop, "rafttype");
+	co.getControl(_suppDensitySpin, "supportdensity");
+	co.getControl(_maxRadSpin, "maxradius");
+	co.getControl(_minRadSpin, "minradius");
+
+	_suppTypeDrop->setEnums<SupportSetting::SupportType>();
+	_raftTypeDrop->setEnums<SupportSetting::RaftType>();
+
+
 }
 
 Hix::Features::SupportMode::~SupportMode()
@@ -150,12 +168,12 @@ Hix::Features::FeatureContainer* Hix::Features::SupportMode::generateAutoSupport
 	if (!Hix::Application::ApplicationManager::getInstance().supportRaftManager().supportsEmpty())
 		return nullptr;
 
-	Hix::Application::ApplicationManager::getInstance().supportRaftManager().setSupportType(scfg->support_type);
+	//Hix::Application::ApplicationManager::getInstance().supportRaftManager().setSupportType(scfg->support_type);
 	Hix::Features::FeatureContainer* container = new FeatureContainer();
 
 	for (auto selectedModel : models)
 	{
-		if (scfg->support_type != SlicingConfiguration::SupportType::None)
+		if (Hix::Application::ApplicationManager::getInstance().settings().supportSetting.supportType != Hix::Settings::SupportSetting::SupportType::None)
 		{
 			container->addFeature(new Move(selectedModel, QVector3D(0, 0, Hix::Support::SupportRaftManager::supportRaftMinLength())));
 		}
@@ -203,6 +221,7 @@ void Hix::Features::SupportMode::regenerateRaft()
 
 void Hix::Features::SupportMode::applyButtonClicked()
 {
+	//do nothing
 }
 
 

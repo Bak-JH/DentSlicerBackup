@@ -2,7 +2,6 @@
 
 #include <QCoreApplication>
 #include "utils/mathutils.h"
-#include "configuration.h"
 #include "../../common/Debug.h"
 #include <list>
 #include <set>
