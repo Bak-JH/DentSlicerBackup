@@ -39,6 +39,7 @@ FeaturePopup {
 		id: labelfont
 		label.text: "Font"
 		dropList: Qt.fontFamilies()
+		index: 0
 		width: parent.width - 16 * 2
 		anchors.left: parent.left
 		anchors.leftMargin: 16
@@ -51,6 +52,7 @@ FeaturePopup {
 		label.text: "Font Size"
 		fromNum: 0
 		toNum: 256
+		value: 12
 		width: parent.width - 16 * 2
 		anchors.left: parent.left
 		anchors.leftMargin: 16
@@ -62,7 +64,8 @@ FeaturePopup {
 		id: labelheight
 		label.text: "Label Height"
 		fromNum: 0
-		toNum: 256
+		toNum: 100
+		value: 1
 		width: parent.width - 16 * 2
 		anchors.left: parent.left
 		anchors.leftMargin: 16

@@ -88,7 +88,7 @@ Hix::Features::DeleteModelMode::DeleteModelMode()
 				container->addFeature(new DeleteModel(model));
 			}
 			Hix::Application::ApplicationManager::getInstance().taskManager().enqueTask(container);
-			//Hix::Application::ApplicationManager::getInstance().featureManager().setMode(nullptr);
+			Hix::Application::ApplicationManager::getInstance().featureManager().setMode(nullptr);
 		},
 		[]() {
 			Hix::Application::ApplicationManager::getInstance().featureManager().setMode(nullptr);
