@@ -89,7 +89,7 @@ namespace Hix
 				void getSelected(EnumType& out)
 				{
 					auto& str = _dropList[getIndex()];
-					out = magic_enum::enum_cast<Color>(std::string_view(str.data(), str.length())).value();
+					out = magic_enum::enum_cast<EnumType>(str.toStdString()).value();
 				}
 
 			signals:
@@ -97,8 +97,6 @@ namespace Hix
 				void listChanged();
 
 			protected:
-
-
 				QStringList _dropList;
 				int _index;
 			};

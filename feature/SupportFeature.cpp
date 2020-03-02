@@ -143,8 +143,21 @@ Hix::Features::SupportMode::SupportMode()
 
 	_suppTypeDrop->setEnums<SupportSetting::SupportType>();
 	_raftTypeDrop->setEnums<SupportSetting::RaftType>();
+	QObject::connect(_generateSupportsBttn, &Hix::QML::Controls::Button::clicked, [this]() {
+			generateAutoSupport(Hix::Application::ApplicationManager::getInstance().partManager().selectedModels());
+		});
+	QObject::connect(_clearSupportsBttn, &Hix::QML::Controls::Button::clicked, [this]() {
+			clearSupport(Hix::Application::ApplicationManager::getInstance().partManager().selectedModels());
+		});
 
-
+	QObject::connect(_suppTypeDrop, &Hix::QML::Controls::DropdownBox::indexChanged, [this]() {
+			auto& setting = Hix::Application::SettingsChanger::settings(Hix::Application::ApplicationManager::getInstance());
+			_suppTypeDrop->getSelected(setting.supportSetting.supportType);
+		});
+	QObject::connect(_raftTypeDrop, &Hix::QML::Controls::DropdownBox::indexChanged, [this]() {
+			auto& setting = Hix::Application::SettingsChanger::settings(Hix::Application::ApplicationManager::getInstance());
+			_raftTypeDrop->getSelected(setting.supportSetting.raftType);
+		});
 }
 
 Hix::Features::SupportMode::~SupportMode()
@@ -162,11 +175,11 @@ void Hix::Features::SupportMode::faceSelected(GLModel* selected, const Hix::Engi
 	}
 }
 
-Hix::Features::FeatureContainer* Hix::Features::SupportMode::generateAutoSupport(std::unordered_set<GLModel*>& models)
+void Hix::Features::SupportMode::generateAutoSupport(std::unordered_set<GLModel*> models)
 {
 
 	if (!Hix::Application::ApplicationManager::getInstance().supportRaftManager().supportsEmpty())
-		return nullptr;
+		return;
 
 	//Hix::Application::ApplicationManager::getInstance().supportRaftManager().setSupportType(scfg->support_type);
 	Hix::Features::FeatureContainer* container = new FeatureContainer();
@@ -184,13 +197,13 @@ Hix::Features::FeatureContainer* Hix::Features::SupportMode::generateAutoSupport
 		}
 	}
 
-	return container;
+	Hix::Application::ApplicationManager::getInstance().taskManager().enqueTask(container);
 }
 
-Hix::Features::FeatureContainer* Hix::Features::SupportMode::clearSupport(const std::unordered_set<GLModel*>& models)
+void Hix::Features::SupportMode::clearSupport(const std::unordered_set<GLModel*> models)
 {
 	if (Hix::Application::ApplicationManager::getInstance().supportRaftManager().supportsEmpty())
-		return nullptr;
+		return;
 
 	Hix::Features::FeatureContainer* container = new FeatureContainer();
 	if (Hix::Application::ApplicationManager::getInstance().supportRaftManager().raftActive())
@@ -202,7 +215,7 @@ Hix::Features::FeatureContainer* Hix::Features::SupportMode::clearSupport(const 
 	for (auto model : models)
 		container->addFeature(new Move(model, QVector3D(0, 0, -Hix::Support::SupportRaftManager::supportRaftMinLength())));
 
-	return container;
+	Hix::Application::ApplicationManager::getInstance().taskManager().enqueTask(container);
 }
 
 void Hix::Features::SupportMode::regenerateRaft()

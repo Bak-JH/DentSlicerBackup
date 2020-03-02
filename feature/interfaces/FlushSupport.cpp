@@ -10,7 +10,7 @@ Hix::Features::FlushSupport::FlushSupport(const std::unordered_set<GLModel*>& mo
 	auto flshSupp = Hix::Application::ApplicationManager::getInstance().supportRaftManager().modelAttachedSupports(models);
 	if (!flshSupp.empty())
 	{
-		Hix::Application::ApplicationManager::getInstance().taskManager().enqueTask(SupportMode().clearSupport(models));
+		SupportMode().clearSupport(models);
 	}
 }
 
@@ -20,7 +20,7 @@ Hix::Features::FlushSupport::FlushSupport(GLModel* model)
 	auto flshSupp = Hix::Application::ApplicationManager::getInstance().supportRaftManager().modelAttachedSupports(models);
 	if (!flshSupp.empty())
 	{
-		Hix::Application::ApplicationManager::getInstance().taskManager().enqueTask(SupportMode().clearSupport(models));
+		SupportMode().clearSupport(models);
 	}
 }
 
