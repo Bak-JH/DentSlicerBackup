@@ -24,7 +24,7 @@ GLModel* Hix::Features::LabellingMode::generatePreviewModel()
 	auto labelMesh = new Mesh();
 	QPainterPath painterPath;
 	painterPath.setFillRule(Qt::WindingFill);
-	QFont font(_fontStyle->getSelectedItem());
+	QFont font(_fontStyle->getSelectedItem(), _fontSize->getValue());
 	painterPath.addText(0, 0, font, QString::fromStdString(_inputText->getInputText()));
 
 	auto width = painterPath.boundingRect().width();
@@ -61,8 +61,8 @@ GLModel* Hix::Features::LabellingMode::generatePreviewModel()
 	// generate cyliner wall
 	std::vector<std::vector<QVector3D>> jointContours;
 	std::vector<QVector3D> path;
-	path.emplace_back(0, 0, -10);
-	path.emplace_back(0, 0, 5);
+	path.emplace_back(0, 0, 0);
+	path.emplace_back(0, 0, _labelHeight->getValue()*3);
 	for (auto& intPath : IntPaths)
 	{
 		std::vector<QVector3D> contour;
@@ -152,20 +152,14 @@ void Hix::Features::LabellingMode::updateLabelMesh(const QVector3D& localInterse
 	_scale = newTransform.scale3D();
 }
 
-Hix::Features::Feature* Hix::Features::LabellingMode::applyLabelMesh()
+void Hix::Features::LabellingMode::applyButtonClicked()
 {
 	if (!_previewModel)
 	{
-		//qDebug() << "no labellingTextPreview";
-		//QMetaObject::invokeMethod(Hix::Application::ApplicationManager::getInstance().labelPopup, "noModel");
-		return nullptr;
+		return;
 	}
 
-	return new Labelling(_targetModel, _previewModel.release());
-}
-
-void Hix::Features::LabellingMode::applyButtonClicked()
-{
+	Hix::Application::ApplicationManager::getInstance().taskManager().enqueTask(new Labelling(_targetModel, _previewModel.release()));
 }
 
 
@@ -194,5 +188,6 @@ void Hix::Features::Labelling::redoImpl()
 void Hix::Features::Labelling::runImpl()
 {
 	_targetModel->setMaterialColor(Hix::Render::Colors::Selected);
+	_targetModel->setHitTestable(true);
 	_targetModel->updateModelMesh();
 }
