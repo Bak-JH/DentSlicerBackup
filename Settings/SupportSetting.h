@@ -21,6 +21,8 @@ namespace Hix
 			};
 
 
+
+
 			SupportSetting(std::filesystem::path settingsPath);
 			~SupportSetting();
 
@@ -40,4 +42,20 @@ namespace Hix
 			rapidjson::Document doc()override;
 		};
 	}
+
+}
+
+namespace magic_enum
+{
+
+	template<>
+	struct name_formatter<Hix::Settings::SupportSetting::SupportType>
+	{
+		static constexpr name_option name_option = name_option::spaced_camel;
+	};
+	template<>
+	struct name_formatter<Hix::Settings::SupportSetting::RaftType>
+	{
+		static constexpr name_option name_option = name_option::spaced_camel;
+	};
 }
