@@ -31,7 +31,6 @@ namespace Hix
 				return ret;
 			}
 			void postUIthread(std::function<void()>&& func);
-
 			void tryRunFeature(Feature& other);
 			void tryUndoFeature(Feature& other);
 			void tryRedoFeature(Feature& other);

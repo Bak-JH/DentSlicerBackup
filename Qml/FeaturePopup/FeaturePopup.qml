@@ -75,7 +75,6 @@ Hix.FeaturePopupShell
 				anchors.verticalCenter: applyButton.verticalCenter
 			}
 
-			onClicked: { console.log("clicked"); }
 			onEntered: { color = "#21959e" }
 			onExited: { color = "#00b9c8" }
 		}

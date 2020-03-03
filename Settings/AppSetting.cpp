@@ -25,15 +25,7 @@ Hix::Settings::AppSetting::~AppSetting()
 
 void Hix::Settings::AppSetting::parseJSON()
 {
-
-	deployInfo.parseJSON();
 	JSONParsedSetting::parseJSON();
-
-	auto printerPath = deployInfo.printerPresetsDir();
-	printerPath.append(printerPresetPath);
-	printerSetting.parseJSON(printerPath);
-	sliceSetting.parseJSON();
-	supportSetting.parseJSON();
 	settingChanged();
 }
 
@@ -56,6 +48,9 @@ void Hix::Settings::AppSetting::initialize()
 
 void Hix::Settings::AppSetting::settingChanged()
 {
+	auto printerPath = deployInfo.printerPresetsDir();
+	printerPath.append(printerPresetPath);
+	printerSetting.parseJSON(printerPath);
 	Hix::Application::ApplicationManager::getInstance().sceneManager().drawBed();
 }
 

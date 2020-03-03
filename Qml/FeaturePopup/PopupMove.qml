@@ -67,7 +67,6 @@ FeaturePopup {
 			anchors.verticalCenter: snapButton.verticalCenter
 		}
 
-		onClicked: { console.log("clicked"); }
 		onEntered: { color = "#dde5e6" }
 		onExited: { color = "transparent" }
 	}

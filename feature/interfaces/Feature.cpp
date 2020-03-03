@@ -32,11 +32,11 @@ void Feature::postUIthread(std::function<void()>&& func)
 }
 void Hix::Features::Feature::run()noexcept
 {
+	runImpl();
 
 	bool success = false;
 	try
 	{
-		runImpl();
 		success = true;
 	}
 	catch (std::exception & e)
@@ -51,7 +51,9 @@ void Hix::Features::Feature::run()noexcept
 	//if feature add to history
 	if (success)
 	{
-		Hix::Application::ApplicationManager::getInstance().featureManager().featureHistoryManager().addFeature(this);
+		postUIthread([this]() {
+			Hix::Application::ApplicationManager::getInstance().featureManager().featureHistoryManager().addFeature(this);
+		});
 	}
 	else
 	{
@@ -63,6 +65,8 @@ QObject* Hix::Features::Feature::uiThreadObject() const
 {
 	return &Hix::Application::ApplicationManager::getInstance().engine();
 }
+
+
 
 void Hix::Features::Feature::tryRunFeature(Feature& other)
 {
