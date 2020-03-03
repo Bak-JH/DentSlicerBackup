@@ -58,7 +58,7 @@ void Hix::Application::PartManager::selectAll()
 		auto modelRaw = each.first;
 		if (!_partList->isSelected(modelRaw))
 		{
-			_partList->setModelSelected(modelRaw, true);
+			setSelected(modelRaw, true);
 		}
 	}
 }
@@ -70,7 +70,7 @@ void Hix::Application::PartManager::unselectAll()
 		auto modelRaw = each.first;
 		if (_partList->isSelected(modelRaw))
 		{
-			_partList->setModelSelected(modelRaw, false);
+			setSelected(modelRaw, false);
 		}
 	}
 }

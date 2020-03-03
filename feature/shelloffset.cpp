@@ -73,6 +73,14 @@ void Hix::Features::ShellOffset::runImpl()
 	addFeature(new HollowMesh(_target, _offset));
 	addFeature(new ZAxialCut(_target, _zPlane, Hix::Features::Cut::KeepTop));
 	FeatureContainer::runImpl();
+
+
+	//std::function<void()> undo = [this]()
+	//{
+	//	_target->updateMesh();
+	//};
+	//postUIthread(std::move(undo));
+
 }
 
 Hix::Features::HollowMesh::HollowMesh(GLModel* target, float offset) : _target(target), _offset(offset)
@@ -98,7 +106,10 @@ void Hix::Features::HollowMesh::redoImpl()
 
 void Hix::Features::HollowMesh::runImpl()
 {
+
 	_prevMesh.reset(_target->getMeshModd());
+	//_prevMesh->reverseFaces();
+	
 	auto hollowMesh = new Mesh(*_prevMesh.get());
 	Mesh offsetMesh(*_target->getMeshModd());
 	offsetMesh.vertexOffset(-_offset);

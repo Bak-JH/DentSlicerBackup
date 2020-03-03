@@ -79,7 +79,7 @@ Hix::Features::DeleteModelMode::DeleteModelMode()
 {
 	Hix::Application::ApplicationManager::getInstance().modalDialogManager().openOkCancelDialog(
 		"Delete selected models?", "Ok", "Cancel", 
-		[]() {
+		[this]() {
 			//ok pressed
 			auto selected = ApplicationManager::getInstance().partManager().selectedModels();
 			Hix::Features::FeatureContainerFlushSupport* container = new Hix::Features::FeatureContainerFlushSupport(selected);
@@ -88,11 +88,14 @@ Hix::Features::DeleteModelMode::DeleteModelMode()
 				container->addFeature(new DeleteModel(model));
 			}
 			Hix::Application::ApplicationManager::getInstance().taskManager().enqueTask(container);
-			Hix::Application::ApplicationManager::getInstance().featureManager().setMode(nullptr);
+			Hix::Application::ApplicationManager::getInstance().modalDialogManager().closeDialog();
+			scheduleForDelete();
+
 		},
-		[]() {
+		[this]() {
 			Hix::Application::ApplicationManager::getInstance().featureManager().setMode(nullptr);
 			Hix::Application::ApplicationManager::getInstance().modalDialogManager().closeDialog();
+			scheduleForDelete();
 		}
 	);
 }
