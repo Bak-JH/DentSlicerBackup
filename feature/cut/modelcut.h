@@ -1,5 +1,6 @@
 #pragma once
 #include "../interfaces/DialogedMode.h"
+#include "../interfaces/SliderMode.h"
 #include "DentEngine/src/ContourBuilder.h"
 #include "DentEngine/src/Bounds3D.h"
 #include "DrawingPlane.h"
@@ -15,7 +16,7 @@ namespace Hix
 
 	namespace Features
 	{
-		class ModelCut : public DialogedMode
+		class ModelCut : public DialogedMode, public SliderMode
 		{
 		public:
 			enum CutType

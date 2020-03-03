@@ -9,16 +9,19 @@ Hix::QML::SlideBarShell::~SlideBarShell()
 {
 }
 
-void Hix::QML::SlideBarShell::setMin(double pMin)
+void Hix::QML::SlideBarShell::setRange(double min, double max)
 {
-	_min = pMin;
-	emit minimumChanged();
-}
+	if (_min != min)
+	{
+		_min = min;
+		emit minimumChanged();
+	}
 
-void Hix::QML::SlideBarShell::setMax(double pMax)
-{
-	_max = pMax;
-	emit maximumChanged();
+	if (_max != max)
+	{
+		_max = max;
+		emit maximumChanged();
+	}
 }
 
 double Hix::QML::SlideBarShell::getMin() const

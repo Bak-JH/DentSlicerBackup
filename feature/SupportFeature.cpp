@@ -149,6 +149,10 @@ Hix::Features::SupportMode::SupportMode()
 	QObject::connect(_clearSupportsBttn, &Hix::QML::Controls::Button::clicked, [this]() {
 			clearSupport(Hix::Application::ApplicationManager::getInstance().partManager().selectedModels());
 		});
+	QObject::connect(_manualEditBttn, &Hix::QML::Controls::ToggleSwitch::checkedChanged, [this]() {
+			auto mode = _manualEditBttn->isChecked() ? Hix::Support::EditMode::Manual : Hix::Support::EditMode::None;
+			Hix::Application::ApplicationManager::getInstance().supportRaftManager().setSupportEditMode(mode);
+		});
 
 	QObject::connect(_suppTypeDrop, &Hix::QML::Controls::DropdownBox::indexChanged, [this]() {
 			auto& setting = Hix::Application::SettingsChanger::settings(Hix::Application::ApplicationManager::getInstance());
@@ -176,7 +180,7 @@ void Hix::Features::SupportMode::faceSelected(GLModel* selected, const Hix::Engi
 }
 
 void Hix::Features::SupportMode::generateAutoSupport(std::unordered_set<GLModel*> models)
-{
+{ 
 
 	if (!Hix::Application::ApplicationManager::getInstance().supportRaftManager().supportsEmpty())
 		return;

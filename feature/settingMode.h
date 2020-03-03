@@ -23,7 +23,6 @@ namespace Hix
 			virtual ~SettingMode();
 			void applyButtonClicked()override;
 
-
 		private:
 			bool isDirty()const;
 			Hix::QML::Controls::DropdownBox* _printerPresets;

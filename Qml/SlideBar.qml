@@ -35,11 +35,13 @@ Hix.SlideBarShell {
 		Slider {
 			id: control
 			from: root.min
-			to: root.max
+			to: root.max.toFixed(2)
 			value: (from + to) / 2
 			orientation: Qt.Vertical
 			anchors.horizontalCenter: parent.horizontalCenter
 			anchors.verticalCenter: parent.verticalCenter
+
+			onMoved: { root.value = value }
 
 			background: Rectangle {
 				anchors.horizontalCenter: parent.horizontalCenter
@@ -49,8 +51,6 @@ Hix.SlideBarShell {
 				implicitHeight: 500
 				width: implicitWidth
 				height: control.availableHeight
-				//width: control.availableWidth
-				//height: implicitHeight
 				radius: width / 2
 				color: "#e4e5e5"
 
