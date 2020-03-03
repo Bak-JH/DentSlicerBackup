@@ -66,23 +66,20 @@ void Hix::Features::Cut::ZAxialCut::doChildrenRecursive(GLModel* subject, float 
 	ZAxialCutImp(subject, cuttingPlane, childTopMesh, childBotMesh, _keep);
 	if(subject->getMesh()->getFaces().empty())
 	{ }
-	else if (childBotMesh == nullptr || childBotMesh->getFaces().empty())
-	{
-		auto addTopModel = new ListModel(subject->getMeshModd(), subject->modelName() + "_top", &subject->transform());
-		addFeature(addTopModel);
-	}
-	else if (childTopMesh == nullptr || childTopMesh->getFaces().empty())
-	{
-		auto addBotModel = new ListModel(subject->getMeshModd(), subject->modelName() + "_bot", &subject->transform());
-		addFeature(addBotModel);
-	}
 	else
 	{
-		auto addTopModel = new ListModel(childTopMesh, subject->modelName() + "_top", &subject->transform());
-		auto addBotModel = new ListModel(childBotMesh, subject->modelName() + "_bot", &subject->transform());
+		if (childTopMesh != nullptr && !childTopMesh->getFaces().empty())
+		{
+			auto addTopModel = new ListModel(childTopMesh, subject->modelName() + "_top", &subject->transform());
+			addFeature(addTopModel);
+
+		}
+		if (childBotMesh != nullptr && !childBotMesh->getFaces().empty())
+		{
+			auto addBotModel = new ListModel(childBotMesh, subject->modelName() + "_bot", &subject->transform());
+			addFeature(addBotModel);
+		}
 		
-		addFeature(addTopModel);
-		addFeature(addBotModel);
 	}
 	for (auto childNode : subject->childNodes())
 	{

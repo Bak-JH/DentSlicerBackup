@@ -36,7 +36,7 @@ FeaturePopup {
 			anchors.verticalCenter: parent.verticalCenter
 			anchors.horizontalCenter: parent.horizontalCenter
 		}
-		onClicked: { console.log("clicked"); settingToggle();}
+		onClicked: { settingToggle();}
 		onEntered: { color = "#d2e0e1" }
 		onExited: { color = "transparent" }
 	}
