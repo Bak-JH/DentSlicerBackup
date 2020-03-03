@@ -21,11 +21,11 @@ Hix::Features::DialogedMode::DialogedMode(const QUrl& dialogUrl)
 	auto& closeButton = _popup->closeButton();
 	auto& applyButton = _popup->applyButton();
 	QObject::connect(&closeButton, &Hix::QML::Controls::Button::clicked, [this]() {
-		Hix::Application::ApplicationManager::getInstance().featureManager().setMode(nullptr);
+		scheduleForDelete();
 		});
 	QObject::connect(&applyButton, &Hix::QML::Controls::Button::clicked, [this]() {
+		scheduleForDelete();
 		applyButtonClicked();
-		Hix::Application::ApplicationManager::getInstance().featureManager().setMode(nullptr);
 		});
 }
 

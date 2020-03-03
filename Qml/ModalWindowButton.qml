@@ -20,7 +20,6 @@ Hix.Button
 		font.family: openSemiBold.name
 	}
 	
-	onClicked: { console.log("clicked"); }
 	onEntered: { button.color = hoverColor }
 	onExited: { button.color = defaultColor}
 	
