@@ -20,7 +20,6 @@ const QUrl LABEL_POPUP_URL = QUrl("qrc:/Qml/FeaturePopup/PopupLabel.qml");
 
 GLModel* Hix::Features::LabellingMode::generatePreviewModel()
 {
-
 	auto labelMesh = new Mesh();
 	QPainterPath painterPath;
 	painterPath.setFillRule(Qt::WindingFill);
