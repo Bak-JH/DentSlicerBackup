@@ -58,6 +58,7 @@ namespace Hix
 			FeatureManager& operator=(FeatureManager other) = delete;
 			FeatureManager& operator=(FeatureManager&& other) = delete;
 			QQuickItem* featureArea();
+			QQuickItem* slideArea();
 			Hix::Features::Mode* currentMode()const;
 			void setMode(Hix::Features::Mode*);
 			Hix::Features::FeatureHistoryManager& featureHistoryManager();
@@ -65,6 +66,7 @@ namespace Hix
 			Hix::QML::Controls::Button* _settingButton;
 			Hix::QML::FeatureMenu* _menu;
 			QQuickItem* _featureArea;
+			QQuickItem* _slideArea;
 			std::unique_ptr<Hix::Features::Mode> _currentMode;
 			Hix::Features::FeatureHistoryManager _featureHistoryManager;
 

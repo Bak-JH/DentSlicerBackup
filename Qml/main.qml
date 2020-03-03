@@ -110,6 +110,7 @@ Item{
 				anchors.leftMargin: 72
 				anchors.topMargin: sidePadding
 			}
+
 			PartList{
 				id: partList
 				//width : 265
@@ -149,14 +150,13 @@ Item{
 				anchors.right: parent.right
 				anchors.rightMargin: sidePadding + 15
 			}
-			
-			
-			// MeshTransformerTab{
-			// 	id:mttab
-			// 	objectName: "mttab"
-			// 	anchors.left: partList.right
-			// 	anchors.top : featureMenu.bottom
-			// }
+
+			Item {
+				id: slideArea
+				anchors.top: cam.bottom
+				anchors.topMargin: 20
+				anchors.left: cam.left
+			}
 
 			Item {
 				id: featureArea

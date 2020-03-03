@@ -27,6 +27,11 @@ QQuickItem* Hix::Application::FeatureManager::featureArea()
 	return _featureArea;
 }
 
+QQuickItem* Hix::Application::FeatureManager::slideArea()
+{
+	return _slideArea;
+}
+
 Hix::Features::Mode* Hix::Application::FeatureManager::currentMode() const
 {
 	return _currentMode.get();
@@ -51,6 +56,7 @@ Hix::Features::FeatureHistoryManager& Hix::Application::FeatureManager::featureH
 void Hix::Application::FeatureManagerLoader::init(FeatureManager& manager, QObject* root)
 {
 	Hix::QML::getItemByID(root, manager._featureArea, "featureArea");
+	Hix::QML::getItemByID(root, manager._slideArea, "slideArea");
 	Hix::QML::getItemByID(root, manager._menu, "featureMenu");
 	Hix::QML::getItemByID(root, manager._settingButton, "settingbutton");
 	QObject::connect(manager._settingButton, &Hix::QML::Controls::Button::clicked, openFeatureModeFunctor<SettingMode>());

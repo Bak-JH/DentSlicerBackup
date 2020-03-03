@@ -253,6 +253,7 @@
     <ClCompile Include="common\GTEngine\Source\Mathematics\GteVETNonmanifoldMesh.cpp" />
     <ClCompile Include="common\GTEngine\Source\Mathematics\MSW\GteCPUQueryInstructions.cpp" />
     <ClCompile Include="common\GTEngine\Source\Mathematics\MSW\GteIntelSSE.cpp" />
+    <ClCompile Include="feature\interfaces\SliderMode.cpp" />
     <ClCompile Include="feature\settingMode.cpp" />
     <ClCompile Include="feature\CopyPaste.cpp" />
     <ClCompile Include="feature\FeaturesLoader.cpp" />
@@ -851,6 +852,7 @@
     <ClInclude Include="common\rapidjson\writer.h" />
     <ClInclude Include="common\Singleton.h" />
     <ClInclude Include="DentEngine\src\mesh.h" />
+    <ClInclude Include="feature\interfaces\SliderMode.h" />
     <ClInclude Include="feature\settingMode.h" />
     <ClInclude Include="feature\CopyPaste.h" />
     <ClInclude Include="feature\FeaturesLoader.h" />
