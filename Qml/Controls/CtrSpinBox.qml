@@ -9,7 +9,7 @@ Hix.InputSpinBox {
 	property alias control: control
 	property alias label: label
 	property double  fromNum
-	property double  toNum
+	property double  toNum: 100
 	
 	onValueChanged:{ 
 		if(root.value < fromNum)

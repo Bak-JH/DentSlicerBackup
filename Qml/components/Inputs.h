@@ -75,15 +75,19 @@ namespace Hix
 
 				//for use with enum
 				template<typename EnumType>
-				void setEnums()
+				void setEnums(EnumType initialValue)
 				{
 					auto enumStrs = magic_enum::enum_names<EnumType>();
+					auto iniIndex = magic_enum::enum_index(initialValue);
+
 					QStringList list;
 					for (auto& str : enumStrs)
 					{
+
 						list.push_back(QString::fromStdString(std::string(str)));
 					}
 					setList(list);
+					setIndex(iniIndex.value());
 				}
 				template<typename EnumType>
 				void getSelected(EnumType& out)
