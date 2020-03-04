@@ -82,6 +82,7 @@ namespace Hix
 		private:
 			Hix::Features::Feature* generateRaft();
 			Hix::Features::Feature* removeRaft();
+			void applySupportSettings();
 			void removeSupport(SupportModel* target);
 			friend class Hix::Support::SupportModel;
 			std::unordered_set<GLModel*> _targetModels;

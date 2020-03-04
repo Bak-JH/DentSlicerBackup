@@ -141,8 +141,15 @@ Hix::Features::SupportMode::SupportMode()
 	co.getControl(_maxRadSpin, "maxradius");
 	co.getControl(_minRadSpin, "minradius");
 
-	_suppTypeDrop->setEnums<SupportSetting::SupportType>();
-	_raftTypeDrop->setEnums<SupportSetting::RaftType>();
+
+	auto& settings = Hix::Application::ApplicationManager::getInstance().settings().supportSetting;
+
+	_suppTypeDrop->setEnums<SupportSetting::SupportType>(settings.supportType);
+	_raftTypeDrop->setEnums<SupportSetting::RaftType>(settings.raftType);
+
+
+
+	// bind buttons
 	QObject::connect(_generateSupportsBttn, &Hix::QML::Controls::Button::clicked, [this]() {
 			generateAutoSupport(Hix::Application::ApplicationManager::getInstance().partManager().selectedModels());
 		});
@@ -154,13 +161,13 @@ Hix::Features::SupportMode::SupportMode()
 			Hix::Application::ApplicationManager::getInstance().supportRaftManager().setSupportEditMode(mode);
 		});
 
-	QObject::connect(_suppTypeDrop, &Hix::QML::Controls::DropdownBox::indexChanged, [this]() {
-			auto& setting = Hix::Application::SettingsChanger::settings(Hix::Application::ApplicationManager::getInstance());
-			_suppTypeDrop->getSelected(setting.supportSetting.supportType);
+	// bind dropbox
+	auto& modSettings = Hix::Application::SettingsChanger::settings(Hix::Application::ApplicationManager::getInstance()).supportSetting;
+	QObject::connect(_suppTypeDrop, &Hix::QML::Controls::DropdownBox::indexChanged, [this, &modSettings]() {
+		_suppTypeDrop->getSelected(modSettings.supportType);
 		});
-	QObject::connect(_raftTypeDrop, &Hix::QML::Controls::DropdownBox::indexChanged, [this]() {
-			auto& setting = Hix::Application::SettingsChanger::settings(Hix::Application::ApplicationManager::getInstance());
-			_raftTypeDrop->getSelected(setting.supportSetting.raftType);
+	QObject::connect(_raftTypeDrop, &Hix::QML::Controls::DropdownBox::indexChanged, [this, &modSettings]() {
+		_raftTypeDrop->getSelected(modSettings.raftType);
 		});
 }
 
@@ -169,11 +176,23 @@ Hix::Features::SupportMode::~SupportMode()
 	Hix::Application::ApplicationManager::getInstance().getRayCaster().setHoverEnabled(false);
 }
 
+
+void Hix::Features::SupportMode::applySupportSettings()
+{
+	auto& modSettings = Hix::Application::SettingsChanger::settings(Hix::Application::ApplicationManager::getInstance()).supportSetting;
+	_suppTypeDrop->getSelected(modSettings.supportType);
+	_raftTypeDrop->getSelected(modSettings.raftType);
+	modSettings.supportDensity = _suppDensitySpin->getValue();
+	modSettings.supportRadiusMax = _maxRadSpin->getValue();
+	modSettings.supportRadiusMin = _minRadSpin->getValue();
+}
+
 void Hix::Features::SupportMode::faceSelected(GLModel* selected, const Hix::Engine3D::FaceConstItr& selectedFace,
 	const Hix::Input::MouseEventData& mouse, const Qt3DRender::QRayCasterHit& hit)
 {
 	auto suppMode = Hix::Application::ApplicationManager::getInstance().supportRaftManager().supportEditMode();
 	if (suppMode == Hix::Support::EditMode::Manual) {
+		applySupportSettings();
 		Hix::OverhangDetect::Overhang newOverhang(selectedFace, selected->ptToRoot(hit.localIntersection()));
 		Hix::Application::ApplicationManager::getInstance().taskManager().enqueTask(new AddSupport(newOverhang));
 	}
@@ -187,6 +206,7 @@ void Hix::Features::SupportMode::generateAutoSupport(std::unordered_set<GLModel*
 
 	//Hix::Application::ApplicationManager::getInstance().supportRaftManager().setSupportType(scfg->support_type);
 	Hix::Features::FeatureContainer* container = new FeatureContainer();
+	applySupportSettings();
 
 	for (auto selectedModel : models)
 	{
@@ -210,6 +230,8 @@ void Hix::Features::SupportMode::clearSupport(const std::unordered_set<GLModel*>
 		return;
 
 	Hix::Features::FeatureContainer* container = new FeatureContainer();
+	applySupportSettings();
+
 	if (Hix::Application::ApplicationManager::getInstance().supportRaftManager().raftActive())
 		container->addFeature(new RemoveRaft());
 
