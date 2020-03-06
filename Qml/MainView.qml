@@ -74,18 +74,55 @@ Entity {
     }
 
 
-    KeyboardDevice{
-        id : keyboardDevice
-    }
+    // KeyboardDevice{
+    //     id : keyboardDevice
+    // }
 
 
-    KeyboardHandler{
-        focus : true
-        id : keyboardHandler
-        objectName: "keyboardHandler"
-        sourceDevice: keyboardDevice
+    // KeyboardHandler{
+    //     focus: false
+    //     id : keyboardHandler
+    //     sourceDevice: keyboardDevice
+    //     onFocusChanged: {
+    //         if(focus)
+    //         {
+    //             console.log("request key activation");
+    //             window.requestActivate();
+    //             scene3d.focus = true;
 
-    }
+    //         }
+    //     }
+
+    // }
+    
+    // KeyboardDevice{
+    //     id : keyboardDevice
+    // }
+    // KeyboardHandler{
+    //     focus : true
+    //     id : keyboardHandler
+    //     objectName: "keyboardHandler"
+    //     sourceDevice: keyboardDevice
+
+    //     Item {
+    //         id: focusItem
+    //         focus: true
+    //         function forceKeyboardFocus() {
+    //             forceActiveFocus();
+    //             keyboardHandler.focus = true;
+    //         }
+    //     }
+
+    //     onPressed: {
+    //         console.log("pressed qml")
+
+    //     }
+    //     onReleased:{
+    //         console.log("released qml");
+    //         featureMenu.visible = false;
+    //     }
+
+    // }
 
 
     function axisAngle2Quaternion(angle, axis){
@@ -107,12 +144,6 @@ Entity {
         result.scalar = a.scalar*b.scalar - a.x*b.x - a.y*b.y - a.z*b.z
 
         return result
-    }
-
-    function openFile(){
-        var compo = Qt.createComponent("Model.qml");
-
-        var loadmodel = compo.createObject(total, {});
     }
 
     function initCamera(){

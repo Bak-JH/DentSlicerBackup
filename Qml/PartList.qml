@@ -37,7 +37,7 @@ Hix.PartList {
 				clip: true
 				width: 240;
 				height: 212;
-				focus: true
+				// focus: true
 				ColumnLayout
 				{
 					id: itemContainer
