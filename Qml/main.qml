@@ -8,6 +8,10 @@ import "Controls"
 import "FeaturePopup"
 
 Item{
+	Keys.onPressed: {
+		console.log("outermost");
+	}
+	// focus: true
 	property var sidePadding: 20
     ApplicationWindow {
         title: qsTr("DentSlicer")
@@ -33,6 +37,10 @@ Item{
 		FontLoader{ id: openBold; source: "qrc:/Resource/font/OpenSans-Bold.ttf" }
 		
         Rectangle{
+			focus: true
+			Keys.onPressed: {
+				console.log("shit");
+			}
 			id: uiRoot
             color: "#E5E5E5"
 			anchors.fill: parent
@@ -84,7 +92,7 @@ Item{
                 anchors.left : parent.left
                 width: window.width
                 height: window.height
-                focus: true
+                // focus: true
                 hoverEnabled: true
                 aspects: ["input", "logic"]
                 cameraAspectRatioMode: Scene3D.UserAspectRatio
@@ -353,10 +361,10 @@ Item{
 		}
     }
 
-    Login{
-        id : loginWindow
-        objectName: "loginWindow"
-    }
+    // Login{
+    //     id : loginWindow
+    //     objectName: "loginWindow"
+    // }
 
 }
 

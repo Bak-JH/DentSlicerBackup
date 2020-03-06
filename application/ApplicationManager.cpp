@@ -42,7 +42,6 @@ void Hix::Application::ApplicationManager::init()
 	PartManagerLoader::init(_partManager, uiRoot);
 	ModalDialogManagerLoader::init(_modalManager, modalItem);
 	RayCastControllerLoader::init(_rayCastController, _sceneManager.root());
-	KeyboardControllerLoader::init(_keyboardController, _sceneManager.root());
 	_supportRaftManager.initialize(_partManager.modelRoot());
 #ifdef _DEBUG
 	Hix::Debug::DebugRenderObject::getInstance().initialize(_partManager.modelRoot());
@@ -56,6 +55,7 @@ void Hix::Application::ApplicationManager::init()
 	QQuickItem* printInfoQ;
 	getItemByID(_windowRoot, printInfoQ, "printInfo");
 	_printInfo = dynamic_cast<Hix::QML::PrintInfo*>(printInfoQ);
+	KeyboardControllerLoader::init(_keyboardController, _sceneManager.root());
 
 #ifdef _DEBUG
 	Hix::Debug::DebugRenderObject::getInstance().initialize(_partManager.modelRoot());

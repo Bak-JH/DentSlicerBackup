@@ -91,13 +91,18 @@ void Hix::Input::KeyboardController::initMouseEvents()
 			Hix::Application::ApplicationManager::getInstance().partManager().deleteSelectedModels();
 		}
 		});
-
+	//QObject::connect(_keyboardHandler, &Qt3DInput::QKeyboardHandler::focusChanged, [this](bool isFocus) {
+	//	qDebug() << "focus" << isFocus;
+	//	_keyboardHandler->setFocus(true);
+	//	});
 }
 
 void Hix::Input::KeyboardControllerLoader::init(KeyboardController& manager, Qt3DCore::QEntity* parentEntity)
 {
-	Hix::QML::getItemByID(parentEntity, manager._keyboardHandler, "keyboardHandler");
-	manager.initMouseEvents();
-	manager._keyboardHandler->setFocus(true);
+	//Hix::QML::getItemByID(parentEntity, manager._keyboardHandler, "keyboardHandler");
+	//manager.initMouseEvents();
+
+
+	//manager._keyboardHandler->setFocus(true);
 
 }
