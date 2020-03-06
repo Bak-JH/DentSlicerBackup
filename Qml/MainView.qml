@@ -73,58 +73,6 @@ Entity {
 
     }
 
-
-    // KeyboardDevice{
-    //     id : keyboardDevice
-    // }
-
-
-    // KeyboardHandler{
-    //     focus: false
-    //     id : keyboardHandler
-    //     sourceDevice: keyboardDevice
-    //     onFocusChanged: {
-    //         if(focus)
-    //         {
-    //             console.log("request key activation");
-    //             window.requestActivate();
-    //             scene3d.focus = true;
-
-    //         }
-    //     }
-
-    // }
-    
-    // KeyboardDevice{
-    //     id : keyboardDevice
-    // }
-    // KeyboardHandler{
-    //     focus : true
-    //     id : keyboardHandler
-    //     objectName: "keyboardHandler"
-    //     sourceDevice: keyboardDevice
-
-    //     Item {
-    //         id: focusItem
-    //         focus: true
-    //         function forceKeyboardFocus() {
-    //             forceActiveFocus();
-    //             keyboardHandler.focus = true;
-    //         }
-    //     }
-
-    //     onPressed: {
-    //         console.log("pressed qml")
-
-    //     }
-    //     onReleased:{
-    //         console.log("released qml");
-    //         featureMenu.visible = false;
-    //     }
-
-    // }
-
-
     function axisAngle2Quaternion(angle, axis){
         var result = Qt.quaternion(0,0,0,0);
         result.x = axis.x * Math.sin(angle/2)

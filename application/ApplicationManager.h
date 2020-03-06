@@ -6,8 +6,6 @@
 #include "SceneManager.h"
 #include "FeatureManager.h"
 #include "../input/raycastcontroller.h"
-#include "../input/KeyboardController.h"
-
 #include "../Settings/AppSetting.h"
 #include "../Tasking/TaskManager.h"
 #include "../support/SupportRaftManager.h"
@@ -28,6 +26,7 @@ namespace Hix
 	}
 	namespace QML
 	{
+		class MainWindow;
 		class PrintInfo;
 	}
 	namespace Application
@@ -68,7 +67,6 @@ namespace Hix
 			FeatureManager _featureManager;
 			MouseCursorManager _cursorManager;
 			Hix::Input::RayCastController _rayCastController;
-			Hix::Input::KeyboardController _keyboardController;
 			Hix::Tasking::TaskManager _taskManager;
 			Hix::Support::SupportRaftManager _supportRaftManager;
 			Hix::Settings::AppSetting _setting;
@@ -76,6 +74,8 @@ namespace Hix
 			//TODO:temp legacy
 			//root of entire window application ie) including login window
 			QQuickItem* _windowRoot;
+			Hix::QML::MainWindow* _mainWindow;
+
 			Hix::QML::PrintInfo* _printInfo;
 			friend class SettingsChanger;
 		};

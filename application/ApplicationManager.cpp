@@ -7,7 +7,7 @@
 #include <qqmlcontext.h>
 #include "../Qml/components/PrintInfo.h"
 #include "../input/raycastcontroller.h"
-
+#include "../Qml/components/MainWindow.h"
 //debug
 #include <QDebug>
 //for absolute correctness
@@ -33,6 +33,7 @@ void Hix::Application::ApplicationManager::init()
 {
 	_windowRoot = dynamic_cast<QQuickItem*>(_engine.rootObjects().first());
 	QQuickItem* uiRoot;
+	getItemByID(_windowRoot, _mainWindow, "window");
 	getItemByID(_windowRoot, uiRoot, "uiRoot");
 	//other singleton managers
 	QQuickItem* modalItem;
@@ -55,8 +56,6 @@ void Hix::Application::ApplicationManager::init()
 	QQuickItem* printInfoQ;
 	getItemByID(_windowRoot, printInfoQ, "printInfo");
 	_printInfo = dynamic_cast<Hix::QML::PrintInfo*>(printInfoQ);
-	KeyboardControllerLoader::init(_keyboardController, _sceneManager.root());
-
 #ifdef _DEBUG
 	Hix::Debug::DebugRenderObject::getInstance().initialize(_partManager.modelRoot());
 #endif
