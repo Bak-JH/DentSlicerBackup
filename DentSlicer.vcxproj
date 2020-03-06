@@ -887,7 +887,6 @@
     <ClInclude Include="Settings\JSONWriteSetting.h" />
     <ClInclude Include="Settings\SliceSetting.h" />
     <ClInclude Include="Settings\SupportSetting.h" />
-    <ClInclude Include="support\SupportModel.h" />
     <ClInclude Include="Tasking\Task.h" />
     <ClInclude Include="common\taskflow\core\executor.hpp" />
     <ClInclude Include="common\taskflow\core\flow_builder.hpp" />

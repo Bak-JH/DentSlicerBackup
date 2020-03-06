@@ -75,6 +75,11 @@ void Hix::Application::PartManager::unselectAll()
 	}
 }
 
+void Hix::Application::PartManager::deleteSelectedModels()
+{
+	_partList->deleteSelectedModels();
+}
+
 std::unordered_set<GLModel*> Hix::Application::PartManager::selectedModels() const
 {
 	return _partList->selectedModels();
