@@ -4,16 +4,19 @@ import QtQuick.Scene3D 2.0
 import QtQuick.Window 2.2
 import QtQuick.Controls.Styles 1.4
 import QtQuick.Dialogs 1.2
+import hix.qml 1.0 as Hix
 import "Controls"
 import "FeaturePopup"
 
 Item{
+	focus: true
 	Keys.onPressed: {
 		console.log("outermost");
 	}
-	// focus: true
 	property var sidePadding: 20
-    ApplicationWindow {
+    // ApplicationWindow {
+    Hix.MainWindow {
+
         title: qsTr("DentSlicer")
         id : window
         width: 1280
@@ -37,7 +40,7 @@ Item{
 		FontLoader{ id: openBold; source: "qrc:/Resource/font/OpenSans-Bold.ttf" }
 		
         Rectangle{
-			focus: true
+			// focus: true
 			Keys.onPressed: {
 				console.log("shit");
 			}
