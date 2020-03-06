@@ -655,7 +655,6 @@
     <ClInclude Include="Qml\components\InputControl.h" />
     <ClInclude Include="Qml\ProgressManager.h" />
     <ClInclude Include="Qml\util\QMLUtil.h" />
-    <ClInclude Include="support\SupportModel.h" />
     <ClInclude Include="Tasking\Task.h" />
     <ClInclude Include="common\taskflow\core\executor.hpp" />
     <ClInclude Include="common\taskflow\core\flow_builder.hpp" />

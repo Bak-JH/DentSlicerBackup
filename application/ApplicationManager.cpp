@@ -42,6 +42,7 @@ void Hix::Application::ApplicationManager::init()
 	PartManagerLoader::init(_partManager, uiRoot);
 	ModalDialogManagerLoader::init(_modalManager, modalItem);
 	RayCastControllerLoader::init(_rayCastController, _sceneManager.root());
+	KeyboardControllerLoader::init(_keyboardController, _sceneManager.root());
 	_supportRaftManager.initialize(_partManager.modelRoot());
 #ifdef _DEBUG
 	Hix::Debug::DebugRenderObject::getInstance().initialize(_partManager.modelRoot());

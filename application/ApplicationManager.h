@@ -6,6 +6,8 @@
 #include "SceneManager.h"
 #include "FeatureManager.h"
 #include "../input/raycastcontroller.h"
+#include "../input/KeyboardController.h"
+
 #include "../Settings/AppSetting.h"
 #include "../Tasking/TaskManager.h"
 #include "../support/SupportRaftManager.h"
@@ -66,6 +68,7 @@ namespace Hix
 			FeatureManager _featureManager;
 			MouseCursorManager _cursorManager;
 			Hix::Input::RayCastController _rayCastController;
+			Hix::Input::KeyboardController _keyboardController;
 			Hix::Tasking::TaskManager _taskManager;
 			Hix::Support::SupportRaftManager _supportRaftManager;
 			Hix::Settings::AppSetting _setting;

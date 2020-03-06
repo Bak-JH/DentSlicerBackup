@@ -29,7 +29,6 @@ Entity {
     // property alias total: total
     property alias cm: cm
     property alias systemTransform: systemTransform
-    property alias keyboardHandler: keyboardHandler
 
     property int ftrDelete : 18
     signal cameraViewChanged();
@@ -79,75 +78,12 @@ Entity {
         id : keyboardDevice
     }
 
-    signal copy();
-    signal paste();
-    signal unDo();
-    signal reDo();
-    signal groupSelectionActivate(bool b);
-
-    function forceFocus(){
-        console.log("force focus");
-        focusItem.forceKeyboardFocus();
-    }
-
-
-
 
     KeyboardHandler{
         focus : true
         id : keyboardHandler
         objectName: "keyboardHandler"
         sourceDevice: keyboardDevice
-
-        Item {
-            id: focusItem
-            focus: true
-            function forceKeyboardFocus() {
-                forceActiveFocus();
-                keyboardHandler.focus = true;
-            }
-        }
-
-
-
-        onPressed: {
-            console.log(event.key);
-            if (event.key === Qt.Key_Delete) {
-                console.log("delete called by keyboard")
-                yesnoPopUp.openYesNoPopUp(false, "", "Are you sure to delete these models?", "", 18, "", ftrDelete, 0)
-                //deletePopUp.targetID = qm.getselectedModelID()
-                //if (deletePopUp.targetID != -1){
-                //    uppertab.all_off();
-                //    deletePopUp.visible = true
-                //    mttab.hideTab();
-                //}
-            } else if (event.key === Qt.Key_Escape) {
-                uppertab.all_off()
-            } else if (event.matches(StandardKey.Undo)){
-                // do undo
-                console.log("undo called");
-                unDo();
-            } else if (event.matches(StandardKey.Redo)){
-                // do redo
-                console.log("redo called");
-                reDo();
-            } else if (event.matches(StandardKey.Open)){
-                openFile();
-            } else if (event.matches(StandardKey.Copy)){
-                copy();
-            } else if (event.matches(StandardKey.Paste)){
-                paste();
-            } else if (event.key === Qt.Key_Shift){
-                console.log("shift pressed");
-                groupSelectionActivate(true);
-            }
-        }
-        onReleased:{
-            if (event.key === Qt.Key_Shift){
-                console.log("shift released");
-                groupSelectionActivate(false);
-            }
-        }
 
     }
 
