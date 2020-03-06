@@ -1,5 +1,5 @@
 #include "MainWindow.h"
-
+#include "../../application/ApplicationManager.h"
 using namespace  Hix::QML;
 
 Hix::QML::MainWindow::MainWindow(QWindow* parent)
@@ -19,7 +19,7 @@ void Hix::QML::MainWindow::keyPressEvent(QKeyEvent* e)
 {
 	__super::keyPressEvent(e);
 	//activate only when there is no focus
-	if (!activeFocusItem())
+	if (!Hix::Application::ApplicationManager::getInstance().featureManager().isFeatureActive())
 	{
 		_keyboardHandler.keyPressed(e);
 	}
@@ -28,7 +28,7 @@ void Hix::QML::MainWindow::keyPressEvent(QKeyEvent* e)
 void Hix::QML::MainWindow::keyReleaseEvent(QKeyEvent* e)
 {
 	__super::keyReleaseEvent(e);
-	if (!activeFocusItem())
+	if (!Hix::Application::ApplicationManager::getInstance().featureManager().isFeatureActive())
 	{
 		_keyboardHandler.keyReleased(e);
 	}
