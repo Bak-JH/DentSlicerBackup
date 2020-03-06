@@ -9,8 +9,11 @@
 #include "FeatureMenu.h"
 #include "PartList.h"
 #include "ModalShell.h"
+#include "MainWindow.h"
 void Hix::QML::registerTypes()
 {
+	qmlRegisterType<Hix::QML::MainWindow>("hix.qml", 1, 0, "MainWindow");
+
 
 	qmlRegisterType<Hix::QML::FeaturePopupShell>("hix.qml", 1, 0, "FeaturePopupShell");
 	qmlRegisterType<Hix::QML::ProgressPopupShell>("hix.qml", 1, 0, "ProgressPopupShell");
