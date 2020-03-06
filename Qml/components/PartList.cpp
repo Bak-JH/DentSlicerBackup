@@ -27,6 +27,7 @@ Hix::QML::PartList::~PartList()
 void Hix::QML::PartList::listModel(GLModel* model)
 {
 	auto item = dynamic_cast<Hix::QML::PartListItem*>(_component.create(qmlContext(this)));
+	item->setModelName(model->modelName());
 	item->setParentItem(_itemContainer);
 	_items.emplace(model, item);
 	//event handler
@@ -143,6 +144,12 @@ void Hix::QML::PartListItem::setSelected(bool selected)
 bool Hix::QML::PartListItem::isSelected() const
 {
 	return _selectButton->isChecked();
+}
+
+void Hix::QML::PartListItem::setModelName(QString name)
+{
+	_modelName = name;
+	emit nameChanged();
 }
 
 
