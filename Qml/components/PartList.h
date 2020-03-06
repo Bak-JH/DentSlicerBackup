@@ -46,14 +46,19 @@ namespace Hix
 		class PartListItem : public QQuickItem, public ControlOwner
 		{
 			Q_OBJECT
+			Q_PROPERTY(QString modelName MEMBER _modelName NOTIFY nameChanged)
 		public:
 			PartListItem(QQuickItem* parent = nullptr);
 			virtual ~PartListItem();
 			void setSelected(bool isSelected);
 			bool isSelected()const;
+			void setModelName(QString name);
 			bool visible()const;
 			Hix::QML::Controls::ToggleSwitch* hideButton();
 			Hix::QML::Controls::ToggleSwitch* selectButton();
+
+		signals:
+			void nameChanged();
 
 		protected:
 			void componentComplete() override;
@@ -61,6 +66,7 @@ namespace Hix
 
 			Hix::QML::Controls::ToggleSwitch* _hideButton;
 			Hix::QML::Controls::ToggleSwitch* _selectButton;
+			QString _modelName;
 			bool _selected = false;
 		};
 	}

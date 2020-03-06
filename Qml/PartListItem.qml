@@ -5,15 +5,20 @@ import QtQuick.Controls.Styles 1.4
 import QtGraphicalEffects 1.12
 
 Hix.PartListItem {
-	width: 224; height: 28
+	id: root
+	width: 224
+	height: 28
+
+	onNameChanged: { modelnameText.text = root.modelName; }
+
 	Column {
 		anchors.verticalCenter: parent.verticalCenter
 		Hix.ToggleSwitch{
 			id: selectButton
 			width: 224; height: 28
 			Text { 
-				id: modelname
-				text: name
+				id: modelnameText
+				text: root.modelName
 				font.family: openRegular.name
 				anchors.verticalCenter: parent.verticalCenter
 				anchors.left: parent.left
@@ -21,7 +26,7 @@ Hix.PartListItem {
 			}
 			onChecked: {
 				color="#f5f5f5"
-				modelname.color="#1db2c4"
+				modelnameText.color="#1db2c4"
 				if(hideButton.isChecked)
 					showhideimg.source = "qrc:/Resource/part_hide_select_1.png"
 				else
@@ -29,7 +34,7 @@ Hix.PartListItem {
 			}
 			onUnchecked: {
 				color="white"
-				modelname.color="black"
+				modelnameText.color="black"
 				if(hideButton.isChecked)
 					showhideimg.source = "qrc:/Resource/part_hide_1.png"
 				else

@@ -146,7 +146,9 @@ Hix::Features::SupportMode::SupportMode()
 
 	_suppTypeDrop->setEnums<SupportSetting::SupportType>(settings.supportType);
 	_raftTypeDrop->setEnums<SupportSetting::RaftType>(settings.raftType);
-
+	_suppDensitySpin->setValue(settings.supportDensity);
+	_maxRadSpin->setValue(settings.supportRadiusMax);
+	_minRadSpin->setValue(settings.supportRadiusMin);
 
 
 	// bind buttons
@@ -185,6 +187,7 @@ void Hix::Features::SupportMode::applySupportSettings()
 	modSettings.supportDensity = _suppDensitySpin->getValue();
 	modSettings.supportRadiusMax = _maxRadSpin->getValue();
 	modSettings.supportRadiusMin = _minRadSpin->getValue();
+	modSettings.writeJSON();
 }
 
 void Hix::Features::SupportMode::faceSelected(GLModel* selected, const Hix::Engine3D::FaceConstItr& selectedFace,
