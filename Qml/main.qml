@@ -9,10 +9,6 @@ import "Controls"
 import "FeaturePopup"
 
 Item{
-	focus: true
-	Keys.onPressed: {
-		console.log("outermost");
-	}
 	property var sidePadding: 20
     // ApplicationWindow {
     Hix.MainWindow {
@@ -40,10 +36,6 @@ Item{
 		FontLoader{ id: openBold; source: "qrc:/Resource/font/OpenSans-Bold.ttf" }
 		
         Rectangle{
-			// focus: true
-			Keys.onPressed: {
-				console.log("shit");
-			}
 			id: uiRoot
             color: "#E5E5E5"
 			anchors.fill: parent
@@ -95,7 +87,6 @@ Item{
                 anchors.left : parent.left
                 width: window.width
                 height: window.height
-                // focus: true
                 hoverEnabled: true
                 aspects: ["input", "logic"]
                 cameraAspectRatioMode: Scene3D.UserAspectRatio

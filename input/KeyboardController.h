@@ -24,22 +24,14 @@ namespace Hix
 		{
 		public:
 			KeyboardController();
+			//outer-most key event handler
+			void keyPressed(QKeyEvent* e);
+			void keyReleased(QKeyEvent* e);
 			virtual ~KeyboardController();
-			bool isMultiselect()const;
 		private:
-			void initMouseEvents();
-			Qt3DInput::QKeyboardHandler * _keyboardHandler;
 
 			bool _shiftPressed = false;
 			bool _ctrlPressed = false;
-			friend class KeyboardControllerLoader;
-		};
-
-		class KeyboardControllerLoader
-		{
-		private:
-			static void init(KeyboardController& manager, Qt3DCore::QEntity* parentEntity);
-			friend class Hix::Application::ApplicationManager;
 		};
 
 	}

@@ -49,11 +49,13 @@ namespace Hix
 			QVector3D getSelectedCenter()const;
 			QVector3D selectedModelsLengths()const;
 			Qt3DCore::QEntity* modelRoot();
+			void setMultiSelect(bool isMulti);
+			bool isMultiSelect()const;
 		private:
 			Qt3DCore::QEntity* _root;
 			std::unordered_map<GLModel*, std::unique_ptr<GLModel>> _models;
 			Hix::QML::PartList* _partList;
-
+			bool _isMulti = false;
 			friend class PartManagerLoader;
 		};
 

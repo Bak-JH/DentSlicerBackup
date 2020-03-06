@@ -114,6 +114,16 @@ Qt3DCore::QEntity* Hix::Application::PartManager::modelRoot()
 	return _root;
 }
 
+void Hix::Application::PartManager::setMultiSelect(bool isMulti)
+{
+	_isMulti = isMulti;
+}
+
+bool Hix::Application::PartManager::isMultiSelect() const
+{
+	return _isMulti;
+}
+
 void Hix::Application::PartManagerLoader::init(PartManager& manager, QObject* root)
 {
 	Hix::QML::getItemByID(root, manager._root, "models");
