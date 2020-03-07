@@ -75,6 +75,11 @@ void Hix::Application::PartManager::unselectAll()
 	}
 }
 
+void Hix::Application::PartManager::deleteSelectedModels()
+{
+	_partList->deleteSelectedModels();
+}
+
 std::unordered_set<GLModel*> Hix::Application::PartManager::selectedModels() const
 {
 	return _partList->selectedModels();
@@ -107,6 +112,16 @@ QVector3D Hix::Application::PartManager::selectedModelsLengths() const
 Qt3DCore::QEntity* Hix::Application::PartManager::modelRoot()
 {
 	return _root;
+}
+
+void Hix::Application::PartManager::setMultiSelect(bool isMulti)
+{
+	_isMulti = isMulti;
+}
+
+bool Hix::Application::PartManager::isMultiSelect() const
+{
+	return _isMulti;
 }
 
 void Hix::Application::PartManagerLoader::init(PartManager& manager, QObject* root)

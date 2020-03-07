@@ -269,6 +269,11 @@ void GLModel::clicked(MouseEventData& pick, const Qt3DRender::QRayCasterHit& hit
 	{
 		if (pick.button == Qt::MouseButton::LeftButton)
 		{
+			//unselect previously selected parts if multi selection is not active.
+			if (!isSelected && !partManager.isMultiSelect())
+			{
+				partManager.unselectAll();
+			}
 			partManager.setSelected(listed, !isSelected);
 		}
 		return;

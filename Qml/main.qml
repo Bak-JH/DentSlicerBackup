@@ -4,12 +4,15 @@ import QtQuick.Scene3D 2.0
 import QtQuick.Window 2.2
 import QtQuick.Controls.Styles 1.4
 import QtQuick.Dialogs 1.2
+import hix.qml 1.0 as Hix
 import "Controls"
 import "FeaturePopup"
 
 Item{
 	property var sidePadding: 20
-    ApplicationWindow {
+    // ApplicationWindow {
+    Hix.MainWindow {
+
         title: qsTr("DentSlicer")
         id : window
         width: 1280
@@ -84,7 +87,6 @@ Item{
                 anchors.left : parent.left
                 width: window.width
                 height: window.height
-                focus: true
                 hoverEnabled: true
                 aspects: ["input", "logic"]
                 cameraAspectRatioMode: Scene3D.UserAspectRatio
@@ -353,10 +355,10 @@ Item{
 		}
     }
 
-    Login{
-        id : loginWindow
-        objectName: "loginWindow"
-    }
+    // Login{
+    //     id : loginWindow
+    //     objectName: "loginWindow"
+    // }
 
 }
 

@@ -42,17 +42,20 @@ namespace Hix
 			void setSelected(GLModel* model, bool selected);
 			void selectAll();
 			void unselectAll();
+			void deleteSelectedModels();
 			std::unordered_set<GLModel*> selectedModels()const;
 			std::unordered_set<GLModel*> allModels()const;
 			Hix::Engine3D::Bounds3D selectedBound()const;
 			QVector3D getSelectedCenter()const;
 			QVector3D selectedModelsLengths()const;
 			Qt3DCore::QEntity* modelRoot();
+			void setMultiSelect(bool isMulti);
+			bool isMultiSelect()const;
 		private:
 			Qt3DCore::QEntity* _root;
 			std::unordered_map<GLModel*, std::unique_ptr<GLModel>> _models;
 			Hix::QML::PartList* _partList;
-
+			bool _isMulti = false;
 			friend class PartManagerLoader;
 		};
 
