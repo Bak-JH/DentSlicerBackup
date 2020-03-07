@@ -94,6 +94,11 @@ Hix::Engine3D::Bounds3D Hix::QML::PartList::selectedBound() const
 	return Hix::Engine3D::combineBounds(_selectedModels);
 }
 
+void Hix::QML::PartList::deleteSelectedModels()
+{
+	emit _deleteButton->clicked();
+}
+
 
 QQuickItem* Hix::QML::PartList::getQItem()
 {

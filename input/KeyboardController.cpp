@@ -1,71 +1,85 @@
 #include "KeyboardController.h"
 #include <QNode>
-#include <QKeyboardHandler>
 
 #include "../feature/UndoRedo.h"
+#include "../feature/FeaturesLoader.h"
+#include "../application/ApplicationManager.h"
+#include "../Qml/util/QMLUtil.h"
 using namespace Hix::Input;
 
 
-Hix::Input::KeyboardController::KeyboardController(Qt3DCore::QNode* parent): _keyboardHandler(new Qt3DInput::QKeyboardHandler(parent))
+Hix::Input::KeyboardController::KeyboardController()
 {
-	QObject::connect(_keyboardHandler, &Qt3DInput::QKeyboardHandler::pressed, [this](Qt3DInput::QKeyEvent* e) {
-		switch (e->key())
-		{
-		case Qt::Key_Shift:
-		{
-			_shiftPressed = true;
-			break;
-		}
-		case Qt::Key_Control:
-		{
-			_ctrlPressed = true;
-			break;
-		}
-		default:
-			break;
-		}
-		if (e->matches(QKeySequence::SelectAll))
-		{
-			//Hix::Application::ApplicationManager::getInstance().selectAll();
-		}
-		else if(e->matches(QKeySequence::Undo))
-		{
 
-		}
-		else if (e->matches(QKeySequence::Redo))
-		{
+}
 
-		}
-		else if (e->matches(QKeySequence::Copy))
-		{
+void Hix::Input::KeyboardController::keyPressed(QKeyEvent* e)
+{
+	switch (e->key())
+	{
+	case Qt::Key_Shift:
+	{
+		_shiftPressed = true;
+		Hix::Application::ApplicationManager::getInstance().partManager().setMultiSelect(true);
+		break;
+	}
+	case Qt::Key_Control:
+	{
+		_ctrlPressed = true;
+		break;
+	}
+	default:
+		break;
+	}
+}
 
-		}
-		else if (e->matches(QKeySequence::Paste))
-		{
+void Hix::Input::KeyboardController::keyReleased(QKeyEvent* e)
+{
+	switch (e->key())
+	{
+	case Qt::Key_Shift:
+	{
+		_shiftPressed = false;
+		Hix::Application::ApplicationManager::getInstance().partManager().setMultiSelect(false);
+		break;
+	}
+	case Qt::Key_Control:
+	{
+		_ctrlPressed = false;
+		break;
+	}
+	default:
+		break;
+	}
 
-		}
-		else if (e->matches(QKeySequence::Cancel))
-		{
-
-		}
-		});
-	QObject::connect(_keyboardHandler, &Qt3DInput::QKeyboardHandler::released, [this](Qt3DInput::QKeyEvent* e) {
-		switch (e->key())
-		{
-		case Qt::Key_Shift:
-		{
-			_shiftPressed = false;
-			break;
-		}
-		case Qt::Key_Control:
-		{
-			_ctrlPressed = false;
-			break;
-		}
-		default:
-			break;
-		}
-		});
+	if (e->matches(QKeySequence::SelectAll))
+	{
+		Hix::Application::ApplicationManager::getInstance().partManager().selectAll();
+	}
+	else if (e->matches(QKeySequence::Undo))
+	{
+		Hix::Application::ApplicationManager::getInstance().taskManager().enqueTask(new Hix::Features::Undo());
+	}
+	else if (e->matches(QKeySequence::Redo))
+	{
+		Hix::Application::ApplicationManager::getInstance().taskManager().enqueTask(new Hix::Features::Redo());
+	}
+	else if (e->matches(QKeySequence::Copy))
+	{
+		//TODO
+	}
+	else if (e->matches(QKeySequence::Paste))
+	{
+		//TODO
+	}
+	else if (e->matches(QKeySequence::Cancel))
+	{
+		//TODO
+	}
+	else if (e->matches(QKeySequence::Delete))
+	{
+		Hix::Application::ApplicationManager::getInstance().partManager().deleteSelectedModels();
+	}
 }
 
 Hix::Input::KeyboardController::~KeyboardController()
@@ -73,7 +87,3 @@ Hix::Input::KeyboardController::~KeyboardController()
 
 }
 
-bool Hix::Input::KeyboardController::isMultiselect() const
-{
-	return _shiftPressed;
-}

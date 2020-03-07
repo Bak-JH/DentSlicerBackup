@@ -176,7 +176,6 @@ Rectangle {
         numberbox3_text.focus = false;
         numberbox_detail2_text.focus = false;
         text3DInput.focus = false;
-        qm.keyboardHandlerFocus();
     }
 
     function numbox_reset() {

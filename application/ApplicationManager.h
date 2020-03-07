@@ -26,6 +26,7 @@ namespace Hix
 	}
 	namespace QML
 	{
+		class MainWindow;
 		class PrintInfo;
 	}
 	namespace Application
@@ -73,6 +74,8 @@ namespace Hix
 			//TODO:temp legacy
 			//root of entire window application ie) including login window
 			QQuickItem* _windowRoot;
+			Hix::QML::MainWindow* _mainWindow;
+
 			Hix::QML::PrintInfo* _printInfo;
 			friend class SettingsChanger;
 		};

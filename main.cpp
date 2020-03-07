@@ -79,23 +79,28 @@ int main(int argc, char** argv)
 	painter.drawText(QPoint(32, 330), "Developed by HiX Inc.");
 	QSplashScreen* splash = new QSplashScreen(pixmap);
 	splash->show();
+	//login or make main window visible
+	QObject *mainWindow;
 
+	Hix::QML::getItemByID(appManager.getWindowRoot(), mainWindow, "window");
+#if  defined(QT_DEBUG) || defined(_DEBUG)
+	mainWindow->setProperty("visible", true);
+#else
+	QObject* loginWindow, * loginButton;
+	Hix::QML::getItemByID(appManager.getWindowRoot(), loginWindow, "loginWindow");
+	Hix::QML::getItemByID(appManager.getWindowRoot(), loginButton, "loginButton");
+	loginWindow->setProperty("visible", true);
+	//auth
+	httpreq* hr = new httpreq(loginWindow, loginButton);
 	// update module codes
 	UpdateChecker* up = new UpdateChecker();
 	up->checkForUpdates();
 
-	//login or make main window visible
-	QObject* loginWindow, *loginButton, *mainWindow;
-	Hix::QML::getItemByID(appManager.getWindowRoot(), loginWindow, "loginWindow");
-	Hix::QML::getItemByID(appManager.getWindowRoot(), loginButton, "loginButton");
-	Hix::QML::getItemByID(appManager.getWindowRoot(), mainWindow, "window");
-	httpreq* hr = new httpreq(loginWindow, loginButton);
-#if  defined(QT_DEBUG) || defined(_DEBUG)
-	mainWindow->setProperty("visible", true);
-#else
-	loginWindow->setProperty("visible", true);
 #endif
 	splash->close();
+	//QQuickItem* focusItem;
+	//Hix::QML::getItemByID(appManager.getWindowRoot(), focusItem, "focusItem");
+	//QMetaObject::invokeMethod(focusItem, "forceKeyboardFocus");
 	return app.exec();
 #endif
 
