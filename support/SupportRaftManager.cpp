@@ -66,7 +66,7 @@ std::vector<QVector3D> Hix::Support::SupportRaftManager::getSupportBasePts() con
 SupportModel* Hix::Support::SupportRaftManager::addSupport(const OverhangDetect::Overhang& overhang)
 {
 	SupportModel* newModel = nullptr;
-	switch (_supportType)
+	switch (Hix::Application::ApplicationManager::getInstance().settings().supportSetting.supportType)
 	{
 	case Hix::Settings::SupportSetting::SupportType::None:
 		break;

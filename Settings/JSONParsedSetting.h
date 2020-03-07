@@ -7,6 +7,7 @@
 #include <unordered_map>
 #include <algorithm>
 #include <optional>
+#include <filesystem>
 namespace Hix
 {
 	namespace Settings
@@ -14,8 +15,9 @@ namespace Hix
 
 		namespace JSON
 		{
+
 			template<typename ValType>
-			void tryParse(const rapidjson::Document& doc, const std::string& key, ValType& value)
+			bool tryParse(const rapidjson::Document& doc, const std::string& key, ValType& value)
 			{
 				try
 				{
@@ -25,15 +27,21 @@ namespace Hix
 						if (genVal.Is<ValType>())
 						{
 							value = genVal.Get<ValType>();
+							return true;
 						}
 					}
 
 				}
 				catch (...)
 				{
+					return false;
 				}
+				return false;
 
 			}
+			template<>
+			bool tryParse<std::filesystem::path>(const rapidjson::Document& doc, const std::string& key, std::filesystem::path& value);
+
 			template<typename ValType>
 			void parse(const rapidjson::Document& doc, const std::string& key, ValType& value)
 			{
@@ -47,6 +55,10 @@ namespace Hix
 					throw std::runtime_error("failed to parse " + key);
 				}
 			}
+			template<>
+			void parse<std::filesystem::path>(const rapidjson::Document& doc, const std::string& key, std::filesystem::path& value);
+
+
 
 			//assume lower case strings for mapping
 			template<typename ValType>

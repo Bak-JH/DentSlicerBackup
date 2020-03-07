@@ -8,11 +8,11 @@
 using namespace Hix::Settings;
 using namespace Hix::Settings::JSON;
 typedef rapidjson::GenericStringBuffer<rapidjson::UTF8<>, rapidjson::MemoryPoolAllocator<>> StringBuffer;
-constexpr auto SETTING_FILE("\\settings.json");
+constexpr auto SETTING_FILE("settings.json");
 
 Hix::Settings::AppSetting::AppSetting(): sliceSetting(deployInfo.settingsDir), supportSetting(deployInfo.settingsDir)
 {
-	auto appSettingsPath = deployInfo.settingsDir;
+	std::filesystem::path appSettingsPath = deployInfo.settingsDir;
 	//appSettingsPath.append("/settings.json");
 	//parseJSON(appSettingsPath);
 	appSettingsPath.append(SETTING_FILE);
