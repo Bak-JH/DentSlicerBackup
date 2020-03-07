@@ -12,7 +12,7 @@ namespace Hix
 		public:
 			DeployInfo();
 			std::string version;
-			std::string settingsDir;
+			std::filesystem::path settingsDir;
 			std::filesystem::path printerPresetsDir()const;
 
 		protected:

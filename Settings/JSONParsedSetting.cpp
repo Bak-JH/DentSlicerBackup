@@ -96,3 +96,22 @@ std::optional<rapidjson::Value> Hix::Settings::JSON::tryParseObj(const rapidjson
 	}
 	return std::optional<rapidjson::Value>();
 }
+template<>
+bool Hix::Settings::JSON::tryParse<std::filesystem::path>(const rapidjson::Document& doc, const std::string& key, std::filesystem::path& value)
+{
+	std::string tmp;
+	if (tryParse(doc, key, tmp))
+	{
+		value = tmp;
+		return true;
+	}
+	return false;
+
+}
+template<>
+void Hix::Settings::JSON::parse<std::filesystem::path>(const rapidjson::Document& doc, const std::string& key, std::filesystem::path& value)
+{
+	std::string tmp;
+	parse(doc, key, tmp);
+	value = tmp;
+}

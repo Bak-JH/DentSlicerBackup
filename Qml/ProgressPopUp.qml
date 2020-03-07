@@ -12,12 +12,12 @@ Hix.ProgressPopupShell {
 	
 	property string imgSource: "qrc:/Resource/progress_loading.png"
 
-	function reportError()
-	{
-		model.clear();
-		var newBtn = Qt.createComponent("ProgressException.qml");
-		var newBtnOption = newBtn.createObject(content);
-	}
+	// function reportError()
+	// {
+	// 	model.clear();
+	// 	var newBtn = Qt.createComponent("ProgressException.qml");
+	// 	var newBtnOption = newBtn.createObject(content);
+	// }
 	
 	MouseArea {
 		id: blockingArea

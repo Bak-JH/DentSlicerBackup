@@ -8,7 +8,7 @@
 using namespace Hix::Settings;
 using namespace Hix::Settings::JSON;
 
-constexpr auto SUPPORT_FILE("\\supportSettings.json");
+constexpr auto SUPPORT_FILE("supportSettings.json");
 
 Hix::Settings::SupportSetting::SupportSetting(std::filesystem::path settingsPath)
 {

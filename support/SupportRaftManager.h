@@ -60,7 +60,6 @@ namespace Hix
 			Qt3DCore::QEntity _root;
 			std::vector<QVector3D> getSupportBasePts()const;
 			EditMode _supportEditMode = EditMode::None;
-			Hix::Settings::SupportSetting::SupportType _supportType;
 			std::unordered_map<SupportModel*, std::unique_ptr<SupportModel>> _supports;
 			std::unique_ptr<RaftModel> _raft;
 			std::unique_ptr<RayCaster> _rayCaster;

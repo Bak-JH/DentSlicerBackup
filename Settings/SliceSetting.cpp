@@ -8,7 +8,7 @@
 using namespace Hix::Settings;
 using namespace Hix::Settings::JSON;
 
-constexpr auto SLICE_FILE("\\sliceSettings.json");
+constexpr auto SLICE_FILE("sliceSettings.json");
 
 Hix::Settings::SliceSetting::SliceSetting(std::filesystem::path settingsPath)
 {
