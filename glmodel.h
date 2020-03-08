@@ -55,7 +55,6 @@ public:
     bool EndsWith(const std::string& a, const std::string& b);
     static QVector3D spreadPoint(QVector3D endpoint,QVector3D startpoint,int factor);
     void changeViewMode(int viewMode);
-	void updateShader(int viewMode);
 
 
 	void setBoundingBoxVisible(bool isEnabled);

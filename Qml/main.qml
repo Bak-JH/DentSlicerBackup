@@ -355,10 +355,10 @@ Item{
 		}
     }
 
-    // Login{
-    //     id : loginWindow
-    //     objectName: "loginWindow"
-    // }
+	Login{
+		id : loginWindow
+		objectName: "loginWindow"
+	}
 
 }
 

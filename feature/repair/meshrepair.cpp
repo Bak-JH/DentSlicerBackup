@@ -4,7 +4,7 @@
 #include <time.h>
 #include "TMesh/tmesh.h"
 #include "../../glmodel.h"
-
+#include "../addModel.h"
 #include"../../common/Debug.h"
 using namespace T_MESH;
 using namespace Hix::Engine3D;
@@ -380,15 +380,12 @@ Hix::Features::MeshRepair::~MeshRepair()
 {
 }
 
-void Hix::Features::MeshRepair::run()
+void Hix::Features::MeshRepair::runImpl()
 {
-
 	for (auto model : _selectedModels)
 	{
 		repairImpl(model, model->modelName());
 	}
-
-
 }
 
 void Hix::Features::MeshRepair::repairImpl(GLModel* subject, const QString& modelName)
@@ -404,8 +401,6 @@ void Hix::Features::MeshRepair::repairImpl(GLModel* subject, const QString& mode
 			++childIdx;
 		}
 	}
-
-	//std::vector<Hix::Engine3D::Mesh*> repairedComps;
 
 	auto seperated = Hix::Features::seperateDisconnectedMeshes(subject->getMeshModd());
 	//remove smallest components
@@ -452,25 +447,20 @@ void Hix::Features::MeshRepair::repairImpl(GLModel* subject, const QString& mode
 	{
 		//mesh was split into seperate components, they should be added as children of the original subject
 		//subject is now an "empty" node, with no mesh and just transform matrix
-
-		postUIthread([subject, &seperated, &modelName]() {
+		postUIthread([subject, &seperated, &modelName, this]() {
 			subject->clearMesh();
 			subject->setMesh(new Mesh());
-			size_t childIdx = 0;
-			auto emptyTransform = Qt3DCore::QTransform();
-			for (auto& comp : seperated)
-			{
-				//Hix::Application::ApplicationManager::getInstance().createAndListModel(comp, modelName + "_child" + QString::number(childIdx), &subject->transform());
-				auto newModel = new GLModel(subject, comp, modelName + "_child" + QString::number(childIdx), &emptyTransform);
-				++childIdx;
-			}
 		});
 
-
-
+		//add children via add model feature
+		size_t childIdx = 0;
+		Qt3DCore::QTransform emptyTransform;
+		for (auto& comp : seperated)
+		{
+			auto addModel = new AddModel(subject, comp, modelName + "_child" + QString::number(childIdx), &emptyTransform);
+			tryRunFeature(*addModel);
+			addFeature(addModel);
+			++childIdx;
+		}
 	}
-	postUIthread([subject]() {
-		subject->updateRecursiveAabb();
-		subject->setZToBed();
-	});
 }

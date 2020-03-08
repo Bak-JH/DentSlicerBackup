@@ -60,8 +60,11 @@ void Hix::Application::SceneManager::drawBed()
 }
 
 
-
-
+//temp
+void Hix::Application::SceneManager::onCameraChanged()
+{
+	Hix::Features::UpdateWidgetModePos();
+}
 
 
 void Hix::Application::SceneManagerLoader::init(SceneManager& manager, QObject* root)
@@ -78,10 +81,7 @@ void Hix::Application::SceneManagerLoader::init(SceneManager& manager, QObject* 
 	//init lights
 	Lights* lights = new Lights(manager._total);
 	//widget mode update when camera changed
-	//QObject::connect(manager._root, SIGNAL(cameraViewChanged()), []() {
-	//	Hix::Features::UpdateWidgetModePos();
-	//});
-
-
-
+	QObject::connect(manager._root, SIGNAL(cameraViewChanged()), &manager, SLOT(onCameraChanged()));
 }
+
+

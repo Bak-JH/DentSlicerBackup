@@ -23,6 +23,7 @@ Hix::Features::MoveMode::~MoveMode()
 
 void Hix::Features::MoveMode::featureStarted()
 {
+	_widget.setManipulated(true);
 	_moveContainer = new FeatureContainerFlushSupport(_targetModels);
 	for (auto& target : _targetModels)
 		_moveContainer->addFeature(new Move(target));
@@ -30,6 +31,7 @@ void Hix::Features::MoveMode::featureStarted()
 
 void Hix::Features::MoveMode::featureEnded()
 {
+	_widget.setManipulated(false);
 	if(!_moveContainer->empty())
 		Hix::Application::ApplicationManager::getInstance().taskManager().enqueTask(_moveContainer);
 
@@ -65,6 +67,7 @@ void Hix::Features::MoveMode::modelMoveWithAxis(QVector3D axis, double distance)
 
 void Hix::Features::MoveMode::modelMove(QVector3D displacement)
 {
+	updatePosition();
 	QVector3D bndCheckedDisp;
 	const auto& printBound = Hix::Application::ApplicationManager::getInstance().settings().printerSetting.bedBound;
 	for (auto selectedModel : _targetModels) {

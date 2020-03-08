@@ -1,9 +1,8 @@
+#include "ImportModel.h"
 #include <QFileDialog>
-
 #include "../glmodel.h"
 #include "addModel.h"
 #include "repair/meshrepair.h"
-#include "ImportModel.h"
 #include "../application/ApplicationManager.h"
 
 Hix::Features::ImportModelMode::ImportModelMode()
@@ -32,15 +31,7 @@ Hix::Features::ImportModel::~ImportModel()
 {
 }
 
-void Hix::Features::ImportModel::undoImpl()
-{
-	tryUndoFeature(*_listModelFeature);
-}
 
-void Hix::Features::ImportModel::redoImpl()
-{
-	tryRedoFeature(*_listModelFeature);
-}
 
 void Hix::Features::ImportModel::runImpl()
 {
@@ -56,17 +47,18 @@ void Hix::Features::ImportModel::runImpl()
 	GLModel::filenameToModelName(filename.toStdString());
 	mesh->centerMesh();
 
-	_listModelFeature.reset(new ListModel(mesh, filename, nullptr));
-	tryRunFeature(*_listModelFeature);
-
+	auto listModel = new ListModel(mesh, filename, nullptr);
+	tryRunFeature(*listModel);
+	addFeature(listModel);
 	//repair mode
 	if (Hix::Features::isRepairNeeded(mesh))
 	{
 		//Hix::Application::ApplicationManager::getInstance().setProgressText("Repairing mesh.");
 		std::unordered_set<GLModel*> repairModels;
-		repairModels.insert(_listModelFeature->getAddedModel());
-		MeshRepair repair(repairModels);
-		repair.run();
+		repairModels.insert(listModel->getAddedModel());
+		auto repair = new MeshRepair(repairModels);
+		tryRunFeature(*repair);
+		addFeature(repair);
 	}
 
 	// do auto arrange

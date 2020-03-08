@@ -17,7 +17,7 @@ Hix::Features::SliceExportMode::SliceExportMode()
 	}
 	auto se = new SliceExport(Hix::Application::ApplicationManager::getInstance().partManager().allModels(), fileName);
 	Hix::Application::ApplicationManager::getInstance().taskManager().enqueTask(se);
-
+	scheduleForDelete();
 }
 
 Hix::Features::SliceExportMode::~SliceExportMode()
