@@ -1,7 +1,7 @@
 #pragma once
 #include <functional>
 #include "feature/interfaces/Progress.h"
-
+#include <qobject.h>
 namespace Hix
 {
 	class ProgressManager;
@@ -17,6 +17,15 @@ namespace Hix
 			Progress* progress();
 
 		protected:
+			QObject* uiThreadObject()const;
+			template<typename ReturnType>
+			ReturnType postUIthread(std::function<ReturnType()>&& func)
+			{
+				ReturnType ret;
+				QMetaObject::invokeMethod(uiThreadObject(), func, Qt::BlockingQueuedConnection, &ret);
+				return ret;
+			}
+			void postUIthread(std::function<void()>&& func);
 			Hix::ProgressManager* _progressManager;
 			Progress _progress;
 		};

@@ -443,25 +443,34 @@ void Hix::Features::MeshRepair::repairImpl(GLModel* subject, const QString& mode
 	else if (seperated.size() == 1)
 	{
 		//do nothing, see seperateDisconnectedMeshes
-		subject->updateMesh(true);
+		postUIthread([subject]() {
+			subject->updateMesh(true);
+		});
 
 	}
 	else
 	{
 		//mesh was split into seperate components, they should be added as children of the original subject
 		//subject is now an "empty" node, with no mesh and just transform matrix
-		subject->clearMesh();
-		subject->setMesh(new Mesh());
-		size_t childIdx = 0;
-		auto emptyTransform = Qt3DCore::QTransform();
-		for (auto& comp : seperated)
-		{
-			//Hix::Application::ApplicationManager::getInstance().createAndListModel(comp, modelName + "_child" + QString::number(childIdx), &subject->transform());
-			auto newModel = new GLModel(subject, comp, modelName + "_child" + QString::number(childIdx), &emptyTransform);
-			++childIdx;
-		}
+
+		postUIthread([subject, &seperated, &modelName]() {
+			subject->clearMesh();
+			subject->setMesh(new Mesh());
+			size_t childIdx = 0;
+			auto emptyTransform = Qt3DCore::QTransform();
+			for (auto& comp : seperated)
+			{
+				//Hix::Application::ApplicationManager::getInstance().createAndListModel(comp, modelName + "_child" + QString::number(childIdx), &subject->transform());
+				auto newModel = new GLModel(subject, comp, modelName + "_child" + QString::number(childIdx), &emptyTransform);
+				++childIdx;
+			}
+		});
+
+
 
 	}
-	subject->updateRecursiveAabb();
-	subject->setZToBed();
+	postUIthread([subject]() {
+		subject->updateRecursiveAabb();
+		subject->setZToBed();
+	});
 }

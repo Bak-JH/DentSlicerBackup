@@ -26,10 +26,6 @@ void Hix::Features::Feature::redo()noexcept
 	redoImpl();
 }
 
-void Feature::postUIthread(std::function<void()>&& func)
-{
-	QMetaObject::invokeMethod(&Hix::Application::ApplicationManager::getInstance().engine(), func, Qt::BlockingQueuedConnection);
-}
 void Hix::Features::Feature::run()noexcept
 {
 	runImpl();
@@ -60,12 +56,6 @@ void Hix::Features::Feature::run()noexcept
 		delete this;
 	}
 }
-
-QObject* Hix::Features::Feature::uiThreadObject() const
-{
-	return &Hix::Application::ApplicationManager::getInstance().engine();
-}
-
 
 
 void Hix::Features::Feature::tryRunFeature(Feature& other)
