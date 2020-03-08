@@ -31,8 +31,10 @@ namespace Hix
 	namespace Application
 	{
 		class ApplicationManager;
-		class SceneManager
+		//temp qobject to get qml side signal
+		class SceneManager: QObject
 		{
+			Q_OBJECT
 		public:
 			SceneManager();
 
@@ -57,6 +59,8 @@ namespace Hix
 			Qt3DRender::QCameraLens* _lens;
 			Hix::UI::GridBed _bed;
 
+		private slots:
+			void onCameraChanged();
 
 
 			friend class SceneManagerLoader;

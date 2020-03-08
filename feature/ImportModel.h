@@ -11,18 +11,16 @@ namespace Hix
 	namespace Features
 	{
 		class ListModel;
-		class ImportModel :public Feature
+		class ImportModel :public FeatureContainer
 		{
 		public:
 			ImportModel(QUrl fileUrl);
 			virtual ~ImportModel();
 		protected:
-			void undoImpl()override;
-			void redoImpl()override;
+
 			void runImpl()override;
 		private:
 			QUrl _fileUrl;
-			std::unique_ptr< Hix::Features::ListModel> _listModelFeature;
 		};
 		class ImportModelMode : public Hix::Features::InstantMode
 		{

@@ -233,7 +233,6 @@ void GLModel::initHitTest()
 void GLModel::qnodeEnabledChanged(bool isEnabled)
 {
 	setHitTestable(isEnabled);
-	//setHoverable(isEnabled);
 }
 
 void GLModel::setHitTestable(bool isEnable)
@@ -295,9 +294,7 @@ void GLModel::clicked(MouseEventData& pick, const Qt3DRender::QRayCasterHit& hit
 	}
 }
 void GLModel::updateModelMesh() {
-	//QMetaObject::invokeMethod((QObject*)Hix::Application::ApplicationManager::getInstance().scene3d, "disableScene3D");
 	updateMesh(_mesh);
-	//QMetaObject::invokeMethod((QObject*)Hix::Application::ApplicationManager::getInstance().scene3d, "enableScene3D");
 }
 
 
@@ -317,8 +314,12 @@ void GLModel::dragStarted(Hix::Input::MouseEventData& e, const Qt3DRender::QRayC
 {
 	//if(!Hix::Application::ApplicationManager::getInstance().featureManager().isActive<Hix::Features::MoveMode>())
 	//	Hix::Application::ApplicationManager::getInstance().moveButton->setProperty("state", "active");
-	Hix::Application::ApplicationManager::getInstance().featureManager().setMode(new Hix::Features::MoveMode());
-	dynamic_cast<Hix::Features::MoveMode*>(Hix::Application::ApplicationManager::getInstance().featureManager().currentMode())->featureStarted();
+	auto& featureManager = Hix::Application::ApplicationManager::getInstance().featureManager();
+	if (!featureManager.isActive<Hix::Features::MoveMode>())
+	{
+		featureManager.setMode(new Hix::Features::MoveMode());
+	}
+	dynamic_cast<Hix::Features::MoveMode*>(featureManager.currentMode())->featureStarted();
 	auto listed = getRootModel();
 	//if (Hix::Application::ApplicationManager::getInstance().supportRaftManager().supportActive())
 	//{
@@ -338,10 +339,7 @@ void GLModel::dragStarted(Hix::Input::MouseEventData& e, const Qt3DRender::QRayC
 void GLModel::doDrag(Hix::Input::MouseEventData& v)
 {
 	QVector2D currentPoint = QVector2D(v.position.x(), v.position.y());
-	//auto pt = Hix::Application::ApplicationManager::getInstance().sceneManager().worldToScreen(QVector3D(0, 0, 0));
-	//auto pt2 = Hix::Application::ApplicationManager::getInstance().sceneManager().worldToScreen(lastpoint);
 
-	//qDebug()<< currentPoint << pt << pt2;
 	QVector3D xAxis3D = QVector3D(1, 0, 0);
 	QVector3D yAxis3D = QVector3D(0, 1, 0);
 	QVector2D xAxis2D = (Hix::Application::ApplicationManager::getInstance().sceneManager().worldToScreen(lastpoint + xAxis3D) - Hix::Application::ApplicationManager::getInstance().sceneManager().worldToScreen(lastpoint));
@@ -407,29 +405,7 @@ void GLModel::changeViewMode(int viewMode) {
 }
 
 
-void GLModel::updateShader(int viewMode)
-{
 
-	//switch (viewMode) {
-	//case VIEW_MODE_OBJECT:
-	//	if (faceSelectionActive())
-	//	{
-	//		setMaterialMode(Hix::Render::ShaderMode::PerPrimitiveColor);
-	//	}
-	//	else
-	//	{
-	//		setMaterialMode(Hix::Render::ShaderMode::SingleColor);
-	//	}
-	//	break;
-	//case VIEW_MODE_LAYER:
-	//	setMaterialMode(Hix::Render::ShaderMode::LayerMode);
-	//	break;
-	//}
-
-
-
-
-}
 
 bool GLModel::perPrimitiveColorActive() const
 {
