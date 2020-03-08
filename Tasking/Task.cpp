@@ -1,4 +1,5 @@
 #include "Task.h"
+#include "../application/ApplicationManager.h"
 
 //template <typename F>
 //static void postToObject(F&& fun, QObject* obj = qApp) {
@@ -16,6 +17,19 @@
 Hix::Tasking::Task::~Task()
 {
 }
+
+
+void Hix::Tasking::Task::postUIthread(std::function<void()>&& func)
+{
+	QMetaObject::invokeMethod(&Hix::Application::ApplicationManager::getInstance().engine(), func, Qt::BlockingQueuedConnection);
+}
+
+QObject* Hix::Tasking::Task::uiThreadObject() const
+{
+	return &Hix::Application::ApplicationManager::getInstance().engine();
+}
+
+
 
 void Hix::Tasking::Task::setProgressManager(Hix::ProgressManager& manager)
 {

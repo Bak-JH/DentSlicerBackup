@@ -54,6 +54,7 @@ Entity {
             },
             RenderSettings {
                 id : rd
+                renderPolicy: RenderSettings.OnDemand
                 pickingSettings.pickMethod: PickingSettings.TrianglePicking
                 pickingSettings.pickResultMode: PickingSettings.NearestPick
                 pickingSettings.faceOrientationPickingMode: PickingSettings.FrontFace

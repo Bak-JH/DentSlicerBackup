@@ -304,7 +304,9 @@ void GLModel::updateModelMesh() {
 bool GLModel::isDraggable(Hix::Input::MouseEventData& e,const Qt3DRender::QRayCasterHit&)
 {
 	auto listed = getRootModel();
-	if (e.button == Qt3DInput::QMouseEvent::Buttons::LeftButton && ApplicationManager::getInstance().partManager().isSelected(listed) && (!Hix::Application::ApplicationManager::getInstance().featureManager().isFeatureActive() || Hix::Application::ApplicationManager::getInstance().featureManager().isActive<Hix::Features::MoveMode>()))
+	if (e.button == Qt3DInput::QMouseEvent::Buttons::LeftButton && ApplicationManager::getInstance().partManager().isSelected(listed)
+		&& (!Hix::Application::ApplicationManager::getInstance().featureManager().isFeatureActive() ||
+			Hix::Application::ApplicationManager::getInstance().featureManager().isActive<Hix::Features::MoveMode>()))
 	{
 		return true;
 	}

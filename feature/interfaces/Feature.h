@@ -22,15 +22,7 @@ namespace Hix
 			void run()noexcept override;
 
 		protected:
-			QObject* uiThreadObject()const;
-			template<typename ReturnType>
-			ReturnType postUIthread(std::function<ReturnType()>&& func)
-			{
-				ReturnType ret;
-				QMetaObject::invokeMethod(uiThreadObject(), func, Qt::BlockingQueuedConnection, &ret);
-				return ret;
-			}
-			void postUIthread(std::function<void()>&& func);
+
 			void tryRunFeature(Feature& other);
 			void tryUndoFeature(Feature& other);
 			void tryRedoFeature(Feature& other);
