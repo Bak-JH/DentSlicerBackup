@@ -26,6 +26,20 @@ namespace Hix
 
 		};
 
+		//vertical suppport only for now....
+		class AutoSupport : public FeatureContainer
+		{
+		public:
+			AutoSupport(GLModel * model);
+			virtual ~AutoSupport();
+		protected:
+			void runImpl()override;
+
+		private:
+			GLModel* _model;
+		};
+
+
 		class RemoveSupport : public Feature
 		{
 		public:

@@ -42,6 +42,24 @@ void Hix::Features::AddSupport::runImpl()
 }
 
 
+Hix::Features::AutoSupport::AutoSupport(GLModel* model): _model(model){}
+Hix::Features::AutoSupport::~AutoSupport(){}
+
+void Hix::Features::AutoSupport::runImpl()
+{
+	auto move = new Move(_model, QVector3D(0, 0, Hix::Support::SupportRaftManager::supportRaftMinLength()));
+	tryRunFeature(*move);
+	addFeature(move);
+	auto overhangs = Hix::Application::ApplicationManager::getInstance().supportRaftManager().detectOverhang(*_model);
+	for (auto overhang : overhangs)
+	{
+		auto supportFeature = new AddSupport(overhang);
+		tryRunFeature(*supportFeature);
+		addFeature(supportFeature);
+	}
+}
+
+
 
 ////////////////////////
 ///  Remove Support  ///
@@ -206,30 +224,17 @@ void Hix::Features::SupportMode::faceSelected(GLModel* selected, const Hix::Engi
 
 void Hix::Features::SupportMode::generateAutoSupport(std::unordered_set<GLModel*> models)
 { 
-
-	if (!Hix::Application::ApplicationManager::getInstance().supportRaftManager().supportsEmpty())
-		return;
-
-	//Hix::Application::ApplicationManager::getInstance().supportRaftManager().setSupportType(scfg->support_type);
-	Hix::Features::FeatureContainer* container = new FeatureContainer();
 	applySupportSettings();
 
-	for (auto selectedModel : models)
+	if (Hix::Application::ApplicationManager::getInstance().settings().supportSetting.supportType != Hix::Settings::SupportSetting::SupportType::None)
 	{
-		if (Hix::Application::ApplicationManager::getInstance().settings().supportSetting.supportType != Hix::Settings::SupportSetting::SupportType::None)
+		Hix::Features::FeatureContainer* container = new FeatureContainer();
+		for (auto selectedModel : models)
 		{
-			auto moveFeature = new Move(selectedModel, QVector3D(0, 0, Hix::Support::SupportRaftManager::supportRaftMinLength()));
-			/*tryr*/
-			container->addFeature();
+			container->addFeature(new AutoSupport(selectedModel));
 		}
-		auto overhangs = Hix::Application::ApplicationManager::getInstance().supportRaftManager().detectOverhang(*selectedModel);
-		for (auto overhang : overhangs)
-		{
-			container->addFeature(new AddSupport(overhang));
-		}
+		Hix::Application::ApplicationManager::getInstance().taskManager().enqueTask(container);
 	}
-
-	//Hix::Application::ApplicationManager::getInstance().taskManager().enqueTask(container);
 }
 
 void Hix::Features::SupportMode::clearSupport(const std::unordered_set<GLModel*> models)
@@ -286,4 +291,6 @@ void Hix::Features::SupportMode::removeSupport(SupportModel* target)
 {
 	Hix::Application::ApplicationManager::getInstance().taskManager().enqueTask(new RemoveSupport(target));
 }
+
+
 
