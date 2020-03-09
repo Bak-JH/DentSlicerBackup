@@ -17,7 +17,6 @@ Hix::UI::Widget3D::~Widget3D()
 
 void Hix::UI::Widget3D::addWidget(std::unique_ptr<Widget> widget)
 {
-
 	_widgets.push_back(std::move(widget));
 }
 
