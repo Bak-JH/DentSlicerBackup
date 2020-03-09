@@ -7,7 +7,6 @@ Hix::Features::WidgetMode::WidgetMode()
 {
 	_widget.setParent(Hix::Application::ApplicationManager::getInstance().sceneManager().total());
 	_controller->setHoverEnabled(true);
-	_widget.setVisible(true);
 }
 
 Hix::Features::WidgetMode::~WidgetMode()
