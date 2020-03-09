@@ -6,7 +6,9 @@
 #include "application/ApplicationManager.h"
 
 const QUrl MOVE_POPUP_URL = QUrl("qrc:/Qml/FeaturePopup/PopupMove.qml");
-Hix::Features::MoveMode::MoveMode() : WidgetMode(), _targetModels(Hix::Application::ApplicationManager::getInstance().partManager().selectedModels()), DialogedMode(MOVE_POPUP_URL)
+Hix::Features::MoveMode::MoveMode() : WidgetMode()
+	, _targetModels(Hix::Application::ApplicationManager::getInstance().partManager().selectedModels())
+	, DialogedMode(MOVE_POPUP_URL)
 {
 	if (Hix::Application::ApplicationManager::getInstance().partManager().selectedModels().empty())
 	{
@@ -14,6 +16,7 @@ Hix::Features::MoveMode::MoveMode() : WidgetMode(), _targetModels(Hix::Applicati
 	}
 	_widget.addWidget(std::make_unique<Hix::UI::MoveWidget>(QVector3D(1, 0, 0), &_widget));
 	_widget.addWidget(std::make_unique<Hix::UI::MoveWidget>(QVector3D(0, 1, 0), &_widget));
+	_widget.setVisible(true);
 
 	auto& co = controlOwner();
 	co.getControl(_xValue, "moveX");
@@ -60,7 +63,6 @@ void Hix::Features::MoveMode::applyButtonClicked()
 QVector3D Hix::Features::MoveMode::getWidgetPosition()
 {
 	return 	Hix::Engine3D::combineBounds(_targetModels).centre();
-
 }
 
 

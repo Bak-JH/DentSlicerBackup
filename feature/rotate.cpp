@@ -13,6 +13,7 @@ Hix::Features::RotateMode::RotateMode(): WidgetMode(), _targetModels(Hix::Applic
 	_widget.addWidget(std::make_unique<Hix::UI::RotateWidget>(QVector3D(1, 0, 0), &_widget));
 	_widget.addWidget(std::make_unique<Hix::UI::RotateWidget>(QVector3D(0, 1, 0), &_widget));
 	_widget.addWidget(std::make_unique<Hix::UI::RotateWidget>(QVector3D(0, 0, 1), &_widget));
+	_widget.setVisible(true);
 
 	auto& co = controlOwner();
 	co.getControl(_xValue, "rotateX");
