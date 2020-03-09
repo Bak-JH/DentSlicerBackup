@@ -59,6 +59,13 @@ void Hix::Application::SceneManager::drawBed()
 	_bed.drawBed();
 }
 
+void Hix::Application::SceneManager::setViewPreset(ViewPreset preset)
+{
+	std::string viewFuncName("view");
+	viewFuncName.append(magic_enum::enum_name(preset));
+	QMetaObject::invokeMethod(_root, viewFuncName.c_str());
+}
+
 
 //temp
 void Hix::Application::SceneManager::onCameraChanged()

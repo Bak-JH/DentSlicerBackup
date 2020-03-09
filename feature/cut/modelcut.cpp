@@ -53,6 +53,7 @@ void ModelCut::cutModeSelected()
 		Hix::Application::ApplicationManager::getInstance().getRayCaster().setHoverEnabled(false);
 		_cuttingPlane.transform().setTranslation(QVector3D(0, 0, _modelsBound.zMin() + 1 * _modelsBound.lengthZ() / 1.8));
 		_cuttingPlane.enablePlane(true);
+		Hix::Application::ApplicationManager::getInstance().sceneManager().setViewPreset(Hix::Application::SceneManager::ViewPreset::Center);
 	}
 	else if (_cutSwitch->isChecked())
 	{
@@ -63,6 +64,7 @@ void ModelCut::cutModeSelected()
 		_cuttingPlane.transform().setTranslation(QVector3D(0, 0, zOverModel));
 		_cuttingPlane.enablePlane(true);
 		Hix::Application::ApplicationManager::getInstance().getRayCaster().setHoverEnabled(true);
+		Hix::Application::ApplicationManager::getInstance().sceneManager().setViewPreset(Hix::Application::SceneManager::ViewPreset::Down);
 	}
 	return;
 }

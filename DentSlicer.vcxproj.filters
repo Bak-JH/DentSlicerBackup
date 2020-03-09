@@ -1055,10 +1055,7 @@
     <None Include="Qml\SettingPopup.qml" />
     <None Include="Qml\SlicingData.qml" />
     <None Include="Qml\SlicingDataElement.qml" />
-    <None Include="Qml\UICore.qml" />
-    <None Include="Qml\UndoRedoButton.qml" />
     <None Include="Qml\ViewButton.qml" />
-    <None Include="Qml\ViewChange.qml" />
     <None Include="Resource\mesh\arrow.stl" />
     <None Include="resource\bar.png" />
     <None Include="Resource\mesh\boundedBox.stl" />
