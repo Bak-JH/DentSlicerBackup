@@ -150,6 +150,10 @@ const QUrl SUPPORT_POPUP_URL = QUrl("qrc:/Qml/FeaturePopup/PopupSupport.qml");
 Hix::Features::SupportMode::SupportMode()
 	: _targetModels(Hix::Application::ApplicationManager::getInstance().partManager().selectedModels()), DialogedMode(SUPPORT_POPUP_URL)
 {
+	if (Hix::Application::ApplicationManager::getInstance().partManager().selectedModels().empty())
+	{
+		Hix::Application::ApplicationManager::getInstance().modalDialogManager().needToSelectModels();
+	}
 	Hix::Application::ApplicationManager::getInstance().getRayCaster().setHoverEnabled(true);
 
 	auto& co = controlOwner();

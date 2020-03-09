@@ -28,11 +28,11 @@ void Hix::Features::Feature::redo()noexcept
 
 void Hix::Features::Feature::run()noexcept
 {
-	runImpl();
 
 	bool success = false;
 	try
 	{
+		runImpl();
 		success = true;
 	}
 	catch (std::exception & e)

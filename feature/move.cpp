@@ -8,6 +8,10 @@
 const QUrl MOVE_POPUP_URL = QUrl("qrc:/Qml/FeaturePopup/PopupMove.qml");
 Hix::Features::MoveMode::MoveMode() : WidgetMode(), _targetModels(Hix::Application::ApplicationManager::getInstance().partManager().selectedModels()), DialogedMode(MOVE_POPUP_URL)
 {
+	if (Hix::Application::ApplicationManager::getInstance().partManager().selectedModels().empty())
+	{
+		Hix::Application::ApplicationManager::getInstance().modalDialogManager().needToSelectModels();
+	}
 	_widget.addWidget(std::make_unique<Hix::UI::MoveWidget>(QVector3D(1, 0, 0), &_widget));
 	_widget.addWidget(std::make_unique<Hix::UI::MoveWidget>(QVector3D(0, 1, 0), &_widget));
 

@@ -7,6 +7,10 @@ const QUrl LAYFLAT_POPUP_URL = QUrl("qrc:/Qml/FeaturePopup/PopupLayFlat.qml");
 Hix::Features::LayFlatMode::LayFlatMode()
 	: PPShaderMode(Hix::Application::ApplicationManager::getInstance().partManager().selectedModels()), DialogedMode(LAYFLAT_POPUP_URL)
 {
+	if (Hix::Application::ApplicationManager::getInstance().partManager().selectedModels().empty())
+	{
+		Hix::Application::ApplicationManager::getInstance().modalDialogManager().needToSelectModels();
+	}
 }
 
 Hix::Features::LayFlatMode::~LayFlatMode()

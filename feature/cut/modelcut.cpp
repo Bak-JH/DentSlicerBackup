@@ -23,6 +23,10 @@ Hix::Features::ModelCut::ModelCut() :
 	DialogedMode(CUT_POPUP_URL),
 	SliderMode(0, Hix::Application::ApplicationManager::getInstance().partManager().selectedBound().lengthZ())
 {
+	if (Hix::Application::ApplicationManager::getInstance().partManager().selectedModels().empty())
+	{
+		Hix::Application::ApplicationManager::getInstance().modalDialogManager().needToSelectModels();
+	}
 	auto& co = controlOwner();
 	co.getControl(_cutSwitch, "cutswitch");
 	QObject::connect(_cutSwitch, &Hix::QML::Controls::ToggleSwitch::checkedChanged, [this]() { cutModeSelected(); });
