@@ -57,7 +57,9 @@ std::unordered_set<GLModel*>& Hix::Features::RotateMode::models()
 
 void Hix::Features::RotateMode::applyButtonClicked()
 {
-	auto rotation = QQuaternion(QVector3D(_xValue->getValue(), _yValue->getValue(), _zValue->getValue()));
+	//auto rotation = QQuaternion(QVector3D(_xValue->getValue(), _yValue->getValue(), _zValue->getValue()));
+	auto rotation = QQuaternion::fromEulerAngles(_xValue->getValue(), _yValue->getValue(), _zValue->getValue());
+
 	Hix::Features::FeatureContainerFlushSupport* container = new FeatureContainerFlushSupport(_targetModels);
 
 	for (auto& target : _targetModels)
