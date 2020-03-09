@@ -22,6 +22,8 @@ Hix::Features::MoveMode::MoveMode() : WidgetMode()
 	co.getControl(_xValue, "moveX");
 	co.getControl(_yValue, "moveY");
 	co.getControl(_zValue, "moveZ");
+
+	updatePosition();
 }
 
 Hix::Features::MoveMode::~MoveMode()
