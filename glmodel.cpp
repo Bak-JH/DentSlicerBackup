@@ -303,7 +303,8 @@ bool GLModel::isDraggable(Hix::Input::MouseEventData& e,const Qt3DRender::QRayCa
 	auto listed = getRootModel();
 	if (e.button == Qt3DInput::QMouseEvent::Buttons::LeftButton && ApplicationManager::getInstance().partManager().isSelected(listed)
 		&& (!Hix::Application::ApplicationManager::getInstance().featureManager().isFeatureActive() ||
-			Hix::Application::ApplicationManager::getInstance().featureManager().isActive<Hix::Features::MoveMode>()))
+			Hix::Application::ApplicationManager::getInstance().featureManager().isActive<Hix::Features::MoveMode>())
+		&& !Hix::Application::ApplicationManager::getInstance().supportRaftManager().modelHasSupport(listed))
 	{
 		return true;
 	}
@@ -312,8 +313,6 @@ bool GLModel::isDraggable(Hix::Input::MouseEventData& e,const Qt3DRender::QRayCa
 
 void GLModel::dragStarted(Hix::Input::MouseEventData& e, const Qt3DRender::QRayCasterHit& hit)
 {
-	//if(!Hix::Application::ApplicationManager::getInstance().featureManager().isActive<Hix::Features::MoveMode>())
-	//	Hix::Application::ApplicationManager::getInstance().moveButton->setProperty("state", "active");
 	auto& featureManager = Hix::Application::ApplicationManager::getInstance().featureManager();
 	if (!featureManager.isActive<Hix::Features::MoveMode>())
 	{

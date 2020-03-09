@@ -16,12 +16,8 @@ namespace Hix
 			};
 			enum class RaftType : uint8_t
 			{
-				None,
 				General
 			};
-
-
-
 
 			SupportSetting(std::filesystem::path settingsPath);
 			~SupportSetting();
@@ -34,7 +30,6 @@ namespace Hix
 			float supportBaseHeight;
 			float raftThickness;
 
-
 		protected:
 			void parseJSONImpl(const rapidjson::Document& doc)override;
 			void initialize()override;
@@ -42,7 +37,6 @@ namespace Hix
 			rapidjson::Document doc()override;
 		};
 	}
-
 }
 
 namespace magic_enum

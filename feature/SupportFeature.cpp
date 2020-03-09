@@ -73,12 +73,17 @@ Hix::Features::RemoveSupport::~RemoveSupport()
 
 void Hix::Features::RemoveSupport::undoImpl()
 {
-	_model = Hix::Application::ApplicationManager::getInstance().supportRaftManager().addSupport(std::move(std::get<std::unique_ptr<SupportModel>>(_model)));
+	postUIthread([this]() {
+		_model = Hix::Application::ApplicationManager::getInstance().supportRaftManager().addSupport(std::move(std::get<std::unique_ptr<SupportModel>>(_model)));
+	});
 }
 
 void Hix::Features::RemoveSupport::redoImpl()
 {
-	_model = Hix::Application::ApplicationManager::getInstance().supportRaftManager().removeSupport(std::get<SupportModel*>(_model));
+
+	postUIthread([this]() {
+		_model = Hix::Application::ApplicationManager::getInstance().supportRaftManager().removeSupport(std::get<SupportModel*>(_model));
+	});
 }
 
 void Hix::Features::RemoveSupport::runImpl()
@@ -99,17 +104,23 @@ Hix::Features::AddRaft::~AddRaft()
 
 void Hix::Features::AddRaft::undoImpl()
 {
-	_model = Hix::Application::ApplicationManager::getInstance().supportRaftManager().removeRaft();
+	postUIthread([this]() {
+		_model = Hix::Application::ApplicationManager::getInstance().supportRaftManager().removeRaft();
+	});
 }
 
 void Hix::Features::AddRaft::redoImpl()
 {
-	_model = Hix::Application::ApplicationManager::getInstance().supportRaftManager().addRaft(std::move(std::get<std::unique_ptr<RaftModel>>(_model)));
+	postUIthread([this]() {
+		_model = Hix::Application::ApplicationManager::getInstance().supportRaftManager().addRaft(std::move(std::get<std::unique_ptr<RaftModel>>(_model)));
+	});
 }
 
 void Hix::Features::AddRaft::runImpl()
 {
-	_model = Hix::Application::ApplicationManager::getInstance().supportRaftManager().generateRaft();
+	postUIthread([this]() {
+		_model = Hix::Application::ApplicationManager::getInstance().supportRaftManager().generateRaft();
+	});
 
 }
 
@@ -132,7 +143,9 @@ void Hix::Features::RemoveRaft::undoImpl()
 
 void Hix::Features::RemoveRaft::redoImpl()
 {
-	_model = Hix::Application::ApplicationManager::getInstance().supportRaftManager().removeRaft();
+	postUIthread([this]() {
+		_model = Hix::Application::ApplicationManager::getInstance().supportRaftManager().removeRaft();
+	});
 }
 
 void Hix::Features::RemoveRaft::runImpl()
@@ -159,6 +172,7 @@ Hix::Features::SupportMode::SupportMode()
 
 	auto& co = controlOwner();
 	co.getControl(_generateSupportsBttn, "generatesupports");
+	co.getControl(_generateRaftBttn, "generateraft");
 	co.getControl(_clearSupportsBttn, "clearsupports");
 	co.getControl(_manualEditBttn, "editsupports");
 	co.getControl(_suppTypeDrop, "supporttype");
@@ -179,15 +193,19 @@ Hix::Features::SupportMode::SupportMode()
 
 	// bind buttons
 	QObject::connect(_generateSupportsBttn, &Hix::QML::Controls::Button::clicked, [this]() {
-			generateAutoSupport(Hix::Application::ApplicationManager::getInstance().partManager().selectedModels());
+		generateAutoSupport(Hix::Application::ApplicationManager::getInstance().partManager().selectedModels());
+		});
+	QObject::connect(_generateRaftBttn, &Hix::QML::Controls::Button::clicked, [this]() {
+		regenerateRaft();
 		});
 	QObject::connect(_clearSupportsBttn, &Hix::QML::Controls::Button::clicked, [this]() {
-			clearSupport(Hix::Application::ApplicationManager::getInstance().partManager().selectedModels());
+		clearSupport(Hix::Application::ApplicationManager::getInstance().partManager().selectedModels());
 		});
 	QObject::connect(_manualEditBttn, &Hix::QML::Controls::ToggleSwitch::checkedChanged, [this]() {
-			auto mode = _manualEditBttn->isChecked() ? Hix::Support::EditMode::Manual : Hix::Support::EditMode::None;
-			Hix::Application::ApplicationManager::getInstance().supportRaftManager().setSupportEditMode(mode);
+		auto mode = _manualEditBttn->isChecked() ? Hix::Support::EditMode::Manual : Hix::Support::EditMode::None;
+		Hix::Application::ApplicationManager::getInstance().supportRaftManager().setSupportEditMode(mode);
 		});
+
 
 	// bind dropbox
 	auto& modSettings = Hix::Application::SettingsChanger::settings(Hix::Application::ApplicationManager::getInstance()).supportSetting;
