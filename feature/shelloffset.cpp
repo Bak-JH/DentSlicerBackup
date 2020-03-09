@@ -19,6 +19,10 @@ Hix::Features::ShellOffsetMode::ShellOffsetMode():
 	_cuttingPlane(Hix::Application::ApplicationManager::getInstance().sceneManager().total()),
 	DialogedMode(OFFSET_POPUP_URL)
 {
+	if (Hix::Application::ApplicationManager::getInstance().partManager().selectedModels().empty())
+	{
+		Hix::Application::ApplicationManager::getInstance().modalDialogManager().needToSelectModels();
+	}
 	auto& co = controlOwner();
 	co.getControl(_offsetValue, "offsetValue");
 

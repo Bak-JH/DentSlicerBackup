@@ -10,7 +10,6 @@ Hix.Button {
 	radius: 6
 	color: "#ffffff"
 
-	onClicked: { console.log("cam clicked"); }
 	onEntered: { color = "#eeeeee" }
 	onExited: { color = "#ffffff" }
 
