@@ -153,6 +153,7 @@ Hix::Features::SupportMode::SupportMode()
 	if (Hix::Application::ApplicationManager::getInstance().partManager().selectedModels().empty())
 	{
 		Hix::Application::ApplicationManager::getInstance().modalDialogManager().needToSelectModels();
+		return;
 	}
 	Hix::Application::ApplicationManager::getInstance().getRayCaster().setHoverEnabled(true);
 

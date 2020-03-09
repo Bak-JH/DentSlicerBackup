@@ -16,6 +16,7 @@ Hix::Features::ExtendMode::ExtendMode()
 	if(Hix::Application::ApplicationManager::getInstance().partManager().selectedModels().empty())
 	{
 		Hix::Application::ApplicationManager::getInstance().modalDialogManager().needToSelectModels();
+		return;
 	}
 	auto& co = controlOwner();
 	co.getControl(_extendValue, "extendvalue");

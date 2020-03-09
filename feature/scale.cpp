@@ -10,6 +10,7 @@ Hix::Features::ScaleMode::ScaleMode(): _targetModels(Hix::Application::Applicati
 	if (Hix::Application::ApplicationManager::getInstance().partManager().selectedModels().empty())
 	{
 		Hix::Application::ApplicationManager::getInstance().modalDialogManager().needToSelectModels();
+		return;
 	}
 	auto& co = controlOwner();
 	co.getControl(_precentValue, "scaleValue");

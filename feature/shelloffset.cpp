@@ -22,6 +22,7 @@ Hix::Features::ShellOffsetMode::ShellOffsetMode():
 	if (Hix::Application::ApplicationManager::getInstance().partManager().selectedModels().empty())
 	{
 		Hix::Application::ApplicationManager::getInstance().modalDialogManager().needToSelectModels();
+		return;
 	}
 	auto& co = controlOwner();
 	co.getControl(_offsetValue, "offsetValue");

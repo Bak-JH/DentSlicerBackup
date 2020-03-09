@@ -10,6 +10,7 @@ Hix::Features::LayFlatMode::LayFlatMode()
 	if (Hix::Application::ApplicationManager::getInstance().partManager().selectedModels().empty())
 	{
 		Hix::Application::ApplicationManager::getInstance().modalDialogManager().needToSelectModels();
+		return;
 	}
 }
 
