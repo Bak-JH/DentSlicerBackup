@@ -15,7 +15,7 @@ FeaturePopup {
 
 	CtrSpinBox {
 		id: scaleX
-		label.text: "X Size(mm)"
+		label.text: "X (multiplier)"
 		fromNum: -100
 		toNum: 100
 		value: 1
@@ -34,7 +34,7 @@ FeaturePopup {
 
 	CtrSpinBox {
 		id: scaleY
-		label.text: "Y Size(mm)"
+		label.text: "Y (multiplier)"
 		width: parent.width - 16 * 2
 		fromNum: -100
 		toNum: 100
@@ -53,7 +53,7 @@ FeaturePopup {
 
 	CtrSpinBox {
 		id: scaleZ
-		label.text: "Z Size(mm)"
+		label.text: "Z (multiplier)"
 		width: parent.width - 16 * 2
 		fromNum: -100
 		toNum: 100

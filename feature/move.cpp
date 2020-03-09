@@ -75,7 +75,7 @@ void Hix::Features::MoveMode::modelMoveWithAxis(QVector3D axis, double distance)
 
 void Hix::Features::MoveMode::modelMove(QVector3D displacement)
 {
-	updatePosition();
+	//updatePosition();
 	QVector3D bndCheckedDisp;
 	const auto& printBound = Hix::Application::ApplicationManager::getInstance().settings().printerSetting.bedBound;
 	for (auto selectedModel : _targetModels) {
