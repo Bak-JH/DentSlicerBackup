@@ -80,7 +80,7 @@ void Hix::Support::CylindricalRaft::generateMesh(const std::vector<QVector3D>& o
 	auto mesh = new Mesh();
 	//generate square for each overhang
 	//std::vector<std::vector<QVector3D>> cylinders;
-	auto square = Hix::Shapes2D::generateSquare(Hix::Application::ApplicationManager::getInstance().settings().supportSetting.supportRadiusMax *1.8);
+	auto square = Hix::Shapes2D::generateSquare(Hix::Application::ApplicationManager::getInstance().settings().supportSetting.supportRadiusMax * 1.0);
 
 	std::vector<QVector3D> contourPoints;
 	contourPoints.reserve(4 * overhangs.size());
@@ -104,8 +104,9 @@ void Hix::Support::CylindricalRaft::generateMesh(const std::vector<QVector3D>& o
 	{
 		interiorPts->push_back({ each.x(), each.y(), 0 });
 	}
-	pcl::ConcaveHull<pcl::PointXYZ> cHull;
-	cHull.setAlpha(minVorDist);
+	//pcl::ConcaveHull<pcl::PointXYZ> cHull;
+	pcl::ConvexHull<pcl::PointXYZ> cHull;
+	//cHull.setAlpha(minVorDist);
 	cHull.setInputCloud(interiorPts);
 	auto test = cHull.getDimension();
 	cHull.reconstruct(*concaveOut, polygons);
