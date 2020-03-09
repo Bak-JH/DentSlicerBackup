@@ -12,7 +12,7 @@ FeaturePopup {
 		id: rotateX
 		fromNum: -360
 		toNum: 360
-		label.text: "X Offset(deg)"
+		label.text: "X (deg)"
 		width: parent.width - 16 * 2
 		anchors.left: parent.left
 		anchors.leftMargin: 16
@@ -24,7 +24,7 @@ FeaturePopup {
 		id: rotateY
 		fromNum: -360
 		toNum: 360
-		label.text: "Y Offset(deg)"
+		label.text: "Y (deg)"
 		width: parent.width - 16 * 2
 		anchors.left: parent.left
 		anchors.leftMargin: 16
@@ -36,7 +36,7 @@ FeaturePopup {
 		id: rotateZ
 		fromNum: -360
 		toNum: 360
-		label.text: "Z Offset(deg)"
+		label.text: "Z (deg)"
 		width: parent.width - 16 * 2
 		anchors.left: parent.left
 		anchors.leftMargin: 16
