@@ -135,9 +135,14 @@ void Hix::Support::SupportRaftManager::removeFromModelMap(SupportModel* support)
 
 std::unique_ptr<SupportModel> Hix::Support::SupportRaftManager::removeSupport(SupportModel* e)
 {
+	std::unique_ptr<SupportModel> result;
 	e->setEnabled(false);
 	e->setHitTestable(false);
-	auto result = std::move(_supports.find(e)->second);
+	auto found = _supports.find(e);
+	if (found != _supports.end())
+	{
+		result = std::move(found->second);
+	}
 	removeFromModelMap(e);
 	_supports.erase(e);
 	return result;
@@ -178,7 +183,8 @@ RaftModel* Hix::Support::SupportRaftManager::addRaft(std::unique_ptr<RaftModel> 
 
 std::unique_ptr<RaftModel> Hix::Support::SupportRaftManager::removeRaft()
 {
-	_raft->setParent((QNode*)nullptr);
+	if(_raft)
+		_raft->setParent((QNode*)nullptr);
 	return std::move(_raft);
 }
 

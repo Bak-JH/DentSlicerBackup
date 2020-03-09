@@ -73,9 +73,14 @@ Hix::Features::RemoveSupport::~RemoveSupport()
 
 void Hix::Features::RemoveSupport::undoImpl()
 {
-	postUIthread([this]() {
-		_model = Hix::Application::ApplicationManager::getInstance().supportRaftManager().addSupport(std::move(std::get<std::unique_ptr<SupportModel>>(_model)));
-	});
+	auto owning = std::move(std::get<std::unique_ptr<SupportModel>>(_model));
+	if (owning)
+	{
+		postUIthread([this, &owning]() {
+			_model = Hix::Application::ApplicationManager::getInstance().supportRaftManager().addSupport(std::move(owning));
+		});
+	}
+
 }
 
 void Hix::Features::RemoveSupport::redoImpl()
@@ -130,7 +135,8 @@ void Hix::Features::AddRaft::runImpl()
 ///  Remove Raft  ///
 /////////////////////
 Hix::Features::RemoveRaft::RemoveRaft()
-{}
+{
+}
 
 Hix::Features::RemoveRaft::~RemoveRaft()
 {}
@@ -266,7 +272,6 @@ void Hix::Features::SupportMode::clearSupport(const std::unordered_set<GLModel*>
 		return;
 
 	Hix::Features::FeatureContainer* container = new FeatureContainer();
-	applySupportSettings();
 
 	if (Hix::Application::ApplicationManager::getInstance().supportRaftManager().raftActive())
 		container->addFeature(new RemoveRaft());
