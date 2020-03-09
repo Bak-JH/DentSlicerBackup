@@ -13,6 +13,7 @@ Hix::Features::MoveMode::MoveMode() : WidgetMode()
 	if (Hix::Application::ApplicationManager::getInstance().partManager().selectedModels().empty())
 	{
 		Hix::Application::ApplicationManager::getInstance().modalDialogManager().needToSelectModels();
+		return;
 	}
 	_widget.addWidget(std::make_unique<Hix::UI::MoveWidget>(QVector3D(1, 0, 0), &_widget));
 	_widget.addWidget(std::make_unique<Hix::UI::MoveWidget>(QVector3D(0, 1, 0), &_widget));
