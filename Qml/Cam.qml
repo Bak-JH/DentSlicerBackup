@@ -129,6 +129,7 @@ Item{
 						anchors.verticalCenter: parent.verticalCenter
 						anchors.horizontalCenter: parent.horizontalCenter
 					}
+					onClicked:{sceneRoot.viewDown();}
 				}
 				CamBox {
 					id: back
@@ -141,6 +142,8 @@ Item{
 						anchors.verticalCenter: parent.verticalCenter
 						anchors.horizontalCenter: parent.horizontalCenter
 					}
+					onClicked:{sceneRoot.viewBack();}
+
 				}
 				CamBox {
 					id: left
@@ -153,6 +156,8 @@ Item{
 						anchors.verticalCenter: parent.verticalCenter
 						anchors.horizontalCenter: parent.horizontalCenter
 					}
+					onClicked:{sceneRoot.viewLeft();}
+
 				}
 				CamBox {
 					id: front
@@ -165,6 +170,7 @@ Item{
 						anchors.verticalCenter: parent.verticalCenter
 						anchors.horizontalCenter: parent.horizontalCenter
 					}
+					onClicked:{sceneRoot.viewFront();}
 				}
 				CamBox {
 					id: right
@@ -177,6 +183,7 @@ Item{
 						anchors.verticalCenter: parent.verticalCenter
 						anchors.horizontalCenter: parent.horizontalCenter
 					}
+					onClicked:{sceneRoot.viewRight();}
 				}
 				CamBox {
 					id: bottom
@@ -189,6 +196,7 @@ Item{
 						anchors.verticalCenter: parent.verticalCenter
 						anchors.horizontalCenter: parent.horizontalCenter
 					}
+					onClicked:{sceneRoot.viewUp();}
 				}
 			}
 

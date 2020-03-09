@@ -36,6 +36,18 @@ namespace Hix
 		{
 			Q_OBJECT
 		public:
+			enum class ViewPreset
+			{
+				Up,
+				Down,
+				Front,
+				Back,
+				Left,
+				Right,
+				Center
+			};
+
+
 			SceneManager();
 
 			SceneManager(const SceneManager& other) = delete;
@@ -49,6 +61,7 @@ namespace Hix
 			const Qt3DCore::QTransform* systemTransform()const;
 			QQuickItem* scene3d();
 			void drawBed();
+			void setViewPreset(ViewPreset preset);
 		private:
 			QQuickItem* _scene3d;
 			Qt3DCore::QEntity* _root;
@@ -78,4 +91,13 @@ namespace Hix
 
 
 	}
+}
+
+namespace magic_enum
+{
+	template<>
+	struct name_formatter<Hix::Application::SceneManager::ViewPreset>
+	{
+		static constexpr name_option name_option = name_option::unchanged;
+	};
 }
