@@ -829,6 +829,9 @@
     <ClInclude Include="Qml\components\MainWindow.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="support\SupportModel.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="debug\moc_predefs.h.cbt" />
@@ -885,8 +888,6 @@
     <Image Include="Resource\menu_cut_select_1.png" />
     <Image Include="Resource\menu_extend.png" />
     <Image Include="Resource\menu_extend_select_1.png" />
-    <Image Include="Resource\menu_extract.png" />
-    <Image Include="Resource\menu_extract_select_1.png" />
     <Image Include="Resource\menu_label.png" />
     <Image Include="Resource\menu_label_select_1.png" />
     <Image Include="Resource\menu_layflat.png" />
@@ -930,6 +931,8 @@
     <Image Include="Resource\triangle_up_hover.png" />
     <Image Include="Resource\undo_arrow.png" />
     <Image Include="Resource\vs_icon.png" />
+    <Image Include="Resource\menu_slice.png" />
+    <Image Include="Resource\menu_slice_select_1.png" />
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="Qml\components\FeatureMenu.h" />

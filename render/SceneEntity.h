@@ -18,6 +18,21 @@ namespace Hix
 	{
 		using namespace Qt3DRender;
 		using namespace Qt3DExtras;
+
+		template<typename OwnerPtr, typename Fn>
+		void callFunctorRecursive(OwnerPtr owner, const Fn& callable)
+		{
+			callable(owner);
+			for (auto child : owner->childNodes())
+			{
+				auto childEntity = dynamic_cast<OwnerPtr>(child);
+				if (childEntity)
+				{
+					callFunctorRecursive(childEntity, callable);
+				}
+			}
+		}
+
 		class SceneEntity : public Qt3DCore::QEntity
 		{
 			Q_OBJECT
@@ -72,6 +87,10 @@ namespace Hix
 			Hix::Engine3D::Bounds3D recursiveAabb()const;
 			void updateRecursiveAabb();
 			Qt3DCore::QTransform& transform();
+
+
+
+
 
 		protected:
 

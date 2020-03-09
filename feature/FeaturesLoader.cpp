@@ -33,8 +33,7 @@ using namespace Hix::QML;
 using namespace Hix::Features;
 
 
-Hix::Features::FeaturesLoader::FeaturesLoader(QQmlEngine* e, Hix::QML::FeatureMenu* menu) 
-		: _component(e, MENU_ITEM_URL), _menu(menu)
+Hix::Features::FeaturesLoader::FeaturesLoader(QQmlEngine* e, Hix::QML::FeatureMenu* menu) : _component(e, MENU_ITEM_URL), _menu(menu)
 {
 }
 
@@ -111,5 +110,5 @@ void Hix::Features::FeaturesLoader::loadFeatureButtons()
 	addDivider();
 
 	addButton<Hix::Features::STLExportMode>("save" ,this);
-	addButton<Hix::Features::SliceExportMode>("extract" ,this);
+	addButton<Hix::Features::SliceExportMode>("slice" ,this);
 }

@@ -9,6 +9,7 @@
 #include "../common/Debug.h"
 #include "../application/ApplicationManager.h"
 #include "feature/SupportFeature.h"
+#include "ModelAttachedSupport.h"
 using namespace Qt3DCore;
 using namespace Hix::Support;
 using namespace Qt3DCore;
@@ -68,23 +69,15 @@ SupportModel* Hix::Support::SupportRaftManager::addSupport(const OverhangDetect:
 	SupportModel* newModel = nullptr;
 	switch (Hix::Application::ApplicationManager::getInstance().settings().supportSetting.supportType)
 	{
-	case Hix::Settings::SupportSetting::SupportType::None:
-		break;
+	//case Hix::Settings::SupportSetting::SupportType::None:
+	//	break;
 	case Hix::Settings::SupportSetting::SupportType::Vertical:
 	{
 		newModel = dynamic_cast<SupportModel*>(new VerticalSupportModel(this, overhang));
-		_supports.insert(std::make_pair(newModel, std::unique_ptr<SupportModel>(newModel)));
 	}
 	break;
-	default:
-		break;
 	}
-	if (newModel)
-	{
-		newModel->setEnabled(true);
-		if (supportEditMode() == Support::EditMode::Manual)
-			newModel->setHitTestable(true);
-	}
+	addSupport(std::unique_ptr<SupportModel>(newModel));
 	return newModel;
 }
 
@@ -92,9 +85,52 @@ SupportModel* Hix::Support::SupportRaftManager::addSupport(std::unique_ptr<Suppo
 {
 	auto key = target.get();
 	_supports.insert(std::make_pair(key,std::move(target)));
+	addToModelMap(key);
 	key->setEnabled(true);
-	key->setHitTestable(true);
+	if (supportEditMode() == Support::EditMode::Manual)
+	{
+		key->setHitTestable(true);
+	}
 	return key;
+}
+
+
+void Hix::Support::SupportRaftManager::addToModelMap(SupportModel* support)
+{
+	auto modelAttached = dynamic_cast<ModelAttachedSupport*>(support);
+	if (modelAttached)
+	{
+		auto model = &modelAttached->getAttachedModel();
+		auto set = _modelSupportMap.find(model);
+		if (set == _modelSupportMap.end())
+		{
+			std::unordered_set<ModelAttachedSupport*> newSet{ modelAttached };
+			_modelSupportMap.insert(std::make_pair(model, std::move(newSet)));
+		}
+		else
+		{
+			set->second.insert(modelAttached);
+		}
+	}
+}
+
+void Hix::Support::SupportRaftManager::removeFromModelMap(SupportModel* support)
+{
+
+	auto modelAttached = dynamic_cast<ModelAttachedSupport*>(support);
+	if (modelAttached)
+	{
+		auto model = &modelAttached->getAttachedModel();
+		auto set = _modelSupportMap.find(model);
+		if (set != _modelSupportMap.end())
+		{
+			set->second.erase(modelAttached);
+			if (set->second.empty())
+			{
+				_modelSupportMap.erase(model);
+			}
+		}
+	}
 }
 
 std::unique_ptr<SupportModel> Hix::Support::SupportRaftManager::removeSupport(SupportModel* e)
@@ -102,13 +138,28 @@ std::unique_ptr<SupportModel> Hix::Support::SupportRaftManager::removeSupport(Su
 	e->setEnabled(false);
 	e->setHitTestable(false);
 	auto result = std::move(_supports.find(e)->second);
+	removeFromModelMap(e);
 	_supports.erase(e);
 	return result;
 }
 
-bool Hix::Support::SupportRaftManager::supportsEmpty()
+bool Hix::Support::SupportRaftManager::supportsEmpty()const
 {
 	return _supports.empty();
+}
+
+bool Hix::Support::SupportRaftManager::modelHasSupport(const GLModel* listed) const
+{
+	std::unordered_set<const GLModel*> models;
+	listed->getChildrenModels(models);
+	models.insert(listed);
+
+	for (auto& model : models)
+	{
+		if (_modelSupportMap.find(model) != _modelSupportMap.cend())
+			return true;
+	}
+	return false;
 }
 
 RaftModel* Hix::Support::SupportRaftManager::generateRaft()
@@ -139,8 +190,6 @@ Hix::OverhangDetect::Overhangs Hix::Support::SupportRaftManager::detectOverhang(
 	models.insert(&listed);
 	QVector3D straightDown(0, 0, -1);
 
-
-
 	for (auto model : models)
 	{
 		Hix::OverhangDetect::Detector detector;
@@ -161,6 +210,7 @@ void  Hix::Support::SupportRaftManager::clear(const GLModel& model)
 	models.insert(&model);
 	clearImpl(models);
 }
+
 
 void Hix::Support::SupportRaftManager::clearImpl(const std::unordered_set<const GLModel*>& models)
 {

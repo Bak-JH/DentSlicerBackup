@@ -103,6 +103,7 @@ namespace Hix
 
 			//UI
 			Hix::QML::Controls::Button* _generateSupportsBttn;
+			Hix::QML::Controls::Button* _generateRaftBttn;
 			Hix::QML::Controls::Button* _clearSupportsBttn;
 			Hix::QML::Controls::ToggleSwitch* _manualEditBttn;
 			//UI slicing options

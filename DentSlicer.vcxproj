@@ -897,6 +897,7 @@
     <ClInclude Include="Settings\JSONWriteSetting.h" />
     <ClInclude Include="Settings\SliceSetting.h" />
     <ClInclude Include="Settings\SupportSetting.h" />
+    <ClInclude Include="support\SupportModel.h" />
     <ClInclude Include="Tasking\Task.h" />
     <ClInclude Include="common\taskflow\core\executor.hpp" />
     <ClInclude Include="common\taskflow\core\flow_builder.hpp" />
@@ -1459,8 +1460,8 @@
     <Image Include="Resource\menu_cut_select_1.png" />
     <Image Include="Resource\menu_extend.png" />
     <Image Include="Resource\menu_extend_select_1.png" />
-    <Image Include="Resource\menu_extract.png" />
-    <Image Include="Resource\menu_extract_select_1.png" />
+    <Image Include="Resource\menu_slice.png" />
+    <Image Include="Resource\menu_slice_select_1.png" />
     <Image Include="Resource\menu_label.png" />
     <Image Include="Resource\menu_label_select_1.png" />
     <Image Include="Resource\menu_layflat.png" />
