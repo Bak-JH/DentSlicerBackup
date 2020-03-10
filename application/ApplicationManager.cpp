@@ -20,18 +20,18 @@ using namespace Hix::Application;
 using namespace Hix::QML;
 using namespace Hix::Input;
 
-Hix::Application::ApplicationManager::ApplicationManager()
+Hix::Application::ApplicationManager::ApplicationManager(): _engine(new QQmlApplicationEngine())
 {
 }
 
 QQmlApplicationEngine& Hix::Application::ApplicationManager::engine()
 {
-	return _engine;
+	return *_engine;
 }
 
 void Hix::Application::ApplicationManager::init()
 {
-	_windowRoot = dynamic_cast<QQuickItem*>(_engine.rootObjects().first());
+	_windowRoot = dynamic_cast<QQuickItem*>(_engine->rootObjects().first());
 	QQuickItem* uiRoot;
 	getItemByID(_windowRoot, _mainWindow, "window");
 	getItemByID(_windowRoot, uiRoot, "uiRoot");
@@ -44,10 +44,6 @@ void Hix::Application::ApplicationManager::init()
 	ModalDialogManagerLoader::init(_modalManager, modalItem);
 	RayCastControllerLoader::init(_rayCastController, _sceneManager.root());
 	_supportRaftManager.initialize(_partManager.modelRoot());
-#ifdef _DEBUG
-	Hix::Debug::DebugRenderObject::getInstance().initialize(_partManager.modelRoot());
-#endif
-
 	//settings
 	_setting.parseJSON();
 	_setting.sliceSetting.parseJSON();

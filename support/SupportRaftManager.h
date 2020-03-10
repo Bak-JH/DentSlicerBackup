@@ -62,7 +62,7 @@ namespace Hix
 			void removeFromModelMap(SupportModel* support);
 			void clearImpl(const std::unordered_set<const GLModel*>& models);
 			void prepareRaycaster(const GLModel& model);
-			Qt3DCore::QEntity _root;
+			Qt3DCore::QEntity* _root;
 			std::vector<QVector3D> getSupportBasePts()const;
 			EditMode _supportEditMode = EditMode::None;
 			std::unordered_map<SupportModel*, std::unique_ptr<SupportModel>> _supports;

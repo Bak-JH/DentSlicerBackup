@@ -855,7 +855,6 @@
     <ClInclude Include="common\rapidjson\stringbuffer.h" />
     <ClInclude Include="common\rapidjson\writer.h" />
     <ClInclude Include="common\Singleton.h" />
-    <ClInclude Include="DentEngine\src\mesh.h" />
     <ClInclude Include="feature\interfaces\SliderMode.h" />
     <ClInclude Include="feature\settingMode.h" />
     <ClInclude Include="feature\CopyPaste.h" />
