@@ -9,7 +9,7 @@
 #include "../../application/ApplicationManager.h"
 using namespace Hix::Features;
 using namespace Hix::Engine3D;
-constexpr float MARGIN = 20;
+constexpr float MARGIN = 1;
 namespace std
 {
 
@@ -59,8 +59,8 @@ void Hix::Features::AutoArrange::runImpl()
 	for (auto model : _selected)
 	{
 		auto bound = model->recursiveAabb();
-		int x = bound.lengthX() * Hix::Polyclipping::INT_PT_RESOLUTION + MARGIN;
-		int y = bound.lengthY() * Hix::Polyclipping::INT_PT_RESOLUTION + MARGIN;
+		int x = (bound.lengthX() + MARGIN) * Hix::Polyclipping::INT_PT_RESOLUTION;
+		int y = (bound.lengthY() + MARGIN) * Hix::Polyclipping::INT_PT_RESOLUTION;
 		if (x < y)
 		{
 			std::swap(x, y);

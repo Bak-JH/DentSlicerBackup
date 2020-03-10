@@ -10,18 +10,6 @@ Hix.InputSpinBox {
 	property alias label: label
 	property double  fromNum
 	property double  toNum: 100
-	
-	onValueChanged:{ 
-		if(root.value < fromNum)
-			root.value = fromNum
-		if(root.value > toNum)
-			root.value = toNum
-		
-		if(!isNaN(root.value)) {
-			controlInput.text = root.value.toFixed(3);
-		}
-	}
-
 	Text 
 	{
 		id: label
@@ -30,6 +18,19 @@ Hix.InputSpinBox {
 		color: "#666666"
 		anchors.verticalCenter: control.verticalCenter
 	}
+	onValueChanged:{ 
+		if(root.value < fromNum)
+			root.value = fromNum
+		if(root.value > toNum)
+			root.value = toNum
+		
+		if(!isNaN(root.value)) {
+			var diff = Math.abs(parseFloat(controlInput.text) - root.value);
+			if(diff >= 0.001)
+				controlInput.text = root.value.toFixed(3);
+		}
+	}
+
 	
 	SpinBox {
 		id: control
@@ -47,6 +48,7 @@ Hix.InputSpinBox {
 		validator: DoubleValidator {
 			bottom: fromNum
 			top: toNum
+			decimals: 3
 		}
 
 		contentItem: TextInput {
@@ -61,9 +63,14 @@ Hix.InputSpinBox {
 			validator: control.validator
 			inputMethodHints: Qt.ImhFormattedNumbersOnly
 			layer.enabled: true
+			onActiveFocusChanged:
+			{
+				if(activeFocus)
+					selectAll();
+			}
 			Component.onCompleted:
 			{
-				text = root.value.toFixed(2);
+				text = root.value.toFixed(3);
 			}
 			onTextEdited:{
 				root.value = parseFloat(text);

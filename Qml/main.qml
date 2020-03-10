@@ -35,11 +35,14 @@ Item{
 		FontLoader{ id: openSemiBold; source: "qrc:/Resource/font/OpenSans-SemiBold.ttf" }
 		FontLoader{ id: openBold; source: "qrc:/Resource/font/OpenSans-Bold.ttf" }
 		
+
         Rectangle{
 
 			id: uiRoot
             color: "#E5E5E5"
 			anchors.fill: parent
+
+
             DropArea {
                 id: drop
                 anchors.fill: parent
@@ -169,6 +172,19 @@ Item{
 				anchors.left: parent.left
 				anchors.leftMargin: sidePadding
 			}
+
+			// CtrSpinBox {
+			// 	id: dssffs
+			// 	fromNum: -360
+			// 	toNum: 360
+			// 	label.text: "Y (deg)"
+			// 	width: 200
+			// 	height: 200
+			// 	anchors.top: featureArea.bottom
+			// 	anchors.topMargin: sidePadding
+			// 	anchors.left: parent.left
+			// 	anchors.leftMargin: sidePadding
+			// }
 
 			// Toast {
 			// 	id: toast
