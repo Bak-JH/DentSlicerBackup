@@ -93,14 +93,16 @@ DropdownBox {
 		}
 
 		popup: Popup {
+			id: frame
 			y: control.height * 1.2
 			width: control.width
-			implicitHeight: contentItem.implicitHeight
+			implicitHeight: contentItem.implicitHeight * contentItem.count
 			padding: 1
 
 			contentItem: ListView {
+				id: content
 				clip: true
-				implicitHeight: contentHeight * 0.7
+				implicitHeight: contentHeight * 0.5
 				model: control.popup.visible ? control.delegateModel : null
 				currentIndex: control.highlightedIndex
 
