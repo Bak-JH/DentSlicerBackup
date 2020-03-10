@@ -63,6 +63,7 @@ namespace Hix
 			void drawBed();
 			void setViewPreset(ViewPreset preset);
 		private:
+			QObject* _dropArea;
 			QQuickItem* _scene3d;
 			Qt3DCore::QEntity* _root;
 			Qt3DCore::QEntity* _mainView;
@@ -74,6 +75,7 @@ namespace Hix
 
 		private slots:
 			void onCameraChanged();
+			void fileDropped(QUrl fileUrl);
 
 
 			friend class SceneManagerLoader;

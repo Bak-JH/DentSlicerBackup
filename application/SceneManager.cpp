@@ -7,6 +7,8 @@
 #include <qcameralens.h>
 #include <qquickitem.h>
 #include "../feature/interfaces/WidgetMode.h"
+#include "../feature/ImportModel.h"
+
 Hix::Application::SceneManager::SceneManager()
 {
 }
@@ -66,6 +68,14 @@ void Hix::Application::SceneManager::setViewPreset(ViewPreset preset)
 	QMetaObject::invokeMethod(_root, viewFuncName.c_str());
 }
 
+void Hix::Application::SceneManager::fileDropped(QUrl fileUrl)
+{
+	auto filename = fileUrl.fileName();
+	if (filename.contains(".stl") || filename.contains(".STL") || filename.contains(".obj") || filename.contains(".OBJ")) {
+		Hix::Application::ApplicationManager::getInstance().taskManager().enqueTask(new Hix::Features::ImportModel(fileUrl));
+	}
+}
+
 
 //temp
 void Hix::Application::SceneManager::onCameraChanged()
@@ -83,12 +93,17 @@ void Hix::Application::SceneManagerLoader::init(SceneManager& manager, QObject* 
 	Hix::QML::getItemByID(root, manager._systemTransform, "systemTransform");
 	Hix::QML::getItemByID(root, manager._camera, "camera");
 	Hix::QML::getItemByID(root, manager._lens, "cameraLens");
+	Hix::QML::getItemByID(root, manager._dropArea, "drop");
 	QMetaObject::invokeMethod(manager._root, "initCamera");
+
 
 	//init lights
 	Lights* lights = new Lights(manager._total);
 	//widget mode update when camera changed
 	QObject::connect(manager._root, SIGNAL(cameraViewChanged()), &manager, SLOT(onCameraChanged()));
+	//dropped files
+	QObject::connect(manager._dropArea, SIGNAL(openFile(QUrl)), &manager, SLOT(fileDropped(QUrl)));
+
 }
 
 
