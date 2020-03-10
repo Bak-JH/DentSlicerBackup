@@ -264,7 +264,7 @@ void GLModel::clicked(MouseEventData& pick, const Qt3DRender::QRayCasterHit& hit
 	auto listed = getRootModel();
 	auto& partManager = Hix::Application::ApplicationManager::getInstance().partManager();
 	auto isSelected = partManager.isSelected(listed);
-	if (!Hix::Application::ApplicationManager::getInstance().featureManager().isFeatureActive() || Hix::Application::ApplicationManager::getInstance().featureManager().isActive<Hix::Features::WidgetMode>())
+	if (!Hix::Application::ApplicationManager::getInstance().featureManager().isFeatureActive())
 	{
 		if (pick.button == Qt::MouseButton::LeftButton)
 		{

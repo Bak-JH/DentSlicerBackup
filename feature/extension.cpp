@@ -21,10 +21,10 @@ Hix::Features::ExtendMode::ExtendMode()
 	auto& co = controlOwner();
 	co.getControl(_extendValue, "extendvalue");
 }
-std::deque<HalfEdgeConstItr> boundaryPath(const std::unordered_set<FaceConstItr>& faces)
+std::deque<std::deque<HalfEdgeConstItr>> boundaryPath(const std::unordered_set<FaceConstItr>& faces)
 {
 	std::unordered_map<VertexConstItr, HalfEdgeConstItr> edgeMap;
-	std::deque<HalfEdgeConstItr> path;
+	std::deque<std::deque<HalfEdgeConstItr>> paths;
 	for (auto& f : faces)
 	{
 		auto e = f.edge();
@@ -47,19 +47,33 @@ std::deque<HalfEdgeConstItr> boundaryPath(const std::unordered_set<FaceConstItr>
 		}
 	}
 	if (edgeMap.empty())
-		return path;
-	path.emplace_back(edgeMap.begin()->second);
-	edgeMap.erase(edgeMap.begin());
+		return paths;
+	
+
 	while (!edgeMap.empty())
 	{
+		std::deque<HalfEdgeConstItr> path;
+		path.emplace_back(edgeMap.begin()->second);
+		edgeMap.erase(edgeMap.begin());
+		bool pathIncomplete = true;
+		while (pathIncomplete)
+		{
 
-		auto to = path.back().to();
-		auto next = edgeMap.at(to);
-		path.emplace_back(next);
-		edgeMap.erase(to);
-
+			auto to = path.back().to();
+			auto found = edgeMap.find(to);
+			if (found != edgeMap.end())
+			{
+				path.emplace_back(found->second);
+			}
+			else
+			{
+				paths.emplace_back(std::move(path));
+				pathIncomplete = false;
+			}
+			edgeMap.erase(to);
+		}
 	}
-	return path;
+	return paths;
 }
 
 void extendAlongOutline(Mesh* mesh, QVector3D normal, double distance, const std::deque<HalfEdgeConstItr>& path) {
@@ -146,9 +160,11 @@ void Hix::Features::Extend::runImpl()
 {
 	_prevMesh = new Mesh(*_model->getMeshModd());
 	_model->unselectMeshFaces();
-	std::deque<HalfEdgeConstItr> path;
-	path = boundaryPath(_extensionFaces);
-	extendAlongOutline(_model->getMeshModd(), _normal, _distance, path);
+	auto paths = boundaryPath(_extensionFaces);
+	for (auto& path : paths)
+	{
+		extendAlongOutline(_model->getMeshModd(), _normal, _distance, path);
+	}
 	coverCap(_model, _normal, _extensionFaces, _distance);
 
 	_model->getMeshModd()->removeFaces(_extensionFaces);
