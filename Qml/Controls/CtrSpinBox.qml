@@ -21,7 +21,7 @@ Hix.InputSpinBox {
 			controlInput.text = root.value.toFixed(3);
 		}
 	}
-
+	
 	Text 
 	{
 		id: label
