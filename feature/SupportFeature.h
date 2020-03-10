@@ -89,7 +89,7 @@ namespace Hix
 			virtual ~SupportMode();
 			void faceSelected(GLModel* selected, const Hix::Engine3D::FaceConstItr& selectedFace, const Hix::Input::MouseEventData& mouse, const Qt3DRender::QRayCasterHit& hit)override;
 			void generateAutoSupport(std::unordered_set<GLModel*> models);
-			void clearSupport(const std::unordered_set<GLModel*> models);
+			static void clearSupport(const std::unordered_set<GLModel*> models);
 			void regenerateRaft();
 			void applyButtonClicked()override;
 
@@ -103,6 +103,7 @@ namespace Hix
 
 			//UI
 			Hix::QML::Controls::Button* _generateSupportsBttn;
+			Hix::QML::Controls::Button* _generateRaftBttn;
 			Hix::QML::Controls::Button* _clearSupportsBttn;
 			Hix::QML::Controls::ToggleSwitch* _manualEditBttn;
 			//UI slicing options

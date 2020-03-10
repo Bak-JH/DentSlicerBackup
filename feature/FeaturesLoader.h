@@ -22,27 +22,27 @@ namespace Hix
 		{
 			static_assert(std::is_base_of<Hix::Features::Mode, ModeType>{});
 			std::function<void()> functor = [button]() {
-				if (!Hix::Application::ApplicationManager::getInstance().featureManager().isFeatureActive())
+				try
 				{
-					try
+					//we need to delete previous task manually, as button uncheck function can close newly opened feature mode.
+					if (Hix::Application::ApplicationManager::getInstance().featureManager().isFeatureActive())
 					{
-
-						ModeType* newMode = new ModeType();
-						newMode->addButton(button);
-						Hix::Application::ApplicationManager::getInstance().featureManager().setMode(newMode);
+						Hix::Application::ApplicationManager::getInstance().featureManager().setMode(nullptr);
+					}
+					ModeType* newMode = new ModeType();
+					newMode->addButton(button);
+					Hix::Application::ApplicationManager::getInstance().featureManager().setMode(newMode);
 						
-					}
-					catch (const std::runtime_error& e)
-					{
-						qDebug() << e.what();
-						Hix::Application::ApplicationManager::getInstance().featureManager().setMode(nullptr);
-					}
-					catch (...)
-					{
-						qDebug() << "mode creation failed";
-						Hix::Application::ApplicationManager::getInstance().featureManager().setMode(nullptr);
-					}
-
+				}
+				catch (const std::runtime_error& e)
+				{
+					qDebug() << e.what();
+					Hix::Application::ApplicationManager::getInstance().featureManager().setMode(nullptr);
+				}
+				catch (...)
+				{
+					qDebug() << "mode creation failed";
+					Hix::Application::ApplicationManager::getInstance().featureManager().setMode(nullptr);
 				}
 			};
 			return functor;

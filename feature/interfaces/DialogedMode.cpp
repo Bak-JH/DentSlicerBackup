@@ -11,10 +11,7 @@ using namespace Hix::QML;
 
 Hix::Features::DialogedMode::DialogedMode(const QUrl& dialogUrl)
 {
-	if (Hix::Application::ApplicationManager::getInstance().partManager().selectedModels().empty())
-	{
-		Hix::Application::ApplicationManager::getInstance().modalDialogManager().needToSelectModels();
-	}
+
 	//QQmlComponent component(Hix::Application::ApplicationManager::getInstance().engine, dialogUrl);
 	QQmlComponent*  component = new QQmlComponent(&Hix::Application::ApplicationManager::getInstance().engine(), dialogUrl);
 	auto featureArea = Hix::Application::ApplicationManager::getInstance().featureManager().featureArea();

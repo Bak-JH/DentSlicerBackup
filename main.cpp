@@ -53,15 +53,17 @@ int main(int argc, char** argv)
 
 #else
 
-	QApplication app(argc, argv);
+	QApplication  app(argc, argv);
 	/* Language patch
 	QTranslator translator ;
 	translator.load(":/lang_ko.qm");
 	app.installTranslator(&translator);
 	*/
+	app.setQuitOnLastWindowClosed(true);
 	Hix::QML::registerTypes();
 	qRegisterMetaType<std::vector<QVector3D>>("std::vector<QVector3D>");
 	qRegisterMetaType<std::vector<float>>("std::vector<float>");
+
 
 	auto& appManager = Hix::Application::ApplicationManager::getInstance();
 	auto& engine = appManager.engine();
@@ -80,15 +82,16 @@ int main(int argc, char** argv)
 	QSplashScreen* splash = new QSplashScreen(pixmap);
 	splash->show();
 	//login or make main window visible
-	QObject *mainWindow;
-
+	QQuickWindow *mainWindow;
 	Hix::QML::getItemByID(appManager.getWindowRoot(), mainWindow, "window");
-#if  defined(QT_DEBUG) || defined(_DEBUG)
-	mainWindow->setProperty("visible", true);
-#else
-	QObject* loginWindow, * loginButton;
+	QQuickWindow* loginWindow;
+	QObject *loginButton;
 	Hix::QML::getItemByID(appManager.getWindowRoot(), loginWindow, "loginWindow");
 	Hix::QML::getItemByID(appManager.getWindowRoot(), loginButton, "loginButton");
+#if  defined(QT_DEBUG) || defined(_DEBUG)
+	mainWindow->setProperty("visible", true);
+	loginWindow->close();
+#else
 	loginWindow->setProperty("visible", true);
 	//auth
 	httpreq* hr = new httpreq(loginWindow, loginButton);
@@ -98,9 +101,6 @@ int main(int argc, char** argv)
 
 #endif
 	splash->close();
-	//QQuickItem* focusItem;
-	//Hix::QML::getItemByID(appManager.getWindowRoot(), focusItem, "focusItem");
-	//QMetaObject::invokeMethod(focusItem, "forceKeyboardFocus");
 	return app.exec();
 #endif
 

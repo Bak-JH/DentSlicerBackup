@@ -6,6 +6,11 @@
 const QUrl ROTATE_POPUP_URL = QUrl("qrc:/Qml/FeaturePopup/PopupRotate.qml");
 Hix::Features::RotateMode::RotateMode(): WidgetMode(), _targetModels(Hix::Application::ApplicationManager::getInstance().partManager().selectedModels()), DialogedMode(ROTATE_POPUP_URL)
 {
+	if (Hix::Application::ApplicationManager::getInstance().partManager().selectedModels().empty())
+	{
+		Hix::Application::ApplicationManager::getInstance().modalDialogManager().needToSelectModels();
+		return;
+	}
 	_widget.addWidget(std::make_unique<Hix::UI::RotateWidget>(QVector3D(1, 0, 0), &_widget));
 	_widget.addWidget(std::make_unique<Hix::UI::RotateWidget>(QVector3D(0, 1, 0), &_widget));
 	_widget.addWidget(std::make_unique<Hix::UI::RotateWidget>(QVector3D(0, 0, 1), &_widget));
@@ -15,6 +20,8 @@ Hix::Features::RotateMode::RotateMode(): WidgetMode(), _targetModels(Hix::Applic
 	co.getControl(_xValue, "rotateX");
 	co.getControl(_yValue, "rotateY");
 	co.getControl(_zValue, "rotateZ");
+	updatePosition();
+
 }
 
 Hix::Features::RotateMode::~RotateMode()
@@ -54,9 +61,8 @@ std::unordered_set<GLModel*>& Hix::Features::RotateMode::models()
 
 void Hix::Features::RotateMode::applyButtonClicked()
 {
-	auto rotation = QQuaternion(QVector3D(_xValue->getValue(), _yValue->getValue(), _zValue->getValue()));
+	auto rotation = QQuaternion::fromEulerAngles(_xValue->getValue(), _yValue->getValue(), _zValue->getValue());
 	Hix::Features::FeatureContainerFlushSupport* container = new FeatureContainerFlushSupport(_targetModels);
-
 	for (auto& target : _targetModels)
 		container->addFeature(new Rotate(target, rotation));
 
@@ -106,7 +112,6 @@ void Hix::Features::Rotate::runImpl()
 	{
 		_model->rotateModel(_rot.value());
 		UpdateWidgetModePos();
-
 	}
 }
 

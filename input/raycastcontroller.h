@@ -52,6 +52,7 @@ namespace Hix
 			Q_OBJECT
 		public:
 			RayCastController();
+			virtual ~RayCastController();
 			//for ray casting optimization using the bounding box
 			//Qt3DRender::QLayer _modelLayer;
 			void addInputLayer(Qt3DRender::QLayer* layer);
@@ -91,11 +92,11 @@ namespace Hix
 			//bool _isPressed = false;
 			bool _mouseBusy = false;
 			std::future<bool> _verifyClickTask;
-			Qt3DInput::QMouseDevice _mouseDevice;
-			Qt3DRender::QScreenRayCaster _rayCaster;
+			Qt3DInput::QMouseDevice* _mouseDevice;
+			Qt3DRender::QScreenRayCaster* _rayCaster;
 			//for objects that responds to hover, only for widget...for now.
-			Qt3DRender::QScreenRayCaster _hoverRayCaster;
-			Qt3DInput::QMouseHandler _mouseHandler;
+			Qt3DRender::QScreenRayCaster* _hoverRayCaster;
+			Qt3DInput::QMouseHandler* _mouseHandler;
 			RayCastMode _rayCastMode;
 			MouseEventData _mouseEvent;
 			bool _hoverEnabled = false;

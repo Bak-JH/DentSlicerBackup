@@ -30,29 +30,34 @@ std::chrono::time_point<std::chrono::system_clock> __startRayTraceTime;
 const std::chrono::milliseconds RayCastController::MAX_CLICK_DURATION = 200ms;
 const float RayCastController::MAX_CLICK_MOVEMENT = 5;
 
-RayCastController::RayCastController()
+RayCastController::RayCastController(): _mouseDevice(new Qt3DInput::QMouseDevice), _rayCaster(new Qt3DRender::QScreenRayCaster),
+_hoverRayCaster(new Qt3DRender::QScreenRayCaster), _mouseHandler(new Qt3DInput::QMouseHandler)
+{
+}
+
+Hix::Input::RayCastController::~RayCastController()
 {
 }
 
 void RayCastController::addInputLayer(Qt3DRender::QLayer* layer)
 {
-	_rayCaster.addLayer(layer);
+	_rayCaster->addLayer(layer);
 
 }
 
 void RayCastController::removeInputLayer(Qt3DRender::QLayer* layer)
 {
-	_rayCaster.removeLayer(layer);
+	_rayCaster->removeLayer(layer);
 }
 
 void RayCastController::addHoverLayer(Qt3DRender::QLayer* layer)
 {
-	_hoverRayCaster.addLayer(layer);
+	_hoverRayCaster->addLayer(layer);
 
 }
 void RayCastController::removeHoverLayer(Qt3DRender::QLayer* layer)
 {
-	_hoverRayCaster.removeLayer(layer);
+	_hoverRayCaster->removeLayer(layer);
 }
 
 
@@ -107,7 +112,7 @@ bool RayCastController::verifyClick()
 		if (!_pressedPt.isNull())
 		{
 			_rayCastMode = RayCastMode::Drag;
-			_rayCaster.trigger(_pressedPt);
+			_rayCaster->trigger(_pressedPt);
 			return true;
 		}
 	}
@@ -165,7 +170,7 @@ void RayCastController::mouseReleased(Qt3DInput::QMouseEvent* mouse)
 					if (!_mouseEvent.position.isNull() && mousePosInBound(mouse))
 					{
 						_rayCastMode = RayCastMode::Click;
-						_rayCaster.trigger(_mouseEvent.position);
+						_rayCaster->trigger(_mouseEvent.position);
 					}
 				}
 			}
@@ -188,7 +193,7 @@ void RayCastController::mousePositionChanged(Qt3DInput::QMouseEvent* mouse)
 			if (!hoverEvent.position.isNull())
 			{
 				_hoverRaycastBusy = true;
-				_hoverRayCaster.trigger(hoverEvent.position);
+				_hoverRayCaster->trigger(hoverEvent.position);
 
 			}
 		}
@@ -217,7 +222,7 @@ void RayCastController::mousePositionChanged(Qt3DInput::QMouseEvent* mouse)
 						{
 							//do drag
 							_rayCastMode = RayCastMode::Drag;
-							_rayCaster.trigger(_pressedPt);
+							_rayCaster->trigger(_pressedPt);
 						}
 
 					}
@@ -278,7 +283,10 @@ void RayCastController::hitsChanged(const Qt3DRender::QAbstractRayCaster::Hits& 
 	}
 	else if(_rayCastMode == Click)
 	{
-		Hix::Application::ApplicationManager::getInstance().partManager().unselectAll();
+		if (!Hix::Application::ApplicationManager::getInstance().featureManager().isFeatureActive())
+		{
+			Hix::Application::ApplicationManager::getInstance().partManager().unselectAll();
+		}
 	}
 }
 
@@ -330,17 +338,17 @@ void Hix::Input::RayCastControllerLoader::init(RayCastController& manager, Qt3DC
 {
 
 
-	parentEntity->addComponent(&manager._rayCaster);
-	parentEntity->addComponent(&manager._hoverRayCaster);
-	parentEntity->addComponent(&manager._mouseHandler);
-	manager._mouseHandler.setSourceDevice(&manager._mouseDevice);
-	manager._rayCaster.setFilterMode(QAbstractRayCaster::FilterMode::AcceptAnyMatchingLayers);
-	manager._hoverRayCaster.setFilterMode(QAbstractRayCaster::FilterMode::AcceptAnyMatchingLayers);
-	manager._rayCaster.setRunMode(QAbstractRayCaster::RunMode::SingleShot);
-	manager._hoverRayCaster.setRunMode(QAbstractRayCaster::RunMode::SingleShot);
-	QObject::connect(&manager._mouseHandler, SIGNAL(released(Qt3DInput::QMouseEvent*)), &manager, SLOT(mouseReleased(Qt3DInput::QMouseEvent*)));
-	QObject::connect(&manager._mouseHandler, SIGNAL(pressed(Qt3DInput::QMouseEvent*)), &manager, SLOT(mousePressed(Qt3DInput::QMouseEvent*)));
-	QObject::connect(&manager._mouseHandler, SIGNAL(positionChanged(Qt3DInput::QMouseEvent*)), &manager, SLOT(mousePositionChanged(Qt3DInput::QMouseEvent*)));
-	QObject::connect(&manager._rayCaster, SIGNAL(hitsChanged(const Qt3DRender::QAbstractRayCaster::Hits&)), &manager, SLOT(hitsChanged(const Qt3DRender::QAbstractRayCaster::Hits&)));
-	QObject::connect(&manager._hoverRayCaster, SIGNAL(hitsChanged(const Qt3DRender::QAbstractRayCaster::Hits&)), &manager, SLOT(hoverHitsChanged(const Qt3DRender::QAbstractRayCaster::Hits&)));
+	parentEntity->addComponent(manager._rayCaster);
+	parentEntity->addComponent(manager._hoverRayCaster);
+	parentEntity->addComponent(manager._mouseHandler);
+	manager._mouseHandler->setSourceDevice(manager._mouseDevice);
+	manager._rayCaster->setFilterMode(QAbstractRayCaster::FilterMode::AcceptAnyMatchingLayers);
+	manager._hoverRayCaster->setFilterMode(QAbstractRayCaster::FilterMode::AcceptAnyMatchingLayers);
+	manager._rayCaster->setRunMode(QAbstractRayCaster::RunMode::SingleShot);
+	manager._hoverRayCaster->setRunMode(QAbstractRayCaster::RunMode::SingleShot);
+	QObject::connect(manager._mouseHandler, SIGNAL(released(Qt3DInput::QMouseEvent*)), &manager, SLOT(mouseReleased(Qt3DInput::QMouseEvent*)));
+	QObject::connect(manager._mouseHandler, SIGNAL(pressed(Qt3DInput::QMouseEvent*)), &manager, SLOT(mousePressed(Qt3DInput::QMouseEvent*)));
+	QObject::connect(manager._mouseHandler, SIGNAL(positionChanged(Qt3DInput::QMouseEvent*)), &manager, SLOT(mousePositionChanged(Qt3DInput::QMouseEvent*)));
+	QObject::connect(manager._rayCaster, SIGNAL(hitsChanged(const Qt3DRender::QAbstractRayCaster::Hits&)), &manager, SLOT(hitsChanged(const Qt3DRender::QAbstractRayCaster::Hits&)));
+	QObject::connect(manager._hoverRayCaster, SIGNAL(hitsChanged(const Qt3DRender::QAbstractRayCaster::Hits&)), &manager, SLOT(hoverHitsChanged(const Qt3DRender::QAbstractRayCaster::Hits&)));
 }

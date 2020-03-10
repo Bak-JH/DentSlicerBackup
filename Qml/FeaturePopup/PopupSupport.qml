@@ -5,8 +5,8 @@ import QtQuick.Controls 2.1
 import "../Controls" 
 
 FeaturePopup {
-	title: qsTr("Extend")
-	height: 186
+	title: qsTr("Support")
+	height: 220
 	enableApply: false
 	function settingToggle() {
 		if (supportsettingpopup.visible == false) { supportsettingpopup.visible = true; }
@@ -20,7 +20,14 @@ FeaturePopup {
 		anchors.topMargin: 44
 		anchors.leftMargin: 16
 		buttonText: "Generate Supports"
+	}
 
+	CtrTextButton {
+		id: generateraft
+		anchors.top: generatesupports.bottom
+		anchors.topMargin: 16
+		anchors.horizontalCenter: parent.horizontalCenter
+		buttonText: "Generate Raft"
 	}
 
 	Hix.Button {
@@ -42,7 +49,7 @@ FeaturePopup {
 	}
 	CtrTextButton {
 		id: clearsupports
-		anchors.top: generatesupports.bottom
+		anchors.top: generateraft.bottom
 		anchors.topMargin: 16
 		anchors.horizontalCenter: parent.horizontalCenter
 		buttonText: "Clear All Supports"
@@ -84,6 +91,7 @@ FeaturePopup {
 			label.text: "Support Type"
 			width: parent.width - 16 * 2 - 16	// 16 = triangle height
 			height: 26
+			color: "transparent"
 			anchors.left: parent.left
 			anchors.leftMargin: 32	// 16 = triangle height
 			anchors.top: parent.top
@@ -94,6 +102,7 @@ FeaturePopup {
 			label.text: "Raft Type"
 			width: parent.width - 16 * 2 - 16	// 16 = triangle height
 			height: 26
+			color: "transparent"
 			anchors.left: parent.left
 			anchors.leftMargin: 32	// 16 = triangle height
 			anchors.top: supporttype.bottom
