@@ -44,6 +44,8 @@ Item{
 
 
             DropArea {
+				signal openFile(url path)
+
                 id: drop
                 anchors.fill: parent
                 property var dragList : []
@@ -62,27 +64,12 @@ Item{
                 onDropped: {
                     console.log("[Droparea] dropped")
                     for(var i = 0; i < dragList.length; i++)
-                        validateFileExtension(dragList[i])
+                        openFile(dragList[i])
 
                     dragList = []
                 }
 
-                // Only STLs
-                function validateFileExtension(filePath) {
-                    console.log(filePath)
-                    var filepath = filePath.toString().replace(/^(file:\/{3})/,"")
-                    console.log("opening" + filepath)
 
-                    if(filePath.split('.').pop().toLowerCase() === "stl") {
-                        qm.openModelFile(filepath)
-                        return filePath.split('.').pop().toLowerCase() === "stl"
-                    }
-                    else if(filePath.split('.').pop().toLowerCase() === "obj") {
-                        qm.openModelFile(filepath)
-                        return filePath.split('.').pop().toLowerCase() === "obj"
-                    }
-
-                }
             }
             Scene3D {
                 id: scene3d
