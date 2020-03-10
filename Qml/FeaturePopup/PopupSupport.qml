@@ -101,9 +101,10 @@ FeaturePopup {
 		}
 		CtrSpinBox {
 			id: supportdensity
-			label.text: "Support Density"
+			label.text: "Support Density(%)"
 			width: parent.width - 16 * 2 - 16	// 16 = triangle height
 			height: 26
+			increment: 5
 			anchors.left: parent.left
 			anchors.leftMargin: 32	// 16 = triangle height
 			anchors.top: rafttype.bottom
@@ -114,6 +115,7 @@ FeaturePopup {
 			label.text: "Max.radius (mm)"
 			height: 26
 			width: parent.width - 16 * 2 - 16	// 16 = triangle height
+			increment: 0.1
 			anchors.left: parent.left
 			anchors.leftMargin: 32	// 16 = triangle height
 			anchors.top: supportdensity.bottom
@@ -124,6 +126,7 @@ FeaturePopup {
 			label.text: "Min.radius (mm)"
 			height: 26
 			width: parent.width - 16 * 2 - 16	// 16 = triangle height
+			increment: 0.1
 			anchors.left: parent.left
 			anchors.leftMargin: 32	// 16 = triangle height
 			anchors.top: maxradius.bottom
