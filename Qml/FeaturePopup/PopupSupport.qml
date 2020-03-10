@@ -5,8 +5,8 @@ import QtQuick.Controls 2.1
 import "../Controls" 
 
 FeaturePopup {
-	title: qsTr("Extend")
-	height: 210
+	title: qsTr("Support")
+	height: 220
 	enableApply: false
 	function settingToggle() {
 		if (supportsettingpopup.visible == false) { supportsettingpopup.visible = true; }
@@ -91,6 +91,7 @@ FeaturePopup {
 			label.text: "Support Type"
 			width: parent.width - 16 * 2 - 16	// 16 = triangle height
 			height: 26
+			color: "transparent"
 			anchors.left: parent.left
 			anchors.leftMargin: 32	// 16 = triangle height
 			anchors.top: parent.top
@@ -101,6 +102,7 @@ FeaturePopup {
 			label.text: "Raft Type"
 			width: parent.width - 16 * 2 - 16	// 16 = triangle height
 			height: 26
+			color: "transparent"
 			anchors.left: parent.left
 			anchors.leftMargin: 32	// 16 = triangle height
 			anchors.top: supporttype.bottom
@@ -108,9 +110,10 @@ FeaturePopup {
 		}
 		CtrSpinBox {
 			id: supportdensity
-			label.text: "Support Density"
+			label.text: "Support Density(%)"
 			width: parent.width - 16 * 2 - 16	// 16 = triangle height
 			height: 26
+			increment: 5
 			anchors.left: parent.left
 			anchors.leftMargin: 32	// 16 = triangle height
 			anchors.top: rafttype.bottom
@@ -121,6 +124,7 @@ FeaturePopup {
 			label.text: "Max.radius (mm)"
 			height: 26
 			width: parent.width - 16 * 2 - 16	// 16 = triangle height
+			increment: 0.1
 			anchors.left: parent.left
 			anchors.leftMargin: 32	// 16 = triangle height
 			anchors.top: supportdensity.bottom
@@ -131,6 +135,7 @@ FeaturePopup {
 			label.text: "Min.radius (mm)"
 			height: 26
 			width: parent.width - 16 * 2 - 16	// 16 = triangle height
+			increment: 0.1
 			anchors.left: parent.left
 			anchors.leftMargin: 32	// 16 = triangle height
 			anchors.top: maxradius.bottom

@@ -4,16 +4,31 @@ import QtQuick.Controls 2.1
 import QtQuick.Controls.Styles 1.4
 import QtGraphicalEffects 1.12
 
+
 Hix.ProgressPopupShell {
 	id:root
-	width: 216
-	height: 216
+	width: window.width
+	height: window.height
+	property string errorMessage;
+
+	MouseArea {
+		id: blockingArea
+		anchors.fill: parent
+		propagateComposedEvents: false
+        hoverEnabled: true
+        preventStealing: true
+
+		onClicked: { console.log(errorMessage); }
+	}
+
 	Rectangle {
 		id: popup
-		width: parent.width
-		height: parent.height
+		width: 216
+		height: 216
 		radius: 8
 		color: "#ffffff"
+		anchors.horizontalCenter: parent.horizontalCenter
+		anchors.verticalCenter: parent.verticalCenter
 
 		property bool running: true
 
@@ -28,7 +43,7 @@ Hix.ProgressPopupShell {
 				from: 0
 				to: 360
 				duration: 1500
-				running: root.runing
+				running: popup.running
 				loops: Animation.Infinite;
 				easing.type: Easing.InOutQuad
 				//easing.amplitude: 5
@@ -36,7 +51,8 @@ Hix.ProgressPopupShell {
 		}
 
 		Text {
-			text: qsTr("Reporting error...")
+			id: errorMsg
+			text: root.errorMessage
 			font.family: openSemiBold.name
 			font.pointSize: 12
 			color: "#f1820b"

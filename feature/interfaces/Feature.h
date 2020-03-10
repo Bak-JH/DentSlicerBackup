@@ -19,7 +19,7 @@ namespace Hix
 			virtual ~Feature();
 			void undo()noexcept;
 			void redo()noexcept;
-			void run()noexcept override;
+			void run() override;
 
 		protected:
 
