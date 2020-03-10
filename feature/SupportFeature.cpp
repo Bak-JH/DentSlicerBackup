@@ -243,8 +243,9 @@ void Hix::Features::SupportMode::applySupportSettings()
 void Hix::Features::SupportMode::faceSelected(GLModel* selected, const Hix::Engine3D::FaceConstItr& selectedFace,
 	const Hix::Input::MouseEventData& mouse, const Qt3DRender::QRayCasterHit& hit)
 {
-	auto suppMode = Hix::Application::ApplicationManager::getInstance().supportRaftManager().supportEditMode();
-	if (suppMode == Hix::Support::EditMode::Manual) {
+	auto editMode = Hix::Application::ApplicationManager::getInstance().supportRaftManager().supportEditMode();
+	auto suppType = Hix::Application::ApplicationManager::getInstance().settings().supportSetting.supportType;
+	if (editMode == Hix::Support::EditMode::Manual && suppType != Hix::Settings::SupportSetting::SupportType::None) {
 		applySupportSettings();
 		Hix::OverhangDetect::Overhang newOverhang(selectedFace, selected->ptToRoot(hit.localIntersection()));
 		Hix::Application::ApplicationManager::getInstance().taskManager().enqueTask(new AddSupport(newOverhang));
@@ -258,6 +259,16 @@ void Hix::Features::SupportMode::generateAutoSupport(std::unordered_set<GLModel*
 	if (Hix::Application::ApplicationManager::getInstance().settings().supportSetting.supportType != Hix::Settings::SupportSetting::SupportType::None)
 	{
 		Hix::Features::FeatureContainer* container = new FeatureContainer();
+		
+		if (ApplicationManager::getInstance().supportRaftManager().supportActive())
+		{
+			for (auto each : Hix::Application::ApplicationManager::getInstance().supportRaftManager().modelAttachedSupports(models))
+				container->addFeature(new RemoveSupport(each));
+
+			for (auto model : models)
+				container->addFeature(new Move::ZToBed(model));
+		}
+		
 		for (auto selectedModel : models)
 		{
 			container->addFeature(new AutoSupport(selectedModel));
@@ -280,7 +291,7 @@ void Hix::Features::SupportMode::clearSupport(const std::unordered_set<GLModel*>
 		container->addFeature(new RemoveSupport(each));
 
 	for (auto model : models)
-		container->addFeature(new Move(model, QVector3D(0, 0, -Hix::Support::SupportRaftManager::supportRaftMinLength())));
+		container->addFeature(new Move::ZToBed(model));
 
 	Hix::Application::ApplicationManager::getInstance().taskManager().enqueTask(container);
 }
