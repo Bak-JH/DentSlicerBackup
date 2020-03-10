@@ -2,6 +2,7 @@
 
 #include "application/ApplicationManager.h"
 #include <QDebug>
+#include <stdexcept>
 using namespace Hix::Features;
 
 Hix::Features::Feature::Feature()
@@ -26,32 +27,15 @@ void Hix::Features::Feature::redo()noexcept
 	redoImpl();
 }
 
-void Hix::Features::Feature::run()noexcept
+void Hix::Features::Feature::run()
 {
-
-	bool success = false;
-	try
-	{
-		runImpl();
-		success = true;
-	}
-	catch (std::exception & e)
-	{
-		qDebug() << e.what();
-		//popup, log, send error report
-	}
-	catch (...)
-	{
-		//incase of custom unknown exception, gracefully exit
-	}
-	//if feature add to history
-	if (success)
-	{
+	runImpl();
+	try {
 		postUIthread([this]() {
 			Hix::Application::ApplicationManager::getInstance().featureManager().featureHistoryManager().addFeature(this);
 		});
 	}
-	else
+	catch(...)
 	{
 		delete this;
 	}

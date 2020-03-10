@@ -1,6 +1,6 @@
 #include "MainWindow.h"
 #include "../../application/ApplicationManager.h"
-#include <QtQuick/5.12.4/QtQuick/private/qquickevents_p_p.h>
+#include <QtQuick/private/qquickevents_p_p.h>
 using namespace  Hix::QML;
 //class QQuickCloseEvent;
 

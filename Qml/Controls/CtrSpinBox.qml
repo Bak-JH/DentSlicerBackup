@@ -18,7 +18,7 @@ Hix.InputSpinBox {
 			root.value = toNum
 		
 		if(!isNaN(root.value)) {
-			controlInput.text = root.value;
+			controlInput.text = root.value.toFixed(3);
 		}
 	}
 
