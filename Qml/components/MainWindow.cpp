@@ -1,9 +1,18 @@
 #include "MainWindow.h"
 #include "../../application/ApplicationManager.h"
+#include <QtQuick/5.12.4/QtQuick/private/qquickevents_p_p.h>
 using namespace  Hix::QML;
+//class QQuickCloseEvent;
 
 Hix::QML::MainWindow::MainWindow(QWindow* parent)
 {
+	//QObject::connect(this, &QQuickWindow::closing, [this](QQuickCloseEvent* close) {
+	//	QMetaObject::invokeMethod(this, []() {
+	//		QCoreApplication::quit();
+	//		}, Qt::QueuedConnection);
+
+	//	
+	//});
 }
 
 Hix::QML::MainWindow::~MainWindow()

@@ -60,7 +60,7 @@ namespace Hix
 			QString getVersion()const;
 
 		private:
-			QQmlApplicationEngine _engine;
+			QQmlApplicationEngine* _engine;
 			PartManager _partManager;
 			ModalDialogManager _modalManager;
 			SceneManager _sceneManager;
@@ -78,6 +78,7 @@ namespace Hix
 
 			Hix::QML::PrintInfo* _printInfo;
 			friend class SettingsChanger;
+
 		};
 
 

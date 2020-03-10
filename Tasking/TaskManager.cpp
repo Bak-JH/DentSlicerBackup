@@ -12,12 +12,12 @@ TaskManager::TaskManager(): _taskThread(&TaskManager::run, this), _progressManag
 void TaskManager::run()
 {
 	TaskVariant taskVariant = nullptr;
-	while (!_end)
+	while (true)
 	{
 		_queue.wait_dequeue(taskVariant);
-
+		if (_end)
+			return;
 		Hix::Tasking::Task* rTask;
-
 		std::visit([this, &rTask](auto&& task) {
 			using T = std::decay_t<decltype(task)>;
 			//for small copy by value tasks and larger copy by pointer tasks

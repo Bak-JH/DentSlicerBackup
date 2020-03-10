@@ -36,6 +36,7 @@ Item{
 		FontLoader{ id: openBold; source: "qrc:/Resource/font/OpenSans-Bold.ttf" }
 		
         Rectangle{
+
 			id: uiRoot
             color: "#E5E5E5"
 			anchors.fill: parent
@@ -353,6 +354,8 @@ Item{
 			anchors.verticalCenter: window.verticalCenter
 			objectName: "popupArea"
 		}
+
+
     }
 
 	Login{

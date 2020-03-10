@@ -14,17 +14,16 @@ using namespace Qt3DCore;
 using namespace Hix::Support;
 using namespace Qt3DCore;
 
-Hix::Support::SupportRaftManager::SupportRaftManager()
+Hix::Support::SupportRaftManager::SupportRaftManager(): _root(new QEntity())
 {
 }
 void Hix::Support::SupportRaftManager::initialize(Qt3DCore::QEntity* parent)
 {
-	_root.setParent(parent);
-	_root.setEnabled(true);
+	_root->setParent(parent);
+	_root->setEnabled(true);
 }
 Hix::Support::SupportRaftManager::~SupportRaftManager()
 {
-	_root.setParent((QNode*)nullptr);
 }
 
 float Hix::Support::SupportRaftManager::supportRaftMinLength()
@@ -288,7 +287,7 @@ std::vector<SupportModel*> Hix::Support::SupportRaftManager::modelAttachedSuppor
 
 Qt3DCore::QEntity& Hix::Support::SupportRaftManager::rootEntity()
 {
-	return _root;
+	return *_root;
 }
 
 size_t Hix::Support::SupportRaftManager::supportCount() const
