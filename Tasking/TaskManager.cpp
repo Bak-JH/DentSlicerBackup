@@ -1,5 +1,7 @@
 #include "TaskManager.h"
 #include <stdexcept>
+#include <sstream>
+#include <iostream>
 
 #include "application/ApplicationManager.h"
 using namespace Hix::Tasking;
@@ -46,7 +48,36 @@ void TaskManager::run()
 			_progressManager.addProgress(rTask->progress());
 		}
 
-		rTask->run();
+		try
+		{
+			rTask->run();
+		}
+		catch (std::exception & e)
+		{
+			qDebug() << e.what();
+			//popup, log, send error report
+			auto generateError = [this]() {Hix::Application::ApplicationManager::getInstance().modalDialogManager().openOkCancelDialog(
+				"Error has occured. Do you report this error?", "Report Error", "Ignore",
+				[this]() {
+					//report error pressed
+					Hix::Application::ApplicationManager::getInstance().modalDialogManager().closeDialog();
+					_progressManager.generateErrorPopup("Reporting Error");
+					
+				},
+				[this]() {
+					Hix::Application::ApplicationManager::getInstance().modalDialogManager().closeDialog();
+				}
+				);
+			};
+
+			QMetaObject::invokeMethod(&Hix::Application::ApplicationManager::getInstance().engine(), generateError, Qt::BlockingQueuedConnection);
+			Sleep(3000);
+			_progressManager.deletePopup();
+		}
+		catch (...)
+		{
+			//incase of custom unknown exception, gracefully exit
+		}
 
 		_progressManager.deletePopup();
 		Hix::Application::ApplicationManager::getInstance().stateChanged();
