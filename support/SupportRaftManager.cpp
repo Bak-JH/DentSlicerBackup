@@ -305,7 +305,7 @@ RayCaster& Hix::Support::SupportRaftManager::supportRaycaster()
 
 bool Hix::Support::SupportRaftManager::supportActive() const
 {
-	return true;
+	return !_supports.empty();
 }
 
 bool Hix::Support::SupportRaftManager::raftActive() const
