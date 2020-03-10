@@ -16,7 +16,7 @@ FeaturePopup {
 	CtrSpinBox {
 		id: scaleX
 		label.text: "X Size(mm)"
-		fromNum: -100
+		fromNum: 0
 		toNum: 100
 		value: 1
 		width: parent.width - 16 * 2
@@ -36,7 +36,7 @@ FeaturePopup {
 		id: scaleY
 		label.text: "Y Size(mm)"
 		width: parent.width - 16 * 2
-		fromNum: -100
+		fromNum: 0
 		toNum: 100
 		value: 1
 		control.anchors.rightMargin: width * 0.2
@@ -55,7 +55,7 @@ FeaturePopup {
 		id: scaleZ
 		label.text: "Z Size(mm)"
 		width: parent.width - 16 * 2
-		fromNum: -100
+		fromNum: 0
 		toNum: 100
 		value: 1
 		control.anchors.rightMargin: width * 0.2

@@ -12,6 +12,7 @@ namespace Hix
 		virtual ~ProgressManager();
 
 		void generatePopup();
+		void generateErrorPopup(const char* message);
 		void addProgress(Progress* progress);
 		void deletePopup();
 
