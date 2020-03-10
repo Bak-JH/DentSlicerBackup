@@ -16,19 +16,23 @@ Hix::Features::DeleteModel::~DeleteModel()
 
 void Hix::Features::DeleteModel::undoImpl()
 {
-	auto& info = std::get<RedoInfo>(_model);
-	auto raw = info.redoModel.get();
-	if (info.isListed)
+	std::function<GLModel*()> undo = [this]()->GLModel*
 	{
-		auto& partManager = ApplicationManager::getInstance().partManager();
-		partManager.addPart(std::move(info.redoModel));
-	}
-	else
-	{
-		info.redoModel.release();
-	}
-	raw->setParent(info.parent);
-	_model = raw;
+		auto& info = std::get<RedoInfo>(_model);
+		auto raw = info.redoModel.get();
+		if (info.isListed)
+		{
+			auto& partManager = ApplicationManager::getInstance().partManager();
+			partManager.addPart(std::move(info.redoModel));
+		}
+		else
+		{
+			info.redoModel.release();
+		}
+		raw->setParent(info.parent);
+		return raw;
+	};
+	_model = postUIthread(std::move(undo));
 }
 
 void Hix::Features::DeleteModel::redoImpl()
@@ -36,12 +40,13 @@ void Hix::Features::DeleteModel::redoImpl()
 	auto raw = std::get<GLModel*>(_model);
 	auto parent = raw->parentNode();
 	bool isListed = ApplicationManager::getInstance().partManager().isTopLevel(raw);
-	auto deleteModel = [&raw]() { raw->QNode::setParent((Qt3DCore::QNode*)nullptr); };
-	postUIthread(deleteModel);
+	postUIthread([&raw]() { raw->QNode::setParent((Qt3DCore::QNode*)nullptr); });
 	if (isListed)
 	{
 		auto& partManager = ApplicationManager::getInstance().partManager();
-		_model = RedoInfo{ partManager.removePart(raw), parent, isListed };
+
+		std::function < std::unique_ptr<GLModel>()>  unlist = [&raw, &partManager]()->std::unique_ptr<GLModel> { return partManager.removePart(raw); };
+		_model = RedoInfo{ postUIthread(std::move(unlist)), parent, isListed };
 	}
 	else
 	{
@@ -55,7 +60,6 @@ void Hix::Features::DeleteModel::runImpl()
 	auto closeModal = []() { 
 		Hix::Application::ApplicationManager::getInstance().modalDialogManager().closeDialog(); 
 	};
-	qDebug() << _progress.getDisplayText();
 	redoImpl();
 	postUIthread(closeModal);
 }

@@ -56,17 +56,18 @@ bool Hix::QML::Controls::ToggleSwitch::isChecked() const
 
 void Hix::QML::Controls::ToggleSwitch::setChecked(bool isChecked)
 {
-	_isChecked = isChecked;
-
+	if (isChecked != _isChecked)
+	{
+		_isChecked = isChecked;
+		if (_isChecked)
+			emit checked();
+		else
+			emit unchecked();
+	}
 }
 
 void Hix::QML::Controls::ToggleSwitch::onClicked()
 {
 	setChecked(!_isChecked);
-	if (_isChecked)
-		emit checked();
-	else
-		emit unchecked();
 	Button::onClicked();
 }
-

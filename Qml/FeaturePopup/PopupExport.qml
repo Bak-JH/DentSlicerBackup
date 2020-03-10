@@ -5,7 +5,7 @@ import QtQuick.Controls 2.1
 import "../Controls"
 
 FeaturePopup {
-	popuptitle.text: qsTr("Export")
+	popuptitle.text: qsTr("Slice")
 	height: 360
 
 	CtrDropdownBox {

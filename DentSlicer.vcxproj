@@ -855,7 +855,6 @@
     <ClInclude Include="common\rapidjson\stringbuffer.h" />
     <ClInclude Include="common\rapidjson\writer.h" />
     <ClInclude Include="common\Singleton.h" />
-    <ClInclude Include="DentEngine\src\mesh.h" />
     <ClInclude Include="feature\interfaces\SliderMode.h" />
     <ClInclude Include="feature\settingMode.h" />
     <ClInclude Include="feature\CopyPaste.h" />
@@ -897,6 +896,7 @@
     <ClInclude Include="Settings\JSONWriteSetting.h" />
     <ClInclude Include="Settings\SliceSetting.h" />
     <ClInclude Include="Settings\SupportSetting.h" />
+    <ClInclude Include="support\SupportModel.h" />
     <ClInclude Include="Tasking\Task.h" />
     <ClInclude Include="common\taskflow\core\executor.hpp" />
     <ClInclude Include="common\taskflow\core\flow_builder.hpp" />
@@ -1250,10 +1250,7 @@
     <None Include="Qml\SettingPopup.qml" />
     <None Include="Qml\SlicingData.qml" />
     <None Include="Qml\SlicingDataElement.qml" />
-    <None Include="Qml\UICore.qml" />
-    <None Include="Qml\UndoRedoButton.qml" />
     <None Include="Qml\ViewButton.qml" />
-    <None Include="Qml\ViewChange.qml" />
     <None Include="Resource\mesh\arrow.stl" />
     <None Include="resource\bar.png" />
     <None Include="Resource\mesh\boundedBox.stl" />
@@ -1462,8 +1459,8 @@
     <Image Include="Resource\menu_cut_select_1.png" />
     <Image Include="Resource\menu_extend.png" />
     <Image Include="Resource\menu_extend_select_1.png" />
-    <Image Include="Resource\menu_extract.png" />
-    <Image Include="Resource\menu_extract_select_1.png" />
+    <Image Include="Resource\menu_slice.png" />
+    <Image Include="Resource\menu_slice_select_1.png" />
     <Image Include="Resource\menu_label.png" />
     <Image Include="Resource\menu_label_select_1.png" />
     <Image Include="Resource\menu_layflat.png" />

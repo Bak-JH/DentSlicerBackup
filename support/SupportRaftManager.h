@@ -16,6 +16,7 @@ namespace Hix
 
 		using namespace Engine3D;
 		class SupportModel;
+		class ModelAttachedSupport;
 		class RaftModel;
 		class SupportRaftManager : public QObject
 		{
@@ -37,8 +38,9 @@ namespace Hix
 			SupportModel* addSupport(std::unique_ptr<SupportModel> target);
 			std::unique_ptr<SupportModel> removeSupport(SupportModel* e);
 
-			bool supportsEmpty();
-
+			bool supportsEmpty()const;
+			bool modelHasSupport(const GLModel* model)const;
+			
 			RaftModel* generateRaft();
 			std::unique_ptr<RaftModel> removeRaft();
 			RaftModel* addRaft(std::unique_ptr<RaftModel> raft);
@@ -55,14 +57,19 @@ namespace Hix
 			RayCaster& supportRaycaster();
 
 		private:
+
+			void addToModelMap(SupportModel* support);
+			void removeFromModelMap(SupportModel* support);
 			void clearImpl(const std::unordered_set<const GLModel*>& models);
 			void prepareRaycaster(const GLModel& model);
-			Qt3DCore::QEntity _root;
+			Qt3DCore::QEntity* _root;
 			std::vector<QVector3D> getSupportBasePts()const;
 			EditMode _supportEditMode = EditMode::None;
 			std::unordered_map<SupportModel*, std::unique_ptr<SupportModel>> _supports;
+			std::unordered_map<const GLModel*, std::unordered_set<ModelAttachedSupport*>> _modelSupportMap;
 			std::unique_ptr<RaftModel> _raft;
 			std::unique_ptr<RayCaster> _rayCaster;
+
 		};
 
 	}

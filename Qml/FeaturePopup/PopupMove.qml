@@ -12,7 +12,7 @@ FeaturePopup {
 		id: moveX
 		fromNum: -100
 		toNum: 100
-		label.text: "X Offset(mm)"
+		label.text: "X (mm)"
 		width: parent.width - 16 * 2
 		anchors.left: parent.left
 		anchors.leftMargin: 16
@@ -24,7 +24,7 @@ FeaturePopup {
 		id: moveY
 		fromNum: -100
 		toNum: 100
-		label.text: "Y Offset(mm)"
+		label.text: "Y (mm)"
 		width: parent.width - 16 * 2
 		anchors.left: parent.left
 		anchors.leftMargin: 16
@@ -36,7 +36,7 @@ FeaturePopup {
 		id: moveZ
 		fromNum: -100
 		toNum: 100
-		label.text: "Z Offset(mm)"
+		label.text: "Z (mm)"
 		width: parent.width - 16 * 2
 		anchors.left: parent.left
 		anchors.leftMargin: 16

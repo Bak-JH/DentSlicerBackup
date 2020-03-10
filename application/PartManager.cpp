@@ -44,10 +44,7 @@ bool Hix::Application::PartManager::isSelected(GLModel* model)const
 
 void Hix::Application::PartManager::setSelected(GLModel* model, bool selected)
 {
-	if (_partList->setModelSelected(model, selected))
-	{
-		model->updatePrintable();
-	}
+	_partList->setModelSelected(model, selected);
 }
 
 

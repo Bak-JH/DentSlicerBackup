@@ -77,6 +77,7 @@ bool Hix::QML::PartList::setModelSelected(GLModel* model, bool isSelected)
 			else
 				_selectedModels.erase(model);
 			listed->second->setSelected(isSelected);
+			model->updatePrintable();
 			return true;
 		}
 	}
@@ -135,14 +136,7 @@ void Hix::QML::PartListItem::setSelected(bool selected)
 {
 	if (isSelected() != selected)
 	{
-		if (selected)
-		{
-			emit _selectButton->checked();
-		}
-		else
-		{
-			emit _selectButton->unchecked();
-		}
+		_selectButton->setChecked(selected);
 	}
 }
 
