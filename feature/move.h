@@ -63,6 +63,7 @@ namespace Hix
 			Hix::QML::Controls::InputSpinBox* _xValue;
 			Hix::QML::Controls::InputSpinBox* _yValue;
 			Hix::QML::Controls::InputSpinBox* _zValue;
+			Hix::QML::Controls::Button* _snapButton;
 		};
 	}
 }

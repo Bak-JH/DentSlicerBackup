@@ -5,6 +5,8 @@
 #include "../glmodel.h"
 #include "application/ApplicationManager.h"
 
+#include "../qml/components/Buttons.h"
+
 const QUrl MOVE_POPUP_URL = QUrl("qrc:/Qml/FeaturePopup/PopupMove.qml");
 Hix::Features::MoveMode::MoveMode() : WidgetMode()
 	, _targetModels(Hix::Application::ApplicationManager::getInstance().partManager().selectedModels())
@@ -23,6 +25,13 @@ Hix::Features::MoveMode::MoveMode() : WidgetMode()
 	co.getControl(_xValue, "moveX");
 	co.getControl(_yValue, "moveY");
 	co.getControl(_zValue, "moveZ");
+	co.getControl(_snapButton, "snapButton");
+	QObject::connect(_snapButton, &Hix::QML::Controls::Button::clicked, [this]() {
+			Hix::Features::FeatureContainerFlushSupport* container = new FeatureContainerFlushSupport(_targetModels);
+			for (auto& target : _targetModels)
+				container->addFeature(new Move::ZToBed(target));
+			Hix::Application::ApplicationManager::getInstance().taskManager().enqueTask(container);
+		});
 
 	updatePosition();
 }

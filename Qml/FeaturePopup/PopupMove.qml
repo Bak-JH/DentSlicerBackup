@@ -10,8 +10,6 @@ FeaturePopup {
 
 	CtrSpinBox {
 		id: moveX
-		fromNum: -100
-		toNum: 100
 		label.text: "X (mm)"
 		width: parent.width - 16 * 2
 		anchors.left: parent.left
@@ -22,8 +20,6 @@ FeaturePopup {
 	
 	CtrSpinBox {
 		id: moveY
-		fromNum: -100
-		toNum: 100
 		label.text: "Y (mm)"
 		width: parent.width - 16 * 2
 		anchors.left: parent.left
@@ -34,8 +30,6 @@ FeaturePopup {
 
 	CtrSpinBox {
 		id: moveZ
-		fromNum: -100
-		toNum: 100
 		label.text: "Z (mm)"
 		width: parent.width - 16 * 2
 		anchors.left: parent.left
