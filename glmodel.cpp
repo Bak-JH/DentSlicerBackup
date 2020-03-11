@@ -264,10 +264,11 @@ void GLModel::clicked(MouseEventData& pick, const Qt3DRender::QRayCasterHit& hit
 	auto listed = getRootModel();
 	auto& partManager = Hix::Application::ApplicationManager::getInstance().partManager();
 	auto isSelected = partManager.isSelected(listed);
-	if (!Hix::Application::ApplicationManager::getInstance().featureManager().isFeatureActive())
+	if (Hix::Application::ApplicationManager::getInstance().featureManager().allowModelSelection())
 	{
 		if (pick.button == Qt::MouseButton::LeftButton)
 		{
+			Hix::Application::ApplicationManager::getInstance().featureManager().setMode(nullptr);
 			//unselect previously selected parts if multi selection is not active.
 			if (!isSelected && !partManager.isMultiSelect())
 			{

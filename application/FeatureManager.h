@@ -42,7 +42,7 @@ namespace Hix
 		public:
 
 			template<typename FeatureType>
-			bool isActive()
+			bool isActive()const
 			{
 				if (_currentMode.get() != nullptr)
 				{
@@ -62,6 +62,7 @@ namespace Hix
 			Hix::Features::Mode* currentMode()const;
 			void setMode(Hix::Features::Mode*);
 			Hix::Features::FeatureHistoryManager& featureHistoryManager();
+			bool allowModelSelection()const;
 		private:
 			Hix::QML::Controls::Button* _settingButton;
 			Hix::QML::FeatureMenu* _menu;
