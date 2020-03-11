@@ -11,7 +11,7 @@ Hix::Features::SliderMode::SliderMode(double min, double max)
 	auto popupShell = dynamic_cast<Hix::QML::SlideBarShell*>(qmlInstance);
 	_slideBar.reset(popupShell);
 	_slideBar->setRange(min, max);
-	
+	_slideBar->setParentItem(slideArea);
 }
 
 void Hix::Features::SliderMode::setSliderVisible(bool isVisible)
