@@ -27,8 +27,10 @@ namespace Hix
 			void unlistModel(GLModel* model);
 			bool isListed(GLModel* model)const;
 			bool isSelected(GLModel* model)const;
+			void unselectAll();
+			void selectAll();
 			//returns if select changed
-			bool setModelSelected(GLModel* model, bool isSelected);
+			bool setModelSelected(GLModel* model, bool isSelected, bool updateList = true);
 			std::unordered_set<GLModel*> selectedModels()const;
 			Hix::Engine3D::Bounds3D selectedBound()const;
 			void deleteSelectedModels();

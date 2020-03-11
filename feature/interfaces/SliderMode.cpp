@@ -14,21 +14,11 @@ Hix::Features::SliderMode::SliderMode(double min, double max)
 	
 }
 
-
+void Hix::Features::SliderMode::setSliderVisible(bool isVisible)
+{
+	_slideBar->setVisible(isVisible);
+}
 
 Hix::Features::SliderMode::~SliderMode()
 {
-}
-
-void Hix::Features::SliderMode::setSliderEnable(bool isEnable)
-{
-	if (isEnable)
-	{
-		auto slideArea = Hix::Application::ApplicationManager::getInstance().featureManager().slideArea();
-		_slideBar->setParentItem(slideArea);
-	}
-	else
-	{
-		_slideBar->setParentItem(nullptr);
-	}
 }
