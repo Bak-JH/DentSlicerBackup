@@ -65,6 +65,8 @@ namespace Hix
 			bool allowModelSelection()const;
 		private:
 			Hix::QML::Controls::Button* _settingButton;
+			Hix::QML::Controls::Button* _undoButton;
+			Hix::QML::Controls::Button* _redoButton;
 			Hix::QML::FeatureMenu* _menu;
 			QQuickItem* _featureArea;
 			QQuickItem* _slideArea;
