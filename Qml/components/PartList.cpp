@@ -35,7 +35,7 @@ void Hix::QML::PartList::listModel(GLModel* model)
 		//unselect previously selected parts if multi selection is not active.
 		if (!Hix::Application::ApplicationManager::getInstance().partManager().isMultiSelect())
 		{
-			unselectAll();
+			unselectAll(false);
 		}
 		setModelSelected(model, true, false);
 		});
@@ -67,26 +67,26 @@ bool Hix::QML::PartList::isSelected(GLModel* model)const
 	return _selectedModels.find(model) != _selectedModels.end();
 }
 
-void Hix::QML::PartList::unselectAll()
+void Hix::QML::PartList::unselectAll(bool updateList)
 {
 	for (auto& each : _items)
 	{
 		auto model = each.first;
 		if (isSelected(model))
 		{
-			setModelSelected(model, false);
+			setModelSelected(model, false, updateList);
 		}
 	}
 }
 
-void Hix::QML::PartList::selectAll()
+void Hix::QML::PartList::selectAll(bool updateList)
 {
 	for (auto& each : _items)
 	{
 		auto model = each.first;
 		if (!isSelected(model))
 		{
-			setModelSelected(model, true);
+			setModelSelected(model, true, updateList);
 		}
 	}
 }
