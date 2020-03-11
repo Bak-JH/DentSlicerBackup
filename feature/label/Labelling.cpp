@@ -8,7 +8,7 @@
 #include "../Extrude.h"
 #include "../../glmodel.h"
 #include "../../application/ApplicationManager.h"
-
+#include "../repair/meshrepair.h"
 //engrave CSG
 #include "../CSG/CSG.h"
 
@@ -67,7 +67,7 @@ GLModel* Hix::Features::LabellingMode::generatePreviewModel()
 	std::vector<std::vector<QVector3D>> jointContours;
 	std::vector<QVector3D> path;
 	path.emplace_back(0, 0, _labelHeight->getValue() * -3);
-	path.emplace_back(0, 0, _labelHeight->getValue()*3);
+	path.emplace_back(0, 0, _labelHeight->getValue() * 3);
 	for (auto& intPath : IntPaths)
 	{
 		std::vector<QVector3D> contour;
@@ -226,6 +226,7 @@ void Hix::Features::LabellingEngrave::cutCSG(GLModel* subject, const CorkTriMesh
 
 	//convert the result back to hix mesh
 	auto result = toHixMesh(output);
+	Hix::Features::repair(*result);
 	//manual free cork memory, TODO RAII
 	freeCorkTriMesh(&subjectCork);
 	freeCorkTriMesh(&output);
@@ -233,7 +234,9 @@ void Hix::Features::LabellingEngrave::cutCSG(GLModel* subject, const CorkTriMesh
 		_prevMesh.reset(subject->getMeshModd());
 		subject->setMesh(result);
 		subject->setZToBed();
+		_label.reset();
 	});
+
 }
 
 
@@ -241,7 +244,6 @@ void Hix::Features::LabellingEngrave::runImpl()
 {
 	auto subtractee = toCorkMesh(*_label->getMesh());
 	cutCSG(_target, subtractee);
-	_label.reset();
 }
 
 void Hix::Features::LabellingEngrave::undoImpl()

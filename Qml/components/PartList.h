@@ -27,8 +27,8 @@ namespace Hix
 			void unlistModel(GLModel* model);
 			bool isListed(GLModel* model)const;
 			bool isSelected(GLModel* model)const;
-			void unselectAll();
-			void selectAll();
+			void unselectAll(bool updateList = true);
+			void selectAll(bool updateList = true);
 			//returns if select changed
 			bool setModelSelected(GLModel* model, bool isSelected, bool updateList = true);
 			std::unordered_set<GLModel*> selectedModels()const;
