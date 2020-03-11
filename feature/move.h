@@ -31,8 +31,8 @@ namespace Hix
 			void redoImpl()override;
 			void runImpl()override;
 			std::optional<QVector3D> _to;
-		private:
 			GLModel* _model;
+		private:
 			QMatrix4x4 _prevMatrix;
 			Engine3D::Bounds3D _prevAabb;
 			QMatrix4x4 _nextMatrix;

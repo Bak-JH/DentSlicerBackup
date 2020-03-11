@@ -220,22 +220,23 @@ QVector3D Hix::Engine3D::Bounds3D::displaceWithin(const Bounds3D& child, QVector
 	for (size_t i = 0; i < 3; ++i)
 	{
 		if (displacement[i] > 0)
-			result[i] = std::min(displacement[i], maxDisplacemnts[i * 2]);
+			result[i] = std::min(displacement[i], maxDisplacemnts[i * 2 + 1]);
 		else
-			result[i] = std::max(displacement[i], maxDisplacemnts[i * 2 + 1]);
+			result[i] = std::max(displacement[i], maxDisplacemnts[i * 2]);
 	}
 	return result;
 }
 
 std::array<float, 6> Hix::Engine3D::Bounds3D::calculateMaxDisplacement(const Bounds3D & child) const
 {
+	//min, max, min, max....
 	std::array<float, 6> result{
-		_bound[0] - child._bound[0],
 		_bound[1] - child._bound[1],
-		_bound[2] - child._bound[2],
+		_bound[0] - child._bound[0],
 		_bound[3] - child._bound[3],
-		_bound[4] - child._bound[4],
-		_bound[5] - child._bound[5]
+		_bound[2] - child._bound[2],
+		_bound[5] - child._bound[5],
+		_bound[4] - child._bound[4]
 	};
 	return result;
 	
@@ -253,5 +254,33 @@ bool Hix::Engine3D::Bounds3D::contains(const Hix::Engine3D::Bounds3D& other)cons
 		return true;
 	}
 	return false;
+}
+
+
+
+bool Hix::Engine3D::Bounds3D::intersects(const Hix::Engine3D::Bounds3D& other)const
+{
+	if (other.xMin() > xMax() ||
+		other.xMax() < xMin() ||
+		other.yMin() > yMax() ||
+		other.yMax() < yMin() ||
+		other.zMin() > zMax() ||
+		other.zMax() < zMin())
+	{
+		return false;
+	}
+	return true;
+}
+
+bool Hix::Engine3D::Bounds3D::intersects2D(const Hix::Engine3D::Bounds3D& other) const
+{
+	if (other.xMin() > xMax() ||
+		other.xMax() < xMin() ||
+		other.yMin() > yMax() ||
+		other.yMax() < yMin())
+	{
+		return false;
+	}
+	return true;
 }
 

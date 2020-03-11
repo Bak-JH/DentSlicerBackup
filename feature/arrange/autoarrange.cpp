@@ -7,6 +7,7 @@
 
 #include "../move.h"
 #include "../../application/ApplicationManager.h"
+#include "../../common/RandomGen.h"
 using namespace Hix::Features;
 using namespace Hix::Engine3D;
 constexpr float MARGIN = 1;
@@ -122,3 +123,48 @@ void Hix::Features::AutoArrange::runImpl()
 	FeatureContainer::runImpl();
 }
 
+Hix::Features::AutoArrangeAppend::AutoArrangeAppend(GLModel* model): Move(model)
+{
+}
+
+void Hix::Features::AutoArrangeAppend::runImpl()
+{
+	//calculate inner fit polygon range
+	auto bound = _model->recursiveAabb();
+	const auto& printBound = Hix::Application::ApplicationManager::getInstance().settings().printerSetting.bedBound;
+	auto maxDisp = printBound.calculateMaxDisplacement(bound);
+	RandomGen random(0);
+	auto allModels = Hix::Application::ApplicationManager::getInstance().partManager().allModels();
+	std::vector<Bounds3D> modelBounds;
+	modelBounds.reserve(allModels.size());
+	_to = QVector3D(0, 0, 0);
+	for (auto& m : allModels)
+	{
+		modelBounds.emplace_back(m->recursiveAabb());
+	}
+	for (size_t i = 0; i < 4000; ++i)
+	{
+		float x = random.getFloat(maxDisp[0], maxDisp[1]);
+		float y = random.getFloat(maxDisp[2], maxDisp[3]);
+		QVector3D disp(x, y, 0);
+		auto curr = bound;
+		curr.translate(disp);
+		bool intersects = false;
+		for (auto& b : modelBounds)
+		{
+			if (b.intersects2D(curr))
+			{
+				intersects = true;
+				break;
+			}
+		}
+		if (!intersects)
+		{
+			_to = disp;
+			break;
+			qDebug() << i;
+		}
+	}
+	__super::runImpl();
+
+}

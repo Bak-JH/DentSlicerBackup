@@ -57,6 +57,9 @@ namespace Hix
 			QVector3D displaceWithin(const Bounds3D& child, QVector3D displacement =  QVector3D())const;
 			std::array<float, 6> calculateMaxDisplacement(const Bounds3D & child)const;
 			bool contains(const Hix::Engine3D::Bounds3D& other)const;
+			bool intersects(const Hix::Engine3D::Bounds3D& other)const;
+			bool intersects2D(const Hix::Engine3D::Bounds3D& other)const;
+
 			//********When centred around origin ********
 			Bounds3D(QVector3D lengths);
 			void setXLength(float length);

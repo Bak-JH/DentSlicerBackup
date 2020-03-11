@@ -8,7 +8,7 @@
 
 //acces unaccessible cpp only functions
 #include "../../DentEngine/src/slicer.h"
-#include "../RandomGen.h"
+#include "../../common/RandomGen.h"
 namespace SlicerTest
 {
 	using namespace Hix;

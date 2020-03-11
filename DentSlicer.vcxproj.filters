@@ -175,7 +175,6 @@
     <ClCompile Include="feature\scale.cpp" />
     <ClCompile Include="widget\Widget.cpp" />
     <ClCompile Include="widget\Widget3D.cpp" />
-    <ClCompile Include="unitTest\RandomGen.cpp" />
     <ClCompile Include="unitTest\RunTests.cpp" />
     <ClCompile Include="utils\gridmesh.cpp" />
     <ClCompile Include="feature\hollowshell.cpp" />
@@ -198,6 +197,7 @@
     <ClCompile Include="Qml\components\MainWindow.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="common\RandomGen.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="application\ApplicationManager.h" />
@@ -797,7 +797,6 @@
     <ClInclude Include="widget\Widget.h" />
     <ClInclude Include="render\Color.h" />
     <ClInclude Include="unitTest\catch.hpp" />
-    <ClInclude Include="unitTest\RandomGen.h" />
     <ClInclude Include="unitTest\tests\BVHTest.h" />
     <ClInclude Include="unitTest\tests\Float3DVectorHash.h" />
     <ClInclude Include="unitTest\tests\IndexedListTest.h" />
@@ -831,6 +830,7 @@
     <ClInclude Include="support\SupportModel.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="common\RandomGen.h" />
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="debug\moc_predefs.h.cbt" />
