@@ -14,6 +14,11 @@ Hix::Features::SliderMode::SliderMode(double min, double max)
 	_slideBar->setParentItem(slideArea);
 }
 
+void Hix::Features::SliderMode::setSliderVisible(bool isVisible)
+{
+	_slideBar->setVisible(isVisible);
+}
+
 Hix::Features::SliderMode::~SliderMode()
 {
 }

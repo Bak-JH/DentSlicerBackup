@@ -32,10 +32,15 @@ void Hix::QML::PartList::listModel(GLModel* model)
 	_items.emplace(model, item);
 	//event handler
 	QObject::connect(item->selectButton(), &Hix::QML::Controls::ToggleSwitch::checked, [this, model]() {
-		setModelSelected(model, true);
+		//unselect previously selected parts if multi selection is not active.
+		if (!Hix::Application::ApplicationManager::getInstance().partManager().isMultiSelect())
+		{
+			unselectAll();
+		}
+		setModelSelected(model, true, false);
 		});
 	QObject::connect(item->selectButton(), &Hix::QML::Controls::ToggleSwitch::unchecked, [this, model]() {
-		setModelSelected(model, false);
+		setModelSelected(model, false, false);
 		});
 	QObject::connect(item->hideButton(), &Hix::QML::Controls::ToggleSwitch::checked, [this, model]() {
 		model->setEnabled(false);
@@ -62,7 +67,31 @@ bool Hix::QML::PartList::isSelected(GLModel* model)const
 	return _selectedModels.find(model) != _selectedModels.end();
 }
 
-bool Hix::QML::PartList::setModelSelected(GLModel* model, bool isSelected)
+void Hix::QML::PartList::unselectAll()
+{
+	for (auto& each : _items)
+	{
+		auto model = each.first;
+		if (isSelected(model))
+		{
+			setModelSelected(model, false);
+		}
+	}
+}
+
+void Hix::QML::PartList::selectAll()
+{
+	for (auto& each : _items)
+	{
+		auto model = each.first;
+		if (!isSelected(model))
+		{
+			setModelSelected(model, true);
+		}
+	}
+}
+
+bool Hix::QML::PartList::setModelSelected(GLModel* model, bool isSelected, bool updateList)
 {
 
 	auto listed = _items.find(model);
@@ -76,7 +105,10 @@ bool Hix::QML::PartList::setModelSelected(GLModel* model, bool isSelected)
 				_selectedModels.insert(model);
 			else
 				_selectedModels.erase(model);
-			listed->second->setSelected(isSelected);
+			if (updateList)
+			{
+				listed->second->setSelected(isSelected);
+			}
 			model->updatePrintable();
 			return true;
 		}
