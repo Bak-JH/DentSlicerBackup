@@ -108,6 +108,11 @@ GLModel* Hix::Features::LabellingMode::generatePreviewModel()
 
 Hix::Features::LabellingMode::LabellingMode() : DialogedMode(LABEL_POPUP_URL)
 {
+	if (Hix::Application::ApplicationManager::getInstance().partManager().selectedModels().empty())
+	{
+		Hix::Application::ApplicationManager::getInstance().modalDialogManager().needToSelectModels();
+		return;
+	}
 	auto& co = controlOwner();
 	co.getControl(_inputText, "labeltext");
 	co.getControl(_fontStyle, "labelfont");

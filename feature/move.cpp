@@ -62,10 +62,16 @@ void Hix::Features::MoveMode::featureEnded()
 void Hix::Features::MoveMode::applyButtonClicked()
 {
 	auto to = QVector3D(_xValue->getValue(), _yValue->getValue(), _zValue->getValue());
+
+
 	Hix::Features::FeatureContainerFlushSupport* container = new FeatureContainerFlushSupport(_targetModels);
-	
+	const auto& printBound = Hix::Application::ApplicationManager::getInstance().settings().printerSetting.bedBound;
 	for (auto& target : _targetModels)
-		container->addFeature(new Move(target, to));
+	{
+		auto checkedDisp = printBound.displaceWithin(target->recursiveAabb(), to);
+		container->addFeature(new Move(target, checkedDisp));
+
+	}
 
 	container->progress()->setDisplayText("Move Model");
 	Hix::Application::ApplicationManager::getInstance().taskManager().enqueTask(container);
