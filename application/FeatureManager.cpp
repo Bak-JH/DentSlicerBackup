@@ -7,10 +7,14 @@
 #include "../glmodel.h"
 #include "../feature/interfaces/Mode.h"
 #include "../feature/settingMode.h"
+#include "../feature/move.h"
+#include "../feature/rotate.h"
+
 #include <qquickitem.h>
 
 using namespace Hix::QML;
 using namespace Hix::Features;
+using namespace Hix::Application;
 Hix::Application::FeatureManager::FeatureManager()
 {
 }
@@ -50,6 +54,11 @@ void Hix::Application::FeatureManager::setMode(Hix::Features::Mode* mode)
 Hix::Features::FeatureHistoryManager& Hix::Application::FeatureManager::featureHistoryManager()
 {
 	return _featureHistoryManager;
+}
+
+bool Hix::Application::FeatureManager::allowModelSelection() const
+{
+	return isActive<MoveMode>() || isActive<RotateMode>() || !Hix::Application::ApplicationManager::getInstance().featureManager().isFeatureActive();
 }
 
 
