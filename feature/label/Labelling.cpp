@@ -1,11 +1,16 @@
 #include "Labelling.h"
 #include "Qml/components/Inputs.h"
+#include "Qml/components/Buttons.h"
+
 #include "../qml/components/ControlOwner.h"
 
 #include "../Shapes2D.h"
 #include "../Extrude.h"
 #include "../../glmodel.h"
 #include "../../application/ApplicationManager.h"
+
+//engrave CSG
+#include "../CSG/CSG.h"
 
 using namespace Hix::Engine3D;
 using namespace Hix::Polyclipping;
@@ -14,6 +19,7 @@ using namespace Hix::Features::Extrusion;
 using namespace ClipperLib;
 using namespace Qt3DCore;
 using namespace Hix::Application;
+using namespace Hix::Features::CSG;
 
 //Mesh* generateLabelMesh(const QVector3D translation, const QVector3D normal, const QString text, const QFont font)
 const QUrl LABEL_POPUP_URL = QUrl("qrc:/Qml/FeaturePopup/PopupLabel.qml");
@@ -60,7 +66,7 @@ GLModel* Hix::Features::LabellingMode::generatePreviewModel()
 	// generate cyliner wall
 	std::vector<std::vector<QVector3D>> jointContours;
 	std::vector<QVector3D> path;
-	path.emplace_back(0, 0, 0);
+	path.emplace_back(0, 0, _labelHeight->getValue() * -3);
 	path.emplace_back(0, 0, _labelHeight->getValue()*3);
 	for (auto& intPath : IntPaths)
 	{
@@ -107,7 +113,7 @@ Hix::Features::LabellingMode::LabellingMode() : DialogedMode(LABEL_POPUP_URL)
 	co.getControl(_fontStyle, "labelfont");
 	co.getControl(_fontSize, "labelfontsize");
 	co.getControl(_labelHeight, "labelheight");
-	co.getControl(_labelType, "labeltype");
+	co.getControl(_isEmboss, "labeltype");
 }
 
 Hix::Features::LabellingMode::~LabellingMode()
@@ -157,8 +163,16 @@ void Hix::Features::LabellingMode::applyButtonClicked()
 	{
 		return;
 	}
+	if (_isEmboss->isChecked())
+	{
+		Hix::Application::ApplicationManager::getInstance().taskManager().enqueTask(new Labelling(_targetModel, _previewModel.release()));
 
-	Hix::Application::ApplicationManager::getInstance().taskManager().enqueTask(new Labelling(_targetModel, _previewModel.release()));
+	}
+	else
+	{
+		Hix::Application::ApplicationManager::getInstance().taskManager().enqueTask(new LabellingEngrave(_targetModel, _previewModel.release()));
+
+	}
 }
 
 
@@ -174,14 +188,23 @@ Hix::Features::Labelling::~Labelling()
 
 void Hix::Features::Labelling::undoImpl()
 {
-	_label->QNode::setParent((Qt3DCore::QNode*)nullptr);
+	postUIthread([this]() {
+		auto raw = std::get<GLModel*>(_label);
+		raw->QNode::setParent((Qt3DCore::QNode*)nullptr);
+		_label = std::unique_ptr<GLModel>(raw);
+		});
 }
 
 void Hix::Features::Labelling::redoImpl()
 {
-	if (!ApplicationManager::getInstance().partManager().isSelected(_targetModel))
-		_label->setMaterialColor(Hix::Render::Colors::Default);
-	_label->QNode::setParent(_targetModel);
+	postUIthread([this]() {
+		auto& owned = std::get<std::unique_ptr<GLModel>>(_label);
+		if (!ApplicationManager::getInstance().partManager().isSelected(_targetModel))
+			owned->setMaterialColor(Hix::Render::Colors::Default);
+		owned->QNode::setParent(_targetModel);
+		_label = owned.release();
+		});
+
 }
 
 void Hix::Features::Labelling::runImpl()
@@ -190,3 +213,52 @@ void Hix::Features::Labelling::runImpl()
 	_targetModel->setHitTestable(true);
 	_targetModel->updateModelMesh();
 }
+
+Hix::Features::LabellingEngrave::LabellingEngrave(GLModel* parentModel, GLModel* previewModel):FlushSupport(parentModel), _target(parentModel), _label(previewModel)
+{
+}
+
+void Hix::Features::LabellingEngrave::cutCSG(GLModel* subject, const CorkTriMesh& subtract)
+{
+	auto subjectCork = toCorkMesh(*subject->getMesh());
+	CorkTriMesh output;
+	computeDifference(subjectCork, subtract, &output);
+
+	//convert the result back to hix mesh
+	auto result = toHixMesh(output);
+	//manual free cork memory, TODO RAII
+	freeCorkTriMesh(&subjectCork);
+	freeCorkTriMesh(&output);
+	postUIthread([result, subject, this]() {
+		_prevMesh.reset(subject->getMeshModd());
+		subject->setMesh(result);
+		subject->setZToBed();
+	});
+}
+
+
+void Hix::Features::LabellingEngrave::runImpl()
+{
+	auto subtractee = toCorkMesh(*_label->getMesh());
+	cutCSG(_target, subtractee);
+	_label.reset();
+}
+
+void Hix::Features::LabellingEngrave::undoImpl()
+{
+	postUIthread([this]() {
+		auto tmp = _prevMesh.release();
+		_prevMesh.reset(_target->getMeshModd());
+		_target->setMesh(tmp);
+		});
+}
+
+void Hix::Features::LabellingEngrave::redoImpl()
+{
+	postUIthread([this]() {
+		auto tmp = _prevMesh.release();
+		_prevMesh.reset(_target->getMeshModd());
+		_target->setMesh(tmp);
+		});
+}
+
