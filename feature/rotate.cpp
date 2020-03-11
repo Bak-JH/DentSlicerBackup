@@ -34,13 +34,13 @@ void Hix::Features::RotateMode::featureStarted()
 	_rotateContainer = new FeatureContainerFlushSupport(_targetModels);
 	for (auto& target : _targetModels)
 		_rotateContainer->addFeature(new Rotate(target));
+	if (!_rotateContainer->empty())
+		Hix::Application::ApplicationManager::getInstance().taskManager().enqueTask(_rotateContainer);
 
 }
 
 void Hix::Features::RotateMode::featureEnded()
 {
-	if (!_rotateContainer->empty())
-		Hix::Application::ApplicationManager::getInstance().taskManager().enqueTask(_rotateContainer);
 	for (auto& each : _targetModels)
 	{
 		each->rotateDone();
@@ -87,32 +87,40 @@ Hix::Features::Rotate::~Rotate()
 
 void Hix::Features::Rotate::undoImpl()
 {
-	_nextMatrix = _model->transform().matrix();
-	_nextAabb = _model->aabb();
+	postUIthread([this]() {
+		_nextMatrix = _model->transform().matrix();
+		_nextAabb = _model->aabb();
+		_model->transform().setMatrix(_prevMatrix);
+		_model->aabb() = _prevAabb;
+		UpdateWidgetModePos();
+		_model->updateMesh();
+		});
 
-	_model->transform().setMatrix(_prevMatrix);
-	_model->aabb() = _prevAabb;
-	UpdateWidgetModePos();
-	_model->updateMesh();
 }
 
 void Hix::Features::Rotate::redoImpl()
 {
-	_model->transform().setMatrix(_nextMatrix);
-	_model->aabb() = _nextAabb;
-	UpdateWidgetModePos();
-	_model->updateMesh();
+	postUIthread([this]() {
+		_model->transform().setMatrix(_nextMatrix);
+		_model->aabb() = _nextAabb;
+		UpdateWidgetModePos();
+		_model->updateMesh();
+		});
+
 }
 
 void Hix::Features::Rotate::runImpl()
 {
-	_prevMatrix = _model->transform().matrix();
-	_prevAabb = _model->aabb();
-	if (_rot)
-	{
-		_model->rotateModel(_rot.value());
-		UpdateWidgetModePos();
-	}
+	postUIthread([this]() {
+		_prevMatrix = _model->transform().matrix();
+		_prevAabb = _model->aabb();
+		if (_rot)
+		{
+			_model->rotateModel(_rot.value());
+			UpdateWidgetModePos();
+		}
+		});
+
 }
 
 const GLModel* Hix::Features::Rotate::model() const
