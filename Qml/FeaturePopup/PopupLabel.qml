@@ -77,11 +77,11 @@ FeaturePopup {
 		id: labeltype
 		leftText
 		{
-			text: "Emboss"
+			text: "Engrave"
 		}
 		rightText
 		{
-			text: "Engrave"
+			text: "Emboss"
 		}
 		width: parent.width / 2
 		anchors.top: labelheight.bottom
