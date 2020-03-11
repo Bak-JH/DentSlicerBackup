@@ -25,5 +25,14 @@ namespace Hix
 			std::unordered_set<GLModel*> _selected;
 		};
 
+		//class AutoArrangeAppend : public Hix::Features::FeatureContainer
+		//{
+		//public:
+		//	AutoArrange(GLModel* model);
+		//protected:
+		//	void runImpl()override;
+		//private:
+		//	std::unordered_set<GLModel*> _selected;
+		//};
 	}
 }

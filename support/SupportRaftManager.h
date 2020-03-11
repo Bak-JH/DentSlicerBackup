@@ -68,6 +68,7 @@ namespace Hix
 			std::unordered_map<SupportModel*, std::unique_ptr<SupportModel>> _supports;
 			std::unordered_map<const GLModel*, std::unordered_set<ModelAttachedSupport*>> _modelSupportMap;
 			std::unique_ptr<RaftModel> _raft;
+			//std::unordered_map<const GLModel*, RayCaster> _rayCasters;
 			std::unique_ptr<RayCaster> _rayCaster;
 
 		};

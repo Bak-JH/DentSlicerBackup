@@ -55,7 +55,7 @@ void Hix::Features::ImportModel::runImpl()
 	{
 		//Hix::Application::ApplicationManager::getInstance().setProgressText("Repairing mesh.");
 		std::unordered_set<GLModel*> repairModels;
-		repairModels.insert(listModel->getAddedModel());
+		repairModels.insert(listModel->get());
 		auto repair = new MeshRepair(repairModels);
 		tryRunFeature(*repair);
 		addFeature(repair);
