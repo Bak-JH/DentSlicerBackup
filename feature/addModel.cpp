@@ -54,7 +54,7 @@ void Hix::Features::AddModel::runImpl()
 	_model = postUIthread(std::move(createModel));
 }
 
-GLModel* Hix::Features::AddModel::getAddedModel()
+GLModel* Hix::Features::AddModel::get()
 {
 	auto idx = _model.index();
 	if (idx == 0)

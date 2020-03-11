@@ -96,7 +96,7 @@ void Hix::Features::Cut::PolylineCut::cutCSG(const QString& subjectName, Hix::Re
 			continue;
 		auto addModel = new Hix::Features::ListModel(seperateParts[i], subjectName + "_cut" + QString::number(i), nullptr);
 		tryRunFeature(*addModel);
-		addModel->getAddedModel()->setZToBed();
+		addModel->get()->setZToBed();
 		addFeature(addModel);
 	}
 	auto model = dynamic_cast<GLModel*>(subject);

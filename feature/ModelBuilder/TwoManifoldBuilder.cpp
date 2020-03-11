@@ -801,7 +801,7 @@ void Hix::Features::TwoManifoldBuilder::runImpl()
 	delFaces.flush();
 	_listModelFeature.reset(new Hix::Features::ListModel(&_model, _name, nullptr));
 	tryRunFeature(*_listModelFeature);
-	auto model = _listModelFeature->getAddedModel();
+	auto model = _listModelFeature->get();
 	if (Hix::Features::isRepairNeeded(model->getMesh()))
 	{
 		std::unordered_set<GLModel*> repairModels;
