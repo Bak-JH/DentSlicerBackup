@@ -48,6 +48,7 @@ void ModelCut::cutModeSelected()
 	//if flat cut		
 	if (!_cutSwitch->isChecked())
 	{
+		setSliderEnable(true);
 		_cutType = ZAxial;
 		_cuttingPlane.enableDrawing(false);
 		_cuttingPlane.clearPt();
@@ -58,6 +59,7 @@ void ModelCut::cutModeSelected()
 	}
 	else if (_cutSwitch->isChecked())
 	{
+		setSliderEnable(false);
 		_cutType = Polyline;
 		_cuttingPlane.enableDrawing(true);
 		//want cutting plane to be over model mesh

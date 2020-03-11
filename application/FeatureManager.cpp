@@ -59,5 +59,11 @@ void Hix::Application::FeatureManagerLoader::init(FeatureManager& manager, QObje
 	Hix::QML::getItemByID(root, manager._slideArea, "slideArea");
 	Hix::QML::getItemByID(root, manager._menu, "featureMenu");
 	Hix::QML::getItemByID(root, manager._settingButton, "settingbutton");
+	Hix::QML::getItemByID(root, manager._undoButton, "undo");
+	Hix::QML::getItemByID(root, manager._redoButton, "redo");
 	QObject::connect(manager._settingButton, &Hix::QML::Controls::Button::clicked, openFeatureModeFunctor<SettingMode>());
+	//QObject::connect(manager._undoButton, &Hix::QML::Controls::Button::clicked, []() { 
+	//	Hix::Application::ApplicationManager::getInstance().featureManager().undo();
+	//	});
+	//QObject::connect(manager._redoButton, &Hix::QML::Controls::Button::clicked, []() {&FeatureHistoryManager::redo});
 }

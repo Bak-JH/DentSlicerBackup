@@ -63,7 +63,7 @@ FeaturePopup {
 	CtrSpinBox {
 		id: labelheight
 		label.text: "Label Height"
-		fromNum: 0
+		fromNum: 0.1
 		toNum: 100
 		value: 1
 		width: parent.width - 16 * 2
