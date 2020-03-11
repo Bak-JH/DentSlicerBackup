@@ -140,29 +140,40 @@ void Hix::Features::AutoArrangeAppend::runImpl()
 	_to = QVector3D(0, 0, 0);
 	for (auto& m : allModels)
 	{
-		modelBounds.emplace_back(m->recursiveAabb());
+		if(m != _model)
+			modelBounds.emplace_back(m->recursiveAabb());
 	}
-	for (size_t i = 0; i < 4000; ++i)
+	for (float mult = 0.01f; mult <= 1.0f; mult += 0.01f)
 	{
-		float x = random.getFloat(maxDisp[0], maxDisp[1]);
-		float y = random.getFloat(maxDisp[2], maxDisp[3]);
-		QVector3D disp(x, y, 0);
-		auto curr = bound;
-		curr.translate(disp);
 		bool intersects = false;
-		for (auto& b : modelBounds)
+		float xMin = maxDisp[0] * mult;
+		float xMax = maxDisp[1] * mult;
+		float yMin = maxDisp[2] * mult;
+		float yMax = maxDisp[3] * mult;
+
+		for (size_t i = 0; i < 6000; ++i)
 		{
-			if (b.intersects2D(curr))
+			QVector3D disp(random.getFloat(xMin, xMax), random.getFloat(yMin, yMax), 0);
+			auto curr = bound;
+			curr.translate(disp);
+			for (auto& b : modelBounds)
 			{
-				intersects = true;
+				if (b.intersects2D(curr))
+				{
+					intersects = true;
+					break;
+				}
+			}
+			if (!intersects)
+			{
+				_to = disp;
 				break;
+				qDebug() << i << mult;
 			}
 		}
 		if (!intersects)
 		{
-			_to = disp;
 			break;
-			qDebug() << i;
 		}
 	}
 	__super::runImpl();

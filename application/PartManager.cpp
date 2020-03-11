@@ -50,26 +50,14 @@ void Hix::Application::PartManager::setSelected(GLModel* model, bool selected)
 
 void Hix::Application::PartManager::selectAll()
 {
-	for (auto& each : _models)
-	{
-		auto modelRaw = each.first;
-		if (!_partList->isSelected(modelRaw))
-		{
-			setSelected(modelRaw, true);
-		}
-	}
+	_partList->selectAll();
+
 }
 
 void Hix::Application::PartManager::unselectAll()
 {
-	for (auto& each : _models)
-	{
-		auto modelRaw = each.first;
-		if (_partList->isSelected(modelRaw))
-		{
-			setSelected(modelRaw, false);
-		}
-	}
+	_partList->unselectAll();
+
 }
 
 void Hix::Application::PartManager::deleteSelectedModels()
