@@ -26,6 +26,7 @@ Hix::Features::MoveMode::MoveMode() : WidgetMode()
 	co.getControl(_yValue, "moveY");
 	co.getControl(_zValue, "moveZ");
 	co.getControl(_snapButton, "snapButton");
+
 	QObject::connect(_snapButton, &Hix::QML::Controls::Button::clicked, [this]() {
 			Hix::Features::FeatureContainerFlushSupport* container = new FeatureContainerFlushSupport(_targetModels);
 			for (auto& target : _targetModels)
@@ -119,32 +120,38 @@ Hix::Features::Move::~Move()
 
 void Hix::Features::Move::undoImpl()
 {
-	_nextMatrix = _model->transform().matrix();
-	_nextAabb = _model->aabb();
+	postUIthread([this]() {
+		_nextMatrix = _model->transform().matrix();
+		_nextAabb = _model->aabb();
 
-	_model->transform().setMatrix(_prevMatrix);
-	_model->aabb() = _prevAabb;
-	UpdateWidgetModePos();
-	_model->updateMesh();
+		_model->transform().setMatrix(_prevMatrix);
+		_model->aabb() = _prevAabb;
+		UpdateWidgetModePos();
+		_model->updateMesh();
+	});
 }
 
 void Hix::Features::Move::redoImpl()
 {
-	_model->transform().setMatrix(_nextMatrix);
-	_model->aabb() = _nextAabb;
-	UpdateWidgetModePos();
-	_model->updateMesh();
+	postUIthread([this]() {
+		_model->transform().setMatrix(_nextMatrix);
+		_model->aabb() = _nextAabb;
+		UpdateWidgetModePos();
+		_model->updateMesh();
+	});
 }
 
 void Hix::Features::Move::runImpl()
 {
-	_prevMatrix = _model->transform().matrix();
-	_prevAabb = _model->aabb();
-	if (_to)
-	{
-		_model->moveModel(_to.value());
-		UpdateWidgetModePos();
-	}
+
+		_prevMatrix = _model->transform().matrix();
+		_prevAabb = _model->aabb();
+		if (_to)
+		{
+			_model->moveModel(_to.value());
+			UpdateWidgetModePos();
+		}
+
 }
 
 Hix::Features::Move::ZToBed::ZToBed(GLModel* target): Move(target)
