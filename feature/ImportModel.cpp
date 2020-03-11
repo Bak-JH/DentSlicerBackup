@@ -3,6 +3,7 @@
 #include "../glmodel.h"
 #include "addModel.h"
 #include "repair/meshrepair.h"
+#include "arrange/autoarrange.h"
 #include "../application/ApplicationManager.h"
 
 Hix::Features::ImportModelMode::ImportModelMode()
@@ -31,6 +32,18 @@ Hix::Features::ImportModel::~ImportModel()
 {
 }
 
+GLModel* Hix::Features::ImportModel::get()
+{
+	for (auto& f : _container)
+	{
+		auto listModel = dynamic_cast<ListModel*>(f.get());
+		if (listModel)
+		{
+			return listModel->get();
+		}
+	}
+}
+
 
 
 void Hix::Features::ImportModel::runImpl()
@@ -54,13 +67,12 @@ void Hix::Features::ImportModel::runImpl()
 	if (Hix::Features::isRepairNeeded(mesh))
 	{
 		//Hix::Application::ApplicationManager::getInstance().setProgressText("Repairing mesh.");
-		std::unordered_set<GLModel*> repairModels;
-		repairModels.insert(listModel->get());
-		auto repair = new MeshRepair(repairModels);
+		auto repair = new MeshRepair(listModel->get());
 		tryRunFeature(*repair);
 		addFeature(repair);
 	}
+	auto arrange = new AutoArrangeAppend(listModel->get());
+	tryRunFeature(*arrange);
+	addFeature(arrange);
 
-	// do auto arrange
-	//Hix::Application::ApplicationManager::getInstance().openArrange();
 }

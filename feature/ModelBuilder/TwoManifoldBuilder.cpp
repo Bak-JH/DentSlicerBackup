@@ -804,9 +804,7 @@ void Hix::Features::TwoManifoldBuilder::runImpl()
 	auto model = _listModelFeature->get();
 	if (Hix::Features::isRepairNeeded(model->getMesh()))
 	{
-		std::unordered_set<GLModel*> repairModels;
-		repairModels.insert(model);
-		MeshRepair rapairModels(repairModels);
+		MeshRepair rapairModels(model);
 		rapairModels.run();
 	}
 }

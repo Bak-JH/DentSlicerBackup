@@ -372,7 +372,7 @@ std::vector<Mesh*> Hix::Features::importAndRepairMesh(const std::string& importP
 	return meshes;
 }
 
-Hix::Features::MeshRepair::MeshRepair(const std::unordered_set<GLModel*>& selectedModels): _selectedModels(selectedModels)
+Hix::Features::MeshRepair::MeshRepair(GLModel* selectedModel): _model(selectedModel)
 {
 }
 
@@ -382,10 +382,13 @@ Hix::Features::MeshRepair::~MeshRepair()
 
 void Hix::Features::MeshRepair::runImpl()
 {
-	for (auto model : _selectedModels)
-	{
-		repairImpl(model, model->modelName());
-	}
+
+	repairImpl(_model, _model->modelName());
+}
+
+GLModel* Hix::Features::MeshRepair::get()
+{
+	return _model;
 }
 
 void Hix::Features::MeshRepair::repairImpl(GLModel* subject, const QString& modelName)

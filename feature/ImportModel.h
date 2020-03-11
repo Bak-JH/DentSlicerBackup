@@ -16,6 +16,7 @@ namespace Hix
 		public:
 			ImportModel(QUrl fileUrl);
 			virtual ~ImportModel();
+			GLModel* get();
 		protected:
 
 			void runImpl()override;
