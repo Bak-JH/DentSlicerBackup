@@ -11,6 +11,7 @@ namespace Hix
 		public:
 			SliderMode(double min, double max);
 			virtual ~SliderMode();
+			void setSliderEnable(bool isEnable);
 		protected:
 			std::unique_ptr<Hix::QML::SlideBarShell> _slideBar;
 		};
