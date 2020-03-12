@@ -190,6 +190,26 @@ void Triangulation<T>::insertEdges(const std::vector<Edge>& edges)
 }
 
 template <typename T>
+void Triangulation<T>::tryInsertEdges(const std::vector<Edge>& edges)
+{
+    typedef std::vector<Edge>::const_iterator ECit;
+    for (ECit e = edges.begin(); e != edges.end(); ++e)
+    {
+        // +3 to account for super-triangle vertices
+        try {
+            insertEdge(Edge(VertInd(e->v1() + 3), VertInd(e->v2() + 3)));
+        }
+        catch (...)
+        {
+            //do something
+        }
+    }
+    eraseDummies();
+}
+
+
+
+template <typename T>
 void Triangulation<T>::insertEdge(Edge edge)
 {
     const VertInd iA = edge.v1();
