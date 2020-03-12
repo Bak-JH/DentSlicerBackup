@@ -1,9 +1,9 @@
 #include "overhangDetect.h"
 #include "DentEngine/src/polyclipping/polyclipping.h"
 #include "DentEngine/src/slicer.h"
-#include "DentEngine/src/configuration.h"
+#include "../application/ApplicationManager.h"
 #include <QtMath>
-
+#include "../utils/mathutils.h"
 using namespace Hix;
 using namespace Hix::Engine3D;
 using namespace Hix::Slicer;
@@ -197,9 +197,10 @@ Hix::OverhangDetect::Overhangs Hix::OverhangDetect::Detector::detectOverhang(con
 		_worldFNCache.emplace(face, face.worldFn());
 	}
 	//if density is 0, don't detect anything
-	if (scfg->supportDensity == 0)
+	auto supportDensity = Hix::Application::ApplicationManager::getInstance().settings().supportSetting.supportDensity;
+	if (Utils::Math::floatAreSame(supportDensity, 0.0f))
 		return overhangs;
-	auto suppDensity = (float)scfg->supportDensity / 100.0f;
+	auto suppDensity = supportDensity / 100.0f;
 	//be generous with bin size for face support
 	constexpr float minDist = 0.8f;
 	auto ptOverhangMinDist = minDist / suppDensity;

@@ -2,12 +2,14 @@
 #include "SupportRaftManager.h"	
 #include "../render/Color.h"
 #include "glmodel.h"
-#include "qmlmanager.h"
+#include "../application/ApplicationManager.h"
 #include "feature/SupportFeature.h"
 
 using namespace Hix::Engine3D;
 using namespace Hix::Support;
-
+using namespace Qt3DCore;
+using namespace Qt3DRender;
+using namespace Qt3DExtras;
 
 
 Hix::Support::SupportModel::SupportModel(SupportRaftManager* manager):
@@ -36,7 +38,7 @@ void Hix::Support::SupportModel::clicked(Hix::Input::MouseEventData&, const Qt3D
 		switch (_manager->supportEditMode())
 		{
 		case EditMode::Manual:
-			dynamic_cast<Features::SupportMode*>(qmlManager->getCurrentMode())->removeSupport(this);
+			dynamic_cast<Features::SupportMode*>(Hix::Application::ApplicationManager::getInstance().featureManager().currentMode())->removeSupport(this);
 			break;
 		default:
 			break;

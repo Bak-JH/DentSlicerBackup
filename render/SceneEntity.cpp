@@ -12,12 +12,13 @@
 #include <QMatrix3x3>
 #include <Qt3DCore/qpropertyupdatedchange.h>
 #include "utils/utils.h"
-#include "qmlmanager.h"
+
 
 
 #define ATTRIBUTE_SIZE_INCREMENT 200
 
 
+using namespace Qt3DCore;
 using namespace Utils::Math;
 using namespace Hix::Engine3D;
 using namespace Hix::Render;

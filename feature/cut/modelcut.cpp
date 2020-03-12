@@ -1,8 +1,12 @@
 #include "modelcut.h"
-#include "../../qmlmanager.h"
 #include "ZAxialCut.h"
 #include "polylinecut.h"
+#include "../qml/components/Buttons.h"
+#include "../qml/components/ControlOwner.h"
 #include "feature/interfaces/Feature.h"
+#include "../application/ApplicationManager.h"
+
+
 using namespace Hix;
 using namespace Hix::Features;
 using namespace Hix::Features::Cut;
@@ -10,32 +14,50 @@ using namespace Hix::Engine3D;
 using namespace Hix::Slicer;
 using namespace ClipperLib;
 
+const QUrl CUT_POPUP_URL = QUrl("qrc:/Qml/FeaturePopup/PopupCut.qml");
 
-
-Hix::Features::ModelCut::ModelCut(const std::unordered_set<GLModel*>& selectedModels, Hix::Engine3D::Bounds3D bound):
-	_models(selectedModels), _cuttingPlane(qmlManager->total), _modelsBound(bound)
+Hix::Features::ModelCut::ModelCut() :
+	_models(Hix::Application::ApplicationManager::getInstance().partManager().selectedModels()),
+	_cuttingPlane(Hix::Application::ApplicationManager::getInstance().sceneManager().total()),
+	_modelsBound(Hix::Application::ApplicationManager::getInstance().partManager().selectedBound()),
+	DialogedMode(CUT_POPUP_URL),
+	SliderMode(0, Hix::Application::ApplicationManager::getInstance().partManager().selectedBound().lengthZ())
 {
+	if (Hix::Application::ApplicationManager::getInstance().partManager().selectedModels().empty())
+	{
+		Hix::Application::ApplicationManager::getInstance().modalDialogManager().needToSelectModels();
+		return;
+	}
+	auto& co = controlOwner();
+	co.getControl(_cutSwitch, "cutswitch");
+	QObject::connect(_cutSwitch, &Hix::QML::Controls::ToggleSwitch::checkedChanged, [this]() { cutModeSelected(); });
+	QObject::connect(_slideBar.get(), &Hix::QML::SlideBarShell::valueChanged, [this]() { 
+		getSliderSignal(_slideBar->getValue()); 
+		});
+	cutModeSelected();
 }
 
 Hix::Features::ModelCut::~ModelCut()
 {
-	qmlManager->getRayCaster().setHoverEnabled(false);
+	Hix::Application::ApplicationManager::getInstance().getRayCaster().setHoverEnabled(false);
 	_cuttingPlane.enablePlane(false);
 }
 
-void ModelCut::cutModeSelected(int type) {
+void ModelCut::cutModeSelected() 
+{
 	//if flat cut		
-
-	if (type == 1)
+	if (!_cutSwitch->isChecked())
 	{
 		_cutType = ZAxial;
 		_cuttingPlane.enableDrawing(false);
 		_cuttingPlane.clearPt();
-		qmlManager->getRayCaster().setHoverEnabled(false);
+		Hix::Application::ApplicationManager::getInstance().getRayCaster().setHoverEnabled(false);
 		_cuttingPlane.transform().setTranslation(QVector3D(0, 0, _modelsBound.zMin() + 1 * _modelsBound.lengthZ() / 1.8));
 		_cuttingPlane.enablePlane(true);
+		Hix::Application::ApplicationManager::getInstance().sceneManager().setViewPreset(Hix::Application::SceneManager::ViewPreset::Center);
+		setSliderVisible(true);
 	}
-	else if (type == 2)
+	else if (_cutSwitch->isChecked())
 	{
 		_cutType = Polyline;
 		_cuttingPlane.enableDrawing(true);
@@ -43,7 +65,9 @@ void ModelCut::cutModeSelected(int type) {
 		float zOverModel = _modelsBound.zMax() + 0.1f;
 		_cuttingPlane.transform().setTranslation(QVector3D(0, 0, zOverModel));
 		_cuttingPlane.enablePlane(true);
-		qmlManager->getRayCaster().setHoverEnabled(true);
+		Hix::Application::ApplicationManager::getInstance().getRayCaster().setHoverEnabled(true);
+		Hix::Application::ApplicationManager::getInstance().sceneManager().setViewPreset(Hix::Application::SceneManager::ViewPreset::Down);
+		setSliderVisible(false);
 	}
 	return;
 }
@@ -53,10 +77,10 @@ void ModelCut::cutModeSelected(int type) {
 void ModelCut::getSliderSignal(double value) {
 	float zlength = _modelsBound.lengthZ();
 	qDebug() << value;
-	_cuttingPlane.transform().setTranslation(QVector3D(0, 0, _modelsBound.zMin() + value * zlength / 1.8));
+	_cuttingPlane.transform().setTranslation(QVector3D(0, 0, _modelsBound.zMin() + value));
 }
 
-void Hix::Features::ModelCut::applyCut()
+void Hix::Features::ModelCut::applyButtonClicked()
 {
 	switch (_cutType)
 	{
@@ -64,8 +88,7 @@ void Hix::Features::ModelCut::applyCut()
 	{
 		for (auto each : _models)
 		{
-			qmlManager->featureHistoryManager().
-				addFeature(new ZAxialCut(each, _cuttingPlane.transform().translation().z()));
+			Hix::Application::ApplicationManager::getInstance().taskManager().enqueTask(new ZAxialCut(each, _cuttingPlane.transform().translation().z(), Hix::Features::Cut::KeepBoth));
 		}
 		break;
 	}
@@ -73,13 +96,12 @@ void Hix::Features::ModelCut::applyCut()
 	{
 		for (auto each : _models)
 		{
-			qmlManager->featureHistoryManager().
-				addFeature(new PolylineCut(each, _cuttingPlane.contour()));
+			Hix::Application::ApplicationManager::getInstance().taskManager().enqueTask(new PolylineCut(each, _cuttingPlane.contour()));
 		}
 		break;
 	}
 	default:
 		break;
 	}
-	qmlManager->unselectAll();
+	//Hix::Application::ApplicationManager::getInstance().partManager().unselectAll();
 }

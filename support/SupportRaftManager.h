@@ -1,6 +1,6 @@
 #pragma once
 
-#include "DentEngine/src/configuration.h"
+#include "../Settings/SupportSetting.h"
 #include "VerticalSupportModel.h"
 
 class GLModel;
@@ -16,6 +16,7 @@ namespace Hix
 
 		using namespace Engine3D;
 		class SupportModel;
+		class ModelAttachedSupport;
 		class RaftModel;
 		class SupportRaftManager : public QObject
 		{
@@ -33,16 +34,16 @@ namespace Hix
 			void  setSupportEditMode(EditMode mode);
 			//coordinate for bottom of support and raft
 
-			void setSupportType(SlicingConfiguration::SupportType supType);
 			SupportModel* addSupport(const OverhangDetect::Overhang& overhang);
 			SupportModel* addSupport(std::unique_ptr<SupportModel> target);
 			std::unique_ptr<SupportModel> removeSupport(SupportModel* e);
 
-			bool supportsEmpty();
-
+			bool supportsEmpty()const;
+			bool modelHasSupport(const GLModel* model)const;
+			
 			RaftModel* generateRaft();
-			RaftModel* removeRaft();
-			RaftModel* addRaft(RaftModel* raft);
+			std::unique_ptr<RaftModel> removeRaft();
+			RaftModel* addRaft(std::unique_ptr<RaftModel> raft);
 			OverhangDetect::Overhangs detectOverhang(const GLModel& model);
 			//removed due to efficiency when deleting multiple
 			std::vector<std::reference_wrapper<const Hix::Render::SceneEntity>> supportModels()const;
@@ -56,15 +57,20 @@ namespace Hix
 			RayCaster& supportRaycaster();
 
 		private:
+
+			void addToModelMap(SupportModel* support);
+			void removeFromModelMap(SupportModel* support);
 			void clearImpl(const std::unordered_set<const GLModel*>& models);
 			void prepareRaycaster(const GLModel& model);
-			Qt3DCore::QEntity _root;
+			Qt3DCore::QEntity* _root;
 			std::vector<QVector3D> getSupportBasePts()const;
 			EditMode _supportEditMode = EditMode::None;
-			SlicingConfiguration::SupportType _supportType;
 			std::unordered_map<SupportModel*, std::unique_ptr<SupportModel>> _supports;
+			std::unordered_map<const GLModel*, std::unordered_set<ModelAttachedSupport*>> _modelSupportMap;
 			std::unique_ptr<RaftModel> _raft;
+			//std::unordered_map<const GLModel*, RayCaster> _rayCasters;
 			std::unique_ptr<RayCaster> _rayCaster;
+
 		};
 
 	}

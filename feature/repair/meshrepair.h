@@ -12,12 +12,15 @@ namespace Hix
 	}
 	namespace Features
 	{
-		class MeshRepair
+		class MeshRepair: public Hix::Features::FeatureContainer
 		{
 		public:
-			MeshRepair(const std::unordered_set<GLModel*>& selectedModels);
+			MeshRepair(GLModel* selectedModel);
 			virtual ~MeshRepair();
+			void runImpl()override;
+			GLModel* get();
 		private:
+			GLModel* _model;
 			void repairImpl(GLModel* subject, const QString& modelName);
 
 		};

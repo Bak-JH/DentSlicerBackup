@@ -1,8 +1,7 @@
 #include "mesh.h"
-#include "qmlmanager.h"
+
 #include <QCoreApplication>
 #include "utils/mathutils.h"
-#include "configuration.h"
 #include "../../common/Debug.h"
 #include <list>
 #include <set>
@@ -199,7 +198,7 @@ void Mesh::vertexOffset(float factor){
 	auto end = vertices.end();
 	for(auto vtxItr = vertices.begin(); vtxItr != end; ++vtxItr)
 	{
-		QVector3D tmp = vtxItr.localPosition() - vtxItr.localVn() * factor;
+		QVector3D tmp = vtxItr.localPosition() + vtxItr.localVn() * factor;
 		vtxItr.ref().position = tmp;
 	};
 	rehashVtcs();

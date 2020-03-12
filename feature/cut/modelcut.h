@@ -1,13 +1,22 @@
 #pragma once
-#include "feature/interfaces/Mode.h"
+#include "../interfaces/DialogedMode.h"
+#include "../interfaces/SliderMode.h"
 #include "DentEngine/src/ContourBuilder.h"
 #include "DentEngine/src/Bounds3D.h"
 #include "DrawingPlane.h"
 namespace Hix
 {
+	namespace QML
+	{
+		namespace Controls
+		{
+			class ToggleSwitch;
+		}
+	}
+
 	namespace Features
 	{
-		class ModelCut : public Mode
+		class ModelCut : public DialogedMode, public SliderMode
 		{
 		public:
 			enum CutType
@@ -15,17 +24,21 @@ namespace Hix
 				ZAxial,
 				Polyline
 			};
-			ModelCut(const std::unordered_set<GLModel*>& selectedModels, Hix::Engine3D::Bounds3D bound);
+			ModelCut();
 			virtual ~ModelCut();
-			void cutModeSelected(int type);
+			void cutModeSelected();
 			void getSliderSignal(double value);
-			void applyCut();
+			void applyButtonClicked()override;
 				
 			// polyline
 			void addCuttingPoint(QVector3D v);
 			void removeCuttingPoint(int idx);
 			void removeCuttingPoints();
 			void drawLine(QVector3D endpoint);
+
+		public slots:
+			void onChecked();
+			void onUnchecked();
 
 		private:
 			//cutting
@@ -34,6 +47,7 @@ namespace Hix
 			Hix::Features::Cut::DrawingPlane _cuttingPlane;
 			Hix::Engine3D::Bounds3D _modelsBound;
 			std::unordered_set<GLModel*> _models;
+			Hix::QML::Controls::ToggleSwitch* _cutSwitch;
 		};
 	}
 }

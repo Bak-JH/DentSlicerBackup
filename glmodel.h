@@ -1,5 +1,4 @@
-#ifndef GLMODEL_H
-#define GLMODEL_H
+#pragma once
 
 #include "render/SceneEntityWithMaterial.h"
 #include "fileloader.h"
@@ -15,9 +14,6 @@
 #include "render/ModelMaterial.h"
 #define MAX_BUF_LEN 2000000
 
-using namespace Qt3DCore;
-using namespace Qt3DRender;
-using namespace Qt3DExtras;
 
 class GLModel;
 class OverhangPoint;
@@ -27,7 +23,7 @@ class GLModel : public Hix::Render::SceneEntityWithMaterial, public Hix::Input::
 {
     Q_OBJECT
 public:
-
+	static QString filenameToModelName(const std::string& s);
     //probably interface this as well
 	void clicked	(Hix::Input::MouseEventData&,const Qt3DRender::QRayCasterHit&) override;
 	bool isDraggable(Hix::Input::MouseEventData& v,const Qt3DRender::QRayCasterHit&) override;
@@ -35,10 +31,13 @@ public:
 	void doDrag(Hix::Input::MouseEventData& e)override;
 	void dragEnded(Hix::Input::MouseEventData&) override;
 
+	void modelSelectionClick();
     // load teeth model default
-    GLModel(QEntity* parent=nullptr, Hix::Engine3D::Mesh* loadMesh=nullptr, QString fname="", const Qt3DCore::QTransform* transform = nullptr); // main constructor for mainmesh and shadowmesh
+    GLModel(Qt3DCore::QEntity* parent=nullptr, Hix::Engine3D::Mesh* loadMesh=nullptr, QString fname="", const Qt3DCore::QTransform* transform = nullptr);
+	GLModel(const GLModel& o);
 	virtual ~GLModel();
 
+	void copyChildrenRecursive(GLModel* newParent)const;
 	void getChildrenModels(std::unordered_set<const GLModel*>& results)const;
 
 	bool appropriately_rotated=false;
@@ -57,7 +56,6 @@ public:
     bool EndsWith(const std::string& a, const std::string& b);
     static QVector3D spreadPoint(QVector3D endpoint,QVector3D startpoint,int factor);
     void changeViewMode(int viewMode);
-	void updateShader(int viewMode);
 
 
 	void setBoundingBoxVisible(bool isEnabled);
@@ -87,6 +85,7 @@ public:
 
 protected:
 	void initHitTest()override;
+	void qnodeEnabledChanged(bool isEnabled);
 
 private:
 	QString _name;
@@ -117,7 +116,3 @@ public slots:
     friend class featureThread;
     friend class STLexporter;
 };
-
-
-
-#endif // GLMODEL_H

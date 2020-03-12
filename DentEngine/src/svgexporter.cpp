@@ -1,11 +1,12 @@
 #include "svgexporter.h"
 #include "slicer.h"
-#include "configuration.h"
-#include "../../qmlmanager.h"
+
 #include "../common/rapidjson/stringbuffer.h"
 #include "../common/rapidjson/writer.h"
 #include "../common/rapidjson/ostreamwrapper.h"
 #include "../common/rapidjson/prettywriter.h"
+#include "../../application/ApplicationManager.h"
+
 #include <fstream>
 
 using namespace Hix::Slicer;
@@ -21,7 +22,12 @@ namespace SVGexporterPrivate
 
 
 void SVGexporter::exportSVG(Slices& shellSlices,QString outfoldername, bool isTemp){
-	auto& printerSetting = qmlManager->settings().printerSetting;
+    auto& setting = Hix::Application::ApplicationManager::getInstance().settings().sliceSetting;
+    if (isTemp || setting.invertX)
+        _invert = true;
+    else
+        _invert = false;
+	auto& printerSetting = Hix::Application::ApplicationManager::getInstance().settings().printerSetting;
 
 	_ppmmX = printerSetting.pixelPerMMX();
 	_ppmmY = printerSetting.pixelPerMMY();
@@ -39,13 +45,13 @@ void SVGexporter::exportSVG(Slices& shellSlices,QString outfoldername, bool isTe
 		PolyTree& shellSlice_polytree = shellSlices[i].polytree;
         outfile.open(QFile::WriteOnly);
         writeHeader(contentStream);
-        if (scfg->slicing_mode == SlicingConfiguration::SlicingMode::Uniform)
-            writeGroupHeader(currentSlice_idx, scfg->layer_height*(currentSlice_idx+1), contentStream);
+        if (setting.slicingMode == Hix::Settings::SliceSetting::SlicingMode::Uniform)
+            writeGroupHeader(currentSlice_idx, Hix::Application::ApplicationManager::getInstance().settings().sliceSetting.layerHeight*(currentSlice_idx+1), contentStream);
         else
-            writeGroupHeader(currentSlice_idx, scfg->layer_height*(currentSlice_idx+1), contentStream);
+            writeGroupHeader(currentSlice_idx, Hix::Application::ApplicationManager::getInstance().settings().sliceSetting.layerHeight*(currentSlice_idx+1), contentStream);
         
         for (int j=0; j<shellSlice_polytree.ChildCount(); j++){
-            parsePolyTreeAndWrite(shellSlice_polytree.Childs[j], isTemp, contentStream);
+            parsePolyTreeAndWrite(shellSlice_polytree.Childs[j], contentStream);
         }
 
 		writeGroupFooter(contentStream);
@@ -77,11 +83,8 @@ void SVGexporter::exportSVG(Slices& shellSlices,QString outfoldername, bool isTe
 	char cbuf[1024]; rapidjson::MemoryPoolAllocator<> allocator(cbuf, sizeof cbuf);
 	rapidjson::Document doc(&allocator, 256);
 	doc.SetObject();
-	doc.AddMember("layer_height", round(scfg->layer_height * 100) / 100, allocator);
+	doc.AddMember("layer_height", round(Hix::Application::ApplicationManager::getInstance().settings().sliceSetting.layerHeight * 100) / 100, allocator);
 	doc.AddMember("total_layer", currentSlice_idx, allocator);
-	doc.AddMember("resin_type", (uint8_t)scfg->resin_type, allocator);
-	doc.AddMember("contraction_ratio", scfg->contraction_ratio, allocator);
-
 	auto& printerConst = printerSetting.printerConstants;
 	if (printerConst)
 	{
@@ -99,7 +102,7 @@ void SVGexporter::exportSVG(Slices& shellSlices,QString outfoldername, bool isTe
 	rapidjson::PrettyWriter<rapidjson::OStreamWrapper> writer{ osw };
 	doc.Accept(writer);
 
-	if (!isTemp && printerSetting.infoFileType == Hix::Settings::PrinterSetting::InfoFileType::ThreeDelight)
+	if (printerSetting.infoFileType == Hix::Settings::PrinterSetting::InfoFileType::ThreeDelight)
 	{
 		SVGexporterPrivate::writeVittroOptions(outfoldername, currentSlice_idx);
 	}
@@ -121,11 +124,11 @@ illumination time = 6\r\n\
 number of override slices = 0\r\n\
 override illumination time = 10\r\n\
 build time estimation = 2718\r\n\
-material consumption estimation = 29.9781\r\n").arg(QString::number((int)(scfg->layer_height*1000)), QString::number(max_slices)).toStdString().data());
+material consumption estimation = 29.9781\r\n").arg(QString::number((int)(Hix::Application::ApplicationManager::getInstance().settings().sliceSetting.layerHeight*1000)), QString::number(max_slices)).toStdString().data());
 
 
     // do run svg 2 png
-	auto& printerSetting = qmlManager->settings().printerSetting;
+	auto& printerSetting = Hix::Application::ApplicationManager::getInstance().settings().printerSetting;
 	for (int i=0; i<max_slices; i++){
         QString svgfilename = outfoldername + "/" + QString::number(i) + ".svg";
         QSvgRenderer renderer(svgfilename);
@@ -135,7 +138,7 @@ material consumption estimation = 29.9781\r\n").arg(QString::number((int)(scfg->
         renderer.render(&painter);
         QString savesvgfilename = "S" + QString::number(i).rightJustified(6,'0') + "_P1.png";
         image.save(outfoldername + "/" + savesvgfilename);
-        buildscriptfile.write(QString("%1, %2, %3\r\n").arg(QString::number(i*scfg->layer_height), savesvgfilename, "6.0").toStdString().data());
+        buildscriptfile.write(QString("%1, %2, %3\r\n").arg(QString::number(i*Hix::Application::ApplicationManager::getInstance().settings().sliceSetting.layerHeight), savesvgfilename, "6.0").toStdString().data());
     }
     buildscriptfile.close();
 
@@ -192,21 +195,21 @@ Edge width = 1\r\n\
 Edge thickness = 1\r\n\
 Distance to Part = 1\r\n\
 Max offset from Part = -1\r\n\
-Grid Base Plate Type = None").arg(QString::number((int)(scfg->layer_height*1000)),
+Grid Base Plate Type = None").arg(QString::number((int)(Hix::Application::ApplicationManager::getInstance().settings().sliceSetting.layerHeight*1000)),
             QString::number(printerSetting.bedBound.lengthX()), QString::number(printerSetting.bedBound.lengthY()),
             QString::number(printerSetting.sliceImageResolutionX), QString::number(printerSetting.sliceImageResolutionY),
-            QString::number(scfg->layer_height)).toStdString().data());
+            QString::number(Hix::Application::ApplicationManager::getInstance().settings().sliceSetting.layerHeight)).toStdString().data());
     parametersfile.close();
 
 }
 
 
 
-void SVGexporter::parsePolyTreeAndWrite(const PolyNode* pn, bool isTemp, std::stringstream& content){
-    writePolygon(pn, isTemp, content);
+void SVGexporter::parsePolyTreeAndWrite(const PolyNode* pn, std::stringstream& content){
+    writePolygon(pn, content);
     for (int i=0; i<pn->ChildCount(); i++){
         PolyNode* new_pn = pn->Childs[i];
-        parsePolyTreeAndWrite(new_pn, isTemp, content);
+        parsePolyTreeAndWrite(new_pn, content);
     }
 
     /*while (pn != NULL){
@@ -217,20 +220,20 @@ void SVGexporter::parsePolyTreeAndWrite(const PolyNode* pn, bool isTemp, std::st
 
 }
 
-void SVGexporter::writePolygon(const PolyNode* contour, bool isTemp, std::stringstream& content){
+void SVGexporter::writePolygon(const PolyNode* contour, std::stringstream& content){
     content << "      <polygon contour:type=\"contour\" points=\"";
     for (IntPoint point: contour->Contour){
-		if (!isTemp && scfg->slice_invert == SlicingConfiguration::Invert::InvertXAxis)
+		if (_invert)
 		{
 			point.X = -1 * point.X;
 		}
 		auto fp = Hix::Polyclipping::toFloatPt(point) + _offsetXY;
         content << std::fixed << 
-			fp.x()*_ppmmX/scfg->contraction_ratio
+			fp.x()*_ppmmX
 			+ (_resX/2)
 			<< "," << std::fixed <<
 			_resY/2
-			- fp.y()*_ppmmY/scfg->contraction_ratio << " "; // doesn't need 100 actually// TODO fix this
+			- fp.y()*_ppmmY<< " "; // doesn't need 100 actually// TODO fix this
 
         // just fit to origin
         //outfile << std::fixed << (float)point.X/Hix::Polyclipping::INT_PT_RESOLUTION - scfg->origin.x() << "," << std::fixed << (float)point.Y/Hix::Polyclipping::INT_PT_RESOLUTION - scfg->origin.y() << " ";
@@ -242,20 +245,20 @@ void SVGexporter::writePolygon(const PolyNode* contour, bool isTemp, std::string
     }
 }
 
-void SVGexporter::writePolygon(ClipperLib::Path& contour, bool isTemp, std::stringstream& content){
+void SVGexporter::writePolygon(ClipperLib::Path& contour, std::stringstream& content){
     content << "      <polygon contour:type=\"contour\" points=\"";
     for (IntPoint point: contour){
-		if (!isTemp && scfg->slice_invert == SlicingConfiguration::Invert::InvertXAxis)
+		if (_invert)
 		{
 			point.X = -1 * point.X;
 		}
 		auto fp = Hix::Polyclipping::toFloatPt(point) + _offsetXY;
         content << std::fixed << 
-			fp.x() * _ppmmX/scfg->contraction_ratio
+			fp.x() * _ppmmX
 			+ (_resX/2) 
 			<< ","<< std::fixed <<
 			_resY/2
-			- fp.y() * _ppmmY / scfg->contraction_ratio << " "; // doesn't need 100 actually
+			- fp.y() * _ppmmY << " "; // doesn't need 100 actually
 
         // just fit to origin
         //outfile << std::fixed << (float)point.X/Hix::Polyclipping::INT_PT_RESOLUTION - scfg->origin.x() << "," << std::fixed << (float)point.Y/Hix::Polyclipping::INT_PT_RESOLUTION - scfg->origin.y() << " ";

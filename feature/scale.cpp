@@ -1,21 +1,36 @@
 #include "scale.h"
+#include "../qml/components/Inputs.h"
+#include "../qml/components/ControlOwner.h"
+#include "../glmodel.h"
+#include "application/ApplicationManager.h"
 
-Hix::Features::ScaleMode::ScaleMode(const std::unordered_set<GLModel*>& selectedModels)
-	: _targetModels(selectedModels)
+const QUrl SCALE_POPUP_URL = QUrl("qrc:/Qml/FeaturePopup/PopupScale.qml");
+Hix::Features::ScaleMode::ScaleMode(): _targetModels(Hix::Application::ApplicationManager::getInstance().partManager().selectedModels()), DialogedMode(SCALE_POPUP_URL)
 {
+	if (Hix::Application::ApplicationManager::getInstance().partManager().selectedModels().empty())
+	{
+		Hix::Application::ApplicationManager::getInstance().modalDialogManager().needToSelectModels();
+		return;
+	}
+	auto& co = controlOwner();
+	co.getControl(_precentValue, "scaleValue");
+	co.getControl(_xValue, "scaleX");
+	co.getControl(_yValue, "scaleY");
+	co.getControl(_zValue, "scaleZ");
 }
-
 Hix::Features::ScaleMode::~ScaleMode()
 {
 }
 
-Hix::Features::FeatureContainerFlushSupport* Hix::Features::ScaleMode::applyScale(QVector3D scale)
+void Hix::Features::ScaleMode::applyButtonClicked()
 {
-	Hix::Features::FeatureContainerFlushSupport* container = new FeatureContainerFlushSupport();
+	auto scale = QVector3D(_xValue->getValue(), _yValue->getValue(), _zValue->getValue());
+	scale /= 100; //percent
+	Hix::Features::FeatureContainerFlushSupport* container = new FeatureContainerFlushSupport(_targetModels);
 	for (auto& target : _targetModels)
 		container->addFeature(new Scale(target, scale));
 
-	return container;
+	Hix::Application::ApplicationManager::getInstance().taskManager().enqueTask(container);
 }
 
 
@@ -23,13 +38,9 @@ Hix::Features::FeatureContainerFlushSupport* Hix::Features::ScaleMode::applyScal
 
 
 Hix::Features::Scale::Scale(GLModel* targetModel, QVector3D& scale)
-	: _model(targetModel)
+	: _model(targetModel), _scale(scale)
 {
-	_prevMatrix = targetModel->transform().matrix();
-	_prevAabb = targetModel->aabb();
-	targetModel->scaleModel(scale);
-	targetModel->scaleDone();
-	qmlManager->sendUpdateModelInfo();
+	_progress.setDisplayText("Scale Model");
 }
 
 Hix::Features::Scale::~Scale()
@@ -40,19 +51,33 @@ Hix::Features::Scale::~Scale()
 
 void Hix::Features::Scale::undoImpl()
 {
-	_nextMatrix = _model->transform().matrix();
-	_nextAabb = _model->aabb();
+	postUIthread([this]() {
+		_nextMatrix = _model->transform().matrix();
+		_nextAabb = _model->aabb();
 
-	_model->transform().setMatrix(_prevMatrix);
-	_model->aabb() = _prevAabb;
-	qmlManager->sendUpdateModelInfo();
-	_model->updateMesh();
+		_model->transform().setMatrix(_prevMatrix);
+		_model->aabb() = _prevAabb;
+		_model->updateMesh();
+		});
 }
 
 void Hix::Features::Scale::redoImpl()
 {
-	_model->transform().setMatrix(_nextMatrix);
-	_model->aabb() = _nextAabb;
-	qmlManager->sendUpdateModelInfo();
-	_model->updateMesh();
+	postUIthread([this]() {
+		_model->transform().setMatrix(_nextMatrix);
+		_model->aabb() = _nextAabb;
+		_model->updateMesh();
+		});
+
+}
+
+void Hix::Features::Scale::runImpl()
+{
+	postUIthread([this]() {
+		_prevMatrix = _model->transform().matrix();
+		_prevAabb = _model->aabb();
+		_model->scaleModel(_scale);
+		_model->scaleDone();
+		});
+
 }

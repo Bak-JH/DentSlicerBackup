@@ -2,6 +2,7 @@
 #include <string>
 #include "JSONParsedSetting.h"
 #include "../DentEngine/src/Bounds3D.h"
+#include <filesystem>
 namespace Hix
 {
 	namespace Settings
@@ -11,7 +12,9 @@ namespace Hix
 		public:
 			DeployInfo();
 			std::string version;
-			std::string settingsDir;
+			std::filesystem::path settingsDir;
+			std::filesystem::path printerPresetsDir()const;
+
 		protected:
 			void initialize()override;
 			void parseJSONImpl(const rapidjson::Document& doc)override;

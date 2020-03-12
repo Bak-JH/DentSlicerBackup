@@ -1,39 +1,60 @@
 #include "addModel.h"
-#include "qmlmanager.h"
+#include "glmodel.h"
+#include "DentEngine/src/mesh.h"
+#include "../application/ApplicationManager.h"
 
+using namespace Hix::Features;
+using namespace Hix::Application;
+using namespace Qt3DCore;
 
-
-
-Hix::Features::AddModel::AddModel(Qt3DCore::QEntity* parent, Hix::Engine3D::Mesh* mesh, QString fname, const Qt3DCore::QTransform* transform)
+Hix::Features::AddModel::AddModel(Qt3DCore::QEntity* parent, Hix::Engine3D::Mesh* mesh, QString fname, const Qt3DCore::QTransform* transform): 
+	_parent(parent), _mesh(mesh), _fname(fname), _transform(transform)
 {
-	auto model = new GLModel(parent, mesh, fname, transform);
-	model->setHitTestable(true);
-	model->setZToBed();
-	_model = model;
+	
 }
 
-Hix::Features::AddModel::~AddModel()
+Hix::Features::AddModel::~AddModel()	
 {
 }
 
 void Hix::Features::AddModel::undoImpl()
 {
-	auto raw = std::get<GLModel*>(_model);
-	auto parent = raw->parentNode();
-	raw->QNode::setParent((QNode*)nullptr);
-	_model = UndoInfo{ std::unique_ptr<GLModel>(raw), parent };
+	std::function<UndoInfo()> undo = [this]()->UndoInfo
+	{
+		auto raw = std::get<GLModel*>(_model);
+		auto parent = raw->parentNode();
+		raw->QNode::setParent((Qt3DCore::QNode*)nullptr);
+		return UndoInfo{ std::unique_ptr<GLModel>(raw), parent };
+	};
+	_model = postUIthread(std::move(undo));
 }
 
 void Hix::Features::AddModel::redoImpl()
 {
-	auto& undoInfo = std::get<UndoInfo>(_model);
-	auto& model = undoInfo.undoModel;
-	_model = model.release();
-	model->setParent(undoInfo.parent);
+	std::function<GLModel*()> redo = [this]()->GLModel*
+	{
+		auto& undoInfo = std::get<UndoInfo>(_model);
+		auto& model = undoInfo.undoModel;
+		model->setParent(undoInfo.parent);
+		return model.release();
+	};
 	
+	_model = postUIthread(std::move(redo));
 }
 
-GLModel* Hix::Features::AddModel::getAddedModel()
+void Hix::Features::AddModel::runImpl()
+{
+	std::function<GLModel*()> createModel = [this]()->GLModel*
+	{
+		auto model = new GLModel(_parent, _mesh, _fname, _transform);
+		model->setHitTestable(true);
+		model->setZToBed();
+		return model;
+	};
+	_model = postUIthread(std::move(createModel));
+}
+
+GLModel* Hix::Features::AddModel::get()
 {
 	auto idx = _model.index();
 	if (idx == 0)
@@ -49,12 +70,9 @@ GLModel* Hix::Features::AddModel::getAddedModel()
 }
 
 
-Hix::Features::ListModel::ListModel(Hix::Engine3D::Mesh* mesh, QString fname, const Qt3DCore::QTransform* transform) : AddModel(qmlManager->models, mesh, fname, transform)
-{
-	auto rawModel = std::get<GLModel*>(_model);
-	qmlManager->addToGLModels(rawModel);
-	qmlManager->addPart(fname, rawModel->ID());
-}
+Hix::Features::ListModel::ListModel(Hix::Engine3D::Mesh* mesh, QString fname, const Qt3DCore::QTransform* transform) : 
+	AddModel(ApplicationManager::getInstance().partManager().modelRoot(), mesh, fname, transform)
+{}
 
 Hix::Features::ListModel::~ListModel()
 {
@@ -63,17 +81,39 @@ Hix::Features::ListModel::~ListModel()
 void Hix::Features::ListModel::undoImpl()
 {
 	AddModel::undoImpl();
-	auto raw = std::get<UndoInfo>(_model).undoModel.get();
-	qmlManager->deletePartListItem(raw->ID());
-	qmlManager->unselectPart(raw);
-	qmlManager->releaseFromGLModels(raw);
 
+	std::function<void()> undo = [this]()
+	{
+		auto raw = std::get<UndoInfo>(_model).undoModel.get();
+		auto& partManager = ApplicationManager::getInstance().partManager();
+		auto owningPtr = partManager.removePart(raw);
+		owningPtr.release(); //since unique_ptr ownership is stolen in AddModel::undoImpl
+	};
+	postUIthread(std::move(undo));
 }
 
 void Hix::Features::ListModel::redoImpl()
 {
 	AddModel::redoImpl();
-	auto raw = std::get<GLModel*>(_model);
-	qmlManager->addPart(raw->modelName(), raw->ID());
-	qmlManager->addToGLModels(raw);
+
+	std::function<void()> redo = [this]()
+	{
+		auto raw = std::get<GLModel*>(_model);
+		auto& partManager = ApplicationManager::getInstance().partManager();
+		partManager.addPart(std::unique_ptr<GLModel>(raw));
+	};
+	postUIthread(std::move(redo));
+}
+
+void Hix::Features::ListModel::runImpl()
+{
+	AddModel::runImpl();
+
+	std::function<void()> redo = [this]()
+	{
+		auto rawModel = std::get<GLModel*>(_model);
+		auto& partManager = ApplicationManager::getInstance().partManager();
+		partManager.addPart(std::unique_ptr<GLModel>(rawModel));
+	};
+	QMetaObject::invokeMethod(&Hix::Application::ApplicationManager::getInstance().engine(), redo, Qt::BlockingQueuedConnection);
 }

@@ -12,7 +12,6 @@ import Qt3D.Render 2.0
 import Qt3D.Input 2.0
 import Qt3D.Extras 2.0
 import QtQuick 2.7
-import DentSlicer 1.0
 //import GLQML 1.0
 
 
@@ -27,14 +26,12 @@ Entity {
     property vector3d zup : Qt.vector3d( 0.0, 0.0, 1.0 )
     property vector3d zdown : Qt.vector3d( 0.0, 0.0, -1.0 )
 
-    property alias total: total
+    // property alias total: total
     property alias cm: cm
     property alias systemTransform: systemTransform
-    property alias keyboardHandler: keyboardHandler
 
     property int ftrDelete : 18
     signal cameraViewChanged();
-    //CoordinateMesh{} // 기준좌표 체크
 
     CameraManager{
         objectName: "cm"
@@ -45,17 +42,12 @@ Entity {
         }
     }
 
-    /*SlicingConfiguration {
-        id : slicingConfiguration
-    }*/
-
 
     Entity{
         id : total
         objectName:"total"
         Transform{
             id: systemTransform
-            objectName : "systemTransform"
             scale3D: Qt.vector3d(0.004,0.004,0.004)
             rotationX : -70
             rotationY : 0
@@ -73,91 +65,13 @@ Entity {
             specular: Qt.rgba(100/255, 100/255, 100/255, 1 )
             shininess: 0
         }
-		Model{
-            id: meshEntity4
+		Entity{
+            id: models
             //inputSource:"file:///C:/Users/user/Downloads/Spider_ascii.stl"
         }
         CoordinateMesh{}
 
     }
-
-
-    KeyboardDevice{
-        id : keyboardDevice
-    }
-
-    signal copy();
-    signal paste();
-    signal unDo();
-    signal reDo();
-    signal groupSelectionActivate(bool b);
-
-    function forceFocus(){
-        console.log("force focus");
-        focusItem.forceKeyboardFocus();
-    }
-
-
-
-
-    KeyboardHandler{
-        focus : true
-        id : keyboardHandler
-        objectName: "keyboardHandler"
-        sourceDevice: keyboardDevice
-
-        Item {
-            id: focusItem
-            focus: true
-            function forceKeyboardFocus() {
-                forceActiveFocus();
-                keyboardHandler.focus = true;
-            }
-        }
-
-
-
-        onPressed: {
-            console.log(event.key);
-            if (event.key === Qt.Key_Delete) {
-                console.log("delete called by keyboard")
-                yesnoPopUp.openYesNoPopUp(false, "", "Are you sure to delete these models?", "", 18, "", ftrDelete, 0)
-                //deletePopUp.targetID = qm.getselectedModelID()
-                //if (deletePopUp.targetID != -1){
-                //    uppertab.all_off();
-                //    deletePopUp.visible = true
-                //    mttab.hideTab();
-                //}
-            } else if (event.key === Qt.Key_Escape) {
-                uppertab.all_off()
-            } else if (event.matches(StandardKey.Undo)){
-                // do undo
-                console.log("undo called");
-                unDo();
-            } else if (event.matches(StandardKey.Redo)){
-                // do redo
-                console.log("redo called");
-                reDo();
-            } else if (event.matches(StandardKey.Open)){
-                openFile();
-            } else if (event.matches(StandardKey.Copy)){
-                copy();
-            } else if (event.matches(StandardKey.Paste)){
-                paste();
-            } else if (event.key === Qt.Key_Shift){
-                console.log("shift pressed");
-                groupSelectionActivate(true);
-            }
-        }
-        onReleased:{
-            if (event.key === Qt.Key_Shift){
-                console.log("shift released");
-                groupSelectionActivate(false);
-            }
-        }
-
-    }
-
 
     function axisAngle2Quaternion(angle, axis){
         var result = Qt.quaternion(0,0,0,0);
@@ -180,14 +94,66 @@ Entity {
         return result
     }
 
-    function openFile(){
-        var compo = Qt.createComponent("Model.qml");
-
-        var loadmodel = compo.createObject(total, {});
-    }
-
     function initCamera(){
         cm.initCamera()
+    }
+
+    function viewUp(){
+        systemTransform.scale3D = Qt.vector3d(0.004,0.004,0.004)
+        systemTransform.rotationX = -180
+        systemTransform.rotationY = 0
+        systemTransform.rotationZ = 0
+        cm.camera.translateWorld(cm.camera.viewCenter.times(-1))
+        cm.camera.translateWorld(Qt.vector3d(0.025,-0.25,0))
+    }
+    function viewDown(){
+        systemTransform.scale3D = Qt.vector3d(0.004,0.004,0.004)
+        systemTransform.rotationX = 0
+        systemTransform.rotationY = 0
+        systemTransform.rotationZ = 0
+        cm.camera.translateWorld(cm.camera.viewCenter.times(-1))
+        cm.camera.translateWorld(Qt.vector3d(0.025,-0.25,0))
+    }
+    function viewFront(){
+        systemTransform.scale3D = Qt.vector3d(0.004,0.004,0.004)
+        systemTransform.rotationX = -90
+        systemTransform.rotationY = 0
+        systemTransform.rotationZ = 0;
+        cm.camera.translateWorld(cm.camera.viewCenter.times(-1))
+        cm.camera.translateWorld(Qt.vector3d(0.02,-0.06,0))
+    }
+    function viewBack(){
+        systemTransform.scale3D = Qt.vector3d(0.004,0.004,0.004)
+        systemTransform.rotationX = -90
+        systemTransform.rotationY = 0
+        systemTransform.rotationZ = -180
+        cm.camera.translateWorld(cm.camera.viewCenter.times(-1))
+        cm.camera.translateWorld(Qt.vector3d(0.02,-0.06,0))
+    }
+    function viewLeft(){
+        systemTransform.scale3D = Qt.vector3d(0.004,0.004,0.004)
+        systemTransform.rotationX = -90
+        systemTransform.rotationY = 0
+        systemTransform.rotationZ = 90;
+        cm.camera.translateWorld(cm.camera.viewCenter.times(-1))
+        cm.camera.translateWorld(Qt.vector3d(0.015,-0.04,0))
+    }
+    function viewRight(){
+        systemTransform.scale3D = Qt.vector3d(0.004,0.004,0.004)
+        systemTransform.rotationX = -90
+        systemTransform.rotationY = 0
+        systemTransform.rotationZ = -90;
+        cm.camera.translateWorld(cm.camera.viewCenter.times(-1))
+        cm.camera.translateWorld(Qt.vector3d(0.015,-0.04,0))
+    }
+
+    function viewCenter(){
+        systemTransform.scale3D = Qt.vector3d(0.004,0.004,0.004)
+        systemTransform.rotationX = -70
+        systemTransform.rotationY = 0
+        systemTransform.rotationZ = -40
+        cm.camera.translateWorld(cm.camera.viewCenter.times(-1))
+        cm.camera.translateWorld(Qt.vector3d(-0.015,-0.16,0))
     }
 
 }

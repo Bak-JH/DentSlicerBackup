@@ -1,14 +1,27 @@
 #include "rotate.h"
-#include "qmlmanager.h"
-#include "ui/RotateWidget.h"
-
-Hix::Features::RotateMode::RotateMode(const std::unordered_set<GLModel*>& targetModels, Hix::Input::RayCastController* controller) 
-		: WidgetMode(targetModels, controller)
+#include "widget/RotateWidget.h"
+#include "application/ApplicationManager.h"
+#include "../glmodel.h"
+#include "../Qml/components/Inputs.h"
+const QUrl ROTATE_POPUP_URL = QUrl("qrc:/Qml/FeaturePopup/PopupRotate.qml");
+Hix::Features::RotateMode::RotateMode(): WidgetMode(), _targetModels(Hix::Application::ApplicationManager::getInstance().partManager().selectedModels()), DialogedMode(ROTATE_POPUP_URL)
 {
+	if (Hix::Application::ApplicationManager::getInstance().partManager().selectedModels().empty())
+	{
+		Hix::Application::ApplicationManager::getInstance().modalDialogManager().needToSelectModels();
+		return;
+	}
 	_widget.addWidget(std::make_unique<Hix::UI::RotateWidget>(QVector3D(1, 0, 0), &_widget));
 	_widget.addWidget(std::make_unique<Hix::UI::RotateWidget>(QVector3D(0, 1, 0), &_widget));
 	_widget.addWidget(std::make_unique<Hix::UI::RotateWidget>(QVector3D(0, 0, 1), &_widget));
 	_widget.setVisible(true);
+
+	auto& co = controlOwner();
+	co.getControl(_xValue, "rotateX");
+	co.getControl(_yValue, "rotateY");
+	co.getControl(_zValue, "rotateZ");
+	updatePosition();
+
 }
 
 Hix::Features::RotateMode::~RotateMode()
@@ -18,46 +31,52 @@ Hix::Features::RotateMode::~RotateMode()
 
 void Hix::Features::RotateMode::featureStarted()
 {
-	_rotateContainer = new FeatureContainerFlushSupport();
+	_rotateContainer = new FeatureContainerFlushSupport(_targetModels);
 	for (auto& target : _targetModels)
 		_rotateContainer->addFeature(new Rotate(target));
+	if (!_rotateContainer->empty())
+		Hix::Application::ApplicationManager::getInstance().taskManager().enqueTask(_rotateContainer);
 
 }
 
 void Hix::Features::RotateMode::featureEnded()
 {
-	if (!_rotateContainer->empty())
-		qmlManager->featureHistoryManager().addFeature(_rotateContainer);
 	for (auto& each : _targetModels)
 	{
 		each->rotateDone();
-		qmlManager->sendUpdateModelInfo();
 	}
-	_widget.updatePosition();
+	updatePosition();
 }
 
-Hix::Features::FeatureContainerFlushSupport* Hix::Features::RotateMode::applyRotate(const QQuaternion& rot)
+QVector3D Hix::Features::RotateMode::getWidgetPosition()
 {
-	Hix::Features::FeatureContainerFlushSupport* container = new FeatureContainerFlushSupport();
+	return 	Hix::Engine3D::combineBounds(_targetModels).centre();
+
+}
+
+std::unordered_set<GLModel*>& Hix::Features::RotateMode::models()
+{
+	return _targetModels;
+}
+
+void Hix::Features::RotateMode::applyButtonClicked()
+{
+	auto rotation = QQuaternion::fromEulerAngles(_xValue->getValue(), _yValue->getValue(), _zValue->getValue());
+	Hix::Features::FeatureContainerFlushSupport* container = new FeatureContainerFlushSupport(_targetModels);
 	for (auto& target : _targetModels)
-		container->addFeature(new Rotate(target, rot));
-	return container;
+		container->addFeature(new Rotate(target, rotation));
+
+	Hix::Application::ApplicationManager::getInstance().taskManager().enqueTask(container);
 }
 
 Hix::Features::Rotate::Rotate(GLModel* target) : _model(target)
 {
-	_prevMatrix = target->transform().matrix();
-	_prevAabb = target->aabb();
+	_progress.setDisplayText("Rotate Model");
 }
 
-Hix::Features::Rotate::Rotate(GLModel* target, const QQuaternion& rot) : _model(target)
+Hix::Features::Rotate::Rotate(GLModel* target, const QQuaternion& rot) : _model(target), _rot(rot)
 {
-	_prevMatrix = target->transform().matrix();
-	_prevAabb = target->aabb();
-	target->rotateModel(rot);
-
-	if (qmlManager->isActive<Hix::Features::WidgetMode>())
-		qmlManager->cameraViewChanged();
+	_progress.setDisplayText("Rotate Model");
 }
 
 Hix::Features::Rotate::~Rotate()
@@ -68,21 +87,40 @@ Hix::Features::Rotate::~Rotate()
 
 void Hix::Features::Rotate::undoImpl()
 {
-	_nextMatrix = _model->transform().matrix();
-	_nextAabb = _model->aabb();
+	postUIthread([this]() {
+		_nextMatrix = _model->transform().matrix();
+		_nextAabb = _model->aabb();
+		_model->transform().setMatrix(_prevMatrix);
+		_model->aabb() = _prevAabb;
+		UpdateWidgetModePos();
+		_model->updateMesh();
+		});
 
-	_model->transform().setMatrix(_prevMatrix);
-	_model->aabb() = _prevAabb;
-	qmlManager->cameraViewChanged();
-	_model->updateMesh();
 }
 
 void Hix::Features::Rotate::redoImpl()
 {
-	_model->transform().setMatrix(_nextMatrix);
-	_model->aabb() = _nextAabb;
-	qmlManager->cameraViewChanged();
-	_model->updateMesh();
+	postUIthread([this]() {
+		_model->transform().setMatrix(_nextMatrix);
+		_model->aabb() = _nextAabb;
+		UpdateWidgetModePos();
+		_model->updateMesh();
+		});
+
+}
+
+void Hix::Features::Rotate::runImpl()
+{
+	postUIthread([this]() {
+		_prevMatrix = _model->transform().matrix();
+		_prevAabb = _model->aabb();
+		if (_rot)
+		{
+			_model->rotateModel(_rot.value());
+			UpdateWidgetModePos();
+		}
+		});
+
 }
 
 const GLModel* Hix::Features::Rotate::model() const
@@ -90,8 +128,9 @@ const GLModel* Hix::Features::Rotate::model() const
 	return _model;
 }
 
-Hix::Features::RotateModeNoUndo::RotateModeNoUndo(const std::unordered_set<GLModel*>& targetModels, Input::RayCastController* controller):RotateMode(targetModels, controller)
+Hix::Features::RotateModeNoUndo::RotateModeNoUndo(const std::unordered_set<GLModel*>& targetModels):RotateMode()
 {
+	_targetModels = targetModels;
 }
 
 Hix::Features::RotateModeNoUndo::~RotateModeNoUndo()
@@ -108,5 +147,6 @@ void Hix::Features::RotateModeNoUndo::featureEnded()
 	{
 		each->updateRecursiveAabb();
 	}
-	_widget.updatePosition();
+	updatePosition();
 }
+

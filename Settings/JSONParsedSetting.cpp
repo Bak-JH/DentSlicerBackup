@@ -7,11 +7,12 @@ using namespace Hix::Settings;
 void Hix::Settings::JSONParsedSetting::parseJSON(const std::filesystem::path& jsonPath)
 {
 	_jsonPath = jsonPath;
-	refresh();
+	parseJSON();
 }
 
-void Hix::Settings::JSONParsedSetting::refresh()
+void Hix::Settings::JSONParsedSetting::parseJSON()
 {
+	//initialize to default values
 	initialize();
 	//check path
 	auto status = std::filesystem::status(_jsonPath);
@@ -79,16 +80,38 @@ std::optional<rapidjson::Value> Hix::Settings::JSON::tryParseObj(const rapidjson
 {
 	try
 	{
-		auto& genVal = doc[key.c_str()];
-		if (genVal.IsObject())
+		if (doc.HasMember(key.c_str()))
 		{
-			rapidjson::Value subObject;
-			subObject.CopyFrom(genVal, allocator);
-			return subObject;
+			auto& genVal = doc[key.c_str()];
+			if (genVal.IsObject())
+			{
+				rapidjson::Value subObject;
+				subObject.CopyFrom(genVal, allocator);
+				return subObject;
+			}
 		}
 	}
 	catch (...)
 	{
 	}
 	return std::optional<rapidjson::Value>();
+}
+template<>
+bool Hix::Settings::JSON::tryParse<std::filesystem::path>(const rapidjson::Document& doc, const std::string& key, std::filesystem::path& value)
+{
+	std::string tmp;
+	if (tryParse(doc, key, tmp))
+	{
+		value = tmp;
+		return true;
+	}
+	return false;
+
+}
+template<>
+void Hix::Settings::JSON::parse<std::filesystem::path>(const rapidjson::Document& doc, const std::string& key, std::filesystem::path& value)
+{
+	std::string tmp;
+	parse(doc, key, tmp);
+	value = tmp;
 }

@@ -1,22 +1,36 @@
 #include "Labelling.h"
-#include "qmlmanager.h"
+#include "Qml/components/Inputs.h"
+#include "Qml/components/Buttons.h"
+
+#include "../qml/components/ControlOwner.h"
+
 #include "../Shapes2D.h"
 #include "../Extrude.h"
+#include "../../glmodel.h"
+#include "../../application/ApplicationManager.h"
+#include "../repair/meshrepair.h"
+//engrave CSG
+#include "../CSG/CSG.h"
+
 using namespace Hix::Engine3D;
 using namespace Hix::Polyclipping;
 using namespace Hix::Shapes2D;
 using namespace Hix::Features::Extrusion;
 using namespace ClipperLib;
+using namespace Qt3DCore;
+using namespace Hix::Application;
+using namespace Hix::Features::CSG;
 
 //Mesh* generateLabelMesh(const QVector3D translation, const QVector3D normal, const QString text, const QFont font)
+const QUrl LABEL_POPUP_URL = QUrl("qrc:/Qml/FeaturePopup/PopupLabel.qml");
 
 GLModel* Hix::Features::LabellingMode::generatePreviewModel()
 {
-
 	auto labelMesh = new Mesh();
 	QPainterPath painterPath;
 	painterPath.setFillRule(Qt::WindingFill);
-	painterPath.addText(0, 0, _font, _text);
+	QFont font(_fontStyle->getSelectedItem(), _fontSize->getValue());
+	painterPath.addText(0, 0, font, QString::fromStdString(_inputText->getInputText()));
 
 	auto width = painterPath.boundingRect().width();
 	auto height = painterPath.boundingRect().height();
@@ -52,8 +66,8 @@ GLModel* Hix::Features::LabellingMode::generatePreviewModel()
 	// generate cyliner wall
 	std::vector<std::vector<QVector3D>> jointContours;
 	std::vector<QVector3D> path;
-	path.emplace_back(0, 0, -10);
-	path.emplace_back(0, 0, 5);
+	path.emplace_back(0, 0, _labelHeight->getValue() * -3);
+	path.emplace_back(0, 0, _labelHeight->getValue() * 3);
 	for (auto& intPath : IntPaths)
 	{
 		std::vector<QVector3D> contour;
@@ -90,11 +104,22 @@ GLModel* Hix::Features::LabellingMode::generatePreviewModel()
 	return new GLModel(_targetModel, labelMesh, "label", 0);
 }
 
-Hix::Features::LabellingMode::LabellingMode()
+
+
+Hix::Features::LabellingMode::LabellingMode() : DialogedMode(LABEL_POPUP_URL)
 {
+	if (Hix::Application::ApplicationManager::getInstance().partManager().selectedModels().empty())
+	{
+		Hix::Application::ApplicationManager::getInstance().modalDialogManager().needToSelectModels();
+		return;
+	}
+	auto& co = controlOwner();
+	co.getControl(_inputText, "labeltext");
+	co.getControl(_fontStyle, "labelfont");
+	co.getControl(_fontSize, "labelfontsize");
+	co.getControl(_labelHeight, "labelheight");
+	co.getControl(_isEmboss, "labeltype");
 }
-
-
 
 Hix::Features::LabellingMode::~LabellingMode()
 {
@@ -106,24 +131,7 @@ void Hix::Features::LabellingMode::faceSelected(GLModel* selected, const Hix::En
 	updateLabelMesh(hit.localIntersection(), selectedFace);
 
 }
-//void xyPlanePath(const QVector3D& worldStart, const Hix::Engine3D::FaceConstItr& face, float width)
-//{
-//	auto radius = width / 2;
-//	auto worldZ = worldStart.z();
-//	auto nFaces = face.neighborFaces();
-//	std::unordered_set<FaceConstItr> explored;
-//	explored.insert(face);
-//	std::deque<FaceConstItr> qL;
-//	std::deque<FaceConstItr> qR;
-//	for (auto& nf : nFaces)
-//	{
-//		auto sortedZ = nf.sortZ();
-//		if (sortedZ[2] >= worldZ && sortedZ[0] <= worldZ)
-//		{
-//			//q
-//		}
-//	}
-//}
+
 void Hix::Features::LabellingMode::updateLabelMesh(const QVector3D& localIntersection, const Hix::Engine3D::FaceConstItr& face)
 {
 	//setMaterialColor(Hix::Render::Colors::Support);
@@ -154,70 +162,29 @@ void Hix::Features::LabellingMode::updateLabelMesh(const QVector3D& localInterse
 	_scale = newTransform.scale3D();
 }
 
-void Hix::Features::LabellingMode::setText(const QString& text)
-{
-	if (_text != text)
-	{
-		_text = text;
-		_isDirty = true;
-		_previewModel.reset(generatePreviewModel());
-		_previewModel->transform().setMatrix(_matrix);
-		_previewModel->updateAABBScale(_scale);
-	}
-}
-
-void Hix::Features::LabellingMode::setFontName(const QString& fontName)
-{
-	_font.setFamily(fontName);
-	_isDirty = true;
-	_previewModel.reset(generatePreviewModel());
-	_previewModel->transform().setMatrix(_matrix);
-	_previewModel->updateAABBScale(_scale);
-}
-
-void Hix::Features::LabellingMode::setFontBold(bool isBold)
-{
-	if (_font.bold() != isBold)
-	{
-		_font.setBold(isBold);
-		_isDirty = true;	
-		_previewModel.reset(generatePreviewModel());
-		_previewModel->transform().setMatrix(_matrix);
-		_previewModel->updateAABBScale(_scale);
-	}
-}
-
-void Hix::Features::LabellingMode::setFontSize(int fontSize)
-{
-	if (_font.pointSize()!= fontSize)
-	{
-		_font.setPointSize(fontSize);
-		_isDirty = true;
-		_previewModel.reset(generatePreviewModel());
-		_previewModel->transform().setMatrix(_matrix);
-		_previewModel->updateAABBScale(_scale);
-	}
-}
-
-Hix::Features::Feature* Hix::Features::LabellingMode::applyLabelMesh()
+void Hix::Features::LabellingMode::applyButtonClicked()
 {
 	if (!_previewModel)
 	{
-		qDebug() << "no labellingTextPreview";
-		QMetaObject::invokeMethod(qmlManager->labelPopup, "noModel");
-		return nullptr;
+		return;
 	}
+	if (_isEmboss->isChecked())
+	{
+		Hix::Application::ApplicationManager::getInstance().taskManager().enqueTask(new Labelling(_targetModel, _previewModel.release()));
 
-	return new Labelling(_targetModel, _previewModel.release());
+	}
+	else
+	{
+		Hix::Application::ApplicationManager::getInstance().taskManager().enqueTask(new LabellingEngrave(_targetModel, _previewModel.release()));
+
+	}
 }
 
 
 
 Hix::Features::Labelling::Labelling(GLModel* parentModel, GLModel* previewModel)
-	: _targetModel(parentModel), _label(previewModel)
+	:FlushSupport(parentModel),_targetModel(parentModel), _label(previewModel)
 {
-	_targetModel->setMaterialColor(Hix::Render::Colors::Selected);
-	_targetModel->updateModelMesh();
 }
 
 Hix::Features::Labelling::~Labelling()
@@ -226,12 +193,79 @@ Hix::Features::Labelling::~Labelling()
 
 void Hix::Features::Labelling::undoImpl()
 {
-	_label->QNode::setParent((QNode*)nullptr);
+	postUIthread([this]() {
+		auto raw = std::get<GLModel*>(_label);
+		raw->QNode::setParent((Qt3DCore::QNode*)nullptr);
+		_label = std::unique_ptr<GLModel>(raw);
+		});
 }
 
 void Hix::Features::Labelling::redoImpl()
 {
-	if (!qmlManager->isSelected(_targetModel))
-		_label->setMaterialColor(Hix::Render::Colors::Default);
-	_label->QNode::setParent(_targetModel);
+	postUIthread([this]() {
+		auto& owned = std::get<std::unique_ptr<GLModel>>(_label);
+		if (!ApplicationManager::getInstance().partManager().isSelected(_targetModel))
+			owned->setMaterialColor(Hix::Render::Colors::Default);
+		owned->QNode::setParent(_targetModel);
+		_label = owned.release();
+		});
+
 }
+
+void Hix::Features::Labelling::runImpl()
+{
+	_targetModel->setMaterialColor(Hix::Render::Colors::Selected);
+	_targetModel->setHitTestable(true);
+	_targetModel->updateModelMesh();
+}
+
+Hix::Features::LabellingEngrave::LabellingEngrave(GLModel* parentModel, GLModel* previewModel):FlushSupport(parentModel), _target(parentModel), _label(previewModel)
+{
+}
+
+void Hix::Features::LabellingEngrave::cutCSG(GLModel* subject, const CorkTriMesh& subtract)
+{
+	auto subjectCork = toCorkMesh(*subject->getMesh());
+	CorkTriMesh output;
+	computeDifference(subjectCork, subtract, &output);
+
+	//convert the result back to hix mesh
+	auto result = toHixMesh(output);
+	Hix::Features::repair(*result);
+	//manual free cork memory, TODO RAII
+	freeCorkTriMesh(&subjectCork);
+	freeCorkTriMesh(&output);
+	postUIthread([result, subject, this]() {
+		_prevMesh.reset(subject->getMeshModd());
+		subject->setMesh(result);
+		subject->setZToBed();
+		_label.reset();
+	});
+
+}
+
+
+void Hix::Features::LabellingEngrave::runImpl()
+{
+	auto subtractee = toCorkMesh(*_label->getMesh());
+	cutCSG(_target, subtractee);
+}
+
+void Hix::Features::LabellingEngrave::undoImpl()
+{
+	postUIthread([this]() {
+		auto tmp = _prevMesh.release();
+		_prevMesh.reset(_target->getMeshModd());
+		_target->setMesh(tmp);
+		});
+}
+
+void Hix::Features::LabellingEngrave::redoImpl()
+{
+	postUIthread([this]() {
+		auto tmp = _prevMesh.release();
+		_prevMesh.reset(_target->getMeshModd());
+		_target->setMesh(tmp);
+		});
+}
+
