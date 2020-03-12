@@ -1,22 +1,16 @@
 #pragma once
 #include <QFont>
 #include <QString>
+#include <memory>
 #include "../interfaces/SelectFaceMode.h"
 #include "../interfaces/FlushSupport.h"
 #include "../interfaces/DialogedMode.h"
 #include "../../DentEngine/src/Bounds3D.h"
+#include "../../Qml/components/ControlForwardInclude.h"
+class CorkTriMesh;
+class GLModel;
 namespace Hix
 {
-	namespace QML
-	{
-		namespace Controls
-		{
-			class TextInputBox;
-			class InputSpinBox;
-			class DropdownBox;
-			class ToggleSwitch;
-		}
-	}
 
 	namespace Features
 	{
@@ -34,7 +28,7 @@ namespace Hix
 			Hix::QML::Controls::DropdownBox* _fontStyle;
 			Hix::QML::Controls::InputSpinBox* _fontSize;
 			Hix::QML::Controls::InputSpinBox* _labelHeight;
-			Hix::QML::Controls::InputSpinBox* _labelType;
+			Hix::QML::Controls::ToggleSwitch* _isEmboss; //engrave
 			//QFont _font = QFont("Arial", 12, QFont::Normal);
 			std::unique_ptr<GLModel> _previewModel;
 			GLModel* _targetModel = nullptr;
@@ -56,8 +50,27 @@ namespace Hix
 			void redoImpl()override;
 			void runImpl()override;
 		private:
-			GLModel* _label;
+			std::variant<GLModel*, std::unique_ptr<GLModel>> _label;
 			GLModel* _targetModel;
 		};
+
+		class LabellingEngrave : public Feature, public FlushSupport
+		{
+		public:
+			LabellingEngrave(GLModel* parentModel, GLModel* previewModel);
+		protected:
+			void runImpl()override;
+			void undoImpl()override;
+			void redoImpl()override;
+		private:
+			void cutCSG(GLModel* subject, const CorkTriMesh& subtract);
+			GLModel* _target;
+			std::unique_ptr<GLModel> _label;
+			std::unique_ptr<Hix::Engine3D::Mesh> _prevMesh;
+
+		};
+
+
+
 	}
 }

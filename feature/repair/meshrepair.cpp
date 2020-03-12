@@ -301,9 +301,6 @@ void Hix::Features::repair(Hix::Engine3D::Mesh& mesh)
 	tin.loadTriangleList(vtcs.data(), triInds.data(), mvs.size(), faces.size());
    //seperate into multiple components if there are disjoing components
 	tin.removeSmallestComponents();
-	
-
-
 
 	// Fill holes
 	if (tin.boundaries())
