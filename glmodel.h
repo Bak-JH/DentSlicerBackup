@@ -31,6 +31,7 @@ public:
 	void doDrag(Hix::Input::MouseEventData& e)override;
 	void dragEnded(Hix::Input::MouseEventData&) override;
 
+	void modelSelectionClick();
     // load teeth model default
     GLModel(Qt3DCore::QEntity* parent=nullptr, Hix::Engine3D::Mesh* loadMesh=nullptr, QString fname="", const Qt3DCore::QTransform* transform = nullptr);
 	GLModel(const GLModel& o);

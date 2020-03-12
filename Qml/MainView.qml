@@ -147,7 +147,6 @@ Entity {
         cm.camera.translateWorld(Qt.vector3d(0.015,-0.04,0))
     }
 
-
     function viewCenter(){
         systemTransform.scale3D = Qt.vector3d(0.004,0.004,0.004)
         systemTransform.rotationX = -70
