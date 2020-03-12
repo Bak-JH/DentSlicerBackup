@@ -9,12 +9,14 @@
 Hix::Features::ImportModelMode::ImportModelMode()
 {
 
-	auto fileUrl = QFileDialog::getOpenFileUrl(nullptr, "Please choose a file", QUrl(), "3D files(*.stl *.obj)");
-	if (!fileUrl.isEmpty())
+	auto fileUrls = QFileDialog::getOpenFileUrls(nullptr, "Please choose 3D models", QUrl(), "3D files(*.stl *.obj)");
+	for (auto& u : fileUrls)
 	{
-		Hix::Application::ApplicationManager::getInstance().taskManager().enqueTask(new ImportModel(fileUrl));
+		if (!u.isEmpty())
+		{
+			Hix::Application::ApplicationManager::getInstance().taskManager().enqueTask(new ImportModel(u));
+		}
 	}
-	//QApplication::setOverrideCursor(QCursor(Qt::ArrowCursor));
 }
 
 Hix::Features::ImportModelMode::~ImportModelMode()
