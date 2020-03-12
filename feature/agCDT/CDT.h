@@ -50,6 +50,9 @@ public:
     void insertVertices(const std::vector<V2d<T> >& vertices);
     /// Add constraints (fixed edges) to triangulation
     void insertEdges(const std::vector<Edge>& edges);
+    // same as above, skip faulty edges
+    void tryInsertEdges(const std::vector<Edge>& edges);
+
     /// Erase triangles adjacent to super triangle
     void eraseSuperTriangle();
     /// Erase triangles outside of constrained boundary using growing
