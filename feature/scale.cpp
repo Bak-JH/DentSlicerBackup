@@ -51,25 +51,33 @@ Hix::Features::Scale::~Scale()
 
 void Hix::Features::Scale::undoImpl()
 {
-	_nextMatrix = _model->transform().matrix();
-	_nextAabb = _model->aabb();
+	postUIthread([this]() {
+		_nextMatrix = _model->transform().matrix();
+		_nextAabb = _model->aabb();
 
-	_model->transform().setMatrix(_prevMatrix);
-	_model->aabb() = _prevAabb;
-	_model->updateMesh();
+		_model->transform().setMatrix(_prevMatrix);
+		_model->aabb() = _prevAabb;
+		_model->updateMesh();
+		});
 }
 
 void Hix::Features::Scale::redoImpl()
 {
-	_model->transform().setMatrix(_nextMatrix);
-	_model->aabb() = _nextAabb;
-	_model->updateMesh();
+	postUIthread([this]() {
+		_model->transform().setMatrix(_nextMatrix);
+		_model->aabb() = _nextAabb;
+		_model->updateMesh();
+		});
+
 }
 
 void Hix::Features::Scale::runImpl()
 {
-	_prevMatrix = _model->transform().matrix();
-	_prevAabb = _model->aabb();
-	_model->scaleModel(_scale);
-	_model->scaleDone();
+	postUIthread([this]() {
+		_prevMatrix = _model->transform().matrix();
+		_prevAabb = _model->aabb();
+		_model->scaleModel(_scale);
+		_model->scaleDone();
+		});
+
 }

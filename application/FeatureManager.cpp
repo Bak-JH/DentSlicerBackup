@@ -7,10 +7,14 @@
 #include "../glmodel.h"
 #include "../feature/interfaces/Mode.h"
 #include "../feature/settingMode.h"
+#include "../feature/move.h"
+#include "../feature/rotate.h"
+#include "../feature/UndoRedo.h"
 #include <qquickitem.h>
 
 using namespace Hix::QML;
 using namespace Hix::Features;
+using namespace Hix::Application;
 Hix::Application::FeatureManager::FeatureManager()
 {
 }
@@ -52,6 +56,11 @@ Hix::Features::FeatureHistoryManager& Hix::Application::FeatureManager::featureH
 	return _featureHistoryManager;
 }
 
+bool Hix::Application::FeatureManager::allowModelSelection() const
+{
+	return isActive<MoveMode>() || isActive<RotateMode>() || !Hix::Application::ApplicationManager::getInstance().featureManager().isFeatureActive();
+}
+
 
 void Hix::Application::FeatureManagerLoader::init(FeatureManager& manager, QObject* root)
 {
@@ -62,8 +71,17 @@ void Hix::Application::FeatureManagerLoader::init(FeatureManager& manager, QObje
 	Hix::QML::getItemByID(root, manager._undoButton, "undo");
 	Hix::QML::getItemByID(root, manager._redoButton, "redo");
 	QObject::connect(manager._settingButton, &Hix::QML::Controls::Button::clicked, openFeatureModeFunctor<SettingMode>());
-	//QObject::connect(manager._undoButton, &Hix::QML::Controls::Button::clicked, []() { 
-	//	Hix::Application::ApplicationManager::getInstance().featureManager().undo();
-	//	});
+	QObject::connect(manager._undoButton, &Hix::QML::Controls::Button::clicked, [&manager]() {
+		manager.setMode(nullptr);
+		Hix::Application::ApplicationManager::getInstance().taskManager().enqueTask(new Hix::Features::Undo());
+		});
+	QObject::connect(manager._redoButton, &Hix::QML::Controls::Button::clicked, [&manager]() {
+		manager.setMode(nullptr);
+		Hix::Application::ApplicationManager::getInstance().taskManager().enqueTask(new Hix::Features::Redo());
+		});
 	//QObject::connect(manager._redoButton, &Hix::QML::Controls::Button::clicked, []() {&FeatureHistoryManager::redo});
+
+
+
+
 }

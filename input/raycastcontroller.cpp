@@ -283,8 +283,9 @@ void RayCastController::hitsChanged(const Qt3DRender::QAbstractRayCaster::Hits& 
 	}
 	else if(_rayCastMode == Click)
 	{
-		if (!Hix::Application::ApplicationManager::getInstance().featureManager().isFeatureActive())
+		if (Hix::Application::ApplicationManager::getInstance().featureManager().allowModelSelection())
 		{
+			Hix::Application::ApplicationManager::getInstance().featureManager().setMode(nullptr);
 			Hix::Application::ApplicationManager::getInstance().partManager().unselectAll();
 		}
 	}

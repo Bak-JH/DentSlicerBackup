@@ -22,13 +22,10 @@ namespace Hix
 		public:
 			ShellOffsetMode();
 			virtual ~ShellOffsetMode();
-			void getSliderSignal(double value);
 			void applyButtonClicked()override;
 		private:
 			GLModel* _subject = nullptr;
-			float _zPlane = 0;
 			Hix::Engine3D::Bounds3D _modelBound;
-			Hix::Features::Cut::DrawingPlane _cuttingPlane;
 			Hix::QML::Controls::InputSpinBox* _offsetValue;
 		};
 
@@ -51,14 +48,13 @@ namespace Hix
 		class ShellOffset : public Hix::Features::FeatureContainer
 		{
 		public:
-			ShellOffset(GLModel* target, float offset, float zPlane);
+			ShellOffset(GLModel* target, float offset);
 			virtual ~ShellOffset();
 		protected:
 			void runImpl()override;
 
 		private:
 			float _offset;
-			float _zPlane;
 			GLModel* _target;
 		};
 	}

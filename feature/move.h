@@ -55,7 +55,6 @@ namespace Hix
 			void applyButtonClicked()override;
 			void modelMoveWithAxis(QVector3D axis, double distance);
 			void modelMove(QVector3D displacement);
-			FeatureContainerFlushSupport* applyMove(const QVector3D& to);
 
 		private:
 			Hix::Features::FeatureContainerFlushSupport* _moveContainer = nullptr;

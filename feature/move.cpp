@@ -47,14 +47,13 @@ void Hix::Features::MoveMode::featureStarted()
 	_moveContainer = new FeatureContainerFlushSupport(_targetModels);
 	for (auto& target : _targetModels)
 		_moveContainer->addFeature(new Move(target));
+	if (!_moveContainer->empty())
+		Hix::Application::ApplicationManager::getInstance().taskManager().enqueTask(_moveContainer);
 }
 
 void Hix::Features::MoveMode::featureEnded()
 {
 	_widget.setManipulated(false);
-	if(!_moveContainer->empty())
-		Hix::Application::ApplicationManager::getInstance().taskManager().enqueTask(_moveContainer);
-
 	for (auto& each : _targetModels)
 		each->moveDone();
 	updatePosition();
@@ -63,10 +62,17 @@ void Hix::Features::MoveMode::featureEnded()
 void Hix::Features::MoveMode::applyButtonClicked()
 {
 	auto to = QVector3D(_xValue->getValue(), _yValue->getValue(), _zValue->getValue());
+	if (to == QVector3D(0, 0, 0))
+		return;
+
 	Hix::Features::FeatureContainerFlushSupport* container = new FeatureContainerFlushSupport(_targetModels);
-	
+	const auto& printBound = Hix::Application::ApplicationManager::getInstance().settings().printerSetting.bedBound;
 	for (auto& target : _targetModels)
-		container->addFeature(new Move(target, to));
+	{
+		auto checkedDisp = printBound.displaceWithin(target->recursiveAabb(), to);
+		container->addFeature(new Move(target, checkedDisp));
+
+	}
 
 	container->progress()->setDisplayText("Move Model");
 	Hix::Application::ApplicationManager::getInstance().taskManager().enqueTask(container);
@@ -108,8 +114,6 @@ Hix::Features::Move::Move(GLModel* target) : _model(target)
 
 Hix::Features::Move::~Move()
 {
-	_model = nullptr;
-	delete _model;
 }
 
 void Hix::Features::Move::undoImpl()
@@ -121,7 +125,7 @@ void Hix::Features::Move::undoImpl()
 		_model->transform().setMatrix(_prevMatrix);
 		_model->aabb() = _prevAabb;
 		UpdateWidgetModePos();
-		_model->updateMesh();
+		//_model->updateMesh();
 	});
 }
 
@@ -131,13 +135,13 @@ void Hix::Features::Move::redoImpl()
 		_model->transform().setMatrix(_nextMatrix);
 		_model->aabb() = _nextAabb;
 		UpdateWidgetModePos();
-		_model->updateMesh();
+		//_model->updateMesh();
 	});
 }
 
 void Hix::Features::Move::runImpl()
 {
-
+	postUIthread([this]() {
 		_prevMatrix = _model->transform().matrix();
 		_prevAabb = _model->aabb();
 		if (_to)
@@ -145,6 +149,9 @@ void Hix::Features::Move::runImpl()
 			_model->moveModel(_to.value());
 			UpdateWidgetModePos();
 		}
+	});
+
+
 
 }
 
