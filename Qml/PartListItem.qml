@@ -13,7 +13,7 @@ Hix.PartListItem {
 
 	Column {
 		anchors.verticalCenter: parent.verticalCenter
-		Hix.ToggleSwitch{
+		Hix.Button{
 			id: selectButton
 			width: 224; height: 28
 			Text { 
@@ -24,7 +24,7 @@ Hix.PartListItem {
 				anchors.left: parent.left
 				anchors.leftMargin: 8
 			}
-			onChecked: {
+			function setSelected(){
 				color="#f5f5f5"
 				modelnameText.color="#1db2c4"
 				if(hideButton.isChecked)
@@ -32,7 +32,7 @@ Hix.PartListItem {
 				else
 					showhideimg.source = "qrc:/Resource/part_show_select_1.png"
 			}
-			onUnchecked: {
+			function setUnselected(){
 				color="white"
 				modelnameText.color="black"
 				if(hideButton.isChecked)
@@ -57,6 +57,9 @@ Hix.PartListItem {
 			source: "qrc:/Resource/part_show_1.png"
 			anchors.verticalCenter: parent.verticalCenter
 		}
+
+		
+
 		onChecked: {
 			if(selectButton.isChecked)
 				showhideimg.source = "qrc:/Resource/part_show_select_1.png"

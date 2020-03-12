@@ -27,10 +27,10 @@ namespace Hix
 			void unlistModel(GLModel* model);
 			bool isListed(GLModel* model)const;
 			bool isSelected(GLModel* model)const;
-			void unselectAll(bool updateList = true);
-			void selectAll(bool updateList = true);
+			void unselectAll();
+			void selectAll();
 			//returns if select changed
-			bool setModelSelected(GLModel* model, bool isSelected, bool updateList = true);
+			bool setModelSelected(GLModel* model, bool isSelected);
 			std::unordered_set<GLModel*> selectedModels()const;
 			Hix::Engine3D::Bounds3D selectedBound()const;
 			void deleteSelectedModels();
@@ -54,11 +54,10 @@ namespace Hix
 			PartListItem(QQuickItem* parent = nullptr);
 			virtual ~PartListItem();
 			void setSelected(bool isSelected);
-			bool isSelected()const;
 			void setModelName(QString name);
 			bool visible()const;
 			Hix::QML::Controls::ToggleSwitch* hideButton();
-			Hix::QML::Controls::ToggleSwitch* selectButton();
+			Hix::QML::Controls::Button* selectButton();
 
 		signals:
 			void nameChanged();
@@ -68,7 +67,7 @@ namespace Hix
 			QQuickItem* getQItem()override;
 
 			Hix::QML::Controls::ToggleSwitch* _hideButton;
-			Hix::QML::Controls::ToggleSwitch* _selectButton;
+			Hix::QML::Controls::Button* _selectButton;
 			QString _modelName;
 			bool _selected = false;
 		};

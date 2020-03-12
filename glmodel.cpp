@@ -259,22 +259,31 @@ int GLModel::ID() const
 	return longPtr;
 }
 
+void GLModel::modelSelectionClick()
+{
+	auto listed = getRootModel();
+	auto& partManager = Hix::Application::ApplicationManager::getInstance().partManager();
+	auto isSelected = partManager.isSelected(listed);
+	Hix::Application::ApplicationManager::getInstance().featureManager().setMode(nullptr);
+	//unselect previously selected parts if multi selection is not active.
+	if (!partManager.isMultiSelect())
+	{
+		partManager.unselectAll();
+	}
+	partManager.setSelected(listed, !isSelected);
+}
+
 void GLModel::clicked(MouseEventData& pick, const Qt3DRender::QRayCasterHit& hit)
 {
 	auto listed = getRootModel();
 	auto& partManager = Hix::Application::ApplicationManager::getInstance().partManager();
 	auto isSelected = partManager.isSelected(listed);
+	
 	if (Hix::Application::ApplicationManager::getInstance().featureManager().allowModelSelection())
 	{
 		if (pick.button == Qt::MouseButton::LeftButton)
 		{
-			Hix::Application::ApplicationManager::getInstance().featureManager().setMode(nullptr);
-			//unselect previously selected parts if multi selection is not active.
-			if (!isSelected && !partManager.isMultiSelect())
-			{
-				partManager.unselectAll();
-			}
-			partManager.setSelected(listed, !isSelected);
+			modelSelectionClick();
 		}
 		return;
 	}
@@ -361,6 +370,7 @@ void GLModel::dragEnded(Hix::Input::MouseEventData&)
 	dynamic_cast<Hix::Features::MoveMode*>(Hix::Application::ApplicationManager::getInstance().featureManager().currentMode())->featureEnded();
     //Hix::Application::ApplicationManager::getInstance().totalMoveDone();
 }
+
 
 
 /** HELPER functions **/
