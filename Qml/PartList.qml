@@ -25,39 +25,37 @@ Hix.PartList {
 			anchors.left: parent.left
 			anchors.leftMargin: myPadding
 		}
-		Rectangle {
-			width: 256 - 16;
-			height: 212;
+		ListView {
+			width: 240
+			height: 212
+			clip: true
 			//anchors.horizontalCenter: parent.horizontalCenter
 			anchors.right: parent.right
 			anchors.top: listtitle.bottom
 			anchors.topMargin: 8
-			ScrollView {
-				anchors.fill: parent
-				clip: true
-				width: 240;
-				height: 212;
-				// focus: true
-				ColumnLayout
-				{
-					id: itemContainer
-					anchors.left: parent.left
-					anchors.right: parent.right
+			
+			ColumnLayout
+			{
+				id: itemContainer
+				anchors.left: parent.left
+				anchors.right: parent.right
 
-				}
-				ScrollBar.vertical: ScrollBar{
-					id: control
-					//width: 12
-					policy: ScrollBar.AlwaysOn
-					contentItem: Rectangle {
-						implicitWidth: 8
-						//implicitHeight: 100
-						radius: 2
-						//color: "#aaaaaaaa"
-						color: control.pressed ? "#eeaaaaaa" : "#aaaaaaaa"
-					}
-                }
 			}
+			ScrollBar.vertical: ScrollBar{
+				id: control
+				active: true
+				anchors.top: parent.top
+				anchors.right: parent.right
+				//width: 12
+				policy: ScrollBar.AlwaysOn
+				contentItem: Rectangle {
+					implicitWidth: 8
+					//implicitHeight: 100
+					radius: 2
+					//color: "#aaaaaaaa"
+					color: control.pressed ? "#eeaaaaaa" : "#aaaaaaaa"
+				}
+            }
 		}
 
 		Hix.Button {
