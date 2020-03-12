@@ -16,11 +16,24 @@ namespace Hix
 {
 	namespace Render
 	{
-		using namespace Qt3DCore;
 		using namespace Qt3DRender;
 		using namespace Qt3DExtras;
-		using namespace Hix::Engine3D;
-		class SceneEntity : public QEntity
+
+		template<typename OwnerPtr, typename Fn>
+		void callFunctorRecursive(OwnerPtr owner, const Fn& callable)
+		{
+			callable(owner);
+			for (auto child : owner->childNodes())
+			{
+				auto childEntity = dynamic_cast<OwnerPtr>(child);
+				if (childEntity)
+				{
+					callFunctorRecursive(childEntity, callable);
+				}
+			}
+		}
+
+		class SceneEntity : public Qt3DCore::QEntity
 		{
 			Q_OBJECT
 		public:
@@ -33,9 +46,9 @@ namespace Hix
 			const static size_t UINT_SIZE = sizeof(uint); //needs to be large enough to accomodate all range of vertex index
 			const static size_t FACE_SIZE = IDX_SIZE * UINT_SIZE;
 			// load teeth model default
-			SceneEntity(QEntity* parent = nullptr); // main constructor for mainmesh and shadowmesh
+			SceneEntity(Qt3DCore::QEntity* parent = nullptr); // main constructor for mainmesh and shadowmesh
 			virtual ~SceneEntity();
-			void setMesh(Mesh* mesh);
+			void setMesh(Hix::Engine3D::Mesh* mesh);
 
 			void clearMesh();
 			//for now, one sceneEntity per mesh, no setter for mesh in sceneEntity
@@ -74,6 +87,10 @@ namespace Hix
 			Hix::Engine3D::Bounds3D recursiveAabb()const;
 			void updateRecursiveAabb();
 			Qt3DCore::QTransform& transform();
+
+
+
+
 
 		protected:
 

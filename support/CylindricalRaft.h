@@ -2,10 +2,6 @@
 
 #include "RaftModel.h"
 
-using namespace Qt3DCore;
-using namespace Qt3DRender;
-using namespace Qt3DExtras;
-
 
 namespace Hix
 {

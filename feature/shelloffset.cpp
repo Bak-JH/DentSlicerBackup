@@ -1,77 +1,115 @@
 #include "shelloffset.h"
-#include "qmlmanager.h"
+#include "../qml/components/Inputs.h"
+#include "../qml/components/ControlOwner.h"
 #include "feature/repair/meshrepair.h"
 #include "DentEngine/src/mesh.h"
 #include "cut/ZAxialCut.h"
 #include "deleteModel.h"
+#include "application/ApplicationManager.h"
+
+
 // offset shell with mm
 
 using namespace Hix::Engine3D;
 using namespace Hix::Features;
 using namespace Hix::Features::Cut;
-Hix::Features::ShellOffsetMode::ShellOffsetMode(GLModel* glmodel) : _subject(glmodel), _cuttingPlane(qmlManager->total)
+const QUrl OFFSET_POPUP_URL = QUrl("qrc:/Qml/FeaturePopup/PopupShellOffset.qml");
+
+Hix::Features::ShellOffsetMode::ShellOffsetMode():DialogedMode(OFFSET_POPUP_URL)
 {
-	_modelBound = _subject->recursiveAabb();
-	_cuttingPlane.enablePlane(true);
-	_cuttingPlane.transform().setTranslation(QVector3D(0, 0, _modelBound.zMin() + 1 * _modelBound.lengthZ() / 1.8));
+	if (Hix::Application::ApplicationManager::getInstance().partManager().selectedModels().empty())
+	{
+		Hix::Application::ApplicationManager::getInstance().modalDialogManager().needToSelectModels();
+		return;
+	}
+	auto& co = controlOwner();
+	co.getControl(_offsetValue, "offsetValue");
+
+	auto selectedModels = Hix::Application::ApplicationManager::getInstance().partManager().selectedModels();
+	if (selectedModels.size() == 1)
+	{
+		_subject = *selectedModels.begin();
+		_modelBound = _subject->recursiveAabb();
+	}
+	else
+	{
+		throw std::runtime_error("A single model must be selected");
+	}
 }
 
 Hix::Features::ShellOffsetMode::~ShellOffsetMode()
 {
 }
 
-void Hix::Features::ShellOffsetMode::getSliderSignal(double value)
+
+void Hix::Features::ShellOffsetMode::applyButtonClicked()
 {
-	float zlength = _modelBound.lengthZ();
-	_cuttingPlane.transform().setTranslation(QVector3D(0, 0, _modelBound.zMin() + value * zlength / 1.8));
+	auto container = new Hix::Features::FeatureContainer();
+	for (auto each : Hix::Application::ApplicationManager::getInstance().partManager().selectedModels())
+	{
+		container->addFeature(new ShellOffset(each, _offsetValue->getValue()));
+	}
+	Hix::Application::ApplicationManager::getInstance().taskManager().enqueTask(container);
 }
 
-Hix::Features::Feature* Hix::Features::ShellOffsetMode::doOffset(float offset)
-{
-	return new ShellOffset(_subject, offset, _cuttingPlane.transform().translation().z());
-}
 
 
 
 
-
-Hix::Features::ShellOffset::ShellOffset(GLModel* target, float offset, float zPlane) : _prevMesh(target->getMeshModd())
-{
-	_container = new FeatureContainer();
-	Mesh offsetMesh(*target->getMeshModd());
-
-	qDebug() << "copy, offset, reverse, add";
-	qmlManager->setProgress(0.42);
-	offsetMesh.vertexOffset(-offset);
-	offsetMesh.reverseFaces();
-
-	// 승환 60%
-	qmlManager->setProgress(0.54);
-	target->getMeshModd()->operator+=(offsetMesh);
-
-	qDebug() << "cut and fill hole";
-
-	qmlManager->setProgress(0.70);
-	// 승환 100%
-	qmlManager->setProgress(1);
-	auto cut = new ZAxialCut(target, zPlane);
-	_container->addFeature(cut);
-
-	for (auto& each : cut->lowerModels())
-		_container->addFeature(new DeleteModel(each));
-
-}
+Hix::Features::ShellOffset::ShellOffset(GLModel* target, float offset) : _target(target), _offset(offset)
+{}
 
 Hix::Features::ShellOffset::~ShellOffset()
 {
 }
 
-void Hix::Features::ShellOffset::undoImpl()
+
+void Hix::Features::ShellOffset::runImpl()
 {
-	_container->undo();
+	addFeature(new HollowMesh(_target, _offset));
+	FeatureContainer::runImpl();
 }
 
-void Hix::Features::ShellOffset::redoImpl()
+Hix::Features::HollowMesh::HollowMesh(GLModel* target, float offset) : _target(target), _offset(offset)
+{}
+
+Hix::Features::HollowMesh::~HollowMesh()
 {
-	_container->redo();
+}
+
+void Hix::Features::HollowMesh::undoImpl()
+{
+	postUIthread([this]() {
+		auto tmp = _target->getMeshModd();
+		_target->setMesh(_prevMesh.release());
+		_prevMesh.reset(tmp);
+		});
+
+
+}
+
+void Hix::Features::HollowMesh::redoImpl()
+{
+	postUIthread([this]() {
+		auto tmp = _target->getMeshModd();
+		_target->setMesh(_prevMesh.release());
+		_prevMesh.reset(tmp);
+		});
+}
+
+void Hix::Features::HollowMesh::runImpl()
+{
+
+	_prevMesh.reset(_target->getMeshModd());
+	//_prevMesh->reverseFaces();
+	
+	auto hollowMesh = new Mesh(*_prevMesh.get());
+	Mesh offsetMesh(*_target->getMeshModd());
+	offsetMesh.vertexOffset(-_offset);
+	offsetMesh.reverseFaces();
+	*hollowMesh += offsetMesh;
+	postUIthread([this, &hollowMesh]() {
+		_target->setMesh(hollowMesh);
+	});
+
 }

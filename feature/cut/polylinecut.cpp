@@ -11,7 +11,7 @@
 #include <Qt3DInput>
 #include <QEntity>
 #include "../../glmodel.h"
-#include "../../qmlmanager.h"
+
 #include "feature/Shapes2D.h"
 #include "feature/Extrude.h"
 #include <vector>
@@ -30,16 +30,19 @@ using namespace Hix::Features::CSG;
 using namespace Hix::Features::Cut;
 
 
-Hix::Features::Cut::PolylineCut::PolylineCut(GLModel * origModel, std::vector<QVector3D> _cuttingPoints)
+Hix::Features::Cut::PolylineCut::PolylineCut(GLModel * origModel, std::vector<QVector3D> cuttingPoints): FeatureContainerFlushSupport(origModel), _target(origModel), _cuttingPoints(cuttingPoints)
+{
+}
+
+void Hix::Features::Cut::PolylineCut::runImpl()
 {
 	//convert polyline to CSG-able 3D mesh, a thin 3D wall.
 	Mesh polylineWall;
-	generateCuttingWalls(_cuttingPoints, origModel->recursiveAabb(), polylineWall);
+	generateCuttingWalls(_cuttingPoints, _target->recursiveAabb(), polylineWall);
 	//convert all meshes to cork meshes
 	auto cylinderWallCork = toCorkMesh(polylineWall);
-	cutCSG(origModel->modelName(), origModel, cylinderWallCork);
+	cutCSG(_target->modelName(), _target, cylinderWallCork);
 	freeCorkTriMesh(&cylinderWallCork);
-
 }
 
 void Hix::Features::Cut::PolylineCut::generateCuttingWalls(const std::vector<QVector3D>& polyline, const Hix::Engine3D::Bounds3D& cutBound, Hix::Engine3D::Mesh& out)
@@ -92,16 +95,15 @@ void Hix::Features::Cut::PolylineCut::cutCSG(const QString& subjectName, Hix::Re
 		if (seperateParts[i]->getFaces().empty())
 			continue;
 		auto addModel = new Hix::Features::ListModel(seperateParts[i], subjectName + "_cut" + QString::number(i), nullptr);
-		addModel->getAddedModel()->setZToBed();
-		_prevDivideMap[dynamic_cast<GLModel*>(subject)].insert(addModel->getAddedModel());
+		tryRunFeature(*addModel);
+		addModel->get()->setZToBed();
 		addFeature(addModel);
 	}
-	//subject->setMesh(nullptr);
 	auto model = dynamic_cast<GLModel*>(subject);
 	if (model)
 	{
 		auto deleteModel = new DeleteModel(model);
-		_prevDivideMap[dynamic_cast<GLModel*>(model)].insert(deleteModel->getDeletedModel());
+		tryRunFeature(*deleteModel);
 		addFeature(deleteModel);
 	}
 	else

@@ -1,28 +1,41 @@
 #include "FlushSupport.h"
-#include "qmlmanager.h"
 #include "feature/SupportFeature.h"
+#include "../../application/ApplicationManager.h"
 
-Hix::Features::FlushSupport::FlushSupport()
+
+
+
+Hix::Features::FlushSupport::FlushSupport(const std::unordered_set<GLModel*>& models)
 {
-	auto selectedModels = qmlManager->getSelectedModels();
-	auto flshSupp = qmlManager->supportRaftManager().modelAttachedSupports(selectedModels);
+	auto flshSupp = Hix::Application::ApplicationManager::getInstance().supportRaftManager().modelAttachedSupports(models);
 	if (!flshSupp.empty())
 	{
-		qmlManager->featureHistoryManager().addFeature(SupportMode(selectedModels).clearSupport());
+		SupportMode::clearSupport(models);
 	}
 }
 
-//Hix::Features::FlushSupport::FlushSupport(GLModel* model)
-//{
-//	std::unordered_set<GLModel*> selectedModels;
-//	selectedModels.insert(model);
-//	auto flshSupp = qmlManager->supportRaftManager().modelAttachedSupports(selectedModels);
-//	if (!flshSupp.empty())
-//	{
-//		qmlManager->featureHistoryManager().addFeature(SupportMode(selectedModels).clearSupport());
-//	}
-//}
+Hix::Features::FlushSupport::FlushSupport(GLModel* model)
+{
+	std::unordered_set<GLModel*> models{ model };
+	auto flshSupp = Hix::Application::ApplicationManager::getInstance().supportRaftManager().modelAttachedSupports(models);
+	if (!flshSupp.empty())
+	{
+		SupportMode::clearSupport(models);
+	}
+}
 
 Hix::Features::FlushSupport::~FlushSupport()
+{
+}
+
+Hix::Features::FeatureContainerFlushSupport::FeatureContainerFlushSupport(const std::unordered_set<GLModel*>& models) : FlushSupport(models)
+{
+}
+
+Hix::Features::FeatureContainerFlushSupport::FeatureContainerFlushSupport(GLModel* model): FlushSupport(model)
+{
+}
+
+Hix::Features::FeatureContainerFlushSupport::~FeatureContainerFlushSupport()
 {
 }

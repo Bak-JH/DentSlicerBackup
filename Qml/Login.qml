@@ -37,7 +37,7 @@ ApplicationWindow {
         height: parent.height-2
         anchors.top: parent.top
         anchors.left: parent.left
-        focus: true
+        // focus: true
 
         color: "#ffffff"
 

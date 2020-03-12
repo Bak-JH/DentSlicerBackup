@@ -2,8 +2,8 @@
 #include <QVector2D>
 #include <QVector3D>
 #include <unordered_set>
-#include "../configuration.h"
-#include "../../qmlmanager.h"
+#include "../../../application/ApplicationManager.h"
+
 using namespace ClipperLib;
 
 static constexpr float INT_PT_RES_FLOAT = (float)Hix::Polyclipping::INT_PT_RESOLUTION;
@@ -26,13 +26,14 @@ IntPoint  Hix::Polyclipping::toInt2DPt(const QVector2D& pt)
 
 IntPoint Hix::Polyclipping::toPixelSize(const QVector2D& pt)
 {
-	auto& pSet = qmlManager->settings().printerSetting;
+	auto& pSet = Hix::Application::ApplicationManager::getInstance().settings().printerSetting;
 	IntPoint pixelSize;
-	float invert = scfg->slice_invert == SlicingConfiguration::Invert::InvertXAxis ? -1.0f : 1.0f;
-	pixelSize.X = std::round(pt.x()* invert * pSet.pixelPerMMX() / scfg->contraction_ratio
+	auto& setting = Hix::Application::ApplicationManager::getInstance().settings().sliceSetting;
+	float invert = setting.invertX ? -1.0f : 1.0f;
+	pixelSize.X = std::round(pt.x()* invert * pSet.pixelPerMMX()
 		+ (pSet.sliceImageResolutionX / 2));
 
-	pixelSize.Y = std::round(pt.y() * pSet.pixelPerMMY() / scfg->contraction_ratio
+	pixelSize.Y = std::round(pt.y() * pSet.pixelPerMMY()
 		+ (pSet.sliceImageResolutionY / 2));
 	return pixelSize;
 }

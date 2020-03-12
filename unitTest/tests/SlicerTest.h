@@ -8,7 +8,7 @@
 
 //acces unaccessible cpp only functions
 #include "../../DentEngine/src/slicer.h"
-#include "../RandomGen.h"
+#include "../../common/RandomGen.h"
 namespace SlicerTest
 {
 	using namespace Hix;
@@ -126,7 +126,7 @@ namespace SlicerTest
 			{
 			}
 
-			//float delta = scfg->layer_height;
+			//float delta = Hix::Application::ApplicationManager::getInstance().settings().sliceSetting.layerHeight;
 			//std::vector<std::vector<Contour>> contoursPerPlane;
 			//std::vector<float> planes;
 

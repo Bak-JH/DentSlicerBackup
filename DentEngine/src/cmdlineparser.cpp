@@ -50,7 +50,7 @@ CommandLineParseResult CmdLineParser::parseCommandLine(QString *errorMessage)
     //inputfilename = positionalArguments.first();
     //outputfilename = positionalArguments.back();
     //if (layerheightoption.valueName() != "")
-    //    scfg->layer_height = layerheightoption.valueName().toFloat();
+    //    Hix::Application::ApplicationManager::getInstance().settings().sliceSetting.layerHeight = layerheightoption.valueName().toFloat();
     //if (supporteroption.valueName() != "")
     //    scfg->support_type = supporteroption.valueName().toInt();
     //if (filloption.valueName() != "")

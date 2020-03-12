@@ -1,13 +1,7 @@
-#ifndef SLICINGENGINE_H
-#define SLICINGENGINE_H
-
-
+#pragma once
 #include <QString>
+#include <unordered_set>
 
-namespace tf
-{
-	class Subflow;
-}
 namespace Hix
 {
 	namespace Support
@@ -18,7 +12,6 @@ namespace Hix
 
 class GLModel;
 
-using namespace Hix::Engine3D;
 namespace SlicingEngine
 {
 	struct Result
@@ -28,9 +21,7 @@ namespace SlicingEngine
 		QString size;
 		float volume;
 	};
-	Result sliceModels (bool isTemp, tf::Subflow& subflow,float zMax, std::vector<std::reference_wrapper<const GLModel>>models, const Hix::Support::SupportRaftManager& suppRaft, QString filename = "");
+	Result sliceModels (bool isTemp, float zMax, const std::unordered_set<GLModel*>& models, const Hix::Support::SupportRaftManager& suppRaft, QString filename = "");
 };
 
-//extern QmlManager qm;
 
-#endif // SLICINGENGINE_H

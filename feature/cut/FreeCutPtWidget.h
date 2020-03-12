@@ -1,5 +1,5 @@
 #pragma once
-#include "../../ui/CubeWidget.h"
+#include "widget/CubeWidget.h"
 #include "../../input/Clickable.h"
 #include "../../input/Hoverable.h"
 #include <memory>

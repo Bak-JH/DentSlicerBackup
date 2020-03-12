@@ -4,7 +4,7 @@
 #include <time.h>
 #include "TMesh/tmesh.h"
 #include "../../glmodel.h"
-#include "../../qmlmanager.h"
+#include "../addModel.h"
 #include"../../common/Debug.h"
 using namespace T_MESH;
 using namespace Hix::Engine3D;
@@ -301,9 +301,6 @@ void Hix::Features::repair(Hix::Engine3D::Mesh& mesh)
 	tin.loadTriangleList(vtcs.data(), triInds.data(), mvs.size(), faces.size());
    //seperate into multiple components if there are disjoing components
 	tin.removeSmallestComponents();
-	
-
-
 
 	// Fill holes
 	if (tin.boundaries())
@@ -372,16 +369,23 @@ std::vector<Mesh*> Hix::Features::importAndRepairMesh(const std::string& importP
 	return meshes;
 }
 
-Hix::Features::MeshRepair::MeshRepair(const std::unordered_set<GLModel*>& selectedModels)
+Hix::Features::MeshRepair::MeshRepair(GLModel* selectedModel): _model(selectedModel)
 {
-	for (auto model : selectedModels)
-	{
-		repairImpl(model, model->modelName());
-	}
 }
 
 Hix::Features::MeshRepair::~MeshRepair()
 {
+}
+
+void Hix::Features::MeshRepair::runImpl()
+{
+
+	repairImpl(_model, _model->modelName());
+}
+
+GLModel* Hix::Features::MeshRepair::get()
+{
+	return _model;
 }
 
 void Hix::Features::MeshRepair::repairImpl(GLModel* subject, const QString& modelName)
@@ -397,8 +401,6 @@ void Hix::Features::MeshRepair::repairImpl(GLModel* subject, const QString& mode
 			++childIdx;
 		}
 	}
-
-	//std::vector<Hix::Engine3D::Mesh*> repairedComps;
 
 	auto seperated = Hix::Features::seperateDisconnectedMeshes(subject->getMeshModd());
 	//remove smallest components
@@ -436,25 +438,29 @@ void Hix::Features::MeshRepair::repairImpl(GLModel* subject, const QString& mode
 	else if (seperated.size() == 1)
 	{
 		//do nothing, see seperateDisconnectedMeshes
-		subject->updateMesh(true);
+		postUIthread([subject]() {
+			subject->updateMesh(true);
+		});
 
 	}
 	else
 	{
 		//mesh was split into seperate components, they should be added as children of the original subject
 		//subject is now an "empty" node, with no mesh and just transform matrix
-		subject->clearMesh();
-		subject->setMesh(new Mesh());
+		postUIthread([subject, &seperated, &modelName, this]() {
+			subject->clearMesh();
+			subject->setMesh(new Mesh());
+		});
+
+		//add children via add model feature
 		size_t childIdx = 0;
-		auto emptyTransform = Qt3DCore::QTransform();
+		Qt3DCore::QTransform emptyTransform;
 		for (auto& comp : seperated)
 		{
-			//qmlManager->createAndListModel(comp, modelName + "_child" + QString::number(childIdx), &subject->transform());
-			auto newModel = new GLModel(subject, comp, modelName + "_child" + QString::number(childIdx), &emptyTransform);
+			auto addModel = new AddModel(subject, comp, modelName + "_child" + QString::number(childIdx), &emptyTransform);
+			tryRunFeature(*addModel);
+			addFeature(addModel);
 			++childIdx;
 		}
-
 	}
-	subject->updateRecursiveAabb();
-	subject->setZToBed();
 }

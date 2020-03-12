@@ -1,9 +1,11 @@
 #include "TwoManifoldBuilder.h"
 #include "../Shapes2D.h"
 #include "../../common/Debug.h"
-#include "../../qmlmanager.h"
+#include "../../glmodel.h"
 #include <cmath>
 #include "../addModel.h"
+#include "../repair/meshrepair.h"
+#include "../Plane3D.h"
 //Few assumptions
 //1. Assume filling plane is XY plane.
 //2. Assume Model have a boundary edges that is roughly parallel to this plane
@@ -755,53 +757,58 @@ void buildBott(Hix::Engine3D::Mesh& mesh, const  std::deque<HalfEdgeConstItr>& b
 }
 
 
-
-
-
-
-Hix::Features::TwoManifoldBuilder::TwoManifoldBuilder(Hix::Engine3D::Mesh& model):_model(model)
+void Hix::Features::guessOrientation(Hix::Engine3D::Mesh& model, float& cuttingPlane, float& bottomPlane, QQuaternion& rotation)
 {
-}
-
-void Hix::Features::TwoManifoldBuilder::autogenOrientation(float& cuttingPlane, float& bottomPlane, QQuaternion& rotation)
-{
-	auto boundary = getLongestBoundary(_model);
+	auto boundary = getLongestBoundary(model);
 	auto isBottEmpty = !isClockwise(boundary);
-	auto entireFitPlane = bestFittingPlaneEntireModel(_model, boundary, isBottEmpty);
+	auto entireFitPlane = bestFittingPlaneEntireModel(model, boundary, isBottEmpty);
 	QVector3D zDirection(0, 0, 1);
 	rotation = QQuaternion::rotationTo(entireFitPlane.normal, zDirection);
 	Qt3DCore::QTransform transform;
 	transform.setRotation(rotation);
-	auto rotatedPlanePos = transform.matrix()* entireFitPlane.point;
+	auto rotatedPlanePos = transform.matrix() * entireFitPlane.point;
 	constexpr float Z_OFFSET = 2.0f;
 	cuttingPlane = rotatedPlanePos.z();
 	bottomPlane = cuttingPlane - Z_OFFSET;
-
-
 }
 
-void Hix::Features::TwoManifoldBuilder::buildModel(const QString& name, float cuttingPlane, float bottomPlane)
-{
-	auto boundary = getLongestBoundary(_model);
-	Hix::Plane3D::PDPlane bestFitPlane{ QVector3D(0,0, cuttingPlane), QVector3D(0,0,1) };
-	auto delFaces = edgeRemoveOutlier(_model, boundary, bestFitPlane);
-	cuntourConcaveFill(_model, boundary, true);
-	zCylinder(_model, boundary, true, bottomPlane);
-	buildBott(_model, boundary, true, bottomPlane);
-	delFaces.flush();
 
-	auto addModel = new Hix::Features::ListModel(&_model, name, nullptr);
-	_result = addModel->getAddedModel();
-	addModel->getAddedModel()->setZToBed();
-	addFeature(addModel);
-}
 
-GLModel* Hix::Features::TwoManifoldBuilder::result()
-{
-	return _result;
-}
+
+Hix::Features::TwoManifoldBuilder::TwoManifoldBuilder(Hix::Engine3D::Mesh& model, const QString& name, float cuttingPlane, float bottomPlane) :_model(model), _name(name),
+_cuttingPlane(cuttingPlane), _bottomPlane(bottomPlane)
+{}
 
 Hix::Features::TwoManifoldBuilder::~TwoManifoldBuilder()
 {
+}
+
+void Hix::Features::TwoManifoldBuilder::undoImpl()
+{
+	tryUndoFeature(*_listModelFeature);
+}
+
+void Hix::Features::TwoManifoldBuilder::redoImpl()
+{
+	tryRedoFeature(*_listModelFeature);
+}
+
+void Hix::Features::TwoManifoldBuilder::runImpl()
+{
+	auto boundary = getLongestBoundary(_model);
+	Hix::Plane3D::PDPlane bestFitPlane{ QVector3D(0,0, _cuttingPlane), QVector3D(0,0,1) };
+	auto delFaces = edgeRemoveOutlier(_model, boundary, bestFitPlane);
+	cuntourConcaveFill(_model, boundary, true);
+	zCylinder(_model, boundary, true, _bottomPlane);
+	buildBott(_model, boundary, true, _bottomPlane);
+	delFaces.flush();
+	_listModelFeature.reset(new Hix::Features::ListModel(&_model, _name, nullptr));
+	tryRunFeature(*_listModelFeature);
+	auto model = _listModelFeature->get();
+	if (Hix::Features::isRepairNeeded(model->getMesh()))
+	{
+		MeshRepair rapairModels(model);
+		rapairModels.run();
+	}
 }
 

@@ -1,8 +1,4 @@
 
-#include "qmlmanager.h"
-QmlManager* qmlManager;
-
-
 
 #if defined(_DEBUG) || defined(QT_DEBUG )
 //run unit test?
@@ -14,12 +10,11 @@ QmlManager* qmlManager;
 #else
 
 #include <QApplication>
-#include <QQmlApplicationEngine>
 #include <QQmlEngine>
 #include <QQmlContext>
 #include "utils/quaternionhelper.h"
 #include "slice/slicingengine.h"
-#include "DentEngine/src/configuration.h"
+
 #include "glmodel.h"
 #include <QQuickView>
 #include "QtConcurrent/QtConcurrent"
@@ -27,6 +22,10 @@ QmlManager* qmlManager;
 #include <QSplashScreen>
 #include "utils/updatechecker.h"
 #include "utils/gridmesh.h"
+#include "qml/components/HixQML.h"
+#include "qml/util/QMLUtil.h"
+#include "application/ApplicationManager.h"
+#include "utils/httpreq.h"
 
 using namespace Qt3DCore;
 
@@ -54,21 +53,22 @@ int main(int argc, char** argv)
 
 #else
 
-	QApplication app(argc, argv);
+	QApplication  app(argc, argv);
 	/* Language patch
 	QTranslator translator ;
 	translator.load(":/lang_ko.qm");
 	app.installTranslator(&translator);
 	*/
-
-	QQmlApplicationEngine engine;
+	app.setQuitOnLastWindowClosed(true);
+	Hix::QML::registerTypes();
 	qRegisterMetaType<std::vector<QVector3D>>("std::vector<QVector3D>");
 	qRegisterMetaType<std::vector<float>>("std::vector<float>");
-	qmlRegisterType<GridMesh>("DentSlicer", 1, 0, "GridMesh");
 
-	QScopedPointer<QuaternionHelper> qq(new QuaternionHelper);
-	qmlManager = new QmlManager();
-	QScopedPointer<QmlManager> qm(qmlManager);
+
+	auto& appManager = Hix::Application::ApplicationManager::getInstance();
+	auto& engine = appManager.engine();
+	engine.load(QUrl(QStringLiteral("qrc:/Qml/main.qml")));
+	appManager.init();
 
 	/** Splash Image **/
 	QPixmap pixmap(":/Resource/splash_dentslicer.png");
@@ -76,55 +76,33 @@ int main(int argc, char** argv)
 	QPen penHText(QColor("#777777"));
 	painter.setFont(QFont("Arial", 9));
 	painter.setPen(penHText);
-
 	painter.drawText(QPoint(32, 290), "Dental 3D Printing Solution");
-	painter.drawText(QPoint(32, 310), "Version " + qmlManager->getVersion());
-	//painter.drawText(QPoint(88,310), version);
+	painter.drawText(QPoint(32, 310), "Version " + Hix::Application::ApplicationManager::getInstance().getVersion());
 	painter.drawText(QPoint(32, 330), "Developed by HiX Inc.");
-
 	QSplashScreen* splash = new QSplashScreen(pixmap);
 	splash->show();
+	//login or make main window visible
+	QQuickWindow *mainWindow;
+	Hix::QML::getItemByID(appManager.getWindowRoot(), mainWindow, "window");
+	QQuickWindow* loginWindow;
+	QObject *loginButton;
+	Hix::QML::getItemByID(appManager.getWindowRoot(), loginWindow, "loginWindow");
+	Hix::QML::getItemByID(appManager.getWindowRoot(), loginButton, "loginButton");
 
-	engine.rootContext()->setContextProperty("qm", qm.data());
-	//FindItemByName(&engine, "slicing_data")->setContextProperty("qm", qmlManager);
-	engine.rootContext()->setContextProperty("qq", qq.data());
-	//engine.rootContext()->setContextProperty("se",se.data());
 
-	engine.load(QUrl(QStringLiteral("qrc:/Qml/main.qml")));
-
+#if  defined(QT_DEBUG) || defined(_DEBUG)
+	mainWindow->setProperty("visible", true);
+	loginWindow->close();
+#else
+	loginWindow->setProperty("visible", true);
+	//auth
+	httpreq* hr = new httpreq(loginWindow, loginButton);
 	// update module codes
 	UpdateChecker* up = new UpdateChecker();
 	up->checkForUpdates();
-	//initWinSparkle();
-	//checkForUpdates();
 
-
-	//language patch
-	//engine.retranslate();
-
-	qmlManager->initializeUI(&engine);
-	splash->close();
-
-#if  defined(QT_DEBUG) || defined(_DEBUG)
-	qmlManager->mainWindow->setProperty("visible", true);
-#else
-	qmlManager->loginWindow->setProperty("visible", true);
 #endif
-
-	QSurfaceFormat format;
-	format.setMajorVersion(4);
-	format.setMinorVersion(3);
-	format.setProfile(QSurfaceFormat::CoreProfile);
-
-	QOpenGLContext gl_ctx;
-	gl_ctx.setFormat(format);
-	if (!gl_ctx.create())
-		throw std::runtime_error("context creation failed");
-
-	QOffscreenSurface surface;
-	surface.create();
-	gl_ctx.makeCurrent(&surface);
-
+	splash->close();
 	return app.exec();
 #endif
 

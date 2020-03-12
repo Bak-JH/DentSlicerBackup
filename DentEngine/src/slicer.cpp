@@ -5,7 +5,6 @@
 #include <unordered_map>
 #include "../../utils/mathutils.h"
 #include "polyclipping/QDebugPolyclipping.h"
-#include "configuration.h"
 #include "ContourBuilder.h"
 #include "Planes.h"
 #include "SlicerDebug.h"

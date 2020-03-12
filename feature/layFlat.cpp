@@ -1,11 +1,17 @@
 #include "layFlat.h"
-#include "qmlmanager.h"
+#include "../glmodel.h"
+#include "application/ApplicationManager.h"
 using namespace Hix::Features;
 
-
-Hix::Features::LayFlatMode::LayFlatMode(const std::unordered_set<GLModel*>& selectedModels)
-	: PPShaderMode(selectedModels)
+const QUrl LAYFLAT_POPUP_URL = QUrl("qrc:/Qml/FeaturePopup/PopupLayFlat.qml");
+Hix::Features::LayFlatMode::LayFlatMode()
+	: PPShaderMode(Hix::Application::ApplicationManager::getInstance().partManager().selectedModels()), DialogedMode(LAYFLAT_POPUP_URL)
 {
+	if (Hix::Application::ApplicationManager::getInstance().partManager().selectedModels().empty())
+	{
+		Hix::Application::ApplicationManager::getInstance().modalDialogManager().needToSelectModels();
+		return;
+	}
 }
 
 Hix::Features::LayFlatMode::~LayFlatMode()
@@ -19,47 +25,29 @@ void Hix::Features::LayFlatMode::faceSelected(GLModel* selected, const Hix::Engi
 	PPShaderMode::colorFaces(selected, neighbors);
 	auto worldFn = selectedFace.worldFn();
 	_args[listed] = listed->vectorToLocal(worldFn);
-	isReady = true;
 }
 
-Hix::Features::FeatureContainerFlushSupport* Hix::Features::LayFlatMode::applyLayFlat()
+void Hix::Features::LayFlatMode::applyButtonClicked()
 {
 	if (_args.empty())
-		return nullptr;
+		return;
 
-	Hix::Features::FeatureContainerFlushSupport* container = new FeatureContainerFlushSupport();
+	Hix::Features::FeatureContainerFlushSupport* container = new FeatureContainerFlushSupport(Hix::Application::ApplicationManager::getInstance().partManager().selectedModels());
 	for (auto& each : _args)
 	{
-		container->addFeature(new LayFlat(each.first, each.second, isReady));
+		container->addFeature(new LayFlat(each.first, each.second));
 	}
 	_args.clear();
-
-	return container;
+	Hix::Application::ApplicationManager::getInstance().taskManager().enqueTask(container);
 }
 
 
 
 
 
-Hix::Features::LayFlat::LayFlat(GLModel* selectedModel, QVector3D normal, bool isReady) : _model(selectedModel)
+Hix::Features::LayFlat::LayFlat(GLModel* selectedModel, QVector3D normal) : _model(selectedModel), _normal(normal)
 {
-	if (!isReady)
-		return;
-
-	_prevMatrix = selectedModel->transform().matrix();
-	_prevAabb = selectedModel->aabb();
-
-	constexpr QVector3D worldBot(0, 0, -1);
-	QVector3D localBotNorml = selectedModel->vectorToLocal(worldBot);
-	auto rot = QQuaternion::rotationTo(normal, localBotNorml);
-
-	selectedModel->unselectMeshFaces();
-	selectedModel->updateMesh(true);
-
-	selectedModel->transform().setRotation(selectedModel->transform().rotation() * rot);
-	selectedModel->updateRecursiveAabb();
-	selectedModel->setZToBed();
-	qmlManager->resetLayflat();
+	_progress.setDisplayText("Lay Flat Model");
 }
 
 void Hix::Features::LayFlat::undoImpl()
@@ -69,7 +57,6 @@ void Hix::Features::LayFlat::undoImpl()
 
 	_model->transform().setMatrix(_prevMatrix);
 	_model->aabb() = _prevAabb;
-	qmlManager->cameraViewChanged();
 	_model->setZToBed();
 	_model->unselectMeshFaces();
 	_model->updateMesh(true);
@@ -85,13 +72,30 @@ void Hix::Features::LayFlat::redoImpl()
 
 	_model->transform().setMatrix(_prevMatrix);
 	_model->aabb() = _prevAabb;
-	qmlManager->cameraViewChanged();
 	_model->setZToBed();
 	_model->unselectMeshFaces();
 	_model->updateMesh(true);
 
 	_prevMatrix = currMatrix;
 	_prevAabb = currAabb;
+}
+
+void Hix::Features::LayFlat::runImpl()
+{
+	_prevMatrix = _model->transform().matrix();
+	_prevAabb = _model->aabb();
+
+	constexpr QVector3D worldBot(0, 0, -1);
+	QVector3D localBotNorml = _model->vectorToLocal(worldBot);
+	auto rot = QQuaternion::rotationTo(_normal, localBotNorml);
+
+	_model->unselectMeshFaces();
+	_model->updateMesh(true);
+
+	_model->transform().setRotation(_model->transform().rotation() * rot);
+	_model->updateRecursiveAabb();
+	_model->setZToBed();
+	//Hix::Application::ApplicationManager::getInstance().resetLayflat();
 }
 
 Hix::Features::LayFlat::~LayFlat()

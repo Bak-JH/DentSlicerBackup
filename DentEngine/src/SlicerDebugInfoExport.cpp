@@ -1,8 +1,8 @@
 #include "SlicerDebugInfoExport.h"
 #include "SlicerDebug.h"
-#include "configuration.h"
 #include <QSvgGenerator>
-#include "../../qmlmanager.h"
+#include "../../application/ApplicationManager.h"
+
 void drawContour(const Hix::Slicer::Contour& contour, QPainter& painter, QString contourName)
 {
 	auto intPath = contour.toDebugPath();
@@ -24,7 +24,7 @@ void Hix::Slicer::Debug::outDebugSVGs(const std::deque<Hix::Slicer::Contour>& co
 	
 	//svg file name
 	QString newPath = SlicerDebug::getInstance().debugFilePath + QString::number(z) + QString(".svg");
-	auto& pSet = qmlManager->settings().printerSetting;
+	auto& pSet = Hix::Application::ApplicationManager::getInstance().settings().printerSetting;
 	QSvgGenerator generator;
 	generator.setFileName(newPath);
 	QSize size(pSet.sliceImageResolutionX + 200, pSet.sliceImageResolutionY + 200);
@@ -66,7 +66,7 @@ void Hix::Slicer::Debug::outDebugIncompletePathsSVGs(const std::deque<Hix::Slice
 
 	//svg file name
 	QString newPath = SlicerDebug::getInstance().debugFilePath +"Incomplete_"+ QString::number(z) + QString(".svg");
-	auto& pSet = qmlManager->settings().printerSetting;
+	auto& pSet = Hix::Application::ApplicationManager::getInstance().settings().printerSetting;
 
 	QSvgGenerator generator;
 	generator.setFileName(newPath);

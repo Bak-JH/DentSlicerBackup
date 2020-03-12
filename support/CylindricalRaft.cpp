@@ -1,6 +1,5 @@
 ﻿#include "CylindricalRaft.h"
 #include "SupportRaftManager.h"
-#include "../DentEngine/src/configuration.h"
 #include "../feature/Extrude.h"
 #include "../feature/Shapes2D.h"
 #include <QTransform>
@@ -9,8 +8,12 @@
 #include <pcl/surface/convex_hull.h>
 #include <pcl/point_types.h>
 #include "../render/LineMeshEntity.h"
-
+#include "../application/ApplicationManager.h"
 constexpr float RAFT_JOINT_CNT = 2;
+
+using namespace Qt3DCore;
+using namespace Qt3DRender;
+using namespace Qt3DExtras;
 
 using namespace Hix::Engine3D;
 using namespace Hix::Input;
@@ -57,7 +60,7 @@ void Hix::Support::CylindricalRaft::generateMeshForContour(Mesh* mesh, const std
 
 	//path is simple cylinder starting from 0,0,0 to 0,0,raft_height
 	path.emplace_back(QVector3D(0, 0, _manager->raftBottom()));
-	path.emplace_back(QVector3D(0, 0, scfg->raft_thickness));
+	path.emplace_back(QVector3D(0, 0, Hix::Application::ApplicationManager::getInstance().settings().supportSetting.raftThickness));
 
 	//create cylinder walls
 	std::vector<std::vector<QVector3D>> jointContours;
@@ -77,7 +80,7 @@ void Hix::Support::CylindricalRaft::generateMesh(const std::vector<QVector3D>& o
 	auto mesh = new Mesh();
 	//generate square for each overhang
 	//std::vector<std::vector<QVector3D>> cylinders;
-	auto square = Hix::Shapes2D::generateSquare(scfg->support_radius_max *1.8);
+	auto square = Hix::Shapes2D::generateSquare(Hix::Application::ApplicationManager::getInstance().settings().supportSetting.supportRadiusMax * 1.0);
 
 	std::vector<QVector3D> contourPoints;
 	contourPoints.reserve(4 * overhangs.size());
@@ -101,8 +104,9 @@ void Hix::Support::CylindricalRaft::generateMesh(const std::vector<QVector3D>& o
 	{
 		interiorPts->push_back({ each.x(), each.y(), 0 });
 	}
-	pcl::ConcaveHull<pcl::PointXYZ> cHull;
-	cHull.setAlpha(minVorDist);
+	//pcl::ConcaveHull<pcl::PointXYZ> cHull;
+	pcl::ConvexHull<pcl::PointXYZ> cHull;
+	//cHull.setAlpha(minVorDist);
 	cHull.setInputCloud(interiorPts);
 	auto test = cHull.getDimension();
 	cHull.reconstruct(*concaveOut, polygons);

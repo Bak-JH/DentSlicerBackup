@@ -1,12 +1,12 @@
 #include "FeatureHistoryManager.h"
 #include <QDebug>
 
-Hix::Features::FeatureHisroyManager::FeatureHisroyManager()
+Hix::Features::FeatureHistoryManager::FeatureHistoryManager()
 {
 	_itr = _history.end();
 }
 
-void Hix::Features::FeatureHisroyManager::addFeature(Hix::Features::Feature* feature)
+void Hix::Features::FeatureHistoryManager::addFeature(Hix::Features::Feature* feature)
 {
 	if (feature == nullptr)
 	{
@@ -33,17 +33,17 @@ void Hix::Features::FeatureHisroyManager::addFeature(Hix::Features::Feature* fea
 	_itr = _history.end();
 }
 
-const Hix::Features::Feature& Hix::Features::FeatureHisroyManager::peek()const
+const Hix::Features::Feature& Hix::Features::FeatureHistoryManager::peek()const
 {
 	return *(_history.back().get());
 }
 
-bool Hix::Features::FeatureHisroyManager::empty() const
+bool Hix::Features::FeatureHistoryManager::empty() const
 {
 	return _history.empty();
 }
 
-void Hix::Features::FeatureHisroyManager::pop()
+void Hix::Features::FeatureHistoryManager::pop()
 {
 	if (*_itr == _history.back())
 	{
@@ -55,7 +55,7 @@ void Hix::Features::FeatureHisroyManager::pop()
 	_history.pop_back();
 }
 
-void Hix::Features::FeatureHisroyManager::undo()
+void Hix::Features::FeatureHistoryManager::undo()
 {
 	if (_itr == _history.begin())
 		return;
@@ -64,7 +64,7 @@ void Hix::Features::FeatureHisroyManager::undo()
 	prevFeature->undo();
 }
 
-void Hix::Features::FeatureHisroyManager::redo()
+void Hix::Features::FeatureHistoryManager::redo()
 {
 	if (_itr == _history.end())
 		return;

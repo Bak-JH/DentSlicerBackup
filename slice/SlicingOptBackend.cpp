@@ -1,5 +1,5 @@
 #include "SlicingOptBackend.h"
-#include "../qmlmanager.h"
+
 #include "../DentEngine/src/configuration.h"
 #include <regex>
 
@@ -89,7 +89,7 @@ void resStringToInt(std::string_view str, int& x, int& y)
 
 }
 
-SlicingOptBackend::SlicingOptBackend(QmlManager* qmlManager, SlicingConfiguration* config): _qmlManager(qmlManager), _config(config)
+SlicingOptBackend::SlicingOptBackend(SlicingConfiguration* config):  _config(config)
 {
 
 }
@@ -103,11 +103,11 @@ void SlicingOptBackend::addOptionDialogCombo(QString opName, std::array<std::str
 	{
 		enumStrings.push_back(each.data());
 	}
-	QMetaObject::invokeMethod(_qmlManager->ltso, "addOptionElementCombo",
-		Q_ARG(QVariant, opName),
-		Q_ARG(QVariant, enumStrings),
-		Q_ARG(QVariant, defaultIdx)
-	);
+	//QMetaObject::invokeMethod(_qmlManager->ltso, "addOptionElementCombo",
+	//	Q_ARG(QVariant, opName),
+	//	Q_ARG(QVariant, enumStrings),
+	//	Q_ARG(QVariant, defaultIdx)
+	//);
 }
 
 void SlicingOptBackend::createSlicingOptControls()
@@ -124,16 +124,16 @@ void SlicingOptBackend::createSlicingOptControls()
 	addOptionDialogPercentage(QString("Support density"), 50);
 	addOptionDialogCombo(QString("Contraction Ratio"), ContractionRatio, 1);
 
-	QObject::connect(_qmlManager->ltso, SIGNAL(optionChanged(QString, QVariant)), this, SLOT(onOptionChanged(QString, QVariant)));
+	//QObject::connect(_qmlManager->ltso, SIGNAL(optionChanged(QString, QVariant)), this, SLOT(onOptionChanged(QString, QVariant)));
 
 }
 
 void SlicingOptBackend::addOptionDialogPercentage(QString opName, int defaultVal)
 {
-	QMetaObject::invokeMethod(_qmlManager->ltso, "addOptionElementPercentage",
-		Q_ARG(QVariant, opName),
-		Q_ARG(QVariant, defaultVal)
-	);
+	//QMetaObject::invokeMethod(_qmlManager->ltso, "addOptionElementPercentage",
+	//	Q_ARG(QVariant, opName),
+	//	Q_ARG(QVariant, defaultVal)
+	//);
 }
 
 
@@ -153,7 +153,7 @@ void SlicingOptBackend::onOptionChanged(QString opName, QVariant newVal)
 	}
 	else if (opName == "Support type")
 	{
-		_config->support_type = (SlicingConfiguration::SupportType)toInt;
+		_config->support_type = (Hix::Settings::SupportSetting::SupportType)toInt;
 
 	}
 	else if (opName == "Infill type")
@@ -168,12 +168,12 @@ void SlicingOptBackend::onOptionChanged(QString opName, QVariant newVal)
 	}
 	else if (opName == "Support min radius")
 	{
-		_config->support_radius_min = std::stof(std::string(SupportRadiusMin[toInt]));
+		_config->supportRadiusMin = std::stof(std::string(SupportRadiusMin[toInt]));
 
 	}
 	else if (opName == "Support max radius")
 	{
-		_config->support_radius_max = std::stof(std::string(SupportRadiusMax[toInt]));
+		_config->supportRadiusMax = std::stof(std::string(SupportRadiusMax[toInt]));
 	}
 	else if (opName == "Slice image inversion")
 	{
