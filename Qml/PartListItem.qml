@@ -8,7 +8,7 @@ Hix.PartListItem {
 	id: root
 	width: 224
 	height: 28
-
+	property bool isSelected: false
 	onNameChanged: { modelnameText.text = root.modelName; }
 
 	Column {
@@ -25,6 +25,7 @@ Hix.PartListItem {
 				anchors.leftMargin: 8
 			}
 			function setSelected(){
+				isSelected = true
 				color="#f5f5f5"
 				modelnameText.color="#1db2c4"
 				if(hideButton.isChecked)
@@ -33,6 +34,7 @@ Hix.PartListItem {
 					showhideimg.source = "qrc:/Resource/part_show_select_1.png"
 			}
 			function setUnselected(){
+				isSelected = false
 				color="white"
 				modelnameText.color="black"
 				if(hideButton.isChecked)
@@ -60,14 +62,14 @@ Hix.PartListItem {
 
 		
 
-		onChecked: {
-			if(selectButton.isChecked)
+		onUnchecked: {
+			if(isSelected)
 				showhideimg.source = "qrc:/Resource/part_show_select_1.png"
 			else
 				showhideimg.source = "qrc:/Resource/part_show_1.png"
 		}
-		onUnchecked: {
-			if(selectButton.isChecked)
+		onChecked: {
+			if(isSelected)
 				showhideimg.source = "qrc:/Resource/part_hide_select_1.png"
 			else
 				showhideimg.source = "qrc:/Resource/part_hide_1.png"
