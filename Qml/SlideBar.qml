@@ -8,6 +8,11 @@ Hix.SlideBarShell {
 	id: root
 	width: 64
 	height: 600
+
+	onValueChanged: {
+		control.value = value
+	}
+
 	Rectangle {
 		id: shell
 		width: parent.width

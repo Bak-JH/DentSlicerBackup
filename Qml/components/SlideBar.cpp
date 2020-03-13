@@ -24,6 +24,12 @@ void Hix::QML::SlideBarShell::setRange(double min, double max)
 	}
 }
 
+void Hix::QML::SlideBarShell::setValue(double value)
+{
+	_value = value;
+	emit valueChanged();
+}
+
 double Hix::QML::SlideBarShell::getMin() const
 {
 	return _min;

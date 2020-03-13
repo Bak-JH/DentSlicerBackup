@@ -20,6 +20,7 @@ namespace Hix
 			SlideBarShell(QQuickItem* parent = nullptr);
 			virtual ~SlideBarShell();
 			void setRange(double min, double max);
+			void setValue(double value);
 			double getMin()const;
 			double getMax()const;
 			double getValue()const;
