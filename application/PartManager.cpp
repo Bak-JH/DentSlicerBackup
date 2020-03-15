@@ -11,6 +11,12 @@ Hix::Application::PartManager::PartManager()
 
 Hix::Application::PartManager::~PartManager()
 {
+	//since this is considered singleton, leak here is not important
+	//also, glmodel is likely to be deleted with QT parent, so double delete error prevalent
+	for (auto& m : _models)
+	{
+		m.second.release();
+	}
 }
 
 void Hix::Application::PartManager::addPart(std::unique_ptr<GLModel>&& model)
