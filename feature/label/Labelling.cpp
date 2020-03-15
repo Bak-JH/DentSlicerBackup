@@ -37,7 +37,6 @@ GLModel* Hix::Features::LabellingMode::generatePreviewModel()
 	// translate float points to int point
 	QList<QPolygonF> polygons = painterPath.toSubpathPolygons(::QTransform().scale(1.0f, -1.0f));
 	std::vector<Path> IntPaths;
-	std::vector<std::vector<QVector3D>> fPath;
 
 	for (auto polygon : polygons)
 	{
@@ -57,31 +56,97 @@ GLModel* Hix::Features::LabellingMode::generatePreviewModel()
 	// generate polytree
 	PolyTree polytree;
 	clpr.Execute(ctUnion, polytree, pftNonZero, pftNonZero);
+	
+	//Fonts have no set orientation, for some fonts holes might be clockwise, others counter-clockwise.
+	//All characters in a same font have same orientation.
+	//Calculate font-wise orientation and standarize them, clockwise for solid, counter-clockwise for holes
+
+	std::vector<std::vector<QVector3D>> jointContours;
+	std::vector<QVector3D> path;
+	path.emplace_back(0, 0, _labelHeight->getValue() * -3);
+	path.emplace_back(0, 0, _labelHeight->getValue() * 3);
+	//DFS polytree
+
+	std::deque<PolyNode*> s;
+	s.push_back(&polytree);
+	while (!s.empty())
+	{
+		auto curr = s.back();
+		s.pop_back();
+		if (!curr->Contour.empty())
+		{
+			std::vector<QVector3D> fContour;
+			fContour.reserve(curr->Contour.size());
+			std::transform(curr->Contour.begin(), curr->Contour.end(), std::back_inserter(fContour), [](const IntPoint& intPt)-> QVector3D {
+				return QVector3D(toFloatPt(intPt));
+			});
+			//if (curr->IsHole())
+			//{
+			//	std::reverse(fContour.begin(), fContour.end());
+			//}
+			extrudeAlongPath<int>(labelMesh, QVector3D(0, 0, 1), fContour, path, jointContours);
+		}
+		for (auto& each : curr->Childs)
+		{
+
+			s.push_back(each);
+		}
+	}
+
+
+
+
+	////get a single char contour and use it to cacluate orientation
+	//std::vector<QVector2D> sampleContour;
+	//PolyNode* sampleNode = &polytree;
+	//bool requireFlip = false;
+	//if (polytree.Childs.size() > 0)
+	//{
+	//	while (sampleNode->IsHole() != true || sampleNode->Contour.size() == 0)
+	//	{
+	//		sampleNode = sampleNode->GetNext();
+	//	}
+	//	auto& samplePath = sampleNode->Contour;
+	//	sampleContour.reserve(samplePath.size());
+	//	std::transform(samplePath.begin(), samplePath.end(), std::back_inserter(sampleContour), [](const IntPoint& intPt)-> QVector2D {
+	//		return toFloatPt(intPt);
+	//		});
+
+	//	requireFlip = Hix::Shapes2D::isClockwise(sampleContour);
+	//	qDebug() << "is hole:" << sampleNode->IsHole();
+	//}
+	//qDebug() << "flipped:" <<  requireFlip;
+
+
 
 	// triangulate
 	PolytreeCDT polycdt(&polytree);
 	std::unordered_map<PolyNode*, std::vector<PolytreeCDT::Triangle>> _trigMap;
 	_trigMap = polycdt.triangulate();
 
-	// generate cyliner wall
-	std::vector<std::vector<QVector3D>> jointContours;
-	std::vector<QVector3D> path;
-	path.emplace_back(0, 0, _labelHeight->getValue() * -3);
-	path.emplace_back(0, 0, _labelHeight->getValue() * 3);
-	for (auto& intPath : IntPaths)
-	{
-		std::vector<QVector3D> contour;
-		contour.reserve(intPath.size());
-		for (auto& point : intPath)
-		{
-			contour.emplace_back(QVector3D(toFloatPt(point).x(), toFloatPt(point).y(), 0));
-		}
-		std::reverse(contour.begin(), contour.end());
+	//// generate cyliner wall
+	//std::vector<std::vector<QVector3D>> jointContours;
+	//std::vector<QVector3D> path;
+	//path.emplace_back(0, 0, _labelHeight->getValue() * -3);
+	//path.emplace_back(0, 0, _labelHeight->getValue() * 3);
+	//for (auto& intPath : IntPaths)
+	//{
+	//	std::vector<QVector3D> contour;
+	//	contour.reserve(intPath.size());
+	//	for (auto& point : intPath)
+	//	{
+	//		auto float2D(toFloatPt(point));
+	//		contour.emplace_back(QVector3D(float2D));
+	//	}
+	//	if (requireFlip)
+	//	{
+	//		std::reverse(contour.begin(), contour.end());
+	//	}
 
-		extrudeAlongPath<int>(labelMesh, QVector3D(0, 0, 1), contour, path, jointContours);
+	//	extrudeAlongPath<int>(labelMesh, QVector3D(0, 0, 1), contour, path, jointContours);
 
-		contour.clear();
-	}
+	//	contour.clear();
+	//}
 
 	//generate front & back mesh
 	for (auto node : _trigMap)
@@ -124,7 +189,9 @@ Hix::Features::LabellingMode::LabellingMode() : DialogedMode(LABEL_POPUP_URL)
 Hix::Features::LabellingMode::~LabellingMode()
 {
 }
-
+//IMPORTANT:
+//this event is called per actual model selected, not the recursive listed parent.
+//so this feature does not require recursion for GLModels
 void Hix::Features::LabellingMode::faceSelected(GLModel* selected, const Hix::Engine3D::FaceConstItr& selectedFace, const Hix::Input::MouseEventData& mouse, const Qt3DRender::QRayCasterHit& hit)
 {
 	_targetModel = selected;
@@ -225,7 +292,8 @@ Hix::Features::LabellingEngrave::LabellingEngrave(GLModel* parentModel, GLModel*
 
 void Hix::Features::LabellingEngrave::cutCSG(GLModel* subject, const CorkTriMesh& subtract)
 {
-	auto subjectCork = toCorkMesh(*subject->getMesh());
+	//convert to cork-mesh, coordinate system same as before
+	auto subjectCork = toCorkMesh(*subject->getMesh(), QMatrix4x4());
 	CorkTriMesh output;
 	computeDifference(subjectCork, subtract, &output);
 
@@ -238,7 +306,6 @@ void Hix::Features::LabellingEngrave::cutCSG(GLModel* subject, const CorkTriMesh
 	postUIthread([result, subject, this]() {
 		_prevMesh.reset(subject->getMeshModd());
 		subject->setMesh(result);
-		subject->setZToBed();
 		_label.reset();
 	});
 
@@ -247,7 +314,8 @@ void Hix::Features::LabellingEngrave::cutCSG(GLModel* subject, const CorkTriMesh
 
 void Hix::Features::LabellingEngrave::runImpl()
 {
-	auto subtractee = toCorkMesh(*_label->getMesh());
+	//change label to cork mesh, change coordinate system to that of subjcect model
+	auto subtractee = toCorkMesh(*_label->getMesh(), _label->transform().matrix());
 	cutCSG(_target, subtractee);
 }
 
