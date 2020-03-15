@@ -57,10 +57,7 @@ GLModel* Hix::Features::LabellingMode::generatePreviewModel()
 	PolyTree polytree;
 	clpr.Execute(ctUnion, polytree, pftNonZero, pftNonZero);
 	
-	//Fonts have no set orientation, for some fonts holes might be clockwise, others counter-clockwise.
-	//All characters in a same font have same orientation.
-	//Calculate font-wise orientation and standarize them, clockwise for solid, counter-clockwise for holes
-
+	//generate wall
 	std::vector<std::vector<QVector3D>> jointContours;
 	std::vector<QVector3D> path;
 	path.emplace_back(0, 0, _labelHeight->getValue() * -3);
@@ -80,73 +77,19 @@ GLModel* Hix::Features::LabellingMode::generatePreviewModel()
 			std::transform(curr->Contour.begin(), curr->Contour.end(), std::back_inserter(fContour), [](const IntPoint& intPt)-> QVector3D {
 				return QVector3D(toFloatPt(intPt));
 			});
-			//if (curr->IsHole())
-			//{
-			//	std::reverse(fContour.begin(), fContour.end());
-			//}
 			extrudeAlongPath<int>(labelMesh, QVector3D(0, 0, 1), fContour, path, jointContours);
 		}
 		for (auto& each : curr->Childs)
 		{
-
 			s.push_back(each);
 		}
 	}
-
-
-
-
-	////get a single char contour and use it to cacluate orientation
-	//std::vector<QVector2D> sampleContour;
-	//PolyNode* sampleNode = &polytree;
-	//bool requireFlip = false;
-	//if (polytree.Childs.size() > 0)
-	//{
-	//	while (sampleNode->IsHole() != true || sampleNode->Contour.size() == 0)
-	//	{
-	//		sampleNode = sampleNode->GetNext();
-	//	}
-	//	auto& samplePath = sampleNode->Contour;
-	//	sampleContour.reserve(samplePath.size());
-	//	std::transform(samplePath.begin(), samplePath.end(), std::back_inserter(sampleContour), [](const IntPoint& intPt)-> QVector2D {
-	//		return toFloatPt(intPt);
-	//		});
-
-	//	requireFlip = Hix::Shapes2D::isClockwise(sampleContour);
-	//	qDebug() << "is hole:" << sampleNode->IsHole();
-	//}
-	//qDebug() << "flipped:" <<  requireFlip;
-
 
 
 	// triangulate
 	PolytreeCDT polycdt(&polytree);
 	std::unordered_map<PolyNode*, std::vector<PolytreeCDT::Triangle>> _trigMap;
 	_trigMap = polycdt.triangulate();
-
-	//// generate cyliner wall
-	//std::vector<std::vector<QVector3D>> jointContours;
-	//std::vector<QVector3D> path;
-	//path.emplace_back(0, 0, _labelHeight->getValue() * -3);
-	//path.emplace_back(0, 0, _labelHeight->getValue() * 3);
-	//for (auto& intPath : IntPaths)
-	//{
-	//	std::vector<QVector3D> contour;
-	//	contour.reserve(intPath.size());
-	//	for (auto& point : intPath)
-	//	{
-	//		auto float2D(toFloatPt(point));
-	//		contour.emplace_back(QVector3D(float2D));
-	//	}
-	//	if (requireFlip)
-	//	{
-	//		std::reverse(contour.begin(), contour.end());
-	//	}
-
-	//	extrudeAlongPath<int>(labelMesh, QVector3D(0, 0, 1), contour, path, jointContours);
-
-	//	contour.clear();
-	//}
 
 	//generate front & back mesh
 	for (auto node : _trigMap)
@@ -299,7 +242,7 @@ void Hix::Features::LabellingEngrave::cutCSG(GLModel* subject, const CorkTriMesh
 
 	//convert the result back to hix mesh
 	auto result = toHixMesh(output);
-	Hix::Features::repair(*result);
+	//Hix::Features::repair(*result);
 	//manual free cork memory, TODO RAII
 	freeCorkTriMesh(&subjectCork);
 	freeCorkTriMesh(&output);
