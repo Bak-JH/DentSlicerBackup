@@ -37,7 +37,6 @@ GLModel* Hix::Features::LabellingMode::generatePreviewModel()
 	// translate float points to int point
 	QList<QPolygonF> polygons = painterPath.toSubpathPolygons(::QTransform().scale(1.0f, -1.0f));
 	std::vector<Path> IntPaths;
-	std::vector<std::vector<QVector3D>> fPath;
 
 	for (auto polygon : polygons)
 	{
@@ -57,31 +56,40 @@ GLModel* Hix::Features::LabellingMode::generatePreviewModel()
 	// generate polytree
 	PolyTree polytree;
 	clpr.Execute(ctUnion, polytree, pftNonZero, pftNonZero);
+	
+	//generate wall
+	std::vector<std::vector<QVector3D>> jointContours;
+	std::vector<QVector3D> path;
+	path.emplace_back(0, 0, _labelHeight->getValue() * -3);
+	path.emplace_back(0, 0, _labelHeight->getValue() * 3);
+	//DFS polytree
+
+	std::deque<PolyNode*> s;
+	s.push_back(&polytree);
+	while (!s.empty())
+	{
+		auto curr = s.back();
+		s.pop_back();
+		if (!curr->Contour.empty())
+		{
+			std::vector<QVector3D> fContour;
+			fContour.reserve(curr->Contour.size());
+			std::transform(curr->Contour.begin(), curr->Contour.end(), std::back_inserter(fContour), [](const IntPoint& intPt)-> QVector3D {
+				return QVector3D(toFloatPt(intPt));
+			});
+			extrudeAlongPath<int>(labelMesh, QVector3D(0, 0, 1), fContour, path, jointContours);
+		}
+		for (auto& each : curr->Childs)
+		{
+			s.push_back(each);
+		}
+	}
+
 
 	// triangulate
 	PolytreeCDT polycdt(&polytree);
 	std::unordered_map<PolyNode*, std::vector<PolytreeCDT::Triangle>> _trigMap;
 	_trigMap = polycdt.triangulate();
-
-	// generate cyliner wall
-	std::vector<std::vector<QVector3D>> jointContours;
-	std::vector<QVector3D> path;
-	path.emplace_back(0, 0, _labelHeight->getValue() * -3);
-	path.emplace_back(0, 0, _labelHeight->getValue() * 3);
-	for (auto& intPath : IntPaths)
-	{
-		std::vector<QVector3D> contour;
-		contour.reserve(intPath.size());
-		for (auto& point : intPath)
-		{
-			contour.emplace_back(QVector3D(toFloatPt(point).x(), toFloatPt(point).y(), 0));
-		}
-		std::reverse(contour.begin(), contour.end());
-
-		extrudeAlongPath<int>(labelMesh, QVector3D(0, 0, 1), contour, path, jointContours);
-
-		contour.clear();
-	}
 
 	//generate front & back mesh
 	for (auto node : _trigMap)
@@ -124,7 +132,9 @@ Hix::Features::LabellingMode::LabellingMode() : DialogedMode(LABEL_POPUP_URL)
 Hix::Features::LabellingMode::~LabellingMode()
 {
 }
-
+//IMPORTANT:
+//this event is called per actual model selected, not the recursive listed parent.
+//so this feature does not require recursion for GLModels
 void Hix::Features::LabellingMode::faceSelected(GLModel* selected, const Hix::Engine3D::FaceConstItr& selectedFace, const Hix::Input::MouseEventData& mouse, const Qt3DRender::QRayCasterHit& hit)
 {
 	_targetModel = selected;
@@ -225,20 +235,20 @@ Hix::Features::LabellingEngrave::LabellingEngrave(GLModel* parentModel, GLModel*
 
 void Hix::Features::LabellingEngrave::cutCSG(GLModel* subject, const CorkTriMesh& subtract)
 {
-	auto subjectCork = toCorkMesh(*subject->getMesh());
+	//convert to cork-mesh, coordinate system same as before
+	auto subjectCork = toCorkMesh(*subject->getMesh(), QMatrix4x4());
 	CorkTriMesh output;
 	computeDifference(subjectCork, subtract, &output);
 
 	//convert the result back to hix mesh
 	auto result = toHixMesh(output);
-	Hix::Features::repair(*result);
+	//Hix::Features::repair(*result);
 	//manual free cork memory, TODO RAII
 	freeCorkTriMesh(&subjectCork);
 	freeCorkTriMesh(&output);
 	postUIthread([result, subject, this]() {
 		_prevMesh.reset(subject->getMeshModd());
 		subject->setMesh(result);
-		subject->setZToBed();
 		_label.reset();
 	});
 
@@ -247,7 +257,8 @@ void Hix::Features::LabellingEngrave::cutCSG(GLModel* subject, const CorkTriMesh
 
 void Hix::Features::LabellingEngrave::runImpl()
 {
-	auto subtractee = toCorkMesh(*_label->getMesh());
+	//change label to cork mesh, change coordinate system to that of subjcect model
+	auto subtractee = toCorkMesh(*_label->getMesh(), _label->transform().matrix());
 	cutCSG(_target, subtractee);
 }
 

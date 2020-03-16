@@ -88,6 +88,8 @@ int main(int argc, char** argv)
 	QObject *loginButton;
 	Hix::QML::getItemByID(appManager.getWindowRoot(), loginWindow, "loginWindow");
 	Hix::QML::getItemByID(appManager.getWindowRoot(), loginButton, "loginButton");
+
+
 #if  defined(QT_DEBUG) || defined(_DEBUG)
 	mainWindow->setProperty("visible", true);
 	loginWindow->close();
