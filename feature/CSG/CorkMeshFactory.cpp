@@ -1,6 +1,16 @@
 #include "CorkMeshFactory.h"
 #include "../../DentEngine/src/mesh.h"
+#include "../../render/SceneEntity.h"
 CorkTriMesh Hix::Features::CSG::toCorkMesh(const Hix::Engine3D::Mesh& mesh)
+{
+	QMatrix4x4 mat;
+	if (mesh.entity() != nullptr)
+	{
+		mat = mesh.entity()->toRootMatrix();
+	}
+	return toCorkMesh(mesh, mat);
+}
+CorkTriMesh Hix::Features::CSG::toCorkMesh(const Hix::Engine3D::Mesh& mesh, const QMatrix4x4& tranMatrix)
 {
 	CorkTriMesh out;
 	auto& vtcs = mesh.getVertices();
@@ -22,18 +32,10 @@ CorkTriMesh Hix::Features::CSG::toCorkMesh(const Hix::Engine3D::Mesh& mesh)
 	}
 	i = 0;
 	for (auto vtxItr = vtcs.cbegin(); vtxItr != vtcsEnd; ++vtxItr, ++i) {
-		QVector3D worldPos;
-		if (mesh.entity() == nullptr)
-		{
-			worldPos = vtxItr.localPosition();
-		}
-		else
-		{
-			worldPos = vtxItr.worldPosition();
-		}
-		(out.vertices)[3 * i + 0] = worldPos.x();
-		(out.vertices)[3 * i + 1] = worldPos.y();
-		(out.vertices)[3 * i + 2] = worldPos.z();
+		QVector3D transformed = tranMatrix * vtxItr.localPosition();
+		(out.vertices)[3 * i + 0] = transformed.x();
+		(out.vertices)[3 * i + 1] = transformed.y();
+		(out.vertices)[3 * i + 2] = transformed.z();
 	}
 	return out;
 }

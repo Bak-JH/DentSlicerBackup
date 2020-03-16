@@ -8,7 +8,7 @@
 #include "../repair/meshrepair.h"
 #include "application/ApplicationManager.h"
 
-constexpr float ZMARGIN = 5;
+constexpr float ZMARGIN = 10;
 
 
 Hix::Features::ModelBuilderMode::ModelBuilderMode(): _topPlane(Hix::Application::ApplicationManager::getInstance().sceneManager().total(), true), _bottPlane(Hix::Application::ApplicationManager::getInstance().sceneManager().total(), true)
@@ -34,13 +34,12 @@ Hix::Features::ModelBuilderMode::ModelBuilderMode(): _topPlane(Hix::Application:
 	_model.reset(new GLModel(Hix::Application::ApplicationManager::getInstance().partManager().modelRoot(), mesh, fileName, nullptr));
 	_model->setZToBed();
 	_model->moveModel(QVector3D(0, 0, ZMARGIN));
-	_zLength = _model->aabb().lengthZ() + ZMARGIN;
-	auto topZ = _model->aabb().zMax();
-	auto botZ = _model->aabb().zMin();
 	float cutPlane, botPlane;
 	QQuaternion rotation;
 	guessOrientation(*_model->getMeshModd(), cutPlane, botPlane, rotation);
 	_model->transform().setRotation(rotation);
+	_model->updateRecursiveAabb();
+	_zLength = _model->aabb().lengthZ() + ZMARGIN;
 	auto translationZ = _model->transform().translation().z();
 	cutPlane += translationZ;
 	botPlane += translationZ;
@@ -78,6 +77,5 @@ void Hix::Features::ModelBuilderMode::getSliderSignalTop(double value)
 
 void Hix::Features::ModelBuilderMode::getSliderSignalBot(double value)
 {
-	_zLength = _model->aabb().lengthZ() + ZMARGIN;
 	_bottPlane.transform().setTranslation(QVector3D(0, 0, _zLength * value / 1.8));
 }

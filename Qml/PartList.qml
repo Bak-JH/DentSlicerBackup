@@ -25,11 +25,19 @@ Hix.PartList {
 			anchors.left: parent.left
 			anchors.leftMargin: myPadding
 		}
-		ListView {
-			width: 240
-			height: 212
-			clip: true
-			//anchors.horizontalCenter: parent.horizontalCenter
+		ScrollView {
+
+			MouseArea {
+				id: wheelArea
+				anchors.fill: parent
+				hoverEnabled: true
+				onClicked: {
+					console.log("sdffsf");
+				}
+			}
+			id: scrollView
+			width: 256 - 16;
+			height: 212;
 			anchors.right: parent.right
 			anchors.top: listtitle.bottom
 			anchors.topMargin: 8
@@ -37,8 +45,8 @@ Hix.PartList {
 			ColumnLayout
 			{
 				id: itemContainer
-				anchors.left: parent.left
-				anchors.right: parent.right
+				width: parent.width
+
 
 			}
 			ScrollBar.vertical: ScrollBar{
