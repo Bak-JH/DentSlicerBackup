@@ -74,9 +74,9 @@ void GLModel::copyChildrenRecursive(GLModel* newParent) const
 		auto model = dynamic_cast<GLModel*>(child);
 		if (model)
 		{
-			auto copy = new GLModel(model);
+			//don't recurse this, copy constructor recurses anyway
+			auto copy = new GLModel(*model);
 			copy->setParent(newParent);
-			callRecursive(model, &GLModel::copyChildrenRecursive, copy);
 		}
 	}
 }
