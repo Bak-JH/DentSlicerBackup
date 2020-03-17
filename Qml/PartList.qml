@@ -12,8 +12,7 @@ Hix.PartList {
 	property var myPadding: 16
 	Rectangle {
 		id: shell
-		width: partList.width
-		height: partList.height
+		anchors.fill: parent
 		radius: 8
 		Text {
 			id: listtitle
@@ -41,8 +40,11 @@ Hix.PartList {
 			anchors.right: parent.right
 			anchors.top: listtitle.bottom
 			anchors.topMargin: 8
-			
-			ColumnLayout
+			clip: true
+			focus: true
+			contentWidth: itemContainer.width 
+			contentHeight: itemContainer.height
+			Column 
 			{
 				id: itemContainer
 				width: parent.width
@@ -51,19 +53,10 @@ Hix.PartList {
 			}
 			ScrollBar.vertical: ScrollBar{
 				id: control
-				active: true
-				anchors.top: parent.top
-				anchors.right: parent.right
-				//width: 12
-				policy: ScrollBar.AlwaysOn
-				contentItem: Rectangle {
-					implicitWidth: 8
-					//implicitHeight: 100
-					radius: 2
-					//color: "#aaaaaaaa"
-					color: control.pressed ? "#eeaaaaaa" : "#aaaaaaaa"
-				}
-            }
+				policy: ScrollBar.AsNeeded
+				interactive: true
+				implicitHeight: scrollView.height
+			}
 		}
 
 		Hix.Button {
