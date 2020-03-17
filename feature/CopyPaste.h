@@ -1,31 +1,33 @@
 #pragma once
-
 #include "interfaces/Mode.h"
 #include "interfaces/DialogedMode.h"
 #include "interfaces/Feature.h"
+#include "addModel.h"
+#include <unordered_set>
+class GLModel;
 namespace Hix
 {
 	namespace Features
 	{
-		class CopyPasteMode : public DialogedMode
+		class CopyPasteMode : public Mode
 		{
 		public:
-			CopyPasteMode();
+			CopyPasteMode(const std::unordered_set<GLModel*>& targets);
 			virtual ~CopyPasteMode();
+			void apply();
 		private:
+			std::unordered_set<GLModel*> _targets;
 		};
 
-		class CopyPaste : public Feature		
+		class CopyPaste : public ListModel		
 		{
 		public:
-			CopyPaste();
+			CopyPaste(GLModel* target);
 			virtual ~CopyPaste();
 		protected:
-			void undoImpl()override;
-			void redoImpl()override;
 			void runImpl()override;
 		private:
-
+			GLModel* _target;
 		};
 	}
 }

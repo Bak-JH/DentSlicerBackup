@@ -7,7 +7,11 @@ using namespace Hix::Features;
 using namespace Hix::Application;
 using namespace Qt3DCore;
 
-Hix::Features::AddModel::AddModel(Qt3DCore::QEntity* parent, Hix::Engine3D::Mesh* mesh, QString fname, const Qt3DCore::QTransform* transform): 
+Hix::Features::AddModel::AddModel()
+{
+}
+
+Hix::Features::AddModel::AddModel(Qt3DCore::QEntity* parent, Hix::Engine3D::Mesh* mesh, QString fname, const Qt3DCore::QTransform* transform):
 	_parent(parent), _mesh(mesh), _fname(fname), _transform(transform)
 {
 	
@@ -70,7 +74,11 @@ GLModel* Hix::Features::AddModel::get()
 }
 
 
-Hix::Features::ListModel::ListModel(Hix::Engine3D::Mesh* mesh, QString fname, const Qt3DCore::QTransform* transform) : 
+Hix::Features::ListModel::ListModel()
+{
+}
+
+Hix::Features::ListModel::ListModel(Hix::Engine3D::Mesh* mesh, QString fname, const Qt3DCore::QTransform* transform) :
 	AddModel(ApplicationManager::getInstance().partManager().modelRoot(), mesh, fname, transform)
 {}
 
@@ -95,25 +103,21 @@ void Hix::Features::ListModel::undoImpl()
 void Hix::Features::ListModel::redoImpl()
 {
 	AddModel::redoImpl();
-
-	std::function<void()> redo = [this]()
+	postUIthread([this]()
 	{
 		auto raw = std::get<GLModel*>(_model);
 		auto& partManager = ApplicationManager::getInstance().partManager();
 		partManager.addPart(std::unique_ptr<GLModel>(raw));
-	};
-	postUIthread(std::move(redo));
+	});
 }
 
 void Hix::Features::ListModel::runImpl()
 {
 	AddModel::runImpl();
-
-	std::function<void()> redo = [this]()
+	postUIthread([this]()
 	{
 		auto rawModel = std::get<GLModel*>(_model);
 		auto& partManager = ApplicationManager::getInstance().partManager();
 		partManager.addPart(std::unique_ptr<GLModel>(rawModel));
-	};
-	QMetaObject::invokeMethod(&Hix::Application::ApplicationManager::getInstance().engine(), redo, Qt::BlockingQueuedConnection);
+	});
 }
