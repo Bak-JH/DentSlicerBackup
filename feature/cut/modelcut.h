@@ -27,7 +27,6 @@ namespace Hix
 			ModelCut();
 			virtual ~ModelCut();
 			void cutModeSelected();
-			void getSliderSignal(double value);
 			void applyButtonClicked()override;
 				
 			// polyline

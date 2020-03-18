@@ -18,6 +18,7 @@ namespace Hix
 			Mode();
 			void addButton(Hix::QML::Controls::ToggleSwitch* button);
 			void scheduleForDelete();
+			virtual void onExit();
 			virtual ~Mode();
 		protected:
 			Hix::QML::Controls::ToggleSwitch* _button = nullptr;

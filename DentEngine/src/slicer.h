@@ -34,15 +34,10 @@ namespace Hix
 		};
 
 
-		class Slices : public std::deque<Slice> {
-		public:
-			Slices(size_t size);
-			void containmentTreeConstruct();
-
-		};
-
 		/****************** Entire Slicing Step *******************/
-		void slice(const Hix::Render::SceneEntity& entitiy, const Planes* planes, Slices* slices);
+		void containmentTreeConstruct(std::vector<Slice>& slices);
+
+		void slice(const Hix::Render::SceneEntity& entitiy, const Planes& planes, std::vector<Slice>& slices);
 	};
 }
 
@@ -52,6 +47,6 @@ namespace Hix
 	namespace Debug
 	{
 		QDebug operator<< (QDebug d, const Hix::Slicer::Slice& obj);
-		QDebug operator<< (QDebug d, const Hix::Slicer::Slices& obj);
+		QDebug operator<< (QDebug d, const  std::vector<Hix::Slicer::Slice> & obj);
 	}
 }

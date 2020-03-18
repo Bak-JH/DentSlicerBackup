@@ -114,13 +114,13 @@ Item{
 				anchors.leftMargin: sidePadding
 			}
 
-			// ViewMode {
-			// 	id: viewmode
-			// 	anchors.top: partList.bottom
-			// 	anchors.topMargin: sidePadding
-			// 	anchors.left: parent.left
-			// 	anchors.leftMargin: sidePadding
-			// }
+			ViewMode {
+				id: viewmode
+				anchors.top: partList.bottom
+				anchors.topMargin: sidePadding
+				anchors.left: parent.left
+				anchors.leftMargin: sidePadding
+			}
 
 			UndoRedo {
 				id: undoredo
@@ -154,7 +154,7 @@ Item{
 			Item {
 				id: featureArea
 				objectName: "featureArea"
-				anchors.top: partList.bottom
+				anchors.top: viewmode.bottom
 				anchors.topMargin: sidePadding
 				anchors.left: parent.left
 				anchors.leftMargin: sidePadding

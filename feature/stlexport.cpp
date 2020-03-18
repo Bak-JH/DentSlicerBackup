@@ -14,7 +14,7 @@ Hix::Features::STLExportMode::STLExportMode()
         return;
     }
     auto se = new STLExport(Hix::Application::ApplicationManager::getInstance().partManager().allModels(), fileName);
-    Hix::Application::ApplicationManager::getInstance().taskManager().enqueTask(se);
+    Hix::Application::ApplicationManager::getInstance().taskManager().enqueTask(std::unique_ptr<STLExport>(se));
 }
 
 Hix::Features::STLExportMode::~STLExportMode()

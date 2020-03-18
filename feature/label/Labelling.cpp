@@ -88,11 +88,10 @@ GLModel* Hix::Features::LabellingMode::generatePreviewModel()
 
 	// triangulate
 	PolytreeCDT polycdt(&polytree);
-	std::unordered_map<PolyNode*, std::vector<PolytreeCDT::Triangle>> _trigMap;
-	_trigMap = polycdt.triangulate();
+	auto trigMap = polycdt.triangulate();
 
 	//generate front & back mesh
-	for (auto node : _trigMap)
+	for (auto node : trigMap)
 	{
 		for (auto trig : node.second)
 		{

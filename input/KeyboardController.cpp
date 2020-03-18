@@ -60,11 +60,11 @@ void Hix::Input::KeyboardController::keyReleased(QKeyEvent* e)
 	}
 	else if (e->matches(QKeySequence::Undo))
 	{
-		ApplicationManager::getInstance().taskManager().enqueTask(new Hix::Features::Undo());
+		ApplicationManager::getInstance().taskManager().enqueTask(std::make_unique<Hix::Features::Undo>());
 	}
 	else if (e->matches(QKeySequence::Redo))
 	{
-		ApplicationManager::getInstance().taskManager().enqueTask(new Hix::Features::Redo());
+		ApplicationManager::getInstance().taskManager().enqueTask(std::make_unique<Hix::Features::Redo>());
 	}
 	else if (e->matches(QKeySequence::Copy))
 	{

@@ -3,27 +3,23 @@
 #include <Qt3DExtras>
 #include <array>
 #include <unordered_set>
+#include "../../render/SceneEntityWithMaterial.h"
 class GLModel;
-
-
 namespace Hix
 {
 	namespace Features
 	{
-		class CrossSectionPlane : public Qt3DCore::QEntity
+		class CrossSectionPlane : public Hix::Render::SceneEntityWithMaterial
 		{
-			Q_OBJECT
 		public:
 			CrossSectionPlane(Qt3DCore::QEntity* owner);
+			void init(const std::unordered_set<GLModel*>& selectedModels);
 			virtual ~CrossSectionPlane();
-			void enablePlane(bool isEnable);
-			Qt3DCore::QTransform& transform();
-			void loadTexture(QString value);
+			void showLayer(size_t layer);
+		protected:
+			QVector4D getPrimitiveColorCode(const Hix::Engine3D::Mesh* mesh, Hix::Engine3D::FaceConstItr faceItr)override;
 		private:
-			std::array<Qt3DExtras::QPlaneMesh, 2> _planeMeshes;
-			Qt3DCore::QTransform _transform;
-			Qt3DRender::QTextureLoader* _textureLoader;
-			Qt3DExtras::QTextureMaterial* _planeMaterial;
+			std::vector<Hix::Engine3D::Mesh> _layerMeshes;
 		};
 
 

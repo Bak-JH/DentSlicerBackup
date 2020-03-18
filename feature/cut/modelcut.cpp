@@ -32,7 +32,7 @@ Hix::Features::ModelCut::ModelCut() :
 	co.getControl(_cutSwitch, "cutswitch");
 	QObject::connect(_cutSwitch, &Hix::QML::Controls::ToggleSwitch::checkedChanged, [this]() { cutModeSelected(); });
 	QObject::connect(_slideBar.get(), &Hix::QML::SlideBarShell::valueChanged, [this]() { 
-		getSliderSignal(_slideBar->getValue()); 
+		_cuttingPlane.transform().setTranslation(QVector3D(0, 0, _modelsBound.zMin() + _slideBar->getValue()));
 		});
 	cutModeSelected();
 }
@@ -75,11 +75,6 @@ void ModelCut::cutModeSelected()
 
 
 
-void ModelCut::getSliderSignal(double value) {
-	float zlength = _modelsBound.lengthZ();
-	qDebug() << value;
-	_cuttingPlane.transform().setTranslation(QVector3D(0, 0, _modelsBound.zMin() + value));
-}
 
 void Hix::Features::ModelCut::applyButtonClicked()
 {
