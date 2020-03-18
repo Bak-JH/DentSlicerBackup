@@ -21,7 +21,7 @@ namespace SVGexporterPrivate
 }
 
 
-void SVGexporter::exportSVG(Slices& shellSlices,QString outfoldername, bool isTemp){
+void SVGexporter::exportSVG(std::vector<Slice>& shellSlices,QString outfoldername, bool isTemp){
     auto& setting = Hix::Application::ApplicationManager::getInstance().settings().sliceSetting;
     if (isTemp || setting.invertX)
         _invert = true;

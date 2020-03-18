@@ -20,15 +20,11 @@ namespace Hix
 		class SliceExport : public Hix::Tasking::Task
 		{
 		public:
-			SliceExport(const std::unordered_set<GLModel*>& selected);
 			SliceExport(const std::unordered_set<GLModel*>& selected, QString path);
 			void run()override;
-			SlicingEngine::Result getResult();
 		private:
 			std::unordered_set<GLModel*> _models;
-			bool _isTemp;
 			QString _path;
-			SlicingEngine::Result _result;
 
 		};
 	}

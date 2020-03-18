@@ -1,6 +1,7 @@
 #pragma once
 #include <QString>
 #include <unordered_set>
+#include "DentEngine/src/slicer.h"
 
 namespace Hix
 {
@@ -14,14 +15,8 @@ class GLModel;
 
 namespace SlicingEngine
 {
-	struct Result
-	{
-		int time;
-		int layerCount;
-		QString size;
-		float volume;
-	};
-	Result sliceModels (bool isTemp, float zMax, const std::unordered_set<GLModel*>& models, const Hix::Support::SupportRaftManager& suppRaft, QString filename = "");
+
+	std::vector<Hix::Slicer::Slice> sliceModels (float zMax, const std::unordered_set<GLModel*>& models, const Hix::Support::SupportRaftManager& suppRaft);
 };
 
 

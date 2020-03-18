@@ -1,69 +1,68 @@
 #include "CrossSectionPlane.h"
 #include "../../application/ApplicationManager.h"
+#include "../../slice/slicingengine.h"
+#include "../Shapes2D.h"
+#include "../../glmodel.h"
 using namespace Hix::Input;
 using namespace Hix::Features;
+using namespace Hix::Render;
+using namespace Hix::Slicer;
+using namespace Hix::Polyclipping;
 
 
-Hix::Features::CrossSectionPlane::CrossSectionPlane(Qt3DCore::QEntity* owner): QEntity(owner)
+Hix::Features::CrossSectionPlane::CrossSectionPlane(Qt3DCore::QEntity* owner): SceneEntityWithMaterial(owner)
 {
-	_planeMaterial = new Qt3DExtras::QTextureMaterial(this);
-	_planeMaterial->setAlphaBlendingEnabled(false);
-	auto clipPlane = new Qt3DExtras::QPlaneMesh(this);
-	clipPlane->setHeight(Hix::Application::ApplicationManager::getInstance().settings().printerSetting.bedBound.lengthX());
-	clipPlane->setWidth(Hix::Application::ApplicationManager::getInstance().settings().printerSetting.bedBound.lengthY());
-	clipPlane->setEnabled(true);
-	_transform.setRotationY(-90);
-	_transform.setRotationZ(-90);
-	addComponent(clipPlane);
-	addComponent(&_transform);
-	addComponent(_planeMaterial);
-	addComponent(&_transform);
-	setEnabled(true);
-
-	_textureLoader = new  Qt3DRender::QTextureLoader(this);
-	_planeMaterial->setTexture(_textureLoader);
 }
 
-
-void CrossSectionPlane::loadTexture(QString filename)
+void Hix::Features::CrossSectionPlane::init(const std::unordered_set<GLModel*>& selectedModels)
 {
+	//slice
+	auto selectedBound = Hix::Engine3D::combineBounds(selectedModels);
+	auto shellSlices = SlicingEngine::sliceModels(selectedBound.zMax(), selectedModels, Hix::Application::ApplicationManager::getInstance().supportRaftManager());
+	_layerMeshes.reserve(shellSlices.size());
 
-	_textureLoader->setSource(QUrl::fromLocalFile(filename));//"C:\\Users\\User\\Desktop\\sliced\\11111_export\\100.svg"));
+	//for each polytree from slice, triangluate, create mesh
+	for (auto& s : shellSlices)
+	{
+		_layerMeshes.emplace_back();
+		auto& mesh = _layerMeshes.back();
+		PolytreeCDT polycdt(&s.polytree);
+		auto trigMap = polycdt.triangulate();
 
-
-	//layerViewPlaneMaterial->setTexture(layerViewPlaneTextureLoader);
-	const float rotation_values[] = { // rotate by -90 deg
-	0, -1, 0,
-	1, 0, 0,
-	0, 0, 1
-	};
-	//flip Ys,
-	const float flip_values[] = {
-		1, 0, 0,
-		0, -1, 0,
-		0, 0, 1
-	};
-
-	QMatrix3x3 rotation_matrix(rotation_values);
-	QMatrix3x3 flip_matrix(flip_values);
-	QMatrix3x3 matrixTransform = flip_matrix * rotation_matrix;
-
-	_planeMaterial->setTextureTransform(matrixTransform);
-
-
-
+		//generate front & back mesh
+		for (auto node : trigMap)
+		{
+			for (auto trig : node.second)
+			{
+				mesh.addFace(
+					QVector3D(trig[0].x(), trig[0].y(), 0),
+					QVector3D(trig[1].x(), trig[1].y(), 0),
+					QVector3D(trig[2].x(), trig[2].y(), 0)
+				);
+			}
+		}
+	}
 }
-
 
 Hix::Features::CrossSectionPlane::~CrossSectionPlane()
 {
 }
 
-void Hix::Features::CrossSectionPlane::enablePlane(bool isEnable)
+void Hix::Features::CrossSectionPlane::showLayer(size_t layer)
 {
+	layer = std::min(_layerMeshes.size() - 1, layer);
+	setMesh(&_layerMeshes[layer]);
+
+	//set z
+	float z = layer * Hix::Application::ApplicationManager::getInstance().settings().sliceSetting.layerHeight;
+	//set to identity
+	transform().setMatrix(QMatrix4x4());
+	transform().setTranslation(QVector3D(0, 0, z));
 }
 
-Qt3DCore::QTransform& Hix::Features::CrossSectionPlane::transform()
+
+QVector4D Hix::Features::CrossSectionPlane::getPrimitiveColorCode(const Hix::Engine3D::Mesh* mesh, FaceConstItr faceItr)
 {
-	return _transform;
+	throw std::runtime_error("Hix::Support::CylindricalRaft::getPrimitiveColorCode not implemented");
+	return QVector4D();
 }

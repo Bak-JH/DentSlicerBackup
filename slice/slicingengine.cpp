@@ -3,12 +3,10 @@
 #include <QObject>
 #include <QDebug>
 #include <QProcess>
-#include "DentEngine/src/svgexporter.h"
 #include "slicingengine.h"
 
 #include "glmodel.h"
 
-#include "DentEngine/src/slicer.h"
 #include "DentEngine/src/Planes.h"
 #include "feature/overhangDetect.h"
 #include "DentEngine/src/SlicerDebug.h"
@@ -19,57 +17,35 @@ using namespace Hix;
 using namespace Hix::Slicer;
 using namespace Hix::Render;
 
-SlicingEngine::Result SlicingEngine::sliceModels(bool isTemp, float zMax,
-	const std::unordered_set<GLModel*>& models, const Hix::Support::SupportRaftManager& suppRaft, QString filename){
-
+std::vector<Hix::Slicer::Slice> SlicingEngine::sliceModels(float zMax,
+	const std::unordered_set<GLModel*>& models, const Hix::Support::SupportRaftManager& suppRaft){
 	constexpr float BOTT = 0.0f;
-
-    //Hix::Application::ApplicationManager::getInstance().setProgress(0.1);
-
 	//generate planes
 	//if (scfg->slicing_mode == SlicingConfiguration::SlicingMode::Uniform) {
 	float delta = Hix::Application::ApplicationManager::getInstance().settings().sliceSetting.layerHeight;
 	UniformPlanes planes(BOTT, zMax, delta);
-	Slices shellSlices(planes.getPlanesVector().size());
+	std::vector<Slice> shellSlices(planes.getPlanesVector().size());
 	auto zPlanes = planes.getPlanesVector();
 	//set z elevation for each slizes
 	for (size_t i = 0; i < zPlanes.size(); ++i)
 	{
 		shellSlices[i].z = zPlanes[i];
 	}
-	filename += "_export";
-	QDir dir(filename);
-	if (!dir.exists()) {
-		dir.mkpath(".");
-	}
-	else {
-		dir.removeRecursively();
-		dir.mkpath(".");
-	}
-	//debug log
-	if (Hix::Slicer::Debug::SlicerDebug::getInstance().enableDebug)
-	{
-		Hix::Slicer::Debug::SlicerDebug::getInstance().debugFilePath = filename + QString("/debug/");
-		QDir debugDir(Hix::Slicer::Debug::SlicerDebug::getInstance().debugFilePath);
-		if (!debugDir.exists()) {
-			debugDir.mkpath(".");
-		}
-	}
 	//slice models
 	for (auto& model : models)
 	{
-		Slicer::slice(dynamic_cast<const SceneEntity&>(*model), &planes, &shellSlices);
+		Slicer::slice(dynamic_cast<const SceneEntity&>(*model), planes, shellSlices);
 	}
 	//slice supports
 	for (auto& support : suppRaft.supportModels())
 	{
-		Slicer::slice(support, &planes, &shellSlices);
+		Slicer::slice(support, planes, shellSlices);
 	}
 	//slice raft
 	auto raft = suppRaft.raftModel();
 	if (raft)
 	{
-		Slicer::slice(*raft, &planes, &shellSlices);
+		Slicer::slice(*raft, planes, shellSlices);
 	}
 	//debug svg
 	if (Hix::Slicer::Debug::SlicerDebug::getInstance().enableDebug)
@@ -82,7 +58,7 @@ SlicingEngine::Result SlicingEngine::sliceModels(bool isTemp, float zMax,
 	}
 
 	//use clipper to combine clippings
-	shellSlices.containmentTreeConstruct();
+	containmentTreeConstruct(shellSlices);
 	//Hix::Application::ApplicationManager::getInstance().setProgress(0.4);
 
 	//remove empty contours from the top and bottom
@@ -93,10 +69,7 @@ SlicingEngine::Result SlicingEngine::sliceModels(bool isTemp, float zMax,
 		++forwardPopCnt;
 		++forwardItr;
 	}
-	for (size_t i = 0; i < forwardPopCnt; ++i)
-	{
-		shellSlices.pop_front();
-	}
+	shellSlices.erase(shellSlices.begin(), shellSlices.begin() + forwardPopCnt);
 	size_t backPopCnt = 0;
 	auto backItr = shellSlices.rbegin();
 	while (backItr->polytree.ChildCount() == 0)
@@ -110,26 +83,5 @@ SlicingEngine::Result SlicingEngine::sliceModels(bool isTemp, float zMax,
 	}
 	qDebug() << "removed empty slices count bott: " << forwardPopCnt << "top :" << backPopCnt;
 
-    // Export to SVG
-    //QString export_info = SVGexporter::exportSVG(shellSlices, supportSlices, raftSlices, filename+"_export", isTemp);
-
-	SVGexporter exp;
-	exp.exportSVG(shellSlices, filename, isTemp);
-
-
-	int layer = planes.getPlanesVector().size();
-	int time = layer * 15 / 60;
-	auto bounds = Hix::Engine3D::combineBounds(models).lengths();
-	int64_t area = 0;
-
-	float volume = ((float)(area / pow(Hix::Application::ApplicationManager::getInstance().settings().printerSetting.pixelPerMMX(), 2)) / 1000000) * delta;
-    //Hix::Application::ApplicationManager::getInstance().setProgress(1);
-    QStringList name_word = filename.split("/");
-
-    QString size;
-    size.sprintf("%.1f X %.1f X %.1f mm", bounds.x(), bounds.y(), bounds.z());
-    //Hix::Application::ApplicationManager::getInstance().openResultPopUp("",
-    //                            QString(name_word[name_word.size()-1]+" slicing done.").toStdString(),
-    //                            "");
-	return { time , layer, size, volume };
+	return shellSlices;
 }
