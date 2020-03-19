@@ -10,9 +10,10 @@ namespace Hix
 		{
 		public:
 			SliderMode(double min, double max);
-			void setSliderVisible(bool isVisible);
 			virtual ~SliderMode();
 		protected:
+			Hix::QML::SlideBarShell& slider();
+		private:
 			std::unique_ptr<Hix::QML::SlideBarShell> _slideBar;
 		};
 	}

@@ -18,12 +18,9 @@ namespace Hix
 
 			SceneEntityWithMaterial(Qt3DCore::QEntity* parent = nullptr); // main constructor for mainmesh and shadowmesh
 			virtual ~SceneEntityWithMaterial();
-			Hix::Render::ModelMaterial& meshMaterial();
-
 			void setMaterialMode(const Hix::Render::ShaderMode mode);
 			void setMaterialColor(const QVector4D color);
-			void setLayerViewHeight(const float height);
-
+			void setMaterialParamter(const std::string& key, const QVariant& value);
 		protected:
 
 			//unsigned int getPrimitiveColorCode(const Hix::Engine3D::Mesh* mesh, size_t faceIdx);

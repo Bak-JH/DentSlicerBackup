@@ -13,9 +13,9 @@ namespace Hix
 		{
 		public:
 			CrossSectionPlane(Qt3DCore::QEntity* owner);
-			void init(const std::unordered_set<GLModel*>& selectedModels);
+			void init(const std::unordered_map<Hix::Render::SceneEntityWithMaterial*, QVector4D>& modelColorMap);
 			virtual ~CrossSectionPlane();
-			void showLayer(size_t layer);
+			void showLayer(double zHeight);
 		protected:
 			QVector4D getPrimitiveColorCode(const Hix::Engine3D::Mesh* mesh, Hix::Engine3D::FaceConstItr faceItr)override;
 		private:

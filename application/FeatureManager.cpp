@@ -54,6 +54,7 @@ void Hix::Application::FeatureManager::setMode(Hix::Features::Mode* mode)
 	auto instantMode = dynamic_cast<Hix::Features::InstantMode*>(mode);
 	if (instantMode)
 	{
+		_currentMode->onExit();
 		_currentMode.reset(nullptr);
 	}
 }

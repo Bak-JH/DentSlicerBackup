@@ -35,7 +35,7 @@ namespace Hix
 				QQuickMouseArea* _mouseArea;
 			};
 			/// Toggle Switch ///
-			class ToggleSwitch : public Button
+			class ToggleSwitch : public QQuickRectangle, public InputControl
 			{
 				Q_OBJECT
 				Q_PROPERTY(bool isChecked MEMBER _isChecked NOTIFY checkedChanged)
@@ -50,8 +50,9 @@ namespace Hix
 				void checked();
 				void unchecked();
 
-			private slots:
-				void onClicked()override;
+			protected slots:
+				virtual void onCheckedChanged();
+				//virtual void onClicked();
 
 			private:
 				bool _isChecked = false; //isRight toggleImgSwitch

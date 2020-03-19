@@ -18,7 +18,7 @@ using namespace Hix::Debug;
 using namespace Hix::Slicer;
 QDebug Hix::Debug::operator<< (QDebug d, const Slice& obj) {
 	d << "z: " << obj.z;
-	d << "polytree: " << obj.polytree;
+	d << "polytree: " << *obj.polytree;
 
 	return d;
 }
@@ -102,11 +102,11 @@ void Hix::Slicer::slice(const Hix::Render::SceneEntity& entity, const Planes& pl
 		auto& currSlice = slices[i];
 		ContourBuilder contourBuilder(mesh, intersectingFaces[i], zPlanes[i]);
 		auto contours = contourBuilder.buildContours();
-		std::move(contours.begin(), contours.end(), std::back_inserter(currSlice.closedContours));  // ##
+		std::move(contours.begin(), contours.end(), std::back_inserter(currSlice.closedContours));
 		if (Hix::Slicer::Debug::SlicerDebug::getInstance().enableDebug)
 		{
 			auto incompleteContours = contourBuilder.flushIncompleteContours();
-			std::move(incompleteContours.begin(), incompleteContours.end(), std::back_inserter(currSlice.incompleteContours));  // ##
+			std::move(incompleteContours.begin(), incompleteContours.end(), std::back_inserter(currSlice.incompleteContours));
 		}
 	}
     return;
@@ -121,14 +121,17 @@ void Hix::Slicer::slice(const Hix::Render::SceneEntity& entity, const Planes& pl
 
 /****************** Deprecated functions *******************/
 void Hix::Slicer::containmentTreeConstruct(std::vector<Slice>& slices){
-    Clipper clpr;
-	for (auto itr = slices.begin(); itr != slices.end(); ++itr) { // divide into parallel threads
-		clpr.Clear();
-		for (auto& each : itr->closedContours)
+	for (auto& s: slices) 
+	{ 
+		Clipper clpr;
+		for (auto& each : s.closedContours)
 		{
 			clpr.AddPath(each.toPath(), ptSubject, true);
 		}
-        clpr.Execute(ctUnion, itr->polytree, pftNonZero, pftNonZero);
+        clpr.Execute(ctUnion, *s.polytree, pftNonZero, pftNonZero);
     }
 }
 
+Hix::Slicer::Slice::Slice():polytree(new PolyTree())
+{
+}

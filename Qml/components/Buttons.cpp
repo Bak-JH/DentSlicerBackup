@@ -39,8 +39,9 @@ void Hix::QML::Controls::Button::onExited()
 
 
 /// Toggle Switch ///
-Hix::QML::Controls::ToggleSwitch::ToggleSwitch(QQuickItem* parent) :Button(parent)
+Hix::QML::Controls::ToggleSwitch::ToggleSwitch(QQuickItem* parent) :QQuickRectangle(parent)
 {
+	connect(this, &Hix::QML::Controls::ToggleSwitch::checkedChanged, this, &Hix::QML::Controls::ToggleSwitch::onCheckedChanged);
 }
 
 Hix::QML::Controls::ToggleSwitch::~ToggleSwitch()
@@ -59,15 +60,23 @@ void Hix::QML::Controls::ToggleSwitch::setChecked(bool isChecked)
 	if (isChecked != _isChecked)
 	{
 		_isChecked = isChecked;
-		if (_isChecked)
-			emit checked();
-		else
-			emit unchecked();
+		//if (_isChecked)
+		//	emit checked();
+		//else
+		//	emit unchecked();
+		emit checkedChanged();
 	}
 }
 
-void Hix::QML::Controls::ToggleSwitch::onClicked()
+void Hix::QML::Controls::ToggleSwitch::onCheckedChanged()
 {
-	setChecked(!_isChecked);
-	Button::onClicked();
+	if (_isChecked)
+		emit checked();
+	else
+		emit unchecked();
 }
+
+//void Hix::QML::Controls::ToggleSwitch::onClicked()
+//{
+//	setChecked(!_isChecked);
+//}

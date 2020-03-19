@@ -3,6 +3,7 @@
 #include "../../slice/slicingengine.h"
 #include "../Shapes2D.h"
 #include "../../glmodel.h"
+#include "../../DentEngine/src/SlicerDebug.h"
 using namespace Hix::Input;
 using namespace Hix::Features;
 using namespace Hix::Render;
@@ -12,13 +13,25 @@ using namespace Hix::Polyclipping;
 
 Hix::Features::CrossSectionPlane::CrossSectionPlane(Qt3DCore::QEntity* owner): SceneEntityWithMaterial(owner)
 {
+	setMaterialColor(Hix::Render::Colors::Selected);
+
 }
 
-void Hix::Features::CrossSectionPlane::init(const std::unordered_set<GLModel*>& selectedModels)
+void Hix::Features::CrossSectionPlane::init(const std::unordered_map<SceneEntityWithMaterial*, QVector4D>& modelColorMap)
 {
+	std::unordered_set<SceneEntity*> entities;
+	for (auto& pair : modelColorMap)
+	{
+		entities.insert(pair.first);
+	}
+	//debug directory
+#ifdef _DEBUG
+	bool prevDebug = Hix::Slicer::Debug::SlicerDebug::getInstance().enableDebug;
+	Hix::Slicer::Debug::SlicerDebug::getInstance().enableDebug = false;
+#endif
+
 	//slice
-	auto selectedBound = Hix::Engine3D::combineBounds(selectedModels);
-	auto shellSlices = SlicingEngine::sliceModels(selectedBound.zMax(), selectedModels, Hix::Application::ApplicationManager::getInstance().supportRaftManager());
+	auto shellSlices = SlicingEngine::sliceEntities(entities);
 	_layerMeshes.reserve(shellSlices.size());
 
 	//for each polytree from slice, triangluate, create mesh
@@ -26,7 +39,7 @@ void Hix::Features::CrossSectionPlane::init(const std::unordered_set<GLModel*>& 
 	{
 		_layerMeshes.emplace_back();
 		auto& mesh = _layerMeshes.back();
-		PolytreeCDT polycdt(&s.polytree);
+		PolytreeCDT polycdt(s.polytree.get());
 		auto trigMap = polycdt.triangulate();
 
 		//generate front & back mesh
@@ -42,22 +55,28 @@ void Hix::Features::CrossSectionPlane::init(const std::unordered_set<GLModel*>& 
 			}
 		}
 	}
+
+#ifdef _DEBUG
+	Hix::Slicer::Debug::SlicerDebug::getInstance().enableDebug = prevDebug;
+#endif
 }
 
 Hix::Features::CrossSectionPlane::~CrossSectionPlane()
 {
+	//sicne mesh will be deleted here
+	setMesh(nullptr);
 }
 
-void Hix::Features::CrossSectionPlane::showLayer(size_t layer)
+void Hix::Features::CrossSectionPlane::showLayer(double zHeight)
 {
+	size_t layer = zHeight / Hix::Application::ApplicationManager::getInstance().settings().sliceSetting.layerHeight;
 	layer = std::min(_layerMeshes.size() - 1, layer);
 	setMesh(&_layerMeshes[layer]);
-
 	//set z
-	float z = layer * Hix::Application::ApplicationManager::getInstance().settings().sliceSetting.layerHeight;
 	//set to identity
+	qDebug() << "layer:" << layer;
 	transform().setMatrix(QMatrix4x4());
-	transform().setTranslation(QVector3D(0, 0, z));
+	transform().setTranslation(QVector3D(0, 0, zHeight));
 }
 
 

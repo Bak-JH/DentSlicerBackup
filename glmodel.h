@@ -40,22 +40,15 @@ public:
 	void copyChildrenRecursive(GLModel* newParent)const;
 	void getChildrenModels(std::unordered_set<const GLModel*>& results)const;
 
-	bool appropriately_rotated=false;
 
-    // feature hollowshell
-    float hollowShellRadius = 0;
     // face selection enabled
     std::unordered_set<FaceConstItr> selectedFaces;
-
-    // feature offset
-    double shellOffsetFactor;
 
     void changeColor(const QVector4D& color);
 	bool isPrintable()const;
     void updatePrintable();
     bool EndsWith(const std::string& a, const std::string& b);
     static QVector3D spreadPoint(QVector3D endpoint,QVector3D startpoint,int factor);
-    void changeViewMode(int viewMode);
 
 
 	void setBoundingBoxVisible(bool isEnabled);
@@ -63,9 +56,6 @@ public:
 	bool perPrimitiveColorActive()const;
 	bool faceSelectionActive()const;
 
-
-	//TODO: remove these
-	// Model Mesh move, rotate, scale
 	void moveModel(const QVector3D& movement);
 	void rotateModel(const QQuaternion& rotation);
 	void scaleModel(const QVector3D& scale);
@@ -82,6 +72,7 @@ public:
 	int ID()const;
 	QString modelName()const;
 	GLModel* getRootModel();
+	void unselectMeshFaces();
 
 protected:
 	void initHitTest()override;
@@ -89,30 +80,9 @@ protected:
 
 private:
 	QString _name;
-
-
-
-	QVector4D getPrimitiveColorCode(const Hix::Engine3D::Mesh* mesh, FaceConstItr faceItr)override;
-
-    //Order is important! Look at the initializer list in constructor
     QVector3D lastpoint;
     QVector2D prevPoint;
+	QVector4D getPrimitiveColorCode(const Hix::Engine3D::Mesh* mesh, FaceConstItr faceItr)override;
 
 
-    int viewMode = -1;
-
-signals:
-	void _updateModelMesh();
-    void modelSelected(int);
-    void resetLayflat();
-
-public slots:
-	void updateModelMesh();
-
-    // Extension
-    void unselectMeshFaces();
-
-    //TODO: get rid of this
-    friend class featureThread;
-    friend class STLexporter;
 };
