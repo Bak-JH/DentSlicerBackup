@@ -29,20 +29,10 @@ SceneEntityWithMaterial::SceneEntityWithMaterial(QEntity* parent)
 	addComponent(&_meshMaterial);
 
 }
-
-
-
-
-
-
 SceneEntityWithMaterial::~SceneEntityWithMaterial()
 {
 }
 
-Hix::Render::ModelMaterial& Hix::Render::SceneEntityWithMaterial::meshMaterial()
-{
-	return _meshMaterial;
-}
 
 inline void eraseBufferData(QAttribute& attr, Qt3DRender::QBuffer& buffer, size_t amount, size_t count)
 {
@@ -141,7 +131,10 @@ void SceneEntityWithMaterial::setMaterialColor(const QVector4D color)
 	callRecursive(this, &SceneEntityWithMaterial::setMaterialColor, color);
 }
 
-void SceneEntityWithMaterial::setLayerViewHeight(const float height)
+
+
+void Hix::Render::SceneEntityWithMaterial::setMaterialParamter(const std::string& key, const QVariant& value)
 {
-	_meshMaterial.setParameterValue("height", QVariant::fromValue(height));
+	_meshMaterial.setParameterValue(key, value);
+	callRecursive(this, &SceneEntityWithMaterial::setMaterialParamter, key, value);
 }

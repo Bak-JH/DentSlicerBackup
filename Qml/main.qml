@@ -35,7 +35,21 @@ Item{
 		FontLoader{ id: openSemiBold; source: "qrc:/Resource/font/OpenSans-SemiBold.ttf" }
 		FontLoader{ id: openBold; source: "qrc:/Resource/font/OpenSans-Bold.ttf" }
 		
+		CtrToggleSwitch {
+			id: gfdgdgdfg
+			sizeMult: 1.3
+			isChecked: false
+			leftText
+			{
+				text: "Object view"
+			}
+			rightText
+			{
+				text: "Layer view"
+			}
 
+		}
+		
         Rectangle{
 
 			id: uiRoot

@@ -24,9 +24,10 @@ namespace Hix
 
 		class Slice { // extends Paths (total paths)
 		public:
+			Slice();
+
 			float z;
-			PolyTree polytree; // containment relationship per slice
-			PolyTree overhang;
+			std::unique_ptr<PolyTree> polytree; // containment relationship per slice
 
 			std::deque<Contour> closedContours;
 			std::deque<Contour> incompleteContours;

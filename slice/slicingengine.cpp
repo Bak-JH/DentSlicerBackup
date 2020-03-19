@@ -1,10 +1,10 @@
-//#include "slicingengine.h"
+#include "slicingengine.h"
+
 #include <QDir>
 #include <QObject>
 #include <QDebug>
 #include <QProcess>
-#include "slicingengine.h"
-
+#include <execution>
 #include "glmodel.h"
 
 #include "DentEngine/src/Planes.h"
@@ -17,13 +17,31 @@ using namespace Hix;
 using namespace Hix::Slicer;
 using namespace Hix::Render;
 
-std::vector<Hix::Slicer::Slice> SlicingEngine::sliceModels(float zMax,
-	const std::unordered_set<GLModel*>& models, const Hix::Support::SupportRaftManager& suppRaft){
-	constexpr float BOTT = 0.0f;
-	//generate planes
-	//if (scfg->slicing_mode == SlicingConfiguration::SlicingMode::Uniform) {
+std::vector<Hix::Slicer::Slice> SlicingEngine::sliceModels(const std::unordered_set<GLModel*>& models, const Hix::Support::SupportRaftManager& suppRaft) {
+	std::unordered_set<SceneEntity*> entities;
+	for (auto& m : models)
+	{
+		entities.emplace(m);
+	}
+	for (auto& support : suppRaft.supportModels())
+	{
+		entities.emplace(support);
+	}
+	auto raft = suppRaft.raftModel();
+	if (raft)
+	{
+		entities.emplace(raft);
+	}
+	return sliceEntities(entities);
+}
+
+std::vector<Hix::Slicer::Slice> SlicingEngine::sliceEntities(const std::unordered_set<SceneEntity*>& models)
+{
+	//due to float error with models
+	constexpr float BOTT = 0.00001f;
+	auto bound = Hix::Engine3D::combineBounds(models);
 	float delta = Hix::Application::ApplicationManager::getInstance().settings().sliceSetting.layerHeight;
-	UniformPlanes planes(BOTT, zMax, delta);
+	UniformPlanes planes(BOTT, bound.zMax(), delta);
 	std::vector<Slice> shellSlices(planes.getPlanesVector().size());
 	auto zPlanes = planes.getPlanesVector();
 	//set z elevation for each slizes
@@ -34,20 +52,10 @@ std::vector<Hix::Slicer::Slice> SlicingEngine::sliceModels(float zMax,
 	//slice models
 	for (auto& model : models)
 	{
-		Slicer::slice(dynamic_cast<const SceneEntity&>(*model), planes, shellSlices);
+		Slicer::slice(*model, planes, shellSlices);
 	}
-	//slice supports
-	for (auto& support : suppRaft.supportModels())
-	{
-		Slicer::slice(support, planes, shellSlices);
-	}
-	//slice raft
-	auto raft = suppRaft.raftModel();
-	if (raft)
-	{
-		Slicer::slice(*raft, planes, shellSlices);
-	}
-	//debug svg
+
+#ifdef _DEBUG
 	if (Hix::Slicer::Debug::SlicerDebug::getInstance().enableDebug)
 	{
 		for (size_t i = 0; i < shellSlices.size(); ++i)
@@ -56,15 +64,13 @@ std::vector<Hix::Slicer::Slice> SlicingEngine::sliceModels(float zMax,
 			Hix::Slicer::Debug::outDebugIncompletePathsSVGs(shellSlices[i].incompleteContours, i);
 		}
 	}
-
+#endif
 	//use clipper to combine clippings
 	containmentTreeConstruct(shellSlices);
-	//Hix::Application::ApplicationManager::getInstance().setProgress(0.4);
-
 	//remove empty contours from the top and bottom
 	size_t forwardPopCnt = 0;
 	auto forwardItr = shellSlices.begin();
-	while (forwardItr->polytree.ChildCount() == 0)
+	while (forwardItr->polytree->ChildCount() == 0)
 	{
 		++forwardPopCnt;
 		++forwardItr;
@@ -72,7 +78,7 @@ std::vector<Hix::Slicer::Slice> SlicingEngine::sliceModels(float zMax,
 	shellSlices.erase(shellSlices.begin(), shellSlices.begin() + forwardPopCnt);
 	size_t backPopCnt = 0;
 	auto backItr = shellSlices.rbegin();
-	while (backItr->polytree.ChildCount() == 0)
+	while (backItr->polytree->ChildCount() == 0)
 	{
 		++backPopCnt;
 		++backItr;

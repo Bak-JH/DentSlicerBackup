@@ -42,7 +42,7 @@ void SVGexporter::exportSVG(std::vector<Slice>& shellSlices,QString outfoldernam
         QString outfilename = outfoldername + "/" + QString::number(currentSlice_idx) + ".svg";
         QFile outfile(outfilename);
         std::stringstream contentStream;
-		PolyTree& shellSlice_polytree = shellSlices[i].polytree;
+		PolyTree& shellSlice_polytree = *shellSlices[i].polytree;
         outfile.open(QFile::WriteOnly);
         writeHeader(contentStream);
         if (setting.slicingMode == Hix::Settings::SliceSetting::SlicingMode::Uniform)

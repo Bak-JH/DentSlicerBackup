@@ -5,6 +5,10 @@
 #include "CrossSectionPlane.h"
 namespace Hix
 {
+	namespace Render
+	{
+		class SceneEntityWithMaterial;
+	}
 	namespace Features
 	{
 		class LayerView: public SliderMode
@@ -14,22 +18,20 @@ namespace Hix
 			virtual ~LayerView();
 			void onExit()override;
 		private:
-			//cutting
+			std::unordered_map<Hix::Render::SceneEntityWithMaterial*, QVector4D> _modelColorMap;
 			Hix::Features::CrossSectionPlane _crossSectionPlane;
 			std::unordered_set<GLModel*> _models;
-			Hix::Engine3D::Bounds3D _modelsBound;
-			int _maxLayer;
 		};
 
 
 		class LayerviewPrep : public Hix::Tasking::Task
 		{
 		public:
-			LayerviewPrep(const std::unordered_set<GLModel*>& selected, Hix::Features::CrossSectionPlane& crossSec);
+			LayerviewPrep(const std::unordered_map<Hix::Render::SceneEntityWithMaterial*, QVector4D>& selected, Hix::Features::CrossSectionPlane& crossSec);
 			virtual ~LayerviewPrep();
 			void run()override;
 		private:
-			std::unordered_set<GLModel*> _models;
+			const std::unordered_map<Hix::Render::SceneEntityWithMaterial*, QVector4D>& _modelColorMap;
 			Hix::Features::CrossSectionPlane& _crossSec;
 
 		};
