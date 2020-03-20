@@ -57,7 +57,6 @@ GLModel::GLModel(Qt3DCore::QEntity*parent, Mesh* loadMesh, QString fname, const 
 		_transform.setMatrix(transform->matrix());
 	}
 	setMesh(loadMesh);
-	QObject::connect(this, SIGNAL(_updateModelMesh()), this, SLOT(updateModelMesh()));
 }
 
 //copy
@@ -74,9 +73,9 @@ void GLModel::copyChildrenRecursive(GLModel* newParent) const
 		auto model = dynamic_cast<GLModel*>(child);
 		if (model)
 		{
-			auto copy = new GLModel(model);
+			//don't recurse this, copy constructor recurses anyway
+			auto copy = new GLModel(*model);
 			copy->setParent(newParent);
-			callRecursive(model, &GLModel::copyChildrenRecursive, copy);
 		}
 	}
 }
@@ -303,10 +302,6 @@ void GLModel::clicked(MouseEventData& pick, const Qt3DRender::QRayCasterHit& hit
 		}
 	}
 }
-void GLModel::updateModelMesh() {
-	updateMesh(_mesh);
-}
-
 
 bool GLModel::isDraggable(Hix::Input::MouseEventData& e,const Qt3DRender::QRayCasterHit&)
 {
@@ -392,28 +387,6 @@ void GLModel:: unselectMeshFaces(){
 	selectedFaces.clear();
 	callRecursive(this, &GLModel::unselectMeshFaces);
 }
-
-void GLModel::changeViewMode(int viewMode) {
- //   if( this->viewMode == viewMode ) {
- //       return;
- //   }
-
- //   this->viewMode = viewMode;
- //   qDebug() << "changeViewMode" << viewMode;
- //   QMetaObject::invokeMethod(Hix::Application::ApplicationManager::getInstance().boxUpperTab, "all_off");
-
- //   switch( viewMode ) {
- //   case VIEW_MODE_OBJECT:
- //       break;
- //   case VIEW_MODE_LAYER:
- //       break;
- //   }
-	//updateShader(viewMode);
-
-
- //   emit _updateModelMesh();
-}
-
 
 
 

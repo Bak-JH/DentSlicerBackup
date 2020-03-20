@@ -51,24 +51,30 @@ bool Hix::Application::PartManager::isSelected(GLModel* model)const
 void Hix::Application::PartManager::setSelected(GLModel* model, bool selected)
 {
 	_partList->setModelSelected(model, selected);
+	Hix::Application::ApplicationManager::getInstance().stateChanged();
+
 }
 
 
 void Hix::Application::PartManager::selectAll()
 {
 	_partList->selectAll();
+	Hix::Application::ApplicationManager::getInstance().stateChanged();
 
 }
 
 void Hix::Application::PartManager::unselectAll()
 {
 	_partList->unselectAll();
+	Hix::Application::ApplicationManager::getInstance().stateChanged();
 
 }
 
 void Hix::Application::PartManager::deleteSelectedModels()
 {
 	_partList->deleteSelectedModels();
+	Hix::Application::ApplicationManager::getInstance().stateChanged();
+
 }
 
 std::unordered_set<GLModel*> Hix::Application::PartManager::selectedModels() const

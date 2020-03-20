@@ -18,11 +18,11 @@ using namespace Hix::Debug;
 using namespace Hix::Slicer;
 QDebug Hix::Debug::operator<< (QDebug d, const Slice& obj) {
 	d << "z: " << obj.z;
-	d << "polytree: " << obj.polytree;
+	d << "polytree: " << *obj.polytree;
 
 	return d;
 }
-QDebug Hix::Debug::operator<< (QDebug d, const Slices& obj) {
+QDebug Hix::Debug::operator<< (QDebug d, const std::vector<Slice>& obj) {
 	d << "slices: ";
 	for (const auto& each : obj)
 	{
@@ -78,7 +78,7 @@ float ContourSegment::dist()const
 
 
 
-void Hix::Slicer::slice(const Hix::Render::SceneEntity& entity, const Planes* planes, Slices* slices){
+void Hix::Slicer::slice(const Hix::Render::SceneEntity& entity, const Planes& planes, std::vector<Slice>& slices){
     
 	for (auto childNode : entity.childNodes())
 	{
@@ -95,18 +95,18 @@ void Hix::Slicer::slice(const Hix::Render::SceneEntity& entity, const Planes* pl
 
 	//MeshRepair::identifyHoles(mesh);
 
-	auto zPlanes = planes->getPlanesVector();
-	auto intersectingFaces = planes->buildTriangleLists(mesh);
+	auto zPlanes = planes.getPlanesVector();
+	auto intersectingFaces = planes.buildTriangleLists(mesh);
 	for (int i = 0; i < zPlanes.size(); i++) {
 		qDebug() << "slicing: " << i;
-		auto& currSlice = (*slices)[i];
+		auto& currSlice = slices[i];
 		ContourBuilder contourBuilder(mesh, intersectingFaces[i], zPlanes[i]);
 		auto contours = contourBuilder.buildContours();
-		std::move(contours.begin(), contours.end(), std::back_inserter(currSlice.closedContours));  // ##
+		std::move(contours.begin(), contours.end(), std::back_inserter(currSlice.closedContours));
 		if (Hix::Slicer::Debug::SlicerDebug::getInstance().enableDebug)
 		{
 			auto incompleteContours = contourBuilder.flushIncompleteContours();
-			std::move(incompleteContours.begin(), incompleteContours.end(), std::back_inserter(currSlice.incompleteContours));  // ##
+			std::move(incompleteContours.begin(), incompleteContours.end(), std::back_inserter(currSlice.incompleteContours));
 		}
 	}
     return;
@@ -117,21 +117,21 @@ void Hix::Slicer::slice(const Hix::Render::SceneEntity& entity, const Planes* pl
 
 
 
-Hix::Slicer::Slices::Slices(size_t size): std::deque<Slice>(size)
-{
-}
+
 
 /****************** Deprecated functions *******************/
-void Slices::containmentTreeConstruct(){
-    Clipper clpr;
-    for (int idx=0; idx<this->size(); idx++){ // divide into parallel threads
-        Slice* slice = &((*this)[idx]);
-		clpr.Clear();
-		for (auto& each : slice->closedContours)
+void Hix::Slicer::containmentTreeConstruct(std::vector<Slice>& slices){
+	for (auto& s: slices) 
+	{ 
+		Clipper clpr;
+		for (auto& each : s.closedContours)
 		{
 			clpr.AddPath(each.toPath(), ptSubject, true);
 		}
-        clpr.Execute(ctUnion, slice->polytree, pftNonZero, pftNonZero);
+        clpr.Execute(ctUnion, *s.polytree, pftNonZero, pftNonZero);
     }
 }
 
+Hix::Slicer::Slice::Slice():polytree(new PolyTree())
+{
+}

@@ -63,7 +63,9 @@ namespace Hix
 			void setMode(Hix::Features::Mode*);
 			Hix::Features::FeatureHistoryManager& featureHistoryManager();
 			bool allowModelSelection()const;
+			void setViewModeSwitch(bool isSet);
 		private:
+			Hix::QML::Controls::ToggleSwitch* _viewSwitch;
 			Hix::QML::Controls::Button* _settingButton;
 			Hix::QML::Controls::Button* _undoButton;
 			Hix::QML::Controls::Button* _redoButton;

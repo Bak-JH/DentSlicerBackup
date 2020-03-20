@@ -89,6 +89,8 @@ SupportModel* Hix::Support::SupportRaftManager::addSupport(std::unique_ptr<Suppo
 	if (supportEditMode() == Support::EditMode::Manual)
 	{
 		key->setHitTestable(true);
+		key->setHoverable(true);
+
 	}
 	return key;
 }
@@ -137,6 +139,7 @@ std::unique_ptr<SupportModel> Hix::Support::SupportRaftManager::removeSupport(Su
 	std::unique_ptr<SupportModel> result;
 	e->setEnabled(false);
 	e->setHitTestable(false);
+	e->setHoverable(false);
 	auto found = _supports.find(e);
 	if (found != _supports.end())
 	{
@@ -243,18 +246,23 @@ void Hix::Support::SupportRaftManager::prepareRaycaster(const GLModel& model)
 	_rayCaster->addAccelerator(new Hix::Engine3D::BVH(model));
 }
 
-const Hix::Render::SceneEntity* Hix::Support::SupportRaftManager::raftModel() const
+RaftModel* Hix::Support::SupportRaftManager::raftModel() 
 {
 	return _raft.get();
 }
 
-std::vector<std::reference_wrapper<const Hix::Render::SceneEntity>> Hix::Support::SupportRaftManager::supportModels() const
+const RaftModel* Hix::Support::SupportRaftManager::raftModel() const
 {
-	std::vector<std::reference_wrapper<const Hix::Render::SceneEntity>> entities;
+	return _raft.get();
+}
+
+std::vector<const Hix::Render::SceneEntity*> Hix::Support::SupportRaftManager::supportModels() const
+{
+	std::vector<const Hix::Render::SceneEntity*> entities;
 	entities.reserve(_supports.size());
 	for (auto& each : _supports)
 	{
-		entities.emplace_back(dynamic_cast<const Hix::Render::SceneEntity&>(*each.first));
+		entities.emplace_back(each.first);
 	}
 	return entities;
 }
@@ -331,6 +339,8 @@ void Hix::Support::SupportRaftManager::setSupportEditMode(Hix::Support::EditMode
 			for (auto& each : _supports)
 			{
 				each.first->setHitTestable(true);
+				each.first->setHoverable(true);
+				
 			}
 		}
 		else
@@ -339,6 +349,7 @@ void Hix::Support::SupportRaftManager::setSupportEditMode(Hix::Support::EditMode
 			for (auto& each : _supports)
 			{
 				each.first->setHitTestable(false);
+				each.first->setHoverable(false);
 			}
 		}
 	}

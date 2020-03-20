@@ -24,9 +24,10 @@ namespace Hix
 
 		class Slice { // extends Paths (total paths)
 		public:
+			Slice();
+
 			float z;
-			PolyTree polytree; // containment relationship per slice
-			PolyTree overhang;
+			std::unique_ptr<PolyTree> polytree; // containment relationship per slice
 
 			std::deque<Contour> closedContours;
 			std::deque<Contour> incompleteContours;
@@ -34,15 +35,10 @@ namespace Hix
 		};
 
 
-		class Slices : public std::deque<Slice> {
-		public:
-			Slices(size_t size);
-			void containmentTreeConstruct();
-
-		};
-
 		/****************** Entire Slicing Step *******************/
-		void slice(const Hix::Render::SceneEntity& entitiy, const Planes* planes, Slices* slices);
+		void containmentTreeConstruct(std::vector<Slice>& slices);
+
+		void slice(const Hix::Render::SceneEntity& entitiy, const Planes& planes, std::vector<Slice>& slices);
 	};
 }
 
@@ -52,6 +48,6 @@ namespace Hix
 	namespace Debug
 	{
 		QDebug operator<< (QDebug d, const Hix::Slicer::Slice& obj);
-		QDebug operator<< (QDebug d, const Hix::Slicer::Slices& obj);
+		QDebug operator<< (QDebug d, const  std::vector<Hix::Slicer::Slice> & obj);
 	}
 }

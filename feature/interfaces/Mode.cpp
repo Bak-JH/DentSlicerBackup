@@ -21,12 +21,17 @@ void Hix::Features::Mode::scheduleForDelete()
 
 }
 
-Hix::Features::Mode::~Mode()
+void Hix::Features::Mode::onExit()
 {
 	if (_button)
 	{
 		_button->setChecked(false);
 	}
+}
+
+Hix::Features::Mode::~Mode()
+{
+
 }
 
 Hix::Features::InstantMode::InstantMode()

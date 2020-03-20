@@ -8,16 +8,15 @@ namespace Hix
 		class PrintInfo : public QQuickItem
 		{
 			Q_OBJECT
-			Q_PROPERTY(QString printsize MEMBER _printsize)
-			Q_PROPERTY(QString printvolume MEMBER _printvolume)
+			Q_PROPERTY(QString printsize MEMBER _printsize  NOTIFY printsizeChanged)
 
 		public:
 			PrintInfo(QQuickItem* parent = nullptr);
-			void printVolumeChanged(const QVector3D& bound);
-
+			void printVolumeChanged(QVector3D bound);
+		signals:
+			void printsizeChanged();
 		protected:
 			QString _printsize = "0mm x 0mm x 0mm";
-			QString _printvolume = "0mL";
 		};		
 	}
 }

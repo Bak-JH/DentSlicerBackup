@@ -44,6 +44,7 @@ Hix.ToggleSwitch {
 		}
 
 		onToggled: {
+			console.log("toggled");
 			isChecked = checked;
 		}
 	}

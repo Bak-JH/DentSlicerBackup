@@ -45,14 +45,23 @@ Hix.ToggleSwitch {
 		text.color = nameColor;
 		iconImg.source = iconBasic;
 	}
-	
-	onEntered: {
-		if (nameColor == activeNameColor) {}	// hover on already selected button
-		else color = hoverColor	// hover on unselected button
+
+	MouseArea {
+		anchors.fill: parent
+		hoverEnabled: true
+		onEntered: {
+			if (nameColor == activeNameColor) {}	// hover on already selected button
+			else color = hoverColor	// hover on unselected button
+		}
+		onExited: {
+			if (nameColor == activeNameColor) {}	// exit from already selected button
+			else color = defaultColor	// exit from unselected button
+		}
+		onClicked: {
+			parent.isChecked = !parent.isChecked;
+		}
+		
 	}
-	onExited: {
-		if (nameColor == activeNameColor) {}	// exit from already selected button
-		else color = defaultColor	// exit from unselected button
-	}
-	
+
+
 }

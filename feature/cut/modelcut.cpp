@@ -31,8 +31,8 @@ Hix::Features::ModelCut::ModelCut() :
 	auto& co = controlOwner();
 	co.getControl(_cutSwitch, "cutswitch");
 	QObject::connect(_cutSwitch, &Hix::QML::Controls::ToggleSwitch::checkedChanged, [this]() { cutModeSelected(); });
-	QObject::connect(_slideBar.get(), &Hix::QML::SlideBarShell::valueChanged, [this]() { 
-		getSliderSignal(_slideBar->getValue()); 
+	QObject::connect(&slider(), &Hix::QML::SlideBarShell::valueChanged, [this]() {
+		_cuttingPlane.transform().setTranslation(QVector3D(0, 0, _modelsBound.zMin() + slider().getValue()));
 		});
 	cutModeSelected();
 }
@@ -55,8 +55,8 @@ void ModelCut::cutModeSelected()
 		_cuttingPlane.transform().setTranslation(QVector3D(0, 0, _modelsBound.zMin() + 1 * _modelsBound.lengthZ() / 1.8));
 		_cuttingPlane.enablePlane(true);
 		Hix::Application::ApplicationManager::getInstance().sceneManager().setViewPreset(Hix::Application::SceneManager::ViewPreset::Center);
-		_slideBar->setValue(_modelsBound.zMin() + 1.0 * _modelsBound.lengthZ());
-		setSliderVisible(true);
+		slider().setValue(_modelsBound.zMin() + 1.0 * _modelsBound.lengthZ());
+		slider().setVisible	(true);
 	}
 	else if (_cutSwitch->isChecked())
 	{
@@ -68,18 +68,13 @@ void ModelCut::cutModeSelected()
 		_cuttingPlane.enablePlane(true);
 		Hix::Application::ApplicationManager::getInstance().getRayCaster().setHoverEnabled(true);
 		Hix::Application::ApplicationManager::getInstance().sceneManager().setViewPreset(Hix::Application::SceneManager::ViewPreset::Down);
-		setSliderVisible(false);
+		slider().setVisible(false);
 	}
 	return;
 }
 
 
 
-void ModelCut::getSliderSignal(double value) {
-	float zlength = _modelsBound.lengthZ();
-	qDebug() << value;
-	_cuttingPlane.transform().setTranslation(QVector3D(0, 0, _modelsBound.zMin() + value));
-}
 
 void Hix::Features::ModelCut::applyButtonClicked()
 {
