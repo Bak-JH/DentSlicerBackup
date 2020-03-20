@@ -23,6 +23,7 @@ namespace Qt3DInput
 {
 	class QMouseHandler;
 	class QMouseEvent;
+	class QWheelEvent;
 }
 namespace Hix
 {
@@ -73,7 +74,7 @@ namespace Hix
 			void mousePressed(Qt3DInput::QMouseEvent* mouse);
 			void mouseReleased(Qt3DInput::QMouseEvent* mouse);
 			void mousePositionChanged(Qt3DInput::QMouseEvent* mouse);
-
+			void onWheel(Qt3DInput::QWheelEvent* wheel);
 			void hitsChanged(const Qt3DRender::QAbstractRayCaster::Hits& hits);
 			void hoverHitsChanged(const Qt3DRender::QAbstractRayCaster::Hits& hits);
 
@@ -87,9 +88,14 @@ namespace Hix
 			};
 			//click detection
 			QPoint _pressedPt;
+
+			//camera stuff
+			QPoint _cameraPrevPt;
+			QPoint _cameraCurrPt;
+			Qt3DInput::QMouseEvent::Buttons _pressedButton;
+
 			std::condition_variable _isClickVerified;
 			std::mutex _clickVerifyMtx;
-			//bool _isPressed = false;
 			bool _mouseBusy = false;
 			std::future<bool> _verifyClickTask;
 			Qt3DInput::QMouseDevice* _mouseDevice;

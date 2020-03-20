@@ -31,7 +31,7 @@ const std::chrono::milliseconds RayCastController::MAX_CLICK_DURATION = 200ms;
 const float RayCastController::MAX_CLICK_MOVEMENT = 5;
 
 RayCastController::RayCastController(): _mouseDevice(new Qt3DInput::QMouseDevice), _rayCaster(new Qt3DRender::QScreenRayCaster),
-_hoverRayCaster(new Qt3DRender::QScreenRayCaster), _mouseHandler(new Qt3DInput::QMouseHandler)
+_hoverRayCaster(new Qt3DRender::QScreenRayCaster), _mouseHandler(new Qt3DInput::QMouseHandler), _pressedButton(Qt3DInput::QMouseEvent::Buttons::NoButton)
 {
 }
 
@@ -121,6 +121,9 @@ bool RayCastController::verifyClick()
 
 void RayCastController::mousePressed(Qt3DInput::QMouseEvent* mouse)
 {
+	_pressedButton = mouse->button();
+	_cameraPrevPt = { mouse->x(), mouse->y() };
+	mouse->setAccepted(false);
 	if (mouse->button() == Qt3DInput::QMouseEvent::Buttons::LeftButton || mouse->button() == Qt3DInput::QMouseEvent::Buttons::RightButton)
 	{
 		if (!_mouseBusy && mousePosInBound(mouse))
@@ -128,23 +131,19 @@ void RayCastController::mousePressed(Qt3DInput::QMouseEvent* mouse)
 
 			//no need for mutex, mouse events occur in main thread
 			_mouseBusy = true;
-			mouse->setAccepted(true);
 			_mouseEvent = MouseEventData(mouse);
 			_pressedPt = _mouseEvent.position;
 			_verifyClickTask = std::async(std::launch::async, &RayCastController::verifyClick, this);
 		}
-
-
-
 	}
 }
 
 void RayCastController::mouseReleased(Qt3DInput::QMouseEvent* mouse)
 {
+	mouse->setAccepted(false);
 	if (mouse->button() == Qt3DInput::QMouseEvent::Buttons::LeftButton || mouse->button() == Qt3DInput::QMouseEvent::Buttons::RightButton)
 	{
 		_mouseEvent = MouseEventData(mouse);
-		mouse->setAccepted(true);
 		Hix::Application::ApplicationManager::getInstance().cursorManager().setCursor(Hix::Application::CursorType::Default);
 		_mouseBusy = false;
 
@@ -177,6 +176,8 @@ void RayCastController::mouseReleased(Qt3DInput::QMouseEvent* mouse)
 
 		}
 	}
+
+	_pressedButton = Qt3DInput::QMouseEvent::Buttons::NoButton;
 	//so that we can know if a verification is still going on by checking validity of verifier
 
 
@@ -185,8 +186,26 @@ void RayCastController::mouseReleased(Qt3DInput::QMouseEvent* mouse)
 
 void RayCastController::mousePositionChanged(Qt3DInput::QMouseEvent* mouse)
 {
+	mouse->setAccepted(false);
 	if (mousePosInBound(mouse))
 	{
+		constexpr float rotationSpeed =  0.2f;
+		auto& scene = Hix::Application::ApplicationManager::getInstance().sceneManager();
+		auto camera = scene.camera();
+		auto systemTransform = scene.systemTransform();
+		_cameraCurrPt = { mouse->x(), mouse->y() };
+		if (_pressedButton == Qt3DInput::QMouseEvent::Buttons::MiddleButton) {//mouse wheel drag
+			camera->translateWorld(QVector3D((-1.0) * (_cameraCurrPt.x() - _cameraPrevPt.x()) / 1000.0, 0, 0), Qt3DRender::QCamera::TranslateViewCenter);
+			camera->translateWorld(QVector3D(0, (1.0) * (_cameraCurrPt.y() - _cameraPrevPt.y()) / 1000.0, 0), Qt3DRender::QCamera::TranslateViewCenter);
+		}
+		else if(_pressedButton == Qt3DInput::QMouseEvent::Buttons::RightButton)
+		{
+			systemTransform->setRotationZ(systemTransform->rotationZ() + rotationSpeed * (_cameraCurrPt.x() - _cameraPrevPt.x()));
+			systemTransform->setRotationX(systemTransform->rotationX() + rotationSpeed * (_cameraCurrPt.y() - _cameraPrevPt.y()));
+		}
+		_cameraPrevPt = _cameraCurrPt;
+		scene.onCameraChanged();
+
 		if (_hoverEnabled && !_hoverRaycastBusy)
 		{
 			auto hoverEvent = MouseEventData(mouse);
@@ -231,6 +250,39 @@ void RayCastController::mousePositionChanged(Qt3DInput::QMouseEvent* mouse)
 			}
 		}
 	}
+}
+
+void Hix::Input::RayCastController::onWheel(Qt3DInput::QWheelEvent* wheel)
+{
+	auto& scene = Hix::Application::ApplicationManager::getInstance().sceneManager();
+	auto camera = scene.camera();
+	auto systemTransform = scene.systemTransform();
+	auto sceneScreen = Hix::Application::ApplicationManager::getInstance().sceneManager().scene3d();
+
+	// mouse wheel scaling: model and bed zooms, camera moves to mouse pointer direction
+	auto d = wheel->angleDelta().y();
+	auto scaleTmp = systemTransform->scale3D();
+
+	auto v_c = camera->position() + QVector3D(0.015, 0.16, -100);
+	QPoint v_m = { wheel->x(),  wheel->y() };   
+	QVector3D v_relative(0, 0, 0);   
+
+
+	v_relative.setX((v_m.x() / sceneScreen->width()) - 0.5);
+	v_relative.setY(-((v_m.y() + ((sceneScreen->width() - sceneScreen->height()) / 2)) / sceneScreen->width()) + 0.5);
+	v_relative.setZ(0);
+
+	if (d > 0) {
+		systemTransform->setScale3D(scaleTmp * 1.08);
+		v_c = v_c + v_relative;
+		camera->translateWorld(v_c * 0.08);
+	}
+	else {
+		systemTransform->setScale3D(scaleTmp * 0.92);
+		v_c = v_c + v_relative;
+		camera->translateWorld(v_c * -0.08);
+	}
+	scene.onCameraChanged();
 }
 
 void RayCastController::hitsChanged(const Qt3DRender::QAbstractRayCaster::Hits& hits)
@@ -350,6 +402,9 @@ void Hix::Input::RayCastControllerLoader::init(RayCastController& manager, Qt3DC
 	QObject::connect(manager._mouseHandler, SIGNAL(released(Qt3DInput::QMouseEvent*)), &manager, SLOT(mouseReleased(Qt3DInput::QMouseEvent*)));
 	QObject::connect(manager._mouseHandler, SIGNAL(pressed(Qt3DInput::QMouseEvent*)), &manager, SLOT(mousePressed(Qt3DInput::QMouseEvent*)));
 	QObject::connect(manager._mouseHandler, SIGNAL(positionChanged(Qt3DInput::QMouseEvent*)), &manager, SLOT(mousePositionChanged(Qt3DInput::QMouseEvent*)));
+	QObject::connect(manager._mouseHandler, SIGNAL(wheel(Qt3DInput::QWheelEvent *)), &manager, SLOT(onWheel(Qt3DInput::QWheelEvent* )));
+
+
 	QObject::connect(manager._rayCaster, SIGNAL(hitsChanged(const Qt3DRender::QAbstractRayCaster::Hits&)), &manager, SLOT(hitsChanged(const Qt3DRender::QAbstractRayCaster::Hits&)));
 	QObject::connect(manager._hoverRayCaster, SIGNAL(hitsChanged(const Qt3DRender::QAbstractRayCaster::Hits&)), &manager, SLOT(hoverHitsChanged(const Qt3DRender::QAbstractRayCaster::Hits&)));
 }

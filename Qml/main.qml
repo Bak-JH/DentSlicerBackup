@@ -35,28 +35,11 @@ Item{
 		FontLoader{ id: openSemiBold; source: "qrc:/Resource/font/OpenSans-SemiBold.ttf" }
 		FontLoader{ id: openBold; source: "qrc:/Resource/font/OpenSans-Bold.ttf" }
 		
-		CtrToggleSwitch {
-			id: gfdgdgdfg
-			sizeMult: 1.3
-			isChecked: false
-			leftText
-			{
-				text: "Object view"
-			}
-			rightText
-			{
-				text: "Layer view"
-			}
 
-		}
-		
         Rectangle{
-
 			id: uiRoot
             color: "#E5E5E5"
 			anchors.fill: parent
-
-
             DropArea {
 				signal openFile(url path)
 
@@ -85,30 +68,34 @@ Item{
 
 
             }
-            Scene3D {
-                id: scene3d
-                objectName: "scene3d"
-                anchors.top : parent.top
-                anchors.left : parent.left
-                width: window.width
-                height: window.height
-                hoverEnabled: true
-                aspects: ["input", "logic"]
-                cameraAspectRatioMode: Scene3D.UserAspectRatio
 
-                function disableScene3D(){
-                    scene3d.enabled = false;
-                }
+			Scene3D {
 
-                function enableScene3D(){
-                    scene3d.enabled = true;
-                }
+				id: scene3d
+				objectName: "scene3d"
+				anchors.top : parent.top
+				anchors.left : parent.left
+				width: window.width
+				height: window.height
+				hoverEnabled: true
+				aspects: ["input", "logic"]
+				cameraAspectRatioMode: Scene3D.UserAspectRatio
 
-                MainView {
-                    objectName: "MainView"
-                    id: sceneRoot
-                }
-            }
+				function disableScene3D(){
+					scene3d.enabled = false;
+				}
+
+				function enableScene3D(){
+					scene3d.enabled = true;
+				}
+
+				MainView {
+					objectName: "MainView"
+					id: sceneRoot
+				}
+			}
+			
+
 			FeatureMenu {
 				id: featureMenu
 				height: 100
@@ -225,82 +212,7 @@ Item{
 				anchors.rightMargin: sidePadding
 			}
 			
-			MouseArea{
-				acceptedButtons: Qt.MiddleButton | Qt.RightButton
-				anchors.fill: parent
-				property int mode: 0;// 0 = none, 1 = translate, 2 = rotate, !#!@# qt...
-				property vector2d prevPosition;
-				property vector2d currPosition;
-				property real rotationSpeed : 0.2;
-				propagateComposedEvents: true;
 
-				onPressed: {
-					if(mouse.button == Qt.RightButton)
-					{
-						mode = 2;
-					}
-					else if(mouse.button == Qt.MiddleButton)
-					{
-						mode = 1;
-					}
-					prevPosition = Qt.vector2d(mouseX,mouseY);
-
-				}
-				onReleased:  {
-					mode = 0;
-					// mttab.updatePosition()
-				}
-
-				onPositionChanged: {
-					if(mode != 0)
-					{
-						currPosition = Qt.vector2d(mouseX,mouseY);
-
-						if(mode == 1){//mouse wheel drag
-							sceneRoot.cm.camera.translateWorld(Qt.vector3d((-1)*(currPosition.x - prevPosition.x)/1000,0,0),0);
-							sceneRoot.cm.camera.translateWorld(Qt.vector3d(0,(1)*(currPosition.y - prevPosition.y)/1000,0),0);
-						}
-						else
-						{
-							sceneRoot.systemTransform.rotationZ += rotationSpeed *(currPosition.x - prevPosition.x);
-							sceneRoot.systemTransform.rotationX += rotationSpeed *(currPosition.y - prevPosition.y);
-						}
-						prevPosition = currPosition;
-						sceneRoot.cameraViewChanged();
-					}
-				}
-				onWheel: {
-					// mouse wheel scaling: model and bed zooms, camera moves to mouse pointer direction
-					var d = wheel.angleDelta.y;
-					var scaleTmp = sceneRoot.systemTransform.scale3D;
-
-					var v_c = sceneRoot.cm.camera.position.plus(Qt.vector3d(0.015, 0.16, -100));
-					var v_m = {};                               // absolute position of mouse pointer
-					var v_relative = Qt.vector3d(0,0,0);        // relative position of mouse pointer based on camera
-
-					v_m.x = wheel.x;
-					v_m.y = wheel.y;
-					v_relative.x = (v_m.x / scene3d.width) - 0.5;
-					v_relative.y = - ((v_m.y + ((scene3d.width - scene3d.height)/2)) / scene3d.width) + 0.5;
-
-					v_relative.z = 0;
-
-					if (d>0) {
-						sceneRoot.systemTransform.scale3D = scaleTmp.times(1.08);
-						v_c = v_c.plus(v_relative);
-						sceneRoot.cm.camera.translateWorld(v_c.times(0.08));
-
-						// mttab.updatePosition();
-					}
-					else {
-						sceneRoot.systemTransform.scale3D = scaleTmp.times(0.92);
-						v_c = v_c.plus(v_relative);
-						sceneRoot.cm.camera.translateWorld(v_c.times(-0.08));
-						// mttab.updatePosition();
-					}
-					sceneRoot.cameraViewChanged();
-				}
-			}
 
 			Item 
 			{
