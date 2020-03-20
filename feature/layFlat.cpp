@@ -95,7 +95,6 @@ void Hix::Features::LayFlat::runImpl()
 	_model->transform().setRotation(_model->transform().rotation() * rot);
 	_model->updateRecursiveAabb();
 	_model->setZToBed();
-	//Hix::Application::ApplicationManager::getInstance().resetLayflat();
 }
 
 Hix::Features::LayFlat::~LayFlat()

@@ -7,20 +7,12 @@
 #include <QImage>
 #include <QPainter>
 #include "polyclipping/polyclipping.h"
-
-namespace Hix
-{
-	namespace Slicer
-	{
-		class Slices;
-
-	}
-}
+#include "slicer.h"
 
 class SVGexporter
 {
 public:
-    void exportSVG(Hix::Slicer::Slices& shellSlices, QString outfoldername, bool isTemp);
+    void exportSVG(std::vector<Hix::Slicer::Slice>& shellSlices, QString outfoldername, bool isTemp);
 
 private:
 	void parsePolyTreeAndWrite(const ClipperLib::PolyNode* pn, std::stringstream& content);

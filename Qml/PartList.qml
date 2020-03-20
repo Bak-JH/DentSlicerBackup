@@ -25,15 +25,6 @@ Hix.PartList {
 			anchors.leftMargin: myPadding
 		}
 		ScrollView {
-
-			MouseArea {
-				id: wheelArea
-				anchors.fill: parent
-				hoverEnabled: true
-				onClicked: {
-					console.log("sdffsf");
-				}
-			}
 			id: scrollView
 			width: 256 - 16;
 			height: 212;
@@ -52,6 +43,10 @@ Hix.PartList {
 
 			}
 			ScrollBar.vertical: ScrollBar{
+				anchors.top: scrollView.top
+				anchors.rightMargin: 4
+				anchors.right: scrollView.right
+				width: 12
 				id: control
 				policy: ScrollBar.AsNeeded
 				interactive: true

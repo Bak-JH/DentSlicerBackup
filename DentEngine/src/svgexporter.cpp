@@ -21,7 +21,7 @@ namespace SVGexporterPrivate
 }
 
 
-void SVGexporter::exportSVG(Slices& shellSlices,QString outfoldername, bool isTemp){
+void SVGexporter::exportSVG(std::vector<Slice>& shellSlices,QString outfoldername, bool isTemp){
     auto& setting = Hix::Application::ApplicationManager::getInstance().settings().sliceSetting;
     if (isTemp || setting.invertX)
         _invert = true;
@@ -42,7 +42,7 @@ void SVGexporter::exportSVG(Slices& shellSlices,QString outfoldername, bool isTe
         QString outfilename = outfoldername + "/" + QString::number(currentSlice_idx) + ".svg";
         QFile outfile(outfilename);
         std::stringstream contentStream;
-		PolyTree& shellSlice_polytree = shellSlices[i].polytree;
+		PolyTree& shellSlice_polytree = *shellSlices[i].polytree;
         outfile.open(QFile::WriteOnly);
         writeHeader(contentStream);
         if (setting.slicingMode == Hix::Settings::SliceSetting::SlicingMode::Uniform)

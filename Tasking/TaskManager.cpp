@@ -80,7 +80,6 @@ void TaskManager::run()
 		}
 
 		_progressManager.deletePopup();
-		Hix::Application::ApplicationManager::getInstance().stateChanged();
 	}
 }
 

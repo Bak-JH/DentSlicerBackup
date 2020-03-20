@@ -16,6 +16,7 @@ namespace Hix
 		class AddModel : public Feature
 		{
 		public:
+			AddModel();
 			AddModel(Qt3DCore::QEntity* parent, Hix::Engine3D::Mesh* mesh, QString fname, const Qt3DCore::QTransform* transform);
 			virtual ~AddModel();
 			GLModel* get();
@@ -30,6 +31,7 @@ namespace Hix
 			};
 			std::variant<GLModel*, UndoInfo> _model;
 			Qt3DCore::QEntity* _parent;
+		private:
 			Hix::Engine3D::Mesh* _mesh;
 			QString _fname;
 			const Qt3DCore::QTransform* _transform;
@@ -38,6 +40,7 @@ namespace Hix
 		class ListModel : public AddModel
 		{
 		public:
+			ListModel();
 			ListModel(Hix::Engine3D::Mesh* mesh, QString fname, const Qt3DCore::QTransform* transform);
 			virtual ~ListModel();
 

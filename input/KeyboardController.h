@@ -1,7 +1,8 @@
 #pragma once
 #include <QKeyboardHandler>
 #include <QKeyboardDevice>
-
+#include <unordered_set>
+class GLModel;
 namespace Qt3DInput
 {
 	class QKeyEvent;
@@ -32,6 +33,7 @@ namespace Hix
 
 			bool _shiftPressed = false;
 			bool _ctrlPressed = false;
+			std::unordered_set<GLModel*> _copyModels;
 		};
 
 	}

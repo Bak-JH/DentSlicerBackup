@@ -832,6 +832,7 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="common\RandomGen.h" />
+    <ClInclude Include="feature\layerview\CrossSectionPlane.h" />
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="debug\moc_predefs.h.cbt" />
@@ -938,7 +939,6 @@
     <QtMoc Include="Qml\components\FeatureMenu.h" />
     <QtMoc Include="Qml\components\PartList.h" />
     <QtMoc Include="Qml\components\ModalShell.h" />
-    <QtMoc Include="feature\layerview\CrossSectionPlane.h" />
     <QtMoc Include="glmodel.h" />
     <QtMoc Include="utils\gridmesh.h" />
     <QtMoc Include="utils\httpreq.h" />
