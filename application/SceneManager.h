@@ -58,10 +58,12 @@ namespace Hix
 			Qt3DCore::QEntity* root();
 			Qt3DCore::QEntity* total();
 			QVector3D cameraViewVector()const;
-			const Qt3DCore::QTransform* systemTransform()const;
+			Qt3DCore::QTransform* systemTransform();
 			QQuickItem* scene3d();
 			void drawBed();
 			void setViewPreset(ViewPreset preset);
+			Qt3DRender::QCamera* camera();
+
 		private:
 			QObject* _dropArea;
 			QQuickItem* _scene3d;
@@ -74,8 +76,9 @@ namespace Hix
 			Hix::UI::GridBed _bed;
 
 		private slots:
-			void onCameraChanged();
 			void fileDropped(QUrl fileUrl);
+		public slots:
+			void onCameraChanged();
 
 
 			friend class SceneManagerLoader;

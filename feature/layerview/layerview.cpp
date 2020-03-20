@@ -21,6 +21,12 @@ Hix::Features::LayerView::LayerView():
 	_models(Hix::Application::ApplicationManager::getInstance().partManager().selectedModels()),
 	_crossSectionPlane(Hix::Application::ApplicationManager::getInstance().sceneManager().total())
 {
+	if (Hix::Application::ApplicationManager::getInstance().partManager().selectedModels().empty())
+	{
+		Hix::Application::ApplicationManager::getInstance().modalDialogManager().needToSelectModels();
+		return;
+	}
+
 	slider().setValue(slider().getMax());
 	slider().setVisible(true);
 

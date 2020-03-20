@@ -46,7 +46,7 @@ QVector3D Hix::Application::SceneManager::cameraViewVector()const
 	return _camera->position() - _systemTransform->translation();
 }
 
-const Qt3DCore::QTransform* Hix::Application::SceneManager::systemTransform() const
+Qt3DCore::QTransform* Hix::Application::SceneManager::systemTransform()
 {
 	return _systemTransform;
 }
@@ -66,6 +66,11 @@ void Hix::Application::SceneManager::setViewPreset(ViewPreset preset)
 	std::string viewFuncName("view");
 	viewFuncName.append(magic_enum::enum_name(preset));
 	QMetaObject::invokeMethod(_root, viewFuncName.c_str());
+}
+
+Qt3DRender::QCamera* Hix::Application::SceneManager::camera()
+{
+	return _camera;
 }
 
 void Hix::Application::SceneManager::fileDropped(QUrl fileUrl)
