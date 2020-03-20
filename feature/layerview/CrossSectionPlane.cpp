@@ -19,7 +19,7 @@ Hix::Features::CrossSectionPlane::CrossSectionPlane(Qt3DCore::QEntity* owner): S
 
 void Hix::Features::CrossSectionPlane::init(const std::unordered_map<SceneEntityWithMaterial*, QVector4D>& modelColorMap)
 {
-	std::unordered_set<SceneEntity*> entities;
+	std::unordered_set<const SceneEntity*> entities;
 	for (auto& pair : modelColorMap)
 	{
 		entities.insert(pair.first);

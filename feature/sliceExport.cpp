@@ -57,7 +57,7 @@ void Hix::Features::SliceExport::run()
 	}
 
 	auto selectedBound = Hix::Engine3D::combineBounds(_models);
-	auto shellSlices = SlicingEngine::sliceModels(selectedBound.zMax(), _models, Hix::Application::ApplicationManager::getInstance().supportRaftManager());
+	auto shellSlices = SlicingEngine::sliceModels(_models, Hix::Application::ApplicationManager::getInstance().supportRaftManager());
 
 	// Export to SVG
 	SVGexporter exp;

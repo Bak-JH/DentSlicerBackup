@@ -46,9 +46,11 @@ namespace Hix
 			RaftModel* addRaft(std::unique_ptr<RaftModel> raft);
 			OverhangDetect::Overhangs detectOverhang(const GLModel& model);
 			//removed due to efficiency when deleting multiple
-			std::vector<std::reference_wrapper<const Hix::Render::SceneEntity>> supportModels()const;
+			std::vector<const Hix::Render::SceneEntity*> supportModels()const;
 			std::vector<SupportModel*> modelAttachedSupports(const std::unordered_set<GLModel*>& models)const;
-			const Hix::Render::SceneEntity* raftModel()const;
+			RaftModel* raftModel();
+			const RaftModel* raftModel()const;
+
 			void clear(const GLModel& model);
 
 			Qt3DCore::QEntity& rootEntity();

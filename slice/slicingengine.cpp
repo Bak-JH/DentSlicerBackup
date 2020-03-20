@@ -13,12 +13,13 @@
 #include "DentEngine/src/SlicerDebugInfoExport.h"
 #include "../support/SupportRaftManager.h"
 #include "../application/ApplicationManager.h"
+#include "../support/RaftModel.h"
 using namespace Hix;
 using namespace Hix::Slicer;
 using namespace Hix::Render;
 
 std::vector<Hix::Slicer::Slice> SlicingEngine::sliceModels(const std::unordered_set<GLModel*>& models, const Hix::Support::SupportRaftManager& suppRaft) {
-	std::unordered_set<SceneEntity*> entities;
+	std::unordered_set<const SceneEntity*> entities;
 	for (auto& m : models)
 	{
 		entities.emplace(m);
@@ -35,7 +36,7 @@ std::vector<Hix::Slicer::Slice> SlicingEngine::sliceModels(const std::unordered_
 	return sliceEntities(entities);
 }
 
-std::vector<Hix::Slicer::Slice> SlicingEngine::sliceEntities(const std::unordered_set<SceneEntity*>& models)
+std::vector<Hix::Slicer::Slice> SlicingEngine::sliceEntities(const std::unordered_set<const SceneEntity*>& models)
 {
 	//due to float error with models
 	constexpr float BOTT = 0.00001f;
