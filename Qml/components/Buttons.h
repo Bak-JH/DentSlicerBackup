@@ -50,8 +50,13 @@ namespace Hix
 				void checked();
 				void unchecked();
 
+				void entered();
+				void exited();
+
 			protected slots:
 				virtual void onCheckedChanged();
+				virtual void onEntered();
+				virtual void onExited();
 				//virtual void onClicked();
 
 			private:
