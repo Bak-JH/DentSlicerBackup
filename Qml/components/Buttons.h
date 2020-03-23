@@ -56,6 +56,7 @@ namespace Hix
 
 			private:
 				bool _isChecked = false; //isRight toggleImgSwitch
+				QQuickMouseArea* _mouseArea;
 			};
 		}
 
