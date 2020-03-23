@@ -72,16 +72,12 @@ Hix.PartListItem {
 		}
 
 		onCheckedChanged: {
-			console.log(isSelected)
-
 			if(isSelected)
 				showhideimg.source = "qrc:/Resource/part_show_select_1.png"
 			else
 				showhideimg.source = "qrc:/Resource/part_show_1.png"
 		}
 		onChecked: {
-			console.log(isSelected)
-			
 			if(isSelected)
 				showhideimg.source = "qrc:/Resource/part_hide_select_1.png"
 			else
