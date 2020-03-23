@@ -46,7 +46,30 @@ Hix.PartListItem {
 					showhideimg.source = "qrc:/Resource/part_show_1.png"
 			}
 
+			MouseArea
+			{
+				anchors.fill: parent
+				onEntered: {
+					holdTimer.start()
+					console.log("ent")
+				}
+			
+				onExited: {
+					holdTimer.stop()
+					console.log("test")
+				}
 
+				Timer {
+				id:  holdTimer
+				interval: 2000
+				running: false
+				repeat: false
+					onTriggered: {
+						selectButton.width += 100
+						console.log("triggered")
+					}
+				}
+			}
 		}
 	}
 	Hix.ToggleSwitch{
@@ -61,14 +84,6 @@ Hix.PartListItem {
 			id: showhideimg
 			source: "qrc:/Resource/part_show_1.png"
 			anchors.verticalCenter: parent.verticalCenter
-		}
-
-		MouseArea {
-			anchors.fill: parent
-			hoverEnabled: true
-			onClicked: {
-				parent.isChecked = !parent.isChecked;
-			}
 		}
 
 		onCheckedChanged: {
