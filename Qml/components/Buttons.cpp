@@ -42,9 +42,9 @@ void Hix::QML::Controls::Button::onExited()
 Hix::QML::Controls::ToggleSwitch::ToggleSwitch(QQuickItem* parent) : _mouseArea(new QQuickMouseArea(this)), QQuickRectangle(parent)
 {
 	// mouse area
-	/*connect(_mouseArea, &QQuickMouseArea::entered, this, &Button::onEntered);
-	connect(_mouseArea, &QQuickMouseArea::exited, this, &Button::onExited);
-	*/
+	connect(_mouseArea, &QQuickMouseArea::entered, this, &ToggleSwitch::onEntered);
+	connect(_mouseArea, &QQuickMouseArea::exited, this, &ToggleSwitch::onExited);
+	
 	connect(_mouseArea, &QQuickMouseArea::clicked, [this]() { setChecked(!_isChecked); });
 	connect(this, &ToggleSwitch::checkedChanged, this, &ToggleSwitch::onCheckedChanged);
 
@@ -87,6 +87,15 @@ void Hix::QML::Controls::ToggleSwitch::onCheckedChanged()
 		emit unchecked();
 }
 
+void Hix::QML::Controls::ToggleSwitch::onEntered()
+{
+	emit entered();
+}
+
+void Hix::QML::Controls::ToggleSwitch::onExited()
+{
+	emit exited();
+}
 //void Hix::QML::Controls::ToggleSwitch::onClicked()
 //{
 //	setChecked(!_isChecked);

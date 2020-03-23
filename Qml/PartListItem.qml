@@ -46,28 +46,22 @@ Hix.PartListItem {
 					showhideimg.source = "qrc:/Resource/part_show_1.png"
 			}
 
-			MouseArea
-			{
-				anchors.fill: parent
-				onEntered: {
-					holdTimer.start()
-					console.log("ent")
-				}
-			
-				onExited: {
-					holdTimer.stop()
-					console.log("test")
-				}
-
-				Timer {
-				id:  holdTimer
-				interval: 2000
-				running: false
-				repeat: false
-					onTriggered: {
-						selectButton.width += 100
-						console.log("triggered")
-					}
+			onEntered: {
+				holdTimer.start()
+			}
+			onExited: {
+				holdTimer.stop()
+			}
+	
+			Timer {
+			id:  holdTimer
+			interval: 2000
+			running: false
+			repeat: false
+				onTriggered: {
+					//selectButton.width += 100
+					//modelnameText.width += 100
+					console.log("triggered")
 				}
 			}
 		}
