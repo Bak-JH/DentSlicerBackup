@@ -25,11 +25,13 @@ namespace Hix
 				void clicked();
 				void entered();
 				void exited();
+				void positionChanged(QQuickMouseEvent* mouse);
 
 			protected slots:
 				virtual void onClicked();
 				virtual void onEntered();
 				virtual void onExited();
+				virtual void onPositionChanged(QQuickMouseEvent* mouse);
 
 			protected:
 				QQuickMouseArea* _mouseArea;
