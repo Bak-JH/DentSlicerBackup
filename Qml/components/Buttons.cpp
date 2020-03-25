@@ -9,6 +9,7 @@ Hix::QML::Controls::Button::Button(QQuickItem* parent) : QQuickRectangle(parent)
 	connect(_mouseArea, &QQuickMouseArea::clicked, this, &Button::onClicked);
 	connect(_mouseArea, &QQuickMouseArea::entered, this, &Button::onEntered);
 	connect(_mouseArea, &QQuickMouseArea::exited, this, &Button::onExited);
+	connect(_mouseArea, &QQuickMouseArea::positionChanged, this, &Button::onPositionChanged);
 
 	qvariant_cast<QObject*>(
 		_mouseArea->property("anchors")
@@ -33,6 +34,11 @@ void Hix::QML::Controls::Button::onEntered()
 void Hix::QML::Controls::Button::onExited()
 {
 	emit exited();
+}
+
+void Hix::QML::Controls::Button::onPositionChanged(QQuickMouseEvent* mouse)
+{
+	emit positionChanged(mouse);
 }
 
 
