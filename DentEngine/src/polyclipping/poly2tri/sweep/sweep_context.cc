@@ -157,6 +157,14 @@ void SweepContext::MapTriangleToNodes(Triangle& t)
   }
 }
 
+void SweepContext::resetPoints()
+{
+    for (auto p : points_)
+    {
+        p->edge_list.clear();
+    }
+}
+
 void SweepContext::RemoveFromMap(Triangle* triangle)
 {
   map_.remove(triangle);

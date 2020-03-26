@@ -4,6 +4,10 @@
 
 namespace Hix
 {
+	namespace Engine3D
+	{
+		class Mesh;
+	}
 	namespace Slicer
 	{
 		class Contour;

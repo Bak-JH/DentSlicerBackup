@@ -235,8 +235,6 @@ void SVGexporter::writePolygon(const PolyNode* contour, std::stringstream& conte
 			_resY/2
 			- fp.y()*_ppmmY<< " "; // doesn't need 100 actually// TODO fix this
 
-        // just fit to origin
-        //outfile << std::fixed << (float)point.X/Hix::Polyclipping::INT_PT_RESOLUTION - scfg->origin.x() << "," << std::fixed << (float)point.Y/Hix::Polyclipping::INT_PT_RESOLUTION - scfg->origin.y() << " ";
     }
     if (! contour->IsHole()){
         content << "\" style=\"fill: white\" />\n";
@@ -260,8 +258,6 @@ void SVGexporter::writePolygon(ClipperLib::Path& contour, std::stringstream& con
 			_resY/2
 			- fp.y() * _ppmmY << " "; // doesn't need 100 actually
 
-        // just fit to origin
-        //outfile << std::fixed << (float)point.X/Hix::Polyclipping::INT_PT_RESOLUTION - scfg->origin.x() << "," << std::fixed << (float)point.Y/Hix::Polyclipping::INT_PT_RESOLUTION - scfg->origin.y() << " ";
     }
     content << "\" style=\"fill: white\" />\n";
 }

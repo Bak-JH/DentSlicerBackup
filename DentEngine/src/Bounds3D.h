@@ -71,6 +71,16 @@ namespace Hix
 
 		};
 
+		template<typename ItrType>
+		Hix::Engine3D::Bounds3D bound2D(ItrType itr, ItrType end)
+		{
+			Hix::Engine3D::Bounds3D bound;
+			for (; itr != end; ++itr)
+			{
+				bound.update(QVector3D(itr->x(), itr->y(), 0));
+			}
+			return bound;
+		}
 		template<typename SceneEntityDType>
 		Hix::Engine3D::Bounds3D combineBounds(const std::unordered_set<SceneEntityDType*>& set)
 		{

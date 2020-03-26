@@ -80,7 +80,7 @@ void AddToMap(Triangle* triangle);
 Point* GetPoint(size_t index);
 
 Point* GetPoints();
-
+void resetPoints();
 void RemoveFromMap(Triangle* triangle);
 
 void AddHole(const std::vector<Point*>& polyline);

@@ -1,20 +1,54 @@
 #include "SlicerDebugInfoExport.h"
-#include "SlicerDebug.h"
-#include <QSvgGenerator>
 #include "../../application/ApplicationManager.h"
 
-void drawContour(const Hix::Slicer::Contour& contour, QPainter& painter, QString contourName)
+
+Hix::Slicer::Debug::SVGOut::SVGOut(const std::string& name, const QSize& size): _randGen(1), _randColor(0, 255)
 {
-	auto intPath = contour.toDebugPath();
-	QPainterPath path;
-	painter.drawText(QPoint(intPath.front().X, intPath.front().Y), contourName);
-	path.moveTo(intPath.front().X, intPath.front().Y);
-	for (auto& each : intPath)
-	{
-		path.lineTo(each.X, each.Y);
-	}
-	painter.strokePath(path, painter.pen());
+	QString newPath = SlicerDebug::getInstance().debugFilePath + QString::fromStdString(name) + QString(".svg");
+	auto& pSet = Hix::Application::ApplicationManager::getInstance().settings().printerSetting;
+	_generator.setFileName(newPath);
+	_generator.setSize(size);
+	_generator.setViewBox(QRect(0, 0, size.width(), size.height()));
+	_painter.begin(&_generator);
+	_painter.setFont(QFont("Arial", size.width()/1000));
+	_painter.fillRect(QRect(0, 0, size.width(), size.height()), Qt::GlobalColor::black);
+
+
 }
+
+Hix::Slicer::Debug::SVGOut::~SVGOut()
+{
+	_painter.end();
+}
+
+QColor Hix::Slicer::Debug::SVGOut::randColor()
+{
+	return QColor(_randColor(_randGen), _randColor(_randGen), _randColor(_randGen));
+}
+
+QPen Hix::Slicer::Debug::SVGOut::defaultPen(const QColor& color)
+{
+	return QPen(color, 4, Qt::SolidLine);
+}
+
+QPen Hix::Slicer::Debug::SVGOut::defaultDottedPen(const QColor& color)
+{
+	return QPen(color, 4, Qt::DashLine);
+}
+
+
+//void drawContour(const Hix::Slicer::Contour& contour, QPainter& painter, QString contourName)
+//{
+//	auto intPath = contour.toDebugPath();
+//	QPainterPath path;
+//	painter.drawText(QPoint(intPath.front().X, intPath.front().Y), contourName);
+//	path.moveTo(intPath.front().X, intPath.front().Y);
+//	for (auto& each : intPath)
+//	{
+//		path.lineTo(each.X, each.Y);
+//	}
+//	painter.strokePath(path, painter.pen());
+//}
 void Hix::Slicer::Debug::outDebugSVGs(const std::deque<Hix::Slicer::Contour>& contours, size_t z)
 {
 	//random gen for random color
@@ -48,7 +82,8 @@ void Hix::Slicer::Debug::outDebugSVGs(const std::deque<Hix::Slicer::Contour>& co
 		}
 		painter.setPen(QPen(QColor::fromRgb(r,g,b),4, penType));
 		auto contourName = QString::number(count);
-		drawContour(contour, painter, contourName);
+		auto intPath = contour.toDebugPath();
+		drawContour(intPath, painter, contourName);
 		++count;
 	}
 	painter.end();
@@ -87,9 +122,11 @@ void Hix::Slicer::Debug::outDebugIncompletePathsSVGs(const std::deque<Hix::Slice
 		auto penType = Qt::SolidLine;
 		painter.setPen(QPen(QColor::fromRgb(r, g, b), 4, penType));
 		auto contourName = QString::number(count);
-		drawContour(contour, painter, contourName);
+		auto intPath = contour.toDebugPath();
+		drawContour(intPath, painter, contourName);
 		++count;
 	}
 	painter.end();
 
 }
+

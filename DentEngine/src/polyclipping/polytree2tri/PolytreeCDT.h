@@ -1,10 +1,11 @@
 #pragma once
-#include "../clipper/clipper.hpp"
-#include "../poly2tri/poly2tri.h"
+#include "../polyclipping.h"
 #include <qvector2d.h>
 #include <unordered_map>
+#include <unordered_set>
 #include <vector>
 #include <array>
+
 namespace Hix
 {
 	namespace Engine3D
@@ -13,11 +14,11 @@ namespace Hix
 	}
 }
 
-
 namespace Hix
 {
 	namespace Polyclipping
 	{
+
 		class PolytreeCDT
 		{
 
@@ -29,10 +30,15 @@ namespace Hix
 			~PolytreeCDT();
 
 		private:
-			void toFloatPts();
-			void toFloatPtsWithMap();
+			std::vector<p2t::Point*>& toFloatPts(ClipperLib::PolyNode& node);
+			std::vector<p2t::Point*>& toFloatPtsImpl(ClipperLib::PolyNode& node);
+			std::vector<p2t::Point*>& toFloatPtsWithMap(ClipperLib::PolyNode& node);
+
+			//points MUST BE UNIQUE!
+			//this is map because p2t::point must be non-const
+			std::unordered_map<Hix::Polyclipping::Point, p2t::Point> _points;
 			//this needs to be maintained as it owns the triangles after triangulation
-			std::unordered_map<ClipperLib::PolyNode*, std::vector<p2t::Point*>> _nodeFloatPtMap;
+			std::unordered_map<ClipperLib::PolyNode*,  std::vector<p2t::Point*>> _nodeFloatCache;
 
 			const ClipperLib::PolyTree* _tree = nullptr;
 			const std::unordered_map<ClipperLib::IntPoint, QVector2D>* _floatIntMap = nullptr;

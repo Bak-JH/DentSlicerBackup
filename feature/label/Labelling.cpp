@@ -11,6 +11,7 @@
 #include "../repair/meshrepair.h"
 //engrave CSG
 #include "../CSG/CSG.h"
+#include "../../DentEngine/src/polyclipping/polytree2tri/PolytreeCDT.h"
 
 using namespace Hix::Engine3D;
 using namespace Hix::Polyclipping;
