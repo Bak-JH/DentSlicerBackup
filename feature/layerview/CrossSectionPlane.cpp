@@ -4,6 +4,8 @@
 #include "../Shapes2D.h"
 #include "../../glmodel.h"
 #include "../../DentEngine/src/SlicerDebug.h"
+#include "../../DentEngine/src/polyclipping/polytree2tri/PolytreeCDT.h"
+
 using namespace Hix::Input;
 using namespace Hix::Features;
 using namespace Hix::Render;
@@ -35,8 +37,16 @@ void Hix::Features::CrossSectionPlane::init(const std::unordered_map<SceneEntity
 	_layerMeshes.reserve(shellSlices.size());
 
 	//for each polytree from slice, triangluate, create mesh
+	size_t i = 0;
 	for (auto& s : shellSlices)
 	{
+		qDebug() << i;
+		if (i == 63)
+		{
+			qDebug() << i;
+
+		}
+		++i;
 		_layerMeshes.emplace_back();
 		auto& mesh = _layerMeshes.back();
 		PolytreeCDT polycdt(s.polytree.get());

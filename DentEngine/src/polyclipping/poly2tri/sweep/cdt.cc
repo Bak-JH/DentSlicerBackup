@@ -62,6 +62,14 @@ std::list<p2t::Triangle*> CDT::GetMap()
   return sweep_context_->GetMap();
 }
 
+void CDT::resetPoints()
+{
+    if (sweep_context_)
+    {
+        sweep_context_->resetPoints();
+    }
+}
+
 CDT::~CDT()
 {
   delete sweep_context_;

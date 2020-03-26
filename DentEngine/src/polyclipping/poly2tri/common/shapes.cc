@@ -51,14 +51,14 @@ Triangle::Triangle(Point& a, Point& b, Point& c)
 // Update neighbor pointers
 void Triangle::MarkNeighbor(Point* p1, Point* p2, Triangle* t)
 {
-  if ((p1 == points_[2] && p2 == points_[1]) || (p1 == points_[1] && p2 == points_[2]))
-    neighbors_[0] = t;
-  else if ((p1 == points_[0] && p2 == points_[2]) || (p1 == points_[2] && p2 == points_[0]))
-    neighbors_[1] = t;
-  else if ((p1 == points_[0] && p2 == points_[1]) || (p1 == points_[1] && p2 == points_[0]))
-    neighbors_[2] = t;
-  else
-    assert(0);
+    if ((p1 == points_[2] && p2 == points_[1]) || (p1 == points_[1] && p2 == points_[2]))
+        neighbors_[0] = t;
+    else if ((p1 == points_[0] && p2 == points_[2]) || (p1 == points_[2] && p2 == points_[0]))
+        neighbors_[1] = t;
+    else if ((p1 == points_[0] && p2 == points_[1]) || (p1 == points_[1] && p2 == points_[0]))
+        neighbors_[2] = t;
+    else
+        throw std::runtime_error("I'm a moron and can't throw shit");
 }
 
 // Exhaustive search to update neighbor pointers

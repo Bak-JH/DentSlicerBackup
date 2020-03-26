@@ -89,6 +89,7 @@ public:
    */
   std::list<Triangle*> GetMap();
 
+  void resetPoints();
   private:
 
   /**

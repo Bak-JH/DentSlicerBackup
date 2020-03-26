@@ -93,8 +93,6 @@ void Hix::Slicer::slice(const Hix::Render::SceneEntity& entity, const Planes& pl
         return;
     }
 
-	//MeshRepair::identifyHoles(mesh);
-
 	auto zPlanes = planes.getPlanesVector();
 	auto intersectingFaces = planes.buildTriangleLists(mesh);
 	for (int i = 0; i < zPlanes.size(); i++) {
@@ -124,6 +122,7 @@ void Hix::Slicer::containmentTreeConstruct(std::vector<Slice>& slices){
 	for (auto& s: slices) 
 	{ 
 		Clipper clpr;
+		clpr.StrictlySimple(true);
 		for (auto& each : s.closedContours)
 		{
 			clpr.AddPath(each.toPath(), ptSubject, true);
