@@ -350,14 +350,14 @@ void Triangle::SetDelunayEdgeCW(const Point& p, bool e)
 }
 
 // The neighbor across to given point
-Triangle& Triangle::NeighborAcross(const Point& opoint)
+Triangle* Triangle::NeighborAcross(const Point& opoint)
 {
   if (&opoint == points_[0]) {
-    return *neighbors_[0];
+    return neighbors_[0];
   } else if (&opoint == points_[1]) {
-    return *neighbors_[1];
+    return neighbors_[1];
   }
-  return *neighbors_[2];
+  return neighbors_[2];
 }
 
 void Triangle::DebugPrint()
