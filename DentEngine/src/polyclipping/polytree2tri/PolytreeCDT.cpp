@@ -72,8 +72,8 @@ bool tooSmallForTrig(const ClipperLib::PolyNode& node, double pixArea)
 	//auto area = ClipperLib::Area(node.Contour) / std::pow((double)Hix::Polyclipping::INT_PT_RESOLUTION, 2);
 	//if (area < pixArea)
 	//	return true;
-	if (node.Contour.front() != node.Contour.back())
-		return true;
+	//if (node.Contour.front() != node.Contour.back())
+	//	return true;
 	return false;
 }
 
@@ -115,14 +115,20 @@ std::unordered_map<PolyNode*, std::vector<PolytreeCDT::Triangle>> Hix::Polyclipp
 			continue;
 
 		//auto isSolidDupe = pathContainsDupe(toFloatPts(*eachSolid));
-		p2t::CDT cdt(toFloatPts(*eachSolid));
+		auto solidF = toFloatPts(*eachSolid);
+		if (solidF.empty())
+			continue;
+		p2t::CDT cdt(solidF);
 		//add holes
 		for (auto hole : eachSolid->Childs)
 		{
 			if (tooSmallForTrig(*hole, pixelArea))
 				continue;
 			//auto isHoleDupe = pathContainsDupe(toFloatPts(*hole));
-			cdt.AddHole(toFloatPts(*hole));
+			auto holeF = toFloatPts(*hole);
+			if (holeF.empty())
+				continue;
+			cdt.AddHole(holeF);
 		}
 		try
 		{
@@ -192,13 +198,21 @@ std::vector<p2t::Point*>& Hix::Polyclipping::PolytreeCDT::toFloatPts(ClipperLib:
 		return toFloatPtsImpl(node);
 	}
 }
+//constexpr double MIN_PIX_AREA = 57.9261875148;
+constexpr double MIN_PIX_AREA = 5;
 
 std::vector<p2t::Point*>& PolytreeCDT::toFloatPtsImpl(ClipperLib::PolyNode& node)
 {
 	std::vector<p2t::Point*> floatPath;
 	floatPath.reserve(node.Contour.size());
 	//pathContainsDupe(node.Contour);
-	for (auto& point : node.Contour)
+	auto cleanedContour = node.Contour;
+	ClipperLib::CleanPolygon(cleanedContour, MIN_PIX_AREA);
+	if (cleanedContour != node.Contour)
+	{
+		qDebug() << "cleaning worked";
+	}
+	for (auto& point : cleanedContour)
 	{
 		auto dPoint = toDPt(point);
 		auto fpt = _points.insert(std::make_pair(dPoint, p2t::Point(dPoint._x, dPoint._y)));
@@ -213,7 +227,13 @@ std::vector<p2t::Point*>& PolytreeCDT::toFloatPtsWithMap(ClipperLib::PolyNode& n
 	std::vector<p2t::Point*> floatPath;
 	floatPath.reserve(node.Contour.size());
 	//pathContainsDupe(node.Contour);
-	for (auto& point : node.Contour)
+	auto cleanedContour = node.Contour;
+	ClipperLib::CleanPolygon(cleanedContour, MIN_PIX_AREA);
+	if (cleanedContour != node.Contour)
+	{
+		qDebug() << "cleaning worked";
+	}
+	for (auto& point : cleanedContour)
 	{
 		auto origFloatPt = _floatIntMap->find(point);
 		if (origFloatPt == _floatIntMap->end())

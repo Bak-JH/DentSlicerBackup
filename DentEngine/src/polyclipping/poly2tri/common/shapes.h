@@ -203,7 +203,7 @@ void ClearDelunayEdges();
 inline bool IsInterior();
 inline void IsInterior(bool b);
 
-Triangle& NeighborAcross(const Point& opoint);
+Triangle* NeighborAcross(const Point& opoint);
 
 void DebugPrint();
 
