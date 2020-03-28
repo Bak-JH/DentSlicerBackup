@@ -35,6 +35,18 @@ uint64_t RandomGen::getUInt(uint64_t pMin, uint64_t pMax)
     return distribution(_random);
 }
 
+int64_t RandomGen::getInt()
+{
+    return getInt(std::numeric_limits<int64_t>::min(), std::numeric_limits<int64_t>::max());
+}
+
+int64_t RandomGen::getInt(int64_t pMin, int64_t pMax)
+{
+    std::uniform_int_distribution<int64_t> distribution(pMin, pMax);
+
+    return distribution(_random);
+}
+
 bool RandomGen::randomChoice(float bias)
 {
     //if (bias > 1)
