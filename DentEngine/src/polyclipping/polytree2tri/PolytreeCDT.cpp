@@ -7,7 +7,7 @@ using namespace ClipperLib;
 using namespace Hix::Polyclipping;
 using namespace Hix::Slicer::Debug;
 
-PolytreeCDT::PolytreeCDT(const ClipperLib::PolyTree* polytree): _tree(polytree)
+PolytreeCDT::PolytreeCDT(const ClipperLib::PolyTree* polytree): _tree(polytree), _random(1)
 {
 }
 
@@ -145,7 +145,7 @@ std::unordered_map<PolyNode*, std::vector<PolytreeCDT::Triangle>> Hix::Polyclipp
 			//stupid fucking code
 			cdt.resetPoints();
 		}
-		catch (...)
+		catch (const std::runtime_error & error)
 		{
 
 			auto solidPath = debugPath(toFloatPts(*eachSolid));
@@ -198,8 +198,50 @@ std::vector<p2t::Point*>& Hix::Polyclipping::PolytreeCDT::toFloatPts(ClipperLib:
 		return toFloatPtsImpl(node);
 	}
 }
+
+
+//inline void boxDither(size_t count, Hix::Polyclipping::Point& pt)
+//{
+//	auto ditherCase = count % 8;
+//	switch (ditherCase)
+//	{
+//	case 0:
+//		pt._x += std::numeric_limits<double>::epsilon() * (double)count;
+//		pt._y += std::numeric_limits<double>::epsilon() * (double)count;
+//		break;
+//	case 1:
+//
+//		break;
+//	case 2:
+//		break;
+//	case 3:
+//		break;
+//	case 4:
+//		break;
+//	case 5:
+//		break;
+//	case 6:
+//		break;
+//	case 7:
+//		break;
+//	default:
+//		break;
+//	}
+//}
+
 //constexpr double MIN_PIX_AREA = 57.9261875148;
-constexpr double MIN_PIX_AREA = 5;
+//constexpr double MIN_PIX_AREA = 2;
+inline void randomDither(Hix::Polyclipping::Point& pt, RandomGen& rand)
+{
+	constexpr int64_t MAX_MULT = 20;
+	constexpr int64_t MIN_MULT = -20;
+
+	double xDither = std::numeric_limits<double>::epsilon() * (double)rand.getInt(MIN_MULT, MAX_MULT);
+	double yDither = std::numeric_limits<double>::epsilon() * (double)rand.getInt(MIN_MULT, MAX_MULT);
+	pt._x += xDither;
+	pt._y += yDither;
+}
+
 
 std::vector<p2t::Point*>& PolytreeCDT::toFloatPtsImpl(ClipperLib::PolyNode& node)
 {
@@ -207,7 +249,7 @@ std::vector<p2t::Point*>& PolytreeCDT::toFloatPtsImpl(ClipperLib::PolyNode& node
 	floatPath.reserve(node.Contour.size());
 	//pathContainsDupe(node.Contour);
 	auto cleanedContour = node.Contour;
-	ClipperLib::CleanPolygon(cleanedContour, MIN_PIX_AREA);
+	ClipperLib::CleanPolygon(cleanedContour);
 	if (cleanedContour != node.Contour)
 	{
 		qDebug() << "cleaning worked";
@@ -216,6 +258,12 @@ std::vector<p2t::Point*>& PolytreeCDT::toFloatPtsImpl(ClipperLib::PolyNode& node
 	{
 		auto dPoint = toDPt(point);
 		auto fpt = _points.insert(std::make_pair(dPoint, p2t::Point(dPoint._x, dPoint._y)));
+		size_t ditherCnt = 0;
+		while (!fpt.second)
+		{
+			randomDither(dPoint, _random);
+			fpt = _points.insert(std::make_pair(dPoint, p2t::Point(dPoint._x, dPoint._y)));
+		}
 		floatPath.emplace_back(&fpt.first->second);
 	}
 	auto inserted = _nodeFloatCache.try_emplace(&node, std::move(floatPath));
@@ -228,7 +276,7 @@ std::vector<p2t::Point*>& PolytreeCDT::toFloatPtsWithMap(ClipperLib::PolyNode& n
 	floatPath.reserve(node.Contour.size());
 	//pathContainsDupe(node.Contour);
 	auto cleanedContour = node.Contour;
-	ClipperLib::CleanPolygon(cleanedContour, MIN_PIX_AREA);
+	ClipperLib::CleanPolygon(cleanedContour);
 	if (cleanedContour != node.Contour)
 	{
 		qDebug() << "cleaning worked";

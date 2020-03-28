@@ -18,6 +18,9 @@ public:
     float getFloat(float pMin, float pMax);
     uint64_t getUInt();
     uint64_t getUInt(uint64_t pMin, uint64_t pMax);
+    int64_t getInt();
+    int64_t getInt(int64_t pMin, int64_t pMax);
+
     bool randomChoice(float bias = 0.5);
 
     float normallyDistributedSingle(float standardDeviation, float pMean);

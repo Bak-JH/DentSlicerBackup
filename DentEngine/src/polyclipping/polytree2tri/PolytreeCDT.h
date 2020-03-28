@@ -5,7 +5,7 @@
 #include <unordered_set>
 #include <vector>
 #include <array>
-
+#include "../../../common/RandomGen.h"
 namespace Hix
 {
 	namespace Engine3D
@@ -33,7 +33,6 @@ namespace Hix
 			std::vector<p2t::Point*>& toFloatPts(ClipperLib::PolyNode& node);
 			std::vector<p2t::Point*>& toFloatPtsImpl(ClipperLib::PolyNode& node);
 			std::vector<p2t::Point*>& toFloatPtsWithMap(ClipperLib::PolyNode& node);
-
 			//points MUST BE UNIQUE!
 			//this is map because p2t::point must be non-const
 			std::unordered_map<Hix::Polyclipping::Point, p2t::Point> _points;
@@ -42,6 +41,8 @@ namespace Hix
 
 			const ClipperLib::PolyTree* _tree = nullptr;
 			const std::unordered_map<ClipperLib::IntPoint, QVector2D>* _floatIntMap = nullptr;
+			
+			RandomGen _random;
 		};
 
 

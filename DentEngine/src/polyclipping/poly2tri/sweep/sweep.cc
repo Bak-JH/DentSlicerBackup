@@ -41,6 +41,11 @@ namespace p2t {
 bool isDegenerate(const Node& node)
 {
   std::unordered_set<const Point*> ptSet{ node.prev->point, node.point, node.next->point };
+  if (ptSet.size() != 3)
+  {
+      int kk;
+      ++kk;
+  }
   return ptSet.size() != 3;
 }
 // Triangulate simple polygon with holes
