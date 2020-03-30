@@ -82,6 +82,7 @@ static size_t dSliceCnt = 0;
 
 std::unordered_map<PolyNode*, std::vector<PolytreeCDT::Triangle>> Hix::Polyclipping::PolytreeCDT::triangulate()
 {
+
 	double pixelArea = Hix::Application::ApplicationManager::getInstance().settings().printerSetting.pixelSizeX() *
 		Hix::Application::ApplicationManager::getInstance().settings().printerSetting.pixelSizeY();
 	std::unordered_map<PolyNode*, std::vector<PolytreeCDT::Triangle>> result;
@@ -150,7 +151,6 @@ std::unordered_map<PolyNode*, std::vector<PolytreeCDT::Triangle>> Hix::Polyclipp
 		catch (const std::runtime_error & error)
 		{
 #ifdef _DEBUG
-			++dSliceCnt;
 			auto solidPath = debugPath(toFloatPts(*eachSolid));
 			{
 				SVGOut output("debug_svg" + std::to_string(dSliceCnt) + "solid", QSize(2000000, 2000000));
@@ -172,6 +172,10 @@ std::unordered_map<PolyNode*, std::vector<PolytreeCDT::Triangle>> Hix::Polyclipp
 		}
 
 	}
+
+#ifdef _DEBUG
+	++dSliceCnt;
+#endif
 	return result;
 }
 
@@ -230,6 +234,7 @@ std::vector<p2t::Point*>& Hix::Polyclipping::PolytreeCDT::toFloatPts(ClipperLib:
 //constexpr double MIN_PIX_AREA = 2;
 inline void randomDither(Hix::Polyclipping::Point& pt, RandomGen& rand)
 {
+	qDebug() << "before random dither: x=" << pt.x() << "y=" << pt.y();
 	constexpr int64_t MAX_MULT = 20;
 	constexpr int64_t MIN_MULT = -20;
 
@@ -237,6 +242,8 @@ inline void randomDither(Hix::Polyclipping::Point& pt, RandomGen& rand)
 	double yDither = std::numeric_limits<double>::epsilon() * (double)rand.getInt(MIN_MULT, MAX_MULT);
 	pt._x += xDither;
 	pt._y += yDither;
+	qDebug() << "after random dither: x=" << pt.x() << "y=" << pt.y();
+
 }
 
 

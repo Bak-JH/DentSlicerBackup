@@ -57,7 +57,9 @@ namespace Hix
 
 
 		//static constexpr double  INT_PT_RESOLUTION = 2048; //2^11
-		static constexpr double  INT_PT_RESOLUTION = 10000;
+		//static constexpr double  INT_PT_RESOLUTION = 10000;
+		static constexpr double  INT_PT_RESOLUTION = 134217728; //2^11
+
 		static constexpr double FLOAT_PT_RESOLUTION = 1.0 / INT_PT_RESOLUTION;
 		// converts float point to int in microns
 		void  addPoint(float x, float y, ClipperLib::Path* path);

@@ -19,26 +19,27 @@ SVGexporter::SVGexporter(float layerH, float ppmmX, float ppmmY, float resX, flo
 {
 }
 
-void SVGexporter::exportSVG(std::vector<Slice>& shellSlices){
+void SVGexporter::exportSVG(std::vector<LayerGroup>& layerGroup){
 
     qDebug() << "export svg at "<< _outfoldername;
-	qDebug() << "shellSlices : " << shellSlices.size();
+	qDebug() << "shellSlices : " << layerGroup.size();
     //qDebug() << jsonBytes;
     int currentSlice_idx = 0;
-    for (int i=0; i<shellSlices.size(); i++){
+    for (int i=0; i< layerGroup.size(); i++){
         QString outfilename = _outfoldername + "/" + QString::number(currentSlice_idx) + ".svg";
         QFile outfile(outfilename);
         std::stringstream contentStream;
-		PolyTree& shellSlice_polytree = *shellSlices[i].polytree;
         outfile.open(QFile::WriteOnly);
         writeHeader(contentStream);
         //if (setting.slicingMode == Hix::Settings::SliceSetting::SlicingMode::Uniform)
         writeGroupHeader(currentSlice_idx, _layerHeight *(currentSlice_idx+1), contentStream);
-        
-        for (int j=0; j<shellSlice_polytree.ChildCount(); j++){
-            parsePolyTreeAndWrite(shellSlice_polytree.Childs[j], contentStream);
+        for (auto& s : layerGroup[i].slices)
+        {
+            PolyTree& shellSlice_polytree = *s.polytree;
+            for (int j = 0; j < shellSlice_polytree.ChildCount(); j++) {
+                parsePolyTreeAndWrite(shellSlice_polytree.Childs[j], contentStream);
+            }
         }
-
 		writeGroupFooter(contentStream);
         writeFooter(contentStream);
         outfile.write(QByteArray::fromStdString(contentStream.str()));

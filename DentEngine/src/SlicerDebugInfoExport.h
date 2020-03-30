@@ -6,7 +6,7 @@
 #include <string>
 #include "ContourBuilder.h"
 #include "SlicerDebug.h"
-
+#include "slicer.h"
 namespace Hix
 {
 	namespace Slicer
@@ -53,7 +53,10 @@ namespace Hix
 			};
 
 			void outDebugSVGs(const std::deque<Hix::Slicer::Contour>& contours, size_t z);
+			void outDebugSVGs(const Hix::Slicer::LayerGroup& contours, size_t z);
 			void outDebugIncompletePathsSVGs(const std::deque<Hix::Slicer::Contour>& contours, size_t z);
+			void outDebugIncompletePathsSVGs(const Hix::Slicer::LayerGroup& contours, size_t z);
+
 
 		}
 	}

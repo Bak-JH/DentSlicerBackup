@@ -17,7 +17,6 @@ using namespace ClipperLib;
 using namespace Hix::Debug;
 using namespace Hix::Slicer;
 QDebug Hix::Debug::operator<< (QDebug d, const Slice& obj) {
-	d << "z: " << obj.z;
 	d << "polytree: " << *obj.polytree;
 
 	return d;
@@ -78,59 +77,55 @@ float ContourSegment::dist()const
 
 
 
-void Hix::Slicer::slice(const Hix::Render::SceneEntity& entity, const Planes& planes, std::vector<Slice>& slices){
-    
-	for (auto childNode : entity.childNodes())
-	{
-		auto sliceableModel = dynamic_cast<const Hix::Render::SceneEntity*>(childNode);
-		if (sliceableModel)
-		{
-			slice(*sliceableModel, planes, slices);
-		}
-	}
+std::vector<LayerGroup> Hix::Slicer::slice(const Hix::Render::SceneEntity& entity, const Planes& planes)
+{
+	std::vector<LayerGroup> layers(planes.getPlanesVector().size());
 	auto mesh = entity.getMesh();
 	if (mesh->getFaces().size() ==0){
-        return;
+        return layers;
     }
 
 	auto zPlanes = planes.getPlanesVector();
 	auto intersectingFaces = planes.buildTriangleLists(mesh);
 	for (int i = 0; i < zPlanes.size(); i++) {
 		qDebug() << "slicing: " << i;
-		auto& currSlice = slices[i];
+		auto& currLayer = layers[i];
+		auto& singleSlice = currLayer.slices.emplace_back();
 		ContourBuilder contourBuilder(mesh, intersectingFaces[i], zPlanes[i]);
 		auto contours = contourBuilder.buildContours();
-		std::move(contours.begin(), contours.end(), std::back_inserter(currSlice.closedContours));
+		std::move(contours.begin(), contours.end(), std::back_inserter(singleSlice.closedContours));
 		if (Hix::Slicer::Debug::SlicerDebug::getInstance().enableDebug)
 		{
 			auto incompleteContours = contourBuilder.flushIncompleteContours();
-			std::move(incompleteContours.begin(), incompleteContours.end(), std::back_inserter(currSlice.incompleteContours));
+			std::move(incompleteContours.begin(), incompleteContours.end(), std::back_inserter(singleSlice.incompleteContours));
 		}
 	}
-    return;
+    return layers;
 }
 
-/****************** Mesh Slicing Step *******************/
 
 
 
-
-
-
-/****************** Deprecated functions *******************/
-void Hix::Slicer::containmentTreeConstruct(std::vector<Slice>& slices){
-	for (auto& s: slices) 
-	{ 
-		Clipper clpr;
-		//clpr.StrictlySimple(true);
-		for (auto& each : s.closedContours)
-		{
-			clpr.AddPath(each.toPath(), ptSubject, true);
-		}
-        clpr.Execute(ctUnion, *s.polytree, pftNonZero, pftNonZero);
-    }
+void Hix::Slicer::containmentTreeConstruct(const Slice& slice){
+	Clipper clpr;
+	clpr.StrictlySimple(true);
+	for (auto& each : slice.closedContours)
+	{
+		clpr.AddPath(each.toPath(), ptSubject, true);
+	}
+    clpr.Execute(ctUnion, *slice.polytree, pftNonZero, pftNonZero);
 }
 
 Hix::Slicer::Slice::Slice():polytree(new PolyTree())
 {
+}
+
+bool Hix::Slicer::LayerGroup::empty() const
+{
+	size_t cnt = 0;
+	for (auto& s : slices)
+	{
+		cnt += s.polytree->ChildCount() + s.polytree->Contour.size();
+	}
+	return cnt == 0;
 }

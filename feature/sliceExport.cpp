@@ -100,26 +100,26 @@ void Hix::Features::SliceExport::run()
 	auto& printerSetting = Hix::Application::ApplicationManager::getInstance().settings().printerSetting;
 
 	auto selectedBound = Hix::Engine3D::combineBounds(_models);
-	auto shellSlices = SlicingEngine::sliceModels(_models, Hix::Application::ApplicationManager::getInstance().supportRaftManager(), setting.layerHeight);
+	auto layerGroups = SlicingEngine::sliceModels(_models, Hix::Application::ApplicationManager::getInstance().supportRaftManager(), setting.layerHeight);
 
 	// Export to SVG
 	Hix::Slicer::SVGexporter exp(setting.layerHeight, printerSetting.pixelPerMMX(), printerSetting.pixelPerMMY(), 
 		printerSetting.sliceImageResolutionX, printerSetting.sliceImageResolutionY, QVector2D(printerSetting.bedOffsetX, printerSetting.bedOffsetY),
 		setting.invertX, filename, setting.slicingMode);
 
-	exp.exportSVG(shellSlices);
+	exp.exportSVG(layerGroups);
 
 
 	//write info files
 	exp.writeBasicInfo();
 	if (printerSetting.printerConstants)
 	{
-		exp.writePrinterConstants(shellSlices.size(), printerSetting.printerConstants.value());
+		exp.writePrinterConstants(layerGroups.size(), printerSetting.printerConstants.value());
 	}
 	
 	if (printerSetting.infoFileType == Hix::Settings::PrinterSetting::InfoFileType::ThreeDelight)
 	{
-		exp.writeVittroOptions(shellSlices.size(), printerSetting.bedBound);
+		exp.writeVittroOptions(layerGroups.size(), printerSetting.bedBound);
 	}
 
 
