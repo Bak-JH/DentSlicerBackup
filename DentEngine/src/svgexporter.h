@@ -22,7 +22,7 @@ namespace Hix
 		{
 		public:
 			SVGexporter(float layerH, float ppmmX, float ppmmY, float resX, float resY, QVector2D offsetXY, bool invertX, QString outfoldername, Hix::Settings::SliceSetting::SlicingMode sm);
-			void exportSVG(std::vector<Hix::Slicer::Slice>& shellSlices);
+			void exportSVG(std::vector<Hix::Slicer::LayerGroup>& shellSlices);
 			void writeBasicInfo();
 			void writeVittroOptions(int max_slices, const Hix::Engine3D::Bounds3D& bound);
 			void writePrinterConstants(int sliceCnt,const rapidjson::Value& value);

@@ -33,38 +33,33 @@ void Hix::Features::CrossSectionPlane::init(const std::unordered_map<SceneEntity
 #endif
 
 	//slice
-	auto shellSlices = SlicingEngine::sliceEntities(entities, 0.1);
-	_layerMeshes.reserve(shellSlices.size());
+	auto layers = SlicingEngine::sliceEntities(entities, 0.1);
+	_layerMeshes.reserve(layers.size());
 
 	//for each polytree from slice, triangluate, create mesh
-	size_t i = 0;
-	for (auto& s : shellSlices)
+	for (auto& l : layers)
 	{
-		qDebug() << i;
-		if (i == 63)
-		{
-			qDebug() << i;
-
-		}
-		++i;
 		_layerMeshes.emplace_back();
 		auto& mesh = _layerMeshes.back();
-		PolytreeCDT polycdt(s.polytree.get());
-		auto trigMap = polycdt.triangulate();
-
-		//generate front & back mesh
-		for (auto node : trigMap)
+		for (auto& s : l.slices)
 		{
-			for (auto trig : node.second)
+			PolytreeCDT polycdt(s.polytree.get());
+			auto trigMap = polycdt.triangulate();
+			//generate front & back mesh
+			for (auto node : trigMap)
 			{
-				mesh.addFace(
-					QVector3D(trig[0].x(), trig[0].y(), 0),
-					QVector3D(trig[1].x(), trig[1].y(), 0),
-					QVector3D(trig[2].x(), trig[2].y(), 0)
-				);
+				for (auto trig : node.second)
+				{
+					mesh.addFace(
+						QVector3D(trig[0].x(), trig[0].y(), 0),
+						QVector3D(trig[1].x(), trig[1].y(), 0),
+						QVector3D(trig[2].x(), trig[2].y(), 0)
+					);
+				}
 			}
 		}
 	}
+
 
 #ifdef _DEBUG
 	Hix::Slicer::Debug::SlicerDebug::getInstance().enableDebug = prevDebug;

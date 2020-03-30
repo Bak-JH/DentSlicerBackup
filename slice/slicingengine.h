@@ -20,8 +20,8 @@ class GLModel;
 namespace SlicingEngine
 {
 	//slice models, automatically include supports and raft
-	std::vector<Hix::Slicer::Slice> sliceModels (const std::unordered_set<GLModel*>& models, const Hix::Support::SupportRaftManager& suppRaft, float delta);
-	std::vector<Hix::Slicer::Slice> sliceEntities(const std::unordered_set<const Hix::Render::SceneEntity*>& models, float delta);
+	std::vector<Hix::Slicer::LayerGroup> sliceModels (const std::unordered_set<GLModel*>& models, const Hix::Support::SupportRaftManager& suppRaft, float delta);
+	std::vector<Hix::Slicer::LayerGroup> sliceEntities(const std::unordered_set<const Hix::Render::SceneEntity*>& models, float delta);
 
 };
 

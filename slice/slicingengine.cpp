@@ -17,7 +17,7 @@ using namespace Hix;
 using namespace Hix::Slicer;
 using namespace Hix::Render;
 
-std::vector<Hix::Slicer::Slice> SlicingEngine::sliceModels(const std::unordered_set<GLModel*>& models, const Hix::Support::SupportRaftManager& suppRaft, float delta) {
+std::vector<Hix::Slicer::LayerGroup> SlicingEngine::sliceModels(const std::unordered_set<GLModel*>& models, const Hix::Support::SupportRaftManager& suppRaft, float delta) {
 	std::unordered_set<const SceneEntity*> entities;
 	for (auto& m : models)
 	{
@@ -35,58 +35,81 @@ std::vector<Hix::Slicer::Slice> SlicingEngine::sliceModels(const std::unordered_
 	return sliceEntities(entities, delta);
 }
 
-std::vector<Hix::Slicer::Slice> SlicingEngine::sliceEntities(const std::unordered_set<const SceneEntity*>& models, float delta)
+std::vector<Hix::Slicer::LayerGroup> SlicingEngine::sliceEntities(const std::unordered_set<const SceneEntity*>& models, float delta)
 {
 	//due to float error with models
 	constexpr float BOTT = 0.00001f;
 	auto bound = Hix::Engine3D::combineBounds(models);
 	UniformPlanes planes(BOTT, bound.zMax(), delta);
-	std::vector<Slice> shellSlices(planes.getPlanesVector().size());
+	size_t layerCnt = planes.getPlanesVector().size();
+	std::vector<LayerGroup> layers(layerCnt);
 	auto zPlanes = planes.getPlanesVector();
+	//add all children, so we don't have to slice recursively
+	std::unordered_set<const SceneEntity*> modelsAndChildren;
+	for (auto m : models)
+	{
+		m->getChildrenModels(modelsAndChildren);
+		modelsAndChildren.insert(m);
+	}
+
 	//set z elevation for each slizes
 	for (size_t i = 0; i < zPlanes.size(); ++i)
 	{
-		shellSlices[i].z = zPlanes[i];
+		layers[i].z = zPlanes[i];
 	}
 	//slice models
-	for (auto& model : models)
+	for (auto& model : modelsAndChildren)
 	{
-		Slicer::slice(*model, planes, shellSlices);
+		auto modelSlices = Slicer::slice(*model, planes);
+		//move individual models slices to total slice
+		for (size_t i = 0; i < layerCnt; ++i)
+		{
+			auto& total = layers[i].slices;
+			auto& from = modelSlices[i].slices;
+			std::move(from.begin(), from.end(), std::back_inserter(total));
+		}
 	}
 
 #ifdef _DEBUG
 	if (Hix::Slicer::Debug::SlicerDebug::getInstance().enableDebug)
 	{
-		for (size_t i = 0; i < shellSlices.size(); ++i)
+		for (size_t i = 0; i < layers.size(); ++i)
 		{
-			Hix::Slicer::Debug::outDebugSVGs(shellSlices[i].closedContours, i);
-			Hix::Slicer::Debug::outDebugIncompletePathsSVGs(shellSlices[i].incompleteContours, i);
+			Hix::Slicer::Debug::outDebugSVGs(layers[i], i);
+			Hix::Slicer::Debug::outDebugIncompletePathsSVGs(layers[i], i);
 		}
 	}
 #endif
 	//use clipper to combine clippings
-	containmentTreeConstruct(shellSlices);
+	for (auto& l : layers)
+	{
+		for (auto& s : l.slices)
+		{
+			containmentTreeConstruct(s);
+
+		}
+	}
 	//remove empty contours from the top and bottom
 	size_t forwardPopCnt = 0;
-	auto forwardItr = shellSlices.begin();
-	while (forwardItr->polytree->ChildCount() == 0)
+	auto forwardItr = layers.begin();
+	while (forwardItr->empty())
 	{
 		++forwardPopCnt;
 		++forwardItr;
 	}
-	shellSlices.erase(shellSlices.begin(), shellSlices.begin() + forwardPopCnt);
+	layers.erase(layers.begin(), layers.begin() + forwardPopCnt);
 	size_t backPopCnt = 0;
-	auto backItr = shellSlices.rbegin();
-	while (backItr->polytree->ChildCount() == 0)
+	auto backItr = layers.rbegin();
+	while (backItr->empty() == 0)
 	{
 		++backPopCnt;
 		++backItr;
 	}
 	for (size_t i = 0; i < backPopCnt; ++i)
 	{
-		shellSlices.pop_back();
+		layers.pop_back();
 	}
 	qDebug() << "removed empty slices count bott: " << forwardPopCnt << "top :" << backPopCnt;
 
-	return shellSlices;
+	return layers;
 }
