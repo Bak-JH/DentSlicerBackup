@@ -25,11 +25,13 @@ namespace Hix
 				void clicked();
 				void entered();
 				void exited();
+				void positionChanged(QQuickMouseEvent* mouse);
 
 			protected slots:
 				virtual void onClicked();
 				virtual void onEntered();
 				virtual void onExited();
+				virtual void onPositionChanged(QQuickMouseEvent* mouse);
 
 			protected:
 				QQuickMouseArea* _mouseArea;
@@ -50,12 +52,18 @@ namespace Hix
 				void checked();
 				void unchecked();
 
+				void entered();
+				void exited();
+
 			protected slots:
 				virtual void onCheckedChanged();
+				virtual void onEntered();
+				virtual void onExited();
 				//virtual void onClicked();
 
 			private:
 				bool _isChecked = false; //isRight toggleImgSwitch
+				QQuickMouseArea* _mouseArea;
 			};
 		}
 

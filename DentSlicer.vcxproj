@@ -1175,6 +1175,7 @@
     <None Include="Qml\Controls\CtrTextButton.qml" />
     <None Include="Qml\Controls\CtrToggleSwitch.qml" />
     <None Include="Qml\FeaturePopup\PrintSettingPopup.qml" />
+    <None Include="Qml\PartListFullnameBox.qml" />
     <None Include="Qml\ProgressItem.qml" />
     <None Include="Qml\FeatureMenu.qml" />
     <None Include="Qml\Cam.qml" />

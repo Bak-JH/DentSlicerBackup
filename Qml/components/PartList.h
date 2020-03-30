@@ -65,6 +65,7 @@ namespace Hix
 		protected:
 			void componentComplete() override;
 			QQuickItem* getQItem()override;
+			void onPositionChanged();
 
 			Hix::QML::Controls::ToggleSwitch* _hideButton;
 			Hix::QML::Controls::Button* _selectButton;
