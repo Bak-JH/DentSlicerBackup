@@ -36,16 +36,18 @@
 #include <cassert>
 #include <stdexcept>
 #include <unordered_set>
+#define _DEGENERATE_THROW
 namespace p2t {
 
 bool isDegenerate(const Node& node)
 {
   std::unordered_set<const Point*> ptSet{ node.prev->point, node.point, node.next->point };
+#ifdef _DEGENERATE_THROW
   if (ptSet.size() != 3)
   {
-      int kk;
-      ++kk;
+      std::runtime_error("isDegenerate");
   }
+#endif
   return ptSet.size() != 3;
 }
 // Triangulate simple polygon with holes
@@ -141,7 +143,6 @@ void Sweep::EdgeEvent(SweepContext& tcx, Point& ep, Point& eq, Triangle* triangl
       EdgeEvent( tcx, ep, *p1, triangle, *p1 );
     } else {
       std::runtime_error("EdgeEvent - collinear points not supported");
-      assert(0);
     }
     return;
   }
@@ -160,7 +161,6 @@ void Sweep::EdgeEvent(SweepContext& tcx, Point& ep, Point& eq, Triangle* triangl
       EdgeEvent( tcx, ep, *p2, triangle, *p2 );
     } else {
       std::runtime_error("EdgeEvent - collinear points not supported");
-      assert(0);
     }
     return;
   }
@@ -721,7 +721,7 @@ void Sweep::FlipEdgeEvent(SweepContext& tcx, Point& ep, Point& eq, Triangle* t, 
 {
   Triangle* ot = t->NeighborAcross(p);
   if (!ot)
-      return;
+      throw std::runtime_error("FlipEdgeEvent");
   Point& op = *ot->OppositePoint(*t, p);
 
   if (InScanArea(p, *t->PointCCW(p), *t->PointCW(p), op)) {
@@ -789,7 +789,7 @@ void Sweep::FlipScanEdgeEvent(SweepContext& tcx, Point& ep, Point& eq, Triangle&
 {
   Triangle* ot = t.NeighborAcross(p);
   if (!ot)
-      return;
+      throw std::runtime_error("FlipScanEdgeEvent");
   Point& op = *ot->OppositePoint(t, p);
 
   if (InScanArea(eq, *flip_triangle.PointCCW(eq), *flip_triangle.PointCW(eq), op)) {

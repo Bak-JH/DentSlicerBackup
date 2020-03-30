@@ -76,8 +76,10 @@ bool tooSmallForTrig(const ClipperLib::PolyNode& node, double pixArea)
 	//	return true;
 	return false;
 }
-
+#ifdef _DEBUG
 static size_t dSliceCnt = 0;
+#endif
+
 std::unordered_map<PolyNode*, std::vector<PolytreeCDT::Triangle>> Hix::Polyclipping::PolytreeCDT::triangulate()
 {
 	double pixelArea = Hix::Application::ApplicationManager::getInstance().settings().printerSetting.pixelSizeX() *
@@ -147,10 +149,9 @@ std::unordered_map<PolyNode*, std::vector<PolytreeCDT::Triangle>> Hix::Polyclipp
 		}
 		catch (const std::runtime_error & error)
 		{
-
+#ifdef _DEBUG
+			++dSliceCnt;
 			auto solidPath = debugPath(toFloatPts(*eachSolid));
-			//auto bound = Hix::Engine3D::bound2D(solidPath.begin(), solidPath.end());
-			//SVGOut output("ssshit", QSize(bound.lengthX() * 100, bound.lengthY() * 100));
 			{
 				SVGOut output("debug_svg" + std::to_string(dSliceCnt) + "solid", QSize(2000000, 2000000));
 				QPen pen(QColor::fromRgb(200, 0, 0), 1, Qt::SolidLine);
@@ -167,14 +168,10 @@ std::unordered_map<PolyNode*, std::vector<PolytreeCDT::Triangle>> Hix::Polyclipp
 				QPen holePen(output.randColor(), 1, Qt::SolidLine);
 				output.addPath(debugPath(toFloatPts(*hole)), holePen, "");
 			}
-			//QMetaObject::invokeMethod(&Hix::Application::ApplicationManager::getInstance().engine(), [&]() {
-			//	}, Qt::BlockingQueuedConnection);
-
-
+#endif
 		}
 
 	}
-	++dSliceCnt;
 	return result;
 }
 
