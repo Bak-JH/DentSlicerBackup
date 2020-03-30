@@ -82,17 +82,17 @@ Hix::Features::FeatureContainer::~FeatureContainer()
 
 void Hix::Features::FeatureContainer::undoImpl()
 {
-	for (auto& each : _container)
+	for (auto each = _container.rbegin(); each != _container.rend(); ++each)
 	{
-		tryUndoFeature(*each);
+		tryUndoFeature(**each);
 	}
 }
 
 void Hix::Features::FeatureContainer::redoImpl()
 {
-	for (auto& each : _container)
+	for (auto each = _container.begin(); each != _container.end(); ++each)
 	{
-		tryRedoFeature(*each);
+		tryRedoFeature(**each);
 	}
 }
 
