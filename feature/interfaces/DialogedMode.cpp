@@ -25,8 +25,7 @@ Hix::Features::DialogedMode::DialogedMode(const QUrl& dialogUrl)
 		scheduleForDelete();
 		});
 	QObject::connect(&applyButton, &Hix::QML::Controls::Button::clicked, [this]() {
-		scheduleForDelete();
-		applyButtonClicked();
+		applyAndClose();
 		});
 }
 
@@ -37,6 +36,12 @@ Hix::Features::DialogedMode::~DialogedMode()
 Hix::QML::ControlOwner& Hix::Features::DialogedMode::controlOwner()
 {
 	return *_popup.get();
+}
+
+void Hix::Features::DialogedMode::applyAndClose()
+{
+	scheduleForDelete();
+	applyButtonClicked();
 }
 
 

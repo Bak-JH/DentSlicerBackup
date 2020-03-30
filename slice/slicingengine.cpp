@@ -12,13 +12,12 @@
 #include "DentEngine/src/SlicerDebug.h"
 #include "DentEngine/src/SlicerDebugInfoExport.h"
 #include "../support/SupportRaftManager.h"
-#include "../application/ApplicationManager.h"
 #include "../support/RaftModel.h"
 using namespace Hix;
 using namespace Hix::Slicer;
 using namespace Hix::Render;
 
-std::vector<Hix::Slicer::Slice> SlicingEngine::sliceModels(const std::unordered_set<GLModel*>& models, const Hix::Support::SupportRaftManager& suppRaft) {
+std::vector<Hix::Slicer::Slice> SlicingEngine::sliceModels(const std::unordered_set<GLModel*>& models, const Hix::Support::SupportRaftManager& suppRaft, float delta) {
 	std::unordered_set<const SceneEntity*> entities;
 	for (auto& m : models)
 	{
@@ -33,15 +32,14 @@ std::vector<Hix::Slicer::Slice> SlicingEngine::sliceModels(const std::unordered_
 	{
 		entities.emplace(raft);
 	}
-	return sliceEntities(entities);
+	return sliceEntities(entities, delta);
 }
 
-std::vector<Hix::Slicer::Slice> SlicingEngine::sliceEntities(const std::unordered_set<const SceneEntity*>& models)
+std::vector<Hix::Slicer::Slice> SlicingEngine::sliceEntities(const std::unordered_set<const SceneEntity*>& models, float delta)
 {
 	//due to float error with models
 	constexpr float BOTT = 0.00001f;
 	auto bound = Hix::Engine3D::combineBounds(models);
-	float delta = Hix::Application::ApplicationManager::getInstance().settings().sliceSetting.layerHeight;
 	UniformPlanes planes(BOTT, bound.zMax(), delta);
 	std::vector<Slice> shellSlices(planes.getPlanesVector().size());
 	auto zPlanes = planes.getPlanesVector();
