@@ -24,12 +24,16 @@ Hix::Features::AddSupport::~AddSupport()
 
 void Hix::Features::AddSupport::undoImpl()
 {
-	_model = Hix::Application::ApplicationManager::getInstance().supportRaftManager().removeSupport(std::get<SupportModel*>(_model));
+	postUIthread([this]() {
+		_model = Hix::Application::ApplicationManager::getInstance().supportRaftManager().removeSupport(std::get<SupportModel*>(_model));
+	});
 }
 
 void Hix::Features::AddSupport::redoImpl()
 {
-	_model = Hix::Application::ApplicationManager::getInstance().supportRaftManager().addSupport(std::move(std::get<std::unique_ptr<SupportModel>>(_model)));
+	postUIthread([this]() {
+		_model = Hix::Application::ApplicationManager::getInstance().supportRaftManager().addSupport(std::move(std::get<std::unique_ptr<SupportModel>>(_model)));
+	});
 }
 
 void Hix::Features::AddSupport::runImpl()
@@ -144,7 +148,9 @@ Hix::Features::RemoveRaft::~RemoveRaft()
 
 void Hix::Features::RemoveRaft::undoImpl()
 {
-	Hix::Application::ApplicationManager::getInstance().supportRaftManager().addRaft(std::move(std::get<std::unique_ptr<RaftModel>>(_model)));
+	postUIthread([this]() {
+		Hix::Application::ApplicationManager::getInstance().supportRaftManager().addRaft(std::move(std::get<std::unique_ptr<RaftModel>>(_model)));
+	});
 }
 
 void Hix::Features::RemoveRaft::redoImpl()
