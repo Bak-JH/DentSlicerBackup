@@ -44,7 +44,6 @@
         <file>Qml/CamBox.qml</file>
         <file>Qml/ViewMode.qml</file>
         <file>Qml/UndoRedo.qml</file>
-        <file>Qml/PartList.qml</file>
         <file>Qml/PrintInfo.qml</file>
         <file>Qml/PrintSetting.qml</file>
         <file>Qml/PlanesliderRange.qml</file>
@@ -77,9 +76,11 @@
         <file>Qml/ProgressException.qml</file>
         <file>Qml/Controls/CtrToggleImgSwitch.qml</file>
         <file>Qml/ProgressItem.qml</file>
-        <file>Qml/PartListItem.qml</file>
         <file>Qml/ModalWindowButton.qml</file>
         <file>Qml/FeaturePopup/PrintSettingPopup.qml</file>
         <file>Qml/Controls/CtrTextButton.qml</file>
+        <file>Qml/PartList.qml</file>
+        <file>Qml/PartListItem.qml</file>
+        <file>Qml/PartListFullnameBox.qml</file>
     </qresource>
 </RCC>

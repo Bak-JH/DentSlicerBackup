@@ -9,6 +9,8 @@ Hix.PartListItem {
 	width: 224
 	height: 28
 	property bool isSelected: false
+	property var labelObject
+	property var mousePos
 	onNameChanged: { modelnameText.text = root.modelName; }
 
 	Column {
@@ -46,7 +48,40 @@ Hix.PartListItem {
 					showhideimg.source = "qrc:/Resource/part_show_1.png"
 			}
 
+			function generateFullnameBox(){
+				var component = Qt.createComponent("PartListFullnameBox.qml")
+				var mousePoint = root.mapToItem(null, root.mousePos.x, root.mousePos.y);
+				root.labelObject = component.createObject(window, 
+							{ modelName: root.modelName, x: mousePoint.x, y: mousePoint.y})
+			}
 
+			function deleteFullnameBox(){
+				if(root.labelObject)
+					root.labelObject.destroy()
+			}
+			
+			
+			onEntered: {
+				holdTimer.start()
+			}
+			onExited: {
+				holdTimer.stop()
+				deleteFullnameBox();
+			}
+			
+			onPositionChanged:{
+				root.mousePos = Qt.point(mouse.x, mouse.y)
+			}
+			
+			Timer {
+			id:  holdTimer
+			interval: 500
+			running: false
+			repeat: false
+				onTriggered: {
+					parent.generateFullnameBox();
+				}
+			}
 		}
 	}
 	Hix.ToggleSwitch{
@@ -61,14 +96,6 @@ Hix.PartListItem {
 			id: showhideimg
 			source: "qrc:/Resource/part_show_1.png"
 			anchors.verticalCenter: parent.verticalCenter
-		}
-
-		MouseArea {
-			anchors.fill: parent
-			hoverEnabled: true
-			onClicked: {
-				parent.isChecked = !parent.isChecked;
-			}
 		}
 
 		onCheckedChanged: {
