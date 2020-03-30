@@ -1207,6 +1207,7 @@
     <None Include="Qml\PartList.qml" />
     <None Include="Qml\PartListItem.qml" />
     <None Include="Qml\PartListFullnameBox.qml" />
+    <None Include="Qml\FeaturePopup\PopupSlice.qml" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Source Files">

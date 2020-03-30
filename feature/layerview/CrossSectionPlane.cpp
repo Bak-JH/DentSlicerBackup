@@ -33,7 +33,7 @@ void Hix::Features::CrossSectionPlane::init(const std::unordered_map<SceneEntity
 #endif
 
 	//slice
-	auto shellSlices = SlicingEngine::sliceEntities(entities);
+	auto shellSlices = SlicingEngine::sliceEntities(entities, 0.1);
 	_layerMeshes.reserve(shellSlices.size());
 
 	//for each polytree from slice, triangluate, create mesh

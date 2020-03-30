@@ -7,8 +7,8 @@
 using namespace ClipperLib;
 
 // representable range
-double constexpr min_value = std::numeric_limits<long>::min() / Hix::Polyclipping::INT_PT_RESOLUTION;
-double constexpr max_value = std::numeric_limits<long>::max() / Hix::Polyclipping::INT_PT_RESOLUTION;
+//double constexpr min_value = std::numeric_limits<long>::min() / Hix::Polyclipping::INT_PT_RESOLUTION;
+//double constexpr max_value = std::numeric_limits<long>::max() / Hix::Polyclipping::INT_PT_RESOLUTION;
 
 
 // converts float point to int in microns

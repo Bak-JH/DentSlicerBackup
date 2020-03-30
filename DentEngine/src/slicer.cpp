@@ -122,7 +122,7 @@ void Hix::Slicer::containmentTreeConstruct(std::vector<Slice>& slices){
 	for (auto& s: slices) 
 	{ 
 		Clipper clpr;
-		clpr.StrictlySimple(true);
+		//clpr.StrictlySimple(true);
 		for (auto& each : s.closedContours)
 		{
 			clpr.AddPath(each.toPath(), ptSubject, true);

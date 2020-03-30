@@ -246,16 +246,15 @@ std::vector<p2t::Point*>& PolytreeCDT::toFloatPtsImpl(ClipperLib::PolyNode& node
 	floatPath.reserve(node.Contour.size());
 	//pathContainsDupe(node.Contour);
 	auto cleanedContour = node.Contour;
-	ClipperLib::CleanPolygon(cleanedContour);
-	if (cleanedContour != node.Contour)
-	{
-		qDebug() << "cleaning worked";
-	}
+	//ClipperLib::CleanPolygon(cleanedContour);
+	//if (cleanedContour != node.Contour)
+	//{
+	//	qDebug() << "cleaning worked";
+	//}
 	for (auto& point : cleanedContour)
 	{
 		auto dPoint = toDPt(point);
 		auto fpt = _points.insert(std::make_pair(dPoint, p2t::Point(dPoint._x, dPoint._y)));
-		size_t ditherCnt = 0;
 		while (!fpt.second)
 		{
 			randomDither(dPoint, _random);
@@ -273,29 +272,32 @@ std::vector<p2t::Point*>& PolytreeCDT::toFloatPtsWithMap(ClipperLib::PolyNode& n
 	floatPath.reserve(node.Contour.size());
 	//pathContainsDupe(node.Contour);
 	auto cleanedContour = node.Contour;
-	ClipperLib::CleanPolygon(cleanedContour);
-	if (cleanedContour != node.Contour)
-	{
-		qDebug() << "cleaning worked";
-	}
+	//ClipperLib::CleanPolygon(cleanedContour);
+	//if (cleanedContour != node.Contour)
+	//{
+	//	qDebug() << "cleaning worked";
+	//}
 	for (auto& point : cleanedContour)
 	{
 		auto origFloatPt = _floatIntMap->find(point);
+		Polyclipping::Point dPoint;
 		if (origFloatPt == _floatIntMap->end())
 		{
 			//no matching original float point detected
 			auto dPoint = toDPt(point);
-			auto fpt = _points.insert(std::make_pair(dPoint, p2t::Point(dPoint._x, dPoint._y)));
-			floatPath.emplace_back(&fpt.first->second);
-
 		}
 		else
 		{
 			auto qVector = origFloatPt->second;
-			Polyclipping::Point dPoint{ qVector.x(), qVector.y() };
-			auto fpt = _points.insert(std::make_pair(dPoint, p2t::Point(dPoint._x, dPoint._y)));
-			floatPath.emplace_back(&fpt.first->second);
+			dPoint = { qVector.x(), qVector.y() };
 		}
+		auto fpt = _points.insert(std::make_pair(dPoint, p2t::Point(dPoint._x, dPoint._y)));
+		while (!fpt.second)
+		{
+			randomDither(dPoint, _random);
+			fpt = _points.insert(std::make_pair(dPoint, p2t::Point(dPoint._x, dPoint._y)));
+		}
+		floatPath.emplace_back(&fpt.first->second);
 	}
 	auto inserted = _nodeFloatCache.try_emplace(&node, std::move(floatPath));
 	return inserted.first->second;
