@@ -18,16 +18,13 @@ Hix::ProgressManager::~ProgressManager()
 
 void Hix::ProgressManager::generatePopup()
 {
-	std::function<void()> generate = [this]()
-	{
-		QQmlComponent* component = new QQmlComponent(&Hix::Application::ApplicationManager::getInstance().engine(), POPUP_URL);
-		auto popupArea = Hix::Application::ApplicationManager::getInstance().modalDialogManager().popupArea();
-		auto qmlInstance = component->create(qmlContext(popupArea));
-		auto popupShell = dynamic_cast<Hix::QML::ProgressPopupShell*>(qmlInstance);
-		_popup.reset(popupShell);
-		_popup->setParentItem(popupArea);
-	};
-	QMetaObject::invokeMethod(&ApplicationManager::getInstance().engine(), generate, Qt::BlockingQueuedConnection);
+	QQmlComponent* component = new QQmlComponent(&Hix::Application::ApplicationManager::getInstance().engine(), POPUP_URL);
+	auto popupArea = Hix::Application::ApplicationManager::getInstance().modalDialogManager().popupArea();
+	auto qmlInstance = component->create(qmlContext(popupArea));
+	auto popupShell = dynamic_cast<Hix::QML::ProgressPopupShell*>(qmlInstance);
+	_popup.reset(popupShell);
+	_popup->setParentItem(popupArea);
+
 }
 
 void Hix::ProgressManager::generateErrorPopup(const char* message)
@@ -44,24 +41,17 @@ void Hix::ProgressManager::generateErrorPopup(const char* message)
 
 void Hix::ProgressManager::addProgress(Hix::Progress* progress)
 {
-	std::function<void()> addItem = [this, &progress]()
-	{
-		qDebug() << progress->getDisplayText();
-		QQmlComponent* component = new QQmlComponent(&Hix::Application::ApplicationManager::getInstance().engine(), POPUP_ITEM_URL);
-		auto item = dynamic_cast<QQuickItem*>(component->create(qmlContext(_popup->featureLayout())));
-		item->setProperty("featureName", progress->getDisplayText());
-		item->setParentItem(_popup->featureLayout());
-	};
-	QMetaObject::invokeMethod(&ApplicationManager::getInstance().engine(), addItem, Qt::BlockingQueuedConnection);
+	qDebug() << progress->getDisplayText();
+	QQmlComponent* component = new QQmlComponent(&Hix::Application::ApplicationManager::getInstance().engine(), POPUP_ITEM_URL);
+	auto item = dynamic_cast<QQuickItem*>(component->create(qmlContext(_popup->featureLayout())));
+	item->setProperty("featureName", progress->getDisplayText());
+	item->setParentItem(_popup->featureLayout());
+
 }
 
 void Hix::ProgressManager::deletePopup()
 {
-	std::function<void()> deletePopup = [this]()
-	{
-		_popup.reset();
-	};
-	QMetaObject::invokeMethod(&ApplicationManager::getInstance().engine(), deletePopup, Qt::BlockingQueuedConnection);
+	_popup.reset();
 }
 
 void Hix::ProgressManager::draw()

@@ -255,6 +255,7 @@
     <ClCompile Include="common\GTEngine\Source\Mathematics\MSW\GteIntelSSE.cpp" />
     <ClCompile Include="DentEngine\src\polyclipping\polytree2tri\PolytreeCDT.cpp" />
     <ClCompile Include="feature\interfaces\SliderMode.cpp" />
+    <ClCompile Include="feature\sendError.cpp" />
     <ClCompile Include="feature\settingMode.cpp" />
     <ClCompile Include="feature\CopyPaste.cpp" />
     <ClCompile Include="feature\FeaturesLoader.cpp" />
@@ -858,6 +859,7 @@
     <ClInclude Include="DentEngine\src\mesh.h" />
     <ClInclude Include="DentEngine\src\polyclipping\polytree2tri\PolytreeCDT.h" />
     <ClInclude Include="feature\interfaces\SliderMode.h" />
+    <ClInclude Include="feature\sendError.h" />
     <ClInclude Include="feature\settingMode.h" />
     <ClInclude Include="feature\CopyPaste.h" />
     <ClInclude Include="feature\FeaturesLoader.h" />

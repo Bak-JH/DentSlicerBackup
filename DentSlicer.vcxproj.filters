@@ -202,6 +202,9 @@
     <ClCompile Include="DentEngine\src\polyclipping\polytree2tri\PolytreeCDT.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="feature\sendError.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="application\ApplicationManager.h" />
@@ -838,6 +841,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="DentEngine\src\polyclipping\polytree2tri\PolytreeCDT.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="feature\sendError.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

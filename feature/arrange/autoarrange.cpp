@@ -136,7 +136,9 @@ void Hix::Features::AutoArrangeAppend::runImpl()
 	if (!printBound.contains(bound))
 	{
 		//model is too large
-		throw std::runtime_error("model is too large for arrange");
+		//throw std::runtime_error("model is too large for arrange");
+		__super::runImpl();
+		return;
 	}
 	auto maxDisp = printBound.calculateMaxDisplacement(bound);
 	RandomGen random(0);
