@@ -8,7 +8,6 @@
 #include "glmodel.h"
 
 #include "application/ApplicationManager.h"
-#include "qmlmanager.h"
 
 using namespace  Hix::QML;
 const QUrl ITEM_URL = QUrl("qrc:/Qml/ModalWindowButton.qml");
