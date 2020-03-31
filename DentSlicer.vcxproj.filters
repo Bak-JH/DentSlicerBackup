@@ -200,6 +200,33 @@
     <ClCompile Include="feature\Shapes2D.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="cork\src\file_formats\files.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="cork\src\file_formats\ifs.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="cork\src\file_formats\off.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="cork\src\isct\empty3d.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="cork\src\isct\quantization.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="cork\src\util\log.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="cork\src\util\timer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="cork\src\cork.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="cork\src\isct\CDTtriangle.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="application\ApplicationManager.h" />
@@ -833,6 +860,75 @@
     </ClInclude>
     <ClInclude Include="common\RandomGen.h" />
     <ClInclude Include="feature\layerview\CrossSectionPlane.h" />
+    <ClInclude Include="cork\src\accel\aabvh.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="cork\src\file_formats\files.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="cork\src\isct\absext4.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="cork\src\isct\empty3d.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="cork\src\isct\ext4.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="cork\src\isct\fixext4.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="cork\src\isct\fixint.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="cork\src\isct\gmpext4.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="cork\src\isct\quantization.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="cork\src\isct\unsafeRayTriIsct.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="cork\src\math\bbox.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="cork\src\math\ray.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="cork\src\math\vec.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="cork\src\mesh\mesh.decl.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="cork\src\mesh\mesh.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="cork\src\rawmesh\rawMesh.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="cork\src\util\iterPool.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="cork\src\util\memPool.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="cork\src\util\prelude.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="cork\src\util\shortVec.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="cork\src\util\unionFind.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="cork\src\cork.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="cork\src\isct\CDTtriangle.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="debug\moc_predefs.h.cbt" />
