@@ -45,20 +45,11 @@ void Hix::QML::Controls::Button::onPositionChanged(QQuickMouseEvent* mouse)
 
 
 /// Toggle Switch ///
-Hix::QML::Controls::ToggleSwitch::ToggleSwitch(QQuickItem* parent) : _mouseArea(new QQuickMouseArea(this)), QQuickRectangle(parent)
+Hix::QML::Controls::ToggleSwitch::ToggleSwitch(QQuickItem* parent) : QQuickRectangle(parent)
 {
 	// mouse area
-	connect(_mouseArea, &QQuickMouseArea::entered, this, &ToggleSwitch::onEntered);
-	connect(_mouseArea, &QQuickMouseArea::exited, this, &ToggleSwitch::onExited);
-	
-	connect(_mouseArea, &QQuickMouseArea::clicked, [this]() { setChecked(!_isChecked); });
-	connect(this, &ToggleSwitch::checkedChanged, this, &ToggleSwitch::onCheckedChanged);
 
-	qvariant_cast<QObject*>(
-		_mouseArea->property("anchors")
-		)->setProperty("fill", _mouseArea->property("parent"));
-	_mouseArea->setHoverEnabled(true);
-	
+	connect(this, &ToggleSwitch::checkedChanged, this, &ToggleSwitch::onCheckedChanged);
 }
 
 Hix::QML::Controls::ToggleSwitch::~ToggleSwitch()

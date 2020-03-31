@@ -1173,6 +1173,7 @@
     <None Include="cpp.hint" />
     <None Include="packages.config" />
     <None Include="Qml\Controls\CtrTextButton.qml" />
+    <None Include="Qml\Controls\CtrToggleButton.qml" />
     <None Include="Qml\Controls\CtrToggleSwitch.qml" />
     <None Include="Qml\FeaturePopup\PopupSlice.qml" />
     <None Include="Qml\FeaturePopup\PrintSettingPopup.qml" />

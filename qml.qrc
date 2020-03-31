@@ -83,5 +83,6 @@
         <file>Qml/PartListItem.qml</file>
         <file>Qml/PartListFullnameBox.qml</file>
         <file>Qml/FeaturePopup/PopupSlice.qml</file>
+        <file>Qml/Controls/CtrToggleButton.qml</file>
     </qresource>
 </RCC>
