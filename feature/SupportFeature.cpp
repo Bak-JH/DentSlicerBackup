@@ -236,9 +236,6 @@ Hix::Features::SupportMode::SupportMode()
 	QObject::connect(_minRadSpin, &Hix::QML::Controls::InputSpinBox::valueChanged, [this, &modSettings]() {
 		modSettings.supportRadiusMin = _minRadSpin->getValue();
 		});
-	QObject::connect(_minRadSpin, &Hix::QML::Controls::InputSpinBox::valueChanged, [this, &modSettings]() {
-		modSettings.supportRadiusMin = _minRadSpin->getValue();
-		});
 }
 
 Hix::Features::SupportMode::~SupportMode()

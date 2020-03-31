@@ -24,6 +24,12 @@ void Hix::Support::SupportRaftManager::initialize(Qt3DCore::QEntity* parent)
 }
 Hix::Support::SupportRaftManager::~SupportRaftManager()
 {
+	//qobjects will delete themselves
+	_raft.release();
+	for (auto& m : _supports)
+	{
+		m.second.release();
+	}
 }
 
 float Hix::Support::SupportRaftManager::supportRaftMinLength()
