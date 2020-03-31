@@ -130,14 +130,19 @@ Hix::Features::AutoArrangeAppend::AutoArrangeAppend(GLModel* model): Move(model)
 void Hix::Features::AutoArrangeAppend::runImpl()
 {
 	//calculate inner fit polygon range
+	_to = QVector3D(0, 0, 0);
 	auto bound = _model->recursiveAabb();
 	const auto& printBound = Hix::Application::ApplicationManager::getInstance().settings().printerSetting.bedBound;
+	if (!printBound.contains(bound))
+	{
+		//model is too large
+		throw std::runtime_error("model is too large for arrange");
+	}
 	auto maxDisp = printBound.calculateMaxDisplacement(bound);
 	RandomGen random(0);
 	auto allModels = Hix::Application::ApplicationManager::getInstance().partManager().allModels();
 	std::vector<Bounds3D> modelBounds;
 	modelBounds.reserve(allModels.size());
-	_to = QVector3D(0, 0, 0);
 	for (auto& m : allModels)
 	{
 		if(m != _model)
