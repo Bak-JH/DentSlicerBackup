@@ -133,13 +133,6 @@ void Hix::Features::AutoArrangeAppend::runImpl()
 	_to = QVector3D(0, 0, 0);
 	auto bound = _model->recursiveAabb();
 	const auto& printBound = Hix::Application::ApplicationManager::getInstance().settings().printerSetting.bedBound;
-	if (!printBound.contains(bound))
-	{
-		//model is too large
-		//throw std::runtime_error("model is too large for arrange");
-		__super::runImpl();
-		return;
-	}
 	auto maxDisp = printBound.calculateMaxDisplacement(bound);
 	RandomGen random(0);
 	auto allModels = Hix::Application::ApplicationManager::getInstance().partManager().allModels();
