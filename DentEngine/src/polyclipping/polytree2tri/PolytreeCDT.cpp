@@ -190,14 +190,31 @@ std::vector<p2t::Point*>& Hix::Polyclipping::PolytreeCDT::toFloatPts(ClipperLib:
 	if (cached != _nodeFloatCache.end())
 		return cached->second;
 
-	if (_floatIntMap)
+	std::vector<p2t::Point*> floatPath;
+	floatPath.reserve(node.Contour.size());
+	//pathContainsDupe(node.Contour);
+	auto cleanedContour = node.Contour;
+	//ClipperLib::CleanPolygon(cleanedContour);
+	//if (cleanedContour != node.Contour)
+	//{
+	//	qDebug() << "cleaning worked";
+	//}
+	for (auto& point : cleanedContour)
 	{
-		return toFloatPtsWithMap(node);
+		if (_floatIntMap)
+		{
+			toFloatPtsWithMap(point, floatPath);
+		}
+		else
+		{
+			toFloatPtsImpl(point, floatPath);
+		}
+
 	}
-	else
-	{
-		return toFloatPtsImpl(node);
-	}
+	auto inserted = _nodeFloatCache.try_emplace(&node, std::move(floatPath));
+	return inserted.first->second;
+
+
 }
 
 
@@ -247,65 +264,40 @@ inline void randomDither(Hix::Polyclipping::Point& pt, RandomGen& rand)
 }
 
 
-std::vector<p2t::Point*>& PolytreeCDT::toFloatPtsImpl(ClipperLib::PolyNode& node)
+void PolytreeCDT::toFloatPtsImpl(ClipperLib::IntPoint& point, std::vector<p2t::Point*>& floatPath)
 {
-	std::vector<p2t::Point*> floatPath;
-	floatPath.reserve(node.Contour.size());
-	//pathContainsDupe(node.Contour);
-	auto cleanedContour = node.Contour;
-	//ClipperLib::CleanPolygon(cleanedContour);
-	//if (cleanedContour != node.Contour)
-	//{
-	//	qDebug() << "cleaning worked";
-	//}
-	for (auto& point : cleanedContour)
+
+	auto dPoint = toDPt(point);
+	auto fpt = _points.insert(std::make_pair(dPoint, p2t::Point(dPoint._x, dPoint._y)));
+	while (!fpt.second)
 	{
-		auto dPoint = toDPt(point);
-		auto fpt = _points.insert(std::make_pair(dPoint, p2t::Point(dPoint._x, dPoint._y)));
-		while (!fpt.second)
-		{
-			randomDither(dPoint, _random);
-			fpt = _points.insert(std::make_pair(dPoint, p2t::Point(dPoint._x, dPoint._y)));
-		}
-		floatPath.emplace_back(&fpt.first->second);
+		randomDither(dPoint, _random);
+		fpt = _points.insert(std::make_pair(dPoint, p2t::Point(dPoint._x, dPoint._y)));
 	}
-	auto inserted = _nodeFloatCache.try_emplace(&node, std::move(floatPath));
-	return inserted.first->second;
+	floatPath.emplace_back(&fpt.first->second);
+
 }
 
-std::vector<p2t::Point*>& PolytreeCDT::toFloatPtsWithMap(ClipperLib::PolyNode& node)
+void PolytreeCDT::toFloatPtsWithMap(ClipperLib::IntPoint& point, std::vector<p2t::Point*>& floatPath)
 {
-	std::vector<p2t::Point*> floatPath;
-	floatPath.reserve(node.Contour.size());
-	//pathContainsDupe(node.Contour);
-	auto cleanedContour = node.Contour;
-	//ClipperLib::CleanPolygon(cleanedContour);
-	//if (cleanedContour != node.Contour)
-	//{
-	//	qDebug() << "cleaning worked";
-	//}
-	for (auto& point : cleanedContour)
+	auto origFloatPt = _floatIntMap->find(point);
+	Polyclipping::Point dPoint;
+	if (origFloatPt == _floatIntMap->end())
 	{
-		auto origFloatPt = _floatIntMap->find(point);
-		Polyclipping::Point dPoint;
-		if (origFloatPt == _floatIntMap->end())
-		{
-			//no matching original float point detected
-			auto dPoint = toDPt(point);
-		}
-		else
-		{
-			auto qVector = origFloatPt->second;
-			dPoint = { qVector.x(), qVector.y() };
-		}
-		auto fpt = _points.insert(std::make_pair(dPoint, p2t::Point(dPoint._x, dPoint._y)));
-		while (!fpt.second)
-		{
-			randomDither(dPoint, _random);
-			fpt = _points.insert(std::make_pair(dPoint, p2t::Point(dPoint._x, dPoint._y)));
-		}
-		floatPath.emplace_back(&fpt.first->second);
+		//no matching original float point detected
+		auto dPoint = toDPt(point);
 	}
-	auto inserted = _nodeFloatCache.try_emplace(&node, std::move(floatPath));
-	return inserted.first->second;
+	else
+	{
+		auto qVector = origFloatPt->second;
+		dPoint = { qVector.x(), qVector.y() };
+	}
+	auto fpt = _points.insert(std::make_pair(dPoint, p2t::Point(dPoint._x, dPoint._y)));
+	while (!fpt.second)
+	{
+		randomDither(dPoint, _random);
+		fpt = _points.insert(std::make_pair(dPoint, p2t::Point(dPoint._x, dPoint._y)));
+	}
+	floatPath.emplace_back(&fpt.first->second);
+
 }

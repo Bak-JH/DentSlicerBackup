@@ -31,8 +31,8 @@ namespace Hix
 
 		private:
 			std::vector<p2t::Point*>& toFloatPts(ClipperLib::PolyNode& node);
-			std::vector<p2t::Point*>& toFloatPtsImpl(ClipperLib::PolyNode& node);
-			std::vector<p2t::Point*>& toFloatPtsWithMap(ClipperLib::PolyNode& node);
+			void toFloatPtsImpl(ClipperLib::IntPoint& point, std::vector<p2t::Point*>& floatPath);
+			void toFloatPtsWithMap(ClipperLib::IntPoint& point, std::vector<p2t::Point*>& floatPath);
 			//points MUST BE UNIQUE!
 			//this is map because p2t::point must be non-const
 			std::unordered_map<Hix::Polyclipping::Point, p2t::Point> _points;
@@ -43,6 +43,11 @@ namespace Hix
 			const std::unordered_map<ClipperLib::IntPoint, QVector2D>* _floatIntMap = nullptr;
 			
 			RandomGen _random;
+		};
+		class CDTImpl
+		{
+		public:
+
 		};
 
 
