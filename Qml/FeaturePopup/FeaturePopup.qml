@@ -12,6 +12,12 @@ Hix.FeaturePopupShell
 	property var title
 	property var myPadding: 16
 	property var enableApply: true
+	
+	MouseArea{
+		id: blockingArea
+		anchors.fill: parent
+	}
+	
 	Rectangle 
 	{
 		id: shell
