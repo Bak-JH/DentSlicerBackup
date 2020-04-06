@@ -1,8 +1,10 @@
-#include "PolytreeCDT.h"
+#include "HixCDT.h"
 #include <unordered_set>
 #include <qdebug.h>
 #include "../../SlicerDebugInfoExport.h"
 #include "../../../../application/ApplicationManager.h"
+#include "../../../feature/agCDT/CDT.h"
+
 #include <array>
 using namespace ClipperLib;
 using namespace Hix::Polyclipping;
@@ -12,6 +14,18 @@ using namespace Hix::Slicer::Debug;
 
 namespace std
 {
+
+
+	template<>
+	struct hash<CDT::V2d<double>>
+	{
+		//2D only!
+		std::size_t operator()(const CDT::V2d<double>& pt)const
+		{
+			return std::hash<double>()(pt.x) ^ std::hash<double>()(pt.y);
+		}
+	};
+
 	template<>
 	struct hash<std::array<size_t, 2>> {
 		std::size_t operator() (const std::array<size_t, 2>& key) const {
@@ -57,7 +71,7 @@ namespace Hix
 		class CDTImplAG : public CDTImpl
 		{
 		public:
-			CDTImplAG(const std::unordered_map<ClipperLib::IntPoint, QVector2D>* map);
+			CDTImplAG(const std::unordered_map<ClipperLib::IntPoint, QVector2D>* map, bool isReverse);
 			virtual ~CDTImplAG();
 			std::vector<Triangle> pairTriangulate(const ClipperLib::PolyNode& solid)override;
 		private:
@@ -76,16 +90,22 @@ namespace Hix
 			size_t _currIdx = 0;
 			std::unordered_map< CDT::V2d<double>, size_t> _points;
 			std::unordered_set<std::array<size_t,2>> _edges;
+			bool _isReverse = false;
 		};
 
 
 
 	}
+	//CDT::V2d<double> toDPt(const ClipperLib::IntPoint& pt);
 
 }
 
 
 
+CDT::V2d<double> toDPt(const ClipperLib::IntPoint& pt)
+{
+	return { (double)pt.X / Hix::Polyclipping::INT_PT_RESOLUTION, (double)pt.Y / Hix::Polyclipping::INT_PT_RESOLUTION };
+}
 
 
 PolytreeCDT::PolytreeCDT(const ClipperLib::PolyTree* polytree): _tree(polytree)
@@ -173,7 +193,8 @@ std::unordered_map<PolyNode*, std::vector<Triangle>> Hix::Polyclipping::Polytree
 
 	for (auto& eachSolid : solids)
 	{
-		CDTImplPoly2Tri impl(_floatIntMap);
+		//CDTImplPoly2Tri impl(_floatIntMap);
+		CDTImplAG impl(_floatIntMap, false);
 		result[eachSolid] = std::move(impl.pairTriangulate(*eachSolid));
 	}
 
@@ -413,7 +434,7 @@ void CDTImplPoly2Tri::toFloatPtsWithMap(const ClipperLib::IntPoint& point, std::
 
 // aG CDT impl
 
-CDTImplAG::CDTImplAG(const std::unordered_map<ClipperLib::IntPoint, QVector2D>* map): _floatIntMap(map)
+CDTImplAG::CDTImplAG(const std::unordered_map<ClipperLib::IntPoint, QVector2D>* map,  bool isReverse): _floatIntMap(map), _isReverse(isReverse)
 {
 	//funnily enough, branch prediciton works with these function pointers
 	if (_floatIntMap)
@@ -465,18 +486,35 @@ std::vector<Triangle> CDTImplAG::pairTriangulate(const ClipperLib::PolyNode& sol
 		cdt.eraseOuterTrianglesAndHoles();
 		auto& vtcsOut = cdt.vertices;
 		auto& tris = cdt.triangles;
-		for (auto& tri : tris)
+		if (_isReverse)
 		{
-			auto& triVtcs = tri.vertices;
-			CDT::V2d<double> pt0, pt1, pt2;
-			pt0 = vtcsOut[triVtcs[2]].pos;
-			pt1 = vtcsOut[triVtcs[1]].pos;
-			pt2 = vtcsOut[triVtcs[0]].pos;
+			for (auto& tri : tris)
+			{
+				auto& triVtcs = tri.vertices;
+				CDT::V2d<double> pt0, pt1, pt2;
+				pt0 = vtcsOut[triVtcs[2]].pos;
+				pt1 = vtcsOut[triVtcs[1]].pos;
+				pt2 = vtcsOut[triVtcs[0]].pos;
 
-			Triangle tri{ QVector2D(pt0.x, pt0.y),QVector2D(pt1.x, pt1.y), QVector2D(pt2.x, pt2.y) };
-			result.emplace_back(std::move(tri));
-
+				Triangle tri{ QVector2D(pt0.x, pt0.y),QVector2D(pt1.x, pt1.y), QVector2D(pt2.x, pt2.y) };
+				result.emplace_back(std::move(tri));
+			}
 		}
+		else
+		{
+			for (auto& tri : tris)
+			{
+				auto& triVtcs = tri.vertices;
+				CDT::V2d<double> pt0, pt1, pt2;
+				pt0 = vtcsOut[triVtcs[0]].pos;
+				pt1 = vtcsOut[triVtcs[1]].pos;
+				pt2 = vtcsOut[triVtcs[2]].pos;
+
+				Triangle tri{ QVector2D(pt0.x, pt0.y),QVector2D(pt1.x, pt1.y), QVector2D(pt2.x, pt2.y) };
+				result.emplace_back(std::move(tri));
+			}
+		}
+
 
 	}
 	catch (const std::runtime_error & error)

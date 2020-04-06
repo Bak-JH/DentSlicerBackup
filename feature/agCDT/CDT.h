@@ -2,8 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at https://mozilla.org/MPL/2.0/. */
 
-#ifndef CDT_lNrmUayWQaIR5fxnsg9B
-#define CDT_lNrmUayWQaIR5fxnsg9B
+#pragma once
 
 #include "CDTUtils.h"
 #ifndef CDT_DONT_USE_BOOST_RTREE
@@ -141,4 +140,3 @@ const static VertInd noVertex =
 #include "CDT.hpp"
 #endif
 
-#endif // header-guard

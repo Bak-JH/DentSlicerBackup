@@ -1,6 +1,6 @@
 ﻿#include "ZAxialCut.h"
 #include "../../glmodel.h"
-#include "../../DentEngine/src/polyclipping/polytree2tri/PolytreeCDT.h"
+#include "../../DentEngine/src/polyclipping/cdt/HixCDT.h"
 #include "feature/addModel.h"
 #include "feature/deleteModel.h"
 using namespace Hix;

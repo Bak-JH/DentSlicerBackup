@@ -4,7 +4,7 @@
 #include "../Shapes2D.h"
 #include "../../glmodel.h"
 #include "../../DentEngine/src/SlicerDebug.h"
-#include "../../DentEngine/src/polyclipping/polytree2tri/PolytreeCDT.h"
+#include "../../DentEngine/src/polyclipping/cdt/HixCDT.h"
 
 using namespace Hix::Input;
 using namespace Hix::Features;
