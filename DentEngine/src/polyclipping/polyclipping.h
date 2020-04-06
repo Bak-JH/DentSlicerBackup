@@ -1,41 +1,14 @@
 #pragma once
 #include "clipper/clipper.hpp"
 #include "poly2tri/poly2tri.h"
+#include "../../../feature/agCDT/CDT.h"
+
 class QVector2D;
 class QVector3D;
 
-namespace Hix
-{
-	namespace Polyclipping
-	{
-		struct Point
-		{
-			double _x;
-			double _y;
-			inline double x() const { return _x; }
-			inline double y() const { return _y; }
-			friend inline bool operator== (const Point& a, const Point& b) {
-				return a._x == b._x && a._y == b._y;
-			}
-			friend inline bool operator!= (const Point& a, const Point& b) {
-				return !operator==(a,b);
-			}
-		};
-	}
-}
+
 namespace std
 {
-	template<>
-	struct hash<Hix::Polyclipping::Point>
-	{
-		//2D only!
-		std::size_t operator()(const Hix::Polyclipping::Point& pt)const
-		{
-			//we don't care about symmertricity as the vertice pair should be sorted anyway ie) no symmetry
-			return std::hash<double>()(pt._x) ^ std::hash<double>()(pt._y);
-		}
-	};
-
 	template<>
 	struct hash<ClipperLib::IntPoint>
 	{
@@ -46,8 +19,23 @@ namespace std
 			return digest;
 		}
 	};
-
+	template<>
+	struct hash<CDT::V2d<double>>
+	{
+		//2D only!
+		std::size_t operator()(const CDT::V2d<double>& pt)const
+		{
+			return std::hash<double>()(pt.x) ^ std::hash<double>()(pt.y);
+		}
+	};
+	template<>
+	struct hash<std::array<CDT::V2d<double>, 2>> {
+		std::size_t operator() (const std::array<CDT::V2d<double>, 2>& key) const {
+			return std::hash<CDT::V2d<double>>()(key[0]) ^ std::hash<CDT::V2d<double>>()(key[1]);
+		}
+	};
 }
+
 
 namespace Hix
 {
@@ -67,7 +55,7 @@ namespace Hix
 		ClipperLib::IntPoint  toPixelSize(const QVector2D& pt);
 		ClipperLib::IntPoint  toInt2DPt(const QVector3D& pt);
 		QVector2D toFloatPt(const ClipperLib::IntPoint& pt);
-		Hix::Polyclipping::Point toDPt(const ClipperLib::IntPoint& pt);
+		CDT::V2d<double> toDPt(const ClipperLib::IntPoint& pt);
 
 		ClipperLib::Path toCLPath(const std::vector<QVector2D>& path);
 		ClipperLib::Path toCLPath(const std::vector<QVector3D>& path);

@@ -64,7 +64,7 @@ QVector2D Hix::Polyclipping::toFloatPt(const IntPoint& pt)
 }
 
 
-Hix::Polyclipping::Point Hix::Polyclipping::toDPt(const ClipperLib::IntPoint& pt)
+CDT::V2d<double> Hix::Polyclipping::toDPt(const ClipperLib::IntPoint& pt)
 {
 	return { (double)pt.X / Hix::Polyclipping::INT_PT_RESOLUTION, (double)pt.Y / Hix::Polyclipping::INT_PT_RESOLUTION };
 }
