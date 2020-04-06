@@ -5,20 +5,20 @@
 
 using namespace ClipperLib;
 
-
-namespace std
-{
-
-	template<>
-	struct hash<CDT::V2d<double>>
-	{
-		//2D only!
-		std::size_t operator()(const CDT::V2d<double>& pt)const
-		{
-			return std::hash<double>()(pt.x) ^ std::hash<double>()(pt.y);
-		}
-	};
-}
+//
+//namespace std
+//{
+//
+//	template<>
+//	struct hash<CDT::V2d<double>>
+//	{
+//		//2D only!
+//		std::size_t operator()(const CDT::V2d<double>& pt)const
+//		{
+//			return std::hash<double>()(pt.x) ^ std::hash<double>()(pt.y);
+//		}
+//	};
+//}
 
 template <typename QVectorType>
 std::vector<CDT::V2d<double>> QVectorToCDTVtx(const std::vector<QVectorType>& input)
@@ -312,7 +312,7 @@ void generateCapZPlaneImpl(Hix::Engine3D::Mesh* mesh, float zPos, const std::vec
 	CDT::Triangulation<double> cdt = CDT::Triangulation<double>(CDT::FindingClosestPoint::BoostRTree);
 	// ... same as above
 	cdt.insertVertices(vtcs);
-	cdt.tryInsertEdges(edges);
+	cdt.insertEdges(edges);
 	cdt.eraseOuterTriangles();
 	//TODO: is input vtcs different from output vtcs?
 	auto& vtcsOut = cdt.vertices;

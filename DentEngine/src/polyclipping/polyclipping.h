@@ -28,12 +28,6 @@ namespace std
 			return std::hash<double>()(pt.x) ^ std::hash<double>()(pt.y);
 		}
 	};
-	template<>
-	struct hash<std::array<CDT::V2d<double>, 2>> {
-		std::size_t operator() (const std::array<CDT::V2d<double>, 2>& key) const {
-			return std::hash<CDT::V2d<double>>()(key[0]) ^ std::hash<CDT::V2d<double>>()(key[1]);
-		}
-	};
 }
 
 

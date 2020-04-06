@@ -269,23 +269,23 @@ std::vector<Triangle> Hix::Polyclipping::CDTImplPoly2Tri::pairTriangulate(const 
 	catch (const std::runtime_error & error)
 	{
 #ifdef _DEBUG
-		auto solidPath = debugPath(toFloatPts(solid));
-		{
-			SVGOut output("debug_svg" + std::to_string(dSliceCnt) + "solid", QSize(2000000, 2000000));
-			QPen pen(QColor::fromRgb(200, 0, 0), 1, Qt::SolidLine);
-			output.addPath(solidPath, pen, "solid");
-		}
+		//auto solidPath = debugPath(toFloatPts(solid));
+		//{
+		//	SVGOut output("debug_svg" + std::to_string(dSliceCnt) + "solid", QSize(2000000, 2000000));
+		//	QPen pen(QColor::fromRgb(200, 0, 0), 1, Qt::SolidLine);
+		//	output.addPath(solidPath, pen, "solid");
+		//}
 
-		size_t cnt = 0;
-		for (auto hole : solid.Childs)
-		{
-			SVGOut output("debug_svg" + std::to_string(dSliceCnt) + "hole" + std::to_string(cnt), QSize(2000000, 2000000));
-			std::string name = "hole" + std::to_string(cnt);
-			++cnt;
-			//auto isHoleDupe = pathContainsDupe(toFloatPts(*hole));
-			QPen holePen(output.randColor(), 1, Qt::SolidLine);
-			output.addPath(debugPath(toFloatPts(*hole)), holePen, "");
-		}
+		//size_t cnt = 0;
+		//for (auto hole : solid.Childs)
+		//{
+		//	SVGOut output("debug_svg" + std::to_string(dSliceCnt) + "hole" + std::to_string(cnt), QSize(2000000, 2000000));
+		//	std::string name = "hole" + std::to_string(cnt);
+		//	++cnt;
+		//	//auto isHoleDupe = pathContainsDupe(toFloatPts(*hole));
+		//	QPen holePen(output.randColor(), 1, Qt::SolidLine);
+		//	output.addPath(debugPath(toFloatPts(*hole)), holePen, "");
+		//}
 #endif
 	}
 	return result;
@@ -461,8 +461,23 @@ std::vector<Triangle> CDTImplAG::pairTriangulate(const ClipperLib::PolyNode& sol
 			edges.emplace_back(CDT::Edge(e[0], e[1]));
 		}
 
-		cdt.tryInsertEdges(edges);
+		cdt.insertEdges(edges);
 		cdt.eraseOuterTrianglesAndHoles();
+		auto& vtcsOut = cdt.vertices;
+		auto& tris = cdt.triangles;
+		for (auto& tri : tris)
+		{
+			auto& triVtcs = tri.vertices;
+			CDT::V2d<double> pt0, pt1, pt2;
+			pt0 = vtcsOut[triVtcs[2]].pos;
+			pt1 = vtcsOut[triVtcs[1]].pos;
+			pt2 = vtcsOut[triVtcs[0]].pos;
+
+			Triangle tri{ QVector2D(pt0.x, pt0.y),QVector2D(pt1.x, pt1.y), QVector2D(pt2.x, pt2.y) };
+			result.emplace_back(std::move(tri));
+
+		}
+
 	}
 	catch (const std::runtime_error & error)
 	{
@@ -483,11 +498,10 @@ std::vector<Triangle> CDTImplAG::pairTriangulate(const ClipperLib::PolyNode& sol
 		//	//auto isHoleDupe = pathContainsDupe(toFloatPts(*hole));
 		//	QPen holePen(output.randColor(), 1, Qt::SolidLine);
 		//	output.addPath(debugPath(toFloatPts(*hole)), holePen, "");
-		}
+		//}
 #endif
 	}
 	return result;
-
 
 }
 
