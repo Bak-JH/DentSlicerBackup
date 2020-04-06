@@ -7,8 +7,11 @@
 
 #include "CDTUtils.h"
 
+#ifndef Q_MOC_RUN
 #include <boost/geometry/geometry.hpp>
 #include <boost/geometry/index/rtree.hpp>
+#endif // Q_MOC_RUN
+
 
 // Specialize boost::geometry point traits for CDT's 2D vector type
 namespace boost

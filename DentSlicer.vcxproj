@@ -253,7 +253,7 @@
     <ClCompile Include="common\GTEngine\Source\Mathematics\GteVETNonmanifoldMesh.cpp" />
     <ClCompile Include="common\GTEngine\Source\Mathematics\MSW\GteCPUQueryInstructions.cpp" />
     <ClCompile Include="common\GTEngine\Source\Mathematics\MSW\GteIntelSSE.cpp" />
-    <ClCompile Include="DentEngine\src\polyclipping\polytree2tri\PolytreeCDT.cpp" />
+    <ClCompile Include="DentEngine\src\polyclipping\cdt\HixCDT.cpp" />
     <ClCompile Include="cork\src\cork.cpp" />
     <ClCompile Include="cork\src\file_formats\files.cpp" />
     <ClCompile Include="cork\src\file_formats\ifs.cpp" />
@@ -866,7 +866,7 @@
     <ClInclude Include="common\rapidjson\writer.h" />
     <ClInclude Include="common\Singleton.h" />
     <ClInclude Include="DentEngine\src\mesh.h" />
-    <ClInclude Include="DentEngine\src\polyclipping\polytree2tri\PolytreeCDT.h" />
+    <ClInclude Include="DentEngine\src\polyclipping\cdt\HixCDT.h" />
     <ClInclude Include="cork\src\accel\aabvh.h" />
     <ClInclude Include="cork\src\cork.h" />
     <ClInclude Include="cork\src\file_formats\files.h" />

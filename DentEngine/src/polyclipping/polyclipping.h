@@ -1,7 +1,6 @@
 #pragma once
 #include "clipper/clipper.hpp"
 #include "poly2tri/poly2tri.h"
-#include "../../../feature/agCDT/CDT.h"
 
 class QVector2D;
 class QVector3D;
@@ -17,15 +16,6 @@ namespace std
 		{
 			size_t digest = pt.X | pt.Y << 32;
 			return digest;
-		}
-	};
-	template<>
-	struct hash<CDT::V2d<double>>
-	{
-		//2D only!
-		std::size_t operator()(const CDT::V2d<double>& pt)const
-		{
-			return std::hash<double>()(pt.x) ^ std::hash<double>()(pt.y);
 		}
 	};
 }
@@ -49,7 +39,6 @@ namespace Hix
 		ClipperLib::IntPoint  toPixelSize(const QVector2D& pt);
 		ClipperLib::IntPoint  toInt2DPt(const QVector3D& pt);
 		QVector2D toFloatPt(const ClipperLib::IntPoint& pt);
-		CDT::V2d<double> toDPt(const ClipperLib::IntPoint& pt);
 
 		ClipperLib::Path toCLPath(const std::vector<QVector2D>& path);
 		ClipperLib::Path toCLPath(const std::vector<QVector3D>& path);

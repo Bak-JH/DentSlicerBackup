@@ -1,6 +1,6 @@
 #include "Shapes2D.h"
 #include "../DentEngine/src/ContourBuilder.h"
-#include "agCDT/CDT.h"
+//#include "../../../feature/agCDT/CDT.h"
 
 
 using namespace ClipperLib;
@@ -19,45 +19,63 @@ using namespace ClipperLib;
 //		}
 //	};
 //}
-
-template <typename QVectorType>
-std::vector<CDT::V2d<double>> QVectorToCDTVtx(const std::vector<QVectorType>& input)
-{
-	std::vector<CDT::V2d<double>> v2d;
-	v2d.reserve(input.size());
-	for (auto& each : input)
-	{
-		v2d.emplace_back(CDT::V2d<double>::make(each.x(), each.y()));
-	}
-
-	std::unordered_set<CDT::V2d<double>> test;
-	for (auto& each : v2d)
-	{
-		test.insert(each);
-	}
-	if (test.size() != v2d.size())
-	{
-		return v2d;
-	}
-
-	return v2d;
-}
-template <typename QVectorType>
-std::vector<CDT::Edge> QVectorToCDTEdge(const std::vector<QVectorType>& input)
-{
-	std::vector<CDT::Edge> edges;
-	if (input.size() < 2)
-		return edges;
-	auto edgeCnt = input.size();
-	edges.reserve(edgeCnt);
-	--edgeCnt;
-	edges.emplace_back(0, edgeCnt);
-	for (size_t i = 0; i < edgeCnt; ++i)
-	{
-		edges.emplace_back(i, i + 1);
-	}
-	return edges;
-}
+//
+//namespace std
+//{
+//
+//
+//	template<>
+//	struct hash<CDT::V2d<double>>
+//	{
+//		//2D only!
+//		std::size_t operator()(const CDT::V2d<double>& pt)const
+//		{
+//			return std::hash<double>()(pt.x) ^ std::hash<double>()(pt.y);
+//		}
+//	};
+//
+//}
+//
+//
+//
+//template <typename QVectorType>
+//std::vector<CDT::V2d<double>> QVectorToCDTVtx(const std::vector<QVectorType>& input)
+//{
+//	std::vector<CDT::V2d<double>> v2d;
+//	v2d.reserve(input.size());
+//	for (auto& each : input)
+//	{
+//		v2d.emplace_back(CDT::V2d<double>::make(each.x(), each.y()));
+//	}
+//
+//	std::unordered_set<CDT::V2d<double>> test;
+//	for (auto& each : v2d)
+//	{
+//		test.insert(each);
+//	}
+//	if (test.size() != v2d.size())
+//	{
+//		return v2d;
+//	}
+//
+//	return v2d;
+//}
+//template <typename QVectorType>
+//std::vector<CDT::Edge> QVectorToCDTEdge(const std::vector<QVectorType>& input)
+//{
+//	std::vector<CDT::Edge> edges;
+//	if (input.size() < 2)
+//		return edges;
+//	auto edgeCnt = input.size();
+//	edges.reserve(edgeCnt);
+//	--edgeCnt;
+//	edges.emplace_back(0, edgeCnt);
+//	for (size_t i = 0; i < edgeCnt; ++i)
+//	{
+//		edges.emplace_back(i, i + 1);
+//	}
+//	return edges;
+//}
 
 std::vector<std::vector<QVector3D>> Hix::Shapes2D::gridCircle(float radius, float offset)
 {
@@ -307,62 +325,62 @@ std::vector<QVector2D> Hix::Shapes2D::PolylineToArea(float thickness, const std:
 }
 
 
-void generateCapZPlaneImpl(Hix::Engine3D::Mesh* mesh, float zPos, const std::vector<CDT::V2d<double>>& vtcs, const std::vector<CDT::Edge> edges, bool isReverse)
-{
-	CDT::Triangulation<double> cdt = CDT::Triangulation<double>(CDT::FindingClosestPoint::BoostRTree);
-	// ... same as above
-	cdt.insertVertices(vtcs);
-	cdt.insertEdges(edges);
-	cdt.eraseOuterTriangles();
-	//TODO: is input vtcs different from output vtcs?
-	auto& vtcsOut = cdt.vertices;
-	auto& tris = cdt.triangles;
+//void generateCapZPlaneImpl(Hix::Engine3D::Mesh* mesh, float zPos, const std::vector<CDT::V2d<double>>& vtcs, const std::vector<CDT::Edge> edges, bool isReverse)
+//{
+	//CDT::Triangulation<double> cdt = CDT::Triangulation<double>(CDT::FindingClosestPoint::BoostRTree);
+	//// ... same as above
+	//cdt.insertVertices(vtcs);
+	//cdt.insertEdges(edges);
+	//cdt.eraseOuterTriangles();
+	////TODO: is input vtcs different from output vtcs?
+	//auto& vtcsOut = cdt.vertices;
+	//auto& tris = cdt.triangles;
 
-	//as long as intial contour is not modified in the p2t library, float->double->float should be lossless
-	for (auto& tri : tris)
-	{
-		auto& triVtcs = tri.vertices;
-		CDT::V2d<double> pt0, pt1,pt2;
-		if (isReverse)
-		{
-			pt0 = vtcsOut[triVtcs[2]].pos;
-			pt1 = vtcsOut[triVtcs[1]].pos;
-			pt2 = vtcsOut[triVtcs[0]].pos;
+	////as long as intial contour is not modified in the p2t library, float->double->float should be lossless
+	//for (auto& tri : tris)
+	//{
+	//	auto& triVtcs = tri.vertices;
+	//	CDT::V2d<double> pt0, pt1,pt2;
+	//	if (isReverse)
+	//	{
+	//		pt0 = vtcsOut[triVtcs[2]].pos;
+	//		pt1 = vtcsOut[triVtcs[1]].pos;
+	//		pt2 = vtcsOut[triVtcs[0]].pos;
 
-		}
-		else
-		{
-			pt0 = vtcsOut[triVtcs[0]].pos;
-			pt1 = vtcsOut[triVtcs[1]].pos;
-			pt2 = vtcsOut[triVtcs[2]].pos;
-		}
+	//	}
+	//	else
+	//	{
+	//		pt0 = vtcsOut[triVtcs[0]].pos;
+	//		pt1 = vtcsOut[triVtcs[1]].pos;
+	//		pt2 = vtcsOut[triVtcs[2]].pos;
+	//	}
 
-		vtcsOut[triVtcs[2]].pos.x;
-		mesh->addFace(
-			QVector3D(pt0.x, pt0.y, zPos),
-			QVector3D(pt1.x, pt1.y, zPos),
-			QVector3D(pt2.x, pt2.y, zPos));
-	}
+	//	vtcsOut[triVtcs[2]].pos.x;
+	//	mesh->addFace(
+	//		QVector3D(pt0.x, pt0.y, zPos),
+	//		QVector3D(pt1.x, pt1.y, zPos),
+	//		QVector3D(pt2.x, pt2.y, zPos));
+	//}
 
-}
+//}
 
 void Hix::Shapes2D::generateCapZPlane(Hix::Engine3D::Mesh* mesh, const std::vector<QVector3D>& contour, bool isReverse)
 {
-	if (contour.size() < 2)
-		return;
-	auto vtcs = QVectorToCDTVtx(contour);
-	auto edges = QVectorToCDTEdge(contour);
-	float z = contour.front().z();
-	generateCapZPlaneImpl(mesh, z, vtcs, edges, isReverse);
+	//if (contour.size() < 2)
+	//	return;
+	//auto vtcs = QVectorToCDTVtx(contour);
+	//auto edges = QVectorToCDTEdge(contour);
+	//float z = contour.front().z();
+	//generateCapZPlaneImpl(mesh, z, vtcs, edges, isReverse);
 }
 
 void Hix::Shapes2D::generateCapZPlane(Hix::Engine3D::Mesh* mesh, const std::vector<QVector2D>& contour, float zPos, bool isReverse)
 {
-	if (contour.size() < 2)
-		return;
-	auto vtcs = QVectorToCDTVtx(contour);
-	auto edges = QVectorToCDTEdge(contour);
-	generateCapZPlaneImpl(mesh, zPos, vtcs, edges, isReverse);
+	//if (contour.size() < 2)
+	//	return;
+	//auto vtcs = QVectorToCDTVtx(contour);
+	//auto edges = QVectorToCDTEdge(contour);
+	//generateCapZPlaneImpl(mesh, zPos, vtcs, edges, isReverse);
 }
 
 std::vector<std::vector<QVector3D>> Hix::Shapes2D::combineContour(const std::vector<std::vector<QVector3D>>& contours)
