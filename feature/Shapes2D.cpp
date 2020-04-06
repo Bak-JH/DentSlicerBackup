@@ -15,10 +15,7 @@ namespace std
 		//2D only!
 		std::size_t operator()(const CDT::V2d<double>& pt)const
 		{
-			size_t x = (size_t)(pt.x);
-			size_t y = (size_t)(pt.y);
-			size_t digest = x | y << 32;
-			return digest;
+			return std::hash<double>()(pt.x) ^ std::hash<double>()(pt.y);
 		}
 	};
 }
