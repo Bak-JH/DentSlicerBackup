@@ -229,7 +229,7 @@
     <ClCompile Include="cork\src\isct\CDTtriangle.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="DentEngine\src\polyclipping\cdt\HixCDT.cpp">
+    <ClCompile Include="feature\cdt\HixCDT.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -939,7 +939,7 @@
     <ClInclude Include="cork\src\isct\CDTtriangle.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="DentEngine\src\polyclipping\cdt\HixCDT.h">
+    <ClInclude Include="feature\cdt\HixCDT.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -1043,6 +1043,8 @@
     <Image Include="Resource\vs_icon.png" />
     <Image Include="Resource\menu_slice.png" />
     <Image Include="Resource\menu_slice_select_1.png" />
+    <Image Include="Resource\menu_modelbuilder.png" />
+    <Image Include="Resource\menu_modelbuilder_select_1.png" />
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="Qml\components\FeatureMenu.h" />

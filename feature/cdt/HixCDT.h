@@ -1,11 +1,11 @@
 #pragma once
-#include "../polyclipping.h"
+#include "../../DentEngine/src/polyclipping/polyclipping.h"
 #include <qvector2d.h>
 #include <unordered_map>
 #include <unordered_set>
 #include <vector>
 #include <array>
-#include "../../../common/RandomGen.h"
+#include "../common/RandomGen.h"
 namespace Hix
 {
 	namespace Engine3D
@@ -16,7 +16,7 @@ namespace Hix
 
 namespace Hix
 {
-	namespace Polyclipping
+	namespace CDT
 	{
 		typedef std::array<QVector2D, 3> Triangle;
 		//WARNING: These classes are dirty, so use them for a single triangulation and don't reuse them.
@@ -39,6 +39,7 @@ namespace Hix
 		class CDTImpl;
 		class MeshCDT
 		{
+		public:
 			MeshCDT(Hix::Engine3D::Mesh* mesh, bool isReverse);
 			virtual ~MeshCDT();
 			void setZ(float z);

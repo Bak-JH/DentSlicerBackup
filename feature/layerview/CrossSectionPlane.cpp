@@ -4,7 +4,7 @@
 #include "../Shapes2D.h"
 #include "../../glmodel.h"
 #include "../../DentEngine/src/SlicerDebug.h"
-#include "../../DentEngine/src/polyclipping/cdt/HixCDT.h"
+#include "../cdt/HixCDT.h"
 
 using namespace Hix::Input;
 using namespace Hix::Features;
@@ -43,7 +43,7 @@ void Hix::Features::CrossSectionPlane::init(const std::unordered_map<SceneEntity
 		auto& mesh = _layerMeshes.back();
 		for (auto& s : l.slices)
 		{
-			PolytreeCDT polycdt(s.polytree.get());
+			Hix::CDT::PolytreeCDT polycdt(s.polytree.get());
 			auto trigMap = polycdt.triangulate();
 			//generate front & back mesh
 			for (auto node : trigMap)

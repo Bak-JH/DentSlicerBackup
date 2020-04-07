@@ -1,13 +1,15 @@
 #include "HixCDT.h"
 #include <unordered_set>
 #include <qdebug.h>
-#include "../../SlicerDebugInfoExport.h"
-#include "../../../../application/ApplicationManager.h"
-#include "../../../feature/agCDT/CDT.h"
+#include "../../DentEngine/src/SlicerDebugInfoExport.h"
+#include "../../application/ApplicationManager.h"
+#include "../feature/agCDT/CDT.h"
 
 #include <array>
 using namespace ClipperLib;
 using namespace Hix::Polyclipping;
+using namespace Hix::CDT;
+
 using namespace Hix::Slicer::Debug;
 
 
@@ -38,7 +40,7 @@ namespace std
 
 namespace Hix
 {
-	namespace Polyclipping
+	namespace CDT
 	{
 		class CDTImpl
 		{
@@ -69,7 +71,7 @@ namespace Hix
 			void toFloatPtsWithMap(const ClipperLib::IntPoint& point, std::vector<p2t::Point*>& floatPath);
 			//points MUST BE UNIQUE!
 			//this is map because p2t::point must be non-const
-			std::unordered_map<CDT::V2d<double>, p2t::Point> _points;
+			std::unordered_map<::CDT::V2d<double>, p2t::Point> _points;
 			//this needs to be maintained as it owns the triangles after triangulation
 			std::unordered_map<const ClipperLib::PolyNode*, std::vector<p2t::Point*>> _nodeFloatCache;
 
@@ -90,20 +92,20 @@ namespace Hix
 
 		private:
 			//returns index of inserted vtx
-			size_t insertVtx(const CDT::V2d<double>& pt);
-			CDT::V2d<double> dVtx(const ClipperLib::IntPoint& pt);
-			CDT::V2d<double> dVtxWithMap(const ClipperLib::IntPoint& pt);
-			void insertEdge(const CDT::V2d<double>& from, const CDT::V2d<double>& to);
+			size_t insertVtx(const ::CDT::V2d<double>& pt);
+			::CDT::V2d<double> dVtx(const ClipperLib::IntPoint& pt);
+			::CDT::V2d<double> dVtxWithMap(const ClipperLib::IntPoint& pt);
+			void insertEdge(const ::CDT::V2d<double>& from, const ::CDT::V2d<double>& to);
 
 			void insertClipperEdge(const ClipperLib::IntPoint& from, const ClipperLib::IntPoint& to);
 			void insertClipperContour(const ClipperLib::Path& contour);
-			typedef  CDT::V2d<double> (CDTImplAG::* VtxFnPtr)(const ClipperLib::IntPoint& pt);  // Okay Bjarne!
+			typedef  ::CDT::V2d<double> (CDTImplAG::* VtxFnPtr)(const ClipperLib::IntPoint& pt);  // Okay Bjarne!
 			VtxFnPtr _addVtxFn;
 			const std::unordered_map<ClipperLib::IntPoint, QVector2D>* _floatIntMap = nullptr;
 			
 			//point and index pair
 			size_t _currIdx = 0;
-			std::unordered_map< CDT::V2d<double>, size_t> _points;
+			std::unordered_map< ::CDT::V2d<double>, size_t> _points;
 			std::unordered_set<std::array<size_t,2>> _edges;
 		};
 
@@ -122,11 +124,11 @@ CDT::V2d<double> toDPt(const ClipperLib::IntPoint& pt)
 }
 
 
-PolytreeCDT::PolytreeCDT(const ClipperLib::PolyTree* polytree): _tree(polytree)
+Hix::CDT::PolytreeCDT::PolytreeCDT(const ClipperLib::PolyTree* polytree): _tree(polytree)
 {
 }
 
-PolytreeCDT::PolytreeCDT(const std::unordered_map<ClipperLib::IntPoint, QVector2D>* map, const ClipperLib::PolyTree* polytree):
+Hix::CDT::PolytreeCDT::PolytreeCDT(const std::unordered_map<ClipperLib::IntPoint, QVector2D>* map, const ClipperLib::PolyTree* polytree):
 	_tree(polytree), _floatIntMap(map)
 {
 }
@@ -184,7 +186,7 @@ Triangle convertTrigReverse(p2t::Triangle* orig)
 
 
 
-std::unordered_map<PolyNode*, std::vector<Triangle>> Hix::Polyclipping::PolytreeCDT::triangulate()
+std::unordered_map<PolyNode*, std::vector<Triangle>> Hix::CDT::PolytreeCDT::triangulate()
 {
 
 
@@ -229,7 +231,7 @@ std::unordered_map<PolyNode*, std::vector<Triangle>> Hix::Polyclipping::Polytree
 }
 
 
-PolytreeCDT::~PolytreeCDT()
+Hix::CDT::PolytreeCDT::~PolytreeCDT()
 {
 }
 
@@ -239,16 +241,20 @@ PolytreeCDT::~PolytreeCDT()
 //IMPLS
 
 
-Hix::Polyclipping::CDTImpl::~CDTImpl()
+Hix::CDT::CDTImpl::~CDTImpl()
+{
+}
+
+Hix::CDT::CDTImpl::CDTImpl(bool isReverse): _isReverse(isReverse)
 {
 }
 
 
-Hix::Polyclipping::CDTImplPoly2Tri::CDTImplPoly2Tri(const std::unordered_map<ClipperLib::IntPoint, QVector2D>* map, bool isReverse) :CDTImpl(isReverse), _random(1), _floatIntMap(map)
+Hix::CDT::CDTImplPoly2Tri::CDTImplPoly2Tri(const std::unordered_map<ClipperLib::IntPoint, QVector2D>* map, bool isReverse) :CDTImpl(isReverse), _random(1), _floatIntMap(map)
 {
 }
 
-Hix::Polyclipping::CDTImplPoly2Tri::~CDTImplPoly2Tri()
+Hix::CDT::CDTImplPoly2Tri::~CDTImplPoly2Tri()
 {
 }
 
@@ -280,7 +286,7 @@ static size_t dSliceCnt = 0;
 
 
 
-void Hix::Polyclipping::CDTImplPoly2Tri::insertPolynodeAndHoles(const ClipperLib::PolyNode& solid)
+void Hix::CDT::CDTImplPoly2Tri::insertPolynodeAndHoles(const ClipperLib::PolyNode& solid)
 {
 	double pixelArea = Hix::Application::ApplicationManager::getInstance().settings().printerSetting.pixelSizeX() *
 		Hix::Application::ApplicationManager::getInstance().settings().printerSetting.pixelSizeY();
@@ -304,7 +310,7 @@ void Hix::Polyclipping::CDTImplPoly2Tri::insertPolynodeAndHoles(const ClipperLib
 	}
 }
 
-void Hix::Polyclipping::CDTImplPoly2Tri::insertContour(const std::vector<QVector2D>& contour)
+void Hix::CDT::CDTImplPoly2Tri::insertContour(const std::vector<QVector2D>& contour)
 {
 	//std::vector<p2t::Point*> p2tPath;
 	//p2tPath.reserve(contour.size());
@@ -317,7 +323,7 @@ void Hix::Polyclipping::CDTImplPoly2Tri::insertContour(const std::vector<QVector
 	throw std::runtime_error("not implemented");
 }
 
-std::vector<Triangle> Hix::Polyclipping::CDTImplPoly2Tri::triangulate()
+std::vector<Triangle> Hix::CDT::CDTImplPoly2Tri::triangulate()
 {
 	std::vector<Triangle> result;
 	try
@@ -370,7 +376,7 @@ std::vector<Triangle> Hix::Polyclipping::CDTImplPoly2Tri::triangulate()
 	return result;
 }
 
-std::vector<p2t::Point*>& Hix::Polyclipping::CDTImplPoly2Tri::toFloatPts(const ClipperLib::PolyNode& node)
+std::vector<p2t::Point*>& Hix::CDT::CDTImplPoly2Tri::toFloatPts(const ClipperLib::PolyNode& node)
 {
 	auto cached = _nodeFloatCache.find(&node);
 	if (cached != _nodeFloatCache.end())
@@ -435,7 +441,7 @@ std::vector<p2t::Point*>& Hix::Polyclipping::CDTImplPoly2Tri::toFloatPts(const C
 
 //constexpr double MIN_PIX_AREA = 57.9261875148;
 //constexpr double MIN_PIX_AREA = 2;
-inline void randomDither(CDT::V2d<double>& pt, RandomGen& rand)
+inline void randomDither(::CDT::V2d<double>& pt, RandomGen& rand)
 {
 	qDebug() << "before random dither: x=" << pt.x << "y=" << pt.y;
 	constexpr int64_t MAX_MULT = 20;
@@ -467,7 +473,7 @@ void CDTImplPoly2Tri::toFloatPtsImpl(const ClipperLib::IntPoint& point, std::vec
 void CDTImplPoly2Tri::toFloatPtsWithMap(const ClipperLib::IntPoint& point, std::vector<p2t::Point*>& floatPath)
 {
 	auto origFloatPt = _floatIntMap->find(point);
-	CDT::V2d<double> dPoint;
+	::CDT::V2d<double> dPoint;
 	if (origFloatPt == _floatIntMap->end())
 	{
 		//no matching original float point detected
@@ -530,8 +536,8 @@ std::vector<Triangle> CDTImplAG::triangulate()
 	std::vector<Triangle> result;
 	try
 	{
-		CDT::Triangulation<double> cdt = CDT::Triangulation<double>(CDT::FindingClosestPoint::BoostRTree);
-		std::vector<CDT::V2d<double>> vtcs(_points.size());
+		::CDT::Triangulation<double> cdt(::CDT::FindingClosestPoint::BoostRTree);
+		std::vector<::CDT::V2d<double>> vtcs(_points.size());
 		//unordered map of pt and indices to vector with matching order
 		for (auto& pt : _points)
 		{
@@ -539,12 +545,12 @@ std::vector<Triangle> CDTImplAG::triangulate()
 		}
 		cdt.insertVertices(vtcs);
 
-		std::vector<CDT::Edge> edges;
+		std::vector<::CDT::Edge> edges;
 		edges.reserve(_edges.size());
 		for (auto& e : _edges)
 		{
 			auto t = e[0];
-			edges.emplace_back(CDT::Edge(e[0], e[1]));
+			edges.emplace_back(::CDT::Edge(e[0], e[1]));
 		}
 
 		cdt.insertEdges(edges);
@@ -556,7 +562,7 @@ std::vector<Triangle> CDTImplAG::triangulate()
 			for (auto& tri : tris)
 			{
 				auto& triVtcs = tri.vertices;
-				CDT::V2d<double> pt0, pt1, pt2;
+				::CDT::V2d<double> pt0, pt1, pt2;
 				pt0 = vtcsOut[triVtcs[2]].pos;
 				pt1 = vtcsOut[triVtcs[1]].pos;
 				pt2 = vtcsOut[triVtcs[0]].pos;
@@ -570,7 +576,7 @@ std::vector<Triangle> CDTImplAG::triangulate()
 			for (auto& tri : tris)
 			{
 				auto& triVtcs = tri.vertices;
-				CDT::V2d<double> pt0, pt1, pt2;
+				::CDT::V2d<double> pt0, pt1, pt2;
 				pt0 = vtcsOut[triVtcs[0]].pos;
 				pt1 = vtcsOut[triVtcs[1]].pos;
 				pt2 = vtcsOut[triVtcs[2]].pos;
@@ -609,12 +615,12 @@ std::vector<Triangle> CDTImplAG::triangulate()
 }
 
 
-CDT::V2d<double> Hix::Polyclipping::CDTImplAG::dVtx(const ClipperLib::IntPoint& pt)
+::CDT::V2d<double> Hix::CDT::CDTImplAG::dVtx(const ClipperLib::IntPoint& pt)
 {
 	return toDPt(pt);
 }
 
-CDT::V2d<double> Hix::Polyclipping::CDTImplAG::dVtxWithMap(const ClipperLib::IntPoint& pt)
+::CDT::V2d<double> Hix::CDT::CDTImplAG::dVtxWithMap(const ClipperLib::IntPoint& pt)
 {
 	auto origFloatPt = _floatIntMap->find(pt);
 	if (origFloatPt == _floatIntMap->end())
@@ -629,7 +635,7 @@ CDT::V2d<double> Hix::Polyclipping::CDTImplAG::dVtxWithMap(const ClipperLib::Int
 	}
 }
 
-void Hix::Polyclipping::CDTImplAG::insertEdge(const CDT::V2d<double>& from, const CDT::V2d<double>& to)
+void Hix::CDT::CDTImplAG::insertEdge(const ::CDT::V2d<double>& from, const ::CDT::V2d<double>& to)
 {
 	auto fIndex = insertVtx(from);
 	auto tIndex = insertVtx(to);
@@ -641,7 +647,7 @@ void Hix::Polyclipping::CDTImplAG::insertEdge(const CDT::V2d<double>& from, cons
 }
 
 
-size_t Hix::Polyclipping::CDTImplAG::insertVtx(const CDT::V2d<double>& pt)
+size_t Hix::CDT::CDTImplAG::insertVtx(const ::CDT::V2d<double>& pt)
 {
 	auto result = _points.insert(std::make_pair(pt, _currIdx));
 	if (result.second)
@@ -650,7 +656,7 @@ size_t Hix::Polyclipping::CDTImplAG::insertVtx(const CDT::V2d<double>& pt)
 }
 
 
-void Hix::Polyclipping::CDTImplAG::insertClipperEdge(const ClipperLib::IntPoint& from, const ClipperLib::IntPoint& to)
+void Hix::CDT::CDTImplAG::insertClipperEdge(const ClipperLib::IntPoint& from, const ClipperLib::IntPoint& to)
 {
 	auto dFrom = (this->*_addVtxFn)(from);
 	auto dTo = (this->*_addVtxFn)(to);
@@ -658,7 +664,7 @@ void Hix::Polyclipping::CDTImplAG::insertClipperEdge(const ClipperLib::IntPoint&
 
 }
 
-void Hix::Polyclipping::CDTImplAG::insertClipperContour(const ClipperLib::Path& contour)
+void Hix::CDT::CDTImplAG::insertClipperContour(const ClipperLib::Path& contour)
 {
 	auto lastItr = contour.cend() - 1;
 	for (auto curr = contour.cbegin(); curr != lastItr; ++curr)
@@ -669,7 +675,7 @@ void Hix::Polyclipping::CDTImplAG::insertClipperContour(const ClipperLib::Path& 
 	insertClipperEdge(contour.back(), contour.front());
 }
 
-void Hix::Polyclipping::CDTImplAG::insertContour(const std::vector<QVector2D>& contour)
+void Hix::CDT::CDTImplAG::insertContour(const std::vector<QVector2D>& contour)
 {
 	if (contour.size() < 2)
 		return;
@@ -696,7 +702,7 @@ MeshCDT::~MeshCDT()
 {
 }
 
-void Hix::Polyclipping::MeshCDT::setZ(float z)
+void Hix::CDT::MeshCDT::setZ(float z)
 {
 	_z = z;
 }
@@ -706,14 +712,14 @@ void MeshCDT::insertSolidContour(const std::vector<QVector2D>& contour)
 	_impl->insertContour(contour);
 }
 
-void Hix::Polyclipping::MeshCDT::insertSolidContourZAxis(const std::vector<QVector3D>& contour)
+void Hix::CDT::MeshCDT::insertSolidContourZAxis(const std::vector<QVector3D>& contour)
 {
 	std::vector<QVector2D> c2d;
 	c2d.reserve(contour.size());
 	if (contour.size() < 2)
 		return;
 	_z = contour.front().z();
-	std::transform(contour.cbegin(), contour.cend(), c2d.begin(), [](const QVector3D& pt){ return QVector2D(pt.x(), pt.y()); });
+	std::transform(contour.cbegin(), contour.cend(), std::back_inserter(c2d), [](const QVector3D& pt){ return QVector2D(pt.x(), pt.y()); });
 	insertSolidContour(c2d);
 }
 

@@ -10,9 +10,49 @@
 
 constexpr float ZMARGIN = 10;
 
+const QUrl MB_POPUP = QUrl("qrc:/Qml/FeaturePopup/PopupRotate.qml");
 
-Hix::Features::ModelBuilderMode::ModelBuilderMode(): _topPlane(Hix::Application::ApplicationManager::getInstance().sceneManager().total(), true), _bottPlane(Hix::Application::ApplicationManager::getInstance().sceneManager().total(), true)
+
+
+
+Hix::Features::ModelBuilderMode::ModelBuilderMode(const std::unordered_set<GLModel*>& models) :
+	_targetModels(models)
 {
+
+}
+
+
+void Hix::Features::ModelBuilderMode::featureStarted()
+{
+}
+
+void Hix::Features::ModelBuilderMode::featureEnded()
+{
+	for (auto& each : _targetModels)
+	{
+		each->updateRecursiveAabb();
+	}
+	updatePosition();
+}
+
+QVector3D Hix::Features::ModelBuilderMode::getWidgetPosition()
+{
+	return 	Hix::Engine3D::combineBounds(_targetModels).centre();
+}
+
+
+
+Hix::Features::ModelBuilderMode::ModelBuilderMode(): 
+	DialogedMode(MB_POPUP),
+	_topPlane(Hix::Application::ApplicationManager::getInstance().sceneManager().total(), true),
+	_bottPlane(Hix::Application::ApplicationManager::getInstance().sceneManager().total(), true)
+{
+	_widget.addWidget(std::make_unique<Hix::UI::RotateWidget>(QVector3D(1, 0, 0), &_widget));
+	_widget.addWidget(std::make_unique<Hix::UI::RotateWidget>(QVector3D(0, 1, 0), &_widget));
+	_widget.addWidget(std::make_unique<Hix::UI::RotateWidget>(QVector3D(0, 0, 1), &_widget));
+	_widget.setVisible(true);
+
+
 	auto fileUrl = QFileDialog::getOpenFileUrl(nullptr, "Select scanned surface file", QUrl(), "3D Model file (*.stl)");
 	auto fileName = fileUrl.fileName();
 	if (fileName.isEmpty())
@@ -52,6 +92,9 @@ Hix::Features::ModelBuilderMode::ModelBuilderMode(): _topPlane(Hix::Application:
 	std::unordered_set<GLModel*> models { _model.get() };
 	_rotateMode.reset(new RotateModeNoUndo(models));
 	//Hix::Application::ApplicationManager::getInstance().setProgress(1.0);
+
+	updatePosition();
+
 }
 
 Hix::Features::ModelBuilderMode::~ModelBuilderMode()
@@ -78,4 +121,9 @@ void Hix::Features::ModelBuilderMode::getSliderSignalTop(double value)
 void Hix::Features::ModelBuilderMode::getSliderSignalBot(double value)
 {
 	_bottPlane.transform().setTranslation(QVector3D(0, 0, _zLength * value / 1.8));
+}
+
+void Hix::Features::ModelBuilderMode::applyButtonClicked()
+{
+	build();
 }

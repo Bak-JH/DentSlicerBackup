@@ -223,5 +223,7 @@
         <file>Resource/progress_loading_yellow.png</file>
         <file>Resource/menu_slice.png</file>
         <file>Resource/menu_slice_select_1.png</file>
+        <file>Resource/menu_modelbuilder.png</file>
+        <file>Resource/menu_modelbuilder_select_1.png</file>
     </qresource>
 </RCC>

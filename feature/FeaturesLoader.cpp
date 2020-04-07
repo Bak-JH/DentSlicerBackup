@@ -4,7 +4,7 @@
 #include "../Qml/components/FeatureMenu.h"
 #include "interfaces/Mode.h"
 
-
+#include "ModelBuilder/ModelBuilderMode.h"
 #include "ImportModel.h"
 #include "move.h"
 #include "rotate.h"
@@ -92,6 +92,8 @@ Hix::QML::FeatureMenu& Hix::Features::FeaturesLoader::menu()
 void Hix::Features::FeaturesLoader::loadFeatureButtons()
 {
 	addButton<Hix::Features::ImportModelMode>("open",this);
+	addButton<Hix::Features::ModelBuilderMode>("modelbuilder", this);
+
 	addDivider();
 
 	addButton<Hix::Features::MoveMode>("move" ,this);
