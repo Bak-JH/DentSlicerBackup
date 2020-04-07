@@ -31,6 +31,15 @@
 #include "cdt.h"
 
 namespace p2t {
+CDT::CDT()
+{
+}
+
+void CDT::initPolyline(const std::vector<Point*>& polyline)
+{
+   sweep_context_ = new SweepContext(polyline);
+   sweep_ = new Sweep;
+}
 
 CDT::CDT(const std::vector<Point*>& polyline)
 {
@@ -72,8 +81,10 @@ void CDT::resetPoints()
 
 CDT::~CDT()
 {
-  delete sweep_context_;
-  delete sweep_;
+  if(sweep_context_)
+    delete sweep_context_;
+  if(sweep_)
+    delete sweep_;
 }
 
 }

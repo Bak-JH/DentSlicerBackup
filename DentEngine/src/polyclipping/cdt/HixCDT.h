@@ -19,7 +19,7 @@ namespace Hix
 	namespace Polyclipping
 	{
 		typedef std::array<QVector2D, 3> Triangle;
-
+		//WARNING: These classes are dirty, so use them for a single triangulation and don't reuse them.
 
 		class PolytreeCDT
 		{
@@ -36,6 +36,23 @@ namespace Hix
 
 		};
 
+		class CDTImpl;
+		class MeshCDT
+		{
+			MeshCDT(Hix::Engine3D::Mesh* mesh, bool isReverse);
+			virtual ~MeshCDT();
+			void setZ(float z);
+			void insertSolidContour(const std::vector<QVector2D>& contour);
+			//overwrites z
+			void insertSolidContourZAxis(const std::vector<QVector3D>& contour);
+
+			//triangulate, append tris to mesh
+			void triangulateAndAppend();
+		private:
+			Hix::Engine3D::Mesh* _mesh;
+			std::unique_ptr<CDTImpl> _impl;
+			float _z = 0.0f;
+		};
 
 
 	}
