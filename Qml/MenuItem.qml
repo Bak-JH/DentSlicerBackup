@@ -14,7 +14,7 @@ CtrToggleButton {
 	property string defaultColor: "#ffffff"
 	property bool isActive: false
 
-	width: 85
+	width: 81
 	height: 90
 	color: "#FFFFFF"
 	

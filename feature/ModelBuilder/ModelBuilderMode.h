@@ -1,5 +1,5 @@
 #pragma once
-#include "../interfaces/Mode.h"`
+#include "../interfaces/DialogedMode.h"`
 #include "DentEngine/src/Bounds3D.h"
 #include "../../render/PlaneMeshEntity.h"
 #include "../rotate.h"
@@ -10,7 +10,7 @@ namespace Hix
 	namespace Features
 	{
 		class TwoManifoldBuilder;
-		class ModelBuilderMode : public Hix::Features::Mode
+		class ModelBuilderMode : public Hix::Features::DialogedMode
 		{
 		public:
 			ModelBuilderMode();
@@ -18,6 +18,7 @@ namespace Hix
 			void build();
 			void getSliderSignalTop(double value);
 			void getSliderSignalBot(double value);
+			void applyButtonClicked()override;
 
 		private:
 			std::unique_ptr<RotateModeNoUndo> _rotateMode;
