@@ -7,19 +7,13 @@
 #include "TwoManifoldBuilder.h"
 #include "../repair/meshrepair.h"
 #include "application/ApplicationManager.h"
+#include "../widget/RotateWidget.h"
 
 constexpr float ZMARGIN = 10;
 
-const QUrl MB_POPUP = QUrl("qrc:/Qml/FeaturePopup/PopupRotate.qml");
+const QUrl MB_POPUP = QUrl("qrc:/Qml/FeaturePopup/PopupModelBuild.qml");
 
 
-
-
-Hix::Features::ModelBuilderMode::ModelBuilderMode(const std::unordered_set<GLModel*>& models) :
-	_targetModels(models)
-{
-
-}
 
 
 void Hix::Features::ModelBuilderMode::featureStarted()
@@ -28,29 +22,23 @@ void Hix::Features::ModelBuilderMode::featureStarted()
 
 void Hix::Features::ModelBuilderMode::featureEnded()
 {
-	for (auto& each : _targetModels)
-	{
-		each->updateRecursiveAabb();
-	}
+
+	_model->updateRecursiveAabb();
 	updatePosition();
 }
 
 QVector3D Hix::Features::ModelBuilderMode::getWidgetPosition()
 {
-	return 	Hix::Engine3D::combineBounds(_targetModels).centre();
+	return 	_model->recursiveAabb().centre();
 }
 
 
 
 Hix::Features::ModelBuilderMode::ModelBuilderMode(): 
-	DialogedMode(MB_POPUP),
+	DialogedMode(MB_POPUP), RangeSliderMode(0, 1),
 	_topPlane(Hix::Application::ApplicationManager::getInstance().sceneManager().total(), true),
 	_bottPlane(Hix::Application::ApplicationManager::getInstance().sceneManager().total(), true)
 {
-	_widget.addWidget(std::make_unique<Hix::UI::RotateWidget>(QVector3D(1, 0, 0), &_widget));
-	_widget.addWidget(std::make_unique<Hix::UI::RotateWidget>(QVector3D(0, 1, 0), &_widget));
-	_widget.addWidget(std::make_unique<Hix::UI::RotateWidget>(QVector3D(0, 0, 1), &_widget));
-	_widget.setVisible(true);
 
 
 	auto fileUrl = QFileDialog::getOpenFileUrl(nullptr, "Select scanned surface file", QUrl(), "3D Model file (*.stl)");
@@ -59,41 +47,18 @@ Hix::Features::ModelBuilderMode::ModelBuilderMode():
 	{
 		return;
 	}
+	Hix::Application::ApplicationManager::getInstance().taskManager().enqueTask(std::make_unique<MBPrep>(this, fileUrl));
 
 
-	//Hix::Application::ApplicationManager::getInstance().openProgressPopUp();
-	auto mesh = new Mesh();
-	if (fileName != "" && (fileName.contains(".stl") || fileName.contains(".STL"))) {
-		FileLoader::loadMeshSTL(mesh, fileUrl);
-	}
-	else if (fileName != "" && (fileName.contains(".obj") || fileName.contains(".OBJ"))) {
-		FileLoader::loadMeshOBJ(mesh, fileUrl);
-	}
-	fileName = GLModel::filenameToModelName(fileName.toStdString());
-	//Hix::Application::ApplicationManager::getInstance().setProgress(0.1);
-	_model.reset(new GLModel(Hix::Application::ApplicationManager::getInstance().partManager().modelRoot(), mesh, fileName, nullptr));
-	_model->setZToBed();
-	_model->moveModel(QVector3D(0, 0, ZMARGIN));
-	float cutPlane, botPlane;
-	QQuaternion rotation;
-	guessOrientation(*_model->getMeshModd(), cutPlane, botPlane, rotation);
-	_model->transform().setRotation(rotation);
-	_model->updateRecursiveAabb();
-	_zLength = _model->aabb().lengthZ() + ZMARGIN;
-	auto translationZ = _model->transform().translation().z();
-	cutPlane += translationZ;
-	botPlane += translationZ;
-	_topPlane.transform().setTranslation(QVector3D(0, 0, cutPlane - ZMARGIN));
-	_bottPlane.transform().setTranslation(QVector3D(0, 0, botPlane - ZMARGIN));
-	//QMetaObject::invokeMethod(Hix::Application::ApplicationManager::getInstance().modelBuilderPopup, "setRangeSliderValueFirst", Q_ARG(QVariant, ((botPlane - ZMARGIN) / _zLength) * 1.8));
-	//QMetaObject::invokeMethod(Hix::Application::ApplicationManager::getInstance().modelBuilderPopup, "setRangeSliderValueSecond", Q_ARG(QVariant, ((cutPlane - ZMARGIN)/ _zLength) * 1.8));
+	QObject::connect(&slider(), &Hix::QML::RangeSlideBarShell::lowerValueChanged, [this]() {
+		_bottPlane.transform().setMatrix(QMatrix4x4());
+		_bottPlane.transform().setTranslation(QVector3D(0, 0, slider().lowerValue()));
+	});
 
-
-	std::unordered_set<GLModel*> models { _model.get() };
-	_rotateMode.reset(new RotateModeNoUndo(models));
-	//Hix::Application::ApplicationManager::getInstance().setProgress(1.0);
-
-	updatePosition();
+	QObject::connect(&slider(), &Hix::QML::RangeSlideBarShell::upperValueChanged, [this]() {
+		_topPlane.transform().setMatrix(QMatrix4x4());
+		_topPlane.transform().setTranslation(QVector3D(0, 0, slider().upperValue()));
+		});
 
 }
 
@@ -113,17 +78,68 @@ void Hix::Features::ModelBuilderMode::build()
 	_model->setMesh(nullptr);
 }
 
-void Hix::Features::ModelBuilderMode::getSliderSignalTop(double value)
-{
-	_topPlane.transform().setTranslation(QVector3D(0, 0, _zLength * value / 1.8));
-}
-
-void Hix::Features::ModelBuilderMode::getSliderSignalBot(double value)
-{
-	_bottPlane.transform().setTranslation(QVector3D(0, 0, _zLength * value / 1.8));
-}
-
 void Hix::Features::ModelBuilderMode::applyButtonClicked()
 {
 	build();
+}
+
+Hix::Features::MBPrep::MBPrep(ModelBuilderMode* mode, QUrl fileUrl): _mode(mode), _fileUrl(fileUrl)
+{
+}
+
+Hix::Features::MBPrep::~MBPrep()
+{
+}
+
+void Hix::Features::MBPrep::run()
+{
+	auto fileName = _fileUrl.fileName();
+
+	auto mesh = new Mesh();
+	if (fileName != "" && (fileName.contains(".stl") || fileName.contains(".STL"))) {
+		FileLoader::loadMeshSTL(mesh, _fileUrl);
+	}
+	else if (fileName != "" && (fileName.contains(".obj") || fileName.contains(".OBJ"))) {
+		FileLoader::loadMeshOBJ(mesh, _fileUrl);
+	}
+	fileName = GLModel::filenameToModelName(fileName.toStdString());
+	//Hix::Application::ApplicationManager::getInstance().setProgress(0.1);
+
+	postUIthread([this, &mesh, &fileName]() {
+		_mode->_model.reset(new GLModel(Hix::Application::ApplicationManager::getInstance().partManager().modelRoot(), mesh, fileName, nullptr));
+		_mode->_model->setZToBed();
+		_mode->_model->moveModel(QVector3D(0, 0, ZMARGIN));
+	});
+	float cutPlane, botPlane;
+	QQuaternion rotation;
+	guessOrientation(*_mode->_model->getMeshModd(), cutPlane, botPlane, rotation);
+
+	postUIthread([this, &cutPlane, &botPlane, &rotation]() {
+		_mode->_model->transform().setRotation(rotation);
+		_mode->_model->updateRecursiveAabb();
+		_mode->_zLength = _mode->_model->aabb().lengthZ() + ZMARGIN;
+		auto translationZ = _mode->_model->transform().translation().z();
+		cutPlane += translationZ;
+		botPlane += translationZ;
+		auto rAABB = _mode->_model->recursiveAabb();
+		auto modelMaxRadius = rAABB.bbMaxRadius();
+		auto modelCentre = rAABB.centre();
+		_mode->slider().setMin(modelCentre.z() -modelMaxRadius);
+		_mode->slider().setMax(modelCentre.z() + modelMaxRadius);
+		_mode->slider().setUpperValue(cutPlane);
+		_mode->slider().setLowerValue(botPlane);
+		_mode->_topPlane.transform().setTranslation(QVector3D(0, 0, cutPlane));
+		_mode->_bottPlane.transform().setTranslation(QVector3D(0, 0, botPlane));
+		std::unordered_set<GLModel*> models{ _mode->_model.get() };
+
+		//widget stuff
+		_mode->_widget.addWidget(std::make_unique<Hix::UI::RotateWidget>(QVector3D(1, 0, 0), &_mode->_widget, models));
+		_mode->_widget.addWidget(std::make_unique<Hix::UI::RotateWidget>(QVector3D(0, 1, 0), &_mode->_widget, models));
+		_mode->_widget.addWidget(std::make_unique<Hix::UI::RotateWidget>(QVector3D(0, 0, 1), &_mode->_widget, models));
+		_mode->_widget.setVisible(true);
+
+
+		_mode->updatePosition();
+		_mode->slider().setVisible(true);
+		});
 }

@@ -51,6 +51,7 @@ namespace Hix
 			float lengthX()const;
 			float lengthY()const;
 			float lengthZ()const;
+			float bbMaxRadius()const;
 			QVector3D centre()const;
 			QVector3D lengths()const;
 			const std::array<float, 6>& bound()const;
@@ -59,7 +60,7 @@ namespace Hix
 			bool contains(const Hix::Engine3D::Bounds3D& other)const;
 			bool intersects(const Hix::Engine3D::Bounds3D& other)const;
 			bool intersects2D(const Hix::Engine3D::Bounds3D& other)const;
-
+			
 			//********When centred around origin ********
 			Bounds3D(QVector3D lengths);
 			void setXLength(float length);

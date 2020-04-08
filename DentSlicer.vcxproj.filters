@@ -232,6 +232,9 @@
     <ClCompile Include="feature\cdt\HixCDT.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="feature\interfaces\RangeSliderMode.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="application\ApplicationManager.h" />
@@ -940,6 +943,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="feature\cdt\HixCDT.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="feature\interfaces\RangeSliderMode.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

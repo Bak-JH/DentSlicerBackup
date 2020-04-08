@@ -12,7 +12,7 @@ using namespace Qt3DExtras;
 
 const float RotateWidget::ROTATE_SPEED = 0.1;
 const float HALF_PI = M_PI / 2;
-RotateWidget::RotateWidget(const QVector3D& axis, Qt3DCore::QEntity* parent) :Widget(axis, parent)
+RotateWidget::RotateWidget(const QVector3D& axis, Qt3DCore::QEntity* parent, const std::unordered_set<GLModel*>& models) :Widget(axis, parent), _models(models)
 {
 
 	addComponent(&_torus);
@@ -58,7 +58,7 @@ bool Hix::UI::RotateWidget::isDraggable(Hix::Input::MouseEventData& e, const Qt3
 
 void Hix::UI::RotateWidget::dragStarted(Hix::Input::MouseEventData& e, const Qt3DRender::QRayCasterHit& hit)
 {
-	dynamic_cast<Features::RotateMode*>(_parent->mode())->featureStarted();
+	dynamic_cast<Features::WidgetMode*>(_parent->mode())->featureStarted();
 	_parent->setManipulated(true);
 	setHighlight(true);
 	_mouseOrigin = e.position;
@@ -105,15 +105,13 @@ void Hix::UI::RotateWidget::setHighlight(bool enable)
 	_material.setSpecular(color);
 }
 
-
 void Hix::UI::RotateWidget::doDrag(Hix::Input::MouseEventData& e)
 {
 	_mouseCurrent = e.position;
 	auto curAngle = calculateRot();
 	auto dif = curAngle - _pastAngle;
 	_pastAngle = curAngle;
-	;
-	for (auto selectedModel : dynamic_cast<Features::RotateMode*>(_parent->mode())->models()) {
+	for (auto selectedModel : _models) {
 		auto rotation = QQuaternion::fromAxisAndAngle(_axis, dif);
 		selectedModel->rotateModel(rotation);
 	}
@@ -122,7 +120,7 @@ void Hix::UI::RotateWidget::doDrag(Hix::Input::MouseEventData& e)
 
 void Hix::UI::RotateWidget::dragEnded(Hix::Input::MouseEventData& e)
 {
-	dynamic_cast<Features::RotateMode*>(_parent->mode())->featureEnded();
+	dynamic_cast<Features::WidgetMode*>(_parent->mode())->featureEnded();
 	_parent->setManipulated(false);
 	setHighlight(false);
     //Hix::Application::ApplicationManager::getInstance().totalRotateDone();

@@ -1,5 +1,8 @@
 #pragma once
-#include "../interfaces/DialogedMode.h"`
+#include "../interfaces/DialogedMode.h"
+#include "../interfaces/WidgetMode.h"
+#include "../interfaces/RangeSliderMode.h"
+
 #include "DentEngine/src/Bounds3D.h"
 #include "../../render/PlaneMeshEntity.h"
 #include "../rotate.h"
@@ -10,22 +13,38 @@ namespace Hix
 	namespace Features
 	{
 		class TwoManifoldBuilder;
-		class ModelBuilderMode : public Hix::Features::DialogedMode
+		class ModelBuilderMode : public Hix::Features::DialogedMode, public Hix::Features::WidgetMode, public Hix::Features::RangeSliderMode
 		{
 		public:
 			ModelBuilderMode();
 			virtual ~ModelBuilderMode();
 			void build();
-			void getSliderSignalTop(double value);
-			void getSliderSignalBot(double value);
 			void applyButtonClicked()override;
+			void featureStarted()override;
+			void featureEnded()override;
+			QVector3D getWidgetPosition()override;
 
 		private:
-			std::unique_ptr<RotateModeNoUndo> _rotateMode;
+			Hix::Features::FeatureContainerFlushSupport* _rotateContainer;
 			Hix::Render::PlaneMeshEntity _topPlane;
 			Hix::Render::PlaneMeshEntity _bottPlane;
 			std::unique_ptr<GLModel> _model;
 			float _zLength;
+			friend class MBPrep;
 		};
+
+		class MBPrep : public Hix::Tasking::Task
+		{
+		public:
+			MBPrep(ModelBuilderMode* mode, QUrl fileUrl);
+			virtual ~MBPrep();
+			void run()override;
+		private:
+			ModelBuilderMode* _mode;
+			QUrl _fileUrl;
+		};
+
 	}
 }
+
+
