@@ -53,7 +53,7 @@ Hix::UI::RotateWidget::~RotateWidget()
 
 bool Hix::UI::RotateWidget::isDraggable(Hix::Input::MouseEventData& e, const Qt3DRender::QRayCasterHit& hit)
 {
-	return _parent->visible();
+	return _parent->visible() && e.button == Qt3DInput::QMouseEvent::Buttons::LeftButton;
 }
 
 void Hix::UI::RotateWidget::dragStarted(Hix::Input::MouseEventData& e, const Qt3DRender::QRayCasterHit& hit)

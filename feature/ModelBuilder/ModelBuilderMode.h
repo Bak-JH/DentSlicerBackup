@@ -29,7 +29,6 @@ namespace Hix
 			Hix::Render::PlaneMeshEntity _topPlane;
 			Hix::Render::PlaneMeshEntity _bottPlane;
 			std::unique_ptr<GLModel> _model;
-			float _zLength;
 			friend class MBPrep;
 		};
 
