@@ -2,7 +2,7 @@
 #include "../glmodel.h"
 #include "arrange/autoarrange.h"
 #include "../application/ApplicationManager.h"
-
+#include "../glmodel.h"
 using namespace Hix::Application;
 
 Hix::Features::CopyPasteMode::CopyPasteMode(const std::unordered_set<GLModel*>& targets): _targets(targets)
@@ -42,6 +42,12 @@ void Hix::Features::CopyPaste::runImpl()
 			partManager.addPart(std::unique_ptr<GLModel>(rawModel));
 			std::get<GLModel*>(_model)->setHitTestable(true);
 		});
-	ApplicationManager::getInstance().taskManager().enqueTask(new AutoArrangeAppend(std::get<GLModel*>(_model)));
+
+	auto bound = std::get<GLModel*>(_model)->recursiveAabb();
+	const auto& printBound = Hix::Application::ApplicationManager::getInstance().settings().printerSetting.bedBound;
+	if (printBound.contains(bound))
+	{
+		ApplicationManager::getInstance().taskManager().enqueTask(new AutoArrangeAppend(std::get<GLModel*>(_model)));
+	}
 }
 

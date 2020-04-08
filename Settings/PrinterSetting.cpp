@@ -12,12 +12,22 @@ Hix::Settings::PrinterSetting::PrinterSetting(): _allocator(&_buffer, _buffer.si
 
 float Hix::Settings::PrinterSetting::pixelPerMMX() const
 {
-	return sliceImageResolutionX / screenX;;
+	return sliceImageResolutionX / screenX;
 }
 
 float Hix::Settings::PrinterSetting::pixelPerMMY() const
 {
 	return sliceImageResolutionY / screenY;
+}
+
+float Hix::Settings::PrinterSetting::pixelSizeX() const
+{
+	return screenX/ sliceImageResolutionX;
+}
+
+float Hix::Settings::PrinterSetting::pixelSizeY() const
+{
+	return screenY/ sliceImageResolutionY;
 }
 
 void Hix::Settings::PrinterSetting::initialize()
@@ -57,6 +67,5 @@ void Hix::Settings::PrinterSetting::parseJSONImpl(const rapidjson::Document& doc
 		bedBound.setXLength(bedX);
 		bedBound.setYLength(bedY);
 	}
-
 	printerConstants = tryParseObj(doc, "printerConstants", _allocator);
 }

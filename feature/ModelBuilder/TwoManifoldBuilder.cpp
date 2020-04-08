@@ -6,6 +6,7 @@
 #include "../addModel.h"
 #include "../repair/meshrepair.h"
 #include "../Plane3D.h"
+#include "../cdt/HixCDT.h"
 //Few assumptions
 //1. Assume filling plane is XY plane.
 //2. Assume Model have a boundary edges that is roughly parallel to this plane
@@ -752,7 +753,10 @@ void buildBott(Hix::Engine3D::Mesh& mesh, const  std::deque<HalfEdgeConstItr>& b
 		{
 			contour.emplace_back(QVector2D(each));
 		}
-		Hix::Shapes2D::generateCapZPlane(&mesh, contour, zVal, isBottEmpty);
+		Hix::CDT::MeshCDT cdt(&mesh, isBottEmpty);
+		cdt.setZ(zVal);
+		cdt.insertSolidContour(contour);
+		cdt.triangulateAndAppend();
 	}
 }
 

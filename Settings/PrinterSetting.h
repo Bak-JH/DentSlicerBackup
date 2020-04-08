@@ -45,6 +45,8 @@ namespace Hix
 			std::optional<rapidjson::Value> printerConstants;
 			float pixelPerMMX()const;
 			float pixelPerMMY()const;
+			float pixelSizeX()const;
+			float pixelSizeY()const;
 		protected:
 			std::array<char, 100> _buffer;
 			rapidjson::MemoryPoolAllocator<> _allocator;

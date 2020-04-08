@@ -85,6 +85,9 @@ enum PolyFillType { pftEvenOdd, pftNonZero, pftPositive, pftNegative };
 struct IntPoint {
   cInt X;
   cInt Y;
+  inline cInt x()const { return X; }
+  inline cInt y()const { return Y; }
+
 #ifdef use_xyz
   cInt Z;
   IntPoint(cInt x = 0, cInt y = 0, cInt z = 0): X(x), Y(y), Z(z) {};

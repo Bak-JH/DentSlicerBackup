@@ -2,6 +2,7 @@
 #include "../../render/SceneEntity.h"
 #include "ContourBuilder.h"
 #include <list>
+#include <vector>
 #include <QThread>
 #include <QDebug>
 #include <QVector2D>
@@ -22,23 +23,24 @@ namespace Hix
 	{
 		class Planes;
 
-		class Slice { // extends Paths (total paths)
-		public:
+		struct Slice { // extends Paths (total paths)
 			Slice();
-
-			float z;
 			std::unique_ptr<PolyTree> polytree; // containment relationship per slice
-
 			std::deque<Contour> closedContours;
 			std::deque<Contour> incompleteContours;
 
 		};
+		struct LayerGroup
+		{
+			float z;
+			std::vector<Slice> slices;
+			bool empty()const;
+		};
 
 
 		/****************** Entire Slicing Step *******************/
-		void containmentTreeConstruct(std::vector<Slice>& slices);
-
-		void slice(const Hix::Render::SceneEntity& entitiy, const Planes& planes, std::vector<Slice>& slices);
+		void containmentTreeConstruct(const Slice& slice);
+		std::vector<LayerGroup> slice(const Hix::Render::SceneEntity& entitiy, const Planes& planes);
 	};
 }
 

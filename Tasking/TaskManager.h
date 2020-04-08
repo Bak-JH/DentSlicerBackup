@@ -20,7 +20,7 @@ namespace Hix
 			void run();
 			void enqueTask(Hix::Tasking::Task* task);
 			void enqueTask(std::unique_ptr<Hix::Tasking::Task> task);
-
+			Hix::ProgressManager& progressManager();
 			~TaskManager();
 		private:
 			using TaskVariant = std::variant<std::unique_ptr<Hix::Tasking::Task>, Hix::Tasking::Task*>;

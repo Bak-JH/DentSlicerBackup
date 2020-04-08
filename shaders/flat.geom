@@ -30,7 +30,8 @@ vec4 calcLights(in vec3 position, in vec3 norm, in vec4 primitiveColor)
     vec3 diff;
     for(int i = 0; i < 4; ++i)
     {
-        s = normalize(  lights[i].position - position );
+        // s = normalize(  lights[i].position - position );
+        s = normalize(lights[i].direction);
         //for now, light color is white, so don't bother multiplying by 1.0
         dotSN = max( dot( s, norm ), 0.0 );
         diff = diffuse * dotSN;

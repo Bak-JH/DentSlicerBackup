@@ -8,12 +8,6 @@ FeaturePopup {
 	title: qsTr("Scale")
 	height: 264
 	property bool lock : false
-
-	function lockToggle() {
-		if (scalelock.source == "qrc:/Resource/img_scale_lock_revised.png") { scalelock.source = "qrc:/Resource/img_scale_unlock_revised.png" }
-		else { scalelock.source = "qrc:/Resource/img_scale_lock_revised.png" }
-	}
-
 	CtrSpinBox {
 		id: scaleX
 		label.text: "X Size(%)"
@@ -65,7 +59,6 @@ FeaturePopup {
 		{
 			if(!lockAxis.isChecked&& !lock)
 			{
-				console.log("sdhit");
 				lock = true;
 				scaleX.value = scaleY.value;
 				scaleZ.value = scaleY.value;
@@ -102,8 +95,7 @@ FeaturePopup {
 			}
 		}
 	}
-
-	Hix.ToggleSwitch {
+	CtrToggleButton {
 		color: "transparent"
 		width: 22
 		height: 128
@@ -115,8 +107,13 @@ FeaturePopup {
 			source: "qrc:/Resource/img_scale_lock_revised.png"
 			anchors.left: parent.left
 			anchors.leftMargin: 6
-			//anchors.horizontalCenter: parent.horizontalCenter
 		}
-		onClicked: { lockToggle(); }
+		onChecked: { 
+			scalelock.source = "qrc:/Resource/img_scale_unlock_revised.png"
+		}
+		onUnchecked: {
+			scalelock.source = "qrc:/Resource/img_scale_lock_revised.png"
+		}
+
 	}
 }

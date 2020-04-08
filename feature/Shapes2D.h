@@ -4,6 +4,10 @@
 
 namespace Hix
 {
+	namespace Engine3D
+	{
+		class Mesh;
+	}
 	namespace Slicer
 	{
 		class Contour;
@@ -43,10 +47,6 @@ namespace Hix
 		std::vector<QVector2D> PolylineToArea(float thickness, const std::vector<QVector2D>& polyline);
 
 		std::vector<std::vector<QVector3D>> combineContour(const std::vector<std::vector<QVector3D>>& contours);
-
-		
-		void generateCapZPlane(Hix::Engine3D::Mesh* mesh, const std::vector<QVector2D>& contour, float zPos, bool isReverse);
-		void generateCapZPlane(Hix::Engine3D::Mesh* mesh, const std::vector<QVector3D>& contour, bool isReverse);
 
 		void moveContour(std::vector<QVector3D>& targetContour, const QVector3D& moveVector);
 		void rotateContour(std::vector<QVector3D>& targetContour,const QQuaternion& rotation);

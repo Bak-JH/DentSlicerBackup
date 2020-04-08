@@ -45,7 +45,7 @@ Hix::UI::MoveWidget::~MoveWidget()
 
 bool Hix::UI::MoveWidget::isDraggable(Hix::Input::MouseEventData& e, const Qt3DRender::QRayCasterHit& hit)
 {
-	return _parent->visible();
+	return _parent->visible()&& e.button == Qt3DInput::QMouseEvent::Buttons::LeftButton;
 }
 
 void Hix::UI::MoveWidget::dragStarted(Hix::Input::MouseEventData& e, const Qt3DRender::QRayCasterHit& hit)
