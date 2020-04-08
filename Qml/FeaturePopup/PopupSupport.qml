@@ -122,8 +122,8 @@ FeaturePopup {
 			anchors.topMargin: 16
 		}
 		CtrSpinBox {
-			id: minradius
-			label.text: "Min.radius (mm)"
+			id: maxradius
+			label.text: "Max.radius (mm)"
 			height: 26
 			width: parent.width - 16 * 2 - 16	// 16 = triangle height
 			increment: 0.05
@@ -135,8 +135,8 @@ FeaturePopup {
 			anchors.topMargin: 16
 		}
 		CtrSpinBox {
-			id: maxradius
-			label.text: "Max.radius (mm)"
+			id: minradius
+			label.text: "Min.radius (mm)"
 			height: 26
 			width: parent.width - 16 * 2 - 16	// 16 = triangle height
 			increment: 0.05
@@ -144,10 +144,9 @@ FeaturePopup {
 			toNum: 5
 			anchors.left: parent.left
 			anchors.leftMargin: 32	// 16 = triangle height
-			anchors.top: minradius.bottom
+			anchors.top: maxradius.bottom
 			anchors.topMargin: 16
 		}
-
 
 
 	}

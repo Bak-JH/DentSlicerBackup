@@ -13,7 +13,6 @@ Hix.RangeSlideBarShell {
 		}
 		onUpperValueChanged: {
 			control.second.value = upperValue;
-
 		}
 	Rectangle {
 		id: shell
@@ -42,10 +41,10 @@ Hix.RangeSlideBarShell {
 		
 		RangeSlider {
 			id: control
-			from: root.min.toFixed(2)
-			to: root.max.toFixed(2)
-			first.value:(from + to) / 2
-			second.value: (from + to) / 2
+			from: root.min.toFixed(3)
+			to: root.max.toFixed(3)
+			// first.value:(from + to) / 2
+			// second.value: (from + to) / 2
 			orientation: Qt.Vertical
 			anchors.horizontalCenter: parent.horizontalCenter
 			anchors.verticalCenter: parent.verticalCenter
@@ -85,7 +84,7 @@ Hix.RangeSlideBarShell {
 
 			first.handle: Rectangle {
 				x: control.leftPadding
-				y: control.bottomPadding + control.first.visualPosition * (control.availableHeight - height) //control.first.visualPosition * parent.height - implicitHeight / 2
+				y: control.bottomPadding + control.first.visualPosition * (control.availableHeight - height) 
 				implicitWidth: 36
 				implicitHeight: 22
 				radius: 2
@@ -157,8 +156,6 @@ Hix.RangeSlideBarShell {
 				implicitWidth: 36
 				implicitHeight: 22
 				radius: 2
-				//border.color: "red"
-				//color: "transparent"
 				color: control.second.pressed ? "#727d7d" : "#929d9d"
 
 				Rectangle {	//current position

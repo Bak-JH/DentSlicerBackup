@@ -9,7 +9,7 @@
 #include "application/ApplicationManager.h"
 #include "../widget/RotateWidget.h"
 
-constexpr float ZMARGIN = 10;
+constexpr float ZMARGIN = 3;
 
 const QUrl MB_POPUP = QUrl("qrc:/Qml/FeaturePopup/PopupModelBuild.qml");
 
@@ -103,12 +103,10 @@ void Hix::Features::MBPrep::run()
 		FileLoader::loadMeshOBJ(mesh, _fileUrl);
 	}
 	fileName = GLModel::filenameToModelName(fileName.toStdString());
-	//Hix::Application::ApplicationManager::getInstance().setProgress(0.1);
-
+	mesh->centerMesh();
 	postUIthread([this, &mesh, &fileName]() {
 		_mode->_model.reset(new GLModel(Hix::Application::ApplicationManager::getInstance().partManager().modelRoot(), mesh, fileName, nullptr));
-		_mode->_model->setZToBed();
-		_mode->_model->moveModel(QVector3D(0, 0, ZMARGIN));
+
 	});
 	float cutPlane, botPlane;
 	QQuaternion rotation;
@@ -117,19 +115,24 @@ void Hix::Features::MBPrep::run()
 	postUIthread([this, &cutPlane, &botPlane, &rotation]() {
 		_mode->_model->transform().setRotation(rotation);
 		_mode->_model->updateRecursiveAabb();
-		_mode->_zLength = _mode->_model->aabb().lengthZ() + ZMARGIN;
-		auto translationZ = _mode->_model->transform().translation().z();
-		cutPlane += translationZ;
-		botPlane += translationZ;
+		auto zTranslate = _mode->_model->setZToBed();
+
+		_mode->_model->moveModel(QVector3D(0, 0, ZMARGIN));
+		zTranslate += ZMARGIN;
+		_mode->_model->updateRecursiveAabb();
+
 		auto rAABB = _mode->_model->recursiveAabb();
 		auto modelMaxRadius = rAABB.bbMaxRadius();
 		auto modelCentre = rAABB.centre();
 		_mode->slider().setMin(modelCentre.z() -modelMaxRadius);
 		_mode->slider().setMax(modelCentre.z() + modelMaxRadius);
-		_mode->slider().setUpperValue(cutPlane);
-		_mode->slider().setLowerValue(botPlane);
-		_mode->_topPlane.transform().setTranslation(QVector3D(0, 0, cutPlane));
-		_mode->_bottPlane.transform().setTranslation(QVector3D(0, 0, botPlane));
+		auto upSliderVal = cutPlane + zTranslate;
+		auto lowSliderVal = botPlane + zTranslate;
+		
+		_mode->slider().setUpperValue(upSliderVal);
+		_mode->slider().setLowerValue(lowSliderVal);
+		_mode->_topPlane.transform().setTranslation(QVector3D(0, 0, upSliderVal));
+		_mode->_bottPlane.transform().setTranslation(QVector3D(0, 0, lowSliderVal));
 		std::unordered_set<GLModel*> models{ _mode->_model.get() };
 
 		//widget stuff
