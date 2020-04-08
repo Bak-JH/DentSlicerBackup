@@ -198,6 +198,26 @@ float Hix::Engine3D::Bounds3D::lengthZ() const
 	return std::abs(zMax() - zMin());
 }
 
+inline float hyp3D(float a, float b, float c)
+{
+	return std::sqrt(a * a + b * b + c * c);
+}
+
+float Hix::Engine3D::Bounds3D::bbMaxRadius() const
+{
+	std::array<float, 8> rads{
+		hyp3D(_bound[0], _bound[2], _bound[4]),
+		hyp3D(_bound[0], _bound[3], _bound[4]),
+		hyp3D(_bound[0], _bound[2], _bound[5]),
+		hyp3D(_bound[0], _bound[3], _bound[5]),
+		hyp3D(_bound[1], _bound[2], _bound[4]),
+		hyp3D(_bound[1], _bound[3], _bound[4]),
+		hyp3D(_bound[1], _bound[2], _bound[5]),
+		hyp3D(_bound[1], _bound[3], _bound[5]),
+	};
+	return *std::max_element(rads.cbegin(), rads.cend());
+}
+
 QVector3D Hix::Engine3D::Bounds3D::centre() const
 {
 	return QVector3D(centreX(), centreY(), centreZ());

@@ -263,6 +263,7 @@
     <ClCompile Include="cork\src\isct\CDTtriangle.c" />
     <ClCompile Include="cork\src\util\log.cpp" />
     <ClCompile Include="cork\src\util\timer.cpp" />
+    <ClCompile Include="feature\interfaces\RangeSliderMode.cpp" />
     <ClCompile Include="feature\interfaces\SliderMode.cpp" />
     <ClCompile Include="feature\sendError.cpp" />
     <ClCompile Include="feature\settingMode.cpp" />
@@ -890,6 +891,7 @@
     <ClInclude Include="cork\src\util\prelude.h" />
     <ClInclude Include="cork\src\util\shortVec.h" />
     <ClInclude Include="cork\src\util\unionFind.h" />
+    <ClInclude Include="feature\interfaces\RangeSliderMode.h" />
     <ClInclude Include="feature\interfaces\SliderMode.h" />
     <ClInclude Include="feature\sendError.h" />
     <ClInclude Include="feature\settingMode.h" />

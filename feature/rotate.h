@@ -63,23 +63,6 @@ namespace Hix
 
 		};
 
-		class RotateModeNoUndo : public WidgetMode
-		{
-		public:
-			RotateModeNoUndo(const std::unordered_set<GLModel*>& models);
-			virtual ~RotateModeNoUndo();
-			void featureStarted()override;
-			void featureEnded()override;
-			QVector3D getWidgetPosition()override;
-			//std::unordered_set<GLModel*>& models();
-
-		protected:
-			Hix::Features::FeatureContainerFlushSupport* _rotateContainer;
-			std::unordered_set<GLModel*> _targetModels;
-
-		};
-
-
 		
 	}
 }
